@@ -1,3 +1,349 @@
+2008-01-03  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * (PHP_5_3)
+      ext/mysqli/tests/mysqli_slave_query.phpt:
+      MFH: Remove test for deprecated (and removed) function
+
+    * ext/mysqli/tests/mysqli_slave_query.phpt:
+      Remove test for deprecated (and removed) function
+
+2008-01-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/tests/bug_43130.phpt
+      ext/pdo/tests/bug_43130.phpt:
+      
+      MFB: Skip test for PostgreSQL driver since error is too dissimilar to
+      other
+      drivers
+
+    * (PHP_5_3)
+      ext/pdo/tests/bug_43130.phpt:
+      Skip test for PostgreSQL driver since error is too dissimilar to other
+      drivers
+
+2008-01-03  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_3)
+      ext/com_dotnet/php_com_dotnet.h
+      ext/ctype/php_ctype.h
+      ext/filter/php_filter.h
+      ext/gmp/php_gmp.h
+      ext/json/php_json.h
+      ext/mime_magic/php_mime_magic.h
+      ext/mssql/php_mssql.h
+      ext/oci8/php_oci8.h
+      ext/pcntl/php_pcntl.h
+      ext/pdo_dblib/php_pdo_dblib.h
+      ext/pdo_firebird/php_pdo_firebird.h
+      ext/pdo_mysql/php_pdo_mysql.h
+      ext/pdo_oci/php_pdo_oci.h
+      ext/pdo_odbc/php_pdo_odbc.h
+      ext/pdo_pgsql/php_pdo_pgsql.h
+      ext/pdo_sqlite/php_pdo_sqlite.h
+      ext/shmop/php_shmop.h
+      ext/simplexml/php_simplexml.h
+      ext/soap/php_soap.h
+      ext/sockets/php_sockets.h
+      ext/sqlite/php_sqlite.h
+      ext/tokenizer/php_tokenizer.h
+      ext/xml/php_xml.h
+      ext/xmlreader/php_xmlreader.h
+      ext/xmlrpc/php_xmlrpc.h
+      ext/xsl/php_xsl.h:
+      remove unused PHP_EXTNAME_API macros.
+
+    * ext/com_dotnet/php_com_dotnet.h
+      ext/ctype/php_ctype.h
+      ext/filter/php_filter.h
+      ext/gmp/php_gmp.h
+      ext/json/php_json.h
+      ext/mime_magic/php_mime_magic.h
+      ext/mssql/php_mssql.h
+      ext/oci8/php_oci8.h
+      ext/pcntl/php_pcntl.h
+      ext/pdo_dblib/php_pdo_dblib.h
+      ext/pdo_firebird/php_pdo_firebird.h
+      ext/pdo_mysql/php_pdo_mysql.h
+      ext/pdo_oci/php_pdo_oci.h
+      ext/pdo_odbc/php_pdo_odbc.h
+      ext/pdo_pgsql/php_pdo_pgsql.h
+      ext/pdo_sqlite/php_pdo_sqlite.h
+      ext/shmop/php_shmop.h
+      ext/simplexml/php_simplexml.h
+      ext/soap/php_soap.h
+      ext/sockets/php_sockets.h
+      ext/sqlite/php_sqlite.h
+      ext/tokenizer/php_tokenizer.h
+      ext/xml/php_xml.h
+      ext/xmlreader/php_xmlreader.h
+      ext/xmlrpc/php_xmlrpc.h
+      ext/xsl/php_xsl.h:
+      MFB: remove unused PHP_EXTNAME_API macros.
+
+2008-01-03  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/tests/mysqli_master_query.phpt:
+      - Remove more replication stuff
+
+2008-01-03  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/mysqlnd_charset.h
+      ext/mysqlnd/mysqlnd_charset.h:
+      Header protection
+
+    * ext/mysqlnd/mysqlnd_charset.c
+      ext/mysqlnd/mysqlnd_structs.h:
+      Remove unneeded field
+
+    * (PHP_5_3)
+      ext/mysqlnd/mysqlnd_charset.c
+      ext/mysqlnd/mysqlnd_structs.h:
+      Remove unused field
+
+2008-01-03  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/mysqli/tests/mysqli_stmt_send_long_data.phpt:
+      Make it work for MySQL 6.x as well.
+
+2008-01-03  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_map_basic.phpt
+      ext/standard/tests/array/array_map_error.phpt
+      ext/standard/tests/array/array_map_object1.phpt
+      ext/standard/tests/array/array_map_object2.phpt
+      ext/standard/tests/array/array_map_object3.phpt
+      ext/standard/tests/array/array_map_variation10.phpt
+      ext/standard/tests/array/array_map_variation11.phpt
+      ext/standard/tests/array/array_map_variation12.phpt
+      ext/standard/tests/array/array_map_variation13.phpt
+      ext/standard/tests/array/array_map_variation14.phpt
+      ext/standard/tests/array/array_map_variation15.phpt
+      ext/standard/tests/array/array_map_variation16.phpt
+      ext/standard/tests/array/array_map_variation17.phpt
+      ext/standard/tests/array/array_map_variation18.phpt
+      ext/standard/tests/array/array_map_variation3.phpt
+      ext/standard/tests/array/array_map_variation4.phpt
+      ext/standard/tests/array/array_map_variation5.phpt
+      ext/standard/tests/array/array_map_variation6.phpt
+      ext/standard/tests/array/array_map_variation7.phpt
+      ext/standard/tests/array/array_map_variation8.phpt
+      ext/standard/tests/array/array_map_variation9.phpt:
+       new smaller testcases for array_map() function
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_map.phpt:
+       this testcase has been split into many smaller testcases and committed.
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_map_basic.phpt
+      ext/standard/tests/array/array_map_error.phpt
+      ext/standard/tests/array/array_map_object1.phpt
+      ext/standard/tests/array/array_map_object2.phpt
+      ext/standard/tests/array/array_map_object3.phpt
+      ext/standard/tests/array/array_map_variation10.phpt
+      ext/standard/tests/array/array_map_variation11.phpt
+      ext/standard/tests/array/array_map_variation12.phpt
+      ext/standard/tests/array/array_map_variation13.phpt
+      ext/standard/tests/array/array_map_variation14.phpt
+      ext/standard/tests/array/array_map_variation15.phpt
+      ext/standard/tests/array/array_map_variation16.phpt
+      ext/standard/tests/array/array_map_variation17.phpt
+      ext/standard/tests/array/array_map_variation18.phpt
+      ext/standard/tests/array/array_map_variation3.phpt
+      ext/standard/tests/array/array_map_variation4.phpt
+      ext/standard/tests/array/array_map_variation5.phpt
+      ext/standard/tests/array/array_map_variation6.phpt
+      ext/standard/tests/array/array_map_variation7.phpt
+      ext/standard/tests/array/array_map_variation8.phpt
+      ext/standard/tests/array/array_map_variation9.phpt:
+      new smaller testcases for array_map() function
+
+    * ext/standard/tests/array/array_map.phpt
+      ext/standard/tests/array/array_map.phpt:
+      this testcase has been split into many smaller testcases and committed.
+
+    * ext/standard/tests/array/array_map_basic.phpt
+      ext/standard/tests/array/array_map_basic.phpt
+      ext/standard/tests/array/array_map_basic.phpt
+      ext/standard/tests/array/array_map_error.phpt
+      ext/standard/tests/array/array_map_error.phpt
+      ext/standard/tests/array/array_map_error.phpt
+      ext/standard/tests/array/array_map_object1.phpt
+      ext/standard/tests/array/array_map_object1.phpt
+      ext/standard/tests/array/array_map_object1.phpt
+      ext/standard/tests/array/array_map_object2.phpt
+      ext/standard/tests/array/array_map_object2.phpt
+      ext/standard/tests/array/array_map_object2.phpt
+      ext/standard/tests/array/array_map_object3.phpt
+      ext/standard/tests/array/array_map_object3.phpt
+      ext/standard/tests/array/array_map_object3.phpt
+      ext/standard/tests/array/array_map_variation10.phpt
+      ext/standard/tests/array/array_map_variation10.phpt
+      ext/standard/tests/array/array_map_variation10.phpt
+      ext/standard/tests/array/array_map_variation11.phpt
+      ext/standard/tests/array/array_map_variation11.phpt
+      ext/standard/tests/array/array_map_variation11.phpt
+      ext/standard/tests/array/array_map_variation12.phpt
+      ext/standard/tests/array/array_map_variation12.phpt
+      ext/standard/tests/array/array_map_variation12.phpt
+      ext/standard/tests/array/array_map_variation13.phpt
+      ext/standard/tests/array/array_map_variation13.phpt
+      ext/standard/tests/array/array_map_variation13.phpt
+      ext/standard/tests/array/array_map_variation14.phpt
+      ext/standard/tests/array/array_map_variation14.phpt
+      ext/standard/tests/array/array_map_variation14.phpt
+      ext/standard/tests/array/array_map_variation15.phpt
+      ext/standard/tests/array/array_map_variation15.phpt
+      ext/standard/tests/array/array_map_variation15.phpt
+      ext/standard/tests/array/array_map_variation16.phpt
+      ext/standard/tests/array/array_map_variation16.phpt
+      ext/standard/tests/array/array_map_variation16.phpt
+      ext/standard/tests/array/array_map_variation17.phpt
+      ext/standard/tests/array/array_map_variation17.phpt
+      ext/standard/tests/array/array_map_variation17.phpt
+      ext/standard/tests/array/array_map_variation18.phpt
+      ext/standard/tests/array/array_map_variation18.phpt
+      ext/standard/tests/array/array_map_variation18.phpt
+      ext/standard/tests/array/array_map_variation3.phpt
+      ext/standard/tests/array/array_map_variation3.phpt
+      ext/standard/tests/array/array_map_variation3.phpt
+      ext/standard/tests/array/array_map_variation4.phpt
+      ext/standard/tests/array/array_map_variation4.phpt
+      ext/standard/tests/array/array_map_variation4.phpt
+      ext/standard/tests/array/array_map_variation5.phpt
+      ext/standard/tests/array/array_map_variation5.phpt
+      ext/standard/tests/array/array_map_variation5.phpt
+      ext/standard/tests/array/array_map_variation6.phpt
+      ext/standard/tests/array/array_map_variation6.phpt
+      ext/standard/tests/array/array_map_variation6.phpt
+      ext/standard/tests/array/array_map_variation7.phpt
+      ext/standard/tests/array/array_map_variation7.phpt
+      ext/standard/tests/array/array_map_variation7.phpt
+      ext/standard/tests/array/array_map_variation8.phpt
+      ext/standard/tests/array/array_map_variation8.phpt
+      ext/standard/tests/array/array_map_variation8.phpt
+      ext/standard/tests/array/array_map_variation9.phpt
+      ext/standard/tests/array/array_map_variation9.phpt
+      ext/standard/tests/array/array_map_variation9.phpt:
+        1.1.4;
+      New smaller testcases for array_map() function
+
+2008-01-03  Steve Seear  <steve.seear@uk.ibm.com>
+
+    * ext/reflection/tests/ReflectionMethod_basic1.phpt
+      ext/reflection/tests/ReflectionMethod_basic1.phpt
+      ext/reflection/tests/ReflectionMethod_basic2.phpt
+      ext/reflection/tests/ReflectionMethod_basic2.phpt
+      ext/reflection/tests/ReflectionMethod_basic3.phpt
+      ext/reflection/tests/ReflectionMethod_basic3.phpt
+      ext/reflection/tests/ReflectionMethod_basic4.phpt
+      ext/reflection/tests/ReflectionMethod_basic4.phpt
+      ext/reflection/tests/ReflectionMethod_constructor_basic.phpt
+      ext/reflection/tests/ReflectionMethod_constructor_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getDeclaringClass_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getDeclaringClass_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getDocComment_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getDocComment_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getDocComment_error.phpt
+      ext/reflection/tests/ReflectionMethod_getDocComment_error.phpt
+      ext/reflection/tests/ReflectionMethod_getModifiers_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getModifiers_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getStaticVariables_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getStaticVariables_basic.phpt
+      ext/reflection/tests/ReflectionMethod_invokeArgs_basic.phpt
+      ext/reflection/tests/ReflectionMethod_invokeArgs_basic.phpt
+      ext/reflection/tests/ReflectionMethod_invokeArgs_error1.phpt
+      ext/reflection/tests/ReflectionMethod_invokeArgs_error1.phpt
+      ext/reflection/tests/ReflectionMethod_invokeArgs_error2.phpt
+      ext/reflection/tests/ReflectionMethod_invokeArgs_error2.phpt
+      ext/reflection/tests/ReflectionMethod_invokeArgs_error3.phpt
+      ext/reflection/tests/ReflectionMethod_invokeArgs_error3.phpt
+      ext/reflection/tests/ReflectionMethod_invoke_basic.phpt
+      ext/reflection/tests/ReflectionMethod_invoke_basic.phpt
+      ext/reflection/tests/ReflectionMethod_invoke_error1.phpt
+      ext/reflection/tests/ReflectionMethod_invoke_error1.phpt
+      ext/reflection/tests/ReflectionMethod_invoke_error2.phpt
+      ext/reflection/tests/ReflectionMethod_invoke_error2.phpt
+      ext/reflection/tests/ReflectionMethod_returnsReference_basic.phpt
+      ext/reflection/tests/ReflectionMethod_returnsReference_basic.phpt:
+      Adding PHPT tests for the ReflectionMethod class.
+
+    * ext/reflection/tests/ReflectionMethod_basic1.phpt
+      ext/reflection/tests/ReflectionMethod_basic1.phpt
+      ext/reflection/tests/ReflectionMethod_basic1.phpt
+      ext/reflection/tests/ReflectionMethod_basic2.phpt
+      ext/reflection/tests/ReflectionMethod_basic2.phpt
+      ext/reflection/tests/ReflectionMethod_basic2.phpt
+      ext/reflection/tests/ReflectionMethod_basic3.phpt
+      ext/reflection/tests/ReflectionMethod_basic3.phpt
+      ext/reflection/tests/ReflectionMethod_basic3.phpt
+      ext/reflection/tests/ReflectionMethod_basic4.phpt
+      ext/reflection/tests/ReflectionMethod_basic4.phpt
+      ext/reflection/tests/ReflectionMethod_basic4.phpt
+      ext/reflection/tests/ReflectionMethod_constructor_basic.phpt
+      ext/reflection/tests/ReflectionMethod_constructor_basic.phpt
+      ext/reflection/tests/ReflectionMethod_constructor_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getDeclaringClass_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getDeclaringClass_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getDeclaringClass_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getDocComment_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getDocComment_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getDocComment_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getDocComment_error.phpt
+      ext/reflection/tests/ReflectionMethod_getDocComment_error.phpt
+      ext/reflection/tests/ReflectionMethod_getDocComment_error.phpt
+      ext/reflection/tests/ReflectionMethod_getModifiers_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getModifiers_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getModifiers_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getStaticVariables_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getStaticVariables_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getStaticVariables_basic.phpt
+      ext/reflection/tests/ReflectionMethod_invokeArgs_basic.phpt
+      ext/reflection/tests/ReflectionMethod_invokeArgs_basic.phpt
+      ext/reflection/tests/ReflectionMethod_invokeArgs_basic.phpt
+      ext/reflection/tests/ReflectionMethod_invokeArgs_error1.phpt
+      ext/reflection/tests/ReflectionMethod_invokeArgs_error1.phpt
+      ext/reflection/tests/ReflectionMethod_invokeArgs_error1.phpt
+      ext/reflection/tests/ReflectionMethod_invokeArgs_error2.phpt
+      ext/reflection/tests/ReflectionMethod_invokeArgs_error2.phpt
+      ext/reflection/tests/ReflectionMethod_invokeArgs_error2.phpt
+      ext/reflection/tests/ReflectionMethod_invokeArgs_error3.phpt
+      ext/reflection/tests/ReflectionMethod_invokeArgs_error3.phpt
+      ext/reflection/tests/ReflectionMethod_invokeArgs_error3.phpt
+      ext/reflection/tests/ReflectionMethod_invoke_basic.phpt
+      ext/reflection/tests/ReflectionMethod_invoke_basic.phpt
+      ext/reflection/tests/ReflectionMethod_invoke_basic.phpt
+      ext/reflection/tests/ReflectionMethod_invoke_error1.phpt
+      ext/reflection/tests/ReflectionMethod_invoke_error1.phpt
+      ext/reflection/tests/ReflectionMethod_invoke_error1.phpt
+      ext/reflection/tests/ReflectionMethod_invoke_error2.phpt
+      ext/reflection/tests/ReflectionMethod_invoke_error2.phpt
+      ext/reflection/tests/ReflectionMethod_invoke_error2.phpt
+      ext/reflection/tests/ReflectionMethod_returnsReference_basic.phpt
+      ext/reflection/tests/ReflectionMethod_returnsReference_basic.phpt
+      ext/reflection/tests/ReflectionMethod_returnsReference_basic.phpt:
+        1.1.4;
+      file ReflectionMethod_basic1.phpt was initially added on branch PHP_5_2.
+
+2008-01-03  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      configure.in
+      main/php_version.h:
+      - Back to dev.
+
+    * (PHP_4_4)
+      sapi/cli/php.1.in:
+      - Bumb copyright year here too.
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Go with PHP 4.4.8.
+
 2008-01-02  Andrey Hristov  <php@hristov.com>
 
     * ext/mysqlnd/mysqlnd.c
