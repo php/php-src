@@ -5,6 +5,15 @@ mysqli_change_user() - LAST_INSERT_ID()
 require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
+require_once('connect.inc');
+if (!$IS_MYSQLND) {
+	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+		die("skip Can't test server version, might hit known bug http://bugs.mysql.com/bug.php?id=30472");
+	if (mysqli_get_client_version($link) < 50123)
+		/* TODO - check wich version got the patch */
+		die(sprintf("skip libmysql %s should have bug http://bugs.mysql.com/bug.php?id=30472", mysqli_get_client_version($link)));
+	mysqli_close($link);
+}
 ?>
 --FILE--
 <?php
