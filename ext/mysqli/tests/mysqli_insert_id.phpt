@@ -1,9 +1,9 @@
 --TEST--
 mysqli_insert_id()
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -104,13 +104,25 @@ require_once('skipifconnectfailure.inc');
 			mysqli_free_result($res);
 
 			if ($next_id != $row['last_id']) {
-				printf("[018] Something is wrong, check manually. Expecting %s got %s.\n",
+				printf("[019] Something is wrong, check manually. Expecting %s got %s.\n",
 					$next_id, $row['last_id']);
 				break;
 			}
 		} while (false);
 		mysqli_query($link, "UNLOCK TABLE test");
 	}
+
+	if (!$res = mysqli_query($link, "INSERT INTO test(id, label) VALUES (1000, 'a')")) {
+		printf("[020] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+	}
+	if (1000 !== ($tmp = mysqli_insert_id($link)))
+		printf("[021] Expecting int/1000, got %s/%s\n", gettype($tmp), $tmp);
+
+	if (!$res = mysqli_query($link, "INSERT INTO test(label) VALUES ('b'), ('c')")) {
+		printf("[022] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+	}
+	if (1000 >= ($tmp = mysqli_insert_id($link)))
+		printf("[023] Expecting int/>1000, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_close($link);
 
