@@ -64,7 +64,6 @@ PHP_METHOD(Phar, getExtractList)
 	zend_hash_apply_with_arguments(&PHAR_G(phar_plain_map), phar_get_extract_list, 1, return_value);
 }
 /* }}} */
-
 static int phar_file_type(HashTable *mimes, char *file, char **mime_type TSRMLS_DC)
 {
 	char *ext;
@@ -144,8 +143,11 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 					return -1;
 				}
 				phar->fp = phar->internal_file->fp;
+				if (phar->internal_file->fp == phar->phar->fp) {
+					phar->zero = phar->internal_file->offset_within_phar;
+				}
 			}
-			php_stream_seek(phar->fp, phar->position + phar->zero, SEEK_SET);
+			php_stream_seek(phar->fp, phar->zero, SEEK_SET);
 			do {
 				if (!phar->zero) {
 					got = php_stream_read(phar->fp, buf, 8192);
@@ -164,6 +166,7 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 			} while (1);
 
 			phar_entry_delref(phar TSRMLS_CC);
+			zend_bailout();
 			return PHAR_MIME_OTHER;
 		case PHAR_MIME_PHP:
 			phar_entry_delref(phar TSRMLS_CC);
@@ -335,7 +338,6 @@ PHP_METHOD(Phar, webPhar)
 					efree(error);
 				}
 				phar_do_404(fname, fname_len, f404, f404_len TSRMLS_CC);
-				phar_entry_delref(phar TSRMLS_CC);
 				zend_bailout();
 				return;
 			} else {
