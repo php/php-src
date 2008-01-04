@@ -208,7 +208,7 @@ static void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC) /* {{{ */
 {
 #if HAVE_PHAR_ZIP
 	if (data->zip) {
-		zip_close(data->zip);
+		_zip_free(data->zip);
 		data->zip = 0;
 	}
 #endif
@@ -3256,7 +3256,7 @@ int phar_zip_flush(phar_archive_data *archive, char *user_stub, long len, char *
 			efree(user_stub);
 		}
 	} else {
-		if (archive->is_brandnew) {
+		if (-1 != phar_stub_index) {
 			struct zip_source *source;
 			/* this is a brand new phar, add the stub */
 			if (NULL == (source = zip_source_buffer(archive->zip, newstub, sizeof(newstub) - 1, 0)) || -1 == zip_add(archive->zip, ".phar/stub.php", source)) {

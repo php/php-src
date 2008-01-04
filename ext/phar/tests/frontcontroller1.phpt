@@ -5,6 +5,8 @@ Phar front controller
 --INI--
 phar.require_hash=0
 phar.readonly=0
+--ENV--
+REQUEST_URI=/frontcontroller1.phar.php/a.jpg
 --FILE--
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
@@ -30,4 +32,4 @@ __HALT_COMPILER();
 Content-type: image/jpeg
 Content-length: 3
 --EXPECT--
-hio===DONE===
+hio
