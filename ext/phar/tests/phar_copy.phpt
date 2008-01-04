@@ -1,9 +1,9 @@
 --TEST--
 Phar: copy()
 --SKIPIF--
-<?php if (!extension_loaded("phar")) print "skip"; ?>
-<?php if (!extension_loaded("spl")) print "skip SPL not available"; ?>
-<?php if (!extension_loaded("zlib")) print "skip zlib not available"; ?>
+<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
+<?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
 --INI--
 phar.readonly=0
 phar.require_hash=1

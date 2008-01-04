@@ -1,7 +1,7 @@
 --TEST--
 Phar with phar-level meta-data (read)
 --SKIPIF--
-<?php if (!extension_loaded("phar")) print "skip";?>
+<?php if (!extension_loaded("phar")) die("skip");?>
 --INI--
 phar.require_hash=0
 --FILE--

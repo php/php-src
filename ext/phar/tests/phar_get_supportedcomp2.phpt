@@ -1,10 +1,10 @@
 --TEST--
 Phar::getSupportedCompression() (bz2)
 --SKIPIF--
-<?php if (!extension_loaded("phar")) print "skip"; ?>
-<?php if (!extension_loaded("spl")) print "skip SPL not available"; ?>
-<?php if (!extension_loaded("bz2")) print "skip bz2 not available"; ?>
-<?php if (extension_loaded("zlib")) print "skip zlib is available"; ?>
+<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
+<?php if (!extension_loaded("bz2")) die("skip bz2 not available"); ?>
+<?php if (extension_loaded("zlib")) die("skip zlib is available"); ?>
 --INI--
 phar.require_hash=0
 --FILE--

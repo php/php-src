@@ -1,8 +1,8 @@
 --TEST--
 Phar and DirectoryIteraotr
 --SKIPIF--
-<?php if (!extension_loaded("phar")) print "skip"; ?>
-<?php if (!extension_loaded("spl")) print "skip SPL not available"; ?>
+<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 --INI--
 phar.require_hash=0
 --FILE--

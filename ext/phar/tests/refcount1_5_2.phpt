@@ -1,8 +1,8 @@
 --TEST--
 Phar: test that refcounting avoids problems with deleting a file
 --SKIPIF--
-<?php if (!extension_loaded("phar")) print "skip"; ?>
-<?php if (!extension_loaded("spl")) print "skip SPL not available"; ?>
+<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 <?php if (version_compare(PHP_VERSION, "5.2", ">")) die("skip requires 5.2 or earlier"); ?>
 --INI--
 phar.readonly=0

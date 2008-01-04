@@ -1,7 +1,7 @@
 --TEST--
 Phar::buildFromIterator() iterator, key is int
 --SKIPIF--
-<?php if (!extension_loaded("phar")) print "skip"; ?>
+<?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
 phar.require_hash=0
 phar.readonly=0
