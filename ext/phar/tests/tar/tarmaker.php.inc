@@ -38,19 +38,21 @@ class tarmaker
      * @param string relative path within the package
      * @param string|resource file contents or open file handle
      */
-    function addFile($path, $fileOrStream)
+    function addFile($path, $fileOrStream, $stat = null)
     {
         clearstatcache();
-        if (is_resource($fileOrStream)) {
-            $stat = fstat($fileOrStream);
-        } else {
-            $stat = array(
-                'mode' => 0x8000 + 0644,
-                'uid' => 0,
-                'gid' => 0,
-                'size' => strlen($fileOrStream),
-                'mtime' => time(),
-            );
+        if ($stat === null) {
+            if (is_resource($fileOrStream)) {
+                $stat = fstat($fileOrStream);
+            } else {
+                $stat = array(
+                    'mode' => 0x8000 + 0644,
+                    'uid' => 0,
+                    'gid' => 0,
+                    'size' => strlen($fileOrStream),
+                    'mtime' => time(),
+                );
+            }
         }
 
         $link = null;
@@ -143,11 +145,17 @@ class tarmaker
     /**
      * Create an internal directory, creating parent directories as needed
      * 
-     * This is a no-op for the tar creator
      * @param string $dir
      */
     function mkdir($dir)
     {
+        $this->addFile($dir, "", array(
+                    'mode' => 0x4000 + 0644,
+                    'uid' => 0,
+                    'gid' => 0,
+                    'size' => 0,
+                    'mtime' => time(),
+                ));
     }
 
     /**
