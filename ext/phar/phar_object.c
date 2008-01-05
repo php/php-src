@@ -476,6 +476,10 @@ PHP_METHOD(Phar, webPhar)
 		/* check for "rewrite" urls */
 		if (SUCCESS == zend_hash_find(Z_ARRVAL_P(rewrites), entry, entry_len+1, (void **) &fd_ptr)) {
 			if (IS_STRING != Z_TYPE_PP(fd_ptr)) {
+				phar_entry_delref(phar TSRMLS_CC);
+#ifdef PHP_WIN32
+				efree(fname);
+#endif
 				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "phar rewrite value for \"%s\" was not a string", entry);
 				return;
 			}
@@ -489,6 +493,7 @@ PHP_METHOD(Phar, webPhar)
 
 	if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", &error TSRMLS_CC)) {
 		phar_do_404(fname, fname_len, f404, f404_len, entry, entry_len TSRMLS_CC);
+		phar_entry_delref(phar TSRMLS_CC);
 #ifdef PHP_WIN32
 		efree(fname);
 #endif
@@ -552,6 +557,7 @@ PHP_METHOD(Phar, webPhar)
 			ulong intkey;
 			if (HASH_KEY_IS_LONG == zend_hash_get_current_key_ex(Z_ARRVAL_P(mimeoverride), &key, &keylen, &intkey, 0, NULL)) {
 				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Key of MIME type overrides array must be a file extension, was \"%d\"", intkey);
+				phar_entry_delref(phar TSRMLS_CC);
 #ifdef PHP_WIN32
 				efree(fname);
 #endif
@@ -559,6 +565,7 @@ PHP_METHOD(Phar, webPhar)
 			}
 			if (FAILURE == zend_hash_get_current_data(Z_ARRVAL_P(mimeoverride), (void **) &val)) {
 				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Failed to retrieve Mime type for extension \"%s\"", key);
+				phar_entry_delref(phar TSRMLS_CC);
 #ifdef PHP_WIN32
 				efree(fname);
 #endif
@@ -570,6 +577,10 @@ PHP_METHOD(Phar, webPhar)
 						PHAR_SET_USER_MIME(Z_LVAL_P(val))
 					} else {
 						zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Unknown mime type specifier used, only Phar::PHP, Phar::PHPS and a mime type string are allowed");
+						phar_entry_delref(phar TSRMLS_CC);
+#ifdef PHP_WIN32
+						efree(fname);
+#endif
 						RETURN_FALSE;
 					}
 					break;
@@ -578,6 +589,10 @@ PHP_METHOD(Phar, webPhar)
 					break;
 				default :
 					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Unknown mime type specifier used, only Phar::PHP, Phar::PHPS and a mime type string are allowed");
+					phar_entry_delref(phar TSRMLS_CC);
+#ifdef PHP_WIN32
+					efree(fname);
+#endif
 					RETURN_FALSE;
 			}
 		}
