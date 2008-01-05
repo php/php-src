@@ -301,7 +301,7 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 	return -1;
 }
 
-void phar_do_404(char *fname, int fname_len, char *f404, int f404_len TSRMLS_DC)
+void phar_do_404(char *fname, int fname_len, char *f404, int f404_len, char *entry, int entry_len TSRMLS_DC)
 {
 	int hi;
 	phar_entry_data *phar;
@@ -322,7 +322,9 @@ nofile:
 		ctr.line = "HTTP/1.0 404 Not Found";
 		sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 		sapi_send_headers(TSRMLS_C);
-		PHPWRITE("<html><head><title>File Not Found<title></head><body><h1>404 - File Not Found</h1></body></html>", sizeof("<html><head><title>File Not Found<title></head><body><h1>404 - File Not Found</h1></body></html>") - 1);
+		PHPWRITE("<html>\n <head>\n  <title>File Not Found<title>\n </head>\n <body>\n  <h1>404 - File ", sizeof("<html>\n <head>\n  <title>File Not Found<title>\n </head>\n <body>\n  <h1>404 - File ") - 1);
+		PHPWRITE(entry, entry_len);
+		PHPWRITE(" Not Found</h1>\n </body>\n</html>",  sizeof(" Not Found</h1>\n </body>\n</html>") - 1);
 	}
 }
 
@@ -350,6 +352,17 @@ PHP_METHOD(Phar, webPhar)
 	}
 
 	phar_request_initialize(TSRMLS_C);
+	if (zend_hash_num_elements(&(PHAR_GLOBALS->phar_plain_map))) {
+		fname = zend_get_executed_filename(TSRMLS_C);
+		fname_len = strlen(fname);
+		if((alias && 
+		    zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), alias, alias_len+1, (void **)&plain_map) == SUCCESS)
+		|| (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), fname, fname_len+1, (void **)&plain_map) == SUCCESS)
+		) {
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Cannot use Phar::webPhar() from an extracted phar archive, simply use the extracted files directly");
+			return;
+		}
+	}
 	if (phar_open_compiled_file(alias, alias_len, &error TSRMLS_CC) != SUCCESS) {
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
@@ -428,7 +441,7 @@ PHP_METHOD(Phar, webPhar)
 			if (error) {
 				efree(error);
 			}
-			phar_do_404(fname, fname_len, f404, f404_len TSRMLS_CC);
+			phar_do_404(fname, fname_len, f404, f404_len, entry, entry_len TSRMLS_CC);
 			zend_bailout();
 			return;
 		} else {
@@ -474,7 +487,7 @@ PHP_METHOD(Phar, webPhar)
 	}
 
 	if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", &error TSRMLS_CC)) {
-		phar_do_404(fname, fname_len, f404, f404_len TSRMLS_CC);
+		phar_do_404(fname, fname_len, f404, f404_len, entry, entry_len TSRMLS_CC);
 #ifdef PHP_WIN32
 		efree(fname);
 #endif
