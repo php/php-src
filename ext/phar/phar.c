@@ -1796,9 +1796,9 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 			php_stream_close(fp);
 			return FAILURE;
 		}
+		php_stream_close(fp);
 	}
 
-	php_stream_close(fp);
 
 	if (PHAR_G(readonly)) {
 		if (options & REPORT_ERRORS) {
@@ -1890,7 +1890,7 @@ int phar_open_filename(char *fname, int fname_len, char *alias, int alias_len, i
 		return FAILURE;
 	}
 
-	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
+	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK, NULL);
 	
 	if (!fp) {
 		if (options & REPORT_ERRORS) {
