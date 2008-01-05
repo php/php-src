@@ -1667,7 +1667,7 @@ COMMAND $cmd
 		$wanted = $wanted_headers . "\n--HEADERS--\n" . $wanted;
 		$output = $output_headers . "\n--HEADERS--\n" . $output;
 		if (isset($wanted_re)) {
-			$wanted_re = $wanted_headers . "\n--HEADERS--\n" . $wanted_re;
+			$wanted_re = preg_quote($wanted_headers . "\n--HEADERS--\n", '/') . $wanted_re;
 		}
 	}
 
