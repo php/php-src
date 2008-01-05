@@ -432,7 +432,7 @@ PHP_METHOD(Phar, webPhar)
 			zend_bailout();
 			return;
 		} else {
-			char *tmp, sa;
+			char *tmp, sa, *myentry;
 			sapi_header_line ctr = {0};
 			ctr.response_code = 301;
 			ctr.line_len = sizeof("HTTP/1.1 301 Moved Permanently")+1;
@@ -443,7 +443,12 @@ PHP_METHOD(Phar, webPhar)
 			sa = *tmp;
 			*tmp = '\0';
 			ctr.response_code = 0;
-			ctr.line_len = spprintf(&(ctr.line), 4096, "Location: %s%s", path_info, entry);
+			if (entry[0] == '/' && path_info[strlen(path_info)-1] == '/') {
+				myentry = entry + 1;
+			} else {
+				myentry = entry;
+			}
+			ctr.line_len = spprintf(&(ctr.line), 4096, "Location: %s%s", path_info, myentry);
 			*tmp = sa;
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 			sapi_send_headers(TSRMLS_C);
