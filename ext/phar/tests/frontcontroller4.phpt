@@ -1,5 +1,5 @@
 --TEST--
-Phar front controller phps
+Phar front controller index.php relocate (no /)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
