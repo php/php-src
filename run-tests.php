@@ -1004,7 +1004,7 @@ TEST $file
 		if (preg_match('/^--([_A-Z]+)--/', $line, $r)) {
 			$section = $r[1];
 			$section_text[$section] = '';
-			$secfile = $section == 'FILE' || $section == 'FILEEOF';
+			$secfile = $section == 'FILE' || $section == 'FILEEOF' || $section == 'FILE_EXTERNAL';
 			$secdone = false;
 			continue;
 		}
@@ -1030,13 +1030,24 @@ TEST $file
 			$borked = false;
 		}
 	} else {
-		if (@count($section_text['FILE']) + @count($section_text['FILEEOF']) != 1) {
+		if (@count($section_text['FILE']) + @count($section_text['FILEEOF']) + @count($section_text['FILE_EXTERNAL']) != 1) {
 			$bork_info = "missing section --FILE--";
 			$borked = true;
 		}
 		if (@count($section_text['FILEEOF']) == 1) {
 			$section_text['FILE'] = preg_replace("/[\r\n]+$/", '', $section_text['FILEEOF']);
 			unset($section_text['FILEEOF']);
+		}
+		if (@count($section_text['FILE_EXTERNAL']) == 1) {
+			// don't allow tests to retrieve files from anywhere but this subdirectory
+			$section_text['FILE_EXTERNAL'] = dirname($file) . '/' . trim(str_replace('..', '', $section_text['FILE_EXTERNAL']));
+			if (@file_exists($section_text['FILE_EXTERNAL'])) {
+				$section_text['FILE'] = file_get_contents($section_text['FILE_EXTERNAL']);
+				unset($section_text['FILE_EXTERNAL']);
+			} else {
+				$bork_info = "could not load --FILE_EXTERNAL-- " . dirname($file) . '/' . trim($section_text['FILE_EXTERNAL']);
+				$borked = true;
+			}
 		}
 		if ((@count($section_text['EXPECT']) + @count($section_text['EXPECTF']) + @count($section_text['EXPECTREGEX'])) != 1) {
 			$bork_info = "missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX--";
@@ -1063,7 +1074,7 @@ TEST $file
 	$tested = trim($section_text['TEST']);
 
 	/* For GET/POST tests, check if cgi sapi is available and if it is, use it. */
-	if (!empty($section_text['GET']) || !empty($section_text['POST']) || !empty($section_text['POST_RAW']) || !empty($section_text['COOKIE'])) {
+	if (!empty($section_text['GET']) || !empty($section_text['POST']) || !empty($section_text['POST_RAW']) || !empty($section_text['COOKIE']) || !empty($section_text['EXPECTHEADERS'])) {
 		if (isset($php_cgi)) {
 			$old_php = $php;
 			$php = $php_cgi .' -C ';
@@ -1333,12 +1344,15 @@ TEST $file
 		$raw_lines = explode("\n", $post);
 
 		$request = '';
+		$started = false;
 		foreach ($raw_lines as $line) {
 			if (empty($env['CONTENT_TYPE']) && preg_match('/^Content-Type:(.*)/i', $line, $res)) {
 				$env['CONTENT_TYPE'] = trim(str_replace("\r", '', $res[1]));
 				continue;
 			}
-			$request .= $line . "\n";
+			if ($started) $request .= "\n";
+			$started = true;
+			$request .= $line;
 		}
 
 		$env['CONTENT_LENGTH'] = strlen($request);
