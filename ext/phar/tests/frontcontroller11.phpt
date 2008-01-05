@@ -1,5 +1,5 @@
 --TEST--
-Phar front controller rewrite array invalid
+Phar front controller mime type extension is not a string
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
