@@ -1,5 +1,5 @@
 --TEST--
-Phar front controller
+Phar front controller other
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
