@@ -541,17 +541,22 @@ PHP_METHOD(Phar, webPhar)
 
 	/* set up user overrides */
 #define PHAR_SET_USER_MIME(ret) \
-		mime.mime = Z_STRVAL_P(val); \
-		mime.len = Z_STRLEN_P(val); \
+		if (Z_TYPE_PP(val) == IS_LONG) { \
+			mime.mime = ""; \
+			mime.len = 0; \
+		} else { \
+			mime.mime = Z_STRVAL_PP(val); \
+			mime.len = Z_STRLEN_PP(val); \
+		} \
 		mime.type = ret; \
-		zend_hash_update(&mimetypes, key, keylen, (void *)&mime, sizeof(phar_mime_type), NULL);
+		zend_hash_update(&mimetypes, key, keylen-1, (void *)&mime, sizeof(phar_mime_type), NULL);
 
 	if (mimeoverride) {
 		if (!zend_hash_num_elements(Z_ARRVAL_P(mimeoverride))) {
 			goto no_mimes;
 		}
 		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(mimeoverride)); SUCCESS == zend_hash_has_more_elements(Z_ARRVAL_P(mimeoverride)); zend_hash_move_forward(Z_ARRVAL_P(mimeoverride))) {
-			zval *val;
+			zval **val;
 			char *key;
 			uint keylen;
 			ulong intkey;
@@ -571,10 +576,10 @@ PHP_METHOD(Phar, webPhar)
 #endif
 				RETURN_FALSE;
 			}
-			switch (Z_TYPE_P(val)) {
+			switch (Z_TYPE_PP(val)) {
 				case IS_LONG :
-					if (Z_LVAL_P(val) == PHAR_MIME_PHP || Z_LVAL_P(val) == PHAR_MIME_PHPS) {
-						PHAR_SET_USER_MIME(Z_LVAL_P(val))
+					if (Z_LVAL_PP(val) == PHAR_MIME_PHP || Z_LVAL_PP(val) == PHAR_MIME_PHPS) {
+						PHAR_SET_USER_MIME(Z_LVAL_PP(val))
 					} else {
 						zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Unknown mime type specifier used, only Phar::PHP, Phar::PHPS and a mime type string are allowed");
 						phar_entry_delref(phar TSRMLS_CC);
@@ -588,7 +593,7 @@ PHP_METHOD(Phar, webPhar)
 					PHAR_SET_USER_MIME(PHAR_MIME_OTHER)
 					break;
 				default :
-					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Unknown mime type specifier used, only Phar::PHP, Phar::PHPS and a mime type string are allowed");
+					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Unknown mime type specifier used (not a string or int), only Phar::PHP, Phar::PHPS and a mime type string are allowed");
 					phar_entry_delref(phar TSRMLS_CC);
 #ifdef PHP_WIN32
 					efree(fname);
