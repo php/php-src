@@ -1,3 +1,206 @@
+2008-01-04  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * (PHP_5_3)
+      ext/mysqli/tests/mysqli_change_user_insert_id.phpt
+      ext/mysqli/tests/mysqli_fetch_assoc_zerofill.phpt
+      ext/mysqli/tests/mysqli_insert_id.phpt
+      ext/mysqli/tests/mysqli_stmt_bind_param_call_user_func.phpt
+      ext/mysqli/tests/mysqli_stmt_bind_result_zerofill.phpt:
+      MFH
+      
+      Added:
+      
+        mysqli_fetch_assoc_zerofill.phpt
+          checks for UNSIGNED ZEROFILL
+      
+        mysqli_stmt_bind_result_zerofill.phpt
+          checks for UNSIGNED ZEROFILL
+      
+        mysqli_stmt_bind_param_call_user_func.phpt
+          Needs to be refined once http://bugs.php.net/bug.php?id=43568
+          has been closed and a decision has been made on
+      call_user_func_array().
+          There seems to be a BC break between 5_2 -> 5_3 .
+          Johannes has an eye on it
+      
+      Modified:
+      
+        mysqli_change_user_insert_id.phpt
+          skip test for buggy MySQL Server versions
+      
+        mysqli_insert_id.phpt
+          added additional checks
+
+    * ext/mysqli/tests/mysqli_change_user_insert_id.phpt
+      ext/mysqli/tests/mysqli_fetch_assoc_zerofill.phpt
+      ext/mysqli/tests/mysqli_fetch_assoc_zerofill.phpt
+      ext/mysqli/tests/mysqli_insert_id.phpt
+      ext/mysqli/tests/mysqli_stmt_bind_param_call_user_func.phpt
+      ext/mysqli/tests/mysqli_stmt_bind_param_call_user_func.phpt
+      ext/mysqli/tests/mysqli_stmt_bind_result_zerofill.phpt
+      ext/mysqli/tests/mysqli_stmt_bind_result_zerofill.phpt:
+      Added:
+      
+        mysqli_fetch_assoc_zerofill.phpt
+          checks for UNSIGNED ZEROFILL
+      
+        mysqli_stmt_bind_result_zerofill.phpt
+          checks for UNSIGNED ZEROFILL
+      
+        mysqli_stmt_bing_call_user_func.phpt
+          Needs to be refined once http://bugs.php.net/bug.php?id=43568
+          has been closed and a decision has been made on
+      call_user_func_array().
+          There seems to be a BC break between 5_2 -> 5_3 .
+          Johannes has an eye on it
+      
+      Modified:
+      
+        mysqli_change_user_insert_id.phpt
+          skip test for buggy MySQL Server versions
+      
+        mysqli_insert_id.phpt
+          added additional checks
+
+2008-01-04  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_diff_basic.phpt
+      ext/standard/tests/array/array_diff_basic.phpt
+      ext/standard/tests/array/array_diff_error.phpt
+      ext/standard/tests/array/array_diff_error.phpt
+      ext/standard/tests/array/array_diff_variation1.phpt
+      ext/standard/tests/array/array_diff_variation1.phpt
+      ext/standard/tests/array/array_diff_variation10.phpt
+      ext/standard/tests/array/array_diff_variation10.phpt
+      ext/standard/tests/array/array_diff_variation2.phpt
+      ext/standard/tests/array/array_diff_variation2.phpt
+      ext/standard/tests/array/array_diff_variation3.phpt
+      ext/standard/tests/array/array_diff_variation3.phpt
+      ext/standard/tests/array/array_diff_variation4.phpt
+      ext/standard/tests/array/array_diff_variation4.phpt
+      ext/standard/tests/array/array_diff_variation5.phpt
+      ext/standard/tests/array/array_diff_variation5.phpt
+      ext/standard/tests/array/array_diff_variation6.phpt
+      ext/standard/tests/array/array_diff_variation6.phpt
+      ext/standard/tests/array/array_diff_variation7.phpt
+      ext/standard/tests/array/array_diff_variation7.phpt
+      ext/standard/tests/array/array_diff_variation8.phpt
+      ext/standard/tests/array/array_diff_variation8.phpt
+      ext/standard/tests/array/array_diff_variation9.phpt
+      ext/standard/tests/array/array_diff_variation9.phpt:
+      New testcases for array_diff() function
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_diff_assoc_basic.phpt
+      ext/standard/tests/array/array_diff_assoc_basic.phpt
+      ext/standard/tests/array/array_diff_assoc_error.phpt
+      ext/standard/tests/array/array_diff_assoc_error.phpt
+      ext/standard/tests/array/array_diff_assoc_variation1.phpt
+      ext/standard/tests/array/array_diff_assoc_variation1.phpt
+      ext/standard/tests/array/array_diff_assoc_variation10.phpt
+      ext/standard/tests/array/array_diff_assoc_variation10.phpt
+      ext/standard/tests/array/array_diff_assoc_variation2.phpt
+      ext/standard/tests/array/array_diff_assoc_variation2.phpt
+      ext/standard/tests/array/array_diff_assoc_variation3.phpt
+      ext/standard/tests/array/array_diff_assoc_variation3.phpt
+      ext/standard/tests/array/array_diff_assoc_variation4.phpt
+      ext/standard/tests/array/array_diff_assoc_variation4.phpt
+      ext/standard/tests/array/array_diff_assoc_variation5.phpt
+      ext/standard/tests/array/array_diff_assoc_variation5.phpt
+      ext/standard/tests/array/array_diff_assoc_variation6.phpt
+      ext/standard/tests/array/array_diff_assoc_variation6.phpt
+      ext/standard/tests/array/array_diff_assoc_variation7.phpt
+      ext/standard/tests/array/array_diff_assoc_variation7.phpt
+      ext/standard/tests/array/array_diff_assoc_variation8.phpt
+      ext/standard/tests/array/array_diff_assoc_variation8.phpt
+      ext/standard/tests/array/array_diff_assoc_variation9.phpt
+      ext/standard/tests/array/array_diff_assoc_variation9.phpt:
+      New testcases for array_diff_assoc() function
+
+    * ext/standard/tests/array/array_diff_assoc_basic.phpt
+      ext/standard/tests/array/array_diff_assoc_basic.phpt
+      ext/standard/tests/array/array_diff_assoc_basic.phpt
+      ext/standard/tests/array/array_diff_assoc_error.phpt
+      ext/standard/tests/array/array_diff_assoc_error.phpt
+      ext/standard/tests/array/array_diff_assoc_error.phpt
+      ext/standard/tests/array/array_diff_assoc_variation1.phpt
+      ext/standard/tests/array/array_diff_assoc_variation1.phpt
+      ext/standard/tests/array/array_diff_assoc_variation1.phpt
+      ext/standard/tests/array/array_diff_assoc_variation10.phpt
+      ext/standard/tests/array/array_diff_assoc_variation10.phpt
+      ext/standard/tests/array/array_diff_assoc_variation10.phpt
+      ext/standard/tests/array/array_diff_assoc_variation2.phpt
+      ext/standard/tests/array/array_diff_assoc_variation2.phpt
+      ext/standard/tests/array/array_diff_assoc_variation2.phpt
+      ext/standard/tests/array/array_diff_assoc_variation3.phpt
+      ext/standard/tests/array/array_diff_assoc_variation3.phpt
+      ext/standard/tests/array/array_diff_assoc_variation3.phpt
+      ext/standard/tests/array/array_diff_assoc_variation4.phpt
+      ext/standard/tests/array/array_diff_assoc_variation4.phpt
+      ext/standard/tests/array/array_diff_assoc_variation4.phpt
+      ext/standard/tests/array/array_diff_assoc_variation5.phpt
+      ext/standard/tests/array/array_diff_assoc_variation5.phpt
+      ext/standard/tests/array/array_diff_assoc_variation5.phpt
+      ext/standard/tests/array/array_diff_assoc_variation6.phpt
+      ext/standard/tests/array/array_diff_assoc_variation6.phpt
+      ext/standard/tests/array/array_diff_assoc_variation6.phpt
+      ext/standard/tests/array/array_diff_assoc_variation7.phpt
+      ext/standard/tests/array/array_diff_assoc_variation7.phpt
+      ext/standard/tests/array/array_diff_assoc_variation7.phpt
+      ext/standard/tests/array/array_diff_assoc_variation8.phpt
+      ext/standard/tests/array/array_diff_assoc_variation8.phpt
+      ext/standard/tests/array/array_diff_assoc_variation8.phpt
+      ext/standard/tests/array/array_diff_assoc_variation9.phpt
+      ext/standard/tests/array/array_diff_assoc_variation9.phpt
+      ext/standard/tests/array/array_diff_assoc_variation9.phpt:
+        1.1.4;
+      New testcases for array_diff_assoc() function
+
+    * ext/standard/tests/array/array_diff_basic.phpt
+      ext/standard/tests/array/array_diff_basic.phpt
+      ext/standard/tests/array/array_diff_basic.phpt
+      ext/standard/tests/array/array_diff_error.phpt
+      ext/standard/tests/array/array_diff_error.phpt
+      ext/standard/tests/array/array_diff_error.phpt
+      ext/standard/tests/array/array_diff_variation1.phpt
+      ext/standard/tests/array/array_diff_variation1.phpt
+      ext/standard/tests/array/array_diff_variation1.phpt
+      ext/standard/tests/array/array_diff_variation10.phpt
+      ext/standard/tests/array/array_diff_variation10.phpt
+      ext/standard/tests/array/array_diff_variation10.phpt
+      ext/standard/tests/array/array_diff_variation2.phpt
+      ext/standard/tests/array/array_diff_variation2.phpt
+      ext/standard/tests/array/array_diff_variation2.phpt
+      ext/standard/tests/array/array_diff_variation3.phpt
+      ext/standard/tests/array/array_diff_variation3.phpt
+      ext/standard/tests/array/array_diff_variation3.phpt
+      ext/standard/tests/array/array_diff_variation4.phpt
+      ext/standard/tests/array/array_diff_variation4.phpt
+      ext/standard/tests/array/array_diff_variation4.phpt
+      ext/standard/tests/array/array_diff_variation5.phpt
+      ext/standard/tests/array/array_diff_variation5.phpt
+      ext/standard/tests/array/array_diff_variation5.phpt
+      ext/standard/tests/array/array_diff_variation6.phpt
+      ext/standard/tests/array/array_diff_variation6.phpt
+      ext/standard/tests/array/array_diff_variation6.phpt
+      ext/standard/tests/array/array_diff_variation7.phpt
+      ext/standard/tests/array/array_diff_variation7.phpt
+      ext/standard/tests/array/array_diff_variation7.phpt
+      ext/standard/tests/array/array_diff_variation8.phpt
+      ext/standard/tests/array/array_diff_variation8.phpt
+      ext/standard/tests/array/array_diff_variation8.phpt
+      ext/standard/tests/array/array_diff_variation9.phpt
+      ext/standard/tests/array/array_diff_variation9.phpt
+      ext/standard/tests/array/array_diff_variation9.phpt:
+        1.1.4;
+      New testcases for array_diff() function
+
+2008-01-04  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/mysqli/tests/047.phpt:
+      Fix for Bug #43036
+
 2008-01-03  Ulf Wendel  <ulf.wendel@phpdoc.de>
 
     * (PHP_5_3)
