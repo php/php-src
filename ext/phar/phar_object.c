@@ -477,6 +477,7 @@ PHP_METHOD(Phar, webPhar)
 		if (SUCCESS == zend_hash_find(Z_ARRVAL_P(rewrites), entry, entry_len+1, (void **) &fd_ptr)) {
 			if (IS_STRING != Z_TYPE_PP(fd_ptr)) {
 				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "phar rewrite value for \"%s\" was not a string", entry);
+				return;
 			}
 			if (entry != index_php) {
 				efree(entry);
