@@ -1990,6 +1990,9 @@ int phar_detect_phar_fname_ext(const char *filename, int check_length, char **ex
 	} else if ((pos_p = strstr(filename, ".phar")) != NULL) {
 		*ext_str = pos_p;
 		*ext_len = 5;
+	} else if ((pos_p = strstr(filename, ".php")) != NULL) {
+		*ext_str = pos_p;
+		*ext_len = 4;
 	} else {
 		/* We have an alias with no extension, so locate the first / and fail */
 		*ext_str = strstr(filename, "/");

@@ -2,30 +2,11 @@
 Phar front controller phps
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
---INI--
-phar.require_hash=0
-phar.readonly=0
---FILE--
-<?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
-$pname = 'phar://' . $fname;
-
-$a = new Phar($fname);
-$a['a.phps'] = '<?php function hio(){}';
-$a->setStub('<?php
-Phar::webPhar();
-__HALT_COMPILER();');
-
-$_SERVER['REQUEST_URI'] = '/' . basename(__FILE__, '.php') . '.phar.php/a.phps';
-include $fname;
-?>
-===DONE===
---CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phartmp.php');
-__HALT_COMPILER();
-?>
+--ENV--
+SCRIPT_NAME=/frontcontroller3.php/a.phps
+REQUEST_URI=/frontcontroller3.php/a.phps
+--FILE_EXTERNAL--
+frontcontroller.phar
 --EXPECTHEADERS--
 Content-type: text/html
 --EXPECT--

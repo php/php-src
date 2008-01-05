@@ -222,6 +222,9 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 				phar->fp = phar->internal_file->fp;
 				if (phar->internal_file->fp == phar->phar->fp) {
 					phar->zero = phar->internal_file->offset_within_phar;
+					if (!phar->is_tar && !phar->is_zip) {
+						phar->zero += phar->phar->internal_file_start;
+					}
 				}
 			}
 			php_stream_seek(phar->fp, phar->zero, SEEK_SET);
