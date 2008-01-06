@@ -23,7 +23,7 @@ fclose($g);
 echo file_get_contents($pname . '/internal/file/here');
 $a = opendir($pname . '/');
 while (false !== ($v = readdir($a))) {
-	echo (is_file($pname . $v) ? "file\n" : "dir\n");
+	echo (is_file($pname . '/' . $v) ? "file\n" : "dir\n");
 	echo $v . "\n";
 }
 closedir($a);

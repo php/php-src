@@ -2225,11 +2225,13 @@ static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char 
 			return NULL;			
 		}		
 		if (phar_split_fname(filename, strlen(filename), &arch, &arch_len, &entry, &entry_len TSRMLS_CC) == FAILURE) {
-			if (arch && !entry) {
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory (always use full path to a new phar)", filename, arch);
-				arch = NULL;
-			} else {
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\" (cannot contain .phar.php and .phar.gz/.phar.bz2)", filename);
+			if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
+				if (arch && !entry) {
+					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory (always use full path to a new phar)", filename, arch);
+					arch = NULL;
+				} else {
+					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\" (cannot contain .phar.php and .phar.gz/.phar.bz2)", filename);
+				}
 			}
 			if (arch) {
 				efree(arch);
@@ -4012,7 +4014,7 @@ static void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stre
 	int tmp_len;
 	memset(ssb, 0, sizeof(php_stream_statbuf));
 
-	if (!is_dir) {
+	if (!is_dir && !data->is_dir) {
 		ssb->sb.st_size = data->uncompressed_filesize;
 		ssb->sb.st_mode = data->flags & PHAR_ENT_PERM_MASK;
 		ssb->sb.st_mode |= S_IFREG; /* regular file */
@@ -4119,7 +4121,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 	uint host_len;
 	int retval;
 
-	if ((resource = phar_open_url(wrapper, url, "r", 0 TSRMLS_CC)) == NULL) {
+	if ((resource = phar_open_url(wrapper, url, "r", flags TSRMLS_CC)) == NULL) {
 		return -1;
 	}
 
