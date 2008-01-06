@@ -106,11 +106,22 @@ $environment = isset($_ENV) ? $_ENV : array();
 // Require the explicit specification.
 // Otherwise we could end up testing the wrong file!
 
+$php = NULL;
+$php_cgi = NULL;
+
 if (getenv('TEST_PHP_EXECUTABLE')) {
 	$php = getenv('TEST_PHP_EXECUTABLE');
 	if ($php=='auto') {
 		$php = $cwd.'/sapi/cli/php';
 		putenv("TEST_PHP_EXECUTABLE=$php");
+		if (!getenv('TEST_PHP_CGI_EXECUTABLE')) {
+			$php_cgi = $cwd.'/sapi/cgi/php-cgi';
+			if (file_exists($php_cgi)) {
+				putenv("TEST_PHP_CGI_EXECUTABLE=$php_cgi");
+			} else {
+				$php_cgi = NULL;
+			}
+		}
 	}
 	$environment['TEST_PHP_EXECUTABLE'] = $php;
 }
@@ -183,7 +194,7 @@ $ini_overwrites = array(
 
 function write_information($show_html)
 {
-	global $cwd, $php, $php_info, $user_tests, $ini_overwrites, $pass_options, $exts_to_test;
+	global $cwd, $php, $php_cgi, $php_info, $user_tests, $ini_overwrites, $pass_options, $exts_to_test;
 
 	// Get info from php
 	$info_file = realpath(dirname(__FILE__)) . '/run-test-info.php';
@@ -200,8 +211,15 @@ More .INIs  : " . (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 	settings2array($ini_overwrites,$info_params);
 	settings2params($info_params);
 	$php_info = `$php $pass_options $info_params "$info_file"`;
-	@unlink($info_file);
 	define('TESTED_PHP_VERSION', `$php -r "echo PHP_VERSION;"`);
+	if ($php_cgi && $php != $php_cgi) {
+		$php_info_cgi = `$php_cgi $pass_options $info_params -q "$info_file"`;
+		$php_info_sep = "\n---------------------------------------------------------------------";
+		$php_cgi_info = "$php_info_sep\nPHP         : $php_cgi $php_info_cgi$php_info_sep";
+	} else {
+		$php_cgi_info = '';
+	}
+	@unlink($info_file);
 
 	// load list of enabled extensions
 	save_text($info_file, '<?php echo join(",",get_loaded_extensions()); ?>');
@@ -223,8 +241,8 @@ More .INIs  : " . (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 	// Write test context information.
 	echo "
 =====================================================================
+PHP         : $php $php_info $php_cgi_info
 CWD         : $cwd
-PHP         : $php $php_info
 Extra dirs  : ";
 	foreach ($user_tests as $test_dir) {
 		echo "{$test_dir}\n              ";
