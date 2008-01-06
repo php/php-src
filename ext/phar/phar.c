@@ -1124,7 +1124,7 @@ int phar_open_zipfile(char *fname, int fname_len, char *alias, int alias_len, ph
 						}
 						zip_close(zip);
 						zend_hash_destroy(&(mydata->manifest));
-						mdata->manifest.arBuckets = NULL;
+						mydata->manifest.arBuckets = NULL;
 						efree(mydata);
 						if (error) {
 							spprintf(error, 0, "bz2 extension is required for Bzip2 compressed zip-based .phar file \"%s\"", fname);
@@ -1876,7 +1876,7 @@ int phar_open_filename(char *fname, int fname_len, char *alias, int alias_len, i
 	
 	if (phar_open_loaded(fname, fname_len, alias, alias_len, options, pphar, error TSRMLS_CC) == SUCCESS) {
 		return SUCCESS;
-	} else if (*error) {
+	} else if (error && *error) {
 		return FAILURE;
 	}
 
