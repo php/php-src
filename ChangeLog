@@ -1,3 +1,17 @@
+2008-01-05  Greg Beaver  <greg@chiaraquartet.net>
+
+    * run-tests.php
+      run-tests.php
+      run-tests.php:
+      remove potential preg warnings if --EXPECTHEADERS-- is combined with
+      --EXPECTF-- or --EXPECTRE--
+
+    * run-tests.php
+      run-tests.php
+      run-tests.php:
+      implement --FILE_EXTERNAL-- section for using an external file as --FILE--,
+      use CGI for --EXPECTHEADERS--, fix --POST_RAW--
+
 2008-01-04  Ulf Wendel  <ulf.wendel@phpdoc.de>
 
     * (PHP_5_3)
