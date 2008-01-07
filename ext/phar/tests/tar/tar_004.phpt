@@ -20,7 +20,7 @@ $a->mkDir('dir');
 $a->addFile('.phar/stub.php', '<?php
 Phar::mapPhar();
 var_dump("it worked");
-include "tar_004.php";
+include "phar://" . __FILE__ . "/tar_004.php";
 ');
 $a->close();
 

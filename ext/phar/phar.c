@@ -218,6 +218,7 @@ static void phar_destroy_phar_data(phar_archive_data *data TSRMLS_DC) /* {{{ */
 	}
 	if (data->fname) {
 		efree(data->fname);
+		data->fname = NULL;
 	}
 	if (data->signature) {
 		efree(data->signature);
@@ -1070,7 +1071,7 @@ int phar_open_zipfile(char *fname, int fname_len, char *alias, int alias_len, ph
 	} else {
 		register_alias = alias ? 1 : 0;
 	}
-	mydata->alias = alias ? estrndup(alias, alias_len) : mydata->fname;
+	mydata->alias = alias ? estrndup(alias, alias_len) : estrndup(mydata->fname, alias_len);
 	mydata->alias_len = alias ? alias_len : fname_len;
 	mydata->is_zip = 1;
 	mydata->zip = zip;
@@ -1175,7 +1176,7 @@ int phar_open_zipfile(char *fname, int fname_len, char *alias, int alias_len, ph
 	/* ignore all errors in loading up manifest */
 	zip_error_clear(zip);
 
-	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
+	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
 	if (register_alias) {
 		mydata->is_explicit_alias = 1;
 		zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
@@ -1635,7 +1636,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 	phar_unixify_path_separators(mydata->fname, fname_len);
 #endif
 	mydata->fname_len = fname_len;
-	mydata->alias = alias ? estrndup(alias, alias_len) : mydata->fname;
+	mydata->alias = alias ? estrndup(alias, alias_len) : estrndup(fname, fname_len);
 	mydata->alias_len = alias ? alias_len : fname_len;
 	mydata->sig_flags = sig_flags;
 	mydata->sig_len = sig_len;
@@ -1834,7 +1835,7 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 #endif
 	}
 	mydata->fname_len = fname_len;
-	mydata->alias = alias ? estrndup(alias, alias_len) : mydata->fname;
+	mydata->alias = alias ? estrndup(alias, alias_len) : estrndup(mydata->fname, fname_len);
 	mydata->alias_len = alias ? alias_len : fname_len;
 	snprintf(mydata->version, sizeof(mydata->version), "%s", PHAR_API_VERSION_STR);
 	mydata->is_explicit_alias = alias ? 1 : 0;
@@ -2312,36 +2313,6 @@ int phar_open_compiled_file(char *alias, int alias_len, char **error TSRMLS_DC) 
 	}
 	fname = zend_get_executed_filename(TSRMLS_C);
 	fname_len = strlen(fname);
-
-	if (strstr(fname, "phar://") && strstr(fname, ".phar/stub.php")) {
-		char *arch, *entry;
-		int arch_len, entry_len;
-		phar_archive_data *phar;
-
-		if (SUCCESS != phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
-			efree(entry);
-			efree(arch);
-			goto regular_error;
-		}
-		if (strcmp(entry, "/.phar/stub.php")) {
-			efree(entry);
-			efree(arch);
-			goto regular_error;
-		}
-
-		/* we're running from inside a zip-based phar */
-		efree(entry);
-		entry = fname;
-		fname = arch;
-		fname_len = arch_len;
-		if (SUCCESS == phar_open_loaded(fname, fname_len, alias, alias_len, 0, &phar, 0 TSRMLS_CC) && phar && (phar->is_zip || phar->is_tar)) {
-			efree(arch);
-			return SUCCESS;
-		}
-		/* restore original value for error purpose */
-		fname = entry;
-	}
-regular_error:
 
 	if (phar_open_loaded(fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, 0 TSRMLS_CC) == SUCCESS) {
 		return SUCCESS;
@@ -4444,10 +4415,12 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char *url_to, int options, php_stream_context *context TSRMLS_DC) /* {{{ */
 {
 	php_url *resource_from, *resource_to;
-	char *from_file, *to_file, *error, *plain_map;
-	phar_entry_data *fromdata, *todata;
+	char *error, *plain_map;
+	phar_archive_data *phar;
+	phar_entry_info *entry;
 	uint host_len;
 
+	error = NULL;
 	if (PHAR_G(readonly)) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by INI setting");
 		return 0;
@@ -4502,102 +4475,66 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 	phar_request_initialize(TSRMLS_C);
 	if (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), resource_from->host, host_len+1, (void **)&plain_map) == SUCCESS) {
 		/*TODO:use php_stream_rename() once available*/
+		php_url_free(resource_from);
+		php_url_free(resource_to);
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\" from extracted phar archive", url_from, url_to);
 		return 0;
 	}
 
-	/* need to copy to strip leading "/", will get touched again */
-	from_file = estrdup(resource_from->path + 1);
-	to_file = estrdup(resource_to->path + 1);
-	if (FAILURE == phar_get_entry_data(&fromdata, resource_from->host, strlen(resource_from->host), from_file, strlen(from_file), "r", &error TSRMLS_CC)) {
-		/* constraints of fp refcount were not met */
-		if (error) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
-			efree(error);
-		}
-		efree(from_file);
-		efree(to_file);
+	if (SUCCESS != phar_get_archive(&phar, resource_from->host, strlen(resource_from->host), NULL, 0, &error TSRMLS_CC)) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
-		return 0;
-	}
-	if (error) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\": %s", url_from, url_to, error);
 		efree(error);
-	}
-	if (!fromdata) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: \"%s\" is not a file in phar \"%s\", cannot rename", from_file, resource_from->host);
-		efree(from_file);
-		efree(to_file);
-		php_url_free(resource_from);
-		php_url_free(resource_to);
-		return 0;
-	}
-	if (!(todata = phar_get_or_create_entry_data(resource_to->host, strlen(resource_to->host), to_file, strlen(to_file), "w", &error TSRMLS_CC))) {
-		/* constraints of fp refcount were not met */
-		if (error) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
-			efree(error);
-		}
-		efree(from_file);
-		efree(to_file);
-		php_url_free(resource_from);
-		php_url_free(resource_to);
-		return 0;
-	}
-	if (error) {
-		efree(error);
-	}
-	if (fromdata->internal_file->fp_refcount > 1) {
-		/* more than just our fp resource is open for this file */ 
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: \"%s\" in phar \"%s\", has open file pointers, cannot rename", from_file, resource_from->host);
-		efree(from_file);
-		efree(to_file);
-		php_url_free(resource_from);
-		php_url_free(resource_to);
-		phar_entry_delref(fromdata TSRMLS_CC);
-		phar_entry_delref(todata TSRMLS_CC);
-		return 0;
-	}
-	if (todata->internal_file->fp_refcount > 1) {
-		/* more than just our fp resource is open for this file */ 
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: \"%s\" in phar \"%s\", has open file pointers, cannot rename", to_file, resource_to->host);
-		efree(from_file);
-		efree(to_file);
-		php_url_free(resource_from);
-		php_url_free(resource_to);
-		phar_entry_delref(fromdata TSRMLS_CC);
-		phar_entry_delref(todata TSRMLS_CC);
 		return 0;
 	}
 
-	php_stream_seek(fromdata->internal_file->fp, 0 + fromdata->zero, SEEK_SET);
-	if (fromdata->internal_file->uncompressed_filesize != php_stream_copy_to_stream(fromdata->internal_file->fp, todata->internal_file->fp, PHP_STREAM_COPY_ALL)) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: rename failed \"%s\" to \"%s\"", url_from, url_to);
-		efree(from_file);
-		efree(to_file);
-		php_url_free(resource_from);
-		php_url_free(resource_to);
-		phar_entry_delref(fromdata TSRMLS_CC);
-		phar_entry_delref(todata TSRMLS_CC);
-		return 0;
+	if (SUCCESS == zend_hash_find(&(phar->manifest), resource_from->path+1, strlen(resource_from->path)-1, (void **)&entry)) {
+		phar_entry_info new;
+
+		/* perform rename magic */
+		if (entry->is_deleted) {
+			php_url_free(resource_from);
+			php_url_free(resource_to);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\" from extracted phar archive, source has been deleted", url_from, url_to);
+			return 0;
+		}
+		/* transfer all data over to the new entry */
+		memcpy((void *) &new, (void *) entry, sizeof(phar_entry_info));
+		/* mark the old one for deletion */
+		entry->is_deleted = 1;
+		entry->fp = NULL;
+		entry->metadata = 0;
+		entry->link = NULL;
+#if HAVE_ZIP
+		entry->zip = NULL;
+#endif
+
+		zend_hash_add(&(phar->manifest), resource_to->path+1, strlen(resource_to->path)-1, (void **)&new, sizeof(phar_entry_info), (void **) &entry);
+		if (!entry->is_modified) {
+			/* copy file contents into a new temp stream */
+			if (!phar_open_jit(phar, entry, phar->fp, &error, 1 TSRMLS_CC)) {
+				php_url_free(resource_from);
+				php_url_free(resource_to);
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\": %s", url_from, url_to, error);
+				efree(error);
+				return 0;
+			}
+		}
+		entry->is_modified = 1;
+		entry->filename = estrdup(resource_to->path+1);
+		entry->filename_len = strlen(entry->filename);
+		phar_flush(phar, 0, 0, &error TSRMLS_CC);
+		if (error) {
+			php_url_free(resource_from);
+			php_url_free(resource_to);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\": %s", url_from, url_to, error);
+			efree(error);
+			return 0;
+		}
 	}
-	todata->internal_file->uncompressed_filesize = todata->internal_file->compressed_filesize = fromdata->internal_file->uncompressed_filesize;
-	phar_entry_delref(fromdata TSRMLS_CC);
-	phar_entry_delref(todata TSRMLS_CC);
-	if (error) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
-		efree(error);
-		efree(from_file);
-		efree(to_file);
-		php_url_free(resource_from);
-		php_url_free(resource_to);
-		return 0;
-	}
-	efree(from_file);
-	efree(to_file);
 	php_url_free(resource_from);
 	php_url_free(resource_to);
-	phar_wrapper_unlink(wrapper, url_from, 0, 0 TSRMLS_CC);
 	return 1;
 }
 /* }}} */
@@ -4743,13 +4680,18 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 	if (strstr(file_handle->filename, ".phar") && !strstr(file_handle->filename, ":\\")) {
 		if (SUCCESS == phar_open_filename(file_handle->filename, strlen(file_handle->filename), NULL, 0, 0, &phar, NULL TSRMLS_CC)) {
 			if (phar->is_zip || phar->is_tar) {
-				/* zip-based phar */
+				zend_file_handle f = *file_handle;
+
+				/* zip or tar-based phar */
 				spprintf(&name, 4096, "phar://%s/%s", file_handle->filename, ".phar/stub.php");
-				file_handle->type = ZEND_HANDLE_FILENAME;
-				file_handle->free_filename = 1;
-				file_handle->filename = name;
-				if (file_handle->opened_path) {
-					efree(file_handle->opened_path);
+				if (SUCCESS == zend_stream_open_function((const char *)name, file_handle TSRMLS_CC)) {
+					efree(name);
+					name = NULL;
+					file_handle->filename = f.filename;
+					file_handle->opened_path = f.opened_path;
+					file_handle->free_filename = f.free_filename;
+				} else {
+					*file_handle = f;
 				}
 				goto skip_phar;
 			}
@@ -4774,6 +4716,10 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 			/* auto-convert to phar:// */
 			spprintf(&name, 4096, "phar://%s/%s", arch, entry);
 			efree(arch);
+			if (file_handle->type == ZEND_HANDLE_FP) {
+				// clean up
+				fclose(file_handle->handle.fp);
+			}
 			file_handle->type = ZEND_HANDLE_FILENAME;
 			file_handle->free_filename = 1;
 			file_handle->filename = name;

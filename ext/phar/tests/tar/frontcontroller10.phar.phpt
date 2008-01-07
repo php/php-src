@@ -10,8 +10,8 @@ frontcontroller4.phar.tar
 --EXPECTHEADERS--
 Content-type: text/html
 --EXPECTF--
-Fatal error: Uncaught exception 'UnexpectedValueException' with message 'phar rewrite value for "/hi" was not a string' in %sfrontcontroller10.phar.php/.phar/stub.php:2
+Fatal error: Uncaught exception 'UnexpectedValueException' with message 'phar rewrite value for "/hi" was not a string' in %sfrontcontroller10.phar.php:2
 Stack trace:
-#0 %sfrontcontroller10.phar.php/.phar/stub.php(2): Phar::webPhar('whatever', 'index.php', '', Array, Array)
+#0 %sfrontcontroller10.phar.php(2): Phar::webPhar('whatever', 'index.php', '', Array, Array)
 #1 {main}
-  thrown in %sfrontcontroller10.phar.php/.phar/stub.php on line 2
+  thrown in %sfrontcontroller10.phar.php on line 2
