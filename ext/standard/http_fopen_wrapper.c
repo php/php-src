@@ -226,8 +226,9 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		}
 	}
 
-	if (stream == NULL)	
+	if (stream == NULL) {
 		goto out;
+	}
 
 	/* avoid buffering issues while reading header */
 	if (options & STREAM_WILL_CAST)
@@ -311,7 +312,6 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	} else {
 		strlcat(scratch, " HTTP/1.0\r\n", scratch_len);
 	}
-
 
 	/* send it */
 	php_stream_write(stream, scratch, strlen(scratch));
