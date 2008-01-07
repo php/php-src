@@ -1,5 +1,5 @@
 --TEST--
-Phar::chmod
+Phar::chmod tar-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
