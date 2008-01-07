@@ -1,5 +1,5 @@
 --TEST--
-Phar: fopen a .phar for writing (new file)
+Phar: fopen a .phar for writing (new file) tar-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
