@@ -1998,10 +1998,10 @@ int phar_detect_phar_fname_ext(const char *filename, int check_length, char **ex
 	} else if (pos_t) {
 		*ext_str = pos_t;
 		*ext_len = 9;
-	} else if ((pos_p = strstr(filename, ".phar")) != NULL) {
+	} else if ((pos_p = strstr(filename, ".phar")) != NULL && pos_p[4] != '\0') {
 		*ext_str = pos_p;
 		*ext_len = 5;
-	} else if ((pos_p = strstr(filename, ".php")) != NULL) {
+	} else if ((pos_p = strstr(filename, ".php")) != NULL && pos_p[4] != '\0') {
 		*ext_str = pos_p;
 		*ext_len = 4;
 	} else {
