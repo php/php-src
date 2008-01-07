@@ -156,7 +156,7 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 	size_t pos = 0, read;
 	tar_header *hdr;
 	php_uint32 sum1, sum2, size, old;
-	phar_archive_data *myphar;
+	phar_archive_data *myphar, **retdata;
 
 	if (error) {
 		*error = NULL;
@@ -283,11 +283,13 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 	myphar->fname_len = fname_len;
 	myphar->fp = fp;
 	phar_request_initialize(TSRMLS_C);
-	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), myphar->fname, fname_len, (void*)&myphar, sizeof(phar_archive_data*),  NULL);
+	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void*)&myphar, sizeof(phar_archive_data*), NULL);
 	if (actual_alias) {
 		myphar->is_explicit_alias = 1;
 		zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), actual_alias, myphar->alias_len, (void*)&myphar, sizeof(phar_archive_data*), NULL);
 	} else {
+		myphar->alias = estrndup(fname, fname_len);
+		myphar->alias_len = fname_len;
 		myphar->is_explicit_alias = 0;
 	}
 	if (pphar) {
@@ -415,6 +417,7 @@ int phar_tar_flush(phar_archive_data *archive, char *user_stub, long len, char *
 	entry.flags = PHAR_ENT_PERM_DEF_FILE;
 	entry.timestamp = time(NULL);
 	entry.is_modified = 1;
+	entry.is_crc_checked = 1;
 	entry.is_tar = 1;
 	entry.tar_type = '0';
 	entry.phar = archive;

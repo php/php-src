@@ -379,31 +379,6 @@ PHP_METHOD(Phar, webPhar)
 	fname = zend_get_executed_filename(TSRMLS_C);
 	fname_len = strlen(fname);
 
-	if (strstr(fname, "://")) {
-		char *arch, *entry;
-		int arch_len, entry_len;
-		phar_archive_data *mphar;
-
-		/* running within a zip-based phar, acquire the actual name */
-		if (SUCCESS != phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
-			efree(entry);
-			efree(arch);
-			return; /* this, incidentally, should be impossible */
-		}
-
-		efree(entry);
-		entry = fname;
-		fname = arch;
-		fname_len = arch_len;
-		if (SUCCESS == phar_open_loaded(fname, fname_len, alias, alias_len, 0, &mphar, 0 TSRMLS_CC) && mphar && (mphar->is_zip || mphar->is_tar)) {
-			efree(arch);
-			fname = mphar->fname;
-			fname_len = mphar->fname_len;
-		} else {
-			efree(arch);
-			fname = entry;
-		}
-	}
 #ifdef PHP_WIN32
 	fname = estrndup(fname, fname_len);
 	phar_unixify_path_separators(fname, fname_len);
