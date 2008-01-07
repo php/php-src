@@ -1,3 +1,26 @@
+2008-01-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/curl/interface.c:
+      
+      MFB: Fixed a safe_mode bypass in cURL identified by Maksymilian
+      Arciemowicz.
+
+    * (PHP_5_2)
+      NEWS
+      ext/curl/interface.c:
+      
+      Fixed a safe_mode bypass in cURL identified by Maksymilian Arciemowicz.
+
+2008-01-06  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      run-tests.php:
+      - MFH Show info for CL and CGI if both are going to be used
+
+    * run-tests.php:
+      - Show info for CL and CGI if both are going to be used
+
 2008-01-05  Greg Beaver  <greg@chiaraquartet.net>
 
     * run-tests.php
