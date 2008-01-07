@@ -28,6 +28,15 @@ while (false !== ($v = readdir($a))) {
 }
 closedir($a);
 
+/* ensure none of the dir tar files were freed */
+echo "second round\n";
+$a = opendir($pname . '/');
+while (false !== ($v = readdir($a))) {
+	echo (is_file($pname . '/' . $v) ? "file\n" : "dir\n");
+	echo $v . "\n";
+}
+closedir($a);
+
 ?>
 ===DONE===
 --CLEAN--
@@ -36,6 +45,13 @@ closedir($a);
 ?>
 --EXPECT--
 hi there!
+dir
+dir
+dir
+internal
+file
+tar_003.phpt
+second round
 dir
 dir
 dir
