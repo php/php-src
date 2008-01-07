@@ -382,7 +382,7 @@ PHP_METHOD(Phar, webPhar)
 	if (strstr(fname, "://")) {
 		char *arch, *entry;
 		int arch_len, entry_len;
-		phar_archive_data *phar;
+		phar_archive_data *mphar;
 
 		/* running within a zip-based phar, acquire the actual name */
 		if (SUCCESS != phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
@@ -395,10 +395,10 @@ PHP_METHOD(Phar, webPhar)
 		entry = fname;
 		fname = arch;
 		fname_len = arch_len;
-		if (SUCCESS == phar_open_loaded(fname, fname_len, alias, alias_len, 0, &phar, 0 TSRMLS_CC) && phar && (phar->is_zip || phar->is_tar)) {
+		if (SUCCESS == phar_open_loaded(fname, fname_len, alias, alias_len, 0, &mphar, 0 TSRMLS_CC) && mphar && (phar->is_zip || phar->is_tar)) {
 			efree(arch);
-			fname = phar->fname;
-			fname_len = phar->fname_len;
+			fname = mphar->fname;
+			fname_len = mphar->fname_len;
 		} else {
 			efree(arch);
 			fname = entry;
@@ -476,7 +476,6 @@ PHP_METHOD(Phar, webPhar)
 		/* check for "rewrite" urls */
 		if (SUCCESS == zend_hash_find(Z_ARRVAL_P(rewrites), entry, entry_len+1, (void **) &fd_ptr)) {
 			if (IS_STRING != Z_TYPE_PP(fd_ptr)) {
-				phar_entry_delref(phar TSRMLS_CC);
 #ifdef PHP_WIN32
 				efree(fname);
 #endif
@@ -1215,6 +1214,39 @@ PHP_METHOD(Phar, count)
 	PHAR_ARCHIVE_OBJECT();
 	
 	RETURN_LONG(zend_hash_num_elements(&phar_obj->arc.archive->manifest));
+}
+/* }}} */
+
+/* {{{ proto bool Phar::isTar()
+ * Returns true if the phar archive is based on the tar file format
+ */
+PHP_METHOD(Phar, isTar)
+{
+	PHAR_ARCHIVE_OBJECT();
+	
+	RETURN_BOOL(phar_obj->arc.archive->is_tar);
+}
+/* }}} */
+
+/* {{{ proto bool Phar::isZip()
+ * Returns true if the phar archive is based on the Zip file format
+ */
+PHP_METHOD(Phar, isZip)
+{
+	PHAR_ARCHIVE_OBJECT();
+	
+	RETURN_BOOL(phar_obj->arc.archive->is_zip);
+}
+/* }}} */
+
+/* {{{ proto bool Phar::isPhar()
+ * Returns true if the phar archive is based on the phar file format
+ */
+PHP_METHOD(Phar, isPhar)
+{
+	PHAR_ARCHIVE_OBJECT();
+	
+	RETURN_BOOL(!phar_obj->arc.archive->is_tar && !phar_obj->arc.archive->is_zip);
 }
 /* }}} */
 
@@ -2217,8 +2249,8 @@ PHP_METHOD(PharFileInfo, __destruct)
 {
 	PHAR_ENTRY_OBJECT();
 
-	if (entry_obj->ent.entry->is_dir) {
-		if (!entry_obj->ent.entry->is_zip && !entry_obj->ent.entry->is_tar && entry_obj->ent.entry->filename) {
+	if (entry_obj->ent.entry->is_dir&& !entry_obj->ent.entry->is_zip && !entry_obj->ent.entry->is_tar) {
+		if (entry_obj->ent.entry->filename) {
 			efree(entry_obj->ent.entry->filename);
 			entry_obj->ent.entry->filename = NULL;
 		}
@@ -2323,7 +2355,7 @@ PHP_METHOD(PharFileInfo, chmod)
 	long perms;
 	PHAR_ENTRY_OBJECT();
 
-	if (entry_obj->ent.entry->is_dir) {
+	if (entry_obj->ent.entry->is_dir && (!entry_obj->ent.entry->is_tar && !entry_obj->ent.entry->is_zip)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
 			"Phar entry is a directory, cannot chmod"); \
 	}
@@ -2728,6 +2760,9 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, offsetUnset,           arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, uncompressAllFiles,    NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, buildFromIterator,     arginfo_phar_build,        ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, isTar,                 NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, isZip,                 NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, isPhar,                NULL,                      ZEND_ACC_PUBLIC)
 #endif
 	/* static member functions */
 	PHP_ME(Phar, apiVersion,            NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
