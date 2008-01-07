@@ -394,8 +394,8 @@ int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC)
 	if (entry->fp && entry->fp_refcount == 0) {
 		if (entry->fp != entry->phar->fp) {
 			php_stream_close(entry->fp);
-			entry->fp = NULL;
 		}
+		entry->fp = NULL;
 	}
 
 	/* note new location within tar */
