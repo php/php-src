@@ -125,18 +125,20 @@ int phar_is_tar(char *buf)
 int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
-	int ret = phar_create_or_parse_filename(fname, fname_len, alias, alias_len, options, pphar, error TSRMLS_CC);
+	int ret = phar_create_or_parse_filename(fname, fname_len, alias, alias_len, options, &phar, error TSRMLS_CC);
 
+	if (pphar) {
+		*pphar = phar;
+	}
 	if (FAILURE == ret) {
 		return FAILURE;
 	}
-	if ((*pphar)->is_tar) {
+	if (phar->is_tar) {
 		return ret;
 	}
-
-	phar = *pphar;
 	if (phar->is_brandnew) {
 		phar->is_tar = 1;
+		phar->internal_file_start = 0;
 		return SUCCESS;
 	}
 
@@ -230,6 +232,9 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 
 		if (old && entry.tar_type == TAR_FILE && S_ISDIR(entry.flags)) {
 			entry.tar_type = TAR_DIR;
+		}
+		if (entry.tar_type == TAR_DIR) {
+			entry.is_dir = 1;
 		}
 
 		entry.link = NULL;
@@ -366,7 +371,11 @@ int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC)
 	if (entry->fp) {
 		/* new file */
 		file = entry->fp;
-		php_stream_seek(file, 0, SEEK_SET);
+		if (file == entry->phar->fp) {
+			php_stream_seek(file, entry->offset_within_phar, SEEK_SET);
+		} else {
+			php_stream_seek(file, 0, SEEK_SET);
+		}
 	} else {
 		file = fp->old;
 		php_stream_seek(file, entry->offset_within_phar, SEEK_SET);
@@ -381,9 +390,12 @@ int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC)
 	memset(padding, 0, 512);
 	php_stream_write(fp->new, padding, ((entry->uncompressed_filesize +511)&~511) - entry->uncompressed_filesize);
 
-	if (entry->fp) {
-		php_stream_close(entry->fp);
-		entry->fp = NULL;
+	entry->is_modified = 0;
+	if (entry->fp && entry->fp_refcount == 0) {
+		if (entry->fp != entry->phar->fp) {
+			php_stream_close(entry->fp);
+			entry->fp = NULL;
+		}
 	}
 
 	/* note new location within tar */
@@ -405,6 +417,7 @@ int phar_tar_flush(phar_archive_data *archive, char *user_stub, long len, char *
 	entry.is_modified = 1;
 	entry.is_tar = 1;
 	entry.tar_type = '0';
+	entry.phar = archive;
 	/* set alias */
 	if (archive->is_explicit_alias) {
 		entry.filename = estrndup(".phar/alias.txt", sizeof(".phar/alias.txt")-1);

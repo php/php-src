@@ -4028,6 +4028,20 @@ static void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stre
 		ssb->sb.st_atime = data->timestamp;
 		ssb->sb.st_ctime = data->timestamp;
 #endif
+	} else if (!is_dir && data->is_dir && (data->is_tar || data->is_zip)) {
+		ssb->sb.st_size = 0;
+		ssb->sb.st_mode = data->flags & PHAR_ENT_PERM_MASK;
+		ssb->sb.st_mode |= S_IFDIR; /* regular directory */
+		/* timestamp is just the timestamp when this was added to the phar */
+#ifdef NETWARE
+		ssb->sb.st_mtime.tv_sec = data->timestamp;
+		ssb->sb.st_atime.tv_sec = data->timestamp;
+		ssb->sb.st_ctime.tv_sec = data->timestamp;
+#else
+		ssb->sb.st_mtime = data->timestamp;
+		ssb->sb.st_atime = data->timestamp;
+		ssb->sb.st_ctime = data->timestamp;
+#endif
 	} else {
 		ssb->sb.st_size = 0;
 		ssb->sb.st_mode = 0777;
@@ -4719,34 +4733,26 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 	char *fname = NULL;
 	int fname_len, failed;
 	zend_op_array *(*save)(zend_file_handle *file_handle, int type TSRMLS_DC);
+	phar_archive_data *phar;
 
 	save = zend_compile_file; /* restore current handler or we cause trouble */
 	zend_compile_file = phar_orig_compile_file;
 
 	fname = zend_get_executed_filename(TSRMLS_C);
 	fname_len = strlen(fname);
-	if (fname_len == sizeof("[no active file]")-1 && !strncmp(fname, "[no active file]", fname_len)) {
-		if (strstr(file_handle->filename, ".phar.zip") && !strstr(file_handle->filename, ":\\")) {
-			/* zip-based phar */
-			spprintf(&name, 4096, "phar://%s/%s", file_handle->filename, ".phar/stub.php");
-			file_handle->type = ZEND_HANDLE_FILENAME;
-			file_handle->free_filename = 1;
-			file_handle->filename = name;
-			if (file_handle->opened_path) {
-				efree(file_handle->opened_path);
+	if (strstr(file_handle->filename, ".phar") && !strstr(file_handle->filename, ":\\")) {
+		if (SUCCESS == phar_open_filename(file_handle->filename, strlen(file_handle->filename), NULL, 0, 0, &phar, NULL TSRMLS_CC)) {
+			if (phar->is_zip || phar->is_tar) {
+				/* zip-based phar */
+				spprintf(&name, 4096, "phar://%s/%s", file_handle->filename, ".phar/stub.php");
+				file_handle->type = ZEND_HANDLE_FILENAME;
+				file_handle->free_filename = 1;
+				file_handle->filename = name;
+				if (file_handle->opened_path) {
+					efree(file_handle->opened_path);
+				}
+				goto skip_phar;
 			}
-			goto skip_phar;
-		}
-		if (strstr(file_handle->filename, ".phar.tar") && !strstr(file_handle->filename, ":\\")) {
-			/* tar-based phar */
-			spprintf(&name, 4096, "phar://%s/%s", file_handle->filename, ".phar/stub.php");
-			file_handle->type = ZEND_HANDLE_FILENAME;
-			file_handle->free_filename = 1;
-			file_handle->filename = name;
-			if (file_handle->opened_path) {
-				efree(file_handle->opened_path);
-			}
-			goto skip_phar;
 		}
 	}
 	if (zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
