@@ -395,7 +395,7 @@ PHP_METHOD(Phar, webPhar)
 		entry = fname;
 		fname = arch;
 		fname_len = arch_len;
-		if (SUCCESS == phar_open_loaded(fname, fname_len, alias, alias_len, 0, &mphar, 0 TSRMLS_CC) && mphar && (phar->is_zip || phar->is_tar)) {
+		if (SUCCESS == phar_open_loaded(fname, fname_len, alias, alias_len, 0, &mphar, 0 TSRMLS_CC) && mphar && (mphar->is_zip || mphar->is_tar)) {
 			efree(arch);
 			fname = mphar->fname;
 			fname_len = mphar->fname_len;
