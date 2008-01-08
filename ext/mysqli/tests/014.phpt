@@ -27,28 +27,28 @@ mysqli autocommit/commit/rollback
 	if (!mysqli_autocommit($link, TRUE))
 		printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_query($link, "DROP TABLE IF EXISTS ac_01"))
+	if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
 		printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_query($link, "CREATE TABLE ac_01(a int, b varchar(10)) type=InnoDB"))
+	if (!mysqli_query($link, "CREATE TABLE test(a int, b varchar(10)) engine=InnoDB"))
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_query($link, "INSERT INTO ac_01 VALUES (1, 'foobar')"))
+	if (!mysqli_query($link, "INSERT INTO test VALUES (1, 'foobar')"))
 		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (!mysqli_autocommit($link, FALSE))
 		printf("[005] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_query($link, "DELETE FROM ac_01"))
+	if (!mysqli_query($link, "DELETE FROM test"))
 		printf("[006] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_query($link, "INSERT INTO ac_01 VALUES (2, 'egon')"))
+	if (!mysqli_query($link, "INSERT INTO test VALUES (2, 'egon')"))
 		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (!mysqli_rollback($link))
 		printf("[008] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!$result = mysqli_query($link, "SELECT * FROM ac_01"))
+	if (!$result = mysqli_query($link, "SELECT * FROM test"))
 		printf("[009] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	printf("Num_of_rows=%d\n", mysqli_num_rows($result));
@@ -59,16 +59,16 @@ mysqli autocommit/commit/rollback
 
 	var_dump($row);
 
-	if (!mysqli_query($link, "DELETE FROM ac_01"))
+	if (!mysqli_query($link, "DELETE FROM test"))
 		printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_query($link, "INSERT INTO ac_01 VALUES (2, 'egon')"))
+	if (!mysqli_query($link, "INSERT INTO test VALUES (2, 'egon')"))
 		printf("[012] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (!mysqli_commit($link))
 		printf("[012] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!$result = mysqli_query($link, "SELECT * FROM ac_01"))
+	if (!$result = mysqli_query($link, "SELECT * FROM test"))
 		printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (!$row = mysqli_fetch_row($result))
@@ -78,6 +78,7 @@ mysqli autocommit/commit/rollback
 
 	var_dump($row);
 
+	mysqli_query($link, "DROP TABLE IF EXISTS test");
 	mysqli_close($link);
 	print "done!";
 ?>

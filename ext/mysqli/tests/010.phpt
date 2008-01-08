@@ -3,14 +3,14 @@ mysqli fetch float values
 --INI--
 precision=12
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
 	include "connect.inc";
-	
+
 	/*** test mysqli_connect 127.0.0.1 ***/
 	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
@@ -19,13 +19,13 @@ require_once('skipifconnectfailure.inc');
 
 	if (!mysqli_query($link, "DROP TABLE IF EXISTS test_bind_fetch"))
 		printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-		
+
 	$rc = mysqli_query($link, "CREATE TABLE test_bind_fetch(c1 float(3),
 													 c2 float,
 													 c3 float unsigned,
 													 c4 float,
 													 c5 float,
-													 c6 float,	
+													 c6 float,
 													 c7 float(10) unsigned) ENGINE=" . $engine);
 	if (!$rc)
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -44,6 +44,7 @@ require_once('skipifconnectfailure.inc');
 	var_dump($test);
 
 	mysqli_stmt_close($stmt);
+	mysqli_query($link, "DROP TABLE IF EXISTS test_bind_fetch");
 	mysqli_close($link);
 	print "done!";
 ?>

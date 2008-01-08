@@ -1,8 +1,8 @@
 --TEST--
 mysqli bind_result 1
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -42,6 +42,7 @@ require_once('skipifconnectfailure.inc');
 	var_dump($test);
 
 	mysqli_stmt_close($stmt);
+	@mysqli_query($link, "DROP TABLE IF EXISTS test_fetch_null");
 	mysqli_close($link);
 	print "done!";
 ?>

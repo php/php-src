@@ -11,7 +11,6 @@ function test: mysqli_insert_id()
 ?>
 --FILE--
 <?php
-
 	include "connect.inc";
 
 	/*** test mysqli_connect 127.0.0.1 ***/
@@ -20,9 +19,7 @@ function test: mysqli_insert_id()
 	mysqli_select_db($link, $db);
 
 	mysqli_query($link, "DROP TABLE IF EXISTS t036");
-
-	mysqli_query($link, "CREATE TABLE t036 (a bigint not null auto_increment primary key, b varchar(10))");
-
+	mysqli_query($link, "CREATE TABLE t036 (a bigint not null auto_increment primary key, b varchar(10)) ENGINE = " . $engine);
 
 	mysqli_query($link, "INSERT INTO t036 (b) VALUES ('foo1')");
 	$test[] = mysqli_insert_id($link);
@@ -41,6 +38,7 @@ function test: mysqli_insert_id()
 
 	var_dump($test);
 
+	mysqli_query($link, "DROP TABLE IF EXISTS t036");
 	mysqli_close($link);
 	print "done!";
 ?>

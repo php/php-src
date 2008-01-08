@@ -20,7 +20,7 @@ if (!function_exists('mysqli_set_local_infile_handler'))
 	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
 	/* create temporary file */
-	$filename = dirname(__FILE__) . "/061.csv";
+	$filename = dirname(__FILE__) . "061.csv";
 	$fp = fopen($filename, "w");
 	fwrite($fp, b"foo;bar");
 	fclose($fp);

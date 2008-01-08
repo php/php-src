@@ -66,6 +66,7 @@ require_once('skipifconnectfailure.inc');
 	var_dump($test);
 
 	mysqli_stmt_close($stmt);
+	mysqli_query($link, "DROP TABLE IF EXISTS test_bind_result");
 	mysqli_close($link);
 
 	print "done!";
