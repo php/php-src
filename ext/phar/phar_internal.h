@@ -317,31 +317,7 @@ int phar_zip_flush(phar_archive_data *archive, char *user_stub, long len, char *
 #ifdef PHAR_MAIN
 static void phar_fopen(INTERNAL_FUNCTION_PARAMETERS);
 static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
-
-static php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, int options TSRMLS_DC);
-
-static php_stream* phar_wrapper_open_url(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
-static php_stream* phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
-static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char *url_to, int options, php_stream_context *context TSRMLS_DC);
-static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC);
-static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC);
-
-/* file/stream handlers */
-static size_t phar_stream_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC);
-static size_t phar_stream_read( php_stream *stream, char *buf, size_t count TSRMLS_DC);
-static int    phar_stream_close(php_stream *stream, int close_handle TSRMLS_DC);
-static int    phar_stream_flush(php_stream *stream TSRMLS_DC);
-static int    phar_stream_seek( php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC);
-static int    phar_stream_stat( php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
-
-/* directory handlers */
-static size_t phar_dir_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC);
-static size_t phar_dir_read( php_stream *stream, char *buf, size_t count TSRMLS_DC);
-static int    phar_dir_close(php_stream *stream, int close_handle TSRMLS_DC);
-static int    phar_dir_flush(php_stream *stream TSRMLS_DC);
-static int    phar_dir_seek( php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC);
-static int    phar_dir_stat( php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
-
+extern php_stream_wrapper php_stream_phar_wrapper;
 #endif
 
 int phar_archive_delref(phar_archive_data *phar TSRMLS_DC);
