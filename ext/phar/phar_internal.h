@@ -115,6 +115,12 @@
 #define PHAR_ENT_PERM_DEF_FILE    0x000001B6
 #define PHAR_ENT_PERM_DEF_DIR     0x000001FF
 
+#define TAR_FILE    '0'
+#define TAR_LINK    '1'
+#define TAR_SYMLINK '2'
+#define TAR_DIR     '5'
+#define TAR_NEW     '8'
+
 ZEND_BEGIN_MODULE_GLOBALS(phar)
 	HashTable   phar_fname_map;
 	HashTable   phar_alias_map;
@@ -182,8 +188,9 @@ typedef struct _phar_entry_info {
 	int                      is_crc_checked:1;
 	int                      is_modified:1;
 	int                      is_deleted:1;
-	/* used when iterating */
 	int                      is_dir:1;
+	/* used when iterating */
+	int                      is_temp_dir:1;
 	phar_archive_data        *phar;
 	smart_str                metadata_str;
 	/* tar-based phar file stuff */

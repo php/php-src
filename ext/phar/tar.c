@@ -19,12 +19,6 @@
 
 #include "phar_internal.h"
 
-#define TAR_FILE    '0'
-#define TAR_LINK    '1'
-#define TAR_SYMLINK '2'
-#define TAR_DIR     '5'
-#define TAR_NEW     '8'
-
 static php_uint32 phar_tar_number(char *buf, int len) /* {{{ */
 {
 	php_uint32 num = 0;
