@@ -156,7 +156,7 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 	size_t pos = 0, read;
 	tar_header *hdr;
 	php_uint32 sum1, sum2, size, old;
-	phar_archive_data *myphar, **retdata;
+	phar_archive_data *myphar;
 
 	if (error) {
 		*error = NULL;
@@ -235,6 +235,8 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 		}
 		if (entry.tar_type == TAR_DIR) {
 			entry.is_dir = 1;
+		} else {
+			entry.is_dir = 0;
 		}
 
 		entry.link = NULL;
@@ -491,12 +493,12 @@ int phar_tar_flush(phar_archive_data *archive, char *user_stub, long len, char *
 			efree(user_stub);
 		}
 	} else {
-		if (archive->is_brandnew) {
+		if (!zend_hash_exists(&archive->manifest, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
 			/* this is a brand new phar */
 			entry.fp = php_stream_fopen_tmpfile();
 			if (sizeof(newstub)-1 != php_stream_write(entry.fp, newstub, sizeof(newstub)-1)) {
 				if (error) {
-					spprintf(error, 0, "unable to create stub in new phar \"%s\"", archive->fname);
+					spprintf(error, 0, "unable to create stub in new tar-based phar \"%s\"", archive->fname);
 				}
 				return EOF;
 			}

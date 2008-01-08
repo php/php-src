@@ -1,5 +1,5 @@
 --TEST--
-Phar: rename test
+Phar: rename test tar-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--

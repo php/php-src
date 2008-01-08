@@ -1,5 +1,5 @@
 --TEST--
-Phar::setStub()/getStub()
+Phar::setStub()/getStub() tar-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
