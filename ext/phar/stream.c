@@ -44,8 +44,8 @@ php_stream_wrapper_ops phar_stream_wops = {
     "phar",
     phar_wrapper_unlink,   /* unlink */
     phar_wrapper_rename,   /* rename */
-    NULL,                  /* create directory */
-    NULL,                  /* remove directory */
+    phar_wrapper_mkdir,    /* create directory */
+    phar_wrapper_rmdir,    /* remove directory */
 };
 
 php_stream_wrapper php_stream_phar_wrapper =  {
@@ -180,7 +180,6 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: file \"%s\" extracted from \"%s\" could not be opened", internal_file, resource->host);
 		}
 		php_url_free(resource);
-		efree(internal_file);
 		return fp;
 	}
 
@@ -448,13 +447,13 @@ static int phar_stream_flush(php_stream *stream TSRMLS_DC) /* {{{ */
  * stat an opened phar file handle stream, used by phar_stat()
  */
 void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, 
-			zend_bool is_dir, char *alias, int alias_len TSRMLS_DC)
+			zend_bool is_temp_dir, char *alias, int alias_len TSRMLS_DC)
 {
 	char *tmp;
 	int tmp_len;
 	memset(ssb, 0, sizeof(php_stream_statbuf));
 
-	if (!is_dir && !data->is_dir) {
+	if (!is_temp_dir && !data->is_dir) {
 		ssb->sb.st_size = data->uncompressed_filesize;
 		ssb->sb.st_mode = data->flags & PHAR_ENT_PERM_MASK;
 		ssb->sb.st_mode |= S_IFREG; /* regular file */
@@ -468,7 +467,7 @@ void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_stat
 		ssb->sb.st_atime = data->timestamp;
 		ssb->sb.st_ctime = data->timestamp;
 #endif
-	} else if (!is_dir && data->is_dir && (data->is_tar || data->is_zip)) {
+	} else if (!is_temp_dir && data->is_dir) {
 		ssb->sb.st_size = 0;
 		ssb->sb.st_mode = data->flags & PHAR_ENT_PERM_MASK;
 		ssb->sb.st_mode |= S_IFDIR; /* regular directory */
