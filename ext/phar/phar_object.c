@@ -1763,12 +1763,15 @@ PHP_METHOD(Phar, copy)
 		/* new file */
 		newentry.fp = php_stream_temp_new();
 		fp = newentry.fp;
-		php_stream_seek(fp, 0, SEEK_SET);
-		if (oldentry->compressed_filesize != php_stream_copy_to_stream(oldentry->fp, fp, oldentry->compressed_filesize)) {
+		php_stream_seek(oldentry->fp, 0, SEEK_SET);
+		if (oldentry->uncompressed_filesize != php_stream_copy_to_stream(oldentry->fp, fp, oldentry->uncompressed_filesize)) {
 			php_stream_close(fp);
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 				"file \"%s\" could not be copied to file \"%s\" in %s, copy failed", oldfile, newfile, phar_obj->arc.archive->fname);
+			return;
 		}
+	} else {
+		newentry.fp = NULL;
 	}
 
 	memcpy((void *) &newentry, oldentry, sizeof(phar_entry_info));
@@ -1779,15 +1782,41 @@ PHP_METHOD(Phar, copy)
 	}
 #if HAVE_PHAR_ZIP
 	if (oldentry->is_zip) {
-		newentry.index = -1;
+		int zindex;
+		/* for new files, start with an empty string */
+		struct zip_source *s;
+		if (!newentry.fp) {
+			if (!phar_open_jit(phar_obj->arc.archive, oldentry, NULL, &error, 0 TSRMLS_CC)) {
+				php_stream_close(fp);
+				if (error) {
+					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+						"file \"%s\" could not be copied to file \"%s\" in %s, open of source file failed: %s", oldfile, newfile, phar_obj->arc.archive->fname, error);
+					efree(error);
+				} else {
+					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+						"file \"%s\" could not be copied to file \"%s\" in %s, open of source file failed", oldfile, newfile, phar_obj->arc.archive->fname);
+				}
+				return;
+			}
+			fp = oldentry->fp;
+			oldentry->fp = NULL;
+		}
+		s = zip_source_buffer(phar_obj->arc.archive->zip, (void *)"", 0, 0);
+		if (-1 == (zindex = zip_add(phar_obj->arc.archive->zip, newfile, s))) {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+				"file \"%s\" could not be copied to file \"%s\" in %s, creation of destination file failed: %s", oldfile, newfile, phar_obj->arc.archive->fname, zip_strerror(phar_obj->arc.archive->zip));
+			zip_error_clear(phar_obj->arc.archive->zip);
+			return;
+		}
+		newentry.index = zindex;
+		newentry.zip = NULL;
 	}
 #endif
 	newentry.fp = fp;
 	newentry.filename = estrndup(newfile, newfile_len);
 	newentry.filename_len = newfile_len;
-	if (oldentry->is_tar) {
-		newentry.tar_type = oldentry->tar_type;
-	}
+	newentry.is_modified = 1;
+	newentry.fp_refcount = 0;
 	phar_obj->arc.archive->is_modified = 1;
 	zend_hash_add(&phar_obj->arc.archive->manifest, newfile, newfile_len, (void*)&newentry, sizeof(phar_entry_info), NULL);
 
@@ -1842,7 +1871,7 @@ PHP_METHOD(Phar, offsetGet)
 		return;
 	}
 	
-	if (!phar_get_entry_info(phar_obj->arc.archive, fname, fname_len, &error TSRMLS_CC)) {
+	if (!phar_get_entry_info_dir(phar_obj->arc.archive, fname, fname_len, 1, &error TSRMLS_CC)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist%s%s", fname, error?", ":"", error?error:"");
 	} else {
 		fname_len = spprintf(&fname, 0, "phar://%s/%s", phar_obj->arc.archive->fname, fname);
@@ -2332,10 +2361,18 @@ PHP_METHOD(PharFileInfo, chmod)
 	if (entry_obj->ent.entry->is_dir && (!entry_obj->ent.entry->is_tar && !entry_obj->ent.entry->is_zip)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
 			"Phar entry is a directory, cannot chmod"); \
+		return;
 	}
 	if (PHAR_G(readonly)) {
-		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Cannot modify permissions for file \"%s\" write operations are prohibited", entry_obj->ent.entry->filename, entry_obj->ent.entry->phar->fname);
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Cannot modify permissions for file \"%s\" in phar \"%s\", write operations are prohibited", entry_obj->ent.entry->filename, entry_obj->ent.entry->phar->fname);
+		return;
 	}
+#if HAVE_ZIP
+	if (entry_obj->ent.entry->is_zip) {
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Cannot modify permissions for file \"%s\" in phar \"%s\", not supported for zip-based phars", entry_obj->ent.entry->filename, entry_obj->ent.entry->phar->fname);
+		return;
+	}
+#endif
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &perms) == FAILURE) {
 		return;
 	}	

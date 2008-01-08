@@ -1,5 +1,5 @@
 --TEST--
-Phar::buildFromIterator() iterator, 1 file resource passed in
+Phar::buildFromIterator() iterator, 1 file resource passed in tar-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
@@ -37,7 +37,7 @@ class myIterator implements Iterator
 }
 try {
 	chdir(dirname(__FILE__));
-	$phar = new Phar(dirname(__FILE__) . '/buildfromiterator.phar');
+	$phar = new Phar(dirname(__FILE__) . '/buildfromiterator.phar.tar');
 	var_dump($phar->buildFromIterator(new myIterator(array('a' => $a = fopen(basename(__FILE__, 'php') . 'phpt', 'r')))));
 	fclose($a);
 } catch (Exception $e) {
@@ -48,7 +48,7 @@ try {
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/buildfromiterator.phar');
+unlink(dirname(__FILE__) . '/buildfromiterator.phar.tar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--

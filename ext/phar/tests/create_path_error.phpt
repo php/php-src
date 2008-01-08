@@ -54,9 +54,9 @@ foreach($checks as $check)
 --EXPECTF--
 string(5) "query"
 string(5) "query"
-Error: file_put_contents(phar://%s//): failed to open stream: phar error: file "" cannot be empty
-Error: file_put_contents(phar://%s/.): failed to open stream: phar error: file "" cannot be empty
-Error: file_put_contents(phar://%s/../): failed to open stream: phar error: file "" cannot be empty
-Error: file_put_contents(phar://%s/a/..): failed to open stream: phar error: file "" cannot be empty
+Error: file_put_contents(phar://%s//): failed to open stream: phar error: file "" in phar "%s" cannot be empty
+Error: file_put_contents(phar://%s/.): failed to open stream: phar error: file "" in phar "%s" cannot be empty
+Error: file_put_contents(phar://%s/../): failed to open stream: phar error: file "" in phar "%s" cannot be empty
+Error: file_put_contents(phar://%s/a/..): failed to open stream: phar error: file "" in phar "%s" cannot be empty
 Exception: Entry a does not exist and cannot be created: phar error: invalid path "a" contains illegal character
 ===DONE===
