@@ -676,14 +676,14 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 		} else if (ok_packet.field_count == 0xFF) {
 			if (ok_packet.sqlstate[0]) {
 				if (!self_alloced) {
-					strncpy(conn->error_info.sqlstate, ok_packet.sqlstate, sizeof(conn->error_info.sqlstate));
+					strlcpy(conn->error_info.sqlstate, ok_packet.sqlstate, sizeof(conn->error_info.sqlstate));
 				}
 				DBG_ERR_FMT("ERROR:%d [SQLSTATE:%s] %s",
 							ok_packet.error_no, ok_packet.sqlstate, ok_packet.error);
 			}
 			if (!self_alloced) {
 				conn->error_info.error_no = ok_packet.error_no;
-				strncpy(conn->error_info.error, ok_packet.error, sizeof(conn->error_info.error));
+				strlcpy(conn->error_info.error, ok_packet.error, sizeof(conn->error_info.error));
 			}
 		}
 	} else {
