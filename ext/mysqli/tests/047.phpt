@@ -15,7 +15,7 @@ require_once('skipifconnectfailure.inc');
 	mysqli_select_db($link, $db);
 
 	mysqli_query($link, "DROP TABLE IF EXISTS test_affected");
-	mysqli_query($link, "CREATE TABLE test_affected (foo int, bar varchar(10) character set latin1)");
+	mysqli_query($link, "CREATE TABLE test_affected (foo int, bar varchar(10) character set latin1) ENGINE=" . $engine);
 
 	mysqli_query($link, "INSERT INTO test_affected VALUES (1, 'Zak'),(2, 'Greant')");
 
@@ -41,6 +41,7 @@ require_once('skipifconnectfailure.inc');
 
 
 	mysqli_stmt_close($stmt);
+	mysqli_query($link, "DROP TABLE IF EXISTS test_affected");
 	mysqli_close($link);
 	print "done!";
 ?>

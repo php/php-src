@@ -1,8 +1,8 @@
 --TEST--
 function test: mysqli_errno
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -14,9 +14,9 @@ require_once('skipifconnectfailure.inc');
 	$errno = mysqli_errno($link);
 	var_dump($errno);
 
-	mysqli_select_db($link, "test");
+	mysqli_select_db($link, $db);
 
-	mysqli_query($link, "select * from non_exisiting_table");
+	mysqli_query($link, "SELECT * FROM non_exisiting_table");
 	$errno = mysqli_errno($link);
 
 	var_dump($errno);

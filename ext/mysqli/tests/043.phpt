@@ -1,8 +1,8 @@
 --TEST--
 mysqli_bind_param (UPDATE)
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -16,7 +16,7 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_query($link,"DROP TABLE IF EXISTS test_update");
 	mysqli_query($link,"CREATE TABLE test_update(a varchar(10),
-                                                     b int)");
+		b int) ENGINE=" . $engine);
 
 	mysqli_query($link, "INSERT INTO test_update VALUES ('foo', 2)");
 
@@ -36,6 +36,7 @@ require_once('skipifconnectfailure.inc');
 
 	var_dump($test);
 
+	mysqli_query($link, "DROP TABLE IF EXISTS test_update");
 	mysqli_close($link);
 	print "done!";
 ?>

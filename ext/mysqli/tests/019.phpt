@@ -1,14 +1,14 @@
 --TEST--
-mysqli fetch (bind_param + bind_result) 
+mysqli fetch (bind_param + bind_result)
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
 	include "connect.inc";
-	
+
 	/*** test mysqli_connect 127.0.0.1 ***/
 	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
@@ -16,18 +16,18 @@ require_once('skipifconnectfailure.inc');
 		printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	$rc = mysqli_query($link,"CREATE TABLE insert_read(col1 tinyint, col2 smallint,
-													col3 int, col4 bigint, 
+													col3 int, col4 bigint,
 													col5 float, col6 double,
-													col7 date, col8 time, 
-													col9 varbinary(10), 
+													col7 date, col8 time,
+													col9 varbinary(10),
 													col10 varchar(50),
 													col11 char(20)) ENGINE=" . $engine);
 	if (!$rc)
 		printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-  
-	if (!$stmt = mysqli_prepare($link, "INSERT INTO insert_read(col1,col10, col11, col6) VALUES(?,?,?,?)"))
+
+	if (!$stmt = mysqli_prepare($link, "INSERT INTO insert_read(col1,col10, col11, col6) VALUES (?,?,?,?)"))
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-	
+
 	mysqli_bind_param($stmt, "issd", $c1, $c2, $c3, $c4);
 
 	$c1 = 1;
@@ -38,10 +38,10 @@ require_once('skipifconnectfailure.inc');
 	mysqli_execute($stmt);
 	mysqli_stmt_close($stmt);
 
-	if (!$stmt = mysqli_prepare($link, "SELECT col1, col2, col3, col4, col5, col6, col7, col8, col9, col10, col11 from insert_read"))
+	if (!$stmt = mysqli_prepare($link, "SELECT col1, col2, col3, col4, col5, col6, col7, col8, col9, col10, col11 FROM insert_read"))
 		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-		
-	mysqli_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7, $c8, $c9, $c10, $c11); 
+
+	mysqli_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7, $c8, $c9, $c10, $c11);
 	mysqli_execute($stmt);
 
 	mysqli_fetch($stmt);
@@ -51,6 +51,7 @@ require_once('skipifconnectfailure.inc');
 	var_dump($test);
 
 	mysqli_stmt_close($stmt);
+	mysqli_query($link, "DROP TABLE IF EXISTS insert_read");
 	mysqli_close($link);
 	print "done!";
 ?>

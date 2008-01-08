@@ -73,6 +73,8 @@ mysqli fetch bigint values (ok to fail with 4.1.x)
 	echo $c1, "\n", $c2, "\n";
 
 	mysqli_stmt_close($stmt);
+	mysqli_query($link, "DROP TABLE IF EXISTS test_bind_fetch");
+	mysqli_query($link, "DROP TABLE IF EXISTS test_bind_fetch_uint");
 	mysqli_close($link);
 	print "done!";
 ?>

@@ -1,8 +1,8 @@
 --TEST--
-mysqli fetch char/text 
+mysqli fetch char/text
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -16,7 +16,7 @@ require_once('skipifconnectfailure.inc');
 
 	if (!mysqli_query($link,"DROP TABLE IF EXISTS test_bind_fetch"))
 		printf("[001] [%d] string\n", mysqli_errno($link), mysqli_error($link));
-		
+
 	if (!mysqli_query($link,"CREATE TABLE test_bind_fetch(c1 char(10), c2 text) ENGINE=" . $engine))
 		printf("[002] [%d] string\n", mysqli_errno($link), mysqli_error($link));
 
@@ -43,6 +43,7 @@ require_once('skipifconnectfailure.inc');
 	}
 
 	mysqli_stmt_close($stmt);
+	mysqli_query($link, "DROP TABLE IF EXISTS test_bind_fetch");
 	mysqli_close($link);
 	print "done!";
 ?>

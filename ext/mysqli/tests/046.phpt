@@ -1,8 +1,8 @@
 --TEST--
 mysqli_stmt_affected_rows (delete)
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -15,7 +15,7 @@ require_once('skipifconnectfailure.inc');
 	mysqli_select_db($link, $db);
 
 	mysqli_query($link, "DROP TABLE IF EXISTS test_affected");
-	mysqli_query($link, "CREATE TABLE test_affected (foo int)");
+	mysqli_query($link, "CREATE TABLE test_affected (foo int) ENGINE=" . $engine);
 
 	mysqli_query($link, "INSERT INTO test_affected VALUES (1),(2),(3),(4),(5)");
 
@@ -30,6 +30,7 @@ require_once('skipifconnectfailure.inc');
 	mysqli_stmt_close($stmt);
 	var_dump($x==1);
 
+	mysqli_query($link, "DROP TABLE IF EXISTS test_affected");
 	mysqli_close($link);
 	print "done!";
 ?>
