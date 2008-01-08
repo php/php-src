@@ -49,6 +49,10 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_free_result($res);
 
+	if (isset($row['VARIABLE_VALUE']) && !isset($row['Value']))
+		// MySQL 6.0
+		$row['Value'] = $row['VARIABLE_VALUE'];
+
 	if (0 === ($max_allowed_packet = (int)$row['Value']))
 		printf("[011] Cannot determine max_allowed_packet size and/or bogus max_allowed_packet setting used.\n");
 
