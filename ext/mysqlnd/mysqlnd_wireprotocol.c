@@ -698,7 +698,7 @@ size_t php_mysqlnd_auth_write(void *_packet, MYSQLND *conn TSRMLS_DC)
 	p+= 23;	
 
 	len= strlen(packet->user);
-	strncpy(p, packet->user, len);
+	memcpy(p, packet->user, len);
 	p+= len;
 	*p++ = '\0';
 
