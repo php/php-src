@@ -2,8 +2,12 @@
 
 $notes = '
 Major feature functionality release
- * include/fopen with include_path all work unmodified within a phar
- * paths with . and .. work (phar://blah.phar/a/../b.php => phar://blah.phar/b.php)
+ * add support for tar-based and zip-based phar archives [Greg]
+ * add Phar::isTar(), Phar::isZip(), and Phar::isPhar() [Greg]
+ * add Phar::webPhar() for running a web-based application unmodified
+   directly from a phar archive [Greg]
+ * include/fopen with include_path all work unmodified within a phar [Greg]
+ * paths with . and .. work (phar://blah.phar/a/../b.php => phar://blah.phar/b.php) [Greg]
  * implement Phar::copy(string $from, string $to) [Greg]
  * implement Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
  * add mapping of include/require from within a phar to location within phar [Greg]
