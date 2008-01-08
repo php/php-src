@@ -176,8 +176,9 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 	if (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), resource->host, host_len+1, (void **)&plain_map) == SUCCESS) {
 		spprintf(&internal_file, 0, "%s%s", plain_map, resource->path);
 		fp = php_stream_open_wrapper_ex(internal_file, mode, options, opened_path, context);
+		efree(internal_file);
 		if (!fp) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: file \"%s\" extracted from \"%s\" could not be opened", internal_file, resource->host);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: file \"%s\" extracted from \"%s\" could not be opened", resource->path+1, resource->host);
 		}
 		php_url_free(resource);
 		return fp;

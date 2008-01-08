@@ -2252,7 +2252,7 @@ PHP_METHOD(PharFileInfo, __destruct)
 {
 	PHAR_ENTRY_OBJECT();
 
-	if (entry_obj->ent.entry->is_dir&& !entry_obj->ent.entry->is_zip && !entry_obj->ent.entry->is_tar) {
+	if (entry_obj->ent.entry->is_temp_dir) {
 		if (entry_obj->ent.entry->filename) {
 			efree(entry_obj->ent.entry->filename);
 			entry_obj->ent.entry->filename = NULL;
@@ -2358,7 +2358,7 @@ PHP_METHOD(PharFileInfo, chmod)
 	long perms;
 	PHAR_ENTRY_OBJECT();
 
-	if (entry_obj->ent.entry->is_dir && (!entry_obj->ent.entry->is_tar && !entry_obj->ent.entry->is_zip)) {
+	if (entry_obj->ent.entry->is_temp_dir) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
 			"Phar entry is a directory, cannot chmod"); \
 		return;

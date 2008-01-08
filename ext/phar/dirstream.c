@@ -391,3 +391,109 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char 
 	return NULL;
 }
 /* }}} */
+
+/**
+ * Make a new directory within a phar archive
+ */
+int phar_wrapper_mkdir(php_stream_wrapper *wrapper, char *url_from, int mode, int options, php_stream_context *context TSRMLS_DC) /* {{{ */
+{
+	phar_entry_info entry;
+	phar_archive_data *phar;
+	char *error;
+	char *plain_map;
+	php_url *resource = NULL;
+	uint host_len;
+
+	if ((resource = phar_open_url(wrapper, url_from, "w", options TSRMLS_CC)) == NULL) {
+		return FAILURE;
+	}
+
+	/* we must have at the very least phar://alias.phar/internalfile.php */
+	if (!resource->scheme || !resource->host || !resource->path) {
+		php_url_free(resource);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\"", url_from);
+		return FAILURE;
+	}
+
+	if (strcasecmp("phar", resource->scheme)) {
+		php_url_free(resource);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: not a phar stream url \"%s\"", url_from);
+		return FAILURE;
+	}
+
+	host_len = strlen(resource->host);
+	phar_request_initialize(TSRMLS_C);
+	if (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), resource->host, host_len+1, (void **)&plain_map) == SUCCESS) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: directory \"%s\" cannot be created in phar \"%s\", phar is extracted in plain map", resource->path+1, resource->host);
+		php_url_free(resource);
+		return FAILURE;
+	}
+
+	if (FAILURE == phar_get_archive(&phar, resource->host, host_len, NULL, 0, &error TSRMLS_CC)) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", error retrieving phar information: %s", resource->path+1, resource->host, error);
+		efree(error);
+		php_url_free(resource);
+		return FAILURE;
+	}
+
+	if (phar_get_entry_info_dir(phar, resource->path + 1, strlen(resource->path + 1), 1, &error TSRMLS_CC)) {
+		/* directory exists, or is a subdirectory of an existing file */
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", directory already exists", resource->path+1, resource->host);
+		php_url_free(resource);
+		return FAILURE;
+	}
+	if (error) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", resource->path+1, resource->host, error);
+		efree(error);
+		php_url_free(resource);
+		return FAILURE;
+	}
+
+	memset((void *) &entry, 0, sizeof(phar_entry_info));
+
+	/* strip leading "/" */
+#if HAVE_PHAR_ZIP
+	if (phar->is_zip) {
+		entry.is_zip = 1;
+		/* prevent attempts to check the CRC */
+		entry.index = -1;
+	}
+#endif
+	entry.filename = estrdup(resource->path + 1);
+	if (phar->is_tar) {
+		entry.is_tar = 1;
+		entry.tar_type = TAR_DIR;
+	}
+	entry.filename_len = strlen(resource->path + 1);
+	php_url_free(resource);
+	entry.is_dir = 1;
+	entry.phar = phar;
+	entry.is_modified = 1;
+	entry.is_crc_checked = 1;
+	entry.flags = PHAR_ENT_PERM_DEF_DIR;
+	entry.old_flags = PHAR_ENT_PERM_DEF_DIR;
+	if (SUCCESS != zend_hash_add(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL)) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", adding to manifest failed", entry.filename, phar->fname);
+		efree(error);
+		efree(entry.filename);
+		return FAILURE;
+	}
+	phar_flush(phar, 0, 0, &error TSRMLS_CC);
+	if (error) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", entry.filename, phar->fname, error);
+		zend_hash_del(&phar->manifest, entry.filename, entry.filename_len);
+		efree(error);
+		efree(entry.filename);
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+/* }}} */
+
+/**
+ * Remove a directory within a phar archive
+ */
+int phar_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC) /* {{{ */
+{
+}
+/* }}} */
