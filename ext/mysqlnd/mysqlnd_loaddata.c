@@ -113,7 +113,7 @@ int	mysqlnd_local_infile_error(void *ptr, char *error_buf, uint error_buf_len TS
 	DBG_ENTER("mysqlnd_local_infile_error");
 
 	if (info) {
-		strncpy(error_buf, info->error_msg, error_buf_len);
+		strlcpy(error_buf, info->error_msg, error_buf_len);
 		DBG_INF_FMT("have info, %d", info->error_no);
 		DBG_RETURN(info->error_no);
 	}

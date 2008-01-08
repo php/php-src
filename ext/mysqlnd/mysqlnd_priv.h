@@ -143,7 +143,7 @@
 	{ \
 		error_info.error_no = 0; \
 		error_info.error[0] = '\0'; \
-		strncpy(error_info.sqlstate, "00000", sizeof("00000") - 1); \
+		strlcpy(error_info.sqlstate, "00000", sizeof(error_info.sqlstate)); \
 	}
 
 #define SET_CLIENT_ERROR(error_info, a, b, c) \
