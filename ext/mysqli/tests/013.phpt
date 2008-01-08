@@ -1,8 +1,8 @@
 --TEST--
 mysqli fetch mixed / mysql_query (may fail when using 4.1 library with 5.x server)
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -52,6 +52,7 @@ require_once('skipifconnectfailure.inc');
 	else
 		echo "error";
 
+	mysqli_query($link, "DROP TABLE IF EXISTS test_bind_result");
 	mysqli_close($link);
 	print "done!";
 ?>

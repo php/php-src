@@ -1,7 +1,7 @@
 --TEST--
-mysqli fetch functions 
+mysqli fetch functions
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
@@ -9,14 +9,14 @@ require_once('skipifconnectfailure.inc');
 --FILE--
 <?php
 	include "connect.inc";
-	
+
 	/*** test mysqli_connect 127.0.0.1 ***/
 	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
 	if (!$stmt = mysqli_prepare($link, "SELECT md5('bar'), database(), 'foo'"))
 		printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	mysqli_bind_result($stmt, $c0, $c1, $c2); 
+	mysqli_bind_result($stmt, $c0, $c1, $c2);
 	mysqli_execute($stmt);
 
 	mysqli_fetch($stmt);

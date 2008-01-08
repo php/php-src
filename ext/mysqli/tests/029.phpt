@@ -1,8 +1,8 @@
 --TEST--
 function test: mysqli_affected_rows
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -14,14 +14,15 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_select_db($link, $db);
 
-	mysqli_query($link, "drop table if exists general_test");
-	mysqli_query($link, "create table general_test (a int)");
-	mysqli_query($link, "insert into general_test values (1),(2),(3)");
+	mysqli_query($link, "DROP TABLE IF EXISTS exists general_test");
+	mysqli_query($link, "CREATE TABLE general_test (a INT)");
+	mysqli_query($link, "INSERT INTO general_test VALUES (1),(2),(3)");
 
 	$afc = mysqli_affected_rows($link);
 
 	var_dump($afc);
 
+	mysqli_query($link, "DROP TABLE IF EXISTS exists general_test");
 	mysqli_close($link);
 	print "done!";
 ?>
