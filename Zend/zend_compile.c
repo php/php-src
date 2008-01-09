@@ -2021,7 +2021,7 @@ static zend_bool zend_do_perform_implementation_check(zend_function *fe, zend_fu
 			return 0;
 		}
 		if (fe->common.arg_info[i].class_name
-			&& strcmp(fe->common.arg_info[i].class_name, proto->common.arg_info[i].class_name)!=0) {
+			&& strcasecmp(fe->common.arg_info[i].class_name, proto->common.arg_info[i].class_name)!=0) {
 			return 0;
 		}
 		if (fe->common.arg_info[i].array_type_hint != proto->common.arg_info[i].array_type_hint) {
