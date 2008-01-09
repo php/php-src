@@ -26,10 +26,7 @@
 #include "ext/standard/base64.h"
 #include <libxml/parserInternals.h>
 #include "zend_strtod.h"
-
-#ifdef HAVE_SPL
-# include "ext/spl/spl_array.h"
-#endif
+#include "zend_interfaces.h"
 
 /* zval type decode */
 static zval *to_zval_double(encodeTypePtr type, xmlNodePtr data);
@@ -2176,9 +2173,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 	int dimension = 1;
 	int* dims;
 	int soap_version;
-#ifdef HAVE_SPL
 	zval *array_copy = NULL;
-#endif
 	TSRMLS_FETCH();
 
 	soap_version = SOAP_GLOBAL(soap_version);
@@ -2198,17 +2193,78 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 		return xmlParam;
 	}
 
-#ifdef HAVE_SPL
-	if (Z_TYPE_P(data) == IS_OBJECT && (instanceof_function(Z_OBJCE_P(data), spl_ce_ArrayObject TSRMLS_CC) || instanceof_function(Z_OBJCE_P(data), spl_ce_ArrayIterator TSRMLS_CC))) {
-		zval getArray;
-            
-		ZVAL_STRING(&getArray, "getArrayCopy", 0);
-		call_user_function_ex(NULL, &data, &getArray, &array_copy, 0, 0, 0, NULL TSRMLS_CC);        
-		if (Z_TYPE_P(array_copy) == IS_ARRAY) {
+	if (Z_TYPE_P(data) == IS_OBJECT && instanceof_function(Z_OBJCE_P(data), zend_ce_traversable TSRMLS_CC)) {
+		zend_object_iterator   *iter;
+		zend_class_entry       *ce = Z_OBJCE_P(data);
+		zval                  **val;
+		zstr                    str_key;
+		uint                    str_key_len;
+		ulong                   int_key;
+		int                     key_type;
+
+		ALLOC_ZVAL(array_copy);
+		INIT_PZVAL(array_copy);
+		array_init(array_copy);
+
+		iter = ce->get_iterator(ce, data, 0 TSRMLS_CC);
+
+		if (EG(exception)) {
+			goto iterator_done;
+		}
+
+		if (iter->funcs->rewind) {
+			iter->funcs->rewind(iter TSRMLS_CC);
+			if (EG(exception)) {
+				goto iterator_done;
+			}
+		}
+
+		while (iter->funcs->valid(iter TSRMLS_CC) == SUCCESS) {
+			if (EG(exception)) {
+				goto iterator_done;
+			}
+
+			iter->funcs->get_current_data(iter, &val TSRMLS_CC);
+			if (EG(exception)) {
+				goto iterator_done;
+			}
+			if (iter->funcs->get_current_key) {
+				key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
+				if (EG(exception)) {
+					goto iterator_done;
+				}
+				switch(key_type) {
+					case HASH_KEY_IS_STRING:
+						add_assoc_zval_ex(array_copy, str_key.s, str_key_len, *val);
+						efree(str_key.s);
+						break;
+					case HASH_KEY_IS_UNICODE:
+						add_u_assoc_zval_ex(array_copy, IS_UNICODE, str_key, str_key_len, *val);
+						efree(str_key.u);
+						break;
+					case HASH_KEY_IS_LONG:
+						add_index_zval(array_copy, int_key, *val);
+						break;
+				}
+			} else {
+				add_next_index_zval(array_copy, *val);
+			}
+			Z_ADDREF_PP(val);
+
+			iter->funcs->move_forward(iter TSRMLS_CC);
+			if (EG(exception)) {
+				goto iterator_done;
+			}
+		}
+iterator_done:
+		iter->funcs->dtor(iter TSRMLS_CC);
+		if (EG(exception)) {
+			zval_ptr_dtor(&array_copy);
+			array_copy = NULL;
+		} else {
 			data = array_copy;
 		}
 	}
-#endif
 
 	if (Z_TYPE_P(data) == IS_ARRAY) {
 		sdlAttributePtr *arrayType;
@@ -2388,11 +2444,9 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 		}
 	}
 
-#ifdef HAVE_SPL
 	if (array_copy) {
 		zval_ptr_dtor(&array_copy);
 	}
-#endif
 
 	return xmlParam;
 }
