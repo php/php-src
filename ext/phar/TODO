@@ -61,7 +61,7 @@ Version 1.2.1
 Version 1.3.0
 
  * ability to have Phar object return file class as offsetGet() result
- * ability to store empty directories
+ X ability to store empty directories [Greg]
  * implement PPG signing
  X tar support [Greg]
  X zip support [Greg]
