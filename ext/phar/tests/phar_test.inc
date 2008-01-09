@@ -61,4 +61,10 @@ foreach($files as $cont)
 
 file_put_contents($fname, $file);
 
+if (@$gzip) {
+	$fp = gzopen($fname, 'w');
+	fwrite($fp, $file);
+	fclose($fp);
+}
+
 ?>

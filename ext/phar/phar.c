@@ -2981,7 +2981,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, char **error 
 		if (!phar->fp) {
 			phar->fp = newfile;
 			if (error) {
-				spprintf(error, 0, "unable to open new phar \"%s\" for writing", phar->fname);
+				spprintf(error, 4096, "unable to open new phar \"%s\" for writing", phar->fname);
 			}
 			return EOF;
 		}
@@ -2991,9 +2991,15 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, char **error 
 			zval filterparams;
 
 			array_init(&filterparams);
-			add_assoc_long(&filterparams, "window", MAX_WBITS);
+			add_assoc_long(&filterparams, "window", MAX_WBITS+16);
 			filter = php_stream_filter_create("zlib.deflate", &filterparams, php_stream_is_persistent(phar->fp) TSRMLS_CC);
 			zval_dtor(&filterparams);
+			if (!filter) {
+				if (error) {
+					spprintf(error, 4096, "unable to compress all contents of phar \"%s\" using zlib, PHP versions older than 5.2.6 have a buggy zlib", phar->fname);
+				}
+				return EOF;
+			}
 			php_stream_filter_append(&phar->fp->writefilters, filter);
 			php_stream_copy_to_stream(newfile, phar->fp, PHP_STREAM_COPY_ALL);
 			php_stream_filter_flush(filter, 1);
@@ -3052,6 +3058,12 @@ static void php_phar_init_globals_module(zend_phar_globals *phar_globals)
 }
 /* }}} */
 
+static long stream_fteller_for_zend(void *handle TSRMLS_DC) /* {{{ */
+{
+	return (long)php_stream_tell((php_stream*)handle);
+}
+/* }}} */
+
 static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC) /* {{{ */
 {
 	zend_op_array *res;
@@ -3082,6 +3094,17 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 				} else {
 					*file_handle = f;
 				}
+				goto skip_phar;
+			} else if (phar->flags & PHAR_FILE_COMPRESSION_MASK) {
+				/* compressed phar */
+				file_handle->type = ZEND_HANDLE_STREAM;
+				file_handle->free_filename = 0;
+				file_handle->handle.stream.handle = phar->fp;
+				file_handle->handle.stream.reader = (zend_stream_reader_t)_php_stream_read;
+				file_handle->handle.stream.closer = NULL; /* don't close - let phar handle this one */
+				file_handle->handle.stream.fteller = stream_fteller_for_zend;
+				file_handle->handle.stream.interactive = 0;
+				php_stream_rewind(phar->fp);
 				goto skip_phar;
 			}
 		}
