@@ -132,7 +132,11 @@ typedef signed int int64;
 #elif SIZEOF_LONG == 8
 typedef signed long int64;
 #elif SIZEOF_LONG_LONG == 8
+#ifdef PHP_WIN32
+typedef __int64 int64;
+#else
 typedef signed long long int64;
+#endif
 #else
 #error "Neither int nor long nor long long is of 8 bytes width"
 #endif
@@ -147,7 +151,11 @@ typedef unsigned int uint64;
 #elif SIZEOF_LONG == 8
 typedef unsigned long uint64;
 #elif SIZEOF_LONG_LONG == 8
+#ifdef PHP_WIN32
+typedef unsigned __int64 uint64;
+#else
 typedef unsigned long long uint64;
+#endif
 #else
 #error "Neither int nor long nor long long is of 8 bytes width"
 #endif
@@ -160,8 +168,6 @@ typedef unsigned long long uint64;
 #ifndef L64
 #define L64(x) x##i64
 #endif
-typedef __int64 int64;
-typedef unsigned __int64 uint64;
 #else
 #define MYSQLND_LLU_SPEC "%llu"
 #define MYSQLND_LL_SPEC "%lld"
