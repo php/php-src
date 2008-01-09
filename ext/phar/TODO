@@ -68,6 +68,5 @@ Version 1.3.0
  X Phar::copy($from, $to); [Greg]
  X Phar::delete($what) [Greg]
  X Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
- * Layout: Option to compress all content rather than single files.
-   That excludes stub and manifest haeder. (tar only)
+ X Layout: Option to compress all content rather than single files. (tar/phar only) [Greg]
  X clean crap paths like phar://blah.phar/file//../to\\here.php [Greg]
