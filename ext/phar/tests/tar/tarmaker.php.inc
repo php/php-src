@@ -131,7 +131,7 @@ class tarmaker
                 $this->tmp = gzopen($this->path, 'wb');
                 break;
             case 'bz2' :
-                $this->tmp = bzopen($this->path, 'wb');
+                $this->tmp = bzopen($this->path, 'w');
                 break;
             case 'none' :
                 $this->tmp = fopen($this->path, 'wb');
