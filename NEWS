@@ -1,7 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.0
-- Added ability to use Traversable objecta instead of plain arrays in ext/soap.
+- Added ability to use Traversable objects instead of plain arrays in ext/soap.
   (Joshua Reese, Dmitry)
 - Added "?:" operator. (Marcus)
 - Added stream_supports_lock() function. (Benjamin Schulz)
