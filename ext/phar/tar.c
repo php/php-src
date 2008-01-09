@@ -170,7 +170,7 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 
 	myphar = (phar_archive_data *) ecalloc(1, sizeof(phar_archive_data));
 	zend_hash_init(&myphar->manifest, sizeof(phar_entry_info),
-		zend_get_hash_value, destroy_phar_manifest, 0);
+		zend_get_hash_value, destroy_phar_manifest_entry, 0);
 	myphar->is_tar = 1;
 
 	entry.is_tar = 1;

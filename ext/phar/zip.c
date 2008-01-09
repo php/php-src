@@ -113,7 +113,7 @@ int phar_open_zipfile(char *fname, int fname_len, char *alias, int alias_len, ph
 	}
 	/* set up our manifest */
 	zend_hash_init(&mydata->manifest, sizeof(phar_entry_info),
-		zend_get_hash_value, destroy_phar_manifest, 0);
+		zend_get_hash_value, destroy_phar_manifest_entry, 0);
 	entry.phar = mydata;
 	entry.is_zip = 1;
 	/* prevent CRC checking */
