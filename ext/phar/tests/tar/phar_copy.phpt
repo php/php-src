@@ -15,7 +15,7 @@ $fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '2.phar.php';
 
 $pname = 'phar://'.$fname;
 $iname = '/file.txt';
-$ename = '/error/';
+$ename = '/error/..';
 
 $p = new Phar($fname);
 
@@ -50,7 +50,7 @@ echo 'c: ' ,file_get_contents($p2['c']->getPathName());
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar.php'); ?>
 --EXPECTF--
 hihibool(true)
-file "/error/" contains invalid characters empty directory, cannot be copied from "a" in phar %s
+file "/error/.." contains invalid characters upper directory reference, cannot be copied from "a" in phar %s
 bool(true)
 
 a: hib: hic: hi===DONE===

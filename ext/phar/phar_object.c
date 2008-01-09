@@ -307,7 +307,7 @@ void phar_do_404(char *fname, int fname_len, char *f404, int f404_len, char *ent
 	phar_entry_data *phar;
 	char *error;
 	if (f404_len) {
-		if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, f404, f404_len, "r", &error TSRMLS_CC)) {
+		if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, f404, f404_len, "r", 0, &error TSRMLS_CC)) {
 			if (error) {
 				efree(error);
 			}
@@ -412,7 +412,7 @@ PHP_METHOD(Phar, webPhar)
 			entry = estrndup("/index.php", sizeof("/index.php"));
 			entry_len = sizeof("/index.php")-1;
 		}
-		if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", &error TSRMLS_CC)) {
+		if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", 0, &error TSRMLS_CC)) {
 			if (error) {
 				efree(error);
 			}
@@ -465,7 +465,7 @@ PHP_METHOD(Phar, webPhar)
 		}
 	}
 
-	if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", &error TSRMLS_CC)) {
+	if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", 0, &error TSRMLS_CC)) {
 		phar_do_404(fname, fname_len, f404, f404_len, entry, entry_len TSRMLS_CC);
 #ifdef PHP_WIN32
 		efree(fname);
@@ -1096,7 +1096,7 @@ phar_spl_fileinfo:
 	}
 
 after_open_fp:
-	if (!(data = phar_get_or_create_entry_data(phar_obj->arc.archive->fname, phar_obj->arc.archive->fname_len, str_key, str_key_len, "w+b", &error TSRMLS_CC))) {
+	if (!(data = phar_get_or_create_entry_data(phar_obj->arc.archive->fname, phar_obj->arc.archive->fname_len, str_key, str_key_len, "w+b", 0, &error TSRMLS_CC))) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s cannot be created: %s", str_key, error);
 		efree(error);
 		if (save) {
@@ -1871,7 +1871,7 @@ PHP_METHOD(Phar, offsetGet)
 		return;
 	}
 	
-	if (!phar_get_entry_info_dir(phar_obj->arc.archive, fname, fname_len, 1, &error TSRMLS_CC)) {
+	if (!phar_get_entry_info_dir(phar_obj->arc.archive, fname, fname_len, 2, &error TSRMLS_CC)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist%s%s", fname, error?", ":"", error?error:"");
 	} else {
 		fname_len = spprintf(&fname, 0, "phar://%s/%s", phar_obj->arc.archive->fname, fname);
@@ -1907,7 +1907,7 @@ PHP_METHOD(Phar, offsetSet)
 		return;
 	}
 
-	if (!(data = phar_get_or_create_entry_data(phar_obj->arc.archive->fname, phar_obj->arc.archive->fname_len, fname, fname_len, "w+b", &error TSRMLS_CC))) {
+	if (!(data = phar_get_or_create_entry_data(phar_obj->arc.archive->fname, phar_obj->arc.archive->fname_len, fname, fname_len, "w+b", 2, &error TSRMLS_CC))) {
 		if (error) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist and cannot be created: %s", fname, error);
 			efree(error);
@@ -1918,18 +1918,20 @@ PHP_METHOD(Phar, offsetSet)
 		if (error) {
 			efree(error);
 		}
-		if (cont_str) {
-			contents_len = php_stream_write(data->fp, cont_str, cont_len);
-			if (contents_len != cont_len) {
-				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
+		if (!data->internal_file->is_dir) {
+			if (cont_str) {
+				contents_len = php_stream_write(data->fp, cont_str, cont_len);
+				if (contents_len != cont_len) {
+					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
+				}
+			} else {
+				if (!(php_stream_from_zval_no_verify(contents_file, &zresource))) {
+					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
+				}
+				contents_len = php_stream_copy_to_stream(contents_file, data->fp, PHP_STREAM_COPY_ALL);
 			}
-		} else {
-			if (!(php_stream_from_zval_no_verify(contents_file, &zresource))) {
-				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
-			}
-			contents_len = php_stream_copy_to_stream(contents_file, data->fp, PHP_STREAM_COPY_ALL);
+			data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
 		}
-		data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
 		phar_entry_delref(data TSRMLS_CC);
 		phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
 		if (error) {

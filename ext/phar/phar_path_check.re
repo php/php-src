@@ -61,10 +61,6 @@ ANY = .;
 			*error = "back-slash";
 			return pcr_err_back_slash;
 		}
-"/" END {
-			*error = "empty directory";
-			return pcr_err_empty_entry;
-		}
 "*" {
 			*error = "star";
 			return pcr_err_star;

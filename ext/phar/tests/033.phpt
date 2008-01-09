@@ -13,6 +13,7 @@ $file = '<?php include "' . $pname . '/a.php"; __HALT_COMPILER(); ?>';
 
 $files = array();
 $files['a.php']   = '<?php echo "This is a\n"; include "'.$pname.'/b.php"; ?>';
+$files['dir/'] = '';
 include 'phar_test.inc';
 $a = new Phar($fname);
 var_dump($a['a.php']->isExecutable());
@@ -20,6 +21,13 @@ $a['a.php']->chmod(0777);
 var_dump($a['a.php']->isExecutable());
 $a['a.php']->chmod(0666);
 var_dump($a['a.php']->isExecutable());
+echo "test dir\n";
+var_dump($a['dir']->isDir());
+var_dump($a['dir']->isReadable());
+$a['dir']->chmod(000);
+var_dump($a['dir']->isReadable());
+$a['dir']->chmod(0666);
+var_dump($a['dir']->isReadable());
 ?>
 ===DONE===
 --CLEAN--
@@ -30,4 +38,9 @@ unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.1.phar.php
 bool(false)
 bool(true)
 bool(false)
+test dir
+bool(true)
+bool(true)
+bool(false)
+bool(true)
 ===DONE===

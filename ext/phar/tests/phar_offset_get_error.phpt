@@ -12,7 +12,7 @@ phar.require_hash=1
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://'.$fname;
 $iname = '/file.txt';
-$ename = '/error/';
+$ename = '/error/..';
 
 $p = new Phar($fname);
 $p[$iname] = "foobar\n";
@@ -32,6 +32,6 @@ include($pname . $iname);
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
-Entry /error/ does not exist and cannot be created: phar error: invalid path "/error/" contains empty directory
+Entry /error/.. does not exist and cannot be created: phar error: invalid path "/error/.." contains upper directory reference
 foobar
 ===DONE===
