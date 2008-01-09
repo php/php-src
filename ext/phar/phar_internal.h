@@ -93,6 +93,12 @@
 #define PHAR_HDR_COMPRESSED_BZ2   0x00002000
 #define PHAR_HDR_SIGNATURE        0x00010000
 
+/* flags for defining that the entire file should be compressed */
+#define PHAR_FILE_COMPRESSION_MASK 0x00F00000
+#define PHAR_FILE_COMPRESSED_NONE  0x00000000
+#define PHAR_FILE_COMPRESSED_GZ    0x00100000
+#define PHAR_FILE_COMPRESSED_BZ2   0x00200000
+
 #define PHAR_SIG_MD5              0x0001
 #define PHAR_SIG_SHA1             0x0002
 #define PHAR_SIG_SHA256           0x0003
@@ -311,10 +317,10 @@ void destroy_phar_manifest_entry(void *pDest);
 
 /* tar functions in tar.c */
 int phar_is_tar(char *buf);
-int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
+int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, php_uint32 compression, char **error TSRMLS_DC);
 int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **error TSRMLS_DC);
 int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
-int phar_tar_flush(phar_archive_data *archive, char *user_stub, long len, char **error TSRMLS_DC);
+int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **error TSRMLS_DC);
 
 /* zip functions in zip.c */
 int phar_open_zipfile(char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, char **error TSRMLS_DC);

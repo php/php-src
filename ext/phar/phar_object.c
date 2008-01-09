@@ -1224,6 +1224,23 @@ PHP_METHOD(Phar, isPhar)
 }
 /* }}} */
 
+/* {{{ proto bool Phar::isCompressed()
+ * Returns Phar::GZ or PHAR::BZ2 if the entire phar archive is compressed (.tar.gz/tar.bz and so on)
+ */
+PHP_METHOD(Phar, isCompressed)
+{
+	PHAR_ARCHIVE_OBJECT();
+	
+	if (phar_obj->arc.archive->flags & PHAR_FILE_COMPRESSED_GZ) {
+		RETURN_LONG(PHAR_ENT_COMPRESSED_GZ);
+	}
+	if (phar_obj->arc.archive->flags & PHAR_FILE_COMPRESSED_BZ2) {
+		RETURN_LONG(PHAR_ENT_COMPRESSED_BZ2);
+	}
+	RETURN_LONG(0);
+}
+/* }}} */
+
 /* {{{ proto bool Phar::delete(string file)
  * Delete a file from within the Phar
  */
@@ -2776,6 +2793,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, isTar,                 NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, isZip,                 NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, isPhar,                NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, isCompressed,          NULL,                      ZEND_ACC_PUBLIC)
 #endif
 	/* static member functions */
 	PHP_ME(Phar, apiVersion,            NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
