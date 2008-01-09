@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Fixed a safe_mode bypass in cURL identified by Maksymilian Arciemowicz.
   (Ilia)
 
+- Fixed bug #43793 (zlib filter is unable to auto-detect gzip/zlib file headers).
+  (Greg)
 - Fixed bug #43663 (Extending PDO class with a __call() function doesn't work). 
   (David Soria Parra)
 - Fixed bug #43647 (Make FindFile use PATH_SEPARATOR instead of ";"). (Ilia)
