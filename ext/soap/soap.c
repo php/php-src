@@ -384,41 +384,47 @@ ZEND_GET_MODULE(soap)
 
 ZEND_INI_MH(OnUpdateCacheEnabled)
 {
-	long *p;
+	if (OnUpdateBool(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC) == FAILURE) {
+		return FAILURE;
+	}
+	if (SOAP_GLOBAL(cache_enabled)) {
+		SOAP_GLOBAL(cache) = SOAP_GLOBAL(cache_mode);
+	} else {
+		SOAP_GLOBAL(cache) = 0;
+	}
+	return SUCCESS;
+}
+
+ZEND_INI_MH(OnUpdateCacheMode)
+{
+	char *p;
 #ifndef ZTS
 	char *base = (char *) mh_arg2;
 #else
-	char *base;
-
-	base = (char *) ts_resource(*((int *) mh_arg2));
+	char *base = (char *) ts_resource(*((int *) mh_arg2));
 #endif
 
 	p = (long*) (base+(size_t) mh_arg1);
 
-	if (new_value_length==2 && strcasecmp("on", new_value)==0) {
-		*p = 1;
-	} 
-	else if (new_value_length==3 && strcasecmp("yes", new_value)==0) {
-		*p = 1;
-	} 
-	else if (new_value_length==4 && strcasecmp("true", new_value)==0) {
-		*p = 1;
-	} 
-	else {
-		*p = (long) (atoi(new_value) != 0);
+	*p = (char)atoi(new_value);
+
+	if (SOAP_GLOBAL(cache_enabled)) {
+		SOAP_GLOBAL(cache) = SOAP_GLOBAL(cache_mode);
+	} else {
+		SOAP_GLOBAL(cache) = 0;
 	}
 	return SUCCESS;
 }
 
 PHP_INI_BEGIN()
 STD_PHP_INI_ENTRY("soap.wsdl_cache_enabled",     "1", PHP_INI_ALL, OnUpdateCacheEnabled,
-                  cache, zend_soap_globals, soap_globals)
+                  cache_enabled, zend_soap_globals, soap_globals)
 STD_PHP_INI_ENTRY("soap.wsdl_cache_dir",         "/tmp", PHP_INI_ALL, OnUpdateString,
                   cache_dir, zend_soap_globals, soap_globals)
 STD_PHP_INI_ENTRY("soap.wsdl_cache_ttl",         "86400", PHP_INI_ALL, OnUpdateLong,
                   cache_ttl, zend_soap_globals, soap_globals)
-STD_PHP_INI_ENTRY("soap.wsdl_cache",             "1", PHP_INI_ALL, OnUpdateLong,
-                  cache, zend_soap_globals, soap_globals)
+STD_PHP_INI_ENTRY("soap.wsdl_cache",             "1", PHP_INI_ALL, OnUpdateCacheMode,
+                  cache_mode, zend_soap_globals, soap_globals)
 STD_PHP_INI_ENTRY("soap.wsdl_cache_limit",       "5", PHP_INI_ALL, OnUpdateLong,
                   cache_limit, zend_soap_globals, soap_globals)
 PHP_INI_END()

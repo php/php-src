@@ -2,6 +2,8 @@
 Bug #38067 (Parameters are not decoded from utf-8 when using encoding option)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 function Test($param) {

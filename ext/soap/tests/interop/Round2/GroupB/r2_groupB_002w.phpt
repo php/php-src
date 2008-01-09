@@ -4,6 +4,7 @@ SOAP Interop Round2 groupB 002 (php/wsdl): echoSimpleTypesAsStruct
 <?php require_once('skipif.inc'); ?>
 --INI--
 precision=14
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 $client = new SoapClient(dirname(__FILE__)."/round2_groupB.wsdl",array("trace"=>1,"exceptions"=>0));

@@ -4,6 +4,7 @@ SOAP Interop Round4 GroupH Simple RPC Enc 005 (php/wsdl): echoMultipleFaults1(2)
 <?php require_once('skipif.inc'); ?>
 --INI--
 precision=14
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 $client = new SoapClient(dirname(__FILE__)."/round4_groupH_simple_rpcenc.wsdl",array("trace"=>1,"exceptions"=>0));
