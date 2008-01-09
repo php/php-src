@@ -3725,7 +3725,7 @@ PHP_FUNCTION(openssl_sign)
 	}
 
 	if (method == NULL || Z_TYPE_P(method) == IS_LONG) {
-		if (Z_TYPE_P(method) == IS_LONG) {
+		if (method != NULL) {
 			signature_algo = Z_LVAL_P(method);
 		}
 		mdtype = php_openssl_get_evp_md_from_algo(signature_algo);
@@ -3780,7 +3780,7 @@ PHP_FUNCTION(openssl_verify)
 	}
 
 	if (method == NULL || Z_TYPE_P(method) == IS_LONG) {
-		if (Z_TYPE_P(method) == IS_LONG) {
+		if (method != NULL) {
 			signature_algo = Z_LVAL_P(method);
 		}
 		mdtype = php_openssl_get_evp_md_from_algo(signature_algo);
