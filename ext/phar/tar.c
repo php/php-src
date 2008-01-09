@@ -569,9 +569,15 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 			zval filterparams;
 
 			array_init(&filterparams);
-			add_assoc_long(&filterparams, "window", MAX_WBITS);
+			add_assoc_long(&filterparams, "window", MAX_WBITS + 16);
 			filter = php_stream_filter_create("zlib.deflate", &filterparams, php_stream_is_persistent(phar->fp) TSRMLS_CC);
 			zval_dtor(&filterparams);
+			if (!filter) {
+				if (error) {
+					spprintf(error, 4096, "unable to compress all contents of phar \"%s\" using zlib, PHP versions older than 5.2.6 have a buggy zlib", phar->fname);
+				}
+				return EOF;
+			}
 			php_stream_filter_append(&phar->fp->writefilters, filter);
 			php_stream_copy_to_stream(newfile, phar->fp, PHP_STREAM_COPY_ALL);
 			php_stream_filter_flush(filter, 1);
