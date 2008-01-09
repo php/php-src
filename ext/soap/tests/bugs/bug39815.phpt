@@ -9,6 +9,7 @@ if (!@setlocale(LC_ALL, 'en_US', 'en_US.ISO8859-1')) die('skip en_US locale not 
 ?>
 --INI--
 precision=14
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 function test(){

@@ -2,6 +2,8 @@
 SOAP typemap 6: SoapServer support for typemap's to_xml() (without WSDL, using SoapVar)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 $GLOBALS['HTTP_RAW_POST_DATA']="
