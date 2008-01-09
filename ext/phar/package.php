@@ -10,6 +10,7 @@ Major feature functionality release
  * paths with . and .. work (phar://blah.phar/a/../b.php => phar://blah.phar/b.php) [Greg]
  * add support for mkdir()/rmdir() and support for empty directories to phar file format [Greg]
  * add option to compress the entire phar file for phar/tar file format [Greg]
+ * implement Phar::isCompressed() returning 0, Phar::GZ or Phar::BZ2 [Greg]
  * implement Phar::copy(string $from, string $to) [Greg]
  * implement Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
  * add mapping of include/require from within a phar to location within phar [Greg]
