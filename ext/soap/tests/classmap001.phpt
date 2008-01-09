@@ -2,6 +2,8 @@
 SOAP Classmap 1: SoapServer support for classmap
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 $GLOBALS['HTTP_RAW_POST_DATA']="

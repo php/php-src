@@ -2,6 +2,8 @@
 SOAP Interop Round4 GroupH Complex RPC Enc 006 (php/wsdl): echoMultipleFaults1(3)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class SOAPStruct {

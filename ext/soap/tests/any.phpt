@@ -2,6 +2,8 @@
 SOAP handling of <any>
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class SOAPComplexType {

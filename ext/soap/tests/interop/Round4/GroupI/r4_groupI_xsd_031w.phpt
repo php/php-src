@@ -2,6 +2,8 @@
 SOAP Interop Round4 GroupI XSD 031 (php/wsdl): echoVoidSoapHeader(2)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 $hdr = new SoapHeader("http://soapinterop.org/","echoMeStringRequest", array(), 1);

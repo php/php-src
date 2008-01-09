@@ -4,6 +4,8 @@ SOAP Server 11: bind
 <?php require_once('skipif.inc'); ?>
 --GET--
 wsdl
+--INI--
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 function Add($x,$y) {

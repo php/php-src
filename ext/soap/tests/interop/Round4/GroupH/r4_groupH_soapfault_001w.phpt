@@ -2,6 +2,8 @@
 SOAP Interop Round4 GroupH SoapFault 001 (php/wsdl): echoVersionMismatchFault(SOAP 1.1)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 $client = new SoapClient(dirname(__FILE__)."/round4_groupH_soapfault.wsdl",array("trace"=>1,"exceptions"=>0));

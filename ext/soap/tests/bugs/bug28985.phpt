@@ -2,6 +2,8 @@
 Bug #28985 (__getTypes() returning nothing on complex WSDL)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 $client = new SOAPClient(dirname(__FILE__).'/bug28985.wsdl', array('trace'=>1));

@@ -2,6 +2,8 @@
 SOAP Interop Round3 GroupE List 006 (php/wsdl): echoLinkedList (cyclic)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class SOAPList {

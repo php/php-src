@@ -2,6 +2,8 @@
 SOAP Typemap 7: SoapClient support for typemap's from_xml() (without WSDL)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class TestSoapClient extends SoapClient{

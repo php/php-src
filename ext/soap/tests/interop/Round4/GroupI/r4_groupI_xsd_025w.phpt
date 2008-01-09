@@ -2,6 +2,8 @@
 SOAP Interop Round4 GroupI XSD 025 (php/wsdl): echoNestedMultiOccurs
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class SOAPMultiOccursComplexType {

@@ -2,6 +2,8 @@
 Bug #32776 (SOAP doesn't support one-way operations)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 

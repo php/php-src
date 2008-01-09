@@ -5,6 +5,7 @@ Bug #38005 (SoapFault faultstring doesn't follow encoding rules)
 --INI--
 unicode.script_encoding=ISO-8859-1
 unicode.output_encoding=ISO-8859-1
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 function Test($param) {
