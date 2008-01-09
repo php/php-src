@@ -67,4 +67,10 @@ if (@$gzip) {
 	fclose($fp);
 }
 
+if (@$bz2) {
+	$fp = bzopen($fname, 'w');
+	fwrite($fp, $file);
+	fclose($fp);
+}
+
 ?>
