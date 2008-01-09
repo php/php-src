@@ -559,20 +559,20 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 	int retval;
 
 	if ((resource = phar_open_url(wrapper, url, "r", flags TSRMLS_CC)) == NULL) {
-		return -1;
+		return FAILURE;
 	}
 
 	/* we must have at the very least phar://alias.phar/internalfile.php */
 	if (!resource->scheme || !resource->host || !resource->path) {
 		php_url_free(resource);
 		php_stream_wrapper_log_error(wrapper, flags TSRMLS_CC, "phar error: invalid url \"%s\"", url);
-		return -1;
+		return FAILURE;
 	}
 
 	if (strcasecmp("phar", resource->scheme)) {
 		php_url_free(resource);
 		php_stream_wrapper_log_error(wrapper, flags TSRMLS_CC, "phar error: not a phar url \"%s\"", url);
-		return -1;
+		return FAILURE;
 	}
 
 	host_len = strlen(resource->host);
@@ -581,7 +581,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 		spprintf(&internal_file, 0, "%s%s", plain_map, resource->path);
 		retval = php_stream_stat_path_ex(internal_file, flags, ssb, context);
   		if (retval == -1) {
-			php_stream_wrapper_log_error(wrapper, 0/* TODO:options */ TSRMLS_CC, "phar error: file \"%s\" extracted from \"%s\" could not be opened", internal_file, resource->host);
+			php_stream_wrapper_log_error(wrapper, 0/* TODO:options */ TSRMLS_CC, "phar error: file \"%s\" extracted from \"%s\" could not be stated", internal_file, resource->host);
 		}
 		php_url_free(resource);
 		efree(internal_file);
@@ -596,7 +596,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 			php_stream_wrapper_log_error(wrapper, flags TSRMLS_CC, error);
 			efree(error);
 		}
-		return 0;
+		return SUCCESS;
 	}
 	if (error) {
 		efree(error);
@@ -605,15 +605,17 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 		/* root directory requested */
 		phar_dostat(phar, NULL, ssb, 1, phar->alias, phar->alias_len TSRMLS_CC);
 		php_url_free(resource);
-		return 0;
+		return SUCCESS;
 	}
 	if (!phar->manifest.arBuckets) {
 		php_url_free(resource);
-		return 0;
+		return SUCCESS;
 	}
 	/* search through the manifest of files, and if we have an exact match, it's a file */
 	if (SUCCESS == zend_hash_find(&phar->manifest, internal_file, strlen(internal_file), (void**)&entry)) {
 		phar_dostat(phar, entry, ssb, 0, phar->alias, phar->alias_len TSRMLS_CC);
+		php_url_free(resource);
+		return SUCCESS;
 	} else {
 		/* search for directory (partial match of a file) */
 		zend_hash_internal_pointer_reset(&phar->manifest);
@@ -625,7 +627,8 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 					/* directory found, all dirs have the same stat */
 					if (key[strlen(internal_file)] == '/') {
 						phar_dostat(phar, NULL, ssb, 1, phar->alias, phar->alias_len TSRMLS_CC);
-						break;
+						php_url_free(resource);
+						return SUCCESS;
 					}
 				}
 			}
@@ -636,7 +639,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 	}
 
 	php_url_free(resource);
-	return 0;
+	return FAILURE;
 }
 /* }}} */
 

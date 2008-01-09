@@ -279,7 +279,7 @@ static void destroy_phar_data(void *pDest) /* {{{ */
 /**
  * destructor for the manifest hash, frees each file's entry
  */
-void destroy_phar_manifest(void *pDest) /* {{{ */
+void destroy_phar_manifest_entry(void *pDest) /* {{{ */
 {
 	phar_entry_info *entry = (phar_entry_info *)pDest;
 	TSRMLS_FETCH();
@@ -1312,7 +1312,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 
 	/* set up our manifest */
 	zend_hash_init(&mydata->manifest, sizeof(phar_entry_info),
-		zend_get_hash_value, destroy_phar_manifest, 0);
+		zend_get_hash_value, destroy_phar_manifest_entry, 0);
 	offset = 0;
 	for (manifest_index = 0; manifest_index < manifest_count; manifest_index++) {
 		if (buffer + 4 > endbuffer) {
@@ -1542,7 +1542,7 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 		*pphar = mydata;
 	}
 	zend_hash_init(&mydata->manifest, sizeof(phar_entry_info),
-		zend_get_hash_value, destroy_phar_manifest, 0);
+		zend_get_hash_value, destroy_phar_manifest_entry, 0);
 	mydata->fname_len = fname_len;
 	mydata->alias = alias ? estrndup(alias, alias_len) : estrndup(mydata->fname, fname_len);
 	mydata->alias_len = alias ? alias_len : fname_len;
@@ -2464,7 +2464,8 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 			entry->metadata_str.len = 0;
 		}
 
-		offset += 4 + entry->filename_len + sizeof(entry_buffer) + entry->metadata_str.len;
+		/* 32 bits for filename length, length of filename, manifest + metadata, and add 1 for trailing / if a directory */
+		offset += 4 + entry->filename_len + sizeof(entry_buffer) + entry->metadata_str.len + (entry->is_dir ? 1 : 0);
 
 		/* compress and rehash as necessary */
 		if (oldfile && !entry->is_modified) {
@@ -2655,7 +2656,12 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 			/* remove this from the new phar */
 			continue;
 		}
-		phar_set_32(entry_buffer, entry->filename_len);
+		if (entry->is_dir) {
+			/* add 1 for trailing slash */
+			phar_set_32(entry_buffer, entry->filename_len + 1);
+		} else {
+			phar_set_32(entry_buffer, entry->filename_len);
+		}
 		if (4 != php_stream_write(newfile, entry_buffer, 4)
 		|| entry->filename_len != php_stream_write(newfile, entry->filename, entry->filename_len)) {
 			if (closeoldfile) {
@@ -2673,7 +2679,7 @@ int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **err
 			}
 			php_stream_close(newfile);
 			if (error) {
-				spprintf(error, 0, "unable to write filename of file \"%s\" to manifest of new phar \"%s\"", entry->filename, archive->fname);
+				spprintf(error, 0, "unable to write filename of directory \"%s\" to manifest of new phar \"%s\"", entry->filename, archive->fname);
 			}
 			return EOF;
 		}

@@ -307,7 +307,7 @@ int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_len, int
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, php_stream *fp,
 				      char **error, int for_write TSRMLS_DC);
 int phar_parse_metadata(char **buffer, zval **metadata, int is_zip TSRMLS_DC);
-void destroy_phar_manifest(void *pDest);
+void destroy_phar_manifest_entry(void *pDest);
 
 /* tar functions in tar.c */
 int phar_is_tar(char *buf);
