@@ -2,6 +2,8 @@
 SOAP Interop Round2 groupB 005 (php/wsdl): echoNestedArray
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 $param = (object)array(

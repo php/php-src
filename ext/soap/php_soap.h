@@ -212,7 +212,9 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	zend_bool  use_soap_error_handler;
 	char*      error_code;
 	zval*      error_object;
-	long       cache;
+	char       cache;
+	char       cache_mode;
+	char       cache_enabled;
 	char*      cache_dir;
 	long       cache_ttl;
 	long       cache_limit;

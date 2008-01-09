@@ -3,7 +3,7 @@ Bug #37083 (Frequent crashs in SOAP extension with new WSDL caching code in mult
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --INI--
-soap.wsdl_cache_enabled=3
+soap.wsdl_cache=3
 --FILE--
 <?php
 class TestSoapClient extends SoapClient {

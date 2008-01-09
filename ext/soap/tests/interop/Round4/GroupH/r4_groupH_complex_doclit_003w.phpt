@@ -2,6 +2,8 @@
 SOAP Interop Round4 GroupH Complex Doc Lit 003 (php/wsdl): echoExtendedStructFault
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class SOAPStruct {

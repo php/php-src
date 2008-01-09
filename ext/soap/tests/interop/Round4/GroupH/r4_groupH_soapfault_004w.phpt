@@ -2,6 +2,8 @@
 SOAP Interop Round4 GroupH SoapFault 004 (php/wsdl): echoMustUnderstandFault
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 $hdr = new SoapHeader("http://soapinterop.org/wsdl", "UnknownHeaderRequest", "Hello World", 1);
