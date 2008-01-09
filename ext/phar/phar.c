@@ -22,7 +22,6 @@
 #define PHAR_MAIN 1
 #include "phar_internal.h"
 #include "SAPI.h"
-#include "php_stream_unlink.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(phar)
 
@@ -398,11 +397,14 @@ phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int pa
 /* }}} */
 /**
  * retrieve information on a file or directory contained within a phar, or null if none found
+ * allow_dir is 0 for none, 1 for both empty directories in the phar and temp directories, and 2 for only
+ * valid pre-existing empty directory entries
  */
 phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, int path_len, char dir, char **error TSRMLS_DC) /* {{{ */
 {
 	const char *pcr_error;
 	phar_entry_info *entry;
+	char is_dir = (path[path_len - 1] == '/');
 
 	if (error) {
 		*error = NULL;
@@ -424,6 +426,9 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 	if (!&phar->manifest.arBuckets) {
 		return NULL;
 	}
+	if (is_dir) {
+		path_len--;
+	}
 	if (SUCCESS == zend_hash_find(&phar->manifest, path, path_len, (void**)&entry)) {
 		if (entry->is_deleted) {
 			/* entry is deleted, but has not been flushed to disk yet */
@@ -435,9 +440,16 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 			}
 			return NULL;
 		}
+		if (!entry->is_dir && is_dir) {
+			/* user requested a directory, we must return one */
+			if (error) {
+				spprintf(error, 4096, "phar error: path \"%s\" exists and is a not a directory", path);
+			}
+			return NULL;
+		}
 		return entry;
 	}
-	if (dir) {
+	if (dir == 1) {
 		/* try to find a directory */
 		HashTable *manifest;
 		char *key;
@@ -525,7 +537,7 @@ static int phar_open_entry_file(phar_archive_data *phar, phar_entry_info *entry,
  * appended, truncated, or read.  For read, if the entry is marked unmodified, it is
  * assumed that the file pointer, if present, is opened for reading
  */
-int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char *path, int path_len, char *mode, char **error TSRMLS_DC) /* {{{ */
+int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char *path, int path_len, char *mode, char allow_dir, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry;
@@ -556,11 +568,20 @@ int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char 
 		}
 		return FAILURE;
 	}
-	if ((entry = phar_get_entry_info(phar, path, path_len, for_create && !PHAR_G(readonly) ? NULL : error TSRMLS_CC)) == NULL) {
-		if (for_create && !PHAR_G(readonly)) {
-			return SUCCESS;
+	if (allow_dir) {
+		if ((entry = phar_get_entry_info_dir(phar, path, path_len, 2, for_create && !PHAR_G(readonly) ? NULL : error TSRMLS_CC)) == NULL) {
+			if (for_create && !PHAR_G(readonly)) {
+				return SUCCESS;
+			}
+			return FAILURE;
 		}
-		return FAILURE;
+	} else {
+		if ((entry = phar_get_entry_info(phar, path, path_len, for_create && !PHAR_G(readonly) ? NULL : error TSRMLS_CC)) == NULL) {
+			if (for_create && !PHAR_G(readonly)) {
+				return SUCCESS;
+			}
+			return FAILURE;
+		}
 	}
 	if (entry->is_modified && !for_write) {
 		if (error) {
@@ -588,6 +609,11 @@ int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char 
 	(*ret)->internal_file = entry;
 	(*ret)->is_zip = entry->is_zip;
 	(*ret)->is_tar = entry->is_tar;
+	if (entry->is_dir) {
+		entry->phar->refcount++;
+		entry->fp_refcount++;
+		return SUCCESS;
+	}
 	if (entry->fp) {
 		/* make a copy */
 		if (for_trunc) {
@@ -712,18 +738,19 @@ void phar_entry_remove(phar_entry_data *idata, char **error TSRMLS_DC) /* {{{ */
 /**
  * Create a new dummy file slot within a writeable phar for a newly created file
  */
-phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, char *mode, char **error TSRMLS_DC) /* {{{ */
+phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, char *mode, char allow_dir, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry, etemp;
 	phar_entry_data *ret;
 	const char *pcr_error;
+	char is_dir = path[path_len - 1] == '/';
 
 	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, error TSRMLS_CC)) {
 		return NULL;
 	}
 
-	if (FAILURE == phar_get_entry_data(&ret, fname, fname_len, path, path_len, mode, error TSRMLS_CC)) {
+	if (FAILURE == phar_get_entry_data(&ret, fname, fname_len, path, path_len, mode, allow_dir, error TSRMLS_CC)) {
 		return NULL;
 	} else if (ret) {
 		return ret;
@@ -749,13 +776,22 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 		}
 		return NULL;
 	}
-	etemp.fp_refcount = 1;
+	if (is_dir) {
+		etemp.fp_refcount = 1;
+		etemp.is_dir = 1;
+		etemp.flags = PHAR_ENT_PERM_DEF_DIR;
+		etemp.old_flags = PHAR_ENT_PERM_DEF_DIR;
+		etemp.filename_len--; /* strip trailing / */
+		path_len--;
+	} else {
+		etemp.fp_refcount = 1;
+		etemp.flags = PHAR_ENT_PERM_DEF_FILE;
+		etemp.old_flags = PHAR_ENT_PERM_DEF_FILE;
+	}
 	etemp.is_modified = 1;
 	etemp.timestamp = time(0);
 	etemp.offset_within_phar = -1;
 	etemp.is_crc_checked = 1;
-	etemp.flags = PHAR_ENT_PERM_DEF_FILE;
-	etemp.old_flags = PHAR_ENT_PERM_DEF_FILE;
 	etemp.phar = phar;
 #if HAVE_PHAR_ZIP
 	if (phar->is_zip) {
@@ -1298,7 +1334,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 			entry.is_dir = 0;
 		}
 		entry.filename = estrndup(buffer, entry.filename_len);
-		buffer += entry.filename_len + entry.is_dir;
+		buffer += entry.filename_len + (entry.is_dir ? 1 : 0);
 		PHAR_GET_32(buffer, entry.uncompressed_filesize);
 		PHAR_GET_32(buffer, entry.timestamp);
 		if (offset == 0) {
