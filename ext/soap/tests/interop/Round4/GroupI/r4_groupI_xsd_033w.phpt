@@ -4,6 +4,7 @@ SOAP Interop Round4 GroupI XSD 033 (php/wsdl): echoVoidSoapHeader(4)
 <?php require_once('skipif.inc'); ?>
 --INI--
 precision=14
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 $hdr = new SoapHeader("http://soapinterop.org/","echoMeComplexTypeRequest", array("varInt"=>34,"varFloat"=>12.345), 1);

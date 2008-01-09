@@ -2,6 +2,8 @@
 SOAP Classmap 2: SoapClient support for classmap
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class TestSoapClient extends SoapClient{

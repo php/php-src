@@ -4,6 +4,7 @@ SOAP Interop Round3 GroupD Compound2 001 (php/wsdl): echoEmployee
 <?php require_once('skipif.inc'); ?>
 --INI--
 precision=14
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class Person {

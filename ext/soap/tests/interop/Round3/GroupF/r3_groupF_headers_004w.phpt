@@ -2,6 +2,8 @@
 SOAP Interop Round3 GroupF Headers 004 (php/wsdl): echoString
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 $hdr = array(

@@ -2,6 +2,8 @@
 SOAP Interop Round3 GroupD RPC Encoded 001 (php/wsdl): echoString
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 $client = new SoapClient(dirname(__FILE__)."/round3_groupD_rpcenc.wsdl",array("trace"=>1,"exceptions"=>0));
