@@ -860,6 +860,7 @@ int spl_dual_it_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 		func_params[current] = (zval **) p - (arg_count-current);
 		current++;
 	}
+	arg_count = current; /* restore */
 
 	if (call_user_function_ex(EG(function_table), NULL, &func, &retval_ptr, arg_count, func_params, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
 		RETURN_ZVAL(retval_ptr, 0, 1);
