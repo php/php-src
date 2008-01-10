@@ -1658,12 +1658,18 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 			test = '\1';
 			pos = buffer+tokenlen;
 			if (!memcmp(pos, gz_magic, 3)) {
+#if !HAVE_ZLIB
+				MAPPHAR_ALLOC_FAIL("unable to decompress gzipped phar archive \"%s\" to temporary file, zlib disabled in phar compilation")
+#else
 				char err = 0;
 				php_stream_filter *filter;
 				php_stream *temp;
 				/* to properly decompress, we have to tell zlib to look for a zlib or gzip header */
 				zval filterparams;
 
+				if (!phar_has_zlib) {
+					MAPPHAR_ALLOC_FAIL("unable to decompress gzipped phar archive \"%s\" to temporary file, enable zlib extension in php.ini")
+				}
 				array_init(&filterparams);
 				add_assoc_long(&filterparams, "window", MAX_WBITS + 32);
 				/* entire file is gzip-compressed, uncompress to temporary file */
@@ -1676,11 +1682,16 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 					err = 1;
 					add_assoc_long(&filterparams, "window", MAX_WBITS);
 					filter = php_stream_filter_create("zlib.inflate", &filterparams, php_stream_is_persistent(fp) TSRMLS_CC);
+					if (!filter) {
+						php_stream_close(temp);
+						MAPPHAR_ALLOC_FAIL("unable to decompress gzipped phar archive \"%s\", ext/zlib is buggy in PHP versions older than 5.2.6")
+					}
 				}
 				zval_dtor(&filterparams);
 				php_stream_filter_append(&temp->writefilters, filter);
 				if (0 == php_stream_copy_to_stream(fp, temp, PHP_STREAM_COPY_ALL)) {
 					if (err) {
+						php_stream_close(temp);
 						MAPPHAR_ALLOC_FAIL("unable to decompress gzipped phar archive \"%s\", ext/zlib is buggy in PHP versions older than 5.2.6")
 					}
 					php_stream_close(temp);
@@ -1695,21 +1706,32 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 
 				/* now, start over */
 				test = '\0';
+#endif
 				continue;
 			} else if (!memcmp(pos, bz_magic, 3)) {
+#if !HAVE_BZ2
+				MAPPHAR_ALLOC_FAIL("unable to decompress bzipped phar archive \"%s\" to temporary file, bzip2 disabled in phar compilation")
+#else
 				php_stream_filter *filter;
 				php_stream *temp;
 
+				if (!phar_has_bz2) {
+					MAPPHAR_ALLOC_FILE("unable to decompress bzipped phar archive \"%s\" to temporary file, enable bzip2 extension in php.ini")
+				}
 				/* entire file is bzip-compressed, uncompress to temporary file */
 				if (!(temp = php_stream_fopen_tmpfile())) {
 					MAPPHAR_ALLOC_FAIL("unable to create temporary file for decompression of bzipped phar archive \"%s\"")
 				}
 				php_stream_rewind(fp);
 				filter = php_stream_filter_create("bzip2.decompress", NULL, php_stream_is_persistent(fp) TSRMLS_CC);
+				if (!filter) {
+					php_stream_close(temp);
+					MAPPHAR_ALLOC_FAIL("unable to decompress bzipped phar archive \"%s\", filter creation failed")
+				}
 				php_stream_filter_append(&temp->writefilters, filter);
 				if (0 == php_stream_copy_to_stream(fp, temp, PHP_STREAM_COPY_ALL)) {
 					php_stream_close(temp);
-					MAPPHAR_ALLOC_FAIL("unable to decompress gzipped phar archive \"%s\" to temporary file")
+					MAPPHAR_ALLOC_FAIL("unable to decompress bzipped phar archive \"%s\" to temporary file")
 				}
 				php_stream_filter_flush(filter, 1);
 				php_stream_filter_remove(filter, 1 TSRMLS_CC);
@@ -1720,6 +1742,7 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 
 				/* now, start over */
 				test = '\0';
+#endif
 				continue;
 			}
 			if (!memcmp(pos, zip_magic, 4)) {
@@ -1870,7 +1893,7 @@ char *tsrm_strtok_r(char *s, const char *delim, char **last)
 /**
  * Remove .. and . references within a phar filename
  */
-static char *phar_fix_filepath(char *path, int *new_len, int cwd) /* {{{ */
+static char *phar_fix_filepath(char *path, int *new_len, int cwd TSRMLS_DC) /* {{{ */
 {
 	char *ptr, *free_path, *new_phar;
 	char *tok;
@@ -1992,7 +2015,7 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 #ifdef PHP_WIN32
 		phar_unixify_path_separators(*entry, *entry_len);
 #endif
-		*entry = phar_fix_filepath(*entry, entry_len, 0);
+		*entry = phar_fix_filepath(*entry, entry_len, 0 TSRMLS_CC);
 	} else {
 		*entry_len = 1;
 		*entry = estrndup("/", 1);
@@ -3164,7 +3187,7 @@ ZEND_API int phar_zend_open(const char *filename, zend_file_handle *handle TSRML
 				phar_archive_data **pphar;
 				/* retrieving an include within the current directory, so use this if possible */
 				if (SUCCESS == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
-					entry = phar_fix_filepath(entry, &entry_len, 1);
+					entry = phar_fix_filepath(entry, &entry_len, 1 TSRMLS_CC);
 					if (!zend_hash_exists(&((*pphar)->manifest), entry, entry_len)) {
 						/* this file is not in the current directory, use the original path */
 						efree(entry);
@@ -3231,7 +3254,7 @@ static void phar_is_dir(INTERNAL_FUNCTION_PARAMETERS)
 			if (SUCCESS == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
 				phar_entry_info *etemp;
 
-				entry = phar_fix_filepath(entry, &entry_len, 1);
+				entry = phar_fix_filepath(entry, &entry_len, 1 TSRMLS_CC);
 				if (zend_hash_find(&((*pphar)->manifest), entry, entry_len, (void **) &etemp)) {
 					/* this file is not in the current directory, use the original path */
 					efree(entry);
@@ -3330,7 +3353,7 @@ static void phar_fgc(INTERNAL_FUNCTION_PARAMETERS)
 				/* retrieving a file defaults to within the current directory, so use this if possible */
 				if (SUCCESS == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
 					name = entry;
-					entry = phar_fix_filepath(entry, &entry_len, 1);
+					entry = phar_fix_filepath(entry, &entry_len, 1 TSRMLS_CC);
 					if (!zend_hash_exists(&((*pphar)->manifest), entry, entry_len)) {
 						/* this file is not in the current directory, use the original path */
 						efree(entry);
@@ -3422,7 +3445,7 @@ static void phar_file_exists(INTERNAL_FUNCTION_PARAMETERS)
 			}
 			/* retrieving a file within the current directory, so use this if possible */
 			if (SUCCESS == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
-				entry = phar_fix_filepath(entry, &entry_len, 1);
+				entry = phar_fix_filepath(entry, &entry_len, 1 TSRMLS_CC);
 				if (zend_hash_exists(&((*pphar)->manifest), entry, entry_len)) {
 					/* this file is not in the current directory, use the original path */
 					efree(entry);
@@ -3483,7 +3506,7 @@ static void phar_fopen(INTERNAL_FUNCTION_PARAMETERS)
 				/* retrieving a file defaults to within the current directory, so use this if possible */
 				if (SUCCESS == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
 					name = entry;
-					entry = phar_fix_filepath(entry, &entry_len, 1);
+					entry = phar_fix_filepath(entry, &entry_len, 1 TSRMLS_CC);
 					if (!zend_hash_exists(&((*pphar)->manifest), entry, entry_len)) {
 						/* this file is not in the current directory, use the original path */
 						efree(entry);
@@ -3520,6 +3543,9 @@ PHP_MINIT_FUNCTION(phar) /* {{{ */
 	PHAR_G(orig_fopen) = NULL;
 	PHAR_G(orig_fgc) = NULL;
 	PHAR_G(file_exists) = NULL;
+	PHAR_G(orig_is_dir) = NULL;
+	PHAR_G(cwd) = NULL;
+	PHAR_G(cwd_len) = 0;
 	phar_has_gnupg = zend_hash_exists(&module_registry, "gnupg", sizeof("gnupg"));
 	phar_has_bz2 = zend_hash_exists(&module_registry, "bz2", sizeof("bz2"));
 	phar_has_zlib = zend_hash_exists(&module_registry, "zlib", sizeof("zlib"));
@@ -3561,6 +3587,10 @@ void phar_request_initialize(TSRMLS_D) /* {{{ */
 		zend_hash_init(&(PHAR_GLOBALS->phar_plain_map), sizeof(const char *),       zend_get_hash_value, NULL, 0);
 		zend_hash_init(&(PHAR_GLOBALS->phar_SERVER_mung_list), sizeof(const char *),       zend_get_hash_value, NULL, 0);
 		phar_split_extract_list(TSRMLS_C);
+		PHAR_G(orig_fopen) = PHAR_G(orig_fgc) = PHAR_G(file_exists) = NULL;
+		PHAR_G(orig_is_dir) = NULL;
+		PHAR_G(cwd) = NULL;
+		PHAR_G(cwd_len) = 0;
 		if (SUCCESS == zend_hash_find(CG(function_table), "fopen", 6, (void **)&orig)) {
 			PHAR_G(orig_fopen) = orig->internal_function.handler;
 			orig->internal_function.handler = phar_fopen;
@@ -3574,10 +3604,9 @@ void phar_request_initialize(TSRMLS_D) /* {{{ */
 			orig->internal_function.handler = phar_file_exists;
 		}
 		if (SUCCESS == zend_hash_find(CG(function_table), "is_dir", 7, (void **)&orig)) {
-			PHAR_G(file_exists) = orig->internal_function.handler;
+			PHAR_G(orig_is_dir) = orig->internal_function.handler;
 			orig->internal_function.handler = phar_is_dir;
 		}
-		PHAR_G(cwd) = NULL;
 	}
 }
 /* }}} */
