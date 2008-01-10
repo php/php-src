@@ -42,6 +42,7 @@
 #include "ext/standard/info.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/file.h"
+#include "ext/standard/php_string.h"
 #include "ext/standard/url.h"
 #include "ext/standard/crc32.h"
 #include "ext/standard/md5.h"
@@ -51,6 +52,7 @@
 #ifndef PHP_WIN32
 #include "TSRM/tsrm_strtok_r.h"
 #endif
+#include "TSRM/tsrm_virtual_cwd.h"
 #if HAVE_PHAR_ZIP
 #include "lib/zip.h"
 #include "lib/zipint.h"
@@ -141,6 +143,12 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	int         request_done;
 	int         request_ends;
 	void        (*orig_fopen)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_fgc)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_is_dir)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*file_exists)(INTERNAL_FUNCTION_PARAMETERS);
+	/* used for includes with . in them inside front controller */
+	char*       cwd;
+	int         cwd_len;
 ZEND_END_MODULE_GLOBALS(phar)
 
 ZEND_EXTERN_MODULE_GLOBALS(phar)
@@ -149,6 +157,7 @@ int phar_has_bz2;
 int phar_has_gnupg;
 int phar_has_zlib;
 zend_op_array *(*phar_orig_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
+ZEND_API int (*phar_orig_zend_open)(const char *filename, zend_file_handle *handle TSRMLS_DC);
 
 #ifdef ZTS
 #	include "TSRM.h"

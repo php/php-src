@@ -165,7 +165,7 @@ static void phar_mung_server_vars(char *fname, char *entry, char *basename, int 
 
 static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, char *entry, int entry_len, char *arch, int arch_len, char *basename, int basename_len TSRMLS_DC)
 {
-	char *name = NULL, buf[8192];
+	char *name = NULL, buf[8192], *cwd;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 	sapi_header_line ctr = {0};
 	size_t got;
@@ -269,7 +269,18 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 			if (!file_handle.opened_path) {
 				file_handle.opened_path = estrndup(name, name_len);
 			}
+			PHAR_G(cwd) = NULL;
+			PHAR_G(cwd_len) = 0;
 			if (zend_hash_add(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
+				if ((cwd = strrchr(entry, '/'))) {
+					if (entry[0] == '/') {
+						PHAR_G(cwd_len) = cwd - (entry + 1);
+						PHAR_G(cwd) = estrndup(entry + 1, PHAR_G(cwd_len));
+					} else {
+						PHAR_G(cwd_len) = cwd - entry;
+						PHAR_G(cwd) = estrndup(entry, PHAR_G(cwd_len));
+					}
+				}
 				new_op_array = zend_compile_file(&file_handle, ZEND_REQUIRE TSRMLS_CC);
 				zend_destroy_file_handle(&file_handle TSRMLS_CC);
 			} else {
@@ -282,18 +293,24 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 			if (new_op_array) {
 				EG(return_value_ptr_ptr) = &result;
 				EG(active_op_array) = new_op_array;
-		
-				zend_execute(new_op_array TSRMLS_CC);
-		
-				destroy_op_array(new_op_array TSRMLS_CC);
-				efree(new_op_array);
-				if (!EG(exception)) {
-					if (EG(return_value_ptr_ptr)) {
-						zval_ptr_dtor(EG(return_value_ptr_ptr));
+
+				zend_try {
+					zend_execute(new_op_array TSRMLS_CC);
+					destroy_op_array(new_op_array TSRMLS_CC);
+					efree(new_op_array);
+					if (!EG(exception)) {
+						if (EG(return_value_ptr_ptr)) {
+							zval_ptr_dtor(EG(return_value_ptr_ptr));
+						}
 					}
-				}
-		
-				efree(name);
+				} zend_catch {
+					if (PHAR_G(cwd)) {
+						efree(PHAR_G(cwd));
+						PHAR_G(cwd) = NULL;
+						PHAR_G(cwd_len) = 0;
+					}
+					efree(name);
+				} zend_end_try();
 				zend_bailout();
 			}
 			return PHAR_MIME_PHP;
