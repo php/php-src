@@ -1716,7 +1716,7 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 				php_stream *temp;
 
 				if (!phar_has_bz2) {
-					MAPPHAR_ALLOC_FILE("unable to decompress bzipped phar archive \"%s\" to temporary file, enable bzip2 extension in php.ini")
+					MAPPHAR_ALLOC_FAIL("unable to decompress bzipped phar archive \"%s\" to temporary file, enable bzip2 extension in php.ini")
 				}
 				/* entire file is bzip-compressed, uncompress to temporary file */
 				if (!(temp = php_stream_fopen_tmpfile())) {
