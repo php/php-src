@@ -944,6 +944,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 
 		if (ARG_SHOULD_BE_SENT_BY_REF(EX(function_state).function, i + 1)
 			&& !PZVAL_IS_REF(*fci->params[i])) {
+
 			if (Z_REFCOUNT_PP(fci->params[i]) > 1) {
 				zval *new_zval;
 
@@ -958,8 +959,14 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 						zval_ptr_dtor(&method_name);
 						zval_ptr_dtor(&params_array);
 					}
+					zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
+						i+1,
+						EX(function_state).function->common.scope ? EX(function_state).function->common.scope->name : "",
+						EX(function_state).function->common.scope ? "::" : "",
+						EX(function_state).function->common.function_name);
 					return FAILURE;
 				}
+
 				ALLOC_ZVAL(new_zval);
 				*new_zval = **fci->params[i];
 				zval_copy_ctor(new_zval);
