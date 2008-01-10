@@ -1,3 +1,14 @@
+2008-01-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      zend_compile.c
+      zend_compile.c
+      tests/bug43703.phpt
+      tests/bug43703.phpt
+      tests/bug43703.phpt
+      tests/bug43703.phpt:
+      Fixed bug #43703 (Signature compatibility check broken)
+
 2007-12-31  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * zend_vm_gen.php
