@@ -269,7 +269,9 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 			keylen = keylen - dirlen - 1;
 		}
 PHAR_ADD_ENTRY:
-		phar_add_empty(data, entry, keylen);
+		if (keylen) {
+			phar_add_empty(data, entry, keylen);
+		}
 		efree(entry);
 		if (SUCCESS != zend_hash_move_forward(manifest)) {
 			break;
@@ -436,7 +438,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, char *url_from, int mode, in
 		return FAILURE;
 	}
 
-	if (e = phar_get_entry_info_dir(phar, resource->path + 1, strlen(resource->path + 1), 1, &error TSRMLS_CC)) {
+	if ((e = phar_get_entry_info_dir(phar, resource->path + 1, strlen(resource->path + 1), 1, &error TSRMLS_CC))) {
 		/* directory exists, or is a subdirectory of an existing file */
 		efree(e->filename);
 		efree(e);
