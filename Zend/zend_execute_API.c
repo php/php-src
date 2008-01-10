@@ -1058,6 +1058,11 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 						zval_ptr_dtor(&method_name);
 						zval_ptr_dtor(&params_array);
 					}
+					zend_error(E_WARNING, "Parameter %d to %v%s%v() expected to be a reference, value given",
+						i+1,
+						EX(function_state).function->common.scope ? EX(function_state).function->common.scope->name : EMPTY_ZSTR,
+						EX(function_state).function->common.scope ? "::" : "",
+						EX(function_state).function->common.function_name);
 					return FAILURE;
 				}
 				ALLOC_ZVAL(new_zval);
