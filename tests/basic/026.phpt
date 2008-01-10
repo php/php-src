@@ -15,10 +15,8 @@ var_dump($_POST, $HTTP_RAW_POST_DATA);
 --EXPECT--
 array(0) {
 }
-string(10) "a=1&b=ZYX
-"
+string(9) "a=1&b=ZYX"
 --UEXPECT--
 array(0) {
 }
-unicode(10) "a=1&b=ZYX
-"
+unicode(9) "a=1&b=ZYX"
