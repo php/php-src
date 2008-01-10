@@ -2526,6 +2526,9 @@ PHP_FUNCTION(stristr)
 		return;
 	}
 
+	SEPARATE_ZVAL(haystack);
+	SEPARATE_ZVAL(needle);
+
 	if (Z_TYPE_PP(haystack) != IS_UNICODE && Z_TYPE_PP(haystack) != IS_STRING) {
 		convert_to_text_ex(haystack);
 	}
