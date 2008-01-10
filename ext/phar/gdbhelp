@@ -1,7 +1,7 @@
 define ___pharglobals
 	if basic_functions_module.zts
 		set $tsrm_ls = ts_resource_ex(0, 0)
-		set $pharglobals = ((zend_executor_globals) (*((void ***) $tsrm_ls))[phar_globals_id-1])
+		set $pharglobals = ((zend_phar_globals) (*((void ***) $tsrm_ls))[phar_globals_id-1])
 	else
 		set $pharglobals = phar_globals
 	end
@@ -41,8 +41,13 @@ define print_phar
 	printf "}\n"
 end
 
-document print_phar
-	dumps open phars and their aliases
+document display_phar_globals
+	display phar globals
+end
+
+define display_phar_globals
+	___pharglobals
+	graph display $phar_globals.$arg0
 end
 
 define print_pharfp
