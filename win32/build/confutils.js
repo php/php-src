@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.70 2007-11-14 19:44:24 auroraeosrose Exp $
+// $Id: confutils.js,v 1.71 2008-01-10 18:21:23 rrichards Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -1009,7 +1009,15 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 		ADD_FLAG("LDFLAGS_" + EXT, "/libpath:$(BUILD_DIR)");
 		ADD_FLAG("LIBS_" + EXT, "php_" + dependson + ".lib");
 		ADD_FLAG("DEPS_" + EXT, "$(BUILD_DIR)\\php_" + dependson + ".lib");
-	}
+	} else {
+		if (dep_present == "no") {
+			if (ext_shared) {
+				WARNING(extname + " has a missing dependency: " + dependson);
+			} else {
+				ERROR("Cannot build " + extname + "; " + dependson + " not enabled");
+			}
+		}
+	} // dependency is statically built-in to PHP 
 }
 
 function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
