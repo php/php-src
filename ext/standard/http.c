@@ -121,7 +121,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				*p = '\0';
 			} else {
 				/* Is an integer key */
-				ekey_len = spprintf(&ekey, 12, "%ld", idx);
+				ekey_len = spprintf(&ekey, 0, "%ld", idx);
 				newprefix_len = key_prefix_len + num_prefix_len + ekey_len + key_suffix_len + 3 /* %5B */;
 				newprefix = emalloc(newprefix_len + 1);
 				p = newprefix;
@@ -172,7 +172,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				if (num_prefix) {
 					smart_str_appendl(formstr, num_prefix, num_prefix_len);
 				}
-				ekey_len = spprintf(&ekey, 12, "%ld", idx);
+				ekey_len = spprintf(&ekey, 0, "%ld", idx);
 				smart_str_appendl(formstr, ekey, ekey_len);
 				efree(ekey);
 			}
@@ -198,10 +198,10 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 					break;
 				case IS_LONG:
 				case IS_BOOL:
-					ekey_len = spprintf(&ekey, 12, "%ld", Z_LVAL_PP(zdata));
+					ekey_len = spprintf(&ekey, 0, "%ld", Z_LVAL_PP(zdata));
 					break;
 				case IS_DOUBLE:
-					ekey_len = spprintf(&ekey, 48, "%.*G", (int) EG(precision), Z_DVAL_PP(zdata));
+					ekey_len = spprintf(&ekey, 0, "%.*G", (int) EG(precision), Z_DVAL_PP(zdata));
 					break;
 				default:
 					/* fall back on convert to string */
