@@ -1,3 +1,9 @@
+2008-01-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c
+      zend_execute_API.c:
+      Added missing warning message
+
 2008-01-09  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_2)
