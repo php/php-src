@@ -639,47 +639,38 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, zval 
 static inline void zend_assign_to_string_offset(temp_variable *T, zval *value, int value_type TSRMLS_DC)
 {
 	if (Z_TYPE_P(T->str_offset.str) == IS_STRING) {
-		zval tmp;
-		zval *final_value = value;
 
 		if (((int)T->str_offset.offset < 0)) {
 			zend_error(E_WARNING, "Illegal string offset:  %d", T->str_offset.offset);
 			return;
 		}
-		if (T->str_offset.offset >= Z_STRLEN_P(T->str_offset.str)) {
-			zend_uint i;
 
-			if (Z_STRLEN_P(T->str_offset.str)==0) {
-				STR_FREE(Z_STRVAL_P(T->str_offset.str));
-				Z_STRVAL_P(T->str_offset.str) = (char *) emalloc(T->str_offset.offset+1+1);
-			} else {
-				Z_STRVAL_P(T->str_offset.str) = (char *) erealloc(Z_STRVAL_P(T->str_offset.str), T->str_offset.offset+1+1);
-			}
-			for (i=Z_STRLEN_P(T->str_offset.str); i<T->str_offset.offset; i++) {
-				Z_STRVAL_P(T->str_offset.str)[i] = ' ';
-			}
+		if (T->str_offset.offset >= Z_STRLEN_P(T->str_offset.str)) {
+			Z_STRVAL_P(T->str_offset.str) = (char *) erealloc(Z_STRVAL_P(T->str_offset.str), T->str_offset.offset+1+1);
+			memset(Z_STRVAL_P(T->str_offset.str) + Z_STRLEN_P(T->str_offset.str),
+			       ' ',
+			       T->str_offset.offset - Z_STRLEN_P(T->str_offset.str));
 			Z_STRVAL_P(T->str_offset.str)[T->str_offset.offset+1] = 0;
 			Z_STRLEN_P(T->str_offset.str) = T->str_offset.offset+1;
 		}
 
-		if (Z_TYPE_P(value)!=IS_STRING) {
-			tmp = *value;
-			if (value_type & (IS_VAR|IS_CV)) {
+		if (Z_TYPE_P(value) != IS_STRING) {
+			zval tmp = *value;
+
+			if (value_type != IS_TMP_VAR) {
 				zval_copy_ctor(&tmp);
 			}
 			convert_to_string(&tmp);
-			final_value = &tmp;
-		}
-
-		Z_STRVAL_P(T->str_offset.str)[T->str_offset.offset] = Z_STRVAL_P(final_value)[0];
-
-		if (final_value == &tmp) {
-			zval_dtor(final_value);
-		} else if (value_type == IS_TMP_VAR) {
-			/* we can safely free final_value here
-			 * because separation is done only
-			 * in case value_type == IS_VAR */
-			STR_FREE(Z_STRVAL_P(final_value));
+			Z_STRVAL_P(T->str_offset.str)[T->str_offset.offset] = Z_STRVAL(tmp)[0];
+			STR_FREE(Z_STRVAL(tmp));
+		} else {
+			Z_STRVAL_P(T->str_offset.str)[T->str_offset.offset] = Z_STRVAL_P(value)[0];
+			if (value_type == IS_TMP_VAR) {
+				/* we can safely free final_value here
+				 * because separation is done only
+				 * in case value_type == IS_VAR */
+				STR_FREE(Z_STRVAL_P(value));
+			}
 		}
 		/*
 		 * the value of an assignment to a string offset is undefined
