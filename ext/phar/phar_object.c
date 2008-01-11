@@ -20,6 +20,7 @@
 /* $Id$ */
 
 #include "phar_internal.h"
+#include "func_interceptors.h"
 
 static zend_class_entry *phar_ce_archive;
 static zend_class_entry *phar_ce_PharException;
@@ -702,6 +703,20 @@ PHP_METHOD(Phar, mungServer)
 			script_filename = 1;
 		}
 	}
+}
+/* }}} */
+
+/* {{{ proto void Phar::interceptFileFuncs()
+ * instructs phar to intercept fopen, file_get_contents, opendir, and all of the stat-related functions
+ * and return stat on files within the phar for relative paths
+ *
+ * Once called, this cannot be reversed, and continue until the end of the request.
+ *
+ * This allows legacy scripts to be pharred unmodified
+ */
+PHP_METHOD(Phar, interceptFileFuncs)
+{
+	phar_intercept_functions(TSRMLS_C);
 }
 /* }}} */
 
@@ -2852,6 +2867,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, mapPhar,               arginfo_phar_mapPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, webPhar,               arginfo_phar_webPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, mungServer,            arginfo_phar_mungServer,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, interceptFileFuncs,    NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, getExtractList,        NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, getSupportedSignatures,NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, getSupportedCompression,NULL,                     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)

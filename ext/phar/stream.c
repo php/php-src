@@ -556,7 +556,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 	phar_archive_data *phar;
 	phar_entry_info *entry;
 	uint host_len;
-	int retval;
+	int retval, internal_file_len;
 
 	if ((resource = phar_open_url(wrapper, url, "r", flags TSRMLS_CC)) == NULL) {
 		return FAILURE;
@@ -611,8 +611,9 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 		php_url_free(resource);
 		return SUCCESS;
 	}
+	internal_file_len = strlen(internal_file);
 	/* search through the manifest of files, and if we have an exact match, it's a file */
-	if (SUCCESS == zend_hash_find(&phar->manifest, internal_file, strlen(internal_file), (void**)&entry)) {
+	if (SUCCESS == zend_hash_find(&phar->manifest, internal_file, internal_file_len, (void**)&entry)) {
 		phar_dostat(phar, entry, ssb, 0, phar->alias, phar->alias_len TSRMLS_CC);
 		php_url_free(resource);
 		return SUCCESS;
@@ -623,9 +624,9 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 			if (HASH_KEY_NON_EXISTANT !=
 					zend_hash_get_current_key_ex(
 						&phar->manifest, &key, &keylen, &unused, 0, NULL)) {
-				if (0 == memcmp(internal_file, key, strlen(internal_file))) {
+				if (0 == memcmp(internal_file, key, internal_file_len)) {
 					/* directory found, all dirs have the same stat */
-					if (key[strlen(internal_file)] == '/') {
+					if (key[internal_file_len] == '/') {
 						phar_dostat(phar, NULL, ssb, 1, phar->alias, phar->alias_len TSRMLS_CC);
 						php_url_free(resource);
 						return SUCCESS;
