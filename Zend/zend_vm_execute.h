@@ -4639,7 +4639,9 @@ static int ZEND_BOOL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_SWITCH_FREE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_switch_free(&EX_T(EX(opline)->op1.u.var), IS_TMP_VAR, EX(opline)->extended_value TSRMLS_CC);
+	zend_op *opline = EX(opline);
+
+	zend_switch_free(&EX_T(opline->op1.u.var), IS_TMP_VAR, opline->extended_value TSRMLS_CC);
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -7814,7 +7816,9 @@ static int ZEND_BOOL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_SWITCH_FREE_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_switch_free(&EX_T(EX(opline)->op1.u.var), IS_VAR, EX(opline)->extended_value TSRMLS_CC);
+	zend_op *opline = EX(opline);
+
+	zend_switch_free(&EX_T(opline->op1.u.var), IS_VAR, opline->extended_value TSRMLS_CC);
 	ZEND_VM_NEXT_OPCODE();
 }
 
