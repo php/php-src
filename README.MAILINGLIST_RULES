@@ -3,10 +3,10 @@
 ====================
 
 This is the first file you should be reading before doing any posts on PHP
-mailinglists. Not following these rules is considered imparative to the sucess
-of the PHP project. Therefore expect your contributions to be of much less
-positive impact if you do not follow these rules. More importantly you can
-actually assume that not following these rules will hurt the PHP project.
+mailinglists. Following these rules is considered imperative to the success of
+the PHP project. Therefore expect your contributions to be of much less positive
+impact if you do not follow these rules. More importantly you can actually
+assume that not following these rules will hurt the PHP project.
 
 PHP is developed through the efforts of a large number of people.
 Collaboration is a Good Thing(tm), and mailinglists lets us do this. Thus,
