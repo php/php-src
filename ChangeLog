@@ -1,3 +1,64 @@
+2008-01-10  Brian Shire  <shire@tekrat.com>
+
+    * (PHP_5_2)
+      ext/standard/http.c
+      ext/standard/http.c:
+      - MFH fix truncation of large values on 64-bit systems in http_build_query
+
+    * ext/standard/http.c:
+      - fix truncation of large values on 64-bit systems in http_build_query
+
+2008-01-10  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      MFH: add errors when missing dependencies (Steph)
+
+    * win32/build/confutils.js:
+      add errors when missing dependencies (Steph)
+
+2008-01-10  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/string.c:
+      fix #43750 (stristr() modifies string)
+      patch by Felipe Pena
+
+2008-01-10  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ext/spl/spl_iterators.c:
+      - MFH Fix bug in example code found by Surf Chen
+
+    * ext/spl/spl_iterators.c:
+      - Fix bug in example code found by Surf Chen
+
+2008-01-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ext/reflection/tests/bug42976.phpt
+      ext/reflection/tests/bug42976.phpt
+      ext/standard/tests/general_functions/bug41970.phpt
+      ext/standard/tests/general_functions/bug41970.phpt:
+      Added missing warning message
+
+2008-01-10  Antony Dovgal  <tony@daylessday.org>
+
+    * tests/basic/026.phpt
+      tests/basic/026.phpt:
+      fix test
+
+    * (PHP_5_2)
+      tests/basic/026.phpt:
+      correct number of symbols
+
+2008-01-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      tests/basic/026.phpt:
+      
+      Fixed test
+
 2008-01-09  Rob Richards  <rrichards@ctindustries.net>
 
     * (PHP_5_3)
