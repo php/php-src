@@ -4,7 +4,7 @@
 ARG_ENABLE("phar", "enable phar support", "no");
 
 if (PHP_PHAR != "no") {
-	EXTENSION("phar", "tar.c zip.c stream.c dirstream.c phar.c phar_object.c phar_path_check.c");
+	EXTENSION("phar", "tar.c zip.c stream.c dirstream.c func_interceptors.c phar.c phar_object.c phar_path_check.c");
 		ADD_SOURCES(configure_module_dirname + "/lib", "zip_add.c zip_error.c zip_fclose.c \
                      zip_fread.c zip_open.c zip_source_filep.c  \
                      zip_strerror.c zip_close.c zip_error_get.c \

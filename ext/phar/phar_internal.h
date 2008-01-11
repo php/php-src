@@ -143,9 +143,26 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	int         request_done;
 	int         request_ends;
 	void        (*orig_fopen)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fgc)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_file_get_contents)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_is_file)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_is_link)(INTERNAL_FUNCTION_PARAMETERS);
 	void        (*orig_is_dir)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*file_exists)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_opendir)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_file_exists)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_fileperms)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_fileinode)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_filesize)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_fileowner)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_filegroup)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_fileatime)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_filemtime)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_filectime)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_filetype)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_is_writable)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_is_readable)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_is_executable)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_lstat)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_stat)(INTERNAL_FUNCTION_PARAMETERS);
 	/* used for includes with . in them inside front controller */
 	char*       cwd;
 	int         cwd_len;
@@ -319,6 +336,7 @@ int phar_open_compiled_file(char *alias, int alias_len, char **error TSRMLS_DC);
 int phar_get_archive(phar_archive_data **archive, char *fname, int fname_len, char *alias, int alias_len, char **error TSRMLS_DC);
 int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
 
+char *phar_fix_filepath(char *path, int *new_len, int use_cwd TSRMLS_DC);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, php_stream *fp,
 				      char **error, int for_write TSRMLS_DC);
 int phar_parse_metadata(char **buffer, zval **metadata, int is_zip TSRMLS_DC);
@@ -337,7 +355,6 @@ int phar_open_or_create_zip(char *fname, int fname_len, char *alias, int alias_l
 int phar_zip_flush(phar_archive_data *archive, char *user_stub, long len, char **error TSRMLS_DC);
 
 #ifdef PHAR_MAIN
-static void phar_fopen(INTERNAL_FUNCTION_PARAMETERS);
 static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
 extern php_stream_wrapper php_stream_phar_wrapper;
 #endif

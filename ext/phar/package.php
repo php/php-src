@@ -6,7 +6,9 @@ Major feature functionality release
  * add Phar::isTar(), Phar::isZip(), and Phar::isPhar() [Greg]
  * add Phar::webPhar() for running a web-based application unmodified
    directly from a phar archive [Greg]
- * include/fopen with include_path all work unmodified within a phar [Greg]
+ * file functions (fopen-based and stat-based) can be instructed to only look for
+   relative paths within a phar via Phar::interceptFileFuncs()
+ * include works unmodified within a phar [Greg]
  * paths with . and .. work (phar://blah.phar/a/../b.php => phar://blah.phar/b.php) [Greg]
  * add support for mkdir()/rmdir() and support for empty directories to phar file format [Greg]
  * add option to compress the entire phar file for phar/tar file format [Greg]

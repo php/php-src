@@ -554,7 +554,6 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 		/* deferred flush */
 		phar->fp = newfile;
 	} else {
-
 		phar->fp = php_stream_open_wrapper(phar->fname, "w+b", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
 		if (!phar->fp) {
 			phar->fp = newfile;
@@ -573,6 +572,9 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 			filter = php_stream_filter_create("zlib.deflate", &filterparams, php_stream_is_persistent(phar->fp) TSRMLS_CC);
 			zval_dtor(&filterparams);
 			if (!filter) {
+				/* copy contents uncompressed rather than lose them */
+				php_stream_copy_to_stream(newfile, phar->fp, PHP_STREAM_COPY_ALL);
+				php_stream_close(newfile);
 				if (error) {
 					spprintf(error, 4096, "unable to compress all contents of phar \"%s\" using zlib, PHP versions older than 5.2.6 have a buggy zlib", phar->fname);
 				}
