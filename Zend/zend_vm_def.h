@@ -2609,7 +2609,9 @@ ZEND_VM_HANDLER(48, ZEND_CASE, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
 
 ZEND_VM_HANDLER(49, ZEND_SWITCH_FREE, TMP|VAR, ANY)
 {
-	zend_switch_free(&EX_T(EX(opline)->op1.u.var), OP1_TYPE, EX(opline)->extended_value TSRMLS_CC);
+	zend_op *opline = EX(opline);
+
+	zend_switch_free(&EX_T(opline->op1.u.var), OP1_TYPE, opline->extended_value TSRMLS_CC);
 	ZEND_VM_NEXT_OPCODE();
 }
 
