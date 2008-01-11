@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Fixed weired behavior in CGI parameter parsing. (Dmitry, Hannes Magnusson)
 - Fixed a safe_mode bypass in cURL identified by Maksymilian Arciemowicz.
   (Ilia)
+- Fixed a bug with PDO::FETCH_COLUMN|PDO::FETCH_GROUP mode when a column # by
+  which to group by data is specified. (Ilia)
 
 - Fixed bug #43793 (zlib filter is unable to auto-detect gzip/zlib file headers).
   (Greg)
