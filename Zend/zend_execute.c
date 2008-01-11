@@ -691,6 +691,7 @@ static inline void zend_assign_to_string_offset(temp_variable *T, zval *value, i
 static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value, int is_tmp_var TSRMLS_DC)
 {
 	zval *variable_ptr = *variable_ptr_ptr;
+	zval garbage;
 
 	if (variable_ptr == EG(error_zval_ptr)) {
 		if (is_tmp_var) {
@@ -716,7 +717,6 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
  		} else if (PZVAL_IS_REF(variable_ptr)) {
  			if (variable_ptr != value) {
  				zend_uint refcount = Z_REFCOUNT_P(variable_ptr);
- 				zval garbage;
  
  				if (!is_tmp_var) {
  					Z_ADDREF_P(value);
@@ -756,7 +756,6 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
  	} else if (PZVAL_IS_REF(variable_ptr)) {
 		if (variable_ptr!=value) {
 			zend_uint refcount = Z_REFCOUNT_P(variable_ptr);
-			zval garbage;
 
 			if (!is_tmp_var) {
 				Z_ADDREF_P(value);
@@ -778,23 +777,25 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 				if (variable_ptr==value) {
 					Z_ADDREF_P(variable_ptr);
 				} else if (PZVAL_IS_REF(value)) {
-					zval tmp;
-
-					tmp = *value;
-					zval_copy_ctor(&tmp);
-					Z_SET_REFCOUNT(tmp, 1);
-					zendi_zval_dtor(*variable_ptr);
-					*variable_ptr = tmp;
+					garbage = *variable_ptr;
+					*variable_ptr = *value;
+					INIT_PZVAL(variable_ptr);
+					zval_copy_ctor(variable_ptr);
+					zendi_zval_dtor(garbage);
+					return variable_ptr;
 				} else {
 					Z_ADDREF_P(value);
+					*variable_ptr_ptr = value;
 					zendi_zval_dtor(*variable_ptr);
 					safe_free_zval_ptr(variable_ptr);
-					*variable_ptr_ptr = value;
+					return value;
 				}
 			} else {
-				zendi_zval_dtor(*variable_ptr);
-				Z_SET_REFCOUNT_P(value, 1);
+				garbage = *variable_ptr;
 				*variable_ptr = *value;
+				INIT_PZVAL(variable_ptr);
+				zendi_zval_dtor(garbage);
+				return variable_ptr;
 			}
 		} else { /* we need to split */
 			if (!is_tmp_var) {
