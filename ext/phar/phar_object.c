@@ -88,15 +88,12 @@ static int phar_file_type(HashTable *mimes, char *file, char **mime_type TSRMLS_
 }
 /* }}} */
 
-static void phar_mung_server_vars(char *fname, char *entry, char *basename, int basename_len TSRMLS_DC)
+static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char *basename, int basename_len TSRMLS_DC)
 {
 	zval **_SERVER, **stuff;
 	char *path_info;
 
 	/* "tweak" $_SERVER variables requested in earlier call to Phar::mungServer() */
-	if (!PHAR_GLOBALS->phar_SERVER_mung_list.arBuckets || !zend_hash_num_elements(&(PHAR_GLOBALS->phar_SERVER_mung_list))) {
-		return;
-	}
 	if (SUCCESS != zend_hash_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER"), (void **) &_SERVER)) {
 		return;
 	}
@@ -123,6 +120,41 @@ static void phar_mung_server_vars(char *fname, char *entry, char *basename, int 
 		} \
 	}
 
+	/* PATH_INFO and PATH_TRANSLATED should always be munged */
+	if (SUCCESS == zend_hash_find(Z_ARRVAL_PP(_SERVER), "PATH_INFO", sizeof("PATH_INFO"), (void **) &stuff)) { 
+		int code; 
+		zval *temp; 
+		char newname[] = "PHAR_PATH_INFO";
+						
+		path_info = Z_STRVAL_PP(stuff); 
+		code = Z_STRLEN_PP(stuff); 
+		Z_STRVAL_PP(stuff) = estrndup(Z_STRVAL_PP(stuff) + entry_len, Z_STRLEN_PP(stuff) - entry_len);
+		Z_STRLEN_PP(stuff) -= entry_len;
+						
+		MAKE_STD_ZVAL(temp); 
+		Z_TYPE_P(temp) = IS_STRING; 
+		Z_STRVAL_P(temp) = path_info; 
+		Z_STRLEN_P(temp) = code; 
+		zend_hash_update(Z_ARRVAL_PP(_SERVER), newname, strlen(newname)+1, (void *) &temp, sizeof(zval **), NULL); 
+	}
+	if (SUCCESS == zend_hash_find(Z_ARRVAL_PP(_SERVER), "PATH_TRANSLATED", sizeof("PATH_TRANSLATED"), (void **) &stuff)) { 
+		int code; 
+		zval *temp; 
+		char newname[] = "PHAR_PATH_TRANSLATED";
+						
+		path_info = Z_STRVAL_PP(stuff); 
+		code = Z_STRLEN_PP(stuff); 
+		Z_STRLEN_PP(stuff) = spprintf(&(Z_STRVAL_PP(stuff)), 4096, "phar://%s%s", fname, entry);
+						
+		MAKE_STD_ZVAL(temp); 
+		Z_TYPE_P(temp) = IS_STRING; 
+		Z_STRVAL_P(temp) = path_info; 
+		Z_STRLEN_P(temp) = code; 
+		zend_hash_update(Z_ARRVAL_PP(_SERVER), newname, strlen(newname)+1, (void *) &temp, sizeof(zval **), NULL); 
+	}
+	if (!PHAR_GLOBALS->phar_SERVER_mung_list.arBuckets || !zend_hash_num_elements(&(PHAR_GLOBALS->phar_SERVER_mung_list))) {
+		return;
+	}
 	PHAR_MUNG_REPLACE(REQUEST_URI);
 	PHAR_MUNG_REPLACE(PHP_SELF);
 
@@ -250,7 +282,7 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 			return PHAR_MIME_OTHER;
 		case PHAR_MIME_PHP:
 			if (basename) {
-				phar_mung_server_vars(arch, entry, basename, basename_len TSRMLS_CC);
+				phar_mung_server_vars(arch, entry, entry_len, basename, basename_len TSRMLS_CC);
 				efree(basename);
 			}
 			phar_entry_delref(phar TSRMLS_CC);
@@ -2086,7 +2118,7 @@ PHP_METHOD(Phar, getStub)
 			len = stub->uncompressed_filesize;
 			goto carry_on;
 		} else {
-			RETURN_STRINGL("", 0, 0);
+			RETURN_STRINGL("", 0, 1);
 		}
 	}
 	len = phar_obj->arc.archive->halt_offset;
