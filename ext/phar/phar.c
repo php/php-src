@@ -3094,6 +3094,9 @@ static long stream_fteller_for_zend(void *handle TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+zend_op_array *(*phar_orig_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
+int (*phar_orig_zend_open)(const char *filename, zend_file_handle *handle TSRMLS_DC);
+
 static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC) /* {{{ */
 {
 	zend_op_array *res;
@@ -3156,7 +3159,7 @@ skip_phar:
 }
 /* }}} */
 
-ZEND_API int phar_zend_open(const char *filename, zend_file_handle *handle TSRMLS_DC) /* {{{ */
+int phar_zend_open(const char *filename, zend_file_handle *handle TSRMLS_DC) /* {{{ */
 {
 	char *arch, *entry;
 
@@ -3349,6 +3352,9 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 /* {{{ phar_module_entry
  */
 static zend_module_dep phar_deps[] = {
+#if HAVE_PHAR_ZIP
+	ZEND_MOD_REQUIRED_EX("zip", ">=", "1.8.11")
+#endif
 #if HAVE_ZLIB
 	ZEND_MOD_OPTIONAL("zlib")
 #endif

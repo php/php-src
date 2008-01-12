@@ -225,6 +225,9 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 		entry.flags = phar_tar_number(hdr->mode, sizeof(hdr->mode)) & PHAR_ENT_PERM_MASK;
 		entry.timestamp = phar_tar_number(hdr->mtime, sizeof(hdr->mtime));
 
+#ifndef S_ISDIR
+#define S_ISDIR(mode)	(((mode)&S_IFMT) == S_IFDIR)
+#endif
 		if (old && entry.tar_type == TAR_FILE && S_ISDIR(entry.flags)) {
 			entry.tar_type = TAR_DIR;
 		}

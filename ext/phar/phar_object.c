@@ -613,7 +613,7 @@ PHP_METHOD(Phar, webPhar)
 			switch (Z_TYPE_PP(val)) {
 				case IS_LONG :
 					if (Z_LVAL_PP(val) == PHAR_MIME_PHP || Z_LVAL_PP(val) == PHAR_MIME_PHPS) {
-						PHAR_SET_USER_MIME(Z_LVAL_PP(val))
+						PHAR_SET_USER_MIME((char) Z_LVAL_PP(val))
 					} else {
 						zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Unknown mime type specifier used, only Phar::PHP, Phar::PHPS and a mime type string are allowed");
 						phar_entry_delref(phar TSRMLS_CC);
@@ -673,7 +673,7 @@ PHP_METHOD(Phar, mungServer)
 	phar_request_initialize(TSRMLS_C);
 
 	for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(mungvalues)); SUCCESS == zend_hash_has_more_elements(Z_ARRVAL_P(mungvalues)); zend_hash_move_forward(Z_ARRVAL_P(mungvalues))) {
-		zval ***data;
+		zval ***data = NULL;
 
 		if (SUCCESS != zend_hash_get_current_data(Z_ARRVAL_P(mungvalues), (void **) data)) {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "unable to retrieve array value in Phar::mungServer()");
