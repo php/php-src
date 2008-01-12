@@ -40,7 +40,7 @@
 
 
 
-void
+PHPZIPAPI void
 zip_file_error_clear(struct zip_file *zf)
 {
     _zip_error_clear(&zf->error);

@@ -45,7 +45,7 @@
 
 
 
-const char *
+PHPZIPAPI const char *
 _zip_error_strerror(struct zip_error *err)
 {
     const char *zs, *ss;

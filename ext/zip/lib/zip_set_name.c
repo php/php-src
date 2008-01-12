@@ -42,7 +42,7 @@
 
 
 
-int
+PHPZIPAPI int
 _zip_set_name(struct zip *za, int idx, const char *name)
 {
     char *s;
