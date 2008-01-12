@@ -57,6 +57,11 @@ int phar_open_zipfile(char *fname, int fname_len, char *alias, int alias_len, ph
 		*error = NULL;
 	}
 
+	if (!phar_has_zip) {
+		spprintf(error, 4096, "phar zip error: cannot open zip-based phar \"%s\", ext/zip is not enabled", fname);
+		return FAILURE;
+	}
+
 	zip = zip_open(fname, 0, &ziperror);
 	if (!zip) {
 		if (error) {
@@ -230,7 +235,7 @@ int phar_open_zipfile(char *fname, int fname_len, char *alias, int alias_len, ph
 	}
 	return SUCCESS;
 #else
-	spprintf(error, 4096, "Error: Cannot open zip-based phar \"%s\"", fname);
+	spprintf(error, 4096, "phar zip error: Cannot open zip-based phar \"%s\", phar not compiled with zip enabled", fname);
 	return FAILURE;
 #endif
 }
@@ -255,6 +260,12 @@ int phar_open_or_create_zip(char *fname, int fname_len, char *alias, int alias_l
 		return ret;
 	}
 
+	if (!phar_has_zip) {
+		if (error) {
+			spprintf(error, 4096, "phar zip error: phar \"%s\" cannot be created as zip-based phar, zip-based phars are disabled (enable ext/zip)", fname);
+		}
+		return FAILURE;
+	}
 	if (phar->is_brandnew) {
 		int *errorp = NULL;
 		phar->is_zip = 1;
@@ -301,7 +312,7 @@ int phar_open_or_create_zip(char *fname, int fname_len, char *alias, int alias_l
 	return FAILURE;
 #else
 	if (error) {
-		spprintf(error, 4096, "phar zip error: phar \"%s\" cannot be created as zip-based phar, zip-based phars are disabled", fname);
+		spprintf(error, 4096, "phar zip error: phar \"%s\" cannot be created as zip-based phar, zip-based phars are disabled and cannot be enabled", fname);
 	}
 	return FAILURE;
 #endif /* #if HAVE_PHAR_ZIP */
