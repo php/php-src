@@ -40,7 +40,7 @@
 
 
 
-void
+PHPZIPAPI void
 zip_file_error_get(struct zip_file *zf, int *zep, int *sep)
 {
     _zip_error_get(&zf->error, zep, sep);

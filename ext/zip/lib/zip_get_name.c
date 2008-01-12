@@ -40,7 +40,7 @@
 
 
 
-const char *
+PHPZIPAPI const char *
 zip_get_name(struct zip *za, int idx, int flags)
 {
     return _zip_get_name(za, idx, flags, &za->error);
@@ -48,7 +48,7 @@ zip_get_name(struct zip *za, int idx, int flags)
 
 
 
-const char *
+PHPZIPAPI const char *
 _zip_get_name(struct zip *za, int idx, int flags, struct zip_error *error)
 {
     if (idx < 0 || idx >= za->nentry) {

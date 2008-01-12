@@ -46,7 +46,7 @@ static struct zip_file *_zip_file_new(struct zip *za);
 
 
 
-struct zip_file *
+PHPZIPAPI struct zip_file *
 zip_fopen_index(struct zip *za, int fileno, int flags)
 {
     int len, ret;
@@ -141,7 +141,7 @@ zip_fopen_index(struct zip *za, int fileno, int flags)
 
 
 
-int
+PHPZIPAPI int
 _zip_file_fillbuf(void *buf, size_t buflen, struct zip_file *zf)
 {
     int i, j;
