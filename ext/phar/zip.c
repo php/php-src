@@ -19,6 +19,21 @@
 #include "phar_internal.h"
 #include "php_stream_unlink.h"
 
+#ifdef PHP_WIN32
+static inline void phar_unixify_path_separators(char *path, int path_len) /* {{{ */
+{
+	char *s;
+
+	/* unixify win paths */
+	for (s = path; s - path < path_len; s++) {
+		if (*s == '\\') {
+			*s = '/';
+		}
+	}
+}
+/* }}} */
+#endif
+
 /**
  * Does not check for a previously opened phar in the cache.
  *
@@ -36,6 +51,7 @@ int phar_open_zipfile(char *fname, int fname_len, char *alias, int alias_len, ph
 	phar_entry_info entry = {0};
 	struct zip_stat zs;
 	char tmp_buf[1024], *metadata;
+	phar_archive_data *mydata = NULL;
 
 	if (error) {
 		*error = NULL;
@@ -61,7 +77,6 @@ int phar_open_zipfile(char *fname, int fname_len, char *alias, int alias_len, ph
 		}
 		return FAILURE;
 	}
-	phar_archive_data *mydata = NULL;
 	mydata = ecalloc(sizeof(phar_archive_data), 1);
 	mydata->fname = estrndup(fname, fname_len);
 #ifdef PHP_WIN32
@@ -229,7 +244,6 @@ int phar_open_or_create_zip(char *fname, int fname_len, char *alias, int alias_l
 #if HAVE_PHAR_ZIP
 	phar_archive_data *phar;
 	int ret = phar_create_or_parse_filename(fname, fname_len, alias, alias_len, options, &phar, error TSRMLS_CC);
-	int register_alias;
 
 	if (pphar) {
 		*pphar = phar;
@@ -242,7 +256,7 @@ int phar_open_or_create_zip(char *fname, int fname_len, char *alias, int alias_l
 	}
 
 	if (phar->is_brandnew) {
-		int *errorp;
+		int *errorp = NULL;
 		phar->is_zip = 1;
 		if (phar->fp) {
 			php_stream_close(phar->fp);
@@ -254,9 +268,7 @@ int phar_open_or_create_zip(char *fname, int fname_len, char *alias, int alias_l
 			return SUCCESS;
 		}
 		/* fail - free newly created manifest entry */
-		if (register_alias) {
-			zend_hash_del(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len);
-		}
+		zend_hash_del(&(PHAR_GLOBALS->phar_alias_map), phar->alias, phar->alias_len);
 		zend_hash_del(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len);
 		efree(phar->fname);
 		efree(phar->alias);

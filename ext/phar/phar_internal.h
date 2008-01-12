@@ -25,6 +25,10 @@
 
 #include <time.h>
 #include "php.h"
+#if HAVE_PHAR_ZIP
+#include "ext/zip/lib/zip.h"
+#include "ext/zip/lib/zipint.h"
+#endif
 #include "tar.h"
 #include "php_ini.h"
 #include "zend_constants.h"
@@ -53,10 +57,6 @@
 #include "TSRM/tsrm_strtok_r.h"
 #endif
 #include "TSRM/tsrm_virtual_cwd.h"
-#if HAVE_PHAR_ZIP
-#include "lib/zip.h"
-#include "lib/zipint.h"
-#endif
 #if HAVE_SPL
 #include "ext/spl/spl_array.h"
 #include "ext/spl/spl_directory.h"
@@ -173,8 +173,6 @@ ZEND_EXTERN_MODULE_GLOBALS(phar)
 int phar_has_bz2;
 int phar_has_gnupg;
 int phar_has_zlib;
-zend_op_array *(*phar_orig_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
-ZEND_API int (*phar_orig_zend_open)(const char *filename, zend_file_handle *handle TSRMLS_DC);
 
 #ifdef ZTS
 #	include "TSRM.h"
