@@ -42,7 +42,7 @@
 
 
 
-struct zip_entry *
+PHPZIPAPI struct zip_entry *
 _zip_entry_new(struct zip *za)
 {
     struct zip_entry *ze;

@@ -40,7 +40,7 @@
 
 
 
-const char *
+PHPZIPAPI const char *
 zip_get_archive_comment(struct zip *za, int *lenp, int flags)
 {
     if ((flags & ZIP_FL_UNCHANGED)

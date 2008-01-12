@@ -52,7 +52,7 @@ static ssize_t read_zip(void *st, void *data, size_t len,
 
 
 
-struct zip_source *
+PHPZIPAPI struct zip_source *
 zip_source_zip(struct zip *za, struct zip *srcza, int srcidx, int flags,
 	       off_t start, off_t len)
 {

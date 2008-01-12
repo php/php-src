@@ -41,7 +41,7 @@
 
 
 
-int
+PHPZIPAPI int
 zip_unchange_archive(struct zip *za)
 {
     free(za->ch_comment);

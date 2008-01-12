@@ -40,7 +40,7 @@
 
 
 
-int
+PHPZIPAPI int
 zip_stat_index(struct zip *za, int index, int flags, struct zip_stat *st)
 {
     const char *name;

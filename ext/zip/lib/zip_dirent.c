@@ -56,7 +56,7 @@ static void _zip_write4(unsigned int, FILE *);
 
 
 
-void
+PHPZIPAPI void
 _zip_cdir_free(struct zip_cdir *cd)
 {
     int i;
@@ -73,7 +73,7 @@ _zip_cdir_free(struct zip_cdir *cd)
 
 
 
-struct zip_cdir *
+PHPZIPAPI struct zip_cdir *
 _zip_cdir_new(int nentry, struct zip_error *error)
 {
     struct zip_cdir *cd;
@@ -102,7 +102,7 @@ _zip_cdir_new(int nentry, struct zip_error *error)
 
 
 
-int
+PHPZIPAPI int
 _zip_cdir_write(struct zip_cdir *cd, FILE *fp, struct zip_error *error)
 {
     int i;
@@ -136,7 +136,7 @@ _zip_cdir_write(struct zip_cdir *cd, FILE *fp, struct zip_error *error)
 
 
 
-void
+PHPZIPAPI void
 _zip_dirent_finalize(struct zip_dirent *zde)
 {
     free(zde->filename);
@@ -149,7 +149,7 @@ _zip_dirent_finalize(struct zip_dirent *zde)
 
 
 
-void
+PHPZIPAPI void
 _zip_dirent_init(struct zip_dirent *de)
 {
     de->version_madeby = 0;
@@ -188,7 +188,7 @@ _zip_dirent_init(struct zip_dirent *de)
    returned.
 */
 
-int
+PHPZIPAPI int
 _zip_dirent_read(struct zip_dirent *zde, FILE *fp,
 		 unsigned char **bufp, unsigned int left, int localp,
 		 struct zip_error *error)
@@ -333,7 +333,7 @@ _zip_dirent_read(struct zip_dirent *zde, FILE *fp,
    returned.
 */
 
-int
+PHPZIPAPI int
 _zip_dirent_write(struct zip_dirent *zde, FILE *fp, int localp,
 		  struct zip_error *error)
 {
@@ -409,7 +409,7 @@ _zip_d2u_time(int dtime, int ddate)
 
 
 
-unsigned short
+PHPZIPAPI unsigned short
 _zip_read2(unsigned char **a)
 {
     unsigned short ret;
@@ -422,7 +422,7 @@ _zip_read2(unsigned char **a)
 
 
 
-unsigned int
+PHPZIPAPI unsigned int
 _zip_read4(unsigned char **a)
 {
     unsigned int ret;
