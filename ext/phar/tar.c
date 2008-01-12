@@ -571,6 +571,10 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 			zval filterparams;
 
 			array_init(&filterparams);
+/* this is defined in zlib's zconf.h */
+#ifndef MAX_WBITS
+#define MAX_WBITS 15
+#endif
 			add_assoc_long(&filterparams, "window", MAX_WBITS + 16);
 			filter = php_stream_filter_create("zlib.deflate", &filterparams, php_stream_is_persistent(phar->fp) TSRMLS_CC);
 			zval_dtor(&filterparams);

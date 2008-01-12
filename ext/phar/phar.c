@@ -1672,6 +1672,10 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 					MAPPHAR_ALLOC_FAIL("unable to decompress gzipped phar archive \"%s\" to temporary file, enable zlib extension in php.ini")
 				}
 				array_init(&filterparams);
+/* this is defined in zlib's zconf.h */
+#ifndef MAX_WBITS
+#define MAX_WBITS 15
+#endif
 				add_assoc_long(&filterparams, "window", MAX_WBITS + 32);
 				/* entire file is gzip-compressed, uncompress to temporary file */
 				if (!(temp = php_stream_fopen_tmpfile())) {
