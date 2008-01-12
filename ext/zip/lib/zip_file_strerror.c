@@ -40,7 +40,7 @@
 
 
 
-PHPZIPAPI const char *
+const char *
 zip_file_strerror(struct zip_file *zf)
 {
     return _zip_error_strerror(&zf->error);

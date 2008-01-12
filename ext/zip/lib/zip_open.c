@@ -58,7 +58,7 @@ static struct zip_cdir *_zip_readcdir(FILE *, unsigned char *, unsigned char *,
 
 
 
-PHPZIPAPI struct zip *
+struct zip *
 zip_open(const char *fn, int flags, int *zep)
 {
     FILE *fp;

@@ -1,3 +1,6 @@
+
+#ifdef _MSC_VER
+
 #define _POSIX_
 #include <windows.h>
 #include <io.h>
@@ -8,6 +11,9 @@
 #endif
 #ifndef mode_t
 #	define mode_t int
+#endif
+#ifndef strcasecmp
+#	define strcasecmp stricmp
 #endif
 #ifndef snprintf
 #	define snprintf _snprintf
@@ -20,3 +26,4 @@
 #	define fseeko fseek
 #endif
 */
+#endif

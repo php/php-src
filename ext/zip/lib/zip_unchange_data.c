@@ -39,7 +39,7 @@
 
 #include "zipint.h"
 
-PHPZIPAPI void
+void
 _zip_unchange_data(struct zip_entry *ze)
 {
     if (ze->source) {

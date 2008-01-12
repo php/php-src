@@ -40,7 +40,7 @@
 
 
 
-PHPZIPAPI int
+int
 zip_replace(struct zip *za, int idx, struct zip_source *source)
 {
     if (idx < 0 || idx >= za->nentry || source == NULL) {
@@ -57,7 +57,7 @@ zip_replace(struct zip *za, int idx, struct zip_source *source)
 
 
 
-PHPZIPAPI int
+int
 _zip_replace(struct zip *za, int idx, const char *name,
 	     struct zip_source *source)
 {

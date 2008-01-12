@@ -41,7 +41,7 @@
 
 
 
-PHPZIPAPI int
+int
 zip_unchange_all(struct zip *za)
 {
     int ret, i;

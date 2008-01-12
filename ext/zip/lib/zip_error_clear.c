@@ -40,7 +40,7 @@
 
 
 
-PHPZIPAPI void
+void
 zip_error_clear(struct zip *za)
 {
     _zip_error_clear(&za->error);

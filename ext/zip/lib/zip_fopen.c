@@ -40,7 +40,7 @@
 
 
 
-PHPZIPAPI struct zip_file *
+struct zip_file *
 zip_fopen(struct zip *za, const char *fname, int flags)
 {
     int idx;

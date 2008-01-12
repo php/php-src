@@ -42,7 +42,7 @@
 
 
 
-PHPZIPAPI int
+int
 zip_set_archive_comment(struct zip *za, const char *comment, int len)
 {
     char *tmpcom;

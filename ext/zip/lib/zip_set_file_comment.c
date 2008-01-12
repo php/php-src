@@ -42,7 +42,7 @@
 
 
 
-PHPZIPAPI int
+int
 zip_set_file_comment(struct zip *za, int idx, const char *comment, int len)
 {
     char *tmpcom;

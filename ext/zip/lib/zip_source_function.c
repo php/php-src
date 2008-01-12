@@ -42,7 +42,7 @@
 
 
 
-PHPZIPAPI struct zip_source *
+struct zip_source *
 zip_source_function(struct zip *za, zip_source_callback zcb, void *ud)
 {
     struct zip_source *zs;

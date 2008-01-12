@@ -42,7 +42,7 @@
 
 
 
-PHPZIPAPI void
+void
 _zip_error_clear(struct zip_error *err)
 {
     err->zip_err = ZIP_ER_OK;
@@ -51,7 +51,7 @@ _zip_error_clear(struct zip_error *err)
 
 
 
-PHPZIPAPI void
+void
 _zip_error_copy(struct zip_error *dst, struct zip_error *src)
 {
     dst->zip_err = src->zip_err;
@@ -60,7 +60,7 @@ _zip_error_copy(struct zip_error *dst, struct zip_error *src)
 
 
 
-PHPZIPAPI void
+void
 _zip_error_fini(struct zip_error *err)
 {
     free(err->str);
@@ -69,7 +69,7 @@ _zip_error_fini(struct zip_error *err)
 
 
 
-PHPZIPAPI void
+void
 _zip_error_get(struct zip_error *err, int *zep, int *sep)
 {
     if (zep)
@@ -84,7 +84,7 @@ _zip_error_get(struct zip_error *err, int *zep, int *sep)
 
 
 
-PHPZIPAPI void
+void
 _zip_error_init(struct zip_error *err)
 {
     err->zip_err = ZIP_ER_OK;
@@ -94,7 +94,7 @@ _zip_error_init(struct zip_error *err)
 
 
 
-PHPZIPAPI void
+void
 _zip_error_set(struct zip_error *err, int ze, int se)
 {
     if (err) {

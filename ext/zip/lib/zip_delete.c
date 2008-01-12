@@ -40,7 +40,7 @@
 
 
 
-PHPZIPAPI int
+int
 zip_delete(struct zip *za, int idx)
 {
     if (idx < 0 || idx >= za->nentry) {

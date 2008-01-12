@@ -40,7 +40,7 @@
 
 
 
-PHPZIPAPI int
+int
 zip_add(struct zip *za, const char *name, struct zip_source *source)
 {
     if (name == NULL || source == NULL) {

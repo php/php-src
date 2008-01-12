@@ -57,7 +57,7 @@ static ssize_t read_file(void *state, void *data, size_t len,
 
 
 
-PHPZIPAPI struct zip_source *
+struct zip_source *
 zip_source_filep(struct zip *za, FILE *file, off_t start, off_t len)
 {
     struct read_file *f;

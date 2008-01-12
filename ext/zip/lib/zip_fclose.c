@@ -42,7 +42,7 @@
 
 
 
-PHPZIPAPI int
+int
 zip_fclose(struct zip_file *zf)
 {
     int i, ret;

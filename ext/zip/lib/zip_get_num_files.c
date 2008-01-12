@@ -40,7 +40,7 @@
 
 
 
-PHPZIPAPI int
+int
 zip_get_num_files(struct zip *za)
 {
     if (za == NULL)

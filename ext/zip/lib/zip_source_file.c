@@ -43,7 +43,7 @@
 
 
 
-PHPZIPAPI struct zip_source *
+struct zip_source *
 zip_source_file(struct zip *za, const char *fname, off_t start, off_t len)
 {
     struct zip_source *zs;
