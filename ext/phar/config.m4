@@ -8,6 +8,7 @@ PHP_ARG_WITH(phar-zip, for zip-based phar support,
 [  --without-phar-zip        PHAR: Disable zip-based phar archive support], no, no)
 
 if test "$PHP_PHAR" != "no"; then
+  PHP_NEW_EXTENSION(phar, tar.c zip.c stream.c func_interceptors.c dirstream.c phar.c phar_object.c phar_path_check.c, $ext_shared)
 	AC_MSG_CHECKING([for zip-based phar support])
 	if test "$PHP_PHAR_ZIP" != "yes"; then
 		AC_MSG_RESULT([yes])
@@ -29,10 +30,10 @@ if test "$PHP_PHAR" != "no"; then
                          lib/zip_unchange_archive.c lib/zip_memdup.c lib/zip_stat_init.c lib/zip_add_dir.c \
                          lib/zip_error_clear.c lib/zip_file_error_clear.c"
 		AC_DEFINE(HAVE_PHAR_ZIP,1,[ ])
+		PHP_ADD_EXTENSION_DEP(phar, zip, false)
 	else
 		AC_MSG_RESULT([no])
 	fi
-  PHP_NEW_EXTENSION(phar, tar.c zip.c stream.c func_interceptors.c dirstream.c phar.c phar_object.c phar_path_check.c $PHP_PHAR_SOURCES, $ext_shared)
   PHP_ADD_BUILD_DIR($ext_builddir/lib, 1)
   PHP_SUBST(PHAR_SHARED_LIBADD)
   PHP_ADD_EXTENSION_DEP(phar, zlib, true)
