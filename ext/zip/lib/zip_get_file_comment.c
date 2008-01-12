@@ -40,7 +40,7 @@
 
 
 
-const char *
+PHPZIPAPI const char *
 zip_get_file_comment(struct zip *za, int idx, int *lenp, int flags)
 {
     if (idx < 0 || idx >= za->nentry) {

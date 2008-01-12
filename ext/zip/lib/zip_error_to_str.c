@@ -45,7 +45,7 @@
 
 
 
-int
+PHPZIPAPI int
 zip_error_to_str(char *buf, size_t len, int ze, int se)
 {
     const char *zs, *ss;

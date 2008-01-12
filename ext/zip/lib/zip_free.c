@@ -45,7 +45,7 @@
    frees the space allocated to a zipfile struct, and closes the
    corresponding file. */
 
-void
+PHPZIPAPI void
 _zip_free(struct zip *za)
 {
     int i;

@@ -40,7 +40,7 @@
 
 
 
-int
+PHPZIPAPI int
 zip_rename(struct zip *za, int idx, const char *name)
 {
     if (idx >= za->nentry || idx < 0) {
