@@ -41,7 +41,7 @@
 
 
 
-void *
+PHPZIPAPI void *
 _zip_memdup(const void *mem, size_t len, struct zip_error *error)
 {
     void *ret;

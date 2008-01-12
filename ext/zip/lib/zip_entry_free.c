@@ -42,7 +42,7 @@
 
 
 
-void
+PHPZIPAPI void
 _zip_entry_free(struct zip_entry *ze)
 {
     free(ze->ch_filename);

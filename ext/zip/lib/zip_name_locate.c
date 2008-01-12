@@ -42,7 +42,7 @@
 
 
 
-int
+PHPZIPAPI int
 zip_name_locate(struct zip *za, const char *fname, int flags)
 {
     return _zip_name_locate(za, fname, flags, &za->error);
@@ -50,7 +50,7 @@ zip_name_locate(struct zip *za, const char *fname, int flags)
 
 
 
-int
+PHPZIPAPI int
 _zip_name_locate(struct zip *za, const char *fname, int flags,
 		 struct zip_error *error)
 {
@@ -62,8 +62,11 @@ _zip_name_locate(struct zip *za, const char *fname, int flags,
 	_zip_error_set(error, ZIP_ER_INVAL, 0);
 	return -1;
     }
-    
-    cmp = (flags & ZIP_FL_NOCASE) ? strcasecmp : strcmp;
+#ifdef PHP_WIN32
+	cmp = (flags & ZIP_FL_NOCASE) ? stricmp : strcmp;
+#else
+	cmp = (flags & ZIP_FL_NOCASE) ? strcasecmp : strcmp;
+#endif
 
     n = (flags & ZIP_FL_UNCHANGED) ? za->cdir->nentry : za->nentry;
     for (i=0; i<n; i++) {

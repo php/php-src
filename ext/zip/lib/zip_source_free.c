@@ -42,7 +42,7 @@
 
 
 
-void
+PHPZIPAPI void
 zip_source_free(struct zip_source *source)
 {
     if (source == NULL)

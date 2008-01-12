@@ -41,7 +41,7 @@
 
 
 
-int
+PHPZIPAPI int
 zip_unchange(struct zip *za, int idx)
 {
     return _zip_unchange(za, idx, 0);
@@ -49,7 +49,7 @@ zip_unchange(struct zip *za, int idx)
 
 
 
-int
+PHPZIPAPI int
 _zip_unchange(struct zip *za, int idx, int allow_duplicates)
 {
     int i;

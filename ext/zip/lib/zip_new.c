@@ -45,7 +45,7 @@
    creates a new zipfile struct, and sets the contents to zero; returns
    the new struct. */
 
-struct zip *
+PHPZIPAPI struct zip *
 _zip_new(struct zip_error *error)
 {
     struct zip *za;

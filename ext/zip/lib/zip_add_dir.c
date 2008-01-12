@@ -43,7 +43,7 @@
 
 
 
-int
+PHPZIPAPI int
 zip_add_dir(struct zip *za, const char *name)
 {
     int len, ret;
