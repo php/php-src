@@ -9,6 +9,9 @@ if (PHP_PHAR != "no") {
 	if (PHP_ZIP_SHARED) {
 		ADD_FLAG("CFLAGS_PHAR", "/D COMPILE_DL_ZIP ");
 	}
+	if (PHP_PHAR_SHARED) {
+		ADD_FLAG("CFLAGS_PHAR", "/D COMPILE_DL_PHAR ");
+	}
 	if (PHP_ZIP != "no") {
 		ADD_EXTENSION_DEP('phar', 'zip', true);
 		AC_DEFINE('HAVE_PHAR_ZIP', 1);
