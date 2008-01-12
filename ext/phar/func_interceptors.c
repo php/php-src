@@ -366,6 +366,19 @@ skip_phar:
 	return;
 }
 
+#ifndef S_ISDIR
+#define S_ISDIR(mode)	(((mode)&S_IFMT) == S_IFDIR)
+#endif
+#ifndef S_ISREG
+#define S_ISREG(mode)	(((mode)&S_IFMT) == S_IFREG)
+#endif
+#ifndef S_ISLNK
+#define S_ISLNK(mode)	(((mode)&S_IFMT) == S_IFLNK)
+#endif
+
+#define S_IXROOT ( S_IXUSR | S_IXGRP | S_IXOTH )
+
+
 #define IS_LINK_OPERATION(__t) ((__t) == FS_TYPE || (__t) == FS_IS_LINK || (__t) == FS_LSTAT)
 #define IS_EXISTS_CHECK(__t) ((__t) == FS_EXISTS  || (__t) == FS_IS_W || (__t) == FS_IS_R || (__t) == FS_IS_X || (__t) == FS_IS_FILE || (__t) == FS_IS_DIR || (__t) == FS_IS_LINK)
 #define IS_ABLE_CHECK(__t) ((__t) == FS_IS_R || (__t) == FS_IS_W || (__t) == FS_IS_X)
@@ -554,7 +567,7 @@ PHPAPI void phar_file_stat(const char *filename, php_stat_len filename_length, i
 		RETURN_FALSE;
 	}
 
-	if (!IS_ABSOLUTE_PATH(filename, filename_len)) {
+	if (!IS_ABSOLUTE_PATH(filename, filename_length)) {
 		char *arch, *entry, *fname;
 		int arch_len, entry_len, fname_len;
 		fname = zend_get_executed_filename(TSRMLS_C);
