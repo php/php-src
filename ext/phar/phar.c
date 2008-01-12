@@ -3225,6 +3225,7 @@ PHP_MINIT_FUNCTION(phar) /* {{{ */
 	phar_has_gnupg = zend_hash_exists(&module_registry, "gnupg", sizeof("gnupg"));
 	phar_has_bz2 = zend_hash_exists(&module_registry, "bz2", sizeof("bz2"));
 	phar_has_zlib = zend_hash_exists(&module_registry, "zlib", sizeof("zlib"));
+	phar_has_zip = zend_hash_exists(&module_registry, "zip", sizeof("zip"));
 
 	phar_orig_compile_file = zend_compile_file;
 	zend_compile_file = phar_compile_file;
@@ -3305,7 +3306,11 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 	php_info_print_table_row(2, "Phar-based phar archives", "enabled");
 	php_info_print_table_row(2, "Tar-based phar archives", "enabled");
 #if HAVE_PHAR_ZIP
-	php_info_print_table_row(2, "ZIP-based phar archives", "enabled");
+	if (phar_has_zip) {
+		php_info_print_table_row(2, "ZIP-based phar archives", "enabled");
+	} else {
+		php_info_print_table_row(2, "ZIP-based phar archives", "disabled (install pecl/zip)");
+	}
 #else
 	php_info_print_table_row(2, "ZIP-based phar archives", "unavailable");
 #endif
@@ -3313,7 +3318,7 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 	if (phar_has_zlib) {
 		php_info_print_table_row(2, "gzip compression", "enabled");
 	} else {
-		php_info_print_table_row(2, "gzip compression", "disabled");
+		php_info_print_table_row(2, "gzip compression", "disabled (install ext/zlib)");
 	}
 #else
 	php_info_print_table_row(2, "gzip compression", "unavailable");
@@ -3342,6 +3347,7 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 	PUTS("Phar based on pear/PHP_Archive, original concept by Davey Shafik.");
 	PUTS(!sapi_module.phpinfo_as_text?"<br />":"\n");	
 	PUTS("Phar fully realized by Gregory Beaver and Marcus Boerger.");
+	PUTS(!sapi_module.phpinfo_as_text?"<br />":"\n");	
 	PUTS("Portions of tar implementation Copyright (c) 2003-2007 Tim Kientzle.");
 	php_info_print_box_end();
 
@@ -3353,7 +3359,7 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
  */
 static zend_module_dep phar_deps[] = {
 #if HAVE_PHAR_ZIP
-	ZEND_MOD_REQUIRED_EX("zip", ">=", "1.8.11")
+	ZEND_MOD_OPTIONAL_EX("zip", ">=", "1.8.11")
 #endif
 #if HAVE_ZLIB
 	ZEND_MOD_OPTIONAL("zlib")

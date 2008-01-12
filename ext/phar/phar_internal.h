@@ -173,6 +173,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phar)
 int phar_has_bz2;
 int phar_has_gnupg;
 int phar_has_zlib;
+int phar_has_zip;
 
 #ifdef ZTS
 #	include "TSRM.h"
