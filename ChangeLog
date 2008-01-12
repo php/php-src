@@ -1,3 +1,71 @@
+2008-01-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c:
+      Simplified assignment to string offset
+
+2008-01-11  Lukas Smith  <smith@pooteeweet.org>
+
+    * README.MAILINGLIST_RULES:
+      - added rules about real names and signatures
+
+2008-01-11  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      ext/libxml/config.w32:
+      MFH: starting with 2.6.30, standard libxml2 build can be used
+
+2008-01-11  Lukas Smith  <smith@pooteeweet.org>
+
+    * README.MAILINGLIST_RULES:
+      - minor typo fixes
+
+2008-01-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Fixed unspecialized executor
+
+2008-01-11  Lukas Smith  <smith@pooteeweet.org>
+
+    * README.MAILINGLIST_RULES
+      README.MAILINGLIST_RULES:
+      
+      - initial commit .. feedback appreciated
+
+2008-01-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug32799.phpt
+      ZendEngine2/tests/bug32799.phpt
+      ZendEngine2/tests/bug39346.phpt
+      ZendEngine2/tests/bug39346.phpt
+      ZendEngine2/tests/bug39346.phpt:
+      Fixed bug #39346 (Unsetting a static variable inside a destructor causes
+      segfault later on)
+
+2008-01-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_stmt.c
+      ext/pdo/pdo_stmt.c:
+      
+      MFB: Fixed a bug with PDO::FETCH_COLUMN|PDO::FETCH_GROUP mode when a
+      column
+
+    * (PHP_5_3)
+      ext/pdo/pdo_stmt.c:
+      
+      Fixed a bug with PDO::FETCH_COLUMN|PDO::FETCH_GROUP mode when a column #
+      by
+      which to group by data is specified.
+
 2008-01-10  Brian Shire  <shire@tekrat.com>
 
     * (PHP_5_2)
