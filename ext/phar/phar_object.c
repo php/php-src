@@ -677,32 +677,32 @@ PHP_METHOD(Phar, mungServer)
 	phar_request_initialize(TSRMLS_C);
 
 	for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(mungvalues)); SUCCESS == zend_hash_has_more_elements(Z_ARRVAL_P(mungvalues)); zend_hash_move_forward(Z_ARRVAL_P(mungvalues))) {
-		zval ***data = NULL;
+		zval **data = NULL;
 
-		if (SUCCESS != zend_hash_get_current_data(Z_ARRVAL_P(mungvalues), (void **) data)) {
+		if (SUCCESS != zend_hash_get_current_data(Z_ARRVAL_P(mungvalues), (void **) &data)) {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "unable to retrieve array value in Phar::mungServer()");
 			return;
 		}
-		if (Z_TYPE_PP(*data) != IS_STRING) {
+		if (Z_TYPE_PP(data) != IS_STRING) {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Non-string value passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
 			return;
 		}
-		if (!php_self && Z_STRLEN_PP(*data) == sizeof("PHP_SELF")-1 && !strncmp(Z_STRVAL_PP(*data), "PHP_SELF", sizeof("PHP_SELF")-1)) {
+		if (!php_self && Z_STRLEN_PP(data) == sizeof("PHP_SELF")-1 && !strncmp(Z_STRVAL_PP(data), "PHP_SELF", sizeof("PHP_SELF")-1)) {
 			if (SUCCESS != zend_hash_add_empty_element(&(PHAR_GLOBALS->phar_SERVER_mung_list), "PHP_SELF", sizeof("PHP_SELF")-1)) {
 				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Unable to add PHP_SELF to Phar::mungServer() list of values to mung");
 				return;
 			}
 			php_self = 1;
 		}
-		if (Z_STRLEN_PP(*data) == sizeof("REQUEST_URI")-1) {
-			if (!request_uri && !strncmp(Z_STRVAL_PP(*data), "REQUEST_URI", sizeof("REQUEST_URI")-1)) {
+		if (Z_STRLEN_PP(data) == sizeof("REQUEST_URI")-1) {
+			if (!request_uri && !strncmp(Z_STRVAL_PP(data), "REQUEST_URI", sizeof("REQUEST_URI")-1)) {
 				if (SUCCESS != zend_hash_add_empty_element(&(PHAR_GLOBALS->phar_SERVER_mung_list), "REQUEST_URI", sizeof("REQUEST_URI")-1)) {
 					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Unable to add REQUEST_URI to Phar::mungServer() list of values to mung");
 					return;
 				}
 				request_uri = 1;
 			}
-			if (!script_name && !strncmp(Z_STRVAL_PP(*data), "SCRIPT_NAME", sizeof("SCRIPT_NAME")-1)) {
+			if (!script_name && !strncmp(Z_STRVAL_PP(data), "SCRIPT_NAME", sizeof("SCRIPT_NAME")-1)) {
 				if (SUCCESS != zend_hash_add_empty_element(&(PHAR_GLOBALS->phar_SERVER_mung_list), "SCRIPT_NAME", sizeof("SCRIPT_NAME")-1)) {
 					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Unable to add SCRIPT_NAME to Phar::mungServer() list of values to mung");
 					return;
@@ -710,7 +710,7 @@ PHP_METHOD(Phar, mungServer)
 				script_name = 1;
 			}
 		}
-		if (!script_filename && Z_STRLEN_PP(*data) == sizeof("SCRIPT_FILENAME")-1 && !strncmp(Z_STRVAL_PP(*data), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME")-1)) {
+		if (!script_filename && Z_STRLEN_PP(data) == sizeof("SCRIPT_FILENAME")-1 && !strncmp(Z_STRVAL_PP(data), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME")-1)) {
 			if (SUCCESS != zend_hash_add_empty_element(&(PHAR_GLOBALS->phar_SERVER_mung_list), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME")-1)) {
 				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Unable to add SCRIPT_FILENAME to Phar::mungServer() list of values to mung");
 				return;
