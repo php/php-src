@@ -100,7 +100,7 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 			consumed += desired;
 			bin += desired;
 
-			if (status == Z_STREAM_END || data->strm.avail_out < data->outbuf_len) {
+			if (data->strm.avail_out < data->outbuf_len) {
 				php_stream_bucket *out_bucket;
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
 				out_bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0 TSRMLS_CC);
@@ -108,13 +108,10 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 				data->strm.avail_out = data->outbuf_len;
 				data->strm.next_out = data->outbuf;
 				exit_status = PSFS_PASS_ON;
-				if (status == Z_STREAM_END) {
-					/* no more data to decompress, and nothing was spat out */
-					if (data->strm.avail_out >= data->outbuf_len) {
-						php_stream_bucket_delref(bucket TSRMLS_CC);
-					}
-					return PSFS_PASS_ON;
-				}
+			} else if (status == Z_STREAM_END && data->strm.avail_out >= data->outbuf_len) {
+				/* no more data to decompress, and nothing was spat out */
+				php_stream_bucket_delref(bucket TSRMLS_CC);
+				return PSFS_PASS_ON;
 			}
 		}
 		php_stream_bucket_delref(bucket TSRMLS_CC);
