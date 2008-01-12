@@ -1,3 +1,28 @@
+2008-01-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c
+      zend_execute.c:
+      Simplified assignment to string offset
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Fixed unspecialized executor
+
+    * zend_execute.c
+      zend_execute.c
+      tests/bug32799.phpt
+      tests/bug32799.phpt
+      tests/bug39346.phpt:
+      Fixed bug #39346 (Unsetting a static variable inside a destructor causes
+      segfault later on)
+
+    * tests/bug39346.phpt
+      tests/bug39346.phpt:
+      
+      file bug39346.phpt was initially added on branch PHP_5_3.
+
 2008-01-10  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute_API.c
