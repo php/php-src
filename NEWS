@@ -7,6 +7,8 @@ PHP                                                                        NEWS
 - Fixed a bug with PDO::FETCH_COLUMN|PDO::FETCH_GROUP mode when a column # by
   which to group by data is specified. (Ilia)
 
+- Fixed faulty fix for bug #40189
+                   (endless loop in zlib.inflate stream filter) (Greg)
 - Fixed bug #43793 (zlib filter is unable to auto-detect gzip/zlib file headers).
   (Greg)
 - Fixed bug #43703 (Signature compatibility check broken). (Dmitry)
