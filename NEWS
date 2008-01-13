@@ -1,6 +1,17 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.0
+- Added new date/time functionality:
+
+  * date_parse_from_format(): Parse date/time strings according to a format.
+  * date_create_from_format()/DateTime::createFromFormat(): Create a date/time
+    object by parsing a date/time string according to a given format.
+  * date_get_last_errors()/DateTime::getLastErrors(): Return a list of warnings
+    and errors that were found while parsing a date/time string through:
+	- strtotime() / new DateTime
+	- date_create_from_format() / DateTime::createFromFormat()
+	- date_parse_from_format()
+
 - Added ability to use Traversable objects instead of plain arrays in ext/soap.
   (Joshua Reese, Dmitry)
 - Added "?:" operator. (Marcus)
