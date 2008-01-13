@@ -49,7 +49,10 @@ PHP_FUNCTION(getdate);
 /* Advanced Interface */
 PHP_METHOD(DateTime, __construct);
 PHP_FUNCTION(date_create);
+PHP_FUNCTION(date_create_from_format);
 PHP_FUNCTION(date_parse);
+PHP_FUNCTION(date_parse_from_format);
+PHP_FUNCTION(date_get_last_errors);
 PHP_FUNCTION(date_format);
 PHP_FUNCTION(date_format_locale);
 PHP_FUNCTION(date_modify);
@@ -93,6 +96,7 @@ ZEND_BEGIN_MODULE_GLOBALS(date)
 	char      *default_timezone;
 	char      *timezone;
 	HashTable  tzcache;
+	timelib_error_container *last_errors;
 ZEND_END_MODULE_GLOBALS(date)
 
 #ifdef ZTS

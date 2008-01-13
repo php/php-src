@@ -169,7 +169,10 @@ const zend_function_entry date_functions[] = {
 
 	/* Advanced Interface */
 	PHP_FE(date_create, NULL)
+	PHP_FE(date_create_from_format, NULL)
 	PHP_FE(date_parse, NULL)
+	PHP_FE(date_parse_from_format, NULL)
+	PHP_FE(date_get_last_errors, NULL)
 	PHP_FE(date_format, NULL)
 	PHP_FE(date_format_locale, NULL)
 	PHP_FE(date_modify, NULL)
@@ -204,6 +207,8 @@ const zend_function_entry date_functions[] = {
 
 const zend_function_entry date_funcs_date[] = {
 	PHP_ME(DateTime,            __construct,       NULL, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+ 	PHP_ME_MAPPING(createFromFormat, date_create_from_format,	NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+ 	PHP_ME_MAPPING(getLastErrors, date_get_last_errors,	NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(format,      date_format,       NULL, 0)
 	PHP_ME_MAPPING(modify,      date_modify,       NULL, 0)
 	PHP_ME_MAPPING(getTimezone, date_timezone_get, NULL, 0)
@@ -515,7 +520,8 @@ PHP_MINIT_FUNCTION(date)
 
 	php_date_global_timezone_db = NULL;
 	php_date_global_timezone_db_enabled = 0;
-	
+
+	DATEG(last_errors) = NULL;
 	return SUCCESS;
 }
 /* }}} */
@@ -524,6 +530,10 @@ PHP_MINIT_FUNCTION(date)
 PHP_MSHUTDOWN_FUNCTION(date)
 {
 	UNREGISTER_INI_ENTRIES();
+
+	if (DATEG(last_errors)) {
+		timelib_error_container_dtor(DATEG(last_errors));
+	}
 
 	return SUCCESS;
 }
@@ -1764,7 +1774,18 @@ static zval * date_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC)
 	return object;
 }
 
-static void date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int time_str_len, zval *timezone_object TSRMLS_DC)
+/* Helper function used to store the latest found warnings and errors while
+ * parsing, from either strtotime or parse_from_format. */
+static void update_errors_warnings(timelib_error_container *last_errors)
+{
+	if (DATEG(last_errors)) {
+		timelib_error_container_dtor(DATEG(last_errors));
+		DATEG(last_errors) = NULL;
+	}
+	DATEG(last_errors) = last_errors;
+}
+
+static void date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int time_str_len, char *format, zval *timezone_object TSRMLS_DC)
 {
 	timelib_time   *now;
 	timelib_tzinfo *tzi;
@@ -1777,15 +1798,14 @@ static void date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int
 		}
 		timelib_time_dtor(dateobj->time);
 	}
-	dateobj->time = timelib_strtotime(time_str_len ? time_str : "now", time_str_len ? time_str_len : sizeof("now") -1, &err, DATE_TIMEZONEDB);
-	if (err) {
-		if (err->error_count) {
-			/* spit out the first library error message, at least */
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to parse time string (%s) at position %d (%c): %s", time_str,
-							err->error_messages[0].position, err->error_messages[0].character, err->error_messages[0].message);
-		}
-		timelib_error_container_dtor(err);
+	if (format) {
+		dateobj->time = timelib_parse_from_format(format, time_str_len ? time_str : "", time_str_len ? time_str_len : 0, &err, DATE_TIMEZONEDB);
+	} else {
+		dateobj->time = timelib_strtotime(time_str_len ? time_str : "now", time_str_len ? time_str_len : sizeof("now") -1, &err, DATE_TIMEZONEDB);
 	}
+
+	// update last errors and warnings
+	update_errors_warnings(err);
 
 	if (timezone_object) {
 		php_timezone_obj *tzobj;
@@ -1832,7 +1852,25 @@ PHP_FUNCTION(date_create)
 	}
 
 	date_instantiate(date_ce_date, return_value TSRMLS_CC);
-	date_initialize(zend_object_store_get_object(return_value TSRMLS_CC), time_str, time_str_len, timezone_object TSRMLS_CC);
+	date_initialize(zend_object_store_get_object(return_value TSRMLS_CC), time_str, time_str_len, NULL, timezone_object TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto DateTime date_create(string format, string time[, DateTimeZone object])
+   Returns new DateTime object
+*/
+PHP_FUNCTION(date_create_from_format)
+{
+	zval           *timezone_object = NULL;
+	char           *time_str = NULL, *format_str = NULL;
+	int             time_str_len = 0, format_str_len = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|O", &format_str, &format_str_len, &time_str, &time_str_len, &timezone_object, date_ce_timezone) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	date_instantiate(date_ce_date, return_value TSRMLS_CC);
+	date_initialize(zend_object_store_get_object(return_value TSRMLS_CC), time_str, time_str_len, format_str, timezone_object TSRMLS_CC);
 }
 /* }}} */
 
@@ -1847,28 +1885,53 @@ PHP_METHOD(DateTime, __construct)
 	
 	php_set_error_handling(EH_THROW, NULL TSRMLS_CC);
 	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sO", &time_str, &time_str_len, &timezone_object, date_ce_timezone)) {
-		date_initialize(zend_object_store_get_object(getThis() TSRMLS_CC), time_str, time_str_len, timezone_object TSRMLS_CC);
+		date_initialize(zend_object_store_get_object(getThis() TSRMLS_CC), time_str, time_str_len, NULL, timezone_object TSRMLS_CC);
 	}
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 }
 /* }}} */
 
-/* {{{ proto array date_parse(string date)
-   Returns associative array with detailed info about given date
-*/
-PHP_FUNCTION(date_parse)
+/* Helper function used to add an associative array of warnings and errors to a zval */
+void zval_from_error_container(zval *z, timelib_error_container *error)
 {
-	char                           *date;
-	int                             date_len, i;
-	struct timelib_error_container *error;
-	timelib_time                   *parsed_time;
-	zval                           *element;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &date, &date_len) == FAILURE) {
+	int   i;
+	zval *element;
+
+	add_ascii_assoc_long(z, "warning_count", error->warning_count);
+	MAKE_STD_ZVAL(element);
+	array_init(element);
+	for (i = 0; i < error->warning_count; i++) {
+		add_index_string(element, error->warning_messages[i].position, error->warning_messages[i].message, 1);
+	}
+	add_ascii_assoc_zval(z, "warnings", element);
+
+	add_ascii_assoc_long(z, "error_count", error->error_count);
+	MAKE_STD_ZVAL(element);
+	array_init(element);
+	for (i = 0; i < error->error_count; i++) {
+		add_index_string(element, error->error_messages[i].position, error->error_messages[i].message, 1);
+	}
+	add_ascii_assoc_zval(z, "errors", element);
+}
+
+/* {{{ proto array date_get_last_errorse()
+   Returns the warnings and errors found while parsing a date/time string.
+*/
+PHP_FUNCTION(date_get_last_errors)
+{
+	array_init(return_value);
+	if (DATEG(last_errors)) {
+		zval_from_error_container(return_value, DATEG(last_errors));
+	} else {
 		RETURN_FALSE;
 	}
+}
+/* }}} */
 
-	parsed_time = timelib_strtotime(date, date_len, &error, DATE_TIMEZONEDB);
+void php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAMETERS, timelib_time *parsed_time, struct timelib_error_container *error)
+{
+	zval *element;
+
 	array_init(return_value);
 #define PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(name, elem) \
 	if (parsed_time->elem == -99999) {               \
@@ -1889,21 +1952,8 @@ PHP_FUNCTION(date_parse)
 		add_ascii_assoc_double(return_value, "fraction", parsed_time->f);
 	}
 
-	add_ascii_assoc_long(return_value, "warning_count", error->warning_count);
-	MAKE_STD_ZVAL(element);
-	array_init(element);
-	for (i = 0; i < error->warning_count; i++) {
-		add_index_string(element, error->warning_messages[i].position, error->warning_messages[i].message, 1);
-	}
-	add_ascii_assoc_zval(return_value, "warnings", element);
+ 	zval_from_error_container(return_value, error);
 
-	add_ascii_assoc_long(return_value, "error_count", error->error_count);
-	MAKE_STD_ZVAL(element);
-	array_init(element);
-	for (i = 0; i < error->error_count; i++) {
-		add_index_string(element, error->error_messages[i].position, error->error_messages[i].message, 1);
-	}
-	add_ascii_assoc_zval(return_value, "errors", element);
 	timelib_error_container_dtor(error);
 
 	add_ascii_assoc_bool(return_value, "is_localtime", parsed_time->is_localtime);
@@ -1950,7 +2000,43 @@ PHP_FUNCTION(date_parse)
 	}
 	timelib_time_dtor(parsed_time);
 }
+
+/* {{{ proto array date_parse(string date)
+   Returns associative array with detailed info about given date
+*/
+PHP_FUNCTION(date_parse)
+{
+	char                           *date;
+	int                             date_len;
+	struct timelib_error_container *error;
+	timelib_time                   *parsed_time;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &date, &date_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	parsed_time = timelib_strtotime(date, date_len, &error, DATE_TIMEZONEDB);
+	php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAM_PASSTHRU, parsed_time, error);
+}
 /* }}} */
+
+/* {{{ proto array date_parse(string date)
+   Returns associative array with detailed info about given date
+*/
+PHP_FUNCTION(date_parse_from_format)
+{
+	char                           *date, *format;
+	int                             date_len, format_len;
+	struct timelib_error_container *error;
+	timelib_time                   *parsed_time;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &format, &format_len, &date, &date_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	parsed_time = timelib_parse_from_format(format, date, date_len, &error, DATE_TIMEZONEDB);
+	php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAM_PASSTHRU, parsed_time, error);
+}
 
 /* {{{ proto string date_format(DateTime object, string format)
    Returns date formatted according to given format
