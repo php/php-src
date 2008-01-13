@@ -1,3 +1,281 @@
+2008-01-12  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/zlib/zlib_filter.c:
+      wrong file version merged in fix for Bug #40189, here is the correct fix
+
+    * ext/bz2/bz2_filter.c
+      ext/zlib/zlib_filter.c:
+      MFB: far better fix for bug #40189
+
+    * (PHP_5_3)
+      ext/bz2/bz2_filter.c
+      ext/zlib/zlib_filter.c:
+      far better fix for bug #40189
+
+    * (PHP_5_2)
+      NEWS
+      ext/bz2/bz2_filter.c
+      ext/bz2/bz2_filter.c
+      ext/zlib/zlib_filter.c
+      ext/zlib/zlib_filter.c
+      ext/zlib/tests/bug.tar
+      ext/zlib/tests/bug.tar
+      ext/zlib/tests/bug_40189.phpt
+      ext/zlib/tests/bug_40189.phpt
+      ext/zlib/tests/bug_40189_2.phpt
+      ext/zlib/tests/bug_40189_2.phpt:
+      MFH: fix faulty fix for Bug #40189, and provide real fix for the bug
+
+    * ext/zlib/tests/bug.tar
+      ext/zlib/tests/bug.tar
+      ext/zlib/tests/bug.tar
+      ext/zlib/tests/bug_40189.phpt
+      ext/zlib/tests/bug_40189.phpt
+      ext/zlib/tests/bug_40189.phpt
+      ext/zlib/tests/bug_40189_2.phpt
+      ext/zlib/tests/bug_40189_2.phpt
+      ext/zlib/tests/bug_40189_2.phpt:
+        1.1.4;
+      fix faulty fix for Bug #40189, and provide real fix for the bug
+
+    * ext/bz2/bz2_filter.c
+      ext/zlib/zlib_filter.c:
+      fix faulty fix for Bug #40189, and provide real fix for the bug
+
+    * (PHP_5_3)
+      ext/standard/tests/file/include_userstream_002.phpt
+      ext/standard/tests/file/include_userstream_003.phpt
+      main/streams/streams.c:
+      MFH: clarify error message on why opening a stream wrapper failed for
+      allow_url_include/allow_url_fopen, add test for allow_url_fopen
+
+    * ext/standard/tests/file/include_userstream_002.phpt
+      ext/standard/tests/file/include_userstream_003.phpt
+      ext/standard/tests/file/include_userstream_003.phpt
+      main/streams/streams.c:
+      clarify error message on why opening a stream wrapper failed for
+      allow_url_include/allow_url_fopen, add test for allow_url_fopen
+
+    * (PHP_5_2)
+      ext/zip/config.w32
+      ext/zip/lib/zip.h
+      ext/zip/lib/zip_add.c
+      ext/zip/lib/zip_add_dir.c
+      ext/zip/lib/zip_close.c
+      ext/zip/lib/zip_delete.c
+      ext/zip/lib/zip_dirent.c
+      ext/zip/lib/zip_entry_free.c
+      ext/zip/lib/zip_entry_new.c
+      ext/zip/lib/zip_error.c
+      ext/zip/lib/zip_error_clear.c
+      ext/zip/lib/zip_error_get.c
+      ext/zip/lib/zip_error_get_sys_type.c
+      ext/zip/lib/zip_error_strerror.c
+      ext/zip/lib/zip_error_to_str.c
+      ext/zip/lib/zip_fclose.c
+      ext/zip/lib/zip_file_error_clear.c
+      ext/zip/lib/zip_file_error_get.c
+      ext/zip/lib/zip_file_get_offset.c
+      ext/zip/lib/zip_file_strerror.c
+      ext/zip/lib/zip_fopen.c
+      ext/zip/lib/zip_fopen_index.c
+      ext/zip/lib/zip_fread.c
+      ext/zip/lib/zip_free.c
+      ext/zip/lib/zip_get_archive_comment.c
+      ext/zip/lib/zip_get_file_comment.c
+      ext/zip/lib/zip_get_name.c
+      ext/zip/lib/zip_get_num_files.c
+      ext/zip/lib/zip_memdup.c
+      ext/zip/lib/zip_name_locate.c
+      ext/zip/lib/zip_new.c
+      ext/zip/lib/zip_open.c
+      ext/zip/lib/zip_rename.c
+      ext/zip/lib/zip_replace.c
+      ext/zip/lib/zip_set_archive_comment.c
+      ext/zip/lib/zip_set_file_comment.c
+      ext/zip/lib/zip_set_name.c
+      ext/zip/lib/zip_source_buffer.c
+      ext/zip/lib/zip_source_file.c
+      ext/zip/lib/zip_source_filep.c
+      ext/zip/lib/zip_source_free.c
+      ext/zip/lib/zip_source_function.c
+      ext/zip/lib/zip_source_zip.c
+      ext/zip/lib/zip_stat.c
+      ext/zip/lib/zip_stat_index.c
+      ext/zip/lib/zip_stat_init.c
+      ext/zip/lib/zip_strerror.c
+      ext/zip/lib/zip_unchange.c
+      ext/zip/lib/zip_unchange_all.c
+      ext/zip/lib/zip_unchange_archive.c
+      ext/zip/lib/zip_unchange_data.c
+      ext/zip/lib/zip_win32.h
+      ext/zip/lib/zipint.h:
+      revert last commit, was to wrong branch
+
+    * (PHP_5_2)
+      ext/zip/config.w32
+      ext/zip/config.w32
+      ext/zip/lib/zip.h
+      ext/zip/lib/zip.h
+      ext/zip/lib/zip_add.c
+      ext/zip/lib/zip_add.c
+      ext/zip/lib/zip_add_dir.c
+      ext/zip/lib/zip_add_dir.c
+      ext/zip/lib/zip_close.c
+      ext/zip/lib/zip_close.c
+      ext/zip/lib/zip_delete.c
+      ext/zip/lib/zip_delete.c
+      ext/zip/lib/zip_dirent.c
+      ext/zip/lib/zip_dirent.c
+      ext/zip/lib/zip_entry_free.c
+      ext/zip/lib/zip_entry_free.c
+      ext/zip/lib/zip_entry_new.c
+      ext/zip/lib/zip_entry_new.c
+      ext/zip/lib/zip_error.c
+      ext/zip/lib/zip_error.c
+      ext/zip/lib/zip_error_clear.c
+      ext/zip/lib/zip_error_clear.c
+      ext/zip/lib/zip_error_get.c
+      ext/zip/lib/zip_error_get.c
+      ext/zip/lib/zip_error_get_sys_type.c
+      ext/zip/lib/zip_error_get_sys_type.c
+      ext/zip/lib/zip_error_strerror.c
+      ext/zip/lib/zip_error_strerror.c
+      ext/zip/lib/zip_error_to_str.c
+      ext/zip/lib/zip_error_to_str.c
+      ext/zip/lib/zip_fclose.c
+      ext/zip/lib/zip_fclose.c
+      ext/zip/lib/zip_file_error_clear.c
+      ext/zip/lib/zip_file_error_clear.c
+      ext/zip/lib/zip_file_error_get.c
+      ext/zip/lib/zip_file_error_get.c
+      ext/zip/lib/zip_file_get_offset.c
+      ext/zip/lib/zip_file_get_offset.c
+      ext/zip/lib/zip_file_strerror.c
+      ext/zip/lib/zip_file_strerror.c
+      ext/zip/lib/zip_fopen.c
+      ext/zip/lib/zip_fopen.c
+      ext/zip/lib/zip_fopen_index.c
+      ext/zip/lib/zip_fopen_index.c
+      ext/zip/lib/zip_fread.c
+      ext/zip/lib/zip_fread.c
+      ext/zip/lib/zip_free.c
+      ext/zip/lib/zip_free.c
+      ext/zip/lib/zip_get_archive_comment.c
+      ext/zip/lib/zip_get_archive_comment.c
+      ext/zip/lib/zip_get_file_comment.c
+      ext/zip/lib/zip_get_file_comment.c
+      ext/zip/lib/zip_get_name.c
+      ext/zip/lib/zip_get_name.c
+      ext/zip/lib/zip_get_num_files.c
+      ext/zip/lib/zip_get_num_files.c
+      ext/zip/lib/zip_memdup.c
+      ext/zip/lib/zip_memdup.c
+      ext/zip/lib/zip_name_locate.c
+      ext/zip/lib/zip_name_locate.c
+      ext/zip/lib/zip_new.c
+      ext/zip/lib/zip_new.c
+      ext/zip/lib/zip_open.c
+      ext/zip/lib/zip_open.c
+      ext/zip/lib/zip_rename.c
+      ext/zip/lib/zip_rename.c
+      ext/zip/lib/zip_replace.c
+      ext/zip/lib/zip_replace.c
+      ext/zip/lib/zip_set_archive_comment.c
+      ext/zip/lib/zip_set_archive_comment.c
+      ext/zip/lib/zip_set_file_comment.c
+      ext/zip/lib/zip_set_file_comment.c
+      ext/zip/lib/zip_set_name.c
+      ext/zip/lib/zip_set_name.c
+      ext/zip/lib/zip_source_buffer.c
+      ext/zip/lib/zip_source_buffer.c
+      ext/zip/lib/zip_source_file.c
+      ext/zip/lib/zip_source_file.c
+      ext/zip/lib/zip_source_filep.c
+      ext/zip/lib/zip_source_filep.c
+      ext/zip/lib/zip_source_free.c
+      ext/zip/lib/zip_source_free.c
+      ext/zip/lib/zip_source_function.c
+      ext/zip/lib/zip_source_function.c
+      ext/zip/lib/zip_source_zip.c
+      ext/zip/lib/zip_source_zip.c
+      ext/zip/lib/zip_stat.c
+      ext/zip/lib/zip_stat.c
+      ext/zip/lib/zip_stat_index.c
+      ext/zip/lib/zip_stat_index.c
+      ext/zip/lib/zip_stat_init.c
+      ext/zip/lib/zip_stat_init.c
+      ext/zip/lib/zip_strerror.c
+      ext/zip/lib/zip_strerror.c
+      ext/zip/lib/zip_unchange.c
+      ext/zip/lib/zip_unchange.c
+      ext/zip/lib/zip_unchange_all.c
+      ext/zip/lib/zip_unchange_all.c
+      ext/zip/lib/zip_unchange_archive.c
+      ext/zip/lib/zip_unchange_archive.c
+      ext/zip/lib/zip_unchange_data.c
+      ext/zip/lib/zip_unchange_data.c
+      ext/zip/lib/zip_win32.h
+      ext/zip/lib/zip_win32.h
+      ext/zip/lib/zipint.h
+      ext/zip/lib/zipint.h:
+      MFH: export symbols for use by other extensions like phar
+
+    * ext/zip/config.w32
+      ext/zip/lib/zip.h
+      ext/zip/lib/zip_add.c
+      ext/zip/lib/zip_add_dir.c
+      ext/zip/lib/zip_close.c
+      ext/zip/lib/zip_delete.c
+      ext/zip/lib/zip_dirent.c
+      ext/zip/lib/zip_entry_free.c
+      ext/zip/lib/zip_entry_new.c
+      ext/zip/lib/zip_error.c
+      ext/zip/lib/zip_error_clear.c
+      ext/zip/lib/zip_error_get.c
+      ext/zip/lib/zip_error_get_sys_type.c
+      ext/zip/lib/zip_error_strerror.c
+      ext/zip/lib/zip_error_to_str.c
+      ext/zip/lib/zip_fclose.c
+      ext/zip/lib/zip_file_error_clear.c
+      ext/zip/lib/zip_file_error_get.c
+      ext/zip/lib/zip_file_get_offset.c
+      ext/zip/lib/zip_file_strerror.c
+      ext/zip/lib/zip_fopen.c
+      ext/zip/lib/zip_fopen_index.c
+      ext/zip/lib/zip_fread.c
+      ext/zip/lib/zip_free.c
+      ext/zip/lib/zip_get_archive_comment.c
+      ext/zip/lib/zip_get_file_comment.c
+      ext/zip/lib/zip_get_name.c
+      ext/zip/lib/zip_get_num_files.c
+      ext/zip/lib/zip_memdup.c
+      ext/zip/lib/zip_name_locate.c
+      ext/zip/lib/zip_new.c
+      ext/zip/lib/zip_open.c
+      ext/zip/lib/zip_rename.c
+      ext/zip/lib/zip_replace.c
+      ext/zip/lib/zip_set_archive_comment.c
+      ext/zip/lib/zip_set_file_comment.c
+      ext/zip/lib/zip_set_name.c
+      ext/zip/lib/zip_source_buffer.c
+      ext/zip/lib/zip_source_file.c
+      ext/zip/lib/zip_source_filep.c
+      ext/zip/lib/zip_source_free.c
+      ext/zip/lib/zip_source_function.c
+      ext/zip/lib/zip_source_zip.c
+      ext/zip/lib/zip_stat.c
+      ext/zip/lib/zip_stat_index.c
+      ext/zip/lib/zip_stat_init.c
+      ext/zip/lib/zip_strerror.c
+      ext/zip/lib/zip_unchange.c
+      ext/zip/lib/zip_unchange_all.c
+      ext/zip/lib/zip_unchange_archive.c
+      ext/zip/lib/zip_unchange_data.c
+      ext/zip/lib/zip_win32.h
+      ext/zip/lib/zipint.h:
+      export symbols for use by other extensions like phar
+
 2008-01-11  Dmitry Stogov  <dmitry@zend.com>
 
     * ZendEngine2/zend_execute.c
