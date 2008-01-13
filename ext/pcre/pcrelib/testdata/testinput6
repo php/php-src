@@ -832,4 +832,79 @@ was broken in all cases./
 
 /(\p{Yi}{0,3}+\277)*/
 
+/^[\p{Arabic}]/8
+    \x{60e} 
+    \x{656} 
+    \x{657} 
+    \x{658} 
+    \x{659} 
+    \x{65a} 
+    \x{65b} 
+    \x{65c} 
+    \x{65d} 
+    \x{65e} 
+    \x{66a} 
+    \x{6e9} 
+    \x{6ef}
+    \x{6fa}  
+    ** Failers
+    \x{600}
+    \x{650}
+    \x{651}  
+    \x{652}  
+    \x{653}  
+    \x{654} 
+    \x{655} 
+    \x{65f}  
+    
+/^\p{Cyrillic}/8
+    \x{1d2b} 
+    
+/^\p{Common}/8
+    \x{589}
+    \x{60c}
+    \x{61f}  
+    \x{964}
+    \x{965}  
+    \x{970}  
+
+/^\p{Inherited}/8
+    \x{64b}
+    \x{654}
+    \x{655}
+    \x{200c} 
+    ** Failers
+    \x{64a}
+    \x{656}     
+
+/^\p{Shavian}/8
+    \x{10450}
+    \x{1047f}
+    
+/^\p{Deseret}/8
+    \x{10400}
+    \x{1044f}
+    
+/^\p{Osmanya}/8
+    \x{10480}
+    \x{1049d}
+    \x{104a0}
+    \x{104a9}
+    ** Failers
+    \x{1049e}
+    \x{1049f}
+    \x{104aa}           
+
+/\p{Zl}{2,3}+/8BZ
+    \xe2\x80\xa8\xe2\x80\xa8
+    \x{2028}\x{2028}\x{2028}
+    
+/\p{Zl}/8BZ
+
+/\p{Lu}{3}+/8BZ
+
+/\pL{2}+/8BZ
+
+/\p{Cc}{2}+/8BZ
+
 / End of testinput6 /

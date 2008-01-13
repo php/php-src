@@ -84,7 +84,7 @@ The following are generic comments about building the PCRE C library "by hand".
        ucptable.h
 
  (5) Also ensure that you have the following file, which is #included as source
-     when building a debugging version of PCRE and is also used by pcretest.
+     when building a debugging version of PCRE, and is also used by pcretest.
 
        pcre_printint.src
 

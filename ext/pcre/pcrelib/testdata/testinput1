@@ -3421,11 +3421,6 @@
 /((?m)^b)/
     a\nb\nc\n
 
-/(?(1)a|b)/
-
-/(?(1)b|a)/
-    a
-
 /(x)?(?(1)a|b)/
     *** Failers
     a
@@ -4029,5 +4024,16 @@
 
 /(  (?(1)0|)*   )/x
     abcd
+
+/[[:abcd:xyz]]/
+    a]
+    :] 
+    
+/[abc[:x\]pqr]/
+    a
+    [
+    :
+    ]
+    p    
 
 / End of testinput1 /

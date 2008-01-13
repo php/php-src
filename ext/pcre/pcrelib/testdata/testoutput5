@@ -1595,4 +1595,17 @@ No match
     a\x0bb\<bsr_anycrlf>
 No match
  
+/.*a.*=.b.*/8<ANY>
+    QQQ\x{2029}ABCaXYZ=!bPQR
+ 0: ABCaXYZ=!bPQR
+    ** Failers
+No match
+    a\x{2029}b
+No match
+    \x61\xe2\x80\xa9\x62 
+No match
+
+/[[:a\x{100}b:]]/8
+Failed: unknown POSIX class name at offset 3
+
 / End of testinput5 /

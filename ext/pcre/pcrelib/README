@@ -258,6 +258,24 @@ library. You can read more about them in the pcrebuild man page.
 
   This automatically implies --enable-rebuild-chartables (see above).
 
+. It is possible to compile pcregrep to use libz and/or libbz2, in order to
+  read .gz and .bz2 files (respectively), by specifying one or both of
+
+  --enable-pcregrep-libz
+  --enable-pcregrep-libbz2
+
+  Of course, the relevant libraries must be installed on your system.
+
+. It is possible to compile pcretest so that it links with the libreadline
+  library, by specifying
+
+  --enable-pcretest-libreadline
+
+  If this is done, when pcretest's input is from a terminal, it reads it using
+  the readline() function. This provides line-editing and history facilities.
+  Note that libreadline is GPL-licenced, so if you distribute a binary of
+  pcretest linked in this way, there may be licensing issues.
+
 The "configure" script builds the following files for the basic C library:
 
 . Makefile is the makefile that builds the library
@@ -725,4 +743,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 21 September 2007
+Last updated: 18 December 2007

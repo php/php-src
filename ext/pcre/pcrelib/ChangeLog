@@ -1,6 +1,143 @@
 ChangeLog for PCRE
 ------------------
 
+Version 7.5 10-Jan-08
+---------------------
+
+1.  Applied a patch from Craig: "This patch makes it possible to 'ignore'
+    values in parens when parsing an RE using the C++ wrapper."
+
+2.  Negative specials like \S did not work in character classes in UTF-8 mode.
+    Characters greater than 255 were excluded from the class instead of being
+    included.
+
+3.  The same bug as (2) above applied to negated POSIX classes such as
+    [:^space:].
+
+4.  PCRECPP_STATIC was referenced in pcrecpp_internal.h, but nowhere was it
+    defined or documented. It seems to have been a typo for PCRE_STATIC, so
+    I have changed it.
+
+5.  The construct (?&) was not diagnosed as a syntax error (it referenced the
+    first named subpattern) and a construct such as (?&a) would reference the
+    first named subpattern whose name started with "a" (in other words, the
+    length check was missing). Both these problems are fixed. "Subpattern name
+    expected" is now given for (?&) (a zero-length name), and this patch also
+    makes it give the same error for \k'' (previously it complained that that
+    was a reference to a non-existent subpattern).
+
+6.  The erroneous patterns (?+-a) and (?-+a) give different error messages;
+    this is right because (?- can be followed by option settings as well as by
+    digits. I have, however, made the messages clearer.
+
+7.  Patterns such as (?(1)a|b) (a pattern that contains fewer subpatterns
+    than the number used in the conditional) now cause a compile-time error.
+    This is actually not compatible with Perl, which accepts such patterns, but
+    treats the conditional as always being FALSE (as PCRE used to), but it
+    seems to me that giving a diagnostic is better.
+
+8.  Change "alphameric" to the more common word "alphanumeric" in comments
+    and messages.
+
+9.  Fix two occurrences of "backslash" in comments that should have been
+    "backspace".
+
+10. Remove two redundant lines of code that can never be obeyed (their function
+    was moved elsewhere).
+
+11. The program that makes PCRE's Unicode character property table had a bug
+    which caused it to generate incorrect table entries for sequences of
+    characters that have the same character type, but are in different scripts.
+    It amalgamated them into a single range, with the script of the first of
+    them. In other words, some characters were in the wrong script. There were
+    thirteen such cases, affecting characters in the following ranges:
+
+      U+002b0 - U+002c1
+      U+0060c - U+0060d
+      U+0061e - U+00612
+      U+0064b - U+0065e
+      U+0074d - U+0076d
+      U+01800 - U+01805
+      U+01d00 - U+01d77
+      U+01d9b - U+01dbf
+      U+0200b - U+0200f
+      U+030fc - U+030fe
+      U+03260 - U+0327f
+      U+0fb46 - U+0fbb1
+      U+10450 - U+1049d
+
+12. The -o option (show only the matching part of a line) for pcregrep was not
+    compatible with GNU grep in that, if there was more than one match in a
+    line, it showed only the first of them. It now behaves in the same way as
+    GNU grep.
+
+13. If the -o and -v options were combined for pcregrep, it printed a blank
+    line for every non-matching line. GNU grep prints nothing, and pcregrep now
+    does the same. The return code can be used to tell if there were any
+    non-matching lines.
+
+14. Added --file-offsets and --line-offsets to pcregrep.
+
+15. The pattern (?=something)(?R) was not being diagnosed as a potentially
+    infinitely looping recursion. The bug was that positive lookaheads were not
+    being skipped when checking for a possible empty match (negative lookaheads
+    and both kinds of lookbehind were skipped).
+
+16. Fixed two typos in the Windows-only code in pcregrep.c, and moved the
+    inclusion of <windows.h> to before rather than after the definition of
+    INVALID_FILE_ATTRIBUTES (patch from David Byron).
+
+17. Specifying a possessive quantifier with a specific limit for a Unicode
+    character property caused pcre_compile() to compile bad code, which led at
+    runtime to PCRE_ERROR_INTERNAL (-14). Examples of patterns that caused this
+    are: /\p{Zl}{2,3}+/8 and /\p{Cc}{2}+/8. It was the possessive "+" that
+    caused the error; without that there was no problem.
+
+18. Added --enable-pcregrep-libz and --enable-pcregrep-libbz2.
+
+19. Added --enable-pcretest-libreadline.
+
+20. In pcrecpp.cc, the variable 'count' was incremented twice in
+    RE::GlobalReplace(). As a result, the number of replacements returned was
+    double what it should be. I removed one of the increments, but Craig sent a
+    later patch that removed the other one (the right fix) and added unit tests
+    that check the return values (which was not done before).
+
+21. Several CMake things:
+
+    (1) Arranged that, when cmake is used on Unix, the libraries end up with
+        the names libpcre and libpcreposix, not just pcre and pcreposix.
+
+    (2) The above change means that pcretest and pcregrep are now correctly
+        linked with the newly-built libraries, not previously installed ones.
+
+    (3) Added PCRE_SUPPORT_LIBREADLINE, PCRE_SUPPORT_LIBZ, PCRE_SUPPORT_LIBBZ2.
+
+22. In UTF-8 mode, with newline set to "any", a pattern such as .*a.*=.b.*
+    crashed when matching a string such as a\x{2029}b (note that \x{2029} is a
+    UTF-8 newline character). The key issue is that the pattern starts .*;
+    this means that the match must be either at the beginning, or after a
+    newline. The bug was in the code for advancing after a failed match and
+    checking that the new position followed a newline. It was not taking
+    account of UTF-8 characters correctly.
+
+23. PCRE was behaving differently from Perl in the way it recognized POSIX
+    character classes. PCRE was not treating the sequence [:...:] as a
+    character class unless the ... were all letters. Perl, however, seems to
+    allow any characters between [: and :], though of course it rejects as
+    unknown any "names" that contain non-letters, because all the known class
+    names consist only of letters. Thus, Perl gives an error for [[:1234:]],
+    for example, whereas PCRE did not - it did not recognize a POSIX character
+    class. This seemed a bit dangerous, so the code has been changed to be
+    closer to Perl. The behaviour is not identical to Perl, because PCRE will
+    diagnose an unknown class for, for example, [[:l\ower:]] where Perl will
+    treat it as [[:lower:]]. However, PCRE does now give "unknown" errors where
+    Perl does, and where it didn't before.
+
+24. Rewrite so as to remove the single use of %n from pcregrep because in some
+    Windows environments %n is disabled by default.
+
+
 Version 7.4 21-Sep-07
 ---------------------
 
