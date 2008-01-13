@@ -71,6 +71,7 @@ PHP                                                                        NEWS
 - Fixed bug #43128 (Very long class name causes segfault). (Dmitry)
 - Fixed bug #42952 (soap cache file is created with insecure permissions).
   (Dmitry)
+- Fixed bug #42945 (preg_split() swallows part of the string). (Nuno)
 - Fixed bug #42868 (Floats cast to integer produce unpredictable results).
   (Zoe Slattery)
 - Fixed bug #42848 (Status: header incorrect under FastCGI). (Dmitry)
