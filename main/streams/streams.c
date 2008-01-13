@@ -2184,7 +2184,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 		if (options & REPORT_ERRORS) {
 			/* protocol[n] probably isn't '\0' */
 			char *protocol_dup = estrndup(protocol, n);
-			if (!PG(allow_url_fopen)) {
+			if (!php_stream_allow_url_fopen(protocol, n)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s:// wrapper is disabled in the server configuration by allow_url_fopen=0", protocol_dup);
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s:// wrapper is disabled in the server configuration by allow_url_include=0", protocol_dup);
