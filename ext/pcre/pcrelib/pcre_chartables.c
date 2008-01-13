@@ -20,7 +20,7 @@ and dead code stripping is activated. This leads to link errors. Pulling in the
 header ensures that the array gets flagged as "someone outside this compilation
 unit might reference this" and so it will always be supplied to the linker. */
 
-#include <config.h>
+#include "config.h"
 
 #include "pcre_internal.h"
 

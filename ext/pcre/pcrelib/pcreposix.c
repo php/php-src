@@ -42,7 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 functions. */
 
 
-#include <config.h>
+#include "config.h"
 
 
 /* Ensure that the PCREPOSIX_EXP_xxx macros are set appropriately for
@@ -55,10 +55,9 @@ previously been set. */
 #  define PCREPOSIX_EXP_DEFN __declspec(dllexport)
 #endif
 
-#include <pcre.h>
+#include "pcre.h"
 #include "pcre_internal.h"
 #include "pcreposix.h"
-
 
 
 /* Table to translate PCRE compile time error codes into POSIX error codes. */
@@ -123,7 +122,9 @@ static const int eint[] = {
   REG_INVARG,  /* inconsistent NEWLINE options */
   REG_BADPAT,  /* \g is not followed followed by an (optionally braced) non-zero number */
   REG_BADPAT,  /* (?+ or (?- must be followed by a non-zero number */
-  REG_BADPAT   /* number is too big */
+  REG_BADPAT,  /* number is too big */
+  REG_BADPAT,  /* subpattern name expected */
+  REG_BADPAT   /* digit expected after (?+ */
 };
 
 /* Table of texts corresponding to POSIX error codes */

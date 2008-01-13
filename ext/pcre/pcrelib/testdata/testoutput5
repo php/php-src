@@ -364,7 +364,6 @@ No match
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Contains explicit CR or LF match
 Options: anchored utf8
 No first char
 No need char
@@ -387,7 +386,6 @@ No match
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Contains explicit CR or LF match
 Options: utf8
 No first char
 No need char
@@ -655,7 +653,6 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -668,7 +665,6 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Contains explicit CR or LF match
 Options: utf8
 No first char
 No need char
@@ -792,7 +788,6 @@ Need char = 191
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -805,7 +800,6 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Contains explicit CR or LF match
 Options: utf8
 No first char
 No need char
@@ -942,7 +936,6 @@ Need char = 'z'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 1
-Contains explicit CR or LF match
 Options: utf8
 No first char
 Need char = 'z'
@@ -1314,7 +1307,7 @@ Failed: missing terminating ] for character class at offset 15
  0: abc8
  0: abc9
 
-/^a\Rb/8
+/^a\Rb/8<bsr_unicode>
     a\nb
  0: a\x{0a}b
     a\rb
@@ -1336,7 +1329,7 @@ No match
     a\n\rb    
 No match
 
-/^a\R*b/8
+/^a\R*b/8<bsr_unicode>
     ab
  0: ab
     a\nb
@@ -1356,7 +1349,7 @@ No match
     a\n\r\x{85}\x0cb 
  0: a\x{0a}\x{0d}\x{85}\x{0c}b
 
-/^a\R+b/8
+/^a\R+b/8<bsr_unicode>
     a\nb
  0: a\x{0a}b
     a\rb
@@ -1378,7 +1371,7 @@ No match
     ab  
 No match
 
-/^a\R{1,3}b/8
+/^a\R{1,3}b/8<bsr_unicode>
     a\nb
  0: a\x{0a}b
     a\n\rb
@@ -1521,5 +1514,98 @@ No match
 Error -10
     \x{7fffffff}\? 
 No match
+
+/a\Rb/I8<bsr_anycrlf>
+Capturing subpattern count = 0
+Options: bsr_anycrlf utf8
+First char = 'a'
+Need char = 'b'
+    a\rb
+ 0: a\x{0d}b
+    a\nb
+ 0: a\x{0a}b
+    a\r\nb
+ 0: a\x{0d}\x{0a}b
+    ** Failers
+No match
+    a\x{85}b
+No match
+    a\x0bb     
+No match
+
+/a\Rb/I8<bsr_unicode>
+Capturing subpattern count = 0
+Options: bsr_unicode utf8
+First char = 'a'
+Need char = 'b'
+    a\rb
+ 0: a\x{0d}b
+    a\nb
+ 0: a\x{0a}b
+    a\r\nb
+ 0: a\x{0d}\x{0a}b
+    a\x{85}b
+ 0: a\x{85}b
+    a\x0bb     
+ 0: a\x{0b}b
+    ** Failers 
+No match
+    a\x{85}b\<bsr_anycrlf>
+No match
+    a\x0bb\<bsr_anycrlf>
+No match
+    
+/a\R?b/I8<bsr_anycrlf>
+Capturing subpattern count = 0
+Options: bsr_anycrlf utf8
+First char = 'a'
+Need char = 'b'
+    a\rb
+ 0: a\x{0d}b
+    a\nb
+ 0: a\x{0a}b
+    a\r\nb
+ 0: a\x{0d}\x{0a}b
+    ** Failers
+No match
+    a\x{85}b
+No match
+    a\x0bb     
+No match
+
+/a\R?b/I8<bsr_unicode>
+Capturing subpattern count = 0
+Options: bsr_unicode utf8
+First char = 'a'
+Need char = 'b'
+    a\rb
+ 0: a\x{0d}b
+    a\nb
+ 0: a\x{0a}b
+    a\r\nb
+ 0: a\x{0d}\x{0a}b
+    a\x{85}b
+ 0: a\x{85}b
+    a\x0bb     
+ 0: a\x{0b}b
+    ** Failers 
+No match
+    a\x{85}b\<bsr_anycrlf>
+No match
+    a\x0bb\<bsr_anycrlf>
+No match
+ 
+/.*a.*=.b.*/8<ANY>
+    QQQ\x{2029}ABCaXYZ=!bPQR
+ 0: ABCaXYZ=!bPQR
+    ** Failers
+No match
+    a\x{2029}b
+No match
+    \x61\xe2\x80\xa9\x62 
+No match
+
+/[[:a\x{100}b:]]/8
+Failed: unknown POSIX class name at offset 3
 
 / End of testinput5 /
