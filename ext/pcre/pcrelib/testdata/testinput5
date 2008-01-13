@@ -453,4 +453,12 @@ can't tell the difference.) --/
     a\x{85}b\<bsr_anycrlf>
     a\x0bb\<bsr_anycrlf>
  
+/.*a.*=.b.*/8<ANY>
+    QQQ\x{2029}ABCaXYZ=!bPQR
+    ** Failers
+    a\x{2029}b
+    \x61\xe2\x80\xa9\x62 
+
+/[[:a\x{100}b:]]/8
+
 / End of testinput5 /

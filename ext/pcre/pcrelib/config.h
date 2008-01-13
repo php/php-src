@@ -51,6 +51,11 @@ them both to 0; an emulation function will be used. */
 /* Define to 1 if you have the <bits/type_traits.h> header file. */
 /* #undef HAVE_BITS_TYPE_TRAITS_H */
 
+/* Define to 1 if you have the <bzlib.h> header file. */
+#ifndef HAVE_BZLIB_H
+#define HAVE_BZLIB_H 1
+#endif
+
 /* Define to 1 if you have the <dirent.h> header file. */
 #ifndef HAVE_DIRENT_H
 #define HAVE_DIRENT_H 1
@@ -84,6 +89,16 @@ them both to 0; an emulation function will be used. */
 /* Define to 1 if you have the <memory.h> header file. */
 #ifndef HAVE_MEMORY_H
 #define HAVE_MEMORY_H 1
+#endif
+
+/* Define to 1 if you have the <readline/history.h> header file. */
+#ifndef HAVE_READLINE_HISTORY_H
+#define HAVE_READLINE_HISTORY_H 1
+#endif
+
+/* Define to 1 if you have the <readline/readline.h> header file. */
+#ifndef HAVE_READLINE_READLINE_H
+#define HAVE_READLINE_READLINE_H 1
 #endif
 
 /* Define to 1 if you have the <stdint.h> header file. */
@@ -151,6 +166,11 @@ them both to 0; an emulation function will be used. */
 
 /* Define to 1 if you have the <windows.h> header file. */
 /* #undef HAVE_WINDOWS_H */
+
+/* Define to 1 if you have the <zlib.h> header file. */
+#ifndef HAVE_ZLIB_H
+#define HAVE_ZLIB_H 1
+#endif
 
 /* Define to 1 if you have the `_strtoi64' function. */
 /* #undef HAVE__STRTOI64 */
@@ -231,13 +251,13 @@ them both to 0; an emulation function will be used. */
 #define PACKAGE_NAME "PCRE"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "PCRE 7.4"
+#define PACKAGE_STRING "PCRE 7.5"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "pcre"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "7.4"
+#define PACKAGE_VERSION "7.5"
 
 
 /* If you are compiling for a system other than a Unix-like system or
@@ -271,6 +291,17 @@ them both to 0; an emulation function will be used. */
 #define STDC_HEADERS 1
 #endif
 
+/* Define to allow pcregrep to be linked with libbz2, so that it is able to
+   handle .bz2 files. */
+/* #undef SUPPORT_LIBBZ2 */
+
+/* Define to allow pcretest to be linked with libreadline. */
+/* #undef SUPPORT_LIBREADLINE */
+
+/* Define to allow pcregrep to be linked with libz, so that it is able to
+   handle .gz files. */
+/* #undef SUPPORT_LIBZ */
+
 /* Define to enable support for Unicode properties */
 /* #undef SUPPORT_UCP */
 
@@ -279,7 +310,7 @@ them both to 0; an emulation function will be used. */
 
 /* Version number of package */
 #ifndef VERSION
-#define VERSION "7.4"
+#define VERSION "7.5"
 #endif
 
 /* Define to empty if `const' does not conform to ANSI C. */

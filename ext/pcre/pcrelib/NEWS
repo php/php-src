@@ -1,6 +1,14 @@
 News about PCRE releases
 ------------------------
 
+Release 7.5 10-Jan-08
+---------------------
+
+This is mainly a bug-fix release. However the ability to link pcregrep with
+libz or libbz2 and the ability to link pcretest with libreadline have been
+added. Also the --line-offsets and --file-offsets options were added to
+pcregrep.
+
 
 Release 7.4 21-Sep-07
 ---------------------
