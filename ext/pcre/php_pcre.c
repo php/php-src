@@ -1747,7 +1747,9 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_uchar utype, char *s
 	}
 
 
-	if (!no_empty || start_offset != subject_len)
+	start_offset = last_match - subject; /* the offset might have been incremented, but without further successful matches */
+
+	if (!no_empty || start_offset < subject_len)
 	{
 		if (offset_capture) {
 			/* Add the last (match, offset) pair to the return value */
