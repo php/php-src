@@ -274,9 +274,9 @@ static char * php_zipobj_get_zip_comment(struct zip *za, int *len TSRMLS_DC) /* 
 
 /* {{{ zend_function_entry */
 static const zend_function_entry zip_functions[] = {
-	PHP_RAW_NAMED_FE("zip_open", zif_zip_open, NULL)
-	PHP_RAW_NAMED_FE("zip_close", zif_zip_close, NULL)
-	PHP_RAW_NAMED_FE("zip_read", zif_zip_read, NULL)
+	ZEND_RAW_FENTRY("zip_open", zif_zip_open, NULL, 0)
+	ZEND_RAW_FENTRY("zip_close", zif_zip_close, NULL, 0)
+	ZEND_RAW_FENTRY("zip_read", zif_zip_read, NULL, 0)
 	PHP_FE(zip_entry_open,		NULL)
 	PHP_FE(zip_entry_close,		NULL)
 	PHP_FE(zip_entry_read,		NULL)
