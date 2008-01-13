@@ -398,8 +398,6 @@
 
 /(?(1?)a|b)/
 
-/(?(1)a|b|c)/
-
 /[a[:xyz:/
 
 /(?<=x+)y/
@@ -568,15 +566,15 @@
 
 /ab\d+/I
 
-/a(?(1)b)/I
+/a(?(1)b)(.)/I
 
-/a(?(1)bag|big)/I
+/a(?(1)bag|big)(.)/I
 
-/a(?(1)bag|big)*/I
+/a(?(1)bag|big)*(.)/I
 
-/a(?(1)bag|big)+/I
+/a(?(1)bag|big)+(.)/I
 
-/a(?(1)b..|b..)/I
+/a(?(1)b..|b..)(.)/I
 
 /ab\d{0}e/I
 
@@ -977,13 +975,13 @@
 
 /()a/I
 
-/(?(1)ab|ac)/I
+/(?(1)ab|ac)(.)/I
 
-/(?(1)abz|acz)/I
+/(?(1)abz|acz)(.)/I
 
-/(?(1)abz)/I
+/(?(1)abz)(.)/I
 
-/(?(1)abz)123/I
+/(?(1)abz)(1)23/I
 
 /(a)+/I
 
@@ -1999,7 +1997,7 @@ a random value. /Ix
 
 /a/<any><crlf>
 
-/^a\Rb/
+/^a\Rb/<bsr_unicode>
     a\nb
     a\rb
     a\r\nb
@@ -2009,7 +2007,7 @@ a random value. /Ix
     ** Failers
     a\n\rb
 
-/^a\R*b/
+/^a\R*b/<bsr_unicode>
     ab
     a\nb
     a\rb
@@ -2020,7 +2018,7 @@ a random value. /Ix
     a\n\rb
     a\n\r\x85\x0cb
 
-/^a\R+b/
+/^a\R+b/<bsr_unicode>
     a\nb
     a\rb
     a\r\nb
@@ -2032,7 +2030,7 @@ a random value. /Ix
     ** Failers
     ab
 
-/^a\R{1,3}b/
+/^a\R{1,3}b/<bsr_unicode>
     a\nb
     a\n\rb
     a\n\r\x85b
@@ -2044,7 +2042,7 @@ a random value. /Ix
     a\n\n\n\rb
     a\r
 
-/^a[\R]b/
+/^a[\R]b/<bsr_unicode>
     aRb
     ** Failers
     a\nb
@@ -2190,8 +2188,8 @@ a random value. /Ix
 
 /((?(-2)a))/BZ
 
-/^(?(+1)X|Y)/BZ
-    Y
+/^(?(+1)X|Y)(.)/BZ
+    Y!
 
 /(foo)\Kbar/
     foobar
@@ -2463,5 +2461,132 @@ a random value. /Ix
     a\nb  
     a\r\nb  
     a\x85b 
+
+/a\Rb/I<bsr_anycrlf>
+    a\rb
+    a\nb
+    a\r\nb
+    ** Failers
+    a\x85b
+    a\x0bb     
+
+/a\Rb/I<bsr_unicode>
+    a\rb
+    a\nb
+    a\r\nb
+    a\x85b
+    a\x0bb     
+    ** Failers 
+    a\x85b\<bsr_anycrlf>
+    a\x0bb\<bsr_anycrlf>
+    
+/a\R?b/I<bsr_anycrlf>
+    a\rb
+    a\nb
+    a\r\nb
+    ** Failers
+    a\x85b
+    a\x0bb     
+
+/a\R?b/I<bsr_unicode>
+    a\rb
+    a\nb
+    a\r\nb
+    a\x85b
+    a\x0bb     
+    ** Failers 
+    a\x85b\<bsr_anycrlf>
+    a\x0bb\<bsr_anycrlf>
+    
+/a\R{2,4}b/I<bsr_anycrlf>
+    a\r\n\nb
+    a\n\r\rb
+    a\r\n\r\n\r\n\r\nb
+    ** Failers
+    a\x85\85b
+    a\x0b\0bb     
+
+/a\R{2,4}b/I<bsr_unicode>
+    a\r\rb
+    a\n\n\nb
+    a\r\n\n\r\rb
+    a\x85\85b
+    a\x0b\0bb     
+    ** Failers 
+    a\r\r\r\r\rb 
+    a\x85\85b\<bsr_anycrlf>
+    a\x0b\0bb\<bsr_anycrlf>
+ 
+/(*BSR_ANYCRLF)a\Rb/I
+    a\nb
+    a\rb 
+
+/(*BSR_UNICODE)a\Rb/I
+    a\x85b
+
+/(*BSR_ANYCRLF)(*CRLF)a\Rb/I
+    a\nb
+    a\rb 
+
+/(*CRLF)(*BSR_UNICODE)a\Rb/I
+    a\x85b
+
+/(*CRLF)(*BSR_ANYCRLF)(*CR)ab/I
+
+/(?<a>)(?&)/
+
+/(?<abc>)(?&a)/
+
+/(?<a>)(?&aaaaaaaaaaaaaaaaaaaaaaa)/
+
+/(?+-a)/
+
+/(?-+a)/
+
+/(?(-1))/
+
+/(?(+10))/
+
+/(?(10))/
+
+/(?(+2))()()/
+
+/(?(2))()()/
+
+/\k''/
+
+/\k<>/
+
+/\k{}/
+
+/(?P=)/
+
+/(?P>)/
+
+/(?!\w)(?R)/
+
+/(?=\w)(?R)/
+
+/(?<!\w)(?R)/
+
+/(?<=\w)(?R)/
+
+/[[:foo:]]/
+
+/[[:1234:]]/
+
+/[[:f\oo:]]/
+
+/[[: :]]/
+
+/[[:...:]]/
+
+/[[:l\ower:]]/
+
+/[[:abc\:]]/
+
+/[abc[:x\]pqr:]]/
+
+/[[:a\dz:]]/
 
 / End of testinput2 /

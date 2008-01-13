@@ -5551,12 +5551,6 @@ No match
  0: b
  1: b
 
-/(?(1)a|b)/
-
-/(?(1)b|a)/
-    a
- 0: a
-
 /(x)?(?(1)a|b)/
     *** Failers
 No match
@@ -6592,5 +6586,23 @@ No match
     abcd
  0: 
  1: 
+
+/[[:abcd:xyz]]/
+    a]
+ 0: a]
+    :] 
+ 0: :]
+    
+/[abc[:x\]pqr]/
+    a
+ 0: a
+    [
+ 0: [
+    :
+ 0: :
+    ]
+ 0: ]
+    p    
+ 0: p
 
 / End of testinput1 /
