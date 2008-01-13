@@ -39,6 +39,9 @@
 #include <zlib.h>
 
 #include "zip.h"
+/* #defines that rename all zip_ functions and structs */
+#include "zipint_alias.h"
+
 BEGIN_EXTERN_C()
 #ifndef HAVE_FSEEKO
 #define fseeko(s, o, w)	(fseek((s), (long int)(o), (w)))

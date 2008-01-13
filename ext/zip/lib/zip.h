@@ -38,6 +38,8 @@
 
 
 #include "main/php.h"
+/* #defines that rename all zip_ functions and structs */
+#include "zip_alias.h"
 #ifdef PHP_WIN32
 #include "zip_win32.h"
 # ifdef PHP_ZIP_EXPORTS
