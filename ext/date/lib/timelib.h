@@ -54,6 +54,7 @@ void timelib_isoweek_from_date(timelib_sll y, timelib_sll m, timelib_sll d, time
 
 /* From parse_date.re */
 timelib_time *timelib_strtotime(char *s, int len, timelib_error_container **errors, const timelib_tzdb *tzdb);
+timelib_time *timelib_parse_from_format(char *format, char *s, int len, timelib_error_container **errors, const timelib_tzdb *tzdb);
 void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options);
 char *timelib_timezone_id_from_abbr(const char *abbr, long gmtoffset, int isdst);
 const timelib_tz_lookup_table *timelib_timezone_abbreviations_list(void);
