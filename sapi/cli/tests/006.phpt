@@ -159,7 +159,13 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
     }
     Function [ <internal:date> function date_create ] {
     }
+    Function [ <internal:date> function date_create_from_format ] {
+    }
     Function [ <internal:date> function date_parse ] {
+    }
+    Function [ <internal:date> function date_parse_from_format ] {
+    }
+    Function [ <internal:date> function date_get_last_errors ] {
     }
     Function [ <internal:date> function date_format ] {
     }
@@ -256,7 +262,12 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
       - Static properties [0] {
       }
 
-      - Static methods [0] {
+      - Static methods [2] {
+        Method [ <internal:date> static public method createFromFormat ] {
+        }
+
+        Method [ <internal:date> static public method getLastErrors ] {
+        }
       }
 
       - Properties [0] {
