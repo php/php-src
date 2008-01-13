@@ -46,6 +46,8 @@
 #  define PHPZIPAPI __declspec(dllexport)
 # elif defined(COMPILE_DL_ZIP)
 #  define PHPZIPAPI __declspec(dllimport)
+# else
+#  define PHPZIPAPI
 # endif
 #else
 #define PHPZIPAPI
