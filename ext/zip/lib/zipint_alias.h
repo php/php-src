@@ -1,45 +1,49 @@
 
-#define zip_source_cmd php_ziplib__zip_source_cmd
-#define zip_source_callback php_ziplib__zip_source_callback
-#define zip_stat php_ziplib__zip_stat
-#define zip php_ziplib__zip
-#define zip_file php_ziplib__zip_file
+/* state of change of a file in zip archive */
+#define zip_state php_ziplib__zip_state
+#define zip_error php_ziplib__zip_error
+#define zip_dirent php_ziplib__zip_dirent
+#define zip_cdir php_ziplib__zip_cdir
 #define zip_source php_ziplib__zip_source
-#define zip_add php_ziplib__zip_add
-#define zip_add_dir php_ziplib__zip_add_dir
-#define zip_close php_ziplib__zip_close
-#define zip_delete php_ziplib__zip_delete
-#define zip_error_clear php_ziplib__zip_error_clear
-#define zip_error_get php_ziplib__zip_error_get
-#define zip_error_get_sys_type php_ziplib__zip_error_get_sys_type
-#define zip_error_to_str php_ziplib__zip_error_to_str
-#define zip_fclose php_ziplib__zip_fclose
-#define zip_file_error_clear php_ziplib__zip_fille_error_clear
-#define zip_file_error_get php_ziplib__zip_file_error_get
-#define zip_file_strerror php_ziplib__zip_file_strerror
-#define zip_fopen php_ziplib__zip_fopen
-#define zip_fopen_index php_ziplib__zip_fopen_index
-#define zip_fread php_ziplib__zip_fread
-#define zip_get_archive_comment php_ziplib__zip_get_archive_comment
-#define zip_get_file_comment php_ziplib__zip_get_file_comment
-#define zip_get_name php_ziplib__zip_get_name
-#define zip_get_num_files php_ziplib__zip_get_num_files
-#define zip_name_locate php_ziplib__zip_name_locate
-#define zip_open php_ziplib__zip_open
-#define zip_rename php_ziplib__zip_rename
-#define zip_replace php_ziplib__zip_replace
-#define zip_set_archive_comment php_ziplib__zip_set_archive_comment
-#define zip_set_file_comment php_ziplib__zip_set_file_comment
-#define zip_source_buffer php_ziplib__zip_source_buffer
-#define zip_source_file php_ziplib__zip_source_file
-#define zip_source_filep php_ziplib__zip_source_filep
-#define zip_source_free php_ziplib__zip_source_free
-#define zip_source_function php_ziplib__zip_source_function
-#define zip_source_zip php_ziplib__zip_source_zip
-#define zip_stat php_ziplib__zip_stat
-#define zip_stat_index php_ziplib__zip_stat_index
-#define zip_stat_init php_ziplib__zip_stat_init
-#define zip_strerror php_ziplib__zip_strerror
-#define zip_unchange php_ziplib__zip_unchange
-#define zip_unchange_all php_ziplib__zip_unchange_all
-#define zip_unchange_archive php_ziplib__zip_unchange_archive
+#define zip_entry php_ziplib__zip_entry
+
+#define _zip_err_str php_ziplib___zip_err_str
+#define _zip_nerr_str php_ziplib___zip_nerr_str
+#define _zip_err_type php_ziplib___zip_err_type
+
+#define _zip_cdir_free php_ziplib___zip_cdir_free
+#define _zip_cdir_new php_ziplib___zip_cdir_new
+#define _zip_cdir_write php_ziplib___zip_cdir_write
+
+#define _zip_dirent_finalize php_ziplib___zip_dirent_finalize
+#define _zip_dirent_init php_ziplib___zip_dirent_init
+#define _zip_dirent_read php_ziplib___zip_dirent_read
+#define _zip_dirent_write php_ziplib___zip_dirent_write
+
+#define _zip_entry_free php_ziplib___zip_entry_free
+#define _zip_entry_init php_ziplib___zip_entry_init
+#define _zip_entry_new php_ziplib___zip_entry_new
+
+#define _zip_error_clear php_ziplib___zip_error_clear
+#define _zip_error_copy php_ziplib___zip_error_copy
+#define _zip_error_fini php_ziplib___zip_error_fini
+#define _zip_error_get php_ziplib___zip_error_get
+#define _zip_error_init php_ziplib___zip_error_init
+#define _zip_error_set php_ziplib___zip_error_set
+#define _zip_error_strerror php_ziplib___zip_error_strerror
+
+#define _zip_file_fillbuf php_ziplib___zip_file_fillbuf
+#define _zip_file_get_offset php_ziplib___zip_file_get_offset
+
+#define _zip_free php_ziplib___zip_free
+#define _zip_get_name php_ziplib___zip_get_name
+#define _zip_local_header_read php_ziplib___zip_local_header_read
+#define _zip_memdup php_ziplib___zip_memdup
+#define _zip_name_locate php_ziplib___zip_name_locate
+#define _zip_new php_ziplib___zip_new
+#define _zip_read2 php_ziplib___zip_read2
+#define _zip_read4 php_ziplib___zip_read4
+#define _zip_replace php_ziplib___zip_replace
+#define _zip_set_name php_ziplib___zip_set_name
+#define _zip_unchange php_ziplib___zip_unchange
+#define _zip_unchange_data php_ziplib___zip_unchange_data
