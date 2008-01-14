@@ -56,7 +56,7 @@
    On error, fills in za->error and returns 0.
 */
 
-unsigned int
+PHPZIPAPI unsigned int
 _zip_file_get_offset(struct zip *za, int idx)
 {
     struct zip_dirent de;

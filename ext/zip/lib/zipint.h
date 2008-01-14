@@ -39,6 +39,10 @@
 #include <zlib.h>
 
 #include "zip.h"
+/* #defines that rename all zip_ functions and structs */
+#include "zipint_alias.h"
+
+BEGIN_EXTERN_C()
 #ifndef HAVE_FSEEKO
 #define fseeko(s, o, w)	(fseek((s), (long int)(o), (w)))
 #endif
@@ -185,42 +189,43 @@ extern const int _zip_err_type[];
 
 
 
-void _zip_cdir_free(struct zip_cdir *);
-struct zip_cdir *_zip_cdir_new(int, struct zip_error *);
-int _zip_cdir_write(struct zip_cdir *, FILE *, struct zip_error *);
+PHPZIPAPI void _zip_cdir_free(struct zip_cdir *);
+PHPZIPAPI struct zip_cdir *_zip_cdir_new(int, struct zip_error *);
+PHPZIPAPI int _zip_cdir_write(struct zip_cdir *, FILE *, struct zip_error *);
 
-void _zip_dirent_finalize(struct zip_dirent *);
-void _zip_dirent_init(struct zip_dirent *);
-int _zip_dirent_read(struct zip_dirent *, FILE *,
+PHPZIPAPI void _zip_dirent_finalize(struct zip_dirent *);
+PHPZIPAPI void _zip_dirent_init(struct zip_dirent *);
+PHPZIPAPI int _zip_dirent_read(struct zip_dirent *, FILE *,
 		     unsigned char **, unsigned int, int, struct zip_error *);
-int _zip_dirent_write(struct zip_dirent *, FILE *, int, struct zip_error *);
+PHPZIPAPI int _zip_dirent_write(struct zip_dirent *, FILE *, int, struct zip_error *);
 
-void _zip_entry_free(struct zip_entry *);
-void _zip_entry_init(struct zip *, int);
-struct zip_entry *_zip_entry_new(struct zip *);
+PHPZIPAPI void _zip_entry_free(struct zip_entry *);
+PHPZIPAPI void _zip_entry_init(struct zip *, int);
+PHPZIPAPI struct zip_entry *_zip_entry_new(struct zip *);
 
-void _zip_error_clear(struct zip_error *);
-void _zip_error_copy(struct zip_error *, struct zip_error *);
-void _zip_error_fini(struct zip_error *);
-void _zip_error_get(struct zip_error *, int *, int *);
-void _zip_error_init(struct zip_error *);
-void _zip_error_set(struct zip_error *, int, int);
-const char *_zip_error_strerror(struct zip_error *);
+PHPZIPAPI void _zip_error_clear(struct zip_error *);
+PHPZIPAPI void _zip_error_copy(struct zip_error *, struct zip_error *);
+PHPZIPAPI void _zip_error_fini(struct zip_error *);
+PHPZIPAPI void _zip_error_get(struct zip_error *, int *, int *);
+PHPZIPAPI void _zip_error_init(struct zip_error *);
+PHPZIPAPI void _zip_error_set(struct zip_error *, int, int);
+PHPZIPAPI const char *_zip_error_strerror(struct zip_error *);
 
-int _zip_file_fillbuf(void *, size_t, struct zip_file *);
-unsigned int _zip_file_get_offset(struct zip *, int);
+PHPZIPAPI int _zip_file_fillbuf(void *, size_t, struct zip_file *);
+PHPZIPAPI unsigned int _zip_file_get_offset(struct zip *, int);
 
-void _zip_free(struct zip *);
-const char *_zip_get_name(struct zip *, int, int, struct zip_error *);
-int _zip_local_header_read(struct zip *, int);
-void *_zip_memdup(const void *, size_t, struct zip_error *);
-int _zip_name_locate(struct zip *, const char *, int, struct zip_error *);
-struct zip *_zip_new(struct zip_error *);
-unsigned short _zip_read2(unsigned char **);
-unsigned int _zip_read4(unsigned char **);
-int _zip_replace(struct zip *, int, const char *, struct zip_source *);
-int _zip_set_name(struct zip *, int, const char *);
-int _zip_unchange(struct zip *, int, int);
-void _zip_unchange_data(struct zip_entry *);
+PHPZIPAPI void _zip_free(struct zip *);
+PHPZIPAPI const char *_zip_get_name(struct zip *, int, int, struct zip_error *);
+PHPZIPAPI int _zip_local_header_read(struct zip *, int);
+PHPZIPAPI void *_zip_memdup(const void *, size_t, struct zip_error *);
+PHPZIPAPI int _zip_name_locate(struct zip *, const char *, int, struct zip_error *);
+PHPZIPAPI struct zip *_zip_new(struct zip_error *);
+PHPZIPAPI unsigned short _zip_read2(unsigned char **);
+PHPZIPAPI unsigned int _zip_read4(unsigned char **);
+PHPZIPAPI int _zip_replace(struct zip *, int, const char *, struct zip_source *);
+PHPZIPAPI int _zip_set_name(struct zip *, int, const char *);
+PHPZIPAPI int _zip_unchange(struct zip *, int, int);
+PHPZIPAPI void _zip_unchange_data(struct zip_entry *);
 
+END_EXTERN_C();
 #endif /* zipint.h */
