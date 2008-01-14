@@ -67,6 +67,7 @@ PHP                                                                        NEWS
 - Fixed bug #43105 (PHP seems to fail to close open files). (Hannes)
 - Fixed bug #42978 (mismatch between number of bound params and values causes
   a crash in pdo_pgsql). (Ilia)
+- Fixed bug #42945 (preg_split() swallows part of the string). (Nuno)
 - Fixed bug #42937 (__call() method not invoked when methods are called on
   parent from child class). (Dmitry)
 - Fixed bug #42736 (xmlrpc_server_call_method() crashes). (Tony)
