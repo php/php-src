@@ -223,7 +223,7 @@ int phar_open_zipfile(char *fname, int fname_len, char *alias, int alias_len, ph
 	/* ignore all errors in loading up manifest */
 	zip_error_clear(zip);
 
-	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
+	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
 	if (register_alias) {
 		mydata->is_explicit_alias = 1;
 		zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
