@@ -1424,7 +1424,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 	phar_unixify_path_separators(mydata->fname, fname_len);
 #endif
 	mydata->fname_len = fname_len;
-	mydata->alias = alias ? estrndup(alias, alias_len) : estrndup(fname, fname_len);
+	mydata->alias = alias ? estrndup(alias, alias_len) : estrndup(mydata->fname, fname_len);
 	mydata->alias_len = alias ? alias_len : fname_len;
 	mydata->sig_flags = sig_flags;
 	mydata->sig_len = sig_len;

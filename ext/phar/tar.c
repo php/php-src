@@ -37,6 +37,20 @@ static php_uint32 phar_tar_number(char *buf, int len) /* {{{ */
 }
 /* }}} */
 
+#ifdef PHP_WIN32
+static inline void phar_unixify_path_separators(char *path, int path_len) /* {{{ */
+{
+	char *s;
+
+	/* unixify win paths */
+	for (s = path; s - path < path_len; s++) {
+		if (*s == '\\') {
+			*s = '/';
+		}
+	}
+}
+/* }}} */
+#endif
 /* adapted from format_octal() in libarchive
  * 
  * Copyright (c) 2003-2007 Tim Kientzle
@@ -150,7 +164,7 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 	size_t pos = 0, read;
 	tar_header *hdr;
 	php_uint32 sum1, sum2, size, old;
-	phar_archive_data *myphar;
+	phar_archive_data *myphar, **actual;
 
 	if (error) {
 		*error = NULL;
@@ -280,15 +294,27 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 		read = php_stream_read(fp, buf, sizeof(buf));
 	} while (read != 0);
 	myphar->fname = estrndup(fname, fname_len);
+#ifdef PHP_WIN32
+	phar_unixify_path_separators(myphar->fname, fname_len);
+#endif
 	myphar->fname_len = fname_len;
 	myphar->fp = fp;
 	phar_request_initialize(TSRMLS_C);
-	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void*)&myphar, sizeof(phar_archive_data*), NULL);
+	if (SUCCESS != zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), myphar->fname, fname_len, (void*)&myphar, sizeof(phar_archive_data*), (void **)&actual)) {
+		if (error) {
+			spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\" to phar registry", fname);
+		}
+		php_stream_close(fp);
+		zend_hash_destroy(&myphar->manifest);
+		efree(myphar);
+		return FAILURE;
+	}
+	myphar = *actual;
 	if (actual_alias) {
 		myphar->is_explicit_alias = 1;
 		zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), actual_alias, myphar->alias_len, (void*)&myphar, sizeof(phar_archive_data*), NULL);
 	} else {
-		myphar->alias = estrndup(fname, fname_len);
+		myphar->alias = estrndup(myphar->fname, fname_len);
 		myphar->alias_len = fname_len;
 		myphar->is_explicit_alias = 0;
 	}
