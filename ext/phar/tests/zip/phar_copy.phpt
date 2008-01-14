@@ -3,7 +3,7 @@ Phar: copy() zip-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
-<?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
+<?php if (!extension_loaded("zip")) die("skip"); ?>
 --INI--
 phar.readonly=0
 phar.require_hash=1

@@ -2,6 +2,7 @@
 Phar::buildFromIterator() iterator, SplFileInfo as current zip-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("zip")) die("skip"); ?>
 --INI--
 phar.readonly=0
 --FILE--

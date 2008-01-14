@@ -2,6 +2,7 @@
 Phar front controller no index file 404 zip-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("zip")) die("skip"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller8.phar.php/
 REQUEST_URI=/frontcontroller8.phar.php/
