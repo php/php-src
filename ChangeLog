@@ -1,3 +1,207 @@
+2008-01-13  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/zip/lib/zip.h:
+      MFH: add missing define for statically-built zip ext
+
+    * ext/zip/lib/zip.h:
+      add missing define for statically-built zip ext
+
+    * main/streams/streams.c:
+      use correct macro
+
+2008-01-13  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/php_date.c:
+      - Fixed TSRM builds.
+
+    * (PHP_5_3)
+      ext/date/php_date.c:
+      - Fixed TSRM builds.
+
+2008-01-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/cli/tests/006.phpt:
+      
+      MFB: fixed test
+
+    * (PHP_5_3)
+      sapi/cli/tests/006.phpt:
+      
+      Fixed test
+
+2008-01-13  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/php_date.c
+      ext/date/php_date.h
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/lib/timelib.h:
+      - MF53: Added new date/time functionality:
+      
+        * date_parse_from_format(): Parse date/time strings according to a
+      format.
+        * date_create_from_format()/DateTime::createFromFormat(): Create a
+      date/time
+          object by parsing a date/time string according to a given format.
+        * date_get_last_errors()/DateTime::getLastErrors(): Return a list of
+      warnings
+          and errors that were found while parsing a date/time string through:
+          - strtotime() / new DateTime
+          - date_create_from_format() / DateTime::createFromFormat()
+          - date_parse_from_format()
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/php_date.c
+      ext/date/php_date.h
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/lib/timelib.h:
+      - Added new date/time functionality:
+      
+        * date_parse_from_format(): Parse date/time strings according to a
+      format.
+        * date_create_from_format()/DateTime::createFromFormat(): Create a
+      date/time
+          object by parsing a date/time string according to a given format.
+        * date_get_last_errors()/DateTime::getLastErrors(): Return a list of
+      warnings
+          and errors that were found while parsing a date/time string through:
+          - strtotime() / new DateTime
+          - date_create_from_format() / DateTime::createFromFormat()
+          - date_parse_from_format()
+
+2008-01-13  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/tests/bug42945.phpt:
+      MFB: fix bug #42945
+
+    * ext/pcre/tests/bug42945.phpt
+      ext/pcre/tests/bug42945.phpt:
+      
+      file bug42945.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      ext/pcre/php_pcre.c:
+      Fixed bug #42945 (preg_split() swallows part of the string)
+
+    * ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/config.h
+      ext/pcre/pcrelib/dftables.c
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre_chartables.c
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_config.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_fullinfo.c
+      ext/pcre/pcrelib/pcre_get.c
+      ext/pcre/pcrelib/pcre_globals.c
+      ext/pcre/pcrelib/pcre_info.c
+      ext/pcre/pcrelib/pcre_internal.h
+      ext/pcre/pcrelib/pcre_maketables.c
+      ext/pcre/pcrelib/pcre_newline.c
+      ext/pcre/pcrelib/pcre_ord2utf8.c
+      ext/pcre/pcrelib/pcre_printint.src
+      ext/pcre/pcrelib/pcre_refcount.c
+      ext/pcre/pcrelib/pcre_study.c
+      ext/pcre/pcrelib/pcre_tables.c
+      ext/pcre/pcrelib/pcre_try_flipped.c
+      ext/pcre/pcrelib/pcre_ucp_searchfuncs.c
+      ext/pcre/pcrelib/pcre_valid_utf8.c
+      ext/pcre/pcrelib/pcre_version.c
+      ext/pcre/pcrelib/pcre_xclass.c
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/ucptable.h
+      ext/pcre/pcrelib/testdata/grepoutput
+      ext/pcre/pcrelib/testdata/testinput1
+      ext/pcre/pcrelib/testdata/testinput2
+      ext/pcre/pcrelib/testdata/testinput4
+      ext/pcre/pcrelib/testdata/testinput5
+      ext/pcre/pcrelib/testdata/testinput6
+      ext/pcre/pcrelib/testdata/testinput7
+      ext/pcre/pcrelib/testdata/testinput8
+      ext/pcre/pcrelib/testdata/testoutput1
+      ext/pcre/pcrelib/testdata/testoutput2
+      ext/pcre/pcrelib/testdata/testoutput4
+      ext/pcre/pcrelib/testdata/testoutput5
+      ext/pcre/pcrelib/testdata/testoutput6
+      ext/pcre/pcrelib/testdata/testoutput7
+      ext/pcre/pcrelib/testdata/testoutput8:
+      upgrade to PCRE 7.5
+
+    * (PHP_5_3)
+      NEWS
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/config.h
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_internal.h
+      ext/pcre/pcrelib/pcre_valid_utf8.c
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/ucptable.h
+      ext/pcre/pcrelib/testdata/grepoutput
+      ext/pcre/pcrelib/testdata/testinput1
+      ext/pcre/pcrelib/testdata/testinput2
+      ext/pcre/pcrelib/testdata/testinput4
+      ext/pcre/pcrelib/testdata/testinput5
+      ext/pcre/pcrelib/testdata/testinput6
+      ext/pcre/pcrelib/testdata/testoutput1
+      ext/pcre/pcrelib/testdata/testoutput2
+      ext/pcre/pcrelib/testdata/testoutput4
+      ext/pcre/pcrelib/testdata/testoutput5
+      ext/pcre/pcrelib/testdata/testoutput6:
+      upgrade PCRE to version 7.5
+
+2008-01-13  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/zip/php_zip.c
+      ext/zip/lib/zipint_alias.h:
+      MFB: a few fixes: overwrote all my careful work in zipint_alias.h with
+      zipint.h, so had to restore that.
+      PHP_RAW_NAMED_FE() won't work, have to use ZEND_RAW_FENTRY
+
+    * (PHP_5_3)
+      ext/zip/php_zip.c
+      ext/zip/lib/zipint_alias.h:
+      a few fixes: overwrite all my careful work in zipint_alias.h with zipint.h,
+      so had to restore that.
+      PHP_RAW_NAMED_FE() won't work, have to use ZEND_RAW_FENTRY
+
+    * (PHP_5_3)
+      ext/zip/php_zip.c
+      ext/zip/lib/zip.h
+      ext/zip/lib/zip_alias.h
+      ext/zip/lib/zipint.h
+      ext/zip/lib/zipint_alias.h:
+      MFH: alias all zip identifiers to avoid potential name conflicts with other
+      apache libs that may export zip symbols
+
+    * ext/zip/lib/zip_alias.h
+      ext/zip/lib/zip_alias.h
+      ext/zip/lib/zipint.h
+      ext/zip/lib/zipint_alias.h
+      ext/zip/lib/zipint_alias.h:
+      
+      MFPECL: alias all zip identifiers to avoid potential name conflicts with
+      other apache libs that may export zip symbols
+
+    * ext/zip/php_zip.c
+      ext/zip/lib/zip.h:
+      MFPECL: alias all zip identifiers to avoid potential name conflicts with
+      other apache libs that may export zip symbols
+
 2008-01-12  Greg Beaver  <greg@chiaraquartet.net>
 
     * ext/zlib/zlib_filter.c:
