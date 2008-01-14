@@ -44,8 +44,6 @@
 #include "zip_win32.h"
 # ifdef PHP_ZIP_EXPORTS
 #  define PHPZIPAPI __declspec(dllexport)
-# elif defined(COMPILE_DL_ZIP)
-#  define PHPZIPAPI __declspec(dllimport)
 # else
 #  define PHPZIPAPI
 # endif
