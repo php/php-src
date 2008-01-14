@@ -943,7 +943,7 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_filesize)
 
 /* {{{ proto string zip_entry_compressionmethod(resource zip_entry) U
    Return a string containing the compression method used on a particular entry */
-static PHP_FUNCTION(zif_zip_entry_compressionmethod)
+static PHP_NAMED_FUNCTION(zif_zip_entry_compressionmethod)
 {
 	php_zip_entry_get_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, 3);
 }
