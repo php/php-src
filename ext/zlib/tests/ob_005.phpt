@@ -9,6 +9,8 @@ if (false === stristr(PHP_SAPI, "cgi")) die("skip need sapi/cgi");
 zlib.output_compression=0
 --ENV--
 HTTP_ACCEPT_ENCODING=gzip
+--POST--
+dummy=42
 --FILE--
 <?php
 ob_start("ob_gzhandler");
