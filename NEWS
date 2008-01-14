@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed a bug with PDO::FETCH_COLUMN|PDO::FETCH_GROUP mode when a column # by
   which to group by data is specified. (Ilia)
+- Upgraded PCRE to version 7.5 (Nuno)
 
 - Fixed faulty fix for bug #40189
                    (endless loop in zlib.inflate stream filter) (Greg)

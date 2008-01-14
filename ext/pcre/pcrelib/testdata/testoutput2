@@ -109,7 +109,7 @@ Failed: missing ) at offset 4
 Failed: missing ) after comment at offset 7
 
 /(?z)abc/
-Failed: unrecognized character after (? at offset 2
+Failed: unrecognized character after (? or (?- at offset 2
 
 /.*b/I
 Capturing subpattern count = 0
@@ -166,7 +166,6 @@ Starting byte set: a b c d
 
 /(a|[^\dZ])/IS
 Capturing subpattern count = 1
-Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -311,7 +310,7 @@ No match
 No match
 
 /ab(?z)cd/
-Failed: unrecognized character after (? at offset 4
+Failed: unrecognized character after (? or (?- at offset 4
 
 /^abc|def/I
 Capturing subpattern count = 0
@@ -403,7 +402,6 @@ Failed: missing terminating ] for character class at offset 4
 /[^aeiou ]{3,}/I
 Capturing subpattern count = 0
 Partial matching not supported
-Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -948,25 +946,22 @@ Failed: missing ) at offset 4
 Failed: unrecognized character after (?< at offset 3
 
 /a(?{)b/
-Failed: unrecognized character after (? at offset 3
+Failed: unrecognized character after (? or (?- at offset 3
 
 /a(?{{})b/
-Failed: unrecognized character after (? at offset 3
+Failed: unrecognized character after (? or (?- at offset 3
 
 /a(?{}})b/
-Failed: unrecognized character after (? at offset 3
+Failed: unrecognized character after (? or (?- at offset 3
 
 /a(?{"{"})b/
-Failed: unrecognized character after (? at offset 3
+Failed: unrecognized character after (? or (?- at offset 3
 
 /a(?{"{"}})b/
-Failed: unrecognized character after (? at offset 3
+Failed: unrecognized character after (? or (?- at offset 3
 
 /(?(1?)a|b)/
 Failed: malformed number or name after (?( at offset 4
-
-/(?(1)a|b|c)/
-Failed: conditional group contains more than two branches at offset 10
 
 /[a[:xyz:/
 Failed: missing terminating ] for character class at offset 8
@@ -1440,7 +1435,6 @@ Need char = 'a'
 /"([^\\"]+|\\.)*"/I
 Capturing subpattern count = 1
 Partial matching not supported
-Contains explicit CR or LF match
 No options
 First char = '"'
 Need char = '"'
@@ -1602,32 +1596,32 @@ No options
 First char = 'a'
 Need char = 'b'
 
-/a(?(1)b)/I
-Capturing subpattern count = 0
+/a(?(1)b)(.)/I
+Capturing subpattern count = 1
 No options
 First char = 'a'
 No need char
 
-/a(?(1)bag|big)/I
-Capturing subpattern count = 0
+/a(?(1)bag|big)(.)/I
+Capturing subpattern count = 1
 No options
 First char = 'a'
 Need char = 'g'
 
-/a(?(1)bag|big)*/I
-Capturing subpattern count = 0
+/a(?(1)bag|big)*(.)/I
+Capturing subpattern count = 1
 No options
 First char = 'a'
 No need char
 
-/a(?(1)bag|big)+/I
-Capturing subpattern count = 0
+/a(?(1)bag|big)+(.)/I
+Capturing subpattern count = 1
 No options
 First char = 'a'
 Need char = 'g'
 
-/a(?(1)b..|b..)/I
-Capturing subpattern count = 0
+/a(?(1)b..|b..)(.)/I
+Capturing subpattern count = 1
 No options
 First char = 'a'
 Need char = 'b'
@@ -1716,7 +1710,6 @@ Study returned NULL
   /Ix
 Capturing subpattern count = 0
 Partial matching not supported
-Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1746,7 +1739,6 @@ No match
 /\(  ( (?>[^()]+) | (?R) )* \) /Ixg
 Capturing subpattern count = 1
 Partial matching not supported
-Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1762,7 +1754,6 @@ Need char = ')'
 /\(  (?: (?>[^()]+) | (?R) ) \) /Ix
 Capturing subpattern count = 0
 Partial matching not supported
-Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1782,7 +1773,6 @@ No match
 /\(  (?: (?>[^()]+) | (?R) )? \) /Ix
 Capturing subpattern count = 0
 Partial matching not supported
-Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1794,7 +1784,6 @@ Need char = ')'
 /\(  ( (?>[^()]+) | (?R) )* \) /Ix
 Capturing subpattern count = 1
 Partial matching not supported
-Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1805,7 +1794,6 @@ Need char = ')'
 /\( ( ( (?>[^()]+) | (?R) )* ) \) /Ix
 Capturing subpattern count = 2
 Partial matching not supported
-Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1817,7 +1805,6 @@ Need char = ')'
 /\( (123)? ( ( (?>[^()]+) | (?R) )* ) \) /Ix
 Capturing subpattern count = 3
 Partial matching not supported
-Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1835,7 +1822,6 @@ Need char = ')'
 /\( ( (123)? ( (?>[^()]+) | (?R) )* ) \) /Ix
 Capturing subpattern count = 3
 Partial matching not supported
-Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1853,7 +1839,6 @@ Need char = ')'
 /\( (((((((((( ( (?>[^()]+) | (?R) )* )))))))))) \) /Ix
 Capturing subpattern count = 11
 Partial matching not supported
-Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1874,7 +1859,6 @@ Need char = ')'
 /\( ( ( (?>[^()<>]+) | ((?>[^()]+)) | (?R) )* ) \) /Ix
 Capturing subpattern count = 3
 Partial matching not supported
-Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1887,7 +1871,6 @@ Need char = ')'
 /\( ( ( (?>[^()]+) | ((?R)) )* ) \) /Ix
 Capturing subpattern count = 3
 Partial matching not supported
-Contains explicit CR or LF match
 Options: extended
 First char = '('
 Need char = ')'
@@ -1919,12 +1902,11 @@ No need char
 ------------------------------------------------------------------
         Bra
         ^
-        [\x00-/:-@[-`{-\xff]
+        [\x00-/:-@[-`{-\xff] (neg)
         Ket
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
@@ -1946,12 +1928,11 @@ No need char
 ------------------------------------------------------------------
         Bra
         ^
-        [\x00-@[-`{-\xff]
+        [\x00-@[-`{-\xff] (neg)
         Ket
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
@@ -1973,7 +1954,6 @@ Starting byte set: A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
@@ -1982,7 +1962,7 @@ No need char
 ------------------------------------------------------------------
         Bra
         ^
-        [\x80-\xff]
+        [\x80-\xff] (neg)
         Ket
         End
 ------------------------------------------------------------------
@@ -2008,12 +1988,11 @@ No need char
 ------------------------------------------------------------------
         Bra
         ^
-        [\x00-\x08\x0a-\x1f!-\xff]
+        [\x00-\x08\x0a-\x1f!-\xff] (neg)
         Ket
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
@@ -2035,7 +2014,6 @@ Starting byte set: \x09 \x0a \x0b \x0c \x0d \x20
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
@@ -2114,7 +2092,6 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
@@ -2162,7 +2139,7 @@ No need char
 ------------------------------------------------------------------
         Bra
         ^
-        [ -~\x80-\xff]
+        [ -~\x80-\xff] (neg)
         Ket
         End
 ------------------------------------------------------------------
@@ -2175,12 +2152,11 @@ No need char
 ------------------------------------------------------------------
         Bra
         ^
-        [\x00-/12:-\xff]
+        [\x00-/12:-\xff] (neg)
         Ket
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
@@ -2189,12 +2165,11 @@ No need char
 ------------------------------------------------------------------
         Bra
         ^
-        [\x00-\x08\x0a-\x1f!-\xff]
+        [\x00-\x08\x0a-\x1f!-\xff] (neg)
         Ket
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
@@ -2758,7 +2733,7 @@ No need char
 /[\S]/DZ
 ------------------------------------------------------------------
         Bra
-        [\x00-\x08\x0b\x0e-\x1f!-\xff]
+        [\x00-\x08\x0b\x0e-\x1f!-\xff] (neg)
         Ket
         End
 ------------------------------------------------------------------
@@ -3083,7 +3058,6 @@ Need char = 'b'
 /([^()]++|\([^()]*\))+/I
 Capturing subpattern count = 1
 Partial matching not supported
-Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -3094,7 +3068,6 @@ No need char
 /\(([^()]++|\([^()]+\))+\)/I
 Capturing subpattern count = 1
 Partial matching not supported
-Contains explicit CR or LF match
 No options
 First char = '('
 Need char = ')'
@@ -3295,7 +3268,6 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -3308,7 +3280,6 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -3316,7 +3287,6 @@ No need char
 /< (?: (?(R) \d++  | [^<>]*+) | (?R)) * >/Ix
 Capturing subpattern count = 0
 Partial matching not supported
-Contains explicit CR or LF match
 Options: extended
 First char = '<'
 Need char = '>'
@@ -3468,26 +3438,26 @@ No options
 No first char
 Need char = 'a'
 
-/(?(1)ab|ac)/I
-Capturing subpattern count = 0
+/(?(1)ab|ac)(.)/I
+Capturing subpattern count = 1
 No options
 First char = 'a'
 No need char
 
-/(?(1)abz|acz)/I
-Capturing subpattern count = 0
+/(?(1)abz|acz)(.)/I
+Capturing subpattern count = 1
 No options
 First char = 'a'
 Need char = 'z'
 
-/(?(1)abz)/I
-Capturing subpattern count = 0
+/(?(1)abz)(.)/I
+Capturing subpattern count = 1
 No options
 No first char
 No need char
 
-/(?(1)abz)123/I
-Capturing subpattern count = 0
+/(?(1)abz)(1)23/I
+Capturing subpattern count = 1
 No options
 No first char
 Need char = '3'
@@ -3531,7 +3501,6 @@ Starting byte set: a b
 
 /[^a]/I
 Capturing subpattern count = 0
-Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -3991,7 +3960,6 @@ Failed: recursive call could loop indefinitely at offset 16
 
 /^([^()]|\((?1)*\))*$/I
 Capturing subpattern count = 1
-Contains explicit CR or LF match
 Options: anchored
 No first char
 No need char
@@ -4011,7 +3979,6 @@ No match
 
 /^>abc>([^()]|\((?1)*\))*<xyz<$/I
 Capturing subpattern count = 1
-Contains explicit CR or LF match
 Options: anchored
 No first char
 Need char = '<'
@@ -4139,7 +4106,6 @@ No match
 /((< (?: (?(R) \d++  | [^<>]*+) | (?2)) * >))/Ix
 Capturing subpattern count = 2
 Partial matching not supported
-Contains explicit CR or LF match
 Options: extended
 First char = '<'
 Need char = '>'
@@ -5958,7 +5924,6 @@ Matched, but too many substrings
 /[^()]*(?:\((?R)\)[^()]*)*/I
 Capturing subpattern count = 0
 Partial matching not supported
-Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -5972,7 +5937,6 @@ No need char
 /[^()]*(?:\((?>(?R))\)[^()]*)*/I
 Capturing subpattern count = 0
 Partial matching not supported
-Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -5984,7 +5948,6 @@ No need char
 /[^()]*(?:\((?R)\))*[^()]*/I
 Capturing subpattern count = 0
 Partial matching not supported
-Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -5996,7 +5959,6 @@ No need char
 /(?:\((?R)\))*[^()]*/I
 Capturing subpattern count = 0
 Partial matching not supported
-Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -6010,7 +5972,6 @@ No need char
 /(?:\((?R)\))|[^()]*/I
 Capturing subpattern count = 0
 Partial matching not supported
-Contains explicit CR or LF match
 No options
 No first char
 No need char
@@ -6205,6 +6166,7 @@ Named capturing subpatterns:
   A   2
   A   3
 Options: anchored dupnames
+Duplicate name status changes
 No first char
 No need char
     a1b\CA
@@ -7913,7 +7875,7 @@ No match
 /a/<any><crlf>
 Failed: inconsistent NEWLINE options at offset 0
 
-/^a\Rb/
+/^a\Rb/<bsr_unicode>
     a\nb
  0: a\x0ab
     a\rb
@@ -7931,7 +7893,7 @@ No match
     a\n\rb
 No match
 
-/^a\R*b/
+/^a\R*b/<bsr_unicode>
     ab
  0: ab
     a\nb
@@ -7951,7 +7913,7 @@ No match
     a\n\r\x85\x0cb
  0: a\x0a\x0d\x85\x0cb
 
-/^a\R+b/
+/^a\R+b/<bsr_unicode>
     a\nb
  0: a\x0ab
     a\rb
@@ -7973,7 +7935,7 @@ No match
     ab
 No match
 
-/^a\R{1,3}b/
+/^a\R{1,3}b/<bsr_unicode>
     a\nb
  0: a\x0ab
     a\n\rb
@@ -7995,7 +7957,7 @@ No match
     a\r
 No match
 
-/^a[\R]b/
+/^a[\R]b/<bsr_unicode>
     aRb
  0: aRb
     ** Failers
@@ -8343,7 +8305,7 @@ Failed: reference to non-existent subpattern at offset 6
 /((?(-2)a))/BZ
 Failed: reference to non-existent subpattern at offset 7
 
-/^(?(+1)X|Y)/BZ
+/^(?(+1)X|Y)(.)/BZ
 ------------------------------------------------------------------
         Bra
         ^
@@ -8353,11 +8315,15 @@ Failed: reference to non-existent subpattern at offset 7
         Alt
         Y
         Ket
+        CBra 1
+        Any
+        Ket
         Ket
         End
 ------------------------------------------------------------------
-    Y
- 0: Y
+    Y!
+ 0: Y!
+ 1: !
 
 /(foo)\Kbar/
     foobar
@@ -9167,5 +9133,256 @@ No match
 No match
     a\x85b 
 No match
+
+/a\Rb/I<bsr_anycrlf>
+Capturing subpattern count = 0
+Options: bsr_anycrlf
+First char = 'a'
+Need char = 'b'
+    a\rb
+ 0: a\x0db
+    a\nb
+ 0: a\x0ab
+    a\r\nb
+ 0: a\x0d\x0ab
+    ** Failers
+No match
+    a\x85b
+No match
+    a\x0bb     
+No match
+
+/a\Rb/I<bsr_unicode>
+Capturing subpattern count = 0
+Options: bsr_unicode
+First char = 'a'
+Need char = 'b'
+    a\rb
+ 0: a\x0db
+    a\nb
+ 0: a\x0ab
+    a\r\nb
+ 0: a\x0d\x0ab
+    a\x85b
+ 0: a\x85b
+    a\x0bb     
+ 0: a\x0bb
+    ** Failers 
+No match
+    a\x85b\<bsr_anycrlf>
+No match
+    a\x0bb\<bsr_anycrlf>
+No match
+    
+/a\R?b/I<bsr_anycrlf>
+Capturing subpattern count = 0
+Options: bsr_anycrlf
+First char = 'a'
+Need char = 'b'
+    a\rb
+ 0: a\x0db
+    a\nb
+ 0: a\x0ab
+    a\r\nb
+ 0: a\x0d\x0ab
+    ** Failers
+No match
+    a\x85b
+No match
+    a\x0bb     
+No match
+
+/a\R?b/I<bsr_unicode>
+Capturing subpattern count = 0
+Options: bsr_unicode
+First char = 'a'
+Need char = 'b'
+    a\rb
+ 0: a\x0db
+    a\nb
+ 0: a\x0ab
+    a\r\nb
+ 0: a\x0d\x0ab
+    a\x85b
+ 0: a\x85b
+    a\x0bb     
+ 0: a\x0bb
+    ** Failers 
+No match
+    a\x85b\<bsr_anycrlf>
+No match
+    a\x0bb\<bsr_anycrlf>
+No match
+    
+/a\R{2,4}b/I<bsr_anycrlf>
+Capturing subpattern count = 0
+Partial matching not supported
+Options: bsr_anycrlf
+First char = 'a'
+Need char = 'b'
+    a\r\n\nb
+ 0: a\x0d\x0a\x0ab
+    a\n\r\rb
+ 0: a\x0a\x0d\x0db
+    a\r\n\r\n\r\n\r\nb
+ 0: a\x0d\x0a\x0d\x0a\x0d\x0a\x0d\x0ab
+    ** Failers
+No match
+    a\x85\85b
+No match
+    a\x0b\0bb     
+No match
+
+/a\R{2,4}b/I<bsr_unicode>
+Capturing subpattern count = 0
+Partial matching not supported
+Options: bsr_unicode
+First char = 'a'
+Need char = 'b'
+    a\r\rb
+ 0: a\x0d\x0db
+    a\n\n\nb
+ 0: a\x0a\x0a\x0ab
+    a\r\n\n\r\rb
+ 0: a\x0d\x0a\x0a\x0d\x0db
+    a\x85\85b
+No match
+    a\x0b\0bb     
+No match
+    ** Failers 
+No match
+    a\r\r\r\r\rb 
+No match
+    a\x85\85b\<bsr_anycrlf>
+No match
+    a\x0b\0bb\<bsr_anycrlf>
+No match
+ 
+/(*BSR_ANYCRLF)a\Rb/I
+Capturing subpattern count = 0
+Options: bsr_anycrlf
+First char = 'a'
+Need char = 'b'
+    a\nb
+ 0: a\x0ab
+    a\rb 
+ 0: a\x0db
+
+/(*BSR_UNICODE)a\Rb/I
+Capturing subpattern count = 0
+Options: bsr_unicode
+First char = 'a'
+Need char = 'b'
+    a\x85b
+ 0: a\x85b
+
+/(*BSR_ANYCRLF)(*CRLF)a\Rb/I
+Capturing subpattern count = 0
+Options: bsr_anycrlf
+Forced newline sequence: CRLF
+First char = 'a'
+Need char = 'b'
+    a\nb
+ 0: a\x0ab
+    a\rb 
+ 0: a\x0db
+
+/(*CRLF)(*BSR_UNICODE)a\Rb/I
+Capturing subpattern count = 0
+Options: bsr_unicode
+Forced newline sequence: CRLF
+First char = 'a'
+Need char = 'b'
+    a\x85b
+ 0: a\x85b
+
+/(*CRLF)(*BSR_ANYCRLF)(*CR)ab/I
+Capturing subpattern count = 0
+Options: bsr_anycrlf
+Forced newline sequence: CR
+First char = 'a'
+Need char = 'b'
+
+/(?<a>)(?&)/
+Failed: subpattern name expected at offset 9
+
+/(?<abc>)(?&a)/
+Failed: reference to non-existent subpattern at offset 12
+
+/(?<a>)(?&aaaaaaaaaaaaaaaaaaaaaaa)/
+Failed: reference to non-existent subpattern at offset 32
+
+/(?+-a)/
+Failed: digit expected after (?+ at offset 3
+
+/(?-+a)/
+Failed: unrecognized character after (? or (?- at offset 3
+
+/(?(-1))/
+Failed: reference to non-existent subpattern at offset 6
+
+/(?(+10))/
+Failed: reference to non-existent subpattern at offset 7
+
+/(?(10))/
+Failed: reference to non-existent subpattern at offset 6
+
+/(?(+2))()()/
+
+/(?(2))()()/
+
+/\k''/
+Failed: subpattern name expected at offset 3
+
+/\k<>/
+Failed: subpattern name expected at offset 3
+
+/\k{}/
+Failed: subpattern name expected at offset 3
+
+/(?P=)/
+Failed: subpattern name expected at offset 4
+
+/(?P>)/
+Failed: subpattern name expected at offset 4
+
+/(?!\w)(?R)/
+Failed: recursive call could loop indefinitely at offset 9
+
+/(?=\w)(?R)/
+Failed: recursive call could loop indefinitely at offset 9
+
+/(?<!\w)(?R)/
+Failed: recursive call could loop indefinitely at offset 10
+
+/(?<=\w)(?R)/
+Failed: recursive call could loop indefinitely at offset 10
+
+/[[:foo:]]/
+Failed: unknown POSIX class name at offset 3
+
+/[[:1234:]]/
+Failed: unknown POSIX class name at offset 3
+
+/[[:f\oo:]]/
+Failed: unknown POSIX class name at offset 3
+
+/[[: :]]/
+Failed: unknown POSIX class name at offset 3
+
+/[[:...:]]/
+Failed: unknown POSIX class name at offset 3
+
+/[[:l\ower:]]/
+Failed: unknown POSIX class name at offset 3
+
+/[[:abc\:]]/
+Failed: unknown POSIX class name at offset 3
+
+/[abc[:x\]pqr:]]/
+Failed: unknown POSIX class name at offset 6
+
+/[[:a\dz:]]/
+Failed: unknown POSIX class name at offset 3
 
 / End of testinput2 /

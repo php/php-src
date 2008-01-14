@@ -9,6 +9,7 @@ This document contains the following sections:
   Building for virtual Pascal
   Stack size in Windows environments
   Comments about Win32 builds
+  Building PCRE with CMake
   Building under Windows with BCC5.5
   Building PCRE on OpenVMS
 
@@ -30,9 +31,10 @@ library consists entirely of code written in Standard C, and so should compile
 successfully on any system that has a Standard C compiler and library. The C++
 wrapper functions are a separate issue (see below).
 
-The PCRE distribution contains some experimental support for "cmake", but this
-is incomplete and not documented. However if you are a "cmake" user you might
-like to try building with "cmake".
+The PCRE distribution includes support for CMake. This support is relatively
+new, but has already been used successfully to build PCRE in multiple build
+environments on Windows. There are some instructions in the section entitled
+"Building PCRE with CMake" below.
 
 
 GENERIC INSTRUCTIONS FOR THE PCRE C LIBRARY
@@ -42,10 +44,13 @@ The following are generic comments about building the PCRE C library "by hand".
  (1) Copy or rename the file config.h.generic as config.h, and edit the macro
      settings that it contains to whatever is appropriate for your environment.
      In particular, if you want to force a specific value for newline, you can
-     define the NEWLINE macro.
+     define the NEWLINE macro. When you compile any of the PCRE modules, you
+     must specify -DHAVE_CONFIG_H to your compiler so that config.h is included
+     in the sources.
 
      An alternative approach is not to edit config.h, but to use -D on the
-     compiler command line to make any changes that you need.
+     compiler command line to make any changes that you need to the
+     configuration options. In this case -DHAVE_CONFIG_H must not be set.
 
      NOTE: There have been occasions when the way in which certain parameters
      in config.h are used has changed between releases. (In the configure/make
@@ -59,13 +64,14 @@ The following are generic comments about building the PCRE C library "by hand".
        Copy or rename file pcre_chartables.c.dist as pcre_chartables.c.
 
      OR:
-       Compile dftables.c as a stand-alone program, and then run it with the
-       single argument "pcre_chartables.c". This generates a set of standard
-       character tables and writes them to that file. The tables are generated
-       using the default C locale for your system. If you want to use a locale
-       that is specified by LC_xxx environment variables, add the -L option to
-       the dftables command. You must use this method if you are building on
-       a system that uses EBCDIC code.
+       Compile dftables.c as a stand-alone program (using -DHAVE_CONFIG_H if
+       you have set up config.h), and then run it with the single argument
+       "pcre_chartables.c". This generates a set of standard character tables
+       and writes them to that file. The tables are generated using the default
+       C locale for your system. If you want to use a locale that is specified
+       by LC_xxx environment variables, add the -L option to the dftables
+       command. You must use this method if you are building on a system that
+       uses EBCDIC code.
 
      The tables in pcre_chartables.c are defaults. The caller of PCRE can
      specify alternative tables at run time.
@@ -78,11 +84,13 @@ The following are generic comments about building the PCRE C library "by hand".
        ucptable.h
 
  (5) Also ensure that you have the following file, which is #included as source
-     when building a debugging version of PCRE and is also used by pcretest.
+     when building a debugging version of PCRE, and is also used by pcretest.
 
        pcre_printint.src
 
- (6) Compile the following source files:
+ (6) Compile the following source files, setting -DHAVE_CONFIG_H as a compiler
+     option if you have set up config.h with your configuration, or else use
+     other -D settings to change the configuration as required.
 
        pcre_chartables.c
        pcre_compile.c
@@ -115,18 +123,21 @@ The following are generic comments about building the PCRE C library "by hand".
      your system has static and shared libraries, you may have to do this once
      for each type.
 
- (8) Similarly, compile pcreposix.c and link the result (on its own) as the
-     pcreposix library.
+ (8) Similarly, compile pcreposix.c (remembering -DHAVE_CONFIG_H if necessary)
+     and link the result (on its own) as the pcreposix library.
 
- (9) Compile the test program pcretest.c. This needs the functions in the
-     pcre and pcreposix libraries when linking. It also needs the
-     pcre_printint.src source file, which it #includes.
+ (9) Compile the test program pcretest.c (again, don't forget -DHAVE_CONFIG_H).
+     This needs the functions in the pcre and pcreposix libraries when linking.
+     It also needs the pcre_printint.src source file, which it #includes.
 
 (10) Run pcretest on the testinput files in the testdata directory, and check
      that the output matches the corresponding testoutput files. Note that the
      supplied files are in Unix format, with just LF characters as line
      terminators. You may need to edit them to change this if your system uses
-     a different convention.
+     a different convention. If you are using Windows, you probably should use
+     the wintestinput3 file instead of testinput3 (and the corresponding output
+     file). This is a locale test; wintestinput3 sets the locale to "french"
+     rather than "fr_FR", and there some minor output differences.
 
 (11) If you want to use the pcregrep command, compile and link pcregrep.c; it
      uses only the basic PCRE library (it does not need the pcreposix library).
@@ -158,11 +169,15 @@ fail because of this. Normally, running out of stack causes a crash, but there
 have been cases where the test program has just died silently. See your linker
 documentation for how to increase stack size if you experience problems. The
 Linux default of 8Mb is a reasonable choice for the stack, though even that can
-be too small for some pattern/subject combinations. There is more about stack
-usage in the "pcrestack" documentation.
+be too small for some pattern/subject combinations.
+
+PCRE has a compile configuration option to disable the use of stack for
+recursion so that heap is used instead. However, pattern matching is
+significantly slower when this is done. There is more about stack usage in the
+"pcrestack" documentation.
 
 
-COMMENTS ABOUT WIN32 BUILDS
+COMMENTS ABOUT WIN32 BUILDS (see also "BUILDING PCRE WITH CMAKE" below)
 
 There are two ways of building PCRE using the "configure, make, make install"
 paradigm on Windows systems: using MinGW or using Cygwin. These are not at all
@@ -235,6 +250,60 @@ The test files that are supplied with PCRE are in Unix format, with LF
 characters as line terminators. It may be necessary to change the line
 terminators in order to get some of the tests to work. We hope to improve
 things in this area in future.
+
+
+BUILDING PCRE WITH CMAKE
+
+CMake is an alternative build facility that can be used instead of the
+traditional Unix "configure". CMake version 2.4.7 supports Borland makefiles,
+MinGW makefiles, MSYS makefiles, NMake makefiles, UNIX makefiles, Visual Studio
+6, Visual Studio 7, Visual Studio 8, and Watcom W8. The following instructions
+were contributed by a PCRE user.
+
+1. Download CMake 2.4.7 or above from http://www.cmake.org/, install and ensure
+   that cmake\bin is on your path.
+
+2. Unzip (retaining folder structure) the PCRE source tree into a source
+   directory such as C:\pcre.
+
+3. Create a new, empty build directory: C:\pcre\build\
+
+4. Run CMakeSetup from the Shell envirornment of your build tool, e.g., Msys
+   for Msys/MinGW or Visual Studio Command Prompt for VC/VC++
+
+5. Enter C:\pcre\pcre-xx and C:\pcre\build for the source and build
+   directories, respectively
+
+6. Hit the "Configure" button.
+
+7. Select the particular IDE / build tool that you are using (Visual Studio,
+   MSYS makefiles, MinGW makefiles, etc.)
+
+8. The GUI will then list several configuration options. This is where you can
+   enable UTF-8 support, etc.
+
+9. Hit "Configure" again. The adjacent "OK" button should now be active.
+
+10. Hit "OK".
+
+11. The build directory should now contain a usable build system, be it a
+    solution file for Visual Studio, makefiles for MinGW, etc.
+
+Testing with RunTest.bat
+
+1. Copy RunTest.bat into the directory where pcretest.exe has been created.
+
+2. Edit RunTest.bat and insert a line that indentifies the relative location of
+   the pcre source, e.g.:
+
+   set srcdir=..\pcre-7.4-RC3
+
+3. Run RunTest.bat from a command shell environment. Test outputs will
+   automatically be compared to expected results, and discrepancies will
+   identified in the console output.
+
+4. To test pcrecpp, run pcrecpp_unittest.exe, pcre_stringpiece_unittest.exe and
+   pcre_scanner_unittest.exe.
 
 
 BUILDING UNDER WINDOWS WITH BCC5.5
@@ -315,5 +384,5 @@ $!   Locale could not be set to fr
 $!
 =========================
 
-Last Updated: 01 August 2007
+Last Updated: 21 September 2007
 ****

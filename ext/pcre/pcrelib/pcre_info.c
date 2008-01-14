@@ -43,7 +43,7 @@ information about a compiled pattern. However, use of this function is now
 deprecated, as it has been superseded by pcre_fullinfo(). */
 
 
-#include <config.h>
+#include "config.h"
 
 #include "pcre_internal.h"
 
@@ -83,8 +83,8 @@ if (re->magic_number != MAGIC_NUMBER)
   }
 if (optptr != NULL) *optptr = (int)(re->options & PUBLIC_OPTIONS);
 if (first_byte != NULL)
-  *first_byte = ((re->options & PCRE_FIRSTSET) != 0)? re->first_byte :
-     ((re->options & PCRE_STARTLINE) != 0)? -1 : -2;
+  *first_byte = ((re->flags & PCRE_FIRSTSET) != 0)? re->first_byte :
+     ((re->flags & PCRE_STARTLINE) != 0)? -1 : -2;
 return re->top_bracket;
 }
 

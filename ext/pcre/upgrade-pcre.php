@@ -37,9 +37,9 @@ function recurse($path)
 
 		if ($file[0] === '.' ||
 		$file === 'CVS' ||
-		substr_compare($file, '.lo', -3, 3) == 0 ||
-		substr_compare($file, '.loT', -4, 4) == 0 ||
-		substr_compare($file, '.o', -2, 2) == 0) continue;
+		@substr_compare($file, '.lo', -3, 3) === 0 ||
+		@substr_compare($file, '.loT', -4, 4) === 0 ||
+		@substr_compare($file, '.o', -2, 2) === 0) continue;
 
 		$file = "$path/$file";
 

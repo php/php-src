@@ -37,7 +37,7 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-#include <config.h>
+#include "config.h"
 
 #include <ctype.h>
 #include <locale.h>
@@ -53,7 +53,15 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <unistd.h>
 #endif
 
-#include <pcre.h>
+#ifdef SUPPORT_LIBZ
+#include <zlib.h>
+#endif
+
+#ifdef SUPPORT_LIBBZ2
+#include <bzlib.h>
+#endif
+
+#include "pcre.h"
 
 #define FALSE 0
 #define TRUE 1
@@ -73,6 +81,10 @@ output. The order is important; it is assumed that a file name is wanted for
 all values greater than FN_DEFAULT. */
 
 enum { FN_NONE, FN_DEFAULT, FN_ONLY, FN_NOMATCH_ONLY, FN_FORCE };
+
+/* File reading styles */
+
+enum { FR_PLAIN, FR_LIBZ, FR_LIBBZ2 };
 
 /* Actions for the -d and -D options */
 
@@ -140,8 +152,10 @@ static int process_options = 0;
 
 static BOOL count_only = FALSE;
 static BOOL do_colour = FALSE;
+static BOOL file_offsets = FALSE;
 static BOOL hyphenpending = FALSE;
 static BOOL invert = FALSE;
+static BOOL line_offsets = FALSE;
 static BOOL multiline = FALSE;
 static BOOL number = FALSE;
 static BOOL only_matching = FALSE;
@@ -172,6 +186,8 @@ used to identify them. */
 #define N_LABEL     (-5)
 #define N_LOCALE    (-6)
 #define N_NULL      (-7)
+#define N_LOFFSETS  (-8)
+#define N_FOFFSETS  (-9)
 
 static option_item optionlist[] = {
   { OP_NODATA,    N_NULL,   NULL,              "",              "  terminate options" },
@@ -187,15 +203,17 @@ static option_item optionlist[] = {
   { OP_PATLIST,   'e',      NULL,              "regex(p)",      "specify pattern (may be used more than once)" },
   { OP_NODATA,    'F',      NULL,              "fixed_strings", "patterns are sets of newline-separated strings" },
   { OP_STRING,    'f',      &pattern_filename, "file=path",     "read patterns from file" },
+  { OP_NODATA,    N_FOFFSETS, NULL,            "file-offsets",  "output file offsets, not text" },
   { OP_NODATA,    'H',      NULL,              "with-filename", "force the prefixing filename on output" },
   { OP_NODATA,    'h',      NULL,              "no-filename",   "suppress the prefixing filename on output" },
   { OP_NODATA,    'i',      NULL,              "ignore-case",   "ignore case distinctions" },
   { OP_NODATA,    'l',      NULL,              "files-with-matches", "print only FILE names containing matches" },
   { OP_NODATA,    'L',      NULL,              "files-without-match","print only FILE names not containing matches" },
   { OP_STRING,    N_LABEL,  &stdin_name,       "label=name",    "set name for standard input" },
+  { OP_NODATA,    N_LOFFSETS, NULL,            "line-offsets",  "output line numbers and offsets, not text" },
   { OP_STRING,    N_LOCALE, &locale,           "locale=locale", "use the named locale" },
   { OP_NODATA,    'M',      NULL,              "multiline",     "run in multiline mode" },
-  { OP_STRING,    'N',      &newline,          "newline=type",  "specify newline type (CR, LF, CRLF, ANYCRLF or ANY)" },
+  { OP_STRING,    'N',      &newline,          "newline=type",  "set newline type (CR, LF, CRLF, ANYCRLF or ANY)" },
   { OP_NODATA,    'n',      NULL,              "line-number",   "print line number with output lines" },
   { OP_NODATA,    'o',      NULL,              "only-matching", "show only the part of the line that matched" },
   { OP_NODATA,    'q',      NULL,              "quiet",         "suppress output, just set return code" },
@@ -314,8 +332,9 @@ return isatty(fileno(stdout));
 
 /* I (Philip Hazel) have no means of testing this code. It was contributed by
 Lionel Fourquaux. David Burgess added a patch to define INVALID_FILE_ATTRIBUTES
-when it did not exist. */
-
+when it did not exist. David Byron added a patch that moved the #include of
+<windows.h> to before the INVALID_FILE_ATTRIBUTES definition rather than after.
+*/
 
 #elif HAVE_WINDOWS_H
 
@@ -325,11 +344,12 @@ when it did not exist. */
 #ifndef WIN32_LEAN_AND_MEAN
 # define WIN32_LEAN_AND_MEAN
 #endif
+
+#include <windows.h>
+
 #ifndef INVALID_FILE_ATTRIBUTES
 #define INVALID_FILE_ATTRIBUTES 0xFFFFFFFF
 #endif
-
-#include <windows.h>
 
 typedef struct directory_type
 {
@@ -415,7 +435,7 @@ regular if they are not directories. */
 
 int isregfile(char *filename)
 {
-return !isdirectory(filename)
+return !isdirectory(filename);
 }
 
 
@@ -426,7 +446,7 @@ return !isdirectory(filename)
 static BOOL
 is_stdout_tty(void)
 {
-FALSE;
+return FALSE;
 }
 
 
@@ -802,22 +822,27 @@ be in the middle third most of the time, so the bottom third is available for
 "before" context printing.
 
 Arguments:
-  in           the fopened FILE stream
+  handle       the fopened FILE stream for a normal file
+               the gzFile pointer when reading is via libz
+               the BZFILE pointer when reading is via libbz2
+  frtype       FR_PLAIN, FR_LIBZ, or FR_LIBBZ2
   printname    the file name if it is to be printed for each match
                or NULL if the file name is not to be printed
                it cannot be NULL if filenames[_nomatch]_only is set
 
 Returns:       0 if there was at least one match
                1 otherwise (no matches)
+               2 if there is a read error on a .bz2 file
 */
 
 static int
-pcregrep(FILE *in, char *printname)
+pcregrep(void *handle, int frtype, char *printname)
 {
 int rc = 1;
 int linenumber = 1;
 int lastmatchnumber = 0;
 int count = 0;
+int filepos = 0;
 int offsets[99];
 char *lastmatchrestart = NULL;
 char buffer[3*MBUFTHIRD];
@@ -825,11 +850,46 @@ char *ptr = buffer;
 char *endptr;
 size_t bufflength;
 BOOL endhyphenpending = FALSE;
+FILE *in = NULL;                    /* Ensure initialized */
 
-/* Do the first read into the start of the buffer and set up the pointer to
-end of what we have. */
+#ifdef SUPPORT_LIBZ
+gzFile ingz = NULL;
+#endif
 
-bufflength = fread(buffer, 1, 3*MBUFTHIRD, in);
+#ifdef SUPPORT_LIBBZ2
+BZFILE *inbz2 = NULL;
+#endif
+
+
+/* Do the first read into the start of the buffer and set up the pointer to end
+of what we have. In the case of libz, a non-zipped .gz file will be read as a
+plain file. However, if a .bz2 file isn't actually bzipped, the first read will
+fail. */
+
+#ifdef SUPPORT_LIBZ
+if (frtype == FR_LIBZ)
+  {
+  ingz = (gzFile)handle;
+  bufflength = gzread (ingz, buffer, 3*MBUFTHIRD);
+  }
+else
+#endif
+
+#ifdef SUPPORT_LIBBZ2
+if (frtype == FR_LIBBZ2)
+  {
+  inbz2 = (BZFILE *)handle;
+  bufflength = BZ2_bzread(inbz2, buffer, 3*MBUFTHIRD);
+  if ((int)bufflength < 0) return 2;   /* Gotcha: bufflength is size_t; */
+  }                                    /* without the cast it is unsigned. */
+else
+#endif
+
+  {
+  in = (FILE *)handle;
+  bufflength = fread(buffer, 1, 3*MBUFTHIRD, in);
+  }
+
 endptr = buffer + bufflength;
 
 /* Loop while the current pointer is not at the end of the file. For large
@@ -842,6 +902,7 @@ while (ptr < endptr)
   int i, endlinelength;
   int mrc = 0;
   BOOL match = FALSE;
+  char *matchptr = ptr;
   char *t = ptr;
   size_t length, linelength;
 
@@ -904,13 +965,17 @@ while (ptr < endptr)
   }
 #endif
 
+  /* We come back here after a match when the -o option (only_matching) is set,
+  in order to find any further matches in the same line. */
+
+  ONLY_MATCHING_RESTART:
 
   /* Run through all the patterns until one matches. Note that we don't include
   the final newline in the subject string. */
 
   for (i = 0; i < pattern_count; i++)
     {
-    mrc = pcre_exec(pattern_list[i], hints_list[i], ptr, length, 0, 0,
+    mrc = pcre_exec(pattern_list[i], hints_list[i], matchptr, length, 0, 0,
       offsets, 99);
     if (mrc >= 0) { match = TRUE; break; }
     if (mrc != PCRE_ERROR_NOMATCH)
@@ -918,7 +983,7 @@ while (ptr < endptr)
       fprintf(stderr, "pcregrep: pcre_exec() error %d while matching ", mrc);
       if (pattern_count > 1) fprintf(stderr, "pattern number %d to ", i+1);
       fprintf(stderr, "this line:\n");
-      fwrite(ptr, 1, linelength, stderr);   /* In case binary zero included */
+      fwrite(matchptr, 1, linelength, stderr);  /* In case binary zero included */
       fprintf(stderr, "\n");
       if (error_count == 0 &&
           (mrc == PCRE_ERROR_MATCHLIMIT || mrc == PCRE_ERROR_RECURSIONLIMIT))
@@ -965,14 +1030,33 @@ while (ptr < endptr)
     else if (quiet) return 0;
 
     /* The --only-matching option prints just the substring that matched, and
-    does not pring any context. */
+    the --file-offsets and --line-offsets options output offsets for the
+    matching substring (they both force --only-matching). None of these options
+    prints any context. Afterwards, adjust the start and length, and then jump
+    back to look for further matches in the same line. If we are in invert
+    mode, however, nothing is printed - this could be still useful because the
+    return code is set. */
 
     else if (only_matching)
       {
-      if (printname != NULL) fprintf(stdout, "%s:", printname);
-      if (number) fprintf(stdout, "%d:", linenumber);
-      fwrite(ptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
-      fprintf(stdout, "\n");
+      if (!invert)
+        {
+        if (printname != NULL) fprintf(stdout, "%s:", printname);
+        if (number) fprintf(stdout, "%d:", linenumber);
+        if (line_offsets)
+          fprintf(stdout, "%d,%d", matchptr + offsets[0] - ptr,
+            offsets[1] - offsets[0]);
+        else if (file_offsets)
+          fprintf(stdout, "%d,%d", filepos + matchptr + offsets[0] - ptr,
+            offsets[1] - offsets[0]);
+        else
+          fwrite(matchptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
+        fprintf(stdout, "\n");
+        matchptr += offsets[1];
+        length -= offsets[1];
+        match = FALSE;
+        goto ONLY_MATCHING_RESTART;
+        }
       }
 
     /* This is the default case when none of the above options is set. We print
@@ -1111,7 +1195,8 @@ while (ptr < endptr)
         fprintf(stdout, "%c[%sm", 0x1b, colour_string);
         fwrite(ptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
         fprintf(stdout, "%c[00m", 0x1b);
-        fwrite(ptr + offsets[1], 1, linelength - offsets[1], stdout);
+        fwrite(ptr + offsets[1], 1, (linelength + endlinelength) - offsets[1],
+          stdout);
         }
       else fwrite(ptr, 1, linelength + endlinelength, stdout);
       }
@@ -1145,9 +1230,11 @@ while (ptr < endptr)
     linelength = endmatch - ptr - ellength;
     }
 
-  /* Advance to after the newline and increment the line number. */
+  /* Advance to after the newline and increment the line number. The file
+  offset to the current line is maintained in filepos. */
 
   ptr += linelength + endlinelength;
+  filepos += linelength + endlinelength;
   linenumber++;
 
   /* If we haven't yet reached the end of the file (the buffer is full), and
@@ -1169,7 +1256,23 @@ while (ptr < endptr)
 
     memmove(buffer, buffer + MBUFTHIRD, 2*MBUFTHIRD);
     ptr -= MBUFTHIRD;
+
+#ifdef SUPPORT_LIBZ
+    if (frtype == FR_LIBZ)
+      bufflength = 2*MBUFTHIRD +
+        gzread (ingz, buffer + 2*MBUFTHIRD, MBUFTHIRD);
+    else
+#endif
+
+#ifdef SUPPORT_LIBBZ2
+    if (frtype == FR_LIBBZ2)
+      bufflength = 2*MBUFTHIRD +
+        BZ2_bzread(inbz2, buffer + 2*MBUFTHIRD, MBUFTHIRD);
+    else
+#endif
+
     bufflength = 2*MBUFTHIRD + fread(buffer + 2*MBUFTHIRD, 1, MBUFTHIRD, in);
+
     endptr = buffer + bufflength;
 
     /* Adjust any last match point */
@@ -1233,17 +1336,27 @@ grep_or_recurse(char *pathname, BOOL dir_recurse, BOOL only_one_at_top)
 {
 int rc = 1;
 int sep;
-FILE *in;
+int frtype;
+int pathlen;
+void *handle;
+FILE *in = NULL;           /* Ensure initialized */
+
+#ifdef SUPPORT_LIBZ
+gzFile ingz = NULL;
+#endif
+
+#ifdef SUPPORT_LIBBZ2
+BZFILE *inbz2 = NULL;
+#endif
 
 /* If the file name is "-" we scan stdin */
 
 if (strcmp(pathname, "-") == 0)
   {
-  return pcregrep(stdin,
+  return pcregrep(stdin, FR_PLAIN,
     (filenames > FN_DEFAULT || (filenames == FN_DEFAULT && !only_one_at_top))?
       stdin_name : NULL);
   }
-
 
 /* If the file is a directory, skip if skipping or if we are recursing, scan
 each file within it, subject to any include or exclude patterns that were set.
@@ -1301,8 +1414,54 @@ skipping was not requested. The scan proceeds. If this is the first and only
 argument at top level, we don't show the file name, unless we are only showing
 the file name, or the filename was forced (-H). */
 
-in = fopen(pathname, "r");
-if (in == NULL)
+pathlen = strlen(pathname);
+
+/* Open using zlib if it is supported and the file name ends with .gz. */
+
+#ifdef SUPPORT_LIBZ
+if (pathlen > 3 && strcmp(pathname + pathlen - 3, ".gz") == 0)
+  {
+  ingz = gzopen(pathname, "rb");
+  if (ingz == NULL)
+    {
+    if (!silent)
+      fprintf(stderr, "pcregrep: Failed to open %s: %s\n", pathname,
+        strerror(errno));
+    return 2;
+    }
+  handle = (void *)ingz;
+  frtype = FR_LIBZ;
+  }
+else
+#endif
+
+/* Otherwise open with bz2lib if it is supported and the name ends with .bz2. */
+
+#ifdef SUPPORT_LIBBZ2
+if (pathlen > 4 && strcmp(pathname + pathlen - 4, ".bz2") == 0)
+  {
+  inbz2 = BZ2_bzopen(pathname, "rb");
+  handle = (void *)inbz2;
+  frtype = FR_LIBBZ2;
+  }
+else
+#endif
+
+/* Otherwise use plain fopen(). The label is so that we can come back here if
+an attempt to read a .bz2 file indicates that it really is a plain file. */
+
+#ifdef SUPPORT_LIBBZ2
+PLAIN_FILE:
+#endif
+  {
+  in = fopen(pathname, "r");
+  handle = (void *)in;
+  frtype = FR_PLAIN;
+  }
+
+/* All the opening methods return errno when they fail. */
+
+if (handle == NULL)
   {
   if (!silent)
     fprintf(stderr, "pcregrep: Failed to open %s: %s\n", pathname,
@@ -1310,10 +1469,50 @@ if (in == NULL)
   return 2;
   }
 
-rc = pcregrep(in, (filenames > FN_DEFAULT ||
+/* Now grep the file */
+
+rc = pcregrep(handle, frtype, (filenames > FN_DEFAULT ||
   (filenames == FN_DEFAULT && !only_one_at_top))? pathname : NULL);
 
+/* Close in an appropriate manner. */
+
+#ifdef SUPPORT_LIBZ
+if (frtype == FR_LIBZ)
+  gzclose(ingz);
+else
+#endif
+
+/* If it is a .bz2 file and the result is 2, it means that the first attempt to
+read failed. If the error indicates that the file isn't in fact bzipped, try
+again as a normal file. */
+
+#ifdef SUPPORT_LIBBZ2
+if (frtype == FR_LIBBZ2)
+  {
+  if (rc == 2)
+    {
+    int errnum;
+    const char *err = BZ2_bzerror(inbz2, &errnum);
+    if (errnum == BZ_DATA_ERROR_MAGIC)
+      {
+      BZ2_bzclose(inbz2);
+      goto PLAIN_FILE;
+      }
+    else if (!silent)
+      fprintf(stderr, "pcregrep: Failed to read %s using bzlib: %s\n",
+        pathname, err);
+    }
+  BZ2_bzclose(inbz2);
+  }
+else
+#endif
+
+/* Normal file close */
+
 fclose(in);
+
+/* Pass back the yield from pcregrep(). */
+
 return rc;
 }
 
@@ -1334,7 +1533,8 @@ for (op = optionlist; op->one_char != 0; op++)
   if (op->one_char > 0) fprintf(stderr, "%c", op->one_char);
   }
 fprintf(stderr, "] [long options] [pattern] [files]\n");
-fprintf(stderr, "Type `pcregrep --help' for more information.\n");
+fprintf(stderr, "Type `pcregrep --help' for more information and the long "
+  "options.\n");
 return rc;
 }
 
@@ -1353,9 +1553,23 @@ option_item *op;
 printf("Usage: pcregrep [OPTION]... [PATTERN] [FILE1 FILE2 ...]\n");
 printf("Search for PATTERN in each FILE or standard input.\n");
 printf("PATTERN must be present if neither -e nor -f is used.\n");
-printf("\"-\" can be used as a file name to mean STDIN.\n\n");
-printf("Example: pcregrep -i 'hello.*world' menu.h main.c\n\n");
+printf("\"-\" can be used as a file name to mean STDIN.\n");
 
+#ifdef SUPPORT_LIBZ
+printf("Files whose names end in .gz are read using zlib.\n");
+#endif
+
+#ifdef SUPPORT_LIBBZ2
+printf("Files whose names end in .bz2 are read using bzlib2.\n");
+#endif
+
+#if defined SUPPORT_LIBZ || defined SUPPORT_LIBBZ2
+printf("Other files and the standard input are read as plain files.\n\n");
+#else
+printf("All files are read as plain files, without any interpretation.\n\n");
+#endif
+
+printf("Example: pcregrep -i 'hello.*world' menu.h main.c\n\n");
 printf("Options:\n");
 
 for (op = optionlist; op->one_char != 0; op++)
@@ -1363,8 +1577,7 @@ for (op = optionlist; op->one_char != 0; op++)
   int n;
   char s[4];
   if (op->one_char > 0) sprintf(s, "-%c,", op->one_char); else strcpy(s, "   ");
-  printf("  %s --%s%n", s, op->long_name, &n);
-  n = 30 - n;
+  n = 30 - printf("  %s --%s", s, op->long_name);
   if (n < 1) n = 1;
   printf("%.*s%s\n", n, "                    ", op->help_text);
   }
@@ -1389,7 +1602,9 @@ handle_option(int letter, int options)
 {
 switch(letter)
   {
+  case N_FOFFSETS: file_offsets = TRUE; break;
   case N_HELP: help(); exit(0);
+  case N_LOFFSETS: line_offsets = number = TRUE; break;
   case 'c': count_only = TRUE; break;
   case 'F': process_options |= PO_FIXED_STRINGS; break;
   case 'H': filenames = FN_FORCE; break;
@@ -1826,6 +2041,19 @@ if (both_context > 0)
   if (before_context == 0) before_context = both_context;
   }
 
+/* Only one of --only-matching, --file-offsets, or --line-offsets is permitted.
+However, the latter two set the only_matching flag. */
+
+if ((only_matching && (file_offsets || line_offsets)) ||
+    (file_offsets && line_offsets))
+  {
+  fprintf(stderr, "pcregrep: Cannot mix --only-matching, --file-offsets "
+    "and/or --line-offsets\n");
+  exit(usage(2));
+  }
+
+if (file_offsets || line_offsets) only_matching = TRUE;
+
 /* If a locale has not been provided as an option, see if the LC_CTYPE or
 LC_ALL environment variable is set, and if so, use it. */
 
@@ -2063,7 +2291,7 @@ if (include_pattern != NULL)
 
 if (i >= argc)
   {
-  rc = pcregrep(stdin, (filenames > FN_DEFAULT)? stdin_name : NULL);
+  rc = pcregrep(stdin, FR_PLAIN, (filenames > FN_DEFAULT)? stdin_name : NULL);
   goto EXIT;
   }
 

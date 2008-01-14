@@ -47,7 +47,7 @@ and NLTYPE_ANY. The full list of Unicode newline characters is taken from
 http://unicode.org/unicode/reports/tr18/. */
 
 
-#include <config.h>
+#include "config.h"
 
 #include "pcre_internal.h"
 
