@@ -1852,7 +1852,7 @@ static int php_check_dots(const char *element, int n)
 
 #define IS_BACKSLASH(c)     ((c) == '/')
 
-#ifdef COMPILE_PHAR_DL
+#ifdef COMPILE_DL_PHAR
 /* stupid-ass non-extern declaration in tsrm_strtok.h breaks dumbass MS compiler */
 static inline int in_character_class(char ch, const char *delim)
 {
