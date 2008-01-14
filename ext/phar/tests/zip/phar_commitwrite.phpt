@@ -2,6 +2,7 @@
 Phar::setStub()/stopBuffering() tar-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("zip")) die("skip"); ?>
 --INI--
 phar.require_hash=0
 phar.readonly=0

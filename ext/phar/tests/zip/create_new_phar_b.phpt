@@ -2,6 +2,7 @@
 Phar: create a completely new zip-based phar
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("zip")) die("skip"); ?>
 --INI--
 phar.readonly=1
 phar.require_hash=1
