@@ -926,6 +926,8 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 				if (colno >= 0 && colno < stmt->column_count) {
 					if (flags == PDO_FETCH_GROUP && stmt->fetch.column == -1) {
 						fetch_value(stmt, return_value, 1, NULL TSRMLS_CC);
+					} else if (flags == PDO_FETCH_GROUP && colno) {
+						fetch_value(stmt, return_value, 0, NULL TSRMLS_CC);
 					} else {
 						fetch_value(stmt, return_value, colno, NULL TSRMLS_CC); 
 					}
