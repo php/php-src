@@ -23,105 +23,7 @@
 #define PHAR_FUNC(name) \
 	static PHP_NAMED_FUNCTION(name)
 
-PHAR_FUNC(phar_fopen);
-PHAR_FUNC(phar_file_get_contents);
-PHAR_FUNC(phar_is_file);
-PHAR_FUNC(phar_is_link);
-PHAR_FUNC(phar_is_dir);
-PHAR_FUNC(phar_opendir);
-PHAR_FUNC(phar_file_exists);
-PHAR_FUNC(phar_fileperms);
-PHAR_FUNC(phar_fileinode);
-PHAR_FUNC(phar_filesize);
-PHAR_FUNC(phar_fileowner);
-PHAR_FUNC(phar_filegroup);
-PHAR_FUNC(phar_fileatime);
-PHAR_FUNC(phar_filemtime);
-PHAR_FUNC(phar_filectime);
-PHAR_FUNC(phar_filetype);
-PHAR_FUNC(phar_is_writable);
-PHAR_FUNC(phar_is_readable);
-PHAR_FUNC(phar_is_executable);
-PHAR_FUNC(phar_lstat);
-PHAR_FUNC(phar_stat);
-
-#define PHAR_INTERCEPT(func) \
-	PHAR_G(orig_##func) = NULL; \
-	if (SUCCESS == zend_hash_find(CG(function_table), #func, sizeof(#func), (void **)&orig)) { \
-		PHAR_G(orig_##func) = orig->internal_function.handler; \
-		orig->internal_function.handler = phar_##func; \
-	}
-
-
-void phar_intercept_functions(TSRMLS_D) /* {{{ */
-{
-	zend_function *orig;
-
-	if (!PHAR_G(request_init)) {
-		PHAR_G(cwd) = NULL;
-		PHAR_G(cwd_len) = 0;
-	} else if (PHAR_G(orig_fopen)) {
-		/* don't double-intercept */
-		return;
-	}
-	PHAR_INTERCEPT(fopen);
-	PHAR_INTERCEPT(file_get_contents);
-	PHAR_INTERCEPT(is_file);
-	PHAR_INTERCEPT(is_link);
-	PHAR_INTERCEPT(is_dir);
-	PHAR_INTERCEPT(opendir);
-	PHAR_INTERCEPT(file_exists);
-	PHAR_INTERCEPT(fileperms);
-	PHAR_INTERCEPT(fileinode);
-	PHAR_INTERCEPT(filesize);
-	PHAR_INTERCEPT(fileowner);
-	PHAR_INTERCEPT(filegroup);
-	PHAR_INTERCEPT(fileatime);
-	PHAR_INTERCEPT(filemtime);
-	PHAR_INTERCEPT(filectime);
-	PHAR_INTERCEPT(filetype);
-	PHAR_INTERCEPT(is_writable);
-	PHAR_INTERCEPT(is_readable);
-	PHAR_INTERCEPT(is_executable);
-	PHAR_INTERCEPT(lstat);
-	PHAR_INTERCEPT(stat);
-}
-
-#define PHAR_RELEASE(func) \
-	if (PHAR_G(orig_##func) && SUCCESS == zend_hash_find(CG(function_table), #func, sizeof(#func), (void **)&orig)) { \
-		orig->internal_function.handler = PHAR_G(orig_##func); \
-	} \
-	PHAR_G(orig_##func) = NULL;
-
-
-void phar_release_functions(TSRMLS_D) /* {{{ */
-{
-	zend_function *orig;
-
-	PHAR_RELEASE(fopen);
-	PHAR_RELEASE(file_get_contents);
-	PHAR_RELEASE(is_file);
-	PHAR_RELEASE(is_dir);
-	PHAR_RELEASE(opendir);
-	PHAR_RELEASE(file_exists);
-	PHAR_RELEASE(fileperms);
-	PHAR_RELEASE(fileinode);
-	PHAR_RELEASE(filesize);
-	PHAR_RELEASE(fileowner);
-	PHAR_RELEASE(filegroup);
-	PHAR_RELEASE(fileatime);
-	PHAR_RELEASE(filemtime);
-	PHAR_RELEASE(filectime);
-	PHAR_RELEASE(filetype);
-	PHAR_RELEASE(is_writable);
-	PHAR_RELEASE(is_readable);
-	PHAR_RELEASE(is_executable);
-	PHAR_RELEASE(lstat);
-	PHAR_RELEASE(stat);
-}
-/* }}} */
-
-PHAR_FUNC(phar_opendir)
+PHAR_FUNC(phar_opendir) /* {{{ */
 {
 	char *filename;
 	int filename_len;
@@ -179,8 +81,9 @@ skip_phar:
 	PHAR_G(orig_opendir)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	return;
 }
+/* }}} */
 
-PHAR_FUNC(phar_file_get_contents)
+PHAR_FUNC(phar_file_get_contents) /* {{{ */
 {
 	char *filename;
 	int filename_len;
@@ -267,12 +170,12 @@ PHAR_FUNC(phar_file_get_contents)
 
 			/* uses mmap if possible */
 			if ((len = php_stream_copy_to_mem(stream, &contents, maxlen, 0)) > 0) {
-		
+#if PHP_MAJOR_VERSION < 6
 				if (PG(magic_quotes_runtime)) {
 					contents = php_addslashes(contents, len, &newlen, 1 TSRMLS_CC); /* 1 = free source string */
 					len = newlen;
 				}
-		
+#endif
 				RETVAL_STRINGL(contents, len, 0);
 			} else if (len == 0) {
 				RETVAL_EMPTY_STRING();
@@ -288,8 +191,9 @@ skip_phar:
 	PHAR_G(orig_file_get_contents)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	return;
 }
+/* }}} */
 
-PHAR_FUNC(phar_fopen)
+PHAR_FUNC(phar_fopen) /* {{{ */
 {
 	char *filename, *mode;
 	int filename_len, mode_len;
@@ -365,6 +269,7 @@ skip_phar:
 	PHAR_G(orig_fopen)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	return;
 }
+/* }}} */
 
 #ifndef S_ISDIR
 #define S_ISDIR(mode)	(((mode)&S_IFMT) == S_IFDIR)
@@ -377,7 +282,6 @@ skip_phar:
 #endif
 
 #define S_IXROOT ( S_IXUSR | S_IXGRP | S_IXOTH )
-
 
 #define IS_LINK_OPERATION(__t) ((__t) == FS_TYPE || (__t) == FS_IS_LINK || (__t) == FS_LSTAT)
 #define IS_EXISTS_CHECK(__t) ((__t) == FS_EXISTS  || (__t) == FS_IS_W || (__t) == FS_IS_R || (__t) == FS_IS_X || (__t) == FS_IS_FILE || (__t) == FS_IS_DIR || (__t) == FS_IS_LINK)
@@ -561,7 +465,7 @@ void phar_fancy_stat(struct stat *stat_sb, int type, zval *return_value TSRMLS_D
 }
 /* }}} */
 
-void phar_file_stat(const char *filename, php_stat_len filename_length, int type, void (*orig_stat_func)(INTERNAL_FUNCTION_PARAMETERS), INTERNAL_FUNCTION_PARAMETERS)
+void phar_file_stat(const char *filename, php_stat_len filename_length, int type, void (*orig_stat_func)(INTERNAL_FUNCTION_PARAMETERS), INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
 	if (!filename_length) {
 		RETURN_FALSE;
@@ -735,6 +639,7 @@ skip_phar:
 	orig_stat_func(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	return;
 }
+/* }}} */
 
 #define PharFileFunction(fname, funcnum, orig) \
 void fname(INTERNAL_FUNCTION_PARAMETERS) { \
@@ -819,7 +724,7 @@ PharFileFunction(phar_file_exists, FS_EXISTS, orig_file_exists)
 PharFileFunction(phar_is_dir, FS_IS_DIR, orig_is_dir)
 /* }}} */
 
-PHAR_FUNC(phar_is_file)
+PHAR_FUNC(phar_is_file) /* {{{ */
 {
 	char *filename;
 	int filename_len;
@@ -872,8 +777,9 @@ skip_phar:
 	PHAR_G(orig_is_file)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	return;
 }
+/* }}} */
 
-PHAR_FUNC(phar_is_link)
+PHAR_FUNC(phar_is_link) /* {{{ */
 {
 	char *filename;
 	int filename_len;
@@ -928,6 +834,7 @@ skip_phar:
 	PHAR_G(orig_file_exists)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	return;
 }
+/* }}} */
 
 /* {{{ proto array lstat(string filename)
    Give information about a file or symbolic link */
@@ -937,6 +844,83 @@ PharFileFunction(phar_lstat, FS_LSTAT, orig_lstat)
 /* {{{ proto array stat(string filename)
    Give information about a file */
 PharFileFunction(phar_stat, FS_STAT, orig_stat)
+/* }}} */
+
+/* {{{ void phar_intercept_functions(TSRMLS_D) */
+#define PHAR_INTERCEPT(func) \
+	PHAR_G(orig_##func) = NULL; \
+	if (SUCCESS == zend_hash_find(CG(function_table), #func, sizeof(#func), (void **)&orig)) { \
+		PHAR_G(orig_##func) = orig->internal_function.handler; \
+		orig->internal_function.handler = phar_##func; \
+	}
+
+void phar_intercept_functions(TSRMLS_D)
+{
+	zend_function *orig;
+
+	if (!PHAR_G(request_init)) {
+		PHAR_G(cwd) = NULL;
+		PHAR_G(cwd_len) = 0;
+	} else if (PHAR_G(orig_fopen)) {
+		/* don't double-intercept */
+		return;
+	}
+	PHAR_INTERCEPT(fopen);
+	PHAR_INTERCEPT(file_get_contents);
+	PHAR_INTERCEPT(is_file);
+	PHAR_INTERCEPT(is_link);
+	PHAR_INTERCEPT(is_dir);
+	PHAR_INTERCEPT(opendir);
+	PHAR_INTERCEPT(file_exists);
+	PHAR_INTERCEPT(fileperms);
+	PHAR_INTERCEPT(fileinode);
+	PHAR_INTERCEPT(filesize);
+	PHAR_INTERCEPT(fileowner);
+	PHAR_INTERCEPT(filegroup);
+	PHAR_INTERCEPT(fileatime);
+	PHAR_INTERCEPT(filemtime);
+	PHAR_INTERCEPT(filectime);
+	PHAR_INTERCEPT(filetype);
+	PHAR_INTERCEPT(is_writable);
+	PHAR_INTERCEPT(is_readable);
+	PHAR_INTERCEPT(is_executable);
+	PHAR_INTERCEPT(lstat);
+	PHAR_INTERCEPT(stat);
+}
+/* }}} */
+
+/* {{{ void phar_release_functions(TSRMLS_D) */
+#define PHAR_RELEASE(func) \
+	if (PHAR_G(orig_##func) && SUCCESS == zend_hash_find(CG(function_table), #func, sizeof(#func), (void **)&orig)) { \
+		orig->internal_function.handler = PHAR_G(orig_##func); \
+	} \
+	PHAR_G(orig_##func) = NULL;
+
+void phar_release_functions(TSRMLS_D)
+{
+	zend_function *orig;
+
+	PHAR_RELEASE(fopen);
+	PHAR_RELEASE(file_get_contents);
+	PHAR_RELEASE(is_file);
+	PHAR_RELEASE(is_dir);
+	PHAR_RELEASE(opendir);
+	PHAR_RELEASE(file_exists);
+	PHAR_RELEASE(fileperms);
+	PHAR_RELEASE(fileinode);
+	PHAR_RELEASE(filesize);
+	PHAR_RELEASE(fileowner);
+	PHAR_RELEASE(filegroup);
+	PHAR_RELEASE(fileatime);
+	PHAR_RELEASE(filemtime);
+	PHAR_RELEASE(filectime);
+	PHAR_RELEASE(filetype);
+	PHAR_RELEASE(is_writable);
+	PHAR_RELEASE(is_readable);
+	PHAR_RELEASE(is_executable);
+	PHAR_RELEASE(lstat);
+	PHAR_RELEASE(stat);
+}
 /* }}} */
 
 /*
