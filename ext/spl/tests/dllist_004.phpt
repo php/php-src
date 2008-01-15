@@ -2,6 +2,8 @@
 SPL: DoublyLinkedList: Stacks
 --SKIPIF--
 <?php if (!extension_loaded("spl")) print "skip"; ?>
+--INI--
+allow_call_time_pass_reference=1
 --FILE--
 <?php
 $stack = new SplStack();
@@ -53,7 +55,6 @@ echo count($stack)."\n";
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-Warning: Call-time pass-by-reference has been deprecated; If you would like to pass it by reference, modify the declaration of [runtime function name]().  If you would like to enable call-time pass-by-reference, you can set allow_call_time_pass_reference to true in your INI file in %s on line %d
 Exception: Can't pop from an empty datastructure
 Exception: Can't shift from an empty datastructure
 3
