@@ -7,6 +7,6 @@ if (PHP_SPL != "no") {
 	if (PHP_SPL_SHARED) {
 		ERROR("SPL cannot be compiled as a shared ext");
 	}
-	EXTENSION("spl", "php_spl.c spl_functions.c spl_engine.c spl_iterators.c spl_array.c spl_directory.c spl_sxe.c spl_exceptions.c spl_observer.c");
+	EXTENSION("spl", "php_spl.c spl_functions.c spl_engine.c spl_iterators.c spl_array.c spl_directory.c spl_sxe.c spl_exceptions.c spl_observer.c spl_dllist.c");
 	AC_DEFINE('HAVE_SPL', 1);
 }
