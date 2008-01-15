@@ -756,7 +756,7 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 
 	if (Z_TYPE_P(variable_ptr) == IS_OBJECT && Z_OBJ_HANDLER_P(variable_ptr, set)) {
 		Z_OBJ_HANDLER_P(variable_ptr, set)(variable_ptr_ptr, value TSRMLS_CC);
-		return value;
+		return variable_ptr;
 	}
 
 	if (PZVAL_IS_REF(variable_ptr)) {
@@ -775,7 +775,7 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 				Z_DELREF_P(value);
 			}
 			zendi_zval_dtor(garbage);
-			return value;
+			return variable_ptr;
 		}
 	} else {
 		if (Z_DELREF_P(variable_ptr) == 0) {
