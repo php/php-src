@@ -77,6 +77,7 @@ $cwd = getcwd();
 set_time_limit(0);
 
 $valgrind_version = 0;
+$valgrind_header = '';
 
 // delete as much output buffers as possible
 while(@ob_end_clean());
@@ -182,7 +183,7 @@ $ini_overwrites = array(
 
 function write_information($show_html)
 {
-	global $cwd, $php, $php_cgi, $php_info, $user_tests, $ini_overwrites, $pass_options, $exts_to_test;
+	global $cwd, $php, $php_cgi, $php_info, $user_tests, $ini_overwrites, $pass_options, $exts_to_test, $leak_check, $valgrind_header;
 
 	// Get info from php
 	$info_file = realpath(dirname(__FILE__)) . '/run-test-info.php';
@@ -240,6 +241,7 @@ Extra dirs  : ";
 		echo "{$test_dir}\n              ";
 	}
 	echo "
+VALGRIND    : " . ($leak_check ? $valgrind_header : 'Not used') . "
 =====================================================================
 ";
 }
@@ -361,6 +363,18 @@ if (isset($argc) && $argc > 1) {
 				//case 'l'
 				case 'm':
 					$leak_check = true;
+					$valgrind_cmd = "valgrind --version";
+					$valgrind_header = system_with_timeout($valgrind_cmd);
+					$replace_count = 0;
+					if (!$valgrind_header) {
+						error("Valgrind returned no version info, cannot proceed.\nPlease check if Valgrind is installed.");
+					} else {
+						$valgrind_version = preg_replace("/valgrind-([0-9])\.([0-9])\.([0-9]+)(-\w+)?(\s+)/", '$1$2$3', $valgrind_header, 1, $replace_count);
+						if ($replace_count != 1 || !is_numeric($valgrind_version)) {
+							error("Valgrind returned invalid version info (\"$valgrind_header\"), cannot proceed.");
+						}
+						$valgrind_header = trim($valgrind_header);
+					}
 					break;
 				case 'n':
 					if (!$pass_option_n) {
@@ -1498,20 +1512,6 @@ TEST $file
 
 	if ($leak_check) {
 		$env['USE_ZEND_ALLOC'] = '0';
-		if (!$valgrind_version) {
-			$valgrind_cmd = "valgrind --version";
-			$out = system_with_timeout($valgrind_cmd);
-			$replace_count = 0;
-
-			if (!$out) {
-				error("Valgrind returned no version info, cannot proceed.\nPlease check if Valgrind is installed.");
-			} else {
-				$valgrind_version = preg_replace("/valgrind-([0-9])\.([0-9])\.([0-9]+)(\s+)/", '$1$2$3', $out, 1, $replace_count);
-				if ($replace_count != 1 || !is_numeric($valgrind_version)) {
-					error("Valgrind returned invalid version info (\"$out\"), cannot proceed.");
-				}
-			}
-		}
 		if ($valgrind_version >= 330) {
 			/* valgrind 3.3.0+ doesn't have --log-file-exactly option */
 			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --log-file=$memcheck_filename $cmd";
