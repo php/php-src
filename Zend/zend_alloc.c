@@ -389,7 +389,7 @@ typedef struct _zend_mm_free_block {
 
 #define ZEND_MM_NUM_BUCKETS (sizeof(size_t) << 3)
 
-#define ZEND_MM_CACHE 1
+#define ZEND_MM_CACHE 0
 #define ZEND_MM_CACHE_SIZE (ZEND_MM_NUM_BUCKETS * 2 * 1024)
 
 #ifndef ZEND_MM_CACHE_STAT
