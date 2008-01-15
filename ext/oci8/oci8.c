@@ -1604,6 +1604,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSR
 	ub4 lob_length;
 	int column_size;
 	char *lob_buffer;
+	int lob_fetch_status;
 	
 	if (column->indicator == -1) { /* column is NULL */ 
 		ZVAL_NULL(value); 
@@ -1634,7 +1635,9 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSR
 		if (column->data_type != SQLT_RDD && (mode & PHP_OCI_RETURN_LOBS)) {
 			/* PHP_OCI_RETURN_LOBS means that we want the content of the LOB back instead of the locator */
 			
-			if (php_oci_lob_read(descriptor, -1, 0, &lob_buffer, &lob_length TSRMLS_CC)) {
+			lob_fetch_status = php_oci_lob_read(descriptor, -1, 0, &lob_buffer, &lob_length TSRMLS_CC);
+			php_oci_temp_lob_close(descriptor);
+			if (lob_fetch_status) {
 				ZVAL_FALSE(value);
 				return 1;
 			} else {
