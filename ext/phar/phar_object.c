@@ -1708,11 +1708,6 @@ PHP_METHOD(Phar, compressAllFilesGZ)
 #endif
 	PHAR_ARCHIVE_OBJECT();
 
-	if (phar_obj->arc.archive->is_tar) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Cannot compress all files as Gzip, not possible with tar-based phar archives");
-		return;
-	}
 	if (PHAR_G(readonly)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Phar is readonly, cannot change compression");
@@ -1729,7 +1724,12 @@ PHP_METHOD(Phar, compressAllFilesGZ)
 			"Cannot compress all files as Gzip, some are compressed as bzip2 and cannot be uncompressed");
 		return;
 	}
-	pharobj_set_compression(&phar_obj->arc.archive->manifest, PHAR_ENT_COMPRESSED_GZ TSRMLS_CC);
+	if (phar_obj->arc.archive->is_tar) {
+		phar_obj->arc.archive->flags &= ~PHAR_FILE_COMPRESSION_MASK;
+		phar_obj->arc.archive->flags |= PHAR_FILE_COMPRESSED_GZ;
+	} else {
+		pharobj_set_compression(&phar_obj->arc.archive->manifest, PHAR_ENT_COMPRESSED_GZ TSRMLS_CC);
+	}
 	phar_obj->arc.archive->is_modified = 1;
 	
 	phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
@@ -1754,11 +1754,6 @@ PHP_METHOD(Phar, compressAllFilesBZIP2)
 #endif
 	PHAR_ARCHIVE_OBJECT();
 
-	if (phar_obj->arc.archive->is_tar) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Cannot compress all files as Bzip2, not possible with tar-based phar archives");
-		return;
-	}
 	if (phar_obj->arc.archive->is_zip) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot compress all files as Bzip2, not possible with zip-based phar archives");
@@ -1781,7 +1776,12 @@ PHP_METHOD(Phar, compressAllFilesBZIP2)
 			"Cannot compress all files as Bzip2, some are compressed as gzip and cannot be uncompressed");
 		return;
 	}
-	pharobj_set_compression(&phar_obj->arc.archive->manifest, PHAR_ENT_COMPRESSED_BZ2 TSRMLS_CC);
+	if (phar_obj->arc.archive->is_tar) {
+		phar_obj->arc.archive->flags &= ~PHAR_FILE_COMPRESSION_MASK;
+		phar_obj->arc.archive->flags |= PHAR_FILE_COMPRESSED_BZ2;
+	} else {
+		pharobj_set_compression(&phar_obj->arc.archive->manifest, PHAR_ENT_COMPRESSED_BZ2 TSRMLS_CC);
+	}
 	phar_obj->arc.archive->is_modified = 1;
 	
 	phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
