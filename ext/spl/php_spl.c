@@ -35,6 +35,7 @@
 #include "spl_sxe.h"
 #include "spl_exceptions.h"
 #include "spl_observer.h"
+#include "spl_dllist.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 #include "ext/standard/md5.h"
@@ -154,6 +155,9 @@ PHP_FUNCTION(class_implements)
 	SPL_ADD_CLASS(AppendIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(ArrayIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(ArrayObject, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(SplDoublyLinkedList, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(SplQueue, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(SplStack, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(BadFunctionCallException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(BadMethodCallException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(CachingIterator, z_list, sub, allow, ce_flags); \
@@ -739,11 +743,12 @@ const zend_function_entry spl_functions[] = {
  */
 PHP_MINIT_FUNCTION(spl)
 {
+	PHP_MINIT(spl_exceptions)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_iterators)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_array)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_directory)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_sxe)(INIT_FUNC_ARGS_PASSTHRU);
-	PHP_MINIT(spl_exceptions)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(spl_dllist)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_observer)(INIT_FUNC_ARGS_PASSTHRU);
 
 	return SUCCESS;
