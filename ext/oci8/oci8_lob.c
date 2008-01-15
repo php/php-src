@@ -575,7 +575,6 @@ int php_oci_lob_copy (php_oci_descriptor *descriptor_dest, php_oci_descriptor *d
 int php_oci_lob_close (php_oci_descriptor *descriptor TSRMLS_DC)
 {
 	php_oci_connection *connection = descriptor->connection;
-	int is_temporary;
 	
 	PHP_OCI_CALL_RETURN(connection->errcode, OCILobClose, (connection->svc, connection->err, descriptor->descriptor));
 
@@ -584,7 +583,21 @@ int php_oci_lob_close (php_oci_descriptor *descriptor TSRMLS_DC)
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 		return 1;
 	}
+
+	if (php_oci_temp_lob_close(descriptor)) {
+		return 1;
+	}
 	
+	return 0;
+} /* }}} */
+
+/* {{{ php_oci_temp_lob_close() 
+   Close Temporary LOB */
+int php_oci_temp_lob_close (php_oci_descriptor *descriptor TSRMLS_DC)
+{
+	php_oci_connection *connection = descriptor->connection;
+	int is_temporary;
+
 	PHP_OCI_CALL_RETURN(connection->errcode, OCILobIsTemporary, (connection->env,connection->err, descriptor->descriptor, &is_temporary));
 	
 	if (connection->errcode != OCI_SUCCESS) {
@@ -594,7 +607,6 @@ int php_oci_lob_close (php_oci_descriptor *descriptor TSRMLS_DC)
 	}
 	
 	if (is_temporary) {
-		
 		PHP_OCI_CALL_RETURN(connection->errcode, OCILobFreeTemporary, (connection->svc, connection->err, descriptor->descriptor));
 		
 		if (connection->errcode != OCI_SUCCESS) {
@@ -605,6 +617,7 @@ int php_oci_lob_close (php_oci_descriptor *descriptor TSRMLS_DC)
 	}
 	return 0;
 } /* }}} */
+
 
 /* {{{ php_oci_lob_flush() 
  Flush buffers for the LOB (only if they have been used) */
@@ -652,7 +665,6 @@ int php_oci_lob_flush(php_oci_descriptor *descriptor, long flush_flag TSRMLS_DC)
  Close LOB descriptor and free associated resources */
 void php_oci_lob_free (php_oci_descriptor *descriptor TSRMLS_DC)
 {
-
 	if (!descriptor || !descriptor->connection) {
 		return;
 	}
@@ -666,6 +678,12 @@ void php_oci_lob_free (php_oci_descriptor *descriptor TSRMLS_DC)
 	if ((descriptor->type == OCI_DTYPE_FILE || descriptor->type == OCI_DTYPE_LOB) && descriptor->buffering == PHP_OCI_LOB_BUFFER_USED) {
 		php_oci_lob_flush(descriptor, OCI_LOB_BUFFER_FREE TSRMLS_CC);
 	}
+
+#ifdef HAVE_OCI8_TEMP_LOB
+	if (descriptor->type == OCI_DTYPE_LOB) {
+		php_oci_temp_lob_close(descriptor);
+	}
+#endif
 
 	PHP_OCI_CALL(OCIDescriptorFree, (descriptor->descriptor, descriptor->type));
 
@@ -899,7 +917,9 @@ int php_oci_lob_write_tmp (php_oci_descriptor *descriptor, ub1 type, zstr data, 
 	return php_oci_lob_write(descriptor, 0, data, data_len, &bytes_written TSRMLS_CC);
 } /* }}} */
 
-int php_oci_lob_get_type(php_oci_descriptor *descriptor, php_oci_lob_type *lob_type TSRMLS_DC) /* {{{ */
+/* {{{ php_oci_lob_get_type() 
+   Determine whether LOB is a CLOB or a BLOB */
+int php_oci_lob_get_type(php_oci_descriptor *descriptor, php_oci_lob_type *lob_type TSRMLS_DC)
 {
 	php_oci_connection *connection = descriptor->connection;
 
