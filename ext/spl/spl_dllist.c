@@ -160,14 +160,13 @@ static spl_ptr_llist_element *spl_ptr_llist_offset(spl_ptr_llist *llist, long of
 {
 
 	spl_ptr_llist_element *current;
+	int pos = 0;
 
 	if (backward) {
 		current = llist->tail;
 	} else {
 		current = llist->head;
 	}
-
-	int pos = 0;
 
 	while (current && pos < offset) {
 		pos++;
@@ -453,12 +452,14 @@ static int spl_dllist_object_count_elements(zval *object, long *count TSRMLS_DC)
 SPL_METHOD(SplDoublyLinkedList, push)
 {
 	zval *value;
+	spl_dllist_object *intern;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &value) == FAILURE) {
 		return;
 	}
 	SEPARATE_ARG_IF_REF(value);
 
-	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	spl_ptr_llist_push(intern->llist, value);
 
@@ -471,12 +472,14 @@ SPL_METHOD(SplDoublyLinkedList, push)
 SPL_METHOD(SplDoublyLinkedList, unshift)
 {
 	zval *value;
+	spl_dllist_object *intern;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &value) == FAILURE) {
 		return;
 	}
 	SEPARATE_ARG_IF_REF(value);
 
-	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	spl_ptr_llist_unshift(intern->llist, value);
 
@@ -489,10 +492,12 @@ SPL_METHOD(SplDoublyLinkedList, unshift)
 SPL_METHOD(SplDoublyLinkedList, pop)
 {
 	zval *value;
+	spl_dllist_object *intern;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
 		return;
 	}
-	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	value = (zval *)spl_ptr_llist_pop(intern->llist);
 
@@ -510,10 +515,12 @@ SPL_METHOD(SplDoublyLinkedList, pop)
 SPL_METHOD(SplDoublyLinkedList, shift)
 {
 	zval *value;
+	spl_dllist_object *intern;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
 		return;
 	}
-	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	value = (zval *)spl_ptr_llist_shift(intern->llist);
 
@@ -531,10 +538,12 @@ SPL_METHOD(SplDoublyLinkedList, shift)
 SPL_METHOD(SplDoublyLinkedList, top)
 {
 	zval *value;
+	spl_dllist_object *intern;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
 		return;
 	}
-	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	value = (zval *)spl_ptr_llist_last(intern->llist);
 
 	if (value == NULL) {
@@ -551,10 +560,12 @@ SPL_METHOD(SplDoublyLinkedList, top)
 SPL_METHOD(SplDoublyLinkedList, bottom)
 {
 	zval *value;
+	spl_dllist_object *intern;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
 		return;
 	}
-	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	value = (zval *)spl_ptr_llist_first(intern->llist);
 
 	if (value == NULL) {
@@ -601,12 +612,13 @@ SPL_METHOD(SplDoublyLinkedList, isEmpty)
 SPL_METHOD(SplDoublyLinkedList, setIteratorMode)
 {
 	long value;
+	spl_dllist_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &value) == FAILURE) {
 		return;
 	}
 
-	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (intern->flags & SPL_DLLIST_IT_FIX
 		&& (intern->flags & SPL_DLLIST_IT_LIFO) != (value & SPL_DLLIST_IT_LIFO)) {
@@ -624,11 +636,13 @@ SPL_METHOD(SplDoublyLinkedList, setIteratorMode)
  Return the mode of iteration */
 SPL_METHOD(SplDoublyLinkedList, getIteratorMode)
 {
+	spl_dllist_object *intern;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
 		return;
 	}
 
-	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	RETURN_LONG(intern->flags);
 }
