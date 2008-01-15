@@ -1182,7 +1182,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		}*/
 		if (EG(exception) && fci->retval_ptr_ptr) {
 			zval_ptr_dtor(fci->retval_ptr_ptr);
-			fci->retval_ptr_ptr = NULL;
+			*fci->retval_ptr_ptr = NULL;
 		}
 	}
 	zend_ptr_stack_clear_multiple(TSRMLS_C);
