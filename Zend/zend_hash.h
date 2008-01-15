@@ -298,7 +298,7 @@ END_EXTERN_C()
 	zend_hash_init(ht, n, NULL, ZVAL_PTR_DTOR, persistent)
 
 
-#define HANDLE_NUMERIC(key, length, func) {												\
+#define ZEND_HANDLE_NUMERIC(key, length, func) {												\
 	register const char *tmp=key;																\
 																						\
 	if (*tmp=='-') {																	\
@@ -336,34 +336,34 @@ END_EXTERN_C()
 
 static inline int zend_symtable_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest)					\
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
 	return zend_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest);
 }
 
 
 static inline int zend_symtable_del(HashTable *ht, const char *arKey, uint nKeyLength)
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx))
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx))
 	return zend_hash_del(ht, arKey, nKeyLength);
 }
 
 
 static inline int zend_symtable_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData)
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_find(ht, idx, pData));
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_find(ht, idx, pData));
 	return zend_hash_find(ht, arKey, nKeyLength, pData);
 }
 
 
 static inline int zend_symtable_exists(HashTable *ht, const char *arKey, uint nKeyLength)
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_exists(ht, idx));
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_exists(ht, idx));
 	return zend_hash_exists(ht, arKey, nKeyLength);
 }
 
 static inline int zend_symtable_update_current_key(HashTable *ht, const char *arKey, uint nKeyLength)
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL, 0, idx));
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL, 0, idx));
 	return zend_hash_update_current_key(ht, HASH_KEY_IS_STRING, arKey, nKeyLength, 0);
 }
 
