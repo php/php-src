@@ -1,3 +1,9 @@
+2008-01-14  Marcus Boerger  <php@marcus-boerger.de>
+
+    * zend_execute_API.c
+      zend_execute_API.c:
+      - Fix memleak (found by colder)
+
 2008-01-11  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute.c

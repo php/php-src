@@ -1,3 +1,141 @@
+2008-01-14  Brian Shire  <shire@tekrat.com>
+
+    * (PHP_5_2)
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/tests/array/bug42850.phpt
+      ext/standard/tests/array/bug42850.phpt:
+      MFH: Fix bug #42850 array_walk_recursive() leaves references, refix bug
+      #34982
+
+    * ext/standard/array.c
+      ext/standard/tests/array/bug42850.phpt
+      ext/standard/tests/array/bug42850.phpt
+      ext/standard/tests/array/bug42850.phpt:
+      Fix bug #42850 array_walk_recursive() leaves references, refix bug #34982
+
+2008-01-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/pdo_stmt.c
+      ext/pdo/pdo_stmt.c:
+      
+      MFB: Missing patch bit from the FETCH_GROUP fix
+
+    * (PHP_5_3)
+      ext/pdo/pdo_stmt.c:
+      
+      Missing patch bit from the FETCH_GROUP fix
+
+2008-01-14  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c:
+      - Fix memleak (found by colder)
+
+2008-01-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      NEWS:
+      
+      Fixed in 5.2
+
+2008-01-14  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/zlib/tests/ob_003.phpt
+      ext/zlib/tests/ob_004.phpt
+      ext/zlib/tests/ob_005.phpt:
+      force tests to be run in CGI mode
+
+    * ext/pcre/upgrade-pcre.php
+      ext/pcre/upgrade-pcre.php:
+      MFB5.2: fix script for files with short names
+
+    * (PHP_5_2)
+      NEWS
+      ext/pcre/upgrade-pcre.php
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/config.h
+      ext/pcre/pcrelib/dftables.c
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre_chartables.c
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_config.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_fullinfo.c
+      ext/pcre/pcrelib/pcre_get.c
+      ext/pcre/pcrelib/pcre_globals.c
+      ext/pcre/pcrelib/pcre_info.c
+      ext/pcre/pcrelib/pcre_internal.h
+      ext/pcre/pcrelib/pcre_maketables.c
+      ext/pcre/pcrelib/pcre_newline.c
+      ext/pcre/pcrelib/pcre_ord2utf8.c
+      ext/pcre/pcrelib/pcre_printint.src
+      ext/pcre/pcrelib/pcre_refcount.c
+      ext/pcre/pcrelib/pcre_study.c
+      ext/pcre/pcrelib/pcre_tables.c
+      ext/pcre/pcrelib/pcre_try_flipped.c
+      ext/pcre/pcrelib/pcre_ucp_searchfuncs.c
+      ext/pcre/pcrelib/pcre_valid_utf8.c
+      ext/pcre/pcrelib/pcre_version.c
+      ext/pcre/pcrelib/pcre_xclass.c
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/ucptable.h
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/testdata/grepoutput
+      ext/pcre/pcrelib/testdata/testinput1
+      ext/pcre/pcrelib/testdata/testinput2
+      ext/pcre/pcrelib/testdata/testinput4
+      ext/pcre/pcrelib/testdata/testinput5
+      ext/pcre/pcrelib/testdata/testinput6
+      ext/pcre/pcrelib/testdata/testinput7
+      ext/pcre/pcrelib/testdata/testinput8
+      ext/pcre/pcrelib/testdata/testoutput1
+      ext/pcre/pcrelib/testdata/testoutput2
+      ext/pcre/pcrelib/testdata/testoutput4
+      ext/pcre/pcrelib/testdata/testoutput5
+      ext/pcre/pcrelib/testdata/testoutput6
+      ext/pcre/pcrelib/testdata/testoutput7
+      ext/pcre/pcrelib/testdata/testoutput8:
+      upgrade PCRE to version 7.5 (as asked by Ilia
+
+    * ext/standard/tests/dir/.cvsignore:
+      add cvsignore
+
+    * ext/standard/tests/dir/.cvsignore
+      ext/standard/tests/dir/.cvsignore:
+      
+      file .cvsignore was initially added on branch PHP_5_3.
+
+2008-01-14  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/zip/php_zip.c:
+      fix build
+
+2008-01-14  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_2)
+      run-tests.php:
+      merge in cgi fixes from PHP_5_3
+
+    * (PHP_5_2)
+      ext/zip/lib/zip_alias.h
+      ext/zip/lib/zipint_alias.h:
+      add missing alias .h files
+
+    * (PHP_5_3)
+      ext/zip/config.w32
+      ext/zip/lib/zip.h:
+      MFH: fix windows build for all cases, and always export symbols (Steph Fox)
+
+    * ext/zip/config.w32
+      ext/zip/lib/zip.h:
+      MFPECL: fix windows build for all cases, and always export symbols (Steph
+      Fox)
+
 2008-01-13  Greg Beaver  <greg@chiaraquartet.net>
 
     * (PHP_5_3)
