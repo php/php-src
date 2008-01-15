@@ -1935,84 +1935,12 @@ ZEND_API ulong zend_hash_next_free_element(HashTable *ht) /* {{{ */
 }
 /* }}} */
 
-/* {{{ HANDLE_*_NUMERIC macros */
-#define HANDLE_NUMERIC(key, length, func) {												\
-	register const char *tmp=key;														\
-																						\
-	if (*tmp=='-') {																	\
-		tmp++;																			\
-	}																					\
-	if ((*tmp>='0' && *tmp<='9')) do { /* possibly a numeric index */					\
-		const char *end=key+length-1;															\
-		long idx;																		\
-																						\
-		if (*tmp++=='0' && length>2) { /* don't accept numbers with leading zeros */	\
-			break;																		\
-		}																				\
-		while (tmp<end) {																\
-			if (!(*tmp>='0' && *tmp<='9')) {											\
-				break;																	\
-			}																			\
-			tmp++;																		\
-		}																				\
-		if (tmp==end && *tmp=='\0') { /* a numeric index */								\
-			if (*key=='-') {															\
-				idx = strtol(key, NULL, 10);											\
-				if (idx!=LONG_MIN) {													\
-					return func;														\
-				}																		\
-			} else {																	\
-				idx = strtol(key, NULL, 10);											\
-				if (idx!=LONG_MAX) {													\
-					return func;														\
-				}																		\
-			}																			\
-		}																				\
-	} while (0);																		\
-}
-
-#define HANDLE_U_NUMERIC(key, length, func) {											\
-	register UChar *tmp=key;															\
-																						\
-	if (*tmp==0x2D /*'-'*/) {															\
-		tmp++;																			\
-	}																					\
-	if ((*tmp>=0x30 /*'0'*/ && *tmp<=0x39 /*'9'*/)) do { /* possibly a numeric index */	\
-		UChar *end=key+length-1;														\
-		long idx;																		\
-																						\
-		if (*tmp++==0x30 && length>2) { /* don't accept numbers with leading zeros */	\
-			break;																		\
-		}																				\
-		while (tmp<end) {																\
-			if (!(*tmp>=0x30 /*'0'*/ && *tmp<=0x39 /*'9'*/)) {							\
-				break;																	\
-			}																			\
-			tmp++;																		\
-		}																				\
-		if (tmp==end && *tmp==0) { /* a numeric index */								\
-			if (*key==0x2D /*'-'*/) {													\
-				idx = zend_u_strtol(key, NULL, 10);										\
-				if (idx!=LONG_MIN) {													\
-					return func;														\
-				}																		\
-			} else {																	\
-				idx = zend_u_strtol(key, NULL, 10);										\
-				if (idx!=LONG_MAX) {													\
-					return func;														\
-				}																		\
-			}																			\
-		}																				\
-	} while (0);																		\
-}
-/* }}} */
-
 ZEND_API int zend_u_symtable_update(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest) /* {{{ */
 {
 	if (type == IS_STRING) {
-		HANDLE_NUMERIC(arKey.s, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
+		ZEND_HANDLE_NUMERIC(arKey.s, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
 	} else if (type == IS_UNICODE) {
-		HANDLE_U_NUMERIC(arKey.u, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
+		ZEND_HANDLE_U_NUMERIC(arKey.u, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
 	}
 	return zend_u_hash_update(ht, type, arKey, nKeyLength, pData, nDataSize, pDest);
 }
@@ -2021,9 +1949,9 @@ ZEND_API int zend_u_symtable_update(HashTable *ht, zend_uchar type, zstr arKey, 
 ZEND_API int zend_u_symtable_del(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength) /* {{{ */
 {
 	if (type == IS_STRING) {
-		HANDLE_NUMERIC(arKey.s, nKeyLength, zend_hash_index_del(ht, idx));
+		ZEND_HANDLE_NUMERIC(arKey.s, nKeyLength, zend_hash_index_del(ht, idx));
 	} else if (type == IS_UNICODE) {
-		HANDLE_U_NUMERIC(arKey.u, nKeyLength, zend_hash_index_del(ht, idx));
+		ZEND_HANDLE_U_NUMERIC(arKey.u, nKeyLength, zend_hash_index_del(ht, idx));
 	}
 	return zend_u_hash_del(ht, type, arKey, nKeyLength);
 }
@@ -2032,9 +1960,9 @@ ZEND_API int zend_u_symtable_del(HashTable *ht, zend_uchar type, zstr arKey, uin
 ZEND_API int zend_u_symtable_find(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, void **pData) /* {{{ */
 {
 	if (type == IS_STRING) {
-		HANDLE_NUMERIC(arKey.s, nKeyLength, zend_hash_index_find(ht, idx, pData));
+		ZEND_HANDLE_NUMERIC(arKey.s, nKeyLength, zend_hash_index_find(ht, idx, pData));
 	} else if (type == IS_UNICODE) {
-		HANDLE_U_NUMERIC(arKey.u, nKeyLength, zend_hash_index_find(ht, idx, pData));
+		ZEND_HANDLE_U_NUMERIC(arKey.u, nKeyLength, zend_hash_index_find(ht, idx, pData));
 	}
 	return zend_u_hash_find(ht, type, arKey, nKeyLength, pData);
 }
@@ -2043,9 +1971,9 @@ ZEND_API int zend_u_symtable_find(HashTable *ht, zend_uchar type, zstr arKey, ui
 ZEND_API int zend_u_symtable_exists(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength) /* {{{ */
 {
 	if (type == IS_STRING) {
-		HANDLE_NUMERIC(arKey.s, nKeyLength, zend_hash_index_exists(ht, idx));
+		ZEND_HANDLE_NUMERIC(arKey.s, nKeyLength, zend_hash_index_exists(ht, idx));
 	} else if (type == IS_UNICODE) {
-		HANDLE_U_NUMERIC(arKey.u, nKeyLength, zend_hash_index_exists(ht, idx));
+		ZEND_HANDLE_U_NUMERIC(arKey.u, nKeyLength, zend_hash_index_exists(ht, idx));
 	}
 	return zend_u_hash_exists(ht, type, arKey, nKeyLength);
 }
@@ -2057,10 +1985,10 @@ ZEND_API int zend_u_symtable_update_current_key(HashTable *ht, zend_uchar type, 
 
 	if (type == IS_STRING) {
 		key_type = HASH_KEY_IS_STRING;
-		HANDLE_NUMERIC(arKey.s, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx));
+		ZEND_HANDLE_NUMERIC(arKey.s, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx));
 	} else {
 		key_type = HASH_KEY_IS_UNICODE;
-		HANDLE_U_NUMERIC(arKey.u, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx));
+		ZEND_HANDLE_U_NUMERIC(arKey.u, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx));
 	}
 	return zend_hash_update_current_key(ht, key_type, arKey, nKeyLength, 0);
 }
@@ -2068,119 +1996,119 @@ ZEND_API int zend_u_symtable_update_current_key(HashTable *ht, zend_uchar type, 
 
 ZEND_API int zend_symtable_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest) /* {{{ */
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
 	return zend_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest);
 }
 /* }}} */
 
 ZEND_API int zend_symtable_del(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx))
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx))
 	return zend_hash_del(ht, arKey, nKeyLength);
 }
 /* }}} */
 
 ZEND_API int zend_symtable_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_find(ht, idx, pData));
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_find(ht, idx, pData));
 	return zend_hash_find(ht, arKey, nKeyLength, pData);
 }
 /* }}} */
 
 ZEND_API int zend_symtable_exists(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_exists(ht, idx));
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_exists(ht, idx));
 	return zend_hash_exists(ht, arKey, nKeyLength);
 }
 /* }}} */
 
 ZEND_API int zend_symtable_update_current_key(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx));
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx));
 	return zend_hash_update_current_key(ht, HASH_KEY_IS_STRING, ZSTR(arKey), nKeyLength, 0);
 }
 /* }}} */
 
 ZEND_API int zend_ascii_symtable_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest) /* {{{ */
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
 	return zend_ascii_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest);
 }
 /* }}} */
 
 ZEND_API int zend_ascii_symtable_del(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx))
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx))
 	return zend_ascii_hash_del(ht, arKey, nKeyLength);
 }
 /* }}} */
 
 ZEND_API int zend_ascii_symtable_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_find(ht, idx, pData));
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_find(ht, idx, pData));
 	return zend_ascii_hash_find(ht, arKey, nKeyLength, pData);
 }
 /* }}} */
 
 ZEND_API int zend_ascii_symtable_exists(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_exists(ht, idx));
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_exists(ht, idx));
 	return zend_ascii_hash_exists(ht, arKey, nKeyLength);
 }
 /* }}} */
 
 ZEND_API int zend_rt_symtable_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest) /* {{{ */
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
 	return zend_rt_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest);
 }
 /* }}} */
 
 ZEND_API int zend_rt_symtable_del(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx))
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx))
 	return zend_rt_hash_del(ht, arKey, nKeyLength);
 }
 /* }}} */
 
 ZEND_API int zend_rt_symtable_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_find(ht, idx, pData));
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_find(ht, idx, pData));
 	return zend_rt_hash_find(ht, arKey, nKeyLength, pData);
 }
 /* }}} */
 
 ZEND_API int zend_rt_symtable_exists(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_exists(ht, idx));
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_exists(ht, idx));
 	return zend_rt_hash_exists(ht, arKey, nKeyLength);
 }
 /* }}} */
 
 ZEND_API int zend_utf8_symtable_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest) /* {{{ */
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
 	return zend_utf8_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest);
 }
 /* }}} */
 
 ZEND_API int zend_utf8_symtable_del(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx))
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx))
 	return zend_utf8_hash_del(ht, arKey, nKeyLength);
 }
 /* }}} */
 
 ZEND_API int zend_utf8_symtable_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_find(ht, idx, pData));
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_find(ht, idx, pData));
 	return zend_utf8_hash_find(ht, arKey, nKeyLength, pData);
 }
 /* }}} */
 
 ZEND_API int zend_utf8_symtable_exists(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_exists(ht, idx));
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_exists(ht, idx));
 	return zend_utf8_hash_exists(ht, arKey, nKeyLength);
 }
 /* }}} */
