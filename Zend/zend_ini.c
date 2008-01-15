@@ -640,7 +640,8 @@ ZEND_API ZEND_INI_MH(OnUpdateStringUnempty) /* {{{ */
 
 ZEND_API ZEND_INI_MH(OnUpdateUTF8String) /* {{{ */
 {
-	UChar **p;
+	UChar **up;
+	char **p;
 	UChar *ustr = NULL;
 	int32_t ustr_len, capacity;
 	UErrorCode status = U_ZERO_ERROR;
@@ -651,30 +652,34 @@ ZEND_API ZEND_INI_MH(OnUpdateUTF8String) /* {{{ */
 
 	base = (char *) ts_resource(*((int *) mh_arg2));
 #endif
+	/* Convert only if unicode semantics is on. Otherwise, same as OnUpdateString */
+	if (UG(unicode)){
+		/* estimate capacity */
+		capacity = (new_value_length > 2) ? ((new_value_length >> 1) + (new_value_length >> 3) + 2) : new_value_length;
 
-	/* estimate capacity */
-	capacity = (new_value_length > 2) ? ((new_value_length >> 1) + (new_value_length >> 3) + 2) : new_value_length;
-
-	while (1) {
-		ustr = eurealloc(ustr, capacity+1);
-		u_strFromUTF8(ustr, capacity, &ustr_len, new_value, new_value_length, &status);
-		if (status == U_BUFFER_OVERFLOW_ERROR) {
-			capacity = ustr_len;
-			status = U_ZERO_ERROR;
-		} else {
-			break;
+		while (1) {
+			ustr = peurealloc(ustr, capacity+1, 1);
+			u_strFromUTF8(ustr, capacity+1, &ustr_len, new_value, new_value_length, &status);
+			if (status == U_BUFFER_OVERFLOW_ERROR || status == U_STRING_NOT_TERMINATED_WARNING) {
+				capacity = ustr_len;
+				status = U_ZERO_ERROR;
+			} else {
+				break;
+			}
 		}
+
+		if (U_FAILURE(status)) {
+			zend_error(E_WARNING, "Could not convert UTF-8 INI value to Unicode");
+			efree(ustr);
+			return FAILURE;
+		}
+
+		up = (UChar **) (base+(size_t) mh_arg1);
+		*up = ustr;
+	} else {		/* Same as OnUpdateString */
+		p = (char **) (base+(size_t) mh_arg1);
+		*p = new_value;
 	}
-
-	if (U_FAILURE(status)) {
-		zend_error(E_WARNING, "Could not convert UTF-8 INI value to Unicode");
-		efree(ustr);
-		return FAILURE;
-	}
-
-	p = (UChar **) (base+(size_t) mh_arg1);
-
-	*p = ustr;
 	return SUCCESS;
 }
 /* }}} */
