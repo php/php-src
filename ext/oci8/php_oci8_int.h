@@ -352,6 +352,7 @@ int php_oci_lob_get_buffering (php_oci_descriptor *);
 int php_oci_lob_copy (php_oci_descriptor *, php_oci_descriptor *, long TSRMLS_DC);
 #ifdef HAVE_OCI8_TEMP_LOB
 int php_oci_lob_close (php_oci_descriptor * TSRMLS_DC);
+int php_oci_temp_lob_close (php_oci_descriptor * TSRMLS_DC);
 int php_oci_lob_write_tmp (php_oci_descriptor *, ub1, zstr, int TSRMLS_DC);
 #endif
 void php_oci_lob_free(php_oci_descriptor * TSRMLS_DC);
