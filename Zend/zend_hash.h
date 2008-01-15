@@ -389,6 +389,78 @@ ZEND_API int zend_u_symtable_find(HashTable *ht, zend_uchar type, zstr arKey, ui
 ZEND_API int zend_u_symtable_exists(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength);
 ZEND_API int zend_u_symtable_update_current_key(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength);
 
+/* {{{ ZEND_HANDLE_*_NUMERIC macros */
+#define ZEND_HANDLE_NUMERIC(key, length, func) {										\
+	register const char *tmp=key;														\
+																						\
+	if (*tmp=='-') {																	\
+		tmp++;																			\
+	}																					\
+	if ((*tmp>='0' && *tmp<='9')) do { /* possibly a numeric index */					\
+		const char *end=key+length-1;													\
+		long idx;																		\
+																						\
+		if (*tmp++=='0' && length>2) { /* don't accept numbers with leading zeros */	\
+			break;																		\
+		}																				\
+		while (tmp<end) {																\
+			if (!(*tmp>='0' && *tmp<='9')) {											\
+				break;																	\
+			}																			\
+			tmp++;																		\
+		}																				\
+		if (tmp==end && *tmp=='\0') { /* a numeric index */								\
+			if (*key=='-') {															\
+				idx = strtol(key, NULL, 10);											\
+				if (idx!=LONG_MIN) {													\
+					return func;														\
+				}																		\
+			} else {																	\
+				idx = strtol(key, NULL, 10);											\
+				if (idx!=LONG_MAX) {													\
+					return func;														\
+				}																		\
+			}																			\
+		}																				\
+	} while (0);																		\
+}
+
+#define ZEND_HANDLE_U_NUMERIC(key, length, func) {										\
+	register UChar *tmp=key;															\
+																						\
+	if (*tmp==0x2D /*'-'*/) {															\
+		tmp++;																			\
+	}																					\
+	if ((*tmp>=0x30 /*'0'*/ && *tmp<=0x39 /*'9'*/)) do { /* possibly a numeric index */	\
+		UChar *end=key+length-1;														\
+		long idx;																		\
+																						\
+		if (*tmp++==0x30 && length>2) { /* don't accept numbers with leading zeros */	\
+			break;																		\
+		}																				\
+		while (tmp<end) {																\
+			if (!(*tmp>=0x30 /*'0'*/ && *tmp<=0x39 /*'9'*/)) {							\
+				break;																	\
+			}																			\
+			tmp++;																		\
+		}																				\
+		if (tmp==end && *tmp==0) { /* a numeric index */								\
+			if (*key==0x2D /*'-'*/) {													\
+				idx = zend_u_strtol(key, NULL, 10);										\
+				if (idx!=LONG_MIN) {													\
+					return func;														\
+				}																		\
+			} else {																	\
+				idx = zend_u_strtol(key, NULL, 10);										\
+				if (idx!=LONG_MAX) {													\
+					return func;														\
+				}																		\
+			}																			\
+		}																				\
+	} while (0);																		\
+}
+/* }}} */
+
 #endif							/* ZEND_HASH_H */
 
 /*
