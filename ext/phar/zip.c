@@ -73,6 +73,7 @@ int phar_open_zipfile(char *fname, int fname_len, char *alias, int alias_len, ph
 				spprintf(error, 4096, "phar zip error: cannot open zip-based phar \"%s\"", fname);
 			} else {
 				if (!zip_error_to_str(tmp, tmp_len + 1, ziperror, ziperror)) {
+					efree(tmp);
 					spprintf(error, 4096, "phar zip error: cannot open zip-based phar \"%s\"", fname);
 				} else {
 					spprintf(error, 4096, "phar zip error: cannot open zip-based phar \"%s\": %s", fname, tmp);
@@ -330,7 +331,8 @@ static ssize_t phar_zip_source(void *state, void *data, size_t len, enum zip_sou
 
 	switch (cmd) {
 		case ZIP_SOURCE_OPEN :
-			php_stream_seek(entry->fp, 0, SEEK_SET);
+			/* offset_within_phar is only non-zero when converting from tar/phar-based to zip-based */
+			php_stream_seek(entry->fp, entry->offset_within_phar, SEEK_SET);
 			return 0;
 		case ZIP_SOURCE_READ :
 			read = php_stream_read(entry->fp, buf, len);
@@ -343,7 +345,8 @@ static ssize_t phar_zip_source(void *state, void *data, size_t len, enum zip_sou
 			return sizeof(struct zip_stat);
 		case ZIP_SOURCE_FREE:
 			entry->is_modified = 0;
-			if (entry->fp && entry->fp_refcount == 0) {
+			/* phar->fp is set only if we're converting from a tar/phar-based archive */
+			if (entry->fp && entry->fp_refcount == 0 && entry->fp != entry->phar->fp) {
 				php_stream_close(entry->fp);
 				entry->fp = NULL;
 			}

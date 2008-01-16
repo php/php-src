@@ -791,7 +791,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 	}
 	etemp.is_modified = 1;
 	etemp.timestamp = time(0);
-	etemp.offset_within_phar = -1;
+	etemp.offset_within_phar = (phar->is_zip ? 0 : -1);
 	etemp.is_crc_checked = 1;
 	etemp.phar = phar;
 #if HAVE_PHAR_ZIP
@@ -2168,7 +2168,6 @@ phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry,
 # if HAVE_BZ2
 				char *filter_name;
 				php_stream_filter *filter;
-				php_stream *fp;
 				/* we have to decompress this by hand */
 
 				if (!phar_has_bz2) {

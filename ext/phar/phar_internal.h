@@ -43,6 +43,7 @@
 #include "main/streams/php_stream_plain_wrapper.h"
 #include "main/SAPI.h"
 #include "main/php_main.h"
+#include "main/php_open_temporary_file.h"
 #include "ext/standard/info.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/file.h"
