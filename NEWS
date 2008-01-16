@@ -106,6 +106,8 @@ PHP                                                                        NEWS
   segfault later on). (Dmitry)
 - Fixed bug #39056 (Interbase NUMERIC data type error). (Lars W)
 - Fixed bug #38468 (Unexpected creation of cycle). (Dmitry)
+- Fixed bug #37964 (Reflection shows private methods of parent class).
+  (Felipe, Marcus)
 - Fixed bug #37911 (preg_replace_callback() ignores named groups). (Nuno)
 - Fixed bug #36128 (Interbase PDO - timestamp columns return NULL). (Lars W)
 - Fixed bug #35386 (firebird: first row is null). (Lars W)
