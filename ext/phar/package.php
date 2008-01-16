@@ -4,6 +4,7 @@ $notes = '
 Major feature functionality release
  * add support for tar-based and zip-based phar archives [Greg]
  * add Phar::isTar(), Phar::isZip(), and Phar::isPhar() [Greg]
+ * add Phar::convertToTar(), Phar::convertToZip(), and Phar::convertToPhar() [Greg]
  * add Phar::webPhar() for running a web-based application unmodified
    directly from a phar archive [Greg]
  * file functions (fopen-based and stat-based) can be instructed to only look for
