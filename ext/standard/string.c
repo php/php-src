@@ -2616,23 +2616,33 @@ PHP_FUNCTION(chr)
 }
 /* }}} */
 
+/* {{{ php_ucfirst
+   Uppercase the first character of the word in a native string */
+static void php_ucfirst(char *str) 
+{
+	register char *r;
+	r = str;
+	*r = toupper((unsigned char) *r);
+}
+/* }}} */
+
 /* {{{ proto string ucfirst(string str)
    Makes a string's first character uppercase */
 PHP_FUNCTION(ucfirst)
 {
-	zval **str;
+	char *str;
+	int  str_len;
 	
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(str);
 
-	if (!Z_STRLEN_PP(str)) {
+	if (!str_len) {
 		RETURN_EMPTY_STRING();
 	}
 
-	ZVAL_STRINGL(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
-	*Z_STRVAL_P(return_value) = toupper((unsigned char) *Z_STRVAL_P(return_value));
+	ZVAL_STRINGL(return_value, str, str_len, 1);
+	php_ucfirst(Z_STRVAL_P(return_value));
 }
 /* }}} */
 
