@@ -1518,6 +1518,7 @@ static void phar_convert_to_other(phar_archive_data *source, int convert TSRMLS_
 		}
 	} else {
 		zval *userz;
+		long tmp;
 
 		if (source->is_tar) {
 			phar_entry_info *entry;
@@ -1536,7 +1537,8 @@ static void phar_convert_to_other(phar_archive_data *source, int convert TSRMLS_
 		/* copy the other phar's stub */
 		ALLOC_ZVAL(userz);
 		php_stream_to_zval(source->fp, userz);
-		phar_flush(&phar, (char *) &userz, -(source->internal_file_start), &error TSRMLS_CC);
+		tmp = source->internal_file_start;
+		phar_flush(&phar, (char *) &userz, -tmp, &error TSRMLS_CC);
 		efree(userz);
 		if (source->is_tar) {
 			source->internal_file_start = 0;
@@ -1645,16 +1647,17 @@ finalize:
 	if (phar.is_zip) {
 		_zip_free(phar.zip);
 		_zip_free(source->zip);
-		if (FAILURE == php_copy_file(opened_path, source->fname)) {
+		if (FAILURE == php_copy_file(opened_path, source->fname TSRMLS_CC)) {
 			/* we can't throw an exception or bad crap will happen */
 			zend_error(E_ERROR, "Error: could not copy newly created zip to \"%s\", phar is in unstable state, shutting down", source->fname);
 		}
 		source->zip = zip_open(source->fname, 0, &ziperror);
 		if (!source->zip) {
-			efree(opened_path);
 			/* now for the stupid hoops libzip forces... */
 			char *tmp;
 			int tmp_len;
+
+			efree(opened_path);
 			tmp_len = zip_error_to_str(NULL, 0, ziperror, ziperror);
 			if (!(tmp = emalloc((tmp_len + 1) * sizeof(char)))) {
 				zend_error(E_ERROR, "Error: could not re-open newly created zip \"%s\", phar is in unstable state, shutting down", source->fname);
@@ -1710,7 +1713,8 @@ PHP_METHOD(Phar, convertToTar)
 		efree(error);
 		return;
 	}
-	phar_convert_to_other(phar_obj->arc.archive, 1);
+	phar_convert_to_other(phar_obj->arc.archive, 1 TSRMLS_CC);
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1787,7 +1791,8 @@ PHP_METHOD(Phar, convertToZip)
 		efree(error);
 		return;
 	}
-	phar_convert_to_other(phar_obj->arc.archive, 2);
+	phar_convert_to_other(phar_obj->arc.archive, 2 TSRMLS_CC);
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1836,7 +1841,7 @@ PHP_METHOD(Phar, convertToPhar)
 		return;
 	}
 		
-	phar_convert_to_other(phar_obj->arc.archive, 0);
+	phar_convert_to_other(phar_obj->arc.archive, 0 TSRMLS_CC);
 	RETURN_TRUE;
 }
 /* }}} */
