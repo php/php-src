@@ -1,3 +1,156 @@
+2008-01-15  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_3)
+      ext/oci8/tests/bug43492.phpt
+      ext/oci8/tests/bug43492.phpt:
+      MFH: Testcase for #43492 (nested cursors)
+
+    * ext/oci8/tests/bug43492.phpt
+      ext/oci8/tests/bug43492.phpt
+      ext/oci8/tests/bug43492.phpt:
+        1.1.4;
+      Testcase for #43492 (nested cursors)
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/bug43497.phpt
+      ext/oci8/tests/bug43497.phpt:
+      MFB: fix #43497 (OCI8 XML/getClobVal aka temporary LOBs leak UGA memory)
+
+    * (PHP_5_2)
+      ext/oci8/oci8.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/bug43497.phpt
+      ext/oci8/tests/bug43497.phpt
+      ext/oci8/tests/bug43497.phpt:
+      fix #43497 (OCI8 XML/getClobVal aka temporary LOBs leak UGA memory)
+
+2008-01-15  Antony Dovgal  <tony@daylessday.org>
+
+    * ZendEngine2/zend_ini.c:
+      fix #43680 (OnUpdateUTF8String problems in PHP 6)
+      patch by Christopher Jones
+
+2008-01-15  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/spl/spl_dllist.c:
+      fix win build
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c
+      ext/openssl/openssl.c:
+      MFH: fix memleak in sign and verify functions
+
+    * ext/openssl/openssl.c:
+      fix memleak in sign and verify functions
+
+2008-01-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/zlib/tests/bug_40189_2.phpt:
+      Allow test to run from any directory
+
+2008-01-15  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      run-tests.php:
+      - MFH valgrind detection, note in header
+
+    * run-tests.php:
+      - Detect versions of valgrind that have an appendix to their verion number
+      - Show whether valgrind is being used in test header
+
+2008-01-15  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/spl/spl_dllist.c
+      ext/spl/tests/dllist_001.phpt
+      ext/spl/tests/dllist_004.phpt
+      ext/spl/tests/dllist_005.phpt:
+      Fix ZTS build, fix tests
+
+    * ext/spl/spl_dllist.c:
+      Fix ZTS build
+
+2008-01-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug43851.phpt:
+      Fixed bug #43851 (Memory corrution on reuse of assigned value)
+
+    * ZendEngine2/tests/bug43851.phpt
+      ZendEngine2/tests/bug43851.phpt:
+      
+      file bug43851.phpt was initially added on branch PHP_5_3.
+
+2008-01-15  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c:
+      - Fix the fix
+
+2008-01-15  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_alloc.c:
+      oops..
+      I didn't mean to commit this
+
+2008-01-15  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/spl_dllist.h:
+      Bump year
+
+    * (PHP_5_3)
+      ext/spl/CREDITS
+      ext/spl/config.m4
+      ext/spl/config.w32
+      ext/spl/php_spl.c
+      ext/spl/spl_dllist.c
+      ext/spl/spl_dllist.h
+      ext/spl/tests/dllist_001.phpt
+      ext/spl/tests/dllist_002.phpt
+      ext/spl/tests/dllist_003.phpt
+      ext/spl/tests/dllist_004.phpt
+      ext/spl/tests/dllist_005.phpt
+      ext/spl/tests/dllist_006.phpt:
+      MFH: Implement splDoublyLinkedList, splQueue, splStack classes in SPL
+
+    * ext/spl/CREDITS
+      ext/spl/config.m4
+      ext/spl/config.w32
+      ext/spl/php_spl.c
+      ext/spl/spl_dllist.c
+      ext/spl/spl_dllist.c
+      ext/spl/spl_dllist.h
+      ext/spl/spl_dllist.h
+      ext/spl/tests/dllist_001.phpt
+      ext/spl/tests/dllist_001.phpt
+      ext/spl/tests/dllist_002.phpt
+      ext/spl/tests/dllist_002.phpt
+      ext/spl/tests/dllist_003.phpt
+      ext/spl/tests/dllist_003.phpt
+      ext/spl/tests/dllist_004.phpt
+      ext/spl/tests/dllist_004.phpt
+      ext/spl/tests/dllist_005.phpt
+      ext/spl/tests/dllist_005.phpt
+      ext/spl/tests/dllist_006.phpt
+      ext/spl/tests/dllist_006.phpt:
+      Implement splDoublyLinkedList, splQueue, splStack classes in SPL
+
+2008-01-15  Antony Dovgal  <tony@daylessday.org>
+
+    * ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.h:
+      rename and export the macros
+      patch by colder
+
 2008-01-14  Brian Shire  <shire@tekrat.com>
 
     * (PHP_5_2)

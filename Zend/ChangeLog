@@ -1,3 +1,39 @@
+2008-01-15  Antony Dovgal  <tony@daylessday.org>
+
+    * zend_ini.c:
+      fix #43680 (OnUpdateUTF8String problems in PHP 6)
+      patch by Christopher Jones
+
+2008-01-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c
+      zend_execute.c
+      tests/bug43851.phpt:
+      Fixed bug #43851 (Memory corrution on reuse of assigned value)
+
+    * tests/bug43851.phpt
+      tests/bug43851.phpt:
+      
+      file bug43851.phpt was initially added on branch PHP_5_3.
+
+2008-01-15  Marcus Boerger  <php@marcus-boerger.de>
+
+    * zend_execute_API.c
+      zend_execute_API.c:
+      - Fix the fix
+
+2008-01-15  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      zend_alloc.c:
+      oops..
+      I didn't mean to commit this
+
+    * zend_hash.c
+      zend_hash.h:
+      rename and export the macros
+      patch by colder
+
 2008-01-14  Marcus Boerger  <php@marcus-boerger.de>
 
     * zend_execute_API.c
