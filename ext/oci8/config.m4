@@ -81,7 +81,7 @@ AC_DEFUN([AC_OCI8_VERSION],[
     OCI8_VERSION=`grep '"ocommon"' $OCI8_DIR/orainst/unix.rgs | $PHP_OCI8_SED 's/[ ][ ]*/:/g' | cut -d: -f 6 | cut -c 2-4`
     test -z "$OCI8_VERSION" && OCI8_VERSION=7.3
   elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.11.1; then
-    OCI8_VERSION=11.1    
+    OCI8_VERSION=11.1
   elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.10.1; then
     OCI8_VERSION=10.1    
   elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.9.0; then
@@ -143,7 +143,9 @@ fi
 
 PHP_OCI8_INSTANT_CLIENT="no"
 
-if test "`echo $PHP_OCI8 | cut -d, -f2`" = "instantclient"; then
+if test "`echo $PHP_OCI8`" = "instantclient"; then
+    PHP_OCI8_INSTANT_CLIENT="yes"
+elif test "`echo $PHP_OCI8 | cut -d, -f2`" = "instantclient"; then
     PHP_OCI8_INSTANT_CLIENT="`echo $PHP_OCI8 | cut -d, -f3`"
     PHP_OCI8="`echo $PHP_OCI8 | cut -d, -f1,4`"
     if test "$PHP_OCI8_INSTANT_CLIENT" = ""; then
@@ -308,14 +310,21 @@ if test "$PHP_OCI8" != "no" && test "$PHP_OCI8_INSTANT_CLIENT" = "no"; then
   
 elif test "$PHP_OCI8" != "no" && test "$PHP_OCI8_INSTANT_CLIENT" != "no"; then
 
+  AC_CHECK_SIZEOF(long int, 4)
+  LIBDIR_SUFFIX=""
+  if test "$ac_cv_sizeof_long_int" = "8" ; then
+    LIBDIR_SUFFIX=64
+  fi
+
   AC_MSG_CHECKING([Oracle Instant Client directory])
   if test "$PHP_OCI8_INSTANT_CLIENT" = "yes"; then
+dnl Find the directory if user specified "instantclient" but did not give a dir.
 dnl Generally the Instant Client can be anywhere so the user must pass in the
 dnl directory to the libraries.  But on Linux we default to the most recent
 dnl version in /usr/lib
-    PHP_OCI8_INSTANT_CLIENT=`ls -d /usr/lib/oracle/*/client/lib  2> /dev/null | tail -1`
+    PHP_OCI8_INSTANT_CLIENT=`ls -d /usr/lib/oracle/*/client${LIBDIR_SUFFIX}/lib 2> /dev/null | tail -1`
     if test -z "$PHP_OCI8_INSTANT_CLIENT"; then
-      AC_MSG_ERROR([Oracle Instant Client directory not found. Try --with-oci8=instantclient,DIR])
+      AC_MSG_ERROR([Oracle Instant Client directory /usr/lib/oracle/.../client${LIBDIR_SUFFIX}/lib not found. Try --with-oci8=instantclient,DIR])
     fi
   fi
   AC_MSG_RESULT($PHP_OCI8_INSTANT_CLIENT)
@@ -362,7 +371,7 @@ dnl Header directory for manual installation
       ;;
 
     *)
-      AC_MSG_ERROR([Oracle Instant CLient version $PHP_OCI8_INSTANT_CLIENT is not supported])
+      AC_MSG_ERROR([Oracle Instant Client version $PHP_OCI8_INSTANT_CLIENT is not supported])
       ;;
   esac
 
