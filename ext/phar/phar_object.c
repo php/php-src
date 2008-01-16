@@ -1336,13 +1336,15 @@ static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp TSRMLS
 }
 /* }}} */
 
-static void phar_convert_to_other(phar_archive_data *source, int convert TSRMLS_DC) /* {{{ */
+static void phar_convert_to_other(phar_archive_data *source, int convert, php_uint32 flags TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data phar = {0};
 	long offset = 0;
 	char *error, *opened_path = NULL;
 	int fd, ziperror;
 
+	/* set whole-archive compression from parameter */
+	phar.flags = flags;
 	switch (convert) {
 		case 1 :
 			phar.is_tar = 1;
@@ -1677,16 +1679,60 @@ finalize:
 #endif
 }
 
-/* {{{ proto bool Phar::convertToTar()
- * Convert the phar archive to the tar file format
+/* {{{ proto bool Phar::convertToTar([int compression])
+ * Convert the phar archive to the tar file format.  The optional parameter can be one of Phar::GZ
+ * or Phar::BZ2 to specify whole-file compression
  */
 PHP_METHOD(Phar, convertToTar)
 {
 	char *error;
+	php_uint32 flags;
+	long method = 0;
 	PHAR_ARCHIVE_OBJECT();
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &method) == FAILURE) {
+		return;
+	}
 
 	if (phar_obj->arc.archive->is_tar) {
 		RETURN_TRUE;
+	}
+
+	switch (method) {
+		case 0:
+			flags = PHAR_FILE_COMPRESSED_NONE;
+			break;
+		case PHAR_ENT_COMPRESSED_GZ:
+#if HAVE_ZLIB
+			if (!phar_has_zlib) {
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+					"Cannot compress entire archive with gzip, enable ext/zlib in php.ini");
+				return;
+			}
+			flags = PHAR_FILE_COMPRESSED_GZ;
+			break;
+#else
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+				"Cannot compress entire archive with gzip, support unavailable");
+#endif
+
+		case PHAR_ENT_COMPRESSED_BZ2:
+#if HAVE_BZ2
+			if (!phar_has_bz2) {
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+					"Cannot compress entire archive with bz2, enable ext/bz2 in php.ini");
+				return;
+			}
+			flags = PHAR_FILE_COMPRESSED_BZ2;
+			break;
+#else
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+				"Cannot compress entire archive with bz2, bz2 support unavailable");
+#endif
+		default:
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+				"Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2");
+			return;
 	}
 	if (PHAR_G(readonly)) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
@@ -1713,7 +1759,7 @@ PHP_METHOD(Phar, convertToTar)
 		efree(error);
 		return;
 	}
-	phar_convert_to_other(phar_obj->arc.archive, 1 TSRMLS_CC);
+	phar_convert_to_other(phar_obj->arc.archive, 1, flags TSRMLS_CC);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1791,22 +1837,66 @@ PHP_METHOD(Phar, convertToZip)
 		efree(error);
 		return;
 	}
-	phar_convert_to_other(phar_obj->arc.archive, 2 TSRMLS_CC);
+	phar_convert_to_other(phar_obj->arc.archive, 2, 0 TSRMLS_CC);
 	RETURN_TRUE;
 }
 /* }}} */
 
 
-/* {{{ proto bool Phar::convertToPhar()
- * Convert the phar archive to the phar file format
+/* {{{ proto bool Phar::convertToPhar([int compression])
+ * Convert the phar archive to the phar file format.  The optional parameter can be one of Phar::GZ
+ * or Phar::BZ2 to specify whole-file compression
  */
 PHP_METHOD(Phar, convertToPhar)
 {
 	char *error;
+	php_uint32 flags;
+	long method = 0;
 	PHAR_ARCHIVE_OBJECT();
-	
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &method) == FAILURE) {
+		return;
+	}
+
 	if (!phar_obj->arc.archive->is_tar && !phar_obj->arc.archive->is_zip) {
 		RETURN_TRUE;
+	}
+
+	switch (method) {
+		case 0:
+			flags = PHAR_FILE_COMPRESSED_NONE;
+			break;
+		case PHAR_ENT_COMPRESSED_GZ:
+#if HAVE_ZLIB
+			if (!phar_has_zlib) {
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+					"Cannot compress entire archive with gzip, enable ext/zlib in php.ini");
+				return;
+			}
+			flags = PHAR_FILE_COMPRESSED_GZ;
+			break;
+#else
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+				"Cannot compress entire archive with gzip, support unavailable");
+#endif
+
+		case PHAR_ENT_COMPRESSED_BZ2:
+#if HAVE_BZ2
+			if (!phar_has_bz2) {
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+					"Cannot compress entire archive with bz2, enable ext/bz2 in php.ini");
+				return;
+			}
+			flags = PHAR_FILE_COMPRESSED_BZ2;
+			break;
+#else
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+				"Cannot compress entire archive with bz2, bz2 support unavailable");
+#endif
+		default:
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+				"Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2");
+			return;
 	}
 	if (PHAR_G(readonly)) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
@@ -1841,7 +1931,7 @@ PHP_METHOD(Phar, convertToPhar)
 		return;
 	}
 		
-	phar_convert_to_other(phar_obj->arc.archive, 0 TSRMLS_CC);
+	phar_convert_to_other(phar_obj->arc.archive, 0, flags TSRMLS_CC);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -3417,6 +3507,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_copy, 0, 0, 2)
 	ZEND_ARG_INFO(0, newfile)
 	ZEND_ARG_INFO(0, oldfile)
 ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_conv, 0, 0, 0)
+	ZEND_ARG_INFO(0, compression)
+ZEND_END_ARG_INFO();
 #endif
 
 static
@@ -3458,9 +3553,9 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, isTar,                 NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, isZip,                 NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, isPhar,                NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, convertToTar,          NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, convertToTar,          arginfo_phar_conv,         ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, convertToZip,          NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, convertToPhar,         NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, convertToPhar,         arginfo_phar_conv,         ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, isCompressed,          NULL,                      ZEND_ACC_PUBLIC)
 #endif
 	/* static member functions */
