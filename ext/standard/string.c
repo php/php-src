@@ -3858,23 +3858,34 @@ PHP_FUNCTION(chr)
 
 /* {{{ php_u_ucfirst()
    Makes an Unicode string's first character uppercase */
-static void php_u_ucfirst(zval *ustr, zval *return_value TSRMLS_DC)
+static void php_u_ucfirst(UChar *ustr, int ustr_len, zval *return_value TSRMLS_DC)
 {
 	UChar tmp[3] = { 0, 0, 0 }; /* UChar32 will be converted to upto 2 UChar units */
 	int tmp_len = 0;
 	int pos = 0;
 	UErrorCode status = U_ZERO_ERROR;
 
-	U16_FWD_1(Z_USTRVAL_P(ustr), pos, Z_USTRLEN_P(ustr));
-	tmp_len = u_strToUpper(tmp, sizeof(tmp)/sizeof(UChar), Z_USTRVAL_P(ustr), pos, UG(default_locale), &status);
+	U16_FWD_1(ustr, pos, ustr_len);
+	tmp_len = u_strToUpper(tmp, sizeof(tmp)/sizeof(UChar), ustr, pos, UG(default_locale), &status);
 
-	Z_USTRVAL_P(return_value) = eumalloc(tmp_len+Z_USTRLEN_P(ustr)-pos+1);
+	Z_USTRVAL_P(return_value) = eumalloc(tmp_len + ustr_len - pos+1);
+	
 	Z_USTRVAL_P(return_value)[0] = tmp[0];
 	if (tmp_len > 1) {
 		Z_USTRVAL_P(return_value)[1] = tmp[1];
 	}
-	u_memcpy(Z_USTRVAL_P(return_value)+tmp_len, Z_USTRVAL_P(ustr)+pos, Z_USTRLEN_P(ustr)-pos+1);
-	Z_USTRLEN_P(return_value) = tmp_len+Z_USTRLEN_P(ustr)-pos;
+	u_memcpy(Z_USTRVAL_P(return_value)+tmp_len, ustr + pos, ustr_len - pos+1);
+	Z_USTRLEN_P(return_value) = tmp_len + ustr_len - pos;
+}
+/* }}} */
+
+/* {{{ php_ucfirst 
+   Uppercase the first character of the word in a native string */
+static void php_ucfirst(char *str)
+{
+	register char *r;
+	r = str;
+	*r = toupper((unsigned char) *r);
 }
 /* }}} */
 
@@ -3882,29 +3893,29 @@ static void php_u_ucfirst(zval *ustr, zval *return_value TSRMLS_DC)
    Makes a string's first character uppercase */
 PHP_FUNCTION(ucfirst)
 {
-	zval **str;
+	zstr       str;
+	int        str_len;
+	zend_uchar str_type;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+		return;
 	}
+	
+	if (str_len == 0) {
+		if (str_type == IS_UNICODE) {
+			RETURN_EMPTY_UNICODE();
+		} else {
+			RETURN_EMPTY_STRING();
+		}
+	}	
 
-	if (Z_TYPE_PP(str) != IS_UNICODE && Z_TYPE_PP(str) != IS_STRING) {
-		convert_to_text_ex(str);
-	}
-
-	if (Z_TYPE_PP(str) == IS_UNICODE && !Z_USTRLEN_PP(str)) {
-		RETURN_EMPTY_UNICODE();
-	} else if (!Z_STRLEN_PP(str)) {
-		RETURN_EMPTY_STRING();
-	}
-
-	if (Z_TYPE_PP(str) == IS_UNICODE) {
+	if (str_type == IS_UNICODE) {
 		Z_TYPE_P(return_value) = IS_UNICODE;
-		php_u_ucfirst(*str, return_value TSRMLS_CC);
+		php_u_ucfirst(str.u, str_len, return_value TSRMLS_CC);
 	} else {
-		ZVAL_STRINGL(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
-		*Z_STRVAL_P(return_value) = toupper((unsigned char) *Z_STRVAL_P(return_value));
-	}
+		ZVAL_STRINGL(return_value, str.s, str_len, ZSTR_DUPLICATE);
+		php_ucfirst(Z_STRVAL_P(return_value));
+	}	
 }
 /* }}} */
 
