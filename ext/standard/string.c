@@ -7821,7 +7821,7 @@ static int php_str_word_count(char *str, int str_len, long type, char *char_list
 
 	while (p < e) {
 		s = p;
-		while (p < e && (isalpha(*p) || (char_list && ch[(unsigned char)*p]) || *p == '\'' || *p == '-')) {
+		while (p < e && (isalpha((unsigned char)*p) || (char_list && ch[(unsigned char)*p]) || *p == '\'' || *p == '-')) {
 			p++;
 		}
 		if (p > s) {
