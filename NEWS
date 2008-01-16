@@ -72,6 +72,8 @@ PHP                                                                        NEWS
 - Fixed bug #42945 (preg_split() swallows part of the string). (Nuno)
 - Fixed bug #42937 (__call() method not invoked when methods are called on
   parent from child class). (Dmitry)
+- Fixed bug #42779 (Incorrect forcing from HTTP/1.0 request to HTTP/1.1
+  response). (Ilia)
 - Fixed bug #42736 (xmlrpc_server_call_method() crashes). (Tony)
 - Fixed bug #42692 (Procedure 'int1' not present with doc/lit SoapServer).
   (Dmitry)
