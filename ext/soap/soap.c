@@ -495,7 +495,7 @@ ZEND_INI_MH(OnUpdateCacheMode)
 	char *base = (char *) ts_resource(*((int *) mh_arg2));
 #endif
 
-	p = (long*) (base+(size_t) mh_arg1);
+	p = (char*) (base+(size_t) mh_arg1);
 
 	*p = (char)atoi(new_value);
 
