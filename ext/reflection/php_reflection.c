@@ -519,7 +519,8 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			zend_hash_internal_pointer_reset_ex(&ce->function_table, &pos);
 
 			while (zend_hash_get_current_data_ex(&ce->function_table, (void **) &mptr, &pos) == SUCCESS) {
-				if (!(mptr->common.fn_flags & ZEND_ACC_STATIC)) {
+				if ((mptr->common.fn_flags & ZEND_ACC_STATIC) == 0 &&
+					((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce)) {
 					zstr key;
 					uint key_len;
 					ulong num_index;
@@ -541,6 +542,9 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 				zend_hash_move_forward_ex(&ce->function_table, &pos);
 			}
 			string_printf(str, "\n%s  - Methods [%d] {", indent, count);
+			if (!count) {
+				string_printf(str, "\n");
+			}
 			string_append(str, &dyn);
 			string_free(&dyn);
 		} else {
