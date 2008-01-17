@@ -79,6 +79,8 @@ PHP                                                                        NEWS
 
 - Fixed bug #43527 (DateTime created from a timestamp reports environment
   timezone). (Derick)
+- Fixed bug #43003 (Invalid timezone reported for DateTime objects constructed
+  using a timestamp). (Derick)
 - Fixed bug #43143 (Warning about empty IV with MCRYPT_MODE_ECB). (Derick)
 - Fixed bug #43136 (possible crash on script execution timeout.
   The EG(function_state_ptr) is completely removed,

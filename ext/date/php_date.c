@@ -273,6 +273,7 @@ struct _php_date_obj {
 
 struct _php_timezone_obj {
 	zend_object     std;
+	int             initialized;
 	int             type;
 	union {
 		timelib_tzinfo *tz; // TIMELIB_ZONETYPE_ID;
@@ -1632,6 +1633,7 @@ static zend_object_value date_object_clone_timezone(zval *this_ptr TSRMLS_DC)
 	
 	zend_objects_clone_members(&new_obj->std, new_ov, &old_obj->std, Z_OBJ_HANDLE_P(this_ptr) TSRMLS_CC);
 	new_obj->type = old_obj->type;
+	new_obj->initialized = 1;
 	switch (new_obj->type) {
 		case TIMELIB_ZONETYPE_ID:
 			new_obj->tzi.tz = old_obj->tzi.tz;
@@ -2052,6 +2054,7 @@ PHP_FUNCTION(date_timezone_get)
 	if (dateobj->time->is_localtime/* && dateobj->time->tz_info*/) {
 		date_instantiate(date_ce_timezone, return_value TSRMLS_CC);
 		tzobj = (php_timezone_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
+		tzobj->initialized = 1;
 		tzobj->type = dateobj->time->zone_type;
 		switch (dateobj->time->zone_type) {
 			case TIMELIB_ZONETYPE_ID:
@@ -2277,6 +2280,7 @@ PHP_METHOD(DateTimeZone, __construct)
 			tzobj = zend_object_store_get_object(getThis() TSRMLS_CC);
 			tzobj->type = TIMELIB_ZONETYPE_ID;
 			tzobj->tzi.tz = tzi;
+			tzobj->initialized = 1;
 		} else {
 			ZVAL_NULL(getThis());
 		}
@@ -2297,7 +2301,7 @@ PHP_FUNCTION(timezone_name_get)
 		RETURN_FALSE;
 	}
 	tzobj = (php_timezone_obj *) zend_object_store_get_object(object TSRMLS_CC);
-	DATE_CHECK_INITIALIZED(tzobj->tzi.tz, DateTimeZone);
+	DATE_CHECK_INITIALIZED(tzobj->initialized, DateTimeZone);
 
 	switch (tzobj->type) {
 		case TIMELIB_ZONETYPE_ID:
@@ -2360,7 +2364,7 @@ PHP_FUNCTION(timezone_offset_get)
 		RETURN_FALSE;
 	}
 	tzobj = (php_timezone_obj *) zend_object_store_get_object(object TSRMLS_CC);
-	DATE_CHECK_INITIALIZED(tzobj->tzi.tz, DateTimeZone);
+	DATE_CHECK_INITIALIZED(tzobj->initialized, DateTimeZone);
 	dateobj = (php_date_obj *) zend_object_store_get_object(dateobject TSRMLS_CC);
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 
@@ -2383,7 +2387,7 @@ PHP_FUNCTION(timezone_transitions_get)
 		RETURN_FALSE;
 	}
 	tzobj = (php_timezone_obj *) zend_object_store_get_object(object TSRMLS_CC);
-	DATE_CHECK_INITIALIZED(tzobj->tzi.tz, DateTimeZone);
+	DATE_CHECK_INITIALIZED(tzobj->initialized, DateTimeZone);
 	if (tzobj->type != TIMELIB_ZONETYPE_ID) {
 		RETURN_FALSE;
 	}
