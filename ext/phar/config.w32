@@ -19,5 +19,4 @@ if (PHP_PHAR != "no") {
 	ADD_EXTENSION_DEP('phar', 'zlib', true);
 	ADD_EXTENSION_DEP('phar', 'bz2', true);
 	ADD_EXTENSION_DEP('phar', 'spl', true);
-	ADD_EXTENSION_DEP('phar', 'gnupg', true);
 }
