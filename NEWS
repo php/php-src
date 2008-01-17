@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 	- strtotime() / new DateTime
 	- date_create_from_format() / DateTime::createFromFormat()
 	- date_parse_from_format()
+  * support for abbreviation and offset based timezone specifiers for
+    DateTime::getOffset() and DateTime::getName().
 
 - Added ability to use Traversable objects instead of plain arrays in ext/soap.
   (Joshua Reese, Dmitry)
@@ -75,6 +77,8 @@ PHP                                                                        NEWS
 
 - Fixed possible crash in ext/soap because of uninitialized value. (Zdash Urf)
 
+- Fixed bug #43527 (DateTime created from a timestamp reports environment
+  timezone). (Derick)
 - Fixed bug #43143 (Warning about empty IV with MCRYPT_MODE_ECB). (Derick)
 - Fixed bug #43136 (possible crash on script execution timeout.
   The EG(function_state_ptr) is completely removed,
@@ -94,6 +98,8 @@ PHP                                                                        NEWS
 - Fixed bug #42548 (mysqli PROCEDURE calls can't return result sets). (hartmut)
 - Fixed bug #42509 (gmp leaks memory when gmp_init() not used). (Stas)
 - Fixed bug #42284 (duplicate of #39700). (Lars W)
+- Fixed bug #42190 (Constructing DateTime with TimeZone Indicator invalidates
+  DateTimeZone). (Derick)
 - Fixed bug #42069 (parse_ini_file() allows using some non-alpha numeric
   characters). (Jani)
 - Fixed bug #41522 (PDO firebird driver returns null if it fails to connect). 
