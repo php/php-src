@@ -71,6 +71,9 @@ The next few rules are more some general hints:
       create an entirely new thread copying anything you wish to quote into the
       new thread.
 
+Finally, additional hints on how to behave inside the virtual community can be
+found in RFC 1855 (http://www.faqs.org/rfcs/rfc1855.html).
+
 Happy hacking,
 
 PHP Team
