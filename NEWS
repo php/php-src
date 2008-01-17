@@ -77,6 +77,7 @@ PHP                                                                        NEWS
 
 - Fixed possible crash in ext/soap because of uninitialized value. (Zdash Urf)
 
+- Fixed bug #43808 (date_create never fails (even when it should)). (Derick)
 - Fixed bug #43527 (DateTime created from a timestamp reports environment
   timezone). (Derick)
 - Fixed bug #43003 (Invalid timezone reported for DateTime objects constructed
