@@ -654,7 +654,7 @@ PHP_FUNCTION(dns_get_record)
 	char *hostname;
 	int hostname_len;
 	long type_param = PHP_DNS_ANY;
-	zval *authns, *addtl;
+	zval *authns = NULL, *addtl = NULL;
 	int addtl_recs = 0;
 	int type_to_fetch;
 	struct __res_state res;
