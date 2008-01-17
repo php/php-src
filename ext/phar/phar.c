@@ -3191,12 +3191,24 @@ skip_phar:
 
 PHP_MINIT_FUNCTION(phar) /* {{{ */
 {
+	zend_module_entry *test;
+
 	ZEND_INIT_MODULE_GLOBALS(phar, php_phar_init_globals_module, NULL);
 	REGISTER_INI_ENTRIES();
 
 	phar_has_bz2 = zend_hash_exists(&module_registry, "bz2", sizeof("bz2"));
 	phar_has_zlib = zend_hash_exists(&module_registry, "zlib", sizeof("zlib"));
-	phar_has_zip = zend_hash_exists(&module_registry, "zip", sizeof("zip"));
+	if (SUCCESS == zend_hash_find(&module_registry, "zip", sizeof("zip"), (void **) &test)) {
+		if (strlen(test->version) == sizeof("1.8.11")-1 && !strncmp(test->version, "1.8.11", sizeof("1.8.11")-1)) {
+			phar_has_zip = 1;
+		} else {
+			phar_has_zip = 0;
+		}
+		phar_zip_ver = test->version;
+	} else {
+		phar_has_zip = 0;
+		phar_zip_ver = NULL;
+	}
 
 	phar_orig_compile_file = zend_compile_file;
 	zend_compile_file = phar_compile_file;
@@ -3280,7 +3292,14 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 	if (phar_has_zip) {
 		php_info_print_table_row(2, "ZIP-based phar archives", "enabled");
 	} else {
-		php_info_print_table_row(2, "ZIP-based phar archives", "disabled (install pecl/zip)");
+		if (phar_zip_ver) {
+			char *tmp;
+			spprintf(&tmp, 0, "disabled (pecl/zip version %s installed, we need zip >= 1.8.11)", phar_zip_ver);
+			php_info_print_table_row(2, "ZIP-based phar archives", tmp);
+			efree(tmp);
+		} else {
+			php_info_print_table_row(2, "ZIP-based phar archives", "disabled (install pecl/zip)");
+		}
 	}
 #else
 	php_info_print_table_row(2, "ZIP-based phar archives", "unavailable");
@@ -3313,7 +3332,7 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
  */
 static zend_module_dep phar_deps[] = {
 #if HAVE_PHAR_ZIP
-	ZEND_MOD_OPTIONAL_EX("zip", ">=", "1.8.11")
+	ZEND_MOD_OPTIONAL("zip")
 #endif
 	ZEND_MOD_OPTIONAL("zlib")
 	ZEND_MOD_OPTIONAL("bz2")
