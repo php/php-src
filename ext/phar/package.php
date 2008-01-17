@@ -64,6 +64,7 @@ $package->addPackageDepWithChannel('optional', 'bz2', 'pecl.php.net', false, fal
 // all this false business sets the <providesextension> tag that allows us to have hash built
 // in statically
 $package->addPackageDepWithChannel('optional', 'hash', 'pecl.php.net', false, false, false, false, 'hash');
+$package->addPackageDepWithChannel('optional', 'zip', 'pecl.php.net', '1.8.11', false, false, false, 'zip');
 $package->addExtensionDep('optional', 'spl');
 $package->addExtensionDep('optional', 'zlib');
 $package->setPackageType('extsrc');
