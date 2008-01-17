@@ -156,23 +156,6 @@ int phar_open_zipfile(char *fname, int fname_len, char *alias, int alias_len, ph
 						entry.flags |= PHAR_ENT_COMPRESSED_GZ;
 						break;
 					case ZIP_CM_BZIP2 :
-#if !HAVE_BZ2
-						if (mydata->metadata) {
-							zval_dtor(mydata->metadata);
-						}
-						efree(mydata->fname);
-						if (mydata->alias) {
-							efree(mydata->alias);
-						}
-						zip_close(zip);
-						zend_hash_destroy(&(mydata->manifest));
-						mydata->manifest.arBuckets = NULL;
-						efree(mydata);
-						if (error) {
-							spprintf(error, 0, "bz2 extension is required for Bzip2 compressed zip-based .phar file \"%s\"", fname);
-						}
-						return FAILURE;
-#else
 						if (!phar_has_bz2) {
 							if (mydata->metadata) {
 								zval_dtor(mydata->metadata);
@@ -190,7 +173,6 @@ int phar_open_zipfile(char *fname, int fname_len, char *alias, int alias_len, ph
 							}
 							return FAILURE;
 						}
-#endif
 						entry.flags |= PHAR_ENT_COMPRESSED_BZ2;
 						break;
 				}

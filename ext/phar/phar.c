@@ -1380,13 +1380,6 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 #endif
 			break;
 		case PHAR_ENT_COMPRESSED_BZ2:
-#if !HAVE_BZ2
-			if (entry.metadata) {
-				zval_ptr_dtor(&entry.metadata);
-			}
-			efree(entry.filename);
-			MAPPHAR_FAIL("bz2 extension is required for bzip2 compressed .phar file \"%s\"");
-#else
 			if (!phar_has_bz2) {
 				if (entry.metadata) {
 					zval_ptr_dtor(&entry.metadata);
@@ -1394,7 +1387,6 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 				efree(entry.filename);
 				MAPPHAR_FAIL("bz2 extension is required for bzip2 compressed .phar file \"%s\"");
 			}
-#endif
 			break;
 		default:
 			if (entry.uncompressed_filesize != entry.compressed_filesize) {
@@ -1714,14 +1706,11 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 #endif
 				continue;
 			} else if (!memcmp(pos, bz_magic, 3)) {
-#if !HAVE_BZ2
-				MAPPHAR_ALLOC_FAIL("unable to decompress bzipped phar archive \"%s\" to temporary file, bzip2 disabled in phar compilation")
-#else
 				php_stream_filter *filter;
 				php_stream *temp;
 
 				if (!phar_has_bz2) {
-					MAPPHAR_ALLOC_FAIL("unable to decompress bzipped phar archive \"%s\" to temporary file, enable bzip2 extension in php.ini")
+					MAPPHAR_ALLOC_FAIL("unable to decompress bzipped phar archive \"%s\" to temporary file, enable bz2 extension in php.ini")
 				}
 				/* entire file is bzip-compressed, uncompress to temporary file */
 				if (!(temp = php_stream_fopen_tmpfile())) {
@@ -1747,7 +1736,6 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 
 				/* now, start over */
 				test = '\0';
-#endif
 				continue;
 			}
 			if (!memcmp(pos, zip_magic, 4)) {
@@ -2165,7 +2153,6 @@ phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry,
 		}
 		if (!entry->zip) {
 			if (entry->flags & PHAR_ENT_COMPRESSED_BZ2) {
-# if HAVE_BZ2
 				char *filter_name;
 				php_stream_filter *filter;
 				/* we have to decompress this by hand */
@@ -2230,12 +2217,6 @@ phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry,
 				php_stream_filter_remove(filter, 1 TSRMLS_CC);
 				php_stream_close(fp);
 				return entry;
-# else /* #if HAVE_BZ2 */
-				if (error) {
-					spprintf(error, 4096, "phar error, cannot decompress bzip2-compressed entry"); 
-				}
-				return NULL;
-# endif /* #if HAVE_BZ2 */
 			} else {
 				/* uncompressed or zlib-compressed */
 				entry->zip = zip_fopen_index(phar->zip, entry->index, 0);
@@ -3325,15 +3306,11 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 #else
 	php_info_print_table_row(2, "gzip compression", "unavailable");
 #endif
-#if HAVE_BZ2
 	if (phar_has_bz2) {
 		php_info_print_table_row(2, "bzip2 compression", "enabled");
 	} else {
 		php_info_print_table_row(2, "bzip2 compression", "disabled (install pecl/bz2)");
 	}
-#else
-	php_info_print_table_row(2, "bzip2 compression", "unavailable (install pecl/bz2)");
-#endif
 	php_info_print_table_end();
 
 	php_info_print_box_start(0);
@@ -3357,9 +3334,7 @@ static zend_module_dep phar_deps[] = {
 #if HAVE_ZLIB
 	ZEND_MOD_OPTIONAL("zlib")
 #endif
-#if HAVE_BZ2
 	ZEND_MOD_OPTIONAL("bz2")
-#endif
 #if HAVE_SPL
 	ZEND_MOD_REQUIRED("spl")
 #endif

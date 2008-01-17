@@ -5,8 +5,25 @@ PHP_ARG_ENABLE(phar, for phar support/phar zlib support,
 [  --enable-phar           Enable phar support])
 
 if test "$PHP_PHAR" != "no"; then
+    AC_MSG_CHECKING([for ZIP includes])
+    if test -f $abs_srcdir/include/php/ext/zip/lib/zip.h; then
+      zip_inc_path=$abs_srcdir/ext
+      AC_DEFINE(HAVE_PHAR_ZIP,1,[ ])
+      AC_MSG_RESULT($zip_inc_path)
+    elif test -f $abs_srcdir/ext/zip/lib/zip.h; then
+      zip_inc_path=$abs_srcdir/ext
+      AC_DEFINE(HAVE_PHAR_ZIP,1,[ ])
+      AC_MSG_RESULT($zip_inc_path)
+    elif test -f $prefix/include/php/ext/zip/lib/zip.h; then
+      zip_inc_path=$prefix/include/php/ext
+      AC_DEFINE(HAVE_PHAR_ZIP,1,[ ])
+      AC_MSG_RESULT($zip_inc_path)
+    else
+      zip_inc_path=/dev/null
+      AC_DEFINE(HAVE_PHAR_ZIP,0,[ ])
+      AC_MSG_RESULT([not found, disabling ZIP-based phar support])
+    fi
   PHP_NEW_EXTENSION(phar, tar.c zip.c stream.c func_interceptors.c dirstream.c phar.c phar_object.c phar_path_check.c, $ext_shared)
-  AC_DEFINE(HAVE_PHAR_ZIP,1,[ ])
   PHP_ADD_BUILD_DIR($ext_builddir/lib, 1)
   PHP_SUBST(PHAR_SHARED_LIBADD)
   PHP_ADD_EXTENSION_DEP(phar, zip, true)
