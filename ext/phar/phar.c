@@ -3225,7 +3225,6 @@ PHP_MINIT_FUNCTION(phar) /* {{{ */
 	ZEND_INIT_MODULE_GLOBALS(phar, php_phar_init_globals_module, NULL);
 	REGISTER_INI_ENTRIES();
 
-	phar_has_gnupg = zend_hash_exists(&module_registry, "gnupg", sizeof("gnupg"));
 	phar_has_bz2 = zend_hash_exists(&module_registry, "bz2", sizeof("bz2"));
 	phar_has_zlib = zend_hash_exists(&module_registry, "zlib", sizeof("zlib"));
 	phar_has_zip = zend_hash_exists(&module_registry, "zip", sizeof("zip"));
@@ -3335,15 +3334,6 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 #else
 	php_info_print_table_row(2, "bzip2 compression", "unavailable (install pecl/bz2)");
 #endif
-#if HAVE_GNUPGLIB
-  if (phar_has_gnupg) {
-		php_info_print_table_row(2, "GPG signature", "enabled");
-	} else {
-		php_info_print_table_row(2, "GPG signature", "disabled (install pecl/gnupg)");
-	}
-#else
-	php_info_print_table_row(2, "GPG signature", "unavailable (install pecl/gnupg)");
-#endif
 	php_info_print_table_end();
 
 	php_info_print_box_start(0);
@@ -3369,9 +3359,6 @@ static zend_module_dep phar_deps[] = {
 #endif
 #if HAVE_BZ2
 	ZEND_MOD_OPTIONAL("bz2")
-#endif
-#if HAVE_GNUPGLIB
-	ZEND_MOD_OPTIONAL("gnupg")
 #endif
 #if HAVE_SPL
 	ZEND_MOD_REQUIRED("spl")
