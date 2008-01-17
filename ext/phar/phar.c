@@ -1363,13 +1363,6 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 		offset += entry.compressed_filesize;
 		switch (entry.flags & PHAR_ENT_COMPRESSION_MASK) {
 		case PHAR_ENT_COMPRESSED_GZ:
-#if !HAVE_ZLIB
-			if (entry.metadata) {
-				zval_ptr_dtor(&entry.metadata);
-			}
-			efree(entry.filename);
-			MAPPHAR_FAIL("zlib extension is required for gz compressed .phar file \"%s\"");
-#else
 			if (!phar_has_zlib) {
 				if (entry.metadata) {
 					zval_ptr_dtor(&entry.metadata);
@@ -1377,7 +1370,6 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 				efree(entry.filename);
 				MAPPHAR_FAIL("zlib extension is required for gz compressed .phar file \"%s\"");
 			}
-#endif
 			break;
 		case PHAR_ENT_COMPRESSED_BZ2:
 			if (!phar_has_bz2) {
@@ -1651,9 +1643,6 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 			test = '\1';
 			pos = buffer+tokenlen;
 			if (!memcmp(pos, gz_magic, 3)) {
-#if !HAVE_ZLIB
-				MAPPHAR_ALLOC_FAIL("unable to decompress gzipped phar archive \"%s\" to temporary file, zlib disabled in phar compilation")
-#else
 				char err = 0;
 				php_stream_filter *filter;
 				php_stream *temp;
@@ -1703,7 +1692,6 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 
 				/* now, start over */
 				test = '\0';
-#endif
 				continue;
 			} else if (!memcmp(pos, bz_magic, 3)) {
 				php_stream_filter *filter;
@@ -3297,15 +3285,11 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 #else
 	php_info_print_table_row(2, "ZIP-based phar archives", "unavailable");
 #endif
-#if HAVE_ZLIB
 	if (phar_has_zlib) {
 		php_info_print_table_row(2, "gzip compression", "enabled");
 	} else {
 		php_info_print_table_row(2, "gzip compression", "disabled (install ext/zlib)");
 	}
-#else
-	php_info_print_table_row(2, "gzip compression", "unavailable");
-#endif
 	if (phar_has_bz2) {
 		php_info_print_table_row(2, "bzip2 compression", "enabled");
 	} else {
@@ -3331,9 +3315,7 @@ static zend_module_dep phar_deps[] = {
 #if HAVE_PHAR_ZIP
 	ZEND_MOD_OPTIONAL_EX("zip", ">=", "1.8.11")
 #endif
-#if HAVE_ZLIB
 	ZEND_MOD_OPTIONAL("zlib")
-#endif
 	ZEND_MOD_OPTIONAL("bz2")
 #if HAVE_SPL
 	ZEND_MOD_REQUIRED("spl")

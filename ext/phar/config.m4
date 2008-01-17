@@ -1,7 +1,7 @@
 dnl $Id$
 dnl config.m4 for extension phar
 
-PHP_ARG_ENABLE(phar, for phar support/phar zlib support,
+PHP_ARG_ENABLE(phar, for phar archive support,
 [  --enable-phar           Enable phar support])
 
 if test "$PHP_PHAR" != "no"; then
