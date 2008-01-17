@@ -12,9 +12,6 @@ if (PHP_PHAR != "no") {
 	if (PHP_PHAR_SHARED) {
 		ADD_FLAG("CFLAGS_PHAR", "/D COMPILE_DL_PHAR ");
 	}
-	if (PHP_ZIP != "no") {
-		AC_DEFINE('HAVE_PHAR_ZIP', 1);
-	}
 	ADD_EXTENSION_DEP('phar', 'zlib', true);
 	ADD_EXTENSION_DEP('phar', 'bz2', true);
 	ADD_EXTENSION_DEP('phar', 'spl', true);
