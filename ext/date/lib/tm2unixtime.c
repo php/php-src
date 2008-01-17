@@ -98,6 +98,7 @@ static void do_adjust_for_weekday(timelib_time* time)
 	} else {
 		time->d -= (7 - (abs(time->relative.weekday) - current_dow));
 	}
+	time->have_weekday_relative = 0;
 }
 
 static void do_normalize(timelib_time* time)
@@ -130,6 +131,7 @@ static void do_adjust_relative(timelib_time* time)
 	do_normalize(time);
 
 	memset(&(time->relative), 0, sizeof(time->relative));
+	time->have_relative = 0;
 }
 
 static void do_adjust_special_weekday(timelib_time* time)
