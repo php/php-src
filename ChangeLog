@@ -1,3 +1,92 @@
+2008-01-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      
+      MFB: Fixed bug #42779 (Incorrect forcing from HTTP/1.0 request to HTTP/1.1
+      response)
+
+    * (PHP_5_3)
+      sapi/apache2handler/sapi_apache2.c:
+      
+      Fixed bug #42779 (Incorrect forcing from HTTP/1.0 request to HTTP/1.1
+      response)
+
+2008-01-16  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      NEWS
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/bug37964.phpt:
+      - MFH Fixed Bug #37964 (Reflection shows private methods of parent class)
+        (felipe@php.net)
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/tests/bug37964.phpt
+      ext/reflection/tests/bug37964.phpt:
+      - Fixed Bug #37964 (Reflection shows private methods of parent class)
+        (felipe@php.net)
+
+2008-01-16  David Coallier  <david.coallier@gmail.com>
+
+    * ext/standard/tests/strings/ucfirst1.phpt:
+      - run-tests.php -U
+      - The unicode test's error messages are working
+
+    * ext/standard/tests/strings/ucfirst1.phpt:
+      - MFB
+      - Make sure to return the good error message with new parse parameters api
+        of ucfirst()
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/ucfirst.phpt:
+      - Making sure the tests are not failing after modifications to the new
+        zend-parsing-parameters in ucfirst()
+
+2008-01-16  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/string.c
+      ext/standard/string.c:
+      MFH: fix #43863 (str_word_count() breaks on cyrillic "ya" in locale cp1251)
+      patch by phprus at gmail dot com
+
+    * ext/standard/string.c:
+      fix #43863 (str_word_count() breaks on cyrillic "ya" in locale cp1251)
+      patch by phprus at gmail dot com
+
+2008-01-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/soap.c
+      ext/soap/soap.c
+      ext/soap/soap.c:
+      Fixed wrong type cast
+
+2008-01-16  David Coallier  <david.coallier@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/string.c:
+      - MFH
+      - Making sure this is also using the good zend parsing and added
+        the php_ucfirst function
+
+    * ext/standard/string.c:
+      - Make sure ucfirst is using the new zend-parse-parameters api
+      - added php_ucfirst for non-unicode calls
+
+2008-01-16  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_2)
+      ext/oci8/config.m4
+      ext/oci8/config.m4:
+      MFH: fix #41941 (oci8 extension not lib64 savvy)
+
+    * ext/oci8/config.m4:
+      fix #41941 (oci8 extension not lib64 savvy)
+
 2008-01-15  Christopher Jones  <christopher.jones@oracle.com>
 
     * (PHP_5_3)
