@@ -106,6 +106,7 @@ PHP                                                                        NEWS
   DateTimeZone). (Derick)
 - Fixed bug #42069 (parse_ini_file() allows using some non-alpha numeric
   characters). (Jani)
+- Fixed bug #41599 (setTime() fails after modify() is used). (Derick)
 - Fixed bug #41522 (PDO firebird driver returns null if it fails to connect). 
   (Lars W)
 - Fixed bug #39822 (new PDO() doesn't work with firebird). (Lars W)
