@@ -654,7 +654,7 @@ zend_module_entry zip_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(zip),
-	"1.4.0",
+	"2.0.0",
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
