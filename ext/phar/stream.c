@@ -65,7 +65,9 @@ php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, 
 
 	if (!strncasecmp(filename, "phar://", 7)) {
 		if (mode[0] == 'a') {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: open mode append not supported");
+			if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: open mode append not supported");
+			}
 			return NULL;			
 		}		
 		if (phar_split_fname(filename, strlen(filename), &arch, &arch_len, &entry, &entry_len TSRMLS_CC) == FAILURE) {
@@ -108,14 +110,18 @@ php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, 
 		}
 		if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
 			if (PHAR_G(readonly)) {
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by INI setting");
+				if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
+					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by INI setting");
+				}
 				php_url_free(resource);
 				return NULL;
 			}
 			if (phar_open_or_create_filename(resource->host, arch_len, NULL, 0, options, NULL, &error TSRMLS_CC) == FAILURE)
 			{
 				if (error) {
-					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+					if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
+						php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+					}
 					efree(error);
 				}
 				php_url_free(resource);
@@ -125,7 +131,9 @@ php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, 
 			if (phar_open_filename(resource->host, arch_len, NULL, 0, options, NULL, &error TSRMLS_CC) == FAILURE)
 			{
 				if (error) {
-					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+					if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
+						php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+					}
 					efree(error);
 				}
 				php_url_free(resource);
