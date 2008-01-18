@@ -54,6 +54,7 @@
 #include "ext/standard/sha1.h"
 #include "ext/standard/php_var.h"
 #include "ext/standard/php_smart_str.h"
+#include "ext/standard/php_versioning.h"
 #ifndef PHP_WIN32
 #include "TSRM/tsrm_strtok_r.h"
 #endif

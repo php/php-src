@@ -11,7 +11,7 @@ chdir(dirname(__FILE__));
 try {
 	$p = new Phar('brandnewphar.phar');
 	$p['file1.txt'] = 'hi';
-	var_dump($p->getStub());
+	var_dump(strlen($p->getStub()));
 	$p->setStub("<?php
 function __autoload(\$class)
 {
@@ -32,8 +32,7 @@ __HALT_COMPILER();
 unlink(dirname(__FILE__) . '/brandnewphar.phar');
 ?>
 --EXPECT--
-string(29) "<?php __HALT_COMPILER(); ?>
-"
+int(4461)
 string(200) "<?php
 function __autoload($class)
 {
