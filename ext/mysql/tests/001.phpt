@@ -14,7 +14,7 @@ $test .= ($db) ? '1' : '0';
 mysql_close($db);
 
 /*** test mysql_connect localhost:port ***/
-$db = mysql_connect("{$host}:3306", $user, $passwd, '');
+$db = mysql_connect("{$host}:3306", $user, $passwd, true);
 $test .= ($db) ? '1' : '0';
 mysql_close($db);
 
