@@ -5,13 +5,14 @@ ARG_ENABLE("phar", "enable phar support", "no");
 
 if (PHP_PHAR != "no") {
 	EXTENSION("phar", "tar.c zip.c stream.c dirstream.c func_interceptors.c phar.c phar_object.c phar_path_check.c");
-	ADD_EXTENSION_DEP('phar', 'zip');
 	if (PHP_ZIP_SHARED) {
 		ADD_FLAG("CFLAGS_PHAR", "/D COMPILE_DL_ZIP ");
 	}
 	if (PHP_PHAR_SHARED) {
 		ADD_FLAG("CFLAGS_PHAR", "/D COMPILE_DL_PHAR ");
 	}
+	AC_DEFINE('HAVE_PHAR_ZIP', 1);
+	ADD_EXTENSION_DEP('phar', 'zip');
 	ADD_EXTENSION_DEP('phar', 'zlib', true);
 	ADD_EXTENSION_DEP('phar', 'bz2', true);
 	ADD_EXTENSION_DEP('phar', 'spl', true);
