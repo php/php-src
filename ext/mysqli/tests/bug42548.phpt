@@ -4,8 +4,10 @@ Bug #42548 PROCEDURE xxx can't return a result set in the given context (works i
 <?php if (!extension_loaded("mysqli")) print "skip"; ?>
 --FILE--
 <?php
+include "connect.inc";
+
 $mysqli = mysqli_init();
-$mysqli->real_connect('localhost', 'root', '', 'test');
+$mysqli->real_connect($host, $user, $passwd, 'test');
 if (mysqli_connect_errno()) {
   printf("Connect failed: %s\n", mysqli_connect_error());
   exit();
