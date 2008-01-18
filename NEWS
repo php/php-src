@@ -8,8 +8,8 @@ PHP                                                                        NEWS
   which to group by data is specified. (Ilia)
 - Upgraded PCRE to version 7.5 (Nuno)
 
-- Fixed faulty fix for bug #40189
-                   (endless loop in zlib.inflate stream filter) (Greg)
+- Fixed faulty fix for bug #40189 (endless loop in zlib.inflate stream filter). 
+  (Greg)
 - Fixed bug #43863 (str_word_count() breaks on cyrillic "ya" in locale cp1251).
   (phprus at gmail dot com, Tony)
 - Fixed bug #43793 (zlib filter is unable to auto-detect gzip/zlib file headers).
@@ -30,6 +30,8 @@ PHP                                                                        NEWS
 - Fixed bug #43533 (escapeshellarg('') returns null). (Ilia)
 - Fixed bug #43522 (stream_get_line() eats additional characters). (Felipe,
   Ilia, Tony)
+- Fixed bug #43497 (OCI8 XML/getClobVal aka temporary LOBs leak UGA memory).
+  (Chris)
 - Fixed bug #43495 (array_merge_recursive() crashes with recursive arrays).
   (Ilia)
 - Fixed bug #43498 (file_exists() on a proftpd server got SIZE not
