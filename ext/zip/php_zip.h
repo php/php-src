@@ -30,6 +30,8 @@ extern zend_module_entry zip_module_entry;
 
 #include "lib/zip.h"
 
+#define PHP_ZIP_VERSION_STRING "1.8.11"
+
 /* {{{ OPENBASEDIR_CHECKPATH(filename) */
 #if (PHP_MAJOR_VERSION < 6)
 #define OPENBASEDIR_CHECKPATH(filename) \
