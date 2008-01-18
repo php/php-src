@@ -1,3 +1,125 @@
+2008-01-17  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_3)
+      NEWS:
+      pcre 7.5 is in 5.2 branch as well
+
+2008-01-17  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_2)
+      win32/build/confutils.js:
+      MFH: add errors when missing dependencies (Steph)
+
+2008-01-17  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/lib/tm2unixtime.c
+      ext/date/lib/tm2unixtime.c
+      ext/date/tests/bug41599.phpt:
+      - Fixed bug #41599 (setTime() fails after modify() is used).
+
+    * ext/date/tests/bug41599.phpt
+      ext/date/tests/bug41599.phpt:
+      
+      - Fixed bug #41599 (setTime() fails after modify() is used).
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/tests/bug43075.phpt:
+      - MFH: Fixed bug #43075 (Support 2007-11-01T24:00:00+00:00).
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/tests/bug43075.phpt
+      ext/date/tests/bug43075.phpt:
+      - Fixed bug #43075 (Support 2007-11-01T24:00:00+00:00).
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/php_date.c
+      ext/date/tests/bug43808.phpt:
+      - MFH: Fixed bug #43808 (date_create never fails (even when it should)).
+
+    * ext/date/php_date.c
+      ext/date/tests/bug43808.phpt
+      ext/date/tests/bug43808.phpt:
+      - Fixed bug #43808 (date_create never fails (even when it should)).
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/php_date.c
+      ext/date/php_date.c
+      ext/date/tests/bug43003.phpt:
+      - Fixed bug #43003 (Invalid timezone reported for DateTime objects
+      constructed
+        using a timestamp).
+
+    * ext/date/tests/bug43003.phpt
+      ext/date/tests/bug43003.phpt:
+      
+      - Fixed bug #43003 (Invalid timezone reported for DateTime objects
+      constructed
+        using a timestamp).
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/php_date.c
+      ext/date/lib/parse_date.c
+      ext/date/tests/bug40743.phpt
+      ext/date/tests/bug42910.phpt
+      ext/date/tests/bug43527.phpt:
+      - MFH: Added support for abbreviation and offset based timezone specifiers
+      for
+        DateTime::getOffset() and DateTime::getName().
+      - MFH: Fixed bug #43527 (DateTime created from a timestamp reports
+      environment
+        timezone).
+      - MFH: Fixed bug #42190 (Constructing DateTime with TimeZone Indicator
+        invalidates DateTimeZone).
+
+    * ext/date/tests/bug40743.phpt
+      ext/date/tests/bug40743.phpt
+      ext/date/tests/bug42910.phpt
+      ext/date/tests/bug42910.phpt
+      ext/date/tests/bug43527.phpt
+      ext/date/tests/bug43527.phpt:
+      
+      - Added support for abbreviation and offset based timezone specifiers for
+        DateTime::getOffset() and DateTime::getName().
+      - Fixed bug #43527 (DateTime created from a timestamp reports environment
+        timezone).
+      - Fixed bug #42190 (Constructing DateTime with TimeZone Indicator
+      invalidates
+        DateTimeZone).
+
+    * ext/date/php_date.c:
+      - Added support for abbreviation and offset based timezone specifiers for
+        DateTime::getOffset() and DateTime::getName().
+      - Fixed bug #43527 (DateTime created from a timestamp reports environment
+        timezone).
+      - Fixed bug #42190 (Constructing DateTime with TimeZone Indicator
+      invalidates
+        DateTimeZone).
+
+2008-01-17  Lukas Smith  <smith@pooteeweet.org>
+
+    * README.MAILINGLIST_RULES:
+      - mention rfc 1855
+
+2008-01-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/dns.c:
+      
+      MFB: Fixed bug #43871 (crash inside dns_get_record)
+
+    * (PHP_5_3)
+      ext/standard/dns.c:
+      
+      Fixed bug #43871 (crash inside dns_get_record)
+
 2008-01-16  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
