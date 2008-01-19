@@ -3856,6 +3856,69 @@ PHP_FUNCTION(chr)
 }
 /* }}} */
 
+/* {{{ php_u_lcfirst()
+   Makes an Unicode string's first character lowercase */
+static void php_u_lcfirst(UChar *ustr, int ustr_len, zval *return_value TSRMLS_DC)
+{
+	UChar tmp[3] = { 0, 0, 0 }; /* UChar32 will be converted to upto 2 UChar units */
+	int tmp_len = 0;
+	int pos = 0;
+	UErrorCode status = U_ZERO_ERROR;
+
+	U16_FWD_1(ustr, pos, ustr_len);
+	tmp_len = u_strToUpper(tmp, sizeof(tmp)/sizeof(UChar), ustr, pos, UG(default_locale), &status);
+
+	Z_USTRVAL_P(return_value) = eumalloc(tmp_len + ustr_len - pos+1);
+	
+	Z_USTRVAL_P(return_value)[0] = tmp[0];
+	if (tmp_len > 1) {
+		Z_USTRVAL_P(return_value)[1] = tmp[1];
+	}
+	u_memcpy(Z_USTRVAL_P(return_value)+tmp_len, ustr + pos, ustr_len - pos+1);
+	Z_USTRLEN_P(return_value) = tmp_len + ustr_len - pos;
+}
+/* }}} */
+
+/* {{{ php_lcfirst 
+   Lowercase the first character of the word in a native string */
+static void php_lcfirst(char *str)
+{
+	register char *r;
+	r = str;
+	*r = tolower((unsigned char) *r);
+}
+/* }}} */
+
+/* {{{ proto string ucfirst(string str) U
+   Makes a string's first character uppercase */
+PHP_FUNCTION(lcfirst)
+{
+	zstr       str;
+	int        str_len;
+	zend_uchar str_type;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+		return;
+	}
+	
+	if (str_len == 0) {
+		if (str_type == IS_UNICODE) {
+			RETURN_EMPTY_UNICODE();
+		} else {
+			RETURN_EMPTY_STRING();
+		}
+	}	
+
+	if (str_type == IS_UNICODE) {
+		Z_TYPE_P(return_value) = IS_UNICODE;
+		php_u_lcfirst(str.u, str_len, return_value TSRMLS_CC);
+	} else {
+		ZVAL_STRINGL(return_value, str.s, str_len, ZSTR_DUPLICATE);
+		php_lcfirst(Z_STRVAL_P(return_value));
+	}	
+}
+/* }}} */
+
 /* {{{ php_u_ucfirst()
    Makes an Unicode string's first character uppercase */
 static void php_u_ucfirst(UChar *ustr, int ustr_len, zval *return_value TSRMLS_DC)
