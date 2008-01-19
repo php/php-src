@@ -2,6 +2,7 @@
 
 $notes = '
 Major feature functionality release
+ * new default stub allows running of phar-based phars without phar extension
  * add support for tar-based and zip-based phar archives [Greg]
  * add Phar::isTar(), Phar::isZip(), and Phar::isPhar() [Greg]
  * add Phar::convertToTar(), Phar::convertToZip(), and Phar::convertToPhar() [Greg]
