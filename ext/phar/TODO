@@ -58,7 +58,7 @@ Version 1.2.1
  X Make -a optional in pack subcommand of phar.phar [Marcus]
  X Make Phar::loadPhar() and Phar::mapPhar() ignore extracted archives
 
-Version 1.3.0
+Version 2.0.0
 
  * ability to have Phar object return file class as offsetGet() result
  X ability to store empty directories [Greg]
