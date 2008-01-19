@@ -29,10 +29,10 @@ unlink(dirname(__FILE__) . '/brandnewphar.phar');
 __HALT_COMPILER();
 ?>
 --EXPECT--
-string(4461) "<?php
+string(4501) "<?php
 if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
 Phar::interceptFileFuncs();
-include 'phar://' . __FILE__ . '/index.php';
+include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
 return;
 }
 class Extract_Phar
@@ -42,6 +42,7 @@ static $origdir;
 const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
+const START = 'index.php';
 static function go($D)
 {
 register_shutdown_function(array('Extract_Phar', '_removeTmpFiles'));
@@ -106,7 +107,7 @@ file_put_contents($temp . '/' . $path, self::extractFile($path, $file, $fp));
 self::$tmp[] = realpath($temp . '/' . $path);
 }
 chdir($temp);
-include 'index.php';
+include self::START;
 }
 
 static function tmpdir()
@@ -205,7 +206,7 @@ if (file_exists($f)) is_dir($f) ? @rmdir($f) : @unlink($f);
 chdir(self::$origdir);
 }
 }
-Extract_Phar::go(4433);
+Extract_Phar::go(4501);
 __HALT_COMPILER(); ?>"
 string(200) "<?php
 function __autoload($class)
