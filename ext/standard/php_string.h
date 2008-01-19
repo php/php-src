@@ -54,6 +54,7 @@ PHP_FUNCTION(strrchr);
 PHP_FUNCTION(substr);
 PHP_FUNCTION(quotemeta);
 PHP_FUNCTION(ucfirst);
+PHP_FUNCTION(lcfirst);
 PHP_FUNCTION(ucwords);
 PHP_FUNCTION(strtr);
 PHP_FUNCTION(strrev);

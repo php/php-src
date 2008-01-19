@@ -2635,6 +2635,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_ucfirst, 0)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO(arginfo_lcfirst, 0)
+	ZEND_ARG_INFO(0, str)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ucwords, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
@@ -3189,6 +3194,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(substr_replace,													arginfo_substr_replace)
 	PHP_FE(quotemeta,														arginfo_quotemeta)
 	PHP_FE(ucfirst,															arginfo_ucfirst)
+	PHP_FE(lcfirst,															arginfo_lcfirst)
 	PHP_FE(ucwords,															arginfo_ucwords)
 	PHP_FE(strtr,															arginfo_strtr)
 	PHP_FE(addslashes,														arginfo_addslashes)
