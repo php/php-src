@@ -1,3 +1,57 @@
+2008-01-18  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/oci8/oci8.c:
+      Add ifdef
+
+2008-01-18  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/mysql/tests/mysql_phpinfo.phpt:
+      fix test
+      the library vresion is actually exposed by ext/mysqli, not ext/mysql
+
+    * (PHP_5_2)
+      ext/mysql/tests/001.phpt
+      ext/mysqli/tests/bug42548.phpt:
+      fix test
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+2008-01-18  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/php_zip.c
+      ext/zip/php_zip.c
+      ext/zip/php_zip.h
+      ext/zip/php_zip.h:
+      - MFB: reflect the correct version
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c
+      ext/zip/php_zip.h:
+      - reflect the correct version
+
+2008-01-18  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/zip/Makefile.frag
+      ext/zip/Makefile.frag
+      ext/zip/config.m4
+      ext/zip/config.m4
+      ext/zip/php_zip.c
+      ext/zip/php_zip.c:
+      MF5.3: install headers, use correct zip version
+
+    * ext/zip/Makefile.frag
+      ext/zip/Makefile.frag
+      ext/zip/Makefile.frag
+      ext/zip/config.m4:
+        1.1.4;
+      file Makefile.frag was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/zip/php_zip.c:
+      update module version number
+
 2008-01-17  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * (PHP_5_3)
