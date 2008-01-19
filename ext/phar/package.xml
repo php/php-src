@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.7.0RC2" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.7.0" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>phar</name>
  <channel>pecl.php.net</channel>
  <summary>allows running of complete applications out of .phar files (like Java .jar files)</summary>
@@ -29,11 +29,11 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
   <email>helly@php.net</email>
   <active>yes</active>
  </lead>
- <date>2008-01-16</date>
- <time>22:56:33</time>
+ <date>2008-01-19</date>
+ <time>12:40:11</time>
  <version>
   <release>1.3.0</release>
-  <api>1.1.0</api>
+  <api>1.1.1</api>
  </version>
  <stability>
   <release>stable</release>
@@ -43,6 +43,7 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
  <notes>
 
 Major feature functionality release
+ * new default stub allows running of phar-based phars without phar extension
  * add support for tar-based and zip-based phar archives [Greg]
  * add Phar::isTar(), Phar::isZip(), and Phar::isPhar() [Greg]
  * add Phar::convertToTar(), Phar::convertToZip(), and Phar::convertToPhar() [Greg]
@@ -246,6 +247,7 @@ Major feature functionality release
      <file name="refcount1_5_2.phpt" role="test" />
      <file name="rename.phpt" role="test" />
      <file name="tarmaker.php.inc" role="test" />
+     <file name="test_works_without_zip.phpt" role="test" />
     </dir> <!-- /tests/zip -->
     <file name="001.phpt" role="test" />
     <file name="002.phpt" role="test" />
@@ -352,6 +354,9 @@ Major feature functionality release
     <file name="metadata_read.phpt" role="test" />
     <file name="metadata_write.phpt" role="test" />
     <file name="metadata_write_commit.phpt" role="test" />
+    <file name="nophar.phar" role="test" />
+    <file name="nophar.phar.inc" role="test" />
+    <file name="nophar.phpt" role="test" />
     <file name="open_for_write_existing.phpt" role="test" />
     <file name="open_for_write_existing_b.phpt" role="test" />
     <file name="open_for_write_existing_c.phpt" role="test" />
@@ -375,6 +380,7 @@ Major feature functionality release
     <file name="phar_convert_tar3.phpt" role="test" />
     <file name="phar_convert_zip.phpt" role="test" />
     <file name="phar_copy.phpt" role="test" />
+    <file name="phar_createdefaultstub.phpt" role="test" />
     <file name="phar_create_in_cwd.phpt" role="test" />
     <file name="phar_ctx_001.phpt" role="test" />
     <file name="phar_dir_iterate.phpt" role="test" />
@@ -430,6 +436,7 @@ Major feature functionality release
     <file name="sha256.phar" role="test" />
     <file name="sha512.phar" role="test" />
     <file name="test_signaturealgos.phpt" role="test" />
+    <file name="withphar.phpt" role="test" />
    </dir> <!-- /tests -->
    <file name="build_precommand.php" role="php" />
    <file name="config.m4" role="src" />
@@ -442,6 +449,7 @@ Major feature functionality release
    <file name="gdbhelp" role="data" />
    <file name="LICENSE" role="doc" />
    <file name="Makefile.frag" role="src" />
+   <file name="makestub.php" role="php" />
    <file name="phar.c" role="src" />
    <file name="phar.phar" role="script" />
    <file name="phar_internal.h" role="src" />
@@ -450,8 +458,10 @@ Major feature functionality release
    <file name="phar_path_check.re" role="src" />
    <file name="php_phar.h" role="src" />
    <file name="php_stream_unlink.h" role="src" />
+   <file name="shortarc.php" role="php" />
    <file name="stream.c" role="src" />
    <file name="stream.h" role="src" />
+   <file name="stub.h" role="src" />
    <file name="tar.c" role="src" />
    <file name="tar.h" role="src" />
    <file name="TODO" role="doc" />
@@ -498,17 +508,18 @@ Major feature functionality release
   <release>
    <version>
     <release>1.3.0</release>
-    <api>1.1.0</api>
+    <api>1.1.1</api>
    </version>
    <stability>
     <release>stable</release>
     <api>stable</api>
    </stability>
-   <date>2008-01-16</date>
+   <date>2008-01-19</date>
    <license uri="http://www.php.net/license">PHP License</license>
    <notes>
 
 Major feature functionality release
+ * new default stub allows running of phar-based phars without phar extension
  * add support for tar-based and zip-based phar archives [Greg]
  * add Phar::isTar(), Phar::isZip(), and Phar::isPhar() [Greg]
  * add Phar::convertToTar(), Phar::convertToZip(), and Phar::convertToPhar() [Greg]
