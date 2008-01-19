@@ -32,7 +32,7 @@ __HALT_COMPILER();
 unlink(dirname(__FILE__) . '/brandnewphar.phar');
 ?>
 --EXPECT--
-int(4461)
+int(4501)
 string(200) "<?php
 function __autoload($class)
 {

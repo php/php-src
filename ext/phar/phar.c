@@ -2335,6 +2335,39 @@ static int phar_flush_clean_deleted_apply(void *data TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+char *phar_create_default_stub(const char *index_php, size_t *len, char **error TSRMLS_DC)
+{
+#include "stub.h"
+	char *stub = NULL;
+	static const char def[] = "index.php";
+	int name_len;
+	size_t dummy;
+
+	if (!len) {
+		len = &dummy;
+	}
+
+	if (index_php) {
+		name_len = strlen(index_php);
+	}
+	if (error) {
+		*error = NULL;
+	}
+	if (index_php && name_len > 400) {
+		/* ridiculous big not allowed for index.php startup filename */
+		if (error) {
+			spprintf(error, 0, "Illegal filename passed in for stub creation, was %d characters long, and only 400 or less is allowed", name_len);
+			return NULL;
+		}
+	}
+	if (!index_php) {
+		*len = spprintf(&stub, sizeof("index.php")-1 + newstub_len - 1, "%s%s%s%d%s", newstub1, def, newstub2, (int) sizeof("index.php")-1 + newstub_len - 1, newstub3);
+	} else {
+		*len = spprintf(&stub, name_len + newstub_len - 1, "%s%s%s%d%s", newstub1, index_php, newstub2, name_len + newstub_len - 1, newstub3);
+	}
+	return stub;
+}
+
 /**
  * Save phar contents to disk
  *
@@ -2343,8 +2376,8 @@ static int phar_flush_clean_deleted_apply(void *data TSRMLS_DC) /* {{{ */
  */
 int phar_flush(phar_archive_data *phar, char *user_stub, long len, char **error TSRMLS_DC) /* {{{ */
 {
-#include "stub.h"
 /*	static const char newstub[] = "<?php __HALT_COMPILER(); ?>\r\n"; */
+	char *newstub;
 	phar_entry_info *entry, *newentry;
 	int halt_offset, restore_alias_len, global_flags = 0, closeoldfile;
 	char *buf, *pos;
@@ -2475,8 +2508,9 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, char **error 
 			}
 		} else {
 			/* this is a brand new phar */
-			phar->halt_offset = sizeof(newstub)-1;
-			if (sizeof(newstub)-1 != php_stream_write(newfile, newstub, sizeof(newstub)-1)) {
+			newstub = phar_create_default_stub(NULL, &(phar->halt_offset), NULL TSRMLS_CC);
+			if (phar->halt_offset != php_stream_write(newfile, newstub, phar->halt_offset)) {
+				efree(newstub);
 				if (closeoldfile) {
 					php_stream_close(oldfile);
 				}
@@ -2486,6 +2520,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, char **error 
 				}
 				return EOF;
 			}
+			efree(newstub);
 		}
 	}
 	manifest_ftell = php_stream_tell(newfile);

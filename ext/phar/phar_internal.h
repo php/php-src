@@ -333,6 +333,7 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 int phar_open_compiled_file(char *alias, int alias_len, char **error TSRMLS_DC);
 int phar_get_archive(phar_archive_data **archive, char *fname, int fname_len, char *alias, int alias_len, char **error TSRMLS_DC);
 int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
+char *phar_create_default_stub(const char *index_php, size_t *len, char **error TSRMLS_DC);
 
 char *phar_fix_filepath(char *path, int *new_len, int use_cwd TSRMLS_DC);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, php_stream *fp,

@@ -735,6 +735,28 @@ PHP_METHOD(Phar, interceptFileFuncs)
 }
 /* }}} */
 
+/* {{ proto array Phar::createDefaultStub([string indexfile])
+ * Return a stub that can be used to run a phar-based archive without the phar extension
+ * indexfile is the startup filename, which defaults to "index.php"
+ */
+PHP_METHOD(Phar, createDefaultStub)
+{
+	char *index = NULL, *error;
+	int index_len;
+	size_t stub_len;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &index, &index_len) == FAILURE) {
+		return;
+	}
+
+	index = phar_create_default_stub(index, &stub_len, &error TSRMLS_CC);
+	if (error) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, error);
+		efree(error);
+		return;
+	}
+	RETURN_STRINGL(index, stub_len, 0);
+}
+
 /* {{{ proto mixed Phar::mapPhar([string alias, [int dataoffset]])
  * Reads the currently executed file (a phar) and registers its manifest */
 PHP_METHOD(Phar, mapPhar)
@@ -3385,6 +3407,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_mungServer, 0, 0, 1)
 ZEND_END_ARG_INFO();
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_cDS, 0, 0, 0)
+	ZEND_ARG_INFO(0, index_php)
+ZEND_END_ARG_INFO();
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_setStub, 0, 0, 1)
 	ZEND_ARG_INFO(0, newstub)
 	ZEND_ARG_INFO(0, maxlen)
@@ -3483,6 +3510,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, getSupportedSignatures,NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, getSupportedCompression,NULL,                     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, isValidPharFilename,   NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, createDefaultStub,     arginfo_phar_cDS,          ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	{NULL, NULL, NULL}
 };
 
