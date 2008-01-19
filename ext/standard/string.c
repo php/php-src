@@ -3866,7 +3866,7 @@ static void php_u_lcfirst(UChar *ustr, int ustr_len, zval *return_value TSRMLS_D
 	UErrorCode status = U_ZERO_ERROR;
 
 	U16_FWD_1(ustr, pos, ustr_len);
-	tmp_len = u_strToUpper(tmp, sizeof(tmp)/sizeof(UChar), ustr, pos, UG(default_locale), &status);
+	tmp_len = u_strToLower(tmp, sizeof(tmp)/sizeof(UChar), ustr, pos, UG(default_locale), &status);
 
 	Z_USTRVAL_P(return_value) = eumalloc(tmp_len + ustr_len - pos+1);
 	
