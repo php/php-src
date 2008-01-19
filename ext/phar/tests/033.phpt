@@ -14,6 +14,7 @@ $file = '<?php include "' . $pname . '/a.php"; __HALT_COMPILER(); ?>';
 $files = array();
 $files['a.php']   = '<?php echo "This is a\n"; include "'.$pname.'/b.php"; ?>';
 $files['dir/'] = '';
+$hasdir = 1;
 include 'phar_test.inc';
 $a = new Phar($fname);
 var_dump($a['a.php']->isExecutable());
