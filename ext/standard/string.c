@@ -2646,6 +2646,36 @@ PHP_FUNCTION(ucfirst)
 }
 /* }}} */
 
+/* {{{
+   Lowercase the first character of the word in a native string */
+static void php_lcfirst(char *str)
+{
+	register char *r;
+	r = str;
+	*r = tolower((unsigned char) *r);
+}
+/* }}} */
+
+/* {{{ proto string ucfirst(string str)
+   Make a string's first character lowercase */
+PHP_FUNCTION(lcfirst)
+{
+	char  *str;
+	int   str_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+		return;
+	}
+
+	if (!str_len) {
+		RETURN_EMPTY_STRING();
+	}
+
+	ZVAL_STRINGL(return_value, str, str_len, 1);
+	php_lcfirst(Z_STRVAL_P(return_value));
+}
+/* }}} */
+
 /* {{{ proto string ucwords(string str)
    Uppercase the first character of every word in a string */
 PHP_FUNCTION(ucwords)
