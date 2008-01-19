@@ -80,9 +80,12 @@
 #endif
 
 #define PHAR_EXT_VERSION_STR      "1.3.0"
-#define PHAR_API_VERSION_STR      "1.1.0"
+#define PHAR_API_VERSION_STR      "1.1.1"
 /* x.y.z maps to 0xyz0 */
-#define PHAR_API_VERSION          0x1100
+#define PHAR_API_VERSION          0x1110
+/* if we bump PHAR_API_VERSION, change this from 0x1100 to PHAR_API_VERSION */
+#define PHAR_API_VERSION_NODIR    0x1100
+#define PHAR_API_MIN_DIR          0x1110
 #define PHAR_API_MIN_READ         0x1000
 #define PHAR_API_MAJORVERSION     0x1000
 #define PHAR_API_MAJORVER_MASK    0xF000

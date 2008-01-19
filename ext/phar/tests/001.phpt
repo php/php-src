@@ -8,5 +8,5 @@ var_dump(Phar::apiVersion());
 ?>
 ===DONE===
 --EXPECT--
-string(5) "1.1.0"
+string(5) "1.1.1"
 ===DONE===
