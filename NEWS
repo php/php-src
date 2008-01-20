@@ -31,6 +31,7 @@ PHP                                                                        NEWS
 - Added long-option feature to getopt() and made getopt() available also on 
   win32 systems by adding a common getopt implementation into core.
   (David Soria Parra, Jani)
+- Added support for optional values, and = as separator, in getopt(). (Hannes)
 - Added support for namespaces. (Dmitry, Stas, Gregory)
 - Added support for Late Static Binding. (Dmitry, Etienne Kneuss)
 - Added support for __callstatic() magic method. (Sara)
