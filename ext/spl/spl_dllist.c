@@ -39,18 +39,12 @@ PHPAPI zend_class_entry  *spl_ce_SplDoublyLinkedList;
 PHPAPI zend_class_entry  *spl_ce_SplQueue;
 PHPAPI zend_class_entry  *spl_ce_SplStack;
 
-#define SPL_LLIST_DELREF(elem, dtor) if(!--(elem)->rc) { \
-	if(dtor) { \
-		dtor(elem); \
-	} \
+#define SPL_LLIST_DELREF(elem) if(!--(elem)->rc) { \
 	efree(elem); \
 	elem = NULL; \
 }
 
-#define SPL_LLIST_CHECK_DELREF(elem, dtor) if((elem) && !--(elem)->rc) { \
-	if(dtor) { \
-		dtor(elem); \
-	} \
+#define SPL_LLIST_CHECK_DELREF(elem) if((elem) && !--(elem)->rc) { \
 	efree(elem); \
 	elem = NULL; \
 }
@@ -113,7 +107,11 @@ struct _spl_dllist_it {
 
 /* {{{  spl_ptr_llist */
 static void spl_ptr_llist_zval_dtor(spl_ptr_llist_element *elem) { /* {{{ */
-	zval_ptr_dtor((zval **)&elem->data);
+	if (elem->data) {
+		zval_ptr_dtor((zval **)&elem->data);
+		elem->data = NULL;
+	}
+
 }
 /* }}} */
 
@@ -148,7 +146,10 @@ static void spl_ptr_llist_destroy(spl_ptr_llist *llist) /* {{{ */
 
 	while (current) {
 		next = current->next;
-		SPL_LLIST_DELREF(current, dtor);
+		if(current && dtor) {
+			dtor(current);
+		}
+		SPL_LLIST_DELREF(current);
 		current = next;
 	}
 
@@ -225,7 +226,6 @@ static void *spl_ptr_llist_pop(spl_ptr_llist *llist) /* {{{ */
 {
 	void                     *data;
 	spl_ptr_llist_element    *tail = llist->tail;
-	spl_ptr_llist_dtor_func   dtor = NULL;
 
 	if (tail == NULL) {
 		return NULL;
@@ -240,8 +240,9 @@ static void *spl_ptr_llist_pop(spl_ptr_llist *llist) /* {{{ */
 	llist->tail = tail->prev;
 	llist->count--;
 	data = tail->data;
+	tail->data = NULL;
 
-	SPL_LLIST_DELREF(tail, dtor);
+	SPL_LLIST_DELREF(tail);
 
 	return data;
 }
@@ -275,7 +276,6 @@ static void *spl_ptr_llist_shift(spl_ptr_llist *llist) /* {{{ */
 {
 	void                    *data;
 	spl_ptr_llist_element   *head = llist->head;
-	spl_ptr_llist_dtor_func  dtor = NULL;
 
 	if (head == NULL) {
 		return NULL;
@@ -290,8 +290,9 @@ static void *spl_ptr_llist_shift(spl_ptr_llist *llist) /* {{{ */
 	llist->head = head->next;
 	llist->count--;
 	data = head->data;
+	head->data = NULL;
 
-	SPL_LLIST_DELREF(head, dtor);
+	SPL_LLIST_DELREF(head);
 
 	return data;
 }
@@ -667,8 +668,7 @@ static long spl_dllist_offset_convert(zval *offset TSRMLS_DC) /* {{{ */
 			return Z_LVAL_P(offset);
 		}
 	}
-	zend_throw_exception(spl_ce_OutOfRangeException, "Invalid offset", 0 TSRMLS_CC);
-	return 0;
+	return -1;
 } 
 /* }}} */
 
@@ -707,7 +707,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetGet)
 	index  = spl_dllist_offset_convert(zindex TSRMLS_CC);
 
     if (index < 0 || index >= intern->llist->count) {
-		zend_throw_exception(spl_ce_OutOfRangeException, "Offset out of range", 0 TSRMLS_CC);
+		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0 TSRMLS_CC);
 		return;
 	}
 
@@ -747,7 +747,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 		index = spl_dllist_offset_convert(zindex TSRMLS_CC);
 
 		if (index < 0 || index >= intern->llist->count) {
-			zend_throw_exception(spl_ce_OutOfRangeException, "Offset out of range", 0 TSRMLS_CC);
+			zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0 TSRMLS_CC);
 			return;
 		}
 
@@ -807,7 +807,11 @@ SPL_METHOD(SplDoublyLinkedList, offsetUnset)
 		}
 		/* finally, delete the element */
 		llist->count--;
-		SPL_LLIST_DELREF(element, llist->dtor);
+
+		if(llist->dtor) {
+			llist->dtor(element);
+		}
+		SPL_LLIST_DELREF(element);
 	} else {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid", 0 TSRMLS_CC);
 		return;
@@ -818,7 +822,7 @@ static void spl_dllist_it_dtor(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
 	spl_dllist_it *iterator = (spl_dllist_it *)iter;
 
-	SPL_LLIST_CHECK_DELREF(iterator->traverse_pointer, iterator->object->llist->dtor);
+	SPL_LLIST_CHECK_DELREF(iterator->traverse_pointer);
 
 	zend_user_it_invalidate_current(iter TSRMLS_CC);
 	zval_ptr_dtor((zval**)&iterator->intern.it.data);
@@ -841,7 +845,7 @@ static void spl_dllist_it_get_current_data(zend_object_iterator *iter, zval ***d
 	spl_dllist_it         *iterator = (spl_dllist_it *)iter;
 	spl_ptr_llist_element *element  = iterator->traverse_pointer;
 
-	if (element == NULL) {
+	if (element == NULL || element->data == NULL) {
 		*data = NULL;
 	} else {
 		*data = (zval **)&element->data;
@@ -872,17 +876,23 @@ static void spl_dllist_it_move_forward(zend_object_iterator *iter TSRMLS_DC) /* 
 			iterator->traverse_pointer = old->prev;
 			iterator->traverse_position--;
 			if (iterator->flags & SPL_DLLIST_IT_DELETE) {
-				spl_ptr_llist_pop(object->llist);
+				zval *prev = (zval *)spl_ptr_llist_pop(object->llist);
+				if (prev) {
+					zval_ptr_dtor((zval **)&prev);
+				}
 			}
 		} else {
 			iterator->traverse_pointer = old->next;
 			iterator->traverse_position++;
 			if (iterator->flags & SPL_DLLIST_IT_DELETE) {
-				spl_ptr_llist_shift(object->llist);
+				zval *prev = (zval *)spl_ptr_llist_shift(object->llist);
+				if (prev) {
+					zval_ptr_dtor((zval **)&prev);
+				}
 			}
 		}
 
-		SPL_LLIST_DELREF(old, object->llist->dtor);
+		SPL_LLIST_DELREF(old);
 		SPL_LLIST_CHECK_ADDREF(iterator->traverse_pointer);
 	}
 }
@@ -894,7 +904,7 @@ static void spl_dllist_it_rewind(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 	spl_dllist_object *object   = iterator->object;
 	spl_ptr_llist     *llist    = object->llist;
 
-	SPL_LLIST_CHECK_DELREF(iterator->traverse_pointer, llist->dtor);
+	SPL_LLIST_CHECK_DELREF(iterator->traverse_pointer);
 	if (iterator->flags & SPL_DLLIST_IT_LIFO) {
 		iterator->traverse_position = llist->count-1;
 		iterator->traverse_pointer  = llist->tail;
