@@ -58,7 +58,7 @@ Unsetting..
 int(3)
 int(4)
 int(2)
-Exception: Invalid offset
+Exception: Offset invalid or out of range
 int(1)
-Exception: Offset out of range
+Exception: Offset invalid or out of range
 ===DONE===
