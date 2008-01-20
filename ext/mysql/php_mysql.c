@@ -646,7 +646,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!s!ll", &host_and_port, &host_len,
 									&user, &user_len, &passwd, &passwd_len, 
 									&new_link, &client_flags)==FAILURE) {
-			WRONG_PARAM_COUNT;
+			return;
 		}
 
 		if (!host_and_port) {
