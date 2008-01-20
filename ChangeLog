@@ -1,3 +1,33 @@
+2008-01-19  David Coallier  <david.coallier@gmail.com>
+
+    * ext/standard/string.c:
+      - Wrong icu call, now using u_strToLower correctly
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c
+      ext/standard/php_string.h
+      ext/standard/string.c
+      ext/standard/tests/strings/lcfirst.phpt:
+      - MFH (lcfirst())
+      - Initial test for lcfirst
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_string.h
+      ext/standard/string.c
+      ext/standard/tests/strings/lcfirst.phpt
+      ext/standard/tests/strings/lcfirst.phpt:
+      - Added lcfirst() function. The sister function of ucfirst()
+      - Test #1 for lcfirst()
+
+2008-01-19  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysql/config.w32:
+      Fix build issue
+
+    * (PHP_5_3)
+      ext/mysql/config.w32:
+      Fix compile issue
+
 2008-01-18  Christopher Jones  <christopher.jones@oracle.com>
 
     * ext/oci8/oci8.c:
