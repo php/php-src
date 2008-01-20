@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 
 - Fixed faulty fix for bug #40189 (endless loop in zlib.inflate stream filter). 
   (Greg)
+- Fixed bug #43875 (Two error messages returned for $new and $flag argument
+  in mysql_connect()). (Hannes)
 - Fixed bug #43863 (str_word_count() breaks on cyrillic "ya" in locale cp1251).
   (phprus at gmail dot com, Tony)
 - Fixed bug #43793 (zlib filter is unable to auto-detect gzip/zlib file headers).
