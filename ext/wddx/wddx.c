@@ -408,10 +408,7 @@ static void php_wddx_serialize_number(wddx_packet *packet, zval *var)
  */
 static void php_wddx_serialize_boolean(wddx_packet *packet, zval *var)
 {
-	char tmp_buf[WDDX_BUF_LEN];
-
-	snprintf(tmp_buf, sizeof(tmp_buf), WDDX_BOOLEAN, Z_LVAL_P(var) ? "true" : "false");
-	php_wddx_add_chunk(packet, tmp_buf);
+	php_wddx_add_chunk(packet, Z_LVAL_P(var) ? WDDX_BOOLEAN_TRUE : WDDX_BOOLEAN_FALSE);
 }
 /* }}} */
 
