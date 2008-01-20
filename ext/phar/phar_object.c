@@ -562,7 +562,7 @@ PHP_METHOD(Phar, webPhar)
 	PHAR_SET_MIME("image/jpeg", PHAR_MIME_OTHER, "jpeg")
 	PHAR_SET_MIME("application/x-javascript", PHAR_MIME_OTHER, "js")
 	PHAR_SET_MIME("audio/midi", PHAR_MIME_OTHER, "midi")
-	PHAR_SET_MIME("audio/midi", PHAR_MIME_OTHER, "midi")
+	PHAR_SET_MIME("audio/midi", PHAR_MIME_OTHER, "mid")
 	PHAR_SET_MIME("audio/mod", PHAR_MIME_OTHER, "mod")
 	PHAR_SET_MIME("movie/quicktime", PHAR_MIME_OTHER, "mov")
 	PHAR_SET_MIME("audio/mp3", PHAR_MIME_OTHER, "mp3")
@@ -735,20 +735,21 @@ PHP_METHOD(Phar, interceptFileFuncs)
 }
 /* }}} */
 
-/* {{ proto array Phar::createDefaultStub([string indexfile])
+/* {{ proto array Phar::createDefaultStub([string indexfile[, string webindexfile]])
  * Return a stub that can be used to run a phar-based archive without the phar extension
- * indexfile is the startup filename, which defaults to "index.php"
+ * indexfile is the CLI startup filename, which defaults to "index.php", webindexfile
+ * is the web startup filename, and also defaults to "index.php"
  */
 PHP_METHOD(Phar, createDefaultStub)
 {
-	char *index = NULL, *error;
-	int index_len;
+	char *index = NULL, *webindex = NULL, *error;
+	int index_len, webindex_len;
 	size_t stub_len;
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &index, &index_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ss", &index, &index_len, &webindex, &webindex_len) == FAILURE) {
 		return;
 	}
 
-	index = phar_create_default_stub(index, &stub_len, &error TSRMLS_CC);
+	index = phar_create_default_stub(index, webindex, &stub_len, &error TSRMLS_CC);
 	if (error) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, error);
 		efree(error);

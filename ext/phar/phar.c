@@ -2335,12 +2335,14 @@ static int phar_flush_clean_deleted_apply(void *data TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-char *phar_create_default_stub(const char *index_php, size_t *len, char **error TSRMLS_DC)
-{
 #include "stub.h"
+
+char *phar_create_default_stub(const char *index_php, const char *web_index, size_t *len, char **error TSRMLS_DC)
+{
 	char *stub = NULL;
 	static const char def[] = "index.php";
-	int name_len;
+	static const char defweb[] = "0";
+	int name_len, web_len;
 	size_t dummy;
 
 	if (!len) {
@@ -2349,6 +2351,9 @@ char *phar_create_default_stub(const char *index_php, size_t *len, char **error 
 
 	if (index_php) {
 		name_len = strlen(index_php);
+	}
+	if (web_index) {
+		web_len = strlen(web_index);
 	}
 	if (error) {
 		*error = NULL;
@@ -2360,10 +2365,21 @@ char *phar_create_default_stub(const char *index_php, size_t *len, char **error 
 			return NULL;
 		}
 	}
-	if (!index_php) {
-		*len = spprintf(&stub, sizeof("index.php")-1 + newstub_len - 1, "%s%s%s%d%s", newstub1, def, newstub2, (int) sizeof("index.php")-1 + newstub_len - 1, newstub3);
+	if (web_index && web_len > 400) {
+		/* ridiculous big not allowed for index.php startup filename */
+		if (error) {
+			spprintf(error, 0, "Illegal web filename passed in for stub creation, was %d characters long, and only 400 or less is allowed", web_len);
+			return NULL;
+		}
+	}
+	if (!index_php && !web_index) {
+		phar_get_stub(def, defweb, len, &stub, sizeof("index.php")-1, 1 TSRMLS_CC);
+	} else if (!index_php && web_index ){
+		phar_get_stub(def, web_index, len, &stub, sizeof("index.php")-1, web_len+1 TSRMLS_CC);
+	} else if (index_php && !web_index) {
+		phar_get_stub(index_php, defweb, len, &stub, name_len+1, 1 TSRMLS_CC);
 	} else {
-		*len = spprintf(&stub, name_len + newstub_len - 1, "%s%s%s%d%s", newstub1, index_php, newstub2, name_len + newstub_len - 1, newstub3);
+		phar_get_stub(index_php, web_index, len, &stub, name_len+1, web_len+1 TSRMLS_CC);
 	}
 	return stub;
 }
@@ -2508,7 +2524,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, char **error 
 			}
 		} else {
 			/* this is a brand new phar */
-			newstub = phar_create_default_stub(NULL, &(phar->halt_offset), NULL TSRMLS_CC);
+			newstub = phar_create_default_stub(NULL, NULL, &(phar->halt_offset), NULL TSRMLS_CC);
 			if (phar->halt_offset != php_stream_write(newfile, newstub, phar->halt_offset)) {
 				efree(newstub);
 				if (closeoldfile) {

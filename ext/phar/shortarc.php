@@ -1,4 +1,100 @@
 <?php
+$web = '000';
+if ($web && in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
+    Phar::interceptFileFuncs();
+    Phar::webPhar(null, $web);
+    include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
+    return;
+}
+if ($web && isset($_SERVER['REQUEST_URI']) && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'POST') {
+    Extract_Phar::go(true);
+    $mimes = array(
+    'phps' => 2,
+    'c' => 'text/plain',
+    'cc' => 'text/plain',
+    'cpp' => 'text/plain',
+    'c++' => 'text/plain',
+    'dtd' => 'text/plain',
+    'h' => 'text/plain',
+    'log' => 'text/plain',
+    'rng' => 'text/plain',
+    'txt' => 'text/plain',
+    'xsd' => 'text/plain',
+    'php' => 1,
+    'inc' => 1,
+    'avi' => 'video/avi',
+    'bmp' => 'image/bmp',
+    'css' => 'text/css',
+    'gif' => 'image/gif',
+    'htm' => 'text/html',
+    'html' => 'text/html',
+    'htmls' => 'text/html',
+    'ico' => 'image/x-ico',
+    'jpe' => 'image/jpeg',
+    'jpg' => 'image/jpeg',
+    'jpeg' => 'image/jpeg',
+    'js' => 'application/x-javascript',
+    'midi' => 'audio/midi',
+    'mid' => 'audio/midi',
+    'mod' => 'audio/mod',
+    'mov' => 'movie/quicktime',
+    'mp3' => 'audio/mp3',
+    'mpg' => 'video/mpeg',
+    'mpeg' => 'video/mpeg',
+    'pdf' => 'application/pdf',
+    'png' => 'image/png',
+    'swf' => 'application/shockwave-flash',
+    'tif' => 'image/tiff',
+    'tiff' => 'image/tiff',
+    'wav' => 'audio/wav',
+    'xbm' => 'image/xbm',
+    'xml' => 'text/xml',
+    );
+    $basename = basename(__FILE__);
+    if (!strpos($_SERVER['REQUEST_URI'], $basename)) {
+        chdir(Extract_Phar::$temp);
+        include Extract_Phar::START;
+    }
+    $pt = substr($_SERVER['REQUEST_URI'], strpos($_SERVER['REQUEST_URI'], $basename) + strlen($basename));
+    if (!$pt || $pt == '/') {
+        $pt = $web;
+        header('HTTP/1.1 301 Moved Permanently');
+        header('Location: ' . $_SERVER['REQUEST_URI'] . '/' . $pt);
+    }
+    $a = realpath(Extract_Phar::$temp . DIRECTORY_SEPARATOR . $pt);
+    if (!$a || strlen(dirname($a)) < strlen(Extract_Phar::$temp)) {
+        header('HTTP/1.0 404 Not Found');
+        echo "<html>\n <head>\n  <title>File Not Found<title>\n </head>\n <body>\n  <h1>404 - File ", $pt, " Not Found</h1>\n </body>\n</html>";
+        exit;
+    }
+    $b = pathinfo($a);
+    if (!isset($b['extension'])) {
+        header('Content-Type: text/plain');
+        header('Content-Length: ' . filesize($a));
+        readfile($a);
+        exit;
+    }
+    if (isset($mimes[$b['extension']])) {
+        if ($mimes[$b['extension']] === 1) {
+            $_SERVER['PHAR_PATH_INFO'] = $_SERVER['PATH_INFO'];
+            $_SERVER['PATH_INFO'] = substr($_SERVER['PATH_INFO'], strpos($_SERVER['PATH_INFO'], $basename) + strlen($basename));
+            if (isset($_SERVER['PATH_TRANSLATED'])) {
+                $_SERVER['PHAR_PATH_TRANSLATED'] = $_SERVER['PATH_TRANSLATED'];
+                $_SERVER['PATH_TRANSLATED'] = $a;
+            }
+            include $a;
+            exit;
+        }
+        if ($mimes[$b['extension']] === 2) {
+            highlight_file($a);
+            exit;
+        }
+        header('Content-Type: ' .$mimes[$b['extension']]);
+        header('Content-Length: ' . filesize($a));
+        readfile($a);
+        exit;
+    }
+}
 if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
     Phar::interceptFileFuncs();
     include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
@@ -6,18 +102,20 @@ if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
 }
 class Extract_Phar
 {
+    static $temp;
     static $tmp = array();
     static $origdir;
     const GZ = 0x1000;
     const BZ2 = 0x2000;
     const MASK = 0x3000;
     const START = 'index.php';
-    static function go($D)
+    const LEN = XXXX;
+    static function go($return  = false)
     {
         register_shutdown_function(array('Extract_Phar', '_removeTmpFiles'));
         $fp = fopen(__FILE__, 'rb');
-        fseek($fp, $D);
-        $L = unpack('V', fread($fp, 4));
+        fseek($fp, self::LEN);
+        $L = unpack('V', $a = fread($fp, 4));
         $m = '';
         do {
             $read = 8192;
@@ -57,11 +155,14 @@ class Extract_Phar
             $temp = $sessionpath;
         }
         $temp .= '/pharextract';
-        if (!file_exists($temp)) {
-            @mkdir($temp);
-            $temp = realpath($temp);
-            self::$tmp[] = $temp;
+        self::$temp = $temp;
+        while (file_exists($temp)) {
+            $temp .= 1;
         }
+        @mkdir($temp);
+        @chmod($temp, 0777);
+        $temp = realpath($temp);
+        self::$tmp[] = $temp;
         self::$origdir = getcwd();
         foreach ($info['m'] as $path => $file) {
             $a = !file_exists(dirname($temp . '/' . $path));
@@ -70,13 +171,15 @@ class Extract_Phar
             if ($a) self::$tmp[] = realpath(dirname($temp . '/' . $path));
             if ($path[strlen($path) - 1] == '/') {
                 mkdir($temp . '/' . $path);
+                @chmod($temp . '/' . $path, 0777);
             } else {
                 file_put_contents($temp . '/' . $path, self::extractFile($path, $file, $fp));
+                @chmod($temp . '/' . $path, 0666);
             }
             self::$tmp[] = realpath($temp . '/' . $path);
         }
         chdir($temp);
-        include self::START;
+        if (!$return) include self::START;
     }
 
     static function tmpdir()
@@ -164,10 +267,8 @@ class Extract_Phar
     static function _removeTmpFiles()
     {
         // for removal of temp files
-        usort(self::$tmp, 'strnatcasecmp');
-        array_reverse(self::$tmp, 1);
         if (count(self::$tmp)) {
-            foreach (self::$tmp as $f) {
+            foreach (array_reverse(self::$tmp) as $f) {
                 if (file_exists($f)) is_dir($f) ? @rmdir($f) : @unlink($f);
             }
             
