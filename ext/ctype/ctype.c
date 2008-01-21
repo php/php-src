@@ -159,17 +159,22 @@ static PHP_MINFO_FUNCTION(ctype)
 		return; \
  	switch (Z_TYPE_P(c)) { \
 	case IS_LONG: \
-		if (Z_LVAL_P(c) <= 255 && Z_LVAL_P(c) >= 0) { \
-			RETURN_BOOL(iswhat(Z_LVAL_P(c))); \
-		} else if (Z_LVAL_P(c) >= -128 && Z_LVAL_P(c) < 0) { \
-			RETURN_BOOL(iswhat(Z_LVAL_P(c) + 256)); \
+		RETURN_BOOL(u_##iswhat(Z_LVAL_P(c))); \
+		break; \
+	case IS_UNICODE: \
+		{ \
+			int ofs = 0; \
+			while (ofs < Z_USTRLEN_P(c)) { \
+				UChar32 ch; \
+				U16_GET(Z_USTRVAL_P(c), 0, ofs, Z_USTRLEN_P(c), ch); \
+				if (!u_##iswhat(ch)) { \
+					RETURN_FALSE; \
+				} \
+				U16_FWD_1(Z_USTRVAL_P(c), ofs, Z_USTRLEN_P(c)); \
+			} \
+			RETURN_TRUE; \
 		} \
-		tmp = *c; \
-		zval_copy_ctor(&tmp); \
-		convert_to_string(&tmp); \
-		c = &tmp; \
 	case IS_STRING: \
-string:\
 		{ \
 			char *p = Z_STRVAL_P(c), *e = Z_STRVAL_P(c) + Z_STRLEN_P(c); \
 			if (e == p) {	\
@@ -185,12 +190,6 @@ string:\
 			if (c == &tmp) zval_dtor(&tmp); \
 			RETURN_TRUE; \
 		} \
-	case IS_UNICODE: \
-		tmp = *c; \
-		zval_copy_ctor(&tmp); \
-		convert_to_string(&tmp); \
-		c = &tmp; \
-		goto string; \
 	default: \
 		break; \
 	} \
@@ -198,7 +197,7 @@ string:\
  
 /* }}} */
 
-/* {{{ proto bool ctype_alnum(mixed c)
+/* {{{ proto bool ctype_alnum(mixed c) U
    Checks for alphanumeric character(s) */
 static PHP_FUNCTION(ctype_alnum)
 {
@@ -206,7 +205,7 @@ static PHP_FUNCTION(ctype_alnum)
 }
 /* }}} */
 
-/* {{{ proto bool ctype_alpha(mixed c)
+/* {{{ proto bool ctype_alpha(mixed c) U
    Checks for alphabetic character(s) */
 static PHP_FUNCTION(ctype_alpha)
 {
@@ -214,7 +213,7 @@ static PHP_FUNCTION(ctype_alpha)
 }
 /* }}} */
 
-/* {{{ proto bool ctype_cntrl(mixed c)
+/* {{{ proto bool ctype_cntrl(mixed c) U
    Checks for control character(s) */
 static PHP_FUNCTION(ctype_cntrl)
 {
@@ -222,7 +221,7 @@ static PHP_FUNCTION(ctype_cntrl)
 }
 /* }}} */
 
-/* {{{ proto bool ctype_digit(mixed c)
+/* {{{ proto bool ctype_digit(mixed c) U
    Checks for numeric character(s) */
 static PHP_FUNCTION(ctype_digit)
 {
@@ -230,7 +229,7 @@ static PHP_FUNCTION(ctype_digit)
 }
 /* }}} */
 
-/* {{{ proto bool ctype_lower(mixed c)
+/* {{{ proto bool ctype_lower(mixed c) U
    Checks for lowercase character(s)  */
 static PHP_FUNCTION(ctype_lower)
 {
@@ -238,7 +237,7 @@ static PHP_FUNCTION(ctype_lower)
 }
 /* }}} */
 
-/* {{{ proto bool ctype_graph(mixed c)
+/* {{{ proto bool ctype_graph(mixed c) U
    Checks for any printable character(s) except space */
 static PHP_FUNCTION(ctype_graph)
 {
@@ -246,7 +245,7 @@ static PHP_FUNCTION(ctype_graph)
 }
 /* }}} */
 
-/* {{{ proto bool ctype_print(mixed c)
+/* {{{ proto bool ctype_print(mixed c) U
    Checks for printable character(s) */
 static PHP_FUNCTION(ctype_print)
 {
@@ -254,7 +253,7 @@ static PHP_FUNCTION(ctype_print)
 }
 /* }}} */
 
-/* {{{ proto bool ctype_punct(mixed c)
+/* {{{ proto bool ctype_punct(mixed c) U
    Checks for any printable character which is not whitespace or an alphanumeric character */
 static PHP_FUNCTION(ctype_punct)
 {
@@ -262,7 +261,7 @@ static PHP_FUNCTION(ctype_punct)
 }
 /* }}} */
 
-/* {{{ proto bool ctype_space(mixed c)
+/* {{{ proto bool ctype_space(mixed c) U
    Checks for whitespace character(s)*/
 static PHP_FUNCTION(ctype_space)
 {
@@ -270,7 +269,7 @@ static PHP_FUNCTION(ctype_space)
 }
 /* }}} */
 
-/* {{{ proto bool ctype_upper(mixed c)
+/* {{{ proto bool ctype_upper(mixed c) U
    Checks for uppercase character(s) */
 static PHP_FUNCTION(ctype_upper)
 {
@@ -278,7 +277,7 @@ static PHP_FUNCTION(ctype_upper)
 }
 /* }}} */
 
-/* {{{ proto bool ctype_xdigit(mixed c)
+/* {{{ proto bool ctype_xdigit(mixed c) U
    Checks for character(s) representing a hexadecimal digit */
 static PHP_FUNCTION(ctype_xdigit)
 {
