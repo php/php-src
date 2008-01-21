@@ -616,7 +616,7 @@ ZEND_FUNCTION(get_class)
 }
 /* }}} */
 
-/* {{{ proto string get_called_class()
+/* {{{ proto string get_called_class() U
    Retrieves the class name */
 ZEND_FUNCTION(get_called_class)
 {
