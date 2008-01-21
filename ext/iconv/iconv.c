@@ -1932,14 +1932,15 @@ static void _php_iconv_show_error(php_iconv_err_t err, const char *out_charset, 
 }
 /* }}} */
 
-/* {{{ proto int iconv_strlen(string str [, string charset])
+/* {{{ proto int iconv_strlen(string str [, string charset]) U
    Returns the character count of str */
 PHP_FUNCTION(iconv_strlen)
 {
 	char *charset;
 	int charset_len = 0;
-	char *str;
-	int str_len; 
+	zstr str;
+	int str_len, argc = ZEND_NUM_ARGS(); 
+	zend_uchar str_type;
 
 	php_iconv_err_t err;
 
@@ -1947,9 +1948,13 @@ PHP_FUNCTION(iconv_strlen)
 
 	charset = ICONVG(internal_encoding);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s",
-		&str, &str_len, &charset, &charset_len) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "t|s",
+		&str, &str_len, &str_type, &charset, &charset_len) == FAILURE) {
 		RETURN_FALSE;
+	}
+
+	if (str_type == IS_UNICODE) {
+		RETURN_LONG(u_countChar32(str.u, str_len));
 	}
 
 	if (charset_len >= ICONV_CSNMAXLEN) {
@@ -1957,7 +1962,7 @@ PHP_FUNCTION(iconv_strlen)
 		RETURN_FALSE;
 	}
 
-	err = _php_iconv_strlen(&retval, str, str_len, charset); 
+	err = _php_iconv_strlen(&retval, str.s, str_len, charset); 
 	_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset TSRMLS_CC);
 	if (err == PHP_ICONV_ERR_SUCCESS) {
 		RETVAL_LONG(retval);
@@ -1967,14 +1972,15 @@ PHP_FUNCTION(iconv_strlen)
 }
 /* }}} */
 
-/* {{{ proto string iconv_substr(string str, int offset, [int length, string charset])
+/* {{{ proto string iconv_substr(string str, int offset, [int length, string charset]) U
    Returns specified part of a string */
 PHP_FUNCTION(iconv_substr)
 {
 	char *charset;
 	int charset_len = 0;
-	char *str;
+	zstr str;
 	int str_len; 
+	zend_uchar str_type;
 	long offset, length;
 
 	php_iconv_err_t err;
@@ -1983,8 +1989,8 @@ PHP_FUNCTION(iconv_substr)
 
 	charset = ICONVG(internal_encoding);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|ls",
-		&str, &str_len, &offset, &length,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tl|ls",
+		&str, &str_len, &str_type, &offset, &length,
 		&charset, &charset_len) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -1998,10 +2004,38 @@ PHP_FUNCTION(iconv_substr)
 		length = str_len; 
 	}
 
-	err = _php_iconv_substr(&retval, str, str_len, offset, length, charset); 
+	if (str_type == IS_UNICODE) {
+		int start, end;
+
+		if (offset >= 0) {
+			start = 0;
+			U16_FWD_N(str.u, start, str_len, offset);
+		} else {
+			start = str_len;
+			U16_BACK_N(str.u, start, str_len, -offset);
+		}
+
+		if (length < 0) {
+			length += u_countChar32(str.u, str_len);
+		}
+
+		end   = start;
+		U16_FWD_N(str.u, end,   str_len, length);
+
+		if (start > str_len) { start = str_len; }
+		if (end   > str_len) { end   = str_len; }
+
+		if (end > start) {
+			RETURN_UNICODEL(str.u + start, end - start, ZSTR_DUPLICATE);
+		} else {
+			RETURN_EMPTY_UNICODE();
+		}
+	}
+
+	err = _php_iconv_substr(&retval, str.s, str_len, offset, length, charset); 
 	_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset TSRMLS_CC);
 
-	if (err == PHP_ICONV_ERR_SUCCESS && str != NULL) {
+	if (err == PHP_ICONV_ERR_SUCCESS && str.s != NULL) {
 		if (retval.c != NULL) {
 			RETVAL_STRINGL(retval.c, retval.len, 0);
 		} else {
@@ -2014,16 +2048,18 @@ PHP_FUNCTION(iconv_substr)
 }
 /* }}} */
 
-/* {{{ proto int iconv_strpos(string haystack, string needle [, int offset [, string charset]])
+/* {{{ proto int iconv_strpos(string haystack, string needle [, int offset [, string charset]]) U
    Finds position of first occurrence of needle within part of haystack beginning with offset */
 PHP_FUNCTION(iconv_strpos)
 {
 	char *charset;
 	int charset_len = 0;
-	char *haystk;
+	zstr haystk;
 	int haystk_len; 
-	char *ndl;
+	zend_uchar haystk_type;
+	zstr ndl;
 	int ndl_len;
+	zend_uchar ndl_type;
 	long offset;
 
 	php_iconv_err_t err;
@@ -2033,8 +2069,8 @@ PHP_FUNCTION(iconv_strpos)
 	offset = 0;
 	charset = ICONVG(internal_encoding);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ls",
-		&haystk, &haystk_len, &ndl, &ndl_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT|ls",
+		&haystk, &haystk_len, &haystk_type, &ndl, &ndl_len, &ndl_type,
 		&offset, &charset, &charset_len) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -2053,7 +2089,21 @@ PHP_FUNCTION(iconv_strpos)
 		RETURN_FALSE;
 	}
 
-	err = _php_iconv_strpos(&retval, haystk, haystk_len, ndl, ndl_len,
+	if (haystk_type == IS_UNICODE) {
+		UChar *pos;
+		int ofs = 0;
+
+		U16_FWD_N(haystk.u, ofs, haystk_len, offset);
+
+		pos = zend_u_memnstr(haystk.u + ofs, ndl.u, ndl_len, haystk.u + haystk_len);
+		if (pos) {
+			RETURN_LONG(u_countChar32(haystk.u, pos - haystk.u));
+		} else {
+			RETURN_FALSE;
+		}
+	}
+
+	err = _php_iconv_strpos(&retval, haystk.s, haystk_len, ndl.s, ndl_len,
 	                        offset, charset); 
 	_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset TSRMLS_CC);
 
@@ -2371,17 +2421,19 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 }
 /* }}} */
 
-/* {{{ proto string iconv(string in_charset, string out_charset, string str)
+/* {{{ proto string iconv(string in_charset, string out_charset, string str) U
    Returns str converted to the out_charset character set */
 PHP_NAMED_FUNCTION(php_if_iconv)
 {
-	char *in_charset, *out_charset, *in_buffer, *out_buffer;
+	char *in_charset, *out_charset, *out_buffer;
+	zstr in_buffer;
 	size_t out_len;
 	int in_charset_len = 0, out_charset_len = 0, in_buffer_len;
+	zend_uchar in_buffer_type;
 	php_iconv_err_t err;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss",
-		&in_charset, &in_charset_len, &out_charset, &out_charset_len, &in_buffer, &in_buffer_len) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sst",
+		&in_charset, &in_charset_len, &out_charset, &out_charset_len, &in_buffer, &in_buffer_len, &in_buffer_type) == FAILURE)
 		return;
 
 	if (in_charset_len >= ICONV_CSNMAXLEN || out_charset_len >= ICONV_CSNMAXLEN) {
@@ -2389,7 +2441,28 @@ PHP_NAMED_FUNCTION(php_if_iconv)
 		RETURN_FALSE;
 	}
 
-	err = php_iconv_string(in_buffer, (size_t)in_buffer_len,
+	if (in_buffer_type == IS_UNICODE) {
+		/* Ignore in_charset and convert according to out_charset */
+		UConverter *conv = NULL;
+		int out_buffer_len;
+
+		if (zend_set_converter_encoding(&conv, out_charset) == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unrecognized charset %s", out_charset);
+			RETURN_FALSE;
+		}
+
+		if (zend_unicode_to_string(conv, &out_buffer, &out_buffer_len, in_buffer.u, in_buffer_len TSRMLS_CC) == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to convert to %s", out_charset);
+			ucnv_close(conv);
+			RETURN_FALSE;
+		}
+
+		RETVAL_STRINGL(out_buffer, out_buffer_len, 0);
+		ucnv_close(conv);
+		return;
+	}
+
+	err = php_iconv_string(in_buffer.s, (size_t)in_buffer_len,
 		&out_buffer, &out_len, out_charset, in_charset);
 	_php_iconv_show_error(err, out_charset, in_charset TSRMLS_CC); 
 	if (out_buffer != NULL) {
