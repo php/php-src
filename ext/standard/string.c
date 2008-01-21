@@ -4151,6 +4151,7 @@ PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len
 	int can_optimize = 1;
 
 	if ((trlen < 1) || (len < 1)) {
+		*outlen = len;
 		return str;
 	}
 
@@ -4270,6 +4271,7 @@ static HashTable* php_u_strtr_array_prepare_hashtable(HashTable *hash, int *minl
 				len = string_key_len-1;
 				if (len < 1) {
 					zend_hash_destroy(tmp_hash);
+					efree(tmp_hash);
 					return NULL;
 				}
 				zend_u_hash_add(tmp_hash, IS_UNICODE, string_key, string_key_len, entry, sizeof(zval*), NULL);
@@ -4506,19 +4508,23 @@ PHP_FUNCTION(strtr)
 	}
 
 	if (Z_TYPE_PP(str) == IS_UNICODE) {
-		int outlen;
+		int outlen = 0;
 		UChar *outstr;
 
 		if (ac == 2) {
-			int minlen, maxlen;
+			int minlen = 0, maxlen = 0;
 			HashTable *hash;
 
 			hash = php_u_strtr_array_prepare_hashtable(HASH_OF(*from), &minlen, &maxlen TSRMLS_CC);
-			outstr = php_u_strtr_array(Z_USTRVAL_PP(str), Z_USTRLEN_PP(str), hash, minlen, maxlen, &outlen TSRMLS_CC);
-			zend_hash_destroy(hash);
-			efree(hash);
-			RETVAL_UNICODEL(outstr, outlen, 0);
-			Z_TYPE_P(return_value) = IS_UNICODE;
+			if (hash) {
+				outstr = php_u_strtr_array(Z_USTRVAL_PP(str), Z_USTRLEN_PP(str), hash, minlen, maxlen, &outlen TSRMLS_CC);
+				zend_hash_destroy(hash);
+				efree(hash);
+				RETVAL_UNICODEL(outstr, outlen, 0);
+				Z_TYPE_P(return_value) = IS_UNICODE;
+			} else {
+				RETURN_ZVAL(*str, 1, 0);
+			}
 		} else {
 			convert_to_unicode_ex(from);
 			convert_to_unicode_ex(to);
@@ -4531,7 +4537,12 @@ PHP_FUNCTION(strtr)
 					  Z_USTRLEN_PP(to),
 					  MIN(Z_USTRLEN_PP(from), Z_USTRLEN_PP(to)),
 					  &outlen TSRMLS_CC);
-			ZVAL_UNICODEL(return_value, outstr, outlen, 0);
+
+			if (Z_USTRVAL_PP(str) == outstr) {
+				ZVAL_UNICODEL(return_value, outstr, outlen, 1);
+			} else {
+				ZVAL_UNICODEL(return_value, outstr, outlen, 0);
+			}
 
 			Z_TYPE_P(return_value) = IS_UNICODE;
 		}
