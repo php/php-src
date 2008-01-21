@@ -725,7 +725,7 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY)
 	zend_free_op free_op1;
 	zval **var_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW);
 
-	if (!var_ptr) {
+	if (OP1_TYPE == IS_VAR && !var_ptr) {
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 	if (*var_ptr == EG(error_zval_ptr)) {
@@ -766,7 +766,7 @@ ZEND_VM_HANDLER(35, ZEND_PRE_DEC, VAR|CV, ANY)
 	zend_free_op free_op1;
 	zval **var_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW);
 
-	if (!var_ptr) {
+	if (OP1_TYPE == IS_VAR && !var_ptr) {
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 	if (*var_ptr == EG(error_zval_ptr)) {
@@ -807,7 +807,7 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 	zend_free_op free_op1;
 	zval **var_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW);
 
-	if (!var_ptr) {
+	if (OP1_TYPE == IS_VAR && !var_ptr) {
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 	if (*var_ptr == EG(error_zval_ptr)) {
@@ -845,7 +845,7 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 	zend_free_op free_op1;
 	zval **var_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW);
 
-	if (!var_ptr) {
+	if (OP1_TYPE == IS_VAR && !var_ptr) {
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 	if (*var_ptr == EG(error_zval_ptr)) {
