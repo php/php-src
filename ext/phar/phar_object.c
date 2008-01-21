@@ -1923,7 +1923,7 @@ PHP_METHOD(Phar, convertToPhar)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::isCompressed()
+/* {{{ proto int|false Phar::isCompressed()
  * Returns Phar::GZ or PHAR::BZ2 if the entire phar archive is compressed (.tar.gz/tar.bz and so on)
  */
 PHP_METHOD(Phar, isCompressed)
@@ -1936,7 +1936,7 @@ PHP_METHOD(Phar, isCompressed)
 	if (phar_obj->arc.archive->flags & PHAR_FILE_COMPRESSED_BZ2) {
 		RETURN_LONG(PHAR_ENT_COMPRESSED_BZ2);
 	}
-	RETURN_LONG(0);
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -2180,6 +2180,11 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 			"Cannot set signature algorithm, not possible with tar-based phar archives");
 		return;
 	}
+	if (phar_obj->arc.archive->is_zip) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Cannot set signature algorithm, not possible with zip-based phar archives");
+		return;
+	}
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "l", &algo) != SUCCESS) {
 		return;
@@ -2201,7 +2206,7 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 
 			phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
 			if (error) {
-				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, error);
+				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 				efree(error);
 			}
 			break;
@@ -2407,7 +2412,11 @@ PHP_METHOD(Phar, uncompressAllFiles)
 			"Cannot uncompress all files, some are compressed as bzip2 or gzip and cannot be uncompressed");
 		return;
 	}
-	pharobj_set_compression(&phar_obj->arc.archive->manifest, PHAR_ENT_COMPRESSED_NONE TSRMLS_CC);
+	if (phar_obj->arc.archive->is_tar) {
+		phar_obj->arc.archive->flags &= ~PHAR_FILE_COMPRESSION_MASK;
+	} else {
+		pharobj_set_compression(&phar_obj->arc.archive->manifest, PHAR_ENT_COMPRESSED_NONE TSRMLS_CC);
+	}
 	phar_obj->arc.archive->is_modified = 1;
 	
 	phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
@@ -2834,6 +2843,10 @@ PHP_METHOD(Phar, setMetadata)
 	zval *metadata;
 	PHAR_ARCHIVE_OBJECT();
 
+	if (PHAR_G(readonly)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by INI setting");
+		return;
+	}
 	if (phar_obj->arc.archive->is_tar) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot set metadata, not possible with tar-based phar archives");
@@ -2859,7 +2872,7 @@ PHP_METHOD(Phar, setMetadata)
 }
 /* }}} */
 
-/* {{{ proto int Phar::delMetaData()
+/* {{{ proto int Phar::delMetadata()
  * Deletes the global metadata of the phar
  */
 PHP_METHOD(Phar, delMetadata)
@@ -2867,6 +2880,10 @@ PHP_METHOD(Phar, delMetadata)
 	char *error;
 	PHAR_ARCHIVE_OBJECT();
 
+	if (PHAR_G(readonly)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by INI setting");
+		return;
+	}
 	if (phar_obj->arc.archive->metadata) {
 		zval_ptr_dtor(&phar_obj->arc.archive->metadata);
 		phar_obj->arc.archive->metadata = NULL;
@@ -3150,6 +3167,10 @@ PHP_METHOD(PharFileInfo, setMetadata)
 	zval *metadata;
 	PHAR_ENTRY_OBJECT();
 
+	if (PHAR_G(readonly)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by INI setting");
+		return;
+	}
 	if (entry_obj->ent.entry->is_tar) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot set metadata, not possible with tar-based phar archives");
@@ -3188,10 +3209,12 @@ PHP_METHOD(PharFileInfo, delMetadata)
 	char *error;
 	PHAR_ENTRY_OBJECT();
 
-	if (entry_obj->ent.entry->is_dir) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
-			"Phar entry is a directory, cannot delete metadata"); \
+	if (PHAR_G(readonly)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by INI setting");
 		return;
+	}
+	if (entry_obj->ent.entry->is_temp_dir) {
+		RETURN_FALSE;
 	}
 	if (entry_obj->ent.entry->metadata) {
 		zval_ptr_dtor(&entry_obj->ent.entry->metadata);
