@@ -74,6 +74,7 @@ PHP                                                                        NEWS
   . Added access to internal values of DSA, RSA and DH keys
 - Improved memory usage by moving constants to read only memory.
   (Dmitry, Pierre)
+- Added lcfirst() function. (David C)
 
 - Fixed possible crash in ext/soap because of uninitialized value. (Zdash Urf)
 
