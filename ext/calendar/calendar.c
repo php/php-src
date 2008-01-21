@@ -173,6 +173,7 @@ const zend_function_entry calendar_functions[] = {
 
 static PHP_GINIT_FUNCTION(calendar)
 {
+	memset(calendar_globals, 0, sizeof(*calendar_globals));
 	if (zend_set_converter_encoding(&(calendar_globals->iso_8859_8_conv), "iso-8859-8") == FAILURE) {
 		php_error(E_CORE_WARNING, "Unable to instatiate iso-8859-8 converter for calendar extension, will be unable to produce hebrew dates in unicode mode");
 		calendar_globals = NULL;
