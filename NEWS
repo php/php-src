@@ -41,6 +41,7 @@ PHP                                                                        NEWS
 - Added "+" and "*" specifiers to zend_parse_parameters(). (Andrei)
 - Added DateTime::setTimestamp() to set a unix timestamp without
   invoking the date parser. (Scott)
+- Added SplDoublyLinkedList, SplStack, SplQueue classes. (Etienne)
 
 - Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
 

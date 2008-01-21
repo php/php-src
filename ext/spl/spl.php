@@ -105,13 +105,21 @@
  * - interface SplSubject
  * - class SplObjectStorage
  *
- * 8) @ref Examples
+ * 8) Datastructures
+ *
+ * SPL proposes a set of datastructures implemented internally.
+ *
+ * - class SplDoublyLinkedList
+ * - class SplStack                 extends SplDoublyLinkedList
+ * - class SplQueue                 extends SplDoublyLinkedList
+ *
+ * 9) @ref Examples
  *
  * The classes and interfaces in this group are contained as PHP code in the 
  * examples subdirectory of ext/SPL. Sooner or later they will be moved to
  * c-code.
  * 
- * 9) Some articles about SPL:
+ * 10) Some articles about SPL:
  * - <a href="http://www.phpro.org/tutorials/Introduction-to-SPL.html">Introduction to Standard PHP Library (SPL)</a>
  * - <a href="http://www.sitepoint.com/article/php5-standard-library/1">Introducing PHP 5's Standard Library</a>
  * - <a href="http://www.ramikayyali.com/archives/2005/02/25/iterators">Iterators in PHP5</a>
@@ -120,13 +128,13 @@
  * - <a href="http://www.devshed.com/c/a/PHP/The-Standard-PHP-Library-Part-2/">The Standard PHP Library, Part 2</a>
  * - <a href="http://www.professionelle-softwareentwicklung-mit-php5.de/erste_auflage/oop.iterators.spl.html">Die Standard PHP Library (SPL) [german]</a>
  *
- * 10) Talks on SPL:
+ * 11) Talks on SPL:
  * - SPL Update <a href="http://talks.somabo.de/200702_vancouver_spl_update.pps">[pps]</a>, <a href="http://talks.somabo.de/200702_vancouver_spl_update.pdf">[pdf]</a>
  * - Happy SPLing <a href="http://talks.somabo.de/200509_toronto_happy_spling.pps">[pps]</a>, <a href="http://talks.somabo.de/200509_toronto_happy_spling.pdf">[pdf]</a>
  * - From engine overloading to SPL <a href="http://talks.somabo.de/200505_cancun_from_engine_overloading_to_spl.pps">[pps]</a>, <a href="http://talks.somabo.de/200505_cancun_from_engine_overloading_to_spl.pdf">[pdf]</a>
  * - SPL for the masses <a href="http://talks.somabo.de/200504_php_quebec_spl_for_the_masses.pps">[pps]</a>, <a href="http://talks.somabo.de/200504_php_quebec_spl_for_the_masses.pdf">[pdf]</a>
  *
- * 11) Debug sessions:
+ * 12) Debug sessions:
  * - Debug session 1 <a href="200407_oscon_introduction_to_iterators_debug.pps">[pps]</a>, <a href="200407_oscon_introduction_to_iterators_debug.pdf">[pdf]</a>
  * - Debug session 2 <a href="http://talks.somabo.de/200509_toronto_iterator_debug_session_1.pps">[pps]</a>, <a href="http://talks.somabo.de/200509_toronto_iterator_debug_session_1.pdf">[pdf]</a>, <a href="http://taks.somabo.de/200411_php_conference_frankfrurt_iterator_debug_session.swf">[swf]</a>
  * - Debug session 3 <a href="http://talks.somabo.de/200509_toronto_iterator_debug_session_2.pps">[pps]</a>, <a href="http://talks.somabo.de/200509_toronto_iterator_debug_session_2.pdf">[pdf]</a>
