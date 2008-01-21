@@ -713,7 +713,7 @@ static inline void zend_assign_to_string_offset(temp_variable *T, zval *value, i
 		}
 
 		if (T->str_offset.offset >= Z_USTRLEN_P(T->str_offset.str)) {
-			Z_USTRVAL_P(T->str_offset.str) = (char *) eurealloc(Z_USTRVAL_P(T->str_offset.str), T->str_offset.offset+1+1);
+			Z_USTRVAL_P(T->str_offset.str) = (UChar *) eurealloc(Z_USTRVAL_P(T->str_offset.str), T->str_offset.offset+1+1);
 			u_memset(Z_USTRVAL_P(T->str_offset.str) + Z_USTRLEN_P(T->str_offset.str),
 			       ' ',
 			       T->str_offset.offset - Z_USTRLEN_P(T->str_offset.str));
