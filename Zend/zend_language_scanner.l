@@ -778,7 +778,6 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 		CG(active_op_array) = op_array;
 		compiler_result = zendparse(TSRMLS_C);
 		zend_do_return(&retval_znode, 0 TSRMLS_CC);
-		zend_do_handle_exception(TSRMLS_C);
 		CG(in_compilation) = original_in_compilation;
 		if (compiler_result==1) { /* parser error */
 			zend_bailout();
@@ -934,7 +933,6 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 			retval = NULL;
 		} else {
 			zend_do_return(NULL, 0 TSRMLS_CC);
-			zend_do_handle_exception(TSRMLS_C);
 			CG(active_op_array) = original_active_op_array;
 			pass_two(op_array TSRMLS_CC);
 			zend_release_labels(TSRMLS_C);

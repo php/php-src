@@ -1461,15 +1461,14 @@ ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, int return_v
 	EX(opline) = new_op
 
 #define ZEND_VM_JMP(new_op) \
-     CHECK_SYMBOL_TABLES() \
- 	   EX(opline) = EG(exception)?EX(opline)+1:new_op; \
-     ZEND_VM_CONTINUE()
+	CHECK_SYMBOL_TABLES() \
+	if (EXPECTED(!EG(exception))) { \
+		EX(opline) = new_op; \
+	} \
+	ZEND_VM_CONTINUE()
 
 #define ZEND_VM_INC_OPCODE() \
-	if (!EG(exception)) { \
-		CHECK_SYMBOL_TABLES() \
-		EX(opline)++; \
-	}
+	EX(opline)++
 
 #define ZEND_VM_EXIT_FROM_EXECUTE_LOOP() \
 	free_alloca(EX(CVs), EX(use_heap)); \
