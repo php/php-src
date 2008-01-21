@@ -121,7 +121,7 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, int gm)
 
 }
 
-/* {{{ proto int easter_date([int year])
+/* {{{ proto int easter_date([int year]) U
    Return the timestamp of midnight on Easter of a given year (defaults to current year) */
 PHP_FUNCTION(easter_date)
 {
@@ -129,7 +129,7 @@ PHP_FUNCTION(easter_date)
 }
 /* }}} */
 
-/* {{{ proto int easter_days([int year, [int method]])
+/* {{{ proto int easter_days([int year, [int method]]) U
    Return the number of days after March 21 that Easter falls on for a given year (defaults to current year) */
 PHP_FUNCTION(easter_days)
 {
