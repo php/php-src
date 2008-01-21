@@ -76,6 +76,9 @@ PHP                                                                        NEWS
   (Dmitry, Pierre)
 - Added lcfirst() function. (David C)
 
+- Changed exception handling. Now each op_array doesn't contain
+  ZEND_HANDLE_EXCEPTION opcode in the end. (Dmitry)
+
 - Fixed possible crash in ext/soap because of uninitialized value. (Zdash Urf)
 
 - Fixed bug #43808 (date_create never fails (even when it should)). (Derick)
