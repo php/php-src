@@ -28,6 +28,17 @@ PHP_FUNCTION(cal_to_jd);
 PHP_FUNCTION(cal_days_in_month);
 PHP_FUNCTION(cal_info);
 
+#ifdef ZTS
+# include "TSRM.h"
+# define CALENDAR_G(v)	TSRMG(calendar_globals_id, zend_calendar_globals *, v)
+#else
+# define CALENDAR_G(v)	(calendar_globals.v)
+#endif
+
+ZEND_BEGIN_MODULE_GLOBALS(calendar)
+	UConverter *iso_8859_8_conv;
+ZEND_END_MODULE_GLOBALS(calendar)
+
 #define phpext_calendar_ptr calendar_module_ptr
 
 /*
