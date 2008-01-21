@@ -1,3 +1,43 @@
+2008-01-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/wddx/php_wddx_api.h
+      ext/wddx/wddx.c:
+      
+      MFB: Optimize wddx boolean encoding
+
+    * (PHP_5_3)
+      ext/wddx/php_wddx_api.h
+      ext/wddx/wddx.c:
+      
+      Optimize wddx boolean encoding
+
+2008-01-20  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      Add note about new getopt() features
+
+    * (PHP_5_2)
+      NEWS
+      ext/mysql/php_mysql.c:
+      MFH: Fixed bug #43875 (Two error messages returned for $new and $flag
+      argument in mysql_connect())
+
+    * (PHP_5_3)
+      ext/mysql/php_mysql.c:
+      MFH: Fixed bug#43875 (Two error messages returned for $new and $flag
+      argument in mysql_connect())
+
+    * ext/mysql/php_mysql.c:
+      Fixed bug#43875 (Two error messages returned for $new and $flag argument in
+      mysql_connect())
+
+2008-01-20  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/spl_dllist.c
+      ext/spl/tests/dllist_006.phpt:
+      Fix mem errors
+
 2008-01-19  David Coallier  <david.coallier@gmail.com>
 
     * ext/standard/string.c:
