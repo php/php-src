@@ -26,6 +26,7 @@
 #include "zend_builtin_functions.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
+#include "zend_vm.h"
 
 zend_class_entry *default_exception_ce;
 zend_class_entry *error_exception_ce;
@@ -56,7 +57,7 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 		return;
 	}
 	EG(opline_before_exception) = EG(current_execute_data)->opline;
-	EG(current_execute_data)->opline = &EG(active_op_array)->opcodes[EG(active_op_array)->last-1-1];
+	EG(current_execute_data)->opline = EG(exception_op);
 }
 /* }}} */
 
@@ -652,6 +653,23 @@ static const zend_function_entry error_exception_functions[] = {
 void zend_register_default_exception(TSRMLS_D) /* {{{ */
 {
 	zend_class_entry ce;
+
+	memset(EG(exception_op), 0, sizeof(EG(exception_op)));
+	EG(exception_op)[0].opcode = ZEND_HANDLE_EXCEPTION;
+	EG(exception_op)[0].op1.op_type = IS_UNUSED;
+	EG(exception_op)[0].op2.op_type = IS_UNUSED;
+	EG(exception_op)[0].result.op_type = IS_UNUSED;
+	ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op));
+	EG(exception_op)[1].opcode = ZEND_HANDLE_EXCEPTION;
+	EG(exception_op)[1].op1.op_type = IS_UNUSED;
+	EG(exception_op)[1].op2.op_type = IS_UNUSED;
+	EG(exception_op)[1].result.op_type = IS_UNUSED;
+	ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op)+1);
+	EG(exception_op)[2].opcode = ZEND_HANDLE_EXCEPTION;
+	EG(exception_op)[2].op1.op_type = IS_UNUSED;
+	EG(exception_op)[2].op2.op_type = IS_UNUSED;
+	EG(exception_op)[2].result.op_type = IS_UNUSED;
+	ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op)+2);
 
 	INIT_CLASS_ENTRY(ce, "Exception", default_exception_functions);
 	default_exception_ce = zend_register_internal_class(&ce TSRMLS_CC);

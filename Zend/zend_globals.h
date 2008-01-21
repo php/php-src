@@ -227,6 +227,7 @@ struct _zend_executor_globals {
 	zend_objects_store objects_store;
 	zval *exception;
 	zend_op *opline_before_exception;
+	zend_op exception_op[3];
 
 	struct _zend_execute_data *current_execute_data;
 
