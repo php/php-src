@@ -20,7 +20,7 @@ $phar['a'] = 'hi there';
 $phar = new Phar($fname);
 $phar->convertToPhar(Phar::GZ);
 var_dump($phar->isPhar());
-var_dump($phar->isCompressed() === 0);
+var_dump($phar->isCompressed());
 copy($fname, $fname2);
 
 $phar = new Phar($fname2);
@@ -37,7 +37,7 @@ __HALT_COMPILER();
 --EXPECT--
 bool(true)
 bool(true)
-bool(true)
+bool(false)
 bool(true)
 bool(true)
 ===DONE===

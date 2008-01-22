@@ -25,7 +25,7 @@ include 'phar_test.inc';
 $phar = new Phar($fname);
 $phar->convertToTar(Phar::GZ);
 var_dump($phar->isTar());
-var_dump($phar->isCompressed() === 0);
+var_dump($phar->isCompressed());
 copy($fname, $fname2);
 
 $phar = new Phar($fname2);
@@ -41,7 +41,7 @@ __HALT_COMPILER();
 ?>
 --EXPECT--
 bool(true)
-bool(true)
+bool(false)
 bool(true)
 bool(true)
 ===DONE===
