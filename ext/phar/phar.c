@@ -3393,11 +3393,7 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
  */
 static zend_module_dep phar_deps[] = {
 #if HAVE_PHAR_ZIP
-# ifdef PHP_WIN32
-	ZEND_MOD_REQUIRED("zip")
-# else
 	ZEND_MOD_OPTIONAL("zip")
-# endif
 #endif
 	ZEND_MOD_OPTIONAL("zlib")
 	ZEND_MOD_OPTIONAL("bz2")
