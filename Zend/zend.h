@@ -762,6 +762,7 @@ END_EXTERN_C()
 
 #define ZEND_INTERNAL_ENCODING "UTF-16"
 
+#include "zend_gc.h"
 #include "zend_operators.h"
 #include "zend_variables.h"
 
