@@ -59,7 +59,6 @@ PHP                                                                        NEWS
 - Added shm_has_var() function. (Mike)
 - Added str_getcsv() function. (Sara)
 - Added ext/hash support to ext/session's ID generator. (Sara)
-- Added SplDoublyLinkedList, SplStack, SplQueue classes. (Etienne)
 
 - Fixed bug #40325 (Vary: header missing in gzip output handlers). (Mike)
 
