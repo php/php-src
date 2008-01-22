@@ -719,11 +719,13 @@ static zval** sxe_property_get_adr(zval *object, zval *member TSRMLS_DC) /* {{{ 
 
 	name = Z_STRVAL_P(member);
 	node = sxe_get_element_by_name(sxe, node, &name, &type TSRMLS_CC);
-	if (!node) {
-		sxe_prop_dim_write(object, member, NULL, 1, 0, &node TSRMLS_CC);
-		type = SXE_ITER_NONE;
-		name = NULL;
+	if (node) {
+		return NULL;
 	}
+	sxe_prop_dim_write(object, member, NULL, 1, 0, &node TSRMLS_CC);
+	type = SXE_ITER_NONE;
+	name = NULL;
+
 	MAKE_STD_ZVAL(return_value);
 	_node_as_zval(sxe, node, return_value, type, name, sxe->iter.nsprefix, sxe->iter.isprefix TSRMLS_CC);
 
