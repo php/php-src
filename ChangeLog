@@ -1,3 +1,93 @@
+2008-01-21  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      NEWS
+      ext/spl/spl.php
+      ext/spl/internal/spldoublylinkedlist.inc
+      ext/spl/internal/splqueue.inc
+      ext/spl/internal/splstack.inc:
+      MFH: Add doxygen docs for SplDoublyLinkedList, SplStack, SplQueue
+
+    * NEWS
+      ext/spl/spl.php
+      ext/spl/internal/spldoublylinkedlist.inc
+      ext/spl/internal/spldoublylinkedlist.inc
+      ext/spl/internal/splqueue.inc
+      ext/spl/internal/splqueue.inc
+      ext/spl/internal/splstack.inc
+      ext/spl/internal/splstack.inc:
+      Add doxygen docs for SplDoublyLinkedList, SplStack, SplQueue
+
+2008-01-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner.l:
+      Changed exception handling. Now each op_array doesn't contain
+      ZEND_HANDLE_EXCEPTION opcode in the end
+
+    * ZendEngine2/zend_execute.c:
+      Fixed compilation warning
+
+    * ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.c:
+      Yet another comparison optimisation for usual cases
+
+2008-01-21  David Coallier  <david.coallier@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      - Added lcfirst() announcement.
+
+2008-01-21  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/bug42861.phpt:
+      fix #42861 (strtr() crashes in Unicode mode when $from argument is empty)
+
+2008-01-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Eliminate unnecessary checks for INC/DEC IS_CV
+
+2008-01-21  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/calendar/calendar.c:
+      fix newly added segfault
+
+2008-01-21  Sara Golemon  <sara@golemon.com>
+
+    * ext/ctype/ctype.c:
+      Unicode migration for ext/ctype
+
+    * ext/iconv/iconv.c:
+      Some unicode upgrades...
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Flag safe func
+
+    * ext/calendar/cal_unix.c
+      ext/calendar/easter.c:
+      Flag additional unicode safe funcs
+
+    * ext/calendar/calendar.c
+      ext/calendar/php_calendar.h:
+      Make unicode ready
+
 2008-01-20  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/wddx/php_wddx_api.h
