@@ -2601,18 +2601,16 @@ PHP_FUNCTION(ord)
    Converts ASCII code to a character */
 PHP_FUNCTION(chr)
 {
-	zval **num;
+	long c;
 	char temp[2];
-	
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_long_ex(num);
-	
-	temp[0] = (char) Z_LVAL_PP(num);
-	temp[1] = 0;
 
-	RETVAL_STRINGL(temp, 1, 1);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &c) == FAILURE) {
+		return;
+	}
+	temp[0] = (char)c;
+	temp[1] = '\0';
+
+	RETURN_STRINGL(temp, 1, 1);
 }
 /* }}} */
 
