@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.0
+- Added garbage collector. (David Wang, Dmitry).
 - Added new date/time functionality:
 
   * date_parse_from_format(): Parse date/time strings according to a format.

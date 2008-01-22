@@ -8850,6 +8850,7 @@ static int zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*binary_op)(zval
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
+						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 						FREE_ZVAL(z);
 					}
@@ -9087,6 +9088,7 @@ static int zend_pre_incdec_property_helper_SPEC_VAR_CONST(incdec_t incdec_op, ZE
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -9177,6 +9179,7 @@ static int zend_post_incdec_property_helper_SPEC_VAR_CONST(incdec_t incdec_op, Z
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -9407,6 +9410,7 @@ static int zend_fetch_property_address_read_helper_SPEC_VAR_CONST(int type, ZEND
 
 		if (RETURN_VALUE_UNUSED(&opline->result)) {
 			if (Z_REFCOUNT_P(retval) == 0) {
+				GC_REMOVE_ZVAL_FROM_BUFFER(retval);
 				zval_dtor(retval);
 				FREE_ZVAL(retval);
 			}
@@ -10589,6 +10593,7 @@ static int zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(int (*binary_op)(zval *
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
+						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 						FREE_ZVAL(z);
 					}
@@ -10827,6 +10832,7 @@ static int zend_pre_incdec_property_helper_SPEC_VAR_TMP(incdec_t incdec_op, ZEND
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -10917,6 +10923,7 @@ static int zend_post_incdec_property_helper_SPEC_VAR_TMP(incdec_t incdec_op, ZEN
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -11147,6 +11154,7 @@ static int zend_fetch_property_address_read_helper_SPEC_VAR_TMP(int type, ZEND_O
 
 		if (RETURN_VALUE_UNUSED(&opline->result)) {
 			if (Z_REFCOUNT_P(retval) == 0) {
+				GC_REMOVE_ZVAL_FROM_BUFFER(retval);
 				zval_dtor(retval);
 				FREE_ZVAL(retval);
 			}
@@ -12260,6 +12268,7 @@ static int zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(int (*binary_op)(zval *
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
+						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 						FREE_ZVAL(z);
 					}
@@ -12498,6 +12507,7 @@ static int zend_pre_incdec_property_helper_SPEC_VAR_VAR(incdec_t incdec_op, ZEND
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -12588,6 +12598,7 @@ static int zend_post_incdec_property_helper_SPEC_VAR_VAR(incdec_t incdec_op, ZEN
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -12818,6 +12829,7 @@ static int zend_fetch_property_address_read_helper_SPEC_VAR_VAR(int type, ZEND_O
 
 		if (RETURN_VALUE_UNUSED(&opline->result)) {
 			if (Z_REFCOUNT_P(retval) == 0) {
+				GC_REMOVE_ZVAL_FROM_BUFFER(retval);
 				zval_dtor(retval);
 				FREE_ZVAL(retval);
 			}
@@ -13734,6 +13746,7 @@ static int zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(int (*binary_op)(zva
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
+						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 						FREE_ZVAL(z);
 					}
@@ -14537,6 +14550,7 @@ static int zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*binary_op)(zval *r
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
+						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 						FREE_ZVAL(z);
 					}
@@ -14774,6 +14788,7 @@ static int zend_pre_incdec_property_helper_SPEC_VAR_CV(incdec_t incdec_op, ZEND_
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -14864,6 +14879,7 @@ static int zend_post_incdec_property_helper_SPEC_VAR_CV(incdec_t incdec_op, ZEND
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -15094,6 +15110,7 @@ static int zend_fetch_property_address_read_helper_SPEC_VAR_CV(int type, ZEND_OP
 
 		if (RETURN_VALUE_UNUSED(&opline->result)) {
 			if (Z_REFCOUNT_P(retval) == 0) {
+				GC_REMOVE_ZVAL_FROM_BUFFER(retval);
 				zval_dtor(retval);
 				FREE_ZVAL(retval);
 			}
@@ -16087,6 +16104,7 @@ static int zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int (*binary_op)(z
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
+						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 						FREE_ZVAL(z);
 					}
@@ -16323,6 +16341,7 @@ static int zend_pre_incdec_property_helper_SPEC_UNUSED_CONST(incdec_t incdec_op,
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -16413,6 +16432,7 @@ static int zend_post_incdec_property_helper_SPEC_UNUSED_CONST(incdec_t incdec_op
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -16492,6 +16512,7 @@ static int zend_fetch_property_address_read_helper_SPEC_UNUSED_CONST(int type, Z
 
 		if (RETURN_VALUE_UNUSED(&opline->result)) {
 			if (Z_REFCOUNT_P(retval) == 0) {
+				GC_REMOVE_ZVAL_FROM_BUFFER(retval);
 				zval_dtor(retval);
 				FREE_ZVAL(retval);
 			}
@@ -17153,6 +17174,7 @@ static int zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(int (*binary_op)(zva
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
+						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 						FREE_ZVAL(z);
 					}
@@ -17390,6 +17412,7 @@ static int zend_pre_incdec_property_helper_SPEC_UNUSED_TMP(incdec_t incdec_op, Z
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -17480,6 +17503,7 @@ static int zend_post_incdec_property_helper_SPEC_UNUSED_TMP(incdec_t incdec_op, 
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -17559,6 +17583,7 @@ static int zend_fetch_property_address_read_helper_SPEC_UNUSED_TMP(int type, ZEN
 
 		if (RETURN_VALUE_UNUSED(&opline->result)) {
 			if (Z_REFCOUNT_P(retval) == 0) {
+				GC_REMOVE_ZVAL_FROM_BUFFER(retval);
 				zval_dtor(retval);
 				FREE_ZVAL(retval);
 			}
@@ -18149,6 +18174,7 @@ static int zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(int (*binary_op)(zva
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
+						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 						FREE_ZVAL(z);
 					}
@@ -18386,6 +18412,7 @@ static int zend_pre_incdec_property_helper_SPEC_UNUSED_VAR(incdec_t incdec_op, Z
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -18476,6 +18503,7 @@ static int zend_post_incdec_property_helper_SPEC_UNUSED_VAR(incdec_t incdec_op, 
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -18555,6 +18583,7 @@ static int zend_fetch_property_address_read_helper_SPEC_UNUSED_VAR(int type, ZEN
 
 		if (RETURN_VALUE_UNUSED(&opline->result)) {
 			if (Z_REFCOUNT_P(retval) == 0) {
+				GC_REMOVE_ZVAL_FROM_BUFFER(retval);
 				zval_dtor(retval);
 				FREE_ZVAL(retval);
 			}
@@ -19145,6 +19174,7 @@ static int zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(int (*binary_op)(
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
+						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 						FREE_ZVAL(z);
 					}
@@ -19412,6 +19442,7 @@ static int zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*binary_op)(zval
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
+						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 						FREE_ZVAL(z);
 					}
@@ -19648,6 +19679,7 @@ static int zend_pre_incdec_property_helper_SPEC_UNUSED_CV(incdec_t incdec_op, ZE
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -19738,6 +19770,7 @@ static int zend_post_incdec_property_helper_SPEC_UNUSED_CV(incdec_t incdec_op, Z
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -19817,6 +19850,7 @@ static int zend_fetch_property_address_read_helper_SPEC_UNUSED_CV(int type, ZEND
 
 		if (RETURN_VALUE_UNUSED(&opline->result)) {
 			if (Z_REFCOUNT_P(retval) == 0) {
+				GC_REMOVE_ZVAL_FROM_BUFFER(retval);
 				zval_dtor(retval);
 				FREE_ZVAL(retval);
 			}
@@ -21887,6 +21921,7 @@ static int zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*binary_op)(zval 
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
+						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 						FREE_ZVAL(z);
 					}
@@ -22123,6 +22158,7 @@ static int zend_pre_incdec_property_helper_SPEC_CV_CONST(incdec_t incdec_op, ZEN
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -22213,6 +22249,7 @@ static int zend_post_incdec_property_helper_SPEC_CV_CONST(incdec_t incdec_op, ZE
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -22442,6 +22479,7 @@ static int zend_fetch_property_address_read_helper_SPEC_CV_CONST(int type, ZEND_
 
 		if (RETURN_VALUE_UNUSED(&opline->result)) {
 			if (Z_REFCOUNT_P(retval) == 0) {
+				GC_REMOVE_ZVAL_FROM_BUFFER(retval);
 				zval_dtor(retval);
 				FREE_ZVAL(retval);
 			}
@@ -23453,6 +23491,7 @@ static int zend_binary_assign_op_obj_helper_SPEC_CV_TMP(int (*binary_op)(zval *r
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
+						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 						FREE_ZVAL(z);
 					}
@@ -23690,6 +23729,7 @@ static int zend_pre_incdec_property_helper_SPEC_CV_TMP(incdec_t incdec_op, ZEND_
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -23780,6 +23820,7 @@ static int zend_post_incdec_property_helper_SPEC_CV_TMP(incdec_t incdec_op, ZEND
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -24009,6 +24050,7 @@ static int zend_fetch_property_address_read_helper_SPEC_CV_TMP(int type, ZEND_OP
 
 		if (RETURN_VALUE_UNUSED(&opline->result)) {
 			if (Z_REFCOUNT_P(retval) == 0) {
+				GC_REMOVE_ZVAL_FROM_BUFFER(retval);
 				zval_dtor(retval);
 				FREE_ZVAL(retval);
 			}
@@ -25023,6 +25065,7 @@ static int zend_binary_assign_op_obj_helper_SPEC_CV_VAR(int (*binary_op)(zval *r
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
+						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 						FREE_ZVAL(z);
 					}
@@ -25260,6 +25303,7 @@ static int zend_pre_incdec_property_helper_SPEC_CV_VAR(incdec_t incdec_op, ZEND_
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -25350,6 +25394,7 @@ static int zend_post_incdec_property_helper_SPEC_CV_VAR(incdec_t incdec_op, ZEND
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -25579,6 +25624,7 @@ static int zend_fetch_property_address_read_helper_SPEC_CV_VAR(int type, ZEND_OP
 
 		if (RETURN_VALUE_UNUSED(&opline->result)) {
 			if (Z_REFCOUNT_P(retval) == 0) {
+				GC_REMOVE_ZVAL_FROM_BUFFER(retval);
 				zval_dtor(retval);
 				FREE_ZVAL(retval);
 			}
@@ -26395,6 +26441,7 @@ static int zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(int (*binary_op)(zval
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
+						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 						FREE_ZVAL(z);
 					}
@@ -27107,6 +27154,7 @@ static int zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binary_op)(zval *re
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
+						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 						FREE_ZVAL(z);
 					}
@@ -27343,6 +27391,7 @@ static int zend_pre_incdec_property_helper_SPEC_CV_CV(incdec_t incdec_op, ZEND_O
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -27433,6 +27482,7 @@ static int zend_post_incdec_property_helper_SPEC_CV_CV(incdec_t incdec_op, ZEND_
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -27662,6 +27712,7 @@ static int zend_fetch_property_address_read_helper_SPEC_CV_CV(int type, ZEND_OPC
 
 		if (RETURN_VALUE_UNUSED(&opline->result)) {
 			if (Z_REFCOUNT_P(retval) == 0) {
+				GC_REMOVE_ZVAL_FROM_BUFFER(retval);
 				zval_dtor(retval);
 				FREE_ZVAL(retval);
 			}
