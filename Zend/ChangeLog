@@ -1,3 +1,38 @@
+2008-01-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      zend_exceptions.c
+      zend_exceptions.c
+      zend_execute.c
+      zend_execute.c
+      zend_execute_API.c
+      zend_execute_API.c
+      zend_globals.h
+      zend_globals.h
+      zend_language_scanner.l
+      zend_language_scanner.l:
+      Changed exception handling. Now each op_array doesn't contain
+      ZEND_HANDLE_EXCEPTION opcode in the end
+
+    * zend_execute.c:
+      Fixed compilation warning
+
+    * zend_operators.c
+      zend_operators.c:
+      Yet another comparison optimisation for usual cases
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Eliminate unnecessary checks for INC/DEC IS_CV
+
+2008-01-21  Sara Golemon  <sara@golemon.com>
+
+    * zend_builtin_functions.c:
+      Flag safe func
+
 2008-01-15  Antony Dovgal  <tony@daylessday.org>
 
     * zend_ini.c:
