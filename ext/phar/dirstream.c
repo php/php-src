@@ -406,6 +406,11 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, char *url_from, int mode, in
 	php_url *resource = NULL;
 	uint host_len;
 
+	if (PHAR_G(readonly)) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\", write operations disabled", url_from);
+		return FAILURE;
+	}
+
 	if ((resource = phar_open_url(wrapper, url_from, "w", options TSRMLS_CC)) == NULL) {
 		return FAILURE;
 	}
@@ -505,6 +510,11 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_
 	char *plain_map;
 	php_url *resource = NULL;
 	uint host_len;
+
+	if (PHAR_G(readonly)) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rmdir directory \"%s\", write operations disabled", url);
+		return FAILURE;
+	}
 
 	if ((resource = phar_open_url(wrapper, url, "w", options TSRMLS_CC)) == NULL) {
 		return FAILURE;
