@@ -445,10 +445,16 @@ ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC) /* {{{ */
 #endif
 	Z_DELREF_PP(zval_ptr);
 	if (Z_REFCOUNT_PP(zval_ptr) == 0) {
+		GC_REMOVE_ZVAL_FROM_BUFFER(*zval_ptr);
 		zval_dtor(*zval_ptr);
 		safe_free_zval_ptr_rel(*zval_ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC);
-	} else if (Z_REFCOUNT_PP(zval_ptr) == 1) {
-		Z_UNSET_ISREF_PP(zval_ptr);
+	} else {
+		TSRMLS_FETCH();
+
+		if (Z_REFCOUNT_PP(zval_ptr) == 1) {
+			Z_UNSET_ISREF_PP(zval_ptr);
+		}
+		GC_ZVAL_CHECK_POSSIBLE_ROOT(*zval_ptr);
 	}
 }
 /* }}} */

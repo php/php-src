@@ -172,8 +172,22 @@ void zend_update_converters_error_behavior(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
+static ZEND_INI_MH(OnUpdateGCEnabled) /* {{{ */
+{
+	OnUpdateBool(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+
+	if (GC_G(gc_enabled)) {
+		gc_init(TSRMLS_C);
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+ 
 ZEND_INI_BEGIN()
 	ZEND_INI_ENTRY("error_reporting",			NULL,		ZEND_INI_ALL,		OnUpdateErrorReporting)
+
+	STD_ZEND_INI_BOOLEAN("zend.enable_gc",				"1",	ZEND_INI_ALL,		OnUpdateGCEnabled,      gc_enabled,     zend_gc_globals,        gc_globals)
 
 	/* Unicode .ini entries */
 	STD_ZEND_INI_BOOLEAN("unicode.semantics",			"0",	ZEND_INI_SYSTEM, OnUpdateBool, unicode, zend_unicode_globals, unicode_globals)
@@ -1324,6 +1338,7 @@ static void shutdown_unicode_request_globals(TSRMLS_D) /* {{{ */
 
 void zend_activate(TSRMLS_D) /* {{{ */
 {
+	gc_reset(TSRMLS_C);
 	init_unicode_request_globals(TSRMLS_C);
 	init_unicode_strings();
 	init_compiler(TSRMLS_C);
@@ -1376,6 +1391,12 @@ void zend_deactivate(TSRMLS_D) /* {{{ */
 	} zend_end_try();
 
 	zend_destroy_rsrc_list(&EG(regular_list) TSRMLS_CC);
+
+#ifdef ZEND_DEBUG
+	if (GC_G(gc_enabled) && !CG(unclean_shutdown)) {
+		gc_collect_cycles(TSRMLS_C);
+	}
+#endif
 
 	zend_try {
 		zend_ini_deactivate(TSRMLS_C);

@@ -85,6 +85,10 @@ static ZEND_FUNCTION(zend_test_func);
 static ZEND_FUNCTION(zend_thread_id);
 #endif
 #endif
+static ZEND_FUNCTION(gc_collect_cycles);
+static ZEND_FUNCTION(gc_enabled);
+static ZEND_FUNCTION(gc_enable);
+static ZEND_FUNCTION(gc_disable);
 /* }}} */
 
 #include "zend_arg_defs.c"
@@ -148,6 +152,10 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(zend_thread_id,		NULL)
 #endif
 #endif
+	ZEND_FE(gc_collect_cycles, NULL)
+	ZEND_FE(gc_enabled, NULL)
+	ZEND_FE(gc_enable, NULL)
+	ZEND_FE(gc_disable, NULL)
 	{ NULL, NULL, NULL }
 };
 /* }}} */
@@ -2323,6 +2331,39 @@ ZEND_FUNCTION(get_extension_funcs)
 		add_next_index_ascii_string(return_value, func->fname, 1);
 		func++;
 	}
+}
+/* }}} */
+
+/* {{{ proto int gc_collect_cycles(void)
+   Forces collection of any existing garbage cycles.
+   Returns number of freed zvals */
+ZEND_FUNCTION(gc_collect_cycles)
+{
+	RETURN_LONG(gc_collect_cycles(TSRMLS_C));
+}
+/* }}} */
+
+/* {{{ proto void gc_enabled(void)
+   Returns status of the circular reference collector */
+ZEND_FUNCTION(gc_enabled)
+{
+	RETURN_BOOL(GC_G(gc_enabled));
+}
+/* }}} */
+
+/* {{{ proto void gc_enable(void)
+   Activates the circular reference collector */
+ZEND_FUNCTION(gc_enable)
+{
+	zend_alter_ini_entry("zend.enable_gc", sizeof("zend.enable_gc"), "1", sizeof("1")-1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+}
+/* }}} */
+
+/* {{{ proto void gc_disable(void)
+   Deactivates the circular reference collector */
+ZEND_FUNCTION(gc_disable)
+{
+	zend_alter_ini_entry("zend.enable_gc", sizeof("zend.enable_gc"), "0", sizeof("0")-1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
 }
 /* }}} */
 

@@ -349,6 +349,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
+						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 						FREE_ZVAL(z);
 					}
@@ -587,6 +588,7 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR|
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -677,6 +679,7 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
+					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 					FREE_ZVAL(z);
 				}
@@ -1262,6 +1265,7 @@ ZEND_VM_HELPER_EX(zend_fetch_property_address_read_helper, VAR|UNUSED|CV, CONST|
 
 		if (RETURN_VALUE_UNUSED(&opline->result)) {
 			if (Z_REFCOUNT_P(retval) == 0) {
+				GC_REMOVE_ZVAL_FROM_BUFFER(retval);
 				zval_dtor(retval);
 				FREE_ZVAL(retval);
 			}

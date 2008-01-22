@@ -65,7 +65,7 @@ static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_
 
 #define TEMP_VAR_STACK_LIMIT 2000
 
-static inline void zend_pzval_unlock_func(zval *z, zend_free_op *should_free, int unref) /* {{{ */
+static inline void zend_pzval_unlock_func(zval *z, zend_free_op *should_free, int unref TSRMLS_DC) /* {{{ */
 {
 	if (!Z_DELREF_P(z)) {
 		Z_SET_REFCOUNT_P(z, 1);
@@ -77,6 +77,7 @@ static inline void zend_pzval_unlock_func(zval *z, zend_free_op *should_free, in
 		if (unref && Z_ISREF_P(z) && Z_REFCOUNT_P(z) == 1) {
 			Z_UNSET_ISREF_P(z);
 		}
+		GC_ZVAL_CHECK_POSSIBLE_ROOT(z);
 	}
 }
 /* }}} */
@@ -84,14 +85,15 @@ static inline void zend_pzval_unlock_func(zval *z, zend_free_op *should_free, in
 static inline void zend_pzval_unlock_free_func(zval *z) /* {{{ */
 {
 	if (!Z_DELREF_P(z)) {
+		GC_REMOVE_ZVAL_FROM_BUFFER(z);
 		zval_dtor(z);
 		safe_free_zval_ptr(z);
 	}
 }
 /* }}} */
 
-#define PZVAL_UNLOCK(z, f) zend_pzval_unlock_func(z, f, 1)
-#define PZVAL_UNLOCK_EX(z, f, u) zend_pzval_unlock_func(z, f, u)
+#define PZVAL_UNLOCK(z, f) zend_pzval_unlock_func(z, f, 1 TSRMLS_CC)
+#define PZVAL_UNLOCK_EX(z, f, u) zend_pzval_unlock_func(z, f, u TSRMLS_CC)
 #define PZVAL_UNLOCK_FREE(z) zend_pzval_unlock_free_func(z)
 #define PZVAL_LOCK(z) Z_ADDREF_P((z))
 #define RETURN_VALUE_UNUSED(pzn)	(((pzn)->u.EA.type & EXT_TYPE_UNUSED))
@@ -792,6 +794,7 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 				} else {
 					Z_ADDREF_P(value);
 					*variable_ptr_ptr = value;
+					GC_REMOVE_ZVAL_FROM_BUFFER(variable_ptr);
 					zendi_zval_dtor(*variable_ptr);
 					safe_free_zval_ptr(variable_ptr);
 					return value;
