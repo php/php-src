@@ -74,8 +74,21 @@ static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
 }
 /* }}} */
 
+static ZEND_INI_MH(OnUpdateGCEnabled) /* {{{ */
+{
+	OnUpdateBool(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+
+	if (GC_G(gc_enabled)) {
+		gc_init(TSRMLS_C);
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 ZEND_INI_BEGIN()
 	ZEND_INI_ENTRY("error_reporting",				NULL,		ZEND_INI_ALL,		OnUpdateErrorReporting)
+	STD_ZEND_INI_BOOLEAN("zend.enable_gc",				"1",	ZEND_INI_ALL,		OnUpdateGCEnabled,      gc_enabled,     zend_gc_globals,        gc_globals)
 	STD_ZEND_INI_BOOLEAN("zend.ze1_compatibility_mode",	"0",	ZEND_INI_ALL,		OnUpdateBool,	ze1_compatibility_mode,	zend_executor_globals,	executor_globals)
 #ifdef ZEND_MULTIBYTE
 	STD_ZEND_INI_BOOLEAN("detect_unicode", "1", ZEND_INI_ALL, OnUpdateBool, detect_unicode, zend_compiler_globals, compiler_globals)
@@ -822,6 +835,7 @@ ZEND_API char *get_zend_version(void) /* {{{ */
 
 void zend_activate(TSRMLS_D) /* {{{ */
 {
+	gc_reset(TSRMLS_C);
 	init_compiler(TSRMLS_C);
 	init_executor(TSRMLS_C);
 	startup_scanner(TSRMLS_C);
@@ -870,6 +884,12 @@ void zend_deactivate(TSRMLS_D) /* {{{ */
 	} zend_end_try();
 
 	zend_destroy_rsrc_list(&EG(regular_list) TSRMLS_CC);
+
+#ifdef ZEND_DEBUG
+	if (GC_G(gc_enabled) && !CG(unclean_shutdown)) {
+		gc_collect_cycles(TSRMLS_C);
+	}
+#endif
 
 	zend_try {
 		zend_ini_deactivate(TSRMLS_C);

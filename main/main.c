@@ -1703,6 +1703,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor) php_win32_core_globals_ctor, (ts_allocate_dtor) php_win32_core_globals_dtor);
 #endif
 #endif
+	gc_globals_ctor(TSRMLS_C);
+
 	EG(bailout) = NULL;
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
 
@@ -1904,6 +1906,7 @@ void php_module_shutdown(TSRMLS_D)
 	zend_ini_shutdown(TSRMLS_C);
 	shutdown_memory_manager(CG(unclean_shutdown), 1 TSRMLS_CC);
 	core_globals_dtor(&core_globals TSRMLS_CC);
+	gc_globals_dtor(TSRMLS_C);
 #else
 	zend_ini_global_shutdown(TSRMLS_C);
 	ts_free_id(core_globals_id);

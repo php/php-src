@@ -709,6 +709,7 @@ END_EXTERN_C()
 
 #define ZEND_MAX_RESERVED_RESOURCES	4
 
+#include "zend_gc.h"
 #include "zend_operators.h"
 #include "zend_variables.h"
 

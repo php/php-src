@@ -84,6 +84,8 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 		if (objects->object_buckets[i].valid) {
 			struct _store_object *obj = &objects->object_buckets[i].bucket.obj;
 
+			GC_REMOVE_ZOBJ_FROM_BUFFER(obj);
+
 			objects->object_buckets[i].valid = 0;
 			if (obj->free_storage) {
 				obj->free_storage(obj->object TSRMLS_CC);
@@ -116,6 +118,7 @@ ZEND_API zend_object_handle zend_objects_store_put(void *object, zend_objects_st
 	EG(objects_store).object_buckets[handle].valid = 1;
 
 	obj->refcount = 1;
+	GC_OBJ_INIT(obj);
 	obj->object = object;
 	obj->dtor = dtor?dtor:(zend_objects_store_dtor_t)zend_objects_destroy_object;
 	obj->free_storage = free_storage;
@@ -167,6 +170,8 @@ ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC)
 	Z_ADDREF_P(zobject);
 	zend_objects_store_del_ref_by_handle(handle TSRMLS_CC);
 	Z_DELREF_P(zobject);
+
+	GC_ZOBJ_CHECK_POSSIBLE_ROOT(zobject);
 }
 
 /*
@@ -201,6 +206,7 @@ ZEND_API void zend_objects_store_del_ref_by_handle(zend_object_handle handle TSR
 				}
 			}
 			if (obj->refcount == 1) {
+				GC_REMOVE_ZOBJ_FROM_BUFFER(obj);
 				if (obj->free_storage) {
 					zend_try {
 						obj->free_storage(obj->object TSRMLS_CC);

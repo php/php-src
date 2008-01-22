@@ -38,6 +38,7 @@ typedef struct _zend_object_store_bucket {
 			zend_objects_free_object_storage_t free_storage;
 			zend_objects_store_clone_t clone;
 			zend_uint refcount;
+			gc_root_buffer *buffered;
 		} obj;
 		struct {
 			int next;
