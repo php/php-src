@@ -480,7 +480,7 @@ size_t mysqlnd_read_body(MYSQLND *conn, zend_uchar *buf, size_t size TSRMLS_DC)
 {
 	size_t ret;
 	char *p = (char *)buf;
-	int iter = 0;
+	unsigned int iter = 0;
 	MYSQLND_NET *net = &conn->net;
 	size_t old_chunk_size = net->stream->chunk_size;
 
@@ -502,7 +502,7 @@ size_t mysqlnd_read_body(MYSQLND *conn, zend_uchar *buf, size_t size TSRMLS_DC)
 
 #ifdef MYSQLND_DUMP_HEADER_N_BODY_FULL
 	{
-		int i;
+		unsigned int i;
 		DBG_INF_FMT("BODY: requested=%d last_read=%3d", p - (char*)buf, ret);
 		for (i = 0 ; i < p - (char*)buf; i++) {
 			if (i && (i % 30 == 0)) {
@@ -746,7 +746,7 @@ php_mysqlnd_ok_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	zend_uchar buf[1024];
 	zend_uchar *p = buf;
 	zend_uchar *begin = buf;
-	int i;
+	unsigned long i;
 	register php_mysql_packet_ok *packet= (php_mysql_packet_ok *) _packet;
 
 	DBG_ENTER("php_mysqlnd_ok_read");
@@ -1068,7 +1068,8 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	zend_uchar *p = buf;
 	zend_uchar *begin = buf;
 	char *root_ptr;
-	size_t buf_len = conn->net.cmd_buffer.length, len, total_len = 0;
+	size_t buf_len = conn->net.cmd_buffer.length, total_len = 0;
+	unsigned long len;
 	MYSQLND_FIELD *meta;
 	unsigned int i, field_count = sizeof(rset_field_offsets)/sizeof(size_t);
 
@@ -1309,7 +1310,7 @@ static
 void php_mysqlnd_rowp_read_binary_protocol(php_mysql_packet_row *packet, MYSQLND *conn,
 										   zend_uchar *p, size_t data_size TSRMLS_DC)
 {
-	int i;
+	unsigned int i;
 	zend_uchar *null_ptr, bit;
 	zval **current_field, **end_field, **start_field;
 	zend_bool as_unicode = conn->options.numeric_and_datetime_as_unicode;
@@ -1348,7 +1349,7 @@ void php_mysqlnd_rowp_read_binary_protocol(php_mysql_packet_row *packet, MYSQLND
 												  0, &p, as_unicode TSRMLS_CC);
 		}
 		if (!((bit<<=1) & 255)) {
-			bit= 1;					/* To next byte */
+			bit = 1;	/* to the following byte */
 			null_ptr++;
 		}
 	}
@@ -1365,7 +1366,7 @@ static
 void php_mysqlnd_rowp_read_text_protocol(php_mysql_packet_row *packet, MYSQLND *conn,
 										 zend_uchar *p, size_t data_size TSRMLS_DC)
 {
-	int i;
+	unsigned int i;
 	zend_bool last_field_was_string;
 	zval **current_field, **end_field, **start_field;
 	zend_uchar *bit_area = packet->row_buffer + data_size + 1; /* we allocate from here */

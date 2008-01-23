@@ -28,7 +28,7 @@
 #define MYSQL_STMT				MYSQLND_STMT
 #define MYSQL_FIELD				MYSQLND_FIELD
 #define MYSQL_RES				MYSQLND_RES
-#define MYSQL_ROW				MYSQLND_ROW
+#define MYSQL_ROW				MYSQLND_ROW_C
 #define MYSQL					MYSQLND
 #define my_bool					zend_bool
 #define my_ulonglong			uint64
@@ -58,7 +58,7 @@
 #define mysql_fetch_field(r)			mysqlnd_fetch_field((r))
 #define mysql_fetch_field_direct(r,o)	mysqlnd_fetch_field_direct((r), (o))
 #define mysql_fetch_lengths(r)			mysqlnd_fetch_lengths((r))
-#define mysql_fetch_row(r)				mysqlnd_fetch_row((r))
+#define mysql_fetch_row(r)				mysqlnd_fetch_row_c((r))
 #define mysql_field_count(r)			mysqlnd_field_count((r))
 #define mysql_field_seek(r,o)			mysqlnd_field_seek((r), (o))
 #define mysql_field_tell(r)				mysqlnd_field_tell((r))
