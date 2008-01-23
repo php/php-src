@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 
 - Fixed faulty fix for bug #40189 (endless loop in zlib.inflate stream filter). 
   (Greg)
+- Fixed bug #43912 (Interbase column names are truncated to 31 characters).
+  (Ilia)
 - Fixed bug #43875 (Two error messages returned for $new and $flag argument
   in mysql_connect()). (Hannes)
 - Fixed bug #43863 (str_word_count() breaks on cyrillic "ya" in locale cp1251).
