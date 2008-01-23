@@ -940,17 +940,17 @@ static char *date_format(char *format, int format_len, int *return_len, timelib_
 					  break;
 			case 'T': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%s", localtime ? offset->abbr : "GMT"); break;
 			case 'e': if (!localtime) {
-					      length = date_spprintf(&buffer, 32, "%s", "UTC");
+					      length = date_spprintf(&buffer, 32 TSRMLS_CC, "%s", "UTC");
 					  } else {
 						  switch (t->zone_type) {
 							  case TIMELIB_ZONETYPE_ID:
-								  length = date_spprintf(&buffer, 32, "%s", t->tz_info->name);
+								  length = date_spprintf(&buffer, 32 TSRMLS_CC, "%s", t->tz_info->name);
 								  break;
 							  case TIMELIB_ZONETYPE_ABBR:
-								  length = date_spprintf(&buffer, 32, "%s", offset->abbr);
+								  length = date_spprintf(&buffer, 32 TSRMLS_CC, "%s", offset->abbr);
 								  break;
 							  case TIMELIB_ZONETYPE_OFFSET:
-								  length = date_spprintf(&buffer, 32, "%c%02d:%02d",
+								  length = date_spprintf(&buffer, 32 TSRMLS_CC, "%c%02d:%02d",
 												((offset->offset < 0) ? '-' : '+'),
 												abs(offset->offset / 3600),
 												abs((offset->offset % 3600) / 60)
