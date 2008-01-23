@@ -1,3 +1,170 @@
+2008-01-22  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      NEWS
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug37076.phpt:
+      - MFH Bugfix #37076 (SimpleXML ignores .=). (felipe, marcus)
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug37076.phpt
+      ext/simplexml/tests/bug37076.phpt:
+      - Bugfix #37076 (SimpleXML ignores .=). (felipe, marcus)
+
+2008-01-22  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/spl/spl_dllist.c:
+      MFH: Typos (Dan Scott)
+      ctor inside the structure. dtor/ctor used on push/pop for better potential
+      interoperability
+
+    * NEWS
+      ext/spl/spl_dllist.c:
+      News: already in 5_3
+      Typos (Dan Scott)
+      ctor inside the structure. dtor/ctor used on push/pop for better potential
+      interoperability
+
+2008-01-22  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/strpos_number.phpt
+      ext/standard/tests/strings/strpos_number.phpt:
+      add new test
+
+    * ext/standard/tests/strings/strpos_number.phpt
+      ext/standard/tests/strings/strpos_number.phpt
+      ext/standard/tests/strings/strpos_number.phpt:
+        1.1.4;
+      new test by Lars Strojny
+
+2008-01-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/gc_001.phpt
+      ZendEngine2/tests/gc_001.phpt
+      ZendEngine2/tests/gc_002.phpt
+      ZendEngine2/tests/gc_002.phpt
+      ZendEngine2/tests/gc_003.phpt
+      ZendEngine2/tests/gc_003.phpt
+      ZendEngine2/tests/gc_004.phpt
+      ZendEngine2/tests/gc_004.phpt
+      ZendEngine2/tests/gc_005.phpt
+      ZendEngine2/tests/gc_005.phpt
+      ZendEngine2/tests/gc_006.phpt
+      ZendEngine2/tests/gc_006.phpt
+      ZendEngine2/tests/gc_007.phpt
+      ZendEngine2/tests/gc_007.phpt
+      ZendEngine2/tests/gc_008.phpt
+      ZendEngine2/tests/gc_008.phpt
+      ZendEngine2/tests/gc_009.phpt
+      ZendEngine2/tests/gc_009.phpt
+      ZendEngine2/tests/gc_010.phpt
+      ZendEngine2/tests/gc_010.phpt
+      ZendEngine2/tests/gc_011.phpt
+      ZendEngine2/tests/gc_011.phpt
+      ZendEngine2/tests/gc_012.phpt
+      ZendEngine2/tests/gc_012.phpt
+      ZendEngine2/tests/gc_013.phpt
+      ZendEngine2/tests/gc_013.phpt
+      ZendEngine2/tests/gc_014.phpt
+      ZendEngine2/tests/gc_014.phpt
+      ZendEngine2/tests/gc_015.phpt
+      ZendEngine2/tests/gc_015.phpt
+      ZendEngine2/tests/gc_016.phpt
+      ZendEngine2/tests/gc_016.phpt
+      ZendEngine2/tests/gc_017.phpt
+      ZendEngine2/tests/gc_017.phpt
+      ZendEngine2/tests/gc_018.phpt
+      ZendEngine2/tests/gc_018.phpt
+      ZendEngine2/tests/gc_019.phpt
+      ZendEngine2/tests/gc_019.phpt
+      ZendEngine2/tests/gc_020.phpt
+      ZendEngine2/tests/gc_020.phpt
+      ZendEngine2/tests/gc_021.phpt
+      ZendEngine2/tests/gc_021.phpt
+      ZendEngine2/tests/gc_022.phpt
+      ZendEngine2/tests/gc_022.phpt
+      ZendEngine2/tests/gc_023.phpt
+      ZendEngine2/tests/gc_023.phpt
+      ZendEngine2/tests/gc_024.phpt
+      ZendEngine2/tests/gc_024.phpt
+      ZendEngine2/tests/gc_025.phpt
+      ZendEngine2/tests/gc_025.phpt
+      ZendEngine2/tests/gc_026.phpt
+      ZendEngine2/tests/gc_026.phpt
+      main/main.c:
+      
+      file gc_001.phpt was initially added on branch PHP_5_3.
+
+    * ZendEngine2/zend_gc.c
+      ZendEngine2/zend_gc.c
+      ZendEngine2/zend_gc.h
+      ZendEngine2/zend_gc.h
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.h
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      
+      file zend_gc.c was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      configure.in
+      configure.in
+      ZendEngine2/zend.c
+      ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_gc.c
+      ZendEngine2/zend_gc.h
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.h
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/gc_001.phpt
+      ZendEngine2/tests/gc_002.phpt
+      ZendEngine2/tests/gc_003.phpt
+      ZendEngine2/tests/gc_004.phpt
+      ZendEngine2/tests/gc_005.phpt
+      ZendEngine2/tests/gc_006.phpt
+      ZendEngine2/tests/gc_007.phpt
+      ZendEngine2/tests/gc_008.phpt
+      ZendEngine2/tests/gc_009.phpt
+      ZendEngine2/tests/gc_010.phpt
+      ZendEngine2/tests/gc_011.phpt
+      ZendEngine2/tests/gc_012.phpt
+      ZendEngine2/tests/gc_013.phpt
+      ZendEngine2/tests/gc_014.phpt
+      ZendEngine2/tests/gc_015.phpt
+      ZendEngine2/tests/gc_016.phpt
+      ZendEngine2/tests/gc_017.phpt
+      ZendEngine2/tests/gc_018.phpt
+      ZendEngine2/tests/gc_019.phpt
+      ZendEngine2/tests/gc_020.phpt
+      ZendEngine2/tests/gc_021.phpt
+      ZendEngine2/tests/gc_022.phpt
+      ZendEngine2/tests/gc_023.phpt
+      ZendEngine2/tests/gc_024.phpt
+      ZendEngine2/tests/gc_025.phpt
+      ZendEngine2/tests/gc_026.phpt
+      main/main.c:
+      Added garbage collector
+
+2008-01-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/standard/string.c:
+      use new param parsing API
+
 2008-01-21  Etienne Kneuss  <php@colder.ch>
 
     * (PHP_5_3)
