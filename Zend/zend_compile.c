@@ -341,16 +341,20 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 	zend_op *opline_ptr;
 	zend_llist *fetch_list_ptr;
 
-	if (varname->op_type == IS_CONST && varname->u.constant.type == IS_STRING &&
-	    !zend_is_auto_global(varname->u.constant.value.str.val, varname->u.constant.value.str.len TSRMLS_CC) &&
-	    !(varname->u.constant.value.str.len == (sizeof("this")-1) &&
-	      !memcmp(varname->u.constant.value.str.val, "this", sizeof("this"))) &&
-	    (CG(active_op_array)->last == 0 ||
-	     CG(active_op_array)->opcodes[CG(active_op_array)->last-1].opcode != ZEND_BEGIN_SILENCE)) {
-		result->op_type = IS_CV;
-		result->u.var = lookup_cv(CG(active_op_array), varname->u.constant.value.str.val, varname->u.constant.value.str.len);
-		result->u.EA.type = 0;
-		return;
+	if (varname->op_type == IS_CONST) {
+		if (Z_TYPE(varname->u.constant) != IS_STRING) {
+			convert_to_string(&varname->u.constant);
+		}
+		if (!zend_is_auto_global(varname->u.constant.value.str.val, varname->u.constant.value.str.len TSRMLS_CC) &&
+		    !(varname->u.constant.value.str.len == (sizeof("this")-1) &&
+		      !memcmp(varname->u.constant.value.str.val, "this", sizeof("this"))) &&
+		    (CG(active_op_array)->last == 0 ||
+		     CG(active_op_array)->opcodes[CG(active_op_array)->last-1].opcode != ZEND_BEGIN_SILENCE)) {
+			result->op_type = IS_CV;
+			result->u.var = lookup_cv(CG(active_op_array), varname->u.constant.value.str.val, varname->u.constant.value.str.len);
+			result->u.EA.type = 0;
+			return;
+		}
 	}
 
 	if (bp) {
@@ -3949,6 +3953,12 @@ void zend_do_fetch_static_variable(znode *varname, znode *static_assignment, int
 	}
 	zend_hash_update(CG(active_op_array)->static_variables, varname->u.constant.value.str.val, varname->u.constant.value.str.len+1, &tmp, sizeof(zval *), NULL);
 
+	if (varname->op_type == IS_CONST) {
+		if (Z_TYPE(varname->u.constant) != IS_STRING) {
+			convert_to_string(&varname->u.constant);
+		}
+	}
+
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_FETCH_W;		/* the default mode must be Write, since fetch_simple_variable() is used to define function arguments */
 	opline->result.op_type = IS_VAR;
@@ -3975,6 +3985,12 @@ void zend_do_fetch_global_variable(znode *varname, znode *static_assignment, int
 	zend_op *opline;
 	znode lval;
 	znode result;
+
+	if (varname->op_type == IS_CONST) {
+		if (Z_TYPE(varname->u.constant) != IS_STRING) {
+			convert_to_string(&varname->u.constant);
+		}
+	}
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_FETCH_W;		/* the default mode must be Write, since fetch_simple_variable() is used to define function arguments */

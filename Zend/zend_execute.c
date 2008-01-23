@@ -325,7 +325,7 @@ static inline zval **_get_zval_ptr_ptr(znode *node, temp_variable *Ts, zend_free
 
 static inline zval *_get_obj_zval_ptr_unused(TSRMLS_D)
 {
-	if (EG(This)) {
+	if (EXPECTED(EG(This) != NULL)) {
 		return EG(This);
 	} else {
 		zend_error_noreturn(E_ERROR, "Using $this when not in object context");
@@ -336,7 +336,7 @@ static inline zval *_get_obj_zval_ptr_unused(TSRMLS_D)
 static inline zval **_get_obj_zval_ptr_ptr(znode *op, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC)
 {
 	if (op->op_type == IS_UNUSED) {
-		if (EG(This)) {
+		if (EXPECTED(EG(This) != NULL)) {
 			/* this should actually never be modified, _ptr_ptr is modified only when
 			   the object is empty */
 			should_free->var = 0;
@@ -350,7 +350,7 @@ static inline zval **_get_obj_zval_ptr_ptr(znode *op, temp_variable *Ts, zend_fr
 
 static inline zval **_get_obj_zval_ptr_ptr_unused(TSRMLS_D)
 {
-	if (EG(This)) {
+	if (EXPECTED(EG(This) != NULL)) {
 		return &EG(This);
 	} else {
 		zend_error_noreturn(E_ERROR, "Using $this when not in object context");
@@ -361,7 +361,7 @@ static inline zval **_get_obj_zval_ptr_ptr_unused(TSRMLS_D)
 static inline zval *_get_obj_zval_ptr(znode *op, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC)
 {
 	if (op->op_type == IS_UNUSED) {
-		if (EG(This)) {
+		if (EXPECTED(EG(This) != NULL)) {
 			should_free->var = 0;
 			return EG(This);
 		} else {
@@ -392,16 +392,8 @@ static inline void zend_switch_free(temp_variable *T, int type, int extended_val
 
 static void zend_assign_to_variable_reference(zval **variable_ptr_ptr, zval **value_ptr_ptr TSRMLS_DC)
 {
-	zval *variable_ptr;
-	zval *value_ptr;
-
-	if (!value_ptr_ptr || !variable_ptr_ptr) {
-		zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
-		return;
-	}
-
-	variable_ptr = *variable_ptr_ptr;
-	value_ptr = *value_ptr_ptr;
+	zval *variable_ptr = *variable_ptr_ptr;
+	zval *value_ptr = *value_ptr_ptr;
 
 	if (variable_ptr == EG(error_zval_ptr) || value_ptr==EG(error_zval_ptr)) {
 		variable_ptr_ptr = &EG(uninitialized_zval_ptr);
@@ -537,10 +529,6 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, zval 
 	zend_free_op free_value;
 	zval *value = get_zval_ptr(value_op, Ts, &free_value, BP_VAR_R);
 	zval **retval = &T(result->u.var).var.ptr;
-
-	if (!object_ptr) {
-		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
-	}
 
 	if (Z_TYPE_P(*object_ptr) != IS_OBJECT) {
 		if (*object_ptr == EG(error_zval_ptr)) {
@@ -900,6 +888,7 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, zval *dim
 	zval **retval;
 	char *offset_key;
 	int offset_key_length;
+	long index;
 
 	switch (dim->type) {
 		case IS_NULL:
@@ -939,38 +928,36 @@ fetch_string_dim:
 			zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", Z_LVAL_P(dim), Z_LVAL_P(dim));
 			/* Fall Through */
 		case IS_DOUBLE:
+			index = (long)Z_DVAL_P(dim);
+			goto num_index;
+
 		case IS_BOOL:
-		case IS_LONG: {
-				long index;
-
-				if (Z_TYPE_P(dim) == IS_DOUBLE) {
-					index = (long)Z_DVAL_P(dim);
-				} else {
-					index = Z_LVAL_P(dim);
-				}
-				if (zend_hash_index_find(ht, index, (void **) &retval) == FAILURE) {
-					switch (type) {
-						case BP_VAR_R:
-							zend_error(E_NOTICE,"Undefined offset:  %ld", index);
-							/* break missing intentionally */
-						case BP_VAR_UNSET:
-						case BP_VAR_IS:
-							retval = &EG(uninitialized_zval_ptr);
-							break;
-						case BP_VAR_RW:
-							zend_error(E_NOTICE,"Undefined offset:  %ld", index);
-							/* break missing intentionally */
-						case BP_VAR_W: {
-							zval *new_zval = &EG(uninitialized_zval);
-
-							Z_ADDREF_P(new_zval);
-							zend_hash_index_update(ht, index, &new_zval, sizeof(zval *), (void **) &retval);
-						}
+		case IS_LONG:
+			index = Z_LVAL_P(dim);
+num_index:
+			if (zend_hash_index_find(ht, index, (void **) &retval) == FAILURE) {
+				switch (type) {
+					case BP_VAR_R:
+						zend_error(E_NOTICE,"Undefined offset:  %ld", index);
+						/* break missing intentionally */
+					case BP_VAR_UNSET:
+					case BP_VAR_IS:
+						retval = &EG(uninitialized_zval_ptr);
 						break;
+					case BP_VAR_RW:
+						zend_error(E_NOTICE,"Undefined offset:  %ld", index);
+						/* break missing intentionally */
+					case BP_VAR_W: {
+						zval *new_zval = &EG(uninitialized_zval);
+
+						Z_ADDREF_P(new_zval);
+						zend_hash_index_update(ht, index, &new_zval, sizeof(zval *), (void **) &retval);
 					}
+					break;
 				}
 			}
 			break;
+
 		default:
 			zend_error(E_WARNING, "Illegal offset type");
 			switch (type) {
@@ -990,14 +977,8 @@ fetch_string_dim:
 
 static void zend_fetch_dimension_address(temp_variable *result, zval **container_ptr, zval *dim, int dim_is_tmp_var, int type TSRMLS_DC)
 {
-	zval *container;
+	zval *container = *container_ptr;;
 	zval **retval;
-
-	if (!container_ptr) {
-		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
-	}
-
-	container = *container_ptr;
 
 	switch (Z_TYPE_P(container)) {
 
@@ -1019,19 +1000,15 @@ fetch_from_array:
 			} else {
 				retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, type TSRMLS_CC);
 			}
-			if (result) {
-				result->var.ptr_ptr = retval;
-				PZVAL_LOCK(*retval);
-			}
+			result->var.ptr_ptr = retval;
+			PZVAL_LOCK(*retval);
 			return;
 			break;
 
 		case IS_NULL:
 			if (container == EG(error_zval_ptr)) {
-				if (result) {
-					result->var.ptr_ptr = &EG(error_zval_ptr);
-					PZVAL_LOCK(EG(error_zval_ptr));
-				}
+				result->var.ptr_ptr = &EG(error_zval_ptr);
+				PZVAL_LOCK(EG(error_zval_ptr));
 			} else if (type != BP_VAR_UNSET) {
 convert_to_array:
 				if (!PZVAL_IS_REF(container)) {
@@ -1041,8 +1018,8 @@ convert_to_array:
 				zval_dtor(container);
 				array_init(container);
 				goto fetch_from_array;
-			} else if (result) {
-				/* for read-mode only */			
+			} else {
+				/* for read-mode only */
 				result->var.ptr_ptr = &EG(uninitialized_zval_ptr);
 				PZVAL_LOCK(EG(uninitialized_zval_ptr));
 			}
@@ -1081,14 +1058,12 @@ convert_to_array:
 				if (type != BP_VAR_UNSET) {
 					SEPARATE_ZVAL_IF_NOT_REF(container_ptr);
 				}
-				if (result) {
-					container = *container_ptr;
-					result->str_offset.str = container;
-					PZVAL_LOCK(container);
-					result->str_offset.offset = Z_LVAL_P(dim);
-					result->var.ptr_ptr = NULL;
-					result->var.ptr = NULL;
-				}
+				container = *container_ptr;
+				result->str_offset.str = container;
+				PZVAL_LOCK(container);
+				result->str_offset.offset = Z_LVAL_P(dim);
+				result->var.ptr_ptr = NULL;
+				result->var.ptr = NULL;
 				return;
 			}
 			break;
@@ -1126,14 +1101,8 @@ convert_to_array:
 				} else {
 					retval = &EG(error_zval_ptr);
 				}
-				if (result) {
-					AI_SET_PTR(result->var, *retval);
-					PZVAL_LOCK(*retval);
-				} else if (Z_REFCOUNT_PP(retval) == 0) {
-					/* Destroy unused result from offsetGet() magic method */
-					Z_SET_REFCOUNT_PP(retval, 1);
-					zval_ptr_dtor(retval);
-				}
+				AI_SET_PTR(result->var, *retval);
+				PZVAL_LOCK(*retval);
 				if (dim_is_tmp_var) {
 					zval_ptr_dtor(&dim);
 				}
@@ -1150,16 +1119,12 @@ convert_to_array:
 		default:
 			if (type == BP_VAR_UNSET) {
 				zend_error(E_WARNING, "Cannot unset offset in a non-array variable");
-				if (result) {
-					AI_SET_PTR(result->var, EG(uninitialized_zval_ptr));
-					PZVAL_LOCK(EG(uninitialized_zval_ptr));
-				}
+				AI_SET_PTR(result->var, EG(uninitialized_zval_ptr));
+				PZVAL_LOCK(EG(uninitialized_zval_ptr));
 			} else {
 				zend_error(E_WARNING, "Cannot use a scalar value as an array");
-				if (result) {
-					result->var.ptr_ptr = &EG(error_zval_ptr);
-					PZVAL_LOCK(EG(error_zval_ptr));
-				}
+				result->var.ptr_ptr = &EG(error_zval_ptr);
+				PZVAL_LOCK(EG(error_zval_ptr));
 			}
 			break;
 	}
@@ -1167,14 +1132,9 @@ convert_to_array:
 
 static void zend_fetch_dimension_address_read(temp_variable *result, zval **container_ptr, zval *dim, int dim_is_tmp_var, int type TSRMLS_DC)
 {
-	zval *container;
+	zval *container = *container_ptr;
 	zval **retval;
 
-	if (!container_ptr) {
-		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
-	}
-
-	container = *container_ptr;
 	switch (Z_TYPE_P(container)) {
 
 		case IS_ARRAY:
@@ -1292,24 +1252,12 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 
 static void zend_fetch_property_address(temp_variable *result, zval **container_ptr, zval *prop_ptr, int type TSRMLS_DC)
 {
-	zval *container;
+	zval *container = *container_ptr;;
 
-	if (!container_ptr) {
-		zend_error(E_WARNING, "Cannot use string offset as an array");
-		if (result) {
-			result->var.ptr_ptr = &EG(error_zval_ptr);
-			PZVAL_LOCK(*result->var.ptr_ptr);
-		}
-		return;
-	}
-
-	container = *container_ptr;
 	if (Z_TYPE_P(container) != IS_OBJECT) {
 		if (container == EG(error_zval_ptr)) {
-			if (result) {
-				result->var.ptr_ptr = &EG(error_zval_ptr);
-				PZVAL_LOCK(*result->var.ptr_ptr);
-			}
+			result->var.ptr_ptr = &EG(error_zval_ptr);
+			PZVAL_LOCK(*result->var.ptr_ptr);
 			return;
 		}
 
@@ -1324,10 +1272,8 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 			}
 			object_init(container);
 		} else {
-			if (result) {
-				result->var.ptr_ptr = &EG(error_zval_ptr);
-				PZVAL_LOCK(EG(error_zval_ptr));
-			}
+			result->var.ptr_ptr = &EG(error_zval_ptr);
+			PZVAL_LOCK(EG(error_zval_ptr));
 			return;
 		}
 	}
@@ -1339,30 +1285,24 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 
 			if (Z_OBJ_HT_P(container)->read_property &&
 				(ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type TSRMLS_CC)) != NULL) {
-				if (result) {
-					AI_SET_PTR(result->var, ptr);
-					PZVAL_LOCK(ptr);
-				}
+				AI_SET_PTR(result->var, ptr);
+				PZVAL_LOCK(ptr);
 			} else {
-				zend_error(E_ERROR, "Cannot access undefined property for object with overloaded property access");
+				zend_error_noreturn(E_ERROR, "Cannot access undefined property for object with overloaded property access");
 			}
-		} else if (result) {
+		} else {
 			result->var.ptr_ptr = ptr_ptr;
 			PZVAL_LOCK(*ptr_ptr);
 		}
 	} else if (Z_OBJ_HT_P(container)->read_property) {
 		zval *ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type TSRMLS_CC);
 
-		if (result) {
-			AI_SET_PTR(result->var, ptr);
-			PZVAL_LOCK(ptr);
-		}
+		AI_SET_PTR(result->var, ptr);
+		PZVAL_LOCK(ptr);
 	} else {
 		zend_error(E_WARNING, "This object doesn't support property references");
-		if (result) {
-			result->var.ptr_ptr = &EG(error_zval_ptr);
-			PZVAL_LOCK(EG(error_zval_ptr));
-		}
+		result->var.ptr_ptr = &EG(error_zval_ptr);
+		PZVAL_LOCK(EG(error_zval_ptr));
 	}
 }
 
