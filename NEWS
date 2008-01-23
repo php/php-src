@@ -84,6 +84,8 @@ PHP                                                                        NEWS
 - Fixed possible crash in ext/soap because of uninitialized value. (Zdash Urf)
 
 - Fixed bug #43808 (date_create never fails (even when it should)). (Derick)
+- Fixed bug #43559 (array_merge_recursive() doesn't behave as expected with 
+  duplicate NULL values). (Felipe, Tony)
 - Fixed bug #43527 (DateTime created from a timestamp reports environment
   timezone). (Derick)
 - Fixed bug #43075 (Support 2007-11-01T24:00:00+00:00). (Derick)
