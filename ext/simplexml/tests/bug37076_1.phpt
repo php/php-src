@@ -8,6 +8,9 @@ print $xml->asXML();
 ?>
 ===DONE===
 --EXPECT--
+Warning: main(): Cannot write or create unnamed element in %s on line %d
+
+Warning: main(): Cannot write or create unnamed element in %s on line %d
 <?xml version="1.0"?>
 <root><foo/></root>
 ===DONE===
