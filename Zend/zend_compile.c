@@ -390,9 +390,11 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 	zend_bool is_auto_global = 0;
 	zend_auto_global *auto_global;
 
-	if (varname->op_type == IS_CONST &&
-	    (Z_TYPE(varname->u.constant) == IS_STRING ||
-	     Z_TYPE(varname->u.constant) == IS_UNICODE)) {
+	if (varname->op_type == IS_CONST) {
+		if (Z_TYPE(varname->u.constant) != IS_STRING &&
+		    Z_TYPE(varname->u.constant) != IS_UNICODE) {
+		    convert_to_text(&varname->u.constant);
+		}
 	    is_auto_global = zend_u_is_auto_global_ex(Z_TYPE(varname->u.constant), Z_UNIVAL(varname->u.constant), Z_UNILEN(varname->u.constant), 0, &auto_global TSRMLS_CC);
 	    if (!is_auto_global &&
 		    !(Z_UNILEN(varname->u.constant) == (sizeof("this")-1) &&
@@ -4273,6 +4275,13 @@ void zend_do_fetch_static_variable(znode *varname, znode *static_assignment, int
 	}
 	zend_u_hash_update(CG(active_op_array)->static_variables, Z_TYPE(varname->u.constant), Z_UNIVAL(varname->u.constant), Z_UNILEN(varname->u.constant)+1, &tmp, sizeof(zval *), NULL);
 
+	if (varname->op_type == IS_CONST) {
+		if (Z_TYPE(varname->u.constant) != IS_STRING &&
+		    Z_TYPE(varname->u.constant) != IS_UNICODE) {
+			convert_to_text(&varname->u.constant);
+		}
+	}
+
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_FETCH_W;		/* the default mode must be Write, since fetch_simple_variable() is used to define function arguments */
 	opline->result.op_type = IS_VAR;
@@ -4300,6 +4309,13 @@ void zend_do_fetch_global_variable(znode *varname, znode *static_assignment, int
 	zend_op *opline;
 	znode lval;
 	znode result;
+
+	if (varname->op_type == IS_CONST) {
+		if (Z_TYPE(varname->u.constant) != IS_STRING &&
+		    Z_TYPE(varname->u.constant) != IS_UNICODE) {
+			convert_to_text(&varname->u.constant);
+		}
+	}
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_FETCH_W;		/* the default mode must be Write, since fetch_simple_variable() is used to define function arguments */
