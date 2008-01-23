@@ -991,7 +991,7 @@ num_index:
 
 static void zend_fetch_dimension_address(temp_variable *result, zval **container_ptr, zval *dim, int dim_is_tmp_var, int type TSRMLS_DC) /* {{{ */
 {
-	zval *container = *container_ptr;;
+	zval *container = *container_ptr;
 	zval **retval;
 
 	switch (Z_TYPE_P(container)) {
