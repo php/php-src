@@ -294,9 +294,11 @@ void *mysqlnd_palloc_get_zval(MYSQLND_THD_ZVAL_PCACHE * const thd_cache, zend_bo
 	void *ret = NULL;
 
 	DBG_ENTER("mysqlnd_palloc_get_zval");
-	DBG_INF_FMT("cache=%p *last_added=%p free_items=%d",
-				thd_cache, thd_cache? thd_cache->parent->free_list.last_added:NULL,
-				thd_cache->parent->free_items);
+	if (thd_cache) {
+		DBG_INF_FMT("cache=%p *last_added=%p free_items=%d",
+					thd_cache, thd_cache->parent->free_list.last_added,
+					thd_cache->parent->free_items);
+	}
 
 	if (thd_cache) {
 		MYSQLND_ZVAL_PCACHE *cache = thd_cache->parent;
@@ -343,11 +345,13 @@ void mysqlnd_palloc_zval_ptr_dtor(zval **zv, MYSQLND_THD_ZVAL_PCACHE * const thd
 {
 	MYSQLND_ZVAL_PCACHE *cache;
 	DBG_ENTER("mysqlnd_palloc_zval_ptr_dtor");
-	DBG_INF_FMT("cache=%p parent_block=%p last_in_block=%p *zv=%p refc=%d type=%d ",
-				thd_cache,
-				thd_cache->parent? thd_cache->parent->block:NULL,
-				thd_cache->parent? thd_cache->parent->last_in_block:NULL,
-				*zv, Z_REFCOUNT_PP(zv), type);
+	if (thd_cache) {
+		DBG_INF_FMT("cache=%p parent_block=%p last_in_block=%p *zv=%p refc=%d type=%d ",
+					thd_cache,
+					thd_cache->parent->block,
+					thd_cache->parent->last_in_block,
+					*zv, Z_REFCOUNT_PP(zv), type);
+	}
 	*copy_ctor_called = FALSE;
 	/* Check whether cache is used and the zval is from the cache */
 	if (!thd_cache || !(cache = thd_cache->parent) || ((char *)*zv < (char *)thd_cache->parent->block ||

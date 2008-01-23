@@ -67,7 +67,7 @@ MYSQLND_STATS *mysqlnd_global_stats = NULL;
 static zend_bool mysqlnd_library_initted = FALSE;
 
 
-enum_func_status mysqlnd_send_close(MYSQLND * conn TSRMLS_DC);
+static enum_func_status mysqlnd_send_close(MYSQLND * conn TSRMLS_DC);
 
 /* {{{ mysqlnd_library_init */
 static
@@ -454,11 +454,11 @@ PHPAPI void mysqlnd_end_psession(MYSQLND *conn)
 
 /* {{{ mysqlnd_connect */
 PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
-						 char *host, char *user,
-						 char *passwd, unsigned int passwd_len,
-						 char *db, unsigned int db_len,
+						 const char *host, const char *user,
+						 const char *passwd, unsigned int passwd_len,
+						 const char *db, unsigned int db_len,
 						 unsigned int port,
-						 char *socket,
+						 const char *socket,
 						 unsigned int mysql_flags,
 						 MYSQLND_THD_ZVAL_PCACHE *zval_cache
 						 TSRMLS_DC)
@@ -949,7 +949,7 @@ MYSQLND_METHOD(mysqlnd_conn, sqlstate)(const MYSQLND * const conn)
 
 
 /* {{{ mysqlnd_old_escape_string */
-PHPAPI ulong mysqlnd_old_escape_string(char *newstr, const char *escapestr, int escapestr_len TSRMLS_DC)
+PHPAPI ulong mysqlnd_old_escape_string(char *newstr, const char *escapestr, size_t escapestr_len TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_old_escape_string");
 	DBG_RETURN(mysqlnd_cset_escape_slashes(mysqlnd_find_charset_name("latin1"),
@@ -961,7 +961,7 @@ PHPAPI ulong mysqlnd_old_escape_string(char *newstr, const char *escapestr, int 
 /* {{{ mysqlnd_conn::escape_string */
 static ulong
 MYSQLND_METHOD(mysqlnd_conn, escape_string)(const MYSQLND * const conn, char *newstr,
-											const char *escapestr, int escapestr_len TSRMLS_DC)
+											const char *escapestr, size_t escapestr_len TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_conn::escape_string");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
@@ -1088,7 +1088,7 @@ MYSQLND_METHOD(mysqlnd_conn, kill)(MYSQLND *conn, unsigned int pid TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ _mysqlnd_conn::set_charset */
+/* {{{ mysqlnd_conn::set_charset */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn, set_charset)(MYSQLND * const conn, const char * const csname TSRMLS_DC)
 {
@@ -1696,8 +1696,8 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 /* }}} */
 
 
-/* {{{ _mysqlnd_conn::use_result */
-MYSQLND_RES *
+/* {{{ mysqlnd_conn::use_result */
+static MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_conn, use_result)(MYSQLND * const conn TSRMLS_DC)
 {
 	MYSQLND_RES *result;
@@ -1729,8 +1729,8 @@ MYSQLND_METHOD(mysqlnd_conn, use_result)(MYSQLND * const conn TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ _mysqlnd_conn::store_result */
-MYSQLND_RES *
+/* {{{ mysqlnd_conn::store_result */
+static MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_conn, store_result)(MYSQLND * const conn TSRMLS_DC)
 {
 	MYSQLND_RES *result;
@@ -1762,7 +1762,7 @@ MYSQLND_METHOD(mysqlnd_conn, store_result)(MYSQLND * const conn TSRMLS_DC)
 
 
 /* {{{ mysqlnd_conn::get_connection_stats */
-void
+static void
 MYSQLND_METHOD(mysqlnd_conn, get_connection_stats)(const MYSQLND * const conn,
 												   zval *return_value
 												   TSRMLS_DC ZEND_FILE_LINE_DC)
