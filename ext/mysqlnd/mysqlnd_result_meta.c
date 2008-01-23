@@ -141,7 +141,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const meta,
 												MYSQLND *conn TSRMLS_DC)
 {
-	int i = 0;
+	unsigned int i = 0;
 	php_mysql_packet_res_field field_packet;
 
 	DBG_ENTER("mysqlnd_res_meta::read_metadata");

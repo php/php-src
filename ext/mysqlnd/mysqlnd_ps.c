@@ -331,7 +331,9 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const stmt, const char * co
 	  no metadata at prepare.
 	*/
 	if (stmt_to_prepare->field_count) {
-		MYSQLND_RES *result = mysqlnd_result_init(stmt_to_prepare->field_count, NULL TSRMLS_CC);
+		MYSQLND_RES *result = mysqlnd_result_init(stmt_to_prepare->field_count,
+												  mysqlnd_palloc_get_thd_cache_reference(stmt->conn->zval_cache)
+												  TSRMLS_CC);
 		/* Allocate the result now as it is needed for the reading of metadata */
 		stmt_to_prepare->result = result; 
 
@@ -731,36 +733,15 @@ MYSQLND_METHOD(mysqlnd_stmt, use_result)(MYSQLND_STMT *stmt TSRMLS_DC)
 	}
 
 	SET_EMPTY_ERROR(stmt->error_info);
-	SET_EMPTY_ERROR(stmt->conn->error_info);
 
 	MYSQLND_INC_CONN_STATISTIC(&stmt->conn->stats, STAT_PS_UNBUFFERED_SETS);
-
-	result					= stmt->result;
-	result->type			= MYSQLND_RES_PS_UNBUF;
-	result->m.fetch_row		= stmt->cursor_exists? mysqlnd_fetch_stmt_row_cursor:
-													mysqlnd_stmt_fetch_row_unbuffered;
-	result->m.fetch_lengths	= NULL; /* makes no sense */
-	result->zval_cache		= mysqlnd_palloc_get_thd_cache_reference(conn->zval_cache);
-
-	result->unbuf = mnd_ecalloc(1, sizeof(MYSQLND_RES_UNBUFFERED));
-
-	DBG_INF_FMT("cursor=%d zval_cache=%p", stmt->cursor_exists, result->zval_cache);
-	/*
-	  Will be freed in the mysqlnd_internal_free_result_contents() called
-	  by the resource destructor. mysqlnd_fetch_row_unbuffered() expects
-	  this to be not NULL.
-	*/
-	PACKET_INIT(result->row_packet, PROT_ROW_PACKET, php_mysql_packet_row *);
-	result->row_packet->field_count = result->field_count;
-	result->row_packet->binary_protocol = TRUE;
-	result->row_packet->fields_metadata = stmt->result->meta->fields;
-	result->row_packet->bit_fields_count = result->meta->bit_fields_count;
-	result->row_packet->bit_fields_total_len = result->meta->bit_fields_total_len;
-	result->lengths = NULL;
+	result = stmt->result;
+	
+	result->m.use_result(stmt->result, TRUE TSRMLS_CC);
+	result->m.fetch_row	= stmt->cursor_exists? mysqlnd_fetch_stmt_row_cursor:
+											   mysqlnd_stmt_fetch_row_unbuffered;
 
 	stmt->state = MYSQLND_STMT_USE_OR_STORE_CALLED;
-
-	/* No multithreading issues as we don't share the connection :) */
 
 	DBG_INF_FMT("%p", result);
 	DBG_RETURN(result);
@@ -1164,6 +1145,31 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_param)(MYSQLND_STMT * const stmt,
 /* }}} */
 
 
+/* {{{ _mysqlnd_stmt_refresh_bind_param */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_stmt, refresh_bind_param)(MYSQLND_STMT * const stmt TSRMLS_DC)
+{
+	DBG_ENTER("mysqlnd_stmt::refresh_bind_param");
+	DBG_INF_FMT("stmt=%lu param_count=%u", stmt->stmt_id, stmt->param_count);
+
+	if (stmt->state < MYSQLND_STMT_PREPARED) {
+		SET_STMT_ERROR(stmt, CR_NO_PREPARE_STMT, UNKNOWN_SQLSTATE, mysqlnd_stmt_not_prepared);
+		DBG_ERR("not prepared");
+		DBG_RETURN(FAIL);
+	}
+
+	SET_EMPTY_ERROR(stmt->error_info);
+	SET_EMPTY_ERROR(stmt->conn->error_info);
+
+	if (stmt->param_count) {
+		stmt->send_types_to_server = 1;
+	}
+	DBG_INF("PASS");
+	DBG_RETURN(PASS);
+}
+/* }}} */
+
+
 /* {{{ mysqlnd_stmt::bind_result */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_stmt, bind_result)(MYSQLND_STMT * const stmt,
@@ -1535,7 +1541,7 @@ void mysqlnd_internal_free_stmt_content(MYSQLND_STMT *stmt TSRMLS_DC)
 
 	/* Destroy the input bind */
 	if (stmt->param_bind) {
-		int i;
+		unsigned int i;
 		/*
 		  Because only the bound variables can point to our internal buffers, then
 		  separate or free only them. Free is possible because the user could have
@@ -1651,7 +1657,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, dtor)(MYSQLND_STMT * const stmt, zend_bool 
 {
 	enum_func_status ret;
 
-	DBG_ENTER("mysqlnd_stmt::close");
+	DBG_ENTER("mysqlnd_stmt::dtor");
 	DBG_INF_FMT("stmt=%p", stmt);
 
 	MYSQLND_INC_GLOBAL_STATISTIC(implicit == TRUE?	STAT_STMT_CLOSE_IMPLICIT:
@@ -1683,6 +1689,7 @@ struct st_mysqlnd_stmt_methods mysqlnd_stmt_methods = {
 	MYSQLND_METHOD(mysqlnd_stmt, fetch),
 
 	MYSQLND_METHOD(mysqlnd_stmt, bind_param),
+	MYSQLND_METHOD(mysqlnd_stmt, refresh_bind_param),
 	MYSQLND_METHOD(mysqlnd_stmt, bind_result),
 	MYSQLND_METHOD(mysqlnd_stmt, send_long_data),
 	MYSQLND_METHOD(mysqlnd_stmt, param_metadata),

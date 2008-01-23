@@ -149,8 +149,8 @@
 #define SET_CLIENT_ERROR(error_info, a, b, c) \
 	{ \
 		error_info.error_no = a; \
-		strncpy(error_info.sqlstate, b, sizeof(error_info.sqlstate)); \
-		strncpy(error_info.error, c, sizeof(error_info.error)); \
+		strlcpy(error_info.sqlstate, b, sizeof(error_info.sqlstate)); \
+		strlcpy(error_info.error, c, sizeof(error_info.error)); \
 	}
 
 #define SET_STMT_ERROR(stmt, a, b, c)	SET_CLIENT_ERROR(stmt->error_info, a, b, c)
