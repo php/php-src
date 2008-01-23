@@ -7,7 +7,7 @@ $xml->{""} .= "bar";
 print $xml->asXML();
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 Warning: main(): Cannot write or create unnamed element in %s on line %d
 
 Warning: main(): Cannot write or create unnamed element in %s on line %d
