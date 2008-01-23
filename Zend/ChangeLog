@@ -1,3 +1,117 @@
+2008-01-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.c
+      zend.c
+      zend.h
+      zend.h
+      zend_builtin_functions.c
+      zend_builtin_functions.c
+      zend_execute.c
+      zend_execute.c
+      zend_execute_API.c
+      zend_execute_API.c
+      zend_gc.c
+      zend_gc.h
+      zend_objects_API.c
+      zend_objects_API.h
+      zend_operators.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/gc_001.phpt
+      tests/gc_002.phpt
+      tests/gc_003.phpt
+      tests/gc_004.phpt
+      tests/gc_005.phpt
+      tests/gc_006.phpt
+      tests/gc_007.phpt
+      tests/gc_008.phpt
+      tests/gc_009.phpt
+      tests/gc_010.phpt
+      tests/gc_011.phpt
+      tests/gc_012.phpt
+      tests/gc_013.phpt
+      tests/gc_014.phpt
+      tests/gc_015.phpt
+      tests/gc_016.phpt
+      tests/gc_017.phpt
+      tests/gc_018.phpt
+      tests/gc_019.phpt
+      tests/gc_020.phpt
+      tests/gc_021.phpt
+      tests/gc_022.phpt
+      tests/gc_023.phpt
+      tests/gc_024.phpt
+      tests/gc_025.phpt
+      tests/gc_026.phpt:
+      Added garbage collector
+
+    * tests/gc_001.phpt
+      tests/gc_001.phpt
+      tests/gc_002.phpt
+      tests/gc_002.phpt
+      tests/gc_003.phpt
+      tests/gc_003.phpt
+      tests/gc_004.phpt
+      tests/gc_004.phpt
+      tests/gc_005.phpt
+      tests/gc_005.phpt
+      tests/gc_006.phpt
+      tests/gc_006.phpt
+      tests/gc_007.phpt
+      tests/gc_007.phpt
+      tests/gc_008.phpt
+      tests/gc_008.phpt
+      tests/gc_009.phpt
+      tests/gc_009.phpt
+      tests/gc_010.phpt
+      tests/gc_010.phpt
+      tests/gc_011.phpt
+      tests/gc_011.phpt
+      tests/gc_012.phpt
+      tests/gc_012.phpt
+      tests/gc_013.phpt
+      tests/gc_013.phpt
+      tests/gc_014.phpt
+      tests/gc_014.phpt
+      tests/gc_015.phpt
+      tests/gc_015.phpt
+      tests/gc_016.phpt
+      tests/gc_016.phpt
+      tests/gc_017.phpt
+      tests/gc_017.phpt
+      tests/gc_018.phpt
+      tests/gc_018.phpt
+      tests/gc_019.phpt
+      tests/gc_019.phpt
+      tests/gc_020.phpt
+      tests/gc_020.phpt
+      tests/gc_021.phpt
+      tests/gc_021.phpt
+      tests/gc_022.phpt
+      tests/gc_022.phpt
+      tests/gc_023.phpt
+      tests/gc_023.phpt
+      tests/gc_024.phpt
+      tests/gc_024.phpt
+      tests/gc_025.phpt
+      tests/gc_025.phpt
+      tests/gc_026.phpt
+      tests/gc_026.phpt:
+      
+      file gc_001.phpt was initially added on branch PHP_5_3.
+
+    * zend_gc.c
+      zend_gc.c
+      zend_gc.h
+      zend_gc.h
+      zend_objects_API.c
+      zend_objects_API.h
+      zend_operators.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      
+      file zend_gc.c was initially added on branch PHP_5_3.
+
 2008-01-21  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c
