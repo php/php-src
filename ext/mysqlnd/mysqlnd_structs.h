@@ -152,7 +152,7 @@ typedef struct st_mysqlnd_option
 
 typedef struct st_mysqlnd_connection MYSQLND;
 typedef struct st_mysqlnd_res	MYSQLND_RES;
-typedef char** 					MYSQLND_ROW;		/* return data as array of strings */
+typedef char** 					MYSQLND_ROW_C;		/* return data as array of strings */
 typedef struct st_mysqlnd_stmt	MYSQLND_STMT;
 typedef unsigned int			MYSQLND_FIELD_OFFSET;
 
@@ -200,7 +200,7 @@ typedef struct st_mysqlnd_net
 
 struct st_mysqlnd_conn_methods
 {
-	ulong				(*escape_string)(const MYSQLND * const conn, char *newstr, const char *escapestr, int escapestr_len TSRMLS_DC);
+	ulong				(*escape_string)(const MYSQLND * const conn, char *newstr, const char *escapestr, size_t escapestr_len TSRMLS_DC);
 	enum_func_status	(*set_charset)(MYSQLND * const conn, const char * const charset TSRMLS_DC);
 	enum_func_status	(*query)(MYSQLND *conn, const char *query, unsigned int query_len TSRMLS_DC);
 	MYSQLND_RES *		(*use_result)(MYSQLND * const conn TSRMLS_DC);
@@ -261,6 +261,7 @@ struct st_mysqlnd_res_methods
 	MYSQLND_RES *		(*use_result)(MYSQLND_RES * const result, zend_bool ps_protocol TSRMLS_DC);
 	MYSQLND_RES *		(*store_result)(MYSQLND_RES * result, MYSQLND * const conn, zend_bool ps TSRMLS_DC);
 	void 				(*fetch_into)(MYSQLND_RES *result, unsigned int flags, zval *return_value, enum_mysqlnd_extension ext TSRMLS_DC ZEND_FILE_LINE_DC);
+	MYSQLND_ROW_C 		(*fetch_row_c)(MYSQLND_RES *result TSRMLS_DC);
 	void 				(*fetch_all)(MYSQLND_RES *result, unsigned int flags, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC);
 	void 				(*fetch_field_data)(MYSQLND_RES *result, unsigned int offset, zval *return_value TSRMLS_DC);
 	uint64		(*num_rows)(const MYSQLND_RES * const result);
@@ -308,6 +309,7 @@ struct st_mysqlnd_stmt_methods
 	enum_func_status	(*fetch)(MYSQLND_STMT * const stmt, zend_bool * const fetched_anything TSRMLS_DC);
 
 	enum_func_status	(*bind_param)(MYSQLND_STMT * const stmt, MYSQLND_PARAM_BIND * const param_bind TSRMLS_DC);
+	enum_func_status	(*refresh_bind_param)(MYSQLND_STMT * const stmt TSRMLS_DC);
 	enum_func_status	(*bind_result)(MYSQLND_STMT * const stmt, MYSQLND_RESULT_BIND * const result_bind TSRMLS_DC);
 	enum_func_status	(*send_long_data)(MYSQLND_STMT * const stmt, unsigned int param_num,
 										  const char * const data, unsigned long length TSRMLS_DC);

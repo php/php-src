@@ -463,7 +463,7 @@ PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const name
 
 /* {{{ mysqlnd_cset_escape_quotes */
 PHPAPI ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset, char *newstr,
-										const char *escapestr, int escapestr_len TSRMLS_DC)
+										const char *escapestr, size_t escapestr_len TSRMLS_DC)
 {
 	const char 	*newstr_s = newstr;
 	const char 	*newstr_e = newstr + 2 * escapestr_len;
@@ -517,7 +517,7 @@ PHPAPI ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset, char
 
 /* {{{ mysqlnd_cset_escape_slashes */
 PHPAPI ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset, char *newstr,
-										 const char *escapestr, int escapestr_len TSRMLS_DC)
+										 const char *escapestr, size_t escapestr_len TSRMLS_DC)
 {
 	const char 	*newstr_s = newstr;
 	const char 	*newstr_e = newstr + 2 * escapestr_len;

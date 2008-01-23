@@ -118,7 +118,7 @@ int	mysqlnd_local_infile_error(void *ptr, char *error_buf, uint error_buf_len TS
 		DBG_RETURN(info->error_no);
 	}
 
-	strncpy(error_buf, "Unknown error", error_buf_len);
+	strlcpy(error_buf, "Unknown error", error_buf_len);
 	DBG_INF_FMT("no info, %d", CR_UNKNOWN_ERROR);
 	DBG_RETURN(CR_UNKNOWN_ERROR);
 }
