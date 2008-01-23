@@ -374,8 +374,10 @@ array(8) {
   object(classA)#%d (0) {
   }
   ["string"]=>
-  array(1) {
+  array(2) {
     [0]=>
+    NULL
+    [1]=>
     string(5) "hello"
   }
   ["resource"]=>
