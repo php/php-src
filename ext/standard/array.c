@@ -2397,8 +2397,18 @@ ukey:
 					SEPARATE_ZVAL(dest_entry);
 					SEPARATE_ZVAL(src_entry);
 
-					convert_to_array_ex(dest_entry);
-					convert_to_array_ex(src_entry);
+					if (Z_TYPE_PP(dest_entry) == IS_NULL) {
+						convert_to_array_ex(dest_entry);
+						add_next_index_null(*dest_entry);
+					} else {
+						convert_to_array_ex(dest_entry);
+					}
+					if (Z_TYPE_PP(src_entry) == IS_NULL) {
+						convert_to_array_ex(src_entry);
+						add_next_index_null(*src_entry);
+					} else {
+						convert_to_array_ex(src_entry);
+					}
 					if (thash) {
 						thash->nApplyCount++;
 					}
