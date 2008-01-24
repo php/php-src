@@ -2244,7 +2244,7 @@ ZEND_FUNCTION(get_extension_funcs)
 }
 /* }}} */
 
-/* {{{ proto int gc_collect_cycles(void)
+/* {{{ proto int gc_collect_cycles(void) U
    Forces collection of any existing garbage cycles.
    Returns number of freed zvals */
 ZEND_FUNCTION(gc_collect_cycles)
@@ -2253,7 +2253,7 @@ ZEND_FUNCTION(gc_collect_cycles)
 }
 /* }}} */
 
-/* {{{ proto void gc_enabled(void)
+/* {{{ proto void gc_enabled(void) U
    Returns status of the circular reference collector */
 ZEND_FUNCTION(gc_enabled)
 {
@@ -2261,7 +2261,7 @@ ZEND_FUNCTION(gc_enabled)
 }
 /* }}} */
 
-/* {{{ proto void gc_enable(void)
+/* {{{ proto void gc_enable(void) U
    Activates the circular reference collector */
 ZEND_FUNCTION(gc_enable)
 {
@@ -2269,7 +2269,7 @@ ZEND_FUNCTION(gc_enable)
 }
 /* }}} */
 
-/* {{{ proto void gc_disable(void)
+/* {{{ proto void gc_disable(void) U
    Deactivates the circular reference collector */
 ZEND_FUNCTION(gc_disable)
 {
