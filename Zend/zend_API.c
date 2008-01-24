@@ -3321,7 +3321,7 @@ ZEND_API int zend_declare_property_null(zend_class_entry *ce, char *name, int na
 	zval *property;
 
 	if (ce->type & ZEND_INTERNAL_CLASS) {
-		property = malloc(sizeof(zval));
+		ALLOC_PERMANENT_ZVAL(property);
 	} else {
 		ALLOC_ZVAL(property);
 	}
@@ -3335,7 +3335,7 @@ ZEND_API int zend_declare_property_bool(zend_class_entry *ce, char *name, int na
 	zval *property;
 
 	if (ce->type & ZEND_INTERNAL_CLASS) {
-		property = malloc(sizeof(zval));
+		ALLOC_PERMANENT_ZVAL(property);
 	} else {
 		ALLOC_ZVAL(property);
 	}
@@ -3350,7 +3350,7 @@ ZEND_API int zend_declare_property_long(zend_class_entry *ce, char *name, int na
 	zval *property;
 
 	if (ce->type & ZEND_INTERNAL_CLASS) {
-		property = malloc(sizeof(zval));
+		ALLOC_PERMANENT_ZVAL(property);
 	} else {
 		ALLOC_ZVAL(property);
 	}
@@ -3365,7 +3365,7 @@ ZEND_API int zend_declare_property_double(zend_class_entry *ce, char *name, int 
 	zval *property;
 
 	if (ce->type & ZEND_INTERNAL_CLASS) {
-		property = malloc(sizeof(zval));
+		ALLOC_PERMANENT_ZVAL(property);
 	} else {
 		ALLOC_ZVAL(property);
 	}
@@ -3381,7 +3381,7 @@ ZEND_API int zend_declare_property_string(zend_class_entry *ce, char *name, int 
 	int len = strlen(value);
 
 	if (ce->type & ZEND_INTERNAL_CLASS) {
-		property = malloc(sizeof(zval));
+		ALLOC_PERMANENT_ZVAL(property);
 		if (UG(unicode)) {
 			Z_TYPE_P(property) = IS_UNICODE;
 			Z_USTRVAL_P(property) = malloc(UBYTES(len+1));
@@ -3404,7 +3404,7 @@ ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, char *name, int
 	zval *property;
 
 	if (ce->type & ZEND_INTERNAL_CLASS) {
-		property = malloc(sizeof(zval));
+		ALLOC_PERMANENT_ZVAL(property);
 		if (UG(unicode)) {
 			Z_TYPE_P(property) = IS_UNICODE;
 			Z_USTRVAL_P(property) = malloc(UBYTES(value_len+1));
@@ -3433,7 +3433,7 @@ ZEND_API int zend_declare_class_constant_null(zend_class_entry *ce, char *name, 
 	zval *constant;
 
 	if (ce->type & ZEND_INTERNAL_CLASS) {
-		constant = malloc(sizeof(zval));
+		ALLOC_PERMANENT_ZVAL(constant);
 	} else {
 		ALLOC_ZVAL(constant);
 	}
@@ -3448,7 +3448,7 @@ ZEND_API int zend_declare_class_constant_long(zend_class_entry *ce, char *name, 
 	zval *constant;
 
 	if (ce->type & ZEND_INTERNAL_CLASS) {
-		constant = malloc(sizeof(zval));
+		ALLOC_PERMANENT_ZVAL(constant);
 	} else {
 		ALLOC_ZVAL(constant);
 	}
@@ -3463,7 +3463,7 @@ ZEND_API int zend_declare_class_constant_bool(zend_class_entry *ce, char *name, 
 	zval *constant;
 
 	if (ce->type & ZEND_INTERNAL_CLASS) {
-		constant = malloc(sizeof(zval));
+		ALLOC_PERMANENT_ZVAL(constant);
 	} else {
 		ALLOC_ZVAL(constant);
 	}
@@ -3478,7 +3478,7 @@ ZEND_API int zend_declare_class_constant_double(zend_class_entry *ce, char *name
 	zval *constant;
 
 	if (ce->type & ZEND_INTERNAL_CLASS) {
-		constant = malloc(sizeof(zval));
+		ALLOC_PERMANENT_ZVAL(constant);
 	} else {
 		ALLOC_ZVAL(constant);
 	}
@@ -3493,7 +3493,7 @@ ZEND_API int zend_declare_class_constant_stringl(zend_class_entry *ce, char *nam
 	zval *constant;
 
 	if (ce->type & ZEND_INTERNAL_CLASS) {
-		constant = malloc(sizeof(zval));
+		ALLOC_PERMANENT_ZVAL(constant);
 		if (UG(unicode)) {
 			Z_TYPE_P(constant) = IS_UNICODE;
 			Z_USTRVAL_P(constant) = malloc(UBYTES(value_length+1));
