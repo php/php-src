@@ -584,7 +584,7 @@ int php_oci_lob_close (php_oci_descriptor *descriptor TSRMLS_DC)
 		return 1;
 	}
 
-	if (php_oci_temp_lob_close(descriptor)) {
+	if (php_oci_temp_lob_close(descriptor TSRMLS_CC)) {
 		return 1;
 	}
 	
@@ -681,7 +681,7 @@ void php_oci_lob_free (php_oci_descriptor *descriptor TSRMLS_DC)
 
 #ifdef HAVE_OCI8_TEMP_LOB
 	if (descriptor->type == OCI_DTYPE_LOB) {
-		php_oci_temp_lob_close(descriptor);
+		php_oci_temp_lob_close(descriptor TSRMLS_CC);
 	}
 #endif
 

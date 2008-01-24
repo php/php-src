@@ -1682,7 +1682,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSR
 			lob_fetch_status = php_oci_lob_read(descriptor, -1, 0, &lob_buffer, &lob_length TSRMLS_CC);
 			lob_fetch_status |= (php_oci_lob_get_type(descriptor, &lob_type TSRMLS_CC) > 0);
 #ifdef HAVE_OCI8_TEMP_LOB
-			php_oci_temp_lob_close(descriptor);
+			php_oci_temp_lob_close(descriptor TSRMLS_CC);
 #endif
 			if (lob_fetch_status) {
 				ZVAL_FALSE(value);
