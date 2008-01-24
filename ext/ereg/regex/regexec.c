@@ -11,8 +11,8 @@
 #include <string.h>
 #include <limits.h>
 #include <ctype.h>
-#include <regex.h>
 
+#include "regex.h"
 #include "utils.h"
 #include "regex2.h"
 
