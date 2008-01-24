@@ -30,10 +30,13 @@ static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, zend_op* o
 #define ZEND_VM_DISPATCH(opcode, opline) return zend_vm_get_opcode_handler(opcode, opline)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 
 #define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data TSRMLS_CC
+#undef EX
+#define EX(element) execute_data->element
+
 
 ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 {
-	zend_execute_data execute_data;
+	zend_execute_data *execute_data;
 
 
 	if (EG(exception)) {
@@ -41,23 +44,23 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	/* Initialize execute_data */
+	execute_data = (zend_execute_data *)zend_vm_stack_alloc(
+		sizeof(zend_execute_data) +
+		sizeof(zval**) * op_array->last_var +
+		sizeof(temp_variable) * op_array->T TSRMLS_CC);
+
+	EX(CVs) = (zval***)((char*)execute_data + sizeof(zend_execute_data));
+	memset(EX(CVs), 0, sizeof(zval**) * op_array->last_var);
+	EX(Ts) = (temp_variable *)(EX(CVs) + op_array->last_var);
 	EX(fbc) = NULL;
 	EX(called_scope) = NULL;
 	EX(object) = NULL;
 	EX(old_error_reporting) = NULL;
-	if (EXPECTED(op_array->T < TEMP_VAR_STACK_LIMIT && op_array->last_var < TEMP_VAR_STACK_LIMIT)) {
-		EX(CVs) = (zval***)do_alloca(sizeof(zval**) * op_array->last_var + sizeof(temp_variable) * op_array->T, EX(use_heap));
-	} else {
-		SET_ALLOCA_FLAG(EX(use_heap));
-		EX(CVs) = (zval***)safe_emalloc(sizeof(temp_variable), op_array->T, sizeof(zval**) * op_array->last_var);
-	}
-	EX(Ts) = (temp_variable *)(EX(CVs) + op_array->last_var);
-	memset(EX(CVs), 0, sizeof(zval**) * op_array->last_var);
 	EX(op_array) = op_array;
 	EX(original_in_execution) = EG(in_execution);
 	EX(symbol_table) = EG(active_symbol_table);
 	EX(prev_execute_data) = EG(current_execute_data);
-	EG(current_execute_data) = &execute_data;
+	EG(current_execute_data) = execute_data;
 
 	EG(in_execution) = 1;
 	if (op_array->start_op) {
@@ -76,6 +79,7 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 	EG(opline_ptr) = &EX(opline);
 
 	EX(function_state).function = (zend_function *) op_array;
+	EX(function_state).arguments = NULL;
 
 	while (1) {
 #ifdef ZEND_WIN32
@@ -84,16 +88,13 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 		}
 #endif
 
-		if (EX(opline)->handler(&execute_data TSRMLS_CC) > 0) {
+		if (EX(opline)->handler(execute_data TSRMLS_CC) > 0) {
 			return;
 		}
 
 	}
 	zend_error_noreturn(E_ERROR, "Arrived at end of main loop which shouldn't happen");
 }
-
-#undef EX
-#define EX(element) execute_data->element
 
 static int ZEND_JMP_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
@@ -173,7 +174,7 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	zend_ptr_stack_3_pop(&EG(arg_types_stack), (void*)&EX(called_scope), (void**)&ex_object, (void**)&EX(fbc));
-	zend_ptr_stack_2_push(&EG(argument_stack), (void *)(zend_uintptr_t)opline->extended_value, NULL);
+	EX(function_state).arguments = zend_vm_stack_push_args(opline->extended_value TSRMLS_CC);
 
 	EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
 
@@ -183,11 +184,8 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 
 		if (EX(function_state).function->common.arg_info) {
 			zend_uint i=0;
-			zval **p;
-			ulong arg_count;
-
-			p = (zval **) EG(argument_stack).top_element-2;
-			arg_count = (ulong)(zend_uintptr_t) *p;
+			zval **p = (zval**)EX(function_state).arguments;
+			ulong arg_count = opline->extended_value;
 
 			while (arg_count>0) {
 				zend_verify_arg_type(EX(function_state).function, ++i, *(p-arg_count), 0 TSRMLS_CC);
@@ -275,6 +273,7 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	EX(function_state).function = (zend_function *) EX(op_array);
+	EX(function_state).arguments = NULL;
 
 	if (EG(This)) {
 		if (EG(exception) && IS_CTOR_CALL(EX(called_scope))) {
@@ -299,7 +298,7 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		EG(called_scope) = current_called_scope;
 	}
 
-	zend_ptr_stack_clear_multiple(TSRMLS_C);
+	zend_vm_stack_clear_multiple(TSRMLS_C);
 
 	if (EG(exception)) {
 		zend_throw_exception_internal(NULL TSRMLS_CC);
@@ -348,10 +347,10 @@ static int ZEND_CATCH_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_RECV_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
-	zval **param;
 	zend_uint arg_num = Z_LVAL(opline->op1.u.constant);
+	zval **param = zend_vm_stack_get_arg(arg_num TSRMLS_CC);
 
-	if (zend_ptr_stack_get_arg(arg_num, (void **) &param TSRMLS_CC)==FAILURE) {
+	if (param == NULL) {
 		char *space;
 		zstr class_name = get_active_class_name(&space TSRMLS_CC);
 		zend_execute_data *ptr = EX(prev_execute_data);
@@ -527,15 +526,16 @@ static int ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	int i;
 	zend_uint catch_op_num;
 	int catched = 0;
-	zval **stack_zval_pp;
 	zval restored_error_reporting;
 
-	stack_zval_pp = (zval **) EG(argument_stack).top_element - 1;
-	while (*stack_zval_pp != NULL) {
-		zval_ptr_dtor(stack_zval_pp);
-		EG(argument_stack).top_element--;
-		EG(argument_stack).top--;
-		stack_zval_pp--;
+	void **stack_frame = (void**)execute_data +
+		(sizeof(zend_execute_data) +
+		 sizeof(zval**) * EX(op_array)->last_var +
+		 sizeof(temp_variable) * EX(op_array)->T) / sizeof(void*);
+
+	while (zend_vm_stack_top(TSRMLS_C) != stack_frame) {
+		zval *stack_zval_p = zend_vm_stack_pop(TSRMLS_C);
+		zval_ptr_dtor(&stack_zval_p);
 	}
 
 	for (i=0; i<EG(active_op_array)->last_try_catch; i++) {
@@ -723,11 +723,12 @@ static int ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_RECV_INIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
-	zval **param, *assignment_value, **var_ptr;
+	zval *assignment_value, **var_ptr;
 	zend_uint arg_num = Z_LVAL(opline->op1.u.constant);
 	zend_free_op free_res;
+	zval **param = zend_vm_stack_get_arg(arg_num TSRMLS_CC);
 
-	if (zend_ptr_stack_get_arg(arg_num, (void **) &param TSRMLS_CC)==FAILURE) {
+	if (param == NULL) {
 		if ((Z_TYPE(opline->op2.u.constant) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT || Z_TYPE(opline->op2.u.constant)==IS_CONSTANT_ARRAY) {
 			zval *default_value;
 
@@ -1502,7 +1503,7 @@ static int ZEND_SEND_VAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (!0) {
 			zval_copy_ctor(valptr);
 		}
-		zend_ptr_stack_push(&EG(argument_stack), valptr);
+		zend_vm_stack_push(valptr TSRMLS_CC);
 
 	}
 	ZEND_VM_NEXT_OPCODE();
@@ -4756,7 +4757,7 @@ static int ZEND_SEND_VAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (!1) {
 			zval_copy_ctor(valptr);
 		}
-		zend_ptr_stack_push(&EG(argument_stack), valptr);
+		zend_vm_stack_push(valptr TSRMLS_CC);
 
 	}
 	ZEND_VM_NEXT_OPCODE();
@@ -7993,7 +7994,7 @@ static int ZEND_SEND_VAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (!0) {
 			zval_copy_ctor(valptr);
 		}
-		zend_ptr_stack_push(&EG(argument_stack), valptr);
+		zend_vm_stack_push(valptr TSRMLS_CC);
 		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	}
 	ZEND_VM_NEXT_OPCODE();
@@ -8020,7 +8021,7 @@ static int zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS)
 		zval_copy_ctor(varptr);
 	}
 	Z_ADDREF_P(varptr);
-	zend_ptr_stack_push(&EG(argument_stack), varptr);
+	zend_vm_stack_push(varptr TSRMLS_CC);
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};  /* for string offsets */
 
 	ZEND_VM_NEXT_OPCODE();
@@ -8056,7 +8057,7 @@ static int ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	     (Z_REFCOUNT_P(varptr) == 1 && (IS_VAR == IS_CV || free_op1.var)))) {
 		Z_SET_ISREF_P(varptr);
 		Z_ADDREF_P(varptr);
-		zend_ptr_stack_push(&EG(argument_stack), varptr);
+		zend_vm_stack_push(varptr TSRMLS_CC);
 	} else {
 		zval *valptr;
 
@@ -8066,7 +8067,7 @@ static int ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (!0) {
 			zval_copy_ctor(valptr);
 		}
-		zend_ptr_stack_push(&EG(argument_stack), valptr);
+		zend_vm_stack_push(valptr TSRMLS_CC);
 	}
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	ZEND_VM_NEXT_OPCODE();
@@ -8087,7 +8088,7 @@ static int ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr_ptr);
 	varptr = *varptr_ptr;
 	Z_ADDREF_P(varptr);
-	zend_ptr_stack_push(&EG(argument_stack), varptr);
+	zend_vm_stack_push(varptr TSRMLS_CC);
 
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	ZEND_VM_NEXT_OPCODE();
@@ -22129,7 +22130,7 @@ static int ZEND_SEND_VAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (!0) {
 			zval_copy_ctor(valptr);
 		}
-		zend_ptr_stack_push(&EG(argument_stack), valptr);
+		zend_vm_stack_push(valptr TSRMLS_CC);
 
 	}
 	ZEND_VM_NEXT_OPCODE();
@@ -22156,7 +22157,7 @@ static int zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS)
 		zval_copy_ctor(varptr);
 	}
 	Z_ADDREF_P(varptr);
-	zend_ptr_stack_push(&EG(argument_stack), varptr);
+	zend_vm_stack_push(varptr TSRMLS_CC);
 	;  /* for string offsets */
 
 	ZEND_VM_NEXT_OPCODE();
@@ -22192,7 +22193,7 @@ static int ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	     (Z_REFCOUNT_P(varptr) == 1 && (IS_CV == IS_CV || free_op1.var)))) {
 		Z_SET_ISREF_P(varptr);
 		Z_ADDREF_P(varptr);
-		zend_ptr_stack_push(&EG(argument_stack), varptr);
+		zend_vm_stack_push(varptr TSRMLS_CC);
 	} else {
 		zval *valptr;
 
@@ -22202,7 +22203,7 @@ static int ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (!0) {
 			zval_copy_ctor(valptr);
 		}
-		zend_ptr_stack_push(&EG(argument_stack), valptr);
+		zend_vm_stack_push(valptr TSRMLS_CC);
 	}
 
 	ZEND_VM_NEXT_OPCODE();
@@ -22223,7 +22224,7 @@ static int ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr_ptr);
 	varptr = *varptr_ptr;
 	Z_ADDREF_P(varptr);
-	zend_ptr_stack_push(&EG(argument_stack), varptr);
+	zend_vm_stack_push(varptr TSRMLS_CC);
 
 	ZEND_VM_NEXT_OPCODE();
 }

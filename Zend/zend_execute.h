@@ -153,30 +153,158 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC);
 ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *scope TSRMLS_DC);
 
 /* dedicated Zend executor functions - do not use! */
-static inline void zend_ptr_stack_clear_multiple(TSRMLS_D)
+#define ZEND_VM_STACK_PAGE_SIZE (64 * 1024)
+
+struct _zend_vm_stack {
+	void **top;
+	void **end;
+	zend_vm_stack prev;
+	void *elements[1];
+};
+
+#define ZEND_VM_STACK_GROW_IF_NEEDED(count)							\
+	do {															\
+		if (UNEXPECTED(count >                                      \
+		    EG(argument_stack)->end - EG(argument_stack)->top)) {	\
+			zend_vm_stack_extend(count TSRMLS_CC);					\
+		}															\
+	} while (0)
+
+static inline zend_vm_stack zend_vm_stack_new_page(int count) {
+	zend_vm_stack page = emalloc(sizeof(*page)+sizeof(page->elements[0])*(count-1));
+
+	page->top = page->elements;
+	page->end = page->elements + count;
+	page->prev = NULL;
+	return page;
+}
+
+static inline void zend_vm_stack_init(TSRMLS_D)
 {
-	void **p = EG(argument_stack).top_element-2;
+	EG(argument_stack) = zend_vm_stack_new_page(ZEND_VM_STACK_PAGE_SIZE);
+}
+
+static inline void zend_vm_stack_destroy(TSRMLS_D)
+{
+	zend_vm_stack stack = EG(argument_stack);
+
+	while (stack != NULL) {
+		zend_vm_stack p = stack->prev;
+		efree(stack);
+		stack = p;
+	}
+}
+
+static inline void zend_vm_stack_extend(int count TSRMLS_DC)
+{
+	zend_vm_stack p = zend_vm_stack_new_page(count >= ZEND_VM_STACK_PAGE_SIZE ? count : ZEND_VM_STACK_PAGE_SIZE);
+	p->prev = EG(argument_stack);
+	EG(argument_stack) = p;
+}
+
+static inline void **zend_vm_stack_top(TSRMLS_D)
+{
+	return EG(argument_stack)->top;
+}
+
+static inline void zend_vm_stack_push(void *ptr TSRMLS_DC)
+{
+	ZEND_VM_STACK_GROW_IF_NEEDED(1);
+	*(EG(argument_stack)->top++) = ptr;
+}
+
+static inline void zend_vm_stack_push_nocheck(void *ptr TSRMLS_DC)
+{
+	*(EG(argument_stack)->top++) = ptr;
+}
+
+static inline void *zend_vm_stack_pop(TSRMLS_D)
+{
+	void *el = *(--EG(argument_stack)->top);
+
+	if (UNEXPECTED(EG(argument_stack)->top == EG(argument_stack)->elements)) {
+		zend_vm_stack p = EG(argument_stack);
+		EG(argument_stack) = p->prev;
+		efree(p);
+ 	}
+	return el;
+}
+
+static inline void *zend_vm_stack_alloc(size_t size TSRMLS_DC)
+{
+	void *ret;
+
+	size = (size + (sizeof(void*) - 1)) / sizeof(void*);
+
+	ZEND_VM_STACK_GROW_IF_NEEDED(size);
+	ret = EG(argument_stack)->top;
+	EG(argument_stack)->top += size;
+	return ret;
+}
+
+static inline void zend_vm_stack_free(void *ptr TSRMLS_DC)
+{	
+	if (UNEXPECTED(EG(argument_stack)->elements == ptr)) {
+		zend_vm_stack p = EG(argument_stack);
+
+		EG(argument_stack) = p->prev;
+		efree(p);
+	} else {
+		EG(argument_stack)->top = ptr;
+	}
+}
+
+static inline void** zend_vm_stack_push_args(int count TSRMLS_DC)
+{
+
+	if (UNEXPECTED(EG(argument_stack)->top - EG(argument_stack)->elements < count)  || 
+		UNEXPECTED(EG(argument_stack)->top == EG(argument_stack)->end)) {
+		zend_vm_stack p = EG(argument_stack);
+
+		zend_vm_stack_extend(count + 1 TSRMLS_CC);
+
+		EG(argument_stack)->top += count;
+		*(EG(argument_stack)->top) = (void*)(zend_uintptr_t)count;
+		while (count-- > 0) {
+			void *data = *(--p->top);
+
+			if (UNEXPECTED(p->top == p->elements)) {
+				zend_vm_stack r = p;
+
+				EG(argument_stack)->prev = p->prev;
+				p = p->prev;
+				efree(r);
+			}
+			*(EG(argument_stack)->elements + count) = data;
+		}
+		return EG(argument_stack)->top++;
+	}
+	*(EG(argument_stack)->top) = (void*)(zend_uintptr_t)count;
+	return EG(argument_stack)->top++;
+}
+
+static inline void zend_vm_stack_clear_multiple(TSRMLS_D)
+{
+	void **p = EG(argument_stack)->top - 1;
 	int delete_count = (int)(zend_uintptr_t) *p;
 
-	EG(argument_stack).top -= (delete_count+2);
 	while (--delete_count>=0) {
 		zval *q = *(zval **)(--p);
 		*p = NULL;
 		zval_ptr_dtor(&q);
 	}
-	EG(argument_stack).top_element = p;
+	zend_vm_stack_free(p TSRMLS_CC);
 }
 
-static inline int zend_ptr_stack_get_arg(int requested_arg, void **data TSRMLS_DC)
+static inline zval** zend_vm_stack_get_arg(int requested_arg TSRMLS_DC)
 {
-	void **p = EG(argument_stack).top_element-2;
+	void **p = EG(current_execute_data)->prev_execute_data->function_state.arguments;
 	int arg_count = (int)(zend_uintptr_t) *p;
 
-	if (requested_arg>arg_count) {
-		return FAILURE;
+	if (UNEXPECTED(requested_arg > arg_count)) {
+		return NULL;
 	}
-	*data = (p-arg_count+requested_arg-1);
-	return SUCCESS;
+	return (zval**)p - arg_count + requested_arg - 1;
 }
 
 void execute_new_code(TSRMLS_D);

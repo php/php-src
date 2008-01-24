@@ -2,7 +2,7 @@
 
 ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 {
-	zend_execute_data execute_data;
+	zend_execute_data *execute_data;
 	{%HELPER_VARS%}
 
 	{%INTERNAL_LABELS%}
@@ -12,23 +12,23 @@ ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	/* Initialize execute_data */
+	execute_data = (zend_execute_data *)zend_vm_stack_alloc(
+		sizeof(zend_execute_data) +
+		sizeof(zval**) * op_array->last_var +
+		sizeof(temp_variable) * op_array->T TSRMLS_CC);
+
+	EX(CVs) = (zval***)((char*)execute_data + sizeof(zend_execute_data));
+	memset(EX(CVs), 0, sizeof(zval**) * op_array->last_var);
+	EX(Ts) = (temp_variable *)(EX(CVs) + op_array->last_var);
 	EX(fbc) = NULL;
 	EX(called_scope) = NULL;
 	EX(object) = NULL;
 	EX(old_error_reporting) = NULL;
-	if (EXPECTED(op_array->T < TEMP_VAR_STACK_LIMIT && op_array->last_var < TEMP_VAR_STACK_LIMIT)) {
-		EX(CVs) = (zval***)do_alloca(sizeof(zval**) * op_array->last_var + sizeof(temp_variable) * op_array->T, EX(use_heap));
-	} else {
-		SET_ALLOCA_FLAG(EX(use_heap));
-		EX(CVs) = (zval***)safe_emalloc(sizeof(temp_variable), op_array->T, sizeof(zval**) * op_array->last_var);
-	}
-	EX(Ts) = (temp_variable *)(EX(CVs) + op_array->last_var);
-	memset(EX(CVs), 0, sizeof(zval**) * op_array->last_var);
 	EX(op_array) = op_array;
 	EX(original_in_execution) = EG(in_execution);
 	EX(symbol_table) = EG(active_symbol_table);
 	EX(prev_execute_data) = EG(current_execute_data);
-	EG(current_execute_data) = &execute_data;
+	EG(current_execute_data) = execute_data;
 
 	EG(in_execution) = 1;
 	if (op_array->start_op) {
@@ -47,9 +47,10 @@ ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 	EG(opline_ptr) = &EX(opline);
 
 	EX(function_state).function = (zend_function *) op_array;
+	EX(function_state).arguments = NULL;
 
 	while (1) {
-    {%ZEND_VM_CONTINUE_LABEL%}
+	{%ZEND_VM_CONTINUE_LABEL%}
 #ifdef ZEND_WIN32
 		if (EG(timed_out)) {
 			zend_timeout(0);

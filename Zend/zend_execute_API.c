@@ -159,8 +159,8 @@ void init_executor(TSRMLS_D) /* {{{ */
 	EG(in_autoload) = NULL;
 	EG(autoload_func) = NULL;
 
-	zend_ptr_stack_init(&EG(argument_stack));
-	zend_ptr_stack_push(&EG(argument_stack), (void *) NULL);
+	zend_vm_stack_init(TSRMLS_C);
+	zend_vm_stack_push((void *) NULL TSRMLS_CC);
 
 	zend_u_hash_init(&EG(symbol_table), 50, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
 	{
@@ -308,7 +308,7 @@ void shutdown_executor(TSRMLS_D) /* {{{ */
 		}
 		zend_hash_apply(EG(class_table), (apply_func_t) zend_cleanup_class_data TSRMLS_CC);
 
-		zend_ptr_stack_destroy(&EG(argument_stack));
+		zend_vm_stack_destroy(TSRMLS_C);
 
 		/* Destroy all op arrays */
 		if (EG(full_tables_cleanup)) {
@@ -1040,6 +1040,12 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		}
 	}
 
+	if (call_via_handler) {
+		ZEND_VM_STACK_GROW_IF_NEEDED(2 + 1);
+	} else {
+		ZEND_VM_STACK_GROW_IF_NEEDED(fci->param_count + 1);
+	}
+
 	for (i=0; i<fci->param_count; i++) {
 		zval *param;
 
@@ -1051,8 +1057,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				if (fci->no_separation) {
 					if(i) {
 						/* hack to clean up the stack */
-						zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) (zend_uintptr_t) i, NULL);
-						zend_ptr_stack_clear_multiple(TSRMLS_C);
+						zend_vm_stack_push_nocheck((void *) (zend_uintptr_t)i TSRMLS_CC);
+						zend_vm_stack_clear_multiple(TSRMLS_C);
 					}
 					if (old_func_name) {
 						efree(Z_STRVAL_P(fci->function_name));
@@ -1092,17 +1098,18 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		if (call_via_handler) {
 			add_next_index_zval(params_array, param);
 		} else {
-			zend_ptr_stack_push(&EG(argument_stack), param);
+			zend_vm_stack_push_nocheck(param TSRMLS_CC);
 		}
 	}
 
 	if (call_via_handler) {
-		zend_ptr_stack_push(&EG(argument_stack), method_name);
-		zend_ptr_stack_push(&EG(argument_stack), params_array);
+		zend_vm_stack_push_nocheck(method_name TSRMLS_CC);
+		zend_vm_stack_push_nocheck(params_array TSRMLS_CC);
 		fci->param_count = 2;
 	}
 
-	zend_ptr_stack_2_push(&EG(argument_stack), (void *) (zend_uintptr_t) fci->param_count, NULL);
+	EX(function_state).arguments = zend_vm_stack_top(TSRMLS_C);
+	zend_vm_stack_push_nocheck((void*)(zend_uintptr_t)fci->param_count TSRMLS_CC);
 
 	current_scope = EG(scope);
 	EG(scope) = calling_scope;
@@ -1191,7 +1198,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			*fci->retval_ptr_ptr = NULL;
 		}
 	}
-	zend_ptr_stack_clear_multiple(TSRMLS_C);
+	zend_vm_stack_clear_multiple(TSRMLS_C);
 	if (call_via_handler) {
 		zval_ptr_dtor(&method_name);
 		zval_ptr_dtor(&params_array);

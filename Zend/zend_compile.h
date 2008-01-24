@@ -276,6 +276,7 @@ typedef union _zend_function {
 
 typedef struct _zend_function_state {
 	zend_function *function;
+	void **arguments;
 } zend_function_state;
 
 
@@ -304,7 +305,6 @@ struct _zend_execute_data {
 	union _temp_variable *Ts;
 	zval ***CVs;
 	zend_bool original_in_execution;
-	ALLOCA_FLAG(use_heap)
 	HashTable *symbol_table;
 	struct _zend_execute_data *prev_execute_data;
 	zval *old_error_reporting;

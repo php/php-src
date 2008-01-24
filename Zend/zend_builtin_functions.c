@@ -178,18 +178,10 @@ ZEND_FUNCTION(zend_version)
    Get the number of arguments that were passed to the function */
 ZEND_FUNCTION(func_num_args)
 {
-	void **p;
-	int arg_count;
+	zend_execute_data *ex = EG(current_execute_data)->prev_execute_data;
 
-	p = EG(argument_stack).top_element-1-1;
-	arg_count = (int)(zend_uintptr_t) *p;		/* this is the amount of arguments passed to func_num_args(); */
-	p -= 1+arg_count;
-	if (*p) {
-		zend_error(E_ERROR, "func_num_args(): Can't be used as a function parameter");
-	}
-	--p;
-	if (p>=EG(argument_stack).elements) {
-		RETURN_LONG((long)(zend_uintptr_t) *p);
+	if (ex && ex->function_state.arguments) {
+		RETURN_LONG((long)(zend_uintptr_t)*(ex->function_state.arguments));
 	} else {
 		zend_error(E_WARNING, "func_num_args():  Called from the global scope - no function context");
 		RETURN_LONG(-1);
@@ -206,6 +198,7 @@ ZEND_FUNCTION(func_get_arg)
 	zval **z_requested_offset;
 	zval *arg;
 	long requested_offset;
+	zend_execute_data *ex = EG(current_execute_data)->prev_execute_data;
 
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &z_requested_offset)==FAILURE) {
 		RETURN_FALSE;
@@ -218,20 +211,15 @@ ZEND_FUNCTION(func_get_arg)
 		RETURN_FALSE;
 	}
 
-	p = EG(argument_stack).top_element-1-1;
-	arg_count = (int)(zend_uintptr_t) *p;		/* this is the amount of arguments passed to func_get_arg(); */
-	p -= 1+arg_count;
-	if (*p) {
-		zend_error(E_ERROR, "func_get_arg(): Can't be used as a function parameter");
-	}
-	--p;
-	if (p<EG(argument_stack).elements) {
+	if (!ex || !ex->function_state.arguments) {
 		zend_error(E_WARNING, "func_get_arg():  Called from the global scope - no function context");
 		RETURN_FALSE;
 	}
-	arg_count = (int)(zend_uintptr_t) *p;
 
-	if (requested_offset>=arg_count) {
+	p = ex->function_state.arguments;
+	arg_count = (int)(zend_uintptr_t) *p;		/* this is the amount of arguments passed to func_get_arg(); */
+
+	if (requested_offset >= arg_count) {
 		zend_error(E_WARNING, "func_get_arg():  Argument %ld not passed to function", requested_offset);
 		RETURN_FALSE;
 	}
@@ -250,21 +238,15 @@ ZEND_FUNCTION(func_get_args)
 	void **p;
 	int arg_count;
 	int i;
+	zend_execute_data *ex = EG(current_execute_data)->prev_execute_data;
 
-	p = EG(argument_stack).top_element-1-1;
-	arg_count = (int)(zend_uintptr_t) *p;		/* this is the amount of arguments passed to func_get_args(); */
-	p -= 1+arg_count;
-	if (*p) {
-		zend_error(E_ERROR, "func_get_args(): Can't be used as a function parameter");
-	}
-	--p;
-
-	if (p<EG(argument_stack).elements) {
+	if (!ex || !ex->function_state.arguments) {
 		zend_error(E_WARNING, "func_get_args():  Called from the global scope - no function context");
 		RETURN_FALSE;
 	}
-	arg_count = (int)(zend_uintptr_t) *p;
 
+	p = ex->function_state.arguments;
+	arg_count = (int)(zend_uintptr_t) *p;		/* this is the amount of arguments passed to func_get_args(); */
 
 	array_init(return_value);
 	for (i=0; i<arg_count; i++) {
@@ -1786,13 +1768,11 @@ bad_module_id:
 }
 /* }}} */
 
-static zval *debug_backtrace_get_args(void ***curpos TSRMLS_DC) /* {{{ */
+static zval *debug_backtrace_get_args(void **curpos TSRMLS_DC) /* {{{ */
 {
-	void **p = *curpos - 2;
+	void **p = curpos;
 	zval *arg_array, **arg;
 	int arg_count = (int)(zend_uintptr_t) *p;
-
-	*curpos -= (arg_count+2);
 
 	MAKE_STD_ZVAL(arg_array);
 	array_init(arg_array);
@@ -1809,11 +1789,6 @@ static zval *debug_backtrace_get_args(void ***curpos TSRMLS_DC) /* {{{ */
 		} else {
 			add_next_index_null(arg_array);
 		}
-	}
-
-	/* skip args from incomplete frames */
-	while ((((*curpos)-1) > EG(argument_stack).elements) && *((*curpos)-1)) {
-		(*curpos)--;
 	}
 
 	return arg_array;
@@ -1848,47 +1823,16 @@ ZEND_FUNCTION(debug_print_backtrace)
 	char *call_type;
 	char *include_filename = NULL;
 	zval *arg_array = NULL;
-	void **cur_arg_pos = EG(argument_stack).top_element;
-	void **args = cur_arg_pos;
-	int arg_stack_consistent = 0;
-	int frames_on_stack = 0;
 	int indent = 0;
 
 	if (ZEND_NUM_ARGS()) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
-	while (--args > EG(argument_stack).elements) {
-		if (*args--) {
-			break;
-		}
-		args -= *(ulong*)args;
-		frames_on_stack++;
-
-		/* skip args from incomplete frames */
-		while (((args-1) > EG(argument_stack).elements) && *(args-1)) {
-			args--;
-		}
-
-		if ((args-1) == EG(argument_stack).elements) {
-			arg_stack_consistent = 1;
-			break;
-		}
-	}
-
 	ptr = EG(current_execute_data);
 
 	/* skip debug_backtrace() */
 	ptr = ptr->prev_execute_data;
-	cur_arg_pos -= 2;
-	frames_on_stack--;
-
-	if (arg_stack_consistent) {
-		/* skip args from incomplete frames */
-		while (((cur_arg_pos-1) > EG(argument_stack).elements) && *(cur_arg_pos-1)) {
-			cur_arg_pos--;
-		}
-	}
 
 	while (ptr) {
 		zstr free_class_name = NULL_ZSTR;
@@ -1906,7 +1850,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL &&
 		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL_BY_NAME &&
 		    skip->prev_execute_data->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
-		  skip = skip->prev_execute_data;
+			skip = skip->prev_execute_data;
 		}
 
 		if (skip->op_array) {
@@ -1943,9 +1887,8 @@ ZEND_FUNCTION(debug_print_backtrace)
 				call_type = NULL;
 			}
 			if ((! ptr->opline) || ((ptr->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (ptr->opline->opcode == ZEND_DO_FCALL))) {
-				if (arg_stack_consistent && (frames_on_stack > 0)) {
-					arg_array = debug_backtrace_get_args(&cur_arg_pos TSRMLS_CC);
-					frames_on_stack--;
+				if (ptr->function_state.arguments) {
+					arg_array = debug_backtrace_get_args(ptr->function_state.arguments TSRMLS_CC);
 				}
 			}
 		} else {
@@ -2048,28 +1991,6 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 	zstr class_name;
 	char *include_filename = NULL;
 	zval *stack_frame;
-	void **cur_arg_pos = EG(argument_stack).top_element;
-	void **args = cur_arg_pos;
-	int arg_stack_consistent = 0;
-	int frames_on_stack = 0;
-
-	while (--args > EG(argument_stack).elements) {
-		if (*args--) {
-			break;
-		}
-		args -= *(ulong*)args;
-		frames_on_stack++;
-
-		/* skip args from incomplete frames */
-		while (((args-1) > EG(argument_stack).elements) && *(args-1)) {
-			args--;
-		}
-
-		if ((args-1) == EG(argument_stack).elements) {
-			arg_stack_consistent = 1;
-			break;
-		}
-	}
 
 	ptr = EG(current_execute_data);
 
@@ -2080,17 +2001,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 	/* skip debug_backtrace() */
 	if (skip_last-- && ptr) {
-		int arg_count = *((ulong*)(cur_arg_pos - 2));
-		cur_arg_pos -= (arg_count + 2);
-		frames_on_stack--;
 		ptr = ptr->prev_execute_data;
-
-		if (arg_stack_consistent) {
-			/* skip args from incomplete frames */
-			while (((cur_arg_pos-1) > EG(argument_stack).elements) && *(cur_arg_pos-1)) {
-				cur_arg_pos--;
-			}
-		}
 	}
 
 	array_init(return_value);
@@ -2164,9 +2075,8 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			}
 
 			if ((! ptr->opline) || ((ptr->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (ptr->opline->opcode == ZEND_DO_FCALL))) {
-				if (arg_stack_consistent && (frames_on_stack > 0)) {
-					add_ascii_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(&cur_arg_pos TSRMLS_CC));
-					frames_on_stack--;
+				if (ptr->function_state.arguments) {
+					add_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(ptr->function_state.arguments TSRMLS_CC));
 				}
 			}
 		} else {
