@@ -203,6 +203,7 @@ ZEND_API void gc_zobj_possible_root(zval *zv TSRMLS_DC)
 				zv->refcount__gc++;
 				gc_collect_cycles(TSRMLS_C);
 				zv->refcount__gc--;
+				obj = &EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zv)].bucket.obj;
 				GC_SET_PURPLE(obj->buffered);
 				newRoot = GC_G(unused);
 			}
