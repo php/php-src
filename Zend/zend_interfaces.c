@@ -422,7 +422,7 @@ int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len
 			zval_ptr_dtor(&retval);
 			return FAILURE;
 		case IS_STRING:
-			*buffer = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
+			*buffer = (unsigned char*)estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
 			*buf_len = Z_STRLEN_P(retval);
 			result = SUCCESS;
 			break;
