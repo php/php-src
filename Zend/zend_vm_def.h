@@ -1310,12 +1310,9 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	}
 	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_W);
 	if (OP1_TYPE == IS_VAR && !container) {
-		zend_error(E_WARNING, "Cannot use string offset as an array");
-		EX_T(opline->result.u.var).var.ptr_ptr = &EG(error_zval_ptr);
-		PZVAL_LOCK(EG(error_zval_ptr));
-	} else {
-		zend_fetch_property_address(&EX_T(opline->result.u.var), container, property, BP_VAR_W TSRMLS_CC);
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
+	zend_fetch_property_address(&EX_T(opline->result.u.var), container, property, BP_VAR_W TSRMLS_CC);
 	if (IS_OP2_TMP_FREE()) {
 		zval_ptr_dtor(&property);
 	} else {
@@ -1352,12 +1349,9 @@ ZEND_VM_HANDLER(88, ZEND_FETCH_OBJ_RW, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 		MAKE_REAL_ZVAL_PTR(property);
 	}
 	if (OP1_TYPE == IS_VAR && !container) {
-		zend_error(E_WARNING, "Cannot use string offset as an array");
-		EX_T(opline->result.u.var).var.ptr_ptr = &EG(error_zval_ptr);
-		PZVAL_LOCK(EG(error_zval_ptr));
-	} else {
-		zend_fetch_property_address(&EX_T(opline->result.u.var), container, property, BP_VAR_RW TSRMLS_CC);
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
+	zend_fetch_property_address(&EX_T(opline->result.u.var), container, property, BP_VAR_RW TSRMLS_CC);
 	if (IS_OP2_TMP_FREE()) {
 		zval_ptr_dtor(&property);
 	} else {
@@ -1394,12 +1388,9 @@ ZEND_VM_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 			MAKE_REAL_ZVAL_PTR(property);
 		}
 		if (OP1_TYPE == IS_VAR && !container) {
-			zend_error(E_WARNING, "Cannot use string offset as an array");
-			EX_T(opline->result.u.var).var.ptr_ptr = &EG(error_zval_ptr);
-			PZVAL_LOCK(EG(error_zval_ptr));
-		} else {
-			zend_fetch_property_address(&EX_T(opline->result.u.var), container, property, BP_VAR_W TSRMLS_CC);
+			zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 		}
+		zend_fetch_property_address(&EX_T(opline->result.u.var), container, property, BP_VAR_W TSRMLS_CC);
 		if (IS_OP2_TMP_FREE()) {
 			zval_ptr_dtor(&property);
 		} else {
@@ -1436,12 +1427,9 @@ ZEND_VM_HANDLER(97, ZEND_FETCH_OBJ_UNSET, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 		MAKE_REAL_ZVAL_PTR(property);
 	}
 	if (OP1_TYPE == IS_VAR && !container) {
-		zend_error(E_WARNING, "Cannot use string offset as an array");
-		EX_T(opline->result.u.var).var.ptr_ptr = &EG(error_zval_ptr);
-		PZVAL_LOCK(EG(error_zval_ptr));
-	} else {
-		zend_fetch_property_address(&EX_T(opline->result.u.var), container, property, BP_VAR_UNSET TSRMLS_CC);
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
+	zend_fetch_property_address(&EX_T(opline->result.u.var), container, property, BP_VAR_UNSET TSRMLS_CC);
 	if (IS_OP2_TMP_FREE()) {
 		zval_ptr_dtor(&property);
 	} else {
