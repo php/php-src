@@ -1654,7 +1654,7 @@ ZEND_FUNCTION(get_defined_constants)
 		zend_constant *val;
 		int module_number;
 		zval **modules;
-		const char **module_names;
+		char **module_names;
 		zend_module_entry *module;
 		int i = 1;
 
@@ -1664,7 +1664,7 @@ ZEND_FUNCTION(get_defined_constants)
 		module_names[0] = "internal";
 		zend_hash_internal_pointer_reset_ex(&module_registry, &pos);
 		while (zend_hash_get_current_data_ex(&module_registry, (void *) &module, &pos) != FAILURE) {
-			module_names[i++] = module->name;
+			module_names[i++] = (char*)module->name;
 			zend_hash_move_forward_ex(&module_registry, &pos);
 		}
 		module_names[i] = "user";
