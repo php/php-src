@@ -1234,12 +1234,7 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 	zval *container;
 
 	if (!container_ptr) {
-		zend_error(E_WARNING, "Cannot use string offset as an array");
-		if (result) {
-			result->var.ptr_ptr = &EG(error_zval_ptr);
-			PZVAL_LOCK(*result->var.ptr_ptr);
-		}
-		return;
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
 	container = *container_ptr;
