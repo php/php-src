@@ -1,3 +1,24 @@
+2008-01-23  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      zend_execute.c:
+      fix build
+
+2008-01-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c:
+      typo
+
+    * zend_compile.c
+      zend_compile.c
+      zend_execute.c
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Additional executor specialization
+
 2008-01-22  Dmitry Stogov  <dmitry@zend.com>
 
     * zend.c

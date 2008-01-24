@@ -1,3 +1,135 @@
+2008-01-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      EXTENSIONS:
+      
+      Added myself as pdo_mysql & pdo_pgsql maintainer
+
+2008-01-23  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_execute.c
+      win32/build/config.w32:
+      fix build
+
+2008-01-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      typo
+
+2008-01-23  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysqlnd/config.w32
+      ext/mysqlnd/config9.m4
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_charset.c
+      ext/mysqlnd/mysqlnd_charset.c
+      ext/mysqlnd/mysqlnd_charset.h
+      ext/mysqlnd/mysqlnd_charset.h
+      ext/mysqlnd/mysqlnd_debug.c
+      ext/mysqlnd/mysqlnd_debug.h
+      ext/mysqlnd/mysqlnd_enum_n_def.h
+      ext/mysqlnd/mysqlnd_libmysql_compat.h
+      ext/mysqlnd/mysqlnd_libmysql_compat.h
+      ext/mysqlnd/mysqlnd_loaddata.c
+      ext/mysqlnd/mysqlnd_loaddata.c
+      ext/mysqlnd/mysqlnd_palloc.c
+      ext/mysqlnd/mysqlnd_palloc.c
+      ext/mysqlnd/mysqlnd_palloc.h
+      ext/mysqlnd/mysqlnd_portability.h
+      ext/mysqlnd/mysqlnd_portability.h
+      ext/mysqlnd/mysqlnd_priv.h
+      ext/mysqlnd/mysqlnd_priv.h
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_ps_codec.c
+      ext/mysqlnd/mysqlnd_qcache.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_result.h
+      ext/mysqlnd/mysqlnd_result_meta.c
+      ext/mysqlnd/mysqlnd_result_meta.c
+      ext/mysqlnd/mysqlnd_result_meta.h
+      ext/mysqlnd/mysqlnd_statistics.c
+      ext/mysqlnd/mysqlnd_statistics.h
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqlnd/mysqlnd_wireprotocol.h
+      ext/mysqlnd/mysqlnd_wireprotocol.h:
+      Merge with internal version
+
+2008-01-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Additional executor specialization
+
+2008-01-23  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/date/php_date.c:
+      add missing TSRMLS_CC and fix segfaults in ZTS mode
+
+    * (PHP_5_3)
+      NEWS:
+      BFN
+
+    * (PHP_5_3)
+      ext/standard/array.c
+      ext/standard/tests/array/array_merge_recursive_variation5.phpt:
+      MFH: fix #43559 (array_merge_recursive() doesn't behave as expected with
+      duplicate NULL values)
+      patch by Felipe
+
+    * ext/standard/array.c:
+      fix #43559 (array_merge_recursive() doesn't behave as expected with
+      duplicate NULL values)
+      patch by Felipe
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug37076_1.phpt:
+      MFH: fix leak appearing when appending data to unnamed attribute
+
+    * (PHP_5_3)
+      ext/simplexml/tests/bug37076_1.phpt:
+      use expectF
+
+    * (PHP_5_3)
+      ext/simplexml/tests/bug37076_1.phpt
+      ext/standard/tests/array/array_merge_recursive_variation5.phpt:
+      fix test
+
+    * (PHP_5_3)
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug37076_1.phpt
+      ext/simplexml/tests/bug37076_1.phpt:
+      fix leak appearing when appending data to unnamed attribute
+
+2008-01-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/interbase/php_ibase_includes.h
+      ext/interbase/php_ibase_includes.h:
+      
+      MFB:Fixed bug #43912 (Interbase column names are truncated to 31
+      characters)
+
+    * (PHP_5_3)
+      ext/interbase/php_ibase_includes.h:
+      Fixed bug #43912 (Interbase column names are truncated to 31 characters)
+
 2008-01-22  Marcus Boerger  <php@marcus-boerger.de>
 
     * (PHP_5_3)
