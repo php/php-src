@@ -404,7 +404,7 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2) {
 					"/ZEND_VM_DISPATCH_TO_HELPER_EX\(\s*([A-Za-z_]*)\s*,\s*([A-Za-z_]*)\s*,\s*(.*)\s*\);/me",
 				),
 				array(
-					"&execute_data",
+					"execute_data",
 					"goto \\1".($spec?"_SPEC":"").$prefix[$op1].$prefix[$op2]."_LABEL",
 					"'goto '.helper_name('\\1',$spec,'$op1','$op2')",
 					"'\\2 = \\3; goto '.helper_name('\\1',$spec,'$op1','$op2').';'",
@@ -420,7 +420,7 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2) {
 					"/ZEND_VM_DISPATCH_TO_HELPER_EX\(\s*([A-Za-z_]*)\s*,\s*([A-Za-z_]*)\s*,\s*(.*)\s*\);/me",
 				),
 				array(
-					"&execute_data",
+					"execute_data",
 					"goto \\1".($spec?"_SPEC":"").$prefix[$op1].$prefix[$op2]."_HANDLER",
 					"'goto '.helper_name('\\1',$spec,'$op1','$op2')",
 					"'\\2 = \\3; goto '.helper_name('\\1',$spec,'$op1','$op2').';'",
@@ -801,20 +801,26 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 							out($f,"#define ZEND_VM_RETURN()     return 1\n");
 							out($f,"#define ZEND_VM_DISPATCH(opcode, opline) return zend_vm_get_opcode_handler(opcode, opline)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n\n");
 							out($f,"#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data TSRMLS_CC\n");
+							out($f,"#undef EX\n");
+							out($f,"#define EX(element) execute_data->element\n\n");
 							break;
 						case ZEND_VM_KIND_SWITCH:
 							out($f,"\n");
 							out($f,"#define ZEND_VM_CONTINUE() goto zend_vm_continue\n");
 							out($f,"#define ZEND_VM_RETURN()   return\n");
 							out($f,"#define ZEND_VM_DISPATCH(opcode, opline) dispatch_handler = zend_vm_get_opcode_handler(opcode, opline); goto zend_vm_dispatch;\n\n");
-							out($f,"#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL &execute_data TSRMLS_CC\n");
+							out($f,"#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data TSRMLS_CC\n");
+							out($f,"#undef EX\n");
+							out($f,"#define EX(element) execute_data->element\n\n");
 							break;
 						case ZEND_VM_KIND_GOTO:
 							out($f,"\n");
 							out($f,"#define ZEND_VM_CONTINUE() goto *(void**)(EX(opline)->handler)\n");
 							out($f,"#define ZEND_VM_RETURN()   return\n");
 							out($f,"#define ZEND_VM_DISPATCH(opcode, opline) goto *(void**)(zend_vm_get_opcode_handler(opcode, opline));\n\n");
-							out($f,"#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL &execute_data TSRMLS_CC\n");
+							out($f,"#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data TSRMLS_CC\n");
+							out($f,"#undef EX\n");
+							out($f,"#define EX(element) execute_data->element\n\n");
 							break;
 					}
 					break;
@@ -862,7 +868,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 				  // Emit code that dispatches to opcode handler
 					switch ($kind) {
 						case ZEND_VM_KIND_CALL:
-							out($f, $m[1]."if (EX(opline)->handler(&execute_data TSRMLS_CC) > 0)".$m[3]."\n");
+							out($f, $m[1]."if (EX(opline)->handler(execute_data TSRMLS_CC) > 0)".$m[3]."\n");
 							break;
 						case ZEND_VM_KIND_SWITCH:
 							out($f, $m[1]."dispatch_handler = EX(opline)->handler;\nzend_vm_dispatch:\n".$m[1]."switch ((int)dispatch_handler)".$m[3]."\n");
@@ -886,9 +892,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 					  // Unspecialized executor with CALL threading is the same as the
 					  // old one, so we don't need to produce code twitch
 						if (!$old || ZEND_VM_SPEC || (ZEND_VM_KIND != ZEND_VM_KIND_CALL)) {
-							out($f,"#undef EX\n");
-							out($f,"#define EX(element) execute_data->element\n\n");
-						  // Emit executor code
+							// Emit executor code
 							gen_executor_code($f, $spec, $kind, $m[1]);
 						}
 					}
