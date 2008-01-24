@@ -270,6 +270,11 @@ PHP_FUNCTION(dbase_add_record)
 	}
 	convert_to_long_ex(dbh_id);
 
+	if (Z_TYPE_PP(fields) != IS_ARRAY) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument two must be of type 'Array'");
+		RETURN_FALSE;
+	}
+
 	dbh = zend_list_find(Z_LVAL_PP(dbh_id), &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %ld", Z_LVAL_PP(dbh_id));
@@ -336,6 +341,11 @@ PHP_FUNCTION(dbase_replace_record)
 	}
 	convert_to_long_ex(dbh_id);
 	convert_to_long_ex(recnum);
+
+	if (Z_TYPE_PP(fields) != IS_ARRAY) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument two must be of type 'Array'");
+		RETURN_FALSE;
+	}
 
 	dbh = zend_list_find(Z_LVAL_PP(dbh_id), &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
