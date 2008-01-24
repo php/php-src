@@ -1,8 +1,8 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <regex.h>
 
+#include "regex.h"
 #include "utils.h"
 #include "regex2.h"
 
