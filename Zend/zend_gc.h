@@ -199,6 +199,12 @@ static zend_always_inline void gc_remove_zval_from_buffer(zval* z)
 	}
 }
 
+#define ALLOC_PERMANENT_ZVAL(z)							\
+	do {												\
+		(z) = (zval*)malloc(sizeof(zval_gc_info));		\
+		GC_ZVAL_INIT(z);								\
+	} while (0)
+
 /* The following macroses override macroses from zend_alloc.h */
 #undef  ALLOC_ZVAL
 #define ALLOC_ZVAL(z) 									\
