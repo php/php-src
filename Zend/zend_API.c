@@ -43,7 +43,7 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...) /* {{{ */
 	zval **param, *param_ptr;
 	TSRMLS_FETCH();
 
-	p = EG(argument_stack).top_element-2;
+	p = zend_vm_stack_top(TSRMLS_C) - 1;
 	arg_count = (int)(zend_uintptr_t) *p;
 
 	if (param_count>arg_count) {
@@ -81,7 +81,7 @@ ZEND_API int _zend_get_parameters_array(int ht, int param_count, zval **argument
 	int arg_count;
 	zval *param_ptr;
 
-	p = EG(argument_stack).top_element-2;
+	p = zend_vm_stack_top(TSRMLS_C) - 1;
 	arg_count = (int)(zend_uintptr_t) *p;
 
 	if (param_count>arg_count) {
@@ -119,7 +119,7 @@ ZEND_API int zend_get_parameters_ex(int param_count, ...) /* {{{ */
 	zval ***param;
 	TSRMLS_FETCH();
 
-	p = EG(argument_stack).top_element-2;
+	p = zend_vm_stack_top(TSRMLS_C) - 1;
 	arg_count = (int)(zend_uintptr_t) *p;
 
 	if (param_count>arg_count) {
@@ -142,7 +142,7 @@ ZEND_API int _zend_get_parameters_array_ex(int param_count, zval ***argument_arr
 	void **p;
 	int arg_count;
 
-	p = EG(argument_stack).top_element-2;
+	p = zend_vm_stack_top(TSRMLS_C) - 1;
 	arg_count = (int)(zend_uintptr_t) *p;
 
 	if (param_count>arg_count) {
@@ -187,7 +187,7 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array TS
 	void **p;
 	int arg_count;
 
-	p = EG(argument_stack).top_element-2;
+	p = zend_vm_stack_top(TSRMLS_C) - 1;
 	arg_count = (int)(zend_uintptr_t) *p;
 
 	if (param_count>arg_count) {
@@ -746,7 +746,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 		return FAILURE;
 	}
 
-	arg_count = (int)(zend_uintptr_t) *(EG(argument_stack).top_element-2);
+	arg_count = (int)(zend_uintptr_t) *(zend_vm_stack_top(TSRMLS_C) - 1);
 
 	if (num_args > arg_count) {
 		zend_error(E_WARNING, "%s(): could not obtain parameters for parsing",
@@ -770,7 +770,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 
 			if (num_varargs > 0) {
 				int iv = 0;
-				zval **p = (zval **) (EG(argument_stack).top_element - 2 - (arg_count - i));
+				zval **p = (zval **) (zend_vm_stack_top(TSRMLS_C) - 1 - (arg_count - i));
 
 				*n_varargs = num_varargs;
 
@@ -790,7 +790,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 			}
 		}
 
-		arg = (zval **) (EG(argument_stack).top_element - 2 - (arg_count-i));
+		arg = (zval **) (zend_vm_stack_top(TSRMLS_C) - 1 - (arg_count-i));
 
 		if (zend_parse_arg(i+1, arg, va, &type_spec, quiet TSRMLS_CC) == FAILURE) {
 			/* clean up varargs array if it was used */
