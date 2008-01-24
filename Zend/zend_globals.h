@@ -64,6 +64,7 @@ typedef struct _zend_declarables {
 	zval ticks;
 } zend_declarables;
 
+typedef struct _zend_vm_stack *zend_vm_stack;
 
 struct _zend_compiler_globals {
 	zend_stack bp_stack;
@@ -207,7 +208,7 @@ struct _zend_executor_globals {
 	HashTable regular_list;
 	HashTable persistent_list;
 
-	zend_ptr_stack argument_stack;
+	zend_vm_stack argument_stack;
 
 	int user_error_handler_error_reporting;
 	zval *user_error_handler;

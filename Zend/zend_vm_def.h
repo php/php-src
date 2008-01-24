@@ -2153,7 +2153,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 	}
 
 	zend_ptr_stack_3_pop(&EG(arg_types_stack), (void*)&EX(called_scope), (void**)&ex_object, (void**)&EX(fbc));
-	zend_ptr_stack_2_push(&EG(argument_stack), (void *)(zend_uintptr_t)opline->extended_value, NULL);
+	EX(function_state).arguments = zend_vm_stack_push_args(opline->extended_value TSRMLS_CC);
 
 	EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
 
@@ -2163,11 +2163,8 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 
 		if (EX(function_state).function->common.arg_info) {
 			zend_uint i=0;
-			zval **p;
-			ulong arg_count;
-
-			p = (zval **) EG(argument_stack).top_element-2;
-			arg_count = (ulong)(zend_uintptr_t) *p;
+			zval **p = (zval**)EX(function_state).arguments;
+			ulong arg_count = opline->extended_value;
 
 			while (arg_count>0) {
 				zend_verify_arg_type(EX(function_state).function, ++i, *(p-arg_count), 0 TSRMLS_CC);
@@ -2255,6 +2252,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 	}
 
 	EX(function_state).function = (zend_function *) EX(op_array);
+	EX(function_state).arguments = NULL;
 
 	if (EG(This)) {
 		if (EG(exception) && IS_CTOR_CALL(EX(called_scope))) {
@@ -2279,7 +2277,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 		EG(called_scope) = current_called_scope;
 	}
 
-	zend_ptr_stack_clear_multiple(TSRMLS_C);
+	zend_vm_stack_clear_multiple(TSRMLS_C);
 
 	if (EG(exception)) {
 		zend_throw_exception_internal(NULL TSRMLS_CC);
@@ -2455,7 +2453,7 @@ ZEND_VM_HANDLER(65, ZEND_SEND_VAL, CONST|TMP|VAR|CV, ANY)
 		if (!IS_OP1_TMP_FREE()) {
 			zval_copy_ctor(valptr);
 		}
-		zend_ptr_stack_push(&EG(argument_stack), valptr);
+		zend_vm_stack_push(valptr TSRMLS_CC);
 		FREE_OP1_IF_VAR();
 	}
 	ZEND_VM_NEXT_OPCODE();
@@ -2482,7 +2480,7 @@ ZEND_VM_HELPER(zend_send_by_var_helper, VAR|CV, ANY)
 		zval_copy_ctor(varptr);
 	}
 	Z_ADDREF_P(varptr);
-	zend_ptr_stack_push(&EG(argument_stack), varptr);
+	zend_vm_stack_push(varptr TSRMLS_CC);
 	FREE_OP1();  /* for string offsets */
 
 	ZEND_VM_NEXT_OPCODE();
@@ -2518,7 +2516,7 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR|CV, ANY)
 	     (Z_REFCOUNT_P(varptr) == 1 && (OP1_TYPE == IS_CV || free_op1.var)))) {
 		Z_SET_ISREF_P(varptr);
 		Z_ADDREF_P(varptr);
-		zend_ptr_stack_push(&EG(argument_stack), varptr);
+		zend_vm_stack_push(varptr TSRMLS_CC);
 	} else {
 		zval *valptr;
 
@@ -2528,7 +2526,7 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR|CV, ANY)
 		if (!IS_OP1_TMP_FREE()) {
 			zval_copy_ctor(valptr);
 		}
-		zend_ptr_stack_push(&EG(argument_stack), valptr);
+		zend_vm_stack_push(valptr TSRMLS_CC);
 	}
 	FREE_OP1_IF_VAR();
 	ZEND_VM_NEXT_OPCODE();
@@ -2549,7 +2547,7 @@ ZEND_VM_HANDLER(67, ZEND_SEND_REF, VAR|CV, ANY)
 	SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr_ptr);
 	varptr = *varptr_ptr;
 	Z_ADDREF_P(varptr);
-	zend_ptr_stack_push(&EG(argument_stack), varptr);
+	zend_vm_stack_push(varptr TSRMLS_CC);
 
 	FREE_OP1_VAR_PTR();
 	ZEND_VM_NEXT_OPCODE();
@@ -2569,10 +2567,10 @@ ZEND_VM_HANDLER(66, ZEND_SEND_VAR, VAR|CV, ANY)
 ZEND_VM_HANDLER(63, ZEND_RECV, ANY, ANY)
 {
 	zend_op *opline = EX(opline);
-	zval **param;
 	zend_uint arg_num = Z_LVAL(opline->op1.u.constant);
+	zval **param = zend_vm_stack_get_arg(arg_num TSRMLS_CC);
 
-	if (zend_ptr_stack_get_arg(arg_num, (void **) &param TSRMLS_CC)==FAILURE) {
+	if (param == NULL) {
 		char *space;
 		zstr class_name = get_active_class_name(&space TSRMLS_CC);
 		zend_execute_data *ptr = EX(prev_execute_data);
@@ -2606,11 +2604,12 @@ ZEND_VM_HANDLER(63, ZEND_RECV, ANY, ANY)
 ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 {
 	zend_op *opline = EX(opline);
-	zval **param, *assignment_value, **var_ptr;
+	zval *assignment_value, **var_ptr;
 	zend_uint arg_num = Z_LVAL(opline->op1.u.constant);
 	zend_free_op free_res;
+	zval **param = zend_vm_stack_get_arg(arg_num TSRMLS_CC);
 
-	if (zend_ptr_stack_get_arg(arg_num, (void **) &param TSRMLS_CC)==FAILURE) {
+	if (param == NULL) {
 		if ((Z_TYPE(opline->op2.u.constant) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT || Z_TYPE(opline->op2.u.constant)==IS_CONSTANT_ARRAY) {
 			zval *default_value;
 
@@ -4173,15 +4172,16 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	int i;
 	zend_uint catch_op_num;
 	int catched = 0;
-	zval **stack_zval_pp;
 	zval restored_error_reporting;
+ 
+	void **stack_frame = (void**)execute_data +
+		(sizeof(zend_execute_data) +
+		 sizeof(zval**) * EX(op_array)->last_var +
+		 sizeof(temp_variable) * EX(op_array)->T) / sizeof(void*);
 
-	stack_zval_pp = (zval **) EG(argument_stack).top_element - 1;
-	while (*stack_zval_pp != NULL) {
-		zval_ptr_dtor(stack_zval_pp);
-		EG(argument_stack).top_element--;
-		EG(argument_stack).top--;
-		stack_zval_pp--;
+	while (zend_vm_stack_top(TSRMLS_C) != stack_frame) {
+		zval *stack_zval_p = zend_vm_stack_pop(TSRMLS_C);
+		zval_ptr_dtor(&stack_zval_p);
 	}
 
 	for (i=0; i<EG(active_op_array)->last_try_catch; i++) {
