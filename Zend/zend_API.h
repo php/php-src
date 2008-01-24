@@ -1790,22 +1790,23 @@ END_EXTERN_C()
 		Z_TYPE_P(z) = IS_UNICODE;		\
 	}
 
-#define ZVAL_ZVAL(z, zv, copy, dtor) {	\
-		int is_ref, refcount;			\
-		is_ref = Z_ISREF_P(z);			\
-		refcount = Z_REFCOUNT_P(z);		\
-		*(z) = *(zv);					\
-		if (copy) {						\
-			zval_copy_ctor(z);			\
-	    }								\
-		if (dtor) {						\
-			if (!copy) {				\
-				ZVAL_NULL(zv);			\
-			}							\
-			zval_ptr_dtor(&zv);			\
-	    }								\
-		Z_SET_ISREF_TO_P(z, is_ref);	\
-		Z_SET_REFCOUNT_P(z, refcount);	\
+#define ZVAL_ZVAL(z, zv, copy, dtor) {			\
+		zend_uchar is_ref = Z_ISREF_P(z);		\
+		zend_uint refcount = Z_REFCOUNT_P(z);	\
+		is_ref = Z_ISREF_P(z);					\
+		refcount = Z_REFCOUNT_P(z);				\
+		*(z) = *(zv);							\
+		if (copy) {								\
+			zval_copy_ctor(z);					\
+	    }										\
+		if (dtor) {								\
+			if (!copy) {						\
+				ZVAL_NULL(zv);					\
+			}									\
+			zval_ptr_dtor(&zv);					\
+	    }										\
+		Z_SET_ISREF_TO_P(z, is_ref);			\
+		Z_SET_REFCOUNT_P(z, refcount);			\
 	}
 
 #define ZVAL_TEXT(z, t, duplicate)					\

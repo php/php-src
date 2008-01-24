@@ -1164,7 +1164,6 @@ static int zend_scan_unicode_single_string(zval *zendlval TSRMLS_DC)
 {
 	register UChar *s, *t;
 	UChar *end;
-	UChar32 codepoint = 0;
 
 	if (!zend_copy_scanner_string(zendlval, yytext+1, yyleng-2, IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
 		return 0;

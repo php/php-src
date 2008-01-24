@@ -4266,7 +4266,7 @@ ZEND_VM_HANDLER(150, ZEND_USER_OPCODE, ANY, ANY)
 		case ZEND_USER_OPCODE_DISPATCH:
 			ZEND_VM_DISPATCH(EX(opline)->opcode, EX(opline));
 		default:
-			ZEND_VM_DISPATCH(ret & 0xff, EX(opline));
+			ZEND_VM_DISPATCH((zend_uchar)(ret & 0xff), EX(opline));
 	}
 }
 
