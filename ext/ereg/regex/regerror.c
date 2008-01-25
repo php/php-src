@@ -30,10 +30,10 @@
  = #define	REG_ATOI	255	// convert name to number (!)
  = #define	REG_ITOA	0400	// convert number to name (!)
  */
-static struct rerr {
+static const struct rerr {
 	int code;
-	char *name;
-	char *explain;
+	const char *name;
+	const char *explain;
 } rerrs[] = {
 	{REG_OKAY,	"REG_OKAY",	"no errors detected"},
 	{REG_NOMATCH,	"REG_NOMATCH",	"regexec() failed to match"},
@@ -67,10 +67,10 @@ const regex_t *preg,
 char *errbuf,
 size_t errbuf_size)
 {
-	register struct rerr *r;
+	register const struct rerr *r;
 	register size_t len;
 	register int target = errcode &~ REG_ITOA;
-	register char *s;
+	register const char *s;
 	char convbuf[50];
 
 	if (errcode == REG_ATOI)
@@ -113,7 +113,7 @@ regatoi(preg, localbuf)
 const regex_t *preg;
 char *localbuf;
 {
-	register struct rerr *r;
+	register const struct rerr *r;
 
 	for (r = rerrs; r->code >= 0; r++)
 		if (strcmp(r->name, preg->re_endp) == 0)
