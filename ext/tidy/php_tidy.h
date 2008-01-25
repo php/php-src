@@ -21,7 +21,7 @@
 #ifndef PHP_TIDY_H
 #define PHP_TIDY_H
 
-extern zend_module_entry tidy_module_entry;
+extern const zend_module_entry tidy_module_entry;
 #define phpext_tidy_ptr &tidy_module_entry
 
 #define TIDY_METHOD_MAP(name, func_name, arg_types) \
