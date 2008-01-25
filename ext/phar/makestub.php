@@ -93,9 +93,7 @@ foreach ($s3split as $i => $chunk) {
     $stub .= "\tstatic const char newstub3_" . $i . '[] = "' . $chunk . '";
 ';
 }
-$stub .= "
-
-\tstatic const int newstub_len = " . $slen . ";
+$stub .= "\n\tstatic const int newstub_len = " . $slen . ";
 
 \t*len = spprintf(stub, name_len + web_len + newstub_len, \"%s%s" . str_repeat('%s', $s1count) . '%s%s%d'
     . str_repeat('%s', $s3count) . '", newstub0, web';

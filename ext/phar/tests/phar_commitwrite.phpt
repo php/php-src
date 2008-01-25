@@ -29,15 +29,16 @@ unlink(dirname(__FILE__) . '/brandnewphar.phar');
 __HALT_COMPILER();
 ?>
 --EXPECT--
-string(7416) "<?php
+string(7110) "<?php
 $web = '0';
-if ($web && in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
+if ($web) {
+if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
 Phar::interceptFileFuncs();
 Phar::webPhar(null, $web);
 include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
 return;
 }
-if ($web && isset($_SERVER['REQUEST_URI']) && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'POST') {
+if (isset($_SERVER['REQUEST_URI']) && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'POST') {
 Extract_Phar::go(true);
 $mimes = array(
 'phps' => 2,
@@ -126,6 +127,7 @@ readfile($a);
 exit;
 }
 }
+}
 if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
 Phar::interceptFileFuncs();
 include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
@@ -140,7 +142,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'index.php';
-const LEN = 7416;
+const LEN = 7110;
 static function go($return = false)
 {
 register_shutdown_function(array('Extract_Phar', '_removeTmpFiles'));
@@ -165,14 +167,14 @@ $info = self::_unpack($m);
 $f = $info['c'];
 if ($f & self::GZ) {
 if (!function_exists('gzinflate')) {
-die('Error: zlib extension is not enabled - gzinflate() function needed' .
-' for compressed .phars');
+die('Error: zlib extension is not enabled -' .
+' gzinflate() function needed for zlib-compressed .phars');
 }
 }
 if ($f & self::BZ2) {
 if (!function_exists('bzdecompress')) {
-die('Error: bzip2 extension is not enabled - bzdecompress() function needed' .
-' for compressed .phars');
+die('Error: bzip2 extension is not enabled -' .
+' bzdecompress() function needed for bz2-compressed .phars');
 }
 }
 $temp = self::tmpdir();
@@ -180,7 +182,7 @@ if (!$temp) {
 $sessionpath = session_save_path();
 if (strpos ($sessionpath, ";") !== FALSE)
 $sessionpath = substr ($sessionpath, strpos ($sessionpath, ";")+1);
-if (!file_exists($sessionpath) && !is_dir($sessionpath)) {
+if (!file_exists($sessionpath) || !is_dir($sessionpath)) {
 die('Could not locate temporary directory to extract phar');
 }
 $temp = $sessionpath;
@@ -216,21 +218,15 @@ if (!$return) include self::START;
 static function tmpdir()
 {
 if (strpos(PHP_OS, 'WIN') !== false) {
-if ($var = isset($_ENV['TMP']) ? $_ENV['TMP'] : getenv('TMP')) {
+if ($var = getenv('TMP') ? getenv('TMP') : getenv('TEMP')) {
 return $var;
 }
-if ($var = isset($_ENV['TEMP']) ? $_ENV['TEMP'] : getenv('TEMP')) {
-return $var;
+if (is_dir('/temp') || mkdir('/temp')) {
+return realpath('/temp');
 }
-if ($var = isset($_ENV['USERPROFILE']) ? $_ENV['USERPROFILE'] : @getenv('USERPROFILE')) {
-return $var;
+return false;
 }
-if ($var = isset($_ENV['windir']) ? $_ENV['windir'] : getenv('windir')) {
-return $var;
-}
-return @getenv('SystemRoot') . '\temp';
-}
-if ($var = isset($_ENV['TMPDIR']) ? $_ENV['TMPDIR'] : getenv('TMPDIR')) {
+if ($var = getenv('TMPDIR')) {
 return $var;
 }
 return realpath('/tmp');
@@ -286,18 +282,17 @@ $data = gzinflate($data);
 $data = bzdecompress($data);
 }
 if (strlen($data) != $entry[0]) {
-die("Not valid internal .phar file (size error " . strlen($data) . " != " .
+die("Invalid internal .phar file (size error " . strlen($data) . " != " .
 $stat[7] . ")");
 }
 if ($entry[3] != sprintf("%u", crc32($data) & 0xffffffff)) {
-die("Not valid internal .phar file (checksum error)");
+die("Invalid internal .phar file (checksum error)");
 }
 return $data;
 }
 
 static function _removeTmpFiles()
 {
-// for removal of temp files
 if (count(self::$tmp)) {
 foreach (array_reverse(self::$tmp) as $f) {
 if (file_exists($f)) is_dir($f) ? @rmdir($f) : @unlink($f);
@@ -307,6 +302,7 @@ if (file_exists($f)) is_dir($f) ? @rmdir($f) : @unlink($f);
 chdir(self::$origdir);
 }
 }
+
 Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 string(200) "<?php

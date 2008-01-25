@@ -1,98 +1,100 @@
 <?php
 $web = '000';
-if ($web && in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
-    Phar::interceptFileFuncs();
-    Phar::webPhar(null, $web);
-    include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
-    return;
-}
-if ($web && isset($_SERVER['REQUEST_URI']) && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'POST') {
-    Extract_Phar::go(true);
-    $mimes = array(
-    'phps' => 2,
-    'c' => 'text/plain',
-    'cc' => 'text/plain',
-    'cpp' => 'text/plain',
-    'c++' => 'text/plain',
-    'dtd' => 'text/plain',
-    'h' => 'text/plain',
-    'log' => 'text/plain',
-    'rng' => 'text/plain',
-    'txt' => 'text/plain',
-    'xsd' => 'text/plain',
-    'php' => 1,
-    'inc' => 1,
-    'avi' => 'video/avi',
-    'bmp' => 'image/bmp',
-    'css' => 'text/css',
-    'gif' => 'image/gif',
-    'htm' => 'text/html',
-    'html' => 'text/html',
-    'htmls' => 'text/html',
-    'ico' => 'image/x-ico',
-    'jpe' => 'image/jpeg',
-    'jpg' => 'image/jpeg',
-    'jpeg' => 'image/jpeg',
-    'js' => 'application/x-javascript',
-    'midi' => 'audio/midi',
-    'mid' => 'audio/midi',
-    'mod' => 'audio/mod',
-    'mov' => 'movie/quicktime',
-    'mp3' => 'audio/mp3',
-    'mpg' => 'video/mpeg',
-    'mpeg' => 'video/mpeg',
-    'pdf' => 'application/pdf',
-    'png' => 'image/png',
-    'swf' => 'application/shockwave-flash',
-    'tif' => 'image/tiff',
-    'tiff' => 'image/tiff',
-    'wav' => 'audio/wav',
-    'xbm' => 'image/xbm',
-    'xml' => 'text/xml',
-    );
-    $basename = basename(__FILE__);
-    if (!strpos($_SERVER['REQUEST_URI'], $basename)) {
-        chdir(Extract_Phar::$temp);
-        include Extract_Phar::START;
+if ($web) {
+    if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
+        Phar::interceptFileFuncs();
+        Phar::webPhar(null, $web);
+        include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
+        return;
     }
-    $pt = substr($_SERVER['REQUEST_URI'], strpos($_SERVER['REQUEST_URI'], $basename) + strlen($basename));
-    if (!$pt || $pt == '/') {
-        $pt = $web;
-        header('HTTP/1.1 301 Moved Permanently');
-        header('Location: ' . $_SERVER['REQUEST_URI'] . '/' . $pt);
-    }
-    $a = realpath(Extract_Phar::$temp . DIRECTORY_SEPARATOR . $pt);
-    if (!$a || strlen(dirname($a)) < strlen(Extract_Phar::$temp)) {
-        header('HTTP/1.0 404 Not Found');
-        echo "<html>\n <head>\n  <title>File Not Found<title>\n </head>\n <body>\n  <h1>404 - File ", $pt, " Not Found</h1>\n </body>\n</html>";
-        exit;
-    }
-    $b = pathinfo($a);
-    if (!isset($b['extension'])) {
-        header('Content-Type: text/plain');
-        header('Content-Length: ' . filesize($a));
-        readfile($a);
-        exit;
-    }
-    if (isset($mimes[$b['extension']])) {
-        if ($mimes[$b['extension']] === 1) {
-            $_SERVER['PHAR_PATH_INFO'] = $_SERVER['PATH_INFO'];
-            $_SERVER['PATH_INFO'] = substr($_SERVER['PATH_INFO'], strpos($_SERVER['PATH_INFO'], $basename) + strlen($basename));
-            if (isset($_SERVER['PATH_TRANSLATED'])) {
-                $_SERVER['PHAR_PATH_TRANSLATED'] = $_SERVER['PATH_TRANSLATED'];
-                $_SERVER['PATH_TRANSLATED'] = $a;
+    if (isset($_SERVER['REQUEST_URI']) && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'POST') {
+        Extract_Phar::go(true);
+        $mimes = array(
+            'phps' => 2,
+            'c' => 'text/plain',
+            'cc' => 'text/plain',
+            'cpp' => 'text/plain',
+            'c++' => 'text/plain',
+            'dtd' => 'text/plain',
+            'h' => 'text/plain',
+            'log' => 'text/plain',
+            'rng' => 'text/plain',
+            'txt' => 'text/plain',
+            'xsd' => 'text/plain',
+            'php' => 1,
+            'inc' => 1,
+            'avi' => 'video/avi',
+            'bmp' => 'image/bmp',
+            'css' => 'text/css',
+            'gif' => 'image/gif',
+            'htm' => 'text/html',
+            'html' => 'text/html',
+            'htmls' => 'text/html',
+            'ico' => 'image/x-ico',
+            'jpe' => 'image/jpeg',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'js' => 'application/x-javascript',
+            'midi' => 'audio/midi',
+            'mid' => 'audio/midi',
+            'mod' => 'audio/mod',
+            'mov' => 'movie/quicktime',
+            'mp3' => 'audio/mp3',
+            'mpg' => 'video/mpeg',
+            'mpeg' => 'video/mpeg',
+            'pdf' => 'application/pdf',
+            'png' => 'image/png',
+            'swf' => 'application/shockwave-flash',
+            'tif' => 'image/tiff',
+            'tiff' => 'image/tiff',
+            'wav' => 'audio/wav',
+            'xbm' => 'image/xbm',
+            'xml' => 'text/xml',
+           );
+        $basename = basename(__FILE__);
+        if (!strpos($_SERVER['REQUEST_URI'], $basename)) {
+            chdir(Extract_Phar::$temp);
+            include Extract_Phar::START;
+        }
+        $pt = substr($_SERVER['REQUEST_URI'], strpos($_SERVER['REQUEST_URI'], $basename) + strlen($basename));
+        if (!$pt || $pt == '/') {
+            $pt = $web;
+            header('HTTP/1.1 301 Moved Permanently');
+            header('Location: ' . $_SERVER['REQUEST_URI'] . '/' . $pt);
+        }
+        $a = realpath(Extract_Phar::$temp . DIRECTORY_SEPARATOR . $pt);
+        if (!$a || strlen(dirname($a)) < strlen(Extract_Phar::$temp)) {
+            header('HTTP/1.0 404 Not Found');
+            echo "<html>\n <head>\n  <title>File Not Found<title>\n </head>\n <body>\n  <h1>404 - File ", $pt, " Not Found</h1>\n </body>\n</html>";
+            exit;
+        }
+        $b = pathinfo($a);
+        if (!isset($b['extension'])) {
+            header('Content-Type: text/plain');
+            header('Content-Length: ' . filesize($a));
+            readfile($a);
+            exit;
+        }
+        if (isset($mimes[$b['extension']])) {
+            if ($mimes[$b['extension']] === 1) {
+                $_SERVER['PHAR_PATH_INFO'] = $_SERVER['PATH_INFO'];
+                $_SERVER['PATH_INFO'] = substr($_SERVER['PATH_INFO'], strpos($_SERVER['PATH_INFO'], $basename) + strlen($basename));
+                if (isset($_SERVER['PATH_TRANSLATED'])) {
+                    $_SERVER['PHAR_PATH_TRANSLATED'] = $_SERVER['PATH_TRANSLATED'];
+                    $_SERVER['PATH_TRANSLATED'] = $a;
+                }
+                include $a;
+                exit;
             }
-            include $a;
+            if ($mimes[$b['extension']] === 2) {
+                highlight_file($a);
+                exit;
+            }
+            header('Content-Type: ' .$mimes[$b['extension']]);
+            header('Content-Length: ' . filesize($a));
+            readfile($a);
             exit;
         }
-        if ($mimes[$b['extension']] === 2) {
-            highlight_file($a);
-            exit;
-        }
-        header('Content-Type: ' .$mimes[$b['extension']]);
-        header('Content-Length: ' . filesize($a));
-        readfile($a);
-        exit;
     }
 }
 if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
@@ -134,14 +136,14 @@ class Extract_Phar
         $f = $info['c'];
         if ($f & self::GZ) {
             if (!function_exists('gzinflate')) {
-                die('Error: zlib extension is not enabled - gzinflate() function needed' .
-                    ' for compressed .phars');
+                die('Error: zlib extension is not enabled -' .
+                    ' gzinflate() function needed for zlib-compressed .phars');
             }
         }
         if ($f & self::BZ2) {
             if (!function_exists('bzdecompress')) {
-                die('Error: bzip2 extension is not enabled - bzdecompress() function needed' .
-                    ' for compressed .phars');
+                die('Error: bzip2 extension is not enabled -' .
+                    ' bzdecompress() function needed for bz2-compressed .phars');
             }
         }
         $temp = self::tmpdir();
@@ -149,7 +151,7 @@ class Extract_Phar
             $sessionpath = session_save_path();
             if (strpos ($sessionpath, ";") !== FALSE)
                 $sessionpath = substr ($sessionpath, strpos ($sessionpath, ";")+1);
-            if (!file_exists($sessionpath) && !is_dir($sessionpath)) {
+            if (!file_exists($sessionpath) || !is_dir($sessionpath)) {
                 die('Could not locate temporary directory to extract phar');
             }
             $temp = $sessionpath;
@@ -185,21 +187,15 @@ class Extract_Phar
     static function tmpdir()
     {
         if (strpos(PHP_OS, 'WIN') !== false) {
-            if ($var = isset($_ENV['TMP']) ? $_ENV['TMP'] : getenv('TMP')) {
+            if ($var = getenv('TMP') ? getenv('TMP') : getenv('TEMP')) {
                 return $var;
             }
-            if ($var = isset($_ENV['TEMP']) ? $_ENV['TEMP'] : getenv('TEMP')) {
-                return $var;
+            if (is_dir('/temp') || mkdir('/temp')) {
+                return realpath('/temp');
             }
-            if ($var = isset($_ENV['USERPROFILE']) ? $_ENV['USERPROFILE'] : @getenv('USERPROFILE')) {
-                return $var;
-            }
-            if ($var = isset($_ENV['windir']) ? $_ENV['windir'] : getenv('windir')) {
-                return $var;
-            }
-            return @getenv('SystemRoot') . '\temp';
+            return false;
         }
-        if ($var = isset($_ENV['TMPDIR']) ? $_ENV['TMPDIR'] : getenv('TMPDIR')) {
+        if ($var = getenv('TMPDIR')) {
             return $var;
         }
         return realpath('/tmp');
@@ -255,18 +251,17 @@ class Extract_Phar
             $data = bzdecompress($data);
         }
         if (strlen($data) != $entry[0]) {
-            die("Not valid internal .phar file (size error " . strlen($data) . " != " .
+            die("Invalid internal .phar file (size error " . strlen($data) . " != " .
                 $stat[7] . ")");
         }
         if ($entry[3] != sprintf("%u", crc32($data) & 0xffffffff)) {
-            die("Not valid internal .phar file (checksum error)");
+            die("Invalid internal .phar file (checksum error)");
         }
         return $data;
     }
 
     static function _removeTmpFiles()
     {
-        // for removal of temp files
         if (count(self::$tmp)) {
             foreach (array_reverse(self::$tmp) as $f) {
                 if (file_exists($f)) is_dir($f) ? @rmdir($f) : @unlink($f);

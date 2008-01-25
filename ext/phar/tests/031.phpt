@@ -28,4 +28,4 @@ __halt_compiler();
 --EXPECTF--
 string(25) "<?php echo new new class;"
 
-Parse error: %s error%s in phar://%sphar_oo_test.phar.php/a.php on line %d
+Parse error: %s in phar://%sphar_oo_test.phar.php/a.php on line %d
