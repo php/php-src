@@ -1534,7 +1534,7 @@ PHP_FUNCTION(extract)
 }
 /* }}} */
 
-static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_value, zval *entry) /* {{{ */
+static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_value, zval *entry TSRMLS_DC) /* {{{ */
 {
 	zstr key;
 	int key_len;
@@ -1585,7 +1585,7 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 		while (zend_hash_get_current_data_ex(Z_ARRVAL_P(entry), (void**)&value_ptr, &pos) == SUCCESS) {
 			value = *value_ptr;
 
-			php_compact_var(eg_active_symbol_table, return_value, value);
+			php_compact_var(eg_active_symbol_table, return_value, value TSRMLS_CC);
 			zend_hash_move_forward_ex(Z_ARRVAL_P(entry), &pos);
 		}
 		Z_ARRVAL_P(entry)->nApplyCount--;
@@ -1613,7 +1613,7 @@ PHP_FUNCTION(compact)
 	array_init(return_value);
 
 	for (i=0; i<ZEND_NUM_ARGS(); i++) {
-		php_compact_var(EG(active_symbol_table), return_value, *args[i]);
+		php_compact_var(EG(active_symbol_table), return_value, *args[i] TSRMLS_CC);
 	}
 
 	efree(args);
