@@ -875,7 +875,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_uchar utype, char *s
 
 /* {{{ proto int preg_match(string pattern, string subject [, array subpatterns [, int flags [, int offset]]]) U
    Perform a Perl-style regular expression match */
-PHP_FUNCTION(preg_match)
+static PHP_FUNCTION(preg_match)
 {
 	php_do_pcre_match(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
@@ -883,7 +883,7 @@ PHP_FUNCTION(preg_match)
 
 /* {{{ proto int preg_match_all(string pattern, string subject, array subpatterns [, int flags [, int offset]]) U
    Perform a Perl-style global regular expression match */
-PHP_FUNCTION(preg_match_all)
+static PHP_FUNCTION(preg_match_all)
 {
 	php_do_pcre_match(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
@@ -1535,7 +1535,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 
 /* {{{ proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, count]]) U
    Perform Perl-style regular expression replacement. */
-PHP_FUNCTION(preg_replace)
+static PHP_FUNCTION(preg_replace)
 {
 	preg_replace_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
@@ -1543,7 +1543,7 @@ PHP_FUNCTION(preg_replace)
 
 /* {{{ proto string preg_replace_callback(mixed regex, mixed callback, mixed subject [, int limit [, count]]) U
    Perform Perl-style regular expression replacement using replacement callback. */
-PHP_FUNCTION(preg_replace_callback)
+static PHP_FUNCTION(preg_replace_callback)
 {
 	preg_replace_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
@@ -1551,7 +1551,7 @@ PHP_FUNCTION(preg_replace_callback)
 
 /* {{{ proto array preg_split(string pattern, string subject [, int limit [, int flags]]) U
    Split string into an array using a perl-style regular expression as a delimiter */
-PHP_FUNCTION(preg_split)
+static PHP_FUNCTION(preg_split)
 {
 	zstr				 regex;			/* Regular expression */
 	zstr				 subject;		/* String to match against */
@@ -1771,7 +1771,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_uchar utype, char *s
 
 /* {{{ proto string preg_quote(string str [, string delim_char]) U
    Quote regular expression characters plus an optional character */
-PHP_FUNCTION(preg_quote)
+static PHP_FUNCTION(preg_quote)
 {
 	int		 in_str_len;
 	char	*in_str;		/* Input string argument */
@@ -1876,7 +1876,7 @@ PHP_FUNCTION(preg_quote)
 
 /* {{{ proto array preg_grep(string regex, array input [, int flags]) U
    Searches array and returns entries which match regex */
-PHP_FUNCTION(preg_grep)
+static PHP_FUNCTION(preg_grep)
 {
 	zstr				 regex;			/* Regular expression */
 	int				 	 regex_len;
@@ -2021,7 +2021,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 /* {{{ proto int preg_last_error()
    Returns the error code of the last regexp execution. */
-PHP_FUNCTION(preg_last_error)
+static PHP_FUNCTION(preg_last_error)
 {
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
 		return;
@@ -2033,7 +2033,7 @@ PHP_FUNCTION(preg_last_error)
 
 /* {{{ module definition structures */
 
-const zend_function_entry pcre_functions[] = {
+static const zend_function_entry pcre_functions[] = {
 	PHP_FE(preg_match,				third_arg_force_ref)
 	PHP_FE(preg_match_all,			third_arg_force_ref)
 	PHP_FE(preg_replace,			fifth_arg_force_ref)
