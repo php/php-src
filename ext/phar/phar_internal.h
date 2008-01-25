@@ -354,7 +354,9 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 /* zip functions in zip.c */
 int phar_open_zipfile(char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, char **error TSRMLS_DC);
 int phar_open_or_create_zip(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
+#if HAVE_PHAR_ZIP
 int phar_zip_flush(phar_archive_data *archive, char *user_stub, long len, char **error TSRMLS_DC);
+#endif
 
 #ifdef PHAR_MAIN
 static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
