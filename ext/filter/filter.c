@@ -38,7 +38,7 @@ typedef struct filter_list_entry {
 } filter_list_entry;
 
 /* {{{ filter_list */
-filter_list_entry filter_list[] = {
+static const filter_list_entry filter_list[] = {
 	{ "int",             FILTER_VALIDATE_INT,           php_filter_int             },
 	{ "boolean",         FILTER_VALIDATE_BOOLEAN,       php_filter_boolean         },
 	{ "float",           FILTER_VALIDATE_FLOAT,         php_filter_float           },
@@ -79,7 +79,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 
 /* {{{ filter_functions[]
  */
-const zend_function_entry filter_functions[] = {
+static const zend_function_entry filter_functions[] = {
 	PHP_FE(filter_input,		NULL)
 	PHP_FE(filter_var,		NULL)
 	PHP_FE(filter_input_array,	NULL)
