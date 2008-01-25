@@ -82,6 +82,8 @@ PHP                                                                        NEWS
 - Changed exception handling. Now each op_array doesn't contain
   ZEND_HANDLE_EXCEPTION opcode in the end. (Dmitry)
 
+- Fixed html_entity_decode() incorrectly converting numeric html entities
+  to different characters with cp1251 and cp866. (Scott)
 - Fixed possible crash in ext/soap because of uninitialized value. (Zdash Urf)
 
 - Fixed bug #43808 (date_create never fails (even when it should)). (Derick)
