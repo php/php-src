@@ -29,13 +29,13 @@
 #include "php_pdo_driver.h"
 
 struct pdo_sqlstate_info {
-	char state[6];
+	const char state[5];
 	const char *desc;
 };
 
 static HashTable err_hash;
 
-static struct pdo_sqlstate_info err_initializer[] = {
+static const struct pdo_sqlstate_info err_initializer[] = {
 	{ "00000",	"No error" },
 	{ "01000",	"Warning" },
 	{ "01001",	"Cursor operation conflict" },
@@ -312,7 +312,7 @@ void pdo_sqlstate_fini_error_table(void)
 int pdo_sqlstate_init_error_table(void)
 {
 	int i;
-	struct pdo_sqlstate_info *info;
+	const struct pdo_sqlstate_info *info;
 
 	if (FAILURE == zend_hash_init(&err_hash,
 			sizeof(err_initializer)/sizeof(err_initializer[0]), NULL, NULL, 1)) {
@@ -330,7 +330,7 @@ int pdo_sqlstate_init_error_table(void)
 
 const char *pdo_sqlstate_state_to_description(char *state)
 {
-	struct pdo_sqlstate_info **info;
+	const struct pdo_sqlstate_info **info;
 	if (SUCCESS == zend_hash_find(&err_hash, state, sizeof(err_initializer[0].state),
 			(void**)&info)) {
 		return (*info)->desc;
