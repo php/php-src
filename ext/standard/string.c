@@ -2604,9 +2604,14 @@ PHP_FUNCTION(chr)
 	long c;
 	char temp[2];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &c) == FAILURE) {
-		return;
+	if (ZEND_NUM_ARGS() != 1) {
+		WRONG_PARAM_COUNT;
 	}
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "l", &c) == FAILURE) {
+		c = 0;
+	}
+
 	temp[0] = (char)c;
 	temp[1] = '\0';
 
