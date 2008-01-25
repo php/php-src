@@ -1348,6 +1348,9 @@ static void phar_convert_to_other(phar_archive_data *source, int convert, php_ui
 	phar_archive_data phar = {0};
 	long offset = 0;
 	char *error, *opened_path = NULL;
+#if HAVE_PHAR_ZIP
+	int fd, ziperror;
+#endif
 
 	/* set whole-archive compression from parameter */
 	phar.flags = flags;
@@ -1358,8 +1361,6 @@ static void phar_convert_to_other(phar_archive_data *source, int convert, php_ui
 		case 2 :
 			phar.is_zip = 1;
 #if HAVE_PHAR_ZIP
-			int fd, ziperror;
-
 			if (!((fd = php_open_temporary_fd(NULL, "pharzip", &opened_path TSRMLS_CC)) >= 0)) {
 				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 					"Cannot convert phar archive \"%s\", unable to open temporary zip archive", source->fname);
