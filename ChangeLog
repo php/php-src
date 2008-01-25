@@ -1,3 +1,150 @@
+2008-01-24  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/ereg/regex/regerror.c
+      ext/ereg/regex/regexec.c
+      ext/ereg/regex/regfree.c:
+      use local header when building bundled regex engine
+
+2008-01-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * win32/build/config.w32:
+      Fixed win32 build
+
+    * ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Fixed compilation warnings
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Fixed comilation warnings
+
+2008-01-24  Robert Nicholson  <rob_nicholson@uk.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/array/compact_basic.phpt
+      ext/standard/tests/array/compact_basic.phpt
+      ext/standard/tests/array/compact_error.phpt
+      ext/standard/tests/array/compact_error.phpt:
+      - New tests for compact()
+
+    * ext/standard/tests/array/compact_basic.phpt
+      ext/standard/tests/array/compact_basic.phpt
+      ext/standard/tests/array/compact_basic.phpt
+      ext/standard/tests/array/compact_error.phpt
+      ext/standard/tests/array/compact_error.phpt
+      ext/standard/tests/array/compact_error.phpt
+      ext/standard/tests/array/compact_variation1.phpt:
+        1.1.4;
+      - New tests for compact()
+
+2008-01-24  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8_lob.c:
+      fix zts build
+
+2008-01-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      Increased Zend MM cache size
+
+    * ZendEngine2/zend_gc.c:
+      Fixed possible GC failure bacause of EG(object_store).object_buckets
+      reallocation
+
+    * (PHP_5_3)
+      ZendEngine2/zend_gc.c:
+      Fixed possible GC failure because of EG(object_store).object_buckets
+      reallocation
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_gc.h
+      ZendEngine2/zend_gc.h:
+      Fixed GC bug
+
+    * ZendEngine2/tests/gc_027.phpt
+      ZendEngine2/tests/gc_027.phpt:
+      
+      file gc_027.phpt was initially added on branch PHP_5_3.
+
+2008-01-24  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ZendEngine2/zend.c:
+      - MFH: Show GC statistics if GC benchmarking is enabled.
+
+    * ZendEngine2/zend.c:
+      - Show GC statistics if GC benchmarking is enabled.
+
+2008-01-24  Sara Golemon  <sara@golemon.com>
+
+    * ext/dbase/dbase.c:
+      Fix potential crash when non-array is used optimisticly
+
+2008-01-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug43426.phpt
+      ZendEngine2/tests/bug43426.phpt:
+      
+      file bug43426.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/tests/bug43426.phpt:
+      Fixed bug #43426 (crash on nested call_user_func() calls)
+
+2008-01-24  Sara Golemon  <sara@golemon.com>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Flag unicode safe functions
+
+2008-01-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.skl
+      ZendEngine2/zend_vm_execute.skl
+      ZendEngine2/zend_vm_gen.php
+      ZendEngine2/zend_vm_gen.php
+      ZendEngine2/tests/bug41209.phpt
+      ZendEngine2/tests/bug41209.phpt:
+      Changed EG(argument_stack) implementation.
+
+    * (PHP_5_2)
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug41919.phpt
+      ZendEngine2/tests/bug41919.phpt:
+      Fixed error message
+
 2008-01-23  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_3)
