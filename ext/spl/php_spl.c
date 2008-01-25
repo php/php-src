@@ -46,13 +46,6 @@ ZEND_GET_MODULE(spl)
 
 ZEND_DECLARE_MODULE_GLOBALS(spl)
 
-/* {{{ spl_functions_none
- */
-const zend_function_entry spl_functions_none[] = {
-	{NULL, NULL, NULL}
-};
-/* }}} */
-
 /* {{{ PHP_GINIT_FUNCTION
  */
 static PHP_GINIT_FUNCTION(spl)
@@ -788,7 +781,7 @@ static const zend_module_dep spl_deps[] = {
 
 /* {{{ spl_module_entry
  */
-zend_module_entry spl_module_entry = {
+const zend_module_entry spl_module_entry = {
 #ifdef HAVE_SIMPLEXML
 	STANDARD_MODULE_HEADER_EX, NULL,
 	spl_deps,
