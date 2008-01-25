@@ -1574,6 +1574,13 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 	else if (Z_TYPE_P(entry) == IS_ARRAY) {
 		HashPosition pos;
 
+		if ((Z_ARRVAL_P(entry)->nApplyCount > 1)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
+			return;
+		}
+
+		Z_ARRVAL_P(entry)->nApplyCount++;
+
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(entry), &pos);
 		while (zend_hash_get_current_data_ex(Z_ARRVAL_P(entry), (void**)&value_ptr, &pos) == SUCCESS) {
 			value = *value_ptr;
@@ -1581,6 +1588,7 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 			php_compact_var(eg_active_symbol_table, return_value, value);
 			zend_hash_move_forward_ex(Z_ARRVAL_P(entry), &pos);
 		}
+		Z_ARRVAL_P(entry)->nApplyCount--;
 	}
 }
 /* }}} */
