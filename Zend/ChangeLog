@@ -1,3 +1,104 @@
+2008-01-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.h
+      zend_builtin_functions.c
+      zend_language_scanner.l
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Fixed compilation warnings
+
+    * (PHP_5_3)
+      zend_API.h
+      zend_builtin_functions.c
+      zend_interfaces.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Fixed comilation warnings
+
+    * zend_alloc.c
+      zend_alloc.c:
+      Increased Zend MM cache size
+
+    * zend_gc.c:
+      Fixed possible GC failure bacause of EG(object_store).object_buckets
+      reallocation
+
+    * (PHP_5_3)
+      zend_gc.c:
+      Fixed possible GC failure because of EG(object_store).object_buckets
+      reallocation
+
+    * zend_API.c
+      zend_API.c
+      zend_gc.h
+      zend_gc.h:
+      Fixed GC bug
+
+    * tests/gc_027.phpt
+      tests/gc_027.phpt:
+      
+      file gc_027.phpt was initially added on branch PHP_5_3.
+
+2008-01-24  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      zend.c:
+      - MFH: Show GC statistics if GC benchmarking is enabled.
+
+    * zend.c:
+      - Show GC statistics if GC benchmarking is enabled.
+
+2008-01-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/bug43426.phpt:
+      Fixed bug #43426 (crash on nested call_user_func() calls)
+
+    * tests/bug43426.phpt
+      tests/bug43426.phpt:
+      
+      file bug43426.phpt was initially added on branch PHP_5_3.
+
+2008-01-24  Sara Golemon  <sara@golemon.com>
+
+    * zend_builtin_functions.c:
+      Flag unicode safe functions
+
+2008-01-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c
+      zend_API.c
+      zend_builtin_functions.c
+      zend_builtin_functions.c
+      zend_compile.h
+      zend_compile.h
+      zend_execute.c
+      zend_execute.c
+      zend_execute.h
+      zend_execute.h
+      zend_execute_API.c
+      zend_execute_API.c
+      zend_globals.h
+      zend_globals.h
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_execute.skl
+      zend_vm_execute.skl
+      zend_vm_gen.php
+      zend_vm_gen.php
+      tests/bug41209.phpt
+      tests/bug41209.phpt:
+      Changed EG(argument_stack) implementation.
+
+    * (PHP_5_2)
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug41919.phpt
+      tests/bug41919.phpt:
+      Fixed error message
+
 2008-01-23  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_3)
