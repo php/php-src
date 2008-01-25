@@ -1,8 +1,8 @@
 /* character-class table */
-static struct cclass {
-	unsigned char *name;
-	unsigned char *chars;
-	unsigned char *multis;
+static const struct cclass {
+	const unsigned char *name;
+	const unsigned char *chars;
+	const unsigned char *multis;
 } cclasses[] = {
 	{"alnum",	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",				""},
 	{"alpha",	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
