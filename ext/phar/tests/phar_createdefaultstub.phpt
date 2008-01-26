@@ -34,7 +34,7 @@ echo $e->getMessage() . "\n";
 ?>
 ===DONE===
 --EXPECT--
-string(7110) "<?php
+string(7133) "<?php
 $web = '0';
 if ($web) {
 if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
@@ -147,7 +147,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'index.php';
-const LEN = 7110;
+const LEN = 7133;
 static function go($return = false)
 {
 register_shutdown_function(array('Extract_Phar', '_removeTmpFiles'));
@@ -183,9 +183,9 @@ die('Error: bzip2 extension is not enabled -' .
 }
 }
 $temp = self::tmpdir();
-if (!$temp) {
+if (!$temp || !is_writable($temp)) {
 $sessionpath = session_save_path();
-if (strpos ($sessionpath, ";") !== FALSE)
+if (strpos ($sessionpath, ";") !== false)
 $sessionpath = substr ($sessionpath, strpos ($sessionpath, ";")+1);
 if (!file_exists($sessionpath) || !is_dir($sessionpath)) {
 die('Could not locate temporary directory to extract phar');
@@ -312,7 +312,7 @@ Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
-string(7121) "<?php
+string(7144) "<?php
 $web = '0';
 if ($web) {
 if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
@@ -425,7 +425,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'my/custom/thingy.php';
-const LEN = 7122;
+const LEN = 7145;
 static function go($return = false)
 {
 register_shutdown_function(array('Extract_Phar', '_removeTmpFiles'));
@@ -461,9 +461,9 @@ die('Error: bzip2 extension is not enabled -' .
 }
 }
 $temp = self::tmpdir();
-if (!$temp) {
+if (!$temp || !is_writable($temp)) {
 $sessionpath = session_save_path();
-if (strpos ($sessionpath, ";") !== FALSE)
+if (strpos ($sessionpath, ";") !== false)
 $sessionpath = substr ($sessionpath, strpos ($sessionpath, ";")+1);
 if (!file_exists($sessionpath) || !is_dir($sessionpath)) {
 die('Could not locate temporary directory to extract phar');
@@ -590,7 +590,7 @@ Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
-int(7501)
+int(7524)
 ============================================================================
 ============================================================================
 Illegal filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
@@ -598,7 +598,7 @@ Illegal filename passed in for stub creation, was 401 characters long, and only 
 ============================================================================
 ============================================================================
 ============================================================================
-string(7131) "<?php
+string(7154) "<?php
 $web = 'the/web.php';
 if ($web) {
 if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
@@ -711,7 +711,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'my/custom/thingy.php';
-const LEN = 7133;
+const LEN = 7156;
 static function go($return = false)
 {
 register_shutdown_function(array('Extract_Phar', '_removeTmpFiles'));
@@ -747,9 +747,9 @@ die('Error: bzip2 extension is not enabled -' .
 }
 }
 $temp = self::tmpdir();
-if (!$temp) {
+if (!$temp || !is_writable($temp)) {
 $sessionpath = session_save_path();
-if (strpos ($sessionpath, ";") !== FALSE)
+if (strpos ($sessionpath, ";") !== false)
 $sessionpath = substr ($sessionpath, strpos ($sessionpath, ";")+1);
 if (!file_exists($sessionpath) || !is_dir($sessionpath)) {
 die('Could not locate temporary directory to extract phar');
@@ -876,6 +876,6 @@ Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
-int(7509)
+int(7532)
 Illegal web filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
 ===DONE===

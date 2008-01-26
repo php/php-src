@@ -147,9 +147,9 @@ class Extract_Phar
             }
         }
         $temp = self::tmpdir();
-        if (!$temp) {
+        if (!$temp || !is_writable($temp)) {
             $sessionpath = session_save_path();
-            if (strpos ($sessionpath, ";") !== FALSE)
+            if (strpos ($sessionpath, ";") !== false)
                 $sessionpath = substr ($sessionpath, strpos ($sessionpath, ";")+1);
             if (!file_exists($sessionpath) || !is_dir($sessionpath)) {
                 die('Could not locate temporary directory to extract phar');

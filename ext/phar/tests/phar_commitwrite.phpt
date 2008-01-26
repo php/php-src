@@ -29,7 +29,7 @@ unlink(dirname(__FILE__) . '/brandnewphar.phar');
 __HALT_COMPILER();
 ?>
 --EXPECT--
-string(7110) "<?php
+string(7133) "<?php
 $web = '0';
 if ($web) {
 if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
@@ -142,7 +142,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'index.php';
-const LEN = 7110;
+const LEN = 7133;
 static function go($return = false)
 {
 register_shutdown_function(array('Extract_Phar', '_removeTmpFiles'));
@@ -178,9 +178,9 @@ die('Error: bzip2 extension is not enabled -' .
 }
 }
 $temp = self::tmpdir();
-if (!$temp) {
+if (!$temp || !is_writable($temp)) {
 $sessionpath = session_save_path();
-if (strpos ($sessionpath, ";") !== FALSE)
+if (strpos ($sessionpath, ";") !== false)
 $sessionpath = substr ($sessionpath, strpos ($sessionpath, ";")+1);
 if (!file_exists($sessionpath) || !is_dir($sessionpath)) {
 die('Could not locate temporary directory to extract phar');
