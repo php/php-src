@@ -1,3 +1,181 @@
+2008-01-25  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_3)
+      ext/spl/php_spl.c
+      ext/spl/php_spl.h
+      ext/tidy/php_tidy.h
+      ext/tidy/tidy.c:
+      more const kewywording
+      remove spl_functions_none var (wast used anywhere
+
+    * ext/ereg/regex/cclass.h
+      ext/ereg/regex/regerror.c
+      ext/filter/filter.c
+      ext/spl/php_spl.c
+      ext/spl/php_spl.h
+      ext/tidy/php_tidy.h
+      ext/tidy/tidy.c:
+      MFB: const keywording
+
+    * (PHP_5_3)
+      ext/filter/filter.c:
+      const more 216 bytes (on a 32-bits host)
+
+    * (PHP_5_3)
+      ext/ereg/regex/cclass.h
+      ext/ereg/regex/regerror.c:
+      const'ify more 372 bytes
+
+    * ext/ereg/regex/cname.h:
+      MFB: const'ify
+
+    * (PHP_5_3)
+      ext/ereg/regex/cname.h:
+      const'ify more 768 bytes
+
+    * ext/pdo/pdo_sqlstate.c:
+      MFB: move data to const segment
+
+    * (PHP_5_3)
+      ext/pdo/pdo_sqlstate.c:
+      move about 3K of data to the const area. also reduce memory usage (~ -266
+      bytes :P)
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.h
+      ext/pcre/php_pcre.h:
+      spread some static keywords
+
+2008-01-25  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/standard/html.c:
+      MFB: Fix html_entity_decode when converting numeric html entities, the
+      numeric values for the extended character set don't correspond to that of
+      windows-1251 and cp866.
+
+    * (PHP_5_3)
+      NEWS
+      ext/standard/html.c:
+      Fix html_entity_decode when converting numeric html entities, the numeric
+      values for the extended characters don't correspond to that of
+      windows-1251 and cp866.
+
+2008-01-25  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_3)
+      ext/dom/dom_fe.h
+      ext/dom/php_dom.c
+      ext/dom/php_dom.h
+      ext/dom/xpath.c
+      ext/dom/tests/domxpath.phpt:
+      backport functionality to call user functions within XPath
+      add test
+
+    * ext/mysqlnd/mysqlnd_result.c:
+      fix win32 compile
+
+    * ext/standard/array.c:
+      fix zts build
+
+2008-01-25  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/standard/array.c:
+      MFH: endless loop (and stack overflow) protection in compact()
+
+    * ext/standard/array.c:
+      endless loop (and stack overflow) protection in compact()
+
+2008-01-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/standard/string.c:
+      
+      Adjust new chr() param handling to address chr("") calls
+
+2008-01-25  Robert Nicholson  <rob_nicholson@uk.ibm.com>
+
+    * ext/standard/tests/array/array_shuffle_basic.phpt
+      ext/standard/tests/array/array_shuffle_basic.phpt:
+      - Add a basic test for array_shuffle()
+
+    * ext/standard/tests/array/array_shuffle_basic.phpt
+      ext/standard/tests/array/array_shuffle_basic.phpt
+      ext/standard/tests/array/array_shuffle_basic.phpt:
+        1.1.4;
+      file array_shuffle_basic.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/array/array_diff_key_basic.phpt
+      ext/standard/tests/array/array_diff_key_basic.phpt
+      ext/standard/tests/array/array_diff_key_variation1.phpt
+      ext/standard/tests/array/array_diff_key_variation1.phpt
+      ext/standard/tests/array/array_diff_uassoc_basic.phpt
+      ext/standard/tests/array/array_diff_uassoc_basic.phpt
+      ext/standard/tests/array/array_diff_ukey_basic.phpt
+      ext/standard/tests/array/array_diff_ukey_basic.phpt
+      ext/standard/tests/array/array_intersect_key_basic.phpt
+      ext/standard/tests/array/array_intersect_key_basic.phpt
+      ext/standard/tests/array/array_intersect_uassoc_basic.phpt
+      ext/standard/tests/array/array_intersect_uassoc_basic.phpt
+      ext/standard/tests/array/array_intersect_ukey_basic.phpt
+      ext/standard/tests/array/array_intersect_ukey_basic.phpt
+      ext/standard/tests/array/array_udiff_assoc_basic.phpt
+      ext/standard/tests/array/array_udiff_assoc_basic.phpt
+      ext/standard/tests/array/array_udiff_basic.phpt
+      ext/standard/tests/array/array_udiff_basic.phpt
+      ext/standard/tests/array/array_udiff_uassoc_basic.phpt
+      ext/standard/tests/array/array_udiff_uassoc_basic.phpt
+      ext/standard/tests/array/array_uintersect_assoc_basic.phpt
+      ext/standard/tests/array/array_uintersect_assoc_basic.phpt
+      ext/standard/tests/array/array_uintersect_basic.phpt
+      ext/standard/tests/array/array_uintersect_basic.phpt
+      ext/standard/tests/array/array_uintersect_uassoc_basic.phpt
+      ext/standard/tests/array/array_uintersect_uassoc_basic.phpt:
+      - add some basic tests for array diff and intersection functions
+
+    * ext/standard/tests/array/array_diff_key_basic.phpt
+      ext/standard/tests/array/array_diff_key_basic.phpt
+      ext/standard/tests/array/array_diff_key_basic.phpt
+      ext/standard/tests/array/array_diff_key_variation1.phpt
+      ext/standard/tests/array/array_diff_key_variation1.phpt
+      ext/standard/tests/array/array_diff_key_variation1.phpt
+      ext/standard/tests/array/array_diff_uassoc_basic.phpt
+      ext/standard/tests/array/array_diff_uassoc_basic.phpt
+      ext/standard/tests/array/array_diff_uassoc_basic.phpt
+      ext/standard/tests/array/array_diff_ukey_basic.phpt
+      ext/standard/tests/array/array_diff_ukey_basic.phpt
+      ext/standard/tests/array/array_diff_ukey_basic.phpt
+      ext/standard/tests/array/array_intersect_key_basic.phpt
+      ext/standard/tests/array/array_intersect_key_basic.phpt
+      ext/standard/tests/array/array_intersect_key_basic.phpt
+      ext/standard/tests/array/array_intersect_uassoc_basic.phpt
+      ext/standard/tests/array/array_intersect_uassoc_basic.phpt
+      ext/standard/tests/array/array_intersect_uassoc_basic.phpt
+      ext/standard/tests/array/array_intersect_ukey_basic.phpt
+      ext/standard/tests/array/array_intersect_ukey_basic.phpt
+      ext/standard/tests/array/array_intersect_ukey_basic.phpt
+      ext/standard/tests/array/array_udiff_assoc_basic.phpt
+      ext/standard/tests/array/array_udiff_assoc_basic.phpt
+      ext/standard/tests/array/array_udiff_assoc_basic.phpt
+      ext/standard/tests/array/array_udiff_basic.phpt
+      ext/standard/tests/array/array_udiff_basic.phpt
+      ext/standard/tests/array/array_udiff_basic.phpt
+      ext/standard/tests/array/array_udiff_uassoc_basic.phpt
+      ext/standard/tests/array/array_udiff_uassoc_basic.phpt
+      ext/standard/tests/array/array_udiff_uassoc_basic.phpt
+      ext/standard/tests/array/array_uintersect_assoc_basic.phpt
+      ext/standard/tests/array/array_uintersect_assoc_basic.phpt
+      ext/standard/tests/array/array_uintersect_assoc_basic.phpt
+      ext/standard/tests/array/array_uintersect_basic.phpt
+      ext/standard/tests/array/array_uintersect_basic.phpt
+      ext/standard/tests/array/array_uintersect_basic.phpt
+      ext/standard/tests/array/array_uintersect_uassoc_basic.phpt
+      ext/standard/tests/array/array_uintersect_uassoc_basic.phpt
+      ext/standard/tests/array/array_uintersect_uassoc_basic.phpt:
+        1.1.4;
+      file array_diff_key_basic.phpt was initially added on branch PHP_5_3.
+
 2008-01-24  Antony Dovgal  <tony@daylessday.org>
 
     * ext/ereg/regex/regerror.c
