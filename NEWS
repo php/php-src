@@ -16,6 +16,7 @@ PHP                                                                        NEWS
   in mysql_connect()). (Hannes)
 - Fixed bug #43863 (str_word_count() breaks on cyrillic "ya" in locale cp1251).
   (phprus at gmail dot com, Tony)
+- Fixed bug #43808 (date_create never fails (even when it should)). (Derick)
 - Fixed bug #43793 (zlib filter is unable to auto-detect gzip/zlib file headers).
   (Greg)
 - Fixed bug #43703 (Signature compatibility check broken). (Dmitry)
@@ -32,6 +33,8 @@ PHP                                                                        NEWS
 - Fixed bug #43580 (removed bogus declaration of a non-existent php_is_url()  
   function). (Ilia)
 - Fixed bug #43533 (escapeshellarg('') returns null). (Ilia)
+- Fixed bug #43527 (DateTime created from a timestamp reports environment
+  timezone). (Derick)
 - Fixed bug #43522 (stream_get_line() eats additional characters). (Felipe,
   Ilia, Tony)
 - Fixed bug #43497 (OCI8 XML/getClobVal aka temporary LOBs leak UGA memory).
@@ -57,6 +60,8 @@ PHP                                                                        NEWS
   (Jani)
 - Fixed bug #43301 (mb_ereg*_replace() crashes when replacement string is
   invalid PHP expression and 'e' option is used). (Jani)
+- Fixed bug #43003 (Invalid timezone reported for DateTime objects constructed
+  using a timestamp). (Derick)
 - Fixed bug #43295 (crash because of uninitialized SG(sapi_headers).mimetype). 
   (Dmitry)
 - Fixed bug #43293 (Multiple segfaults in getopt()). (Hannes)
@@ -87,6 +92,9 @@ PHP                                                                        NEWS
 - Fixed bug #42272 (var_export() incorrectly escapes char(0)). (Derick)
 - Fixed bug #42261 (Incorrect lengths for date and boolean data types).
   (Ilia)
+- Fixed bug #42190 (Constructing DateTime with TimeZone Indicator invalidates
+  DateTimeZone). (Derick)
+- Fixed bug #41599 (setTime() fails after modify() is used). (Derick)
 - Fixed bug #38468 (Unexpected creation of cycle). (Dmitry)
 
 08 Nov 2007, PHP 5.2.5
