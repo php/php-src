@@ -1627,6 +1627,19 @@ PHP_FUNCTION(getdate)
 }
 /* }}} */
 
+#define PHP_DATE_TIMEZONE_GROUP_AMERICA    0x0001
+#define PHP_DATE_TIMEZONE_GROUP_ANTARCTICA 0x0002
+#define PHP_DATE_TIMEZONE_GROUP_ARCTIC     0x0004
+#define PHP_DATE_TIMEZONE_GROUP_ASIA       0x0008
+#define PHP_DATE_TIMEZONE_GROUP_ATLANTIC   0x0010
+#define PHP_DATE_TIMEZONE_GROUP_AUSTRALIA  0x0020
+#define PHP_DATE_TIMEZONE_GROUP_EUROPE     0x0040
+#define PHP_DATE_TIMEZONE_GROUP_INDIAN     0x0080
+#define PHP_DATE_TIMEZONE_GROUP_PACIFIC    0x0100
+#define PHP_DATE_TIMEZONE_GROUP_UTC        0x0200
+#define PHP_DATE_TIMEZONE_GROUP_ALL        0x03FF
+#define PHP_DATE_TIMEZONE_GROUP_ALL_W_BC   0x07FF
+
 static void date_register_classes(TSRMLS_D)
 {
 	zend_class_entry ce_date, ce_timezone;
@@ -1659,6 +1672,22 @@ static void date_register_classes(TSRMLS_D)
 	date_ce_timezone = zend_register_internal_class_ex(&ce_timezone, NULL, NULL TSRMLS_CC);
 	memcpy(&date_object_handlers_timezone, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	date_object_handlers_timezone.clone_obj = date_object_clone_timezone;
+
+#define REGISTER_TIMEZONE_CLASS_CONST_STRING(const_name, value) \
+	zend_declare_class_constant_long(date_ce_timezone, const_name, sizeof(const_name)-1, value TSRMLS_CC);
+
+	REGISTER_TIMEZONE_CLASS_CONST_STRING("AMERICA",     PHP_DATE_TIMEZONE_GROUP_AMERICA);
+	REGISTER_TIMEZONE_CLASS_CONST_STRING("ANTARCTICA",  PHP_DATE_TIMEZONE_GROUP_ANTARCTICA);
+	REGISTER_TIMEZONE_CLASS_CONST_STRING("ARCTIC",      PHP_DATE_TIMEZONE_GROUP_ARCTIC);
+	REGISTER_TIMEZONE_CLASS_CONST_STRING("ASIA",        PHP_DATE_TIMEZONE_GROUP_ASIA);
+	REGISTER_TIMEZONE_CLASS_CONST_STRING("ATLANTIC",    PHP_DATE_TIMEZONE_GROUP_ATLANTIC);
+	REGISTER_TIMEZONE_CLASS_CONST_STRING("AUSTRALIA",   PHP_DATE_TIMEZONE_GROUP_AUSTRALIA);
+	REGISTER_TIMEZONE_CLASS_CONST_STRING("EUROPE",      PHP_DATE_TIMEZONE_GROUP_EUROPE);
+	REGISTER_TIMEZONE_CLASS_CONST_STRING("INDIAN",      PHP_DATE_TIMEZONE_GROUP_INDIAN);
+	REGISTER_TIMEZONE_CLASS_CONST_STRING("PACIFIC",     PHP_DATE_TIMEZONE_GROUP_PACIFIC);
+	REGISTER_TIMEZONE_CLASS_CONST_STRING("UTC",         PHP_DATE_TIMEZONE_GROUP_UTC);
+	REGISTER_TIMEZONE_CLASS_CONST_STRING("ALL",         PHP_DATE_TIMEZONE_GROUP_ALL);
+	REGISTER_TIMEZONE_CLASS_CONST_STRING("ALL_WITH_BC", PHP_DATE_TIMEZONE_GROUP_ALL_W_BC);
 }
 
 static inline zend_object_value date_object_new_date_ex(zend_class_entry *class_type, php_date_obj **ptr TSRMLS_DC)
@@ -2585,6 +2614,21 @@ PHP_FUNCTION(timezone_transitions_get)
 }
 /* }}} */
 
+static int check_id_allowed(char *id, long what)
+{
+	if (what & PHP_DATE_TIMEZONE_GROUP_AMERICA    && strncasecmp(id, "America/",     8) == 0) return 1;
+	if (what & PHP_DATE_TIMEZONE_GROUP_ANTARCTICA && strncasecmp(id, "Antarctica/", 11) == 0) return 1;
+	if (what & PHP_DATE_TIMEZONE_GROUP_ARCTIC     && strncasecmp(id, "Arctic/",      7) == 0) return 1;
+	if (what & PHP_DATE_TIMEZONE_GROUP_ASIA       && strncasecmp(id, "Asia/",        5) == 0) return 1;
+	if (what & PHP_DATE_TIMEZONE_GROUP_ATLANTIC   && strncasecmp(id, "Atlantic/",    9) == 0) return 1;
+	if (what & PHP_DATE_TIMEZONE_GROUP_AUSTRALIA  && strncasecmp(id, "Australia/",  10) == 0) return 1;
+	if (what & PHP_DATE_TIMEZONE_GROUP_EUROPE     && strncasecmp(id, "Europe/",      7) == 0) return 1;
+	if (what & PHP_DATE_TIMEZONE_GROUP_INDIAN     && strncasecmp(id, "Indian/",      7) == 0) return 1;
+	if (what & PHP_DATE_TIMEZONE_GROUP_PACIFIC    && strncasecmp(id, "Pacific/",     8) == 0) return 1;
+	if (what & PHP_DATE_TIMEZONE_GROUP_UTC        && strncasecmp(id, "UTC",          3) == 0) return 1;
+	return 0;
+}
+
 /* {{{ proto array timezone_identifiers_list()
    Returns numerically index array with all timezone identifiers.
 */
@@ -2593,6 +2637,11 @@ PHP_FUNCTION(timezone_identifiers_list)
 	const timelib_tzdb             *tzdb;
 	const timelib_tzdb_index_entry *table;
 	int                             i, item_count;
+	long                            what = PHP_DATE_TIMEZONE_GROUP_ALL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &what) == FAILURE) {
+		RETURN_FALSE;
+	}
 
 	tzdb = DATE_TIMEZONEDB;
 	item_count = tzdb->index_size;
@@ -2601,7 +2650,9 @@ PHP_FUNCTION(timezone_identifiers_list)
 	array_init(return_value);
 
 	for (i = 0; i < item_count; ++i) {
-		add_next_index_string(return_value, table[i].id, 1);
+		if (what == PHP_DATE_TIMEZONE_GROUP_ALL_W_BC || check_id_allowed(table[i].id, what)) {
+			add_next_index_string(return_value, table[i].id, 1);
+		}
 	};
 }
 /* }}} */
