@@ -911,14 +911,14 @@ static void spl_dllist_it_helper_move_forward(spl_ptr_llist_element **traverse_p
 			}
 		} else {
 			*traverse_pointer_ptr = old->next;
-			(*traverse_position_ptr)++;
-
 			if (flags & SPL_DLLIST_IT_DELETE) {
 				zval *prev = (zval *)spl_ptr_llist_shift(llist);
 
 				if (prev) {
 					zval_ptr_dtor((zval **)&prev);
 				}
+			} else {
+				(*traverse_position_ptr)++;
 			}
 		}
 
