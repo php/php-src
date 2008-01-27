@@ -28,7 +28,7 @@
 #define SPL_DEBUG(x)
 #endif
 
-extern const zend_module_entry spl_module_entry;
+extern zend_module_entry spl_module_entry;
 #define phpext_spl_ptr &spl_module_entry
 
 #ifdef PHP_WIN32
