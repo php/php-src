@@ -5,6 +5,9 @@ Test setlocale() function : basic functionality - setting system locale to a spe
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Not valid for windows');
 }
+if (setlocale(LC_ALL, "en_US.utf8", "en_AU.utf8", "ko_KR.utf8", "zh_CN.utf8", "de_DE.utf8", "es_EC.utf8", "fr_FR.utf8", "ja_JP.utf8", "el_GR.utf8", "nl_NL.utf8") === false) {
+    die('skip available locales not usable');
+}
 ?>
 --FILE--
 <?php

@@ -5,6 +5,9 @@ Test setlocale() function : usage variations - passing multiple valid/invlaid lo
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Not valid for windows');
 }
+if (setlocale(LC_ALL, "en_US.utf8", "Ko_KR.utf8", "zh_CN.utf8") === false) {
+    die('skip en_US.utf8/Ko_KR.utf8/zh_CN.utf8 locales not available');
+}
 ?>
 --FILE--
 <?php
