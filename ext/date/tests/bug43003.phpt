@@ -2,6 +2,8 @@
 Bug #43003 (Invalid timezone reported for DateTime objects constructed using a timestamp)
 --FILE--
 <?php
+date_default_timezone_set('Europe/Oslo');
+
 $oDateTest = new DateTime("@0", new DateTimeZone(date_default_timezone_get()));
 echo $oDateTest->getTimezone()->getName().": " .  $oDateTest->format("Y-m-d H:i:s")."\n";
 
