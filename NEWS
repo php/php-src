@@ -2,7 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.0
 - Added garbage collector. (David Wang, Dmitry).
-- Added new date/time functionality:
+- Added new date/time functionality: (Derick)
 
   * date_parse_from_format(): Parse date/time strings according to a format.
   * date_create_from_format()/DateTime::createFromFormat(): Create a date/time
@@ -14,6 +14,10 @@ PHP                                                                        NEWS
 	- date_parse_from_format()
   * support for abbreviation and offset based timezone specifiers for
     DateTime::getOffset() and DateTime::getName().
+  * support for selectively listing timezone identifiers through
+    timezone_identifiers_list() / DateTimezone::listIdentifiers().
+  * date_timestamp_set() / DateTime::setTimestamp() to set a Unix timestamp
+    without invoking the date parser. (Scott)
 
 - Added ability to use Traversable objects instead of plain arrays in ext/soap.
   (Joshua Reese, Dmitry)
@@ -40,8 +44,6 @@ PHP                                                                        NEWS
   (Etienne Kneuss)
 - Added "compact" handler for Zend MM storage. (Dmitry)
 - Added "+" and "*" specifiers to zend_parse_parameters(). (Andrei)
-- Added DateTime::setTimestamp() to set a unix timestamp without
-  invoking the date parser. (Scott)
 - Added SplDoublyLinkedList, SplStack, SplQueue classes. (Etienne)
 
 - Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
