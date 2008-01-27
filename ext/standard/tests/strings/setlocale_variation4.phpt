@@ -6,6 +6,8 @@ if (substr(PHP_OS, 0, 3) == 'WIN')
   die('skip Not valid for windows');
 if(ini_get("unicode.semantics") == "1")
   die('skip do not run when unicode on');
+if (setlocale(LC_ALL,'en_US.utf8') === false || setlocale(LC_ALL,'en_AU.utf8') === false)
+  die('skip en_US.utf8/en_AU.utf8 locales not available');
 ?>
 --ENV--
 LC_ALL=en_US.utf8;

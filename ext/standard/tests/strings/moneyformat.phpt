@@ -5,6 +5,10 @@ money_format test
 	if (!function_exists('money_format') || !function_exists('setlocale')) {
 		die("SKIP money_format - not supported\n");
 	}
+
+if (setlocale(LC_MONETARY, 'en_US') == false) {
+	die('skip en_US locale not available');
+}
 ?>
 --FILE--
 <?php
