@@ -359,7 +359,7 @@ static zend_class_entry *tidy_ce_doc, *tidy_ce_node;
 static zend_object_handlers tidy_object_handlers_doc;
 static zend_object_handlers tidy_object_handlers_node;
 
-const zend_module_entry tidy_module_entry = {
+zend_module_entry tidy_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"tidy",
 	tidy_functions,
