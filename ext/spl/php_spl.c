@@ -781,7 +781,7 @@ static const zend_module_dep spl_deps[] = {
 
 /* {{{ spl_module_entry
  */
-const zend_module_entry spl_module_entry = {
+zend_module_entry spl_module_entry = {
 #ifdef HAVE_SIMPLEXML
 	STANDARD_MODULE_HEADER_EX, NULL,
 	spl_deps,
