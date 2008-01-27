@@ -1,3 +1,38 @@
+2008-01-26  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/spl/spl_dllist.c
+      ext/spl/tests/dllist_007.phpt:
+      MFH: Iterator implementation in SplDoublyLinkedList, SplStack, SplQueue
+
+    * ext/spl/spl_dllist.c
+      ext/spl/tests/dllist_007.phpt
+      ext/spl/tests/dllist_007.phpt:
+      Iterator implementation for SplDoublyLinkedList, SplStack, SplQueue
+
+2008-01-26  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/php_date.c
+      ext/date/lib/parse_date.c
+      ext/date/lib/tm2unixtime.c
+      ext/date/tests/bug40743.phpt
+      ext/date/tests/bug41599.phpt
+      ext/date/tests/bug42910.phpt
+      ext/date/tests/bug43003.phpt
+      ext/date/tests/bug43527.phpt
+      ext/date/tests/bug43808.phpt:
+      - MFH Bugfixes:
+      	- Fixed bug #43808 (date_create never fails (even when it should)).
+      	- Fixed bug #43527 (DateTime created from a timestamp reports environment
+      	  timezone).
+      	- Fixed bug #43003 (Invalid timezone reported for DateTime objects
+      	  constructed using a timestamp).
+      	- Fixed bug #42190 (Constructing DateTime with TimeZone Indicator
+      	  invalidates DateTimeZone).
+      	- Fixed bug #41599 (setTime() fails after modify() is used).
+
 2008-01-25  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * (PHP_5_3)
