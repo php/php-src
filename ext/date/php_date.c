@@ -2629,7 +2629,7 @@ static int check_id_allowed(char *id, long what)
 	return 0;
 }
 
-/* {{{ proto array timezone_identifiers_list()
+/* {{{ proto array timezone_identifiers_list([long what])
    Returns numerically index array with all timezone identifiers.
 */
 PHP_FUNCTION(timezone_identifiers_list)
