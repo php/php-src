@@ -19,6 +19,8 @@ PHP                                                                        NEWS
   * date_timestamp_set() / DateTime::setTimestamp() to set a Unix timestamp
     without invoking the date parser. (Scott)
 
+- Added ability to store associative infor with objects in SplObjectStorage.
+  (Marcus)
 - Added ability to use Traversable objects instead of plain arrays in ext/soap.
   (Joshua Reese, Dmitry)
 - Added "?:" operator. (Marcus)

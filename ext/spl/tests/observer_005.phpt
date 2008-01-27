@@ -110,26 +110,36 @@ object(MyStorage)#%d (5) {
   ["storage":"SplObjectStorage":private]=>
   array(2) {
     ["%s"]=>
-    object(TestClass)#%d (4) {
-      ["def"]=>
-      int(24)
-      ["pub"]=>
-      int(4)
-      ["pro":protected]=>
-      int(5)
-      ["pri":"TestClass":private]=>
-      int(6)
+    array(2) {
+      ["obj"]=>
+      object(TestClass)#%d (4) {
+        ["def"]=>
+        int(24)
+        ["pub"]=>
+        int(4)
+        ["pro":protected]=>
+        int(5)
+        ["pri":"TestClass":private]=>
+        int(6)
+      }
+      ["inf"]=>
+      NULL
     }
     ["%s"]=>
-    object(TestClass)#%d (4) {
-      ["def"]=>
-      int(24)
-      ["pub"]=>
-      int(7)
-      ["pro":protected]=>
-      int(8)
-      ["pri":"TestClass":private]=>
-      int(9)
+    array(2) {
+      ["obj"]=>
+      object(TestClass)#%d (4) {
+        ["def"]=>
+        int(24)
+        ["pub"]=>
+        int(7)
+        ["pro":protected]=>
+        int(8)
+        ["pri":"TestClass":private]=>
+        int(9)
+      }
+      ["inf"]=>
+      NULL
     }
   }
 }
@@ -168,26 +178,36 @@ object(MyStorage)#%d (5) {
   ["storage":"SplObjectStorage":private]=>
   array(2) {
     ["%s"]=>
-    object(TestClass)#%d (4) {
-      ["def"]=>
-      int(24)
-      ["pub"]=>
-      int(4)
-      ["pro":protected]=>
-      int(5)
-      ["pri":"TestClass":private]=>
-      int(6)
+    array(2) {
+      ["obj"]=>
+      object(TestClass)#%d (4) {
+        ["def"]=>
+        int(24)
+        ["pub"]=>
+        int(4)
+        ["pro":protected]=>
+        int(5)
+        ["pri":"TestClass":private]=>
+        int(6)
+      }
+      ["inf"]=>
+      NULL
     }
     ["%s"]=>
-    object(TestClass)#%d (4) {
-      ["def"]=>
-      int(24)
-      ["pub"]=>
-      int(7)
-      ["pro":protected]=>
-      int(8)
-      ["pri":"TestClass":private]=>
-      int(9)
+    array(2) {
+      ["obj"]=>
+      object(TestClass)#%d (4) {
+        ["def"]=>
+        int(24)
+        ["pub"]=>
+        int(7)
+        ["pro":protected]=>
+        int(8)
+        ["pri":"TestClass":private]=>
+        int(9)
+      }
+      ["inf"]=>
+      NULL
     }
   }
 }
