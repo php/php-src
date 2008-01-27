@@ -308,7 +308,19 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
 
     Class [ <internal:date> class DateTimeZone ] {
 
-      - Constants [0] {
+      - Constants [12] {
+        Constant [ integer AMERICA ] { 1 }
+        Constant [ integer ANTARCTICA ] { 2 }
+        Constant [ integer ARCTIC ] { 4 }
+        Constant [ integer ASIA ] { 8 }
+        Constant [ integer ATLANTIC ] { 16 }
+        Constant [ integer AUSTRALIA ] { 32 }
+        Constant [ integer EUROPE ] { 64 }
+        Constant [ integer INDIAN ] { 128 }
+        Constant [ integer PACIFIC ] { 256 }
+        Constant [ integer UTC ] { 512 }
+        Constant [ integer ALL ] { 1023 }
+        Constant [ integer ALL_WITH_BC ] { 2047 }
       }
 
       - Static properties [0] {
