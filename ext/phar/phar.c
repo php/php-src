@@ -71,21 +71,6 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 }
 /* }}}*/
 
-#ifdef PHP_WIN32
-static inline void phar_unixify_path_separators(char *path, int path_len) /* {{{ */
-{
-	char *s;
-
-	/* unixify win paths */
-	for (s = path; s - path < path_len; s++) {
-		if (*s == '\\') {
-			*s = '/';
-		}
-	}
-}
-/* }}} */
-#endif
-
 static void phar_split_extract_list(TSRMLS_D)
 {
 	char *tmp = estrdup(PHAR_GLOBALS->extract_list);
@@ -868,7 +853,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 		buffer += entry.filename_len;
 		PHAR_GET_32(buffer, entry.uncompressed_filesize);
 		PHAR_GET_32(buffer, entry.timestamp);
-		if (offset == halt_offset + manifest_len + 4) {
+		if (offset == halt_offset + (int)manifest_len + 4) {
 			mydata->min_timestamp = entry.timestamp;
 			mydata->max_timestamp = entry.timestamp;
 		} else {

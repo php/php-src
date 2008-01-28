@@ -37,20 +37,6 @@ static php_uint32 phar_tar_number(char *buf, int len) /* {{{ */
 }
 /* }}} */
 
-#ifdef PHP_WIN32
-static inline void phar_unixify_path_separators(char *path, int path_len) /* {{{ */
-{
-	char *s;
-
-	/* unixify win paths */
-	for (s = path; s - path < path_len; s++) {
-		if (*s == '\\') {
-			*s = '/';
-		}
-	}
-}
-/* }}} */
-#endif
 /* adapted from format_octal() in libarchive
  * 
  * Copyright (c) 2003-2007 Tim Kientzle

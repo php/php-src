@@ -4,7 +4,7 @@
 ARG_ENABLE("phar", "enable phar support", "no");
 
 if (PHP_PHAR != "no") {
-	EXTENSION("phar", "util.c dirstream.c func_interceptors.c phar.c phar_object.c phar_path_check.c stream.c tar.c zip.c");
+	EXTENSION("phar", "dirstream.c func_interceptors.c phar.c phar_object.c phar_path_check.c stream.c tar.c util.c zip.c");
 	if (PHP_PHAR_SHARED) {
 		ADD_FLAG("CFLAGS_PHAR", "/D COMPILE_DL_PHAR ");
 	}
