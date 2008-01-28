@@ -2,7 +2,6 @@
 Phar front controller phps zip-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zip")) die("skip"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller3.phar.php/a.phps
 REQUEST_URI=/frontcontroller3.phar.php/a.phps

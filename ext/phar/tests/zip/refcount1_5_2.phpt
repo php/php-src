@@ -4,7 +4,6 @@ Phar: test that refcounting avoids problems with deleting a file zip-based
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 <?php if (version_compare(PHP_VERSION, "5.2", ">")) die("skip requires 5.2 or earlier"); ?>
-<?php if (!extension_loaded("zip")) die("skip"); ?>
 --INI--
 phar.readonly=0
 phar.require_hash=0

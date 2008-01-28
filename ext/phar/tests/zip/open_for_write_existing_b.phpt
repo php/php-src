@@ -2,7 +2,6 @@
 Phar: fopen a .phar for writing (existing file) zip-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zip")) die("skip"); ?>
 --INI--
 phar.readonly=1
 phar.require_hash=0

@@ -2,7 +2,6 @@
 Phar front controller $_SERVER munging failure zip-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zip")) die("skip"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller18.phar.php/fronk.gronk
 REQUEST_URI=/frontcontroller18.phar.php/fronk.gronk
