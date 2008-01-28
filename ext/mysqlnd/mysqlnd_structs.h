@@ -41,7 +41,6 @@ struct st_mysqlnd_memory_pool
 	uint free_chunk_list_elements;
 
 	MYSQLND_MEMORY_POOL_CHUNK*	(*get_chunk)(MYSQLND_MEMORY_POOL * pool, uint size TSRMLS_DC);
-	void 						(*free_contents)(MYSQLND_MEMORY_POOL * pool TSRMLS_DC);
 };
 
 struct st_mysqlnd_memory_pool_chunk
@@ -443,6 +442,8 @@ struct st_mysqlnd_connection
 
 	/* qcache */
 	MYSQLND_QCACHE	*qcache;
+
+	MYSQLND_MEMORY_POOL * result_set_memory_pool;
 
 	/* stats */
 	MYSQLND_STATS	stats;
