@@ -156,6 +156,14 @@
 #define SET_STMT_ERROR(stmt, a, b, c)	SET_CLIENT_ERROR(stmt->error_info, a, b, c)
 
 
+#ifdef ZTS
+#define CONN_GET_STATE(c)		(c)->m->get_state((c) TSRMLS_CC)
+#define CONN_SET_STATE(c, s)	(c)->m->set_state((c), (s) TSRMLS_CC)
+#else
+#define CONN_GET_STATE(c)		(c)->state
+#define CONN_SET_STATE(c, s)	(c)->state = s
+#endif
+
 
 /* PS stuff */
 typedef void (*ps_field_fetch_func)(zval *zv, const MYSQLND_FIELD * const field,
@@ -174,6 +182,8 @@ extern struct st_mysqlnd_perm_bind mysqlnd_ps_fetch_functions[MYSQL_TYPE_LAST + 
 
 extern const char * mysqlnd_out_of_sync;
 extern const char * mysqlnd_server_gone;
+
+extern MYSQLND_MEMORY_POOL mysqlnd_memory_pool;
 
 
 enum_func_status mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_warning TSRMLS_DC);

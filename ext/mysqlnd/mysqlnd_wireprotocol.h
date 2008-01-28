@@ -258,7 +258,7 @@ struct st_php_mysql_packet_row {
 	mysqlnd_2b		warning_count;
 	mysqlnd_2b		server_status;
 
-	zend_uchar		*row_buffer;
+	struct st_mysqlnd_memory_pool_chunk	*row_buffer;
 
 	zend_bool		skip_extraction;
 	zend_bool		binary_protocol;
@@ -322,6 +322,13 @@ unsigned long	php_mysqlnd_net_field_length(zend_uchar **packet);
 zend_uchar *	php_mysqlnd_net_store_length(zend_uchar *packet, uint64 length);
 
 extern char * const mysqlnd_empty_string;
+
+
+void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
+										   uint field_count, MYSQLND_FIELD *fields_metadata, MYSQLND *conn TSRMLS_DC);
+
+void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
+										 uint field_count, MYSQLND_FIELD *fields_metadata, MYSQLND *conn TSRMLS_DC);
 
 #endif /* MYSQLND_WIREPROTOCOL_H */
 
