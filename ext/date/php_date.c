@@ -2159,6 +2159,7 @@ PHP_FUNCTION(date_parse_from_format)
 	parsed_time = timelib_parse_from_format(format, date, date_len, &error, DATE_TIMEZONEDB);
 	php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAM_PASSTHRU, parsed_time, error);
 }
+/* }}} */
 
 /* {{{ proto string date_format(DateTime object, string format)
    Returns date formatted according to given format
