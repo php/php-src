@@ -3,7 +3,7 @@ Phar: fopen a .phar for writing (existing file) tar-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
-phar.readonly=1
+phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
@@ -22,6 +22,7 @@ foreach ($files as $n => $file) {
 $a->addFile($n, $file);
 }
 $a->close();
+ini_set('phar.readonly', 1);
 
 $fp = fopen($pname . '/b/c.php', 'wb');
 fwrite($fp, 'extra');

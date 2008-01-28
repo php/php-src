@@ -448,7 +448,7 @@ static int phar_zip_changed_apply(void *data, void *arg TSRMLS_DC) /* {{{ */
 	phar_zip_u2d_time(entry->timestamp, &local.timestamp, &local.datestamp);
 	central.timestamp = local.timestamp;
 	central.datestamp = local.datestamp;
-	central.filename_len = local.filename_len = entry->filename_len;
+	central.filename_len = local.filename_len = entry->filename_len + (entry->is_dir ? 1 : 0);
 	central.offset = php_stream_tell(p->filefp);
 	/* do extra field for perms later */
 	if (entry->is_modified) {
@@ -549,7 +549,7 @@ continue_dir:
 		central.comment_len = entry->metadata_str.len;
 	}
 	entry->header_offset = php_stream_tell(p->filefp);
-	offset = entry->header_offset + sizeof(local) + entry->filename_len + sizeof(perms);
+	offset = entry->header_offset + sizeof(local) + entry->filename_len + (entry->is_dir ? 1 : 0) + sizeof(perms);
 	if (sizeof(local) != php_stream_write(p->filefp, (char *)&local, sizeof(local))) {
 		spprintf(p->error, 0, "unable to write local file header of file \"%s\" to zip-based phar \"%s\"", entry->filename, entry->phar->fname);
 		return ZEND_HASH_APPLY_STOP;
@@ -558,13 +558,32 @@ continue_dir:
 		spprintf(p->error, 0, "unable to write central directory entry for file \"%s\" while creating zip-based phar \"%s\"", entry->filename, entry->phar->fname);
 		return ZEND_HASH_APPLY_STOP;
 	}
-	if (entry->filename_len != php_stream_write(p->filefp, entry->filename, entry->filename_len)) {
-		spprintf(p->error, 0, "unable to write filename to local directory entry for file \"%s\" while creating zip-based phar \"%s\"", entry->filename, entry->phar->fname);
-		return ZEND_HASH_APPLY_STOP;
-	}
-	if (entry->filename_len != php_stream_write(p->centralfp, entry->filename, entry->filename_len)) {
-		spprintf(p->error, 0, "unable to write filename to central directory entry for file \"%s\" while creating zip-based phar \"%s\"", entry->filename, entry->phar->fname);
-		return ZEND_HASH_APPLY_STOP;
+	if (entry->is_dir) {
+		if (entry->filename_len != php_stream_write(p->filefp, entry->filename, entry->filename_len)) {
+			spprintf(p->error, 0, "unable to write filename to local directory entry for directory \"%s\" while creating zip-based phar \"%s\"", entry->filename, entry->phar->fname);
+			return ZEND_HASH_APPLY_STOP;
+		}
+		if (1 != php_stream_write(p->filefp, "/", 1)) {
+			spprintf(p->error, 0, "unable to write filename to local directory entry for directory \"%s\" while creating zip-based phar \"%s\"", entry->filename, entry->phar->fname);
+			return ZEND_HASH_APPLY_STOP;
+		}
+		if (entry->filename_len != php_stream_write(p->centralfp, entry->filename, entry->filename_len)) {
+			spprintf(p->error, 0, "unable to write filename to central directory entry for directory \"%s\" while creating zip-based phar \"%s\"", entry->filename, entry->phar->fname);
+			return ZEND_HASH_APPLY_STOP;
+		}
+		if (1 != php_stream_write(p->centralfp, "/", 1)) {
+			spprintf(p->error, 0, "unable to write filename to central directory entry for directory \"%s\" while creating zip-based phar \"%s\"", entry->filename, entry->phar->fname);
+			return ZEND_HASH_APPLY_STOP;
+		}
+	} else {
+		if (entry->filename_len != php_stream_write(p->filefp, entry->filename, entry->filename_len)) {
+			spprintf(p->error, 0, "unable to write filename to local directory entry for file \"%s\" while creating zip-based phar \"%s\"", entry->filename, entry->phar->fname);
+			return ZEND_HASH_APPLY_STOP;
+		}
+		if (entry->filename_len != php_stream_write(p->centralfp, entry->filename, entry->filename_len)) {
+			spprintf(p->error, 0, "unable to write filename to central directory entry for file \"%s\" while creating zip-based phar \"%s\"", entry->filename, entry->phar->fname);
+			return ZEND_HASH_APPLY_STOP;
+		}
 	}
 	if (sizeof(perms) != php_stream_write(p->filefp, (char *)&perms, sizeof(perms))) {
 		spprintf(p->error, 0, "unable to write local extra permissions file header of file \"%s\" to zip-based phar \"%s\"", entry->filename, entry->phar->fname);
@@ -660,7 +679,9 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 	}
 	/* register alias */
 	if (phar->alias_len) {
-		phar_get_archive(&phar, phar->fname, phar->fname_len, phar->alias, phar->alias_len, NULL TSRMLS_CC);
+		if (FAILURE == phar_get_archive(&phar, phar->fname, phar->fname_len, phar->alias, phar->alias_len, error TSRMLS_CC)) {
+			return EOF;
+		}
 	}
 
 	/* set stub */
