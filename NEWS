@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   which to group by data is specified. (Ilia)
 - Upgraded PCRE to version 7.5 (Nuno)
 
+- Fixed bug #43954 (Memory leak when sending the same HTTP status code
+  multiple times). (Scott)
 - Fixed faulty fix for bug #40189 (endless loop in zlib.inflate stream filter). 
   (Greg)
 - Fixed bug #43912 (Interbase column names are truncated to 31 characters).
