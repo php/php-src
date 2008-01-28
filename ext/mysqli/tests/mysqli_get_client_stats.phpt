@@ -969,9 +969,9 @@ array(61) {
   ["mem_efree_count"]=>
   string(1) "0"
   ["mem_malloc_count"]=>
-  string(1) "0"
+  string(1) "1"
   ["mem_malloc_ammount"]=>
-  string(1) "0"
+  string(%d) "%d"
   ["mem_calloc_count"]=>
   string(1) "0"
   ["mem_calloc_ammount"]=>
@@ -1106,9 +1106,9 @@ array(61) {
   [u"mem_efree_count"]=>
   unicode(1) "0"
   [u"mem_malloc_count"]=>
-  unicode(1) "0"
+  unicode(1) "1"
   [u"mem_malloc_ammount"]=>
-  unicode(1) "0"
+  unicode(%d) "%d"
   [u"mem_calloc_count"]=>
   unicode(1) "0"
   [u"mem_calloc_ammount"]=>

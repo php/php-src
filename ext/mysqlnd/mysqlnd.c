@@ -66,12 +66,205 @@ const char * mysqlnd_out_of_sync = "Commands out of sync; you can't run this com
 MYSQLND_STATS *mysqlnd_global_stats = NULL;
 static zend_bool mysqlnd_library_initted = FALSE;
 
+MYSQLND_MEMORY_POOL mysqlnd_memory_pool;
 
 static enum_func_status mysqlnd_send_close(MYSQLND * conn TSRMLS_DC);
 
+#define MYSQLND_SILENT 1
+
+#ifdef MYSQLND_THREADED
+/* {{{ _mysqlnd_fetch_thread */
+void * _mysqlnd_fetch_thread(void *arg)
+{
+	MYSQLND *conn = (MYSQLND *) arg;
+	MYSQLND_RES * result = NULL;
+	void ***tsrm_ls = conn->tsrm_ls;
+#ifndef MYSQLND_SILENT
+	printf("conn=%p tsrm_ls=%p\n", conn, conn->tsrm_ls);
+#endif
+	do {
+		pthread_mutex_lock(&conn->LOCK_work);
+		while (conn->thread_killed == FALSE /* && there is work */) {
+#ifndef MYSQLND_SILENT
+			printf("Waiting for work in %s\n", __FUNCTION__);
+#endif
+			pthread_cond_wait(&conn->COND_work, &conn->LOCK_work);
+		}
+		if (conn->thread_killed == TRUE) {
+#ifndef MYSQLND_SILENT
+			printf("Thread killed in %s\n", __FUNCTION__);
+#endif
+			pthread_cond_signal(&conn->COND_thread_ended);
+			pthread_mutex_unlock(&conn->LOCK_work);
+			break;
+		}
+#ifndef MYSQLND_SILENT
+		printf("Got work in %s\n", __FUNCTION__);
+#endif
+		CONN_SET_STATE(conn, CONN_FETCHING_DATA);
+		result = conn->current_result;
+		conn->current_result = NULL;
+		pthread_mutex_unlock(&conn->LOCK_work);
+
+		mysqlnd_background_store_result_fetch_data(result TSRMLS_CC);
+
+		/* do fetch the data from the wire */
+
+		pthread_mutex_lock(&conn->LOCK_work);
+		CONN_SET_STATE(conn, CONN_READY);
+		pthread_cond_signal(&conn->COND_work_done);
+#ifndef MYSQLND_SILENT
+		printf("Signaling work done in %s\n", __FUNCTION__);
+#endif
+		pthread_mutex_unlock(&conn->LOCK_work);
+	} while (1);
+
+#ifndef MYSQLND_SILENT
+	printf("Exiting worker thread in %s\n", __FUNCTION__);
+#endif
+	return NULL;
+}
+/* }}} */
+#endif /* MYSQLND_THREADED */
+
+/************************************************************************************************/
+/* Let's don't use pool allocation for now */
+/* {{{ mysqlnd_mempool_free_chunk */
+static
+void mysqlnd_mempool_free_contents(MYSQLND_MEMORY_POOL * pool TSRMLS_DC)
+{
+	DBG_ENTER("mysqlnd_mempool_dtor");
+	uint i;
+	for (i = 0; i < pool->free_chunk_list_elements; i++) {
+		MYSQLND_MEMORY_POOL_CHUNK * chunk = pool->free_chunk_list[i];
+		chunk->free_chunk(chunk, FALSE TSRMLS_CC);
+	}
+	
+	DBG_VOID_RETURN;
+}
+/* }}} */
+
+/* Let's don't use pool allocation for now */
+/* {{{ mysqlnd_mempool_free_chunk */
+static
+void mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, zend_bool cache_it TSRMLS_DC)
+{
+	DBG_ENTER("mysqlnd_mempool_free_chunk");
+	MYSQLND_MEMORY_POOL * pool = chunk->pool;
+	if (chunk->from_pool) {
+		/* Try to back-off and guess if this is the last block allocated */
+		if (chunk->ptr == (pool->arena + (pool->arena_size - pool->free_size - chunk->size))) {
+			/*
+				This was the last allocation. Lucky us, we can free
+				a bit of memory from the pool. Next time we will return from the same ptr.
+			*/
+			pool->free_size += chunk->size;
+		}
+		pool->refcount--;
+	} else {
+		mnd_free(chunk->ptr);
+	}
+	if (cache_it && pool->free_chunk_list_elements < MYSQLND_MEMORY_POOL_CHUNK_LIST_SIZE) {
+		chunk->ptr = NULL;
+		pool->free_chunk_list[pool->free_chunk_list_elements++] = chunk;
+	} else {
+		/* We did not cache it -> free it */
+		mnd_free(chunk);
+	}
+	DBG_VOID_RETURN;
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_mempool_resize_chunk */
+static void
+mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, uint size TSRMLS_DC)
+{
+	DBG_ENTER("mysqlnd_mempool_resize_chunk");
+	if (chunk->from_pool) {
+		MYSQLND_MEMORY_POOL * pool = chunk->pool;
+		/* Try to back-off and guess if this is the last block allocated */
+		if (chunk->ptr == (pool->arena + (pool->arena_size - pool->free_size - chunk->size))) {
+			/*
+				This was the last allocation. Lucky us, we can free
+				a bit of memory from the pool. Next time we will return from the same ptr.
+			*/
+			if ((chunk->size + pool->free_size) < size) {
+				zend_uchar *new_ptr;
+				new_ptr = mnd_malloc(size);
+				memcpy(new_ptr, chunk->ptr, chunk->size);
+				chunk->ptr = new_ptr;
+				pool->free_size += chunk->size;
+				chunk->size = size;
+				chunk->pool = NULL; /* now we have no pool memory */
+				pool->refcount--;
+			} else {
+				/* If the chunk is > than asked size then free_memory increases, otherwise decreases*/
+				pool->free_size += (chunk->size - size);
+			}
+		} else {
+			/* Not last chunk, if the user asks for less, give it to him */
+			if (chunk->size >= size) {
+				; /* nop */
+			} else {
+				zend_uchar *new_ptr;
+				new_ptr = mnd_malloc(size);
+				memcpy(new_ptr, chunk->ptr, chunk->size);
+				chunk->ptr = new_ptr;
+				chunk->size = size;
+				chunk->pool = NULL; /* now we have no pool memory */
+				pool->refcount--;				
+			}
+		}
+	} else {
+		chunk->ptr = mnd_realloc(chunk->ptr, size);
+	}
+	DBG_VOID_RETURN;
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_mempool_get_chunk */
+static
+MYSQLND_MEMORY_POOL_CHUNK * mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool, uint size TSRMLS_DC)
+{
+	MYSQLND_MEMORY_POOL_CHUNK *chunk = NULL;
+	DBG_ENTER("mysqlnd_mempool_get_chunk");
+
+	if (pool->free_chunk_list_elements) {
+		chunk = pool->free_chunk_list[--pool->free_chunk_list_elements];
+	} else {
+		chunk = mnd_malloc(sizeof(MYSQLND_MEMORY_POOL_CHUNK));
+	}
+
+	chunk->free_chunk = mysqlnd_mempool_free_chunk;
+	chunk->resize_chunk = mysqlnd_mempool_resize_chunk;
+	chunk->size = size;
+	/*
+	  Should not go over MYSQLND_MAX_PACKET_SIZE, since we
+	  expect non-arena memory in mysqlnd_wireprotocol.c . We
+	  realloc the non-arena memory.
+	*/
+	chunk->pool = pool;
+	if (size > pool->free_size) {
+		chunk->ptr = mnd_malloc(size);
+		chunk->from_pool = FALSE;
+	} else {
+		chunk->from_pool = TRUE;
+		++pool->refcount;
+		chunk->ptr = pool->arena + (pool->arena_size - pool->free_size);
+		/* Last step, update free_size */
+		pool->free_size -= size;
+	}
+	DBG_RETURN(chunk);
+}
+/* }}} */
+/************************************************************************************************/
+
+
 /* {{{ mysqlnd_library_init */
 static
-void mysqlnd_library_init()
+void mysqlnd_library_init(TSRMLS_D)
 {
 	if (mysqlnd_library_initted == FALSE) {
 		mysqlnd_library_initted = TRUE;
@@ -81,6 +274,13 @@ void mysqlnd_library_init()
 #ifdef ZTS
 		mysqlnd_global_stats->LOCK_access = tsrm_mutex_alloc();
 #endif
+		mysqlnd_memory_pool.arena_size = 16000;
+		mysqlnd_memory_pool.free_size = mysqlnd_memory_pool.arena_size;
+		mysqlnd_memory_pool.refcount = 0;
+		/* OOM ? */
+		mysqlnd_memory_pool.arena = mnd_malloc(mysqlnd_memory_pool.arena_size);
+		mysqlnd_memory_pool.get_chunk = mysqlnd_mempool_get_chunk;
+		mysqlnd_memory_pool.free_contents = mysqlnd_mempool_free_contents;
 	}
 }
 /* }}} */
@@ -88,9 +288,12 @@ void mysqlnd_library_init()
 
 /* {{{ mysqlnd_library_end */
 static
-void mysqlnd_library_end()
+void mysqlnd_library_end(TSRMLS_D)
 {
 	if (mysqlnd_library_initted == TRUE) {
+		/* mnd_free will reference LOCK_access and won't crash...*/
+		mysqlnd_memory_pool.free_contents(&mysqlnd_memory_pool TSRMLS_CC);
+		free(mysqlnd_memory_pool.arena);
 #ifdef ZTS
 		tsrm_mutex_free(mysqlnd_global_stats->LOCK_access);
 #endif
@@ -229,6 +432,7 @@ MYSQLND_METHOD(mysqlnd_conn, free_contents)(MYSQLND *conn TSRMLS_DC)
 		mnd_pefree(conn->net.cmd_buffer.buffer, pers);
 		conn->net.cmd_buffer.buffer = NULL;
 	}
+
 	conn->charset = NULL;
 	conn->greet_charset = NULL;
 
@@ -245,6 +449,22 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn, dtor)(MYSQLND *conn TSRMLS_DC)
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
 	conn->m->free_contents(conn TSRMLS_CC);
+
+#ifdef MYSQLND_THREADED
+	if (conn->thread_is_running) {
+		pthread_mutex_lock(&conn->LOCK_work);
+		conn->thread_killed = TRUE;
+		pthread_cond_signal(&conn->COND_work);
+		pthread_cond_wait(&conn->COND_thread_ended, &conn->LOCK_work);
+		pthread_mutex_unlock(&conn->LOCK_work);
+	}
+
+	tsrm_mutex_free(conn->LOCK_state);
+
+	pthread_cond_destroy(&conn->COND_work);
+	pthread_cond_destroy(&conn->COND_work_done);
+	pthread_mutex_destroy(&conn->LOCK_work);
+#endif
 
 	mnd_pefree(conn, conn->persistent);
 
@@ -363,7 +583,7 @@ mysqlnd_simple_command(MYSQLND *conn, enum php_mysqlnd_server_command command,
 	DBG_ENTER("mysqlnd_simple_command");
 	DBG_INF_FMT("command=%s ok_packet=%d silent=%d", mysqlnd_command_to_text[command], ok_packet, silent);
 
-	switch (conn->state) {
+	switch (CONN_GET_STATE(conn)) {
 		case CONN_READY:
 			break;
 		case CONN_QUIT_SENT:
@@ -481,13 +701,13 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 	DBG_ENTER("mysqlnd_connect");
 	DBG_INF_FMT("host=%s user=%s db=%s port=%d flags=%d persistent=%d state=%d",
 				host?host:"", user?user:"", db?db:"", port, mysql_flags,
-				conn? conn->persistent:0, conn? conn->state:-1);
+				conn? conn->persistent:0, conn? CONN_GET_STATE(conn):-1);
 
-	DBG_INF_FMT("state=%d", conn->state);
-	if (conn && conn->state > CONN_ALLOCED && conn->state ) {
+	DBG_INF_FMT("state=%d", CONN_GET_STATE(conn));
+	if (conn && CONN_GET_STATE(conn) > CONN_ALLOCED && CONN_GET_STATE(conn) ) {
 		DBG_INF("Connecting on a connected handle.");
 
-		if (conn->state < CONN_QUIT_SENT) {
+		if (CONN_GET_STATE(conn) < CONN_QUIT_SENT) {
 			MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_CLOSE_IMPLICIT);
 			reconnect = TRUE;
 			mysqlnd_send_close(conn TSRMLS_CC);
@@ -551,7 +771,7 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 		self_alloced = TRUE;
 	}
 
-	conn->state	= CONN_ALLOCED;
+	CONN_SET_STATE(conn, CONN_ALLOCED);
 	conn->net.packet_no = 0;
 
 	if (conn->options.timeout_connect) {
@@ -663,7 +883,7 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 	conn->scramble = auth_packet->server_scramble_buf = mnd_pemalloc(SCRAMBLE_LENGTH, conn->persistent);
 	memcpy(auth_packet->server_scramble_buf, greet_packet.scramble_buf, SCRAMBLE_LENGTH);
 	if (!PACKET_WRITE(auth_packet, conn)) {
-		conn->state = CONN_QUIT_SENT;
+		CONN_SET_STATE(conn, CONN_QUIT_SENT);
 		SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 		goto err;	
 	}
@@ -687,7 +907,7 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 			}
 		}
 	} else {
-		conn->state				= CONN_READY;
+		CONN_SET_STATE(conn, CONN_READY);
 
 		conn->user				= pestrdup(user, conn->persistent);
 		conn->passwd			= pestrndup(passwd, passwd_len, conn->persistent);
@@ -759,6 +979,23 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 			DBG_INF("unicode set");
 		}
 #endif
+#ifdef MYSQLND_THREADED
+		{
+			pthread_t th;
+			pthread_attr_t connection_attrib;
+			conn->tsrm_ls = tsrm_ls;
+
+			pthread_attr_init(&connection_attrib);
+			pthread_attr_setdetachstate(&connection_attrib, PTHREAD_CREATE_DETACHED);
+
+			conn->thread_is_running = TRUE;
+			if (pthread_create(&th, &connection_attrib, _mysqlnd_fetch_thread, (void*)conn)) {
+				conn->thread_is_running = FALSE;
+			}
+		}
+#endif
+
+
 		DBG_RETURN(conn);
 	}
 err:
@@ -1081,7 +1318,7 @@ MYSQLND_METHOD(mysqlnd_conn, kill)(MYSQLND *conn, unsigned int pid TSRMLS_DC)
 		SET_ERROR_AFF_ROWS(conn);
 	} else if (PASS == (ret = mysqlnd_simple_command(conn, COM_PROCESS_KILL, buff,
 													 4, PROT_LAST, FALSE TSRMLS_CC))) {
-		conn->state = CONN_QUIT_SENT;
+		CONN_SET_STATE(conn, CONN_QUIT_SENT);
 	}
 	DBG_RETURN(ret);
 }
@@ -1154,7 +1391,7 @@ MYSQLND_METHOD(mysqlnd_conn, shutdown)(MYSQLND * const conn, unsigned long level
 
 
 /* {{{ mysqlnd_send_close */
-enum_func_status
+static enum_func_status
 mysqlnd_send_close(MYSQLND * conn TSRMLS_DC)
 {
 	enum_func_status ret = PASS;
@@ -1163,7 +1400,7 @@ mysqlnd_send_close(MYSQLND * conn TSRMLS_DC)
 	DBG_INF_FMT("conn=%llu conn->net.stream->abstract=%p",
 				conn->thread_id, conn->net.stream? conn->net.stream->abstract:NULL);
 
-	switch (conn->state) {
+	switch (CONN_GET_STATE(conn)) {
 		case CONN_READY:
 			DBG_INF("Connection clean, sending COM_QUIT");
 			ret =  mysqlnd_simple_command(conn, COM_QUIT, NULL, 0, PROT_LAST,
@@ -1199,7 +1436,7 @@ mysqlnd_send_close(MYSQLND * conn TSRMLS_DC)
 	  We hold one reference, and every other object which needs the
 	  connection does increase it by 1.
 	*/
-	conn->state = CONN_QUIT_SENT;
+	CONN_SET_STATE(conn, CONN_QUIT_SENT);
 
 	DBG_RETURN(ret);
 }
@@ -1236,7 +1473,6 @@ MYSQLND_METHOD(mysqlnd_conn, close)(MYSQLND * conn, enum_connection_close_type c
 
 	ret = conn->m->free_reference(conn TSRMLS_CC);
 
-
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -1269,6 +1505,46 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn, free_reference)(MYSQLND * const conn TSRMLS
 		conn->m->dtor(conn TSRMLS_CC);
 	}
 	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_conn::get_state */
+#ifdef MYSQLND_THREADED
+static enum mysqlnd_connection_state
+MYSQLND_METHOD_PRIVATE(mysqlnd_conn, get_state)(MYSQLND * const conn TSRMLS_DC)
+{
+	enum mysqlnd_connection_state state;
+	DBG_ENTER("mysqlnd_conn::get_state");
+ 	tsrm_mutex_lock(conn->LOCK_state);
+	state = conn->state;
+	tsrm_mutex_unlock(conn->LOCK_state);
+	DBG_RETURN(state);
+}
+#else
+static enum mysqlnd_connection_state
+MYSQLND_METHOD_PRIVATE(mysqlnd_conn, get_state)(MYSQLND * const conn TSRMLS_DC)
+{
+	DBG_ENTER("mysqlnd_conn::get_state");
+	DBG_RETURN(conn->state);
+}
+#endif
+/* }}} */
+
+
+/* {{{ mysqlnd_conn::set_state */
+static void
+MYSQLND_METHOD_PRIVATE(mysqlnd_conn, set_state)(MYSQLND * const conn, enum mysqlnd_connection_state new_state TSRMLS_DC)
+{
+	DBG_ENTER("mysqlnd_conn::set_state");
+#ifdef MYSQLND_THREADED
+ 	tsrm_mutex_lock(conn->LOCK_state);
+#endif
+	conn->state = new_state;
+#ifdef MYSQLND_THREADED
+	tsrm_mutex_unlock(conn->LOCK_state);
+#endif
+	DBG_VOID_RETURN;
 }
 /* }}} */
 
@@ -1420,7 +1696,7 @@ MYSQLND_METHOD(mysqlnd_conn, next_result)(MYSQLND * const conn TSRMLS_DC)
 	DBG_ENTER("mysqlnd_conn::next_result");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
-	if (conn->state != CONN_NEXT_RESULT_PENDING) {
+	if (CONN_GET_STATE(conn) != CONN_NEXT_RESULT_PENDING) {
 		DBG_RETURN(FAIL);
 	}
 
@@ -1433,7 +1709,7 @@ MYSQLND_METHOD(mysqlnd_conn, next_result)(MYSQLND * const conn TSRMLS_DC)
 	if (FAIL == (ret = mysqlnd_query_read_result_set_header(conn, NULL TSRMLS_CC))) {
 		DBG_ERR_FMT("Serious error. %s::%d", __FILE__, __LINE__);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Serious error. PID=%d", getpid());
-		conn->state = CONN_QUIT_SENT;
+		CONN_SET_STATE(conn, CONN_QUIT_SENT);
 	}
 
 	DBG_RETURN(ret);
@@ -1710,7 +1986,7 @@ MYSQLND_METHOD(mysqlnd_conn, use_result)(MYSQLND * const conn TSRMLS_DC)
 	}
 
 	/* Nothing to store for UPSERT/LOAD DATA */
-	if (conn->last_query_type != QUERY_SELECT || conn->state != CONN_FETCHING_DATA) {
+	if (conn->last_query_type != QUERY_SELECT || CONN_GET_STATE(conn) != CONN_FETCHING_DATA) {
 		SET_CLIENT_ERROR(conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE,
 						 mysqlnd_out_of_sync);
 		DBG_ERR("Command out of sync");
@@ -1743,7 +2019,7 @@ MYSQLND_METHOD(mysqlnd_conn, store_result)(MYSQLND * const conn TSRMLS_DC)
 	}
 
 	/* Nothing to store for UPSERT/LOAD DATA*/
-	if (conn->last_query_type != QUERY_SELECT || conn->state != CONN_FETCHING_DATA) {
+	if (conn->last_query_type != QUERY_SELECT || CONN_GET_STATE(conn) != CONN_FETCHING_DATA) {
 		SET_CLIENT_ERROR(conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE,
 						 mysqlnd_out_of_sync);
 		DBG_ERR("Command out of sync");
@@ -1756,6 +2032,44 @@ MYSQLND_METHOD(mysqlnd_conn, store_result)(MYSQLND * const conn TSRMLS_DC)
 	conn->current_result = NULL;
 
 	result = result->m.store_result(result, conn, FALSE TSRMLS_CC);
+	DBG_RETURN(result);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_conn::background_store_result */
+MYSQLND_RES *
+MYSQLND_METHOD(mysqlnd_conn, background_store_result)(MYSQLND * const conn TSRMLS_DC)
+{
+	MYSQLND_RES *result;
+
+	DBG_ENTER("mysqlnd_conn::store_result");
+	DBG_INF_FMT("conn=%llu", conn->thread_id);
+
+	if (!conn->current_result) {
+		DBG_RETURN(NULL);
+	}
+
+	/* Nothing to store for UPSERT/LOAD DATA*/
+	if (conn->last_query_type != QUERY_SELECT || CONN_GET_STATE(conn) != CONN_FETCHING_DATA) {
+		SET_CLIENT_ERROR(conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE,
+						 mysqlnd_out_of_sync);
+		DBG_ERR("Command out of sync");
+		DBG_RETURN(NULL);
+	}
+
+	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_BUFFERED_SETS);
+
+	result = conn->current_result;
+
+	result = result->m.background_store_result(result, conn, FALSE TSRMLS_CC);
+
+	/*
+	  Should be here, because current_result is used by the fetching thread to get data info
+	  The thread is contacted in mysqlnd_res::background_store_result().
+	*/
+	conn->current_result = NULL;
+
 	DBG_RETURN(result);
 }
 /* }}} */
@@ -1784,6 +2098,7 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 	MYSQLND_METHOD(mysqlnd_conn, query),
 	MYSQLND_METHOD(mysqlnd_conn, use_result),
 	MYSQLND_METHOD(mysqlnd_conn, store_result),
+	MYSQLND_METHOD(mysqlnd_conn, background_store_result),
 	MYSQLND_METHOD(mysqlnd_conn, next_result),
 	MYSQLND_METHOD(mysqlnd_conn, more_results),
 
@@ -1829,6 +2144,8 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn, get_reference),
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn, free_reference),
+	MYSQLND_METHOD_PRIVATE(mysqlnd_conn, get_state),
+	MYSQLND_METHOD_PRIVATE(mysqlnd_conn, set_state),
 MYSQLND_CLASS_METHODS_END;
 
 
@@ -1845,6 +2162,15 @@ PHPAPI MYSQLND *_mysqlnd_init(zend_bool persistent TSRMLS_DC)
 
 	ret->m = & mysqlnd_mysqlnd_conn_methods;
 	ret->m->get_reference(ret);
+
+#ifdef MYSQLND_THREADED
+	ret->LOCK_state = tsrm_mutex_alloc();
+
+	pthread_mutex_init(&ret->LOCK_work, NULL);
+	pthread_cond_init(&ret->COND_work, NULL);
+	pthread_cond_init(&ret->COND_work_done, NULL);
+	pthread_cond_init(&ret->COND_thread_ended, NULL);
+#endif
 
 	DBG_RETURN(ret);
 }
@@ -1985,7 +2311,7 @@ static PHP_MINIT_FUNCTION(mysqlnd)
 {
 	REGISTER_INI_ENTRIES();
 
-	mysqlnd_library_init();
+	mysqlnd_library_init(TSRMLS_C);
 	return SUCCESS;
 }
 /* }}} */
@@ -1995,7 +2321,7 @@ static PHP_MINIT_FUNCTION(mysqlnd)
  */
 static PHP_MSHUTDOWN_FUNCTION(mysqlnd)
 {
-	mysqlnd_library_end();
+	mysqlnd_library_end(TSRMLS_C);
 
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
