@@ -171,7 +171,7 @@ struct _zend_vm_stack {
 	} while (0)
 
 static inline zend_vm_stack zend_vm_stack_new_page(int count) {
-	zend_vm_stack page = emalloc(sizeof(*page)+sizeof(page->elements[0])*(count-1));
+	zend_vm_stack page = (zend_vm_stack)emalloc(sizeof(*page)+sizeof(page->elements[0])*(count-1));
 
 	page->top = page->elements;
 	page->end = page->elements + count;
