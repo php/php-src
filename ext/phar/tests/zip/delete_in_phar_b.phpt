@@ -3,7 +3,7 @@ Phar: delete a file within a zip-based .phar
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
-phar.readonly=1
+phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
@@ -18,6 +18,7 @@ $a->addFile('b.php', '<?php echo "This is b\n"; ?>');
 $a->addFile('b/c.php', '<?php echo "This is b/c\n"; ?>');
 $a->addFile('.phar/stub.php', '<?php __HALT_COMPILER(); ?>');
 $a->close();
+ini_set('phar.readonly', 1);
 
 include $pname . '/a.php';
 include $pname . '/b.php';

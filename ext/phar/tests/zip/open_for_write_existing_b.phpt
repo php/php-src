@@ -3,7 +3,7 @@ Phar: fopen a .phar for writing (existing file) zip-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
-phar.readonly=1
+phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
@@ -22,6 +22,7 @@ foreach ($files as $n => $file) {
 $a->addFile($n, $file);
 }
 $a->close();
+ini_set('phar.readonly', 1);
 
 function err_handler($errno, $errstr, $errfile, $errline) {
   echo "Catchable fatal error: $errstr in $errfile on line $errline\n";

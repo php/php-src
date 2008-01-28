@@ -3,7 +3,7 @@ Phar::chmod zip-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
-phar.readonly=1
+phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
@@ -17,6 +17,7 @@ $a->addFile('a.php', '<?php echo "This is a\n"; include "'.$pname.'/b.php"; ?>')
 $a->addFile('.phar/alias.txt', 'hio');
 $a->mkDir('test');
 $a->close();
+ini_set('phar.readonly', 1);
 
 try {
 	$a = new Phar($fname);
