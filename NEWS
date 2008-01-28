@@ -98,6 +98,8 @@ PHP                                                                        NEWS
   to different characters with cp1251 and cp866. (Scott)
 - Fixed possible crash in ext/soap because of uninitialized value. (Zdash Urf)
 
+- Fixed bug #43927 (koi8r is missing from html_entity_decode()). 
+  (andy at demos dot su, Tony)
 - Fixed bug #43808 (date_create never fails (even when it should)). (Derick)
 - Fixed bug #43559 (array_merge_recursive() doesn't behave as expected with 
   duplicate NULL values). (Felipe, Tony)
