@@ -632,7 +632,8 @@ void php_mysqlnd_crypt(zend_uchar *buffer, const zend_uchar *s1, const zend_ucha
 
 
 /* {{{ php_mysqlnd_scramble */
-void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const password)
+void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble,
+						  const zend_uchar * const password)
 {
 	PHP_SHA1_CTX context;
 	unsigned char sha1[SHA1_MAX_LENGTH];
@@ -656,7 +657,7 @@ void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const sc
 	PHP_SHA1Final(buffer, &context);
 
 	/* let's crypt buffer now */
-	php_mysqlnd_crypt(buffer, (const unsigned char *)buffer, (const unsigned  char *)sha1, SHA1_MAX_LENGTH);
+	php_mysqlnd_crypt(buffer, (const uchar *)buffer, (const uchar *)sha1, SHA1_MAX_LENGTH);
 }
 /* }}} */
 
@@ -1267,7 +1268,8 @@ php_mysqlnd_read_row_ex(MYSQLND *conn, MYSQLND_MEMORY_POOL_CHUNK **buffer,
 			  We need a trailing \0 for the last string, in case of text-mode,
 			  to be able to implement read-only variables. Thus, we add + 1.
 			*/
-			*buffer = mysqlnd_memory_pool.get_chunk(&mysqlnd_memory_pool, *data_size + 1 TSRMLS_CC);
+			*buffer = conn->result_set_memory_pool->get_chunk(conn->result_set_memory_pool,
+															  *data_size + 1 TSRMLS_CC);
 			p = (*buffer)->ptr;
 		} else if (!first_iteration) {
 			/* Empty packet after MYSQLND_MAX_PACKET_SIZE packet. That's ok, break */
@@ -1308,7 +1310,8 @@ php_mysqlnd_read_row_ex(MYSQLND *conn, MYSQLND_MEMORY_POOL_CHUNK **buffer,
 
 /* {{{ php_mysqlnd_rowp_read_binary_protocol */
 void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
-										   uint field_count, MYSQLND_FIELD *fields_metadata, MYSQLND *conn TSRMLS_DC)
+										   uint field_count, MYSQLND_FIELD *fields_metadata,
+										   MYSQLND *conn TSRMLS_DC)
 {
 	int i;
 	zend_uchar *p = row_buffer->ptr;
@@ -1362,7 +1365,8 @@ void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffe
 
 /* {{{ php_mysqlnd_rowp_read_text_protocol */
 void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
-										 uint field_count, MYSQLND_FIELD *fields_metadata, MYSQLND *conn TSRMLS_DC)
+										 uint field_count, MYSQLND_FIELD *fields_metadata,
+										 MYSQLND *conn TSRMLS_DC)
 {
 	int i;
 	zend_bool last_field_was_string = FALSE;
