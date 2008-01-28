@@ -235,7 +235,8 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 		}
 
 		entry.tar_type = ((old & (hdr->typeflag == 0))?'0':hdr->typeflag);
-		entry.offset_within_phar = pos;
+		entry.offset = entry.offset_abs = pos; /* header_offset unused in tar */
+		entry.fp_type = PHAR_FP;
 		entry.flags = phar_tar_number(hdr->mode, sizeof(hdr->mode)) & PHAR_ENT_PERM_MASK;
 		entry.timestamp = phar_tar_number(hdr->mtime, sizeof(hdr->mtime));
 
@@ -337,7 +338,6 @@ int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC)
 	size_t pos;
 	phar_entry_info *entry = (phar_entry_info *) pDest;
 	struct _phar_pass_tar_info *fp = (struct _phar_pass_tar_info *)argument;
-	php_stream *file;
 	char padding[512];
 
 	if (entry->is_deleted) {
@@ -387,6 +387,7 @@ int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC)
 	}
 
 	/* write header */
+	entry->header_offset = php_stream_tell(fp->new);
 	if (sizeof(header) != php_stream_write(fp->new, (char *) &header, sizeof(header))) {
 		if (fp->error) {
 			spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, header for  file \"%s\" could not be written", entry->phar->fname, entry->filename);
@@ -396,19 +397,16 @@ int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC)
 	pos = php_stream_tell(fp->new); /* save start of file within tar */
 
 	/* write contents */
-	if (entry->fp) {
-		/* new file */
-		file = entry->fp;
-		if (file == entry->phar->fp) {
-			php_stream_seek(file, entry->offset_within_phar, SEEK_SET);
-		} else {
-			php_stream_seek(file, 0, SEEK_SET);
-		}
-	} else {
-		file = fp->old;
-		php_stream_seek(file, entry->offset_within_phar, SEEK_SET);
+	if (FAILURE == phar_open_entry_fp(entry, fp->error TSRMLS_CC)) {
+		return ZEND_HASH_APPLY_STOP;
 	}
-	if (entry->uncompressed_filesize != php_stream_copy_to_stream(file, fp->new, entry->uncompressed_filesize)) {
+	if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0 TSRMLS_CC)) {
+		if (fp->error) {
+			spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, contents of file \"%s\" could not be written, seek failed", entry->phar->fname, entry->filename);
+		}
+		return ZEND_HASH_APPLY_STOP;
+	}
+	if (entry->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(entry), fp->new, entry->uncompressed_filesize)) {
 		if (fp->error) {
 			spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, contents of file \"%s\" could not be written", entry->phar->fname, entry->filename);
 		}
@@ -419,15 +417,14 @@ int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC)
 	php_stream_write(fp->new, padding, ((entry->uncompressed_filesize +511)&~511) - entry->uncompressed_filesize);
 
 	entry->is_modified = 0;
-	if (entry->fp && entry->fp_refcount == 0) {
-		if (entry->fp != entry->phar->fp) {
-			php_stream_close(entry->fp);
-		}
+	if (entry->fp_type == PHAR_MOD && entry->fp != entry->phar->fp && entry->fp != entry->phar->ufp) {
+		php_stream_close(entry->fp);
 		entry->fp = NULL;
 	}
+	entry->fp_type = PHAR_FP;
 
 	/* note new location within tar */
-	entry->offset_within_phar = pos;
+	entry->offset = entry->offset_abs = pos;
 	return ZEND_HASH_APPLY_KEEP;
 }
 
@@ -447,6 +444,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 	entry.is_tar = 1;
 	entry.tar_type = '0';
 	entry.phar = phar;
+	entry.fp_type = PHAR_MOD;
 	/* set alias */
 	if (phar->is_explicit_alias) {
 		entry.filename = estrndup(".phar/alias.txt", sizeof(".phar/alias.txt")-1);
@@ -573,6 +571,10 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 	}
 	if (phar->fp) {
 		php_stream_close(phar->fp);
+	}
+	if (phar->ufp) {
+		php_stream_close(phar->ufp);
+		phar->ufp = NULL;
 	}
 
 	phar->is_brandnew = 0;

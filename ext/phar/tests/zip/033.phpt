@@ -42,7 +42,13 @@ try {
 <?php 
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.1.phar.php');
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
-Cannot modify permissions for file "a.php" in phar "%s033.1.phar.php", not supported for zip-based phars
+bool(true)
+bool(false)
+test dir
+bool(true)
+bool(true)
+bool(false)
+bool(true)
 ===DONE===

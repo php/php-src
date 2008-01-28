@@ -241,8 +241,9 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 			if (error) {
 				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
 				efree(error);
+			} else {
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: \"%s\" is not a file in phar \"%s\"", internal_file, resource->host);
 			}
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: \"%s\" is not a file in phar \"%s\"", internal_file, resource->host);
 			efree(internal_file);
 			php_url_free(resource);
 			return NULL;
@@ -260,56 +261,13 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 		fprintf(stderr, "Cached:     %s\n", idata->internal_file->filedata ? "yes" : "no");
 #endif
 
-	/* do we have the data already? */
-	if (idata->fp) {
-		fpf = php_stream_alloc(&phar_ops, idata, NULL, mode);
-		efree(internal_file);
-		return fpf;
-	}
-
-#if PHP_MAJOR_VERSION < 6
-	if (PG(safe_mode) && (!php_checkuid(idata->phar->fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
-		phar_entry_delref(idata TSRMLS_CC);
-		efree(internal_file);
-		return NULL;
-	}
-#endif
-	
-	if (php_check_open_basedir(idata->phar->fname TSRMLS_CC)) {
-		phar_entry_delref(idata TSRMLS_CC);
-		efree(internal_file);
-		return NULL;
-	}
-
-	fp = idata->phar->fp;
-
-	if (!idata->phar->is_zip && !fp) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot open phar \"%s\"", idata->phar->fname);
-		phar_entry_delref(idata TSRMLS_CC);
-		efree(internal_file);
-		return NULL;
-	}
-
-	if (!phar_open_jit(idata->phar, idata->internal_file, fp, &error, idata->for_write TSRMLS_CC)) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
-		efree(error);
-		phar_entry_delref(idata TSRMLS_CC);
-		efree(internal_file);
-		return NULL;
-	}
-	idata->fp = idata->internal_file->fp;
-	if (idata->fp == idata->phar->fp) {
-		idata->zero = idata->internal_file->offset_within_phar + idata->phar->internal_file_start;
-	}
-
 	/* check length, crc32 */
-	if (!idata->internal_file->is_crc_checked && phar_postprocess_file(wrapper, options, idata, idata->internal_file->crc32 TSRMLS_CC) != SUCCESS) {
+	if (!idata->internal_file->is_crc_checked && phar_postprocess_file(wrapper, options, idata, idata->internal_file->crc32, &error TSRMLS_CC) != SUCCESS) {
 		/* already issued the error */
 		phar_entry_delref(idata TSRMLS_CC);
 		efree(internal_file);
 		return NULL;
 	}
-	idata->internal_file->is_crc_checked = 1;
 
 	fpf = php_stream_alloc(&phar_ops, idata, NULL, mode);
 	efree(internal_file);
@@ -344,18 +302,9 @@ static size_t phar_stream_read(php_stream *stream, char *buf, size_t count TSRML
 	/* use our proxy position */
 	php_stream_seek(data->fp, data->position + data->zero, SEEK_SET);
 
-	if (!data->zero) {
-		got = php_stream_read(data->fp, buf, count);
-		if (data->fp->eof) {
-			stream->eof = 1;
-		}
-		/* note the position, and restore the stream for the next fp */
-		data->position = php_stream_tell(data->fp);
-	} else {
-		got = php_stream_read(data->fp, buf, MIN(count, data->internal_file->uncompressed_filesize - data->position));
-		data->position = php_stream_tell(data->fp) - data->zero;
-		stream->eof = (data->position == (off_t) data->internal_file->uncompressed_filesize);
-	}
+	got = php_stream_read(data->fp, buf, MIN(count, data->internal_file->uncompressed_filesize - data->position));
+	data->position = php_stream_tell(data->fp) - data->zero;
+	stream->eof = (data->position == (off_t) data->internal_file->uncompressed_filesize);
 
 
 	return got;
@@ -370,39 +319,28 @@ static int phar_stream_seek(php_stream *stream, off_t offset, int whence, off_t 
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 
 	int res;
-	if (data->zero) {
-		off_t temp;
-		switch (whence) {
-			case SEEK_END :
-				temp = data->zero + data->internal_file->uncompressed_filesize + offset;
-				break;
-			case SEEK_CUR :
-				temp = data->zero + data->position + offset;
-				break;
-			case SEEK_SET :
-				temp = data->zero + offset;
-				break;
-		}
-		if (temp > data->zero + (off_t) data->internal_file->uncompressed_filesize) {
-			*newoffset = -1;
-			return -1;
-		}
-		if (temp < data->zero) {
-			*newoffset = -1;
-			return -1;
-		}
-		res = php_stream_seek(data->fp, temp, SEEK_SET);
-		*newoffset = php_stream_tell(data->fp) - data->zero;
-		data->position = *newoffset;
-		return res;
+	off_t temp;
+	switch (whence) {
+		case SEEK_END :
+			temp = data->zero + data->internal_file->uncompressed_filesize + offset;
+			break;
+		case SEEK_CUR :
+			temp = data->zero + data->position + offset;
+			break;
+		case SEEK_SET :
+			temp = data->zero + offset;
+			break;
 	}
-	if (whence != SEEK_SET) {
-		/* use our proxy position, so the relative stuff works */
-		php_stream_seek(data->fp, data->position, SEEK_SET);
+	if (temp > data->zero + (off_t) data->internal_file->uncompressed_filesize) {
+		*newoffset = -1;
+		return -1;
 	}
-	/* now do the actual seek */
-	res = php_stream_seek(data->fp, offset, whence);
-	*newoffset = php_stream_tell(data->fp);
+	if (temp < data->zero) {
+		*newoffset = -1;
+		return -1;
+	}
+	res = php_stream_seek(data->fp, temp, SEEK_SET);
+	*newoffset = php_stream_tell(data->fp) - data->zero;
 	data->position = *newoffset;
 	return res;
 }
@@ -817,7 +755,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 	}
 
 	if (SUCCESS == zend_hash_find(&(phar->manifest), resource_from->path+1, strlen(resource_from->path)-1, (void **)&entry)) {
-		phar_entry_info new;
+		phar_entry_info new, *source;
 
 		/* perform rename magic */
 		if (entry->is_deleted) {
@@ -833,23 +771,21 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		entry->fp = NULL;
 		entry->metadata = 0;
 		entry->link = NULL;
-#if HAVE_PHAR_ZIP
-		entry->zip = NULL;
-#endif
+		source = entry;
 
+		/* add to the manifest, and then store the pointer to the new guy in entry */
 		zend_hash_add(&(phar->manifest), resource_to->path+1, strlen(resource_to->path)-1, (void **)&new, sizeof(phar_entry_info), (void **) &entry);
-		if (!entry->is_modified) {
-			/* copy file contents into a new temp stream */
-			if (!phar_open_jit(phar, entry, phar->fp, &error, 1 TSRMLS_CC)) {
-				php_url_free(resource_from);
-				php_url_free(resource_to);
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\": %s", url_from, url_to, error);
-				efree(error);
-				return 0;
-			}
+
+		entry->filename = estrdup(resource_to->path+1);
+		if (FAILURE == phar_copy_entry_fp(source, entry, &error TSRMLS_CC)) {
+			php_url_free(resource_from);
+			php_url_free(resource_to);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\": %s", url_from, url_to, error);
+			efree(error);
+			zend_hash_del(&(phar->manifest), entry->filename, strlen(entry->filename));
+			return 0;
 		}
 		entry->is_modified = 1;
-		entry->filename = estrdup(resource_to->path+1);
 		entry->filename_len = strlen(entry->filename);
 		phar_flush(phar, 0, 0, &error TSRMLS_CC);
 		if (error) {
@@ -857,6 +793,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 			php_url_free(resource_to);
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\": %s", url_from, url_to, error);
 			efree(error);
+			zend_hash_del(&(phar->manifest), entry->filename, strlen(entry->filename));
 			return 0;
 		}
 	}
