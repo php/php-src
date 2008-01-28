@@ -34,6 +34,7 @@ try {
 <?php 
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phartmp.php');
+unlink(dirname(__FILE__) . '/notphar.phar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--

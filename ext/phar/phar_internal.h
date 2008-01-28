@@ -25,10 +25,6 @@
 
 #include <time.h>
 #include "php.h"
-#if HAVE_PHAR_ZIP
-#include "ext/zip/lib/zip.h"
-#include "ext/zip/lib/zipint.h"
-#endif
 #include "tar.h"
 #include "php_ini.h"
 #include "zend_constants.h"
@@ -174,8 +170,6 @@ ZEND_EXTERN_MODULE_GLOBALS(phar)
 
 int phar_has_bz2;
 int phar_has_zlib;
-int phar_has_zip;
-char *phar_zip_ver;
 
 #ifdef ZTS
 #	include "TSRM.h"
@@ -193,11 +187,24 @@ char *phar_zip_ver;
 #  define php_uint16 uint16_t
 # endif
 #endif
+#include "pharzip.h"
 
 #if HAVE_SPL
 typedef union _phar_archive_object  phar_archive_object;
 typedef union _phar_entry_object    phar_entry_object;
 #endif
+
+/*
+ * used in phar_entry_info->fp_type to
+ */
+enum phar_fp_type {
+	/* regular file pointer phar_archive_data->fp */
+	PHAR_FP,
+	/* uncompressed file pointer phar_archive_data->uncompressed_fp */
+	PHAR_UFP,
+	/* modified file pointer phar_entry_info->fp */
+	PHAR_MOD
+};
 
 typedef struct _phar_archive_data phar_archive_data;
 /* entry for one file in a phar file */
@@ -214,7 +221,13 @@ typedef struct _phar_entry_info {
 	zval                     *metadata;
 	php_uint32               filename_len;
 	char                     *filename;
-	long                     offset_within_phar;
+	enum phar_fp_type        fp_type;
+	/* offset within original phar file of the file contents */
+	long                     offset_abs;
+	/* offset within fp of the file contents */
+	long                     offset;
+	/* offset within original phar file of the file header (for zip-based/tar-based) */
+	long                     header_offset;
 	php_stream               *fp;
 	php_stream               *cfp;
 	int                      fp_refcount;
@@ -232,10 +245,6 @@ typedef struct _phar_entry_info {
 	char                     tar_type;
 	/* zip-based phar file stuff */
 	int                      is_zip:1;
-#if HAVE_PHAR_ZIP
-	int                      index;
-	struct zip_file          *zip;
-#endif
 } phar_entry_info;
 
 /* information about a phar file (the archive itself) */
@@ -252,6 +261,8 @@ struct _phar_archive_data {
 	php_uint32               min_timestamp;
 	php_uint32               max_timestamp;
 	php_stream               *fp;
+	/* decompressed file contents are stored here */
+	php_stream               *ufp;
 	int                      refcount;
 	php_uint32               sig_flags;
 	int                      sig_len;
@@ -267,9 +278,6 @@ struct _phar_archive_data {
 	int                      is_zip:1;
 	/* tar-based phar variables */
 	int                      is_tar:1;
-#if HAVE_PHAR_ZIP
-	struct zip               *zip;
-#endif
 };
 
 #define PHAR_MIME_PHP '\0'
@@ -286,8 +294,8 @@ typedef struct _phar_mime_type {
 /* stream access data for one file entry in a phar file */
 typedef struct _phar_entry_data {
 	phar_archive_data        *phar;
-	/* stream position proxy, allows multiple open streams referring to the same fp */
 	php_stream               *fp;
+	/* stream position proxy, allows multiple open streams referring to the same fp */
 	off_t                    position;
 	/* for copies of the phar fp, defines where 0 is */
 	off_t                    zero;
@@ -330,19 +338,31 @@ void phar_request_initialize(TSRMLS_D);
 
 void phar_object_init(TSRMLS_D);
 
+int phar_open_entry_file(phar_archive_data *phar, phar_entry_info *entry, char **error TSRMLS_DC);
 int phar_open_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
 int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
 int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
 int phar_open_compiled_file(char *alias, int alias_len, char **error TSRMLS_DC);
 int phar_get_archive(phar_archive_data **archive, char *fname, int fname_len, char *alias, int alias_len, char **error TSRMLS_DC);
 int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
+
+/* utility functions */
 char *phar_create_default_stub(const char *index_php, const char *web_index, size_t *len, char **error TSRMLS_DC);
+char * phar_decompress_filter(phar_entry_info * entry, int return_unknown);
+char * phar_compress_filter(phar_entry_info * entry, int return_unknown);
 
 char *phar_fix_filepath(char *path, int *new_len, int use_cwd TSRMLS_DC);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, php_stream *fp,
 				      char **error, int for_write TSRMLS_DC);
 int phar_parse_metadata(char **buffer, zval **metadata, int is_zip TSRMLS_DC);
 void destroy_phar_manifest_entry(void *pDest);
+int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t position TSRMLS_DC);
+php_stream *phar_get_efp(phar_entry_info *entry);
+int phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **error TSRMLS_DC);
+int phar_open_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC);
+int phar_create_writeable_entry(phar_archive_data *phar, phar_entry_info *entry, char **error TSRMLS_DC);
+int phar_separate_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC);
+int phar_open_archive_fp(phar_archive_data *phar TSRMLS_DC);
 
 /* tar functions in tar.c */
 int phar_is_tar(char *buf);
@@ -352,11 +372,9 @@ int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_l
 int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **error TSRMLS_DC);
 
 /* zip functions in zip.c */
-int phar_open_zipfile(char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, char **error TSRMLS_DC);
+int phar_open_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, char **error TSRMLS_DC);
 int phar_open_or_create_zip(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
-#if HAVE_PHAR_ZIP
 int phar_zip_flush(phar_archive_data *archive, char *user_stub, long len, char **error TSRMLS_DC);
-#endif
 
 #ifdef PHAR_MAIN
 static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);

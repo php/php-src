@@ -461,13 +461,9 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, char *url_from, int mode, in
 	memset((void *) &entry, 0, sizeof(phar_entry_info));
 
 	/* strip leading "/" */
-#if HAVE_PHAR_ZIP
 	if (phar->is_zip) {
 		entry.is_zip = 1;
-		/* prevent attempts to check the CRC */
-		entry.index = -1;
 	}
-#endif
 	entry.filename = estrdup(resource->path + 1);
 	if (phar->is_tar) {
 		entry.is_tar = 1;

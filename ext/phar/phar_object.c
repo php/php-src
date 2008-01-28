@@ -243,7 +243,7 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 			}
 
 			/* prepare to output  */
-			if (!phar->fp) {
+			if (!phar_get_efp(phar->internal_file)) {
 				char *error;
 				if (!phar_open_jit(phar->phar, phar->internal_file, phar->phar->fp, &error, 0 TSRMLS_CC)) {
 					if (error) {
@@ -252,29 +252,16 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 					}
 					return -1;
 				}
-				phar->fp = phar->internal_file->fp;
-				if (phar->internal_file->fp == phar->phar->fp) {
-					phar->zero = phar->internal_file->offset_within_phar;
-					if (!phar->is_tar && !phar->is_zip) {
-						phar->zero += phar->phar->internal_file_start;
-					}
-				}
+				phar->fp = phar_get_efp(phar->internal_file);
+				phar->zero = phar->internal_file->offset;
 			}
-			php_stream_seek(phar->fp, phar->zero, SEEK_SET);
+			phar_seek_efp(phar->internal_file, 0, SEEK_SET, 0 TSRMLS_CC);
 			do {
-				if (!phar->zero) {
-					got = php_stream_read(phar->fp, buf, 8192);
-					PHPWRITE(buf, got);
-					if (phar->fp->eof) {
-						break;
-					}
-				} else {
-					got = php_stream_read(phar->fp, buf, MIN(8192, phar->internal_file->uncompressed_filesize - phar->position));
-					PHPWRITE(buf, got);
-					phar->position = php_stream_tell(phar->fp) - phar->zero;
-					if (phar->position == (off_t) phar->internal_file->uncompressed_filesize) {
-						break;
-					}
+				got = php_stream_read(phar->fp, buf, MIN(8192, phar->internal_file->uncompressed_filesize - phar->position));
+				PHPWRITE(buf, got);
+				phar->position = php_stream_tell(phar->fp) - phar->zero;
+				if (phar->position == (off_t) phar->internal_file->uncompressed_filesize) {
+					break;
 				}
 			} while (1);
 
@@ -1313,44 +1300,65 @@ PHP_METHOD(Phar, isPhar)
 
 static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp TSRMLS_DC) /* {{{ */
 {
-	/* if not available, open the file for reading */
-	if (!entry->fp) {
-		char *error;
-		if (!phar_open_jit(entry->phar, entry, entry->phar->fp, &error, 0 TSRMLS_CC)) {
-			if (error) {
-				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-					"Cannot convert phar archive \"%s\", unable to open entry \"%s\" contents: %s", entry->phar->fname, entry->filename, error);
-				efree(error);
-			} else {
-				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-					"Cannot convert phar archive \"%s\", unable to open entry \"%s\" contents", entry->phar->fname, entry->filename);
-			}
-			return FAILURE;
+	char *error;
+	off_t offset;
+
+	if (FAILURE == phar_open_entry_fp(entry, &error TSRMLS_CC)) {
+		if (error) {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+				"Cannot convert phar archive \"%s\", unable to open entry \"%s\" contents: %s", entry->phar->fname, entry->filename, error);
+			efree(error);
+		} else {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+				"Cannot convert phar archive \"%s\", unable to open entry \"%s\" contents", entry->phar->fname, entry->filename);
 		}
+		return FAILURE;
 	}
 	/* copy old contents in entirety */
-	php_stream_seek(entry->fp, entry->phar->internal_file_start + entry->offset_within_phar, SEEK_SET);
-	if (entry->uncompressed_filesize != php_stream_copy_to_stream(entry->fp, fp, entry->uncompressed_filesize)) {
+	phar_seek_efp(entry, 0, SEEK_SET, 0 TSRMLS_CC);
+	offset = php_stream_tell(fp);
+	if (entry->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(entry), fp, entry->uncompressed_filesize)) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"Cannot convert phar archive \"%s\", unable to copy entry \"%s\" contents", entry->phar->fname, entry->filename);
 		return FAILURE;
 	}
-	if (entry->fp != entry->phar->fp) {
-		php_stream_close(entry->fp);
+	if (entry->fp_type == PHAR_MOD) {
+		/* save for potential restore on error */
+		entry->cfp = entry->fp;
 		entry->fp = NULL;
 	}
+	/* set new location of file contents */
+	entry->fp_type = PHAR_FP;
+	entry->offset = offset;
 	return SUCCESS;
 }
 /* }}} */
 
+static int phar_restore_apply(void *data TSRMLS_DC) /* {{{ */
+{
+	phar_entry_info *entry = (phar_entry_info *)data;
+
+	if (entry->cfp) {
+		entry->fp_type = PHAR_MOD;
+		entry->fp = entry->cfp;
+		entry->cfp = NULL;
+		entry->offset = 0;
+	} else {
+		entry->fp_type = PHAR_FP;
+		entry->fp = NULL;
+		entry->offset = entry->offset_abs;
+	}
+	return ZEND_HASH_APPLY_KEEP;
+}
+
 static void phar_convert_to_other(phar_archive_data *source, int convert, php_uint32 flags TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data phar = {0};
-	long offset = 0;
-	char *error, *opened_path = NULL;
-#if HAVE_PHAR_ZIP
-	int fd, ziperror;
-#endif
+	char *error;
+	zval *userz;
+	long tmp;
+	php_stream *fp;
+	phar_entry_info *entry, newentry;
 
 	/* set whole-archive compression from parameter */
 	phar.flags = flags;
@@ -1360,39 +1368,6 @@ static void phar_convert_to_other(phar_archive_data *source, int convert, php_ui
 			break;
 		case 2 :
 			phar.is_zip = 1;
-#if HAVE_PHAR_ZIP
-			if (!((fd = php_open_temporary_fd(NULL, "pharzip", &opened_path TSRMLS_CC)) >= 0)) {
-				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-					"Cannot convert phar archive \"%s\", unable to open temporary zip archive", source->fname);
-				return;
-			}
-			close(fd);
-			unlink(opened_path);
-			phar.zip = zip_open(opened_path, ZIP_CREATE, &ziperror);
-			if (!phar.zip) {
-				/* now for the stupid hoops libzip forces... */
-				char *tmp;
-				int tmp_len;
-
-				efree(opened_path);
-				tmp_len = zip_error_to_str(NULL, 0, ziperror, ziperror);
-				if (!(tmp = emalloc((tmp_len + 1) * sizeof(char)))) {
-					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-						"Cannot convert phar archive \"%s\", unable to open temporary zip archive", source->fname);
-				} else {
-					if (!zip_error_to_str(tmp, tmp_len + 1, ziperror, ziperror)) {
-						efree(tmp);
-						zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-							"Cannot convert phar archive \"%s\", unable to open temporary zip archive", source->fname);
-					} else {
-						zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, 
-							"Cannot convert phar archive \"%s\", unable to open temporary zip archive: %s", source->fname, tmp);
-						efree(tmp);
-					}
-				}
-				return;
-			}
-#endif
 			break;
 	}
 
@@ -1403,67 +1378,51 @@ static void phar_convert_to_other(phar_archive_data *source, int convert, php_ui
 	phar.fname = source->fname;
 	/* first copy each file's uncompressed contents to a temporary file and set per-file flags */
 	for (zend_hash_internal_pointer_reset(&source->manifest); SUCCESS == zend_hash_has_more_elements(&source->manifest); zend_hash_move_forward(&source->manifest)) {
-		phar_entry_info *entry, newentry;
+
 		if (FAILURE == zend_hash_get_current_data(&source->manifest, (void **) &entry)) {
 			zend_hash_destroy(&(phar.manifest));
 			php_stream_close(phar.fp);
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 				"Cannot convert phar archive \"%s\"", source->fname);
-			if (opened_path) {
-				efree(opened_path);
-			}
-#if HAVE_PHAR_ZIP
-			if (phar.is_zip) {
-				_zip_free(phar.zip);
-			}
-#endif
+			zend_hash_apply(&source->manifest, phar_restore_apply TSRMLS_CC);
 			return;
+		}
+		if (!convert) {
+			/* converting to Phar */
+			if (entry->filename_len == sizeof(".phar/stub.php")-1 && !strncmp(entry->filename, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
+				/* do not copy stub file */
+				continue;
+			}
+			if (entry->filename_len == sizeof(".phar/alias.txt")-1 && !strncmp(entry->filename, ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
+				/* do not copy alias file */
+				continue;
+			}
 		}
 		if (entry->fp_refcount > 0) {
 			zend_hash_destroy(&(phar.manifest));
 			php_stream_close(phar.fp);
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 				"Cannot convert phar archive \"%s\", open file pointers for entry \"%s\"", source->fname, entry->filename);
-#if HAVE_PHAR_ZIP
-			if (phar.is_zip) {
-				_zip_free(phar.zip);
-			}
-#endif
-			if (opened_path) {
-				efree(opened_path);
-			}
+			zend_hash_apply(&source->manifest, phar_restore_apply TSRMLS_CC);
 			return;
 		}
 		newentry = *entry;
-		if (FAILURE == phar_copy_file_contents(entry, phar.fp TSRMLS_CC)) {
+		if (FAILURE == phar_copy_file_contents(&newentry, phar.fp TSRMLS_CC)) {
 			zend_hash_destroy(&(phar.manifest));
 			php_stream_close(phar.fp);
 			/* exception already thrown */
-#if HAVE_PHAR_ZIP
-			if (phar.is_zip) {
-				_zip_free(phar.zip);
-			}
-#endif
-			if (opened_path) {
-				efree(opened_path);
-			}
+			zend_hash_apply(&source->manifest, phar_restore_apply TSRMLS_CC);
 			return;
 		}
 		newentry.filename = estrndup(newentry.filename, newentry.filename_len);
 		if (newentry.metadata) {
 			SEPARATE_ZVAL(&(newentry.metadata));
 		}
-		newentry.offset_within_phar = offset;
-		offset += newentry.uncompressed_filesize;
 		newentry.is_zip = phar.is_zip;
 		newentry.is_tar = phar.is_tar;
 		if (newentry.is_tar) {
 			newentry.tar_type = (entry->is_dir ? TAR_DIR : TAR_FILE);
 		}
-		newentry.fp = phar.fp;
-#if HAVE_PHAR_ZIP
-		newentry.index = -1;
-#endif
 		newentry.is_modified = 1;
 		newentry.phar = &phar;
  		newentry.old_flags = newentry.flags & ~PHAR_ENT_COMPRESSION_MASK; /* remove compression from old_flags */
@@ -1471,90 +1430,28 @@ static void phar_convert_to_other(phar_archive_data *source, int convert, php_ui
 	}
 
 	/* next copy the stub and flush */
-	if (phar.is_zip) {
-		phar.fname = opened_path;
-	}
 
-	if (source->is_zip) {
-		phar_entry_info *entry;
-		long tmp = 0;
-		zval *userz;
-
+	if (source->is_tar || source->is_zip) {
 		if (FAILURE == (zend_hash_find(&source->manifest, ".phar/stub.php", sizeof(".phar/stub.php")-1, (void **)&entry))) {
 			/* use default stub - the existing one in the manifest will be used if present */
 			phar_flush(&phar, NULL, 0, &error TSRMLS_CC);
 			goto finalize;
 		}
-		if (!entry->fp && !phar_open_jit(source, entry, NULL, &error, 0 TSRMLS_CC)) {
-			if (error) {
-				efree(error);
-			}
-			php_stream_close(phar.fp);
-			zend_hash_destroy(&(phar.manifest));
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-				"Cannot convert phar archive \"%s\": unable to retrieve stub", source->fname, error);
-#if HAVE_PHAR_ZIP
-			if (phar.is_zip) {
-				_zip_free(phar.zip);
-			}
-#endif
-			if (opened_path) {
-				efree(opened_path);
-			}
-			return;
-		}
-		/* copy the other phar's stub */
-		php_stream_seek(entry->fp, 0, SEEK_SET);
-		ALLOC_ZVAL(userz);
-		php_stream_to_zval(entry->fp, userz);
-		tmp = entry->uncompressed_filesize;
-		phar_flush(&phar, (char *) &userz, -tmp, &error TSRMLS_CC);
-		efree(userz);
-		php_stream_close(entry->fp);
-		if (error) {
-			zend_hash_destroy(&(phar.manifest));
-			php_stream_close(phar.fp);
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-				"Cannot convert phar archive \"%s\": %s", source->fname, error);
-			efree(error);
-#if HAVE_PHAR_ZIP
-			if (phar.is_zip) {
-				_zip_free(phar.zip);
-			}
-#endif
-			if (opened_path) {
-				efree(opened_path);
-			}
-			return;
-		}
+		fp = php_stream_open_wrapper(source->fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|0, NULL);
+		php_stream_seek(fp, entry->offset, SEEK_SET);
+		/* use this unused value to set the stub size */
+		source->internal_file_start = entry->uncompressed_filesize;
 	} else {
-		zval *userz;
-		long tmp;
-
-		if (source->is_tar) {
-			phar_entry_info *entry;
-
-			if (FAILURE == (zend_hash_find(&source->manifest, ".phar/stub.php", sizeof(".phar/stub.php")-1, (void **)&entry))) {
-				/* use default stub - the existing one in the manifest will be used if present */
-				phar_flush(&phar, NULL, 0, &error TSRMLS_CC);
-				goto finalize;
-			}
-			php_stream_seek(source->fp, entry->offset_within_phar, SEEK_SET);
-			/* use this unused value to set the stub size */
-			source->internal_file_start = entry->uncompressed_filesize;
-		} else {
-			php_stream_seek(source->fp, 0, SEEK_SET);
-		}
-		/* copy the other phar's stub */
-		ALLOC_ZVAL(userz);
-		php_stream_to_zval(source->fp, userz);
-		tmp = source->internal_file_start;
-		phar_flush(&phar, (char *) &userz, -tmp, &error TSRMLS_CC);
-		efree(userz);
-		if (source->is_tar) {
-			source->internal_file_start = 0;
-		}
+		fp = php_stream_open_wrapper(source->fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|0, NULL);
 	}
+	/* copy the other phar's stub */
+	ALLOC_ZVAL(userz);
+	php_stream_to_zval(fp, userz);
+	tmp = source->internal_file_start;
+	source->internal_file_start = 0;
+	phar_flush(&phar, (char *) &userz, -tmp, &error TSRMLS_CC);
+	php_stream_close(fp);
+	efree(userz);
 
 	if (error) {
 		zend_hash_destroy(&(phar.manifest));
@@ -1562,14 +1459,6 @@ static void phar_convert_to_other(phar_archive_data *source, int convert, php_ui
 			"Cannot convert phar archive \"%s\": %s", source->fname, error);
 		efree(error);
 		php_stream_close(phar.fp);
-#if HAVE_PHAR_ZIP
-		if (phar.is_zip) {
-			_zip_free(phar.zip);
-		}
-#endif
-		if (opened_path) {
-			efree(opened_path);
-		}
 		return;
 	}
 
@@ -1582,14 +1471,6 @@ finalize:
 			php_stream_close(phar.fp);
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 				"Cannot convert phar archive \"%s\"", source->fname);
-#if HAVE_PHAR_ZIP
-			if (phar.is_zip) {
-				_zip_free(phar.zip);
-			}
-#endif
-			if (opened_path) {
-				efree(opened_path);
-			}
 			/* we can't throw an exception or bad crap will happen */
 			zend_error(E_ERROR, "Error: could not convert phar archive \"%s\", phar is in unstable state, shutting down", source->fname);
 			return;
@@ -1600,6 +1481,7 @@ finalize:
 					/* a little hack to prevent destruction of data */
 					dtor_func_t save;
 
+					entry->phar = source;
 					save = phar.manifest.pDestructor;
 					phar.manifest.pDestructor = NULL;
 					zend_hash_add(&source->manifest, ".phar/stub.php", sizeof(".phar/stub.php")-1, (void*)entry, sizeof(phar_entry_info), NULL);
@@ -1611,6 +1493,7 @@ finalize:
 					/* a little hack to prevent destruction of data */
 					dtor_func_t save;
 
+					entry->phar = source;
 					save = phar.manifest.pDestructor;
 					phar.manifest.pDestructor = NULL;
 					zend_hash_add(&source->manifest, ".phar/alias.txt", sizeof(".phar/alias.txt")-1, (void*)entry, sizeof(phar_entry_info), NULL);
@@ -1621,14 +1504,6 @@ finalize:
 			}
 			zend_hash_destroy(&(phar.manifest));
 			php_stream_close(phar.fp);
-#if HAVE_PHAR_ZIP
-			if (phar.is_zip) {
-				_zip_free(phar.zip);
-			}
-#endif
-			if (opened_path) {
-				efree(opened_path);
-			}
 			/* we can't throw an exception or bad crap will happen */
 			zend_error(E_ERROR, "Error: could not convert phar archive \"%s\", phar is in unstable state, shutting down", source->fname);
 			return;
@@ -1639,53 +1514,32 @@ finalize:
 			zval_dtor(mine->metadata);
 			efree(mine->metadata);
 		}
+		if (mine->fp_type == PHAR_MOD && mine->fp != source->fp && mine->fp != source->ufp) {
+			php_stream_close(mine->fp);
+		}
 		*mine = *entry;
 		mine->phar = source;
+	}
+	if (source->fp && source->refcount == 1) {
+		php_stream_close(source->fp);
 	}
 	source->fp = phar.fp;
 	/* don't free stuff */
 	phar.manifest.pDestructor = NULL;
 	zend_hash_destroy(&(phar.manifest));
 	source->is_zip = phar.is_zip;
+	if (phar.is_zip || phar.is_tar) {
+		source->internal_file_start = source->halt_offset = 0;
+	}
 	source->is_tar = phar.is_tar;
+	if (source->signature) {
+		efree(source->signature);
+	}
 	if (phar.signature) {
-		if (source->signature) {
-			efree(source->signature);
-		}
 		source->signature = phar.signature;
+	} else {
+		source->signature = 0;
 	}
-#if HAVE_PHAR_ZIP
-	if (phar.is_zip) {
-		_zip_free(phar.zip);
-		_zip_free(source->zip);
-		if (FAILURE == php_copy_file(opened_path, source->fname TSRMLS_CC)) {
-			/* we can't throw an exception or bad crap will happen */
-			zend_error(E_ERROR, "Error: could not copy newly created zip to \"%s\", phar is in unstable state, shutting down", source->fname);
-		}
-		source->zip = zip_open(source->fname, 0, &ziperror);
-		if (!source->zip) {
-			/* now for the stupid hoops libzip forces... */
-			char *tmp;
-			int tmp_len;
-
-			efree(opened_path);
-			tmp_len = zip_error_to_str(NULL, 0, ziperror, ziperror);
-			if (!(tmp = emalloc((tmp_len + 1) * sizeof(char)))) {
-				zend_error(E_ERROR, "Error: could not re-open newly created zip \"%s\", phar is in unstable state, shutting down", source->fname);
-			} else {
-				if (!zip_error_to_str(tmp, tmp_len + 1, ziperror, ziperror)) {
-					efree(tmp);
-					zend_error(E_ERROR, "Error: could not re-open newly created zip \"%s\", phar is in unstable state, shutting down", source->fname);
-				} else {
-					zend_error(E_ERROR, "Error: could not re-open newly created zip \"%s\" (%s), phar is in unstable state, shutting down", source->fname, tmp);
-					efree(tmp);
-				}
-			}
-			return;
-		}
-		efree(opened_path);
-	}
-#endif
 }
 
 /* {{{ proto bool Phar::convertToTar([int compression])
@@ -1781,44 +1635,6 @@ PHP_METHOD(Phar, convertToZip)
 		return;
 	}
 
-#if HAVE_PHAR_ZIP
-	if (!phar_has_zip) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Cannot convert phar archive to zip format, zip-based phar archives are disabled (enable ext/zip in php.ini)");
-		return;
-	}
-
-	if (!zend_hash_num_elements(&phar_obj->arc.archive->manifest)) {
-		int ziperror;
-		/* nothing need be done specially, this has no files in it */
-		phar_obj->arc.archive->is_zip = 1;
-		phar_obj->arc.archive->internal_file_start = 0;
-		phar_obj->arc.archive->is_modified = 1;
-		phar_obj->arc.archive->zip = zip_open(phar_obj->arc.archive->fname, ZIP_CREATE, &ziperror);
-		if (!phar_obj->arc.archive->zip) {
-			/* now for the stupid hoops libzip forces... */
-			char *tmp;
-			int tmp_len;
-			tmp_len = zip_error_to_str(NULL, 0, ziperror, ziperror);
-			if (!(tmp = emalloc((tmp_len + 1) * sizeof(char)))) {
-				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-					"Cannot convert phar archive to zip format, unable to open", phar_obj->arc.archive->fname);
-			} else {
-				if (!zip_error_to_str(tmp, tmp_len + 1, ziperror, ziperror)) {
-					efree(tmp);
-					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-						"Cannot convert phar archive to zip format, unable to open", phar_obj->arc.archive->fname);
-				} else {
-				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-					"Cannot convert phar archive to zip format, unable to open: %s", phar_obj->arc.archive->fname, tmp);
-					efree(tmp);
-				}
-			}
-			return;
-		}
-		RETURN_TRUE;
-	}
-
 	if (phar_obj->arc.archive->donotflush) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot convert phar archive to zip format, call stopBuffering() first");
@@ -1833,11 +1649,6 @@ PHP_METHOD(Phar, convertToZip)
 	}
 	phar_convert_to_other(phar_obj->arc.archive, 2, 0 TSRMLS_CC);
 	RETURN_TRUE;
-#else
-	zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-		"Cannot convert phar archive to zip format, zip-based phar archives are unavailable");
-	return;
-#endif
 }
 /* }}} */
 
@@ -2359,12 +2170,6 @@ PHP_METHOD(Phar, compressAllFilesBZIP2)
 	char *error;
 	PHAR_ARCHIVE_OBJECT();
 
-	if (phar_obj->arc.archive->is_zip) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Cannot compress all files as Bzip2, not possible with zip-based phar archives");
-		return;
-	}
-
 	if (PHAR_G(readonly)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Phar is readonly, cannot change compression");
@@ -2438,7 +2243,6 @@ PHP_METHOD(Phar, copy)
 	const char *pcr_error;
 	int oldfile_len, newfile_len;
 	phar_entry_info *oldentry, newentry = {0}, *temp;
-	php_stream *fp;
 	PHAR_ARCHIVE_OBJECT();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &oldfile, &oldfile_len, &newfile, &newfile_len) == FAILURE) {
@@ -2477,67 +2281,28 @@ PHP_METHOD(Phar, copy)
 		RETURN_FALSE;
 	}
 
-	fp = oldentry->fp;
-	if (fp && fp != phar_obj->arc.archive->fp) {
-		/* new file */
-		newentry.fp = php_stream_temp_new();
-		fp = newentry.fp;
-		php_stream_seek(oldentry->fp, 0, SEEK_SET);
-		if (oldentry->uncompressed_filesize != php_stream_copy_to_stream(oldentry->fp, fp, oldentry->uncompressed_filesize)) {
-			php_stream_close(fp);
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-				"file \"%s\" could not be copied to file \"%s\" in %s, copy failed", oldfile, newfile, phar_obj->arc.archive->fname);
-			return;
-		}
-	} else {
-		newentry.fp = NULL;
-	}
-
 	memcpy((void *) &newentry, oldentry, sizeof(phar_entry_info));
 	if (newentry.metadata) {
 		SEPARATE_ZVAL(&(newentry.metadata));
 		newentry.metadata_str.c = NULL;
 		newentry.metadata_str.len = 0;
 	}
-#if HAVE_PHAR_ZIP
-	if (oldentry->is_zip) {
-		int zindex;
-		/* for new files, start with an empty string */
-		struct zip_source *s;
-		if (!newentry.fp) {
-			if (!phar_open_jit(phar_obj->arc.archive, oldentry, NULL, &error, 0 TSRMLS_CC)) {
-				php_stream_close(fp);
-				if (error) {
-					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-						"file \"%s\" could not be copied to file \"%s\" in %s, open of source file failed: %s", oldfile, newfile, phar_obj->arc.archive->fname, error);
-					efree(error);
-				} else {
-					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-						"file \"%s\" could not be copied to file \"%s\" in %s, open of source file failed", oldfile, newfile, phar_obj->arc.archive->fname);
-				}
-				return;
-			}
-			fp = oldentry->fp;
-			oldentry->fp = NULL;
-		}
-		s = zip_source_buffer(phar_obj->arc.archive->zip, (void *)"", 0, 0);
-		if (-1 == (zindex = zip_add(phar_obj->arc.archive->zip, newfile, s))) {
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-				"file \"%s\" could not be copied to file \"%s\" in %s, creation of destination file failed: %s", oldfile, newfile, phar_obj->arc.archive->fname, zip_strerror(phar_obj->arc.archive->zip));
-			zip_error_clear(phar_obj->arc.archive->zip);
-			return;
-		}
-		newentry.index = zindex;
-		newentry.zip = NULL;
-	}
-#endif
-	newentry.fp = fp;
 	newentry.filename = estrndup(newfile, newfile_len);
 	newentry.filename_len = newfile_len;
-	newentry.is_modified = 1;
 	newentry.fp_refcount = 0;
+
+	if (oldentry->fp_type != PHAR_FP) {
+		if (FAILURE == phar_copy_entry_fp(oldentry, &newentry, &error TSRMLS_CC)) {
+			efree(newentry.filename);
+			php_stream_close(newentry.fp);
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+			efree(error);
+			return;
+		}
+	}
+
+	zend_hash_add(&oldentry->phar->manifest, newfile, newfile_len, (void*)&newentry, sizeof(phar_entry_info), NULL);
 	phar_obj->arc.archive->is_modified = 1;
-	zend_hash_add(&phar_obj->arc.archive->manifest, newfile, newfile_len, (void*)&newentry, sizeof(phar_entry_info), NULL);
 
 	phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
 	if (error) {
@@ -2691,15 +2456,6 @@ PHP_METHOD(Phar, offsetUnset)
 			}
 			entry->is_modified = 0;
 			entry->is_deleted = 1;
-#if HAVE_PHAR_ZIP
-			if (entry->is_zip) {
-				if (entry->zip) {
-					zip_fclose(entry->zip);
-					entry->zip = 0;
-				}
-				zip_delete(phar_obj->arc.archive->zip, entry->index);
-			}
-#endif
 			/* we need to "flush" the stream to save the newly deleted file on disk */
 			phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
 			if (error) {
@@ -2719,49 +2475,34 @@ PHP_METHOD(Phar, offsetUnset)
  */
 PHP_METHOD(Phar, getStub)
 {
-	char *buf;
 	size_t len;
+	char *buf;
 	php_stream *fp;
+	php_stream_filter *filter = NULL;
+	phar_entry_info *stub;
 	PHAR_ARCHIVE_OBJECT();
 
-#if HAVE_PHAR_ZIP
-	if (phar_obj->arc.archive->is_zip) {
-		struct zip_stat zs;
-		struct zip_file *zf;
-		int index;
-
-		if (-1 == zip_stat(phar_obj->arc.archive->zip, ".phar/stub.php", 0, &zs)) {
-			zip_error_clear(phar_obj->arc.archive->zip);
-			RETURN_STRINGL("", 0, 1);
-		}
-		index = zs.index;
-		len = zs.size;
-		zf = zip_fopen_index(phar_obj->arc.archive->zip, index, 0);
-		if (!zf) {
-			zip_error_clear(phar_obj->arc.archive->zip);
-			RETURN_STRINGL("", 0, 1);
-		}
-		buf = safe_emalloc(len, 1, 1);
-		if (len != zip_fread(zf, buf, len)) {
-			zip_fclose(zf);
-			efree(buf);
-			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
-				"Unable to read stub");
-			return;
-		}
-		buf[len] = '\0';
-
-		RETURN_STRINGL(buf, len, 0);
-	}
-#endif
-	if (phar_obj->arc.archive->is_tar) {
-		phar_entry_info *stub;
+	if (phar_obj->arc.archive->is_tar || phar_obj->arc.archive->is_zip) {
 
 		if (SUCCESS == zend_hash_find(&(phar_obj->arc.archive->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1, (void **)&stub)) {
-			if (phar_obj->arc.archive->fp && !phar_obj->arc.archive->is_brandnew) {
+			if (phar_obj->arc.archive->fp && !phar_obj->arc.archive->is_brandnew && !(stub->flags & PHAR_ENT_COMPRESSION_MASK)) {
 				fp = phar_obj->arc.archive->fp;
 			} else {
 				fp = php_stream_open_wrapper(phar_obj->arc.archive->fname, "rb", 0, NULL);
+				if (stub->flags & PHAR_ENT_COMPRESSION_MASK) {
+					char *filter_name;
+
+					if ((filter_name = phar_decompress_filter(stub, 0)) != NULL) {
+						filter = php_stream_filter_create(phar_decompress_filter(stub, 0), NULL, php_stream_is_persistent(fp) TSRMLS_CC);
+					} else {
+						filter = NULL;
+					}
+					if (!filter) {
+						zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "phar error: unable to read stub of phar \"%s\" (cannot create %s filter)", phar_obj->arc.archive->fname, phar_decompress_filter(stub, 1));
+						return;
+					}
+					php_stream_filter_append(&fp->readfilters, filter);
+				}
 			}
 
 			if (!fp)  {
@@ -2770,7 +2511,7 @@ PHP_METHOD(Phar, getStub)
 				return;
 			}
 
-			php_stream_seek(fp, stub->offset_within_phar, SEEK_SET);
+			php_stream_seek(fp, stub->offset_abs, SEEK_SET);
 			len = stub->uncompressed_filesize;
 			goto carry_on;
 		} else {
@@ -2802,6 +2543,10 @@ carry_on:
 			"Unable to read stub");
 		efree(buf);
 		return;
+	}
+	if (filter) {
+		php_stream_filter_flush(filter, 1);
+		php_stream_filter_remove(filter, 1 TSRMLS_CC);
 	}
 	if (fp != phar_obj->arc.archive->fp) {
 		php_stream_close(fp);
@@ -3101,12 +2846,6 @@ PHP_METHOD(PharFileInfo, chmod)
 		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Cannot modify permissions for file \"%s\" in phar \"%s\", write operations are prohibited", entry_obj->ent.entry->filename, entry_obj->ent.entry->phar->fname);
 		return;
 	}
-#if HAVE_PHAR_ZIP
-	if (entry_obj->ent.entry->is_zip) {
-		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Cannot modify permissions for file \"%s\" in phar \"%s\", not supported for zip-based phars", entry_obj->ent.entry->filename, entry_obj->ent.entry->phar->fname);
-		return;
-	}
-#endif
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &perms) == FAILURE) {
 		return;
 	}	

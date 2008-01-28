@@ -19,8 +19,14 @@
 
 /* $Id$ */
 
+#ifdef PHP_WIN32
+#pragma pack(1)
+# define PHAR_ZIP_PACK
+#else
+# define PHAR_ZIP_PACK __attribute__((__packed__))
+#endif
 typedef struct _phar_zip_file_header {
-	char magic[4];           /* local file header signature     4 bytes  (0x04034b50) */
+	char signature[4];       /* local file header signature     4 bytes  (0x04034b50) */
 	char zipversion[2];      /* version needed to extract       2 bytes */
 	php_uint16 flags;        /* general purpose bit flag        2 bytes */
 	php_uint16 compressed;   /* compression method              2 bytes */
@@ -33,13 +39,13 @@ typedef struct _phar_zip_file_header {
 	php_uint16 extra_len;    /* extra field length              2 bytes */
 /* file name (variable size) */
 /* extra field (variable size) */
-} phar_zip_file_header;
+} PHAR_ZIP_PACK phar_zip_file_header;
 
 typedef struct _phar_zip_file_datadesc {
 	php_uint32 crc32;      /* crc-32                          4 bytes */
 	php_uint32 compsize;   /* compressed size                 4 bytes */
 	php_uint32 uncompsize; /* uncompressed size               4 bytes */
-} phar_zip_data_desc;
+} PHAR_ZIP_PACK phar_zip_data_desc;
 
 typedef struct _phar_zip_file_datadesc_zip64 {
 	php_uint32 crc32;       /* crc-32                          4 bytes */
@@ -47,13 +53,13 @@ typedef struct _phar_zip_file_datadesc_zip64 {
 	php_uint32 compsize2;
 	php_uint32 uncompsize;  /* uncompressed size               8 bytes */
 	php_uint32 uncompsize2;
-} phar_zip_data_desc_zip64;
+} PHAR_ZIP_PACK phar_zip_data_desc_zip64;
 
 typedef struct _phar_zip_archive_extra_data_record {
 	char signature[4];   /* archive extra data signature    4 bytes  (0x08064b50) */
 	php_uint32 len;      /* extra field length              4 bytes */
 /* extra field data                (variable size) */
-} phar_zip_archive_extra_data_record;
+} PHAR_ZIP_PACK phar_zip_archive_extra_data_record;
 
 /* madeby/extractneeded value if bzip2 compression is used */
 #define PHAR_ZIP_BZIP2 "46"
@@ -132,18 +138,18 @@ typedef struct _phar_zip_archive_extra_data_record {
 typedef struct _phar_zip_extra_field_header {
 	char tag[2];
 	php_uint16 size;
-} phar_zip_extra_field_header;
+} PHAR_ZIP_PACK phar_zip_extra_field_header;
 
 typedef struct _phar_zip_unix3 {
 	char tag[2];            /* 0x756e        Short       tag for this extra block type ("nu") */
 	php_uint16 size;        /* TSize         Short       total data size for this block */
 	php_uint32 crc32;       /* CRC           Long        CRC-32 of the remaining data */
 	php_uint16 perms;       /* Mode          Short       file permissions */
-	php_uint32 smylinksize; /* SizDev        Long        symlink'd size OR major/minor dev num */
+	php_uint32 symlinksize; /* SizDev        Long        symlink'd size OR major/minor dev num */
 	php_uint16 uid;         /* UID           Short       user ID */
 	php_uint16 gid;         /* GID           Short       group ID */
 /* (var.)        variable    symbolic link filename */
-} phar_zip_unix3;
+} PHAR_ZIP_PACK phar_zip_unix3;
 
 typedef struct _phar_zip_central_dir_file {
 	char signature[4];            /* central file header signature   4 bytes  (0x02014b50) */
@@ -167,12 +173,12 @@ typedef struct _phar_zip_central_dir_file {
 /* file name (variable size) */
 /* extra field (variable size) */
 /* file comment (variable size) */
-} phar_zip_central_dir_file;
+} PHAR_ZIP_PACK phar_zip_central_dir_file;
 
 typedef struct _phar_zip_dir_signature {
 	char signature[4];  /* header signature                4 bytes  (0x05054b50) */
 	php_uint16 size;    /* size of data                    2 bytes */
-} phar_zip_dir_signature;
+} PHAR_ZIP_PACK phar_zip_dir_signature;
 
 typedef struct _phar_zip64_dir_end {
 	char signature[4];        /* zip64 end of central dir 
@@ -198,7 +204,7 @@ typedef struct _phar_zip64_dir_end {
                                  the starting disk number        8 bytes */
 	php_uint32 offset2;
 /* zip64 extensible data sector    (variable size) */
-} phar_zip64_dir_end;
+} PHAR_ZIP_PACK phar_zip64_dir_end;
 
 typedef struct _phar_zip64_dir_locator {
 	char signature[4];     /* zip64 end of central dir locator 
@@ -210,7 +216,7 @@ typedef struct _phar_zip64_dir_locator {
                               end of central directory record 8 bytes */
 	php_uint32 diroffset2;
 	php_uint32 totaldisks; /* total number of disks           4 bytes */
-} phar_zip64_dir_locator;
+} PHAR_ZIP_PACK phar_zip64_dir_locator;
 
 typedef struct _phar_zip_dir_end {
 	char signature[4];           /* end of central dir signature    4 bytes  (0x06054b50) */
@@ -227,11 +233,10 @@ typedef struct _phar_zip_dir_end {
                                     the starting disk number        4 bytes */
 	php_uint16 comment_len;      /* .ZIP file comment length        2 bytes */
 /* .ZIP file comment       (variable size) */
-} phar_zip_dir_end;
-
-BEGIN_EXTERN_C()
-int phar_zip_parse(char *fname, int fname_len, char **error TSRMLS_DC);
-END_EXTERN_C()
+} PHAR_ZIP_PACK phar_zip_dir_end;
+#ifdef PHP_WIN32
+#pragma pack()
+#endif
 /*
  * Local variables:
  * tab-width: 4
