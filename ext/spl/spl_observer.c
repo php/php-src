@@ -288,6 +288,25 @@ SPL_METHOD(SplObjectStorage, detach)
 	intern->index = 0;
 } /* }}} */
 
+/* {{{ proto mixed SplObjectStorage::offsetGet($object) U
+ Returns associated information for a stored object */
+SPL_METHOD(SplObjectStorage, offsetGet)
+{
+	zval *obj;
+	spl_SplObjectStorageElement *element;
+	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &obj) == FAILURE) {
+		return;
+	}
+	element = spl_object_storage_get(intern, obj TSRMLS_CC);
+	if (!element) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Object not found");
+	} else {
+		RETURN_ZVAL(element->inf,1, 0);
+	}
+} /* }}} */
+
 /* {{{ proto bool SplObjectStorage::contains($obj) U
  Determine whethe an object is contained in the storage */
 SPL_METHOD(SplObjectStorage, contains)
@@ -565,20 +584,39 @@ ZEND_BEGIN_ARG_INFO(arginfo_setInfo, 0)
 	ZEND_ARG_INFO(0, info)
 ZEND_END_ARG_INFO();
 
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_offsetGet, 0, 0, 1)
+	ZEND_ARG_INFO(0, object)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_offsetSet, 0, 0, 2)
+	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, info)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry spl_funcs_SplObjectStorage[] = {
 	SPL_ME(SplObjectStorage,  attach,      arginfo_attach,        0)
 	SPL_ME(SplObjectStorage,  detach,      arginfo_Object,        0)
 	SPL_ME(SplObjectStorage,  contains,    arginfo_Object,        0)
+	SPL_ME(SplObjectStorage,  getInfo,     NULL,                  0)
+	SPL_ME(SplObjectStorage,  setInfo,     arginfo_setInfo,       0)
+	/* Countable */
 	SPL_ME(SplObjectStorage,  count,       NULL,                  0)
+	/* Iterator */
 	SPL_ME(SplObjectStorage,  rewind,      NULL,                  0)
 	SPL_ME(SplObjectStorage,  valid,       NULL,                  0)
 	SPL_ME(SplObjectStorage,  key,         NULL,                  0)
 	SPL_ME(SplObjectStorage,  current,     NULL,                  0)
 	SPL_ME(SplObjectStorage,  next,        NULL,                  0)
+	/* Serializable */
 	SPL_ME(SplObjectStorage,  unserialize, arginfo_Serialized,    0)
 	SPL_ME(SplObjectStorage,  serialize,   NULL,                  0)
-	SPL_ME(SplObjectStorage,  getInfo,     NULL,                  0)
-	SPL_ME(SplObjectStorage,  setInfo,     arginfo_setInfo,       0)
+	/* ArrayAccess */
+	SPL_MA(SplObjectStorage, offsetExists, SplObjectStorage, contains, arginfo_offsetGet, 0)
+	SPL_MA(SplObjectStorage, offsetSet,    SplObjectStorage, attach,   arginfo_offsetSet, 0)
+	SPL_MA(SplObjectStorage, offsetUnset,  SplObjectStorage, detach,   arginfo_offsetGet, 0)
+	SPL_ME(SplObjectStorage, offsetGet,    arginfo_offsetGet,     0)
 	{NULL, NULL, NULL}
 };
 
@@ -595,6 +633,7 @@ PHP_MINIT_FUNCTION(spl_observer)
 	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, Countable);
 	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, Iterator);
 	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, Serializable);
+	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, ArrayAccess);
 
 	return SUCCESS;
 }
