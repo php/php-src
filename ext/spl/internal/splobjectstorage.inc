@@ -20,7 +20,7 @@
  * here therefore has a complexity of O(n) while the actual implementation has
  * complexity O(1).
  */
-class SplObjectStorage implements Iterator, Countable
+class SplObjectStorage implements Iterator, Countable, ArrayAccess
 {
 	private $storage = array();
 	private $index = 0;
@@ -88,9 +88,9 @@ class SplObjectStorage implements Iterator, Countable
 		return count($this->storage);
 	}
 
-	/** @param obj object to look for
+	/** @param $obj object to look for
 	 * @return whether $obj is contained in storage
-	  */
+	 */
 	function contains($obj)
 	{
 		if (is_object($obj))
@@ -106,7 +106,9 @@ class SplObjectStorage implements Iterator, Countable
 		return false;
 	}
 
-	/** @param $obj new object to attach to storage if not yet contained
+	/** @param $obj new object to attach to storage or object whose
+	 *              associative information is to be replaced
+	 * @param $inf associative information stored along the object
 	 */
 	function attach($obj, $inf = NULL)
 	{
@@ -132,6 +134,54 @@ class SplObjectStorage implements Iterator, Countable
 				}
 			}
 		}
+	}
+
+	/** @param $obj new object to attach to storage or object whose
+	 *              associative information is to be replaced
+	 * @param $inf associative information stored along the object
+	 * @since 5.3.0
+	 */
+	function offsetSet($obj, $inf)
+	{
+		$this->attach($obj, $inf);
+	}
+
+	/** @param $obj Exising object to look for
+	 * @return associative information stored with object
+	 * @throw UnexpectedValueException if Object $obj is not contained in
+	 *                                 storage
+	 * @since 5.3.0
+	 */
+	function offsetGet($obj)
+	{
+		if (is_object($obj))
+		{
+			foreach($this->storage as $idx => $element)
+			{
+				if ($object === $element[0])
+				{
+					return $element[1];
+				}
+			}
+		}
+		throw new UnexpectedValueException('Object not found');
+	}
+
+	/** @param $obj Exising object to look for
+	 * @return associative information stored with object
+	 * @since 5.3.0
+	 */
+	function offsetUnset($obj)
+	{
+		$this->detach($obj);
+	}
+
+	/** @param $obj object to look for
+	 * @return whether $obj is contained in storage
+	 */
+	function offsetEsists($obj)
+	{
+		return $this->contains($obj);
 	}
 }
 
