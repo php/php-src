@@ -2606,16 +2606,17 @@ PHP_FUNCTION(timezone_offset_get)
 }
 /* }}} */
 
-/* {{{ proto array timezone_transitions_get(DateTimeZone object)
-   Returns numeracilly indexed array containing associative array for all transitions for the timezone.
+/* {{{ proto array timezone_transitions_get(DateTimeZone object [, long timestamp_begin [, long timestamp_end ]])
+   Returns numerically indexed array containing associative array for all transitions in the specified range for the timezone.
 */
 PHP_FUNCTION(timezone_transitions_get)
 {
 	zval                *object, *element;
 	php_timezone_obj    *tzobj;
-	int                  i;
+	int                  i, first = 1;
+	long                 timestamp_begin = LONG_MIN, timestamp_end = LONG_MAX;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &object, date_ce_timezone) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|ll", &object, date_ce_timezone, &timestamp_begin, &timestamp_end) == FAILURE) {
 		RETURN_FALSE;
 	}
 	tzobj = (php_timezone_obj *) zend_object_store_get_object(object TSRMLS_CC);
@@ -2626,19 +2627,38 @@ PHP_FUNCTION(timezone_transitions_get)
 
 	array_init(return_value);
 	for (i = 0; i < tzobj->tzi.tz->timecnt; ++i) {
-		MAKE_STD_ZVAL(element);
-		array_init(element);
-		add_ascii_assoc_long(element, "ts",     tzobj->tzi.tz->trans[i]);
-		if (UG(unicode)) {
-			add_ascii_assoc_unicode(element, "time", (UChar*) php_format_date(DATE_FORMAT_ISO8601, 13, tzobj->tzi.tz->trans[i], 0 TSRMLS_CC), 0);
-		} else {
-			add_assoc_string(element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, tzobj->tzi.tz->trans[i], 0 TSRMLS_CC), 0);
-		}
-		add_ascii_assoc_long(element, "offset", tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].offset);
-		add_ascii_assoc_bool(element, "isdst",  tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].isdst);
-		add_ascii_assoc_ascii_string(element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].abbr_idx], 1);
+		if (tzobj->tzi.tz->trans[i] >= timestamp_begin && tzobj->tzi.tz->trans[i] < timestamp_end) {
+			if (first && timestamp_begin != LONG_MIN && i > 0 && timestamp_begin != tzobj->tzi.tz->trans[i])
+			{
+				MAKE_STD_ZVAL(element);
+				array_init(element);
+				add_ascii_assoc_long(element, "ts",     timestamp_begin);
+				if (UG(unicode)) {
+					add_ascii_assoc_unicode(element, "time", (UChar*) php_format_date(DATE_FORMAT_ISO8601, 13, timestamp_begin, 0 TSRMLS_CC), 0);
+				} else {
+					add_assoc_string(element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, timestamp_begin, 0 TSRMLS_CC), 0);
+				}
+				add_ascii_assoc_long(element, "offset", tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i-1]].offset);
+				add_ascii_assoc_bool(element, "isdst",  tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i-1]].isdst);
+				add_ascii_assoc_ascii_string(element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i-1]].abbr_idx], 1);
 
-		add_next_index_zval(return_value, element);
+				add_next_index_zval(return_value, element);
+			}
+			MAKE_STD_ZVAL(element);
+			array_init(element);
+			add_ascii_assoc_long(element, "ts",     tzobj->tzi.tz->trans[i]);
+			if (UG(unicode)) {
+				add_ascii_assoc_unicode(element, "time", (UChar*) php_format_date(DATE_FORMAT_ISO8601, 13, tzobj->tzi.tz->trans[i], 0 TSRMLS_CC), 0);
+			} else {
+				add_assoc_string(element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, tzobj->tzi.tz->trans[i], 0 TSRMLS_CC), 0);
+			}
+			add_ascii_assoc_long(element, "offset", tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].offset);
+			add_ascii_assoc_bool(element, "isdst",  tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].isdst);
+			add_ascii_assoc_ascii_string(element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].abbr_idx], 1);
+
+			add_next_index_zval(return_value, element);
+			first = 0;
+		}
 	}
 }
 /* }}} */
