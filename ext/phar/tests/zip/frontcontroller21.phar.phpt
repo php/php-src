@@ -2,7 +2,6 @@
 Phar front controller $_SERVER munging success zip-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zip")) die("skip"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller21.phar.php/index.php
 REQUEST_URI=/frontcontroller21.phar.php/index.php?test=hi

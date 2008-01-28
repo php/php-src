@@ -2,7 +2,6 @@
 Phar front controller index.php relocate (no /) zip-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zip")) die("skip"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller4.phar.php
 REQUEST_URI=/frontcontroller4.phar.php

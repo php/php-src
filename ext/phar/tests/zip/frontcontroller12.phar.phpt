@@ -2,7 +2,6 @@
 Phar front controller mime type unknown int zip-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zip")) die("skip"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller12.phar.php/a.php
 REQUEST_URI=/frontcontroller12.phar.php/a.php

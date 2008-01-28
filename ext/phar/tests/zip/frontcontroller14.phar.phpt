@@ -2,7 +2,6 @@
 Phar front controller mime type override, other zip-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zip")) die("skip"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller14.phar.php/a.jpg
 REQUEST_URI=/frontcontroller14.phar.php/a.jpg
