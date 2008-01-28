@@ -50,6 +50,8 @@ PHP                                                                        NEWS
 
 - Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
 
+- Improved engine stack implementation for better performance and stability.
+  (Dmitry)
 - Improved php.ini handling: (Jani)
   . Added ".htaccess" style user-defined php.ini files support for CGI/FastCGI
   . Added support for special [PATH=/opt/httpd/www.example.com/] and 
@@ -82,7 +84,6 @@ PHP                                                                        NEWS
   (Dmitry, Pierre)
 - Added lcfirst() function. (David C)
 
-- Changed EG(argument_stack) implementation. (Dmitry)
 - Changed exception handling. Now each op_array doesn't contain
   ZEND_HANDLE_EXCEPTION opcode in the end. (Dmitry)
 
