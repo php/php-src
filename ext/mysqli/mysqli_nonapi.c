@@ -473,7 +473,11 @@ PHP_FUNCTION(mysqli_query)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty query");
 		RETURN_FALSE;
 	}
-	if (resultmode != MYSQLI_USE_RESULT && resultmode != MYSQLI_STORE_RESULT) {
+	if (resultmode != MYSQLI_USE_RESULT && resultmode != MYSQLI_STORE_RESULT
+#if defined(HAVE_MYSQLND) && defined(MYSQLND_THREADING)
+		&& resultmode != MYSQLI_BG_STORE_RESULT
+#endif
+	) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value for resultmode");
 		RETURN_FALSE;
 	}
@@ -495,8 +499,19 @@ PHP_FUNCTION(mysqli_query)
 		RETURN_TRUE;
 	}
 
-	result = (resultmode == MYSQLI_USE_RESULT) ? mysql_use_result(mysql->mysql) : mysql_store_result(mysql->mysql);
-
+	switch (resultmode) {
+		case MYSQLI_STORE_RESULT:
+			result = mysql_store_result(mysql->mysql);
+			break;
+		case MYSQLI_USE_RESULT:
+			result = mysql_use_result(mysql->mysql);
+			break;
+#if defined(HAVE_MYSQLND) && defined(MYSQLND_THREADING)
+		case MYSQLI_BG_STORE_RESULT:
+			result = mysqli_bg_store_result(mysql->mysql);
+			break;
+#endif
+	}
 	if (!result) {
 		php_mysqli_throw_sql_exception((char *)mysql_sqlstate(mysql->mysql), mysql_errno(mysql->mysql) TSRMLS_CC,
 										"%s", mysql_error(mysql->mysql)); 

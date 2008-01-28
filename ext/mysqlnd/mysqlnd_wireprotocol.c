@@ -43,12 +43,11 @@
 #define MYSQLND_DUMP_HEADER_N_BODY2
 #define MYSQLND_DUMP_HEADER_N_BODY_FULL2
 
-#define MYSQLND_MAX_PACKET_SIZE (256L*256L*256L-1)
 
 #define	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, buf_size, packet_type) \
 	{ \
 		if (FAIL == mysqlnd_read_header((conn), &((packet)->header) TSRMLS_CC)) {\
-			conn->state = CONN_QUIT_SENT; \
+			CONN_SET_STATE(conn, CONN_QUIT_SENT); \
 			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);\
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", mysqlnd_server_gone); \
 			DBG_ERR_FMT("Can't read %s's header", (packet_type)); \
@@ -60,7 +59,7 @@
 		}\
 		if (!mysqlnd_read_body((conn), (buf), \
 							   MIN((buf_size), (packet)->header.size) TSRMLS_CC)) { \
-			conn->state = CONN_QUIT_SENT; \
+			CONN_SET_STATE(conn, CONN_QUIT_SENT); \
 			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);\
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", mysqlnd_server_gone); \
 			DBG_ERR_FMT("Empty %s packet body", (packet_type)); \
@@ -490,7 +489,7 @@ size_t mysqlnd_read_body(MYSQLND *conn, zend_uchar *buf, size_t size TSRMLS_DC)
 	net->stream->chunk_size = MIN(size, conn->options.net_read_buffer_size);
 	do {
 		size -= (ret = php_stream_read(net->stream, p, size));
-		if (size || iter++) {
+		if (size > 0 || iter++) {
 			DBG_INF_FMT("read=%d buf=%p p=%p chunk_size=%d left=%d",
 						ret, buf, p , net->stream->chunk_size, size);
 		}
@@ -1234,13 +1233,13 @@ void php_mysqlnd_rset_field_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 
 
 static enum_func_status
-php_mysqlnd_read_row_ex(MYSQLND *conn, zend_uchar **buf, int buf_size,
-						size_t *data_size, zend_bool persistent_alloc,
+php_mysqlnd_read_row_ex(MYSQLND *conn, MYSQLND_MEMORY_POOL_CHUNK **buffer,
+						uint64 *data_size, zend_bool persistent_alloc,
 						unsigned int prealloc_more_bytes TSRMLS_DC)
 {
 	enum_func_status ret = PASS;
 	mysqlnd_packet_header header;
-	zend_uchar *new_buf = NULL, *p = *buf;
+	zend_uchar *p = NULL;
 	zend_bool first_iteration = TRUE;
 
 	DBG_ENTER("php_mysqlnd_read_row_ex");
@@ -1262,13 +1261,14 @@ php_mysqlnd_read_row_ex(MYSQLND *conn, zend_uchar **buf, int buf_size,
 
 		*data_size += header.size;
 
-		if (first_iteration && header.size > buf_size) {
+		if (first_iteration) {
 			first_iteration = FALSE;
 			/*
 			  We need a trailing \0 for the last string, in case of text-mode,
 			  to be able to implement read-only variables. Thus, we add + 1.
 			*/
-			p = new_buf = mnd_pemalloc(*data_size + 1, persistent_alloc);
+			*buffer = mysqlnd_memory_pool.get_chunk(&mysqlnd_memory_pool, *data_size + 1 TSRMLS_CC);
+			p = (*buffer)->ptr;
 		} else if (!first_iteration) {
 			/* Empty packet after MYSQLND_MAX_PACKET_SIZE packet. That's ok, break */
 			if (!header.size) {
@@ -1281,9 +1281,9 @@ php_mysqlnd_read_row_ex(MYSQLND *conn, zend_uchar **buf, int buf_size,
 			  We need a trailing \0 for the last string, in case of text-mode,
 			  to be able to implement read-only variables.
 			*/
-			new_buf = mnd_perealloc(new_buf, *data_size + 1, persistent_alloc);
+			(*buffer)->resize_chunk((*buffer), *data_size + 1 TSRMLS_CC);
 			/* The position could have changed, recalculate */
-			p = new_buf + (*data_size - header.size);
+			p = (*buffer)->ptr + (*data_size - header.size);
 		}
 
 		if (!mysqlnd_read_body(conn, p, header.size TSRMLS_CC)) {
@@ -1297,8 +1297,9 @@ php_mysqlnd_read_row_ex(MYSQLND *conn, zend_uchar **buf, int buf_size,
 			break;
 		}
 	}
-	if (ret == PASS && new_buf) {
-		*buf = new_buf;
+	if (ret == FAIL) {
+		(*buffer)->free_chunk((*buffer), TRUE TSRMLS_CC);
+		*buffer = NULL;
 	}
 	*data_size -= prealloc_more_bytes;
 	DBG_RETURN(ret);
@@ -1306,11 +1307,11 @@ php_mysqlnd_read_row_ex(MYSQLND *conn, zend_uchar **buf, int buf_size,
 
 
 /* {{{ php_mysqlnd_rowp_read_binary_protocol */
-static
-void php_mysqlnd_rowp_read_binary_protocol(php_mysql_packet_row *packet, MYSQLND *conn,
-										   zend_uchar *p, size_t data_size TSRMLS_DC)
+void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
+										   uint field_count, MYSQLND_FIELD *fields_metadata, MYSQLND *conn TSRMLS_DC)
 {
-	unsigned int i;
+	int i;
+	zend_uchar *p = row_buffer->ptr;
 	zend_uchar *null_ptr, bit;
 	zval **current_field, **end_field, **start_field;
 	zend_bool as_unicode = conn->options.numeric_and_datetime_as_unicode;
@@ -1319,14 +1320,14 @@ void php_mysqlnd_rowp_read_binary_protocol(php_mysql_packet_row *packet, MYSQLND
 
 	DBG_ENTER("php_mysqlnd_rowp_read_binary_protocol");
 
-	end_field = (current_field = start_field = packet->fields) + packet->field_count;
+	end_field = (current_field = start_field = fields) + field_count;
 
 
 	/* skip the first byte, not 0xFE -> 0x0, status */
 	p++;
 	null_ptr= p;
-	p += (packet->field_count + 9)/8;		/* skip null bits */
-	bit	= 4;								/* first 2 bits are reserved */
+	p += (field_count + 9)/8;		/* skip null bits */
+	bit	= 4;						/* first 2 bits are reserved */
 
 	for (i = 0; current_field < end_field; current_field++, i++) {
 #if 1
@@ -1344,8 +1345,8 @@ void php_mysqlnd_rowp_read_binary_protocol(php_mysql_packet_row *packet, MYSQLND
 		if (*null_ptr & bit) {
 			ZVAL_NULL(*current_field);
 		} else {
-			enum_mysqlnd_field_types type = packet->fields_metadata[i].type;
-			mysqlnd_ps_fetch_functions[type].func(*current_field, &packet->fields_metadata[i],
+			enum_mysqlnd_field_types type = fields_metadata[i].type;
+			mysqlnd_ps_fetch_functions[type].func(*current_field, &fields_metadata[i],
 												  0, &p, as_unicode TSRMLS_CC);
 		}
 		if (!((bit<<=1) & 255)) {
@@ -1353,8 +1354,6 @@ void php_mysqlnd_rowp_read_binary_protocol(php_mysql_packet_row *packet, MYSQLND
 			null_ptr++;
 		}
 	}
-	/* Normal queries: The buffer has one more byte at the end, because we need it */
-	packet->row_buffer[data_size] = '\0';
 
 	DBG_VOID_RETURN;
 }
@@ -1362,14 +1361,15 @@ void php_mysqlnd_rowp_read_binary_protocol(php_mysql_packet_row *packet, MYSQLND
 
 
 /* {{{ php_mysqlnd_rowp_read_text_protocol */
-static
-void php_mysqlnd_rowp_read_text_protocol(php_mysql_packet_row *packet, MYSQLND *conn,
-										 zend_uchar *p, size_t data_size TSRMLS_DC)
+void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
+										 uint field_count, MYSQLND_FIELD *fields_metadata, MYSQLND *conn TSRMLS_DC)
 {
-	unsigned int i;
-	zend_bool last_field_was_string;
+	int i;
+	zend_bool last_field_was_string = FALSE;
 	zval **current_field, **end_field, **start_field;
-	zend_uchar *bit_area = packet->row_buffer + data_size + 1; /* we allocate from here */
+	zend_uchar *p = row_buffer->ptr;
+	size_t data_size = row_buffer->app;
+	zend_uchar *bit_area = (zend_uchar*) row_buffer->ptr + data_size + 1; /* we allocate from here */
 	zend_bool as_unicode = conn->options.numeric_and_datetime_as_unicode;
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
 	zend_bool as_int = conn->options.int_and_year_as_int;
@@ -1377,7 +1377,7 @@ void php_mysqlnd_rowp_read_text_protocol(php_mysql_packet_row *packet, MYSQLND *
 
 	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol");
 
-	end_field = (current_field = start_field = packet->fields) + packet->field_count;
+	end_field = (current_field = start_field = fields) + field_count;
 	for (i = 0; current_field < end_field; current_field++, i++) {
 		/* Don't reverse the order. It is significant!*/
 		void *obj;
@@ -1418,7 +1418,7 @@ void php_mysqlnd_rowp_read_text_protocol(php_mysql_packet_row *packet, MYSQLND *
 		} else {
 #if PHP_MAJOR_VERSION >= 6 || defined(MYSQLND_STRING_TO_INT_CONVERSION)
 			struct st_mysqlnd_perm_bind perm_bind =
-					mysqlnd_ps_fetch_functions[packet->fields_metadata[i].type];
+					mysqlnd_ps_fetch_functions[fields_metadata[i].type];
 #endif
 
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
@@ -1453,7 +1453,7 @@ void php_mysqlnd_rowp_read_text_protocol(php_mysql_packet_row *packet, MYSQLND *
 				*(p + len) = save;
 			} else
 #endif
-			if (packet->fields_metadata[i].type == MYSQL_TYPE_BIT) {
+			if (fields_metadata[i].type == MYSQL_TYPE_BIT) {
 				/*
 				  BIT fields are specially handled. As they come as bit mask, we have
 				  to convert it to human-readable representation. As the bits take
@@ -1464,7 +1464,7 @@ void php_mysqlnd_rowp_read_text_protocol(php_mysql_packet_row *packet, MYSQLND *
 				  Definitely not nice, _hackish_ :(, but works.
 				*/
 				zend_uchar *start = bit_area;
-				ps_fetch_from_1_to_8_bytes(*current_field, &(packet->fields_metadata[i]),
+				ps_fetch_from_1_to_8_bytes(*current_field, &(fields_metadata[i]),
 							   			   0, &p, as_unicode, len TSRMLS_CC);
 				/*
 				  We have advanced in ps_fetch_from_1_to_8_bytes. We should go back because
@@ -1532,7 +1532,7 @@ void php_mysqlnd_rowp_read_text_protocol(php_mysql_packet_row *packet, MYSQLND *
 				   which will make with this `if` an `else if`.
 			*/
 			if ((perm_bind.is_possibly_blob == TRUE &&
-				 packet->fields_metadata[i].charsetnr == MYSQLND_BINARY_CHARSET_NR) ||
+				 fields_metadata[i].charsetnr == MYSQLND_BINARY_CHARSET_NR) ||
 				(!as_unicode && perm_bind.can_ret_as_str_in_uni == TRUE))
 			{
 				/* BLOB - no conversion please */
@@ -1561,7 +1561,7 @@ void php_mysqlnd_rowp_read_text_protocol(php_mysql_packet_row *packet, MYSQLND *
 	}
 	if (last_field_was_string) {
 		/* Normal queries: The buffer has one more byte at the end, because we need it */
-		packet->row_buffer[data_size] = '\0';
+		row_buffer->ptr[data_size] = '\0';
 	}
 
 	DBG_VOID_RETURN;
@@ -1580,10 +1580,10 @@ php_mysqlnd_rowp_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	MYSQLND_NET *net = &conn->net;
 	zend_uchar *p;
 	enum_func_status ret = PASS;
-	size_t data_size = 0;
 	size_t old_chunk_size = net->stream->chunk_size;
 	php_mysql_packet_row *packet= (php_mysql_packet_row *) _packet;
 	size_t post_alloc_for_bit_fields = 0;
+	uint64 data_size = 0;
 
 	DBG_ENTER("php_mysqlnd_rowp_read");
 
@@ -1593,17 +1593,18 @@ php_mysqlnd_rowp_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 			packet->bit_fields_total_len + packet->bit_fields_count;
 	}
 
-	ret = php_mysqlnd_read_row_ex(conn, &packet->row_buffer, 0, &data_size,
+	ret = php_mysqlnd_read_row_ex(conn, &packet->row_buffer, &data_size,
 								  packet->persistent_alloc, post_alloc_for_bit_fields
 								  TSRMLS_CC);
 	if (FAIL == ret) {
 		goto end;
 	}
 
-	/* packet->row_buffer is of size 'data_size + 1' */
+	/* packet->row_buffer->ptr is of size 'data_size + 1' */
 	packet->header.size = data_size;
+	packet->row_buffer->app = data_size;
 
-	if ((*(p = packet->row_buffer)) == 0xFF) {
+	if ((*(p = packet->row_buffer->ptr)) == 0xFF) {
 		/*
 		   Error message as part of the result set,
 		   not good but we should not hang. See:
@@ -1646,14 +1647,8 @@ php_mysqlnd_rowp_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 				  but mostly like old-API unbuffered and thus will populate this array with
 				  value.
 				*/
-				packet->fields = (zval **) mnd_pemalloc(packet->field_count * sizeof(zval *),
-													packet->persistent_alloc);
-			}
-
-			if (packet->binary_protocol) {
-				php_mysqlnd_rowp_read_binary_protocol(packet, conn, p, data_size TSRMLS_CC);
-			} else {
-				php_mysqlnd_rowp_read_text_protocol(packet, conn, p, data_size TSRMLS_CC);
+				packet->fields = (zval **) mnd_pecalloc(packet->field_count, sizeof(zval *),
+														packet->persistent_alloc);
 			}
 		} else {
 			MYSQLND_INC_CONN_STATISTIC(&conn->stats,
@@ -1675,7 +1670,7 @@ void php_mysqlnd_rowp_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 {
 	php_mysql_packet_row *p= (php_mysql_packet_row *) _packet;
 	if (p->row_buffer) {
-		mnd_pefree(p->row_buffer, p->persistent_alloc);
+		p->row_buffer->free_chunk(p->row_buffer, TRUE TSRMLS_CC);
 		p->row_buffer = NULL;
 	}
 	/*

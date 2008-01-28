@@ -23,6 +23,39 @@
 #ifndef MYSQLND_STRUCTS_H
 #define MYSQLND_STRUCTS_H
 
+typedef struct st_mysqlnd_memory_pool MYSQLND_MEMORY_POOL;
+typedef struct st_mysqlnd_memory_pool_chunk MYSQLND_MEMORY_POOL_CHUNK;
+typedef struct st_mysqlnd_memory_pool_chunk_llist MYSQLND_MEMORY_POOL_CHUNK_LLIST;
+
+
+#define MYSQLND_MEMORY_POOL_CHUNK_LIST_SIZE 100
+
+struct st_mysqlnd_memory_pool
+{
+	zend_uchar *arena;
+	uint refcount;
+	uint arena_size;
+	uint free_size;
+
+	MYSQLND_MEMORY_POOL_CHUNK* free_chunk_list[MYSQLND_MEMORY_POOL_CHUNK_LIST_SIZE];
+	uint free_chunk_list_elements;
+
+	MYSQLND_MEMORY_POOL_CHUNK*	(*get_chunk)(MYSQLND_MEMORY_POOL * pool, uint size TSRMLS_DC);
+	void 						(*free_contents)(MYSQLND_MEMORY_POOL * pool TSRMLS_DC);
+};
+
+struct st_mysqlnd_memory_pool_chunk
+{
+	uint64				app;
+	MYSQLND_MEMORY_POOL *pool;
+	zend_uchar			*ptr;
+	uint				size;
+	void				(*resize_chunk)(MYSQLND_MEMORY_POOL_CHUNK * chunk, uint size TSRMLS_DC);
+	void				(*free_chunk)(MYSQLND_MEMORY_POOL_CHUNK * chunk, zend_bool cache_it TSRMLS_DC);
+	zend_bool			from_pool;
+};
+
+
 typedef struct st_mysqlnd_cmd_buffer
 {
 	zend_uchar		*buffer;
@@ -162,6 +195,7 @@ typedef struct st_mysqlnd_result_bind MYSQLND_RESULT_BIND;
 
 typedef struct st_mysqlnd_result_metadata MYSQLND_RES_METADATA;
 typedef struct st_mysqlnd_buffered_result MYSQLND_RES_BUFFERED;
+typedef struct st_mysqlnd_background_buffered_result MYSQLND_RES_BG_BUFFERED;
 typedef struct st_mysqlnd_unbuffered_result MYSQLND_RES_UNBUFFERED;
 
 typedef struct st_mysqlnd_debug MYSQLND_DEBUG;
@@ -205,6 +239,7 @@ struct st_mysqlnd_conn_methods
 	enum_func_status	(*query)(MYSQLND *conn, const char *query, unsigned int query_len TSRMLS_DC);
 	MYSQLND_RES *		(*use_result)(MYSQLND * const conn TSRMLS_DC);
 	MYSQLND_RES *		(*store_result)(MYSQLND * const conn TSRMLS_DC);
+	MYSQLND_RES *		(*background_store_result)(MYSQLND * const conn TSRMLS_DC);
 	enum_func_status	(*next_result)(MYSQLND * const conn TSRMLS_DC);
 	zend_bool			(*more_results)(const MYSQLND * const conn);
 
@@ -249,6 +284,8 @@ struct st_mysqlnd_conn_methods
 
 	MYSQLND *			(*get_reference)(MYSQLND * const conn);
 	enum_func_status	(*free_reference)(MYSQLND * const conn TSRMLS_DC);
+	enum mysqlnd_connection_state (*get_state)(MYSQLND * const conn TSRMLS_DC);
+	void				(*set_state)(MYSQLND * const conn, enum mysqlnd_connection_state new_state TSRMLS_DC);
 };
 
 
@@ -260,6 +297,7 @@ struct st_mysqlnd_res_methods
 
 	MYSQLND_RES *		(*use_result)(MYSQLND_RES * const result, zend_bool ps_protocol TSRMLS_DC);
 	MYSQLND_RES *		(*store_result)(MYSQLND_RES * result, MYSQLND * const conn, zend_bool ps TSRMLS_DC);
+	MYSQLND_RES *		(*background_store_result)(MYSQLND_RES * result, MYSQLND * const conn, zend_bool ps TSRMLS_DC);
 	void 				(*fetch_into)(MYSQLND_RES *result, unsigned int flags, zval *return_value, enum_mysqlnd_extension ext TSRMLS_DC ZEND_FILE_LINE_DC);
 	MYSQLND_ROW_C 		(*fetch_row_c)(MYSQLND_RES *result TSRMLS_DC);
 	void 				(*fetch_all)(MYSQLND_RES *result, unsigned int flags, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC);
@@ -271,7 +309,7 @@ struct st_mysqlnd_res_methods
 	MYSQLND_FIELD_OFFSET (*seek_field)(MYSQLND_RES * const result, MYSQLND_FIELD_OFFSET field_offset);
 	MYSQLND_FIELD_OFFSET (*field_tell)(const MYSQLND_RES * const result);
 	MYSQLND_FIELD *		(*fetch_field)(MYSQLND_RES * const result TSRMLS_DC);
-	MYSQLND_FIELD *		(*fetch_field_direct)(const MYSQLND_RES * const result, MYSQLND_FIELD_OFFSET fieldnr TSRMLS_DC);
+	MYSQLND_FIELD *		(*fetch_field_direct)(MYSQLND_RES * const result, MYSQLND_FIELD_OFFSET fieldnr TSRMLS_DC);
 
 	enum_func_status	(*read_result_metadata)(MYSQLND_RES *result, MYSQLND *conn TSRMLS_DC);
 	unsigned long *		(*fetch_lengths)(MYSQLND_RES * const result);
@@ -279,6 +317,9 @@ struct st_mysqlnd_res_methods
 	enum_func_status	(*free_result)(MYSQLND_RES * result, zend_bool implicit TSRMLS_DC);
 	void 				(*free_result_internal)(MYSQLND_RES *result TSRMLS_DC);
 	void 				(*free_result_contents)(MYSQLND_RES *result TSRMLS_DC);
+
+	/* for decoding - binary or text protocol */	
+	void 				(*row_decoder)(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields, uint field_count, MYSQLND_FIELD *fields_metadata, MYSQLND *conn TSRMLS_DC);
 };
 
 
@@ -299,6 +340,7 @@ struct st_mysqlnd_stmt_methods
 	enum_func_status	(*execute)(MYSQLND_STMT * const stmt TSRMLS_DC);
 	MYSQLND_RES *		(*use_result)(MYSQLND_STMT * const stmt TSRMLS_DC);
 	MYSQLND_RES *		(*store_result)(MYSQLND_STMT * const stmt TSRMLS_DC);
+	MYSQLND_RES *		(*background_store_result)(MYSQLND_STMT * const stmt TSRMLS_DC);
 	MYSQLND_RES *		(*get_result)(MYSQLND_STMT * const stmt TSRMLS_DC);
 	enum_func_status	(*free_result)(MYSQLND_STMT * const stmt TSRMLS_DC);
 	enum_func_status	(*seek_data)(const MYSQLND_STMT * const stmt, uint64 row TSRMLS_DC);
@@ -405,6 +447,20 @@ struct st_mysqlnd_connection
 	/* stats */
 	MYSQLND_STATS	stats;
 
+#ifdef ZTS
+	MUTEX_T			LOCK_state;
+
+	pthread_cond_t	COND_work_done;
+
+	pthread_mutex_t	LOCK_work;
+	pthread_cond_t	COND_work;
+	pthread_cond_t	COND_thread_ended;
+	zend_bool		thread_is_running;
+	zend_bool		thread_killed;
+	void ***		tsrm_ls;
+#endif
+
+
 	struct st_mysqlnd_conn_methods *m;
 };
 
@@ -436,18 +492,43 @@ struct st_mysqlnd_result_metadata
 };
 
 
-struct st_mysqlnd_buffered_result
+struct st_mysqlnd_background_buffered_result
 {
 	zval				***data;
+	uint64		data_size;
 	zval				***data_cursor;
-	zend_uchar			**row_buffers;
+	MYSQLND_MEMORY_POOL_CHUNK **row_buffers;
 	uint64		row_count;
+	uint64		initialized_rows;
 	zend_bool			persistent;
 
 	MYSQLND_QCACHE		*qcache;
 	unsigned int		references;
 
-	zend_bool			async_invalid;
+	zend_bool			decode_in_foreground;
+
+#ifdef ZTS
+	zend_bool			bg_fetch_finished;
+	MUTEX_T				LOCK;
+#endif
+
+	mysqlnd_error_info		error_info;
+	mysqlnd_upsert_status	upsert_status;
+};
+
+
+struct st_mysqlnd_buffered_result
+{
+	zval				**data;
+	zval				**data_cursor;
+	MYSQLND_MEMORY_POOL_CHUNK **row_buffers;
+	uint64		row_count;
+	uint64		initialized_rows;
+	zend_bool			persistent;
+
+	MYSQLND_QCACHE		*qcache;
+	unsigned int		references;
+
 	mysqlnd_error_info	error_info;
 };
 
@@ -456,7 +537,7 @@ struct st_mysqlnd_unbuffered_result
 {
 	/* For unbuffered (both normal and PS) */
 	zval				**last_row_data;
-	zend_uchar			*last_row_buffer;
+	MYSQLND_MEMORY_POOL_CHUNK *last_row_buffer;
 
 	uint64		row_count;
 	zend_bool			eof_reached;
@@ -475,9 +556,9 @@ struct st_mysqlnd_res
 	MYSQLND_RES_METADATA	*meta;
 
 	/* To be used with store_result() - both normal and PS */
-	MYSQLND_RES_BUFFERED	*data;
-
-	MYSQLND_RES_UNBUFFERED	*unbuf;
+	MYSQLND_RES_BUFFERED		*stored_data;
+	MYSQLND_RES_BG_BUFFERED		*bg_stored_data;
+	MYSQLND_RES_UNBUFFERED		*unbuf;
 
 	/*
 	  Column lengths of current row - both buffered and unbuffered.

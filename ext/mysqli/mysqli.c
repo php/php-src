@@ -33,9 +33,6 @@
 #include "php_mysqli_structs.h"
 #include "zend_exceptions.h"
 
-#define MYSQLI_STORE_RESULT 0
-#define MYSQLI_USE_RESULT 1
-
 ZEND_DECLARE_MODULE_GLOBALS(mysqli)
 static PHP_GINIT_FUNCTION(mysqli);
 
@@ -685,8 +682,11 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_CLIENT_FOUND_ROWS", CLIENT_FOUND_ROWS, CONST_CS | CONST_PERSISTENT);
 
 	/* for mysqli_query */
-	REGISTER_LONG_CONSTANT("MYSQLI_STORE_RESULT", 0, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MYSQLI_USE_RESULT", 1, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_STORE_RESULT", MYSQLI_STORE_RESULT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_USE_RESULT", MYSQLI_USE_RESULT, CONST_CS | CONST_PERSISTENT);
+#if defined(HAVE_MYSQLND) && defined(MYSQLND_THREADING)
+	REGISTER_LONG_CONSTANT("MYSQLI_BG_STORE_RESULT", MYSQLI_BG_STORE_RESULT, CONST_CS | CONST_PERSISTENT);
+#endif
 
 	/* for mysqli_fetch_assoc */
 	REGISTER_LONG_CONSTANT("MYSQLI_ASSOC", MYSQLI_ASSOC, CONST_CS | CONST_PERSISTENT);
@@ -952,7 +952,7 @@ Parameters:
 ZEND_FUNCTION(mysqli_result_construct)
 {
 	MY_MYSQL			*mysql;
-	MYSQL_RES			*result;
+	MYSQL_RES			*result = NULL;
 	zval				*mysql_link;
 	MYSQLI_RESOURCE 	*mysqli_resource;
 	long				resmode = MYSQLI_STORE_RESULT;
@@ -967,10 +967,6 @@ ZEND_FUNCTION(mysqli_result_construct)
 			if (zend_parse_parameters(2 TSRMLS_CC, "Ol", &mysql_link, mysqli_link_class_entry, &resmode)==FAILURE) {
 				return;
 			}
-			if (resmode != MYSQLI_USE_RESULT && resmode != MYSQLI_STORE_RESULT) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value for resultmode");
-				RETURN_FALSE;
-			}
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -978,8 +974,21 @@ ZEND_FUNCTION(mysqli_result_construct)
 
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
-	result = (resmode == MYSQLI_STORE_RESULT) ? mysql_store_result(mysql->mysql) :
-												mysql_use_result(mysql->mysql);
+	switch (resmode) {
+		case MYSQLI_STORE_RESULT:
+			result = mysql_store_result(mysql->mysql);
+			break;
+		case MYSQLI_USE_RESULT:
+			result = mysql_use_result(mysql->mysql);
+			break;
+#if defined(HAVE_MYSQLND) && defined(MYSQLND_THREADING)
+		case MYSQLI_BG_STORE_RESULT:
+			result = mysqli_bg_store_result(mysql->mysql);
+			break;
+#endif
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value for resultmode");
+	}
 
 	if (!result) {
 		RETURN_FALSE;

@@ -213,7 +213,7 @@ static int result_type_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 	if (!p) {
 		ZVAL_NULL(*retval);
 	} else {
-		ZVAL_LONG(*retval, (p->data) ? MYSQLI_STORE_RESULT : MYSQLI_USE_RESULT);
+		ZVAL_LONG(*retval, mysqli_result_is_unbuffered(p) ? MYSQLI_USE_RESULT:MYSQLI_STORE_RESULT);
 	}
 	return SUCCESS;
 }
