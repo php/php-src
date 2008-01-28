@@ -1,13 +1,17 @@
 <?php
 $web = '000';
-if ($web) {
-    if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
-        Phar::interceptFileFuncs();
-        Phar::webPhar(null, $web);
+if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
+    Phar::interceptFileFuncs();
+    if (!$web || PHP_SAPI == 'cli') {
         include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
-        return;
+    } else {
+        Phar::webPhar(null, $web);
+        include 'phar://' . __FILE__ . '/' . $web;
     }
-    if (isset($_SERVER['REQUEST_URI']) && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'POST') {
+    exit;
+}
+if ($web) {
+    if (@(isset($_SERVER['REQUEST_URI']) && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'POST')) {
         Extract_Phar::go(true);
         $mimes = array(
             'phps' => 2,
@@ -51,16 +55,22 @@ if ($web) {
             'xbm' => 'image/xbm',
             'xml' => 'text/xml',
            );
+
+        header("Cache-Control: no-cache, must-revalidate");
+        header("Pragma: no-cache");
+
         $basename = basename(__FILE__);
         if (!strpos($_SERVER['REQUEST_URI'], $basename)) {
             chdir(Extract_Phar::$temp);
-            include Extract_Phar::START;
+            include $web;
+            return;
         }
         $pt = substr($_SERVER['REQUEST_URI'], strpos($_SERVER['REQUEST_URI'], $basename) + strlen($basename));
         if (!$pt || $pt == '/') {
             $pt = $web;
             header('HTTP/1.1 301 Moved Permanently');
             header('Location: ' . $_SERVER['REQUEST_URI'] . '/' . $pt);
+            exit;
         }
         $a = realpath(Extract_Phar::$temp . DIRECTORY_SEPARATOR . $pt);
         if (!$a || strlen(dirname($a)) < strlen(Extract_Phar::$temp)) {
@@ -77,18 +87,11 @@ if ($web) {
         }
         if (isset($mimes[$b['extension']])) {
             if ($mimes[$b['extension']] === 1) {
-                $_SERVER['PHAR_PATH_INFO'] = $_SERVER['PATH_INFO'];
-                $_SERVER['PATH_INFO'] = substr($_SERVER['PATH_INFO'], strpos($_SERVER['PATH_INFO'], $basename) + strlen($basename));
-                if (isset($_SERVER['PATH_TRANSLATED'])) {
-                    $_SERVER['PHAR_PATH_TRANSLATED'] = $_SERVER['PATH_TRANSLATED'];
-                    $_SERVER['PATH_TRANSLATED'] = $a;
-                }
                 include $a;
-                exit;
+                return;
             }
             if ($mimes[$b['extension']] === 2) {
                 highlight_file($a);
-                exit;
             }
             header('Content-Type: ' .$mimes[$b['extension']]);
             header('Content-Length: ' . filesize($a));
@@ -97,15 +100,10 @@ if ($web) {
         }
     }
 }
-if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
-    Phar::interceptFileFuncs();
-    include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
-    return;
-}
+
 class Extract_Phar
 {
     static $temp;
-    static $tmp = array();
     static $origdir;
     const GZ = 0x1000;
     const BZ2 = 0x2000;
@@ -114,7 +112,6 @@ class Extract_Phar
     const LEN = XXXX;
     static function go($return  = false)
     {
-        register_shutdown_function(array('Extract_Phar', '_removeTmpFiles'));
         $fp = fopen(__FILE__, 'rb');
         fseek($fp, self::LEN);
         $L = unpack('V', $a = fread($fp, 4));
@@ -156,32 +153,33 @@ class Extract_Phar
             }
             $temp = $sessionpath;
         }
-        $temp .= '/pharextract';
+        $temp .= '/pharextract/'.basename(__FILE__, '.phar');
         self::$temp = $temp;
-        while (file_exists($temp)) {
-            $temp .= 1;
-        }
-        @mkdir($temp);
-        @chmod($temp, 0777);
-        $temp = realpath($temp);
-        self::$tmp[] = $temp;
         self::$origdir = getcwd();
+        if (file_exists(realpath($temp))) {
+            if (file_exists($temp. DIRECTORY_SEPARATOR . md5_file(__FILE__))) {
+                return;
+            }
+            self::_removeTmpFiles($temp, getcwd());
+        }
+        @mkdir($temp, 0777, true);
+        $temp = realpath($temp);
+        file_put_contents($temp . '/' . md5_file(__FILE__), '');
         foreach ($info['m'] as $path => $file) {
             $a = !file_exists(dirname($temp . '/' . $path));
             @mkdir(dirname($temp . '/' . $path), 0777, true);
             clearstatcache();
-            if ($a) self::$tmp[] = realpath(dirname($temp . '/' . $path));
             if ($path[strlen($path) - 1] == '/') {
-                mkdir($temp . '/' . $path);
-                @chmod($temp . '/' . $path, 0777);
+                @mkdir($temp . '/' . $path, 0777);
             } else {
                 file_put_contents($temp . '/' . $path, self::extractFile($path, $file, $fp));
                 @chmod($temp . '/' . $path, 0666);
             }
-            self::$tmp[] = realpath($temp . '/' . $path);
         }
         chdir($temp);
-        if (!$return) include self::START;
+        if (!$return) {
+            include self::START;
+        }
     }
 
     static function tmpdir()
@@ -260,14 +258,19 @@ class Extract_Phar
         return $data;
     }
 
-    static function _removeTmpFiles()
+    static function _removeTmpFiles($temp, $origdir)
     {
-        if (count(self::$tmp)) {
-            foreach (array_reverse(self::$tmp) as $f) {
-                if (file_exists($f)) is_dir($f) ? @rmdir($f) : @unlink($f);
+        chdir($temp);
+        foreach (glob('*') as $f) {
+            if (file_exists($f)) {
+                is_dir($f) ? @rmdir($f) : @unlink($f);
+                if (file_exists($f) && is_dir($f)) {
+                    self::_removeTmpFiles($f, getcwd());
+                }
             }
-            
         }
-        chdir(self::$origdir);
+        @rmdir($temp);
+        clearstatcache();
+        chdir($origdir);
     }
 }
