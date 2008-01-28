@@ -33,10 +33,6 @@ PHP                                                                        NEWS
 - Moved extensions to PECL:
   . ext/ncurses (Hartmut)
 
-- Improved ext/openssl (Dmitry)
-  . Added support for OpenSSL digest functions
-  . Added support for OpenSSL cipher functions
-  . Added access to internal values of DSA, RSA and DH keys
 - Improved ext/zlib; re-implemented non-file related functionality. (Mike)
 - Improved output layer; see README.NEW-OUTPUT-API for internals. (Mike)
 - Improved ext/mhash: (Mike)
@@ -55,7 +51,6 @@ PHP                                                                        NEWS
     set params during context creation. (Sara)
   . "context" and "binary_pipes" params in "other_options" arg. (Sara)
   . stream_resolve_include_path(). (Sara)
-- Added gmp_testbit() function. (Tony)
 - Added shm_has_var() function. (Mike)
 - Added str_getcsv() function. (Sara)
 - Added ext/hash support to ext/session's ID generator. (Sara)
