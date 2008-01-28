@@ -18,21 +18,6 @@
 
 #include "phar_internal.h"
 
-#ifdef PHP_WIN32
-static inline void phar_unixify_path_separators(char *path, int path_len) /* {{{ */
-{
-	char *s;
-
-	/* unixify win paths */
-	for (s = path; s - path < path_len; s++) {
-		if (*s == '\\') {
-			*s = '/';
-		}
-	}
-}
-/* }}} */
-#endif
-
 static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, php_uint16 len TSRMLS_DC)
 {
 	union {
@@ -656,7 +641,7 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 	/* set alias */
 	if (phar->is_explicit_alias) {
 		entry.fp = php_stream_fopen_tmpfile();
-		if (phar->alias_len != php_stream_write(entry.fp, phar->alias, phar->alias_len)) {
+		if (phar->alias_len != (int)php_stream_write(entry.fp, phar->alias, phar->alias_len)) {
 			if (error) {
 				spprintf(error, 0, "unable to set alias in new zip-based phar \"%s\"", phar->fname);
 			}
