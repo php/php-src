@@ -29,6 +29,9 @@
 /* This forces inlining of some accessor functions */
 #define MYSQLND_USE_OPTIMISATIONS 0
 
+
+//#define MYSQLND_THREADING
+
 /* #define MYSQLND_STRING_TO_INT_CONVERSION */
 /*
   This force mysqlnd to do a single (or more depending on ammount of data)
@@ -98,6 +101,7 @@ void _mysqlnd_debug(const char *mode TSRMLS_DC);
 
 #define mysqlnd_use_result(conn)		(conn)->m->use_result((conn) TSRMLS_CC)
 #define mysqlnd_store_result(conn)		(conn)->m->store_result((conn) TSRMLS_CC)
+#define mysqlnd_bg_store_result(conn) 	(conn)->m->background_store_result((conn) TSRMLS_CC)
 #define mysqlnd_next_result(conn)		(conn)->m->next_result((conn) TSRMLS_CC)
 #define mysqlnd_more_results(conn)		(conn)->m->more_results((conn))
 #define mysqlnd_free_result(r,e_or_i)	((MYSQLND_RES*)r)->m.free_result(((MYSQLND_RES*)(r)), (e_or_i) TSRMLS_CC)
@@ -242,6 +246,7 @@ PHPAPI ulong mysqlnd_old_escape_string(char *newstr, const char *escapestr, size
 /* PS */
 #define mysqlnd_stmt_init(conn)				(conn)->m->stmt_init((conn) TSRMLS_CC)
 #define mysqlnd_stmt_store_result(stmt)		(!mysqlnd_stmt_field_count((stmt)) ? PASS:((stmt)->m->store_result((stmt) TSRMLS_CC)? PASS:FAIL))
+#define mysqlnd_stmt_bg_store_result(stmt)	(!mysqlnd_stmt_field_count((stmt)) ? PASS:((stmt)->m->background_store_result((stmt) TSRMLS_CC)? PASS:FAIL))
 #define mysqlnd_stmt_get_result(stmt)		(stmt)->m->get_result((stmt) TSRMLS_CC)
 #define mysqlnd_stmt_data_seek(stmt, row)	(stmt)->m->seek_data((stmt), (row) TSRMLS_CC)
 #define mysqlnd_stmt_prepare(stmt, q, qlen)	(stmt)->m->prepare((stmt), (q), (qlen) TSRMLS_CC)

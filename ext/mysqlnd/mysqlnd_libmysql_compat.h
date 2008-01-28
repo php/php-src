@@ -108,6 +108,7 @@
 #define mysql_free_result(r)			mysqlnd_free_result((r), FALSE)
 #define mysql_store_result(r)			mysqlnd_store_result((r))
 #define mysql_use_result(r)				mysqlnd_use_result((r))
+#define mysql_async_store_result(r)		mysqlnd_async_store_result((r))
 #define mysql_thread_id(r)				mysqlnd_thread_id((r))
 #define mysql_get_client_info()			mysqlnd_get_client_info()
 #define mysql_get_client_version()		mysqlnd_get_client_version()
@@ -116,6 +117,6 @@
 #define mysql_get_server_info(r)		mysqlnd_get_server_info((r))
 #define mysql_get_server_version(r)		mysqlnd_get_server_version((r))
 #define mysql_warning_count(r)			mysqlnd_warning_count((r))
-#define mysql_eof(r)					(((r)->unbuf && (r)->unbuf->eof_reached) || (r)->data)
+#define mysql_eof(r)					(((r)->unbuf && (r)->unbuf->eof_reached) || (r)->stored_data)
 
 #endif /* MYSQLND_LIBMYSQL_COMPAT_H */
