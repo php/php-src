@@ -22,12 +22,6 @@
 #ifndef PHP_MYSQL_STRUCTS_H
 #define PHP_MYSQL_STRUCTS_H
 
-#ifdef PHP_WIN32
-#define PHP_MYSQL_API __declspec(dllexport)
-#else
-#define PHP_MYSQL_API
-#endif
-
 #if HAVE_MYSQL
 
 #ifdef ZTS
