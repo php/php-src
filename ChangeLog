@@ -1,3 +1,155 @@
+2008-01-27  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/tests/date_create-2.phpt
+      ext/date/tests/strtotime.phpt:
+      - Fixed parsing of timestamps.
+
+2008-01-27  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * sapi/cli/tests/006.phpt
+      sapi/cli/tests/006.phpt:
+      Fix test
+
+    * (PHP_5_2)
+      ext/spl/tests/observer_006.phpt:
+      Remove bogus test (should be in HEAD)
+
+2008-01-27  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ext/spl/tests/observer_006.phpt:
+      - Test went to 5.2... somehow.... very strange
+
+    * (PHP_5_3)
+      NEWS
+      ext/spl/spl_observer.c
+      ext/spl/internal/splobjectstorage.inc
+      ext/spl/tests/observer_004.phpt
+      ext/spl/tests/observer_005.phpt
+      ext/spl/tests/observer_006.phpt:
+      MFH:
+      [DOC] Add ability to store associative infor with objects in
+      SplObjectStorage
+      - Add second parameter to SplObjectStorage::attach()
+      - Add SplObjectStorage::setInfo()
+      - Add SplObjectStorage::getInfo()
+
+    * ext/spl/spl_observer.c
+      ext/spl/internal/splobjectstorage.inc
+      ext/spl/tests/observer_004.phpt
+      ext/spl/tests/observer_005.phpt
+      ext/spl/tests/observer_006.phpt
+      ext/spl/tests/observer_006.phpt
+      ext/spl/tests/observer_006.phpt:
+      - Add second parameter to SplObjectStorage::attach()
+      - Add SplObjectStorage::setInfo()
+      - Add SplObjectStorage::getInfo()
+
+2008-01-27  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/php_date.c:
+      - Update proto.
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/php_date.c
+      ext/date/tests/timezones-list.phpt:
+      - MFH: Added support for selectively listing timezone identifiers through
+        timezone_identifiers_list() / DateTimezone::listIdentifiers().
+
+    * ext/date/tests/timezones-list.phpt
+      ext/date/tests/timezones-list.phpt:
+      
+      - Added support for selectively listing timezone identifiers through
+        timezone_identifiers_list() / DateTimezone::listIdentifiers().
+
+    * ext/date/php_date.c:
+      - Added support for selectively listing timezone identifiers through
+        timezone_identifiers_list() / DateTimezone::listIdentifiers().
+
+2008-01-27  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/date/tests/bug43003.phpt
+      ext/date/tests/bug43003.phpt:
+      fix test
+
+2008-01-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/shmop/shmop.c:
+      
+      WS
+
+2008-01-27  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/standard/tests/strings/moneyformat.phpt
+      ext/standard/tests/strings/moneyformat.phpt:
+      be more strict in the skipif
+
+    * ext/standard/tests/strings/moneyformat.phpt
+      ext/standard/tests/strings/setlocale_basic1.phpt
+      ext/standard/tests/strings/setlocale_basic2.phpt
+      ext/standard/tests/strings/setlocale_basic3.phpt
+      ext/standard/tests/strings/setlocale_variation1.phpt
+      ext/standard/tests/strings/setlocale_variation3.phpt
+      ext/standard/tests/strings/setlocale_variation4.phpt
+      ext/standard/tests/strings/setlocale_variation5.phpt:
+      MFB: fix skipifs
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/moneyformat.phpt
+      ext/standard/tests/strings/setlocale_basic1.phpt
+      ext/standard/tests/strings/setlocale_basic2.phpt
+      ext/standard/tests/strings/setlocale_basic3.phpt
+      ext/standard/tests/strings/setlocale_variation1.phpt
+      ext/standard/tests/strings/setlocale_variation3.phpt
+      ext/standard/tests/strings/setlocale_variation4.phpt
+      ext/standard/tests/strings/setlocale_variation5.phpt:
+      fix a bunch of SKIPIF (check for non available locales)
+
+2008-01-27  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/libxml/php_libxml2.def:
+      add missing export
+
+2008-01-27  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ext/spl/spl_observer.c:
+      - Minor rearrange and fix potential issue with double adding
+
+    * ext/spl/php_spl.c
+      ext/spl/php_spl.h
+      ext/tidy/php_tidy.h
+      ext/tidy/tidy.c:
+      - revert over constfying
+
+2008-01-27  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/internal/spldoublylinkedlist.inc:
+      Typo
+
+    * (PHP_5_3)
+      ext/spl/spl_dllist.c
+      ext/spl/internal/spldoublylinkedlist.inc
+      ext/spl/internal/splqueue.inc
+      ext/spl/internal/splstack.inc
+      ext/spl/tests/dllist_003.phpt:
+      MFH: -Pointer doesn't move if we're moving forward and shifting at the same
+      time
+      -Userland implementation
+      -Doxygen doc
+
+    * ext/spl/spl_dllist.c
+      ext/spl/internal/spldoublylinkedlist.inc
+      ext/spl/internal/splqueue.inc
+      ext/spl/internal/splstack.inc
+      ext/spl/tests/dllist_003.phpt:
+      -Pointer doesn't move if we're moving forward and shifting at the same time
+      -Userland implementation
+      -Doxygen doc
+
 2008-01-26  Etienne Kneuss  <php@colder.ch>
 
     * (PHP_5_3)
