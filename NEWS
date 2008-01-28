@@ -24,8 +24,11 @@ PHP                                                                        NEWS
     DateTimeZone::getTranstions() to limit the range of transitions being
     returned.
 
-- Added ability to store associative infor with objects in SplObjectStorage.
-  (Marcus)
+- Improved SPL extension:
+  . Added ability to store associative information with objects in 
+    SplObjectStorage. (Marcus)
+  . Added ArrayAccess support to SplObjectStorage. (Marcus)
+  . Added SplDoublyLinkedList, SplStack, SplQueue classes. (Etienne)
 - Added ability to use Traversable objects instead of plain arrays in ext/soap.
   (Joshua Reese, Dmitry)
 - Added "?:" operator. (Marcus)
@@ -51,7 +54,6 @@ PHP                                                                        NEWS
   (Etienne Kneuss)
 - Added "compact" handler for Zend MM storage. (Dmitry)
 - Added "+" and "*" specifiers to zend_parse_parameters(). (Andrei)
-- Added SplDoublyLinkedList, SplStack, SplQueue classes. (Etienne)
 
 - Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
 
