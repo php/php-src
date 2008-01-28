@@ -1,15 +1,12 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_WITH("mysqlnd", "MySQL-nd support", "no");
-
-if (PHP_MYSQLND != "no") {
-mysqld_source = "";
 if (CHECK_LIB("ws2_32.lib", "mysqlnd")) {
 	mysqlnd_source = 
 		"mysqlnd.c " +
-		"mysqlnd_debug.c " +
+		"mysqlnd_block_alloc.c" +
 		"mysqlnd_charset.c " +
+		"mysqlnd_debug.c " +
 		"mysqlnd_loaddata.c " +
 		"mysqlnd_palloc.c " +
 		"mysqlnd_ps.c " +
@@ -20,5 +17,4 @@ if (CHECK_LIB("ws2_32.lib", "mysqlnd")) {
 		"mysqlnd_statistics.c " +
 		"mysqlnd_wireprotocol.c";
 	EXTENSION("mysqlnd", mysqlnd_source, false);
-}
 }

@@ -27,6 +27,7 @@
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_charset.h"
 #include "mysqlnd_debug.h"
+#include "mysqlnd_block_alloc.h"
 #include "php_ini.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/php_lcg.h"
@@ -66,7 +67,6 @@ const char * mysqlnd_out_of_sync = "Commands out of sync; you can't run this com
 MYSQLND_STATS *mysqlnd_global_stats = NULL;
 static zend_bool mysqlnd_library_initted = FALSE;
 
-MYSQLND_MEMORY_POOL mysqlnd_memory_pool;
 
 static enum_func_status mysqlnd_send_close(MYSQLND * conn TSRMLS_DC);
 
@@ -127,140 +127,6 @@ void * _mysqlnd_fetch_thread(void *arg)
 /* }}} */
 #endif /* MYSQLND_THREADED */
 
-/************************************************************************************************/
-/* Let's don't use pool allocation for now */
-/* {{{ mysqlnd_mempool_free_chunk */
-static
-void mysqlnd_mempool_free_contents(MYSQLND_MEMORY_POOL * pool TSRMLS_DC)
-{
-	DBG_ENTER("mysqlnd_mempool_dtor");
-	uint i;
-	for (i = 0; i < pool->free_chunk_list_elements; i++) {
-		MYSQLND_MEMORY_POOL_CHUNK * chunk = pool->free_chunk_list[i];
-		chunk->free_chunk(chunk, FALSE TSRMLS_CC);
-	}
-	
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
-/* Let's don't use pool allocation for now */
-/* {{{ mysqlnd_mempool_free_chunk */
-static
-void mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, zend_bool cache_it TSRMLS_DC)
-{
-	DBG_ENTER("mysqlnd_mempool_free_chunk");
-	MYSQLND_MEMORY_POOL * pool = chunk->pool;
-	if (chunk->from_pool) {
-		/* Try to back-off and guess if this is the last block allocated */
-		if (chunk->ptr == (pool->arena + (pool->arena_size - pool->free_size - chunk->size))) {
-			/*
-				This was the last allocation. Lucky us, we can free
-				a bit of memory from the pool. Next time we will return from the same ptr.
-			*/
-			pool->free_size += chunk->size;
-		}
-		pool->refcount--;
-	} else {
-		mnd_free(chunk->ptr);
-	}
-	if (cache_it && pool->free_chunk_list_elements < MYSQLND_MEMORY_POOL_CHUNK_LIST_SIZE) {
-		chunk->ptr = NULL;
-		pool->free_chunk_list[pool->free_chunk_list_elements++] = chunk;
-	} else {
-		/* We did not cache it -> free it */
-		mnd_free(chunk);
-	}
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_mempool_resize_chunk */
-static void
-mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, uint size TSRMLS_DC)
-{
-	DBG_ENTER("mysqlnd_mempool_resize_chunk");
-	if (chunk->from_pool) {
-		MYSQLND_MEMORY_POOL * pool = chunk->pool;
-		/* Try to back-off and guess if this is the last block allocated */
-		if (chunk->ptr == (pool->arena + (pool->arena_size - pool->free_size - chunk->size))) {
-			/*
-				This was the last allocation. Lucky us, we can free
-				a bit of memory from the pool. Next time we will return from the same ptr.
-			*/
-			if ((chunk->size + pool->free_size) < size) {
-				zend_uchar *new_ptr;
-				new_ptr = mnd_malloc(size);
-				memcpy(new_ptr, chunk->ptr, chunk->size);
-				chunk->ptr = new_ptr;
-				pool->free_size += chunk->size;
-				chunk->size = size;
-				chunk->pool = NULL; /* now we have no pool memory */
-				pool->refcount--;
-			} else {
-				/* If the chunk is > than asked size then free_memory increases, otherwise decreases*/
-				pool->free_size += (chunk->size - size);
-			}
-		} else {
-			/* Not last chunk, if the user asks for less, give it to him */
-			if (chunk->size >= size) {
-				; /* nop */
-			} else {
-				zend_uchar *new_ptr;
-				new_ptr = mnd_malloc(size);
-				memcpy(new_ptr, chunk->ptr, chunk->size);
-				chunk->ptr = new_ptr;
-				chunk->size = size;
-				chunk->pool = NULL; /* now we have no pool memory */
-				pool->refcount--;				
-			}
-		}
-	} else {
-		chunk->ptr = mnd_realloc(chunk->ptr, size);
-	}
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_mempool_get_chunk */
-static
-MYSQLND_MEMORY_POOL_CHUNK * mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool, uint size TSRMLS_DC)
-{
-	MYSQLND_MEMORY_POOL_CHUNK *chunk = NULL;
-	DBG_ENTER("mysqlnd_mempool_get_chunk");
-
-	if (pool->free_chunk_list_elements) {
-		chunk = pool->free_chunk_list[--pool->free_chunk_list_elements];
-	} else {
-		chunk = mnd_malloc(sizeof(MYSQLND_MEMORY_POOL_CHUNK));
-	}
-
-	chunk->free_chunk = mysqlnd_mempool_free_chunk;
-	chunk->resize_chunk = mysqlnd_mempool_resize_chunk;
-	chunk->size = size;
-	/*
-	  Should not go over MYSQLND_MAX_PACKET_SIZE, since we
-	  expect non-arena memory in mysqlnd_wireprotocol.c . We
-	  realloc the non-arena memory.
-	*/
-	chunk->pool = pool;
-	if (size > pool->free_size) {
-		chunk->ptr = mnd_malloc(size);
-		chunk->from_pool = FALSE;
-	} else {
-		chunk->from_pool = TRUE;
-		++pool->refcount;
-		chunk->ptr = pool->arena + (pool->arena_size - pool->free_size);
-		/* Last step, update free_size */
-		pool->free_size -= size;
-	}
-	DBG_RETURN(chunk);
-}
-/* }}} */
-/************************************************************************************************/
-
 
 /* {{{ mysqlnd_library_init */
 static
@@ -274,13 +140,6 @@ void mysqlnd_library_init(TSRMLS_D)
 #ifdef ZTS
 		mysqlnd_global_stats->LOCK_access = tsrm_mutex_alloc();
 #endif
-		mysqlnd_memory_pool.arena_size = 16000;
-		mysqlnd_memory_pool.free_size = mysqlnd_memory_pool.arena_size;
-		mysqlnd_memory_pool.refcount = 0;
-		/* OOM ? */
-		mysqlnd_memory_pool.arena = mnd_malloc(mysqlnd_memory_pool.arena_size);
-		mysqlnd_memory_pool.get_chunk = mysqlnd_mempool_get_chunk;
-		mysqlnd_memory_pool.free_contents = mysqlnd_mempool_free_contents;
 	}
 }
 /* }}} */
@@ -291,9 +150,6 @@ static
 void mysqlnd_library_end(TSRMLS_D)
 {
 	if (mysqlnd_library_initted == TRUE) {
-		/* mnd_free will reference LOCK_access and won't crash...*/
-		mysqlnd_memory_pool.free_contents(&mysqlnd_memory_pool TSRMLS_CC);
-		free(mysqlnd_memory_pool.arena);
 #ifdef ZTS
 		tsrm_mutex_free(mysqlnd_global_stats->LOCK_access);
 #endif
@@ -421,6 +277,10 @@ MYSQLND_METHOD(mysqlnd_conn, free_contents)(MYSQLND *conn TSRMLS_DC)
 		DBG_INF("Freeing zval cache reference");
 		mysqlnd_palloc_free_thd_cache_reference(&conn->zval_cache);
 		conn->zval_cache = NULL;
+	}
+	if (conn->result_set_memory_pool) {
+		mysqlnd_mempool_destroy(conn->result_set_memory_pool TSRMLS_CC);
+		conn->result_set_memory_pool = NULL;
 	}
 	if (conn->qcache) {
 		DBG_INF("Freeing qcache reference");
@@ -971,6 +831,7 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 		}
 
 		DBG_INF_FMT("connection_id=%llu", conn->thread_id);
+		conn->result_set_memory_pool = mysqlnd_mempool_create(16000 TSRMLS_CC);
 #if PHP_MAJOR_VERSION >= 6
 		{
 			uint as_unicode = 1;

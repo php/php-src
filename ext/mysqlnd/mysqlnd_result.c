@@ -585,6 +585,7 @@ unsigned long * mysqlnd_fetch_lengths_buffered(MYSQLND_RES * const result)
 /* }}} */
 
 
+#ifdef MYSQLND_THREADED
 /* {{{ mysqlnd_fetch_lengths_async_buffered */
 /*
   Do lazy initialization for buffered results. As PHP strings have
@@ -620,6 +621,7 @@ unsigned long * mysqlnd_fetch_lengths_async_buffered(MYSQLND_RES * const result)
 	return result->lengths;
 }
 /* }}} */
+#endif
 
 
 /* {{{ mysqlnd_fetch_lengths_unbuffered */
