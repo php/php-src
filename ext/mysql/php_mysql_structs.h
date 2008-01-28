@@ -23,12 +23,6 @@
 #ifndef PHP_MYSQL_STRUCTS_H
 #define PHP_MYSQL_STRUCTS_H
 
-#ifdef PHP_WIN32
-#define PHP_MYSQL_API __declspec(dllexport)
-#else
-#define PHP_MYSQL_API
-#endif
-
 #ifdef ZTS
 #include "TSRM.h"
 #endif
