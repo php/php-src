@@ -2,7 +2,6 @@
 Phar: delete a file within a zip-based .phar
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zip")) die("skip"); ?>
 --INI--
 phar.readonly=0
 phar.require_hash=0

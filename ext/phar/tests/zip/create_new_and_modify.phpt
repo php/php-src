@@ -3,7 +3,6 @@ Phar: create and modify zip-based phar
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
-<?php if (!extension_loaded("zip")) die("skip"); ?>
 --INI--
 phar.readonly=0
 --FILE--
