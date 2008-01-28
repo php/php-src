@@ -18,6 +18,8 @@ PHP                                                                        NEWS
     timezone_identifiers_list() / DateTimezone::listIdentifiers().
   * date_timestamp_set() / DateTime::setTimestamp() to set a Unix timestamp
     without invoking the date parser. (Scott)
+  * date_timestamp_get() / DateTime::getTimestamp() to retrieve the Unix
+    timestamp belonging to a date object.
 
 - Added ability to store associative infor with objects in SplObjectStorage.
   (Marcus)
