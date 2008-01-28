@@ -64,6 +64,7 @@ PHP_FUNCTION(date_time_set);
 PHP_FUNCTION(date_date_set);
 PHP_FUNCTION(date_isodate_set);
 PHP_FUNCTION(date_timestamp_set);
+PHP_FUNCTION(date_timestamp_get);
 
 PHP_METHOD(DateTimeZone, __construct);
 PHP_FUNCTION(timezone_open);
