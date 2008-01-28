@@ -1399,17 +1399,17 @@ void zend_deactivate(TSRMLS_D) /* {{{ */
 #endif
 
 #if GC_BENCH
-	printf("GC Statistics\n");
-	printf("-------------\n");
-	printf("Runs:               %d\n", GC_G(gc_runs));
-	printf("Collected:          %d\n", GC_G(collected));
-	printf("Root buffer length: %d\n", GC_G(root_buf_length));
-	printf("Root buffer peak:   %d\n\n", GC_G(root_buf_peak));
-	printf("      Possible            Remove from  Marked\n");
-	printf("        Root    Buffered     buffer     grey\n");
-	printf("      --------  --------  -----------  ------\n");
-	printf("ZVAL  %8d  %8d  %9d  %8d\n", GC_G(zval_possible_root), GC_G(zval_buffered), GC_G(zval_remove_from_buffer), GC_G(zval_marked_grey));
-	printf("ZOBJ  %8d  %8d  %9d  %8d\n", GC_G(zobj_possible_root), GC_G(zobj_buffered), GC_G(zobj_remove_from_buffer), GC_G(zobj_marked_grey));
+	fprintf(stderr, "GC Statistics\n");
+	fprintf(stderr, "-------------\n");
+	fprintf(stderr, "Runs:               %d\n", GC_G(gc_runs));
+	fprintf(stderr, "Collected:          %d\n", GC_G(collected));
+	fprintf(stderr, "Root buffer length: %d\n", GC_G(root_buf_length));
+	fprintf(stderr, "Root buffer peak:   %d\n\n", GC_G(root_buf_peak));
+	fprintf(stderr, "      Possible            Remove from  Marked\n");
+	fprintf(stderr, "        Root    Buffered     buffer     grey\n");
+	fprintf(stderr, "      --------  --------  -----------  ------\n");
+	fprintf(stderr, "ZVAL  %8d  %8d  %9d  %8d\n", GC_G(zval_possible_root), GC_G(zval_buffered), GC_G(zval_remove_from_buffer), GC_G(zval_marked_grey));
+	fprintf(stderr, "ZOBJ  %8d  %8d  %9d  %8d\n", GC_G(zobj_possible_root), GC_G(zobj_buffered), GC_G(zobj_remove_from_buffer), GC_G(zobj_marked_grey));
 #endif
 
 	zend_try {
