@@ -958,6 +958,7 @@ PHPAPI char *php_unescape_html_entities(char *orig, int oldlen, int *newlen, int
 					case cs_cp1251:
 					case cs_8859_5:
 					case cs_cp866:
+					case cs_koi8r:
 						replacement[0] = k;
 						replacement[1] = '\0';
 						replacement_len = 1;
