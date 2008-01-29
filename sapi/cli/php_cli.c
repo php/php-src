@@ -588,7 +588,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 int main(int argc, char *argv[])
 #endif
 {
-	int exit_status = SUCCESS;
+	volatile int exit_status = SUCCESS;
 	int c;
 	zend_file_handle file_handle;
 /* temporary locals */
@@ -599,8 +599,8 @@ int main(int argc, char *argv[])
 	char *arg_free=NULL, **arg_excp=&arg_free;
 	char *script_file=NULL;
 	int interactive=0;
-	int module_started = 0;
-	int request_started = 0;
+	volatile int module_started = 0;
+	volatile int request_started = 0;
 	int lineno = 0;
 	char *exec_direct=NULL, *exec_run=NULL, *exec_begin=NULL, *exec_end=NULL;
 	const char *param_error=NULL;
@@ -1229,8 +1229,9 @@ int main(int argc, char *argv[])
 				if (exec_end && zend_eval_string_ex(exec_end, NULL, "Command line end code", 1 TSRMLS_CC) == FAILURE) {
 					exit_status=254;
 				}
-	
+
 				break;
+			}
 #ifdef HAVE_REFLECTION
 			case PHP_MODE_REFLECTION_FUNCTION:
 			case PHP_MODE_REFLECTION_CLASS:
@@ -1311,7 +1312,6 @@ int main(int argc, char *argv[])
 					zend_printf("Additional .ini files parsed:      %s\n", php_ini_scanned_files ? php_ini_scanned_files : "(none)");
 					break;
 				}
-			}
 		}
 
 	} zend_end_try();
