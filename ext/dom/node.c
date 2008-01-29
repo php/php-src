@@ -27,6 +27,122 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_insert_before, 0, 0, 2)
+	ZEND_ARG_OBJ_INFO(0, newChild, DOMNode, 0)
+	ZEND_ARG_OBJ_INFO(0, refChild, DOMNode, 0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_replace_child, 0, 0, 2)
+	ZEND_ARG_OBJ_INFO(0, newChild, DOMNode, 0)
+	ZEND_ARG_OBJ_INFO(0, oldChild, DOMNode, 0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_remove_child, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, oldChild, DOMNode, 0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_append_child, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, newChild, DOMNode, 0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_has_child_nodes, 0, 0, 0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_clone_node, 0, 0, 1)
+	ZEND_ARG_INFO(0, deep)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_normalize, 0, 0, 0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_is_supported, 0, 0, 2)
+	ZEND_ARG_INFO(0, feature)
+	ZEND_ARG_INFO(0, version)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_has_attributes, 0, 0, 0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_compare_document_position, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, other, DOMNode, 0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_is_same_node, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, other, DOMNode, 0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_lookup_prefix, 0, 0, 1)
+	ZEND_ARG_INFO(0, namespaceURI)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_is_default_namespace, 0, 0, 1)
+	ZEND_ARG_INFO(0, namespaceURI)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_lookup_namespace_uri, 0, 0, 1)
+	ZEND_ARG_INFO(0, prefix)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_is_equal_node, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, arg, DOMNode, 0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_get_feature, 0, 0, 2)
+	ZEND_ARG_INFO(0, feature)
+	ZEND_ARG_INFO(0, version)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_set_user_data, 0, 0, 3)
+	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_OBJ_INFO(0, data, DOMUserData, 0)
+	ZEND_ARG_INFO(0, handler)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_get_user_data, 0, 0, 1)
+	ZEND_ARG_INFO(0, key)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_getNodePath, 0, 0, 0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_C14N, 0, 0, 0)
+	ZEND_ARG_INFO(0, exclusive)
+	ZEND_ARG_INFO(0, with_comments)
+	ZEND_ARG_ARRAY_INFO(0, xpath, 0)
+	ZEND_ARG_ARRAY_INFO(0, ns_prefixes, 0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_C14NFile, 0, 0, 1)
+	ZEND_ARG_INFO(0, uri)
+	ZEND_ARG_INFO(0, exclusive)
+	ZEND_ARG_INFO(0, with_comments)
+	ZEND_ARG_ARRAY_INFO(0, xpath, 0)
+	ZEND_ARG_ARRAY_INFO(0, ns_prefixes, 0)
+ZEND_END_ARG_INFO();
+/* }}} */
+
 /*
 * class DOMNode 
 *
@@ -35,27 +151,27 @@
 */
 
 const zend_function_entry php_dom_node_class_functions[] = {
-	PHP_FALIAS(insertBefore, dom_node_insert_before, NULL)
-	PHP_FALIAS(replaceChild, dom_node_replace_child, NULL)
-	PHP_FALIAS(removeChild, dom_node_remove_child, NULL)
-	PHP_FALIAS(appendChild, dom_node_append_child, NULL)
-	PHP_FALIAS(hasChildNodes, dom_node_has_child_nodes, NULL)
-	PHP_FALIAS(cloneNode, dom_node_clone_node, NULL)
-	PHP_FALIAS(normalize, dom_node_normalize, NULL)
-	PHP_FALIAS(isSupported, dom_node_is_supported, NULL)
-	PHP_FALIAS(hasAttributes, dom_node_has_attributes, NULL)
-	PHP_FALIAS(compareDocumentPosition, dom_node_compare_document_position, NULL)
-	PHP_FALIAS(isSameNode, dom_node_is_same_node, NULL)
-	PHP_FALIAS(lookupPrefix, dom_node_lookup_prefix, NULL)
-	PHP_FALIAS(isDefaultNamespace, dom_node_is_default_namespace, NULL)
-	PHP_FALIAS(lookupNamespaceUri, dom_node_lookup_namespace_uri, NULL)
-	PHP_FALIAS(isEqualNode, dom_node_is_equal_node, NULL)
-	PHP_FALIAS(getFeature, dom_node_get_feature, NULL)
-	PHP_FALIAS(setUserData, dom_node_set_user_data, NULL)
-	PHP_FALIAS(getUserData, dom_node_get_user_data, NULL)
-	PHP_ME(domnode, getNodePath, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(domnode, C14N, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(domnode, C14NFile, NULL, ZEND_ACC_PUBLIC)
+	PHP_FALIAS(insertBefore, dom_node_insert_before, arginfo_dom_node_insert_before)
+	PHP_FALIAS(replaceChild, dom_node_replace_child, arginfo_dom_node_replace_child)
+	PHP_FALIAS(removeChild, dom_node_remove_child, arginfo_dom_node_remove_child)
+	PHP_FALIAS(appendChild, dom_node_append_child, arginfo_dom_node_append_child)
+	PHP_FALIAS(hasChildNodes, dom_node_has_child_nodes, arginfo_dom_node_has_child_nodes)
+	PHP_FALIAS(cloneNode, dom_node_clone_node, arginfo_dom_node_clone_node)
+	PHP_FALIAS(normalize, dom_node_normalize, arginfo_dom_node_normalize)
+	PHP_FALIAS(isSupported, dom_node_is_supported, arginfo_dom_node_is_supported)
+	PHP_FALIAS(hasAttributes, dom_node_has_attributes, arginfo_dom_node_has_attributes)
+	PHP_FALIAS(compareDocumentPosition, dom_node_compare_document_position, arginfo_dom_node_compare_document_position)
+	PHP_FALIAS(isSameNode, dom_node_is_same_node, arginfo_dom_node_is_same_node)
+	PHP_FALIAS(lookupPrefix, dom_node_lookup_prefix, arginfo_dom_node_lookup_prefix)
+	PHP_FALIAS(isDefaultNamespace, dom_node_is_default_namespace, arginfo_dom_node_is_default_namespace)
+	PHP_FALIAS(lookupNamespaceUri, dom_node_lookup_namespace_uri, arginfo_dom_node_lookup_namespace_uri)
+	PHP_FALIAS(isEqualNode, dom_node_is_equal_node, arginfo_dom_node_is_equal_node)
+	PHP_FALIAS(getFeature, dom_node_get_feature, arginfo_dom_node_get_feature)
+	PHP_FALIAS(setUserData, dom_node_set_user_data, arginfo_dom_node_set_user_data)
+	PHP_FALIAS(getUserData, dom_node_get_user_data, arginfo_dom_node_get_user_data)
+	PHP_ME(domnode, getNodePath, arginfo_dom_node_getNodePath, ZEND_ACC_PUBLIC)
+	PHP_ME(domnode, C14N, arginfo_dom_node_C14N, ZEND_ACC_PUBLIC)
+	PHP_ME(domnode, C14NFile, arginfo_dom_node_C14NFile, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
