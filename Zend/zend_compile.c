@@ -2721,7 +2721,7 @@ static inline void do_implement_interface(zend_class_entry *ce, zend_class_entry
 		zend_error(E_CORE_ERROR, "Class %v could not implement interface %v", ce->name, iface->name);
 	}
 	if (ce == iface) {
-		zend_error(E_ERROR, "Interface %v cannot not implement itself", ce->name);
+		zend_error(E_ERROR, "Interface %v cannot implement itself", ce->name);
 	}
 }
 /* }}} */
