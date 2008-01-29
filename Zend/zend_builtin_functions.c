@@ -2077,7 +2077,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 			if ((! ptr->opline) || ((ptr->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (ptr->opline->opcode == ZEND_DO_FCALL))) {
 				if (ptr->function_state.arguments) {
-					add_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(ptr->function_state.arguments TSRMLS_CC));
+					add_ascii_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(ptr->function_state.arguments TSRMLS_CC));
 				}
 			}
 		} else {
