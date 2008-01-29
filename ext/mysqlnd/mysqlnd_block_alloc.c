@@ -31,8 +31,8 @@
 static void
 mysqlnd_mempool_free_contents(MYSQLND_MEMORY_POOL * pool TSRMLS_DC)
 {
-	DBG_ENTER("mysqlnd_mempool_dtor");
 	uint i;
+	DBG_ENTER("mysqlnd_mempool_dtor");
 	for (i = 0; i < pool->free_chunk_list_elements; i++) {
 		MYSQLND_MEMORY_POOL_CHUNK * chunk = pool->free_chunk_list[i];
 		chunk->free_chunk(chunk, FALSE TSRMLS_CC);
@@ -47,8 +47,8 @@ mysqlnd_mempool_free_contents(MYSQLND_MEMORY_POOL * pool TSRMLS_DC)
 static void
 mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, zend_bool cache_it TSRMLS_DC)
 {
-	DBG_ENTER("mysqlnd_mempool_free_chunk");
 	MYSQLND_MEMORY_POOL * pool = chunk->pool;
+	DBG_ENTER("mysqlnd_mempool_free_chunk");
 	if (chunk->from_pool) {
 		/* Try to back-off and guess if this is the last block allocated */
 		if (chunk->ptr == (pool->arena + (pool->arena_size - pool->free_size - chunk->size))) {

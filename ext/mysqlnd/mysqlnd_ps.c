@@ -613,8 +613,8 @@ mysqlnd_fetch_stmt_row_buffered(MYSQLND_RES *result, void *param, unsigned int f
 			zval **current_row = set->data_cursor;
 
 			if (NULL == current_row[0]) {
-				set->initialized_rows++;
 				uint64 row_num = (set->data_cursor - set->data) / field_count;
+				set->initialized_rows++;
 				result->m.row_decoder(set->row_buffers[row_num],
 									  current_row,
 									  result->meta->field_count,
