@@ -185,6 +185,8 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
     }
     Function [ <internal:date> function date_timestamp_set ] {
     }
+    Function [ <internal:date> function date_timestamp_get ] {
+    }
     Function [ <internal:date> function timezone_open ] {
     }
     Function [ <internal:date> function timezone_name_get ] {
@@ -273,7 +275,7 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
       - Properties [0] {
       }
 
-      - Methods [10] {
+      - Methods [11] {
         Method [ <internal:date, ctor> public method __construct ] {
         }
 
@@ -302,6 +304,9 @@ string(%d) "Extension [ <persistent> extension #%d date version %s ] {
         }
 
         Method [ <internal:date> public method setTimestamp ] {
+        }
+
+        Method [ <internal:date> public method getTimestamp ] {
         }
       }
     }
