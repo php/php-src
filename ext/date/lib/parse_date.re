@@ -107,7 +107,7 @@ typedef unsigned char uchar;
 #define TIMELIB_HAVE_RELATIVE() { s->time->have_relative = 1; s->time->relative.weekday_behavior = 1; }
 #define TIMELIB_HAVE_WEEKDAY_RELATIVE() { s->time->have_weekday_relative = 1; }
 #define TIMELIB_HAVE_SPECIAL_RELATIVE() { s->time->have_special_relative = 1; }
-#define TIMELIB_HAVE_TZ() { s->cur = cursor; if (s->time->have_zone) { add_warning(s, "Double timezone specification"); timelib_string_free(str); return TIMELIB_ERROR; } else { s->time->have_zone = 1; } }
+#define TIMELIB_HAVE_TZ() { s->cur = cursor; if (s->time->have_zone) { s->time->have_zone > 1 ? add_error(s, "Double timezone specification") : add_warning(s, "Double timezone specification"); timelib_string_free(str); s->time->have_zone++; return TIMELIB_ERROR; } else { s->time->have_zone++; } }
 
 #define TIMELIB_INIT  s->cur = cursor; str = timelib_string(s); ptr = str
 #define TIMELIB_DEINIT timelib_string_free(str)
@@ -755,6 +755,9 @@ static long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_
 	while (**ptr == ' ' || **ptr == '\t' || **ptr == '(') {
 		++*ptr;
 	}
+	if ((*ptr)[0] == 'G' && (*ptr)[1] == 'M' && (*ptr)[2] == 'T' && ((*ptr)[3] == '+' | (*ptr)[3] == '-')) {
+		*ptr += 3;
+	}
 	if (**ptr == '+') {
 		++*ptr;
 		t->is_localtime = 1;
@@ -845,7 +848,7 @@ second = minute | "60";
 secondlz = minutelz | "60";
 meridian = ([AaPp] "."? [Mm] "."?) [\000\t ];
 tz = "("? [A-Za-z]{1,6} ")"? | [A-Z][a-z]+([_/][A-Z][a-z]+)+;
-tzcorrection = [+-] hour24 ":"? minute?;
+tzcorrection = "GMT"? [+-] hour24 ":"? minute?;
 
 daysuf = "st" | "nd" | "rd" | "th";
 
