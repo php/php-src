@@ -1,3 +1,229 @@
+2008-01-28  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute.h:
+      fix type
+
+2008-01-28  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/config.w32
+      ext/mysqlnd/config.w32
+      ext/mysqlnd/config9.m4
+      ext/mysqlnd/config9.m4
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd.h:
+      Moving extension specific code to php_mysqlnd.c as the old rule is.
+
+2008-01-28  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      NEWS:
+      BFN
+
+    * ext/standard/html.c
+      ext/standard/tests/strings/bug43927.phpt:
+      MFB: fix #43927 (koi8r is missing from html_entity_decode())
+      patch by andy at demos dot su
+
+    * ext/standard/tests/strings/bug43927.phpt
+      ext/standard/tests/strings/bug43927.phpt:
+      
+      file bug43927.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/standard/html.c:
+      fix #43927 (koi8r is missing from html_entity_decode())
+      patch by andy at demos dot su
+
+2008-01-28  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysql/config.w32
+      ext/mysqli/tests/mysqli_get_client_stats.phpt
+      ext/mysqlnd/config.w32
+      ext/mysqlnd/config9.m4
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd_block_alloc.c
+      ext/mysqlnd/mysqlnd_block_alloc.h
+      ext/mysqlnd/mysqlnd_priv.h
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c:
+      MFB:
+      some config.w32 fixes
+      moved mysqlnd's block allocator to a separate file and also now
+      it's part of the connection, no MT problems.
+
+    * (PHP_5_3)
+      ext/mysql/config.w32
+      ext/mysqli/tests/mysqli_get_client_stats.phpt
+      ext/mysqlnd/config.w32
+      ext/mysqlnd/config9.m4
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd_block_alloc.c
+      ext/mysqlnd/mysqlnd_block_alloc.c
+      ext/mysqlnd/mysqlnd_block_alloc.h
+      ext/mysqlnd/mysqlnd_block_alloc.h
+      ext/mysqlnd/mysqlnd_priv.h
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c:
+      some config.w32 fixes
+      moved mysqlnd's block allocator to a separate file and also now
+      it's part of the connection, no MT problems.
+
+2008-01-28  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      NEWS
+      ext/spl/spl_observer.c
+      ext/spl/internal/splobjectstorage.inc:
+      - MFH Make SplObjectStorage implement ArrayAccess
+      [DOC]
+
+    * ext/spl/spl_observer.c
+      ext/spl/internal/splobjectstorage.inc:
+      - Make SplObjectStorage implement ArrayAccess
+
+2008-01-28  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/php_date.c:
+      - MFH: Added two optional parameters to timezone_transitions_get() /
+        DateTimeZone::getTranstions() to limit the range of transitions being
+        returned.
+
+    * ext/date/php_date.c:
+      - Added two optional parameters to timezone_transitions_get() /
+        DateTimeZone::getTranstions() to limit the range of transitions being
+        returned.
+
+    * ext/date/tests/strtotime.phpt:
+      - MF53: Fixed test case.
+
+    * (PHP_5_3)
+      ext/date/tests/strtotime.phpt:
+      - Fixed test case.
+
+    * ext/date/php_date.c:
+      - MF53: Added missing folding tags.
+
+    * (PHP_5_3)
+      ext/date/php_date.c:
+      - Add missing folding tags.
+
+    * (PHP_5_3)
+      ZendEngine2/zend.c:
+      - MFH: Send the debug info to stderr instead of stdout.
+
+    * ZendEngine2/zend.c:
+      - Send the debug info to stderr instead of stdout.
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/php_date.c
+      ext/date/php_date.h:
+      - MFH: Added date_timestamp_get() / DateTime::getTimestamp() to retrieve
+      the
+        Unix timestamp belonging to a date object.
+
+    * ext/date/php_date.c
+      ext/date/php_date.h:
+      - Added DateTime::getTimestamp() / date_timestamp_get().
+
+2008-01-28  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_mysqlnd.h
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/php_mysqli_structs.h
+      ext/mysqli/tests/mysqli_get_client_stats.phpt
+      ext/mysqlnd/config9.m4
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_enum_n_def.h
+      ext/mysqlnd/mysqlnd_libmysql_compat.h
+      ext/mysqlnd/mysqlnd_palloc.c
+      ext/mysqlnd/mysqlnd_priv.h
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_result.h
+      ext/mysqlnd/mysqlnd_result_meta.c
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqlnd/mysqlnd_wireprotocol.h:
+      MFB: More optimizations - less MM calls
+      Clearly separated fetching (physical reading) from decoding phases (data
+      interpretation). Threaded fetching added but disabled as needs more work
+      for
+      Windows. For Linux needs some touches to add pthreads if this is enabled,
+      probably with a compile-time switch.
+      The code reorganisation makes it easy to add also async API, similar to
+      cURL's one.
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_mysqlnd.h
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/php_mysqli_structs.h
+      ext/mysqli/tests/mysqli_get_client_stats.phpt
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_enum_n_def.h
+      ext/mysqlnd/mysqlnd_libmysql_compat.h
+      ext/mysqlnd/mysqlnd_priv.h
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_result.h
+      ext/mysqlnd/mysqlnd_result_meta.c
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqlnd/mysqlnd_wireprotocol.h:
+      More optimizations - less MM calls
+      Clearly separated fetching (physical reading) from decoding phases (data
+      interpretation). Threaded fetching added but disabled as needs more work
+      for
+      Windows. For Linux needs some touches to add pthreads if this is enabled,
+      probably with a compile-time switch.
+      The code reorganisation makes it easy to add also async API, similar to
+      cURL's one.
+
+2008-01-28  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_2)
+      NEWS
+      main/SAPI.c
+      main/SAPI.c:
+      MFH: Fixed bug #43954 (Memory leak when sending the same HTTP status code
+      more than once.)
+
+    * main/SAPI.c:
+      Fixed bug #43954 (Memory leak when sending the same HTTP status code more
+      than once.)
+
+2008-01-28  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * NEWS:
+      Remove items already in 5.3
+
+2008-01-28  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/mysql/php_mysql_structs.h
+      ext/mysql/php_mysql_structs.h:
+      remove unused PHP_MYSQL_API macro
+
+2008-01-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS:
+      Better message
+
 2008-01-27  Derick Rethans  <php@derickrethans.nl>
 
     * ext/date/lib/parse_date.c
