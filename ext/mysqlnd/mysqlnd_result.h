@@ -38,6 +38,10 @@ enum_func_status mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STM
 void mysqlnd_res_initialize_result_set_rest(MYSQLND_RES * const result TSRMLS_DC);
 
 
+#ifdef MYSQLND_THREADED
+void * mysqlnd_fetch_thread(void *arg);
+#endif
+
 enum_func_status mysqlnd_background_store_result_fetch_data(MYSQLND_RES *result TSRMLS_DC);
 #endif /* MYSQLND_RESULT_H */
 

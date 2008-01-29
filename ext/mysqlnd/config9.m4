@@ -2,6 +2,11 @@ dnl
 dnl $Id$
 dnl config.m4 for mysqlnd driver
 
+
+PHP_ARG_ENABLE(mysqlnd_threading, whether to enable threaded fetch in mysqlnd,
+[  --enable-mysqlnd-threading  mysqlnd: Enable threaded fetch], no, no)
+
+
 dnl If some extension uses mysqlnd it will get compiled in PHP core
 if test "$PHP_MYSQLND_ENABLED" = "yes"; then
   mysqlnd_sources="mysqlnd.c mysqlnd_charset.c mysqlnd_wireprotocol.c \
@@ -15,6 +20,13 @@ if test "$PHP_MYSQLND_ENABLED" = "yes"; then
   PHP_INSTALL_HEADERS([ext/mysqlnd])
   PHP_INSTALL_HEADERS([$ext_builddir/php_mysqlnd_config.h])
   AC_DEFINE([HAVE_MYSQLND], 1, [Whether mysqlnd is enabled])
+
+  dnl Windows uses config.w32 thus this code is safe for now
+  if test "$PHP_MYSQLND_THREADING" = "yes"; then
+    PHP_BUILD_THREAD_SAFE
+    AC_DEFINE([MYSQLND_THREADED], 1, [Whether mysqlnd threading is enabled])
+  fi
+
 
   dnl This creates a file so it has to be after above macros
   PHP_CHECK_TYPES([int8 uint8 int16 uint16 int32 uint32 uchar ulong int8_t uint8_t int16_t uint16_t int32_t uint32_t int64_t uint64_t], [

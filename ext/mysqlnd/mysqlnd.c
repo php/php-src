@@ -68,63 +68,6 @@ static zend_bool mysqlnd_library_initted = FALSE;
 
 static enum_func_status mysqlnd_send_close(MYSQLND * conn TSRMLS_DC);
 
-#define MYSQLND_SILENT 1
-
-#ifdef MYSQLND_THREADED
-/* {{{ _mysqlnd_fetch_thread */
-void * _mysqlnd_fetch_thread(void *arg)
-{
-	MYSQLND *conn = (MYSQLND *) arg;
-	MYSQLND_RES * result = NULL;
-	void ***tsrm_ls = conn->tsrm_ls;
-#ifndef MYSQLND_SILENT
-	printf("conn=%p tsrm_ls=%p\n", conn, conn->tsrm_ls);
-#endif
-	do {
-		pthread_mutex_lock(&conn->LOCK_work);
-		while (conn->thread_killed == FALSE /* && there is work */) {
-#ifndef MYSQLND_SILENT
-			printf("Waiting for work in %s\n", __FUNCTION__);
-#endif
-			pthread_cond_wait(&conn->COND_work, &conn->LOCK_work);
-		}
-		if (conn->thread_killed == TRUE) {
-#ifndef MYSQLND_SILENT
-			printf("Thread killed in %s\n", __FUNCTION__);
-#endif
-			pthread_cond_signal(&conn->COND_thread_ended);
-			pthread_mutex_unlock(&conn->LOCK_work);
-			break;
-		}
-#ifndef MYSQLND_SILENT
-		printf("Got work in %s\n", __FUNCTION__);
-#endif
-		CONN_SET_STATE(conn, CONN_FETCHING_DATA);
-		result = conn->current_result;
-		conn->current_result = NULL;
-		pthread_mutex_unlock(&conn->LOCK_work);
-
-		mysqlnd_background_store_result_fetch_data(result TSRMLS_CC);
-
-		/* do fetch the data from the wire */
-
-		pthread_mutex_lock(&conn->LOCK_work);
-		CONN_SET_STATE(conn, CONN_READY);
-		pthread_cond_signal(&conn->COND_work_done);
-#ifndef MYSQLND_SILENT
-		printf("Signaling work done in %s\n", __FUNCTION__);
-#endif
-		pthread_mutex_unlock(&conn->LOCK_work);
-	} while (1);
-
-#ifndef MYSQLND_SILENT
-	printf("Exiting worker thread in %s\n", __FUNCTION__);
-#endif
-	return NULL;
-}
-/* }}} */
-#endif /* MYSQLND_THREADED */
-
 
 /* {{{ mysqlnd_library_init */
 void mysqlnd_library_init(TSRMLS_D)
@@ -839,7 +782,7 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 			pthread_attr_setdetachstate(&connection_attrib, PTHREAD_CREATE_DETACHED);
 
 			conn->thread_is_running = TRUE;
-			if (pthread_create(&th, &connection_attrib, _mysqlnd_fetch_thread, (void*)conn)) {
+			if (pthread_create(&th, &connection_attrib, mysqlnd_fetch_thread, (void*)conn)) {
 				conn->thread_is_running = FALSE;
 			}
 		}
