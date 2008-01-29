@@ -3,18 +3,15 @@ $s = str_replace("\r", '', file_get_contents(dirname(__FILE__) . '/shortarc.php'
 
 $s .= "\nExtract_Phar::go();\n__HALT_COMPILER();";
 $news = '';
-$last = -1;
 foreach (token_get_all($s) as $token) {
     if (is_array($token)) {
-        if ($token[0] == T_WHITESPACE) {
-            if ($last == T_COMMENT) {
-                $token[1] = '';
-            } else {
-                $n = str_repeat("\n", substr_count($token[1], "\n"));
-                $token[1] = strlen($n) ? $n : ' ';
-            }
+        if ($token[0] == T_COMMENT) {
+            $token[1] = '';
         }
-        $last = $token[0];
+        if ($token[0] == T_WHITESPACE) {
+            $n = str_repeat("\n", substr_count($token[1], "\n"));
+            $token[1] = strlen($n) ? $n : ' ';
+        }
         $news .= $token[1];
     } else {
         $news .= $token;
@@ -106,8 +103,7 @@ foreach ($s3split as $i => $unused) {
     $stub .= ', newstub3_' . $i;
 }
 $stub .= ");
-}
-";
+}";
 
 file_put_contents(dirname(__FILE__) . '/stub.h', $stub);
 ?>
