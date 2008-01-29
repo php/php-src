@@ -1,15 +1,16 @@
 <?php
+
 $web = '000';
+
 if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
     Phar::interceptFileFuncs();
-    if (!$web || PHP_SAPI == 'cli') {
-        include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
-    } else {
+    if ($web) {
         Phar::webPhar(null, $web);
-        include 'phar://' . __FILE__ . '/' . $web;
     }
-    exit;
+    include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
+    return;
 }
+
 if ($web) {
     if (@(isset($_SERVER['REQUEST_URI']) && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'POST')) {
         Extract_Phar::go(true);
