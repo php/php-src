@@ -1125,7 +1125,6 @@ PHPAPI char *php_escape_html_entities_ex(unsigned char *old, int oldlen, int *ne
 		maxlen = 128;
 	replaced = emalloc (maxlen);
 	len = 0;
-	//Sleep(10*1000);
 	i = 0;
 	while (i < oldlen) {
 		unsigned char mbsequence[16];	/* allow up to 15 characters in a multibyte sequence */
