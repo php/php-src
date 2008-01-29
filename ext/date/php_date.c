@@ -221,15 +221,16 @@ const zend_function_entry date_funcs_date[] = {
 };
 
 const zend_function_entry date_funcs_timezone[] = {
-	PHP_ME(DateTimeZone,				__construct,				NULL, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getName,				timezone_name_get,			NULL, 0)
-	PHP_ME_MAPPING(getOffset,			timezone_offset_get,		NULL, 0)
-	PHP_ME_MAPPING(getTransitions,		timezone_transitions_get,	NULL, 0)
-	PHP_ME_MAPPING(listAbbreviations,	timezone_abbreviations_list, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	PHP_ME_MAPPING(listIdentifiers,		timezone_identifiers_list,	NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME(DateTimeZone,              __construct,                 NULL, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getName,           timezone_name_get,           NULL, 0)
+	PHP_ME_MAPPING(getOffset,         timezone_offset_get,         NULL, 0)
+	PHP_ME_MAPPING(getTransitions,    timezone_transitions_get,    NULL, 0)
+	PHP_ME_MAPPING(listAbbreviations, timezone_abbreviations_list, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(listIdentifiers,   timezone_identifiers_list,   NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	{NULL, NULL, NULL}
 };
 
+static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC);
 static void date_register_classes(TSRMLS_D);
 static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC);
 /* }}} */
@@ -1152,7 +1153,7 @@ PHP_FUNCTION(strtotime)
 		timelib_time_dtor(now);	
 		RETURN_FALSE;
 	}
-	
+
 	t = timelib_strtotime(times, time_len, &error, DATE_TIMEZONEDB);
 	error1 = error->error_count;
 	timelib_error_container_dtor(error);
