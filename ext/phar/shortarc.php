@@ -88,10 +88,11 @@ if ($web) {
         if (isset($mimes[$b['extension']])) {
             if ($mimes[$b['extension']] === 1) {
                 include $a;
-                return;
+                exit;
             }
             if ($mimes[$b['extension']] === 2) {
                 highlight_file($a);
+                exit;
             }
             header('Content-Type: ' .$mimes[$b['extension']]);
             header('Content-Length: ' . filesize($a));
@@ -110,12 +111,14 @@ class Extract_Phar
     const MASK = 0x3000;
     const START = 'index.php';
     const LEN = XXXX;
+
     static function go($return  = false)
     {
         $fp = fopen(__FILE__, 'rb');
         fseek($fp, self::LEN);
         $L = unpack('V', $a = fread($fp, 4));
         $m = '';
+
         do {
             $read = 8192;
             if ($L[1] - strlen($m) < 8192) {
@@ -124,26 +127,32 @@ class Extract_Phar
             $last = fread($fp, $read);
             $m .= $last;
         } while (strlen($last) && strlen($m) < $L[1]);
+
         if (strlen($m) < $L[1]) {
             die('ERROR: manifest length read was "' . 
                 strlen($m) .'" should be "' .
                 $L[1] . '"');
         }
+
         $info = self::_unpack($m);
         $f = $info['c'];
+
         if ($f & self::GZ) {
             if (!function_exists('gzinflate')) {
                 die('Error: zlib extension is not enabled -' .
                     ' gzinflate() function needed for zlib-compressed .phars');
             }
         }
+
         if ($f & self::BZ2) {
             if (!function_exists('bzdecompress')) {
                 die('Error: bzip2 extension is not enabled -' .
                     ' bzdecompress() function needed for bz2-compressed .phars');
             }
         }
+
         $temp = self::tmpdir();
+
         if (!$temp || !is_writable($temp)) {
             $sessionpath = session_save_path();
             if (strpos ($sessionpath, ";") !== false)
@@ -153,27 +162,34 @@ class Extract_Phar
             }
             $temp = $sessionpath;
         }
+
         $temp .= '/pharextract/'.basename(__FILE__, '.phar');
         self::$temp = $temp;
         self::$origdir = getcwd();
         @mkdir($temp, 0777, true);
         $temp = realpath($temp);
-        if (!file_exists($temp. DIRECTORY_SEPARATOR . md5_file(__FILE__))) {
+
+        if (!file_exists($temp . DIRECTORY_SEPARATOR . md5_file(__FILE__))) {
             self::_removeTmpFiles($temp, getcwd());
-        }
-        @file_put_contents($temp . '/' . md5_file(__FILE__), '');
-        foreach ($info['m'] as $path => $file) {
-            $a = !file_exists(dirname($temp . '/' . $path));
-            @mkdir(dirname($temp . '/' . $path), 0777, true);
-            clearstatcache();
-            if ($path[strlen($path) - 1] == '/') {
-                @mkdir($temp . '/' . $path, 0777);
-            } else {
-                file_put_contents($temp . '/' . $path, self::extractFile($path, $file, $fp));
-                @chmod($temp . '/' . $path, 0666);
+            @mkdir($temp, 0777, true);
+            @file_put_contents($temp . '/' . md5_file(__FILE__), '');
+
+            foreach ($info['m'] as $path => $file) {
+                $a = !file_exists(dirname($temp . '/' . $path));
+                @mkdir(dirname($temp . '/' . $path), 0777, true);
+                clearstatcache();
+
+                if ($path[strlen($path) - 1] == '/') {
+                    @mkdir($temp . '/' . $path, 0777);
+                } else {
+                    file_put_contents($temp . '/' . $path, self::extractFile($path, $file, $fp));
+                    @chmod($temp . '/' . $path, 0666);
+                }
             }
         }
+
         chdir($temp);
+
         if (!$return) {
             include self::START;
         }
@@ -206,6 +222,7 @@ class Extract_Phar
         $o = 0;
         $start = 4 + $s[1];
         $ret['c'] = 0;
+
         for ($i = 0; $i < $info[1]; $i++) {
             // length of the file name
             $len = unpack('V', substr($m, $start, 4));
@@ -231,6 +248,7 @@ class Extract_Phar
     {
         $data = '';
         $c = $entry[2];
+
         while ($c) {
             if ($c < 8192) {
                 $data .= @fread($fp, $c);
@@ -240,24 +258,29 @@ class Extract_Phar
                 $data .= @fread($fp, 8192);
             }
         }
+
         if ($entry[4] & self::GZ) {
             $data = gzinflate($data);
         } elseif ($entry[4] & self::BZ2) {
             $data = bzdecompress($data);
         }
+
         if (strlen($data) != $entry[0]) {
             die("Invalid internal .phar file (size error " . strlen($data) . " != " .
                 $stat[7] . ")");
         }
+
         if ($entry[3] != sprintf("%u", crc32($data) & 0xffffffff)) {
             die("Invalid internal .phar file (checksum error)");
         }
+
         return $data;
     }
 
     static function _removeTmpFiles($temp, $origdir)
     {
         chdir($temp);
+
         foreach (glob('*') as $f) {
             if (file_exists($f)) {
                 is_dir($f) ? @rmdir($f) : @unlink($f);
@@ -266,6 +289,7 @@ class Extract_Phar
                 }
             }
         }
+
         @rmdir($temp);
         clearstatcache();
         chdir($origdir);
