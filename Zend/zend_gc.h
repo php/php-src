@@ -98,6 +98,7 @@ typedef struct _zval_gc_info {
 
 typedef struct _zend_gc_globals {
 	zend_bool         gc_enabled;
+	zend_bool         gc_active;
 
 	gc_root_buffer   *buf;				/* preallocated arrays of buffers   */
 	gc_root_buffer    roots;			/* list of possible roots of cycles */
