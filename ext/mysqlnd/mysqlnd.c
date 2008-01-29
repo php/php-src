@@ -133,10 +133,7 @@ void mysqlnd_library_init(TSRMLS_D)
 		mysqlnd_library_initted = TRUE;
 		_mysqlnd_init_ps_subsystem();
 		/* Should be calloc, as mnd_calloc will reference LOCK_access*/
-		mysqlnd_global_stats = calloc(1, sizeof(MYSQLND_STATS));
-#ifdef ZTS
-		mysqlnd_global_stats->LOCK_access = tsrm_mutex_alloc();
-#endif
+		mysqlnd_stats_init(&mysqlnd_global_stats);
 	}
 }
 /* }}} */
@@ -146,11 +143,7 @@ void mysqlnd_library_init(TSRMLS_D)
 void mysqlnd_library_end(TSRMLS_D)
 {
 	if (mysqlnd_library_initted == TRUE) {
-#ifdef ZTS
-		tsrm_mutex_free(mysqlnd_global_stats->LOCK_access);
-#endif
-		/* mnd_free will reference LOCK_access and crash...*/
-		free(mysqlnd_global_stats);
+		mysqlnd_stats_end(mysqlnd_global_stats);
 		mysqlnd_global_stats = NULL;
 		mysqlnd_library_initted = FALSE;
 	}
