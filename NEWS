@@ -155,6 +155,8 @@ PHP                                                                        NEWS
 - Fixed bug #30907 (ibase_query() crashes (same bug as #32143). (Lars W)
 - Fixed bug #30690 (Resource handle from ibase_execute becomes invalid after 
   return). (Lars W)
+- Fixed bug #29044 (compact function doesn't have infinite recursion protection). 
+  (Tony)
 - Fixed bug #27372 (parse error loading browscap.ini at apache startup).
   (Jani)
 
