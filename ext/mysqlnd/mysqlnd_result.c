@@ -1006,8 +1006,8 @@ mysqlnd_fetch_row_buffered_c(MYSQLND_RES *result TSRMLS_DC)
 		unsigned int i;
 
 		if (NULL == current_row[0]) {
-			set->initialized_rows++;
 			uint64 row_num = (set->data_cursor - set->data) / result->meta->field_count;
+			set->initialized_rows++;
 			result->m.row_decoder(set->row_buffers[row_num],
 								  current_row,
 								  result->meta->field_count,
@@ -1072,8 +1072,8 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int flags,
 		struct mysqlnd_field_hash_key *zend_hash_key = result->meta->zend_hash_keys;
 
 		if (NULL == current_row[0]) {
-			set->initialized_rows++;
 			uint64 row_num = (set->data_cursor - set->data) / result->meta->field_count;
+			set->initialized_rows++;
 			result->m.row_decoder(set->row_buffers[row_num],
 								  current_row,
 								  result->meta->field_count,
