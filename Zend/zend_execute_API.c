@@ -1877,6 +1877,7 @@ zend_class_entry *zend_fetch_class(char *class_name, uint class_name_len, int fe
 typedef struct _zend_abstract_info {
 	zend_function *afn[MAX_ABSTRACT_INFO_CNT + 1];
 	int cnt;
+	int ctor;
 } zend_abstract_info;
 
 static int zend_verify_abstract_class_function(zend_function *fn, zend_abstract_info *ai TSRMLS_DC) /* {{{ */
@@ -1885,7 +1886,16 @@ static int zend_verify_abstract_class_function(zend_function *fn, zend_abstract_
 		if (ai->cnt < MAX_ABSTRACT_INFO_CNT) {
 			ai->afn[ai->cnt] = fn;
 		}
-		ai->cnt++;
+		if (fn->common.fn_flags & ZEND_ACC_CTOR) {
+			if (!ai->ctor) {
+				ai->cnt++;
+				ai->ctor = 1;
+			} else {
+				ai->afn[ai->cnt] = NULL;
+			}
+		} else {
+			ai->cnt++;
+		}
 	}
 	return 0;
 }
