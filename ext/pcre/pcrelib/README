@@ -119,9 +119,9 @@ If you are using HP's ANSI C++ compiler (aCC), please see the special note
 in the section entitled "Using HP's ANSI C++ compiler (aCC)" below.
 
 The following instructions assume the use of the widely used "configure, make,
-make install" process. There is also some experimental support for "cmake" in
-the PCRE distribution, but it is incomplete and not documented. However, if you
-are a "cmake" user, you might want to try it.
+make install" process. There is also support for CMake in the PCRE
+distribution; there are some comments about using CMake in the NON-UNIX-USE
+file, though it can also be used in Unix-like systems.
 
 To build PCRE on a Unix-like system, first run the "configure" command from the
 PCRE distribution directory, with your current directory set to the directory
@@ -303,12 +303,12 @@ script that can be run to recreate the configuration, and config.log, which
 contains compiler output from tests that "configure" runs.
 
 Once "configure" has run, you can run "make". It builds two libraries, called
-libpcre and libpcreposix, a test program called pcretest, a demonstration
-program called pcredemo, and the pcregrep command. If a C++ compiler was found
-on your system, "make" also builds the C++ wrapper library, which is called
-libpcrecpp, and some test programs called pcrecpp_unittest,
-pcre_scanner_unittest, and pcre_stringpiece_unittest. Building the C++ wrapper
-can be disabled by adding --disable-cpp to the "configure" command.
+libpcre and libpcreposix, a test program called pcretest, and the pcregrep
+command. If a C++ compiler was found on your system, "make" also builds the C++
+wrapper library, which is called libpcrecpp, and some test programs called
+pcrecpp_unittest, pcre_scanner_unittest, and pcre_stringpiece_unittest.
+Building the C++ wrapper can be disabled by adding --disable-cpp to the
+"configure" command.
 
 The command "make check" runs all the appropriate tests. Details of the PCRE
 tests are given below in a separate section of this document.
@@ -359,9 +359,6 @@ system. The following are installed (file names are all relative to the
     pcre.txt       (a concatenation of the man(3) pages)
     pcretest.txt   the pcretest man page
     pcregrep.txt   the pcregrep man page
-
-Note that the pcredemo program that is built by "configure" is *not* installed
-anywhere. It is a demonstration for programmers wanting to use PCRE.
 
 If you want to remove PCRE from your system, you can run "make uninstall".
 This removes all the files that "make install" installed. However, it does not
@@ -743,4 +740,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 18 December 2007
+Last updated: 25 January 2008

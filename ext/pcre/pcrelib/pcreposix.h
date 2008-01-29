@@ -9,7 +9,7 @@
 Compatible Regular Expression library. It defines the things POSIX says should
 be there. I hope.
 
-            Copyright (c) 1997-2007 University of Cambridge
+            Copyright (c) 1997-2008 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
