@@ -36,12 +36,41 @@
 
 #if defined(LIBXML_XPATH_ENABLED)
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_xpath_construct, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, doc, DOMDocument, 0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_xpath_register_ns, 0, 0, 2)
+	ZEND_ARG_INFO(0, prefix)
+	ZEND_ARG_INFO(0, uri)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_xpath_query, 0, 0, 1)
+	ZEND_ARG_INFO(0, expr)
+	ZEND_ARG_OBJ_INFO(0, context, DOMNode, 0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_xpath_evaluate, 0, 0, 1)
+	ZEND_ARG_INFO(0, expr)
+	ZEND_ARG_OBJ_INFO(0, context, DOMNode, 0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_xpath_register_php_functions, 0, 0, 0)
+ZEND_END_ARG_INFO();
+/* }}} */
+
 const zend_function_entry php_dom_xpath_class_functions[] = {
-	PHP_ME(domxpath, __construct, NULL, ZEND_ACC_PUBLIC)
-	PHP_FALIAS(registerNamespace, dom_xpath_register_ns, NULL)
-	PHP_FALIAS(query, dom_xpath_query, NULL)
-	PHP_FALIAS(evaluate, dom_xpath_evaluate, NULL)
-	PHP_FALIAS(registerPhpFunctions, dom_xpath_register_php_functions, NULL)
+	PHP_ME(domxpath, __construct, arginfo_dom_xpath_construct, ZEND_ACC_PUBLIC)
+	PHP_FALIAS(registerNamespace, dom_xpath_register_ns, arginfo_dom_xpath_register_ns)
+	PHP_FALIAS(query, dom_xpath_query, arginfo_dom_xpath_query)
+	PHP_FALIAS(evaluate, dom_xpath_evaluate, arginfo_dom_xpath_evaluate)
+	PHP_FALIAS(registerPhpFunctions, dom_xpath_register_php_functions, arginfo_dom_xpath_register_php_functions)
 	{NULL, NULL, NULL}
 };
 
