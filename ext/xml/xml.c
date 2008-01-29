@@ -591,15 +591,27 @@ PHPAPI char *xml_utf8_decode(const XML_Char *s, int len, int *newlen, const XML_
 	while (pos > 0) {
 		c = (unsigned char)(*s);
 		if (c >= 0xf0) { /* four bytes encoded, 21 bits */
-			c = ((s[0]&7)<<18) | ((s[1]&63)<<12) | ((s[2]&63)<<6) | (s[3]&63);
+			if(pos-4 >= 0) {
+				c = ((s[0]&7)<<18) | ((s[1]&63)<<12) | ((s[2]&63)<<6) | (s[3]&63);
+			} else {
+				c = '?';	
+			}
 			s += 4;
 			pos -= 4;
 		} else if (c >= 0xe0) { /* three bytes encoded, 16 bits */
-			c = ((s[0]&63)<<12) | ((s[1]&63)<<6) | (s[2]&63);
+			if(pos-3 >= 0) {
+				c = ((s[0]&63)<<12) | ((s[1]&63)<<6) | (s[2]&63);
+			} else {
+				c = '?';
+			}
 			s += 3;
 			pos -= 3;
 		} else if (c >= 0xc0) { /* two bytes encoded, 11 bits */
-			c = ((s[0]&63)<<6) | (s[1]&63);
+			if(pos-3 >= 0) {
+				c = ((s[0]&63)<<6) | (s[1]&63);
+			} else {
+				c = '?';
+			}
 			s += 2;
 			pos -= 2;
 		} else {
