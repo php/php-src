@@ -106,6 +106,7 @@ PHP                                                                        NEWS
 - Fixed bug #43527 (DateTime created from a timestamp reports environment
   timezone). (Derick)
 - Fixed bug #43426 (crash on nested call_user_func() calls). (Dmitry)
+- Fixed bug #43323 (Wrong count abstract methods). (Felipe, Dmitry)
 - Fixed bug #43075 (Support 2007-11-01T24:00:00+00:00). (Derick)
 - Fixed bug #43003 (Invalid timezone reported for DateTime objects constructed
   using a timestamp). (Derick)
