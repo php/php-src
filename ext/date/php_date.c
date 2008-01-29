@@ -205,7 +205,6 @@ const zend_function_entry date_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-
 const zend_function_entry date_funcs_date[] = {
 	PHP_ME(DateTime,            __construct,       NULL, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
  	PHP_ME_MAPPING(createFromFormat, date_create_from_format,	NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -233,8 +232,8 @@ const zend_function_entry date_funcs_timezone[] = {
 	{NULL, NULL, NULL}
 };
 
-static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC);
 static void date_register_classes(TSRMLS_D);
+static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC);
 /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(date)
@@ -494,9 +493,7 @@ PHP_RSHUTDOWN_FUNCTION(date)
 PHP_MINIT_FUNCTION(date)
 {
 	REGISTER_INI_ENTRIES();
-
 	date_register_classes(TSRMLS_C);
-
 /*
  * RFC4287, Section 3.3: http://www.ietf.org/rfc/rfc4287.txt
  *   A Date construct is an element whose content MUST conform to the
@@ -1196,7 +1193,7 @@ PHP_FUNCTION(idate)
 
 	ret = php_idate(format[0], ts, 0);
 	if (ret == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unrecognized date format token");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unrecognized date format token.");
 		RETURN_FALSE;
 	}
 	RETURN_LONG(ret);
@@ -1291,7 +1288,7 @@ PHP_FUNCTION(strtotime)
 		timelib_tzinfo_dtor(t->tz_info);
 	}
 
-	timelib_time_dtor(now);	
+	timelib_time_dtor(now);
 	timelib_time_dtor(t);
 
 	if (error1 || error2) {
@@ -1514,7 +1511,6 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 		} else {
 			RETURN_STRINGL(buf, real_len, 0);
 		}
-
 	}
 	efree(buf);
 	RETURN_FALSE;
@@ -1945,7 +1941,7 @@ static int date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int 
 
 	dateobj->time->have_weekday_relative = dateobj->time->have_relative = 0;
 
- 	if (type == TIMELIB_ZONETYPE_ID && now->tz_info != tzi) {
+	if (type == TIMELIB_ZONETYPE_ID && now->tz_info != tzi) {
 		timelib_tzinfo_dtor(now->tz_info);
 	}
 	if (free_tzi) {
@@ -2074,7 +2070,7 @@ void php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAMETERS, timelib_time *
 		add_ascii_assoc_double(return_value, "fraction", parsed_time->f);
 	}
 
- 	zval_from_error_container(return_value, error);
+	zval_from_error_container(return_value, error);
 
 	timelib_error_container_dtor(error);
 
