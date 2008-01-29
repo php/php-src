@@ -30,8 +30,6 @@
 #define MYSQLND_USE_OPTIMISATIONS 0
 
 
-//#define MYSQLND_THREADING
-
 /* #define MYSQLND_STRING_TO_INT_CONVERSION */
 /*
   This force mysqlnd to do a single (or more depending on ammount of data)

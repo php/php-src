@@ -33,6 +33,62 @@
 
 #define MYSQLND_SILENT
 
+#ifdef MYSQLND_THREADED
+/* {{{ mysqlnd_fetch_thread */
+void * mysqlnd_fetch_thread(void *arg)
+{
+	MYSQLND *conn = (MYSQLND *) arg;
+	MYSQLND_RES * result = NULL;
+	void ***tsrm_ls = conn->tsrm_ls;
+#ifndef MYSQLND_SILENT
+	printf("conn=%p tsrm_ls=%p\n", conn, conn->tsrm_ls);
+#endif
+	do {
+		pthread_mutex_lock(&conn->LOCK_work);
+		while (conn->thread_killed == FALSE /* && there is work */) {
+#ifndef MYSQLND_SILENT
+			printf("Waiting for work in %s\n", __FUNCTION__);
+#endif
+			pthread_cond_wait(&conn->COND_work, &conn->LOCK_work);
+		}
+		if (conn->thread_killed == TRUE) {
+#ifndef MYSQLND_SILENT
+			printf("Thread killed in %s\n", __FUNCTION__);
+#endif
+			pthread_cond_signal(&conn->COND_thread_ended);
+			pthread_mutex_unlock(&conn->LOCK_work);
+			break;
+		}
+#ifndef MYSQLND_SILENT
+		printf("Got work in %s\n", __FUNCTION__);
+#endif
+		CONN_SET_STATE(conn, CONN_FETCHING_DATA);
+		result = conn->current_result;
+		conn->current_result = NULL;
+		pthread_mutex_unlock(&conn->LOCK_work);
+
+		mysqlnd_background_store_result_fetch_data(result TSRMLS_CC);
+
+		/* do fetch the data from the wire */
+
+		pthread_mutex_lock(&conn->LOCK_work);
+		CONN_SET_STATE(conn, CONN_READY);
+		pthread_cond_signal(&conn->COND_work_done);
+#ifndef MYSQLND_SILENT
+		printf("Signaling work done in %s\n", __FUNCTION__);
+#endif
+		pthread_mutex_unlock(&conn->LOCK_work);
+	} while (1);
+
+#ifndef MYSQLND_SILENT
+	printf("Exiting worker thread in %s\n", __FUNCTION__);
+#endif
+	return NULL;
+}
+/* }}} */
+#endif /* MYSQLND_THREADED */
+
+
 /* {{{ mysqlnd_res_initialize_result_set_rest */
 void mysqlnd_res_initialize_result_set_rest(MYSQLND_RES * const result TSRMLS_DC)
 {
@@ -1261,8 +1317,8 @@ mysqlnd_fetch_row_async_buffered(MYSQLND_RES *result, void *param, unsigned int 
 			break;
 		}
 		if (!set->data_cursor || (set->data_cursor - set->data) < (set->row_count)) {
-#if HAVE_USLEEP
  			tsrm_mutex_unlock(set->LOCK);
+#if HAVE_USLEEP
 			usleep(2000);
 #else
 			volatile int i = 0;
@@ -1281,6 +1337,7 @@ mysqlnd_fetch_row_async_buffered(MYSQLND_RES *result, void *param, unsigned int 
 		/* We don't forget to release the lock */
 		tsrm_mutex_unlock(set->LOCK);
 
+		/* If there was no decoding in background, we have to decode here */
 		if (set->decode_in_foreground == TRUE) {
 			MYSQLND_MEMORY_POOL_CHUNK *current_buffer = set->row_buffers[row_num];
 			result->m.row_decoder(current_buffer,
