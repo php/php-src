@@ -74,6 +74,7 @@ ZEND_END_ARG_INFO();
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xsl_xsltprocessor_register_php_functions, 0, 0, 0)
+	ZEND_ARG_INFO(0, restrict)
 ZEND_END_ARG_INFO();
 
 static
@@ -831,7 +832,7 @@ PHP_FUNCTION(xsl_xsltprocessor_remove_parameter)
 }
 /* }}} end xsl_xsltprocessor_remove_parameter */
 
-/* {{{ proto void xsl_xsltprocessor_register_php_functions() U
+/* {{{ proto void xsl_xsltprocessor_register_php_functions([mixed $restrict]); U
 */
 PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 {
