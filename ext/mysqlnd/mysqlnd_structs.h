@@ -448,7 +448,7 @@ struct st_mysqlnd_connection
 	/* stats */
 	MYSQLND_STATS	stats;
 
-#ifdef ZTS
+#ifdef MYSQLND_THREADED
 	MUTEX_T			LOCK_state;
 
 	pthread_cond_t	COND_work_done;
