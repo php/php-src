@@ -1,3 +1,18 @@
+2008-01-28  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.h
+      zend_execute.h:
+      fix type
+
+2008-01-28  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      zend.c:
+      - MFH: Send the debug info to stderr instead of stdout.
+
+    * zend.c:
+      - Send the debug info to stderr instead of stdout.
+
 2008-01-24  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_API.h
