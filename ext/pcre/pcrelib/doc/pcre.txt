@@ -869,7 +869,7 @@ PCRE API OVERVIEW
        a  Perl-compatible  manner. A sample program that demonstrates the sim-
        plest way of using them is provided in the file  called  pcredemo.c  in
        the  source distribution. The pcresample documentation describes how to
-       run it.
+       compile and run it.
 
        A second matching function, pcre_dfa_exec(), which is not Perl-compati-
        ble,  is  also provided. This uses a different algorithm for the match-
@@ -2565,8 +2565,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 26 December 2007
-       Copyright (c) 1997-2007 University of Cambridge.
+       Last updated: 23 January 2008
+       Copyright (c) 1997-2008 University of Cambridge.
 ------------------------------------------------------------------------------
 
 
@@ -6321,29 +6321,28 @@ PCRE SAMPLE PROGRAM
        bility  of  matching an empty string. Comments in the code explain what
        is going on.
 
-       The demonstration program is automatically built if you use  "./config-
-       ure;make"  to  build PCRE. Otherwise, if PCRE is installed in the stan-
-       dard include and library directories for your  system,  you  should  be
-       able to compile the demonstration program using this command:
+       If PCRE is installed in the standard include  and  library  directories
+       for  your  system, you should be able to compile the demonstration pro-
+       gram using this command:
 
          gcc -o pcredemo pcredemo.c -lpcre
 
-       If  PCRE is installed elsewhere, you may need to add additional options
-       to the command line. For example, on a Unix-like system that  has  PCRE
-       installed  in  /usr/local,  you  can  compile the demonstration program
+       If PCRE is installed elsewhere, you may need to add additional  options
+       to  the  command line. For example, on a Unix-like system that has PCRE
+       installed in /usr/local, you  can  compile  the  demonstration  program
        using a command like this:
 
          gcc -o pcredemo -I/usr/local/include pcredemo.c \
              -L/usr/local/lib -lpcre
 
-       Once you have compiled the demonstration program, you  can  run  simple
+       Once  you  have  compiled the demonstration program, you can run simple
        tests like this:
 
          ./pcredemo 'cat|dog' 'the cat sat on the mat'
          ./pcredemo -g 'cat|dog' 'the dog sat on the cat'
 
-       Note  that  there  is  a  much  more comprehensive test program, called
-       pcretest, which supports  many  more  facilities  for  testing  regular
+       Note that there is a  much  more  comprehensive  test  program,  called
+       pcretest,  which  supports  many  more  facilities  for testing regular
        expressions and the PCRE library. The pcredemo program is provided as a
        simple coding example.
 
@@ -6351,10 +6350,10 @@ PCRE SAMPLE PROGRAM
        the standard library directory, you may get an error like this when you
        try to run pcredemo:
 
-         ld.so.1: a.out: fatal: libpcre.so.0: open failed:  No  such  file  or
+         ld.so.1:  a.out:  fatal:  libpcre.so.0:  open failed: No such file or
        directory
 
-       This  is  caused  by the way shared library support works on those sys-
+       This is caused by the way shared library support works  on  those  sys-
        tems. You need to add
 
          -R/usr/local/lib
@@ -6371,8 +6370,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 13 June 2007
-       Copyright (c) 1997-2007 University of Cambridge.
+       Last updated: 23 January 2008
+       Copyright (c) 1997-2008 University of Cambridge.
 ------------------------------------------------------------------------------
 PCRESTACK(3)                                                      PCRESTACK(3)
 

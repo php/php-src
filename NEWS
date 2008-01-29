@@ -6,7 +6,7 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed a bug with PDO::FETCH_COLUMN|PDO::FETCH_GROUP mode when a column # by
   which to group by data is specified. (Ilia)
-- Upgraded PCRE to version 7.5 (Nuno)
+- Upgraded PCRE to version 7.6 (Nuno)
 
 - Fixed bug #43954 (Memory leak when sending the same HTTP status code
   multiple times). (Scott)
