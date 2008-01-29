@@ -4,7 +4,7 @@
 if (CHECK_LIB("ws2_32.lib", "mysqlnd")) {
 	mysqlnd_source = 
 		"mysqlnd.c " +
-		"mysqlnd_block_alloc.c" +
+		"mysqlnd_block_alloc.c " +
 		"mysqlnd_charset.c " +
 		"mysqlnd_debug.c " +
 		"mysqlnd_loaddata.c " +
@@ -15,7 +15,7 @@ if (CHECK_LIB("ws2_32.lib", "mysqlnd")) {
 		"mysqlnd_result.c " +
 		"mysqlnd_result_meta.c " +
 		"mysqlnd_statistics.c " +
-		"mysqlnd_wireprotocol.c" +
+		"mysqlnd_wireprotocol.c " +
 		"php_mysqlnd.c";
 	EXTENSION("mysqlnd", mysqlnd_source, false);
 }
