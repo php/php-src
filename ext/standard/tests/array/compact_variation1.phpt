@@ -29,12 +29,22 @@ var_dump (compact ($arr2));
 var_dump (compact ($arr3));
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing compact() : usage variations  - arrays containg references ***
+
+Warning: compact(): recursion detected in %s on line %d
 array(1) {
   ["a"]=>
   int(1)
 }
+
+Warning: compact(): recursion detected in %s on line %d
+
+Warning: compact(): recursion detected in %s on line %d
+
+Warning: compact(): recursion detected in %s on line %d
+
+Warning: compact(): recursion detected in %s on line %d
 array(2) {
   ["a"]=>
   int(1)
@@ -46,12 +56,22 @@ array(1) {
   int(3)
 }
 Done
---UEXPECT--
+--UEXPECTF--
 *** Testing compact() : usage variations  - arrays containg references ***
+
+Warning: compact(): recursion detected in %s on line %d
 array(1) {
   [u"a"]=>
   int(1)
 }
+
+Warning: compact(): recursion detected in %s on line %d
+
+Warning: compact(): recursion detected in %s on line %d
+
+Warning: compact(): recursion detected in %s on line %d
+
+Warning: compact(): recursion detected in %s on line %d
 array(2) {
   [u"a"]=>
   int(1)
