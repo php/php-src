@@ -237,20 +237,20 @@ static inline void *zend_vm_stack_alloc(size_t size TSRMLS_DC)
 	size = (size + (sizeof(void*) - 1)) / sizeof(void*);
 
 	ZEND_VM_STACK_GROW_IF_NEEDED(size);
-	ret = EG(argument_stack)->top;
+	ret = (void*)EG(argument_stack)->top;
 	EG(argument_stack)->top += size;
 	return ret;
 }
 
 static inline void zend_vm_stack_free(void *ptr TSRMLS_DC)
 {	
-	if (UNEXPECTED(EG(argument_stack)->elements == ptr)) {
+	if (UNEXPECTED(EG(argument_stack)->elements == (void**)ptr)) {
 		zend_vm_stack p = EG(argument_stack);
 
 		EG(argument_stack) = p->prev;
 		efree(p);
 	} else {
-		EG(argument_stack)->top = ptr;
+		EG(argument_stack)->top = (void**)ptr;
 	}
 }
 
