@@ -39,6 +39,7 @@ PHP                                                                        NEWS
   timezone). (Derick)
 - Fixed bug #43522 (stream_get_line() eats additional characters). (Felipe,
   Ilia, Tony)
+- Fixed bug #43505 (Assign by reference bug). (Dmitry)
 - Fixed bug #43497 (OCI8 XML/getClobVal aka temporary LOBs leak UGA memory).
   (Chris)
 - Fixed bug #43495 (array_merge_recursive() crashes with recursive arrays).
