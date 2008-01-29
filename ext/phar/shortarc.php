@@ -156,15 +156,12 @@ class Extract_Phar
         $temp .= '/pharextract/'.basename(__FILE__, '.phar');
         self::$temp = $temp;
         self::$origdir = getcwd();
-        if (file_exists(realpath($temp))) {
-            if (file_exists($temp. DIRECTORY_SEPARATOR . md5_file(__FILE__))) {
-                return;
-            }
-            self::_removeTmpFiles($temp, getcwd());
-        }
         @mkdir($temp, 0777, true);
         $temp = realpath($temp);
-        file_put_contents($temp . '/' . md5_file(__FILE__), '');
+        if (!file_exists($temp. DIRECTORY_SEPARATOR . md5_file(__FILE__))) {
+            self::_removeTmpFiles($temp, getcwd());
+        }
+        @file_put_contents($temp . '/' . md5_file(__FILE__), '');
         foreach ($info['m'] as $path => $file) {
             $a = !file_exists(dirname($temp . '/' . $path));
             @mkdir(dirname($temp . '/' . $path), 0777, true);
