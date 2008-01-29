@@ -196,6 +196,10 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 void mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, zval *return_value
 							 TSRMLS_DC ZEND_FILE_LINE_DC);
 
+
+void mysqlnd_stats_init(MYSQLND_STATS ** stats);
+void mysqlnd_stats_end(MYSQLND_STATS * stats);
+
 #endif	/* MYSQLND_STATISTICS_H */
 
 

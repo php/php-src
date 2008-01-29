@@ -145,6 +145,32 @@ PHPAPI void _mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_LIN
 /* }}} */
 
 
+/* {{{ mysqlnd_stats_init */
+void
+mysqlnd_stats_init(MYSQLND_STATS ** stats)
+{
+	*stats = calloc(1, sizeof(MYSQLND_STATS));
+#ifdef ZTS
+	(*stats)->LOCK_access = tsrm_mutex_alloc();
+#endif
+
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_stats_end */
+void
+mysqlnd_stats_end(MYSQLND_STATS * stats)
+{
+#ifdef ZTS
+	tsrm_mutex_free(stats->LOCK_access);
+#endif
+	/* mnd_free will reference LOCK_access and crash...*/
+	free(stats);
+}
+/* }}} */
+
+
 /*
  * Local variables:
  * tab-width: 4
