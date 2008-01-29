@@ -1,6 +1,54 @@
 ChangeLog for PCRE
 ------------------
 
+Version 7.6 28-Jan-08
+---------------------
+
+1.  A character class containing a very large number of characters with
+    codepoints greater than 255 (in UTF-8 mode, of course) caused a buffer
+    overflow.
+
+2.  Patch to cut out the "long long" test in pcrecpp_unittest when
+    HAVE_LONG_LONG is not defined.
+
+3.  Applied Christian Ehrlicher's patch to update the CMake build files to
+    bring them up to date and include new features. This patch includes:
+
+    - Fixed PH's badly added libz and libbz2 support.
+    - Fixed a problem with static linking.
+    - Added pcredemo. [But later removed - see 7 below.]
+    - Fixed dftables problem and added an option.
+    - Added a number of HAVE_XXX tests, including HAVE_WINDOWS_H and
+        HAVE_LONG_LONG.
+    - Added readline support for pcretest.
+    - Added an listing of the option settings after cmake has run.
+
+4.  A user submitted a patch to Makefile that makes it easy to create
+    "pcre.dll" under mingw when using Configure/Make. I added stuff to
+    Makefile.am that cause it to include this special target, without
+    affecting anything else. Note that the same mingw target plus all
+    the other distribution libraries and programs are now supported
+    when configuring with CMake (see 6 below) instead of with
+    Configure/Make.
+
+5.  Applied Craig's patch that moves no_arg into the RE class in the C++ code.
+    This is an attempt to solve the reported problem "pcrecpp::no_arg is not
+    exported in the Windows port". It has not yet been confirmed that the patch
+    solves the problem, but it does no harm.
+
+6.  Applied Sheri's patch to CMakeLists.txt to add NON_STANDARD_LIB_PREFIX and
+    NON_STANDARD_LIB_SUFFIX for dll names built with mingw when configured
+    with CMake, and also correct the comment about stack recursion.
+
+7.  Remove the automatic building of pcredemo from the ./configure system and
+    from CMakeLists.txt. The whole idea of pcredemo.c is that it is an example
+    of a program that users should build themselves after PCRE is installed, so
+    building it automatically is not really right. What is more, it gave
+    trouble in some build environments.
+
+8.  Further tidies to CMakeLists.txt from Sheri and Christian.
+
+
 Version 7.5 10-Jan-08
 ---------------------
 
