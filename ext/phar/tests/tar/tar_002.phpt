@@ -27,6 +27,6 @@ echo $e->getMessage() . "\n";
 @unlink(dirname(__FILE__) . '/tar_002.phar');
 ?>
 --EXPECTF--
-Warning: fopen(phar://%s/tar_002.phar/tar_002.phpt): failed to open stream: phar error: "%s/tar_002.phar" is a corrupted tar file in %star_002.php on line %d
-Cannot open phar file '%s/tar_002.phar' with alias '(null)': phar error: "%s/tar_002.phar" is a corrupted tar file
+Warning: fopen(phar://%star_002.phar/tar_002.phpt): failed to open stream: phar error: "%star_002.phar" is a corrupted tar file in %star_002.php on line %d
+Cannot open phar file '%star_002.phar' with alias '(null)': phar error: "%star_002.phar" is a corrupted tar file
 ===DONE===
