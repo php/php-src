@@ -44,6 +44,12 @@ extern php_apache_info_struct php_apache_info;
 #define AP(v) (php_apache_info.v)
 #endif
 
+/* fix for gcc4 visibility patch */
+#ifndef PHP_WIN32
+# undef MODULE_VAR_EXPORT
+# define MODULE_VAR_EXPORT PHPAPI
+#endif
+
 #endif							/* MOD_PHP5_H */
 
 /*

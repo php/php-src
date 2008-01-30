@@ -22,10 +22,12 @@
 
 #ifdef TSRM_WIN32
 #	ifdef TSRM_EXPORTS
-#	define TSRM_API __declspec(dllexport)
+#		define TSRM_API __declspec(dllexport)
 #	else
-#	define TSRM_API __declspec(dllimport)
+#		define TSRM_API __declspec(dllimport)
 #	endif
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#	define TSRM_API __attribute__ ((visibility("default")))
 #else
 #	define TSRM_API
 #endif

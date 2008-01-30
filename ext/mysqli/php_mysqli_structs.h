@@ -145,7 +145,11 @@ typedef struct {
 #define L64(x) x##i64
 typedef __int64 my_longlong;
 #else
-#define PHP_MYSQLI_API
+# if defined(__GNUC__) && __GNUC__ >= 4
+#  define PHP_MYSQLI_API __attribute__ ((visibility("default")))
+# else
+#  define PHP_MYSQLI_API
+# endif
 #define MYSQLI_LLU_SPEC "%llu"
 #define MYSQLI_LL_SPEC "%lld"
 #define L64(x) x##LL

@@ -19,8 +19,14 @@
 
 /* $Id$ */
 
-#define ZEND_API
-#define ZEND_DLEXPORT
+#if defined(__GNUC__) && __GNUC__ >= 4
+# define ZEND_API __attribute__ ((visibility("default")))
+# define ZEND_DLEXPORT __attribute__ ((visibility("default")))
+#else
+# define ZEND_API
+# define ZEND_DLEXPORT
+#endif
+
 #define ZEND_DLIMPORT
 
 @TOP@

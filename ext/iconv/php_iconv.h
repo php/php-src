@@ -23,13 +23,15 @@
 #define PHP_ICONV_H
 
 #ifdef PHP_WIN32
-#ifdef PHP_ICONV_EXPORTS
-#define PHP_ICONV_API __declspec(dllexport)
+#	ifdef PHP_ICONV_EXPORTS
+#		define PHP_ICONV_API __declspec(dllexport)
+#	else
+#		define PHP_ICONV_API __declspec(dllimport)
+#	endif 
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#	define PHP_ICONV_API __attribute__ ((visibility("default")))
 #else
-#define PHP_ICONV_API __declspec(dllimport)
-#endif 
-#else
-#define PHP_ICONV_API
+#	define PHP_ICONV_API
 #endif
 
 #ifdef PHP_ATOM_INC
