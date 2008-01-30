@@ -5,7 +5,6 @@ Test wrong number of arguments for acosh()
 if(substr(PHP_OS, 0, 3) == "WIN" )
         die ("skip - function not supported on Windows");
 ?>
---INI--
 --FILE--
 <?php
 /* 
