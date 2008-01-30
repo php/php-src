@@ -640,7 +640,7 @@ SPL_METHOD(SplFileInfo, getPath)
 	char *path;
 	int path_len;
 
-  path = spl_filesystem_object_get_path(intern, &path_len TSRMLS_CC);
+  	path = spl_filesystem_object_get_path(intern, &path_len TSRMLS_CC);
 	RETURN_STRINGL(path, path_len, 1);
 }
 /* }}} */
@@ -652,7 +652,7 @@ SPL_METHOD(SplFileInfo, getFilename)
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	int path_len;
 
-  spl_filesystem_object_get_path(intern, &path_len TSRMLS_CC);
+	spl_filesystem_object_get_path(intern, &path_len TSRMLS_CC);
 	
 	if (path_len && path_len < intern->file_name_len) {
 		RETURN_STRINGL(intern->file_name + path_len + 1, intern->file_name_len - (path_len + 1), 1);
@@ -685,7 +685,7 @@ SPL_METHOD(SplFileInfo, getBasename)
 		return;
 	}
 
-  spl_filesystem_object_get_path(intern, &path_len TSRMLS_CC);
+	spl_filesystem_object_get_path(intern, &path_len TSRMLS_CC);
 
 	if (path_len && path_len < intern->file_name_len) {
 		fname = intern->file_name + path_len + 1;
@@ -1034,7 +1034,7 @@ SPL_METHOD(SplFileInfo, getPathInfo)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|C", &ce) == SUCCESS) {
 		int path_len;
-    char *path = spl_filesystem_object_get_path(intern, &path_len TSRMLS_CC);
+		char *path = spl_filesystem_object_get_path(intern, &path_len TSRMLS_CC);
 		spl_filesystem_object_create_info(intern, path, path_len, 1, ce, return_value TSRMLS_CC);
 	}
 
