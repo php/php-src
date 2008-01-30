@@ -97,7 +97,7 @@ PHP_MINFO_FUNCTION(json)
 /* }}} */
 
 static void json_encode_r(smart_str *buf, zval *val, int options TSRMLS_DC);
-static void json_escape_string(smart_str *buf, zstr s, int len, zend_uchar type, int options);
+static void json_escape_string(smart_str *buf, zstr s, int len, zend_uchar type, int options TSRMLS_DC);
 
 static int json_determine_array_type(zval **val TSRMLS_DC) /* {{{ */
 {
@@ -205,7 +205,7 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 							need_comma = 1;
 						}
 
-						json_escape_string(buf, key, key_len - 1, (i==HASH_KEY_IS_UNICODE)?IS_UNICODE:IS_STRING, options);
+						json_escape_string(buf, key, key_len - 1, (i==HASH_KEY_IS_UNICODE)?IS_UNICODE:IS_STRING, options TSRMLS_CC);
 						smart_str_appendc(buf, ':');
 
 						json_encode_r(buf, *data, options TSRMLS_CC);
@@ -245,7 +245,7 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 
 #define REVERSE16(us) (((us & 0xf) << 12) | (((us >> 4) & 0xf) << 8) | (((us >> 8) & 0xf) << 4) | ((us >> 12) & 0xf))
 
-static void json_escape_string(smart_str *buf, zstr s, int len, zend_uchar type, int options) /* {{{ */
+static void json_escape_string(smart_str *buf, zstr s, int len, zend_uchar type, int options TSRMLS_DC) /* {{{ */
 {
 	int pos = 0;
 	unsigned short us;
@@ -437,7 +437,7 @@ static void json_encode_r(smart_str *buf, zval *val, int options TSRMLS_DC) /* {
 			break;
 		case IS_STRING:
 		case IS_UNICODE:
-			json_escape_string(buf, Z_UNIVAL_P(val), Z_UNILEN_P(val), Z_TYPE_P(val), options);
+			json_escape_string(buf, Z_UNIVAL_P(val), Z_UNILEN_P(val), Z_TYPE_P(val), options TSRMLS_CC);
 			break;
 		case IS_ARRAY:
 		case IS_OBJECT:
