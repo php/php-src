@@ -445,7 +445,7 @@ SINCE:               4.0.2
 -------------------------------------------------------------------------------
 EXTENSION:           readline
 MAINTENANCE:         Unknown
-STATUS:              Unknown
+STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           recode
 PRIMARY MAINTAINER:  Kristian Köhntopp <kris@koehntopp.de>
