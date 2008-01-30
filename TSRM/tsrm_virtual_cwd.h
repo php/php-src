@@ -134,13 +134,15 @@ typedef unsigned short mode_t;
 #endif
 
 #ifdef TSRM_WIN32
-#       ifdef CWD_EXPORTS
-#       define CWD_API __declspec(dllexport)
-#       else
-#       define CWD_API __declspec(dllimport)
-#       endif
+#	ifdef CWD_EXPORTS
+#		define CWD_API __declspec(dllexport)
+#	else
+#		define CWD_API __declspec(dllimport)
+#	endif
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#	define CWD_API __attribute__ ((visibility("default")))
 #else
-#define CWD_API
+#	define CWD_API
 #endif
 
 #ifdef TSRM_WIN32

@@ -104,9 +104,11 @@ extern zend_module_entry hash_module_entry;
 #define phpext_hash_ptr &hash_module_entry
 
 #ifdef PHP_WIN32
-#define PHP_HASH_API __declspec(dllexport)
+#	define PHP_HASH_API __declspec(dllexport)
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#	define PHP_HASH_API __attribute__ ((visibility("default")))
 #else
-#define PHP_HASH_API
+#	define PHP_HASH_API
 #endif
 
 #ifdef ZTS

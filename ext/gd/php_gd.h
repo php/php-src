@@ -49,9 +49,11 @@
 #define PHP_GDIMG_TYPE_GD2PART 10
 
 #ifdef PHP_WIN32
-#define PHP_GD_API __declspec(dllexport)
+#	define PHP_GD_API __declspec(dllexport)
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#	define PHP_GD_API __attribute__ ((visibility("default")))
 #else
-#define PHP_GD_API
+#	define PHP_GD_API
 #endif
 
 PHPAPI extern const char php_sig_gif[3];

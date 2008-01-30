@@ -45,17 +45,22 @@
 #define PHP_DEBUG ZEND_DEBUG
 
 #ifdef PHP_WIN32
-#include "tsrm_win32.h"
-#include "win95nt.h"
+#	include "tsrm_win32.h"
+#	include "win95nt.h"
 #	ifdef PHP_EXPORTS
-#	define PHPAPI __declspec(dllexport)
+#		define PHPAPI __declspec(dllexport)
 #	else
-#	define PHPAPI __declspec(dllimport)
+#		define PHPAPI __declspec(dllimport)
 #	endif
-#define PHP_DIR_SEPARATOR '\\'
-#define PHP_EOL "\r\n"
+#	define PHP_DIR_SEPARATOR '\\'
+#	define PHP_EOL "\r\n"
 #else
-#define PHPAPI
+#	if defined(__GNUC__) && __GNUC__ >= 4
+#		define PHPAPI __attribute__ ((visibility("default")))
+#	else
+#		define PHPAPI
+#	endif
+
 #define THREAD_LS
 #define PHP_DIR_SEPARATOR '/'
 #if defined(__MacOSX__)

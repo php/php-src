@@ -34,15 +34,17 @@ extern zend_module_entry bz2_module_entry;
 #endif
 
 #ifdef PHP_WIN32
-# ifdef PHP_BZ2_EXPORTS
-#  define PHP_BZ2_API __declspec(dllexport)
-# elif defined(COMPILE_DL_BZ2)
-#  define PHP_BZ2_API __declspec(dllimport)
-# else
-#  define PHP_BZ2_API /* nothing special */
-# endif
+#	ifdef PHP_BZ2_EXPORTS
+#		define PHP_BZ2_API __declspec(dllexport)
+#	elif defined(COMPILE_DL_BZ2)
+#		define PHP_BZ2_API __declspec(dllimport)
+#	else
+#		define PHP_BZ2_API /* nothing special */
+#	endif
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#	define PHP_BZ2_API __attribute__ ((visibility("default")))
 #else
-# define PHP_BZ2_API
+#	define PHP_BZ2_API
 #endif
 
 PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);

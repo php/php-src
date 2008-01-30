@@ -41,14 +41,16 @@
 /* #defines that rename all zip_ functions and structs */
 #include "zip_alias.h"
 #ifdef PHP_WIN32
-#include "zip_win32.h"
-# ifdef PHP_ZIP_EXPORTS
-#  define PHPZIPAPI __declspec(dllexport)
-# else
-#  define PHPZIPAPI
-# endif
+#	include "zip_win32.h"
+#	ifdef PHP_ZIP_EXPORTS
+#		define PHPZIPAPI __declspec(dllexport)
+#	else
+#		define PHPZIPAPI
+#	endif
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#	define PHPZIPAPI __attribute__ ((visibility("default")))
 #else
-#define PHPZIPAPI
+#	define PHPZIPAPI
 #endif
 BEGIN_EXTERN_C()
 #include <sys/types.h>
