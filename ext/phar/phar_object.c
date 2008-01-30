@@ -1061,7 +1061,9 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC)
 				}
 				switch (intern->type) {
 					case SPL_FS_DIR:
-#if PHP_VERSION_ID >= 50300
+#if PHP_VERSION_ID >= 60000
+						test = spl_filesystem_object_get_path(intern, NULL, NULL TSRMLS_CC).s;
+#elif PHP_VERSION_ID >= 50300
 						test = spl_filesystem_object_get_path(intern, NULL TSRMLS_CC);
 #else
 						test = intern->path;
