@@ -7,9 +7,11 @@ extern zend_module_entry extname_module_entry;
 #define phpext_extname_ptr &extname_module_entry
 
 #ifdef PHP_WIN32
-#define PHP_EXTNAME_API __declspec(dllexport)
+#	define PHP_EXTNAME_API __declspec(dllexport)
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#	define PHP_EXTNAME_API __attribute__ ((visibility("default")))
 #else
-#define PHP_EXTNAME_API
+#	define PHP_EXTNAME_API
 #endif
 
 #ifdef ZTS

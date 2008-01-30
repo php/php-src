@@ -37,9 +37,11 @@ extern zend_module_entry unicode_module_entry;
 #define phpext_unicode_ptr &unicode_module_entry
 
 #ifdef PHP_WIN32
-#define PHP_UNICODE_API __declspec(dllexport)
+#	define PHP_UNICODE_API __declspec(dllexport)
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#	define PHP_UNICODE_API __attribute__ ((visibility("default")))
 #else
-#define PHP_UNICODE_API
+#	define PHP_UNICODE_API
 #endif
 
 PHP_MINIT_FUNCTION(unicode);

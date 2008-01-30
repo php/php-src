@@ -35,14 +35,19 @@ typedef struct _dom_object {
 } dom_object;
 
 #ifdef PHP_WIN32
-#ifdef PHPAPI
-#undef PHPAPI
-#endif
-#ifdef DOM_EXPORTS
-#define PHPAPI __declspec(dllexport)
-#else
-#define PHPAPI __declspec(dllimport)
-#endif /* DOM_EXPORTS */
+#	ifdef PHPAPI
+#		undef PHPAPI
+#	endif
+#	ifdef DOM_EXPORTS
+#		define PHPAPI __declspec(dllexport)
+#	else
+#		define PHPAPI __declspec(dllimport)
+#	endif /* DOM_EXPORTS */
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#	ifdef PHPAPI
+#		undef PHPAPI
+#	endif
+#	define PHPAPI __attribute__ ((visibility("default")))
 #endif /* PHP_WIN32 */
 
 #define PHP_DOM_EXPORT PHPAPI

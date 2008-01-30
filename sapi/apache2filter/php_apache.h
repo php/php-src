@@ -65,4 +65,10 @@ extern const command_rec php_dir_cmds[];
 
 #define APR_ARRAY_FOREACH_CLOSE() }}
 
+/* fix for gcc4 visibility patch */
+#ifndef PHP_WIN32
+# undef AP_MODULE_DECLARE_DATA
+# define AP_MODULE_DECLARE_DATA PHPAPI
+#endif
+
 #endif /* PHP_APACHE_H */

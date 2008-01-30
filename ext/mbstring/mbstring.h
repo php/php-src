@@ -52,17 +52,20 @@
 #endif
 
 #ifdef PHP_WIN32
-# undef MBSTRING_API
-# ifdef MBSTRING_EXPORTS
-#  define MBSTRING_API __declspec(dllexport)
-# elif defined(COMPILE_DL_MBSTRING)
-#  define MBSTRING_API __declspec(dllimport)
-# else
-#  define MBSTRING_API /* nothing special */
-# endif
+#	undef MBSTRING_API
+#	ifdef MBSTRING_EXPORTS
+#		define MBSTRING_API __declspec(dllexport)
+#	elif defined(COMPILE_DL_MBSTRING)
+#		define MBSTRING_API __declspec(dllimport)
+#	else
+#		define MBSTRING_API /* nothing special */
+#	endif
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#	undef MBSTRING_API
+#	define MBSTRING_API __attribute__ ((visibility("default")))
 #else
-# undef MBSTRING_API
-# define MBSTRING_API /* nothing special */
+#	undef MBSTRING_API
+#	define MBSTRING_API /* nothing special */
 #endif
 
 
