@@ -103,16 +103,15 @@ if test "$PHP_SQLITE" != "no"; then
         libsqlite/src/vacuum.c libsqlite/src/copy.c \
         libsqlite/src/vdbeaux.c libsqlite/src/date.c \
         libsqlite/src/where.c libsqlite/src/trigger.c"
- 
-    PHP_ADD_EXTENSION_DEP(sqlite, spl)
-    PHP_ADD_EXTENSION_DEP(sqlite, pdo)
   fi
-
   dnl
   dnl Common for both bundled/external
   dnl
   sqlite_sources="sqlite.c sess_sqlite.c pdo_sqlite2.c $sqlite_extra_sources" 
   PHP_NEW_EXTENSION(sqlite, $sqlite_sources, $ext_shared,,$PHP_SQLITE_CFLAGS)
+  PHP_ADD_EXTENSION_DEP(sqlite, spl, true)
+  PHP_ADD_EXTENSION_DEP(sqlite, pdo, true)
+  
   PHP_ADD_MAKEFILE_FRAGMENT
   PHP_SUBST(SQLITE_SHARED_LIBADD)
   PHP_INSTALL_HEADERS([$ext_builddir/libsqlite/src/sqlite.h])
