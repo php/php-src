@@ -9,8 +9,12 @@
 #		define MODULE_API __declspec(dllimport) 
 #	endif
 #else
+#	if defined(__GNUC__) && __GNUC__ >= 4
+#		define MODULE_API __attribute__ ((visibility("default")))
+#	else
+#		define MODULE_API
+#	endif
 #	define far
-#	define MODULE_API
 
 	typedef int BOOL;
 	typedef void far *LPVOID;

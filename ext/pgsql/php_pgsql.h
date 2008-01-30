@@ -42,7 +42,11 @@ extern zend_module_entry pgsql_module_entry;
 #endif
 #else
 #include <libpq/libpq-fs.h>
-#define PHP_PGSQL_API /* nothing special */
+# if defined(__GNUC__) && __GNUC__ >= 4
+#  define PHP_PGSQL_API __attribute__ ((visibility("default")))
+# else
+#  define PHP_PGSQL_API
+# endif
 #endif
 
 #ifdef HAVE_PG_CONFIG_H

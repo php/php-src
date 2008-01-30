@@ -57,6 +57,8 @@ PHP                                                                        NEWS
 
 - Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
 
+- Improved PHP binary size and startup speed with GCC4 visibility control.
+  (Nuno)
 - Improved engine stack implementation for better performance and stability.
   (Dmitry)
 - Improved php.ini handling: (Jani)

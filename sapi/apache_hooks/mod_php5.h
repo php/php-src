@@ -71,6 +71,13 @@ extern php_apache_info_struct php_apache_info;
 #define AP_LOGGING 10
 #define AP_CLEANUP 11
 
+
+/* fix for gcc4 visibility patch */
+#ifndef PHP_WIN32
+# undef MODULE_VAR_EXPORT
+# define MODULE_VAR_EXPORT PHPAPI
+#endif
+
 #endif							/* MOD_PHP5_H */
 
 /*
