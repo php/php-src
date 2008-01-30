@@ -1,6 +1,5 @@
 --TEST--
 Test wrong number of arguments for cos()
---INI--
 --FILE--
 <?php
 /* 
