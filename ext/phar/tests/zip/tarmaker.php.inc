@@ -73,6 +73,6 @@ class tarmaker
 
     function __destruct()
     {
-        @unlink($this->tmppath);
+        unlink($this->tmppath);
     }
 }
