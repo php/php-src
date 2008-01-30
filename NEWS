@@ -103,6 +103,7 @@ PHP                                                                        NEWS
   DateTimeZone). (Derick)
 - Fixed bug #41941 (oci8 extension not lib64 savvy). (Chris)
 - Fixed bug #41599 (setTime() fails after modify() is used). (Derick)
+- Fixed bug #41562 (SimpleXML memory issue). (Rob)
 - Fixed bug #38468 (Unexpected creation of cycle). (Dmitry)
 
 08 Nov 2007, PHP 5.2.5
