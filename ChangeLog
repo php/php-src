@@ -1,3 +1,402 @@
+2008-01-29  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/xml/xml.c
+      ext/xml/tests/bug43957.phpt:
+      Fixed bug #43957
+
+    * (PHP_5_2)
+      ext/xml/xml.c
+      ext/xml/xml.c
+      ext/xml/tests/bug43957.phpt:
+      Fixed bug #43957 (utf8_decode() bogus conversion of partial multibyte UTF8
+      char)
+
+    * ext/xml/tests/bug43957.phpt
+      ext/xml/tests/bug43957.phpt
+      ext/xml/tests/bug43957.phpt:
+        1.1.4;
+      file bug43957.phpt was initially added on branch PHP_5_3.
+
+2008-01-29  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/mysqlnd/mysqlnd_block_alloc.c
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_structs.h:
+      fix win32 build
+
+2008-01-29  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/html.c:
+      no sleep here either
+
+    * (PHP_5_3)
+      ext/standard/html.c:
+      rm cruft
+
+2008-01-29  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/xsl/xsltprocessor.c:
+      - Fix arginfo and prototype.
+
+2008-01-29  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pcre/pcrelib/AUTHORS
+      ext/pcre/pcrelib/AUTHORS
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/LICENCE
+      ext/pcre/pcrelib/LICENCE
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/config.h
+      ext/pcre/pcrelib/config.h
+      ext/pcre/pcrelib/dftables.c
+      ext/pcre/pcrelib/dftables.c
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_config.c
+      ext/pcre/pcrelib/pcre_config.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_fullinfo.c
+      ext/pcre/pcrelib/pcre_fullinfo.c
+      ext/pcre/pcrelib/pcre_get.c
+      ext/pcre/pcrelib/pcre_get.c
+      ext/pcre/pcrelib/pcre_globals.c
+      ext/pcre/pcrelib/pcre_globals.c
+      ext/pcre/pcrelib/pcre_info.c
+      ext/pcre/pcrelib/pcre_info.c
+      ext/pcre/pcrelib/pcre_internal.h
+      ext/pcre/pcrelib/pcre_internal.h
+      ext/pcre/pcrelib/pcre_maketables.c
+      ext/pcre/pcrelib/pcre_maketables.c
+      ext/pcre/pcrelib/pcre_newline.c
+      ext/pcre/pcrelib/pcre_newline.c
+      ext/pcre/pcrelib/pcre_ord2utf8.c
+      ext/pcre/pcrelib/pcre_ord2utf8.c
+      ext/pcre/pcrelib/pcre_printint.src
+      ext/pcre/pcrelib/pcre_printint.src
+      ext/pcre/pcrelib/pcre_refcount.c
+      ext/pcre/pcrelib/pcre_refcount.c
+      ext/pcre/pcrelib/pcre_study.c
+      ext/pcre/pcrelib/pcre_study.c
+      ext/pcre/pcrelib/pcre_tables.c
+      ext/pcre/pcrelib/pcre_tables.c
+      ext/pcre/pcrelib/pcre_try_flipped.c
+      ext/pcre/pcrelib/pcre_try_flipped.c
+      ext/pcre/pcrelib/pcre_ucp_searchfuncs.c
+      ext/pcre/pcrelib/pcre_ucp_searchfuncs.c
+      ext/pcre/pcrelib/pcre_valid_utf8.c
+      ext/pcre/pcrelib/pcre_valid_utf8.c
+      ext/pcre/pcrelib/pcre_version.c
+      ext/pcre/pcrelib/pcre_version.c
+      ext/pcre/pcrelib/pcre_xclass.c
+      ext/pcre/pcrelib/pcre_xclass.c
+      ext/pcre/pcrelib/pcredemo.c
+      ext/pcre/pcrelib/pcredemo.c
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/pcreposix.h
+      ext/pcre/pcrelib/pcreposix.h
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/testdata/testinput4
+      ext/pcre/pcrelib/testdata/testinput4
+      ext/pcre/pcrelib/testdata/testoutput4
+      ext/pcre/pcrelib/testdata/testoutput4:
+      upgrade to pcre 7.6
+
+    * (PHP_5_3)
+      ext/pcre/pcrelib/AUTHORS
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/LICENCE
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/config.h
+      ext/pcre/pcrelib/dftables.c
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_config.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_fullinfo.c
+      ext/pcre/pcrelib/pcre_get.c
+      ext/pcre/pcrelib/pcre_globals.c
+      ext/pcre/pcrelib/pcre_info.c
+      ext/pcre/pcrelib/pcre_internal.h
+      ext/pcre/pcrelib/pcre_maketables.c
+      ext/pcre/pcrelib/pcre_newline.c
+      ext/pcre/pcrelib/pcre_ord2utf8.c
+      ext/pcre/pcrelib/pcre_printint.src
+      ext/pcre/pcrelib/pcre_refcount.c
+      ext/pcre/pcrelib/pcre_study.c
+      ext/pcre/pcrelib/pcre_tables.c
+      ext/pcre/pcrelib/pcre_try_flipped.c
+      ext/pcre/pcrelib/pcre_ucp_searchfuncs.c
+      ext/pcre/pcrelib/pcre_valid_utf8.c
+      ext/pcre/pcrelib/pcre_version.c
+      ext/pcre/pcrelib/pcre_xclass.c
+      ext/pcre/pcrelib/pcredemo.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/pcreposix.h
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/testdata/testinput4
+      ext/pcre/pcrelib/testdata/testoutput4:
+      upgrade to PCRE 7.6.
+
+2008-01-29  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - MF53: That should have been ||.
+
+    * (PHP_5_3)
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - That should have been ||.
+
+    * (PHP_5_3)
+      ext/date/php_date.c:
+      - Make whitespace the same as in HEAD.
+
+    * ext/date/php_date.c:
+      - Make whitespace the same as in 5.3.
+
+    * ext/date/lib/parse_date.c:
+      - Commit generated file.
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/tests/bug43960.phpt:
+      - MFH: Fixed bug #43960 (strtotime() returns timestamp in the future when
+      given
+        a bogus string).
+
+    * ext/date/tests/bug43960.phpt
+      ext/date/tests/bug43960.phpt:
+      
+      - Fixed bug #43960 (strtotime() returns timestamp in the future when given
+      a
+        bogus string).
+
+    * ext/date/lib/parse_date.re:
+      - Fixed bug #43960 (strtotime() returns timestamp in the future when given
+      a
+        bogus string).
+
+2008-01-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cli/php_cli.c
+      sapi/cli/php_cli.c
+      sapi/cli/php_cli.c:
+      Fixed bug #43968 (Extending internal class causes a crash)
+      The fix is a workaround for GCC optizer bug.
+
+2008-01-29  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/config9.m4
+      ext/mysqlnd/config9.m4
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_result.h
+      ext/mysqlnd/mysqlnd_result.h
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/php_mysqlnd.c:
+      Fix the build, add a missing file
+
+    * ext/mysqlnd/php_mysqlnd.c
+      ext/mysqlnd/php_mysqlnd.c:
+      
+      file php_mysqlnd.c was initially added on branch PHP_5_3.
+
+2008-01-29  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_2)
+      ext/dom/xpath.c
+      ext/dom/xpath.c:
+      MFH: Add Reflection API metadata for DOMXPath.
+
+    * ext/dom/xpath.c:
+      Add Reflection API metadata for DOMXPath.
+
+    * (PHP_5_2)
+      ext/dom/node.c
+      ext/dom/node.c:
+      MFH: Add Reflection API metadata for DOMNode.
+
+    * ext/dom/node.c:
+      Add Reflection API metadata for DOMNode.
+
+2008-01-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      main/fopen_wrappers.c
+      main/fopen_wrappers.c
+      main/fopen_wrappers.c:
+      Fixed bug #43491 (Under certain conditions, file_exists() never returns)
+
+2008-01-29  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      NEWS:
+      entry moved to 5_2
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/html.c
+      ext/standard/tests/strings/bug43927.phpt:
+      MFH: fix #43927 (koi8r is missing from html_entity_decode())
+      patch by andy at demos dot su
+
+    * sapi/cli/tests/006.phpt:
+      fix test
+
+2008-01-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/mysqlnd/config.w32
+      ext/mysqlnd/config.w32:
+      missing spaces
+
+2008-01-29  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      sapi/cli/tests/006.phpt:
+      fix test
+      Derick, you're adding new methods too fast =)
+
+2008-01-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Unicode support
+
+2008-01-29  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd_statistics.c
+      ext/mysqlnd/mysqlnd_statistics.h:
+      Moved initialization into a separate function
+
+    * (PHP_5_3)
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd_statistics.c
+      ext/mysqlnd/mysqlnd_statistics.h:
+      Moved initialization code into a function.
+
+2008-01-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute.h:
+      Fixed types
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/bug43323.phpt
+      ZendEngine2/tests/bug43323.phpt
+      ZendEngine2/tests/bug43323.phpt:
+      Fixed bug #43323 (Wrong count abstract methods). (Felipe, Dmitry)
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/tests/array/bug43505.phpt
+      ext/standard/tests/array/bug43505.phpt
+      ext/standard/tests/array/bug43505.phpt
+      ext/standard/tests/array/bug43505.phpt
+      ext/standard/tests/array/bug43505.phpt:
+      Fixed bug #43505 (Assign by reference bug)
+
+    * (PHP_5_2)
+      ext/date/tests/bug43003.phpt:
+      Fixed test
+
+    * ZendEngine2/zend_gc.c
+      ZendEngine2/zend_gc.c
+      ZendEngine2/zend_gc.h
+      ZendEngine2/zend_gc.h
+      ZendEngine2/tests/bug43918.phpt
+      ext/simplexml/simplexml.c:
+      Fixed bug #43918 (Segmentation fault in garbage collector)
+
+    * ZendEngine2/tests/bug43918.phpt
+      ZendEngine2/tests/bug43918.phpt
+      ext/simplexml/simplexml.c:
+      
+      file bug43918.phpt was initially added on branch PHP_5_3.
+
+2008-01-29  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      NEWS
+      NEWS:
+      BFN
+
+2008-01-29  Robert Nicholson  <rob_nicholson@uk.ibm.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/compact_variation1.phpt:
+      - MFH compact_variation1.phpt  - fix for bug #29044
+
+    * ext/standard/tests/array/compact_variation1.phpt
+      ext/standard/tests/array/compact_variation1.phpt:
+      
+      - update compact_variation1.phpt to take into account fix for bug #29044
+
+2008-01-29  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_2)
+      ext/xsl/xsltprocessor.c
+      ext/xsl/xsltprocessor.c:
+      MFH: Add Reflection API metadata for XSLTProcessor.
+
+    * ext/xsl/xsltprocessor.c:
+      Add Reflection API metadata for XSLTProcessor.
+
+2008-01-29  David Coallier  <david.coallier@gmail.com>
+
+    * ext/standard/string.c:
+      - Good proto message and description of function
+
+2008-01-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/pdo_pgsql/pgsql_statement.c:
+      
+      Simplify code
+
+2008-01-29  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/standard/array.c:
+      MFH: fix #43596 (array_slice(): $length arg ignored when it is 0)
+
+    * ext/standard/array.c:
+      fix #43596 (array_slice(): $length arg ignored when it is 0)
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug30922.phpt:
+      fix typo and bug #43646
+
 2008-01-28  Stanislav Malyshev  <stas@zend.com>
 
     * ZendEngine2/zend_execute.h
