@@ -35,3 +35,8 @@ Is? A true, instanceof: true
 Is? C false, instanceof: false
 Is? D true, instanceof: true
 Is? E true, instanceof: true
+--UEXPECT--
+Is? A true, instanceof: true
+Is? C false, instanceof: false
+Is? D true, instanceof: true
+Is? E true, instanceof: true

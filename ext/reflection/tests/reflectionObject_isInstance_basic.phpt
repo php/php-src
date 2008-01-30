@@ -23,7 +23,7 @@ foreach ($classes as $class) {
 ?>
 --EXPECTF--
 is myA a A? bool(true)
-is myB a A? bool(false)
+is myB a A? bool(true)
 is myX a A? bool(false)
 is myA a B? bool(false)
 is myB a B? bool(true)
@@ -33,7 +33,7 @@ is myB a X? bool(false)
 is myX a X? bool(true)
 --UEXPECTF--
 is myA a A? bool(true)
-is myB a A? bool(false)
+is myB a A? bool(true)
 is myX a A? bool(false)
 is myA a B? bool(false)
 is myB a B? bool(true)
