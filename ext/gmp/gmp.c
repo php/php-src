@@ -577,6 +577,9 @@ static inline void gmp_zval_binary_ui_op_ex(zval *return_value, zval **a_arg, zv
 	if (use_ui && gmp_ui_op) {
 		if (allow_ui_return) {
 			long_result = gmp_ui_op(*gmpnum_result, *gmpnum_a, (unsigned long)Z_LVAL_PP(b_arg));
+			if (mpz_sgn(*gmpnum_a) == -1) {
+				long_result = -long_result;
+			}
 		} else {
 			gmp_ui_op(*gmpnum_result, *gmpnum_a, (unsigned long)Z_LVAL_PP(b_arg));
 		}
