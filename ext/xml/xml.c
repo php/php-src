@@ -607,7 +607,7 @@ PHPAPI char *xml_utf8_decode(const XML_Char *s, int len, int *newlen, const XML_
 			s += 3;
 			pos -= 3;
 		} else if (c >= 0xc0) { /* two bytes encoded, 11 bits */
-			if(pos-3 >= 0) {
+			if(pos-2 >= 0) {
 				c = ((s[0]&63)<<6) | (s[1]&63);
 			} else {
 				c = '?';
