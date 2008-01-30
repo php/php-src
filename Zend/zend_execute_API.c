@@ -1297,7 +1297,7 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 
 	ALLOC_ZVAL(class_name_ptr);
 	INIT_PZVAL(class_name_ptr);
-	ZVAL_ZSTR(class_name_ptr, type, autoload_name, 1);
+	ZVAL_ZSTRL(class_name_ptr, type, autoload_name, lc_name_len, 1);
 
 	args[0] = &class_name_ptr;
 
