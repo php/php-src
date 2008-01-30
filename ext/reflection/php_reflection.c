@@ -3402,7 +3402,7 @@ ZEND_METHOD(reflection_class, isInstance)
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);	
-	RETURN_BOOL(HAS_CLASS_ENTRY(*object) && instanceof_function(Z_OBJCE_P(object), ce TSRMLS_CC));
+	RETURN_BOOL(HAS_CLASS_ENTRY(*object) && instanceof_function(ce, Z_OBJCE_P(object) TSRMLS_CC));
 }
 /* }}} */
 
