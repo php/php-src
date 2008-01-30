@@ -1,3 +1,40 @@
+2008-01-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_builtin_functions.c:
+      Unicode support
+
+    * zend_execute_API.c
+      zend_execute_API.c
+      tests/bug43323.phpt:
+      Fixed bug #43323 (Wrong count abstract methods). (Felipe, Dmitry)
+
+    * zend_execute.h
+      zend_execute.h:
+      Fixed types
+
+    * tests/bug43323.phpt
+      tests/bug43323.phpt:
+      
+      file bug43323.phpt was initially added on branch PHP_5_3.
+
+    * zend_gc.c
+      zend_gc.c
+      zend_gc.h
+      zend_gc.h
+      tests/bug43918.phpt:
+      Fixed bug #43918 (Segmentation fault in garbage collector)
+
+    * tests/bug43918.phpt
+      tests/bug43918.phpt:
+      
+      file bug43918.phpt was initially added on branch PHP_5_3.
+
+2008-01-29  Antony Dovgal  <tony@daylessday.org>
+
+    * zend_compile.c
+      tests/bug30922.phpt:
+      fix typo and bug #43646
+
 2008-01-28  Stanislav Malyshev  <stas@zend.com>
 
     * zend_execute.h
