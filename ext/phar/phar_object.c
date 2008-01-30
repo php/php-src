@@ -1061,7 +1061,12 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC)
 				}
 				switch (intern->type) {
 					case SPL_FS_DIR:
-						fname_len = spprintf(&fname, 0, "%s%c%s", intern->path, DEFAULT_SLASH, intern->u.dir.entry.d_name);
+#if PHP_VERSION_ID >= 50300
+						test = spl_filesystem_object_get_path(intern, NULL TSRMLS_CC);
+#else
+						test = intern->path;
+#endif
+						fname_len = spprintf(&fname, 0, "%s%c%s", test, DEFAULT_SLASH, intern->u.dir.entry.d_name);
 						php_stat(fname, fname_len, FS_IS_DIR, &dummy TSRMLS_CC);
 						if (Z_BVAL(dummy)) {
 							/* ignore directories */
