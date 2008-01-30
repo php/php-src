@@ -29,9 +29,9 @@
 
 /* {{{ arginfo */
 static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_insert_before, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_insert_before, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, newChild, DOMNode, 0)
-	ZEND_ARG_OBJ_INFO(0, refChild, DOMNode, 0)
+	ZEND_ARG_OBJ_INFO(0, refChild, DOMNode, 1)
 ZEND_END_ARG_INFO();
 
 static
@@ -129,8 +129,8 @@ static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_C14N, 0, 0, 0)
 	ZEND_ARG_INFO(0, exclusive)
 	ZEND_ARG_INFO(0, with_comments)
-	ZEND_ARG_ARRAY_INFO(0, xpath, 0)
-	ZEND_ARG_ARRAY_INFO(0, ns_prefixes, 0)
+	ZEND_ARG_ARRAY_INFO(0, xpath, 1)
+	ZEND_ARG_ARRAY_INFO(0, ns_prefixes, 1)
 ZEND_END_ARG_INFO();
 
 static
@@ -138,8 +138,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_C14NFile, 0, 0, 1)
 	ZEND_ARG_INFO(0, uri)
 	ZEND_ARG_INFO(0, exclusive)
 	ZEND_ARG_INFO(0, with_comments)
-	ZEND_ARG_ARRAY_INFO(0, xpath, 0)
-	ZEND_ARG_ARRAY_INFO(0, ns_prefixes, 0)
+	ZEND_ARG_ARRAY_INFO(0, xpath, 1)
+	ZEND_ARG_ARRAY_INFO(0, ns_prefixes, 1)
 ZEND_END_ARG_INFO();
 /* }}} */
 
