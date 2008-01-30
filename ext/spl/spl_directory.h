@@ -43,6 +43,8 @@ typedef struct _spl_filesystem_object  spl_filesystem_object;
 typedef void (*spl_foreign_dtor_t)(spl_filesystem_object *object TSRMLS_DC);
 typedef void (*spl_foreign_clone_t)(spl_filesystem_object *src, spl_filesystem_object *dst TSRMLS_DC);
 
+PHPAPI zstr spl_filesystem_object_get_path(spl_filesystem_object *intern, int *len, zend_uchar *type TSRMLS_DC);
+
 typedef struct _spl_other_handler {
 	spl_foreign_dtor_t     dtor;
 	spl_foreign_clone_t    clone;
@@ -58,9 +60,9 @@ struct _spl_filesystem_object {
 	zend_object        std;
 	void               *oth;
 	spl_other_handler  *oth_handler;
-	zend_uchar         path_type;
-	zstr               path;
-	int                path_len;
+	zend_uchar         _path_type;
+	zstr               _path;
+	int                _path_len;
 	zend_uchar         file_name_type;
 	zstr               file_name;
 	int                file_name_len;
