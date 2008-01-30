@@ -141,24 +141,6 @@ zend_module_entry libxml_module_entry = {
 /* }}} */
 
 /* {{{ internal functions for interoperability */
-static int php_libxml_dec_node(php_libxml_node_ptr *nodeptr)
-{
-	int ret_refcount;
-
-	ret_refcount = --nodeptr->refcount;
-	if (ret_refcount == 0) {
-		if (nodeptr->node != NULL && nodeptr->node->type != XML_DOCUMENT_NODE) {
-			nodeptr->node->_private = NULL;
-		}
-		/* node is destroyed by another object. reset ret_refcount to 1 and node to NULL
-		so the php_libxml_node_ptr is detroyed when the object is destroyed */
-		nodeptr->refcount = 1;
-		nodeptr->node = NULL;
-	}
-
-	return ret_refcount;
-}
-
 static int php_libxml_clear_object(php_libxml_node_object *object TSRMLS_DC)
 {
 	if (object->properties) {
@@ -179,7 +161,10 @@ static int php_libxml_unregister_node(xmlNodePtr nodep TSRMLS_DC)
 		if (wrapper) {
 			php_libxml_clear_object(wrapper TSRMLS_CC);
 		} else {
-			php_libxml_dec_node(nodeptr);
+			if (nodeptr->node != NULL && nodeptr->node->type != XML_DOCUMENT_NODE) {
+				nodeptr->node->_private = NULL;
+			}
+			nodeptr->node = NULL;
 		}
 	}
 
