@@ -22,10 +22,10 @@ echo "Done\n";
 --EXPECTF--
 OCI8 DEBUG: OCINlsEnvironmentVariableGet at (%s:%d) 
 Done
-OCI8 DEBUG: OCISessionEnd at (%s:%d) 
+OCI8 DEBUG: OCISessionRelease at (%s:%d) 
 OCI8 DEBUG: OCIHandleFree at (%s:%d) 
-OCI8 DEBUG: OCIServerDetach at (%s:%d) 
 OCI8 DEBUG: OCIHandleFree at (%s:%d) 
+OCI8 DEBUG: OCISessionPoolDestroy at (%s:%d) 
 OCI8 DEBUG: OCIHandleFree at (%s:%d) 
 OCI8 DEBUG: OCIHandleFree at (%s:%d) 
 OCI8 DEBUG: OCIHandleFree at (%s:%d) 
