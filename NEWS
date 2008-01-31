@@ -99,6 +99,8 @@ PHP                                                                        NEWS
 - Fixed bug #42692 (Procedure 'int1' not present with doc/lit SoapServer).
   (Dmitry)
 - Fixed bug #42548 (mysqli PROCEDURE calls can't return result sets). (hartmut)
+- Fixed bug #42369 (Implicit conversion to string leaks memory). 
+  (David C., Rob).
 - Fixed bug #42272 (var_export() incorrectly escapes char(0)). (Derick)
 - Fixed bug #42261 (Incorrect lengths for date and boolean data types).
   (Ilia)
