@@ -194,7 +194,7 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, char *path TS
 
 	if (intern->_path_len && (path[intern->_path_len-1] == '/'
 #if defined(PHP_WIN32) || defined(NETWARE)
-		|| path[intern->path_len-1] == '\\'
+		|| path[intern->_path_len-1] == '\\'
 #endif
 	)) {
 		intern->_path = estrndup(path, --intern->_path_len);
