@@ -24,21 +24,27 @@ dnl PHP_IMAP_TEST_BUILD(function, action-if-ok, action-if-not-ok, extra-libs)
 AC_DEFUN([PHP_IMAP_TEST_BUILD], [
   PHP_TEST_BUILD([$1], [$2], [$3], [$4],
   [
-    void mm_log(void){}
-    void mm_dlog(void){}
-    void mm_flags(void){}
-    void mm_fatal(void){}
-    void mm_critical(void){}
-    void mm_nocritical(void){}
-    void mm_notify(void){}
-    void mm_login(void){}
-    void mm_diskerror(void){}
-    void mm_status(void){}
-    void mm_lsub(void){}
-    void mm_list(void){}
-    void mm_exists(void){}
-    void mm_searched(void){}
-    void mm_expunged(void){}
+#if defined(__GNUC__) && __GNUC__ >= 4
+# define PHP_IMAP_EXPORT __attribute__ ((visibility("default")))
+#else
+# define PHP_IMAP_EXPORT
+#endif
+
+    PHP_IMAP_EXPORT void mm_log(void){}
+    PHP_IMAP_EXPORT void mm_dlog(void){}
+    PHP_IMAP_EXPORT void mm_flags(void){}
+    PHP_IMAP_EXPORT void mm_fatal(void){}
+    PHP_IMAP_EXPORT void mm_critical(void){}
+    PHP_IMAP_EXPORT void mm_nocritical(void){}
+    PHP_IMAP_EXPORT void mm_notify(void){}
+    PHP_IMAP_EXPORT void mm_login(void){}
+    PHP_IMAP_EXPORT void mm_diskerror(void){}
+    PHP_IMAP_EXPORT void mm_status(void){}
+    PHP_IMAP_EXPORT void mm_lsub(void){}
+    PHP_IMAP_EXPORT void mm_list(void){}
+    PHP_IMAP_EXPORT void mm_exists(void){}
+    PHP_IMAP_EXPORT void mm_searched(void){}
+    PHP_IMAP_EXPORT void mm_expunged(void){}
   ])
 ])
 
