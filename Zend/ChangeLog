@@ -1,3 +1,22 @@
+2008-01-30  Antony Dovgal  <tony@daylessday.org>
+
+    * zend_execute_API.c:
+      fix #43973 (__autoload called with wrong classname when triggered by static
+      callback)
+      the issue was present only in HEAD
+      patch by Felipe
+
+2008-01-30  Dmitry Stogov  <dmitry@zend.com>
+
+    * acconfig.h:
+      Imporoved PHP binary size and startup speed with GCC4 visibility control
+      (Nuno)
+
+    * (PHP_5_3)
+      acconfig.h:
+      Improved PHP binary size and startup speed with GCC4 visibility control
+      (Nuno)
+
 2008-01-29  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_builtin_functions.c:

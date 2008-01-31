@@ -1,3 +1,625 @@
+2008-01-30  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ext/spl/spl_directory.c
+      ext/spl/spl_directory.h:
+      - MFB SplDirectoryIterator/glob:// stream integration
+
+    * (PHP_5_3)
+      ext/spl/spl_directory.c:
+      - WS
+
+    * main/streams/glob_wrapper.c:
+      - Get rid of overoptimization
+
+    * (PHP_5_3)
+      ext/spl/spl_directory.c:
+      - Sub path may be NULL
+
+    * (PHP_5_3)
+      NEWS
+      ext/spl/spl_directory.c
+      ext/spl/spl_directory.h:
+      - Fixed glob:// stream handling in (Recursive)DirectoryIterator.
+
+2008-01-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/gmp/gmp.c:
+      
+      MFB: Fixed bug #43981 (gmp_div_r() does not preserve the sign of 1st
+      argument)
+
+    * ext/gmp/gmp.c:
+      
+      MFB: Fixed bug #43981 (gmp_div_r() does not preserve the sign of 1st
+      argument)
+
+    * (PHP_5_3)
+      ext/gmp/gmp.c:
+      
+      Fixed bug #43981 (gmp_div_r() does not preserve the sign of 1st argument)
+
+2008-01-30  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * ext/standard/tests/math/acos_error.phpt
+      ext/standard/tests/math/acos_error.phpt
+      ext/standard/tests/math/acos_error.phpt
+      ext/standard/tests/math/acosh_error.phpt
+      ext/standard/tests/math/acosh_error.phpt
+      ext/standard/tests/math/acosh_error.phpt
+      ext/standard/tests/math/asin_error.phpt
+      ext/standard/tests/math/asin_error.phpt
+      ext/standard/tests/math/asin_error.phpt
+      ext/standard/tests/math/asinh_error.phpt
+      ext/standard/tests/math/asinh_error.phpt
+      ext/standard/tests/math/asinh_error.phpt
+      ext/standard/tests/math/atan_error.phpt
+      ext/standard/tests/math/atan_error.phpt
+      ext/standard/tests/math/atan_error.phpt
+      ext/standard/tests/math/atanh_error.phpt
+      ext/standard/tests/math/atanh_error.phpt
+      ext/standard/tests/math/atanh_error.phpt
+      ext/standard/tests/math/cos_error.phpt
+      ext/standard/tests/math/cos_error.phpt
+      ext/standard/tests/math/cos_error.phpt
+      ext/standard/tests/math/cosh_error.phpt
+      ext/standard/tests/math/cosh_error.phpt
+      ext/standard/tests/math/cosh_error.phpt
+      ext/standard/tests/math/sin_error.phpt
+      ext/standard/tests/math/sin_error.phpt
+      ext/standard/tests/math/sin_error.phpt
+      ext/standard/tests/math/sinh_error.phpt
+      ext/standard/tests/math/sinh_error.phpt
+      ext/standard/tests/math/sinh_error.phpt
+      ext/standard/tests/math/tan_error.phpt
+      ext/standard/tests/math/tan_error.phpt
+      ext/standard/tests/math/tan_error.phpt
+      ext/standard/tests/math/tanh_error.phpt
+      ext/standard/tests/math/tanh_error.phpt
+      ext/standard/tests/math/tanh_error.phpt:
+      Removing superfluous --INI-- section
+
+2008-01-30  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/libxml/libxml.c
+      ext/libxml/libxml.c:
+      MFH: fix bug #41562 (SimpleXML memory issue)
+
+    * ext/libxml/libxml.c:
+      fix bug #41562 (SimpleXML memory issue)
+
+2008-01-30  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/reflection/tests/bug43926.phpt
+      ext/reflection/tests/bug43926.phpt
+      ext/reflection/tests/reflectionClass_isInstance_basic.phpt
+      ext/reflection/tests/reflectionObject_isInstance_basic.phpt:
+      Fix test
+
+    * (PHP_5_3)
+      ext/reflection/php_reflection.c:
+      Revert
+
+2008-01-30  Robin Fernandes  <robin_fernandes@uk.ibm.com>
+
+    * tests/classes/__call_003.phpt
+      tests/classes/autoload_007.phpt
+      tests/classes/autoload_008.phpt
+      tests/classes/autoload_009.phpt
+      tests/classes/autoload_010.phpt
+      tests/classes/autoload_011.phpt
+      tests/classes/autoload_012.phpt
+      tests/classes/autoload_013.phpt
+      tests/classes/autoload_014.phpt
+      tests/classes/autoload_015.phpt
+      tests/classes/autoload_016.phpt
+      tests/classes/autoload_017.phpt
+      tests/classes/autoload_018.phpt
+      tests/classes/autoload_019.phpt
+      tests/classes/autoload_020.phpt
+      tests/classes/constants_basic_001.phpt
+      tests/classes/constants_basic_002.phpt
+      tests/classes/constants_basic_003.inc
+      tests/classes/constants_basic_003.phpt
+      tests/classes/constants_basic_004.phpt
+      tests/classes/constants_basic_005.phpt
+      tests/classes/constants_basic_006.phpt
+      tests/classes/constants_error_001.phpt
+      tests/classes/constants_error_002.phpt
+      tests/classes/constants_error_003.phpt
+      tests/classes/constants_error_004.phpt
+      tests/classes/constants_error_005.phpt
+      tests/classes/constants_error_006.phpt
+      tests/classes/constants_error_007.phpt
+      tests/classes/final_ctor3.phpt
+      tests/classes/inheritance_005.phpt
+      tests/classes/method_call_variation_001.phpt
+      tests/classes/new_001.phpt
+      tests/classes/property_override_privateStatic_private.phpt
+      tests/classes/property_override_privateStatic_privateStatic.phpt
+      tests/classes/property_override_privateStatic_protected.phpt
+      tests/classes/property_override_privateStatic_protectedStatic.phpt
+      tests/classes/property_override_privateStatic_public.phpt
+      tests/classes/property_override_privateStatic_publicStatic.phpt
+      tests/classes/property_override_private_private.phpt
+      tests/classes/property_override_private_privateStatic.phpt
+      tests/classes/property_override_private_protected.phpt
+      tests/classes/property_override_private_protectedStatic.phpt
+      tests/classes/property_override_private_public.phpt
+      tests/classes/property_override_private_publicStatic.phpt
+      tests/classes/property_override_protectedStatic_private.phpt
+      tests/classes/property_override_protectedStatic_privateStatic.phpt
+      tests/classes/property_override_protectedStatic_protected.phpt
+      tests/classes/property_override_protectedStatic_protectedStatic.phpt
+      tests/classes/property_override_protectedStatic_public.phpt
+      tests/classes/property_override_protectedStatic_publicStatic.phpt
+      tests/classes/property_override_protected_private.phpt
+      tests/classes/property_override_protected_privateStatic.phpt
+      tests/classes/property_override_protected_protected.phpt
+      tests/classes/property_override_protected_protectedStatic.phpt
+      tests/classes/property_override_protected_public.phpt
+      tests/classes/property_override_protected_publicStatic.phpt
+      tests/classes/property_override_publicStatic_private.phpt
+      tests/classes/property_override_publicStatic_privateStatic.phpt
+      tests/classes/property_override_publicStatic_protected.phpt
+      tests/classes/property_override_publicStatic_protectedStatic.phpt
+      tests/classes/property_override_publicStatic_public.phpt
+      tests/classes/property_override_publicStatic_publicStatic.phpt
+      tests/classes/property_override_public_private.phpt
+      tests/classes/property_override_public_privateStatic.phpt
+      tests/classes/property_override_public_protected.phpt
+      tests/classes/property_override_public_protectedStatic.phpt
+      tests/classes/property_override_public_public.phpt
+      tests/classes/property_override_public_publicStatic.phpt
+      tests/classes/type_hinting_004.phpt:
+      Adding tests for class features, including __autoload(), property
+      inheritance rules and class constants. Note: autoload_012.phpt failing on
+      php6, fix expected via bug 43973.
+
+    * (PHP_5_3)
+      tests/classes/__call_003.phpt
+      tests/classes/autoload_007.phpt
+      tests/classes/autoload_008.phpt
+      tests/classes/autoload_009.phpt
+      tests/classes/autoload_010.phpt
+      tests/classes/autoload_011.phpt
+      tests/classes/autoload_012.phpt
+      tests/classes/autoload_013.phpt
+      tests/classes/autoload_014.phpt
+      tests/classes/autoload_015.phpt
+      tests/classes/autoload_016.phpt
+      tests/classes/autoload_017.phpt
+      tests/classes/autoload_018.phpt
+      tests/classes/autoload_019.phpt
+      tests/classes/autoload_020.phpt
+      tests/classes/constants_basic_001.phpt
+      tests/classes/constants_basic_002.phpt
+      tests/classes/constants_basic_003.inc
+      tests/classes/constants_basic_003.phpt
+      tests/classes/constants_basic_004.phpt
+      tests/classes/constants_basic_005.phpt
+      tests/classes/constants_basic_006.phpt
+      tests/classes/constants_error_001.phpt
+      tests/classes/constants_error_002.phpt
+      tests/classes/constants_error_003.phpt
+      tests/classes/constants_error_004.phpt
+      tests/classes/constants_error_005.phpt
+      tests/classes/constants_error_006.phpt
+      tests/classes/constants_error_007.phpt
+      tests/classes/final_ctor3.phpt
+      tests/classes/inheritance_005.phpt
+      tests/classes/method_call_variation_001.phpt
+      tests/classes/new_001.phpt
+      tests/classes/property_override_privateStatic_private.phpt
+      tests/classes/property_override_privateStatic_privateStatic.phpt
+      tests/classes/property_override_privateStatic_protected.phpt
+      tests/classes/property_override_privateStatic_protectedStatic.phpt
+      tests/classes/property_override_privateStatic_public.phpt
+      tests/classes/property_override_privateStatic_publicStatic.phpt
+      tests/classes/property_override_private_private.phpt
+      tests/classes/property_override_private_privateStatic.phpt
+      tests/classes/property_override_private_protected.phpt
+      tests/classes/property_override_private_protectedStatic.phpt
+      tests/classes/property_override_private_public.phpt
+      tests/classes/property_override_private_publicStatic.phpt
+      tests/classes/property_override_protectedStatic_private.phpt
+      tests/classes/property_override_protectedStatic_privateStatic.phpt
+      tests/classes/property_override_protectedStatic_protected.phpt
+      tests/classes/property_override_protectedStatic_protectedStatic.phpt
+      tests/classes/property_override_protectedStatic_public.phpt
+      tests/classes/property_override_protectedStatic_publicStatic.phpt
+      tests/classes/property_override_protected_private.phpt
+      tests/classes/property_override_protected_privateStatic.phpt
+      tests/classes/property_override_protected_protected.phpt
+      tests/classes/property_override_protected_protectedStatic.phpt
+      tests/classes/property_override_protected_public.phpt
+      tests/classes/property_override_protected_publicStatic.phpt
+      tests/classes/property_override_publicStatic_private.phpt
+      tests/classes/property_override_publicStatic_privateStatic.phpt
+      tests/classes/property_override_publicStatic_protected.phpt
+      tests/classes/property_override_publicStatic_protectedStatic.phpt
+      tests/classes/property_override_publicStatic_public.phpt
+      tests/classes/property_override_publicStatic_publicStatic.phpt
+      tests/classes/property_override_public_private.phpt
+      tests/classes/property_override_public_privateStatic.phpt
+      tests/classes/property_override_public_protected.phpt
+      tests/classes/property_override_public_protectedStatic.phpt
+      tests/classes/property_override_public_public.phpt
+      tests/classes/property_override_public_publicStatic.phpt
+      tests/classes/type_hinting_004.phpt:
+      Adding tests for class features, including __autoload(), property
+      inheritance rules and class constants.
+
+    * tests/classes/__call_003.phpt
+      tests/classes/__call_003.phpt
+      tests/classes/__call_003.phpt
+      tests/classes/autoload_007.phpt
+      tests/classes/autoload_007.phpt
+      tests/classes/autoload_007.phpt
+      tests/classes/autoload_008.phpt
+      tests/classes/autoload_008.phpt
+      tests/classes/autoload_008.phpt
+      tests/classes/autoload_009.phpt
+      tests/classes/autoload_009.phpt
+      tests/classes/autoload_009.phpt
+      tests/classes/autoload_010.phpt
+      tests/classes/autoload_010.phpt
+      tests/classes/autoload_010.phpt
+      tests/classes/autoload_011.phpt
+      tests/classes/autoload_011.phpt
+      tests/classes/autoload_011.phpt
+      tests/classes/autoload_012.phpt
+      tests/classes/autoload_012.phpt
+      tests/classes/autoload_012.phpt
+      tests/classes/autoload_013.phpt
+      tests/classes/autoload_013.phpt
+      tests/classes/autoload_013.phpt
+      tests/classes/autoload_014.phpt
+      tests/classes/autoload_014.phpt
+      tests/classes/autoload_014.phpt
+      tests/classes/autoload_015.phpt
+      tests/classes/autoload_015.phpt
+      tests/classes/autoload_015.phpt
+      tests/classes/autoload_016.phpt
+      tests/classes/autoload_016.phpt
+      tests/classes/autoload_016.phpt
+      tests/classes/autoload_017.phpt
+      tests/classes/autoload_017.phpt
+      tests/classes/autoload_017.phpt
+      tests/classes/autoload_018.phpt
+      tests/classes/autoload_018.phpt
+      tests/classes/autoload_018.phpt
+      tests/classes/autoload_019.phpt
+      tests/classes/autoload_019.phpt
+      tests/classes/autoload_019.phpt
+      tests/classes/autoload_020.phpt
+      tests/classes/autoload_020.phpt
+      tests/classes/autoload_020.phpt
+      tests/classes/constants_basic_001.phpt
+      tests/classes/constants_basic_001.phpt
+      tests/classes/constants_basic_001.phpt
+      tests/classes/constants_basic_002.phpt
+      tests/classes/constants_basic_002.phpt
+      tests/classes/constants_basic_002.phpt
+      tests/classes/constants_basic_003.inc
+      tests/classes/constants_basic_003.inc
+      tests/classes/constants_basic_003.inc
+      tests/classes/constants_basic_003.phpt
+      tests/classes/constants_basic_003.phpt
+      tests/classes/constants_basic_003.phpt
+      tests/classes/constants_basic_004.phpt
+      tests/classes/constants_basic_004.phpt
+      tests/classes/constants_basic_004.phpt
+      tests/classes/constants_basic_005.phpt
+      tests/classes/constants_basic_005.phpt
+      tests/classes/constants_basic_005.phpt
+      tests/classes/constants_basic_006.phpt
+      tests/classes/constants_basic_006.phpt
+      tests/classes/constants_basic_006.phpt
+      tests/classes/constants_error_001.phpt
+      tests/classes/constants_error_001.phpt
+      tests/classes/constants_error_001.phpt
+      tests/classes/constants_error_002.phpt
+      tests/classes/constants_error_002.phpt
+      tests/classes/constants_error_002.phpt
+      tests/classes/constants_error_003.phpt
+      tests/classes/constants_error_003.phpt
+      tests/classes/constants_error_003.phpt
+      tests/classes/constants_error_004.phpt
+      tests/classes/constants_error_004.phpt
+      tests/classes/constants_error_004.phpt
+      tests/classes/constants_error_005.phpt
+      tests/classes/constants_error_005.phpt
+      tests/classes/constants_error_005.phpt
+      tests/classes/constants_error_006.phpt
+      tests/classes/constants_error_006.phpt
+      tests/classes/constants_error_006.phpt
+      tests/classes/constants_error_007.phpt
+      tests/classes/constants_error_007.phpt
+      tests/classes/constants_error_007.phpt
+      tests/classes/final_ctor3.phpt
+      tests/classes/final_ctor3.phpt
+      tests/classes/final_ctor3.phpt
+      tests/classes/inheritance_005.phpt
+      tests/classes/inheritance_005.phpt
+      tests/classes/inheritance_005.phpt
+      tests/classes/method_call_variation_001.phpt
+      tests/classes/method_call_variation_001.phpt
+      tests/classes/method_call_variation_001.phpt
+      tests/classes/new_001.phpt
+      tests/classes/new_001.phpt
+      tests/classes/new_001.phpt
+      tests/classes/property_override_privateStatic_private.phpt
+      tests/classes/property_override_privateStatic_private.phpt
+      tests/classes/property_override_privateStatic_private.phpt
+      tests/classes/property_override_privateStatic_privateStatic.phpt
+      tests/classes/property_override_privateStatic_privateStatic.phpt
+      tests/classes/property_override_privateStatic_privateStatic.phpt
+      tests/classes/property_override_privateStatic_protected.phpt
+      tests/classes/property_override_privateStatic_protected.phpt
+      tests/classes/property_override_privateStatic_protected.phpt
+      tests/classes/property_override_privateStatic_protectedStatic.phpt
+      tests/classes/property_override_privateStatic_protectedStatic.phpt
+      tests/classes/property_override_privateStatic_protectedStatic.phpt
+      tests/classes/property_override_privateStatic_public.phpt
+      tests/classes/property_override_privateStatic_public.phpt
+      tests/classes/property_override_privateStatic_public.phpt
+      tests/classes/property_override_privateStatic_publicStatic.phpt
+      tests/classes/property_override_privateStatic_publicStatic.phpt
+      tests/classes/property_override_privateStatic_publicStatic.phpt
+      tests/classes/property_override_private_private.phpt
+      tests/classes/property_override_private_private.phpt
+      tests/classes/property_override_private_private.phpt
+      tests/classes/property_override_private_privateStatic.phpt
+      tests/classes/property_override_private_privateStatic.phpt
+      tests/classes/property_override_private_privateStatic.phpt
+      tests/classes/property_override_private_protected.phpt
+      tests/classes/property_override_private_protected.phpt
+      tests/classes/property_override_private_protected.phpt
+      tests/classes/property_override_private_protectedStatic.phpt
+      tests/classes/property_override_private_protectedStatic.phpt
+      tests/classes/property_override_private_protectedStatic.phpt
+      tests/classes/property_override_private_public.phpt
+      tests/classes/property_override_private_public.phpt
+      tests/classes/property_override_private_public.phpt
+      tests/classes/property_override_private_publicStatic.phpt
+      tests/classes/property_override_private_publicStatic.phpt
+      tests/classes/property_override_private_publicStatic.phpt
+      tests/classes/property_override_protectedStatic_private.phpt
+      tests/classes/property_override_protectedStatic_private.phpt
+      tests/classes/property_override_protectedStatic_private.phpt
+      tests/classes/property_override_protectedStatic_privateStatic.phpt
+      tests/classes/property_override_protectedStatic_privateStatic.phpt
+      tests/classes/property_override_protectedStatic_privateStatic.phpt
+      tests/classes/property_override_protectedStatic_protected.phpt
+      tests/classes/property_override_protectedStatic_protected.phpt
+      tests/classes/property_override_protectedStatic_protected.phpt
+      tests/classes/property_override_protectedStatic_protectedStatic.phpt
+      tests/classes/property_override_protectedStatic_protectedStatic.phpt
+      tests/classes/property_override_protectedStatic_protectedStatic.phpt
+      tests/classes/property_override_protectedStatic_public.phpt
+      tests/classes/property_override_protectedStatic_public.phpt
+      tests/classes/property_override_protectedStatic_public.phpt
+      tests/classes/property_override_protectedStatic_publicStatic.phpt
+      tests/classes/property_override_protectedStatic_publicStatic.phpt
+      tests/classes/property_override_protectedStatic_publicStatic.phpt
+      tests/classes/property_override_protected_private.phpt
+      tests/classes/property_override_protected_private.phpt
+      tests/classes/property_override_protected_private.phpt
+      tests/classes/property_override_protected_privateStatic.phpt
+      tests/classes/property_override_protected_privateStatic.phpt
+      tests/classes/property_override_protected_privateStatic.phpt
+      tests/classes/property_override_protected_protected.phpt
+      tests/classes/property_override_protected_protected.phpt
+      tests/classes/property_override_protected_protected.phpt
+      tests/classes/property_override_protected_protectedStatic.phpt
+      tests/classes/property_override_protected_protectedStatic.phpt
+      tests/classes/property_override_protected_protectedStatic.phpt
+      tests/classes/property_override_protected_public.phpt
+      tests/classes/property_override_protected_public.phpt
+      tests/classes/property_override_protected_public.phpt
+      tests/classes/property_override_protected_publicStatic.phpt
+      tests/classes/property_override_protected_publicStatic.phpt
+      tests/classes/property_override_protected_publicStatic.phpt
+      tests/classes/property_override_publicStatic_private.phpt
+      tests/classes/property_override_publicStatic_private.phpt
+      tests/classes/property_override_publicStatic_private.phpt
+      tests/classes/property_override_publicStatic_privateStatic.phpt
+      tests/classes/property_override_publicStatic_privateStatic.phpt
+      tests/classes/property_override_publicStatic_privateStatic.phpt
+      tests/classes/property_override_publicStatic_protected.phpt
+      tests/classes/property_override_publicStatic_protected.phpt
+      tests/classes/property_override_publicStatic_protected.phpt
+      tests/classes/property_override_publicStatic_protectedStatic.phpt
+      tests/classes/property_override_publicStatic_protectedStatic.phpt
+      tests/classes/property_override_publicStatic_protectedStatic.phpt
+      tests/classes/property_override_publicStatic_public.phpt
+      tests/classes/property_override_publicStatic_public.phpt
+      tests/classes/property_override_publicStatic_public.phpt
+      tests/classes/property_override_publicStatic_publicStatic.phpt
+      tests/classes/property_override_publicStatic_publicStatic.phpt
+      tests/classes/property_override_publicStatic_publicStatic.phpt
+      tests/classes/property_override_public_private.phpt
+      tests/classes/property_override_public_private.phpt
+      tests/classes/property_override_public_private.phpt
+      tests/classes/property_override_public_privateStatic.phpt
+      tests/classes/property_override_public_privateStatic.phpt
+      tests/classes/property_override_public_privateStatic.phpt
+      tests/classes/property_override_public_protected.phpt
+      tests/classes/property_override_public_protected.phpt
+      tests/classes/property_override_public_protected.phpt
+      tests/classes/property_override_public_protectedStatic.phpt
+      tests/classes/property_override_public_protectedStatic.phpt
+      tests/classes/property_override_public_protectedStatic.phpt
+      tests/classes/property_override_public_public.phpt
+      tests/classes/property_override_public_public.phpt
+      tests/classes/property_override_public_public.phpt
+      tests/classes/property_override_public_publicStatic.phpt
+      tests/classes/property_override_public_publicStatic.phpt
+      tests/classes/property_override_public_publicStatic.phpt
+      tests/classes/type_hinting_004.phpt
+      tests/classes/type_hinting_004.phpt
+      tests/classes/type_hinting_004.phpt:
+        1.1.4;
+      file __call_003.phpt was initially added on branch PHP_5_2.
+
+2008-01-30  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/reflection/php_reflection.c:
+      Fix the fix (isInstance - order of parameters)
+
+2008-01-30  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/php_reflection.c:
+      fix ZTS build
+
+    * ZendEngine2/zend_execute_API.c:
+      fix #43973 (__autoload called with wrong classname when triggered by static
+      callback)
+      the issue was present only in HEAD
+      patch by Felipe
+
+2008-01-30  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/reflection/tests/bug43926.phpt
+      ext/reflection/tests/reflectionClass_isInstance_basic.phpt
+      ext/reflection/tests/reflectionClass_isInstance_basic.phpt
+      ext/reflection/tests/reflectionObject_isInstance_basic.phpt
+      ext/reflection/tests/reflectionObject_isInstance_basic.phpt:
+      Fix tests
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/tests/bug43926.phpt:
+      Fixed Bug #43926 (isInstance() isn't equivalent to instanceof operator)
+
+    * (PHP_5_3)
+      NEWS
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/bug43926.phpt
+      ext/reflection/tests/bug43926.phpt:
+      Fixed Bug#43926 (isInstance() isn't equivalent to instanceof operator)
+
+2008-01-30  Dmitry Stogov  <dmitry@zend.com>
+
+    * configure.in
+      TSRM/TSRM.h
+      TSRM/tsrm_virtual_cwd.h
+      ZendEngine2/acconfig.h
+      ext/bz2/php_bz2.h
+      ext/dom/xml_common.h
+      ext/gd/php_gd.h
+      ext/hash/php_hash.h
+      ext/iconv/php_iconv.h
+      ext/libxml/php_libxml.h
+      ext/mbstring/mbstring.h
+      ext/mysqli/php_mysqli_structs.h
+      ext/pdo/php_pdo.h
+      ext/pgsql/php_pgsql.h
+      ext/skeleton/php_skeleton.h
+      ext/spl/php_spl.h
+      ext/unicode/php_unicode.h
+      ext/zip/lib/zip.h
+      main/SAPI.h
+      main/php.h
+      sapi/apache2filter/php_apache.h
+      sapi/apache2handler/php_apache.h
+      sapi/apache_hooks/mod_php5.h
+      sapi/pi3web/pi3web_sapi.h:
+      Imporoved PHP binary size and startup speed with GCC4 visibility control
+      (Nuno)
+
+    * (PHP_5_3)
+      NEWS
+      configure.in
+      TSRM/TSRM.h
+      TSRM/tsrm_virtual_cwd.h
+      ZendEngine2/acconfig.h
+      ext/bz2/php_bz2.h
+      ext/dom/xml_common.h
+      ext/gd/php_gd.h
+      ext/hash/php_hash.h
+      ext/iconv/php_iconv.h
+      ext/libxml/php_libxml.h
+      ext/mbstring/mbstring.h
+      ext/mysqli/php_mysqli_structs.h
+      ext/pdo/php_pdo.h
+      ext/pgsql/php_pgsql.h
+      ext/skeleton/php_skeleton.h
+      ext/spl/php_spl.h
+      ext/zip/lib/zip.h
+      main/SAPI.h
+      main/php.h
+      sapi/apache/mod_php5.h
+      sapi/apache2filter/php_apache.h
+      sapi/apache2handler/php_apache.h
+      sapi/apache_hooks/mod_php5.h
+      sapi/pi3web/pi3web_sapi.h:
+      Improved PHP binary size and startup speed with GCC4 visibility control
+      (Nuno)
+
+2008-01-30  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/sqlite/config.m4:
+      both pdo & spl dependencies are optional
+
+2008-01-30  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/xml/xml.c:
+      Fix typo
+
+    * (PHP_5_3)
+      ext/xml/xml.c:
+      fix typo
+
+    * (PHP_5_2)
+      ext/xml/xml.c:
+      Copy-paste typo
+
+2008-01-30  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/json/json.c
+      ext/json/json.c:
+      ZTS fix
+
+2008-01-30  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/dom/node.c:
+      Fix arginfo.
+
+2008-01-30  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_2)
+      ext/json/tests/bug41567.phpt:
+      This one depends on the precision setting
+
+2008-01-30  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/json/json.c
+      ext/json/json.c
+      ext/json/utf8_to_utf16.c
+      ext/json/utf8_to_utf16.c
+      ext/json/tests/bug43941.phpt:
+      fix #43941: invalid utf-8 not accepted
+
+    * ext/json/tests/bug43941.phpt
+      ext/json/tests/bug43941.phpt:
+      
+      file bug43941.phpt was initially added on branch PHP_5_3.
+
+2008-01-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      EXTENSIONS:
+      Change readline extension status to Working
+
 2008-01-29  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * ext/xml/xml.c
