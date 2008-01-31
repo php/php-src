@@ -1174,6 +1174,14 @@ sb4 php_oci_bind_out_callback(
 	}
 
 	if (Z_TYPE_P(val) == IS_RESOURCE) {
+		/* Processing for ref-cursor out binds */
+		if (phpbind->statement != NULL) {
+			*bufpp = phpbind->statement;
+			*alenpp = &phpbind->dummy_len;
+			*piecep = OCI_ONE_PIECE;
+			*rcodepp = &phpbind->retcode;
+			*indpp = &phpbind->indicator;
+		}
 		retval = OCI_CONTINUE;
 	} else if (Z_TYPE_P(val) == IS_OBJECT) {
 		if (!phpbind->descriptor) {

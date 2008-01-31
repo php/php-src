@@ -1,7 +1,11 @@
 --TEST--
 ocipasswordchange()
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+<?php
+if (!extension_loaded('oci8')) die("skip no oci8 extension"); 
+require dirname(__FILE__)."/details.inc";
+if ($test_drcp) die("skip password change not supported in DRCP Mode");
+?>
 --FILE--
 <?php
 
