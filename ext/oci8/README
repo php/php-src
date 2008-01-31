@@ -99,6 +99,10 @@ directory will contain logs of any failures.
   If the database is on the same machine as PHP, set
   $oracle_on_localhost to TRUE.
 
+  If Oracle 11g Database Resident Connection Pooling is being tested,
+  set $test_drcp to TRUE and ensure the connection string uses an
+  appropriate pooled server (see section 6.2.2).
+
   An alternative to editing details.inc is the set the environment
   variables
 
@@ -106,6 +110,7 @@ directory will contain logs of any failures.
     PHP_OCI8_TEST_PASS
     PHP_OCI8_TEST_DB
     PHP_OCI8_TEST_DB_ON_LOCALHOST
+    PHP_OCI8_TEST_DRCP
 
   for example:
 
@@ -113,6 +118,7 @@ directory will contain logs of any failures.
     $ export PHP_OCI8_TEST_PASS=oracle
     $ export PHP_OCI8_TEST_DB=localhost/XE
     $ export PHP_OCI8_TEST_DB_ON_LOCALHOST=TRUE
+    $ export PHP_OCI8_TEST_DRCP=FALSE
 
 5.1.2. Set any necessary environment variables for the Oracle
     database.  With Oracle 10g XE do:
@@ -160,7 +166,7 @@ directory will contain logs of any failures.
 6. DRCP and FAN Support
 -----------------------
 
-Th PHP OCI8 Beta extension has support for the Oracle Database
+The PHP 5.3 OCI8 Beta extension has support for the Oracle Database
 Resident Connection Pool (DRCP) and Fast Application Notification
 (FAN).
 
@@ -292,7 +298,7 @@ To enable FAN support in PHP, after building PHP with Oracle 10gR2 or
 6.3.4. Run your application, connecting to a 10gR2 or 11g database.
 
 
-6.4. Changes and Known Issues in this release from PECL OCI8 1.3.0 Beta
+6.4. Changes in this release from PECL OCI8 1.3.0 Beta
 
 The initial release of OCI8 with DRCP and FAN support was PECL OCI8
 1.3.0 Beta.  This section documents differences from that release.
@@ -330,11 +336,11 @@ documented restriction of Oracle Database 11g.
 6.4.3 Oci8.max_persistent setting is re-enabled.
 
 The php.ini parameter oci8.max_persistent will limit the number of
-persistent connctions that each PHP process will keep open between
+persistent connections that each PHP process will keep open between
 HTTP requests.  Any further oci_pconnect() calls once this limit is
 reached will be treated as oci_connect() calls.
 
-Is it still recommended that DRCP users modify the connection pool
+It is still recommended that DRCP users modify the connection pool
 settings of the database to control resource usage.  Non-DRCP users
 should consider setting oci8.persistent_timeout to close idle
 connections.
