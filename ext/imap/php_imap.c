@@ -66,6 +66,12 @@ MAILSTREAM DEFAULTPROTO;
 #define SENDBUFLEN 16385
 #endif
 
+#if defined(__GNUC__) && __GNUC__ >= 4
+# define PHP_IMAP_EXPORT __attribute__ ((visibility("default")))
+#else
+# define PHP_IMAP_EXPORT
+#endif
+
 static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC);
 static void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC);
 static void _php_imap_parse_address(ADDRESS *addresslist, char **fulladdress, zval *paddress TSRMLS_DC);
@@ -4332,7 +4338,7 @@ static char *php_mail_gets(readfn_t f, void *stream, unsigned long size, GETS_DA
 
 /* {{{ Interfaces to C-client 
  */
-void mm_searched(MAILSTREAM *stream, unsigned long number)
+PHP_IMAP_EXPORT void mm_searched(MAILSTREAM *stream, unsigned long number)
 {
 	MESSAGELIST *cur = NIL;
 	TSRMLS_FETCH();
@@ -4352,20 +4358,20 @@ void mm_searched(MAILSTREAM *stream, unsigned long number)
 	}
 }
 
-void mm_exists(MAILSTREAM *stream, unsigned long number)
+PHP_IMAP_EXPORT void mm_exists(MAILSTREAM *stream, unsigned long number)
 {
 }
 
-void mm_expunged(MAILSTREAM *stream, unsigned long number)
+PHP_IMAP_EXPORT void mm_expunged(MAILSTREAM *stream, unsigned long number)
 {
 }
 
-void mm_flags(MAILSTREAM *stream, unsigned long number)
+PHP_IMAP_EXPORT void mm_flags(MAILSTREAM *stream, unsigned long number)
 {
 }
 
 /* Author: CJH */
-void mm_notify(MAILSTREAM *stream, char *str, long errflg)
+PHP_IMAP_EXPORT void mm_notify(MAILSTREAM *stream, char *str, long errflg)
 {
 	STRINGLIST *cur = NIL;
 	TSRMLS_FETCH();
@@ -4388,7 +4394,7 @@ void mm_notify(MAILSTREAM *stream, char *str, long errflg)
 	}
 }
 
-void mm_list(MAILSTREAM *stream, DTYPE delimiter, char *mailbox, long attributes)
+PHP_IMAP_EXPORT void mm_list(MAILSTREAM *stream, DTYPE delimiter, char *mailbox, long attributes)
 {
 	STRINGLIST *cur=NIL;
 	FOBJECTLIST *ocur=NIL;
@@ -4435,7 +4441,7 @@ void mm_list(MAILSTREAM *stream, DTYPE delimiter, char *mailbox, long attributes
 	}
 }
 
-void mm_lsub(MAILSTREAM *stream, DTYPE delimiter, char *mailbox, long attributes)
+PHP_IMAP_EXPORT void mm_lsub(MAILSTREAM *stream, DTYPE delimiter, char *mailbox, long attributes)
 {
 	STRINGLIST *cur=NIL;
 	FOBJECTLIST *ocur=NIL;
@@ -4479,7 +4485,7 @@ void mm_lsub(MAILSTREAM *stream, DTYPE delimiter, char *mailbox, long attributes
 	}
 }
 
-void mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
+PHP_IMAP_EXPORT void mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
 {
 	TSRMLS_FETCH();
 
@@ -4501,7 +4507,7 @@ void mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
 	}
 }
 
-void mm_log(char *str, long errflg)
+PHP_IMAP_EXPORT void mm_log(char *str, long errflg)
 {
 	ERRORLIST *cur = NIL;
 	TSRMLS_FETCH();
@@ -4527,14 +4533,14 @@ void mm_log(char *str, long errflg)
 	}
 }
 
-void mm_dlog(char *str)
+PHP_IMAP_EXPORT void mm_dlog(char *str)
 {
 	/* CJH: this is for debugging; it might be useful to allow setting
 	   the stream to debug mode and capturing this somewhere - syslog?
 	   php debugger? */
 }
 
-void mm_login(NETMBX *mb, char *user, char *pwd, long trial)
+PHP_IMAP_EXPORT void mm_login(NETMBX *mb, char *user, char *pwd, long trial)
 {
 	TSRMLS_FETCH();
 
@@ -4546,20 +4552,20 @@ void mm_login(NETMBX *mb, char *user, char *pwd, long trial)
 	strlcpy (pwd, IMAPG(imap_password), MAILTMPLEN);
 }
 
-void mm_critical(MAILSTREAM *stream)
+PHP_IMAP_EXPORT void mm_critical(MAILSTREAM *stream)
 {
 }
 
-void mm_nocritical(MAILSTREAM *stream)
+PHP_IMAP_EXPORT void mm_nocritical(MAILSTREAM *stream)
 {
 }
 
-long mm_diskerror(MAILSTREAM *stream, long errcode, long serious)
+PHP_IMAP_EXPORT long mm_diskerror(MAILSTREAM *stream, long errcode, long serious)
 {
 	return 1;
 }
 
-void mm_fatal(char *str)
+PHP_IMAP_EXPORT void mm_fatal(char *str)
 {
 }
 /* }}} */
