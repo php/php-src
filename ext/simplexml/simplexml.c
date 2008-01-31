@@ -1787,6 +1787,11 @@ static int sxe_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 		}
 	}
 
+	if (readobj == writeobj) {
+		INIT_PZVAL(writeobj);
+		zval_dtor(readobj);
+	}
+
 	rv = cast_object(writeobj, type, (char *)contents TSRMLS_CC);
 
 	if (contents) {
