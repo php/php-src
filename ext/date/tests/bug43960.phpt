@@ -1,6 +1,6 @@
 --TEST--
 Bug #43960 (strtotime() returns timestamp in the future when given a bogus string)
--INI--
+--INI--
 date.timezone=UTC
 --FILE--
 <?php

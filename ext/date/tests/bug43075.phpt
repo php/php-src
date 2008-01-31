@@ -1,6 +1,6 @@
 --TEST--
 Bug #43075 (Support 24 as hour)
--INI--
+--INI--
 date.timezone=UTC
 --FILE--
 <?php
