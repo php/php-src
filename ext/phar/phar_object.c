@@ -1811,7 +1811,7 @@ PHP_METHOD(Phar, getAlias)
 PHP_METHOD(Phar, setAlias)
 {
 	char *alias, *error;
-	phar_archive_data *fd, **fd_ptr;
+	phar_archive_data **fd_ptr;
 	int alias_len;
 	PHAR_ARCHIVE_OBJECT();
 
@@ -1833,7 +1833,6 @@ PHP_METHOD(Phar, setAlias)
 		}
 		if (phar_obj->arc.archive->alias_len && SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), phar_obj->arc.archive->alias, phar_obj->arc.archive->alias_len, (void**)&fd_ptr)) {
 			zend_hash_del(&(PHAR_GLOBALS->phar_alias_map), phar_obj->arc.archive->alias, phar_obj->arc.archive->alias_len);
-			fd = *fd_ptr;
 		}
 
 		if (phar_obj->arc.archive->alias) {
