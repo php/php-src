@@ -374,7 +374,7 @@ PHP_FUNCTION(is_callable)
 		syntax = Z_BVAL_PP(syntax_only);
 	}
 
-	syntax = syntax ? IS_CALLABLE_CHECK_SYNTAX_ONLY : IS_CALLABLE_STRICT;
+	syntax = syntax ? IS_CALLABLE_CHECK_SYNTAX_ONLY : 0;
 	if (argc > 2) {
 		retval = zend_is_callable(*var, syntax, &name);
 		zval_dtor(*callable_name);
