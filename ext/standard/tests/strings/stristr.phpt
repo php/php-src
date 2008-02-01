@@ -19,7 +19,7 @@ stristr() function
 	var_dump(stristr("tEsT sTrInG", " "));
 ?>
 --EXPECTF--
-Warning: Wrong parameter count for stristr() in %s on line %d
+Warning: stristr() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
 Notice: Array to string conversion in %s on line %d
