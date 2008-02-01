@@ -2,7 +2,7 @@
 Test bindec() - basic function test bindec()
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
@@ -40,7 +40,7 @@ int(129)
 int(455)
 int(224)
 int(2147483647)
-float(2147483648)
+int(2147483648)
 int(129)
 int(0)
 int(13)
