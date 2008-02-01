@@ -2412,9 +2412,9 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 					}
 				} else {
 					if (error) {
-						zend_spprintf(error, 0, "non-static method %s::%s() cannot be called statically", (*ce_ptr)->name, fptr->common.function_name);
+						zend_spprintf(error, 0, "non-static method %s::%s() should not be called statically", (*ce_ptr)->name, fptr->common.function_name);
 					} else if (retval) {
-						zend_error(E_STRICT, "Non-static method %s::%s() cannot be called statically", (*ce_ptr)->name, fptr->common.function_name);
+						zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically", (*ce_ptr)->name, fptr->common.function_name);
 					}
 				}
 			}
@@ -2478,7 +2478,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, char **
 				return 1;
 			}
 
-			return zend_is_callable_check_func(check_flags|IS_CALLABLE_CHECK_IS_STATIC, zobj_ptr_ptr, NULL, callable, ce_ptr, fptr_ptr, error TSRMLS_CC);
+			return zend_is_callable_check_func(check_flags, zobj_ptr_ptr, NULL, callable, ce_ptr, fptr_ptr, error TSRMLS_CC);
 
 		case IS_ARRAY:
 			{
