@@ -1687,7 +1687,7 @@ PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end)
 }
 /* }}} */
 
-/* {{{ proto string stristr(string haystack, string needle)
+/* {{{ proto string stristr(string haystack, string needle[, bool part])
    Finds first occurrence of a string within another, case insensitive */
 PHP_FUNCTION(stristr)
 {
@@ -1696,9 +1696,10 @@ PHP_FUNCTION(stristr)
 	int  found_offset;
 	char *haystack_orig;
 	char needle_char[2];
+	zend_bool part = 0;
 	
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &haystack, &needle) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ|b", &haystack, &needle, &part) == FAILURE) {
+		return;
 	}
 
 	SEPARATE_ZVAL(haystack);
@@ -1732,7 +1733,11 @@ PHP_FUNCTION(stristr)
 
 	if (found) {
 		found_offset = found - Z_STRVAL_PP(haystack);
-		RETVAL_STRINGL(haystack_orig + found_offset, Z_STRLEN_PP(haystack) - found_offset, 1);
+		if (part) {
+			RETVAL_STRINGL(haystack_orig, found_offset, 1);
+		} else {
+			RETVAL_STRINGL(haystack_orig + found_offset, Z_STRLEN_PP(haystack) - found_offset, 1);
+		}			
 	} else {
 		RETVAL_FALSE;
 	}
@@ -1741,7 +1746,7 @@ PHP_FUNCTION(stristr)
 }
 /* }}} */
 
-/* {{{ proto string strstr(string haystack, string needle)
+/* {{{ proto string strstr(string haystack, string needle[, bool part])
    Finds first occurrence of a string within another */
 PHP_FUNCTION(strstr)
 {
@@ -1749,9 +1754,10 @@ PHP_FUNCTION(strstr)
 	char *found = NULL;
 	char needle_char[2];
 	long found_offset;
+	zend_bool part = 0;
 	
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &haystack, &needle) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ|b", &haystack, &needle, &part) == FAILURE) {
+		return;
 	}
 
 	convert_to_string_ex(haystack);
@@ -1779,7 +1785,11 @@ PHP_FUNCTION(strstr)
 
 	if (found) {
 		found_offset = found - Z_STRVAL_PP(haystack);
-		RETURN_STRINGL(found, Z_STRLEN_PP(haystack) - found_offset, 1);
+		if (part) {
+			RETURN_STRINGL(Z_STRVAL_PP(haystack), found_offset, 1);
+		} else {
+			RETURN_STRINGL(found, Z_STRLEN_PP(haystack) - found_offset, 1);
+		}
 	} else {
 		RETURN_FALSE;
 	}
