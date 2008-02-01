@@ -168,9 +168,6 @@ ZEND_END_MODULE_GLOBALS(phar)
 
 ZEND_EXTERN_MODULE_GLOBALS(phar)
 
-extern int phar_has_bz2;
-extern int phar_has_zlib;
-
 #ifdef ZTS
 #	include "TSRM.h"
 #	define PHAR_G(v) TSRMG(phar_globals_id, zend_phar_globals *, v)
@@ -330,6 +327,10 @@ union _phar_entry_object {
 #endif
 
 BEGIN_EXTERN_C()
+
+int phar_has_bz2;
+int phar_has_zlib;
+
 #ifdef PHP_WIN32
 char *tsrm_strtok_r(char *s, const char *delim, char **last);
 
