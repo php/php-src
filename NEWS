@@ -44,8 +44,6 @@ PHP                                                                        NEWS
 - Added runtime JIT auto-globals fetching and caching. (Dmitry, Sara)
 - Added "jump label" operator (limited "goto"). (Dmitry, Sara)
 - Added E_STRICT to E_ALL. (Dmitry)
-- Added an optional parameter to strstr() and stristr() for retrieval of either
-  the part of haystack before or after first occurrence of needle. (Johannes)
 - Added streams features:
   . Second optional parameter to stream_context_create() to
     set params during context creation. (Sara)
