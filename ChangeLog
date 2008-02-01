@@ -1,3 +1,161 @@
+2008-01-31  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/oci8/tests/bug37220.phpt
+      ext/oci8/tests/bug37220.phpt:
+      
+      New test for old, suspended bug
+
+2008-01-31  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug42369.phpt
+      ext/simplexml/tests/bug42369.phpt:
+      MFH: fix bug #42369 (Implicit conversion to string leaks memory)
+      add test
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug42369.phpt
+      ext/simplexml/tests/bug42369.phpt
+      ext/simplexml/tests/bug42369.phpt:
+      fix bug #42369 (Implicit conversion to string leaks memory)
+      add test
+
+2008-01-31  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_3)
+      ext/date/tests/bug43075.phpt
+      ext/date/tests/bug43960.phpt:
+      Typo
+
+    * (PHP_5_3)
+      ext/date/tests/bug43075.phpt
+      ext/date/tests/bug43960.phpt:
+      These two tests both need a timezone
+
+2008-01-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/pdo/EXPERIMENTAL:
+      
+      PDO is hardly experimental
+
+2008-01-31  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+2008-01-31  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_3)
+      ext/oci8/README:
+      Update test environement description. Typos
+
+2008-01-31  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/imap/config.m4
+      ext/imap/php_imap.c:
+      fix gcc 4 build
+
+    * (PHP_5_3)
+      ext/imap/php_imap.c:
+      try to fix build with gcc 4: take #2
+
+2008-01-31  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/file/005_variation-win32.phpt:
+      There are plenty of other non-Windows operating systems
+
+2008-01-31  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_3)
+      ext/imap/config.m4:
+      try to fix build with gcc 4: take #1
+
+2008-01-31  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ext/standard/type.c:
+      - fix flag handling in is_callable()
+
+2008-01-31  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/spl/spl_directory.c:
+      fix win32 build
+
+2008-01-31  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ext/spl/tests/dit_001.phpt:
+      - Fix test
+
+2008-01-31  Elizabeth Marie Smith  <emsmith@elizabethmariesmith.com>
+
+    * (PHP_5_3)
+      ext/spl/spl_directory.c:
+      Fix windows build
+
+2008-01-31  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/oci8/tests/drcp_scope2.phpt
+      ext/oci8/tests/drcp_scope2.phpt
+      ext/oci8/tests/password.phpt
+      ext/oci8/tests/password_2.phpt
+      ext/oci8/tests/password_new.phpt
+      ext/oci8/tests/password_old.phpt:
+      
+      file drcp_scope2.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/oci8/README
+      ext/oci8/oci8.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/package2.xml
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/bug42841.phpt
+      ext/oci8/tests/debug.phpt
+      ext/oci8/tests/details.inc
+      ext/oci8/tests/drcp_characterset.phpt
+      ext/oci8/tests/drcp_characterset.phpt
+      ext/oci8/tests/drcp_conn_close1.phpt
+      ext/oci8/tests/drcp_conn_close1.phpt
+      ext/oci8/tests/drcp_conn_close2.phpt
+      ext/oci8/tests/drcp_conn_close2.phpt
+      ext/oci8/tests/drcp_connect1.phpt
+      ext/oci8/tests/drcp_connect1.phpt
+      ext/oci8/tests/drcp_connection_class.phpt
+      ext/oci8/tests/drcp_connection_class.phpt
+      ext/oci8/tests/drcp_functions.inc
+      ext/oci8/tests/drcp_functions.inc
+      ext/oci8/tests/drcp_newconnect.phpt
+      ext/oci8/tests/drcp_newconnect.phpt
+      ext/oci8/tests/drcp_pconn_close1.phpt
+      ext/oci8/tests/drcp_pconn_close1.phpt
+      ext/oci8/tests/drcp_pconn_close2.phpt
+      ext/oci8/tests/drcp_pconn_close2.phpt
+      ext/oci8/tests/drcp_privileged.phpt
+      ext/oci8/tests/drcp_privileged.phpt
+      ext/oci8/tests/drcp_scope1.phpt
+      ext/oci8/tests/drcp_scope1.phpt:
+      Merge DRCP & FAN support. PHP6 sync will happen later
+
+    * ext/oci8/tests/bug42841.phpt
+      ext/oci8/tests/bug42841.phpt
+      ext/oci8/tests/bug42841.phpt:
+        1.1.4;
+      file bug42841.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/oci8/oci8_statement.c:
+      Fixed bug #42841 (REF CURSOR and oci_new_cursor PHP crash)
+
 2008-01-30  Marcus Boerger  <php@marcus-boerger.de>
 
     * ext/spl/spl_directory.c
