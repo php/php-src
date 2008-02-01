@@ -192,7 +192,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 	phar_entry_info *entry, etemp;
 	phar_entry_data *ret;
 	const char *pcr_error;
-	char is_dir = path[path_len - 1] == '/';
+	char is_dir = (path_len > 0 && path != NULL) ? path[path_len - 1] == '/' : 0;
 
 	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, error TSRMLS_CC)) {
 		return NULL;
