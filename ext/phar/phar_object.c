@@ -1075,7 +1075,7 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC)
 							efree(fname);
 							return ZEND_HASH_APPLY_KEEP;
 						}
-						test = expand_filepath(fname, test TSRMLS_CC);
+						test = expand_filepath(fname, NULL TSRMLS_CC);
 						if (test) {
 							efree(fname);
 							fname = test;
