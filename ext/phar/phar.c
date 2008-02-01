@@ -1476,13 +1476,13 @@ char *phar_fix_filepath(char *path, int *new_len, int use_cwd TSRMLS_DC) /* {{{ 
 		ptr = tsrm_strtok_r(NULL, "/", &tok);
 	}
 
-	efree(free_path);
-
 	if (path[path_length-1] == '/' && new_phar_len > 1) {
 		new_phar = (char*)erealloc(new_phar, new_phar_len + 2);
 		new_phar[new_phar_len++] = '/';
 		new_phar[new_phar_len] = 0;
 	}
+
+	efree(free_path);
 
 	if (new_phar_len == 0) {
 		new_phar = (char *) erealloc(new_phar, new_phar_len+1+1);
