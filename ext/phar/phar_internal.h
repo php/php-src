@@ -168,8 +168,8 @@ ZEND_END_MODULE_GLOBALS(phar)
 
 ZEND_EXTERN_MODULE_GLOBALS(phar)
 
-int phar_has_bz2;
-int phar_has_zlib;
+extern int phar_has_bz2;
+extern int phar_has_zlib;
 
 #ifdef ZTS
 #	include "TSRM.h"
