@@ -50,7 +50,9 @@ static zend_object_handlers spl_filesystem_object_handlers;
 /* decalre the class entry */
 PHPAPI zend_class_entry *spl_ce_SplFileInfo;
 PHPAPI zend_class_entry *spl_ce_DirectoryIterator;
+PHPAPI zend_class_entry *spl_ce_FilesystemIterator;
 PHPAPI zend_class_entry *spl_ce_RecursiveDirectoryIterator;
+PHPAPI zend_class_entry *spl_ce_GlobIterator;
 PHPAPI zend_class_entry *spl_ce_SplFileObject;
 PHPAPI zend_class_entry *spl_ce_SplTempFileObject;
 
@@ -88,6 +90,7 @@ static void spl_filesystem_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 	case SPL_FS_DIR:
 		if (intern->u.dir.dirp) {
 			php_stream_close(intern->u.dir.dirp);
+			intern->u.dir.dirp = NULL;
 		}
 		if (intern->u.dir.sub_path) {
 			efree(intern->u.dir.sub_path);
@@ -184,6 +187,19 @@ static inline void spl_filesystem_object_get_file_name(spl_filesystem_object *in
 	}
 } /* }}} */
 
+static int spl_filesystem_dir_read(spl_filesystem_object *intern TSRMLS_DC) /* {{{ */
+{
+	if (!intern->u.dir.dirp || !php_stream_readdir(intern->u.dir.dirp, &intern->u.dir.entry)) {
+		intern->u.dir.entry.d_name[0] = '\0';
+		return 0;
+	} else {
+		return 1;
+	}
+}
+/* }}} */
+
+#define IS_SLASH_AT(zs, pos) (IS_SLASH(zs[pos]))
+
 /* {{{ spl_filesystem_dir_open */
 /* open a directory resource */
 static void spl_filesystem_dir_open(spl_filesystem_object* intern, char *path TSRMLS_DC)
@@ -192,11 +208,7 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, char *path TS
 	intern->_path_len = strlen(path);
 	intern->u.dir.dirp = php_stream_opendir(path, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
 
-	if (intern->_path_len && (path[intern->_path_len-1] == '/'
-#if defined(PHP_WIN32) || defined(NETWARE)
-		|| path[intern->_path_len-1] == '\\'
-#endif
-	)) {
+	if (intern->_path_len && IS_SLASH_AT(path, intern->_path_len-1)) {
 		intern->_path = estrndup(path, --intern->_path_len);
 	} else {
 		intern->_path = estrndup(path, intern->_path_len);
@@ -207,9 +219,7 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, char *path TS
 		/* throw exception: should've been already happened */
 		intern->u.dir.entry.d_name[0] = '\0';
 	} else {
-		if (!php_stream_readdir(intern->u.dir.dirp, &intern->u.dir.entry)) {
-			intern->u.dir.entry.d_name[0] = '\0';
-		}
+		spl_filesystem_dir_read(intern TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -233,11 +243,7 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 		zend_list_addref(Z_RESVAL_P(intern->u.file.zcontext));
 	}
 
-	if (intern->file_name[intern->file_name_len-1] == '/'
-#if defined(PHP_WIN32) || defined(NETWARE)
-	  ||intern->file_name[intern->file_name_len-1] == '\\'
-#endif
-	) {
+	if (intern->file_name_len && IS_SLASH_AT(intern->file_name, intern->file_name_len-1)) {
 		intern->file_name_len--;
 	}
 
@@ -341,7 +347,6 @@ static spl_filesystem_object * spl_filesystem_object_create_info(spl_filesystem_
 		if (file_path && !use_copy) {
 			efree(file_path);
 		}
-		return NULL;
 #else
 		if (file_path && !use_copy) {
 			efree(file_path);
@@ -350,6 +355,7 @@ static spl_filesystem_object * spl_filesystem_object_create_info(spl_filesystem_
 		file_path_len = 1;
 		file_path = "/";
 #endif
+		return NULL;
 	}
 
 	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
@@ -503,7 +509,7 @@ static HashTable* spl_filesystem_object_get_debug_info(zval *obj, int *is_temp T
 		efree(pnstr);
 	}
 	if (intern->type == SPL_FS_DIR) {
-		pnstr = spl_gen_private_prop_name(spl_ce_RecursiveDirectoryIterator, "glob", sizeof("glob")-1, &pnlen TSRMLS_CC);
+		pnstr = spl_gen_private_prop_name(spl_ce_DirectoryIterator, "glob", sizeof("glob")-1, &pnlen TSRMLS_CC);
 		if (php_stream_is(intern->u.dir.dirp ,&php_glob_stream_ops)) {
 			add_assoc_stringl_ex(&zrv, pnstr, pnlen+1, intern->_path, intern->_path_len, 1);
 		} else {
@@ -537,21 +543,29 @@ static HashTable* spl_filesystem_object_get_debug_info(zval *obj, int *is_temp T
 }
 /* }}}} */
 
-/* {{{ proto void DirectoryIterator::__construct(string path)
- Cronstructs a new dir iterator from a path. */
-SPL_METHOD(DirectoryIterator, __construct)
+#define DIT_CTOR_FLAGS  0x00000001
+#define DIT_CTOR_GLOB   0x00000002
+
+void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, int ctor_flags) /* {{{ */
 {
 	spl_filesystem_object *intern;
 	char *path;
-	int len;
+	int parsed, len;
+	long flags;
 
-	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
+	php_set_error_handling(EH_THROW, spl_ce_UnexpectedValueException TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &path, &len) == FAILURE) {
+	if (ctor_flags & DIT_CTOR_FLAGS) {
+		flags = SPL_FILE_DIR_CURRENT_AS_FILEINFO;
+		parsed = zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &path, &len, &flags);
+	} else {
+		flags = 0;
+		parsed = zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &path, &len);
+	}
+	if (parsed == FAILURE) {
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 		return;
 	}
-
 	if (!len) {
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Directory name must not be empty.");
@@ -559,11 +573,26 @@ SPL_METHOD(DirectoryIterator, __construct)
 	}
 
 	intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	spl_filesystem_dir_open(intern, path TSRMLS_CC);
+	if ((ctor_flags & DIT_CTOR_GLOB) && strstr(path, "glob://") != path) {
+		spprintf(&path, 0, "glob://%s", path);
+		spl_filesystem_dir_open(intern, path TSRMLS_CC);
+		efree(path);
+	} else {
+		spl_filesystem_dir_open(intern, path TSRMLS_CC);
+	}
+
 	intern->u.dir.is_recursive = instanceof_function(intern->std.ce, spl_ce_RecursiveDirectoryIterator TSRMLS_CC) ? 1 : 0;
-	intern->flags = 0;
+	intern->flags = flags;
 
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto void DirectoryIterator::__construct(string path)
+ Cronstructs a new dir iterator from a path. */
+SPL_METHOD(DirectoryIterator, __construct)
+{
+	spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -577,9 +606,7 @@ SPL_METHOD(DirectoryIterator, rewind)
 	if (intern->u.dir.dirp) {
 		php_stream_rewinddir(intern->u.dir.dirp);
 	}
-	if (!intern->u.dir.dirp || !php_stream_readdir(intern->u.dir.dirp, &intern->u.dir.entry)) {
-		intern->u.dir.entry.d_name[0] = '\0';
-	}
+	spl_filesystem_dir_read(intern TSRMLS_CC);
 }
 /* }}} */
 
@@ -612,9 +639,7 @@ SPL_METHOD(DirectoryIterator, next)
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	intern->u.dir.index++;
-	if (!intern->u.dir.dirp || !php_stream_readdir(intern->u.dir.dirp, &intern->u.dir.entry)) {
-		intern->u.dir.entry.d_name[0] = '\0';
-	}
+	spl_filesystem_dir_read(intern TSRMLS_CC);
 	if (intern->file_name) {
 		efree(intern->file_name);
 		intern->file_name = NULL;
@@ -740,9 +765,9 @@ SPL_METHOD(SplFileInfo, getPathname)
 }
 /* }}} */
 
-/* {{{ proto string RecursiveDirectoryIterator::key()
+/* {{{ proto string FilesystemIterator::key()
    Return getPathname() or getFilename() depending on flags */
-SPL_METHOD(RecursiveDirectoryIterator, key)
+SPL_METHOD(FilesystemIterator, key)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
@@ -755,9 +780,9 @@ SPL_METHOD(RecursiveDirectoryIterator, key)
 }
 /* }}} */
 
-/* {{{ proto string RecursiveDirectoryIterator::current()
+/* {{{ proto string FilesystemIterator::current()
    Return getFilename(), getFileInfo() or $this depending on flags */
-SPL_METHOD(RecursiveDirectoryIterator, current)
+SPL_METHOD(FilesystemIterator, current)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
@@ -1042,34 +1067,17 @@ SPL_METHOD(SplFileInfo, getPathInfo)
 }
 /* }}} */
 
-/* {{{ proto void RecursiveDirectoryIterator::__construct(string path [, int flags])
+/* {{{ proto void FilesystemIterator::__construct(string path [, int flags])
  Cronstructs a new dir iterator from a path. */
-SPL_METHOD(RecursiveDirectoryIterator, __construct)
+SPL_METHOD(FilesystemIterator, __construct)
 {
-	spl_filesystem_object *intern;
-	char *path;
-	int len;
-	long flags = SPL_FILE_DIR_CURRENT_AS_FILEINFO;
-
-	php_set_error_handling(EH_THROW, spl_ce_UnexpectedValueException TSRMLS_CC);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &path, &len, &flags) == FAILURE) {
-		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-		return;
-	}
-
-	intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	spl_filesystem_dir_open(intern, path TSRMLS_CC);
-	intern->u.dir.is_recursive = instanceof_function(intern->std.ce, spl_ce_RecursiveDirectoryIterator TSRMLS_CC) ? 1 : 0;
-	intern->flags = flags;
-
-	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+	spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIT_CTOR_FLAGS);
 }
 /* }}} */
 
-/* {{{ proto void RecursiveDirectoryIterator::rewind()
+/* {{{ proto void FilesystemIterator::rewind()
    Rewind dir back to the start */
-SPL_METHOD(RecursiveDirectoryIterator, rewind)
+SPL_METHOD(FilesystemIterator, rewind)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
@@ -1078,24 +1086,20 @@ SPL_METHOD(RecursiveDirectoryIterator, rewind)
 		php_stream_rewinddir(intern->u.dir.dirp);
 	}
 	do {
-		if (!intern->u.dir.dirp || !php_stream_readdir(intern->u.dir.dirp, &intern->u.dir.entry)) {
-			intern->u.dir.entry.d_name[0] = '\0';
-		}
+		spl_filesystem_dir_read(intern TSRMLS_CC);
 	} while (spl_filesystem_is_dot(intern->u.dir.entry.d_name));
 }
 /* }}} */
 
-/* {{{ proto void RecursiveDirectoryIterator::next()
+/* {{{ proto void FilesystemIterator::next()
    Move to next entry */
-SPL_METHOD(RecursiveDirectoryIterator, next)
+SPL_METHOD(FilesystemIterator, next)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	intern->u.dir.index++;
 	do {
-		if (!intern->u.dir.dirp || !php_stream_readdir(intern->u.dir.dirp, &intern->u.dir.entry)) {
-			intern->u.dir.entry.d_name[0] = '\0';
-		}
+		spl_filesystem_dir_read(intern TSRMLS_CC);
 	} while (spl_filesystem_is_dot(intern->u.dir.entry.d_name));
 	if (intern->file_name) {
 		efree(intern->file_name);
@@ -1112,7 +1116,7 @@ SPL_METHOD(RecursiveDirectoryIterator, hasChildren)
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	
 	if (spl_filesystem_is_invalid_or_dot(intern->u.dir.entry.d_name)) {
-		RETURN_BOOL(0);
+		RETURN_FALSE;
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &allow_links) == FAILURE) {
 			return;
@@ -1121,7 +1125,7 @@ SPL_METHOD(RecursiveDirectoryIterator, hasChildren)
 		if (!allow_links) {
 			php_stat(intern->file_name, intern->file_name_len, FS_IS_LINK, return_value TSRMLS_CC);
 			if (zend_is_true(return_value)) {
-				RETURN_BOOL(0);
+				RETURN_FALSE;
 			}
 		}
 		php_stat(intern->file_name, intern->file_name_len, FS_IS_DIR, return_value TSRMLS_CC);
@@ -1133,16 +1137,18 @@ SPL_METHOD(RecursiveDirectoryIterator, hasChildren)
    Returns an iterator for the current entry if it is a directory */
 SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 {
-	zval zpath;
+	zval zpath, zflags;
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	spl_filesystem_object *subdir;
 	
 	spl_filesystem_object_get_file_name(intern TSRMLS_CC);
 
+	INIT_PZVAL(&zflags);
 	INIT_PZVAL(&zpath);
+	ZVAL_LONG(&zflags, intern->flags);
 	ZVAL_STRINGL(&zpath, intern->file_name, intern->file_name_len, 0);
 
-	spl_instantiate_arg_ex1(spl_ce_RecursiveDirectoryIterator, &return_value, 0, &zpath TSRMLS_CC);
+	spl_instantiate_arg_ex2(spl_ce_RecursiveDirectoryIterator, &return_value, 0, &zpath, &zflags TSRMLS_CC);
 	
 	subdir = (spl_filesystem_object*)zend_object_store_get_object(return_value TSRMLS_CC);
 	if (subdir) {
@@ -1154,7 +1160,6 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 		}
 		subdir->info_class = intern->info_class;
 		subdir->file_class = intern->file_class;
-		subdir->flags = intern->flags;
 		subdir->oth = intern->oth;
 	}
 }
@@ -1191,12 +1196,36 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPathname)
 }
 /* }}} */
 
-/* define an overloaded iterator structure */
-typedef struct {
-	zend_object_iterator  intern;
-	zval                  *current;
-	spl_filesystem_object *object;
-} spl_filesystem_dir_it;
+/* {{{ proto int RecursiveDirectoryIterator::__construct(string path [, int flags])
+ Cronstructs a new dir iterator from a path. */
+SPL_METHOD(RecursiveDirectoryIterator, __construct)
+{
+	spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIT_CTOR_FLAGS);
+}
+/* }}} */
+
+/* {{{ proto int GlobIterator::__construct(string path [, int flags])
+ Cronstructs a new dir iterator from a glob expression (no glob:// needed). */
+SPL_METHOD(GlobIterator, __construct)
+{
+	spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIT_CTOR_FLAGS|DIT_CTOR_GLOB);
+}
+/* }}} */
+
+/* {{{ proto int GlobIterator::cont()
+   Return the number of directories and files found by globbing */
+SPL_METHOD(GlobIterator, count)
+{
+	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (php_stream_is(intern->u.dir.dirp ,&php_glob_stream_ops)) {
+		RETURN_LONG(php_glob_stream_get_count(intern->u.dir.dirp, NULL));
+	} else {
+		/* should not happen */
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "GlobIterator lost glob state");
+	}
+}
+/* }}} */
 
 /* forward declarations to the iterator handlers */
 static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC);
@@ -1219,20 +1248,19 @@ zend_object_iterator_funcs spl_filesystem_dir_it_funcs = {
 /* {{{ spl_ce_dir_get_iterator */
 zend_object_iterator *spl_filesystem_dir_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator;
-	spl_filesystem_object *dir_object;
+	spl_filesystem_iterator *iterator;
+	spl_filesystem_object   *dir_object;
 
 	if (by_ref) {
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
-	iterator   = emalloc(sizeof(spl_filesystem_dir_it));
 	dir_object = (spl_filesystem_object*)zend_object_store_get_object(object TSRMLS_CC);
+	iterator   = spl_filesystem_object_to_iterator(dir_object);
 
 	Z_SET_REFCOUNT_P(object, Z_REFCOUNT_P(object) + 2);
 	iterator->intern.data = (void*)object;
 	iterator->intern.funcs = &spl_filesystem_dir_it_funcs;
 	iterator->current = object;
-	iterator->object = dir_object;
 	
 	return (zend_object_iterator*)iterator;
 }
@@ -1241,20 +1269,18 @@ zend_object_iterator *spl_filesystem_dir_get_iterator(zend_class_entry *ce, zval
 /* {{{ spl_filesystem_dir_it_dtor */
 static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
+	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
 
 	zval_ptr_dtor(&iterator->current);
 	zval_ptr_dtor((zval**)&iterator->intern.data);
-
-	efree(iterator);
+	iterator->intern.data = NULL; /* mark as unused */
 }
 /* }}} */
 	
 /* {{{ spl_filesystem_dir_it_valid */
 static int spl_filesystem_dir_it_valid(zend_object_iterator *iter TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
-	spl_filesystem_object *object   = iterator->object;
+	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
 
 	return object->u.dir.entry.d_name[0] != '\0' ? SUCCESS : FAILURE;
 }
@@ -1264,7 +1290,7 @@ static int spl_filesystem_dir_it_valid(zend_object_iterator *iter TSRMLS_DC)
 /* {{{ spl_filesystem_dir_it_current_data */
 static void spl_filesystem_dir_it_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
+	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
 	
 	*data = &iterator->current;
 }
@@ -1273,8 +1299,7 @@ static void spl_filesystem_dir_it_current_data(zend_object_iterator *iter, zval 
 /* {{{ spl_filesystem_dir_it_current_key */
 static int spl_filesystem_dir_it_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
-	spl_filesystem_object *object   = iterator->object;
+	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
 	
 	*int_key = object->u.dir.index;
 	return HASH_KEY_IS_LONG;
@@ -1284,13 +1309,10 @@ static int spl_filesystem_dir_it_current_key(zend_object_iterator *iter, char **
 /* {{{ spl_filesystem_dir_it_move_forward */
 static void spl_filesystem_dir_it_move_forward(zend_object_iterator *iter TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
-	spl_filesystem_object *object   = iterator->object;
+	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
 	
 	object->u.dir.index++;
-	if (!object->u.dir.dirp || !php_stream_readdir(object->u.dir.dirp, &object->u.dir.entry)) {
-		object->u.dir.entry.d_name[0] = '\0';
-	}
+	spl_filesystem_dir_read(object TSRMLS_CC);
 	if (object->file_name) {
 		efree(object->file_name);
 		object->file_name = NULL;
@@ -1301,38 +1323,34 @@ static void spl_filesystem_dir_it_move_forward(zend_object_iterator *iter TSRMLS
 /* {{{ spl_filesystem_dir_it_rewind */
 static void spl_filesystem_dir_it_rewind(zend_object_iterator *iter TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
-	spl_filesystem_object *object   = iterator->object;
+	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
 	
 	object->u.dir.index = 0;
 	if (object->u.dir.dirp) {
 		php_stream_rewinddir(object->u.dir.dirp);
 	}
-	if (!object->u.dir.dirp || !php_stream_readdir(object->u.dir.dirp, &object->u.dir.entry)) {
-		object->u.dir.entry.d_name[0] = '\0';
-	}
+	spl_filesystem_dir_read(object TSRMLS_CC);
 }
 /* }}} */
 
 /* {{{ spl_filesystem_tree_it_dtor */
 static void spl_filesystem_tree_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
+	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
 
 	if (iterator->current) {
 		zval_ptr_dtor(&iterator->current);
 	}
 	zval_ptr_dtor((zval**)&iterator->intern.data);
-
-	efree(iterator);
+	iterator->intern.data = NULL; /* mark as unused */
 }
 /* }}} */
 	
 /* {{{ spl_filesystem_tree_it_current_data */
 static void spl_filesystem_tree_it_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
-	spl_filesystem_object *object   = iterator->object;
+	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
+	spl_filesystem_object   *object   = spl_filesystem_iterator_to_object(iterator);
 
 	if (object->flags & SPL_FILE_DIR_CURRENT_AS_PATHNAME) {
 		if (!iterator->current) {
@@ -1357,8 +1375,7 @@ static void spl_filesystem_tree_it_current_data(zend_object_iterator *iter, zval
 /* {{{ spl_filesystem_tree_it_current_key */
 static int spl_filesystem_tree_it_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
-	spl_filesystem_object *object   = iterator->object;
+	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
 	
 	if (object->flags & SPL_FILE_DIR_KEY_AS_FILENAME) {
 		*str_key_len = strlen(object->u.dir.entry.d_name) + 1;
@@ -1375,14 +1392,12 @@ static int spl_filesystem_tree_it_current_key(zend_object_iterator *iter, char *
 /* {{{ spl_filesystem_tree_it_move_forward */
 static void spl_filesystem_tree_it_move_forward(zend_object_iterator *iter TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
-	spl_filesystem_object *object   = iterator->object;
+	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
+	spl_filesystem_object   *object   = spl_filesystem_iterator_to_object(iterator);
 	
 	object->u.dir.index++;
 	do {
-		if (!object->u.dir.dirp || !php_stream_readdir(object->u.dir.dirp, &object->u.dir.entry)) {
-			object->u.dir.entry.d_name[0] = '\0';
-		}
+		spl_filesystem_dir_read(object TSRMLS_CC);
 	} while (spl_filesystem_is_dot(object->u.dir.entry.d_name));
 	if (object->file_name) {
 		efree(object->file_name);
@@ -1398,17 +1413,15 @@ static void spl_filesystem_tree_it_move_forward(zend_object_iterator *iter TSRML
 /* {{{ spl_filesystem_tree_it_rewind */
 static void spl_filesystem_tree_it_rewind(zend_object_iterator *iter TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator = (spl_filesystem_dir_it *)iter;
-	spl_filesystem_object *object   = iterator->object;
+	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
+	spl_filesystem_object   *object   = spl_filesystem_iterator_to_object(iterator);
 	
 	object->u.dir.index = 0;
 	if (object->u.dir.dirp) {
 		php_stream_rewinddir(object->u.dir.dirp);
 	}
 	do {
-		if (!object->u.dir.dirp || !php_stream_readdir(object->u.dir.dirp, &object->u.dir.entry)) {
-			object->u.dir.entry.d_name[0] = '\0';
-		}
+		spl_filesystem_dir_read(object TSRMLS_CC);
 	} while (spl_filesystem_is_dot(object->u.dir.entry.d_name));
 	if (iterator->current) {
 		zval_ptr_dtor(&iterator->current);
@@ -1430,20 +1443,19 @@ zend_object_iterator_funcs spl_filesystem_tree_it_funcs = {
 /* {{{ spl_ce_dir_get_iterator */
 zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
-	spl_filesystem_dir_it *iterator;
+	spl_filesystem_iterator *iterator;
 	spl_filesystem_object *dir_object;
 
 	if (by_ref) {
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
-	iterator   = emalloc(sizeof(spl_filesystem_dir_it));
 	dir_object = (spl_filesystem_object*)zend_object_store_get_object(object TSRMLS_CC);
+	iterator   = spl_filesystem_object_to_iterator(dir_object);
 
 	Z_ADDREF_P(object);
 	iterator->intern.data = (void*)object;
 	iterator->intern.funcs = &spl_filesystem_tree_it_funcs;
 	iterator->current = NULL;
-	iterator->object = dir_object;
 	
 	return (zend_object_iterator*)iterator;
 }
@@ -1562,16 +1574,27 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_r_dir_hasChildren, 0, 0, 0)
 	ZEND_ARG_INFO(0, allow_links)
 ZEND_END_ARG_INFO()
 
+static const zend_function_entry spl_FilesystemIterator_functions[] = {
+	SPL_ME(FilesystemIterator, __construct,   arginfo_r_dir___construct, ZEND_ACC_PUBLIC)
+	SPL_ME(FilesystemIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FilesystemIterator, next,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FilesystemIterator, key,           NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FilesystemIterator, current,       NULL, ZEND_ACC_PUBLIC)
+	{NULL, NULL, NULL}
+};
+
 static const zend_function_entry spl_RecursiveDirectoryIterator_functions[] = {
 	SPL_ME(RecursiveDirectoryIterator, __construct,   arginfo_r_dir___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveDirectoryIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveDirectoryIterator, next,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveDirectoryIterator, key,           NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveDirectoryIterator, current,       NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, hasChildren,   arginfo_r_dir_hasChildren, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, getChildren,   NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, getSubPath,    NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, getSubPathname,NULL, ZEND_ACC_PUBLIC)
+	{NULL, NULL, NULL}
+};
+
+static const zend_function_entry spl_GlobIterator_functions[] = {
+	SPL_ME(GlobIterator, __construct,   arginfo_r_dir___construct, ZEND_ACC_PUBLIC)
+	SPL_ME(GlobIterator, count,         NULL,                      ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -2444,19 +2467,24 @@ PHP_MINIT_FUNCTION(spl_directory)
 
 	spl_ce_DirectoryIterator->get_iterator = spl_filesystem_dir_get_iterator;
 
-	REGISTER_SPL_SUB_CLASS_EX(RecursiveDirectoryIterator, DirectoryIterator, spl_filesystem_object_new, spl_RecursiveDirectoryIterator_functions);
+	REGISTER_SPL_SUB_CLASS_EX(FilesystemIterator, DirectoryIterator, spl_filesystem_object_new, spl_FilesystemIterator_functions);
+
+	REGISTER_SPL_CLASS_CONST_LONG(FilesystemIterator, "CURRENT_MODE_MASK",   SPL_FILE_DIR_CURRENT_MODE_MASK);
+	REGISTER_SPL_CLASS_CONST_LONG(FilesystemIterator, "CURRENT_AS_PATHNAME", SPL_FILE_DIR_CURRENT_AS_PATHNAME);
+	REGISTER_SPL_CLASS_CONST_LONG(FilesystemIterator, "CURRENT_AS_FILEINFO", SPL_FILE_DIR_CURRENT_AS_FILEINFO);
+	REGISTER_SPL_CLASS_CONST_LONG(FilesystemIterator, "CURRENT_AS_SELF",     0);
+	REGISTER_SPL_CLASS_CONST_LONG(FilesystemIterator, "KEY_MODE_MASK",       SPL_FILE_DIR_KEY_MODE_MASK);
+	REGISTER_SPL_CLASS_CONST_LONG(FilesystemIterator, "KEY_AS_PATHNAME",     0);
+	REGISTER_SPL_CLASS_CONST_LONG(FilesystemIterator, "KEY_AS_FILENAME",     SPL_FILE_DIR_KEY_AS_FILENAME);
+	REGISTER_SPL_CLASS_CONST_LONG(FilesystemIterator, "NEW_CURRENT_AND_KEY", SPL_FILE_DIR_KEY_AS_FILENAME|SPL_FILE_DIR_CURRENT_AS_FILEINFO);
+
+	spl_ce_FilesystemIterator->get_iterator = spl_filesystem_tree_get_iterator;
+
+	REGISTER_SPL_SUB_CLASS_EX(RecursiveDirectoryIterator, FilesystemIterator, spl_filesystem_object_new, spl_RecursiveDirectoryIterator_functions);
 	REGISTER_SPL_IMPLEMENTS(RecursiveDirectoryIterator, RecursiveIterator);
 
-	REGISTER_SPL_CLASS_CONST_LONG(RecursiveDirectoryIterator, "CURRENT_MODE_MASK",   SPL_FILE_DIR_CURRENT_MODE_MASK);
-	REGISTER_SPL_CLASS_CONST_LONG(RecursiveDirectoryIterator, "CURRENT_AS_PATHNAME", SPL_FILE_DIR_CURRENT_AS_PATHNAME);
-	REGISTER_SPL_CLASS_CONST_LONG(RecursiveDirectoryIterator, "CURRENT_AS_FILEINFO", SPL_FILE_DIR_CURRENT_AS_FILEINFO);
-	REGISTER_SPL_CLASS_CONST_LONG(RecursiveDirectoryIterator, "CURRENT_AS_SELF",     0);
-	REGISTER_SPL_CLASS_CONST_LONG(RecursiveDirectoryIterator, "KEY_MODE_MASK",       SPL_FILE_DIR_KEY_MODE_MASK);
-	REGISTER_SPL_CLASS_CONST_LONG(RecursiveDirectoryIterator, "KEY_AS_PATHNAME",     0);
-	REGISTER_SPL_CLASS_CONST_LONG(RecursiveDirectoryIterator, "KEY_AS_FILENAME",     SPL_FILE_DIR_KEY_AS_FILENAME);
-	REGISTER_SPL_CLASS_CONST_LONG(RecursiveDirectoryIterator, "NEW_CURRENT_AND_KEY", SPL_FILE_DIR_KEY_AS_FILENAME|SPL_FILE_DIR_CURRENT_AS_FILEINFO);
-
-	spl_ce_RecursiveDirectoryIterator->get_iterator = spl_filesystem_tree_get_iterator;
+	REGISTER_SPL_SUB_CLASS_EX(GlobIterator, FilesystemIterator, spl_filesystem_object_new, spl_GlobIterator_functions);
+	REGISTER_SPL_IMPLEMENTS(GlobIterator, Countable);
 
 	REGISTER_SPL_SUB_CLASS_EX(SplFileObject, SplFileInfo, spl_filesystem_object_new, spl_SplFileObject_functions);
 	REGISTER_SPL_IMPLEMENTS(SplFileObject, RecursiveIterator);

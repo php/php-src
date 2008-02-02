@@ -164,7 +164,9 @@ PHP_FUNCTION(class_implements)
 	SPL_ADD_CLASS(DirectoryIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(DomainException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(EmptyIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(FilesystemIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(FilterIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(GlobIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(InfiniteIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(InvalidArgumentException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(IteratorIterator, z_list, sub, allow, ce_flags); \
@@ -536,6 +538,9 @@ PHP_FUNCTION(spl_autoload_unregister)
 			efree(func_name);
 		}
 		RETURN_FALSE;
+	}
+	if (error) {
+		efree(error);
 	}
 
 	zend_str_tolower(func_name, func_name_len);
