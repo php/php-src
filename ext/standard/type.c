@@ -359,28 +359,22 @@ PHP_FUNCTION(is_scalar)
    Returns true if var is callable. */
 PHP_FUNCTION(is_callable)
 {
-	zval **var, **syntax_only, **callable_name;
-	char *name;
+	zval *var, **callable_name;
+	zval name;
 	zend_bool retval;
-	zend_bool syntax = 0;
-	int argc=ZEND_NUM_ARGS();
+	zend_bool syntax_only = 0;
 
-	if (argc < 1 || argc > 3 || zend_get_parameters_ex(argc, &var, &syntax_only, &callable_name) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|bZ", &var,
+							  &syntax_only, &callable_name) == FAILURE) {
+		return;
 	}
 
-	if (argc > 1) {
-		convert_to_boolean_ex(syntax_only);
-		syntax = Z_BVAL_PP(syntax_only);
-	}
-
-	syntax = syntax ? IS_CALLABLE_CHECK_SYNTAX_ONLY : 0;
-	if (argc > 2) {
-		retval = zend_is_callable(*var, syntax, &name);
-		zval_dtor(*callable_name);
-		ZVAL_STRING(*callable_name, name, 0);
+	syntax_only = syntax_only ? IS_CALLABLE_CHECK_SYNTAX_ONLY : 0;
+	if (ZEND_NUM_ARGS() > 2) {
+		retval = zend_is_callable(var, syntax_only, &name);
+		REPLACE_ZVAL_VALUE(callable_name, &name, 0);
 	} else {
-		retval = zend_is_callable(*var, syntax, NULL);
+		retval = zend_is_callable(var, syntax_only, NULL);
 	}
 
 	RETURN_BOOL(retval);
