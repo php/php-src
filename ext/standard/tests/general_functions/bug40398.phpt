@@ -78,11 +78,11 @@ new Derived_6('6');
 Base::__construct(1)
 Base::__construct(2)
 
-Warning: call_user_func_array() expects parameter 1 to be valid callback, string given in %sbug40398.php on line %d
+Strict Standards: call_user_func_array() expects parameter 1 to be a valid callback, non-static method Base::__construct() cannot be called statically, assuming $this from compatible context Derived_%d in %s on line %d
 
-Warning: call_user_func_array() expects parameter 1 to be valid callback, string given in %sbug40398.php on line %d
+Strict Standards: call_user_func_array() expects parameter 1 to be a valid callback, non-static method Base::__construct() cannot be called statically, assuming $this from compatible context Derived_%d in %s on line %d
 
-Warning: call_user_func_array() expects parameter 1 to be valid callback, array given in %sbug40398.php on line %d
+Strict Standards: call_user_func_array() expects parameter 1 to be a valid callback, non-static method Base::__construct() cannot be called statically, assuming $this from compatible context Derived_%d in %s on line %d
 
-Warning: call_user_func_array() expects parameter 1 to be valid callback, array given in %sbug40398.php on line %d
+Strict Standards: call_user_func_array() expects parameter 1 to be a valid callback, non-static method Base::__construct() cannot be called statically, assuming $this from compatible context Derived_%d in %s on line %d
 ===DONE===
