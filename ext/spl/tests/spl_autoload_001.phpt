@@ -108,15 +108,15 @@ catch(Exception $e)
 --EXPECTF--
 ===EMPTY===
 string(9) ".inc,.php"
-%stestclass.inc
+/home/felipe/php5/ext/spl/tests/testclass.inc
 Exception: Class TestClass could not be loaded
 ===()===
 Exception: Class TestClass could not be loaded
 ===(1)===
 Exception: Class TestClass could not be loaded
 ===(.inc,,.php.inc)===
-%stestclass
-%stestclass.php.inc
+/home/felipe/php5/ext/spl/tests/testclass
+/home/felipe/php5/ext/spl/tests/testclass.php.inc
 Exception: Class TestClass could not be loaded
 ===()===
 Exception: Class TestClass could not be loaded
@@ -131,8 +131,8 @@ bool(false)
 ===LOAD===
 TestFunc1(TestClass)
 TestFunc2(TestClass)
-%stestclass.class.inc
+/home/felipe/php5/ext/spl/tests/testclass.class.inc
 bool(true)
 ===NOFUNCTION===
-Exception: Function 'unavailable_autoload_function' not found
+Exception: Function 'unavailable_autoload_function' not found (function 'unavailable_autoload_function' not found or invalid function name)
 ===DONE===
