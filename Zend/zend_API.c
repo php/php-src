@@ -2767,6 +2767,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 					severity = E_STRICT;
 					verb = "should not";
 				} else {
+					/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
 					severity = E_ERROR;
 					verb = "cannot";
 				}

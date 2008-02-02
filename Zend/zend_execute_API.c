@@ -1150,6 +1150,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				severity = E_STRICT;
 				verb = "should not";
 			} else {
+				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
 				severity = E_ERROR;
 				verb = "cannot";
 			}
