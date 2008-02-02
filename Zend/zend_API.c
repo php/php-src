@@ -2652,6 +2652,10 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 	zend_function *fptr;
 	HashTable *ftable;
 
+	if (error) {
+		*error = NULL;
+	}
+
 	*ce_ptr = NULL;
 	*fptr_ptr = NULL;
 
@@ -2792,12 +2796,22 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 			if (retval && (check_flags & IS_CALLABLE_CHECK_NO_ACCESS) == 0) {
 				if (fptr->op_array.fn_flags & ZEND_ACC_PRIVATE) {
 					if (!zend_check_private(fptr, *zobj_ptr_ptr ? Z_OBJCE_PP(*zobj_ptr_ptr) : EG(scope), lmname, mlen TSRMLS_CC)) {
-						if (error) zend_spprintf(error, 0, "cannot access private method %s::%s()", (*ce_ptr)->name, fptr->common.function_name);
+						if (error) {
+							if (*error) {
+								efree(*error);
+							}
+							zend_spprintf(error, 0, "cannot access private method %s::%s()", (*ce_ptr)->name, fptr->common.function_name);
+						}
 						retval = 0;
 					}
 				} else if ((fptr->common.fn_flags & ZEND_ACC_PROTECTED)) {
 					if (!zend_check_protected(fptr->common.scope, EG(scope))) {
-						if (error) zend_spprintf(error, 0, "cannot access protected method %s::%s()", (*ce_ptr)->name, fptr->common.function_name);
+						if (error) {
+							if (*error) {
+								efree(*error);
+							}
+							zend_spprintf(error, 0, "cannot access protected method %s::%s()", (*ce_ptr)->name, fptr->common.function_name);
+						}
 						retval = 0;
 					}
 				}
