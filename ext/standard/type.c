@@ -360,7 +360,7 @@ PHP_FUNCTION(is_scalar)
 PHP_FUNCTION(is_callable)
 {
 	zval *var, **callable_name;
-	zval name;
+	char *name;
 	zend_bool retval;
 	zend_bool syntax_only = 0;
 
@@ -372,7 +372,8 @@ PHP_FUNCTION(is_callable)
 	syntax_only = syntax_only ? IS_CALLABLE_CHECK_SYNTAX_ONLY : 0;
 	if (ZEND_NUM_ARGS() > 2) {
 		retval = zend_is_callable(var, syntax_only, &name);
-		REPLACE_ZVAL_VALUE(callable_name, &name, 0);
+		zval_dtor(*callable_name);
+		ZVAL_STRING(*callable_name, name, 0);
 	} else {
 		retval = zend_is_callable(var, syntax_only, NULL);
 	}
