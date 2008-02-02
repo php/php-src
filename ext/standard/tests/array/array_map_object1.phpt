@@ -121,29 +121,35 @@ echo "Done";
 *** Testing array_map() : object functionality ***
 -- simple class with public variable and method --
 
-Warning: array_map() expects parameter 1 to be valid callback, array given in %s on line %d%d
+Strict Standards: array_map() expects parameter 1 to be a valid callback, non-static method SimpleClass::square() should not be called statically in %s on line %d
+
+Warning: array_map() expects parameter 2 to be a valid callback, second array member is not a valid method in %s on line %d
 NULL
 
 -- simple class with private variable and method --
 
-Warning: array_map() expects parameter 1 to be valid callback, array given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, cannot access private method SimpleClassPri::add() in %s on line %d
 NULL
 
 -- simple class with protected variable and method --
 
-Warning: array_map() expects parameter 1 to be valid callback, array given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, cannot access protected method SimpleClassPro::mul() in %s on line %d
 NULL
 
 -- class without members --
-Warning: array_map() expects parameter 1 to be valid callback, array given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, array must have exactly two members in %s on line %d
 NULL
 
 -- abstract class --
-Warning: array_map() expects parameter 1 to be valid callback, array given in %s on line %d%d
+Strict Standards: array_map() expects parameter 1 to be a valid callback, non-static method ChildClass::emptyFunction() should not be called statically in %s on line %d
+
+Warning: array_map() expects parameter 2 to be a valid callback, second array member is not a valid method in %s on line %d
 NULL
 
 -- class with final method --
-Warning: array_map() expects parameter 1 to be valid callback, array given in %s on line %d%d
+Strict Standards: array_map() expects parameter 1 to be a valid callback, non-static method FinalClass::finalMethod() should not be called statically in %s on line %d
+
+Warning: array_map() expects parameter 2 to be a valid callback, second array member is not a valid method in %s on line %d
 NULL
 
 -- class with static members --
@@ -154,10 +160,10 @@ array(2) {
   int(4)
 }
 
-Warning: array_map() expects parameter 1 to be valid callback, array given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, cannot access private method StaticClass::cube() in %s on line %d
 NULL
 
-Warning: array_map() expects parameter 1 to be valid callback, array given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, cannot access protected method StaticClass::retVal() in %s on line %d
 NULL
 -- class implementing an interface --
 array(2) {
