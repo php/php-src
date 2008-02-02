@@ -590,6 +590,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 						*severity = E_STRICT;
 						zend_spprintf(error, 0, "to be a valid callback, %s", is_callable_error);
 						efree(is_callable_error);
+						*spec = spec_walk;
 						return "";
 					}
 					break;
