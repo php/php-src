@@ -1,5 +1,7 @@
 --TEST--
 Test vsprintf() function : usage variations - string formats with non-string values
+--INI--
+precision=12
 --FILE--
 <?php
 /* Prototype  : string vsprintf(string format, array args)
@@ -72,10 +74,10 @@ echo "Done";
 *** Testing vsprintf() : string formats and non-string values ***
 
 -- Iteration 1 --
-string(177) "2.2 0.2 10.2 
+string(174) "2.2 0.2 10.2 
    123456.234 s -1234.6789 1234.6789
          2000 2000       -400000000000 2200
-   12345.78 12.000000011111 -12.00000111111 -123456.234
+   12345.78 12.0000000111 -12.0000011111 -123456.234
    10.2 123456.234 2.2 0.2"
 
 -- Iteration 2 --
