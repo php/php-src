@@ -4,8 +4,8 @@
  * @brief   Class Tree example
  * @ingroup Examples
  * @author  Marcus Boerger
- * @date    2003 - 2005
- * @version 1.0
+ * @date    2003 - 2008
+ * @version 1.1
  *
  * Usage: php class_tree.php \<class\>
  *
@@ -38,17 +38,25 @@ class SubClasses extends RecursiveArrayIterator
 	{
 		foreach(get_declared_classes() as $cname)
 		{
-			if (strcasecmp(get_parent_class($cname), $base) == 0)
+			$parent = get_parent_class($cname);
+			if (strcasecmp($parent, $base) == 0)
 			{
 				$this->offsetSet($cname, new SubClasses($cname));
 			}
 			if ($check_interfaces)
 			{
+				if ($parent)
+				{
+					$parent_imp = class_implements($parent);
+				}
 				foreach(class_implements($cname) as $iname)
 				{
 					if (strcasecmp($iname, $base) == 0)
 					{
-						$this->offsetSet($cname, new SubClasses($cname));
+						if (!$parent || !in_array($iname, $parent_imp))
+						{
+							$this->offsetSet($cname, new SubClasses($cname));
+						}
 					}
 				}
 			}
@@ -66,13 +74,31 @@ class SubClasses extends RecursiveArrayIterator
 				}
 			}
 		}
+		$this->uksort('strnatcasecmp');
 	}
 
 	/** @return key() since that is the name we need
 	 */
 	function current()
 	{
-		return parent::key();
+		$result = parent::key();
+		$parent = get_parent_class($result);
+		if ($parent)
+		{
+			$interfaces = array_diff(class_implements($result), class_implements($parent));
+			if ($interfaces)
+			{
+				$implements = array();
+				foreach($interfaces as $interface)
+				{
+					$implements = array_merge($implements, class_implements($interface));
+				}
+				$interfaces = array_diff($interfaces, $implements);
+				natcasesort($interfaces);
+				$result .= ' (' . join(', ', $interfaces) . ')';
+			}
+		}
+		return $result;
 	}
 }
 
