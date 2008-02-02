@@ -2376,7 +2376,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		*ce_ptr = ce_org;
 	} else {
 		/* We already checked for plain function before. */
-		if (error) zend_spprintf(error, 0, "function '%s' not found or invalid function name", Z_STRVAL_P(callable)[0]);
+		if (error) zend_spprintf(error, 0, "function '%s' not found or invalid function name", Z_STRVAL_P(callable));
 		return 0;
 	}
 
