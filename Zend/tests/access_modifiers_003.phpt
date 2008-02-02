@@ -10,4 +10,4 @@ final final class test {
 echo "Done\n";
 ?>
 --EXPECTF--	
-Parse error: syntax error, unexpected T_FINAL, expecting T_CLASS in %s on line %d
+Parse error: parse error, expecting `T_CLASS' in %s on line %d
