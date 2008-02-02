@@ -1,3 +1,563 @@
+2008-02-01  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ext/spl/php_spl.c:
+      - Fix build, thanks Christian Rodriguez for noticing
+
+2008-02-01  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/tests/math/bindec_basic.phpt
+      ext/standard/tests/math/bindec_basic.phpt
+      ext/standard/tests/math/bindec_basic_64bit.phpt
+      ext/standard/tests/math/bindec_basic_64bit.phpt
+      ext/standard/tests/math/bindec_basic_64bit.phpt:
+      fix test, add 64bit version
+
+2008-02-01  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.c:
+      Small tweak.  Need to make array and string callback syntax behave the
+      same way.  Also change "cannot" to "should not" since we obviously
+      "can" make the call.
+
+2008-02-01  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ext/standard/type.c:
+      [DOC]
+      - Fix callable/static mess, the following will now all result in a
+      E_STRICT
+        . binding a dynamic function as a static callback
+        . static call of a dynamic function
+        . is_callable() on a static binding to a dynamic function
+
+2008-02-01  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      MFH: Added new parameter for strstr(), stristr()
+
+2008-02-01  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * generate_phpt.php
+      generate_phpt.php:
+      
+      file generate_phpt.php was initially added on branch PHP_5_3.
+
+2008-02-01  Felipe Pena  <felipensp@gmail.com>
+
+    * NEWS:
+      The new parameter was merged to 5.3 [DOC]
+
+2008-02-01  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/math/atan2_basic.phpt
+      ext/standard/tests/math/atan2_basic.phpt
+      ext/standard/tests/math/atan2_error.phpt
+      ext/standard/tests/math/atan2_error.phpt
+      ext/standard/tests/math/base_convert_basic.phpt
+      ext/standard/tests/math/base_convert_basic.phpt
+      ext/standard/tests/math/base_convert_error.phpt
+      ext/standard/tests/math/base_convert_error.phpt
+      ext/standard/tests/math/bindec_basic.phpt
+      ext/standard/tests/math/bindec_basic.phpt
+      ext/standard/tests/math/bindec_error.phpt
+      ext/standard/tests/math/bindec_error.phpt
+      ext/standard/tests/math/constants_basic.phpt
+      ext/standard/tests/math/constants_basic.phpt
+      ext/standard/tests/math/decbin_basic.phpt
+      ext/standard/tests/math/decbin_basic.phpt
+      ext/standard/tests/math/decbin_error.phpt
+      ext/standard/tests/math/decbin_error.phpt:
+      A few new tests for math functions - Note the "constants" test will fail on
+      Windows - Bug 42143.
+
+    * ext/standard/tests/math/atan2_basic.phpt
+      ext/standard/tests/math/atan2_basic.phpt
+      ext/standard/tests/math/atan2_basic.phpt
+      ext/standard/tests/math/atan2_error.phpt
+      ext/standard/tests/math/atan2_error.phpt
+      ext/standard/tests/math/atan2_error.phpt
+      ext/standard/tests/math/base_convert_basic.phpt
+      ext/standard/tests/math/base_convert_basic.phpt
+      ext/standard/tests/math/base_convert_basic.phpt
+      ext/standard/tests/math/base_convert_error.phpt
+      ext/standard/tests/math/base_convert_error.phpt
+      ext/standard/tests/math/base_convert_error.phpt
+      ext/standard/tests/math/bindec_basic.phpt
+      ext/standard/tests/math/bindec_basic.phpt
+      ext/standard/tests/math/bindec_basic.phpt
+      ext/standard/tests/math/bindec_error.phpt
+      ext/standard/tests/math/bindec_error.phpt
+      ext/standard/tests/math/bindec_error.phpt
+      ext/standard/tests/math/constants_basic.phpt
+      ext/standard/tests/math/constants_basic.phpt
+      ext/standard/tests/math/constants_basic.phpt
+      ext/standard/tests/math/decbin_basic.phpt
+      ext/standard/tests/math/decbin_basic.phpt
+      ext/standard/tests/math/decbin_basic.phpt
+      ext/standard/tests/math/decbin_error.phpt
+      ext/standard/tests/math/decbin_error.phpt
+      ext/standard/tests/math/decbin_error.phpt:
+        1.1.4;
+      A few new tests for math functions
+
+2008-02-01  Robert Nicholson  <rob_nicholson@uk.ibm.com>
+
+    * (PHP_5_2)
+      ext/gd/tests/gd_info_basic.phpt
+      ext/gd/tests/gd_info_basic.phpt
+      ext/gd/tests/image_type_to_mime_type_basic.phpt
+      ext/gd/tests/image_type_to_mime_type_basic.phpt
+      ext/gd/tests/imagecopyresampled_basic.phpt
+      ext/gd/tests/imagecopyresampled_basic.phpt
+      ext/gd/tests/imagedashedline_basic.phpt
+      ext/gd/tests/imagedashedline_basic.phpt
+      ext/gd/tests/imagefilledpolygon_basic.phpt
+      ext/gd/tests/imagefilledpolygon_basic.phpt
+      ext/gd/tests/imagepolygon_basic.phpt
+      ext/gd/tests/imagepolygon_basic.phpt:
+      - a few more gd tests (committed on behalf of andy wharmby)
+
+    * ext/gd/tests/gd_info_basic.phpt
+      ext/gd/tests/gd_info_basic.phpt
+      ext/gd/tests/gd_info_basic.phpt
+      ext/gd/tests/image_type_to_mime_type_basic.phpt
+      ext/gd/tests/image_type_to_mime_type_basic.phpt
+      ext/gd/tests/image_type_to_mime_type_basic.phpt
+      ext/gd/tests/imagecopyresampled_basic.phpt
+      ext/gd/tests/imagecopyresampled_basic.phpt
+      ext/gd/tests/imagecopyresampled_basic.phpt
+      ext/gd/tests/imagedashedline_basic.phpt
+      ext/gd/tests/imagedashedline_basic.phpt
+      ext/gd/tests/imagedashedline_basic.phpt
+      ext/gd/tests/imagefilledpolygon_basic.phpt
+      ext/gd/tests/imagefilledpolygon_basic.phpt
+      ext/gd/tests/imagefilledpolygon_basic.phpt
+      ext/gd/tests/imagepolygon_basic.phpt
+      ext/gd/tests/imagepolygon_basic.phpt
+      ext/gd/tests/imagepolygon_basic.phpt:
+        1.1.4;
+      - a few more gd tests (committed on behalf of andy wharmby)
+
+2008-02-01  Josie Messa  <josmessa@uk.ibm.com>
+
+    * ext/mbstring/tests/mb_convert_encoding_basic.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_basic.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation1.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation2.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation3.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation4.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation5.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation6.phpt
+      ext/mbstring/tests/mb_ereg_basic.phpt
+      ext/mbstring/tests/mb_ereg_error.phpt
+      ext/mbstring/tests/mb_ereg_variation1.phpt
+      ext/mbstring/tests/mb_ereg_variation2.phpt
+      ext/mbstring/tests/mb_ereg_variation3.phpt
+      ext/mbstring/tests/mb_ereg_variation4.phpt
+      ext/mbstring/tests/mb_ereg_variation5.phpt
+      ext/mbstring/tests/mb_ereg_variation6.phpt
+      ext/mbstring/tests/mb_ereg_variation7.phpt
+      ext/mbstring/tests/mb_internal_encoding_basic.phpt
+      ext/mbstring/tests/mb_internal_encoding_error1.phpt
+      ext/mbstring/tests/mb_internal_encoding_error2.phpt
+      ext/mbstring/tests/mb_internal_encoding_variation1.phpt
+      ext/mbstring/tests/mb_internal_encoding_variation2.phpt
+      ext/mbstring/tests/mb_regex_encoding_basic.phpt
+      ext/mbstring/tests/mb_regex_encoding_error1.phpt
+      ext/mbstring/tests/mb_regex_encoding_error2.phpt
+      ext/mbstring/tests/mb_regex_encoding_variation1.phpt
+      ext/mbstring/tests/mb_regex_encoding_variation2.phpt
+      ext/mbstring/tests/mb_strlen_basic.phpt
+      ext/mbstring/tests/mb_strlen_error1.phpt
+      ext/mbstring/tests/mb_strlen_error2.phpt
+      ext/mbstring/tests/mb_strlen_variation1.phpt
+      ext/mbstring/tests/mb_strlen_variation2.phpt
+      ext/mbstring/tests/mb_strlen_variation3.phpt
+      ext/mbstring/tests/mb_strpos_basic.phpt
+      ext/mbstring/tests/mb_strpos_error1.phpt
+      ext/mbstring/tests/mb_strpos_error2.phpt
+      ext/mbstring/tests/mb_strpos_variation1.phpt
+      ext/mbstring/tests/mb_strpos_variation2.phpt
+      ext/mbstring/tests/mb_strpos_variation3.phpt
+      ext/mbstring/tests/mb_strpos_variation4.phpt
+      ext/mbstring/tests/mb_strpos_variation5.phpt
+      ext/mbstring/tests/mb_strrpos_basic.phpt
+      ext/mbstring/tests/mb_strrpos_error1.phpt
+      ext/mbstring/tests/mb_strrpos_error2.phpt
+      ext/mbstring/tests/mb_strrpos_variation1.phpt
+      ext/mbstring/tests/mb_strrpos_variation2.phpt
+      ext/mbstring/tests/mb_strrpos_variation3.phpt
+      ext/mbstring/tests/mb_strrpos_variation4.phpt
+      ext/mbstring/tests/mb_strrpos_variation5.phpt
+      ext/mbstring/tests/mb_strrpos_variation6.phpt
+      ext/mbstring/tests/mb_strtolower_basic.phpt
+      ext/mbstring/tests/mb_strtolower_error1.phpt
+      ext/mbstring/tests/mb_strtolower_error2.phpt
+      ext/mbstring/tests/mb_strtolower_variation1.phpt
+      ext/mbstring/tests/mb_strtolower_variation2.phpt
+      ext/mbstring/tests/mb_strtolower_variation3.phpt
+      ext/mbstring/tests/mb_strtolower_variation4.phpt
+      ext/mbstring/tests/mb_strtoupper_basic.phpt
+      ext/mbstring/tests/mb_strtoupper_error1.phpt
+      ext/mbstring/tests/mb_strtoupper_error2.phpt
+      ext/mbstring/tests/mb_strtoupper_variation1.phpt
+      ext/mbstring/tests/mb_strtoupper_variation2.phpt
+      ext/mbstring/tests/mb_strtoupper_variation3.phpt
+      ext/mbstring/tests/mb_strtoupper_variation4.phpt
+      ext/mbstring/tests/mb_substr_basic.phpt
+      ext/mbstring/tests/mb_substr_count_basic.phpt
+      ext/mbstring/tests/mb_substr_count_error1.phpt
+      ext/mbstring/tests/mb_substr_count_error2.phpt
+      ext/mbstring/tests/mb_substr_count_variation1.phpt
+      ext/mbstring/tests/mb_substr_count_variation2.phpt
+      ext/mbstring/tests/mb_substr_count_variation3.phpt
+      ext/mbstring/tests/mb_substr_count_variation4.phpt
+      ext/mbstring/tests/mb_substr_error1.phpt
+      ext/mbstring/tests/mb_substr_error2.phpt
+      ext/mbstring/tests/mb_substr_variation1.phpt
+      ext/mbstring/tests/mb_substr_variation2.phpt
+      ext/mbstring/tests/mb_substr_variation3.phpt
+      ext/mbstring/tests/mb_substr_variation4.phpt
+      ext/mbstring/tests/mb_substr_variation5.phpt:
+      - Committing new tests for MBString extensions
+      - The tests listed in the following link will fail as they are adjusted
+      to expose bugs
+      (more details here: http://news.php.net/php.qa/62382)
+
+    * (PHP_5_3)
+      ext/mbstring/tests/mb_convert_encoding_basic.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_basic.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation1.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation2.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation3.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation4.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation5.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation6.phpt
+      ext/mbstring/tests/mb_ereg_basic.phpt
+      ext/mbstring/tests/mb_ereg_error.phpt
+      ext/mbstring/tests/mb_ereg_variation1.phpt
+      ext/mbstring/tests/mb_ereg_variation2.phpt
+      ext/mbstring/tests/mb_ereg_variation3.phpt
+      ext/mbstring/tests/mb_ereg_variation4.phpt
+      ext/mbstring/tests/mb_ereg_variation5.phpt
+      ext/mbstring/tests/mb_ereg_variation6.phpt
+      ext/mbstring/tests/mb_ereg_variation7.phpt
+      ext/mbstring/tests/mb_internal_encoding_basic.phpt
+      ext/mbstring/tests/mb_internal_encoding_error1.phpt
+      ext/mbstring/tests/mb_internal_encoding_error2.phpt
+      ext/mbstring/tests/mb_internal_encoding_variation1.phpt
+      ext/mbstring/tests/mb_internal_encoding_variation2.phpt
+      ext/mbstring/tests/mb_regex_encoding_basic.phpt
+      ext/mbstring/tests/mb_regex_encoding_error1.phpt
+      ext/mbstring/tests/mb_regex_encoding_error2.phpt
+      ext/mbstring/tests/mb_regex_encoding_variation1.phpt
+      ext/mbstring/tests/mb_strlen_basic.phpt
+      ext/mbstring/tests/mb_strlen_error1.phpt
+      ext/mbstring/tests/mb_strlen_error2.phpt
+      ext/mbstring/tests/mb_strlen_variation1.phpt
+      ext/mbstring/tests/mb_strlen_variation2.phpt
+      ext/mbstring/tests/mb_strlen_variation3.phpt
+      ext/mbstring/tests/mb_strpos_basic.phpt
+      ext/mbstring/tests/mb_strpos_error1.phpt
+      ext/mbstring/tests/mb_strpos_error2.phpt
+      ext/mbstring/tests/mb_strpos_variation1.phpt
+      ext/mbstring/tests/mb_strpos_variation2.phpt
+      ext/mbstring/tests/mb_strpos_variation3.phpt
+      ext/mbstring/tests/mb_strpos_variation4.phpt
+      ext/mbstring/tests/mb_strrpos_basic.phpt
+      ext/mbstring/tests/mb_strrpos_error1.phpt
+      ext/mbstring/tests/mb_strrpos_error2.phpt
+      ext/mbstring/tests/mb_strrpos_variation1.phpt
+      ext/mbstring/tests/mb_strrpos_variation2.phpt
+      ext/mbstring/tests/mb_strrpos_variation3.phpt
+      ext/mbstring/tests/mb_strrpos_variation4.phpt
+      ext/mbstring/tests/mb_strrpos_variation5.phpt
+      ext/mbstring/tests/mb_strtolower_basic.phpt
+      ext/mbstring/tests/mb_strtolower_error1.phpt
+      ext/mbstring/tests/mb_strtolower_error2.phpt
+      ext/mbstring/tests/mb_strtolower_variation1.phpt
+      ext/mbstring/tests/mb_strtolower_variation2.phpt
+      ext/mbstring/tests/mb_strtolower_variation3.phpt
+      ext/mbstring/tests/mb_strtolower_variation4.phpt
+      ext/mbstring/tests/mb_strtoupper_basic.phpt
+      ext/mbstring/tests/mb_strtoupper_error1.phpt
+      ext/mbstring/tests/mb_strtoupper_error2.phpt
+      ext/mbstring/tests/mb_strtoupper_variation1.phpt
+      ext/mbstring/tests/mb_strtoupper_variation2.phpt
+      ext/mbstring/tests/mb_strtoupper_variation3.phpt
+      ext/mbstring/tests/mb_strtoupper_variation4.phpt
+      ext/mbstring/tests/mb_substr_basic.phpt
+      ext/mbstring/tests/mb_substr_count_basic.phpt
+      ext/mbstring/tests/mb_substr_count_error1.phpt
+      ext/mbstring/tests/mb_substr_count_error2.phpt
+      ext/mbstring/tests/mb_substr_count_variation1.phpt
+      ext/mbstring/tests/mb_substr_count_variation2.phpt
+      ext/mbstring/tests/mb_substr_count_variation3.phpt
+      ext/mbstring/tests/mb_substr_error1.phpt
+      ext/mbstring/tests/mb_substr_error2.phpt
+      ext/mbstring/tests/mb_substr_variation1.phpt
+      ext/mbstring/tests/mb_substr_variation2.phpt
+      ext/mbstring/tests/mb_substr_variation3.phpt
+      ext/mbstring/tests/mb_substr_variation4.phpt
+      ext/mbstring/tests/mb_substr_variation5.phpt:
+      - Committing new tests for MBString extension.
+      More details can be found here: http://news.php.net/php.qa/62382
+
+    * ext/mbstring/tests/mb_convert_encoding_basic.phpt
+      ext/mbstring/tests/mb_convert_encoding_basic.phpt
+      ext/mbstring/tests/mb_convert_encoding_basic.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation1.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation1.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation1.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation2.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation2.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation2.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation3.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation3.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation3.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation4.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation4.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation4.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation5.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation6.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation6.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation6.phpt
+      ext/mbstring/tests/mb_ereg_basic.phpt
+      ext/mbstring/tests/mb_ereg_basic.phpt
+      ext/mbstring/tests/mb_ereg_basic.phpt
+      ext/mbstring/tests/mb_ereg_error.phpt
+      ext/mbstring/tests/mb_ereg_error.phpt
+      ext/mbstring/tests/mb_ereg_error.phpt
+      ext/mbstring/tests/mb_ereg_variation1.phpt
+      ext/mbstring/tests/mb_ereg_variation1.phpt
+      ext/mbstring/tests/mb_ereg_variation1.phpt
+      ext/mbstring/tests/mb_ereg_variation2.phpt
+      ext/mbstring/tests/mb_ereg_variation2.phpt
+      ext/mbstring/tests/mb_ereg_variation2.phpt
+      ext/mbstring/tests/mb_ereg_variation3.phpt
+      ext/mbstring/tests/mb_ereg_variation3.phpt
+      ext/mbstring/tests/mb_ereg_variation3.phpt
+      ext/mbstring/tests/mb_ereg_variation4.phpt
+      ext/mbstring/tests/mb_ereg_variation4.phpt
+      ext/mbstring/tests/mb_ereg_variation4.phpt
+      ext/mbstring/tests/mb_ereg_variation5.phpt
+      ext/mbstring/tests/mb_ereg_variation5.phpt
+      ext/mbstring/tests/mb_ereg_variation5.phpt
+      ext/mbstring/tests/mb_ereg_variation7.phpt
+      ext/mbstring/tests/mb_ereg_variation7.phpt
+      ext/mbstring/tests/mb_ereg_variation7.phpt
+      ext/mbstring/tests/mb_internal_encoding_error2.phpt
+      ext/mbstring/tests/mb_internal_encoding_error2.phpt
+      ext/mbstring/tests/mb_internal_encoding_error2.phpt
+      ext/mbstring/tests/mb_internal_encoding_variation1.phpt
+      ext/mbstring/tests/mb_internal_encoding_variation1.phpt
+      ext/mbstring/tests/mb_internal_encoding_variation1.phpt
+      ext/mbstring/tests/mb_internal_encoding_variation2.phpt
+      ext/mbstring/tests/mb_internal_encoding_variation2.phpt
+      ext/mbstring/tests/mb_internal_encoding_variation2.phpt
+      ext/mbstring/tests/mb_regex_encoding_basic.phpt
+      ext/mbstring/tests/mb_regex_encoding_basic.phpt
+      ext/mbstring/tests/mb_regex_encoding_basic.phpt
+      ext/mbstring/tests/mb_regex_encoding_error1.phpt
+      ext/mbstring/tests/mb_regex_encoding_error1.phpt
+      ext/mbstring/tests/mb_regex_encoding_error1.phpt
+      ext/mbstring/tests/mb_regex_encoding_error2.phpt
+      ext/mbstring/tests/mb_regex_encoding_error2.phpt
+      ext/mbstring/tests/mb_regex_encoding_error2.phpt
+      ext/mbstring/tests/mb_strlen_basic.phpt
+      ext/mbstring/tests/mb_strlen_basic.phpt
+      ext/mbstring/tests/mb_strlen_basic.phpt
+      ext/mbstring/tests/mb_strlen_error1.phpt
+      ext/mbstring/tests/mb_strlen_error1.phpt
+      ext/mbstring/tests/mb_strlen_error1.phpt
+      ext/mbstring/tests/mb_strlen_error2.phpt
+      ext/mbstring/tests/mb_strlen_error2.phpt
+      ext/mbstring/tests/mb_strlen_error2.phpt
+      ext/mbstring/tests/mb_strlen_variation1.phpt
+      ext/mbstring/tests/mb_strlen_variation1.phpt
+      ext/mbstring/tests/mb_strlen_variation1.phpt
+      ext/mbstring/tests/mb_strlen_variation2.phpt
+      ext/mbstring/tests/mb_strlen_variation2.phpt
+      ext/mbstring/tests/mb_strlen_variation2.phpt
+      ext/mbstring/tests/mb_strlen_variation3.phpt
+      ext/mbstring/tests/mb_strlen_variation3.phpt
+      ext/mbstring/tests/mb_strlen_variation3.phpt
+      ext/mbstring/tests/mb_strpos_basic.phpt
+      ext/mbstring/tests/mb_strpos_basic.phpt
+      ext/mbstring/tests/mb_strpos_basic.phpt
+      ext/mbstring/tests/mb_strpos_error1.phpt
+      ext/mbstring/tests/mb_strpos_error1.phpt
+      ext/mbstring/tests/mb_strpos_error1.phpt
+      ext/mbstring/tests/mb_strpos_error2.phpt
+      ext/mbstring/tests/mb_strpos_error2.phpt
+      ext/mbstring/tests/mb_strpos_error2.phpt
+      ext/mbstring/tests/mb_strpos_variation1.phpt
+      ext/mbstring/tests/mb_strpos_variation1.phpt
+      ext/mbstring/tests/mb_strpos_variation1.phpt
+      ext/mbstring/tests/mb_strpos_variation3.phpt
+      ext/mbstring/tests/mb_strpos_variation3.phpt
+      ext/mbstring/tests/mb_strpos_variation3.phpt
+      ext/mbstring/tests/mb_strpos_variation4.phpt
+      ext/mbstring/tests/mb_strpos_variation4.phpt
+      ext/mbstring/tests/mb_strpos_variation4.phpt
+      ext/mbstring/tests/mb_strrpos_basic.phpt
+      ext/mbstring/tests/mb_strrpos_basic.phpt
+      ext/mbstring/tests/mb_strrpos_basic.phpt
+      ext/mbstring/tests/mb_strrpos_error2.phpt
+      ext/mbstring/tests/mb_strrpos_error2.phpt
+      ext/mbstring/tests/mb_strrpos_error2.phpt
+      ext/mbstring/tests/mb_strrpos_variation1.phpt
+      ext/mbstring/tests/mb_strrpos_variation1.phpt
+      ext/mbstring/tests/mb_strrpos_variation1.phpt
+      ext/mbstring/tests/mb_strrpos_variation2.phpt
+      ext/mbstring/tests/mb_strrpos_variation2.phpt
+      ext/mbstring/tests/mb_strrpos_variation2.phpt
+      ext/mbstring/tests/mb_strrpos_variation3.phpt
+      ext/mbstring/tests/mb_strrpos_variation3.phpt
+      ext/mbstring/tests/mb_strrpos_variation3.phpt
+      ext/mbstring/tests/mb_strrpos_variation4.phpt
+      ext/mbstring/tests/mb_strrpos_variation4.phpt
+      ext/mbstring/tests/mb_strrpos_variation4.phpt
+      ext/mbstring/tests/mb_strtolower_error1.phpt
+      ext/mbstring/tests/mb_strtolower_error1.phpt
+      ext/mbstring/tests/mb_strtolower_error1.phpt
+      ext/mbstring/tests/mb_strtolower_variation2.phpt
+      ext/mbstring/tests/mb_strtolower_variation2.phpt
+      ext/mbstring/tests/mb_strtolower_variation2.phpt
+      ext/mbstring/tests/mb_strtolower_variation4.phpt
+      ext/mbstring/tests/mb_strtolower_variation4.phpt
+      ext/mbstring/tests/mb_strtolower_variation4.phpt
+      ext/mbstring/tests/mb_strtoupper_basic.phpt
+      ext/mbstring/tests/mb_strtoupper_basic.phpt
+      ext/mbstring/tests/mb_strtoupper_basic.phpt
+      ext/mbstring/tests/mb_strtoupper_error2.phpt
+      ext/mbstring/tests/mb_strtoupper_error2.phpt
+      ext/mbstring/tests/mb_strtoupper_error2.phpt
+      ext/mbstring/tests/mb_strtoupper_variation1.phpt
+      ext/mbstring/tests/mb_strtoupper_variation1.phpt
+      ext/mbstring/tests/mb_strtoupper_variation1.phpt
+      ext/mbstring/tests/mb_strtoupper_variation2.phpt
+      ext/mbstring/tests/mb_strtoupper_variation2.phpt
+      ext/mbstring/tests/mb_strtoupper_variation2.phpt
+      ext/mbstring/tests/mb_strtoupper_variation3.phpt
+      ext/mbstring/tests/mb_strtoupper_variation3.phpt
+      ext/mbstring/tests/mb_strtoupper_variation3.phpt
+      ext/mbstring/tests/mb_substr_count_basic.phpt
+      ext/mbstring/tests/mb_substr_count_basic.phpt
+      ext/mbstring/tests/mb_substr_count_basic.phpt
+      ext/mbstring/tests/mb_substr_count_error1.phpt
+      ext/mbstring/tests/mb_substr_count_error1.phpt
+      ext/mbstring/tests/mb_substr_count_error1.phpt
+      ext/mbstring/tests/mb_substr_count_error2.phpt
+      ext/mbstring/tests/mb_substr_count_error2.phpt
+      ext/mbstring/tests/mb_substr_count_error2.phpt
+      ext/mbstring/tests/mb_substr_count_variation1.phpt
+      ext/mbstring/tests/mb_substr_count_variation1.phpt
+      ext/mbstring/tests/mb_substr_count_variation1.phpt
+      ext/mbstring/tests/mb_substr_count_variation2.phpt
+      ext/mbstring/tests/mb_substr_count_variation2.phpt
+      ext/mbstring/tests/mb_substr_count_variation2.phpt
+      ext/mbstring/tests/mb_substr_error2.phpt
+      ext/mbstring/tests/mb_substr_error2.phpt
+      ext/mbstring/tests/mb_substr_error2.phpt
+      ext/mbstring/tests/mb_substr_variation2.phpt
+      ext/mbstring/tests/mb_substr_variation2.phpt
+      ext/mbstring/tests/mb_substr_variation2.phpt
+      ext/mbstring/tests/mb_substr_variation3.phpt
+      ext/mbstring/tests/mb_substr_variation3.phpt
+      ext/mbstring/tests/mb_substr_variation3.phpt
+      ext/mbstring/tests/mb_substr_variation4.phpt
+      ext/mbstring/tests/mb_substr_variation4.phpt
+      ext/mbstring/tests/mb_substr_variation4.phpt:
+        1.1.4;
+      file mb_convert_encoding_basic.phpt was initially added on branch PHP_5_2.
+
+    * ext/mbstring/tests/mb_encode_mimeheader_basic.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_basic.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_basic.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation5.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation5.phpt
+      ext/mbstring/tests/mb_ereg_variation6.phpt
+      ext/mbstring/tests/mb_ereg_variation6.phpt
+      ext/mbstring/tests/mb_ereg_variation6.phpt
+      ext/mbstring/tests/mb_internal_encoding_basic.phpt
+      ext/mbstring/tests/mb_internal_encoding_basic.phpt
+      ext/mbstring/tests/mb_internal_encoding_basic.phpt
+      ext/mbstring/tests/mb_internal_encoding_error1.phpt
+      ext/mbstring/tests/mb_internal_encoding_error1.phpt
+      ext/mbstring/tests/mb_internal_encoding_error1.phpt
+      ext/mbstring/tests/mb_regex_encoding_variation1.phpt
+      ext/mbstring/tests/mb_regex_encoding_variation1.phpt
+      ext/mbstring/tests/mb_regex_encoding_variation1.phpt
+      ext/mbstring/tests/mb_strpos_variation2.phpt
+      ext/mbstring/tests/mb_strpos_variation2.phpt
+      ext/mbstring/tests/mb_strpos_variation2.phpt
+      ext/mbstring/tests/mb_strrpos_error1.phpt
+      ext/mbstring/tests/mb_strrpos_error1.phpt
+      ext/mbstring/tests/mb_strrpos_error1.phpt
+      ext/mbstring/tests/mb_strrpos_variation5.phpt
+      ext/mbstring/tests/mb_strrpos_variation5.phpt
+      ext/mbstring/tests/mb_strrpos_variation5.phpt
+      ext/mbstring/tests/mb_strtolower_basic.phpt
+      ext/mbstring/tests/mb_strtolower_basic.phpt
+      ext/mbstring/tests/mb_strtolower_basic.phpt
+      ext/mbstring/tests/mb_strtolower_error2.phpt
+      ext/mbstring/tests/mb_strtolower_error2.phpt
+      ext/mbstring/tests/mb_strtolower_error2.phpt
+      ext/mbstring/tests/mb_strtolower_variation1.phpt
+      ext/mbstring/tests/mb_strtolower_variation1.phpt
+      ext/mbstring/tests/mb_strtolower_variation1.phpt
+      ext/mbstring/tests/mb_strtolower_variation3.phpt
+      ext/mbstring/tests/mb_strtolower_variation3.phpt
+      ext/mbstring/tests/mb_strtolower_variation3.phpt
+      ext/mbstring/tests/mb_strtoupper_error1.phpt
+      ext/mbstring/tests/mb_strtoupper_error1.phpt
+      ext/mbstring/tests/mb_strtoupper_error1.phpt
+      ext/mbstring/tests/mb_strtoupper_variation4.phpt
+      ext/mbstring/tests/mb_strtoupper_variation4.phpt
+      ext/mbstring/tests/mb_strtoupper_variation4.phpt
+      ext/mbstring/tests/mb_substr_basic.phpt
+      ext/mbstring/tests/mb_substr_basic.phpt
+      ext/mbstring/tests/mb_substr_basic.phpt
+      ext/mbstring/tests/mb_substr_count_variation3.phpt
+      ext/mbstring/tests/mb_substr_count_variation3.phpt
+      ext/mbstring/tests/mb_substr_count_variation3.phpt
+      ext/mbstring/tests/mb_substr_error1.phpt
+      ext/mbstring/tests/mb_substr_error1.phpt
+      ext/mbstring/tests/mb_substr_error1.phpt
+      ext/mbstring/tests/mb_substr_variation1.phpt
+      ext/mbstring/tests/mb_substr_variation1.phpt
+      ext/mbstring/tests/mb_substr_variation1.phpt
+      ext/mbstring/tests/mb_substr_variation5.phpt
+      ext/mbstring/tests/mb_substr_variation5.phpt
+      ext/mbstring/tests/mb_substr_variation5.phpt:
+        1.1.4;
+      file mb_encode_mimeheader_basic.phpt was initially added on branch
+      PHP_5_2.
+
+2008-02-01  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/stristr.phpt
+      ext/standard/tests/strings/stristr2.phpt
+      ext/standard/tests/strings/stristr2.phpt
+      ext/standard/tests/strings/strstr.phpt
+      ext/standard/tests/strings/strstr2.phpt
+      ext/standard/tests/strings/strstr2.phpt:
+      New tests and fix tests (new error message)
+
+2008-02-01  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      glob:// was added in 5.3, no need to mention bug fixes for it
+
 2008-01-31  Christopher Jones  <christopher.jones@oracle.com>
 
     * ext/oci8/tests/bug37220.phpt
