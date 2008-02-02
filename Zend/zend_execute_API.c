@@ -1145,12 +1145,15 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		EG(This) = NULL;
 		if (calling_scope && !(EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)) {
 			int severity;
+			char *verb;
 			if (EX(function_state).function->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 				severity = E_STRICT;
+				verb = "should not";
 			} else {
 				severity = E_ERROR;
+				verb = "cannot";
 			}
-			zend_error(severity, "Non-static method %v::%v() cannot be called statically", calling_scope->name, EX(function_state).function->common.function_name);
+			zend_error(severity, "Non-static method %v::%v() %s be called statically", calling_scope->name, EX(function_state).function->common.function_name, verb);
 		}
 	}
 
