@@ -116,10 +116,10 @@ array(2) {
 }
 -- with empty string --
 
-Warning: array_map() expects parameter 1 to be valid callback, string given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, function '(null)' not found or invalid function name in /home/felipe/php5/ext/standard/tests/array/array_map_variation14.php on line 36
 NULL
 -- with empty array --
 
-Warning: array_map() expects parameter 1 to be valid callback, array given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, array must have exactly two members in /home/felipe/php5/ext/standard/tests/array/array_map_variation14.php on line 39
 NULL
 Done

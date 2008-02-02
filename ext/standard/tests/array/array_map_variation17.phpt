@@ -77,82 +77,82 @@ echo "Done";
 *** Testing array_map() : unexpected values for 'callback' argument ***
 
 -- Iteration 1 --
-Warning: array_map() expects parameter 1 to be valid callback, integer given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in /home/felipe/php5/ext/standard/tests/array/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 2 --
-Warning: array_map() expects parameter 1 to be valid callback, integer given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in /home/felipe/php5/ext/standard/tests/array/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 3 --
-Warning: array_map() expects parameter 1 to be valid callback, integer given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in /home/felipe/php5/ext/standard/tests/array/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 4 --
-Warning: array_map() expects parameter 1 to be valid callback, integer given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in /home/felipe/php5/ext/standard/tests/array/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 5 --
-Warning: array_map() expects parameter 1 to be valid callback, double given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in /home/felipe/php5/ext/standard/tests/array/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 6 --
-Warning: array_map() expects parameter 1 to be valid callback, double given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in /home/felipe/php5/ext/standard/tests/array/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 7 --
-Warning: array_map() expects parameter 1 to be valid callback, double given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in /home/felipe/php5/ext/standard/tests/array/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 8 --
-Warning: array_map() expects parameter 1 to be valid callback, double given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in /home/felipe/php5/ext/standard/tests/array/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 9 --
-Warning: array_map() expects parameter 1 to be valid callback, double given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in /home/felipe/php5/ext/standard/tests/array/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 10 --
-Warning: array_map() expects parameter 1 to be valid callback, boolean given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in /home/felipe/php5/ext/standard/tests/array/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 11 --
-Warning: array_map() expects parameter 1 to be valid callback, boolean given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in /home/felipe/php5/ext/standard/tests/array/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 12 --
-Warning: array_map() expects parameter 1 to be valid callback, boolean given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in /home/felipe/php5/ext/standard/tests/array/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 13 --
-Warning: array_map() expects parameter 1 to be valid callback, boolean given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in /home/felipe/php5/ext/standard/tests/array/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 14 --
-Warning: array_map() expects parameter 1 to be valid callback, string given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, function '(null)' not found or invalid function name in /home/felipe/php5/ext/standard/tests/array/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 15 --
-Warning: array_map() expects parameter 1 to be valid callback, string given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, function '(null)' not found or invalid function name in /home/felipe/php5/ext/standard/tests/array/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 16 --
-Warning: array_map() expects parameter 1 to be valid callback, array given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, array must have exactly two members in /home/felipe/php5/ext/standard/tests/array/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 17 --
-Warning: array_map() expects parameter 1 to be valid callback, array given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, second array member is not a valid method in /home/felipe/php5/ext/standard/tests/array/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 18 --
-Warning: array_map() expects parameter 1 to be valid callback, array given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, second array member is not a valid method in /home/felipe/php5/ext/standard/tests/array/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 19 --
-Warning: array_map() expects parameter 1 to be valid callback, object given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in /home/felipe/php5/ext/standard/tests/array/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 20 --
-Warning: array_map() expects parameter 1 to be valid callback, resource given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, no array or string given in /home/felipe/php5/ext/standard/tests/array/array_map_variation17.php on line 67
 NULL
 Done
