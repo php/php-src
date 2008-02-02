@@ -1,5 +1,7 @@
 --TEST--
 Test array_reverse() function : usage variations - assoc. array with diff. value for 'array' argument
+--INI--
+precision=12
 --FILE--
 <?php
 /* Prototype  : array array_reverse(array $array [, bool $preserve_keys])
@@ -179,7 +181,7 @@ array(1) {
 - default argument -
 array(4) {
   ["f4"]=>
-  float(33333333.333333)
+  float(33333333.3333)
   [0]=>
   float(4.8999992284)
   ["f2"]=>
@@ -190,7 +192,7 @@ array(4) {
 - $preserve keys = true -
 array(4) {
   ["f4"]=>
-  float(33333333.333333)
+  float(33333333.3333)
   [3]=>
   float(4.8999992284)
   ["f2"]=>
@@ -201,7 +203,7 @@ array(4) {
 - $preserve_keys = false -
 array(4) {
   ["f4"]=>
-  float(33333333.333333)
+  float(33333333.3333)
   [0]=>
   float(4.8999992284)
   ["f2"]=>
