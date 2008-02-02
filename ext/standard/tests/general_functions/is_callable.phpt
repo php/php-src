@@ -1111,9 +1111,9 @@ Resource id #5
 
 *** Testing error conditions ***
 
-Warning: Wrong parameter count for is_callable() in %s on line %d
+Warning: is_callable() expects at least 1 parameter, 0 given in %sis_callable.php on line %d
 NULL
 
-Warning: Wrong parameter count for is_callable() in %s on line %d
+Warning: is_callable() expects at most 3 parameters, 4 given in %sis_callable.php on line %d
 NULL
 Done
