@@ -4,7 +4,7 @@
  * @brief   Class Tree example
  * @ingroup Examples
  * @author  Marcus Boerger
- * @date    2003 - 2006
+ * @date    2003 - 2008
  * @version 1.1
  *
  * Usage: php class_tree.php \<class\>
@@ -76,12 +76,29 @@ class SubClasses extends RecursiveArrayIterator
 		}
 		$this->uksort('strnatcasecmp');
 	}
-	
+
 	/** @return key() since that is the name we need
 	 */
 	function current()
 	{
-		return parent::key();
+		$result = parent::key();
+		$parent = get_parent_class($result);
+		if ($parent)
+		{
+			$interfaces = array_diff(class_implements($result), class_implements($parent));
+			if ($interfaces)
+			{
+				$implements = array();
+				foreach($interfaces as $interface)
+				{
+					$implements = array_merge($implements, class_implements($interface));
+				}
+				$interfaces = array_diff($interfaces, $implements);
+				natcasesort($interfaces);
+				$result .= ' (' . join(', ', $interfaces) . ')';
+			}
+		}
+		return $result;
 	}
 }
 
