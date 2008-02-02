@@ -2032,6 +2032,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 				severity = E_STRICT;
 				verb = "should not";
 			} else {
+				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
 				severity = E_ERROR;
 				verb = "cannot";
 			}
@@ -2144,6 +2145,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			zend_error(E_STRICT, "Non-static method %v::%v() should not be called statically", EX(function_state).function->common.scope->name, EX(function_state).function->common.function_name);
 		} else {
 			/* FIXME: output identifiers properly */
+			/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
 			zend_error_noreturn(E_ERROR, "Non-static method %v::%v() cannot be called statically", EX(function_state).function->common.scope->name, EX(function_state).function->common.function_name);
 		}
 	}
