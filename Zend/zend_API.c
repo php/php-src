@@ -585,7 +585,6 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					break;
 				}
 
-				/* TODO(helly): Change to IS_CALLABLE_STRICT in next version */
 				if (zend_fcall_info_init(*arg, 0, fci, fcc, NULL, &is_callable_error TSRMLS_CC) == SUCCESS) {
 					if (is_callable_error) {
 						*severity = E_STRICT;
