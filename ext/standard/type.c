@@ -467,6 +467,7 @@ PHP_FUNCTION(is_callable)
 		return;
 	}
 
+	syntax_only = syntax_only ? IS_CALLABLE_CHECK_SYNTAX_ONLY : 0;
 	if (ZEND_NUM_ARGS() > 2) {
 		retval = zend_is_callable(var, syntax_only, &name);
 		REPLACE_ZVAL_VALUE(callable_name, &name, 0);
