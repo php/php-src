@@ -29,6 +29,8 @@ PHP                                                                        NEWS
     SplObjectStorage. (Marcus)
   . Added ArrayAccess support to SplObjectStorage. (Marcus)
   . Added SplDoublyLinkedList, SplStack, SplQueue classes. (Etienne)
+  . Added FilesystemIterator. (Marcus)
+  . Added GlobIterator. (Marcus)
 - Added ability to use Traversable objects instead of plain arrays in ext/soap.
   (Joshua Reese, Dmitry)
 - Added "?:" operator. (Marcus)
