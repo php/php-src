@@ -2489,6 +2489,7 @@ PHP_FUNCTION(timezone_open)
 	tzobj = zend_object_store_get_object(date_instantiate(date_ce_timezone, return_value TSRMLS_CC) TSRMLS_CC);
 	tzobj->type = TIMELIB_ZONETYPE_ID;
 	tzobj->tzi.tz = tzi;
+	tzobj->initialized = 1;
 }
 /* }}} */
 
