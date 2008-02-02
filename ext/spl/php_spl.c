@@ -389,6 +389,7 @@ PHP_FUNCTION(spl_autoload_call)
  Register given function as __autoload() implementation */
 PHP_FUNCTION(spl_autoload_register)
 {
+	char *error = NULL;
 	zval zfunc_name, ztmp;
 	zval *zcallable = NULL;
 	zend_bool do_throw = 1;
@@ -424,33 +425,48 @@ PHP_FUNCTION(spl_autoload_register)
 			zval_dtor(&ztmp);
 		}
 	
-		if (!zend_is_callable_ex(zcallable, IS_CALLABLE_STRICT, &zfunc_name, &alfi.ce, &alfi.func_ptr, &obj_ptr TSRMLS_CC)) {
+		if (!zend_is_callable_ex(zcallable, IS_CALLABLE_STRICT, &zfunc_name, &alfi.ce, &alfi.func_ptr, &obj_ptr, &error TSRMLS_CC)) {
 			if (Z_TYPE_P(zcallable) == IS_ARRAY) {
 				if (!obj_ptr && alfi.func_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 					if (do_throw) {
-						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array specifies a non static method but no object");
+						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array specifies a non static method but no object (%s)", error);
+					}
+					if (error) {
+						efree(error);
 					}
 					zval_dtor(&zfunc_name);
 					RETURN_FALSE;
 				}
 				else if (do_throw) {
-					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array does not specify %s %smethod", alfi.func_ptr ? "a callable" : "an existing", !obj_ptr ? "static " : "");
+					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array does not specify %s %smethod (%s)", alfi.func_ptr ? "a callable" : "an existing", !obj_ptr ? "static " : "", error);
+				}
+				if (error) {
+					efree(error);
 				}
 				zval_dtor(&zfunc_name);
 				RETURN_FALSE;
 			} else if (Z_TYPE_P(zcallable) == IS_STRING || Z_TYPE_P(zcallable) == IS_UNICODE) {
 				if (do_throw) {
-					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function '%R' not %s", Z_TYPE_P(zcallable), Z_UNIVAL_P(zcallable), alfi.func_ptr ? "callable" : "found");
+					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function '%R' not %s, (%s)", Z_TYPE_P(zcallable), Z_UNIVAL_P(zcallable), alfi.func_ptr ? "callable" : "found", error);
+				}
+				if (error) {
+					efree(error);
 				}
 				zval_dtor(&zfunc_name);
 				RETURN_FALSE;
 			} else {
 				if (do_throw) {
-					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Illegal value passed");
+					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Illegal value passed (%s)", error);
+				}
+				if (error) {
+					efree(error);
 				}
 				zval_dtor(&zfunc_name);
 				RETURN_FALSE;
 			}
+		}
+		if (error) {
+			efree(error);
 		}
 	
 		zend_u_str_tolower(Z_TYPE(zfunc_name), Z_UNIVAL(zfunc_name), Z_UNILEN(zfunc_name));
@@ -512,6 +528,7 @@ skip:
  Unregister given function as __autoload() implementation */
 PHP_FUNCTION(spl_autoload_unregister)
 {
+	char *error = NULL;
 	zval zfunc_name;
 	zval *zcallable;
 	zstr lc_name;
@@ -523,9 +540,16 @@ PHP_FUNCTION(spl_autoload_unregister)
 		return;
 	}
 
-	if (!zend_is_callable_ex(zcallable, IS_CALLABLE_CHECK_SYNTAX_ONLY, &zfunc_name, NULL, NULL, &obj_ptr TSRMLS_CC)) {
+	if (!zend_is_callable_ex(zcallable, IS_CALLABLE_CHECK_SYNTAX_ONLY, &zfunc_name, NULL, NULL, &obj_ptr, &error TSRMLS_CC)) {
+		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Unable to unregister invalid function (%s)", error);
+		if (error) {
+			efree(error);
+		}
 		zval_dtor(&zfunc_name);
 		RETURN_FALSE;
+	}
+	if (error) {
+		efree(error);
 	}
 
 	lc_name = zend_u_str_tolower_dup(Z_TYPE(zfunc_name), Z_UNIVAL(zfunc_name), Z_UNILEN(zfunc_name));
