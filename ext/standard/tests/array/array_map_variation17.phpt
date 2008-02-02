@@ -129,11 +129,11 @@ Warning: array_map() expects parameter 1 to be a valid callback, no array or str
 NULL
 
 -- Iteration 14 --
-Warning: array_map() expects parameter 1 to be a valid callback, function '(null)' not found or invalid function name in %s on line %d
+Warning: array_map() expects parameter 1 to be a valid callback, function '' not found or invalid function name in %s on line %d
 NULL
 
 -- Iteration 15 --
-Warning: array_map() expects parameter 1 to be a valid callback, function '(null)' not found or invalid function name in %s on line %d
+Warning: array_map() expects parameter 1 to be a valid callback, function '' not found or invalid function name in %s on line %d
 NULL
 
 -- Iteration 16 --
