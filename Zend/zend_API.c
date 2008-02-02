@@ -2400,21 +2400,30 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		*fptr_ptr = fptr;
 		if (*ce_ptr) {
 			if (!*zobj_ptr_ptr && !(fptr->common.fn_flags & ZEND_ACC_STATIC)) {
+				int severity;
+				char *verb;
+				if (fptr->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
+					severity = E_STRICT;
+					verb = "should not";
+				} else {
+					severity = E_ERROR;
+					verb = "cannot";
+				}
 				if ((check_flags & IS_CALLABLE_CHECK_IS_STATIC) != 0) {
 					retval = 0;
 				}
 				if (EG(This) && instanceof_function(Z_OBJCE_P(EG(This)), *ce_ptr TSRMLS_CC)) {
 					*zobj_ptr_ptr = &EG(This);
 					if (error) {
-						zend_spprintf(error, 0, "non-static method %s::%s() cannot be called statically, assuming $this from compatible context %s", (*ce_ptr)->name, fptr->common.function_name, Z_OBJCE_P(EG(This))->name);
+						zend_spprintf(error, 0, "non-static method %s::%s() %s be called statically, assuming $this from compatible context %s", (*ce_ptr)->name, fptr->common.function_name, verb, Z_OBJCE_P(EG(This))->name);
 					} else if (retval) {
-						zend_error(E_STRICT, "Non-static method %s::%s() cannot be called statically, assuming $this from compatible context %s", (*ce_ptr)->name, fptr->common.function_name, Z_OBJCE_P(EG(This))->name);
+						zend_error(severity, "Non-static method %s::%s() %s be called statically, assuming $this from compatible context %s", (*ce_ptr)->name, fptr->common.function_name, verb, Z_OBJCE_P(EG(This))->name);
 					}
 				} else {
 					if (error) {
-						zend_spprintf(error, 0, "non-static method %s::%s() should not be called statically", (*ce_ptr)->name, fptr->common.function_name);
+						zend_spprintf(error, 0, "non-static method %s::%s() %s be called statically", (*ce_ptr)->name, fptr->common.function_name, verb);
 					} else if (retval) {
-						zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically", (*ce_ptr)->name, fptr->common.function_name);
+						zend_error(severity, "Non-static method %s::%s() %s be called statically", (*ce_ptr)->name, fptr->common.function_name, verb);
 					}
 				}
 			}
