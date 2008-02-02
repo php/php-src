@@ -1,5 +1,7 @@
 --TEST--
 Test array_unshift() function : usage variations - assoc. array with diff values for 'array' argument
+--INI--
+precision=12
 --FILE-- 
 <?php
 /* Prototype  : int array_unshift(array $array, mixed $var [, mixed ...])
@@ -209,7 +211,7 @@ array(5) {
   [1]=>
   float(4.8999992284)
   ["f4"]=>
-  float(33333333.333333)
+  float(33333333.3333)
 }
 int(7)
 array(7) {
@@ -226,7 +228,7 @@ array(7) {
   [3]=>
   float(4.8999992284)
   ["f4"]=>
-  float(33333333.333333)
+  float(33333333.3333)
 }
 -- Iteration 7 --
 int(5)
