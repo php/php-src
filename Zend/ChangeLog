@@ -1,3 +1,23 @@
+2008-02-01  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_3)
+      zend_API.c:
+      Small tweak.  Need to make array and string callback syntax behave the
+      same way.  Also change "cannot" to "should not" since we obviously
+      "can" make the call.
+
+2008-02-01  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      zend_API.c
+      zend_API.h:
+      [DOC]
+      - Fix callable/static mess, the following will now all result in a
+      E_STRICT
+        . binding a dynamic function as a static callback
+        . static call of a dynamic function
+        . is_callable() on a static binding to a dynamic function
+
 2008-01-30  Antony Dovgal  <tony@daylessday.org>
 
     * zend_execute_API.c:
