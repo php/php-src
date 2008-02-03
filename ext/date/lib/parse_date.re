@@ -78,6 +78,7 @@
 #define TIMELIB_DATE_FULL_POINTED 277
 #define TIMELIB_TIME24_WITH_ZONE 278
 #define TIMELIB_ISO_WEEK       279
+#define TIMELIB_LF_DAY_OF_MONTH 280
 
 #define TIMELIB_TIMEZONE       300
 #define TIMELIB_AGO            301
@@ -923,6 +924,8 @@ pgtextreverse    = year "-" monthabbr "-" daylz;
 isoweekday       = year4 "-"? "W" weekofyear "-"? [0-7];
 isoweek          = year4 "-"? "W" weekofyear;
 exif             = year4 ":" monthlz ":" daylz " " hour24lz ":" minutelz ":" secondlz;
+firstdayof       = 'first day' ' of'?;
+lastdayof        = 'last day' ' of'?;
 
 /* Common Log Format: 10/Oct/2000:13:55:36 -0700 */
 clf              = day "/" monthabbr "/" year4 ":" hour24lz ":" minutelz ":" secondlz space tzcorrection;
@@ -1029,6 +1032,23 @@ relativetext = reltextnumber space reltextunit;
 
 		TIMELIB_DEINIT;
 		return TIMELIB_RELATIVE;
+	}
+
+	firstdayof | lastdayof
+	{
+		DEBUG_OUTPUT("firstdayof | lastdayof");
+		TIMELIB_INIT;
+		TIMELIB_HAVE_RELATIVE();
+
+		// skip "last day of" or "first day of"
+		if (*ptr == 'l') {
+			s->time->relative.first_last_day_of = 2;
+		} else {
+			s->time->relative.first_last_day_of = 1;
+		}
+
+		TIMELIB_DEINIT;
+		return TIMELIB_LF_DAY_OF_MONTH;
 	}
 
 	timetiny12 | timeshort12 | timelong12
