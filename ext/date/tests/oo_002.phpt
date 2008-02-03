@@ -19,14 +19,14 @@ var_dump($t->getName());
 $c = clone $t;
 var_dump($c->getName());
 ?>
---EXPECTF--
+--EXPECT--
 string(29) "Wed, 01 Aug 07 13:00:00 +0000"
 string(29) "Wed, 01 Aug 07 13:00:00 +0000"
 string(29) "Wed, 01 Aug 07 14:00:00 +0000"
 string(29) "Wed, 01 Aug 07 12:59:59 +0000"
 string(10) "Asia/Tokyo"
 string(10) "Asia/Tokyo"
---UEXPECTF--
+--UEXPECT--
 unicode(29) "Wed, 01 Aug 07 13:00:00 +0000"
 unicode(29) "Wed, 01 Aug 07 13:00:00 +0000"
 unicode(29) "Wed, 01 Aug 07 14:00:00 +0000"
