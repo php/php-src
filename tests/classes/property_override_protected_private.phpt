@@ -1,6 +1,5 @@
 --TEST--
-Redeclare inherited protected property as private.
-Included for completeness (duplicates test Zend/tests/errmsg_023.phpt).
+Redeclare inherited protected property as private (duplicates Zend/tests/errmsg_023.phpt).
 --FILE--
 <?php
   class A
