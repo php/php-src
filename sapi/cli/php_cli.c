@@ -168,13 +168,14 @@ static const opt_struct OPTIONS[] = {
 	{'-', 0, NULL} /* end of args */
 };
 
-static int print_module_info(zend_module_entry *module TSRMLS_DC)
+static int print_module_info(zend_module_entry *module TSRMLS_DC) /* {{{ */
 {
 	php_printf("%s\n", module->name);
 	return ZEND_HASH_APPLY_KEEP;
 }
+/* }}} */
 
-static int module_name_cmp(const void *a, const void *b TSRMLS_DC)
+static int module_name_cmp(const void *a, const void *b TSRMLS_DC) /* {{{ */
 {
 	Bucket *f = *((Bucket **) a);
 	Bucket *s = *((Bucket **) b);
@@ -182,8 +183,9 @@ static int module_name_cmp(const void *a, const void *b TSRMLS_DC)
 	return strcasecmp(((zend_module_entry *)f->pData)->name,
 				  ((zend_module_entry *)s->pData)->name);
 }
+/* }}} */
 
-static void print_modules(TSRMLS_D)
+static void print_modules(TSRMLS_D) /* {{{ */
 {
 	HashTable sorted_registry;
 	zend_module_entry tmp;
@@ -194,21 +196,23 @@ static void print_modules(TSRMLS_D)
 	zend_hash_apply(&sorted_registry, (apply_func_t) print_module_info TSRMLS_CC);
 	zend_hash_destroy(&sorted_registry);
 }
+/* }}} */
 
-static int print_extension_info(zend_extension *ext TSRMLS_DC)
+static int print_extension_info(zend_extension *ext TSRMLS_DC) /* {{{ */
 {
 	php_printf("%s\n", ext->name);
 	return ZEND_HASH_APPLY_KEEP;
 }
+/* }}} */
 
-static int extension_name_cmp(const zend_llist_element **f,
-							  const zend_llist_element **s TSRMLS_DC)
+static int extension_name_cmp(const zend_llist_element **f, const zend_llist_element **s TSRMLS_DC) /* {{{ */
 {
 	return strcmp(((zend_extension *)(*f)->data)->name,
 				  ((zend_extension *)(*s)->data)->name);
 }
+/* }}} */
 
-static void print_extensions(TSRMLS_D)
+static void print_extensions(TSRMLS_D) /* {{{ */
 {
 	zend_llist sorted_exts;
 
@@ -218,12 +222,13 @@ static void print_extensions(TSRMLS_D)
 	zend_llist_apply(&sorted_exts, (llist_apply_func_t) print_extension_info TSRMLS_CC);
 	zend_llist_destroy(&sorted_exts);
 }
+/* }}} */
 
 #ifndef STDOUT_FILENO
 #define STDOUT_FILENO 1
 #endif
 
-static inline size_t sapi_cli_single_write(const char *str, uint str_length)
+static inline size_t sapi_cli_single_write(const char *str, uint str_length) /* {{{ */
 {
 #ifdef PHP_WRITE_STDOUT
 	long ret;
@@ -240,8 +245,9 @@ static inline size_t sapi_cli_single_write(const char *str, uint str_length)
 	return ret;
 #endif
 }
+/* }}} */
 
-static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC)
+static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
 {
 	const char *ptr = str;
 	uint remaining = str_length;
@@ -270,9 +276,9 @@ static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC)
 
 	return str_length;
 }
+/* }}} */
 
-
-static void sapi_cli_flush(void *server_context)
+static void sapi_cli_flush(void *server_context) /* {{{ */
 {
 	/* Ignore EBADF here, it's caused by the fact that STDIN/STDOUT/STDERR streams
 	 * are/could be closed before fflush() is called.
@@ -283,11 +289,12 @@ static void sapi_cli_flush(void *server_context)
 #endif
 	}
 }
+/* }}} */
 
 static char *php_self = "";
 static char *script_filename = "";
 
-static void sapi_cli_register_variables(zval *track_vars_array TSRMLS_DC)
+static void sapi_cli_register_variables(zval *track_vars_array TSRMLS_DC) /* {{{ */
 {
 	/* In CGI mode, we consider the environment to be a part of the server
 	 * variables
@@ -303,14 +310,15 @@ static void sapi_cli_register_variables(zval *track_vars_array TSRMLS_DC)
 	/* just make it available */
 	php_register_variable("DOCUMENT_ROOT", "", track_vars_array TSRMLS_CC);
 }
+/* }}} */
 
-
-static void sapi_cli_log_message(char *message)
+static void sapi_cli_log_message(char *message) /* {{{ */
 {
 	fprintf(stderr, "%s\n", message);
 }
+/* }}} */
 
-static int sapi_cli_deactivate(TSRMLS_D)
+static int sapi_cli_deactivate(TSRMLS_D) /* {{{ */
 {
 	fflush(stdout);
 	if(SG(request_info).argv0) {
@@ -319,59 +327,59 @@ static int sapi_cli_deactivate(TSRMLS_D)
 	}
 	return SUCCESS;
 }
+/* }}} */
 
-static char* sapi_cli_read_cookies(TSRMLS_D)
+static char* sapi_cli_read_cookies(TSRMLS_D) /* {{{ */
 {
 	return NULL;
 }
+/* }}} */
 
-static int sapi_cli_header_handler(sapi_header_struct *h, sapi_headers_struct *s TSRMLS_DC)
+static int sapi_cli_header_handler(sapi_header_struct *h, sapi_headers_struct *s TSRMLS_DC) /* {{{ */
 {
 	/* free allocated header line */
 	efree(h->header);
 	/* avoid pushing headers into SAPI headers list */
 	return 0;
 }
+/* }}} */
 
-static int sapi_cli_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
+static int sapi_cli_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC) /* {{{ */
 {
 	/* We do nothing here, this function is needed to prevent that the fallback
 	 * header handling is called. */
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
+/* }}} */
 
-static void sapi_cli_send_header(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC)
+static void sapi_cli_send_header(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC) /* {{{ */
 {
 }
+/* }}} */
 
-
-static int php_cli_startup(sapi_module_struct *sapi_module)
+static int php_cli_startup(sapi_module_struct *sapi_module) /* {{{ */
 {
 	if (php_module_startup(sapi_module, NULL, 0)==FAILURE) {
 		return FAILURE;
 	}
 	return SUCCESS;
 }
-
+/* }}} */
 
 /* {{{ sapi_cli_ini_defaults */
 
 /* overwriteable ini defaults must be set in sapi_cli_ini_defaults() */
 #define INI_DEFAULT(name,value)\
-	ZVAL_STRING(tmp, value, 0);\
-	zend_hash_update(configuration_hash, name, sizeof(name), tmp, sizeof(zval), (void**)&entry);\
-	Z_STRVAL_P(entry) = zend_strndup(Z_STRVAL_P(entry), Z_STRLEN_P(entry))
+	Z_SET_REFCOUNT(tmp, 0);\
+	Z_UNSET_ISREF(tmp);	\
+	ZVAL_STRINGL(&tmp, zend_strndup(value, sizeof(value)-1), sizeof(value)-1, 0);\
+	zend_hash_update(configuration_hash, name, sizeof(name), &tmp, sizeof(zval), NULL);\
 
 static void sapi_cli_ini_defaults(HashTable *configuration_hash)
 {
-	zval *tmp, *entry;
-	
-	MAKE_STD_ZVAL(tmp);
-
+	zval tmp;
 	INI_DEFAULT("report_zend_debug", "0");
 	INI_DEFAULT("display_errors", "1");
-
-	FREE_ZVAL(tmp);
 }
 /* }}} */
 
@@ -483,7 +491,7 @@ static void php_cli_usage(char *argv0)
 
 static php_stream *s_in_process = NULL;
 
-static void cli_register_file_handles(TSRMLS_D)
+static void cli_register_file_handles(TSRMLS_D) /* {{{ */
 {
 	zval *zin, *zout, *zerr;
 	php_stream *s_in, *s_out, *s_err;
@@ -545,6 +553,7 @@ static void cli_register_file_handles(TSRMLS_D)
 	FREE_ZVAL(zout);
 	FREE_ZVAL(zerr);
 }
+/* }}} */
 
 static const char *param_mode_conflict = "Either execute direct code, process stdin or use a file.\n";
 
