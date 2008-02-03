@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   which to group by data is specified. (Ilia)
 - Upgraded PCRE to version 7.6 (Nuno)
 
+- Fixed bug #44028 (crash inside stream_socket_enable_crypto() when enabling  
+  encryption without crypto type). (Ilia)
 - Fixed bug #43981 (gmp_div_r() does not preserve the sign of 1st argument).
   (Ilia)
 - Fixed bug #43954 (Memory leak when sending the same HTTP status code
