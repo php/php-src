@@ -125,7 +125,7 @@ PHP_FUNCTION(move_uploaded_file);
 
 /* From the INI parser */
 PHP_FUNCTION(parse_ini_file);
-PHP_FUNCTION(dump_config_hash);
+PHP_FUNCTION(config_get_hash);
 
 PHP_FUNCTION(str_rot13);
 PHP_FUNCTION(stream_get_filters);

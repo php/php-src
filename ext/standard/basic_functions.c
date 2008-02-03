@@ -944,7 +944,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_parse_ini_file, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_get_config_hash, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_config_get_hash, 0)
 ZEND_END_ARG_INFO()
 
 static
@@ -3437,7 +3437,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(connection_status,												arginfo_connection_status)
 	PHP_FE(ignore_user_abort,												arginfo_ignore_user_abort)
 	PHP_FE(parse_ini_file,													arginfo_parse_ini_file)
-	PHP_FE(get_config_hash,													arginfo_get_config_hash)
+	PHP_FE(config_get_hash,													arginfo_config_get_hash)
 	PHP_FE(is_uploaded_file,												arginfo_is_uploaded_file)
 	PHP_FE(move_uploaded_file,												arginfo_move_uploaded_file)
 
@@ -6336,9 +6336,9 @@ PHP_FUNCTION(parse_ini_file)
 }
 /* }}} */
 
-/* {{{ proto array get_config_hash(void)
- */
-PHP_FUNCTION(get_config_hash)
+/* {{{ proto array config_get_hash(void)
+ Return all configuration valus as an array */
+PHP_FUNCTION(config_get_hash)
 {
 	HashTable *hash = php_ini_get_configuration_hash();
 
