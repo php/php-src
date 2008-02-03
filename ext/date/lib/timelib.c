@@ -203,6 +203,16 @@ void timelib_dump_date(timelib_time *d, int options)
 		if (d->have_relative) {
 			printf("%3lldY %3lldM %3lldD / %3lldH %3lldM %3lldS", 
 				d->relative.y, d->relative.m, d->relative.d, d->relative.h, d->relative.i, d->relative.s);
+			if (d->relative.first_last_day_of != 0) {
+				switch (d->relative.first_last_day_of) {
+					case 1:
+						printf(" / first day of");
+						break;
+					case 2:
+						printf(" / last day of");
+						break;
+				}
+			}
 		}
 		if (d->have_weekday_relative) {
 			printf(" / %d.%d", d->relative.weekday, d->relative.weekday_behavior);
