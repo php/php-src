@@ -1684,7 +1684,7 @@ static int date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int 
 	timelib_time   *now;
 	timelib_tzinfo *tzi;
 	timelib_error_container *err = NULL;
-	int free_tzi = 0, type = TIMELIB_ZONETYPE_ID, new_dst;
+	int free_tzi = 0, type = TIMELIB_ZONETYPE_ID, new_dst, errors_found = 0;
 	char *new_abbr;
 	timelib_sll     new_offset;
 	
@@ -1695,22 +1695,17 @@ static int date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int 
 		timelib_time_dtor(dateobj->time);
 	}
 	dateobj->time = timelib_strtotime(time_str_len ? time_str : "now", time_str_len ? time_str_len : sizeof("now") -1, &err, DATE_TIMEZONEDB);
-	if (err) {
-		if (ctor && err && err->error_count) {
+
+	if (err && err->error_count) {
+		if (ctor) {
 			/* spit out the first library error message, at least */
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to parse time string (%s) at position %d (%c): %s", time_str,
-							err->error_messages[0].position, err->error_messages[0].character, err->error_messages[0].message);
+				err->error_messages[0].position, err->error_messages[0].character, err->error_messages[0].message);
 		}
-		timelib_error_container_dtor(err);
+		errors_found = 1;
 	}
-
-
-	if (ctor && err && err->error_count) {
-		/* spit out the first library error message, at least */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to parse time string (%s) at position %d (%c): %s", time_str,
-			err->error_messages[0].position, err->error_messages[0].character, err->error_messages[0].message);
-	}
-	if (err && err->error_count) {
+	timelib_error_container_dtor(err);
+	if (errors_found) {
 		return 0;
 	}
 
