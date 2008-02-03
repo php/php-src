@@ -1702,10 +1702,8 @@ PHP_FUNCTION(stristr)
 		return;
 	}
 
-	SEPARATE_ZVAL(haystack);
-	SEPARATE_ZVAL(needle);
-	
-	convert_to_string_ex(haystack);
+	SEPARATE_ZVAL(haystack);	
+	convert_to_string(*haystack);
 
 	haystack_orig = estrndup(Z_STRVAL_PP(haystack), Z_STRLEN_PP(haystack));
 
@@ -1716,19 +1714,14 @@ PHP_FUNCTION(stristr)
 			RETURN_FALSE;
 		}
 
-		found = php_stristr(Z_STRVAL_PP(haystack),
-							Z_STRVAL_PP(needle),
-							Z_STRLEN_PP(haystack),
-							Z_STRLEN_PP(needle));
+		found = php_stristr(Z_STRVAL_PP(haystack), Z_STRVAL_PP(needle),	Z_STRLEN_PP(haystack), Z_STRLEN_PP(needle));
 	} else {
-		convert_to_long_ex(needle);
+		SEPARATE_ZVAL(needle);
+		convert_to_long(*needle);
 		needle_char[0] = (char) Z_LVAL_PP(needle);
 		needle_char[1] = 0;
 
-		found = php_stristr(Z_STRVAL_PP(haystack),
-							needle_char,
-							Z_STRLEN_PP(haystack),
-							1);
+		found = php_stristr(Z_STRVAL_PP(haystack), needle_char,	Z_STRLEN_PP(haystack), 1);
 	}
 
 	if (found) {
@@ -1760,7 +1753,8 @@ PHP_FUNCTION(strstr)
 		return;
 	}
 
-	convert_to_string_ex(haystack);
+	SEPARATE_ZVAL(haystack);
+	convert_to_string(*haystack);
 
 	if (Z_TYPE_PP(needle) == IS_STRING) {
 		if (!Z_STRLEN_PP(needle)) {
@@ -1768,19 +1762,14 @@ PHP_FUNCTION(strstr)
 			RETURN_FALSE;
 		}
 
-		found = php_memnstr(Z_STRVAL_PP(haystack), 
-		                    Z_STRVAL_PP(needle),
-		                    Z_STRLEN_PP(needle), 
-		                    Z_STRVAL_PP(haystack) + Z_STRLEN_PP(haystack));
+		found = php_memnstr(Z_STRVAL_PP(haystack), Z_STRVAL_PP(needle), Z_STRLEN_PP(needle), Z_STRVAL_PP(haystack) + Z_STRLEN_PP(haystack));
 	} else {
-		convert_to_long_ex(needle);
+		SEPARATE_ZVAL(needle);
+		convert_to_long(*needle);
 		needle_char[0] = (char) Z_LVAL_PP(needle);
 		needle_char[1] = 0;
 
-		found = php_memnstr(Z_STRVAL_PP(haystack), 
-							needle_char,
-							1,
-		                    Z_STRVAL_PP(haystack) + Z_STRLEN_PP(haystack));
+		found = php_memnstr(Z_STRVAL_PP(haystack), needle_char,	1, Z_STRVAL_PP(haystack) + Z_STRLEN_PP(haystack));
 	}
 
 	if (found) {
@@ -1790,9 +1779,8 @@ PHP_FUNCTION(strstr)
 		} else {
 			RETURN_STRINGL(found, Z_STRLEN_PP(haystack) - found_offset, 1);
 		}
-	} else {
-		RETURN_FALSE;
 	}
+	RETURN_FALSE;
 }
 /* }}} */
 
