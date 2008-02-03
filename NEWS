@@ -23,6 +23,7 @@ PHP                                                                        NEWS
   * two optional parameters to timezone_transitions_get() /
     DateTimeZone::getTranstions() to limit the range of transitions being
     returned.
+  * support for "first/last day of <month>" style texts.
 
 - Improved SPL extension:
   . Added ability to store associative information with objects in 
