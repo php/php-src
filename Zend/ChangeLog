@@ -1,3 +1,65 @@
+2008-02-02  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      zend_API.c:
+      MFH: fix leak appearing when calling non-static protected or private
+      methods as static
+
+    * zend_API.c:
+      fix leak appearing when calling non-static protected or private methods as
+      static
+      (error message is allocated twice)
+
+2008-02-02  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      zend_API.c
+      zend_execute_API.c
+      zend_vm_def.h:
+      - MFH Add comment that explains why we need E_ERROR  in those cases
+
+    * zend_API.c
+      zend_execute_API.c
+      zend_vm_def.h:
+      -Add comment that explains wh we need E_ERROR in those cases
+
+    * zend_API.c
+      zend_API.h
+      zend_execute_API.c
+      zend_vm_def.h:
+      - MFB static callable message mess
+
+    * (PHP_5_3)
+      zend_API.c
+      tests/bug32290.phpt:
+      - Fix remaining issue (should be last one)
+
+    * (PHP_5_3)
+      zend_API.c:
+      - Drop useless TODO, this would need to be fixed in a generic way
+
+    * (PHP_5_3)
+      zend_API.c
+      zend_execute_API.c
+      zend_vm_def.h:
+      - Fix flag handling in message generation
+
+2008-02-02  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_3)
+      zend_API.c:
+      What's the [0] for here?  Looks wrong and causes stuff to segv
+
+    * (PHP_5_3)
+      tests/access_modifiers_003.phpt
+      tests/bug31720.phpt
+      tests/bug32290.phpt
+      tests/lsb_006.phpt
+      tests/lsb_007.phpt
+      tests/lsb_008.phpt
+      tests/lsb_009.phpt:
+      Fix more tests (some of these were not broken by the recent changes)
+
 2008-02-01  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * (PHP_5_3)
