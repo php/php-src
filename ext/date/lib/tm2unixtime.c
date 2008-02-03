@@ -128,6 +128,15 @@ static void do_adjust_relative(timelib_time* time)
 		time->m += time->relative.m;
 		time->y += time->relative.y;
 	}
+	switch (time->relative.first_last_day_of) {
+		case 1: // first
+			time->d = 1;
+			break;
+		case 2: // last
+			time->d = 0;
+			time->m++;
+			break;
+	}
 	do_normalize(time);
 
 	memset(&(time->relative), 0, sizeof(time->relative));
