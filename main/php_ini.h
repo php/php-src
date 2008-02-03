@@ -36,7 +36,7 @@ PHPAPI int php_parse_user_ini_file(char *dirname, char *ini_filename, HashTable 
 PHPAPI void php_ini_activate_config(HashTable *source_hash, int modify_type, int stage TSRMLS_DC);
 PHPAPI void php_ini_activate_per_dir_config(char *path, uint path_len TSRMLS_DC);
 PHPAPI void php_ini_activate_per_host_config(char *host, uint host_len TSRMLS_DC);
-PHPAPI HashTable* php_in_get_configuration_hash(void);
+PHPAPI HashTable* php_ini_get_configuration_hash(void);
 END_EXTERN_C()
 
 #define PHP_INI_USER	ZEND_INI_USER
