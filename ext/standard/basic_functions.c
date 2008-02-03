@@ -943,11 +943,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_parse_ini_file, 0, 0, 1)
 	ZEND_ARG_INFO(0, scanner_mode)
 ZEND_END_ARG_INFO()
 
-#if ZEND_DEBUG
 static
-ZEND_BEGIN_ARG_INFO(arginfo_dump_config_hash, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_get_config_hash, 0)
 ZEND_END_ARG_INFO()
-#endif
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_import_request_variables, 0, 0, 1)
@@ -3439,9 +3437,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(connection_status,												arginfo_connection_status)
 	PHP_FE(ignore_user_abort,												arginfo_ignore_user_abort)
 	PHP_FE(parse_ini_file,													arginfo_parse_ini_file)
-#if ZEND_DEBUG
-	PHP_FE(dump_config_hash,												arginfo_dump_config_hash)
-#endif
+	PHP_FE(get_config_hash,													arginfo_get_config_hash)
 	PHP_FE(is_uploaded_file,												arginfo_is_uploaded_file)
 	PHP_FE(move_uploaded_file,												arginfo_move_uploaded_file)
 
@@ -6340,18 +6336,16 @@ PHP_FUNCTION(parse_ini_file)
 }
 /* }}} */
 
-#if ZEND_DEBUG
-/* {{{ proto void dump_config_hash(void)
+/* {{{ proto array get_config_hash(void)
  */
-PHP_FUNCTION(dump_config_hash)
+PHP_FUNCTION(get_config_hash)
 {
-	HashTable hash = get_configuration_hash();
+	HashTable *hash = php_ini_get_configuration_hash();
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(&hash, (apply_func_args_t) add_config_entry_cb, 1, return_value TSRMLS_CC);
+	zend_hash_apply_with_arguments(hash, (apply_func_args_t) add_config_entry_cb, 1, return_value TSRMLS_CC);
 }
 /* }}} */
-#endif
 
 static int copy_request_variable(void *pDest, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
