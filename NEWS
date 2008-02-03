@@ -45,7 +45,7 @@ PHP                                                                        NEWS
   setting network timeout (FR #42837). (Jani)
 - Added optional escape character parameter to fgetcsv(). (David Soria Parra)
 - Added an optional parameter to strstr() and stristr() for retrieval of either
-  the part of haystack before or after first occurrence of needle. (Felipe)
+  the part of haystack before or after first occurrence of needle. (Johannes, Felipe)
 - Added xsl->setProfiling() for profiling stylesheets. (Christian)
 - Added long-option feature to getopt() and made getopt() available also on 
   win32 systems by adding a common getopt implementation into core.
