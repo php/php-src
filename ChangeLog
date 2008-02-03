@@ -1,3 +1,200 @@
+2008-02-02  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/standard/tests/math/bindec_basic.phpt
+      ext/standard/tests/math/bindec_basic_64bit.phpt:
+      fix test, add 64bit version
+
+2008-02-02  Marcus Boerger  <php@marcus-boerger.de>
+
+    * main/output.c:
+      - Fix build
+
+    * (PHP_5_3)
+      NEWS
+      ext/spl/php_spl.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_directory.h:
+      - MFH Synch directory changes
+      [DOC]
+
+    * ext/spl/php_spl.c:
+      - Fix error handling
+
+    * ext/spl/php_spl.c:
+      - Add new classes
+
+    * ext/spl/spl_directory.c
+      ext/spl/spl_directory.h:
+      - MFB glob handling
+      - Add GlobIterator and FilesystemIterator
+
+2008-02-02  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.c:
+      MFH: fix leak appearing when calling non-static protected or private
+      methods as static
+
+    * ZendEngine2/zend_API.c:
+      fix leak appearing when calling non-static protected or private methods as
+      static
+      (error message is allocated twice)
+
+2008-02-02  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ext/spl/examples/class_tree.php:
+      - Show interfaces
+
+2008-02-02  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/php_date.c:
+      - Make timezone_open() work again.
+
+2008-02-02  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h:
+      - MFH Add comment that explains why we need E_ERROR  in those cases
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h:
+      -Add comment that explains wh we need E_ERROR in those cases
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h:
+      - MFB static callable message mess
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.c
+      ZendEngine2/tests/bug32290.phpt:
+      - Fix remaining issue (should be last one)
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/vsprintf_variation8.phpt:
+      - Fix the expectations. Tests still fails because of something else.
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.c:
+      - Drop useless TODO, this would need to be fixed in a generic way
+
+    * (PHP_5_3)
+      ext/standard/type.c:
+      - It appears HEAD needs to be MFB'ed and this needs another fix now
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h:
+      - Fix flag handling in message generation
+
+    * ext/standard/tests/array/array_reverse_variation5.phpt
+      ext/standard/tests/array/array_unshift_variation5.phpt
+      ext/standard/tests/assert/assert_variation.phpt
+      ext/standard/tests/general_functions/010.phpt
+      ext/standard/tests/general_functions/bug40398.phpt
+      ext/standard/tests/general_functions/is_callable.phpt:
+      - Fix tests
+
+    * ext/standard/type.c:
+      - Fix flag handling (MFB)
+
+2008-02-02  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/bug43505.phpt:
+      Countable requires SPL
+
+2008-02-02  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/spl/tests/spl_autoload_001.phpt:
+      Fix the fix
+
+    * (PHP_5_3)
+      ext/spl/tests/spl_004.phpt
+      ext/spl/tests/spl_autoload_001.phpt
+      ext/spl/tests/spl_autoload_005.phpt
+      ext/spl/tests/spl_autoload_007.phpt
+      ext/spl/tests/spl_autoload_008.phpt
+      ext/standard/tests/array/array_map_variation12.phpt
+      ext/standard/tests/array/array_map_variation14.phpt
+      ext/standard/tests/array/array_map_variation14.phpt
+      ext/standard/tests/array/array_map_variation15.phpt
+      ext/standard/tests/array/array_map_variation16.phpt
+      ext/standard/tests/array/array_map_variation17.phpt
+      ext/standard/tests/array/array_map_variation17.phpt
+      ext/standard/tests/array/array_walk.phpt
+      ext/standard/tests/array/array_walk_error1.phpt
+      ext/standard/tests/array/array_walk_recursive1.phpt
+      ext/standard/tests/array/array_walk_recursive_error1.phpt
+      ext/standard/tests/array/array_walk_recursive_variation2.phpt
+      ext/standard/tests/array/array_walk_recursive_variation8.phpt
+      ext/standard/tests/array/array_walk_variation2.phpt
+      ext/standard/tests/array/array_walk_variation8.phpt
+      ext/standard/tests/array/uasort_error.phpt
+      ext/standard/tests/array/uasort_variation2.phpt
+      ext/standard/tests/array/uasort_variation8.phpt:
+      Fix tests (new error message)
+
+2008-02-02  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_map_object1.phpt
+      ext/standard/tests/array/array_map_object2.phpt
+      ext/standard/tests/array/array_map_object3.phpt:
+      Another batch of fixed tests
+
+2008-02-02  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_map_variation14.phpt
+      ext/standard/tests/array/array_map_variation17.phpt:
+      Ops, fix the fix
+
+2008-02-02  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_filter_error.phpt
+      ext/standard/tests/array/array_filter_variation2.phpt
+      ext/standard/tests/array/array_filter_variation9.phpt:
+      Fix a few more tests
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.c:
+      What's the [0] for here?  Looks wrong and causes stuff to segv
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_filter.phpt:
+      Fix test and convert to UNIX line endings
+
+    * (PHP_5_3)
+      ZendEngine2/tests/access_modifiers_003.phpt
+      ZendEngine2/tests/bug31720.phpt
+      ZendEngine2/tests/bug32290.phpt
+      ZendEngine2/tests/lsb_006.phpt
+      ZendEngine2/tests/lsb_007.phpt
+      ZendEngine2/tests/lsb_008.phpt
+      ZendEngine2/tests/lsb_009.phpt:
+      Fix more tests (some of these were not broken by the recent changes)
+
+    * (PHP_5_3)
+      tests/classes/autoload_012.phpt
+      tests/classes/bug27504.phpt:
+      2 more test fixes
+
+    * (PHP_5_3)
+      ext/standard/tests/general_functions/010.phpt
+      ext/standard/tests/general_functions/bug32647.phpt
+      ext/standard/tests/general_functions/bug40398.phpt
+      ext/standard/tests/general_functions/is_callable.phpt:
+      Fix some tests
+
 2008-02-01  Marcus Boerger  <php@marcus-boerger.de>
 
     * (PHP_5_3)
