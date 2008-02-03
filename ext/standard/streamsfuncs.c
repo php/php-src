@@ -1487,6 +1487,9 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 		if (php_stream_xport_crypto_setup(stream, cryptokind, sessstream TSRMLS_CC) < 0) {
 			RETURN_FALSE;
 		}
+	} else if (enable) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "When enabling encryption you must specify the crypto type");
+		RETURN_FALSE;
 	}
 
 	ret = php_stream_xport_crypto_enable(stream, enable TSRMLS_CC);
