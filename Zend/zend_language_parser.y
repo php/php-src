@@ -776,13 +776,13 @@ r_variable:
 
 
 w_variable:
-	variable	{ zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); $$ = $1; }
-				{ zend_check_writable_variable(&$1); }
+	variable	{ zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); $$ = $1;
+				  zend_check_writable_variable(&$1); }
 ;
 
 rw_variable:
-	variable	{ zend_do_end_variable_parse(BP_VAR_RW, 0 TSRMLS_CC); $$ = $1; }
-				{ zend_check_writable_variable(&$1); }
+	variable	{ zend_do_end_variable_parse(BP_VAR_RW, 0 TSRMLS_CC); $$ = $1;
+				  zend_check_writable_variable(&$1); }
 ;
 
 variable:
