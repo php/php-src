@@ -366,20 +366,16 @@ static int php_cli_startup(sapi_module_struct *sapi_module) /* {{{ */
 
 /* overwriteable ini defaults must be set in sapi_cli_ini_defaults() */
 #define INI_DEFAULT(name,value)\
-	ZVAL_STRING(tmp, value, 0);\
-	zend_hash_update(configuration_hash, name, sizeof(name), tmp, sizeof(zval), (void**)&entry);\
-	Z_STRVAL_P(entry) = zend_strndup(Z_STRVAL_P(entry), Z_STRLEN_P(entry))
+	Z_SET_REFCOUNT(tmp, 0);\
+	Z_UNSET_ISREF(tmp);	\
+	ZVAL_STRINGL(&tmp, zend_strndup(value, sizeof(value)-1), sizeof(value)-1, 0);\
+	zend_hash_update(configuration_hash, name, sizeof(name), &tmp, sizeof(zval), NULL);\
 
 static void sapi_cli_ini_defaults(HashTable *configuration_hash)
 {
-	zval *tmp, *entry;
-	
-	MAKE_STD_ZVAL(tmp);
-
+	zval tmp;
 	INI_DEFAULT("report_zend_debug", "0");
 	INI_DEFAULT("display_errors", "1");
-
-	FREE_ZVAL(tmp);
 }
 /* }}} */
 
