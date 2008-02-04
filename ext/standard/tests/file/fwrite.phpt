@@ -36,7 +36,7 @@ NULL
 Notice: Array to string conversion in %s on line %d
 int(5)
 int(0)
-int(4)
+int(0)
 int(4)
 
 Warning: fwrite(): 7 is not a valid stream resource in %s on line %d
@@ -50,5 +50,5 @@ NULL
 
 Warning: fwrite() expects at least 2 parameters, 1 given in %s on line %d
 NULL
-string(8) "datadata"
+string(4) "data"
 Done
