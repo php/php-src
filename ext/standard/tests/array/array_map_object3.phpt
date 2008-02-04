@@ -74,7 +74,7 @@ array(3) {
 }
 -- accessing child method from parent class --
 
-Warning: array_map() expects parameter 1 to be valid callback, array given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, class 'ParentClass' does not have a method 'staticchild' in %s on line %d
 NULL
 -- accessing parent method using child class object --
 array(3) {
@@ -87,7 +87,7 @@ array(3) {
 }
 -- accessing child method using parent class object --
 
-Warning: array_map() expects parameter 1 to be valid callback, array given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, class 'ParentClass' does not have a method 'staticchild' in %s on line %d
 NULL
 Done
 --UEXPECTF--
@@ -103,7 +103,7 @@ array(3) {
 }
 -- accessing child method from parent class --
 
-Warning: array_map() expects parameter 1 to be valid callback, array given in %s on line %d
+Warning: array_map() expects parameter 1 to be a valid callback, class 'ParentClass' does not have a method 'staticchild' in %s on line %d
 NULL
 -- accessing parent method using child class object --
 array(3) {
@@ -116,6 +116,6 @@ array(3) {
 }
 -- accessing child method using parent class object --
 
-Warning: array_map() expects parameter 1 to be valid callback, array given in %s on line %d
+Warning: array_map() expects parameter 1 to be a valid callback, class 'ParentClass' does not have a method 'staticchild' in %s on line %d
 NULL
 Done

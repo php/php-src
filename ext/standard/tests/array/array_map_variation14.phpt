@@ -116,11 +116,11 @@ array(2) {
 }
 -- with empty string --
 
-Warning: array_map() expects parameter 1 to be valid callback, string given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, function '' not found or invalid function name in %s on line %d
 NULL
 -- with empty array --
 
-Warning: array_map() expects parameter 1 to be valid callback, array given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, array must have exactly two members in %s on line %d
 NULL
 Done
 --UEXPECTF--
@@ -132,7 +132,7 @@ array(2) {
     [0]=>
     int(1)
     [1]=>
-    unicode(3) "one"
+    string(3) "one"
     [2]=>
     float(1.1)
   }
@@ -141,7 +141,7 @@ array(2) {
     [0]=>
     int(2)
     [1]=>
-    unicode(3) "two"
+    string(3) "two"
     [2]=>
     float(2.2)
   }
@@ -152,7 +152,7 @@ array(2) {
     [0]=>
     int(1)
     [1]=>
-    unicode(3) "one"
+    string(3) "one"
     [2]=>
     float(1.1)
   }
@@ -161,7 +161,7 @@ array(2) {
     [0]=>
     int(2)
     [1]=>
-    unicode(3) "two"
+    string(3) "two"
     [2]=>
     float(2.2)
   }
@@ -173,7 +173,7 @@ array(2) {
     [0]=>
     int(1)
     [1]=>
-    unicode(3) "one"
+    string(3) "one"
     [2]=>
     float(1.1)
   }
@@ -182,7 +182,7 @@ array(2) {
     [0]=>
     int(2)
     [1]=>
-    unicode(3) "two"
+    string(3) "two"
     [2]=>
     float(2.2)
   }
@@ -196,10 +196,10 @@ array(2) {
 }
 -- with empty string --
 
-Warning: array_map() expects parameter 1 to be valid callback, Unicode string given in %s on line %d
+Warning: array_map() expects parameter 1 to be a valid callback, function '' not found or invalid function name in %s on line %d
 NULL
 -- with empty array --
 
-Warning: array_map() expects parameter 1 to be valid callback, array given in %s on line %d
+Warning: array_map() expects parameter 1 to be a valid callback, array must have exactly two members in %s on line %d
 NULL
 Done
