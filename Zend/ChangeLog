@@ -1,3 +1,9 @@
+2008-02-03  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      zend_language_parser.y:
+      - Fix warnings
+
 2008-02-02  Antony Dovgal  <tony@daylessday.org>
 
     * (PHP_5_3)

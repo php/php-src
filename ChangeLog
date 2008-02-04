@@ -1,3 +1,129 @@
+2008-02-03  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ext/dba/libcdb/.cvsignore
+      ext/dba/libcdb/.cvsignore
+      ext/dba/libflatfile/.cvsignore
+      ext/dba/libflatfile/.cvsignore
+      ext/dba/libinifile/.cvsignore
+      ext/dba/libinifile/.cvsignore:
+      - Update .cvsignore
+
+    * sapi/cli/php_cli.c:
+      - MFB Sync
+
+    * (PHP_5_3)
+      sapi/cli/php_cli.c:
+      - Small improvements, no malloc needed for the zval
+
+2008-02-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.c:
+      
+      MFB: Fixed bug #44028 (crash inside stream_socket_enable_crypto() when
+      enabling encryption without crypto type)
+
+    * (PHP_5_3)
+      ext/standard/streamsfuncs.c:
+      
+      Fixed bug #44028 (crash inside stream_socket_enable_crypto() when enabling
+      encryption without crypto type)
+
+2008-02-03  Marcus Boerger  <php@marcus-boerger.de>
+
+    * main/php_ini.h:
+      - Typo
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      - MFH Rename it again
+      [DOC]
+      - MFH Add config_get_hash()
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      - Rename it again
+      [DOC]
+      - Add config_get_hash()
+
+2008-02-03  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/tests/bug43075.phpt
+      ext/date/tests/bug43960.phpt
+      ext/date/tests/oo_002.phpt:
+      - Sync tests.
+
+2008-02-03  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      main/php_ini.c
+      main/php_ini.h:
+      - MFH Rename dump_config_hash() to get_config_hash() as it doesn't dump
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      main/php_ini.c
+      main/php_ini.h:
+      - Rename dump_config_hash() to get_config_hash() as it doesn't dump
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_parser.y:
+      - Fix warnings
+
+2008-02-03  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/string.c:
+      Fixed reference problem (variable were converted)
+
+2008-02-03  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      ext/date/php_date.c:
+      - Fixed invalid read errors as found by GCOV.
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/lib/timelib.c
+      ext/date/lib/timelib_structs.h
+      ext/date/lib/tm2unixtime.c:
+      - MFH: Support "first/last day of <month>" style texts.
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/lib/timelib.c
+      ext/date/lib/timelib_structs.h
+      ext/date/lib/tm2unixtime.c:
+      - Support "first/last day of <month>" style texts.
+
+2008-02-03  Marcus Boerger  <php@marcus-boerger.de>
+
+    * tests/classes/property_override_protected_private.phpt
+      tests/classes/property_override_protected_private.phpt:
+      - Only one line heading
+
+2008-02-03  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      Missing Johannes' name
+
+2008-02-03  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * (PHP_5_3)
+      generate_phpt.php
+      scripts/dev/generate_phpt.php
+      scripts/dev/generate_phpt.php:
+      Moving the the phpt generation script to scripts/dev directory at Jani's
+      suggestion.
+
 2008-02-02  Antony Dovgal  <tony@daylessday.org>
 
     * (PHP_5_2)
