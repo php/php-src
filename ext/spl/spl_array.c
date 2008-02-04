@@ -1214,7 +1214,7 @@ SPL_METHOD(Array, count)
 	RETURN_LONG(count);
 } /* }}} */
 
-static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fname_len, int use_arg)
+static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fname_len, int use_arg) /* {{{ */
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	HashTable *aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
@@ -1233,7 +1233,7 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 	} else {
 		zend_call_method(NULL, NULL, NULL, fname, fname_len, &return_value, 1, &tmp, NULL TSRMLS_CC);
 	}
-}
+} /* }}} */
 
 #define SPL_ARRAY_METHOD(cname, fname, use_arg) \
 SPL_METHOD(cname, fname) \
@@ -1483,7 +1483,6 @@ SPL_METHOD(Array, serialize)
 	}
 
 	RETURN_NULL();
-	
 } /* }}} */
 
 /* {{{ proto void ArrayObject::unserialize(string serialized)
