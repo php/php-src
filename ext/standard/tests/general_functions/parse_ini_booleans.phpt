@@ -15,7 +15,7 @@ array(3) {
   ["error_reporting values"]=>
   array(6) {
     ["foo"]=>
-    string(14) "E_ALL E_NOTICE"
+    string(6) "6143 8"
     ["error_reporting"]=>
     string(4) "6143"
     ["error_reporting1"]=>
