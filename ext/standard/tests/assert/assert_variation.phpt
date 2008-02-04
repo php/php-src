@@ -107,7 +107,7 @@ array(2) {
 ini.get("assert.callback") => [f2]
 
 
-Strict Standards: Non-static method c1::assert() cannot be called statically in %s on line 53
+Strict Standards: Non-static method c1::assert() should not be called statically in %s on line %d
 Class assertion failed 53, "0 != 0"
 NULL
 
@@ -166,7 +166,7 @@ array(2) {
 ini.get("assert.callback") => [f2]
 
 
-Strict Standards: Non-static method c1::assert() cannot be called statically in %s on line 53
+Strict Standards: Non-static method c1::assert() should not be called statically in %s on line %d
 Class assertion failed 53, "0 != 0"
 NULL
 

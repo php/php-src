@@ -45,7 +45,7 @@ NULL
 Warning: array_filter() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 -- Testing array_filter() function with incorrect callback --
-Warning: array_filter() expects parameter 2 to be valid callback, string given in %s on line %d
+Warning: array_filter() expects parameter 2 to be a valid callback, function 'even' not found or invalid function name in %s on line %d
 NULL
 Done
 --UEXPECTF--
@@ -57,6 +57,6 @@ NULL
 Warning: array_filter() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 -- Testing array_filter() function with incorrect callback --
-Warning: array_filter() expects parameter 2 to be valid callback, Unicode string given in %s on line %d
+Warning: array_filter() expects parameter 2 to be a valid callback, function 'even' not found or invalid function name in %s on line %d
 NULL
 Done

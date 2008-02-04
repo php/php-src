@@ -82,13 +82,13 @@ array(2) {
 array(0) {
 }
 
-Warning: array_filter() expects parameter 2 to be valid callback, array given in %s on line %d
+Warning: array_filter() expects parameter 2 to be a valid callback, array must have exactly two members in %s on line %d
 NULL
 
 Warning: array_filter() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
-Warning: array_filter() expects parameter 2 to be valid callback, integer given in %s on line %d
+Warning: array_filter() expects parameter 2 to be a valid callback, no array or string given in %s on line %d
 NULL
 == DONE ==
 --UEXPECTF--
@@ -141,12 +141,12 @@ array(2) {
 array(0) {
 }
 
-Warning: array_filter() expects parameter 2 to be valid callback, array given in %s on line %d
+Warning: array_filter() expects parameter 2 to be a valid callback, array must have exactly two members in %s on line %d
 NULL
 
-Warning: array_filter() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_filter() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
-Warning: array_filter() expects parameter 2 to be valid callback, integer given in %s on line %d
+Warning: array_filter() expects parameter 2 to be a valid callback, no array or string given in %s on line %d
 NULL
 == DONE ==

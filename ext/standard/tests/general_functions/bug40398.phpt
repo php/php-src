@@ -78,23 +78,31 @@ new Derived_6('6');
 Base::__construct(1)
 Base::__construct(2)
 
-Warning: call_user_func_array() expects parameter 1 to be valid callback, string given in %sbug40398.php on line %d
+Strict Standards: call_user_func_array() expects parameter 1 to be a valid callback, non-static method Base::__construct() cannot be called statically, assuming $this from compatible context Derived_3 in %s on line %d
+Base::__construct(3)
 
-Warning: call_user_func_array() expects parameter 1 to be valid callback, string given in %sbug40398.php on line %d
+Strict Standards: call_user_func_array() expects parameter 1 to be a valid callback, non-static method Base::__construct() cannot be called statically, assuming $this from compatible context Derived_4 in %s on line %d
+Base::__construct(4)
 
-Warning: call_user_func_array() expects parameter 1 to be valid callback, array given in %sbug40398.php on line %d
+Strict Standards: call_user_func_array() expects parameter 1 to be a valid callback, non-static method Base::__construct() cannot be called statically, assuming $this from compatible context Derived_5 in %s on line %d
+Base::__construct(5)
 
-Warning: call_user_func_array() expects parameter 1 to be valid callback, array given in %sbug40398.php on line %d
+Strict Standards: call_user_func_array() expects parameter 1 to be a valid callback, non-static method Base::__construct() cannot be called statically, assuming $this from compatible context Derived_6 in %s on line %d
+Base::__construct(6)
 ===DONE===
 --UEXPECTF--
 Base::__construct(1)
 Base::__construct(2)
 
-Warning: call_user_func_array() expects parameter 1 to be valid callback, Unicode string given in %sbug40398.php on line %d
+Strict Standards: call_user_func_array() expects parameter 1 to be a valid callback, non-static method Base::__construct() cannot be called statically, assuming $this from compatible context Derived_3 in %s on line %d
+Base::__construct(3)
 
-Warning: call_user_func_array() expects parameter 1 to be valid callback, Unicode string given in %sbug40398.php on line %d
+Strict Standards: call_user_func_array() expects parameter 1 to be a valid callback, non-static method Base::__construct() cannot be called statically, assuming $this from compatible context Derived_4 in %s on line %d
+Base::__construct(4)
 
-Warning: call_user_func_array() expects parameter 1 to be valid callback, array given in %sbug40398.php on line %d
+Strict Standards: call_user_func_array() expects parameter 1 to be a valid callback, non-static method Base::__construct() cannot be called statically, assuming $this from compatible context Derived_5 in %s on line %d
+Base::__construct(5)
 
-Warning: call_user_func_array() expects parameter 1 to be valid callback, array given in %sbug40398.php on line %d
+Strict Standards: call_user_func_array() expects parameter 1 to be a valid callback, non-static method Base::__construct() cannot be called statically, assuming $this from compatible context Derived_6 in %s on line %d
+Base::__construct(6)
 ===DONE===

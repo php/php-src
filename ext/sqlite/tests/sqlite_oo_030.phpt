@@ -39,7 +39,9 @@ NULL
 string(1) "1"
 string(3) "PHP"
 
-Fatal error: Call to undefined method foo::bar("php")() in %ssqlite_oo_030.php on line %d
+Warning: SQLiteDatabase::singleQuery(): function `foo::bar("PHP")' is not a function name in %s on line %d
+bool(false)
+===DONE===
 --UEXPECTF--
 NULL
 unicode(1) "1"
@@ -48,4 +50,6 @@ NULL
 unicode(1) "1"
 unicode(3) "PHP"
 
-Fatal error: Call to undefined method foo::bar("php")() in %ssqlite_oo_030.php on line %d
+Warning: SQLiteDatabase::singleQuery(): function `foo::bar("PHP")' is not a function name in %s on line %d
+bool(false)
+===DONE===
