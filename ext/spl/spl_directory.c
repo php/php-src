@@ -1337,7 +1337,7 @@ SPL_METHOD(GlobIterator, count)
 }
 /* }}} */
 
-/* forward declarations to the iterator handlers */
+/* {{{ forward declarations to the iterator handlers */
 static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC);
 static int spl_filesystem_dir_it_valid(zend_object_iterator *iter TSRMLS_DC);
 static void spl_filesystem_dir_it_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC);
@@ -1354,6 +1354,7 @@ zend_object_iterator_funcs spl_filesystem_dir_it_funcs = {
 	spl_filesystem_dir_it_move_forward,
 	spl_filesystem_dir_it_rewind
 };
+/* }}} */
 
 /* {{{ spl_ce_dir_get_iterator */
 zend_object_iterator *spl_filesystem_dir_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
@@ -1386,7 +1387,7 @@ static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 	iterator->intern.data = NULL; /* mark as unused */
 }
 /* }}} */
-	
+
 /* {{{ spl_filesystem_dir_it_valid */
 static int spl_filesystem_dir_it_valid(zend_object_iterator *iter TSRMLS_DC)
 {
@@ -1395,7 +1396,6 @@ static int spl_filesystem_dir_it_valid(zend_object_iterator *iter TSRMLS_DC)
 	return object->u.dir.entry.d_name[0] != '\0' ? SUCCESS : FAILURE;
 }
 /* }}} */
-
 
 /* {{{ spl_filesystem_dir_it_current_data */
 static void spl_filesystem_dir_it_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
@@ -1455,7 +1455,7 @@ static void spl_filesystem_tree_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 	iterator->intern.data = NULL; /* mark as unused */
 }
 /* }}} */
-	
+
 /* {{{ spl_filesystem_tree_it_current_data */
 static void spl_filesystem_tree_it_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
 {
@@ -1541,7 +1541,7 @@ static void spl_filesystem_tree_it_rewind(zend_object_iterator *iter TSRMLS_DC)
 }
 /* }}} */
 
-/* iterator handler table */
+/* {{{ iterator handler table */
 zend_object_iterator_funcs spl_filesystem_tree_it_funcs = {
 	spl_filesystem_tree_it_dtor,
 	spl_filesystem_dir_it_valid,
@@ -1550,6 +1550,7 @@ zend_object_iterator_funcs spl_filesystem_tree_it_funcs = {
 	spl_filesystem_tree_it_move_forward,
 	spl_filesystem_tree_it_rewind
 };
+/* }}} */
 
 /* {{{ spl_ce_dir_get_iterator */
 zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
@@ -1610,7 +1611,7 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type, v
 }
 /* }}} */
 
-/* declare method parameters */
+/* {{{ declare method parameters */
 /* supply a name and default to call by parameter */
 static
 ZEND_BEGIN_ARG_INFO(arginfo_info___construct, 0) 
@@ -1725,6 +1726,7 @@ static const zend_function_entry spl_GlobIterator_functions[] = {
 	SPL_ME(GlobIterator, count,         NULL,                      ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
 static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent TSRMLS_DC) /* {{{ */
 {
@@ -1814,12 +1816,12 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 	return result;
 } /* }}} */
 
-#define FileFunctionCall(func_name, pass_num_args, arg2) \
+#define FileFunctionCall(func_name, pass_num_args, arg2) /* {{{ */\
 { \
 	zend_function *func_ptr; \
 	zend_hash_find(EG(function_table), #func_name, sizeof(#func_name), (void **) &func_ptr); \
 	spl_filesystem_file_call(intern, func_ptr, pass_num_args, return_value, arg2 TSRMLS_CC); \
-}
+} /* }}} */
 
 static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, char escape, zval *return_value TSRMLS_DC) /* {{{ */
 {
@@ -2311,7 +2313,6 @@ SPL_METHOD(SplFileObject, fflush)
 	RETURN_BOOL(!php_stream_flush(intern->u.file.stream));
 } /* }}} */
 
-
 /* {{{ proto int SplFileObject::ftell() U
    Return current file position */
 SPL_METHOD(SplFileObject, ftell)
@@ -2633,7 +2634,6 @@ PHP_MINIT_FUNCTION(spl_directory)
 	return SUCCESS;
 }
 /* }}} */
-
 
 /*
  * Local variables:
