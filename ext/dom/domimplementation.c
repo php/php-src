@@ -27,6 +27,32 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_implementation_get_feature, 0, 0, 2)
+	ZEND_ARG_INFO(0, feature)
+	ZEND_ARG_INFO(0, version)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_implementation_has_feature, 0, 0, 0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_implementation_create_documenttype, 0, 0, 3)
+	ZEND_ARG_INFO(0, qualifiedName)
+	ZEND_ARG_INFO(0, publicId)
+	ZEND_ARG_INFO(0, systemId)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_implementation_create_document, 0, 0, 3)
+	ZEND_ARG_INFO(0, namespaceURI)
+	ZEND_ARG_INFO(0, qualifiedName)
+	ZEND_ARG_OBJ_INFO(0, docType, DOMDocumentType, 0)
+ZEND_END_ARG_INFO();
+/* }}} */
+
 /*
 * class DOMImplementation 
 *
@@ -35,10 +61,10 @@
 */
 
 const zend_function_entry php_dom_domimplementation_class_functions[] = {
-	PHP_ME(domimplementation, getFeature, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
-	PHP_ME(domimplementation, hasFeature, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
-	PHP_ME(domimplementation, createDocumentType, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
-	PHP_ME(domimplementation, createDocument, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
+	PHP_ME(domimplementation, getFeature, arginfo_dom_implementation_get_feature, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
+	PHP_ME(domimplementation, hasFeature, arginfo_dom_implementation_has_feature, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
+	PHP_ME(domimplementation, createDocumentType, arginfo_dom_implementation_create_documenttype, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
+	PHP_ME(domimplementation, createDocument, arginfo_dom_implementation_create_document, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
 	{NULL, NULL, NULL}
 };
 

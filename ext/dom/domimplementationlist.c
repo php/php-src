@@ -28,6 +28,13 @@
 #include "php_dom.h"
 
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_implementationlist_item, 0, 0, 1)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO();
+/* }}} */
+
 /*
 * class domimplementationlist 
 *
@@ -36,7 +43,7 @@
 */
 
 const zend_function_entry php_dom_domimplementationlist_class_functions[] = {
-	PHP_FALIAS(item, dom_domimplementationlist_item, NULL)
+	PHP_FALIAS(item, dom_domimplementationlist_item, arginfo_dom_implementationlist_item)
 	{NULL, NULL, NULL}
 };
 
