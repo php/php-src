@@ -19,14 +19,14 @@ $a = unserialize(serialize($a));
 var_dump($a);
 var_dump($a->var);
 
-class Sláinte extends ArrayObject
+class Bla extends ArrayObject
 {
-    public $var = 'tá';
-    protected $bar = 'trí';
-    private $foo = '年';
+    public $var = 'aaa';
+    protected $bar = 'bbb';
+    private $foo = 'ccc';
 }
 
-$a = new Sláinte();
+$a = new Bla();
 var_dump($a);
 var_dump($a->var);
 
@@ -61,27 +61,76 @@ object(Name)#2 (4) {
   }
 }
 string(1) "a"
-object(Sláinte)#1 (4) {
+object(Bla)#1 (4) {
   ["var"]=>
-  string(3) "tá"
+  string(3) "aaa"
   ["bar":protected]=>
-  string(4) "trí"
-  ["foo":"Sláinte":private]=>
-  string(3) "年"
+  string(3) "bbb"
+  ["foo":"Bla":private]=>
+  string(3) "ccc"
   ["storage":"ArrayObject":private]=>
   array(0) {
   }
 }
-string(3) "tá"
-object(Sláinte)#2 (4) {
+string(3) "aaa"
+object(Bla)#2 (4) {
   ["var"]=>
-  string(3) "tá"
+  string(3) "aaa"
   ["bar":protected]=>
-  string(4) "trí"
-  ["foo":"Sláinte":private]=>
-  string(3) "年"
+  string(3) "bbb"
+  ["foo":"Bla":private]=>
+  string(3) "ccc"
   ["storage":"ArrayObject":private]=>
   array(0) {
   }
 }
-string(3) "tá"
+string(3) "aaa"
+--UEXPECT--
+object(Name)#1 (4) {
+  [u"var"]=>
+  unicode(1) "a"
+  [u"bar":protected]=>
+  unicode(1) "b"
+  [u"foo":u"Name":private]=>
+  unicode(1) "c"
+  [u"storage":u"ArrayObject":private]=>
+  array(0) {
+  }
+}
+unicode(1) "a"
+object(Name)#2 (4) {
+  [u"var"]=>
+  unicode(1) "a"
+  [u"bar":protected]=>
+  unicode(1) "b"
+  [u"foo":u"Name":private]=>
+  unicode(1) "c"
+  [u"storage":u"ArrayObject":private]=>
+  array(0) {
+  }
+}
+unicode(1) "a"
+object(Bla)#1 (4) {
+  [u"var"]=>
+  unicode(3) "aaa"
+  [u"bar":protected]=>
+  unicode(3) "bbb"
+  [u"foo":u"Bla":private]=>
+  unicode(3) "ccc"
+  [u"storage":u"ArrayObject":private]=>
+  array(0) {
+  }
+}
+unicode(3) "aaa"
+object(Bla)#2 (4) {
+  [u"var"]=>
+  unicode(3) "aaa"
+  [u"bar":protected]=>
+  unicode(3) "bbb"
+  [u"foo":u"Bla":private]=>
+  unicode(3) "ccc"
+  [u"storage":u"ArrayObject":private]=>
+  array(0) {
+  }
+}
+unicode(3) "aaa"

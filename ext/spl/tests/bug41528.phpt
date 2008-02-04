@@ -35,3 +35,20 @@ object(ClassOne)#2 (2) {
   }
 }
 int(1)
+--UEXPECT--
+object(ClassOne)#1 (2) {
+  [u"a"]=>
+  int(1)
+  [u"storage":u"ArrayObject":private]=>
+  array(0) {
+  }
+}
+int(1)
+object(ClassOne)#2 (2) {
+  [u"a"]=>
+  int(1)
+  [u"storage":u"ArrayObject":private]=>
+  array(0) {
+  }
+}
+int(1)
