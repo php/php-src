@@ -551,7 +551,7 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, int ctor_flag
 	spl_filesystem_object *intern;
 	char *path;
 	int parsed, len;
-	long flags;
+	long flags = 0;
 
 	php_set_error_handling(EH_THROW, spl_ce_UnexpectedValueException TSRMLS_CC);
 
@@ -1148,7 +1148,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 	ZVAL_LONG(&zflags, intern->flags);
 	ZVAL_STRINGL(&zpath, intern->file_name, intern->file_name_len, 0);
 
-	spl_instantiate_arg_ex2(spl_ce_RecursiveDirectoryIterator, &return_value, 0, &zpath, &zflags TSRMLS_CC);
+	spl_instantiate_arg_ex2(Z_OBJCE_P(getThis()), &return_value, 0, &zpath, &zflags TSRMLS_CC);
 	
 	subdir = (spl_filesystem_object*)zend_object_store_get_object(return_value TSRMLS_CC);
 	if (subdir) {
