@@ -28,8 +28,6 @@
 #include "mysqlnd_charset.h"
 #include "mysqlnd_debug.h"
 #include "mysqlnd_block_alloc.h"
-#include "ext/standard/basic_functions.h"
-#include "ext/standard/php_lcg.h"
 
 /* the server doesn't support 4byte utf8, but let's make it forward compatible */
 #define MYSQLND_MAX_ALLOWED_USER_LEN	256  /* 64 char * 4byte */
@@ -544,15 +542,6 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 	}
 	DBG_INF_FMT("transport=%p", transport);
 
-	if (conn->persistent) {
-		struct timeval tv;
-		gettimeofday(&tv, NULL);
-		/* We should generate something unique */
-		hashed_details_len = spprintf(&hashed_details, 0, "%s@%s@%s@%ld@%ld@%0.8F",
-									  transport, user, db, tv.tv_sec, (long int)tv.tv_usec,
-									  php_combined_lcg(TSRMLS_C) * 10);
-		DBG_INF_FMT("hashed_details=%s", hashed_details);
-	} 
 
 	PACKET_INIT_ALLOCA(greet_packet, PROT_GREET_PACKET);
 	PACKET_INIT(auth_packet, PROT_AUTH_PACKET, php_mysql_packet_auth *);
@@ -562,6 +551,19 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 		conn = mysqlnd_init(FALSE);
 		self_alloced = TRUE;
 	}
+
+	if (conn->persistent) {
+#if 0
+		struct timeval tv;
+		gettimeofday(&tv, NULL);
+		/* We should generate something unique */
+		hashed_details_len = spprintf(&hashed_details, 0, "%s@%s@%s@%ld@%ld@%0.8F",
+									  transport, user, db, tv.tv_sec, (long int)tv.tv_usec,
+									  php_combined_lcg(TSRMLS_C) * 10);
+#endif
+		hashed_details_len = spprintf(&hashed_details, 0, "%p", conn);
+		DBG_INF_FMT("hashed_details=%s", hashed_details);
+	} 
 
 	CONN_SET_STATE(conn, CONN_ALLOCED);
 	conn->net.packet_no = 0;
@@ -584,6 +586,9 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 	DBG_INF_FMT("stream=%p", conn->net.stream);
 
 	if (errstr || !conn->net.stream) {
+		if (hashed_details) {
+			mnd_efree(hashed_details);
+		}
 		goto err;
 	}
 
