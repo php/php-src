@@ -8,4 +8,4 @@ spl_autoload_register();
 new Foo();
 ?>
 --EXPECTF--
-Fatal error: spl_autoload(): Class Foo could not be loaded in %s on line 3
+Fatal error: Class 'Foo' not found in %s on line %d
