@@ -25,12 +25,12 @@ echo "Done";
 --EXPECTF--
 *** Testing array_map() : non existent 'callback' function ***
 
-Warning: array_map() expects parameter 1 to be valid callback, string given in %s on line %d%d
+Warning: array_map() expects parameter 1 to be a valid callback, function 'non_existent' not found or invalid function name in %s on line %d
 NULL
 Done
 --UEXPECTF--
 *** Testing array_map() : non existent 'callback' function ***
 
-Warning: array_map() expects parameter 1 to be valid callback, Unicode string given in %s on line %d
+Warning: array_map() expects parameter 1 to be a valid callback, function 'non_existent' not found or invalid function name in %s on line %d
 NULL
 Done
