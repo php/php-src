@@ -556,10 +556,8 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, int ctor_flag
 	php_set_error_handling(EH_THROW, spl_ce_UnexpectedValueException TSRMLS_CC);
 
 	if (ctor_flags & DIT_CTOR_FLAGS) {
-		flags = SPL_FILE_DIR_CURRENT_AS_FILEINFO;
 		parsed = zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &path, &len, &flags);
 	} else {
-		flags = 0;
 		parsed = zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &path, &len);
 	}
 	if (parsed == FAILURE) {
