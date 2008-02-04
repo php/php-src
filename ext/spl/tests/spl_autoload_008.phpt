@@ -82,7 +82,7 @@ Exception: Bla
 int(0)
 ====2====
 string(22) "MyAutoLoader::dynaLoad"
-LogicException: Function 'MyAutoLoader::dynaLoad' not callable (non-static method MyAutoLoader::dynaLoad() should not be called statically)
+LogicException: Function 'MyAutoLoader::dynaLoad' not callable, (non-static method MyAutoLoader::dynaLoad() should not be called statically)
 int(0)
 ====3====
 array(2) {
@@ -144,7 +144,7 @@ Exception: Bla
 int(0)
 ====2====
 unicode(22) "MyAutoLoader::dynaLoad"
-LogicException: Function 'MyAutoLoader::dynaLoad' not callable (non-static method MyAutoLoader::dynaLoad() should not be called statically)
+LogicException: Function 'MyAutoLoader::dynaLoad' not callable, (non-static method MyAutoLoader::dynaLoad() should not be called statically)
 int(0)
 ====3====
 array(2) {
