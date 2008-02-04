@@ -597,7 +597,7 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, int ctor_flag
 	zstr path;
 	int parsed, len;
 	zend_uchar path_type;
-	long flags;
+	long flags = 0;
 	
 	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
 
