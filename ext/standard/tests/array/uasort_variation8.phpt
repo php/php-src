@@ -69,11 +69,11 @@ array(5) {
 }
 -- Testing uasort() with language construct as 'cmp_function' --
 
-Warning: uasort() expects parameter 2 to be valid callback, string given in %s on line %d
+Warning: uasort() expects parameter 2 to be a valid callback, function 'echo' not found or invalid function name in %s on line %d
 NULL
 -- Testing uasort() with language construct as 'cmp_function' --
 
-Warning: uasort() expects parameter 2 to be valid callback, string given in %s on line %d
+Warning: uasort() expects parameter 2 to be a valid callback, function 'exit' not found or invalid function name in %s on line %d
 NULL
 Done
 --UEXPECTF--
@@ -108,10 +108,10 @@ array(5) {
 }
 -- Testing uasort() with language construct as 'cmp_function' --
 
-Warning: uasort() expects parameter 2 to be valid callback, Unicode string given in %s on line %d
+Warning: uasort() expects parameter 2 to be a valid callback, function 'echo' not found or invalid function name in %s on line %d
 NULL
 -- Testing uasort() with language construct as 'cmp_function' --
 
-Warning: uasort() expects parameter 2 to be valid callback, Unicode string given in %s on line %d
+Warning: uasort() expects parameter 2 to be a valid callback, function 'exit' not found or invalid function name in %s on line %d
 NULL
 Done

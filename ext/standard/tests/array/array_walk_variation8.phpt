@@ -37,7 +37,7 @@ bool(true)
 bool(true)
 -- With 'echo' language construct --
 
-Warning: array_walk() expects parameter 2 to be valid callback, string given in %s on line %d
+Warning: array_walk() expects parameter 2 to be a valid callback, function 'echo' not found or invalid function name in %s on line %d
 NULL
 Done
 --UEXPECTF--
@@ -48,6 +48,6 @@ bool(true)
 bool(true)
 -- With 'echo' language construct --
 
-Warning: array_walk() expects parameter 2 to be valid callback, Unicode string given in %s on line %d
+Warning: array_walk() expects parameter 2 to be a valid callback, function 'echo' not found or invalid function name in %s on line %d
 NULL
 Done
