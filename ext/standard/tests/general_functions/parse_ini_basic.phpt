@@ -8,14 +8,16 @@ basicqval=FUBAR_QUOTES_VARIABLE
 
 $ini_file = dirname(__FILE__)."/parse_ini_basic.data";
 
+define('TEST_CONSTANT', 'this_is_test_constant');
+
 var_dump(parse_ini_file($ini_file, 1));
 
 echo "Done.\n";
 ?>
 --EXPECTF--	
-array(22) {
+array(25) {
   ["basic"]=>
-  array(14) {
+  array(15) {
     ["basicval"]=>
     string(3) "bar"
     ["longval"]=>
@@ -44,6 +46,8 @@ array(22) {
     string(51) "asdadfsdjkslkj ¡@£$$ { } !^~|¥¥{[()/)&/% ¤ # #"
     ["php_constant"]=>
     string(4) "8191"
+    ["user_constant"]=>
+    string(21) "this_is_test_constant"
   }
   ["basic with whitespace"]=>
   array(13) {
@@ -234,6 +238,39 @@ array(22) {
   array(1) {
     ["bla"]=>
     string(3) "bla"
+  }
+  ["bug #43923"]=>
+  array(3) {
+    ["curly1"]=>
+    string(1) "{"
+    ["curly2"]=>
+    string(1) "{"
+    ["curly3"]=>
+    string(1) "{"
+  }
+  ["bug #44019"]=>
+  array(6) {
+    ["concatenation_before"]=>
+    string(37) "this_is_test_constant+some_text_after"
+    ["concatenation_middle"]=>
+    string(54) "some_text_before+this_is_test_constant+some_text_after"
+    ["concatenation_after"]=>
+    string(38) "some_text_before+this_is_test_constant"
+    ["concatenation_nows_before"]=>
+    string(37) "this_is_test_constant+some_text_after"
+    ["concatenation_nows_middle"]=>
+    string(54) "some_text_before+this_is_test_constant+some_text_after"
+    ["concatenation_nows_after"]=>
+    string(38) "some_text_before+this_is_test_constant"
+  }
+  ["bug #43915"]=>
+  array(3) {
+    ["ini_with-hyphen"]=>
+    string(26) "with hyphen and underscore"
+    ["ini.with-hyphen"]=>
+    string(14) "dot and hyphen"
+    ["ini-with.hyphen"]=>
+    string(14) "hyphen and dot"
   }
 }
 Done.
