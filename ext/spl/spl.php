@@ -13,25 +13,25 @@
  *
  * SPL - Standard PHP Library
  *
- * SPL is a collection of interfaces and classes that are meant to solve 
- * standard problems and implements some efficient data access interfaces 
- * and classes. You'll find the classes documented using php code in the 
- * file spl.php or in corresponding .inc files in subdirectories examples 
- * and internal. Based on the internal implementations or the files in the 
+ * SPL is a collection of interfaces and classes that are meant to solve
+ * standard problems and implements some efficient data access interfaces
+ * and classes. You'll find the classes documented using php code in the
+ * file spl.php or in corresponding .inc files in subdirectories examples
+ * and internal. Based on the internal implementations or the files in the
  * examples subdirectory there are also some .php files to experiment with.
- * 
- * The .inc files are not included automatically because they are sooner or 
- * later integrated into the extension. That means that you either need to 
- * put the code of examples/autoload.inc into your autoprepend file or that 
+ *
+ * The .inc files are not included automatically because they are sooner or
+ * later integrated into the extension. That means that you either need to
+ * put the code of examples/autoload.inc into your autoprepend file or that
  * you have to point your ini setting auto_prepend_file to that file.
- * 
+ *
  * Below is a list of interfaces/classes already availabel natively through
  * the SPL extension grouped by category.
- * 
+ *
  * 1) Iterators
- * 
+ *
  * SPL offers some advanced iterator algorithms:
- * 
+ *
  * - interface RecursiveIterator extends Iterator
  * - interface OuterIterator extends Iterator
  * - class RecursiveIteratorIterator implements OuterIterator
@@ -48,32 +48,32 @@
  * - class AppendIterator implements OuterIterator
  * - class RegexIterator extends FilterIterator
  * - class RecursiveRegexIterator extends RegexIterator implements RecursiveIterator
- * 
+ *
  * 2) Directories and Files
- * 
+ *
  * SPL offers two advanced directory and file handling classes:
- * 
+ *
  * - class SplFileInfo
  * - class DirectoryIterator extends SplFileInfo implements Iterator
  * - class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveIterator
  * - class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIterator
- * 
+ *
  * 3) XML
- * 
+ *
  * SPL offers an advanced XML handling class:
- * 
+ *
  * - class SimpleXMLIterator extends simplexml_element implements RecursiveIterator
- * 
+ *
  * 4) Array Overloading
- * 
+ *
  * SPL offers advanced Array overloading:
- * 
+ *
  * - class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
  * - class ArrayIterator implements Iterator, ArrayAccess, Countable, SeekableIterator
  * - class RecursiveArrayIterator extends ArrayIterator implements RecursiveIterator
- * 
+ *
  * As the above suggest an ArrayObject creates an ArrayIterator when it comes to
- * iteration (e.g. ArrayObject instance used inside foreach). 
+ * iteration (e.g. ArrayObject instance used inside foreach).
  *
  * 5) Counting
  *
@@ -81,7 +81,7 @@
  *
  * 6) Exception%s
  *
- * SPL provides a set of standard Exception classes each meant to indicate a 
+ * SPL provides a set of standard Exception classes each meant to indicate a
  * certain problem type.
  *
  * - class LogicException           extends Exception
@@ -107,10 +107,10 @@
  *
  * 8) @ref Examples
  *
- * The classes and interfaces in this group are contained as PHP code in the 
+ * The classes and interfaces in this group are contained as PHP code in the
  * examples subdirectory of ext/SPL. Sooner or later they will be moved to
  * c-code.
- * 
+ *
  * 9) Some articles about SPL:
  * - <a href="http://www.phpro.org/tutorials/Introduction-to-SPL.html">Introduction to Standard PHP Library (SPL)</a>
  * - <a href="http://www.sitepoint.com/article/php5-standard-library/1">Introducing PHP 5's Standard Library</a>
@@ -131,7 +131,7 @@
  * - Debug session 2 <a href="http://talks.somabo.de/200509_toronto_iterator_debug_session_1.pps">[pps]</a>, <a href="http://talks.somabo.de/200509_toronto_iterator_debug_session_1.pdf">[pdf]</a>, <a href="http://taks.somabo.de/200411_php_conference_frankfrurt_iterator_debug_session.swf">[swf]</a>
  * - Debug session 3 <a href="http://talks.somabo.de/200509_toronto_iterator_debug_session_2.pps">[pps]</a>, <a href="http://talks.somabo.de/200509_toronto_iterator_debug_session_2.pdf">[pdf]</a>
  *
- * You can download this documentation as a chm file 
+ * You can download this documentation as a chm file
  * <a href="http://php.net/~helly/php/ext/spl/spl.chm">here</a>.
  *
  * (c) Marcus Boerger, 2003 - 2007
@@ -139,19 +139,19 @@
 
 /** @defgroup ZendEngine Zend engine classes
  *
- * The classes and interfaces in this group are contained in the c-code of 
+ * The classes and interfaces in this group are contained in the c-code of
  * PHP's Zend engine.
  */
 
 /** @defgroup SPL Internal classes
  *
- * The classes and interfaces in this group are contained in the c-code of 
+ * The classes and interfaces in this group are contained in the c-code of
  * ext/SPL.
  */
 
 /** @defgroup Examples Example classes
  *
- * The classes and interfaces in this group are contained as PHP code in the 
+ * The classes and interfaces in this group are contained as PHP code in the
  * examples subdirectory of ext/SPL. Sooner or later they will be moved to
  * c-code.
  */
@@ -173,13 +173,13 @@ function spl_autoload(string $class_name, string $file_extensions = NULL) {/**/}
  */
 function spl_autoload_call(string $class_name) {/**/};
 
-/** @ingroup SPL 
+/** @ingroup SPL
  * @brief Register and return default file extensions for spl_autoload
  * @since PHP 5.1
  *
- * @param file_extensions optional comma separated list of extensions to use in 
+ * @param file_extensions optional comma separated list of extensions to use in
  *        default autoload function. If not given just return the current list.
- * @return comma separated list of file extensions to use in default autoload 
+ * @return comma separated list of file extensions to use in default autoload
  *        function.
  */
 function spl_autoload_extensions($file_extensions) {/**/};
@@ -196,7 +196,7 @@ function spl_autoload_functions() {/**/};
  * @brief Register given function as autoload implementation
  * @since PHP 5.1
  *
- * @param autoload_function  name of function or array of object/class and 
+ * @param autoload_function  name of function or array of object/class and
  *                           function name to register as autoload function.
  * @param throw              whether to throw or issue an error on failure.
  */
@@ -206,7 +206,7 @@ function spl_autoload_register(string $autoload_function = "spl_autoload", $thro
  * @brief Unregister given function as autoload implementation
  * @since PHP 5.1
  *
- * @param autoload_function  name of function or array of object/class and 
+ * @param autoload_function  name of function or array of object/class and
  *                           function name to unregister as autoload function.
  */
 function spl_autoload_unregister(string $autoload_function = "spl_autoload") {/**/};
@@ -214,7 +214,7 @@ function spl_autoload_unregister(string $autoload_function = "spl_autoload") {/*
 /** @ingroup SPL
  * @brief Return an array of classes and interfaces in SPL
  *
- * @return array containing the names of all clsses and interfaces defined in 
+ * @return array containing the names of all clsses and interfaces defined in
  *         extension SPL
  */
 function spl_classes() {/**/};
@@ -244,26 +244,26 @@ function iterator_to_array(Traversable $it, $use_keys = true) {/**/};
 class Exception
 {
 	/** The exception message */
-    protected $message;
-    
-    /** The string represenations as generated during construction */
-    private $string;
-    
-    /** The code passed to the constructor */
-    protected $code;
-    
-    /** The file name where the exception was instantiated */
-    protected $file;
-    
-    /** The line number where the exception was instantiated */
-    protected $line;
-    
-    /** The stack trace */
-    private $trace;
+	protected $message;
+
+	/** The string represenations as generated during construction */
+	private $string;
+
+	/** The code passed to the constructor */
+	protected $code;
+
+	/** The file name where the exception was instantiated */
+	protected $file;
+
+	/** The line number where the exception was instantiated */
+	protected $line;
+
+	/** The stack trace */
+	private $trace;
 
 	/** Prevent clone
 	 */
-    final private function __clone() {}
+	final private function __clone() {}
 
 	/** Construct an exception
 	 *
@@ -279,55 +279,55 @@ class Exception
 		$this->line = __LINE__; // of throw clause
 		$this->trace = debug_backtrace();
 		$this->string = StringFormat($this);
-	} 
+	}
 
 	/** @return the message passed to the constructor
 	 */
-    final public function getMessage()
-    {
-    	return $this->message;
-    }
+	final public function getMessage()
+	{
+		return $this->message;
+	}
 
 	/** @return the code passed to the constructor
 	 */
-    final public function getCode()
-    {
-    	return $this->code;
-    }
+	final public function getCode()
+	{
+		return $this->code;
+	}
 
 	/** @return the name of the file where the exception was thrown
 	 */
-    final public function getFile()
-    {
-    	return $this->file;
-    }
+	final public function getFile()
+	{
+		return $this->file;
+	}
 
 	/** @return the line number where the exception was thrown
 	 */
-    final public function getLine()
-    {
-    	return $this->line;
-    }
+	final public function getLine()
+	{
+		return $this->line;
+	}
 
 	/** @return the stack trace as array
 	 */
-    final public function getTrace()
-    {
-    	return $this->trace;
-    }
+	final public function getTrace()
+	{
+		return $this->trace;
+	}
 
 	/** @return the stack trace as string
 	 */
-    final public function getTraceAsString()
-    {
-    }
+	final public function getTraceAsString()
+	{
+	}
 
 	/** @return string represenation of exception
 	 */
-    public function __toString()
-    {
-    	return $this->string;
-    }
+	public function __toString()
+	{
+		return $this->string;
+	}
 }
 
 /** @ingroup SPL
@@ -360,7 +360,7 @@ class BadMethodCallException extends BadFunctionCallException
  * @brief Exception that denotes a value not in the valid domain was used.
  * @since PHP 5.1
  *
- * This kind of exception should be used to inform about domain erors in 
+ * This kind of exception should be used to inform about domain erors in
  * mathematical sense.
  *
  * @see RangeException
@@ -383,7 +383,7 @@ class InvalidArgumentException extends LogicException
  * @brief Exception thrown when a parameter exceeds the allowed length.
  * @since PHP 5.1
  *
- * This can be used for strings length, array size, file size, number of 
+ * This can be used for strings length, array size, file size, number of
  * elements read from an Iterator and so on.
  */
 class LengthException extends LogicException
@@ -403,7 +403,7 @@ class OutOfRangeException extends LogicException
 }
 
 /** @ingroup SPL
- * @brief Exception thrown for errors that are only detectable at runtime. 
+ * @brief Exception thrown for errors that are only detectable at runtime.
  * @since PHP 5.1
  */
 class RuntimeException extends Exception
@@ -457,7 +457,7 @@ class UnderflowException extends RuntimeException
  *
  * Typically this happens when a function calls another function and espects
  * the return value to be of a certain type or value not including arithmetic
- * or buffer related errors. 
+ * or buffer related errors.
  *
  * @see InvalidArgumentException
  */
@@ -496,14 +496,14 @@ interface ArrayAccess
  * @since PHP 5.0
  *
  * Abstract base interface that cannot be implemented alone. Instead it
- * must be implemented by either IteratorAggregate or Iterator. 
+ * must be implemented by either IteratorAggregate or Iterator.
  *
- * @note Internal classes that implement this interface can be used in a 
+ * @note Internal classes that implement this interface can be used in a
  * foreach construct and do not need to implement IteratorAggregate or
  * Iterator.
  *
  * @note This is an engine internal interface which cannot be implemented
- * in PHP scripts. Either IteratorAggregate or Iterator must be used 
+ * in PHP scripts. Either IteratorAggregate or Iterator must be used
  * instead.
  */
 interface Traversable
@@ -515,7 +515,7 @@ interface Traversable
  * @since PHP 5.0
  *
  * @note This is an engine internal interface.
- */ 
+ */
 interface IteratorAggregate extends Traversable
 {
 	/** @return an Iterator for the implementing object.
@@ -527,7 +527,7 @@ interface IteratorAggregate extends Traversable
  * @brief Basic iterator
  * @since PHP 5.0
  *
- * Interface for external iterators or objects that can be iterated 
+ * Interface for external iterators or objects that can be iterated
  * themselves internally.
  *
  * @note This is an engine internal interface.
@@ -569,8 +569,8 @@ interface Countable
 /** @ingroup ZendEngine
  * @brief Interface for customized serializing
  * @since 5.1
- * 
- * Classes that implement this interface no longer support __sleep() and 
+ *
+ * Classes that implement this interface no longer support __sleep() and
  * __wakeup(). The method serialized is called whenever an instance needs to
  * be serialized. This does not invoke __destruct() or has any other side
  * effect unless programmed inside the method. When the data is unserialized
@@ -584,10 +584,10 @@ interface Serializable
 	 * @return string representation of the instance
 	 */
 	function serialize();
-	
+
 	/**
 	 * @note This is a constructor
-	 * 
+	 *
 	 * @param $serialized data read from stream to construct the instance
 	 */
 	function unserialize($serialized);
@@ -598,7 +598,7 @@ interface Serializable
  * @since PHP 5.0
  * @version 1.2
  *
- * This array wrapper allows to recursively iterate over Arrays and public 
+ * This array wrapper allows to recursively iterate over Arrays and public
  * Object properties.
  *
  * @see ArrayIterator
@@ -621,14 +621,14 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 	function __construct($array, $flags = 0, $iterator_class = "ArrayIterator") {/**/}
 
 	/** Set behavior flags.
-	 *	
+	 *
 	 * @param $flags bitmask as follows:
 	 *        0 set: properties of the object have their normal functionality
 	 *               when accessed as list (var_dump, foreach, etc.)
 	 *        1 set: array indices can be accessed as properties in read/write
 	 */
 	function setFlags($flags) {/**/}
-	                    
+
 	/** @return current flags
 	 */
 	function getFlags() {/**/}
@@ -636,27 +636,27 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 	/** Sort the entries by values.
 	 */
 	function asort() {/**/}
-	
+
 	/** Sort the entries by key.
 	 */
 	function ksort() {/**/}
-	
+
 	/** Sort the entries by values using user defined function.
 	 */
 	function uasort(mixed cmp_function) {/**/}
-	
+
 	/** Sort the entries by key using user defined function.
 	 */
 	function uksort(mixed cmp_function) {/**/}
-	
+
 	/** Sort the entries by values using "natural order" algorithm.
 	 */
 	function natsort() {/**/}
-	
+
 	/** Sort the entries by values using case insensitive "natural order" algorithm.
 	 */
 	function natcasesort() {/**/}
-	
+
 	/** @param $array new array or object
 	 */
 	function exchangeArray($array) {/**/}
@@ -668,44 +668,44 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 
 	/** @param $index offset to inspect
 	 * @return whetehr offset $index esists
-	 */	
+	 */
 	function offsetExists($index) {/**/}
 
 	/** @param $index offset to return value for
 	 * @return value at offset $index
-	 */	
+	 */
 	function offsetGet($index) {/**/}
 
 	/** @param $index index to set
 	 * @param $newval new value to store at offset $index
-	 */	
+	 */
 	function offsetSet($index, $newval) {/**/}
 
 	/** @param $index offset to unset
-	 */	
+	 */
 	function offsetUnset($index) {/**/}
 
 	/** @param $value is appended as last element
-	 * @warning this method cannot be called when the ArrayObject refers to 
+	 * @warning this method cannot be called when the ArrayObject refers to
 	 *          an object.
-	 */	
+	 */
 	function append($value) {/**/}
 
 	/** @return a \b copy of the array
-	 * @note when the ArrayObject refers to an object then this method 
+	 * @note when the ArrayObject refers to an object then this method
 	 *       returns an array of the public properties.
-	 */	
+	 */
 	function getArrayCopy() {/**/}
 
 	/** @return the number of elements in the array or the number of public
 	 * properties in the object.
 	 */
 	function count() {/**/}
-	
+
 	/* @param $iterator_class new class used in getIterator()
 	 */
 	function setIteratorClass($itertor_class) {/**/}
-	
+
 	/* @return class used in getIterator()
 	 */
 	function getIteratorClass() {/**/}
@@ -719,9 +719,9 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
  * This iterator allows to unset and modify values and keys while iterating
  * over Arrays and Objects.
  *
- * When you want to iterate over the same array multiple times you need to 
- * instanciate ArrayObject and let it create ArrayIterator instances that 
- * refer to it either by using foreach or by calling its getIterator() 
+ * When you want to iterate over the same array multiple times you need to
+ * instanciate ArrayObject and let it create ArrayIterator instances that
+ * refer to it either by using foreach or by calling its getIterator()
  * method manually.
  */
 class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
@@ -741,7 +741,7 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
 	function __construct($array, $flags = 0) {/**/}
 
 	/** Set behavior flags.
-	 *	
+	 *
 	 * @param $flags bitmask as follows:
 	 *        0 set: properties of the object have their normal functionality
 	 *               when accessed as list (var_dump, foreach, etc.)
@@ -757,56 +757,56 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
 	/** Sort the entries by values.
 	 */
 	function asort() {/**/}
-	
+
 	/** Sort the entries by key.
 	 */
 	function ksort() {/**/}
-	
+
 	/** Sort the entries by values using user defined function.
 	 */
 	function uasort(mixed cmp_function) {/**/}
-	
+
 	/** Sort the entries by key using user defined function.
 	 */
 	function uksort(mixed cmp_function) {/**/}
-	
+
 	/** Sort the entries by values using "natural order" algorithm.
 	 */
 	function natsort() {/**/}
-	
+
 	/** Sort the entries by values using case insensitive "natural order" algorithm.
 	 */
 	function natcasesort() {/**/}
-	
+
 	/** @param $index offset to inspect
 	 * @return whetehr offset $index esists
-	 */	
+	 */
 	function offsetExists($index) {/**/}
 
 	/** @param $index offset to return value for
 	 * @return value at offset $index
-	 */	
+	 */
 	function offsetGet($index) {/**/}
 
 	/** @param $index index to set
 	 * @param $newval new value to store at offset $index
-	 */	
+	 */
 	function offsetSet($index, $newval) {/**/}
 
 	/** @param $index offset to unset
-	 */	
+	 */
 	function offsetUnset($index) {/**/}
 
 	/** @param $value is appended as last element
-	 * @warning this method cannot be called when the ArrayIterator refers to 
+	 * @warning this method cannot be called when the ArrayIterator refers to
 	 *          an object.
-	 */	
+	 */
 	function append($value) {/**/}
 
 	/** @return a \b copy of the array
-	 * @note when the ArrayIterator refers to an object then this method 
+	 * @note when the ArrayIterator refers to an object then this method
 	 *       returns an array of the public properties.
-	 */	
+	 */
 	function getArrayCopy() {/**/}
 
 	/** @param $position offset to seek to
@@ -821,16 +821,16 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
 
 	/** @copydoc Iterator::rewind */
 	function rewind() {/**/}
-	
+
 	/** @copydoc Iterator::valid */
 	function valid() {/**/}
-	
+
 	/** @copydoc Iterator::current */
 	function current() {/**/}
-	
+
 	/** @copydoc Iterator::key */
 	function key() {/**/}
-	
+
 	/** @copydoc Iterator::next */
 	function next() {/**/}
 }
@@ -839,7 +839,7 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
  * @brief File info class
  * @since PHP 5.1.3
  */
-class SplFileInfo 
+class SplFileInfo
 {
 	/** Construct a file info object
 	 *
@@ -849,11 +849,11 @@ class SplFileInfo
 
 	/** @return the path part only.
 	 */
-	function getPath() {/**/}	
+	function getPath() {/**/}
 
 	/** @return the filename only.
 	 */
-	function getFilename() {/**/}	
+	function getFilename() {/**/}
 
 	/** @return SplFileInfo created for the file
 	 * @param class_name name of class to instantiate
@@ -863,7 +863,7 @@ class SplFileInfo
 
 	/** @return The current entries path and file name.
 	 */
-	function getPathname() {/**/}	
+	function getPathname() {/**/}
 
 	/** @return SplFileInfo created for the path
 	 * @param class_name name of class to instantiate
@@ -925,7 +925,7 @@ class SplFileInfo
 
 	/** @return Whether the current entry is a directory.
 	 */
-	function isDir() {/**/}	
+	function isDir() {/**/}
 
 	/** @return whether the current entry is a link.
 	 */
@@ -938,7 +938,7 @@ class SplFileInfo
 	/** @return The resolved path
 	 */
 	function getRealPath() {/**/}
-	
+
 	/** @return getPathname()
 	 */
 	function __toString() {/**/}
@@ -948,7 +948,7 @@ class SplFileInfo
 	 * @param mode              open mode
 	 * @param use_include_path  whether to search include paths (don't use)
 	 * @param context           resource context to pased to open function
-	 * @throw RuntimeException  if file cannot be opened (e.g. insufficient 
+	 * @throw RuntimeException  if file cannot be opened (e.g. insufficient
 	 *                          access rights).
 	 * @return The opened file as a SplFileObject instance
 	 *
@@ -958,7 +958,7 @@ class SplFileInfo
 	 */
 	function openFile($mode = 'r', $use_include_path = false, $context = NULL) {/**/}
 
-	/** @param class_name name of class used with openFile(). Must be derived 
+	/** @param class_name name of class used with openFile(). Must be derived
 	 * from SPLFileObject.
 	 */
 	function setFileClass(string class_name = "SplFileObject") {/**/}
@@ -984,10 +984,10 @@ class DirectoryIterator extends SplFileInfo implements Iterator
 
 	/** @copydoc Iterator::rewind */
 	function rewind() {/**/}
-	
+
 	/** @copydoc Iterator::valid */
 	function valid() {/**/}
-	
+
 	/** @return index of entry
 	 */
 	function key() {/**/}
@@ -1001,7 +1001,7 @@ class DirectoryIterator extends SplFileInfo implements Iterator
 
 	/** @return Whether the current entry is either '.' or '..'.
 	 */
-	function isDot() {/**/}	
+	function isDot() {/**/}
 
 	/** @return whether the current entry is a link.
 	 */
@@ -1019,17 +1019,25 @@ class DirectoryIterator extends SplFileInfo implements Iterator
  */
 class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveIterator
 {
-	const CURRENT_AS_FILEINFO   0x00000010; /* make RecursiveDirectoryTree::current() return SplFileInfo */
-	const KEY_AS_FILENAME       0x00000020; /* make RecursiveDirectoryTree::key() return getFilename() */
-	const NEW_CURRENT_AND_KEY   0x00000030; /* CURRENT_AS_FILEINFO + KEY_AS_FILENAME */
+	const CURRENT_AS_FILEINFO   0x00000000; /* make RecursiveDirectoryTree::current() return SplFileInfo */
+	const CURRENT_AS_SELF       0x00000010; /* make RecursiveDirectoryTree::current() return getSelf() */
+	const CURRENT_AS_PATHNAME   0x00000020; /* make RecursiveDirectoryTree::current() return getPathname() */
+
+	const KEY_AS_PATHNAME       0x00000000; /* make RecursiveDirectoryTree::key() return getPathname() */
+	const KEY_AS_FILENAME       0x00000100; /* make RecursiveDirectoryTree::key() return getFilename() */
+
+	const NEW_CURRENT_AND_KEY   0x00000100; /* CURRENT_AS_FILEINFO + KEY_AS_FILENAME */
 
 	/** Construct a directory iterator from a path-string.
 	 *
 	 * @param $path   directory to iterate.
 	 * @param $flags  open flags
 	 * - CURRENT_AS_FILEINFO
+	 * - CURRENT_AS_SELF
+	 * - CURRENT_AS_PATHNAME
+	 * - KEY_AS_PATHNAME
 	 * - KEY_AS_FILENAME
-	 * - NEW_CURRENT_AND_KEY 
+	 * - NEW_CURRENT_AND_KEY
 	 */
 	function __construct($path, $flags = 0) {/**/}
 
@@ -1043,11 +1051,11 @@ class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveI
 
 	/** @return whether the current is a directory (not '.' or '..').
 	 */
-	function hasChildren() {/**/}	
+	function hasChildren() {/**/}
 
 	/** @return a RecursiveDirectoryIterator for the current entry.
 	 */
-	function getChildren() {/**/}	
+	function getChildren() {/**/}
 
 	/** @return sub path only (without main path)
 	 */
@@ -1062,7 +1070,7 @@ class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveI
  * @brief recursive SimpleXML_Element iterator
  * @since PHP 5.0
  *
- * The SimpleXMLIterator implements the RecursiveIterator interface. This 
+ * The SimpleXMLIterator implements the RecursiveIterator interface. This
  * allows iteration over all elements using foreach or an appropriate while
  * construct, just like SimpleXMLElement does. When using the foreach construct,
  * you will also iterate over the subelements. For every element which
@@ -1073,11 +1081,11 @@ class SimpleXMLIterator extends SimpleXMLElement implements RecursiveIterator, C
 {
 	/** @return whether the current node has sub nodes.
 	 */
-	function hasChildren() {/**/}	
+	function hasChildren() {/**/}
 
 	/** @return a SimpleXMLIterator for the current node.
 	 */
-	function getChildren() {/**/}	
+	function getChildren() {/**/}
 
 	/** @return number of elements/attributes seen with foreach()
 	 */
@@ -1085,16 +1093,16 @@ class SimpleXMLIterator extends SimpleXMLElement implements RecursiveIterator, C
 
 	/** @copydoc Iterator::rewind */
 	function rewind() {/**/}
-	
+
 	/** @copydoc Iterator::valid */
 	function valid() {/**/}
-	
+
 	/** @copydoc Iterator::current */
 	function current() {/**/}
-	
+
 	/** @copydoc Iterator::key */
 	function key() {/**/}
-	
+
 	/** @copydoc Iterator::next */
 	function next() {/**/}
 }
@@ -1126,16 +1134,16 @@ interface SplSubject
 {
 	/** @param $observer new observer to attach
 	 */
-    function attach(SplObserver $observer);
+	function attach(SplObserver $observer);
 
 	/** @param $observer existing observer to detach
 	 * @note a non attached observer shouldn't result in a warning or similar
 	 */
-    function detach(SplObserver $observer);
+	function detach(SplObserver $observer);
 
 	/** Notify all observers
 	 */
-    function notify();
+	function notify();
 }
 
 ?>
