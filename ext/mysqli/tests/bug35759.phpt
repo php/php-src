@@ -32,7 +32,9 @@ EOSQL;
 	$stmt = $mysql->prepare("SELECT * FROM blobby");
 	$stmt->execute();
 	$stmt->store_result();
-	$params= array_pad(array(), $col_num, "");
+	for ($i = 0; $i < $col_num; $i++) {
+		$params[] = &$col_num;
+	}
 	call_user_func_array(array($stmt, "bind_result"), $params);
 	$stmt->fetch();
 	

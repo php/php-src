@@ -186,6 +186,7 @@ mysqlnd_mempool_destroy(MYSQLND_MEMORY_POOL * pool TSRMLS_DC)
 	/* mnd_free will reference LOCK_access and might crash, depending on the caller...*/
 	mysqlnd_mempool_free_contents(pool TSRMLS_CC);
 	mnd_free(pool->arena);
+	mnd_free(pool);
 	DBG_VOID_RETURN;
 }
 /* }}} */
