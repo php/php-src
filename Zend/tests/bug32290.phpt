@@ -99,8 +99,9 @@ var_dump($x->doSomethingStatic(1));
 ===A===
 TestB::doSomething(1)
 
-Warning: call_user_func_array() expects parameter 1 to be valid callback, array given in %s on line %d
-NULL
+Strict Standards: call_user_func_array() expects parameter 1 to be a valid callback, non-static method TestA::doSomething() should not be called statically, assuming $this from compatible context TestB in %s on line %d
+TestA::doSomething(2)
+int(1)
 
 ===B===
 TestB::doSomethingThis(1)
@@ -110,8 +111,9 @@ int(1)
 ===C===
 TestB::doSomethingParent(1)
 
-Warning: call_user_func_array() expects parameter 1 to be valid callback, array given in %s on line %d
-NULL
+Strict Standards: call_user_func_array() expects parameter 1 to be a valid callback, non-static method TestA::doSomethingParent() should not be called statically, assuming $this from compatible context TestB in %s on line %d
+TestA::doSomethingParent(2)
+int(1)
 
 ===D===
 TestB::doSomethingParentThis(1)
