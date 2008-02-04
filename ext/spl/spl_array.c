@@ -1483,16 +1483,14 @@ SPL_METHOD(Array, unserialize)
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	
-	zstr buf;
-	unsigned int buf_len;
-	UChar *p, *s;
-	zend_uchar buf_type; 
-		
+	char *buf;
+	int buf_len;
+	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
 	zval *pentry, *pmembers, *pflags = NULL;
 	long flags;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &buf, &buf_len, &buf_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
 		return;
 	}
 
@@ -1501,8 +1499,7 @@ SPL_METHOD(Array, unserialize)
 		return;
 	}
 
-	s = p = (buf_type == IS_UNICODE ? buf.u : (UChar *)buf.s);
-
+	s = p = (const unsigned char*)buf;
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
 	if (*p!= 'x' || *++p != ':') {
@@ -1569,7 +1566,7 @@ SPL_METHOD(Array, unserialize)
 
 outexcept:
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset %ld of %d bytes", (long)((char*)p - (long)(buf_type == IS_UNICODE ? buf.u : (UChar *)buf.s)), buf_len);
+	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset %ld of %d bytes", (long)((char*)p - (long)buf), buf_len);
 	return;
 
 } /* }}} */

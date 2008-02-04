@@ -59,16 +59,16 @@ foreach($funcs as $idx => $func)
 <?php exit(0); ?>
 --EXPECTF--
 string(22) "MyAutoLoader::notExist"
-Function 'MyAutoLoader::notExist' not found, (class 'MyAutoLoader' does not have a method 'notexist')
+Function 'MyAutoLoader::notExist' not found (class 'MyAutoLoader' does not have a method 'notexist')
 
 string(22) "MyAutoLoader::noAccess"
-Function 'MyAutoLoader::noAccess' not callable, (cannot access protected method MyAutoLoader::noAccess())
+Function 'MyAutoLoader::noAccess' not callable (cannot access protected method MyAutoLoader::noAccess())
 
 string(22) "MyAutoLoader::autoLoad"
 ok
 
 string(22) "MyAutoLoader::dynaLoad"
-Function 'MyAutoLoader::dynaLoad' not callable, (non-static method MyAutoLoader::dynaLoad() should not be called statically)
+Function 'MyAutoLoader::dynaLoad' not callable (non-static method MyAutoLoader::dynaLoad() should not be called statically)
 
 array(2) {
   [0]=>
@@ -140,16 +140,16 @@ ok
 ===DONE===
 --UEXPECTF--
 unicode(22) "MyAutoLoader::notExist"
-Function 'MyAutoLoader::notExist' not found, (class 'MyAutoLoader' does not have a method 'notexist')
+Function 'MyAutoLoader::notExist' not found (class 'MyAutoLoader' does not have a method 'notexist')
 
 unicode(22) "MyAutoLoader::noAccess"
-Function 'MyAutoLoader::noAccess' not callable, (cannot access protected method MyAutoLoader::noAccess())
+Function 'MyAutoLoader::noAccess' not callable (cannot access protected method MyAutoLoader::noAccess())
 
 unicode(22) "MyAutoLoader::autoLoad"
 ok
 
 unicode(22) "MyAutoLoader::dynaLoad"
-Function 'MyAutoLoader::dynaLoad' not callable, (non-static method MyAutoLoader::dynaLoad() should not be called statically)
+Function 'MyAutoLoader::dynaLoad' not callable (non-static method MyAutoLoader::dynaLoad() should not be called statically)
 
 array(2) {
   [0]=>

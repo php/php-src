@@ -134,7 +134,7 @@ TestFunc2(TestClass)
 %stestclass.class.inc
 bool(true)
 ===NOFUNCTION===
-Exception: Function 'unavailable_autoload_function' not found, (function 'unavailable_autoload_function' not found or invalid function name)
+Exception: Function 'unavailable_autoload_function' not found (function 'unavailable_autoload_function' not found or invalid function name)
 ===DONE===
 --UEXPECTF--
 ===EMPTY===
@@ -165,5 +165,5 @@ TestFunc2(TestClass)
 %stestclass.class.inc
 bool(true)
 ===NOFUNCTION===
-Exception: Function 'unavailable_autoload_function' not found, (function 'unavailable_autoload_function' not found or invalid function name)
+Exception: Function 'unavailable_autoload_function' not found (function 'unavailable_autoload_function' not found or invalid function name)
 ===DONE===
