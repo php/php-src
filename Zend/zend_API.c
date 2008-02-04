@@ -2724,13 +2724,13 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		*ce_ptr = zend_u_fetch_class(Z_TYPE_P(callable), Z_UNIVAL_P(callable), clen, ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_SILENT TSRMLS_CC);
 		if (!*ce_ptr) {
 			char *cname = estrndup(Z_STRVAL_P(callable), clen);
-			if (error) zend_spprintf(error, 0, "class '%s' not found", cname);
+			if (error) zend_spprintf(error, 0, "class '%v' not found", cname);
 			efree(cname);
 			return 0;
 		}
 		ftable = &(*ce_ptr)->function_table;
 		if (ce_org && !instanceof_function(ce_org, *ce_ptr TSRMLS_CC)) {
-			if (error) zend_spprintf(error, 0, "class '%s' is not a subclass of '%s'", ce_org->name, (*ce_ptr)->name);
+			if (error) zend_spprintf(error, 0, "class '%v' is not a subclass of '%v'", ce_org->name, (*ce_ptr)->name);
 			return 0;
 		}
 		lmname = zend_u_str_case_fold(Z_TYPE_P(callable), mname, mlen, 1, &mlen);
@@ -2741,7 +2741,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		*ce_ptr = ce_org;
 	} else {
 		/* We already checked for plain function before. */
-		if (error) zend_spprintf(error, 0, "function '%s' not found or invalid function name", Z_STRVAL_P(callable));
+		if (error) zend_spprintf(error, 0, "function '%v' not found or invalid function name", Z_STRVAL_P(callable));
 		return 0;
 	}
 
@@ -2756,9 +2756,9 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 			*fptr_ptr = (*ce_ptr)->__callstatic;
 		} else {
 			if (*ce_ptr) {
-				if (error) zend_spprintf(error, 0, "class '%s' does not have a method '%s'", (*ce_ptr)->name, lmname);
+				if (error) zend_spprintf(error, 0, "class '%v' does not have a method '%v'", (*ce_ptr)->name, lmname);
 			} else {
-				if (error) zend_spprintf(error, 0, "function '%s' does not exist", lmname);
+				if (error) zend_spprintf(error, 0, "function '%v' does not exist", lmname);
 			}
 		}
 	} else {
@@ -2781,15 +2781,15 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 				if (EG(This) && instanceof_function(Z_OBJCE_P(EG(This)), *ce_ptr TSRMLS_CC)) {
 					*zobj_ptr_ptr = &EG(This);
 					if (error) {
-						zend_spprintf(error, 0, "non-static method %s::%s() %s be called statically, assuming $this from compatible context %s", (*ce_ptr)->name, fptr->common.function_name, verb, Z_OBJCE_P(EG(This))->name);
+						zend_spprintf(error, 0, "non-static method %v::%v() %s be called statically, assuming $this from compatible context %v", (*ce_ptr)->name, fptr->common.function_name, verb, Z_OBJCE_P(EG(This))->name);
 					} else if (retval) {
-						zend_error(severity, "Non-static method %s::%s() %s be called statically, assuming $this from compatible context %s", (*ce_ptr)->name, fptr->common.function_name, verb, Z_OBJCE_P(EG(This))->name);
+						zend_error(severity, "Non-static method %v::%v() %s be called statically, assuming $this from compatible context %v", (*ce_ptr)->name, fptr->common.function_name, verb, Z_OBJCE_P(EG(This))->name);
 					}
 				} else {
 					if (error) {
-						zend_spprintf(error, 0, "non-static method %s::%s() %s be called statically", (*ce_ptr)->name, fptr->common.function_name, verb);
+						zend_spprintf(error, 0, "non-static method %v::%v() %s be called statically", (*ce_ptr)->name, fptr->common.function_name, verb);
 					} else if (retval) {
-						zend_error(severity, "Non-static method %s::%s() %s be called statically", (*ce_ptr)->name, fptr->common.function_name, verb);
+						zend_error(severity, "Non-static method %v::%v() %s be called statically", (*ce_ptr)->name, fptr->common.function_name, verb);
 					}
 				}
 			}
@@ -2800,7 +2800,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 							if (*error) {
 								efree(*error);
 							}
-							zend_spprintf(error, 0, "cannot access private method %s::%s()", (*ce_ptr)->name, fptr->common.function_name);
+							zend_spprintf(error, 0, "cannot access private method %v::%v()", (*ce_ptr)->name, fptr->common.function_name);
 						}
 						retval = 0;
 					}
@@ -2810,7 +2810,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 							if (*error) {
 								efree(*error);
 							}
-							zend_spprintf(error, 0, "cannot access protected method %s::%s()", (*ce_ptr)->name, fptr->common.function_name);
+							zend_spprintf(error, 0, "cannot access protected method %v::%v()", (*ce_ptr)->name, fptr->common.function_name);
 						}
 						retval = 0;
 					}
