@@ -118,8 +118,8 @@ static inline spl_filesystem_object* spl_filesystem_iterator_to_object(spl_files
 #define SPL_FILE_OBJECT_SKIP_EMPTY         0x00000006 /* skip empty lines */
 #define SPL_FILE_OBJECT_READ_CSV           0x00000008 /* read via fgetcsv */
 
-#define SPL_FILE_DIR_CURRENT_AS_FILEINFO   0x00000000 /* make RecursiveDirectoryTree::current() return SplFileInfo */
-#define SPL_FILE_DIR_CURRENT_AS_SELF       0x00000010 /* make RecursiveDirectoryTree::current() return getSelf() */
+#define SPL_FILE_DIR_CURRENT_AS_SELF       0x00000000 /* make RecursiveDirectoryTree::current() return getSelf() */
+#define SPL_FILE_DIR_CURRENT_AS_FILEINFO   0x00000010 /* make RecursiveDirectoryTree::current() return SplFileInfo */
 #define SPL_FILE_DIR_CURRENT_AS_PATHNAME   0x00000020 /* make RecursiveDirectoryTree::current() return getPathname() */
 #define SPL_FILE_DIR_CURRENT_MODE_MASK     0x000000F0 /* mask RecursiveDirectoryTree::current() */
 #define SPL_FILE_DIR_CURRENT(intern,mode)  ((intern->flags&SPL_FILE_DIR_CURRENT_MODE_MASK)==mode)
