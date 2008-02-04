@@ -6,7 +6,7 @@ error_reporting2 = E_ALL&~E_NOTICE
 error_reporting3 =  E_ALL & ~E_NOTICE 	 
 error_reporting4 = E_ALL & ~E_NOTICE | E_STRICT 
 
-[true or false]
+['true or false']
 bool_true = 	true 
 bool_yes  =  yes	 
 bool_on =	   on  	 

@@ -13,6 +13,7 @@ string = asdadfsdjkslkj ¡@£$$ { }[ ]/%#¤
 sqstring = 'adsasdadasdasd'
 dqstring = "asdadfsdjkslkj ¡@£$$ { } !^~|¥¥{[()/)&/% ¤ # #"
 php_constant = E_ALL
+user_constant = TEST_CONSTANT
 
 [basic with whitespace]
 basicval = 	 	 bar	 	 	 	
@@ -89,7 +90,7 @@ novalue_option4[]=
 ;[PATH="${basicval}/path/quoted"]
 ["PATH=${basicval}/all/quoted"]
 
-; The rest is from bug #29306
+; This is test for bug #29306
 [01]
 e=e
 f=f
@@ -104,3 +105,25 @@ c=c
 d=d
 [0815]
 bla=bla
+
+;Test for bug #43923
+[bug #43923]
+curly1 = {
+curly2 = "{"
+curly3 = '{'
+
+;Test for bug #44019
+[bug #44019]
+concatenation_before = TEST_CONSTANT "+some_text_after"
+concatenation_middle = "some_text_before+" TEST_CONSTANT "+some_text_after"
+concatenation_after = "some_text_before+" TEST_CONSTANT
+concatenation_nows_before = TEST_CONSTANT"+some_text_after"
+concatenation_nows_middle = "some_text_before+"TEST_CONSTANT"+some_text_after"
+concatenation_nows_after = "some_text_before+"TEST_CONSTANT
+
+;Test for bug #43915
+[bug #43915]
+ini_with-hyphen = with hyphen and underscore
+ini.with-hyphen = dot and hyphen
+ini-with.hyphen = hyphen and dot
+

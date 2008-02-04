@@ -246,13 +246,16 @@ ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int s
 
 %}
 
-%expect 1
+%expect 0
 %pure_parser
 
 %token TC_SECTION
 %token TC_RAW
+%token TC_CONSTANT
 %token TC_NUMBER
 %token TC_STRING
+%token TC_WHITESPACE
+%token TC_LABEL
 %token TC_OFFSET
 %token TC_DOLLAR_CURLY
 %token TC_VARNAME
@@ -260,7 +263,7 @@ ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int s
 %token BOOL_TRUE
 %token BOOL_FALSE
 %token END_OF_LINE
-%token '=' ':' ',' '.' '"' '\'' '^' '+' '-' '/' '*' '%' '$' '~' '<' '>' '?' '@'
+%token '=' ':' ',' '.' '"' '\'' '^' '+' '-' '/' '*' '%' '$' '~' '<' '>' '?' '@' '{' '}'
 %left '|' '&'
 %right '~' '!'
 
@@ -279,7 +282,7 @@ statement:
 			ZEND_INI_PARSER_CB(&$2, NULL, NULL, ZEND_INI_PARSER_SECTION, ZEND_INI_PARSER_ARG TSRMLS_CC);
 			free(Z_STRVAL($2));
 		}
-	|	TC_STRING '=' string_or_value {
+	|	TC_LABEL '=' string_or_value {
 #if DEBUG_CFG_PARSER
 			printf("NORMAL: '%s' = '%s'\n", Z_STRVAL($1), Z_STRVAL($3));
 #endif
@@ -296,32 +299,24 @@ statement:
 			free(Z_STRVAL($2));
 			free(Z_STRVAL($5));
 		}
-	|	TC_STRING	{ ZEND_INI_PARSER_CB(&$1, NULL, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC); free(Z_STRVAL($1)); }
+	|	TC_LABEL	{ ZEND_INI_PARSER_CB(&$1, NULL, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC); free(Z_STRVAL($1)); }
 	|	END_OF_LINE
 ;
 
 section_string_or_value:
-		TC_RAW							{ $$ = $1; }
-	|	section_var_list				{ $$ = $1; }
-	|	'"' encapsed_list '"'			{ $$ = $2; }
+		var_string_list					{ $$ = $1; }
 	|	/* empty */						{ zend_ini_init_string(&$$); }
 ;
 
 string_or_value:
 		expr							{ $$ = $1; }
-	|	TC_RAW							{ $$ = $1; }
-	|	TC_NUMBER						{ $$ = $1; }
 	|	BOOL_TRUE						{ $$ = $1; }
 	|	BOOL_FALSE						{ $$ = $1; }
-	|	'"' encapsed_list '"'			{ $$ = $2; }
 	|	END_OF_LINE						{ zend_ini_init_string(&$$); }
 ;
 
 option_offset:
-		TC_NUMBER						{ $$ = $1; }
-	|	TC_RAW							{ $$ = $1; }
-	|	var_string_list					{ $$ = $1; }
-	|	'"' encapsed_list '"'			{ $$ = $2; }
+		var_string_list					{ $$ = $1; }
 	|	/* empty */						{ zend_ini_init_string(&$$); }
 ;
 
@@ -331,18 +326,13 @@ encapsed_list:
 	|	/* empty */						{ zend_ini_init_string(&$$); }
 ;
 
-section_var_list:
-		cfg_var_ref						{ $$ = $1; }
-	|	TC_STRING						{ $$ = $1; }
-	|	section_var_list cfg_var_ref 	{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
-	|	section_var_list TC_STRING 		{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
-;
-
 var_string_list:
 		cfg_var_ref						{ $$ = $1; }
 	|	constant_string					{ $$ = $1; }
+	|	'"' encapsed_list '"'			{ $$ = $2; }
 	|	var_string_list cfg_var_ref 	{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
 	|	var_string_list constant_string	{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
+	|	var_string_list '"' encapsed_list '"'  { zend_ini_add_string(&$$, &$1, &$3); free(Z_STRVAL($3)); }
 ;
 
 expr:
@@ -359,7 +349,11 @@ cfg_var_ref:
 ;
 
 constant_string:
-		TC_STRING						{ zend_ini_get_constant(&$$, &$1 TSRMLS_CC); }
+		TC_CONSTANT						{ zend_ini_get_constant(&$$, &$1 TSRMLS_CC); }
+	|	TC_RAW							{ $$ = $1; /*printf("TC_RAW: '%s'\n", Z_STRVAL($1));*/ }
+	|	TC_NUMBER						{ $$ = $1; /*printf("TC_NUMBER: '%s'\n", Z_STRVAL($1));*/ }
+	|	TC_STRING						{ $$ = $1; /*printf("TC_STRING: '%s'\n", Z_STRVAL($1));*/ }
+	|	TC_WHITESPACE					{ $$ = $1; /*printf("TC_WHITESPACE: '%s'\n", Z_STRVAL($1));*/ }
 ;
 
 /*
