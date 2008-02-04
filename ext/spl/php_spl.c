@@ -378,7 +378,7 @@ PHP_FUNCTION(spl_autoload_call)
 			zend_hash_get_current_data_ex(SPL_G(autoload_functions), (void **) &alfi, &function_pos);
 			zend_call_method(alfi->obj ? &alfi->obj : NULL, alfi->ce, &alfi->func_ptr, func_name, func_name_len, &retval, 1, class_name, NULL TSRMLS_CC);
 			if (retval) {
-				zval_ptr_dtor(&retval);					
+				zval_ptr_dtor(&retval);
 			}
 			if (zend_hash_exists(EG(class_table), lc_name, class_name_len + 1)) {
 				break;
@@ -435,7 +435,7 @@ PHP_FUNCTION(spl_autoload_register)
 					RETURN_FALSE;
 				}
 				else if (do_throw) {
-					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array does not specify %s %smethod, (%s)", alfi.func_ptr ? "a callable" : "an existing", !obj_ptr ? "static " : "", error);
+					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array does not specify %s %smethod (%s)", alfi.func_ptr ? "a callable" : "an existing", !obj_ptr ? "static " : "", error);
 				}
 				if (error) {
 					efree(error);

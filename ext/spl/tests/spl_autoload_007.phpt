@@ -76,7 +76,7 @@ array(2) {
   [1]=>
   string(8) "notExist"
 }
-Passed array does not specify an existing static method, (class 'MyAutoLoader' does not have a method 'notexist')
+Passed array does not specify an existing static method (class 'MyAutoLoader' does not have a method 'notexist')
 
 array(2) {
   [0]=>
@@ -84,7 +84,7 @@ array(2) {
   [1]=>
   string(8) "noAccess"
 }
-Passed array does not specify a callable static method, (cannot access protected method MyAutoLoader::noAccess())
+Passed array does not specify a callable static method (cannot access protected method MyAutoLoader::noAccess())
 
 array(2) {
   [0]=>
@@ -109,7 +109,7 @@ array(2) {
   [1]=>
   string(8) "notExist"
 }
-Passed array does not specify an existing method, (class 'MyAutoLoader' does not have a method 'notexist')
+Passed array does not specify an existing method (class 'MyAutoLoader' does not have a method 'notexist')
 
 array(2) {
   [0]=>
@@ -118,7 +118,7 @@ array(2) {
   [1]=>
   string(8) "noAccess"
 }
-Passed array does not specify a callable method, (cannot access protected method MyAutoLoader::noAccess())
+Passed array does not specify a callable method (cannot access protected method MyAutoLoader::noAccess())
 
 array(2) {
   [0]=>
