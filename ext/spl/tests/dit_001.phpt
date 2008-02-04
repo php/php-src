@@ -15,7 +15,7 @@ var_dump(is_string($d));
 object(DirectoryIterator)#%d (3) {
   %s"pathName"%s"SplFileInfo":private]=>
   %s(1) "."
-  %s"glob"%s"RecursiveDirectoryIterator":private]=>
+  %s"glob"%s"DirectoryIterator":private]=>
   bool(false)
   %s"subPathName"%s"RecursiveDirectoryIterator":private]=>
   %s(0) ""
