@@ -82,7 +82,7 @@ Exception: Bla
 int(0)
 ====2====
 string(22) "MyAutoLoader::dynaLoad"
-LogicException: Function 'MyAutoLoader::dynaLoad' not callable
+LogicException: Function 'MyAutoLoader::dynaLoad' not callable (non-static method MyAutoLoader::dynaLoad() should not be called statically)
 int(0)
 ====3====
 array(2) {
@@ -102,7 +102,7 @@ array(2) {
   [1]=>
   string(8) "dynaLoad"
 }
-LogicException: Passed array specifies a non static method but no object
+LogicException: Passed array specifies a non static method but no object (non-static method MyAutoLoader::dynaLoad() should not be called statically)
 int(0)
 ====5====
 array(2) {
@@ -144,7 +144,7 @@ Exception: Bla
 int(0)
 ====2====
 unicode(22) "MyAutoLoader::dynaLoad"
-LogicException: Function 'MyAutoLoader::dynaLoad' not callable
+LogicException: Function 'MyAutoLoader::dynaLoad' not callable (non-static method MyAutoLoader::dynaLoad() should not be called statically)
 int(0)
 ====3====
 array(2) {
@@ -164,7 +164,7 @@ array(2) {
   [1]=>
   unicode(8) "dynaLoad"
 }
-LogicException: Passed array specifies a non static method but no object
+LogicException: Passed array specifies a non static method but no object (non-static method MyAutoLoader::dynaLoad() should not be called statically)
 int(0)
 ====5====
 array(2) {

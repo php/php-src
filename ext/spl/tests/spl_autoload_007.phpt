@@ -59,16 +59,16 @@ foreach($funcs as $idx => $func)
 <?php exit(0); ?>
 --EXPECTF--
 string(22) "MyAutoLoader::notExist"
-Function 'MyAutoLoader::notExist' not found
+Function 'MyAutoLoader::notExist' not found, (class 'MyAutoLoader' does not have a method 'notexist')
 
 string(22) "MyAutoLoader::noAccess"
-Function 'MyAutoLoader::noAccess' not callable
+Function 'MyAutoLoader::noAccess' not callable, (cannot access protected method MyAutoLoader::noAccess())
 
 string(22) "MyAutoLoader::autoLoad"
 ok
 
 string(22) "MyAutoLoader::dynaLoad"
-Function 'MyAutoLoader::dynaLoad' not callable
+Function 'MyAutoLoader::dynaLoad' not callable, (non-static method MyAutoLoader::dynaLoad() should not be called statically)
 
 array(2) {
   [0]=>
@@ -76,7 +76,7 @@ array(2) {
   [1]=>
   string(8) "notExist"
 }
-Passed array does not specify an existing static method
+Passed array does not specify an existing static method (class 'MyAutoLoader' does not have a method 'notexist')
 
 array(2) {
   [0]=>
@@ -84,7 +84,7 @@ array(2) {
   [1]=>
   string(8) "noAccess"
 }
-Passed array does not specify a callable static method
+Passed array does not specify a callable static method (cannot access protected method MyAutoLoader::noAccess())
 
 array(2) {
   [0]=>
@@ -100,7 +100,7 @@ array(2) {
   [1]=>
   string(8) "dynaLoad"
 }
-Passed array specifies a non static method but no object
+Passed array specifies a non static method but no object (non-static method MyAutoLoader::dynaLoad() should not be called statically)
 
 array(2) {
   [0]=>
@@ -109,7 +109,7 @@ array(2) {
   [1]=>
   string(8) "notExist"
 }
-Passed array does not specify an existing method
+Passed array does not specify an existing method (class 'MyAutoLoader' does not have a method 'notexist')
 
 array(2) {
   [0]=>
@@ -118,7 +118,7 @@ array(2) {
   [1]=>
   string(8) "noAccess"
 }
-Passed array does not specify a callable method
+Passed array does not specify a callable method (cannot access protected method MyAutoLoader::noAccess())
 
 array(2) {
   [0]=>
@@ -140,16 +140,16 @@ ok
 ===DONE===
 --UEXPECTF--
 unicode(22) "MyAutoLoader::notExist"
-Function 'MyAutoLoader::notExist' not found
+Function 'MyAutoLoader::notExist' not found, (class 'MyAutoLoader' does not have a method 'notexist')
 
 unicode(22) "MyAutoLoader::noAccess"
-Function 'MyAutoLoader::noAccess' not callable
+Function 'MyAutoLoader::noAccess' not callable, (cannot access protected method MyAutoLoader::noAccess())
 
 unicode(22) "MyAutoLoader::autoLoad"
 ok
 
 unicode(22) "MyAutoLoader::dynaLoad"
-Function 'MyAutoLoader::dynaLoad' not callable
+Function 'MyAutoLoader::dynaLoad' not callable, (non-static method MyAutoLoader::dynaLoad() should not be called statically)
 
 array(2) {
   [0]=>
@@ -157,7 +157,7 @@ array(2) {
   [1]=>
   unicode(8) "notExist"
 }
-Passed array does not specify an existing static method
+Passed array does not specify an existing static method (class 'MyAutoLoader' does not have a method 'notexist')
 
 array(2) {
   [0]=>
@@ -165,7 +165,7 @@ array(2) {
   [1]=>
   unicode(8) "noAccess"
 }
-Passed array does not specify a callable static method
+Passed array does not specify a callable static method (cannot access protected method MyAutoLoader::noAccess())
 
 array(2) {
   [0]=>
@@ -181,7 +181,7 @@ array(2) {
   [1]=>
   unicode(8) "dynaLoad"
 }
-Passed array specifies a non static method but no object
+Passed array specifies a non static method but no object (non-static method MyAutoLoader::dynaLoad() should not be called statically)
 
 array(2) {
   [0]=>
@@ -190,7 +190,7 @@ array(2) {
   [1]=>
   unicode(8) "notExist"
 }
-Passed array does not specify an existing method
+Passed array does not specify an existing method (class 'MyAutoLoader' does not have a method 'notexist')
 
 array(2) {
   [0]=>
@@ -199,7 +199,7 @@ array(2) {
   [1]=>
   unicode(8) "noAccess"
 }
-Passed array does not specify a callable method
+Passed array does not specify a callable method (cannot access protected method MyAutoLoader::noAccess())
 
 array(2) {
   [0]=>

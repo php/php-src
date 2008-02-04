@@ -79,7 +79,7 @@ int(4)
 Error: Argument 3 passed to iterator_apply() must be an array, integer given
 Error: iterator_apply() expects parameter 3 to be array, integer given
 NULL
-Error: iterator_apply() expects parameter 2 to be valid callback,%sstring given
+Error: iterator_apply() expects parameter 2 to be a valid callback, function 'non_existing_functon' not found or invalid function name
 NULL
 Error: iterator_apply() expects at most 3 parameters, 4 given
 NULL
