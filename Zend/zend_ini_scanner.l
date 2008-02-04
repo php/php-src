@@ -263,7 +263,6 @@ static void zend_ini_escape_string(zval *lval, char *str, int len, char quote_ty
 		} else {
 			*t++ = *s;
 		}
-
 		if (*s == '\n' || (*s == '\r' && (*(s+1) != '\n'))) {
 			SCNG(lineno)++;
 		}
@@ -277,25 +276,26 @@ static void zend_ini_escape_string(zval *lval, char *str, int len, char quote_ty
 
 LNUM [0-9]+
 DNUM ([0-9]*[\.][0-9]+)|([0-9]+[\.][0-9]*)
-NUMBER {LNUM}|{DNUM}
-ANY_CHAR (.|[\n])
+NUMBER [-]?{LNUM}|{DNUM}
+ANY_CHAR (.|[\n\t])
 NEWLINE	("\r"|"\n"|"\r\n")
 TABS_AND_SPACES [ \t]
+WHITESPACE [ \t]+
 CONSTANT [a-zA-Z][a-zA-Z0-9_]*
-LABEL [a-zA-Z0-9][a-zA-Z0-9._]*
-TOKENS [:,.\[\]"'()|^&+-/*=%$!~<>?@]
+LABEL [a-zA-Z0-9][a-zA-Z0-9._-]*
+TOKENS [:,.\[\]"'()|^&+-/*=%$!~<>?@{}]
 OPERATORS [&|~()!]
+DOLLAR_CURLY "${"
 
-LITERAL_DOLLAR ("$"+([^a-zA-Z0-9$"'\\{]|("\\"{ANY_CHAR})))
-VALUE_CHARS ("{"*([^=\n\r;&|~()!$"'\\{]|("\\"{ANY_CHAR}))|{LITERAL_DOLLAR})
-RAW_VALUE_CHARS [^=\n\r;]
-SINGLE_QUOTED_CHARS [^']
-
-SECTION_VALUE_CHARS ("{"*([^\n\r;$"'\\{\]]|("\\"{ANY_CHAR}))|{LITERAL_DOLLAR})
 SECTION_RAW_CHARS [^\]\n\r]
+SINGLE_QUOTED_CHARS [^']
+RAW_VALUE_CHARS [^=\n\r;]
 
-/* Allow using ${foobar} inside quoted strings */
-DOUBLE_QUOTES_CHARS ("{"*([^$"\\{]|("\\"{ANY_CHAR}))|{LITERAL_DOLLAR})
+/* Allow using ${foobar} in sections, quoted strings and values */
+LITERAL_DOLLAR ("$"([^a-zA-Z0-9{]|("\\"{ANY_CHAR})))
+VALUE_CHARS         ([^$= \t\n\r;&|~()!"']|{LITERAL_DOLLAR})
+SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
+DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 
 /* " */
 
@@ -348,7 +348,7 @@ DOUBLE_QUOTES_CHARS ("{"*([^$"\\{]|("\\"{ANY_CHAR}))|{LITERAL_DOLLAR})
 	return ']';
 }
 
-<ST_DOUBLE_QUOTES,ST_SECTION_VALUE,ST_VALUE,ST_OFFSET>"${" { /* Variable start */
+<ST_DOUBLE_QUOTES,ST_SECTION_VALUE,ST_VALUE,ST_OFFSET>{DOLLAR_CURLY} { /* Variable start */
 	yy_push_state(ST_VARNAME TSRMLS_CC);
 	return TC_DOLLAR_CURLY;
 }
@@ -370,8 +370,8 @@ DOUBLE_QUOTES_CHARS ("{"*([^$"\\{]|("\\"{ANY_CHAR}))|{LITERAL_DOLLAR})
 	RETURN_TOKEN(BOOL_FALSE, "", 0);
 }
 
-<INITIAL,ST_OFFSET>{LABEL} { /* Get option name or option offset value */
-	RETURN_TOKEN(TC_STRING, yytext, yyleng);
+<INITIAL>{LABEL} { /* Get option name */
+	RETURN_TOKEN(TC_LABEL, yytext, yyleng);
 }
 
 <INITIAL>{TABS_AND_SPACES}*[=]{TABS_AND_SPACES}* { /* Start option value */ 
@@ -397,17 +397,17 @@ DOUBLE_QUOTES_CHARS ("{"*([^$"\\{]|("\\"{ANY_CHAR}))|{LITERAL_DOLLAR})
 	RETURN_TOKEN(TC_RAW, yytext, yyleng);
 }
 
-<ST_VALUE,ST_RAW>{NEWLINE} { /* End of option value */
+<ST_VALUE,ST_RAW>{TABS_AND_SPACES}*{NEWLINE} { /* End of option value */
 	BEGIN(INITIAL);
 	SCNG(lineno)++;
 	return END_OF_LINE;
 }
 
-<ST_VALUE,ST_OFFSET>{CONSTANT} { /* Get constant option value */
-	RETURN_TOKEN(TC_STRING, yytext, yyleng);
+<ST_SECTION_VALUE,ST_VALUE,ST_OFFSET>{CONSTANT} { /* Get constant option value */
+	RETURN_TOKEN(TC_CONSTANT, yytext, yyleng);
 }
 
-<ST_VALUE,ST_OFFSET>{NUMBER} { /* Get number option value as string */
+<ST_SECTION_VALUE,ST_VALUE,ST_OFFSET>{NUMBER} { /* Get number option value as string */
 	RETURN_TOKEN(TC_NUMBER, yytext, yyleng);
 }
 
@@ -426,8 +426,6 @@ DOUBLE_QUOTES_CHARS ("{"*([^$"\\{]|("\\"{ANY_CHAR}))|{LITERAL_DOLLAR})
 }
 
 <ST_VALUE>{VALUE_CHARS}+ { /* Get everything else as option/offset value */
-	/* Eat trailing tabs and spaces */
-	EAT_TRAILING_WHITESPACE();
 	RETURN_TOKEN(TC_STRING, yytext, yyleng);
 }
 
@@ -435,7 +433,7 @@ DOUBLE_QUOTES_CHARS ("{"*([^$"\\{]|("\\"{ANY_CHAR}))|{LITERAL_DOLLAR})
 	RETURN_TOKEN(TC_STRING, yytext, yyleng);
 }
 
-<ST_SECTION_VALUE,ST_VALUE,ST_OFFSET>["] { /* Double quoted '"' string start */
+<ST_SECTION_VALUE,ST_VALUE,ST_OFFSET>{TABS_AND_SPACES}*["] { /* Double quoted '"' string start */
 	yy_push_state(ST_DOUBLE_QUOTES TSRMLS_CC);
 	return '"';
 }
@@ -445,21 +443,25 @@ DOUBLE_QUOTES_CHARS ("{"*([^$"\\{]|("\\"{ANY_CHAR}))|{LITERAL_DOLLAR})
 	return TC_QUOTED_STRING;
 }
 
-<ST_DOUBLE_QUOTES>["] { /* Double quoted '"' string ends */
+<ST_DOUBLE_QUOTES>["]{TABS_AND_SPACES}* { /* Double quoted '"' string ends */
 	yy_pop_state(TSRMLS_C);
 	return '"';
 }
 
-<INITIAL,ST_VALUE,ST_RAW,ST_OFFSET>{TABS_AND_SPACES} {
+<ST_SECTION_VALUE,ST_VALUE,ST_OFFSET>{WHITESPACE} {
+	RETURN_TOKEN(TC_WHITESPACE, yytext, yyleng);
+}
+
+<INITIAL,ST_RAW>{TABS_AND_SPACES}+ {
 	/* eat whitespace */
 }
 
-<INITIAL>{NEWLINE} {
+<INITIAL>{TABS_AND_SPACES}*{NEWLINE} {
 	SCNG(lineno)++;
 	return END_OF_LINE;
 }
 
-<INITIAL,ST_VALUE,ST_RAW>[;][^\r\n]*{NEWLINE} { /* Comment */
+<INITIAL,ST_VALUE,ST_RAW>{TABS_AND_SPACES}*[;][^\r\n]*{NEWLINE} { /* Comment */
 	BEGIN(INITIAL);
 	SCNG(lineno)++;
 	return END_OF_LINE;
