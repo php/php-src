@@ -28,6 +28,18 @@
 #include "php_dom.h"
 
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_namelist_get_name, 0, 0, 1)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_namelist_get_namespace_uri, 0, 0, 1)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO();
+/* }}} */
+
 /*
 * class DOMNameList 
 *
@@ -36,8 +48,8 @@
 */
 
 const zend_function_entry php_dom_namelist_class_functions[] = {
-	PHP_FALIAS(getName, dom_namelist_get_name, NULL)
-	PHP_FALIAS(getNamespaceURI, dom_namelist_get_namespace_uri, NULL)
+	PHP_FALIAS(getName, dom_namelist_get_name, arginfo_dom_namelist_get_name)
+	PHP_FALIAS(getNamespaceURI, dom_namelist_get_namespace_uri, arginfo_dom_namelist_get_namespace_uri)
 	{NULL, NULL, NULL}
 };
 

@@ -28,6 +28,38 @@
 #include "php_dom.h"
 
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_substring_data, 0, 0, 2)
+	ZEND_ARG_INFO(0, offset)
+	ZEND_ARG_INFO(0, count)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_append_data, 0, 0, 1)
+	ZEND_ARG_INFO(0, arg)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_insert_data, 0, 0, 2)
+	ZEND_ARG_INFO(0, offset)
+	ZEND_ARG_INFO(0, arg)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_delete_data, 0, 0, 2)
+	ZEND_ARG_INFO(0, offset)
+	ZEND_ARG_INFO(0, count)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_replace_data, 0, 0, 3)
+	ZEND_ARG_INFO(0, offset)
+	ZEND_ARG_INFO(0, count)
+	ZEND_ARG_INFO(0, arg)
+ZEND_END_ARG_INFO();
+/* }}} */
+
 /*
 * class DOMCharacterData extends DOMNode 
 *
@@ -36,11 +68,11 @@
 */
 
 const zend_function_entry php_dom_characterdata_class_functions[] = {
-	PHP_FALIAS(substringData, dom_characterdata_substring_data, NULL)
-	PHP_FALIAS(appendData, dom_characterdata_append_data, NULL)
-	PHP_FALIAS(insertData, dom_characterdata_insert_data, NULL)
-	PHP_FALIAS(deleteData, dom_characterdata_delete_data, NULL)
-	PHP_FALIAS(replaceData, dom_characterdata_replace_data, NULL)
+	PHP_FALIAS(substringData, dom_characterdata_substring_data, arginfo_dom_characterdata_substring_data)
+	PHP_FALIAS(appendData, dom_characterdata_append_data, arginfo_dom_characterdata_append_data)
+	PHP_FALIAS(insertData, dom_characterdata_insert_data, arginfo_dom_characterdata_insert_data)
+	PHP_FALIAS(deleteData, dom_characterdata_delete_data, arginfo_dom_characterdata_delete_data)
+	PHP_FALIAS(replaceData, dom_characterdata_replace_data, arginfo_dom_characterdata_replace_data)
 	{NULL, NULL, NULL}
 };
 

@@ -28,6 +28,117 @@
 #include "php_dom.h"
 
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_get_attribute, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_set_attribute, 0, 0, 2)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_remove_attribute, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_get_attribute_node, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_set_attribute_node, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, newAttr, DOMAttr, 0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_remove_attribute_node, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, oldAttr, DOMAttr, 0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_get_elements_by_tag_name, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_get_attribute_ns, 0, 0, 2)
+	ZEND_ARG_INFO(0, namespaceURI)
+	ZEND_ARG_INFO(0, localName)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_set_attribute_ns, 0, 0, 3)
+	ZEND_ARG_INFO(0, namespaceURI)
+	ZEND_ARG_INFO(0, qualifiedName)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_remove_attribute_ns, 0, 0, 2)
+	ZEND_ARG_INFO(0, namespaceURI)
+	ZEND_ARG_INFO(0, localName)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_get_attribute_node_ns, 0, 0, 2)
+	ZEND_ARG_INFO(0, namespaceURI)
+	ZEND_ARG_INFO(0, localName)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_set_attribute_node_ns, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, newAttr, DOMAttr, 0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_get_elements_by_tag_name_ns, 0, 0, 2)
+	ZEND_ARG_INFO(0, namespaceURI)
+	ZEND_ARG_INFO(0, localName)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_has_attribute, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_has_attribute_ns, 0, 0, 2)
+	ZEND_ARG_INFO(0, namespaceURI)
+	ZEND_ARG_INFO(0, localName)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_set_id_attribute, 0, 0, 2)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, isId)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_set_id_attribute_ns, 0, 0, 3)
+	ZEND_ARG_INFO(0, namespaceURI)
+	ZEND_ARG_INFO(0, localName)
+	ZEND_ARG_INFO(0, isId)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_set_id_attribute_node, 0, 0, 2)
+	ZEND_ARG_OBJ_INFO(0, attr, DOMAttr, 0)
+	ZEND_ARG_INFO(0, isId)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_construct, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_INFO(0, uri)
+ZEND_END_ARG_INFO();
+/* }}} */
+
 /*
 * class DOMElement extends DOMNode 
 *
@@ -36,25 +147,25 @@
 */
 
 const zend_function_entry php_dom_element_class_functions[] = {
-	PHP_FALIAS(getAttribute, dom_element_get_attribute, NULL)
-	PHP_FALIAS(setAttribute, dom_element_set_attribute, NULL)
-	PHP_FALIAS(removeAttribute, dom_element_remove_attribute, NULL)
-	PHP_FALIAS(getAttributeNode, dom_element_get_attribute_node, NULL)
-	PHP_FALIAS(setAttributeNode, dom_element_set_attribute_node, NULL)
-	PHP_FALIAS(removeAttributeNode, dom_element_remove_attribute_node, NULL)
-	PHP_FALIAS(getElementsByTagName, dom_element_get_elements_by_tag_name, NULL)
-	PHP_FALIAS(getAttributeNS, dom_element_get_attribute_ns, NULL)
-	PHP_FALIAS(setAttributeNS, dom_element_set_attribute_ns, NULL)
-	PHP_FALIAS(removeAttributeNS, dom_element_remove_attribute_ns, NULL)
-	PHP_FALIAS(getAttributeNodeNS, dom_element_get_attribute_node_ns, NULL)
-	PHP_FALIAS(setAttributeNodeNS, dom_element_set_attribute_node_ns, NULL)
-	PHP_FALIAS(getElementsByTagNameNS, dom_element_get_elements_by_tag_name_ns, NULL)
-	PHP_FALIAS(hasAttribute, dom_element_has_attribute, NULL)
-	PHP_FALIAS(hasAttributeNS, dom_element_has_attribute_ns, NULL)
-	PHP_FALIAS(setIdAttribute, dom_element_set_id_attribute, NULL)
-	PHP_FALIAS(setIdAttributeNS, dom_element_set_id_attribute_ns, NULL)
-	PHP_FALIAS(setIdAttributeNode, dom_element_set_id_attribute_node, NULL)
-	PHP_ME(domelement, __construct, NULL, ZEND_ACC_PUBLIC)
+	PHP_FALIAS(getAttribute, dom_element_get_attribute, arginfo_dom_element_get_attribute)
+	PHP_FALIAS(setAttribute, dom_element_set_attribute, arginfo_dom_element_set_attribute)
+	PHP_FALIAS(removeAttribute, dom_element_remove_attribute, arginfo_dom_element_remove_attribute)
+	PHP_FALIAS(getAttributeNode, dom_element_get_attribute_node, arginfo_dom_element_get_attribute_node)
+	PHP_FALIAS(setAttributeNode, dom_element_set_attribute_node, arginfo_dom_element_set_attribute_node)
+	PHP_FALIAS(removeAttributeNode, dom_element_remove_attribute_node, arginfo_dom_element_remove_attribute_node)
+	PHP_FALIAS(getElementsByTagName, dom_element_get_elements_by_tag_name, arginfo_dom_element_get_elements_by_tag_name)
+	PHP_FALIAS(getAttributeNS, dom_element_get_attribute_ns, arginfo_dom_element_get_attribute_ns)
+	PHP_FALIAS(setAttributeNS, dom_element_set_attribute_ns, arginfo_dom_element_set_attribute_ns)
+	PHP_FALIAS(removeAttributeNS, dom_element_remove_attribute_ns, arginfo_dom_element_remove_attribute_ns)
+	PHP_FALIAS(getAttributeNodeNS, dom_element_get_attribute_node_ns, arginfo_dom_element_get_attribute_node_ns)
+	PHP_FALIAS(setAttributeNodeNS, dom_element_set_attribute_node_ns, arginfo_dom_element_set_attribute_node_ns)
+	PHP_FALIAS(getElementsByTagNameNS, dom_element_get_elements_by_tag_name_ns, arginfo_dom_element_get_elements_by_tag_name_ns)
+	PHP_FALIAS(hasAttribute, dom_element_has_attribute, arginfo_dom_element_has_attribute)
+	PHP_FALIAS(hasAttributeNS, dom_element_has_attribute_ns, arginfo_dom_element_has_attribute_ns)
+	PHP_FALIAS(setIdAttribute, dom_element_set_id_attribute, arginfo_dom_element_set_id_attribute)
+	PHP_FALIAS(setIdAttributeNS, dom_element_set_id_attribute_ns, arginfo_dom_element_set_id_attribute_ns)
+	PHP_FALIAS(setIdAttributeNode, dom_element_set_id_attribute_node, arginfo_dom_element_set_id_attribute_node)
+	PHP_ME(domelement, __construct, arginfo_dom_element_construct, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 

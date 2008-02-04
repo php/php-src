@@ -28,6 +28,18 @@
 #include "php_dom.h"
 
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_string_extend_find_offset16, 0, 0, 1)
+	ZEND_ARG_INFO(0, offset32)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_string_extend_find_offset32, 0, 0, 1)
+	ZEND_ARG_INFO(0, offset16)
+ZEND_END_ARG_INFO();
+/* }}} */
+
 /*
 * class domstringextend 
 *
@@ -36,8 +48,8 @@
 */
 
 const zend_function_entry php_dom_string_extend_class_functions[] = {
-	PHP_FALIAS(findOffset16, dom_string_extend_find_offset16, NULL)
-	PHP_FALIAS(findOffset32, dom_string_extend_find_offset32, NULL)
+	PHP_FALIAS(findOffset16, dom_string_extend_find_offset16, arginfo_dom_string_extend_find_offset16)
+	PHP_FALIAS(findOffset32, dom_string_extend_find_offset32, arginfo_dom_string_extend_find_offset32)
 	{NULL, NULL, NULL}
 };
 

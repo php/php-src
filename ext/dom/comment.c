@@ -28,6 +28,13 @@
 #include "php_dom.h"
 
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_comment_construct, 0, 0, 0)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO();
+/* }}} */
+
 /*
 * class DOMComment extends DOMCharacterData 
 *
@@ -36,7 +43,7 @@
 */
 
 const zend_function_entry php_dom_comment_class_functions[] = {
-	PHP_ME(domcomment, __construct, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(domcomment, __construct, arginfo_dom_comment_construct, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
