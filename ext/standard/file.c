@@ -1359,22 +1359,22 @@ PHPAPI PHP_FUNCTION(fwrite)
 		RETURN_NULL();
 	}
 
-	if (write_len <= 0) {
+	php_stream_from_zval(stream, &zstream);
+	
+	if (argc > 2 && write_len <= 0) {
 		RETURN_LONG(0);
 	}
 
-	php_stream_from_zval(stream, &zstream);
-
 	if (Z_TYPE_P(zstring) == IS_UNICODE) {
+		if (write_len < 0 || write_len > Z_USTRLEN_P(zstring)) {
+			write_len = Z_USTRLEN_P(zstring);
+		}
 		/* Convert code units to data points */
 		int32_t write_uchars = 0;
 
 		U16_FWD_N(Z_USTRVAL_P(zstring), write_uchars, Z_USTRLEN_P(zstring), write_len);
 		write_len = write_uchars;
 
-		if (write_len > Z_USTRLEN_P(zstring)) {
-			write_len = Z_USTRLEN_P(zstring);
-		}
 		ret = php_stream_write_unicode(stream, Z_USTRVAL_P(zstring), write_len);
 
 		/* Convert data points back to code units */
@@ -1383,7 +1383,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 		}
 	} else {
 		convert_to_string(zstring);
-		if (write_len > Z_STRLEN_P(zstring)) {
+		if (write_len < 0 || write_len > Z_STRLEN_P(zstring)) {
 			write_len = Z_STRLEN_P(zstring);
 		}
 
