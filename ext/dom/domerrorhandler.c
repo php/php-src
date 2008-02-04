@@ -28,6 +28,13 @@
 #include "php_dom.h"
 
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_domerrorhandler_handle_error, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, error, DOMError, 0)
+ZEND_END_ARG_INFO();
+/* }}} */
+
 /*
 * class domerrorhandler 
 *
@@ -36,7 +43,7 @@
 */
 
 const zend_function_entry php_dom_domerrorhandler_class_functions[] = {
-	PHP_FALIAS(handleError, dom_domerrorhandler_handle_error, NULL)
+	PHP_FALIAS(handleError, dom_domerrorhandler_handle_error, arginfo_dom_domerrorhandler_handle_error)
 	{NULL, NULL, NULL}
 };
 

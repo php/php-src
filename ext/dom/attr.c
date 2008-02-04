@@ -30,6 +30,18 @@
 #include "php_dom.h"
 
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_attr_is_id, 0, 0, 0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_attr_construct, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO();
+/* }}} */
+
 /*
 * class DOMAttr extends DOMNode 
 *
@@ -38,8 +50,8 @@
 */
 
 const zend_function_entry php_dom_attr_class_functions[] = {
-	PHP_FALIAS(isId, dom_attr_is_id, NULL)
-	PHP_ME(domattr, __construct, NULL, ZEND_ACC_PUBLIC)
+	PHP_FALIAS(isId, dom_attr_is_id, arginfo_dom_attr_is_id)
+	PHP_ME(domattr, __construct, arginfo_dom_attr_construct, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 

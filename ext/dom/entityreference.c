@@ -28,6 +28,13 @@
 #include "php_dom.h"
 
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_entityreference_construct, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO();
+/* }}} */
+
 /*
 * class DOMEntityReference extends DOMNode 
 *
@@ -36,7 +43,7 @@
 */
 
 const zend_function_entry php_dom_entityreference_class_functions[] = {
-	PHP_ME(domentityreference, __construct, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(domentityreference, __construct, arginfo_dom_entityreference_construct, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 

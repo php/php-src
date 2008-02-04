@@ -28,6 +28,13 @@
 #include "php_dom.h"
 
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_cdatasection_construct, 0, 0, 1)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO();
+/* }}} */
+
 /*
 * class DOMCdataSection extends DOMText 
 *
@@ -36,7 +43,7 @@
 */
 
 const zend_function_entry php_dom_cdatasection_class_functions[] = {
-	PHP_ME(domcdatasection, __construct, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(domcdatasection, __construct, arginfo_dom_cdatasection_construct, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 

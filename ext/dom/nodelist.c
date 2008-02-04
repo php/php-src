@@ -28,6 +28,13 @@
 #include "php_dom.h"
 
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_nodelist_item, 0, 0, 1)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO();
+/* }}} */
+
 /*
 * class DOMNodeList 
 *
@@ -36,7 +43,7 @@
 */
 
 const zend_function_entry php_dom_nodelist_class_functions[] = {
-	PHP_FALIAS(item, dom_nodelist_item, NULL)
+	PHP_FALIAS(item, dom_nodelist_item, arginfo_dom_nodelist_item)
 	{NULL, NULL, NULL}
 };
 

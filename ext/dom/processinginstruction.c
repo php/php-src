@@ -28,6 +28,14 @@
 #include "php_dom.h"
 
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_processinginstruction_construct, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO();
+/* }}} */
+
 /*
 * class DOMProcessingInstruction extends DOMNode 
 *
@@ -36,7 +44,7 @@
 */
 
 const zend_function_entry php_dom_processinginstruction_class_functions[] = {
-	PHP_ME(domprocessinginstruction, __construct, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(domprocessinginstruction, __construct, arginfo_dom_processinginstruction_construct, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
