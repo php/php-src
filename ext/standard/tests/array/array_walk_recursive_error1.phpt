@@ -58,6 +58,6 @@ Warning: array_walk_recursive() expects at least 2 parameters, 1 given in %s on 
 NULL
 -- Testing array_walk_recursive() function with non existent callback function  --
 
-Warning: array_walk_recursive() expects parameter 2 to be valid callback, Unicode string given in %s on line %d
+Warning: array_walk_recursive() expects parameter 2 to be a valid callback, function 'non_existent' not found or invalid function name in %s on line %d
 NULL
 Done
