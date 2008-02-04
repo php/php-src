@@ -447,7 +447,7 @@ PHP_FUNCTION(spl_autoload_register)
 				RETURN_FALSE;
 			} else if (Z_TYPE_P(zcallable) == IS_STRING || Z_TYPE_P(zcallable) == IS_UNICODE) {
 				if (do_throw) {
-					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function '%R' not %s, (%s)", Z_TYPE_P(zcallable), Z_UNIVAL_P(zcallable), alfi.func_ptr ? "callable" : "found", error);
+					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function '%R' not %s (%s)", Z_TYPE_P(zcallable), Z_UNIVAL_P(zcallable), alfi.func_ptr ? "callable" : "found", error);
 				}
 				if (error) {
 					efree(error);
