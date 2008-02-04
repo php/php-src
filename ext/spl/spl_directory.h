@@ -99,8 +99,8 @@ struct _spl_filesystem_object {
 #define SPL_FILE_DIR_CURRENT_MODE_MASK     0x000000F0 /* mask RecursiveDirectoryTree::current() */
 #define SPL_FILE_DIR_CURRENT(intern,mode)  ((intern->flags&SPL_FILE_DIR_CURRENT_MODE_MASK)==mode)
 
-#define SPL_FILE_DIR_KEY_AS_FILENAME       0x00000000 /* make RecursiveDirectoryTree::key() return getFilename() */
-#define SPL_FILE_DIR_KEY_AS_PATHNAME       0x00000100 /* make RecursiveDirectoryTree::key() return getPathname() */
+#define SPL_FILE_DIR_KEY_AS_PATHNAME       0x00000000 /* make RecursiveDirectoryTree::key() return getPathname() */
+#define SPL_FILE_DIR_KEY_AS_FILENAME       0x00000100 /* make RecursiveDirectoryTree::key() return getFilename() */
 #define SPL_FILE_DIR_KEY_MODE_MASK         0x00000F00 /* mask RecursiveDirectoryTree::key() */
 #define SPL_FILE_DIR_KEY(intern,mode)      ((intern->flags&SPL_FILE_DIR_KEY_MODE_MASK)==mode)
 
