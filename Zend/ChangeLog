@@ -1,3 +1,26 @@
+2008-02-04  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      zend_ini_parser.y
+      zend_ini_scanner.l:
+      MFH: - Fixed bugs #43915, #43923 and #44019, a tiny performance issue fixed
+      too
+
+    * zend_ini_parser.y
+      zend_ini_scanner.l:
+      - Fixed bugs #43915, #43923 and #44019, a tiny performance issue fixed too
+
+2008-02-04  Felipe Pena  <felipensp@gmail.com>
+
+    * tests/bug31720.phpt
+      tests/bug32290.phpt:
+      Fix tests (new error message)
+
+2008-02-04  Marcus Boerger  <php@marcus-boerger.de>
+
+    * zend_API.c:
+      - Spread some %v's
+
 2008-02-03  Marcus Boerger  <php@marcus-boerger.de>
 
     * (PHP_5_3)

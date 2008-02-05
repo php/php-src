@@ -1,3 +1,349 @@
+2008-02-04  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_2)
+      ext/spl/spl_directory.h:
+      - Damnit you flags (wrong commit)
+
+    * (PHP_5_2)
+      ext/spl/spl.php
+      ext/spl/spl.php
+      ext/spl/spl_directory.h
+      ext/spl/spl_directory.h
+      ext/spl/examples/tree.php
+      ext/spl/examples/tree.php:
+      - MFH Really last flag change (got confused with code)
+
+    * ext/spl/spl.php
+      ext/spl/spl_directory.h
+      ext/spl/examples/tree.php:
+      - Really last flag change (got confused with code)
+
+2008-02-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/gmp/gmp.c:
+      
+      Revert fix for bug #43981, not yet ready for 5.2
+
+2008-02-04  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_ini_parser.y
+      ZendEngine2/zend_ini_scanner.l
+      ext/standard/tests/general_functions/parse_ini_basic.data
+      ext/standard/tests/general_functions/parse_ini_basic.phpt
+      ext/standard/tests/general_functions/parse_ini_booleans.data
+      ext/standard/tests/general_functions/parse_ini_booleans.phpt:
+      MFH: - Fixed bugs #43915, #43923 and #44019, a tiny performance issue fixed
+      too
+
+    * ZendEngine2/zend_ini_parser.y
+      ZendEngine2/zend_ini_scanner.l
+      ext/standard/tests/general_functions/parse_ini_basic.data
+      ext/standard/tests/general_functions/parse_ini_basic.phpt
+      ext/standard/tests/general_functions/parse_ini_booleans.data
+      ext/standard/tests/general_functions/parse_ini_booleans.phpt:
+      - Fixed bugs #43915, #43923 and #44019, a tiny performance issue fixed too
+
+2008-02-04  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ext/spl/spl.php:
+      - Update docu
+
+2008-02-04  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      main/main.c:
+      MFH: allow using these constants in php.ini (f.e. PHP_SAPI..)
+
+    * main/main.c:
+      - Allow using any constants registered by PHP in php.ini too
+
+2008-02-04  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/file/fwrite.phpt:
+      Fix wrong test
+
+    * ext/standard/file.c:
+      Fixed wrong fix
+
+2008-02-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_2)
+      NEWS:
+      Add NEWS entry for ext/dom arginfo changes.
+
+2008-02-04  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ext/spl/spl_directory.c:
+      - Fix/add folding markers
+
+    * ext/spl/spl_directory.c
+      ext/spl/spl_directory.h:
+      - Really fix flag handling
+
+    * (PHP_5_3)
+      ext/spl/spl_directory.c:
+      - MFH Fix #44018 (RecursiveDirectoryIterator options inconsistancy)
+
+    * ext/spl/spl_directory.c:
+      - Fix #44018 (RecursiveDirectoryIterator options inconsistancy)
+
+2008-02-04  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/file.c:
+      Fixed Bug #42057 (fwrite() writes data into file when length is given as a
+      negative value)
+
+2008-02-04  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ext/spl/spl_directory.c:
+      - Setting flags once is enough
+
+2008-02-04  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/mysqlnd.c:
+      MFB: Simplify unique string generation and plug a leak.
+
+    * (PHP_5_3)
+      ext/mysqlnd/mysqlnd.c:
+      Simplify unique string generation and plug a leak.
+
+    * (PHP_5_3)
+      ext/mysqli/tests/bug35759.phpt
+      ext/mysqlnd/mysqlnd_block_alloc.c
+      ext/mysqlnd/mysqlnd_result.c:
+      Fix a leak, memory warning and failing test case.
+
+    * ext/mysqli/tests/bug35759.phpt
+      ext/mysqlnd/mysqlnd_block_alloc.c
+      ext/mysqlnd/mysqlnd_result.c:
+      Fix a leak and memory warning.
+
+2008-02-04  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/general_functions/is_callable.phpt:
+      Fix error messages
+
+2008-02-04  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ext/spl/spl_directory.c:
+      - MFH Fix default flag value in contructor
+
+    * ext/spl/spl_directory.c:
+       Fix default flag value in contructor
+
+    * (PHP_5_3)
+      ext/spl/spl_array.c:
+      - CS/WS
+
+    * ext/spl/spl_array.c
+      ext/spl/tests/array_023.phpt
+      ext/spl/tests/bug41528.phpt
+      ext/spl/tests/bug42654.phpt
+      ext/spl/tests/bug42703.phpt
+      ext/spl/tests/spl_autoload_001.phpt
+      ext/spl/tests/spl_autoload_007.phpt
+      ext/spl/tests/spl_autoload_008.phpt:
+      - Fix ArrayObject serializing
+      - Fix test expectations
+
+    * ext/spl/tests/dit_001.phpt:
+      - Fix test
+
+    * ext/spl/php_spl.c:
+      - Fix message
+
+2008-02-04  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/spl/tests/spl_autoload_008.phpt
+      ext/standard/tests/array/array_walk_recursive_error1.phpt:
+      Fix tests
+
+2008-02-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_2)
+      ext/dom/attr.c
+      ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/cdatasection.c
+      ext/dom/characterdata.c
+      ext/dom/characterdata.c
+      ext/dom/comment.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/documentfragment.c
+      ext/dom/domconfiguration.c
+      ext/dom/domconfiguration.c
+      ext/dom/domerrorhandler.c
+      ext/dom/domerrorhandler.c
+      ext/dom/domimplementation.c
+      ext/dom/domimplementation.c
+      ext/dom/domimplementationlist.c
+      ext/dom/domimplementationlist.c
+      ext/dom/domimplementationsource.c
+      ext/dom/domimplementationsource.c
+      ext/dom/domstringlist.c
+      ext/dom/domstringlist.c
+      ext/dom/element.c
+      ext/dom/element.c
+      ext/dom/entityreference.c
+      ext/dom/entityreference.c
+      ext/dom/namednodemap.c
+      ext/dom/namednodemap.c
+      ext/dom/namelist.c
+      ext/dom/namelist.c
+      ext/dom/nodelist.c
+      ext/dom/nodelist.c
+      ext/dom/processinginstruction.c
+      ext/dom/processinginstruction.c
+      ext/dom/string_extend.c
+      ext/dom/string_extend.c
+      ext/dom/text.c
+      ext/dom/text.c:
+      MFH: Add missing Reflection API metadata for DOM classes.
+
+    * ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/characterdata.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/domconfiguration.c
+      ext/dom/domerrorhandler.c
+      ext/dom/domimplementation.c
+      ext/dom/domimplementationlist.c
+      ext/dom/domimplementationsource.c
+      ext/dom/domstringlist.c
+      ext/dom/element.c
+      ext/dom/entityreference.c
+      ext/dom/namednodemap.c
+      ext/dom/namelist.c
+      ext/dom/nodelist.c
+      ext/dom/processinginstruction.c
+      ext/dom/string_extend.c
+      ext/dom/text.c:
+      Add missing Reflection API metadata for DOM classes.
+
+2008-02-04  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/tests/bug31720.phpt
+      ZendEngine2/tests/bug32290.phpt
+      ext/spl/tests/bug38325.phpt
+      ext/spl/tests/spl_004.phpt
+      ext/spl/tests/spl_autoload_001.phpt
+      ext/spl/tests/spl_autoload_005.phpt
+      ext/spl/tests/spl_autoload_007.phpt
+      ext/spl/tests/spl_autoload_008.phpt
+      ext/sqlite/tests/sqlite_oo_030.phpt
+      ext/standard/tests/array/array_filter.phpt
+      ext/standard/tests/array/array_filter_error.phpt
+      ext/standard/tests/array/array_filter_variation2.phpt
+      ext/standard/tests/array/array_filter_variation9.phpt
+      ext/standard/tests/array/array_intersect_variation9.phpt
+      ext/standard/tests/array/array_map_object1.phpt
+      ext/standard/tests/array/array_map_object2.phpt
+      ext/standard/tests/array/array_map_object3.phpt
+      ext/standard/tests/array/array_map_variation12.phpt
+      ext/standard/tests/array/array_map_variation14.phpt
+      ext/standard/tests/array/array_map_variation15.phpt
+      ext/standard/tests/array/array_map_variation16.phpt
+      ext/standard/tests/array/array_map_variation17.phpt
+      ext/standard/tests/array/array_walk.phpt
+      ext/standard/tests/array/array_walk_error1.phpt
+      ext/standard/tests/array/array_walk_recursive1.phpt
+      ext/standard/tests/array/array_walk_recursive_error1.phpt
+      ext/standard/tests/array/array_walk_recursive_variation2.phpt
+      ext/standard/tests/array/array_walk_recursive_variation8.phpt
+      ext/standard/tests/array/array_walk_variation2.phpt
+      ext/standard/tests/array/array_walk_variation8.phpt
+      ext/standard/tests/array/uasort_error.phpt
+      ext/standard/tests/array/uasort_variation2.phpt
+      ext/standard/tests/array/uasort_variation8.phpt
+      ext/standard/tests/assert/assert_variation.phpt
+      ext/standard/tests/general_functions/010.phpt
+      ext/standard/tests/general_functions/bug32647.phpt
+      ext/standard/tests/general_functions/bug40398.phpt
+      tests/classes/autoload_012.phpt
+      tests/classes/bug27504.phpt:
+      Fix tests (new error message)
+
+2008-02-04  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ZendEngine2/zend_API.c:
+      - Spread some %v's
+
+2008-02-04  Robert Nicholson  <rob_nicholson@uk.ibm.com>
+
+    * ext/standard/tests/array/arsort_error.phpt
+      ext/standard/tests/array/arsort_error.phpt
+      ext/standard/tests/array/arsort_variation1.phpt
+      ext/standard/tests/array/arsort_variation1.phpt
+      ext/standard/tests/array/arsort_variation10.phpt
+      ext/standard/tests/array/arsort_variation10.phpt
+      ext/standard/tests/array/arsort_variation11.phpt
+      ext/standard/tests/array/arsort_variation11.phpt
+      ext/standard/tests/array/arsort_variation2.phpt
+      ext/standard/tests/array/arsort_variation2.phpt
+      ext/standard/tests/array/arsort_variation3.phpt
+      ext/standard/tests/array/arsort_variation3.phpt
+      ext/standard/tests/array/arsort_variation4.phpt
+      ext/standard/tests/array/arsort_variation4.phpt
+      ext/standard/tests/array/arsort_variation5.phpt
+      ext/standard/tests/array/arsort_variation5.phpt
+      ext/standard/tests/array/arsort_variation6.phpt
+      ext/standard/tests/array/arsort_variation6.phpt
+      ext/standard/tests/array/arsort_variation7.phpt
+      ext/standard/tests/array/arsort_variation7.phpt
+      ext/standard/tests/array/arsort_variation8.phpt
+      ext/standard/tests/array/arsort_variation8.phpt
+      ext/standard/tests/array/arsort_variation9.phpt
+      ext/standard/tests/array/arsort_variation9.phpt:
+      - added some new tests for arsort
+
+    * ext/standard/tests/array/arsort_error.phpt
+      ext/standard/tests/array/arsort_error.phpt
+      ext/standard/tests/array/arsort_error.phpt
+      ext/standard/tests/array/arsort_variation1.phpt
+      ext/standard/tests/array/arsort_variation1.phpt
+      ext/standard/tests/array/arsort_variation1.phpt
+      ext/standard/tests/array/arsort_variation10.phpt
+      ext/standard/tests/array/arsort_variation10.phpt
+      ext/standard/tests/array/arsort_variation10.phpt
+      ext/standard/tests/array/arsort_variation11.phpt
+      ext/standard/tests/array/arsort_variation11.phpt
+      ext/standard/tests/array/arsort_variation11.phpt
+      ext/standard/tests/array/arsort_variation2.phpt
+      ext/standard/tests/array/arsort_variation2.phpt
+      ext/standard/tests/array/arsort_variation2.phpt
+      ext/standard/tests/array/arsort_variation3.phpt
+      ext/standard/tests/array/arsort_variation3.phpt
+      ext/standard/tests/array/arsort_variation3.phpt
+      ext/standard/tests/array/arsort_variation4.phpt
+      ext/standard/tests/array/arsort_variation4.phpt
+      ext/standard/tests/array/arsort_variation4.phpt
+      ext/standard/tests/array/arsort_variation5.phpt
+      ext/standard/tests/array/arsort_variation5.phpt
+      ext/standard/tests/array/arsort_variation5.phpt
+      ext/standard/tests/array/arsort_variation6.phpt
+      ext/standard/tests/array/arsort_variation6.phpt
+      ext/standard/tests/array/arsort_variation6.phpt
+      ext/standard/tests/array/arsort_variation7.phpt
+      ext/standard/tests/array/arsort_variation7.phpt
+      ext/standard/tests/array/arsort_variation7.phpt
+      ext/standard/tests/array/arsort_variation8.phpt
+      ext/standard/tests/array/arsort_variation8.phpt
+      ext/standard/tests/array/arsort_variation8.phpt
+      ext/standard/tests/array/arsort_variation9.phpt
+      ext/standard/tests/array/arsort_variation9.phpt
+      ext/standard/tests/array/arsort_variation9.phpt:
+        1.1.4;
+      file arsort_error.phpt was initially added on branch PHP_5_2.
+
 2008-02-03  Marcus Boerger  <php@marcus-boerger.de>
 
     * ext/dba/libcdb/.cvsignore
