@@ -2201,103 +2201,79 @@ PHP_FUNCTION(array_splice)
    Returns elements specified by offset and length */
 PHP_FUNCTION(array_slice)
 {
-	zval	   **input,		/* Input array */
-		   **offset,		/* Offset to get elements from */
-		   **length,		/* How many elements to get */
-		   **entry,			/* An array entry */
-		   **z_preserve_keys; /* Whether to preserve keys while copying to the new array or not */
-	int	     offset_val,	/* Value of the offset argument */
-		     length_val,	/* Value of the length argument */
-		     num_in,		/* Number of elements in the input array */
-		     pos,		/* Current position in the array */
-		     argc;		/* Number of function arguments */
-				 
+	zval	 *input,		/* Input array */
+			**entry;		/* An array entry */
+	long	 offset,		/* Offset to get elements from */
+			 length = NULL;	/* How many elements to get */
+	zend_bool preserve_keys = 0; /* Whether to preserve keys while copying to the new array or not */
+	int		 num_in,		/* Number of elements in the input array */
+			 pos;			/* Current position in the array */
 	char *string_key;
 	uint string_key_len;
 	ulong num_key;
 	HashPosition hpos;
-	zend_bool	 preserve_keys = 0;
 
-	/* Get the arguments and do error-checking */	
-	argc = ZEND_NUM_ARGS();
-	if (argc < 2 || argc > 4 || zend_get_parameters_ex(argc, &input, &offset, &length, &z_preserve_keys)) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The first argument should be an array");
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al|lb", &input, &offset, &length, &preserve_keys) == FAILURE) {
 		return;
 	}
-	
-	/* Make sure offset and length are integers and assume
-	   we want all entries from offset to the end if length
-	   is not passed */
-	convert_to_long_ex(offset);
-	offset_val = Z_LVAL_PP(offset);
-	if (argc >= 3 && Z_TYPE_PP(length) != IS_NULL) {
-		convert_to_long_ex(length);
-		length_val = Z_LVAL_PP(length);
-	} else {
-		length_val = zend_hash_num_elements(Z_ARRVAL_PP(input));
+
+	/* Get number of entries in the input hash */
+	num_in = zend_hash_num_elements(Z_ARRVAL_P(input));
+
+	/* We want all entries from offset to the end if length is not passed or is null */
+	if (length == NULL) {
+		length = num_in;
 	}
 
-	if (ZEND_NUM_ARGS() > 3) {
-		convert_to_boolean_ex(z_preserve_keys);
-		preserve_keys = Z_BVAL_PP(z_preserve_keys);
-	}
-	
 	/* Initialize returned array */
 	array_init(return_value);
-	
-	/* Get number of entries in the input hash */
-	num_in = zend_hash_num_elements(Z_ARRVAL_PP(input));
-	
+
 	/* Clamp the offset.. */
-	if (offset_val > num_in)
+	if (offset > num_in) {
 		return;
-	else if (offset_val < 0 && (offset_val = (num_in + offset_val)) < 0)
-		offset_val = 0;
-	
-	/* ..and the length */
-	if (length_val < 0) {
-		length_val = num_in - offset_val + length_val;
-	} else if (((unsigned)offset_val + (unsigned)length_val) > (unsigned)num_in) {
-		length_val = num_in - offset_val;
+	} else if (offset < 0 && (offset = (num_in + offset)) < 0) {
+		offset = 0;
 	}
-	
-	if (length_val == 0)
+
+	/* ..and the length */
+	if (length < 0) {
+		length = num_in - offset + length;
+	} else if (((unsigned) offset + (unsigned) length) > (unsigned) num_in) {
+		length = num_in - offset;
+	}
+
+	if (length == 0) {
 		return;
-	
+	}
+
 	/* Start at the beginning and go until we hit offset */
 	pos = 0;
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(input), &hpos);
-	while (pos < offset_val && zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &hpos) == SUCCESS) {
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(input), &hpos);
+	while (pos < offset && zend_hash_get_current_data_ex(Z_ARRVAL_P(input), (void **)&entry, &hpos) == SUCCESS) {
 		pos++;
-		zend_hash_move_forward_ex(Z_ARRVAL_PP(input), &hpos);
+		zend_hash_move_forward_ex(Z_ARRVAL_P(input), &hpos);
 	}
-	
-	/* Copy elements from input array to the one that's returned */
-	while (pos < offset_val+length_val && zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &hpos) == SUCCESS) {
-		
-		(*entry)->refcount++;
 
-		switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(input), &string_key, &string_key_len, &num_key, 0, &hpos)) {
+	/* Copy elements from input array to the one that's returned */
+	while (pos < offset + length && zend_hash_get_current_data_ex(Z_ARRVAL_P(input), (void **)&entry, &hpos) == SUCCESS) {
+
+		zval_add_ref(entry);
+
+		switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(input), &string_key, &string_key_len, &num_key, 0, &hpos)) {
 			case HASH_KEY_IS_STRING:
-				zend_hash_update(Z_ARRVAL_P(return_value), string_key, string_key_len,
-								 entry, sizeof(zval *), NULL);
+				zend_hash_update(Z_ARRVAL_P(return_value), string_key, string_key_len, entry, sizeof(zval *), NULL);
 				break;
-	
+
 			case HASH_KEY_IS_LONG:
-				if (preserve_keys)
-					zend_hash_index_update(Z_ARRVAL_P(return_value), num_key,
-										   entry, sizeof(zval *), NULL);
-				else
-					zend_hash_next_index_insert(Z_ARRVAL_P(return_value),
-												entry, sizeof(zval *), NULL);
+				if (preserve_keys) {
+					zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry, sizeof(zval *), NULL);
+				} else {
+					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), entry, sizeof(zval *), NULL);
+				}
 				break;
 		}
 		pos++;
-		zend_hash_move_forward_ex(Z_ARRVAL_PP(input), &hpos);
+		zend_hash_move_forward_ex(Z_ARRVAL_P(input), &hpos);
 	}
 }
 /* }}} */
