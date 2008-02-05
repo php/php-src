@@ -5,4 +5,5 @@ ZE2 Late Static Binding interface name "static"
 interface static {
 }
 --EXPECTF--
-Parse error: parse error, expecting `T_STRING' in %s on line %d
+Parse error: %s error,%sexpecting %s in %s on line %d
+

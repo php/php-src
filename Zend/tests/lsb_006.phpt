@@ -9,4 +9,5 @@ class Foo extends static {
 ?>
 ==DONE==
 --EXPECTF--
-Parse error: parse error, expecting `T_STRING' or `T_PAAMAYIM_NEKUDOTAYIM' or `T_NAMESPACE' in %s on line %d
+Parse error: %s error,%sexpecting %s in %s on line %d
+
