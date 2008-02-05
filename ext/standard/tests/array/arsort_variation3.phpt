@@ -59,3 +59,268 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
+--EXPECT--
+*** Testing arsort() : usage variations ***
+
+-- Testing arsort() by supplying various integer/float arrays --
+
+-- Iteration 1 --
+- With default sort_flag -
+bool(true)
+array(9) {
+  [8]=>
+  int(41)
+  [5]=>
+  int(31)
+  [3]=>
+  int(21)
+  [1]=>
+  int(11)
+  [7]=>
+  int(0)
+  [2]=>
+  int(-11)
+  [4]=>
+  int(-21)
+  [6]=>
+  int(-31)
+  [10]=>
+  int(-41)
+}
+- Sort_flag = SORT_REGULAR -
+bool(true)
+array(9) {
+  [8]=>
+  int(41)
+  [5]=>
+  int(31)
+  [3]=>
+  int(21)
+  [1]=>
+  int(11)
+  [7]=>
+  int(0)
+  [2]=>
+  int(-11)
+  [4]=>
+  int(-21)
+  [6]=>
+  int(-31)
+  [10]=>
+  int(-41)
+}
+- Sort_flag = SORT_NUMERIC -
+bool(true)
+array(9) {
+  [8]=>
+  int(41)
+  [5]=>
+  int(31)
+  [3]=>
+  int(21)
+  [1]=>
+  int(11)
+  [7]=>
+  int(0)
+  [2]=>
+  int(-11)
+  [4]=>
+  int(-21)
+  [6]=>
+  int(-31)
+  [10]=>
+  int(-41)
+}
+
+-- Iteration 2 --
+- With default sort_flag -
+bool(true)
+array(7) {
+  [3]=>
+  float(1050)
+  [1]=>
+  float(10.5)
+  [5]=>
+  float(0.5)
+  [4]=>
+  float(0.106)
+  [6]=>
+  float(0.0001)
+  [7]=>
+  float(-0.1)
+  [2]=>
+  float(-10.5)
+}
+- Sort_flag = SORT_REGULAR -
+bool(true)
+array(7) {
+  [3]=>
+  float(1050)
+  [1]=>
+  float(10.5)
+  [5]=>
+  float(0.5)
+  [4]=>
+  float(0.106)
+  [6]=>
+  float(0.0001)
+  [7]=>
+  float(-0.1)
+  [2]=>
+  float(-10.5)
+}
+- Sort_flag = SORT_NUMERIC -
+bool(true)
+array(7) {
+  [3]=>
+  float(1050)
+  [1]=>
+  float(10.5)
+  [5]=>
+  float(0.5)
+  [4]=>
+  float(0.106)
+  [6]=>
+  float(0.0001)
+  [7]=>
+  float(-0.1)
+  [2]=>
+  float(-10.5)
+}
+
+-- Iteration 3 --
+- With default sort_flag -
+bool(true)
+array(11) {
+  [11]=>
+  int(33)
+  [7]=>
+  int(2)
+  [9]=>
+  float(0.106)
+  [6]=>
+  float(0.09)
+  [2]=>
+  float(0.0021)
+  [1]=>
+  float(0.0001)
+  [5]=>
+  int(0)
+  [3]=>
+  float(-0.01)
+  [10]=>
+  float(-0.106)
+  [8]=>
+  float(-0.9)
+  [4]=>
+  int(-1)
+}
+- Sort_flag = SORT_REGULAR -
+bool(true)
+array(11) {
+  [11]=>
+  int(33)
+  [7]=>
+  int(2)
+  [9]=>
+  float(0.106)
+  [6]=>
+  float(0.09)
+  [2]=>
+  float(0.0021)
+  [1]=>
+  float(0.0001)
+  [5]=>
+  int(0)
+  [3]=>
+  float(-0.01)
+  [10]=>
+  float(-0.106)
+  [8]=>
+  float(-0.9)
+  [4]=>
+  int(-1)
+}
+- Sort_flag = SORT_NUMERIC -
+bool(true)
+array(11) {
+  [11]=>
+  int(33)
+  [7]=>
+  int(2)
+  [9]=>
+  float(0.106)
+  [6]=>
+  float(0.09)
+  [2]=>
+  float(0.0021)
+  [1]=>
+  float(0.0001)
+  [5]=>
+  int(0)
+  [3]=>
+  float(-0.01)
+  [10]=>
+  float(-0.106)
+  [8]=>
+  float(-0.9)
+  [4]=>
+  int(-1)
+}
+
+-- Iteration 4 --
+- With default sort_flag -
+bool(true)
+array(7) {
+  [2]=>
+  float(2147483648)
+  [1]=>
+  int(2147483647)
+  [6]=>
+  int(0)
+  [5]=>
+  int(0)
+  [3]=>
+  int(-2147483647)
+  [4]=>
+  float(-2147483648)
+  [7]=>
+  float(-2147483649)
+}
+- Sort_flag = SORT_REGULAR -
+bool(true)
+array(7) {
+  [2]=>
+  float(2147483648)
+  [1]=>
+  int(2147483647)
+  [6]=>
+  int(0)
+  [5]=>
+  int(0)
+  [3]=>
+  int(-2147483647)
+  [4]=>
+  float(-2147483648)
+  [7]=>
+  float(-2147483649)
+}
+- Sort_flag = SORT_NUMERIC -
+bool(true)
+array(7) {
+  [2]=>
+  float(2147483648)
+  [1]=>
+  int(2147483647)
+  [6]=>
+  int(0)
+  [5]=>
+  int(0)
+  [3]=>
+  int(-2147483647)
+  [4]=>
+  float(-2147483648)
+  [7]=>
+  float(-2147483649)
+}
+Done
