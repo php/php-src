@@ -2359,7 +2359,10 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 
 		/* This is a compound name.
 		 * Try to fetch class and then find static method. */
- 		*ce_ptr = zend_fetch_class(Z_STRVAL_P(callable), clen, ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_SILENT TSRMLS_CC);
+		zend_class_entry *last_scope = EG(scope);
+		EG(scope) = ce_org;
+		*ce_ptr = zend_fetch_class(Z_STRVAL_P(callable), clen, ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_SILENT TSRMLS_CC);
+		EG(scope) = last_scope;
 		if (!*ce_ptr) {
 			char *cname = estrndup(Z_STRVAL_P(callable), clen);
 			if (error) zend_spprintf(error, 0, "class '%s' not found", cname);
@@ -2375,7 +2378,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 	} else if (ce_org) {
 		/* Try to fetch find static method of given class. */
 		mlen = Z_STRLEN_P(callable);
- 		lmname = zend_str_tolower_dup(Z_STRVAL_P(callable), Z_STRLEN_P(callable));
+		lmname = zend_str_tolower_dup(Z_STRVAL_P(callable), Z_STRLEN_P(callable));
 		ftable = &ce_org->function_table;
 		*ce_ptr = ce_org;
 	} else {
