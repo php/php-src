@@ -1326,7 +1326,11 @@ PHP_FUNCTION(mysqli_init)
 #if !defined(HAVE_MYSQLND)
 	if (!(mysql->mysql = mysql_init(NULL)))
 #else
-	if (!(mysql->mysql = mysql_init(FALSE)))
+	/*
+	  We create always persistent, as if the user want to connecto
+	  to p:somehost, we can't convert the handle then
+	*/
+	if (!(mysql->mysql = mysql_init(TRUE)))
 #endif
 	{
 		efree(mysql);
@@ -1665,86 +1669,7 @@ PHP_FUNCTION(mysqli_prepare)
    Open a connection to a mysql server */ 
 PHP_FUNCTION(mysqli_real_connect)
 {
-	MY_MYSQL		*mysql;
-	char			*hostname = NULL, *username=NULL, *passwd=NULL, *dbname=NULL, *socket=NULL;
-	unsigned int	hostname_len = 0, username_len = 0, passwd_len = 0, dbname_len = 0, socket_len = 0;
-	unsigned long	port=0, flags=0;
-	zval			*mysql_link;
-
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|s&s&s&s&ls&l", &mysql_link, mysqli_link_class_entry,
-		&hostname, &hostname_len, UG(utf8_conv), &username, &username_len, UG(utf8_conv), &passwd, &passwd_len, UG(utf8_conv),
-		&dbname, &dbname_len, UG(utf8_conv), &port, &socket, &socket_len, UG(utf8_conv), &flags) == FAILURE) {
-		return;
-	}
-
-	if (!socket_len) {
-		socket = NULL;
-	}
-	if (!socket) {
-		socket = MyG(default_socket);
-	}	
-	if (!passwd) {
-		passwd = MyG(default_pw);
-		passwd_len = strlen(passwd);
-	}
-	if (!username){
-		username = MyG(default_user);
-	}
-	if (!hostname) {
-		hostname = MyG(default_host);
-	}
-
-	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_INITIALIZED);
-
-	/* set some required options */
-	flags |= CLIENT_MULTI_RESULTS; /* needed for mysql_multi_query() */
-	/* remove some insecure options */
-	flags &= ~CLIENT_MULTI_STATEMENTS;   /* don't allow multi_queries via connect parameter */
-	if (PG(open_basedir) && PG(open_basedir)[0] != '\0') {
-		flags ^= CLIENT_LOCAL_FILES;
-	}
-
-	if (UG(unicode)) {
-		mysql_options(mysql->mysql, MYSQL_SET_CHARSET_NAME, "utf8");
-	}
-
-#if !defined(HAVE_MYSQLND)
-	if (mysql_real_connect(mysql->mysql, hostname, username, passwd, dbname ,port, socket ,flags) == NULL) 
-#else
-	if (mysqlnd_connect(mysql->mysql, hostname, username, passwd, passwd_len, dbname, dbname_len,
-						port, socket, flags, MyG(mysqlnd_thd_zval_cache) TSRMLS_CC) == NULL)
-#endif
-	{
-		php_mysqli_set_error(mysql_errno(mysql->mysql), (char *) mysql_error(mysql->mysql) TSRMLS_CC);
-		php_mysqli_throw_sql_exception((char *)mysql_sqlstate(mysql->mysql), mysql_errno(mysql->mysql) TSRMLS_CC,
-										"%s", mysql_error(mysql->mysql));
-
-		/* change status */
-		MYSQLI_SET_STATUS(&mysql_link, MYSQLI_STATUS_INITIALIZED);
-		RETURN_FALSE;
-	}
-
-	/* when PHP runs in unicode, set default character set to utf8 */
-	if (UG(unicode)) {
-		mysql->conv = UG(utf8_conv);
-	}
-
-	/* clear error */
-	php_mysqli_set_error(mysql_errno(mysql->mysql), (char *)mysql_error(mysql->mysql) TSRMLS_CC);
-
-#if !defined(HAVE_MYSQLND)
-	mysql->mysql->reconnect = MyG(reconnect);
-
-	/* set our own local_infile handler */
-	php_set_local_infile_handler_default(mysql);
-#endif
-
-	mysql_options(mysql->mysql, MYSQL_OPT_LOCAL_INFILE, (char *)&MyG(allow_local_infile));
-
-	/* change status */
-	MYSQLI_SET_STATUS(&mysql_link, MYSQLI_STATUS_VALID);
-
-	RETURN_TRUE;
+	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, TRUE);
 }
 /* }}} */
 
