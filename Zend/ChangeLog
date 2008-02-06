@@ -1,3 +1,22 @@
+2008-02-05  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      zend_API.c:
+      - MFH Fix cross class tree reference issues with callbacks (colder,helly)
+
+    * zend_API.c:
+      - Fix cross class tree reference issues with callbacks
+
+2008-02-05  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_3)
+      tests/access_modifiers_003.phpt
+      tests/lsb_006.phpt
+      tests/lsb_007.phpt
+      tests/lsb_008.phpt
+      tests/lsb_009.phpt:
+      Fix test
+
 2008-02-04  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_5_3)

@@ -1,3 +1,50 @@
+2008-02-05  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.c:
+      - MFH Fix cross class tree reference issues with callbacks (colder,helly)
+
+    * ZendEngine2/zend_API.c:
+      - Fix cross class tree reference issues with callbacks
+
+    * ext/standard/tests/general_functions/callbacks_001.phpt
+      ext/standard/tests/general_functions/callbacks_001.phpt:
+      
+      - Add new test
+
+2008-02-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c
+      ext/standard/array.c:
+      
+      MFB: Fixed bug #44046 (crash inside array_slice() function with an invalid
+      by-ref offset).
+
+    * (PHP_5_3)
+      ext/standard/array.c:
+      
+      Fixed bug #44046 (crash inside array_slice() function with an invalid
+      by-ref offset).
+
+2008-02-05  Robert Nicholson  <rob_nicholson@uk.ibm.com>
+
+    * ext/standard/tests/array/arsort_variation3.phpt
+      ext/standard/tests/array/arsort_variation3.phpt
+      ext/standard/tests/array/arsort_variation3.phpt:
+      - fix arsort_variation3.phpt which was missing its EXPECT section
+
+2008-02-05  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/access_modifiers_003.phpt
+      ZendEngine2/tests/lsb_006.phpt
+      ZendEngine2/tests/lsb_007.phpt
+      ZendEngine2/tests/lsb_008.phpt
+      ZendEngine2/tests/lsb_009.phpt:
+      Fix test
+
 2008-02-04  Marcus Boerger  <php@marcus-boerger.de>
 
     * (PHP_5_2)
