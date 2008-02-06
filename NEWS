@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 20??, PHP 6.0
 - Unicode support. (Andrei, Dmitry, et al)
 
-- Changed dl() to be disabled by default. Enabled only when explicitly 
+- Changed dl() to be disabled by default. Enabled only when explicitly
   registered by the SAPI layer. Enabled only with CLI, CGI and EMBED. (Dmitry)
 - Changed "instanceof" and "catch" operators, is_a() and is_subclass_of()
   functions to not call __autoload(). (Dmitry)
