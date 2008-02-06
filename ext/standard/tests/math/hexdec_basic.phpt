@@ -1,5 +1,9 @@
 --TEST--
 Test hexdec() - basic function test hexdec()
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+?>
 --FILE--
 <?php
 $values = array(0x123abc,
