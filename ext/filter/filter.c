@@ -460,13 +460,13 @@ static void php_zval_filter_recursive(zval **value, long filter, long flags, zva
 			 zend_hash_move_forward_ex(Z_ARRVAL_PP(value), &pos)
 		) {
 			SEPARATE_ZVAL_IF_NOT_REF(element);
-				if (Z_TYPE_PP(element) == IS_ARRAY) {
-					Z_ARRVAL_PP(element)->nApplyCount++;
-					php_zval_filter_recursive(element, filter, flags, options, charset, copy TSRMLS_CC);
-					Z_ARRVAL_PP(element)->nApplyCount--;
-				} else {
-					php_zval_filter(element, filter, flags, options, charset, copy TSRMLS_CC);
-				}
+			if (Z_TYPE_PP(element) == IS_ARRAY) {
+				Z_ARRVAL_PP(element)->nApplyCount++;
+				php_zval_filter_recursive(element, filter, flags, options, charset, copy TSRMLS_CC);
+				Z_ARRVAL_PP(element)->nApplyCount--;
+			} else {
+				php_zval_filter(element, filter, flags, options, charset, copy TSRMLS_CC);
+			}
 		}
 	} else {
 		php_zval_filter(value, filter, flags, options, charset, copy TSRMLS_CC);
