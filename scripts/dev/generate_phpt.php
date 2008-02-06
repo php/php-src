@@ -33,13 +33,16 @@ dirlist($opt['source_loc'], $c_file_count, $all_c);
 $test_info = get_loc_proto($all_c, $opt['name'], $opt['source_loc']);
 
 if (!$test_info['found']) {
-	echo "Exiting: Unable to find implementation of {$opt['name']} in {$opt['source_loc']}\n";
+	echo "\nExiting: Unable to find implementation of {$opt['name']} in {$opt['source_loc']}\n";
+	if ($test_info['falias']) {
+		//But it may be aliased to something else
+		echo "\n{$test_info['name']}() is an alias of {$test_info['alias']}() --- Write test cases for this instead \n";
+	}
 	exit();
 }
 if ($test_info['falias']) {
-	//If this function is  falias'd to another function direct the test case writer to the principle alias for tests
-	echo "{$test_info['name']}() is an alias of {$test_info['alias']}() --- please see testcases for {$test_info['alias']}() \n";
-	exit();
+	//If this function is  falias'd to another function tell the test case writer about them
+	echo "\nNote: {$test_info['name']}() is an alias of {$test_info['alias']}() \n";
 }
 if ($test_info['error'] != NULL) {
 	echo $test_info['error']."\n";
@@ -330,8 +333,8 @@ function gen_array_with_diff_values($var_type,  $array_name, $code_block) {
 	$variation_array['float'] = array(
   		"10.5",
   		"-10.5",
-  		"10.5e10",
-  		"10.6E-10",
+  		"10.1234567e10",
+  		"10.7654321E-10",
   		".5"
 		);
 
@@ -801,86 +804,6 @@ function gen_one_arg_code($fn_name, $arg_name, $arg_type, $code_block) {
         array_push ($code_block, "var_dump( $fn_name(\$$arg_name) );");
   return $code_block;
 }
-/* 
- * Function to get the name of the source file in which the function is implemented and the proto comment
- * Arguments: 
- * 	$all_c => list of all c files in the PHP source
- * 	$fname => function name
- * 	$source => directory path of PHP source code
- * Returns:
- * 	$test_info = > array( source file, return type, parameters, falias, found, alias, error)
- */
-function get_loc_proto($all_c, $fname, $source) {
-//get location 
-    $test_info['name'] = $fname;
-    $test_info['source_file'] = NULL;
-    $test_info['return_type'] = NULL;
-    $test_info['params'] = NULL;
-    $test_info['falias'] = false;
-    $test_info['found'] = false;
-    $test_info['alias'] = NULL;
-    $test_info['error'] = NULL;
-  
-    $escaped_source = preg_replace("/\\\/", "\\\\\\", $source);
-    $escaped_source = preg_replace("/\//", "\\\/", $escaped_source);
-    
-    
-	for ($i=0; $i<count($all_c); $i++)
-	{ 
-		$strings=file_get_contents(chop($all_c[$i]));
-		if (preg_match ("/FUNCTION\($fname\)/",$strings))
-		{
-			//strip build specific part of the implementation file name
-			preg_match("/$escaped_source\/(.*)$/", $all_c[$i], $tmp);
-			$test_info['source_file'] = $tmp[1];
-			//get prototype information
-			if (preg_match("/\/\*\s+{{{\s*proto\s+(\w*)\s*$fname\(\s*(.*)\s*\)(\n|)\s*(.*)\*\//", $strings, $matches)) {
-				$test_info['return_type'] = $matches[1];
-				$test_info['params'] = $matches[2];
-				$test_info['desc'] = $matches[4];
-			}
-			else {
-				$test_info['error'] = "Failed to  parse prototype for $fname in $all_c[$i] in function get_loc_proto()";
-			}
-			$test_info['found'] = true;
-			if (preg_match ("/FALIAS\((\w+).*$fname,.*\)/",$strings, $alias_name)) {
-			// This is not the main implementation, set falias to true
-			$test_info['falias'] = true;
-				if ( $test_info['alias'] != NULL) {
-                               		$test_info['alias']  = $test_info['alias']." ".$alias_name[1];
-                        	} else {
-                                	$test_info['alias'] = $alias_name[1];
-                        	}
-			}
-			break;
-		}
-		elseif (preg_match ("/FALIAS\($fname,\s*(\w+).*\)/",$strings, $alias_name)){
-			// This is the main implementation but it has other functions aliased to it
-			// Leave falias as false, but collect a list of the alias names
-			if ( $test_info['alias'] != NULL) {
-				$test_info['alias']  = $test_info['alias']." ".$alias_name[1];
-			} else {
-				$test_info['alias'] = $alias_name[1];
-			}
-			//strip build specific part of the implementation file name
-			preg_match("/$escaped_source\/(.*)$/", $all_c[$i], $tmp);
-			$test_info['source_file']= $tmp[1];
-			$test_info['found'] = true;
-		}
-		//Some functions are in their own files and not declared using FUNTION/FALIAS. 
-		//If we haven't found either FUNCTION or FAILIAS try just looking for the prototype 
-		elseif (preg_match ("/\/\*\s+{{{\s*proto\s+(\w*)\s*$fname\(\s*(.*)\s*\)(\n|)\s*(.*)\*\//", $strings, $matches)) {
-                        $test_info['return_type'] = $matches[1];
-                        $test_info['params'] = $matches[2];
-                        $test_info['desc'] = $matches[4];
-                        $test_info['found'] = true;
-			preg_match("/$escaped_source\/(.*)$/", $all_c[$i], $tmp);
-                        $test_info['source_file']= $tmp[1];
-                        break;
-		}
-	}
-	return $test_info;
-}
 /*  
  * Generates code for basic functionality test. The generated code
  * will test the function with it's mandatory arguments and with all optional arguments.
@@ -1101,5 +1024,75 @@ function gen_zero_arg_error_case($fn_name, $code_block) {
 	array_push ($code_block, "echo \"\\n-- Testing $fn_name() function with Zero arguments --\\n\";");
 	array_push ($code_block, "var_dump( $fn_name() );");
   return $code_block;
+}
+function get_loc_proto($all_c, $fname, $source) {
+//get location 
+    $test_info['name'] = $fname;
+    $test_info['source_file'] = NULL;
+    $test_info['return_type'] = NULL;
+    $test_info['params'] = NULL;
+    $test_info['falias'] = false;
+    $test_info['found'] = false;
+    $test_info['alias'] = NULL;
+    $test_info['error'] = NULL;
+  
+    $escaped_source = preg_replace("/\\\/", "\\\\\\", $source);
+    $escaped_source = preg_replace("/\//", "\\\/", $escaped_source);
+    
+    
+	for ($i=0; $i<count($all_c); $i++)
+	{ 
+		$strings=file_get_contents(chop($all_c[$i]));
+		if (preg_match ("/FUNCTION\($fname\)/",$strings))
+		{
+			//strip build specific part of the implementation file name
+			preg_match("/$escaped_source\/(.*)$/", $all_c[$i], $tmp);
+			$test_info['source_file'] = $tmp[1];
+			//get prototype information
+			if (preg_match("/\/\*\s+{{{\s*proto\s+(\w*)\s*$fname\(\s*(.*)\s*\)(\n|)\s*(.*?)(\*\/|\n)/", $strings, $matches)) {
+				$test_info['return_type'] = $matches[1];
+				$test_info['params'] = $matches[2];
+				$test_info['desc'] = $matches[4];
+			}
+			else {
+				$test_info['error'] = "\nFailed to  parse prototype for $fname in $all_c[$i]".
+				"\nEither the {{{proto comment is too hard to parse, or ".
+				"\nthe real implementation is in an alias.\n";
+			}
+			$test_info['found'] = true;
+			if ((preg_match ("/FALIAS\($fname,\s*(\w+),.*\)/",$strings, $alias_name)) 
+			 || (preg_match ("/FALIAS\((\w+),\s*$fname.*\)/",$strings, $alias_name))) {
+			// There is another alias referred to in the same C source file. Make a note of it.
+			$test_info['falias'] = true;
+				if ( $test_info['alias'] != NULL) {
+                               		$test_info['alias']  = $test_info['alias']." ".$alias_name[1];
+                        	} else {
+                                	$test_info['alias'] = $alias_name[1];
+                        	}
+			}
+		}
+		elseif ((preg_match ("/FALIAS\($fname,\s*(\w+),.*\)/",$strings, $alias_name)) 
+		 || (preg_match ("/FALIAS\((\w+),\s*$fname.*\)/",$strings, $alias_name))) {
+			// There is an alias to the function in a different file from the main function definition - make a note of it
+			$test_info['falias'] = true;
+			if ( $test_info['alias'] != NULL) {
+				$test_info['alias']  = $test_info['alias']." ".$alias_name[1];
+			} else {
+				$test_info['alias'] = $alias_name[1];
+			}
+		}
+		//Some functions are in their own files and not declared using FUNTION/FALIAS. 
+		//If we haven't found either FUNCTION or FALIAS try just looking for the prototype 
+		elseif (preg_match ("/\/\*\s+{{{\s*proto\s+(\w*)\s*$fname\(\s*(.*)\s*\)(\n|)\s*(.*)\*\//", $strings, $matches)) {
+                        $test_info['return_type'] = $matches[1];
+                        $test_info['params'] = $matches[2];
+                        $test_info['desc'] = $matches[4];
+                        $test_info['found'] = true;
+			preg_match("/$escaped_source\/(.*)$/", $all_c[$i], $tmp);
+                        $test_info['source_file']= $tmp[1];
+                        //break;
+		}
+	}
+	return $test_info;
 }
 ?>
