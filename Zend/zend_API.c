@@ -2722,7 +2722,9 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		/* This is a compound name.
 		 * Try to fetch class and then find static method. */
 		zend_class_entry *last_scope = EG(scope);
-		EG(scope) = ce_org;
+		if (ce_org) {
+			EG(scope) = ce_org;
+		}
 		*ce_ptr = zend_u_fetch_class(Z_TYPE_P(callable), Z_UNIVAL_P(callable), clen, ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_SILENT TSRMLS_CC);
 		EG(scope) = last_scope;
 		if (!*ce_ptr) {
