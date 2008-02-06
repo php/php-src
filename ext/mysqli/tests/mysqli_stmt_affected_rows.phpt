@@ -160,17 +160,77 @@ require_once('skipifconnectfailure.inc');
 	if (1 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
 		printf("[029] Expecting int/1, got %s/%s\n", gettype($tmp), $tmp);
 
+	if (!mysqli_stmt_prepare($stmt, 'SELECT label FROM test WHERE id = 100') ||
+		!mysqli_stmt_execute($stmt))
+		printf("[030] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	/* use it like num_rows */
+	/* PS are unbuffered, num_rows cannot determine the row count before all rows have been fetched and/or buffered */
+	if (-1 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
+		printf("[031] Expecting int/-1, got %s/%s\n", gettype($tmp), $tmp);
+
+	if (0 !== ($tmp = mysqli_stmt_num_rows($stmt)))
+		printf("[032] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
+
+	if (!mysqli_stmt_store_result($stmt))
+		printf("[033] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	if (1 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
+		printf("[034] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
+
+	if (1 !== ($tmp = mysqli_stmt_num_rows($stmt)))
+		printf("[035] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
+
+	mysqli_stmt_free_result($stmt);
+	mysqli_stmt_close($stmt);
+	$stmt = mysqli_stmt_init($link);
+
+	if (!mysqli_stmt_prepare($stmt, 'SELECT label FROM test WHERE 1 = 2') ||
+		!mysqli_stmt_execute($stmt))
+		printf("[036] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	/* use it like num_rows */
+	if (-1 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
+		printf("[037] Expecting int/-1, got %s/%s\n", gettype($tmp), $tmp);
+
+	if (true !== ($tmp = mysqli_stmt_store_result($stmt)))
+		printf("[038] Expecting boolean/true, got %s\%s\n", gettype($tmp), $tmp);
+
+	if (0 !== ($tmp = mysqli_stmt_num_rows($stmt)))
+		printf("[039] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
+
+	if (0 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
+		printf("[040] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
+
+	/* try to use stmt_affected_rows like stmt_num_rows */
+	/* stmt_affected_rows is not really meant for SELECT! */
+	if (mysqli_stmt_prepare($stmt, 'SELECT unknown_column FROM this_table_does_not_exist') ||
+		mysqli_stmt_execute($stmt))
+		printf("[041] The invalid SELECT statement is issued on purpose\n");
+
+	if (-1 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
+		printf("[042] Expecting int/-1, got %s/%s\n", gettype($tmp), $tmp);
+
+	if (false !== ($tmp = mysqli_stmt_store_result($stmt)))
+		printf("[043] Expecting boolean/false, got %s\%s\n", gettype($tmp), $tmp);
+
+	if (0 !== ($tmp = mysqli_stmt_num_rows($stmt)))
+		printf("[044] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
+
+	if (-1 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
+		printf("[045] Expecting int/-1, got %s/%s\n", gettype($tmp), $tmp);
+
 	mysqli_stmt_close($stmt);
 	$stmt = mysqli_stmt_init($link);
 
 	if (!mysqli_stmt_prepare($stmt, "DROP TABLE IF EXISTS test") ||
 		!mysqli_stmt_execute($stmt))
-		printf("[030] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+		printf("[046] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	mysqli_stmt_close($stmt);
 
 	if (!is_null($tmp = mysqli_stmt_affected_rows($stmt)))
-		printf("[031] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+		printf("[047] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_close($link);
 
