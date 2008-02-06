@@ -344,6 +344,9 @@ PHP_MYSQLI_API void mysqli_register_stmt(zval *return_value, void *stmt TSRMLS_D
 PHP_MYSQLI_API void mysqli_register_result(zval *return_value, void *result TSRMLS_DC);
 PHP_MYSQLI_API void php_mysqli_set_error(long mysql_errno, char *mysql_err TSRMLS_DC);
 
+void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_connect);
+
+
 ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	long			default_link;
 	long			num_links;

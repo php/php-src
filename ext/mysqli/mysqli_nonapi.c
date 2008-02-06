@@ -33,10 +33,7 @@
 
 #define SAFE_STR(a) ((a)?a:"")
 
-
-/* {{{ proto object mysqli_connect([string hostname [,string username [,string passwd [,string dbname [,int port [,string socket]]]]]])
-   Open a connection to a mysql server */ 
-PHP_FUNCTION(mysqli_connect)
+void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_connect)
 {
 	MY_MYSQL			*mysql = NULL;
 	MYSQLI_RESOURCE		*mysqli_resource = NULL;
@@ -44,7 +41,7 @@ PHP_FUNCTION(mysqli_connect)
 	char				*hostname = NULL, *username=NULL, *passwd=NULL, *dbname=NULL, *socket=NULL;
 	unsigned int		hostname_len = 0, username_len = 0, passwd_len = 0, dbname_len = 0, socket_len = 0;
 	zend_bool			persistent = FALSE;
-	long				port = 0;
+	long				port = 0, flags = 0;
 	uint				hash_len;
 	char				*hash_key = NULL;
 	zend_bool			new_connection = FALSE;
@@ -56,10 +53,49 @@ PHP_FUNCTION(mysqli_connect)
 	}
 	hostname = username = dbname = passwd = socket = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ssssls", &hostname, &hostname_len, &username, &username_len, 
-		&passwd, &passwd_len, &dbname, &dbname_len, &port, &socket, &socket_len) == FAILURE) {
-		return;
+	if (!is_real_connect) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ssssls", &hostname, &hostname_len, &username, &username_len, 
+									&passwd, &passwd_len, &dbname, &dbname_len, &port, &socket, &socket_len) == FAILURE) {
+			return;
+		}
+
+		if (object && instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry TSRMLS_CC)) {
+			mysqli_resource = ((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->ptr;
+			if (mysqli_resource && mysqli_resource->ptr &&
+				mysqli_resource->status > MYSQLI_STATUS_INITIALIZED)
+			{
+				mysql = (MY_MYSQL*)mysqli_resource->ptr;
+				php_clear_mysql(mysql);
+				if (mysql->mysql) {
+					mysqli_close(mysql->mysql, MYSQLI_CLOSE_EXPLICIT);
+					mysql->mysql = NULL;
+				}
+			}
+		}
+		if (!mysql) {
+			mysql = (MY_MYSQL *) ecalloc(1, sizeof(MY_MYSQL));
+		}
+		flags |= CLIENT_MULTI_RESULTS; /* needed for mysql_multi_query() */
+
+	} else {
+		/* We have flags too */
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|sssslsl", &object, mysqli_link_class_entry,
+										&hostname, &hostname_len, &username, &username_len, &passwd, &passwd_len, &dbname, &dbname_len, &port, &socket, &socket_len,
+										&flags) == FAILURE) {
+			return;
+		}
+		mysqli_resource = ((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->ptr;
+		MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &object, "mysqli_link", MYSQLI_STATUS_INITIALIZED);
+
+		/* set some required options */
+		flags |= CLIENT_MULTI_RESULTS; /* needed for mysql_multi_query() */
+		/* remove some insecure options */
+		flags &= ~CLIENT_MULTI_STATEMENTS;   /* don't allow multi_queries via connect parameter */
+		if (PG(open_basedir) && PG(open_basedir)[0] != '\0') {
+			flags &= ~CLIENT_LOCAL_FILES;
+		}
 	}
+
 
 	if (!socket_len || !socket) {
 		socket = MyG(default_socket);
@@ -76,24 +112,6 @@ PHP_FUNCTION(mysqli_connect)
 		hostname = MyG(default_host);
 	}
 
-
-	if (object && instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry TSRMLS_CC)) {
-		mysqli_resource = ((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->ptr;
-		if (mysqli_resource && mysqli_resource->ptr &&
-			mysqli_resource->status >= MYSQLI_STATUS_INITIALIZED)
-		{
-			mysql = (MY_MYSQL*)mysqli_resource->ptr;
-			php_clear_mysql(mysql);
-			if (mysql->mysql) {
-				mysqli_close(mysql->mysql, MYSQLI_CLOSE_EXPLICIT);
-				mysql->mysql = NULL;
-			}
-		}
-	}
-	if (!mysql) {
-		mysql = (MY_MYSQL *) ecalloc(1, sizeof(MY_MYSQL));
-	}
-
 	if (strlen(SAFE_STR(hostname)) > 2 && !strncasecmp(hostname, "p:", 2)) {
 		hostname += 2;
 		if (!MyG(allow_persistent)) {
@@ -101,11 +119,7 @@ PHP_FUNCTION(mysqli_connect)
 		} else {
 			mysql->persistent = persistent = TRUE;
 
-			if (!strlen(hostname)) {
-				hostname = MyG(default_host);
-			}
-
-			hash_len = spprintf(&hash_key, 0, "mysqli_%s%ld%s%s%s", SAFE_STR(hostname), 
+			hash_len = spprintf(&hash_key, 0, "mysqli_%s_%s%ld%s%s%s", SAFE_STR(hostname), SAFE_STR(socket), 
 								port, SAFE_STR(username), SAFE_STR(dbname), 
 								SAFE_STR(passwd));
 
@@ -118,6 +132,15 @@ PHP_FUNCTION(mysqli_connect)
 
 					do {
 						if (zend_ptr_stack_num_elements(&plist->free_links)) {
+							if (is_real_connect) {
+								/*
+								  Gotcha! If there are some options set on the handle with mysqli_options()
+								  they will be lost. We will fetch other handle with other options. This could
+								  be a source of bug reports of people complaining but...nothing else could be
+								  done, if they want PCONN!
+								*/
+								mysqli_close(mysql->mysql, MYSQLI_CLOSE_IMPLICIT);
+							}
 							mysql->mysql = zend_ptr_stack_pop(&plist->free_links);
 
 							MyG(num_inactive_persistent)--;
@@ -165,15 +188,16 @@ PHP_FUNCTION(mysqli_connect)
 								MyG(num_active_persistent) + MyG(num_inactive_persistent));
 		goto err;
 	}
-
+	if (!is_real_connect) {
 #if !defined(HAVE_MYSQLND)
-	if (!(mysql->mysql = mysql_init(NULL))) {
+		if (!(mysql->mysql = mysql_init(NULL))) {
 #else
-	if (!(mysql->mysql = mysqlnd_init(persistent))) {
+		if (!(mysql->mysql = mysqlnd_init(persistent))) {
 #endif
-		goto err;
+			goto err;
+		}
+		new_connection = TRUE;
 	}
-	new_connection = TRUE;
 
 #ifdef HAVE_EMBEDDED_MYSQLI
 	if (hostname_len) {
@@ -188,16 +212,17 @@ PHP_FUNCTION(mysqli_connect)
 	if (mysql_real_connect(mysql->mysql, hostname, username, passwd, dbname, port, socket, CLIENT_MULTI_RESULTS) == NULL)
 #else
 	if (mysqlnd_connect(mysql->mysql, hostname, username, passwd, passwd_len, dbname, dbname_len,
-						port, socket, CLIENT_MULTI_RESULTS, MyG(mysqlnd_thd_zval_cache) TSRMLS_CC) == NULL)
+						port, socket, flags, MyG(mysqlnd_thd_zval_cache) TSRMLS_CC) == NULL)
 #endif
 	{
 		/* Save error messages */
 		php_mysqli_set_error(mysql_errno(mysql->mysql), (char *) mysql_error(mysql->mysql) TSRMLS_CC);
 		php_mysqli_throw_sql_exception((char *)mysql_sqlstate(mysql->mysql), mysql_errno(mysql->mysql) TSRMLS_CC,
 										"%s", mysql_error(mysql->mysql));
-
-		/* free mysql structure */
-		mysqli_close(mysql->mysql, MYSQLI_CLOSE_DISCONNECTED);
+		if (!is_real_connect) {
+			/* free mysql structure */
+			mysqli_close(mysql->mysql, MYSQLI_CLOSE_DISCONNECTED);
+		}
 		goto err;
 	}
 
@@ -221,7 +246,7 @@ end:
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
 
 	/* store persistent connection */
-	if (persistent && new_connection) {
+	if (persistent && (new_connection || is_real_connect)) {
 		MyG(num_active_persistent)++;
 	}
 
@@ -233,20 +258,34 @@ end:
 	mysql->multi_query = 1;
 #endif
 
-
 	if (!object || !instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry TSRMLS_CC)) {
 		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);	
 	} else {
 		((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->ptr = mysqli_resource;
 	}
-	return;
+	if (!is_real_connect) {
+		return;
+	} else {
+		RETURN_TRUE;
+	}
 
 err:
-	efree(mysql);
-	if (hash_key) {
-		efree(hash_key);
+	if (mysql->hash_key) {
+		efree(mysql->hash_key);
+		mysql->hash_key = NULL;
+	}
+	if (!is_real_connect) {
+		efree(mysql);
 	}
 	RETVAL_FALSE;
+}
+
+
+/* {{{ proto object mysqli_connect([string hostname [,string username [,string passwd [,string dbname [,int port [,string socket]]]]]])
+   Open a connection to a mysql server */ 
+PHP_FUNCTION(mysqli_connect)
+{
+	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, FALSE);
 }
 /* }}} */
 
@@ -460,7 +499,7 @@ PHP_FUNCTION(mysqli_query)
 		RETURN_FALSE;
 	}
 	if (resultmode != MYSQLI_USE_RESULT && resultmode != MYSQLI_STORE_RESULT
-#if defined(HAVE_MYSQLND) && defined(MYSQLND_THREADING)
+#if defined(HAVE_MYSQLND) && defined(MYSQLND_THREADED)
 		&& resultmode != MYSQLI_BG_STORE_RESULT
 #endif
 	) {
@@ -493,7 +532,7 @@ PHP_FUNCTION(mysqli_query)
 		case MYSQLI_USE_RESULT:
 			result = mysql_use_result(mysql->mysql);
 			break;
-#if defined(HAVE_MYSQLND) && defined(MYSQLND_THREADING)
+#if defined(HAVE_MYSQLND) && defined(MYSQLND_THREADED)
 		case MYSQLI_BG_STORE_RESULT:
 			result = mysqli_bg_store_result(mysql->mysql);
 			break;
