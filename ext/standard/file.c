@@ -2158,7 +2158,7 @@ PHP_FUNCTION(fgetcsv)
 	}
 
 	if (stream->readbuf_type == IS_STRING) {
-		/* Binary mode stream needs binary delmiter/enclosure */
+		/* Binary mode stream needs binary delimiter/enclosure */
 		if (delimiter_type == IS_UNICODE) {
 			if (FAILURE == zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &delimiter, &delimiter_len, (UChar*)delimiter, delimiter_len TSRMLS_CC)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed converting delimiter from unicode");
@@ -2211,7 +2211,17 @@ PHP_FUNCTION(fgetcsv)
 		}
 	}
 
-	buf.v = php_stream_get_line_ex(stream, stream->readbuf_type, NULL_ZSTR, 0, (len < 0) ? 0 : len, &buf_len);
+	if (len < 0) {
+		buf.v = php_stream_get_line_ex(stream, stream->readbuf_type, NULL_ZSTR, 0, 0, &buf_len);
+	} else {
+		buf.v = stream->readbuf_type == IS_UNICODE ? emalloc(UBYTES(len + 1)) : emalloc(len + 1);
+		if (php_stream_get_line_ex(stream, stream->readbuf_type, buf, len + 1, len + 1, &buf_len) == NULL) {
+			efree(buf.v);
+			RETVAL_FALSE;
+			goto cleanup;	
+		}
+	}
+
 	if (!buf.v) {
 		/* No data */
 		RETVAL_FALSE;
@@ -2473,7 +2483,7 @@ post_enc:
 
 			case PHP_FGETCSV_FIELD_NO_ENC:
 				/* Check for escapes */
-				if (PHP_FGETCSV_BIN_CHECK(p, e, escape, escape_len)) {
+				if (!PHP_FGETCSV_BIN_CHECK(p, e, delimiter, delimiter_len) && PHP_FGETCSV_BIN_CHECK(p, e, escape, escape_len)) {
 					p += escape_len + 1;
 				}
 
@@ -2682,7 +2692,7 @@ post_enc:
 
 			case PHP_FGETCSV_FIELD_NO_ENC:
 				/* Check for escapes */
-				if (PHP_FGETCSV_UNI_CHECK(p, e, escape, escape_len)) {
+				if (!PHP_FGETCSV_UNI_CHECK(p, e, delimiter, delimiter_len) && PHP_FGETCSV_UNI_CHECK(p, e, escape, escape_len)) {
 					p += escape_len + 1;
 				}
 
