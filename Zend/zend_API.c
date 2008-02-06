@@ -2728,9 +2728,11 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		*ce_ptr = zend_u_fetch_class(Z_TYPE_P(callable), Z_UNIVAL_P(callable), clen, ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_SILENT TSRMLS_CC);
 		EG(scope) = last_scope;
 		if (!*ce_ptr) {
-			char *cname = estrndup(Z_STRVAL_P(callable), clen);
-			if (error) zend_spprintf(error, 0, "class '%v' not found", cname);
-			efree(cname);
+			if (error) {
+				zstr cname = ezstrndup(Z_TYPE_P(callable), Z_UNIVAL_P(callable), clen);
+				zend_spprintf(error, 0, "class '%R' not found", Z_TYPE_P(callable), cname.v);
+				efree(cname.v);
+			}
 			return 0;
 		}
 		ftable = &(*ce_ptr)->function_table;
@@ -2746,7 +2748,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		*ce_ptr = ce_org;
 	} else {
 		/* We already checked for plain function before. */
-		if (error) zend_spprintf(error, 0, "function '%v' not found or invalid function name", Z_STRVAL_P(callable));
+		if (error) zend_spprintf(error, 0, "function '%R' not found or invalid function name", Z_TYPE_P(callable), Z_UNIVAL_P(callable));
 		return 0;
 	}
 
