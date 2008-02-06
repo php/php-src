@@ -298,9 +298,9 @@ if (version_compare(PHP_VERSION, '5.3.0-dev') == -1)
 	$id = 1;
 	$params = array(
 		0 => 'i',
-		1 => $id
+		1 => &$id
 	);
-	if (call_user_func_array(array($stmt, 'bind_param'), $params))
+	if (!call_user_func_array(array($stmt, 'bind_param'), $params))
 		printf("[047] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	if (!mysqli_stmt_execute($stmt))
@@ -318,9 +318,9 @@ if (version_compare(PHP_VERSION, '5.3.0-dev') == -1)
 	$params = array(
 		0 => $stmt,
 		1 => 'i',
-		2 => $id
+		2 => &$id
 	);
-	if (call_user_func_array('mysqli_stmt_bind_param', $params))
+	if (!call_user_func_array('mysqli_stmt_bind_param', $params))
 		printf("[051] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	if (!mysqli_stmt_execute($stmt))
@@ -359,8 +359,6 @@ string(1) "a"
 Call user func, procedural, using references for bound parameter, using variable for resource, using constant for types, array
 int(1)
 string(1) "a"
-[048] [2031] (Message might vary with MySQL Server version, e.g. No data supplied for parameters in prepared statement)
-[052] [2031] (Message might vary with MySQL Server version, e.g. No data supplied for parameters in prepared statement)
 done!
 --UEXPECTF--
 Regular, procedural, using variables
@@ -393,6 +391,4 @@ unicode(1) "a"
 Call user func, procedural, using references for bound parameter, using variable for resource, using constant for types, array
 int(1)
 unicode(1) "a"
-[048] [2031] (Message might vary with MySQL Server version, e.g. No data supplied for parameters in prepared statement)
-[052] [2031] (Message might vary with MySQL Server version, e.g. No data supplied for parameters in prepared statement)
 done!
