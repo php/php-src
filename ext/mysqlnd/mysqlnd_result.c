@@ -372,7 +372,6 @@ static
 void mysqlnd_internal_free_result(MYSQLND_RES *result TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_internal_free_result");
-
 	result->m.free_result_contents(result TSRMLS_CC);
 
 	if (result->conn) {
