@@ -82,12 +82,12 @@ if (!ini_get('sql.safe_mode')) {
 }
 
 /* we don't care if we can connect or not, this is just to test the different connect syntax variants */
-$myhost = sprintf('%s:%d', $host, $port - 100);
+$myhost = sprintf('%s:%d', $host, $port );
 if ($link = mysql_connect($myhost, $user, $passwd, true))
 	mysql_close($link);
 
 /* interesting, isn't it? */
-$myhost = sprintf('%s:%d:%s', $host, $port - 100, $socket);
+$myhost = sprintf('%s:%d', $host, $port , $socket);
 if ($link = mysql_connect($myhost, $user, $passwd, true))
 	mysql_close($link);
 
