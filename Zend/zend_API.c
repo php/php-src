@@ -3016,7 +3016,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *c
 					if (ce) {
 						return zend_is_callable_check_func(check_flags, zobj_ptr_ptr, ce, *method, ce_ptr, fptr_ptr, error TSRMLS_CC);
 					} else {
-						if (error) zend_spprintf(error, 0, "first array member is not a valid %s", Z_TYPE_PP(obj) == IS_STRING ? "class name" : "object");
+						if (error) zend_spprintf(error, 0, "first array member is not a valid %s", (Z_TYPE_PP(obj) == IS_STRING || Z_TYPE_PP(obj) == IS_UNICODE) ? "class name" : "object");
 					}
 				} else {
 					if (zend_hash_num_elements(Z_ARRVAL_P(callable)) == 2) {
