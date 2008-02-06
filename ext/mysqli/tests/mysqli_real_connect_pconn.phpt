@@ -117,7 +117,6 @@ mysqli.max_persistent=10
 	mysqli_close($link);
 
 	if ($IS_MYSQLND) {
-		ini_set('mysqli.default_host', 'p:' . $host);
 		$link = mysqli_init();
 		if (!@mysqli_real_connect($link)) {
 			printf("[022] Usage of mysqli.default_host=p:%s (persistent) failed\n", $host) ;
@@ -136,14 +135,14 @@ mysqli.max_persistent=10
 
 		ini_set('mysqli.default_host', 'p:');
 		$link = mysqli_init();
-		if (@mysqli_real_sconnect($link)) {
+		if (@mysqli_real_connect($link)) {
 			printf("[025] Usage of mysqli.default_host=p: did not fail\n") ;
 			mysqli_close($link);
 		}
 	}
 
-	if (NULL !== ($tmp = mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)))
-		printf("[026] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (NULL === ($tmp = mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)))
+		printf("[026] Expecting not NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>
