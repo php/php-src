@@ -46,7 +46,7 @@ bool(true)
 --UEXPECTF--
 Warning: count_chars(): Only mode=1 is supported with Unicode strings in %s on line %d
 
-Warning: implode(): Argument to implode must be an array in %s on line %d
+Warning: implode(): Argument must be an array in %s on line %d
 
 Array
 (
@@ -73,7 +73,7 @@ Array
 
 Warning: count_chars(): Only mode=1 is supported with Unicode strings in %s on line %d
 
-Warning: implode(): Argument to implode must be an array in %s on line %d
+Warning: implode(): Argument must be an array in %s on line %d
 
 
 Warning: count_chars(): Only mode=1 is supported with Unicode strings in %s on line %d
