@@ -581,16 +581,17 @@ typedef struct buf_area buffy;
  */
 static int format_converter(register buffy * odp, const char *fmt, va_list ap) /* {{{ */
 {
-	register char *sp;
-	register char *bep;
-	register int cc = 0;
-	register int i;
+	char *sp;
+	char *bep;
+	int cc = 0;
+	int i;
 
-	register char *s = NULL;
+	char *s = NULL;
 	char *q;
-	int s_len;
+	int s_len, free_zcopy;
+	zval *zvp, zcopy;
 
-	register int min_width = 0;
+	int min_width = 0;
 	int precision = 0;
 	enum {
 		LEFT, RIGHT
@@ -634,6 +635,7 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 			alternate_form = print_sign = print_blank = NO;
 			pad_char = ' ';
 			prefix_char = NUL;
+			free_zcopy = 0;
 
 			fmt++;
 
@@ -780,6 +782,18 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 			 *   It is reset to ' ' by non-numeric formats
 			 */
 			switch (*fmt) {
+				case 'Z':
+					zvp = (zval*) va_arg(ap, zval*);
+					zend_make_printable_zval(zvp, &zcopy, &free_zcopy);
+					if (free_zcopy) {
+						zvp = &zcopy;
+					}
+					s_len = Z_STRLEN_P(zvp);
+					s = Z_STRVAL_P(zvp);
+					if (adjust_precision && precision < s_len) {
+						s_len = precision;
+					}
+					break;
 				case 'u':
 					switch(modifier) {
 						default:
@@ -1019,19 +1033,19 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 					}
 
 					if (zend_isnan(fp_num)) {
- 						s = "NAN";
- 						s_len = 3;
- 						break;
- 					} else if (zend_isinf(fp_num)) {
- 						if (fp_num > 0) {
- 							s = "INF";
- 							s_len = 3;
- 						} else {
- 							s = "-INF";
- 							s_len = 4;
- 						}
- 						break;
- 					}
+						s = "NAN";
+						s_len = 3;
+						break;
+					} else if (zend_isinf(fp_num)) {
+						if (fp_num > 0) {
+							s = "INF";
+							s_len = 3;
+						} else {
+							s = "-INF";
+							s_len = 4;
+						}
+						break;
+					}
 
 					if (adjust_precision == NO) {
 						precision = FLOAT_DIGITS;
@@ -1161,6 +1175,9 @@ fmt_error:
 
 			if (adjust_width && adjust == LEFT && min_width > s_len)
 				PAD(min_width, s_len, pad_char);
+			if (free_zcopy) {
+				zval_dtor(&zcopy);
+			}
 		}
 skip_output:
 		fmt++;
