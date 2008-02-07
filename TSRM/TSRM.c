@@ -647,19 +647,26 @@ TSRM_API void tsrm_mutex_free(MUTEX_T mutexp)
 }
 
 
-/* Lock a mutex */
+/*
+  Lock a mutex.
+  A return value of 0 indicates success
+*/
 TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp)
 {
 	TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Mutex locked thread: %ld", tsrm_thread_id()));
 #ifdef TSRM_WIN32
 	EnterCriticalSection(mutexp);
-	return 1;
+	return 0;
 #elif defined(GNUPTH)
-	return pth_mutex_acquire(mutexp, 0, NULL);
+	if (pth_mutex_acquire(mutexp, 0, NULL)) {
+		return 0;
+	}
+	return -1;
 #elif defined(PTHREADS)
 	return pthread_mutex_lock(mutexp);
 #elif defined(NSAPI)
-	return crit_enter(mutexp);
+	crit_enter(mutexp);
+	return 0;
 #elif defined(PI3WEB)
 	return PISync_lock(mutexp);
 #elif defined(TSRM_ST)
@@ -672,19 +679,26 @@ TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp)
 }
 
 
-/* Unlock a mutex */
+/*
+  Unlock a mutex.
+  A return value of 0 indicates success
+*/
 TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp)
 {
 	TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Mutex unlocked thread: %ld", tsrm_thread_id()));
 #ifdef TSRM_WIN32
 	LeaveCriticalSection(mutexp);
-	return 1;
+	return 0;
 #elif defined(GNUPTH)
-	return pth_mutex_release(mutexp);
+	if (pth_mutex_release(mutexp)) {
+		return 0;
+	}
+	return -1;
 #elif defined(PTHREADS)
 	return pthread_mutex_unlock(mutexp);
 #elif defined(NSAPI)
-	return crit_exit(mutexp);
+	crit_exit(mutexp);
+	return 0;
 #elif defined(PI3WEB)
 	return PISync_unlock(mutexp);
 #elif defined(TSRM_ST)
