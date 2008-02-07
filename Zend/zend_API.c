@@ -2366,9 +2366,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		*ce_ptr = zend_fetch_class(Z_STRVAL_P(callable), clen, ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_SILENT TSRMLS_CC);
 		EG(scope) = last_scope;
 		if (!*ce_ptr) {
-			char *cname = estrndup(Z_STRVAL_P(callable), clen);
-			if (error) zend_spprintf(error, 0, "class '%s' not found", cname);
-			efree(cname);
+			if (error) zend_spprintf(error, 0, "class '%.*Z' not found", clen, callable);
 			return 0;
 		}
 		ftable = &(*ce_ptr)->function_table;
