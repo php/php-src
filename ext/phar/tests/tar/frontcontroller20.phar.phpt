@@ -3,8 +3,9 @@ Phar front controller $_SERVER munging failure 3 tar-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
-SCRIPT_NAME=/frontcontroller20.phar.php/
+SCRIPT_NAME=/frontcontroller20.phar.php
 REQUEST_URI=/frontcontroller20.phar.php/
+PATH_INFO=/
 --FILE_EXTERNAL--
 frontcontroller11.phar.tar
 --EXPECTF--

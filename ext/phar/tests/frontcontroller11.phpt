@@ -3,8 +3,9 @@ Phar front controller mime type extension is not a string
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
-SCRIPT_NAME=/frontcontroller11.php/a.php
+SCRIPT_NAME=/frontcontroller11.php
 REQUEST_URI=/frontcontroller11.php/a.php
+PATH_INFO=/a.php
 --FILE_EXTERNAL--
 frontcontroller5.phar
 --EXPECTHEADERS--

@@ -367,7 +367,7 @@ PHP_METHOD(Phar, webPhar)
 	phar_mime_type mime;
 	zval *mimeoverride = NULL, *rewrites = NULL;
 	char *alias = NULL, *error, *plain_map, *index_php, *f404 = NULL;
-	int alias_len = 0, ret, f404_len = 0;
+	int alias_len = 0, ret, f404_len = 0, free_pathinfo = 0;
 	char *fname, *basename, *path_info, *mime_type, *entry, *pt;
 	int fname_len, entry_len, code, index_php_len = 0;
 	phar_entry_data *phar;
@@ -416,7 +416,30 @@ PHP_METHOD(Phar, webPhar)
 		basename++;
 	}
 
-	path_info = SG(request_info).request_uri;
+	if (strlen(sapi_module.name) == sizeof("cgi-fcgi")-1 && !strncmp(sapi_module.name, "cgi-fcgi", sizeof("cgi-fcgi")-1)) {
+		char *testit;
+
+		testit = sapi_getenv("SCRIPT_NAME", sizeof("SCRIPT_NAME")-1 TSRMLS_CC);
+		if (!(pt = strstr(testit, basename))) {
+			return;
+		}
+		path_info = sapi_getenv("PATH_INFO", sizeof("PATH_INFO")-1 TSRMLS_CC);
+		if (path_info) {
+			entry = estrdup(path_info);
+			entry_len = strlen(entry);
+			spprintf(&path_info, 0, "%s%s", testit, path_info);
+			free_pathinfo = 1;
+		} else {
+			path_info = testit;
+			entry = estrndup("", 0);
+			entry_len = 0;
+		}
+		pt = estrndup(testit, (pt - testit) + (fname_len - (basename - fname)));
+		goto skip_entry_dupe;
+	} else {
+		path_info = SG(request_info).request_uri;
+	}
+
 	if (!(pt = strstr(path_info, basename))) {
 		/* this can happen with rewrite rules - and we have no idea what to do then, so return */
 		return;
@@ -427,6 +450,8 @@ PHP_METHOD(Phar, webPhar)
 	entry = estrndup(pt + (fname_len - (basename - fname)), entry_len);
 
 	pt = estrndup(path_info, (pt - path_info) + (fname_len - (basename - fname)));
+
+skip_entry_dupe:
 	if (!entry_len || (entry_len == 1 && entry[0] == '/')) {
 		efree(entry);
 		/* direct request */
@@ -447,6 +472,9 @@ PHP_METHOD(Phar, webPhar)
 				efree(error);
 			}
 			phar_do_404(fname, fname_len, f404, f404_len, entry, entry_len TSRMLS_CC);
+			if (free_pathinfo) {
+				efree(path_info);
+			}
 			zend_bailout();
 			return;
 		} else {
@@ -467,6 +495,9 @@ PHP_METHOD(Phar, webPhar)
 				ctr.line_len = spprintf(&(ctr.line), 4096, "Location: %s%s", path_info, entry);
 			}
 			*tmp = sa;
+			if (free_pathinfo) {
+				efree(path_info);
+			}
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 			sapi_send_headers(TSRMLS_C);
 			phar_entry_delref(phar TSRMLS_CC);
