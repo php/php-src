@@ -2729,9 +2729,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		EG(scope) = last_scope;
 		if (!*ce_ptr) {
 			if (error) {
-				zstr cname = ezstrndup(Z_TYPE_P(callable), Z_UNIVAL_P(callable), clen);
-				zend_spprintf(error, 0, "class '%R' not found", Z_TYPE_P(callable), cname.v);
-				efree(cname.v);
+				zend_spprintf(error, 0, "class '%.*Z' not found", clen, callable);
 			}
 			return 0;
 		}
@@ -2748,7 +2746,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		*ce_ptr = ce_org;
 	} else {
 		/* We already checked for plain function before. */
-		if (error) zend_spprintf(error, 0, "function '%R' not found or invalid function name", Z_TYPE_P(callable), Z_UNIVAL_P(callable));
+		if (error) zend_spprintf(error, 0, "function '%Z' not found or invalid function name", callable);
 		return 0;
 	}
 
