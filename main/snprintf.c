@@ -573,17 +573,18 @@ typedef struct buf_area buffy;
  */
 static int format_converter(register buffy * odp, const char *fmt, va_list ap) /* {{{ */
 {
-	register char *sp;
-	register char *bep;
-	register int cc = 0;
-	register int i;
+	char *sp;
+	char *bep;
+	int cc = 0;
+	int i;
 
-	register char *s = NULL;
-	register UChar *u = NULL;
+	char *s = NULL;
+	UChar *u = NULL;
 	char *q;
-	int s_len, s_unicode, u_len;
+	int s_len, s_unicode, u_len, free_zcopy;
+	zval *zvp, zcopy;
 
-	register int min_width = 0;
+	int min_width = 0;
 	int precision = 0;
 	enum {
 		LEFT, RIGHT
@@ -631,6 +632,7 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 			pad_char = ' ';
 			prefix_char = NUL;
 			s_to_free = NULL;
+			free_zcopy = 0;
 			s_unicode = 0;
 
 			fmt++;
@@ -778,6 +780,18 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 			 *   It is reset to ' ' by non-numeric formats
 			 */
 			switch (*fmt) {
+				case 'Z':
+					zvp = (zval*) va_arg(ap, zval*);
+					zend_make_string_zval(zvp, &zcopy, &free_zcopy);
+					if (free_zcopy) {
+						zvp = &zcopy;
+					}
+					s_len = Z_UNILEN_P(zvp);
+					s = Z_STRVAL_P(zvp);
+					if (adjust_precision && precision < s_len) {
+						s_len = precision;
+					}
+					break;
 				case 'u':
 					switch(modifier) {
 						default:
@@ -1203,7 +1217,12 @@ fmt_error:
 				s++;
 			}
 
-			if (s_to_free) efree(s_to_free);
+			if (s_to_free) {
+				efree(s_to_free);
+			}
+			if (free_zcopy) {
+				zval_dtor(&zcopy);
+			}
 
 			if (adjust_width && adjust == LEFT && min_width > s_len)
 				PAD(min_width, s_len, pad_char);

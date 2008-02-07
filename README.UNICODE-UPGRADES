@@ -540,6 +540,19 @@ Unicode strings:
     zend_error(E_WARNING, "%v::__toString() did not return anything",
             Z_OBJCE_P(object)->name);
 
+  %Z
+    This format prints a zval's value. You can specify the minimum length
+    of the string representation using "%*Z" as well as the absolute length
+    using "%.*Z". The following example is taken from the engine and
+    therefor uses zend_spprintf rather than spprintf. Further more clen is
+    an integer that is smaller than Z_UNILEN_P(callable).
+
+    zend_spprintf(error, 0, "class '%.*Z' not found", clen, callable);
+
+    The function allows to output any kind of zaval values, as long as a
+    string (or unicode) conversion is available. Note that printing non
+    string zvals outside of request time is not possible.
+
 Since [v]spprintf() can only output native strings there are also the new
 functions [v]uspprintf() and [v]zspprintf() that create unicode strings and
 return the number of characters printed. That is they return the length rather
