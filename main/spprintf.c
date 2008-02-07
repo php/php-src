@@ -214,12 +214,12 @@ do { 												\
  */
 static void xbuf_format_converter(int unicode, smart_str *xbuf, const char *fmt, va_list ap) /* {{{ */
 {
-	register char *s = NULL;
-	register UChar *u = NULL;
+	char *s = NULL;
+	UChar *u = NULL;
 	char *q;
-	int s_len, s_unicode, u_len;
-
-	register int min_width = 0;
+	int s_len, s_unicode, u_len, free_zcopy;
+	zval *zvp, zcopy;
+	int min_width = 0;
 	int precision = 0;
 	enum {
 		LEFT, RIGHT
@@ -232,7 +232,7 @@ static void xbuf_format_converter(int unicode, smart_str *xbuf, const char *fmt,
 	u_wide_int ui_num;
 
 	char num_buf[NUM_BUF_SIZE];
-	char char_buf[2];			/* for printing %% and %<unknown> */
+	char char_buf[2]; /* for printing %% and %<unknown> */
 	zend_bool free_s; /* free string if allocated here */
 
 #ifdef HAVE_LOCALE_H
@@ -264,6 +264,7 @@ static void xbuf_format_converter(int unicode, smart_str *xbuf, const char *fmt,
 			pad_char = ' ';
 			prefix_char = NUL;
 			free_s = 0;
+			free_zcopy = 0;
 			s_unicode = 0;
 
 			fmt++;
@@ -411,6 +412,23 @@ static void xbuf_format_converter(int unicode, smart_str *xbuf, const char *fmt,
 			 *   It is reset to ' ' by non-numeric formats
 			 */
 			switch (*fmt) {
+				case 'Z':
+					zvp = (zval*) va_arg(ap, zval*);
+					if (unicode) {
+						zend_make_unicode_zval(zvp, &zcopy, &free_zcopy);
+						s_unicode = 1;
+					} else {
+						zend_make_string_zval(zvp, &zcopy, &free_zcopy);
+					}
+					if (free_zcopy) {
+						zvp = &zcopy;
+					}
+					s_len = Z_UNILEN_P(zvp);
+					s = Z_STRVAL_P(zvp);
+					if (adjust_precision && precision < s_len) {
+						s_len = precision;
+					}
+					break;
 				case 'u':
 					switch(modifier) {
 						default:
@@ -838,7 +856,12 @@ fmt_error:
 			 * Print the string s.
 			 */
 			INS_STRING(unicode, s_unicode, xbuf, s, s_len);
-			if (free_s) efree(s);
+			if (free_s) {
+				efree(s);
+			}
+			if (free_zcopy) {
+				zval_dtor(&zcopy);
+			}
 
 			if (adjust_width && adjust == LEFT && min_width > s_len) {
 				PAD(unicode, xbuf, min_width - s_len, pad_char);
