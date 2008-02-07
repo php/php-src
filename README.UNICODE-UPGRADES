@@ -96,7 +96,7 @@ modifier.
     }
     /* process Unicode string */
 
-    
+
   'T' specifier
   -------------
   This specifier is useful when the function takes two or more strings and
@@ -104,7 +104,7 @@ modifier.
   problematic if the passed-in strings are of mixed types, and multiple
   checks need to be performed in order to do anything. All parameters
   marked by the 'T' specifier are promoted to the same type.
-  
+
   If at least one of the 'T' parameters is of Unicode type, then the rest of
   them are converted to IS_UNICODE. Otherwise all 'T' parameters are conveted to
   IS_STRING type.
@@ -293,7 +293,7 @@ convert_to_text(zval *op)
 zend_ascii_to_unicode() function can be used to convert an ASCII char*
 string to Unicode. This is useful especially for inline string literals, in
 which case you can simply use USTR_MAKE() macro, e.g.:
-   
+
    UChar* ustr;
 
    ustr = USTR_MAKE("main");
@@ -393,7 +393,7 @@ Miscellaneous
 
 UBYTES() macro can be used to obtain the number of bytes necessary to store
 the given number of UChar's. The typical usage is:
-  
+
     char *constant_name = colon + (UG(unicode)?UBYTES(2):2);
 
 
@@ -463,8 +463,8 @@ allocating UChar's.
     eustrndup(s, length)
     eustrdup(s)
 
-    peumalloc(size, persistent) 
-    peurealloc(ptr, size, persistent) 
+    peumalloc(size, persistent)
+    peurealloc(ptr, size, persistent)
 
 The size parameter refers to the number of UChar's, not bytes.
 
@@ -542,7 +542,7 @@ Unicode strings:
 
 Since [v]spprintf() can only output native strings there are also the new
 functions [v]uspprintf() and [v]zspprintf() that create unicode strings and
-return the number of characters printed. That is they return the length rather 
+return the number of characters printed. That is they return the length rather
 than the byte size. The second pair of functions also takes an additional type
 parameter that allows to create a string of arbitrary type. The following
 example illustrates the use. Assume it fetches a unicode/native string into
@@ -556,9 +556,9 @@ path, path_len and path_type inorder to create sub_name, sub_len and sub_type.
 
 	if (path.v) {
 		sub_type = path_type;
-		sub_len = zspprintf(path_type, &sub_name, 0, "%R%c%s", 
-			path_type, path, 
-			DEFAULT_SLASH, 
+		sub_len = zspprintf(path_type, &sub_name, 0, "%R%c%s",
+			path_type, path,
+			DEFAULT_SLASH,
 			entry.d_name);
 	}
 
