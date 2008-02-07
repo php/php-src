@@ -30,7 +30,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -154,7 +154,7 @@ do { 												\
 		smart_str_appendl(xbuf, s, s_len);			\
 	}												\
 } while (0)
-	
+
 #define INS_CHAR(unicode, xbuf, ch)					\
 	INS_CHAR_NR(unicode, xbuf, ch)
 
@@ -394,7 +394,7 @@ static void xbuf_format_converter(int unicode, smart_str *xbuf, const char *fmt,
 						fmt++;
 					}
 					/* these are promoted to int, so no break */
-				default:				
+				default:
 					modifier = LM_STD;
 					break;
 			}
@@ -629,7 +629,7 @@ fmt_unicode:
 						s = res;
 						free_s = 1;
 					}
-						
+
 					pad_char = ' ';
 					break;
 				}
@@ -767,17 +767,17 @@ fmt_string:
 					goto skip_output;
 
 					/*
-					 * Always extract the argument as a "char *" pointer. We 
-					 * should be using "void *" but there are still machines 
+					 * Always extract the argument as a "char *" pointer. We
+					 * should be using "void *" but there are still machines
 					 * that don't understand it.
 					 * If the pointer size is equal to the size of an unsigned
-					 * integer we convert the pointer to a hex number, otherwise 
+					 * integer we convert the pointer to a hex number, otherwise
 					 * we print "%p" to indicate that we don't handle "%p".
 					 */
 				case 'p':
 					if (sizeof(char *) <= sizeof(u_wide_int)) {
 						ui_num = (u_wide_int)((size_t) va_arg(ap, char *));
-						s = ap_php_conv_p2(ui_num, 4, 'x', 
+						s = ap_php_conv_p2(ui_num, 4, 'x',
 								&num_buf[NUM_BUF_SIZE], &s_len);
 						if (ui_num != 0) {
 							*--s = 'x';
@@ -835,7 +835,7 @@ fmt_error:
 				PAD(unicode, xbuf, min_width - s_len, pad_char);
 			}
 			/*
-			 * Print the string s. 
+			 * Print the string s.
 			 */
 			INS_STRING(unicode, s_unicode, xbuf, s, s_len);
 			if (free_s) efree(s);
@@ -859,14 +859,14 @@ PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap
 	smart_str xbuf = {0};
 
 	xbuf_format_converter(0, &xbuf, format, ap);
-	
+
 	if (max_len && xbuf.len > max_len) {
 		xbuf.len = max_len;
 	}
 	smart_str_0(&xbuf);
-		
+
 	*pbuf = xbuf.c;
-	
+
 	return xbuf.len;
 }
 /* }}} */
@@ -888,14 +888,14 @@ PHPAPI int vuspprintf(UChar **pbuf, size_t max_len, const char *format, va_list 
 	smart_str xbuf = {0};
 
 	xbuf_format_converter(1, &xbuf, format, ap);
-	
+
 	if (max_len && xbuf.len > max_len) {
 		xbuf.len = max_len;
 	}
 	smart_str_0(&xbuf);
-		
+
 	*pbuf = (UChar*)xbuf.c;
-	
+
 	return xbuf.len / sizeof(UChar);
 }
 /* }}} */
