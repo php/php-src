@@ -156,7 +156,7 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
 	}
 
 	for (i = 0; i < ndigit && digits[i] != '\0'; i++);
-	
+
 	if ((decpt >= 0 && decpt - i > 4)
 			|| (decpt < 0 && decpt < -3)) {     /* use E-style */
 		/* exponential format (e.g. 1.2345e+13) */
@@ -241,7 +241,7 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -327,7 +327,7 @@ char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
 		*is_negative = (num < 0);
 
 		/*
-		 * On a 2's complement machine, negating the most negative integer 
+		 * On a 2's complement machine, negating the most negative integer
 		 * results in a number that cannot be represented as a signed integer.
 		 * Here is what we do to obtain the number's magnitude:
 		 *      a. add 1 to the number
@@ -344,7 +344,7 @@ char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
 	}
 
 	/*
-	 * We use a do-while loop so that we write at least 1 digit 
+	 * We use a do-while loop so that we write at least 1 digit
 	 */
 	do {
 		register u_wide_int new_magnitude = magnitude / 10;
@@ -763,7 +763,7 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 						fmt++;
 					}
 					/* these are promoted to int, so no break */
-				default:				
+				default:
 					modifier = LM_STD;
 					break;
 			}
@@ -961,7 +961,7 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 					pad_char = ' ';
 					break;
 
-				
+
 				case 'f':
 				case 'F':
 				case 'e':
@@ -1084,17 +1084,17 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 					goto skip_output;
 
 					/*
-					 * Always extract the argument as a "char *" pointer. We 
-					 * should be using "void *" but there are still machines 
+					 * Always extract the argument as a "char *" pointer. We
+					 * should be using "void *" but there are still machines
 					 * that don't understand it.
 					 * If the pointer size is equal to the size of an unsigned
-					 * integer we convert the pointer to a hex number, otherwise 
+					 * integer we convert the pointer to a hex number, otherwise
 					 * we print "%p" to indicate that we don't handle "%p".
 					 */
 				case 'p':
 					if (sizeof(char *) <= sizeof(u_wide_int)) {
 						ui_num = (u_wide_int)((size_t) va_arg(ap, char *));
-						s = ap_php_conv_p2(ui_num, 4, 'x', 
+						s = ap_php_conv_p2(ui_num, 4, 'x',
 								&num_buf[NUM_BUF_SIZE], &s_len);
 						if (ui_num != 0) {
 							*--s = 'x';
@@ -1152,7 +1152,7 @@ fmt_error:
 				PAD(min_width, s_len, pad_char);
 			}
 			/*
-			 * Print the string s. 
+			 * Print the string s.
 			 */
 			for (i = s_len; i != 0; i--) {
 				INS_CHAR(*s, sp, bep, cc);
