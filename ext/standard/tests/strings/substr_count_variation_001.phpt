@@ -113,13 +113,13 @@ int(2)
 
 -- 3rd or 4th arg as NULL --
 
-Warning: substr_count() expects parameter 3 to be long, string given in %s on line %d
+Warning: substr_count() expects parameter 3 to be long, Unicode string given in %s on line %d
 NULL
 
-Warning: substr_count() expects parameter 3 to be long, string given in %s on line %d
+Warning: substr_count() expects parameter 3 to be long, Unicode string given in %s on line %d
 NULL
 
-Warning: substr_count() expects parameter 3 to be long, string given in %s on line %d
+Warning: substr_count() expects parameter 3 to be long, Unicode string given in %s on line %d
 NULL
 int(0)
 int(2)

@@ -102,7 +102,7 @@ array(5) {
   [3]=>
   unicode(5) "estca"
   [4]=>
-  string(2) "se"
+  unicode(2) "se"
 }
 -- With split_length as default argument --
 array(22) {
