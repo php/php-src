@@ -185,11 +185,12 @@
  */
 static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap) /* {{{ */
 {
-	register char *s = NULL;
+	char *s = NULL;
 	char *q;
-	int s_len;
+	int s_len, free_zcopy;
+	zval *zvp, zcopy;
 
-	register int min_width = 0;
+	int min_width = 0;
 	int precision = 0;
 	enum {
 		LEFT, RIGHT
@@ -230,6 +231,7 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap) 
 			alternate_form = print_sign = print_blank = NO;
 			pad_char = ' ';
 			prefix_char = NUL;
+			free_zcopy = 0;
 
 			fmt++;
 
@@ -376,6 +378,18 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap) 
 			 *   It is reset to ' ' by non-numeric formats
 			 */
 			switch (*fmt) {
+				case 'Z':
+					zvp = (zval*) va_arg(ap, zval*);
+					zend_make_printable_zval(zvp, &zcopy, &free_zcopy);
+					if (free_zcopy) {
+						zvp = &zcopy;
+					}
+					s_len = Z_STRLEN_P(zvp);
+					s = Z_STRVAL_P(zvp);
+					if (adjust_precision && precision < s_len) {
+						s_len = precision;
+					}
+					break;
 				case 'u':
 					switch(modifier) {
 						default:
@@ -751,6 +765,9 @@ fmt_error:
 
 			if (adjust_width && adjust == LEFT && min_width > s_len)
 				PAD(xbuf, min_width - s_len, pad_char);
+			if (free_zcopy) {
+				zval_dtor(&zcopy);
+			}
 		}
 skip_output:
 		fmt++;
