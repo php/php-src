@@ -2488,7 +2488,6 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 {
 	zend_op_array *res;
 	char *name = NULL;
-	char *fname = NULL;
 	int failed;
 	zend_op_array *(*save)(zend_file_handle *file_handle, int type TSRMLS_DC);
 	phar_archive_data *phar;
@@ -2496,7 +2495,6 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 	save = zend_compile_file; /* restore current handler or we cause trouble */
 	zend_compile_file = phar_orig_compile_file;
 
-	fname = zend_get_executed_filename(TSRMLS_C);
 	if (strstr(file_handle->filename, ".phar") && !strstr(file_handle->filename, "://")) {
 		if (SUCCESS == phar_open_filename(file_handle->filename, strlen(file_handle->filename), NULL, 0, 0, &phar, NULL TSRMLS_CC)) {
 			if (phar->is_zip || phar->is_tar) {
