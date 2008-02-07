@@ -1085,18 +1085,17 @@ static void alloc_curl_handle(php_curl **ch)
    Initialize a cURL session */
 PHP_FUNCTION(curl_init)
 {
-	zval       **url;
 	php_curl    *ch;
 	CURL        *cp;
-	int          argc = ZEND_NUM_ARGS();
+	char	    *url = NULL;
+	int	     url_len;
 
-	if (argc < 0 || argc > 1 || zend_get_parameters_ex(argc, &url) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &url, &url_len) == FAILURE) {
+		return;
 	}
 
-	if (argc > 0) {
-		convert_to_string_ex(url);
-		PHP_CURL_CHECK_OPEN_BASEDIR(Z_STRVAL_PP(url), Z_STRLEN_PP(url), (void) NULL);
+	if (url) {
+		PHP_CURL_CHECK_OPEN_BASEDIR(url, url_len, (void) NULL);
 	}
 
 	cp = curl_easy_init();
@@ -1133,10 +1132,10 @@ PHP_FUNCTION(curl_init)
 	curl_easy_setopt(ch->cp, CURLOPT_NOSIGNAL, 1);
 #endif
 
-	if (argc > 0) {
+	if (url) {
 		char *urlcopy;
 
-		urlcopy = estrndup(Z_STRVAL_PP(url), Z_STRLEN_PP(url));
+		urlcopy = estrndup(url, url_len);
 		curl_easy_setopt(ch->cp, CURLOPT_URL, urlcopy);
 		zend_llist_add_element(&ch->to_free.str, &urlcopy);
 	}
