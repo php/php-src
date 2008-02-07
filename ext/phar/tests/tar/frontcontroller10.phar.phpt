@@ -10,9 +10,13 @@ PATH_INFO=/hi
 frontcontroller4.phar.tar
 --EXPECTHEADERS--
 Content-type: text/html
---EXPECTF--
-Fatal error: Uncaught exception 'UnexpectedValueException' with message 'phar rewrite value for "/hi" was not a string' in %sfrontcontroller10.phar.php:2
-Stack trace:
-#0 %sfrontcontroller10.phar.php(2): Phar::webPhar('whatever', 'index.php', '', Array, Array)
-#1 {main}
-  thrown in %sfrontcontroller10.phar.php on line 2
+Status: 403 Access Denied
+--EXPECT--
+<html>
+ <head>
+  <title>Access Denied</title>
+ </head>
+ <body>
+  <h1>403 - File /hi Access Denied</h1>
+ </body>
+</html>

@@ -13,7 +13,7 @@ Status: 404 Not Found
 --EXPECT--
 <html>
  <head>
-  <title>File Not Found<title>
+  <title>File Not Found</title>
  </head>
  <body>
   <h1>404 - File /notfound.php Not Found</h1>
