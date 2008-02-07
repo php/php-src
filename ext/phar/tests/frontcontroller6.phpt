@@ -3,8 +3,9 @@ Phar front controller 404
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
-SCRIPT_NAME=/frontcontroller6.php/notfound.php
+SCRIPT_NAME=/frontcontroller6.php
 REQUEST_URI=/frontcontroller6.php/notfound.php
+PATH_INFO=/notfound.php
 --FILE_EXTERNAL--
 frontcontroller.phar
 --EXPECTHEADERS--

@@ -3,8 +3,9 @@ Phar front controller rewrite array invalid tar-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
-SCRIPT_NAME=/frontcontroller10.phar.php/hi
+SCRIPT_NAME=/frontcontroller10.phar.php
 REQUEST_URI=/frontcontroller10.phar.php/hi
+PATH_INFO=/hi
 --FILE_EXTERNAL--
 frontcontroller4.phar.tar
 --EXPECTHEADERS--

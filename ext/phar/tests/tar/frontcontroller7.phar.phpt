@@ -3,8 +3,9 @@ Phar front controller alternate index file tar-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
-SCRIPT_NAME=/frontcontroller7.phar.php/
+SCRIPT_NAME=/frontcontroller7.phar.php
 REQUEST_URI=/frontcontroller7.phar.php/
+PATH_INFO=/
 --FILE_EXTERNAL--
 frontcontroller2.phar.tar
 --EXPECTHEADERS--

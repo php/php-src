@@ -3,8 +3,9 @@ Phar front controller include from cwd test 1
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
-SCRIPT_NAME=/frontcontroller22.php/index.php
+SCRIPT_NAME=/frontcontroller22.php
 REQUEST_URI=/frontcontroller22.php/index.php
+PATH_INFO=/index.php
 --FILE_EXTERNAL--
 frontcontroller13.phar
 --EXPECTHEADERS--

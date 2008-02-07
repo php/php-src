@@ -3,8 +3,9 @@ Phar front controller mime type override, Phar::PHPS tar-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
-SCRIPT_NAME=/frontcontroller15.phar.php/a.php
+SCRIPT_NAME=/frontcontroller15.phar.php
 REQUEST_URI=/frontcontroller15.phar.php/a.php
+PATH_INFO=/a.php
 --FILE_EXTERNAL--
 frontcontroller8.phar.tar
 --EXPECTHEADERS--

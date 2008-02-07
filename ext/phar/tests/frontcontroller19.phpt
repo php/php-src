@@ -3,8 +3,9 @@ Phar front controller $_SERVER munging failure 2
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
-SCRIPT_NAME=/frontcontroller19.php/
+SCRIPT_NAME=/frontcontroller19.php
 REQUEST_URI=/frontcontroller19.php/
+PATH_INFO=/
 --FILE_EXTERNAL--
 frontcontroller10.phar
 --EXPECTF--

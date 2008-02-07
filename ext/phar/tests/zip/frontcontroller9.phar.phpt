@@ -3,8 +3,9 @@ Phar front controller rewrite array zip-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
-SCRIPT_NAME=/frontcontroller9.phar.php/hi
+SCRIPT_NAME=/frontcontroller9.phar.php
 REQUEST_URI=/frontcontroller9.phar.php/hi
+PATH_INFO=/hi
 --FILE_EXTERNAL--
 frontcontroller3.phar.zip
 --EXPECTHEADERS--

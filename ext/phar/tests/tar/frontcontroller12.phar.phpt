@@ -3,8 +3,9 @@ Phar front controller mime type unknown int tar-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
-SCRIPT_NAME=/frontcontroller12.phar.php/a.php
+SCRIPT_NAME=/frontcontroller12.phar.php
 REQUEST_URI=/frontcontroller12.phar.php/a.php
+PATH_INFO=/a.php
 --FILE_EXTERNAL--
 frontcontroller6.phar.tar
 --EXPECTHEADERS--
