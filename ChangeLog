@@ -1,3 +1,354 @@
+2008-02-06  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ZendEngine2/zend_API.c:
+      - Is there an easier way to figure out something is a string?
+
+    * ZendEngine2/zend_API.c:
+      - Fix unicode
+
+    * ZendEngine2/zend_API.c
+      ext/standard/tests/array/array_map_object1.phpt:
+      - Fix missing check and tests
+
+2008-02-06  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/filter/tests/052.phpt
+      ext/filter/tests/052.phpt
+      ext/filter/tests/052.phpt:
+        1.1.4;
+      - Add test for the "modifying original array" bug
+
+    * (PHP_5_2)
+      ext/filter/filter.c
+      ext/filter/filter.c:
+      MFH:- Fixed bug in handling arrays which caused the original array being
+      modified too.
+
+    * ext/filter/filter.c:
+      ws
+
+    * ext/filter/filter.c:
+      - Fixed bug in handling arrays which caused the original array being
+      modified too.
+
+2008-02-06  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysql/tests/mysql_connect.phpt:
+      Fix a test
+
+    * (PHP_5_3)
+      ext/mysqli/tests/mysqli_stmt_affected_rows.phpt
+      ext/mysqlnd/mysqlnd_result.c:
+      MFH: Fix a compatibility bug and a failing test
+
+    * ext/mysqli/tests/mysqli_stmt_affected_rows.phpt
+      ext/mysqlnd/mysqlnd_result.c:
+      Fix a bug and a test
+
+    * ext/mysqli/tests/mysqli_stmt_bind_param_call_user_func.phpt:
+      Fix test
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli_structs.h
+      ext/mysqli/tests/mysqli_real_connect.phpt
+      ext/mysqli/tests/mysqli_real_connect_pconn.phpt:
+      Pconnect working with mysqli_real_connect()
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli_structs.h
+      ext/mysqli/tests/mysqli_real_connect.phpt
+      ext/mysqli/tests/mysqli_real_connect_pconn.phpt
+      ext/mysqlnd/mysqlnd_result.c:
+      Pconnect working with mysqli_real_connect(). To less failing tests.
+
+2008-02-06  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN
+
+    * (PHP_5_3)
+      NEWS:
+      - WS/Cleanup/grouping - WOW that'll be a really nice release!
+
+    * NEWS
+      NEWS:
+      - WS
+
+2008-02-06  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * (PHP_5_3)
+      scripts/dev/generate_phpt.php:
+      Fixing bug 44042
+
+    * (PHP_5_2)
+      ext/standard/tests/math/dechex_basic.phpt
+      ext/standard/tests/math/dechex_basic.phpt
+      ext/standard/tests/math/dechex_error.phpt
+      ext/standard/tests/math/dechex_error.phpt
+      ext/standard/tests/math/decoct_basic.phpt
+      ext/standard/tests/math/decoct_basic.phpt
+      ext/standard/tests/math/decoct_error.phpt
+      ext/standard/tests/math/decoct_error.phpt
+      ext/standard/tests/math/deg2rad_basic.phpt
+      ext/standard/tests/math/deg2rad_basic.phpt
+      ext/standard/tests/math/deg2rad_error.phpt
+      ext/standard/tests/math/deg2rad_error.phpt
+      ext/standard/tests/math/deg2rad_variation.phpt
+      ext/standard/tests/math/deg2rad_variation.phpt
+      ext/standard/tests/math/exp_error.phpt
+      ext/standard/tests/math/exp_error.phpt
+      ext/standard/tests/math/fmod_basic.phpt
+      ext/standard/tests/math/fmod_basic.phpt
+      ext/standard/tests/math/fmod_error.phpt
+      ext/standard/tests/math/fmod_error.phpt
+      ext/standard/tests/math/getrandmax_basic.phpt
+      ext/standard/tests/math/getrandmax_basic.phpt
+      ext/standard/tests/math/getrandmax_error.phpt
+      ext/standard/tests/math/getrandmax_error.phpt
+      ext/standard/tests/math/hexdec_basic.phpt
+      ext/standard/tests/math/hexdec_basic.phpt
+      ext/standard/tests/math/hexdec_error.phpt
+      ext/standard/tests/math/hexdec_error.phpt
+      ext/standard/tests/math/hypot_error.phpt
+      ext/standard/tests/math/hypot_error.phpt
+      ext/standard/tests/math/is_finite_basic.phpt
+      ext/standard/tests/math/is_finite_basic.phpt
+      ext/standard/tests/math/is_finite_error.phpt
+      ext/standard/tests/math/is_finite_error.phpt
+      ext/standard/tests/math/is_infinite_basic.phpt
+      ext/standard/tests/math/is_infinite_basic.phpt
+      ext/standard/tests/math/is_infinite_error.phpt
+      ext/standard/tests/math/is_infinite_error.phpt
+      ext/standard/tests/math/is_nan_basic.phpt
+      ext/standard/tests/math/is_nan_basic.phpt
+      ext/standard/tests/math/is_nan_error.phpt
+      ext/standard/tests/math/is_nan_error.phpt
+      ext/standard/tests/math/lcg_value_basic.phpt
+      ext/standard/tests/math/lcg_value_basic.phpt
+      ext/standard/tests/math/log10_basic.phpt
+      ext/standard/tests/math/log10_basic.phpt
+      ext/standard/tests/math/log10_error.phpt
+      ext/standard/tests/math/log10_error.phpt
+      ext/standard/tests/math/log10_variation.phpt
+      ext/standard/tests/math/log10_variation.phpt
+      ext/standard/tests/math/log_basic.phpt
+      ext/standard/tests/math/log_basic.phpt
+      ext/standard/tests/math/log_error.phpt
+      ext/standard/tests/math/log_error.phpt
+      ext/standard/tests/math/mt_getrandmax_basic.phpt
+      ext/standard/tests/math/mt_getrandmax_basic.phpt
+      ext/standard/tests/math/mt_getrandmax_error.phpt
+      ext/standard/tests/math/mt_getrandmax_error.phpt
+      ext/standard/tests/math/mt_rand_basic.phpt
+      ext/standard/tests/math/mt_rand_basic.phpt
+      ext/standard/tests/math/mt_rand_error.phpt
+      ext/standard/tests/math/mt_rand_error.phpt
+      ext/standard/tests/math/mt_srand_basic.phpt
+      ext/standard/tests/math/mt_srand_basic.phpt
+      ext/standard/tests/math/mt_srand_error.phpt
+      ext/standard/tests/math/mt_srand_error.phpt
+      ext/standard/tests/math/number_format_basic.phpt
+      ext/standard/tests/math/number_format_error.phpt
+      ext/standard/tests/math/number_format_error.phpt
+      ext/standard/tests/math/octdec_basic.phpt
+      ext/standard/tests/math/octdec_basic.phpt
+      ext/standard/tests/math/octdec_error.phpt
+      ext/standard/tests/math/octdec_error.phpt
+      ext/standard/tests/math/pi_basic.phpt
+      ext/standard/tests/math/pi_basic.phpt
+      ext/standard/tests/math/pow_basic.phpt
+      ext/standard/tests/math/pow_basic.phpt
+      ext/standard/tests/math/pow_error.phpt
+      ext/standard/tests/math/pow_error.phpt
+      ext/standard/tests/math/rad2deg_basic.phpt
+      ext/standard/tests/math/rad2deg_basic.phpt
+      ext/standard/tests/math/rad2deg_error.phpt
+      ext/standard/tests/math/rad2deg_error.phpt
+      ext/standard/tests/math/rad2deg_variation.phpt
+      ext/standard/tests/math/rad2deg_variation.phpt
+      ext/standard/tests/math/rand_basic.phpt
+      ext/standard/tests/math/rand_basic.phpt
+      ext/standard/tests/math/rand_error.phpt
+      ext/standard/tests/math/rand_error.phpt
+      ext/standard/tests/math/sqrt_basic.phpt
+      ext/standard/tests/math/sqrt_basic.phpt
+      ext/standard/tests/math/sqrt_error.phpt
+      ext/standard/tests/math/sqrt_error.phpt
+      ext/standard/tests/math/srand_basic.phpt
+      ext/standard/tests/math/srand_basic.phpt
+      ext/standard/tests/math/srand_error.phpt
+      ext/standard/tests/math/srand_error.phpt:
+      Tests for assorted Maths functions
+
+    * (PHP_5_3)
+      ext/standard/tests/math/hexdec_basic.phpt
+      ext/standard/tests/math/octdec_basic.phpt:
+      Fixing 32 bit specific
+
+    * ext/standard/tests/math/hexdec_basic.phpt
+      ext/standard/tests/math/hexdec_basic.phpt
+      ext/standard/tests/math/octdec_basic.phpt
+      ext/standard/tests/math/octdec_basic.phpt:
+      
+      Fixing 32 bit specific
+
+    * ext/standard/tests/math/dechex_basic.phpt
+      ext/standard/tests/math/dechex_basic.phpt
+      ext/standard/tests/math/dechex_basic.phpt
+      ext/standard/tests/math/dechex_error.phpt
+      ext/standard/tests/math/dechex_error.phpt
+      ext/standard/tests/math/dechex_error.phpt
+      ext/standard/tests/math/decoct_basic.phpt
+      ext/standard/tests/math/decoct_basic.phpt
+      ext/standard/tests/math/decoct_basic.phpt
+      ext/standard/tests/math/decoct_error.phpt
+      ext/standard/tests/math/decoct_error.phpt
+      ext/standard/tests/math/decoct_error.phpt
+      ext/standard/tests/math/deg2rad_basic.phpt
+      ext/standard/tests/math/deg2rad_basic.phpt
+      ext/standard/tests/math/deg2rad_basic.phpt
+      ext/standard/tests/math/deg2rad_error.phpt
+      ext/standard/tests/math/deg2rad_error.phpt
+      ext/standard/tests/math/deg2rad_error.phpt
+      ext/standard/tests/math/deg2rad_variation.phpt
+      ext/standard/tests/math/deg2rad_variation.phpt
+      ext/standard/tests/math/deg2rad_variation.phpt
+      ext/standard/tests/math/exp_error.phpt
+      ext/standard/tests/math/exp_error.phpt
+      ext/standard/tests/math/exp_error.phpt
+      ext/standard/tests/math/fmod_basic.phpt
+      ext/standard/tests/math/fmod_basic.phpt
+      ext/standard/tests/math/fmod_basic.phpt
+      ext/standard/tests/math/fmod_error.phpt
+      ext/standard/tests/math/fmod_error.phpt
+      ext/standard/tests/math/fmod_error.phpt
+      ext/standard/tests/math/getrandmax_basic.phpt
+      ext/standard/tests/math/getrandmax_basic.phpt
+      ext/standard/tests/math/getrandmax_basic.phpt
+      ext/standard/tests/math/getrandmax_error.phpt
+      ext/standard/tests/math/getrandmax_error.phpt
+      ext/standard/tests/math/getrandmax_error.phpt
+      ext/standard/tests/math/hexdec_basic.phpt
+      ext/standard/tests/math/hexdec_basic.phpt
+      ext/standard/tests/math/hexdec_error.phpt
+      ext/standard/tests/math/hexdec_error.phpt
+      ext/standard/tests/math/hexdec_error.phpt
+      ext/standard/tests/math/hypot_error.phpt
+      ext/standard/tests/math/hypot_error.phpt
+      ext/standard/tests/math/hypot_error.phpt
+      ext/standard/tests/math/is_finite_basic.phpt
+      ext/standard/tests/math/is_finite_basic.phpt
+      ext/standard/tests/math/is_finite_basic.phpt
+      ext/standard/tests/math/is_finite_error.phpt
+      ext/standard/tests/math/is_finite_error.phpt
+      ext/standard/tests/math/is_finite_error.phpt
+      ext/standard/tests/math/is_infinite_basic.phpt
+      ext/standard/tests/math/is_infinite_basic.phpt
+      ext/standard/tests/math/is_infinite_basic.phpt
+      ext/standard/tests/math/is_infinite_error.phpt
+      ext/standard/tests/math/is_infinite_error.phpt
+      ext/standard/tests/math/is_infinite_error.phpt
+      ext/standard/tests/math/is_nan_basic.phpt
+      ext/standard/tests/math/is_nan_basic.phpt
+      ext/standard/tests/math/is_nan_basic.phpt
+      ext/standard/tests/math/is_nan_error.phpt
+      ext/standard/tests/math/is_nan_error.phpt
+      ext/standard/tests/math/is_nan_error.phpt
+      ext/standard/tests/math/lcg_value_basic.phpt
+      ext/standard/tests/math/lcg_value_basic.phpt
+      ext/standard/tests/math/lcg_value_basic.phpt
+      ext/standard/tests/math/log10_basic.phpt
+      ext/standard/tests/math/log10_basic.phpt
+      ext/standard/tests/math/log10_basic.phpt
+      ext/standard/tests/math/log10_error.phpt
+      ext/standard/tests/math/log10_error.phpt
+      ext/standard/tests/math/log10_error.phpt
+      ext/standard/tests/math/log10_variation.phpt
+      ext/standard/tests/math/log10_variation.phpt
+      ext/standard/tests/math/log10_variation.phpt
+      ext/standard/tests/math/log_basic.phpt
+      ext/standard/tests/math/log_basic.phpt
+      ext/standard/tests/math/log_basic.phpt
+      ext/standard/tests/math/log_error.phpt
+      ext/standard/tests/math/log_error.phpt
+      ext/standard/tests/math/log_error.phpt
+      ext/standard/tests/math/mt_getrandmax_basic.phpt
+      ext/standard/tests/math/mt_getrandmax_basic.phpt
+      ext/standard/tests/math/mt_getrandmax_basic.phpt
+      ext/standard/tests/math/mt_getrandmax_error.phpt
+      ext/standard/tests/math/mt_getrandmax_error.phpt
+      ext/standard/tests/math/mt_getrandmax_error.phpt
+      ext/standard/tests/math/mt_rand_basic.phpt
+      ext/standard/tests/math/mt_rand_basic.phpt
+      ext/standard/tests/math/mt_rand_basic.phpt
+      ext/standard/tests/math/mt_rand_error.phpt
+      ext/standard/tests/math/mt_rand_error.phpt
+      ext/standard/tests/math/mt_rand_error.phpt
+      ext/standard/tests/math/mt_srand_basic.phpt
+      ext/standard/tests/math/mt_srand_basic.phpt
+      ext/standard/tests/math/mt_srand_basic.phpt
+      ext/standard/tests/math/mt_srand_error.phpt
+      ext/standard/tests/math/mt_srand_error.phpt
+      ext/standard/tests/math/mt_srand_error.phpt
+      ext/standard/tests/math/number_format_basic.phpt
+      ext/standard/tests/math/number_format_basic.phpt
+      ext/standard/tests/math/octdec_basic.phpt
+      ext/standard/tests/math/octdec_basic.phpt
+      ext/standard/tests/math/octdec_error.phpt
+      ext/standard/tests/math/octdec_error.phpt
+      ext/standard/tests/math/octdec_error.phpt
+      ext/standard/tests/math/pi_basic.phpt
+      ext/standard/tests/math/pi_basic.phpt
+      ext/standard/tests/math/pi_basic.phpt
+      ext/standard/tests/math/pow_basic.phpt
+      ext/standard/tests/math/pow_basic.phpt
+      ext/standard/tests/math/pow_basic.phpt
+      ext/standard/tests/math/pow_error.phpt
+      ext/standard/tests/math/pow_error.phpt
+      ext/standard/tests/math/pow_error.phpt
+      ext/standard/tests/math/rad2deg_basic.phpt
+      ext/standard/tests/math/rad2deg_basic.phpt
+      ext/standard/tests/math/rad2deg_basic.phpt
+      ext/standard/tests/math/rad2deg_error.phpt
+      ext/standard/tests/math/rad2deg_error.phpt
+      ext/standard/tests/math/rad2deg_error.phpt
+      ext/standard/tests/math/rad2deg_variation.phpt
+      ext/standard/tests/math/rad2deg_variation.phpt
+      ext/standard/tests/math/rad2deg_variation.phpt
+      ext/standard/tests/math/rand_basic.phpt
+      ext/standard/tests/math/rand_basic.phpt
+      ext/standard/tests/math/rand_basic.phpt
+      ext/standard/tests/math/rand_error.phpt
+      ext/standard/tests/math/rand_error.phpt
+      ext/standard/tests/math/rand_error.phpt
+      ext/standard/tests/math/sqrt_basic.phpt
+      ext/standard/tests/math/sqrt_basic.phpt
+      ext/standard/tests/math/sqrt_basic.phpt
+      ext/standard/tests/math/sqrt_error.phpt
+      ext/standard/tests/math/sqrt_error.phpt
+      ext/standard/tests/math/sqrt_error.phpt
+      ext/standard/tests/math/srand_basic.phpt
+      ext/standard/tests/math/srand_basic.phpt
+      ext/standard/tests/math/srand_basic.phpt
+      ext/standard/tests/math/srand_error.phpt
+      ext/standard/tests/math/srand_error.phpt
+      ext/standard/tests/math/srand_error.phpt:
+        1.1.4;
+      Tests for assorted Maths functions
+
+2008-02-06  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/file.c:
+      Fixed bug #42167 (fgetcsv gives different output on php6 compared to php5),
+      #42219 (length argument of fgetcsv() is not effective/working in PHP6)
+
 2008-02-05  Marcus Boerger  <php@marcus-boerger.de>
 
     * (PHP_5_3)

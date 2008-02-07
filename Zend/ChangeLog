@@ -1,3 +1,14 @@
+2008-02-06  Marcus Boerger  <php@marcus-boerger.de>
+
+    * zend_API.c:
+      - Is there an easier way to figure out something is a string?
+
+    * zend_API.c:
+      - Fix unicode
+
+    * zend_API.c:
+      - Fix missing check and tests
+
 2008-02-05  Marcus Boerger  <php@marcus-boerger.de>
 
     * (PHP_5_3)
