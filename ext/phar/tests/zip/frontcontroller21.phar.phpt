@@ -13,7 +13,7 @@ frontcontroller12.phar.zip
 Content-type: text/html
 --EXPECTF--
 string(10) "/index.php"
-string(%d) "phar://%sfrontcontroller21.phar.php/index.php"
+string(10) "/index.php"
 string(%d) "phar://%sfrontcontroller21.phar.php/index.php"
 string(18) "/index.php?test=hi"
 string(37) "/frontcontroller21.phar.php/index.php"

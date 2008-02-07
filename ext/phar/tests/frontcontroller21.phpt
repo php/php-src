@@ -13,7 +13,7 @@ frontcontroller12.phar
 Content-type: text/html
 --EXPECTF--
 string(10) "/index.php"
-string(%d) "phar://%sfrontcontroller21.php/index.php"
+string(10) "/index.php"
 string(%d) "phar://%sfrontcontroller21.php/index.php"
 string(18) "/index.php?test=hi"
 string(32) "/frontcontroller21.php/index.php"
