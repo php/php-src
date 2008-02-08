@@ -11,4 +11,4 @@ echo $e->getMessage();
 }
 __HALT_COMPILER(); ?>~~~~
 --EXPECTF--
-manifest cannot be larger than 1 MB in phar "%s"
+manifest cannot be larger than 100 MB in phar "%s"

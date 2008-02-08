@@ -545,9 +545,9 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 		MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated manifest at manifest length)")
 	}
 	PHAR_GET_32(buffer, manifest_len);
-	if (manifest_len > 1048576) {
-		/* prevent serious memory issues by limiting manifest to at most 1 MB in length */
-		MAPPHAR_ALLOC_FAIL("manifest cannot be larger than 1 MB in phar \"%s\"")
+	if (manifest_len > 1048576 * 100) {
+		/* prevent serious memory issues by limiting manifest to at most 100 MB in length */
+		MAPPHAR_ALLOC_FAIL("manifest cannot be larger than 100 MB in phar \"%s\"")
 	}
 	buffer = (char *)emalloc(manifest_len);
 	savebuf = buffer;
