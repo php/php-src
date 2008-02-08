@@ -90,8 +90,8 @@ static void Decode(php_hash_uint32 *output, const unsigned char *input, unsigned
 
 /* MD4 */
 
-#define MD4_F(x,y,z)			(((x) & (y)) | ((~(x)) & (z)))
-#define MD4_G(x,y,z)			(((x) & (y)) | ((x) & (z)) | ((y) & (z)))
+#define MD4_F(x,y,z)			((z) ^ ((x) & ((y) ^ (z))))
+#define MD4_G(x,y,z)			(((x) & ((y) | (z))) | ((y) & (z)))
 #define MD4_H(x,y,z)			((x) ^ (y) ^ (z))
 
 #define ROTL32(s,v)				(((v) << (s)) | ((v) >> (32 - (s))))
@@ -166,8 +166,23 @@ static void MD4Transform(php_hash_uint32 state[4], const unsigned char block[64]
 	state[3] += d;
 }
 
+/* {{{ PHP_MD4Init
+ * MD4 initialization. Begins an MD4 operation, writing a new context.
+ */
+PHP_HASH_API void PHP_MD4Init(PHP_MD4_CTX * context)
+{
+	context->count[0] = context->count[1] = 0;
+	/* Load magic initialization constants.
+	 */
+	context->state[0] = 0x67452301;
+	context->state[1] = 0xefcdab89;
+	context->state[2] = 0x98badcfe;
+	context->state[3] = 0x10325476;
+}
+/* }}} */
+
 /* {{{ PHP_MD4Update
-   MD4 block update operation. Continues an MD5 message-digest
+   MD4 block update operation. Continues an MD4 message-digest
    operation, processing another message block, and updating the
    context.
  */
