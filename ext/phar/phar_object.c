@@ -1549,7 +1549,20 @@ static void phar_convert_to_other(phar_archive_data *source, int convert, php_ui
 		}
 		newentry.filename = estrndup(newentry.filename, newentry.filename_len);
 		if (newentry.metadata) {
-			SEPARATE_ZVAL(&(newentry.metadata));
+			zval *t;
+
+			t = newentry.metadata;
+			ALLOC_ZVAL(newentry.metadata);
+			*newentry.metadata = *t;
+			zval_copy_ctor(newentry.metadata);
+#if PHP_VERSION_ID < 50300
+			newentry.metadata.refcount = 1;
+#else
+			Z_SET_REFCOUNT_P(newentry.metadata, 1);
+#endif
+
+			newentry.metadata_str.c = NULL;
+			newentry.metadata_str.len = 0;
 		}
 		newentry.is_zip = phar.is_zip;
 		newentry.is_tar = phar.is_tar;
@@ -2415,7 +2428,18 @@ PHP_METHOD(Phar, copy)
 
 	memcpy((void *) &newentry, oldentry, sizeof(phar_entry_info));
 	if (newentry.metadata) {
-		SEPARATE_ZVAL(&(newentry.metadata));
+		zval *t;
+
+		t = newentry.metadata;
+		ALLOC_ZVAL(newentry.metadata);
+		*newentry.metadata = *t;
+		zval_copy_ctor(newentry.metadata);
+#if PHP_VERSION_ID < 50300
+		newentry.metadata.refcount = 1;
+#else
+		Z_SET_REFCOUNT_P(newentry.metadata, 1);
+#endif
+
 		newentry.metadata_str.c = NULL;
 		newentry.metadata_str.len = 0;
 	}
