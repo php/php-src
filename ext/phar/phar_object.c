@@ -515,7 +515,7 @@ PHP_METHOD(Phar, webPhar)
 		ZVAL_STRINGL(params, entry, entry_len, 1);
 		zp[0] = &params;
 
-		if (FAILURE == zend_fcall_info_init(rewrite, &fci, &fcc, NULL TSRMLS_CC)) {
+		if (FAILURE == zend_fcall_info_init(rewrite, 0, &fci, &fcc, NULL, NULL TSRMLS_CC)) {
 			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "phar error: invalid rewrite callback");
 			if (free_pathinfo) {
 				efree(path_info);
