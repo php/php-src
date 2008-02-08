@@ -549,7 +549,7 @@ Unicode strings:
 
     zend_spprintf(error, 0, "class '%.*Z' not found", clen, callable);
 
-    The function allows to output any kind of zaval values, as long as a
+    The function allows to output any kind of zval values, as long as a
     string (or unicode) conversion is available. Note that printing non
     string zvals outside of request time is not possible.
 
