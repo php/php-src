@@ -213,6 +213,7 @@ foundit:
 	entry.fp_type = PHAR_FP;
 #define PHAR_ZIP_FAIL(errmsg) \
 			zend_hash_destroy(&mydata->manifest); \
+			mydata->manifest.arBuckets = 0; \
 			php_stream_close(fp); \
 			if (mydata->metadata) { \
 				zval_dtor(mydata->metadata); \
