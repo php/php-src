@@ -1,3 +1,8 @@
+2008-02-07  Marcus Boerger  <php@marcus-boerger.de>
+
+    * zend_API.c:
+      - Simplify
+
 2008-02-06  Marcus Boerger  <php@marcus-boerger.de>
 
     * zend_API.c:
