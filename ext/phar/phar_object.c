@@ -609,15 +609,19 @@ PHP_METHOD(Phar, webPhar)
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 
 			tmp = strstr(path_info, basename) + fname_len;
-			sa = *tmp;
-			*tmp = '\0';
+			if (tmp) {
+				sa = *tmp;
+				*tmp = '\0';
+			}
 			ctr.response_code = 0;
 			if (path_info[strlen(path_info)-1] == '/') {
 				ctr.line_len = spprintf(&(ctr.line), 4096, "Location: %s%s", path_info, entry + 1);
 			} else {
 				ctr.line_len = spprintf(&(ctr.line), 4096, "Location: %s%s", path_info, entry);
 			}
-			*tmp = sa;
+			if (tmp) {
+				*tmp = sa;
+			}
 			if (free_pathinfo) {
 				efree(path_info);
 			}
@@ -1063,11 +1067,7 @@ PHP_METHOD(Phar, __construct)
 	phar_obj->arc.archive = phar_data;
 	phar_obj->spl.oth_handler = &phar_spl_foreign_handler;
 
-#ifdef PHP_WIN32
-	phar_unixify_path_separators(fname, fname_len);
-#endif
-
-	fname_len = spprintf(&fname, 0, "phar://%s", fname);
+	fname_len = spprintf(&fname, 0, "phar://%s", phar_data->fname);
 	INIT_PZVAL(&arg1);
 	ZVAL_STRINGL(&arg1, fname, fname_len, 0);
 
