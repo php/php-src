@@ -184,6 +184,7 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 			}
 			php_stream_close(fp);
 			zend_hash_destroy(&myphar->manifest);
+			myphar->manifest.arBuckets = 0;
 			efree(myphar);
 			return FAILURE;
 		}
@@ -201,6 +202,7 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 			}
 			php_stream_close(fp);
 			zend_hash_destroy(&myphar->manifest);
+			myphar->manifest.arBuckets = 0;
 			efree(myphar);
 			return FAILURE;
 		}
@@ -214,10 +216,19 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 			strcpy(name, hdr->prefix);
 			strcat(name, hdr->name);
 			entry.filename_len = strlen(name);
+			if (name[entry.filename_len - 1] == '/') {
+				/* some tar programs store directories with trailing slash */
+				entry.filename_len--;
+			}
 			entry.filename = estrndup(name, entry.filename_len);
 		} else {
 			entry.filename = estrdup(hdr->name);
 			entry.filename_len = strlen(entry.filename);
+			if (entry.filename[entry.filename_len - 1] == '/') {
+				/* some tar programs store directories with trailing slash */
+				entry.filename[entry.filename_len - 1] = '\0';
+				entry.filename_len--;
+			}
 		}
 
 		entry.tar_type = ((old & (hdr->typeflag == 0))?'0':hdr->typeflag);
@@ -246,6 +257,7 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 				}
 				php_stream_close(fp);
 				zend_hash_destroy(&myphar->manifest);
+				myphar->manifest.arBuckets = 0;
 				efree(myphar);
 				return FAILURE;
 			}
@@ -269,6 +281,7 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 				}
 				php_stream_close(fp);
 				zend_hash_destroy(&myphar->manifest);
+				myphar->manifest.arBuckets = 0;
 				efree(myphar);
 				return FAILURE;
 			}
@@ -293,6 +306,7 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 		}
 		php_stream_close(fp);
 		zend_hash_destroy(&myphar->manifest);
+		myphar->manifest.arBuckets = 0;
 		efree(myphar);
 		return FAILURE;
 	}
@@ -404,7 +418,9 @@ int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC)
 
 	entry->is_modified = 0;
 	if (entry->fp_type == PHAR_MOD && entry->fp != entry->phar->fp && entry->fp != entry->phar->ufp) {
-		php_stream_close(entry->fp);
+		if (!entry->fp_refcount) {
+			php_stream_close(entry->fp);
+		}
 		entry->fp = NULL;
 	}
 	entry->fp_type = PHAR_FP;
