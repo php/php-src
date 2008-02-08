@@ -39,7 +39,7 @@ static int phar_get_extract_list(void *pDest, int num_args, va_list args, zend_h
 }
 /* }}} */
 
-/* {{ proto array Phar::getExtractList()
+/* {{{ proto array Phar::getExtractList()
  * Return array of extract list
  */
 PHP_METHOD(Phar, getExtractList)
@@ -50,7 +50,8 @@ PHP_METHOD(Phar, getExtractList)
 	zend_hash_apply_with_arguments(&PHAR_G(phar_plain_map), phar_get_extract_list, 1, return_value);
 }
 /* }}} */
-static int phar_file_type(HashTable *mimes, char *file, char **mime_type TSRMLS_DC)
+
+static int phar_file_type(HashTable *mimes, char *file, char **mime_type TSRMLS_DC) /* {{{ */
 {
 	char *ext;
 	phar_mime_type *mime;
@@ -74,7 +75,7 @@ static int phar_file_type(HashTable *mimes, char *file, char **mime_type TSRMLS_
 }
 /* }}} */
 
-static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char *basename, int basename_len, char *request_uri, int request_uri_len TSRMLS_DC)
+static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char *basename, int basename_len, char *request_uri, int request_uri_len TSRMLS_DC) /* {{{ */
 {
 	zval **_SERVER, **stuff;
 	char *path_info;
@@ -181,8 +182,9 @@ static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char 
 		}
 	}
 }
+/* }}} */
 
-static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, char *entry, int entry_len, char *arch, int arch_len, char *basename, int basename_len, char *ru, int ru_len TSRMLS_DC)
+static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, char *entry, int entry_len, char *arch, int arch_len, char *basename, int basename_len, char *ru, int ru_len TSRMLS_DC) /* {{{ */
 {
 	char *name = NULL, buf[8192], *cwd;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
@@ -326,8 +328,9 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 	}
 	return -1;
 }
+/* }}} */
 
-static void phar_do_403(char *entry, int entry_len TSRMLS_DC)
+static void phar_do_403(char *entry, int entry_len TSRMLS_DC) /* {{{ */
 {
 	sapi_header_line ctr = {0};
 
@@ -340,8 +343,9 @@ static void phar_do_403(char *entry, int entry_len TSRMLS_DC)
 	PHPWRITE(entry, entry_len);
 	PHPWRITE(" Access Denied</h1>\n </body>\n</html>", sizeof(" Access Denied</h1>\n </body>\n</html>") - 1);
 }
+/* }}} */
 
-static void phar_do_404(char *fname, int fname_len, char *f404, int f404_len, char *entry, int entry_len TSRMLS_DC)
+static void phar_do_404(char *fname, int fname_len, char *f404, int f404_len, char *entry, int entry_len TSRMLS_DC) /* {{{ */
 {
 	int hi;
 	phar_entry_data *phar;
@@ -367,9 +371,9 @@ nofile:
 		PHPWRITE(" Not Found</h1>\n </body>\n</html>",  sizeof(" Not Found</h1>\n </body>\n</html>") - 1);
 	}
 }
+/* }}} */
 
-static void phar_postprocess_ru_web(char *fname, int fname_len, char **entry,
-					int *entry_len, char **ru, int *ru_len TSRMLS_DC)
+static void phar_postprocess_ru_web(char *fname, int fname_len, char **entry, int *entry_len, char **ru, int *ru_len TSRMLS_DC) /* {{{ */
 {
 	char *e = *entry + 1, *u = NULL, *saveu = NULL;
 	int e_len = *entry_len - 1, u_len = 0;
@@ -408,6 +412,7 @@ static void phar_postprocess_ru_web(char *fname, int fname_len, char **entry,
 		e_len -= u_len + 1;
 	} while (1);
 }
+/* }}} */
 
 /* {{{ proto void Phar::webPhar([string alias, [string index, [string f404, [array mimetypes, [callback rewrites]]]]])
  * mapPhar for web-based phars. Reads the currently executed file (a phar)
@@ -515,7 +520,11 @@ PHP_METHOD(Phar, webPhar)
 		ZVAL_STRINGL(params, entry, entry_len, 1);
 		zp[0] = &params;
 
+#if PHP_VERSION_ID < 50300
+		if (FAILURE == zend_fcall_info_init(rewrite, &fci, &fcc, NULL TSRMLS_CC)) {
+#else
 		if (FAILURE == zend_fcall_info_init(rewrite, 0, &fci, &fcc, NULL, NULL TSRMLS_CC)) {
+#endif
 			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "phar error: invalid rewrite callback");
 			if (free_pathinfo) {
 				efree(path_info);
@@ -767,6 +776,7 @@ no_mimes:
 #endif
 	RETURN_LONG(ret);
 }
+/* }}} */
 
 /* {{{ proto void Phar::mungServer(array munglist)
  * Defines a list of up to 4 $_SERVER variables that should be modified for execution
@@ -852,7 +862,7 @@ PHP_METHOD(Phar, interceptFileFuncs)
 }
 /* }}} */
 
-/* {{ proto array Phar::createDefaultStub([string indexfile[, string webindexfile]])
+/* {{{ proto array Phar::createDefaultStub([string indexfile[, string webindexfile]])
  * Return a stub that can be used to run a phar-based archive without the phar extension
  * indexfile is the CLI startup filename, which defaults to "index.php", webindexfile
  * is the web startup filename, and also defaults to "index.php"
@@ -874,6 +884,7 @@ PHP_METHOD(Phar, createDefaultStub)
 	}
 	RETURN_STRINGL(index, stub_len, 0);
 }
+/* }}} */
 
 /* {{{ proto mixed Phar::mapPhar([string alias, [int dataoffset]])
  * Reads the currently executed file (a phar) and registers its manifest */
@@ -1132,7 +1143,7 @@ PHP_METHOD(Phar, getSupportedCompression)
 		return; \
 	}
 
-static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC)
+static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ */
 {
 	zval **value;
 	zend_uchar key_type;
@@ -1332,6 +1343,7 @@ after_open_fp:
 	phar_entry_delref(data TSRMLS_CC);
 	return ZEND_HASH_APPLY_KEEP;
 }
+/* }}} */
 
 /* {{{ proto array Phar::buildFromIterator(Iterator iter[, string base_directory])
  * Construct a phar archive from an iterator.  The iterator must return a series of strings
@@ -1483,6 +1495,7 @@ static int phar_restore_apply(void *data TSRMLS_DC) /* {{{ */
 	}
 	return ZEND_HASH_APPLY_KEEP;
 }
+/* }}} */
 
 static void phar_convert_to_other(phar_archive_data *source, int convert, php_uint32 flags TSRMLS_DC) /* {{{ */
 {
@@ -1687,6 +1700,7 @@ finalize:
 		source->signature = 0;
 	}
 }
+/* }}} */
 
 /* {{{ proto bool Phar::convertToTar([int compression])
  * Convert the phar archive to the tar file format.  The optional parameter can be one of Phar::GZ
@@ -1763,7 +1777,6 @@ PHP_METHOD(Phar, convertToTar)
 }
 /* }}} */
 
-
 /* {{{ proto bool Phar::convertToZip()
  * Convert the phar archive to the zip file format
  */
@@ -1797,7 +1810,6 @@ PHP_METHOD(Phar, convertToZip)
 	RETURN_TRUE;
 }
 /* }}} */
-
 
 /* {{{ proto bool Phar::convertToPhar([int compression])
  * Convert the phar archive to the phar file format.  The optional parameter can be one of Phar::GZ
@@ -2010,6 +2022,7 @@ PHP_METHOD(Phar, setAlias)
 
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto string Phar::getVersion()
  * Return version info of Phar archive
@@ -2468,6 +2481,7 @@ PHP_METHOD(Phar, copy)
 
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto int Phar::offsetExists(string offset)
  * determines whether a file exists in the phar
