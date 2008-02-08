@@ -31,7 +31,7 @@ typedef struct {
 	unsigned char buffer[64];
 } PHP_MD4_CTX;
 
-#define PHP_MD4Init			PHP_MD5Init
+PHP_HASH_API void PHP_MD4Init(PHP_MD4_CTX *);
 PHP_HASH_API void PHP_MD4Update(PHP_MD4_CTX *context, const unsigned char *, unsigned int);
 PHP_HASH_API void PHP_MD4Final(unsigned char[16], PHP_MD4_CTX *);
 
