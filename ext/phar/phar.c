@@ -1199,6 +1199,13 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 					MAPPHAR_ALLOC_FAIL("unable to decompress gzipped phar archive \"%s\" to temporary file, enable zlib extension in php.ini")
 				}
 				array_init(&filterparams);
+				/* ext/zlib zval_dtors a separated zval, so we have to make sure it doesn't destroy ours */
+#if PHP_VERSION_ID < 50300
+				filterparams->refcount = 26;
+#else
+				Z_SET_REFCOUNT(filterparams, 26);
+#endif
+
 /* this is defined in zlib's zconf.h */
 #ifndef MAX_WBITS
 #define MAX_WBITS 15
@@ -1214,10 +1221,13 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 					err = 1;
 					add_assoc_long(&filterparams, "window", MAX_WBITS);
 					filter = php_stream_filter_create("zlib.inflate", &filterparams, php_stream_is_persistent(fp) TSRMLS_CC);
+					zval_dtor(&filterparams);
 					if (!filter) {
 						php_stream_close(temp);
 						MAPPHAR_ALLOC_FAIL("unable to decompress gzipped phar archive \"%s\", ext/zlib is buggy in PHP versions older than 5.2.6")
 					}
+				} else {
+					zval_dtor(&filterparams);
 				}
 				php_stream_filter_append(&temp->writefilters, filter);
 				if (0 == php_stream_copy_to_stream(fp, temp, PHP_STREAM_COPY_ALL)) {
@@ -2406,8 +2416,15 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, char **error 
 			zval filterparams;
 
 			array_init(&filterparams);
+			/* ext/zlib zval_dtors a separated zval, so we have to make sure it doesn't destroy ours */
+#if PHP_VERSION_ID < 50300
+			filterparams->refcount = 26;
+#else
+			Z_SET_REFCOUNT(filterparams, 26);
+#endif
 			add_assoc_long(&filterparams, "window", MAX_WBITS+16);
 			filter = php_stream_filter_create("zlib.deflate", &filterparams, php_stream_is_persistent(phar->fp) TSRMLS_CC);
+			zval_dtor(&filterparams);
 			if (!filter) {
 				if (error) {
 					spprintf(error, 4096, "unable to compress all contents of phar \"%s\" using zlib, PHP versions older than 5.2.6 have a buggy zlib", phar->fname);
