@@ -424,7 +424,7 @@ PHP_METHOD(Phar, webPhar)
 	char *alias = NULL, *error, *plain_map, *index_php, *f404 = NULL, *ru = NULL;
 	int alias_len = 0, ret, f404_len = 0, free_pathinfo = 0, ru_len = 0;
 	char *fname, *basename, *path_info, *mime_type, *entry, *pt;
-	int fname_len, entry_len, code, index_php_len = 0;
+	int fname_len, entry_len, code, index_php_len = 0, not_cgi;
 	phar_entry_data *phar;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!saz", &alias, &alias_len, &index_php, &index_php_len, &f404, &f404_len, &mimeoverride, &rewrite) == FAILURE) {
@@ -489,6 +489,7 @@ PHP_METHOD(Phar, webPhar)
 			entry_len = 0;
 		}
 		pt = estrndup(testit, (pt - testit) + (fname_len - (basename - fname)));
+		not_cgi = 1;
 	} else {
 		path_info = SG(request_info).request_uri;
 
@@ -502,6 +503,7 @@ PHP_METHOD(Phar, webPhar)
 		entry = estrndup(pt + (fname_len - (basename - fname)), entry_len);
 
 		pt = estrndup(path_info, (pt - path_info) + (fname_len - (basename - fname)));
+		not_cgi = 0;
 	}
 
 	if (rewrite) {
@@ -608,8 +610,8 @@ PHP_METHOD(Phar, webPhar)
 			ctr.line = "HTTP/1.1 301 Moved Permanently";
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 
-			tmp = strstr(path_info, basename) + fname_len;
-			if (tmp) {
+			if (not_cgi) {
+				tmp = strstr(path_info, basename) + fname_len;
 				sa = *tmp;
 				*tmp = '\0';
 			}
@@ -619,7 +621,7 @@ PHP_METHOD(Phar, webPhar)
 			} else {
 				ctr.line_len = spprintf(&(ctr.line), 4096, "Location: %s%s", path_info, entry);
 			}
-			if (tmp) {
+			if (not_cgi) {
 				*tmp = sa;
 			}
 			if (free_pathinfo) {
