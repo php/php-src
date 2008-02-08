@@ -489,7 +489,7 @@ PHP_METHOD(Phar, webPhar)
 			entry_len = 0;
 		}
 		pt = estrndup(testit, (pt - testit) + (fname_len - (basename - fname)));
-		not_cgi = 1;
+		not_cgi = 0;
 	} else {
 		path_info = SG(request_info).request_uri;
 
@@ -503,7 +503,7 @@ PHP_METHOD(Phar, webPhar)
 		entry = estrndup(pt + (fname_len - (basename - fname)), entry_len);
 
 		pt = estrndup(path_info, (pt - path_info) + (fname_len - (basename - fname)));
-		not_cgi = 0;
+		not_cgi = 1;
 	}
 
 	if (rewrite) {
