@@ -1,3 +1,69 @@
+2008-02-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      header:
+      
+      Update copyright
+
+2008-02-07  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ZendEngine2/zend_API.c:
+      - Simplify
+
+    * README.UNICODE-UPGRADES
+      main/snprintf.c
+      main/spprintf.c:
+      - Add %Z to *printf
+
+    * README.UNICODE-UPGRADES
+      main/snprintf.c
+      main/snprintf.h
+      main/spprintf.c
+      main/spprintf.h:
+      - WS
+
+2008-02-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/vsprintf_variation8.phpt:
+      fix test
+
+2008-02-07  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/strings/count_chars.phpt:
+      Fix error message
+
+    * ext/standard/tests/general_functions/parse_ini_basic.phpt
+      ext/standard/tests/general_functions/parse_ini_booleans.phpt
+      ext/standard/tests/general_functions/parse_ini_file.phpt:
+      Added UEXPECTF
+
+    * ext/standard/tests/strings/str_split_basic.phpt
+      ext/standard/tests/strings/substr_count_variation_001.phpt
+      ext/standard/tests/strings/wordwrap_variation2.phpt:
+      Fixed some tests (UEXPECT)
+
+2008-02-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/zlib/tests/bug_40189.phpt:
+      - Fix test (no files in "root" please)
+
+2008-02-07  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      TSRM/TSRM.c:
+      MFH: fix TSRM mutex return value inconsitencies (patch by Scott MacVicar)
+
+    * TSRM/TSRM.c:
+      fix TSRM mutex return value inconsitencies (patch by Scott MacVicar)
+
+2008-02-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/curl/interface.c:
+      
+      New param parsing API
+
 2008-02-06  Marcus Boerger  <php@marcus-boerger.de>
 
     * ZendEngine2/zend_API.c:
