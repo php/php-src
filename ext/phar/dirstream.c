@@ -221,6 +221,14 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 		if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(manifest, &key, &keylen, &unused, 0, NULL)) {
 			break;
 		}
+		if (keylen <= dirlen) {
+			if (keylen < dirlen || !strncmp(key, dir, dirlen)) {
+				if (SUCCESS != zend_hash_move_forward(manifest)) {
+					break;
+				}
+				continue;
+			}
+		}
 		if (*dir == '/') {
 			/* root directory */
 			if (NULL != (found = (char *) memchr(key, '/', keylen))) {
@@ -286,8 +294,7 @@ PHAR_ADD_ENTRY:
 		return php_stream_alloc(&phar_dir_ops, data, NULL, "r");
 	} else {
 		efree(dir);
-		FREE_HASHTABLE(data);
-		return NULL;
+		return php_stream_alloc(&phar_dir_ops, data, NULL, "r");
 	}
 }
 /* }}}*/
@@ -304,7 +311,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char 
 	uint keylen;
 	ulong unused;
 	phar_archive_data *phar;
-	phar_entry_info *entry;
+	phar_entry_info *entry = NULL;
 	uint host_len;
 
 	if ((resource = phar_open_url(wrapper, path, mode, options TSRMLS_CC)) == NULL) {
@@ -365,20 +372,26 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char 
 		php_url_free(resource);
 		return NULL;
 	}
-	if (SUCCESS == zend_hash_find(&phar->manifest, internal_file, strlen(internal_file), (void**)&entry)) {
+	if (SUCCESS == zend_hash_find(&phar->manifest, internal_file, strlen(internal_file), (void**)&entry) && !entry->is_dir) {
 		php_url_free(resource);
 		return NULL;
+	} else if (entry && entry->is_dir) {
+		internal_file = estrdup(internal_file);
+		php_url_free(resource);
+		return phar_make_dirstream(internal_file, &phar->manifest TSRMLS_CC);
 	} else {
+		int i_len = strlen(internal_file);
+
 		/* search for directory */
 		zend_hash_internal_pointer_reset(&phar->manifest);
 		while (FAILURE != zend_hash_has_more_elements(&phar->manifest)) {
 			if (HASH_KEY_NON_EXISTANT != 
 					zend_hash_get_current_key_ex(
 						&phar->manifest, &key, &keylen, &unused, 0, NULL)) {
-				if (0 == memcmp(key, internal_file, strlen(internal_file))) {
+				if (keylen > i_len && 0 == memcmp(key, internal_file, i_len)) {
 					/* directory found */
 					internal_file = estrndup(internal_file,
-							strlen(internal_file));
+							i_len);
 					php_url_free(resource);
 					return phar_make_dirstream(internal_file, &phar->manifest TSRMLS_CC);
 				}

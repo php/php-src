@@ -601,12 +601,19 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 			zval filterparams;
 
 			array_init(&filterparams);
+			/* ext/zlib zval_dtors a separated zval, so we have to make sure it doesn't destroy ours */
+#if PHP_VERSION_ID < 50300
+			filterparams->refcount = 26;
+#else
+			Z_SET_REFCOUNT(filterparams, 26);
+#endif
 /* this is defined in zlib's zconf.h */
 #ifndef MAX_WBITS
 #define MAX_WBITS 15
 #endif
 			add_assoc_long(&filterparams, "window", MAX_WBITS + 16);
 			filter = php_stream_filter_create("zlib.deflate", &filterparams, php_stream_is_persistent(phar->fp) TSRMLS_CC);
+			zval_dtor(&filterparams);
 			if (!filter) {
 				/* copy contents uncompressed rather than lose them */
 				php_stream_copy_to_stream(newfile, phar->fp, PHP_STREAM_COPY_ALL);
