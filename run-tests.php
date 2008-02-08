@@ -1099,7 +1099,7 @@ TEST $file
 		}
 
 		// End of actual test?
-		if ($secfile && preg_match('/^===DONE===$/', $line)) {
+		if ($secfile && preg_match('/^===DONE===\s*$/', $line)) {
 			$secdone = true;
 		}
 	}
