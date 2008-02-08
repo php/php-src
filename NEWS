@@ -102,6 +102,7 @@ PHP                                                                        NEWS
   . Added support for OpenSSL digest functions
   . Added support for OpenSSL cipher functions
   . Added access to internal values of DSA, RSA and DH keys
+- Imoroved md5() implementation (Solar Designer, Dmitry)
 
 - Fixed html_entity_decode() incorrectly converting numeric html entities
   to different characters with cp1251 and cp866. (Scott)
