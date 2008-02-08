@@ -1198,7 +1198,6 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 				if (!phar_has_zlib) {
 					MAPPHAR_ALLOC_FAIL("unable to decompress gzipped phar archive \"%s\" to temporary file, enable zlib extension in php.ini")
 				}
-				INIT_ZVAL(filterparams);
 				array_init(&filterparams);
 /* this is defined in zlib's zconf.h */
 #ifndef MAX_WBITS
@@ -2406,7 +2405,6 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, char **error 
 			/* to properly compress, we have to tell zlib to add a zlib header */
 			zval filterparams;
 
-			INIT_ZVAL(filterparams);
 			array_init(&filterparams);
 			add_assoc_long(&filterparams, "window", MAX_WBITS+16);
 			filter = php_stream_filter_create("zlib.deflate", &filterparams, php_stream_is_persistent(phar->fp) TSRMLS_CC);
