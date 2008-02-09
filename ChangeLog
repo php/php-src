@@ -1,3 +1,42 @@
+2008-02-08  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * run-tests.php
+      run-tests.php:
+      fix ===DONE=== with windows EOLs
+
+    * tests/func/010.phpt:
+      MFB: add new test
+
+    * tests/func/010.phpt
+      tests/func/010.phpt:
+      
+      file 010.phpt was initially added on branch PHP_5_3.
+
+2008-02-08  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysql/tests/mysql_connect.phpt
+      ext/mysqli/mysqli_nonapi.c:
+      Remove dead code
+
+2008-02-08  Marcus Boerger  <php@marcus-boerger.de>
+
+    * README.UNICODE-UPGRADES:
+      - Type
+
+2008-02-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/hash/hash_md.c
+      ext/hash/hash_md.c
+      ext/hash/php_hash_md.h
+      ext/hash/php_hash_md.h
+      ext/standard/md5.c
+      ext/standard/md5.c
+      ext/standard/md5.h
+      ext/standard/md5.h:
+      Improved md5() implementation (Solar Designer)
+
 2008-02-07  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_3)
