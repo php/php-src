@@ -2650,6 +2650,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 	zstr lmname, mname, colon = NULL_ZSTR;
 	unsigned int clen = 0, mlen;
 	zend_function *fptr;
+	zend_class_entry *last_scope;
 	HashTable *ftable;
 
 	if (error) {
@@ -2721,7 +2722,7 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 	if (colon.v != NULL) {
 		/* This is a compound name.
 		 * Try to fetch class and then find static method. */
-		zend_class_entry *last_scope = EG(scope);
+		last_scope = EG(scope);
 		if (ce_org) {
 			EG(scope) = ce_org;
 		}
