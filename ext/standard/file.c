@@ -1181,14 +1181,16 @@ PHPAPI PHP_FUNCTION(fgetc)
 		int buflen = 1;
 		UChar *buf = php_stream_read_unicode_chars(stream, &buflen);
 
-		if (!buf) {
+		if (!buf || !buflen) {
 			RETURN_FALSE;
 		}
 		RETURN_UNICODEL(buf, buflen, 0);
 	} else { /* IS_STRING */
 		char buf[2];
 
-		buf[0] = php_stream_getc(stream);
+		if ((buf[0] = php_stream_getc(stream)) == EOF) {
+			RETURN_FALSE;
+		}
 		buf[1] = 0;
 		RETURN_STRINGL(buf, 1, 1);
 	}
