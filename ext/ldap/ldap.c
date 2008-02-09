@@ -1726,10 +1726,9 @@ PHP_FUNCTION(ldap_get_option)
 			zval_dtor(*retval);
 			ZVAL_LONG(*retval, val);
 		} break;
-#if defined(LDAP_OPT_NETWORK_TIMEOUT) || defined(LDAP_X_OPT_CONNECT_TIMEOUT)
+#ifdef LDAP_OPT_NETWORK_TIMEOUT
 	case LDAP_OPT_NETWORK_TIMEOUT:
 		{
-# ifdef LDAP_OPT_NETWORK_TIMEOUT
 			struct timeval *timeout;
 
 			if (ldap_get_option(ld->link, LDAP_OPT_NETWORK_TIMEOUT, (void *) &timeout)) {
@@ -1741,7 +1740,10 @@ PHP_FUNCTION(ldap_get_option)
 			zval_dtor(*retval);
 			ZVAL_LONG(*retval, timeout->tv_sec);
 			ldap_memfree(timeout);
-# elif defined(LDAP_X_OPT_CONNECT_TIMEOUT)
+		} break;
+#elif defined(LDAP_X_OPT_CONNECT_TIMEOUT)
+	case LDAP_X_OPT_CONNECT_TIMEOUT:
+		{
 			int timeout;
 
 			if (ldap_get_option(ld->link, LDAP_X_OPT_CONNECT_TIMEOUT, &timeout)) {
@@ -1749,7 +1751,6 @@ PHP_FUNCTION(ldap_get_option)
 			}			
 			zval_dtor(*retval);
 			ZVAL_LONG(*retval, (timeout / 1000));
-# endif
 		} break;
 #endif
 	/* options with string value */
@@ -1834,10 +1835,9 @@ PHP_FUNCTION(ldap_set_option)
 				RETURN_FALSE;
 			}
 		} break;
-#if defined(LDAP_OPT_NETWORK_TIMEOUT) || defined(LDAP_X_OPT_CONNECT_TIMEOUT)
+#ifdef LDAP_OPT_NETWORK_TIMEOUT
 	case LDAP_OPT_NETWORK_TIMEOUT:
 		{
-# ifdef LDAP_OPT_NETWORK_TIMEOUT
 			struct timeval timeout;
 
 			convert_to_long_ex(newval);
@@ -1846,15 +1846,17 @@ PHP_FUNCTION(ldap_set_option)
 			if (ldap_set_option(ldap, LDAP_OPT_NETWORK_TIMEOUT, (void *) &timeout)) {
 				RETURN_FALSE;
 			}			
-# elif defined(LDAP_X_OPT_CONNECT_TIMEOUT)
+		} break;
+#elif defined(LDAP_X_OPT_CONNECT_TIMEOUT)
+	case LDAP_X_OPT_CONNECT_TIMEOUT:
+		{
 			int timeout;
 
 			convert_to_long_ex(newval);
-			timeou = 1000 * Z_LVAL_PP(newval); /* Convert to milliseconds */
+			timeout = 1000 * Z_LVAL_PP(newval); /* Convert to milliseconds */
 			if (ldap_set_option(ldap, LDAP_X_OPT_CONNECT_TIMEOUT, &timeout)) {
 				RETURN_FALSE;
 			}			
-# endif
 		} break;
 #endif
 		/* options with string value */
