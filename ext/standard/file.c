@@ -2216,7 +2216,7 @@ PHP_FUNCTION(fgetcsv)
 	if (len < 0) {
 		buf.v = php_stream_get_line_ex(stream, stream->readbuf_type, NULL_ZSTR, 0, 0, &buf_len);
 	} else {
-		buf.v = stream->readbuf_type == IS_UNICODE ? emalloc(UBYTES(len + 1)) : emalloc(len + 1);
+		buf.v = stream->readbuf_type == IS_UNICODE ? eumalloc(len + 1) : emalloc(len + 1);
 		if (php_stream_get_line_ex(stream, stream->readbuf_type, buf, len + 1, len + 1, &buf_len) == NULL) {
 			efree(buf.v);
 			RETVAL_FALSE;
@@ -2541,7 +2541,7 @@ ready_state:
 				if (*p == '\r' || *p == '\n') {
 					/* Terminal delimiter, treat as empty field */
 					p++;
-					add_next_index_stringl(return_value, "", 0, 1);
+					add_next_index_unicodel(return_value, (UChar*)"", 0, 1);
 					break;
 				}
 
@@ -2595,7 +2595,7 @@ with_enc:
 					/* Enclosure encountered, is it paired? */
 					if (PHP_FGETCSV_UNI_CHECK(p + enclosure_len, e, enclosure, enclosure_len)) {
 						/* Double enclosure gets translated to single enclosure */
-						memmove(p, p + enclosure_len, (e - p) - enclosure_len);
+						memmove(p, p + enclosure_len, UBYTES((e - p) - enclosure_len));
 						e -= enclosure_len;
 						p += enclosure_len;
 						if (p >= e) break;
@@ -2672,7 +2672,7 @@ post_enc:
 						int cruft_len = p - (field_end + enclosure_len);
 
 						field = eumalloc(field_len + cruft_len + 1);
-						memcpy(field, field_start, field_len);
+						memcpy(field, field_start, UBYTES(field_len));
 						memcpy(field + field_len, field_end + enclosure_len, UBYTES(cruft_len));
 						field_len += cruft_len;
 						field[field_len] = 0;
