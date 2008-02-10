@@ -70,7 +70,7 @@ bool(true)
 -- With symlink --
 bool(true)
 -- With hardlink --
-Warning: link(): Operation not permitted in %s on line %d
+Warning: link(): %s in %s on line %d
 bool(false)
 
 *** Testing is_dir() with file and links to a file ***
