@@ -2359,6 +2359,11 @@ ready_state:
 					if (p >= e) break;
 					goto ready_state;
 				}
+				
+				/* Otherwise, starting a new field without enclosures */
+				state = PHP_FGETCSV_FIELD_NO_ENC;
+				field_start = p++;
+				field_end = NULL;
 
 				/* Is it an escape character? */
 				if ((PHP_FGETCSV_BIN_CHECK(p, e, escape, escape_len) && escape != enclosure) ||
@@ -2368,15 +2373,9 @@ ready_state:
 					/* Skip escape sequence and let next char be treated as literal
 					 * If enclosure is the same character as esacpe, it is considered as esacped
 					 * if it appears twice */
-					p += escape_len;
+					p += escape_len - 1;
 					/* FALL THROUGH */
 				}
-
-				/* Otherwise, starting a new field without enclosures */
-				state = PHP_FGETCSV_FIELD_NO_ENC;
-				field_start = p;
-				field_end = NULL;
-				p++;
 				break;
 
 			case PHP_FGETCSV_FIELD_WITH_ENC:
@@ -2568,6 +2567,11 @@ ready_state:
 					if (p >= e) break;
 					goto ready_state;
 				}
+				
+				/* Otherwise, starting a new field without enclosures */
+				state = PHP_FGETCSV_FIELD_NO_ENC;
+				field_start = p++;
+				field_end = NULL;
 
 				/* Is it an escape character? */
 				if ((PHP_FGETCSV_UNI_CHECK(p, e, escape, escape_len) && escape != enclosure) ||
@@ -2575,17 +2579,11 @@ ready_state:
 					PHP_FGETCSV_UNI_CHECK(p+1, e, escape, escape_len) && escape == enclosure)
 				) {
 					/* Skip escape sequence and let next char be treated as literal
-					 * If enclosure is the same character as esacpe, it is considered as esacped
+					 * If enclosure is the same character as escape, it is considered as escaped
 					 * if it appears twice */
-					p += escape_len;
+					p += escape_len - 1;
 					/* FALL THROUGH */
 				}
-
-				/* Otherwise, starting a new field without enclosures */
-				state = PHP_FGETCSV_FIELD_NO_ENC;
-				field_start = p;
-				field_end = NULL;
-				p++;
 				break;
 
 			case PHP_FGETCSV_FIELD_WITH_ENC:
