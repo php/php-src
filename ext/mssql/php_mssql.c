@@ -890,6 +890,10 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 				DBDATEREC dateinfo;	
 				int res_length = dbdatlen(mssql_ptr->link,offset);
 
+				if (res_length == -1) {
+					res_length = 255;
+				}
+
 				if ((column_type != SQLDATETIME && column_type != SQLDATETIM4) || MS_SQL_G(datetimeconvert)) {
 
 					switch (column_type) {
