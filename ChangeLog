@@ -1,3 +1,23 @@
+2008-02-09  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ext/ldap/ldap.c:
+      Fix build on Solaris
+
+2008-02-09  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ZendEngine2/zend_API.c:
+      - Windows build fix
+
+2008-02-09  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/file.c:
+      Fixed bugs:
+      - #42036	fgetc() sets end of the file flag when reading on write only file
+      - #42037	fgetc() retuns one char when fails to read on php6
+
+    * ext/standard/tests/strings/bug44075.phpt:
+      New test for strtok
+
 2008-02-08  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * run-tests.php
