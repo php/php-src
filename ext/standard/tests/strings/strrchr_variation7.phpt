@@ -42,9 +42,11 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+bool(false)
 *** Done ***
 --UEXPECTF--
 *** Testing strrchr() function: with heredoc strings ***
+bool(false)
 bool(false)
 bool(false)
 bool(false)
