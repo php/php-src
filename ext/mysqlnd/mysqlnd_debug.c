@@ -433,7 +433,8 @@ MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const
 					}
 					i = j;
 				} else {
-					self->file_name = (char *) mysqlnd_debug_default_trace_file;
+					if (!self->file_name)
+						self->file_name = (char *) mysqlnd_debug_default_trace_file;
 				}
 				state = PARSER_WAIT_COLON;
 				break;
@@ -491,9 +492,10 @@ MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const
 				if ((i + 1) < mode_len && mode[i+1] == ',') {
 					i+= 2;
 					while (i < mode_len) {
-						if (mode[i++] == ':') {
+						if (mode[i] == ':') {
 							break;
 						}
+						i++;
 					}
 				}
 				state = PARSER_WAIT_COLON;
