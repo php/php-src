@@ -369,7 +369,7 @@ track_errors = Off
 ;docref_ext = .html
 
 ; String to output before an error message.
-;error_prepend_string = "<font color=ff0000>"
+;error_prepend_string = "<font color=#ff0000>"
 
 ; String to output after an error message.
 ;error_append_string = "</font>"
