@@ -7,22 +7,15 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-include dirname(__FILE__) . '/tarmaker.php.inc';
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
-$pname = 'phar://' . $fname;
-$a = new tarmaker($fname, 'none');
-$a->init();
-$a->addFile('.phar/stub.php', $stub = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>');
 
-$files = array();
-$files['a'] = 'a';
-$files['.phar/alias.txt'] = 'hio';
-foreach ($files as $n => $file) {
-$a->addFile($n, $file);
-}
-$a->close();
+$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip';
 
 $phar = new Phar($fname);
+$phar->setStub($stub = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>');
+$phar->setAlias('hio');
+$phar['a'] = 'a';
+$phar->stopBuffering();
+
 var_dump($stub);
 var_dump($phar->getStub());
 var_dump($phar->getStub() == $stub);
@@ -46,14 +39,14 @@ var_dump($phar->getStub() == $stub);
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
 __HALT_COMPILER();
 ?>
 --EXPECTF--
 string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
 string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
 bool(true)
-Exception: illegal stub for zip-based phar "%sphar_stub_error.phar.php"
+Exception: illegal stub for zip-based phar "%sphar_stub_error.phar.zip"
 string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
 bool(true)
 string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"

@@ -1,6 +1,6 @@
 <?php
 // stolen from PEAR2_Pyrus_Developer_Creator_Zip by Greg Beaver, the original author, for use in unit tests
-class tarmaker
+class zipmaker
 {
     /**
      * Path to archive file
@@ -9,19 +9,17 @@ class tarmaker
      */
     protected $archive;
     /**
-     * @var Phar
+     * @var ZIPArchive
      */
     protected $zip;
     protected $path;
-    /**
-     * this is the location we'll create the phar, then we'll copy() it to $path
-     * @var string
-     */
-    protected $tmppath;
     function __construct($path)
     {
+        if (!class_exists('ZIPArchive')) {
+            throw new Exception(
+                'Zip extension is not available');
+        }
         $this->path = $path;
-        $this->tmppath = dirname($path) . "/.tmp.thingy.phar";
     }
 
     /**
@@ -31,12 +29,11 @@ class tarmaker
      */
     function addFile($path, $fileOrStream)
     {
-        if ($path == '.phar/stub.php') {
-            $this->zip->setStub($fileOrStream);
-        } elseif ($path == '.phar/alias.txt') {
-            $this->zip->setAlias($fileOrStream);
+        if (is_resource($fileOrStream)) {
+            $this->zip->addFromString($path, stream_get_contents($fileOrStream));
+        } else {
+            $this->zip->addFromString($path, $fileOrStream);
         }
-        $this->zip[$path] = $fileOrStream;
     }
 
     /**
@@ -44,8 +41,12 @@ class tarmaker
      */
     function init()
     {
-        $this->zip = new Phar($this->tmppath);
-        $this->zip->convertToZip();
+        $this->zip = new ZipArchive;
+        if (true !== $this->zip->open($this->path, ZIPARCHIVE::CREATE)) {
+            throw new Exception(
+                'Cannot open ZIP archive ' . $this->path
+            );
+        }
     }
 
     /**
@@ -56,8 +57,7 @@ class tarmaker
      */
     function mkdir($dir)
     {
-        if ($dir[strlen($dir)-1] != '/') $dir .= '/';
-        $this->zip[$dir] = '';
+        $this->zip->addEmptyDir($dir);
     }
 
     /**
@@ -65,14 +65,6 @@ class tarmaker
      */
     function close()
     {
-        $this->zip->stopBuffering();
-        copy($this->tmppath, $this->path);
-        $this->zip->setAlias('not.to.be.used'); // for preventing alias conflict
-        $this->zip->stopBuffering();
-    }
-
-    function __destruct()
-    {
-        unlink($this->tmppath);
+        $this->zip->close();
     }
 }

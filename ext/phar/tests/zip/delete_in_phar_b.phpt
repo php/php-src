@@ -7,34 +7,33 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
-include dirname(__FILE__) . '/tarmaker.php.inc';
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
-$pname = 'phar://' . $fname;
 
-$a = new tarmaker($fname, 'none');
-$a->init();
-$a->addFile('a.php', '<?php echo "This is a\n"; ?>');
-$a->addFile('b.php', '<?php echo "This is b\n"; ?>');
-$a->addFile('b/c.php', '<?php echo "This is b/c\n"; ?>');
-$a->addFile('.phar/stub.php', '<?php __HALT_COMPILER(); ?>');
-$a->close();
+$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip';
+$alias = 'phar://' . $fname;
+
+$phar = new Phar($fname);
+$phar['a.php'] = '<?php echo "This is a\n"; ?>';
+$phar['b.php'] = '<?php echo "This is b\n"; ?>';
+$phar['b/c.php'] = '<?php echo "This is b/c\n"; ?>';
+$phar->setStub('<?php __HALT_COMPILER(); ?>');
+$phar->stopBuffering();
 ini_set('phar.readonly', 1);
 
-include $pname . '/a.php';
-include $pname . '/b.php';
-include $pname . '/b/c.php';
-unlink($pname . '/b/c.php');
+include $alias . '/a.php';
+include $alias . '/b.php';
+include $alias . '/b/c.php';
+unlink($alias . '/b/c.php');
 ?>
 ===AFTER===
 <?php
-include $pname . '/a.php';
-include $pname . '/b.php';
-include $pname . '/b/c.php';
+include $alias . '/a.php';
+include $alias . '/b.php';
+include $alias . '/b/c.php';
 ?>
 
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>
 --EXPECTF--
 This is a
 This is b
