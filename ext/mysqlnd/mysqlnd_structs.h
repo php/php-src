@@ -399,9 +399,6 @@ struct st_mysqlnd_connection
 	unsigned long	client_flag;
 	unsigned long	server_capabilities;
 
-	int				tmp_int;
-
-
 	/* For UPSERT queries */
 	mysqlnd_upsert_status upsert_status;
 	char			*last_message;

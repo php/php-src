@@ -28,6 +28,8 @@
 #include "mysqlnd_charset.h"
 #include "mysqlnd_debug.h"
 #include "mysqlnd_block_alloc.h"
+/* for php_get_current_user() */
+#include "ext/standard/basic_functions.h" 
 
 /* the server doesn't support 4byte utf8, but let's make it forward compatible */
 #define MYSQLND_MAX_ALLOWED_USER_LEN	256  /* 64 char * 4byte */

@@ -46,6 +46,12 @@
 #define MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND 1
 #endif
 
+#if PHP_DEBUG && !defined(PHP_WIN32)
+#define MYSQLND_DBG_ENABLED 1
+#else
+#define MYSQLND_DBG_ENABLED 0
+#endif
+
 #ifdef ZTS
 #include "TSRM.h"
 #endif
