@@ -9,6 +9,7 @@ function s($a)
 {
     static $b = array("/hi" => "a.phps");
     if (isset($b[$a])) return $b[$a];
+    return $a;
 }
 Phar::webPhar("whatever", "/index.php", null, array(), "s");
 echo "oops did not run\n";
