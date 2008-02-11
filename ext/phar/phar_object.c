@@ -437,9 +437,9 @@ PHP_METHOD(Phar, webPhar)
 	}
 
 	phar_request_initialize(TSRMLS_C);
+	fname = zend_get_executed_filename(TSRMLS_C);
+	fname_len = strlen(fname);
 	if (zend_hash_num_elements(&(PHAR_GLOBALS->phar_plain_map))) {
-		fname = zend_get_executed_filename(TSRMLS_C);
-		fname_len = strlen(fname);
 		if((alias && 
 		    zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), alias, alias_len+1, (void **)&plain_map) == SUCCESS)
 		|| (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), fname, fname_len+1, (void **)&plain_map) == SUCCESS)
@@ -460,9 +460,6 @@ PHP_METHOD(Phar, webPhar)
 	if (!(SG(request_info).request_method && SG(request_info).request_uri && (!strcmp(SG(request_info).request_method, "GET") || !strcmp(SG(request_info).request_method, "POST")))) {
 		return;
 	}
-
-	fname = zend_get_executed_filename(TSRMLS_C);
-	fname_len = strlen(fname);
 
 #ifdef PHP_WIN32
 	fname = estrndup(fname, fname_len);
