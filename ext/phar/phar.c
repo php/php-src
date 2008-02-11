@@ -498,7 +498,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 	php_uint32 manifest_len, manifest_count, manifest_flags, manifest_index, tmp_len, sig_flags;
 	php_uint16 manifest_ver;
 	long offset;
-	int register_alias, sig_len;
+	int register_alias, sig_len, temp_alias = 0;
 	char *signature = NULL;
 
 	if (pphar) {
@@ -808,8 +808,9 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 		alias = NULL;
 		alias_len = 0;
 		register_alias = 0;
-	} else {
+	} else if (alias_len) {
 		register_alias = 1;
+		temp_alias = 1;
 	}
 	
 	/* we have 5 32-bit items plus 1 byte at least */
@@ -929,10 +930,10 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 	phar_request_initialize(TSRMLS_C);
 	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len, (void*)&mydata, sizeof(phar_archive_data*),  NULL);
 	if (register_alias) {
-		mydata->is_explicit_alias = 1;
+		mydata->is_temporary_alias = temp_alias;
 		zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
 	} else {
-		mydata->is_explicit_alias = 0;
+		mydata->is_temporary_alias = 1;
 	}
 	efree(savebuf);
 	
@@ -1069,7 +1070,7 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 	mydata->alias = alias ? estrndup(alias, alias_len) : estrndup(mydata->fname, fname_len);
 	mydata->alias_len = alias ? alias_len : fname_len;
 	snprintf(mydata->version, sizeof(mydata->version), "%s", PHAR_API_VERSION_STR);
-	mydata->is_explicit_alias = alias ? 1 : 0;
+	mydata->is_temporary_alias = alias ? 0 : 1;
 	mydata->internal_file_start = -1;
 	mydata->fp = fp;
 	mydata->is_writeable = 1;
@@ -1201,7 +1202,7 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 				array_init(&filterparams);
 				/* ext/zlib zval_dtors a separated zval, so we have to make sure it doesn't destroy ours */
 #if PHP_VERSION_ID < 50300
-				filterparams->refcount = 26;
+				filterparams.refcount = 26;
 #else
 				Z_SET_REFCOUNT(filterparams, 26);
 #endif
@@ -2082,7 +2083,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, char **error 
 	 *  ?: phar metadata
 	 */
 	restore_alias_len = phar->alias_len;
-	if (!phar->is_explicit_alias) {
+	if (phar->is_temporary_alias) {
 		phar->alias_len = 0;
 	}
 
