@@ -1046,8 +1046,8 @@ PHP_METHOD(Phar, __construct)
 #if !HAVE_SPL
 	zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Cannot instantiate Phar object without SPL extension");
 #else
-	char *fname, *alias = NULL, *error;
-	int fname_len, alias_len = 0;
+	char *fname, *alias = NULL, *error, *arch, *entry = NULL, *save_fname;
+	int fname_len, alias_len = 0, arch_len, entry_len;
 	long flags = 0;
 	phar_archive_object *phar_obj;
 	phar_archive_data   *phar_data;
@@ -1064,23 +1064,45 @@ PHP_METHOD(Phar, __construct)
 		return;
 	}
 
+	if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len)) {
+		/* use arch for fname instead of fname */
+		/* this allows support for RecursiveDirectoryIterator of subdirectories */
+		save_fname = fname;
+		fname = arch;
+		fname_len = arch_len;
+	}
 	if (phar_open_or_create_filename(fname, fname_len, alias, alias_len, REPORT_ERRORS, &phar_data, &error TSRMLS_CC) == FAILURE) {
+		if (fname == arch) {
+			efree(arch);
+			fname = save_fname;
+		}
 		if (error) {
+			efree(entry);
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 				"Cannot open phar file '%s' with alias '%s': %s", fname, alias, error);
 			efree(error);
 		} else {
+			efree(entry);
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 				"Cannot open phar file '%s' with alias '%s'", fname, alias);
 		}
 		return;
 	}
 
+	if (fname == arch) {
+		efree(arch);
+		fname = save_fname;
+	}
 	phar_data->refcount++;
 	phar_obj->arc.archive = phar_data;
 	phar_obj->spl.oth_handler = &phar_spl_foreign_handler;
 
-	fname_len = spprintf(&fname, 0, "phar://%s", phar_data->fname);
+	if (entry) {
+		fname_len = spprintf(&fname, 0, "phar://%s%s", phar_data->fname, entry);
+		efree(entry);
+	} else {
+		fname_len = spprintf(&fname, 0, "phar://%s", phar_data->fname);
+	}
 	INIT_PZVAL(&arg1);
 	ZVAL_STRINGL(&arg1, fname, fname_len, 0);
 
@@ -1976,9 +1998,9 @@ PHP_METHOD(Phar, getAlias)
  */
 PHP_METHOD(Phar, setAlias)
 {
-	char *alias, *error;
+	char *alias, *error, *oldalias;
 	phar_archive_data **fd_ptr;
-	int alias_len;
+	int alias_len, oldalias_len, old_temp, readd = 0;
 	PHAR_ARCHIVE_OBJECT();
 
 	if (PHAR_G(readonly)) {
@@ -1999,23 +2021,35 @@ PHP_METHOD(Phar, setAlias)
 		}
 		if (phar_obj->arc.archive->alias_len && SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), phar_obj->arc.archive->alias, phar_obj->arc.archive->alias_len, (void**)&fd_ptr)) {
 			zend_hash_del(&(PHAR_GLOBALS->phar_alias_map), phar_obj->arc.archive->alias, phar_obj->arc.archive->alias_len);
+			readd = 1;
 		}
 
-		if (phar_obj->arc.archive->alias) {
-			efree(phar_obj->arc.archive->alias);
-		}
+		oldalias = phar_obj->arc.archive->alias;
+		oldalias_len = phar_obj->arc.archive->alias_len;
+		old_temp = phar_obj->arc.archive->is_temporary_alias;
 		if (alias_len) {
 			phar_obj->arc.archive->alias = estrndup(alias, alias_len);
 		} else {
 			phar_obj->arc.archive->alias = NULL;
 		}
 		phar_obj->arc.archive->alias_len = alias_len;
-		phar_obj->arc.archive->is_explicit_alias = 1;
+		phar_obj->arc.archive->is_temporary_alias = 0;
 
 		phar_flush(phar_obj->arc.archive, NULL, 0, &error TSRMLS_CC);
 		if (error) {
+			phar_obj->arc.archive->alias = oldalias;
+			phar_obj->arc.archive->alias_len = oldalias_len;
+			phar_obj->arc.archive->is_temporary_alias = old_temp;
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+			if (readd) {
+				zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), oldalias, oldalias_len, (void*)&(phar_obj->arc.archive), sizeof(phar_archive_data*), NULL);
+			}
 			efree(error);
+			return;
+		}
+		zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&(phar_obj->arc.archive), sizeof(phar_archive_data*), NULL);
+		if (oldalias) {
+			efree(oldalias);
 		}
 		RETURN_TRUE;
 	}

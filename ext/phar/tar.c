@@ -312,12 +312,12 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 	}
 	myphar = *actual;
 	if (actual_alias) {
-		myphar->is_explicit_alias = 1;
+		myphar->is_temporary_alias = 0;
 		zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), actual_alias, myphar->alias_len, (void*)&myphar, sizeof(phar_archive_data*), NULL);
 	} else {
 		myphar->alias = estrndup(myphar->fname, fname_len);
 		myphar->alias_len = fname_len;
-		myphar->is_explicit_alias = 0;
+		myphar->is_temporary_alias = 1;
 	}
 	if (pphar) {
 		*pphar = myphar;
@@ -448,14 +448,26 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 	entry.phar = phar;
 	entry.fp_type = PHAR_MOD;
 	/* set alias */
-	if (phar->is_explicit_alias) {
+	if (!phar->is_temporary_alias && phar->alias_len) {
 		entry.filename = estrndup(".phar/alias.txt", sizeof(".phar/alias.txt")-1);
 		entry.filename_len = sizeof(".phar/alias.txt")-1;
 		entry.fp = php_stream_fopen_tmpfile();
 		entry.crc32 = phar_tar_checksum(phar->alias, phar->alias_len);
-		php_stream_write(entry.fp, phar->alias, phar->alias_len);
+		if (phar->alias_len != (int)php_stream_write(entry.fp, phar->alias, phar->alias_len)) {
+			if (error) {
+				spprintf(error, 0, "unable to set alias in tar-based phar \"%s\"", phar->fname);
+			}
+			return EOF;
+		}
 		entry.uncompressed_filesize = phar->alias_len;
-		zend_hash_update(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL);
+		if (SUCCESS != zend_hash_update(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL)) {
+			if (error) {
+				spprintf(error, 0, "unable to set alias in tar-based phar \"%s\"", phar->fname);
+			}
+			return EOF;
+		}
+	} else {
+		zend_hash_del(&phar->manifest, ".phar/alias.txt", sizeof(".phar/alias.txt")-1);
 	}
 
 	/* set stub */

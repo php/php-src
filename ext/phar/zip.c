@@ -350,7 +350,7 @@ foundit:
 				}
 			}
 
-			mydata->is_explicit_alias = 1;
+			mydata->is_temporary_alias = 0;
 			mydata->alias_len = zipentry.uncompsize;
 			zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), mydata->alias, mydata->alias_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
 			/* return to central directory parsing */
@@ -659,11 +659,11 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 	entry.fp_type = PHAR_MOD;
 
 	/* set alias */
-	if (phar->is_explicit_alias) {
+	if (!phar->is_temporary_alias && phar->alias_len) {
 		entry.fp = php_stream_fopen_tmpfile();
 		if (phar->alias_len != (int)php_stream_write(entry.fp, phar->alias, phar->alias_len)) {
 			if (error) {
-				spprintf(error, 0, "unable to set alias in new zip-based phar \"%s\"", phar->fname);
+				spprintf(error, 0, "unable to set alias in zip-based phar \"%s\"", phar->fname);
 			}
 			return EOF;
 		}
@@ -673,10 +673,12 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 		entry.is_modified = 1;
 		if (SUCCESS != zend_hash_update(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL)) {
 			if (error) {
-				spprintf(error, 0, "unable to set alias in new zip-based phar \"%s\"", phar->fname);
+				spprintf(error, 0, "unable to set alias in zip-based phar \"%s\"", phar->fname);
 			}
 			return EOF;
 		}
+	} else {
+		zend_hash_del(&phar->manifest, ".phar/alias.txt", sizeof(".phar/alias.txt")-1);
 	}
 	/* register alias */
 	if (phar->alias_len) {

@@ -265,7 +265,8 @@ struct _phar_archive_data {
 	int                      sig_len;
 	char                     *signature;
 	zval                     *metadata;
-	int                      is_explicit_alias:1;
+	/* if 1, then this alias was manually specified by the user and is not a permanent alias */
+	int                      is_temporary_alias:1;
 	int                      is_modified:1;
 	int                      is_writeable:1;
 	int                      is_brandnew:1;
