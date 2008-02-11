@@ -2020,8 +2020,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
 	} else {
-		if (OP2_TYPE != IS_UNUSED &&
-		    EG(This) &&
+		if (EG(This) &&
 		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
 		    !instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
