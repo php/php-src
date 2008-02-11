@@ -132,7 +132,7 @@ array(2) {
     [0]=>
     int(1)
     [1]=>
-    string(3) "one"
+    unicode(3) "one"
     [2]=>
     float(1.1)
   }
@@ -141,7 +141,7 @@ array(2) {
     [0]=>
     int(2)
     [1]=>
-    string(3) "two"
+    unicode(3) "two"
     [2]=>
     float(2.2)
   }
@@ -152,7 +152,7 @@ array(2) {
     [0]=>
     int(1)
     [1]=>
-    string(3) "one"
+    unicode(3) "one"
     [2]=>
     float(1.1)
   }
@@ -161,7 +161,7 @@ array(2) {
     [0]=>
     int(2)
     [1]=>
-    string(3) "two"
+    unicode(3) "two"
     [2]=>
     float(2.2)
   }
@@ -173,7 +173,7 @@ array(2) {
     [0]=>
     int(1)
     [1]=>
-    string(3) "one"
+    unicode(3) "one"
     [2]=>
     float(1.1)
   }
@@ -182,7 +182,7 @@ array(2) {
     [0]=>
     int(2)
     [1]=>
-    string(3) "two"
+    unicode(3) "two"
     [2]=>
     float(2.2)
   }
