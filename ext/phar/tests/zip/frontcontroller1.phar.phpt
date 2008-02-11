@@ -7,7 +7,7 @@ SCRIPT_NAME=/frontcontroller1.phar.php
 REQUEST_URI=/frontcontroller1.phar.php/a.jpg
 PATH_INFO=/a.jpg
 --FILE_EXTERNAL--
-frontcontroller.phar.zip
+files/frontcontroller.phar.zip
 --EXPECTHEADERS--
 Content-type: image/jpeg
 Content-length: 3

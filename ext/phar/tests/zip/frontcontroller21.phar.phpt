@@ -8,7 +8,7 @@ REQUEST_URI=/frontcontroller21.phar.php/index.php?test=hi
 PATH_INFO=/index.php
 QUERY_STRING=test=hi
 --FILE_EXTERNAL--
-frontcontroller12.phar.zip
+files/frontcontroller12.phar.zip
 --EXPECTHEADERS--
 Content-type: text/html
 --EXPECTF--

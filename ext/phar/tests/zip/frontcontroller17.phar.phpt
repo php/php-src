@@ -7,7 +7,7 @@ SCRIPT_NAME=/frontcontroller17.phar.php
 REQUEST_URI=/frontcontroller17.phar.php/fronk.gronk
 PATH_INFO=/fronk.gronk
 --FILE_EXTERNAL--
-frontcontroller8.phar.zip
+files/frontcontroller8.phar.zip
 --EXPECTHEADERS--
 Content-type: application/octet-stream
 Content-length: 4

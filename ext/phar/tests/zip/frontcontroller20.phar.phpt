@@ -7,7 +7,7 @@ SCRIPT_NAME=/frontcontroller20.phar.php
 REQUEST_URI=/frontcontroller20.phar.php/
 PATH_INFO=/
 --FILE_EXTERNAL--
-frontcontroller11.phar.zip
+files/frontcontroller11.phar.zip
 --EXPECTF--
 Fatal error: Uncaught exception 'UnexpectedValueException' with message 'Non-string value passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME' in %sfrontcontroller20.phar.php:2
 Stack trace:
