@@ -39,6 +39,9 @@ int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t positi
 	php_stream *fp = phar_get_efp(entry);
 	off_t temp;
 
+	if (entry->is_dir) {
+		return 0;
+	}
 	switch (whence) {
 		case SEEK_END :
 			temp = entry->offset + entry->uncompressed_filesize + offset;
