@@ -210,6 +210,7 @@ typedef enum mysqlnd_server_option
 #define TIMESTAMP_FLAG			 1024
 #define SET_FLAG				 2048
 #define NO_DEFAULT_VALUE_FLAG	 4096
+#define ON_UPDATE_NOW_FLAG		 8192
 #define PART_KEY_FLAG			16384
 #define GROUP_FLAG				32768
 #define NUM_FLAG				32768

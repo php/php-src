@@ -78,7 +78,8 @@ void	_mysqlnd_free(void *ptr MYSQLND_MEM_D);
 
 char *	mysqlnd_get_backtrace(TSRMLS_D);
 
-#if PHP_DEBUG && !defined(PHP_WIN32)
+#if MYSQLND_DBG_ENABLED == 1
+
 #define DBG_INF(msg) do { if (dbg_skip_trace == FALSE) MYSQLND_G(dbg)->m->log(MYSQLND_G(dbg), __LINE__, __FILE__, -1, "info : ", (msg)); } while (0)
 #define DBG_ERR(msg) do { if (dbg_skip_trace == FALSE) MYSQLND_G(dbg)->m->log(MYSQLND_G(dbg), __LINE__, __FILE__, -1, "error: ", (msg)); } while (0)
 #define DBG_INF_FMT(...) do { if (dbg_skip_trace == FALSE) MYSQLND_G(dbg)->m->log_va(MYSQLND_G(dbg), __LINE__, __FILE__, -1, "info : ", __VA_ARGS__); } while (0)
@@ -90,7 +91,9 @@ char *	mysqlnd_get_backtrace(TSRMLS_D);
 
 
 
-#else
+#elif MYSQLND_DBG_ENABLED == 0
+
+
 static inline void DBG_INF(char *msg) {}
 static inline void DBG_ERR(char *msg) {}
 static inline void DBG_INF_FMT(char *format, ...) {}
