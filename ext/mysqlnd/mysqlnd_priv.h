@@ -90,7 +90,7 @@
 #define SERVER_STATUS_LAST_ROW_SENT			128
 #define SERVER_STATUS_DB_DROPPED			256 /* A database was dropped */
 #define SERVER_STATUS_NO_BACKSLASH_ESCAPES	512
-
+#define SERVER_QUERY_WAS_SLOW				1024
 
 
 /* Client Error codes */
