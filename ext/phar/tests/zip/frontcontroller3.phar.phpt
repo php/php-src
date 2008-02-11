@@ -7,7 +7,7 @@ SCRIPT_NAME=/frontcontroller3.phar.php
 REQUEST_URI=/frontcontroller3.phar.php/a.phps
 PATH_INFO=/a.phps
 --FILE_EXTERNAL--
-frontcontroller.phar.zip
+files/frontcontroller.phar.zip
 --EXPECTHEADERS--
 Content-type: text/html
 --EXPECT--
