@@ -1065,8 +1065,18 @@ PHP_METHOD(Phar, __construct)
 		/* use arch for fname instead of fname */
 		/* this allows support for RecursiveDirectoryIterator of subdirectories */
 		save_fname = fname;
+#ifdef PHP_WIN32
+		phar_unixify_path_separators(arch, arch_len);
+#endif
 		fname = arch;
 		fname_len = arch_len;
+#ifdef PHP_WIN32
+	} else {
+		arch = estrndup(fname, fname_len);
+		save_fname = fname;
+		fname = arch;
+		phar_unixify_path_separators(arch, arch_len);
+#endif
 	}
 	if (phar_open_or_create_filename(fname, fname_len, alias, alias_len, REPORT_ERRORS, &phar_data, &error TSRMLS_CC) == FAILURE) {
 		if (fname == arch) {
