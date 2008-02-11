@@ -221,8 +221,8 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 		if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(manifest, &key, &keylen, &unused, 0, NULL)) {
 			break;
 		}
-		if (keylen <= dirlen) {
-			if (keylen < dirlen || !strncmp(key, dir, dirlen)) {
+		if (keylen <= (uint)dirlen) {
+			if (keylen < (uint)dirlen || !strncmp(key, dir, dirlen)) {
 				if (SUCCESS != zend_hash_move_forward(manifest)) {
 					break;
 				}
@@ -388,7 +388,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char 
 			if (HASH_KEY_NON_EXISTANT != 
 					zend_hash_get_current_key_ex(
 						&phar->manifest, &key, &keylen, &unused, 0, NULL)) {
-				if (keylen > i_len && 0 == memcmp(key, internal_file, i_len)) {
+				if (keylen > (uint)i_len && 0 == memcmp(key, internal_file, i_len)) {
 					/* directory found */
 					internal_file = estrndup(internal_file,
 							i_len);
