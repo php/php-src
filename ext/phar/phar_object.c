@@ -1172,16 +1172,6 @@ PHP_METHOD(Phar, getSupportedCompression)
 		return; \
 	}
 
-/* {{{ proto void Phar::__destruct()
- * remove reference count of phar
- */
-PHP_METHOD(Phar, __destruct)
-{
-	PHAR_ARCHIVE_OBJECT();
-
-	phar_archive_delref(phar_obj->arc.archive TSRMLS_CC);
-}
-
 static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ */
 {
 	zval **value;
@@ -3449,7 +3439,6 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, __construct,           arginfo_phar___construct,  ZEND_ACC_PRIVATE)
 #else
 	PHP_ME(Phar, __construct,           arginfo_phar___construct,  ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, __destruct,            NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, startBuffering,        NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, stopBuffering,         NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, compressAllFilesGZ,    NULL,                      ZEND_ACC_PUBLIC)

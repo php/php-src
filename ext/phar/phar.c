@@ -213,6 +213,13 @@ int phar_archive_delref(phar_archive_data *phar TSRMLS_DC) /* {{{ */
 			phar_destroy_phar_data(phar TSRMLS_CC);
 		}
 		return 1;
+	} else if (!phar->refcount) {
+		if (phar->fp) {
+			/* close open file handle - allows removal or rename of
+			the file on windows, which has greedy locking */
+			php_stream_close(phar->fp);
+			phar->fp = NULL;
+		}
 	}
 	return 0;
 }
