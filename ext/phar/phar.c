@@ -1039,10 +1039,10 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 	mydata = ecalloc(sizeof(phar_archive_data), 1);
 
 	mydata->fname = expand_filepath(fname, NULL TSRMLS_CC);
-#ifdef PHP_WIN32
-	phar_unixify_path_separators(fname, fname_len);
-#endif
 	fname_len = strlen(mydata->fname);
+#ifdef PHP_WIN32
+	phar_unixify_path_separators(mydata->fname, fname_len);
+#endif
 	
 	if (pphar) {
 		*pphar = mydata;
