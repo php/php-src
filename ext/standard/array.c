@@ -2296,7 +2296,7 @@ PHP_FUNCTION(array_slice)
 	zval	 *input,		/* Input array */
 			**entry;		/* An array entry */
 	long	 offset,		/* Offset to get elements from */
-			 length = NULL;
+			 length = 0;
 	zend_bool preserve_keys = 0; /* Whether to preserve keys while copying to the new array or not */
 	int		 num_in,		/* Number of elements in the input array */
 			 pos;			/* Current position in the array */
@@ -2313,7 +2313,7 @@ PHP_FUNCTION(array_slice)
 	num_in = zend_hash_num_elements(Z_ARRVAL_P(input));
 
 	/* We want all entries from offset to the end if length is not passed or length is null */
-	if (length == NULL) {
+	if (length == 0) {
 		length = num_in;
 	}
 
