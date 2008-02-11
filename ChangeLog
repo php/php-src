@@ -1,3 +1,37 @@
+2008-02-10  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      ext/standard/tests/file/is_dir_variation2.phpt:
+      MFH: The exact message differs on different systems
+
+    * ext/standard/tests/file/is_dir_variation2.phpt:
+      The exact message differs on different systems
+
+2008-02-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/mssql/php_mssql.c:
+      
+      Possible fix for bug #43861
+
+2008-02-10  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/spl_dllist.c:
+      Cosmetics, move stuff around, ws
+
+2008-02-10  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/file.c:
+      Fixed Bug #42229 (fgetcsv() behaves differently for a file containing '\n'
+      with php5 and php6)
+
+    * ext/standard/tests/file/bug42229.phpt:
+      New test
+
+    * ext/standard/file.c:
+      Fixed Bug #42163 (fgetcsv() gives different output with and without
+      Unicode)
+
 2008-02-09  Johannes Schlüter  <johannes@schlueters.de>
 
     * ext/ldap/ldap.c:
