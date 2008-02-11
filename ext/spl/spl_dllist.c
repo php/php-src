@@ -314,25 +314,6 @@ static void *spl_ptr_llist_shift(spl_ptr_llist *llist) /* {{{ */
 }
 /* }}} */
 
-static void spl_dllist_object_free_storage(void *object TSRMLS_DC) /* {{{ */
-{
-	spl_dllist_object *intern = (spl_dllist_object *)object;
-	zval              *tmp    = NULL;
-
-	zend_object_std_dtor(&intern->std TSRMLS_CC);
-
-	while(intern->llist->count > 0) {
-		tmp = (zval *)spl_ptr_llist_pop(intern->llist);
-		zval_ptr_dtor(&tmp);
-	}
-
-	spl_ptr_llist_destroy(intern->llist);
-	zval_ptr_dtor(&intern->retval);
-
-	efree(object);
-}
-/* }}} */
-
 static void spl_ptr_llist_copy(spl_ptr_llist *from, spl_ptr_llist *to) /* {{{ */
 {
 	spl_ptr_llist_element   *current = from->head, *next;
@@ -352,6 +333,25 @@ static void spl_ptr_llist_copy(spl_ptr_llist *from, spl_ptr_llist *to) /* {{{ */
 }
 /* }}} */
 
+/* }}} */
+
+static void spl_dllist_object_free_storage(void *object TSRMLS_DC) /* {{{ */
+{
+	spl_dllist_object *intern = (spl_dllist_object *)object;
+	zval              *tmp    = NULL;
+
+	zend_object_std_dtor(&intern->std TSRMLS_CC);
+
+	while(intern->llist->count > 0) {
+		tmp = (zval *)spl_ptr_llist_pop(intern->llist);
+		zval_ptr_dtor(&tmp);
+	}
+
+	spl_ptr_llist_destroy(intern->llist);
+	zval_ptr_dtor(&intern->retval);
+
+	efree(object);
+}
 /* }}} */
 
 zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
@@ -1054,20 +1054,20 @@ zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object
 		return NULL;
 	}
 
-	iterator     = emalloc(sizeof(spl_dllist_it));
-
 	Z_ADDREF_P(object);
-	iterator->intern.it.data = (void*)object;
-	iterator->intern.it.funcs = &spl_dllist_it_funcs;
-	iterator->intern.ce = ce;
-	iterator->intern.value = NULL;
+
+	iterator                     = emalloc(sizeof(spl_dllist_it));
+	iterator->intern.it.data     = (void*)object;
+	iterator->intern.it.funcs    = &spl_dllist_it_funcs;
+	iterator->intern.ce          = ce;
+	iterator->intern.value       = NULL;
 	iterator->traverse_position  = dllist_object->traverse_position;
 	iterator->traverse_pointer   = dllist_object->traverse_pointer;
 	iterator->flags              = dllist_object->flags & SPL_DLLIST_IT_MASK;
+	iterator->object             = dllist_object;
 
 	SPL_LLIST_CHECK_ADDREF(iterator->traverse_pointer);
 
-	iterator->object = dllist_object;
 
 	return (zend_object_iterator*)iterator;
 }
