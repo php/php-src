@@ -1061,7 +1061,7 @@ PHP_METHOD(Phar, __construct)
 		return;
 	}
 
-	if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len)) {
+	if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
 		/* use arch for fname instead of fname */
 		/* this allows support for RecursiveDirectoryIterator of subdirectories */
 		save_fname = fname;
@@ -1588,7 +1588,7 @@ static void phar_convert_to_other(phar_archive_data *source, int convert, php_ui
 			*newentry.metadata = *t;
 			zval_copy_ctor(newentry.metadata);
 #if PHP_VERSION_ID < 50300
-			newentry.metadata.refcount = 1;
+			newentry.metadata->refcount = 1;
 #else
 			Z_SET_REFCOUNT_P(newentry.metadata, 1);
 #endif
