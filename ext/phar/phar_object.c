@@ -521,7 +521,7 @@ PHP_METHOD(Phar, webPhar)
 		zp[0] = &params;
 
 #if PHP_VERSION_ID < 50300
-		if (FAILURE == zend_fcall_info_init(rewrite, &fci, &fcc, NULL TSRMLS_CC)) {
+		if (FAILURE == zend_fcall_info_init(rewrite, &fci, &fcc TSRMLS_CC)) {
 #else
 		if (FAILURE == zend_fcall_info_init(rewrite, 0, &fci, &fcc, NULL, NULL TSRMLS_CC)) {
 #endif
@@ -2448,7 +2448,7 @@ PHP_METHOD(Phar, copy)
 		*newentry.metadata = *t;
 		zval_copy_ctor(newentry.metadata);
 #if PHP_VERSION_ID < 50300
-		newentry.metadata.refcount = 1;
+		newentry.metadata->refcount = 1;
 #else
 		Z_SET_REFCOUNT_P(newentry.metadata, 1);
 #endif
