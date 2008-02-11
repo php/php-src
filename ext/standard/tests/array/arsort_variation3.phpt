@@ -59,7 +59,7 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing arsort() : usage variations ***
 
 -- Testing arsort() by supplying various integer/float arrays --
@@ -273,7 +273,7 @@ array(11) {
 bool(true)
 array(7) {
   [2]=>
-  float(2147483648)
+  %s(2147483648)
   [1]=>
   int(2147483647)
   [6]=>
@@ -283,15 +283,15 @@ array(7) {
   [3]=>
   int(-2147483647)
   [4]=>
-  float(-2147483648)
+  %s(-2147483648)
   [7]=>
-  float(-2147483649)
+  %s(-2147483649)
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
 array(7) {
   [2]=>
-  float(2147483648)
+  %s(2147483648)
   [1]=>
   int(2147483647)
   [6]=>
@@ -301,15 +301,15 @@ array(7) {
   [3]=>
   int(-2147483647)
   [4]=>
-  float(-2147483648)
+  %s(-2147483648)
   [7]=>
-  float(-2147483649)
+  %s(-2147483649)
 }
 - Sort_flag = SORT_NUMERIC -
 bool(true)
 array(7) {
   [2]=>
-  float(2147483648)
+  %s(2147483648)
   [1]=>
   int(2147483647)
   [6]=>
@@ -319,8 +319,8 @@ array(7) {
   [3]=>
   int(-2147483647)
   [4]=>
-  float(-2147483648)
+  %s(-2147483648)
   [7]=>
-  float(-2147483649)
+  %s(-2147483649)
 }
 Done
