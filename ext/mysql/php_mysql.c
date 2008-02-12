@@ -556,7 +556,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		hashed_details_length = spprintf(&hashed_details, 0, "mysql__%s_", user);
 		client_flags = CLIENT_INTERACTIVE;
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!s!ll", &host_and_port, &host_len,
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!s!bl", &host_and_port, &host_len,
 									&user, &user_len, &passwd, &passwd_len, 
 									&new_link, &client_flags)==FAILURE) {
 			return;
