@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2008, PHP 5.2.6
+- Fixed potential memleak in stream filter parameter for zlib filter (Greg)
 - Added Reflection API metadata for the methods of the DOM classes. (Sebastian)
 - Fixed weired behavior in CGI parameter parsing. (Dmitry, Hannes Magnusson)
 - Fixed a safe_mode bypass in cURL identified by Maksymilian Arciemowicz.
