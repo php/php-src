@@ -26,6 +26,10 @@
 php_stream *phar_get_efp(phar_entry_info *entry)
 {
 	if (entry->fp_type == PHAR_FP) {
+		if (!entry->phar->fp) {
+			/* re-open just in time for cases where our refcount reached 0 on the phar archive */
+			phar_open_archive_fp(entry->phar TSRMLS_CC);
+		}
 		return entry->phar->fp;
 	} else if (entry->fp_type == PHAR_UFP) {
 		return entry->phar->ufp;
