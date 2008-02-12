@@ -471,14 +471,14 @@ PHP_FUNCTION(pow)
    Returns e raised to the power of the number */
 PHP_FUNCTION(exp)
 {
-	zval **num;
+        double num;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_double_ex(num);
-	Z_DVAL_P(return_value) = exp(Z_DVAL_PP(num));
-	Z_TYPE_P(return_value) = IS_DOUBLE;
+        if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
+                return;
+        }
+
+        RETURN_DOUBLE(exp(num));
+
 }
 /* }}} */
 
