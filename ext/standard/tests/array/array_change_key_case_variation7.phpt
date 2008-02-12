@@ -1,5 +1,7 @@
 --TEST--
 Test array_change_key_case() function : usage variations - referenced variables
+--INI--
+allow_call_time_pass_reference=on
 --FILE--
 <?php
 /* Prototype  : array array_change_key_case(array $input [, int $case])
