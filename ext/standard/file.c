@@ -1368,11 +1368,12 @@ PHPAPI PHP_FUNCTION(fwrite)
 	}
 
 	if (Z_TYPE_P(zstring) == IS_UNICODE) {
+		int32_t write_uchars = 0;
+
 		if (write_len < 0 || write_len > Z_USTRLEN_P(zstring)) {
 			write_len = Z_USTRLEN_P(zstring);
 		}
 		/* Convert code units to data points */
-		int32_t write_uchars = 0;
 
 		U16_FWD_N(Z_USTRVAL_P(zstring), write_uchars, Z_USTRLEN_P(zstring), write_len);
 		write_len = write_uchars;
