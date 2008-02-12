@@ -75,7 +75,6 @@ static int le_pmysqli;
 void php_mysqli_dtor_p_elements(void *data)
 {
 	MYSQL *mysql = (MYSQL *) data;
-	TSRMLS_FETCH();
 #if defined(HAVE_MYSQLND)
 	mysqlnd_end_psession(mysql);
 #endif
