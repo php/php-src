@@ -76,6 +76,8 @@ void php_mysqli_dtor_p_elements(void *data)
 {
 	MYSQL *mysql = (MYSQL *) data;
 #if defined(HAVE_MYSQLND)
+	TSRMLS_FETCH();
+
 	mysqlnd_end_psession(mysql);
 #endif
 	mysqli_close(mysql, MYSQLI_CLOSE_IMPLICIT);
