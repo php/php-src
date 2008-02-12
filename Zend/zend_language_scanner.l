@@ -39,6 +39,9 @@
 %x ST_HEREDOC
 %x ST_START_HEREDOC
 %x ST_END_HEREDOC
+%x ST_NOWDOC
+%x ST_START_NOWDOC
+%x ST_END_NOWDOC
 %x ST_LOOKING_FOR_PROPERTY
 %x ST_LOOKING_FOR_VARNAME
 %x ST_VAR_OFFSET
@@ -1411,6 +1414,8 @@ DOUBLE_QUOTES_CHARS ("{"*([^$"\\{]|("\\"{ANY_CHAR}))|{DOUBLE_QUOTES_LITERAL_DOLL
 BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({HEREDOC_NEWLINE}+({HEREDOC_NON_LABEL}|{HEREDOC_LABEL_NO_NEWLINE})))
 
+NOWDOC_CHARS		({NEWLINE}*(([^a-zA-Z_\x7f-\xff\n\r][^\n\r]*)|({LABEL}[^a-zA-Z0-9_\x7f-\xff;\n\r][^\n\r]*)|({LABEL}[;][^\n\r]+)))
+
 %option noyylineno
 %option noyywrap
 %%
@@ -2588,6 +2593,109 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 	}
 }
 
+
+%{
+/* BEGIN nowdoc */
+%}
+<ST_IN_SCRIPTING>b?"<<<"{TABS_AND_SPACES}[']{LABEL}[']{NEWLINE} {
+	int bprefix = (yytext[0] != '<') ? 1 : 0;
+	char *s;
+	CG(zend_lineno)++;
+	/* 3 is <<<, 2 is quotes, 1 is newline */
+	CG(heredoc_len) = yyleng-bprefix-3-2-1-(yytext[yyleng-2]=='\r'?1:0);
+	s = yytext+bprefix+3;
+	while ((*s == ' ') || (*s == '\t')) {
+		s++;
+		CG(heredoc_len)--;
+	}
+	s++; /* first quote */
+	CG(heredoc) = estrndup(s, CG(heredoc_len));
+
+	CG(literal_type) = bprefix?IS_STRING:ZEND_STR_TYPE;
+	BEGIN(ST_START_NOWDOC);
+	return T_START_NOWDOC;
+}
+
+<ST_START_NOWDOC>{ANY_CHAR} {
+	yyless(0);
+	BEGIN(ST_NOWDOC);
+}
+
+<ST_START_NOWDOC>{LABEL}";"?[\r\n] {
+	int label_len = yyleng - 1;
+
+	if (yytext[label_len-1]==';') {
+		label_len--;
+	}
+
+	if (label_len==CG(heredoc_len) && !memcmp(yytext, CG(heredoc), label_len)) {
+		yyless(label_len-1);
+		yyleng = 0;
+		BEGIN(ST_END_NOWDOC);
+		if (CG(literal_type) == IS_UNICODE) {
+			ZVAL_EMPTY_UNICODE(zendlval);
+		} else {
+			ZVAL_EMPTY_STRING(zendlval);
+		}
+		return T_ENCAPSED_AND_WHITESPACE;
+	} else {
+		yyless(label_len);
+		yymore();
+		BEGIN(ST_NOWDOC);
+	}
+}
+
+<ST_NOWDOC>{NOWDOC_CHARS}*{NEWLINE}+{LABEL}";"?[\n\r] {
+	char *end = yytext + yyleng - 1;
+
+	if (end[-1] == ';') {
+		end--;
+		yyleng--;
+	}
+
+	if (yyleng > CG(heredoc_len) && !memcmp(end - CG(heredoc_len), CG(heredoc), CG(heredoc_len))) {
+		int len = yyleng - CG(heredoc_len) - 2; /* 2 for newline before and after label */
+
+		if (len > 0 && yytext[len - 1] == '\r' && yytext[len] == '\n') {
+			len--;
+		}
+
+		/* Go back before last label char, to match in ST_END_HEREDOC state */
+		yyless(yyleng - 2);
+
+		/* Subtract the remaining label length. yyleng must include newline
+		 * before label, for zend_highlight/strip, tokenizer, etc. */
+		yyleng -= CG(heredoc_len) - 1;
+
+		CG(increment_lineno) = 1; /* For newline before label */
+		BEGIN(ST_END_NOWDOC);
+
+		HANDLE_NEWLINES(yytext, len);
+		if (!zend_copy_scanner_string(zendlval, yytext, len, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
+			return 0;
+		}
+		return T_ENCAPSED_AND_WHITESPACE;
+	} else {
+		/* Go back to end of label, so the next match works correctly in case of
+		 * a variable or another label at the beginning of the next line */
+		yyless(yyleng - 1);
+		yymore();
+	}
+}
+
+<ST_END_NOWDOC>{ANY_CHAR} {
+	Z_STRVAL_P(zendlval) = CG(heredoc);
+	Z_STRLEN_P(zendlval) = CG(heredoc_len);
+	yytext = CG(heredoc);
+	yyleng = CG(heredoc_len);
+	CG(heredoc) = NULL;
+	CG(heredoc_len) = 0;
+	BEGIN(ST_IN_SCRIPTING);
+	return T_END_NOWDOC;
+}
+%{
+/* END nowdoc */
+%}
 
 <ST_DOUBLE_QUOTES>["] {
 	BEGIN(ST_IN_SCRIPTING);
