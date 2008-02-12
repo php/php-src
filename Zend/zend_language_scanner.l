@@ -62,6 +62,8 @@
 #include "zend_API.h"
 #include "zend_strtod.h"
 #include "zend_exceptions.h"
+#include "tsrm_virtual_cwd.h"
+#include "tsrm_config_common.h"
 
 #ifdef HAVE_STDARG_H
 # include <stdarg.h>
@@ -1543,6 +1545,33 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 	zendlval->value.str.val = estrndup(filename, zendlval->value.str.len);
 	zendlval->type = IS_STRING;
 	return T_FILE;
+}
+
+<ST_IN_SCRIPTING>"__DIR__" {
+	char *filename = zend_get_compiled_filename(TSRMLS_C);
+	const size_t filename_len = strlen(filename);
+	char *dirname;
+
+	if (!filename) {
+		filename = "";
+	}
+
+	dirname = estrndup(filename, filename_len);
+	zend_dirname(dirname, filename_len);
+
+	if (strcmp(dirname, ".") == 0) {
+		dirname = erealloc(dirname, MAXPATHLEN);
+#if HAVE_GETCWD
+		VCWD_GETCWD(dirname, MAXPATHLEN);
+#elif HAVE_GETWD
+		VCWD_GETWD(dirname);
+#endif
+	}
+
+	zendlval->value.str.len = strlen(dirname);
+	zendlval->value.str.val = dirname;
+	zendlval->type = IS_STRING;
+	return T_DIR;
 }
 
 <ST_IN_SCRIPTING>"__NAMESPACE__" {

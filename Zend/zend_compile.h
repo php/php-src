@@ -570,6 +570,7 @@ void zend_auto_global_dtor(zend_auto_global *auto_global);
 ZEND_API int zend_register_auto_global(char *name, uint name_len, zend_auto_global_callback auto_global_callback TSRMLS_DC);
 ZEND_API zend_bool zend_is_auto_global(char *name, uint name_len TSRMLS_DC);
 ZEND_API int zend_auto_global_disable_jit(char *varname, zend_uint varname_length TSRMLS_DC);
+ZEND_API size_t zend_dirname(char *path, size_t len);
 
 int zendlex(znode *zendlval TSRMLS_DC);
 
