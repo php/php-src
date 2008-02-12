@@ -4945,6 +4945,8 @@ void zend_do_end_compilation(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
+/* {{{ zend_dirname
+   Returns directory name component of path */
 ZEND_API size_t zend_dirname(char *path, size_t len)
 {
 	register char *end = path + len - 1;
@@ -5036,6 +5038,7 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 	return (size_t)(end + 1 - path) + len_adjust;
 }
 /* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
