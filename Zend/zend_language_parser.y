@@ -786,13 +786,11 @@ r_variable:
 
 
 w_variable:
-	variable	{ zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); $$ = $1; }
-				{ zend_check_writable_variable(&$1); }
+	variable	{ zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); $$ = $1; zend_check_writable_variable(&$1); }
 ;
 
 rw_variable:
-	variable	{ zend_do_end_variable_parse(BP_VAR_RW, 0 TSRMLS_CC); $$ = $1; }
-				{ zend_check_writable_variable(&$1); }
+	variable	{ zend_do_end_variable_parse(BP_VAR_RW, 0 TSRMLS_CC); $$ = $1; zend_check_writable_variable(&$1); }
 ;
 
 variable:
@@ -867,7 +865,7 @@ dim_offset:
 
 object_property:
 		object_dim_list { $$ = $1; }
-	|	variable_without_objects { zend_do_end_variable_parse(BP_VAR_R, 0 TSRMLS_CC); } { znode tmp_znode;  zend_do_pop_object(&tmp_znode TSRMLS_CC);  zend_do_fetch_property(&$$, &tmp_znode, &$1 TSRMLS_CC);}
+	|	variable_without_objects { znode tmp_znode; zend_do_end_variable_parse(BP_VAR_R, 0 TSRMLS_CC); zend_do_pop_object(&tmp_znode TSRMLS_CC); zend_do_fetch_property(&$$, &tmp_znode, &$1 TSRMLS_CC);}
 ;
 
 object_dim_list:
