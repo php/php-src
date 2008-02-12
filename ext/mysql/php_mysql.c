@@ -643,7 +643,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		user = MySG(default_user);
 		passwd = MySG(default_password);
 		
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&s&s&ll", &host_and_port, &host_len, UG(utf8_conv),
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&s&s&bl", &host_and_port, &host_len, UG(utf8_conv),
 									&user, &user_len, UG(utf8_conv), &passwd, &passwd_len, UG(utf8_conv),
 									&new_link, &client_flags)==FAILURE) {
 			return;
