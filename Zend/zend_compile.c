@@ -5011,6 +5011,7 @@ again:
 			retval = T_ECHO;
 			break;
 		case T_END_HEREDOC:
+		case T_END_NOWDOC:
 			efree(Z_STRVAL(zendlval->u.constant));
 			break;
 	}

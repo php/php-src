@@ -149,6 +149,8 @@
 %token T_NAMESPACE
 %token T_NS_C
 %token T_DIR
+%token T_START_NOWDOC
+%token T_END_NOWDOC
 
 %% /* Rules */
 
@@ -727,6 +729,7 @@ common_scalar:
 	|	T_METHOD_C					{ $$ = $1; }
 	|	T_FUNC_C					{ $$ = $1; }
 	|	T_NS_C						{ $$ = $1; }
+	|	T_START_NOWDOC T_ENCAPSED_AND_WHITESPACE T_END_NOWDOC	{ $$ = $2; }
 ;
 
 
