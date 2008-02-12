@@ -2294,6 +2294,7 @@ PHP_FUNCTION(array_splice)
 PHP_FUNCTION(array_slice)
 {
 	zval	 *input,		/* Input array */
+			**z_length,		/* How many elements to get */ 
 			**entry;		/* An array entry */
 	long	 offset,		/* Offset to get elements from */
 			 length = 0;
@@ -2305,7 +2306,7 @@ PHP_FUNCTION(array_slice)
 	ulong num_key;
 	HashPosition hpos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al|lb", &input, &offset, &length, &preserve_keys) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al|Zb", &input, &offset, &z_length, &preserve_keys) == FAILURE) {
 		return;
 	}
 
@@ -2313,8 +2314,11 @@ PHP_FUNCTION(array_slice)
 	num_in = zend_hash_num_elements(Z_ARRVAL_P(input));
 
 	/* We want all entries from offset to the end if length is not passed or length is null */
-	if (length == 0) {
+	if (ZEND_NUM_ARGS() < 3 || Z_TYPE_PP(z_length) == IS_NULL) {
 		length = num_in;
+	} else {
+		convert_to_long_ex(z_length);
+		length = Z_LVAL_PP(z_length);
 	}
 
 	/* Initialize returned array */
