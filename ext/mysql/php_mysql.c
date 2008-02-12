@@ -643,10 +643,19 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		hashed_details_length = spprintf(&hashed_details, 0, "mysql__%s_", user);
 		client_flags = CLIENT_INTERACTIVE;
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!s!bl", &host_and_port, &host_len,
-									&user, &user_len, &passwd, &passwd_len, 
-									&new_link, &client_flags)==FAILURE) {
-			return;
+		/* mysql_pconnect does not support new_link parameter */
+		if (persistent) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!s!l", &host_and_port, &host_len,
+									&user, &user_len, &passwd, &passwd_len,
+									&client_flags)==FAILURE) {
+				return;
+        	}
+		} else {
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!s!bl", &host_and_port, &host_len,
+										&user, &user_len, &passwd, &passwd_len, 
+										&new_link, &client_flags)==FAILURE) {
+				return;
+			}
 		}
 
 		if (!host_and_port) {
@@ -657,11 +666,6 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 		if (!passwd) {
 			passwd = MySG(default_password);
-		}
-
-		/* mysql_pconnect does not support new_link parameter */
-		if (persistent) {
-			client_flags= new_link;
 		}
 
 		/* disable local infile option for open_basedir */
