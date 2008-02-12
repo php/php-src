@@ -214,9 +214,11 @@ int phar_archive_delref(phar_archive_data *phar TSRMLS_DC) /* {{{ */
 		}
 		return 1;
 	} else if (!phar->refcount) {
-		if (phar->fp) {
+		if (phar->fp && !(phar->flags & PHAR_FILE_COMPRESSION_MASK)) {
 			/* close open file handle - allows removal or rename of
-			the file on windows, which has greedy locking */
+			the file on windows, which has greedy locking
+			only close if the archive was not already compressed.  If it
+			was compressed, then the fp does not refer to the original file */
 			php_stream_close(phar->fp);
 			phar->fp = NULL;
 		}
