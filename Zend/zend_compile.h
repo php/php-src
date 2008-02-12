@@ -601,6 +601,8 @@ ZEND_API zend_bool zend_is_auto_global(char *name, uint name_len TSRMLS_DC);
 ZEND_API zend_bool zend_u_is_auto_global(zend_uchar type, zstr name, uint name_len TSRMLS_DC);
 ZEND_API zend_bool zend_u_is_auto_global_ex(zend_uchar type, zstr name, uint name_len, zend_bool runtime, zend_auto_global **ret TSRMLS_DC);
 ZEND_API int zend_auto_global_disable_jit(char *varname, zend_uint varname_length TSRMLS_DC);
+ZEND_API size_t zend_dirname(char *path, size_t len);
+ZEND_API size_t zend_u_dirname(UChar *path, size_t len);
 
 int zendlex(znode *zendlval TSRMLS_DC);
 
