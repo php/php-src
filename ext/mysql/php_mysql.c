@@ -642,16 +642,20 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		host_and_port = MySG(default_host);
 		user = MySG(default_user);
 		passwd = MySG(default_password);
-		
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&s&s&bl", &host_and_port, &host_len, UG(utf8_conv),
+	
+		/* mysql_pconnect does not support new_link parameter */
+		if (persistent) {	
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&s&s&l", &host_and_port, &host_len, UG(utf8_conv),
+									&user, &user_len, UG(utf8_conv), &passwd, &passwd_len, UG(utf8_conv),
+									&client_flags)==FAILURE) {
+				return;
+			}
+		} else {
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&s&s&bl", &host_and_port, &host_len, UG(utf8_conv),
 									&user, &user_len, UG(utf8_conv), &passwd, &passwd_len, UG(utf8_conv),
 									&new_link, &client_flags)==FAILURE) {
-			return;
-		}
-
-		/* mysql_pconnect does not support new_link parameter */
-		if (persistent) {
-			client_flags= new_link;
+				return;
+			}
 		}
 
 		/* disable local infile option for open_basedir */
