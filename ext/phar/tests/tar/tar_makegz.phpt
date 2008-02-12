@@ -8,26 +8,29 @@ Phar: tar-based phar, make new gzipped tar
 phar.readonly=0
 --FILE--
 <?php
-include dirname(__FILE__) . '/tarmaker.php.inc';
-$fname = dirname(__FILE__) . '/tar_makegz.phar.tar';
-$pname = 'phar://' . $fname;
-$fname2 = dirname(__FILE__) . '/tar_makegz2.phar.tar';
-$pname2 = 'phar://' . $fname2;
 
-$a = new Phar($fname);
-$a['test'] = 'hi';
-var_dump($a->isTar());
-$a->compressAllFilesGZ();
+$fname = dirname(__FILE__) . '/tar_makegz.phar.tar';
+$alias = 'phar://' . $fname;
+$fname2 = dirname(__FILE__) . '/tar_makegz_b.phar.tar';
+$alias2 = 'phar://' . $fname2;
+
+$phar = new Phar($fname);
+$phar['test'] = 'hi';
+var_dump($phar->isTar());
+$phar->compressAllFilesGZ();
+
 copy($fname, $fname2);
-$b = new Phar($fname2);
-var_dump($b->isTar());
-var_dump($b->isCompressed() == Phar::GZ);
+
+$phar2 = new Phar($fname2);
+var_dump($phar2->isTar());
+var_dump($phar2->isCompressed() == Phar::GZ);
+
 ?>
 ===DONE===
 --CLEAN--
 <?php
 @unlink(dirname(__FILE__) . '/tar_makegz.phar.tar');
-@unlink(dirname(__FILE__) . '/tar_makegz2.phar.tar');
+@unlink(dirname(__FILE__) . '/tar_makegz_b.phar.tar');
 ?>
 --EXPECTF--
 bool(true)

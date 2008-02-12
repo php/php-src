@@ -7,7 +7,7 @@ SCRIPT_NAME=/frontcontroller18.phar.php
 REQUEST_URI=/frontcontroller18.phar.php/fronk.gronk
 PATH_INFO=/fronk.gronk
 --FILE_EXTERNAL--
-frontcontroller9.phar.tar
+files/frontcontroller9.phar.tar
 --EXPECTF--
 Fatal error: Uncaught exception 'UnexpectedValueException' with message 'No values passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME' in %sfrontcontroller18.phar.php:2
 Stack trace:

@@ -7,7 +7,7 @@ SCRIPT_NAME=/frontcontroller5.phar.php
 REQUEST_URI=/frontcontroller5.phar.php/
 PATH_INFO=/
 --FILE_EXTERNAL--
-frontcontroller.phar.tar
+files/frontcontroller.phar.tar
 --EXPECTHEADERS--
 Status: 301 Moved Permanently
 Location: /frontcontroller5.phar.php/index.php
