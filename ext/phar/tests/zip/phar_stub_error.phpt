@@ -11,7 +11,7 @@ phar.readonly=0
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip';
 
 $phar = new Phar($fname);
-$phar->setStub($stub = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>');
+$phar->setStub($stub = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>' . "\r\n");
 $phar->setAlias('hio');
 $phar['a'] = 'a';
 $phar->stopBuffering();
@@ -43,12 +43,16 @@ unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip')
 __HALT_COMPILER();
 ?>
 --EXPECTF--
-string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
-string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
+string(50) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>
+"
+string(50) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>
+"
 bool(true)
 Exception: illegal stub for zip-based phar "%sphar_stub_error.phar.zip"
-string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
+string(50) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>
+"
 bool(true)
-string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
+string(50) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>
+"
 bool(true)
 ===DONE===
