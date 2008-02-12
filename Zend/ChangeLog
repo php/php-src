@@ -1,3 +1,14 @@
+2008-02-11  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      MFB: Fix segfaults when calling ctors statically
+
+    * (PHP_5_3)
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Fix segfaults when calling "ctors statically"
+
 2008-02-09  Marcus Boerger  <php@marcus-boerger.de>
 
     * zend_API.c:

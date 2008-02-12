@@ -1,3 +1,89 @@
+2008-02-11  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli.c
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_debug.c
+      ext/mysqlnd/mysqlnd_debug.c
+      ext/mysqlnd/mysqlnd_debug.h
+      ext/mysqlnd/mysqlnd_debug.h
+      ext/mysqlnd/mysqlnd_enum_n_def.h
+      ext/mysqlnd/mysqlnd_enum_n_def.h
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_structs.h:
+      cvs sync
+
+2008-02-11  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/spl_dllist.c:
+      Provide ctod/dtor with TSRM
+
+2008-02-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/array/arsort_variation3.phpt:
+      
+      MFB:Fixed test on 64bit machines
+
+    * (PHP_5_2)
+      ext/standard/tests/array/arsort_variation3.phpt:
+      
+      MFB: Fixed test on 64bit machines
+
+    * (PHP_5_3)
+      ext/standard/tests/array/arsort_variation3.phpt:
+      
+      Fixed test on 64bit machines
+
+2008-02-11  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/strings/strrchr_variation7.phpt:
+      Fix test (missing result)
+
+2008-02-11  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      MFB: Fix segfaults when calling ctors statically
+
+2008-02-11  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/array/array_map_variation14.phpt:
+      Fix test (UEXPECTF)
+
+2008-02-11  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Fix segfaults when calling "ctors statically"
+
+2008-02-11  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/mysqlnd_priv.h
+      ext/mysqlnd/mysqlnd_priv.h:
+      new 6.0 flag
+
+2008-02-11  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/array.c:
+      this is integer, not pointer
+
+2008-02-11  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/is_dir_variation2.phpt:
+      MFH: The exact message differs on different systems
+
+    * php.ini-dist
+      php.ini-dist
+      php.ini-dist
+      php.ini-recommended
+      php.ini-recommended
+      php.ini-recommended:
+      - Fix typo (see #44095)
+
 2008-02-10  Johannes Schlüter  <johannes@schlueters.de>
 
     * (PHP_5_3)
