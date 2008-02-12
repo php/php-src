@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.0
 - Added and improved PHP syntax and semantics:
+  . Added NOWDOC. (Gwynne Raskind, Stas, Dmitry)
   . Added "?:" operator. (Marcus)
   . Added support for namespaces. (Dmitry, Stas, Gregory)
   . Added support for Late Static Binding. (Dmitry, Etienne Kneuss)
