@@ -9,6 +9,7 @@ PHP                                                                        NEWS
   . Added support for dynamic access of static members using $foo::myFunc().
     (Etienne Kneuss)
   . Improved checks for callbacks. (Marcus)
+  . Added __DIR__ constant. (Lars Strojny)
 
 - Added new date/time functionality: (Derick)
   . date_parse_from_format(): Parse date/time strings according to a format.
