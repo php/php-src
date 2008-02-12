@@ -150,6 +150,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 		}
 		switch (token_type) {
 			case T_END_HEREDOC:
+			case T_END_NOWDOC:
 				zend_html_puts(token.value.str.val, token.value.str.len TSRMLS_CC);
 				break;
 			default:
@@ -172,7 +173,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 					efree(token.value.str.val);
 					break;
 			}
-		} else if (token_type == T_END_HEREDOC) {
+		} else if (token_type == T_END_HEREDOC || token_type == T_END_NOWDOC) {
 			efree(token.value.str.val);
 		}
 		token.type = 0;
@@ -222,6 +223,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 				return;
 			
 			case T_END_HEREDOC:
+			case T_END_NOWDOC:
 				zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				efree(token.value.str.val);
 				/* read the following character, either newline or ; */
