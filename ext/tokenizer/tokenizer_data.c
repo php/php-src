@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2008 The PHP Group                                |
+   | Copyright (c) 1997-2007 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -136,6 +136,7 @@ void tokenizer_register_constants(INIT_FUNC_ARGS) {
 	REGISTER_LONG_CONSTANT("T_FUNC_C", T_FUNC_C, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_LINE", T_LINE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_FILE", T_FILE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("T_DIR", T_DIR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_COMMENT", T_COMMENT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_DOC_COMMENT", T_DOC_COMMENT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_OPEN_TAG", T_OPEN_TAG, CONST_CS | CONST_PERSISTENT);
@@ -263,6 +264,7 @@ char *get_token_type_name(int token_type)
 		case T_FUNC_C: return "T_FUNC_C";
 		case T_LINE: return "T_LINE";
 		case T_FILE: return "T_FILE";
+		case T_DIR: return "T_DIR";
 		case T_COMMENT: return "T_COMMENT";
 		case T_DOC_COMMENT: return "T_DOC_COMMENT";
 		case T_OPEN_TAG: return "T_OPEN_TAG";
