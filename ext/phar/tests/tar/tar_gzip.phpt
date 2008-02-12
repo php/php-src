@@ -9,7 +9,7 @@ Phar: tar-based phar, gzipped tar
 phar.readonly=0
 --FILE--
 <?php
-include dirname(__FILE__) . '/tarmaker.php.inc';
+include dirname(__FILE__) . '/files/tarmaker.php.inc';
 $fname = dirname(__FILE__) . '/tar_gzip.phar';
 $pname = 'phar://' . $fname;
 $fname2 = dirname(__FILE__) . '/tar_gzip.phar.tar';

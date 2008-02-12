@@ -7,7 +7,7 @@ SCRIPT_NAME=/frontcontroller8.phar.php
 REQUEST_URI=/frontcontroller8.phar.php/
 PATH_INFO=/
 --FILE_EXTERNAL--
-frontcontroller3.phar.tar
+files/frontcontroller3.phar.tar
 --EXPECTHEADERS--
 Status: 404 Not Found
 --EXPECT--
