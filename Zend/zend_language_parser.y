@@ -133,6 +133,7 @@
 %token T_FUNC_C
 %token T_LINE
 %token T_FILE
+%token T_DIR
 %token T_COMMENT
 %token T_DOC_COMMENT
 %token T_OPEN_TAG
@@ -721,6 +722,7 @@ common_scalar:
 	|	T_CONSTANT_ENCAPSED_STRING	{ $$ = $1; }
 	|	T_LINE 						{ $$ = $1; }
 	|	T_FILE 						{ $$ = $1; }
+	|	T_DIR   					{ $$ = $1; }
 	|	T_CLASS_C					{ $$ = $1; }
 	|	T_METHOD_C					{ $$ = $1; }
 	|	T_FUNC_C					{ $$ = $1; }

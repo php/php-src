@@ -25,6 +25,7 @@
 #include "zend_constants.h"
 #include "zend_llist.h"
 #include "zend_API.h"
+#include "tsrm_virtual_cwd.h"
 
 ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
 ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, char *filename TSRMLS_DC);
@@ -5468,6 +5469,194 @@ void zend_do_end_compilation(TSRMLS_D) /* {{{ */
 		efree(CG(current_import));
 		CG(current_import) = NULL;
 	}
+}
+/* }}} */
+
+/* {{{ zend_dirname
+   Returns directory name component of path */
+ZEND_API size_t zend_dirname(char *path, size_t len)
+{
+	register char *end = path + len - 1;
+	unsigned int len_adjust = 0;
+
+#ifdef PHP_WIN32
+	/* Note that on Win32 CWD is per drive (heritage from CP/M).
+	 * This means dirname("c:foo") maps to "c:." or "c:" - which means CWD on C: drive.
+	 */
+	if ((2 <= len) && isalpha((int)((unsigned char *)path)[0]) && (':' == path[1])) {
+		/* Skip over the drive spec (if any) so as not to change */
+		path += 2;
+		len_adjust += 2;
+		if (2 == len) {
+			/* Return "c:" on Win32 for dirname("c:").
+			 * It would be more consistent to return "c:." 
+			 * but that would require making the string *longer*.
+			 */
+			return len;
+		}
+	}
+#elif defined(NETWARE)
+	/*
+	 * Find the first occurence of : from the left 
+	 * move the path pointer to the position just after :
+	 * increment the len_adjust to the length of path till colon character(inclusive)
+	 * If there is no character beyond : simple return len
+	 */
+	char *colonpos = NULL;
+	colonpos = strchr(path, ':');
+	if (colonpos != NULL) {
+		len_adjust = ((colonpos - path) + 1);
+		path += len_adjust;
+		if (len_adjust == len) {
+			return len;
+		}
+    }
+#endif
+
+	if (len == 0) {
+		/* Illegal use of this function */
+		return 0;
+	}
+
+	/* Strip trailing slashes */
+	while (end >= path && IS_SLASH_P(end)) {
+		end--;
+	}
+	if (end < path) {
+		/* The path only contained slashes */
+		path[0] = DEFAULT_SLASH;
+		path[1] = '\0';
+		return 1 + len_adjust;
+	}
+
+	/* Strip filename */
+	while (end >= path && !IS_SLASH_P(end)) {
+		end--;
+	}
+	if (end < path) {
+		/* No slash found, therefore return '.' */
+#ifdef NETWARE
+		if (len_adjust == 0) {
+			path[0] = '.';
+			path[1] = '\0';
+			return 1; //only one character
+		} else {
+			path[0] = '\0';
+			return len_adjust;
+		}
+#else
+		path[0] = '.';
+		path[1] = '\0';
+		return 1 + len_adjust;
+#endif
+	}
+
+	/* Strip slashes which came before the file name */
+	while (end >= path && IS_SLASH_P(end)) {
+		end--;
+	}
+	if (end < path) {
+		path[0] = DEFAULT_SLASH;
+		path[1] = '\0';
+		return 1 + len_adjust;
+	}
+	*(end+1) = '\0';
+
+	return (size_t)(end + 1 - path) + len_adjust;
+}
+/* }}} */
+/* {{{ zend_u_dirname
+   Returns directory name component of path */
+ZEND_API size_t zend_u_dirname(UChar *path, size_t len)
+{
+	register UChar *end = path + len - 1;
+	unsigned int len_adjust = 0;
+
+#ifdef PHP_WIN32
+	/* Note that on Win32 CWD is per drive (heritage from CP/M).
+	 * This means dirname("c:foo") maps to "c:." or "c:" - which means CWD on C: drive.
+	 */
+	if ((2 <= len) && u_isalpha((UChar32)path[0]) && ((UChar)0x3a /*':'*/ == path[1])) {
+		/* Skip over the drive spec (if any) so as not to change */
+		path += 2;
+		len_adjust += 2;
+		if (2 == len) {
+			/* Return "c:" on Win32 for dirname("c:").
+			 * It would be more consistent to return "c:."
+			 * but that would require making the string *longer*.
+			 */
+			return len;
+		}
+	}
+#elif defined(NETWARE)
+	/*
+	 * Find the first occurence of : from the left
+	 * move the path pointer to the position just after :
+	 * increment the len_adjust to the length of path till colon character(inclusive)
+	 * If there is no character beyond : simple return len
+	 */
+	UChar *colonpos = NULL;
+	colonpos = u_strchr(path, (UChar) 0x3a /*':'*/);
+	if(colonpos != NULL) {
+		len_adjust = ((colonpos - path) + 1);
+		path += len_adjust;
+		if(len_adjust == len) {
+		return len;
+		}
+    	}
+#endif
+
+	if (len == 0) {
+		/* Illegal use of this function */
+		return 0;
+	}
+
+	/* Strip trailing slashes */
+	while (end >= path && IS_U_SLASH_P(end)) {
+		end--;
+	}
+	if (end < path) {
+		/* The path only contained slashes */
+		path[0] = DEFAULT_U_SLASH;
+		path[1] = 0;
+		return 1 + len_adjust;
+	}
+
+	/* Strip filename */
+	while (end >= path && !IS_U_SLASH_P(end)) {
+		end--;
+	}
+	if (end < path) {
+		/* No slash found, therefore return '.' */
+#ifdef NETWARE
+		if(len_adjust == 0) {
+			path[0] = (UChar) 0x2e /*'.'*/;
+			path[1] = 0;
+			return 1; //only one character
+		}
+		else {
+			path[0] = 0;
+			return len_adjust;
+		}
+#else
+		path[0] = (UChar) 0x2e /*'.'*/;
+		path[1] = 0;
+		return 1 + len_adjust;
+#endif
+	}
+
+	/* Strip slashes which came before the file name */
+	while (end >= path && IS_U_SLASH_P(end)) {
+		end--;
+	}
+	if (end < path) {
+		path[0] = DEFAULT_U_SLASH;
+		path[1] = 0;
+		return 1 + len_adjust;
+	}
+	*(end+1) = 0;
+
+	return (size_t)(end + 1 - path) + len_adjust;
 }
 /* }}} */
 
