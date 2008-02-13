@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <math.h>
 #include <assert.h>
+#include <string.h>
 
 #ifdef HAVE_IEEEFP_H
 #include <ieeefp.h>
@@ -239,6 +240,9 @@ zend_memnstr(char *haystack, char *needle, int needle_len, char *end)
 	return NULL;
 }
 
+#ifdef HAVE_MEMRCHR
+# define zend_memrchr(s,c,n) memrchr(s,c,n)
+#else
 static inline void *zend_memrchr(const void *s, int c, size_t n)
 {
 	register unsigned char *e;
@@ -255,6 +259,7 @@ static inline void *zend_memrchr(const void *s, int c, size_t n)
 
 	return NULL;
 }
+#endif
 
 BEGIN_EXTERN_C()
 ZEND_API int increment_function(zval *op1);
