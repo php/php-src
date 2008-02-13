@@ -269,6 +269,22 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 		return NULL;
 	}
 
+	if (!PHAR_G(cwd_init) && options & STREAM_OPEN_FOR_INCLUDE) {
+		char *entry = idata->internal_file->filename, *cwd;
+
+		PHAR_G(cwd_init) = 1;
+		if (idata->phar->is_tar || idata->phar->is_zip && idata->internal_file->filename_len == sizeof(".phar/stub.php")-1 && !strncmp(idata->internal_file->filename, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
+			/* we're executing the stub, which doesn't count as a file */
+			PHAR_G(cwd_init) = 0;
+		} else if ((cwd = strrchr(entry, '/'))) {
+			PHAR_G(cwd_len) = cwd - entry;
+			PHAR_G(cwd) = estrndup(entry, PHAR_G(cwd_len));
+		} else {
+			/* root directory */
+			PHAR_G(cwd_len) = 0;
+			PHAR_G(cwd) = NULL;
+		}
+	}
 	fpf = php_stream_alloc(&phar_ops, idata, NULL, mode);
 	efree(internal_file);
 	return fpf;

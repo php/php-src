@@ -279,7 +279,7 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 			PHAR_G(cwd) = NULL;
 			PHAR_G(cwd_len) = 0;
 			if (zend_hash_add(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
-				if ((cwd = strrchr(entry, '/'))) {
+				if (0 && (cwd = strrchr(entry, '/'))) {
 					if (entry == cwd) {
 						/* root directory */
 						PHAR_G(cwd_len) = 0;

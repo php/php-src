@@ -613,12 +613,6 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 			zval filterparams;
 
 			array_init(&filterparams);
-			/* ext/zlib zval_dtors a separated zval, so we have to make sure it doesn't destroy ours */
-#if PHP_VERSION_ID < 50300
-			filterparams.refcount = 26;
-#else
-			Z_SET_REFCOUNT(filterparams, 26);
-#endif
 /* this is defined in zlib's zconf.h */
 #ifndef MAX_WBITS
 #define MAX_WBITS 15
