@@ -1192,12 +1192,6 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 					MAPPHAR_ALLOC_FAIL("unable to decompress gzipped phar archive \"%s\" to temporary file, enable zlib extension in php.ini")
 				}
 				array_init(&filterparams);
-				/* ext/zlib zval_dtors a separated zval, so we have to make sure it doesn't destroy ours */
-#if PHP_VERSION_ID < 50300
-				filterparams.refcount = 26;
-#else
-				Z_SET_REFCOUNT(filterparams, 26);
-#endif
 
 /* this is defined in zlib's zconf.h */
 #ifndef MAX_WBITS
@@ -1428,7 +1422,7 @@ char *phar_fix_filepath(char *path, int *new_len, int use_cwd TSRMLS_DC) /* {{{ 
 	char *tok;
 	int ptr_length, new_phar_len = 1, path_length = *new_len;
 
-	if (use_cwd) {
+	if (PHAR_G(cwd_len) && use_cwd && path_length > 2 && path[0] == '.' && path[1] == '/') {
 		free_path = path = estrndup(path, path_length);
 		new_phar_len = PHAR_G(cwd_len);
 		new_phar = estrndup(PHAR_G(cwd), new_phar_len);
@@ -2409,12 +2403,6 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, char **error 
 			zval filterparams;
 
 			array_init(&filterparams);
-			/* ext/zlib zval_dtors a separated zval, so we have to make sure it doesn't destroy ours */
-#if PHP_VERSION_ID < 50300
-			filterparams.refcount = 26;
-#else
-			Z_SET_REFCOUNT(filterparams, 26);
-#endif
 			add_assoc_long(&filterparams, "window", MAX_WBITS+16);
 			filter = php_stream_filter_create("zlib.deflate", &filterparams, php_stream_is_persistent(phar->fp) TSRMLS_CC);
 			zval_dtor(&filterparams);
@@ -2496,11 +2484,7 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 	zend_op_array *res;
 	char *name = NULL;
 	int failed;
-	zend_op_array *(*save)(zend_file_handle *file_handle, int type TSRMLS_DC);
 	phar_archive_data *phar;
-
-	save = zend_compile_file; /* restore current handler or we cause trouble */
-	zend_compile_file = phar_orig_compile_file;
 
 	if (strstr(file_handle->filename, ".phar") && !strstr(file_handle->filename, "://")) {
 		if (SUCCESS == phar_open_filename(file_handle->filename, strlen(file_handle->filename), NULL, 0, 0, &phar, NULL TSRMLS_CC)) {
@@ -2536,14 +2520,13 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 skip_phar:
 	zend_try {
 		failed = 0;
-		res = zend_compile_file(file_handle, type TSRMLS_CC);
+		res = phar_orig_compile_file(file_handle, type TSRMLS_CC);
 	} zend_catch {
 		failed = 1;
 	} zend_end_try();
 	if (name) {
 		efree(name);
 	}
-	zend_compile_file = save;
 	if (failed) {
 		zend_bailout();
 	}
@@ -2567,13 +2550,14 @@ int phar_zend_open(const char *filename, zend_file_handle *handle TSRMLS_DC) /* 
 		}
 		fname_len = strlen(fname);
 		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
-			char *name;
+			char *name, *old;
 
-			efree(entry);
+			old = entry;
 			entry = (char *) filename;
 			/* include within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			if (strstr(entry, "://")) {
 				efree(arch);
+				efree(old);
 				goto skip_phar;
 			}
 			entry_len = strlen(entry);
@@ -2581,23 +2565,24 @@ int phar_zend_open(const char *filename, zend_file_handle *handle TSRMLS_DC) /* 
 				phar_archive_data **pphar;
 				/* retrieving an include within the current directory, so use this if possible */
 				if (SUCCESS == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
-					entry = phar_fix_filepath(entry, &entry_len, 1 TSRMLS_CC);
-					if (!zend_hash_exists(&((*pphar)->manifest), entry, entry_len)) {
-						/* this file is not in the current directory, use the original path */
-						efree(entry);
-						entry = (char *) filename;
+					if (!(entry = phar_find_in_include_path(entry, old, *pphar TSRMLS_CC))) {
+						/* this file is not in the phar, use the original path */
+						efree(old);
+						efree(arch);
+						goto skip_phar;
 					}
 				}
 			}
+			efree(old);
 			/* auto-convert to phar:// */
 			spprintf(&name, 4096, "phar://%s/%s", arch, entry);
 			efree(arch);
+			if (entry != filename) {
+				efree(entry);
+			}
 			if (SUCCESS == phar_orig_zend_open(name, handle TSRMLS_CC)) {
 				if (!handle->opened_path) {
 					handle->opened_path = name;
-				}
-				if (entry != filename) {
-					efree(entry);
 				}
 				return SUCCESS;
 			}
@@ -2655,6 +2640,7 @@ void phar_request_initialize(TSRMLS_D) /* {{{ */
 		phar_split_extract_list(TSRMLS_C);
 		PHAR_G(cwd) = NULL;
 		PHAR_G(cwd_len) = 0;
+		PHAR_G(cwd_init) = 0;
 		phar_intercept_functions(TSRMLS_C);
 	}
 }
@@ -2680,6 +2666,7 @@ PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 		}
 		PHAR_G(cwd) = NULL;
 		PHAR_G(cwd_len) = 0;
+		PHAR_G(cwd_init) = 0;
 	}
 	PHAR_GLOBALS->request_done = 1;
 	return SUCCESS;

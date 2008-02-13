@@ -14,6 +14,6 @@ Content-type: text/html
 string(4) "test"
 string(12) "oof/test.php"
 
-Warning: include(phar://%s/./hi.php): failed to open stream: phar error: "hi.php" is not a file in phar "%sfrontcontroller22.php" in phar://%s/oof/test.php on line %d
+Warning: include(./hi.php): failed to open stream: No such file or directory in phar://%s/oof/test.php on line %d
 
 Warning: include(): Failed opening './hi.php' for inclusion (include_path='%s') in phar://%soof/test.php on line %d

@@ -164,6 +164,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	/* used for includes with . in them inside front controller */
 	char*       cwd;
 	int         cwd_len;
+	int         cwd_init;
 ZEND_END_MODULE_GLOBALS(phar)
 
 ZEND_EXTERN_MODULE_GLOBALS(phar)
@@ -365,6 +366,7 @@ char *phar_create_default_stub(const char *index_php, const char *web_index, siz
 char * phar_decompress_filter(phar_entry_info * entry, int return_unknown);
 char * phar_compress_filter(phar_entry_info * entry, int return_unknown);
 
+char *phar_find_in_include_path(char *file, char *entry, phar_archive_data *phar TSRMLS_DC);
 char *phar_fix_filepath(char *path, int *new_len, int use_cwd TSRMLS_DC);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, php_stream *fp,
 				      char **error, int for_write TSRMLS_DC);

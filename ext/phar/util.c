@@ -67,6 +67,54 @@ int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t positi
 	return php_stream_seek(fp, temp, SEEK_SET);
 }
 
+char *phar_find_in_include_path(char *file, char *entry, phar_archive_data *phar TSRMLS_DC) /* {{{ */
+{
+	char *path = PG(include_path), *pathbuf, *ptr, *end;
+	char *trypath;
+
+	if (!path || (path && !*path)) {
+		return file;
+	}
+
+	/* check in provided path */
+	/* append the calling scripts' current working directory
+	 * as a fall back case
+	 */
+	spprintf(&pathbuf, 0, "%s%c.", path, DEFAULT_DIR_SEPARATOR);
+
+	ptr = pathbuf;
+
+	while (ptr && *ptr) {
+		int try_len;
+		char *test;
+
+		end = strchr(ptr, DEFAULT_DIR_SEPARATOR);
+		if (end != NULL) {
+			*end = '\0';
+			end++;
+		}
+		if (*ptr == '\0') {
+			goto stream_skip;
+		}
+		try_len = spprintf(&trypath, MAXPATHLEN, "%s/%s", ptr, file);
+		test = phar_fix_filepath(trypath, &try_len, 1 TSRMLS_CC);
+		if (zend_hash_exists(&(phar->manifest), test + 1, try_len - 1)) {
+			char *save = test;
+			efree(pathbuf);
+			test = estrndup(test + 1, try_len - 1);
+			efree(save);
+			return test;
+		}
+		efree(test);
+stream_skip:
+		ptr = end;
+	} /* end provided path */
+
+	efree(pathbuf);
+	return NULL;
+}
+/* }}} */
+
 /**
  * Retrieve a copy of the file information on a single file within a phar, or null.
  * This also transfers the open file pointer, if any, to the entry.
