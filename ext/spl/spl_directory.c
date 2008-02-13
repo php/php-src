@@ -556,7 +556,7 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, int ctor_flag
 	php_set_error_handling(EH_THROW, spl_ce_UnexpectedValueException TSRMLS_CC);
 
 	if (ctor_flags & DIT_CTOR_FLAGS) {
-		flags = 0;
+		flags = SPL_FILE_DIR_KEY_AS_PATHNAME|SPL_FILE_DIR_CURRENT_AS_FILEINFO;
 		parsed = zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &path, &len, &flags);
 	} else {
 		flags = SPL_FILE_DIR_KEY_AS_PATHNAME|SPL_FILE_DIR_CURRENT_AS_SELF;
@@ -1108,6 +1108,28 @@ SPL_METHOD(FilesystemIterator, next)
 }
 /* }}} */
 
+/* {{{ proto int FilesystemIterator::getFlags()
+   Get handling flags */
+SPL_METHOD(FilesystemIterator, getFlags)
+{
+	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	RETURN_LONG(intern->flags);
+} /* }}} */
+
+/* {{{ proto void FilesystemIterator::setFlags(long $flags)
+   Set handling flags */
+SPL_METHOD(FilesystemIterator, setFlags)
+{
+	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	long flags;
+
+	zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &flags);
+
+	intern->flags &= ~(SPL_FILE_DIR_KEY_MODE_MASK|SPL_FILE_DIR_CURRENT_MODE_MASK);
+	intern->flags |= ((SPL_FILE_DIR_KEY_MODE_MASK|SPL_FILE_DIR_CURRENT_MODE_MASK) & flags);
+} /* }}} */
+
 /* {{{ proto bool RecursiveDirectoryIterator::hasChildren([bool $allow_links = false])
    Returns whether current entry is a directory and not '.' or '..' */
 SPL_METHOD(RecursiveDirectoryIterator, hasChildren)
@@ -1575,12 +1597,19 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_r_dir_hasChildren, 0, 0, 0)
 	ZEND_ARG_INFO(0, allow_links)
 ZEND_END_ARG_INFO()
 
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_r_dir_setFlags, 0, 0, 0)
+	ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry spl_FilesystemIterator_functions[] = {
 	SPL_ME(FilesystemIterator, __construct,   arginfo_r_dir___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(FilesystemIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(FilesystemIterator, next,          NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(FilesystemIterator, key,           NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(FilesystemIterator, current,       NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FilesystemIterator, getFlags,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FilesystemIterator, setFlags,      arginfo_r_dir_setFlags, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
