@@ -1,3 +1,205 @@
+2008-02-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_highlight.c
+      zend_language_parser.y
+      zend_language_scanner.l
+      tests/heredoc_001.phpt
+      tests/heredoc_002.phpt
+      tests/heredoc_003.phpt
+      tests/heredoc_004.phpt
+      tests/heredoc_005.phpt
+      tests/heredoc_006.phpt
+      tests/heredoc_007.phpt
+      tests/heredoc_008.phpt
+      tests/heredoc_009.phpt
+      tests/heredoc_010.phpt
+      tests/heredoc_011.phpt
+      tests/nowdoc.inc
+      tests/nowdoc_001.phpt
+      tests/nowdoc_002.phpt
+      tests/nowdoc_003.phpt
+      tests/nowdoc_004.phpt
+      tests/nowdoc_005.phpt
+      tests/nowdoc_006.phpt
+      tests/nowdoc_007.phpt
+      tests/nowdoc_008.phpt
+      tests/nowdoc_009.phpt
+      tests/nowdoc_010.phpt
+      tests/nowdoc_011.phpt
+      tests/nowdoc_012.phpt
+      tests/nowdoc_013.phpt
+      tests/nowdoc_014.phpt
+      tests/nowdoc_015.phpt:
+      Added NOWDOC
+
+    * (PHP_5_3)
+      zend_compile.c
+      zend_highlight.c
+      zend_language_parser.y
+      zend_language_scanner.l
+      tests/heredoc_001.phpt
+      tests/heredoc_001.phpt
+      tests/heredoc_002.phpt
+      tests/heredoc_002.phpt
+      tests/heredoc_003.phpt
+      tests/heredoc_003.phpt
+      tests/heredoc_004.phpt
+      tests/heredoc_004.phpt
+      tests/heredoc_005.phpt
+      tests/heredoc_005.phpt
+      tests/heredoc_006.phpt
+      tests/heredoc_006.phpt
+      tests/heredoc_007.phpt
+      tests/heredoc_007.phpt
+      tests/heredoc_008.phpt
+      tests/heredoc_008.phpt
+      tests/heredoc_009.phpt
+      tests/heredoc_009.phpt
+      tests/heredoc_010.phpt
+      tests/heredoc_010.phpt
+      tests/heredoc_011.phpt
+      tests/heredoc_011.phpt
+      tests/nowdoc.inc
+      tests/nowdoc.inc
+      tests/nowdoc_001.phpt
+      tests/nowdoc_001.phpt
+      tests/nowdoc_002.phpt
+      tests/nowdoc_002.phpt
+      tests/nowdoc_003.phpt
+      tests/nowdoc_003.phpt
+      tests/nowdoc_004.phpt
+      tests/nowdoc_004.phpt
+      tests/nowdoc_005.phpt
+      tests/nowdoc_005.phpt
+      tests/nowdoc_006.phpt
+      tests/nowdoc_006.phpt
+      tests/nowdoc_007.phpt
+      tests/nowdoc_007.phpt
+      tests/nowdoc_008.phpt
+      tests/nowdoc_008.phpt
+      tests/nowdoc_009.phpt
+      tests/nowdoc_009.phpt
+      tests/nowdoc_010.phpt
+      tests/nowdoc_010.phpt
+      tests/nowdoc_011.phpt
+      tests/nowdoc_011.phpt
+      tests/nowdoc_012.phpt
+      tests/nowdoc_012.phpt
+      tests/nowdoc_013.phpt
+      tests/nowdoc_013.phpt
+      tests/nowdoc_014.phpt
+      tests/nowdoc_014.phpt
+      tests/nowdoc_015.phpt
+      tests/nowdoc_015.phpt:
+      Added NEWDOC
+
+    * zend_language_parser.y:
+      Fixed comilation warnings
+
+    * zend_language_parser.y
+      zend_language_parser.y:
+      Fixed ext/tokenizer test failures because of token renumbering
+
+2008-02-12  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      zend_compile.c:
+      fix folding
+
+    * zend_compile.c
+      zend_compile.h
+      zend_language_parser.y
+      zend_language_scanner.l:
+      MFB __DIR_ constant support
+
+    * tests/constants/dir-constant-eval.phpt
+      tests/constants/dir-constant-includes.phpt
+      tests/constants/dir-constant-nested_includes.phpt
+      tests/constants/dir-constant-normal.phpt
+      tests/constants/fixtures/folder1/fixture.php
+      tests/constants/fixtures/folder1/subfolder1/fixture.php
+      tests/constants/fixtures/folder1/subfolder2/fixture.php
+      tests/constants/fixtures/folder1/subfolder3/fixture.php
+      tests/constants/fixtures/folder1/subfolder4/fixture.php
+      tests/constants/fixtures/folder2/fixture.php
+      tests/constants/fixtures/folder2/subfolder1/fixture.php
+      tests/constants/fixtures/folder2/subfolder2/fixture.php
+      tests/constants/fixtures/folder2/subfolder3/fixture.php
+      tests/constants/fixtures/folder2/subfolder4/fixture.php
+      tests/constants/fixtures/folder3/fixture.php
+      tests/constants/fixtures/folder3/subfolder1/fixture.php
+      tests/constants/fixtures/folder3/subfolder2/fixture.php
+      tests/constants/fixtures/folder3/subfolder3/fixture.php
+      tests/constants/fixtures/folder3/subfolder4/fixture.php
+      tests/constants/fixtures/folder4/fixture.php
+      tests/constants/fixtures/folder4/subfolder1/fixture.php
+      tests/constants/fixtures/folder4/subfolder2/fixture.php
+      tests/constants/fixtures/folder4/subfolder3/fixture.php
+      tests/constants/fixtures/folder4/subfolder4/fixture.php:
+      MFB tests for __DIR__
+
+    * tests/constants/fixtures/folder4/subfolder4/fixture.php
+      tests/constants/fixtures/folder4/subfolder4/fixture.php:
+      
+      file fixture.php was initially added on branch PHP_5_3.
+
+    * tests/constants/dir-constant-eval.phpt
+      tests/constants/dir-constant-eval.phpt
+      tests/constants/dir-constant-includes.phpt
+      tests/constants/dir-constant-includes.phpt
+      tests/constants/dir-constant-nested_includes.phpt
+      tests/constants/dir-constant-nested_includes.phpt
+      tests/constants/dir-constant-normal.phpt
+      tests/constants/dir-constant-normal.phpt
+      tests/constants/fixtures/folder1/fixture.php
+      tests/constants/fixtures/folder1/fixture.php
+      tests/constants/fixtures/folder1/subfolder1/fixture.php
+      tests/constants/fixtures/folder1/subfolder1/fixture.php
+      tests/constants/fixtures/folder1/subfolder2/fixture.php
+      tests/constants/fixtures/folder1/subfolder2/fixture.php
+      tests/constants/fixtures/folder1/subfolder3/fixture.php
+      tests/constants/fixtures/folder1/subfolder3/fixture.php
+      tests/constants/fixtures/folder1/subfolder4/fixture.php
+      tests/constants/fixtures/folder1/subfolder4/fixture.php
+      tests/constants/fixtures/folder2/fixture.php
+      tests/constants/fixtures/folder2/fixture.php
+      tests/constants/fixtures/folder2/subfolder1/fixture.php
+      tests/constants/fixtures/folder2/subfolder1/fixture.php
+      tests/constants/fixtures/folder2/subfolder2/fixture.php
+      tests/constants/fixtures/folder2/subfolder2/fixture.php
+      tests/constants/fixtures/folder2/subfolder3/fixture.php
+      tests/constants/fixtures/folder2/subfolder3/fixture.php
+      tests/constants/fixtures/folder2/subfolder4/fixture.php
+      tests/constants/fixtures/folder2/subfolder4/fixture.php
+      tests/constants/fixtures/folder3/fixture.php
+      tests/constants/fixtures/folder3/fixture.php
+      tests/constants/fixtures/folder3/subfolder1/fixture.php
+      tests/constants/fixtures/folder3/subfolder1/fixture.php
+      tests/constants/fixtures/folder3/subfolder2/fixture.php
+      tests/constants/fixtures/folder3/subfolder2/fixture.php
+      tests/constants/fixtures/folder3/subfolder3/fixture.php
+      tests/constants/fixtures/folder3/subfolder3/fixture.php
+      tests/constants/fixtures/folder3/subfolder4/fixture.php
+      tests/constants/fixtures/folder3/subfolder4/fixture.php
+      tests/constants/fixtures/folder4/fixture.php
+      tests/constants/fixtures/folder4/fixture.php
+      tests/constants/fixtures/folder4/subfolder1/fixture.php
+      tests/constants/fixtures/folder4/subfolder1/fixture.php
+      tests/constants/fixtures/folder4/subfolder2/fixture.php
+      tests/constants/fixtures/folder4/subfolder2/fixture.php
+      tests/constants/fixtures/folder4/subfolder3/fixture.php
+      tests/constants/fixtures/folder4/subfolder3/fixture.php:
+      
+      file dir-constant-eval.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      zend_compile.c
+      zend_compile.h
+      zend_language_parser.y
+      zend_language_scanner.l:
+      [DOC] Add compile-time __DIR__ constant which implements dirname(__FILE__)
+
 2008-02-11  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * zend_vm_def.h

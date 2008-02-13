@@ -1,3 +1,378 @@
+2008-02-12  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_2)
+      NEWS
+      ext/zlib/zlib_filter.c
+      ext/zlib/zlib_filter.c:
+      MFH: fix potential memleak due to destruction of filterparams zval
+
+    * ext/zlib/zlib_filter.c:
+      fix potential memleak due to destruction of filterparams zval
+
+2008-02-12  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/mysqli.c:
+      Fix Windows build. VC doesn't like nested macros - expansion + #if
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli.c:
+      Fix windows build - VC doesn't like nested macros
+
+2008-02-12  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.c:
+      - MFH: Make clear what's going on and avoid overwriting parameters
+
+    * ext/mysql/php_mysql.c:
+      - Make clear what's going on and avoid overwriting parameters
+
+    * ext/mysqli/mysqli.c:
+      - Fix build with TSRM and mysqlnd
+
+2008-02-12  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_change_key_case_variation7.phpt
+      ext/standard/tests/array/array_change_key_case_variation7.phpt:
+      Fix test
+
+2008-02-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      run-tests.php:
+      
+      Disable mbstring overload
+
+2008-02-12  Josie Messa  <josmessa@uk.ibm.com>
+
+    * ext/standard/tests/array/array_change_key_case_variation1.phpt
+      ext/standard/tests/array/array_change_key_case_variation1.phpt
+      ext/standard/tests/array/array_change_key_case_variation2.phpt
+      ext/standard/tests/array/array_change_key_case_variation2.phpt
+      ext/standard/tests/array/array_change_key_case_variation3.phpt
+      ext/standard/tests/array/array_change_key_case_variation3.phpt
+      ext/standard/tests/array/array_change_key_case_variation4.phpt
+      ext/standard/tests/array/array_change_key_case_variation4.phpt
+      ext/standard/tests/array/array_change_key_case_variation5.phpt
+      ext/standard/tests/array/array_change_key_case_variation5.phpt
+      ext/standard/tests/array/array_change_key_case_variation6.phpt
+      ext/standard/tests/array/array_change_key_case_variation6.phpt
+      ext/standard/tests/array/array_change_key_case_variation7.phpt
+      ext/standard/tests/array/array_change_key_case_variation7.phpt
+      ext/standard/tests/array/array_change_key_case_variation8.phpt
+      ext/standard/tests/array/array_change_key_case_variation8.phpt:
+      - committing array_change_key_case variation tests
+
+    * ext/standard/tests/array/array_change_key_case_variation1.phpt
+      ext/standard/tests/array/array_change_key_case_variation1.phpt
+      ext/standard/tests/array/array_change_key_case_variation1.phpt
+      ext/standard/tests/array/array_change_key_case_variation2.phpt
+      ext/standard/tests/array/array_change_key_case_variation2.phpt
+      ext/standard/tests/array/array_change_key_case_variation2.phpt
+      ext/standard/tests/array/array_change_key_case_variation3.phpt
+      ext/standard/tests/array/array_change_key_case_variation3.phpt
+      ext/standard/tests/array/array_change_key_case_variation3.phpt
+      ext/standard/tests/array/array_change_key_case_variation4.phpt
+      ext/standard/tests/array/array_change_key_case_variation4.phpt
+      ext/standard/tests/array/array_change_key_case_variation4.phpt
+      ext/standard/tests/array/array_change_key_case_variation5.phpt
+      ext/standard/tests/array/array_change_key_case_variation5.phpt
+      ext/standard/tests/array/array_change_key_case_variation5.phpt
+      ext/standard/tests/array/array_change_key_case_variation6.phpt
+      ext/standard/tests/array/array_change_key_case_variation6.phpt
+      ext/standard/tests/array/array_change_key_case_variation6.phpt
+      ext/standard/tests/array/array_change_key_case_variation7.phpt
+      ext/standard/tests/array/array_change_key_case_variation7.phpt
+      ext/standard/tests/array/array_change_key_case_variation7.phpt
+      ext/standard/tests/array/array_change_key_case_variation8.phpt
+      ext/standard/tests/array/array_change_key_case_variation8.phpt
+      ext/standard/tests/array/array_change_key_case_variation8.phpt:
+        1.1.4;
+      file array_change_key_case_variation1.phpt was initially added on branch
+      PHP_5_2.
+
+2008-02-12  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/mysqli/mysqli.c:
+      nuke unnecessary TSRMLS_FETCH()
+
+2008-02-12  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli.c:
+      Fix typo
+
+2008-02-12  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.c:
+      MFB: Fixed Bug #44094 (SEGFAULT when using mysql_connect())
+
+    * (PHP_5_3)
+      ext/mysql/php_mysql.c:
+      Fixed Bug #44094 (SEGFAULT when using mysql_connect())
+
+2008-02-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_highlight.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/tests/heredoc_001.phpt
+      ZendEngine2/tests/heredoc_002.phpt
+      ZendEngine2/tests/heredoc_003.phpt
+      ZendEngine2/tests/heredoc_004.phpt
+      ZendEngine2/tests/heredoc_005.phpt
+      ZendEngine2/tests/heredoc_006.phpt
+      ZendEngine2/tests/heredoc_007.phpt
+      ZendEngine2/tests/heredoc_008.phpt
+      ZendEngine2/tests/heredoc_009.phpt
+      ZendEngine2/tests/heredoc_010.phpt
+      ZendEngine2/tests/heredoc_011.phpt
+      ZendEngine2/tests/nowdoc.inc
+      ZendEngine2/tests/nowdoc_001.phpt
+      ZendEngine2/tests/nowdoc_002.phpt
+      ZendEngine2/tests/nowdoc_003.phpt
+      ZendEngine2/tests/nowdoc_004.phpt
+      ZendEngine2/tests/nowdoc_005.phpt
+      ZendEngine2/tests/nowdoc_006.phpt
+      ZendEngine2/tests/nowdoc_007.phpt
+      ZendEngine2/tests/nowdoc_008.phpt
+      ZendEngine2/tests/nowdoc_009.phpt
+      ZendEngine2/tests/nowdoc_010.phpt
+      ZendEngine2/tests/nowdoc_011.phpt
+      ZendEngine2/tests/nowdoc_012.phpt
+      ZendEngine2/tests/nowdoc_013.phpt
+      ZendEngine2/tests/nowdoc_014.phpt
+      ZendEngine2/tests/nowdoc_015.phpt
+      ext/tokenizer/tokenizer.c
+      ext/tokenizer/tokenizer.c:
+      Added NOWDOC
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_highlight.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/tests/heredoc_001.phpt
+      ZendEngine2/tests/heredoc_001.phpt
+      ZendEngine2/tests/heredoc_002.phpt
+      ZendEngine2/tests/heredoc_002.phpt
+      ZendEngine2/tests/heredoc_003.phpt
+      ZendEngine2/tests/heredoc_003.phpt
+      ZendEngine2/tests/heredoc_004.phpt
+      ZendEngine2/tests/heredoc_004.phpt
+      ZendEngine2/tests/heredoc_005.phpt
+      ZendEngine2/tests/heredoc_005.phpt
+      ZendEngine2/tests/heredoc_006.phpt
+      ZendEngine2/tests/heredoc_006.phpt
+      ZendEngine2/tests/heredoc_007.phpt
+      ZendEngine2/tests/heredoc_007.phpt
+      ZendEngine2/tests/heredoc_008.phpt
+      ZendEngine2/tests/heredoc_008.phpt
+      ZendEngine2/tests/heredoc_009.phpt
+      ZendEngine2/tests/heredoc_009.phpt
+      ZendEngine2/tests/heredoc_010.phpt
+      ZendEngine2/tests/heredoc_010.phpt
+      ZendEngine2/tests/heredoc_011.phpt
+      ZendEngine2/tests/heredoc_011.phpt
+      ZendEngine2/tests/nowdoc.inc
+      ZendEngine2/tests/nowdoc.inc
+      ZendEngine2/tests/nowdoc_001.phpt
+      ZendEngine2/tests/nowdoc_001.phpt
+      ZendEngine2/tests/nowdoc_002.phpt
+      ZendEngine2/tests/nowdoc_002.phpt
+      ZendEngine2/tests/nowdoc_003.phpt
+      ZendEngine2/tests/nowdoc_003.phpt
+      ZendEngine2/tests/nowdoc_004.phpt
+      ZendEngine2/tests/nowdoc_004.phpt
+      ZendEngine2/tests/nowdoc_005.phpt
+      ZendEngine2/tests/nowdoc_005.phpt
+      ZendEngine2/tests/nowdoc_006.phpt
+      ZendEngine2/tests/nowdoc_006.phpt
+      ZendEngine2/tests/nowdoc_007.phpt
+      ZendEngine2/tests/nowdoc_007.phpt
+      ZendEngine2/tests/nowdoc_008.phpt
+      ZendEngine2/tests/nowdoc_008.phpt
+      ZendEngine2/tests/nowdoc_009.phpt
+      ZendEngine2/tests/nowdoc_009.phpt
+      ZendEngine2/tests/nowdoc_010.phpt
+      ZendEngine2/tests/nowdoc_010.phpt
+      ZendEngine2/tests/nowdoc_011.phpt
+      ZendEngine2/tests/nowdoc_011.phpt
+      ZendEngine2/tests/nowdoc_012.phpt
+      ZendEngine2/tests/nowdoc_012.phpt
+      ZendEngine2/tests/nowdoc_013.phpt
+      ZendEngine2/tests/nowdoc_013.phpt
+      ZendEngine2/tests/nowdoc_014.phpt
+      ZendEngine2/tests/nowdoc_014.phpt
+      ZendEngine2/tests/nowdoc_015.phpt
+      ZendEngine2/tests/nowdoc_015.phpt:
+      Added NEWDOC
+
+    * ZendEngine2/zend_language_parser.y:
+      Fixed comilation warnings
+
+    * ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_parser.y:
+      Fixed ext/tokenizer test failures because of token renumbering
+
+2008-02-12  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * (PHP_5_2)
+      ext/standard/math.c
+      ext/standard/math.c
+      ext/standard/tests/math/exp_error.phpt
+      ext/standard/tests/math/exp_error.phpt:
+      Fixing 44092
+
+2008-02-12  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/array.c
+      ext/standard/array.c:
+      MFB: array_slice() - Fixed behavior when NULL is given in third parameter
+      (BC)
+
+    * (PHP_5_3)
+      ext/standard/array.c:
+      array_slice() - Fixed behavior when NULL is given in third parameter (BC)
+
+2008-02-12  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/file.c:
+      fix build
+
+2008-02-12  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/array/array_slice_variation1.phpt:
+      New test
+
+    * ext/standard/tests/array/array_slice_variation1.phpt
+      ext/standard/tests/array/array_slice_variation1.phpt:
+      
+      file array_slice_variation1.phpt was initially added on branch PHP_5_3.
+
+2008-02-12  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c:
+      fix folding
+
+    * ext/standard/string.c
+      ext/tokenizer/tokenizer_data.c:
+      MFB __DIR__ constant support
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l:
+      MFB __DIR_ constant support
+
+    * ZendEngine2/tests/constants/dir-constant-eval.phpt
+      ZendEngine2/tests/constants/dir-constant-includes.phpt
+      ZendEngine2/tests/constants/dir-constant-nested_includes.phpt
+      ZendEngine2/tests/constants/dir-constant-normal.phpt
+      ZendEngine2/tests/constants/fixtures/folder1/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder1/subfolder1/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder1/subfolder2/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder1/subfolder3/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder1/subfolder4/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder2/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder2/subfolder1/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder2/subfolder2/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder2/subfolder3/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder2/subfolder4/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder3/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder3/subfolder1/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder3/subfolder2/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder3/subfolder3/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder3/subfolder4/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder4/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder4/subfolder1/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder4/subfolder2/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder4/subfolder3/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder4/subfolder4/fixture.php:
+      MFB tests for __DIR__
+
+    * (PHP_5_3)
+      ext/tokenizer/tokenizer_data.c
+      ext/tokenizer/tokenizer_data_gen.sh
+      ext/tokenizer/tokenizer_data_gen.sh:
+      HNY
+
+    * (PHP_5_3)
+      ext/tokenizer/tokenizer_data.c:
+      add T_DIR
+
+    * ZendEngine2/tests/constants/fixtures/folder4/subfolder4/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder4/subfolder4/fixture.php:
+      
+      file fixture.php was initially added on branch PHP_5_3.
+
+    * ZendEngine2/tests/constants/dir-constant-eval.phpt
+      ZendEngine2/tests/constants/dir-constant-eval.phpt
+      ZendEngine2/tests/constants/dir-constant-includes.phpt
+      ZendEngine2/tests/constants/dir-constant-includes.phpt
+      ZendEngine2/tests/constants/dir-constant-nested_includes.phpt
+      ZendEngine2/tests/constants/dir-constant-nested_includes.phpt
+      ZendEngine2/tests/constants/dir-constant-normal.phpt
+      ZendEngine2/tests/constants/dir-constant-normal.phpt
+      ZendEngine2/tests/constants/fixtures/folder1/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder1/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder1/subfolder1/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder1/subfolder1/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder1/subfolder2/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder1/subfolder2/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder1/subfolder3/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder1/subfolder3/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder1/subfolder4/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder1/subfolder4/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder2/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder2/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder2/subfolder1/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder2/subfolder1/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder2/subfolder2/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder2/subfolder2/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder2/subfolder3/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder2/subfolder3/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder2/subfolder4/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder2/subfolder4/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder3/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder3/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder3/subfolder1/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder3/subfolder1/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder3/subfolder2/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder3/subfolder2/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder3/subfolder3/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder3/subfolder3/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder3/subfolder4/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder3/subfolder4/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder4/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder4/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder4/subfolder1/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder4/subfolder1/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder4/subfolder2/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder4/subfolder2/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder4/subfolder3/fixture.php
+      ZendEngine2/tests/constants/fixtures/folder4/subfolder3/fixture.php:
+      
+      file dir-constant-eval.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS:
+      __DIR__ announce
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l
+      ext/standard/string.c:
+      [DOC] Add compile-time __DIR__ constant which implements dirname(__FILE__)
+
 2008-02-11  Andrey Hristov  <php@hristov.com>
 
     * ext/mysqli/mysqli.c
