@@ -2172,8 +2172,10 @@ PHP_FUNCTION(substr)
 	}
 	
 	f = Z_LVAL_PP(from);
-	if (f > Z_STRLEN_PP(str) || (f < 0 && -f > Z_STRLEN_PP(str))) {
+	if (f > Z_STRLEN_PP(str)) {
 		RETURN_FALSE;
+	} else if (f < 0 && -f > Z_STRLEN_PP(str)) {
+		f = 0;
 	}
 
 	if (l < 0 && (l + Z_STRLEN_PP(str) - f) < 0) {
@@ -5245,14 +5247,13 @@ PHP_FUNCTION(substr_compare)
 		offset = (offset < 0) ? 0 : offset;
 	}
 
-	if (offset > s1_len) {
+	if (offset >= s1_len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The start position cannot exceed initial string length");
 		RETURN_FALSE;
 	}
 
 	if (len > s1_len - offset) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The length cannot exceed initial string length");
-		RETURN_FALSE;
+		len = s1_len - offset;
 	}
 
 	cmp_len = (uint) (len ? len : MAX(s2_len, (s1_len - offset)));
