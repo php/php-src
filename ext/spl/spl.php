@@ -1030,8 +1030,8 @@ class DirectoryIterator extends SplFileInfo implements Iterator
  */
 class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveIterator
 {
-	const CURRENT_AS_SELF       0x00000000; /* make RecursiveDirectoryTree::current() return getSelf() */
-	const CURRENT_AS_FILEINFO   0x00000010; /* make RecursiveDirectoryTree::current() return SplFileInfo */
+	const CURRENT_AS_FILEINFO   0x00000000; /* make RecursiveDirectoryTree::current() return SplFileInfo */
+	const CURRENT_AS_SELF       0x00000010; /* make RecursiveDirectoryTree::current() return getSelf() */
 	const CURRENT_AS_PATHNAME   0x00000020; /* make RecursiveDirectoryTree::current() return getPathname() */
 
 	const KEY_AS_PATHNAME       0x00000000; /* make RecursiveDirectoryTree::key() return getPathname() */
