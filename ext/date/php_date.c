@@ -2098,7 +2098,7 @@ void php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAMETERS, timelib_time *
 				break;
 		}
 	}
-	if (parsed_time->have_relative || parsed_time->have_weekday_relative) {
+	if (parsed_time->have_relative || parsed_time->have_weekday_relative || parsed_time->have_special_relative || parsed_time->relative.first_last_day_of) {
 		MAKE_STD_ZVAL(element);
 		array_init(element);
 	}
@@ -2113,7 +2113,13 @@ void php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAMETERS, timelib_time *
 	if (parsed_time->have_weekday_relative) {
 		add_ascii_assoc_long(element, "weekday", parsed_time->relative.weekday);
 	}
-	if (parsed_time->have_relative || parsed_time->have_weekday_relative) {
+	if (parsed_time->have_special_relative && (parsed_time->special.type == TIMELIB_SPECIAL_WEEKDAY)) {
+		add_ascii_assoc_long(element, "weekdays", parsed_time->special.amount);
+	}
+	if (parsed_time->relative.first_last_day_of) {
+		add_ascii_assoc_bool(element, parsed_time->relative.first_last_day_of == 1 ? "first_day_of_month" : "last_day_of_month", 1);
+	}
+	if (parsed_time->have_relative || parsed_time->have_weekday_relative || parsed_time->have_special_relative || parsed_time->relative.first_last_day_of) {
 		add_ascii_assoc_zval(return_value, "relative", element);
 	}
 	timelib_time_dtor(parsed_time);
