@@ -962,7 +962,7 @@ SPL_METHOD(RecursiveDirectoryIterator, __construct)
 	spl_filesystem_object *intern;
 	char *path;
 	int len;
-	long flags = 0;
+	long flags = SPL_FILE_DIR_KEY_AS_PATHNAME|SPL_FILE_DIR_CURRENT_AS_FILEINFO;
 
 	php_set_error_handling(EH_THROW, spl_ce_UnexpectedValueException TSRMLS_CC);
 
