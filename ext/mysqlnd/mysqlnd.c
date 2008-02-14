@@ -546,7 +546,7 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 
 
 	PACKET_INIT_ALLOCA(greet_packet, PROT_GREET_PACKET);
-	PACKET_INIT(auth_packet, PROT_AUTH_PACKET, php_mysql_packet_auth *);
+	PACKET_INIT(auth_packet, PROT_AUTH_PACKET, php_mysql_packet_auth *, FALSE);
 	PACKET_INIT_ALLOCA(ok_packet, PROT_OK_PACKET);
 
 	if (!conn) {
@@ -851,7 +851,7 @@ MYSQLND_METHOD(mysqlnd_conn, query)(MYSQLND *conn, const char *query, unsigned i
 									   FALSE TSRMLS_CC)) {
 		DBG_RETURN(FAIL);
 	}
-
+	CONN_SET_STATE(conn, CONN_QUERY_SENT);
 	/*
 	  Here read the result set. We don't do it in simple_command because it need
 	  information from the ok packet. We will fetch it ourselves.
@@ -1340,6 +1340,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn, set_state)(MYSQLND * const conn, enum mysql
 #ifdef MYSQLND_THREADED
  	tsrm_mutex_lock(conn->LOCK_state);
 #endif
+	DBG_INF_FMT("New state=%d", new_state);
 	conn->state = new_state;
 #ifdef MYSQLND_THREADED
 	tsrm_mutex_unlock(conn->LOCK_state);
