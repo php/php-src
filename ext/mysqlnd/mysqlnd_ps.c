@@ -513,6 +513,8 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const stmt TSRMLS_DC)
 	}
 	stmt->execute_count++;
 
+	CONN_SET_STATE(conn, CONN_QUERY_SENT);
+
 	ret = mysqlnd_query_read_result_set_header(stmt->conn, stmt TSRMLS_CC);
 	if (ret == FAIL) {
 		stmt->error_info = conn->error_info;
