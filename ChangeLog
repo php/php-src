@@ -1,3 +1,310 @@
+2008-02-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/calendar/cal_unix.c:
+      
+      New calendar parsing API
+
+2008-02-13  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/date/php_date.c:
+      - MFH: Add some missing elements from the return value.
+
+    * ext/date/php_date.c:
+      - Add some missing elements from the return value.
+
+2008-02-13  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ZendEngine2/tests/constants/.cvsignore
+      ZendEngine2/tests/constants/.cvsignore:
+      
+      - Add missig .cvsignore
+
+2008-02-13  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/standard/string.c
+      ext/standard/tests/strings/substr.phpt
+      ext/standard/tests/strings/substr_compare.phpt:
+      MFH: Fix inconcistencies between substr and substr_compare
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/substr.phpt
+      ext/standard/tests/strings/substr_compare.phpt:
+      Fix inconcistencies between substr and substr_compare
+
+2008-02-13  Josie Messa  <josmessa@uk.ibm.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_shift_basic.phpt
+      ext/standard/tests/array/array_shift_basic.phpt
+      ext/standard/tests/array/array_shift_error.phpt
+      ext/standard/tests/array/array_shift_error.phpt
+      ext/standard/tests/array/array_shift_variation1.phpt
+      ext/standard/tests/array/array_shift_variation1.phpt
+      ext/standard/tests/array/array_shift_variation2.phpt
+      ext/standard/tests/array/array_shift_variation2.phpt
+      ext/standard/tests/array/array_shift_variation3.phpt
+      ext/standard/tests/array/array_shift_variation3.phpt
+      ext/standard/tests/array/array_shift_variation4.phpt
+      ext/standard/tests/array/array_shift_variation4.phpt
+      ext/standard/tests/array/array_shift_variation5.phpt
+      ext/standard/tests/array/array_shift_variation5.phpt
+      ext/standard/tests/array/array_shift_variation6.phpt
+      ext/standard/tests/array/array_shift_variation6.phpt
+      ext/standard/tests/array/array_shift_variation7.phpt
+      ext/standard/tests/array/array_shift_variation7.phpt
+      ext/standard/tests/array/array_shift_variation8.phpt
+      ext/standard/tests/array/array_shift_variation8.phpt:
+      - New tests for array_shift() function
+
+    * ext/standard/tests/array/array_shift_basic.phpt
+      ext/standard/tests/array/array_shift_basic.phpt
+      ext/standard/tests/array/array_shift_basic.phpt
+      ext/standard/tests/array/array_shift_error.phpt
+      ext/standard/tests/array/array_shift_error.phpt
+      ext/standard/tests/array/array_shift_error.phpt
+      ext/standard/tests/array/array_shift_variation1.phpt
+      ext/standard/tests/array/array_shift_variation1.phpt
+      ext/standard/tests/array/array_shift_variation1.phpt
+      ext/standard/tests/array/array_shift_variation2.phpt
+      ext/standard/tests/array/array_shift_variation2.phpt
+      ext/standard/tests/array/array_shift_variation2.phpt
+      ext/standard/tests/array/array_shift_variation3.phpt
+      ext/standard/tests/array/array_shift_variation3.phpt
+      ext/standard/tests/array/array_shift_variation3.phpt
+      ext/standard/tests/array/array_shift_variation4.phpt
+      ext/standard/tests/array/array_shift_variation4.phpt
+      ext/standard/tests/array/array_shift_variation4.phpt
+      ext/standard/tests/array/array_shift_variation5.phpt
+      ext/standard/tests/array/array_shift_variation5.phpt
+      ext/standard/tests/array/array_shift_variation5.phpt
+      ext/standard/tests/array/array_shift_variation6.phpt
+      ext/standard/tests/array/array_shift_variation6.phpt
+      ext/standard/tests/array/array_shift_variation6.phpt
+      ext/standard/tests/array/array_shift_variation7.phpt
+      ext/standard/tests/array/array_shift_variation7.phpt
+      ext/standard/tests/array/array_shift_variation7.phpt
+      ext/standard/tests/array/array_shift_variation8.phpt
+      ext/standard/tests/array/array_shift_variation8.phpt
+      ext/standard/tests/array/array_shift_variation8.phpt:
+        1.1.4;
+      - New tests for array_shift() function
+
+2008-02-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * configure.in
+      configure.in
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_operators.h:
+      Use memrchr() instead of zend_memrchr() if available. (Nuno)
+
+2008-02-13  Josie Messa  <josmessa@uk.ibm.com>
+
+    * ext/standard/tests/array/array_push_basic.phpt
+      ext/standard/tests/array/array_push_basic.phpt
+      ext/standard/tests/array/array_push_error1.phpt
+      ext/standard/tests/array/array_push_error1.phpt
+      ext/standard/tests/array/array_push_error2.phpt
+      ext/standard/tests/array/array_push_error2.phpt
+      ext/standard/tests/array/array_push_variation1.phpt
+      ext/standard/tests/array/array_push_variation1.phpt
+      ext/standard/tests/array/array_push_variation2.phpt
+      ext/standard/tests/array/array_push_variation2.phpt
+      ext/standard/tests/array/array_push_variation3.phpt
+      ext/standard/tests/array/array_push_variation3.phpt
+      ext/standard/tests/array/array_push_variation4.phpt
+      ext/standard/tests/array/array_push_variation4.phpt
+      ext/standard/tests/array/array_push_variation5.phpt
+      ext/standard/tests/array/array_push_variation5.phpt
+      ext/standard/tests/array/array_push_variation6.phpt
+      ext/standard/tests/array/array_push_variation6.phpt:
+      - New tests for array_push() function
+
+    * ext/standard/tests/array/array_push_basic.phpt
+      ext/standard/tests/array/array_push_basic.phpt
+      ext/standard/tests/array/array_push_basic.phpt
+      ext/standard/tests/array/array_push_error1.phpt
+      ext/standard/tests/array/array_push_error1.phpt
+      ext/standard/tests/array/array_push_error1.phpt
+      ext/standard/tests/array/array_push_error2.phpt
+      ext/standard/tests/array/array_push_error2.phpt
+      ext/standard/tests/array/array_push_error2.phpt
+      ext/standard/tests/array/array_push_variation1.phpt
+      ext/standard/tests/array/array_push_variation1.phpt
+      ext/standard/tests/array/array_push_variation1.phpt
+      ext/standard/tests/array/array_push_variation2.phpt
+      ext/standard/tests/array/array_push_variation2.phpt
+      ext/standard/tests/array/array_push_variation2.phpt
+      ext/standard/tests/array/array_push_variation3.phpt
+      ext/standard/tests/array/array_push_variation3.phpt
+      ext/standard/tests/array/array_push_variation3.phpt
+      ext/standard/tests/array/array_push_variation4.phpt
+      ext/standard/tests/array/array_push_variation4.phpt
+      ext/standard/tests/array/array_push_variation4.phpt
+      ext/standard/tests/array/array_push_variation5.phpt
+      ext/standard/tests/array/array_push_variation5.phpt
+      ext/standard/tests/array/array_push_variation5.phpt
+      ext/standard/tests/array/array_push_variation6.phpt
+      ext/standard/tests/array/array_push_variation6.phpt
+      ext/standard/tests/array/array_push_variation6.phpt:
+        1.1.4;
+      file array_push_basic.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_merge_basic.phpt
+      ext/standard/tests/array/array_merge_basic.phpt
+      ext/standard/tests/array/array_merge_error.phpt
+      ext/standard/tests/array/array_merge_error.phpt
+      ext/standard/tests/array/array_merge_variation1.phpt
+      ext/standard/tests/array/array_merge_variation1.phpt
+      ext/standard/tests/array/array_merge_variation10.phpt
+      ext/standard/tests/array/array_merge_variation10.phpt
+      ext/standard/tests/array/array_merge_variation2.phpt
+      ext/standard/tests/array/array_merge_variation2.phpt
+      ext/standard/tests/array/array_merge_variation3.phpt
+      ext/standard/tests/array/array_merge_variation3.phpt
+      ext/standard/tests/array/array_merge_variation4.phpt
+      ext/standard/tests/array/array_merge_variation4.phpt
+      ext/standard/tests/array/array_merge_variation5.phpt
+      ext/standard/tests/array/array_merge_variation5.phpt
+      ext/standard/tests/array/array_merge_variation6.phpt
+      ext/standard/tests/array/array_merge_variation6.phpt
+      ext/standard/tests/array/array_merge_variation7.phpt
+      ext/standard/tests/array/array_merge_variation7.phpt
+      ext/standard/tests/array/array_merge_variation8.phpt
+      ext/standard/tests/array/array_merge_variation8.phpt
+      ext/standard/tests/array/array_merge_variation9.phpt
+      ext/standard/tests/array/array_merge_variation9.phpt:
+      - committing tests for array_merge() function
+
+    * ext/standard/tests/array/array_merge_basic.phpt
+      ext/standard/tests/array/array_merge_basic.phpt
+      ext/standard/tests/array/array_merge_basic.phpt
+      ext/standard/tests/array/array_merge_error.phpt
+      ext/standard/tests/array/array_merge_error.phpt
+      ext/standard/tests/array/array_merge_error.phpt
+      ext/standard/tests/array/array_merge_variation1.phpt
+      ext/standard/tests/array/array_merge_variation1.phpt
+      ext/standard/tests/array/array_merge_variation1.phpt
+      ext/standard/tests/array/array_merge_variation10.phpt
+      ext/standard/tests/array/array_merge_variation10.phpt
+      ext/standard/tests/array/array_merge_variation10.phpt
+      ext/standard/tests/array/array_merge_variation2.phpt
+      ext/standard/tests/array/array_merge_variation2.phpt
+      ext/standard/tests/array/array_merge_variation2.phpt
+      ext/standard/tests/array/array_merge_variation3.phpt
+      ext/standard/tests/array/array_merge_variation3.phpt
+      ext/standard/tests/array/array_merge_variation3.phpt
+      ext/standard/tests/array/array_merge_variation4.phpt
+      ext/standard/tests/array/array_merge_variation4.phpt
+      ext/standard/tests/array/array_merge_variation4.phpt
+      ext/standard/tests/array/array_merge_variation5.phpt
+      ext/standard/tests/array/array_merge_variation5.phpt
+      ext/standard/tests/array/array_merge_variation5.phpt
+      ext/standard/tests/array/array_merge_variation6.phpt
+      ext/standard/tests/array/array_merge_variation6.phpt
+      ext/standard/tests/array/array_merge_variation6.phpt
+      ext/standard/tests/array/array_merge_variation7.phpt
+      ext/standard/tests/array/array_merge_variation7.phpt
+      ext/standard/tests/array/array_merge_variation7.phpt
+      ext/standard/tests/array/array_merge_variation8.phpt
+      ext/standard/tests/array/array_merge_variation8.phpt
+      ext/standard/tests/array/array_merge_variation8.phpt
+      ext/standard/tests/array/array_merge_variation9.phpt
+      ext/standard/tests/array/array_merge_variation9.phpt
+      ext/standard/tests/array/array_merge_variation9.phpt:
+        1.1.4;
+      - committing tests for array_merge() function
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_key_exists_basic.phpt
+      ext/standard/tests/array/array_key_exists_basic.phpt
+      ext/standard/tests/array/array_key_exists_error.phpt
+      ext/standard/tests/array/array_key_exists_error.phpt
+      ext/standard/tests/array/array_key_exists_object1.phpt
+      ext/standard/tests/array/array_key_exists_object1.phpt
+      ext/standard/tests/array/array_key_exists_object2.phpt
+      ext/standard/tests/array/array_key_exists_object2.phpt
+      ext/standard/tests/array/array_key_exists_variation1.phpt
+      ext/standard/tests/array/array_key_exists_variation1.phpt
+      ext/standard/tests/array/array_key_exists_variation2.phpt
+      ext/standard/tests/array/array_key_exists_variation2.phpt
+      ext/standard/tests/array/array_key_exists_variation3.phpt
+      ext/standard/tests/array/array_key_exists_variation3.phpt
+      ext/standard/tests/array/array_key_exists_variation4.phpt
+      ext/standard/tests/array/array_key_exists_variation4.phpt
+      ext/standard/tests/array/array_key_exists_variation5.phpt
+      ext/standard/tests/array/array_key_exists_variation5.phpt
+      ext/standard/tests/array/array_key_exists_variation6.phpt
+      ext/standard/tests/array/array_key_exists_variation6.phpt
+      ext/standard/tests/array/array_key_exists_variation7.phpt
+      ext/standard/tests/array/array_key_exists_variation7.phpt
+      ext/standard/tests/array/array_key_exists_variation8.phpt
+      ext/standard/tests/array/array_key_exists_variation8.phpt:
+      - committing tests for array_key_exists() function
+
+    * ext/standard/tests/array/array_key_exists_basic.phpt
+      ext/standard/tests/array/array_key_exists_basic.phpt
+      ext/standard/tests/array/array_key_exists_basic.phpt
+      ext/standard/tests/array/array_key_exists_error.phpt
+      ext/standard/tests/array/array_key_exists_error.phpt
+      ext/standard/tests/array/array_key_exists_error.phpt
+      ext/standard/tests/array/array_key_exists_object1.phpt
+      ext/standard/tests/array/array_key_exists_object1.phpt
+      ext/standard/tests/array/array_key_exists_object1.phpt
+      ext/standard/tests/array/array_key_exists_object2.phpt
+      ext/standard/tests/array/array_key_exists_object2.phpt
+      ext/standard/tests/array/array_key_exists_object2.phpt
+      ext/standard/tests/array/array_key_exists_variation1.phpt
+      ext/standard/tests/array/array_key_exists_variation1.phpt
+      ext/standard/tests/array/array_key_exists_variation1.phpt
+      ext/standard/tests/array/array_key_exists_variation2.phpt
+      ext/standard/tests/array/array_key_exists_variation2.phpt
+      ext/standard/tests/array/array_key_exists_variation2.phpt
+      ext/standard/tests/array/array_key_exists_variation3.phpt
+      ext/standard/tests/array/array_key_exists_variation3.phpt
+      ext/standard/tests/array/array_key_exists_variation3.phpt
+      ext/standard/tests/array/array_key_exists_variation4.phpt
+      ext/standard/tests/array/array_key_exists_variation4.phpt
+      ext/standard/tests/array/array_key_exists_variation4.phpt
+      ext/standard/tests/array/array_key_exists_variation5.phpt
+      ext/standard/tests/array/array_key_exists_variation5.phpt
+      ext/standard/tests/array/array_key_exists_variation5.phpt
+      ext/standard/tests/array/array_key_exists_variation6.phpt
+      ext/standard/tests/array/array_key_exists_variation6.phpt
+      ext/standard/tests/array/array_key_exists_variation6.phpt
+      ext/standard/tests/array/array_key_exists_variation7.phpt
+      ext/standard/tests/array/array_key_exists_variation7.phpt
+      ext/standard/tests/array/array_key_exists_variation7.phpt
+      ext/standard/tests/array/array_key_exists_variation8.phpt
+      ext/standard/tests/array/array_key_exists_variation8.phpt
+      ext/standard/tests/array/array_key_exists_variation8.phpt:
+        1.1.4;
+      - committig tests for array_key_exists() function
+
+2008-02-13  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_2)
+      ext/spl/spl.php
+      ext/spl/spl.php
+      ext/spl/spl_directory.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_directory.h
+      ext/spl/spl_directory.h
+      ext/spl/tests/dit_002.phpt
+      ext/spl/tests/dit_002.phpt:
+      - MFH Make this behave like in <= 5.2.5 and test for it
+
+    * ext/spl/spl.php
+      ext/spl/spl_directory.c
+      ext/spl/spl_directory.h
+      ext/spl/tests/dit_002.phpt
+      ext/spl/tests/dit_002.phpt
+      ext/spl/tests/dit_002.phpt:
+      - Make this behave like in <= 5.2.5 and test for it
+
 2008-02-12  Greg Beaver  <greg@chiaraquartet.net>
 
     * (PHP_5_2)
