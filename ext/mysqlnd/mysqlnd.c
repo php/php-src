@@ -28,6 +28,8 @@
 #include "mysqlnd_charset.h"
 #include "mysqlnd_debug.h"
 #include "mysqlnd_block_alloc.h"
+/* for php_get_current_user() */
+#include "ext/standard/basic_functions.h" 
 
 /* the server doesn't support 4byte utf8, but let's make it forward compatible */
 #define MYSQLND_MAX_ALLOWED_USER_LEN	256  /* 64 char * 4byte */
@@ -544,7 +546,7 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 
 
 	PACKET_INIT_ALLOCA(greet_packet, PROT_GREET_PACKET);
-	PACKET_INIT(auth_packet, PROT_AUTH_PACKET, php_mysql_packet_auth *);
+	PACKET_INIT(auth_packet, PROT_AUTH_PACKET, php_mysql_packet_auth *, FALSE);
 	PACKET_INIT_ALLOCA(ok_packet, PROT_OK_PACKET);
 
 	if (!conn) {
@@ -849,7 +851,7 @@ MYSQLND_METHOD(mysqlnd_conn, query)(MYSQLND *conn, const char *query, unsigned i
 									   FALSE TSRMLS_CC)) {
 		DBG_RETURN(FAIL);
 	}
-
+	CONN_SET_STATE(conn, CONN_QUERY_SENT);
 	/*
 	  Here read the result set. We don't do it in simple_command because it need
 	  information from the ok packet. We will fetch it ourselves.
@@ -1338,6 +1340,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn, set_state)(MYSQLND * const conn, enum mysql
 #ifdef MYSQLND_THREADED
  	tsrm_mutex_lock(conn->LOCK_state);
 #endif
+	DBG_INF_FMT("New state=%d", new_state);
 	conn->state = new_state;
 #ifdef MYSQLND_THREADED
 	tsrm_mutex_unlock(conn->LOCK_state);

@@ -37,10 +37,11 @@ extern char * mysqlnd_read_body_name;
 
 
 /* Packet handling */
-#define PACKET_INIT(packet, enum_type, c_type)  \
+#define PACKET_INIT(packet, enum_type, c_type, pers)  \
 	{ \
-		packet = (c_type) ecalloc(1, packet_methods[enum_type].struct_size); \
-		((c_type) (packet))->header.m = &packet_methods[enum_type]; \
+		packet = (c_type) pecalloc(1, packet_methods[(enum_type)].struct_size, (pers)); \
+		((c_type) (packet))->header.m = &packet_methods[(enum_type)]; \
+		((c_type) (packet))->header.persistent = (pers); \
 	}
 #define PACKET_WRITE(packet, conn)	((packet)->header.m->write_to_net((packet), (conn) TSRMLS_CC))
 #define PACKET_READ(packet, conn)	((packet)->header.m->read_from_net((packet), (conn) TSRMLS_CC))
@@ -126,8 +127,9 @@ extern mysqlnd_packet_methods packet_methods[];
 
 typedef struct st_mysqlnd_packet_header {
 	size_t		size;
-	zend_uchar	packet_no;
 	mysqlnd_packet_methods *m;
+	zend_uchar	packet_no;
+	zend_bool	persistent;
 } mysqlnd_packet_header;
 
 /* Server greets the client */

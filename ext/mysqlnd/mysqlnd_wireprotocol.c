@@ -1685,7 +1685,7 @@ void php_mysqlnd_rowp_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 		not free the array. As it is passed to us, we should not clean it ourselves.
 	*/
 	if (!alloca) {
-		mnd_efree(p);
+		mnd_pefree(p, p->header.persistent);
 	}
 }
 /* }}} */
@@ -1723,7 +1723,7 @@ void php_mysqlnd_stats_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 		p->message = NULL;
 	}
 	if (!alloca) {
-		mnd_efree(p);
+		mnd_pefree(p, p->header.persistent);
 	}
 }
 /* }}} */
@@ -1807,7 +1807,7 @@ void php_mysqlnd_prepare_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 {
 	php_mysql_packet_prepare_response *p= (php_mysql_packet_prepare_response *) _packet;
 	if (!alloca) {
-		mnd_efree(p);
+		mnd_pefree(p, p->header.persistent);
 	}
 }
 /* }}} */
@@ -1866,7 +1866,7 @@ static
 void php_mysqlnd_chg_user_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 {
 	if (!alloca) {
-		mnd_efree(_packet);
+		mnd_pefree(_packet, ((php_mysql_packet_chg_user_resp *)_packet)->header.persistent);
 	}
 }
 /* }}} */

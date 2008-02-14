@@ -40,32 +40,36 @@ void * mysqlnd_fetch_thread(void *arg)
 	MYSQLND_RES * result = NULL;
 	void ***tsrm_ls = conn->tsrm_ls;
 #ifndef MYSQLND_SILENT
-	printf("conn=%p tsrm_ls=%p\n", conn, conn->tsrm_ls);
+	printf("THREAD] conn=%p tsrm_ls=%p\n", conn, conn->tsrm_ls);
 #endif
 	do {
 		pthread_mutex_lock(&conn->LOCK_work);
-		while (conn->thread_killed == FALSE /* && there is work */) {
+		while (conn->thread_killed == FALSE && !conn->current_result) {
 #ifndef MYSQLND_SILENT
-			printf("Waiting for work in %s\n", __FUNCTION__);
+			printf("THREAD] Waiting for work in %s\n", __FUNCTION__);
 #endif
 			pthread_cond_wait(&conn->COND_work, &conn->LOCK_work);
 		}
 		if (conn->thread_killed == TRUE) {
 #ifndef MYSQLND_SILENT
-			printf("Thread killed in %s\n", __FUNCTION__);
+			printf("THREAD] Thread killed in %s\n", __FUNCTION__);
 #endif
 			pthread_cond_signal(&conn->COND_thread_ended);
 			pthread_mutex_unlock(&conn->LOCK_work);
 			break;
 		}
 #ifndef MYSQLND_SILENT
-		printf("Got work in %s\n", __FUNCTION__);
+		printf("THREAD] Got work in %s\n", __FUNCTION__);
 #endif
 		CONN_SET_STATE(conn, CONN_FETCHING_DATA);
 		result = conn->current_result;
 		conn->current_result = NULL;
+		pthread_cond_signal(&conn->COND_work); /* sent notification back */
 		pthread_mutex_unlock(&conn->LOCK_work);
 
+#ifndef MYSQLND_SILENT
+		printf("THREAD] Starting fetch %s\n", __FUNCTION__);
+#endif
 		mysqlnd_background_store_result_fetch_data(result TSRMLS_CC);
 
 		/* do fetch the data from the wire */
@@ -74,13 +78,13 @@ void * mysqlnd_fetch_thread(void *arg)
 		CONN_SET_STATE(conn, CONN_READY);
 		pthread_cond_signal(&conn->COND_work_done);
 #ifndef MYSQLND_SILENT
-		printf("Signaling work done in %s\n", __FUNCTION__);
+		printf("THREAD] Signaling work done in %s\n", __FUNCTION__);
 #endif
 		pthread_mutex_unlock(&conn->LOCK_work);
 	} while (1);
 
 #ifndef MYSQLND_SILENT
-	printf("Exiting worker thread in %s\n", __FUNCTION__);
+	printf("THREAD] Exiting worker thread in %s\n", __FUNCTION__);
 #endif
 	return NULL;
 }
@@ -461,6 +465,8 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 			*/
 			conn->error_info = rset_header.error_info;
 			ret = FAIL;
+			/* Return back from CONN_QUERY_SENT */
+			CONN_SET_STATE(conn, CONN_READY);
 			break;
 		}
 		conn->error_info.error_no = 0;
@@ -976,7 +982,8 @@ MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, zend_bool ps
 	  by the resource destructor. mysqlnd_fetch_row_unbuffered() expects
 	  this to be not NULL.
 	*/
-	PACKET_INIT(result->row_packet, PROT_ROW_PACKET, php_mysql_packet_row *);
+	/* FALSE = non-persistent */
+	PACKET_INIT(result->row_packet, PROT_ROW_PACKET, php_mysql_packet_row *, FALSE);
 	result->row_packet->field_count = result->field_count;
 	result->row_packet->binary_protocol = ps;
 	result->row_packet->fields_metadata = result->meta->fields;
@@ -1182,7 +1189,8 @@ mysqlnd_store_result_fetch_data(MYSQLND * const conn, MYSQLND_RES *result,
 	set->qcache		= to_cache? mysqlnd_qcache_get_cache_reference(conn->qcache):NULL;
 	set->references	= 1;
 
-	PACKET_INIT(row_packet, PROT_ROW_PACKET, php_mysql_packet_row *);
+	/* non-persistent */
+	PACKET_INIT(row_packet, PROT_ROW_PACKET, php_mysql_packet_row *, FALSE);
 	row_packet->field_count = meta->field_count;
 	row_packet->binary_protocol = binary_protocol;
 	row_packet->fields_metadata = meta->fields;
@@ -1315,6 +1323,7 @@ mysqlnd_fetch_row_async_buffered(MYSQLND_RES *result, void *param, unsigned int 
 	do {
 	 	tsrm_mutex_lock(set->LOCK);
 		if (set->bg_fetch_finished == TRUE) {
+			/* Don't unlock here, will be done later */
 			break;
 		}
 		if (!set->data_cursor || (set->data_cursor - set->data) < (set->row_count)) {
@@ -1439,14 +1448,14 @@ mysqlnd_background_store_result_fetch_data(MYSQLND_RES *result TSRMLS_DC)
 
 	free_rows = next_extend;
 
-	PACKET_INIT(row_packet, PROT_ROW_PACKET, php_mysql_packet_row *);
+	/* persistent */
+	PACKET_INIT(row_packet, PROT_ROW_PACKET, php_mysql_packet_row *, TRUE);
 	row_packet->field_count = result->meta->field_count;
 	row_packet->binary_protocol = result->m.row_decoder == php_mysqlnd_rowp_read_binary_protocol;
 	row_packet->fields_metadata = result->meta->fields;
 	row_packet->bit_fields_count	= result->meta->bit_fields_count;
 	row_packet->bit_fields_total_len= result->meta->bit_fields_total_len;
-
-//	row_packet->skip_extraction = TRUE; /* let php_mysqlnd_rowp_read() not allocate row_packet->fields, we will do it */
+	row_packet->persistent_alloc = TRUE;
 
 	while (FAIL != (ret = PACKET_READ(row_packet, conn)) && !row_packet->eof) {
 		tsrm_mutex_lock(set->LOCK);
@@ -1560,7 +1569,7 @@ MYSQLND_METHOD(mysqlnd_res, background_store_result)(MYSQLND_RES * result, MYSQL
 	return (result->m.store_result(result, conn, ps TSRMLS_CC));
 #else
 	enum_func_status ret;
-	zend_bool to_cache = FALSE;
+	zend_bool to_cache = TRUE;
 
 	DBG_ENTER("mysqlnd_res::background_store_result");
 	DBG_INF_FMT("conn=%d ps_protocol=%d", conn->thread_id, ps);
@@ -1585,11 +1594,26 @@ MYSQLND_METHOD(mysqlnd_res, background_store_result)(MYSQLND_RES * result, MYSQL
 								php_mysqlnd_rowp_read_text_protocol;
 
 	CONN_SET_STATE(conn, CONN_FETCHING_DATA);
-	result->bg_stored_data->decode_in_foreground = FALSE;
+	/*
+	  This should be definitely TRUE. Decoding in background means creating zvals
+	  which is not very safe for Zend MM, will complain in debug mode and more problems
+	  also manifest themselves - unstable.
+	*/
+	result->bg_stored_data->decode_in_foreground = TRUE;
 
 	result->lengths = mnd_ecalloc(result->field_count, sizeof(unsigned long));
 
+	pthread_mutex_lock(&conn->LOCK_work);
+
+	pthread_cond_signal(&conn->COND_work);
+	do {
+		pthread_cond_wait(&conn->COND_work, &conn->LOCK_work);
+	} while (conn->current_result); /* this is our invariant */
+	pthread_mutex_unlock(&conn->LOCK_work);
+
+#if 0
 	ret = mysqlnd_background_store_result_fetch_data(result TSRMLS_CC);
+#endif
 
 	DBG_RETURN(result);
 #endif
