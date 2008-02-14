@@ -733,7 +733,7 @@ static
 void php_mysqlnd_auth_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 {
 	if (!alloca) {
-		mnd_efree((php_mysql_packet_auth *) _packet);
+		mnd_pefree((php_mysql_packet_auth *) _packet, ((php_mysql_packet_auth *)_packet)->header.persistent);
 	}
 }
 /* }}} */
@@ -807,7 +807,7 @@ void php_mysqlnd_ok_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 		p->message = NULL;
 	}
 	if (!alloca) {
-		mnd_efree(p);
+		mnd_pefree(p, p->header.persistent);
 	}
 }
 /* }}} */
@@ -877,7 +877,7 @@ static
 void php_mysqlnd_eof_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 {
 	if (!alloca) {
-		mnd_efree(_packet);
+		mnd_pefree(_packet, ((php_mysql_packet_eof *)_packet)->header.persistent);
 	}
 }
 /* }}} */
@@ -949,7 +949,7 @@ static
 void php_mysqlnd_cmd_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 {
 	if (!alloca) {
-		mnd_efree((php_mysql_packet_command *) _packet);
+		mnd_pefree(_packet, ((php_mysql_packet_command *)_packet)->header.persistent);
 	}
 }
 /* }}} */
@@ -1036,7 +1036,7 @@ void php_mysqlnd_rset_header_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 		p->info_or_local_file = NULL;
 	}
 	if (!alloca) {
-		mnd_efree(p);
+		mnd_pefree(p, p->header.persistent);
 	}
 }
 /* }}} */
@@ -1227,7 +1227,7 @@ void php_mysqlnd_rset_field_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 
 	/* p->metadata was passed to us as temporal buffer */
 	if (!alloca) {
-		mnd_efree(p);
+		mnd_pefree(p, p->header.persistent);
 	}
 }
 /* }}} */
