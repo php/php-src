@@ -32,6 +32,9 @@ echo "\n-- Pass \$var argument which is a reference to \$stack argument --\n";
 var_dump(array_push($array, &$array));
 var_dump($array);
 
+/* break cycle */
+$array[9] = null;
+
 echo "Done";
 ?>
 --EXPECTF--
