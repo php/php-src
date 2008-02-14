@@ -178,11 +178,12 @@ static PHP_MSHUTDOWN_FUNCTION(mysqlnd)
 /* }}} */
 
 
-#ifdef PHP_DEBUG
+#if defined(PHP_DEBUG) || defined(MYSQLND_THREADED)
 /* {{{ PHP_RINIT_FUNCTION
  */
 static PHP_RINIT_FUNCTION(mysqlnd)
 {
+#if defined(PHP_DEBUG)
 	if (MYSQLND_G(debug)) {
 		MYSQLND_DEBUG *dbg = mysqlnd_debug_init(TSRMLS_C);
 		if (!dbg) {
@@ -190,8 +191,11 @@ static PHP_RINIT_FUNCTION(mysqlnd)
 		}
 		dbg->m->set_mode(dbg, MYSQLND_G(debug));
 		MYSQLND_G(dbg) = dbg;
-		MYSQLND_G(thread_id) = tsrm_thread_id();
 	}
+#endif
+#ifdef MYSQLND_THREADED
+	MYSQLND_G(thread_id) = tsrm_thread_id();
+#endif
 	return SUCCESS;
 }
 /* }}} */
@@ -222,11 +226,14 @@ zend_module_entry mysqlnd_module_entry = {
 	mysqlnd_functions,
 	PHP_MINIT(mysqlnd),
 	PHP_MSHUTDOWN(mysqlnd),
-#ifdef PHP_DEBUG
+#ifdef PHP_DEBUG || defined(MYSQLND_THREADED)
 	PHP_RINIT(mysqlnd),
-	PHP_RSHUTDOWN(mysqlnd),
 #else
 	NULL,
+#endif
+#ifdef PHP_DEBUG
+	PHP_RSHUTDOWN(mysqlnd),
+#else
 	NULL,
 #endif
 	PHP_MINFO(mysqlnd),
