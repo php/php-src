@@ -1,3 +1,16 @@
+2008-02-13  Marcus Boerger  <php@marcus-boerger.de>
+
+    * tests/constants/.cvsignore
+      tests/constants/.cvsignore:
+      
+      - Add missig .cvsignore
+
+2008-02-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_operators.h
+      zend_operators.h:
+      Use memrchr() instead of zend_memrchr() if available. (Nuno)
+
 2008-02-12  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c
