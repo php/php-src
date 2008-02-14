@@ -912,7 +912,7 @@ function parse_args ($arglist, $opt)
 								break;
 
                         default:
-                                echo "Command line option $arg[$j] not recognised\n";
+                                echo "Command line option $arglist[$j] not recognised\n";
                                 print_opts();
                 }
 
