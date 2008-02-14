@@ -95,7 +95,7 @@ MYSQLND_METHOD(mysqlnd_debug, log)(MYSQLND_DEBUG * self,
 		 line_buffer[6], level_buffer[7];
 	MYSQLND_ZTS(self);
 
-#ifdef ZTS
+#ifdef MYSQLND_THREADED
 	if (MYSQLND_G(thread_id) != tsrm_thread_id()) {
 		return PASS; /* don't trace background threads */
 	}
@@ -201,7 +201,7 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 		 line_buffer[6], level_buffer[7];
 	MYSQLND_ZTS(self);
 
-#ifdef ZTS
+#ifdef MYSQLND_THREADED
 	if (MYSQLND_G(thread_id) != tsrm_thread_id()) {
 		return PASS; /* don't trace background threads */
 	}
@@ -307,7 +307,7 @@ MYSQLND_METHOD(mysqlnd_debug, func_enter)(MYSQLND_DEBUG * self,
 	if ((self->flags & MYSQLND_DEBUG_DUMP_TRACE) == 0 || self->file_name == NULL) {
 		return FALSE;
 	}
-#ifdef ZTS
+#ifdef MYSQLND_THREADED
 	if (MYSQLND_G(thread_id) != tsrm_thread_id()) {
 		return FALSE; /* don't trace background threads */
 	}
@@ -354,7 +354,7 @@ MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int lin
 	if ((self->flags & MYSQLND_DEBUG_DUMP_TRACE) == 0 || self->file_name == NULL) {
 		return PASS;
 	}
-#ifdef ZTS
+#ifdef MYSQLND_THREADED
 	if (MYSQLND_G(thread_id) != tsrm_thread_id()) {
 		return PASS; /* don't trace background threads */
 	}
@@ -667,7 +667,7 @@ void * _mysqlnd_emalloc(size_t size MYSQLND_MEM_D)
 {
 	void *ret;
 	DBG_ENTER(mysqlnd_emalloc_name);
-#ifdef ZTS
+#ifdef MYSQLND_THREADED
 	if (MYSQLND_G(thread_id) != tsrm_thread_id()) {
 		DBG_RETURN(_mysqlnd_pemalloc(size, 1 TSRMLS_CC ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC));
 	}
@@ -720,7 +720,7 @@ void * _mysqlnd_ecalloc(uint nmemb, size_t size MYSQLND_MEM_D)
 {
 	void *ret;
 	DBG_ENTER(mysqlnd_ecalloc_name);
-#ifdef ZTS
+#ifdef MYSQLND_THREADED
 	if (MYSQLND_G(thread_id) != tsrm_thread_id()) {
 		DBG_RETURN(_mysqlnd_pecalloc(nmemb, size, 1 TSRMLS_CC ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC));
 	}
@@ -773,7 +773,7 @@ void * _mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 {
 	void *ret;
 	DBG_ENTER(mysqlnd_erealloc_name);
-#ifdef ZTS
+#ifdef MYSQLND_THREADED
 	if (MYSQLND_G(thread_id) != tsrm_thread_id()) {
 		DBG_RETURN(_mysqlnd_perealloc(ptr, new_size, 1 TSRMLS_CC ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC));
 	}
@@ -827,7 +827,7 @@ void * _mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQL
 void _mysqlnd_efree(void *ptr MYSQLND_MEM_D)
 {
 	DBG_ENTER(mysqlnd_efree_name);
-#ifdef ZTS
+#ifdef MYSQLND_THREADED
 	if (MYSQLND_G(thread_id) != tsrm_thread_id()) {
 		DBG_RETURN(_mysqlnd_pefree(ptr, 1 TSRMLS_CC ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC));
 	}
