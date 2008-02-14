@@ -98,6 +98,7 @@ PHP                                                                        NEWS
 - Fixed bug #42937 (__call() method not invoked when methods are called on
   parent from child class). (Dmitry)
 - Fixed bug #42841 (REF CURSOR and oci_new_cursor() crash PHP). (Chris)
+- Fixed Bug #42838 (Wrong results in array_diff_uassoc) (Felipe)
 - Fixed bug #42779 (Incorrect forcing from HTTP/1.0 request to HTTP/1.1
   response). (Ilia)
 - Fixed bug #42736 (xmlrpc_server_call_method() crashes). (Tony)

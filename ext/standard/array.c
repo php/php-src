@@ -3718,13 +3718,14 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		}
 		c = 1;
 		for (i = 1; i < arr_argc; i++) {
+			Bucket **ptr = ptrs[i];
 			if (behavior == DIFF_NORMAL) {
-				while (*ptrs[i] && (0 < (c = diff_data_compare_func(ptrs[0], ptrs[i] TSRMLS_CC)))) {
-					ptrs[i]++;
+				while (*ptr && (0 < (c = diff_data_compare_func(ptrs[0], ptr TSRMLS_CC)))) {
+					ptr++;
 				}
 			} else if (behavior & DIFF_ASSOC) { /* triggered also when DIFF_KEY */
-				while (*ptrs[i] && (0 < (c = diff_key_compare_func(ptrs[0], ptrs[i] TSRMLS_CC)))) {
-					ptrs[i]++;
+				while (*ptr && (0 != (c = diff_key_compare_func(ptrs[0], ptr TSRMLS_CC)))) {
+					ptr++;
 				}
 			}
 			if (!c) {
@@ -3738,11 +3739,11 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 						In this branch is execute only when DIFF_ASSOC. If behavior == DIFF_KEY
 						data comparison is not needed - skipped.
 					*/
-					if (*ptrs[i]) {
+					if (*ptr) {
 						if (data_compare_type == DIFF_COMP_DATA_USER) {
 							BG(user_compare_func_name) = args[arr_argc];
 						}
-						if (diff_data_compare_func(ptrs[0], ptrs[i] TSRMLS_CC) != 0) {
+						if (diff_data_compare_func(ptrs[0], ptr TSRMLS_CC) != 0) {
 							/* the data is not the same */
 							c = -1;
 							if (key_compare_type == DIFF_COMP_KEY_USER) {
