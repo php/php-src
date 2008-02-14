@@ -1784,6 +1784,7 @@ static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 	size_t remaining_size;
 	size_t segment_size;
 	zend_mm_segment *segment;
+	int keep_rest = 0;
 
 	if (EXPECTED(ZEND_MM_SMALL_SIZE(true_size))) {
 		size_t index = ZEND_MM_BUCKET_INDEX(true_size);
@@ -1852,6 +1853,7 @@ static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 			   segment must have header "size" and trailer "guard" block */
 			segment_size = true_size + ZEND_MM_ALIGNED_SEGMENT_SIZE + ZEND_MM_ALIGNED_HEADER_SIZE;
 			segment_size = (segment_size + (heap->block_size-1)) & ~(heap->block_size-1);
+			keep_rest = 1;
 		} else {
 			segment_size = heap->block_size;
 		}
@@ -1931,7 +1933,11 @@ zend_mm_finished_searching_for_block:
 		ZEND_MM_BLOCK(new_free_block, ZEND_MM_FREE_BLOCK, remaining_size);
 
 		/* add the new free block to the free list */
-		zend_mm_add_to_free_list(heap, new_free_block);
+		if (EXPECTED(!keep_rest)) {
+			zend_mm_add_to_free_list(heap, new_free_block);
+		} else {
+			zend_mm_add_to_rest_list(heap, new_free_block);
+		}
 	}
 
 	ZEND_MM_SET_DEBUG_INFO(best_fit, size, 1, 1);
