@@ -189,7 +189,8 @@ static PHP_RINIT_FUNCTION(mysqlnd)
 			return FAILURE;
 		}
 		dbg->m->set_mode(dbg, MYSQLND_G(debug));
-		MYSQLND_G(dbg) = dbg;	
+		MYSQLND_G(dbg) = dbg;
+		MYSQLND_G(thread_id) = tsrm_thread_id();
 	}
 	return SUCCESS;
 }
