@@ -346,7 +346,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	MYSQLND_DEBUG	*dbg;	/* The DBG object */
 	long			net_cmd_buffer_size;
 	long			net_read_buffer_size;
-#ifdef ZTS
+#ifdef MYSQLND_THREADED
 	THREAD_T		thread_id;
 #endif
 ZEND_END_MODULE_GLOBALS(mysqlnd)
