@@ -1,3 +1,23 @@
+2008-02-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_alloc.c
+      zend_alloc.c
+      zend_alloc.c
+      tests/bug44069.phpt
+      tests/bug44069.phpt
+      tests/bug44069.phpt:
+      Fixed bug #44069 (Huge memory usage with concatenation using . instead of
+      .=)
+
+    * tests/bug44069.phpt
+      tests/bug44069.phpt:
+      
+      file bug44069.phpt was initially added on branch PHP_5_3.
+
+    * zend_operators.h
+      zend_operators.h:
+      Reverted memrchr() patch, because it is broken on linux 64-bit
+
 2008-02-13  Marcus Boerger  <php@marcus-boerger.de>
 
     * tests/constants/.cvsignore
