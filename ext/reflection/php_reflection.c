@@ -180,6 +180,7 @@ static void string_free(string *str)
 typedef struct _property_reference {
 	zend_class_entry *ce;
 	zend_property_info prop;
+	unsigned int ignore_visibility:1;
 } property_reference;
 
 /* Struct for parameters */
@@ -1176,6 +1177,7 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 	reference = (property_reference*) emalloc(sizeof(property_reference));
 	reference->ce = ce;
 	reference->prop = *prop;
+	reference->ignore_visibility = 0;
 	intern->ptr = reference;
 	intern->free_ptr = 1;
 	intern->ce = ce;
@@ -3856,6 +3858,7 @@ ZEND_METHOD(reflection_property, __construct)
 	reference = (property_reference*) emalloc(sizeof(property_reference));
 	reference->ce = ce;
 	reference->prop = *property_info;
+	reference->ignore_visibility = 0;
 	intern->ptr = reference;
 	intern->free_ptr = 1;
 	intern->ce = ce;
@@ -3963,7 +3966,7 @@ ZEND_METHOD(reflection_property, getValue)
 	METHOD_NOTSTATIC(reflection_property_ptr);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (!(ref->prop.flags & ZEND_ACC_PUBLIC)) {
+	if (!(ref->prop.flags & ZEND_ACC_PUBLIC) && ref->ignore_visibility == 0) {
 		_default_get_entry(getThis(), "name", sizeof("name"), &name TSRMLS_CC);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 			"Cannot access non-public member %s::%s", intern->ce->name, Z_STRVAL(name));
@@ -3981,10 +3984,13 @@ ZEND_METHOD(reflection_property, getValue)
 		zval_copy_ctor(return_value);
 		INIT_PZVAL(return_value);
 	} else {
+		char *class_name, *prop_name;
+		
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &object) == FAILURE) {
 			return;
 		}
-		member_p = zend_read_property(Z_OBJCE_P(object), object, ref->prop.name, ref->prop.name_length, 1 TSRMLS_CC);
+		zend_unmangle_property_name(ref->prop.name, ref->prop.name_length, &class_name, &prop_name);
+		member_p = zend_read_property(Z_OBJCE_P(object), object, prop_name, strlen(prop_name), 1 TSRMLS_CC);
 		*return_value= *member_p;
 		zval_copy_ctor(return_value);
 		INIT_PZVAL(return_value);
@@ -4110,6 +4116,24 @@ ZEND_METHOD(reflection_property, getDocComment)
 		RETURN_STRINGL(ref->prop.doc_comment, ref->prop.doc_comment_len, 1);
 	}
 	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto public int ReflectionProperty::setAccesible()
+   Sets whether non-public properties can be requested */
+ZEND_METHOD(reflection_property, setAccesible)
+{
+	reflection_object *intern;
+	property_reference *ref;
+	zend_bool visible;
+
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 1);
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "b", &visible) == FAILURE) {
+		return;
+	}
+	ref->ignore_visibility = visible;
 }
 /* }}} */
 
@@ -4719,6 +4743,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_property_setValue, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+static
+ZEND_BEGIN_ARG_INFO(arginfo_reflection_property_setAccesible, 0)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection, __clone, NULL, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_property, export, arginfo_reflection_property_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
@@ -4735,6 +4764,7 @@ static const zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection_property, getModifiers, NULL, 0)
 	ZEND_ME(reflection_property, getDeclaringClass, NULL, 0)
 	ZEND_ME(reflection_property, getDocComment, NULL, 0)
+	ZEND_ME(reflection_property, setAccesible, arginfo_reflection_property_setAccesible, 0)
 	{NULL, NULL, NULL}
 };
 
