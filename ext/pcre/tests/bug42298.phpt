@@ -44,3 +44,36 @@ array(1) {
     string(4) "€ "
   }
 }
+--UEXPECT--
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    unicode(3) "A£"
+    [1]=>
+    unicode(2) "BC"
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    unicode(3) "A£"
+    [1]=>
+    unicode(2) "BC"
+  }
+}
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    unicode(4) "€ "
+  }
+}
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    unicode(4) "€ "
+  }
+}
