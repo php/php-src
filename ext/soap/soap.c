@@ -2382,6 +2382,8 @@ static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeade
 	int size;
 	xmlDocPtr doc_return;
 	UConverter *old_runtime_conv, *old_output_conv;
+	zval **agent_name;
+	int use_http_error_status = 1;
 
 	soap_version = SOAP_GLOBAL(soap_version);
 
@@ -2389,11 +2391,21 @@ static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeade
 
 	xmlDocDumpMemory(doc_return, &buf, &size);
 
+	zend_is_auto_global("_SERVER", sizeof("_SERVER") - 1 TSRMLS_CC);
+	if (PG(http_globals)[TRACK_VARS_SERVER] &&
+		zend_ascii_hash_find(PG(http_globals)[TRACK_VARS_SERVER]->value.ht, "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT"), (void **) &agent_name) == SUCCESS &&
+		Z_TYPE_PP(agent_name) == IS_STRING) {
+		if (strncmp(Z_STRVAL_PP(agent_name), "Shockwave Flash", sizeof("Shockwave Flash")-1) == 0) {
+			use_http_error_status = 0;
+		}
+	}
 	/*
 	   Want to return HTTP 500 but apache wants to over write
 	   our fault code with their own handling... Figure this out later
 	*/
-	sapi_add_header("HTTP/1.1 500 Internal Service Error", sizeof("HTTP/1.1 500 Internal Service Error")-1, 1);
+	if (use_http_error_status) {
+		sapi_add_header("HTTP/1.1 500 Internal Service Error", sizeof("HTTP/1.1 500 Internal Service Error")-1, 1);
+	}
 	if (zend_ini_long("zlib.output_compression", sizeof("zlib.output_compression"), 0)) {
 		sapi_add_header("Connection: close", sizeof("Connection: close")-1, 1);
 	} else {
