@@ -1,5 +1,5 @@
 --TEST--
-Bug #42850 array_walk_recursive() leaves references, #34982 array_walk_recursive() modifies elements outside function scope 
+Bug #42850 (array_walk_recursive() leaves references)
 --FILE--
 <?php
 

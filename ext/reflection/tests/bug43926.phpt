@@ -1,5 +1,5 @@
 --TEST--
-Bug#43926 - isInstance() isn't equivalent to instanceof operator
+Bug #43926 (isInstance() isn't equivalent to instanceof operator)
 --FILE--
 <?php
 

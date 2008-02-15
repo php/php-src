@@ -1,5 +1,5 @@
 --TEST--
-Bug#42838 - Wrong results in array_diff_uassoc
+Bug #42838 (Wrong results in array_diff_uassoc)
 --FILE--
 <?php
 
