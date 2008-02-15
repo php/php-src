@@ -1,3 +1,293 @@
+2008-02-14  Josie Messa  <josmessa@uk.ibm.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/count_basic.phpt
+      ext/standard/tests/array/count_basic.phpt
+      ext/standard/tests/array/count_error.phpt
+      ext/standard/tests/array/count_error.phpt
+      ext/standard/tests/array/count_variation1.phpt
+      ext/standard/tests/array/count_variation1.phpt
+      ext/standard/tests/array/count_variation2.phpt
+      ext/standard/tests/array/count_variation2.phpt
+      ext/standard/tests/array/count_variation3.phpt
+      ext/standard/tests/array/count_variation3.phpt:
+      - New tests for count() function
+
+    * ext/standard/tests/array/count_basic.phpt
+      ext/standard/tests/array/count_basic.phpt
+      ext/standard/tests/array/count_basic.phpt
+      ext/standard/tests/array/count_error.phpt
+      ext/standard/tests/array/count_error.phpt
+      ext/standard/tests/array/count_error.phpt
+      ext/standard/tests/array/count_variation1.phpt
+      ext/standard/tests/array/count_variation1.phpt
+      ext/standard/tests/array/count_variation1.phpt
+      ext/standard/tests/array/count_variation2.phpt
+      ext/standard/tests/array/count_variation2.phpt
+      ext/standard/tests/array/count_variation2.phpt
+      ext/standard/tests/array/count_variation3.phpt
+      ext/standard/tests/array/count_variation3.phpt
+      ext/standard/tests/array/count_variation3.phpt:
+        1.1.4;
+      - New tests for count() function
+
+2008-02-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/array/array_push_error2.phpt:
+      
+      MFB: Fixed test on 64bit machines
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_push_error2.phpt:
+      
+      Fixed test on 64bit machines
+
+2008-02-14  Josie Messa  <josmessa@uk.ibm.com>
+
+    * (PHP_5_2)
+      .project:
+      - removing .project file
+
+    * .project
+      .project
+      ext/standard/tests/array/array_values_variation7.phpt:
+      
+      file .project was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/array/array_values_variation7.phpt
+      ext/standard/tests/array/array_values_variation7.phpt:
+      
+      - New variation test for array_values()
+
+2008-02-14  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_debug.c
+      ext/mysqlnd/mysqlnd_debug.c
+      ext/mysqlnd/php_mysqlnd.c
+      ext/mysqlnd/php_mysqlnd.c:
+      Another fix
+
+    * (PHP_5_3)
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_wireprotocol.c:
+      Fix memory errors<
+
+    * ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_wireprotocol.c:
+      Fix memory errors
+
+2008-02-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/tests/bug44069.phpt:
+      Fixed bug #44069 (Huge memory usage with concatenation using . instead of
+      .=)
+
+    * ZendEngine2/tests/bug44069.phpt
+      ZendEngine2/tests/bug44069.phpt:
+      
+      Fixed bug #44069 (Huge memory usage with concatenation using . instead of
+      .=)
+
+    * ZendEngine2/tests/bug44069.phpt
+      ZendEngine2/tests/bug44069.phpt:
+      
+      file bug44069.phpt was initially added on branch PHP_5_3.
+
+2008-02-14  Josie Messa  <josmessa@uk.ibm.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_values_basic.phpt
+      ext/standard/tests/array/array_values_basic.phpt
+      ext/standard/tests/array/array_values_variation1.phpt
+      ext/standard/tests/array/array_values_variation1.phpt
+      ext/standard/tests/array/array_values_variation2.phpt
+      ext/standard/tests/array/array_values_variation2.phpt
+      ext/standard/tests/array/array_values_variation3.phpt
+      ext/standard/tests/array/array_values_variation3.phpt
+      ext/standard/tests/array/array_values_variation4.phpt
+      ext/standard/tests/array/array_values_variation4.phpt
+      ext/standard/tests/array/array_values_variation5.phpt
+      ext/standard/tests/array/array_values_variation5.phpt
+      ext/standard/tests/array/array_values_variation6.phpt
+      ext/standard/tests/array/array_values_variation6.phpt:
+      - New tests for array_values() function
+
+    * ext/standard/tests/array/array_values_basic.phpt
+      ext/standard/tests/array/array_values_basic.phpt
+      ext/standard/tests/array/array_values_basic.phpt
+      ext/standard/tests/array/array_values_variation1.phpt
+      ext/standard/tests/array/array_values_variation1.phpt
+      ext/standard/tests/array/array_values_variation1.phpt
+      ext/standard/tests/array/array_values_variation2.phpt
+      ext/standard/tests/array/array_values_variation2.phpt
+      ext/standard/tests/array/array_values_variation2.phpt
+      ext/standard/tests/array/array_values_variation3.phpt
+      ext/standard/tests/array/array_values_variation3.phpt
+      ext/standard/tests/array/array_values_variation3.phpt
+      ext/standard/tests/array/array_values_variation4.phpt
+      ext/standard/tests/array/array_values_variation4.phpt
+      ext/standard/tests/array/array_values_variation4.phpt
+      ext/standard/tests/array/array_values_variation5.phpt
+      ext/standard/tests/array/array_values_variation5.phpt
+      ext/standard/tests/array/array_values_variation5.phpt
+      ext/standard/tests/array/array_values_variation6.phpt
+      ext/standard/tests/array/array_values_variation6.phpt
+      ext/standard/tests/array/array_values_variation6.phpt:
+        1.1.4;
+      - New tests for array_values() function
+
+2008-02-14  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/array.c
+      ext/standard/array.c:
+      MFB: Fixed Bug #42838 (Wrong results in array_diff_uassoc)
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c:
+      Fixed Bug #42838 (Wrong results in array_diff_uassoc)
+
+    * ext/standard/tests/array/bug42838.phpt
+      ext/standard/tests/array/bug42838.phpt:
+      New test
+
+    * ext/standard/tests/array/bug42838.phpt
+      ext/standard/tests/array/bug42838.phpt
+      ext/standard/tests/array/bug42838.phpt:
+        1.1.4;
+      file bug42838.phpt was initially added on branch PHP_5_2.
+
+2008-02-14  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_block_alloc.c
+      ext/mysqlnd/mysqlnd_block_alloc.h
+      ext/mysqlnd/mysqlnd_debug.c
+      ext/mysqlnd/mysqlnd_debug.c
+      ext/mysqlnd/mysqlnd_debug.h
+      ext/mysqlnd/mysqlnd_enum_n_def.h
+      ext/mysqlnd/mysqlnd_palloc.c
+      ext/mysqlnd/mysqlnd_palloc.h
+      ext/mysqlnd/mysqlnd_priv.h
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_ps_codec.c
+      ext/mysqlnd/mysqlnd_qcache.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_result.h
+      ext/mysqlnd/mysqlnd_result_meta.c
+      ext/mysqlnd/mysqlnd_result_meta.h
+      ext/mysqlnd/mysqlnd_statistics.c
+      ext/mysqlnd/mysqlnd_statistics.h
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqlnd/mysqlnd_wireprotocol.h
+      ext/mysqlnd/mysqlnd_wireprotocol.h
+      ext/mysqlnd/php_mysqlnd.c
+      ext/mysqlnd/php_mysqlnd.c
+      ext/mysqlnd/php_mysqlnd.h:
+      Update mysqlnd - fix bg_store
+
+2008-02-14  Josie Messa  <josmessa@uk.ibm.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_slice_basic.phpt
+      ext/standard/tests/array/array_slice_basic.phpt
+      ext/standard/tests/array/array_slice_error.phpt
+      ext/standard/tests/array/array_slice_error.phpt
+      ext/standard/tests/array/array_slice_variation1.phpt
+      ext/standard/tests/array/array_slice_variation10.phpt
+      ext/standard/tests/array/array_slice_variation10.phpt
+      ext/standard/tests/array/array_slice_variation11.phpt
+      ext/standard/tests/array/array_slice_variation2.phpt
+      ext/standard/tests/array/array_slice_variation2.phpt
+      ext/standard/tests/array/array_slice_variation3.phpt
+      ext/standard/tests/array/array_slice_variation3.phpt
+      ext/standard/tests/array/array_slice_variation4.phpt
+      ext/standard/tests/array/array_slice_variation4.phpt
+      ext/standard/tests/array/array_slice_variation5.phpt
+      ext/standard/tests/array/array_slice_variation5.phpt
+      ext/standard/tests/array/array_slice_variation6.phpt
+      ext/standard/tests/array/array_slice_variation6.phpt
+      ext/standard/tests/array/array_slice_variation7.phpt
+      ext/standard/tests/array/array_slice_variation7.phpt
+      ext/standard/tests/array/array_slice_variation8.phpt
+      ext/standard/tests/array/array_slice_variation8.phpt
+      ext/standard/tests/array/array_slice_variation9.phpt
+      ext/standard/tests/array/array_slice_variation9.phpt:
+      - New tests for array_slice() function
+
+    * ext/standard/tests/array/array_slice_basic.phpt
+      ext/standard/tests/array/array_slice_basic.phpt
+      ext/standard/tests/array/array_slice_basic.phpt
+      ext/standard/tests/array/array_slice_error.phpt
+      ext/standard/tests/array/array_slice_error.phpt
+      ext/standard/tests/array/array_slice_error.phpt
+      ext/standard/tests/array/array_slice_variation10.phpt
+      ext/standard/tests/array/array_slice_variation10.phpt
+      ext/standard/tests/array/array_slice_variation10.phpt
+      ext/standard/tests/array/array_slice_variation11.phpt
+      ext/standard/tests/array/array_slice_variation11.phpt
+      ext/standard/tests/array/array_slice_variation2.phpt
+      ext/standard/tests/array/array_slice_variation2.phpt
+      ext/standard/tests/array/array_slice_variation2.phpt
+      ext/standard/tests/array/array_slice_variation3.phpt
+      ext/standard/tests/array/array_slice_variation3.phpt
+      ext/standard/tests/array/array_slice_variation3.phpt
+      ext/standard/tests/array/array_slice_variation4.phpt
+      ext/standard/tests/array/array_slice_variation4.phpt
+      ext/standard/tests/array/array_slice_variation4.phpt
+      ext/standard/tests/array/array_slice_variation5.phpt
+      ext/standard/tests/array/array_slice_variation5.phpt
+      ext/standard/tests/array/array_slice_variation5.phpt
+      ext/standard/tests/array/array_slice_variation6.phpt
+      ext/standard/tests/array/array_slice_variation6.phpt
+      ext/standard/tests/array/array_slice_variation6.phpt
+      ext/standard/tests/array/array_slice_variation7.phpt
+      ext/standard/tests/array/array_slice_variation7.phpt
+      ext/standard/tests/array/array_slice_variation7.phpt
+      ext/standard/tests/array/array_slice_variation8.phpt
+      ext/standard/tests/array/array_slice_variation8.phpt
+      ext/standard/tests/array/array_slice_variation8.phpt
+      ext/standard/tests/array/array_slice_variation9.phpt
+      ext/standard/tests/array/array_slice_variation9.phpt
+      ext/standard/tests/array/array_slice_variation9.phpt:
+        1.1.4;
+      - New tests for array_slice() function
+
+2008-02-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * configure.in
+      configure.in
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_operators.h:
+      Reverted memrchr() patch, because it is broken on linux 64-bit
+
+2008-02-14  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * (PHP_5_3)
+      scripts/dev/generate_phpt.php:
+      Fixing typo arg->arglist at line 195. Thanks Chris J!
+
+2008-02-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/tests/array/array_push_variation4.phpt:
+      Fixed memory leak
+
 2008-02-13  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_3)
