@@ -50,6 +50,8 @@ PHP                                                                        NEWS
   timezone). (Derick)
 - Fixed bug #43522 (stream_get_line() eats additional characters). (Felipe,
   Ilia, Tony)
+- Fixed bug #43507 (SOAPFault HTTP Status 500 - would like to be able to set
+  the HTTP Status). (Dmitry)
 - Fixed bug #43505 (Assign by reference bug). (Dmitry)
 - Fixed bug #43497 (OCI8 XML/getClobVal aka temporary LOBs leak UGA memory).
   (Chris)
