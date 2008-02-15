@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     (Etienne Kneuss)
   . Improved checks for callbacks. (Marcus)
   . Added __DIR__ constant. (Lars Strojny)
+  . Added PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION,
+    PHP_EXTRA_VERSION, PHP_VERSION_ID, PHP_ZTS and PHP_DEBUG constants (Pierre)
 
 - Added new date/time functionality: (Derick)
   . date_parse_from_format(): Parse date/time strings according to a format.
