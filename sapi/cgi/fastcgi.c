@@ -632,7 +632,7 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 		}
 		memcpy(tmp, p, name_len);
 		tmp[name_len] = 0;
-		s = zend_strndup((char*)p + name_len, val_len);
+		s = estrndup((char*)p + name_len, val_len);
 		zend_hash_update(&req->env, tmp, name_len+1, &s, sizeof(char*), NULL);
 		p += name_len + val_len;
 	}
@@ -644,7 +644,7 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 
 static void fcgi_free_var(char **s)
 {
-	free(*s);
+	efree(*s);
 }
 
 static int fcgi_read_request(fcgi_request *req)
@@ -657,7 +657,7 @@ static int fcgi_read_request(fcgi_request *req)
 	req->in_len = 0;
 	req->out_hdr = NULL;
 	req->out_pos = req->out_buf;
-	zend_hash_init(&req->env, 0, NULL, (void (*)(void *)) fcgi_free_var, 1);
+	zend_hash_init(&req->env, 0, NULL, (void (*)(void *)) fcgi_free_var, 0);
 
 	if (safe_read(req, &hdr, sizeof(fcgi_header)) != sizeof(fcgi_header) ||
 	    hdr.version < FCGI_VERSION_1) {
@@ -693,15 +693,15 @@ static int fcgi_read_request(fcgi_request *req)
 		req->keep = (((fcgi_begin_request*)buf)->flags & FCGI_KEEP_CONN);
 		switch ((((fcgi_begin_request*)buf)->roleB1 << 8) + ((fcgi_begin_request*)buf)->roleB0) {
 			case FCGI_RESPONDER:
-				val = strdup("RESPONDER");
+				val = estrdup("RESPONDER");
 				zend_hash_update(&req->env, "FCGI_ROLE", sizeof("FCGI_ROLE"), &val, sizeof(char*), NULL);
 				break;
 			case FCGI_AUTHORIZER:
-				val = strdup("AUTHORIZER");
+				val = estrdup("AUTHORIZER");
 				zend_hash_update(&req->env, "FCGI_ROLE", sizeof("FCGI_ROLE"), &val, sizeof(char*), NULL);
 				break;
 			case FCGI_FILTER:
-				val = strdup("FILTER");
+				val = estrdup("FILTER");
 				zend_hash_update(&req->env, "FCGI_ROLE", sizeof("FCGI_ROLE"), &val, sizeof(char*), NULL);
 				break;
 			default:
@@ -1168,11 +1168,13 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 
 int fcgi_finish_request(fcgi_request *req)
 {
+	int ret = 1;
+
 	if (req->fd >= 0) {
-		fcgi_flush(req, 1);
+		ret = fcgi_flush(req, 1);
 		fcgi_close(req, 0, 1);
 	}
-	return 1;
+	return ret;
 }
 
 char* fcgi_getenv(fcgi_request *req, const char* var, int var_len)
@@ -1195,7 +1197,7 @@ char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val)
 		} else {
 			char **ret;
 
-			val = strdup(val);
+			val = estrdup(val);
 			if (zend_hash_update(&req->env, var, var_len+1, &val, sizeof(char*), (void**)&ret) == SUCCESS) {
 				return *ret;
 			}

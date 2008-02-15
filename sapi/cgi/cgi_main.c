@@ -754,7 +754,17 @@ static int sapi_cgi_deactivate(TSRMLS_D)
 		2. When the first call occurs and the request is not set up, flush fails on FastCGI.
 	*/
 	if (SG(sapi_started)) {
-		sapi_cgibin_flush(SG(server_context));
+		if (fcgi_is_fastcgi()) {
+			if (
+#ifndef PHP_WIN32
+				!parent &&
+#endif
+				!fcgi_finish_request((fcgi_request*)SG(server_context))) {
+				php_handle_aborted_connection();
+			}
+		} else {
+			sapi_cgibin_flush(SG(server_context));
+		}
 	}
 	return SUCCESS;
 }
