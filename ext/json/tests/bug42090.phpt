@@ -1,5 +1,5 @@
 --TEST--
-Bug#42090 (json_decode causes segmentation fault)
+Bug #42090 (json_decode causes segmentation fault)
 --SKIPIF--
 <?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
