@@ -281,6 +281,11 @@ static int php_count_recursive(zval *array, long mode TSRMLS_DC) /* {{{ */
 	zval **element;
 
 	if (Z_TYPE_P(array) == IS_ARRAY) {
+		if (Z_ARRVAL_P(array)->nApplyCount > 1) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
+			return 0;
+		}
+
 		cnt = zend_hash_num_elements(Z_ARRVAL_P(array));
 		if (mode == COUNT_RECURSIVE) {
 			HashPosition pos;
@@ -289,7 +294,9 @@ static int php_count_recursive(zval *array, long mode TSRMLS_DC) /* {{{ */
 				zend_hash_get_current_data_ex(Z_ARRVAL_P(array), (void **) &element, &pos) == SUCCESS;
 				zend_hash_move_forward_ex(Z_ARRVAL_P(array), &pos)
 			) {
+				Z_ARRVAL_P(array)->nApplyCount++;
 				cnt += php_count_recursive(*element, COUNT_RECURSIVE TSRMLS_CC);
+				Z_ARRVAL_P(array)->nApplyCount--;
 			}
 		}
 	}
