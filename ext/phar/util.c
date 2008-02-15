@@ -34,7 +34,13 @@ php_stream *phar_get_efp(phar_entry_info *entry)
 		return entry->phar->fp;
 	} else if (entry->fp_type == PHAR_UFP) {
 		return entry->phar->ufp;
+	} else if (entry->fp_type == PHAR_MOD) {
+		return entry->fp;
 	} else {
+		/* temporary manifest entry */
+		if (!entry->fp) {
+			entry->fp = php_stream_open_wrapper(entry->link, "rb", STREAM_MUST_SEEK|0, NULL);
+		}
 		return entry->fp;
 	}
 }
@@ -65,6 +71,33 @@ int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t positi
 		return -1;
 	}
 	return php_stream_seek(fp, temp, SEEK_SET);
+}
+
+/* mount an absolute path or uri to a path internal to the phar archive */
+int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, char *path, int path_len, int is_dir TSRMLS_DC)
+{
+	phar_entry_info entry = {0};
+
+#if PHP_MAJOR_VERSION < 6
+	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
+		return FAILURE;
+	}
+#endif
+
+	/* only check openbasedir for files, not for phar streams */
+	if (!strstr(filename, "phar://") && php_check_open_basedir(filename TSRMLS_CC)) {
+		return FAILURE;
+	}
+
+	entry.phar = phar;
+	entry.filename = estrndup(path, path_len);
+	entry.filename_len = path_len;
+	entry.link = estrndup(filename, filename_len);
+	entry.is_mounted = 1;
+	entry.is_crc_checked = 1;
+	entry.fp_type = PHAR_TMP;
+	entry.is_dir = is_dir;
+	return zend_hash_add(&phar->manifest, path, path_len, (void*)&entry, sizeof(phar_entry_info), NULL);
 }
 
 char *phar_find_in_include_path(char *file, char *entry, phar_archive_data *phar TSRMLS_DC) /* {{{ */
