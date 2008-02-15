@@ -29,6 +29,9 @@ $input[] = &$input;
 echo "\n-- Array values of an infinitely recursive array --\n";
 var_dump(array_values($input));
 
+// break cycle
+$input[0] = null;
+
 echo "Done";
 ?>
 
