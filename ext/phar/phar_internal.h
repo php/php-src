@@ -201,7 +201,10 @@ enum phar_fp_type {
 	/* uncompressed file pointer phar_archive_data->uncompressed_fp */
 	PHAR_UFP,
 	/* modified file pointer phar_entry_info->fp */
-	PHAR_MOD
+	PHAR_MOD,
+	/* temporary manifest entry (file outside of the phar mapped to a location inside the phar)
+	   this entry stores the stream to open in link (normally used for tars, but we steal it here) */
+	PHAR_TMP
 };
 
 typedef struct _phar_archive_data phar_archive_data;
@@ -233,6 +236,9 @@ typedef struct _phar_entry_info {
 	int                      is_modified:1;
 	int                      is_deleted:1;
 	int                      is_dir:1;
+	/* this flag is used for mounted entries (external files mapped to location
+	   inside a phar */
+	int                      is_mounted:1;
 	/* used when iterating */
 	int                      is_temp_dir:1;
 	phar_archive_data        *phar;
