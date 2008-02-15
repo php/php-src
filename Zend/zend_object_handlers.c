@@ -758,14 +758,15 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 	zend_function *fbc;
 	char *lc_method_name;
 	zval *object = *object_ptr;
+	ALLOCA_FLAG(use_heap)
 	
-	lc_method_name = do_alloca(method_len+1);
+	lc_method_name = do_alloca_with_limit(method_len+1, use_heap);
 	/* Create a zend_copy_str_tolower(dest, src, src_length); */
 	zend_str_tolower_copy(lc_method_name, method_name, method_len);
 		
 	zobj = Z_OBJ_P(object);
 	if (zend_hash_find(&zobj->ce->function_table, lc_method_name, method_len+1, (void **)&fbc) == FAILURE) {
-		free_alloca(lc_method_name);
+		free_alloca_with_limit(lc_method_name, use_heap);
 		if (zobj->ce->__call) {
 			zend_internal_function *call_user_call = emalloc(sizeof(zend_internal_function));
 			call_user_call->type = ZEND_INTERNAL_FUNCTION;
@@ -820,7 +821,7 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 		}
 	}
 
-	free_alloca(lc_method_name);
+	free_alloca_with_limit(lc_method_name, use_heap);
 	return fbc;
 }
 

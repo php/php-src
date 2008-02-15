@@ -1100,6 +1100,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	zend_uint fn_flags;
 	char *lcname;
 	zend_bool orig_interactive;
+	ALLOCA_FLAG(use_heap)
 
 	if (is_method) {
 		if (CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE) {
@@ -1160,7 +1161,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		}
 
 		if (!(CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE)) {
-			short_class_name = do_alloca(short_class_name_length + 1);
+			short_class_name = do_alloca_with_limit(short_class_name_length + 1, use_heap);
 			zend_str_tolower_copy(short_class_name, CG(active_class_entry)->name, short_class_name_length);
 			/* Improve after RC: cache the lowercase class name */
 
@@ -1194,7 +1195,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			} else if (!(fn_flags & ZEND_ACC_STATIC)) {
 				CG(active_op_array)->fn_flags |= ZEND_ACC_ALLOW_STATIC;
 			}
-			free_alloca(short_class_name);
+			free_alloca_with_limit(short_class_name, use_heap);
 		}
 
 		efree(lcname);

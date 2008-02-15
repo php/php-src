@@ -1013,19 +1013,20 @@ ZEND_FUNCTION(class_exists)
 	char *class_name, *lc_name;
 	zend_class_entry **ce;
 	int class_name_len;
-	zend_bool autoload = 1;
 	int found;
+	zend_bool autoload = 1;
+	ALLOCA_FLAG(use_heap)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &class_name, &class_name_len, &autoload) == FAILURE) {
 		return;
 	}
 
 	if (!autoload) {
-		lc_name = do_alloca(class_name_len + 1);
+		lc_name = do_alloca_with_limit(class_name_len + 1, use_heap);
 		zend_str_tolower_copy(lc_name, class_name, class_name_len);
 	
 		found = zend_hash_find(EG(class_table), lc_name, class_name_len+1, (void **) &ce);
-		free_alloca(lc_name);
+		free_alloca_with_limit(lc_name, use_heap);
 		RETURN_BOOL(found == SUCCESS && !((*ce)->ce_flags & ZEND_ACC_INTERFACE));
 	}
 
@@ -1044,19 +1045,20 @@ ZEND_FUNCTION(interface_exists)
 	char *iface_name, *lc_name;
 	zend_class_entry **ce;
 	int iface_name_len;
-	zend_bool autoload = 1;
 	int found;
+	zend_bool autoload = 1;
+	ALLOCA_FLAG(use_heap)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &iface_name, &iface_name_len, &autoload) == FAILURE) {
 		return;
 	}
 
 	if (!autoload) {
-		lc_name = do_alloca(iface_name_len + 1);
+		lc_name = do_alloca_with_limit(iface_name_len + 1, use_heap);
 		zend_str_tolower_copy(lc_name, iface_name, iface_name_len);
 	
 		found = zend_hash_find(EG(class_table), lc_name, iface_name_len+1, (void **) &ce);
-		free_alloca(lc_name);
+		free_alloca_with_limit(lc_name, use_heap);
 		RETURN_BOOL(found == SUCCESS && (*ce)->ce_flags & ZEND_ACC_INTERFACE);
 	}
 

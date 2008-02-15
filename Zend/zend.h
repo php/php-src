@@ -181,9 +181,21 @@ char *alloca ();
 #if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(ZEND_WIN32)) && !(defined(ZTS) && defined(NETWARE)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
 # define do_alloca(p) alloca(p)
 # define free_alloca(p)
+# define ZEND_ALLOCA_MAX_SIZE (32 * 1024)
+# define ALLOCA_FLAG(name) \
+	zend_bool name;
+# define do_alloca_with_limit_ex(size, limit, use_heap) \
+	((use_heap = ((size) > (limit))) ? emalloc(size) : alloca(size))
+# define do_alloca_with_limit(size, use_heap) \
+	do_alloca_with_limit_ex(size, ZEND_ALLOCA_MAX_SIZE, use_heap)
+# define free_alloca_with_limit(p, use_heap) \
+	do { if (use_heap) efree(p); } while (0)
 #else
 # define do_alloca(p)		emalloc(p)
 # define free_alloca(p)	efree(p)
+# define ALLOCA_FLAG(name)
+# define do_alloca_with_limit(p, use_heap)		emalloc(p)
+# define free_alloca_with_limit(p, use_heap)	efree(p)
 #endif
 
 #if ZEND_DEBUG

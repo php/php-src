@@ -95,6 +95,7 @@ PHP                                                                        NEWS
   truncation). (Ilia)
 - Fixed bug #43175 (__destruct() throwing an exception with __call() causes
   segfault). (Dmitry)
+- Fixed bug #43128 (Very long class name causes segfault). (Dmitry)
 - Fixed bug #43105 (PHP seems to fail to close open files). (Hannes)
 - Fixed bug #42978 (mismatch between number of bound params and values causes
   a crash in pdo_pgsql). (Ilia)

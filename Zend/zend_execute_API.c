@@ -1034,19 +1034,20 @@ ZEND_API int zend_lookup_class_ex(char *name, int name_length, int use_autoload,
 	int retval;
 	char *lc_name;
 	zval *exception;
-	char dummy = 1;
 	zend_fcall_info fcall_info;
 	zend_fcall_info_cache fcall_cache;
+	char dummy = 1;
+	ALLOCA_FLAG(use_heap)
 
 	if (name == NULL || !name_length) {
 		return FAILURE;
 	}
 	
-	lc_name = do_alloca(name_length + 1);
+	lc_name = do_alloca_with_limit(name_length + 1, use_heap);
 	zend_str_tolower_copy(lc_name, name, name_length);
 
 	if (zend_hash_find(EG(class_table), lc_name, name_length+1, (void **) ce) == SUCCESS) {
-		free_alloca(lc_name);
+		free_alloca_with_limit(lc_name, use_heap);
 		return SUCCESS;
 	}
 
@@ -1054,7 +1055,7 @@ ZEND_API int zend_lookup_class_ex(char *name, int name_length, int use_autoload,
 	 * (doesn't impact fuctionality of __autoload()
 	*/
 	if (!use_autoload || zend_is_compiling(TSRMLS_C)) {
-		free_alloca(lc_name);
+		free_alloca_with_limit(lc_name, use_heap);
 		return FAILURE;
 	}
 
@@ -1064,7 +1065,7 @@ ZEND_API int zend_lookup_class_ex(char *name, int name_length, int use_autoload,
 	}
 	
 	if (zend_hash_add(EG(in_autoload), lc_name, name_length+1, (void**)&dummy, sizeof(char), NULL) == FAILURE) {
-		free_alloca(lc_name);
+		free_alloca_with_limit(lc_name, use_heap);
 		return FAILURE;
 	}
 
@@ -1102,12 +1103,12 @@ ZEND_API int zend_lookup_class_ex(char *name, int name_length, int use_autoload,
 
 	if (retval == FAILURE) {
 		EG(exception) = exception;
-		free_alloca(lc_name);
+		free_alloca_with_limit(lc_name, use_heap);
 		return FAILURE;
 	}
 
 	if (EG(exception) && exception) {
-		free_alloca(lc_name);
+		free_alloca_with_limit(lc_name, use_heap);
 		zend_error(E_ERROR, "Function %s(%s) threw an exception of type '%s'", ZEND_AUTOLOAD_FUNC_NAME, name, Z_OBJCE_P(EG(exception))->name);
 		return FAILURE;
 	}
@@ -1119,7 +1120,7 @@ ZEND_API int zend_lookup_class_ex(char *name, int name_length, int use_autoload,
 	}
 
 	retval = zend_hash_find(EG(class_table), lc_name, name_length + 1, (void **) ce);
-	free_alloca(lc_name);
+	free_alloca_with_limit(lc_name, use_heap);
 	return retval;
 }
 
