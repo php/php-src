@@ -40,7 +40,7 @@ PHP                                                                        NEWS
   . Added SplDoublyLinkedList, SplStack, SplQueue classes. (Etienne)
   . Added FilesystemIterator. (Marcus)
   . Added GlobIterator. (Marcus)
-- Add the ReflectionProperty::setAccesible() method that allows non-public
+- Add the ReflectionProperty::setAccessible() method that allows non-public
   property's values to be read through ::getValue().
 - Added ability to use Traversable objects instead of plain arrays in ext/soap.
   (Joshua Reese, Dmitry)

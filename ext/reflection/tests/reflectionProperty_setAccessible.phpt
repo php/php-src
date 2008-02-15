@@ -1,5 +1,5 @@
 --TEST--
-Test ReflectionProperty::setAccesible().
+Test ReflectionProperty::setAccessible().
 --SKIPIF--
 <?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
@@ -27,10 +27,10 @@ catch(Exception $exc) {
     echo $exc->getMessage(), "\n";
 }
 
-$propInfo->setAccesible(true);
+$propInfo->setAccessible(true);
 var_dump($propInfo->getValue($instance));
 
-$propInfo->setAccesible(false);
+$propInfo->setAccessible(false);
 try {
     var_dump($propInfo->getValue($instance));
 }
