@@ -102,7 +102,7 @@ typedef struct { /* php_oci_spool {{{ */
 	OCIError* err;			/* pool's error handle  */
 	OCISPool *poolh;		/* pool handle */
 	void* poolname;			/* session pool name */ 
-	unsigned int poolnamelen;	/* length of session pool name */
+	unsigned int poolname_len;	/* length of session pool name */
 	char *spool_hash_key;		/* Hash key for session pool in plist */
 } php_oci_spool; /* }}} */
 
