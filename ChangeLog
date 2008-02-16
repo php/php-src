@@ -1,3 +1,204 @@
+2008-02-15  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/oci8/oci8_collection.c
+      ext/oci8/oci8_collection.c
+      ext/oci8/tests/bug44113.phpt
+      ext/oci8/tests/bug44113.phpt:
+      MHB: Bug #44113 (New collection creation can fail with OCI-22303)
+
+    * (PHP_5_2)
+      ext/oci8/oci8_collection.c
+      ext/oci8/tests/bug44113.phpt
+      ext/oci8/tests/bug44113.phpt
+      ext/oci8/tests/bug44113.phpt:
+      Bug #44113 (New collection creation can fail with OCI-22303)
+
+2008-02-15  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/pcre/tests/bug42298.phpt
+      ext/standard/tests/array/count_variation3.phpt:
+      Fix tests
+
+2008-02-15  Josie Messa  <josmessa@uk.ibm.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/rsort_basic.phpt
+      ext/standard/tests/array/rsort_basic.phpt
+      ext/standard/tests/array/rsort_error.phpt
+      ext/standard/tests/array/rsort_error.phpt
+      ext/standard/tests/array/rsort_object1.phpt
+      ext/standard/tests/array/rsort_object1.phpt
+      ext/standard/tests/array/rsort_object2.phpt
+      ext/standard/tests/array/rsort_object2.phpt
+      ext/standard/tests/array/rsort_variation1.phpt
+      ext/standard/tests/array/rsort_variation1.phpt
+      ext/standard/tests/array/rsort_variation10.phpt
+      ext/standard/tests/array/rsort_variation10.phpt
+      ext/standard/tests/array/rsort_variation11.phpt
+      ext/standard/tests/array/rsort_variation11.phpt
+      ext/standard/tests/array/rsort_variation2.phpt
+      ext/standard/tests/array/rsort_variation2.phpt
+      ext/standard/tests/array/rsort_variation3.phpt
+      ext/standard/tests/array/rsort_variation3.phpt
+      ext/standard/tests/array/rsort_variation4.phpt
+      ext/standard/tests/array/rsort_variation4.phpt
+      ext/standard/tests/array/rsort_variation5.phpt
+      ext/standard/tests/array/rsort_variation5.phpt
+      ext/standard/tests/array/rsort_variation6.phpt
+      ext/standard/tests/array/rsort_variation6.phpt
+      ext/standard/tests/array/rsort_variation7.phpt
+      ext/standard/tests/array/rsort_variation7.phpt
+      ext/standard/tests/array/rsort_variation8.phpt
+      ext/standard/tests/array/rsort_variation8.phpt
+      ext/standard/tests/array/rsort_variation9.phpt
+      ext/standard/tests/array/rsort_variation9.phpt:
+      - New tests for rsort() function
+
+    * ext/standard/tests/array/rsort_basic.phpt
+      ext/standard/tests/array/rsort_basic.phpt
+      ext/standard/tests/array/rsort_basic.phpt
+      ext/standard/tests/array/rsort_error.phpt
+      ext/standard/tests/array/rsort_error.phpt
+      ext/standard/tests/array/rsort_error.phpt
+      ext/standard/tests/array/rsort_object1.phpt
+      ext/standard/tests/array/rsort_object1.phpt
+      ext/standard/tests/array/rsort_object1.phpt
+      ext/standard/tests/array/rsort_object2.phpt
+      ext/standard/tests/array/rsort_object2.phpt
+      ext/standard/tests/array/rsort_object2.phpt
+      ext/standard/tests/array/rsort_variation1.phpt
+      ext/standard/tests/array/rsort_variation1.phpt
+      ext/standard/tests/array/rsort_variation1.phpt
+      ext/standard/tests/array/rsort_variation10.phpt
+      ext/standard/tests/array/rsort_variation10.phpt
+      ext/standard/tests/array/rsort_variation10.phpt
+      ext/standard/tests/array/rsort_variation11.phpt
+      ext/standard/tests/array/rsort_variation11.phpt
+      ext/standard/tests/array/rsort_variation11.phpt
+      ext/standard/tests/array/rsort_variation2.phpt
+      ext/standard/tests/array/rsort_variation2.phpt
+      ext/standard/tests/array/rsort_variation2.phpt
+      ext/standard/tests/array/rsort_variation3.phpt
+      ext/standard/tests/array/rsort_variation3.phpt
+      ext/standard/tests/array/rsort_variation3.phpt
+      ext/standard/tests/array/rsort_variation4.phpt
+      ext/standard/tests/array/rsort_variation4.phpt
+      ext/standard/tests/array/rsort_variation4.phpt
+      ext/standard/tests/array/rsort_variation5.phpt
+      ext/standard/tests/array/rsort_variation5.phpt
+      ext/standard/tests/array/rsort_variation5.phpt
+      ext/standard/tests/array/rsort_variation6.phpt
+      ext/standard/tests/array/rsort_variation6.phpt
+      ext/standard/tests/array/rsort_variation6.phpt
+      ext/standard/tests/array/rsort_variation7.phpt
+      ext/standard/tests/array/rsort_variation7.phpt
+      ext/standard/tests/array/rsort_variation7.phpt
+      ext/standard/tests/array/rsort_variation8.phpt
+      ext/standard/tests/array/rsort_variation8.phpt
+      ext/standard/tests/array/rsort_variation8.phpt
+      ext/standard/tests/array/rsort_variation9.phpt
+      ext/standard/tests/array/rsort_variation9.phpt
+      ext/standard/tests/array/rsort_variation9.phpt:
+        1.1.4;
+      - New tests for rsort() function
+
+2008-02-15  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * main/main.c:
+      - [DOC] MFB: add PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION,
+        PHP_EXTRA_VERSION, PHP_VERSION_ID, PHP_ZTS and PHP_DEBUG constants
+
+2008-02-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      optimization
+
+2008-02-15  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      NEWS
+      main/main.c:
+      - [DOC] add PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION,
+        PHP_EXTRA_VERSION, PHP_VERSION_ID, PHP_ZTS and PHP_DEBUG constants
+
+2008-02-15  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      NEWS
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/reflectionProperty_setAccesible.phpt
+      ext/reflection/tests/reflectionProperty_setAccessible.phpt:
+      - Fixed speling.
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/tests/reflectionProperty_setAccesible.phpt
+      ext/reflection/tests/reflectionProperty_setAccessible.phpt
+      ext/reflection/tests/reflectionProperty_setAccessible.phpt:
+      - Fixed typo
+
+    * (PHP_5_3)
+      NEWS
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/reflectionProperty_setAccesible.phpt:
+      - Add the ReflectionProperty::setAccesible() method that allows non-public
+        property's values to be read through ::getValue().
+
+    * ext/reflection/tests/reflectionProperty_setAccesible.phpt
+      ext/reflection/tests/reflectionProperty_setAccesible.phpt:
+      
+      - Add the ReflectionProperty::setAccesible() method that allows non-public
+        property's values to be read through ::getValue().
+
+    * ext/reflection/php_reflection.c:
+      - Add the ReflectionProperty::setAccesible() method that allows non-public
+        property's values to be read through ::getValue().
+
+2008-02-15  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/reflection/tests/bug38465.phpt
+      ext/reflection/tests/bug43926.phpt
+      ext/soap/tests/bugs/bug42151.phpt
+      ext/standard/tests/array/bug33382.phpt
+      ext/standard/tests/array/bug42838.phpt
+      ext/standard/tests/array/bug42850.phpt
+      ext/standard/tests/file/bug43248.phpt
+      ext/standard/tests/general_functions/bug42272.phpt:
+      more cosmetics
+
+    * ext/standard/array.c:
+      recursion protection in count()
+
+    * ext/json/tests/bug42090.phpt:
+      cosmetic fix
+
+2008-02-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug43128.phpt:
+      MFH: Fixed bug #43128 (Very long class name causes segfault)
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/soap.c
+      ext/soap/soap.c
+      ext/soap/soap.c:
+      Fixed bug #43507 (SOAPFault HTTP Status 500 - would like to be able to set
+      the HTTP Status)
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_values_variation4.phpt:
+      Fixed test
+
 2008-02-14  Josie Messa  <josmessa@uk.ibm.com>
 
     * (PHP_5_3)
