@@ -11,7 +11,7 @@
 
 const mbfl_language mbfl_language_armenian = {
 	mbfl_no_language_armenian ,
-	"Armenian ",
+	"Armenian",
 	"hy",
 	NULL,
 	mbfl_no_encoding_armscii8,
