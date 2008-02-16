@@ -1,3 +1,15 @@
+2008-02-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      zend.h
+      zend_API.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_execute_API.c
+      zend_object_handlers.c
+      tests/bug43128.phpt:
+      MFH: Fixed bug #43128 (Very long class name causes segfault)
+
 2008-02-14  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_alloc.c
