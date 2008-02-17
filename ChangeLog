@@ -1,3 +1,82 @@
+2008-02-16  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/count_variation3.phpt:
+      Fix test
+
+2008-02-16  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_4_4)
+      ext/mbstring/mbstring.c
+      ext/mbstring/libmbfl/nls/nls_hy.c:
+      revert commit.
+
+    * (PHP_5_3)
+      ext/mbstring/php_unicode.c:
+      fixed #43998  	Two error messages returned for incorrect encoding for
+      mb_strto[upper|lower]
+
+    * (PHP_5_3)
+      ext/mbstring/php_mbregex.c:
+      fixed #43994  mb_ereg 'successfully' matching incorrectly.
+
+    * (PHP_5_3)
+      ext/mbstring/mbstring.c:
+      fixed #43841  mb_strrpos offset is byte count for negative values.
+
+    * (PHP_5_3)
+      ext/mbstring/mbstring.c:
+      fixed bug #43840  mb_strpos bounds check is byte count rather than a
+      character count.
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/libmbfl/nls/nls_hy.c
+      ext/mbstring/libmbfl/nls/nls_hy.c:
+      MFB
+
+    * (PHP_5_3)
+      ext/mbstring/libmbfl/nls/nls_hy.c:
+      removed unnecessary space.
+
+    * (PHP_5_2)
+      ext/mbstring/mbstring.c
+      ext/mbstring/libmbfl/nls/nls_hy.c:
+      MF PHP5_3
+
+    * (PHP_5_3)
+      ext/mbstring/mbstring.c:
+      'auto' encoding was not initialized correctly per request basis.
+
+2008-02-16  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/oci8/tests/lob_042.phpt
+      ext/oci8/tests/lob_042.phpt:
+      MFB: Test existing LOB error messages
+
+    * ext/oci8/tests/lob_042.phpt
+      ext/oci8/tests/lob_042.phpt
+      ext/oci8/tests/lob_042.phpt:
+        1.1.4;
+      file lob_042.phpt was initially added on branch PHP_5_2.
+
+2008-02-16  Felipe Pena  <felipensp@gmail.com>
+
+    * main/main.c:
+      Fix build
+
+2008-02-16  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_3)
+      ext/oci8/oci8.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/debug.phpt
+      ext/oci8/tests/details.inc:
+      Streamlined code and incorporated review comments. Respect
+      oci8.ping_interval when oci_pconnect called multiple times in a script.
+      Changed OCIServerVersion to OCIPing
+      (http://pecl.php.net/bugs/bug.php?id=11976)
+
 2008-02-15  Christopher Jones  <christopher.jones@oracle.com>
 
     * ext/oci8/oci8_collection.c
