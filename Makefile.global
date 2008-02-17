@@ -11,7 +11,7 @@ all: $(all_targets)
 	@echo "Don't forget to run 'make test'."
 	@echo
 	
-build-modules: $(PHP_MODULES)
+build-modules: $(PHP_MODULES) $(PHP_ZEND_EX)
 
 libphp$(PHP_MAJOR_VERSION).la: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
 	$(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -rpath $(phptempdir) $(EXTRA_LDFLAGS) $(LDFLAGS) $(PHP_RPATHS) $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $@
@@ -73,6 +73,11 @@ PHP_TEST_SHARED_EXTENSIONS =  ` \
 		for i in $(PHP_MODULES)""; do \
 			. $$i; $(top_srcdir)/build/shtool echo -n -- " -d extension=$$dlname"; \
 		done; \
+	fi; \
+	if test "x$(PHP_ZEND_EX)" != "x"; then \
+		for i in $(PHP_ZEND_EX)""; do \
+			. $$i; $(top_srcdir)/build/shtool echo -n -- " -d $(ZEND_EXT_TYPE)=$(top_builddir)/modules/$$dlname"; \
+		done; \
 	fi`
 
 test: all
@@ -84,7 +89,7 @@ test: all
 	elif test ! -z "$(SAPI_CLI_PATH)" && test -x "$(SAPI_CLI_PATH)"; then \
 		INI_FILE=`$(top_builddir)/$(SAPI_CLI_PATH) -r 'echo php_ini_loaded_file();'`; \
 		if test "$$INI_FILE"; then \
-			$(EGREP) -v '^extension[\t\ ]*=' "$$INI_FILE" > $(top_builddir)/tmp-php.ini; \
+			$(EGREP) -v '^(zend_)?extension(_debug)?(_ts)?[\t\ ]*=' "$$INI_FILE" > $(top_builddir)/tmp-php.ini; \
 		else \
 			echo > $(top_builddir)/tmp-php.ini; \
 		fi; \

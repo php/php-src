@@ -837,7 +837,7 @@ AC_DEFUN([PHP_BUILD_PROGRAM],[
 ])
 
 dnl
-dnl PHP_SHARED_MODULE(module-name, object-var, build-dir, cxx)
+dnl PHP_SHARED_MODULE(module-name, object-var, build-dir, cxx, zend_ext)
 dnl
 dnl Basically sets up the link-stage for building module-name
 dnl from object_var in build-dir.
@@ -860,7 +860,11 @@ AC_DEFUN([PHP_SHARED_MODULE],[
       ;;
   esac
 
-  PHP_MODULES="$PHP_MODULES \$(phplibdir)/$1.$suffix"
+  if test "x$5" = "xyes"; then
+    PHP_ZEND_EX="$PHP_ZEND_EX \$(phplibdir)/$1.$suffix"
+  else
+    PHP_MODULES="$PHP_MODULES \$(phplibdir)/$1.$suffix"
+  fi
   PHP_SUBST($2)
   cat >>Makefile.objects<<EOF
 \$(phplibdir)/$1.$suffix: $3/$1.$suffix
@@ -916,7 +920,7 @@ AC_DEFUN([PHP_GEN_BUILD_DIRS],[
 ])
 
 dnl
-dnl PHP_NEW_EXTENSION(extname, sources [, shared [,sapi_class[, extra-cflags[, cxx]]]])
+dnl PHP_NEW_EXTENSION(extname, sources [, shared [,sapi_class[, extra-cflags[, cxx[, zend_ext]]]]])
 dnl
 dnl Includes an extension in the build.
 dnl
@@ -949,10 +953,10 @@ dnl ---------------------------------------------- Shared module
       PHP_ADD_SOURCES_X(PHP_EXT_DIR($1),$2,$ac_extra,shared_objects_$1,yes)
       case $host_alias in
         *netware*[)]
-          PHP_SHARED_MODULE(php$1,shared_objects_$1, $ext_builddir, $6)
+          PHP_SHARED_MODULE(php$1,shared_objects_$1, $ext_builddir, $6, $7)
           ;;
         *[)]
-          PHP_SHARED_MODULE($1,shared_objects_$1, $ext_builddir, $6)
+          PHP_SHARED_MODULE($1,shared_objects_$1, $ext_builddir, $6, $7)
           ;;
       esac
       AC_DEFINE_UNQUOTED([COMPILE_DL_]translit($1,a-z_-,A-Z__), 1, Whether to build $1 as dynamic module)
