@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.71 2008-01-10 18:21:23 rrichards Exp $
+// $Id: confutils.js,v 1.72 2008-02-17 01:29:16 pajoye Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -501,6 +501,7 @@ function PATH_PROG(progname, additional_paths, symbol)
 	var exe;
 	var place;
 	var cyg_path = PHP_CYGWIN + "\\bin;" + PHP_CYGWIN + "\\usr\\local\\bin";
+	var php_build_bin_path = PHP_PHP_BUILD + "\\bin"
 
 	exe = progname + ".exe";
 
@@ -509,6 +510,8 @@ function PATH_PROG(progname, additional_paths, symbol)
 	} else {
 		additional_paths += ";" + cyg_path;
 	}
+
+	additional_paths = additional_paths + ";" + php_build_bin_path;
 
 	place = search_paths(exe, additional_paths, "PATH");
 
