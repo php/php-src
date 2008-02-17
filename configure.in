@@ -870,7 +870,7 @@ enable_static=yes
 case $php_build_target in
 program|static)
     standard_libtool_flag='-prefer-non-pic -static'
-    if test -z "$PHP_MODULES"; then
+    if test -z "$PHP_MODULES" && test -z "$PHP_ZEND_EX"; then
         enable_shared=no
     fi
 ;;
@@ -1076,6 +1076,7 @@ PHP_SUBST(PHP_CLI_OBJS)
 PHP_SUBST(PHP_GLOBAL_OBJS)
 
 PHP_SUBST(PHP_MODULES)
+PHP_SUBST(PHP_ZEND_EX)
 
 PHP_SUBST(EXT_LIBS)
 
@@ -1156,6 +1157,17 @@ if test "$PHP_THREAD_SAFETY" = "yes" && test "$PHP_MYSQL" = "yes"; then
   CPPFLAGS="$CPPFLAGS -DTHREAD=1"
 fi
 
+if test "$PHP_DEBUG" = "yes" && test "$PHP_THREAD_SAFETY" = "yes; then
+ZEND_EXT_TYPE="zend_extension_debug_ts"
+elif test "$PHP_DEBUG" = "yes"; then
+ZEND_EXT_TYPE="zend_extension_debug"
+elif test "$PHP_THREAD_SAFETY" = "yes; then
+ZEND_EXT_TYPE="zend_extension_ts"
+else
+ZEND_EXT_TYPE="zend_extension"
+fi
+PHP_SUBST(ZEND_EXT_TYPE)
+
 dnl
 dnl Libtool creation
 dnl
@@ -1192,7 +1204,7 @@ CFLAGS="\$(CFLAGS_CLEAN) $standard_libtool_flag"
 INLINE_CFLAGS="$INLINE_CFLAGS $standard_libtool_flag"
 CXXFLAGS="$CXXFLAGS $standard_libtool_flag"
 
-all_targets="$lcov_target \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_CLI_TARGET)"
+all_targets="$lcov_target \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_CLI_TARGET)"
 install_targets="$install_modules install-build install-headers install-programs"
 
 case $PHP_SAPI in
