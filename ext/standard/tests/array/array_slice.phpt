@@ -91,23 +91,23 @@ foreach ($var_array as $sub_array)
 --EXPECTF--
 *** Output for Zero Argument ***
 
-Warning: array_slice() expects at least 2 parameters, 0 given in /home/felipe/php5/ext/standard/tests/array/array_slice.php on line 22
+Warning: array_slice() expects at least 2 parameters, 0 given in %s on line %d
 
 *** Output for Single array Argument ***
 
-Warning: array_slice() expects at least 2 parameters, 1 given in /home/felipe/php5/ext/standard/tests/array/array_slice.php on line 26
+Warning: array_slice() expects at least 2 parameters, 1 given in %s on line %d
 
 *** Output for invalid number of Arguments ***
 
-Warning: array_slice() expects at most 4 parameters, 5 given in /home/felipe/php5/ext/standard/tests/array/array_slice.php on line 30
+Warning: array_slice() expects at most 4 parameters, 5 given in %s on line %d
 
 *** Output for scalar Argument ***
 
-Warning: array_slice() expects parameter 1 to be array, integer given in /home/felipe/php5/ext/standard/tests/array/array_slice.php on line 34
+Warning: array_slice() expects parameter 1 to be array, integer given in %s on line %d
 
 *** Output for string Argument ***
 
-Warning: array_slice() expects parameter 1 to be array, string given in /home/felipe/php5/ext/standard/tests/array/array_slice.php on line 38
+Warning: array_slice() expects parameter 1 to be array, string given in %s on line %d
 
 *** Iteration 1 ***
 
