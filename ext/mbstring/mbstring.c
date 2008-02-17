@@ -1726,6 +1726,13 @@ PHP_FUNCTION(mb_strrpos)
 	if (needle.len <= 0) {
 		RETURN_FALSE;
 	}
+
+	if ((offset > 0 && offset > mbfl_strlen(&haystack)) ||
+		(offset < 0 && -offset > mbfl_strlen(&haystack))) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
+		RETURN_FALSE;
+	}
+
 	n = mbfl_strpos(&haystack, &needle, offset, 1);
 	if (n >= 0) {
 		RETVAL_LONG(n);
