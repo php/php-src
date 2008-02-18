@@ -753,16 +753,12 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 		if (variable_ptr!=value) {
 			zend_uint refcount = Z_REFCOUNT_P(variable_ptr);
 
-			if (!is_tmp_var) {
-				Z_ADDREF_P(value);
-			}
 			garbage = *variable_ptr;
 			*variable_ptr = *value;
 			Z_SET_REFCOUNT_P(variable_ptr, refcount);
 			Z_SET_ISREF_P(variable_ptr);
 			if (!is_tmp_var) {
 				zendi_zval_copy_ctor(*variable_ptr);
-				Z_DELREF_P(value);
 			}
 			zendi_zval_dtor(garbage);
 			return variable_ptr;
