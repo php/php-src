@@ -380,7 +380,7 @@ phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry,
 int phar_parse_metadata(char **buffer, zval **metadata, int is_zip TSRMLS_DC);
 void destroy_phar_manifest_entry(void *pDest);
 int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t position TSRMLS_DC);
-php_stream *phar_get_efp(phar_entry_info *entry);
+php_stream *phar_get_efp(phar_entry_info *entry TSRMLS_DC);
 int phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **error TSRMLS_DC);
 int phar_open_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC);
 int phar_create_writeable_entry(phar_archive_data *phar, phar_entry_info *entry, char **error TSRMLS_DC);

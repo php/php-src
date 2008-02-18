@@ -474,7 +474,7 @@ static int phar_zip_changed_apply(void *data, void *arg TSRMLS_DC) /* {{{ */
 			spprintf(p->error, 0, "unable to seek to start of file \"%s\" to zip-based phar \"%s\"", entry->filename, entry->phar->fname);
 			return ZEND_HASH_APPLY_STOP;
 		}
-		efp = phar_get_efp(entry);
+		efp = phar_get_efp(entry TSRMLS_CC);
 
 		newcrc32 = ~0;
 		for (loc = 0;loc < entry->uncompressed_filesize; loc++) {
@@ -607,7 +607,7 @@ continue_dir:
 				return ZEND_HASH_APPLY_STOP;
 			}
 			phar_seek_efp(entry, 0, SEEK_SET, 0 TSRMLS_CC);
-			if (entry->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(entry), p->filefp, entry->uncompressed_filesize)) {
+			if (entry->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(entry TSRMLS_CC), p->filefp, entry->uncompressed_filesize)) {
 				spprintf(p->error, 0, "unable to write contents of file \"%s\" in zip-based phar \"%s\"", entry->filename, entry->phar->fname);
 				return ZEND_HASH_APPLY_STOP;
 			}
