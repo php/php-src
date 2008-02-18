@@ -24,6 +24,8 @@ var_dump(count ($array1));
 echo "\n-- \$mode = 1: --\n";
 var_dump(count ($array1, 1));
 
+$array1[3] = null;
+
 echo "Done";
 ?>
 --EXPECTF--
@@ -33,3 +35,7 @@ echo "Done";
 int(4)
 
 -- $mode = 1: --
+
+Warning: count(): recursion detected in %s on line %d
+int(12)
+Done
