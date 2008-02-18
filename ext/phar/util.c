@@ -78,6 +78,7 @@ int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t positi
 int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, char *path, int path_len, int is_dir TSRMLS_DC)
 {
 	phar_entry_info entry = {0};
+	php_stream_statbuf ssb;
 
 #if PHP_MAJOR_VERSION < 6
 	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
@@ -98,7 +99,20 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 	entry.is_crc_checked = 1;
 	entry.fp_type = PHAR_TMP;
 	entry.is_dir = is_dir;
-	return zend_hash_add(&phar->manifest, path, path_len, (void*)&entry, sizeof(phar_entry_info), NULL);
+
+	if (SUCCESS != php_stream_stat_path(entry.link, &ssb)) {
+		efree(entry.link);
+		efree(entry.filename);
+		return FAILURE;
+	}
+	entry.uncompressed_filesize = entry.compressed_filesize = ssb.sb.st_size;
+	entry.flags = ssb.sb.st_mode;
+	if (SUCCESS == zend_hash_add(&phar->manifest, path, path_len, (void*)&entry, sizeof(phar_entry_info), NULL)) {
+		return SUCCESS;
+	}
+	efree(entry.link);
+	efree(entry.filename);
+	return FAILURE;
 }
 
 char *phar_find_in_include_path(char *file, char *entry, phar_archive_data *phar TSRMLS_DC) /* {{{ */
@@ -416,6 +430,12 @@ int phar_open_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC)
 	char *filtername;
 	off_t loc;
 
+	if (entry->fp_type == PHAR_TMP) {
+		if (!entry->fp) {
+			entry->fp = php_stream_open_wrapper(entry->link, "rb", STREAM_MUST_SEEK|0, NULL);
+		}
+		return SUCCESS;
+	}
 	if (entry->fp_type != PHAR_FP) {
 		/* either newly created or already modified */
 		return SUCCESS;
