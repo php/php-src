@@ -28,8 +28,6 @@ echo "Done";
 --EXPECTF--
 *** Testing mb_strtolower() : error conditions***
 
-Warning: mb_strtolower(): Illegal character encoding specified in %s on line %d
-
 Warning: mb_strtolower(): Unknown encoding "unknown-encoding" in %s on line %d
 bool(false)
 Done
