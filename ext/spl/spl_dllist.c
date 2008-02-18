@@ -473,6 +473,51 @@ static int spl_dllist_object_count_elements(zval *object, long *count TSRMLS_DC)
 } 
 /* }}} */
 
+static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /* {{{{ */
+{
+	spl_dllist_object     *intern  = (spl_dllist_object*)zend_object_store_get_object(obj TSRMLS_CC);
+	spl_ptr_llist_element *current = intern->llist->head, *next;
+	HashTable *rv;
+	zval *tmp, zrv, *dllist_array;
+	zstr pnstr;
+	int  pnlen;
+	int  i = 0;;
+
+	*is_temp = 1;
+
+	ALLOC_HASHTABLE(rv);
+	ZEND_INIT_SYMTABLE_EX(rv, zend_hash_num_elements(intern->std.properties) + 1, 0);
+
+	INIT_PZVAL(&zrv);
+	Z_ARRVAL(zrv) = rv;
+
+	zend_hash_copy(rv, intern->std.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+	pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "flags", sizeof("flags")-1, &pnlen TSRMLS_CC);
+	add_u_assoc_long_ex(&zrv, ZEND_STR_TYPE, pnstr, pnlen+1, intern->flags);
+	efree(pnstr.v);
+
+	ALLOC_INIT_ZVAL(dllist_array);
+	array_init(dllist_array);
+
+	while (current) {
+		next = current->next;
+
+		add_index_zval(dllist_array, i, (zval *)current->data);
+		Z_ADDREF_P(current->data);
+		i++;
+
+		current = next;
+	}
+
+	pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "dllist", sizeof("dllist")-1, &pnlen TSRMLS_CC);
+	add_u_assoc_zval_ex(&zrv, ZEND_STR_TYPE, pnstr, pnlen+1, dllist_array);
+	efree(pnstr.v);
+
+	return rv;
+}
+/* }}}} */
+
 /* {{{ proto bool SplDoublyLinkedList::push(mixed $value) U
 	   Push $value on the SplDoublyLinkedList */
 SPL_METHOD(SplDoublyLinkedList, push)
@@ -1131,8 +1176,9 @@ PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 	REGISTER_SPL_STD_CLASS_EX(SplDoublyLinkedList, spl_dllist_object_new, spl_funcs_SplDoublyLinkedList);
 	memcpy(&spl_handler_SplDoublyLinkedList, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 
-	spl_handler_SplDoublyLinkedList.clone_obj = spl_dllist_object_clone;
+	spl_handler_SplDoublyLinkedList.clone_obj      = spl_dllist_object_clone;
 	spl_handler_SplDoublyLinkedList.count_elements = spl_dllist_object_count_elements;
+	spl_handler_SplDoublyLinkedList.get_debug_info = spl_dllist_object_get_debug_info;
 
 	REGISTER_SPL_CLASS_CONST_LONG(SplDoublyLinkedList, "IT_MODE_LIFO",  SPL_DLLIST_IT_LIFO);
 	REGISTER_SPL_CLASS_CONST_LONG(SplDoublyLinkedList, "IT_MODE_FIFO",  0);
