@@ -108,7 +108,17 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 		efree(entry.filename);
 		return FAILURE;
 	}
-	entry.is_dir = ssb.sb.st_mode & S_IFDIR ? 1 : 0;
+	if (ssb.sb.st_mode & S_IFDIR) {
+		entry.is_dir = 1;
+		if (SUCCESS != zend_hash_add(&phar->mounted_dirs, path, path_len, (void *)&path, sizeof(char *), NULL)) {
+			/* directory already mounted */
+			efree(entry.link);
+			efree(entry.filename);
+			return FAILURE;
+		}
+	} else {
+		entry.is_dir = 0;
+	}
 	entry.uncompressed_filesize = entry.compressed_filesize = ssb.sb.st_size;
 	entry.flags = ssb.sb.st_mode;
 	if (SUCCESS == zend_hash_add(&phar->manifest, path, path_len, (void*)&entry, sizeof(phar_entry_info), NULL)) {

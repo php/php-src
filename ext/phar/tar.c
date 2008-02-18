@@ -170,6 +170,8 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 	myphar = (phar_archive_data *) ecalloc(1, sizeof(phar_archive_data));
 	zend_hash_init(&myphar->manifest, sizeof(phar_entry_info),
 		zend_get_hash_value, destroy_phar_manifest_entry, 0);
+	zend_hash_init(&myphar->mounted_dirs, sizeof(char *),
+		zend_get_hash_value, NULL, 0);
 	myphar->is_tar = 1;
 	/* remember whether this entire phar was compressed with gz/bzip2 */
 	myphar->flags = compression;

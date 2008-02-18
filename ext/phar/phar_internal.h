@@ -261,6 +261,8 @@ struct _phar_archive_data {
 	size_t                   internal_file_start;
 	size_t                   halt_offset;
 	HashTable                manifest;
+	/* hash of mounted directory paths */
+	HashTable                mounted_dirs;
 	php_uint32               flags;
 	php_uint32               min_timestamp;
 	php_uint32               max_timestamp;

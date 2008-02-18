@@ -208,6 +208,8 @@ foundit:
 	/* read in central directory */
 	zend_hash_init(&mydata->manifest, sizeof(phar_entry_info),
 		zend_get_hash_value, destroy_phar_manifest_entry, 0);
+	zend_hash_init(&mydata->mounted_dirs, sizeof(char *),
+		zend_get_hash_value, NULL, 0);
 	entry.phar = mydata;
 	entry.is_zip = 1;
 	entry.fp_type = PHAR_FP;

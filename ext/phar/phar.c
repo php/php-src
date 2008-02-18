@@ -186,6 +186,10 @@ static void phar_destroy_phar_data(phar_archive_data *phar TSRMLS_DC) /* {{{ */
 		zend_hash_destroy(&phar->manifest);
 		phar->manifest.arBuckets = NULL;
 	}
+	if (phar->mounted_dirs.arBuckets) {
+		zend_hash_destroy(&phar->mounted_dirs);
+		phar->mounted_dirs.arBuckets = NULL;
+	}
 	if (phar->metadata) {
 		zval_ptr_dtor(&phar->metadata);
 		phar->metadata = 0;
@@ -838,6 +842,8 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 	/* set up our manifest */
 	zend_hash_init(&mydata->manifest, sizeof(phar_entry_info),
 		zend_get_hash_value, destroy_phar_manifest_entry, 0);
+	zend_hash_init(&mydata->mounted_dirs, sizeof(char *),
+		zend_get_hash_value, NULL, 0);
 	offset = halt_offset + manifest_len + 4;
 	memset(&entry, 0, sizeof(phar_entry_info));
 	entry.phar = mydata;
