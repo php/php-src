@@ -75,10 +75,16 @@ int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t positi
 }
 
 /* mount an absolute path or uri to a path internal to the phar archive */
-int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, char *path, int path_len, int is_dir TSRMLS_DC)
+int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, char *path, int path_len TSRMLS_DC)
 {
 	phar_entry_info entry = {0};
 	php_stream_statbuf ssb;
+	const char *err;
+	int is_dir;
+
+	if (phar_path_check(&path, &path_len, &err) > pcr_is_ok) {
+		return FAILURE;
+	}
 
 #if PHP_MAJOR_VERSION < 6
 	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
@@ -98,13 +104,13 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 	entry.is_mounted = 1;
 	entry.is_crc_checked = 1;
 	entry.fp_type = PHAR_TMP;
-	entry.is_dir = is_dir;
 
 	if (SUCCESS != php_stream_stat_path(entry.link, &ssb)) {
 		efree(entry.link);
 		efree(entry.filename);
 		return FAILURE;
 	}
+	entry.is_dir = ssb.sb.st_mode & S_IFDIR ? 1 : 0;
 	entry.uncompressed_filesize = entry.compressed_filesize = ssb.sb.st_size;
 	entry.flags = ssb.sb.st_mode;
 	if (SUCCESS == zend_hash_add(&phar->manifest, path, path_len, (void*)&entry, sizeof(phar_entry_info), NULL)) {
