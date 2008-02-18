@@ -1194,7 +1194,9 @@ void php_local_infile_end(void *ptr)
 		return;
 	}
 
-	php_stream_close(mysql->li_stream);
+	if (mysql->li_stream) {
+		php_stream_close(mysql->li_stream);
+	}
 	free(data);
 	return;	
 }
