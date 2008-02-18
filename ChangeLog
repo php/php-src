@@ -1,3 +1,69 @@
+2008-02-17  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      Makefile.global
+      acinclude.m4
+      configure.in:
+      - MFH Allow zend_extensions to be build inside ext and tested with 'make
+      test'
+
+    * Makefile.global
+      acinclude.m4
+      configure.in:
+      - Allow zend_extensions to be build inside ext and tested with 'make test'
+
+2008-02-17  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - Fixed typoes.
+
+2008-02-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      
+      Mbstring bug fixing news
+
+2008-02-17  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_2)
+      ext/mbstring/mbstring.c:
+      MF PHP5_3 (fixed #43841)
+
+    * (PHP_5_2)
+      ext/mbstring/php_mbregex.c:
+      MF PHP5_3 (fixed #43994)
+
+    * (PHP_5_2)
+      ext/mbstring/php_unicode.c:
+      MF PHP5_3 (fixed #43998)
+
+    * (PHP_5_2)
+      ext/mbstring/mbstring.c:
+      MF PHP5_3 (fixed #43840)
+
+2008-02-17  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * win32/build/confutils.js:
+       - MFB: add PHP_PHP_BUILD\bin to the path in PATH_PROG (option set with
+      --with-php-builds=[PATH] the zip.zip contains all we need (except re2c! )
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      - add PHP_PHP_BUILD\bin to the path in PATH_PROG (option set with
+      --with-php-builds=[PATH] the zip.zip contains all we need (except re2c! )
+
+2008-02-17  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/array/array_slice.phpt
+      ext/standard/tests/array/array_slice.phpt:
+      Fix test
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_slice.phpt:
+      Fix the fix
+
 2008-02-16  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
