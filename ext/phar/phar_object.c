@@ -898,20 +898,22 @@ PHP_METHOD(Phar, interceptFileFuncs)
  */
 PHP_METHOD(Phar, createDefaultStub)
 {
-	char *index = NULL, *webindex = NULL, *error;
+	char *index = NULL, *webindex = NULL, *stub, *error;
 	int index_len, webindex_len;
 	size_t stub_len;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ss", &index, &index_len, &webindex, &webindex_len) == FAILURE) {
 		return;
 	}
 
-	index = phar_create_default_stub(index, webindex, &stub_len, &error TSRMLS_CC);
+	stub = phar_create_default_stub(index, webindex, &stub_len, &error TSRMLS_CC);
+
 	if (error) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, error);
 		efree(error);
 		return;
 	}
-	RETURN_STRINGL(index, stub_len, 0);
+	RETURN_STRINGL(stub, stub_len, 0);
 }
 /* }}} */
 

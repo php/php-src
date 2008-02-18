@@ -1701,47 +1701,45 @@ static int phar_flush_clean_deleted_apply(void *data TSRMLS_DC) /* {{{ */
 char *phar_create_default_stub(const char *index_php, const char *web_index, size_t *len, char **error TSRMLS_DC)
 {
 	char *stub = NULL;
-	static const char def[] = "index.php";
-	static const char defweb[] = "0";
-	int name_len, web_len;
+	int index_len, web_len;
 	size_t dummy;
 
 	if (!len) {
 		len = &dummy;
 	}
 
-	if (index_php) {
-		name_len = strlen(index_php);
-	}
-	if (web_index) {
-		web_len = strlen(web_index);
-	}
 	if (error) {
 		*error = NULL;
 	}
-	if (index_php && name_len > 400) {
-		/* ridiculous big not allowed for index.php startup filename */
+
+	if (!index_php) {
+		index_php = "index.php";
+	}
+
+	if (!web_index) {
+		web_index = "index.php";
+	}
+
+	index_len = strlen(index_php);
+	web_len = strlen(web_index);
+
+	if (index_len > 400) {
+		/* ridiculous size not allowed for index.php startup filename */
 		if (error) {
-			spprintf(error, 0, "Illegal filename passed in for stub creation, was %d characters long, and only 400 or less is allowed", name_len);
+			spprintf(error, 0, "Illegal filename passed in for stub creation, was %d characters long, and only 400 or less is allowed", index_len);
 			return NULL;
 		}
 	}
-	if (web_index && web_len > 400) {
-		/* ridiculous big not allowed for index.php startup filename */
+
+	if (web_len > 400) {
+		/* ridiculous size not allowed for index.php startup filename */
 		if (error) {
 			spprintf(error, 0, "Illegal web filename passed in for stub creation, was %d characters long, and only 400 or less is allowed", web_len);
 			return NULL;
 		}
 	}
-	if (!index_php && !web_index) {
-		phar_get_stub(def, defweb, len, &stub, sizeof("index.php")-1, 1 TSRMLS_CC);
-	} else if (!index_php && web_index ){
-		phar_get_stub(def, web_index, len, &stub, sizeof("index.php")-1, web_len+1 TSRMLS_CC);
-	} else if (index_php && !web_index) {
-		phar_get_stub(index_php, defweb, len, &stub, name_len+1, 1 TSRMLS_CC);
-	} else {
-		phar_get_stub(index_php, web_index, len, &stub, name_len+1, web_len+1 TSRMLS_CC);
-	}
+
+	phar_get_stub(index_php, web_index, len, &stub, index_len+1, web_len+1 TSRMLS_CC);
 	return stub;
 }
 
