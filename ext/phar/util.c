@@ -78,7 +78,6 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 	phar_entry_info entry = {0};
 	php_stream_statbuf ssb;
 	const char *err;
-	int is_dir;
 
 	if (phar_path_check(&path, &path_len, &err) > pcr_is_ok) {
 		return FAILURE;

@@ -2574,7 +2574,7 @@ int phar_zend_open(const char *filename, zend_file_handle *handle TSRMLS_DC) /* 
 					if (!(entry = phar_find_in_include_path(entry, old, *pphar TSRMLS_CC))) {
 						/* this file is not in the phar, use the original path */
 						if (SUCCESS == phar_orig_zend_open(filename, handle TSRMLS_CC)) {
-							if (SUCCESS == phar_mount_entry(*pphar, handle->opened_path ? handle->opened_path : (char *) filename, strlen(handle->opened_path ? handle->opened_path : filename), (char *) filename, strlen(filename))) {
+							if (SUCCESS == phar_mount_entry(*pphar, handle->opened_path ? handle->opened_path : (char *) filename, strlen(handle->opened_path ? handle->opened_path : filename), (char *) filename, strlen(filename) TSRMLS_CC)) {
 								entry = (char *) filename;
 								goto dopharthing;
 							}
