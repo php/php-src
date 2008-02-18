@@ -736,18 +736,12 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
  				zend_uint refcount = variable_ptr->refcount;
  				zval garbage;
  
- 				if (type != IS_TMP_VAR) {
- 					value->refcount++;
- 				}
  				garbage = *variable_ptr;
  				*variable_ptr = *value;
  				variable_ptr->refcount = refcount;
  				variable_ptr->is_ref = 1;
  				zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
  				variable_ptr->value.obj = Z_OBJ_HANDLER_P(value, clone_obj)(value TSRMLS_CC);
- 				if (type != IS_TMP_VAR) {
- 					value->refcount--;
- 				}
  				zendi_zval_dtor(garbage);
  			}
  		} else {
@@ -775,16 +769,12 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 			zend_uint refcount = variable_ptr->refcount;
 			zval garbage;
 
-			if (type!=IS_TMP_VAR) {
-				value->refcount++;
-			}
 			garbage = *variable_ptr;
 			*variable_ptr = *value;
 			variable_ptr->refcount = refcount;
 			variable_ptr->is_ref = 1;
 			if (type!=IS_TMP_VAR) {
 				zendi_zval_copy_ctor(*variable_ptr);
-				value->refcount--;
 			}
 			zendi_zval_dtor(garbage);
 		}
