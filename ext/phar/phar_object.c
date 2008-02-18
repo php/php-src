@@ -414,6 +414,38 @@ static void phar_postprocess_ru_web(char *fname, int fname_len, char **entry, in
 }
 /* }}} */
 
+/* {{{ proto void Phar::mount(string pharpath, string externalfile)
+ * mount an external file or path to a location within the phar.  This maps
+ * an external file or directory to a location within the phar archive, allowing
+ * reference to an external location as if it were within the phar archive.  This
+ * is useful for writable temp files like databases
+ */
+PHP_METHOD(Phar, mount)
+{
+	char *fname, *arch, *entry, *path, *actual;
+	int fname_len, arch_len, entry_len, path_len, actual_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &path, &path_len, &actual, &actual_len) == FAILURE) {
+		return;
+	}
+
+	fname = zend_get_executed_filename(TSRMLS_C);
+	fname_len = strlen(fname);
+
+	if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
+		phar_archive_data **pphar;
+		if (SUCCESS != zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **)&pphar)) {
+			/* TODO: throw exception */
+			return;
+		}
+		if (SUCCESS != phar_mount_entry(*pphar, actual, actual_len, path, path_len TSRMLS_CC)) {
+			/* TODO: throw exception */
+			return;
+		}
+	}
+}
+/* }}} */
+
 /* {{{ proto void Phar::webPhar([string alias, [string index, [string f404, [array mimetypes, [callback rewrites]]]]])
  * mapPhar for web-based phars. Reads the currently executed file (a phar)
  * and registers its manifest. When executed in the CLI or CGI command-line sapi,
@@ -3424,6 +3456,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_copy, 0, 0, 2)
 ZEND_END_ARG_INFO();
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_mount, 0, 0, 2)
+	ZEND_ARG_INFO(0, inphar)
+	ZEND_ARG_INFO(0, externalfile)
+ZEND_END_ARG_INFO();
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_conv, 0, 0, 0)
 	ZEND_ARG_INFO(0, compression)
 ZEND_END_ARG_INFO();
@@ -3480,6 +3518,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, loadPhar,              arginfo_phar_loadPhar,     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, mapPhar,               arginfo_phar_mapPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, webPhar,               arginfo_phar_webPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, mount,                 arginfo_phar_mount,        ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, mungServer,            arginfo_phar_mungServer,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, interceptFileFuncs,    NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, getExtractList,        NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
