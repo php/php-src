@@ -406,7 +406,7 @@ int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC)
 		}
 		return ZEND_HASH_APPLY_STOP;
 	}
-	if (entry->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(entry), fp->new, entry->uncompressed_filesize)) {
+	if (entry->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(entry TSRMLS_CC), fp->new, entry->uncompressed_filesize)) {
 		if (fp->error) {
 			spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, contents of file \"%s\" could not be written", entry->phar->fname, entry->filename);
 		}

@@ -23,10 +23,8 @@
 #include "phar_internal.h"
 
 /* retrieve a phar_entry_info's current file pointer for reading contents */
-php_stream *phar_get_efp(phar_entry_info *entry)
+php_stream *phar_get_efp(phar_entry_info *entry TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (entry->fp_type == PHAR_FP) {
 		if (!entry->phar->fp) {
 			/* re-open just in time for cases where our refcount reached 0 on the phar archive */
@@ -48,7 +46,7 @@ php_stream *phar_get_efp(phar_entry_info *entry)
 
 int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t position TSRMLS_DC)
 {
-	php_stream *fp = phar_get_efp(entry);
+	php_stream *fp = phar_get_efp(entry TSRMLS_CC);
 	off_t temp;
 
 	if (entry->is_dir) {
@@ -285,7 +283,7 @@ int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char 
 	(*ret)->internal_file = entry;
 	(*ret)->is_zip = entry->is_zip;
 	(*ret)->is_tar = entry->is_tar;
-	(*ret)->fp = phar_get_efp(entry);
+	(*ret)->fp = phar_get_efp(entry TSRMLS_CC);
 	(*ret)->zero = entry->offset;
 	entry->fp_refcount++;
 	entry->phar->refcount++;
@@ -416,7 +414,7 @@ int phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **er
 	dest->fp = php_stream_fopen_tmpfile();
 
 	phar_seek_efp(source, 0, SEEK_SET, 0 TSRMLS_CC);
-	if (source->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(source), dest->fp, source->uncompressed_filesize)) {
+	if (source->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(source TSRMLS_CC), dest->fp, source->uncompressed_filesize)) {
 		php_stream_close(dest->fp);
 		dest->fp_type = PHAR_FP;
 		if (error) {
@@ -595,7 +593,7 @@ int phar_separate_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC)
 
 	fp = php_stream_fopen_tmpfile();
 	phar_seek_efp(entry, 0, SEEK_SET, 0 TSRMLS_CC);
-	if (entry->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(entry), fp, entry->uncompressed_filesize)) {
+	if (entry->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(entry TSRMLS_CC), fp, entry->uncompressed_filesize)) {
 		if (error) {
 			spprintf(error, 4096, "phar error: cannot separate entry file \"%s\" contents in phar archive \"%s\" for write access", entry->filename, entry->phar->fname);
 		}

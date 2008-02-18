@@ -1957,7 +1957,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, char **error 
 		if (oldfile && !entry->is_modified) {
 			continue;
 		}
-		if (!phar_get_efp(entry)) {
+		if (!phar_get_efp(entry TSRMLS_CC)) {
 			/* re-open internal file pointer just-in-time */
 			newentry = phar_open_jit(phar, entry, oldfile, error, 0 TSRMLS_CC);
 			if (!newentry) {
@@ -1968,7 +1968,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, char **error 
 			}
 			entry = newentry;
 		}
-		file = phar_get_efp(entry);
+		file = phar_get_efp(entry TSRMLS_CC);
 		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0 TSRMLS_CC)) {
 			if (closeoldfile) {
 				php_stream_close(oldfile);
@@ -2218,7 +2218,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, char **error 
 			file = entry->cfp;
 			php_stream_rewind(file);
 		} else {
-			file = phar_get_efp(entry);
+			file = phar_get_efp(entry TSRMLS_CC);
 			if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0 TSRMLS_CC)) {
 				if (closeoldfile) {
 					php_stream_close(oldfile);

@@ -230,7 +230,7 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 			}
 
 			/* prepare to output  */
-			if (!phar_get_efp(phar->internal_file)) {
+			if (!phar_get_efp(phar->internal_file TSRMLS_CC)) {
 				char *error;
 				if (!phar_open_jit(phar->phar, phar->internal_file, phar->phar->fp, &error, 0 TSRMLS_CC)) {
 					if (error) {
@@ -239,7 +239,7 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 					}
 					return -1;
 				}
-				phar->fp = phar_get_efp(phar->internal_file);
+				phar->fp = phar_get_efp(phar->internal_file TSRMLS_CC);
 				phar->zero = phar->internal_file->offset;
 			}
 			phar_seek_efp(phar->internal_file, 0, SEEK_SET, 0 TSRMLS_CC);
@@ -1523,7 +1523,7 @@ static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp TSRMLS
 	/* copy old contents in entirety */
 	phar_seek_efp(entry, 0, SEEK_SET, 0 TSRMLS_CC);
 	offset = php_stream_tell(fp);
-	if (entry->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(entry), fp, entry->uncompressed_filesize)) {
+	if (entry->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(entry TSRMLS_CC), fp, entry->uncompressed_filesize)) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"Cannot convert phar archive \"%s\", unable to copy entry \"%s\" contents", entry->phar->fname, entry->filename);
 		return FAILURE;
