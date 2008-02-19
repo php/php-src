@@ -34,20 +34,17 @@ echo $e->getMessage() . "\n";
 ?>
 ===DONE===
 --EXPECT--
-string(6591) "<?php
+string(6571) "<?php
 
-$web = '0';
+$web = 'index.php';
 
 if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
 Phar::interceptFileFuncs();
-if ($web) {
 Phar::webPhar(null, $web);
-}
 include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
 return;
 }
 
-if ($web) {
 if (@(isset($_SERVER['REQUEST_URI']) && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'POST')) {
 Extract_Phar::go(true);
 $mimes = array(
@@ -135,7 +132,6 @@ header('Content-Type: ' .$mimes[$b['extension']]);
 header('Content-Length: ' . filesize($a));
 readfile($a);
 exit;
-}
 }
 }
 
@@ -147,7 +143,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'index.php';
-const LEN = 6591;
+const LEN = 6573;
 
 static function go($return = false)
 {
@@ -331,20 +327,17 @@ Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
-string(6602) "<?php
+string(6582) "<?php
 
-$web = '0';
+$web = 'index.php';
 
 if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
 Phar::interceptFileFuncs();
-if ($web) {
 Phar::webPhar(null, $web);
-}
 include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
 return;
 }
 
-if ($web) {
 if (@(isset($_SERVER['REQUEST_URI']) && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'POST')) {
 Extract_Phar::go(true);
 $mimes = array(
@@ -434,7 +427,6 @@ readfile($a);
 exit;
 }
 }
-}
 
 class Extract_Phar
 {
@@ -444,7 +436,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'my/custom/thingy.php';
-const LEN = 6603;
+const LEN = 6584;
 
 static function go($return = false)
 {
@@ -628,7 +620,7 @@ Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
-int(6982)
+int(6962)
 ============================================================================
 ============================================================================
 Illegal filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
@@ -636,20 +628,17 @@ Illegal filename passed in for stub creation, was 401 characters long, and only 
 ============================================================================
 ============================================================================
 ============================================================================
-string(6612) "<?php
+string(6584) "<?php
 
 $web = 'the/web.php';
 
 if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
 Phar::interceptFileFuncs();
-if ($web) {
 Phar::webPhar(null, $web);
-}
 include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
 return;
 }
 
-if ($web) {
 if (@(isset($_SERVER['REQUEST_URI']) && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'POST')) {
 Extract_Phar::go(true);
 $mimes = array(
@@ -739,7 +728,6 @@ readfile($a);
 exit;
 }
 }
-}
 
 class Extract_Phar
 {
@@ -749,7 +737,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'my/custom/thingy.php';
-const LEN = 6614;
+const LEN = 6586;
 
 static function go($return = false)
 {
@@ -933,6 +921,6 @@ Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
-int(6990)
+int(6962)
 Illegal web filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
 ===DONE===
