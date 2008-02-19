@@ -158,8 +158,7 @@ ZEND_API void zend_objects_store_add_ref_by_handle(zend_object_handle handle TSR
 
 #define ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST()																	\
 			EG(objects_store).object_buckets[handle].bucket.free_list.next = EG(objects_store).free_list_head;	\
-			EG(objects_store).free_list_head = handle;															\
-			EG(objects_store).object_buckets[handle].valid = 0;
+			EG(objects_store).free_list_head = handle;
 
 ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC)
 {
@@ -186,13 +185,12 @@ ZEND_API void zend_objects_store_del_ref_by_handle(zend_object_handle handle TSR
 		return;
 	}
 
-	obj = &EG(objects_store).object_buckets[handle].bucket.obj;
-
 	/*	Make sure we hold a reference count during the destructor call
 		otherwise, when the destructor ends the storage might be freed
 		when the refcount reaches 0 a second time
 	 */
 	if (EG(objects_store).object_buckets[handle].valid) {
+		obj = &EG(objects_store).object_buckets[handle].bucket.obj;
 		if (obj->refcount == 1) {
 			if (!EG(objects_store).object_buckets[handle].destructor_called) {
 				EG(objects_store).object_buckets[handle].destructor_called = 1;
@@ -206,6 +204,7 @@ ZEND_API void zend_objects_store_del_ref_by_handle(zend_object_handle handle TSR
 				}
 			}
 			if (obj->refcount == 1) {
+				EG(objects_store).object_buckets[handle].valid = 0;
 				GC_REMOVE_ZOBJ_FROM_BUFFER(obj);
 				if (obj->free_storage) {
 					zend_try {
@@ -217,19 +216,20 @@ ZEND_API void zend_objects_store_del_ref_by_handle(zend_object_handle handle TSR
 				ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST();
 			}
 		}
-	}
 
-	obj->refcount--;
+		obj->refcount--;
 
 #if ZEND_DEBUG_OBJECTS
-	if (obj->refcount == 0) {
-		fprintf(stderr, "Deallocated object id #%d\n", handle);
-	} else {
-		fprintf(stderr, "Decreased refcount of object id #%d\n", handle);
-	}
+		if (obj->refcount == 0) {
+			fprintf(stderr, "Deallocated object id #%d\n", handle);
+		} else {
+			fprintf(stderr, "Decreased refcount of object id #%d\n", handle);
+		}
 #endif
-	if (failure) {
-		zend_bailout();
+
+		if (failure) {
+			zend_bailout();
+		}
 	}
 }
 
