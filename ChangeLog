@@ -1,3 +1,52 @@
+2008-02-18  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/spl_dllist.c:
+      Add debug_info handler to SplDoublyLinkedList/Stack/Queue to make them
+      var_dump friendly
+
+2008-02-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/php_reflection.c
+      ext/reflection/php_reflection.c:
+      Made code opcode-cache friendly. (It is disallowed to change code during
+      execution)
+
+2008-02-18  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_2)
+      ext/mbstring/tests/bug43301.phpt
+      ext/mbstring/tests/mb_ereg1.phpt
+      ext/mbstring/tests/mb_strrpos_variation3.phpt
+      ext/mbstring/tests/mb_strtolower_error2.phpt
+      ext/mbstring/tests/mb_strtolower_variation2.phpt
+      ext/mbstring/tests/mb_strtoupper_error2.phpt
+      ext/mbstring/tests/mb_strtoupper_variation2.phpt:
+      fixed some failures on test scripts caused by bug fix.
+
+2008-02-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/mysqli/mysqli.c:
+      
+      MFB:Fixed a possible crash
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli.c:
+      
+      Fixed a possible crash
+
+2008-02-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c:
+      Removed redundant refcount manipulations
+
+    * (PHP_5_2)
+      ext/standard/tests/array/count_variation3.phpt:
+      Fixed test
+
 2008-02-17  Marcus Boerger  <php@marcus-boerger.de>
 
     * (PHP_5_3)

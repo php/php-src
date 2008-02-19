@@ -1,3 +1,10 @@
+2008-02-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c
+      zend_execute.c
+      zend_execute.c:
+      Removed redundant refcount manipulations
+
 2008-02-15  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_2)
