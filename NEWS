@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   which to group by data is specified. (Ilia)
 - Upgraded PCRE to version 7.6 (Nuno)
 
+- Fixed Bug #44159 (Crash: $pdo->setAttribute(PDO::STATEMENT_ATTR_CLASS, NULL)).
+  (Felipe)
 - Fixed bug #44069 (Huge memory usage with concatenation using . instead of
   .=). (Dmitry)
 - Fixed bug #44046 (crash inside array_slice() function with an invalid
