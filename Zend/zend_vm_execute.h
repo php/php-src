@@ -181,6 +181,13 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 
 		ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
 		INIT_ZVAL(*(EX_T(opline->result.u.var).var.ptr));
+if (strcmp(EX(function_state).function->common.function_name, "set_error_handler") == 0) {
+static n = 0;
+++n;
+if (n>=542) {
+fprintf(stderr, "%3d 0x%08X %s\n", n, EX_T(opline->result.u.var).var.ptr, EX(function_state).function->common.function_name);
+}
+}
 
 		if (EX(function_state).function->common.arg_info) {
 			zend_uint i=0;
