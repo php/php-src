@@ -1270,6 +1270,7 @@ ZEND_FUNCTION(set_error_handler)
 		had_orig_error_handler = 1;
 		*return_value = *EG(user_error_handler);
 		zval_copy_ctor(return_value);
+		INIT_PZVAL(return_value);
 		zend_stack_push(&EG(user_error_handlers_error_reporting), &EG(user_error_handler_error_reporting), sizeof(EG(user_error_handler_error_reporting)));
 		zend_ptr_stack_push(&EG(user_error_handlers), EG(user_error_handler));
 	}
@@ -1284,6 +1285,7 @@ ZEND_FUNCTION(set_error_handler)
 	EG(user_error_handler_error_reporting) = (int)error_type;
 	*EG(user_error_handler) = *error_handler;
 	zval_copy_ctor(EG(user_error_handler));
+	INIT_PZVAL(EG(user_error_handler));
 
 	if (!had_orig_error_handler) {
 		RETURN_NULL();
