@@ -44,6 +44,8 @@ require_once('skipifconnectfailure.inc');
 		"MYSQLI_TIMESTAMP_FLAG"				=> true,
 		"MYSQLI_SET_FLAG"					=> true,
 		"MYSQLI_NUM_FLAG"					=> true,
+		"MYSQLI_ENUM_FLAG"					=> true,
+		"MYSQLI_BINARY_FLAG"				=> true,
 		"MYSQLI_PART_KEY_FLAG"				=> true,
 		"MYSQLI_GROUP_FLAG"					=> true,
 		"MYSQLI_TYPE_DECIMAL"				=> true,
@@ -90,8 +92,14 @@ require_once('skipifconnectfailure.inc');
 		$version = 50007 + 1;
 		$expected_constants['MYSQLI_OPT_NET_CMD_BUFFER_SIZE'] = true;
 		$expected_constants['MYSQLI_OPT_NET_READ_BUFFER_SIZE'] = true;
+		$expected_constants['MYSQLI_DEBUG_TRACE_ENABLED'] = true;
+		
 	} else {
 		$version = mysqli_get_client_version();
+	}
+
+	if (($version > 51122 && $version < 60000) || ($version > 60003) || $IS_MYSQLND) {
+		$expected_constants['MYSQLI_ON_UPDATE_NOW_FLAG'] = true;	
 	}
 
 	if ($version > 50002) {
@@ -99,6 +107,10 @@ require_once('skipifconnectfailure.inc');
 			"MYSQLI_TYPE_NEWDECIMAL"	=> true,
 			"MYSQLI_TYPE_BIT"			=> true,
 		));
+	}
+
+	if ($version > 50002 || $IS_MYSQLND) {
+		$expected_constants['MYSQLI_NO_DEFAULT_VALUE_FLAG'] = true;
 	}
 
 	if ($version > 50003) {
