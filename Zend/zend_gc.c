@@ -502,7 +502,7 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 			if (Z_TYPE(p->z) == IS_OBJECT) {
 				if (EG(objects_store).object_buckets &&
 					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].valid &&
-					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.refcount <= 1) {
+					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.refcount <= 0) {
 					if (EXPECTED(Z_OBJ_HANDLER(p->z, get_properties) != NULL)) {
 						Z_OBJPROP(p->z)->pDestructor = NULL;
 					}
