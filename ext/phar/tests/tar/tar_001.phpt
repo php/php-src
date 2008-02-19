@@ -23,7 +23,7 @@ try {
 ===DONE===
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . '/tar_001.phar');
+@unlink(dirname(__FILE__) . '/tar_001.phar.tar');
 ?>
 --EXPECTF--
 Warning: fopen(phar://%star_001.phar.tar/tar_001.phpt): failed to open stream: phar error: "%star_001.phar.tar" is a corrupted tar file in %star_001.php on line %d
