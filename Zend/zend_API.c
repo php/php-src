@@ -2191,7 +2191,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 				if (!(scope->ce_flags & ZEND_ACC_INTERFACE)) {
 					/* Since the class is not an interface it needs to be declared as a abstract class. */
 					/* Since here we are handling internal functions only we can add the keyword flag. */
-					/* This time we set the flag for the keyword 'abstratc'. */
+					/* This time we set the flag for the keyword 'abstract'. */
 					scope->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
 				}
 			}
