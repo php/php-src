@@ -29,20 +29,17 @@ unlink(dirname(__FILE__) . '/brandnewphar.phar');
 __HALT_COMPILER();
 ?>
 --EXPECT--
-string(6591) "<?php
+string(6571) "<?php
 
-$web = '0';
+$web = 'index.php';
 
 if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
 Phar::interceptFileFuncs();
-if ($web) {
 Phar::webPhar(null, $web);
-}
 include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
 return;
 }
 
-if ($web) {
 if (@(isset($_SERVER['REQUEST_URI']) && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'POST')) {
 Extract_Phar::go(true);
 $mimes = array(
@@ -132,7 +129,6 @@ readfile($a);
 exit;
 }
 }
-}
 
 class Extract_Phar
 {
@@ -142,7 +138,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'index.php';
-const LEN = 6591;
+const LEN = 6573;
 
 static function go($return = false)
 {
