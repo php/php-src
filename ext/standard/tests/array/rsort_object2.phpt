@@ -263,7 +263,7 @@ Done
 bool(true)
 array(4) {
   [0]=>
-  object(for_integer_rsort)#2 (3) {
+  object(for_integer_rsort)#%d (3) {
     [u"public_class_value"]=>
     int(66)
     [u"private_class_value":u"for_integer_rsort":private]=>
@@ -272,7 +272,7 @@ array(4) {
     int(4)
   }
   [1]=>
-  object(for_integer_rsort)#1 (3) {
+  object(for_integer_rsort)#%d (3) {
     [u"public_class_value"]=>
     int(11)
     [u"private_class_value":u"for_integer_rsort":private]=>
@@ -281,7 +281,7 @@ array(4) {
     int(30)
   }
   [2]=>
-  object(for_integer_rsort)#4 (3) {
+  object(for_integer_rsort)#%d (3) {
     [u"public_class_value"]=>
     float(0.001)
     [u"private_class_value":u"for_integer_rsort":private]=>
@@ -290,7 +290,7 @@ array(4) {
     float(0.1)
   }
   [3]=>
-  object(for_integer_rsort)#3 (3) {
+  object(for_integer_rsort)#%d (3) {
     [u"public_class_value"]=>
     int(-88)
     [u"private_class_value":u"for_integer_rsort":private]=>
@@ -302,7 +302,7 @@ array(4) {
 bool(true)
 array(4) {
   [0]=>
-  object(for_string_rsort)#7 (3) {
+  object(for_string_rsort)#%d (3) {
     [u"public_class_value"]=>
     unicode(1) "w"
     [u"private_class_value":u"for_string_rsort":private]=>
@@ -311,7 +311,7 @@ array(4) {
     unicode(1) "c"
   }
   [1]=>
-  object(for_string_rsort)#6 (3) {
+  object(for_string_rsort)#%d (3) {
     [u"public_class_value"]=>
     unicode(1) "t"
     [u"private_class_value":u"for_string_rsort":private]=>
@@ -320,7 +320,7 @@ array(4) {
     unicode(3) "abb"
   }
   [2]=>
-  object(for_string_rsort)#8 (3) {
+  object(for_string_rsort)#%d (3) {
     [u"public_class_value"]=>
     unicode(2) "py"
     [u"private_class_value":u"for_string_rsort":private]=>
@@ -329,7 +329,7 @@ array(4) {
     unicode(2) "pt"
   }
   [3]=>
-  object(for_string_rsort)#5 (3) {
+  object(for_string_rsort)#%d (3) {
     [u"public_class_value"]=>
     unicode(3) "axx"
     [u"private_class_value":u"for_string_rsort":private]=>
@@ -343,7 +343,7 @@ array(4) {
 bool(true)
 array(4) {
   [0]=>
-  object(for_integer_rsort)#2 (3) {
+  object(for_integer_rsort)#%d (3) {
     [u"public_class_value"]=>
     int(66)
     [u"private_class_value":u"for_integer_rsort":private]=>
@@ -352,7 +352,7 @@ array(4) {
     int(4)
   }
   [1]=>
-  object(for_integer_rsort)#1 (3) {
+  object(for_integer_rsort)#%d (3) {
     [u"public_class_value"]=>
     int(11)
     [u"private_class_value":u"for_integer_rsort":private]=>
@@ -361,7 +361,7 @@ array(4) {
     int(30)
   }
   [2]=>
-  object(for_integer_rsort)#4 (3) {
+  object(for_integer_rsort)#%d (3) {
     [u"public_class_value"]=>
     float(0.001)
     [u"private_class_value":u"for_integer_rsort":private]=>
@@ -370,7 +370,7 @@ array(4) {
     float(0.1)
   }
   [3]=>
-  object(for_integer_rsort)#3 (3) {
+  object(for_integer_rsort)#%d (3) {
     [u"public_class_value"]=>
     int(-88)
     [u"private_class_value":u"for_integer_rsort":private]=>
@@ -382,7 +382,7 @@ array(4) {
 bool(true)
 array(4) {
   [0]=>
-  object(for_string_rsort)#7 (3) {
+  object(for_string_rsort)#%d (3) {
     [u"public_class_value"]=>
     unicode(1) "w"
     [u"private_class_value":u"for_string_rsort":private]=>
@@ -391,7 +391,7 @@ array(4) {
     unicode(1) "c"
   }
   [1]=>
-  object(for_string_rsort)#6 (3) {
+  object(for_string_rsort)#%d (3) {
     [u"public_class_value"]=>
     unicode(1) "t"
     [u"private_class_value":u"for_string_rsort":private]=>
@@ -400,7 +400,7 @@ array(4) {
     unicode(3) "abb"
   }
   [2]=>
-  object(for_string_rsort)#8 (3) {
+  object(for_string_rsort)#%d (3) {
     [u"public_class_value"]=>
     unicode(2) "py"
     [u"private_class_value":u"for_string_rsort":private]=>
@@ -409,7 +409,7 @@ array(4) {
     unicode(2) "pt"
   }
   [3]=>
-  object(for_string_rsort)#5 (3) {
+  object(for_string_rsort)#%d (3) {
     [u"public_class_value"]=>
     unicode(3) "axx"
     [u"private_class_value":u"for_string_rsort":private]=>
