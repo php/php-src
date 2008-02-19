@@ -5,6 +5,7 @@ oci_password_change() for persistent connections
 if (!extension_loaded('oci8')) die("skip no oci8 extension"); 
 require(dirname(__FILE__)."/details.inc");
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user"); 
+if ($test_drcp) die("skip password change not supported in DRCP Mode");
 ?>
 --FILE--
 <?php
@@ -31,8 +32,8 @@ var_dump($c1);
 ob_start();
 var_dump($c1);
 $r1 = ob_get_clean();
-preg_match("/resource\(([0-9])\) of.*/", $r1, $matches);
-$rn1 = $matches[1]; /* resource number */
+preg_match("/resource\(([0-9]*)\) of.*/", $r1, $matches);
+$rn1 = $matches[0]; /* resource number */
 
 oci_password_change($c1, "testuser", "testuserpwd", "testuserpwd2");
 
@@ -43,8 +44,8 @@ var_dump($c2);
 ob_start();
 var_dump($c2);
 $r2 = ob_get_clean();
-preg_match("/resource\(([0-9])\) of.*/", $r2, $matches);
-$rn2 = $matches[1]; /* resource number */
+preg_match("/resource\(([0-9]*)\) of.*/", $r2, $matches);
+$rn2 = $matches[0]; /* resource number */
 
 // Despite using the old password this connect should succeed and return the original resource
 $c3 = oci_pconnect("testuser", "testuserpwd", $dbase);  
@@ -53,8 +54,8 @@ var_dump($c3);
 ob_start();
 var_dump($c3);
 $r3 = ob_get_clean();
-preg_match("/resource\(([0-9])\) of.*/", $r3, $matches);
-$rn3 = $matches[1]; /* resource number */
+preg_match("/resource\(([0-9]*)\) of.*/", $r3, $matches);
+$rn3 = $matches[0]; /* resource number */
 
 // Connections should differ
 if ($rn1 == $rn2) {
