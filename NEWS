@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   which to group by data is specified. (Ilia)
 - Upgraded PCRE to version 7.6 (Nuno)
 
+- Fixed bug #44171 (Invalid FETCH_COLUMN index does not raise an error). (Ilia)
 - Fixed Bug #44159 (Crash: $pdo->setAttribute(PDO::STATEMENT_ATTR_CLASS, NULL)).
   (Felipe)
 - Fixed bug #44069 (Huge memory usage with concatenation using . instead of
