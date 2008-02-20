@@ -1,3 +1,37 @@
+2008-02-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      zend_objects_API.c:
+      everted (this part was committed by mistake)
+
+    * (PHP_5_2)
+      zend_vm_execute.h:
+      Reverted wrong commit (debug code)
+
+    * zend_builtin_functions.c
+      zend_builtin_functions.c
+      zend_builtin_functions.c
+      zend_vm_execute.h:
+      Fixed memory leaks
+
+    * zend_gc.c
+      zend_gc.c:
+      Fixed GC bug
+
+    * zend_constants.c
+      zend_constants.c:
+      Fixed memory leak
+
+    * (PHP_5_3)
+      zend_constants.c
+      zend_objects_API.c:
+      iFixed memory leak
+
+2008-02-19  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_API.c:
+      Fugbix typo.
+
 2008-02-18  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute.c
