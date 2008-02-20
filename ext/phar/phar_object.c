@@ -1974,7 +1974,7 @@ PHP_METHOD(Phar, isCompressed)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::delete(string file)
+/* {{{ proto bool Phar::delete(string entry)
  * Delete a file from within the Phar
  */
 PHP_METHOD(Phar, delete)
@@ -2558,7 +2558,7 @@ PHP_METHOD(Phar, copy)
 }
 /* }}} */
 
-/* {{{ proto int Phar::offsetExists(string offset)
+/* {{{ proto int Phar::offsetExists(string entry)
  * determines whether a file exists in the phar
  */
 PHP_METHOD(Phar, offsetExists)
@@ -2586,7 +2586,7 @@ PHP_METHOD(Phar, offsetExists)
 }
 /* }}} */
 
-/* {{{ proto int Phar::offsetGet(string offset)
+/* {{{ proto int Phar::offsetGet(string entry)
  * get a PharFileInfo object for a specific file
  */
 PHP_METHOD(Phar, offsetGet)
@@ -2613,7 +2613,7 @@ PHP_METHOD(Phar, offsetGet)
 }
 /* }}} */
 
-/* {{{ proto int Phar::offsetSet(string offset, string value)
+/* {{{ proto int Phar::offsetSet(string entry, string value)
  * set the contents of an internal file to those of an external file
  */
 PHP_METHOD(Phar, offsetSet)
@@ -2674,7 +2674,7 @@ PHP_METHOD(Phar, offsetSet)
 }
 /* }}} */
 
-/* {{{ proto int Phar::offsetUnset()
+/* {{{ proto int Phar::offsetUnset(string entry)
  * remove a file from a phar
  */
 PHP_METHOD(Phar, offsetUnset)
@@ -3391,8 +3391,20 @@ PHP_METHOD(PharFileInfo, setUncompressed)
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar___construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, fname)
+	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, flags)
+	ZEND_ARG_INFO(0, alias)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_createDS, 0, 0, 0)
+	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_INFO(0, webindex)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_loadPhar, 0, 0, 1)
+	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, alias)
 ZEND_END_ARG_INFO();
 
@@ -3400,6 +3412,17 @@ static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_mapPhar, 0, 0, 0)
 	ZEND_ARG_INFO(0, alias)
 	ZEND_ARG_INFO(0, offset)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_mount, 0, 0, 2)
+	ZEND_ARG_INFO(0, inphar)
+	ZEND_ARG_INFO(0, externalfile)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_mungServer, 0, 0, 1)
+	ZEND_ARG_INFO(0, munglist)
 ZEND_END_ARG_INFO();
 
 static
@@ -3411,29 +3434,30 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_webPhar, 0, 0, 0)
 	ZEND_ARG_INFO(0, rewrites)
 ZEND_END_ARG_INFO();
 
-static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_mungServer, 0, 0, 1)
-	ZEND_ARG_INFO(0, munglist)
-ZEND_END_ARG_INFO();
-
-static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_cDS, 0, 0, 0)
-	ZEND_ARG_INFO(0, index_php)
-ZEND_END_ARG_INFO();
-
-static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_setStub, 0, 0, 1)
-	ZEND_ARG_INFO(0, newstub)
-	ZEND_ARG_INFO(0, maxlen)
-ZEND_END_ARG_INFO();
-
-static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_loadPhar, 0, 0, 1)
-	ZEND_ARG_INFO(0, fname)
-	ZEND_ARG_INFO(0, alias)
-ZEND_END_ARG_INFO();
-
 #if HAVE_SPL
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_build, 0, 0, 1)
+	ZEND_ARG_INFO(0, iterator)
+	ZEND_ARG_INFO(0, base_directory)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_conv, 0, 0, 0)
+	ZEND_ARG_INFO(0, compression_type)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_copy, 0, 0, 2)
+	ZEND_ARG_INFO(0, newfile)
+	ZEND_ARG_INFO(0, oldfile)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_delete, 0, 0, 1)
+	ZEND_ARG_INFO(0, entry)
+ZEND_END_ARG_INFO();
+
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_offsetExists, 0, 0, 1)
 	ZEND_ARG_INFO(0, entry)
@@ -3446,46 +3470,42 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_offsetSet, 0, 0, 2)
 ZEND_END_ARG_INFO();
 
 static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_build, 0, 0, 1)
-	ZEND_ARG_INFO(0, iterator)
-	ZEND_ARG_INFO(0, base_directory)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_setAlias, 0, 0, 1)
+	ZEND_ARG_INFO(0, alias)
 ZEND_END_ARG_INFO();
 
 static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_copy, 0, 0, 2)
-	ZEND_ARG_INFO(0, newfile)
-	ZEND_ARG_INFO(0, oldfile)
-ZEND_END_ARG_INFO();
-
-static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_mount, 0, 0, 2)
-	ZEND_ARG_INFO(0, inphar)
-	ZEND_ARG_INFO(0, externalfile)
-ZEND_END_ARG_INFO();
-
-static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_conv, 0, 0, 0)
-	ZEND_ARG_INFO(0, compression)
-ZEND_END_ARG_INFO();
-#endif
-
-static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_entry_setMetadata, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_setMetadata, 0, 0, 1)
 	ZEND_ARG_INFO(0, metadata)
 ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_setSigAlgo, 0, 0, 1)
+	ZEND_ARG_INFO(0, algorithm)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_setStub, 0, 0, 1)
+	ZEND_ARG_INFO(0, newstub)
+	ZEND_ARG_INFO(0, maxlen)
+ZEND_END_ARG_INFO();
+
+#endif /* HAVE_SPL */
 
 zend_function_entry php_archive_methods[] = {
 #if !HAVE_SPL
 	PHP_ME(Phar, __construct,           arginfo_phar___construct,  ZEND_ACC_PRIVATE)
 #else
 	PHP_ME(Phar, __construct,           arginfo_phar___construct,  ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, startBuffering,        NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, stopBuffering,         NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, compressAllFilesGZ,    NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, buildFromIterator,     arginfo_phar_build,        ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, compressAllFilesBZIP2, NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, compressAllFilesGZ,    NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, convertToPhar,         arginfo_phar_conv,         ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, convertToTar,          arginfo_phar_conv,         ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, convertToZip,          NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, copy,                  arginfo_phar_copy,         ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, count,                 NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, delete,                arginfo_phar_mapPhar,      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, delete,                arginfo_phar_delete,       ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, delMetadata,           NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getAlias,              NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getMetadata,           NULL,                      ZEND_ACC_PUBLIC)
@@ -3493,72 +3513,74 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, getSignature,          NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getStub,               NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getVersion,            NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, isBuffering,           NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, hasMetadata,           NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, setAlias,              arginfo_phar_mapPhar,      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, setMetadata,           arginfo_entry_setMetadata, ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, setStub,               arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, setSignatureAlgorithm, arginfo_entry_setMetadata, ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, isBuffering,           NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, isCompressed,          NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, isPhar,                NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, isTar,                 NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, isZip,                 NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetExists,          arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetGet,             arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetSet,             arginfo_phar_offsetSet,    ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetUnset,           arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, setAlias,              arginfo_phar_setAlias,     ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, setMetadata,           arginfo_phar_setMetadata,  ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, setSignatureAlgorithm, arginfo_phar_setSigAlgo ,  ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, setStub,               arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, startBuffering,        NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, stopBuffering,         NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, uncompressAllFiles,    NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, buildFromIterator,     arginfo_phar_build,        ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, isTar,                 NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, isZip,                 NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, isPhar,                NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, convertToTar,          arginfo_phar_conv,         ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, convertToZip,          NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, convertToPhar,         arginfo_phar_conv,         ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, isCompressed,          NULL,                      ZEND_ACC_PUBLIC)
 #endif
 	/* static member functions */
 	PHP_ME(Phar, apiVersion,            NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, canCompress,           NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, canWrite,              NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, createDefaultStub,     arginfo_phar_createDS,     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, getExtractList,        NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, getSupportedCompression,NULL,                     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, getSupportedSignatures,NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, interceptFileFuncs,    NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, isValidPharFilename,   NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, loadPhar,              arginfo_phar_loadPhar,     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, mapPhar,               arginfo_phar_mapPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, webPhar,               arginfo_phar_webPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, mount,                 arginfo_phar_mount,        ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, mungServer,            arginfo_phar_mungServer,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, interceptFileFuncs,    NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, getExtractList,        NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, getSupportedSignatures,NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, getSupportedCompression,NULL,                     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, isValidPharFilename,   NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, createDefaultStub,     arginfo_phar_cDS,          ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, webPhar,               arginfo_phar_webPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	{NULL, NULL, NULL}
 };
 
 #if HAVE_SPL
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_entry___construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, fname)
-	ZEND_ARG_INFO(0, flags)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_entry_chmod, 0, 0, 1)
+	ZEND_ARG_INFO(0, perms)
 ZEND_END_ARG_INFO();
 
 zend_function_entry php_entry_methods[] = {
 	PHP_ME(PharFileInfo, __construct,        arginfo_entry___construct,  0)
 	PHP_ME(PharFileInfo, __destruct,         NULL,                       0)
+	PHP_ME(PharFileInfo, chmod,              arginfo_entry_chmod,        0)
+	PHP_ME(PharFileInfo, delMetadata,        NULL,                       0)
 	PHP_ME(PharFileInfo, getCompressedSize,  NULL,                       0)
-	PHP_ME(PharFileInfo, isCompressed,       NULL,                       0)
-	PHP_ME(PharFileInfo, isCompressedGZ,     NULL,                       0)
-	PHP_ME(PharFileInfo, isCompressedBZIP2,  NULL,                       0)
-	PHP_ME(PharFileInfo, setUncompressed,    NULL,                       0)
-	PHP_ME(PharFileInfo, setCompressedGZ,    NULL,                       0)
-	PHP_ME(PharFileInfo, setCompressedBZIP2, NULL,                       0)
 	PHP_ME(PharFileInfo, getCRC32,           NULL,                       0)
-	PHP_ME(PharFileInfo, isCRCChecked,       NULL,                       0)
+	PHP_ME(PharFileInfo, getMetadata,        NULL,                       0)
 	PHP_ME(PharFileInfo, getPharFlags,       NULL,                       0)
 	PHP_ME(PharFileInfo, hasMetadata,        NULL,                       0)
-	PHP_ME(PharFileInfo, getMetadata,        NULL,                       0)
-	PHP_ME(PharFileInfo, setMetadata,        arginfo_entry_setMetadata,  0)
-	PHP_ME(PharFileInfo, delMetadata,        NULL,                       0)
-	PHP_ME(PharFileInfo, chmod,              arginfo_entry_setMetadata,  0)
+	PHP_ME(PharFileInfo, isCompressed,       NULL,                       0)
+	PHP_ME(PharFileInfo, isCompressedBZIP2,  NULL,                       0)
+	PHP_ME(PharFileInfo, isCompressedGZ,     NULL,                       0)
+	PHP_ME(PharFileInfo, isCRCChecked,       NULL,                       0)
+	PHP_ME(PharFileInfo, setCompressedBZIP2, NULL,                       0)
+	PHP_ME(PharFileInfo, setCompressedGZ,    NULL,                       0)
+	PHP_ME(PharFileInfo, setMetadata,        arginfo_phar_setMetadata,   0)
+	PHP_ME(PharFileInfo, setUncompressed,    NULL,                       0)
 	{NULL, NULL, NULL}
 };
-#endif
+#endif /* HAVE_SPL */
 
 zend_function_entry phar_exception_methods[] = {
 	{NULL, NULL, NULL}
@@ -3595,16 +3617,16 @@ void phar_object_init(TSRMLS_D) /* {{{ */
 	phar_ce_archive->ce_flags |= ZEND_ACC_FINAL_CLASS;
 #endif
 
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "COMPRESSED", PHAR_ENT_COMPRESSION_MASK)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "GZ", PHAR_ENT_COMPRESSED_GZ)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "BZ2", PHAR_ENT_COMPRESSED_BZ2)
+	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "GZ", PHAR_ENT_COMPRESSED_GZ)
+	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "COMPRESSED", PHAR_ENT_COMPRESSION_MASK)
+	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "PHP", PHAR_MIME_PHP)
+	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "PHPS", PHAR_MIME_PHPS)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "MD5", PHAR_SIG_MD5)
+	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "PGP", PHAR_SIG_PGP)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA1", PHAR_SIG_SHA1)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA256", PHAR_SIG_SHA256)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA512", PHAR_SIG_SHA512)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "PGP", PHAR_SIG_PGP)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "PHP", PHAR_MIME_PHP)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "PHPS", PHAR_MIME_PHPS)
 }
 /* }}} */
 
