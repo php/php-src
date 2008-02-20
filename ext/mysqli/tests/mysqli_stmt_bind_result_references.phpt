@@ -25,7 +25,7 @@ require_once('skipifconnectfailure.inc');
 	if (true !== ($tmp = mysqli_stmt_bind_result($stmt, $id, $label)))
 		printf("[002] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt))
+	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt) || mysqli_stmt_fetch($stmt))
 		printf("[003] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	var_dump($id);
@@ -42,7 +42,7 @@ require_once('skipifconnectfailure.inc');
 	if (true !== ($tmp = mysqli_stmt_bind_result($stmt, $id_ref, $label_ref)))
 		printf("[004] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt))
+	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt) || mysqli_stmt_fetch($stmt))
 		printf("[005] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 	var_dump($id_ref);
 	var_dump($id);
@@ -62,7 +62,7 @@ require_once('skipifconnectfailure.inc');
 	if (true !== ($tmp = mysqli_stmt_bind_result($stmt, $id_ref_ref, $label_ref_ref)))
 		printf("[006] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt))
+	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt) || mysqli_stmt_fetch($stmt))
 		printf("[007] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 	var_dump($id_ref_ref);
 	var_dump($id_ref);
@@ -81,7 +81,7 @@ require_once('skipifconnectfailure.inc');
 	if (true !== ($tmp = mysqli_stmt_bind_result($stmt, $id_ref, $label_ref)))
 		printf("[008] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt))
+	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt) || mysqli_stmt_fetch($stmt))
 		printf("[009] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 	var_dump($id_ref);
 	var_dump($id);
@@ -95,7 +95,7 @@ require_once('skipifconnectfailure.inc');
 	if (true !== ($tmp = mysqli_stmt_bind_result($stmt, $id, $label)))
 		printf("[010] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt))
+	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt) || mysqli_stmt_fetch($stmt))
 		printf("[011] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	var_dump($id);
@@ -110,7 +110,7 @@ require_once('skipifconnectfailure.inc');
 	if (true !== ($tmp = mysqli_stmt_bind_result($stmt, $obj->id, $obj->label)))
 		printf("[012] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt))
+	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt) || mysqli_stmt_fetch($stmt))
 		printf("[013] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	var_dump($obj->id);
@@ -128,7 +128,7 @@ require_once('skipifconnectfailure.inc');
 	if (true !== ($tmp = mysqli_stmt_bind_result($stmt, $id, $label)))
 		printf("[012] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt))
+	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt) || mysqli_stmt_fetch($stmt))
 		printf("[013] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	var_dump($obj->id);
@@ -148,7 +148,7 @@ require_once('skipifconnectfailure.inc');
 	$label = &$obj->id;
 	$id = null;
 
-	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt))
+	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt) || mysqli_stmt_fetch($stmt))
 		printf("[013] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	var_dump($obj->id);
@@ -169,7 +169,7 @@ require_once('skipifconnectfailure.inc');
 	$id_ref = 1;
 	$label_ref = 1;
 
-	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt))
+	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt) || mysqli_stmt_fetch($stmt))
 		printf("[015] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 	var_dump($id_ref);
 	var_dump($id);
@@ -184,7 +184,7 @@ require_once('skipifconnectfailure.inc');
 
 	if (true !== ($tmp = mysqli_stmt_bind_result($stmt, $id, $label_a)))
 		printf("[016] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
-	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt))
+	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt) || mysqli_stmt_fetch($stmt))
 		printf("[017] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	var_dump($id);
@@ -208,7 +208,7 @@ require_once('skipifconnectfailure.inc');
 
 	if (true !== ($tmp = mysqli_stmt_bind_result($stmt, $id, $label_ref)))
 		printf("[018] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
-	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt))
+	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt) || mysqli_stmt_fetch($stmt))
 		printf("[019] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	var_dump($id);
@@ -231,7 +231,7 @@ require_once('skipifconnectfailure.inc');
 
 	if (true !== ($tmp = mysqli_stmt_bind_result($stmt, $id, $label)))
 		printf("[020] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
-	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt))
+	if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_fetch($stmt) || mysqli_stmt_fetch($stmt))
 		printf("[021] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 	var_dump($id);
 	var_dump($label);
