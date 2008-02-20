@@ -564,11 +564,12 @@ static int ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	for (i=0; i<EX(op_array)->last_brk_cont; i++) {
-		if (EX(op_array)->brk_cont_array[i].start > op_num) {
+		if (EX(op_array)->brk_cont_array[i].start < 0) {
+			continue;
+		} else if (EX(op_array)->brk_cont_array[i].start > op_num) {
 			/* further blocks will not be relevant... */
 			break;
-		}
-		if (op_num < EX(op_array)->brk_cont_array[i].brk) {
+		} else if (op_num < EX(op_array)->brk_cont_array[i].brk) {
 			if (!catched ||
 			    catch_op_num >= EX(op_array)->brk_cont_array[i].brk) {
 				zend_op *brk_opline = &EX(op_array)->opcodes[EX(op_array)->brk_cont_array[i].brk];

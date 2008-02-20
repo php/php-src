@@ -752,8 +752,14 @@ static inline void do_begin_loop(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-static inline void do_end_loop(int cont_addr TSRMLS_DC) /* {{{ */
+static inline void do_end_loop(int cont_addr, int has_loop_var TSRMLS_DC) /* {{{ */
 {
+	if (!has_loop_var) {
+		/* The start fileld is used to free temporary variables in case of exceptions.
+		 * We won't try to free something of we don't have loop variable.
+		 */
+		CG(active_op_array)->brk_cont_array[CG(active_op_array)->current_brk_cont].start = -1;
+	}
 	CG(active_op_array)->brk_cont_array[CG(active_op_array)->current_brk_cont].cont = cont_addr;
 	CG(active_op_array)->brk_cont_array[CG(active_op_array)->current_brk_cont].brk = get_next_op_number(CG(active_op_array));
 	CG(active_op_array)->current_brk_cont = CG(active_op_array)->brk_cont_array[CG(active_op_array)->current_brk_cont].parent;
@@ -788,7 +794,7 @@ void zend_do_while_end(znode *while_token, znode *close_bracket_token TSRMLS_DC)
 	/* update while's conditional jmp */
 	CG(active_op_array)->opcodes[close_bracket_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));
 
-	do_end_loop(while_token->u.opline_num TSRMLS_CC);
+	do_end_loop(while_token->u.opline_num, 0 TSRMLS_CC);
 
 	DEC_BPC(CG(active_op_array));
 }
@@ -832,7 +838,7 @@ void zend_do_for_end(znode *second_semicolon_token TSRMLS_DC) /* {{{ */
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
 
-	do_end_loop(second_semicolon_token->u.opline_num+1 TSRMLS_CC);
+	do_end_loop(second_semicolon_token->u.opline_num+1, 0 TSRMLS_CC);
 
 	DEC_BPC(CG(active_op_array));
 }
@@ -3151,7 +3157,7 @@ void zend_do_do_while_end(znode *do_token, znode *expr_open_bracket, znode *expr
 	opline->op2.u.opline_num = do_token->u.opline_num;
 	SET_UNUSED(opline->op2);
 
-	do_end_loop(expr_open_bracket->u.opline_num TSRMLS_CC);
+	do_end_loop(expr_open_bracket->u.opline_num, 0 TSRMLS_CC);
 
 	DEC_BPC(CG(active_op_array));
 }
@@ -4661,7 +4667,7 @@ void zend_do_foreach_end(znode *foreach_token, znode *as_token TSRMLS_DC) /* {{{
 	CG(active_op_array)->opcodes[foreach_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array)); /* FE_RESET */
 	CG(active_op_array)->opcodes[as_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array)); /* FE_FETCH */
 
-	do_end_loop(as_token->u.opline_num TSRMLS_CC);
+	do_end_loop(as_token->u.opline_num, 1 TSRMLS_CC);
 
 	zend_stack_top(&CG(foreach_copy_stack), (void **) &container_ptr);
 	generate_free_foreach_copy(container_ptr TSRMLS_CC);
