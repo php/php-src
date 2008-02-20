@@ -110,6 +110,7 @@ PHP_RINIT_FUNCTION(syslog) /* {{{ */
 	} else {
 		BG(syslog_started)=0;
 	}
+	BG(syslog_device) = NULL;
 	return SUCCESS;
 }
 /* }}} */
@@ -127,6 +128,7 @@ PHP_MSHUTDOWN_FUNCTION(syslog) /* {{{ */
 {
 	if (BG(syslog_device)) {
 		free(BG(syslog_device));
+		BG(syslog_device) = NULL;
 	}
 	return SUCCESS;
 }
