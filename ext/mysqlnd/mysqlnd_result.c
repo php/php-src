@@ -336,6 +336,12 @@ MYSQLND_METHOD(mysqlnd_res, free_result_buffers)(MYSQLND_RES *result TSRMLS_DC)
 		result->lengths = NULL;
 	}
 
+	if (result->row_packet) {
+		DBG_INF("Freeing packet");
+		PACKET_FREE(result->row_packet);
+		result->row_packet = NULL;
+	}
+
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -348,12 +354,6 @@ void mysqlnd_internal_free_result_contents(MYSQLND_RES *result TSRMLS_DC)
 	DBG_ENTER("mysqlnd_internal_free_result_contents");
 
 	result->m.free_result_buffers(result TSRMLS_CC);
-
-	if (result->row_packet) {
-		DBG_INF("Freeing packet");
-		PACKET_FREE(result->row_packet);
-		result->row_packet = NULL;
-	}
 
 	if (result->meta) {
 		result->meta->m->free_metadata(result->meta, FALSE TSRMLS_CC);

@@ -1672,11 +1672,13 @@ end:
 static
 void php_mysqlnd_rowp_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 {
+	DBG_ENTER("php_mysqlnd_rowp_free_mem");
 	php_mysql_packet_row *p= (php_mysql_packet_row *) _packet;
 	if (p->row_buffer) {
 		p->row_buffer->free_chunk(p->row_buffer, TRUE TSRMLS_CC);
 		p->row_buffer = NULL;
 	}
+	DBG_INF_FMT("alloca=%d persistent=%d", (int)alloca, (int)p->header.persistent);
 	/*
 	  Don't free packet->fields :
 	  - normal queries -> store_result() | fetch_row_unbuffered() will transfer
@@ -1687,6 +1689,7 @@ void php_mysqlnd_rowp_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 	if (!alloca) {
 		mnd_pefree(p, p->header.persistent);
 	}
+	DBG_VOID_RETURN;
 }
 /* }}} */
 
