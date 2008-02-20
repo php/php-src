@@ -24,7 +24,7 @@ var_dump($phar->getStub());
 ===DONE===
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . '/tar_004.phar');
+@unlink(dirname(__FILE__) . '/tar_004.phar.tar');
 ?>
 --EXPECTF--
 string(0) ""

@@ -22,7 +22,7 @@ require $pname;
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/phar_oo_test.phar.php');
+unlink(dirname(__FILE__) . '/files/phar_oo_test.phar.php');
 __halt_compiler();
 ?>
 --EXPECTF--
