@@ -13,7 +13,7 @@ $file = "<?php __HALT_COMPILER(); ?>";
 
 $files = array();
 $files['a'] = array('cont'=>'a', 'ulen'=>2, 'clen'=>2);
-include 'phar_test.inc';
+include 'files/phar_test.inc';
 
 echo file_get_contents($pname.'/a');
 ?>

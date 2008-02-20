@@ -7,7 +7,7 @@ SCRIPT_NAME=/frontcontroller19.php
 REQUEST_URI=/frontcontroller19.php/
 PATH_INFO=/
 --FILE_EXTERNAL--
-frontcontroller10.phar
+files/frontcontroller10.phar
 --EXPECTF--
 Fatal error: Uncaught exception 'UnexpectedValueException' with message 'Too many values passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME' in %sfrontcontroller19.php:2
 Stack trace:

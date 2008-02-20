@@ -6,6 +6,6 @@ Phar: default web stub, no phar extension
 SCRIPT_NAME=/nophar.phar
 REQUEST_URI=/nophar.phar
 --FILE_EXTERNAL--
-nophar.phar
+files/nophar.phar
 --EXPECT--
 web

@@ -10,7 +10,7 @@ phar.require_hash=0
 
 $pharconfig = 2;
 
-require_once 'phar_oo_test.inc';
+require_once 'files/phar_oo_test.inc';
 
 $phar = new Phar($fname);
 $phar->setInfoClass('SplFileObject');

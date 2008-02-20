@@ -20,7 +20,7 @@ $files['a'] = 'a';
 $files['b'] = 'b';
 $files['c'] = 'c';
 
-include 'phar_test.inc';
+include 'files/phar_test.inc';
 
 $phar = new Phar($fname);
 $phar->convertToTar(Phar::GZ);

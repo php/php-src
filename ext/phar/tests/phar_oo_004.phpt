@@ -8,7 +8,7 @@ phar.require_hash=0
 --FILE--
 <?php
 
-require_once 'phar_oo_test.inc';
+require_once 'files/phar_oo_test.inc';
 
 $it = new DirectoryIterator('phar://'.$fname);
 

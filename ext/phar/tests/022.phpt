@@ -15,7 +15,7 @@ __HALT_COMPILER(); ?>";
 $files = array();
 $files['a'] = 'abcdefg';
 
-include 'phar_test.inc';
+include 'files/phar_test.inc';
 
 include $fname;
 

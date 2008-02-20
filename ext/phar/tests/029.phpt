@@ -19,7 +19,7 @@ $files['b/c.php'] = '<?php echo "This is b/c\n"; include "'.$pname.'/b/d.php"; ?
 $files['b/d.php'] = '<?php echo "This is b/d\n"; include "'.$pname.'/e.php"; ?>';    
 $files['e.php']   = '<?php echo "This is e\n"; ?>';                                  
 
-include 'phar_test.inc';
+include 'files/phar_test.inc';
 
 file_put_contents($fname2, $file);
 

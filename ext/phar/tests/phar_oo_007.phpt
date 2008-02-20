@@ -8,7 +8,7 @@ phar.require_hash=0
 --FILE--
 <?php
 
-require_once 'phar_oo_test.inc';
+require_once 'files/phar_oo_test.inc';
 
 class MyFile extends SplFileObject
 {
@@ -59,11 +59,11 @@ var_dump($f->eof());
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/phar_oo_test.phar.php');
+unlink(dirname(__FILE__) . '/files/phar_oo_test.phar.php');
 __halt_compiler();
 ?>
 --EXPECTF--
-MyFile::__construct(phar://*/phar_oo_test.phar.php/a.php)
+MyFile::__construct(phar://*/files/phar_oo_test.phar.php/a.php)
 int(1141214400)
 int(1141214400)
 int(1141214400)
@@ -79,7 +79,7 @@ int(0)
 string(32) "<?php echo "This is a.php\n"; ?>"
 int(32)
 ===AGAIN===
-MyFile::__construct(phar://*/phar_oo_test.phar.php/a.php)
+MyFile::__construct(phar://*/files/phar_oo_test.phar.php/a.php)
 int(0)
 bool(false)
 string(32) "<?php echo "This is a.php\n"; ?>"

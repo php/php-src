@@ -6,7 +6,7 @@ Phar front controller index.php relocate (no /)
 SCRIPT_NAME=/frontcontroller4.php
 REQUEST_URI=/frontcontroller4.php
 --FILE_EXTERNAL--
-frontcontroller.phar
+files/frontcontroller.phar
 --EXPECTHEADERS--
 Status: 301 Moved Permanently
 Location: /frontcontroller4.php/index.php

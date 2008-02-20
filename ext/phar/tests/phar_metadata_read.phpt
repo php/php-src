@@ -17,7 +17,7 @@ $files['a'] = array('cont' => 'a');
 $files['b'] = array('cont' => 'b');
 $files['c'] = array('cont' => 'c', 'meta' => array('hi', 'there'));
 $files['d'] = array('cont' => 'd', 'meta' => array('hi'=>'there','foo'=>'bar'));
-include 'phar_test.inc';
+include 'files/phar_test.inc';
 
 foreach($files as $name => $cont) {
 	var_dump(file_get_contents($pname.'/'.$name));

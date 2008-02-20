@@ -15,7 +15,7 @@ $file = $stub;
 $files = array();
 $files['a'] = 'a';
 
-include 'phar_test.inc';
+include 'files/phar_test.inc';
 
 $phar = new Phar($fname);
 var_dump($stub);

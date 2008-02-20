@@ -14,7 +14,7 @@ __HALT_COMPILER(); ?>";
 
 $files = array();
 $files['a'] = 'abc';
-include 'phar_test.inc';
+include 'files/phar_test.inc';
 
 include $fname;
 $dir = opendir('phar://hio');

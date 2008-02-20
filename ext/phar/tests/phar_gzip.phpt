@@ -28,7 +28,7 @@ $files['internal/dir/'] = '';
 $files['dir/'] = '';
 $gzip = true;
 
-include 'phar_test.inc';
+include 'files/phar_test.inc';
 
 include $fname;
 

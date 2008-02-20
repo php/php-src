@@ -16,7 +16,7 @@ __HALT_COMPILER(); ?>";
 
 $files = array();
 $files['a'] = array('cont'=>'a','ulen'=>1,'clen'=>2);;
-include 'phar_test.inc';
+include 'files/phar_test.inc';
 try {
 include $fname;
 echo file_get_contents('phar://hio/a');

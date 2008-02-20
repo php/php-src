@@ -18,7 +18,7 @@ $files['b/a'] = 'b';
 $files['b/c/d'] = 'c';
 $files['bad/c'] = 'd';
 
-include 'phar_test.inc';
+include 'files/phar_test.inc';
 
 include $fname;
 

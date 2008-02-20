@@ -18,7 +18,7 @@ $files['a'] = 'a';
 $files['b/a'] = 'b';
 $files['b/c/d'] = 'c';
 $files['bad/c'] = 'd';
-include 'phar_test.inc';
+include 'files/phar_test.inc';
 include $fname;
 
 var_dump(stat('phar://hio/a'), stat('phar://hio/b'));

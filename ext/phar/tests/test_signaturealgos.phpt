@@ -8,16 +8,16 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$a = new Phar('sha1.phar');
+$a = new Phar('files/sha1.phar');
 $r = $a->getSignature();
 var_dump($r['hash_type']);
-$a = new Phar('sha512.phar');
+$a = new Phar('files/sha512.phar');
 $r = $a->getSignature();
 var_dump($r['hash_type']);
-$a = new Phar('sha256.phar');
+$a = new Phar('files/sha256.phar');
 $r = $a->getSignature();
 var_dump($r['hash_type']);
-$a = new Phar('md5.phar');
+$a = new Phar('files/md5.phar');
 $r = $a->getSignature();
 var_dump($r['hash_type']);
 ?>
