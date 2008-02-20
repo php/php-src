@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 - Upgraded PCRE to version 7.6 (Nuno)
 
 
+- Fixed Bug #44191 (preg_grep messes up array index). (Felipe)
 - Fixed bug #44184 (Double free of loop-variable on exception). (Dmitry)
 - Fixed bug #44171 (Invalid FETCH_COLUMN index does not raise an error). (Ilia)
 - Fixed Bug #44159 (Crash: $pdo->setAttribute(PDO::STATEMENT_ATTR_CLASS, NULL)).
