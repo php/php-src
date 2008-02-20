@@ -18,7 +18,7 @@ $files['a'] = array('cont'=>'a','comp'=> pack('H*', 'cbc80400'),'flags'=>0x00001
 $files['b'] = $files['a'];
 $files['c'] = array('cont'=>'*');
 $files['d'] = $files['a'];
-include 'phar_test.inc';
+include 'files/phar_test.inc';
 
 var_dump(file_get_contents($pname . '/a'));
 var_dump(file_get_contents($pname . '/b'));

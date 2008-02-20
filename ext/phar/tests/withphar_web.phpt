@@ -7,7 +7,7 @@ SCRIPT_NAME=/withphar_web.php
 REQUEST_URI=/withphar_web.php/web.php
 PATH_INFO=/web.php
 --FILE_EXTERNAL--
-nophar.phar
+files/nophar.phar
 --EXPECTHEADERS--
 Content-type: text/html
 --EXPECT--

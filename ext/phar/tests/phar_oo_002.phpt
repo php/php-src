@@ -9,7 +9,7 @@ phar.require_hash=0
 --FILE--
 <?php
 
-require_once 'phar_oo_test.inc';
+require_once 'files/phar_oo_test.inc';
 
 $phar = new Phar($fname);
 $phar->setInfoClass('SplFileInfo');
@@ -47,11 +47,11 @@ foreach(new RecursiveIteratorIterator($phar) as $name => $ent)
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/phar_oo_test.phar.php');
+unlink(dirname(__FILE__) . '/files/phar_oo_test.phar.php');
 __halt_compiler();
 ?>
 --EXPECTF--
-string(36) "phar://*/phar_oo_test.phar.php%ca.php"
+string(42) "phar://*/files/phar_oo_test.phar.php%ca.php"
 string(5) "a.php"
 int(32)
 string(4) "file"
@@ -64,7 +64,7 @@ bool(false)
 int(1141214400)
 int(1141214400)
 int(1141214400)
-string(32) "phar://*/phar_oo_test.phar.php%cb"
+string(38) "phar://*/files/phar_oo_test.phar.php%cb"
 string(1) "b"
 int(0)
 string(3) "dir"
@@ -77,7 +77,7 @@ bool(false)
 int(1141214400)
 int(1141214400)
 int(1141214400)
-string(36) "phar://*/phar_oo_test.phar.php%cb.php"
+string(42) "phar://*/files/phar_oo_test.phar.php%cb.php"
 string(5) "b.php"
 int(32)
 string(4) "file"
@@ -90,7 +90,7 @@ bool(false)
 int(1141214400)
 int(1141214400)
 int(1141214400)
-string(36) "phar://*/phar_oo_test.phar.php%ce.php"
+string(42) "phar://*/files/phar_oo_test.phar.php%ce.php"
 string(5) "e.php"
 int(32)
 string(4) "file"
@@ -104,31 +104,31 @@ int(1141214400)
 int(1141214400)
 int(1141214400)
 ==RECURSIVE==
-string(36) "phar://*/phar_oo_test.phar.php%ca.php"
+string(42) "phar://*/files/phar_oo_test.phar.php%ca.php"
 string(5) "a.php"
 int(32)
 bool(false)
 NULL
 int(0)
-string(38) "phar://*/phar_oo_test.phar.php%cb%cc.php"
+string(44) "phar://*/files/phar_oo_test.phar.php%cb%cc.php"
 string(5) "c.php"
 int(34)
 bool(false)
 NULL
 int(0)
-string(38) "phar://*/phar_oo_test.phar.php%cb%cd.php"
+string(44) "phar://*/files/phar_oo_test.phar.php%cb%cd.php"
 string(5) "d.php"
 int(34)
 bool(false)
 NULL
 int(0)
-string(36) "phar://*/phar_oo_test.phar.php%cb.php"
+string(42) "phar://*/files/phar_oo_test.phar.php%cb.php"
 string(5) "b.php"
 int(32)
 bool(false)
 NULL
 int(0)
-string(36) "phar://*/phar_oo_test.phar.php%ce.php"
+string(42) "phar://*/files/phar_oo_test.phar.php%ce.php"
 string(5) "e.php"
 int(32)
 bool(false)

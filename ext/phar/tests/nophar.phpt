@@ -4,7 +4,7 @@ Phar: phar run without pecl/phar with default stub
 <?php if (extension_loaded("phar")) die("skip"); ?>
 --FILE--
 <?php
-include dirname(__FILE__) . '/nophar.phar';
+include dirname(__FILE__) . '/files/nophar.phar';
 ?>
 ===DONE===
 --EXPECT--

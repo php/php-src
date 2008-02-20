@@ -7,7 +7,7 @@ SCRIPT_NAME=/frontcontroller10.php
 REQUEST_URI=/frontcontroller10.php/hi
 PATH_INFO=/hi
 --FILE_EXTERNAL--
-frontcontroller4.phar
+files/frontcontroller4.phar
 --EXPECTHEADERS--
 Content-type: text/html
 Status: 403 Access Denied

@@ -16,7 +16,7 @@ $files['a'] = 'a';
 $files['b'] = 'b';
 $files['c'] = 'c';
 
-include 'phar_test.inc';
+include 'files/phar_test.inc';
 
 $file = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
 $fp = fopen($fname, 'rb');

@@ -15,7 +15,7 @@ $files['a'] = '<?php echo "This is a\n"; ?>';
 $files['b'] = '<?php echo "This is b\n"; ?>';
 $files['b/b'] = '<?php echo "This is b/b\n"; ?>';
 
-include 'phar_test.inc';
+include 'files/phar_test.inc';
 
 include $pname . '/a';
 include $pname . '/b';

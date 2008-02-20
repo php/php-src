@@ -15,7 +15,7 @@ $files['a.php'] = '<?php echo "This is a\n"; ?>';
 $files['b.php'] = '<?php echo "This is b\n"; ?>';
 $files['b/c.php'] = '<?php echo "This is b/c\n"; ?>';
 
-include 'phar_test.inc';
+include 'files/phar_test.inc';
 
 var_dump(file_get_contents($pname . '/a.php'));
 var_dump(file_get_contents($pname . '/b.php'));

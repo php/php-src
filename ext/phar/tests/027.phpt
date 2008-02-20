@@ -17,7 +17,7 @@ $files['b/c.php'] = '<?php echo "This is b/c\n"; require \''.$pname.'/b/d.php\';
 $files['b/d.php'] = '<?php echo "This is b/d\n"; require \''.$pname.'/e.php\'; ?>';    
 $files['e.php']   = '<?php echo "This is e\n"; ?>';                                  
 
-include 'phar_test.inc';
+include 'files/phar_test.inc';
 
 function dump($phar, $base)
 {

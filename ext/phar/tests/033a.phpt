@@ -13,7 +13,7 @@ $file = '<?php include "' . $pname . '/a.php"; __HALT_COMPILER(); ?>';
 
 $files = array();
 $files['a.php']   = '<?php echo "This is a\n"; include "'.$pname.'/b.php"; ?>';
-include 'phar_test.inc';
+include 'files/phar_test.inc';
 try {
 	$a = new Phar($fname);
 	var_dump($a['a.php']->isExecutable());

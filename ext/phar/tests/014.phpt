@@ -13,7 +13,7 @@ $file = "<?php __HALT_COMPILER(); ?>";
 
 $files = array();
 $files['a'] = array('cont'=>'a', 'crc32'=>crc32('aX'));
-include 'phar_test.inc';
+include 'files/phar_test.inc';
 
 echo file_get_contents($pname.'/a');
 ?>

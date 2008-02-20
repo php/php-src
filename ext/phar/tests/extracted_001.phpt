@@ -14,9 +14,9 @@ var_dump(Phar::getExtractList());
 
 $pname = 'phar://phar_test.phar';
 
-var_dump(file_get_contents($pname . '/extracted.inc'));
+var_dump(file_get_contents($pname . '/files/extracted.inc'));
 
-include $pname . '/extracted.inc';
+include $pname . '/files/extracted.inc';
 
 ?>
 ===DONE===

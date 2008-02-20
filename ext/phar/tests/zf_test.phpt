@@ -8,7 +8,7 @@ phar.readonly=0
 <?php
 
 $file = "zfapp";
-$tgz_file = dirname(__FILE__) . "/$file.tgz";
+$tgz_file = dirname(__FILE__) . "/files/$file.tgz";
 chdir(dirname(__FILE__));
 
 $phar_file = basename(__FILE__, '.php') . '.phar';

@@ -9,7 +9,7 @@ phar.require_hash=0
 
 $pharconfig = 3;
 
-require_once 'phar_oo_test.inc';
+require_once 'files/phar_oo_test.inc';
 
 Phar::loadPhar($fname);
 
