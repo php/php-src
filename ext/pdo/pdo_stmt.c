@@ -936,6 +936,8 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 					} else {
 						break;
 					}
+				} else {
+					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Invalid column index" TSRMLS_CC);
 				}
 				return 0;
 
