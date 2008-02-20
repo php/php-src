@@ -1,3 +1,274 @@
+2008-02-19  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_3)
+      ext/oci8/package2.xml:
+      Update for PECL release
+
+2008-02-19  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/tests/bug34810.phpt
+      ext/mysqli/tests/bug34810.phpt:
+      Fix a failing test
+
+2008-02-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_objects_API.c:
+      everted (this part was committed by mistake)
+
+2008-02-19  Josie Messa  <josmessa@uk.ibm.com>
+
+    * ext/standard/tests/array/each_basic.phpt
+      ext/standard/tests/array/each_basic.phpt
+      ext/standard/tests/array/each_error.phpt
+      ext/standard/tests/array/each_error.phpt
+      ext/standard/tests/array/each_variation1.phpt
+      ext/standard/tests/array/each_variation1.phpt
+      ext/standard/tests/array/each_variation2.phpt
+      ext/standard/tests/array/each_variation2.phpt
+      ext/standard/tests/array/each_variation3.phpt
+      ext/standard/tests/array/each_variation3.phpt
+      ext/standard/tests/array/each_variation4.phpt
+      ext/standard/tests/array/each_variation4.phpt
+      ext/standard/tests/array/each_variation5.phpt
+      ext/standard/tests/array/each_variation5.phpt
+      ext/standard/tests/array/each_variation6.phpt
+      ext/standard/tests/array/each_variation6.phpt:
+      - New tests for each() function
+
+    * ext/standard/tests/array/each_basic.phpt
+      ext/standard/tests/array/each_basic.phpt
+      ext/standard/tests/array/each_basic.phpt
+      ext/standard/tests/array/each_error.phpt
+      ext/standard/tests/array/each_error.phpt
+      ext/standard/tests/array/each_error.phpt
+      ext/standard/tests/array/each_variation1.phpt
+      ext/standard/tests/array/each_variation1.phpt
+      ext/standard/tests/array/each_variation1.phpt
+      ext/standard/tests/array/each_variation2.phpt
+      ext/standard/tests/array/each_variation2.phpt
+      ext/standard/tests/array/each_variation2.phpt
+      ext/standard/tests/array/each_variation3.phpt
+      ext/standard/tests/array/each_variation3.phpt
+      ext/standard/tests/array/each_variation3.phpt
+      ext/standard/tests/array/each_variation4.phpt
+      ext/standard/tests/array/each_variation4.phpt
+      ext/standard/tests/array/each_variation4.phpt
+      ext/standard/tests/array/each_variation5.phpt
+      ext/standard/tests/array/each_variation5.phpt
+      ext/standard/tests/array/each_variation5.phpt
+      ext/standard/tests/array/each_variation6.phpt
+      ext/standard/tests/array/each_variation6.phpt
+      ext/standard/tests/array/each_variation6.phpt:
+        1.1.4;
+      file each_basic.phpt was initially added on branch PHP_5_2.
+
+2008-02-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_vm_execute.h:
+      Reverted wrong commit (debug code)
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_vm_execute.h:
+      Fixed memory leaks
+
+    * (PHP_5_2)
+      ext/standard/tests/array/natcasesort_variation7.phpt:
+      Fixed test
+
+    * ZendEngine2/zend_gc.c
+      ZendEngine2/zend_gc.c:
+      Fixed GC bug
+
+2008-02-19  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysqlnd/php_mysqlnd.c:
+      Fix compile warning
+
+    * ext/mysqli/tests/mysqli_constants.phpt
+      ext/mysqlnd/php_mysqlnd.c:
+      Fix a compile warning + test
+
+    * (PHP_5_3)
+      ext/mysqli/tests/mysqli_constants.phpt:
+      Fix test
+
+2008-02-19  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/pdo/tests/bug_44159.phpt:
+      New test
+
+    * ext/pdo/tests/bug_44159.phpt
+      ext/pdo/tests/bug_44159.phpt
+      ext/pdo/tests/bug_44159.phpt:
+        1.1.4;
+      file bug_44159.phpt was initially added on branch PHP_5_3.
+
+2008-02-19  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pdo/tests/bug_38253.phpt:
+      MFB
+
+    * (PHP_5_3)
+      ext/pdo/tests/bug_38253.phpt:
+      some BDs (e.g. firebird) dont support text, so replace it with
+      varchar(255).
+
+2008-02-19  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_dbh.c:
+      MFB: Fixed Bug #44159 (Crash: $pdo->setAttribute(PDO::STATEMENT_ATTR_CLASS,
+      NULL))
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_dbh.c:
+      Fixed Bug #44159 (Crash: $pdo->setAttribute(PDO::STATEMENT_ATTR_CLASS,
+      NULL))
+
+2008-02-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.c:
+      Fixed memory leak
+
+    * (PHP_5_3)
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_objects_API.c:
+      iFixed memory leak
+
+2008-02-19  Josie Messa  <josmessa@uk.ibm.com>
+
+    * ext/standard/tests/array/natcasesort_basic.phpt
+      ext/standard/tests/array/natcasesort_basic.phpt
+      ext/standard/tests/array/natcasesort_error.phpt
+      ext/standard/tests/array/natcasesort_error.phpt
+      ext/standard/tests/array/natcasesort_object1.phpt
+      ext/standard/tests/array/natcasesort_object1.phpt
+      ext/standard/tests/array/natcasesort_object2.phpt
+      ext/standard/tests/array/natcasesort_object2.phpt
+      ext/standard/tests/array/natcasesort_variation1.phpt
+      ext/standard/tests/array/natcasesort_variation1.phpt
+      ext/standard/tests/array/natcasesort_variation10.phpt
+      ext/standard/tests/array/natcasesort_variation10.phpt
+      ext/standard/tests/array/natcasesort_variation11.phpt
+      ext/standard/tests/array/natcasesort_variation11.phpt
+      ext/standard/tests/array/natcasesort_variation2.phpt
+      ext/standard/tests/array/natcasesort_variation2.phpt
+      ext/standard/tests/array/natcasesort_variation3.phpt
+      ext/standard/tests/array/natcasesort_variation3.phpt
+      ext/standard/tests/array/natcasesort_variation4.phpt
+      ext/standard/tests/array/natcasesort_variation4.phpt
+      ext/standard/tests/array/natcasesort_variation5.phpt
+      ext/standard/tests/array/natcasesort_variation5.phpt
+      ext/standard/tests/array/natcasesort_variation6.phpt
+      ext/standard/tests/array/natcasesort_variation6.phpt
+      ext/standard/tests/array/natcasesort_variation7.phpt
+      ext/standard/tests/array/natcasesort_variation7.phpt
+      ext/standard/tests/array/natcasesort_variation8.phpt
+      ext/standard/tests/array/natcasesort_variation8.phpt
+      ext/standard/tests/array/natcasesort_variation9.phpt
+      ext/standard/tests/array/natcasesort_variation9.phpt:
+      - New tests for natcasesort() function
+
+    * ext/standard/tests/array/natcasesort_basic.phpt
+      ext/standard/tests/array/natcasesort_basic.phpt
+      ext/standard/tests/array/natcasesort_basic.phpt
+      ext/standard/tests/array/natcasesort_error.phpt
+      ext/standard/tests/array/natcasesort_error.phpt
+      ext/standard/tests/array/natcasesort_error.phpt
+      ext/standard/tests/array/natcasesort_object1.phpt
+      ext/standard/tests/array/natcasesort_object1.phpt
+      ext/standard/tests/array/natcasesort_object1.phpt
+      ext/standard/tests/array/natcasesort_object2.phpt
+      ext/standard/tests/array/natcasesort_object2.phpt
+      ext/standard/tests/array/natcasesort_object2.phpt
+      ext/standard/tests/array/natcasesort_variation1.phpt
+      ext/standard/tests/array/natcasesort_variation1.phpt
+      ext/standard/tests/array/natcasesort_variation1.phpt
+      ext/standard/tests/array/natcasesort_variation10.phpt
+      ext/standard/tests/array/natcasesort_variation10.phpt
+      ext/standard/tests/array/natcasesort_variation10.phpt
+      ext/standard/tests/array/natcasesort_variation11.phpt
+      ext/standard/tests/array/natcasesort_variation11.phpt
+      ext/standard/tests/array/natcasesort_variation11.phpt
+      ext/standard/tests/array/natcasesort_variation2.phpt
+      ext/standard/tests/array/natcasesort_variation2.phpt
+      ext/standard/tests/array/natcasesort_variation2.phpt
+      ext/standard/tests/array/natcasesort_variation3.phpt
+      ext/standard/tests/array/natcasesort_variation3.phpt
+      ext/standard/tests/array/natcasesort_variation3.phpt
+      ext/standard/tests/array/natcasesort_variation4.phpt
+      ext/standard/tests/array/natcasesort_variation4.phpt
+      ext/standard/tests/array/natcasesort_variation4.phpt
+      ext/standard/tests/array/natcasesort_variation5.phpt
+      ext/standard/tests/array/natcasesort_variation5.phpt
+      ext/standard/tests/array/natcasesort_variation5.phpt
+      ext/standard/tests/array/natcasesort_variation6.phpt
+      ext/standard/tests/array/natcasesort_variation6.phpt
+      ext/standard/tests/array/natcasesort_variation6.phpt
+      ext/standard/tests/array/natcasesort_variation7.phpt
+      ext/standard/tests/array/natcasesort_variation7.phpt
+      ext/standard/tests/array/natcasesort_variation7.phpt
+      ext/standard/tests/array/natcasesort_variation8.phpt
+      ext/standard/tests/array/natcasesort_variation8.phpt
+      ext/standard/tests/array/natcasesort_variation8.phpt
+      ext/standard/tests/array/natcasesort_variation9.phpt
+      ext/standard/tests/array/natcasesort_variation9.phpt
+      ext/standard/tests/array/natcasesort_variation9.phpt:
+        1.1.4;
+      file natcasesort_basic.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/array/rsort_object2.phpt:
+      - changed UEXPECTF section
+
+2008-02-19  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZendEngine2/zend_API.c:
+      Fugbix typo.
+
+2008-02-19  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/oci8/README
+      ext/oci8/oci8.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/bug42841.phpt
+      ext/oci8/tests/debug.phpt
+      ext/oci8/tests/details.inc
+      ext/oci8/tests/drcp_characterset.phpt
+      ext/oci8/tests/drcp_conn_close1.phpt
+      ext/oci8/tests/drcp_conn_close2.phpt
+      ext/oci8/tests/drcp_connect1.phpt
+      ext/oci8/tests/drcp_connection_class.phpt
+      ext/oci8/tests/drcp_functions.inc
+      ext/oci8/tests/drcp_newconnect.phpt
+      ext/oci8/tests/drcp_pconn_close1.phpt
+      ext/oci8/tests/drcp_pconn_close2.phpt
+      ext/oci8/tests/drcp_privileged.phpt
+      ext/oci8/tests/drcp_scope1.phpt
+      ext/oci8/tests/drcp_scope2.phpt
+      ext/oci8/tests/fetch_all3.phpt
+      ext/oci8/tests/password.phpt
+      ext/oci8/tests/password_2.phpt
+      ext/oci8/tests/password_new.phpt
+      ext/oci8/tests/password_old.phpt:
+      MFB: sync DRCP connection pooling and FAN support from PHP 5.3
+
+2008-02-19  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/spl/spl_dllist.c:
+      MFH: Add debug_info handler to SplDoublyLinkedList/Stack/Queue to make them
+      var_dump friendly
+
 2008-02-18  Etienne Kneuss  <php@colder.ch>
 
     * ext/spl/spl_dllist.c:
