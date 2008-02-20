@@ -239,7 +239,8 @@ static void zobj_scan_black(struct _store_object *obj, zval *pz TSRMLS_DC)
 {
 	GC_SET_BLACK(obj->buffered);
 
-	if (EXPECTED(Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
+	if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
+	             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
 		zend_hash_apply(Z_OBJPROP_P(pz), (apply_func_t) children_scan_black TSRMLS_CC);
 	}
 }
@@ -278,7 +279,8 @@ static void zobj_mark_grey(struct _store_object *obj, zval *pz TSRMLS_DC)
 	if (GC_GET_COLOR(obj->buffered) != GC_GREY) {
 		GC_BENCH_INC(zobj_marked_grey);
 		GC_SET_COLOR(obj->buffered, GC_GREY);
-		if (EXPECTED(Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
+		if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
+		             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
 			zend_hash_apply(Z_OBJPROP_P(pz), (apply_func_t) children_mark_grey TSRMLS_CC);
 		}
 	}
@@ -353,7 +355,8 @@ static void zobj_scan(zval *pz TSRMLS_DC)
 				zobj_scan_black(obj, pz TSRMLS_CC);
 			} else {
 				GC_SET_COLOR(obj->buffered, GC_WHITE);
-				if (EXPECTED(Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
+				if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
+				             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
 					zend_hash_apply(Z_OBJPROP_P(pz), (apply_func_t) children_scan TSRMLS_CC);
 				}
 			}
@@ -417,7 +420,8 @@ static void zobj_collect_white(zval *pz TSRMLS_DC)
 		if (obj->buffered == (gc_root_buffer*)GC_WHITE) {
 			GC_SET_BLACK(obj->buffered);
 
-			if (EXPECTED(Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
+			if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
+			             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
 				zend_hash_apply(Z_OBJPROP_P(pz), (apply_func_t) children_collect_white TSRMLS_CC);
 			}
 		}
