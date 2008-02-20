@@ -303,7 +303,9 @@ MYSQLND_METHOD(mysqlnd_debug, func_enter)(MYSQLND_DEBUG * self,
 										  unsigned int line, const char * const file,
 										  char * func_name, uint func_name_len)
 {
+#ifdef MYSQLND_THREADED
 	MYSQLND_ZTS(self);
+#endif
 	if ((self->flags & MYSQLND_DEBUG_DUMP_TRACE) == 0 || self->file_name == NULL) {
 		return FALSE;
 	}
@@ -349,8 +351,9 @@ MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int lin
 										  const char * const file)
 {
 	char *func_name;
+#ifdef MYSQLND_THREADED
 	MYSQLND_ZTS(self);
-
+#endif
 	if ((self->flags & MYSQLND_DEBUG_DUMP_TRACE) == 0 || self->file_name == NULL) {
 		return PASS;
 	}
