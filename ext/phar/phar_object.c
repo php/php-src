@@ -2204,6 +2204,61 @@ PHP_METHOD(Phar, setStub)
 }
 /* }}} */
 
+/* {{{ proto bool Phar::setDefaultStub([string index[, string webindex]])
+ * Sets a stub that can be used to run a phar-based archive without the phar extension
+ * index is the CLI startup filename, which defaults to "index.php"
+ * webindex is the web startup filename and also defaults to "index.php"
+ * (falling back to CLI behaviour)
+ */
+ PHP_METHOD(Phar, setDefaultStub)
+{
+	char *index = NULL, *webindex = NULL, *error = NULL, *stub = NULL;
+	int index_len = 0, webindex_len = 0;
+	size_t stub_len;
+	PHAR_ARCHIVE_OBJECT();
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ss", &index, &index_len, &webindex, &webindex_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (phar_obj->arc.archive->is_tar) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Stub cannot be changed in a tar-based phar");
+		RETURN_FALSE;
+	}
+
+	if (phar_obj->arc.archive->is_zip) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Stub cannot be changed in a zip-based phar");
+		RETURN_FALSE;
+	}
+
+	if (PHAR_G(readonly)) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Cannot change stub: phar.readonly=1");
+		RETURN_FALSE;
+	}
+
+	stub = phar_create_default_stub(index, webindex, &stub_len, &error TSRMLS_CC);
+
+	if (error) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, error);
+		efree(error);
+		RETURN_FALSE;
+	}
+
+	phar_flush(phar_obj->arc.archive, stub, stub_len, &error TSRMLS_CC);
+
+	if (error) {
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+		efree(error);
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+/* }}} */
+
 /* {{{ proto array Phar::setSignatureAlgorithm(int sigtype)
  * set the signature algorithm for a phar and apply it.  The
  * signature algorithm must be one of Phar::MD5, Phar::SHA1,
@@ -3524,6 +3579,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, offsetSet,             arginfo_phar_offsetSet,    ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetUnset,           arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, setAlias,              arginfo_phar_setAlias,     ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, setDefaultStub,        arginfo_phar_createDS,     ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, setMetadata,           arginfo_phar_setMetadata,  ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, setSignatureAlgorithm, arginfo_phar_setSigAlgo ,  ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, setStub,               arginfo_phar_setStub,      ZEND_ACC_PUBLIC)

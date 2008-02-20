@@ -84,9 +84,9 @@ Version 2.0.0
  * don't allow a stub to be added to a .zip/.tar that does not have ".phar" in the filename somewhere
  * allow read/write on .tar/.zip files that do not contain a stub or alias file
  * prevent manual addition of stub via $a['.phar/stub.php'] = '<?php my stub';
- * make createDefaultStub() setDefaultStub() and have it file format-specific so that zip/tar-based phars
-   do not have a phar-specific stub
- * convertTo*() should always uses the default stub.
+ X make createDefaultStub() setDefaultStub() and have it file format-specific
+    so that zip/tar-based phars do not have a phar-specific stub [Steph]
+ * convertTo*() should always use the default stub
  X ability to store empty directories [Greg]
  X tar support [Greg]
  X zip support [Greg]
