@@ -42,11 +42,13 @@ extern char * mysqlnd_read_body_name;
 		packet = (c_type) pecalloc(1, packet_methods[(enum_type)].struct_size, (pers)); \
 		((c_type) (packet))->header.m = &packet_methods[(enum_type)]; \
 		((c_type) (packet))->header.persistent = (pers); \
+		DBG_INF_FMT("PACKET_INIT(%p, %d, %d)", packet, (int) enum_type, (int) pers); \
 	}
 #define PACKET_WRITE(packet, conn)	((packet)->header.m->write_to_net((packet), (conn) TSRMLS_CC))
 #define PACKET_READ(packet, conn)	((packet)->header.m->read_from_net((packet), (conn) TSRMLS_CC))
 #define PACKET_FREE(packet) \
 	do { \
+		DBG_INF_FMT("PACKET_FREE(%p)", packet); \
 		((packet)->header.m->free_mem((packet), FALSE TSRMLS_CC)); \
 	} while (0);
 
