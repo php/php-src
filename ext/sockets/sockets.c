@@ -585,7 +585,7 @@ static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds TSRMLS_DC) /
 	php_socket	*php_sock;
 	HashTable	*new_hash;
 	char 		*key;
-	int			num;
+	int			num = 0;
 	ulong       num_key;
 	uint 		key_len;
 
