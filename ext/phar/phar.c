@@ -1712,7 +1712,7 @@ char *phar_create_default_stub(const char *index_php, const char *web_index, siz
 		*error = NULL;
 	}
 
-	if (!index_php || strlen(index_php) == 0) {
+	if (!index_php) {
 		index_php = "index.php";
 	}
 

@@ -10,6 +10,12 @@ $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
 $phar = new Phar($fname);
 $phar['a.php'] = '<php echo "this is a\n"; ?>';
 $phar['b.php'] = '<php echo "this is b\n"; ?>';
+$phar->setStub('<?php echo "Hello World\n"; __HALT_COMPILER(); ?>');
+
+var_dump($phar->getStub());
+
+echo "============================================================================\n";
+echo "============================================================================\n";
 
 try {
 	$phar->setDefaultStub();
@@ -50,18 +56,23 @@ var_dump($phar->getStub());
 <?php 
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
 ?>
---EXPECT--
-Stub cannot be changed in a tar-based phar
+--EXPECTF--
+string(51) "<?php echo "Hello World\n"; __HALT_COMPILER(); ?>
+"
+============================================================================
+============================================================================
 string(60) "<?php // tar-based phar archive stub file
 __HALT_COMPILER();"
 ============================================================================
 ============================================================================
-Stub cannot be changed in a tar-based phar
+
+Warning: Phar::setDefaultStub(): method accepts no arguments for a tar- or zip-based phar stub, 1 given in %sphar_setdefaultstub.php on line %d
 string(60) "<?php // tar-based phar archive stub file
 __HALT_COMPILER();"
 ============================================================================
 ============================================================================
-Stub cannot be changed in a tar-based phar
+
+Warning: Phar::setDefaultStub(): method accepts no arguments for a tar- or zip-based phar stub, 2 given in %sphar_setdefaultstub.php on line %d
 string(60) "<?php // tar-based phar archive stub file
 __HALT_COMPILER();"
 ===DONE===

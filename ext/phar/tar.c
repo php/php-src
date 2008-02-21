@@ -449,6 +449,8 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 	entry.tar_type = '0';
 	entry.phar = phar;
 	entry.fp_type = PHAR_MOD;
+
+
 	/* set alias */
 	if (!phar->is_temporary_alias && phar->alias_len) {
 		entry.filename = estrndup(".phar/alias.txt", sizeof(".phar/alias.txt")-1);
@@ -473,7 +475,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 	}
 
 	/* set stub */
-	if (user_stub) {
+	if (user_stub && user_stub != "dummy") {
 		char *pos;
 		if (len < 0) {
 			/* resource passed in */
@@ -531,19 +533,38 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 			efree(user_stub);
 		}
 	} else {
-		if (!zend_hash_exists(&phar->manifest, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
-			/* this is a brand new phar */
-			entry.fp = php_stream_fopen_tmpfile();
-			if (sizeof(newstub)-1 != php_stream_write(entry.fp, newstub, sizeof(newstub)-1)) {
+		/* Either this is a brand new phar (add the stub), or setDefaultStub() is the caller (overwrite the stub) */
+		entry.fp = php_stream_fopen_tmpfile();
+		if (sizeof(newstub)-1 != php_stream_write(entry.fp, newstub, sizeof(newstub)-1)) {
+			if (error) {
+				spprintf(error, 0, "unable to %s stub in%szip-based phar \"%s\", failed", user_stub ? "overwrite" : "create", user_stub ? " " : " new ", phar->fname);
+			}
+			return EOF;
+		}
+		entry.uncompressed_filesize = entry.compressed_filesize = sizeof(newstub) - 1;
+		entry.filename = estrndup(".phar/stub.php", sizeof(".phar/stub.php")-1);
+		entry.filename_len = sizeof(".phar/stub.php")-1;
+
+		if (!user_stub) {
+			if (!zend_hash_exists(&phar->manifest, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
+				if (SUCCESS != zend_hash_add(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL)) {
+					php_stream_close(entry.fp);
+					efree(entry.filename);
+					if (error) {
+						spprintf(error, 0, "unable to create stub in zip-based phar \"%s\"", phar->fname);
+					}
+					return EOF;
+				}
+			}
+		} else {
+			if (SUCCESS != zend_hash_update(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL)) {
+				php_stream_close(entry.fp);
+				efree(entry.filename);
 				if (error) {
-					spprintf(error, 0, "unable to create stub in new tar-based phar \"%s\"", phar->fname);
+					spprintf(error, 0, "unable to overwrite stub in zip-based phar \"%s\"", phar->fname);
 				}
 				return EOF;
 			}
-			entry.uncompressed_filesize = sizeof(newstub) - 1;
-			entry.filename = estrndup(".phar/stub.php", sizeof(".phar/stub.php")-1);
-			entry.filename_len = sizeof(".phar/stub.php")-1;
-			zend_hash_add(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL);
 		}
 	}
 
