@@ -757,7 +757,9 @@ msql.max_persistent = -1
 msql.max_links = -1
 
 [OCI8]
-; enables privileged connections using external credentials (OCI_SYSOPER, OCI_SYSDBA)
+
+; Connection: Enables privileged connections using external
+; credentials (OCI_SYSOPER, OCI_SYSDBA)
 ;oci8.privileged_connect = Off
 
 ; Connection: The maximum number of persistent OCI8 connections per
@@ -775,6 +777,18 @@ msql.max_links = -1
 ; pings completely.
 ;oci8.ping_interval = 60
 
+; Connection: Set this to a user chosen connection class to be used
+; for all pooled server requests with Oracle 11g Database Resident
+; Connection Pooling (DRCP).  The default name is system generated.
+; To use DRCP, the database pool must be configured, and the
+; connection string must also specify to use a pooled server.
+;oci8.connection_class = MYPHPAPP
+
+; High Availability: Using 1 lets PHP receive Fast Application
+; Notification (FAN) events generated when a database node fails. The
+; database must also be configured to post FAN events.
+;oci8.events = 0
+
 ; Tuning: This option enables statement caching, and specifies how
 ; many statements to cache. Using 0 disables statement caching.
 ;oci8.statement_cache_size = 20
@@ -783,9 +797,9 @@ msql.max_links = -1
 ; rows that will be fetched automatically after statement execution.
 ;oci8.default_prefetch = 10
 
-; Compatibility. Using On means oci_close() will not close
+; Compatibility. Using 1 means oci_close() will not close
 ; oci_connect() and oci_new_connect() connections.
-;oci8.old_oci_close_semantics = Off
+;oci8.old_oci_close_semantics = 0
 
 [PostgresSQL]
 ; Allow or prevent persistent links.
