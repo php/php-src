@@ -1052,7 +1052,7 @@ ZEND_API union _zend_function *zend_std_get_constructor(zval *object TSRMLS_DC) 
 		} else if (constructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
-			if (Z_OBJ_HANDLER_P(object, get_class_entry)(object TSRMLS_CC) != EG(scope)) {
+			if (constructor->common.scope != EG(scope)) {
 				if (EG(scope)) {
 					zend_error(E_ERROR, "Call to private %v::%v() from context '%v'", constructor->common.scope->name, constructor->common.function_name, EG(scope)->name);
 				} else {
