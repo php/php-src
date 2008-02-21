@@ -1691,8 +1691,6 @@ finalize:
 		if (FAILURE == zend_hash_get_current_data(&(phar.manifest), (void **) &entry)) {
 			zend_hash_destroy(&(phar.manifest));
 			php_stream_close(phar.fp);
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-				"Cannot convert phar archive \"%s\"", source->fname);
 			/* we can't throw an exception or bad crap will happen */
 			zend_error(E_ERROR, "Error: could not convert phar archive \"%s\", phar is in unstable state, shutting down", source->fname);
 			return;
