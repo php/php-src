@@ -7,7 +7,6 @@ dechex(23,2,true);
 ?>
 
 --EXPECTF--
+Warning: dechex() expects exactly 1 parameter, 0 given in %s on line %d
 
-Warning: Wrong parameter count for dechex() in %s on line 2
-
-Warning: Wrong parameter count for dechex() in %s on line 3
+Warning: dechex() expects exactly 1 parameter, 3 given in %s on line %d

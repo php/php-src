@@ -9,9 +9,8 @@ log(36,4,true);
 log(36, -4);
 ?>
 --EXPECTF--
+Warning: log() expects at least 1 parameter, 0 given in %s on line %d
 
-Warning: Wrong parameter count for log() in %s on line 2
+Warning: log() expects at most 2 parameters, 3 given in %s on line %d
 
-Warning: Wrong parameter count for log() in %s on line 3
-
-Warning: log(): base must be greater than 0 in %s on line 4
+Warning: log(): base must be greater than 0 in %s on line %d

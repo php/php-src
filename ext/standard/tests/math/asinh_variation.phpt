@@ -39,7 +39,7 @@ for ($i = 0; $i < count($values); $i++) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 float(3.829113652)
 float(-3.829113652)
 float(3.848471992)
@@ -49,8 +49,12 @@ float(3.829113652)
 float(3.829113652)
 float(3.848471992)
 float(3.848471992)
-float(0)
+
+Warning: asinh() expects parameter 1 to be double, string given in %s on line %d
+NULL
 float(7.60090271)
+
+Notice: A non well formed numeric value encountered in %s on line %d
 float(7.60090271)
 float(0)
 float(0.881373587)

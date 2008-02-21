@@ -20,10 +20,10 @@ var_dump(atan());
 --EXPECTF--
 Too many arguments
 
-Warning: Wrong parameter count for atan() in %s on line 11
+Warning: atan() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
 Too few arguments
 
-Warning: Wrong parameter count for atan() in %s on line 14
+Warning: atan() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
