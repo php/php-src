@@ -34,7 +34,7 @@ for ($i = 0; $i < count($values); $i++) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 float(4872401723)
 float(-4872401723)
 float(7641446995)
@@ -44,8 +44,12 @@ float(4872401723)
 float(4872401723)
 float(7641446995)
 float(7641446995)
-float(0)
+
+Warning: sinh() expects parameter 1 to be double, string given in %s on line %d
+NULL
 float(INF)
+
+Notice: A non well formed numeric value encountered in %s on line %d
 float(INF)
 float(0)
 float(1.175201194)

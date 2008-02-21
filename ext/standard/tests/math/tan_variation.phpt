@@ -34,7 +34,7 @@ for ($i = 0; $i < count($values); $i++) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 float(1.588153083)
 float(-1.588153083)
 float(8.895619796)
@@ -44,8 +44,12 @@ float(1.588153083)
 float(1.588153083)
 float(8.895619796)
 float(8.895619796)
-float(0)
+
+Warning: tan() expects parameter 1 to be double, string given in %s on line %d
+NULL
 float(1.470324156)
+
+Notice: A non well formed numeric value encountered in %s on line %d
 float(1.470324156)
 float(0)
 float(1.557407725)

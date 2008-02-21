@@ -9,10 +9,8 @@ hypot(36);
 hypot(36,25,0);
 ?>
 --EXPECTF--
+Warning: hypot() expects exactly 2 parameters, 0 given in %s on line %d
 
+Warning: hypot() expects exactly 2 parameters, 1 given in %s on line %d
 
-Warning: Wrong parameter count for hypot() in %s on line 2
-
-Warning: Wrong parameter count for hypot() in %s on line 3
-
-Warning: Wrong parameter count for hypot() in %s on line 4
+Warning: hypot() expects exactly 2 parameters, 3 given in %s on line %d

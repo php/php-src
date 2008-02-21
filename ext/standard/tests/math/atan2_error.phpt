@@ -7,9 +7,8 @@ atan2(36);
 atan2(36,25,0);
 ?>
 --EXPECTF--
+Warning: atan2() expects exactly 2 parameters, 0 given in %s on line %d
 
-Warning: Wrong parameter count for atan2() in %s on line 2
+Warning: atan2() expects exactly 2 parameters, 1 given in %s on line %d
 
-Warning: Wrong parameter count for atan2() in %s on line 3
-
-Warning: Wrong parameter count for atan2() in %s on line 4
+Warning: atan2() expects exactly 2 parameters, 3 given in %s on line %d

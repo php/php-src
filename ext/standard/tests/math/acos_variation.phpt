@@ -34,7 +34,7 @@ for ($i = 0; $i < count($values); $i++) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 float(NAN)
 float(NAN)
 float(NAN)
@@ -44,8 +44,12 @@ float(NAN)
 float(NAN)
 float(NAN)
 float(NAN)
-float(1.570796327)
+
+Warning: acos() expects parameter 1 to be double, string given in %s on line %d
+NULL
 float(NAN)
+
+Notice: A non well formed numeric value encountered in %s on line %d
 float(NAN)
 float(1.570796327)
 float(0)

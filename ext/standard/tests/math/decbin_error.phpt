@@ -6,8 +6,6 @@ decbin();
 decbin(23,2,true);
 ?>
 --EXPECTF--
+Warning: decbin() expects exactly 1 parameter, 0 given in %s on line %d
 
-Warning: Wrong parameter count for decbin() in %s on line 2
-
-Warning: Wrong parameter count for decbin() in %s on line 3
-
+Warning: decbin() expects exactly 1 parameter, 3 given in %s on line %d

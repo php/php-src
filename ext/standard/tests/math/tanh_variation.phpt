@@ -34,7 +34,7 @@ for ($i = 0; $i < count($values); $i++) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 float(1)
 float(-1)
 float(1)
@@ -44,8 +44,12 @@ float(1)
 float(1)
 float(1)
 float(1)
-float(0)
+
+Warning: tanh() expects parameter 1 to be double, string given in %s on line %d
+NULL
 float(1)
+
+Notice: A non well formed numeric value encountered in %s on line %d
 float(1)
 float(0)
 float(0.761594156)
