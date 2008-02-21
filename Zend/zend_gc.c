@@ -493,8 +493,8 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 		}
 		GC_G(gc_runs)++;
 		GC_G(zval_to_free) = NULL;
-		gc_mark_roots(TSRMLS_C);
 		GC_G(gc_active) = 1;
+		gc_mark_roots(TSRMLS_C);
 		gc_scan_roots(TSRMLS_C);
 		gc_collect_roots(TSRMLS_C);
 		GC_G(gc_active) = 0;
@@ -508,7 +508,9 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].valid &&
 					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.refcount <= 0) {
 					if (EXPECTED(Z_OBJ_HANDLER(p->z, get_properties) != NULL)) {
+						GC_G(gc_active) = 1;
 						Z_OBJPROP(p->z)->pDestructor = NULL;
+						GC_G(gc_active) = 0;
 					}
 					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.refcount = 1;
 					zend_objects_store_del_ref_by_handle(Z_OBJ_HANDLE(p->z) TSRMLS_CC);
