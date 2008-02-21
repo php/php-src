@@ -138,7 +138,7 @@ int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_l
 
 	/* we've reached here - the phar exists and is a regular phar */
 	if (error) {
-		spprintf(error, 4096, "phar zip error: phar \"%s\" already exists as a regular phar and must be deleted from disk prior to creating as a zip-based phar", fname);
+		spprintf(error, 4096, "phar tar error: \"%s\" already exists as a regular phar and must be deleted from disk prior to creating as a tar-based phar", fname);
 	}
 	return FAILURE;
 }
@@ -537,7 +537,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 		entry.fp = php_stream_fopen_tmpfile();
 		if (sizeof(newstub)-1 != php_stream_write(entry.fp, newstub, sizeof(newstub)-1)) {
 			if (error) {
-				spprintf(error, 0, "unable to %s stub in%szip-based phar \"%s\", failed", user_stub ? "overwrite" : "create", user_stub ? " " : " new ", phar->fname);
+				spprintf(error, 0, "unable to %s stub in%star-based phar \"%s\", failed", user_stub ? "overwrite" : "create", user_stub ? " " : " new ", phar->fname);
 			}
 			return EOF;
 		}
@@ -551,7 +551,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 					php_stream_close(entry.fp);
 					efree(entry.filename);
 					if (error) {
-						spprintf(error, 0, "unable to create stub in zip-based phar \"%s\"", phar->fname);
+						spprintf(error, 0, "unable to create stub in tar-based phar \"%s\"", phar->fname);
 					}
 					return EOF;
 				}
@@ -561,7 +561,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 				php_stream_close(entry.fp);
 				efree(entry.filename);
 				if (error) {
-					spprintf(error, 0, "unable to overwrite stub in zip-based phar \"%s\"", phar->fname);
+					spprintf(error, 0, "unable to overwrite stub in tar-based phar \"%s\"", phar->fname);
 				}
 				return EOF;
 			}
