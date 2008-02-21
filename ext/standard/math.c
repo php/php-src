@@ -471,14 +471,13 @@ PHP_FUNCTION(pow)
    Returns e raised to the power of the number */
 PHP_FUNCTION(exp)
 {
-        double num;
+	double num;
 
-        if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
-                return;
-        }
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
+		return;
+	}
 
-        RETURN_DOUBLE(exp(num));
-
+	RETURN_DOUBLE(exp(num));
 }
 /* }}} */
 
