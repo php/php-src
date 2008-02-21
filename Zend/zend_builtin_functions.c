@@ -904,7 +904,7 @@ ZEND_FUNCTION(get_class_methods)
 		if ((mptr->common.fn_flags & ZEND_ACC_PUBLIC)
 		 || (EG(scope) &&
 		     (((mptr->common.fn_flags & ZEND_ACC_PROTECTED) &&
-		       instanceof_function(EG(scope), mptr->common.scope TSRMLS_CC))
+		       zend_check_protected(mptr->common.scope, EG(scope)))
 		   || ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) &&
 		       EG(scope) == mptr->common.scope)))) {
 			zstr key;
