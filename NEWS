@@ -20,6 +20,8 @@ PHP                                                                        NEWS
 - Fixed bug #44159 (Crash: $pdo->setAttribute(PDO::STATEMENT_ATTR_CLASS, NULL)).
   (Felipe)
 - Fixed bug #44152 (Possible crash with syslog logging on ZTS builds). (Ilia)
+- Fixed bug #44141 (private parent constructor callable through static
+  function). (Dmitry)
 - Fixed bug #44069 (Huge memory usage with concatenation using . instead of
   .=). (Dmitry)
 - Fixed bug #44046 (crash inside array_slice() function with an invalid
