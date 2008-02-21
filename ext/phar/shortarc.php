@@ -9,7 +9,7 @@ if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
     return;
 }
 
-if (@(isset($_SERVER['REQUEST_URI']) && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'POST')) {
+if (@(isset($_SERVER['REQUEST_URI']) && isset($_SERVER['REQUEST_METHOD']) && ($_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'POST'))) {
     Extract_Phar::go(true);
     $mimes = array(
         'phps' => 2,
