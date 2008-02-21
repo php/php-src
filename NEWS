@@ -81,6 +81,8 @@ PHP                                                                        NEWS
   is not available). (Ilia)
 - Fixed bug #43491 (Under certain conditions, file_exists() never returns).
   (Dmitry)
+- Fixed bug #43483 (get_class_methods() does not list all visible methods).
+  (Dmitry)
 - Fixed bug #43482 (array_pad() does not warn on very small pad numbers).
   (Ilia)
 - Fixed bug #43457 (Prepared statement with incorrect parms doesn't throw
