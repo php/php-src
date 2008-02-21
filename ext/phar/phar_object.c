@@ -2212,24 +2212,18 @@ PHP_METHOD(Phar, setStub)
  */
  PHP_METHOD(Phar, setDefaultStub)
 {
-	char *index = NULL, *webindex = NULL, *error = NULL, *stub = NULL;
+	char *index = NULL, *webindex = NULL, *error = NULL;
+	char *stub = "dummy";
 	int index_len = 0, webindex_len = 0;
-	size_t stub_len;
+	size_t stub_len = 0;
 	PHAR_ARCHIVE_OBJECT();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ss", &index, &index_len, &webindex, &webindex_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s", &index, &index_len, &webindex, &webindex_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (phar_obj->arc.archive->is_tar) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-			"Stub cannot be changed in a tar-based phar");
-		RETURN_FALSE;
-	}
-
-	if (phar_obj->arc.archive->is_zip) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-			"Stub cannot be changed in a zip-based phar");
+	if (ZEND_NUM_ARGS() > 0 && (phar_obj->arc.archive->is_tar || phar_obj->arc.archive->is_zip)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "method accepts no arguments for a tar- or zip-based phar stub, %d given", ZEND_NUM_ARGS());
 		RETURN_FALSE;
 	}
 
@@ -2239,12 +2233,14 @@ PHP_METHOD(Phar, setStub)
 		RETURN_FALSE;
 	}
 
-	stub = phar_create_default_stub(index, webindex, &stub_len, &error TSRMLS_CC);
+	if (!phar_obj->arc.archive->is_tar && !phar_obj->arc.archive->is_zip) {
+		stub = phar_create_default_stub(index, webindex, &stub_len, &error TSRMLS_CC);
 
-	if (error) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, error);
-		efree(error);
-		RETURN_FALSE;
+		if (error) {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, error);
+			efree(error);
+			RETURN_FALSE;
+		}
 	}
 
 	phar_flush(phar_obj->arc.archive, stub, stub_len, &error TSRMLS_CC);
