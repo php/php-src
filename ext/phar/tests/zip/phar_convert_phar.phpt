@@ -44,8 +44,7 @@ __HALT_COMPILER();
 ?>
 --EXPECT--
 bool(false)
-string(50) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>
-"
+int(6573)
 bool(true)
 string(60) "<?php // zip-based phar archive stub file
 __HALT_COMPILER();"
