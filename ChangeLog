@@ -1,3 +1,135 @@
+2008-02-20  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.c:
+      MFB: Fixed Bug #44191 (preg_grep messes up array index)
+
+    * (PHP_5_2)
+      NEWS
+      ext/pcre/php_pcre.c:
+      Fixed Bug #44191 (preg_grep messes up array index)
+
+    * ext/pcre/tests/bug44191.phpt
+      ext/pcre/tests/bug44191.phpt:
+      New test
+
+    * ext/pcre/tests/bug44191.phpt
+      ext/pcre/tests/bug44191.phpt
+      ext/pcre/tests/bug44191.phpt:
+        1.1.4;
+      file bug44191.phpt was initially added on branch PHP_5_2.
+
+2008-02-20  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/tests/mysqli_stmt_bind_result_references.phpt
+      ext/mysqli/tests/mysqli_stmt_bind_result_references.phpt:
+      Fix test. Now passes.
+
+2008-02-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/syslog.c:
+      
+      MFB: Fixed bug #44152 (Possible crash with syslog logging on ZTS builds).
+
+    * ext/standard/syslog.c:
+      
+      MFB: Fixed a possible crash with syslog logging on ZTS builds
+
+    * (PHP_5_3)
+      ext/standard/syslog.c:
+      Fixed a possible crash with syslog logging on ZTS builds
+
+2008-02-20  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysqlnd/mysqlnd_debug.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqlnd/mysqlnd_wireprotocol.h
+      ext/mysqlnd/mysqlnd_wireprotocol.h:
+      Fix memory leak
+
+2008-02-20  Josie Messa  <josmessa@uk.ibm.com>
+
+    * ext/standard/tests/array/current_basic.phpt
+      ext/standard/tests/array/current_basic.phpt
+      ext/standard/tests/array/current_error.phpt
+      ext/standard/tests/array/current_error.phpt
+      ext/standard/tests/array/current_variation1.phpt
+      ext/standard/tests/array/current_variation1.phpt
+      ext/standard/tests/array/current_variation2.phpt
+      ext/standard/tests/array/current_variation2.phpt
+      ext/standard/tests/array/current_variation3.phpt
+      ext/standard/tests/array/current_variation3.phpt
+      ext/standard/tests/array/current_variation4.phpt
+      ext/standard/tests/array/current_variation4.phpt:
+      - New tests for current() function
+
+    * ext/standard/tests/array/current_basic.phpt
+      ext/standard/tests/array/current_basic.phpt
+      ext/standard/tests/array/current_basic.phpt
+      ext/standard/tests/array/current_error.phpt
+      ext/standard/tests/array/current_error.phpt
+      ext/standard/tests/array/current_error.phpt
+      ext/standard/tests/array/current_variation1.phpt
+      ext/standard/tests/array/current_variation1.phpt
+      ext/standard/tests/array/current_variation1.phpt
+      ext/standard/tests/array/current_variation2.phpt
+      ext/standard/tests/array/current_variation2.phpt
+      ext/standard/tests/array/current_variation2.phpt
+      ext/standard/tests/array/current_variation3.phpt
+      ext/standard/tests/array/current_variation3.phpt
+      ext/standard/tests/array/current_variation3.phpt
+      ext/standard/tests/array/current_variation4.phpt
+      ext/standard/tests/array/current_variation4.phpt
+      ext/standard/tests/array/current_variation4.phpt:
+        1.1.4;
+      file current_basic.phpt was initially added on branch PHP_5_2.
+
+2008-02-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug44184.phpt
+      ZendEngine2/tests/bug44184.phpt
+      ZendEngine2/tests/bug44184.phpt:
+        1.1.4;
+      file bug44184.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug44184.phpt
+      ZendEngine2/tests/bug44184.phpt:
+      Fixed bug #44184 (Double free of loop-variable on exception)
+
+    * ZendEngine2/zend_gc.c
+      ZendEngine2/zend_gc.c:
+      Added checks for destoied objects
+
+2008-02-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_stmt.c
+      ext/pdo/pdo_stmt.c:
+      
+      MFB: Fixed bug #44171 (Invalid FETCH_COLUMN index does not raise an error)
+
+    * (PHP_5_3)
+      ext/pdo/pdo_stmt.c:
+      Fixed bug #44171 (Invalid FETCH_COLUMN index does not raise an error)
+
 2008-02-19  Christopher Jones  <christopher.jones@oracle.com>
 
     * (PHP_5_3)
