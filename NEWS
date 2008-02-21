@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 
 - Fixed bug #44197 (socket array keys lost on socket_select). (Felipe)
 - Fixed bug #44191 (preg_grep messes up array index). (Felipe)
+- Fixed bug #44189 (PDO setAttribute() does not properly validate values for 
+  native numeric options). (Ilia)
 - Fixed bug #44184 (Double free of loop-variable on exception). (Dmitry)
 - Fixed bug #44171 (Invalid FETCH_COLUMN index does not raise an error). (Ilia)
 - Fixed bug #44159 (Crash: $pdo->setAttribute(PDO::STATEMENT_ATTR_CLASS, NULL)).
