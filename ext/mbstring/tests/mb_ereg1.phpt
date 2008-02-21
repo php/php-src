@@ -17,9 +17,8 @@ foreach ($a as $args) {
 	var_dump(mb_ereg($args[0], $args[1], $args[2]));
 	var_dump($args);
 }
-
-echo "Done\n";
 ?>
+===DONE===
 --EXPECTF--	
 bool(false)
 array(3) {
@@ -30,17 +29,16 @@ array(3) {
   [2]=>
   int(3)
 }
-int(1)
+
+Warning: mb_ereg(): empty pattern in %s on line %d
+bool(false)
 array(3) {
   [0]=>
   string(0) ""
   [1]=>
   string(0) ""
   [2]=>
-  array(1) {
-    [0]=>
-    bool(false)
-  }
+  string(0) ""
 }
 
 Notice: Array to string conversion in %s on line %d
@@ -76,4 +74,4 @@ array(3) {
   array(0) {
   }
 }
-Done
+===DONE===

@@ -83,9 +83,8 @@ foreach($inputs as $input) {
   var_dump( mb_strrpos($haystack, $needle, $input, $encoding));
   $iterator++;
 };
-
-echo "Done";
 ?>
+===DONE===
 --EXPECTF--
 *** Testing mb_strrpos() : usage variations ***
 
@@ -96,9 +95,13 @@ int(8)
 int(8)
 
 -- Iteration 3 --
+
+Notice: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 
 -- Iteration 4 --
+
+Notice: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 
 -- Iteration 5 --
@@ -108,6 +111,8 @@ bool(false)
 bool(false)
 
 -- Iteration 7 --
+
+Notice: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 
 -- Iteration 8 --
@@ -144,4 +149,4 @@ int(8)
 
 -- Iteration 18 --
 int(8)
-Done
+===DONE===
