@@ -1,3 +1,28 @@
+2008-02-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      zend_compile.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug44184.phpt
+      tests/bug44184.phpt:
+      Fixed bug #44184 (Double free of loop-variable on exception)
+
+    * tests/bug44184.phpt
+      tests/bug44184.phpt
+      tests/bug44184.phpt:
+        1.1.4;
+      file bug44184.phpt was initially added on branch PHP_5_2.
+
+    * zend_gc.c
+      zend_gc.c:
+      Added checks for destoied objects
+
 2008-02-19  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_3)
