@@ -23,10 +23,11 @@ bool(false)
 
 Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error: PDO::ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); the classname must be a string specifying an existing class in %s on line %d
 bool(false)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
 
+Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error: attribute value must be an integer in %s on line %d
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
