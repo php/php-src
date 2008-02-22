@@ -35,10 +35,12 @@ static timelib_sll timelib_day_of_week_ex(timelib_sll y, timelib_sll m, timelib_
 {
 	timelib_sll c1, y1, m1, dow;
 
-	/* Only valid for Gregorian calendar */
+	/* Only valid for Gregorian calendar, commented out as we don't handle
+	 * julian calendar. We just return the 'wrong' day of week to be
+	 * consistent.
 	if (y < 1753) {
 		return -1;
-	}
+	} */
 	c1 = century_value(y / 100);
 	y1 = (y % 100);
 	m1 = timelib_is_leap(y) ? m_table_leap[m] : m_table_common[m];
