@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 - Upgraded PCRE to version 7.6 (Nuno)
 
 
+- Fixed bug #44209 (strtotime() doesn't support 64 bit timestamps on 64 bit
+  platforms). (Derick)
 - Fixed bug #44197 (socket array keys lost on socket_select). (Felipe)
 - Fixed bug #44191 (preg_grep messes up array index). (Felipe)
 - Fixed bug #44189 (PDO setAttribute() does not properly validate values for 
