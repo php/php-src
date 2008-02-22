@@ -22,6 +22,9 @@
 #define __TIMELIB_H__
 
 #include "timelib_structs.h"
+#if HAVE_LIMITS_H
+#include <limits.h>
+#endif
 
 #define TIMELIB_NONE             0x00
 #define TIMELIB_OVERRIDE_TIME    0x01
