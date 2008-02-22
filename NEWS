@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 - Upgraded PCRE to version 7.6 (Nuno)
 
 
+- Fixed bug #44216 (strftime segfaults on large negative value). (Derick)
 - Fixed bug #44209 (strtotime() doesn't support 64 bit timestamps on 64 bit
   platforms). (Derick)
 - Fixed bug #44197 (socket array keys lost on socket_select). (Felipe)
