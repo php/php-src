@@ -87,7 +87,7 @@ a. Requirements
 
 c. Generating configure
 
- Change directory to where you have your PHP 5 sources.
+ Change directory to where you have your PHP sources.
  Run buildconf.bat.
 
 d. Configuring
