@@ -43,6 +43,7 @@ var_dump(key($multi_array));
 var_dump(key($multi_array[3][3][3]));
 // see if internal pointer is in the same position from when accessing this inner array
 var_dump(key($multi_array[3][3][3][1]));
+$multi_array[3] = null;
 ?>
 ===DONE===
 --EXPECTF--
