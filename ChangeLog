@@ -1,3 +1,272 @@
+2008-02-21  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      Fix typo and add Derick's name
+
+    * (PHP_5_3)
+      ext/standard/math.c:
+      New parameter parsing [DOC]
+
+    * (PHP_5_3)
+      ext/standard/tests/math/acos_error.phpt
+      ext/standard/tests/math/acos_variation.phpt
+      ext/standard/tests/math/acosh_error.phpt
+      ext/standard/tests/math/acosh_variation.phpt
+      ext/standard/tests/math/asin_error.phpt
+      ext/standard/tests/math/asin_variation.phpt
+      ext/standard/tests/math/asinh_error.phpt
+      ext/standard/tests/math/asinh_variation.phpt
+      ext/standard/tests/math/atan2_error.phpt
+      ext/standard/tests/math/atan_error.phpt
+      ext/standard/tests/math/atan_variation.phpt
+      ext/standard/tests/math/atanh_error.phpt
+      ext/standard/tests/math/atanh_variation.phpt
+      ext/standard/tests/math/base_convert_error.phpt
+      ext/standard/tests/math/bindec_error.phpt
+      ext/standard/tests/math/cos_error.phpt
+      ext/standard/tests/math/cos_variation.phpt
+      ext/standard/tests/math/cosh_error.phpt
+      ext/standard/tests/math/cosh_variation.phpt
+      ext/standard/tests/math/decbin_error.phpt
+      ext/standard/tests/math/dechex_error.phpt
+      ext/standard/tests/math/decoct_error.phpt
+      ext/standard/tests/math/deg2rad_error.phpt
+      ext/standard/tests/math/deg2rad_variation.phpt
+      ext/standard/tests/math/hexdec_error.phpt
+      ext/standard/tests/math/hypot_error.phpt
+      ext/standard/tests/math/log10_error.phpt
+      ext/standard/tests/math/log10_variation.phpt
+      ext/standard/tests/math/log_error.phpt
+      ext/standard/tests/math/octdec_error.phpt
+      ext/standard/tests/math/rad2deg_error.phpt
+      ext/standard/tests/math/rad2deg_variation.phpt
+      ext/standard/tests/math/sin_error.phpt
+      ext/standard/tests/math/sin_variation.phpt
+      ext/standard/tests/math/sinh_error.phpt
+      ext/standard/tests/math/sinh_variation.phpt
+      ext/standard/tests/math/sqrt_error.phpt
+      ext/standard/tests/math/tan_error.phpt
+      ext/standard/tests/math/tan_variation.phpt
+      ext/standard/tests/math/tanh_error.phpt
+      ext/standard/tests/math/tanh_variation.phpt:
+      Fix test (new parameter parsing)
+
+2008-02-21  Josie Messa  <josmessa@uk.ibm.com>
+
+    * ext/standard/tests/array/end_basic.phpt
+      ext/standard/tests/array/end_basic.phpt
+      ext/standard/tests/array/end_error.phpt
+      ext/standard/tests/array/end_error.phpt
+      ext/standard/tests/array/end_variation1.phpt
+      ext/standard/tests/array/end_variation1.phpt
+      ext/standard/tests/array/end_variation2.phpt
+      ext/standard/tests/array/end_variation2.phpt
+      ext/standard/tests/array/end_variation3.phpt
+      ext/standard/tests/array/end_variation3.phpt
+      ext/standard/tests/array/next_basic.phpt
+      ext/standard/tests/array/next_basic.phpt
+      ext/standard/tests/array/next_error.phpt
+      ext/standard/tests/array/next_error.phpt
+      ext/standard/tests/array/next_variation1.phpt
+      ext/standard/tests/array/next_variation1.phpt
+      ext/standard/tests/array/next_variation2.phpt
+      ext/standard/tests/array/next_variation2.phpt:
+      - New tests for end() and next() function
+
+    * ext/standard/tests/array/end_basic.phpt
+      ext/standard/tests/array/end_basic.phpt
+      ext/standard/tests/array/end_basic.phpt
+      ext/standard/tests/array/end_error.phpt
+      ext/standard/tests/array/end_error.phpt
+      ext/standard/tests/array/end_error.phpt
+      ext/standard/tests/array/end_variation1.phpt
+      ext/standard/tests/array/end_variation1.phpt
+      ext/standard/tests/array/end_variation1.phpt
+      ext/standard/tests/array/end_variation2.phpt
+      ext/standard/tests/array/end_variation2.phpt
+      ext/standard/tests/array/end_variation2.phpt
+      ext/standard/tests/array/end_variation3.phpt
+      ext/standard/tests/array/end_variation3.phpt
+      ext/standard/tests/array/end_variation3.phpt
+      ext/standard/tests/array/next_basic.phpt
+      ext/standard/tests/array/next_basic.phpt
+      ext/standard/tests/array/next_basic.phpt
+      ext/standard/tests/array/next_error.phpt
+      ext/standard/tests/array/next_error.phpt
+      ext/standard/tests/array/next_error.phpt
+      ext/standard/tests/array/next_variation1.phpt
+      ext/standard/tests/array/next_variation1.phpt
+      ext/standard/tests/array/next_variation1.phpt
+      ext/standard/tests/array/next_variation2.phpt
+      ext/standard/tests/array/next_variation2.phpt
+      ext/standard/tests/array/next_variation2.phpt:
+        1.1.4;
+      file end_basic.phpt was initially added on branch PHP_5_2.
+
+2008-02-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug43483.phpt
+      ZendEngine2/tests/bug43483.phpt
+      ZendEngine2/tests/bug43483.phpt:
+        1.1.4;
+      file bug43483.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/tests/bug43483.phpt
+      ZendEngine2/tests/bug43483.phpt:
+      Fixed bug #43483 (get_class_methods() does not list all visible methods)
+
+2008-02-21  Josie Messa  <josmessa@uk.ibm.com>
+
+    * ext/standard/tests/array/key_basic.phpt
+      ext/standard/tests/array/key_basic.phpt
+      ext/standard/tests/array/key_error.phpt
+      ext/standard/tests/array/key_error.phpt
+      ext/standard/tests/array/key_error.phpt
+      ext/standard/tests/array/key_variation1.phpt
+      ext/standard/tests/array/key_variation1.phpt
+      ext/standard/tests/array/key_variation2.phpt
+      ext/standard/tests/array/key_variation2.phpt
+      ext/standard/tests/array/key_variation3.phpt
+      ext/standard/tests/array/key_variation3.phpt
+      ext/standard/tests/array/key_variation4.phpt
+      ext/standard/tests/array/key_variation4.phpt:
+      - New tests for key() function
+
+    * ext/standard/tests/array/key_basic.phpt
+      ext/standard/tests/array/key_basic.phpt
+      ext/standard/tests/array/key_basic.phpt
+      ext/standard/tests/array/key_error.phpt
+      ext/standard/tests/array/key_error.phpt
+      ext/standard/tests/array/key_variation1.phpt
+      ext/standard/tests/array/key_variation1.phpt
+      ext/standard/tests/array/key_variation1.phpt
+      ext/standard/tests/array/key_variation2.phpt
+      ext/standard/tests/array/key_variation2.phpt
+      ext/standard/tests/array/key_variation2.phpt
+      ext/standard/tests/array/key_variation3.phpt
+      ext/standard/tests/array/key_variation3.phpt
+      ext/standard/tests/array/key_variation3.phpt
+      ext/standard/tests/array/key_variation4.phpt
+      ext/standard/tests/array/key_variation4.phpt
+      ext/standard/tests/array/key_variation4.phpt:
+        1.1.4;
+      file key_basic.phpt was initially added on branch PHP_5_2.
+
+2008-02-21  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/pcre/tests/bug44191.phpt
+      ext/pcre/tests/bug44191.phpt:
+      Fix test
+
+2008-02-21  Josie Messa  <josmessa@uk.ibm.com>
+
+    * (PHP_5_3)
+      ext/mbstring/tests/mb_ereg1.phpt
+      ext/mbstring/tests/mb_strrpos_variation3.phpt
+      ext/mbstring/tests/mb_strtolower_error2.phpt
+      ext/mbstring/tests/mb_strtolower_variation2.phpt
+      ext/mbstring/tests/mb_strtoupper_error2.phpt
+      ext/mbstring/tests/mb_strtoupper_variation2.phpt:
+      - Fixed failing mbstring tests after bug fixes
+
+2008-02-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug44141.phpt
+      ZendEngine2/tests/bug44141.phpt
+      ZendEngine2/tests/bug44141.phpt:
+        1.1.4;
+      file bug44141.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug44141.phpt
+      ZendEngine2/tests/bug44141.phpt:
+      Fixed bug #44141 (private parent constructor callable through static
+      function)
+
+2008-02-21  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/pcre/tests/bug44191.phpt
+      ext/pcre/tests/bug44191.phpt:
+      fix test
+
+2008-02-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_dbh.c:
+      
+      MFB: Fixed bug #44189 (PDO setAttribute() does not properly validate
+      values
+      for native numeric options)
+
+    * (PHP_5_3)
+      ext/pdo/pdo_dbh.c:
+      Fixed bug #44189 (PDO setAttribute() does not properly validate values for
+      native numeric options)
+
+2008-02-21  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      NEWS:
+      news entry for new stuff
+
+    * php.ini-dist
+      php.ini-recommended:
+      new Oracle stuff
+
+2008-02-21  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      Cosmetics change
+
+2008-02-21  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/standard/math.c:
+      MF53
+
+    * (PHP_5_3)
+      ext/standard/math.c:
+      ws->tab fixes
+
+2008-02-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_gc.c
+      ZendEngine2/zend_gc.c:
+      Prevented recursive collector invocation
+
+    * (PHP_5_2)
+      ext/standard/tests/array/current_variation4.phpt:
+      Fixed test
+
+2008-02-21  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/sockets/sockets.c:
+      MFB: Fixed Bug #44197 (socket array keys lost on socket_select)
+
+    * (PHP_5_2)
+      ext/sockets/sockets.c:
+      Fix typo
+
+    * (PHP_5_2)
+      NEWS
+      ext/sockets/sockets.c:
+      Fixed Bug #44197 (socket array keys lost on socket_select)
+
 2008-02-20  Felipe Pena  <felipensp@gmail.com>
 
     * ext/pcre/php_pcre.c

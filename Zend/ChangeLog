@@ -1,3 +1,36 @@
+2008-02-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_builtin_functions.c
+      zend_builtin_functions.c
+      zend_builtin_functions.c
+      tests/bug43483.phpt
+      tests/bug43483.phpt:
+      Fixed bug #43483 (get_class_methods() does not list all visible methods)
+
+    * tests/bug43483.phpt
+      tests/bug43483.phpt
+      tests/bug43483.phpt:
+        1.1.4;
+      file bug43483.phpt was initially added on branch PHP_5_2.
+
+    * zend_object_handlers.c
+      zend_object_handlers.c
+      zend_object_handlers.c
+      tests/bug44141.phpt
+      tests/bug44141.phpt:
+      Fixed bug #44141 (private parent constructor callable through static
+      function)
+
+    * tests/bug44141.phpt
+      tests/bug44141.phpt
+      tests/bug44141.phpt:
+        1.1.4;
+      file bug44141.phpt was initially added on branch PHP_5_2.
+
+    * zend_gc.c
+      zend_gc.c:
+      Prevented recursive collector invocation
+
 2008-02-20  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c
