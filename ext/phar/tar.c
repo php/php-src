@@ -475,7 +475,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 	}
 
 	/* set stub */
-	if (user_stub && (len < 0 || (len == sizeof("dummy") - 1 && !strncmp(user_stub, "dummy", sizeof("dummy")-1)))) {
+	if (user_stub && len) {
 		char *pos;
 		if (len < 0) {
 			/* resource passed in */
