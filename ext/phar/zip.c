@@ -689,7 +689,7 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 	}
 
 	/* set stub */
-	if (user_stub && user_stub != "dummy") {
+	if (user_stub && !len) {
 		if (len < 0) {
 			/* resource passed in */
 			if (!(php_stream_from_zval_no_verify(stubfile, (zval **)user_stub))) {
@@ -757,6 +757,7 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 		/* Either this is a brand new phar (add the stub), or setDefaultStub() is the caller (overwrite the stub) */
 		entry.fp = php_stream_fopen_tmpfile();
 		if (sizeof(newstub)-1 != php_stream_write(entry.fp, newstub, sizeof(newstub)-1)) {
+			php_stream_close(entry.fp);
 			if (error) {
 				spprintf(error, 0, "unable to %s stub in%szip-based phar \"%s\", failed", user_stub ? "overwrite" : "create", user_stub ? " " : " new ", phar->fname);
 			}
@@ -776,6 +777,9 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 					}
 					return EOF;
 				}
+			} else {
+				php_stream_close(entry.fp);
+				efree(entry.filename);
 			}
 		} else {
 			if (SUCCESS != zend_hash_update(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL)) {
