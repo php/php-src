@@ -124,7 +124,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(get_included_files,	NULL)
 	ZEND_FALIAS(get_required_files,	get_included_files,		NULL)
 	ZEND_FE(is_subclass_of,		NULL)
-	ZEND_FE(is_a,				NULL)
+	ZEND_DEP_FE(is_a,			NULL)
 	ZEND_FE(get_class_vars,		NULL)
 	ZEND_FE(get_object_vars,	NULL)
 	ZEND_FE(get_class_methods,	NULL)
@@ -740,7 +740,6 @@ ZEND_FUNCTION(is_subclass_of)
    Returns true if the object is of this class or has this class as one of its parents */
 ZEND_FUNCTION(is_a)
 {
-	zend_error(E_STRICT, "is_a(): Deprecated. Please use the instanceof operator");
 	is_a_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
