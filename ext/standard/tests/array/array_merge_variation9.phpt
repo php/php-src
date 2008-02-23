@@ -38,7 +38,7 @@ echo "Done";
 ?>
 
 --EXPECTF--
-Strict Standards: Call-time pass-by-reference has been deprecated in %s on line %d
+Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 *** Testing array_merge() : usage variations ***
 
 -- Merge an array made up of referenced variables to an assoc. array --
@@ -112,7 +112,7 @@ array(3) {
 }
 Done
 --UEXPECTF--
-Strict Standards: Call-time pass-by-reference has been deprecated in %s on line %d
+Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 *** Testing array_merge() : usage variations ***
 
 -- Merge an array made up of referenced variables to an assoc. array --
