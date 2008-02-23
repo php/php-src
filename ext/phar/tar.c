@@ -187,6 +187,8 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 			php_stream_close(fp);
 			zend_hash_destroy(&myphar->manifest);
 			myphar->manifest.arBuckets = 0;
+			zend_hash_destroy(&myphar->mounted_dirs);
+			myphar->mounted_dirs.arBuckets = 0;
 			efree(myphar);
 			return FAILURE;
 		}
@@ -205,6 +207,8 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 			php_stream_close(fp);
 			zend_hash_destroy(&myphar->manifest);
 			myphar->manifest.arBuckets = 0;
+			zend_hash_destroy(&myphar->mounted_dirs);
+			myphar->mounted_dirs.arBuckets = 0;
 			efree(myphar);
 			return FAILURE;
 		}
@@ -260,6 +264,8 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 				php_stream_close(fp);
 				zend_hash_destroy(&myphar->manifest);
 				myphar->manifest.arBuckets = 0;
+				zend_hash_destroy(&myphar->mounted_dirs);
+				myphar->mounted_dirs.arBuckets = 0;
 				efree(myphar);
 				return FAILURE;
 			}
@@ -284,6 +290,8 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 				php_stream_close(fp);
 				zend_hash_destroy(&myphar->manifest);
 				myphar->manifest.arBuckets = 0;
+				zend_hash_destroy(&myphar->mounted_dirs);
+				myphar->mounted_dirs.arBuckets = 0;
 				efree(myphar);
 				return FAILURE;
 			}
@@ -309,6 +317,8 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 		php_stream_close(fp);
 		zend_hash_destroy(&myphar->manifest);
 		myphar->manifest.arBuckets = 0;
+		zend_hash_destroy(&myphar->mounted_dirs);
+		myphar->mounted_dirs.arBuckets = 0;
 		efree(myphar);
 		return FAILURE;
 	}
