@@ -53,7 +53,7 @@ echo count($queue)."\n";
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-Strict Standards: Call-time pass-by-reference has been deprecated in %s on line %d
+Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 Exception: Can't shift from an empty datastructure
 Exception: Can't shift from an empty datastructure
 2
