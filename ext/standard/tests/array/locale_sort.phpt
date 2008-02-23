@@ -58,7 +58,7 @@ array(13) {
   string(25) "Territoires du Nord-Ouest"
 }
 --UEXPECTF--
-Strict Standards: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 array(13) {
   [u"AB"]=>
   unicode(7) "Alberta"
