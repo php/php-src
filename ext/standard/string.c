@@ -491,7 +491,7 @@ PHP_FUNCTION(nl_langinfo)
 	}
 
 	if (UG(unicode)) {
-		php_error_docref(NULL TSRMLS_CC, E_STRICT, "deprecated in Unicode mode, please use ICU locale functions");
+		php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "deprecated in Unicode mode, please use ICU locale functions");
 	}
 
 	switch(item) { /* {{{ */
@@ -6148,7 +6148,7 @@ PHP_FUNCTION(setlocale)
 	}
 
 	if (UG(unicode)) {
-		php_error_docref(NULL TSRMLS_CC, E_STRICT, "deprecated in Unicode mode, please use ICU locale functions");
+		php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "deprecated in Unicode mode, please use ICU locale functions");
 	}
 
 #ifdef HAVE_SETLOCALE
@@ -7177,7 +7177,7 @@ PHP_FUNCTION(localeconv)
 	}
 
 	if (UG(unicode)) {
-		php_error_docref(NULL TSRMLS_CC, E_STRICT, "deprecated in Unicode mode, please use ICU locale functions");
+		php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "deprecated in Unicode mode, please use ICU locale functions");
 	}
 
 	MAKE_STD_ZVAL(grouping);
