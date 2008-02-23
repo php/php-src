@@ -1,5 +1,7 @@
 --TEST--
 Test setlocale() function : error condition
+--INI--
+error_reporting=14335
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
@@ -60,7 +62,7 @@ bool(false)
 
 -- Testing setlocale() function with invalid category --
 
-Warning: setlocale(): Passing locale category name as string is deprecated. Use the LC_* -constants instead in %s on line %d
+Deprecated: setlocale(): Passing locale category name as string is deprecated. Use the LC_* -constants instead in %s on line %d
 
 Warning: setlocale(): Invalid locale category name TEST, must be one of LC_ALL, LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC, or LC_TIME in %s on line %d
 bool(false)

@@ -1462,7 +1462,7 @@ PHP_FUNCTION(mysql_db_query)
 	}
 	
 	if (MySG(trace_mode) || !strcasecmp(get_active_function_name(TSRMLS_C), "mysql")) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "This function is deprecated; use mysql_query() instead.");
+		php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "This function is deprecated; use mysql_query() instead.");
 	}
 	
 	php_mysql_do_query_general(query, mysql_link, id, db, MYSQL_STORE_RESULT, return_value TSRMLS_CC);
@@ -1762,7 +1762,7 @@ PHP_FUNCTION(mysql_escape_string)
 	Z_TYPE_P(return_value) = IS_STRING;
 
 	if (MySG(trace_mode)){
-		php_error_docref("function.mysql-real-escape-string" TSRMLS_CC, E_WARNING, "This function is deprecated; use mysql_real_escape_string() instead.");
+		php_error_docref("function.mysql-real-escape-string" TSRMLS_CC, E_DEPRECATED, "This function is deprecated; use mysql_real_escape_string() instead.");
 	}
 }
 /* }}} */

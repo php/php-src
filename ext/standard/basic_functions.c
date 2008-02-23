@@ -4934,6 +4934,9 @@ PHP_FUNCTION(set_magic_quotes_runtime)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &new_setting) == FAILURE) {
 		RETURN_FALSE;
 	}
+
+	php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "This function is deprecated and removed in PHP 6. See http://php.net/{migrate}#set_magic_quotes_runtime for details.");
+
 	convert_to_boolean_ex(new_setting);
 
 	PG(magic_quotes_runtime) = (zend_bool) Z_LVAL_PP(new_setting);
@@ -4945,6 +4948,7 @@ PHP_FUNCTION(set_magic_quotes_runtime)
    Get the current active configuration setting of magic_quotes_runtime */
 PHP_FUNCTION(get_magic_quotes_runtime)
 {
+	php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "This function is deprecated and removed in PHP 6. See http://php.net/{migrate}#get_magic_quotes_runtime for details.");
 	RETURN_LONG(PG(magic_quotes_runtime));
 }
 /* }}} */
@@ -4953,6 +4957,7 @@ PHP_FUNCTION(get_magic_quotes_runtime)
    Get the current active configuration setting of magic_quotes_gpc */
 PHP_FUNCTION(get_magic_quotes_gpc)
 {
+	php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "This function is deprecated and removed in PHP 6. See http://php.net/{migrate}#get_magic_quotes_gpc for details.");
 	RETURN_LONG(PG(magic_quotes_gpc));
 }
 /* }}} */

@@ -477,7 +477,7 @@ void fetch_array_dim(znode *result, znode *parent, znode *dim TSRMLS_DC)
 void fetch_string_offset(znode *result, znode *parent, znode *offset TSRMLS_DC)
 {
 #ifdef ilia_0
-	zend_error(E_STRICT, "Usage of {} to access string offsets is deprecated and will be removed in PHP 6");
+	zend_error(E_DEPRECATED, "Usage of {} to access string offsets is deprecated and will be removed in PHP 6");
 #endif
 	fetch_array_dim(result, parent, offset TSRMLS_CC);
 }
@@ -1853,7 +1853,7 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC)
 
 	if (original_op==ZEND_SEND_REF
 		&& !CG(allow_call_time_pass_reference)) {
-		zend_error(E_COMPILE_WARNING,
+		zend_error(E_DEPRECATED,
 					"Call-time pass-by-reference has been deprecated; "
 					"If you would like to pass it by reference, modify the declaration of %s().  "
 					"If you would like to enable call-time pass-by-reference, you can set "
