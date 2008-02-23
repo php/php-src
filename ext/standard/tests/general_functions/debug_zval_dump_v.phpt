@@ -123,7 +123,7 @@ echo "Done\n";
 ?>
 
 --EXPECTF--
-Strict Standards: Call-time pass-by-reference has been deprecated in %s on line %d
+Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 *** Testing debug_zval_dump() on functions ***
 --- Variation 1: global variable inside a function ---
 
@@ -215,7 +215,7 @@ string(10) "NULLstring" refcount(3)
 &string(10) "NULLstring" refcount(2)
 Done
 --UEXPECTF--
-Strict Standards: Call-time pass-by-reference has been deprecated in %s on line %d
+Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 *** Testing debug_zval_dump() on functions ***
 --- Variation 1: global variable inside a function ---
 
