@@ -36,19 +36,19 @@ var_dump($array);
 echo "Done";
 ?>
 --EXPECTF--
-Strict Standards: Call-time pass-by-reference has been deprecated in %s on line %d
+Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 
-Strict Standards: Call-time pass-by-reference has been deprecated in %s on line %d
+Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 
-Strict Standards: Call-time pass-by-reference has been deprecated in %s on line %d
+Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 
-Strict Standards: Call-time pass-by-reference has been deprecated in %s on line %d
+Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 
-Strict Standards: Call-time pass-by-reference has been deprecated in %s on line %d
+Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 
-Strict Standards: Call-time pass-by-reference has been deprecated in %s on line %d
+Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 
-Strict Standards: Call-time pass-by-reference has been deprecated in %s on line %d
+Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 *** Testing array_push() : usage variations ***
 
 -- Pass array_push referenced varialbes as $var arguments --
@@ -142,19 +142,19 @@ array(10) {
 }
 Done
 --UEXPECTF--
-Strict Standards: Call-time pass-by-reference has been deprecated in %s on line %d
+Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 
-Strict Standards: Call-time pass-by-reference has been deprecated in %s on line %d
+Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 
-Strict Standards: Call-time pass-by-reference has been deprecated in %s on line %d
+Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 
-Strict Standards: Call-time pass-by-reference has been deprecated in %s on line %d
+Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 
-Strict Standards: Call-time pass-by-reference has been deprecated in %s on line %d
+Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 
-Strict Standards: Call-time pass-by-reference has been deprecated in %s on line %d
+Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 
-Strict Standards: Call-time pass-by-reference has been deprecated in %s on line %d
+Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 *** Testing array_push() : usage variations ***
 
 -- Pass array_push referenced varialbes as $var arguments --
