@@ -534,7 +534,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 		}
 	} else {
 		/* Either this is a brand new phar (add the stub), or setDefaultStub() is the caller (overwrite the stub) */
-		if (!zend_hash_exists(&phar->manifest, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
+		if (zend_hash_exists(&phar->manifest, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
 			goto no_default_stub;
 		}
 		entry.fp = php_stream_fopen_tmpfile();
