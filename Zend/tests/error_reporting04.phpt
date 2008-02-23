@@ -19,5 +19,5 @@ echo "Done\n";
 ?>
 --EXPECTF--
 Notice: Undefined variable: undef in %s on line %d
-int(8191)
+int(16383)
 Done

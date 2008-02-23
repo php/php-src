@@ -66,7 +66,7 @@ static int (*zend_get_configuration_directive_p)(char *name, uint name_length, z
 static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
 {
 	if (!new_value) {
-		EG(error_reporting) = E_ALL & ~E_NOTICE & ~E_STRICT;
+		EG(error_reporting) = E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED;
 	} else {
 		EG(error_reporting) = atoi(new_value);
 	}
@@ -974,6 +974,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 		case E_ERROR:
 		case E_NOTICE:
 		case E_STRICT:
+		case E_DEPRECATED:
 		case E_WARNING:
 		case E_USER_ERROR:
 		case E_USER_WARNING:

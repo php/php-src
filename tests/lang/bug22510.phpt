@@ -1,7 +1,7 @@
 --TEST--
 Bug #22510 (segfault among complex references)
 --INI--
-error_reporting=4095
+error_reporting=E_ALL | E_DEPRECATED
 --FILE--
 <?php
 class foo 
@@ -91,7 +91,7 @@ $bar->instance->finalize();
 print "I'm alive!\n";
 ?>
 --EXPECTF--
-Strict Standards: Assigning the return value of new by reference is deprecated in %s on line %d
+Deprecated: Assigning the return value of new by reference is deprecated in %s on line %d
 ok1
 bar::run1
 foo::method1
