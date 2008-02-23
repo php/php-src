@@ -534,11 +534,15 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 		}
 	} else {
 		/* Either this is a brand new phar (add the stub), or setDefaultStub() is the caller (overwrite the stub) */
+		if (!zend_hash_exists(&phar->manifest, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
+			goto no_default_stub;
+		}
 		entry.fp = php_stream_fopen_tmpfile();
 		if (sizeof(newstub)-1 != php_stream_write(entry.fp, newstub, sizeof(newstub)-1)) {
 			if (error) {
 				spprintf(error, 0, "unable to %s stub in%star-based phar \"%s\", failed", user_stub ? "overwrite" : "create", user_stub ? " " : " new ", phar->fname);
 			}
+			php_stream_close(entry.fp);
 			return EOF;
 		}
 		entry.uncompressed_filesize = entry.compressed_filesize = sizeof(newstub) - 1;
@@ -546,15 +550,13 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 		entry.filename_len = sizeof(".phar/stub.php")-1;
 
 		if (!user_stub) {
-			if (!zend_hash_exists(&phar->manifest, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
-				if (SUCCESS != zend_hash_add(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL)) {
-					php_stream_close(entry.fp);
-					efree(entry.filename);
-					if (error) {
-						spprintf(error, 0, "unable to create stub in tar-based phar \"%s\"", phar->fname);
-					}
-					return EOF;
+			if (SUCCESS != zend_hash_add(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL)) {
+				php_stream_close(entry.fp);
+				efree(entry.filename);
+				if (error) {
+					spprintf(error, 0, "unable to create stub in tar-based phar \"%s\"", phar->fname);
 				}
+				return EOF;
 			}
 		} else {
 			if (SUCCESS != zend_hash_update(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL)) {
@@ -567,7 +569,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 			}
 		}
 	}
-
+no_default_stub:
 	if (phar->fp && !phar->is_brandnew) {
 		oldfile = phar->fp;
 		closeoldfile = 0;
