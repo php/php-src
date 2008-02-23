@@ -1,3 +1,101 @@
+2008-02-22  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/lib/dow.c
+      ext/date/lib/dow.c:
+      - MFH: Fixed bug #44216 (strftime segfaults on large negative value).
+
+    * ext/date/lib/dow.c:
+      - Fixed bug #44216 (strftime segfaults on large negative value).
+
+2008-02-22  Philip Olson  <philipolson@gmail.com>
+
+    * README.WIN32-BUILD-SYSTEM:
+      typo (closes bug #43943)
+
+2008-02-22  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/array.c
+      ext/standard/array.c:
+      Fixed Bug #44212 (array_diff_assoc not reporting missing arguments)
+
+2008-02-22  Robert Nicholson  <rob_nicholson@uk.ibm.com>
+
+    * ext/standard/tests/array/array_diff_assoc_error.phpt
+      ext/standard/tests/array/array_diff_assoc_error.phpt:
+      - bug #44212  array_diff_assoc_error.phpt should  expect warnings for
+      missing parameters
+
+2008-02-22  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/lib/timelib.h
+      ext/date/lib/timelib.h:
+      - MFH: Fixed bug #44209: strtotime doesn't support 64 bit timestamps.
+
+    * ext/date/lib/timelib.h:
+      - Fixed bug #44209: strtotime doesn't support 64 bit timestamps.
+
+2008-02-22  Josie Messa  <josmessa@uk.ibm.com>
+
+    * ext/standard/tests/array/reset_basic.phpt
+      ext/standard/tests/array/reset_basic.phpt
+      ext/standard/tests/array/reset_error.phpt
+      ext/standard/tests/array/reset_error.phpt
+      ext/standard/tests/array/reset_variation1.phpt
+      ext/standard/tests/array/reset_variation1.phpt
+      ext/standard/tests/array/reset_variation2.phpt
+      ext/standard/tests/array/reset_variation2.phpt
+      ext/standard/tests/array/reset_variation3.phpt
+      ext/standard/tests/array/reset_variation3.phpt:
+      - New tests for reset() function
+
+    * ext/standard/tests/array/reset_basic.phpt
+      ext/standard/tests/array/reset_basic.phpt
+      ext/standard/tests/array/reset_basic.phpt
+      ext/standard/tests/array/reset_error.phpt
+      ext/standard/tests/array/reset_error.phpt
+      ext/standard/tests/array/reset_error.phpt
+      ext/standard/tests/array/reset_variation1.phpt
+      ext/standard/tests/array/reset_variation1.phpt
+      ext/standard/tests/array/reset_variation1.phpt
+      ext/standard/tests/array/reset_variation2.phpt
+      ext/standard/tests/array/reset_variation2.phpt
+      ext/standard/tests/array/reset_variation2.phpt
+      ext/standard/tests/array/reset_variation3.phpt
+      ext/standard/tests/array/reset_variation3.phpt
+      ext/standard/tests/array/reset_variation3.phpt:
+        1.1.4;
+      file reset_basic.phpt was initially added on branch PHP_5_2.
+
+2008-02-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/pcre/tests/bug44191.phpt
+      ext/standard/tests/array/key_variation4.phpt:
+      Fixed test
+
+2008-02-22  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_3)
+      ext/standard/head.c:
+      No point in echoeing the raw value back here in the error message
+
+    * ext/soap/php_http.c:
+      Missing footer comment
+
+    * (PHP_5_3)
+      ext/soap/php_http.c:
+      Missing footer
+
+2008-02-22  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/pdo/tests/bug_44159.phpt
+      ext/pdo/tests/bug_44159.phpt:
+      Fix test
+
 2008-02-21  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
