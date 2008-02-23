@@ -2212,7 +2212,7 @@ PHP_METHOD(Phar, setStub)
 {
 	char *index = NULL, *webindex = NULL, *error = NULL;
 	char *stub = "dummy";
-	int index_len = 0, webindex_len = 0;
+	int index_len = 0, webindex_len = 0, created_stub = 0;
 	size_t stub_len = 0;
 	PHAR_ARCHIVE_OBJECT();
 
@@ -2237,11 +2237,18 @@ PHP_METHOD(Phar, setStub)
 		if (error) {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, error);
 			efree(error);
+			if (stub) {
+				efree(stub);
+			}
 			RETURN_FALSE;
 		}
+		created_stub = 1;
 	}
 
 	phar_flush(phar_obj->arc.archive, stub, stub_len, &error TSRMLS_CC);
+	if (created_stub) {
+		efree(stub);
+	}
 
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
