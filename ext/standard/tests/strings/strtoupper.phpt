@@ -22,5 +22,5 @@ echo strtoupper($chars)."\n";
 --EXPECT--
 ÄÖÜ
 --UEXPECTF--
-Strict Standards: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 ÄÖÜ

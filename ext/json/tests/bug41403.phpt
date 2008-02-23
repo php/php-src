@@ -43,7 +43,7 @@ array(2) {
 }
 Done
 --UEXPECTF--
-Strict Standards: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 array(1) {
   [0]=>
   float(2,1)
