@@ -2579,7 +2579,7 @@ int phar_zend_open(const char *filename, zend_file_handle *handle TSRMLS_DC) /* 
 						}
 						efree(old);
 						efree(arch);
-						goto skip_phar;
+						return FAILURE;
 					}
 				}
 			}
