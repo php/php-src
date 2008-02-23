@@ -782,7 +782,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 		return NULL;
 	}
 
-	if (!&phar->manifest.arBuckets) {
+	if (!phar->manifest.arBuckets) {
 		return NULL;
 	}
 	if (is_dir) {
