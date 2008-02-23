@@ -216,6 +216,8 @@ foundit:
 #define PHAR_ZIP_FAIL(errmsg) \
 			zend_hash_destroy(&mydata->manifest); \
 			mydata->manifest.arBuckets = 0; \
+			zend_hash_destroy(&mydata->mounted_dirs); \
+			mydata->mounted_dirs.arBuckets = 0; \
 			php_stream_close(fp); \
 			if (mydata->metadata) { \
 				zval_dtor(mydata->metadata); \
