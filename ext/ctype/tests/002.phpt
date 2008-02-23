@@ -47,9 +47,9 @@ ctype_punct 32 32 0
 ctype_space 6 6 0
 ctype_xdigit 22 22 0
 --UEXPECTF--
-Strict Standards: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s002.php on line %d
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s002.php on line %d
 
-Strict Standards: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s002.php on line %d
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s002.php on line %d
 LOCALE is '%s'
 ctype_lower 26 26 0
 ctype_upper 26 26 0
