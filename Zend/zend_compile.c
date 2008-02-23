@@ -2032,13 +2032,13 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC) /* {{
 		    function_ptr->common.function_name.v &&
 		    function_ptr->common.type == ZEND_USER_FUNCTION &&
 		    !ARG_SHOULD_BE_SENT_BY_REF(function_ptr, (zend_uint) offset)) {
-			zend_error(E_STRICT,
+			zend_error(E_DEPRECATED,
 				"Call-time pass-by-reference has been deprecated; "
 				"if you would like to pass argument by reference, modify the declaration of %R().",
 				UG(unicode)?IS_UNICODE:IS_STRING,
 				function_ptr->common.function_name.v);
 		} else{
-			zend_error(E_STRICT,
+			zend_error(E_DEPRECATED,
 				"Call-time pass-by-reference has been deprecated");
 		}
 		send_by_reference = 1;

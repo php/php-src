@@ -1,5 +1,7 @@
 --TEST--
 Confirm difference between assigning new directly and by reference.
+--INI--
+error_reporting=E_ALL | E_DEPRECATED
 --FILE--
 <?php
   echo "Compile-time strict error message should precede this.\n";
@@ -27,7 +29,7 @@ Confirm difference between assigning new directly and by reference.
   var_dump($f);
 ?>
 --EXPECTF--
-Strict Standards: Assigning the return value of new by reference is deprecated in %s on line 23
+Deprecated: Assigning the return value of new by reference is deprecated in %s on line 23
 Compile-time strict error message should precede this.
 $f initially points to the first object:
 object(Inc)#%d (1) {

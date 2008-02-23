@@ -2129,7 +2129,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			ZEND_VM_NEXT_OPCODE(); /* Never reached */
 		}
 		if (EX(function_state).function->common.fn_flags & ZEND_ACC_DEPRECATED) {
-			zend_error(E_STRICT, "Function %v%s%v() is deprecated",
+			zend_error(E_DEPRECATED, "Function %v%s%v() is deprecated",
 				EX(function_state).function->common.scope ? EX(function_state).function->common.scope->name : EMPTY_ZSTR,
 				EX(function_state).function->common.scope ? "::" : "",
 				EX(function_state).function->common.function_name);

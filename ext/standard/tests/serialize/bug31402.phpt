@@ -1,7 +1,7 @@
 --TEST--
 Bug #31402 (unserialize() generates references when it should not)
 --INI--
-error_reporting=E_ALL&~E_STRICT
+error_reporting=E_ALL&~E_STRICT&~E_DEPRECATED
 --FILE--
 <?php 
 

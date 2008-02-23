@@ -1,7 +1,7 @@
 --TEST--
 is_a() and is_subclass_of() shouldn't call __autoload
 --INI--
-error_reporting=4095
+error_reporting=14335
 --FILE--
 <?php
 function __autoload($name) {
@@ -31,16 +31,16 @@ var_dump(is_subclass_of($a, "INT"));
 var_dump(is_subclass_of("X1", "X2"));
 ?>
 --EXPECTF--
-Strict Standards: is_a(): Deprecated. Please use the instanceof operator in %sis_a.php on line 17
+Deprecated: is_a(): Deprecated. Please use the instanceof operator in %sis_a.php on line 17
 bool(false)
 
-Strict Standards: is_a(): Deprecated. Please use the instanceof operator in %sis_a.php on line 18
+Deprecated: is_a(): Deprecated. Please use the instanceof operator in %sis_a.php on line 18
 bool(true)
 
-Strict Standards: is_a(): Deprecated. Please use the instanceof operator in %sis_a.php on line 19
+Deprecated: is_a(): Deprecated. Please use the instanceof operator in %sis_a.php on line 19
 bool(true)
 
-Strict Standards: is_a(): Deprecated. Please use the instanceof operator in %sis_a.php on line 20
+Deprecated: is_a(): Deprecated. Please use the instanceof operator in %sis_a.php on line 20
 bool(true)
 bool(false)
 bool(false)
