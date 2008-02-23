@@ -691,7 +691,7 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 	}
 
 	/* set stub */
-	if (user_stub && !len) {
+	if (user_stub && len) {
 		if (len < 0) {
 			/* resource passed in */
 			if (!(php_stream_from_zval_no_verify(stubfile, (zval **)user_stub))) {
