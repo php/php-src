@@ -322,7 +322,7 @@ static void php_zval_filter(zval **value, long filter, long flags, zval *options
 	filter_func.function(*value, flags, options, charset TSRMLS_CC);
 
 	if (
-		options &&
+		options && (Z_TYPE_P(options) == IS_ARRAY || Z_TYPE_P(options) == IS_OBJECT) &&
 		((flags & FILTER_NULL_ON_FAILURE && Z_TYPE_PP(value) == IS_NULL) || 
 		(!(flags & FILTER_NULL_ON_FAILURE) && Z_TYPE_PP(value) == IS_BOOL && Z_LVAL_PP(value) == 0)) &&
 		zend_hash_exists(HASH_OF(options), "default", sizeof("default"))
