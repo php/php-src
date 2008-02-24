@@ -22,8 +22,8 @@ string(7) "X$3.14Y"
 Warning: money_format(): Only a single %ci or %cn token can be used in %s on line %d
 bool(false)
 --UEXPECTF--
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in /home/jani/src/php6/ext/standard/tests/strings/moneyformat.php on line 2
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 unicode(7) "X$3.14Y"
 
-Warning: money_format(): Only a single %i or %n token can be used in /home/jani/src/php6/ext/standard/tests/strings/moneyformat.php on line 4
+Warning: money_format(): Only a single %ci or %cn token can be used in %s on line %d
 bool(false)
