@@ -8,10 +8,10 @@ phar.readonly=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar';
 $pname = 'phar://' . $fname;
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.php';
-$pname2 = 'phar://' . $fname;
+$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip';
+$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.zip';
 $stub = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
 $file = $stub;
 
@@ -30,9 +30,9 @@ $phar->convertToZip();
 var_dump($phar->isZip());
 var_dump($phar->getStub());
 
-copy($fname, $fname2);
+copy($fname2, $fname3);
 
-$phar = new Phar($fname2);
+$phar = new Phar($fname3);
 var_dump($phar->isZip());
 var_dump($phar->getStub());
 
@@ -40,8 +40,8 @@ var_dump($phar->getStub());
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.zip');
 __HALT_COMPILER();
 ?>
 --EXPECT--
