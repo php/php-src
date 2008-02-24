@@ -19,8 +19,8 @@ printf("thousands_sep: %s\n", $lc['thousands_sep']);
 decimal_point: ,
 thousands_sep: .
 --UEXPECTF--
-Strict Standards: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 
-Strict Standards: localeconv(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+Deprecated: localeconv(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 decimal_point: ,
 thousands_sep: .
