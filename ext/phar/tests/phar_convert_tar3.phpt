@@ -33,7 +33,7 @@ var_dump($phar->isTar());
 var_dump($phar->isCompressed());
 var_dump($phar->getStub());
 
-copy($fname2, $fname3);
+copy($fname2 . '.bz2', $fname3);
 
 $phar = new Phar($fname3);
 var_dump($phar->isTar());
