@@ -392,14 +392,13 @@ int phar_open_archive_fp(phar_archive_data *phar TSRMLS_DC);
 /* tar functions in tar.c */
 int phar_is_tar(char *buf);
 int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, php_uint32 compression, char **error TSRMLS_DC);
-int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **error TSRMLS_DC);
 int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
-int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **error TSRMLS_DC);
+int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defaultstub, char **error TSRMLS_DC);
 
 /* zip functions in zip.c */
 int phar_open_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, char **error TSRMLS_DC);
 int phar_open_or_create_zip(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
-int phar_zip_flush(phar_archive_data *archive, char *user_stub, long len, char **error TSRMLS_DC);
+int phar_zip_flush(phar_archive_data *archive, char *user_stub, long len, int defaultstub, char **error TSRMLS_DC);
 
 #ifdef PHAR_MAIN
 static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
@@ -413,7 +412,7 @@ phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int pa
 phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, int path_len, char dir, char **error TSRMLS_DC);
 phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, char *mode, char allow_dir, char **error TSRMLS_DC);
 int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char *path, int path_len, char *mode, char allow_dir, char **error TSRMLS_DC);
-int phar_flush(phar_archive_data *archive, char *user_stub, long len, char **error TSRMLS_DC);
+int phar_flush(phar_archive_data *archive, char *user_stub, long len, int convert, char **error TSRMLS_DC);
 int phar_detect_phar_fname_ext(const char *filename, int check_length, char **ext_str, int *ext_len);
 int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_len, char **entry, int *entry_len TSRMLS_DC);
 

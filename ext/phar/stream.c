@@ -393,7 +393,7 @@ static int phar_stream_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 	char *error;
 	int ret;
 	if (stream->mode[0] == 'w' || (stream->mode[0] == 'r' && stream->mode[1] == '+')) {
-		ret = phar_flush(((phar_entry_data *)stream->abstract)->phar, 0, 0, &error TSRMLS_CC);
+		ret = phar_flush(((phar_entry_data *)stream->abstract)->phar, 0, 0, 0, &error TSRMLS_CC);
 		if (error) {
 			php_stream_wrapper_log_error(stream->wrapper, REPORT_ERRORS TSRMLS_CC, error);
 			efree(error);
@@ -803,7 +803,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		}
 		entry->is_modified = 1;
 		entry->filename_len = strlen(entry->filename);
-		phar_flush(phar, 0, 0, &error TSRMLS_CC);
+		phar_flush(phar, 0, 0, 0, &error TSRMLS_CC);
 		if (error) {
 			php_url_free(resource_from);
 			php_url_free(resource_to);

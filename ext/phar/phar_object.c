@@ -1452,7 +1452,7 @@ PHP_METHOD(Phar, buildFromIterator)
 	pass.ret = return_value;
 
 	if (SUCCESS == spl_iterator_apply(obj, (spl_iterator_apply_func_t) phar_build, (void *) &pass TSRMLS_CC)) {
-		phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
+		phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 			efree(error);
@@ -1560,13 +1560,10 @@ static int phar_restore_apply(void *data TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static void phar_convert_to_other(phar_archive_data *source, int convert, php_uint32 flags TSRMLS_DC) /* {{{ */
+static void phar_convert_to_other(phar_archive_data *source, int convert, char *ext, php_uint32 flags TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data phar = {0};
 	char *error;
-	zval *userz;
-	long tmp;
-	php_stream *fp;
 	phar_entry_info *entry, newentry;
 
 	/* set whole-archive compression from parameter */
@@ -1595,17 +1592,6 @@ static void phar_convert_to_other(phar_archive_data *source, int convert, php_ui
 				"Cannot convert phar archive \"%s\"", source->fname);
 			zend_hash_apply(&source->manifest, phar_restore_apply TSRMLS_CC);
 			return;
-		}
-		if (!convert) {
-			/* converting to Phar */
-			if (entry->filename_len == sizeof(".phar/stub.php")-1 && !strncmp(entry->filename, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
-				/* do not copy stub file */
-				continue;
-			}
-			if (entry->filename_len == sizeof(".phar/alias.txt")-1 && !strncmp(entry->filename, ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
-				/* do not copy alias file */
-				continue;
-			}
 		}
 		if (entry->fp_refcount > 0) {
 			zend_hash_destroy(&(phar.manifest));
@@ -1651,41 +1637,7 @@ static void phar_convert_to_other(phar_archive_data *source, int convert, php_ui
 		zend_hash_add(&(phar.manifest), newentry.filename, newentry.filename_len, (void*)&newentry, sizeof(phar_entry_info), NULL);
 	}
 
-	/* next copy the stub and flush */
-
-	if (source->is_tar || source->is_zip) {
-		if (FAILURE == (zend_hash_find(&source->manifest, ".phar/stub.php", sizeof(".phar/stub.php")-1, (void **)&entry))) {
-			/* use default stub - the existing one in the manifest will be used if present */
-			phar_flush(&phar, NULL, 0, &error TSRMLS_CC);
-			goto finalize;
-		}
-		fp = php_stream_open_wrapper(source->fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|0, NULL);
-		php_stream_seek(fp, entry->offset, SEEK_SET);
-		/* use this unused value to set the stub size */
-		source->internal_file_start = entry->uncompressed_filesize;
-	} else {
-		fp = php_stream_open_wrapper(source->fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|0, NULL);
-	}
-	/* copy the other phar's stub */
-	ALLOC_ZVAL(userz);
-	php_stream_to_zval(fp, userz);
-	tmp = source->internal_file_start;
-	source->internal_file_start = 0;
-	phar_flush(&phar, (char *) &userz, -tmp, &error TSRMLS_CC);
-	php_stream_close(fp);
-	efree(userz);
-
-	if (error) {
-		zend_hash_destroy(&(phar.manifest));
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-			"Cannot convert phar archive \"%s\": %s", source->fname, error);
-		efree(error);
-		php_stream_close(phar.fp);
-		return;
-	}
-
-finalize:
-	/* third, update the old phar's manifest */
+	/* update the original manifest */
 	for (zend_hash_internal_pointer_reset(&(phar.manifest)); SUCCESS == zend_hash_has_more_elements(&(phar.manifest)); zend_hash_move_forward(&(phar.manifest))) {
 		phar_entry_info *entry, *mine;
 		if (FAILURE == zend_hash_get_current_data(&(phar.manifest), (void **) &entry)) {
@@ -1696,32 +1648,6 @@ finalize:
 			return;
 		}
 		if (FAILURE == zend_hash_find(&source->manifest, entry->filename, entry->filename_len, (void **) &mine)) {
-			if (phar.is_tar || phar.is_zip) {
-				if (entry->filename_len == sizeof(".phar/stub.php")-1 && !strncmp(entry->filename, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
-					/* a little hack to prevent destruction of data */
-					dtor_func_t save;
-
-					entry->phar = source;
-					save = phar.manifest.pDestructor;
-					phar.manifest.pDestructor = NULL;
-					zend_hash_add(&source->manifest, ".phar/stub.php", sizeof(".phar/stub.php")-1, (void*)entry, sizeof(phar_entry_info), NULL);
-					zend_hash_del(&(phar.manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1);
-					phar.manifest.pDestructor = save;
-					continue;
-				}
-				if (entry->filename_len == sizeof(".phar/alias.txt")-1 && !strncmp(entry->filename, ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
-					/* a little hack to prevent destruction of data */
-					dtor_func_t save;
-
-					entry->phar = source;
-					save = phar.manifest.pDestructor;
-					phar.manifest.pDestructor = NULL;
-					zend_hash_add(&source->manifest, ".phar/alias.txt", sizeof(".phar/alias.txt")-1, (void*)entry, sizeof(phar_entry_info), NULL);
-					zend_hash_del(&(phar.manifest), ".phar/alias.txt", sizeof(".phar/alias.txt")-1);
-					phar.manifest.pDestructor = save;
-					continue;
-				}
-			}
 			zend_hash_destroy(&(phar.manifest));
 			php_stream_close(phar.fp);
 			/* we can't throw an exception or bad crap will happen */
@@ -1748,10 +1674,10 @@ finalize:
 	phar.manifest.pDestructor = NULL;
 	zend_hash_destroy(&(phar.manifest));
 	source->is_zip = phar.is_zip;
+	source->is_tar = phar.is_tar;
 	if (phar.is_zip || phar.is_tar) {
 		source->internal_file_start = source->halt_offset = 0;
 	}
-	source->is_tar = phar.is_tar;
 	if (source->signature) {
 		efree(source->signature);
 	}
@@ -1760,21 +1686,34 @@ finalize:
 	} else {
 		source->signature = 0;
 	}
+	if (source->alias) {
+		efree(source->alias);
+	}
+	source->alias = NULL;
+	source->alias_len = 0;
+	source->is_temporary_alias = 0;
+	source->flags = phar.flags;
+
+	phar_rename_archive(source, ext TSRMLS_CC);
+	phar_flush(source, 0, 0, convert, &error TSRMLS_CC);
 }
 /* }}} */
 
-/* {{{ proto bool Phar::convertToTar([int compression])
- * Convert the phar archive to the tar file format.  The optional parameter can be one of Phar::GZ
- * or Phar::BZ2 to specify whole-file compression
+/* {{{ proto bool Phar::convertToTar([int compression, [string extension]])
+ * Convert the phar archive to the tar file format.  The first parameter can
+ * be one of Phar::GZ or Phar::BZ2 to specify whole-file compression. The
+ * second parameter allows the user to determine the new filename extension
+ * (default is phar.tar). Both parameters are optional.
  */
 PHP_METHOD(Phar, convertToTar)
 {
-	char *error;
+	char *error, *ext = NULL;
 	php_uint32 flags;
 	long method = 0;
+	int ext_len = 0;
 	PHAR_ARCHIVE_OBJECT();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &method) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ls", &method, &ext, &ext_len) == FAILURE) {
 		return;
 	}
 
@@ -1814,26 +1753,13 @@ PHP_METHOD(Phar, convertToTar)
 		return;
 	}
 
-	if (!zend_hash_num_elements(&phar_obj->arc.archive->manifest)) {
-		/* nothing need be done specially, this has no files in it */
-		phar_obj->arc.archive->is_tar = 1;
-		phar_obj->arc.archive->is_modified = 1;
-		RETURN_TRUE;
-	}
-
 	if (phar_obj->arc.archive->donotflush) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot convert phar archive to tar format, call stopBuffering() first");
 		return;
 	}
 
-	phar_flush(phar_obj->arc.archive, NULL, 0, &error TSRMLS_CC);
-	if (error) {
-		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
-		efree(error);
-		return;
-	}
-	phar_convert_to_other(phar_obj->arc.archive, 1, flags TSRMLS_CC);
+	phar_convert_to_other(phar_obj->arc.archive, 1, ext, flags TSRMLS_CC);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1843,8 +1769,13 @@ PHP_METHOD(Phar, convertToTar)
  */
 PHP_METHOD(Phar, convertToZip)
 {
-	char *error;
+	char *error, *ext = NULL;
+	int ext_len = 0;
 	PHAR_ARCHIVE_OBJECT();
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &ext) == FAILURE) {
+		return;
+	}
 	
 	if (phar_obj->arc.archive->is_zip) {
 		RETURN_TRUE;
@@ -1861,29 +1792,26 @@ PHP_METHOD(Phar, convertToZip)
 		return;
 	}
 
-	phar_flush(phar_obj->arc.archive, NULL, 0, &error TSRMLS_CC);
-	if (error) {
-		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
-		efree(error);
-		return;
-	}
-	phar_convert_to_other(phar_obj->arc.archive, 2, 0 TSRMLS_CC);
+	phar_convert_to_other(phar_obj->arc.archive, 2, ext, 0 TSRMLS_CC);
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool Phar::convertToPhar([int compression])
- * Convert the phar archive to the phar file format.  The optional parameter can be one of Phar::GZ
- * or Phar::BZ2 to specify whole-file compression
+/* {{{ proto bool Phar::convertToPhar([int compression, [bool rename]])
+ * Convert the phar archive to the tar file format.  The first parameter can
+ * be one of Phar::GZ or Phar::BZ2 to specify whole-file compression. The
+ * second parameter determines whether the filename should be changed to
+ * reflect the new type (on by default). Both parameters are optional.
  */
 PHP_METHOD(Phar, convertToPhar)
 {
-	char *error;
+	char *error, *ext = NULL;
 	php_uint32 flags;
 	long method = 0;
+	int ext_len = 0;
 	PHAR_ARCHIVE_OBJECT();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &method) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ls", &method, &ext, &ext_len) == FAILURE) {
 		return;
 	}
 
@@ -1929,28 +1857,7 @@ PHP_METHOD(Phar, convertToPhar)
 		return;
 	}
 
-	if (!zend_hash_num_elements(&phar_obj->arc.archive->manifest)) {
-		/* nothing need be done specially, this has no files in it */
-		phar_obj->arc.archive->is_tar = 0;
-		phar_obj->arc.archive->is_zip = 0;
-		phar_obj->arc.archive->is_modified = 1;
-		RETURN_TRUE;
-	}
-
-	if (phar_obj->arc.archive->donotflush) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Cannot convert phar archive to zip format, call stopBuffering() first");
-		return;
-	}
-
-	phar_flush(phar_obj->arc.archive, NULL, 0, &error TSRMLS_CC);
-	if (error) {
-		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
-		efree(error);
-		return;
-	}
-		
-	phar_convert_to_other(phar_obj->arc.archive, 0, flags TSRMLS_CC);
+	phar_convert_to_other(phar_obj->arc.archive, 0, ext, flags TSRMLS_CC);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2009,7 +1916,7 @@ PHP_METHOD(Phar, delete)
 		RETURN_FALSE;
 	}
 
-	phar_flush(phar_obj->arc.archive, NULL, 0, &error TSRMLS_CC);
+	phar_flush(phar_obj->arc.archive, NULL, 0, 0, &error TSRMLS_CC);
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 		efree(error);
@@ -2074,7 +1981,7 @@ PHP_METHOD(Phar, setAlias)
 		phar_obj->arc.archive->alias_len = alias_len;
 		phar_obj->arc.archive->is_temporary_alias = 0;
 
-		phar_flush(phar_obj->arc.archive, NULL, 0, &error TSRMLS_CC);
+		phar_flush(phar_obj->arc.archive, NULL, 0, 0, &error TSRMLS_CC);
 		if (error) {
 			phar_obj->arc.archive->alias = oldalias;
 			phar_obj->arc.archive->alias_len = oldalias_len;
@@ -2146,7 +2053,7 @@ PHP_METHOD(Phar, stopBuffering)
 
 	phar_obj->arc.archive->donotflush = 0;
 
-	phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
+	phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 		efree(error);
@@ -2179,7 +2086,7 @@ PHP_METHOD(Phar, setStub)
 			} else {
 				len = -1;
 			}
-			phar_flush(phar_obj->arc.archive, (char *) &zstub, len, &error TSRMLS_CC);
+			phar_flush(phar_obj->arc.archive, (char *) &zstub, len, 0, &error TSRMLS_CC);
 			if (error) {
 				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 				efree(error);
@@ -2190,7 +2097,7 @@ PHP_METHOD(Phar, setStub)
 				"Cannot change stub, unable to read from input stream");
 		}
 	} else if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &stub, &stub_len) == SUCCESS) {
-		phar_flush(phar_obj->arc.archive, stub, stub_len, &error TSRMLS_CC);
+		phar_flush(phar_obj->arc.archive, stub, stub_len, 0, &error TSRMLS_CC);
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 			efree(error);
@@ -2210,8 +2117,7 @@ PHP_METHOD(Phar, setStub)
  */
  PHP_METHOD(Phar, setDefaultStub)
 {
-	char *index = NULL, *webindex = NULL, *error = NULL;
-	char *stub = "dummy";
+	char *index = NULL, *webindex = NULL, *error = NULL, *stub = NULL;
 	int index_len = 0, webindex_len = 0, created_stub = 0;
 	size_t stub_len = 0;
 	PHAR_ARCHIVE_OBJECT();
@@ -2232,6 +2138,7 @@ PHP_METHOD(Phar, setStub)
 	}
 
 	if (!phar_obj->arc.archive->is_tar && !phar_obj->arc.archive->is_zip) {
+
 		stub = phar_create_default_stub(index, webindex, &stub_len, &error TSRMLS_CC);
 
 		if (error) {
@@ -2245,7 +2152,8 @@ PHP_METHOD(Phar, setStub)
 		created_stub = 1;
 	}
 
-	phar_flush(phar_obj->arc.archive, stub, stub_len, &error TSRMLS_CC);
+	phar_flush(phar_obj->arc.archive, stub, stub_len, 1, &error TSRMLS_CC);
+
 	if (created_stub) {
 		efree(stub);
 	}
@@ -2306,7 +2214,7 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 			phar_obj->arc.archive->sig_flags = algo;
 			phar_obj->arc.archive->is_modified = 1;
 
-			phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
+			phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 			if (error) {
 				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 				efree(error);
@@ -2443,7 +2351,7 @@ PHP_METHOD(Phar, compressAllFilesGZ)
 	}
 	phar_obj->arc.archive->is_modified = 1;
 	
-	phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
+	phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 	if (error) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, error);
 		efree(error);
@@ -2482,7 +2390,7 @@ PHP_METHOD(Phar, compressAllFilesBZIP2)
 	}
 	phar_obj->arc.archive->is_modified = 1;
 	
-	phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
+	phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 	if (error) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, error);
 		efree(error);
@@ -2515,7 +2423,7 @@ PHP_METHOD(Phar, uncompressAllFiles)
 	}
 	phar_obj->arc.archive->is_modified = 1;
 	
-	phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
+	phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 	if (error) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, error);
 		efree(error);
@@ -2604,7 +2512,7 @@ PHP_METHOD(Phar, copy)
 	zend_hash_add(&oldentry->phar->manifest, newfile, newfile_len, (void*)&newentry, sizeof(phar_entry_info), NULL);
 	phar_obj->arc.archive->is_modified = 1;
 
-	phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
+	phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 		efree(error);
@@ -2721,7 +2629,7 @@ PHP_METHOD(Phar, offsetSet)
 			data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
 		}
 		phar_entry_delref(data TSRMLS_CC);
-		phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
+		phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 			efree(error);
@@ -2758,7 +2666,7 @@ PHP_METHOD(Phar, offsetUnset)
 			entry->is_modified = 0;
 			entry->is_deleted = 1;
 			/* we need to "flush" the stream to save the newly deleted file on disk */
-			phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
+			phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 			if (error) {
 				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 				efree(error);
@@ -2912,7 +2820,7 @@ PHP_METHOD(Phar, setMetadata)
 	MAKE_STD_ZVAL(phar_obj->arc.archive->metadata);
 	ZVAL_ZVAL(phar_obj->arc.archive->metadata, metadata, 1, 0);
 
-	phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
+	phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 		efree(error);
@@ -2936,7 +2844,7 @@ PHP_METHOD(Phar, delMetadata)
 		zval_ptr_dtor(&phar_obj->arc.archive->metadata);
 		phar_obj->arc.archive->metadata = NULL;
 
-		phar_flush(phar_obj->arc.archive, 0, 0, &error TSRMLS_CC);
+		phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 			efree(error);
@@ -3168,7 +3076,7 @@ PHP_METHOD(PharFileInfo, chmod)
 	BG(CurrentLStatFile) = NULL;
 	BG(CurrentStatFile) = NULL;
 
-	phar_flush(entry_obj->ent.entry->phar, 0, 0, &error TSRMLS_CC);
+	phar_flush(entry_obj->ent.entry->phar, 0, 0, 0, &error TSRMLS_CC);
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 		efree(error);
@@ -3235,7 +3143,7 @@ PHP_METHOD(PharFileInfo, setMetadata)
 	MAKE_STD_ZVAL(entry_obj->ent.entry->metadata);
 	ZVAL_ZVAL(entry_obj->ent.entry->metadata, metadata, 1, 0);
 
-	phar_flush(entry_obj->ent.entry->phar, 0, 0, &error TSRMLS_CC);
+	phar_flush(entry_obj->ent.entry->phar, 0, 0, 0, &error TSRMLS_CC);
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 		efree(error);
@@ -3262,7 +3170,7 @@ PHP_METHOD(PharFileInfo, delMetadata)
 		zval_ptr_dtor(&entry_obj->ent.entry->metadata);
 		entry_obj->ent.entry->metadata = NULL;
 
-		phar_flush(entry_obj->ent.entry->phar, 0, 0, &error TSRMLS_CC);
+		phar_flush(entry_obj->ent.entry->phar, 0, 0, 0, &error TSRMLS_CC);
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 			efree(error);
@@ -3319,7 +3227,7 @@ PHP_METHOD(PharFileInfo, setCompressedGZ)
 	entry_obj->ent.entry->phar->is_modified = 1;
 	entry_obj->ent.entry->is_modified = 1;
 
-	phar_flush(entry_obj->ent.entry->phar, 0, 0, &error TSRMLS_CC);
+	phar_flush(entry_obj->ent.entry->phar, 0, 0, 0, &error TSRMLS_CC);
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 		efree(error);
@@ -3375,7 +3283,7 @@ PHP_METHOD(PharFileInfo, setCompressedBZIP2)
 	entry_obj->ent.entry->phar->is_modified = 1;
 	entry_obj->ent.entry->is_modified = 1;
 
-	phar_flush(entry_obj->ent.entry->phar, 0, 0, &error TSRMLS_CC);
+	phar_flush(entry_obj->ent.entry->phar, 0, 0, 0, &error TSRMLS_CC);
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 		efree(error);
@@ -3432,7 +3340,7 @@ PHP_METHOD(PharFileInfo, setUncompressed)
 	entry_obj->ent.entry->phar->is_modified = 1;
 	entry_obj->ent.entry->is_modified = 1;
 
-	phar_flush(entry_obj->ent.entry->phar, 0, 0, &error TSRMLS_CC);
+	phar_flush(entry_obj->ent.entry->phar, 0, 0, 0, &error TSRMLS_CC);
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 		efree(error);

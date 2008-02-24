@@ -501,7 +501,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, char *url_from, int mode, in
 		efree(entry.filename);
 		return FAILURE;
 	}
-	phar_flush(phar, 0, 0, &error TSRMLS_CC);
+	phar_flush(phar, 0, 0, 0, &error TSRMLS_CC);
 	if (error) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", entry.filename, phar->fname, error);
 		zend_hash_del(&phar->manifest, entry.filename, entry.filename_len);
@@ -576,7 +576,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_
 	/* now for the easy part */
 	entry->is_deleted = 1;
 	entry->is_modified = 1;
-	phar_flush(phar, 0, 0, &error TSRMLS_CC);
+	phar_flush(phar, 0, 0, 0, &error TSRMLS_CC);
 	if (error) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", entry->filename, phar->fname, error);
 		zend_hash_del(&phar->manifest, entry->filename, entry->filename_len);

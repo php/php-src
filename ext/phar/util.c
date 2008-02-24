@@ -72,6 +72,74 @@ int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t positi
 	return php_stream_seek(fp, temp, SEEK_SET);
 }
 
+void phar_rename_archive(phar_archive_data *phar, char *ext TSRMLS_DC) {
+
+	char *oldname = NULL, *oldpath = NULL;
+	char *basename = NULL, *basepath = NULL;
+	char *newname = NULL, *newpath = NULL;
+
+	if (!ext) {
+		if (phar->is_zip) {
+			ext = "phar.zip";
+		} else if (phar->is_tar) {
+			switch (phar->flags) {
+				case PHAR_FILE_COMPRESSED_GZ:
+					ext = "phar.tar.gz";
+					break;
+				case PHAR_FILE_COMPRESSED_BZ2:
+					ext = "phar.tar.bz2";
+					break;
+				default:
+					ext = "phar.tar";
+			}
+		} else {
+			switch (phar->flags) {
+				case PHAR_FILE_COMPRESSED_GZ:
+					ext = "phar.gz";
+					break;
+				case PHAR_FILE_COMPRESSED_BZ2:
+					ext = "phar.bz2";
+					break;
+				default:
+					ext = "phar";
+			}
+		}
+	}
+
+	if (ext[0] == '.') {
+		ext++;
+	}
+
+	oldpath = estrndup(phar->fname, phar->fname_len);
+	oldname = strrchr(phar->fname, '/');
+	oldname++;
+
+	basename = estrndup(oldname, strlen(oldname));
+	spprintf(&newname, 0, "%s.%s", strtok(basename, "."), ext);
+	efree(basename);
+
+	basepath = estrndup(oldpath, strlen(oldpath) - strlen(oldname));
+	spprintf(&newpath, 0, "%s%s", basepath, newname);
+	efree(basepath);
+	efree(newname);
+
+	if (!phar->is_zip && !phar->is_tar) {
+		phar->alias = estrndup(newpath, strlen(newpath));
+		phar->alias_len = strlen(newpath);
+		zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), newpath, strlen(newpath), (void*)&phar, sizeof(phar_archive_data*), NULL);
+	}
+
+	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), newpath, strlen(newpath), (void*)&phar, sizeof(phar_archive_data*), NULL);
+
+	efree(phar->fname);
+
+	phar->fname = newpath;
+	phar->fname_len = strlen(newpath);
+
+	unlink(oldpath);
+	efree(oldpath);
+}
+
 /* mount an absolute path or uri to a path internal to the phar archive */
 int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, char *path, int path_len TSRMLS_DC)
 {
