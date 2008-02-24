@@ -23,3 +23,7 @@ var_dump($str, htmlentities($str, ENT_QUOTES, ''));
 --EXPECT--
 string(9) "роскошный"
 string(63) "&#1088;&#1086;&#1089;&#1082;&#1086;&#1096;&#1085;&#1099;&#1081;"
+--UEXPECTF--
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+unicode(9) "роскошный"
+unicode(9) "роскошный"

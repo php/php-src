@@ -19,3 +19,6 @@ mbstring.internal_encoding=none
 ?>
 --EXPECT--
 string(6) "¡¢¡£¡¤"
+--UEXPECTF--
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+unicode(42) "&iexcl;&cent;&iexcl;&pound;&iexcl;&curren;"

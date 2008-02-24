@@ -19,3 +19,6 @@ mbstring.internal_encoding=none
 ?>
 --EXPECT--
 string(20) "&OElig;&oelig;&Yuml;"
+--UEXPECTF--
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+unicode(24) "&frac14;&frac12;&frac34;"
