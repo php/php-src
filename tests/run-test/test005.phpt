@@ -24,7 +24,7 @@ var_dump($php_errormsg);
 ?>
 --EXPECTF--
 string(1) "1"
-string(4) "8191"
+string(5) "16383"
 string(1) "0"
 string(1) "1"
 string(1) "0"
@@ -32,7 +32,7 @@ NULL
 string(%d) "%sivision by zer%s"
 --UEXPECTF--
 unicode(1) "1"
-unicode(4) "8191"
+unicode(5) "16383"
 unicode(1) "0"
 unicode(1) "1"
 unicode(1) "0"
