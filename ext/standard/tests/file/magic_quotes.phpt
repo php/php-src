@@ -42,46 +42,45 @@ var_dump(file_get_contents($filename));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-
-Deprecated: get_magic_quotes_runtime(): This function is deprecated and will be removed in PHP 6. See http://php.net/%s#get_magic_quotes_runtime for details. in %s on line %d
+--EXPECTF-- 
+Deprecated: get_magic_quotes_runtime(): This function is deprecated and removed in PHP 6. See http://php.net/%s#get_magic_quotes_runtime for details. in %s on line %d
 int(0)
 
-Deprecated: get_magic_quotes_runtime(): This function is deprecated and will be removed in PHP 6. See http://php.net/%s#get_magic_quotes_runtime for details. in %s on line %d
+Deprecated: get_magic_quotes_runtime(): This function is deprecated and removed in PHP 6. See http://php.net/%s#get_magic_quotes_runtime for details. in %s on line %d
 int(0)
 
-Deprecated: set_magic_quotes_runtime(): This function is deprecated and will be removed in PHP 6. See http://php.net/%s#set_magic_quotes_runtime for details. in %s on line %d
+Deprecated: set_magic_quotes_runtime(): This function is deprecated and removed in PHP 6. See http://php.net/%s#set_magic_quotes_runtime for details. in %s on line %d
 bool(true)
 
-Deprecated: get_magic_quotes_runtime(): This function is deprecated and will be removed in PHP 6. See http://php.net/%s#get_magic_quotes_runtime for details. in %s on line %d
+Deprecated: get_magic_quotes_runtime(): This function is deprecated and removed in PHP 6. See http://php.net/%s#get_magic_quotes_runtime for details. in %s on line %d
 int(1)
 
-Deprecated: set_magic_quotes_runtime(): This function is deprecated and will be removed in PHP 6. See http://php.net/%s#set_magic_quotes_runtime for details. in %s on line %d
+Deprecated: set_magic_quotes_runtime(): This function is deprecated and removed in PHP 6. See http://php.net/%s#set_magic_quotes_runtime for details. in %s on line %d
 bool(true)
 
-Deprecated: get_magic_quotes_runtime(): This function is deprecated and will be removed in PHP 6. See http://php.net/%s#get_magic_quotes_runtime for details. in %s on line %d
+Deprecated: get_magic_quotes_runtime(): This function is deprecated and removed in PHP 6. See http://php.net/%s#get_magic_quotes_runtime for details. in %s on line %d
 int(1)
 string(30) "some\'content\'here\"and}there"
 
-Deprecated: set_magic_quotes_runtime(): This function is deprecated and will be removed in PHP 6. See http://php.net/%s#set_magic_quotes_runtime for details. in %s on line %d
+Deprecated: set_magic_quotes_runtime(): This function is deprecated and removed in PHP 6. See http://php.net/%s#set_magic_quotes_runtime for details. in %s on line %d
 bool(true)
 
-Deprecated: get_magic_quotes_runtime(): This function is deprecated and will be removed in PHP 6. See http://php.net/%s#get_magic_quotes_runtime for details. in %s on line %d
+Deprecated: get_magic_quotes_runtime(): This function is deprecated and removed in PHP 6. See http://php.net/%s#get_magic_quotes_runtime for details. in %s on line %d
 int(0)
 string(27) "some'content'here"and}there"
 
-Deprecated: set_magic_quotes_runtime(): This function is deprecated and will be removed in PHP 6. See http://php.net/%s#set_magic_quotes_runtime for details. in %s on line %d
+Deprecated: set_magic_quotes_runtime(): This function is deprecated and removed in PHP 6. See http://php.net/%s#set_magic_quotes_runtime for details. in %s on line %d
 bool(true)
 
-Deprecated: get_magic_quotes_runtime(): This function is deprecated and will be removed in PHP 6. See http://php.net/%s#get_magic_quotes_runtime for details. in %s on line %d
+Deprecated: get_magic_quotes_runtime(): This function is deprecated and removed in PHP 6. See http://php.net/%s#get_magic_quotes_runtime for details. in %s on line %d
 int(1)
 string(30) "some\'content\'here\"and}there"
 
-Deprecated: set_magic_quotes_runtime(): This function is deprecated and will be removed in PHP 6. See http://php.net/%s#set_magic_quotes_runtime for details. in %s on line %d
+Deprecated: set_magic_quotes_runtime(): This function is deprecated and removed in PHP 6. See http://php.net/%s#set_magic_quotes_runtime for details. in %s on line %d
 bool(true)
 bool(false)
 
-Deprecated: get_magic_quotes_runtime(): This function is deprecated and will be removed in PHP 6. See http://php.net/%s#get_magic_quotes_runtime for details. in %s on line %d
+Deprecated: get_magic_quotes_runtime(): This function is deprecated and removed in PHP 6. See http://php.net/%s#get_magic_quotes_runtime for details. in %s on line %d
 int(0)
 string(27) "some'content'here"and}there"
 Done
