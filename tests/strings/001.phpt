@@ -208,3 +208,21 @@ Testing strtr: passed
 Testing addslashes: passed
 Testing stripslashes: passed
 Testing uniqid: passed
+--UEXPECTF--
+Deprecated: Assigning the return value of new by reference is deprecated in %s on line %d
+Testing strtok: passed
+Testing strstr: passed
+Testing strrchr: passed
+Testing strtoupper: passed
+Testing strtolower: passed
+Testing substr: passed
+Testing rawurlencode: passed
+Testing rawurldecode: passed
+Testing urlencode: passed
+Testing urldecode: passed
+Testing quotemeta: passed
+Testing ufirst: passed
+Testing strtr: passed
+Testing addslashes: passed
+Testing stripslashes: passed
+Testing uniqid: passed
