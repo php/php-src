@@ -78,15 +78,14 @@ Version 2.0.0
    storing sqlite databases, cache, or template files in a location external to the phar.  Copy of the files
    would need to be performed in an installation step, phar would not attempt to do this for performance and
    security reasons.
- * make convertToZip/convertToTar rename files and return the new filename.  Also, convertToPhar() with full
-   file compression should rename to append .gz or .bz
+ X make convertToZip/convertToTar rename files [Steph]
+ X make convertTo*() with full file compression rename to append .gz or .bz2 [Steph]
  * don't automatically add a stub to .zip or .tar files
- * don't allow a stub to be added to a .zip/.tar that does not have ".phar" in the filename somewhere
+ * don't allow a stub to be added to a .zip/.tar that does not have ".phar" in the filename
  * allow read/write on .tar/.zip files that do not contain a stub or alias file
  * prevent manual addition of stub via $a['.phar/stub.php'] = '<?php my stub';
- X make createDefaultStub() setDefaultStub() and have it file format-specific
-    so that zip/tar-based phars do not have a phar-specific stub [Steph]
- * convertTo*() should always use the default stub
+ X make createDefaultStub() setDefaultStub() and have it file format-specific [Steph]
+ X convertTo*() should always use the default stub [Steph]
  X ability to store empty directories [Greg]
  X tar support [Greg]
  X zip support [Greg]

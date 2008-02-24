@@ -641,7 +641,7 @@ continue_dir:
 }
 /* }}} */
 
-int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, char **error TSRMLS_DC) /* {{{ */
+int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, int defaultstub, char **error TSRMLS_DC) /* {{{ */
 {
 	char *pos;
 	smart_str main_metadata_str = {0};
@@ -691,7 +691,7 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 	}
 
 	/* set stub */
-	if (user_stub && len) {
+	if (user_stub && !defaultstub) {
 		if (len < 0) {
 			/* resource passed in */
 			if (!(php_stream_from_zval_no_verify(stubfile, (zval **)user_stub))) {
@@ -756,8 +756,9 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 			efree(user_stub);
 		}
 	} else {
-		/* Either this is a brand new phar (add the stub), or setDefaultStub() is the caller (overwrite the stub) */
+		/* Either this is a brand new phar (add the stub), or the default stub is required (overwrite the stub) */
 		entry.fp = php_stream_fopen_tmpfile();
+
 		if (sizeof(newstub)-1 != php_stream_write(entry.fp, newstub, sizeof(newstub)-1)) {
 			php_stream_close(entry.fp);
 			if (error) {
@@ -765,11 +766,12 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 			}
 			return EOF;
 		}
+
 		entry.uncompressed_filesize = entry.compressed_filesize = sizeof(newstub) - 1;
 		entry.filename = estrndup(".phar/stub.php", sizeof(".phar/stub.php")-1);
 		entry.filename_len = sizeof(".phar/stub.php")-1;
 
-		if (!user_stub) {
+		if (!defaultstub) {
 			if (!zend_hash_exists(&phar->manifest, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
 				if (SUCCESS != zend_hash_add(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL)) {
 					php_stream_close(entry.fp);

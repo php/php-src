@@ -442,7 +442,7 @@ int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC)
 	return ZEND_HASH_APPLY_KEEP;
 }
 
-int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **error TSRMLS_DC) /* {{{ */
+int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defaultstub, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_entry_info entry = {0};
 	static const char newstub[] = "<?php // tar-based phar archive stub file\n__HALT_COMPILER();";
@@ -459,7 +459,6 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 	entry.tar_type = '0';
 	entry.phar = phar;
 	entry.fp_type = PHAR_MOD;
-
 
 	/* set alias */
 	if (!phar->is_temporary_alias && phar->alias_len) {
@@ -485,7 +484,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 	}
 
 	/* set stub */
-	if (user_stub && len) {
+	if (user_stub && !defaultstub) {
 		char *pos;
 		if (len < 0) {
 			/* resource passed in */
@@ -543,8 +542,9 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 			efree(user_stub);
 		}
 	} else {
-		/* Either this is a brand new phar (add the stub), or setDefaultStub() is the caller (overwrite the stub) */
+		/* Either this is a brand new phar (add the stub), or the default stub is required (overwrite the stub) */
 		entry.fp = php_stream_fopen_tmpfile();
+
 		if (sizeof(newstub)-1 != php_stream_write(entry.fp, newstub, sizeof(newstub)-1)) {
 			php_stream_close(entry.fp);
 			if (error) {
@@ -552,11 +552,12 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, char **er
 			}
 			return EOF;
 		}
+
 		entry.uncompressed_filesize = entry.compressed_filesize = sizeof(newstub) - 1;
 		entry.filename = estrndup(".phar/stub.php", sizeof(".phar/stub.php")-1);
 		entry.filename_len = sizeof(".phar/stub.php")-1;
 
-		if (!user_stub) {
+		if (!defaultstub) {
 			if (!zend_hash_exists(&phar->manifest, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
 				if (SUCCESS != zend_hash_add(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL)) {
 					php_stream_close(entry.fp);

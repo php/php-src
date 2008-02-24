@@ -343,7 +343,7 @@ void phar_entry_remove(phar_entry_data *idata, char **error TSRMLS_DC) /* {{{ */
 		phar_entry_delref(idata TSRMLS_CC);
 	}
 	if (!phar->donotflush) {
-		phar_flush(phar, 0, 0, error TSRMLS_CC);
+		phar_flush(phar, 0, 0, 0, error TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -1749,7 +1749,7 @@ char *phar_create_default_stub(const char *index_php, const char *web_index, siz
  * user_stub contains either a string, or a resource pointer, if len is a negative length.
  * user_stub and len should be both 0 if the default or existing stub should be used
  */
-int phar_flush(phar_archive_data *phar, char *user_stub, long len, char **error TSRMLS_DC) /* {{{ */
+int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, char **error TSRMLS_DC) /* {{{ */
 {
 /*	static const char newstub[] = "<?php __HALT_COMPILER(); ?>\r\n"; */
 	char *newstub;
@@ -1777,11 +1777,12 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, char **error 
 	}
 
 	if (phar->is_zip) {
-		return phar_zip_flush(phar, user_stub, len, error TSRMLS_CC);
+		return phar_zip_flush(phar, user_stub, len, convert, error TSRMLS_CC);
 	}
 	if (phar->is_tar) {
-		return phar_tar_flush(phar, user_stub, len, error TSRMLS_CC);
+		return phar_tar_flush(phar, user_stub, len, convert, error TSRMLS_CC);
 	}
+
 	if (phar->fp && !phar->is_brandnew) {
 		oldfile = phar->fp;
 		closeoldfile = 0;
@@ -1868,8 +1869,8 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, char **error 
 			efree(user_stub);
 		}
 	} else {
-		if (phar->halt_offset && oldfile && !phar->is_brandnew) {
-			if (phar->halt_offset != php_stream_copy_to_stream(oldfile, newfile, phar->halt_offset)) {	
+		if (!user_stub && phar->halt_offset && oldfile && !phar->is_brandnew) {
+			if (phar->halt_offset != php_stream_copy_to_stream(oldfile, newfile, phar->halt_offset)) {
 				if (closeoldfile) {
 					php_stream_close(oldfile);
 				}
@@ -1880,7 +1881,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, char **error 
 				return EOF;
 			}
 		} else {
-			/* this is a brand new phar */
+			/* this is either a brand new phar or a default stub overwrite */
 			newstub = phar_create_default_stub(NULL, NULL, &(phar->halt_offset), NULL TSRMLS_CC);
 			if (phar->halt_offset != php_stream_write(newfile, newstub, phar->halt_offset)) {
 				efree(newstub);
