@@ -1493,7 +1493,6 @@ PHPAPI int php_mkdir_ex(char *dir, long mode, int options TSRMLS_DC)
 {
 	int ret;
 
-	php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "This function is deprecated; use php_stream_mkdir() instead.");
 	if (php_check_open_basedir(dir TSRMLS_CC)) {
 		return -1;
 	}
