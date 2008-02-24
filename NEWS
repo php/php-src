@@ -12,6 +12,8 @@ PHP                                                                        NEWS
 
 
 - Fixed bug #44216 (strftime segfaults on large negative value). (Derick)
+- Fixed bug #44200 (A crash in PDO when no bound targets exists and yet 
+  bound parameters are present). (Ilia)
 - Fixed bug #44209 (strtotime() doesn't support 64 bit timestamps on 64 bit
   platforms). (Derick)
 - Fixed bug #44197 (socket array keys lost on socket_select). (Felipe)
