@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed a bug with PDO::FETCH_COLUMN|PDO::FETCH_GROUP mode when a column # by
   which to group by data is specified. (Ilia)
+- Fixed segfault in filter extension when using callbacks. (Arnar Mar Sig,
+  Felipe)
 - Upgraded PCRE to version 7.6 (Nuno)
 
 
