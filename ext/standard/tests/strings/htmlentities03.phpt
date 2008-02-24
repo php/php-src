@@ -18,3 +18,6 @@ mbstring.internal_encoding=none
 ?>
 --EXPECT--
 string(18) "&auml;&ouml;&uuml;"
+--UEXPECTF--
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+unicode(18) "&auml;&ouml;&uuml;"
