@@ -1,3 +1,122 @@
+2008-02-23  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/json/tests/bug41403.phpt
+      ext/standard/tests/array/locale_sort.phpt
+      ext/standard/tests/strings/bug39873.phpt
+      ext/standard/tests/strings/htmlentities.phpt
+      ext/standard/tests/strings/moneyformat.phpt
+      ext/standard/tests/strings/strtotitle.phpt
+      ext/standard/tests/strings/strtoupper.phpt:
+      FIxed tests (new error message - E_DEPRECATED)
+
+2008-02-23  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ZendEngine2/zend_compile.c:
+      - Felipe just told me we forgot this one
+
+2008-02-23  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/ctype/tests/001.phpt
+      ext/ctype/tests/002.phpt
+      ext/spl/tests/dllist_001.phpt
+      ext/spl/tests/dllist_004.phpt
+      ext/spl/tests/dllist_005.phpt
+      ext/standard/tests/array/array_change_key_case_variation7.phpt
+      ext/standard/tests/array/array_key_exists_variation4.phpt
+      ext/standard/tests/array/array_merge_variation9.phpt
+      ext/standard/tests/array/array_push_variation4.phpt
+      ext/standard/tests/array/array_slice_variation9.phpt
+      ext/standard/tests/array/array_values_variation6.phpt
+      ext/standard/tests/array/bug33940.phpt
+      ext/standard/tests/array/each_variation4.phpt
+      ext/standard/tests/array/rsort_variation4.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_b.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_v.phpt:
+      Fixed tests (new error message - E_DEPRECATED)
+
+    * run-tests.php:
+      New E_ALL value
+
+    * ext/standard/string.c:
+      Change some E_STRICTs to E_DEPRECATED
+
+2008-02-23  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_errors.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug33771.phpt
+      ZendEngine2/tests/bug34767.phpt
+      ZendEngine2/tests/error_reporting01.phpt
+      ZendEngine2/tests/error_reporting02.phpt
+      ZendEngine2/tests/error_reporting03.phpt
+      ZendEngine2/tests/error_reporting04.phpt
+      ZendEngine2/tests/error_reporting05.phpt
+      ZendEngine2/tests/error_reporting06.phpt
+      ZendEngine2/tests/error_reporting07.phpt
+      ZendEngine2/tests/error_reporting08.phpt
+      ZendEngine2/tests/error_reporting09.phpt
+      ZendEngine2/tests/error_reporting10.phpt
+      ZendEngine2/tests/is_a.phpt
+      ext/date/php_date.c
+      ext/mysql/php_mysql.c
+      ext/standard/basic_functions.c
+      ext/standard/dl.c
+      ext/standard/file.c
+      ext/standard/string.c
+      ext/standard/tests/file/magic_quotes.phpt
+      ext/standard/tests/serialize/bug31402.phpt
+      ext/standard/tests/strings/setlocale_error.phpt
+      main/main.c
+      tests/classes/new_001.phpt
+      tests/lang/bug20175.phpt
+      tests/lang/bug22231.phpt
+      tests/lang/bug22510.phpt:
+      - MFH Add E_DEPRECATED (Lars Strojny, Felipe Pena, Marcus)
+      [DOC] Finally added deprecation messages
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_errors.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug33771.phpt
+      ZendEngine2/tests/error_reporting01.phpt
+      ZendEngine2/tests/error_reporting02.phpt
+      ZendEngine2/tests/error_reporting03.phpt
+      ZendEngine2/tests/error_reporting04.phpt
+      ZendEngine2/tests/error_reporting05.phpt
+      ZendEngine2/tests/error_reporting06.phpt
+      ZendEngine2/tests/error_reporting07.phpt
+      ZendEngine2/tests/error_reporting08.phpt
+      ZendEngine2/tests/error_reporting09.phpt
+      ZendEngine2/tests/error_reporting10.phpt
+      ZendEngine2/tests/is_a.phpt
+      ext/date/php_date.c
+      ext/mysql/php_mysql.c
+      ext/standard/dl.c
+      ext/standard/file.c
+      ext/standard/string.c
+      ext/standard/tests/serialize/bug31402.phpt
+      main/main.c
+      tests/classes/new_001.phpt
+      tests/lang/bug20175.phpt
+      tests/lang/bug22231.phpt
+      tests/lang/bug22510.phpt:
+      - Add E_DEPRECATED (Lars Strojny, Felipe Pena, Marcus)
+
 2008-02-22  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_5_2)

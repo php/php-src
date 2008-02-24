@@ -1,3 +1,57 @@
+2008-02-23  Marcus Boerger  <php@marcus-boerger.de>
+
+    * zend_compile.c:
+      - Felipe just told me we forgot this one
+
+    * (PHP_5_3)
+      zend.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_constants.c
+      zend_errors.h
+      zend_execute_API.c
+      zend_language_parser.y
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug33771.phpt
+      tests/bug34767.phpt
+      tests/error_reporting01.phpt
+      tests/error_reporting02.phpt
+      tests/error_reporting03.phpt
+      tests/error_reporting04.phpt
+      tests/error_reporting05.phpt
+      tests/error_reporting06.phpt
+      tests/error_reporting07.phpt
+      tests/error_reporting08.phpt
+      tests/error_reporting09.phpt
+      tests/error_reporting10.phpt
+      tests/is_a.phpt:
+      - MFH Add E_DEPRECATED (Lars Strojny, Felipe Pena, Marcus)
+      [DOC] Finally added deprecation messages
+
+    * zend.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_constants.c
+      zend_errors.h
+      zend_execute_API.c
+      zend_language_parser.y
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug33771.phpt
+      tests/error_reporting01.phpt
+      tests/error_reporting02.phpt
+      tests/error_reporting03.phpt
+      tests/error_reporting04.phpt
+      tests/error_reporting05.phpt
+      tests/error_reporting06.phpt
+      tests/error_reporting07.phpt
+      tests/error_reporting08.phpt
+      tests/error_reporting09.phpt
+      tests/error_reporting10.phpt
+      tests/is_a.phpt:
+      - Add E_DEPRECATED (Lars Strojny, Felipe Pena, Marcus)
+
 2008-02-21  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_builtin_functions.c
