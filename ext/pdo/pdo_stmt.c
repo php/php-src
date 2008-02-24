@@ -142,6 +142,10 @@ static int dispatch_param_event(pdo_stmt_t *stmt, enum pdo_param_event event_typ
 
 	ht = stmt->bound_params;
 
+	if (ht && !stmt->bound_param_map) {
+		return 0;
+	}
+
 iterate:
 	if (ht) {
 		zend_hash_internal_pointer_reset(ht);
