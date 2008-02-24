@@ -28,7 +28,7 @@ var_dump($phar->isPhar());
 var_dump($phar->isCompressed());
 var_dump(strlen($phar->getStub()));
 
-copy($fname, $fname2);
+copy($fname . '.bz2', $fname2);
 
 $phar = new Phar($fname2);
 var_dump($phar->isPhar());
@@ -39,7 +39,7 @@ var_dump(strlen($phar->getStub()));
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.bz2');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar');
 __HALT_COMPILER();
 ?>
