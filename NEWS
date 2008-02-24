@@ -135,7 +135,6 @@ PHP                                                                        NEWS
 - Fixed bug #43136 (possible crash on script execution timeout.
   The EG(function_state_ptr) is completely removed,
   EG(current_execute_data)->function_state must be used instead). (Dmitry)
-- Fixed bug #43128 (Very long class name causes segfault). (Dmitry)
 - Fixed bug #42952 (soap cache file is created with insecure permissions).
   (Dmitry)
 - Fixed bug #42868 (Floats cast to integer produce unpredictable results).
