@@ -3437,6 +3437,12 @@ ZEND_END_ARG_INFO();
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_conv, 0, 0, 0)
 	ZEND_ARG_INFO(0, compression_type)
+	ZEND_ARG_INFO(0, file_ext)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_convz, 0, 0, 0)
+	ZEND_ARG_INFO(0, file_ext)
 ZEND_END_ARG_INFO();
 
 static
@@ -3494,7 +3500,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, compressAllFilesGZ,    NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, convertToPhar,         arginfo_phar_conv,         ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, convertToTar,          arginfo_phar_conv,         ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, convertToZip,          NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, convertToZip,          arginfo_phar_convz,        ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, copy,                  arginfo_phar_copy,         ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, count,                 NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, delete,                arginfo_phar_delete,       ZEND_ACC_PUBLIC)
