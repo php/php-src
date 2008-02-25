@@ -1,8 +1,8 @@
 --TEST--
-wddx deserialization test (32-bit)
+wddx deserialization test (64-bit)
 --SKIPIF--
 <?php if (!extension_loaded("wddx")) print "skip"; ?>
-<?php echo PHP_INT_SIZE == 8 ? "skip 32-bit only" : "OK" ?>
+<?php echo PHP_INT_SIZE != 8 ? "skip 64-bit only" : "OK" ?>
 --INI--
 precision=14
 --FILE--
@@ -23,7 +23,7 @@ array(11) {
   ["aDateTime2"]=>
   int(329632332)
   ["aDateTime3"]=>
-  string(22) "2040-06-12T04:32:12+00"
+  int(2223088332)
   ["aBoolean"]=>
   bool(true)
   ["anArray"]=>
