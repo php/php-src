@@ -1,3 +1,91 @@
+2008-02-24  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/filter/tests/053.phpt
+      ext/filter/tests/053.phpt:
+      New test
+
+    * ext/filter/tests/053.phpt
+      ext/filter/tests/053.phpt
+      ext/filter/tests/053.phpt:
+        1.1.4;
+      file 053.phpt was initially added on branch PHP_5_2.
+
+    * ext/filter/filter.c
+      ext/filter/filter.c:
+      MFB: Fixed segfault in filter extension when using callbacks.
+
+    * (PHP_5_2)
+      NEWS
+      ext/filter/filter.c:
+      Fixed segfault in filter extension when using callbacks. (reported &
+      patched by Arnar Mar Sig)
+
+    * (PHP_5_3)
+      NEWS:
+      Entry existent in 5_2
+
+2008-02-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_stmt.c
+      ext/pdo/pdo_stmt.c:
+      
+      MFB: Fixed bug #44200 (A crash in PDO when no bound targets exists and yet
+      bound parameters are present)
+
+    * (PHP_5_3)
+      ext/pdo/pdo_stmt.c:
+      
+      Fixed bug #44200 (A crash in PDO when no bound targets exists and yet
+      bound parameters are present)
+
+2008-02-24  Felipe Pena  <felipensp@gmail.com>
+
+    * tests/strings/001.phpt:
+      Fix the fix
+
+    * tests/strings/001.phpt:
+      Fix test
+
+    * tests/classes/new_001.phpt
+      tests/lang/034.phpt
+      tests/lang/bug22231.phpt
+      tests/lang/bug30638.phpt:
+      Fixed tests (new error message - E_DEPRECATED)
+
+    * ZendEngine2/tests/is_a.phpt
+      ZendEngine2/tests/magic_by_ref_010.phpt
+      ext/standard/tests/strings/implode1.phpt
+      ext/standard/tests/strings/moneyformat.phpt
+      tests/run-test/test005.phpt
+      tests/run-test/test008a.phpt:
+      Fixed tests
+
+    * (PHP_5_3)
+      tests/run-test/test005.phpt
+      tests/run-test/test008a.phpt:
+      Fixed tests (new E_ALL value)
+
+    * (PHP_5_3)
+      run-tests.php:
+      New E_ALL value
+
+    * ext/standard/file.c
+      ext/standard/file.c:
+      Removed internal warning
+
+    * (PHP_5_3)
+      ext/standard/tests/file/magic_quotes.phpt:
+      Fixed test
+
+    * ext/standard/tests/strings/htmlentities02.phpt
+      ext/standard/tests/strings/htmlentities03.phpt
+      ext/standard/tests/strings/htmlentities04.phpt
+      ext/standard/tests/strings/htmlentities10.phpt
+      ext/standard/tests/strings/htmlentities15.phpt:
+      Added UEXPECTF
+
 2008-02-23  Felipe Pena  <felipensp@gmail.com>
 
     * ext/json/tests/bug41403.phpt
