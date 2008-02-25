@@ -65,7 +65,7 @@ class PharCommand extends CLICommand
             'b' => array(
                 'typ' => 'any',
                 'val' => NULL,
-                'inf' => '<bang>   Hash-bang line to start the archieve (e.g. #!/usr/bin/php). The hash '
+                'inf' => '<bang>   Hash-bang line to start the archive (e.g. #!/usr/bin/php). The hash '
                          .'         mark itself \'#!\' and the newline character are optional.'
             ),
             'c' => array(
