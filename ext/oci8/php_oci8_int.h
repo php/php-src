@@ -150,6 +150,7 @@ typedef struct { /* php_oci_descriptor {{{ */
 	ub4 chunk_size;					/* chunk size of the LOB. 0 - unknown */
 	ub1 charset_form;				/* charset form, required for NCLOBs */
 	ub2 charset_id;					/* charset ID */
+	unsigned is_open:1;				/* helps to determine if lob is open or not */
 	php_oci_lob_type lob_type;		/* CLOB/BLOB */
 } php_oci_descriptor; /* }}} */
 
@@ -180,6 +181,7 @@ typedef struct { /* php_oci_define {{{ */
 
 typedef struct { /* php_oci_statement {{{ */
 	int id;
+	int parent_stmtid;				/* parent statement id */
 	php_oci_connection *connection; /* parent connection handle */
 	sword errcode;					/* last errcode*/
 	OCIError *err;					/* private error handle */
@@ -192,7 +194,6 @@ typedef struct { /* php_oci_statement {{{ */
 	int ncolumns;					/* number of columns in the result */
 	unsigned executed:1;			/* statement executed flag */
 	unsigned has_data:1;			/* statement has more data flag */
-	unsigned nested:1;			/* statement handle is valid */
 	ub2 stmttype;					/* statement type */
 } php_oci_statement; /* }}} */
 
