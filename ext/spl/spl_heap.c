@@ -1181,6 +1181,8 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 
 	return SUCCESS;
 }
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
