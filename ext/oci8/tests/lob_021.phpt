@@ -20,8 +20,6 @@ $blob = oci_new_descriptor($c,OCI_D_LOB);
 oci_bind_by_name($statement,":v_blob", $blob,-1,OCI_B_BLOB);
 oci_execute($statement, OCI_DEFAULT);
 
-$blob;
-
 var_dump($blob->write("test"));
 var_dump($blob->close());
 var_dump($blob->write("test"));
@@ -50,9 +48,7 @@ echo "Done\n";
 ?>
 --EXPECTF--
 int(4)
-
-Warning: OCI-Lob::close(): ORA-22289: cannot perform  operation on an unopened file or LOB in %s on line %d
-bool(false)
+bool(true)
 int(4)
 bool(true)
 
