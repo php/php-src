@@ -1,7 +1,8 @@
 --TEST--
-wddx unserialization test
+wddx unserialization test (32-bit)
 --SKIPIF--
 <?php if (!extension_loaded("wddx")) print "skip"; ?>
+<?php echo PHP_INT_SIZE == 8 ? "skip 32-bit only" : "OK" ?>
 --INI--
 precision=14
 --FILE--

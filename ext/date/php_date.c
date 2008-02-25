@@ -1193,7 +1193,7 @@ PHP_FUNCTION(idate)
 
 	ret = php_idate(format[0], ts, 0);
 	if (ret == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unrecognized date format token.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unrecognized date format token");
 		RETURN_FALSE;
 	}
 	RETURN_LONG(ret);
