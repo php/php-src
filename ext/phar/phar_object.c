@@ -1727,11 +1727,12 @@ static void phar_convert_to_other(phar_archive_data *source, int convert, char *
 }
 /* }}} */
 
-/* {{{ proto bool Phar::convertToTar([int compression, [string extension]])
- * Convert the phar archive to the tar file format.  The first parameter can
- * be one of Phar::GZ or Phar::BZ2 to specify whole-file compression. The
- * second parameter allows the user to determine the new filename extension
- * (default is phar.tar). Both parameters are optional.
+/* {{{ proto bool Phar::convertToTar([int compression, [string file_ext]])
+ * Convert a phar or phar.zip archive to the tar file format. The first
+ * parameter can be one of Phar::GZ or Phar::BZ2 to specify whole-file
+ * compression. The second parameter allows the user to determine the new
+ * filename extension (default is phar.tar/phar.tar.bz2/phar.tar.gz).
+ * Both parameters are optional.
  */
 PHP_METHOD(Phar, convertToTar)
 {
@@ -1792,8 +1793,10 @@ PHP_METHOD(Phar, convertToTar)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::convertToZip()
- * Convert the phar archive to the zip file format
+/* {{{ proto bool Phar::convertToZip([string file_ext])
+ * Convert a phar or phar.tar archive to the zip file format. The single
+ * optional argument allows the user to determine the new filename extension
+ * (default is phar.zip).
  */
 PHP_METHOD(Phar, convertToZip)
 {
@@ -1825,11 +1828,12 @@ PHP_METHOD(Phar, convertToZip)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::convertToPhar([int compression, [bool rename]])
- * Convert the phar archive to the tar file format.  The first parameter can
- * be one of Phar::GZ or Phar::BZ2 to specify whole-file compression. The
- * second parameter determines whether the filename should be changed to
- * reflect the new type (on by default). Both parameters are optional.
+/* {{{ proto bool Phar::convertToPhar([int compression, [string file_ext]])
+ * Convert a phar.tar or phar.zip archive to the phar file format. The first
+ * parameter can be one of Phar::GZ or Phar::BZ2 to specify whole-file
+ * compression. The second parameter allows the user to determine the new
+ * filename extension (default is phar/phar.bz2/phar.gz).
+ * Both parameters are optional.
  */
 PHP_METHOD(Phar, convertToPhar)
 {
@@ -1881,7 +1885,7 @@ PHP_METHOD(Phar, convertToPhar)
 
 	if (phar_obj->arc.archive->donotflush) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Cannot convert phar archive to phar format, call stopBuffering() first");
+			"Cannot convert archive to phar format, call stopBuffering() first");
 		return;
 	}
 
@@ -1891,7 +1895,8 @@ PHP_METHOD(Phar, convertToPhar)
 /* }}} */
 
 /* {{{ proto int|false Phar::isCompressed()
- * Returns Phar::GZ or PHAR::BZ2 if the entire phar archive is compressed (.tar.gz/tar.bz and so on)
+ * Returns Phar::GZ or PHAR::BZ2 if the entire archive is compressed
+ * (.tar.gz/tar.bz2 and so on), or FALSE otherwise.
  */
 PHP_METHOD(Phar, isCompressed)
 {
@@ -1908,7 +1913,7 @@ PHP_METHOD(Phar, isCompressed)
 /* }}} */
 
 /* {{{ proto bool Phar::delete(string entry)
- * Delete a file from within the Phar
+ * Deletes a named file within the archive.
  */
 PHP_METHOD(Phar, delete)
 {
@@ -1955,7 +1960,7 @@ PHP_METHOD(Phar, delete)
 /* }}} */
 
 /* {{{ proto int Phar::getAlias()
- * Returns the alias for the PHAR or NULL
+ * Returns the alias for the Phar or NULL.
  */
 PHP_METHOD(Phar, getAlias)
 {
@@ -1968,7 +1973,8 @@ PHP_METHOD(Phar, getAlias)
 /* }}} */
 
 /* {{{ proto bool Phar::setAlias(string alias)
- * Set the alias for the PHAR
+ * Sets the alias for a Phar archive. The default value is the full path
+ * to the archive.
  */
 PHP_METHOD(Phar, setAlias)
 {
@@ -2055,7 +2061,7 @@ PHP_METHOD(Phar, startBuffering)
 /* }}} */
 
 /* {{{ proto bool Phar::isBuffering()
- * Returns whether write operations are flushing to disk immediately
+ * Returns whether write operations are flushing to disk immediately.
  */
 PHP_METHOD(Phar, isBuffering)
 {
@@ -2066,7 +2072,7 @@ PHP_METHOD(Phar, isBuffering)
 /* }}} */
 
 /* {{{ proto bool Phar::stopBuffering()
- * Save the contents of a modified phar
+ * Saves the contents of a modified archive to disk.
  */
 PHP_METHOD(Phar, stopBuffering)
 {
@@ -2090,7 +2096,8 @@ PHP_METHOD(Phar, stopBuffering)
 /* }}} */
 
 /* {{{ proto bool Phar::setStub(string|stream stub [, int len])
- * Change the stub of the archive
+ * Change the stub in a phar, phar.tar or phar.zip archive to something other
+ * than the default. The stub *must* end with a call to __HALT_COMPILER().
  */
 PHP_METHOD(Phar, setStub)
 {
@@ -2138,10 +2145,17 @@ PHP_METHOD(Phar, setStub)
 /* }}} */
 
 /* {{{ proto bool Phar::setDefaultStub([string index[, string webindex]])
- * Sets a stub that can be used to run a phar-based archive without the phar extension
- * index is the CLI startup filename, which defaults to "index.php"
- * webindex is the web startup filename and also defaults to "index.php"
- * (falling back to CLI behaviour)
+ * In a pure phar archive, sets a stub that can be used to run the archive
+ * regardless of whether the phar extension is available. The first parameter
+ * is the CLI startup filename, which defaults to "index.php". The second
+ * parameter is the web startup filename and also defaults to "index.php"
+ * (falling back to CLI behaviour).
+ * Both parameters are optional.
+ * In a phar.zip or phar.tar archive, the default stub is used only to
+ * identify the archive to the extension as a Phar object. This allows the
+ * extension to treat phar.zip and phar.tar types as honorary phars. Since
+ * files cannot be loaded via this kind of stub, no parameters are accepted
+ * when the Phar object is zip- or tar-based.
  */
  PHP_METHOD(Phar, setDefaultStub)
 {
@@ -2197,10 +2211,11 @@ PHP_METHOD(Phar, setStub)
 /* }}} */
 
 /* {{{ proto array Phar::setSignatureAlgorithm(int sigtype)
- * set the signature algorithm for a phar and apply it.  The
- * signature algorithm must be one of Phar::MD5, Phar::SHA1,
- * Phar::SHA256, Phar::SHA512, or Phar::PGP (pgp not yet supported and
- * falls back to SHA-1)
+ * Sets the signature algorithm for a phar and applies it. The signature
+ * algorithm must be one of Phar::MD5, Phar::SHA1, Phar::SHA256,
+ * Phar::SHA512, or Phar::PGP (PGP is not yet supported and falls back to
+ * SHA-1). Note that zip- and tar- based phar archives cannot support
+ * signatures.
  */
 PHP_METHOD(Phar, setSignatureAlgorithm)
 {
@@ -2256,7 +2271,7 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 /* }}} */
 
 /* {{{ proto array|false Phar::getSignature()
- * Return signature or false
+ * Returns a hash signature, or FALSE if the archive is unsigned.
  */
 PHP_METHOD(Phar, getSignature)
 {
@@ -2708,7 +2723,7 @@ PHP_METHOD(Phar, offsetUnset)
 /* }}} */
 
 /* {{{ proto string Phar::getStub()
- * Get the pre-phar stub
+ * Returns the stub at the head of a phar archive as a string.
  */
 PHP_METHOD(Phar, getStub)
 {
@@ -2795,7 +2810,7 @@ carry_on:
 /* }}}*/
 
 /* {{{ proto int Phar::hasMetaData()
- * Returns whether phar has global metadata
+ * Returns TRUE if the phar has global metadata, FALSE otherwise.
  */
 PHP_METHOD(Phar, hasMetadata)
 {
