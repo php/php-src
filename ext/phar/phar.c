@@ -1064,6 +1064,8 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 	}
 	zend_hash_init(&mydata->manifest, sizeof(phar_entry_info),
 		zend_get_hash_value, destroy_phar_manifest_entry, 0);
+	zend_hash_init(&mydata->mounted_dirs, sizeof(char *),
+		zend_get_hash_value, NULL, 0);
 	mydata->fname_len = fname_len;
 	mydata->alias = alias ? estrndup(alias, alias_len) : estrndup(mydata->fname, fname_len);
 	mydata->alias_len = alias ? alias_len : fname_len;

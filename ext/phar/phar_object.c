@@ -414,6 +414,26 @@ static void phar_postprocess_ru_web(char *fname, int fname_len, char **entry, in
 }
 /* }}} */
 
+/* {{{ proto void Phar::getRunningPhar()
+ * return the name of the currently running phar archive
+ */
+PHP_METHOD(Phar, getRunningPhar)
+{
+	char *fname, *arch, *entry;
+	int fname_len, arch_len, entry_len;
+
+	fname = zend_get_executed_filename(TSRMLS_C);
+	fname_len = strlen(fname);
+
+	if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
+		efree(entry);
+		RETURN_STRINGL(arch, arch_len, 0);
+	}
+	efree(entry);
+	RETURN_STRING("", 0);
+}
+/* }}} */
+
 /* {{{ proto void Phar::mount(string pharpath, string externalfile)
  * mount an external file or path to a location within the phar.  This maps
  * an external file or directory to a location within the phar archive, allowing
@@ -424,6 +444,7 @@ PHP_METHOD(Phar, mount)
 {
 	char *fname, *arch, *entry, *path, *actual;
 	int fname_len, arch_len, entry_len, path_len, actual_len;
+	phar_archive_data **pphar;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &path, &path_len, &actual, &actual_len) == FAILURE) {
 		return;
@@ -433,16 +454,23 @@ PHP_METHOD(Phar, mount)
 	fname_len = strlen(fname);
 
 	if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
-		phar_archive_data **pphar;
+		efree(entry);
 		if (SUCCESS != zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **)&pphar)) {
-			/* TODO: throw exception */
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s is not a phar archive, cannot mount", arch);
+			efree(arch);
 			return;
 		}
+carry_on:
 		if (SUCCESS != phar_mount_entry(*pphar, actual, actual_len, path, path_len TSRMLS_CC)) {
-			/* TODO: throw exception */
-			return;
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Mounting of %s to %s within phar %s failed", path, actual, arch);
+			efree(arch);
 		}
+		efree(arch);
+		return;
+	} else if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void **)&pphar)) {
+		goto carry_on;
 	}
+	zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Phar::mount() can only be run from within a phar archive");
 }
 /* }}} */
 
@@ -3508,6 +3536,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, isValidPharFilename,   NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, loadPhar,              arginfo_phar_loadPhar,     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, mapPhar,               arginfo_phar_mapPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, getRunningPhar,        NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, mount,                 arginfo_phar_mount,        ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, mungServer,            arginfo_phar_mungServer,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, webPhar,               arginfo_phar_webPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
