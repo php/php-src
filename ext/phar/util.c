@@ -154,6 +154,9 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 
 	entry.phar = phar;
 	entry.filename = estrndup(path, path_len);
+#ifdef PHP_WIN32
+	phar_unixify_path_separators(entry.filename, path_len);
+#endif
 	entry.filename_len = path_len;
 	if (strstr(filename, "phar://")) {
 		entry.link = estrndup(filename, filename_len);
@@ -190,7 +193,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 	}
 	if (ssb.sb.st_mode & S_IFDIR) {
 		entry.is_dir = 1;
-		if (SUCCESS != zend_hash_add(&phar->mounted_dirs, path, path_len, (void *)&path, sizeof(char *), NULL)) {
+		if (SUCCESS != zend_hash_add(&phar->mounted_dirs, entry.filename, path_len, (void *)&(entry.filename), sizeof(char *), NULL)) {
 			/* directory already mounted */
 			efree(entry.link);
 			efree(entry.filename);
@@ -201,7 +204,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 		entry.uncompressed_filesize = entry.compressed_filesize = ssb.sb.st_size;
 	}
 	entry.flags = ssb.sb.st_mode;
-	if (SUCCESS == zend_hash_add(&phar->manifest, path, path_len, (void*)&entry, sizeof(phar_entry_info), NULL)) {
+	if (SUCCESS == zend_hash_add(&phar->manifest, entry.filename, path_len, (void*)&entry, sizeof(phar_entry_info), NULL)) {
 		return SUCCESS;
 	}
 	efree(entry.link);
