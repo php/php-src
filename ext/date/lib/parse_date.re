@@ -667,7 +667,7 @@ static long timelib_lookup_zone(char **ptr, int *dst, char **tz_abbr, int *found
 	long  value = 0;
 	const timelib_tz_lookup_table *tp;
 
-	while (**ptr != '\0' && **ptr != ')') {
+	while (**ptr != '\0' && **ptr != ')' && **ptr != ' ') {
 		++*ptr;
 	}
 	end = *ptr;
