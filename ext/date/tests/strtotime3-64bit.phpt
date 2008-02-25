@@ -1,7 +1,7 @@
 --TEST--
-strtotime() function (32 bit)
+strtotime() function (64 bit)
 --SKIPIF--
-<?php echo PHP_INT_SIZE == 8 ? "skip 32-bit only" : "OK"; ?>
+<?php echo PHP_INT_SIZE != 8 ? "skip 64-bit only" : "OK"; ?>
 --FILE--
 <?php
 date_default_timezone_set('Europe/Lisbon');
@@ -53,7 +53,7 @@ bool(false)
 string(31) "Fri, 16 Jun 2006 23:49:12 +0100"
 bool(false)
 string(31) "Fri, 16 Jun 2006 02:22:00 +0100"
-bool(false)
+string(31) "Mon, 16 Jun 0222 02:22:00 -0036"
 string(31) "Fri, 16 Jun 2006 02:22:33 +0100"
 bool(false)
 string(31) "Tue, 02 Mar 2004 00:00:00 +0000"
@@ -78,7 +78,7 @@ bool(false)
 unicode(31) "Fri, 16 Jun 2006 23:49:12 +0100"
 bool(false)
 unicode(31) "Fri, 16 Jun 2006 02:22:00 +0100"
-bool(false)
+unicode(31) "Mon, 16 Jun 0222 02:22:00 -0036"
 unicode(31) "Fri, 16 Jun 2006 02:22:33 +0100"
 bool(false)
 unicode(31) "Tue, 02 Mar 2004 00:00:00 +0000"

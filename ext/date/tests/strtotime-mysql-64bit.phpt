@@ -1,7 +1,7 @@
 --TEST--
-strtotime() and mysql timestamps (32 bit)
+strtotime() and mysql timestamps (64 bit)
 --SKIPIF--
-<?php echo PHP_INT_SIZE == 8 ? "skip 32-bit only" : "OK"; ?>
+<?php echo PHP_INT_SIZE != 8 ? "skip 64-bit only" : "OK"; ?>
 --FILE--
 <?php
 date_default_timezone_set('UTC');
@@ -24,8 +24,10 @@ foreach($d as $date) {
 --EXPECT--
 string(31) "Fri, 23 May 1997 09:15:28 +0000"
 string(31) "Sun, 31 Dec 2000 18:58:59 +0000"
-bool(false)
+string(31) "Wed, 10 Apr 2080 10:10:10 +0000"
+
 --UEXPECT--
 unicode(31) "Fri, 23 May 1997 09:15:28 +0000"
 unicode(31) "Sun, 31 Dec 2000 18:58:59 +0000"
-bool(false)
+unicode(31) "Wed, 10 Apr 2080 10:10:10 +0000"
+
