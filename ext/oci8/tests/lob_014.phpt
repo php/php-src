@@ -43,9 +43,7 @@ echo "Done\n";
 ?>
 --EXPECTF--
 int(4)
-
-Warning: OCI-Lob::close(): ORA-22289: cannot perform  operation on an unopened file or LOB in %slob_014.php on line %d
-bool(false)
+bool(true)
 int(4)
 bool(true)
 
