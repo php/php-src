@@ -1672,8 +1672,10 @@ end:
 static
 void php_mysqlnd_rowp_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 {
+	php_mysql_packet_row *p;
+
 	DBG_ENTER("php_mysqlnd_rowp_free_mem");
-	php_mysql_packet_row *p= (php_mysql_packet_row *) _packet;
+	p = (php_mysql_packet_row *) _packet;
 	if (p->row_buffer) {
 		p->row_buffer->free_chunk(p->row_buffer, TRUE TSRMLS_CC);
 		p->row_buffer = NULL;
