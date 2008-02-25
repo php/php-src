@@ -88,6 +88,7 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, long typ
 	descriptor->buffering = PHP_OCI_LOB_BUFFER_DISABLED;				/* buffering is off by default */
 	descriptor->charset_form = SQLCS_IMPLICIT;	/* default value */
 	descriptor->charset_id = connection->charset;
+	descriptor->is_open = 0;
 
 	if (descriptor->type == OCI_DTYPE_LOB || descriptor->type == OCI_DTYPE_FILE) {
 		/* add Lobs & Files to hash. we'll flush them at the end */
@@ -576,7 +577,9 @@ int php_oci_lob_close (php_oci_descriptor *descriptor TSRMLS_DC)
 {
 	php_oci_connection *connection = descriptor->connection;
 	
-	PHP_OCI_CALL_RETURN(connection->errcode, OCILobClose, (connection->svc, connection->err, descriptor->descriptor));
+	if (descriptor->is_open) {
+		PHP_OCI_CALL_RETURN(connection->errcode, OCILobClose, (connection->svc, connection->err, descriptor->descriptor));
+	}
 
 	if (connection->errcode != OCI_SUCCESS) {
 		php_oci_error(connection->err, connection->errcode TSRMLS_CC);
@@ -913,6 +916,8 @@ int php_oci_lob_write_tmp (php_oci_descriptor *descriptor, ub1 type, zstr data, 
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 		return 1;
 	}
+
+	descriptor->is_open = 1;
 
 	return php_oci_lob_write(descriptor, 0, data, data_len, &bytes_written TSRMLS_CC);
 } /* }}} */
