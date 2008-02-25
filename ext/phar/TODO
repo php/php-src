@@ -73,11 +73,13 @@ Version 2.0.0
    $phar->mount('/path/to/external.phar', 'internal/path');
    this would travers external.phar's manifest, and add each entry as a virtual entry just like
    automatic mounting of internal phars
- * implement manual mounting of external paths to a directory inside a phar path.  Because the mapping
+ X implement manual mounting of external paths to a directory inside a phar path.  Because the mapping
    would be to an external directory, write access would be allowed always.  This allows
    storing sqlite databases, cache, or template files in a location external to the phar.  Copy of the files
    would need to be performed in an installation step, phar would not attempt to do this for performance and
-   security reasons.
+   security reasons. [Greg]
+ * implement write support for mounted files even if phar.readonly=1
+ * implement opendir support for mounted paths
  X make convertToZip/convertToTar rename files [Steph]
  X make convertTo*() with full file compression rename to append .gz or .bz2 [Steph]
  * don't automatically add a stub to .zip or .tar files
