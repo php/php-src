@@ -1,3 +1,9 @@
+2008-02-24  Felipe Pena  <felipensp@gmail.com>
+
+    * tests/is_a.phpt
+      tests/magic_by_ref_010.phpt:
+      Fixed tests
+
 2008-02-23  Marcus Boerger  <php@marcus-boerger.de>
 
     * zend_compile.c:
