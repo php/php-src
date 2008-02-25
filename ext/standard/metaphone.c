@@ -151,7 +151,12 @@ static char Lookahead(char *word, int how_far) /* {{{ */
 						(*phoned_word)[p_idx++] = c; \
 					}
 /* Slap a null character on the end of the phoned word */
-#define End_Phoned_Word	{(*phoned_word)[p_idx] = '\0';}
+#define End_Phoned_Word	{ \
+							if (p_idx == max_buffer_len) { \
+								*phoned_word = erealloc(*phoned_word, max_buffer_len + 1); \
+							} \
+							(*phoned_word)[p_idx] = '\0'; \
+						}
 /* How long is the phoned word? */
 #define Phone_Len	(p_idx)
 
