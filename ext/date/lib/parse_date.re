@@ -726,7 +726,7 @@ static long timelib_lookup_zone(char **ptr, int *dst, char **tz_abbr, int *found
 	long  value = 0;
 	const timelib_tz_lookup_table *tp;
 
-	while (**ptr != '\0' && **ptr != ')') {
+	while (**ptr != '\0' && **ptr != ')' && **ptr != ' ') {
 		++*ptr;
 	}
 	end = *ptr;
@@ -1867,6 +1867,39 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 				}
 				break;
 
+			case ';':
+			case ':':
+			case '/':
+			case '.':
+			case ',':
+			case '-':
+				if (*ptr == *fptr) {
+					++ptr;
+				} else {
+					add_pbf_error(s, "The separation symbol could not be found", string, begin);
+				}
+				break;
+
+			case '!': // reset all fields to default
+				s->time->y = 1970;
+				s->time->m = 1;
+				s->time->d = 1;
+				s->time->h = s->time->i = s->time->s = 0;
+				s->time->f = 0.0;
+				s->time->tz_info = NULL;
+				break; // break intentionally not missing
+
+			case '|': // reset all fields to default when not set
+				if (s->time->y == TIMELIB_UNSET ) s->time->y = 1970;
+				if (s->time->m == TIMELIB_UNSET ) s->time->m = 1;
+				if (s->time->d == TIMELIB_UNSET ) s->time->d = 1;
+				if (s->time->h == TIMELIB_UNSET ) s->time->h = 0;
+				if (s->time->i == TIMELIB_UNSET ) s->time->i = 0;
+				if (s->time->s == TIMELIB_UNSET ) s->time->s = 0;
+				if (s->time->f == TIMELIB_UNSET ) s->time->f = 0.0;
+				
+				break; // break intentionally not missing
+
 			case '?': // random char
 				++ptr;
 				break;
@@ -1889,6 +1922,20 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 	if (*fptr) {
 		add_pbf_error(s, "Data missing", string, ptr);
 	}
+
+	// clean up a bit
+	if (s->time->h != TIMELIB_UNSET || s->time->i != TIMELIB_UNSET || s->time->s != TIMELIB_UNSET) {
+		if (s->time->h == TIMELIB_UNSET ) {
+			s->time->h = 0;
+		}
+		if (s->time->i == TIMELIB_UNSET ) {
+			s->time->i = 0;
+		}
+		if (s->time->s == TIMELIB_UNSET ) {
+			s->time->s = 0;
+		}
+	}
+
 
 	if (errors) {
 		*errors = in.errors;
