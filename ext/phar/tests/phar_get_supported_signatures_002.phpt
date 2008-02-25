@@ -1,5 +1,5 @@
 --TEST--
-Phar::setSupportedSignatures()
+Phar::getSupportedSignatures()
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if (!extension_loaded("hash")) die("skip extension hash required"); ?>

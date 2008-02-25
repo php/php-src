@@ -1,8 +1,8 @@
 --TEST--
-Phar::setSupportedSignatures()
+Phar::getSupportedSignatures()
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if ( extension_loaded("hash")) die("skip extension hash conflicts"); ?>
+<?php if (extension_loaded("hash")) die("skip extension hash conflicts"); ?>
 --INI--
 phar.require_hash=0
 phar.readonly=0

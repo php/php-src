@@ -1,5 +1,5 @@
 --TEST--
-Phar::convertToTar() gzipped
+Phar::convertToTar() gzip compressed
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if (!extension_loaded("zlib")) die("skip"); ?>
