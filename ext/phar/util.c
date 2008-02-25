@@ -72,8 +72,8 @@ int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t positi
 	return php_stream_seek(fp, temp, SEEK_SET);
 }
 
-void phar_rename_archive(phar_archive_data *phar, char *ext TSRMLS_DC) {
-
+void phar_rename_archive(phar_archive_data *phar, char *ext TSRMLS_DC)
+{
 	char *oldname = NULL, *oldpath = NULL;
 	char *basename = NULL, *basepath = NULL;
 	char *newname = NULL, *newpath = NULL;
@@ -151,26 +151,39 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 		return FAILURE;
 	}
 
-#if PHP_MAJOR_VERSION < 6
-	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
-		return FAILURE;
-	}
-#endif
-
-	/* only check openbasedir for files, not for phar streams */
-	if (!strstr(filename, "phar://") && php_check_open_basedir(filename TSRMLS_CC)) {
-		return FAILURE;
-	}
 
 	entry.phar = phar;
 	entry.filename = estrndup(path, path_len);
 	entry.filename_len = path_len;
-	entry.link = estrndup(filename, filename_len);
+	if (strstr(filename, "phar://")) {
+		entry.link = estrndup(filename, filename_len);
+	} else {
+		entry.link = expand_filepath(filename, NULL TSRMLS_CC);
+		if (!entry.link) {
+			entry.link = estrndup(filename, filename_len);
+		}
+	}
+#if PHP_MAJOR_VERSION < 6
+	if (PG(safe_mode) && !strstr(filename, "phar://") && (!php_checkuid(entry.link, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
+		efree(entry.link);
+		efree(entry.filename);
+		return FAILURE;
+	}
+#endif
+
+	filename_len = strlen(entry.link);
+	filename = entry.link;
+	/* only check openbasedir for files, not for phar streams */
+	if (!strstr(filename, "phar://") && php_check_open_basedir(filename TSRMLS_CC)) {
+		efree(entry.link);
+		efree(entry.filename);
+		return FAILURE;
+	}
 	entry.is_mounted = 1;
 	entry.is_crc_checked = 1;
 	entry.fp_type = PHAR_TMP;
 
-	if (SUCCESS != php_stream_stat_path(entry.link, &ssb)) {
+	if (SUCCESS != php_stream_stat_path(filename, &ssb)) {
 		efree(entry.link);
 		efree(entry.filename);
 		return FAILURE;
@@ -185,8 +198,8 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 		}
 	} else {
 		entry.is_dir = 0;
+		entry.uncompressed_filesize = entry.compressed_filesize = ssb.sb.st_size;
 	}
-	entry.uncompressed_filesize = entry.compressed_filesize = ssb.sb.st_size;
 	entry.flags = ssb.sb.st_mode;
 	if (SUCCESS == zend_hash_add(&phar->manifest, path, path_len, (void*)&entry, sizeof(phar_entry_info), NULL)) {
 		return SUCCESS;
@@ -233,6 +246,15 @@ char *phar_find_in_include_path(char *file, char *entry, phar_archive_data *phar
 			test = estrndup(test + 1, try_len - 1);
 			efree(save);
 			return test;
+		}
+		if (zend_hash_num_elements(&(phar->mounted_dirs))) {
+			if (phar_get_entry_info_dir(phar, test + 1, try_len - 1, 0, NULL TSRMLS_CC)) {
+				char *save = test;
+				efree(pathbuf);
+				test = estrndup(test + 1, try_len - 1);
+				efree(save);
+				return test;
+			}
 		}
 		efree(test);
 stream_skip:
@@ -875,8 +897,76 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 			return NULL;
 		}
 		return entry;
+	} else if (phar->mounted_dirs.arBuckets && zend_hash_num_elements(&phar->mounted_dirs)) {
+		char *key;
+		ulong unused;
+		uint keylen;
+
+		zend_hash_internal_pointer_reset(&phar->mounted_dirs);
+		while (FAILURE != zend_hash_has_more_elements(&phar->mounted_dirs)) {
+			if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(&phar->mounted_dirs, &key, &keylen, &unused, 0, NULL)) {
+				break;
+			}
+			if (keylen >= path_len || strncmp(key, path, keylen)) {
+				continue;
+			} else {
+				char *test;
+				int test_len;
+				phar_entry_info *entry;
+				php_stream_statbuf ssb;
+
+				if (SUCCESS != zend_hash_find(&phar->manifest, key, keylen, (void **) &entry)) {
+					if (error) {
+						spprintf(error, 4096, "phar internal error: mounted path \"%s\" could not be retrieved from manifest", key);
+					}
+					return NULL;
+				}
+				if (!entry->link || !entry->is_mounted) {
+					if (error) {
+						spprintf(error, 4096, "phar internal error: mounted path \"%s\" is not properly initialized as a mounted path", key);
+					}
+					return NULL;
+				}
+				test_len = spprintf(&test, MAXPATHLEN, "%s%s", entry->link, path + keylen);
+				if (SUCCESS != php_stream_stat_path(test, &ssb)) {
+					efree(test);
+					return NULL;
+				}
+				if (ssb.sb.st_mode & S_IFDIR && !dir) {
+					efree(test);
+					if (error) {
+						spprintf(error, 4096, "phar error: path \"%s\" is a directory", path);
+					}
+					return NULL;
+				}
+				if (ssb.sb.st_mode & S_IFDIR && dir) {
+					efree(test);
+					/* user requested a directory, we must return one */
+					if (error) {
+						spprintf(error, 4096, "phar error: path \"%s\" exists and is a not a directory", path);
+					}
+					return NULL;
+				}
+				/* mount the file just in time */
+				if (SUCCESS != phar_mount_entry(phar, test, test_len, path, path_len TSRMLS_CC)) {
+					efree(test);
+					if (error) {
+						spprintf(error, 4096, "phar error: path \"%s\" exists as file \"%s\" and could not be mounted", path, test);
+					}
+					return NULL;
+				}
+				efree(test);
+				if (SUCCESS != zend_hash_find(&phar->manifest, path, path_len, (void**)&entry)) {
+					if (error) {
+						spprintf(error, 4096, "phar error: path \"%s\" exists as file \"%s\" and could not be retrieved after being mounted", path, test);
+					}
+					return NULL;
+				}
+				return entry;
+			}
+		}
 	}
-	if (dir == 1) {
+	if (dir) {
 		/* try to find a directory */
 		HashTable *manifest;
 		char *key;
