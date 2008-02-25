@@ -1,7 +1,7 @@
 --TEST--
-mktime() [3] (32-bit)
+mktime() [3] (64-bit)
 --SKIPIF--
-<?php echo PHP_INT_SIZE == 8 ? "skip 32-bit only" : "OK" ?>
+<?php echo PHP_INT_SIZE != 8 ? "skip 64-bit only" : "OK" ?>
 --INI--
 error_reporting=2047
 --FILE--
@@ -27,14 +27,14 @@ foreach ($tzs as $tz) {
 --EXPECT--
 America/Toronto
 Y:    0 - January 2000-01-01T01:01:01-0500
-Y:   69 - out of range
+Y:   69 - January 2069-01-01T01:01:01-0500
 Y:   70 - January 1970-01-01T01:01:01-0500
 Y:   71 - January 1971-01-01T01:01:01-0500
 Y:   99 - January 1999-01-01T01:01:01-0500
 Y:  100 - January 2000-01-01T01:01:01-0500
 Y:  105 - January 2005-01-01T01:01:01-0500
-Y: 1900 - out of range
-Y: 1901 - out of range
+Y: 1900 - January 1900-01-01T01:01:01-0500
+Y: 1901 - January 1901-01-01T01:01:01-0500
 Y: 1902 - January 1902-01-01T01:01:01-0500
 Y: 1999 - January 1999-01-01T01:01:01-0500
 Y: 2000 - January 2000-01-01T01:01:01-0500
@@ -42,14 +42,14 @@ Y: 2001 - January 2001-01-01T01:01:01-0500
 
 Europe/Oslo
 Y:    0 - January 2000-01-01T01:01:01+0100
-Y:   69 - out of range
+Y:   69 - January 2069-01-01T01:01:01+0100
 Y:   70 - January 1970-01-01T01:01:01+0100
 Y:   71 - January 1971-01-01T01:01:01+0100
 Y:   99 - January 1999-01-01T01:01:01+0100
 Y:  100 - January 2000-01-01T01:01:01+0100
 Y:  105 - January 2005-01-01T01:01:01+0100
-Y: 1900 - out of range
-Y: 1901 - out of range
+Y: 1900 - January 1900-01-01T01:01:01+0100
+Y: 1901 - January 1901-01-01T01:01:01+0100
 Y: 1902 - January 1902-01-01T01:01:01+0100
 Y: 1999 - January 1999-01-01T01:01:01+0100
 Y: 2000 - January 2000-01-01T01:01:01+0100
