@@ -1,5 +1,5 @@
 --TEST--
-Phar with phar meta-data (write)
+Phar with metadata (write)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip");?>
 --INI--

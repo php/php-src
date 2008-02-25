@@ -1,5 +1,5 @@
 --TEST--
-Phar::getSupportedCompression() (bz2)
+Phar::getSupportedCompression() (bz2 only)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
