@@ -57,9 +57,27 @@ array(1) {
     [0]=>
     string(11) "clob test 1"
     [1]=>
-    string(11) "clob test 2"
+    string(22) "           clob test 2"
     [2]=>
-    string(11) "clob test 3"
+    string(33) "                      clob test 3"
+  }
+}
+Done
+--UEXPECT--
+Test 1: CLOB
+int(11)
+int(11)
+int(11)
+bool(true)
+array(1) {
+  [u"CLOB"]=>
+  array(3) {
+    [0]=>
+    unicode(11) "clob test 1"
+    [1]=>
+    unicode(22) "           clob test 2"
+    [2]=>
+    unicode(33) "                      clob test 3"
   }
 }
 Done
