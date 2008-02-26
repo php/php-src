@@ -45,7 +45,7 @@ array(25) {
     ["dqstring"]=>
     string(51) "asdadfsdjkslkj ¡@£$$ { } !^~|¥¥{[()/)&/% ¤ # #"
     ["php_constant"]=>
-    string(4) "6143"
+    string(5) "14335"
     ["user_constant"]=>
     string(21) "this_is_test_constant"
   }
@@ -76,7 +76,7 @@ array(25) {
     ["dqstring"]=>
     string(41) "asdadfsdjkslkj ¡@£$$€¥¥{[()/)&/%#¤"
     ["php_constant"]=>
-    string(4) "6143"
+    string(5) "14335"
   }
   ["comments"]=>
   array(1) {
