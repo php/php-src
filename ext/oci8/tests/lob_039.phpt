@@ -57,9 +57,9 @@ array(1) {
     [0]=>
     string(11) "clob test 1"
     [1]=>
-    string(11) "clob test 2"
+    string(22) "           clob test 2"
     [2]=>
-    string(11) "clob test 3"
+    string(33) "                      clob test 3"
   }
 }
 Done
