@@ -19,6 +19,8 @@ PHP                                                                        NEWS
   bound parameters are present). (Ilia)
 - Fixed bug #44209 (strtotime() doesn't support 64 bit timestamps on 64 bit
   platforms). (Derick)
+- Fixed bug #44206 (OCI8 selecting ref cursors leads to ORA-1000 maximum
+  open cursors reached). (Oracle Corp.)
 - Fixed bug #44197 (socket array keys lost on socket_select). (Felipe)
 - Fixed bug #44191 (preg_grep messes up array index). (Felipe)
 - Fixed bug #44189 (PDO setAttribute() does not properly validate values for 
@@ -30,6 +32,8 @@ PHP                                                                        NEWS
 - Fixed bug #44152 (Possible crash with syslog logging on ZTS builds). (Ilia)
 - Fixed bug #44141 (private parent constructor callable through static
   function). (Dmitry)
+- Fixed bug #44113 (OCI8 new collection creation can fail with OCI-22303).
+  (Oracle Corp.)
 - Fixed bug #44069 (Huge memory usage with concatenation using . instead of
   .=). (Dmitry)
 - Fixed bug #44046 (crash inside array_slice() function with an invalid
@@ -37,6 +41,8 @@ PHP                                                                        NEWS
 - Fixed bug #44028 (crash inside stream_socket_enable_crypto() when enabling
   encryption without crypto type). (Ilia)
 - Fixed bug #44018 (RecursiveDirectoryIterator options inconsistancy). (Marcus)
+- Fixed bug #44008 (OCI8 incorrect usage of OCI-Lob->close crashes PHP).
+  (Oracle Corp.)
 - Fixed bug #43998 (Two error messages returned for incorrect encoding for
   mb_strto[upper|lower]). (Rui)
 - Fixed bug #43994 (mb_ereg 'successfully' matching incorrect). (Rui)
@@ -243,6 +249,8 @@ PHP                                                                        NEWS
   64-bit PHP). (Derick)
 - Fixed bug #42506 (php_pgsql_convert() timezone parse bug) (nonunnet at
   gmail dot com, Ilia)
+- Fixed bug #42496 (OCI8 cursor is not closed when using 2 clobs in a select
+  query). (Oracle Corp.)
 - Fixed bug #42462 (Segmentation when trying to set an attribute in a
   DOMElement). (Rob)
 - Fixed bug #42453 (CGI SAPI does not shut down cleanly with -i/-m/-v cmdline
