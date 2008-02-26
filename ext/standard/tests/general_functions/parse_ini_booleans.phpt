@@ -15,17 +15,17 @@ array(3) {
   ["error_reporting values"]=>
   array(6) {
     ["foo"]=>
-    string(6) "8191 8"
+    string(7) "16383 8"
     ["error_reporting"]=>
-    string(4) "8191"
+    string(5) "16383"
     ["error_reporting1"]=>
     string(4) "4177"
     ["error_reporting2"]=>
-    string(4) "8183"
+    string(5) "16375"
     ["error_reporting3"]=>
-    string(4) "8183"
+    string(5) "16375"
     ["error_reporting4"]=>
-    string(4) "8183"
+    string(5) "16375"
   }
   ["true or false"]=>
   array(8) {
@@ -72,17 +72,17 @@ array(3) {
   [u"error_reporting values"]=>
   array(6) {
     [u"foo"]=>
-    unicode(6) "8191 8"
+    unicode(7) "16383 8"
     [u"error_reporting"]=>
-    unicode(4) "8191"
+    unicode(5) "16383"
     [u"error_reporting1"]=>
     unicode(4) "4177"
     [u"error_reporting2"]=>
-    unicode(4) "8183"
+    unicode(5) "16375"
     [u"error_reporting3"]=>
-    unicode(4) "8183"
+    unicode(5) "16375"
     [u"error_reporting4"]=>
-    unicode(4) "8183"
+    unicode(5) "16375"
   }
   [u"true or false"]=>
   array(8) {
