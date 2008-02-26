@@ -1,3 +1,181 @@
+2008-02-25  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_3)
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/bug43492_2.phpt
+      ext/oci8/tests/bug44008.phpt
+      ext/oci8/tests/bug44206.phpt
+      ext/oci8/tests/lob_014.phpt
+      ext/oci8/tests/lob_021.phpt:
+      MFH: OCI8: fix bug #44008 (OCI-Lob->close) & bug #44206 (ref cursor leak)
+
+    * ext/oci8/oci8_interface.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/bug43492_2.phpt
+      ext/oci8/tests/bug43492_2.phpt
+      ext/oci8/tests/bug43492_2.phpt
+      ext/oci8/tests/bug43492_2.phpt
+      ext/oci8/tests/bug44008.phpt
+      ext/oci8/tests/bug44008.phpt
+      ext/oci8/tests/bug44008.phpt
+      ext/oci8/tests/bug44008.phpt
+      ext/oci8/tests/bug44206.phpt
+      ext/oci8/tests/bug44206.phpt
+      ext/oci8/tests/bug44206.phpt
+      ext/oci8/tests/bug44206.phpt
+      ext/oci8/tests/lob_014.phpt
+      ext/oci8/tests/lob_014.phpt
+      ext/oci8/tests/lob_021.phpt
+      ext/oci8/tests/lob_021.phpt:
+      OCI8: fix bug #44008 (OCI-Lob->close) & bug #44206 (ref cursor leak)
+
+2008-02-25  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/spl_heap.c:
+      Fix folding
+
+    * (PHP_5_3)
+      ext/spl/config.m4
+      ext/spl/config.w32
+      ext/spl/php_spl.c
+      ext/spl/spl_heap.c
+      ext/spl/spl_heap.h
+      ext/spl/tests/heap_001.phpt
+      ext/spl/tests/heap_002.phpt
+      ext/spl/tests/heap_003.phpt
+      ext/spl/tests/heap_004.phpt
+      ext/spl/tests/heap_005.phpt
+      ext/spl/tests/heap_006.phpt
+      ext/spl/tests/heap_007.phpt
+      ext/spl/tests/heap_008.phpt
+      ext/spl/tests/pqueue_001.phpt
+      ext/spl/tests/pqueue_002.phpt
+      ext/spl/tests/pqueue_003.phpt
+      ext/spl/tests/pqueue_004.phpt:
+      MFH: SplHeap, SplMinHeap, SplMaxHeap, SplPriorityQueue implementation
+
+    * ext/spl/config.m4
+      ext/spl/config.w32
+      ext/spl/php_spl.c
+      ext/spl/spl_heap.c
+      ext/spl/spl_heap.c
+      ext/spl/spl_heap.h
+      ext/spl/spl_heap.h
+      ext/spl/tests/heap_001.phpt
+      ext/spl/tests/heap_001.phpt
+      ext/spl/tests/heap_002.phpt
+      ext/spl/tests/heap_002.phpt
+      ext/spl/tests/heap_003.phpt
+      ext/spl/tests/heap_003.phpt
+      ext/spl/tests/heap_004.phpt
+      ext/spl/tests/heap_004.phpt
+      ext/spl/tests/heap_005.phpt
+      ext/spl/tests/heap_005.phpt
+      ext/spl/tests/heap_006.phpt
+      ext/spl/tests/heap_006.phpt
+      ext/spl/tests/heap_007.phpt
+      ext/spl/tests/heap_007.phpt
+      ext/spl/tests/heap_008.phpt
+      ext/spl/tests/heap_008.phpt
+      ext/spl/tests/pqueue_001.phpt
+      ext/spl/tests/pqueue_001.phpt
+      ext/spl/tests/pqueue_002.phpt
+      ext/spl/tests/pqueue_002.phpt
+      ext/spl/tests/pqueue_003.phpt
+      ext/spl/tests/pqueue_003.phpt
+      ext/spl/tests/pqueue_004.phpt
+      ext/spl/tests/pqueue_004.phpt:
+      SplHeap, SplMinHeap, SplMaxHeap, SplPriorityQueue implementation
+
+2008-02-25  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/metaphone.c
+      ext/standard/metaphone.c
+      ext/standard/tests/strings/bug44242.phpt
+      ext/standard/tests/strings/bug44242.phpt:
+      MFB: Fixed bug #44242 (metaphone('CMXFXM') crashes PHP)
+
+2008-02-25  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/mysqlnd/mysqlnd_wireprotocol.c:
+      fix win32 build
+
+2008-02-25  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/metaphone.c
+      ext/standard/tests/strings/bug44242.phpt
+      ext/standard/tests/strings/bug44242.phpt
+      ext/standard/tests/strings/bug44242.phpt:
+      Fixed bug #44242 (metaphone(CMXFXM) crashes PHP)
+
+2008-02-25  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/php_date.c
+      ext/date/tests/bug41523-64bit.phpt
+      ext/date/tests/bug41523-64bit.phpt
+      ext/date/tests/bug41523-64bit.phpt
+      ext/date/tests/bug41523.phpt
+      ext/date/tests/mktime-3-64bit.phpt
+      ext/date/tests/mktime-3-64bit.phpt
+      ext/date/tests/mktime-3-64bit.phpt
+      ext/date/tests/mktime-3.phpt
+      ext/date/tests/strtotime-mysql-64bit.phpt
+      ext/date/tests/strtotime-mysql-64bit.phpt
+      ext/date/tests/strtotime-mysql-64bit.phpt
+      ext/date/tests/strtotime-mysql.phpt
+      ext/date/tests/strtotime3-64bit.phpt
+      ext/date/tests/strtotime3-64bit.phpt
+      ext/date/tests/strtotime3-64bit.phpt
+      ext/date/tests/strtotime3.phpt:
+      - Fixed tests on 64bit platform.
+
+    * ext/wddx/tests/001-64bit.phpt
+      ext/wddx/tests/001-64bit.phpt
+      ext/wddx/tests/001-64bit.phpt
+      ext/wddx/tests/001.phpt:
+        1.1.4;
+      - Fixed tests on 64bit platform.
+
+    * (PHP_5_2)
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - MFH: Fixed a problem with parsing timezones as part of a format.
+
+    * (PHP_5_3)
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - MFH: Added a few new separation specifiers.
+      - MFH: Added specifiers that can reset or default the y/m/d/h/i/s/tz
+      values.
+      - MFH: Fixed a problem with parsing timezones as part of a format.
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - Added a few new separation specifiers.
+      - Added specifiers that can reset or default the y/m/d/h/i/s/tz values.
+      - Fixed a problem with parsing timezones as part of a format.
+
+2008-02-25  Steve Seear  <steve.seear@uk.ibm.com>
+
+    * ext/standard/tests/file/fgetc_basic.phpt
+      ext/standard/tests/file/fgetc_basic.phpt
+      ext/standard/tests/file/fgetc_basic.phpt
+      ext/standard/tests/file/fgetc_variation2.phpt
+      ext/standard/tests/file/fgetc_variation2.phpt
+      ext/standard/tests/file/fgetc_variation2.phpt:
+      Replace hardcoded resource ids with %d in fgetc() tests.
+
 2008-02-24  Felipe Pena  <felipensp@gmail.com>
 
     * ext/filter/tests/053.phpt
