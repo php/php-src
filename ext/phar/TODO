@@ -94,6 +94,9 @@ Version 2.0.0
    ".phar" in the filename (or already have stub/alias)
  * allow read/write on .tar/.zip files that do not contain a stub or alias
  * prevent manual addition of stub via $a['.phar/stub.php'] = '<?php my stub';
+ * investigate potential collision between SPL's DirectoryIterator flags and
+   those in phar_archive_data
+ X implement initial support for simple zip/tar archives (PharData) [Steph]
  X make createDefaultStub() setDefaultStub() and have it file format-specific
    [Steph]
  X convertTo*() should always use the default stub [Steph]
