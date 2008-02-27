@@ -116,7 +116,7 @@ int phar_is_tar(char *buf)
 	return ret;
 }
 
-int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
+int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 	int ret = phar_create_or_parse_filename(fname, fname_len, alias, alias_len, options, &phar, error TSRMLS_CC);
@@ -124,12 +124,23 @@ int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_l
 	if (pphar) {
 		*pphar = phar;
 	}
+
+	phar->is_data = is_data;
+
+	if (is_data) {
+		phar->is_writeable;
+		phar->alias = NULL;
+		phar->alias_len = 0;
+	}
+
 	if (FAILURE == ret) {
 		return FAILURE;
 	}
+
 	if (phar->is_tar) {
 		return ret;
 	}
+
 	if (phar->is_brandnew) {
 		phar->is_tar = 1;
 		phar->internal_file_start = 0;
@@ -460,6 +471,10 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 	entry.phar = phar;
 	entry.fp_type = PHAR_MOD;
 
+	if (phar->is_data) {
+		goto nostub;
+	}
+
 	/* set alias */
 	if (!phar->is_temporary_alias && phar->alias_len) {
 		entry.filename = estrndup(".phar/alias.txt", sizeof(".phar/alias.txt")-1);
@@ -582,6 +597,8 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 			}
 		}
 	}
+
+nostub:
 
 	if (phar->fp && !phar->is_brandnew) {
 		oldfile = phar->fp;
