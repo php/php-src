@@ -79,6 +79,8 @@ PHP                                                                        NEWS
 - Fixed bug #43589 (a possible infinite loop in bz2_filter.c). (Greg)
 - Fixed bug #43580 (removed bogus declaration of a non-existent php_is_url()
   function). (Ilia)
+- Fixed bug #43559 (array_merge_recursive() doesn't behave as expected with
+  duplicate NULL values). (Felipe, Tony)
 - Fixed bug #43533 (escapeshellarg('') returns null). (Ilia)
 - Fixed bug #43527 (DateTime created from a timestamp reports environment
   timezone). (Derick)
