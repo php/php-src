@@ -35,6 +35,10 @@
 # define MSG_DONTWAIT 0
 #endif
 
+#ifndef MSG_PEEK
+# define MSG_PEEK 0
+#endif
+
 php_stream_ops php_stream_generic_socket_ops;
 PHPAPI php_stream_ops php_stream_socket_ops;
 php_stream_ops php_stream_udp_socket_ops;
