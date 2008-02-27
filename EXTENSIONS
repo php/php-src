@@ -159,7 +159,7 @@ STATUS:              Working
 SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           oci8
-PRIMARY MAINTAINER:  Antony Dovgal <tony2001@php.net>
+PRIMARY MAINTAINER:  Christopher Jones <sixd@php.net>, Antony Dovgal <tony2001@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
