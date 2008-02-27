@@ -1,3 +1,110 @@
+2008-02-26  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/general_functions/parse_ini_basic.phpt
+      ext/standard/tests/general_functions/parse_ini_basic.phpt
+      ext/standard/tests/general_functions/parse_ini_booleans.phpt
+      ext/standard/tests/general_functions/parse_ini_booleans.phpt
+      tests/unicode/func/strpos.phpt
+      tests/unicode/func/strstr.phpt:
+      Fixed tests
+
+2008-02-26  Josie Messa  <josmessa@uk.ibm.com>
+
+    * ext/standard/tests/dir/chdir_basic.phpt
+      ext/standard/tests/dir/chdir_basic.phpt
+      ext/standard/tests/dir/chdir_error1.phpt
+      ext/standard/tests/dir/chdir_error1.phpt
+      ext/standard/tests/dir/chdir_error2.phpt
+      ext/standard/tests/dir/chdir_error2.phpt
+      ext/standard/tests/dir/chdir_variation1.phpt
+      ext/standard/tests/dir/chdir_variation1.phpt
+      ext/standard/tests/dir/chdir_variation2.phpt
+      ext/standard/tests/dir/chdir_variation2.phpt:
+      - New tests for chdir() function
+
+    * (PHP_5_3)
+      ext/standard/tests/array/chdir_basic.phpt
+      ext/standard/tests/array/chdir_error1.phpt
+      ext/standard/tests/array/chdir_error2.phpt
+      ext/standard/tests/array/chdir_variation1.phpt
+      ext/standard/tests/array/chdir_variation2.phpt:
+      - committed chdir() tests in wrong directory
+
+    * ext/standard/tests/array/chdir_basic.phpt
+      ext/standard/tests/array/chdir_basic.phpt
+      ext/standard/tests/array/chdir_error1.phpt
+      ext/standard/tests/array/chdir_error1.phpt
+      ext/standard/tests/array/chdir_error2.phpt
+      ext/standard/tests/array/chdir_error2.phpt
+      ext/standard/tests/array/chdir_variation1.phpt
+      ext/standard/tests/array/chdir_variation1.phpt
+      ext/standard/tests/array/chdir_variation2.phpt
+      ext/standard/tests/array/chdir_variation2.phpt:
+      
+      file chdir_basic.phpt was initially added on branch PHP_5_3.
+
+    * ext/standard/tests/dir/chdir_basic.phpt
+      ext/standard/tests/dir/chdir_basic.phpt
+      ext/standard/tests/dir/chdir_basic.phpt
+      ext/standard/tests/dir/chdir_error1.phpt
+      ext/standard/tests/dir/chdir_error1.phpt
+      ext/standard/tests/dir/chdir_error1.phpt
+      ext/standard/tests/dir/chdir_error2.phpt
+      ext/standard/tests/dir/chdir_error2.phpt
+      ext/standard/tests/dir/chdir_error2.phpt
+      ext/standard/tests/dir/chdir_variation1.phpt
+      ext/standard/tests/dir/chdir_variation1.phpt
+      ext/standard/tests/dir/chdir_variation1.phpt
+      ext/standard/tests/dir/chdir_variation2.phpt
+      ext/standard/tests/dir/chdir_variation2.phpt
+      ext/standard/tests/dir/chdir_variation2.phpt:
+        1.1.4;
+      file chdir_basic.phpt was initially added on branch PHP_5_2.
+
+2008-02-26  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_3)
+      ext/oci8/oci8.c:
+      MFH: Use STD_PHP_INI_BOOLEAN.  Fix whitespace.
+
+    * ext/oci8/oci8.c:
+      Use STD_PHP_INI_BOOLEAN.  Fix whitespace.
+
+    * (PHP_5_2)
+      ext/oci8/tests/bug27303.phpt
+      ext/oci8/tests/bug27303.phpt
+      ext/oci8/tests/bug27303_2.phpt
+      ext/oci8/tests/bug27303_2.phpt
+      ext/oci8/tests/bug27303_4.phpt
+      ext/oci8/tests/bug27303_4.phpt
+      ext/oci8/tests/lob_039.phpt
+      ext/oci8/tests/lob_039.phpt:
+      Fix test noise
+
+    * ext/oci8/tests/lob_039.phpt:
+      fix test noise
+
+2008-02-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdo/pdo_stmt.c
+      ext/pdo/pdo_stmt.c
+      ext/pdo_pgsql/pgsql_statement.c
+      ext/pdo_pgsql/pgsql_statement.c:
+      
+      MFB: Better fix for bug #44189
+
+    * (PHP_5_3)
+      ext/pdo/pdo_stmt.c
+      ext/pdo_pgsql/pgsql_statement.c:
+      
+      Better fix for bug #44189
+
+2008-02-26  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_2)
+      NEWS:
+      Add recent OCI8 bug fixes
+
 2008-02-25  Christopher Jones  <christopher.jones@oracle.com>
 
     * (PHP_5_3)
