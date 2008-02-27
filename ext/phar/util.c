@@ -80,17 +80,33 @@ void phar_rename_archive(phar_archive_data *phar, char *ext TSRMLS_DC)
 
 	if (!ext) {
 		if (phar->is_zip) {
-			ext = "phar.zip";
+			if (phar->is_data) {
+				ext = "zip";
+			} else {
+				ext = "phar.zip";
+			}
 		} else if (phar->is_tar) {
 			switch (phar->flags) {
 				case PHAR_FILE_COMPRESSED_GZ:
-					ext = "phar.tar.gz";
+					if (phar->is_data) {
+						ext = "tar.gz";
+					} else {
+						ext = "phar.tar.gz";
+					}
 					break;
 				case PHAR_FILE_COMPRESSED_BZ2:
-					ext = "phar.tar.bz2";
+					if (phar->is_data) {
+						ext = "tar.bz2";
+					} else {
+						ext = "phar.tar.bz2";
+					}
 					break;
 				default:
-					ext = "phar.tar";
+					if (phar->is_data) {
+						ext = "tar";
+					} else {
+						ext = "phar.tar";
+					}
 			}
 		} else {
 			switch (phar->flags) {
@@ -123,7 +139,7 @@ void phar_rename_archive(phar_archive_data *phar, char *ext TSRMLS_DC)
 	efree(basepath);
 	efree(newname);
 
-	if (!phar->is_zip && !phar->is_tar) {
+	if (!strncmp(ext, "zip", 3) && !strncmp(ext, "tar", 3)) {
 		phar->alias = estrndup(newpath, strlen(newpath));
 		phar->alias_len = strlen(newpath);
 		zend_hash_update(&(PHAR_GLOBALS->phar_alias_map), newpath, strlen(newpath), (void*)&phar, sizeof(phar_archive_data*), NULL);

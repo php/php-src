@@ -116,7 +116,7 @@ php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, 
 				php_url_free(resource);
 				return NULL;
 			}
-			if (phar_open_or_create_filename(resource->host, arch_len, NULL, 0, options, NULL, &error TSRMLS_CC) == FAILURE)
+			if (phar_open_or_create_filename(resource->host, arch_len, NULL, 0, NULL, options, NULL, &error TSRMLS_CC) == FAILURE)
 			{
 				if (error) {
 					if (!(options & PHP_STREAM_URL_STAT_QUIET)) {

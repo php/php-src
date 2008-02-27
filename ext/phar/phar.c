@@ -388,7 +388,7 @@ void phar_entry_remove(phar_entry_data *idata, char **error TSRMLS_DC) /* {{{ */
 /**
  * Open an already loaded phar
  */
-int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
+int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 #ifdef PHP_WIN32
@@ -420,6 +420,7 @@ int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_len, int
 		if (pphar) {
 			*pphar = phar;
 		}
+		phar->is_data = is_data;
 		return SUCCESS;
 	} else {
 #ifdef PHP_WIN32
@@ -963,33 +964,63 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 /**
  * Create or open a phar for writing
  */
-int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
+int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int alias_len, char *objname, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
 	char *ext_str;
-	int ext_len;
+	int ext_len, is_data = 0, zip = 0, tar = 0;
 
 	if (error) {
 		*error = NULL;
 	}
 
-	if (phar_open_loaded(fname, fname_len, alias, alias_len, options, pphar, 0 TSRMLS_CC) == SUCCESS) {
-		if (pphar && !PHAR_G(readonly)) {
+	if (phar_detect_phar_fname_ext(fname, 1, &ext_str, &ext_len) == SUCCESS) {
+
+		if (ext_len >= sizeof(".zip")-1 && !memcmp((void *) ext_str, (void *) ".zip", sizeof(".zip")-1)) {
+			zip = 1;
+		}
+			
+		if (ext_len >= sizeof(".tar")-1 && !memcmp((void *) ext_str, (void *) ".tar", sizeof(".tar")-1)) {
+			tar = 1;
+		}
+
+		if (tar || zip) {
+			if (objname && strncmp(objname, "PharData", 8) != 0) {
+				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Cannot open '%s' as a Phar object. Use PharData::__construct() for a standard zip or tar archive", fname);
+				return FAILURE;
+			}
+			is_data = 1;
+		} else {
+			if (objname && strncmp(objname, "PharData", 8) == 0) {
+				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Cannot open '%s' as a PharData object. Use Phar::__construct() for archives other than .zip and .tar", fname);
+				return FAILURE;
+			}
+		}
+
+	} else {
+
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Cannot open '%s' as a %s object, file extension (or combination) not recognised", fname, objname);
+		return FAILURE;
+	}
+
+	if (phar_open_loaded(fname, fname_len, alias, alias_len, is_data, options, pphar, 0 TSRMLS_CC) == SUCCESS) {
+		if (pphar && (!PHAR_G(readonly) || is_data)) {
 			(*pphar)->is_writeable = 1;
 		}
 		return SUCCESS;
 	}
 
-	if (phar_detect_phar_fname_ext(fname, 1, &ext_str, &ext_len) == SUCCESS) {
-		if (ext_len >= sizeof(".phar.zip")-1 && !memcmp((void *) ext_str, (void *) ".phar.zip", sizeof(".phar.zip")-1)) {
-			/* assume zip-based phar */
-			return phar_open_or_create_zip(fname, fname_len, alias, alias_len, options, pphar, error TSRMLS_CC);
-		}
-		if (ext_len >= sizeof(".phar.tar")-1 && !memcmp((void *) ext_str, (void *) ".phar.tar", sizeof(".phar.tar")-1)) {
-			/* assume tar-based phar */
-			return phar_open_or_create_tar(fname, fname_len, alias, alias_len, options, pphar, error TSRMLS_CC);
-		}
+	if ((ext_len >= sizeof(".phar.zip")-1 && !memcmp((void *) ext_str, (void *) ".phar.zip", sizeof(".phar.zip")-1)) || zip) {
+		// assume zip-based phar
+		return phar_open_or_create_zip(fname, fname_len, alias, alias_len, is_data, options, pphar, error TSRMLS_CC);
 	}
+
+	if ((ext_len >= sizeof(".phar.tar")-1 && !memcmp((void *) ext_str, (void *) ".phar.tar", sizeof(".phar.tar")-1)) || tar) {
+		// assume tar-based phar
+		return phar_open_or_create_tar(fname, fname_len, alias, alias_len, is_data, options, pphar, error TSRMLS_CC);
+	}
+
 	return phar_create_or_parse_filename(fname, fname_len, alias, alias_len, options, pphar, error TSRMLS_CC);
+
 }
 
 int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
@@ -1109,7 +1140,7 @@ int phar_open_filename(char *fname, int fname_len, char *alias, int alias_len, i
 		*error = NULL;
 	}
 	
-	if (phar_open_loaded(fname, fname_len, alias, alias_len, options, pphar, error TSRMLS_CC) == SUCCESS) {
+	if (phar_open_loaded(fname, fname_len, alias, alias_len, 0, options, pphar, error TSRMLS_CC) == SUCCESS) {
 		return SUCCESS;
 	} else if (error && *error) {
 		return FAILURE;
@@ -1303,43 +1334,64 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 int phar_detect_phar_fname_ext(const char *filename, int check_length, char **ext_str, int *ext_len) /* {{{ */
 {
 	char end;
-	char *pos_p = strstr(filename, ".phar.php");
-	char *pos_zi = strstr(filename, ".phar.zip");
-	char *pos_zi2 = strstr(filename, ".phar.zip.php");
-	char *pos_t = strstr(filename, ".phar.tar");
-	char *pos_t2 = strstr(filename, ".phar.tar.php");
-	char *pos_z = strstr(filename, ".phar.gz");
-	char *pos_b = strstr(filename, ".phar.bz2");
+	char *pos_t = strstr(filename, ".tar");
+	char *pos_z = strstr(filename, ".zip");
+	char *pos_tg = strstr(filename, ".tar.gz");
+	char *pos_tb = strstr(filename, ".tar.bz2");
+	char *pos_pg = strstr(filename, ".phar.gz");
+	char *pos_pb = strstr(filename, ".phar.bz2");
+	char *pos_pp = strstr(filename, ".phar.php");
+	char *pos_pt = strstr(filename, ".phar.tar");
+	char *pos_pz = strstr(filename, ".phar.zip");
+	char *pos_ptg = strstr(filename, ".phar.tar.gz");
+	char *pos_ptb = strstr(filename, ".phar.tar.bz2");
+	char *pos_ptp = strstr(filename, ".phar.tar.php");
+	char *pos_pzp = strstr(filename, ".phar.zip.php");
 
-	if (pos_p) {
-		if (pos_z) {
-			return FAILURE;
-		}
-		*ext_str = pos_p;
+	if (pos_pzp) {
+		*ext_str = pos_pzp;
+		*ext_len = 13;
+	} else if (pos_ptp) {
+		*ext_str = pos_ptp;
+		*ext_len = 13;
+	} else if (pos_ptb) {
+		*ext_str = pos_ptb;
+		*ext_len = 13;
+	} else if (pos_ptg) {
+		*ext_str = pos_ptg;
+		*ext_len = 12;
+	} else if (pos_pz) {
+		*ext_str = pos_pz;
 		*ext_len = 9;
+	} else if (pos_pt) {
+		*ext_str = pos_pt;
+		*ext_len = 9;
+	} else if (pos_pp) {
+		*ext_str = pos_pp;
+		*ext_len = 9;
+	} else if (pos_pb) {
+		*ext_str = pos_pb;
+		*ext_len = 9;
+	} else if (pos_pg) {
+		*ext_str = pos_pg;
+		*ext_len = 8;
+	} else if (pos_tb) {
+		*ext_str = pos_tb;
+		*ext_len = 8;
+	} else if (pos_tg) {
+		*ext_str = pos_tg;
+		*ext_len = 7;
 	} else if (pos_z) {
 		*ext_str = pos_z;
-		*ext_len = 8;
-	} else if (pos_b) {
-		*ext_str = pos_b;
-		*ext_len = 9;
-	} else if (pos_zi2) {
-		*ext_str = pos_zi2;
-		*ext_len = 13;
-	} else if (pos_zi) {
-		*ext_str = pos_zi;
-		*ext_len = 9;
-	} else if (pos_t2) {
-		*ext_str = pos_t2;
-		*ext_len = 13;
+		*ext_len = 4;
 	} else if (pos_t) {
 		*ext_str = pos_t;
-		*ext_len = 9;
-	} else if ((pos_p = strstr(filename, ".phar")) != NULL && pos_p[4] != '\0') {
-		*ext_str = pos_p;
+		*ext_len = 4;
+	} else if ((pos_pp = strstr(filename, ".phar")) != NULL && pos_pp[4] != '\0') {
+		*ext_str = pos_pp;
 		*ext_len = 5;
-	} else if ((pos_p = strstr(filename, ".php")) != NULL && pos_p[4] != '\0') {
-		*ext_str = pos_p;
+	} else if ((pos_pp = strstr(filename, ".php")) != NULL && pos_pp[4] != '\0') {
+		*ext_str = pos_pp;
 		*ext_len = 4;
 	} else {
 		/* We have an alias with no extension, so locate the first / and fail */
@@ -1571,7 +1623,7 @@ int phar_open_compiled_file(char *alias, int alias_len, char **error TSRMLS_DC) 
 	fname = zend_get_executed_filename(TSRMLS_C);
 	fname_len = strlen(fname);
 
-	if (phar_open_loaded(fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, 0 TSRMLS_CC) == SUCCESS) {
+	if (phar_open_loaded(fname, fname_len, alias, alias_len, 0, REPORT_ERRORS, NULL, 0 TSRMLS_CC) == SUCCESS) {
 		return SUCCESS;
 	}
 

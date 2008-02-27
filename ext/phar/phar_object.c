@@ -23,6 +23,7 @@
 #include "func_interceptors.h"
 
 static zend_class_entry *phar_ce_archive;
+static zend_class_entry *phar_ce_data;
 static zend_class_entry *phar_ce_PharException;
 
 #if HAVE_SPL
@@ -1099,6 +1100,8 @@ static spl_other_handler phar_spl_foreign_handler = {
 
 /* {{{ proto void Phar::__construct(string fname [, int flags [, string alias]])
  * Construct a Phar archive object
+ * {{{ proto void PharData::__construct(string fname [, int flags [, string alias]])
+ * Construct a PharData archive object
  */
 PHP_METHOD(Phar, __construct)
 {
@@ -1106,7 +1109,7 @@ PHP_METHOD(Phar, __construct)
 	zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Cannot instantiate Phar object without SPL extension");
 #else
 	char *fname, *alias = NULL, *error, *arch, *entry = NULL, *save_fname;
-	int fname_len, alias_len = 0, arch_len, entry_len;
+	int fname_len, alias_len = 0, arch_len, entry_len, is_data;
 	long flags = 0;
 	phar_archive_object *phar_obj;
 	phar_archive_data   *phar_data;
@@ -1124,7 +1127,7 @@ PHP_METHOD(Phar, __construct)
 	}
 
 	if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
-		/* use arch for fname instead of fname */
+		/* use arch (the basename for the archive) for fname instead of fname */
 		/* this allows support for RecursiveDirectoryIterator of subdirectories */
 		save_fname = fname;
 #ifdef PHP_WIN32
@@ -1140,7 +1143,9 @@ PHP_METHOD(Phar, __construct)
 		phar_unixify_path_separators(arch, arch_len);
 #endif
 	}
-	if (phar_open_or_create_filename(fname, fname_len, alias, alias_len, REPORT_ERRORS, &phar_data, &error TSRMLS_CC) == FAILURE) {
+
+	if (phar_open_or_create_filename(fname, fname_len, alias, alias_len, phar_obj->std.ce->name, REPORT_ERRORS, &phar_data, &error TSRMLS_CC) == FAILURE) {
+
 		if (fname == arch) {
 			efree(arch);
 			fname = save_fname;
@@ -1162,6 +1167,8 @@ PHP_METHOD(Phar, __construct)
 		efree(arch);
 		fname = save_fname;
 	}
+
+	is_data = phar_data->is_data;
 	phar_data->refcount++;
 	phar_obj->arc.archive = phar_data;
 	phar_obj->spl.oth_handler = &phar_spl_foreign_handler;
@@ -1172,6 +1179,7 @@ PHP_METHOD(Phar, __construct)
 	} else {
 		fname_len = spprintf(&fname, 0, "phar://%s", phar_data->fname);
 	}
+
 	INIT_PZVAL(&arg1);
 	ZVAL_STRINGL(&arg1, fname, fname_len, 0);
 
@@ -1185,6 +1193,7 @@ PHP_METHOD(Phar, __construct)
 			&spl_ce_RecursiveDirectoryIterator->constructor, "__construct", NULL, &arg1);
 	}
 
+	phar_obj->arc.archive->is_data = is_data;
 	phar_obj->spl.info_class = phar_ce_entry;
 
 	efree(fname);
@@ -1592,10 +1601,12 @@ static void phar_convert_to_other(phar_archive_data *source, int convert, char *
 {
 	phar_archive_data phar = {0};
 	char *error;
+	int is_data;
 	phar_entry_info *entry, newentry;
 
-	/* set whole-archive compression from parameter */
+	/* set whole-archive compression and type from parameter */
 	phar.flags = flags;
+
 	switch (convert) {
 		case 1 :
 			phar.is_tar = 1;
@@ -1697,12 +1708,14 @@ static void phar_convert_to_other(phar_archive_data *source, int convert, char *
 	if (source->fp && source->refcount == 1) {
 		php_stream_close(source->fp);
 	}
+
 	source->fp = phar.fp;
 	/* don't free stuff */
 	phar.manifest.pDestructor = NULL;
 	zend_hash_destroy(&(phar.manifest));
 	source->is_zip = phar.is_zip;
 	source->is_tar = phar.is_tar;
+
 	if (phar.is_zip || phar.is_tar) {
 		source->internal_file_start = source->halt_offset = 0;
 	}
@@ -1842,6 +1855,12 @@ PHP_METHOD(Phar, convertToPhar)
 	long method = 0;
 	int ext_len = 0;
 	PHAR_ARCHIVE_OBJECT();
+
+	if (phar_obj->arc.archive->is_data) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"A plain %s archive cannot be converted to a Phar archive", phar_obj->arc.archive->is_tar ? "tar" : "zip");
+		return;
+	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ls", &method, &ext, &ext_len) == FAILURE) {
 		return;
@@ -1989,6 +2008,12 @@ PHP_METHOD(Phar, setAlias)
 		return;
 	}
 
+	if (phar_obj->arc.archive->is_data) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"A Phar alias cannot be set in a plain %s archive", phar_obj->arc.archive->is_tar ? "tar" : "zip");
+		return;
+	}
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &alias, &alias_len) == SUCCESS) {
 		if (alias_len == phar_obj->arc.archive->alias_len && memcmp(phar_obj->arc.archive->alias, alias, alias_len) == 0) {
 			RETURN_TRUE;
@@ -2114,6 +2139,12 @@ PHP_METHOD(Phar, setStub)
 		return;
 	}
 
+	if (phar_obj->arc.archive->is_data) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"A Phar stub cannot be set in a plain %s archive", phar_obj->arc.archive->is_tar ? "tar" : "zip");
+		return;
+	}
+
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &zstub, &len) == SUCCESS) {
 		if ((php_stream_from_zval_no_verify(stream, &zstub)) != NULL) {
 			if (len > 0) {
@@ -2163,6 +2194,12 @@ PHP_METHOD(Phar, setStub)
 	int index_len = 0, webindex_len = 0, created_stub = 0;
 	size_t stub_len = 0;
 	PHAR_ARCHIVE_OBJECT();
+
+	if (phar_obj->arc.archive->is_data) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"A Phar stub cannot be set in a plain %s archive", phar_obj->arc.archive->is_tar ? "tar" : "zip");
+		return;
+	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s", &index, &index_len, &webindex, &webindex_len) == FAILURE) {
 		RETURN_FALSE;
@@ -3624,12 +3661,21 @@ void phar_object_init(TSRMLS_D) /* {{{ */
 
 	zend_class_implements(phar_ce_archive TSRMLS_CC, 2, spl_ce_Countable, zend_ce_arrayaccess);
 
+	INIT_CLASS_ENTRY(ce, "PharData", php_archive_methods);
+	phar_ce_data = zend_register_internal_class_ex(&ce, spl_ce_RecursiveDirectoryIterator, NULL  TSRMLS_CC);
+
+	zend_class_implements(phar_ce_data TSRMLS_CC, 2, spl_ce_Countable, zend_ce_arrayaccess);
+
 	INIT_CLASS_ENTRY(ce, "PharFileInfo", php_entry_methods);
 	phar_ce_entry = zend_register_internal_class_ex(&ce, spl_ce_SplFileInfo, NULL  TSRMLS_CC);
 #else
 	INIT_CLASS_ENTRY(ce, "Phar", php_archive_methods);
 	phar_ce_archive = zend_register_internal_class(&ce TSRMLS_CC);
 	phar_ce_archive->ce_flags |= ZEND_ACC_FINAL_CLASS;
+
+	INIT_CLASS_ENTRY(ce, "PharData", php_archive_methods);
+	phar_ce_data = zend_register_internal_class(&ce TSRMLS_CC);
+	phar_ce_data->ce_flags |= ZEND_ACC_FINAL_CLASS;
 #endif
 
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "BZ2", PHAR_ENT_COMPRESSED_BZ2)
