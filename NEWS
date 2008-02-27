@@ -14,6 +14,8 @@ PHP                                                                        NEWS
 
 
 - Fixed bug #44242 (metaphone('CMXFXM') crashes PHP). (Felipe)
+- Fixed bug #44233 (MSG_PEEK undefined under BeOS R5). (jonathonfreeman at
+  gmail dot com, Ilia)
 - Fixed bug #44216 (strftime segfaults on large negative value). (Derick)
 - Fixed bug #44200 (A crash in PDO when no bound targets exists and yet 
   bound parameters are present). (Ilia)
