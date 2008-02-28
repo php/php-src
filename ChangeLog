@@ -1,3 +1,51 @@
+2008-02-27  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/date/php_date.c:
+      - MFH: Fixed bug #44260 (African timezones missing).
+
+    * ext/date/php_date.c:
+      - Fixed bug #44260 (African timezones missing).
+
+2008-02-27  Antony Dovgal  <tony@daylessday.org>
+
+    * EXTENSIONS:
+      Chris is now primary maintainer of OCI8
+
+2008-02-27  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      Fix (#43559) merged into 5_2
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c
+      ext/standard/tests/array/array_merge_recursive_variation5.phpt:
+      MFB: Fixed bug #43559 (array_merge_recursive() doesn't behave as expected
+      with duplicate NULL values)
+
+    * ext/standard/metaphone.c
+      ext/standard/metaphone.c:
+      MFB: Improved fix for #44242
+
+    * (PHP_5_2)
+      ext/standard/metaphone.c:
+      Improved fix for #44242
+
+2008-02-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      main/streams/xp_socket.c
+      main/streams/xp_socket.c:
+      
+      MFB: Fixed bug #44233 (MSG_PEEK undefined under BeOS R5)
+
+    * (PHP_5_3)
+      main/streams/xp_socket.c:
+      Fixed bug #44233 (MSG_PEEK undefined under BeOS R5)
+
 2008-02-26  Felipe Pena  <felipensp@gmail.com>
 
     * ext/standard/tests/general_functions/parse_ini_basic.phpt
