@@ -5,5 +5,5 @@ Test getrandmax() - wrong params test getrandmax()
 var_dump($biggest_int = getrandmax(true));
 ?>
 --EXPECTF--
-Warning: Wrong parameter count for getrandmax() in %s on line 2
+Warning: getrandmax() expects exactly 0 parameters, 1 given in %s on line 2
 NULL
