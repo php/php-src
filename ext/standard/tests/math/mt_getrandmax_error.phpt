@@ -5,5 +5,5 @@ Test mt_getrandmax() - wrong paramas mt_getrandmax()
 var_dump(mt_getrandmax(true));
 ?>
 --EXPECTF--
-Warning: Wrong parameter count for mt_getrandmax() in %s on line 2
+Warning: mt_getrandmax() expects exactly 0 parameters, 1 given in %s on line 2
 NULL
