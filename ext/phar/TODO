@@ -96,6 +96,7 @@ Version 2.0.0
  * prevent manual addition of stub via $a['.phar/stub.php'] = '<?php my stub';
  * investigate potential collision between SPL's DirectoryIterator flags and
    those in phar_archive_data
+ * compression should work for non-phar archives
  X implement initial support for simple zip/tar archives (PharData) [Steph]
  X make createDefaultStub() setDefaultStub() and have it file format-specific
    [Steph]
