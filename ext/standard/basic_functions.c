@@ -4828,8 +4828,8 @@ PHP_FUNCTION(time_sleep_until)
    Get the name of the owner of the current PHP script */
 PHP_FUNCTION(get_current_user)
 {
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	RETURN_RT_STRING(php_get_current_user(), ZSTR_DUPLICATE);
@@ -5055,7 +5055,7 @@ PHPAPI char *php_get_current_user(void) /* {{{ */
 	Get the last occurred error as associative array. Returns NULL if there hasn't been an error yet. */
 PHP_FUNCTION(error_get_last)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -5804,7 +5804,7 @@ PHP_FUNCTION(get_include_path)
 {
 	char *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -5822,7 +5822,7 @@ PHP_FUNCTION(get_include_path)
    Restore the value of the include_path configuration option */
 PHP_FUNCTION(restore_include_path)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 	zend_restore_ini_entry("include_path", sizeof("include_path"), PHP_INI_STAGE_RUNTIME);

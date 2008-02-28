@@ -262,8 +262,8 @@ static void php_head_apply_header_list_to_hash(void *data, void *arg TSRMLS_DC)
    Return list of headers to be sent / already sent */
 PHP_FUNCTION(headers_list)
 {
-	if (ZEND_NUM_ARGS() > 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	if (!&SG(sapi_headers).headers) {

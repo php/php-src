@@ -577,8 +577,8 @@ PHP_FUNCTION(stream_get_filters)
 	HashPosition pos;
 	ulong num_key;
 
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	array_init(return_value);

@@ -1024,7 +1024,7 @@ PHPAPI char *php_logo_guid(void)
    Return the special ID used to request the PHP logo in phpinfo screens*/
 PHP_FUNCTION(php_logo_guid)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1036,7 +1036,7 @@ PHP_FUNCTION(php_logo_guid)
    Return the special ID used to request the PHP logo in phpinfo screens*/
 PHP_FUNCTION(php_real_logo_guid)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1048,7 +1048,7 @@ PHP_FUNCTION(php_real_logo_guid)
    Return the special ID used to request the PHP logo in phpinfo screens*/
 PHP_FUNCTION(php_egg_logo_guid)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1060,7 +1060,7 @@ PHP_FUNCTION(php_egg_logo_guid)
    Return the special ID used to request the Zend logo in phpinfo screens*/
 PHP_FUNCTION(zend_logo_guid)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1072,7 +1072,7 @@ PHP_FUNCTION(zend_logo_guid)
    Return the current SAPI module name */
 PHP_FUNCTION(php_sapi_name)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 

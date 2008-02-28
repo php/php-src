@@ -332,7 +332,7 @@ PHP_FUNCTION(collator_get_attribute)
    Returns default collator */
 PHP_FUNCTION(collator_get_default)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_FALSE;
 	}
 

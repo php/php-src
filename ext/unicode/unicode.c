@@ -224,7 +224,7 @@ PHP_FUNCTION(unicode_get_error_mode)
    Returns global substitution character for conversion from Unicode to codepage */
 PHP_FUNCTION(unicode_get_subst_char)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 

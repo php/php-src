@@ -2615,8 +2615,8 @@ PHP_FUNCTION(sqlite_column)
    Returns the version of the linked SQLite library. */
 PHP_FUNCTION(sqlite_libversion)
 {
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 	RETURN_ASCII_STRING((char*)sqlite_libversion(), ZSTR_DUPLICATE);
 }
@@ -2626,8 +2626,8 @@ PHP_FUNCTION(sqlite_libversion)
    Returns the encoding (iso8859 or UTF-8) of the linked SQLite library. */
 PHP_FUNCTION(sqlite_libencoding)
 {
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 	RETURN_ASCII_STRING((char*)sqlite_libencoding(), ZSTR_DUPLICATE);
 }
@@ -2642,8 +2642,8 @@ PHP_FUNCTION(sqlite_changes)
 	zval *object = getThis();
 
 	if (object) {
-		if (ZEND_NUM_ARGS() != 0) {
-			WRONG_PARAM_COUNT
+		if (zend_parse_parameters_none() == FAILURE) {
+			return;
 		}
 		DB_FROM_OBJECT(db, object);
 	} else {
@@ -2666,8 +2666,8 @@ PHP_FUNCTION(sqlite_last_insert_rowid)
 	zval *object = getThis();
 
 	if (object) {
-		if (ZEND_NUM_ARGS() != 0) {
-			WRONG_PARAM_COUNT
+		if (zend_parse_parameters_none() == FAILURE) {
+			return;
 		}
 		DB_FROM_OBJECT(db, object);
 	} else {
@@ -2703,8 +2703,8 @@ PHP_FUNCTION(sqlite_num_rows)
 	zval *object = getThis();
 
 	if (object) {
-		if (ZEND_NUM_ARGS() != 0) {
-			WRONG_PARAM_COUNT
+		if (zend_parse_parameters_none() == FAILURE) {
+			return;
 		}
 		RES_FROM_OBJECT(res, object);
 	} else {
@@ -2732,8 +2732,8 @@ PHP_FUNCTION(sqlite_valid)
 	zval *object = getThis();
 
 	if (object) {
-		if (ZEND_NUM_ARGS() != 0) {
-			WRONG_PARAM_COUNT
+		if (zend_parse_parameters_none() == FAILURE) {
+			return;
 		}
 		RES_FROM_OBJECT(res, object);
 	} else {
@@ -2756,8 +2756,8 @@ PHP_FUNCTION(sqlite_has_prev)
 	zval *object = getThis();
 
 	if (object) {
-		if (ZEND_NUM_ARGS() != 0) {
-			WRONG_PARAM_COUNT
+		if (zend_parse_parameters_none() == FAILURE) {
+			return;
 		}
 		RES_FROM_OBJECT(res, object);
 	} else {
@@ -2785,8 +2785,8 @@ PHP_FUNCTION(sqlite_num_fields)
 	zval *object = getThis();
 
 	if (object) {
-		if (ZEND_NUM_ARGS() != 0) {
-			WRONG_PARAM_COUNT
+		if (zend_parse_parameters_none() == FAILURE) {
+			return;
 		}
 		RES_FROM_OBJECT(res, object);
 	} else {
@@ -2874,8 +2874,8 @@ PHP_FUNCTION(sqlite_rewind)
 	zval *object = getThis();
 
 	if (object) {
-		if (ZEND_NUM_ARGS() != 0) {
-			WRONG_PARAM_COUNT
+		if (zend_parse_parameters_none() == FAILURE) {
+			return;
 		}
 		RES_FROM_OBJECT(res, object);
 	} else {
@@ -2909,8 +2909,8 @@ PHP_FUNCTION(sqlite_next)
 	zval *object = getThis();
 
 	if (object) {
-		if (ZEND_NUM_ARGS() != 0) {
-			WRONG_PARAM_COUNT
+		if (zend_parse_parameters_none() == FAILURE) {
+			return;
 		}
 		RES_FROM_OBJECT(res, object);
 	} else {
@@ -2944,8 +2944,8 @@ PHP_FUNCTION(sqlite_key)
 	zval *object = getThis();
 
 	if (object) {
-		if (ZEND_NUM_ARGS() != 0) {
-			WRONG_PARAM_COUNT
+		if (zend_parse_parameters_none() == FAILURE) {
+			return;
 		}
 		RES_FROM_OBJECT(res, object);
 	} else {
@@ -2968,8 +2968,8 @@ PHP_FUNCTION(sqlite_prev)
 	zval *object = getThis();
 
 	if (object) {
-		if (ZEND_NUM_ARGS() != 0) {
-			WRONG_PARAM_COUNT
+		if (zend_parse_parameters_none() == FAILURE) {
+			return;
 		}
 		RES_FROM_OBJECT(res, object);
 	} else {
@@ -3036,8 +3036,8 @@ PHP_FUNCTION(sqlite_last_error)
 	zval *object = getThis();
 
 	if (object) {
-		if (ZEND_NUM_ARGS() != 0) {
-			WRONG_PARAM_COUNT
+		if (zend_parse_parameters_none() == FAILURE) {
+			return;
 		}
 		DB_FROM_OBJECT(db, object);
 	} else {
