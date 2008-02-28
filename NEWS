@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2008, PHP 5.2.6
+27 Feb 2008, PHP 5.2.6RC1
+- Fixed security issue detailed in CVE-2008-0599. (Rasmus)
 - Fixed potential memleak in stream filter parameter for zlib filter (Greg)
 - Added Reflection API metadata for the methods of the DOM classes. (Sebastian)
 - Fixed weired behavior in CGI parameter parsing. (Dmitry, Hannes Magnusson)
