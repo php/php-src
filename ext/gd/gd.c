@@ -1351,7 +1351,7 @@ PHP_MINFO_FUNCTION(gd)
 PHP_FUNCTION(gd_info)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	array_init(return_value);
