@@ -443,8 +443,8 @@ static SWFBitmap getBitmap(zval *id TSRMLS_DC)
    Returns the width of this bitmap */
 PHP_METHOD(swfbitmap, getWidth)
 {
-	if(ZEND_NUM_ARGS() != 0) {
-	    WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+	    return;
 	}
 	RETURN_DOUBLE(SWFBitmap_getWidth(getBitmap(getThis() TSRMLS_CC)));
 }
@@ -454,8 +454,8 @@ PHP_METHOD(swfbitmap, getWidth)
    Returns the height of this bitmap */
 PHP_METHOD(swfbitmap, getHeight)
 {
-	if(ZEND_NUM_ARGS() != 0) {
-	    WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+	    return;
 	}
 	RETURN_DOUBLE(SWFBitmap_getHeight(getBitmap(getThis() TSRMLS_CC)));
 }
@@ -1056,9 +1056,9 @@ PHP_METHOD(swfdisplayitem, remove)
 {
 	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
 
-	if(ZEND_NUM_ARGS() != 0)
-		WRONG_PARAM_COUNT;
-
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	SWFDisplayItem_remove(item);
 }
 /* }}} */
@@ -1086,9 +1086,9 @@ PHP_METHOD(swfdisplayitem, endMask)
 {
 	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
 
-	if(ZEND_NUM_ARGS() != 0)
-		WRONG_PARAM_COUNT;
-
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	SWFDisplayItem_endMask(item);
 }
 /* }}} */
@@ -1100,9 +1100,9 @@ PHP_METHOD(swfdisplayitem, getX)
 	float ret;
 	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
 
-	if(ZEND_NUM_ARGS() != 0)
-		WRONG_PARAM_COUNT;
-
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	ret = SWFDisplayItem_get_x(item);
 	RETURN_DOUBLE(ret);
 }
@@ -1115,9 +1115,9 @@ PHP_METHOD(swfdisplayitem, getY)
 	float ret;
 	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
 
-	if(ZEND_NUM_ARGS() != 0)
-		WRONG_PARAM_COUNT;
-
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	ret = SWFDisplayItem_get_y(item);
 	RETURN_DOUBLE(ret);
 }
@@ -1130,9 +1130,9 @@ PHP_METHOD(swfdisplayitem, getXScale)
 	float ret;
 	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
 
-	if(ZEND_NUM_ARGS() != 0)
-		WRONG_PARAM_COUNT;
-
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	ret = SWFDisplayItem_get_xScale(item);
 	RETURN_DOUBLE(ret);
 }
@@ -1145,9 +1145,9 @@ PHP_METHOD(swfdisplayitem, getYScale)
 	float ret;
 	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
 
-	if(ZEND_NUM_ARGS() != 0)
-		WRONG_PARAM_COUNT;
-
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	ret = SWFDisplayItem_get_yScale(item);
 	RETURN_DOUBLE(ret);
 }
@@ -1160,9 +1160,9 @@ PHP_METHOD(swfdisplayitem, getXSkew)
 	float ret;
 	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
 
-	if(ZEND_NUM_ARGS() != 0)
-		WRONG_PARAM_COUNT;
-
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	ret = SWFDisplayItem_get_xSkew(item);
 	RETURN_DOUBLE(ret);
 }
@@ -1175,9 +1175,9 @@ PHP_METHOD(swfdisplayitem, getYSkew)
 	float ret;
 	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
 
-	if(ZEND_NUM_ARGS() != 0)
-		WRONG_PARAM_COUNT;
-
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	ret = SWFDisplayItem_get_ySkew(item);
 	RETURN_DOUBLE(ret);
 }
@@ -1190,9 +1190,9 @@ PHP_METHOD(swfdisplayitem, getRot)
 	float ret;
 	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
 
-	if(ZEND_NUM_ARGS() != 0)
-		WRONG_PARAM_COUNT;
-
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	ret = SWFDisplayItem_get_rot(item);
 	RETURN_DOUBLE(ret);
 }
@@ -1547,8 +1547,8 @@ PHP_METHOD(swffont, getWideWidth)
    Returns the ascent of the font, or 0 if not available */
 PHP_METHOD(swffont, getAscent)
 {
-    if(ZEND_NUM_ARGS() != 0) {
-	    WRONG_PARAM_COUNT;
+    if (zend_parse_parameters_none() == FAILURE) {
+	    return;
 	}
 	RETURN_DOUBLE(SWFFont_getAscent(getFont(getThis() TSRMLS_CC)));
 }
@@ -1558,8 +1558,8 @@ PHP_METHOD(swffont, getAscent)
    Returns the descent of the font, or 0 if not available */
 PHP_METHOD(swffont, getDescent)
 {
-    if(ZEND_NUM_ARGS() != 0) {
-	    WRONG_PARAM_COUNT;
+    if (zend_parse_parameters_none() == FAILURE) {
+	    return;
 	}
 	RETURN_DOUBLE(SWFFont_getDescent(getFont(getThis() TSRMLS_CC)));
 }
@@ -1569,8 +1569,8 @@ PHP_METHOD(swffont, getDescent)
    Returns the leading of the font, or 0 if not available */
 PHP_METHOD(swffont, getLeading)
 {
-    if(ZEND_NUM_ARGS() != 0) {
-	    WRONG_PARAM_COUNT;
+    if (zend_parse_parameters_none() == FAILURE) {
+	    return;
 	}
 	RETURN_DOUBLE(SWFFont_getLeading(getFont(getThis() TSRMLS_CC)));
 }
@@ -1879,9 +1879,9 @@ PHP_METHOD(swfsoundinstance, noMultiple)
 {
 	SWFSoundInstance inst = getSoundInstance(getThis() TSRMLS_CC);
 
-	if(ZEND_NUM_ARGS() != 0)
-		WRONG_PARAM_COUNT;
-
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	SWFSoundInstance_setNoMultiple(inst);
 }
 /* }}} */
@@ -2030,9 +2030,9 @@ PHP_METHOD(swfvideostream, setdimension)
 /* {{{ getNumFrames */
 PHP_METHOD(swfvideostream, getnumframes) 
 {
-	if(ZEND_NUM_ARGS() != 0)
-		WRONG_PARAM_COUNT;
-
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	RETURN_LONG(SWFVideoStream_getNumFrames(getVideoStream(getThis() TSRMLS_CC)));
 }
 /* }}} */
@@ -3746,8 +3746,8 @@ PHP_METHOD(swftext, getWideWidth)
    Returns the ascent of the current font at its current size, or 0 if not available */
 PHP_METHOD(swftext, getAscent)
 {
-	if(ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 	RETURN_DOUBLE(SWFText_getAscent(getText(getThis() TSRMLS_CC)));
 }
@@ -3757,8 +3757,8 @@ PHP_METHOD(swftext, getAscent)
    Returns the descent of the current font at its current size, or 0 if not available */
 PHP_METHOD(swftext, getDescent)
 {
-	if(ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
   RETURN_DOUBLE(SWFText_getDescent(getText(getThis() TSRMLS_CC)));
 }
@@ -3768,8 +3768,8 @@ PHP_METHOD(swftext, getDescent)
    Returns the leading of the current font at its current size, or 0 if not available */
 PHP_METHOD(swftext, getLeading)
 {
-	if(ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
   RETURN_DOUBLE(SWFText_getLeading(getText(getThis() TSRMLS_CC)));
 }

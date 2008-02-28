@@ -528,8 +528,8 @@ PHP_FUNCTION(fdf_create)
 	FDFDoc fdf;
 	FDFErc err;
 
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	err = FDFCreate(&fdf);

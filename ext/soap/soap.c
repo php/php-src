@@ -111,8 +111,8 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 #define HTTP_RAW_POST_DATA "HTTP_RAW_POST_DATA"
 
 #define ZERO_PARAM() \
-	if (ZEND_NUM_ARGS() != 0) \
- 		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) \
+ 		return;
 
 static zend_class_entry* soap_client_class_entry;
 static zend_class_entry* soap_server_class_entry;
@@ -1130,8 +1130,8 @@ PHP_METHOD(SoapFault, __toString)
 	zend_fcall_info fci;
 	zval fname;
 
-	if (ZEND_NUM_ARGS() > 0) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	faultcode   = zend_read_property(soap_fault_class_entry, this_ptr, "faultcode", sizeof("faultcode")-1, 1 TSRMLS_CC);

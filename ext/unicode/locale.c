@@ -42,7 +42,7 @@ static void php_canonicalize_locale_id(char **target, int32_t *target_len, char 
    Returns default locale */
 PHP_FUNCTION(locale_get_default)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 

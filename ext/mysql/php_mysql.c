@@ -1032,8 +1032,8 @@ PHP_FUNCTION(mysql_select_db)
    Returns a string that represents the client library version */
 PHP_FUNCTION(mysql_get_client_info)
 {
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	RETURN_UTF8_STRING((char *)mysql_get_client_info(), ZSTR_DUPLICATE);

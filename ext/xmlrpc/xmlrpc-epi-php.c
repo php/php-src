@@ -785,8 +785,8 @@ PHP_FUNCTION(xmlrpc_decode)
    Creates an xmlrpc server */
 PHP_FUNCTION(xmlrpc_server_create)
 {
-	if(ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	if(return_value_used) {

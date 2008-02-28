@@ -7172,7 +7172,7 @@ PHP_FUNCTION(localeconv)
 	int len, i;
 
 	/* We don't need no stinkin' parameters... */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 

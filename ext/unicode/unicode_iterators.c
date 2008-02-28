@@ -1043,7 +1043,7 @@ PHP_METHOD(TextIterator, current)
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1087,7 +1087,7 @@ PHP_METHOD(TextIterator, key)
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1102,7 +1102,7 @@ PHP_METHOD(TextIterator, valid)
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1118,7 +1118,7 @@ PHP_METHOD(TextIterator, rewind)
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1140,7 +1140,7 @@ PHP_METHOD(TextIterator, last)
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1162,7 +1162,7 @@ PHP_METHOD(TextIterator, offset)
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1267,7 +1267,7 @@ PHP_METHOD(TextIterator, getAvailableLocales)
 {
 	int32_t count, i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1286,7 +1286,7 @@ PHP_METHOD(TextIterator, getRuleStatus)
 	zval *object = getThis();
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1308,7 +1308,7 @@ PHP_METHOD(TextIterator, getRuleStatusArray)
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 	UErrorCode status = U_ZERO_ERROR;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1344,7 +1344,7 @@ PHP_METHOD(TextIterator, getAll)
 	text_iter_obj *intern = (text_iter_obj*) zend_object_store_get_object(object TSRMLS_CC);
 	text_iter_ops *ops = iter_ops[intern->type];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 

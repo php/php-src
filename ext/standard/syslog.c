@@ -205,7 +205,7 @@ static void start_syslog(TSRMLS_D)
    Initializes all syslog-related variables */
 PHP_FUNCTION(define_syslog_variables)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -245,7 +245,7 @@ PHP_FUNCTION(openlog)
    Close connection to system logger */
 PHP_FUNCTION(closelog)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 

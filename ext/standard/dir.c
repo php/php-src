@@ -355,8 +355,8 @@ PHP_FUNCTION(getcwd)
 	char path[MAXPATHLEN];
 	char *ret=NULL;
 	
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 #if HAVE_GETCWD

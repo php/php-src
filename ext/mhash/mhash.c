@@ -63,7 +63,7 @@ zend_module_entry mhash_module_entry = {
 ZEND_GET_MODULE(mhash)
 #endif
 
-#define NO_ARGS() (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, ""))
+#define NO_ARGS() (SUCCESS == zend_parse_parameters_none())
 
 #ifndef HAVE_MHASH_GET_HASH_NAME_STATIC_PROTO
 extern const char *mhash_get_hash_name_static(hashid hash);
