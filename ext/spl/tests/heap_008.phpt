@@ -33,4 +33,22 @@ object(SplMaxHeap)#1 (3) {
     int(1)
   }
 }
+--UEXPECTF--
+object(SplMaxHeap)#1 (3) {
+  [u"flags":u"SplHeap":private]=>
+  int(0)
+  [u"isCorrupted":u"SplHeap":private]=>
+  bool(false)
+  [u"heap":u"SplHeap":private]=>
+  array(4) {
+    [0]=>
+    int(5)
+    [1]=>
+    int(4)
+    [2]=>
+    int(0)
+    [3]=>
+    int(1)
+  }
+}
 ===DONE===
