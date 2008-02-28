@@ -1188,8 +1188,8 @@ ZEND_FUNCTION(get_included_files)
 	unsigned int len;
 	int ustr_len;
 
-	if (ZEND_NUM_ARGS() != 0) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	array_init(return_value);
@@ -1402,8 +1402,8 @@ ZEND_FUNCTION(get_declared_classes)
 	zend_uint mask = ZEND_ACC_INTERFACE;
 	zend_uint comply = 0;
 
-	if (ZEND_NUM_ARGS() != 0) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	array_init(return_value);
@@ -1418,8 +1418,8 @@ ZEND_FUNCTION(get_declared_interfaces)
 	zend_uint mask = ZEND_ACC_INTERFACE;
 	zend_uint comply = 1;
 
-	if (ZEND_NUM_ARGS() != 0) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	array_init(return_value);
@@ -1463,8 +1463,8 @@ ZEND_FUNCTION(get_defined_functions)
 	zval *internal;
 	zval *user;
 
-	if (ZEND_NUM_ARGS() != 0) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	MAKE_STD_ZVAL(internal);
