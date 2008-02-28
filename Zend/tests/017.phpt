@@ -66,12 +66,12 @@ string(5) "array"
 string(5) "array"
 int(%d)
 
-Warning: Wrong parameter count for get_defined_functions() in %s on line %d
+Warning: get_defined_functions() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 string(5) "array"
 int(%d)
 
-Warning: Wrong parameter count for get_declared_interfaces() in %s on line %d
+Warning: get_declared_interfaces() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 string(5) "array"
 int(%d)
@@ -106,12 +106,12 @@ unicode(5) "array"
 unicode(5) "array"
 int(%d)
 
-Warning: Wrong parameter count for get_defined_functions() in %s on line %d
+Warning: get_defined_functions() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 unicode(5) "array"
 int(%d)
 
-Warning: Wrong parameter count for get_declared_interfaces() in %s on line %d
+Warning: get_declared_interfaces() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 unicode(5) "array"
 int(%d)
