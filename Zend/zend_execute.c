@@ -1291,6 +1291,7 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 				SEPARATE_ZVAL(container_ptr);
 				container = *container_ptr;
 			}
+			zend_error(E_STRICT, "Creating default object from empty value");
 			object_init(container);
 		} else {
 			result->var.ptr_ptr = &EG(error_zval_ptr);
