@@ -197,8 +197,8 @@ ZEND_METHOD(error_exception, __construct)
 /* }}} */
 
 #define DEFAULT_0_PARAMS \
-	if (ZEND_NUM_ARGS() > 0) { \
-		ZEND_WRONG_PARAM_COUNT(); \
+	if (zend_parse_parameters_none() == FAILURE) { \
+		return; \
 	}
 
 static void _default_exception_get_entry(zval *object, char *name, int name_len, zval *return_value TSRMLS_DC) /* {{{ */

@@ -194,6 +194,8 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array TS
 	_zend_get_parameters_array(ht, param_count, argument_array TSRMLS_CC)
 #define zend_get_parameters_array_ex(param_count, argument_array)			\
 	_zend_get_parameters_array_ex(param_count, argument_array TSRMLS_CC)
+#define zend_parse_parameters_none()										\
+	zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "")
 
 
 /* Parameter parsing API -- andrei */
