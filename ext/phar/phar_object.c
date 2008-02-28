@@ -1824,8 +1824,9 @@ PHP_METHOD(Phar, convertToZip)
 // need to check that the string isn't Phar::GZ etc
 	if (ext_len) {
 		if (strncmp(ext, "Phar::GZ", 8) || strncmp(ext, "Phar::BZ2", 9)) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-			"Cannot compress a zip-based archive with gz or bz2");
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+				"Cannot compress a zip-based archive with gz or bz2");
+			return;
 		}
 	}
 
