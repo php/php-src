@@ -121,6 +121,10 @@ int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_l
 	phar_archive_data *phar;
 	int ret = phar_create_or_parse_filename(fname, fname_len, alias, alias_len, options, &phar, error TSRMLS_CC);
 
+	if (FAILURE == ret) {
+		return FAILURE;
+	}
+
 	if (pphar) {
 		*pphar = phar;
 	}
@@ -128,13 +132,9 @@ int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_l
 	phar->is_data = is_data;
 
 	if (is_data) {
-		phar->is_writeable;
+		/* phar->is_writeable; WTF */
 		phar->alias = NULL;
 		phar->alias_len = 0;
-	}
-
-	if (FAILURE == ret) {
-		return FAILURE;
 	}
 
 	if (phar->is_tar) {
