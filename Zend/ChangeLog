@@ -1,3 +1,19 @@
+2008-02-28  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_execute.c
+      tests/objects_016.phpt:
+      Add "Strict error" when assigning value to property of inexistent object
+
+    * tests/014.phpt
+      tests/017.phpt:
+      Fixed tests (new error message)
+
+    * zend_API.h
+      zend_builtin_functions.c
+      zend_exceptions.c:
+      Added new macro for check void parameters.
+      (deprecating ZEND_WRONG_PARAM_COUNT for this cases)
+
 2008-02-24  Felipe Pena  <felipensp@gmail.com>
 
     * tests/is_a.phpt
