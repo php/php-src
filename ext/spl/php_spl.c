@@ -606,8 +606,9 @@ PHP_FUNCTION(spl_autoload_unregister)
  Return all registered __autoload() functionns */
 PHP_FUNCTION(spl_autoload_functions)
 {
-	zend_function *fptr, **func_ptr_ptr;
+	zend_function *fptr;
 	HashPosition function_pos;
+	autoload_func_info *alfi;
 
 	if (!EG(autoload_func)) {
 		if (zend_hash_find(EG(function_table), ZEND_AUTOLOAD_FUNC_NAME, sizeof(ZEND_AUTOLOAD_FUNC_NAME), (void **) &fptr) == SUCCESS) {
@@ -624,17 +625,23 @@ PHP_FUNCTION(spl_autoload_functions)
 		array_init(return_value);
 		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &function_pos);
 		while(zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS) {
-			zend_hash_get_current_data_ex(SPL_G(autoload_functions), (void **) &func_ptr_ptr, &function_pos);
-			if ((*func_ptr_ptr)->common.scope) {
+			zend_hash_get_current_data_ex(SPL_G(autoload_functions), (void **) &alfi, &function_pos);
+			if (alfi->func_ptr->common.scope) {
 				zval *tmp;
 				MAKE_STD_ZVAL(tmp);
 				array_init(tmp);
 
-				add_next_index_text(tmp, (*func_ptr_ptr)->common.scope->name, 1);
-				add_next_index_text(tmp, (*func_ptr_ptr)->common.function_name, 1);
+				if (alfi->obj) {
+					Z_ADDREF_P(alfi->obj);
+					add_next_index_zval(tmp, alfi->obj);
+				} else {
+					add_next_index_text(tmp, alfi->ce->name, 1);
+				}
+				add_next_index_text(tmp, alfi->func_ptr->common.function_name, 1);
 				add_next_index_zval(return_value, tmp);
-			} else
-				add_next_index_text(return_value, (*func_ptr_ptr)->common.function_name, 1);
+			} else {
+				add_next_index_text(return_value, alfi->func_ptr->common.function_name, 1);
+			}
 
 			zend_hash_move_forward_ex(SPL_G(autoload_functions), &function_pos);
 		}
