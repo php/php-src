@@ -273,13 +273,15 @@ static spl_ptr_heap_element spl_ptr_heap_top(spl_ptr_heap *heap) { /* {{{ */
 static spl_ptr_heap_element spl_ptr_heap_delete_top(spl_ptr_heap *heap, void *cmp_userdata TSRMLS_DC) { /* {{{ */
 	int i, j;
 	const int limit = (heap->count-1)/2;
+	spl_ptr_heap_element top;
+	spl_ptr_heap_element bottom;
 
 	if (heap->count == 0) {
 		return NULL;
 	}
 
-	spl_ptr_heap_element top    = heap->elements[0];
-	spl_ptr_heap_element bottom = heap->elements[--heap->count];
+	top    = heap->elements[0];
+	bottom = heap->elements[--heap->count];
 
 	for( i = 0; i < limit; i = j)
 	{
@@ -920,13 +922,14 @@ static void spl_heap_it_move_forward(zend_object_iterator *iter TSRMLS_DC) /* {{
 {
 	zval                 *object   = (zval*)((zend_user_iterator *)iter)->it.data;
 	spl_heap_it          *iterator = (spl_heap_it *)iter;
+	spl_ptr_heap_element elem;
 
 	if (iterator->object->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0 TSRMLS_CC);
 		return;
 	}
 
-	spl_ptr_heap_element  elem     = spl_ptr_heap_delete_top(iterator->object->heap, object TSRMLS_CC);
+	elem = spl_ptr_heap_delete_top(iterator->object->heap, object TSRMLS_CC);
 
 	if (elem != NULL) {
 		zval_ptr_dtor((zval **)&elem);
