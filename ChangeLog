@@ -1,3 +1,135 @@
+2008-02-28  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/tests/objects_016.phpt:
+      Add "Strict error" when assigning value to property of inexistent object
+
+    * ext/gd/gd.c:
+      Fixed return value changed previously
+
+2008-02-28  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/simplexml/tests/034.phpt:
+      MFB
+
+    * ext/simplexml/tests/034.phpt
+      ext/simplexml/tests/034.phpt:
+      
+      file 034.phpt was initially added on branch PHP_5_3.
+
+2008-02-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/dl.c
+      ext/standard/dl.c:
+      We don't nave to change request shutdown sequence if dl() was failed
+
+2008-02-28  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/spl/tests/heap_008.phpt
+      ext/spl/tests/pqueue_004.phpt
+      ext/sqlite/tests/bug35248.phpt:
+      Added UEXPECT
+
+    * ZendEngine2/tests/014.phpt
+      ZendEngine2/tests/017.phpt:
+      Fixed tests (new error message)
+
+2008-02-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      configure.in
+      main/php_version.h:
+      Set proper RC version (Thanks Hannes)
+
+2008-02-28  Felipe Pena  <felipensp@gmail.com>
+
+    * sapi/cli/tests/006.phpt:
+      Revert
+
+    * ext/standard/tests/file/get_current_user.phpt
+      ext/standard/tests/general_functions/rand.phpt
+      ext/standard/tests/math/getrandmax_error.phpt
+      ext/standard/tests/math/mt_getrandmax_error.phpt
+      ext/standard/tests/strings/setlocale_error.phpt
+      sapi/cli/tests/006.phpt:
+      Fixed tests
+
+    * ext/com_dotnet/com_com.c
+      ext/curl/multi.c
+      ext/dom/php_dom.h
+      ext/fdf/fdf.c
+      ext/gd/gd.c
+      ext/imap/php_imap.c
+      ext/interbase/interbase.c
+      ext/mhash/mhash.c
+      ext/ming/ming.c
+      ext/mysql/php_mysql.c
+      ext/odbc/php_odbc.c
+      ext/openssl/openssl.c
+      ext/pcre/php_pcre.c
+      ext/session/session.c
+      ext/skeleton/create_stubs
+      ext/snmp/snmp.c
+      ext/soap/soap.c
+      ext/spl/spl_dllist.c
+      ext/sqlite/sqlite.c
+      ext/standard/basic_functions.c
+      ext/standard/dir.c
+      ext/standard/file.c
+      ext/standard/head.c
+      ext/standard/info.c
+      ext/standard/rand.c
+      ext/standard/streamsfuncs.c
+      ext/standard/string.c
+      ext/standard/syslog.c
+      ext/standard/user_filters.c
+      ext/unicode/collator.c
+      ext/unicode/locale.c
+      ext/unicode/unicode.c
+      ext/unicode/unicode_iterators.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      sapi/apache_hooks/php_apache.c:
+      New macro for check void parameters
+
+    * ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_exceptions.c:
+      Added new macro for check void parameters.
+      (deprecating ZEND_WRONG_PARAM_COUNT for this cases)
+
+2008-02-28  Antony Dovgal  <tony@daylessday.org>
+
+    * sapi/cli/tests/006.phpt:
+      use pcre for testing reflection
+
+2008-02-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/cgi/cgi_main.c:
+      MFB:  Fixed security issue detailed in CVE-2008-0599
+
+    * (PHP_5_3)
+      sapi/cgi/cgi_main.c:
+      
+      MFB:  Fixed security issue detailed in CVE-2008-0599
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      Back to dev
+
+    * (PHP_5_2)
+      configure.in
+      main/php_version.h:
+      5.2.6RC1
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/cgi_main.c:
+      
+      Fixed security issue detailed in CVE-2008-0599
+
 2008-02-27  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_5_3)
