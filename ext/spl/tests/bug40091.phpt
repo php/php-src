@@ -25,13 +25,19 @@ Array
 (
     [0] => Array
         (
-            [0] => MyAutoloader
+            [0] => MyAutoloader Object
+                (
+                )
+
             [1] => autoload
         )
 
     [1] => Array
         (
-            [0] => MyAutoloader
+            [0] => MyAutoloader Object
+                (
+                )
+
             [1] => autoload
         )
 
