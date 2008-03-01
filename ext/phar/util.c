@@ -642,10 +642,9 @@ int phar_create_writeable_entry(phar_archive_data *phar, phar_entry_info *entry,
 			} else if (php_stream_is(*(php_stream**)entry->fp->abstract, PHP_STREAM_IS_STDIO)) {
 				php_stream_truncate_set_size(*(php_stream**)entry->fp->abstract, 0);
 			} else {
-				efree(*ret);
 				*ret = NULL;
 				if (error) {
-					spprintf(error, 0, "phar error: file \"%s\" cannot be opened for writing, no truncate support", fname);
+					spprintf(error, 0, "phar error: file \"%s\" cannot be opened for writing, no truncate support", phar->fname);
 				}
 				return FAILURE;
 			}
@@ -926,7 +925,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 			if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(&phar->mounted_dirs, &key, &keylen, &unused, 0, NULL)) {
 				break;
 			}
-			if (keylen >= path_len || strncmp(key, path, keylen)) {
+			if ((int)keylen >= path_len || strncmp(key, path, keylen)) {
 				continue;
 			} else {
 				char *test;
