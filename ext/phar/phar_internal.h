@@ -338,6 +338,8 @@ union _phar_entry_object {
 };
 #endif
 
+BEGIN_EXTERN_C()
+
 int phar_has_bz2;
 int phar_has_zlib;
 
@@ -356,8 +358,6 @@ static inline void phar_unixify_path_separators(char *path, int path_len)
 	}
 }
 #endif
-
-BEGIN_EXTERN_C()
 
 void phar_request_initialize(TSRMLS_D);
 
