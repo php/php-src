@@ -642,7 +642,6 @@ int phar_create_writeable_entry(phar_archive_data *phar, phar_entry_info *entry,
 			} else if (php_stream_is(*(php_stream**)entry->fp->abstract, PHP_STREAM_IS_STDIO)) {
 				php_stream_truncate_set_size(*(php_stream**)entry->fp->abstract, 0);
 			} else {
-				*ret = NULL;
 				if (error) {
 					spprintf(error, 0, "phar error: file \"%s\" cannot be opened for writing, no truncate support", phar->fname);
 				}
@@ -651,10 +650,8 @@ int phar_create_writeable_entry(phar_archive_data *phar, phar_entry_info *entry,
 		} else if (php_stream_is(entry->fp, PHP_STREAM_IS_STDIO)) {
 			php_stream_truncate_set_size(entry->fp, 0);
 		} else {
-			efree(*ret);
-			*ret = NULL;
 			if (error) {
-				spprintf(error, 0, "phar error: file \"%s\" cannot be opened for writing, no truncate support", fname);
+				spprintf(error, 0, "phar error: file \"%s\" cannot be opened for writing, no truncate support", phar->fname);
 			}
 			return FAILURE;
 		}
