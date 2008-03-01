@@ -1,3 +1,26 @@
+2008-02-29  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/spl/php_spl.c
+      ext/spl/tests/bug40091.phpt:
+      MFH: Fix #44144 (object methods as spl autoload functions returned
+      correctly)
+
+    * ext/spl/php_spl.c
+      ext/spl/tests/bug40091.phpt:
+      Fix #44144 (object methods as spl autoload functions returned correctly)
+
+    * ext/spl/tests/heap_008.phpt
+      ext/spl/tests/pqueue_004.phpt:
+      Fix tests in non-unicode mode
+
+    * (PHP_5_3)
+      NEWS:
+      Heaps addition
+
+    * ext/spl/spl_heap.c:
+      Fix #44288 (Move declarations)
+
 2008-02-28  Felipe Pena  <felipensp@gmail.com>
 
     * ZendEngine2/zend_execute.c
