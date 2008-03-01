@@ -11,34 +11,57 @@ Rolling a release candidate
 
 3. Commit those changes
 
-4. tag the repository with "``cvs tag php_4_4_1RC1``" (of course, you need to change that to the version you're rolling an RC for). When making 5.X release, you need to tag the Zend directory separately!!
+4. tag the repository with "``cvs tag php_4_4_1RC1``" (of course, you need to
+change that to the version you're rolling an RC for). When making 5.X release,
+you need to tag the Zend directory separately!!
 
-5. Bumb up the version numbers in ``main/php_version.h``, ``configure.in`` and possibly ``NEWS`` again, to the **next** version. F.e. if the release candidate was "4.4.1RC1" then the new one should be "4.4.1RC2-dev" - regardless if we get a new RC or not. This is to make sure ``version_compare()`` can correctly work.
+5. Bumb up the version numbers in ``main/php_version.h``, ``configure.in``
+and possibly ``NEWS`` again, to the **next** version. F.e. if the release
+candidate was "4.4.1RC1" then the new one should be "4.4.1RC2-dev" - regardless
+if we get a new RC or not. This is to make sure ``version_compare()`` can
+correctly work.
 
 6. Commit those changes
 
-7. Log in onto the snaps box and go into the correct tree (f.e. the PHP_4_4 branch if you're rolling 4.4.x releases).
+7. Log in onto the snaps box and go into the correct tree (f.e. the PHP_4_4
+branch if you're rolling 4.4.x releases).
 
 8. You do not have to update the tree, but ofcourse you can with "``cvs up -dP``".
 
-9. run: ``./makedist php 4.4.1RC1``, this will export the tree, create configure and build two tarballs (one gz and one bz2).
+9. run: ``./makedist php 4.4.1RC1``, this will export the tree, create configure
+and build two tarballs (one gz and one bz2).
 
-10. Copy those two tarballs to www.php.net, in your homedir their should be a directory "downloads/". Copy them into there, so that the system can generate MD5 sums. If you do not have this directory, talk to Derick.
+10. Copy those two tarballs to www.php.net, in your homedir their should be a
+directory "downloads/". Copy them into there, so that the system can generate
+MD5 sums. If you do not have this directory, talk to Derick.
 
-11. Now the RC can be found on http://downloads.php.net/yourname, f.e. http://downloads.php.net/derick/
+11. Now the RC can be found on http://downloads.php.net/yourname,
+f.e. http://downloads.php.net/derick/
 
-12. Once the release has been tagged, contact Edin Kadribasic (edink @ usual php e-mail) so that Windows binaries can be created. Once those are made, they should be placed into the same directory as the source snapshots.
+12. Once the release has been tagged, contact Edin Kadribasic (edink @ usual
+php e-mail) so that Windows binaries can be created. Once those are made, they
+should be placed into the same directory as the source snapshots.
 
 Getting the Release Candidate out there
 ---------------------------------------
 
-1. Send an email (see example here: http://news.php.net/php.internals/19486) **To** ``internals@lists.php.net`` and ``php-general@lists.php.net`` lists pointing out "the location of the release" and "the possible release date of either the next RC, or the final release".
+1. Send an email (see example here: http://news.php.net/php.internals/19486)
+**To** ``internals@lists.php.net`` and ``php-general@lists.php.net`` lists
+pointing out "the location of the release" and "the possible release date of
+either the next RC, or the final release".
 
-2. Send an email (see example here http://news.php.net/php.qa/26069) **To** ``php-qa@lists.php.net`` and **Bcc** everybody on the PhP4yz, PhP5yz or PhP6yz list (depending on the PHP version). This email is to notify the selected projects about a new RC so that they can make sure their projects keep working.
+2. Send an email (see example here http://news.php.net/php.qa/26069) **To**
+``php-qa@lists.php.net`` and **Bcc** everybody on the
+`PhP4yz<http://wiki.pooteeweet.org/PhP4yz>`_,
+`PhP5yz<http://wiki.pooteeweet.org/PhP5yz>`_ or
+`PhP6yz<http://wiki.pooteeweet.org/PhP6yz>`_ list (depending on the PHP version).
+This email is to notify the selected projects about a new RC so that they can
+make sure their projects keep working.
 
 3. Update the MD5 sums in ``qaweb/include/rc-md5sums.txt``.
 
-4. Update in ``qaweb/include/release-qa.php`` constants with the new RC and commit this.
+4. Update in ``qaweb/include/release-qa.php`` constants with the new RC and
+commit this.
 
  a. ``$BUILD_TEST_RELEASES`` = array("4.4.7RC1", "5.2.2RC1")
 
@@ -46,7 +69,8 @@ Getting the Release Candidate out there
 
  c. ``$RELEASE_PROCESS`` = array(4 => true, 5 => true)
 
-1. Update in ``php-bugs-web/include/functions.inc`` the ``show_version_option`` function to include the new RC and commit.
+1. Update in ``php-bugs-web/include/functions.inc`` the ``show_version_option``
+function to include the new RC and commit.
 
 2. Run the bumpRelease script for phpweb
 
@@ -73,25 +97,35 @@ Rolling a release
 
 4. Commit those changes
 
-5. tag the repository with "``cvs tag php_4_4_1``" (of course, you need to change that to the version you're rolling an RC for). When making 5.X release, you need to tag the Zend directory separately!!
+5. tag the repository with "``cvs tag php_4_4_1``" (of course, you need to
+change that to the version you're rolling an RC for). When making 5.X release,
+you need to tag the Zend directory separately!!
 
-6. Bumb up the version numbers in ``main/php_version.h``, ``configure.in`` and possibly ``NEWS`` again, to the **next** version. F.e. if the release candidate was "4.4.1RC1" then the new one should be "4.4.1RC2-dev" - regardless if we get a new RC or not. This is to make sure ``version_compare()`` can correctly work.
+6. Bumb up the version numbers in ``main/php_version.h``, ``configure.in`` and
+possibly ``NEWS`` again, to the **next** version. F.e. if the release candidate
+was "4.4.1RC1" then the new one should be "4.4.1RC2-dev" - regardless if we get
+a new RC or not. This is to make sure ``version_compare()`` can correctly work.
 
 7. Commit those changes
 
-8. Log in onto the snaps box and go into the correct tree (f.e. the PHP_4_4 branch if you're rolling 4.4.x releases).
+8. Log in onto the snaps box and go into the correct tree (f.e. the PHP_4_4
+branch if you're rolling 4.4.x releases).
 
 9. You do not have to update the tree, but ofcourse you can with "``cvs up -dP``".
 
-10. run: ``./makedist php 4.4.1``, this will export the tree, create configure and build two tarballs (one gz and one bz2).
+10. run: ``./makedist php 4.4.1``, this will export the tree, create configure
+and build two tarballs (one gz and one bz2).
 
 11. Commit those two tarballs to CVS (phpweb/distributions)
 
-12. Once the release has been tagged, contact Edin Kadribasic (edink @ usual php e-mail) so that Windows binaries can be created. Once those are made, they should be committed to CVS too.
+12. Once the release has been tagged, contact Edin Kadribasic (edink @ usual
+php e-mail) so that Windows binaries can be created. Once those are made, they
+should be committed to CVS too.
 
 13. Check if the pear files are updated (phar for 5.1+ or run pear/make-pear-bundle.php with 4.4)
 
-14. When making a final release, also remind Edin to ask John to prepare the installer packages for Win32.
+14. When making a final release, also remind Edin to ask John to prepare the
+installer packages for Win32.
 
 Getting the Release out there
 -----------------------------
@@ -110,7 +144,8 @@ Getting the Release out there
 
  d. set ``$PHP_X_RC`` to false!
 
- e. Make sure there are no outdated "notes" or edited "date" keys in the ``$RELEASES[X][$PHP_X_VERSION]["source"]`` array
+ e. Make sure there are no outdated "notes" or edited "date" keys in the
+ ``$RELEASES[X][$PHP_X_VERSION]["source"]`` array
 
  f. if the windows builds aren't ready yet prefix the "windows" key with a dot (".windows")
 
@@ -134,21 +169,28 @@ Getting the Release out there
 
 5. ``cvs add releases/4_4_1.php``
 
-6. Update the ``releases/*.php`` file with relevant data. The release announcement file should list in detail:
+6. Update the ``releases/*.php`` file with relevant data. The release
+announcement file should list in detail:
 
  a. security fixes,
 
  b. changes in behaviour (whether due to a bug fix or not)
 
-7. Add a short notice to phpweb stating that there is a new release, and highlight the major important things (security fixes) and when it is important to upgrade.
+7. Add a short notice to phpweb stating that there is a new release, and
+highlight the major important things (security fixes) and when it is important
+to upgrade.
 
  a. php bin/createNewsEntry
 
-8. Commit all the changes, do not release on Fridays, Saturdays or Sundays because the sysadmins can not upgrade stuff then.
+8. Commit all the changes, do not release on Fridays, Saturdays or Sundays
+because the sysadmins can not upgrade stuff then.
 
-9. Wait an hour or two, then send a mail to php-announce@lists.php.net, php-general@lists.php.net and internals@lists.php.net with a text similar to http://news.php.net/php.internals/17222.
+9. Wait an hour or two, then send a mail to php-announce@lists.php.net,
+php-general@lists.php.net and internals@lists.php.net with a text similar to
+http://news.php.net/php.internals/17222.
 
-10. Update ``php-bugs-web/include/functions.php`` to include the new version number, and remove the RC from there.
+10. Update ``php-bugs-web/include/functions.php`` to include the new version
+number, and remove the RC from there.
 
 11. Update ``qaweb/include/release-qa.php``
 
