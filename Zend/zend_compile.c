@@ -2482,7 +2482,7 @@ static zend_bool zend_do_perform_implementation_check(zend_function *fe, zend_fu
 	}
 
 	/* check number of arguments */
-	if (proto->common.required_num_args != fe->common.required_num_args
+	if (proto->common.required_num_args < fe->common.required_num_args
 		|| proto->common.num_args > fe->common.num_args) {
 		return 0;
 	}
