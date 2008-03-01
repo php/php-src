@@ -386,7 +386,7 @@ int phar_open_or_create_zip(char *fname, int fname_len, char *alias, int alias_l
 	phar->is_data = is_data;
 
 	if (is_data) {
-		phar->is_writeable;
+		phar->is_writeable = 1;
 		phar->alias = NULL;
 		phar->alias_len = 0;
 	}
