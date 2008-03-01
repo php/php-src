@@ -1601,7 +1601,6 @@ static void phar_convert_to_other(phar_archive_data *source, int convert, char *
 {
 	phar_archive_data phar = {0};
 	char *error;
-	int is_data;
 	phar_entry_info *entry, newentry;
 
 	/* set whole-archive compression and type from parameter */
@@ -1749,7 +1748,7 @@ static void phar_convert_to_other(phar_archive_data *source, int convert, char *
  */
 PHP_METHOD(Phar, convertToTar)
 {
-	char *error, *ext = NULL;
+	char *ext = NULL;
 	php_uint32 flags;
 	long method = 0;
 	int ext_len = 0;
@@ -1813,7 +1812,7 @@ PHP_METHOD(Phar, convertToTar)
  */
 PHP_METHOD(Phar, convertToZip)
 {
-	char *error, *ext = NULL;
+	char *ext = NULL;
 	int ext_len = 0;
 	PHAR_ARCHIVE_OBJECT();
 
@@ -1859,7 +1858,7 @@ PHP_METHOD(Phar, convertToZip)
  */
 PHP_METHOD(Phar, convertToPhar)
 {
-	char *error, *ext = NULL;
+	char *ext = NULL;
 	php_uint32 flags;
 	long method = 0;
 	int ext_len = 0;
