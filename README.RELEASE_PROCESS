@@ -7,7 +7,7 @@ Rolling a release candidate
 
 1. Check windows snapshot builder logs (http://snaps.php.net/win32/snapshot-STABLE.log f.e.)
 
-2. Bumb the version numbers in ``main/php_version.h``, ``configure.in`` and possibly ``NEWS``.
+2. Bump the version numbers in ``main/php_version.h``, ``configure.in`` and possibly ``NEWS``.
 
 3. Commit those changes
 
@@ -15,7 +15,7 @@ Rolling a release candidate
 change that to the version you're rolling an RC for). When making 5.X release,
 you need to tag the Zend directory separately!!
 
-5. Bumb up the version numbers in ``main/php_version.h``, ``configure.in``
+5. Bump up the version numbers in ``main/php_version.h``, ``configure.in``
 and possibly ``NEWS`` again, to the **next** version. F.e. if the release
 candidate was "4.4.1RC1" then the new one should be "4.4.1RC2-dev" - regardless
 if we get a new RC or not. This is to make sure ``version_compare()`` can
@@ -91,7 +91,7 @@ Rolling a release
 
 1. Check windows snapshot builder logs (http://snaps.php.net/win32/snapshot-STABLE.log f.e.)
 
-2. Bumb the version numbers in ``main/php_version.h``, ``configure.in`` and possibly ``NEWS``.
+2. Bump the version numbers in ``main/php_version.h``, ``configure.in`` and possibly ``NEWS``.
 
 3. **Merge** all related sections in NEWS (f.e. merge the 4.4.1RC1 and 4.4.0 sections)
 
@@ -101,7 +101,7 @@ Rolling a release
 change that to the version you're rolling an RC for). When making 5.X release,
 you need to tag the Zend directory separately!!
 
-6. Bumb up the version numbers in ``main/php_version.h``, ``configure.in`` and
+6. Bump up the version numbers in ``main/php_version.h``, ``configure.in`` and
 possibly ``NEWS`` again, to the **next** version. F.e. if the release candidate
 was "4.4.1RC1" then the new one should be "4.4.1RC2-dev" - regardless if we get
 a new RC or not. This is to make sure ``version_compare()`` can correctly work.
