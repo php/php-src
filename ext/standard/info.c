@@ -376,7 +376,7 @@ PHPAPI char *php_get_uname(char mode)
 				php_uname = tmp_uname;
 				break;
 			case PROCESSOR_ARCHITECTURE_MIPS :
-				php_uname = "MIPS R4000";
+				snprintf(tmp_uname, sizeof(tmp_uname), "MIPS R%d000", SysInfo.wProcessorLevel);
 				php_uname = tmp_uname;
 				break;
 			case PROCESSOR_ARCHITECTURE_ALPHA :
