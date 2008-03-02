@@ -1,3 +1,19 @@
+2008-03-01  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      zend_compile.c
+      tests/022.phpt:
+      MFH: Allow implementation of abstract methods with optional parameters
+      (Christian
+        Schneider)
+
+    * zend_compile.c
+      tests/022.phpt
+      tests/022.phpt:
+      - Allow implementation of abstract methods with optional parameters
+      (Christian
+        Schneider)
+
 2008-02-28  Felipe Pena  <felipensp@gmail.com>
 
     * zend_execute.c
