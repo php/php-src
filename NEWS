@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Mar 2008, PHP 5.2.6
+- Fixed bug #44306 (Better detection of MIPS processors on Windows). (Ilia)
 
 27 Feb 2008, PHP 5.2.6RC1
 - Fixed security issue detailed in CVE-2008-0599. (Rasmus)
