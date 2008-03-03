@@ -1108,7 +1108,7 @@ PHP_METHOD(Phar, __construct)
 #if !HAVE_SPL
 	zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Cannot instantiate Phar object without SPL extension");
 #else
-	char *fname, *alias = NULL, *error, *arch, *entry = NULL, *save_fname;
+	char *fname, *alias = NULL, *error, *arch, *entry = NULL, *save_fname, *objname;
 	int fname_len, alias_len = 0, arch_len, entry_len, is_data;
 	long flags = 0;
 	phar_archive_object *phar_obj;
@@ -1144,21 +1144,21 @@ PHP_METHOD(Phar, __construct)
 #endif
 	}
 
-	if (phar_open_or_create_filename(fname, fname_len, alias, alias_len, phar_obj->std.ce->name, REPORT_ERRORS, &phar_data, &error TSRMLS_CC) == FAILURE) {
+	objname = phar_obj->std.ce->name;
+
+	if (phar_open_or_create_filename(fname, fname_len, alias, alias_len, objname, REPORT_ERRORS, &phar_data, &error TSRMLS_CC) == FAILURE) {
 
 		if (fname == arch) {
 			efree(arch);
 			fname = save_fname;
 		}
+		if (entry) {
+			efree(entry);
+		}
 		if (error) {
-			efree(entry);
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-				"Cannot open phar file '%s' with alias '%s': %s", fname, alias, error);
+				"%s", error);
 			efree(error);
-		} else {
-			efree(entry);
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-				"Cannot open phar file '%s' with alias '%s'", fname, alias);
 		}
 		return;
 	}
@@ -1864,18 +1864,18 @@ PHP_METHOD(Phar, convertToPhar)
 	int ext_len = 0;
 	PHAR_ARCHIVE_OBJECT();
 
-	if (phar_obj->arc.archive->is_data) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-			"A plain %s archive cannot be converted to a Phar archive", phar_obj->arc.archive->is_tar ? "tar" : "zip");
-		return;
-	}
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ls", &method, &ext, &ext_len) == FAILURE) {
 		return;
 	}
 
 	if (!phar_obj->arc.archive->is_tar && !phar_obj->arc.archive->is_zip) {
 		RETURN_TRUE;
+	}
+
+	if (PHAR_G(readonly)) { /* Don't override this one for is_data */
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Cannot write out phar archive, phar is read-only");
+		return;
 	}
 
 	switch (method) {
@@ -1903,11 +1903,6 @@ PHP_METHOD(Phar, convertToPhar)
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 				"Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2");
 			return;
-	}
-	if (PHAR_G(readonly)) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-			"Cannot write out phar archive, phar is read-only");
-		return;
 	}
 
 	if (phar_obj->arc.archive->donotflush) {

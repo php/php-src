@@ -29,6 +29,6 @@ try {
 @unlink(dirname(__FILE__) . '/tar_002.phar.tar');
 ?>
 --EXPECTF--
-Warning: fopen(phar://%star_002.phar.tar/tar_002.phpt): failed to open stream: phar error: "%star_002.phar.tar" is a corrupted tar file in %star_002.php on line %d
-Cannot open phar file '%star_002.phar.tar' with alias '(null)': phar error: "%star_002.phar.tar" is a corrupted tar file
+Warning: fopen(phar://C:\sandbox\pecl\phar\tests\tar/tar_002.phar.tar/tar_002.phpt): failed to open stream: phar error: "C:\sandbox\pecl\phar\tests\tar\tar_002.phar.tar" is a corrupted tar file in C:\sandbox\pecl\phar\tests\tar\tar_002.php on line 9
+phar error: "C:\sandbox\pecl\phar\tests\tar\tar_002.phar.tar" is a corrupted tar file
 ===DONE===

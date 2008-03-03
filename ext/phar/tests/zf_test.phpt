@@ -8,12 +8,14 @@ phar.readonly=0
 <?php
 
 $file = "zfapp";
-$tgz_file = dirname(__FILE__) . "/files/$file.tgz";
-chdir(dirname(__FILE__));
+$orig_file = dirname(__FILE__) . "/files/$file.tgz";
+$tgz_file = dirname(__FILE__) . "/$file.tgz";
+$phar_file = dirname(__FILE__) . "/$file.phar";
+copy($orig_file, $tgz_file);
 
-$phar_file = basename(__FILE__, '.php') . '.phar';
-@unlink($phar_file);
-copy($tgz_file, $phar_file);
+$phar = new PharData($tgz_file);
+$phar->convertToPhar();
+$phar->stopBuffering();
 
 $phar = new Phar($phar_file);
 $phar->startBuffering();
@@ -34,14 +36,13 @@ foreach(new RecursiveIteratorIterator($phar) as $path) {
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
-__HALT_COMPILER();
+unlink(dirname(__FILE__) . '/zfapp.phar');
 ?>
 --EXPECTF--
-phar://%szf_test.phar/application/default/controllers/ErrorController.php
-phar://%szf_test.phar/application/default/controllers/IndexController.php
-phar://%szf_test.phar/application/default/views/scripts/error/error.phtml
-phar://%szf_test.phar/application/default/views/scripts/index/index.phtml
-phar://%szf_test.phar/html/.htaccess
-phar://%szf_test.phar/html/index.php
+phar://%szfapp.phar/application/default/controllers/ErrorController.php
+phar://%szfapp.phar/application/default/controllers/IndexController.php
+phar://%szfapp.phar/application/default/views/scripts/error/error.phtml
+phar://%szfapp.phar/application/default/views/scripts/index/index.phtml
+phar://%szfapp.phar/html/.htaccess
+phar://%szfapp.phar/html/index.php
 ===DONE===
