@@ -2696,18 +2696,6 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 					ht = &parent_ce->default_static_members;
 				}
 				if (zend_u_hash_find(ht, utype, prot_name, prot_name_length+1, (void**)&prop) == SUCCESS) {
-					zval **new_prop;
-					if (zend_u_hash_find(&ce->default_static_members, utype, child_info->name, child_info->name_length+1, (void**)&new_prop) == SUCCESS) {
-						if (Z_TYPE_PP(new_prop) != IS_NULL && Z_TYPE_PP(prop) != IS_NULL) {
-							zstr prop_name, tmp;
-
-							zend_u_unmangle_property_name(utype, child_info->name, child_info->name_length, &tmp, &prop_name);
-							zend_error(E_COMPILE_ERROR, "Cannot change initial value of property static protected %v::$%v in class %v",
-								parent_ce->name, prop_name, ce->name);
-						}
-					}
-					Z_ADDREF_PP(prop);
-					zend_u_hash_update(&ce->default_static_members, utype, child_info->name, child_info->name_length+1, (void**)prop, sizeof(zval*), NULL);
 					zend_u_hash_del(&ce->default_static_members, utype, prot_name, prot_name_length+1);
 				}
 			} else {
@@ -5674,3 +5662,4 @@ ZEND_API size_t zend_u_dirname(UChar *path, size_t len)
  * indent-tabs-mode: t
  * End:
  */
+
