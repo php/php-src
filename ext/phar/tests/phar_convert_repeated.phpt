@@ -90,7 +90,7 @@ var_dump($phar->getAlias());
 <?php 
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
 ?>
---EXPECT--
+--EXPECTF--
 =================== new Phar() =======================
 bool(true)
 bool(false)
@@ -103,39 +103,39 @@ bool(true)
 bool(false)
 string(60) "<?php // tar-based phar archive stub file
 __HALT_COMPILER();"
-string(57) "C:/sandbox/pecl/phar/tests/phar_convert_repeated.phar.tar"
+string(%d) "%sphar_convert_repeated.phar.tar"
 ================= convertToZip() =====================
 bool(false)
 bool(false)
 bool(true)
 string(60) "<?php // zip-based phar archive stub file
 __HALT_COMPILER();"
-string(57) "C:/sandbox/pecl/phar/tests/phar_convert_repeated.phar.zip"
+string(%d) "%sphar_convert_repeated.phar.zip"
 ================= convertToPhar() ====================
 bool(true)
 bool(false)
 bool(false)
 int(6573)
-string(53) "C:/sandbox/pecl/phar/tests/phar_convert_repeated.phar"
+string(%d) "%sphar_convert_repeated.phar"
 ================= convertToZip() =====================
 bool(false)
 bool(false)
 bool(true)
 string(60) "<?php // zip-based phar archive stub file
 __HALT_COMPILER();"
-string(57) "C:/sandbox/pecl/phar/tests/phar_convert_repeated.phar.zip"
+string(%d) "%sphar_convert_repeated.phar.zip"
 ================= convertToTar() =====================
 bool(false)
 bool(true)
 bool(false)
 string(60) "<?php // tar-based phar archive stub file
 __HALT_COMPILER();"
-string(57) "C:/sandbox/pecl/phar/tests/phar_convert_repeated.phar.tar"
+string(%d) "%sphar_convert_repeated.phar.tar"
 ================= convertToZip() =====================
 bool(false)
 bool(false)
 bool(true)
 string(60) "<?php // zip-based phar archive stub file
 __HALT_COMPILER();"
-string(57) "C:/sandbox/pecl/phar/tests/phar_convert_repeated.phar.zip"
+string(%d) "%sphar_convert_repeated.phar.zip"
 ===DONE===
