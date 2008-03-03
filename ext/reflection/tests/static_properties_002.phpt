@@ -19,7 +19,7 @@ class base {
 }
 
 class derived extends base {
-	static public $prop;
+	static public $prop = 2;
 	
 	static function show() {
 		echo __METHOD__ . '(' . self::$prop . ")\n";
@@ -54,9 +54,9 @@ base::show(2)
 derived::show(2)
 base::inc()
 base::show(3)
-derived::show(3)
+derived::show(2)
 derived::inc()
-base::show(4)
-derived::show(4)
+base::show(3)
+derived::show(3)
 Number of properties: 1
 Done

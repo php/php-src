@@ -1,5 +1,5 @@
 --TEST--
-errmsg: cannot change initial value of property
+No more errmsg: can now change initial value of property
 --FILE--
 <?php
 
@@ -14,4 +14,4 @@ class test extends test1 {
 echo "Done\n";
 ?>
 --EXPECTF--	
-Fatal error: Cannot change initial value of property static protected test1::$var in class test in %s on line %d
+Done

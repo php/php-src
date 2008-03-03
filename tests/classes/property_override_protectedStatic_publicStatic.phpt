@@ -27,5 +27,7 @@ Redeclare inherited protected static property as public static.
   B::showB();
 ?>
 --EXPECTF--
+A::p (static)
+A::p (static)
+B::p (static)
 
-Fatal error: Cannot change initial value of property static protected A::$p in class B in %s on line 18
