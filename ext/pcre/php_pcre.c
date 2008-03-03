@@ -244,7 +244,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 
 	/* Try to lookup the cached regex entry, and if successful, just pass
 	   back the compiled pattern, otherwise go on and compile it. */
-	regex_len = strlen(regex);
 	if (zend_hash_find(&PCRE_G(pcre_cache), regex, regex_len+1, (void **)&pce) == SUCCESS) {
 		/*
 		 * We use a quick pcre_info() check to see whether cache is corrupted, and if it
