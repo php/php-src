@@ -1,3 +1,16 @@
+2008-03-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/info.c
+      ext/standard/info.c:
+      
+      MFB: Fixed bug #44306 (Better detection of MIPS processors on Windows)
+
+    * (PHP_5_3)
+      ext/standard/info.c:
+      Fixed bug #44306 (Better detection of MIPS processors on Windows)
+
 2008-03-01  Lukas Smith  <smith@pooteeweet.org>
 
     * README.RELEASE_PROCESS:
