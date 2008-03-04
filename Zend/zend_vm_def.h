@@ -1586,13 +1586,23 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 		value = get_zval_ptr(&op_data->op1, EX(Ts), &free_op_data1, BP_VAR_R);
 		variable_ptr_ptr = _get_zval_ptr_ptr_var(&op_data->op2, EX(Ts), &free_op_data2 TSRMLS_CC);
 		if (!variable_ptr_ptr) {
-			zend_assign_to_string_offset(&EX_T(op_data->op2.u.var), value, op_data->op1.op_type TSRMLS_CC);
+			if (zend_assign_to_string_offset(&EX_T(op_data->op2.u.var), value, op_data->op1.op_type TSRMLS_CC)) {
+				if (!RETURN_VALUE_UNUSED(&opline->result)) {
+					EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
+					ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
+					INIT_PZVAL(EX_T(opline->result.u.var).var.ptr);
+					ZVAL_STRINGL(EX_T(opline->result.u.var).var.ptr, Z_STRVAL_P(EX_T(op_data->op2.u.var).str_offset.str)+EX_T(op_data->op2.u.var).str_offset.offset, 1, 1);
+				}
+			} else if (!RETURN_VALUE_UNUSED(&opline->result)) {
+				AI_SET_PTR(EX_T(opline->result.u.var).var, EG(uninitialized_zval_ptr));
+				PZVAL_LOCK(EG(uninitialized_zval_ptr));
+			}
 		} else {
 		 	value = zend_assign_to_variable(variable_ptr_ptr, value, IS_TMP_FREE(free_op_data1) TSRMLS_CC);
-		}
-		if (!RETURN_VALUE_UNUSED(&opline->result)) {
-			AI_SET_PTR(EX_T(opline->result.u.var).var, value);
-			PZVAL_LOCK(value);
+			if (!RETURN_VALUE_UNUSED(&opline->result)) {
+				AI_SET_PTR(EX_T(opline->result.u.var).var, value);
+				PZVAL_LOCK(value);
+			}
 		}
 		FREE_OP_VAR_PTR(free_op_data2);
 	 	FREE_OP_IF_VAR(free_op_data1);
@@ -1611,14 +1621,23 @@ ZEND_VM_HANDLER(38, ZEND_ASSIGN, VAR|CV, CONST|TMP|VAR|CV)
 	zval **variable_ptr_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
 
 	if (!variable_ptr_ptr) {
-		zend_assign_to_string_offset(&EX_T(opline->op1.u.var), value, OP2_TYPE TSRMLS_CC);
+		if (zend_assign_to_string_offset(&EX_T(opline->op1.u.var), value, OP2_TYPE TSRMLS_CC)) {
+			if (!RETURN_VALUE_UNUSED(&opline->result)) {
+				EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
+				ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
+				INIT_PZVAL(EX_T(opline->result.u.var).var.ptr);
+				ZVAL_STRINGL(EX_T(opline->result.u.var).var.ptr, Z_STRVAL_P(EX_T(opline->op1.u.var).str_offset.str)+EX_T(opline->op1.u.var).str_offset.offset, 1, 1);
+			}
+		} else if (!RETURN_VALUE_UNUSED(&opline->result)) {
+			AI_SET_PTR(EX_T(opline->result.u.var).var, EG(uninitialized_zval_ptr));
+			PZVAL_LOCK(EG(uninitialized_zval_ptr));
+		}
 	} else {
 	 	value = zend_assign_to_variable(variable_ptr_ptr, value, IS_OP2_TMP_FREE() TSRMLS_CC);
-	}
-
-	if (!RETURN_VALUE_UNUSED(&opline->result)) {
-		AI_SET_PTR(EX_T(opline->result.u.var).var, value);
-		PZVAL_LOCK(value);
+		if (!RETURN_VALUE_UNUSED(&opline->result)) {
+			AI_SET_PTR(EX_T(opline->result.u.var).var, value);
+			PZVAL_LOCK(value);
+		}
 	}
 
 	FREE_OP1_VAR_PTR();
