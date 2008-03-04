@@ -736,9 +736,6 @@ static int ZEND_RECV_INIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 			ALLOC_ZVAL(default_value);
 			*default_value = opline->op2.u.constant;
-			if (Z_TYPE(opline->op2.u.constant)==IS_CONSTANT_ARRAY) {
-				zval_copy_ctor(default_value);
-			}
 			Z_SET_REFCOUNT_P(default_value, 1);
 			zval_update_constant(&default_value, 0 TSRMLS_CC);
 			Z_SET_REFCOUNT_P(default_value, 0);
