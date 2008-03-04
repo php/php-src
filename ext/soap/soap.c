@@ -602,6 +602,7 @@ PHP_RINIT_FUNCTION(soap)
 	SOAP_GLOBAL(encoding) = NULL;
 	SOAP_GLOBAL(class_map) = NULL;
 	SOAP_GLOBAL(features) = 0;
+	SOAP_GLOBAL(ref_map) = NULL;
 	return SUCCESS;
 }
 
