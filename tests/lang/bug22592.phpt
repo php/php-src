@@ -46,9 +46,9 @@ string(8) "4-4s4s*0"
 string(9) "4-4s4s505"
 string(9) "454s4s505"
 string(1) "-"
-string(6) "string"
-int(4)
-int(5)
+string(1) "s"
+string(1) "4"
+string(1) "5"
 string(1) "5"
 [Illegal string offset:  -1]
 --UEXPECT--
@@ -63,8 +63,8 @@ unicode(8) "4-4s4s*0"
 unicode(9) "4-4s4s505"
 unicode(9) "454s4s505"
 unicode(1) "-"
-unicode(6) "string"
-int(4)
-int(5)
+unicode(1) "s"
+unicode(1) "4"
+unicode(1) "5"
 unicode(1) "5"
 [Illegal string offset:  -1]
