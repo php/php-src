@@ -127,22 +127,13 @@ php_oci_statement *php_oci_statement_create (php_oci_connection *connection, zst
  Set prefetch buffer size for the statement (we're assuming that one row is ~1K sized) */
 int php_oci_statement_set_prefetch(php_oci_statement *statement, long size TSRMLS_DC)
 { 
-	ub4 prefetch = size * 1024;
+	ub4 prefetch = size;
 
 	if (size < 1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of rows has to be greater than or equal to 1");
 		return 1;
 	}
 	
-	PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrSet, (statement->stmt, OCI_HTYPE_STMT, &prefetch, 0, OCI_ATTR_PREFETCH_MEMORY, statement->err));
-
-	if (statement->errcode != OCI_SUCCESS) {
-		php_oci_error(statement->err, statement->errcode TSRMLS_CC);
-		PHP_OCI_HANDLE_ERROR(statement->connection, statement->errcode);
-		return 1;
-	}
-
-	prefetch = size;
 	PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrSet, (statement->stmt, OCI_HTYPE_STMT, &prefetch, 0, OCI_ATTR_PREFETCH_ROWS, statement->err));
 	
 	if (statement->errcode != OCI_SUCCESS) {
@@ -1010,8 +1001,8 @@ int php_oci_bind_by_name(php_oci_statement *statement, zstr name, int name_len, 
 		case SQLT_LBI:
 		case SQLT_BIN:
 		case SQLT_LNG:
-		case SQLT_CHR:
-			/* this is the default case when type was not specified */
+		case SQLT_AFC:
+		case SQLT_CHR: /* SQLT_CHAR is the default value when type was not specified */
 			if (Z_TYPE_P(var) != IS_NULL) {
 				convert_to_text(var);
 			}
