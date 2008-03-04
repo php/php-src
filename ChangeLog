@@ -1,3 +1,58 @@
+2008-03-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/pdo/pdo_dbh.c:
+      MFB: Fixed bug #44166 (Parameter handling flaw in
+      PDO::getAvailableDrivers())
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_dbh.c:
+      
+      MFB: Fixed bug #44166 (Parameter handling flaw in
+      PDO::getAvailableDrivers())
+
+    * (PHP_5_3)
+      ext/pdo/pdo_dbh.c:
+      Fixed bug #44166 (Parameter handling flaw in PDO::getAvailableDrivers())
+
+2008-03-03  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      ext/pdo/pdo_stmt.c
+      ext/pdo/tests/pdo_035.phpt:
+      MFH: Fix get_parent_class() of PDORow instances
+
+    * ext/pdo/pdo_stmt.c
+      ext/pdo/tests/pdo_035.phpt
+      ext/pdo/tests/pdo_035.phpt:
+      - Fix get_parent_class() of PDORow instances
+
+2008-03-03  Robin Fernandes  <robin_fernandes@uk.ibm.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/errmsg_024.phpt
+      ZendEngine2/tests/errmsg_024.phpt
+      ZendEngine2/tests/lsb_019.phpt
+      ZendEngine2/tests/lsb_019.phpt
+      ZendEngine2/tests/lsb_019.phpt
+      ZendEngine2/tests/lsb_020.phpt
+      ZendEngine2/tests/lsb_020.phpt
+      ZendEngine2/tests/lsb_020.phpt
+      ext/reflection/tests/static_properties_002.phpt
+      ext/reflection/tests/static_properties_002.phpt
+      tests/classes/property_override_protectedStatic_publicStatic.phpt
+      tests/classes/property_override_protectedStatic_publicStatic.phpt:
+      Remove inconsistent behaviour when a protected static prop is overridden by
+      public static prop (details: http://turl.ca/phhhf ).
+
+2008-03-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ext/pcre/php_pcre.c:
+      Removed unnecassary strlen()
+
 2008-03-02  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)

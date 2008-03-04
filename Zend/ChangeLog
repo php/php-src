@@ -1,3 +1,18 @@
+2008-03-03  Robin Fernandes  <robin_fernandes@uk.ibm.com>
+
+    * zend_compile.c
+      zend_compile.c
+      tests/errmsg_024.phpt
+      tests/errmsg_024.phpt
+      tests/lsb_019.phpt
+      tests/lsb_019.phpt
+      tests/lsb_019.phpt
+      tests/lsb_020.phpt
+      tests/lsb_020.phpt
+      tests/lsb_020.phpt:
+      Remove inconsistent behaviour when a protected static prop is overridden by
+      public static prop (details: http://turl.ca/phhhf ).
+
 2008-03-01  Johannes Schlüter  <johannes@schlueters.de>
 
     * (PHP_5_3)
