@@ -798,8 +798,8 @@ PHPAPI void php_clear_stat_cache(TSRMLS_D)
    Clear file stat cache */
 PHP_FUNCTION(clearstatcache)
 {
-	if (ZEND_NUM_ARGS()) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 	php_clear_stat_cache(TSRMLS_C);
 }

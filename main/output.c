@@ -1355,8 +1355,8 @@ PHP_FUNCTION(ob_start)
    Flush (send) contents of the output buffer. The last buffer content is sent to next buffer */
 PHP_FUNCTION(ob_flush)
 {
-	if (ZEND_NUM_ARGS()) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 	
 	if (!OG(active)) {
@@ -1376,8 +1376,8 @@ PHP_FUNCTION(ob_flush)
    Clean (delete) the current output buffer */
 PHP_FUNCTION(ob_clean)
 {
-	if (ZEND_NUM_ARGS()) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 	
 	if (!OG(active)) {
@@ -1396,8 +1396,8 @@ PHP_FUNCTION(ob_clean)
    Flush (send) the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_end_flush)
 {
-	if (ZEND_NUM_ARGS()) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 	
 	if (!OG(active)) {
@@ -1412,8 +1412,8 @@ PHP_FUNCTION(ob_end_flush)
    Clean the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_end_clean)
 {
-	if (ZEND_NUM_ARGS()) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 	
 	if (!OG(active)) {
@@ -1428,8 +1428,8 @@ PHP_FUNCTION(ob_end_clean)
    Get current buffer contents, flush (send) the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_get_flush)
 {
-	if (ZEND_NUM_ARGS()) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 	
 	if (SUCCESS != php_output_get_contents(return_value TSRMLS_CC)) {
@@ -1446,8 +1446,8 @@ PHP_FUNCTION(ob_get_flush)
    Get current buffer contents and delete current output buffer */
 PHP_FUNCTION(ob_get_clean)
 {
-	if (ZEND_NUM_ARGS()) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 	
 	if (SUCCESS != php_output_get_contents(return_value TSRMLS_CC)) {
@@ -1464,8 +1464,8 @@ PHP_FUNCTION(ob_get_clean)
    Return the contents of the output buffer */
 PHP_FUNCTION(ob_get_contents)
 {
-	if (ZEND_NUM_ARGS()) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 	if (SUCCESS != php_output_get_contents(return_value TSRMLS_CC)) {
 		RETURN_FALSE;
@@ -1477,8 +1477,8 @@ PHP_FUNCTION(ob_get_contents)
    Return the nesting level of the output buffer */
 PHP_FUNCTION(ob_get_level)
 {
-	if (ZEND_NUM_ARGS()) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 	RETURN_LONG(php_output_get_level(TSRMLS_C));
 }
@@ -1488,8 +1488,8 @@ PHP_FUNCTION(ob_get_level)
    Return the length of the output buffer */
 PHP_FUNCTION(ob_get_length)
 {
-	if (ZEND_NUM_ARGS()) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 	if (SUCCESS != php_output_get_length(return_value TSRMLS_CC)) {
 		RETURN_FALSE;
@@ -1502,8 +1502,8 @@ PHP_FUNCTION(ob_get_length)
  */
 PHP_FUNCTION(ob_list_handlers)
 {
-	if (ZEND_NUM_ARGS()) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	array_init(return_value);
