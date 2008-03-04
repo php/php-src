@@ -1827,8 +1827,8 @@ ZEND_FUNCTION(debug_print_backtrace)
 	zval *arg_array = NULL;
 	int indent = 0;
 
-	if (ZEND_NUM_ARGS()) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	ptr = EG(current_execute_data);
