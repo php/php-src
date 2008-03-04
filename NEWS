@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Mar 2008, PHP 5.2.6
+- Fixed bug #44333 (SEGFAULT when using mysql_pconnect() with client_flags).
+  (Felipe)
 - Fixed bug #44325 (mssql_bind not correctly bind empty strings as parameter  
   value). (Ilia)
 - Fixed bug #44306 (Better detection of MIPS processors on Windows). (Ilia)
