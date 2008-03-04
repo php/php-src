@@ -979,8 +979,8 @@ static PHP_METHOD(PDO, errorCode)
 {
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	if (ZEND_NUM_ARGS()) {
-		RETURN_FALSE;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 	PDO_CONSTRUCT_CHECK;
 
@@ -998,8 +998,8 @@ static PHP_METHOD(PDO, errorInfo)
 {
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	if (ZEND_NUM_ARGS()) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 	PDO_CONSTRUCT_CHECK;
 
@@ -1141,8 +1141,8 @@ static PHP_METHOD(PDO, getAvailableDrivers)
 	HashPosition pos;
 	pdo_driver_t **pdriver;
 
-	if (ZEND_NUM_ARGS()) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 	
 	array_init(return_value);

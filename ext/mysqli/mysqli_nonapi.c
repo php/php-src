@@ -397,8 +397,8 @@ PHP_FUNCTION(mysqli_fetch_all)
    Returns statistics about the zval cache */
 PHP_FUNCTION(mysqli_get_cache_stats) 
 {
-	if (ZEND_NUM_ARGS()) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 	mysqlnd_palloc_stats(mysqli_mysqlnd_zval_cache, return_value);
 }
@@ -409,8 +409,8 @@ PHP_FUNCTION(mysqli_get_cache_stats)
    Returns statistics about the zval cache */
 PHP_FUNCTION(mysqli_get_client_stats) 
 {
-	if (ZEND_NUM_ARGS()) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 	mysqlnd_get_client_stats(return_value);
 }

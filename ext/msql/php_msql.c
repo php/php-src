@@ -747,8 +747,8 @@ PHP_FUNCTION(msql_list_fields)
    Returns the text of the error message from previous mSQL operation */
 PHP_FUNCTION(msql_error)
 {
-	if (ZEND_NUM_ARGS()) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 	RETURN_STRING(msqlErrMsg,1);
 }
