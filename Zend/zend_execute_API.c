@@ -487,6 +487,19 @@ ZEND_API int zend_is_true(zval *op) /* {{{ */
 #define Z_REAL_TYPE_P(p)			(Z_TYPE_P(p) & ~IS_VISITED_CONSTANT)
 #define MARK_CONSTANT_VISITED(p)	Z_TYPE_P(p) |= IS_VISITED_CONSTANT
 
+static void zval_deep_copy(zval **p)
+{
+	zval *value;
+
+	ALLOC_ZVAL(value);
+	*value = **p;
+	Z_TYPE_P(value) &= ~IS_CONSTANT_INDEX;
+	zval_copy_ctor(value);
+	Z_TYPE_P(value) = Z_TYPE_PP(p);
+	INIT_PZVAL(value);
+	*p = value;
+}
+
 ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *scope TSRMLS_DC) /* {{{ */
 {
 	zval *p = *pp;
@@ -567,6 +580,16 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 		SEPARATE_ZVAL_IF_NOT_REF(pp);
 		p = *pp;
 		Z_TYPE_P(p) = IS_ARRAY;
+
+		if (!inline_change) {
+			zval *tmp;
+			HashTable *tmp_ht = NULL;
+
+			ALLOC_HASHTABLE(tmp_ht);
+			zend_hash_init(tmp_ht, zend_hash_num_elements(Z_ARRVAL_P(p)), NULL, ZVAL_PTR_DTOR, 0);
+			zend_hash_copy(tmp_ht, Z_ARRVAL_P(p), (copy_ctor_func_t) zval_deep_copy, (void *) &tmp, sizeof(zval *));
+			Z_ARRVAL_P(p) = tmp_ht;
+		} 
 
 		/* First go over the array and see if there are any constant indices */
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(p));
