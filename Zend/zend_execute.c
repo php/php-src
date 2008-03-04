@@ -645,7 +645,13 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 
 			if (((int)T->str_offset.offset < 0)) {
 				zend_error(E_WARNING, "Illegal string offset:  %d", T->str_offset.offset);
-				break;
+				if (!RETURN_VALUE_UNUSED(result)) {
+					T(result->u.var).var.ptr_ptr = &EG(uninitialized_zval_ptr);
+					PZVAL_LOCK(*T(result->u.var).var.ptr_ptr);
+					AI_USE_PTR(T(result->u.var).var);
+				}
+				FREE_OP_VAR_PTR(free_op1);
+				return;
 			}
 			if (T->str_offset.offset >= Z_STRLEN_P(T->str_offset.str)) {
 				zend_uint i;
@@ -665,7 +671,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 
 			if (Z_TYPE_P(value)!=IS_STRING) {
 				tmp = *value;
-				if (op2->op_type & (IS_VAR|IS_CV)) {
+				if (op2->op_type != IS_TMP_VAR) {
 					zval_copy_ctor(&tmp);
 				}
 				convert_to_string(&tmp);
@@ -674,16 +680,13 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 
 			Z_STRVAL_P(T->str_offset.str)[T->str_offset.offset] = Z_STRVAL_P(final_value)[0];
 
-			if (op2->op_type == IS_TMP_VAR) {
-				if (final_value == &T(op2->u.var).tmp_var) {
-					/* we can safely free final_value here
-					 * because separation is done only
-					 * in case op2->op_type == IS_VAR */
-					STR_FREE(Z_STRVAL_P(final_value));
-				}
-			}
 			if (final_value == &tmp) {
 				zval_dtor(final_value);
+			} else if (op2->op_type == IS_TMP_VAR) {
+				/* we can safely free final_value here
+				 * because separation is done only
+				 * in case op2->op_type == IS_VAR */
+				STR_FREE(Z_STRVAL_P(final_value));
 			}
 			/*
 			 * the value of an assignment to a string offset is undefined
@@ -692,11 +695,11 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		} while (0);
 		/* zval_ptr_dtor(&T->str_offset.str); Nuke this line if it doesn't cause a leak */
 
-/*		T(result->u.var).var.ptr_ptr = &EG(uninitialized_zval_ptr); */
 		if (!RETURN_VALUE_UNUSED(result)) {
-			T(result->u.var).var.ptr_ptr = &value;
-			PZVAL_LOCK(*T(result->u.var).var.ptr_ptr);
-			AI_USE_PTR(T(result->u.var).var);
+			T(result->u.var).var.ptr_ptr = &T(result->u.var).var.ptr;
+			ALLOC_ZVAL(T(result->u.var).var.ptr);
+			INIT_PZVAL(T(result->u.var).var.ptr);
+			ZVAL_STRINGL(T(result->u.var).var.ptr, Z_STRVAL_P(T->str_offset.str)+T->str_offset.offset, 1, 1);
 		}
 		FREE_OP_VAR_PTR(free_op1);
 		return;
