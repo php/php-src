@@ -71,7 +71,7 @@ PHP                                                                        NEWS
 - Added "+" and "*" specifiers to zend_parse_parameters(). (Andrei)
 - Added lcfirst() function. (David C)
 - Added OCI8 Database Resident Connection Pooling (DRCP) and Fast
-  Application Notification (FAN) support (Oracle)
+  Application Notification (FAN) support (Oracle Corp.)
 
 - Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
 
@@ -119,7 +119,7 @@ PHP                                                                        NEWS
   to different characters with cp1251 and cp866. (Scott)
 - Fixed possible crash in ext/soap because of uninitialized value. (Zdash Urf)
 
-- Fixed PECL bug #12431 (OCI8 ping functionality is broken). (Oracle)
+- Fixed PECL bug #12431 (OCI8 ping functionality is broken). (Oracle Corp.)
 - Fixed bug #43960 (strtotime() returns timestamp in the future when given a
   bogus string).
 - Fixed bug #43808 (date_create never fails (even when it should)). (Derick)
@@ -155,6 +155,7 @@ PHP                                                                        NEWS
 - Fixed bug #41599 (setTime() fails after modify() is used). (Derick)
 - Fixed bug #41522 (PDO firebird driver returns null if it fails to connect).
   (Lars W)
+- Fixed bug #41069 (OCI8: Seg fault with query over DB link) (Chris Jones)
 - Fixed bug #39822 (new PDO() doesn't work with firebird). (Lars W)
 - Fixed bug #39700 (NUMERIC error when result precision are 7,8 or 12-14 ).
   (Lars W)
