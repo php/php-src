@@ -72,6 +72,8 @@ PHP                                                                        NEWS
 - Added lcfirst() function. (David C)
 - Added OCI8 Database Resident Connection Pooling (DRCP) and Fast
   Application Notification (FAN) support (Oracle Corp.)
+- Added OCI8 SQLT_AFC (aka CHAR datatype) support to oci_bind_by_name
+  (Chris Jones)
 
 - Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
 
