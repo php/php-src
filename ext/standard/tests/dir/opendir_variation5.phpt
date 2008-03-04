@@ -89,7 +89,7 @@ rmdir($parent_dir_path);
 ?>
 
 --EXPECTF--
-"*** Testing opendir() : usage variations ***
+*** Testing opendir() : usage variations ***
 
 -- After restricting 1st level parent directory --
 
