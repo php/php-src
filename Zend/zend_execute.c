@@ -652,7 +652,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, zval 
 }
 /* }}} */
 
-static inline void zend_assign_to_string_offset(temp_variable *T, zval *value, int value_type TSRMLS_DC) /* {{{ */
+static inline int zend_assign_to_string_offset(temp_variable *T, zval *value, int value_type TSRMLS_DC) /* {{{ */
 {
 	if (UG(unicode) && Z_TYPE_P(T->str_offset.str) == IS_STRING && Z_TYPE_P(value) != IS_STRING) {
 		convert_to_unicode(T->str_offset.str);
@@ -662,7 +662,7 @@ static inline void zend_assign_to_string_offset(temp_variable *T, zval *value, i
 
 		if (((int)T->str_offset.offset < 0)) {
 			zend_error(E_WARNING, "Illegal string offset:  %d", T->str_offset.offset);
-			return;
+			return 0;
 		}
 
 		if (T->str_offset.offset >= Z_STRLEN_P(T->str_offset.str)) {
@@ -699,7 +699,7 @@ static inline void zend_assign_to_string_offset(temp_variable *T, zval *value, i
 
 		if (((int)T->str_offset.offset < 0)) {
 			zend_error(E_WARNING, "Illegal string offset:  %d", T->str_offset.offset);
-			return;
+			return 0;
 		}
 
 		if (T->str_offset.offset >= Z_USTRLEN_P(T->str_offset.str)) {
@@ -729,6 +729,7 @@ static inline void zend_assign_to_string_offset(temp_variable *T, zval *value, i
 			}
 		}
 	}
+	return 1;
 }
 /* }}} */
 
