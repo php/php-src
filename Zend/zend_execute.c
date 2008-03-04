@@ -626,13 +626,13 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, zval 
 	FREE_OP_IF_VAR(free_value);
 }
 
-static inline void zend_assign_to_string_offset(temp_variable *T, zval *value, int value_type TSRMLS_DC)
+static inline int zend_assign_to_string_offset(temp_variable *T, zval *value, int value_type TSRMLS_DC)
 {
 	if (Z_TYPE_P(T->str_offset.str) == IS_STRING) {
 
 		if (((int)T->str_offset.offset < 0)) {
 			zend_error(E_WARNING, "Illegal string offset:  %d", T->str_offset.offset);
-			return;
+			return 0;
 		}
 
 		if (T->str_offset.offset >= Z_STRLEN_P(T->str_offset.str)) {
@@ -667,6 +667,7 @@ static inline void zend_assign_to_string_offset(temp_variable *T, zval *value, i
 		T(result->u.var).var = &T->str_offset.str;
 		*/
 	}
+	return 1;
 }
 
 static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value, int is_tmp_var TSRMLS_DC)
