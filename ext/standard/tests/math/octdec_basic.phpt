@@ -1,5 +1,9 @@
 --TEST--
 Test octdec() - basic function test octdec()
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+?>
 --FILE--
 <?php
 $values = array(01234567,
