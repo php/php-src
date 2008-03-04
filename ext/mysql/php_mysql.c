@@ -600,7 +600,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	int  user_len, passwd_len, host_len;
 	char *hashed_details=NULL;
 	int hashed_details_length, port = MYSQL_PORT;
-	int client_flags = 0;
+	long client_flags = 0;
 	php_mysql_conn *mysql=NULL;
 #if MYSQL_VERSION_ID <= 32230
 	void (*handler) (int);
