@@ -46,8 +46,8 @@ string(8) "4-4s4s*0"
 string(9) "4-4s4s505"
 string(9) "454s4s505"
 string(1) "-"
-string(6) "string"
-int(4)
-int(5)
+string(1) "s"
+string(1) "4"
+string(1) "5"
 string(1) "5"
 [Illegal string offset:  -1]
