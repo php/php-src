@@ -4,6 +4,8 @@ import_request_variables() tests
 a=1&b=heh&c=3&d[]=5&GLOBALS=test&1=hm
 --POST--
 ap=25&bp=test&cp=blah3&dp[]=ar
+--INI--
+register_globals=off
 --FILE--
 <?php
 
