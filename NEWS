@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - Fixed bug #44306 (Better detection of MIPS processors on Windows). (Ilia)
 - Fixed bug #44166 (Parameter handling flaw in PDO::getAvailableDrivers()).
   (Ilia)
+- Fixed bug #42505 (new sendmail default breaks on Netware platform) 
+  (Guenter Knauf)
 
 27 Feb 2008, PHP 5.2.6RC1
 - Fixed security issue detailed in CVE-2008-0599. (Rasmus)
