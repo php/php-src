@@ -87,6 +87,8 @@ PHP                                                                        NEWS
     (Dmitry, Pierre)
   . Changed exception handling. Now each op_array doesn't contain
     ZEND_HANDLE_EXCEPTION opcode in the end. (Dmitry)
+  . Optimized require_once() and include_once() by eliminating fopen(3) on
+    second usage. (Dmitry)
 - Improved php.ini handling: (Jani)
   . Added ".htaccess" style user-defined php.ini files support for CGI/FastCGI
   . Added support for special [PATH=/opt/httpd/www.example.com/] and
