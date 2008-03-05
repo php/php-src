@@ -33,6 +33,8 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 
 PHPAPI int php_check_safe_mode_include_dir(const char *path TSRMLS_DC);
 
+PHPAPI char *php_resolve_path(const char *filename, int filename_len, const char *path TSRMLS_DC);
+
 PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const char *path, char **opened_path TSRMLS_DC);
 
 PHPAPI char *php_strip_url_passwd(char *path);

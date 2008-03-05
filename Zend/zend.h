@@ -463,6 +463,7 @@ typedef struct _zend_utility_functions {
 	int (*stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
 	int (*vspprintf_function)(char **pbuf, size_t max_len, const char *format, va_list ap);
 	char *(*getenv_function)(char *name, size_t name_len TSRMLS_DC);
+	char *(*resolve_path_function)(const char *filename, int filename_len TSRMLS_DC);
 } zend_utility_functions;
 
 typedef struct _zend_utility_values {
@@ -590,6 +591,7 @@ extern void (*zend_on_timeout)(int seconds TSRMLS_DC);
 extern ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
 extern int (*zend_vspprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);
 extern ZEND_API char *(*zend_getenv)(char *name, size_t name_len TSRMLS_DC);
+extern ZEND_API char *(*zend_resolve_path)(const char *filename, int filename_len TSRMLS_DC);
 
 ZEND_API void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
