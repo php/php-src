@@ -771,15 +771,15 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 				}
 				if (ce_base) {
 					if ((!*pce || !instanceof_function(*pce, ce_base TSRMLS_CC))) {
-						zend_spprintf(error, 0, "to be a class name derived from %s, '%s' given",
-							ce_base->name, Z_STRVAL_PP(arg));
+						zend_spprintf(error, 0, "to be a class name derived from %v, '%v' given",
+							ce_base->name, Z_UNIVAL_PP(arg));
 						*pce = NULL;
 						return "";
 					}
 				}
 				if (!*pce) {
-					zend_spprintf(error, 0, "to be a valid class name, '%s' given",
-						Z_STRVAL_PP(arg));
+					zend_spprintf(error, 0, "to be a valid class name, '%v' given",
+						Z_UNIVAL_PP(arg));
 					return "";
 				}
 				break;
