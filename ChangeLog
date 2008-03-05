@@ -1,3 +1,253 @@
+2008-03-04  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/zend_builtin_functions.c
+      ext/date/php_date.c
+      ext/filter/filter.c
+      ext/msql/php_msql.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_stmt.c
+      ext/posix/posix.c
+      ext/standard/filestat.c
+      ext/tidy/tidy.c
+      ext/unicode/collator.c
+      ext/xmlwriter/php_xmlwriter.c
+      ext/zlib/zlib.c
+      main/output.c
+      sapi/apache2handler/php_functions.c:
+      New way for check void parameters
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.c:
+      MFB: Fixed bug #44333 (SEGFAULT when using mysql_pconnect() with
+      client_flags)
+
+    * (PHP_5_2)
+      NEWS
+      ext/mysql/php_mysql.c:
+      Fixed bug #44333 (SEGFAULT when using mysql_pconnect() with client_flags)
+
+2008-03-04  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_3)
+      NEWS:
+      Add oci_bind_by_name update
+
+    * (PHP_5_3)
+      NEWS:
+      Add #41069. Clarify attributions.
+
+    * (PHP_5_3)
+      ext/oci8/oci8_statement.c
+      ext/oci8/tests/bind_char_1.phpt
+      ext/oci8/tests/bind_char_2.phpt
+      ext/oci8/tests/bind_char_3.phpt
+      ext/oci8/tests/bind_char_4.phpt
+      ext/oci8/tests/bug41069.phpt:
+      MFH Fix bug #41069 (db link crash).  Also allow SQLT_AFC (aka CHAR
+      datatype) in oci_bind_by_name
+
+    * ext/oci8/oci8_statement.c
+      ext/oci8/tests/bind_char_1.phpt
+      ext/oci8/tests/bind_char_1.phpt
+      ext/oci8/tests/bind_char_2.phpt
+      ext/oci8/tests/bind_char_2.phpt
+      ext/oci8/tests/bind_char_3.phpt
+      ext/oci8/tests/bind_char_3.phpt
+      ext/oci8/tests/bind_char_4.phpt
+      ext/oci8/tests/bind_char_4.phpt
+      ext/oci8/tests/bug41069.phpt
+      ext/oci8/tests/bug41069.phpt:
+      Fix bug #41069 (db link crash).  Also allow SQLT_AFC (aka CHAR datatype) in
+      oci_bind_by_name
+
+    * ext/oci8/tests/pecl_bug10194_blob.phpt
+      ext/oci8/tests/pecl_bug10194_blob.phpt:
+      Attempt greater test portability
+
+2008-03-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mssql/php_mssql.c:
+      
+      MFB: Fixed bug #44325 (mssql_bind not correctly bind empty strings as
+      parameter value)
+
+    * (PHP_5_2)
+      NEWS
+      ext/mssql/php_mssql.c:
+      MFB: Fixed bug #44325 (mssql_bind not correctly bind empty strings as
+      parameter value)
+
+    * (PHP_5_3)
+      ext/mssql/php_mssql.c:
+      Fixed bug #44325 (mssql_bind not correctly bind empty strings as parameter
+      value)
+
+2008-03-04  Josie Messa  <josmessa@uk.ibm.com>
+
+    * ext/standard/tests/dir/readdir_basic.phpt
+      ext/standard/tests/dir/readdir_basic.phpt
+      ext/standard/tests/dir/readdir_error.phpt
+      ext/standard/tests/dir/readdir_error.phpt
+      ext/standard/tests/dir/readdir_variation1.phpt
+      ext/standard/tests/dir/readdir_variation1.phpt
+      ext/standard/tests/dir/readdir_variation2.phpt
+      ext/standard/tests/dir/readdir_variation2.phpt
+      ext/standard/tests/dir/readdir_variation3.phpt
+      ext/standard/tests/dir/readdir_variation3.phpt
+      ext/standard/tests/dir/readdir_variation4.phpt
+      ext/standard/tests/dir/readdir_variation4.phpt
+      ext/standard/tests/dir/readdir_variation5.phpt
+      ext/standard/tests/dir/readdir_variation5.phpt
+      ext/standard/tests/dir/readdir_variation6.phpt
+      ext/standard/tests/dir/readdir_variation6.phpt:
+      - new tests for readdir() function
+
+    * ext/standard/tests/dir/readdir_basic.phpt
+      ext/standard/tests/dir/readdir_basic.phpt
+      ext/standard/tests/dir/readdir_basic.phpt
+      ext/standard/tests/dir/readdir_error.phpt
+      ext/standard/tests/dir/readdir_error.phpt
+      ext/standard/tests/dir/readdir_error.phpt
+      ext/standard/tests/dir/readdir_variation1.phpt
+      ext/standard/tests/dir/readdir_variation1.phpt
+      ext/standard/tests/dir/readdir_variation1.phpt
+      ext/standard/tests/dir/readdir_variation2.phpt
+      ext/standard/tests/dir/readdir_variation2.phpt
+      ext/standard/tests/dir/readdir_variation2.phpt
+      ext/standard/tests/dir/readdir_variation3.phpt
+      ext/standard/tests/dir/readdir_variation3.phpt
+      ext/standard/tests/dir/readdir_variation3.phpt
+      ext/standard/tests/dir/readdir_variation4.phpt
+      ext/standard/tests/dir/readdir_variation4.phpt
+      ext/standard/tests/dir/readdir_variation4.phpt
+      ext/standard/tests/dir/readdir_variation5.phpt
+      ext/standard/tests/dir/readdir_variation5.phpt
+      ext/standard/tests/dir/readdir_variation5.phpt
+      ext/standard/tests/dir/readdir_variation6.phpt
+      ext/standard/tests/dir/readdir_variation6.phpt
+      ext/standard/tests/dir/readdir_variation6.phpt:
+        1.1.4;
+      file readdir_basic.phpt was initially added on branch PHP_5_2.
+
+2008-03-04  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/math/hexdec_basic.phpt
+      ext/standard/tests/math/octdec_basic.phpt:
+      re-fixing to skip on 64 bit
+
+2008-03-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/soap.c
+      ext/soap/soap.c:
+      Fixed SIGSEGV because of access to uninitialized data
+
+    * (PHP_5_2)
+      ext/soap/soap.c:
+      Fixed SIGSEGV because of acess to uninitialized data
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Fixed shared memory corruption of opcode caches
+
+2008-03-04  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/tests/dir/opendir_variation5.phpt:
+      fix test
+
+2008-03-04  Josie Messa  <josmessa@uk.ibm.com>
+
+    * ext/standard/tests/dir/opendir_basic.phpt
+      ext/standard/tests/dir/opendir_basic.phpt
+      ext/standard/tests/dir/opendir_error1.phpt
+      ext/standard/tests/dir/opendir_error1.phpt
+      ext/standard/tests/dir/opendir_error2.phpt
+      ext/standard/tests/dir/opendir_error2.phpt
+      ext/standard/tests/dir/opendir_variation1.phpt
+      ext/standard/tests/dir/opendir_variation1.phpt
+      ext/standard/tests/dir/opendir_variation2.phpt
+      ext/standard/tests/dir/opendir_variation2.phpt
+      ext/standard/tests/dir/opendir_variation3.phpt
+      ext/standard/tests/dir/opendir_variation3.phpt
+      ext/standard/tests/dir/opendir_variation4.phpt
+      ext/standard/tests/dir/opendir_variation4.phpt
+      ext/standard/tests/dir/opendir_variation5.phpt
+      ext/standard/tests/dir/opendir_variation5.phpt
+      ext/standard/tests/dir/opendir_variation6.phpt
+      ext/standard/tests/dir/opendir_variation6.phpt
+      ext/standard/tests/dir/opendir_variation7.phpt
+      ext/standard/tests/dir/opendir_variation7.phpt:
+      - new tests for opendir() function
+
+    * ext/standard/tests/dir/opendir_basic.phpt
+      ext/standard/tests/dir/opendir_basic.phpt
+      ext/standard/tests/dir/opendir_basic.phpt
+      ext/standard/tests/dir/opendir_error1.phpt
+      ext/standard/tests/dir/opendir_error1.phpt
+      ext/standard/tests/dir/opendir_error1.phpt
+      ext/standard/tests/dir/opendir_error2.phpt
+      ext/standard/tests/dir/opendir_error2.phpt
+      ext/standard/tests/dir/opendir_error2.phpt
+      ext/standard/tests/dir/opendir_variation1.phpt
+      ext/standard/tests/dir/opendir_variation1.phpt
+      ext/standard/tests/dir/opendir_variation1.phpt
+      ext/standard/tests/dir/opendir_variation2.phpt
+      ext/standard/tests/dir/opendir_variation2.phpt
+      ext/standard/tests/dir/opendir_variation2.phpt
+      ext/standard/tests/dir/opendir_variation3.phpt
+      ext/standard/tests/dir/opendir_variation3.phpt
+      ext/standard/tests/dir/opendir_variation3.phpt
+      ext/standard/tests/dir/opendir_variation4.phpt
+      ext/standard/tests/dir/opendir_variation4.phpt
+      ext/standard/tests/dir/opendir_variation4.phpt
+      ext/standard/tests/dir/opendir_variation5.phpt
+      ext/standard/tests/dir/opendir_variation5.phpt
+      ext/standard/tests/dir/opendir_variation5.phpt
+      ext/standard/tests/dir/opendir_variation6.phpt
+      ext/standard/tests/dir/opendir_variation6.phpt
+      ext/standard/tests/dir/opendir_variation6.phpt
+      ext/standard/tests/dir/opendir_variation7.phpt
+      ext/standard/tests/dir/opendir_variation7.phpt
+      ext/standard/tests/dir/opendir_variation7.phpt:
+        1.1.4;
+      file opendir_basic.phpt was initially added on branch PHP_5_2.
+
+2008-03-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/lang/bug22592.phpt
+      tests/lang/bug22592.phpt
+      tests/lang/bug22592.phpt:
+      Fixed wrong result of cascading assignment to string offset
+
+    * (PHP_5_3)
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Fixed wrong result of cascading assignment to string offset
+      Fixed memory corruption on cascading assignment of IS_TMP_VAR into string
+      offset
+      Fixed opcode caches shared memory corruption on cascading assignment of
+      IS_CONST
+       into string offset
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Fixed wrong result of cascading assignment to string offset
+      Fixed memory corruption on cascading assignment of IS_TMP_VAR into string
+      offset
+      Fixed opcode caches shared memory corruption on cascading assignment of
+      IS_CONST into string offset
+
 2008-03-03  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
