@@ -447,6 +447,80 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ php_resolve_path
+ * Returns the realpath for given filename according to include path
+ */
+PHPAPI char *php_resolve_path(const char *filename, int filename_length, const char *path TSRMLS_DC)
+{
+	char resolved_path[MAXPATHLEN];
+	char trypath[MAXPATHLEN];
+	char *ptr, *end;
+
+	if (!filename) {
+		return NULL;
+	}
+
+	if (*filename == '.' ||
+	    IS_ABSOLUTE_PATH(filename, filename_length) ||
+	    !path ||
+	    !*path) {
+		if (tsrm_realpath(filename, resolved_path TSRMLS_CC)) {
+			return estrdup(resolved_path);
+		} else {
+			return NULL;
+		}
+	}
+
+	ptr = path;
+	while (ptr && *ptr) {
+		end = strchr(ptr, DEFAULT_DIR_SEPARATOR);
+		if (end) {
+			if ((end-ptr) + 1 + filename_length + 1 >= MAXPATHLEN) {
+				ptr = end + 1;
+				continue;
+			}
+			memcpy(trypath, ptr, end-ptr);
+			trypath[end-ptr] = '/';
+			memcpy(trypath+(end-ptr)+1, filename, filename_length+1);
+			ptr = end+1;
+		} else {
+			int len = strlen(ptr);
+
+			if (len + 1 + filename_length + 1 >= MAXPATHLEN) {
+				break;
+			}
+			memcpy(trypath, ptr, len);
+			trypath[len] = '/';
+			memcpy(trypath+len+1, filename, filename_length+1);
+			ptr = NULL;
+		}
+		if (tsrm_realpath(trypath, resolved_path TSRMLS_CC)) {
+			return estrdup(resolved_path);
+		}
+	} /* end provided path */
+
+	/* check in calling scripts' current working directory as a fall back case
+	 */
+	if (zend_is_executing(TSRMLS_C)) {
+		char *exec_fname = zend_get_executed_filename(TSRMLS_C);
+		int exec_fname_length = strlen(exec_fname);
+
+		while ((--exec_fname_length >= 0) && !IS_SLASH(exec_fname[exec_fname_length]));
+		if (exec_fname && exec_fname[0] != '[' &&
+		    exec_fname_length > 0 &&
+		    exec_fname_length + 1 + filename_length + 1 < MAXPATHLEN) {
+			memcpy(trypath, exec_fname, exec_fname_length + 1);
+			memcpy(trypath+exec_fname_length + 1, filename, filename_length+1);
+			if (tsrm_realpath(trypath, resolved_path TSRMLS_CC)) {
+				return estrdup(resolved_path);
+			}
+		}
+	}
+
+	return NULL;
+}
+/* }}} */
+
 /* {{{ php_fopen_with_path
  * Tries to open a file with a PATH-style list of directories.
  * If the filename starts with "." or "/", the path is ignored.
