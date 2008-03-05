@@ -1202,6 +1202,12 @@ PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *h
 }
 /* }}} */
 
+static char *php_resolve_path_for_zend(const char *filename, int filename_len TSRMLS_DC) /* {{{ */
+{
+	return php_resolve_path(filename, filename_len, PG(include_path) TSRMLS_CC);
+}
+/* }}} */
+
 /* {{{ php_get_configuration_directive_for_zend
  */
 static int php_get_configuration_directive_for_zend(char *name, uint name_length, zval *contents)
@@ -1816,6 +1822,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zuf.stream_open_function = php_stream_open_for_zend;
 	zuf.vspprintf_function = vspprintf;
 	zuf.getenv_function = sapi_getenv;
+	zuf.resolve_path_function = php_resolve_path_for_zend;
 	zend_startup(&zuf, NULL, 1);
 
 #ifdef ZTS

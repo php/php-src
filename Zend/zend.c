@@ -65,6 +65,7 @@ ZEND_API void (*zend_ticks_function)(int ticks);
 ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 int (*zend_vspprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);
 ZEND_API char *(*zend_getenv)(char *name, size_t name_len TSRMLS_DC);
+ZEND_API char *(*zend_resolve_path)(const char *filename, int filename_len TSRMLS_DC);
 
 void (*zend_on_timeout)(int seconds TSRMLS_DC);
 
@@ -1067,6 +1068,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_on_timeout = utility_functions->on_timeout;
 	zend_vspprintf = utility_functions->vspprintf_function;
 	zend_getenv = utility_functions->getenv_function;
+	zend_resolve_path = utility_functions->resolve_path_function;
 
 	zend_compile_file = compile_file;
 	zend_compile_string = compile_string;
