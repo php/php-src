@@ -278,13 +278,15 @@ PHP_FUNCTION(closedir)
 {
 	zval **id, **tmp, *myself;
 	php_stream *dirp;
+	int rsrc_id;
 
 	FETCH_DIRP();
 
-	if (dirp->rsrc_id == DIRG(default_dir)) {
+	rsrc_id = dirp->rsrc_id;
+	zend_list_delete(dirp->rsrc_id);
+
+	if (rsrc_id == DIRG(default_dir)) {
 		php_set_default_dir(-1 TSRMLS_CC);
-	} else {
-		zend_list_delete(dirp->rsrc_id);
 	}
 }
 /* }}} */
