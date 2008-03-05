@@ -1,5 +1,7 @@
 --TEST--
 Test array_push() function : usage variations - referenced variables
+--INI--
+allow_call_time_pass_reference=on
 --FILE--
 <?php
 /* Prototype  : int array_push(array $stack, mixed $var [, mixed $...])

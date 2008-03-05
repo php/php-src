@@ -1,5 +1,7 @@
 --TEST--
 Test array_slice() function : usage variations - referenced variables
+--INI--
+allow_call_time_pass_reference=on
 --FILE--
 <?php
 /* Prototype  : array array_slice(array $input, int $offset [, int $length [, bool $preserve_keys]])
