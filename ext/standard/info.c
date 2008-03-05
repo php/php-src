@@ -425,6 +425,30 @@ PHPAPI char *php_get_uname(char mode)
 	if (uname((struct utsname *)&buf) == -1) {
 		php_uname = PHP_UNAME;
 	} else {
+#ifdef NETWARE
+		if (mode == 's') {
+			php_uname = buf.sysname;
+		} else if (mode == 'r') {
+			snprintf(tmp_uname, sizeof(tmp_uname), "%d.%d.%d", 
+					 buf.netware_major, buf.netware_minor, buf.netware_revision);
+			php_uname = tmp_uname;
+		} else if (mode == 'n') {
+			php_uname = buf.servername;
+		} else if (mode == 'v') {
+			snprintf(tmp_uname, sizeof(tmp_uname), "libc-%d.%d.%d #%d",
+					 buf.libmajor, buf.libminor, buf.librevision, buf.libthreshold);
+			php_uname = tmp_uname;
+		} else if (mode == 'm') {
+			php_uname = buf.machine;
+		} else { /* assume mode == 'a' */
+			snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d.%d libc-%d.%d.%d #%d %s",
+					 buf.sysname, buf.servername,
+					 buf.netware_major, buf.netware_minor, buf.netware_revision,
+					 buf.libmajor, buf.libminor, buf.librevision, buf.libthreshold,
+					 buf.machine);
+			php_uname = tmp_uname;
+		}
+#else
 		if (mode == 's') {
 			php_uname = buf.sysname;
 		} else if (mode == 'r') {
@@ -441,6 +465,7 @@ PHPAPI char *php_get_uname(char mode)
 					 buf.machine);
 			php_uname = tmp_uname;
 		}
+#endif /* NETWARE */
 	}
 #else
 	php_uname = PHP_UNAME;
