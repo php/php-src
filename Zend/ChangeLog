@@ -1,3 +1,42 @@
+2008-03-04  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_builtin_functions.c:
+      New way for check void parameters
+
+2008-03-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c
+      zend_execute_API.c
+      zend_execute_API.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Fixed shared memory corruption of opcode caches
+
+    * (PHP_5_3)
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Fixed wrong result of cascading assignment to string offset
+      Fixed memory corruption on cascading assignment of IS_TMP_VAR into string
+      offset
+      Fixed opcode caches shared memory corruption on cascading assignment of
+      IS_CONST
+       into string offset
+
+    * zend_execute.c
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Fixed wrong result of cascading assignment to string offset
+      Fixed memory corruption on cascading assignment of IS_TMP_VAR into string
+      offset
+      Fixed opcode caches shared memory corruption on cascading assignment of
+      IS_CONST into string offset
+
 2008-03-03  Robin Fernandes  <robin_fernandes@uk.ibm.com>
 
     * zend_compile.c
