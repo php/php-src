@@ -12,11 +12,9 @@ hello, I have got a cr*sh on you
 doc;
 
 echo mb_ereg_replace($ptr,'$1',$txt,'e');
-
 ?>
 --EXPECTF--
-Parse error: parse error, expecting `T_VARIABLE' or `'$'' in %s(9) : mbregex replace on line %d
+Parse error: syntax error, unexpected T_LNUMBER, expecting T_VARIABLE or '$' in %s/bug43301.php(%d) : mbregex replace on line 1
 
 Fatal error: mb_ereg_replace(): Failed evaluating code: 
-$1 in %s on line %d
-
+$1 in %s/bug43301.php on line %d
