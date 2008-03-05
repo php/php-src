@@ -11,9 +11,9 @@ PHP                                                                        NEWS
 
 27 Feb 2008, PHP 5.2.6RC1
 - Fixed security issue detailed in CVE-2008-0599. (Rasmus)
-- Fixed potential memleak in stream filter parameter for zlib filter (Greg)
+- Fixed potential memleak in stream filter parameter for zlib filter. (Greg)
 - Added Reflection API metadata for the methods of the DOM classes. (Sebastian)
-- Fixed weired behavior in CGI parameter parsing. (Dmitry, Hannes Magnusson)
+- Fixed weird behavior in CGI parameter parsing. (Dmitry, Hannes Magnusson)
 - Fixed a safe_mode bypass in cURL identified by Maksymilian Arciemowicz.
   (Ilia)
 - Fixed a bug with PDO::FETCH_COLUMN|PDO::FETCH_GROUP mode when a column # by
@@ -157,7 +157,7 @@ PHP                                                                        NEWS
 - Fixed bug #42736 (xmlrpc_server_call_method() crashes). (Tony)
 - Fixed bug #42692 (Procedure 'int1' not present with doc/lit SoapServer).
   (Dmitry)
-- Fixed bug #42548 (mysqli PROCEDURE calls can't return result sets). (hartmut)
+- Fixed bug #42548 (mysqli PROCEDURE calls can't return result sets). (Hartmut)
 - Fixed bug #42369 (Implicit conversion to string leaks memory).
   (David C., Rob).
 - Fixed bug #42272 (var_export() incorrectly escapes char(0)). (Derick)
