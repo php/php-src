@@ -460,9 +460,8 @@ static PHP_INI_MH(OnChangeMailForceExtra)
  * PHP_INCLUDE_PATH
  */
 
-#if defined(PHP_PROG_SENDMAIL) && !defined(NETWARE)
-#	define DEFAULT_SENDMAIL_PATH PHP_PROG_SENDMAIL " -t -i "
-#elif defined(PHP_WIN32)
+/* Windows and Netware use the internal mail */
+#if defined(PHP_WIN32) || defined(NETWARE)
 #	define DEFAULT_SENDMAIL_PATH NULL
 #else
 #	define DEFAULT_SENDMAIL_PATH "/usr/sbin/sendmail -t -i" 
