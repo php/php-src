@@ -2056,19 +2056,14 @@ PHP_FUNCTION(mssql_bind)
 
 	/* modify datalen and maxlen according to dbrpcparam documentation */
 	if ( (type==SQLVARCHAR) || (type==SQLCHAR) || (type==SQLTEXT) )	{	/* variable-length type */
-		if (is_null || Z_TYPE_PP(var) == IS_NULL) {
+		if (is_null) {
 			maxlen=0;
 			datalen=0;
-		} else {
+		}
+		else {
 			convert_to_string_ex(var);
-			datalen = Z_STRLEN_PP(var);
-			value = (LPBYTE)Z_STRVAL_PP(var);
-			if (!datalen) {
-				datalen = 1;
-				if (maxlen == -1) {
-					maxlen = 1;
-				}
-			}
+			datalen=Z_STRLEN_PP(var);
+			value=(LPBYTE)Z_STRVAL_PP(var);
 		}
 	}
 	else	{	/* fixed-length type */
