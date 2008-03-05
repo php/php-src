@@ -1,5 +1,7 @@
 --TEST--
 Test array_key_exists() function : usage variations - referenced variables
+--INI--
+allow_call_time_pass_reference=on
 --FILE--
 <?php
 /* Prototype  : bool array_key_exists(mixed $key, array $search)

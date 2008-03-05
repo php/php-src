@@ -1,5 +1,7 @@
 --TEST--
 Test array_values() function : usage variations - Referenced variables
+--INI--
+allow_call_time_pass_reference=on
 --FILE--
 <?php
 /* Prototype  : array array_values(array $input)

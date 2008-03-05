@@ -1,5 +1,7 @@
 --TEST--
 Test array_merge() function : usage variations - referenced variables
+--INI--
+allow_call_time_pass_reference=on
 --FILE--
 <?php
 /* Prototype  : array array_merge(array $arr1, array $arr2 [, array $...])
