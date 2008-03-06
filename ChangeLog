@@ -1,3 +1,139 @@
+2008-03-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c:
+      
+      MFB: Revert patch for bug #44325
+
+    * (PHP_5_3)
+      ext/mssql/php_mssql.c:
+      
+      Revert patch for bug #44325
+
+2008-03-05  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * main/main.c:
+      - MFB: #42505, new sendmail default path breaks on Novell (Guenter Knauf)
+
+    * ext/standard/info.c:
+      - MFB: #40013, php_uname() does not return nodename on Netware
+        (Guenter Knauf)
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/info.c:
+      - #40013, php_uname() does not return nodename on Netware (Guenter Knauf)
+
+    * (PHP_5_2)
+      NEWS
+      main/main.c:
+      - #42505, new sendmail default path breaks on Novell (Guenter Knauf)
+
+2008-03-05  Lars Strojny  <lars@strojny.net>
+
+    * run-tests.php
+      run-tests.php:
+      Using new magic constant __DIR__ in run-tests.php
+
+2008-03-05  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_key_exists_variation4.phpt
+      ext/standard/tests/array/array_merge_variation9.phpt
+      ext/standard/tests/array/array_push_variation4.phpt
+      ext/standard/tests/array/array_slice_variation9.phpt
+      ext/standard/tests/array/array_values_variation6.phpt
+      ext/standard/tests/array/each_variation4.phpt
+      ext/standard/tests/array/rsort_variation4.phpt:
+      MF53: Fix tests
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_key_exists_variation4.phpt
+      ext/standard/tests/array/array_merge_variation9.phpt
+      ext/standard/tests/array/array_push_variation4.phpt
+      ext/standard/tests/array/array_slice_variation9.phpt
+      ext/standard/tests/array/array_values_variation6.phpt
+      ext/standard/tests/array/each_variation4.phpt
+      ext/standard/tests/array/rsort_variation4.phpt:
+      - Fix tests (allow_call_time_pass_reference might be off for properly
+      configured sites.. :)
+
+    * (PHP_5_2)
+      ext/mbstring/tests/bug43301.phpt:
+      - fix test (MF53)
+
+2008-03-05  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/zend_API.c:
+      Fixed error message on unicode mode
+
+    * ext/standard/tests/file/clearstatcache_error.phpt
+      ext/xmlwriter/tests/bug41326.phpt:
+      Fix test
+
+2008-03-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      main/fopen_wrappers.c
+      main/fopen_wrappers.h
+      main/main.c:
+      Optimized require_once() and include_once() by eliminationg open() syscall
+      on se
+      cond usage.
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      main/fopen_wrappers.c
+      main/fopen_wrappers.h
+      main/main.c:
+      Optimized require_once() and include_once() by eliminationg open() syscall
+      on second usage.
+
+2008-03-05  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/standard/tests/dir/.cvsignore:
+      add missing .cvsignore
+
+2008-03-05  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      ext/standard/tests/general_functions/import_request.phpt:
+      - Fix test when register_globals=On in php.ini
+
+    * (PHP_5_2)
+      ext/standard/tests/general_functions/dl-cve-2007-4887.phpt
+      ext/standard/tests/general_functions/import_request.phpt:
+      - Fix tests
+
+2008-03-05  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/dir.c:
+      apply better fix, so that the default handle would be closed when closing
+      its reference
+
+    * (PHP_5_2)
+      NEWS:
+      cosmetic fixes
+
+    * (PHP_5_2)
+      ext/standard/dir.c
+      ext/standard/dir.c:
+      MFH: fix memory corruption due to double destruction of default dir handle
+
+    * ext/standard/dir.c:
+      fix memory corruption due to double destruction of default dir handle
+      (detected by ext/standard/tests/dir/readdir_variation6.phpt)
+
 2008-03-04  Felipe Pena  <felipensp@gmail.com>
 
     * ZendEngine2/zend_builtin_functions.c

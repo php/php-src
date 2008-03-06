@@ -1,3 +1,26 @@
+2008-03-05  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_API.c:
+      Fixed error message on unicode mode
+
+2008-03-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.c
+      zend.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Optimized require_once() and include_once() by eliminationg open() syscall
+      on se
+      cond usage.
+
+    * (PHP_5_3)
+      zend.c
+      zend.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Optimized require_once() and include_once() by eliminationg open() syscall
+      on second usage.
+
 2008-03-04  Felipe Pena  <felipensp@gmail.com>
 
     * zend_builtin_functions.c:
