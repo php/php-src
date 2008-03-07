@@ -102,7 +102,7 @@ Warning: opendir(%s/opendir_variation5/sub_dir/child_dir): failed to open dir: P
 bool(false)
 ===DONE===
 --UEXPECTF--
-"*** Testing opendir() : usage variations ***
+*** Testing opendir() : usage variations ***
 
 -- After restricting 1st level parent directory --
 
