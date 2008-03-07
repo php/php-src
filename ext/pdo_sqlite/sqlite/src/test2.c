@@ -16,8 +16,6 @@
 ** $Id$
 */
 #include "sqliteInt.h"
-#include "os.h"
-#include "pager.h"
 #include "tcl.h"
 #include <stdlib.h>
 #include <string.h>
@@ -68,6 +66,7 @@ static int pager_open(
   int argc,              /* Number of arguments */
   const char **argv      /* Text of each argument */
 ){
+  u16 pageSize;
   Pager *pPager;
   int nPage;
   int rc;
@@ -78,13 +77,15 @@ static int pager_open(
     return TCL_ERROR;
   }
   if( Tcl_GetInt(interp, argv[2], &nPage) ) return TCL_ERROR;
-  rc = sqlite3PagerOpen(&pPager, argv[1], 0, 0);
+  rc = sqlite3PagerOpen(sqlite3_vfs_find(0), &pPager, argv[1], 0, 0,
+      SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_MAIN_DB);
   if( rc!=SQLITE_OK ){
     Tcl_AppendResult(interp, errorName(rc), 0);
     return TCL_ERROR;
   }
   sqlite3PagerSetCachesize(pPager, nPage);
-  sqlite3PagerSetPagesize(pPager, test_pagesize);
+  pageSize = test_pagesize;
+  sqlite3PagerSetPagesize(pPager, &pageSize);
   sqlite3_snprintf(sizeof(zBuf),zBuf,"%p",pPager);
   Tcl_AppendResult(interp, zBuf, 0);
   return TCL_OK;
@@ -528,31 +529,30 @@ static int fake_big_file(
   int argc,              /* Number of arguments */
   const char **argv      /* Text of each argument */
 ){
+  sqlite3_vfs *pVfs;
+  sqlite3_file *fd = 0;
   int rc;
   int n;
   i64 offset;
-  OsFile *fd = 0;
-  int readOnly = 0;
   if( argc!=3 ){
     Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
        " N-MEGABYTES FILE\"", 0);
     return TCL_ERROR;
   }
   if( Tcl_GetInt(interp, argv[1], &n) ) return TCL_ERROR;
-  rc = sqlite3OsOpenReadWrite(argv[2], &fd, &readOnly);
+
+  pVfs = sqlite3_vfs_find(0);
+  rc = sqlite3OsOpenMalloc(pVfs, argv[2], &fd, 
+      (SQLITE_OPEN_CREATE|SQLITE_OPEN_READWRITE|SQLITE_OPEN_MAIN_DB), 0
+  );
   if( rc ){
     Tcl_AppendResult(interp, "open failed: ", errorName(rc), 0);
     return TCL_ERROR;
   }
   offset = n;
   offset *= 1024*1024;
-  rc = sqlite3OsSeek(fd, offset);
-  if( rc ){
-    Tcl_AppendResult(interp, "seek failed: ", errorName(rc), 0);
-    return TCL_ERROR;
-  }
-  rc = sqlite3OsWrite(fd, "Hello, World!", 14);
-  sqlite3OsClose(&fd);
+  rc = sqlite3OsWrite(fd, "Hello, World!", 14, offset);
+  sqlite3OsCloseFree(fd);
   if( rc ){
     Tcl_AppendResult(interp, "write failed: ", errorName(rc), 0);
     return TCL_ERROR;

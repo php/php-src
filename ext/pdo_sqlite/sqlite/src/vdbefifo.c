@@ -24,7 +24,7 @@ static FifoPage *allocateFifoPage(int nEntry){
   if( nEntry>32767 ){
     nEntry = 32767;
   }
-  pPage = sqliteMallocRaw( sizeof(FifoPage) + sizeof(i64)*(nEntry-1) );
+  pPage = sqlite3_malloc( sizeof(FifoPage) + sizeof(i64)*(nEntry-1) );
   if( pPage ){
     pPage->nSlot = nEntry;
     pPage->iWrite = 0;
@@ -87,7 +87,7 @@ int sqlite3VdbeFifoPop(Fifo *pFifo, i64 *pVal){
   pFifo->nEntry--;
   if( pPage->iRead>=pPage->iWrite ){
     pFifo->pFirst = pPage->pNext;
-    sqliteFree(pPage);
+    sqlite3_free(pPage);
     if( pFifo->nEntry==0 ){
       assert( pFifo->pLast==pPage );
       pFifo->pLast = 0;
@@ -108,7 +108,7 @@ void sqlite3VdbeFifoClear(Fifo *pFifo){
   FifoPage *pPage, *pNextPage;
   for(pPage=pFifo->pFirst; pPage; pPage=pNextPage){
     pNextPage = pPage->pNext;
-    sqliteFree(pPage);
+    sqlite3_free(pPage);
   }
   sqlite3VdbeFifoInit(pFifo);
 }

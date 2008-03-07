@@ -22,20 +22,11 @@
 #include <ctype.h>
 #include <stdarg.h>
 
-#if !defined(_WIN32) && !defined(WIN32) && !defined(__MACOS__) && !defined(__OS2__)
+#if !defined(_WIN32) && !defined(WIN32) && !defined(__OS2__)
 # include <signal.h>
 # include <pwd.h>
 # include <unistd.h>
 # include <sys/types.h>
-#endif
-
-#ifdef __MACOS__
-# include <console.h>
-# include <signal.h>
-# include <unistd.h>
-# include <extras.h>
-# include <Files.h>
-# include <Folders.h>
 #endif
 
 #ifdef __OS2__
@@ -60,6 +51,61 @@
 */
 extern int isatty();
 #endif
+
+#if defined(_WIN32_WCE)
+/* Windows CE (arm-wince-mingw32ce-gcc) does not provide isatty()
+ * thus we always assume that we have a console. That can be
+ * overridden with the -batch command line option.
+ */
+#define isatty(x) 1
+#endif
+
+#if !defined(_WIN32) && !defined(WIN32) && !defined(__OS2__)
+#include <sys/time.h>
+#include <sys/resource.h>
+
+/* Saved resource information for the beginning of an operation */
+static struct rusage sBegin;
+
+/* True if the timer is enabled */
+static int enableTimer = 0;
+
+/*
+** Begin timing an operation
+*/
+static void beginTimer(void){
+  if( enableTimer ){
+    getrusage(RUSAGE_SELF, &sBegin);
+  }
+}
+
+/* Return the difference of two time_structs in microseconds */
+static int timeDiff(struct timeval *pStart, struct timeval *pEnd){
+  return (pEnd->tv_usec - pStart->tv_usec) + 
+         1000000*(pEnd->tv_sec - pStart->tv_sec);
+}
+
+/*
+** Print the timing results.
+*/
+static void endTimer(void){
+  if( enableTimer ){
+    struct rusage sEnd;
+    getrusage(RUSAGE_SELF, &sEnd);
+    printf("CPU Time: user %f sys %f\n",
+       0.000001*timeDiff(&sBegin.ru_utime, &sEnd.ru_utime),
+       0.000001*timeDiff(&sBegin.ru_stime, &sEnd.ru_stime));
+  }
+}
+#define BEGIN_TIMER beginTimer()
+#define END_TIMER endTimer()
+#define HAS_TIMER 1
+#else
+#define BEGIN_TIMER 
+#define END_TIMER
+#define HAS_TIMER 0
+#endif
+
 
 /*
 ** If the following flag is set, then command execution stops
@@ -101,7 +147,9 @@ static char continuePrompt[20]; /* Continuation prompt. default: "   ...> " */
 /*
 ** Write I/O traces to the following stream.
 */
+#ifdef SQLITE_ENABLE_IOTRACE
 static FILE *iotrace = 0;
+#endif
 
 /*
 ** This routine works like printf in that its first argument is a
@@ -109,6 +157,7 @@ static FILE *iotrace = 0;
 ** in place of % fields.  The result of formatting this string
 ** is written to iotrace.
 */
+#ifdef SQLITE_ENABLE_IOTRACE
 static void iotracePrintf(const char *zFormat, ...){
   va_list ap;
   char *z;
@@ -119,6 +168,7 @@ static void iotracePrintf(const char *zFormat, ...){
   fprintf(iotrace, "%s", z);
   sqlite3_free(z);
 }
+#endif
 
 
 /*
@@ -287,6 +337,7 @@ struct callback_data {
 #define MODE_Tcl      6  /* Generate ANSI-C or TCL quoted elements */
 #define MODE_Csv      7  /* Quote strings, numbers are plain */
 #define MODE_NUM_OF   8  /* The number of modes (not a mode itself) */
+#define MODE_Explain  9  /* Like MODE_Column, but do not truncate data */
 
 static const char *modeDescr[MODE_NUM_OF] = {
   "line",
@@ -419,8 +470,11 @@ static void output_csv(struct callback_data *p, const char *z, int bSep){
     fprintf(out,"%s",p->nullvalue);
   }else{
     int i;
+    int nSep = strlen(p->separator);
     for(i=0; z[i]; i++){
-      if( needCsvQuote[((unsigned char*)z)[i]] ){
+      if( needCsvQuote[((unsigned char*)z)[i]] 
+         || (z[i]==p->separator[0] && 
+             (nSep==1 || memcmp(z, p->separator, nSep)==0)) ){
         i = 0;
         break;
       }
@@ -437,7 +491,7 @@ static void output_csv(struct callback_data *p, const char *z, int bSep){
     }
   }
   if( bSep ){
-    fprintf(p->out, p->separator);
+    fprintf(p->out, "%s", p->separator);
   }
 }
 
@@ -473,14 +527,15 @@ static int callback(void *pArg, int nArg, char **azArg, char **azCol){
       }
       break;
     }
+    case MODE_Explain:
     case MODE_Column: {
       if( p->cnt++==0 ){
         for(i=0; i<nArg; i++){
           int w, n;
           if( i<ArraySize(p->colWidth) ){
-             w = p->colWidth[i];
+            w = p->colWidth[i];
           }else{
-             w = 0;
+            w = 0;
           }
           if( w<=0 ){
             w = strlen(azCol[i] ? azCol[i] : "");
@@ -516,6 +571,9 @@ static int callback(void *pArg, int nArg, char **azArg, char **azCol){
            w = p->actualWidth[i];
         }else{
            w = 10;
+        }
+        if( p->mode==MODE_Explain && azArg[i] && strlen(azArg[i])>w ){
+          w = strlen(azArg[i]);
         }
         fprintf(p->out,"%-*.*s%s",w,w,
             azArg[i] ? azArg[i] : p->nullvalue, i==nArg-1 ? "\n": "  ");
@@ -833,7 +891,7 @@ static int run_schema_dump_query(
     if( pzErrMsg ) sqlite3_free(*pzErrMsg);
     zQ2 = malloc( len+100 );
     if( zQ2==0 ) return rc;
-    sprintf(zQ2, "%s ORDER BY rowid DESC", zQuery);
+    sqlite3_snprintf(sizeof(zQ2), zQ2, "%s ORDER BY rowid DESC", zQuery);
     rc = sqlite3_exec(p->db, zQ2, dump_callback, p, pzErrMsg);
     free(zQ2);
   }
@@ -854,6 +912,9 @@ static char zHelp[] =
   ".help                  Show this message\n"
   ".import FILE TABLE     Import data from FILE into TABLE\n"
   ".indices TABLE         Show names of all indices on TABLE\n"
+#ifdef SQLITE_ENABLE_IOTRACE
+  ".iotrace FILE          Enable I/O diagnostic logging to FILE\n"
+#endif
 #ifndef SQLITE_OMIT_LOAD_EXTENSION
   ".load FILE ?ENTRY?     Load an extension library\n"
 #endif
@@ -877,6 +938,9 @@ static char zHelp[] =
   ".show                  Show the current values for various settings\n"
   ".tables ?PATTERN?      List names of tables matching a LIKE pattern\n"
   ".timeout MS            Try opening locked tables for MS milliseconds\n"
+#if HAS_TIMER
+  ".timer ON|OFF          Turn the CPU timer measurement on or off\n"
+#endif
   ".width NUM NUM ...     Set column widths for \"column\" mode\n"
 ;
 
@@ -1086,14 +1150,17 @@ static int do_meta_command(char *zLine, struct callback_data *p){
       ** did an .explain followed by a .width, .mode or .header
       ** command.
       */
-      p->mode = MODE_Column;
+      p->mode = MODE_Explain;
       p->showHeader = 1;
       memset(p->colWidth,0,ArraySize(p->colWidth));
-      p->colWidth[0] = 4;
-      p->colWidth[1] = 14;
-      p->colWidth[2] = 10;
-      p->colWidth[3] = 10;
-      p->colWidth[4] = 33;
+      p->colWidth[0] = 4;                  /* addr */
+      p->colWidth[1] = 13;                 /* opcode */
+      p->colWidth[2] = 4;                  /* P1 */
+      p->colWidth[3] = 4;                  /* P2 */
+      p->colWidth[4] = 4;                  /* P3 */
+      p->colWidth[5] = 13;                 /* P4 */
+      p->colWidth[6] = 2;                  /* P5 */
+      p->colWidth[7] = 13;                  /* Comment */
     }else if (p->explainPrev.valid) {
       p->explainPrev.valid = 0;
       p->mode = p->explainPrev.mode;
@@ -1242,6 +1309,7 @@ static int do_meta_command(char *zLine, struct callback_data *p){
     }
   }else
 
+#ifdef SQLITE_ENABLE_IOTRACE
   if( c=='i' && strncmp(azArg[0], "iotrace", n)==0 ){
     extern void (*sqlite3_io_trace)(const char*, ...);
     if( iotrace && iotrace!=stdout ) fclose(iotrace);
@@ -1261,6 +1329,7 @@ static int do_meta_command(char *zLine, struct callback_data *p){
       }
     }
   }else
+#endif
 
 #ifndef SQLITE_OMIT_LOAD_EXTENSION
   if( c=='l' && strncmp(azArg[0], "load", n)==0 && nArg>=2 ){
@@ -1297,10 +1366,10 @@ static int do_meta_command(char *zLine, struct callback_data *p){
       p->mode = MODE_Tcl;
     }else if( strncmp(azArg[1],"csv",n2)==0 ){
       p->mode = MODE_Csv;
-      strcpy(p->separator, ",");
+      sqlite3_snprintf(sizeof(p->separator), p->separator, ",");
     }else if( strncmp(azArg[1],"tabs",n2)==0 ){
       p->mode = MODE_List;
-      strcpy(p->separator, "\t");
+      sqlite3_snprintf(sizeof(p->separator), p->separator, "\t");
     }else if( strncmp(azArg[1],"insert",n2)==0 ){
       p->mode = MODE_Insert;
       if( nArg>=3 ){
@@ -1315,7 +1384,8 @@ static int do_meta_command(char *zLine, struct callback_data *p){
   }else
 
   if( c=='n' && strncmp(azArg[0], "nullvalue", n)==0 && nArg==2 ) {
-    sprintf(p->nullvalue, "%.*s", (int)ArraySize(p->nullvalue)-1, azArg[1]);
+    sqlite3_snprintf(sizeof(p->nullvalue), p->nullvalue,
+                     "%.*s", (int)ArraySize(p->nullvalue)-1, azArg[1]);
   }else
 
   if( c=='o' && strncmp(azArg[0], "output", n)==0 && nArg==2 ){
@@ -1324,14 +1394,14 @@ static int do_meta_command(char *zLine, struct callback_data *p){
     }
     if( strcmp(azArg[1],"stdout")==0 ){
       p->out = stdout;
-      strcpy(p->outfile,"stdout");
+      sqlite3_snprintf(sizeof(p->outfile), p->outfile, "stdout");
     }else{
       p->out = fopen(azArg[1], "wb");
       if( p->out==0 ){
         fprintf(stderr,"can't write to \"%s\"\n", azArg[1]);
         p->out = stdout;
       } else {
-         strcpy(p->outfile,azArg[1]);
+         sqlite3_snprintf(sizeof(p->outfile), p->outfile, "%s", azArg[1]);
       }
     }
   }else
@@ -1423,7 +1493,8 @@ static int do_meta_command(char *zLine, struct callback_data *p){
   }else
 
   if( c=='s' && strncmp(azArg[0], "separator", n)==0 && nArg==2 ){
-    sprintf(p->separator, "%.*s", (int)ArraySize(p->separator)-1, azArg[1]);
+    sqlite3_snprintf(sizeof(p->separator), p->separator,
+                     "%.*s", (int)sizeof(p->separator)-1, azArg[1]);
   }else
 
   if( c=='s' && strncmp(azArg[0], "show", n)==0){
@@ -1504,10 +1575,16 @@ static int do_meta_command(char *zLine, struct callback_data *p){
     sqlite3_free_table(azResult);
   }else
 
-  if( c=='t' && n>1 && strncmp(azArg[0], "timeout", n)==0 && nArg>=2 ){
+  if( c=='t' && n>4 && strncmp(azArg[0], "timeout", n)==0 && nArg>=2 ){
     open_db(p);
     sqlite3_busy_timeout(p->db, atoi(azArg[1]));
   }else
+  
+#if HAS_TIMER  
+  if( c=='t' && n>=5 && strncmp(azArg[0], "timer", n)==0 && nArg>1 ){
+    enableTimer = booleanValue(azArg[1]);
+  }else
+#endif
 
   if( c=='w' && strncmp(azArg[0], "width", n)==0 ){
     int j;
@@ -1516,6 +1593,7 @@ static int do_meta_command(char *zLine, struct callback_data *p){
       p->colWidth[j-1] = atoi(azArg[j]);
     }
   }else
+
 
   {
     fprintf(stderr, "unknown command or invalid arguments: "
@@ -1526,12 +1604,13 @@ static int do_meta_command(char *zLine, struct callback_data *p){
 }
 
 /*
-** Return TRUE if the last non-whitespace character in z[] is a semicolon.
-** z[] is N characters long.
+** Return TRUE if a semicolon occurs anywhere in the first N characters
+** of string z[].
 */
-static int _ends_with_semicolon(const char *z, int N){
-  while( N>0 && isspace((unsigned char)z[N-1]) ){ N--; }
-  return N>0 && z[N-1]==';';
+static int _contains_semicolon(const char *z, int N){
+  int i;
+  for(i=0; i<N; i++){  if( z[i]==';' ) return 1; }
+  return 0;
 }
 
 /*
@@ -1583,9 +1662,10 @@ static int _is_command_terminator(const char *zLine){
 ** Return the number of errors.
 */
 static int process_input(struct callback_data *p, FILE *in){
-  char *zLine;
+  char *zLine = 0;
   char *zSql = 0;
   int nSql = 0;
+  int nSqlPrior = 0;
   char *zErrMsg;
   int rc;
   int errCnt = 0;
@@ -1594,6 +1674,7 @@ static int process_input(struct callback_data *p, FILE *in){
 
   while( errCnt==0 || !bail_on_error || (in==0 && stdin_is_interactive) ){
     fflush(p->out);
+    free(zLine);
     zLine = one_input_line(zSql, in);
     if( zLine==0 ){
       break;  /* We have reached EOF */
@@ -1607,7 +1688,6 @@ static int process_input(struct callback_data *p, FILE *in){
     if( (zSql==0 || zSql[0]==0) && _all_whitespace(zLine) ) continue;
     if( zLine && zLine[0]=='.' && nSql==0 ){
       rc = do_meta_command(zLine, p);
-      free(zLine);
       if( rc==2 ){
         break;
       }else if( rc ){
@@ -1616,8 +1696,9 @@ static int process_input(struct callback_data *p, FILE *in){
       continue;
     }
     if( _is_command_terminator(zLine) ){
-      strcpy(zLine,";");
+      memcpy(zLine,";",2);
     }
+    nSqlPrior = nSql;
     if( zSql==0 ){
       int i;
       for(i=0; zLine[i] && isspace((unsigned char)zLine[i]); i++){}
@@ -1628,7 +1709,7 @@ static int process_input(struct callback_data *p, FILE *in){
           fprintf(stderr, "out of memory\n");
           exit(1);
         }
-        strcpy(zSql, zLine);
+        memcpy(zSql, zLine, nSql+1);
         startline = lineno;
       }
     }else{
@@ -1638,21 +1719,24 @@ static int process_input(struct callback_data *p, FILE *in){
         fprintf(stderr,"%s: out of memory!\n", Argv0);
         exit(1);
       }
-      strcpy(&zSql[nSql++], "\n");
-      strcpy(&zSql[nSql], zLine);
+      zSql[nSql++] = '\n';
+      memcpy(&zSql[nSql], zLine, len+1);
       nSql += len;
     }
-    free(zLine);
-    if( zSql && _ends_with_semicolon(zSql, nSql) && sqlite3_complete(zSql) ){
+    if( zSql && _contains_semicolon(&zSql[nSqlPrior], nSql-nSqlPrior)
+                && sqlite3_complete(zSql) ){
       p->cnt = 0;
       open_db(p);
+      BEGIN_TIMER;
       rc = sqlite3_exec(p->db, zSql, callback, p, &zErrMsg);
+      END_TIMER;
       if( rc || zErrMsg ){
         char zPrefix[100];
         if( in!=0 || !stdin_is_interactive ){
-          sprintf(zPrefix, "SQL error near line %d:", startline);
+          sqlite3_snprintf(sizeof(zPrefix), zPrefix, 
+                           "SQL error near line %d:", startline);
         }else{
-          sprintf(zPrefix, "SQL error:");
+          sqlite3_snprintf(sizeof(zPrefix), zPrefix, "SQL error:");
         }
         if( zErrMsg!=0 ){
           printf("%s %s\n", zPrefix, zErrMsg);
@@ -1672,6 +1756,7 @@ static int process_input(struct callback_data *p, FILE *in){
     if( !_all_whitespace(zSql) ) printf("Incomplete SQL: %s\n", zSql);
     free(zSql);
   }
+  free(zLine);
   return errCnt;
 }
 
@@ -1684,7 +1769,7 @@ static int process_input(struct callback_data *p, FILE *in){
 static char *find_home_dir(void){
   char *home_dir = NULL;
 
-#if !defined(_WIN32) && !defined(WIN32) && !defined(__MACOS__) && !defined(__OS2__)
+#if !defined(_WIN32) && !defined(WIN32) && !defined(__OS2__) && !defined(_WIN32_WCE)
   struct passwd *pwent;
   uid_t uid = getuid();
   if( (pwent=getpwuid(uid)) != NULL) {
@@ -1692,10 +1777,11 @@ static char *find_home_dir(void){
   }
 #endif
 
-#ifdef __MACOS__
-  char home_path[_MAX_PATH+1];
-  home_dir = getcwd(home_path, _MAX_PATH);
-#endif
+#if defined(_WIN32_WCE)
+  /* Windows CE (arm-wince-mingw32ce-gcc) does not provide getenv()
+   */
+  home_dir = strdup("/");
+#else
 
 #if defined(_WIN32) || defined(WIN32) || defined(__OS2__)
   if (!home_dir) {
@@ -1724,9 +1810,12 @@ static char *find_home_dir(void){
   }
 #endif
 
+#endif /* !_WIN32_WCE */
+
   if( home_dir ){
-    char *z = malloc( strlen(home_dir)+1 );
-    if( z ) strcpy(z, home_dir);
+    int n = strlen(home_dir) + 1;
+    char *z = malloc( n );
+    if( z ) memcpy(z, home_dir, n);
     home_dir = z;
   }
 
@@ -1745,6 +1834,7 @@ static void process_sqliterc(
   const char *sqliterc = sqliterc_override;
   char *zBuf = 0;
   FILE *in = NULL;
+  int nBuf;
 
   if (sqliterc == NULL) {
     home_dir = find_home_dir();
@@ -1752,19 +1842,20 @@ static void process_sqliterc(
       fprintf(stderr,"%s: cannot locate your home directory!\n", Argv0);
       return;
     }
-    zBuf = malloc(strlen(home_dir) + 15);
+    nBuf = strlen(home_dir) + 16;
+    zBuf = malloc( nBuf );
     if( zBuf==0 ){
       fprintf(stderr,"%s: out of memory!\n", Argv0);
       exit(1);
     }
-    sprintf(zBuf,"%s/.sqliterc",home_dir);
+    sqlite3_snprintf(nBuf, zBuf,"%s/.sqliterc",home_dir);
     free(home_dir);
     sqliterc = (const char*)zBuf;
   }
   in = fopen(sqliterc,"rb");
   if( in ){
     if( stdin_is_interactive ){
-      printf("Loading resources from %s\n",sqliterc);
+      printf("-- Loading resources from %s\n",sqliterc);
     }
     process_input(p,in);
     fclose(in);
@@ -1811,10 +1902,10 @@ static void usage(int showDetail){
 static void main_init(struct callback_data *data) {
   memset(data, 0, sizeof(*data));
   data->mode = MODE_List;
-  strcpy(data->separator,"|");
+  memcpy(data->separator,"|", 2);
   data->showHeader = 0;
-  strcpy(mainPrompt,"sqlite> ");
-  strcpy(continuePrompt,"   ...> ");
+  sqlite3_snprintf(sizeof(mainPrompt), mainPrompt,"sqlite> ");
+  sqlite3_snprintf(sizeof(continuePrompt), continuePrompt,"   ...> ");
 }
 
 int main(int argc, char **argv){
@@ -1824,10 +1915,6 @@ int main(int argc, char **argv){
   char *zFirstCmd = 0;
   int i;
   int rc = 0;
-
-#ifdef __MACOS__
-  argc = ccommand(&argv);
-#endif
 
   Argv0 = argv[0];
   main_init(&data);
@@ -1912,13 +1999,15 @@ int main(int argc, char **argv){
       data.mode = MODE_Column;
     }else if( strcmp(z,"-csv")==0 ){
       data.mode = MODE_Csv;
-      strcpy(data.separator,",");
+      memcpy(data.separator,",",2);
     }else if( strcmp(z,"-separator")==0 ){
       i++;
-      sprintf(data.separator,"%.*s",(int)sizeof(data.separator)-1,argv[i]);
+      sqlite3_snprintf(sizeof(data.separator), data.separator,
+                       "%.*s",(int)sizeof(data.separator)-1,argv[i]);
     }else if( strcmp(z,"-nullvalue")==0 ){
       i++;
-      sprintf(data.nullvalue,"%.*s",(int)sizeof(data.nullvalue)-1,argv[i]);
+      sqlite3_snprintf(sizeof(data.nullvalue), data.nullvalue,
+                       "%.*s",(int)sizeof(data.nullvalue)-1,argv[i]);
     }else if( strcmp(z,"-header")==0 ){
       data.showHeader = 1;
     }else if( strcmp(z,"-noheader")==0 ){
@@ -1964,14 +2053,15 @@ int main(int argc, char **argv){
     if( stdin_is_interactive ){
       char *zHome;
       char *zHistory = 0;
+      int nHistory;
       printf(
         "SQLite version %s\n"
         "Enter \".help\" for instructions\n",
         sqlite3_libversion()
       );
       zHome = find_home_dir();
-      if( zHome && (zHistory = malloc(strlen(zHome)+20))!=0 ){
-        sprintf(zHistory,"%s/.sqlite_history", zHome);
+      if( zHome && (zHistory = malloc(nHistory = strlen(zHome)+20))!=0 ){
+        sqlite3_snprintf(nHistory, zHistory,"%s/.sqlite_history", zHome);
       }
 #if defined(HAVE_READLINE) && HAVE_READLINE==1
       if( zHistory ) read_history(zHistory);
