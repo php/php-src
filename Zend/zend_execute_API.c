@@ -1982,7 +1982,7 @@ ZEND_API int zend_u_delete_global_variable(zend_uchar type, zstr name, int name_
 				for (i = 0; i < ex->op_array->last_var; i++) {
 					if (ex->op_array->vars[i].hash_value == hash_value &&
 						ex->op_array->vars[i].name_len == name_len &&
-						!memcmp(ex->op_array->vars[i].name.v, name.v, type == IS_UNICODE ? UBYTES(name_len) : name_len)
+						!memcmp(ex->op_array->vars[i].name.v, name.v, USTR_BYTES(type, name_len))
 					) {
 						ex->CVs[i] = NULL;
 						break;

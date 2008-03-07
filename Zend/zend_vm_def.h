@@ -3299,7 +3299,7 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, ANY)
 					for (i = 0; i < ex->op_array->last_var; i++) {
 						if (ex->op_array->vars[i].hash_value == hash_value &&
 						    ex->op_array->vars[i].name_len == Z_UNILEN_P(varname) &&
-						    !memcmp(ex->op_array->vars[i].name.v, Z_UNIVAL_P(varname).v, Z_TYPE_P(varname)==IS_UNICODE?UBYTES(Z_UNILEN_P(varname)):Z_UNILEN_P(varname))) {
+						    !memcmp(ex->op_array->vars[i].name.v, Z_UNIVAL_P(varname).v, USTR_BYTES(Z_TYPE_P(varname), Z_UNILEN_P(varname)))) {
 							ex->CVs[i] = NULL;
 							break;
 						}
@@ -3381,7 +3381,7 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 									for (i = 0; i < ex->op_array->last_var; i++) {
 										if (ex->op_array->vars[i].hash_value == hash_value &&
 										    ex->op_array->vars[i].name_len == offset_len &&
-										    !memcmp(ex->op_array->vars[i].name.v, offset_key.v, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
+										    !memcmp(ex->op_array->vars[i].name.v, offset_key.v, USTR_BYTES(Z_TYPE_P(offset), offset_len))) {
 											ex->CVs[i] = NULL;
 											break;
 										}

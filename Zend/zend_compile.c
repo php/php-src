@@ -285,7 +285,7 @@ static int lookup_cv(zend_op_array *op_array, zend_uchar type, zstr name, int na
 	while (i < op_array->last_var) {
 		if (op_array->vars[i].hash_value == hash_value &&
 		    op_array->vars[i].name_len == name_len &&
-		    !memcmp(op_array->vars[i].name.v, name.v, type==IS_UNICODE?UBYTES(name_len):name_len)) {
+		    !memcmp(op_array->vars[i].name.v, name.v, USTR_BYTES(type, name_len))) {
 		  efree(name.v);
 		  return i;
 		}
