@@ -44,6 +44,7 @@ var_dump( feof($fp, "handle"));
 fclose($fp);
 
 /* test invalid arguments : non-resources */
+chdir(dirname(__FILE__));
 echo "-- Testing fopen(), fclose() & feof() with invalid arguments --\n";
 $invalid_args = array (
   "string",
