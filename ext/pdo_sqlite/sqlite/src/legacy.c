@@ -18,7 +18,6 @@
 */
 
 #include "sqliteInt.h"
-#include "os.h"
 #include <ctype.h>
 
 /*
@@ -47,6 +46,8 @@ int sqlite3_exec(
   int nCallback;
 
   if( zSql==0 ) return SQLITE_OK;
+
+  sqlite3_mutex_enter(db->mutex);
   while( (rc==SQLITE_OK || (rc==SQLITE_SCHEMA && (++nRetry)<2)) && zSql[0] ){
     int nCol;
     char **azVals = 0;
@@ -66,7 +67,7 @@ int sqlite3_exec(
     nCallback = 0;
 
     nCol = sqlite3_column_count(pStmt);
-    azCols = sqliteMalloc(2*nCol*sizeof(const char *) + 1);
+    azCols = sqlite3DbMallocZero(db, 2*nCol*sizeof(const char *) + 1);
     if( azCols==0 ){
       goto exec_out;
     }
@@ -108,24 +109,26 @@ int sqlite3_exec(
       }
     }
 
-    sqliteFree(azCols);
+    sqlite3_free(azCols);
     azCols = 0;
   }
 
 exec_out:
   if( pStmt ) sqlite3_finalize(pStmt);
-  if( azCols ) sqliteFree(azCols);
+  if( azCols ) sqlite3_free(azCols);
 
-  rc = sqlite3ApiExit(0, rc);
+  rc = sqlite3ApiExit(db, rc);
   if( rc!=SQLITE_OK && rc==sqlite3_errcode(db) && pzErrMsg ){
-    *pzErrMsg = sqlite3_malloc(1+strlen(sqlite3_errmsg(db)));
+    int nErrMsg = 1 + strlen(sqlite3_errmsg(db));
+    *pzErrMsg = sqlite3_malloc(nErrMsg);
     if( *pzErrMsg ){
-      strcpy(*pzErrMsg, sqlite3_errmsg(db));
+      memcpy(*pzErrMsg, sqlite3_errmsg(db), nErrMsg);
     }
   }else if( pzErrMsg ){
     *pzErrMsg = 0;
   }
 
   assert( (rc&db->errMask)==rc );
+  sqlite3_mutex_leave(db->mutex);
   return rc;
 }

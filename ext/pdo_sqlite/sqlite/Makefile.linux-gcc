@@ -104,6 +104,10 @@ LIBTCL = /home/drh/tcltk/8.4linux/libtcl8.4g.a -lm -ldl
 #LIBTCL = /home/drh/tcltk/8.4win/libtcl84s.a -lmsvcrt
 #LIBTCL = /home/drh/tcltk/8.3hpux/libtcl8.3.a -ldld -lm -lc
 
+#### Additional objects for SQLite library when TCL support is enabled.
+#TCLOBJ =
+TCLOBJ = tclsqlite.o
+
 #### Compiler options needed for programs that use the readline() library.
 #
 READLINE_FLAGS =
@@ -113,12 +117,6 @@ READLINE_FLAGS =
 #
 LIBREADLINE =
 #LIBREADLINE = -static -lreadline -ltermcap
-
-#### Should the database engine assume text is coded as UTF-8 or iso8859?
-#
-# ENCODING  = UTF8
-ENCODING = ISO8859
-
 
 #### Which "awk" program provides nawk compatibilty
 #

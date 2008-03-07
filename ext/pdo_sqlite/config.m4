@@ -81,7 +81,10 @@ if test "$PHP_PDO_SQLITE" != "no"; then
       sqlite/src/trigger.c sqlite/src/update.c sqlite/src/utf.c sqlite/src/util.c \
       sqlite/src/vacuum.c sqlite/src/vdbeapi.c sqlite/src/vdbeaux.c sqlite/src/vdbe.c \
       sqlite/src/vdbemem.c sqlite/src/where.c sqlite/src/parse.c sqlite/src/opcodes.c \
-      sqlite/src/alter.c sqlite/src/vdbefifo.c sqlite/src/vtab.c sqlite/src/loadext.c"
+      sqlite/src/alter.c sqlite/src/vdbefifo.c sqlite/src/vtab.c sqlite/src/loadext.c \
+      sqlite/src/btmutex.c sqlite/src/fault.c sqlite/src/journal.c \
+      sqlite/src/malloc.c sqlite/src/mem1.c sqlite/src/mutex.c sqlite/src/mutex_unix.c \
+      sqlite/src/mutex_w32.c sqlite/src/vdbeblob.c"
 
       if test "$enable_maintainer_zts" = "yes"; then
         threadsafe_flag="-DTHREADSAFE=1"
@@ -121,7 +124,7 @@ EOF
       AC_CHECK_FUNCS(usleep nanosleep)
       AC_CHECK_HEADERS(time.h)
   fi
-      
+
   dnl Solaris fix
   PHP_CHECK_LIBRARY(rt, fdatasync, [PHP_ADD_LIBRARY(rt,, PDO_SQLITE_SHARED_LIBADD)])
 

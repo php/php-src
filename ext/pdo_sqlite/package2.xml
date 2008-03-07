@@ -11,7 +11,7 @@ SQLite V3 is NOT compatible with the bundled SQLite 2 in PHP 5, but is a signifi
 step forwards, featuring complete utf-8 support, native support for blobs,
 native support for prepared statements with bound parameters and improved
 concurrency.
- 
+
  </description>
  <lead>
   <name>Wez Furlong</name>
@@ -37,7 +37,7 @@ concurrency.
 - Fixed PECL Bug #3452; problem when first row of a result set contains a NULL value.
 - Upgraded bundled sqlite to 3.1.3
 - setting PDO_ATTR_TIMEOUT controls the busy timeout
-- Fixed PECL Bug #3391; cannot bind NULL parameters	
+- Fixed PECL Bug #3391; cannot bind NULL parameters
 - Fixed build problem when building the bundled sqlite library
 
 Windows binary:
@@ -115,6 +115,20 @@ http://pecl4win.php.net/ext.php/php_pdo_sqlite.dll
      <file name="loadext.c" role="src" />
      <file name="complete.c" role="src" />
      <file name="sqlite3ext.h" role="src" />
+     <file name="btmutex.c" role="src" />
+     <file name="btreeInt.h" role="src" />
+     <file name="experimental.c" role="src" />
+     <file name="fault.c" role="src" />
+     <file name="journal.c" role="src" />
+     <file name="limits.h" role="src" />
+     <file name="malloc.c" role="src" />
+     <file name="mem1.c" role="src" />
+     <file name="mutex.c" role="src" />
+     <file name="mutex.h" role="src" />
+     <file name="mutex_unix.c" role="src" />
+     <file name="mutex_w32.c" role="src" />
+     <file name="sqliteLimit.h" role="src" />
+     <file name="vdbeblob.c" role="src" />
     </dir> <!-- //sqlite/src -->
     <dir name="tool">
      <file name="diffdb.c" role="src" />

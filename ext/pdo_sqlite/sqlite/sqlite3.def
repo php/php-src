@@ -40,6 +40,7 @@ sqlite3_create_function
 sqlite3_create_function16
 sqlite3_data_count
 sqlite3_db_handle
+sqlite3_enable_load_extension
 sqlite3_enable_shared_cache
 sqlite3_errcode
 sqlite3_errmsg
@@ -57,12 +58,15 @@ sqlite3_interrupt
 sqlite3_last_insert_rowid
 sqlite3_libversion
 sqlite3_libversion_number
+sqlite3_load_extension
+sqlite3_malloc
 sqlite3_mprintf
 sqlite3_open
 sqlite3_open16
 sqlite3_prepare
 sqlite3_prepare16
 sqlite3_progress_handler
+sqlite3_realloc
 sqlite3_reset
 sqlite3_result_blob
 sqlite3_result_double

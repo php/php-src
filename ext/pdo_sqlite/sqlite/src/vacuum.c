@@ -18,7 +18,6 @@
 */
 #include "sqliteInt.h"
 #include "vdbeInt.h"
-#include "os.h"
 
 #if !defined(SQLITE_OMIT_VACUUM) && !defined(SQLITE_OMIT_ATTACH)
 /*
@@ -26,6 +25,9 @@
 */
 static int execSql(sqlite3 *db, const char *zSql){
   sqlite3_stmt *pStmt;
+  if( !zSql ){
+    return SQLITE_NOMEM;
+  }
   if( SQLITE_OK!=sqlite3_prepare(db, zSql, -1, &pStmt, 0) ){
     return sqlite3_errcode(db);
   }
@@ -68,7 +70,7 @@ static int execExecSql(sqlite3 *db, const char *zSql){
 void sqlite3Vacuum(Parse *pParse){
   Vdbe *v = sqlite3GetVdbe(pParse);
   if( v ){
-    sqlite3VdbeAddOp(v, OP_Vacuum, 0, 0);
+    sqlite3VdbeAddOp2(v, OP_Vacuum, 0, 0);
   }
   return;
 }
@@ -112,7 +114,7 @@ int sqlite3RunVacuum(char **pzErrMsg, sqlite3 *db){
   pTemp = db->aDb[db->nDb-1].pBt;
   sqlite3BtreeSetPageSize(pTemp, sqlite3BtreeGetPageSize(pMain),
      sqlite3BtreeGetReserve(pMain));
-  if( sqlite3MallocFailed() ){
+  if( db->mallocFailed ){
     rc = SQLITE_NOMEM;
     goto end_of_vacuum;
   }
@@ -123,7 +125,8 @@ int sqlite3RunVacuum(char **pzErrMsg, sqlite3 *db){
   }
 
 #ifndef SQLITE_OMIT_AUTOVACUUM
-  sqlite3BtreeSetAutoVacuum(pTemp, sqlite3BtreeGetAutoVacuum(pMain));
+  sqlite3BtreeSetAutoVacuum(pTemp, db->nextAutovac>=0 ? db->nextAutovac :
+                                           sqlite3BtreeGetAutoVacuum(pMain));
 #endif
 
   /* Begin a transaction */
@@ -134,17 +137,17 @@ int sqlite3RunVacuum(char **pzErrMsg, sqlite3 *db){
   ** in the temporary database.
   */
   rc = execExecSql(db, 
-      "SELECT 'CREATE TABLE vacuum_db.' || substr(sql,14,100000000) "
+      "SELECT 'CREATE TABLE vacuum_db.' || substr(sql,14) "
       "  FROM sqlite_master WHERE type='table' AND name!='sqlite_sequence'"
       "   AND rootpage>0"
   );
   if( rc!=SQLITE_OK ) goto end_of_vacuum;
   rc = execExecSql(db, 
-      "SELECT 'CREATE INDEX vacuum_db.' || substr(sql,14,100000000)"
+      "SELECT 'CREATE INDEX vacuum_db.' || substr(sql,14)"
       "  FROM sqlite_master WHERE sql LIKE 'CREATE INDEX %' ");
   if( rc!=SQLITE_OK ) goto end_of_vacuum;
   rc = execExecSql(db, 
-      "SELECT 'CREATE UNIQUE INDEX vacuum_db.' || substr(sql,21,100000000) "
+      "SELECT 'CREATE UNIQUE INDEX vacuum_db.' || substr(sql,21) "
       "  FROM sqlite_master WHERE sql LIKE 'CREATE UNIQUE INDEX %'");
   if( rc!=SQLITE_OK ) goto end_of_vacuum;
 
@@ -248,9 +251,7 @@ end_of_vacuum:
   db->autoCommit = 1;
 
   if( pDb ){
-    sqlite3MallocDisallow();
     sqlite3BtreeClose(pDb->pBt);
-    sqlite3MallocAllow();
     pDb->pBt = 0;
     pDb->pSchema = 0;
   }

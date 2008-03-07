@@ -11,7 +11,7 @@ cd tsrc
 rm shell.c
 TCLDIR=/home/drh/tcltk/846/linux/846linux
 TCLSTUBLIB=$TCLDIR/libtclstub8.4g.a
-OPTS='-DUSE_TCL_STUBS=1 -DNDEBUG=1'
+OPTS='-DUSE_TCL_STUBS=1 -DNDEBUG=1 -DHAVE_DLOPEN=1'
 for i in *.c; do
   if test $i != 'keywordhash.c'; then
     CMD="cc -fPIC $OPTS -O2 -I. -I$TCLDIR -c $i"

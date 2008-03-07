@@ -366,9 +366,9 @@ static void md5step(sqlite3_context *context, int argc, sqlite3_value **argv){
     MD5Init(p);
   }
   for(i=0; i<argc; i++){
-    const char *zData = sqlite3_value_text(argv[i]);
+    const char *zData = (char*)sqlite3_value_text(argv[i]);
     if( zData ){
-      MD5Update(p, zData, strlen(zData));
+      MD5Update(p, (unsigned char*)zData, strlen(zData));
     }
   }
 }

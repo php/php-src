@@ -20,32 +20,6 @@
 #define _PAGER_H_
 
 /*
-** The default size of a database page.
-*/
-#ifndef SQLITE_DEFAULT_PAGE_SIZE
-# define SQLITE_DEFAULT_PAGE_SIZE 1024
-#endif
-
-/* Maximum page size.  The upper bound on this value is 32768.  This a limit
-** imposed by necessity of storing the value in a 2-byte unsigned integer
-** and the fact that the page size must be a power of 2.
-**
-** This value is used to initialize certain arrays on the stack at
-** various places in the code.  On embedded machines where stack space
-** is limited and the flexibility of having large pages is not needed,
-** it makes good sense to reduce the maximum page size to something more
-** reasonable, like 1024.
-*/
-#ifndef SQLITE_MAX_PAGE_SIZE
-# define SQLITE_MAX_PAGE_SIZE 32768
-#endif
-
-/*
-** Maximum number of pages in one database.
-*/
-#define SQLITE_MAX_PAGE 1073741823
-
-/*
 ** The type used to represent a page number.  The first page in a file
 ** is called page 1.  0 is used to represent "not a page".
 */
@@ -80,12 +54,12 @@ typedef struct PgHdr DbPage;
 ** See source code comments for a detailed description of the following
 ** routines:
 */
-int sqlite3PagerOpen(Pager **ppPager, const char *zFilename,
-                     int nExtra, int flags);
+int sqlite3PagerOpen(sqlite3_vfs *, Pager **ppPager, const char*, int,int,int);
 void sqlite3PagerSetBusyhandler(Pager*, BusyHandler *pBusyHandler);
 void sqlite3PagerSetDestructor(Pager*, void(*)(DbPage*,int));
 void sqlite3PagerSetReiniter(Pager*, void(*)(DbPage*,int));
-int sqlite3PagerSetPagesize(Pager*, int);
+int sqlite3PagerSetPagesize(Pager*, u16*);
+int sqlite3PagerMaxPageCount(Pager*, int);
 int sqlite3PagerReadFileheader(Pager*, int, unsigned char*);
 void sqlite3PagerSetCachesize(Pager*, int);
 int sqlite3PagerClose(Pager *pPager);
@@ -94,9 +68,7 @@ int sqlite3PagerAcquire(Pager *pPager, Pgno pgno, DbPage **ppPage, int clrFlag);
 DbPage *sqlite3PagerLookup(Pager *pPager, Pgno pgno);
 int sqlite3PagerRef(DbPage*);
 int sqlite3PagerUnref(DbPage*);
-Pgno sqlite3PagerPagenumber(DbPage*);
 int sqlite3PagerWrite(DbPage*);
-int sqlite3PagerIswriteable(DbPage*);
 int sqlite3PagerOverwrite(Pager *pPager, Pgno pgno, void*);
 int sqlite3PagerPagecount(Pager*);
 int sqlite3PagerTruncate(Pager*,Pgno);
@@ -111,29 +83,35 @@ int sqlite3PagerStmtRollback(Pager*);
 void sqlite3PagerDontRollback(DbPage*);
 void sqlite3PagerDontWrite(DbPage*);
 int sqlite3PagerRefcount(Pager*);
-int *sqlite3PagerStats(Pager*);
 void sqlite3PagerSetSafetyLevel(Pager*,int,int);
 const char *sqlite3PagerFilename(Pager*);
+const sqlite3_vfs *sqlite3PagerVfs(Pager*);
+sqlite3_file *sqlite3PagerFile(Pager*);
 const char *sqlite3PagerDirname(Pager*);
 const char *sqlite3PagerJournalname(Pager*);
 int sqlite3PagerNosync(Pager*);
-int sqlite3PagerRename(Pager*, const char *zNewName);
-void sqlite3PagerSetCodec(Pager*,void*(*)(void*,void*,Pgno,int),void*);
 int sqlite3PagerMovepage(Pager*,DbPage*,Pgno);
-int sqlite3PagerReset(Pager*);
-int sqlite3PagerReleaseMemory(int);
-
 void *sqlite3PagerGetData(DbPage *); 
 void *sqlite3PagerGetExtra(DbPage *); 
 int sqlite3PagerLockingMode(Pager *, int);
+void *sqlite3PagerTempSpace(Pager*);
 
-#if defined(SQLITE_DEBUG) || defined(SQLITE_TEST)
-int sqlite3PagerLockstate(Pager*);
+#if defined(SQLITE_ENABLE_MEMORY_MANAGEMENT) && !defined(SQLITE_OMIT_DISKIO)
+  int sqlite3PagerReleaseMemory(int);
+#endif
+
+#ifdef SQLITE_HAS_CODEC
+  void sqlite3PagerSetCodec(Pager*,void*(*)(void*,void*,Pgno,int),void*);
+#endif
+
+#if !defined(NDEBUG) || defined(SQLITE_TEST)
+  Pgno sqlite3PagerPagenumber(DbPage*);
+  int sqlite3PagerIswriteable(DbPage*);
 #endif
 
 #ifdef SQLITE_TEST
-void sqlite3PagerRefdump(Pager*);
-int pager3_refinfo_enable;
+  int *sqlite3PagerStats(Pager*);
+  void sqlite3PagerRefdump(Pager*);
 #endif
 
 #ifdef SQLITE_TEST
