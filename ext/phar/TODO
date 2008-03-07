@@ -89,14 +89,14 @@ Version 2.0.0
  X make convertToZip/convertToTar rename files [Steph]
  X make convertTo*() with full file compression rename to append .gz or .bz2
    [Steph]
- * don't automatically add a stub to .zip or .tar files
- * don't allow a stub or alias to be added to a .zip/.tar that does not have
-   ".phar" in the filename (or already have stub/alias)
+ X don't automatically add a stub to .zip or .tar files [Steph]
+ X don't allow a stub or alias to be added to a .zip/.tar that does not have
+   ".phar" in the filename (or already have stub/alias) [Steph]
  * allow read/write on .tar/.zip files that do not contain a stub or alias
  * prevent manual addition of stub via $a['.phar/stub.php'] = '<?php my stub';
  * investigate potential collision between SPL's DirectoryIterator flags and
    those in phar_archive_data
- * compression should work for non-phar archives
+ X compression should work for non-phar archives [Steph]
  X implement initial support for simple zip/tar archives (PharData) [Steph]
  X make createDefaultStub() setDefaultStub() and have it file format-specific
    [Steph]
