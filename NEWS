@@ -1,8 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.0
-- Add new error mode E_DEPRECATED that informs about stuff that gets dropped in
-  later PHP versions. (Lars Strojny, Felipe, Marcus)
+- Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
+
+- Added new error mode E_DEPRECATED which is used to inform about stuff to be
+  dropped in future PHP versions. (Lars Strojny, Felipe, Marcus)
 - Added and improved PHP syntax and semantics:
   . Added NOWDOC. (Gwynne Raskind, Stas, Dmitry)
   . Added "?:" operator. (Marcus)
@@ -15,7 +17,6 @@ PHP                                                                        NEWS
   . Added __DIR__ constant. (Lars Strojny)
   . Added PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION,
     PHP_EXTRA_VERSION, PHP_VERSION_ID, PHP_ZTS and PHP_DEBUG constants (Pierre)
-
 - Added new date/time functionality: (Derick)
   . date_parse_from_format(): Parse date/time strings according to a format.
   . date_create_from_format()/DateTime::createFromFormat(): Create a date/time
@@ -45,11 +46,10 @@ PHP                                                                        NEWS
   . Added FilesystemIterator. (Marcus)
   . Added GlobIterator. (Marcus)
   . Added SplHeap, SplMinHeap, SplMaxHeap, SplPriorityQueue classes. (Etienne)
-- Add the ReflectionProperty::setAccessible() method that allows non-public
+- Added ReflectionProperty::setAccessible() method that allows non-public
   property's values to be read through ::getValue(). (Derick)
 - Added ability to use Traversable objects instead of plain arrays in ext/soap.
   (Joshua Reese, Dmitry)
-- Added stream_supports_lock() function. (Benjamin Schulz)
 - Added msg_queue_exists() function. (Benjamin Schulz)
 - Added 3 Firebird specific attributes that can be set via PDO::setAttribute()
   to control formatting of date/timestamp columns: PDO::FB_ATTR_DATE_FORMAT,
@@ -74,8 +74,6 @@ PHP                                                                        NEWS
   Application Notification (FAN) support (Oracle Corp.)
 - Added OCI8 SQLT_AFC (aka CHAR datatype) support to oci_bind_by_name
   (Chris Jones)
-
-- Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
 
 - Improved PHP runtime speed and memory usage:
   . Added garbage collector. (David Wang, Dmitry).
@@ -108,6 +106,7 @@ PHP                                                                        NEWS
   . Added CGI SAPI -T option which can be used to measure execution
     time of script repeated several times. (Dmitry)
 - Improved streams:
+  . Added stream_supports_lock() function. (Benjamin Schulz)
   . Added "ignore_errors" option to http fopen wrapper. (David Zulke, Sara)
   . Added context parameter for copy() function. (Sara)
   . Added "glob" stream wrapper. (Marcus)
@@ -117,14 +116,15 @@ PHP                                                                        NEWS
   . Added support for OpenSSL digest functions
   . Added support for OpenSSL cipher functions
   . Added access to internal values of DSA, RSA and DH keys
-- Improved md5() implementation (Solar Designer, Dmitry)
-- Upgraded bundled sqlite to version 3.5.6 (Scott)
+- Improved md5() implementation. (Solar Designer, Dmitry)
+
+- Upgraded bundled sqlite to version 3.5.6. (Scott)
 
 - Fixed html_entity_decode() incorrectly converting numeric html entities
   to different characters with cp1251 and cp866. (Scott)
 - Fixed possible crash in ext/soap because of uninitialized value. (Zdash Urf)
-
 - Fixed PECL bug #12431 (OCI8 ping functionality is broken). (Oracle Corp.)
+
 - Fixed bug #43960 (strtotime() returns timestamp in the future when given a
   bogus string).
 - Fixed bug #43808 (date_create never fails (even when it should)). (Derick)
