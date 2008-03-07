@@ -152,6 +152,8 @@ PHP                                                                        NEWS
 - Fixed bug #42637 (SoapFault : Only http and https are allowed). (Bill Moran)
 - Fixed bug #42548 (mysqli PROCEDURE calls can't return result sets). (hartmut)
 - Fixed bug #42509 (gmp leaks memory when gmp_init() not used). (Stas)
+- Fixed bug #42443 (PDO SQLite driver binds integers and booleans as strings).
+  (Scott)
 - Fixed bug #42284 (duplicate of #39700). (Lars W)
 - Fixed bug #42190 (Constructing DateTime with TimeZone Indicator invalidates
   DateTimeZone). (Derick)
@@ -160,6 +162,8 @@ PHP                                                                        NEWS
 - Fixed bug #41599 (setTime() fails after modify() is used). (Derick)
 - Fixed bug #41522 (PDO firebird driver returns null if it fails to connect).
   (Lars W)
+- Fixed bug #41135 (PDO SQLite driver binds blobs as strings,
+  use sqlite3_bind_blob() to stop errors with null bytes). (Scott)
 - Fixed bug #41069 (OCI8: Seg fault with query over DB link) (Chris Jones)
 - Fixed bug #39822 (new PDO() doesn't work with firebird). (Lars W)
 - Fixed bug #39700 (NUMERIC error when result precision are 7,8 or 12-14 ).
