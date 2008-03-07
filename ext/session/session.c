@@ -82,6 +82,7 @@ static inline void php_rinit_session_globals(TSRMLS_D)
 	PS(id) = NULL;
 	PS(session_status) = php_session_none;
 	PS(mod_data) = NULL;
+	/* Do NOT init PS(mod_user_names) here! */
 	PS(http_session_vars) = NULL;
 }
 
@@ -92,6 +93,7 @@ static inline void php_rshutdown_session_globals(TSRMLS_D)
 		zval_ptr_dtor(&PS(http_session_vars));
 		PS(http_session_vars) = NULL;
 	}
+	/* Do NOT destroy PS(mod_user_names) here! */
 	if (PS(mod_data)) {
 		zend_try {
 			PS(mod)->s_close(&PS(mod_data) TSRMLS_CC);
@@ -1476,7 +1478,6 @@ static PHP_FUNCTION(session_set_save_handler)
 {
 	zval **args[6];
 	int i;
-	ps_user *mdata;
 	zval name;
 
 	if (PS(session_status) != php_session_none) {
@@ -1499,14 +1500,13 @@ static PHP_FUNCTION(session_set_save_handler)
 	
 	zend_alter_ini_entry("session.save_handler", sizeof("session.save_handler"), "user", sizeof("user")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 
-	mdata = emalloc(sizeof(*mdata));
-	
 	for (i = 0; i < 6; i++) {
+		if (PS(mod_user_names).names[i] != NULL) {
+			zval_ptr_dtor(&PS(mod_user_names).names[i]);
+		}
 		Z_ADDREF_P(*args[i]);
-		mdata->names[i] = *args[i];
+		PS(mod_user_names).names[i] = *args[i];
 	}
-
-	PS(mod_data) = (void *) mdata;
 	
 	RETURN_TRUE;
 }
@@ -1830,8 +1830,16 @@ static PHP_RINIT_FUNCTION(session)
 
 static PHP_RSHUTDOWN_FUNCTION(session)
 {
+	int i;
+	
 	php_session_flush(TSRMLS_C);
 	php_rshutdown_session_globals(TSRMLS_C);
+	/* this should NOT be done in php_rshutdown_session_globals() */
+	for (i = 0; i < 6; i++) {
+		if (PS(mod_user_names).names[i] != NULL) {
+			zval_ptr_dtor(&PS(mod_user_names).names[i]);
+		}
+	}
 
 	return SUCCESS;
 }
@@ -1839,12 +1847,17 @@ static PHP_RSHUTDOWN_FUNCTION(session)
 
 static PHP_GINIT_FUNCTION(ps)
 {
+	int i;
+	
 	ps_globals->save_path = NULL;
 	ps_globals->session_name = NULL;
 	ps_globals->id = NULL;
 	ps_globals->mod = NULL;
 	ps_globals->mod_data = NULL;
 	ps_globals->session_status = php_session_none;
+	for (i = 0; i < 6; i++) {
+		ps_globals->mod_user_names.names[i] = NULL;
+	}
 	ps_globals->http_session_vars = NULL;
 }
 

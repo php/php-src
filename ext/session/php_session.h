@@ -116,6 +116,17 @@ typedef struct _php_ps_globals {
 	long gc_maxlifetime;
 	int module_number;
 	long cache_expire;
+	union {
+		zval *names[6];
+		struct {
+			zval *ps_open;
+			zval *ps_close;
+			zval *ps_read;
+			zval *ps_write;
+			zval *ps_destroy;
+			zval *ps_gc;
+		} name;
+	} mod_user_names;
 	const struct ps_serializer_struct *serializer;
 	zval *http_session_vars;
 	zend_bool auto_start;
