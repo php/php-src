@@ -2039,8 +2039,8 @@ void zval_from_error_container(zval *z, timelib_error_container *error)
 */
 PHP_FUNCTION(date_get_last_errors)
 {
-	array_init(return_value);
 	if (DATEG(last_errors)) {
+		array_init(return_value);
 		zval_from_error_container(return_value, DATEG(last_errors));
 	} else {
 		RETURN_FALSE;
