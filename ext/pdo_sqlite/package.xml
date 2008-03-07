@@ -140,6 +140,20 @@
 <file role="src" name="vdbemem.c"/>
 <file role="src" name="where.c"/>
 <file role="src" name="sqlite3ext.h"/>
+<file name="btmutex.c" role="src" />
+<file name="btreeInt.h" role="src" />
+<file name="experimental.c" role="src" />
+<file name="fault.c" role="src" />
+<file name="journal.c" role="src" />
+<file name="limits.h" role="src" />
+<file name="malloc.c" role="src" />
+<file name="mem1.c" role="src" />
+<file name="mutex.c" role="src" />
+<file name="mutex.h" role="src" />
+<file name="mutex_unix.c" role="src" />
+<file name="mutex_w32.c" role="src" />
+<file name="sqliteLimit.h" role="src" />
+<file name="vdbeblob.c" role="src" />
 </dir>
 
 <dir name="tool">

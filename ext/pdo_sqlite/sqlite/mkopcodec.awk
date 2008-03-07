@@ -15,14 +15,17 @@ BEGIN {
   printf    " || !defined(NDEBUG)"
   printf    " || defined(VDBE_PROFILE)"
   print     " || defined(SQLITE_DEBUG)"
-  print "const char *const sqlite3OpcodeNames[] = { \"?\","
+  print "const char *sqlite3OpcodeName(int i){"
+  print " static const char *const azName[] = { \"?\","
 }
 /define OP_/ {
   sub("OP_","",$2)
   i++
-  printf " /* %3d */ \"%s\",\n", $3, $2
+  printf "     /* %3d */ \"%s\",\n", $3, $2
 }
 END {
-  print "};"
+  print "  };"
+  print "  return azName[i];"
+  print "}"
   print "#endif"
 }

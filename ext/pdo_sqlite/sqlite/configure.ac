@@ -45,18 +45,6 @@
 #        The filename extension for executables on the build
 #        platform.  "" for Unix and ".exe" for Windows.
 #
-#    TARGET_CC
-#
-#        The name of a command that runs on the build platform
-#        and converts C source files into *.o files for the
-#        target platform.  In other words, the cross-compiler.
-#
-#    TARGET_CFLAGS
-#
-#        Switches that the target compiler needs to turn C source files
-#        into *.o files.  Do not include TARGET_TCL_INC in this list.
-#        Makefiles might add additional switches such as "-I.".
-#
 #    TCL_*
 #
 #        Lots of values are read in from the tclConfig.sh script,
@@ -75,18 +63,6 @@
 #        This variables define the directory that contain header
 #        files for the readline library.  If the compiler is able 
 #        to find <readline.h> on its own, then this can be blank.
-#
-#    TARGET_LINK
-#
-#        The name of the linker that combines *.o files generated
-#        by TARGET_CC into executables for the target platform.
-#
-#    TARGET_LIBS
-#
-#        Additional libraries or other switch that the target linker needs
-#        to build an executable on the target.  Do not include
-#        on this list any libraries in TARGET_TCL_LIBS and
-#        TARGET_READLINE_LIBS, etc.
 #
 #    TARGET_EXEEXT
 #
@@ -184,113 +160,36 @@ fi
 # Locate a compiler for the build machine.  This compiler should
 # generate command-line programs that run on the build machine.
 #
-default_build_cflags="-g"
-if test "$config_BUILD_CC" = ""; then
-  AC_PROG_CC
-  if test "$cross_compiling" = "yes"; then
-    AC_MSG_ERROR([unable to find a compiler for building build tools])
-  fi
-  BUILD_CC=$CC
-  default_build_cflags=$CFLAGS
+if test x"$cross_compiling" = xno; then
+	BUILD_CC=$CC
+	BUILD_CFLAGS=$CFLAGS
 else
-  BUILD_CC=$config_BUILD_CC
-  AC_MSG_CHECKING([host compiler])
-  CC=$BUILD_CC
-  AC_MSG_RESULT($BUILD_CC)
-fi
-AC_MSG_CHECKING([switches for the host compiler])
-if test "$config_BUILD_CFLAGS" != ""; then
-  CFLAGS=$config_BUILD_CFLAGS
-  BUILD_CFLAGS=$config_BUILD_CFLAGS
-else
-  BUILD_CFLAGS=$default_build_cflags
-fi
-AC_MSG_RESULT($BUILD_CFLAGS)
-if test "$config_BUILD_LIBS" != ""; then
-  BUILD_LIBS=$config_BUILD_LIBS
+	if test "${BUILD_CC+set}" != set; then
+		AC_CHECK_PROGS(BUILD_CC, gcc cc cl)
+	fi
+	if test "${BUILD_CFLAGS+set}" != set; then
+		BUILD_CFLAGS="-g"
+	fi
 fi
 AC_SUBST(BUILD_CC)
 AC_SUBST(BUILD_CFLAGS)
-AC_SUBST(BUILD_LIBS)
-
-##########
-# Locate a compiler that converts C code into *.o files that run on
-# the target machine.
-#
-AC_MSG_CHECKING([target compiler])
-if test "$config_TARGET_CC" != ""; then
-  TARGET_CC=$config_TARGET_CC
-else
-  TARGET_CC=$BUILD_CC
-fi
-AC_MSG_RESULT($TARGET_CC)
-AC_MSG_CHECKING([switches on the target compiler])
-if test "$config_TARGET_CFLAGS" != ""; then
-  TARGET_CFLAGS=$config_TARGET_CFLAGS
-else
-  TARGET_CFLAGS=$BUILD_CFLAGS
-fi
-AC_MSG_RESULT($TARGET_CFLAGS)
-AC_MSG_CHECKING([target linker])
-if test "$config_TARGET_LINK" = ""; then
-  TARGET_LINK=$TARGET_CC
-else
-  TARGET_LINK=$config_TARGET_LINK
-fi
-AC_MSG_RESULT($TARGET_LINK)
-AC_MSG_CHECKING([switches on the target compiler])
-if test "$config_TARGET_TFLAGS" != ""; then
-  TARGET_TFLAGS=$config_TARGET_TFLAGS
-else
-  TARGET_TFLAGS=$BUILD_CFLAGS
-fi
-if test "$config_TARGET_RANLIB" != ""; then
-  TARGET_RANLIB=$config_TARGET_RANLIB
-else
-  AC_PROG_RANLIB
-  TARGET_RANLIB=$RANLIB
-fi
-if test "$config_TARGET_AR" != ""; then
-  TARGET_AR=$config_TARGET_AR
-else
-  TARGET_AR='ar cr'
-fi
-AC_MSG_RESULT($TARGET_TFLAGS)
-AC_SUBST(TARGET_CC)
-AC_SUBST(TARGET_CFLAGS)
-AC_SUBST(TARGET_LINK)
-AC_SUBST(TARGET_LFLAGS)
-AC_SUBST(TARGET_RANLIB)
-AC_SUBST(TARGET_AR)
-
-# Set the $cross variable if we are cross-compiling.  Make
-# it 0 if we are not.
-#
-AC_MSG_CHECKING([if host and target compilers are the same])
-if test "$BUILD_CC" = "$TARGET_CC"; then
-  cross=0
-  AC_MSG_RESULT(yes)
-else
-  cross=1
-  AC_MSG_RESULT(no)
-fi
 
 ##########
 # Do we want to support multithreaded use of sqlite
 #
 AC_ARG_ENABLE(threadsafe, 
-AC_HELP_STRING([--enable-threadsafe],[Support threadsafe operation]),,enable_threadsafe=no)
+AC_HELP_STRING([--enable-threadsafe],[Support threadsafe operation]),,enable_threadsafe=yes)
 AC_MSG_CHECKING([whether to support threadsafe operation])
 if test "$enable_threadsafe" = "no"; then
-  THREADSAFE=0
+  SQLITE_THREADSAFE=0
   AC_MSG_RESULT([no])
 else
-  THREADSAFE=1
+  SQLITE_THREADSAFE=1
   AC_MSG_RESULT([yes])
 fi
-AC_SUBST(THREADSAFE)
+AC_SUBST(SQLITE_THREADSAFE)
 
-if test "$THREADSAFE" = "1"; then
+if test "$SQLITE_THREADSAFE" = "1"; then
   LIBS=""
   AC_CHECK_LIB(pthread, pthread_create)
   TARGET_THREAD_LIB="$LIBS"
@@ -345,7 +244,7 @@ if test "$enable_releasemode" = "no"; then
   ALLOWRELEASE=""
   AC_MSG_RESULT([no])
 else
-  ALLOWRELEASE="-release `cat VERSION`"
+  ALLOWRELEASE="-release `cat $srcdir/VERSION`"
   AC_MSG_RESULT([yes])
 fi
 AC_SUBST(ALLOWRELEASE)
@@ -401,7 +300,7 @@ if test "$CYGWIN" = "yes"; then
 else
   BUILD_EXEEXT=$EXEEXT
 fi
-if test "$cross" = "0"; then
+if test x"$cross_compiling" = xno; then
   TARGET_EXEEXT=$BUILD_EXEEXT
 else
   TARGET_EXEEXT=$config_TARGET_EXEEXT
@@ -436,15 +335,6 @@ AC_SUBST(OS_UNIX)
 AC_SUBST(OS_WIN)
 AC_SUBST(OS_OS2)
 AC_SUBST(TARGET_EXEEXT)
-
-##########
-# Extract generic linker options from the environment.
-#
-if test "$config_TARGET_LIBS" != ""; then
-  TARGET_LIBS=$config_TARGET_LIBS
-else
-  TARGET_LIBS=""
-fi
 
 ##########
 # Figure out all the parameters needed to compile against Tcl.
@@ -592,66 +482,74 @@ AC_SUBST(HAVE_TCL)
 # Figure out what C libraries are required to compile programs
 # that use "readline()" library.
 #
-if test "$config_TARGET_READLINE_LIBS" != ""; then
-  TARGET_READLINE_LIBS="$config_TARGET_READLINE_LIBS"
-else
-  CC=$TARGET_CC
-  LIBS=""
-  AC_SEARCH_LIBS(tgetent, [readline ncurses curses termcap])
-  AC_CHECK_LIB([readline], [readline])
-  TARGET_READLINE_LIBS="$LIBS"
+TARGET_READLINE_LIBS=""
+TARGET_READLINE_INC=""
+TARGET_HAVE_READLINE=0
+AC_ARG_ENABLE([readline],
+	[AC_HELP_STRING([--disable-readline],[disable readline support [default=detect]])],
+	[with_readline=$enableval],
+	[with_readline=auto])
+
+if test x"$with_readline" != xno; then
+	found="yes"
+
+	AC_ARG_WITH([readline-lib],
+		[AC_HELP_STRING([--with-readline-lib],[specify readline library])],
+		[with_readline_lib=$withval],
+		[with_readline_lib="auto"])
+	if test "x$with_readline_lib" = xauto; then
+		save_LIBS="$LIBS"
+		LIBS=""
+		AC_SEARCH_LIBS(tgetent, [readline ncurses curses termcap], [term_LIBS="$LIBS"], [term_LIBS=""])
+		AC_CHECK_LIB([readline], [readline], [TARGET_READLINE_LIBS="-lreadline"], [found="no"])
+		TARGET_READLINE_LIBS="$TARGET_READLINE_LIBS $term_LIBS"
+		LIBS="$save_LIBS"
+	else
+		TARGET_READLINE_LIBS="$with_readline_lib"
+	fi
+
+	AC_ARG_WITH([readline-inc],
+		[AC_HELP_STRING([--with-readline-inc],[specify readline include paths])],
+		[with_readline_inc=$withval],
+		[with_readline_inc="auto"])
+	if test "x$with_readline_inc" = xauto; then
+		AC_CHECK_HEADER(readline.h, [found="yes"], [
+			found="no"
+			if test "$cross_compiling" != yes; then
+				for dir in /usr /usr/local /usr/local/readline /usr/contrib /mingw; do
+					for subdir in include include/readline; do
+						AC_CHECK_FILE($dir/$subdir/readline.h, found=yes)
+						if test "$found" = "yes"; then
+							TARGET_READLINE_INC="-I$dir/$subdir"
+							break
+						fi
+					done
+					test "$found" = "yes" && break
+				done
+			fi
+		])
+	else
+		TARGET_READLINE_INC="$with_readline_inc"
+	fi
+
+	if test x"$found" = xno; then
+		TARGET_READLINE_LIBS=""
+		TARGET_READLINE_INC=""
+		TARGET_HAVE_READLINE=0
+	else
+		TARGET_HAVE_READLINE=1
+	fi
 fi
+
 AC_SUBST(TARGET_READLINE_LIBS)
+AC_SUBST(TARGET_READLINE_INC)
+AC_SUBST(TARGET_HAVE_READLINE)
 
 ##########
 # Figure out what C libraries are required to compile programs
 # that use "fdatasync()" function.
 #
-CC=$TARGET_CC
-LIBS=$TARGET_LIBS
 AC_SEARCH_LIBS(fdatasync, [rt])
-TARGET_LIBS="$LIBS"
-
-##########
-# Figure out where to get the READLINE header files.
-#
-AC_MSG_CHECKING([readline header files])
-found=no
-if test "$config_TARGET_READLINE_INC" != ""; then
-  TARGET_READLINE_INC=$config_TARGET_READLINE_INC
-  found=yes
-fi
-if test "$found" = "yes"; then
-  AC_MSG_RESULT($TARGET_READLINE_INC)
-else
-  AC_MSG_RESULT(not specified: still searching...)
-  AC_CHECK_HEADER(readline.h, [found=yes])
-fi
-if test "$found" = "no"; then
-  for dir in /usr /usr/local /usr/local/readline /usr/contrib /mingw; do
-    AC_CHECK_FILE($dir/include/readline.h, found=yes)
-    if test "$found" = "yes"; then
-      TARGET_READLINE_INC="-I$dir/include"
-      break
-    fi
-    AC_CHECK_FILE($dir/include/readline/readline.h, found=yes)
-    if test "$found" = "yes"; then
-      TARGET_READLINE_INC="-I$dir/include/readline"
-      break
-    fi
-  done
-fi
-if test "$found" = "yes"; then
-  if test "$TARGET_READLINE_LIBS" = ""; then
-    TARGET_HAVE_READLINE=0
-  else
-    TARGET_HAVE_READLINE=1
-  fi
-else
-  TARGET_HAVE_READLINE=0
-fi
-AC_SUBST(TARGET_READLINE_INC)
-AC_SUBST(TARGET_HAVE_READLINE)
 
 #########
 # check for debug enabled
@@ -674,11 +572,6 @@ AC_CHECK_FUNC(usleep, [TARGET_CFLAGS="$TARGET_CFLAGS -DHAVE_USLEEP=1"])
 #--------------------------------------------------------------------
 
 AC_CHECK_FUNC(fdatasync, [TARGET_CFLAGS="$TARGET_CFLAGS -DHAVE_FDATASYNC=1"])
-
-#########
-# Put out accumulated miscellaneous LIBRARIES
-#
-AC_SUBST(TARGET_LIBS)
 
 #########
 # Generate the output files.

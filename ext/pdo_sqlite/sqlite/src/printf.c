@@ -73,6 +73,8 @@
 #define etTOKEN      13 /* a pointer to a Token structure */
 #define etSRCLIST    14 /* a pointer to a SrcList */
 #define etPOINTER    15 /* The %p conversion */
+#define etSQLESCAPE3 16 /* %w -> Strings with '\"' doubled */
+#define etORDINAL    17 /* %r -> 1st, 2nd, 3rd, 4th, etc.  English only */
 
 
 /*
@@ -111,9 +113,10 @@ static const et_info fmtinfo[] = {
   {  'd', 10, 1, etRADIX,      0,  0 },
   {  's',  0, 4, etSTRING,     0,  0 },
   {  'g',  0, 1, etGENERIC,    30, 0 },
-  {  'z',  0, 6, etDYNSTRING,  0,  0 },
+  {  'z',  0, 4, etDYNSTRING,  0,  0 },
   {  'q',  0, 4, etSQLESCAPE,  0,  0 },
   {  'Q',  0, 4, etSQLESCAPE2, 0,  0 },
+  {  'w',  0, 4, etSQLESCAPE3, 0,  0 },
   {  'c',  0, 0, etCHARX,      0,  0 },
   {  'o',  8, 0, etRADIX,      0,  2 },
   {  'u', 10, 0, etRADIX,      0,  0 },
@@ -131,6 +134,7 @@ static const et_info fmtinfo[] = {
   {  'p', 16, 0, etPOINTER,    0,  1 },
   {  'T',  0, 2, etTOKEN,      0,  0 },
   {  'S',  0, 2, etSRCLIST,    0,  0 },
+  {  'r', 10, 3, etORDINAL,    0,  0 },
 };
 #define etNINFO  (sizeof(fmtinfo)/sizeof(fmtinfo[0]))
 
@@ -163,6 +167,20 @@ static int et_getdigit(LONGDOUBLE_TYPE *val, int *cnt){
   return digit;
 }
 #endif /* SQLITE_OMIT_FLOATING_POINT */
+
+/*
+** Append N space characters to the given string buffer.
+*/
+static void appendSpace(StrAccum *pAccum, int N){
+  static const char zSpaces[] = "                             ";
+  while( N>=sizeof(zSpaces)-1 ){
+    sqlite3StrAccumAppend(pAccum, zSpaces, sizeof(zSpaces)-1);
+    N -= sizeof(zSpaces)-1;
+  }
+  if( N>0 ){
+    sqlite3StrAccumAppend(pAccum, zSpaces, N);
+  }
+}
 
 /*
 ** On machines with a small stack size, you can redefine the
@@ -201,9 +219,8 @@ static int et_getdigit(LONGDOUBLE_TYPE *val, int *cnt){
 ** seems to make a big difference in determining how fast this beast
 ** will run.
 */
-static int vxprintf(
-  void (*func)(void*,const char*,int),     /* Consumer of text */
-  void *arg,                         /* First argument to the consumer */
+static void vxprintf(
+  StrAccum *pAccum,                  /* Accumulate results here */
   int useExtended,                   /* Allow extended %-conversions */
   const char *fmt,                   /* Format string */
   va_list ap                         /* arguments */
@@ -213,7 +230,6 @@ static int vxprintf(
   int precision;             /* Precision of the current field */
   int length;                /* Length of the field */
   int idx;                   /* A general purpose loop counter */
-  int count;                 /* Total number of characters output */
   int width;                 /* Width of the current field */
   etByte flag_leftjustify;   /* True if "-" flag is present */
   etByte flag_plussign;      /* True if "+" flag is present */
@@ -232,9 +248,6 @@ static int vxprintf(
   etByte errorflag = 0;      /* True if an error is encountered */
   etByte xtype;              /* Conversion paradigm */
   char *zExtra;              /* Extra memory used for etTCLESCAPE conversions */
-  static const char spaces[] =
-   "                                                                         ";
-#define etSPACESIZE (sizeof(spaces)-1)
 #ifndef SQLITE_OMIT_FLOATING_POINT
   int  exp, e2;              /* exponent of real numbers */
   double rounder;            /* Used for rounding floating point values */
@@ -244,8 +257,7 @@ static int vxprintf(
   int nsd;                   /* Number of significant digits returned */
 #endif
 
-  func(arg,"",0);
-  count = length = 0;
+  length = 0;
   bufpt = 0;
   for(; (c=(*fmt))!=0; ++fmt){
     if( c!='%' ){
@@ -253,14 +265,12 @@ static int vxprintf(
       bufpt = (char *)fmt;
       amt = 1;
       while( (c=(*++fmt))!='%' && c!=0 ) amt++;
-      (*func)(arg,bufpt,amt);
-      count += amt;
+      sqlite3StrAccumAppend(pAccum, bufpt, amt);
       if( c==0 ) break;
     }
     if( (c=(*++fmt))==0 ){
       errorflag = 1;
-      (*func)(arg,"%",1);
-      count++;
+      sqlite3StrAccumAppend(pAccum, "%", 1);
       break;
     }
     /* Find out what flags are present */
@@ -334,14 +344,14 @@ static int vxprintf(
         if( useExtended || (infop->flags & FLAG_INTERN)==0 ){
           xtype = infop->type;
         }else{
-          return -1;
+          return;
         }
         break;
       }
     }
     zExtra = 0;
     if( infop==0 ){
-      return -1;
+      return;
     }
 
 
@@ -376,6 +386,7 @@ static int vxprintf(
         flag_longlong = sizeof(char*)==sizeof(i64);
         flag_long = sizeof(char*)==sizeof(long int);
         /* Fall through into the next case */
+      case etORDINAL:
       case etRADIX:
         if( infop->flags & FLAG_SIGNED ){
           i64 v;
@@ -402,6 +413,16 @@ static int vxprintf(
           precision = width-(prefix!=0);
         }
         bufpt = &buf[etBUFSIZE-1];
+        if( xtype==etORDINAL ){
+          static const char zOrd[] = "thstndrd";
+          int x = longvalue % 10;
+          if( x>=4 || (longvalue/10)%10==1 ){
+            x = 0;
+          }
+          buf[etBUFSIZE-3] = zOrd[x*2];
+          buf[etBUFSIZE-2] = zOrd[x*2+1];
+          bufpt -= 2;
+        }
         {
           register const char *cset;      /* Use registers for speed */
           register int base;
@@ -453,6 +474,11 @@ static int vxprintf(
         if( xtype==etFLOAT ) realvalue += rounder;
         /* Normalize realvalue to within 10.0 > realvalue >= 1.0 */
         exp = 0;
+        if( sqlite3_isnan(realvalue) ){
+          bufpt = "NaN";
+          length = 3;
+          break;
+        }
         if( realvalue>0.0 ){
           while( realvalue>=1e32 && exp<=350 ){ realvalue *= 1e-32; exp+=32; }
           while( realvalue>=1e8 && exp<=350 ){ realvalue *= 1e-8; exp+=8; }
@@ -460,8 +486,14 @@ static int vxprintf(
           while( realvalue<1e-8 && exp>=-350 ){ realvalue *= 1e8; exp-=8; }
           while( realvalue<1.0 && exp>=-350 ){ realvalue *= 10.0; exp--; }
           if( exp>350 || exp<-350 ){
-            bufpt = "NaN";
-            length = 3;
+            if( prefix=='-' ){
+              bufpt = "-Inf";
+            }else if( prefix=='+' ){
+              bufpt = "+Inf";
+            }else{
+              bufpt = "Inf";
+            }
+            length = strlen(bufpt);
             break;
           }
         }
@@ -568,7 +600,7 @@ static int vxprintf(
 #endif
         break;
       case etSIZE:
-        *(va_arg(ap,int*)) = count;
+        *(va_arg(ap,int*)) = pAccum->nChar;
         length = width = 0;
         break;
       case etPERCENT:
@@ -599,30 +631,32 @@ static int vxprintf(
         if( precision>=0 && precision<length ) length = precision;
         break;
       case etSQLESCAPE:
-      case etSQLESCAPE2: {
+      case etSQLESCAPE2:
+      case etSQLESCAPE3: {
         int i, j, n, ch, isnull;
         int needQuote;
+        char q = ((xtype==etSQLESCAPE3)?'"':'\'');   /* Quote character */
         char *escarg = va_arg(ap,char*);
         isnull = escarg==0;
         if( isnull ) escarg = (xtype==etSQLESCAPE2 ? "NULL" : "(NULL)");
         for(i=n=0; (ch=escarg[i])!=0; i++){
-          if( ch=='\'' )  n++;
+          if( ch==q )  n++;
         }
         needQuote = !isnull && xtype==etSQLESCAPE2;
         n += i + 1 + needQuote*2;
         if( n>etBUFSIZE ){
-          bufpt = zExtra = sqliteMalloc( n );
-          if( bufpt==0 ) return -1;
+          bufpt = zExtra = sqlite3_malloc( n );
+          if( bufpt==0 ) return;
         }else{
           bufpt = buf;
         }
         j = 0;
-        if( needQuote ) bufpt[j++] = '\'';
+        if( needQuote ) bufpt[j++] = q;
         for(i=0; (ch=escarg[i])!=0; i++){
           bufpt[j++] = ch;
-          if( ch=='\'' ) bufpt[j++] = ch;
+          if( ch==q ) bufpt[j++] = ch;
         }
-        if( needQuote ) bufpt[j++] = '\'';
+        if( needQuote ) bufpt[j++] = q;
         bufpt[j] = 0;
         length = j;
         /* The precision is ignored on %q and %Q */
@@ -632,7 +666,7 @@ static int vxprintf(
       case etTOKEN: {
         Token *pToken = va_arg(ap, Token*);
         if( pToken && pToken->z ){
-          (*func)(arg, (char*)pToken->z, pToken->n);
+          sqlite3StrAccumAppend(pAccum, (const char*)pToken->z, pToken->n);
         }
         length = width = 0;
         break;
@@ -643,10 +677,10 @@ static int vxprintf(
         struct SrcList_item *pItem = &pSrc->a[k];
         assert( k>=0 && k<pSrc->nSrc );
         if( pItem->zDatabase && pItem->zDatabase[0] ){
-          (*func)(arg, pItem->zDatabase, strlen(pItem->zDatabase));
-          (*func)(arg, ".", 1);
+          sqlite3StrAccumAppend(pAccum, pItem->zDatabase, -1);
+          sqlite3StrAccumAppend(pAccum, ".", 1);
         }
-        (*func)(arg, pItem->zName, strlen(pItem->zName));
+        sqlite3StrAccumAppend(pAccum, pItem->zName, -1);
         length = width = 0;
         break;
       }
@@ -660,147 +694,140 @@ static int vxprintf(
       register int nspace;
       nspace = width-length;
       if( nspace>0 ){
-        count += nspace;
-        while( nspace>=etSPACESIZE ){
-          (*func)(arg,spaces,etSPACESIZE);
-          nspace -= etSPACESIZE;
-        }
-        if( nspace>0 ) (*func)(arg,spaces,nspace);
+        appendSpace(pAccum, nspace);
       }
     }
     if( length>0 ){
-      (*func)(arg,bufpt,length);
-      count += length;
+      sqlite3StrAccumAppend(pAccum, bufpt, length);
     }
     if( flag_leftjustify ){
       register int nspace;
       nspace = width-length;
       if( nspace>0 ){
-        count += nspace;
-        while( nspace>=etSPACESIZE ){
-          (*func)(arg,spaces,etSPACESIZE);
-          nspace -= etSPACESIZE;
-        }
-        if( nspace>0 ) (*func)(arg,spaces,nspace);
+        appendSpace(pAccum, nspace);
       }
     }
     if( zExtra ){
-      sqliteFree(zExtra);
+      sqlite3_free(zExtra);
     }
   }/* End for loop over the format string */
-  return errorflag ? -1 : count;
 } /* End of function */
 
-
-/* This structure is used to store state information about the
-** write to memory that is currently in progress.
+/*
+** Append N bytes of text from z to the StrAccum object.
 */
-struct sgMprintf {
-  char *zBase;     /* A base allocation */
-  char *zText;     /* The string collected so far */
-  int  nChar;      /* Length of the string so far */
-  int  nTotal;     /* Output size if unconstrained */
-  int  nAlloc;     /* Amount of space allocated in zText */
-  void *(*xRealloc)(void*,int);  /* Function used to realloc memory */
-};
-
-/* 
-** This function implements the callback from vxprintf. 
-**
-** This routine add nNewChar characters of text in zNewText to
-** the sgMprintf structure pointed to by "arg".
-*/
-static void mout(void *arg, const char *zNewText, int nNewChar){
-  struct sgMprintf *pM = (struct sgMprintf*)arg;
-  pM->nTotal += nNewChar;
-  if( pM->nChar + nNewChar + 1 > pM->nAlloc ){
-    if( pM->xRealloc==0 ){
-      nNewChar =  pM->nAlloc - pM->nChar - 1;
+void sqlite3StrAccumAppend(StrAccum *p, const char *z, int N){
+  if( p->tooBig | p->mallocFailed ){
+    return;
+  }
+  if( N<0 ){
+    N = strlen(z);
+  }
+  if( N==0 ){
+    return;
+  }
+  if( p->nChar+N >= p->nAlloc ){
+    char *zNew;
+    if( !p->useMalloc ){
+      p->tooBig = 1;
+      N = p->nAlloc - p->nChar - 1;
+      if( N<=0 ){
+        return;
+      }
     }else{
-      pM->nAlloc = pM->nChar + nNewChar*2 + 1;
-      if( pM->zText==pM->zBase ){
-        pM->zText = pM->xRealloc(0, pM->nAlloc);
-        if( pM->zText && pM->nChar ){
-          memcpy(pM->zText, pM->zBase, pM->nChar);
-        }
-      }else{
-        char *zNew;
-        zNew = pM->xRealloc(pM->zText, pM->nAlloc);
-        if( zNew ){
-          pM->zText = zNew;
+      p->nAlloc += p->nAlloc + N + 1;
+      if( p->nAlloc > SQLITE_MAX_LENGTH ){
+        p->nAlloc = SQLITE_MAX_LENGTH;
+        if( p->nChar+N >= p->nAlloc ){
+          sqlite3StrAccumReset(p);
+          p->tooBig = 1;
+          return;
         }
       }
-    }
-  }
-  if( pM->zText ){
-    if( nNewChar>0 ){
-      memcpy(&pM->zText[pM->nChar], zNewText, nNewChar);
-      pM->nChar += nNewChar;
-    }
-    pM->zText[pM->nChar] = 0;
-  }
-}
-
-/*
-** This routine is a wrapper around xprintf() that invokes mout() as
-** the consumer.  
-*/
-static char *base_vprintf(
-  void *(*xRealloc)(void*,int),   /* Routine to realloc memory. May be NULL */
-  int useInternal,                /* Use internal %-conversions if true */
-  char *zInitBuf,                 /* Initially write here, before mallocing */
-  int nInitBuf,                   /* Size of zInitBuf[] */
-  const char *zFormat,            /* format string */
-  va_list ap                      /* arguments */
-){
-  struct sgMprintf sM;
-  sM.zBase = sM.zText = zInitBuf;
-  sM.nChar = sM.nTotal = 0;
-  sM.nAlloc = nInitBuf;
-  sM.xRealloc = xRealloc;
-  vxprintf(mout, &sM, useInternal, zFormat, ap);
-  if( xRealloc ){
-    if( sM.zText==sM.zBase ){
-      sM.zText = xRealloc(0, sM.nChar+1);
-      if( sM.zText ){
-        memcpy(sM.zText, sM.zBase, sM.nChar+1);
-      }
-    }else if( sM.nAlloc>sM.nChar+10 ){
-      char *zNew = xRealloc(sM.zText, sM.nChar+1);
+      zNew = sqlite3_malloc( p->nAlloc );
       if( zNew ){
-        sM.zText = zNew;
+        memcpy(zNew, p->zText, p->nChar);
+        sqlite3StrAccumReset(p);
+        p->zText = zNew;
+      }else{
+        p->mallocFailed = 1;
+        sqlite3StrAccumReset(p);
+        return;
       }
     }
   }
-  return sM.zText;
+  memcpy(&p->zText[p->nChar], z, N);
+  p->nChar += N;
 }
 
 /*
-** Realloc that is a real function, not a macro.
+** Finish off a string by making sure it is zero-terminated.
+** Return a pointer to the resulting string.  Return a NULL
+** pointer if any kind of error was encountered.
 */
-static void *printf_realloc(void *old, int size){
-  return sqliteRealloc(old,size);
+char *sqlite3StrAccumFinish(StrAccum *p){
+  if( p->zText ){
+    p->zText[p->nChar] = 0;
+    if( p->useMalloc && p->zText==p->zBase ){
+      p->zText = sqlite3_malloc( p->nChar+1 );
+      if( p->zText ){
+        memcpy(p->zText, p->zBase, p->nChar+1);
+      }else{
+        p->mallocFailed = 1;
+      }
+    }
+  }
+  return p->zText;
+}
+
+/*
+** Reset an StrAccum string.  Reclaim all malloced memory.
+*/
+void sqlite3StrAccumReset(StrAccum *p){
+  if( p->zText!=p->zBase ){
+    sqlite3_free(p->zText);
+    p->zText = 0;
+  }
+}
+
+/*
+** Initialize a string accumulator
+*/
+static void sqlite3StrAccumInit(StrAccum *p, char *zBase, int n){
+  p->zText = p->zBase = zBase;
+  p->nChar = 0;
+  p->nAlloc = n;
+  p->useMalloc = 1;
+  p->tooBig = 0;
+  p->mallocFailed = 0;
 }
 
 /*
 ** Print into memory obtained from sqliteMalloc().  Use the internal
 ** %-conversion extensions.
 */
-char *sqlite3VMPrintf(const char *zFormat, va_list ap){
-  char zBase[SQLITE_PRINT_BUF_SIZE];
-  return base_vprintf(printf_realloc, 1, zBase, sizeof(zBase), zFormat, ap);
-}
-
-/*
-** Print into memory obtained from sqliteMalloc().  Use the internal
-** %-conversion extensions.
-*/
-char *sqlite3MPrintf(const char *zFormat, ...){
-  va_list ap;
+char *sqlite3VMPrintf(sqlite3 *db, const char *zFormat, va_list ap){
   char *z;
   char zBase[SQLITE_PRINT_BUF_SIZE];
+  StrAccum acc;
+  sqlite3StrAccumInit(&acc, zBase, sizeof(zBase));
+  vxprintf(&acc, 1, zFormat, ap);
+  z = sqlite3StrAccumFinish(&acc);
+  if( acc.mallocFailed && db ){
+    db->mallocFailed = 1;
+  }
+  return z;
+}
+
+/*
+** Print into memory obtained from sqliteMalloc().  Use the internal
+** %-conversion extensions.
+*/
+char *sqlite3MPrintf(sqlite3 *db, const char *zFormat, ...){
+  va_list ap;
+  char *z;
   va_start(ap, zFormat);
-  z = base_vprintf(printf_realloc, 1, zBase, sizeof(zBase), zFormat, ap);
+  z = sqlite3VMPrintf(db, zFormat, ap);
   va_end(ap);
   return z;
 }
@@ -810,8 +837,13 @@ char *sqlite3MPrintf(const char *zFormat, ...){
 ** %-conversion extensions.
 */
 char *sqlite3_vmprintf(const char *zFormat, va_list ap){
+  char *z;
   char zBase[SQLITE_PRINT_BUF_SIZE];
-  return base_vprintf(sqlite3_realloc, 0, zBase, sizeof(zBase), zFormat, ap);
+  StrAccum acc;
+  sqlite3StrAccumInit(&acc, zBase, sizeof(zBase));
+  vxprintf(&acc, 0, zFormat, ap);
+  z = sqlite3StrAccumFinish(&acc);
+  return z;
 }
 
 /*
@@ -821,9 +853,8 @@ char *sqlite3_vmprintf(const char *zFormat, va_list ap){
 char *sqlite3_mprintf(const char *zFormat, ...){
   va_list ap;
   char *z;
-  char zBase[SQLITE_PRINT_BUF_SIZE];
   va_start(ap, zFormat);
-  z = base_vprintf(sqlite3_realloc, 0, zBase, sizeof(zBase), zFormat, ap);
+  z = sqlite3_vmprintf(zFormat, ap);
   va_end(ap);
   return z;
 }
@@ -837,27 +868,37 @@ char *sqlite3_mprintf(const char *zFormat, ...){
 char *sqlite3_snprintf(int n, char *zBuf, const char *zFormat, ...){
   char *z;
   va_list ap;
+  StrAccum acc;
 
+  if( n<=0 ){
+    return zBuf;
+  }
+  sqlite3StrAccumInit(&acc, zBuf, n);
+  acc.useMalloc = 0;
   va_start(ap,zFormat);
-  z = base_vprintf(0, 0, zBuf, n, zFormat, ap);
+  vxprintf(&acc, 0, zFormat, ap);
   va_end(ap);
+  z = sqlite3StrAccumFinish(&acc);
   return z;
 }
 
-#if defined(SQLITE_TEST) || defined(SQLITE_DEBUG)
+#if defined(SQLITE_TEST) || defined(SQLITE_DEBUG) || defined(SQLITE_MEMDEBUG)
 /*
 ** A version of printf() that understands %lld.  Used for debugging.
 ** The printf() built into some versions of windows does not understand %lld
 ** and segfaults if you give it a long long int.
 */
 void sqlite3DebugPrintf(const char *zFormat, ...){
-  extern int getpid(void);
   va_list ap;
+  StrAccum acc;
   char zBuf[500];
-  va_start(ap, zFormat);
-  base_vprintf(0, 0, zBuf, sizeof(zBuf), zFormat, ap);
+  sqlite3StrAccumInit(&acc, zBuf, sizeof(zBuf));
+  acc.useMalloc = 0;
+  va_start(ap,zFormat);
+  vxprintf(&acc, 0, zFormat, ap);
   va_end(ap);
-  fprintf(stdout,"%d: %s", getpid(), zBuf);
+  sqlite3StrAccumFinish(&acc);
+  fprintf(stdout,"%s", zBuf);
   fflush(stdout);
 }
 #endif

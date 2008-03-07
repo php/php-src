@@ -18,14 +18,15 @@ if (PHP_PDO_SQLITE != "no") {
 
 	FSO.CopyFile(configure_module_dirname + "\\sqlite\\src\\sqlite_config.w32.h",
 	   	configure_module_dirname + "\\sqlite\\src\\config.h");
-		
+
 	EXTENSION("pdo_sqlite", "pdo_sqlite.c sqlite_driver.c sqlite_statement.c", null, "/DSQLITE_OMIT_CURSOR /I" + configure_module_dirname + "/sqlite/src /I" + configure_module_dirname);
 	ADD_SOURCES(configure_module_dirname + "/sqlite/src",
 		"attach.c auth.c btree.c build.c callback.c date.c delete.c expr.c func.c hash.c insert.c \
 		 legacy.c main.c os.c os_unix.c os_win.c pager.c pragma.c prepare.c printf.c random.c \
 		 select.c table.c tokenize.c trigger.c update.c utf.c util.c vacuum.c vdbeapi.c analyze.c complete.c \
-		 vdbeaux.c vdbe.c vdbemem.c vdbefifo.c where.c parse.c opcodes.c alter.c vtab.c loadext.c", "pdo_sqlite");
-	
+		 vdbeaux.c vdbe.c vdbemem.c vdbefifo.c where.c parse.c opcodes.c alter.c vtab.c loadext.c \
+		 btmutex.c fault.c journal.c malloc.c mem1.c mutex.c mutex_unix.c mutex_w32.c vdbeblob.c", "pdo_sqlite");
+
 	ADD_EXTENSION_DEP('pdo_sqlite', 'pdo');
 }
 

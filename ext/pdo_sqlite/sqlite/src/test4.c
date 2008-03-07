@@ -15,8 +15,7 @@
 */
 #include "sqliteInt.h"
 #include "tcl.h"
-#include "os.h"
-#if defined(OS_UNIX) && OS_UNIX==1 && defined(THREADSAFE) && THREADSAFE==1
+#if defined(OS_UNIX) && OS_UNIX==1 && SQLITE_THREADSAFE
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
@@ -142,14 +141,14 @@ static int tcl_thread_create(
     return TCL_ERROR;
   }
   threadset[i].busy = 1;
-  sqliteFree(threadset[i].zFilename);
-  threadset[i].zFilename = sqliteStrDup(argv[2]);
+  sqlite3_free(threadset[i].zFilename);
+  threadset[i].zFilename = sqlite3StrDup(argv[2]);
   threadset[i].opnum = 1;
   threadset[i].completed = 0;
   rc = pthread_create(&x, 0, thread_main, &threadset[i]);
   if( rc ){
     Tcl_AppendResult(interp, "failed to create the thread", 0);
-    sqliteFree(threadset[i].zFilename);
+    sqlite3_free(threadset[i].zFilename);
     threadset[i].busy = 0;
     return TCL_ERROR;
   }
@@ -200,9 +199,9 @@ static void stop_thread(Thread *p){
   p->xOp = 0;
   p->opnum++;
   thread_wait(p);
-  sqliteFree(p->zArg);
+  sqlite3_free(p->zArg);
   p->zArg = 0;
-  sqliteFree(p->zFilename);
+  sqlite3_free(p->zFilename);
   p->zFilename = 0;
   p->busy = 0;
 }
@@ -476,8 +475,8 @@ static int tcl_thread_compile(
   }
   thread_wait(&threadset[i]);
   threadset[i].xOp = do_compile;
-  sqliteFree(threadset[i].zArg);
-  threadset[i].zArg = sqliteStrDup(argv[2]);
+  sqlite3_free(threadset[i].zArg);
+  threadset[i].zArg = sqlite3StrDup(argv[2]);
   threadset[i].opnum++;
   return TCL_OK;
 }
@@ -571,7 +570,7 @@ static int tcl_thread_finalize(
   }
   thread_wait(&threadset[i]);
   threadset[i].xOp = do_finalize;
-  sqliteFree(threadset[i].zArg);
+  sqlite3_free(threadset[i].zArg);
   threadset[i].zArg = 0;
   threadset[i].opnum++;
   return TCL_OK;

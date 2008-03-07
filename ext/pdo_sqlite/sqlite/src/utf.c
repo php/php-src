@@ -34,101 +34,32 @@
 **     0xff 0xfe   little-endian utf-16 follows
 **     0xfe 0xff   big-endian utf-16 follows
 **
-**
-** Handling of malformed strings:
-**
-** SQLite accepts and processes malformed strings without an error wherever
-** possible. However this is not possible when converting between UTF-8 and
-** UTF-16.
-**
-** When converting malformed UTF-8 strings to UTF-16, one instance of the
-** replacement character U+FFFD for each byte that cannot be interpeted as
-** part of a valid unicode character.
-**
-** When converting malformed UTF-16 strings to UTF-8, one instance of the
-** replacement character U+FFFD for each pair of bytes that cannot be
-** interpeted as part of a valid unicode character.
-**
-** This file contains the following public routines:
-**
-** sqlite3VdbeMemTranslate() - Translate the encoding used by a Mem* string.
-** sqlite3VdbeMemHandleBom() - Handle byte-order-marks in UTF16 Mem* strings.
-** sqlite3utf16ByteLen()     - Calculate byte-length of a void* UTF16 string.
-** sqlite3utf8CharLen()      - Calculate char-length of a char* UTF8 string.
-** sqlite3utf8LikeCompare()  - Do a LIKE match given two UTF8 char* strings.
-**
 */
 #include "sqliteInt.h"
 #include <assert.h>
 #include "vdbeInt.h"
 
 /*
-** This table maps from the first byte of a UTF-8 character to the number
-** of trailing bytes expected. A value '255' indicates that the table key
-** is not a legal first byte for a UTF-8 character.
+** The following constant value is used by the SQLITE_BIGENDIAN and
+** SQLITE_LITTLEENDIAN macros.
 */
-static const u8 xtra_utf8_bytes[256]  = {
-/* 0xxxxxxx */
-0, 0, 0, 0, 0, 0, 0, 0,     0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0,     0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0,     0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0,     0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0,     0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0,     0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0,     0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0,     0, 0, 0, 0, 0, 0, 0, 0,
-
-/* 10wwwwww */
-255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-
-/* 110yyyyy */
-1, 1, 1, 1, 1, 1, 1, 1,     1, 1, 1, 1, 1, 1, 1, 1,
-1, 1, 1, 1, 1, 1, 1, 1,     1, 1, 1, 1, 1, 1, 1, 1,
-
-/* 1110zzzz */
-2, 2, 2, 2, 2, 2, 2, 2,     2, 2, 2, 2, 2, 2, 2, 2,
-
-/* 11110yyy */
-3, 3, 3, 3, 3, 3, 3, 3,     255, 255, 255, 255, 255, 255, 255, 255,
-};
+const int sqlite3one = 1;
 
 /*
-** This table maps from the number of trailing bytes in a UTF-8 character
-** to an integer constant that is effectively calculated for each character
-** read by a naive implementation of a UTF-8 character reader. The code
-** in the READ_UTF8 macro explains things best.
+** This lookup table is used to help decode the first byte of
+** a multi-byte UTF8 character.
 */
-static const int xtra_utf8_bits[4] =  {
-0,
-12416,          /* (0xC0 << 6) + (0x80) */
-925824,         /* (0xE0 << 12) + (0x80 << 6) + (0x80) */
-63447168        /* (0xF0 << 18) + (0x80 << 12) + (0x80 << 6) + 0x80 */
+static const unsigned char sqlite3UtfTrans1[] = {
+  0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+  0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
+  0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+  0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f,
+  0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+  0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
+  0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+  0x00, 0x01, 0x02, 0x03, 0x00, 0x01, 0x00, 0x00,
 };
 
-#define READ_UTF8(zIn, c) { \
-  int xtra;                                            \
-  c = *(zIn)++;                                        \
-  xtra = xtra_utf8_bytes[c];                           \
-  switch( xtra ){                                      \
-    case 255: c = (int)0xFFFD; break;                  \
-    case 3: c = (c<<6) + *(zIn)++;                     \
-    case 2: c = (c<<6) + *(zIn)++;                     \
-    case 1: c = (c<<6) + *(zIn)++;                     \
-    c -= xtra_utf8_bits[xtra];                         \
-  }                                                    \
-}
-int sqlite3ReadUtf8(const unsigned char *z){
-  int c;
-  READ_UTF8(z, c);
-  return c;
-}
-
-#define SKIP_UTF8(zIn) {                               \
-  zIn += (xtra_utf8_bytes[*(u8 *)zIn] + 1);            \
-}
 
 #define WRITE_UTF8(zOut, c) {                          \
   if( c<0x00080 ){                                     \
@@ -177,54 +108,72 @@ int sqlite3ReadUtf8(const unsigned char *z){
 #define READ_UTF16LE(zIn, c){                                         \
   c = (*zIn++);                                                       \
   c += ((*zIn++)<<8);                                                 \
-  if( c>=0xD800 && c<=0xE000 ){                                       \
+  if( c>=0xD800 && c<0xE000 ){                                       \
     int c2 = (*zIn++);                                                \
     c2 += ((*zIn++)<<8);                                              \
     c = (c2&0x03FF) + ((c&0x003F)<<10) + (((c&0x03C0)+0x0040)<<10);   \
+    if( (c & 0xFFFF0000)==0 ) c = 0xFFFD;                             \
   }                                                                   \
 }
 
 #define READ_UTF16BE(zIn, c){                                         \
   c = ((*zIn++)<<8);                                                  \
   c += (*zIn++);                                                      \
-  if( c>=0xD800 && c<=0xE000 ){                                       \
+  if( c>=0xD800 && c<0xE000 ){                                       \
     int c2 = ((*zIn++)<<8);                                           \
     c2 += (*zIn++);                                                   \
     c = (c2&0x03FF) + ((c&0x003F)<<10) + (((c&0x03C0)+0x0040)<<10);   \
+    if( (c & 0xFFFF0000)==0 ) c = 0xFFFD;                             \
   }                                                                   \
 }
 
-#define SKIP_UTF16BE(zIn){                                            \
-  if( *zIn>=0xD8 && (*zIn<0xE0 || (*zIn==0xE0 && *(zIn+1)==0x00)) ){  \
-    zIn += 4;                                                         \
-  }else{                                                              \
-    zIn += 2;                                                         \
-  }                                                                   \
-}
-#define SKIP_UTF16LE(zIn){                                            \
-  zIn++;                                                              \
-  if( *zIn>=0xD8 && (*zIn<0xE0 || (*zIn==0xE0 && *(zIn-1)==0x00)) ){  \
-    zIn += 3;                                                         \
-  }else{                                                              \
-    zIn += 1;                                                         \
-  }                                                                   \
+/*
+** Translate a single UTF-8 character.  Return the unicode value.
+**
+** During translation, assume that the byte that zTerm points
+** is a 0x00.
+**
+** Write a pointer to the next unread byte back into *pzNext.
+**
+** Notes On Invalid UTF-8:
+**
+**  *  This routine never allows a 7-bit character (0x00 through 0x7f) to
+**     be encoded as a multi-byte character.  Any multi-byte character that
+**     attempts to encode a value between 0x00 and 0x7f is rendered as 0xfffd.
+**
+**  *  This routine never allows a UTF16 surrogate value to be encoded.
+**     If a multi-byte character attempts to encode a value between
+**     0xd800 and 0xe000 then it is rendered as 0xfffd.
+**
+**  *  Bytes in the range of 0x80 through 0xbf which occur as the first
+**     byte of a character are interpreted as single-byte characters
+**     and rendered as themselves even though they are technically
+**     invalid characters.
+**
+**  *  This routine accepts an infinite number of different UTF8 encodings
+**     for unicode values 0x80 and greater.  It do not change over-length
+**     encodings to 0xfffd as some systems recommend.
+*/
+int sqlite3Utf8Read(
+  const unsigned char *z,         /* First byte of UTF-8 character */
+  const unsigned char *zTerm,     /* Pretend this byte is 0x00 */
+  const unsigned char **pzNext    /* Write first byte past UTF-8 char here */
+){
+  int c = *(z++);
+  if( c>=0xc0 ){
+    c = sqlite3UtfTrans1[c-0xc0];
+    while( z!=zTerm && (*z & 0xc0)==0x80 ){
+      c = (c<<6) + (0x3f & *(z++));
+    }
+    if( c<0x80
+        || (c&0xFFFFF800)==0xD800
+        || (c&0xFFFFFFFE)==0xFFFE ){  c = 0xFFFD; }
+  }
+  *pzNext = z;
+  return c;
 }
 
-#define RSKIP_UTF16LE(zIn){                                            \
-  if( *zIn>=0xD8 && (*zIn<0xE0 || (*zIn==0xE0 && *(zIn-1)==0x00)) ){  \
-    zIn -= 4;                                                         \
-  }else{                                                              \
-    zIn -= 2;                                                         \
-  }                                                                   \
-}
-#define RSKIP_UTF16BE(zIn){                                            \
-  zIn--;                                                              \
-  if( *zIn>=0xD8 && (*zIn<0xE0 || (*zIn==0xE0 && *(zIn+1)==0x00)) ){  \
-    zIn -= 3;                                                         \
-  }else{                                                              \
-    zIn -= 1;                                                         \
-  }                                                                   \
-}
+
 
 /*
 ** If the TRANSLATE_TRACE macro is defined, the value of each Mem is
@@ -245,8 +194,9 @@ int sqlite3VdbeMemTranslate(Mem *pMem, u8 desiredEnc){
   unsigned char *zIn;                   /* Input iterator */
   unsigned char *zTerm;                 /* End of input */
   unsigned char *z;                     /* Output iterator */
-  int c;
+  unsigned int c;
 
+  assert( pMem->db==0 || sqlite3_mutex_held(pMem->db->mutex) );
   assert( pMem->flags&MEM_Str );
   assert( pMem->enc!=desiredEnc );
   assert( pMem->enc!=0 );
@@ -305,14 +255,16 @@ int sqlite3VdbeMemTranslate(Mem *pMem, u8 desiredEnc){
   ** byte past the end.
   **
   ** Variable zOut is set to point at the output buffer. This may be space
-  ** obtained from malloc(), or Mem.zShort, if it large enough and not in
-  ** use, or the zShort array on the stack (see above).
+  ** obtained from sqlite3_malloc(), or Mem.zShort, if it large enough and
+  ** not in use, or the zShort array on the stack (see above).
   */
   zIn = (u8*)pMem->z;
   zTerm = &zIn[pMem->n];
   if( len>NBFS ){
-    zOut = sqliteMallocRaw(len);
-    if( !zOut ) return SQLITE_NOMEM;
+    zOut = sqlite3DbMallocRaw(pMem->db, len);
+    if( !zOut ){
+      return SQLITE_NOMEM;
+    }
   }else{
     zOut = zShort;
   }
@@ -322,14 +274,14 @@ int sqlite3VdbeMemTranslate(Mem *pMem, u8 desiredEnc){
     if( desiredEnc==SQLITE_UTF16LE ){
       /* UTF-8 -> UTF-16 Little-endian */
       while( zIn<zTerm ){
-        READ_UTF8(zIn, c); 
+        c = sqlite3Utf8Read(zIn, zTerm, (const u8**)&zIn);
         WRITE_UTF16LE(z, c);
       }
     }else{
       assert( desiredEnc==SQLITE_UTF16BE );
       /* UTF-8 -> UTF-16 Big-endian */
       while( zIn<zTerm ){
-        READ_UTF8(zIn, c); 
+        c = sqlite3Utf8Read(zIn, zTerm, (const u8**)&zIn);
         WRITE_UTF16BE(z, c);
       }
     }
@@ -415,7 +367,8 @@ int sqlite3VdbeMemHandleBom(Mem *pMem){
       char *z = pMem->z;
       pMem->z = 0;
       pMem->xDel = 0;
-      rc = sqlite3VdbeMemSetStr(pMem, &z[2], pMem->n-2, bom, SQLITE_TRANSIENT);
+      rc = sqlite3VdbeMemSetStr(pMem, &z[2], pMem->n-2, bom, 
+          SQLITE_TRANSIENT);
       xDel(z);
     }else{
       rc = sqlite3VdbeMemSetStr(pMem, &pMem->z[2], pMem->n-2, bom, 
@@ -433,38 +386,74 @@ int sqlite3VdbeMemHandleBom(Mem *pMem){
 ** number of unicode characters in the first nByte of pZ (or up to 
 ** the first 0x00, whichever comes first).
 */
-int sqlite3utf8CharLen(const char *z, int nByte){
+int sqlite3Utf8CharLen(const char *zIn, int nByte){
   int r = 0;
-  const char *zTerm;
+  const u8 *z = (const u8*)zIn;
+  const u8 *zTerm;
   if( nByte>=0 ){
     zTerm = &z[nByte];
   }else{
-    zTerm = (const char *)(-1);
+    zTerm = (const u8*)(-1);
   }
   assert( z<=zTerm );
   while( *z!=0 && z<zTerm ){
-    SKIP_UTF8(z);
+    SQLITE_SKIP_UTF8(z);
     r++;
   }
   return r;
 }
 
+/* This test function is not currently used by the automated test-suite. 
+** Hence it is only available in debug builds.
+*/
+#if defined(SQLITE_TEST) && defined(SQLITE_DEBUG)
+/*
+** Translate UTF-8 to UTF-8.
+**
+** This has the effect of making sure that the string is well-formed
+** UTF-8.  Miscoded characters are removed.
+**
+** The translation is done in-place (since it is impossible for the
+** correct UTF-8 encoding to be longer than a malformed encoding).
+*/
+int sqlite3Utf8To8(unsigned char *zIn){
+  unsigned char *zOut = zIn;
+  unsigned char *zStart = zIn;
+  unsigned char *zTerm;
+  u32 c;
+
+  while( zIn[0] ){
+    c = sqlite3Utf8Read(zIn, zTerm, (const u8**)&zIn);
+    if( c!=0xfffd ){
+      WRITE_UTF8(zOut, c);
+    }
+  }
+  *zOut = 0;
+  return zOut - zStart;
+}
+#endif
+
 #ifndef SQLITE_OMIT_UTF16
 /*
 ** Convert a UTF-16 string in the native encoding into a UTF-8 string.
-** Memory to hold the UTF-8 string is obtained from malloc and must be
-** freed by the calling function.
+** Memory to hold the UTF-8 string is obtained from sqlite3_malloc and must
+** be freed by the calling function.
 **
 ** NULL is returned if there is an allocation error.
 */
-char *sqlite3utf16to8(const void *z, int nByte){
+char *sqlite3Utf16to8(sqlite3 *db, const void *z, int nByte){
   Mem m;
   memset(&m, 0, sizeof(m));
+  m.db = db;
   sqlite3VdbeMemSetStr(&m, z, nByte, SQLITE_UTF16NATIVE, SQLITE_STATIC);
   sqlite3VdbeChangeEncoding(&m, SQLITE_UTF8);
-  assert( (m.flags & MEM_Term)!=0 || sqlite3MallocFailed() );
-  assert( (m.flags & MEM_Str)!=0 || sqlite3MallocFailed() );
-  return (m.flags & MEM_Dyn)!=0 ? m.z : sqliteStrDup(m.z);
+  if( db->mallocFailed ){
+    sqlite3VdbeMemRelease(&m);
+    m.z = 0;
+  }
+  assert( (m.flags & MEM_Term)!=0 || db->mallocFailed );
+  assert( (m.flags & MEM_Str)!=0 || db->mallocFailed );
+  return (m.flags & MEM_Dyn)!=0 ? m.z : sqlite3DbStrDup(db, m.z);
 }
 
 /*
@@ -474,8 +463,8 @@ char *sqlite3utf16to8(const void *z, int nByte){
 ** then return the number of bytes in the first nChar unicode characters
 ** in pZ (or up until the first pair of 0x00 bytes, whichever comes first).
 */
-int sqlite3utf16ByteLen(const void *zIn, int nChar){
-  int c = 1;
+int sqlite3Utf16ByteLen(const void *zIn, int nChar){
+  unsigned int c = 1;
   char const *z = zIn;
   int n = 0;
   if( SQLITE_UTF16NATIVE==SQLITE_UTF16BE ){
@@ -501,91 +490,51 @@ int sqlite3utf16ByteLen(const void *zIn, int nChar){
   return (z-(char const *)zIn)-((c==0)?2:0);
 }
 
-/*
-** UTF-16 implementation of the substr()
-*/
-void sqlite3utf16Substr(
-  sqlite3_context *context,
-  int argc,
-  sqlite3_value **argv
-){
-  int y, z;
-  unsigned char const *zStr;
-  unsigned char const *zStrEnd;
-  unsigned char const *zStart;
-  unsigned char const *zEnd;
-  int i;
-
-  zStr = (unsigned char const *)sqlite3_value_text16(argv[0]);
-  zStrEnd = &zStr[sqlite3_value_bytes16(argv[0])];
-  y = sqlite3_value_int(argv[1]);
-  z = sqlite3_value_int(argv[2]);
-
-  if( y>0 ){
-    y = y-1;
-    zStart = zStr;
-    if( SQLITE_UTF16BE==SQLITE_UTF16NATIVE ){
-      for(i=0; i<y && zStart<zStrEnd; i++) SKIP_UTF16BE(zStart);
-    }else{
-      for(i=0; i<y && zStart<zStrEnd; i++) SKIP_UTF16LE(zStart);
-    }
-  }else{
-    zStart = zStrEnd;
-    if( SQLITE_UTF16BE==SQLITE_UTF16NATIVE ){
-      for(i=y; i<0 && zStart>zStr; i++) RSKIP_UTF16BE(zStart);
-    }else{
-      for(i=y; i<0 && zStart>zStr; i++) RSKIP_UTF16LE(zStart);
-    }
-    for(; i<0; i++) z -= 1;
-  }
-
-  zEnd = zStart;
-  if( SQLITE_UTF16BE==SQLITE_UTF16NATIVE ){
-    for(i=0; i<z && zEnd<zStrEnd; i++) SKIP_UTF16BE(zEnd);
-  }else{
-    for(i=0; i<z && zEnd<zStrEnd; i++) SKIP_UTF16LE(zEnd);
-  }
-
-  sqlite3_result_text16(context, zStart, zEnd-zStart, SQLITE_TRANSIENT);
-}
-
 #if defined(SQLITE_TEST)
 /*
 ** This routine is called from the TCL test function "translate_selftest".
 ** It checks that the primitives for serializing and deserializing
 ** characters in each encoding are inverses of each other.
 */
-void sqlite3utfSelfTest(){
-  int i;
+void sqlite3UtfSelfTest(){
+  unsigned int i, t;
   unsigned char zBuf[20];
   unsigned char *z;
+  unsigned char *zTerm;
   int n;
-  int c;
+  unsigned int c;
 
   for(i=0; i<0x00110000; i++){
     z = zBuf;
     WRITE_UTF8(z, i);
     n = z-zBuf;
+    z[0] = 0;
+    zTerm = z;
     z = zBuf;
-    READ_UTF8(z, c);
-    assert( c==i );
+    c = sqlite3Utf8Read(z, zTerm, (const u8**)&z);
+    t = i;
+    if( i>=0xD800 && i<=0xDFFF ) t = 0xFFFD;
+    if( (i&0xFFFFFFFE)==0xFFFE ) t = 0xFFFD;
+    assert( c==t );
     assert( (z-zBuf)==n );
   }
   for(i=0; i<0x00110000; i++){
-    if( i>=0xD800 && i<=0xE000 ) continue;
+    if( i>=0xD800 && i<0xE000 ) continue;
     z = zBuf;
     WRITE_UTF16LE(z, i);
     n = z-zBuf;
+    z[0] = 0;
     z = zBuf;
     READ_UTF16LE(z, c);
     assert( c==i );
     assert( (z-zBuf)==n );
   }
   for(i=0; i<0x00110000; i++){
-    if( i>=0xD800 && i<=0xE000 ) continue;
+    if( i>=0xD800 && i<0xE000 ) continue;
     z = zBuf;
     WRITE_UTF16BE(z, i);
     n = z-zBuf;
+    z[0] = 0;
     z = zBuf;
     READ_UTF16BE(z, c);
     assert( c==i );
