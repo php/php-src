@@ -15,7 +15,6 @@
 */
 #include "sqliteInt.h"
 #include "vdbeInt.h"
-#include "os.h"
 
 /*
 ** Return TRUE (non-zero) of the statement supplied as an argument needs
@@ -30,6 +29,72 @@ int sqlite3_expired(sqlite3_stmt *pStmt){
   return p==0 || p->expired;
 }
 
+/*
+** The following routine destroys a virtual machine that is created by
+** the sqlite3_compile() routine. The integer returned is an SQLITE_
+** success/failure code that describes the result of executing the virtual
+** machine.
+**
+** This routine sets the error code and string returned by
+** sqlite3_errcode(), sqlite3_errmsg() and sqlite3_errmsg16().
+*/
+int sqlite3_finalize(sqlite3_stmt *pStmt){
+  int rc;
+  if( pStmt==0 ){
+    rc = SQLITE_OK;
+  }else{
+    Vdbe *v = (Vdbe*)pStmt;
+#ifndef SQLITE_MUTEX_NOOP
+    sqlite3_mutex *mutex = v->db->mutex;
+#endif
+    sqlite3_mutex_enter(mutex);
+    rc = sqlite3VdbeFinalize(v);
+    sqlite3_mutex_leave(mutex);
+  }
+  return rc;
+}
+
+/*
+** Terminate the current execution of an SQL statement and reset it
+** back to its starting state so that it can be reused. A success code from
+** the prior execution is returned.
+**
+** This routine sets the error code and string returned by
+** sqlite3_errcode(), sqlite3_errmsg() and sqlite3_errmsg16().
+*/
+int sqlite3_reset(sqlite3_stmt *pStmt){
+  int rc;
+  if( pStmt==0 ){
+    rc = SQLITE_OK;
+  }else{
+    Vdbe *v = (Vdbe*)pStmt;
+    sqlite3_mutex_enter(v->db->mutex);
+    rc = sqlite3VdbeReset(v);
+    sqlite3VdbeMakeReady(v, -1, 0, 0, 0);
+    assert( (rc & (v->db->errMask))==rc );
+    sqlite3_mutex_leave(v->db->mutex);
+  }
+  return rc;
+}
+
+/*
+** Set all the parameters in the compiled SQL statement to NULL.
+*/
+int sqlite3_clear_bindings(sqlite3_stmt *pStmt){
+  int i;
+  int rc = SQLITE_OK;
+#ifndef SQLITE_MUTEX_NOOP
+  sqlite3_mutex *mutex = ((Vdbe*)pStmt)->db->mutex;
+#endif
+  sqlite3_mutex_enter(mutex);
+  for(i=1; rc==SQLITE_OK && i<=sqlite3_bind_parameter_count(pStmt); i++){
+    rc = sqlite3_bind_null(pStmt, i);
+  }
+  sqlite3_mutex_leave(mutex);
+  return rc;
+}
+
+
 /**************************** sqlite3_value_  *******************************
 ** The following routines extract information from a Mem or sqlite3_value
 ** structure.
@@ -37,6 +102,9 @@ int sqlite3_expired(sqlite3_stmt *pStmt){
 const void *sqlite3_value_blob(sqlite3_value *pVal){
   Mem *p = (Mem*)pVal;
   if( p->flags & (MEM_Blob|MEM_Str) ){
+    sqlite3VdbeMemExpandBlob(p);
+    p->flags &= ~MEM_Str;
+    p->flags |= MEM_Blob;
     return p->z;
   }else{
     return sqlite3_value_text(pVal);
@@ -74,7 +142,6 @@ const void *sqlite3_value_text16le(sqlite3_value *pVal){
 int sqlite3_value_type(sqlite3_value* pVal){
   return pVal->type;
 }
-/* sqlite3_value_numeric_type() defined in vdbe.c */
 
 /**************************** sqlite3_result_  *******************************
 ** The following routines are used by user-defined functions to specify
@@ -87,28 +154,35 @@ void sqlite3_result_blob(
   void (*xDel)(void *)
 ){
   assert( n>=0 );
+  assert( sqlite3_mutex_held(pCtx->s.db->mutex) );
   sqlite3VdbeMemSetStr(&pCtx->s, z, n, 0, xDel);
 }
 void sqlite3_result_double(sqlite3_context *pCtx, double rVal){
+  assert( sqlite3_mutex_held(pCtx->s.db->mutex) );
   sqlite3VdbeMemSetDouble(&pCtx->s, rVal);
 }
 void sqlite3_result_error(sqlite3_context *pCtx, const char *z, int n){
-  pCtx->isError = 1;
+  assert( sqlite3_mutex_held(pCtx->s.db->mutex) );
+  pCtx->isError = SQLITE_ERROR;
   sqlite3VdbeMemSetStr(&pCtx->s, z, n, SQLITE_UTF8, SQLITE_TRANSIENT);
 }
 #ifndef SQLITE_OMIT_UTF16
 void sqlite3_result_error16(sqlite3_context *pCtx, const void *z, int n){
-  pCtx->isError = 1;
+  assert( sqlite3_mutex_held(pCtx->s.db->mutex) );
+  pCtx->isError = SQLITE_ERROR;
   sqlite3VdbeMemSetStr(&pCtx->s, z, n, SQLITE_UTF16NATIVE, SQLITE_TRANSIENT);
 }
 #endif
 void sqlite3_result_int(sqlite3_context *pCtx, int iVal){
+  assert( sqlite3_mutex_held(pCtx->s.db->mutex) );
   sqlite3VdbeMemSetInt64(&pCtx->s, (i64)iVal);
 }
 void sqlite3_result_int64(sqlite3_context *pCtx, i64 iVal){
+  assert( sqlite3_mutex_held(pCtx->s.db->mutex) );
   sqlite3VdbeMemSetInt64(&pCtx->s, iVal);
 }
 void sqlite3_result_null(sqlite3_context *pCtx){
+  assert( sqlite3_mutex_held(pCtx->s.db->mutex) );
   sqlite3VdbeMemSetNull(&pCtx->s);
 }
 void sqlite3_result_text(
@@ -117,6 +191,7 @@ void sqlite3_result_text(
   int n,
   void (*xDel)(void *)
 ){
+  assert( sqlite3_mutex_held(pCtx->s.db->mutex) );
   sqlite3VdbeMemSetStr(&pCtx->s, z, n, SQLITE_UTF8, xDel);
 }
 #ifndef SQLITE_OMIT_UTF16
@@ -126,6 +201,7 @@ void sqlite3_result_text16(
   int n, 
   void (*xDel)(void *)
 ){
+  assert( sqlite3_mutex_held(pCtx->s.db->mutex) );
   sqlite3VdbeMemSetStr(&pCtx->s, z, n, SQLITE_UTF16NATIVE, xDel);
 }
 void sqlite3_result_text16be(
@@ -134,6 +210,7 @@ void sqlite3_result_text16be(
   int n, 
   void (*xDel)(void *)
 ){
+  assert( sqlite3_mutex_held(pCtx->s.db->mutex) );
   sqlite3VdbeMemSetStr(&pCtx->s, z, n, SQLITE_UTF16BE, xDel);
 }
 void sqlite3_result_text16le(
@@ -142,29 +219,58 @@ void sqlite3_result_text16le(
   int n, 
   void (*xDel)(void *)
 ){
+  assert( sqlite3_mutex_held(pCtx->s.db->mutex) );
   sqlite3VdbeMemSetStr(&pCtx->s, z, n, SQLITE_UTF16LE, xDel);
 }
 #endif /* SQLITE_OMIT_UTF16 */
 void sqlite3_result_value(sqlite3_context *pCtx, sqlite3_value *pValue){
+  assert( sqlite3_mutex_held(pCtx->s.db->mutex) );
   sqlite3VdbeMemCopy(&pCtx->s, pValue);
 }
+void sqlite3_result_zeroblob(sqlite3_context *pCtx, int n){
+  assert( sqlite3_mutex_held(pCtx->s.db->mutex) );
+  sqlite3VdbeMemSetZeroBlob(&pCtx->s, n);
+}
+void sqlite3_result_error_code(sqlite3_context *pCtx, int errCode){
+  pCtx->isError = errCode;
+}
 
+/* Force an SQLITE_TOOBIG error. */
+void sqlite3_result_error_toobig(sqlite3_context *pCtx){
+  assert( sqlite3_mutex_held(pCtx->s.db->mutex) );
+  sqlite3VdbeMemSetZeroBlob(&pCtx->s, SQLITE_MAX_LENGTH+1);
+}
+
+/* An SQLITE_NOMEM error. */
+void sqlite3_result_error_nomem(sqlite3_context *pCtx){
+  assert( sqlite3_mutex_held(pCtx->s.db->mutex) );
+  sqlite3VdbeMemSetNull(&pCtx->s);
+  pCtx->isError = SQLITE_NOMEM;
+  pCtx->s.db->mallocFailed = 1;
+}
 
 /*
 ** Execute the statement pStmt, either until a row of data is ready, the
 ** statement is completely executed or an error occurs.
+**
+** This routine implements the bulk of the logic behind the sqlite_step()
+** API.  The only thing omitted is the automatic recompile if a 
+** schema change has occurred.  That detail is handled by the
+** outer sqlite3_step() wrapper procedure.
 */
-int sqlite3_step(sqlite3_stmt *pStmt){
-  Vdbe *p = (Vdbe*)pStmt;
+static int sqlite3Step(Vdbe *p){
   sqlite3 *db;
   int rc;
 
-  /* Assert that malloc() has not failed */
-  assert( !sqlite3MallocFailed() );
-
-  if( p==0 || p->magic!=VDBE_MAGIC_RUN ){
+  assert(p);
+  if( p->magic!=VDBE_MAGIC_RUN ){
     return SQLITE_MISUSE;
   }
+
+  /* Assert that malloc() has not failed */
+  db = p->db;
+  assert( !db->mallocFailed );
+
   if( p->aborted ){
     return SQLITE_ABORT;
   }
@@ -172,9 +278,9 @@ int sqlite3_step(sqlite3_stmt *pStmt){
     if( p->rc==SQLITE_OK ){
       p->rc = SQLITE_SCHEMA;
     }
-    return SQLITE_ERROR;
+    rc = SQLITE_ERROR;
+    goto end_of_step;
   }
-  db = p->db;
   if( sqlite3SafetyOn(db) ){
     p->rc = SQLITE_MISUSE;
     return SQLITE_MISUSE;
@@ -189,35 +295,12 @@ int sqlite3_step(sqlite3_stmt *pStmt){
     }
 
 #ifndef SQLITE_OMIT_TRACE
-    /* Invoke the trace callback if there is one
-    */
-    if( db->xTrace && !db->init.busy ){
-      assert( p->nOp>0 );
-      assert( p->aOp[p->nOp-1].opcode==OP_Noop );
-      assert( p->aOp[p->nOp-1].p3!=0 );
-      assert( p->aOp[p->nOp-1].p3type==P3_DYNAMIC );
-      sqlite3SafetyOff(db);
-      db->xTrace(db->pTraceArg, p->aOp[p->nOp-1].p3);
-      if( sqlite3SafetyOn(db) ){
-        p->rc = SQLITE_MISUSE;
-        return SQLITE_MISUSE;
-      }
-    }
     if( db->xProfile && !db->init.busy ){
       double rNow;
-      sqlite3OsCurrentTime(&rNow);
+      sqlite3OsCurrentTime(db->pVfs, &rNow);
       p->startTime = (rNow - (int)rNow)*3600.0*24.0*1000000000.0;
     }
 #endif
-
-    /* Print a copy of SQL as it is executed if the SQL_TRACE pragma is turned
-    ** on in debugging mode.
-    */
-#ifdef SQLITE_DEBUG
-    if( (db->flags & SQLITE_SqlTrace)!=0 ){
-      sqlite3DebugPrintf("SQL-trace: %s\n", p->aOp[p->nOp-1].p3);
-    }
-#endif /* SQLITE_DEBUG */
 
     db->activeVdbeCnt++;
     p->pc = 0;
@@ -238,24 +321,88 @@ int sqlite3_step(sqlite3_stmt *pStmt){
 #ifndef SQLITE_OMIT_TRACE
   /* Invoke the profile callback if there is one
   */
-  if( rc!=SQLITE_ROW && db->xProfile && !db->init.busy ){
+  if( rc!=SQLITE_ROW && db->xProfile && !db->init.busy && p->nOp>0
+           && p->aOp[0].opcode==OP_Trace && p->aOp[0].p4.z!=0 ){
     double rNow;
     u64 elapseTime;
 
-    sqlite3OsCurrentTime(&rNow);
+    sqlite3OsCurrentTime(db->pVfs, &rNow);
     elapseTime = (rNow - (int)rNow)*3600.0*24.0*1000000000.0 - p->startTime;
-    assert( p->nOp>0 );
-    assert( p->aOp[p->nOp-1].opcode==OP_Noop );
-    assert( p->aOp[p->nOp-1].p3!=0 );
-    assert( p->aOp[p->nOp-1].p3type==P3_DYNAMIC );
-    db->xProfile(db->pProfileArg, p->aOp[p->nOp-1].p3, elapseTime);
+    db->xProfile(db->pProfileArg, p->aOp[0].p4.z, elapseTime);
   }
 #endif
 
   sqlite3Error(p->db, rc, 0);
   p->rc = sqlite3ApiExit(p->db, p->rc);
+end_of_step:
+  assert( (rc&0xff)==rc );
+  if( p->zSql && (rc&0xff)<SQLITE_ROW ){
+    /* This behavior occurs if sqlite3_prepare_v2() was used to build
+    ** the prepared statement.  Return error codes directly */
+    sqlite3Error(p->db, p->rc, 0);
+    return p->rc;
+  }else{
+    /* This is for legacy sqlite3_prepare() builds and when the code
+    ** is SQLITE_ROW or SQLITE_DONE */
+    return rc;
+  }
+}
+
+/*
+** This is the top-level implementation of sqlite3_step().  Call
+** sqlite3Step() to do most of the work.  If a schema error occurs,
+** call sqlite3Reprepare() and try again.
+*/
+#ifdef SQLITE_OMIT_PARSER
+int sqlite3_step(sqlite3_stmt *pStmt){
+  int rc = SQLITE_MISUSE;
+  if( pStmt ){
+    Vdbe *v;
+    v = (Vdbe*)pStmt;
+    sqlite3_mutex_enter(v->db->mutex);
+    rc = sqlite3Step(v);
+    sqlite3_mutex_leave(v->db->mutex);
+  }
   return rc;
 }
+#else
+int sqlite3_step(sqlite3_stmt *pStmt){
+  int rc = SQLITE_MISUSE;
+  if( pStmt ){
+    int cnt = 0;
+    Vdbe *v = (Vdbe*)pStmt;
+    sqlite3 *db = v->db;
+    sqlite3_mutex_enter(db->mutex);
+    while( (rc = sqlite3Step(v))==SQLITE_SCHEMA
+           && cnt++ < 5
+           && sqlite3Reprepare(v) ){
+      sqlite3_reset(pStmt);
+      v->expired = 0;
+    }
+    if( rc==SQLITE_SCHEMA && v->zSql && db->pErr ){
+      /* This case occurs after failing to recompile an sql statement. 
+      ** The error message from the SQL compiler has already been loaded 
+      ** into the database handle. This block copies the error message 
+      ** from the database handle into the statement and sets the statement
+      ** program counter to 0 to ensure that when the statement is 
+      ** finalized or reset the parser error message is available via
+      ** sqlite3_errmsg() and sqlite3_errcode().
+      */
+      const char *zErr = (const char *)sqlite3_value_text(db->pErr); 
+      sqlite3_free(v->zErrMsg);
+      if( !db->mallocFailed ){
+        v->zErrMsg = sqlite3DbStrDup(db, zErr);
+      } else {
+        v->zErrMsg = 0;
+        v->rc = SQLITE_NOMEM;
+      }
+    }
+    rc = sqlite3ApiExit(db, rc);
+    sqlite3_mutex_leave(db->mutex);
+  }
+  return rc;
+}
+#endif
 
 /*
 ** Extract the user data from a sqlite3_context structure and return a
@@ -267,27 +414,45 @@ void *sqlite3_user_data(sqlite3_context *p){
 }
 
 /*
+** The following is the implementation of an SQL function that always
+** fails with an error message stating that the function is used in the
+** wrong context.  The sqlite3_overload_function() API might construct
+** SQL function that use this routine so that the functions will exist
+** for name resolution but are actually overloaded by the xFindFunction
+** method of virtual tables.
+*/
+void sqlite3InvalidFunction(
+  sqlite3_context *context,  /* The function calling context */
+  int argc,                  /* Number of arguments to the function */
+  sqlite3_value **argv       /* Value of each argument */
+){
+  const char *zName = context->pFunc->zName;
+  char *zErr;
+  zErr = sqlite3MPrintf(0,
+      "unable to use function %s in the requested context", zName);
+  sqlite3_result_error(context, zErr, -1);
+  sqlite3_free(zErr);
+}
+
+/*
 ** Allocate or return the aggregate context for a user function.  A new
 ** context is allocated on the first call.  Subsequent calls return the
 ** same context that was returned on prior calls.
 */
 void *sqlite3_aggregate_context(sqlite3_context *p, int nByte){
-  Mem *pMem = p->pMem;
+  Mem *pMem;
   assert( p && p->pFunc && p->pFunc->xStep );
+  assert( sqlite3_mutex_held(p->s.db->mutex) );
+  pMem = p->pMem;
   if( (pMem->flags & MEM_Agg)==0 ){
     if( nByte==0 ){
       assert( pMem->flags==MEM_Null );
       pMem->z = 0;
     }else{
       pMem->flags = MEM_Agg;
-      pMem->xDel = sqlite3FreeX;
-      *(FuncDef**)&pMem->i = p->pFunc;
-      if( nByte<=NBFS ){
-        pMem->z = pMem->zShort;
-        memset(pMem->z, 0, nByte);
-      }else{
-        pMem->z = sqliteMalloc( nByte );
-      }
+      pMem->xDel = sqlite3_free;
+      pMem->u.pDef = p->pFunc;
+      pMem->z = sqlite3DbMallocZero(p->s.db, nByte);
     }
   }
   return (void*)pMem->z;
@@ -298,7 +463,10 @@ void *sqlite3_aggregate_context(sqlite3_context *p, int nByte){
 ** the user-function defined by pCtx.
 */
 void *sqlite3_get_auxdata(sqlite3_context *pCtx, int iArg){
-  VdbeFunc *pVdbeFunc = pCtx->pVdbeFunc;
+  VdbeFunc *pVdbeFunc;
+
+  assert( sqlite3_mutex_held(pCtx->s.db->mutex) );
+  pVdbeFunc = pCtx->pVdbeFunc;
   if( !pVdbeFunc || iArg>=pVdbeFunc->nAux || iArg<0 ){
     return 0;
   }
@@ -318,16 +486,19 @@ void sqlite3_set_auxdata(
 ){
   struct AuxData *pAuxData;
   VdbeFunc *pVdbeFunc;
-  if( iArg<0 ) return;
+  if( iArg<0 ) goto failed;
 
+  assert( sqlite3_mutex_held(pCtx->s.db->mutex) );
   pVdbeFunc = pCtx->pVdbeFunc;
   if( !pVdbeFunc || pVdbeFunc->nAux<=iArg ){
+    int nAux = (pVdbeFunc ? pVdbeFunc->nAux : 0);
     int nMalloc = sizeof(VdbeFunc) + sizeof(struct AuxData)*iArg;
-    pVdbeFunc = sqliteRealloc(pVdbeFunc, nMalloc);
-    if( !pVdbeFunc ) return;
+    pVdbeFunc = sqlite3DbRealloc(pCtx->s.db, pVdbeFunc, nMalloc);
+    if( !pVdbeFunc ){
+      goto failed;
+    }
     pCtx->pVdbeFunc = pVdbeFunc;
-    memset(&pVdbeFunc->apAux[pVdbeFunc->nAux], 0, 
-             sizeof(struct AuxData)*(iArg+1-pVdbeFunc->nAux));
+    memset(&pVdbeFunc->apAux[nAux], 0, sizeof(struct AuxData)*(iArg+1-nAux));
     pVdbeFunc->nAux = iArg+1;
     pVdbeFunc->pFunc = pCtx->pFunc;
   }
@@ -338,6 +509,12 @@ void sqlite3_set_auxdata(
   }
   pAuxData->pAux = pAux;
   pAuxData->xDelete = xDelete;
+  return;
+
+failed:
+  if( xDelete ){
+    xDelete(pAux);
+  }
 }
 
 /*
@@ -368,7 +545,7 @@ int sqlite3_column_count(sqlite3_stmt *pStmt){
 */
 int sqlite3_data_count(sqlite3_stmt *pStmt){
   Vdbe *pVm = (Vdbe *)pStmt;
-  if( pVm==0 || !pVm->resOnStack ) return 0;
+  if( pVm==0 || pVm->pResultSet==0 ) return 0;
   return pVm->nResColumn;
 }
 
@@ -380,14 +557,24 @@ int sqlite3_data_count(sqlite3_stmt *pStmt){
 ** of NULL.
 */
 static Mem *columnMem(sqlite3_stmt *pStmt, int i){
-  Vdbe *pVm = (Vdbe *)pStmt;
-  int vals = sqlite3_data_count(pStmt);
-  if( i>=vals || i<0 ){
-    static const Mem nullMem = {0, 0.0, "", 0, MEM_Null, MEM_Null };
-    sqlite3Error(pVm->db, SQLITE_RANGE, 0);
-    return (Mem*)&nullMem;
+  Vdbe *pVm;
+  int vals;
+  Mem *pOut;
+
+  pVm = (Vdbe *)pStmt;
+  if( pVm && pVm->pResultSet!=0 && i<pVm->nResColumn && i>=0 ){
+    sqlite3_mutex_enter(pVm->db->mutex);
+    vals = sqlite3_data_count(pStmt);
+    pOut = &pVm->pResultSet[i];
+  }else{
+    static const Mem nullMem = {{0}, 0.0, 0, "", 0, MEM_Null, SQLITE_NULL };
+    if( pVm->db ){
+      sqlite3_mutex_enter(pVm->db->mutex);
+      sqlite3Error(pVm->db, SQLITE_RANGE, 0);
+    }
+    pOut = (Mem*)&nullMem;
   }
-  return &pVm->pTos[(1-vals)+i];
+  return pOut;
 }
 
 /*
@@ -397,7 +584,7 @@ static Mem *columnMem(sqlite3_stmt *pStmt, int i){
 ** malloc() has failed, the threads mallocFailed flag is cleared and the result
 ** code of statement pStmt set to SQLITE_NOMEM.
 **
-** Specificly, this is called from within:
+** Specifically, this is called from within:
 **
 **     sqlite3_column_int()
 **     sqlite3_column_int64()
@@ -417,7 +604,10 @@ static void columnMallocFailure(sqlite3_stmt *pStmt)
   ** and _finalize() will return NOMEM.
   */
   Vdbe *p = (Vdbe *)pStmt;
-  p->rc = sqlite3ApiExit(0, p->rc);
+  if( p ){
+    p->rc = sqlite3ApiExit(p->db, p->rc);
+    sqlite3_mutex_leave(p->db->mutex);
+  }
 }
 
 /**************************** sqlite3_column_  *******************************
@@ -426,9 +616,12 @@ static void columnMallocFailure(sqlite3_stmt *pStmt)
 */
 const void *sqlite3_column_blob(sqlite3_stmt *pStmt, int i){
   const void *val;
-  sqlite3MallocDisallow();
   val = sqlite3_value_blob( columnMem(pStmt,i) );
-  sqlite3MallocAllow();
+  /* Even though there is no encoding conversion, value_blob() might
+  ** need to call malloc() to expand the result of a zeroblob() 
+  ** expression. 
+  */
+  columnMallocFailure(pStmt);
   return val;
 }
 int sqlite3_column_bytes(sqlite3_stmt *pStmt, int i){
@@ -462,7 +655,9 @@ const unsigned char *sqlite3_column_text(sqlite3_stmt *pStmt, int i){
   return val;
 }
 sqlite3_value *sqlite3_column_value(sqlite3_stmt *pStmt, int i){
-  return columnMem(pStmt, i);
+  sqlite3_value *pOut = columnMem(pStmt, i);
+  columnMallocFailure(pStmt);
+  return pOut;
 }
 #ifndef SQLITE_OMIT_UTF16
 const void *sqlite3_column_text16(sqlite3_stmt *pStmt, int i){
@@ -472,7 +667,9 @@ const void *sqlite3_column_text16(sqlite3_stmt *pStmt, int i){
 }
 #endif /* SQLITE_OMIT_UTF16 */
 int sqlite3_column_type(sqlite3_stmt *pStmt, int i){
-  return sqlite3_value_type( columnMem(pStmt,i) );
+  int iType = sqlite3_value_type( columnMem(pStmt,i) );
+  columnMallocFailure(pStmt);
+  return iType;
 }
 
 /* The following function is experimental and subject to change or
@@ -504,20 +701,28 @@ static const void *columnName(
   const void *(*xFunc)(Mem*),
   int useType
 ){
-  const void *ret;
+  const void *ret = 0;
   Vdbe *p = (Vdbe *)pStmt;
-  int n = sqlite3_column_count(pStmt);
+  int n;
+  
 
-  if( p==0 || N>=n || N<0 ){
-    return 0;
+  if( p!=0 ){
+    n = sqlite3_column_count(pStmt);
+    if( N<n && N>=0 ){
+      N += useType*n;
+      sqlite3_mutex_enter(p->db->mutex);
+      ret = xFunc(&p->aColName[N]);
+
+      /* A malloc may have failed inside of the xFunc() call. If this
+      ** is the case, clear the mallocFailed flag and return NULL.
+      */
+      if( p->db && p->db->mallocFailed ){
+        p->db->mallocFailed = 0;
+        ret = 0;
+      }
+      sqlite3_mutex_leave(p->db->mutex);
+    }
   }
-  N += useType*n;
-  ret = xFunc(&p->aColName[N]);
-
-  /* A malloc may have failed inside of the xFunc() call. If this is the case,
-  ** clear the mallocFailed flag and return NULL.
-  */
-  sqlite3ApiExit(0, 0);
   return ret;
 }
 
@@ -636,29 +841,33 @@ static int vdbeUnbind(Vdbe *p, int i){
 ** Bind a text or BLOB value.
 */
 static int bindText(
-  sqlite3_stmt *pStmt, 
-  int i, 
-  const void *zData, 
-  int nData, 
-  void (*xDel)(void*),
-  int encoding
+  sqlite3_stmt *pStmt,   /* The statement to bind against */
+  int i,                 /* Index of the parameter to bind */
+  const void *zData,     /* Pointer to the data to be bound */
+  int nData,             /* Number of bytes of data to be bound */
+  void (*xDel)(void*),   /* Destructor for the data */
+  int encoding           /* Encoding for the data */
 ){
   Vdbe *p = (Vdbe *)pStmt;
   Mem *pVar;
   int rc;
 
+  if( p==0 ){
+    return SQLITE_MISUSE;
+  }
+  sqlite3_mutex_enter(p->db->mutex);
   rc = vdbeUnbind(p, i);
-  if( rc || zData==0 ){
-    return rc;
+  if( rc==SQLITE_OK && zData!=0 ){
+    pVar = &p->aVar[i-1];
+    rc = sqlite3VdbeMemSetStr(pVar, zData, nData, encoding, xDel);
+    if( rc==SQLITE_OK && encoding!=0 ){
+      rc = sqlite3VdbeChangeEncoding(pVar, ENC(p->db));
+    }
+    sqlite3Error(p->db, rc, 0);
+    rc = sqlite3ApiExit(p->db, rc);
   }
-  pVar = &p->aVar[i-1];
-  rc = sqlite3VdbeMemSetStr(pVar, zData, nData, encoding, xDel);
-  if( rc==SQLITE_OK && encoding!=0 ){
-    rc = sqlite3VdbeChangeEncoding(pVar, ENC(p->db));
-  }
-
-  sqlite3Error(((Vdbe *)pStmt)->db, rc, 0);
-  return sqlite3ApiExit(((Vdbe *)pStmt)->db, rc);
+  sqlite3_mutex_leave(p->db->mutex);
+  return rc;
 }
 
 
@@ -677,10 +886,12 @@ int sqlite3_bind_blob(
 int sqlite3_bind_double(sqlite3_stmt *pStmt, int i, double rValue){
   int rc;
   Vdbe *p = (Vdbe *)pStmt;
+  sqlite3_mutex_enter(p->db->mutex);
   rc = vdbeUnbind(p, i);
   if( rc==SQLITE_OK ){
     sqlite3VdbeMemSetDouble(&p->aVar[i-1], rValue);
   }
+  sqlite3_mutex_leave(p->db->mutex);
   return rc;
 }
 int sqlite3_bind_int(sqlite3_stmt *p, int i, int iValue){
@@ -689,14 +900,21 @@ int sqlite3_bind_int(sqlite3_stmt *p, int i, int iValue){
 int sqlite3_bind_int64(sqlite3_stmt *pStmt, int i, sqlite_int64 iValue){
   int rc;
   Vdbe *p = (Vdbe *)pStmt;
+  sqlite3_mutex_enter(p->db->mutex);
   rc = vdbeUnbind(p, i);
   if( rc==SQLITE_OK ){
     sqlite3VdbeMemSetInt64(&p->aVar[i-1], iValue);
   }
+  sqlite3_mutex_leave(p->db->mutex);
   return rc;
 }
-int sqlite3_bind_null(sqlite3_stmt* p, int i){
-  return vdbeUnbind((Vdbe *)p, i);
+int sqlite3_bind_null(sqlite3_stmt *pStmt, int i){
+  int rc;
+  Vdbe *p = (Vdbe*)pStmt;
+  sqlite3_mutex_enter(p->db->mutex);
+  rc = vdbeUnbind(p, i);
+  sqlite3_mutex_leave(p->db->mutex);
+  return rc;
 }
 int sqlite3_bind_text( 
   sqlite3_stmt *pStmt, 
@@ -721,10 +939,23 @@ int sqlite3_bind_text16(
 int sqlite3_bind_value(sqlite3_stmt *pStmt, int i, const sqlite3_value *pValue){
   int rc;
   Vdbe *p = (Vdbe *)pStmt;
+  sqlite3_mutex_enter(p->db->mutex);
   rc = vdbeUnbind(p, i);
   if( rc==SQLITE_OK ){
-    sqlite3VdbeMemCopy(&p->aVar[i-1], pValue);
+    rc = sqlite3VdbeMemCopy(&p->aVar[i-1], pValue);
   }
+  sqlite3_mutex_leave(p->db->mutex);
+  return rc;
+}
+int sqlite3_bind_zeroblob(sqlite3_stmt *pStmt, int i, int n){
+  int rc;
+  Vdbe *p = (Vdbe *)pStmt;
+  sqlite3_mutex_enter(p->db->mutex);
+  rc = vdbeUnbind(p, i);
+  if( rc==SQLITE_OK ){
+    sqlite3VdbeMemSetZeroBlob(&p->aVar[i-1], n);
+  }
+  sqlite3_mutex_leave(p->db->mutex);
   return rc;
 }
 
@@ -744,15 +975,19 @@ int sqlite3_bind_parameter_count(sqlite3_stmt *pStmt){
 */
 static void createVarMap(Vdbe *p){
   if( !p->okVar ){
-    int j;
-    Op *pOp;
-    for(j=0, pOp=p->aOp; j<p->nOp; j++, pOp++){
-      if( pOp->opcode==OP_Variable ){
-        assert( pOp->p1>0 && pOp->p1<=p->nVar );
-        p->azVar[pOp->p1-1] = pOp->p3;
+    sqlite3_mutex_enter(p->db->mutex);
+    if( !p->okVar ){
+      int j;
+      Op *pOp;
+      for(j=0, pOp=p->aOp; j<p->nOp; j++, pOp++){
+        if( pOp->opcode==OP_Variable ){
+          assert( pOp->p1>0 && pOp->p1<=p->nVar );
+          p->azVar[pOp->p1-1] = pOp->p4.z;
+        }
       }
+      p->okVar = 1;
     }
-    p->okVar = 1;
+    sqlite3_mutex_leave(p->db->mutex);
   }
 }
 
@@ -804,17 +1039,19 @@ int sqlite3_transfer_bindings(sqlite3_stmt *pFromStmt, sqlite3_stmt *pToStmt){
   Vdbe *pTo = (Vdbe*)pToStmt;
   int i, rc = SQLITE_OK;
   if( (pFrom->magic!=VDBE_MAGIC_RUN && pFrom->magic!=VDBE_MAGIC_HALT)
-    || (pTo->magic!=VDBE_MAGIC_RUN && pTo->magic!=VDBE_MAGIC_HALT) ){
+    || (pTo->magic!=VDBE_MAGIC_RUN && pTo->magic!=VDBE_MAGIC_HALT)
+    || pTo->db!=pFrom->db ){
     return SQLITE_MISUSE;
   }
   if( pFrom->nVar!=pTo->nVar ){
     return SQLITE_ERROR;
   }
+  sqlite3_mutex_enter(pTo->db->mutex);
   for(i=0; rc==SQLITE_OK && i<pFrom->nVar; i++){
-    sqlite3MallocDisallow();
-    rc = sqlite3VdbeMemMove(&pTo->aVar[i], &pFrom->aVar[i]);
-    sqlite3MallocAllow();
+    sqlite3VdbeMemMove(&pTo->aVar[i], &pFrom->aVar[i]);
   }
+  sqlite3_mutex_leave(pTo->db->mutex);
+  assert( rc==SQLITE_OK || rc==SQLITE_NOMEM );
   return rc;
 }
 

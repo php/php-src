@@ -15,6 +15,7 @@
 */
 #include "sqliteInt.h"
 
+#ifndef SQLITE_OMIT_ATTACH
 /*
 ** Resolve an expression that was part of an ATTACH or DETACH statement. This
 ** is slightly different from resolving a normal SQL expression, because simple
@@ -39,6 +40,10 @@ static int resolveAttachExpr(NameContext *pName, Expr *pExpr)
   if( pExpr ){
     if( pExpr->op!=TK_ID ){
       rc = sqlite3ExprResolveNames(pName, pExpr);
+      if( rc==SQLITE_OK && !sqlite3ExprIsConstant(pExpr) ){
+        sqlite3ErrorMsg(pName->pParse, "invalid name: \"%T\"", &pExpr->span);
+        return SQLITE_ERROR;
+      }
     }else{
       pExpr->op = TK_STRING;
     }
@@ -68,8 +73,8 @@ static void attachFunc(
   const char *zName;
   const char *zFile;
   Db *aNew;
-  char zErr[128];
   char *zErrDyn = 0;
+  char zErr[128];
 
   zFile = (const char *)sqlite3_value_text(argv[0]);
   zName = (const char *)sqlite3_value_text(argv[1]);
@@ -82,20 +87,23 @@ static void attachFunc(
   **     * Transaction currently open
   **     * Specified database name already being used.
   */
-  if( db->nDb>=MAX_ATTACHED+2 ){
+  if( db->nDb>=SQLITE_MAX_ATTACHED+2 ){
     sqlite3_snprintf(
-      sizeof(zErr), zErr, "too many attached databases - max %d", MAX_ATTACHED
+      sizeof(zErr), zErr, "too many attached databases - max %d", 
+      SQLITE_MAX_ATTACHED
     );
     goto attach_error;
   }
   if( !db->autoCommit ){
-    strcpy(zErr, "cannot ATTACH database within transaction");
+    sqlite3_snprintf(sizeof(zErr), zErr,
+                     "cannot ATTACH database within transaction");
     goto attach_error;
   }
   for(i=0; i<db->nDb; i++){
     char *z = db->aDb[i].zName;
     if( z && zName && sqlite3StrICmp(z, zName)==0 ){
-      sqlite3_snprintf(sizeof(zErr), zErr, "database %s is already in use", zName);
+      sqlite3_snprintf(sizeof(zErr), zErr, 
+                       "database %s is already in use", zName);
       goto attach_error;
     }
   }
@@ -104,14 +112,16 @@ static void attachFunc(
   ** hash tables.
   */
   if( db->aDb==db->aDbStatic ){
-    aNew = sqliteMalloc( sizeof(db->aDb[0])*3 );
+    aNew = sqlite3_malloc( sizeof(db->aDb[0])*3 );
     if( aNew==0 ){
+      db->mallocFailed = 1;
       return;
     }
     memcpy(aNew, db->aDb, sizeof(db->aDb[0])*2);
   }else{
-    aNew = sqliteRealloc(db->aDb, sizeof(db->aDb[0])*(db->nDb+1) );
+    aNew = sqlite3_realloc(db->aDb, sizeof(db->aDb[0])*(db->nDb+1) );
     if( aNew==0 ){
+      db->mallocFailed = 1;
       return;
     } 
   }
@@ -123,23 +133,26 @@ static void attachFunc(
   ** it to obtain the database schema. At this point the schema may
   ** or may not be initialised.
   */
-  rc = sqlite3BtreeFactory(db, zFile, 0, MAX_PAGES, &aNew->pBt);
+  rc = sqlite3BtreeFactory(db, zFile, 0, SQLITE_DEFAULT_CACHE_SIZE,
+                           db->openFlags | SQLITE_OPEN_MAIN_DB,
+                           &aNew->pBt);
   if( rc==SQLITE_OK ){
-    aNew->pSchema = sqlite3SchemaGet(aNew->pBt);
+    aNew->pSchema = sqlite3SchemaGet(db, aNew->pBt);
     if( !aNew->pSchema ){
       rc = SQLITE_NOMEM;
     }else if( aNew->pSchema->file_format && aNew->pSchema->enc!=ENC(db) ){
-      strcpy(zErr, 
+      sqlite3_snprintf(sizeof(zErr), zErr, 
         "attached databases must use the same text encoding as main database");
       goto attach_error;
     }
+    sqlite3PagerLockingMode(sqlite3BtreePager(aNew->pBt), db->dfltLockMode);
   }
-  aNew->zName = sqliteStrDup(zName);
+  aNew->zName = sqlite3DbStrDup(db, zName);
   aNew->safety_level = 3;
 
 #if SQLITE_HAS_CODEC
   {
-    extern int sqlite3CodecAttach(sqlite3*, int, void*, int);
+    extern int sqlite3CodecAttach(sqlite3*, int, const void*, int);
     extern void sqlite3CodecGetKey(sqlite3*, int, void**, int*);
     int nKey;
     char *zKey;
@@ -147,7 +160,7 @@ static void attachFunc(
     switch( t ){
       case SQLITE_INTEGER:
       case SQLITE_FLOAT:
-        zErrDyn = sqliteStrDup("Invalid key value");
+        zErrDyn = sqlite3DbStrDup(db, "Invalid key value");
         rc = SQLITE_ERROR;
         break;
         
@@ -173,9 +186,11 @@ static void attachFunc(
   ** we found it.
   */
   if( rc==SQLITE_OK ){
-    sqlite3SafetyOn(db);
+    (void)sqlite3SafetyOn(db);
+    sqlite3BtreeEnterAll(db);
     rc = sqlite3Init(db, &zErrDyn);
-    sqlite3SafetyOff(db);
+    sqlite3BtreeLeaveAll(db);
+    (void)sqlite3SafetyOff(db);
   }
   if( rc ){
     int iDb = db->nDb - 1;
@@ -187,8 +202,8 @@ static void attachFunc(
     }
     sqlite3ResetInternalSchema(db, 0);
     db->nDb = iDb;
-    if( rc==SQLITE_NOMEM ){
-      if( !sqlite3MallocFailed() ) sqlite3FailedMalloc();
+    if( rc==SQLITE_NOMEM || rc==SQLITE_IOERR_NOMEM ){
+      db->mallocFailed = 1;
       sqlite3_snprintf(sizeof(zErr),zErr, "out of memory");
     }else{
       sqlite3_snprintf(sizeof(zErr),zErr, "unable to open database: %s", zFile);
@@ -202,11 +217,12 @@ attach_error:
   /* Return an error if we get here */
   if( zErrDyn ){
     sqlite3_result_error(context, zErrDyn, -1);
-    sqliteFree(zErrDyn);
+    sqlite3_free(zErrDyn);
   }else{
     zErr[sizeof(zErr)-1] = 0;
     sqlite3_result_error(context, zErr, -1);
   }
+  if( rc ) sqlite3_result_error_code(context, rc);
 }
 
 /*
@@ -244,7 +260,8 @@ static void detachFunc(
     goto detach_error;
   }
   if( !db->autoCommit ){
-    strcpy(zErr, "cannot DETACH database within transaction");
+    sqlite3_snprintf(sizeof(zErr), zErr,
+                     "cannot DETACH database within transaction");
     goto detach_error;
   }
   if( sqlite3BtreeIsInReadTrans(pDb->pBt) ){
@@ -281,16 +298,17 @@ static void codeAttach(
   Vdbe *v;
   FuncDef *pFunc;
   sqlite3* db = pParse->db;
+  int regArgs;
 
 #ifndef SQLITE_OMIT_AUTHORIZATION
-  assert( sqlite3MallocFailed() || pAuthArg );
+  assert( db->mallocFailed || pAuthArg );
   if( pAuthArg ){
-    char *zAuthArg = sqlite3NameFromToken(&pAuthArg->span);
+    char *zAuthArg = sqlite3NameFromToken(db, &pAuthArg->span);
     if( !zAuthArg ){
       goto attach_end;
     }
     rc = sqlite3AuthCheck(pParse, type, zAuthArg, 0, 0);
-    sqliteFree(zAuthArg);
+    sqlite3_free(zAuthArg);
     if(rc!=SQLITE_OK ){
       goto attach_end;
     }
@@ -310,21 +328,23 @@ static void codeAttach(
   }
 
   v = sqlite3GetVdbe(pParse);
-  sqlite3ExprCode(pParse, pFilename);
-  sqlite3ExprCode(pParse, pDbname);
-  sqlite3ExprCode(pParse, pKey);
+  regArgs = sqlite3GetTempRange(pParse, 3);
+  sqlite3ExprCode(pParse, pFilename, regArgs);
+  sqlite3ExprCode(pParse, pDbname, regArgs+1);
+  sqlite3ExprCode(pParse, pKey, regArgs+2);
 
-  assert( v || sqlite3MallocFailed() );
+  assert( v || db->mallocFailed );
   if( v ){
-    sqlite3VdbeAddOp(v, OP_Function, 0, nFunc);
+    sqlite3VdbeAddOp3(v, OP_Function, 0, regArgs+3-nFunc, regArgs);
+    sqlite3VdbeChangeP5(v, nFunc);
     pFunc = sqlite3FindFunction(db, zFunc, strlen(zFunc), nFunc, SQLITE_UTF8,0);
-    sqlite3VdbeChangeP3(v, -1, (char *)pFunc, P3_FUNCDEF);
+    sqlite3VdbeChangeP4(v, -1, (char *)pFunc, P4_FUNCDEF);
 
     /* Code an OP_Expire. For an ATTACH statement, set P1 to true (expire this
     ** statement only). For DETACH, set it to false (expire all existing
     ** statements).
     */
-    sqlite3VdbeAddOp(v, OP_Expire, (type==SQLITE_ATTACH), 0);
+    sqlite3VdbeAddOp1(v, OP_Expire, (type==SQLITE_ATTACH));
   }
   
 attach_end:
@@ -350,14 +370,17 @@ void sqlite3Detach(Parse *pParse, Expr *pDbname){
 void sqlite3Attach(Parse *pParse, Expr *p, Expr *pDbname, Expr *pKey){
   codeAttach(pParse, SQLITE_ATTACH, "sqlite_attach", 3, p, p, pDbname, pKey);
 }
+#endif /* SQLITE_OMIT_ATTACH */
 
 /*
 ** Register the functions sqlite_attach and sqlite_detach.
 */
 void sqlite3AttachFunctions(sqlite3 *db){
+#ifndef SQLITE_OMIT_ATTACH
   static const int enc = SQLITE_UTF8;
   sqlite3CreateFunc(db, "sqlite_attach", 3, enc, db, attachFunc, 0, 0);
   sqlite3CreateFunc(db, "sqlite_detach", 1, enc, db, detachFunc, 0, 0);
+#endif
 }
 
 /*
@@ -412,7 +435,7 @@ int sqlite3FixSrcList(
   zDb = pFix->zDb;
   for(i=0, pItem=pList->a; i<pList->nSrc; i++, pItem++){
     if( pItem->zDatabase==0 ){
-      pItem->zDatabase = sqliteStrDup(zDb);
+      pItem->zDatabase = sqlite3DbStrDup(pFix->pParse->db, zDb);
     }else if( sqlite3StrICmp(pItem->zDatabase,zDb)!=0 ){
       sqlite3ErrorMsg(pFix->pParse,
          "%s %T cannot reference objects in database %s",

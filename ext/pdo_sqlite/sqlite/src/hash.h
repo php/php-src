@@ -33,10 +33,8 @@ struct Hash {
   char keyClass;          /* SQLITE_HASH_INT, _POINTER, _STRING, _BINARY */
   char copyKey;           /* True if copy of key made on insert */
   int count;              /* Number of entries in this table */
-  HashElem *first;        /* The first element of the array */
-  void *(*xMalloc)(int);  /* malloc() function to use */
-  void (*xFree)(void *);  /* free() function to use */
   int htsize;             /* Number of buckets in the hash table */
+  HashElem *first;        /* The first element of the array */
   struct _ht {            /* the hash table */
     int count;               /* Number of entries with this hash */
     HashElem *chain;         /* Pointer to first entry with this hash */
@@ -83,6 +81,7 @@ struct HashElem {
 void sqlite3HashInit(Hash*, int keytype, int copyKey);
 void *sqlite3HashInsert(Hash*, const void *pKey, int nKey, void *pData);
 void *sqlite3HashFind(const Hash*, const void *pKey, int nKey);
+HashElem *sqlite3HashFindElem(const Hash*, const void *pKey, int nKey);
 void sqlite3HashClear(Hash*);
 
 /*

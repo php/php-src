@@ -41,8 +41,6 @@ void sqlite3HashInit(Hash *pNew, int keyClass, int copyKey){
   pNew->count = 0;
   pNew->htsize = 0;
   pNew->ht = 0;
-  pNew->xMalloc = sqlite3MallocX;
-  pNew->xFree = sqlite3FreeX;
 }
 
 /* Remove all entries from a hash table.  Reclaim all memory.
@@ -55,15 +53,15 @@ void sqlite3HashClear(Hash *pH){
   assert( pH!=0 );
   elem = pH->first;
   pH->first = 0;
-  if( pH->ht ) pH->xFree(pH->ht);
+  if( pH->ht ) sqlite3_free(pH->ht);
   pH->ht = 0;
   pH->htsize = 0;
   while( elem ){
     HashElem *next_elem = elem->next;
     if( pH->copyKey && elem->pKey ){
-      pH->xFree(elem->pKey);
+      sqlite3_free(elem->pKey);
     }
-    pH->xFree(elem);
+    sqlite3_free(elem);
     elem = next_elem;
   }
   pH->count = 0;
@@ -216,7 +214,7 @@ static void insertElement(
 
 /* Resize the hash table so that it cantains "new_size" buckets.
 ** "new_size" must be a power of 2.  The hash table might fail 
-** to resize if sqliteMalloc() fails.
+** to resize if sqlite3_malloc() fails.
 */
 static void rehash(Hash *pH, int new_size){
   struct _ht *new_ht;            /* The new hash table */
@@ -224,9 +222,18 @@ static void rehash(Hash *pH, int new_size){
   int (*xHash)(const void*,int); /* The hash function */
 
   assert( (new_size & (new_size-1))==0 );
-  new_ht = (struct _ht *)pH->xMalloc( new_size*sizeof(struct _ht) );
+
+  /* There is a call to sqlite3_malloc() inside rehash(). If there is
+  ** already an allocation at pH->ht, then if this malloc() fails it
+  ** is benign (since failing to resize a hash table is a performance
+  ** hit only, not a fatal error).
+  */
+  sqlite3FaultBenign(SQLITE_FAULTINJECTOR_MALLOC, pH->htsize>0);
+  new_ht = (struct _ht *)sqlite3MallocZero( new_size*sizeof(struct _ht) );
+  sqlite3FaultBenign(SQLITE_FAULTINJECTOR_MALLOC, 0);
+
   if( new_ht==0 ) return;
-  if( pH->ht ) pH->xFree(pH->ht);
+  if( pH->ht ) sqlite3_free(pH->ht);
   pH->ht = new_ht;
   pH->htsize = new_size;
   xHash = hashFunction(pH->keyClass);
@@ -291,10 +298,10 @@ static void removeElementGivenHash(
   if( pEntry->count<=0 ){
     pEntry->chain = 0;
   }
-  if( pH->copyKey && elem->pKey ){
-    pH->xFree(elem->pKey);
+  if( pH->copyKey ){
+    sqlite3_free(elem->pKey);
   }
-  pH->xFree( elem );
+  sqlite3_free( elem );
   pH->count--;
   if( pH->count<=0 ){
     assert( pH->first==0 );
@@ -304,10 +311,11 @@ static void removeElementGivenHash(
 }
 
 /* Attempt to locate an element of the hash table pH with a key
-** that matches pKey,nKey.  Return the data for this element if it is
-** found, or NULL if there is no match.
+** that matches pKey,nKey.  Return a pointer to the corresponding 
+** HashElem structure for this element if it is found, or NULL
+** otherwise.
 */
-void *sqlite3HashFind(const Hash *pH, const void *pKey, int nKey){
+HashElem *sqlite3HashFindElem(const Hash *pH, const void *pKey, int nKey){
   int h;             /* A hash on key */
   HashElem *elem;    /* The element that matches key */
   int (*xHash)(const void*,int);  /* The hash function */
@@ -318,6 +326,16 @@ void *sqlite3HashFind(const Hash *pH, const void *pKey, int nKey){
   h = (*xHash)(pKey,nKey);
   assert( (pH->htsize & (pH->htsize-1))==0 );
   elem = findElementGivenHash(pH,pKey,nKey, h & (pH->htsize-1));
+  return elem;
+}
+
+/* Attempt to locate an element of the hash table pH with a key
+** that matches pKey,nKey.  Return the data for this element if it is
+** found, or NULL if there is no match.
+*/
+void *sqlite3HashFind(const Hash *pH, const void *pKey, int nKey){
+  HashElem *elem;    /* The element that matches key */
+  elem = sqlite3HashFindElem(pH, pKey, nKey);
   return elem ? elem->data : 0;
 }
 
@@ -356,16 +374,20 @@ void *sqlite3HashInsert(Hash *pH, const void *pKey, int nKey, void *data){
       removeElementGivenHash(pH,elem,h);
     }else{
       elem->data = data;
+      if( !pH->copyKey ){
+        elem->pKey = (void *)pKey;
+      }
+      assert(nKey==elem->nKey);
     }
     return old_data;
   }
   if( data==0 ) return 0;
-  new_elem = (HashElem*)pH->xMalloc( sizeof(HashElem) );
+  new_elem = (HashElem*)sqlite3_malloc( sizeof(HashElem) );
   if( new_elem==0 ) return data;
   if( pH->copyKey && pKey!=0 ){
-    new_elem->pKey = pH->xMalloc( nKey );
+    new_elem->pKey = sqlite3_malloc( nKey );
     if( new_elem->pKey==0 ){
-      pH->xFree(new_elem);
+      sqlite3_free(new_elem);
       return data;
     }
     memcpy((void*)new_elem->pKey, pKey, nKey);
@@ -378,7 +400,10 @@ void *sqlite3HashInsert(Hash *pH, const void *pKey, int nKey, void *data){
     rehash(pH,8);
     if( pH->htsize==0 ){
       pH->count = 0;
-      pH->xFree(new_elem);
+      if( pH->copyKey ){
+        sqlite3_free(new_elem->pKey);
+      }
+      sqlite3_free(new_elem);
       return data;
     }
   }

@@ -1,5 +1,5 @@
 /*
-** 2007 June 7
+** 2006 June 7
 **
 ** The author disclaims copyright to this source code.  In place of
 ** a legal notice, here is a blessing:
@@ -19,13 +19,19 @@
 */
 #ifndef _SQLITE3EXT_H_
 #define _SQLITE3EXT_H_
-#include <sqlite3.h>
+#include "sqlite3.h"
 
 typedef struct sqlite3_api_routines sqlite3_api_routines;
 
 /*
 ** The following structure hold pointers to all of the SQLite API
 ** routines.
+**
+** WARNING:  In order to maintain backwards compatibility, add new
+** interfaces to the end of this structure only.  If you insert new
+** interfaces in the middle of this structure, then older different
+** versions of SQLite will not be able to load each others shared
+** libraries!
 */
 struct sqlite3_api_routines {
   void * (*aggregate_context)(sqlite3_context*,int nBytes);
@@ -92,7 +98,7 @@ struct sqlite3_api_routines {
   void * (*get_auxdata)(sqlite3_context*,int);
   int  (*get_table)(sqlite3*,const char*,char***,int*,int*,char**);
   int  (*global_recover)(void);
-  void  (*interrupt)(sqlite3*);
+  void  (*interruptx)(sqlite3*);
   sqlite_int64  (*last_insert_rowid)(sqlite3*);
   const char * (*libversion)(void);
   int  (*libversion_number)(void);
@@ -142,7 +148,40 @@ struct sqlite3_api_routines {
   const void * (*value_text16be)(sqlite3_value*);
   const void * (*value_text16le)(sqlite3_value*);
   int  (*value_type)(sqlite3_value*);
-  char * (*vmprintf)(const char*,va_list);
+  char *(*vmprintf)(const char*,va_list);
+  /* Added ??? */
+  int (*overload_function)(sqlite3*, const char *zFuncName, int nArg);
+  /* Added by 3.3.13 */
+  int (*prepare_v2)(sqlite3*,const char*,int,sqlite3_stmt**,const char**);
+  int (*prepare16_v2)(sqlite3*,const void*,int,sqlite3_stmt**,const void**);
+  int (*clear_bindings)(sqlite3_stmt*);
+  /* Added by 3.4.1 */
+  int (*create_module_v2)(sqlite3*,const char*,const sqlite3_module*,void*,void (*xDestroy)(void *));
+  /* Added by 3.5.0 */
+  int (*bind_zeroblob)(sqlite3_stmt*,int,int);
+  int (*blob_bytes)(sqlite3_blob*);
+  int (*blob_close)(sqlite3_blob*);
+  int (*blob_open)(sqlite3*,const char*,const char*,const char*,sqlite3_int64,int,sqlite3_blob**);
+  int (*blob_read)(sqlite3_blob*,void*,int,int);
+  int (*blob_write)(sqlite3_blob*,const void*,int,int);
+  int (*create_collation_v2)(sqlite3*,const char*,int,void*,int(*)(void*,int,const void*,int,const void*),void(*)(void*));
+  int (*file_control)(sqlite3*,const char*,int,void*);
+  sqlite3_int64 (*memory_highwater)(int);
+  sqlite3_int64 (*memory_used)(void);
+  sqlite3_mutex *(*mutex_alloc)(int);
+  void (*mutex_enter)(sqlite3_mutex*);
+  void (*mutex_free)(sqlite3_mutex*);
+  void (*mutex_leave)(sqlite3_mutex*);
+  int (*mutex_try)(sqlite3_mutex*);
+  int (*open_v2)(const char*,sqlite3**,int,const char*);
+  int (*release_memory)(int);
+  void (*result_error_nomem)(sqlite3_context*);
+  void (*result_error_toobig)(sqlite3_context*);
+  int (*sleep)(int);
+  void (*soft_heap_limit)(int);
+  sqlite3_vfs *(*vfs_find)(const char*);
+  int (*vfs_register)(sqlite3_vfs*,int);
+  int (*vfs_unregister)(sqlite3_vfs*);
 };
 
 /*
@@ -205,6 +244,7 @@ struct sqlite3_api_routines {
 #define sqlite3_create_function        sqlite3_api->create_function
 #define sqlite3_create_function16      sqlite3_api->create_function16
 #define sqlite3_create_module          sqlite3_api->create_module
+#define sqlite3_create_module_v2       sqlite3_api->create_module_v2
 #define sqlite3_data_count             sqlite3_api->data_count
 #define sqlite3_db_handle              sqlite3_api->db_handle
 #define sqlite3_declare_vtab           sqlite3_api->declare_vtab
@@ -221,7 +261,7 @@ struct sqlite3_api_routines {
 #define sqlite3_get_auxdata            sqlite3_api->get_auxdata
 #define sqlite3_get_table              sqlite3_api->get_table
 #define sqlite3_global_recover         sqlite3_api->global_recover
-#define sqlite3_interrupt              sqlite3_api->interrupt
+#define sqlite3_interrupt              sqlite3_api->interruptx
 #define sqlite3_last_insert_rowid      sqlite3_api->last_insert_rowid
 #define sqlite3_libversion             sqlite3_api->libversion
 #define sqlite3_libversion_number      sqlite3_api->libversion_number
@@ -231,6 +271,8 @@ struct sqlite3_api_routines {
 #define sqlite3_open16                 sqlite3_api->open16
 #define sqlite3_prepare                sqlite3_api->prepare
 #define sqlite3_prepare16              sqlite3_api->prepare16
+#define sqlite3_prepare_v2             sqlite3_api->prepare_v2
+#define sqlite3_prepare16_v2           sqlite3_api->prepare16_v2
 #define sqlite3_profile                sqlite3_api->profile
 #define sqlite3_progress_handler       sqlite3_api->progress_handler
 #define sqlite3_realloc                sqlite3_api->realloc
@@ -272,6 +314,34 @@ struct sqlite3_api_routines {
 #define sqlite3_value_text16le         sqlite3_api->value_text16le
 #define sqlite3_value_type             sqlite3_api->value_type
 #define sqlite3_vmprintf               sqlite3_api->vmprintf
+#define sqlite3_overload_function      sqlite3_api->overload_function
+#define sqlite3_prepare_v2             sqlite3_api->prepare_v2
+#define sqlite3_prepare16_v2           sqlite3_api->prepare16_v2
+#define sqlite3_clear_bindings         sqlite3_api->clear_bindings
+#define sqlite3_bind_zeroblob          sqlite3_api->bind_zeroblob
+#define sqlite3_blob_bytes             sqlite3_api->blob_bytes
+#define sqlite3_blob_close             sqlite3_api->blob_close
+#define sqlite3_blob_open              sqlite3_api->blob_open
+#define sqlite3_blob_read              sqlite3_api->blob_read
+#define sqlite3_blob_write             sqlite3_api->blob_write
+#define sqlite3_create_collation_v2    sqlite3_api->create_collation_v2
+#define sqlite3_file_control           sqlite3_api->file_control
+#define sqlite3_memory_highwater       sqlite3_api->memory_highwater
+#define sqlite3_memory_used            sqlite3_api->memory_used
+#define sqlite3_mutex_alloc            sqlite3_api->mutex_alloc
+#define sqlite3_mutex_enter            sqlite3_api->mutex_enter
+#define sqlite3_mutex_free             sqlite3_api->mutex_free
+#define sqlite3_mutex_leave            sqlite3_api->mutex_leave
+#define sqlite3_mutex_try              sqlite3_api->mutex_try
+#define sqlite3_open_v2                sqlite3_api->open_v2
+#define sqlite3_release_memory         sqlite3_api->release_memory
+#define sqlite3_result_error_nomem     sqlite3_api->result_error_nomem
+#define sqlite3_result_error_toobig    sqlite3_api->result_error_toobig
+#define sqlite3_sleep                  sqlite3_api->sleep
+#define sqlite3_soft_heap_limit        sqlite3_api->soft_heap_limit
+#define sqlite3_vfs_find               sqlite3_api->vfs_find
+#define sqlite3_vfs_register           sqlite3_api->vfs_register
+#define sqlite3_vfs_unregister         sqlite3_api->vfs_unregister
 #endif /* SQLITE_CORE */
 
 #define SQLITE_EXTENSION_INIT1     const sqlite3_api_routines *sqlite3_api;

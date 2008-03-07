@@ -19,7 +19,6 @@
 */
 #include "sqliteInt.h"
 #include "vdbeInt.h"
-#include "os.h"         /* to get SQLITE_BIGENDIAN */
 #include "tcl.h"
 #include <stdlib.h>
 #include <string.h>
@@ -142,7 +141,7 @@ static int test_translate(
     return TCL_ERROR;
   }
   if( objc==5 ){
-    xDel = sqlite3FreeX;
+    xDel = sqlite3_free;
   }
 
   enc_from = name_to_enc(interp, objv[2]);
@@ -150,19 +149,19 @@ static int test_translate(
   enc_to = name_to_enc(interp, objv[3]);
   if( !enc_to ) return TCL_ERROR;
 
-  pVal = sqlite3ValueNew();
+  pVal = sqlite3ValueNew(0);
 
   if( enc_from==SQLITE_UTF8 ){
     z = Tcl_GetString(objv[1]);
     if( objc==5 ){
-      z = sqliteStrDup(z);
+      z = sqlite3StrDup(z);
     }
     sqlite3ValueSetStr(pVal, -1, z, enc_from, xDel);
   }else{
     z = (char*)Tcl_GetByteArrayFromObj(objv[1], &len);
     if( objc==5 ){
       char *zTmp = z;
-      z = sqliteMalloc(len);
+      z = sqlite3_malloc(len);
       memcpy(z, zTmp, len);
     }
     sqlite3ValueSetStr(pVal, -1, z, enc_from, xDel);
@@ -180,10 +179,10 @@ static int test_translate(
 /*
 ** Usage: translate_selftest
 **
-** Call sqlite3utfSelfTest() to run the internal tests for unicode
+** Call sqlite3UtfSelfTest() to run the internal tests for unicode
 ** translation. If there is a problem an assert() will fail.
 **/
-void sqlite3utfSelfTest();
+void sqlite3UtfSelfTest();
 static int test_translate_selftest(
   void * clientData,
   Tcl_Interp *interp,
@@ -191,7 +190,7 @@ static int test_translate_selftest(
   Tcl_Obj *CONST objv[]
 ){
 #ifndef SQLITE_OMIT_UTF16
-  sqlite3utfSelfTest();
+  sqlite3UtfSelfTest();
 #endif
   return SQLITE_OK;
 }

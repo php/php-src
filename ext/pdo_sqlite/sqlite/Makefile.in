@@ -26,7 +26,7 @@ BCC = @BUILD_CC@ @BUILD_CFLAGS@
 # will run on the target platform.  (BCC and TCC are usually the
 # same unless your are cross-compiling.)
 #
-TCC = @TARGET_CC@ @TARGET_CFLAGS@ -I. -I${TOP}/src
+TCC = @CC@ @CFLAGS@ -I. -I${TOP}/src
 
 # Define -DNDEBUG to compile without debugging (i.e., for production usage)
 # Omitting the define will cause extra debugging code to be inserted and
@@ -52,7 +52,7 @@ LIBREADLINE = @TARGET_READLINE_LIBS@
 
 # Should the database engine be compiled threadsafe
 #
-TCC += -DTHREADSAFE=@THREADSAFE@
+TCC += -DSQLITE_THREADSAFE=@SQLITE_THREADSAFE@
 
 # The pthreads library if needed
 #
@@ -63,7 +63,7 @@ LIBPTHREAD=@TARGET_THREAD_LIB@
 TCC += -DSQLITE_THREAD_OVERRIDE_LOCK=@THREADSOVERRIDELOCKS@
 
 # The fdatasync library
-TLIBS = @TARGET_LIBS@
+TLIBS = @LIBS@
 
 # Flags controlling use of the in memory btree implementation
 #
@@ -107,8 +107,8 @@ LIBTOOL = ./libtool
 ALLOWRELEASE = @ALLOWRELEASE@
 
 # libtool compile/link/install
-LTCOMPILE = $(LIBTOOL) --mode=compile $(TCC)
-LTLINK = $(LIBTOOL) --mode=link $(TCC)
+LTCOMPILE = $(LIBTOOL) --mode=compile --tag=CC $(TCC)
+LTLINK = $(LIBTOOL) --mode=link $(TCC) @LDFLAGS@
 LTINSTALL = $(LIBTOOL) --mode=install $(INSTALL)
 
 # nawk compatible awk.
@@ -116,20 +116,21 @@ NAWK = @AWK@
 
 # You should not have to change anything below this line
 ###############################################################################
-OPTS = 
-OPTS += -DSQLITE_OMIT_CURSOR          # Cursors do not work at this time
-TCC += -DSQLITE_OMIT_CURSOR
+TCC += -DSQLITE_OMIT_LOAD_EXTENSION=1
 
 # Object files for the SQLite library.
 #
-LIBOBJ = alter.lo analyze.lo attach.lo auth.lo btree.lo build.lo \
+LIBOBJ = alter.lo analyze.lo attach.lo auth.lo btmutex.lo btree.lo build.lo \
          callback.lo complete.lo date.lo \
-         delete.lo expr.lo func.lo hash.lo insert.lo loadext.lo \
-         main.lo opcodes.lo os.lo os_unix.lo os_win.lo os_os2.lo \
+         delete.lo expr.lo fault.lo func.lo \
+         hash.lo journal.lo insert.lo loadext.lo \
+         main.lo malloc.lo mem1.lo mem2.lo mem3.lo mem4.lo mutex.lo \
+         mutex_os2.lo mutex_unix.lo mutex_w32.lo \
+         opcodes.lo os.lo os_unix.lo os_win.lo os_os2.lo \
          pager.lo parse.lo pragma.lo prepare.lo printf.lo random.lo \
          select.lo table.lo tokenize.lo trigger.lo update.lo \
          util.lo vacuum.lo \
-         vdbe.lo vdbeapi.lo vdbeaux.lo vdbefifo.lo vdbemem.lo \
+         vdbe.lo vdbeapi.lo vdbeaux.lo vdbeblob.lo vdbefifo.lo vdbemem.lo \
          where.lo utf.lo legacy.lo vtab.lo
 
 # All of the source code files.
@@ -139,6 +140,7 @@ SRC = \
   $(TOP)/src/analyze.c \
   $(TOP)/src/attach.c \
   $(TOP)/src/auth.c \
+  $(TOP)/src/btmutex.c \
   $(TOP)/src/btree.c \
   $(TOP)/src/btree.h \
   $(TOP)/src/build.c \
@@ -147,13 +149,24 @@ SRC = \
   $(TOP)/src/date.c \
   $(TOP)/src/delete.c \
   $(TOP)/src/expr.c \
+  $(TOP)/src/fault.c \
   $(TOP)/src/func.c \
   $(TOP)/src/hash.c \
   $(TOP)/src/hash.h \
   $(TOP)/src/insert.c \
+  $(TOP)/src/journal.c \
   $(TOP)/src/legacy.c \
   $(TOP)/src/loadext.c \
   $(TOP)/src/main.c \
+  $(TOP)/src/malloc.c \
+  $(TOP)/src/mem1.c \
+  $(TOP)/src/mem2.c \
+  $(TOP)/src/mem3.c \
+  $(TOP)/src/mem4.c \
+  $(TOP)/src/mutex.c \
+  $(TOP)/src/mutex_os2.c \
+  $(TOP)/src/mutex_unix.c \
+  $(TOP)/src/mutex_w32.c \
   $(TOP)/src/os.c \
   $(TOP)/src/os_unix.c \
   $(TOP)/src/os_win.c \
@@ -181,25 +194,46 @@ SRC = \
   $(TOP)/src/vdbe.h \
   $(TOP)/src/vdbeapi.c \
   $(TOP)/src/vdbeaux.c \
+  $(TOP)/src/vdbeblob.c \
   $(TOP)/src/vdbefifo.c \
   $(TOP)/src/vdbemem.c \
   $(TOP)/src/vdbeInt.h \
   $(TOP)/src/vtab.c \
   $(TOP)/src/where.c
 
+# Source code for extensions
+#
+SRC += \
+  $(TOP)/ext/fts1/fts1.c \
+  $(TOP)/ext/fts1/fts1.h \
+  $(TOP)/ext/fts1/fts1_hash.c \
+  $(TOP)/ext/fts1/fts1_hash.h \
+  $(TOP)/ext/fts1/fts1_porter.c \
+  $(TOP)/ext/fts1/fts1_tokenizer.h \
+  $(TOP)/ext/fts1/fts1_tokenizer1.c
+
+
 # Source code to the test files.
 #
 TESTSRC = \
+  $(TOP)/src/attach.c \
   $(TOP)/src/btree.c \
+  $(TOP)/src/build.c \
   $(TOP)/src/date.c \
+  $(TOP)/src/expr.c \
   $(TOP)/src/func.c \
+  $(TOP)/src/insert.c \
+  $(TOP)/src/malloc.c \
   $(TOP)/src/os.c \
+  $(TOP)/src/os_os2.c \
   $(TOP)/src/os_unix.c \
   $(TOP)/src/os_win.c \
-  $(TOP)/src/os_os2.c \
   $(TOP)/src/pager.c \
   $(TOP)/src/pragma.c \
+  $(TOP)/src/prepare.c \
   $(TOP)/src/printf.c \
+  $(TOP)/src/random.c \
+  $(TOP)/src/select.c \
   $(TOP)/src/test1.c \
   $(TOP)/src/test2.c \
   $(TOP)/src/test3.c \
@@ -208,22 +242,39 @@ TESTSRC = \
   $(TOP)/src/test6.c \
   $(TOP)/src/test7.c \
   $(TOP)/src/test8.c \
+  $(TOP)/src/test9.c \
+  $(TOP)/src/test_autoext.c \
   $(TOP)/src/test_async.c \
+  $(TOP)/src/test_btree.c \
+  $(TOP)/src/test_config.c \
+  $(TOP)/src/test_devsym.c \
+  $(TOP)/src/test_hexio.c \
+  $(TOP)/src/test_malloc.c \
   $(TOP)/src/test_md5.c \
+  $(TOP)/src/test_onefile.c \
   $(TOP)/src/test_schema.c \
   $(TOP)/src/test_server.c \
   $(TOP)/src/test_tclvar.c \
+  $(TOP)/src/test_thread.c \
+  $(TOP)/src/tokenize.c \
   $(TOP)/src/utf.c \
   $(TOP)/src/util.c \
   $(TOP)/src/vdbe.c \
-  $(TOP)/src/where.c
+  $(TOP)/src/vdbeapi.c \
+  $(TOP)/src/vdbeaux.c \
+  $(TOP)/src/vdbemem.c \
+  $(TOP)/src/where.c \
+  parse.c
 
 # Header files used by all library source files.
 #
 HDR = \
    sqlite3.h  \
    $(TOP)/src/btree.h \
+   $(TOP)/src/btreeInt.h \
    $(TOP)/src/hash.h \
+   $(TOP)/src/sqliteLimit.h \
+   $(TOP)/src/mutex.h \
    opcodes.h \
    $(TOP)/src/os.h \
    $(TOP)/src/os_common.h \
@@ -231,6 +282,13 @@ HDR = \
    $(TOP)/src/sqliteInt.h  \
    $(TOP)/src/vdbe.h \
    parse.h
+
+# Header files used by extensions
+#
+HDR += \
+  $(TOP)/ext/fts1/fts1.h \
+  $(TOP)/ext/fts1/fts1_hash.h \
+  $(TOP)/ext/fts1/fts1_tokenizer.h
 
 # Header files used by the VDBE submodule
 #
@@ -280,12 +338,14 @@ target_source:	$(SRC) parse.c opcodes.c keywordhash.h $(VDBEHDR)
 	cp $(SRC) $(VDBEHDR) tsrc
 	rm tsrc/sqlite.h.in tsrc/parse.y
 	cp parse.c opcodes.c keywordhash.h tsrc
-	cp $(TOP)/sqlite3.def tsrc
+
+sqlite3.c:	target_source $(TOP)/tool/mksqlite3c.tcl
+	tclsh $(TOP)/tool/mksqlite3c.tcl
 
 # Rules to build the LEMON compiler generator
 #
 lemon$(BEXE):	$(TOP)/tool/lemon.c $(TOP)/tool/lempar.c
-	$(BCC) -o lemon $(TOP)/tool/lemon.c
+	$(BCC) -o lemon$(BEXE) $(TOP)/tool/lemon.c
 	cp $(TOP)/tool/lempar.c .
 
 
@@ -302,6 +362,9 @@ attach.lo:	$(TOP)/src/attach.c $(HDR)
 
 auth.lo:	$(TOP)/src/auth.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/auth.c
+
+btmutex.lo:	$(TOP)/src/btmutex.c $(HDR)
+	$(LTCOMPILE) -c $(TOP)/src/btmutex.c
 
 btree.lo:	$(TOP)/src/btree.c $(HDR) $(TOP)/src/pager.h
 	$(LTCOMPILE) -c $(TOP)/src/btree.c
@@ -324,6 +387,9 @@ delete.lo:	$(TOP)/src/delete.c $(HDR)
 expr.lo:	$(TOP)/src/expr.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/expr.c
 
+fault.lo:	$(TOP)/src/fault.c $(HDR)
+	$(LTCOMPILE) -c $(TOP)/src/fault.c
+
 func.lo:	$(TOP)/src/func.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/func.c
 
@@ -333,6 +399,9 @@ hash.lo:	$(TOP)/src/hash.c $(HDR)
 insert.lo:	$(TOP)/src/insert.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/insert.c
 
+journal.lo:	$(TOP)/src/journal.c $(HDR)
+	$(LTCOMPILE) -c $(TOP)/src/journal.c
+
 legacy.lo:	$(TOP)/src/legacy.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/legacy.c
 
@@ -341,6 +410,33 @@ loadext.lo:	$(TOP)/src/loadext.c $(HDR)
 
 main.lo:	$(TOP)/src/main.c $(HDR)
 	$(LTCOMPILE) $(TEMP_STORE) -c $(TOP)/src/main.c
+
+malloc.lo:	$(TOP)/src/malloc.c $(HDR)
+	$(LTCOMPILE) $(TEMP_STORE) -c $(TOP)/src/malloc.c
+
+mem1.lo:	$(TOP)/src/mem1.c $(HDR)
+	$(LTCOMPILE) $(TEMP_STORE) -c $(TOP)/src/mem1.c
+
+mem2.lo:	$(TOP)/src/mem2.c $(HDR)
+	$(LTCOMPILE) $(TEMP_STORE) -c $(TOP)/src/mem2.c
+
+mem3.lo:	$(TOP)/src/mem3.c $(HDR)
+	$(LTCOMPILE) $(TEMP_STORE) -c $(TOP)/src/mem3.c
+
+mem4.lo:	$(TOP)/src/mem4.c $(HDR)
+	$(LTCOMPILE) $(TEMP_STORE) -c $(TOP)/src/mem4.c
+
+mutex.lo:	$(TOP)/src/mutex.c $(HDR)
+	$(LTCOMPILE) $(TEMP_STORE) -c $(TOP)/src/mutex.c
+
+mutex_os2.lo:	$(TOP)/src/mutex_os2.c $(HDR)
+	$(LTCOMPILE) $(TEMP_STORE) -c $(TOP)/src/mutex_os2.c
+
+mutex_unix.lo:	$(TOP)/src/mutex_unix.c $(HDR)
+	$(LTCOMPILE) $(TEMP_STORE) -c $(TOP)/src/mutex_unix.c
+
+mutex_w32.lo:	$(TOP)/src/mutex_w32.c $(HDR)
+	$(LTCOMPILE) $(TEMP_STORE) -c $(TOP)/src/mutex_w32.c
 
 pager.lo:	$(TOP)/src/pager.c $(HDR) $(TOP)/src/pager.h
 	$(LTCOMPILE) -c $(TOP)/src/pager.c
@@ -373,9 +469,9 @@ parse.h:	parse.c
 
 parse.c:	$(TOP)/src/parse.y lemon$(BEXE) $(TOP)/addopcodes.awk
 	cp $(TOP)/src/parse.y .
-	./lemon $(OPTS) parse.y
+	./lemon$(BEXE) $(OPTS) parse.y
 	mv parse.h parse.h.temp
-	awk -f $(TOP)/addopcodes.awk parse.h.temp >parse.h
+	$(NAWK) -f $(TOP)/addopcodes.awk parse.h.temp >parse.h
 
 pragma.lo:	$(TOP)/src/pragma.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/pragma.c
@@ -433,6 +529,9 @@ vdbeapi.lo:	$(TOP)/src/vdbeapi.c $(VDBEHDR)
 vdbeaux.lo:	$(TOP)/src/vdbeaux.c $(VDBEHDR)
 	$(LTCOMPILE) -c $(TOP)/src/vdbeaux.c
 
+vdbeblob.lo:	$(TOP)/src/vdbeblob.c $(VDBEHDR)
+	$(LTCOMPILE) -c $(TOP)/src/vdbeblob.c
+
 vdbefifo.lo:	$(TOP)/src/vdbefifo.c $(VDBEHDR)
 	$(LTCOMPILE) -c $(TOP)/src/vdbefifo.c
 
@@ -457,7 +556,8 @@ tclsqlite3:	tclsqlite-shell.lo libsqlite3.la
 
 testfixture$(TEXE):	$(TOP)/src/tclsqlite.c libsqlite3.la $(TESTSRC)
 	$(LTLINK) -DTCLSH=1 -DSQLITE_TEST=1 -DSQLITE_CRASH_TEST=1 \
-		$(TEMP_STORE) -o testfixture $(TESTSRC) $(TOP)/src/tclsqlite.c \
+                -DSQLITE_NO_SYNC=1 $(TEMP_STORE) \
+		-o testfixture $(TESTSRC) $(TOP)/src/tclsqlite.c \
 		libsqlite3.la $(LIBTCL)
 
 
@@ -480,172 +580,15 @@ sqlite3_analyzer$(TEXE):	$(TOP)/src/tclsqlite.c libtclsqlite3.la \
                 -o sqlite3_analyzer$(EXE) $(TESTSRC) $(TOP)/src/tclsqlite.c \
 		libtclsqlite3.la $(LIBTCL)
 
-# Rules used to build documentation
-#
-arch.html:	$(TOP)/www/arch.tcl
-	tclsh $(TOP)/www/arch.tcl >arch.html
 
-arch2.gif:	$(TOP)/www/arch2.gif
-	cp $(TOP)/www/arch2.gif .
-
-autoinc.html:	$(TOP)/www/autoinc.tcl
-	tclsh $(TOP)/www/autoinc.tcl >autoinc.html
-
-c_interface.html:	$(TOP)/www/c_interface.tcl
-	tclsh $(TOP)/www/c_interface.tcl >c_interface.html
-
-capi3.html:	$(TOP)/www/capi3.tcl
-	tclsh $(TOP)/www/capi3.tcl >capi3.html
-
-capi3ref.html:	$(TOP)/www/capi3ref.tcl
-	tclsh $(TOP)/www/capi3ref.tcl >capi3ref.html
-
-changes.html:	$(TOP)/www/changes.tcl
-	tclsh $(TOP)/www/changes.tcl >changes.html
-
-compile.html:	$(TOP)/www/compile.tcl
-	tclsh $(TOP)/www/compile.tcl >compile.html
-
-copyright.html:	$(TOP)/www/copyright.tcl
-	tclsh $(TOP)/www/copyright.tcl >copyright.html
-
-copyright-release.html:	$(TOP)/www/copyright-release.html
-	cp $(TOP)/www/copyright-release.html .
-
-copyright-release.pdf:	$(TOP)/www/copyright-release.pdf
-	cp $(TOP)/www/copyright-release.pdf .
-
-common.tcl:	$(TOP)/www/common.tcl
-	cp $(TOP)/www/common.tcl .
-
-conflict.html:	$(TOP)/www/conflict.tcl
-	tclsh $(TOP)/www/conflict.tcl >conflict.html
-
-datatypes.html:	$(TOP)/www/datatypes.tcl
-	tclsh $(TOP)/www/datatypes.tcl >datatypes.html
-
-datatype3.html:	$(TOP)/www/datatype3.tcl
-	tclsh $(TOP)/www/datatype3.tcl >datatype3.html
-
-docs.html:	$(TOP)/www/docs.tcl
-	tclsh $(TOP)/www/docs.tcl >docs.html
-
-download.html:	$(TOP)/www/download.tcl
-	mkdir -p doc
-	tclsh $(TOP)/www/download.tcl >download.html
-
-faq.html:	$(TOP)/www/faq.tcl
-	tclsh $(TOP)/www/faq.tcl >faq.html
-
-fileformat.html:	$(TOP)/www/fileformat.tcl
-	tclsh $(TOP)/www/fileformat.tcl >fileformat.html
-
-formatchng.html:	$(TOP)/www/formatchng.tcl
-	tclsh $(TOP)/www/formatchng.tcl >formatchng.html
-
-index.html:	$(TOP)/www/index.tcl last_change
-	tclsh $(TOP)/www/index.tcl >index.html
-
-lang.html:	$(TOP)/www/lang.tcl
-	tclsh $(TOP)/www/lang.tcl >lang.html
-
-pragma.html:	$(TOP)/www/pragma.tcl
-	tclsh $(TOP)/www/pragma.tcl >pragma.html
-
-lockingv3.html:	$(TOP)/www/lockingv3.tcl
-	tclsh $(TOP)/www/lockingv3.tcl >lockingv3.html
-
-oldnews.html:	$(TOP)/www/oldnews.tcl
-	tclsh $(TOP)/www/oldnews.tcl >oldnews.html
-
-omitted.html:	$(TOP)/www/omitted.tcl
-	tclsh $(TOP)/www/omitted.tcl >omitted.html
-
-opcode.html:	$(TOP)/www/opcode.tcl $(TOP)/src/vdbe.c
-	tclsh $(TOP)/www/opcode.tcl $(TOP)/src/vdbe.c >opcode.html
-
-mingw.html:	$(TOP)/www/mingw.tcl
-	tclsh $(TOP)/www/mingw.tcl >mingw.html
-
-nulls.html:	$(TOP)/www/nulls.tcl
-	tclsh $(TOP)/www/nulls.tcl >nulls.html
-
-quickstart.html:	$(TOP)/www/quickstart.tcl
-	tclsh $(TOP)/www/quickstart.tcl >quickstart.html
-
-speed.html:	$(TOP)/www/speed.tcl
-	tclsh $(TOP)/www/speed.tcl >speed.html
-
-sqlite.gif:	$(TOP)/art/SQLite.gif
-	cp $(TOP)/art/SQLite.gif sqlite.gif
-
-sqlite.html:	$(TOP)/www/sqlite.tcl
-	tclsh $(TOP)/www/sqlite.tcl >sqlite.html
-
-support.html:	$(TOP)/www/support.tcl
-	tclsh $(TOP)/www/support.tcl >support.html
-
-tclsqlite.html:	$(TOP)/www/tclsqlite.tcl
-	tclsh $(TOP)/www/tclsqlite.tcl >tclsqlite.html
-
-vdbe.html:	$(TOP)/www/vdbe.tcl
-	tclsh $(TOP)/www/vdbe.tcl >vdbe.html
-
-version3.html:	$(TOP)/www/version3.tcl
-	tclsh $(TOP)/www/version3.tcl >version3.html
-
-
-# Files to be published on the website.
-#
-DOC = \
-  arch.html \
-  arch2.gif \
-  autoinc.html \
-  c_interface.html \
-  capi3.html \
-  capi3ref.html \
-  changes.html \
-  compile.html \
-  copyright.html \
-  copyright-release.html \
-  copyright-release.pdf \
-  conflict.html \
-  datatypes.html \
-  datatype3.html \
-  docs.html \
-  download.html \
-  faq.html \
-  fileformat.html \
-  formatchng.html \
-  index.html \
-  lang.html \
-  lockingv3.html \
-  mingw.html \
-  nulls.html \
-  oldnews.html \
-  omitted.html \
-  opcode.html \
-  pragma.html \
-  quickstart.html \
-  speed.html \
-  sqlite.gif \
-  sqlite.html \
-  support.html \
-  tclsqlite.html \
-  vdbe.html \
-  version3.html 
-
-doc:	common.tcl $(DOC)
-	mkdir -p doc
-	mv $(DOC) doc
-
-install:	sqlite3 libsqlite3.la sqlite3.h ${HAVE_TCL:1=tcl_install}
+install:	sqlite3$(BEXE) libsqlite3.la sqlite3.h ${HAVE_TCL:1=tcl_install}
 	$(INSTALL) -d $(DESTDIR)$(libdir)
 	$(LTINSTALL) libsqlite3.la $(DESTDIR)$(libdir)
 	$(INSTALL) -d $(DESTDIR)$(exec_prefix)/bin
-	$(LTINSTALL) sqlite3 $(DESTDIR)$(exec_prefix)/bin
+	$(LTINSTALL) sqlite3$(BEXE) $(DESTDIR)$(exec_prefix)/bin
 	$(INSTALL) -d $(DESTDIR)$(prefix)/include
 	$(INSTALL) -m 0644 sqlite3.h $(DESTDIR)$(prefix)/include
+	$(INSTALL) -m 0644 $(TOP)/src/sqlite3ext.h $(DESTDIR)$(prefix)/include
 	$(INSTALL) -d $(DESTDIR)$(libdir)/pkgconfig; 
 	$(INSTALL) -m 0644 sqlite3.pc $(DESTDIR)$(libdir)/pkgconfig; 
 
@@ -661,30 +604,26 @@ clean:
 	rm -f $(PUBLISH)
 	rm -f *.da *.bb *.bbg gmon.out
 	rm -f testfixture$(TEXE) test.db
-	rm -rf doc
 	rm -f common.tcl
-	rm -f sqlite3.dll sqlite3.lib
+	rm -f sqlite3.dll sqlite3.lib sqlite3.def
+
+distclean:	clean
+	rm -f config.log config.status libtool Makefile config.h sqlite3.pc
 
 #
-# Windows section; all this funky .dll stuff ;-)
+# Windows section
 #
 dll: sqlite3.dll
 
 REAL_LIBOBJ = $(LIBOBJ:%.lo=.libs/%.o)
 
-sqlite3.dll: $(LIBOBJ) $(TOP)/sqlite3.def
-	dllwrap --dllname sqlite3.dll --def $(TOP)/sqlite3.def $(REAL_LIBOBJ)
-	strip sqlite3.dll
+$(REAL_LIBOBJ): $(LIBOBJ)
 
-#target for dll import libraries
-implib: sqlite3.lib 
+sqlite3.def: $(REAL_LIBOBJ)
+	echo 'EXPORTS' >sqlite3.def
+	nm $(REAL_LIBOBJ) | grep ' T ' | grep ' _sqlite3_' \
+		| sed 's/^.* _//' >>sqlite3.def
 
-#make Borland C++ and/or Microsoft VC import library for the dll
-#   ignore any errors (usually due to missing programs)
-sqlite3.lib: sqlite3.dll
-	-impdef -a sqlite3.def sqlite3.dll
-	-implib sqlite3.lib sqlite3.def
-	-lib /machine:i386 /def:$(TOP)/sqlite3.def 
-
-distclean:	clean
-	rm -f config.log config.status libtool Makefile config.h
+sqlite3.dll: $(REAL_LIBOBJ) sqlite3.def
+	$(TCC) -shared -o sqlite3.dll sqlite3.def \
+		-Wl,"--strip-all" $(REAL_LIBOBJ)

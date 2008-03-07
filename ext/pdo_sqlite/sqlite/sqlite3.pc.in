@@ -9,4 +9,5 @@ Name: SQLite
 Description: SQL database engine
 Version: @VERSION@
 Libs: -L${libdir} -lsqlite3
+Libs.private: -lpthread
 Cflags: -I${includedir}

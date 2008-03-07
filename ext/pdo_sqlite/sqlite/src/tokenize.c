@@ -18,7 +18,6 @@
 ** $Id$
 */
 #include "sqliteInt.h"
-#include "os.h"
 #include <ctype.h>
 #include <stdlib.h>
 
@@ -86,7 +85,7 @@ const unsigned char ebcdicToAscii[] = {
 ** But the feature is undocumented.
 */
 #ifdef SQLITE_ASCII
-const char sqlite3IsIdChar[] = {
+const char sqlite3IsAsciiIdChar[] = {
 /* x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 xA xB xC xD xE xF */
     0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  /* 2x */
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,  /* 3x */
@@ -95,10 +94,10 @@ const char sqlite3IsIdChar[] = {
     0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  /* 6x */
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,  /* 7x */
 };
-#define IdChar(C)  (((c=C)&0x80)!=0 || (c>0x1f && sqlite3IsIdChar[c-0x20]))
+#define IdChar(C)  (((c=C)&0x80)!=0 || (c>0x1f && sqlite3IsAsciiIdChar[c-0x20]))
 #endif
 #ifdef SQLITE_EBCDIC
-const char sqlite3IsIdChar[] = {
+const char sqlite3IsEbcdicIdChar[] = {
 /* x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 xA xB xC xD xE xF */
     0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,  /* 4x */
     0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0,  /* 5x */
@@ -113,7 +112,7 @@ const char sqlite3IsIdChar[] = {
     0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1,  /* Ex */
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0,  /* Fx */
 };
-#define IdChar(C)  (((c=C)>=0x42 && sqlite3IsIdChar[c-0x40]))
+#define IdChar(C)  (((c=C)>=0x42 && sqlite3IsEbcdicIdChar[c-0x40]))
 #endif
 
 
@@ -293,7 +292,7 @@ static int getToken(const unsigned char *z, int *tokenType){
     }
     case '[': {
       for(i=1, c=z[0]; c!=']' && (c=z[i])!=0; i++){}
-      *tokenType = TK_ID;
+      *tokenType = c==']' ? TK_ID : TK_ILLEGAL;
       return i;
     }
     case '?': {
@@ -345,19 +344,14 @@ static int getToken(const unsigned char *z, int *tokenType){
     }
 #ifndef SQLITE_OMIT_BLOB_LITERAL
     case 'x': case 'X': {
-      if( (c=z[1])=='\'' || c=='"' ){
-        int delim = c;
+      if( z[1]=='\'' ){
         *tokenType = TK_BLOB;
-        for(i=2; (c=z[i])!=0; i++){
-          if( c==delim ){
-            if( i%2 ) *tokenType = TK_ILLEGAL;
-            break;
-          }
+        for(i=2; (c=z[i])!=0 && c!='\''; i++){
           if( !isxdigit(c) ){
             *tokenType = TK_ILLEGAL;
-            return i;
           }
         }
+        if( i%2 || !c ) *tokenType = TK_ILLEGAL;
         if( c ) i++;
         return i;
       }
@@ -384,7 +378,7 @@ int sqlite3GetToken(const unsigned char *z, int *tokenType){
 ** Run the parser on the given SQL string.  The parser structure is
 ** passed in.  An SQLITE_ status code is returned.  If an error occurs
 ** and pzErrMsg!=NULL then an error message might be written into 
-** memory obtained from malloc() and *pzErrMsg made to point to that
+** memory obtained from sqlite3_malloc() and *pzErrMsg made to point to that
 ** error message.  Or maybe not.
 */
 int sqlite3RunParser(Parse *pParse, const char *zSql, char **pzErrMsg){
@@ -394,17 +388,15 @@ int sqlite3RunParser(Parse *pParse, const char *zSql, char **pzErrMsg){
   int tokenType;
   int lastTokenParsed = -1;
   sqlite3 *db = pParse->db;
-  extern void *sqlite3ParserAlloc(void*(*)(int));
-  extern void sqlite3ParserFree(void*, void(*)(void*));
-  extern int sqlite3Parser(void*, int, Token, Parse*);
 
   if( db->activeVdbeCnt==0 ){
     db->u1.isInterrupted = 0;
   }
   pParse->rc = SQLITE_OK;
   i = 0;
-  pEngine = sqlite3ParserAlloc((void*(*)(int))sqlite3MallocX);
+  pEngine = sqlite3ParserAlloc((void*(*)(size_t))sqlite3_malloc);
   if( pEngine==0 ){
+    db->mallocFailed = 1;
     return SQLITE_NOMEM;
   }
   assert( pParse->sLastToken.dyn==0 );
@@ -415,12 +407,16 @@ int sqlite3RunParser(Parse *pParse, const char *zSql, char **pzErrMsg){
   assert( pParse->nVarExprAlloc==0 );
   assert( pParse->apVarExpr==0 );
   pParse->zTail = pParse->zSql = zSql;
-  while( !sqlite3MallocFailed() && zSql[i]!=0 ){
+  while( !db->mallocFailed && zSql[i]!=0 ){
     assert( i>=0 );
     pParse->sLastToken.z = (u8*)&zSql[i];
     assert( pParse->sLastToken.dyn==0 );
     pParse->sLastToken.n = getToken((unsigned char*)&zSql[i],&tokenType);
     i += pParse->sLastToken.n;
+    if( SQLITE_MAX_SQL_LENGTH>0 && i>SQLITE_MAX_SQL_LENGTH ){
+      pParse->rc = SQLITE_TOOBIG;
+      break;
+    }
     switch( tokenType ){
       case TK_SPACE:
       case TK_COMMENT: {
@@ -433,8 +429,8 @@ int sqlite3RunParser(Parse *pParse, const char *zSql, char **pzErrMsg){
       }
       case TK_ILLEGAL: {
         if( pzErrMsg ){
-          sqliteFree(*pzErrMsg);
-          *pzErrMsg = sqlite3MPrintf("unrecognized token: \"%T\"",
+          sqlite3_free(*pzErrMsg);
+          *pzErrMsg = sqlite3MPrintf(db, "unrecognized token: \"%T\"",
                           &pParse->sLastToken);
         }
         nErr++;
@@ -462,8 +458,8 @@ abort_parse:
     }
     sqlite3Parser(pEngine, 0, pParse->sLastToken, pParse);
   }
-  sqlite3ParserFree(pEngine, sqlite3FreeX);
-  if( sqlite3MallocFailed() ){
+  sqlite3ParserFree(pEngine, sqlite3_free);
+  if( db->mallocFailed ){
     pParse->rc = SQLITE_NOMEM;
   }
   if( pParse->rc!=SQLITE_OK && pParse->rc!=SQLITE_DONE && pParse->zErrMsg==0 ){
@@ -473,10 +469,10 @@ abort_parse:
     if( pzErrMsg && *pzErrMsg==0 ){
       *pzErrMsg = pParse->zErrMsg;
     }else{
-      sqliteFree(pParse->zErrMsg);
+      sqlite3_free(pParse->zErrMsg);
     }
     pParse->zErrMsg = 0;
-    if( !nErr ) nErr++;
+    nErr++;
   }
   if( pParse->pVdbe && pParse->nErr>0 && pParse->nested==0 ){
     sqlite3VdbeDelete(pParse->pVdbe);
@@ -484,7 +480,7 @@ abort_parse:
   }
 #ifndef SQLITE_OMIT_SHARED_CACHE
   if( pParse->nested==0 ){
-    sqliteFree(pParse->aTableLock);
+    sqlite3_free(pParse->aTableLock);
     pParse->aTableLock = 0;
     pParse->nTableLock = 0;
   }
@@ -495,11 +491,11 @@ abort_parse:
     ** structure built up in pParse->pNewTable. The calling code (see vtab.c)
     ** will take responsibility for freeing the Table structure.
     */
-    sqlite3DeleteTable(pParse->db, pParse->pNewTable);
+    sqlite3DeleteTable(pParse->pNewTable);
   }
 
   sqlite3DeleteTrigger(pParse->pNewTrigger);
-  sqliteFree(pParse->apVarExpr);
+  sqlite3_free(pParse->apVarExpr);
   if( nErr>0 && (pParse->rc==SQLITE_OK || pParse->rc==SQLITE_DONE) ){
     pParse->rc = SQLITE_ERROR;
   }

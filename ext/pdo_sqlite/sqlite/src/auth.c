@@ -74,9 +74,11 @@ int sqlite3_set_authorizer(
   int (*xAuth)(void*,int,const char*,const char*,const char*,const char*),
   void *pArg
 ){
+  sqlite3_mutex_enter(db->mutex);
   db->xAuth = xAuth;
   db->pAuthArg = pArg;
   sqlite3ExpirePreparedStatements(db);
+  sqlite3_mutex_leave(db->mutex);
   return SQLITE_OK;
 }
 
@@ -103,11 +105,12 @@ static void sqliteAuthBadReturnCode(Parse *pParse, int rc){
 void sqlite3AuthRead(
   Parse *pParse,        /* The parser context */
   Expr *pExpr,          /* The expression to check authorization on */
+  Schema *pSchema,      /* The schema of the expression */
   SrcList *pTabList     /* All table that pExpr might refer to */
 ){
   sqlite3 *db = pParse->db;
   int rc;
-  Table *pTab;          /* The table being read */
+  Table *pTab = 0;      /* The table being read */
   const char *zCol;     /* Name of the column of the table */
   int iSrc;             /* Index in pTabList->a[] of table being read */
   const char *zDBase;   /* Name of database being accessed */
@@ -115,9 +118,8 @@ void sqlite3AuthRead(
   int iDb;              /* The index of the database the expression refers to */
 
   if( db->xAuth==0 ) return;
-  if( pExpr->op==TK_AS ) return;
-  assert( pExpr->op==TK_COLUMN );
-  iDb = sqlite3SchemaToIndex(pParse->db, pExpr->pSchema);
+  if( pExpr->op!=TK_COLUMN ) return;
+  iDb = sqlite3SchemaToIndex(pParse->db, pSchema);
   if( iDb<0 ){
     /* An attempt to read a column out of a subquery or other
     ** temporary table. */
@@ -134,8 +136,6 @@ void sqlite3AuthRead(
     */
     assert( pExpr->iTable==pStack->newIdx || pExpr->iTable==pStack->oldIdx );
     pTab = pStack->pTab;
-  }else{
-    return;
   }
   if( pTab==0 ) return;
   if( pExpr->iColumn>=0 ){
