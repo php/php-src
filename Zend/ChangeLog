@@ -1,3 +1,18 @@
+2008-03-06  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      zend_API.c
+      tests/clone_uncloneable.phpt:
+      MFH: fix segfault when trying to clone uncloneable object
+
+    * (PHP_5_3)
+      zend_API.c
+      tests/clone_uncloneable.phpt
+      tests/clone_uncloneable.phpt
+      tests/clone_uncloneable.phpt:
+      fix segfault when trying to clone uncloneable object because of
+      zend.ze1_compatibility_mode which we should have got rid of years ago
+
 2008-03-05  Felipe Pena  <felipensp@gmail.com>
 
     * zend_API.c:
