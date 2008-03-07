@@ -104,6 +104,21 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 						pdo_sqlite_error_stmt(stmt);
 						return 0;
 					
+					case PDO_PARAM_INT:
+					case PDO_PARAM_BOOL:
+						if (Z_TYPE_P(param->parameter) == IS_NULL) {
+							if (sqlite3_bind_null(S->stmt, param->paramno + 1) == SQLITE_OK) {
+								return 1;
+							}
+						} else {
+							convert_to_long(param->parameter);
+							if (SQLITE_OK == sqlite3_bind_int(S->stmt, param->paramno + 1, Z_LVAL_P(param->parameter))) {
+								return 1;
+							}
+						}
+						pdo_sqlite_error_stmt(stmt);
+						return 0;
+					
 					case PDO_PARAM_LOB:
 						if (Z_TYPE_P(param->parameter) == IS_RESOURCE) {
 							php_stream *stm;
@@ -117,9 +132,25 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 								pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource" TSRMLS_CC);
 								return 0;
 							}
+						} else if (Z_TYPE_P(param->parameter) == IS_NULL) {
+							if (sqlite3_bind_null(S->stmt, param->paramno + 1) == SQLITE_OK) {
+								return 1;
+							}
+							pdo_sqlite_error_stmt(stmt);
+							return 0;
+						} else {
+							convert_to_string(param->parameter);
 						}
-						/* fall through */
-		
+						
+						if (SQLITE_OK == sqlite3_bind_blob(S->stmt, param->paramno + 1,
+								Z_STRVAL_P(param->parameter),
+								Z_STRLEN_P(param->parameter),
+								SQLITE_STATIC)) {
+							return 1;	
+						}
+						pdo_sqlite_error_stmt(stmt);
+						return 0;
+							
 					case PDO_PARAM_STR:
 					default:
 						if (Z_TYPE_P(param->parameter) == IS_NULL) {
