@@ -5,6 +5,9 @@ Test setlocale() function : usage variations - Setting system locale as empty st
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Not valid for windows');
 }
+if (setlocale(LC_ALL,'en_AU.utf8') === false || setlocale(LC_ALL,'en_US.utf8') === false) {
+    die('skip en_AU.utf8/en_US.utf8 locales not available');
+}
 ?>
 --ENV--
 LC_ALL=en_US.utf8;
