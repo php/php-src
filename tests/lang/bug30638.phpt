@@ -4,6 +4,8 @@ Bug #30638 (localeconv returns wrong LC_NUMERIC settings) (ok to fail on MacOS X
 <?php  # try to activate a german locale
 if (setlocale(LC_NUMERIC, "de_DE", "de", "german", "ge") === FALSE) {
 	print "skip";
+} elseif (strtolower(php_uname('s')) == 'darwin') {
+    print "skip ok to fail on MacOS X";
 }
 ?>
 --FILE--
