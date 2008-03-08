@@ -1,3 +1,468 @@
+2008-03-07  Gwynne Raskind  <gwynne@wanderingknights.org>
+
+    * (PHP_5_3)
+      ext/session/tests/bug32330.phpt:
+      Forgot one file in last commit
+
+    * (PHP_5_3)
+      ext/session/mod_user.c
+      ext/session/mod_user.h
+      ext/session/php_session.h
+      ext/session/session.c:
+      MFH: fix bug #32330 (session_destroy, "Failed to initialize storage
+      module", custom session handler)
+
+    * ext/session/mod_user.c
+      ext/session/mod_user.h
+      ext/session/php_session.h
+      ext/session/session.c
+      ext/session/tests/bug32330.phpt
+      ext/session/tests/bug32330.phpt:
+      Fix bug #32330 (session_destroy, "Failed to initialize storage module",
+      custom session handler)
+
+2008-03-07  Johannes Schlüter  <johannes@schlueters.de>
+
+    * sapi/cli/tests/018.phpt
+      sapi/cli/tests/018.phpt
+      sapi/cli/tests/019.phpt
+      sapi/cli/tests/019.phpt
+      sapi/cli/tests/020.phpt
+      sapi/cli/tests/020.phpt:
+      
+      - New tests
+
+2008-03-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/exif/exif.c:
+      - MFB: #44355  	compilation breaks due illegal const usage
+
+    * (PHP_5_2)
+      ext/exif/exif.c:
+      - #44355, compilation breaks due illegal const usage (Guenter Knauf)
+        I suppose it must break on other platform, it is not used anywhere else
+        but here, and it was introduced after 5.2.5 (why no news)
+
+2008-03-07  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      NEWS:
+      BFN.
+
+    * ext/pdo_sqlite/sqlite_statement.c:
+      MFB:
+      Fixed bug #41135 (When binding as binary data use sqlite3_bind_blob() to
+      stop errors with null bytes.)
+      Fixed bug #42443 (Bind integers and booleans as integers rather than
+      strings.)
+
+    * (PHP_5_3)
+      ext/pdo_sqlite/sqlite_statement.c:
+      Fixed bug #41135 (When binding as binary data use sqlite3_bind_blob() to
+      stop errors with null bytes.)
+      Fixed bug #42443 (Bind integers and booleans as integers rather than
+      strings.)
+
+2008-03-07  Josie Messa  <josmessa@uk.ibm.com>
+
+    * ext/standard/tests/dir/closedir_variation3.phpt
+      ext/standard/tests/dir/closedir_variation3.phpt
+      ext/standard/tests/dir/readdir_variation7.phpt
+      ext/standard/tests/dir/readdir_variation7.phpt
+      ext/standard/tests/dir/rewinddir_variation3.phpt
+      ext/standard/tests/dir/rewinddir_variation3.phpt:
+      - Tests awaiting fix of bug #44246
+
+    * ext/standard/tests/dir/closedir_variation3.phpt
+      ext/standard/tests/dir/closedir_variation3.phpt
+      ext/standard/tests/dir/closedir_variation3.phpt
+      ext/standard/tests/dir/readdir_variation7.phpt
+      ext/standard/tests/dir/readdir_variation7.phpt
+      ext/standard/tests/dir/readdir_variation7.phpt
+      ext/standard/tests/dir/rewinddir_variation3.phpt
+      ext/standard/tests/dir/rewinddir_variation3.phpt
+      ext/standard/tests/dir/rewinddir_variation3.phpt:
+        1.1.4;
+      file closedir_variation3.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/dir/rewinddir_basic.phpt
+      ext/standard/tests/dir/rewinddir_basic.phpt
+      ext/standard/tests/dir/rewinddir_error.phpt
+      ext/standard/tests/dir/rewinddir_error.phpt
+      ext/standard/tests/dir/rewinddir_variation1.phpt
+      ext/standard/tests/dir/rewinddir_variation1.phpt
+      ext/standard/tests/dir/rewinddir_variation2.phpt
+      ext/standard/tests/dir/rewinddir_variation2.phpt:
+      - New tests for rewinddir() function
+
+    * ext/standard/tests/dir/rewinddir_basic.phpt
+      ext/standard/tests/dir/rewinddir_basic.phpt
+      ext/standard/tests/dir/rewinddir_basic.phpt
+      ext/standard/tests/dir/rewinddir_error.phpt
+      ext/standard/tests/dir/rewinddir_error.phpt
+      ext/standard/tests/dir/rewinddir_error.phpt
+      ext/standard/tests/dir/rewinddir_variation1.phpt
+      ext/standard/tests/dir/rewinddir_variation1.phpt
+      ext/standard/tests/dir/rewinddir_variation1.phpt
+      ext/standard/tests/dir/rewinddir_variation2.phpt
+      ext/standard/tests/dir/rewinddir_variation2.phpt
+      ext/standard/tests/dir/rewinddir_variation2.phpt:
+        1.1.4;
+      file rewinddir_basic.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/dir/opendir_variation5.phpt:
+      fix test
+
+    * ext/standard/tests/dir/closedir_basic.phpt
+      ext/standard/tests/dir/closedir_basic.phpt
+      ext/standard/tests/dir/closedir_error.phpt
+      ext/standard/tests/dir/closedir_error.phpt
+      ext/standard/tests/dir/closedir_variation1.phpt
+      ext/standard/tests/dir/closedir_variation1.phpt
+      ext/standard/tests/dir/closedir_variation2.phpt
+      ext/standard/tests/dir/closedir_variation2.phpt:
+      - New tests for closedir() function
+
+    * ext/standard/tests/dir/closedir_basic.phpt
+      ext/standard/tests/dir/closedir_basic.phpt
+      ext/standard/tests/dir/closedir_basic.phpt
+      ext/standard/tests/dir/closedir_error.phpt
+      ext/standard/tests/dir/closedir_error.phpt
+      ext/standard/tests/dir/closedir_error.phpt
+      ext/standard/tests/dir/closedir_variation1.phpt
+      ext/standard/tests/dir/closedir_variation1.phpt
+      ext/standard/tests/dir/closedir_variation1.phpt
+      ext/standard/tests/dir/closedir_variation2.phpt
+      ext/standard/tests/dir/closedir_variation2.phpt
+      ext/standard/tests/dir/closedir_variation2.phpt:
+        1.1.4;
+      file closedir_basic.phpt was initially added on branch PHP_5_2.
+
+2008-03-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      NEWS:
+      style
+
+2008-03-07  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      NEWS:
+      BFN
+
+    * ext/pdo_sqlite/config.m4
+      ext/pdo_sqlite/config.w32
+      ext/pdo_sqlite/package.xml
+      ext/pdo_sqlite/sqlite/Makefile.in
+      ext/pdo_sqlite/sqlite/Makefile.linux-gcc
+      ext/pdo_sqlite/sqlite/VERSION
+      ext/pdo_sqlite/sqlite/aclocal.m4
+      ext/pdo_sqlite/sqlite/addopcodes.awk
+      ext/pdo_sqlite/sqlite/config.guess
+      ext/pdo_sqlite/sqlite/config.sub
+      ext/pdo_sqlite/sqlite/configure
+      ext/pdo_sqlite/sqlite/configure.ac
+      ext/pdo_sqlite/sqlite/ltmain.sh
+      ext/pdo_sqlite/sqlite/main.mk
+      ext/pdo_sqlite/sqlite/mkdll.sh
+      ext/pdo_sqlite/sqlite/mkopcodec.awk
+      ext/pdo_sqlite/sqlite/mkopcodeh.awk
+      ext/pdo_sqlite/sqlite/mkso.sh
+      ext/pdo_sqlite/sqlite/publish.sh
+      ext/pdo_sqlite/sqlite/sqlite3.def
+      ext/pdo_sqlite/sqlite/sqlite3.pc.in
+      ext/pdo_sqlite/sqlite/src/.cvsignore
+      ext/pdo_sqlite/sqlite/src/alter.c
+      ext/pdo_sqlite/sqlite/src/analyze.c
+      ext/pdo_sqlite/sqlite/src/attach.c
+      ext/pdo_sqlite/sqlite/src/auth.c
+      ext/pdo_sqlite/sqlite/src/btmutex.c
+      ext/pdo_sqlite/sqlite/src/btree.c
+      ext/pdo_sqlite/sqlite/src/btree.h
+      ext/pdo_sqlite/sqlite/src/btreeInt.h
+      ext/pdo_sqlite/sqlite/src/build.c
+      ext/pdo_sqlite/sqlite/src/callback.c
+      ext/pdo_sqlite/sqlite/src/complete.c
+      ext/pdo_sqlite/sqlite/src/date.c
+      ext/pdo_sqlite/sqlite/src/delete.c
+      ext/pdo_sqlite/sqlite/src/expr.c
+      ext/pdo_sqlite/sqlite/src/fault.c
+      ext/pdo_sqlite/sqlite/src/func.c
+      ext/pdo_sqlite/sqlite/src/hash.c
+      ext/pdo_sqlite/sqlite/src/hash.h
+      ext/pdo_sqlite/sqlite/src/insert.c
+      ext/pdo_sqlite/sqlite/src/journal.c
+      ext/pdo_sqlite/sqlite/src/keywordhash.h
+      ext/pdo_sqlite/sqlite/src/legacy.c
+      ext/pdo_sqlite/sqlite/src/limits.h
+      ext/pdo_sqlite/sqlite/src/loadext.c
+      ext/pdo_sqlite/sqlite/src/main.c
+      ext/pdo_sqlite/sqlite/src/malloc.c
+      ext/pdo_sqlite/sqlite/src/md5.c
+      ext/pdo_sqlite/sqlite/src/mem1.c
+      ext/pdo_sqlite/sqlite/src/mutex.c
+      ext/pdo_sqlite/sqlite/src/mutex.h
+      ext/pdo_sqlite/sqlite/src/mutex_unix.c
+      ext/pdo_sqlite/sqlite/src/mutex_w32.c
+      ext/pdo_sqlite/sqlite/src/opcodes.c
+      ext/pdo_sqlite/sqlite/src/opcodes.h
+      ext/pdo_sqlite/sqlite/src/os.c
+      ext/pdo_sqlite/sqlite/src/os.h
+      ext/pdo_sqlite/sqlite/src/os_common.h
+      ext/pdo_sqlite/sqlite/src/os_unix.c
+      ext/pdo_sqlite/sqlite/src/os_win.c
+      ext/pdo_sqlite/sqlite/src/pager.c
+      ext/pdo_sqlite/sqlite/src/pager.h
+      ext/pdo_sqlite/sqlite/src/parse.c
+      ext/pdo_sqlite/sqlite/src/parse.h
+      ext/pdo_sqlite/sqlite/src/parse.y
+      ext/pdo_sqlite/sqlite/src/pragma.c
+      ext/pdo_sqlite/sqlite/src/prepare.c
+      ext/pdo_sqlite/sqlite/src/printf.c
+      ext/pdo_sqlite/sqlite/src/random.c
+      ext/pdo_sqlite/sqlite/src/select.c
+      ext/pdo_sqlite/sqlite/src/shell.c
+      ext/pdo_sqlite/sqlite/src/sqlite.h.in
+      ext/pdo_sqlite/sqlite/src/sqlite3ext.h
+      ext/pdo_sqlite/sqlite/src/sqliteInt.h
+      ext/pdo_sqlite/sqlite/src/sqliteLimit.h
+      ext/pdo_sqlite/sqlite/src/table.c
+      ext/pdo_sqlite/sqlite/src/tclsqlite.c
+      ext/pdo_sqlite/sqlite/src/test1.c
+      ext/pdo_sqlite/sqlite/src/test2.c
+      ext/pdo_sqlite/sqlite/src/test3.c
+      ext/pdo_sqlite/sqlite/src/test4.c
+      ext/pdo_sqlite/sqlite/src/test5.c
+      ext/pdo_sqlite/sqlite/src/tokenize.c
+      ext/pdo_sqlite/sqlite/src/trigger.c
+      ext/pdo_sqlite/sqlite/src/update.c
+      ext/pdo_sqlite/sqlite/src/utf.c
+      ext/pdo_sqlite/sqlite/src/util.c
+      ext/pdo_sqlite/sqlite/src/vacuum.c
+      ext/pdo_sqlite/sqlite/src/vdbe.c
+      ext/pdo_sqlite/sqlite/src/vdbe.h
+      ext/pdo_sqlite/sqlite/src/vdbeInt.h
+      ext/pdo_sqlite/sqlite/src/vdbeapi.c
+      ext/pdo_sqlite/sqlite/src/vdbeaux.c
+      ext/pdo_sqlite/sqlite/src/vdbeblob.c
+      ext/pdo_sqlite/sqlite/src/vdbefifo.c
+      ext/pdo_sqlite/sqlite/src/vdbemem.c
+      ext/pdo_sqlite/sqlite/src/vtab.c
+      ext/pdo_sqlite/sqlite/src/where.c
+      ext/pdo_sqlite/sqlite/tool/fragck.tcl
+      ext/pdo_sqlite/sqlite/tool/lemon.c
+      ext/pdo_sqlite/sqlite/tool/lempar.c
+      ext/pdo_sqlite/sqlite/tool/mkkeywordhash.c
+      ext/pdo_sqlite/sqlite/tool/mksqlite3c.tcl
+      ext/pdo_sqlite/sqlite/tool/mksqlite3internalh.tcl
+      ext/pdo_sqlite/sqlite/tool/omittest.tcl
+      ext/pdo_sqlite/sqlite/tool/soak1.tcl
+      ext/pdo_sqlite/sqlite/tool/spaceanal.tcl:
+      MFB: Update bundled SQLite to 3.5.6
+
+    * ext/pdo_sqlite/sqlite/tool/fragck.tcl
+      ext/pdo_sqlite/sqlite/tool/fragck.tcl
+      ext/pdo_sqlite/sqlite/tool/lemon.c
+      ext/pdo_sqlite/sqlite/tool/lempar.c
+      ext/pdo_sqlite/sqlite/tool/mkkeywordhash.c
+      ext/pdo_sqlite/sqlite/tool/mksqlite3c.tcl
+      ext/pdo_sqlite/sqlite/tool/mksqlite3c.tcl
+      ext/pdo_sqlite/sqlite/tool/mksqlite3internalh.tcl
+      ext/pdo_sqlite/sqlite/tool/mksqlite3internalh.tcl
+      ext/pdo_sqlite/sqlite/tool/omittest.tcl
+      ext/pdo_sqlite/sqlite/tool/omittest.tcl
+      ext/pdo_sqlite/sqlite/tool/soak1.tcl
+      ext/pdo_sqlite/sqlite/tool/soak1.tcl
+      ext/pdo_sqlite/sqlite/tool/spaceanal.tcl:
+      
+      file fragck.tcl was initially added on branch PHP_5_3.
+
+    * ext/pdo_sqlite/sqlite/src/btmutex.c
+      ext/pdo_sqlite/sqlite/src/btmutex.c
+      ext/pdo_sqlite/sqlite/src/btreeInt.h
+      ext/pdo_sqlite/sqlite/src/btreeInt.h
+      ext/pdo_sqlite/sqlite/src/fault.c
+      ext/pdo_sqlite/sqlite/src/fault.c
+      ext/pdo_sqlite/sqlite/src/journal.c
+      ext/pdo_sqlite/sqlite/src/journal.c
+      ext/pdo_sqlite/sqlite/src/limits.h
+      ext/pdo_sqlite/sqlite/src/limits.h
+      ext/pdo_sqlite/sqlite/src/malloc.c
+      ext/pdo_sqlite/sqlite/src/malloc.c
+      ext/pdo_sqlite/sqlite/src/mem1.c
+      ext/pdo_sqlite/sqlite/src/mem1.c
+      ext/pdo_sqlite/sqlite/src/mutex.c
+      ext/pdo_sqlite/sqlite/src/mutex.c
+      ext/pdo_sqlite/sqlite/src/mutex.h
+      ext/pdo_sqlite/sqlite/src/mutex.h
+      ext/pdo_sqlite/sqlite/src/mutex_unix.c
+      ext/pdo_sqlite/sqlite/src/mutex_unix.c
+      ext/pdo_sqlite/sqlite/src/mutex_w32.c
+      ext/pdo_sqlite/sqlite/src/mutex_w32.c
+      ext/pdo_sqlite/sqlite/src/sqliteLimit.h
+      ext/pdo_sqlite/sqlite/src/sqliteLimit.h
+      ext/pdo_sqlite/sqlite/src/test1.c
+      ext/pdo_sqlite/sqlite/src/test2.c
+      ext/pdo_sqlite/sqlite/src/test3.c
+      ext/pdo_sqlite/sqlite/src/test4.c
+      ext/pdo_sqlite/sqlite/src/test5.c
+      ext/pdo_sqlite/sqlite/src/tokenize.c
+      ext/pdo_sqlite/sqlite/src/trigger.c
+      ext/pdo_sqlite/sqlite/src/update.c
+      ext/pdo_sqlite/sqlite/src/utf.c
+      ext/pdo_sqlite/sqlite/src/util.c
+      ext/pdo_sqlite/sqlite/src/vacuum.c
+      ext/pdo_sqlite/sqlite/src/vdbe.c
+      ext/pdo_sqlite/sqlite/src/vdbe.h
+      ext/pdo_sqlite/sqlite/src/vdbeInt.h
+      ext/pdo_sqlite/sqlite/src/vdbeapi.c
+      ext/pdo_sqlite/sqlite/src/vdbeaux.c
+      ext/pdo_sqlite/sqlite/src/vdbeblob.c
+      ext/pdo_sqlite/sqlite/src/vdbeblob.c
+      ext/pdo_sqlite/sqlite/src/vdbefifo.c
+      ext/pdo_sqlite/sqlite/src/vdbemem.c
+      ext/pdo_sqlite/sqlite/src/vtab.c
+      ext/pdo_sqlite/sqlite/src/where.c:
+      
+      file btmutex.c was initially added on branch PHP_5_3.
+
+    * ext/pdo_sqlite/sqlite/addopcodes.awk
+      ext/pdo_sqlite/sqlite/addopcodes.awk
+      ext/pdo_sqlite/sqlite/configure.ac
+      ext/pdo_sqlite/sqlite/ltmain.sh
+      ext/pdo_sqlite/sqlite/main.mk
+      ext/pdo_sqlite/sqlite/mkdll.sh
+      ext/pdo_sqlite/sqlite/mkopcodec.awk
+      ext/pdo_sqlite/sqlite/mkopcodeh.awk
+      ext/pdo_sqlite/sqlite/mkso.sh
+      ext/pdo_sqlite/sqlite/publish.sh
+      ext/pdo_sqlite/sqlite/sqlite3.def
+      ext/pdo_sqlite/sqlite/sqlite3.pc.in
+      ext/pdo_sqlite/sqlite/src/alter.c
+      ext/pdo_sqlite/sqlite/src/analyze.c
+      ext/pdo_sqlite/sqlite/src/attach.c
+      ext/pdo_sqlite/sqlite/src/auth.c
+      ext/pdo_sqlite/sqlite/src/btree.c
+      ext/pdo_sqlite/sqlite/src/btree.h
+      ext/pdo_sqlite/sqlite/src/build.c
+      ext/pdo_sqlite/sqlite/src/callback.c
+      ext/pdo_sqlite/sqlite/src/complete.c
+      ext/pdo_sqlite/sqlite/src/date.c
+      ext/pdo_sqlite/sqlite/src/delete.c
+      ext/pdo_sqlite/sqlite/src/expr.c
+      ext/pdo_sqlite/sqlite/src/func.c
+      ext/pdo_sqlite/sqlite/src/hash.c
+      ext/pdo_sqlite/sqlite/src/hash.h
+      ext/pdo_sqlite/sqlite/src/insert.c
+      ext/pdo_sqlite/sqlite/src/keywordhash.h
+      ext/pdo_sqlite/sqlite/src/legacy.c
+      ext/pdo_sqlite/sqlite/src/loadext.c
+      ext/pdo_sqlite/sqlite/src/main.c
+      ext/pdo_sqlite/sqlite/src/md5.c
+      ext/pdo_sqlite/sqlite/src/opcodes.c
+      ext/pdo_sqlite/sqlite/src/opcodes.h
+      ext/pdo_sqlite/sqlite/src/os.c
+      ext/pdo_sqlite/sqlite/src/os.h
+      ext/pdo_sqlite/sqlite/src/os_common.h
+      ext/pdo_sqlite/sqlite/src/os_unix.c
+      ext/pdo_sqlite/sqlite/src/os_win.c
+      ext/pdo_sqlite/sqlite/src/pager.c
+      ext/pdo_sqlite/sqlite/src/pager.h
+      ext/pdo_sqlite/sqlite/src/parse.c
+      ext/pdo_sqlite/sqlite/src/parse.y
+      ext/pdo_sqlite/sqlite/src/pragma.c
+      ext/pdo_sqlite/sqlite/src/prepare.c
+      ext/pdo_sqlite/sqlite/src/printf.c
+      ext/pdo_sqlite/sqlite/src/random.c
+      ext/pdo_sqlite/sqlite/src/select.c
+      ext/pdo_sqlite/sqlite/src/shell.c
+      ext/pdo_sqlite/sqlite/src/sqlite.h.in
+      ext/pdo_sqlite/sqlite/src/sqlite3ext.h
+      ext/pdo_sqlite/sqlite/src/sqliteInt.h
+      ext/pdo_sqlite/sqlite/src/table.c
+      ext/pdo_sqlite/sqlite/src/tclsqlite.c:
+      
+      file addopcodes.awk was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/pdo_sqlite/config.m4
+      ext/pdo_sqlite/config.w32
+      ext/pdo_sqlite/package2.xml
+      ext/pdo_sqlite/sqlite/Makefile.in
+      ext/pdo_sqlite/sqlite/Makefile.linux-gcc
+      ext/pdo_sqlite/sqlite/VERSION
+      ext/pdo_sqlite/sqlite/aclocal.m4
+      ext/pdo_sqlite/sqlite/config.guess
+      ext/pdo_sqlite/sqlite/config.sub
+      ext/pdo_sqlite/sqlite/configure:
+      Update bundled SQLite to 3.5.6
+
+    * (PHP_5_2)
+      ext/pdo_sqlite/sqlite/VERSION:
+      Typo, bundled version is really 3.3.7
+
+2008-03-07  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/standard/php_rand.h
+      ext/standard/php_rand.h:
+      fix build
+
+2008-03-07  Gwynne Raskind  <gwynne@wanderingknights.org>
+
+    * ext/standard/php_rand.h:
+      Fix build (one too many right parenthesis in last commit for non-Windows
+      builds)
+
+2008-03-07  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/standard/tests/file/007_error.phpt
+      ext/standard/tests/file/007_error.phpt:
+      test was failing because I had a file named 1 in the checkout directory
+
+2008-03-07  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/php_rand.h
+      ext/standard/php_rand.h
+      ext/standard/php_rand.h:
+      improve seed calculation
+
+2008-03-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/date/php_date.c:
+      
+      MFB: Fixed a memory leak inside date_get_last_errors() when there are no
+      errors
+
+    * (PHP_5_3)
+      ext/date/php_date.c:
+      
+      Fixed a memory leak inside date_get_last_errors() when there are no errors
+
+2008-03-07  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Better readability (USTR_BYTES)
+
+2008-03-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      5.2.6RC2
+
 2008-03-06  Antony Dovgal  <tony@daylessday.org>
 
     * (PHP_5_2)

@@ -1,3 +1,11 @@
+2008-03-07  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_compile.c
+      zend_execute_API.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Better readability (USTR_BYTES)
+
 2008-03-06  Antony Dovgal  <tony@daylessday.org>
 
     * (PHP_5_2)
