@@ -1,5 +1,7 @@
 --TEST--
 Stream: RFC2397 Mozilla tests
+--INI--
+allow_url_fopen=1
 --FILE--
 <?php
 

@@ -1,5 +1,7 @@
 --TEST--
 stream_supports_lock
+--INI--
+allow_url_fopen=1
 --FILE--
 <?php
 $fp = fopen(__FILE__, "r");
