@@ -28,10 +28,10 @@ echo "Done\n";
 int(2)
 int(1)
 
-Notice: Undefined index:   in %s on line %d
+Notice: Undefined index:  in %s on line %d
 NULL
 
-Notice: Undefined index:  run away in %s on line %d
+Notice: Undefined index: run away in %s on line %d
 NULL
 int(2)
 int(1)

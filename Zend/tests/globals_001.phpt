@@ -26,7 +26,7 @@ string(5) "array"
 int(%d)
 string(%d) "%s"
 
-Notice: Undefined index:  PHP_SELF in %s on line %d
+Notice: Undefined index: PHP_SELF in %s on line %d
 NULL
 
 Notice: Undefined variable: _SERVER in %s on line %d
@@ -39,7 +39,7 @@ unicode(5) "array"
 int(%d)
 string(%d) "%s"
 
-Notice: Undefined index:  PHP_SELF in %s on line %d
+Notice: Undefined index: PHP_SELF in %s on line %d
 NULL
 
 Notice: Undefined variable: _SERVER in %s on line %d
