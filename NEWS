@@ -181,6 +181,8 @@ PHP                                                                        NEWS
 - Fixed bug #36128 (Interbase PDO - timestamp columns return NULL). (Lars W)
 - Fixed bug #35386 (firebird: first row is null). (Lars W)
 - Fixed bug #35163 (Array elements can lose references). (Dmitry)
+- Fixed bug #32330 (session_destroy, "Failed to initialize storage module",
+  custom session handler). (Gwynne)
 - Fixed bug #32143 (ibase_query() causing IBserver 7 crash with NULL param as
   link-id). (Lars W)
 - Fixed bug #30907 (ibase_query() crashes (same bug as #32143). (Lars W)
