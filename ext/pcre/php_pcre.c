@@ -48,7 +48,8 @@ enum {
 	PHP_PCRE_INTERNAL_ERROR,
 	PHP_PCRE_BACKTRACK_LIMIT_ERROR,
 	PHP_PCRE_RECURSION_LIMIT_ERROR,
-	PHP_PCRE_BAD_UTF8_ERROR
+	PHP_PCRE_BAD_UTF8_ERROR,
+	PHP_PCRE_BAD_UTF8_OFFSET_ERROR
 };
 
 
@@ -70,6 +71,10 @@ static void pcre_handle_exec_error(int pcre_code TSRMLS_DC) /* {{{ */
 
 		case PCRE_ERROR_BADUTF8:
 			preg_code = PHP_PCRE_BAD_UTF8_ERROR;
+			break;
+
+		case PCRE_ERROR_BADUTF8_OFFSET:
+			preg_code = PHP_PCRE_BAD_UTF8_OFFSET_ERROR;
 			break;
 
 		default:
@@ -145,6 +150,7 @@ static PHP_MINIT_FUNCTION(pcre)
 	REGISTER_LONG_CONSTANT("PREG_BACKTRACK_LIMIT_ERROR", PHP_PCRE_BACKTRACK_LIMIT_ERROR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_RECURSION_LIMIT_ERROR", PHP_PCRE_RECURSION_LIMIT_ERROR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_BAD_UTF8_ERROR", PHP_PCRE_BAD_UTF8_ERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_BAD_UTF8_OFFSET_ERROR", PHP_PCRE_BAD_UTF8_OFFSET_ERROR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("PCRE_VERSION", (char *)pcre_version(), CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
@@ -614,7 +620,10 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 		count = pcre_exec(pce->re, extra, subject, subject_len, start_offset,
 						  exoptions|g_notempty, offsets, size_offsets);
 
-		/* Check for too many substrings condition. */	
+		/* the string was already proved to be valid UTF-8 */
+		exoptions |= PCRE_NO_UTF8_CHECK;
+
+		/* Check for too many substrings condition. */
 		if (count == 0) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Matched, but too many substrings");
 			count = size_offsets/3;
@@ -1034,7 +1043,10 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 		/* Execute the regular expression. */
 		count = pcre_exec(pce->re, extra, subject, subject_len, start_offset,
 						  exoptions|g_notempty, offsets, size_offsets);
-		
+
+		/* the string was already proved to be valid UTF-8 */
+		exoptions |= PCRE_NO_UTF8_CHECK;
+
 		/* Check for too many substrings condition. */
 		if (count == 0) {
 			php_error_docref(NULL TSRMLS_CC,E_NOTICE, "Matched, but too many substrings");
@@ -1472,6 +1484,9 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 						  subject_len, start_offset,
 						  exoptions|g_notempty, offsets, size_offsets);
 
+		/* the string was already proved to be valid UTF-8 */
+		exoptions |= PCRE_NO_UTF8_CHECK;
+
 		/* Check for too many substrings condition. */
 		if (count == 0) {
 			php_error_docref(NULL TSRMLS_CC,E_NOTICE, "Matched, but too many substrings");
@@ -1535,9 +1550,8 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 							  subject_len, start_offset,
 							  exoptions, offsets, size_offsets);
 					if (count < 1) {
-						php_error_docref(NULL TSRMLS_CC,E_NOTICE, "Unknown error");
-						offsets[0] = start_offset;
-						offsets[1] = start_offset + 1;
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error");
+						RETURN_FALSE;
 					}
 				} else {
 					offsets[0] = start_offset;
