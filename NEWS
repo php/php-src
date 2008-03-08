@@ -128,6 +128,8 @@ PHP                                                                        NEWS
 
 - Fixed bug #44336 (Improve pcre UTF-8 string matching performance).
   (frode at coretrek dot com, Nuno)
+- Fixed bug #44214 (Crash using preg_replace_callback() and global variable).
+  (Nuno, Scott)
 - Fixed bug #43960 (strtotime() returns timestamp in the future when given a
   bogus string).
 - Fixed bug #43808 (date_create never fails (even when it should)). (Derick)
