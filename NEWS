@@ -174,6 +174,7 @@ PHP                                                                        NEWS
 - Fixed bug #39822 (new PDO() doesn't work with firebird). (Lars W)
 - Fixed bug #39700 (NUMERIC error when result precision are 7,8 or 12-14 ).
   (Lars W)
+- Fixed bug #39457 (Multiple invoked OO connections never close). (Andrey)
 - Fixed bug #39397 (invalid statement handle in Unknown on line 0). (Lars W)
 - Fixed bug #39346 (Unsetting a static variable inside a destructor causes
   segfault later on). (Dmitry)
