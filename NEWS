@@ -1,7 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Mar 2008 , PHP 5.2.6
-
+- Fixed bug #44373 (PDO_OCI extension compile failed). (Felipe)
 
 06 Mar 2008, PHP 5.2.6RC2
 - Fixed bug #44333 (SEGFAULT when using mysql_pconnect() with client_flags).
