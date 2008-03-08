@@ -910,14 +910,14 @@ fetch_string_dim:
 			if (zend_u_symtable_find(ht, ztype, offset_key, offset_key_length + 1, (void **) &retval) == FAILURE) {
 				switch (type) {
 					case BP_VAR_R:
-						zend_error(E_NOTICE, "Undefined index:  %R", ztype, offset_key);
+						zend_error(E_NOTICE, "Undefined index: %R", ztype, offset_key);
 						/* break missing intentionally */
 					case BP_VAR_UNSET:
 					case BP_VAR_IS:
 						retval = &EG(uninitialized_zval_ptr);
 						break;
 					case BP_VAR_RW:
-						zend_error(E_NOTICE,"Undefined index:  %R", ztype, offset_key);
+						zend_error(E_NOTICE,"Undefined index: %R", ztype, offset_key);
 						/* break missing intentionally */
 					case BP_VAR_W: {
 							zval *new_zval = &EG(uninitialized_zval);
@@ -946,14 +946,14 @@ num_index:
 			if (zend_hash_index_find(ht, index, (void **) &retval) == FAILURE) {
 				switch (type) {
 					case BP_VAR_R:
-						zend_error(E_NOTICE,"Undefined offset:  %ld", index);
+						zend_error(E_NOTICE,"Undefined offset: %ld", index);
 						/* break missing intentionally */
 					case BP_VAR_UNSET:
 					case BP_VAR_IS:
 						retval = &EG(uninitialized_zval_ptr);
 						break;
 					case BP_VAR_RW:
-						zend_error(E_NOTICE,"Undefined offset:  %ld", index);
+						zend_error(E_NOTICE,"Undefined offset: %ld", index);
 						/* break missing intentionally */
 					case BP_VAR_W: {
 						zval *new_zval = &EG(uninitialized_zval);
