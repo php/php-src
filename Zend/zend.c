@@ -1513,7 +1513,8 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 
 	/* if we don't have a user defined error handler */
 	if (!EG(user_error_handler)
-		|| !(EG(user_error_handler_error_reporting) & type)) {
+		|| !(EG(user_error_handler_error_reporting) & type)
+		|| EG(error_handling) != EH_NORMAL) {
 		zend_error_cb(type, error_filename, error_lineno, format, args);
 	} else switch (type) {
 		case E_ERROR:

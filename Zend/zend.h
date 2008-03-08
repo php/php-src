@@ -768,6 +768,12 @@ END_EXTERN_C()
 #include "zend_operators.h"
 #include "zend_variables.h"
 
+typedef enum {
+	EH_NORMAL = 0,
+	EH_SUPPRESS,
+	EH_THROW
+} zend_error_handling_t;
+
 #define ZEND_U_EQUAL(type, ustr, ulen, str, slen) \
 	((type == IS_STRING)? \
 	  (!memcmp((ustr).s,(str),(slen))): \
