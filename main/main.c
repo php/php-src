@@ -878,17 +878,15 @@ PHPAPI void php_html_puts(const char *str, uint size TSRMLS_DC)
 /* {{{ php_suppress_errors */
 PHPAPI void php_set_error_handling(error_handling_t error_handling, zend_class_entry *exception_class TSRMLS_DC)
 {
-	PG(error_handling) = error_handling;
-	PG(exception_class) = exception_class;
-	if (PG(last_error_message)) {
-		free(PG(last_error_message));
-		PG(last_error_message) = NULL;
+	EG(error_handling) = error_handling;
+	EG(exception_class) = exception_class;
+
+	if (error_handling == EH_NORMAL) {
+		EG(user_error_handler)     = EG(user_error_handler_old);
+	} else {
+		EG(user_error_handler_old) = EG(user_error_handler);
+		EG(user_error_handler)     = NULL;
 	}
-	if (PG(last_error_file)) {
-		free(PG(last_error_file));
-		PG(last_error_file) = NULL;
-	}
-	PG(last_error_lineno) = 0;
 }
 /* }}} */
 
@@ -933,7 +931,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 	}
 
 	/* according to error handling mode, suppress error, throw exception or show it */
-	if (PG(error_handling) != EH_NORMAL) {
+	if (EG(error_handling) != EH_NORMAL) {
 		switch (type) {
 			case E_ERROR:
 			case E_CORE_ERROR:
@@ -954,8 +952,8 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 				/* throw an exception if we are in EH_THROW mode
 				 * but DO NOT overwrite a pending exception
 				 */
-				if (PG(error_handling) == EH_THROW && !EG(exception)) {
-					zend_throw_error_exception(PG(exception_class), buffer, 0, type TSRMLS_CC);
+				if (EG(error_handling) == EH_THROW && !EG(exception)) {
+					zend_throw_error_exception(EG(exception_class), buffer, 0, type TSRMLS_CC);
 				}
 				efree(buffer);
 				return;
@@ -1847,7 +1845,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	PG(last_error_message) = NULL;
 	PG(last_error_file) = NULL;
 	PG(last_error_lineno) = 0;
-	PG(error_handling) = EH_NORMAL;
+	EG(error_handling)  = EH_NORMAL;
+	EG(exception_class) = NULL;
 	PG(disable_functions) = NULL;
 	PG(disable_classes) = NULL;
 	PG(allow_url_fopen_list) = NULL;
