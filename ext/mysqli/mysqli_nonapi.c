@@ -33,7 +33,7 @@
 
 #define SAFE_STR(a) ((a)?a:"")
 
-void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_connect)
+void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_connect, zend_bool in_ctor)
 {
 	MY_MYSQL			*mysql = NULL;
 	MYSQLI_RESOURCE		*mysqli_resource = NULL;
@@ -48,7 +48,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 	zend_rsrc_list_entry	*le;
 	mysqli_plist_entry *plist = NULL;
 
-	if (getThis() && !ZEND_NUM_ARGS()) {
+	if (getThis() && !ZEND_NUM_ARGS() && in_ctor) {
 		RETURN_NULL();
 	}
 	hostname = username = dbname = passwd = socket = NULL;
@@ -61,14 +61,14 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 
 		if (object && instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry TSRMLS_CC)) {
 			mysqli_resource = ((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->ptr;
-			if (mysqli_resource && mysqli_resource->ptr &&
-				mysqli_resource->status > MYSQLI_STATUS_INITIALIZED)
-			{
-				mysql = (MY_MYSQL*)mysqli_resource->ptr;
-				php_clear_mysql(mysql);
-				if (mysql->mysql) {
-					mysqli_close(mysql->mysql, MYSQLI_CLOSE_EXPLICIT);
-					mysql->mysql = NULL;
+			if (mysqli_resource && mysqli_resource->ptr) {
+				mysql = (MY_MYSQL*) mysqli_resource->ptr;			
+				if (mysqli_resource->status > MYSQLI_STATUS_INITIALIZED) {
+					php_clear_mysql(mysql);
+					if (mysql->mysql) {
+						mysqli_close(mysql->mysql, MYSQLI_CLOSE_EXPLICIT);
+						mysql->mysql = NULL;
+					}
 				}
 			}
 		}
@@ -76,7 +76,6 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 			mysql = (MY_MYSQL *) ecalloc(1, sizeof(MY_MYSQL));
 		}
 		flags |= CLIENT_MULTI_RESULTS; /* needed for mysql_multi_query() */
-
 	} else {
 		/* We have flags too */
 		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|sssslsl", &object, mysqli_link_class_entry,
@@ -84,6 +83,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 										&flags) == FAILURE) {
 			return;
 		}
+
 		mysqli_resource = ((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->ptr;
 		MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &object, "mysqli_link", MYSQLI_STATUS_INITIALIZED);
 
@@ -188,7 +188,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 								MyG(num_active_persistent) + MyG(num_inactive_persistent));
 		goto err;
 	}
-	if (!is_real_connect) {
+	if (!is_real_connect && !mysql->mysql) {
 #if !defined(HAVE_MYSQLND)
 		if (!(mysql->mysql = mysql_init(NULL))) {
 #else
@@ -285,7 +285,16 @@ err:
    Open a connection to a mysql server */ 
 PHP_FUNCTION(mysqli_connect)
 {
-	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, FALSE);
+	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, FALSE, FALSE);
+}
+/* }}} */
+
+
+/* {{{ proto object mysqli_link_construct()
+  */ 
+PHP_FUNCTION(mysqli_link_construct)
+{
+	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, FALSE, TRUE);
 }
 /* }}} */
 
