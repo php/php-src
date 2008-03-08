@@ -21,9 +21,9 @@ $_SESSION['bar'] = $bar;
 var_dump($_SESSION);
 ?>
 --EXPECTF--
-Notice: Undefined index:  foo in %s on line %d
+Notice: Undefined index: foo in %s on line %d
 
-Notice: Undefined index:  bar in %s on line %d
+Notice: Undefined index: bar in %s on line %d
 NULL
 NULL
 array(0) {
