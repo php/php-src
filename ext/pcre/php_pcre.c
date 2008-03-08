@@ -969,8 +969,8 @@ static int preg_do_repl_func(zval *function, char *subject, int *offsets, char *
 		result_len = offsets[1] - offsets[0];
 		*result = estrndup(&subject[offsets[0]], result_len);
 	}
-	zval_dtor(subpats);
-	FREE_ZVAL(subpats);
+
+	zval_ptr_dtor(&subpats);
 
 	return result_len;
 }
