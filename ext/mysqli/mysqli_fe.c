@@ -211,7 +211,7 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(set_local_infile_handler,mysqli_set_local_infile_handler,NULL)
 #endif
 	PHP_FALIAS(multi_query,mysqli_multi_query,NULL)
-	PHP_FALIAS(mysqli,mysqli_connect,NULL)
+	PHP_FALIAS(mysqli,mysqli_link_construct,NULL)
 	PHP_FALIAS(more_results,mysqli_more_results, NULL)
 	PHP_FALIAS(next_result, mysqli_next_result, NULL)
 	PHP_FALIAS(options,mysqli_options,NULL)

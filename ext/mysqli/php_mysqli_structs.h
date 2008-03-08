@@ -359,7 +359,7 @@ PHP_MYSQLI_API void mysqli_register_stmt(zval *return_value, void *stmt TSRMLS_D
 PHP_MYSQLI_API void mysqli_register_result(zval *return_value, void *result TSRMLS_DC);
 PHP_MYSQLI_API void php_mysqli_set_error(long mysql_errno, char *mysql_err TSRMLS_DC);
 
-void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_connect);
+void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_connect, zend_bool in_ctor);
 
 
 ZEND_BEGIN_MODULE_GLOBALS(mysqli)
@@ -456,6 +456,7 @@ PHP_FUNCTION(mysqli_info);
 PHP_FUNCTION(mysqli_insert_id);
 PHP_FUNCTION(mysqli_init);
 PHP_FUNCTION(mysqli_kill);
+PHP_FUNCTION(mysqli_link_construct);
 PHP_FUNCTION(mysqli_set_local_infile_default);
 PHP_FUNCTION(mysqli_set_local_infile_handler);
 PHP_FUNCTION(mysqli_more_results);

@@ -1669,7 +1669,7 @@ PHP_FUNCTION(mysqli_prepare)
    Open a connection to a mysql server */ 
 PHP_FUNCTION(mysqli_real_connect)
 {
-	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, TRUE);
+	mysqli_common_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, TRUE, FALSE);
 }
 /* }}} */
 
