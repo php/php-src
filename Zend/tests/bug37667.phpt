@@ -30,7 +30,7 @@ var_dump($obj);
 --EXPECTF--
 string(3) "bar"
 
-Notice: Undefined offset:  2 in %sbug37667.php on line 16
+Notice: Undefined offset: 2 in %sbug37667.php on line 16
 NULL
 object(Test)#%d (1) {
   ["property":protected]=>
@@ -54,7 +54,7 @@ object(Test)#%d (1) {
 --UEXPECTF--
 unicode(3) "bar"
 
-Notice: Undefined offset:  2 in %sbug37667.php on line %d
+Notice: Undefined offset: 2 in %sbug37667.php on line %d
 NULL
 object(Test)#%d (1) {
   [u"property":protected]=>
