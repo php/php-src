@@ -715,6 +715,12 @@ END_EXTERN_C()
 #include "zend_operators.h"
 #include "zend_variables.h"
 
+typedef enum {
+	EH_NORMAL = 0,
+	EH_SUPPRESS,
+	EH_THROW
+} zend_error_handling_t;
+
 #endif /* ZEND_H */
 
 /*
