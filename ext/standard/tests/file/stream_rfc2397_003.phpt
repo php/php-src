@@ -1,5 +1,7 @@
 --TEST--
 Stream: RFC2397 decoding data
+--INI--
+allow_url_fopen=1
 --FILE--
 <?php
 
