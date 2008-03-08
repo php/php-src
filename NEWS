@@ -155,6 +155,7 @@ PHP                                                                        NEWS
 - Fixed bug #42443 (PDO SQLite driver binds integers and booleans as strings).
   (Scott)
 - Fixed bug #42284 (duplicate of #39700). (Lars W)
+- Fixed bug #42203 (Clear SQLite result sets before closing database). (Scott)
 - Fixed bug #42190 (Constructing DateTime with TimeZone Indicator invalidates
   DateTimeZone). (Derick)
 - Fixed bug #42069 (parse_ini_file() allows using some non-alpha numeric
