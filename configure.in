@@ -122,6 +122,21 @@ dnl or the contents of libs.
 $php_shtool mkdir -p libs
 rm -f libs/*
 
+dnl Darwin 9 hack
+dnl Because the default debugging format used by Apple's GCC on Mac OS 10.5
+dnl causes errors in all current and past versions of Autoconf, we do a little
+dnl messing with the CFLAGS here to trick it.
+php_did_darwin9_cheat=0
+case $host_alias in
+*darwin9*)
+  echo $CFLAGS | grep -E '(^-g)|([[:space:]]-g)' 2>/dev/null >/dev/null
+  if test "$?" -ne 0; then
+    php_did_darwin9_cheat=1
+    CFLAGS="$CFLAGS -gstabs"
+  fi
+  ;;
+esac
+
 dnl Checks for programs.
 dnl -------------------------------------------------------------------------
 
@@ -167,7 +182,14 @@ esac
 
 dnl activate some gcc specific optimizations for gcc >= 4
 if test "$GCC" = "yes"; then
-  GCC_MAJOR_VERSION=`$CC --version | $SED -n '1s/[[^0-9]]*\([[0-9]]\+\)\.[[0-9]]\+\..*/\1/;1p'`
+  case $host_alias in
+  *darwin*)
+    GCC_MAJOR_VERSION=`$CC -dumpversion | $SED -nE '1s/([[0-9]]+)\.[[0-9]]+\..*/\1/;1p'`
+    ;;
+  *)
+    GCC_MAJOR_VERSION=`$CC --version | $SED -n '1s/[[^0-9]]*\([[0-9]]\+\)\.[[0-9]]\+\..*/\1/;1p'`
+    ;;
+  esac
   if test $GCC_MAJOR_VERSION -ge 4; then
     CFLAGS="$CFLAGS -fvisibility=hidden"
   fi
@@ -715,6 +737,10 @@ if test "$PHP_DEBUG" = "yes"; then
     CXXFLAGS="$CXXFLAGS -O0"
   fi
 else
+  dnl Finish the Darwin hack
+  if test "$php_did_darwin9_cheat" -eq 1; then
+    CFLAGS=`echo "$CFLAGS" | $SED -e 's/-gstabs//g'`
+  fi
   PHP_DEBUG=0
   ZEND_DEBUG=no
 fi
