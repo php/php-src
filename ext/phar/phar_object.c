@@ -1734,7 +1734,7 @@ static void phar_convert_to_other(phar_archive_data *source, int convert, char *
 	source->is_temporary_alias = 0;
 	source->flags = phar.flags;
 
-	phar_rename_archive(source, ext TSRMLS_CC);
+	phar_rename_archive(source, ext, 0 TSRMLS_CC);
 	phar_flush(source, 0, 0, convert, &error TSRMLS_CC);
 }
 /* }}} */
@@ -2432,8 +2432,10 @@ PHP_METHOD(Phar, compressAllFilesGZ)
 	} else {
 		pharobj_set_compression(&phar_obj->arc.archive->manifest, PHAR_ENT_COMPRESSED_GZ TSRMLS_CC);
 	}
+
 	phar_obj->arc.archive->is_modified = 1;
-	
+	phar_rename_archive(phar_obj->arc.archive, NULL, 1 TSRMLS_CC);
+
 	phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 	if (error) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, error);
@@ -2471,8 +2473,10 @@ PHP_METHOD(Phar, compressAllFilesBZIP2)
 	} else {
 		pharobj_set_compression(&phar_obj->arc.archive->manifest, PHAR_ENT_COMPRESSED_BZ2 TSRMLS_CC);
 	}
+
 	phar_obj->arc.archive->is_modified = 1;
-	
+	phar_rename_archive(phar_obj->arc.archive, NULL, 1 TSRMLS_CC);
+
 	phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 	if (error) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, error);
@@ -2504,8 +2508,10 @@ PHP_METHOD(Phar, uncompressAllFiles)
 	} else {
 		pharobj_set_compression(&phar_obj->arc.archive->manifest, PHAR_ENT_COMPRESSED_NONE TSRMLS_CC);
 	}
+
 	phar_obj->arc.archive->is_modified = 1;
-	
+	phar_rename_archive(phar_obj->arc.archive, NULL, 0 TSRMLS_CC);
+
 	phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 	if (error) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, error);

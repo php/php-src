@@ -72,11 +72,21 @@ int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t positi
 	return php_stream_seek(fp, temp, SEEK_SET);
 }
 
-void phar_rename_archive(phar_archive_data *phar, char *ext TSRMLS_DC)
+void phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool compress TSRMLS_DC)
 {
 	char *oldname = NULL, *oldpath = NULL;
 	char *basename = NULL, *basepath = NULL;
 	char *newname = NULL, *newpath = NULL;
+
+	if (phar->flags && compress) {
+		char *error;
+	
+		phar_flush(phar, 0, 0, 0, &error TSRMLS_CC);
+		if (error) {
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, error);
+			efree(error);
+		}
+	}
 
 	if (!ext) {
 		if (phar->is_zip) {
