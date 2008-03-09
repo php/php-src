@@ -110,7 +110,7 @@ if test "$PHP_APXS2FILTER" != "no"; then
     `ln -s $APXS_BINDIR/httpd _APP_`
     EXTRA_LIBS="$EXTRA_LIBS _APP_"
     PHP_SELECT_SAPI(apache2filter, shared, sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS)
-    INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL" 
+    INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL"
     ;;
   *)
     PHP_SELECT_SAPI(apache2filter, shared, sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS) 
@@ -118,7 +118,7 @@ if test "$PHP_APXS2FILTER" != "no"; then
     ;;
   esac
 
-  if test "$APXS_MPM" != "prefork"; then
+  if test "$APXS_MPM" != "prefork" && test "$APXS_MPM" != "peruser" && test "$APXS_MPM" != "itk"; then
     PHP_BUILD_THREAD_SAFE
   fi
   AC_MSG_RESULT(yes)
