@@ -1,3 +1,53 @@
+2008-03-08  Felipe Pena  <felipensp@gmail.com>
+
+    * zend.c
+      zend.h
+      zend_globals.h:
+      MFB: User error handlers no longer catch supressed errors (patch by Etienne
+      Kneuss)
+
+    * (PHP_5_3)
+      zend.c
+      zend.h
+      zend_globals.h:
+      User error handlers no longer catch supressed errors (patch by Etienne
+      Kneuss)
+
+    * tests/bug37667.phpt
+      tests/bug37667.phpt
+      tests/bug39304.phpt
+      tests/bug39304.phpt
+      tests/globals_001.phpt
+      tests/globals_001.phpt
+      tests/globals_002.phpt
+      tests/globals_002.phpt
+      tests/globals_003.phpt
+      tests/globals_003.phpt
+      tests/globals_004.phpt
+      tests/globals_004.phpt
+      tests/offset_array.phpt
+      tests/offset_array.phpt:
+      Fix tests (removed space on error message "Undefined index: ...")
+
+    * zend_execute.c
+      zend_execute.c:
+      Cosmetics (removed space on error message)
+
+    * zend_execute.c
+      tests/bug39018.phpt
+      tests/bug39018_2.phpt:
+      MFB: Fixed bug #39018 (Error control operator '@' fails to suppress
+      "Uninitialized string offset")
+
+    * (PHP_5_3)
+      zend_execute.c
+      tests/bug39018.phpt
+      tests/bug39018.phpt
+      tests/bug39018_2.phpt
+      tests/bug39018_2.phpt:
+      Fixed bug #39018 (Error control operator '@' fails to suppress
+      "Uninitialized string offset")
+
 2008-03-07  Felipe Pena  <felipensp@gmail.com>
 
     * zend_compile.c

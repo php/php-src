@@ -1,3 +1,284 @@
+2008-03-08  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/session/tests/bug24592.phpt:
+      Fix test (thanks Scoates!)
+
+    * ext/mysql/tests/mysql_trace_mode.phpt
+      ext/mysql/tests/mysql_trace_mode.phpt
+      ext/session/tests/bug24592.phpt:
+      Fix test
+
+    * (PHP_5_3)
+      sapi/cli/tests/006.phpt:
+      Fix test (new constant was added in PREG)
+
+2008-03-08  Etienne Kneuss  <php@colder.ch>
+
+    * ext/standard/tests/general_functions/bug44295.phpt
+      main/main.c
+      main/php.h
+      main/php_globals.h:
+      User error handlers no longer catch supressed errors
+
+    * (PHP_5_3)
+      main/main.c
+      main/php.h
+      main/php_globals.h:
+      MFH: User error handlers no longer catch supressed errors
+
+    * ext/standard/tests/general_functions/bug44295.phpt
+      ext/standard/tests/general_functions/bug44295.phpt:
+      
+      file bug44295.phpt was initially added on branch PHP_5_3.
+
+2008-03-08  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_globals.h:
+      MFB: User error handlers no longer catch supressed errors (patch by Etienne
+      Kneuss)
+
+    * (PHP_5_3)
+      ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_globals.h:
+      User error handlers no longer catch supressed errors (patch by Etienne
+      Kneuss)
+
+2008-03-08  David Coallier  <david.coallier@gmail.com>
+
+    * (PHP_5_2)
+      ext/dom/tests/bug38474.phpt:
+      - MFH . Libxml version < 2.6.21 it fails. Patch from scoates
+
+2008-03-08  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/standard/tests/file/stream_rfc2397_001.phpt
+      ext/standard/tests/file/stream_rfc2397_001.phpt
+      ext/standard/tests/file/stream_rfc2397_002.phpt
+      ext/standard/tests/file/stream_rfc2397_002.phpt
+      ext/standard/tests/file/stream_rfc2397_003.phpt
+      ext/standard/tests/file/stream_rfc2397_003.phpt
+      ext/standard/tests/file/stream_rfc2397_004.phpt
+      ext/standard/tests/file/stream_rfc2397_004.phpt
+      ext/standard/tests/file/stream_rfc2397_005.phpt
+      ext/standard/tests/file/stream_rfc2397_005.phpt
+      ext/standard/tests/file/stream_rfc2397_006.phpt
+      ext/standard/tests/file/stream_rfc2397_006.phpt
+      ext/standard/tests/file/stream_rfc2397_007.phpt
+      ext/standard/tests/file/stream_rfc2397_007.phpt
+      ext/standard/tests/file/stream_supports_lock.phpt
+      ext/standard/tests/file/stream_supports_lock.phpt:
+      fix tests if allow_url_fopen is disabled in php.ini
+
+2008-03-08  David Coallier  <david.coallier@gmail.com>
+
+    * (PHP_5_3)
+      ext/dom/tests/bug38474.phpt:
+      - MFH
+      - If libxml dotted version smaller than 2.6.20 it's a fail. Patch from
+      scoates
+
+    * ext/dom/tests/bug38474.phpt:
+      - Skipif libxml dotted version is < 2.6.20. Patch from scoates
+
+2008-03-08  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/standard/tests/network/http-stream.phpt
+      ext/standard/tests/network/http-stream.phpt:
+      fix test if allow_url_fopen is disabled in php.ini
+
+2008-03-08  David Coallier  <david.coallier@gmail.com>
+
+    * tests/lang/bug30638.phpt:
+      - MFB. Ok to fail on OSX. Patch from scoates
+
+    * (PHP_5_3)
+      tests/lang/bug30638.phpt:
+      - Ok to fail on OSX, adjusted bug, patch from scoates
+
+2008-03-08  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * ext/standard/tests/array/bug43505.phpt
+      ext/standard/tests/array/bug43505.phpt:
+      Countable requires SPL
+
+2008-03-08  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c:
+      Bug fixed in MySQL 5.0.46
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli_structs.h
+      ext/mysqli/tests/bug39457.phpt:
+      MFB:
+      - Fixed problem with $mysqli->connect() not connecting with defaults
+      - Fixed leak (#39475)
+
+    * (PHP_5_3)
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c:
+      Bug fixed in 5.0.46
+
+    * (PHP_5_2)
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c:
+      Fix introduced in 5.0.46, not in 5.0.42
+
+    * (PHP_5_3)
+      NEWS:
+      update NEWS
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli_structs.h
+      ext/mysqli/tests/bug39457.phpt
+      ext/mysqli/tests/bug39457.phpt:
+      Fix a problem with $mysqi->connect() not working with default values.
+      Fix a leak, bug#39457
+
+2008-03-08  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN: #44373
+
+    * ext/pdo_oci/oci_driver.c
+      ext/pdo_oci/oci_driver.c:
+      MFB: Fixed bug #44373 (PDO_OCI extension compile failed)
+
+    * (PHP_5_2)
+      ext/pdo_oci/oci_driver.c:
+      Fixed bug #44373 (PDO_OCI extension compile failed)
+
+2008-03-08  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/tests/bug44214.phpt
+      ext/pcre/tests/bug44214_2.phpt:
+      MFB: fix #44214
+
+    * (PHP_5_3)
+      NEWS:
+      BFN #44214
+
+    * ext/pcre/tests/bug44214.phpt
+      ext/pcre/tests/bug44214.phpt
+      ext/pcre/tests/bug44214_2.phpt
+      ext/pcre/tests/bug44214_2.phpt:
+      
+      file bug44214.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/pcre/php_pcre.c:
+      fix bug #44214: crash with preg_replace_callback and global variables
+
+2008-03-08  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/tests/bug37667.phpt
+      ZendEngine2/tests/bug37667.phpt
+      ZendEngine2/tests/bug39304.phpt
+      ZendEngine2/tests/bug39304.phpt
+      ZendEngine2/tests/globals_001.phpt
+      ZendEngine2/tests/globals_001.phpt
+      ZendEngine2/tests/globals_002.phpt
+      ZendEngine2/tests/globals_002.phpt
+      ZendEngine2/tests/globals_003.phpt
+      ZendEngine2/tests/globals_003.phpt
+      ZendEngine2/tests/globals_004.phpt
+      ZendEngine2/tests/globals_004.phpt
+      ZendEngine2/tests/offset_array.phpt
+      ZendEngine2/tests/offset_array.phpt
+      tests/classes/array_access_001.phpt
+      tests/classes/array_access_001.phpt
+      tests/classes/array_access_002.phpt
+      tests/classes/array_access_002.phpt
+      tests/lang/bug25547.phpt:
+      Fix tests (removed space on error message "Undefined index: ...")
+
+    * (PHP_5_3)
+      NEWS:
+      BFN: #39108
+
+2008-03-08  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/setlocale_variation4.phpt
+      ext/standard/tests/strings/setlocale_variation5.phpt:
+      MFB53 skipif patch as asked by gentoo guys
+
+    * (PHP_5_3)
+      NEWS:
+      BFN: #44336
+
+    * ext/pcre/php_pcre.c:
+      MFB
+
+    * (PHP_5_3)
+      ext/pcre/php_pcre.c:
+      implement #44336: optimize utf8 string matching
+      add PREG_BAD_UTF8_OFFSET_ERROR constant
+
+    * ext/pcre/tests/007.phpt
+      ext/pcre/tests/invalid_utf8_offset.phpt:
+      add new tests
+
+    * ext/pcre/tests/007.phpt
+      ext/pcre/tests/007.phpt
+      ext/pcre/tests/invalid_utf8_offset.phpt
+      ext/pcre/tests/invalid_utf8_offset.phpt:
+      
+      file 007.phpt was initially added on branch PHP_5_3.
+
+2008-03-08  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c:
+      Cosmetics (removed space on error message)
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug39018.phpt
+      ZendEngine2/tests/bug39018_2.phpt:
+      MFB: Fixed bug #39018 (Error control operator '@' fails to suppress
+      "Uninitialized string offset")
+
+    * (PHP_5_3)
+      ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug39018.phpt
+      ZendEngine2/tests/bug39018.phpt
+      ZendEngine2/tests/bug39018_2.phpt
+      ZendEngine2/tests/bug39018_2.phpt:
+      Fixed bug #39018 (Error control operator '@' fails to suppress
+      "Uninitialized string offset")
+
+2008-03-08  Gwynne Raskind  <gwynne@wanderingknights.org>
+
+    * (PHP_5_3)
+      NEWS:
+      BFN
+
+2008-03-08  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      NEWS:
+      BFN
+
+    * (PHP_5_3)
+      ext/sqlite/sqlite.c:
+      MFB: Fixed bug #42203 (Clear SQLite result sets before closing database.)
+
+    * ext/sqlite/sqlite.c:
+      Fixed bug #42203 (Clear SQLite result sets before closing database.)
+
 2008-03-07  Gwynne Raskind  <gwynne@wanderingknights.org>
 
     * (PHP_5_3)
