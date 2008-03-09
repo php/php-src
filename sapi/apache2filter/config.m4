@@ -118,7 +118,7 @@ if test "$PHP_APXS2FILTER" != "no"; then
     ;;
   esac
 
-  if test "$APXS_MPM" != "prefork" && test "$APXS_MPM" != "peruser" && test "$APXS_MPM" != "itk"; then
+  if test "$APXS_MPM" != "prefork" && test "$APXS_MPM" != "peruser"; then
     PHP_BUILD_THREAD_SAFE
   fi
   AC_MSG_RESULT(yes)
