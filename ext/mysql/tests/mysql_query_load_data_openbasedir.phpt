@@ -11,7 +11,7 @@ if (file_exists('./simple.csv') && !unlink('./simple.csv'))
 if (!$fp = fopen('./simple.csv', 'w'))
 	die("skip Cannot create test CSV file");
 
-flose($fp);
+fclose($fp);
 @unlink('./simple.csv');
 ?>
 --INI--
