@@ -454,10 +454,10 @@ static int _clean_unfinished_results(zend_rsrc_list_entry *le, void *db TSRMLS_D
 	if (Z_TYPE_P(le) == le_sqlite_result) {
 		struct php_sqlite_result *res = (struct php_sqlite_result *)le->ptr;
 		if (res->db->rsrc_id == ((struct php_sqlite_db*)db)->rsrc_id) {
-			real_result_dtor(res TSRMLS_CC);
+			return ZEND_HASH_APPLY_REMOVE;
 		}
 	}
-	return 0;
+	return ZEND_HASH_APPLY_KEEP;
 }
 
 static ZEND_RSRC_DTOR_FUNC(php_sqlite_result_dtor)
