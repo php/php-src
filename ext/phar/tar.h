@@ -19,6 +19,12 @@
   +----------------------------------------------------------------------+
 */
 
+#ifdef PHP_WIN32
+#pragma pack(1)
+# define PHAR_TAR_PACK
+#else
+# define PHAR_TAR_PACK __attribute__((__packed__))
+#endif
 /**
  * the format of the header block for a file, in the older UNIX-compatible
  * TAR format
@@ -37,7 +43,7 @@ typedef struct _old_tar_header {  /* {{{ */
 	                         2 for a symbolic link,
 	                         0 otherwise */
 	char linkname[100]; /* name of linked file */
-} old_tar_header;
+} PHAR_TAR_PACK old_tar_header;
 /* }}} */
 
 /**
@@ -74,7 +80,7 @@ typedef struct _tar_header {  /* {{{ */
 	                       is prefixed to the name field to allow names
 	                       longer then 100 characters */
 	char padding[12];   /* unused zeroed bytes */
-} tar_header;
+} PHAR_TAR_PACK tar_header;
 /* }}} */
 
 #endif
