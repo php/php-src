@@ -9,19 +9,18 @@ phar.readonly=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/tar_makegz.phar.tar';
-$alias = 'phar://' . $fname;
-$fname2 = dirname(__FILE__) . '/tar_makegz_b.phar.tar';
-$alias2 = 'phar://' . $fname2;
+$fname = dirname(__FILE__) . '/tar_makebz2.phar.tar';
+$fname2 = dirname(__FILE__) . '/tar_makebz2.phar.tar.gz';
+$fname3 = dirname(__FILE__) . '/tar_makebz2_b.phar.tar.gz';
 
 $phar = new Phar($fname);
 $phar['test'] = 'hi';
 var_dump($phar->isTar());
 $phar->compressAllFilesGZ();
 
-copy($fname, $fname2);
+copy($fname2, $fname3);
 
-$phar2 = new Phar($fname2);
+$phar2 = new Phar($fname3);
 var_dump($phar2->isTar());
 var_dump($phar2->isCompressed() == Phar::GZ);
 
@@ -29,8 +28,8 @@ var_dump($phar2->isCompressed() == Phar::GZ);
 ===DONE===
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . '/tar_makegz.phar.tar');
-@unlink(dirname(__FILE__) . '/tar_makegz_b.phar.tar');
+@unlink(dirname(__FILE__) . '/tar_makebz2.phar.tar.gz');
+@unlink(dirname(__FILE__) . '/tar_makebz2_b.phar.tar.gz');
 ?>
 --EXPECTF--
 bool(true)

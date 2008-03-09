@@ -52,7 +52,7 @@ var_dump($phar['a']->isCompressed());
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
 ?>
 --EXPECTF--
 string(1) "a"

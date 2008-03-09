@@ -27,7 +27,7 @@ var_dump($phar->getModified());
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
 ?>
 --EXPECTF--
 bool(false)
