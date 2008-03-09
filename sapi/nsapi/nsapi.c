@@ -860,7 +860,7 @@ int NSAPI_PUBLIC php5_init(pblock *pb, Session *sn, Request *rq)
 
 	daemon_atrestart(&php5_close, NULL);
 
-	log_error(LOG_INFORM, pblock_findval("fn", pb), sn, rq, "Initialized PHP Module (%d threads exspected)", threads);
+	log_error(LOG_INFORM, pblock_findval("fn", pb), sn, rq, "Initialized PHP Module (%d threads expected)", threads);
 	return REQ_PROCEED;
 }
 
