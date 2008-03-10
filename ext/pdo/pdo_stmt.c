@@ -1729,8 +1729,8 @@ static PHP_METHOD(PDOStatement, errorCode)
 {
 	PHP_STMT_GET_OBJ;
 
-	if (ZEND_NUM_ARGS()) {
-		RETURN_FALSE;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	RETURN_STRING(stmt->error_code, 1);
@@ -1743,8 +1743,8 @@ static PHP_METHOD(PDOStatement, errorInfo)
 {
 	PHP_STMT_GET_OBJ;
 
-	if (ZEND_NUM_ARGS()) {
-		RETURN_FALSE;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	array_init(return_value);
@@ -1844,8 +1844,8 @@ static PHP_METHOD(PDOStatement, getAttribute)
 static PHP_METHOD(PDOStatement, columnCount)
 {
 	PHP_STMT_GET_OBJ;
-	if (ZEND_NUM_ARGS()) {
-		RETURN_FALSE;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 	RETURN_LONG(stmt->column_count);
 }

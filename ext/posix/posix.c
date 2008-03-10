@@ -209,7 +209,7 @@ zend_module_entry posix_module_entry = {
 ZEND_GET_MODULE(posix)
 #endif
 
-#define PHP_POSIX_NO_ARGS	if (ZEND_NUM_ARGS()) WRONG_PARAM_COUNT;
+#define PHP_POSIX_NO_ARGS	if (zend_parse_parameters_none() == FAILURE) return;
 
 #define PHP_POSIX_RETURN_LONG_FUNC(func_name)	\
 	PHP_POSIX_NO_ARGS	\

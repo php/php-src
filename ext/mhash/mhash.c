@@ -95,8 +95,8 @@ PHP_MINFO_FUNCTION(mhash)
    Gets the number of available hashes */
 PHP_FUNCTION(mhash_count)
 {
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	RETURN_LONG(mhash_count());

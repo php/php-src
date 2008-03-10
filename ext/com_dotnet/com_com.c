@@ -658,8 +658,8 @@ PHP_FUNCTION(com_create_guid)
 	GUID retval;
 	OLECHAR *guid_string;
 
-	if (ZEND_NUM_ARGS() != 0) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	php_com_initialize(TSRMLS_C);
