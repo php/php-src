@@ -37,7 +37,7 @@ $xw->endDocument();
 print $xw->flush(true);
 ?>
 --EXPECTF--
-Warning: Wrong parameter count for XMLWriter::endElement() in %s on line %d
+Warning: XMLWriter::endElement() expects exactly 0 parameters, 1 given in %s on line %d
 <?xml version="1.0"?>
 <test>
  <foo/>
