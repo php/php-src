@@ -129,8 +129,8 @@ dnl messing with the CFLAGS here to trick it.
 php_did_darwin9_cheat=0
 case $host_alias in
 *darwin9*)
-  echo $CFLAGS | grep -E '(^-g)|([[:space:]]-g)' 2>/dev/null >/dev/null
-  if test "$?" -ne 0; then
+  hasg=`echo $CFLAGS | grep -E '(^-g)|([[:space:]]-g)'`
+  if test x"$hasg" = "x"; then
     php_did_darwin9_cheat=1
     CFLAGS="$CFLAGS -gstabs"
   fi
@@ -391,7 +391,6 @@ langinfo.h \
 limits.h \
 locale.h \
 monetary.h \
-mach-o/dyld.h \
 netdb.h \
 pwd.h \
 resolv.h \
@@ -442,6 +441,18 @@ assert.h
 #include <arpa/nameser.h>
 #endif
 ])
+
+dnl Don't use mach-o/dyld.h on Darwin 8+, dl* is recommended by Apple from there on
+dnl See http://developer.apple.com/documentation/DeveloperTools/Conceptual/MachOTopics/Articles/loading_code.html
+case $host_alias in
+*darwin[[89]]*)
+    ;;
+*)
+    AC_CHECK_HEADERS([  \
+mach-o/dyld.h
+],[],[][])
+    ;;
+esac
 
 PHP_FOPENCOOKIE
 PHP_BROKEN_GETCWD
@@ -737,10 +748,6 @@ if test "$PHP_DEBUG" = "yes"; then
     CXXFLAGS="$CXXFLAGS -O0"
   fi
 else
-  dnl Finish the Darwin hack
-  if test "$php_did_darwin9_cheat" -eq 1; then
-    CFLAGS=`echo "$CFLAGS" | $SED -e 's/-gstabs//g'`
-  fi
   PHP_DEBUG=0
   ZEND_DEBUG=no
 fi
@@ -1221,6 +1228,15 @@ test -z "$CXX_PHP_COMPILE" && CXX_PHP_COMPILE='$(LIBTOOL) --mode=compile $(CXX_C
 SHARED_LIBTOOL='$(LIBTOOL)'
 
 CC=$old_CC
+
+dnl Finish the Darwin hack
+if test "$php_did_darwin9_cheat" -eq 1; then
+  if test "$PHP_DEBUG" = "yes"; then
+    CFLAGS=`echo "$CFLAGS" | $SED -e 's/-gstabs/-g/g'`
+  else
+    CFLAGS=`echo "$CFLAGS" | $SED -e 's/-gstabs//g'`
+  fi
+fi
 
 PHP_CONFIGURE_PART(Generating files)
 
