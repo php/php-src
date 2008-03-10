@@ -1293,11 +1293,13 @@ static int dbh_compare(zval *object1, zval *object2 TSRMLS_DC)
 	return -1;
 }
 
+#if PHP_MAJOR_VERSION < 6
 static zend_object_value dbh_ze1_clone_obj(zval *object TSRMLS_DC)
 {
 	php_error(E_ERROR, "Cannot clone object of class %s due to 'zend.ze1_compatibility_mode'", Z_OBJCE_P(object)->name);
 	return object->value.obj;
 }
+#endif
 
 static zend_object_handlers pdo_dbh_object_handlers;
 #if PHP_MAJOR_VERSION < 6
