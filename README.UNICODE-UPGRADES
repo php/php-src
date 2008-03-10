@@ -46,7 +46,7 @@ another structure:
     ....
     } value;
 
-Where zstr ia union of char*, UChar*, and void*.
+Where zstr is a union of char*, UChar*, and void*.
 
 
 Parameter Parsing API Modifications
