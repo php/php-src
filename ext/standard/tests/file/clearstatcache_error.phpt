@@ -14,6 +14,6 @@ echo "*** Done ***\n";
 --EXPECTF--
 *** Testing clearstatcache() function: error conditions ***
 
-Warning: Wrong parameter count for clearstatcache() in %s on line %d
+Warning: clearstatcache() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 *** Done ***

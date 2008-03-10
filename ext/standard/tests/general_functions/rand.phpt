@@ -54,10 +54,10 @@ Warning: mt_srand() expects parameter 1 to be long, array given in %s on line %d
 NULL
 int(%d)
 
-Warning: Wrong parameter count for getrandmax() in %s on line %d
+Warning: getrandmax() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 int(%d)
 
-Warning: Wrong parameter count for mt_getrandmax() in %s on line %d
+Warning: mt_getrandmax() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 Done
