@@ -61,8 +61,19 @@ sys/time.h \
 signal.h \
 unix.h \
 stdlib.h \
-mach-o/dyld.h \
 dlfcn.h)
+
+dnl Don't use mach-o/dyld.h on Darwin 8+, dl* is recommended by Apple from there on
+dnl See http://developer.apple.com/documentation/DeveloperTools/Conceptual/MachOTopics/Articles/loading_code.html
+case $host_alias in
+*darwin[[89]]*)
+    ;;
+*)
+    AC_CHECK_HEADERS([  \
+mach-o/dyld.h
+],[],[][])
+    ;;
+esac
 
 AC_TYPE_SIZE_T
 AC_TYPE_SIGNAL
