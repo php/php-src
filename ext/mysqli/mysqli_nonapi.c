@@ -151,13 +151,13 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 #else
 							if (!mysql_ping(mysql->mysql)) {
 #endif
-#ifdef HAVE_MYSQLND
+#ifdef MYSQLI_USE_MYSQLND
 								mysqlnd_restart_psession(mysql->mysql);
 #endif
 								MyG(num_active_persistent)++;
 								goto end;
 							} else {
-#if defined(HAVE_MYSQLND)
+#if defined(MYSQLI_USE_MYSQLND)
 								mysqlnd_end_psession(mysql->mysql);
 #endif	
 								mysqli_close(mysql->mysql, MYSQLI_CLOSE_IMPLICIT);
@@ -189,7 +189,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 		goto err;
 	}
 	if (!is_real_connect && !mysql->mysql) {
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 		if (!(mysql->mysql = mysql_init(NULL))) {
 #else
 		if (!(mysql->mysql = mysqlnd_init(persistent))) {
@@ -213,7 +213,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 	}
 #endif
 
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 	if (mysql_real_connect(mysql->mysql, hostname, username, passwd, dbname, port, socket, CLIENT_MULTI_RESULTS) == NULL)
 #else
 	if (mysqlnd_connect(mysql->mysql, hostname, username, passwd, passwd_len, dbname, dbname_len,
@@ -239,7 +239,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 	/* clear error */
 	php_mysqli_set_error(mysql_errno(mysql->mysql), (char *) mysql_error(mysql->mysql) TSRMLS_CC);
 
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 	mysql->mysql->reconnect = MyG(reconnect);
 
 	/* set our own local_infile handler */
@@ -262,7 +262,7 @@ end:
 
 	MyG(num_links)++;
 
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 	mysql->multi_query = 0;
 #else
 	mysql->multi_query = 1;
@@ -334,7 +334,7 @@ PHP_FUNCTION(mysqli_connect_error)
    Fetch a result row as an associative array, a numeric array, or both */
 PHP_FUNCTION(mysqli_fetch_array) 
 {
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 0);
 #else
 	MYSQL_RES		*result;
@@ -360,7 +360,7 @@ PHP_FUNCTION(mysqli_fetch_array)
    Fetch a result row as an associative array */
 PHP_FUNCTION(mysqli_fetch_assoc) 
 {
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQLI_ASSOC, 0);
 #else
 	MYSQL_RES		*result;
@@ -379,7 +379,7 @@ PHP_FUNCTION(mysqli_fetch_assoc)
 
 /* {{{ proto mixed mysqli_fetch_all (object result [,int resulttype]) U
    Fetches all result rows as an associative array, a numeric array, or both */
-#if defined(HAVE_MYSQLND)
+#if defined(MYSQLI_USE_MYSQLND)
 PHP_FUNCTION(mysqli_fetch_all) 
 {
 	MYSQL_RES		*result;
@@ -471,7 +471,7 @@ PHP_FUNCTION(mysqli_multi_query)
 
 	MYSQLI_ENABLE_MQ;	
 	if (mysql_real_query(mysql->mysql, query, query_len)) {
-#ifndef HAVE_MYSQLND
+#ifndef MYSQLI_USE_MYSQLND
 		char s_error[MYSQL_ERRMSG_SIZE], s_sqlstate[SQLSTATE_LENGTH+1];
 		unsigned int s_errno;
 		/* we have to save error information, cause 
@@ -485,7 +485,7 @@ PHP_FUNCTION(mysqli_multi_query)
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		MYSQLI_DISABLE_MQ;
 
-#ifndef HAVE_MYSQLND
+#ifndef MYSQLI_USE_MYSQLND
 		/* restore error information */
 		strcpy(mysql->mysql->net.last_error, s_error);
 		strcpy(mysql->mysql->net.sqlstate, s_sqlstate);
@@ -520,7 +520,7 @@ PHP_FUNCTION(mysqli_query)
 		RETURN_FALSE;
 	}
 	if (resultmode != MYSQLI_USE_RESULT && resultmode != MYSQLI_STORE_RESULT
-#if defined(HAVE_MYSQLND) && defined(MYSQLND_THREADED)
+#if defined(MYSQLI_USE_MYSQLND) && defined(MYSQLND_THREADED)
 		&& resultmode != MYSQLI_BG_STORE_RESULT
 #endif
 	) {
@@ -552,7 +552,7 @@ PHP_FUNCTION(mysqli_query)
 		case MYSQLI_USE_RESULT:
 			result = mysql_use_result(mysql->mysql);
 			break;
-#if defined(HAVE_MYSQLND) && defined(MYSQLND_THREADED)
+#if defined(MYSQLI_USE_MYSQLND) && defined(MYSQLND_THREADED)
 		case MYSQLI_BG_STORE_RESULT:
 			result = mysqli_bg_store_result(mysql->mysql);
 			break;
@@ -576,7 +576,7 @@ PHP_FUNCTION(mysqli_query)
 /* }}} */
 
 
-#if defined(HAVE_MYSQLND)
+#if defined(MYSQLI_USE_MYSQLND)
 /* {{{ proto object mysqli_stmt_get_result(object link) U
    Buffer result set on client */
 PHP_FUNCTION(mysqli_stmt_get_result)
@@ -695,7 +695,7 @@ PHP_FUNCTION(mysqli_get_charset)
 	zval					*mysql_link;
 	char 					*name = NULL, *collation = NULL, *dir = NULL;
 	uint					minlength, maxlength, number, state;
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 	MY_CHARSET_INFO			cs;
 #else
 	const MYSQLND_CHARSET	*cs;
@@ -708,7 +708,7 @@ PHP_FUNCTION(mysqli_get_charset)
 
 	object_init(return_value);
 
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 	mysql_get_character_set_info(mysql->mysql, &cs);
 	name = (char *)cs.csname;
 	collation = (char *)cs.name;

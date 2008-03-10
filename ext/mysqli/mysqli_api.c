@@ -76,7 +76,7 @@ PHP_FUNCTION(mysqli_autocommit)
 /* }}} */
 
 /* {{{ mysqli_stmt_bind_param_do_bind */
-#ifndef HAVE_MYSQLND
+#ifndef MYSQLI_USE_MYSQLND
 static
 int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int argc, unsigned int num_vars,
 								   zval ***args, unsigned int start, const char * const types TSRMLS_DC)
@@ -271,7 +271,7 @@ PHP_FUNCTION(mysqli_stmt_bind_param)
 /* }}} */
 
 /* {{{ mysqli_stmt_bind_result_do_bind */
-#ifndef HAVE_MYSQLND
+#ifndef MYSQLI_USE_MYSQLND
 /* TODO:
    do_alloca, free_alloca
 */
@@ -345,7 +345,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 				break;
 
 			case MYSQL_TYPE_LONGLONG:
-#if MYSQL_VERSION_ID > 50002 || defined(HAVE_MYSQLND)
+#if MYSQL_VERSION_ID > 50002 || defined(MYSQLI_USE_MYSQLND)
 			case MYSQL_TYPE_BIT:
 #endif
 				stmt->result.buf[ofs].type = IS_STRING; 
@@ -704,7 +704,7 @@ PHP_FUNCTION(mysqli_stmt_execute)
 {
 	MY_STMT		*stmt;
 	zval			*mysql_stmt;
-#ifndef HAVE_MYSQLND
+#ifndef MYSQLI_USE_MYSQLND
 	unsigned int	i;
 #endif
 
@@ -713,7 +713,7 @@ PHP_FUNCTION(mysqli_stmt_execute)
 	}
 	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt", MYSQLI_STATUS_VALID);
 
-#ifndef HAVE_MYSQLND
+#ifndef MYSQLI_USE_MYSQLND
 	for (i = 0; i < stmt->param.var_cnt; i++) {
 		if (stmt->param.vars[i]) {
 			if ( !(stmt->param.is_null[i] = (stmt->param.vars[i]->type == IS_NULL)) ) {
@@ -758,7 +758,7 @@ PHP_FUNCTION(mysqli_stmt_execute)
 		php_mysqli_report_index(stmt->query, mysqli_stmt_server_status(stmt->stmt) TSRMLS_CC);
 	}
 
-#ifndef HAVE_MYSQLND
+#ifndef MYSQLI_USE_MYSQLND
 	/* free converted utf8 strings */
 	if (UG(unicode)) {
 		for (i = 0; i < stmt->param.var_cnt; i++) {
@@ -773,7 +773,7 @@ PHP_FUNCTION(mysqli_stmt_execute)
 
 
 
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 #define MYSQL_BINARY_CHARSET_NR 63
 
 #if MYSQL_VERSION_ID > 50002
@@ -987,7 +987,7 @@ void mysqli_stmt_fetch_mysqlnd(INTERNAL_FUNCTION_PARAMETERS)
    Fetch results from a prepared statement into the bound variables */
 PHP_FUNCTION(mysqli_stmt_fetch)
 {
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 	mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 #else
 	mysqli_stmt_fetch_mysqlnd(INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -1127,7 +1127,7 @@ PHP_FUNCTION(mysqli_fetch_lengths)
    Get a result row as an enumerated array */
 PHP_FUNCTION(mysqli_fetch_row) 
 {
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQLI_NUM, 0);
 #else
 	MYSQL_RES	*result;
@@ -1323,7 +1323,7 @@ PHP_FUNCTION(mysqli_init)
 	MYSQLI_RESOURCE *mysqli_resource;
 	MY_MYSQL *mysql = (MY_MYSQL *)ecalloc(1, sizeof(MY_MYSQL));
 
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 	if (!(mysql->mysql = mysql_init(NULL)))
 #else
 	/*
@@ -1394,7 +1394,7 @@ PHP_FUNCTION(mysqli_kill)
 
 /* {{{ proto void mysqli_set_local_infile_default(object link) U
    unsets user defined handler for load local infile command */
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 PHP_FUNCTION(mysqli_set_local_infile_default)
 {
 	MY_MYSQL	*mysql;
@@ -1604,7 +1604,7 @@ PHP_FUNCTION(mysqli_prepare)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 	if (mysql->mysql->status == MYSQL_STATUS_GET_RESULT) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "All data must be fetched before a new statement prepare takes place");
 		RETURN_FALSE;
@@ -1616,7 +1616,7 @@ PHP_FUNCTION(mysqli_prepare)
 	if ((stmt->stmt = mysql_stmt_init(mysql->mysql))) {
 		if (mysql_stmt_prepare(stmt->stmt, query, query_len)) {
 			/* mysql_stmt_close() clears errors, so we have to store them temporarily */
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 			char  last_error[MYSQL_ERRMSG_SIZE];
 			char  sqlstate[SQLSTATE_LENGTH+1];
 			unsigned int last_errno;
@@ -1631,7 +1631,7 @@ PHP_FUNCTION(mysqli_prepare)
 			stmt->stmt = NULL;
 
 			/* restore error messages */
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 			mysql->mysql->net.last_errno = last_errno;
 			memcpy(mysql->mysql->net.last_error, last_error, MYSQL_ERRMSG_SIZE);
 			memcpy(mysql->mysql->net.sqlstate, sqlstate, SQLSTATE_LENGTH+1);
@@ -1982,7 +1982,7 @@ PHP_FUNCTION(mysqli_sqlstate)
 
 /* {{{ proto bool mysqli_ssl_set(object link ,string key ,string cert ,string ca ,string capath ,string cipher]) U
 */
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 PHP_FUNCTION(mysqli_ssl_set)
 {
 	MY_MYSQL	*mysql;
@@ -2018,7 +2018,7 @@ PHP_FUNCTION(mysqli_stat)
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
 	char		*stat;
-#if defined(HAVE_MYSQLND)
+#if defined(MYSQLI_USE_MYSQLND)
 	uint		stat_len;
 #endif
 
@@ -2027,7 +2027,7 @@ PHP_FUNCTION(mysqli_stat)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 	if ((stat = (char *)mysql_stat(mysql->mysql)))
 	{
 		RETURN_UTF8_STRING(stat, ZSTR_DUPLICATE);
@@ -2078,7 +2078,7 @@ PHP_FUNCTION(mysqli_stmt_attr_get)
 {
 	MY_STMT	*stmt;
 	zval	*mysql_stmt;
-#if !defined(HAVE_MYSQLND) && MYSQL_VERSION_ID > 50099
+#if !defined(MYSQLI_USE_MYSQLND) && MYSQL_VERSION_ID > 50099
 	my_bool value;
 #else
 	ulong	value = 0;
@@ -2223,7 +2223,7 @@ PHP_FUNCTION(mysqli_stmt_store_result)
 	}
 	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt", MYSQLI_STATUS_VALID);
 	
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 	{
 		/*
 		  If the user wants to store the data and we have BLOBs/TEXTs we try to allocate

@@ -36,14 +36,14 @@
 #define FALSE 0
 #endif
 
-#if defined(HAVE_MYSQLND)
+#if defined(MYSQL_USE_MYSQLND)
 #include "ext/mysqlnd/mysqlnd.h"
-#include "ext/mysql/mysql_mysqlnd.h"
+#include "mysql_mysqlnd.h"
 #else
 #include <mysql.h>
 #endif
 
-#if (MYSQL_VERSION_ID >= 40113 && MYSQL_VERSION_ID < 50000) || MYSQL_VERSION_ID >= 50007 || HAVE_MYSQLND
+#if (MYSQL_VERSION_ID >= 40113 && MYSQL_VERSION_ID < 50000) || MYSQL_VERSION_ID >= 50007 || MYSQL_USE_MYSQLND
 #define MYSQL_HAS_SET_CHARSET
 #endif
 
@@ -120,7 +120,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mysql)
 	long result_allocated;
 	long trace_mode;
 	long allow_local_infile;
-#ifdef HAVE_MYSQLND
+#ifdef MYSQL_USE_MYSQLND
 	MYSQLND_THD_ZVAL_PCACHE *mysqlnd_thd_zval_cache;
 	MYSQLND_QCACHE			*mysqlnd_qcache;
 	long					cache_size;

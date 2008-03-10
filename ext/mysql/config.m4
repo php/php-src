@@ -158,5 +158,6 @@ if test "$PHP_MYSQL" != "no"; then
 
   if test "$PHP_MYSQL" = "mysqlnd"; then
     PHP_ADD_EXTENSION_DEP(mysql, mysqlnd)
+    AC_DEFINE([MYSQL_USE_MYSQLND], 1, [Whether mysqlnd is enabled])
   fi
 fi

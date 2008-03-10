@@ -77,7 +77,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_fetch_fields,							NULL)
 	PHP_FE(mysqli_fetch_field_direct,					NULL)
 	PHP_FE(mysqli_fetch_lengths,						NULL)
-#ifdef HAVE_MYSQLND
+#ifdef MYSQLI_USE_MYSQLND
 	PHP_FE(mysqli_fetch_all,							NULL)
 #endif
 	PHP_FE(mysqli_fetch_array,							NULL)
@@ -88,7 +88,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_field_seek,							NULL)
 	PHP_FE(mysqli_field_tell,							NULL)
 	PHP_FE(mysqli_free_result,							NULL)
-#if defined(HAVE_MYSQLND)
+#if defined(MYSQLI_USE_MYSQLND)
 	PHP_FE(mysqli_get_cache_stats,						NULL)
 	PHP_FE(mysqli_get_connection_stats,					NULL)
 	PHP_FE(mysqli_get_client_stats,						NULL)
@@ -107,7 +107,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_info,									NULL)
 	PHP_FE(mysqli_insert_id,							NULL)
 	PHP_FE(mysqli_kill,									NULL)
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 	PHP_FE(mysqli_set_local_infile_default,				NULL)
 	PHP_FE(mysqli_set_local_infile_handler,				NULL)
 #endif
@@ -140,7 +140,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_stmt_bind_result,						second_arg_force_by_ref_rest)
 	PHP_FE(mysqli_stmt_fetch,							NULL)
 	PHP_FE(mysqli_stmt_free_result,						NULL)
-#if defined(HAVE_MYSQLND)
+#if defined(MYSQLI_USE_MYSQLND)
 	PHP_FE(mysqli_stmt_get_result,						NULL)
 #endif
 	PHP_FE(mysqli_stmt_get_warnings,					NULL)
@@ -148,7 +148,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_stmt_reset,							NULL)
 	PHP_FE(mysqli_stmt_param_count,						NULL)
 	PHP_FE(mysqli_sqlstate,   							NULL)
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 	PHP_FE(mysqli_ssl_set,								NULL)
 #endif
 	PHP_FE(mysqli_stat,									NULL)
@@ -199,14 +199,14 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(get_charset,mysqli_get_charset,NULL)
 #endif
 	PHP_FALIAS(get_client_info,mysqli_get_client_info,NULL)
-#if defined(HAVE_MYSQLND)
+#if defined(MYSQLI_USE_MYSQLND)
 	PHP_FALIAS(get_connection_stats,mysqli_get_connection_stats,NULL)
 #endif
 	PHP_FALIAS(get_server_info,mysqli_get_server_info,NULL)
 	PHP_FALIAS(get_warnings, mysqli_get_warnings, NULL)
 	PHP_FALIAS(init,mysqli_init,NULL)
 	PHP_FALIAS(kill,mysqli_kill,NULL)
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 	PHP_FALIAS(set_local_infile_default,mysqli_set_local_infile_default,NULL)
 	PHP_FALIAS(set_local_infile_handler,mysqli_set_local_infile_handler,NULL)
 #endif
@@ -228,7 +228,7 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(set_charset,mysqli_set_charset,NULL)
 #endif
 	PHP_FALIAS(set_opt, mysqli_options,NULL)
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 	PHP_FALIAS(ssl_set,mysqli_ssl_set,NULL)
 #endif
 	PHP_FALIAS(stat,mysqli_stat,NULL)
@@ -252,7 +252,7 @@ const zend_function_entry mysqli_result_methods[] = {
 	PHP_FALIAS(fetch_field,mysqli_fetch_field,NULL)
 	PHP_FALIAS(fetch_fields,mysqli_fetch_fields,NULL)
 	PHP_FALIAS(fetch_field_direct,mysqli_fetch_field_direct,NULL)
-#if defined(HAVE_MYSQLND)
+#if defined(MYSQLI_USE_MYSQLND)
 	PHP_FALIAS(fetch_all,mysqli_fetch_all,NULL)
 #endif
 	PHP_FALIAS(fetch_array,mysqli_fetch_array,NULL)
@@ -288,7 +288,7 @@ const zend_function_entry mysqli_stmt_methods[] = {
 	PHP_FALIAS(reset,mysqli_stmt_reset,NULL)
 	PHP_FALIAS(prepare,mysqli_stmt_prepare, NULL)
 	PHP_FALIAS(store_result,mysqli_stmt_store_result,NULL)
-#if defined(HAVE_MYSQLND)
+#if defined(MYSQLI_USE_MYSQLND)
 	PHP_FALIAS(get_result,mysqli_stmt_get_result,NULL)
 #endif
 	{NULL, NULL, NULL}

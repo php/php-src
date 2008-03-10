@@ -36,7 +36,7 @@
 #define FALSE 0
 #endif
 
-#ifdef HAVE_MYSQLND
+#ifdef MYSQLI_USE_MYSQLND
 #include "ext/mysqlnd/mysqlnd.h"
 #include "mysqli_mysqlnd.h"
 #else
@@ -139,7 +139,7 @@ typedef struct _mysqli_property_entry {
 	int (*w_func)(mysqli_object *obj, zval *value TSRMLS_DC);
 } mysqli_property_entry;
 
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 typedef struct {
 	char	error_msg[LOCAL_INFILE_ERROR_LEN];
 	void	*userdata;
@@ -188,7 +188,7 @@ extern const mysqli_property_entry mysqli_stmt_property_entries[];
 extern const mysqli_property_entry mysqli_driver_property_entries[];
 extern const mysqli_property_entry mysqli_warning_property_entries[];
 
-#ifdef HAVE_MYSQLND
+#ifdef MYSQLI_USE_MYSQLND
 extern MYSQLND_ZVAL_PCACHE	*mysqli_mysqlnd_zval_cache;
 extern MYSQLND_QCACHE		*mysqli_mysqlnd_qcache;
 #endif
@@ -315,7 +315,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 
 #define MYSQLI_STORE_RESULT 0
 #define MYSQLI_USE_RESULT 	1
-#ifdef HAVE_MYSQLND 
+#ifdef MYSQLI_USE_MYSQLND 
 #ifdef MYSQLND_THREADED
 #define MYSQLI_BG_STORE_RESULT 	101
 #endif
@@ -385,7 +385,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	HashTable		*report_ht;
 	unsigned long	multi_query;
 	unsigned long	embedded;
-#ifdef HAVE_MYSQLND
+#ifdef MYSQLI_USE_MYSQLND
 	MYSQLND_THD_ZVAL_PCACHE	*mysqlnd_thd_zval_cache;
 #endif
 ZEND_END_MODULE_GLOBALS(mysqli)

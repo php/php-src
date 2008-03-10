@@ -14,7 +14,7 @@ if (PHP_MYSQL != "no") {
 			WARNING("mysql not enabled; libraries and headers not found");
 		}
 	} else {
-		AC_DEFINE('HAVE_MYSQLND', 1, 'MySQL native driver support enabled');
+		AC_DEFINE('MYSQLI_USE_MYSQLND', 1, 'MySQL native driver support enabled');
 		ADD_EXTENSION_DEP('mysql', 'mysqlnd', true);
 		EXTENSION("mysql", "php_mysql.c");
 		AC_DEFINE('HAVE_MYSQL', 1, 'Have MySQL library');
