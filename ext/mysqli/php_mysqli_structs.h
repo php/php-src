@@ -38,11 +38,11 @@
 
 #ifdef HAVE_MYSQLND
 #include "ext/mysqlnd/mysqlnd.h"
-#include "ext/mysqli/mysqli_mysqlnd.h"
+#include "mysqli_mysqlnd.h"
 #else
 #include <mysql.h>
 #include <errmsg.h>
-#include "ext/mysqli/mysqli_libmysql.h"
+#include "mysqli_libmysql.h"
 #endif
 
 #include "php_mysqli.h"
