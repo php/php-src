@@ -24,6 +24,6 @@ var_dump( getcwd($extra_arg) );
 
 -- Testing getcwd() function with one argument --
 
-Warning: Wrong parameter count for getcwd() in %s on line %d
+Warning: getcwd() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 ===DONE===
