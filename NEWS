@@ -126,7 +126,6 @@ PHP                                                                        NEWS
 - Fixed possible crash in ext/soap because of uninitialized value. (Zdash Urf)
 - Fixed PECL bug #12431 (OCI8 ping functionality is broken). (Oracle Corp.)
 
-- Fixed bug #44371 (mysqli extension compile failed). (Andrey, petr_hroch_info)
 - Fixed bug #44336 (Improve pcre UTF-8 string matching performance).
   (frode at coretrek dot com, Nuno)
 - Fixed bug #44214 (Crash using preg_replace_callback() and global variable).
