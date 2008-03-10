@@ -85,21 +85,21 @@ rmdir($parent_dir_path);
 *** Testing dir() : remove execute permission from the parent dir ***
 -- After restricting 1st level parent directory --
 
-Warning: dir(%s/dir_variation7/sub_dir/child_dir): failed to open dir: Permission denied in %s on line %d
+Warning: dir(%s/dir_variation7/sub_dir/child_dir): failed to open dir: %s in %s on line %d
 bool(false)
 -- After restricting parent directory --
 
-Warning: dir(%s/dir_variation7/sub_dir/child_dir): failed to open dir: Permission denied in %s on line %d
+Warning: dir(%s/dir_variation7/sub_dir/child_dir): failed to open dir: %s in %s on line %d
 bool(false)
 Done
 --UEXPECTF--
 *** Testing dir() : remove execute permission from the parent dir ***
 -- After restricting 1st level parent directory --
 
-Warning: dir(%s/dir_variation7/sub_dir/child_dir): failed to open dir: Permission denied in %s on line %d
+Warning: dir(%s/dir_variation7/sub_dir/child_dir): failed to open dir: %s in %s on line %d
 bool(false)
 -- After restricting parent directory --
 
-Warning: dir(%s/dir_variation7/sub_dir/child_dir): failed to open dir: Permission denied in %s on line %d
+Warning: dir(%s/dir_variation7/sub_dir/child_dir): failed to open dir: %s in %s on line %d
 bool(false)
 Done

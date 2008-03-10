@@ -93,12 +93,12 @@ rmdir($parent_dir_path);
 
 -- After restricting 1st level parent directory --
 
-Warning: opendir(%s/opendir_variation5/sub_dir/child_dir): failed to open dir: Permission denied in %s on line %d
+Warning: opendir(%s/opendir_variation5/sub_dir/child_dir): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- After restricting parent directory --
 
-Warning: opendir(%s/opendir_variation5/sub_dir/child_dir): failed to open dir: Permission denied in %s on line %d
+Warning: opendir(%s/opendir_variation5/sub_dir/child_dir): failed to open dir: %s in %s on line %d
 bool(false)
 ===DONE===
 --UEXPECTF--
@@ -106,11 +106,11 @@ bool(false)
 
 -- After restricting 1st level parent directory --
 
-Warning: opendir(%s/opendir_variation5/sub_dir/child_dir): failed to open dir: Permission denied in %s on line %d
+Warning: opendir(%s/opendir_variation5/sub_dir/child_dir): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- After restricting parent directory --
 
-Warning: opendir(%s/opendir_variation5/sub_dir/child_dir): failed to open dir: Permission denied in %s on line %d
+Warning: opendir(%s/opendir_variation5/sub_dir/child_dir): failed to open dir: %s in %s on line %d
 bool(false)
 ===DONE===

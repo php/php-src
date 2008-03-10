@@ -115,47 +115,47 @@ rmdir($path);
 
 -- Iteration 1 --
 
-Warning: opendir(0): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(0): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 2 --
 
-Warning: opendir(1): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(1): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 3 --
 
-Warning: opendir(12345): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(12345): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 4 --
 
-Warning: opendir(-2345): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(-2345): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 5 --
 
-Warning: opendir(10.5): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(10.5): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: opendir(-10.5): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(-10.5): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 7 --
 
-Warning: opendir(123456789000): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(123456789000): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 8 --
 
-Warning: opendir(1.23456789E-9): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(1.23456789E-9): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 9 --
 
-Warning: opendir(0.5): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(0.5): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 10 --
@@ -166,7 +166,7 @@ bool(false)
 
 -- Iteration 12 --
 
-Warning: opendir(1): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(1): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 13 --
@@ -174,7 +174,7 @@ bool(false)
 
 -- Iteration 14 --
 
-Warning: opendir(1): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(1): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 15 --
@@ -190,7 +190,7 @@ bool(false)
 
 Notice: Array to string conversion in %s on line %d
 
-Warning: opendir(Array): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(Array): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 19 --
@@ -198,7 +198,7 @@ resource(%d) of type (stream)
 
 -- Iteration 20 --
 
-Warning: opendir(string): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(string): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 21 --
@@ -215,7 +215,7 @@ bool(false)
 
 -- Iteration 25 --
 
-Warning: opendir(Resource id #%d): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(Resource id #%d): failed to open dir: %s in %s on line %d
 bool(false)
 ===DONE===
 --UEXPECTF--
@@ -223,47 +223,47 @@ bool(false)
 
 -- Iteration 1 --
 
-Warning: opendir(0): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(0): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 2 --
 
-Warning: opendir(1): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(1): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 3 --
 
-Warning: opendir(12345): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(12345): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 4 --
 
-Warning: opendir(-2345): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(-2345): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 5 --
 
-Warning: opendir(10.5): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(10.5): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: opendir(-10.5): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(-10.5): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 7 --
 
-Warning: opendir(123456789000): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(123456789000): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 8 --
 
-Warning: opendir(1.23456789E-9): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(1.23456789E-9): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 9 --
 
-Warning: opendir(0.5): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(0.5): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 10 --
@@ -274,7 +274,7 @@ bool(false)
 
 -- Iteration 12 --
 
-Warning: opendir(1): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(1): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 13 --
@@ -282,7 +282,7 @@ bool(false)
 
 -- Iteration 14 --
 
-Warning: opendir(1): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(1): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 15 --
@@ -298,7 +298,7 @@ bool(false)
 
 Notice: Array to string conversion in %s on line %d
 
-Warning: opendir(Array): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(Array): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 19 --
@@ -306,7 +306,7 @@ resource(%d) of type (stream)
 
 -- Iteration 20 --
 
-Warning: opendir(string): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(string): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Iteration 21 --
@@ -323,6 +323,6 @@ bool(false)
 
 -- Iteration 25 --
 
-Warning: opendir(Resource id #%d): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(Resource id #%d): failed to open dir: %s in %s on line %d
 bool(false)
 ===DONE===
