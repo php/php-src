@@ -83,4 +83,8 @@ typedef struct _tar_header {  /* {{{ */
 } PHAR_TAR_PACK tar_header;
 /* }}} */
 
+#ifdef PHP_WIN32
+#pragma pack()
 #endif
+
+#endif /* __PHAR_TAR_H */
