@@ -1,3 +1,9 @@
+2008-03-09  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      zend_execute_API.c:
+      %v -> %s, this is 5_3
+
 2008-03-08  Felipe Pena  <felipensp@gmail.com>
 
     * zend.c

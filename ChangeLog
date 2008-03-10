@@ -1,3 +1,65 @@
+2008-03-09  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/sqlite/sqlite.c:
+      MFB: Fix memory issues with statement being deleted twice
+
+    * (PHP_5_3)
+      ext/sqlite/sqlite.c:
+      Fix memory issues with statement being deleted twice
+
+2008-03-09  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_execute_API.c:
+      %v -> %s, this is 5_3
+
+2008-03-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/date/php_date.c:
+      
+      MFB: Initialize ts only after successful argument parsing
+
+    * (PHP_5_3)
+      ext/date/php_date.c:
+      
+      Initialize ts only after successful argument parsing
+
+2008-03-09  Felipe Pena  <felipensp@gmail.com>
+
+    * sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c:
+      Fix typo (#44381)
+
+2008-03-09  Gwynne Raskind  <gwynne@wanderingknights.org>
+
+    * (PHP_5_3)
+      configure.in:
+      MFH: Fix Darwin 9/Mac OS X 10.5 build problems, or at least patch them
+
+    * configure.in:
+      Fix Darwin 9/Mac OS X 10.5 build problems, or at least patch them
+
+2008-03-09  Lars Strojny  <lars@strojny.net>
+
+    * sapi/apache2filter/config.m4
+      sapi/apache2filter/config.m4
+      sapi/apache2handler/config.m4
+      sapi/apache2handler/config.m4:
+      sapi/apache2(handler|filter)/config.m4: Removing itk from the list of
+      threaded MPMs (thanks Hannes)
+
+    * sapi/apache2filter/config.m4
+      sapi/apache2filter/config.m4
+      sapi/apache2handler/config.m4
+      sapi/apache2handler/config.m4:
+      Adding itk and and peruser MPM to the list of threaded Apache MPMs
+
+2008-03-09  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ext/mysql/tests/mysql_query_load_data_openbasedir.phpt:
+      - Fix typo in skipif
+
 2008-03-08  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
