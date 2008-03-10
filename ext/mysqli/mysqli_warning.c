@@ -47,7 +47,7 @@ void php_clear_warnings(MYSQLI_WARNING *w)
 /* }}} */
 
 
-#ifndef HAVE_MYSQLND
+#ifndef MYSQLI_USE_MYSQLND
 /* {{{ MYSQLI_WARNING *php_new_warning */
 static
 MYSQLI_WARNING *php_new_warning(const char *reason, int errorno TSRMLS_DC)

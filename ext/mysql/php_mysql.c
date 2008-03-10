@@ -72,7 +72,7 @@ static int le_result, le_link, le_plink;
 
 #define SAFE_STRING(s) ((s)?(s):"")
 
-#if MYSQL_VERSION_ID > 32199 || defined(HAVE_MYSQLND)
+#if MYSQL_VERSION_ID > 32199 || defined(MYSQL_USE_MYSQLND)
 # define mysql_row_length_type unsigned long
 # define HAVE_MYSQL_ERRNO
 #else
@@ -82,7 +82,7 @@ static int le_result, le_link, le_plink;
 # endif
 #endif
 
-#if MYSQL_VERSION_ID >= 32032 || defined(HAVE_MYSQLND)
+#if MYSQL_VERSION_ID >= 32032 || defined(MYSQL_USE_MYSQLND)
 #define HAVE_GETINFO_FUNCS
 #endif
 
@@ -118,7 +118,7 @@ typedef struct _php_mysql_conn {
 	int multi_query;
 } php_mysql_conn;
 
-#ifdef HAVE_MYSQLND
+#ifdef MYSQL_USE_MYSQLND
 static MYSQLND_ZVAL_PCACHE *mysql_mysqlnd_zval_cache;
 static MYSQLND_QCACHE		*mysql_mysqlnd_qcache;
 #endif
@@ -220,7 +220,7 @@ static const zend_function_entry mysql_functions[] = {
 
 /* Dependancies */
 static const zend_module_dep mysql_deps[] = {
-#if defined(HAVE_MYSQLND)
+#if defined(MYSQL_USE_MYSQLND)
 	ZEND_MOD_REQUIRED("mysqlnd")
 #endif
 	{NULL, NULL, NULL}
@@ -259,7 +259,7 @@ void timeout(int sig);
 
 #define CHECK_LINK(link) { if (link==-1) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "A link to the server could not be established"); RETURN_FALSE; } }
 
-#if defined(HAVE_MYSQLND)
+#if defined(MYSQL_USE_MYSQLND)
 #define PHPMY_UNBUFFERED_QUERY_CHECK() \
 {\
 	if (mysql->active_result_id) { \
@@ -398,7 +398,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mysql.connect_timeout",		"60",	PHP_INI_ALL,		OnUpdateLong,		connect_timeout, 	zend_mysql_globals,		mysql_globals)
 	STD_PHP_INI_BOOLEAN("mysql.trace_mode",			"0",	PHP_INI_ALL,		OnUpdateLong,		trace_mode, 		zend_mysql_globals,		mysql_globals)
 	STD_PHP_INI_BOOLEAN("mysql.allow_local_infile",	"1",	PHP_INI_SYSTEM,		OnUpdateLong,		allow_local_infile, zend_mysql_globals,		mysql_globals)
-#ifdef HAVE_MYSQLND
+#ifdef MYSQL_USE_MYSQLND
 	STD_PHP_INI_ENTRY("mysql.cache_size",			"2000",	PHP_INI_SYSTEM,		OnUpdateLong,		cache_size,			zend_mysql_globals,		mysql_globals)
 #endif
 PHP_INI_END()
@@ -419,7 +419,7 @@ static PHP_GINIT_FUNCTION(mysql)
 	mysql_globals->trace_mode = 0;
 	mysql_globals->allow_local_infile = 1;
 	mysql_globals->result_allocated = 0;
-#ifdef HAVE_MYSQLND
+#ifdef MYSQL_USE_MYSQLND
 	mysql_globals->cache_size = 0;
 	mysql_globals->mysqlnd_thd_zval_cache = NULL;
 #endif
@@ -446,7 +446,7 @@ ZEND_MODULE_STARTUP_D(mysql)
 	REGISTER_LONG_CONSTANT("MYSQL_CLIENT_INTERACTIVE", CLIENT_INTERACTIVE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQL_CLIENT_IGNORE_SPACE", CLIENT_IGNORE_SPACE, CONST_CS | CONST_PERSISTENT); 
 
-#ifndef HAVE_MYSQLND
+#ifndef MYSQL_USE_MYSQLND
 #if MYSQL_VERSION_ID >= 40000
 	if (mysql_server_init(0, NULL, NULL)) {
 		return FAILURE;
@@ -465,7 +465,7 @@ ZEND_MODULE_STARTUP_D(mysql)
  */
 PHP_MSHUTDOWN_FUNCTION(mysql)
 {
-#ifndef HAVE_MYSQLND
+#ifndef MYSQL_USE_MYSQLND
 #if MYSQL_VERSION_ID >= 40000
 #ifdef PHP_WIN32
 	unsigned long client_ver = mysql_get_client_version();
@@ -494,7 +494,7 @@ PHP_MSHUTDOWN_FUNCTION(mysql)
  */
 PHP_RINIT_FUNCTION(mysql)
 {
-#if !defined(HAVE_MYSQLND) && defined(ZTS) && MYSQL_VERSION_ID >= 40000
+#if !defined(MYSQL_USE_MYSQLND) && defined(ZTS) && MYSQL_VERSION_ID >= 40000
 	if (mysql_thread_init()) {
 		return FAILURE;
 	}
@@ -506,7 +506,7 @@ PHP_RINIT_FUNCTION(mysql)
 	MySG(connect_errno) =0;
 	MySG(result_allocated) = 0;
 
-#ifdef HAVE_MYSQLND
+#ifdef MYSQL_USE_MYSQLND
 	MySG(mysqlnd_thd_zval_cache) = mysqlnd_palloc_rinit(mysql_mysqlnd_zval_cache);
 #endif
 
@@ -518,7 +518,7 @@ PHP_RINIT_FUNCTION(mysql)
  */
 PHP_RSHUTDOWN_FUNCTION(mysql)
 {
-#if !defined(HAVE_MYSQLND) && defined(ZTS) && MYSQL_VERSION_ID >= 40000
+#if !defined(MYSQL_USE_MYSQLND) && defined(ZTS) && MYSQL_VERSION_ID >= 40000
 	mysql_thread_end();
 #endif
 
@@ -531,7 +531,7 @@ PHP_RSHUTDOWN_FUNCTION(mysql)
 	if (MySG(connect_error)!=NULL) {
 		efree(MySG(connect_error));
 	}
-#ifdef HAVE_MYSQLND
+#ifdef MYSQL_USE_MYSQLND
 	mysqlnd_palloc_rshutdown(MySG(mysqlnd_thd_zval_cache));
 #endif
 
@@ -552,13 +552,13 @@ PHP_MINFO_FUNCTION(mysql)
 	snprintf(buf, sizeof(buf), "%ld", MySG(num_links));
 	php_info_print_table_row(2, "Active Links", buf);
 	php_info_print_table_row(2, "Client API version", mysql_get_client_info());
-#if !defined (PHP_WIN32) && !defined (NETWARE) && !defined(HAVE_MYSQLND)
+#if !defined (PHP_WIN32) && !defined (NETWARE) && !defined(MYSQL_USE_MYSQLND)
 	php_info_print_table_row(2, "MYSQL_MODULE_TYPE", PHP_MYSQL_TYPE);
 	php_info_print_table_row(2, "MYSQL_SOCKET", MYSQL_UNIX_ADDR);
 	php_info_print_table_row(2, "MYSQL_INCLUDE", PHP_MYSQL_INCLUDE);
 	php_info_print_table_row(2, "MYSQL_LIBS", PHP_MYSQL_LIBS);
 #endif
-#if defined(HAVE_MYSQLND)
+#if defined(MYSQL_USE_MYSQLND)
 	{
 		zval values;
 
@@ -590,7 +590,7 @@ PHP_MINFO_FUNCTION(mysql)
 	MYSQL_DO_CONNECT_CLEANUP();				\
 	RETURN_FALSE;
 
-#ifdef HAVE_MYSQLND
+#ifdef MYSQL_USE_MYSQLND
 #define MYSQL_PORT 0
 #endif
 
@@ -715,7 +715,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			mysql = (php_mysql_conn *) malloc(sizeof(php_mysql_conn));
 			mysql->active_result_id = 0;
 			mysql->multi_query = 1;
-#ifndef HAVE_MYSQLND
+#ifndef MYSQL_USE_MYSQLND
 			mysql->conn = mysql_init(NULL);
 #else
 			mysql->conn = mysql_init(persistent);
@@ -726,7 +726,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 			if (connect_timeout != -1)
 				mysql_options(mysql->conn, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout);
-#ifndef HAVE_MYSQLND
+#ifndef MYSQL_USE_MYSQLND
 			if (mysql_real_connect(mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL)
 #else
 			if (mysqlnd_connect(mysql->conn, host, user, passwd, 0, NULL, 0, 
@@ -748,7 +748,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 			mysql_options(mysql->conn, MYSQL_OPT_LOCAL_INFILE, (char *)&MySG(allow_local_infile));
 
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQL_USE_MYSQLND)
 			if (UG(unicode)) {
 #ifdef MYSQL_HAS_SET_CHARSET
 				mysql_set_character_set(mysql->conn, "utf8");
@@ -784,7 +784,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 					if (UG(unicode)) {
 						mysql_options(mysql->conn, MYSQL_SET_CHARSET_NAME, "utf8");
 					}
-#ifndef HAVE_MYSQLND
+#ifndef MYSQL_USE_MYSQLND
 					if (mysql_real_connect(mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL)
 #else
 					if (mysqlnd_connect(mysql->conn, host, user, passwd, 0, NULL, 0, 
@@ -796,7 +796,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 						efree(hashed_details);
 						MYSQL_DO_CONNECT_RETURN_FALSE();
 					}
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQL_USE_MYSQLND)
 					if (UG(unicode)) {
 #ifdef MYSQL_HAS_SET_CHARSET
 						mysql_set_character_set(mysql->conn, "utf8");
@@ -812,7 +812,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 					mysql_options(mysql->conn, MYSQL_OPT_LOCAL_INFILE, (char *)&MySG(allow_local_infile));
 				}
 			} else {
-#ifdef HAVE_MYSQLND
+#ifdef MYSQL_USE_MYSQLND
 				mysqlnd_restart_psession(mysql->conn);
 #endif
 			}
@@ -857,7 +857,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		mysql = (php_mysql_conn *) emalloc(sizeof(php_mysql_conn));
 		mysql->active_result_id = 0;
 		mysql->multi_query = 1;
-#ifndef HAVE_MYSQLND
+#ifndef MYSQL_USE_MYSQLND
 		mysql->conn = mysql_init(NULL);
 #else
 		mysql->conn = mysql_init(persistent);
@@ -870,7 +870,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			mysql_options(mysql->conn, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout);
 		}
 
-#ifndef HAVE_MYSQLND
+#ifndef MYSQL_USE_MYSQLND
 		if (mysql_real_connect(mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL) 
 #else
 		if (mysqlnd_connect(mysql->conn, host, user, passwd, 0, NULL, 0, 
@@ -888,14 +888,14 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #endif
 			efree(hashed_details);
 			/* free mysql structure */
-#ifdef HAVE_MYSQLND
+#ifdef MYSQL_USE_MYSQLND
 			mysqli_close(mysql->conn, MYSQLI_CLOSE_DISCONNECTED);
 #endif
 			efree(mysql);
 			MYSQL_DO_CONNECT_RETURN_FALSE();
 		}
 
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQL_USE_MYSQLND)
 		if (UG(unicode)) {
 #ifdef MYSQL_HAS_SET_CHARSET
 			mysql_set_character_set(mysql->conn, "utf8");
@@ -1188,7 +1188,7 @@ PHP_FUNCTION(mysql_stat)
 	int id = -1;
 	php_mysql_conn *mysql;
 	char *stat;
-#ifdef HAVE_MYSQLND
+#ifdef MYSQL_USE_MYSQLND
 	uint stat_len;
 #endif
 
@@ -1203,7 +1203,7 @@ PHP_FUNCTION(mysql_stat)
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
 	PHPMY_UNBUFFERED_QUERY_CHECK();
-#ifndef HAVE_MYSQLND
+#ifndef MYSQL_USE_MYSQLND
 	if ((stat = (char *)mysql_stat(mysql->conn))) {
 		RETURN_UTF8_STRING(stat, ZSTR_DUPLICATE);
 #else
@@ -1357,7 +1357,7 @@ static void php_mysql_do_query_general(char *query, zval **mysql_link, int link_
 	PHPMY_UNBUFFERED_QUERY_CHECK();
 
 	MYSQL_DISABLE_MQ;
-#ifndef HAVE_MYSQLND
+#ifndef MYSQL_USE_MYSQLND
 	/* check explain */
 	if (MySG(trace_mode)) {
 		if (!strncasecmp("select", query, 6)){
@@ -1846,7 +1846,7 @@ PHP_FUNCTION(mysql_result)
 {
 	zval **result, **row, **field=NULL;
 	MYSQL_RES *mysql_result;
-#ifndef HAVE_MYSQLND
+#ifndef MYSQL_USE_MYSQLND
 	MYSQL_ROW sql_row;
 	mysql_row_length_type *sql_row_lengths;
 #endif
@@ -1926,7 +1926,7 @@ PHP_FUNCTION(mysql_result)
 		}
 	}
 
-#ifndef HAVE_MYSQLND
+#ifndef MYSQL_USE_MYSQLND
 	if ((sql_row=mysql_fetch_row(mysql_result))==NULL 
 		|| (sql_row_lengths=mysql_fetch_lengths(mysql_result))==NULL) { /* shouldn't happen? */
 		RETURN_FALSE;
@@ -1983,7 +1983,7 @@ PHP_FUNCTION(mysql_num_fields)
 
 #define MYSQL_BINARY_CHARSET_NR 63
 
-#if MYSQL_VERSION_ID > 50002 || defined(HAVE_MYSQLND)
+#if MYSQL_VERSION_ID > 50002 || defined(MYSQL_USE_MYSQLND)
 /* we have BIT */
 #define IS_BINARY_DATA(f) (((f)->type == MYSQL_TYPE_TINY_BLOB || (f)->type == MYSQL_TYPE_BLOB || \
 	(f)->type == MYSQL_TYPE_MEDIUM_BLOB || (f)->type == MYSQL_TYPE_LONG_BLOB || \
@@ -2006,7 +2006,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 	MYSQL_RES *mysql_result;
 	zval            *res, *ctor_params = NULL;
 	zend_class_entry *ce = NULL;
-#ifndef HAVE_MYSQLND
+#ifndef MYSQL_USE_MYSQLND
 	int i;
 	MYSQL_FIELD *mysql_field;
 	MYSQL_ROW mysql_row;
@@ -2065,7 +2065,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 	
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);
 
-#ifndef HAVE_MYSQLND
+#ifndef MYSQL_USE_MYSQLND
 	if ((mysql_row = mysql_fetch_row(mysql_result)) == NULL  ||
 		(mysql_row_lengths = mysql_fetch_lengths(mysql_result)) == NULL) {
 		RETURN_FALSE;
@@ -2206,7 +2206,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
    Gets a result row as an enumerated array */
 PHP_FUNCTION(mysql_fetch_row)
 {
-#ifdef HAVE_MYSQLND
+#ifdef MYSQL_USE_MYSQLND
 	MYSQL_RES		*result;
 	zval			*mysql_result;
 
@@ -2240,7 +2240,7 @@ PHP_FUNCTION(mysql_fetch_object)
    Fetch a result row as an array (associative, numeric or both) */
 PHP_FUNCTION(mysql_fetch_array)
 {
-#ifndef HAVE_MYSQLND
+#ifndef MYSQL_USE_MYSQLND
 	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 2, 0);
 #else
 	MYSQL_RES		*result;
@@ -2262,7 +2262,7 @@ PHP_FUNCTION(mysql_fetch_array)
    Fetch a result row as an associative array */
 PHP_FUNCTION(mysql_fetch_assoc)
 {
-#ifndef HAVE_MYSQLND
+#ifndef MYSQL_USE_MYSQLND
 	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_ASSOC, 1, 0);
 #else
 	MYSQL_RES		*result;
@@ -2339,7 +2339,7 @@ static char *php_mysql_get_field_name(int field_type)
 		case FIELD_TYPE_VAR_STRING:
 			return "string";
 			break;
-#if MYSQL_VERSION_ID > 50002 || defined(HAVE_MYSQLND)
+#if MYSQL_VERSION_ID > 50002 || defined(MYSQL_USE_MYSQLND)
 		case MYSQL_TYPE_BIT:
 #endif
 #ifdef MYSQL_HAS_TINY
