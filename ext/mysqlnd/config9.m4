@@ -19,7 +19,6 @@ if test "$PHP_MYSQLND_ENABLED" = "yes"; then
   PHP_ADD_BUILD_DIR([ext/mysqlnd], 1)
   PHP_INSTALL_HEADERS([ext/mysqlnd])
   PHP_INSTALL_HEADERS([$ext_builddir/php_mysqlnd_config.h])
-  AC_DEFINE([HAVE_MYSQLND], 1, [Whether mysqlnd is enabled])
 
   dnl Windows uses config.w32 thus this code is safe for now
   if test "$PHP_MYSQLND_THREADING" = "yes"; then

@@ -49,7 +49,7 @@ zend_class_entry *mysqli_driver_class_entry;
 zend_class_entry *mysqli_warning_class_entry;
 zend_class_entry *mysqli_exception_class_entry;
 
-#ifdef HAVE_MYSQLND
+#ifdef MYSQLI_USE_MYSQLND
 MYSQLND_ZVAL_PCACHE *mysqli_mysqlnd_zval_cache;
 MYSQLND_QCACHE		*mysqli_mysqlnd_qcache;
 #endif
@@ -69,7 +69,7 @@ static int le_pmysqli;
 void php_mysqli_dtor_p_elements(void *data)
 {
 	MYSQL *mysql = (MYSQL *) data;
-#if defined(HAVE_MYSQLND)
+#if defined(MYSQLI_USE_MYSQLND)
 	TSRMLS_FETCH();
 
 	mysqlnd_end_psession(mysql);
@@ -94,7 +94,7 @@ int php_le_pmysqli(void)
 	return le_pmysqli;
 }
 
-#ifndef HAVE_MYSQLND
+#ifndef MYSQLI_USE_MYSQLND
 /* {{{ php_free_stmt_bind_buffer */
 void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type)
 {
@@ -151,7 +151,7 @@ void php_clear_stmt_bind(MY_STMT *stmt TSRMLS_DC)
 	  mysqlnd keeps track of the binding and has freed its
 	  structures in stmt_close() above
 	*/
-#ifndef HAVE_MYSQLND
+#ifndef MYSQLI_USE_MYSQLND
 	/* Clean param bind */
 	php_free_stmt_bind_buffer(stmt->param, FETCH_SIMPLE);
 	/* Clean output bind */
@@ -499,7 +499,7 @@ const static zend_module_dep mysqli_deps[] = {
 #if defined(HAVE_SPL) && ((PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1))
 	ZEND_MOD_REQUIRED("spl")
 #endif
-#if defined(HAVE_MYSQLND)
+#if defined(MYSQLI_USE_MYSQLND)
 	ZEND_MOD_REQUIRED("mysqlnd")
 #endif
 	{NULL, NULL, NULL}
@@ -547,7 +547,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mysqli.default_socket",			NULL,	PHP_INI_ALL,		OnUpdateStringUnempty,	default_socket,	zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_BOOLEAN("mysqli.reconnect",				"0",	PHP_INI_SYSTEM,		OnUpdateLong,		reconnect,			zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_BOOLEAN("mysqli.allow_local_infile",	"1",	PHP_INI_SYSTEM,		OnUpdateLong,		allow_local_infile,	zend_mysqli_globals,		mysqli_globals)
-#ifdef HAVE_MYSQLND
+#ifdef MYSQLI_USE_MYSQLND
 	STD_PHP_INI_ENTRY("mysqli.cache_size",				"2000",	PHP_INI_SYSTEM,		OnUpdateLong,		cache_size,			zend_mysqli_globals,		mysqli_globals)
 #endif
 PHP_INI_END()
@@ -579,7 +579,7 @@ static PHP_GINIT_FUNCTION(mysqli)
 #else
 	mysqli_globals->embedded = 0;
 #endif
-#ifdef HAVE_MYSQLND
+#ifdef MYSQLI_USE_MYSQLND
 	mysqli_globals->cache_size = 0;
 	mysqli_globals->mysqlnd_thd_zval_cache = NULL;
 #endif
@@ -594,7 +594,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	zend_object_handlers *std_hnd = zend_get_std_object_handlers();
 	
 	REGISTER_INI_ENTRIES();
-#ifndef HAVE_MYSQLND
+#ifndef MYSQLI_USE_MYSQLND
 #if MYSQL_VERSION_ID >= 40000
 	if (mysql_server_init(0, NULL, NULL)) {
 		return FAILURE;
@@ -666,7 +666,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_CONNECT_TIMEOUT", MYSQL_OPT_CONNECT_TIMEOUT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_LOCAL_INFILE", MYSQL_OPT_LOCAL_INFILE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_INIT_COMMAND", MYSQL_INIT_COMMAND, CONST_CS | CONST_PERSISTENT);
-#if defined(HAVE_MYSQLND)
+#if defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_CMD_BUFFER_SIZE", MYSQLND_OPT_NET_CMD_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_READ_BUFFER_SIZE", MYSQLND_OPT_NET_READ_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
 #endif
@@ -685,7 +685,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	/* for mysqli_query */
 	REGISTER_LONG_CONSTANT("MYSQLI_STORE_RESULT", MYSQLI_STORE_RESULT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_USE_RESULT", MYSQLI_USE_RESULT, CONST_CS | CONST_PERSISTENT);
-#if defined(HAVE_MYSQLND) && defined(MYSQLND_THREADED)
+#if defined(MYSQLI_USE_MYSQLND) && defined(MYSQLND_THREADED)
 	REGISTER_LONG_CONSTANT("MYSQLI_BG_STORE_RESULT", MYSQLI_BG_STORE_RESULT, CONST_CS | CONST_PERSISTENT);
 #endif
 
@@ -697,7 +697,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	/* for mysqli_stmt_set_attr */
 	REGISTER_LONG_CONSTANT("MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH", STMT_ATTR_UPDATE_MAX_LENGTH, CONST_CS | CONST_PERSISTENT);
 
-#if MYSQL_VERSION_ID > 50003 || defined(HAVE_MYSQLND)
+#if MYSQL_VERSION_ID > 50003 || defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_STMT_ATTR_CURSOR_TYPE", STMT_ATTR_CURSOR_TYPE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_CURSOR_TYPE_NO_CURSOR", CURSOR_TYPE_NO_CURSOR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_CURSOR_TYPE_READ_ONLY", CURSOR_TYPE_READ_ONLY, CONST_CS | CONST_PERSISTENT);
@@ -705,7 +705,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_CURSOR_TYPE_SCROLLABLE", CURSOR_TYPE_SCROLLABLE, CONST_CS | CONST_PERSISTENT);
 #endif
 
-#if MYSQL_VERSION_ID > 50007 || defined(HAVE_MYSQLND)
+#if MYSQL_VERSION_ID > 50007 || defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_STMT_ATTR_PREFETCH_ROWS", STMT_ATTR_PREFETCH_ROWS, CONST_CS | CONST_PERSISTENT);
 #endif
 	
@@ -725,11 +725,11 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_GROUP_FLAG", GROUP_FLAG, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_ENUM_FLAG", ENUM_FLAG, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_BINARY_FLAG", BINARY_FLAG, CONST_CS | CONST_PERSISTENT);
-#if MYSQL_VERSION_ID > 50001 || defined(HAVE_MYSQLND)
+#if MYSQL_VERSION_ID > 50001 || defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_NO_DEFAULT_VALUE_FLAG", NO_DEFAULT_VALUE_FLAG, CONST_CS | CONST_PERSISTENT);
 #endif
 
-#if (MYSQL_VERSION_ID > 51122 && MYSQL_VERSION_ID < 60000) || (MYSQL_VERSION_ID > 60003) || defined(HAVE_MYSQLND)
+#if (MYSQL_VERSION_ID > 51122 && MYSQL_VERSION_ID < 60000) || (MYSQL_VERSION_ID > 60003) || defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_ON_UPDATE_NOW_FLAG", ON_UPDATE_NOW_FLAG, CONST_CS | CONST_PERSISTENT);
 #endif
 
@@ -760,7 +760,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_TYPE_INTERVAL", FIELD_TYPE_INTERVAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_TYPE_GEOMETRY", FIELD_TYPE_GEOMETRY, CONST_CS | CONST_PERSISTENT);
 
-#if MYSQL_VERSION_ID > 50002 || defined(HAVE_MYSQLND)
+#if MYSQL_VERSION_ID > 50002 || defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_TYPE_NEWDECIMAL", FIELD_TYPE_NEWDECIMAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_TYPE_BIT", FIELD_TYPE_BIT, CONST_CS | CONST_PERSISTENT);
 #endif
@@ -781,7 +781,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_REPORT_OFF", 0, CONST_CS | CONST_PERSISTENT);
 
 	/* We use non-nested macros with expansion, as VC has problems */
-#ifdef HAVE_MYSQLND
+#ifdef MYSQLI_USE_MYSQLND
 	REGISTER_LONG_CONSTANT("MYSQLI_DEBUG_TRACE_ENABLED", MYSQLND_DBG_ENABLED, CONST_CS | CONST_PERSISTENT);
 #else
 #ifndef DBUG_OFF
@@ -799,7 +799,7 @@ PHP_MINIT_FUNCTION(mysqli)
  */
 PHP_MSHUTDOWN_FUNCTION(mysqli)
 {
-#ifndef HAVE_MYSQLND
+#ifndef MYSQLI_USE_MYSQLND
 #if MYSQL_VERSION_ID >= 40000
 #ifdef PHP_WIN32
 	unsigned long client_ver = mysql_get_client_version();
@@ -835,14 +835,14 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
  */
 PHP_RINIT_FUNCTION(mysqli)
 {
-#if !defined(HAVE_MYSQLND) && defined(ZTS) && MYSQL_VERSION_ID >= 40000
+#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS) && MYSQL_VERSION_ID >= 40000
 	if (mysql_thread_init()) {
 		return FAILURE;
 	}
 #endif
 	MyG(error_msg) = NULL;
 	MyG(error_no) = 0;
-#ifdef HAVE_MYSQLND
+#ifdef MYSQLI_USE_MYSQLND
 	MyG(mysqlnd_thd_zval_cache) = mysqlnd_palloc_rinit(mysqli_mysqlnd_zval_cache);
 #endif
 
@@ -856,13 +856,13 @@ PHP_RSHUTDOWN_FUNCTION(mysqli)
 {
 	/* check persistent connections, move used to free */
 
-#if !defined(HAVE_MYSQLND) && defined(ZTS) && MYSQL_VERSION_ID >= 40000
+#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS) && MYSQL_VERSION_ID >= 40000
 	mysql_thread_end();
 #endif
 	if (MyG(error_msg)) {
 		efree(MyG(error_msg));
 	}
-#ifdef HAVE_MYSQLND
+#ifdef MYSQLI_USE_MYSQLND
 	mysqlnd_palloc_rshutdown(MyG(mysqlnd_thd_zval_cache));
 #endif
 	return SUCCESS;
@@ -885,7 +885,7 @@ PHP_MINFO_FUNCTION(mysqli)
 	php_info_print_table_row(2, "Inactive Persistent Links", buf);
 	snprintf(buf, sizeof(buf), "%ld", MyG(num_links));
 	php_info_print_table_row(2, "Active Links", buf);
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 	php_info_print_table_row(2, "Client API header version", MYSQL_SERVER_VERSION);
 	php_info_print_table_row(2, "MYSQLI_SOCKET", MYSQL_UNIX_ADDR);
 #else
@@ -1002,7 +1002,7 @@ ZEND_FUNCTION(mysqli_result_construct)
 		case MYSQLI_USE_RESULT:
 			result = mysql_use_result(mysql->mysql);
 			break;
-#if defined(HAVE_MYSQLND) && defined(MYSQLND_THREADED)
+#if defined(MYSQLI_USE_MYSQLND) && defined(MYSQLND_THREADED)
 		case MYSQLI_BG_STORE_RESULT:
 			result = mysqli_bg_store_result(mysql->mysql);
 			break;
@@ -1033,7 +1033,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 	long			fetchtype;
 	zval			*ctor_params = NULL;
 	zend_class_entry *ce = NULL;
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 	unsigned int	i;
 	MYSQL_FIELD		*fields;
 	MYSQL_ROW		row;
@@ -1077,7 +1077,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		RETURN_FALSE;
 	}
 
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 	if (!(row = mysql_fetch_row(result))) {
 		RETURN_NULL();
 	}
@@ -1203,7 +1203,7 @@ PHP_MYSQLI_API void php_mysqli_set_error(long mysql_errno, char *mysql_err TSRML
 }
 /* }}} */
 
-#if !defined(HAVE_MYSQLND)
+#if !defined(MYSQLI_USE_MYSQLND)
 
 #define ALLOC_CALLBACK_ARGS(a, b, c)\
 if (c) {\
