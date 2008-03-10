@@ -693,8 +693,8 @@ PHP_FUNCTION(snmprealwalk)
    Return the current status of quick_print */
 PHP_FUNCTION(snmp_get_quick_print)
 {
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 #ifdef HAVE_NET_SNMP

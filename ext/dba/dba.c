@@ -1200,8 +1200,7 @@ PHP_FUNCTION(dba_list)
 	zend_rsrc_list_entry *le;
 	dba_info *info;
 
-	if (ZEND_NUM_ARGS()!=0) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_FALSE;
 	}
 

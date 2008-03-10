@@ -164,8 +164,8 @@ static void apache_request_read_string_slot(int offset, INTERNAL_FUNCTION_PARAME
 	request_rec *r;
 	char *s;
 
-	if (ZEND_NUM_ARGS() > 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	APREQ_GET_REQUEST(id, r);
@@ -224,8 +224,8 @@ static void apache_request_read_int_slot(int offset, INTERNAL_FUNCTION_PARAMETER
 	request_rec *r;
 	long l;
 
-	if (ZEND_NUM_ARGS() > 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	APREQ_GET_REQUEST(id, r);
@@ -683,8 +683,8 @@ PHP_FUNCTION(apache_request_server_port)
 	zval *id;
 	request_rec *r;
 
-	if (ZEND_NUM_ARGS() > 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	APREQ_GET_REQUEST(id, r);
@@ -766,8 +766,8 @@ PHP_FUNCTION(apache_request_set_etag)
 	zval *id;
 	request_rec *r;
 
-	if (ZEND_NUM_ARGS() > 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	APREQ_GET_REQUEST(id, r);
@@ -784,8 +784,8 @@ PHP_FUNCTION(apache_request_set_last_modified)
 	zval *id;
 	request_rec *r;
 
-	if (ZEND_NUM_ARGS() > 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	APREQ_GET_REQUEST(id, r);
@@ -802,8 +802,8 @@ PHP_FUNCTION(apache_request_meets_conditions)
 	zval *id;
 	request_rec *r;
 
-	if (ZEND_NUM_ARGS() > 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	APREQ_GET_REQUEST(id, r);
@@ -819,8 +819,8 @@ PHP_FUNCTION(apache_request_discard_request_body)
 	zval *id;
 	request_rec *r;
 
-	if (ZEND_NUM_ARGS() > 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	APREQ_GET_REQUEST(id, r);
@@ -836,8 +836,8 @@ PHP_FUNCTION(apache_request_satisfies)
 	zval *id;
 	request_rec *r;
 
-	if (ZEND_NUM_ARGS() > 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	APREQ_GET_REQUEST(id, r);
@@ -854,8 +854,8 @@ PHP_FUNCTION(apache_request_is_initial_req)
 	zval *id;
 	request_rec *r;
 
-	if (ZEND_NUM_ARGS() > 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	APREQ_GET_REQUEST(id, r);
@@ -871,8 +871,8 @@ PHP_FUNCTION(apache_request_some_auth_required)
 	zval *id;
 	request_rec *r;
 
-	if (ZEND_NUM_ARGS() > 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	APREQ_GET_REQUEST(id, r);
@@ -889,8 +889,8 @@ PHP_FUNCTION(apache_request_auth_type)
 	request_rec *r;
 	char *t;
 
-	if (ZEND_NUM_ARGS() > 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	APREQ_GET_REQUEST(id, r);
@@ -911,8 +911,8 @@ PHP_FUNCTION(apache_request_auth_name)
 	request_rec *r;
 	char *t;
 
-	if (ZEND_NUM_ARGS() > 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	APREQ_GET_REQUEST(id, r);

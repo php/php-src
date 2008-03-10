@@ -3648,8 +3648,8 @@ PHP_FUNCTION(openssl_error_string)
 	char buf[512];
 	unsigned long val;
 
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	val = ERR_get_error();

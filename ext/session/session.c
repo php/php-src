@@ -1411,8 +1411,8 @@ PHP_FUNCTION(session_set_cookie_params)
    Return the session cookie parameters */ 
 PHP_FUNCTION(session_get_cookie_params)
 {
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	array_init(return_value);
@@ -1763,8 +1763,8 @@ PHP_FUNCTION(session_encode)
 	int len;
 	char *enc;
 
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	enc = php_session_encode(&len TSRMLS_CC);
@@ -1812,8 +1812,8 @@ PHP_FUNCTION(session_start)
    Destroy the current session and all data associated with it */
 PHP_FUNCTION(session_destroy)
 {
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	if (php_session_destroy(TSRMLS_C) == SUCCESS) {

@@ -55,8 +55,8 @@ PHP_FUNCTION(curl_multi_init)
 {
 	php_curlm *mh;
 	
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	mh = ecalloc(1, sizeof(php_curlm));
