@@ -27,12 +27,12 @@ var_dump(opendir('idonotexist'));
 
 -- Pass a non-existent absolute path: --
 
-Warning: opendir(%s/idonotexist): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(%s/idonotexist): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Pass a non-existent relative path: --
 
-Warning: opendir(idonotexist): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(idonotexist): failed to open dir: %s in %s on line %d
 bool(false)
 ===DONE===
 --UEXPECTF--
@@ -40,11 +40,11 @@ bool(false)
 
 -- Pass a non-existent absolute path: --
 
-Warning: opendir(%s/idonotexist): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(%s/idonotexist): failed to open dir: %s in %s on line %d
 bool(false)
 
 -- Pass a non-existent relative path: --
 
-Warning: opendir(idonotexist): failed to open dir: No such file or directory in %s on line %d
+Warning: opendir(idonotexist): failed to open dir: %s in %s on line %d
 bool(false)
 ===DONE===
