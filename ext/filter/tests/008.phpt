@@ -50,6 +50,6 @@ array(18) {
   string(8) "callback"
 }
 
-Warning: Wrong parameter count for filter_list() in %s on line %d
+Warning: filter_list() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 Done

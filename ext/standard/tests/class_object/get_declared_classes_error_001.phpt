@@ -22,6 +22,6 @@ echo "Done";
 
 -- Testing get_declared_classes() function with one argument --
 
-Warning: Wrong parameter count for get_declared_classes() in %s on line 13
+Warning: get_declared_classes() expects exactly 0 parameters, 1 given in %s on line 13
 NULL
 Done
