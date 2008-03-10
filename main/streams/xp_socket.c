@@ -601,7 +601,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 {
 	char *host = NULL, *bindto = NULL;
 	int portno, bindport = 0;
-	int err;
+	int err = 0;
 	int ret;
 	zval **tmpzval = NULL;
 
