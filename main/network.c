@@ -205,10 +205,12 @@ static int php_network_getaddresses(const char *host, int socktype, struct socka
 # endif
 		
 	if ((n = getaddrinfo(host, NULL, &hints, &res))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_network_getaddresses: getaddrinfo failed: %s", PHP_GAI_STRERROR(n));
+		spprintf(error_string, 0, "php_network_getaddresses: getaddrinfo failed: %s", PHP_GAI_STRERROR(n));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", *error_string);
 		return 0;
 	} else if (res == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_network_getaddresses: getaddrinfo failed (null result pointer)");
+		spprintf(error_string, 0, "php_network_getaddresses: getaddrinfo failed (null result pointer) errno=%d", errno);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", *error_string);
 		return 0;
 	}
 
@@ -232,7 +234,8 @@ static int php_network_getaddresses(const char *host, int socktype, struct socka
 		/* XXX NOT THREAD SAFE (is safe under win32) */
 		host_info = gethostbyname(host);
 		if (host_info == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_network_getaddresses: gethostbyname failed");
+			spprintf(error_string, 0, "php_network_getaddresses: gethostbyname failed. errno=%d", errno);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", *error_string);
 			return 0;
 		}
 		in = *((struct in_addr *) host_info->h_addr);
