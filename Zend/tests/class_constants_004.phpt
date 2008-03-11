@@ -27,7 +27,8 @@ var_dump(	foo,
 			$const::foo,
 			::foo,
 			constant('foo'),
-			Ifoo::foo			
+			Ifoo::foo,
+			$const2::foo
 			);
 
 ?>
@@ -39,4 +40,5 @@ int(2)
 int(2)
 int(3)
 int(3)
+int(4)
 int(4)
