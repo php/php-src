@@ -65,7 +65,7 @@ print "\nDone\n";
 
 Notice: Uninitialized string offset: 0 in %s on line 12
 
-Notice: Uninitialized string offset: -2147483648 in %s on line 16
+Notice: Uninitialized string offset: -%d in %s on line 16
 
 Notice: Uninitialized string offset: 4 in %s on line 28
 
