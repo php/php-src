@@ -25,7 +25,7 @@ $dir_handle = opendir($dir_path);
 $extra_arg = 10;
 var_dump( closedir($dir_handle, $extra_arg) );
 
-//successfully close the directory handle so can delete in --CLEAN-- section
+//successfully close the directory handle so can delete in CLEAN section
 closedir($dir_handle);
 ?>
 ===DONE===
