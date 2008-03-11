@@ -1943,6 +1943,7 @@ PHP_RSHUTDOWN_FUNCTION(session)
 	for (i = 0; i < 6; i++) {
 		if (PS(mod_user_names).names[i] != NULL) {
 			zval_ptr_dtor(&PS(mod_user_names).names[i]);
+			PS(mod_user_names).names[i] = NULL;
 		}
 	}
 
