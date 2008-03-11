@@ -14,4 +14,6 @@
 	--> Our test suite doesn't allow us to test persistent connections
 	    at this time :/
 
+- Use later version of built-in library
+
 vim:tw=78
