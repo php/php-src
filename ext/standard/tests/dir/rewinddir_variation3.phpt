@@ -36,6 +36,7 @@ if ($result1 === $result2) {
 resource(%d) of type (stream)
 
 Warning: rewinddir(): %d is not a valid Directory resource in %s on line %d
+bool(false)
 
 -- Check if rewinddir() has repositioned the file pointer --
 rewinddir() does not work on file pointers
