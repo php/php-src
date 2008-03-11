@@ -1,3 +1,251 @@
+2008-03-10  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/014.phpt
+      ZendEngine2/tests/017.phpt
+      ext/filter/tests/008.phpt
+      ext/standard/tests/class_object/get_declared_classes_error_001.phpt
+      ext/standard/tests/class_object/get_declared_interfaces_error_001.phpt
+      ext/standard/tests/dir/getcwd_error.phpt
+      ext/standard/tests/file/clearstatcache_error.phpt
+      ext/standard/tests/file/get_current_user.phpt
+      ext/standard/tests/general_functions/rand.phpt
+      ext/standard/tests/math/getrandmax_error.phpt
+      ext/standard/tests/math/mt_getrandmax_error.phpt
+      ext/xmlwriter/tests/bug41326.phpt:
+      Fix tests (new error message for void parameters)
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_exceptions.c:
+      MFH: Added new macro for check void parameters.
+      (deprecating ZEND_WRONG_PARAM_COUNT for this cases)
+
+2008-03-10  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysql/config.m4
+      ext/mysql/config.m4
+      ext/mysql/config.w32
+      ext/mysql/config.w32
+      ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.c
+      ext/mysql/php_mysql_structs.h
+      ext/mysql/php_mysql_structs.h
+      ext/mysqli/config.m4
+      ext/mysqli/config.m4
+      ext/mysqli/config.w32
+      ext/mysqli/config.w32
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_warning.c
+      ext/mysqli/mysqli_warning.c
+      ext/mysqli/php_mysqli_structs.h
+      ext/mysqli/php_mysqli_structs.h
+      ext/mysqlnd/config9.m4
+      ext/mysqlnd/config9.m4:
+      Update mysqlnd, ext/mysql and ext/mysqli - now possible to compile with
+      different
+      configurations one or the another extension to use libmysql or mysqlnd
+      mixed in
+      one binary
+
+    * (PHP_5_2)
+      main/network.c
+      main/streams/xp_socket.c:
+      char **error_string was passed but not used. This causes problems in cases
+      of getaddrinfo() failure, because the upper layers don't get the error.
+      initialize a variable because we were reading initialized in case of
+      error.
+
+    * main/network.c
+      main/streams/xp_socket.c:
+        char **error_message was passed but not used. This causes problems in
+      cases
+        of getaddrinfo() failure, because the upper layers don't get the error.
+        initialize a variable because we were reading initialized in case of
+      error.
+
+    * (PHP_5_3)
+      main/network.c
+      main/streams/xp_socket.c:
+      char **error_message was passed but not used. This causes problems in cases
+      of getaddrinfo() failure, because the upper layers don't get the error.
+      initialize a variable because we were reading initialized in case of
+      error.
+
+2008-03-10  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/pdo_sqlite/sqlite/src/parse.c:
+      fix gcov build
+
+2008-03-10  Josie Messa  <josmessa@uk.ibm.com>
+
+    * ext/standard/tests/dir/getcwd_basic.phpt
+      ext/standard/tests/dir/getcwd_basic.phpt
+      ext/standard/tests/dir/getcwd_error.phpt
+      ext/standard/tests/dir/getcwd_error.phpt:
+      - New tests for getcwd() function
+
+    * ext/standard/tests/dir/getcwd_basic.phpt
+      ext/standard/tests/dir/getcwd_basic.phpt
+      ext/standard/tests/dir/getcwd_basic.phpt
+      ext/standard/tests/dir/getcwd_error.phpt
+      ext/standard/tests/dir/getcwd_error.phpt
+      ext/standard/tests/dir/getcwd_error.phpt:
+        1.1.4;
+      file getcwd_basic.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/dir/dir_variation7.phpt
+      ext/standard/tests/dir/dir_variation7.phpt
+      ext/standard/tests/dir/dir_variation7.phpt
+      ext/standard/tests/dir/opendir_error2.phpt
+      ext/standard/tests/dir/opendir_error2.phpt
+      ext/standard/tests/dir/opendir_error2.phpt
+      ext/standard/tests/dir/opendir_variation1.phpt
+      ext/standard/tests/dir/opendir_variation1.phpt
+      ext/standard/tests/dir/opendir_variation1.phpt
+      ext/standard/tests/dir/opendir_variation5.phpt
+      ext/standard/tests/dir/opendir_variation5.phpt
+      ext/standard/tests/dir/opendir_variation5.phpt
+      ext/standard/tests/dir/opendir_variation6.phpt
+      ext/standard/tests/dir/opendir_variation6.phpt
+      ext/standard/tests/dir/opendir_variation6.phpt:
+      - Modified expected output to allow tests to work on all platforms
+
+2008-03-10  Gwynne Raskind  <gwynne@wanderingknights.org>
+
+    * configure.in:
+      Improve the Darwin 9 hack considerably and switch to using dl*() instead of
+      NS*() on Darwin 8+.
+
+2008-03-10  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/Zend.m4:
+      MFB: Improve the Darwin 9 hack considerably and switch to using dl*()
+      instead of NS*() on Darwin 8+. (Patch by Gwynne)
+
+    * (PHP_5_3)
+      ZendEngine2/Zend.m4:
+      Improve the Darwin 9 hack considerably and switch to using dl*() instead of
+      NS*() on Darwin 8+. (Patch by Gwynne)
+
+    * (PHP_5_2)
+      ZendEngine2/zend_language_parser.y:
+      Fixed compilation warnings
+
+2008-03-10  Gwynne Raskind  <gwynne@wanderingknights.org>
+
+    * ext/pdo/pdo_dbh.c:
+      Unused function in HEAD, fixes compiler warning
+
+    * README.UNICODE-UPGRADES:
+      Fix small typo
+
+2008-03-10  Josie Messa  <josmessa@uk.ibm.com>
+
+    * ext/standard/tests/dir/scandir_basic.phpt
+      ext/standard/tests/dir/scandir_basic.phpt
+      ext/standard/tests/dir/scandir_error1.phpt
+      ext/standard/tests/dir/scandir_error1.phpt
+      ext/standard/tests/dir/scandir_error2.phpt
+      ext/standard/tests/dir/scandir_error2.phpt
+      ext/standard/tests/dir/scandir_variation1.phpt
+      ext/standard/tests/dir/scandir_variation1.phpt
+      ext/standard/tests/dir/scandir_variation2.phpt
+      ext/standard/tests/dir/scandir_variation2.phpt
+      ext/standard/tests/dir/scandir_variation3.phpt
+      ext/standard/tests/dir/scandir_variation3.phpt
+      ext/standard/tests/dir/scandir_variation4.phpt
+      ext/standard/tests/dir/scandir_variation4.phpt
+      ext/standard/tests/dir/scandir_variation5.phpt
+      ext/standard/tests/dir/scandir_variation5.phpt
+      ext/standard/tests/dir/scandir_variation6.phpt
+      ext/standard/tests/dir/scandir_variation6.phpt
+      ext/standard/tests/dir/scandir_variation7.phpt
+      ext/standard/tests/dir/scandir_variation7.phpt
+      ext/standard/tests/dir/scandir_variation8.phpt
+      ext/standard/tests/dir/scandir_variation8.phpt
+      ext/standard/tests/dir/scandir_variation9.phpt
+      ext/standard/tests/dir/scandir_variation9.phpt:
+      - New tests for scandir() function
+
+    * ext/standard/tests/dir/scandir_basic.phpt
+      ext/standard/tests/dir/scandir_basic.phpt
+      ext/standard/tests/dir/scandir_basic.phpt
+      ext/standard/tests/dir/scandir_error1.phpt
+      ext/standard/tests/dir/scandir_error1.phpt
+      ext/standard/tests/dir/scandir_error1.phpt
+      ext/standard/tests/dir/scandir_error2.phpt
+      ext/standard/tests/dir/scandir_error2.phpt
+      ext/standard/tests/dir/scandir_error2.phpt
+      ext/standard/tests/dir/scandir_variation1.phpt
+      ext/standard/tests/dir/scandir_variation1.phpt
+      ext/standard/tests/dir/scandir_variation1.phpt
+      ext/standard/tests/dir/scandir_variation2.phpt
+      ext/standard/tests/dir/scandir_variation2.phpt
+      ext/standard/tests/dir/scandir_variation2.phpt
+      ext/standard/tests/dir/scandir_variation3.phpt
+      ext/standard/tests/dir/scandir_variation3.phpt
+      ext/standard/tests/dir/scandir_variation3.phpt
+      ext/standard/tests/dir/scandir_variation4.phpt
+      ext/standard/tests/dir/scandir_variation4.phpt
+      ext/standard/tests/dir/scandir_variation4.phpt
+      ext/standard/tests/dir/scandir_variation5.phpt
+      ext/standard/tests/dir/scandir_variation5.phpt
+      ext/standard/tests/dir/scandir_variation5.phpt
+      ext/standard/tests/dir/scandir_variation6.phpt
+      ext/standard/tests/dir/scandir_variation6.phpt
+      ext/standard/tests/dir/scandir_variation6.phpt
+      ext/standard/tests/dir/scandir_variation7.phpt
+      ext/standard/tests/dir/scandir_variation7.phpt
+      ext/standard/tests/dir/scandir_variation7.phpt
+      ext/standard/tests/dir/scandir_variation8.phpt
+      ext/standard/tests/dir/scandir_variation8.phpt
+      ext/standard/tests/dir/scandir_variation8.phpt
+      ext/standard/tests/dir/scandir_variation9.phpt
+      ext/standard/tests/dir/scandir_variation9.phpt
+      ext/standard/tests/dir/scandir_variation9.phpt:
+        1.1.4;
+      file scandir_basic.phpt was initially added on branch PHP_5_2.
+
+2008-03-10  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli.c:
+      Fix typo
+
+    * ext/mysqli/mysqli.c:
+      - Fix build with older MySQL
+
+2008-03-10  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      NEWS:
+      Remove unneeded entry
+
+    * (PHP_5_3)
+      NEWS:
+      Update NEWS
+
+    * (PHP_5_3)
+      ext/mysql/php_mysql.c
+      ext/mysqli/php_mysqli_structs.h:
+        - Fix a warning in php_mysql.c
+        - Fixed #44371 Extension compile failed
+
+    * ext/mysql/php_mysql.c
+      ext/mysqli/php_mysqli_structs.h:
+      - Fix a warning in php_mysql.c
+      - Fixed #44371 Extension compile failed
+
 2008-03-09  Scott MacVicar  <scott@macvicar.net>
 
     * ext/sqlite/sqlite.c:
