@@ -35,7 +35,9 @@ if(is_resource($fp)) {
 resource(%d) of type (stream)
 
 -- Try to close the file pointer using closedir() --
+
 Warning: closedir(): %d is not a valid Directory resource in %s on line %d
+bool(false)
 
 -- Check file pointer: --
 resource(%d) of type (stream)
@@ -47,7 +49,9 @@ resource(%d) of type (stream)
 resource(%d) of type (stream)
 
 -- Try to close the file pointer using closedir() --
+
 Warning: closedir(): %d is not a valid Directory resource in %s on line %d
+bool(false)
 
 -- Check file pointer: --
 resource(%d) of type (stream)
