@@ -2410,7 +2410,7 @@ ukey:
 				if (recursive && zend_u_hash_find(dest, utype, string_key, string_key_len, (void **)&dest_entry) == SUCCESS) {
 					HashTable *thash = HASH_OF(*dest_entry);
 
-					if ((thash && thash->nApplyCount > 1) || (*src_entry == *dest_entry && (Z_REFCOUNT_PP(dest_entry) % 2))) {
+					if ((thash && thash->nApplyCount > 1) || (*src_entry == *dest_entry && Z_ISREF_PP(dest_entry) && (Z_REFCOUNT_PP(dest_entry) % 2))) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
 						return 0;
 					}
