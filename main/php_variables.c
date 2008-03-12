@@ -1010,7 +1010,13 @@ static zend_bool php_auto_globals_create_request(char *name, uint name_len TSRML
 	array_init(form_variables);
 	INIT_PZVAL(form_variables);
 
-	for (p = PG(variables_order); p && *p; p++) {
+	if(PG(request_order) != NULL) {
+		p = PG(request_order);
+	} else {
+		p = PG(variables_order);
+	}
+
+	for (; p && *p; p++) {
 		switch (*p) {
 			case 'g':
 			case 'G':
