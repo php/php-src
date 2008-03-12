@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Mar 2008 , PHP 5.2.6
+- Fixed bug #44394 (Last two bytes missing from output). (Felipe)
 - Fixed bug #44373 (PDO_OCI extension compile failed). (Felipe)
 
 06 Mar 2008, PHP 5.2.6RC2
