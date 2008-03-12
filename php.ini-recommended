@@ -464,6 +464,12 @@ track_errors = Off
 ; values override older values.
 variables_order = "GPCS"
 
+; This directive describes the order in which PHP registers GET, POST and Cookie
+; variables into the _REQUEST array. Registration is done from left to right, 
+; newer values override older values.
+; If this directive is not set, variables_order is used for _REQUEST contents.
+request_order = "GP"
+
 ; Whether or not to register the EGPCS variables as global variables.  You may
 ; want to turn this off if you don't want to clutter your scripts' global scope
 ; with user data.  This makes most sense when coupled with track_vars - in which

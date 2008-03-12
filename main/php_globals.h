@@ -162,6 +162,8 @@ struct _php_core_globals {
 
 	char *user_ini_filename;
 	long user_ini_cache_ttl;
+
+	char *request_order;
 };
 
 
