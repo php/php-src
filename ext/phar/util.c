@@ -150,6 +150,9 @@ void phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool compress 
 	efree(newname);
 
 	if (!phar->is_data) {
+		if (phar->alias) {
+			efree(phar->alias);
+		}
 		phar->alias = estrndup(newpath, strlen(newpath));
 		phar->alias_len = strlen(newpath);
 		zend_hash_update(&(PHAR_GLOBALS->phar_alias_map), newpath, strlen(newpath), (void*)&phar, sizeof(phar_archive_data*), NULL);
