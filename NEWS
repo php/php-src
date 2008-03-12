@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Fixed bug #44394 (Last two bytes missing from output). (Felipe)
 - Fixed bug #44388 (Crash inside exif_read_data() on invalid images) (Ilia)
 - Fixed bug #44373 (PDO_OCI extension compile failed). (Felipe)
+- Fixed bug #42177 (Warning "array_merge_recursive(): recursion detected" comes 
+  again...). (Felipe)
 
 06 Mar 2008, PHP 5.2.6RC2
 - Fixed bug #44333 (SEGFAULT when using mysql_pconnect() with client_flags).
