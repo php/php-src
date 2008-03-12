@@ -126,6 +126,7 @@ PHP                                                                        NEWS
 - Fixed possible crash in ext/soap because of uninitialized value. (Zdash Urf)
 - Fixed PECL bug #12431 (OCI8 ping functionality is broken). (Oracle Corp.)
 
+- Fixed bug #44414 (Incomplete reporting about abstract methods). (Dmitry)
 - Fixed bug #44394 (Last two bytes missing from output). (Felipe)
 - Fixed bug #44336 (Improve pcre UTF-8 string matching performance).
   (frode at coretrek dot com, Nuno)
