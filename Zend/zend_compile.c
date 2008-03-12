@@ -1546,20 +1546,7 @@ int zend_do_begin_function_call(znode *function_name, zend_bool check_namespace 
 	Z_UNIVAL(function_name->u.constant) = lcname;
 	Z_UNILEN(function_name->u.constant) = lcname_len;
 
-	switch (function->type) {
-		case ZEND_USER_FUNCTION:	{
-				zend_op_array *op_array = (zend_op_array *) function;
-
-				zend_stack_push(&CG(function_call_stack), (void *) &op_array, sizeof(zend_function *));
-			}
-			break;
-		case ZEND_INTERNAL_FUNCTION: {
-				zend_internal_function *internal_function = (zend_internal_function *) function;
-
-				zend_stack_push(&CG(function_call_stack), (void *) &internal_function, sizeof(zend_function *));
-			}
-			break;
-	}
+	zend_stack_push(&CG(function_call_stack), (void *) &function, sizeof(zend_function *));
 	zend_do_extended_fcall_begin(TSRMLS_C);
 	return 0;
 }
