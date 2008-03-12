@@ -88,6 +88,8 @@ PHP                                                                        NEWS
     ZEND_HANDLE_EXCEPTION opcode in the end. (Dmitry)
   . Optimized require_once() and include_once() by eliminating fopen(3) on
     second usage. (Dmitry)
+  . Optimized ZEND_FETCH_CLASS + ZEND_ADD_INTERFACE into single
+    ZEND_ADD_INTERFACE opcode (Dmitry)
 - Improved php.ini handling: (Jani)
   . Added ".htaccess" style user-defined php.ini files support for CGI/FastCGI
   . Added support for special [PATH=/opt/httpd/www.example.com/] and
