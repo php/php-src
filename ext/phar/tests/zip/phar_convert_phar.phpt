@@ -42,12 +42,12 @@ __HALT_COMPILER();
 ?>
 --EXPECT--
 bool(false)
-int(6573)
+int(6651)
 bool(true)
 string(60) "<?php // zip-based phar archive stub file
 __HALT_COMPILER();"
 bool(true)
-int(6573)
+int(6651)
 bool(true)
-int(6573)
+int(6651)
 ===DONE===

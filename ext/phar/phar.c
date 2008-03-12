@@ -2567,7 +2567,244 @@ static long stream_fteller_for_zend(void *handle TSRMLS_DC) /* {{{ */
 /* }}} */
 
 zend_op_array *(*phar_orig_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
+#if PHP_VERSION_ID >= 50300
+#define phar_orig_zend_open zend_stream_open_function
+static char *(*phar_save_resolve_path)(const char *filename, int filename_len TSRMLS_DC);
+#else
 int (*phar_orig_zend_open)(const char *filename, zend_file_handle *handle TSRMLS_DC);
+#endif
+
+/*
+ Used to add the fake CWD to include_path prior to parsing it in PHP 5.3+
+ Does complete include_path scan for file in PHP 5.2
+
+ This is only called in PHP 5.2 if we know for certain that we are running within
+ a phar, and only supports phar stream wrapper in 5.2.
+ */
+char *phar_resolve_path(const char *filename, int filename_len TSRMLS_DC)
+{
+#if PHP_VERSION_ID >= 50300
+	char *path, *fname, *arch, *entry, *ret, *test;
+	int arch_len, entry_len;
+
+	if (!zend_is_executing(TSRMLS_C) || !PHAR_G(cwd)) {
+		return phar_save_resolve_path(filename, filename_len TSRMLS_CC);
+	}
+	fname = zend_get_executed_filename(TSRMLS_C);
+	if (SUCCESS != phar_split_fname(fname, strlen(fname), &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
+		return phar_save_resolve_path(filename, filename_len TSRMLS_CC);
+	}
+	if (*filename == '.') {
+		phar_archive_data **pphar;
+		int try_len;
+
+		if (SUCCESS != (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
+			efree(arch);
+			efree(entry);
+			return phar_save_resolve_path(filename, filename_len TSRMLS_CC);
+		}
+		efree(entry);
+		test = phar_fix_filepath(estrndup(filename, filename_len), &try_len, 1 TSRMLS_CC);
+		if (zend_hash_exists(&((*pphar)->manifest), test + 1, try_len - 1)) {
+			spprintf(&ret, 0, "phar://%s%s", arch, test);
+			efree(arch);
+			efree(test);
+			return ret;
+		}
+	}
+	efree(entry);
+	spprintf(&path, MAXPATHLEN, "phar://%s/%s%c%s", arch, PHAR_G(cwd), DEFAULT_DIR_SEPARATOR, PG(include_path));
+	efree(arch);
+	ret = php_resolve_path(filename, filename_len, path);
+	efree(path);
+	return ret;
+#else /* PHP 5.2 */
+	char resolved_path[MAXPATHLEN];
+	char trypath[MAXPATHLEN];
+	char *ptr, *end, *path = PG(include_path);
+	php_stream_wrapper *wrapper;
+	const char *p;
+	int n = 0;
+	char *fname, *arch, *entry, *ret, *test;
+	int arch_len, entry_len;
+
+	if (!filename) {
+		return NULL;
+	}
+
+	if (!zend_is_executing(TSRMLS_C) || !PHAR_G(cwd)) {
+		goto doit;
+	}
+	fname = zend_get_executed_filename(TSRMLS_C);
+	if (SUCCESS != phar_split_fname(fname, strlen(fname), &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
+		goto doit;
+	}
+
+	if (*filename == '.') {
+		phar_archive_data **pphar;
+		int try_len;
+
+		if (SUCCESS != (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
+			efree(arch);
+			efree(entry);
+			goto doit;
+		}
+		efree(entry);
+		test = phar_fix_filepath(estrndup(filename, filename_len), &try_len, 1 TSRMLS_CC);
+		if (zend_hash_exists(&((*pphar)->manifest), test + 1, try_len - 1)) {
+			spprintf(&ret, 0, "phar://%s%s", arch, test);
+			efree(arch);
+			efree(test);
+			return ret;
+		}
+		efree(test);
+	}
+	efree(arch);
+	efree(entry);
+
+doit:
+	if (*filename == '.' ||
+	    IS_ABSOLUTE_PATH(filename, filename_len) ||
+	    !path ||
+	    !*path) {
+		if (tsrm_realpath(filename, resolved_path TSRMLS_CC)) {
+			return estrdup(resolved_path);
+		} else {
+			return NULL;
+		}
+	}
+	/* test for stream wrappers and return */
+	for (p = filename; p - filename < filename_len && (isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'); p++) {
+		n++;
+	}
+
+	if (n < filename_len - 3 && (*p == ':') && (!strncmp("//", p+1, 2) || ( filename_len > 4 && !memcmp("data", filename, 4)))) {
+		/* found stream wrapper, this is an absolute path until stream wrappers implement realpath */
+		return estrndup(filename, filename_len);
+	}
+
+	ptr = (char *) path;
+	while (ptr && *ptr) {
+		int len, is_stream_wrapper = 0, maybe_stream = 1;
+
+		end = strchr(ptr, DEFAULT_DIR_SEPARATOR);
+#ifndef PHP_WIN32
+		/* search for stream wrapper */
+		if (end - ptr  <= 1) {
+			maybe_stream = 0;
+			goto not_stream;
+		}
+		for (p = ptr, n = 0; p < end && (isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'); p++) {
+			n++;
+		}
+
+		if (n == end - ptr && *p && !strncmp("//", p+1, 2)) {
+			is_stream_wrapper = 1;
+			/* seek to real end of include_path portion */
+			end = strchr(end + 1, DEFAULT_DIR_SEPARATOR);
+		} else {
+			maybe_stream = 0;
+		}
+not_stream:
+#endif
+		if (end) {
+			if ((end-ptr) + 1 + filename_len + 1 >= MAXPATHLEN) {
+				ptr = end + 1;
+				continue;
+			}
+			memcpy(trypath, ptr, end-ptr);
+			len = end-ptr;
+			trypath[end-ptr] = '/';
+			memcpy(trypath+(end-ptr)+1, filename, filename_len+1);
+			ptr = end+1;
+		} else {
+			len = strlen(ptr);
+
+			if (len + 1 + filename_len + 1 >= MAXPATHLEN) {
+				break;
+			}
+			memcpy(trypath, ptr, len);
+			trypath[len] = '/';
+			memcpy(trypath+len+1, filename, filename_len+1);
+			ptr = NULL;
+		}
+
+		if (!is_stream_wrapper && maybe_stream) {
+			/* search for stream wrapper */
+			for (p = trypath, n = 0; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++) {
+				n++;
+			}
+		}
+
+		if (is_stream_wrapper || (n < len - 3 && (*p == ':') && (n > 1) && (!strncmp("//", p+1, 2) || !memcmp("data", trypath, 4)))) {
+			char *actual;
+
+			wrapper = php_stream_locate_url_wrapper(trypath, &actual, STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
+			if (wrapper == &php_plain_files_wrapper) {
+				strncpy(trypath, actual, MAXPATHLEN);
+			} else if (!wrapper) {
+				/* if wrapper is NULL, there was a mal-formed include_path stream wrapper, so skip this ptr */
+				continue;
+			} else {
+				if (wrapper->wops->url_stat) {
+					php_stream_statbuf ssb;
+
+					if (SUCCESS == wrapper->wops->url_stat(wrapper, trypath, 0, &ssb, NULL TSRMLS_CC)) {
+						return estrdup(trypath);
+					}
+				}
+				continue;
+			}
+		}
+
+		if (tsrm_realpath(trypath, resolved_path TSRMLS_CC)) {
+			return estrdup(resolved_path);
+		}
+	} /* end provided path */
+
+	/* check in calling scripts' current working directory as a fall back case
+	 */
+	if (zend_is_executing(TSRMLS_C)) {
+		char *exec_fname = zend_get_executed_filename(TSRMLS_C);
+		int exec_fname_length = strlen(exec_fname);
+		const char *p;
+		int n = 0;
+
+		while ((--exec_fname_length >= 0) && !IS_SLASH(exec_fname[exec_fname_length]));
+		if (exec_fname && exec_fname[0] != '[' &&
+		    exec_fname_length > 0 &&
+		    exec_fname_length + 1 + filename_len + 1 < MAXPATHLEN) {
+			memcpy(trypath, exec_fname, exec_fname_length + 1);
+			memcpy(trypath+exec_fname_length + 1, filename, filename_len+1);
+
+			/* search for stream wrapper */
+			for (p = trypath; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++) {
+				n++;
+			}
+			if (n < exec_fname_length - 3 && (*p == ':') && (n > 1) && (!strncmp("//", p+1, 2) || !memcmp("data", trypath, 4))) {
+				char *actual;
+	
+				wrapper = php_stream_locate_url_wrapper(trypath, &actual, STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
+				if (wrapper == &php_plain_files_wrapper) {
+					/* this should never technically happen, but we'll leave it here for completeness */
+					strncpy(trypath, actual, MAXPATHLEN);
+				} else if (!wrapper) {
+					/* if wrapper is NULL, there was a mal-formed include_path stream wrapper
+					   this also should be impossible */
+					return NULL;
+				} else {
+					return estrdup(trypath);
+				}
+			}
+			if (tsrm_realpath(trypath, resolved_path TSRMLS_CC)) {
+				return estrdup(resolved_path);
+			}
+		}
+	}
+
+	return NULL;
+#endif /* PHP 5.2 */
+}
 
 static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC) /* {{{ */
 {
@@ -2587,6 +2824,9 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 					efree(name);
 					name = NULL;
 					file_handle->filename = f.filename;
+					if (file_handle->opened_path) {
+						efree(file_handle->opened_path);
+					}
 					file_handle->opened_path = f.opened_path;
 					file_handle->free_filename = f.free_filename;
 				} else {
@@ -2624,13 +2864,45 @@ skip_phar:
 }
 /* }}} */
 
+#if PHP_VERSION_ID < 50300
 int phar_zend_open(const char *filename, zend_file_handle *handle TSRMLS_DC) /* {{{ */
 {
 	char *arch, *entry;
+	int arch_len, entry_len;
 
+	/* this code is obsoleted in php 5.3 */
 	entry = (char *) filename;
-	if (zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
-		int arch_len, entry_len;
+	if (!IS_ABSOLUTE_PATH(entry, strlen(entry))) {
+		phar_archive_data **pphar = NULL;
+		char *fname;
+		int fname_len;
+
+		fname = zend_get_executed_filename(TSRMLS_C);
+		fname_len = strlen(fname);
+		if (fname_len > 7 && !strncasecmp(fname, "phar://", 7)) {
+			if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
+				zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar);
+				efree(arch);
+				efree(entry);
+			}
+		}
+		/* retrieving an include within the current directory, so use this if possible */
+		if (!(entry = phar_find_in_include_path((char *) filename, pphar TSRMLS_CC))) {
+			/* this file is not in the phar, use the original path */
+			goto skip_phar;
+		}
+		if (SUCCESS == phar_orig_zend_open(entry, handle TSRMLS_CC)) {
+			if (!handle->opened_path) {
+				handle->opened_path = entry;
+			}
+			return SUCCESS;
+		}
+		if (entry != filename) {
+			efree(entry);
+		}
+		return FAILURE;
+	}
+	if (0 && zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
 		char *fname = NULL;
 		int fname_len;
 
@@ -2655,7 +2927,7 @@ int phar_zend_open(const char *filename, zend_file_handle *handle TSRMLS_DC) /* 
 				phar_archive_data **pphar;
 				/* retrieving an include within the current directory, so use this if possible */
 				if (SUCCESS == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
-					if (!(entry = phar_find_in_include_path(entry, old, *pphar TSRMLS_CC))) {
+					if (!(entry = phar_find_in_include_path(entry, pphar TSRMLS_CC))) {
 						/* this file is not in the phar, use the original path */
 						if (SUCCESS == phar_orig_zend_open(filename, handle TSRMLS_CC)) {
 							if (SUCCESS == phar_mount_entry(*pphar, handle->opened_path ? handle->opened_path : (char *) filename, strlen(handle->opened_path ? handle->opened_path : filename), (char *) filename, strlen(filename) TSRMLS_CC)) {
@@ -2693,6 +2965,7 @@ skip_phar:
 	return phar_orig_zend_open(filename, handle TSRMLS_CC);
 }
 /* }}} */
+#endif
 
 PHP_MINIT_FUNCTION(phar) /* {{{ */
 {
@@ -2702,11 +2975,16 @@ PHP_MINIT_FUNCTION(phar) /* {{{ */
 	phar_has_bz2 = zend_hash_exists(&module_registry, "bz2", sizeof("bz2"));
 	phar_has_zlib = zend_hash_exists(&module_registry, "zlib", sizeof("zlib"));
 
-	phar_orig_compile_file = zend_compile_file;
-	zend_compile_file = phar_compile_file;
-
+#if PHP_VERSION_ID >= 50300
+	phar_save_resolve_path = zend_resolve_path;
+	zend_resolve_path = phar_resolve_path;
+#else
 	phar_orig_zend_open = zend_stream_open_function;
 	zend_stream_open_function = phar_zend_open;
+#endif
+
+	phar_orig_compile_file = zend_compile_file;
+	zend_compile_file = phar_compile_file;
 
 	phar_object_init(TSRMLS_C);
 
@@ -2720,9 +2998,11 @@ PHP_MSHUTDOWN_FUNCTION(phar) /* {{{ */
 	if (zend_compile_file == phar_compile_file) {
 		zend_compile_file = phar_orig_compile_file;
 	}
+#if PHP_VERSION_ID < 50300
 	if (zend_stream_open_function == phar_zend_open) {
 		zend_stream_open_function = phar_orig_zend_open;
 	}
+#endif
 }
 /* }}} */
 

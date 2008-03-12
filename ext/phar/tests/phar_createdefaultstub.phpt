@@ -34,12 +34,13 @@ echo $e->getMessage() . "\n";
 ?>
 ===DONE===
 --EXPECT--
-string(6573) "<?php
+string(6651) "<?php
 
 $web = 'index.php';
 
 if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
 Phar::interceptFileFuncs();
+set_include_path('phar://' . __FILE__ . PATH_SEPARATOR . get_include_path());
 Phar::webPhar(null, $web);
 include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
 return;
@@ -143,7 +144,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'index.php';
-const LEN = 6575;
+const LEN = 6653;
 
 static function go($return = false)
 {
@@ -327,12 +328,13 @@ Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
-string(6584) "<?php
+string(6662) "<?php
 
 $web = 'index.php';
 
 if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
 Phar::interceptFileFuncs();
+set_include_path('phar://' . __FILE__ . PATH_SEPARATOR . get_include_path());
 Phar::webPhar(null, $web);
 include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
 return;
@@ -436,7 +438,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'my/custom/thingy.php';
-const LEN = 6586;
+const LEN = 6664;
 
 static function go($return = false)
 {
@@ -620,7 +622,7 @@ Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
-int(6964)
+int(7042)
 ============================================================================
 ============================================================================
 Illegal filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
@@ -628,12 +630,13 @@ Illegal filename passed in for stub creation, was 401 characters long, and only 
 ============================================================================
 ============================================================================
 ============================================================================
-string(6586) "<?php
+string(6664) "<?php
 
 $web = 'the/web.php';
 
 if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
 Phar::interceptFileFuncs();
+set_include_path('phar://' . __FILE__ . PATH_SEPARATOR . get_include_path());
 Phar::webPhar(null, $web);
 include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
 return;
@@ -737,7 +740,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'my/custom/thingy.php';
-const LEN = 6588;
+const LEN = 6666;
 
 static function go($return = false)
 {
@@ -921,6 +924,6 @@ Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
-int(6964)
+int(7042)
 Illegal web filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
 ===DONE===
