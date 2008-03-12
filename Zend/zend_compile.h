@@ -147,6 +147,10 @@ typedef struct _zend_try_catch_element {
 /* deprecation flag */
 #define ZEND_ACC_DEPRECATED 0x40000
 
+/* class implement interface(s) flag */
+#define ZEND_ACC_IMPLEMENT_INTERFACES 0x80000
+
+
 char *zend_visibility_string(zend_uint fn_flags);
 
 

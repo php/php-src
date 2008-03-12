@@ -2803,7 +2803,8 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 
 	if (ce->ce_flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS && ce->type == ZEND_INTERNAL_CLASS) {
 		ce->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
-	} else {
+	} else if (!(ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES)) {
+		/* The verification will be done in runtime by ZEND_VERIFY_ABSTRACT_CLASS */
 		zend_verify_abstract_class(ce TSRMLS_CC);
 	}
 }
@@ -2919,7 +2920,7 @@ ZEND_API zend_class_entry *do_bind_class(zend_op *opline, HashTable *class_table
 		}
 		return NULL;
 	} else {
-		if (!(ce->ce_flags & ZEND_ACC_INTERFACE)) {
+		if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLEMENT_INTERFACES))) {
 			zend_verify_abstract_class(ce TSRMLS_CC);
 		}
 		return ce;
@@ -3478,10 +3479,13 @@ void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRML
 		}
 	}
 	/* Inherit interfaces; reset number to zero, we need it for above check and
-	 * will restore it during actual implementation. */
+	 * will restore it during actual implementation. 
+	 * The ZEND_ACC_IMPLEMENT_INTERFACES flag disables double call to
+	 * zend_verify_abstract_class() */
 	if (ce->num_interfaces > 0) {
 		ce->interfaces = NULL;
 		ce->num_interfaces = 0;
+		ce->ce_flags |= ZEND_ACC_IMPLEMENT_INTERFACES;
 	}
 	CG(active_class_entry) = NULL;
 }
