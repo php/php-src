@@ -136,7 +136,7 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 				if (SUCCESS == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
 					name = entry;
 					if (use_include_path) {
-						if (!(entry = phar_find_in_include_path(entry, old, *pphar TSRMLS_CC))) {
+						if (!(entry = phar_find_in_include_path(entry, pphar TSRMLS_CC))) {
 							/* this file is not in the phar, use the original path */
 							efree(arch);
 							efree(old);
@@ -243,13 +243,15 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 			/* retrieving a file defaults to within the current directory, so use this if possible */
 			if (SUCCESS == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
 				if (use_include_path) {
-					if (!(entry = phar_find_in_include_path(entry, old, *pphar TSRMLS_CC))) {
+					if (!(entry = phar_find_in_include_path(entry, pphar TSRMLS_CC))) {
 						/* this file is not in the phar, use the original path */
 						efree(old);
 						efree(arch);
 						goto skip_phar;
 					}
 					efree(old);
+					name = entry;
+					goto already_setup;
 				} else {
 					efree(old);
 					entry = phar_fix_filepath(entry, &entry_len, 1 TSRMLS_CC);
@@ -266,6 +268,7 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 			if (entry != filename) {
 				efree(entry);
 			}
+already_setup:
 			efree(arch);
 			context = php_stream_context_from_zval(zcontext, 0);
 			stream = php_stream_open_wrapper_ex(name, mode, 0 | REPORT_ERRORS, NULL, context);

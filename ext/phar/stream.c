@@ -235,6 +235,9 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 				idata->phar->is_modified = 1;
 			}
 		}
+		if (opened_path) {
+			spprintf(opened_path, MAXPATHLEN, "phar://%s/%s", idata->phar->fname, idata->internal_file->filename);
+		}
 		return fpf;
 	} else {
 		if ((FAILURE == phar_get_entry_data(&idata, resource->host, host_len, internal_file, strlen(internal_file), "r", 0, &error TSRMLS_CC)) || !idata) {
@@ -286,6 +289,9 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 		}
 	}
 	fpf = php_stream_alloc(&phar_ops, idata, NULL, mode);
+	if (opened_path) {
+		spprintf(opened_path, MAXPATHLEN, "phar://%s/%s", idata->phar->fname, idata->internal_file->filename);
+	}
 	efree(internal_file);
 	return fpf;
 }

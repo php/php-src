@@ -54,12 +54,13 @@ try {
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
 ?>
 --EXPECT--
-string(6575) "<?php
+string(6653) "<?php
 
 $web = 'index.php';
 
 if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
 Phar::interceptFileFuncs();
+set_include_path('phar://' . __FILE__ . PATH_SEPARATOR . get_include_path());
 Phar::webPhar(null, $web);
 include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
 return;
@@ -163,7 +164,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'index.php';
-const LEN = 6575;
+const LEN = 6653;
 
 static function go($return = false)
 {
@@ -348,12 +349,13 @@ __HALT_COMPILER(); ?>
 "
 ============================================================================
 ============================================================================
-string(6586) "<?php
+string(6664) "<?php
 
 $web = 'index.php';
 
 if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
 Phar::interceptFileFuncs();
+set_include_path('phar://' . __FILE__ . PATH_SEPARATOR . get_include_path());
 Phar::webPhar(null, $web);
 include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
 return;
@@ -457,7 +459,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'my/custom/thingy.php';
-const LEN = 6586;
+const LEN = 6664;
 
 static function go($return = false)
 {
@@ -642,12 +644,13 @@ __HALT_COMPILER(); ?>
 "
 ============================================================================
 ============================================================================
-string(6588) "<?php
+string(6666) "<?php
 
 $web = 'the/web.php';
 
 if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
 Phar::interceptFileFuncs();
+set_include_path('phar://' . __FILE__ . PATH_SEPARATOR . get_include_path());
 Phar::webPhar(null, $web);
 include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
 return;
@@ -751,7 +754,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'my/custom/thingy.php';
-const LEN = 6588;
+const LEN = 6666;
 
 static function go($return = false)
 {
@@ -936,6 +939,6 @@ __HALT_COMPILER(); ?>
 "
 ============================================================================
 ============================================================================
-int(6966)
+int(7044)
 Illegal filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
 ===DONE===

@@ -241,11 +241,18 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 	return FAILURE;
 }
 
-char *phar_find_in_include_path(char *file, char *entry, phar_archive_data *phar TSRMLS_DC) /* {{{ */
+char *phar_find_in_include_path(char *file, phar_archive_data **pphar TSRMLS_DC) /* {{{ */
 {
 	char *path = PG(include_path), *pathbuf, *ptr, *end;
 	char *trypath;
+	phar_archive_data *blank = NULL, *self;
 
+	if (!pphar) {
+		pphar = &blank;
+		self = NULL;
+	} else {
+		self = *pphar;
+	}
 	if (!path || (path && !*path)) {
 		return file;
 	}
@@ -263,6 +270,49 @@ char *phar_find_in_include_path(char *file, char *entry, phar_archive_data *phar
 		char *test;
 
 		end = strchr(ptr, DEFAULT_DIR_SEPARATOR);
+		/* check for phar:// */
+		if (end - ptr == 4 && !strncmp(ptr, "phar", 4)) {
+			char *arch, *entry;
+			int arch_len, entry_len;
+
+			/* found phar:// */
+			end = strchr(end + 1, DEFAULT_DIR_SEPARATOR);
+			if (end != NULL) {
+				*end = '\0';
+				end++;
+			}
+
+			if (SUCCESS != phar_split_fname(ptr, end - ptr, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
+				continue;
+			}
+			if (SUCCESS != (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
+				efree(arch);
+				efree(entry);
+				continue;
+			}
+			try_len = spprintf(&trypath, MAXPATHLEN, "%s/%s", entry, file);
+			efree(entry);
+			test = phar_fix_filepath(trypath, &try_len, 0 TSRMLS_CC);
+			if (zend_hash_exists(&((*pphar)->manifest), test + 1, try_len - 1)) {
+				efree(pathbuf);
+				spprintf(&trypath, 0, "phar://%s%s", arch, test);
+				efree(arch);
+				efree(test);
+				return trypath;
+			}
+			if (zend_hash_num_elements(&((*pphar)->mounted_dirs))) {
+				if (phar_get_entry_info_dir(*pphar, test + 1, try_len - 1, 0, NULL TSRMLS_CC)) {
+					spprintf(&trypath, 0, "phar://%s%s", arch, test);
+					efree(arch);
+					efree(test);
+					return trypath;
+				}
+			}
+			efree(test);
+			*pphar = self;
+			ptr = end;
+			continue;
+		}
 		if (end != NULL) {
 			*end = '\0';
 			end++;
@@ -270,17 +320,22 @@ char *phar_find_in_include_path(char *file, char *entry, phar_archive_data *phar
 		if (*ptr == '\0') {
 			goto stream_skip;
 		}
+		if (!*pphar || ptr[0] != '.') {
+			ptr = end;
+			continue;
+		}
+		/* relative path in include_path starting with ".", look inside current phar, if any */
 		try_len = spprintf(&trypath, MAXPATHLEN, "%s/%s", ptr, file);
 		test = phar_fix_filepath(trypath, &try_len, 1 TSRMLS_CC);
-		if (zend_hash_exists(&(phar->manifest), test + 1, try_len - 1)) {
+		if (zend_hash_exists(&((*pphar)->manifest), test + 1, try_len - 1)) {
 			char *save = test;
 			efree(pathbuf);
 			test = estrndup(test + 1, try_len - 1);
 			efree(save);
 			return test;
 		}
-		if (zend_hash_num_elements(&(phar->mounted_dirs))) {
-			if (phar_get_entry_info_dir(phar, test + 1, try_len - 1, 0, NULL TSRMLS_CC)) {
+		if (zend_hash_num_elements(&((*pphar)->mounted_dirs))) {
+			if (phar_get_entry_info_dir(*pphar, test + 1, try_len - 1, 0, NULL TSRMLS_CC)) {
 				char *save = test;
 				efree(pathbuf);
 				test = estrndup(test + 1, try_len - 1);

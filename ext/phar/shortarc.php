@@ -4,6 +4,7 @@ $web = '000';
 
 if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
     Phar::interceptFileFuncs();
+    set_include_path('phar://' . __FILE__ . PATH_SEPARATOR . get_include_path());
     Phar::webPhar(null, $web);
     include 'phar://' . __FILE__ . '/' . Extract_Phar::START;
     return;

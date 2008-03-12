@@ -378,7 +378,7 @@ char * phar_compress_filter(phar_entry_info * entry, int return_unknown);
 
 void phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool compress TSRMLS_DC);
 int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, char *path, int path_len TSRMLS_DC);
-char *phar_find_in_include_path(char *file, char *entry, phar_archive_data *phar TSRMLS_DC);
+char *phar_find_in_include_path(char *file, phar_archive_data **phar TSRMLS_DC);
 char *phar_fix_filepath(char *path, int *new_len, int use_cwd TSRMLS_DC);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, php_stream *fp,
 				      char **error, int for_write TSRMLS_DC);
