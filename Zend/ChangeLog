@@ -1,3 +1,61 @@
+2008-03-11  Felipe Pena  <felipensp@gmail.com>
+
+    * tests/access_modifiers_009.phpt
+      tests/access_modifiers_009.phpt:
+      
+      Add new test (bug reported in internals list by Robin)
+
+    * tests/access_modifiers_008.phpt
+      tests/access_modifiers_009.phpt:
+      Add new test (bug reported in internals list by Robin)
+
+    * tests/access_modifiers_008.phpt
+      tests/access_modifiers_008.phpt:
+      
+      file access_modifiers_008.phpt was initially added on branch PHP_5_3.
+
+    * tests/class_constants_004.phpt
+      tests/class_constants_004.phpt:
+      Missing a line
+
+    * tests/class_constants_004.phpt
+      tests/objects_017.phpt
+      tests/objects_018.phpt:
+      New tests
+
+    * tests/class_constants_004.phpt
+      tests/class_constants_004.phpt
+      tests/objects_017.phpt
+      tests/objects_017.phpt
+      tests/objects_018.phpt
+      tests/objects_018.phpt:
+      
+      file class_constants_004.phpt was initially added on branch PHP_5_3.
+
+    * tests/bug39018.phpt
+      tests/bug39018.phpt:
+      Fix test
+
+2008-03-11  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      tests/assign_to_var_001.phpt
+      tests/assign_to_var_002.phpt
+      tests/assign_to_var_003.phpt
+      tests/assign_to_var_004.phpt:
+      some more tests
+
+    * tests/assign_to_var_001.phpt
+      tests/assign_to_var_001.phpt
+      tests/assign_to_var_002.phpt
+      tests/assign_to_var_002.phpt
+      tests/assign_to_var_003.phpt
+      tests/assign_to_var_003.phpt
+      tests/assign_to_var_004.phpt
+      tests/assign_to_var_004.phpt:
+      
+      some more tests
+
 2008-03-10  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
