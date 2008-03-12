@@ -166,7 +166,7 @@ directory will contain logs of any failures.
 6. DRCP and FAN Support
 -----------------------
 
-The PHP OCI8 Beta extension has support for the Oracle Database
+The PHP 6 OCI8 Beta extension has support for the Oracle Database
 Resident Connection Pool (DRCP) and Fast Application Notification
 (FAN).
 
@@ -204,6 +204,25 @@ contains background information on DRCP.
 
 After building PHP with the OCI8 extension and 11g libraries, follow
 these steps:
+
+6.2.0 Important: if Oracle Database 11.1.0.6 with DRCP connections is
+    used, then the Oracle database patch for bug 6474441 must be
+    applied (see section 6.5) or a workaround below used.  Without
+    this patch, "ORA-01000: maximum open cursors exceeded", "ORA-01001
+    invalid cursor" or "ORA-01002 fetch out of sequence" errors may
+    occur.
+
+    If the Oracle 11.1.0.6 database patch cannot be applied, one of
+    the following three workarounds can be used to disable statement
+    caching instead:
+
+    (i) Connect using Oracle dedicated or shared servers instead of DRCP.
+
+    (ii) Set PHP's oci8.statement_cache_size to 0.
+
+    (iii) Set an event in the database initialization parameter file:
+    event="56699 trace name context forever, level 128".
+
 
 6.2.1. As a privileged database administrator, use a program like
        SQL*Plus to start the connection pool in the database:
@@ -298,55 +317,15 @@ To enable FAN support in PHP, after building PHP with Oracle 10gR2 or
 6.3.4. Run your application, connecting to a 10gR2 or 11g database.
 
 
-6.4. Changes in this release from PECL OCI8 1.3.0 Beta
+6.4. Recommendations and Known Limitations 
 
-The initial release of OCI8 with DRCP and FAN support was PECL OCI8
-1.3.0 Beta.  This section documents differences from that release.
+6.4.1 Changing Password for DRCP connections
 
-6.4.1 Statement caching has been re-enabled.
+Changing a password over DRCP connections will fail with the error
+"ORA-56609: Usage not supported with DRCP".  This is an documented
+restriction of Oracle Database 11g.
 
-Important: if Oracle Database 11.1.0.6 with DRCP connections is used,
-then the Oracle database patch for bug 6474441 must be applied (see
-section 6.5) or a workaround below used.  Without this patch,
-"ORA-01000: maximum open cursors exceeded", "ORA-01001 invalid cursor"
-or "ORA-01002 fetch out of sequence" errors may occur.
-
-If the Oracle 11.1.0.6 database patch cannot be applied, one of the
-following three workarounds can be used to disable statement caching
-instead:
-
-(i) Connect using Oracle dedicated or shared servers instead of DRCP.
-
-(ii) Set PHP's oci8.statement_cache_size to 0.
-
-(iii) Set an event in the database initialization parameter file:
-event="56699 trace name context forever, level 128".
-
-6.4.2 Changing Password for non-DRCP connections has been re-enabled.
-
-When oci_password_change() is successfully performed for non-DRCP
-connections in a PHP script, subsequent connections with the new
-password from this PHP instance no longer fail with "ORA-1017 invalid
-username/password".
-
-Changing a password over DRCP connections will continue to fail with
-the error "ORA-56609: Usage not supported with DRCP".  This is an
-documented restriction of Oracle Database 11g.
-
-6.4.3 Oci8.max_persistent setting is re-enabled.
-
-The php.ini parameter oci8.max_persistent will limit the number of
-persistent connections that each PHP process will keep open between
-HTTP requests.  Any further oci_pconnect() calls once this limit is
-reached will be treated as oci_connect() calls.
-
-It is still recommended that DRCP users modify the connection pool
-settings of the database to control resource usage.  Non-DRCP users
-should consider setting oci8.persistent_timeout to close idle
-connections.
-
-
-6.4.4 LOGON Triggers can be used to set session properties
+6.4.2 LOGON Triggers can be used to set session properties
 
 The patch for Oracle Database 11.1.0.6 bug 6474441 (see section 6.5)
 allows PHP applications with DRCP connection to use a database LOGON
@@ -364,9 +343,9 @@ application code.
 With DRCP there is an connection management relationship between (i)
 DRCP's automatic pool expansion and reduction, (ii) PHP's persistent
 connection caching, (iii) with the way LOGON triggers fire with DRCP
-authentication.  Because of this interplay, LOGON triggers in PHP when
-DRCP is used are only recommended for setting session attributes and
-not for per-PHP connection events.
+authentication.  Because of this interplay, LOGON triggers in PHP
+(when DRCP is used) are only recommended for setting session
+attributes and not for per-PHP connection events.
 
 
 6.5. Patching Oracle Database 11g
