@@ -2856,7 +2856,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 					/* exception are IFD pointers */
 					exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal pointer offset(x%04X + x%04X = x%04X > x%04X)", tag, exif_get_tagname(tag, tagname, -12, tag_table TSRMLS_CC), offset_val, byte_count, offset_val+byte_count, IFDlength);
 				}
-				return TRUE;
+				return FALSE;
 			}
 			if (byte_count>sizeof(cbuf)) {
 				/* mark as outside range and get buffer */
