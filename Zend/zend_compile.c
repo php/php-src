@@ -3493,35 +3493,25 @@ void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRML
 
 void zend_do_implements_interface(znode *interface_name TSRMLS_DC) /* {{{ */
 {
-	znode interface_node;
 	zend_op *opline;
 
-	zend_do_fetch_class(&interface_node, interface_name TSRMLS_CC);
-	switch (interface_node.u.EA.type) {
+	switch (zend_get_class_fetch_type(Z_TYPE(interface_name->u.constant), Z_UNIVAL(interface_name->u.constant), Z_UNILEN(interface_name->u.constant))) {
 		case ZEND_FETCH_CLASS_SELF:
-			zend_error(E_COMPILE_ERROR, "Cannot use 'self' as interface name as it is reserved");
-			break;
 		case ZEND_FETCH_CLASS_PARENT:
-			zend_error(E_COMPILE_ERROR, "Cannot use 'parent' as interface name as it is reserved");
-			break;
 		case ZEND_FETCH_CLASS_STATIC:
-			zend_error(E_COMPILE_ERROR, "Cannot use 'static' as interface name as it is reserved");
+			zend_error(E_COMPILE_ERROR, "Cannot use '%R' as interface name as it is reserved", Z_TYPE(interface_name->u.constant), Z_UNIVAL(interface_name->u.constant));
 			break;
 		default:
-			if (CG(active_op_array)->last > 0) {
-				opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
-				if (opline->opcode == ZEND_FETCH_CLASS) {
-					opline->extended_value = (opline->extended_value & ~ZEND_FETCH_CLASS_MASK) | ZEND_FETCH_CLASS_INTERFACE;
-				}
-			}
 			break;
 	}
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_ADD_INTERFACE;
 	opline->op1 = CG(implementing_class);
-	opline->op2 = interface_node;
-	opline->extended_value = CG(active_class_entry)->num_interfaces++;
+	zend_resolve_class_name(interface_name, &opline->extended_value, 0 TSRMLS_CC);
+	opline->extended_value = (opline->extended_value & ~ZEND_FETCH_CLASS_MASK) | ZEND_FETCH_CLASS_INTERFACE;
+	opline->op2 = *interface_name;
+	CG(active_class_entry)->num_interfaces++;
 }
 /* }}} */
 
