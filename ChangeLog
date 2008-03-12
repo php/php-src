@@ -1,3 +1,115 @@
+2008-03-11  Lars Strojny  <lars@strojny.net>
+
+    * sapi/apache2filter/config.m4
+      sapi/apache2handler/config.m4
+      sapi/apache2handler/config.m4:
+      Adding itk again to non-threaded MPMs. Sorry for the confusion
+
+2008-03-11  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/tests/access_modifiers_009.phpt
+      ZendEngine2/tests/access_modifiers_009.phpt:
+      
+      Add new test (bug reported in internals list by Robin)
+
+    * ZendEngine2/tests/access_modifiers_008.phpt
+      ZendEngine2/tests/access_modifiers_009.phpt:
+      Add new test (bug reported in internals list by Robin)
+
+    * ZendEngine2/tests/access_modifiers_008.phpt
+      ZendEngine2/tests/access_modifiers_008.phpt:
+      
+      file access_modifiers_008.phpt was initially added on branch PHP_5_3.
+
+    * ZendEngine2/tests/class_constants_004.phpt
+      ZendEngine2/tests/class_constants_004.phpt:
+      Missing a line
+
+    * ZendEngine2/tests/class_constants_004.phpt
+      ZendEngine2/tests/objects_017.phpt
+      ZendEngine2/tests/objects_018.phpt:
+      New tests
+
+    * ZendEngine2/tests/class_constants_004.phpt
+      ZendEngine2/tests/class_constants_004.phpt
+      ZendEngine2/tests/objects_017.phpt
+      ZendEngine2/tests/objects_017.phpt
+      ZendEngine2/tests/objects_018.phpt
+      ZendEngine2/tests/objects_018.phpt:
+      
+      file class_constants_004.phpt was initially added on branch PHP_5_3.
+
+    * ZendEngine2/tests/bug39018.phpt
+      ZendEngine2/tests/bug39018.phpt:
+      Fix test
+
+2008-03-11  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/assign_to_var_001.phpt
+      ZendEngine2/tests/assign_to_var_002.phpt
+      ZendEngine2/tests/assign_to_var_003.phpt
+      ZendEngine2/tests/assign_to_var_004.phpt:
+      some more tests
+
+    * ZendEngine2/tests/assign_to_var_001.phpt
+      ZendEngine2/tests/assign_to_var_001.phpt
+      ZendEngine2/tests/assign_to_var_002.phpt
+      ZendEngine2/tests/assign_to_var_002.phpt
+      ZendEngine2/tests/assign_to_var_003.phpt
+      ZendEngine2/tests/assign_to_var_003.phpt
+      ZendEngine2/tests/assign_to_var_004.phpt
+      ZendEngine2/tests/assign_to_var_004.phpt:
+      
+      some more tests
+
+    * (PHP_5_2)
+      main/network.c
+      main/network.c:
+      MFH: fix segfault - error_string may be NULL, in this case we have to
+      follow the old behavior
+
+    * main/network.c:
+      fix segfault - error_string may be NULL, in this case we have to follow the
+      old behavior
+
+2008-03-11  Josie Messa  <josmessa@uk.ibm.com>
+
+    * ext/standard/tests/dir/closedir_variation3.phpt
+      ext/standard/tests/dir/closedir_variation3.phpt
+      ext/standard/tests/dir/closedir_variation3.phpt
+      ext/standard/tests/dir/readdir_variation7.phpt
+      ext/standard/tests/dir/rewinddir_variation3.phpt
+      ext/standard/tests/dir/rewinddir_variation3.phpt
+      ext/standard/tests/dir/rewinddir_variation3.phpt:
+      - Added extra whitespace around error messages in expected output
+
+    * (PHP_5_3)
+      ext/standard/tests/dir/rewinddir_variation3.phpt
+      ext/standard/tests/dir/rewinddir_variation3.phpt:
+      - Fix test
+
+    * (PHP_5_2)
+      ext/standard/tests/dir/rewinddir_variation3.phpt:
+      - Replace with previous commit
+
+    * (PHP_5_2)
+      ext/standard/tests/dir/closedir_error.phpt
+      ext/standard/tests/dir/readdir_variation7.phpt:
+      - Modified tests
+
+2008-03-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/session/session.c
+      ext/session/session.c:
+      Fixed memory corruption because of double free()
+
+2008-03-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/sqlite/TODO:
+      More todo items
+
 2008-03-10  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
