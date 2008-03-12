@@ -164,9 +164,9 @@ struct _zend_vm_stack {
 
 #define ZEND_VM_STACK_GROW_IF_NEEDED(count)							\
 	do {															\
-		if (UNEXPECTED(count >                                      \
+		if (UNEXPECTED((count) >									\
 		    EG(argument_stack)->end - EG(argument_stack)->top)) {	\
-			zend_vm_stack_extend(count TSRMLS_CC);					\
+			zend_vm_stack_extend((count) TSRMLS_CC);				\
 		}															\
 	} while (0)
 
@@ -236,7 +236,7 @@ static inline void *zend_vm_stack_alloc(size_t size TSRMLS_DC)
 
 	size = (size + (sizeof(void*) - 1)) / sizeof(void*);
 
-	ZEND_VM_STACK_GROW_IF_NEEDED(size);
+	ZEND_VM_STACK_GROW_IF_NEEDED((int)size);
 	ret = (void*)EG(argument_stack)->top;
 	EG(argument_stack)->top += size;
 	return ret;
