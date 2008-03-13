@@ -178,7 +178,7 @@ typedef struct timelib_error_container {
 typedef struct _timelib_tz_lookup_table {
 	char       *name;
 	int         type;
-	int         gmtoffset;
+	float       gmtoffset;
 	char       *full_tz_name;
 } timelib_tz_lookup_table;
 
