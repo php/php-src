@@ -60,9 +60,11 @@ static int zend_restore_ini_entry_cb(zend_ini_entry *ini_entry, int stage TSRMLS
 		}
 		ini_entry->value = ini_entry->orig_value;
 		ini_entry->value_length = ini_entry->orig_value_length;
+		ini_entry->modifiable = ini_entry->orig_modifiable;
 		ini_entry->modified = 0;
 		ini_entry->orig_value = NULL;
 		ini_entry->orig_value_length = 0;
+		ini_entry->orig_modifiable = 0;
 	}
 	return 0;
 }
@@ -247,11 +249,15 @@ ZEND_API int zend_alter_ini_entry_ex(char *name, uint name_length, char *new_val
 {
 	zend_ini_entry *ini_entry;
 	char *duplicate;
+	zend_bool modifiable;
 	zend_bool modified;
 
 	if (zend_hash_find(EG(ini_directives), name, name_length, (void **) &ini_entry) == FAILURE) {
 		return FAILURE;
 	}
+
+	modifiable = ini_entry->modifiable;
+	modified = ini_entry->modified;
 
 	if (stage == ZEND_INI_STAGE_ACTIVATE && modify_type == ZEND_INI_SYSTEM) {
 		ini_entry->modifiable = ZEND_INI_SYSTEM;
@@ -263,8 +269,6 @@ ZEND_API int zend_alter_ini_entry_ex(char *name, uint name_length, char *new_val
 		}
 	}
 
-	modified = ini_entry->modified;
-
 	if (!EG(modified_ini_directives)) {
 		ALLOC_HASHTABLE(EG(modified_ini_directives));
 		zend_hash_init(EG(modified_ini_directives), 8, NULL, NULL, 0);
@@ -272,6 +276,7 @@ ZEND_API int zend_alter_ini_entry_ex(char *name, uint name_length, char *new_val
 	if (!modified) {
 		ini_entry->orig_value = ini_entry->value;
 		ini_entry->orig_value_length = ini_entry->value_length;
+		ini_entry->orig_modifiable = modifiable;
 		ini_entry->modified = 1;
 		zend_hash_add(EG(modified_ini_directives), name, name_length, &ini_entry, sizeof(zend_ini_entry*), NULL);
 	}
