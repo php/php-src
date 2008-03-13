@@ -1,3 +1,246 @@
+2008-03-12  Stanislav Malyshev  <stas@zend.com>
+
+    * php.ini-dist
+      php.ini-recommended
+      main/main.c
+      main/php_globals.h
+      main/php_variables.c:
+      MFB: add request_order INI variable to control $_REQUEST content
+
+    * (PHP_5_3)
+      php.ini-dist
+      php.ini-recommended
+      main/main.c
+      main/php_globals.h
+      main/php_variables.c:
+      [DOC] add request_order INI variable to control $_REQUEST content
+
+2008-03-12  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/url_scanner_ex.re
+      ext/standard/url_scanner_ex.re
+      ext/standard/url_scanner_ex.re:
+      Sync with fix for #44394
+
+    * ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/tests/array/bug42177.phpt
+      ext/standard/tests/array/bug42177.phpt:
+      MFB: Fixed bug #42177 (Warning "array_merge_recursive(): recursion
+      detected" comes again...)
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c
+      ext/standard/tests/array/bug42177.phpt
+      ext/standard/tests/array/bug42177.phpt
+      ext/standard/tests/array/bug42177.phpt:
+      Fixed bug #42177 (Warning "array_merge_recursive(): recursion detected"
+      comes again...)
+
+2008-03-12  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/oci8/tests/bug6109.phpt
+      ext/oci8/tests/bug6109.phpt
+      ext/oci8/tests/bug6109.phpt:
+        1.1.4;
+      New test for existing behavior
+
+2008-03-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/exif/exif.c
+      ext/exif/exif.c:
+      
+      MFB: Fixed bug #44388 (Crash inside exif_read_data() on invalid images)
+
+    * (PHP_5_3)
+      ext/exif/exif.c:
+      
+      Fixed bug #44388 (Crash inside exif_read_data() on invalid images)
+
+2008-03-12  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/tests/objects_020.phpt:
+      Fix test
+
+2008-03-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/errmsg_044.phpt
+      ZendEngine2/tests/errmsg_044.phpt:
+      Fixed test
+
+2008-03-12  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/spl_iterators.c
+      ext/spl/spl_iterators.c
+      ext/spl/spl_iterators.c
+      ext/spl/tests/bug41828.phpt
+      ext/spl/tests/bug41828.phpt:
+      Fix bug #41828 (Fix crash on wrong instantiation)
+
+2008-03-12  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/tests/objects_020.phpt:
+      New test
+
+    * ZendEngine2/tests/objects_020.phpt
+      ZendEngine2/tests/objects_020.phpt:
+      
+      file objects_020.phpt was initially added on branch PHP_5_3.
+
+2008-03-12  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/tests/bug41828.phpt
+      ext/spl/tests/bug41828.phpt
+      ext/spl/tests/bug41828.phpt:
+        1.1.4;
+      file bug41828.phpt was initially added on branch PHP_5_2.
+
+2008-03-12  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/tests/access_modifiers_010.phpt
+      ZendEngine2/tests/errmsg_044.phpt
+      ZendEngine2/tests/foreach_002.phpt
+      ZendEngine2/tests/inter_03.phpt
+      ZendEngine2/tests/list_001.phpt
+      ZendEngine2/tests/list_002.phpt
+      ZendEngine2/tests/objects_019.phpt:
+      New tests
+
+    * ZendEngine2/tests/access_modifiers_010.phpt
+      ZendEngine2/tests/access_modifiers_010.phpt
+      ZendEngine2/tests/errmsg_044.phpt
+      ZendEngine2/tests/errmsg_044.phpt
+      ZendEngine2/tests/foreach_002.phpt
+      ZendEngine2/tests/foreach_002.phpt
+      ZendEngine2/tests/inter_03.phpt
+      ZendEngine2/tests/inter_03.phpt
+      ZendEngine2/tests/list_001.phpt
+      ZendEngine2/tests/list_001.phpt
+      ZendEngine2/tests/list_002.phpt
+      ZendEngine2/tests/list_002.phpt
+      ZendEngine2/tests/objects_019.phpt
+      ZendEngine2/tests/objects_019.phpt:
+      
+      file access_modifiers_010.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS:
+      Merged into 5_2
+
+    * (PHP_5_2)
+      NEWS
+      NEWS
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.c
+      ext/standard/tests/general_functions/bug44394.phpt
+      ext/standard/tests/general_functions/bug44394_2.phpt:
+      Fixed bug #44394 (Last two bytes missing from output)
+
+2008-03-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c:
+      Code simplification
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Optimized ZEND_FETCH_CLASS + ZEND_ADD_INTERFACE into single
+      ZEND_ADD_INTERFACE opcode
+
+    * ZendEngine2/tests/bug44414.phpt
+      ZendEngine2/tests/bug44414.phpt:
+      
+      file bug44414.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/tests/bug44414.phpt:
+      Fixed bug #44414 (Incomplete reporting about abstract methods)
+
+    * ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute.h:
+      Fixed warning
+
+2008-03-12  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/tests/general_functions/bug44394.phpt
+      ext/standard/tests/general_functions/bug44394.phpt
+      ext/standard/tests/general_functions/bug44394_2.phpt
+      ext/standard/tests/general_functions/bug44394_2.phpt:
+      MFB: Fixed bug #44394 (Last two bytes missing from output)
+
+    * ext/standard/tests/general_functions/bug44394.phpt
+      ext/standard/tests/general_functions/bug44394.phpt
+      ext/standard/tests/general_functions/bug44394_2.phpt
+      ext/standard/tests/general_functions/bug44394_2.phpt:
+      
+      file bug44394.phpt was initially added on branch PHP_5_3.
+
+2008-03-12  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_3)
+      ext/oci8/README
+      ext/oci8/oci8.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/drcp_cclass1.phpt:
+      
+      MFH
+      
+      Cleaned up whitespace
+      
+      Fixed bug #44372 (compilation with Oracle 10gR1 libraries)
+      http://bugs.php.net/bug.php?id=44372
+      
+      Updated updated error number list to improve re-connection
+      behavior after a database restart.
+      
+      Guard against potential internal list corruption after ping
+      removes old oci_pconnect() information.
+      
+      Fix ini_set("oci8.connection_class", "abc") to get an appropriate
+      persistent connection.
+      
+      Ping at oci8.ping_interval for oci_connect() and oci_new_connect()
+      when DRCP connections are used. This improves non-persistent
+      connection reliability if a database gets restarted.
+
+    * ext/oci8/README
+      ext/oci8/oci8.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/drcp_cclass1.phpt
+      ext/oci8/tests/drcp_cclass1.phpt:
+      Cleaned up whitespace
+      
+      Fixed bug #44372 (compilation with Oracle 10gR1 libraries)
+      http://bugs.php.net/bug.php?id=44372
+      
+      Updated updated error number list to improve re-connection
+      behavior after a database restart.
+      
+      Guard against potential internal list corruption after ping
+      removes old oci_pconnect() information.
+      
+      Fix ini_set("oci8.connection_class", "abc") to get an appropriate
+      persistent connection.
+      
+      Ping at oci8.ping_interval for oci_connect() and oci_new_connect()
+      when DRCP connections are used. This improves non-persistent
+      connection reliability if a database gets restarted.
+
 2008-03-11  Lars Strojny  <lars@strojny.net>
 
     * sapi/apache2filter/config.m4

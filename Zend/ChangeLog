@@ -1,3 +1,81 @@
+2008-03-12  Felipe Pena  <felipensp@gmail.com>
+
+    * tests/objects_020.phpt:
+      Fix test
+
+2008-03-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/errmsg_044.phpt
+      tests/errmsg_044.phpt:
+      Fixed test
+
+2008-03-12  Felipe Pena  <felipensp@gmail.com>
+
+    * tests/objects_020.phpt:
+      New test
+
+    * tests/objects_020.phpt
+      tests/objects_020.phpt:
+      
+      file objects_020.phpt was initially added on branch PHP_5_3.
+
+    * tests/access_modifiers_010.phpt
+      tests/errmsg_044.phpt
+      tests/foreach_002.phpt
+      tests/inter_03.phpt
+      tests/list_001.phpt
+      tests/list_002.phpt
+      tests/objects_019.phpt:
+      New tests
+
+    * tests/access_modifiers_010.phpt
+      tests/access_modifiers_010.phpt
+      tests/errmsg_044.phpt
+      tests/errmsg_044.phpt
+      tests/foreach_002.phpt
+      tests/foreach_002.phpt
+      tests/inter_03.phpt
+      tests/inter_03.phpt
+      tests/list_001.phpt
+      tests/list_001.phpt
+      tests/list_002.phpt
+      tests/list_002.phpt
+      tests/objects_019.phpt
+      tests/objects_019.phpt:
+      
+      file access_modifiers_010.phpt was initially added on branch PHP_5_3.
+
+2008-03-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c:
+      Code simplification
+
+    * zend_compile.c
+      zend_compile.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Optimized ZEND_FETCH_CLASS + ZEND_ADD_INTERFACE into single
+      ZEND_ADD_INTERFACE opcode
+
+    * zend_compile.c
+      zend_compile.c
+      zend_compile.h
+      zend_compile.h
+      tests/bug44414.phpt:
+      Fixed bug #44414 (Incomplete reporting about abstract methods)
+
+    * tests/bug44414.phpt
+      tests/bug44414.phpt:
+      
+      file bug44414.phpt was initially added on branch PHP_5_3.
+
+    * zend_execute.h
+      zend_execute.h:
+      Fixed warning
+
 2008-03-11  Felipe Pena  <felipensp@gmail.com>
 
     * tests/access_modifiers_009.phpt
