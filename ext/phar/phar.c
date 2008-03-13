@@ -2615,7 +2615,7 @@ char *phar_resolve_path(const char *filename, int filename_len TSRMLS_DC)
 	efree(entry);
 	spprintf(&path, MAXPATHLEN, "phar://%s/%s%c%s", arch, PHAR_G(cwd), DEFAULT_DIR_SEPARATOR, PG(include_path));
 	efree(arch);
-	ret = php_resolve_path(filename, filename_len, path);
+	ret = php_resolve_path(filename, filename_len, path TSRMLS_CC);
 	efree(path);
 	return ret;
 #else /* PHP 5.2 */
