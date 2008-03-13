@@ -153,6 +153,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, p
 	int nsql_len = 0;
 
 	S->H = H;
+	S->assume_utf8 = H->assume_utf8;
 
 	/* before we prepare, we need to peek at the query; if it uses named parameters,
 	 * we want PDO to rewrite them for us */
@@ -335,8 +336,24 @@ static int odbc_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 	return 1;
 }
 
+static int odbc_handle_set_attr(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
+{
+	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
+	switch (attr) {
+		case PDO_ODBC_ATTR_ASSUME_UTF8:
+			H->assume_utf8 = zval_is_true(val);
+			return 1;
+		default:
+			strcpy(H->einfo.last_err_msg, "Unknown Attribute");
+			H->einfo.what = "setAttribute";
+			strcpy(H->einfo.last_state, "IM0001");
+			return -1;
+	}
+}
+
 static int odbc_handle_get_attr(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
 {
+	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	switch (attr) {
 		case PDO_ATTR_CLIENT_VERSION:
 			ZVAL_STRING(val, "ODBC-" PDO_ODBC_TYPE, 1);
@@ -348,6 +365,9 @@ static int odbc_handle_get_attr(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
 		case PDO_ATTR_SERVER_INFO:
 		case PDO_ATTR_CONNECTION_STATUS:
 			break;
+		case PDO_ODBC_ATTR_ASSUME_UTF8:
+			ZVAL_BOOL(val, H->assume_utf8 ? 1 : 0);
+			return 1;
 
 	}
 	return 0;
@@ -361,7 +381,7 @@ static struct pdo_dbh_methods odbc_methods = {
 	odbc_handle_begin,
 	odbc_handle_commit,
 	odbc_handle_rollback,
-	NULL, 	/* set attr */
+	odbc_handle_set_attr,
 	NULL,	/* last id */
 	pdo_odbc_fetch_error_func,
 	odbc_handle_get_attr,	/* get attr */
