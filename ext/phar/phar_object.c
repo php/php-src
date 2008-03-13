@@ -1144,7 +1144,11 @@ PHP_METHOD(Phar, __construct)
 #endif
 	}
 
+#if PHP_VERSION_ID >= 60000
+	objname = phar_obj->std.ce->name.s;
+#else
 	objname = phar_obj->std.ce->name;
+#endif
 
 	if (phar_open_or_create_filename(fname, fname_len, alias, alias_len, objname, REPORT_ERRORS, &phar_data, &error TSRMLS_CC) == FAILURE) {
 
