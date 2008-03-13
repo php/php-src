@@ -1293,10 +1293,11 @@ zend_object_iterator *spl_filesystem_dir_get_iterator(zend_class_entry *ce, zval
 static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
 	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
+	zval *zfree = (zval*)iterator->intern.data;
 
-	zval_ptr_dtor(&iterator->current);
-	zval_ptr_dtor((zval**)&iterator->intern.data);
 	iterator->intern.data = NULL; /* mark as unused */
+	zval_ptr_dtor(&iterator->current);
+	zval_ptr_dtor(&zfree);
 }
 /* }}} */
 
@@ -1359,12 +1360,15 @@ static void spl_filesystem_dir_it_rewind(zend_object_iterator *iter TSRMLS_DC)
 static void spl_filesystem_tree_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
 	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
+	zval *zfree = (zval*)iterator->intern.data;
 
 	if (iterator->current) {
 		zval_ptr_dtor(&iterator->current);
 	}
-	zval_ptr_dtor((zval**)&iterator->intern.data);
 	iterator->intern.data = NULL; /* mark as unused */
+	/* free twice as we add ref twice */
+	zval_ptr_dtor(&zfree);
+	zval_ptr_dtor(&zfree);
 }
 /* }}} */
 
@@ -1475,7 +1479,7 @@ zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zva
 	dir_object = (spl_filesystem_object*)zend_object_store_get_object(object TSRMLS_CC);
 	iterator   = spl_filesystem_object_to_iterator(dir_object);
 
-	Z_ADDREF_P(object);
+	Z_SET_REFCOUNT_P(object, Z_REFCOUNT_P(object) + 2);
 	iterator->intern.data = (void*)object;
 	iterator->intern.funcs = &spl_filesystem_tree_it_funcs;
 	iterator->current = NULL;
