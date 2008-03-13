@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Fixed bug #44394 (Last two bytes missing from output). (Felipe)
 - Fixed bug #44388 (Crash inside exif_read_data() on invalid images) (Ilia)
 - Fixed bug #44373 (PDO_OCI extension compile failed). (Felipe)
+- Fixed bug #43677 (Inconsistent behaviour of include_path set with
+  php_value). (manuel at mausz dot at)
 - Fixed bug #42177 (Warning "array_merge_recursive(): recursion detected" comes 
   again...). (Felipe)
 
