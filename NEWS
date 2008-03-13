@@ -132,6 +132,8 @@ PHP                                                                        NEWS
 - Fixed bug #44414 (Incomplete reporting about abstract methods). (Dmitry)
 - Fixed bug #44336 (Improve pcre UTF-8 string matching performance).
   (frode at coretrek dot com, Nuno)
+- Fixed bug #44257 (timelib_tz_lookup_table must use float for gmtoffset). 
+  (Derick, iuri dot fiedoruk at hp dot com).
 - Fixed bug #44214 (Crash using preg_replace_callback() and global variable).
   (Nuno, Scott)
 - Fixed bug #43960 (strtotime() returns timestamp in the future when given a
