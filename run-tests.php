@@ -1421,7 +1421,7 @@ TEST $file
 			if (!$out) {
 				error("Valgrind returned no version info, cannot proceed.\nPlease check if Valgrind is installed.");
 			} else {
-				$valgrind_version = preg_replace("/valgrind-([0-9])\.([0-9])\.([0-9]+)(\s+)/", '$1$2$3', $out, 1, $replace_count);
+				$valgrind_version = preg_replace("/valgrind-([0-9])\.([0-9])\.([0-9]+)(?:-\w+)?\s*/", '$1$2$3', $out, 1, $replace_count);
 				if ($replace_count != 1 || !is_numeric($valgrind_version)) {
 					error("Valgrind returned invalid version info (\"$out\"), cannot proceed.");
 				}
