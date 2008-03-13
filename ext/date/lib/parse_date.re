@@ -473,20 +473,23 @@ static double timelib_get_frac_nr(char **ptr, int max_length)
 	double tmp_nr = TIMELIB_UNSET;
 	int len = 0;
 
-	while ((**ptr != '.') && ((**ptr < '0') || (**ptr > '9'))) {
+	while ((**ptr != '.') && (**ptr != ':') && ((**ptr < '0') || (**ptr > '9'))) {
 		if (**ptr == '\0') {
 			return TIMELIB_UNSET;
 		}
 		++*ptr;
 	}
 	begin = *ptr;
-	while (((**ptr == '.') || ((**ptr >= '0') && (**ptr <= '9'))) && len < max_length) {
+	while (((**ptr == '.') || (**ptr == ':') || ((**ptr >= '0') && (**ptr <= '9'))) && len < max_length) {
 		++*ptr;
 		++len;
 	}
 	end = *ptr;
 	str = calloc(1, end - begin + 1);
 	memcpy(str, begin, end - begin);
+	if (str[0] == ':') {
+		str[0] = '.';
+	}
 	tmp_nr = strtod(str, NULL);
 	free(str);
 	return tmp_nr;
@@ -921,6 +924,7 @@ wddx             = year4 "-" month "-" day "T" hour24 ":" minute ":" second;
 pgydotd          = year4 "."? dayofyear;
 pgtextshort      = monthabbr "-" daylz "-" year;
 pgtextreverse    = year "-" monthabbr "-" daylz;
+mssqltime        = hour12 ":" minutelz ":" secondlz [:.] [0-9]+ meridian;
 isoweekday       = year4 "-"? "W" weekofyear "-"? [0-7];
 isoweek          = year4 "-"? "W" weekofyear;
 exif             = year4 ":" monthlz ":" daylz " " hour24lz ":" minutelz ":" secondlz;
@@ -1066,6 +1070,27 @@ relativetext = reltextnumber space reltextunit;
 		s->time->h += timelib_meridian((char **) &ptr, s->time->h);
 		TIMELIB_DEINIT;
 		return TIMELIB_TIME12;
+	}
+
+	mssqltime
+	{
+		int tz_not_found;
+		DEBUG_OUTPUT("mssqltime");
+		TIMELIB_INIT;
+		TIMELIB_HAVE_TIME();
+		s->time->h = timelib_get_nr((char **) &ptr, 2);
+		s->time->i = timelib_get_nr((char **) &ptr, 2);
+		if (*ptr == ':' || *ptr == '.') {
+			s->time->s = timelib_get_nr((char **) &ptr, 2);
+
+			if (*ptr == ':' || *ptr == '.') {
+				s->time->f = timelib_get_frac_nr((char **) &ptr, 8);
+			}
+		}
+		timelib_eat_spaces((char **) &ptr);
+		s->time->h += timelib_meridian((char **) &ptr, s->time->h);
+		TIMELIB_DEINIT;
+		return TIMELIB_TIME24_WITH_ZONE;
 	}
 
 	timeshort24 | timelong24 /* | iso8601short | iso8601norm */ | iso8601long /*| iso8601shorttz | iso8601normtz | iso8601longtz*/
