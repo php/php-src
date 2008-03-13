@@ -77,6 +77,7 @@ struct _zend_ini_entry {
 
 	char *orig_value;
 	uint orig_value_length;
+	int orig_modifiable;
 	int modified;
 
 	void (*displayer)(zend_ini_entry *ini_entry, int type);
@@ -112,10 +113,10 @@ ZEND_API ZEND_INI_DISP(display_link_numbers);
 END_EXTERN_C()
 
 #define ZEND_INI_BEGIN()		static const zend_ini_entry ini_entries[] = {
-#define ZEND_INI_END()		{ 0, 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, 0, NULL, 0, 0, NULL } };
+#define ZEND_INI_END()		{ 0, 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, 0, NULL, 0, 0, 0, NULL } };
 
 #define ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, arg1, arg2, arg3, displayer) \
-	{ 0, modifiable, name, sizeof(name), on_modify, arg1, arg2, arg3, default_value, sizeof(default_value)-1, NULL, 0, 0, displayer },
+	{ 0, modifiable, name, sizeof(name), on_modify, arg1, arg2, arg3, default_value, sizeof(default_value)-1, NULL, 0, 0, 0, displayer },
 
 #define ZEND_INI_ENTRY3(name, default_value, modifiable, on_modify, arg1, arg2, arg3) \
 	ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, arg1, arg2, arg3, NULL)
