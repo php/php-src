@@ -1,5 +1,9 @@
 --TEST--
 Test array_push() function : error conditions - min and max int values as keys
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+?>
 --FILE--
 <?php
 /* Prototype  : int array_push(array $stack, mixed $var [, mixed $...])
