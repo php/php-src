@@ -55,6 +55,7 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals TSRMLS_DC)
 	gc_globals->roots.prev = NULL;
 	gc_globals->unused = NULL;
 	gc_globals->zval_to_free = NULL;
+	gc_globals->free_list = NULL;
 
 	gc_globals->gc_runs = 0;
 	gc_globals->collected = 0;
@@ -136,6 +137,19 @@ ZEND_API void gc_init(TSRMLS_D)
 
 ZEND_API void gc_zval_possible_root(zval *zv TSRMLS_DC)
 {
+	if (UNEXPECTED(GC_G(free_list) != NULL &&
+		           GC_ZVAL_ADDRESS(zv) != NULL &&
+		           GC_ZVAL_GET_COLOR(zv) == GC_BLACK)) {
+		zval_gc_info **p = &GC_G(free_list);
+
+		while (*p != NULL) {
+			if (*p == (zval_gc_info*)zv) {
+				return;
+			}
+			p = &(*p)->u.next;
+		}
+	}
+
 	if (zv->type == IS_OBJECT) {
 		GC_ZOBJ_CHECK_POSSIBLE_ROOT(zv);
 		return;
@@ -233,6 +247,28 @@ ZEND_API void gc_zobj_possible_root(zval *zv TSRMLS_DC)
 			GC_BENCH_PEAK(root_buf_peak, root_buf_length);
 		}
 	}
+}
+
+ZEND_API void _gc_remove_zval_from_buffer(zval *zv)
+{
+	gc_root_buffer* root_buffer = GC_ADDRESS(((zval_gc_info*)zv)->u.buffered);
+	TSRMLS_FETCH();
+
+	if (UNEXPECTED(GC_G(free_list) != NULL &&
+		           GC_ZVAL_GET_COLOR(zv) == GC_BLACK)) {
+		zval_gc_info **p = &GC_G(free_list);
+
+		while (*p != NULL) {
+			if (*p == (zval_gc_info*)zv) {
+				*p = (*p)->u.next;
+				return;
+			}
+			p = &(*p)->u.next;
+		}
+	}
+	GC_BENCH_INC(zval_remove_from_buffer);
+	GC_REMOVE_FROM_BUFFER(root_buffer);
+	((zval_gc_info*)zv)->u.buffered = NULL;
 }
 
 static void zobj_scan_black(struct _store_object *obj, zval *pz TSRMLS_DC)
@@ -371,7 +407,6 @@ static int zval_scan(zval *pz TSRMLS_DC)
 			zval_scan_black(pz TSRMLS_CC);
 		} else {
 			GC_ZVAL_SET_COLOR(pz, GC_WHITE);
-
 			if (Z_TYPE_P(pz) == IS_OBJECT) {
 				zobj_scan(pz TSRMLS_CC);
 			} else if (Z_TYPE_P(pz) == IS_ARRAY) {
@@ -435,17 +470,22 @@ static void zval_collect_white(zval *pz TSRMLS_DC)
 
 		if (Z_TYPE_P(pz) == IS_OBJECT) {
 			zobj_collect_white(pz TSRMLS_CC);
+			if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
+			             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
+				Z_OBJPROP_P(pz)->pDestructor = NULL;
+			}
 		} else {
 			if (Z_TYPE_P(pz) == IS_ARRAY) {
-				if (Z_ARRVAL_P(pz) == &EG(symbol_table)) {
-					return;
-				}
+//				if (Z_ARRVAL_P(pz) == &EG(symbol_table)) {
+//					return;
+//				}
 				zend_hash_apply(Z_ARRVAL_P(pz), (apply_func_t) children_collect_white TSRMLS_CC);
+				Z_ARRVAL_P(pz)->pDestructor = NULL;
 			}
-			/* restore refcount */
-			pz->refcount__gc++;
 		}
 
+		/* restore refcount and put into list to free */
+		pz->refcount__gc++;
 		((zval_gc_info*)pz)->u.next = GC_G(zval_to_free);
 		GC_G(zval_to_free) = (zval_gc_info*)pz;
 	}
@@ -453,6 +493,9 @@ static void zval_collect_white(zval *pz TSRMLS_DC)
 
 static int children_collect_white(zval **pz TSRMLS_DC)
 {
+	if (Z_TYPE_PP(pz) != IS_ARRAY || Z_ARRVAL_PP(pz) != &EG(symbol_table)) {
+		(*pz)->refcount__gc++;
+	}
 	zval_collect_white(*pz TSRMLS_CC);
 	return 0;
 }
@@ -486,7 +529,7 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 	int count = 0;
 
 	if (GC_G(roots).next != &GC_G(roots)) {
-		zval_gc_info *p, *q;
+		zval_gc_info *p, *q, *orig_free_list;
 
 		if (GC_G(gc_active)) {
 			return 0;
@@ -497,35 +540,53 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 		gc_mark_roots(TSRMLS_C);
 		gc_scan_roots(TSRMLS_C);
 		gc_collect_roots(TSRMLS_C);
+
+		orig_free_list = GC_G(free_list);
+		p = GC_G(free_list) = GC_G(zval_to_free);
+		GC_G(zval_to_free) = NULL;
 		GC_G(gc_active) = 0;
 
-		p = GC_G(zval_to_free);
-		GC_G(zval_to_free) = NULL;
+		/* First call destructors */
+		while (p) {
+			if (Z_TYPE(p->z) == IS_OBJECT) {
+				if (EG(objects_store).object_buckets &&
+					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].valid &&
+					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.refcount <= 0 &&
+					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.dtor &&
+					!EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].destructor_called) {
+
+					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].destructor_called = 1;
+					zend_try {
+						EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.dtor(EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.object, Z_OBJ_HANDLE(p->z) TSRMLS_CC);
+					} zend_end_try();
+				}
+			}
+			p = p->u.next;
+		}
+
+		p = GC_G(free_list);
 		while (p) {
 			q = p->u.next;
 			if (Z_TYPE(p->z) == IS_OBJECT) {
 				if (EG(objects_store).object_buckets &&
 					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].valid &&
 					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.refcount <= 0) {
-					if (EXPECTED(Z_OBJ_HANDLER(p->z, get_properties) != NULL)) {
-						GC_G(gc_active) = 1;
-						Z_OBJPROP(p->z)->pDestructor = NULL;
-						GC_G(gc_active) = 0;
-					}
 					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.refcount = 1;
-					zend_objects_store_del_ref_by_handle(Z_OBJ_HANDLE(p->z) TSRMLS_CC);
+					zend_try {
+						zend_objects_store_del_ref_by_handle(Z_OBJ_HANDLE(p->z) TSRMLS_CC);
+					} zend_end_try();
 				}
 			} else {
-				if (Z_TYPE(p->z) == IS_ARRAY) {
-					Z_ARRVAL(p->z)->pDestructor = NULL;
-				}
-				zval_dtor(&p->z);
+				zend_try {
+					zval_dtor(&p->z);
+				} zend_end_try();
 			}
 			FREE_ZVAL_EX(&p->z);
 			p = q;
 			count++;
 		}
 		GC_G(collected) += count;
+		GC_G(free_list) = orig_free_list;
 	}
 
 	return count;
