@@ -105,6 +105,7 @@ typedef struct _zend_gc_globals {
 	gc_root_buffer   *unused;			/* list of unused buffers           */
 
 	zval_gc_info     *zval_to_free;		/* temporaryt list of zvals to free */
+	zval_gc_info     *free_list;
 
 	zend_uint gc_runs;
 	zend_uint collected;
@@ -138,6 +139,7 @@ BEGIN_EXTERN_C()
 ZEND_API int  gc_collect_cycles(TSRMLS_D);
 ZEND_API void gc_zval_possible_root(zval *zv TSRMLS_DC);
 ZEND_API void gc_zobj_possible_root(zval *zv TSRMLS_DC);
+ZEND_API void _gc_remove_zval_from_buffer(zval *zv);
 ZEND_API void gc_globals_ctor(TSRMLS_D);
 ZEND_API void gc_globals_dtor(TSRMLS_D);
 ZEND_API void gc_init(TSRMLS_D);
@@ -163,7 +165,7 @@ END_EXTERN_C()
 
 #define GC_REMOVE_ZOBJ_FROM_BUFFER(obj)									\
 	do {																\
-		if (GC_ADDRESS((obj)->buffered)) {								\
+		if (GC_ADDRESS((obj)->buffered) && !GC_G(gc_active)) {			\
 			GC_BENCH_INC(zobj_remove_from_buffer);						\
 			GC_REMOVE_FROM_BUFFER(GC_ADDRESS((obj)->buffered));			\
 			(obj)->buffered = NULL;										\
@@ -188,15 +190,8 @@ static zend_always_inline void gc_remove_from_buffer(gc_root_buffer *root TSRMLS
 
 static zend_always_inline void gc_remove_zval_from_buffer(zval* z)
 {
-	gc_root_buffer* root_buffer;
-
-	root_buffer = GC_ADDRESS(((zval_gc_info*)z)->u.buffered);
-	if (root_buffer) {
-		TSRMLS_FETCH();
-
-		GC_BENCH_INC(zval_remove_from_buffer);
-		GC_REMOVE_FROM_BUFFER(root_buffer);
-		((zval_gc_info*)z)->u.buffered = NULL;
+	if (GC_ADDRESS(((zval_gc_info*)z)->u.buffered)) {
+		_gc_remove_zval_from_buffer(z);
 	}
 }
 
