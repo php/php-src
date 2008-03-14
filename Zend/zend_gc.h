@@ -139,7 +139,7 @@ BEGIN_EXTERN_C()
 ZEND_API int  gc_collect_cycles(TSRMLS_D);
 ZEND_API void gc_zval_possible_root(zval *zv TSRMLS_DC);
 ZEND_API void gc_zobj_possible_root(zval *zv TSRMLS_DC);
-ZEND_API void _gc_remove_zval_from_buffer(zval *zv);
+ZEND_API void gc_remove_zval_from_buffer(zval *zv);
 ZEND_API void gc_globals_ctor(TSRMLS_D);
 ZEND_API void gc_globals_dtor(TSRMLS_D);
 ZEND_API void gc_init(TSRMLS_D);
@@ -152,8 +152,10 @@ END_EXTERN_C()
 #define GC_REMOVE_FROM_BUFFER(current) \
 	gc_remove_from_buffer((current) TSRMLS_CC)
 
-#define GC_REMOVE_ZVAL_FROM_BUFFER(z) \
-	gc_remove_zval_from_buffer(z)
+#define GC_REMOVE_ZVAL_FROM_BUFFER(z)					\
+	if (GC_ADDRESS(((zval_gc_info*)z)->u.buffered)) {	\
+		gc_remove_zval_from_buffer(z);					\
+	}
 
 #define GC_ZOBJ_CHECK_POSSIBLE_ROOT(zobject)									\
 	do {																		\
@@ -186,13 +188,6 @@ static zend_always_inline void gc_remove_from_buffer(gc_root_buffer *root TSRMLS
 	root->prev = GC_G(unused);
 	GC_G(unused) = root;
 	GC_BENCH_DEC(root_buf_length);
-}
-
-static zend_always_inline void gc_remove_zval_from_buffer(zval* z)
-{
-	if (GC_ADDRESS(((zval_gc_info*)z)->u.buffered)) {
-		_gc_remove_zval_from_buffer(z);
-	}
 }
 
 #define ALLOC_PERMANENT_ZVAL(z)							\
