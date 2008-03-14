@@ -1091,7 +1091,13 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				
 					wlen = write(fd, buff, blen);
 			
-					if (wlen < blen) {
+					if (wlen == -1) {
+						/* write failed */
+#if DEBUG_FILE_UPLOAD
+						sapi_module.sapi_error(E_NOTICE, "write() failed - %s", strerror(errno));
+#endif
+						cancel_upload = UPLOAD_ERROR_F;
+					} else if (wlen < blen) {
 #if DEBUG_FILE_UPLOAD
 						sapi_module.sapi_error(E_NOTICE, "Only %d bytes were written, expected to write %d", wlen, blen);
 #endif
