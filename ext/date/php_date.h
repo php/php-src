@@ -48,6 +48,8 @@ PHP_FUNCTION(getdate);
 
 /* Advanced Interface */
 PHP_METHOD(DateTime, __construct);
+PHP_METHOD(DateTime, __wakeup);
+PHP_METHOD(DateTime, __set_state);
 PHP_FUNCTION(date_create);
 PHP_FUNCTION(date_create_from_format);
 PHP_FUNCTION(date_parse);
