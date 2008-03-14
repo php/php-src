@@ -1,3 +1,24 @@
+2008-03-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_ini.c
+      zend_ini.h:
+      
+      MFB: MFB: Fixed bug #43677 (Inconsistent behaviour of include_path set
+      with
+      php_value).
+
+    * (PHP_5_3)
+      zend_ini.c
+      zend_ini.h:
+      MFB: Fixed bug #43677 (Inconsistent behaviour of include_path set with
+      php_value). (Patch by: manuel at mausz dot at)
+
+    * (PHP_5_2)
+      zend_ini.c:
+      
+      Fixed bug #43677 (Inconsistent behaviour of include_path set with
+      php_value).
+
 2008-03-12  Felipe Pena  <felipensp@gmail.com>
 
     * tests/objects_020.phpt:

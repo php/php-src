@@ -1,3 +1,85 @@
+2008-03-13  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ext/spl/spl_directory.c
+      ext/spl/tests/dit_003.phpt
+      ext/spl/tests/dit_003.phpt:
+      - Fix possible memory corruption
+
+2008-03-13  Elizabeth Marie Smith  <emsmith@elizabethmariesmith.com>
+
+    * (PHP_5_3)
+      ext/pdo_odbc/odbc_driver.c
+      ext/pdo_odbc/odbc_stmt.c
+      ext/pdo_odbc/pdo_odbc.c
+      ext/pdo_odbc/php_pdo_odbc_int.h:
+      [DOC] adds new odbc driver specific ODBC_ATTR_ASSUME_UTF8 to deal with
+      unicode coming out of Microsoft SQL Server and is only relevant on
+      windows, use it if unicode output from the server is garbled and it will
+      autoconvert text - original patch by wez
+
+2008-03-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.h:
+      
+      MFB: MFB: Fixed bug #43677 (Inconsistent behaviour of include_path set
+      with
+      php_value).
+
+    * (PHP_5_3)
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.h:
+      MFB: Fixed bug #43677 (Inconsistent behaviour of include_path set with
+      php_value). (Patch by: manuel at mausz dot at)
+
+2008-03-13  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/lib/timelib_structs.h:
+      - MF53: Fixed bug #44257 (timelib_tz_lookup_table must use float for
+        gmtoffset).
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/lib/timelib_structs.h:
+      - Fixed bug #44257 (timelib_tz_lookup_table must use float for gmtoffset).
+
+2008-03-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_ini.c
+      ext/reflection/php_reflection.c:
+      
+      Fixed bug #43677 (Inconsistent behaviour of include_path set with
+      php_value).
+
+2008-03-13  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - MF53: Added support for parsing date/time strings returned by MS SQL with
+      strtotime().
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - Added support for parsing date/time strings returned by MS SQL with
+      strtotime().
+
+2008-03-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * main/fopen_wrappers.c
+      main/fopen_wrappers.c:
+      Disable path resolution for filenames with stream wrappers
+      More careful check for relative pathes (./xxx and ../xxx)
+
+2008-03-13  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      run-tests.php:
+      Fix valgrind version validation (accepting "valgrind-3.2.1-Debian")
+
 2008-03-12  Stanislav Malyshev  <stas@zend.com>
 
     * php.ini-dist
