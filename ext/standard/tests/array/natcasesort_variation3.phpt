@@ -1,5 +1,9 @@
 --TEST--
 Test natcasesort() function : usage variations - different numeric types
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+?>
 --FILE--
 <?php
 /* Prototype  : bool natcasesort(array &$array_arg)
