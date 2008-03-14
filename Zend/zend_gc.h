@@ -106,6 +106,7 @@ typedef struct _zend_gc_globals {
 
 	zval_gc_info     *zval_to_free;		/* temporaryt list of zvals to free */
 	zval_gc_info     *free_list;
+	zval_gc_info     *next_to_free;
 
 	zend_uint gc_runs;
 	zend_uint collected;
