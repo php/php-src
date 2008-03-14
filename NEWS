@@ -39,6 +39,7 @@ PHP                                                                        NEWS
     returned.
   . support for "first/last day of <month>" style texts.
   . support for date/time strings returned by MS SQL.
+  . support for serialization and unserialization of DateTime objects.
 - Added functionality to SPL extension:
   . Added ability to store associative information with objects in
     SplObjectStorage. (Marcus)
