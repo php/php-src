@@ -51,12 +51,15 @@ pointing out "the location of the release" and "the possible release date of
 either the next RC, or the final release".
 
 2. Send an email (see example here http://news.php.net/php.qa/26069) **To**
-``php-qa@lists.php.net`` and **Bcc** everybody on the
-`PhP4yz<http://wiki.pooteeweet.org/PhP4yz>`_,
-`PhP5yz<http://wiki.pooteeweet.org/PhP5yz>`_ or
-`PhP6yz<http://wiki.pooteeweet.org/PhP6yz>`_ list (depending on the PHP version).
+``php-qa@lists.php.net`` and **CC** ``primary-qa-tests@lists.php.net``.
 This email is to notify the selected projects about a new RC so that they can
-make sure their projects keep working.
+make sure their projects keep working. Make sure that you have been setup
+as a moderator for ``primary-qa-tests@lists.php.net`` by having someone (Wez,
+Derick) run the following commands for you:
+
+``ssh lists.php.net``
+
+``sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester/mod moderator-email-address``
 
 3. Update the MD5 sums in ``qaweb/include/rc-md5sums.txt``.
 
