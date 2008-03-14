@@ -249,7 +249,7 @@ ZEND_API void gc_zobj_possible_root(zval *zv TSRMLS_DC)
 	}
 }
 
-ZEND_API void _gc_remove_zval_from_buffer(zval *zv)
+ZEND_API void gc_remove_zval_from_buffer(zval *zv)
 {
 	gc_root_buffer* root_buffer = GC_ADDRESS(((zval_gc_info*)zv)->u.buffered);
 	TSRMLS_FETCH();
@@ -476,9 +476,6 @@ static void zval_collect_white(zval *pz TSRMLS_DC)
 			}
 		} else {
 			if (Z_TYPE_P(pz) == IS_ARRAY) {
-//				if (Z_ARRVAL_P(pz) == &EG(symbol_table)) {
-//					return;
-//				}
 				zend_hash_apply(Z_ARRVAL_P(pz), (apply_func_t) children_collect_white TSRMLS_CC);
 				Z_ARRVAL_P(pz)->pDestructor = NULL;
 			}
