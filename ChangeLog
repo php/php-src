@@ -1,3 +1,84 @@
+2008-03-14  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_push_error2.phpt
+      ext/standard/tests/array/natcasesort_variation3.phpt
+      ext/standard/tests/array/natcasesort_variation3.phpt
+      ext/standard/tests/array/rsort_variation3.phpt
+      ext/standard/tests/array/rsort_variation3.phpt:
+      Add SKIPIF (32bit platform only)
+
+2008-03-14  Lukas Smith  <smith@pooteeweet.org>
+
+    * README.RELEASE_PROCESS:
+      updated due to the creation of the primary testers mailinglist
+
+2008-03-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_gc.c
+      ZendEngine2/zend_gc.c
+      ZendEngine2/zend_gc.h
+      ZendEngine2/zend_gc.h
+      ZendEngine2/tests/gc_029.phpt:
+      Improve GC to support garbage created in destructors during objects
+      utilization
+
+    * ZendEngine2/tests/gc_029.phpt
+      ZendEngine2/tests/gc_029.phpt:
+      
+      file gc_029.phpt was initially added on branch PHP_5_3.
+
+2008-03-14  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/date/php_date.c
+      ext/date/php_date.c:
+      Fix build (ZTS)
+
+2008-03-14  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/php_date.c
+      ext/date/php_date.h:
+      - MFH: Allow datetime objects to be serialized and woken up.
+      - MFH: Implemented __set_state().
+
+    * ext/date/php_date.c
+      ext/date/php_date.h:
+      - Allow datetime objects to be serialized and woken up.
+      - Implemented __set_state().
+
+2008-03-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_gc.c
+      ZendEngine2/zend_gc.c
+      ZendEngine2/zend_gc.h
+      ZendEngine2/zend_gc.h:
+      Removed commented code and unnecessary inline function
+
+    * ZendEngine2/zend_gc.c
+      ZendEngine2/zend_gc.c
+      ZendEngine2/zend_gc.h
+      ZendEngine2/zend_gc.h
+      ZendEngine2/tests/gc_028.phpt:
+      Fixed GC bug
+
+    * ZendEngine2/tests/gc_028.phpt
+      ZendEngine2/tests/gc_028.phpt:
+      
+      file gc_028.phpt was initially added on branch PHP_5_3.
+
+2008-03-14  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      main/rfc1867.c:
+      MFH: check if return value of write() is -1 and abort upload in this case
+      setting the correct error status
+
+    * main/rfc1867.c:
+      check if return value of write() is -1 and abort upload in this case
+      setting the correct error status
+
 2008-03-13  Marcus Boerger  <php@marcus-boerger.de>
 
     * ext/spl/spl_directory.c
