@@ -1,3 +1,36 @@
+2008-03-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_gc.c
+      zend_gc.c
+      zend_gc.h
+      zend_gc.h
+      tests/gc_029.phpt:
+      Improve GC to support garbage created in destructors during objects
+      utilization
+
+    * tests/gc_029.phpt
+      tests/gc_029.phpt:
+      
+      file gc_029.phpt was initially added on branch PHP_5_3.
+
+    * zend_gc.c
+      zend_gc.c
+      zend_gc.h
+      zend_gc.h:
+      Removed commented code and unnecessary inline function
+
+    * zend_gc.c
+      zend_gc.c
+      zend_gc.h
+      zend_gc.h
+      tests/gc_028.phpt:
+      Fixed GC bug
+
+    * tests/gc_028.phpt
+      tests/gc_028.phpt:
+      
+      file gc_028.phpt was initially added on branch PHP_5_3.
+
 2008-03-13  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_ini.c
