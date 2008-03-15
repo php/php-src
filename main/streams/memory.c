@@ -234,6 +234,9 @@ static int php_stream_memory_stat(php_stream *stream, php_stream_statbuf *ssb TS
 
 #ifndef PHP_WIN32
 	ssb->sb.st_blksize = -1;
+#endif
+
+#if !defined(PHP_WIN32) && !defined(__BEOS__)
 	ssb->sb.st_blocks = -1;
 #endif
 
