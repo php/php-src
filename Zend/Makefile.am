@@ -17,7 +17,7 @@ libZend_la_SOURCES=\
 	zend_objects_API.c zend_ts_hash.c zend_stream.c \
 	zend_default_classes.c \
 	zend_iterators.c zend_interfaces.c zend_exceptions.c \
-	zend_strtod.c zend_multibyte.c
+	zend_strtod.c
 
 libZend_la_LDFLAGS =
 libZend_la_LIBADD = @ZEND_EXTRA_LIBS@
@@ -31,7 +31,7 @@ zend_ini_scanner.lo: zend_ini_parser.h
 # Language parser/scanner rules
 
 zend_language_scanner.c: $(srcdir)/zend_language_scanner.l
-	$(LEX) -Pzend -S$(srcdir)/flex.skl -o$@ -i $(srcdir)/zend_language_scanner.l
+	$(RE2C) $(RE2C_FLAGS) --case-inverted -cbdFt $(srcdir)/zend_language_scanner_defs.h -o$@ $(srcdir)/zend_language_scanner.l
 
 zend_language_parser.h: zend_language_parser.c
 zend_language_parser.c: $(srcdir)/zend_language_parser.y
@@ -43,7 +43,7 @@ zend_ini_parser.c: $(srcdir)/zend_ini_parser.y
 	$(YACC) -p ini_ -v -d $(srcdir)/zend_ini_parser.y -o zend_ini_parser.c
 
 zend_ini_scanner.c: $(srcdir)/zend_ini_scanner.l
-	$(LEX) -Pini_ -S$(srcdir)/flex.skl -o$@ -i $(srcdir)/zend_ini_scanner.l
+	$(RE2C) $(RE2C_FLAGS) --case-inverted -cbdFt $(srcdir)/zend_ini_scanner_defs.h -o$@ $(srcdir)/zend_ini_scanner.l
 
 zend_ini_parser.h: zend_ini_parser.c
 

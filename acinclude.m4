@@ -2087,64 +2087,6 @@ AC_DEFUN([PHP_PROG_BISON], [
 ])
 
 dnl
-dnl PHP_PROG_LEX
-dnl
-dnl Search for (f)lex and check it's version
-dnl
-AC_DEFUN([PHP_PROG_LEX], [
-dnl we only support certain flex versions
-  flex_version_list="2.5.4"
-   
-  AC_PROG_LEX
-  if test "$LEX" = "flex"; then
-dnl AC_DECL_YYTEXT is obsolete since autoconf 2.50 and merged into AC_PROG_LEX
-dnl this is what causes that annoying "PHP_PROG_LEX is expanded from" warning with autoconf 2.50+
-dnl it should be removed once we drop support of autoconf 2.13 (if ever)
-    AC_DECL_YYTEXT
-    :
-  fi
-  dnl ## Make flex scanners use const if they can, even if __STDC__ is not
-  dnl ## true, for compilers like Sun's that only set __STDC__ true in
-  dnl ## "limit-to-ANSI-standard" mode, not in "ANSI-compatible" mode
-  AC_C_CONST
-  if test "$ac_cv_c_const" = "yes" ; then
-    LEX_CFLAGS="-DYY_USE_CONST"
-  fi
-
-  if test "$LEX" = "flex"; then
-    AC_CACHE_CHECK([for flex version], php_cv_flex_version, [
-      flex_version=`$LEX -V -v --version 2>/dev/null | $SED -e 's/^.* //'`
-      php_cv_flex_version=invalid
-      for flex_check_version in $flex_version_list; do
-        if test "$flex_version" = "$flex_check_version"; then
-          php_cv_flex_version="$flex_check_version (ok)"
-        fi
-      done
-    ])
-  else
-    flex_version=none
-  fi
-  
-  case $php_cv_flex_version in
-    ""|invalid[)]
-      if test -f "$abs_srcdir/Zend/zend_language_scanner.c" && test -f "$abs_srcdir/Zend/zend_ini_scanner.c"; then
-        AC_MSG_WARN([flex versions supported for regeneration of the Zend/PHP parsers: $flex_version_list  (found: $flex_version)])
-      else
-        flex_msg="Supported flex versions are: $flex_version_list"
-        if test "$flex_version" = "none"; then
-          flex_msg="flex not found. flex is required to generate the Zend/PHP parsers! $flex_msg"
-        else
-          flex_msg="Found invalid flex version: $flex_version. $flex_msg"
-        fi
-        AC_MSG_ERROR([$flex_msg])
-      fi
-      LEX="exit 0;"
-      ;;
-  esac
-  PHP_SUBST(LEX)
-])
-
-dnl
 dnl PHP_PROG_RE2C
 dnl
 dnl Search for the re2c binary and check the version
@@ -2153,17 +2095,17 @@ AC_DEFUN([PHP_PROG_RE2C],[
   AC_CHECK_PROG(RE2C, re2c, re2c)
   if test -n "$RE2C"; then
     AC_CACHE_CHECK([for re2c version], php_cv_re2c_version, [
-      re2c_vernum=`re2c --vernum 2>/dev/null`
-      if test -z "$re2c_vernum" || test "$re2c_vernum" -lt "1200"; then
+      re2c_vernum=`$RE2C --vernum 2>/dev/null`
+      if test -z "$re2c_vernum" || test "$re2c_vernum" -lt "1302"; then
         php_cv_re2c_version=invalid
       else
-        php_cv_re2c_version="`re2c --version | cut -d ' ' -f 2  2>/dev/null` (ok)"
+        php_cv_re2c_version="`$RE2C --version | cut -d ' ' -f 2  2>/dev/null` (ok)"
       fi 
     ])
   fi
   case $php_cv_re2c_version in
     ""|invalid[)]
-      AC_MSG_WARN([You will need re2c 0.12.0 or later if you want to regenerate PHP parsers.])
+      AC_MSG_WARN([You will need re2c 0.13.3 or later if you want to regenerate PHP parsers.])
       RE2C="exit 0;"
       ;;
   esac
@@ -2710,11 +2652,6 @@ AC_DEFUN([PHP_CHECK_CONFIGURE_OPTIONS],[
       # PHP_ARG_* macros set php_enable_<arg_name> or php_with_<arg_name>
       *[)]
         # Options that exist before PHP 6
-        if test "$PHP_MAJOR_VERSION" -lt "6"; then
-          case $arg_name in
-            enable-zend-multibyte[)] continue;;
-          esac 
-        fi
         is_arg_set=php_[]`echo [$]arg_name | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ-' 'abcdefghijklmnopqrstuvwxyz_'`
         if eval test "x\$$is_arg_set" = "x"; then
           PHP_UNKNOWN_CONFIGURE_OPTIONS="$PHP_UNKNOWN_CONFIGURE_OPTIONS

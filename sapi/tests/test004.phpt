@@ -12,9 +12,9 @@ PATH_INFO=/path/info
 END;
 --ENV--
 return <<<END
-REDIRECT_URL=$scriptname
-PATH_TRANSLATED=$filename/path/info
-PATH_INFO=$scriptname/path/info
+REDIRECT_URL=/path
+PATH_TRANSLATED=/path/info/fpp
+PATH_INFO=/path/info
 SCRIPT_NAME=/scriptalias/php
 SCRIPT_FILENAME=$this->conf['TEST_PHP_EXECUTABLE']
 END;

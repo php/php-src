@@ -58,17 +58,6 @@ ZEND_API void zend_html_puts(const char *s, uint len TSRMLS_DC)
 {
 	const char *ptr=s, *end=s+len;
 
-#ifdef ZEND_MULTIBYTE
-	char *filtered;
-	int filtered_len;
-
-	if (LANG_SCNG(output_filter)) {
-		LANG_SCNG(output_filter)(&filtered, &filtered_len, s, len TSRMLS_CC);
-		ptr = filtered;
-		end = filtered + filtered_len;
-	}
-#endif /* ZEND_MULTIBYTE */
-	
 	while (ptr<end) {
 		if (*ptr==' ') {
 			do {
@@ -78,14 +67,7 @@ ZEND_API void zend_html_puts(const char *s, uint len TSRMLS_DC)
 			zend_html_putc(*ptr++);
 		}
 	}
-
-#ifdef ZEND_MULTIBYTE
-	if (LANG_SCNG(output_filter)) {
-		efree(filtered);
-	}
-#endif /* ZEND_MULTIBYTE */
 }
-
 
 
 ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini TSRMLS_DC)
@@ -180,7 +162,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 	}
 
 	/* handler for trailing comments, see bug #42767 */
-	if (LANG_SCNG(yy_leng) && LANG_SCNG(_yy_more_len)) {
+	if (LANG_SCNG(yy_leng) && LANG_SCNG(yy_text) < LANG_SCNG(yy_limit)) {
 		if (last_color != syntax_highlighter_ini->highlight_comment) {
 			if (last_color != syntax_highlighter_ini->highlight_html) {
 				zend_printf("</span>");
@@ -189,7 +171,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				zend_printf("<span style=\"color: %s\">", syntax_highlighter_ini->highlight_comment);
 			}
 		}
-		zend_html_puts(LANG_SCNG(yy_text), LANG_SCNG(_yy_more_len) TSRMLS_CC);
+		zend_html_puts(LANG_SCNG(yy_text), (LANG_SCNG(yy_limit) - LANG_SCNG(yy_text)) TSRMLS_CC);
 	}
 done:
 	if (last_color != syntax_highlighter_ini->highlight_html) {

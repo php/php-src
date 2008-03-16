@@ -333,12 +333,6 @@ AC_DEFINE('HAVE_IPV6', main_network_has_ipv6);
 ARG_ENABLE('fd-setsize', "Set maximum number of sockets for select(2)", "256");
 ADD_FLAG("CFLAGS", "/D FD_SETSIZE=" + parseInt(PHP_FD_SETSIZE));
 
-ARG_ENABLE("zend-multibyte", "Enable Zend multibyte encoding support", "no");
-if (PHP_ZEND_MULTIBYTE == "yes") {
-	STDOUT.WriteLine("Enabling Zend multibyte encoding support");
-	AC_DEFINE('ZEND_MULTIBYTE', 1);
-}
-
 AC_DEFINE('HAVE_USLEEP', 1);
 AC_DEFINE('HAVE_STRCOLL', 1);
 

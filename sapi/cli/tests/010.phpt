@@ -12,8 +12,8 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 $php = getenv('TEST_PHP_EXECUTABLE');
 
-$filename = dirname(__FILE__)."/010.test.php";
-$filename_txt = dirname(__FILE__)."/010.test.txt";
+$filename = __DIR__."/010.test.php";
+$filename_txt = __DIR__."/010.test.txt";
 
 $code = '
 <?php
@@ -25,23 +25,22 @@ file_put_contents($filename, $code);
 
 $txt = '
 test
-hello
-';
+hello';
 
 file_put_contents($filename_txt, $txt);
 
 var_dump(`cat "$filename_txt" | "$php" -n -F "$filename"`);
 
-@unlink($filename);
-@unlink($filename_txt);
-
-echo "Done\n";
+?>
+===DONE===
+--CLEAN--
+<?php
+@unlink(__DIR__."/010.test.php");
+@unlink(__DIR__."/010.test.txt");
 ?>
 --EXPECTF--	
-string(39) "
+string(25) "
 string(10) "test
 hello"
-
-string(0) ""
 "
-Done
+===DONE===
