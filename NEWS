@@ -79,6 +79,7 @@ PHP                                                                        NEWS
 - Added PREG_BAD_UTF8_OFFSET_ERROR constant. (Nuno)
 
 - Improved PHP runtime speed and memory usage:
+  . Replaced flex based scanner with re2c based scanner. (Marcus, Nuno, Scott)
   . Added garbage collector. (David Wang, Dmitry).
   . Improved PHP binary size and startup speed with GCC4 visibility control.
     (Nuno)

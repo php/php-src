@@ -238,7 +238,7 @@ static int spl_autoload(const char *class_name, const char * lc_name, int class_
 			zend_destroy_file_handle(&file_handle TSRMLS_CC);
 		} else {
 			new_op_array = NULL;
-			zend_file_handle_dtor(&file_handle);
+			zend_file_handle_dtor(&file_handle TSRMLS_CC);
 		}
 		if (new_op_array) {
 			EG(return_value_ptr_ptr) = &result;

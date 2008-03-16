@@ -655,14 +655,6 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_CT	(1<<0)
 #define ZEND_RT (1<<1)
 
-
-#define ZEND_HANDLE_FILENAME		0
-#define ZEND_HANDLE_FD				1
-#define ZEND_HANDLE_FP				2
-#define ZEND_HANDLE_STDIOSTREAM		3
-#define ZEND_HANDLE_FSTREAM			4
-#define ZEND_HANDLE_STREAM			5
-
 #define ZEND_FETCH_STANDARD		0
 #define ZEND_FETCH_ADD_LOCK		(1<<0)
 #define ZEND_FETCH_MAKE_REF		(1<<1)

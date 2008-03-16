@@ -1960,7 +1960,7 @@ consult the installation file that came with this distribution, or visit \n\
 				case PHP_MODE_STRIP:
 					if (open_file_for_scanning(&file_handle TSRMLS_CC) == SUCCESS) {
 						zend_strip(TSRMLS_C);
-						fclose(file_handle.handle.fp);
+						zend_file_handle_dtor(&file_handle TSRMLS_CC);
 						php_end_ob_buffers(1 TSRMLS_CC);
 					}
 					return SUCCESS;
@@ -1975,7 +1975,7 @@ consult the installation file that came with this distribution, or visit \n\
 							if (fastcgi) {
 								goto fastcgi_request_done;
 							}
-							fclose(file_handle.handle.fp);
+							zend_file_handle_dtor(&file_handle TSRMLS_CC);
 							php_end_ob_buffers(1 TSRMLS_CC);
 						}
 						return SUCCESS;
@@ -1986,7 +1986,7 @@ consult the installation file that came with this distribution, or visit \n\
 				case PHP_MODE_INDENT:
 					open_file_for_scanning(&file_handle TSRMLS_CC);
 					zend_indent();
-					fclose(file_handle.handle.fp);
+					zend_file_handle_dtor(&file_handle TSRMLS_CC);
 					return SUCCESS;
 					break;
 #endif

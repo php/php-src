@@ -35,10 +35,6 @@
 #include "zend_objects_API.h"
 #include "zend_modules.h"
 
-#ifdef ZEND_MULTIBYTE
-#include "zend_multibyte.h"
-#endif /* ZEND_MULTIBYTE */
-
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
 
@@ -133,19 +129,6 @@ struct _zend_compiler_globals {
 
 	zval      *current_namespace;
 	HashTable *current_import;
-
-#ifdef ZEND_MULTIBYTE
-	zend_encoding **script_encoding_list;
-	int script_encoding_list_size;
-	zend_bool detect_unicode;
-
-	zend_encoding *internal_encoding;
-
-	/* multibyte utility functions */
-	zend_encoding_detector encoding_detector;
-	zend_encoding_converter encoding_converter;
-	zend_encoding_oddlen encoding_oddlen;
-#endif /* ZEND_MULTIBYTE */
 
 #ifdef ZTS
 	HashTable **static_members;
@@ -251,47 +234,40 @@ struct _zend_executor_globals {
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 
-struct _zend_scanner_globals {
+struct _zend_ini_scanner_globals {
 	zend_file_handle *yy_in;
 	zend_file_handle *yy_out;
-	int yy_leng;
-	char *yy_text;
-	struct yy_buffer_state *current_buffer;
-	char *c_buf_p;
-	int init;
-	int start;
+
+        unsigned int yy_leng;
+        unsigned char *yy_start;
+        unsigned char *yy_text;
+        unsigned char *yy_cursor;
+        unsigned char *yy_marker;
+        unsigned char *yy_limit;
+        int yy_state;
+        zend_stack state_stack;
+
+	char *filename;
 	int lineno;
-	char _yy_hold_char;
-	int yy_n_chars;
-	int _yy_did_buffer_switch_on_eof;
-	int _yy_last_accepting_state; /* Must be of the same type as yy_state_type,
-								   * if for whatever reason it's no longer int!
-								   */
-	char *_yy_last_accepting_cpos;
-	int _yy_more_flag;
-	int _yy_more_len;
-	int yy_start_stack_ptr;
-	int yy_start_stack_depth;
-	int *yy_start_stack;
 
-	/* For ini scanner. Modes are: ZEND_INI_SCANNER_NORMAL, ZEND_INI_SCANNER_RAW */
+	/* Modes are: ZEND_INI_SCANNER_NORMAL, ZEND_INI_SCANNER_RAW */
 	int scanner_mode;
+};
 
-#ifdef ZEND_MULTIBYTE
-	/* original (unfiltered) script */
-	char *script_org;
-	int script_org_size;
+struct _zend_php_scanner_globals {
+	zend_file_handle *yy_in;
+	zend_file_handle *yy_out;
 
-	/* filtered script */
-	char *script_filtered;
-	int script_filtered_size;
-
-	/* input/ouput filters */
-	zend_encoding_filter input_filter;
-	zend_encoding_filter output_filter;
-	zend_encoding *script_encoding;
-	zend_encoding *internal_encoding;
-#endif /* ZEND_MULTIBYTE */
+	unsigned int yy_leng;
+	unsigned char *yy_start;
+	unsigned char *yy_text;
+	unsigned char *yy_cursor;
+	unsigned char *yy_marker;
+	unsigned char *yy_limit;
+	int yy_state;
+	zend_stack state_stack;
+	
+	zend_llist used_state_stacks;
 };
 
 #endif /* ZEND_GLOBALS_H */
