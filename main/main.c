@@ -1064,7 +1064,7 @@ static void php_zend_stream_closer(void *handle TSRMLS_DC) /* {{{ */
 static void php_zend_stream_mmap_closer(void *handle TSRMLS_DC) /* {{{ */
 {
 	php_stream_mmap_unmap((php_stream*)handle);
-	php_zend_stream_closer(handle);
+	php_zend_stream_closer(handle TSRMLS_CC);
 }
 /* }}} */
 
@@ -1101,7 +1101,7 @@ PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *h
 		memset(&handle->handle.stream.mmap, 0, sizeof(handle->handle.stream.mmap));
 		len = php_zend_stream_fsizer(stream TSRMLS_CC) + ZEND_MMAP_AHEAD;
 		if (php_stream_mmap_possible(stream)
-		&& (p = php_stream_mmap_range(stream, 0, len, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped_len TSRMLS_CC)) != NULL) {
+		&& (p = php_stream_mmap_range(stream, 0, len, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped_len)) != NULL) {
 			handle->handle.stream.closer   = php_zend_stream_mmap_closer;
 			handle->handle.stream.mmap.buf = p;
 			handle->handle.stream.mmap.len = mapped_len;
