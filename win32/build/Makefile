@@ -21,6 +21,9 @@ CC="$(CL)"
 LD="$(LINK)"
 MC="$(MC)"
 MT="$(MT)"
+RE2C="$(RE2C)"
+RE2C_FLAGS=""
+
 
 MCFILE=$(BUILD_DIR)\wsyslog.rc
 
@@ -42,11 +45,11 @@ Zend\zend_ini_parser.c Zend\zend_ini_parser.h: Zend\zend_ini_parser.y
 Zend\zend_language_parser.c Zend\zend_language_parser.h: Zend\zend_language_parser.y
 	$(BISON) --output=Zend/zend_language_parser.c -v -d -p zend Zend/zend_language_parser.y
 
-Zend\zend_ini_scanner.c: Zend\flex.skl Zend\zend_ini_scanner.l
-	$(FLEX) -B -i -SZend/flex.skl -Pini_ -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l
+Zend\zend_ini_scanner.c: Zend\zend_ini_scanner.l
+	$(RE2C) $(RE2C_FLAGS) --case-inverted -cbdFt Zend\zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend\zend_ini_scanner.l
 
-Zend\zend_language_scanner.c: Zend\flex.skl Zend\zend_language_scanner.l
-	$(FLEX) -i -SZend/flex.skl -Pzend -oZend/zend_language_scanner.c Zend/zend_language_scanner.l
+Zend\zend_language_scanner.c: Zend\zend_language_scanner.l
+	$(RE2C) $(RE2C_FLAGS) --case-inverted -cbdFt $(srcdir)/zend_language_scanner_defs.h -o$@ $(srcdir)/zend_language_scanner.l
 
 PHPDLL_RES=$(BUILD_DIR)\$(PHPDLL).res
 
