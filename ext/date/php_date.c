@@ -2124,7 +2124,6 @@ static int php_date_initialize_from_hash(zval **return_value, php_date_obj **dat
 */
 PHP_METHOD(DateTime, __set_state)
 {
-	zval             *object = getThis();
 	php_date_obj     *dateobj;
 	zval             *array;
 	HashTable        *myht;
