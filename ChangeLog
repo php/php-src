@@ -1,3 +1,17 @@
+2008-03-15  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN: #41828, #44440
+
+    * main/streams/memory.c
+      main/streams/memory.c:
+      MFB: Fixed bug #44440 (st_blocks undefined under BeOS)
+
+    * (PHP_5_2)
+      main/streams/memory.c:
+      Fixed bug #44440 (st_blocks undefined under BeOS)
+
 2008-03-14  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
