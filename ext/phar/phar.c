@@ -2560,11 +2560,26 @@ static void php_phar_init_globals_module(zend_phar_globals *phar_globals)
 }
 /* }}} */
 
+#if PHP_VERSION_ID >= 50300
+static size_t phar_zend_stream_reader(void *handle, char *buf, size_t len TSRMLS_DC) /* {{{ */
+{
+	return php_stream_read(((phar_archive_data*)handle)->fp, buf, len);
+}
+/* }}} */
+
+static size_t phar_zend_stream_fsizer(void *handle TSRMLS_DC) /* {{{ */
+{
+	return ((phar_archive_data*)handle)->halt_offset + 32;
+} /* }}} */
+
+#else /* PHP_VERSION_ID */
+
 static long stream_fteller_for_zend(void *handle TSRMLS_DC) /* {{{ */
 {
 	return (long)php_stream_tell((php_stream*)handle);
 }
 /* }}} */
+#endif
 
 zend_op_array *(*phar_orig_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
 #if PHP_VERSION_ID >= 50300
@@ -2832,9 +2847,19 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 				} else {
 					*file_handle = f;
 				}
-				goto skip_phar;
 			} else if (phar->flags & PHAR_FILE_COMPRESSION_MASK) {
 				/* compressed phar */
+#if PHP_VERSION_ID >= 50300
+				file_handle->type = ZEND_HANDLE_STREAM;
+				file_handle->free_filename = 0;
+				file_handle->handle.stream.handle  = phar;
+				file_handle->handle.stream.reader  = phar_zend_stream_reader;
+				file_handle->handle.stream.closer  = NULL;
+				file_handle->handle.stream.fsizer  = phar_zend_stream_fsizer;
+				file_handle->handle.stream.isatty  = 0;
+				php_stream_rewind(phar->fp);
+				memset(&file_handle->handle.stream.mmap, 0, sizeof(file_handle->handle.stream.mmap));
+#else /* PHP_VERSION_ID */
 				file_handle->type = ZEND_HANDLE_STREAM;
 				file_handle->free_filename = 0;
 				file_handle->handle.stream.handle = phar->fp;
@@ -2843,11 +2868,10 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 				file_handle->handle.stream.fteller = stream_fteller_for_zend;
 				file_handle->handle.stream.interactive = 0;
 				php_stream_rewind(phar->fp);
-				goto skip_phar;
+#endif
 			}
 		}
 	}
-skip_phar:
 	zend_try {
 		failed = 0;
 		res = phar_orig_compile_file(file_handle, type TSRMLS_CC);
