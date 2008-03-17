@@ -20,7 +20,7 @@ echo "Done\n";
 --EXPECTF--     
 [PHP Modules]
 %a
-standard
+pcre
 %a
 
 [Zend Modules]
