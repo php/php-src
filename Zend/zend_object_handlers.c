@@ -892,9 +892,17 @@ ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{
 
 ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC) /* {{{ */
 {
-	zend_function *fbc;
+	zend_function *fbc = NULL;
+	char *lc_class_name;
 
-	if (zend_hash_find(&ce->function_table, function_name_strval, function_name_strlen + 1, (void **) &fbc)==FAILURE) {
+	if (function_name_strlen == ce->name_length && ce->constructor) {
+		lc_class_name = zend_str_tolower_dup(ce->name, ce->name_length);
+		if (!memcmp(lc_class_name, function_name_strval, function_name_strlen)) {
+			fbc = ce->constructor;
+		}
+		efree(lc_class_name);
+	}
+	if (!fbc && zend_hash_find(&ce->function_table, function_name_strval, function_name_strlen+1, (void **) &fbc)==FAILURE) {
 		if (ce->__call &&
 		    EG(This) &&
 		    Z_OBJ_HT_P(EG(This))->get_class_entry &&

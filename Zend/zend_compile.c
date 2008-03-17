@@ -2197,10 +2197,11 @@ static void do_inherit_parent_constructor(zend_class_entry *ce)
 		lc_class_name = zend_str_tolower_dup(ce->name, ce->name_length);
 		if (!zend_hash_exists(&ce->function_table, lc_class_name, ce->name_length+1)) {
 			lc_parent_class_name = zend_str_tolower_dup(ce->parent->name, ce->parent->name_length);
-			if (zend_hash_find(&ce->parent->function_table, lc_parent_class_name, ce->parent->name_length+1, (void **)&function)==SUCCESS) {
+			if (!zend_hash_exists(&ce->function_table, lc_parent_class_name, ce->parent->name_length+1) && 
+					zend_hash_find(&ce->parent->function_table, lc_parent_class_name, ce->parent->name_length+1, (void **)&function)==SUCCESS) {
 				if (function->common.fn_flags & ZEND_ACC_CTOR) {
 					/* inherit parent's constructor */
-					zend_hash_update(&ce->function_table, lc_class_name, ce->name_length+1, function, sizeof(zend_function), NULL);
+					zend_hash_update(&ce->function_table, lc_parent_class_name, ce->parent->name_length+1, function, sizeof(zend_function), NULL);
 					function_add_ref(function);
 				}
 			}
