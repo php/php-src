@@ -60,7 +60,7 @@ if (!PATH_PROG('bison')) {
 if (!PATH_PROG('re2c')) {
 	ERROR('re2c is required')
 }
-DEFINE('RE2C_FLAGS', null);
+DEFINE('RE2C_FLAGS', '');
 PATH_PROG('zip');
 PATH_PROG('lemon');
 
