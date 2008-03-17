@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? Mar 2008 , PHP 5.2.6
 - Properly address incomplete multibyte chars inside escapeshellcmd() (Ilia,
   Stefan Esser)
+- Fix integer overflow in printf(). (Stas, Maksymilian Aciemowicz)
 - Fixed bug #44440 (st_blocks undefined under BeOS). (Felipe)
 - Fixed bug #44394 (Last two bytes missing from output). (Felipe)
 - Fixed bug #44388 (Crash inside exif_read_data() on invalid images) (Ilia)
