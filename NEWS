@@ -77,6 +77,8 @@ PHP                                                                        NEWS
 - Added OCI8 SQLT_AFC (aka CHAR datatype) support to oci_bind_by_name
   (Chris Jones)
 - Added PREG_BAD_UTF8_OFFSET_ERROR constant. (Nuno)
+- Added request_order INI variable to control specifically $_REQUEST 
+  behavior. (Stas)
 
 - Improved PHP runtime speed and memory usage:
   . Replaced flex based scanner with re2c based scanner. (Marcus, Nuno, Scott)
