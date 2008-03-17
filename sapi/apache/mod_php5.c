@@ -243,14 +243,12 @@ static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_
 	table_entry *elts = (table_entry *) arr->elts;
 	zval **path_translated;
 	HashTable *symbol_table;
-	int new_val_len;
+	int val_len, new_val_len;
+	char *val;
 
 	for (i = 0; i < arr->nelts; i++) {
-		char *val;
-		int val_len;
-
 		if (elts[i].val) {
-			val = elts[i].val;
+			val = estrdup(elts[i].val);
 		} else {
 			val = "";
 		}
@@ -275,8 +273,9 @@ static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_
 		php_register_variable("PATH_TRANSLATED", Z_STRVAL_PP(path_translated), track_vars_array TSRMLS_CC);
 	}
 
-	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &((request_rec *) SG(server_context))->uri, strlen(((request_rec *) SG(server_context))->uri), &new_val_len TSRMLS_CC)) {
-		php_register_variable("PHP_SELF", ((request_rec *) SG(server_context))->uri, track_vars_array TSRMLS_CC);
+	val = estrdup(((request_rec *)SG(server_context))->uri);
+	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", val, strlen(val), &new_val_len TSRMLS_CC)) {
+		php_register_variable_safe("PHP_SELF", val, new_val_len, track_vars_array TSRMLS_CC);
 	}
 }
 /* }}} */
