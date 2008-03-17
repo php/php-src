@@ -1053,16 +1053,7 @@ TEST $file
 ";
 
 	// Load the sections of the test file.
-	$section_text = array(
-		'TEST'   => '',
-		'SKIPIF' => '',
-		'GET'    => '',
-		'COOKIE' => '',
-		'POST_RAW' => '',
-		'POST'   => '',
-		'UPLOAD' => '',
-		'ARGS'   => '',
-	);
+	$section_text = array('TEST' => '');
 
 	$fp = fopen($file, "rt") or error("Cannot open test file: $file");
 
@@ -1087,6 +1078,12 @@ TEST $file
 		// Match the beginning of a section.
 		if (preg_match('/^--([_A-Z]+)--/', $line, $r)) {
 			$section = $r[1];
+
+			if (isset($section_text[$section])) {
+				$bork_info = "duplicated $section section";
+				$borked    = true;
+			}
+
 			$section_text[$section] = '';
 			$secfile = $section == 'FILE' || $section == 'FILEEOF' || $section == 'FILE_EXTERNAL';
 			$secdone = false;
@@ -1454,7 +1451,7 @@ TEST $file
 		$env['HTTP_COOKIE'] = '';
 	}
 
-	$args = $section_text['ARGS'] ? ' -- '.$section_text['ARGS'] : '';
+	$args = isset($section_text['ARGS']) ? ' -- '.$section_text['ARGS'] : '';
 
 	if (array_key_exists('POST_RAW', $section_text) && !empty($section_text['POST_RAW'])) {
 		$post = trim($section_text['POST_RAW']);
