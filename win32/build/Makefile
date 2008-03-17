@@ -21,8 +21,6 @@ CC="$(CL)"
 LD="$(LINK)"
 MC="$(MC)"
 MT="$(MT)"
-RE2C="$(RE2C)"
-RE2C_FLAGS=""
 
 
 MCFILE=$(BUILD_DIR)\wsyslog.rc
@@ -46,10 +44,10 @@ Zend\zend_language_parser.c Zend\zend_language_parser.h: Zend\zend_language_pars
 	$(BISON) --output=Zend/zend_language_parser.c -v -d -p zend Zend/zend_language_parser.y
 
 Zend\zend_ini_scanner.c: Zend\zend_ini_scanner.l
-	$(RE2C) $(RE2C_FLAGS) --case-inverted -cbdFt Zend\zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend\zend_ini_scanner.l
+	$(RE2C) $(RE2C_FLAGS) --case-inverted -cbdFt Zend/zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l
 
 Zend\zend_language_scanner.c: Zend\zend_language_scanner.l
-	$(RE2C) $(RE2C_FLAGS) --case-inverted -cbdFt $(srcdir)/zend_language_scanner_defs.h -o$@ $(srcdir)/zend_language_scanner.l
+	$(RE2C) $(RE2C_FLAGS) --case-inverted -cbdFt Zend/zend_language_scanner_defs.h -oZend/zend_language_scanner.c Zend/zend_language_scanner.l
 
 PHPDLL_RES=$(BUILD_DIR)\$(PHPDLL).res
 
@@ -70,14 +68,14 @@ $(PHPDLL_RES): win32\build\template.rc
 	$(RC) /fo $(PHPDLL_RES) /d FILE_DESCRIPTION="\"PHP Script Interpreter\"" \
 		/d FILE_NAME="\"$(PHPDLL)\"" /d PRODUCT_NAME="\"PHP Script Interpreter\"" \
 		/I$(BUILD_DIR) /d MC_INCLUDE="\"$(MCFILE)\"" \
-		win32\build\template.rc 
+		win32\build\template.rc
 
 $(BUILD_DIR)\$(PHPDLL): generated_files $(PHPDEF) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(PHPDLL_RES) $(MCFILE)
 	@$(CC) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /link /out:$(BUILD_DIR)\$(PHPDLL) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
 	-@$(_VC_MANIFEST_EMBED_DLL)
-	
+
 $(BUILD_DIR)\$(PHPLIB): $(BUILD_DIR)\$(PHPDLL)
-	
+
 $(BUILD_DIR) $(BUILD_DIRS_SUB):
 	@echo Recreating build dirs
 	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
@@ -94,7 +92,7 @@ clean: clean-sapi
 	@echo Cleaning build dirs
 	@for %D in (_x $(BUILD_DIRS_SUB)) do @if exist %D @del /F /Q %D\*.* > NUL
 	-@del /F /Q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\php-$(PHP_VERSION_STRING)-Win32.zip $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)-Win32.zip > NUL
-	-rmdir /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING) 
+	-rmdir /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
 
 clean-pecl:
 	@echo Cleaning PECL targets only
