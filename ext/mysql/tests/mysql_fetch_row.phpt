@@ -50,20 +50,6 @@ bool(false)
 Warning: mysql_fetch_row(): %d is not a valid MySQL result resource in %s on line %d
 bool(false)
 done!
---EXPECTF--
-[004]
-array(2) {
-  [0]=>
-  string(1) "1"
-  [1]=>
-  string(1) "a"
-}
-[005]
-bool(false)
-
-Warning: mysql_fetch_row(): %d is not a valid MySQL result resource in %s on line %d
-bool(false)
-done!
 --UEXPECTF--
 [004]
 array(2) {
