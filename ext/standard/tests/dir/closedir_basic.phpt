@@ -38,7 +38,7 @@ var_dump($dh2);
 --CLEAN--
 <?php
 $base_dir = dirname(__FILE__);
-$dir_path = $base_dir . '\closedir_basic';
+$dir_path = $base_dir . '/closedir_basic';
 rmdir($dir_path);
 ?>
 --EXPECTF--
