@@ -256,6 +256,11 @@ PHPAPI char *php_escape_shell_cmd(char *str)
 	cmd = safe_emalloc(2, l, 1);
 
 	for (x = 0, y = 0; x < l; x++) {
+		/* skip non-valid multibyte characters */
+		if (php_mblen(str + x, (l - x)) < 0) {
+			continue;
+		}
+
 		switch (str[x]) {
 			case '"':
 			case '\'':
