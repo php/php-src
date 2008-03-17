@@ -94,6 +94,7 @@ php_sprintf_appendstring(char **buffer, int *pos, int *size, char *add,
 	register int npad;
 	int req_size;
 	int copy_len;
+	int m_width;
 
 	copy_len = (expprec ? MIN(max_width, len) : len);
 	npad = min_width - copy_len;
@@ -104,11 +105,19 @@ php_sprintf_appendstring(char **buffer, int *pos, int *size, char *add,
 	
 	PRINTF_DEBUG(("sprintf: appendstring(%x, %d, %d, \"%s\", %d, '%c', %d)\n",
 				  *buffer, *pos, *size, add, min_width, padding, alignment));
+	m_width = MAX(min_width, copy_len);
 
-	req_size = *pos + MAX(min_width, copy_len) + 1;
+	if(m_width > INT_MAX - *pos - 1) {
+		zend_error_noreturn(E_ERROR, "Field width %d is too long", m_width);
+	}
+
+	req_size = *pos + m_width + 1;
 
 	if (req_size > *size) {
 		while (req_size > *size) {
+			if(*size > INT_MAX/2) {
+				zend_error_noreturn(E_ERROR, "Field width %d is too long", req_size); 
+			}
 			*size <<= 1;
 		}
 		PRINTF_DEBUG(("sprintf ereallocing buffer to %d bytes\n", *size));
