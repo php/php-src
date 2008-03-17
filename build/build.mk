@@ -67,7 +67,7 @@ snapshot:
 
 cvsclean-work:
 	@for i in `find . -name .cvsignore`; do \
-		(cd `dirname $$i` 2>/dev/null && rm -rf `cat .cvsignore | grep -v config.nice | sed 's/[\r\n]/ /g'` *.o *.a .libs || true); \
+		(cd `dirname $$i` 2>/dev/null && rm -rf `cat .cvsignore | grep -v config.nice | sed 's/[[:space:]]/ /g'` *.o *.a .libs || true); \
 	done
 
 .PHONY: $(ALWAYS) snapshot
