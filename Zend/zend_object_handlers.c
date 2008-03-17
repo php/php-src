@@ -905,9 +905,22 @@ ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{
 
 ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_uchar type, zstr function_name_strval, int function_name_strlen TSRMLS_DC) /* {{{ */
 {
-	zend_function *fbc;
+	zend_function *fbc = NULL;
 
-	if (zend_u_hash_find(&ce->function_table, type, function_name_strval, function_name_strlen + 1, (void **) &fbc)==FAILURE) {
+	if (function_name_strlen == ce->name_length && ce->constructor) {
+		zstr lc_class_name;
+		unsigned int lc_class_name_len, real_len;
+
+		lc_class_name = zend_u_str_case_fold(type, ce->name, ce->name_length, 0, &lc_class_name_len);
+		real_len = USTR_BYTES(type, lc_class_name_len);
+
+		if (!memcmp(lc_class_name.s, function_name_strval.s, real_len)) {
+			fbc = ce->constructor;
+		}
+		efree(lc_class_name.v);
+	}
+
+	if (!fbc && zend_u_hash_find(&ce->function_table, type, function_name_strval, function_name_strlen + 1, (void **) &fbc)==FAILURE) {
 		if (ce->__call &&
 		    EG(This) &&
 		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
