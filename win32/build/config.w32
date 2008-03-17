@@ -15,7 +15,7 @@ function probe_msvc_compiler_version(CL)
 	// tricky escapes to get stderr redirection to work
 	var banner = execute('cmd /c ""' + CL + '" 2>&1"');
 	if (banner.match(/(\d+)\.(\d+)\.(\d+)(\.(\d+))?/)) {
-		return RegExp.$1;		
+		return RegExp.$1;
 	}
 	return 0;
 }
@@ -26,14 +26,14 @@ STDOUT.WriteLine("Detected MS compiler version " + VCVERS);
 // 12 is VC6
 // 13 is vs.net 2003
 // 14 is vs.net 2005
- 
+
 // do we use x64 or 80x86 version of compiler?
 function probe_msvc_compiler_x64(CL)
 {
 	// tricky escapes to get stderr redirection to work
 	var banner = execute('cmd /c ""' + CL + '" 2>&1"');
 	if (banner.match(/x64/)) {
-		return 1;		
+		return 1;
 	}
 	return 0;
 }
@@ -60,6 +60,7 @@ if (!PATH_PROG('bison')) {
 if (!PATH_PROG('re2c')) {
 	ERROR('re2c is required')
 }
+DEFINE('RE2C_FLAGS', null);
 PATH_PROG('zip');
 PATH_PROG('lemon');
 
@@ -147,7 +148,7 @@ DEFINE("DLL_LDFLAGS", "/dll ");
 DEFINE("PHP_LDFLAGS", "$(DLL_LDFLAGS)");
 
 // General libs
-// urlmon.lib ole32.lib oleaut32.lib uuid.lib gdi32.lib winspool.lib comdlg32.lib 
+// urlmon.lib ole32.lib oleaut32.lib uuid.lib gdi32.lib winspool.lib comdlg32.lib
 DEFINE("LIBS", "kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib");
 
 // Set some debug/release specific options
@@ -174,7 +175,7 @@ if (PHP_DEBUG == "yes") {
 if (PHP_ZTS == "yes") {
 	ADD_FLAG("CFLAGS", "/D ZTS=1");
 }
-	
+
 // we want msvcrt in the PHP DLL
 ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:libcmt");
 
