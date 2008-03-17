@@ -6,10 +6,8 @@ Ensure implicit final inherited old-style constructor cannot be overridden.
       final function A() { }
   }
   class B extends A {
-  }
-  class C extends B {
-      function B() { }
+      function A() { }
   }
 ?>
 --EXPECTF--
-Fatal error: Cannot override final method A::B() in %s on line 9
+Fatal error: Cannot override final method A::A() in %s on line %d
