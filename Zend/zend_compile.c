@@ -2417,12 +2417,19 @@ static void do_inherit_parent_constructor(zend_class_entry *ce TSRMLS_DC) /* {{{
 	} else if (ce->parent->constructor) {
 		ce->constructor = ce->parent->constructor;
 		if (!zend_ascii_hash_exists(&ce->function_table, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME))) {
-			unsigned int lc_class_name_len;
-			zstr lc_class_name = zend_u_str_case_fold(ZEND_STR_TYPE, ce->name, ce->name_length, 0, &lc_class_name_len);
+			unsigned int lc_parent_class_name_len;
+			zend_function *function;
+			zstr lc_parent_class_name = zend_u_str_case_fold(ZEND_STR_TYPE, ce->parent->name, ce->parent->name_length, 0, &lc_parent_class_name_len);
 
-			zend_u_hash_update(&ce->function_table, ZEND_STR_TYPE, lc_class_name, lc_class_name_len+1, ce->constructor, sizeof(zend_function), NULL);
-			function_add_ref(ce->constructor TSRMLS_CC);
-			efree(lc_class_name.v);
+			if (!zend_u_hash_exists(&ce->function_table, ZEND_STR_TYPE, lc_parent_class_name, ce->parent->name_length+1) &&
+					zend_u_hash_find(&ce->parent->function_table, ZEND_STR_TYPE, lc_parent_class_name, ce->parent->name_length+1, (void **)&function)==SUCCESS) {
+				if (function->common.fn_flags & ZEND_ACC_CTOR) {
+					/* inherit parent's constructor */
+					zend_u_hash_update(&ce->function_table, ZEND_STR_TYPE, lc_parent_class_name, ce->parent->name_length+1, function, sizeof(zend_function), NULL);
+					function_add_ref(function);
+				}
+			}
+			efree(lc_parent_class_name.v);
 		}
 	}
 }
