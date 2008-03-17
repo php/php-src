@@ -1260,7 +1260,11 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 					if (readobj == writeobj) {
 						zval_dtor(readobj);
 					}
-					ZVAL_EMPTY_STRING(writeobj);
+					if (type == IS_UNICODE) {
+						ZVAL_EMPTY_UNICODE(writeobj);
+					} else {
+						ZVAL_EMPTY_STRING(writeobj);
+					}
 					zend_error(E_RECOVERABLE_ERROR, "Method %v::__toString() must return a string value", ce->name);
 					return SUCCESS;
 				}
