@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 ?? ??? 20??, PHP 5.3.0
 - Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
 
+- Added concept of "delayed early binding" that allows opcode caches to perform
+  class declaration (early and/or run-time binding) in exactly the same order
+  as vanila php. (Dmitry)
 - Added new error mode E_DEPRECATED which is used to inform about stuff to be
   dropped in future PHP versions. (Lars Strojny, Felipe, Marcus)
 - Added and improved PHP syntax and semantics:

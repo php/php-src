@@ -55,6 +55,9 @@ END_EXTERN_C()
 /* excpt.h on Digital Unix 4.0 defines function_table */
 #undef function_table
 
+#define ZEND_EARLY_BINDING_COMPILE_TIME 0
+#define ZEND_EARLY_BINDING_DELAYED      1
+#define ZEND_EARLY_BINDING_DELAYED_ALL  2
 
 typedef struct _zend_declarables {
 	zval ticks;
@@ -101,10 +104,6 @@ struct _zend_compiler_globals {
 
 	zend_declarables declarables;
 
-	/* For extensions support */
-	zend_bool extended_info;	/* generate extension information for debugger/profiler */
-	zend_bool handle_op_arrays;	/* run op_arrays through op_array handlers */
-
 	zend_bool unclean_shutdown;
 
 	zend_bool ini_parser_unbuffered_errors;
@@ -126,6 +125,8 @@ struct _zend_compiler_globals {
 
 	char *doc_comment;
 	zend_uint doc_comment_len;
+
+	zend_uint compiler_options; /* set of ZEND_COMPILE_* constants */
 
 	zval      *current_namespace;
 	HashTable *current_import;

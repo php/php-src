@@ -1264,7 +1264,7 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSR
 	zval pv;
 	zend_op_array *new_op_array;
 	zend_op_array *original_active_op_array = EG(active_op_array);
-	zend_uchar original_handle_op_arrays;
+	zend_uint original_compiler_options;
 	int retval;
 
 	if (retval_ptr) {
@@ -1284,10 +1284,10 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSR
 
 	/*printf("Evaluating '%s'\n", pv.value.str.val);*/
 
-	original_handle_op_arrays = CG(handle_op_arrays);
-	CG(handle_op_arrays) = 0;
+	original_compiler_options = CG(compiler_options);
+	CG(compiler_options) = ZEND_COMPILE_DEFAULT_FOR_EVAL;
 	new_op_array = zend_compile_string(&pv, string_name TSRMLS_CC);
-	CG(handle_op_arrays) = original_handle_op_arrays;
+	CG(compiler_options) = original_compiler_options;
 
 	if (new_op_array) {
 		zval *local_retval_ptr=NULL;
