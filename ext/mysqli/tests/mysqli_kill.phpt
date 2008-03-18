@@ -68,7 +68,41 @@ require_once('skipifconnectfailure.inc');
 Warning: mysqli_kill(): processid should have positive value in %s on line %d
 string(%d) "%s"
 bool(false)
-object(mysqli)#%d (0) {
+object(mysqli)#%d (%d) {
+  ["affected_rows"]=>
+  int(-1)
+  ["client_info"]=>
+  string(%d) "%s"
+  ["client_version"]=>
+  int(%d)
+  ["connect_errno"]=>
+  int(0)
+  ["connect_error"]=>
+  string(0) ""
+  ["errno"]=>
+  int(2006)
+  ["error"]=>
+  string(26) "MySQL server has gone away"
+  ["field_count"]=>
+  int(0)
+  ["host_info"]=>
+  string(42) "MySQL host info: Localhost via UNIX socket"
+  ["info"]=>
+  string(38) "Records: 6  Duplicates: 0  Warnings: 0"
+  ["insert_id"]=>
+  int(0)
+  ["server_info"]=>
+  string(%d) "%s"
+  ["server_version"]=>
+  int(%d)
+  ["sqlstate"]=>
+  string(5) "HY000"
+  ["protocol_version"]=>
+  int(10)
+  ["thread_id"]=>
+  int(%d)
+  ["warning_count"]=>
+  int(0)
 }
 
 Warning: mysqli_kill(): processid should have positive value in %s on line %d
