@@ -25,6 +25,7 @@
 #include "safe_mode.h"
 #include "ext/standard/head.h"
 #include "ext/standard/file.h"
+#include "basic_functions.h"
 #include "exec.h"
 #include "php_globals.h"
 #include "SAPI.h"
@@ -267,6 +268,8 @@ PHPAPI char *php_escape_shell_cmd(char *str)
 	char *cmd;
 	char *p = NULL;
 	size_t estimate = (2 * l) + 1;
+	
+	TSRMLS_FETCH();
 
 	cmd = safe_emalloc(2, l, 1);
 
