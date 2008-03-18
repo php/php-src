@@ -279,4 +279,49 @@ returnsReference: no
 Modifiers: %d
 Number of Parameters: 0
 Number of Required Parameters: 0
+
+Inspecting property 'current_field'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
+Inspecting property 'field_count'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
+Inspecting property 'lengths'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
+Inspecting property 'num_rows'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
+Inspecting property 'type'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+Default property 'current_field'
+Default property 'field_count'
+Default property 'lengths'
+Default property 'num_rows'
+Default property 'type'
 done!

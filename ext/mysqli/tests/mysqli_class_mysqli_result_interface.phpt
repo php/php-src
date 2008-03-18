@@ -67,13 +67,13 @@ require_once('skipifconnectfailure.inc');
 
 
 	printf("\nClass variables:\n");
-	$variables = get_class_vars(get_class($mysqli_result));
+	$variables = array_keys(get_class_vars(get_class($mysqli_result)));
 	sort($variables);
 	foreach ($variables as $k => $var)
 		printf("%s\n", $var);
 
 	printf("\nObject variables:\n");
-	$variables = get_object_vars($mysqli_result);
+	$variables = array_keys(get_object_vars($mysqli_result));
 	foreach ($variables as $k => $var)
 		printf("%s\n", $var);
 
@@ -162,8 +162,18 @@ Methods:
 ok
 
 Class variables:
+current_field
+field_count
+lengths
+num_rows
+type
 
 Object variables:
+current_field
+field_count
+lengths
+num_rows
+type
 
 Magic, magic properties:
 mysqli_result->current_field = '0'/integer ('0'/integer)
@@ -189,8 +199,18 @@ Methods:
 ok
 
 Class variables:
+current_field
+field_count
+lengths
+num_rows
+type
 
 Object variables:
+current_field
+field_count
+lengths
+num_rows
+type
 
 Magic, magic properties:
 mysqli_result->current_field = '0'/integer ('0'/integer)

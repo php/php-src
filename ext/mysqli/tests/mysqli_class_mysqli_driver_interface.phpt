@@ -46,13 +46,13 @@ require_once('skipifconnectfailure.inc');
 		printf("ok\n");
 
 	printf("\nClass variables:\n");
-	$variables = get_class_vars(get_class($driver));
+	$variables = array_keys(get_class_vars(get_class($driver)));
 	sort($variables);
 	foreach ($variables as $k => $var)
 		printf("%s\n", $var);
 
 	printf("\nObject variables:\n");
-	$variables = get_object_vars($driver);
+	$variables = array_keys(get_object_vars($driver));
 	foreach ($variables as $k => $var)
 		printf("%s\n", $var);
 
@@ -99,8 +99,20 @@ Methods:
 ok
 
 Class variables:
+client_info
+client_version
+driver_version
+embedded
+reconnect
+report_mode
 
 Object variables:
+client_info
+client_version
+driver_version
+embedded
+reconnect
+report_mode
 
 Magic, magic properties:
 driver->client_info = '%s'

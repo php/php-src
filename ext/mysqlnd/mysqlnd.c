@@ -805,8 +805,7 @@ err:
 
 	if (errstr) {
 		DBG_ERR_FMT("[%d] %.64s (trying to connect via %s)", errcode, errstr, conn->scheme);
-		SET_CLIENT_ERROR(conn->error_info, errcode, UNKNOWN_SQLSTATE, errstr);
-
+		SET_CLIENT_ERROR(conn->error_info, errcode? errcode:CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, errstr);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "[%d] %.64s (trying to connect via %s)", errcode, errstr, conn->scheme);
 
 		mnd_efree(errstr);

@@ -163,7 +163,7 @@ require_once('skipifconnectfailure.inc');
 		}
 	}
 
-	var_dump($link);
+	@var_dump($link);
 
 	if (NULL === ($tmp = mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)))
 		printf("[026] Expecting not NULL, got %s/%s\n", gettype($tmp), $tmp);
@@ -173,5 +173,39 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 Warning: mysqli_real_connect(): (%d/%d): Access denied for user '%s'@'%s' (using password: YES) in %s on line %d
 object(mysqli)#%d (%d) {
+  ["affected_rows"]=>
+  NULL
+  ["client_info"]=>
+  string(%d) "%s"
+  ["client_version"]=>
+  int(%d)
+  ["connect_errno"]=>
+  int(%d)
+  ["connect_error"]=>
+  string(%d) "%s"
+  ["errno"]=>
+  int(%d)
+  ["error"]=>
+  string(%d) "%s"
+  ["field_count"]=>
+  NULL
+  ["host_info"]=>
+  NULL
+  ["info"]=>
+  NULL
+  ["insert_id"]=>
+  NULL
+  ["server_info"]=>
+  NULL
+  ["server_version"]=>
+  NULL
+  ["sqlstate"]=>
+  NULL
+  ["protocol_version"]=>
+  NULL
+  ["thread_id"]=>
+  NULL
+  ["warning_count"]=>
+  NULL
 }
 done!
