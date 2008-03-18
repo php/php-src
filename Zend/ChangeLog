@@ -1,3 +1,33 @@
+2008-03-17  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_3)
+      FlexLexer.h
+      flex.skl:
+      remove leftovers
+
+2008-03-17  Antony Dovgal  <tony@daylessday.org>
+
+    * zend_object_handlers.c:
+      return empty string of correct type if __toString() returned invalid value
+
+    * (PHP_5_3)
+      zend_compile.c
+      zend_object_handlers.c
+      tests/bug39127.phpt:
+      MFH: fix #39127 (Old-style constructor fallbacks produce strange results)
+
+    * zend_compile.c
+      zend_object_handlers.c
+      tests/bug39127.phpt
+      tests/bug39127.phpt:
+      fix #39127i (Old-style constructor fallbacks produce strange results)
+
+2008-03-17  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      tests/bug38779.phpt:
+      Fix test
+
 2008-03-16  Marcus Boerger  <php@marcus-boerger.de>
 
     * (PHP_5_3)
