@@ -394,6 +394,7 @@ static sapi_module_struct thttpd_sapi_module = {
 	sapi_thttpd_register_variables,
 	NULL,									/* Log message */
 	NULL,									/* Get request time */
+	NULL,									/* Child terminate */
 
 	NULL,									/* php.ini path override */
 	NULL,									/* Block interruptions */
