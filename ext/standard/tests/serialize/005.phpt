@@ -179,7 +179,7 @@ do_autoload(autoload_not_available)
 do_autoload(autoload_not_available)
 
 Warning: unserialize(): Function unserializer() hasn't defined the class it was called for in %s005.php on line %d
-object(__PHP_Incomplete_Class)#1 (1) {
+object(__PHP_Incomplete_Class)#%d (1) {
   ["__PHP_Incomplete_Class_Name"]=>
   string(22) "autoload_not_available"
 }
