@@ -229,6 +229,7 @@ struct _zend_op_array {
 	zend_uint line_end;
 	zstr doc_comment;
 	zend_uint doc_comment_len;
+	zend_uint early_binding; /* the linked list of delayed declarations */
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
@@ -440,6 +441,7 @@ void zend_do_implements_interface(znode *interface_znode TSRMLS_DC);
 
 ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRMLS_DC);
 void zend_do_early_binding(TSRMLS_D);
+ZEND_API void zend_do_delayed_early_binding(zend_op_array *op_array TSRMLS_DC);
 
 void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC);
 
@@ -758,6 +760,32 @@ END_EXTERN_C()
 #define ZEND_AUTOLOAD_FUNC_NAME     "__autoload"
 
 #define ZEND_HALT_CONSTANT_NAME	    "__COMPILER_HALT_OFFSET__"
+
+/* The following constants may be combined in CG(compiler_options)
+ * to change the default compiler behavior */
+
+/* generate extended debug information */
+#define ZEND_COMPILE_EXTENDED_INFO				(1<<0)
+
+/* call op_array handler of extendions */
+#define ZEND_COMPILE_HANDLE_OP_ARRAY            (1<<1)
+
+/* generate ZEND_DO_FCALL_BY_NAME for internal functions instead of ZEND_DO_FCALL */
+#define ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS	(1<<2)
+
+/* don't perform early binding for classes inherited form internal ones;
+ * in namespaces assume that internal class that doesn't exist at compile-time
+ * may apper in run-time */
+#define ZEND_COMPILE_IGNORE_INTERNAL_CLASSES	(1<<3)
+
+/* generate ZEND_DECLARE_INHERITED_CLASS_DELAYED opcode to delay early binding */
+#define ZEND_COMPILE_DELAYED_BINDING			(1<<4)
+
+/* The default value for CG(compiler_options) */
+#define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY
+
+/* The default value for CG(compiler_options) during eval() */
+#define ZEND_COMPILE_DEFAULT_FOR_EVAL			0
 
 #endif /* ZEND_COMPILE_H */
 

@@ -1409,7 +1409,7 @@ ZEND_API int zend_u_eval_string(zend_uchar type, zstr string, zval *retval_ptr, 
 	zval pv;
 	zend_op_array *new_op_array;
 	zend_op_array *original_active_op_array = EG(active_op_array);
-	zend_uchar original_handle_op_arrays;
+	zend_uint original_compiler_options;
 	int retval;
 
 	if (type == IS_UNICODE) {
@@ -1443,10 +1443,10 @@ ZEND_API int zend_u_eval_string(zend_uchar type, zstr string, zval *retval_ptr, 
 
 	/*printf("Evaluating '%s'\n", Z_STRVAL(pv));*/
 
-	original_handle_op_arrays = CG(handle_op_arrays);
-	CG(handle_op_arrays) = 0;
+	original_compiler_options = CG(compiler_options);
+	CG(compiler_options) = ZEND_COMPILE_DEFAULT_FOR_EVAL;
 	new_op_array = zend_compile_string(&pv, string_name TSRMLS_CC);
-	CG(handle_op_arrays) = original_handle_op_arrays;
+	CG(compiler_options) = original_compiler_options;
 
 	if (new_op_array) {
 		zval *local_retval_ptr=NULL;
