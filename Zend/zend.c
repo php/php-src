@@ -794,7 +794,7 @@ ZEND_API void _zend_bailout(char *filename, uint lineno) /* {{{ */
 	CG(unclean_shutdown) = 1;
 	CG(in_compilation) = EG(in_execution) = 0;
 	EG(current_execute_data) = NULL;
-	longjmp(*EG(bailout), FAILURE);
+	siglongjmp(*EG(bailout), FAILURE);
 }
 /* }}} */
 END_EXTERN_C()

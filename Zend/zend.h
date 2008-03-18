@@ -522,11 +522,11 @@ END_EXTERN_C()
 
 #define zend_try												\
 	{															\
-		jmp_buf *__orig_bailout = EG(bailout);					\
-		jmp_buf __bailout;										\
+		sigjmp_buf *__orig_bailout = EG(bailout);					\
+		sigjmp_buf __bailout;										\
 																\
 		EG(bailout) = &__bailout;								\
-		if (setjmp(__bailout)==0) {
+		if (sigsetjmp(__bailout, 0)==0) {
 #define zend_catch												\
 		} else {												\
 			EG(bailout) = __orig_bailout;
