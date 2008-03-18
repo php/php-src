@@ -986,9 +986,7 @@ PHP_RSHUTDOWN_FUNCTION(mysqli)
  */
 PHP_MINFO_FUNCTION(mysqli)
 {
-#if defined(MYSQLI_USE_MYSQLND)
 	char buf[32];
-#endif
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "MysqlI Support", "enabled");
