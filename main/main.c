@@ -1816,6 +1816,22 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		return FAILURE;
 	}
 
+	/* Check for deprecated directives */
+	{
+		static const char *directives[] = {
+			"zend.ze1_compatibility_mode",
+			NULL};
+		const char **p = directives;
+		long val;
+
+		while (*p) {
+			if (cfg_get_long((char*)*p, &val) == SUCCESS && val) {
+				zend_error(E_WARNING, "Directive '%s' is no longer supported in PHP 5.3 and greater", *p);
+			}
+			++p;
+		}
+	}
+
 	/* Register PHP core ini entries */
 	REGISTER_INI_ENTRIES();
 

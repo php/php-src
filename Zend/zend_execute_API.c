@@ -425,11 +425,6 @@ ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC) /* {{{ */
 		TSRMLS_FETCH();
 
 		if (Z_REFCOUNT_PP(zval_ptr) == 1) {
-			if ((*zval_ptr)->type == IS_OBJECT) {
-				if (EG(ze1_compatibility_mode)) {
-					return;
-				}
-			}
 			Z_UNSET_ISREF_PP(zval_ptr);
 		}
 

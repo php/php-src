@@ -1872,41 +1872,6 @@ static zend_object_handlers sxe_object_handlers = { /* {{{ */
 };
 /* }}} */
 
-static zend_object_handlers sxe_ze1_object_handlers = { /* {{{ */
-	ZEND_OBJECTS_STORE_HANDLERS,
-	sxe_property_read,
-	sxe_property_write,
-	sxe_dimension_read,
-	sxe_dimension_write,
-	sxe_property_get_adr,
-	sxe_get_value,			/* get */
-	NULL,
-	sxe_property_exists,
-	sxe_property_delete,
-	sxe_dimension_exists,
-	sxe_dimension_delete,
-	sxe_get_properties,
-	NULL, /* zend_get_std_object_handlers()->get_method,*/
-	NULL, /* zend_get_std_object_handlers()->call_method,*/
-	NULL, /* zend_get_std_object_handlers()->get_constructor, */
-	NULL, /* zend_get_std_object_handlers()->get_class_entry,*/
-	NULL, /* zend_get_std_object_handlers()->get_class_name,*/
-	sxe_objects_compare,
-	sxe_object_cast,
-	sxe_count_elements,
-	sxe_get_debug_info
-};
-/* }}} */
-
-static zend_object_value sxe_object_ze1_clone(zval *zobject TSRMLS_DC) /* {{{ */
-{
-	php_error(E_ERROR, "Cannot clone object of class %s due to 'zend.ze1_compatibility_mode'", Z_OBJCE_P(zobject)->name);
-	/* Return zobject->value.obj just to satisfy compiler */
-	/* FIXME: Should not be a fatal */
-	return zobject->value.obj;
-}
-/* }}} */
-
 /* {{{ sxe_object_clone()
  */
 static void
@@ -2044,11 +2009,7 @@ php_sxe_register_object(php_sxe_object *intern TSRMLS_DC)
 	zend_object_value rv;
 
 	rv.handle = zend_objects_store_put(intern, sxe_object_dtor, (zend_objects_free_object_storage_t)sxe_object_free_storage, sxe_object_clone TSRMLS_CC);
-	if (EG(ze1_compatibility_mode)) {
-		rv.handlers = (zend_object_handlers *) &sxe_ze1_object_handlers;
-	} else {
-		rv.handlers = (zend_object_handlers *) &sxe_object_handlers;
-	}
+	rv.handlers = (zend_object_handlers *) &sxe_object_handlers;
 
 	return rv;
 }
@@ -2478,12 +2439,6 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_object_handlers.get_constructor = zend_get_std_object_handlers()->get_constructor;
 	sxe_object_handlers.get_class_entry = zend_get_std_object_handlers()->get_class_entry;
 	sxe_object_handlers.get_class_name = zend_get_std_object_handlers()->get_class_name;
-
-	sxe_ze1_object_handlers.get_method = zend_get_std_object_handlers()->get_method;
-	sxe_ze1_object_handlers.get_constructor = zend_get_std_object_handlers()->get_constructor;
-	sxe_ze1_object_handlers.get_class_entry = zend_get_std_object_handlers()->get_class_entry;
-	sxe_ze1_object_handlers.get_class_name = zend_get_std_object_handlers()->get_class_name;
-	sxe_ze1_object_handlers.clone_obj = sxe_object_ze1_clone;
 
 #ifdef HAVE_SPL
 	if (zend_get_module_started("spl") == SUCCESS) {
