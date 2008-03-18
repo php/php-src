@@ -301,6 +301,7 @@ static sapi_module_struct sapi_module = {
 	sapi_webjames_register_variables,       /* register server variables */
 	NULL,									/* Log message */
 	NULL,									/* Get request time */
+	NULL,									/* Child terminate */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
