@@ -1314,14 +1314,7 @@ static int dbh_compare(zval *object1, zval *object2 TSRMLS_DC)
 	return -1;
 }
 
-static zend_object_value dbh_ze1_clone_obj(zval *object TSRMLS_DC)
-{
-	php_error(E_ERROR, "Cannot clone object of class %s due to 'zend.ze1_compatibility_mode'", Z_OBJCE_P(object)->name);
-	return object->value.obj;
-}
-
 static zend_object_handlers pdo_dbh_object_handlers;
-static zend_object_handlers pdo_dbh_object_handlers_ze1;
 
 void pdo_dbh_init(TSRMLS_D)
 {
@@ -1335,11 +1328,6 @@ void pdo_dbh_init(TSRMLS_D)
 	pdo_dbh_object_handlers.get_method = dbh_method_get;
 	pdo_dbh_object_handlers.compare_objects = dbh_compare;
 	
-	memcpy(&pdo_dbh_object_handlers_ze1, &std_object_handlers, sizeof(zend_object_handlers));
-	pdo_dbh_object_handlers_ze1.get_method = dbh_method_get;
-	pdo_dbh_object_handlers_ze1.compare_objects = dbh_compare;
-	pdo_dbh_object_handlers_ze1.clone_obj = dbh_ze1_clone_obj;
-
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_BOOL", (long)PDO_PARAM_BOOL);
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_NULL", (long)PDO_PARAM_NULL);
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_INT",  (long)PDO_PARAM_INT);
@@ -1527,7 +1515,7 @@ zend_object_value pdo_dbh_new(zend_class_entry *ce TSRMLS_DC)
 	dbh->def_stmt_ce = pdo_dbstmt_ce;
 	
 	retval.handle = zend_objects_store_put(dbh, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t)pdo_dbh_free_storage, NULL TSRMLS_CC);
-	retval.handlers = EG(ze1_compatibility_mode) ? &pdo_dbh_object_handlers_ze1 : &pdo_dbh_object_handlers;
+	retval.handlers = &pdo_dbh_object_handlers;
 	
 	return retval;
 }
