@@ -1527,7 +1527,7 @@ void zend_shutdown_timeout_thread(void) /* {{{ */
 #define SIGPROF 27
 #endif
 
-void zend_set_timeout(long seconds) /* {{{ */
+void zend_set_timeout(long seconds, int reset_signals) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -1554,16 +1554,22 @@ void zend_set_timeout(long seconds) /* {{{ */
 
 #	ifdef __CYGWIN__
 		setitimer(ITIMER_REAL, &t_r, NULL);
-		signal(SIGALRM, zend_timeout);
-		sigemptyset(&sigset);
-		sigaddset(&sigset, SIGALRM);
+		if(reset_signals) {
+			signal(SIGALRM, zend_timeout);
+			sigemptyset(&sigset);
+			sigaddset(&sigset, SIGALRM);
+		}
 #	else
 		setitimer(ITIMER_PROF, &t_r, NULL);
-		signal(SIGPROF, zend_timeout);
-		sigemptyset(&sigset);
-		sigaddset(&sigset, SIGPROF);
+		if(reset_signals) {
+			signal(SIGPROF, zend_timeout);
+			sigemptyset(&sigset);
+			sigaddset(&sigset, SIGPROF);
+		}
 #	endif
-		sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+		if(reset_signals) {
+			sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+		}
 	}
 #	endif
 #endif
