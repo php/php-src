@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.0
 - Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
+- Dropped zend.ze1_compatibility_mode (Dmitry)
 
 - Added concept of "delayed early binding" that allows opcode caches to perform
   class declaration (early and/or run-time binding) in exactly the same order

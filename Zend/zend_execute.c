@@ -560,26 +560,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, zval 
 	object = *object_ptr;
 
 	/* separate our value if necessary */
-	if (EG(ze1_compatibility_mode) && Z_TYPE_P(value) == IS_OBJECT) {
-		zval *orig_value = value;
-		char *class_name;
-		zend_uint class_name_len;
-		int dup;
-		
-		ALLOC_ZVAL(value);
-		*value = *orig_value;
-	 	Z_UNSET_ISREF_P(value);
-		Z_SET_REFCOUNT_P(value, 0);
-		dup = zend_get_object_classname(orig_value, &class_name, &class_name_len TSRMLS_CC);
-		if (Z_OBJ_HANDLER_P(value, clone_obj) == NULL) {
-			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
-		}
-		zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);		
-		value->value.obj = Z_OBJ_HANDLER_P(orig_value, clone_obj)(orig_value TSRMLS_CC);
-		if(!dup)	{
-			efree(class_name);
-		}
-	} else if (value_op->op_type == IS_TMP_VAR) {
+	if (value_op->op_type == IS_TMP_VAR) {
 		zval *orig_value = value;
 
 		ALLOC_ZVAL(value);
@@ -686,49 +667,7 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 		return variable_ptr;
 	}
 
- 	if (EG(ze1_compatibility_mode) && Z_TYPE_P(value) == IS_OBJECT) {
- 		char *class_name;
- 		zend_uint class_name_len;
- 		int dup;
- 			
- 		dup = zend_get_object_classname(value, &class_name, &class_name_len TSRMLS_CC);
-  
- 		if (Z_OBJ_HANDLER_P(value, clone_obj) == NULL) {
- 			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
- 		} else if (PZVAL_IS_REF(variable_ptr)) {
- 			if (variable_ptr != value) {
- 				zend_uint refcount = Z_REFCOUNT_P(variable_ptr);
- 
- 				garbage = *variable_ptr;
- 				*variable_ptr = *value;
- 				Z_SET_REFCOUNT_P(variable_ptr, refcount);
- 				Z_SET_ISREF_P(variable_ptr);
- 				zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
- 				variable_ptr->value.obj = Z_OBJ_HANDLER_P(value, clone_obj)(value TSRMLS_CC);
- 				zendi_zval_dtor(garbage);
-				return variable_ptr;
- 			}
- 		} else {
- 			if (variable_ptr != value) {
- 				Z_ADDREF_P(value);
- 				Z_DELREF_P(variable_ptr);
- 				if (Z_REFCOUNT_P(variable_ptr) == 0) {
- 					zendi_zval_dtor(*variable_ptr);
- 				} else {
- 					ALLOC_ZVAL(variable_ptr);
- 					*variable_ptr_ptr = variable_ptr;
- 				}
- 				*variable_ptr = *value;
- 				INIT_PZVAL(variable_ptr);
- 				zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
- 				variable_ptr->value.obj = Z_OBJ_HANDLER_P(value, clone_obj)(value TSRMLS_CC);
- 				zval_ptr_dtor(&value);
- 			}
- 		}
- 		if (!dup) {
- 			efree(class_name);
- 		}
- 	} else if (PZVAL_IS_REF(variable_ptr)) {
+ 	if (PZVAL_IS_REF(variable_ptr)) {
 		if (variable_ptr!=value) {
 			zend_uint refcount = Z_REFCOUNT_P(variable_ptr);
 
@@ -798,32 +737,9 @@ static inline void zend_receive(zval **variable_ptr_ptr, zval *value TSRMLS_DC)
 {
 	zval *variable_ptr = *variable_ptr_ptr;
 
- 	if (EG(ze1_compatibility_mode) && Z_TYPE_P(value) == IS_OBJECT) {
- 		char *class_name;
- 		zend_uint class_name_len;
- 		int dup;
- 
- 		dup = zend_get_object_classname(value, &class_name, &class_name_len TSRMLS_CC);
- 		
-  		if (Z_OBJ_HANDLER_P(value, clone_obj) == NULL) {
- 			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
- 		} else {
- 			Z_DELREF_P(variable_ptr);
- 			ALLOC_ZVAL(variable_ptr);
- 			*variable_ptr_ptr = variable_ptr;
- 			*variable_ptr = *value;
- 			INIT_PZVAL(variable_ptr);
- 			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
- 			variable_ptr->value.obj = Z_OBJ_HANDLER_P(value, clone_obj)(value TSRMLS_CC);
- 		}
- 		if (!dup) {
- 			efree(class_name);
- 		}
- 	} else {
- 		Z_DELREF_P(variable_ptr);
- 		*variable_ptr_ptr = value;
- 		Z_ADDREF_P(value);
- 	}
+	Z_DELREF_P(variable_ptr);
+	*variable_ptr_ptr = value;
+	Z_ADDREF_P(value);
 }
 
 /* Utility Functions for Extensions */
