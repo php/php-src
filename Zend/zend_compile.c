@@ -159,7 +159,6 @@ void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 	zend_llist_init(&CG(list_llist), sizeof(list_llist_element), NULL, 0);
 	zend_llist_init(&CG(dimension_llist), sizeof(int), NULL, 0);
 	zend_stack_init(&CG(list_stack));
-	CG(handle_op_arrays) = 1;
 	CG(in_compilation) = 0;
 	CG(start_lineno) = 0;
 	init_compiler_declarables(TSRMLS_C);
@@ -1324,7 +1323,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		zend_u_hash_update(CG(function_table), Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
 	}
 
-	if (CG(extended_info)) {
+	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO) {
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 		opline->opcode = ZEND_EXT_NOP;
@@ -1537,7 +1536,9 @@ int zend_do_begin_function_call(znode *function_name, zend_bool check_namespace 
 	}
 
 	lcname = zend_u_str_case_fold(Z_TYPE(function_name->u.constant), Z_UNIVAL(function_name->u.constant), Z_UNILEN(function_name->u.constant), 0, &lcname_len);
-	if (zend_u_hash_find(CG(function_table), Z_TYPE(function_name->u.constant), lcname, lcname_len+1, (void **) &function)==FAILURE) {
+	if ((zend_u_hash_find(CG(function_table), Z_TYPE(function_name->u.constant), lcname, lcname_len+1, (void **) &function)==FAILURE) ||
+	    ((CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS) &&
+	     (function->type == ZEND_INTERNAL_FUNCTION))) {
 		zend_do_begin_dynamic_function_call(function_name, prefix_len TSRMLS_CC);
 		efree(lcname.v);
 		return 1; /* Dynamic */
@@ -1762,8 +1763,9 @@ void zend_resolve_class_name(znode *class_name, ulong *fetch_type, int check_ns_
 				efree(ns_lcname.v);
 			}
 
-			if (zend_u_hash_find(CG(class_table), Z_TYPE(class_name->u.constant), lcname, lcname_len+1, (void**)&pce) == SUCCESS &&
-			    (*pce)->type == ZEND_INTERNAL_CLASS) {
+			if ((CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES) ||
+			    (zend_u_hash_find(CG(class_table), Z_TYPE(class_name->u.constant), lcname, lcname_len+1, (void**)&pce) == SUCCESS &&
+			     (*pce)->type == ZEND_INTERNAL_CLASS)) {
 			    /* There is an internal class with the same name exists.
 			       PHP will need to perform additional cheks at run-time to
 			       determine if we assume class in current namespace or
@@ -2970,7 +2972,6 @@ void zend_do_early_binding(TSRMLS_D) /* {{{ */
 {
 	zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
 	HashTable *table;
-	zend_bool is_abstract_class = 0;
 
 	while (opline->opcode == ZEND_TICKS && opline > CG(active_op_array)->opcodes) {
 		opline--;
@@ -2984,57 +2985,44 @@ void zend_do_early_binding(TSRMLS_D) /* {{{ */
 			table = CG(function_table);
 			break;
 		case ZEND_DECLARE_CLASS:
+			if (do_bind_class(opline, CG(class_table), 1 TSRMLS_CC) == NULL) {
+				return;
+			}
+			table = CG(class_table);
+			break;
 		case ZEND_DECLARE_INHERITED_CLASS:
-			is_abstract_class = 1;
-			/* break missing intentionally */
-		case ZEND_VERIFY_ABSTRACT_CLASS: {
-				zend_op *verify_abstract_class_op = opline;
+			{
+				zend_op *fetch_class_opline = opline-1;
+				zval *parent_name = &fetch_class_opline->op2.u.constant;
+				zend_class_entry **pce;
 
-				if (!is_abstract_class) {
-					opline--;
-				}
-				if (opline->opcode == ZEND_DECLARE_CLASS) {
-					if (do_bind_class(opline, CG(class_table), 1 TSRMLS_CC) == NULL) {
-						return;
-					}
-				} else if (opline->opcode == ZEND_DECLARE_INHERITED_CLASS) {
-					zval *parent_name = &(opline-1)->op2.u.constant;
-					zend_class_entry **pce;
+				if ((zend_u_lookup_class(Z_TYPE_P(parent_name), Z_UNIVAL_P(parent_name), Z_UNILEN_P(parent_name), &pce TSRMLS_CC) == FAILURE) ||
+				    ((CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES) &&
+				     ((*pce)->type == ZEND_INTERNAL_CLASS))) {
+				    if (CG(compiler_options) & ZEND_COMPILE_DELAYED_BINDING) {
+						zend_uint *opline_num = &CG(active_op_array)->early_binding;
 
-					if (zend_u_lookup_class(Z_TYPE_P(parent_name), Z_UNIVAL_P(parent_name), Z_UNILEN_P(parent_name), &pce TSRMLS_CC) == FAILURE) {
-						return;
+						while (*opline_num != -1) {
+							opline_num = &CG(active_op_array)->opcodes[*opline_num].result.u.opline_num;
+						}
+						*opline_num = opline - CG(active_op_array)->opcodes;
+						opline->opcode = ZEND_DECLARE_INHERITED_CLASS_DELAYED;
+						opline->result.op_type = IS_UNUSED;
+						opline->result.u.opline_num = -1;
 					}
-					if (do_bind_inherited_class(opline, CG(class_table), *pce, 1 TSRMLS_CC) == NULL) {
-						return;
-					}
-					/* clear unnecessary ZEND_FETCH_CLASS opcode */
-					if (opline > CG(active_op_array)->opcodes &&
-					    (opline-1)->opcode == ZEND_FETCH_CLASS) {
-					  zend_op *fetch_class_opline = opline-1;
-
-						zval_dtor(&fetch_class_opline->op2.u.constant);
-						fetch_class_opline->opcode = ZEND_NOP;
-						memset(&fetch_class_opline->op1, 0, sizeof(znode));
-						memset(&fetch_class_opline->op2, 0, sizeof(znode));
-						SET_UNUSED(fetch_class_opline->op1);
-						SET_UNUSED(fetch_class_opline->op2);
-						SET_UNUSED(fetch_class_opline->result);
-					}
-				} else {
-					/* We currently don't early-bind classes that implement interfaces */
 					return;
 				}
-				table = CG(class_table);
-				if (!is_abstract_class) {
-					/* clear the verify_abstract_class op */
-					init_op(verify_abstract_class_op TSRMLS_CC);
-					SET_UNUSED(verify_abstract_class_op->op1);
-					SET_UNUSED(verify_abstract_class_op->op2);
-					verify_abstract_class_op->opcode = ZEND_NOP;
+				if (do_bind_inherited_class(opline, CG(class_table), *pce, 1 TSRMLS_CC) == NULL) {
+					return;
 				}
-			}
+				/* clear unnecessary ZEND_FETCH_CLASS opcode */
+				zval_dtor(&fetch_class_opline->op2.u.constant);
+				MAKE_NOP(fetch_class_opline);
 
-			break;
+				table = CG(class_table);
+				break;
+			}
+		case ZEND_VERIFY_ABSTRACT_CLASS:
 		case ZEND_ADD_INTERFACE:
 			/* We currently don't early-bind classes that implement interfaces */
 			return;
@@ -3046,11 +3034,26 @@ void zend_do_early_binding(TSRMLS_D) /* {{{ */
 	zend_u_hash_del(table, Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant));
 	zval_dtor(&opline->op1.u.constant);
 	zval_dtor(&opline->op2.u.constant);
-	opline->opcode = ZEND_NOP;
-	memset(&opline->op1, 0, sizeof(znode));
-	memset(&opline->op2, 0, sizeof(znode));
-	SET_UNUSED(opline->op1);
-	SET_UNUSED(opline->op2);
+	MAKE_NOP(opline);
+}
+/* }}} */
+
+ZEND_API void zend_do_delayed_early_binding(zend_op_array *op_array TSRMLS_DC) /* {{{ */
+{
+	if (op_array->early_binding != -1) {
+		zend_bool orig_in_compilation = CG(in_compilation);
+		zend_uint opline_num = op_array->early_binding;
+		zend_class_entry **pce;
+
+		CG(in_compilation) = 1;
+		while (opline_num != -1) {
+			if (zend_u_lookup_class(Z_TYPE(op_array->opcodes[opline_num-1].op2.u.constant), Z_UNIVAL(op_array->opcodes[opline_num-1].op2.u.constant), Z_UNILEN(op_array->opcodes[opline_num-1].op2.u.constant), &pce TSRMLS_CC) == SUCCESS) {
+				do_bind_inherited_class(&op_array->opcodes[opline_num], EG(class_table), *pce, 1 TSRMLS_CC);
+			}
+			opline_num = op_array->opcodes[opline_num].result.u.opline_num;
+		}
+		CG(in_compilation) = orig_in_compilation;
+	}
 }
 /* }}} */
 
@@ -4852,7 +4855,7 @@ void zend_do_extended_info(TSRMLS_D) /* {{{ */
 {
 	zend_op *opline;
 
-	if (!CG(extended_info)) {
+	if (!(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
 		return;
 	}
 
@@ -4868,7 +4871,7 @@ void zend_do_extended_fcall_begin(TSRMLS_D) /* {{{ */
 {
 	zend_op *opline;
 
-	if (!CG(extended_info)) {
+	if (!(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
 		return;
 	}
 
@@ -4884,7 +4887,7 @@ void zend_do_extended_fcall_end(TSRMLS_D) /* {{{ */
 {
 	zend_op *opline;
 
-	if (!CG(extended_info)) {
+	if (!(CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO)) {
 		return;
 	}
 
