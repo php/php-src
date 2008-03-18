@@ -25,6 +25,7 @@
 #include "safe_mode.h"
 #include "ext/standard/head.h"
 #include "ext/standard/file.h"
+#include "basic_functions.h"
 #include "exec.h"
 #include "php_globals.h"
 #include "SAPI.h"
@@ -265,6 +266,8 @@ char *php_escape_shell_cmd(char *str) {
 	register int x, y, l;
 	char *cmd;
 	char *p = NULL;
+	
+	TSRMLS_FETCH();
 
 	l = strlen(str);
 	cmd = safe_emalloc(2, l, 1);
