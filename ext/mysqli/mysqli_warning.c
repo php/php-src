@@ -140,7 +140,7 @@ MYSQLI_WARNING *php_get_warnings(MYSQL *mysql TSRMLS_DC)
 		int errno;
 
 		MAKE_STD_ZVAL(row);
-		mysqlnd_fetch_into(result, MYSQLND_FETCH_NUM, row, MYSQLND_MYSQL);
+		mysqlnd_fetch_into(result, MYSQLND_FETCH_NUM, row, MYSQLND_MYSQLI);
 		if (Z_TYPE_P(row) != IS_ARRAY) {
 			zval_ptr_dtor(&row);
 			break;
@@ -322,12 +322,22 @@ const zend_function_entry mysqli_warning_methods[] = {
 
 /* {{{ mysqli_warning_property_entries */
 const mysqli_property_entry mysqli_warning_property_entries[] = {
-	{"message", mysqli_warning_message, NULL},
-	{"sqlstate", mysqli_warning_sqlstate, NULL},
-	{"errno", mysqli_warning_errno, NULL},
-	{NULL, NULL, NULL}
+	{"message", sizeof("message") - 1, mysqli_warning_message, NULL},
+	{"sqlstate", sizeof("sqlstate") - 1, mysqli_warning_sqlstate, NULL},
+	{"errno", sizeof("errno") - 1, mysqli_warning_errno, NULL},
+	{NULL, 0, NULL, NULL}
 };
 /* }}} */
+
+/* {{{ mysqli_warning_property_info_entries */
+zend_property_info mysqli_warning_property_info_entries[] = {
+	{ZEND_ACC_PUBLIC, {"message"}, 	sizeof("message") - 1,	0, {NULL}, 0, NULL},
+	{ZEND_ACC_PUBLIC, {"sqlstate"},	sizeof("sqlstate") - 1,	0, {NULL}, 0, NULL},
+	{ZEND_ACC_PUBLIC, {"errno"},	sizeof("errno") - 1, 	0, {NULL}, 0, NULL},
+	{0,					{NULL}, 			0,				0, {NULL}, 0, NULL}	
+};
+/* }}} */
+
 
 /*
  * Local variables:

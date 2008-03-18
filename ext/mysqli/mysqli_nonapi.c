@@ -33,6 +33,19 @@
 
 #define SAFE_STR(a) ((a)?a:"")
 
+/* {{{ php_mysqli_set_error
+ */
+static void php_mysqli_set_error(long mysql_errno, char *mysql_err TSRMLS_DC)
+{
+	MyG(error_no) = mysql_errno;
+	if (MyG(error_msg)) {
+		efree(MyG(error_msg));
+	}
+	MyG(error_msg) = estrdup(mysql_err);
+}
+/* }}} */
+
+
 void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_connect, zend_bool in_ctor)
 {
 	MY_MYSQL			*mysql = NULL;
@@ -92,7 +105,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 		/* remove some insecure options */
 		flags &= ~CLIENT_MULTI_STATEMENTS;   /* don't allow multi_queries via connect parameter */
 		if (PG(open_basedir) && PG(open_basedir)[0] != '\0') {
-			flags ^= CLIENT_LOCAL_FILES;
+			flags &= ~CLIENT_LOCAL_FILES;
 		}
 	}
 
@@ -220,7 +233,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 						port, socket, flags, MyG(mysqlnd_thd_zval_cache) TSRMLS_CC) == NULL)
 #endif
 	{
-		/* Save error messages */
+		/* Save error messages - for mysqli_connect_error() & mysqli_connect_errno() */
 		php_mysqli_set_error(mysql_errno(mysql->mysql), (char *) mysql_error(mysql->mysql) TSRMLS_CC);
 		php_mysqli_throw_sql_exception((char *)mysql_sqlstate(mysql->mysql), mysql_errno(mysql->mysql) TSRMLS_CC,
 										"%s", mysql_error(mysql->mysql));
@@ -630,7 +643,7 @@ PHP_FUNCTION(mysqli_get_warnings)
 }
 /* }}} */
 
-/* {{{ proto object mysqli_stmt_get_warnings(object link) U */ 
+/* {{{ proto object mysqli_stmt_get_warnings(object link) U */
 PHP_FUNCTION(mysqli_stmt_get_warnings)
 {
 	MY_STMT				*stmt;

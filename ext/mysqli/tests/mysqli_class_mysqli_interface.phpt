@@ -92,13 +92,13 @@ require_once('skipifconnectfailure.inc');
 		printf("ok\n");
 
 	printf("\nClass variables:\n");
-	$variables = get_class_vars(get_class($mysqli));
+	$variables = array_keys(get_class_vars(get_class($mysqli)));
 	sort($variables);
 	foreach ($variables as $k => $var)
 		printf("%s\n", $var);
 
 	printf("\nObject variables:\n");
-	$variables = get_object_vars($mysqli);
+	$variables = array_keys(get_object_vars($mysqli));
 	foreach ($variables as $k => $var)
 		printf("%s\n", $var);
 
@@ -213,8 +213,42 @@ Methods:
 ok
 
 Class variables:
+affected_rows
+client_info
+client_version
+connect_errno
+connect_error
+errno
+error
+field_count
+host_info
+info
+insert_id
+protocol_version
+server_info
+server_version
+sqlstate
+thread_id
+warning_count
 
 Object variables:
+affected_rows
+client_info
+client_version
+connect_errno
+connect_error
+errno
+error
+field_count
+host_info
+info
+insert_id
+server_info
+server_version
+sqlstate
+protocol_version
+thread_id
+warning_count
 
 Magic, magic properties:
 mysqli->affected_rows = '%s'/integer ('%s'/integer)
@@ -250,8 +284,42 @@ Methods:
 ok
 
 Class variables:
+affected_rows
+client_info
+client_version
+connect_errno
+connect_error
+errno
+error
+field_count
+host_info
+info
+insert_id
+protocol_version
+server_info
+server_version
+sqlstate
+thread_id
+warning_count
 
 Object variables:
+affected_rows
+client_info
+client_version
+connect_errno
+connect_error
+errno
+error
+field_count
+host_info
+info
+insert_id
+server_info
+server_version
+sqlstate
+protocol_version
+thread_id
+warning_count
 
 Magic, magic properties:
 mysqli->affected_rows = '%s'/integer ('%s'/integer)

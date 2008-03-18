@@ -24,7 +24,7 @@ if ($MYSQLND_VERSION < 576)
 	require_once('reflection_tools.inc');
 	$class = new ReflectionClass('mysqli');
 	inspectClass($class);
-	print "done!";
+	print "done!\n";
 ?>
 --EXPECTF--
 Inspecting class 'mysqli'
@@ -646,4 +646,158 @@ returnsReference: no
 Modifiers: 256
 Number of Parameters: 0
 Number of Required Parameters: 0
+
+Inspecting property 'affected_rows'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
+Inspecting property 'client_info'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
+Inspecting property 'client_version'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
+Inspecting property 'connect_errno'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
+Inspecting property 'connect_error'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
+Inspecting property 'errno'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
+Inspecting property 'error'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
+Inspecting property 'field_count'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
+Inspecting property 'host_info'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
+Inspecting property 'info'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
+Inspecting property 'insert_id'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
+Inspecting property 'protocol_version'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
+Inspecting property 'server_info'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
+Inspecting property 'server_version'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
+Inspecting property 'sqlstate'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
+Inspecting property 'thread_id'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+
+Inspecting property 'warning_count'
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isDefault: yes
+Modifiers: 256
+Default property 'affected_rows'
+Default property 'client_info'
+Default property 'client_version'
+Default property 'connect_errno'
+Default property 'connect_error'
+Default property 'errno'
+Default property 'error'
+Default property 'field_count'
+Default property 'host_info'
+Default property 'info'
+Default property 'insert_id'
+Default property 'protocol_version'
+Default property 'server_info'
+Default property 'server_version'
+Default property 'sqlstate'
+Default property 'thread_id'
+Default property 'warning_count'
 done!
+

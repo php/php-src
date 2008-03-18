@@ -50,17 +50,32 @@ new mysqli()
 
 	ini_set('mysqli.default_host', $host);
 	if (!is_object($mysqli = new mysqli()) || (0 !== mysqli_connect_errno())) {
-		printf("[008] Usage of mysqli.default_host failed\n") ;
+		printf("[012] Failed to create mysqli object\n");
 	} else {
-		$mysqli->close();
+		// There shall be NO connection! Using new mysqli(void) shall not use defaults for a connection!
+			// We had long discussions on this and found that the ext/mysqli API as
+			// such is broken. As we can't fix it, we document how it has behaved from
+			// the first day on. And that's: no connection.
+			if (NULL !== ($tmp = @$mysqli->query('SELECT 1'))) {
+				printf("[013] There shall be no connection!\n");
+				$mysqli->close();
+			}
 	}
 
 	if ($IS_MYSQLND) {
 		ini_set('mysqli.default_host', 'p:' . $host);
-		if (!is_object($mysqli = new mysqli()) || (0 !== mysqli_connect_errno())) {
-			printf("[008b] Usage of mysqli.default_host failed\n") ;
+		if (!is_object($mysqli = new mysqli())) {
+			// Due to an API flaw this shall not connect
+			printf("[010] Failed to create mysqli object\n");
 		} else {
-			$mysqli->close();
+			// There shall be NO connection! Using new mysqli(void) shall not use defaults for a connection!
+			// We had long discussions on this and found that the ext/mysqli API as
+			// such is broken. As we can't fix it, we document how it has behaved from
+			// the first day on. And that's: no connection.
+			if (NULL !== ($tmp = @$mysqli->query('SELECT 1'))) {
+				printf("[011] There shall be no connection!\n");
+				$mysqli->close();
+			}
 		}
 	}
 
@@ -130,8 +145,6 @@ new mysqli()
 ?>
 --EXPECTF--
 Warning: mysqli::mysqli(): (%d/%d): Access denied for user '%sunknown%s'@'%s' (using password: %s) in %s on line %d
-
-Warning: mysqli::close(): Couldn't fetch mysqli in %s on line %d
 ... and now Exceptions
 Access denied for user '%s'@'%s' (using password: %s)
 done!

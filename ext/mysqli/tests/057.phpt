@@ -62,6 +62,24 @@ require_once('skipifconnectfailure.inc');
 bool(true)
 bool(true)
 object(mysqli_stmt)#%d (%d) {
+  ["affected_rows"]=>
+  int(-1)
+  ["insert_id"]=>
+  int(0)
+  ["num_rows"]=>
+  int(0)
+  ["param_count"]=>
+  int(0)
+  ["field_count"]=>
+  int(1)
+  ["errno"]=>
+  int(0)
+  ["error"]=>
+  string(0) ""
+  ["sqlstate"]=>
+  string(5) "00000"
+  ["id"]=>
+  int(3)
 }
 bool(true)
 bool(false)

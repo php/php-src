@@ -16,7 +16,8 @@ class DbConnection {
 		var_dump($link); 
 		
 		$link = mysqli_init();
-		var_dump($link);
+		/* @ is to supress 'Property access is not allowed yet' */
+		@var_dump($link);
 		
 		$mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
 		$mysql->query("DROP TABLE IF EXISTS test_warnings");
@@ -33,10 +34,84 @@ $db->connect();
 echo "Done\n";
 ?>
 --EXPECTF--	
-object(mysqli)#%d (0) {
+object(mysqli)#%d (%d) {
+  ["affected_rows"]=>
+  int(0)
+  ["client_info"]=>
+  string(%d) "%s"
+  ["client_version"]=>
+  int(%d)
+  ["connect_errno"]=>
+  int(0)
+  ["connect_error"]=>
+  string(0) ""
+  ["errno"]=>
+  int(0)
+  ["error"]=>
+  string(0) ""
+  ["field_count"]=>
+  int(0)
+  ["host_info"]=>
+  string(42) "MySQL host info: Localhost via UNIX socket"
+  ["info"]=>
+  NULL
+  ["insert_id"]=>
+  int(0)
+  ["server_info"]=>
+  string(%d) "%s"
+  ["server_version"]=>
+  int(%d)
+  ["sqlstate"]=>
+  string(5) "00000"
+  ["protocol_version"]=>
+  int(10)
+  ["thread_id"]=>
+  int(%d)
+  ["warning_count"]=>
+  int(0)
 }
-object(mysqli)#%d (0) {
+object(mysqli)#%d (%d) {
+  ["affected_rows"]=>
+  NULL
+  ["client_info"]=>
+  string(%d) "%s"
+  ["client_version"]=>
+  int(%d)
+  ["connect_errno"]=>
+  int(0)
+  ["connect_error"]=>
+  string(0) ""
+  ["errno"]=>
+  int(0)
+  ["error"]=>
+  string(0) ""
+  ["field_count"]=>
+  NULL
+  ["host_info"]=>
+  NULL
+  ["info"]=>
+  NULL
+  ["insert_id"]=>
+  NULL
+  ["server_info"]=>
+  NULL
+  ["server_version"]=>
+  NULL
+  ["sqlstate"]=>
+  NULL
+  ["protocol_version"]=>
+  NULL
+  ["thread_id"]=>
+  NULL
+  ["warning_count"]=>
+  NULL
 }
-object(mysqli_warning)#%d (0) {
+object(mysqli_warning)#%d (%d) {
+  ["message"]=>
+  string(25) "Column 'a' cannot be null"
+  ["sqlstate"]=>
+  string(5) "HY000"
+  ["errno"]=>
+  int(1048)
 }
 Done

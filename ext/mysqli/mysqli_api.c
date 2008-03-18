@@ -430,7 +430,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 		stmt->result.vars = (zval **)safe_emalloc((var_cnt), sizeof(zval), 0);
 		for (i = start; i < var_cnt+start; i++) {
 			ofs = i-start;
-			Z_ADDREF_P(*args[i]);
+			Z_ADDREF_PP(args[i]);
 			stmt->result.vars[ofs] = *args[i];
 		}
 	}
@@ -562,7 +562,6 @@ PHP_FUNCTION(mysqli_close)
 
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_INITIALIZED);
 
-
 	if (!mysql->persistent) {
 		mysqli_close(mysql->mysql, MYSQLI_CLOSE_EXPLICIT);
 		mysql->mysql = NULL;
@@ -582,7 +581,7 @@ PHP_FUNCTION(mysqli_close)
 
 	php_clear_mysql(mysql);
 
-	MYSQLI_CLEAR_RESOURCE(&mysql_link);	
+	MYSQLI_CLEAR_RESOURCE(&mysql_link);
 	efree(mysql);
 	RETURN_TRUE;
 }
@@ -686,7 +685,7 @@ PHP_FUNCTION(mysqli_errno)
    Returns the text of the error message from previous MySQL operation */
 PHP_FUNCTION(mysqli_error) 
 {
-	MY_MYSQL 	*mysql;
+	MY_MYSQL	*mysql;
 	zval		*mysql_link;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
@@ -703,7 +702,7 @@ PHP_FUNCTION(mysqli_error)
 PHP_FUNCTION(mysqli_stmt_execute)
 {
 	MY_STMT		*stmt;
-	zval			*mysql_stmt;
+	zval		*mysql_stmt;
 #ifndef MYSQLI_USE_MYSQLND
 	unsigned int	i;
 #endif
@@ -798,7 +797,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 	MY_STMT		*stmt;
 	zval			*mysql_stmt;
 	unsigned int	i;
-	ulong 			ret;
+	ulong			ret;
 	unsigned int	uval;
 	my_ulonglong	llval;
 	MYSQL_RES		*result_metadata = NULL;
@@ -1041,9 +1040,9 @@ PHP_FUNCTION(mysqli_fetch_field)
 PHP_FUNCTION(mysqli_fetch_fields) 
 {
 	MYSQL_RES	*result;
-	zval  		*mysql_result;
+	zval		*mysql_result;
 	MYSQL_FIELD	*field;
-	zval 		*obj;
+	zval		*obj;
 
 	unsigned int i;
 
@@ -1220,9 +1219,7 @@ PHP_FUNCTION(mysqli_free_result)
    Get MySQL client info */
 PHP_FUNCTION(mysqli_get_client_info)
 {
-	char *info = (char *)mysql_get_client_info();
-
-	RETURN_UTF8_STRING(info, ZSTR_DUPLICATE);
+	RETURN_UTF8_STRING((char *)mysql_get_client_info(), ZSTR_DUPLICATE);
 }
 /* }}} */
 
@@ -1236,7 +1233,7 @@ PHP_FUNCTION(mysqli_get_client_version)
 
 /* {{{ proto string mysqli_get_host_info (object link) U
    Get MySQL host info */
-PHP_FUNCTION(mysqli_get_host_info) 
+PHP_FUNCTION(mysqli_get_host_info)
 {
 	MY_MYSQL	*mysql;
 	zval		*mysql_link = NULL;
@@ -1246,7 +1243,7 @@ PHP_FUNCTION(mysqli_get_host_info)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
-	RETURN_UTF8_STRING(mysql->mysql->host_info, ZSTR_DUPLICATE);
+	RETURN_UTF8_STRING((mysql->mysql->host_info) ? mysql->mysql->host_info : "", ZSTR_DUPLICATE);
 }
 /* }}} */
 

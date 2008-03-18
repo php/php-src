@@ -93,13 +93,13 @@ require_once('skipifconnectfailure.inc');
 		$expected_constants['MYSQLI_OPT_NET_CMD_BUFFER_SIZE'] = true;
 		$expected_constants['MYSQLI_OPT_NET_READ_BUFFER_SIZE'] = true;
 		$expected_constants['MYSQLI_DEBUG_TRACE_ENABLED'] = true;
-		
+
 	} else {
 		$version = mysqli_get_client_version();
 	}
 
 	if (($version > 51122 && $version < 60000) || ($version > 60003) || $IS_MYSQLND) {
-		$expected_constants['MYSQLI_ON_UPDATE_NOW_FLAG'] = true;	
+		$expected_constants['MYSQLI_ON_UPDATE_NOW_FLAG'] = true;
 	}
 
 	if ($version > 50002) {
