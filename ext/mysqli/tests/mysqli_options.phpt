@@ -1,14 +1,33 @@
 --TEST--
 mysqli_options()
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
 	include "connect.inc";
+
+/*
+TODO: ext/mysqli might lack support for those options which are available
+with the libmysql C call mysql_options(). Not sure which of them make
+sense to have in PHP and not even sure which of them might be available
+already through other measures.
+
+	MYSQL_OPT_COMPRESS (argument: not used) --> Andrey/Ulf: bug, should be added
+	? MYSQL_OPT_NAMED_PIPE (argument: not used) ?
+	MYSQL_OPT_READ_TIMEOUT (argument type: unsigned int *) --> Andrey/Ulf: bug, should be added
+	MYSQL_OPT_RECONNECT (argument type: my_bool *) -->  Andrey/Ulf: might be security risk to have
+	MYSQL_OPT_SSL_VERIFY_SERVER_CERT (argument type: my_bool *) --> Andrey/Ulf: might be security risk to have
+	MYSQL_OPT_WRITE_TIMEOUT (argument type: unsigned int *) --> Andrey/Ulf: bug, should be added
+	MYSQL_REPORT_DATA_TRUNCATION (argument type: my_bool *) --> Andrey: bug, although truncation might only happen with libmysql not with mysqlnd
+	MYSQL_SECURE_AUTH (argument type: my_bool *) --> Ulf: let's say deprecated, no bug
+	? MYSQL_SET_CHARSET_DIR (argument type: char *) ?
+	MYSQL_SHARED_MEMORY_BASE_NAME (argument type: char *)
+*/
+
 	$valid_options = array(  MYSQLI_READ_DEFAULT_GROUP, MYSQLI_READ_DEFAULT_FILE,
 		MYSQLI_OPT_CONNECT_TIMEOUT, MYSQLI_OPT_LOCAL_INFILE,
 		MYSQLI_INIT_COMMAND, MYSQLI_READ_DEFAULT_GROUP,

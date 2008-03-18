@@ -8,6 +8,12 @@ require_once('skipifconnectfailure.inc');
 
 if (!function_exists('mysqli_debug'))
  	die("skip: mysqli_debug() not available");
+
+if (!defined('MYSQLI_DEGBUG_TRACE_ENABLED'))
+	die("skip: can't say for sure if mysqli_debug works");
+
+if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
+	die("skip: debug functionality not enabled");
 ?>
 --FILE--
 <?php

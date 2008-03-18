@@ -134,7 +134,8 @@ struct st_mysqli_warning {
 };
 
 typedef struct _mysqli_property_entry {
-	char *pname;
+	const char *pname;
+	size_t pname_length;
 	int (*r_func)(mysqli_object *obj, zval **retval TSRMLS_DC);
 	int (*w_func)(mysqli_object *obj, zval *value TSRMLS_DC);
 } mysqli_property_entry;
@@ -188,6 +189,12 @@ extern const mysqli_property_entry mysqli_stmt_property_entries[];
 extern const mysqli_property_entry mysqli_driver_property_entries[];
 extern const mysqli_property_entry mysqli_warning_property_entries[];
 
+extern zend_property_info mysqli_link_property_info_entries[];
+extern zend_property_info mysqli_result_property_info_entries[];
+extern zend_property_info mysqli_stmt_property_info_entries[];
+extern zend_property_info mysqli_driver_property_info_entries[];
+extern zend_property_info mysqli_warning_property_info_entries[];
+
 #ifdef MYSQLI_USE_MYSQLND
 extern MYSQLND_ZVAL_PCACHE	*mysqli_mysqlnd_zval_cache;
 extern MYSQLND_QCACHE		*mysqli_mysqlnd_qcache;
@@ -201,10 +208,6 @@ extern void php_clear_warnings(MYSQLI_WARNING *w);
 extern void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type);
 extern void php_mysqli_report_error(const char *sqlstate, int errorno, const char *error TSRMLS_DC);
 extern void php_mysqli_report_index(const char *query, unsigned int status TSRMLS_DC);
-extern int php_local_infile_init(void **, const char *, void *);
-extern int php_local_infile_read(void *, char *, uint);
-extern void php_local_infile_end(void *);
-extern int php_local_infile_error(void *, char *, uint);
 extern void php_set_local_infile_handler_default(MY_MYSQL *);
 extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC, char *format, ...);
 extern zend_class_entry *mysqli_link_class_entry;
@@ -298,24 +301,9 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 	}					\
 }
 
-#define MYSQLI_ADD_PROPERTIES(a,b) \
-{ \
-	int i = 0; \
-	while (b[i].pname != NULL) { \
-		mysqli_add_property(a, b[i].pname, (mysqli_read_t)b[i].r_func, (mysqli_write_t)b[i].w_func TSRMLS_CC); \
-		i++; \
-	}\
-}
-
-#if WIN32|WINNT
-#define SCLOSE(a) closesocket(a)
-#else
-#define SCLOSE(a) close(a)
-#endif
-
 #define MYSQLI_STORE_RESULT 0
 #define MYSQLI_USE_RESULT 	1
-#ifdef MYSQLI_USE_MYSQLND 
+#ifdef MYSQLI_USE_MYSQLND
 #ifdef MYSQLND_THREADED
 #define MYSQLI_BG_STORE_RESULT 	101
 #endif
@@ -325,12 +313,6 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 #define MYSQLI_ASSOC	1
 #define MYSQLI_NUM		2
 #define MYSQLI_BOTH		3
-
-/* for mysqli_bind_param */
-#define MYSQLI_BIND_INT		1
-#define MYSQLI_BIND_DOUBLE	2
-#define MYSQLI_BIND_STRING	3
-#define MYSQLI_BIND_SEND_DATA	4
 
 /* fetch types */
 #define FETCH_SIMPLE		1
@@ -353,11 +335,6 @@ if ((MyG(report_mode) & MYSQLI_REPORT_ERROR) && mysql_errno(mysql)) { \
 if ((MyG(report_mode) & MYSQLI_REPORT_ERROR) && mysql_stmt_errno(stmt)) { \
 	php_mysqli_report_error(mysql_stmt_sqlstate(stmt), mysql_stmt_errno(stmt), mysql_stmt_error(stmt) TSRMLS_CC); \
 }
-
-PHP_MYSQLI_API void mysqli_register_link(zval *return_value, void *link TSRMLS_DC);
-PHP_MYSQLI_API void mysqli_register_stmt(zval *return_value, void *stmt TSRMLS_DC);
-PHP_MYSQLI_API void mysqli_register_result(zval *return_value, void *result TSRMLS_DC);
-PHP_MYSQLI_API void php_mysqli_set_error(long mysql_errno, char *mysql_err TSRMLS_DC);
 
 void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_connect, zend_bool in_ctor);
 
@@ -390,9 +367,6 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 #endif
 ZEND_END_MODULE_GLOBALS(mysqli)
 
-#define MYSQLI_PROPERTY(a) extern int a(mysqli_object *obj, zval **retval TSRMLS_DC)
-
-MYSQLI_PROPERTY(my_prop_link_host);
 
 #ifdef ZTS
 #define MyG(v) TSRMG(mysqli_globals_id, zend_mysqli_globals *, v)
@@ -512,10 +486,10 @@ PHP_FUNCTION(mysqli_thread_safe);
 PHP_FUNCTION(mysqli_use_result);
 PHP_FUNCTION(mysqli_warning_count);
 
-ZEND_FUNCTION(mysqli_stmt_construct);
-ZEND_FUNCTION(mysqli_result_construct);
-ZEND_FUNCTION(mysqli_driver_construct);
-ZEND_METHOD(mysqli_warning,__construct);
+PHP_FUNCTION(mysqli_stmt_construct);
+PHP_FUNCTION(mysqli_result_construct);
+PHP_FUNCTION(mysqli_driver_construct);
+PHP_METHOD(mysqli_warning,__construct);
 
 #endif	/* PHP_MYSQLI_STRUCTS.H */
 

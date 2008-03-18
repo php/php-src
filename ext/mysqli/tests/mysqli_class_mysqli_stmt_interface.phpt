@@ -67,13 +67,13 @@ Interface of the class mysqli_stmt
 		printf("ok\n");
 
 	printf("\nClass variables:\n");
-	$variables = get_class_vars(get_class($stmt));
+	$variables = array_keys(get_class_vars(get_class($stmt)));
 	sort($variables);
 	foreach ($variables as $k => $var)
 		printf("%s\n", $var);
 
 	printf("\nObject variables:\n");
-	$variables = get_object_vars($stmt);
+	$variables = array_keys(get_object_vars($stmt));
 	foreach ($variables as $k => $var)
 		printf("%s\n", $var);
 
@@ -138,8 +138,26 @@ Methods:
 ok
 
 Class variables:
+affected_rows
+errno
+error
+field_count
+id
+insert_id
+num_rows
+param_count
+sqlstate
 
 Object variables:
+affected_rows
+insert_id
+num_rows
+param_count
+field_count
+errno
+error
+sqlstate
+id
 
 Magic, magic properties:
 
@@ -176,8 +194,26 @@ Methods:
 ok
 
 Class variables:
+affected_rows
+errno
+error
+field_count
+id
+insert_id
+num_rows
+param_count
+sqlstate
 
 Object variables:
+affected_rows
+insert_id
+num_rows
+param_count
+field_count
+errno
+error
+sqlstate
+id
 
 Magic, magic properties:
 
