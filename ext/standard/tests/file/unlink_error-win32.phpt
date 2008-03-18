@@ -8,12 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-if (substr(PHP_OS, 0, 3) != 'WIN') {
-    die('skip.. only on Windows');
-}
-?>
---FILE--
-<?php
 /* Prototype : bool unlink ( string $filename [, resource $context] );
    Description : Deletes filename
 */
