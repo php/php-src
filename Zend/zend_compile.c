@@ -2504,26 +2504,17 @@ static zend_bool zend_do_perform_implementation_check(zend_function *fe, zend_fu
 
 			zstr colon;
 
-			if (fe->common.type == ZEND_USER_FUNCTION &&
-			    ((UG(unicode) &&
-			      u_strchr(proto->common.arg_info[i].class_name.u, ':') == NULL &&
-			      (colon.u = u_memrchr(fe->common.arg_info[i].class_name.u, ':', fe->common.arg_info[i].class_name_len)) != NULL &&
-			      fe->common.arg_info[i].class_name_len - (colon.u + 1 - fe->common.arg_info[i].class_name.u) == proto->common.arg_info[i].class_name_len &&
-			      zend_u_binary_strcasecmp(colon.u + 1, proto->common.arg_info[i].class_name_len, proto->common.arg_info[i].class_name.u, proto->common.arg_info[i].class_name_len) == 0) ||
-			     (!UG(unicode) &&
-			      strchr(proto->common.arg_info[i].class_name.s, ':') == NULL &&
-			      (colon.s = zend_memrchr(fe->common.arg_info[i].class_name.s, ':', fe->common.arg_info[i].class_name_len)) != NULL &&
-			      fe->common.arg_info[i].class_name_len - (colon.s + 1 - fe->common.arg_info[i].class_name.s) == proto->common.arg_info[i].class_name_len &&
-			      zend_binary_strcasecmp(colon.s + 1, proto->common.arg_info[i].class_name_len, proto->common.arg_info[i].class_name.s, proto->common.arg_info[i].class_name_len) == 0))) {
-
-				efree((char*)fe->common.arg_info[i].class_name.v);
-				if (UG(unicode)) {
-					fe->common.arg_info[i].class_name.u = eustrndup(proto->common.arg_info[i].class_name.u, proto->common.arg_info[i].class_name_len);
-				} else {
-					fe->common.arg_info[i].class_name.s = estrndup(proto->common.arg_info[i].class_name.s, proto->common.arg_info[i].class_name_len);
-				}
-				fe->common.arg_info[i].class_name_len = proto->common.arg_info[i].class_name_len;
-			} else {
+			if (fe->common.type != ZEND_USER_FUNCTION ||
+			    ((!UG(unicode) ||
+			      u_strchr(proto->common.arg_info[i].class_name.u, ':') != NULL ||
+			      (colon.u = u_memrchr(fe->common.arg_info[i].class_name.u, ':', fe->common.arg_info[i].class_name_len)) == NULL ||
+			      fe->common.arg_info[i].class_name_len - (colon.u + 1 - fe->common.arg_info[i].class_name.u) != proto->common.arg_info[i].class_name_len ||
+			      zend_u_binary_strcasecmp(colon.u + 1, proto->common.arg_info[i].class_name_len, proto->common.arg_info[i].class_name.u, proto->common.arg_info[i].class_name_len) != 0) &&
+			     (UG(unicode) ||
+			      strchr(proto->common.arg_info[i].class_name.s, ':') != NULL ||
+			      (colon.s = zend_memrchr(fe->common.arg_info[i].class_name.s, ':', fe->common.arg_info[i].class_name_len)) == NULL ||
+			      fe->common.arg_info[i].class_name_len - (colon.s + 1 - fe->common.arg_info[i].class_name.s) != proto->common.arg_info[i].class_name_len ||
+			      zend_binary_strcasecmp(colon.s + 1, proto->common.arg_info[i].class_name_len, proto->common.arg_info[i].class_name.s, proto->common.arg_info[i].class_name_len) != 0))) {
 				return 0;
 			}
 		}
