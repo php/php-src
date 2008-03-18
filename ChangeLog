@@ -1,3 +1,495 @@
+2008-03-17  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      report printf fix
+
+    * ext/standard/formatted_print.c:
+      fix integer overflow in lenght calculation
+
+2008-03-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/exec.c
+      ext/standard/exec.c:
+      
+      MFB: Properly address incomplete multibyte chars inside escapeshellcmd()
+
+    * (PHP_5_3)
+      ext/standard/exec.c:
+      
+      Properly address incomplete multibyte chars inside escapeshellcmd()
+
+2008-03-17  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/formatted_print.c
+      ext/standard/formatted_print.c:
+      fix integer overflow in length calculation
+
+2008-03-17  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_3)
+      sapi/apache/mod_php5.c:
+      Revert
+      
+      Never mind, it looks like ext/filter does an estrdup on everything it
+      gets which doesn't seem very efficient to me as most things it gets
+      passed will already be emalloc'ed.  My custom version of the filter
+      extension doesn't do this which led to the confusion.
+
+    * (PHP_5_3)
+      sapi/apache/mod_php5.c:
+      We need to pass PHP-managed pointers to filter here to avoid having
+      emalloc'ed data assigned to things like r->uri and having it get
+      efree()'ed
+      on request shutdown which then means that if the Apache logging module
+      tries to log r->uri it would be reading from free'ed memory.  So a simple
+      estrdup before the filter call takes care of that.
+
+2008-03-17  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      win32/build/config.w32:
+      fix win32 build
+
+2008-03-17  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * run-tests.php:
+      MFB: detect duplicate sections
+
+    * (PHP_5_3)
+      ext/mysql/tests/mysql_fetch_row.phpt
+      ext/pdo/tests/bug_43663.phpt
+      ext/standard/tests/file/unlink_error-win32.phpt:
+      remove duplicated sections
+
+    * (PHP_5_3)
+      run-tests.php:
+      detect test cases with duplicated sections
+
+2008-03-17  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      win32/build/Makefile
+      win32/build/config.w32:
+      Fix build on Windows
+
+2008-03-17  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      NEWS:
+      add request_order
+
+2008-03-17  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_3)
+      sapi/cli/tests/016.phpt
+      sapi/cli/tests/017.phpt:
+      fix tests (removed duplicated stuff)
+
+    * (PHP_5_3)
+      ZendEngine2/FlexLexer.h
+      ZendEngine2/flex.skl:
+      remove leftovers
+
+2008-03-17  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/tests/dir/closedir_basic.phpt
+      ext/standard/tests/dir/closedir_basic.phpt
+      sapi/cli/tests/018.phpt
+      sapi/cli/tests/018.phpt:
+      fix test
+
+2008-03-17  Gwynne Raskind  <gwynne@wanderingknights.org>
+
+    * (PHP_5_3)
+      build/build.mk:
+      MFH: Fix bug #44443 (cvsclean fails on Darwin 9)
+
+    * build/build.mk:
+      Fix bug #44443 (cvsclean fails on Darwin 9)
+
+2008-03-17  Antony Dovgal  <tony@daylessday.org>
+
+    * ZendEngine2/zend_object_handlers.c:
+      return empty string of correct type if __toString() returned invalid value
+
+    * tests/classes/final_ctor3.phpt
+      tests/classes/final_ctor3.phpt
+      tests/classes/inheritance_005.phpt
+      tests/classes/inheritance_005.phpt:
+      fix tests
+
+    * (PHP_5_3)
+      NEWS:
+      BFN
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug39127.phpt:
+      MFH: fix #39127 (Old-style constructor fallbacks produce strange results)
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug39127.phpt
+      ZendEngine2/tests/bug39127.phpt:
+      fix #39127i (Old-style constructor fallbacks produce strange results)
+
+2008-03-17  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/bug38779.phpt:
+      Fix test
+
+2008-03-17  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      Makefile.frag:
+      use @ to silence the commands
+
+2008-03-17  Josie Messa  <josmessa@uk.ibm.com>
+
+    * ext/ctype/tests/ctype_alnum_basic.phpt
+      ext/ctype/tests/ctype_alnum_basic.phpt
+      ext/ctype/tests/ctype_alnum_error.phpt
+      ext/ctype/tests/ctype_alnum_error.phpt
+      ext/ctype/tests/ctype_alnum_variation1.phpt
+      ext/ctype/tests/ctype_alnum_variation1.phpt
+      ext/ctype/tests/ctype_alnum_variation2.phpt
+      ext/ctype/tests/ctype_alnum_variation2.phpt
+      ext/ctype/tests/ctype_alnum_variation3.phpt
+      ext/ctype/tests/ctype_alnum_variation3.phpt
+      ext/ctype/tests/ctype_alnum_variation4.phpt
+      ext/ctype/tests/ctype_alnum_variation4.phpt
+      ext/ctype/tests/ctype_alpha_basic.phpt
+      ext/ctype/tests/ctype_alpha_basic.phpt
+      ext/ctype/tests/ctype_alpha_error.phpt
+      ext/ctype/tests/ctype_alpha_error.phpt
+      ext/ctype/tests/ctype_alpha_variation1.phpt
+      ext/ctype/tests/ctype_alpha_variation1.phpt
+      ext/ctype/tests/ctype_alpha_variation2.phpt
+      ext/ctype/tests/ctype_alpha_variation2.phpt
+      ext/ctype/tests/ctype_alpha_variation3.phpt
+      ext/ctype/tests/ctype_alpha_variation3.phpt
+      ext/ctype/tests/ctype_alpha_variation4.phpt
+      ext/ctype/tests/ctype_alpha_variation4.phpt
+      ext/ctype/tests/ctype_cntrl_basic.phpt
+      ext/ctype/tests/ctype_cntrl_basic.phpt
+      ext/ctype/tests/ctype_cntrl_error.phpt
+      ext/ctype/tests/ctype_cntrl_error.phpt
+      ext/ctype/tests/ctype_cntrl_variation1.phpt
+      ext/ctype/tests/ctype_cntrl_variation1.phpt
+      ext/ctype/tests/ctype_cntrl_variation2.phpt
+      ext/ctype/tests/ctype_cntrl_variation2.phpt
+      ext/ctype/tests/ctype_cntrl_variation3.phpt
+      ext/ctype/tests/ctype_cntrl_variation3.phpt
+      ext/ctype/tests/ctype_cntrl_variation4.phpt
+      ext/ctype/tests/ctype_cntrl_variation4.phpt
+      ext/ctype/tests/ctype_digit_basic.phpt
+      ext/ctype/tests/ctype_digit_basic.phpt
+      ext/ctype/tests/ctype_digit_error.phpt
+      ext/ctype/tests/ctype_digit_error.phpt
+      ext/ctype/tests/ctype_digit_variation1.phpt
+      ext/ctype/tests/ctype_digit_variation1.phpt
+      ext/ctype/tests/ctype_digit_variation2.phpt
+      ext/ctype/tests/ctype_digit_variation2.phpt
+      ext/ctype/tests/ctype_digit_variation3.phpt
+      ext/ctype/tests/ctype_digit_variation3.phpt
+      ext/ctype/tests/ctype_digit_variation4.phpt
+      ext/ctype/tests/ctype_digit_variation4.phpt
+      ext/ctype/tests/ctype_graph_basic.phpt
+      ext/ctype/tests/ctype_graph_basic.phpt
+      ext/ctype/tests/ctype_graph_error.phpt
+      ext/ctype/tests/ctype_graph_error.phpt
+      ext/ctype/tests/ctype_graph_variation1.phpt
+      ext/ctype/tests/ctype_graph_variation1.phpt
+      ext/ctype/tests/ctype_graph_variation2.phpt
+      ext/ctype/tests/ctype_graph_variation2.phpt
+      ext/ctype/tests/ctype_graph_variation3.phpt
+      ext/ctype/tests/ctype_graph_variation3.phpt
+      ext/ctype/tests/ctype_graph_variation4.phpt
+      ext/ctype/tests/ctype_graph_variation4.phpt
+      ext/ctype/tests/ctype_lower_basic.phpt
+      ext/ctype/tests/ctype_lower_basic.phpt
+      ext/ctype/tests/ctype_lower_error.phpt
+      ext/ctype/tests/ctype_lower_error.phpt
+      ext/ctype/tests/ctype_lower_variation1.phpt
+      ext/ctype/tests/ctype_lower_variation1.phpt
+      ext/ctype/tests/ctype_lower_variation2.phpt
+      ext/ctype/tests/ctype_lower_variation2.phpt
+      ext/ctype/tests/ctype_lower_variation3.phpt
+      ext/ctype/tests/ctype_lower_variation3.phpt
+      ext/ctype/tests/ctype_lower_variation4.phpt
+      ext/ctype/tests/ctype_lower_variation4.phpt
+      ext/ctype/tests/ctype_print_basic.phpt
+      ext/ctype/tests/ctype_print_basic.phpt
+      ext/ctype/tests/ctype_print_error.phpt
+      ext/ctype/tests/ctype_print_error.phpt
+      ext/ctype/tests/ctype_print_variation1.phpt
+      ext/ctype/tests/ctype_print_variation1.phpt
+      ext/ctype/tests/ctype_print_variation2.phpt
+      ext/ctype/tests/ctype_print_variation2.phpt
+      ext/ctype/tests/ctype_print_variation3.phpt
+      ext/ctype/tests/ctype_print_variation3.phpt
+      ext/ctype/tests/ctype_print_variation4.phpt
+      ext/ctype/tests/ctype_print_variation4.phpt
+      ext/ctype/tests/ctype_punct_basic.phpt
+      ext/ctype/tests/ctype_punct_basic.phpt
+      ext/ctype/tests/ctype_punct_error.phpt
+      ext/ctype/tests/ctype_punct_error.phpt
+      ext/ctype/tests/ctype_punct_variation1.phpt
+      ext/ctype/tests/ctype_punct_variation1.phpt
+      ext/ctype/tests/ctype_punct_variation2.phpt
+      ext/ctype/tests/ctype_punct_variation2.phpt
+      ext/ctype/tests/ctype_punct_variation3.phpt
+      ext/ctype/tests/ctype_punct_variation3.phpt
+      ext/ctype/tests/ctype_punct_variation4.phpt
+      ext/ctype/tests/ctype_punct_variation4.phpt
+      ext/ctype/tests/ctype_space_basic.phpt
+      ext/ctype/tests/ctype_space_basic.phpt
+      ext/ctype/tests/ctype_space_error.phpt
+      ext/ctype/tests/ctype_space_error.phpt
+      ext/ctype/tests/ctype_space_variation1.phpt
+      ext/ctype/tests/ctype_space_variation1.phpt
+      ext/ctype/tests/ctype_space_variation2.phpt
+      ext/ctype/tests/ctype_space_variation2.phpt
+      ext/ctype/tests/ctype_space_variation3.phpt
+      ext/ctype/tests/ctype_space_variation3.phpt
+      ext/ctype/tests/ctype_space_variation4.phpt
+      ext/ctype/tests/ctype_space_variation4.phpt
+      ext/ctype/tests/ctype_upper_basic.phpt
+      ext/ctype/tests/ctype_upper_basic.phpt
+      ext/ctype/tests/ctype_upper_error.phpt
+      ext/ctype/tests/ctype_upper_error.phpt
+      ext/ctype/tests/ctype_upper_variation1.phpt
+      ext/ctype/tests/ctype_upper_variation1.phpt
+      ext/ctype/tests/ctype_upper_variation2.phpt
+      ext/ctype/tests/ctype_upper_variation2.phpt
+      ext/ctype/tests/ctype_upper_variation3.phpt
+      ext/ctype/tests/ctype_upper_variation3.phpt
+      ext/ctype/tests/ctype_upper_variation4.phpt
+      ext/ctype/tests/ctype_upper_variation4.phpt
+      ext/ctype/tests/ctype_xdigit_basic.phpt
+      ext/ctype/tests/ctype_xdigit_basic.phpt
+      ext/ctype/tests/ctype_xdigit_error.phpt
+      ext/ctype/tests/ctype_xdigit_error.phpt
+      ext/ctype/tests/ctype_xdigit_variation1.phpt
+      ext/ctype/tests/ctype_xdigit_variation1.phpt
+      ext/ctype/tests/ctype_xdigit_variation2.phpt
+      ext/ctype/tests/ctype_xdigit_variation2.phpt
+      ext/ctype/tests/ctype_xdigit_variation3.phpt
+      ext/ctype/tests/ctype_xdigit_variation3.phpt
+      ext/ctype/tests/ctype_xdigit_variation4.phpt
+      ext/ctype/tests/ctype_xdigit_variation4.phpt:
+      - new tests for ctype functions
+
+    * ext/ctype/tests/ctype_alnum_basic.phpt
+      ext/ctype/tests/ctype_alnum_basic.phpt
+      ext/ctype/tests/ctype_alnum_basic.phpt
+      ext/ctype/tests/ctype_alnum_error.phpt
+      ext/ctype/tests/ctype_alnum_error.phpt
+      ext/ctype/tests/ctype_alnum_error.phpt
+      ext/ctype/tests/ctype_alnum_variation3.phpt
+      ext/ctype/tests/ctype_alnum_variation3.phpt
+      ext/ctype/tests/ctype_alnum_variation3.phpt
+      ext/ctype/tests/ctype_alnum_variation4.phpt
+      ext/ctype/tests/ctype_alnum_variation4.phpt
+      ext/ctype/tests/ctype_alnum_variation4.phpt
+      ext/ctype/tests/ctype_alpha_basic.phpt
+      ext/ctype/tests/ctype_alpha_basic.phpt
+      ext/ctype/tests/ctype_alpha_basic.phpt
+      ext/ctype/tests/ctype_alpha_variation2.phpt
+      ext/ctype/tests/ctype_alpha_variation2.phpt
+      ext/ctype/tests/ctype_alpha_variation2.phpt
+      ext/ctype/tests/ctype_alpha_variation3.phpt
+      ext/ctype/tests/ctype_alpha_variation3.phpt
+      ext/ctype/tests/ctype_alpha_variation3.phpt
+      ext/ctype/tests/ctype_cntrl_error.phpt
+      ext/ctype/tests/ctype_cntrl_error.phpt
+      ext/ctype/tests/ctype_cntrl_error.phpt
+      ext/ctype/tests/ctype_cntrl_variation1.phpt
+      ext/ctype/tests/ctype_cntrl_variation1.phpt
+      ext/ctype/tests/ctype_cntrl_variation1.phpt
+      ext/ctype/tests/ctype_cntrl_variation2.phpt
+      ext/ctype/tests/ctype_cntrl_variation2.phpt
+      ext/ctype/tests/ctype_cntrl_variation2.phpt
+      ext/ctype/tests/ctype_cntrl_variation3.phpt
+      ext/ctype/tests/ctype_digit_basic.phpt
+      ext/ctype/tests/ctype_digit_basic.phpt
+      ext/ctype/tests/ctype_digit_basic.phpt
+      ext/ctype/tests/ctype_digit_error.phpt
+      ext/ctype/tests/ctype_digit_error.phpt
+      ext/ctype/tests/ctype_digit_error.phpt
+      ext/ctype/tests/ctype_digit_variation2.phpt
+      ext/ctype/tests/ctype_digit_variation2.phpt
+      ext/ctype/tests/ctype_digit_variation2.phpt
+      ext/ctype/tests/ctype_digit_variation4.phpt
+      ext/ctype/tests/ctype_digit_variation4.phpt
+      ext/ctype/tests/ctype_digit_variation4.phpt
+      ext/ctype/tests/ctype_graph_basic.phpt
+      ext/ctype/tests/ctype_graph_basic.phpt
+      ext/ctype/tests/ctype_graph_basic.phpt
+      ext/ctype/tests/ctype_lower_basic.phpt
+      ext/ctype/tests/ctype_lower_basic.phpt
+      ext/ctype/tests/ctype_lower_basic.phpt
+      ext/ctype/tests/ctype_lower_variation1.phpt
+      ext/ctype/tests/ctype_lower_variation1.phpt
+      ext/ctype/tests/ctype_lower_variation1.phpt
+      ext/ctype/tests/ctype_lower_variation2.phpt
+      ext/ctype/tests/ctype_lower_variation2.phpt
+      ext/ctype/tests/ctype_lower_variation2.phpt
+      ext/ctype/tests/ctype_print_basic.phpt
+      ext/ctype/tests/ctype_print_basic.phpt
+      ext/ctype/tests/ctype_print_basic.phpt
+      ext/ctype/tests/ctype_print_error.phpt
+      ext/ctype/tests/ctype_print_error.phpt
+      ext/ctype/tests/ctype_print_error.phpt
+      ext/ctype/tests/ctype_print_variation1.phpt
+      ext/ctype/tests/ctype_print_variation1.phpt
+      ext/ctype/tests/ctype_print_variation1.phpt
+      ext/ctype/tests/ctype_print_variation2.phpt
+      ext/ctype/tests/ctype_print_variation2.phpt
+      ext/ctype/tests/ctype_print_variation2.phpt
+      ext/ctype/tests/ctype_print_variation4.phpt
+      ext/ctype/tests/ctype_print_variation4.phpt
+      ext/ctype/tests/ctype_print_variation4.phpt
+      ext/ctype/tests/ctype_punct_basic.phpt
+      ext/ctype/tests/ctype_punct_basic.phpt
+      ext/ctype/tests/ctype_punct_basic.phpt
+      ext/ctype/tests/ctype_punct_error.phpt
+      ext/ctype/tests/ctype_punct_error.phpt
+      ext/ctype/tests/ctype_punct_error.phpt
+      ext/ctype/tests/ctype_punct_variation4.phpt
+      ext/ctype/tests/ctype_punct_variation4.phpt
+      ext/ctype/tests/ctype_punct_variation4.phpt
+      ext/ctype/tests/ctype_space_variation2.phpt
+      ext/ctype/tests/ctype_space_variation2.phpt
+      ext/ctype/tests/ctype_space_variation2.phpt
+      ext/ctype/tests/ctype_space_variation3.phpt
+      ext/ctype/tests/ctype_space_variation3.phpt
+      ext/ctype/tests/ctype_space_variation3.phpt
+      ext/ctype/tests/ctype_upper_error.phpt
+      ext/ctype/tests/ctype_upper_error.phpt
+      ext/ctype/tests/ctype_upper_error.phpt
+      ext/ctype/tests/ctype_upper_variation1.phpt
+      ext/ctype/tests/ctype_upper_variation1.phpt
+      ext/ctype/tests/ctype_upper_variation1.phpt
+      ext/ctype/tests/ctype_upper_variation3.phpt
+      ext/ctype/tests/ctype_upper_variation3.phpt
+      ext/ctype/tests/ctype_upper_variation3.phpt
+      ext/ctype/tests/ctype_upper_variation4.phpt
+      ext/ctype/tests/ctype_upper_variation4.phpt
+      ext/ctype/tests/ctype_upper_variation4.phpt
+      ext/ctype/tests/ctype_xdigit_basic.phpt
+      ext/ctype/tests/ctype_xdigit_basic.phpt
+      ext/ctype/tests/ctype_xdigit_basic.phpt
+      ext/ctype/tests/ctype_xdigit_error.phpt
+      ext/ctype/tests/ctype_xdigit_error.phpt
+      ext/ctype/tests/ctype_xdigit_error.phpt
+      ext/ctype/tests/ctype_xdigit_variation1.phpt
+      ext/ctype/tests/ctype_xdigit_variation1.phpt
+      ext/ctype/tests/ctype_xdigit_variation1.phpt
+      ext/ctype/tests/ctype_xdigit_variation3.phpt
+      ext/ctype/tests/ctype_xdigit_variation3.phpt
+      ext/ctype/tests/ctype_xdigit_variation3.phpt:
+        1.1.4;
+      file ctype_alnum_basic.phpt was initially added on branch PHP_5_2.
+
+    * ext/ctype/tests/ctype_alnum_variation1.phpt
+      ext/ctype/tests/ctype_alnum_variation1.phpt
+      ext/ctype/tests/ctype_alnum_variation1.phpt
+      ext/ctype/tests/ctype_alnum_variation2.phpt
+      ext/ctype/tests/ctype_alnum_variation2.phpt
+      ext/ctype/tests/ctype_alnum_variation2.phpt
+      ext/ctype/tests/ctype_alpha_error.phpt
+      ext/ctype/tests/ctype_alpha_error.phpt
+      ext/ctype/tests/ctype_alpha_error.phpt
+      ext/ctype/tests/ctype_alpha_variation1.phpt
+      ext/ctype/tests/ctype_alpha_variation1.phpt
+      ext/ctype/tests/ctype_alpha_variation1.phpt
+      ext/ctype/tests/ctype_alpha_variation4.phpt
+      ext/ctype/tests/ctype_alpha_variation4.phpt
+      ext/ctype/tests/ctype_alpha_variation4.phpt
+      ext/ctype/tests/ctype_cntrl_basic.phpt
+      ext/ctype/tests/ctype_cntrl_basic.phpt
+      ext/ctype/tests/ctype_cntrl_basic.phpt
+      ext/ctype/tests/ctype_cntrl_variation3.phpt
+      ext/ctype/tests/ctype_cntrl_variation3.phpt
+      ext/ctype/tests/ctype_cntrl_variation4.phpt
+      ext/ctype/tests/ctype_cntrl_variation4.phpt
+      ext/ctype/tests/ctype_cntrl_variation4.phpt
+      ext/ctype/tests/ctype_digit_variation1.phpt
+      ext/ctype/tests/ctype_digit_variation1.phpt
+      ext/ctype/tests/ctype_digit_variation1.phpt
+      ext/ctype/tests/ctype_digit_variation3.phpt
+      ext/ctype/tests/ctype_digit_variation3.phpt
+      ext/ctype/tests/ctype_digit_variation3.phpt
+      ext/ctype/tests/ctype_graph_error.phpt
+      ext/ctype/tests/ctype_graph_error.phpt
+      ext/ctype/tests/ctype_graph_error.phpt
+      ext/ctype/tests/ctype_graph_variation1.phpt
+      ext/ctype/tests/ctype_graph_variation1.phpt
+      ext/ctype/tests/ctype_graph_variation1.phpt
+      ext/ctype/tests/ctype_graph_variation2.phpt
+      ext/ctype/tests/ctype_graph_variation2.phpt
+      ext/ctype/tests/ctype_graph_variation2.phpt
+      ext/ctype/tests/ctype_graph_variation3.phpt
+      ext/ctype/tests/ctype_graph_variation3.phpt
+      ext/ctype/tests/ctype_graph_variation3.phpt
+      ext/ctype/tests/ctype_graph_variation4.phpt
+      ext/ctype/tests/ctype_graph_variation4.phpt
+      ext/ctype/tests/ctype_graph_variation4.phpt
+      ext/ctype/tests/ctype_lower_error.phpt
+      ext/ctype/tests/ctype_lower_error.phpt
+      ext/ctype/tests/ctype_lower_error.phpt
+      ext/ctype/tests/ctype_lower_variation3.phpt
+      ext/ctype/tests/ctype_lower_variation3.phpt
+      ext/ctype/tests/ctype_lower_variation3.phpt
+      ext/ctype/tests/ctype_lower_variation4.phpt
+      ext/ctype/tests/ctype_lower_variation4.phpt
+      ext/ctype/tests/ctype_lower_variation4.phpt
+      ext/ctype/tests/ctype_print_variation3.phpt
+      ext/ctype/tests/ctype_print_variation3.phpt
+      ext/ctype/tests/ctype_print_variation3.phpt
+      ext/ctype/tests/ctype_punct_variation1.phpt
+      ext/ctype/tests/ctype_punct_variation1.phpt
+      ext/ctype/tests/ctype_punct_variation1.phpt
+      ext/ctype/tests/ctype_punct_variation2.phpt
+      ext/ctype/tests/ctype_punct_variation2.phpt
+      ext/ctype/tests/ctype_punct_variation2.phpt
+      ext/ctype/tests/ctype_punct_variation3.phpt
+      ext/ctype/tests/ctype_punct_variation3.phpt
+      ext/ctype/tests/ctype_punct_variation3.phpt
+      ext/ctype/tests/ctype_space_basic.phpt
+      ext/ctype/tests/ctype_space_basic.phpt
+      ext/ctype/tests/ctype_space_basic.phpt
+      ext/ctype/tests/ctype_space_error.phpt
+      ext/ctype/tests/ctype_space_error.phpt
+      ext/ctype/tests/ctype_space_error.phpt
+      ext/ctype/tests/ctype_space_variation1.phpt
+      ext/ctype/tests/ctype_space_variation1.phpt
+      ext/ctype/tests/ctype_space_variation1.phpt
+      ext/ctype/tests/ctype_space_variation4.phpt
+      ext/ctype/tests/ctype_space_variation4.phpt
+      ext/ctype/tests/ctype_space_variation4.phpt
+      ext/ctype/tests/ctype_upper_basic.phpt
+      ext/ctype/tests/ctype_upper_basic.phpt
+      ext/ctype/tests/ctype_upper_basic.phpt
+      ext/ctype/tests/ctype_upper_variation2.phpt
+      ext/ctype/tests/ctype_upper_variation2.phpt
+      ext/ctype/tests/ctype_upper_variation2.phpt
+      ext/ctype/tests/ctype_xdigit_variation2.phpt
+      ext/ctype/tests/ctype_xdigit_variation2.phpt
+      ext/ctype/tests/ctype_xdigit_variation2.phpt
+      ext/ctype/tests/ctype_xdigit_variation4.phpt
+      ext/ctype/tests/ctype_xdigit_variation4.phpt
+      ext/ctype/tests/ctype_xdigit_variation4.phpt:
+        1.1.4;
+      file ctype_alnum_variation1.phpt was initially added on branch PHP_5_2.
+
 2008-03-16  Scott MacVicar  <scott@macvicar.net>
 
     * (PHP_5_3)
