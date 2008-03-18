@@ -2426,7 +2426,7 @@ static void do_inherit_parent_constructor(zend_class_entry *ce TSRMLS_DC) /* {{{
 				if (function->common.fn_flags & ZEND_ACC_CTOR) {
 					/* inherit parent's constructor */
 					zend_u_hash_update(&ce->function_table, ZEND_STR_TYPE, lc_parent_class_name, ce->parent->name_length+1, function, sizeof(zend_function), NULL);
-					function_add_ref(function);
+					function_add_ref(function TSRMLS_CC);
 				}
 			}
 			efree(lc_parent_class_name.v);
