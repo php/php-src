@@ -23,6 +23,7 @@
 #include "php_ini.h"
 #include "php_variables.h"
 #include "zend_highlight.h"
+#include "zend.h"
 
 #include "lsapilib.h"
 
@@ -55,11 +56,11 @@
 
 
 #define SAPI_LSAPI_MAX_HEADER_LENGTH 2048
-static char s_headerBuf[SAPI_LSAPI_MAX_HEADER_LENGTH];
 
 static int  lsapi_mode       = 1;
 static char *php_self        = "";
 static char *script_filename = "";
+static int  source_highlight = 0;
 
 #ifdef ZTS
 zend_compiler_globals    *compiler_globals;
@@ -69,6 +70,7 @@ sapi_globals_struct      *sapi_globals;
 void ***tsrm_ls;
 #endif
 
+zend_module_entry litespeed_module_entry;
 
 /* {{{ php_lsapi_startup
  */
@@ -233,20 +235,22 @@ static int sapi_lsapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 
         h = zend_llist_get_first_ex(&sapi_headers->headers, &pos);
         while (h) {
-            LSAPI_AppendRespHeader(h->header, h->header_len);
+            if ( h->header_len > 0 )
+                LSAPI_AppendRespHeader(h->header, h->header_len);
             h = zend_llist_get_next_ex(&sapi_headers->headers, &pos);
         }
         if (SG(sapi_headers).send_default_content_type)
         {
             char    *hd;
             int     len;
+            char    headerBuf[SAPI_LSAPI_MAX_HEADER_LENGTH];
 
             hd = sapi_get_default_content_type(TSRMLS_C);
-            len = snprintf( s_headerBuf, SAPI_LSAPI_MAX_HEADER_LENGTH - 1,
+            len = snprintf( headerBuf, SAPI_LSAPI_MAX_HEADER_LENGTH - 1,
                             "Content-type: %s", hd );
             efree(hd);
 
-            LSAPI_AppendRespHeader( s_headerBuf, len );
+            LSAPI_AppendRespHeader( headerBuf, len );
         }
     }
     LSAPI_FinalizeRespHeaders();
@@ -322,7 +326,9 @@ static int init_request_info( TSRMLS_D )
     SG(request_info).request_uri = LSAPI_GetScriptName();
     SG(request_info).content_length = LSAPI_GetReqBodyLen();
     SG(request_info).path_translated = LSAPI_GetScriptFileName();
-    SG(sapi_headers).http_response_code = 0;    //It is not reset by zend engine, set it to 0.
+
+    /* It is not reset by zend engine, set it to 0. */
+    SG(sapi_headers).http_response_code = 0;
     
     pAuth = LSAPI_GetHeader( H_AUTHORIZATION );
     php_handle_auth_data(pAuth TSRMLS_CC);
@@ -397,7 +403,7 @@ static int processReq( TSRMLS_D )
 
         override_ini();
 
-        if ( lsapi_module_main( 0 TSRMLS_CC ) == -1 )
+        if ( lsapi_module_main( source_highlight TSRMLS_CC ) == -1 )
             ret = -1;
 
     } zend_end_try();
@@ -408,27 +414,28 @@ static void cli_usage( TSRMLS_D )
 {
     static const char * usage =
         "Usage: php\n"
-        "       php -[h|i|q|v|?] [<file>] [args...]\n"
-        "  Run in LSAPI mode when no parameter or only '-c' is specified\n"
-        "  Run in Command Line Interpreter mode when parameters are specified"
+        "       php -[b|c|h|i|q|s|v|?] [<file>] [args...]\n"
+        "  Run in LSAPI mode, only '-b', '-s' and '-c' are effective\n"
+        "  Run in Command Line Interpreter mode when parameters are specified\n"
         "\n"
+        "  -b <address:port>|<port> Bind Path for external LSAPI Server mode\n"
         "  -c <path>|<file> Look for php.ini file in this directory\n"
         "  -h               This help\n"
         "  -i               PHP information\n"
         "  -q               Quiet-mode.  Suppress HTTP Header output.\n"
+        "  -s               Display colour syntax highlighted source.\n"
         "  -v               Version number\n"
         "  -?               This help\n"
         "\n"
         "  args...          Arguments passed to script.\n";
     php_output_startup();
     php_output_activate(TSRMLS_C);
-//    SG(headers_sent) = 1;
     php_printf( usage );
     php_end_ob_buffers(1 TSRMLS_CC);
 }
 
 static int parse_opt( int argc, char * argv[], int *climode,
-                        char **php_ini_path )
+                        char **php_ini_path, char ** php_bind )
 {
     char ** p = &argv[1];
     char ** argend= &argv[argc];
@@ -439,6 +446,15 @@ static int parse_opt( int argc, char * argv[], int *climode,
         ++p;
         switch( c )
         {
+        case 'b':
+            if ( p >= argend )
+            {
+                fprintf( stderr, "TCP or socket address must be specified following '-b' option.\n");
+                return -1;
+            }
+            *php_bind = *p++;
+            break;
+            
         case 'c':
             if ( p >= argend )
             {
@@ -448,6 +464,9 @@ static int parse_opt( int argc, char * argv[], int *climode,
             }
             *php_ini_path = *p++;
             break;
+        case 's':
+            source_highlight = 1;
+            break;    
         case 'h':
         case 'i':
         case 'q':
@@ -514,14 +533,10 @@ static int cli_main( int argc, char * argv[] )
             switch( c )
             {
             case 'q':
-//                SG(headers_sent) = 1;
-//                SG(request_info).no_headers = 1;
                 break;
             case 'i':
                 if (php_request_startup(TSRMLS_C) != FAILURE)
                 {
-//                    SG(headers_sent) = 1;
-//                    SG(request_info).no_headers = 1;
                     php_print_info(0xFFFFFFFF TSRMLS_CC);
                     php_end_ob_buffers(1 TSRMLS_CC);
                     php_request_shutdown( NULL );
@@ -531,8 +546,6 @@ static int cli_main( int argc, char * argv[] )
             case 'v':
                 if (php_request_startup(TSRMLS_C) != FAILURE)
                 {
-//                    SG(headers_sent) = 1;
-//                    SG(request_info).no_headers = 1;
 #if ZEND_DEBUG
                     php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2004 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #else
@@ -545,7 +558,10 @@ static int cli_main( int argc, char * argv[] )
                 break;
             case 'c':
                 ++p;
+            /* fall through */
+            case 's':
                 break;
+                
             case 'h':
             case '?':
             default:
@@ -580,12 +596,22 @@ static int cli_main( int argc, char * argv[] )
                     }
                     else
                     {
+                        if (source_highlight)
+                        {
+                            zend_syntax_highlighter_ini syntax_highlighter_ini;
+                    
+                            php_get_highlight_struct(&syntax_highlighter_ini);
+                            highlight_file(SG(request_info).path_translated, &syntax_highlighter_ini TSRMLS_CC);
+                        }
+                        else
+                        {
+                            file_handle.filename = *p;
+                            file_handle.free_filename = 0;
+                            file_handle.opened_path = NULL;
 
-                        file_handle.filename = *p;
-                        file_handle.free_filename = 0;
-                        file_handle.opened_path = NULL;
+                            php_execute_script(&file_handle TSRMLS_CC);
+                        }
 
-                        php_execute_script(&file_handle TSRMLS_CC);
                         php_request_shutdown( NULL );
                     }
                 }
@@ -667,7 +693,7 @@ void start_children( int children )
         pid = wait( &status );
         running--;
     }
-	kill( -getpgrp(), s_stop );
+	kill( -getpgrp(), SIGUSR1 );
     exit( 0 );
 }
 
@@ -677,12 +703,14 @@ void start_children( int children )
 int main( int argc, char * argv[] )
 {
     int ret;
-    int max_requests = 500;
-    int requests     = 0;
+    int bindFd;
 
     char * php_ini_path = NULL;
+    char * php_bind     = NULL;
+    char * p;
+    int n;
     int climode = 0;
-
+    
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
     signal(SIGPIPE, SIG_IGN);
@@ -695,7 +723,7 @@ int main( int argc, char * argv[] )
 
     if (argc > 1 )
     {
-        if ( parse_opt( argc, argv, &climode, &php_ini_path ) == -1 )
+        if ( parse_opt( argc, argv, &climode, &php_ini_path, &php_bind ) == -1 )
             return 1;
     }
     if ( climode )
@@ -717,7 +745,7 @@ int main( int argc, char * argv[] )
     if ( php_ini_path )
         lsapi_sapi_module.php_ini_path_override = php_ini_path;
 
-    if (php_module_startup(&lsapi_sapi_module, NULL, 0) == FAILURE) {
+    if (php_module_startup(&lsapi_sapi_module, &litespeed_module_entry, 1) == FAILURE) {
 #ifdef ZTS
         tsrm_shutdown();
 #endif
@@ -729,37 +757,36 @@ int main( int argc, char * argv[] )
         return cli_main(argc, argv);
     }
 
-    if( getenv( "PHP_LSAPI_MAX_REQUESTS" ))
+    
+    if ( php_bind )
     {
-        max_requests = atoi( getenv( "PHP_LSAPI_MAX_REQUESTS" ));
-        if( !max_requests )
+        bindFd = LSAPI_CreateListenSock( php_bind, 10 );
+        if ( bindFd == -1 )
         {
             fprintf( stderr,
-                     "PHP_LSAPI_MAX_REQUESTS is not valid\n" );
-            exit( 1 );
+                     "Failed to bind socket [%s]: %s\n", php_bind, strerror( errno ) );
+            exit( 2 );
+        }
+        if ( bindFd != 0 )
+        {
+            dup2( bindFd, 0 );
+            close( bindFd );
         }
     }
-    
+
     LSAPI_Init();
+   
+    LSAPI_Init_Env_Parameters( NULL );
 
-    if (( getenv( "PHP_LSAPI_CHILDREN" ) )&& LSAPI_Is_Listen() )
-    {
-        int children = atoi( getenv( "PHP_LSAPI_CHILDREN" ));
-        if ( children > 0 )
-            start_children( children );
-    }
+    if ( php_bind )
+        LSAPI_No_Check_ppid();
 
-    while( LSAPI_Accept() >= 0 )
+    while( LSAPI_Prefork_Accept_r( &g_req ) >= 0 )
     {
         ret = processReq(TSRMLS_C);
         LSAPI_Finish();
         if ( ret )
             break;
-        requests++;
-        if( max_requests && ( requests == max_requests ))
-        {
-            break;
-        }
     }
     php_module_shutdown(TSRMLS_C);
 
@@ -768,6 +795,122 @@ int main( int argc, char * argv[] )
 #endif
     return ret;
 }
+
+
+/*   LiteSpeed PHP module starts here */
+
+
+
+PHP_FUNCTION(litespeed_request_headers);
+PHP_FUNCTION(litespeed_response_headers);
+
+PHP_MINFO_FUNCTION(litespeed);
+
+zend_function_entry litespeed_functions[] = {
+	PHP_FE(litespeed_request_headers,					NULL)
+	PHP_FE(litespeed_response_headers,					NULL)
+	PHP_FALIAS(getallheaders, litespeed_request_headers, NULL)
+	PHP_FALIAS(apache_request_headers, litespeed_request_headers, NULL)
+	PHP_FALIAS(apache_response_headers, litespeed_response_headers, NULL)
+	{NULL, NULL, NULL}
+};
+
+static PHP_MINIT_FUNCTION(litespeed)
+{
+	//REGISTER_INI_ENTRIES();
+	return SUCCESS;
+}
+
+
+static PHP_MSHUTDOWN_FUNCTION(litespeed)
+{
+	//UNREGISTER_INI_ENTRIES();
+	return SUCCESS;
+}
+
+zend_module_entry litespeed_module_entry = {
+	STANDARD_MODULE_HEADER,
+	"litespeed",
+	litespeed_functions,
+	PHP_MINIT(litespeed),
+	PHP_MSHUTDOWN(litespeed),
+	NULL,
+	NULL,
+	NULL,
+	NO_VERSION_YET,
+	STANDARD_MODULE_PROPERTIES
+};
+
+static int add_associate_array( const char * pKey, int keyLen, const char * pValue, int valLen,
+                         void * arg )
+{
+    add_assoc_string_ex( (zval *)arg, (char *)pKey, keyLen+1, (char *)pValue, 1 );
+    return 1;
+}
+
+
+/* {{{ proto array litespeed_request_headers(void)
+   Fetch all HTTP request headers */
+PHP_FUNCTION(litespeed_request_headers)
+{
+    //TODO:
+    if (ZEND_NUM_ARGS() > 0) {
+        WRONG_PARAM_COUNT;
+    }
+    array_init(return_value);
+
+    LSAPI_ForeachOrgHeader( add_associate_array, return_value );
+
+}
+/* }}} */
+
+
+
+/* {{{ proto array litespeed_response_headers(void)
+   Fetch all HTTP response headers */
+PHP_FUNCTION(litespeed_response_headers)
+{
+    sapi_header_struct  *h;
+    zend_llist_position pos;
+    char *       p;
+    int          len;
+    char         headerBuf[SAPI_LSAPI_MAX_HEADER_LENGTH];
+
+    if (ZEND_NUM_ARGS() > 0) {
+		WRONG_PARAM_COUNT;
+	}
+
+	if (!&SG(sapi_headers).headers) {
+		RETURN_FALSE;
+	}
+	array_init(return_value);
+
+    h = zend_llist_get_first_ex(&SG(sapi_headers).headers, &pos);
+    while (h)
+    {
+        if ( h->header_len > 0 )
+        {
+            p = strchr( h->header, ':' );
+            len = p - h->header;
+            if (( p )&&( len > 0 ))
+            {
+                memmove( headerBuf, h->header, len );
+                while( len > 0 && (isspace( headerBuf[len-1])) )
+                    --len;
+                headerBuf[len] = 0;
+                if ( len )
+                {
+                    while( isspace(*++p));
+                    add_assoc_string_ex(return_value, headerBuf, len+1, p, 1 );
+                }
+            }
+        }
+        h = zend_llist_get_next_ex(&SG(sapi_headers).headers, &pos);
+    }  
+}
+
+/* }}} */
+
 
 /*
  * Local variables:
