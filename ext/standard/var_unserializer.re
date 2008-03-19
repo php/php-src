@@ -330,10 +330,10 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 				break;
 			case IS_STRING:
 			case IS_UNICODE:
-				if (zend_u_hash_find(ht, Z_TYPE_P(key), Z_UNIVAL_P(key), Z_UNILEN_P(key) + 1, (void **)&old_data)==SUCCESS) {
+				if (zend_u_symtable_find(ht, Z_TYPE_P(key), Z_UNIVAL_P(key), Z_UNILEN_P(key) + 1, (void **)&old_data)==SUCCESS) {
 					var_push_dtor(var_hash, old_data);
 				}
-				zend_u_hash_update(ht, Z_TYPE_P(key), Z_UNIVAL_P(key), Z_UNILEN_P(key) + 1, &data, sizeof(data), NULL);
+				zend_u_symtable_update(ht, Z_TYPE_P(key), Z_UNIVAL_P(key), Z_UNILEN_P(key) + 1, &data, sizeof(data), NULL);
 				break;
 		}
 
