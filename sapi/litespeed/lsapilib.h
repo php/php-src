@@ -49,6 +49,9 @@ extern "C" {
 #include <stddef.h>
 #include <lsapidef.h>
 
+#include <sys/time.h>
+#include <sys/types.h>
+
 struct LSAPI_key_value_pair
 {
     char * pKey;
@@ -64,7 +67,10 @@ typedef struct lsapi_request
 {
     int               m_fdListen;
     int               m_fd;
-    
+
+    long              m_lLastActive;
+    long              m_lReqBegin;
+
     char            * m_pReqBuf;
     int               m_reqBufSize;
     
@@ -114,14 +120,14 @@ typedef struct lsapi_request
 extern LSAPI_Request g_req;
 
 
-//return: >0 continue, ==0 stop, -1 failed
+/* return: >0 continue, ==0 stop, -1 failed  */
 typedef int (*LSAPI_CB_EnvHandler )( const char * pKey, int keyLen,
                 const char * pValue, int valLen, void * arg );
 
 
 int LSAPI_Init(void);
 
-void LSAPI_stop(void);
+void LSAPI_Stop(void);
 
 int LSAPI_Is_Listen_r( LSAPI_Request * pReq);
 
@@ -140,6 +146,9 @@ char * LSAPI_GetHeader_r( LSAPI_Request * pReq, int headerIndex );
 int LSAPI_ForeachHeader_r( LSAPI_Request * pReq,
             LSAPI_CB_EnvHandler fn, void * arg );
 
+int LSAPI_ForeachOrgHeader_r( LSAPI_Request * pReq,
+            LSAPI_CB_EnvHandler fn, void * arg );
+
 int LSAPI_ForeachEnv_r( LSAPI_Request * pReq,
             LSAPI_CB_EnvHandler fn, void * arg );
 
@@ -149,9 +158,12 @@ int LSAPI_ForeachSpecialEnv_r( LSAPI_Request * pReq,
 char * LSAPI_GetEnv_r( LSAPI_Request * pReq, const char * name );
             
 
-int LSAPI_GetContentLen_r( LSAPI_Request * pReq );
-
 int LSAPI_ReadReqBody_r( LSAPI_Request * pReq, char * pBuf, int len );
+
+int LSAPI_ReqBodyGetChar_r( LSAPI_Request * pReq );
+
+int LSAPI_ReqBodyGetLine_r( LSAPI_Request * pReq, char * pBuf, int bufLen, int *getLF );
+
 
 int LSAPI_FinalizeRespHeaders_r( LSAPI_Request * pReq );
 
@@ -211,6 +223,13 @@ static inline int  LSAPI_GetReqBodyLen_r( LSAPI_Request * pReq )
     return -1;
 }
 
+static inline int LSAPI_GetReqBodyRemain_r( LSAPI_Request * pReq )
+{
+    if ( pReq )
+        return pReq->m_pHeader->m_reqBodyLen - pReq->m_reqBodyRead;
+    return -1;
+}
+
 
 int LSAPI_Is_Listen(void);
 
@@ -225,6 +244,10 @@ static inline char * LSAPI_GetHeader( int headerIndex )
 
 static inline int LSAPI_ForeachHeader( LSAPI_CB_EnvHandler fn, void * arg )
 {   return LSAPI_ForeachHeader_r( &g_req, fn, arg );        }
+
+static inline int LSAPI_ForeachOrgHeader(
+            LSAPI_CB_EnvHandler fn, void * arg )
+{   return LSAPI_ForeachOrgHeader_r( &g_req, fn, arg );     }
 
 static inline int LSAPI_ForeachEnv( LSAPI_CB_EnvHandler fn, void * arg )
 {   return LSAPI_ForeachEnv_r( &g_req, fn, arg );           }
@@ -250,8 +273,19 @@ static inline char * LSAPI_GetRequestMethod()
 static inline int LSAPI_GetReqBodyLen()
 {   return LSAPI_GetReqBodyLen_r( &g_req );                 }
 
+static inline int LSAPI_GetReqBodyRemain()
+{   return LSAPI_GetReqBodyRemain_r( &g_req );                 }
+
 static inline int LSAPI_ReadReqBody( char * pBuf, int len )
 {   return LSAPI_ReadReqBody_r( &g_req, pBuf, len );        }
+
+static inline int LSAPI_ReqBodyGetChar()
+{   return LSAPI_ReqBodyGetChar_r( &g_req );        }
+
+static inline int LSAPI_ReqBodyGetLine( char * pBuf, int len, int *getLF )
+{   return LSAPI_ReqBodyGetLine_r( &g_req, pBuf, len, getLF );        }
+
+
 
 static inline int LSAPI_FinalizeRespHeaders(void)
 {   return LSAPI_FinalizeRespHeaders_r( &g_req );           }
@@ -271,6 +305,31 @@ static inline int LSAPI_AppendRespHeader( char * pBuf, int len )
 static inline int LSAPI_SetRespStatus( int code )
 {   return LSAPI_SetRespStatus_r( &g_req, code );           }
 
+int LSAPI_IsRunning(void);
+
+int LSAPI_CreateListenSock( const char * pBind, int backlog );
+
+typedef int (*fn_select_t)( int, fd_set *, fd_set *, fd_set *, struct timeval * );
+
+int LSAPI_Init_Prefork_Server( int max_children, fn_select_t fp, int avoidFork );
+
+void LSAPI_Set_Server_fd( int fd );
+
+int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq );
+
+void LSAPI_Set_Max_Reqs( int reqs );
+
+void LSAPI_Set_Max_Idle( int secs );
+
+void LSAPI_Set_Max_Children( int maxChildren );
+
+void LSAPI_Set_Max_Idle_Children( int maxIdleChld );
+
+void LSAPI_Set_Server_Max_Idle_Secs( int serverMaxIdle );
+
+void LSAPI_Set_Max_Process_Time( int secs );
+
+void LSAPI_Init_Env_Parameters( fn_select_t fp );
 
 #if defined (c_plusplus) || defined (__cplusplus)
 }

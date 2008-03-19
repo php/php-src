@@ -79,9 +79,9 @@ enum
 #define LSAPI_SOCK_FILENO           0
 
 #define LSAPI_VERSION_B0            'L'
-#define LSAPI_VERSION_B1            'S'                
+#define LSAPI_VERSION_B1            'S'
 
-//Values for m_flag in lsapi_packet_header
+/* Values for m_flag in lsapi_packet_header */
 #define LSAPI_ENDIAN_LITTLE         0
 #define LSAPI_ENDIAN_BIG            1 
 #define LSAPI_ENDIAN_BIT            1
@@ -92,7 +92,7 @@ enum
 #define LSAPI_ENDIAN                LSAPI_ENDIAN_BIG
 #endif
 
-//Values for m_type in lsapi_packet_header
+/* Values for m_type in lsapi_packet_header */
 #define LSAPI_BEGIN_REQUEST         1
 #define LSAPI_ABORT_REQUEST         2
 #define LSAPI_RESP_HEADER           3
@@ -111,24 +111,26 @@ enum
 
 struct lsapi_packet_header
 {
-    char    m_versionB0;      //LSAPI protocol version 
+    char    m_versionB0;      /* LSAPI protocol version */
     char    m_versionB1;
     char    m_type;
     char    m_flag;
     union
     {
-        int32_t m_iLen;    //include this header
+        int32_t m_iLen;       /* include this header */
         char    m_bytes[4];
     }m_packetLen;
 };
 
-// LSAPI request header packet
-//
-// 1. struct lsapi_req_header
-// 2. struct lsapi_http_header_index
-// 3. lsapi_header_offset * unknownHeaders
-// 4. org http request header
-// 5. request body if available
+/*
+    LSAPI request header packet
+    
+    1. struct lsapi_req_header
+    2. struct lsapi_http_header_index
+    3. lsapi_header_offset * unknownHeaders
+    4. org http request header
+    5. request body if available
+*/
 
 struct lsapi_req_header
 {
@@ -136,9 +138,9 @@ struct lsapi_req_header
         
     int32_t m_httpHeaderLen;
     int32_t m_reqBodyLen;
-    int32_t m_scriptFileOff;   //path to the script file.
-    int32_t m_scriptNameOff;   //decrypted URI, without pathinfo,
-    int32_t m_queryStringOff;  //Query string inside env 
+    int32_t m_scriptFileOff;   /* path to the script file. */
+    int32_t m_scriptNameOff;   /* decrypted URI, without pathinfo, */
+    int32_t m_queryStringOff;  /* Query string inside env */
     int32_t m_requestMethodOff;
     int32_t m_cntUnknownHeaders;
     int32_t m_cntEnv;
