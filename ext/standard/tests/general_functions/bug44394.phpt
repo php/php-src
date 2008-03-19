@@ -1,5 +1,5 @@
 --TEST--
-Bug #44394	Last two bytes missing from output
+Bug #44394 (Last two bytes missing from output)
 --FILE--
 <?php
 
