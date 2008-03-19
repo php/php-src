@@ -18,9 +18,11 @@ echo "\n--- Testing Circular reference of an array ---\n";
 echo "-- Normal array --\n";
 $arr_circ = array(0, 1, -2, 3.333333, "a", array(), &$arr_circ);
 $serialize_data = serialize($arr_circ);
+$arr_circ[6] = null;
 var_dump( $serialize_data );
 $arr_circ = unserialize($serialize_data);
 var_dump( $arr_circ );
+$arr_circ[6] = null;
 
 echo "\n-- Associative array --\n";
 $arr_asso = array("a" => "test");
