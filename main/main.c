@@ -118,7 +118,7 @@ static PHP_INI_MH(OnSetPrecision)
 static PHP_INI_MH(OnChangeMemoryLimit)
 {
 	if (new_value) {
-		PG(memory_limit) = zend_atoi(new_value, new_value_length);
+		PG(memory_limit) = zend_atol(new_value, new_value_length);
 	} else {
 		PG(memory_limit) = 1<<30;		/* effectively, no limit */
 	}
