@@ -1710,15 +1710,15 @@ void zend_shutdown_timeout_thread(void) /* {{{ */
 #define SIGPROF 27
 #endif
 
-void zend_set_timeout(long seconds) /* {{{ */
+void zend_set_timeout(long seconds, int reset_signals) /* {{{ */
 {
 	TSRMLS_FETCH();
 
 	EG(timeout_seconds) = seconds;
+#ifdef ZEND_WIN32
 	if(!seconds) {
 		return;
 	}
-#ifdef ZEND_WIN32
 	if (timeout_thread_initialized == 0 && InterlockedIncrement(&timeout_thread_initialized) == 1) {
 		/* We start up this process-wide thread here and not in zend_startup(), because if Zend
 		 * is initialized inside a DllMain(), you're not supposed to start threads from it.
@@ -1731,22 +1731,30 @@ void zend_set_timeout(long seconds) /* {{{ */
 	{
 		struct itimerval t_r;		/* timeout requested */
 		sigset_t sigset;
-
-		t_r.it_value.tv_sec = seconds;
-		t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
+		if(seconds) {
+			t_r.it_value.tv_sec = seconds;
+			t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
 
 #	ifdef __CYGWIN__
-		setitimer(ITIMER_REAL, &t_r, NULL);
-		signal(SIGALRM, zend_timeout);
-		sigemptyset(&sigset);
-		sigaddset(&sigset, SIGALRM);
+			setitimer(ITIMER_REAL, &t_r, NULL);
+		}
+		if(reset_signals) {
+			signal(SIGALRM, zend_timeout);
+			sigemptyset(&sigset);
+			sigaddset(&sigset, SIGALRM);
+		}
 #	else
-		setitimer(ITIMER_PROF, &t_r, NULL);
-		signal(SIGPROF, zend_timeout);
-		sigemptyset(&sigset);
-		sigaddset(&sigset, SIGPROF);
+			setitimer(ITIMER_PROF, &t_r, NULL);
+		}
+		if(reset_signals) {
+			signal(SIGPROF, zend_timeout);
+			sigemptyset(&sigset);
+			sigaddset(&sigset, SIGPROF);
+		}
 #	endif
-		sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+		if(reset_signals) {
+			sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+		}
 	}
 #	endif
 #endif

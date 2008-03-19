@@ -343,6 +343,7 @@ static sapi_module_struct apache2_sapi_module = {
 	php_apache_sapi_register_variables,
 	php_apache_sapi_log_message,			/* Log message */
 	php_apache_sapi_get_request_time,		/* Get Request Time */
+	NULL,									/* Child terminate */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };

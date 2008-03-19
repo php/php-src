@@ -135,6 +135,7 @@ sapi_module_struct php_embed_module = {
 	php_embed_register_variables,   /* register server variables */
 	php_embed_log_message,          /* Log message */
 	NULL,							/* Get request time */
+	NULL,                           /* Child terminate */
   
 	STANDARD_SAPI_MODULE_PROPERTIES
 };

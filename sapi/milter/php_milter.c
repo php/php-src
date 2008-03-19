@@ -869,6 +869,7 @@ static sapi_module_struct milter_sapi_module = {
 	sapi_milter_register_variables,	/* register server variables */
 	NULL,							/* Log message */
 	NULL,							/* Get request time */
+	NULL,							/* Child terminate */
 
 	NULL,							/* Block interruptions */
 	NULL,							/* Unblock interruptions */
