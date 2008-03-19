@@ -29,3 +29,17 @@ array(2) {
     string(3) "aaa"
   }
 }
+--UEXPECT--
+unicode(31) "xxx bbb ccc ddd eee ccc xxx bbb"
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    unicode(3) "aaa"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    unicode(3) "aaa"
+  }
+}
