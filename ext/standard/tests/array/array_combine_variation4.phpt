@@ -250,7 +250,7 @@ array(4) {
   int(111)
   [u"color"]=>
   unicode(5) "color"
-  [2]=>
+  [u"2.2"]=>
   float(2.2)
   [33]=>
   int(33)
@@ -261,7 +261,7 @@ array(4) {
   int(111)
   [u"color"]=>
   unicode(5) "color"
-  [2]=>
+  [u"2.2"]=>
   float(2.2)
   [33]=>
   int(33)
@@ -282,7 +282,7 @@ array(1) {
 array(6) {
   [1]=>
   int(1)
-  [2]=>
+  [u"2.2"]=>
   float(2.2)
   [u"int"]=>
   unicode(3) "int"
