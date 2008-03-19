@@ -379,7 +379,7 @@ sapi_module_struct capi_sapi_module = {
    sapi_capi_register_server_variables,	/* register server variables */
    capi_log_message,		/* Log message */
    NULL,			/* Get request time */
-   NULL,			/ Child terminate */
+   NULL,			/* Child terminate */
 
    NULL,			/* Block interruptions */
    NULL,			/* Unblock interruptions */
