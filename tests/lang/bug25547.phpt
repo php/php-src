@@ -22,7 +22,7 @@ print_r($output);
 echo "Done";
 ?>
 --EXPECT--
-handler(Undefined index:  foo)
+handler(Undefined index: foo)
 Array
 (
     [foo] => 1
