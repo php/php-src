@@ -933,6 +933,12 @@ SAPI_API time_t sapi_get_request_time(TSRMLS_D)
 	return SG(global_request_time);
 }
 
+SAPI_API void sapi_terminate_process(TSRMLS_D) {
+	if (sapi_module.terminate_process) {
+		sapi_module.terminate_process(TSRMLS_C);
+	}
+}
+
 /*
  * Local variables:
  * tab-width: 4

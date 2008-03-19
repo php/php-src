@@ -208,6 +208,7 @@ SAPI_API int sapi_force_http_10(TSRMLS_D);
 SAPI_API int sapi_get_target_uid(uid_t * TSRMLS_DC);
 SAPI_API int sapi_get_target_gid(gid_t * TSRMLS_DC);
 SAPI_API time_t sapi_get_request_time(TSRMLS_D);
+SAPI_API void sapi_terminate_process(TSRMLS_D);
 END_EXTERN_C()
 
 struct _sapi_module_struct {
@@ -237,6 +238,7 @@ struct _sapi_module_struct {
 	void (*register_server_variables)(zval *track_vars_array TSRMLS_DC);
 	void (*log_message)(char *message);
 	time_t (*get_request_time)(TSRMLS_D);
+	void (*terminate_process)(TSRMLS_D);
 
 	char *php_ini_path_override;
 

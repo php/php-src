@@ -180,6 +180,7 @@ static sapi_module_struct phttpd_sapi_module = {
 	NULL,									/* register server variables */
 	NULL,									/* Log message */
 	NULL,									/* Get request time */
+	NULL,									/* Child terminate */
 
     STANDARD_SAPI_MODULE_PROPERTIES
 };

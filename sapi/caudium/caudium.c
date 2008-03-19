@@ -551,6 +551,7 @@ static sapi_module_struct caudium_sapi_module = {
   sapi_caudium_register_variables,	/* register server variables */
   NULL,					/* Log message */
   NULL,					/* Get request time */
+  NULL,					/* Child terminate */
 
   STANDARD_SAPI_MODULE_PROPERTIES
 };

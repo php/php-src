@@ -566,13 +566,23 @@ END_EXTERN_C()
 
 #define zend_bailout()		_zend_bailout(__FILE__, __LINE__)
 
+#ifdef HAVE_SIGSETJMP
+#	define SETJMP(a) sigsetjmp(a, 0)
+#	define LONGJMP(a,b) siglongjmp(a, b)
+#	define JMP_BUF sigjmp_buf
+#else
+#	define SETJMP(a) setjmp(a)
+#	define LONGJMP(a,b) longjmp(a, b)
+#	define JMP_BUF jmp_buf
+#endif
+
 #define zend_try												\
 	{															\
-		jmp_buf *__orig_bailout = EG(bailout);					\
-		jmp_buf __bailout;										\
+		JMP_BUF *__orig_bailout = EG(bailout);					\
+		JMP_BUF __bailout;										\
 																\
 		EG(bailout) = &__bailout;								\
-		if (setjmp(__bailout)==0) {
+		if (SETJMP(__bailout)==0) {
 #define zend_catch												\
 		} else {												\
 			EG(bailout) = __orig_bailout;

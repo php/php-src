@@ -208,7 +208,7 @@ static PHP_INI_MH(OnUpdateTimeout)
 		return SUCCESS;
 	}
 	zend_unset_timeout(TSRMLS_C);
-	zend_set_timeout(EG(timeout_seconds));
+	zend_set_timeout(EG(timeout_seconds), 0);
 	return SUCCESS;
 }
 /* }}} */
@@ -554,6 +554,7 @@ PHP_INI_BEGIN()
 
 	STD_PHP_INI_ENTRY("user_ini.filename",		".user.ini",	PHP_INI_SYSTEM,	OnUpdateString,	user_ini_filename,	php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("user_ini.cache_ttl",		"300",			PHP_INI_SYSTEM,	OnUpdateLong,	user_ini_cache_ttl,	php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("exit_on_timeout",		"0",		PHP_INI_ALL,		OnUpdateBool,	exit_on_timeout,	php_core_globals,	core_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -1309,7 +1310,8 @@ static void php_message_handler_for_zend(long message, void *data)
 void php_on_timeout(int seconds TSRMLS_DC) /* {{{ */
 {
 	PG(connection_status) |= PHP_CONNECTION_TIMEOUT;
-	zend_set_timeout(EG(timeout_seconds));
+	zend_set_timeout(EG(timeout_seconds), 0);
+	if(PG(exit_on_timeout)) sapi_terminate_process(TSRMLS_C);
 }
 /* }}} */
 
@@ -1340,7 +1342,7 @@ static int php_start_sapi(TSRMLS_D)
 			PG(connection_status) = PHP_CONNECTION_NORMAL;
 
 			zend_activate(TSRMLS_C);
-			zend_set_timeout(EG(timeout_seconds));
+			zend_set_timeout(EG(timeout_seconds), 1);
 			zend_activate_modules(TSRMLS_C);
 			PG(modules_activated)=1;
 		} zend_catch {
@@ -1384,9 +1386,9 @@ int php_request_startup(TSRMLS_D)
 		sapi_activate(TSRMLS_C);
 
 		if (PG(max_input_time) == -1) {
-			zend_set_timeout(EG(timeout_seconds));
+			zend_set_timeout(EG(timeout_seconds), 1);
 		} else {
-			zend_set_timeout(PG(max_input_time));
+			zend_set_timeout(PG(max_input_time), 1);
 		}
 
 		/* Disable realpath cache if safe_mode or open_basedir are set */
@@ -2191,7 +2193,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 #ifdef PHP_WIN32
 			zend_unset_timeout(TSRMLS_C);
 #endif
-			zend_set_timeout(INI_INT("max_execution_time"));
+			zend_set_timeout(EG(timeout_seconds), 0);
 		}
 		retval = (zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 3, prepend_file_p, primary_file, append_file_p) == SUCCESS);
 
