@@ -1532,9 +1532,7 @@ void zend_set_timeout(long seconds, int reset_signals) /* {{{ */
 	TSRMLS_FETCH();
 
 	EG(timeout_seconds) = seconds;
-	if(!seconds) {
-		return;
-	}
+
 #ifdef ZEND_WIN32
 	if (timeout_thread_initialized == 0 && InterlockedIncrement(&timeout_thread_initialized) == 1) {
 		/* We start up this process-wide thread here and not in zend_startup(), because if Zend
@@ -1542,25 +1540,28 @@ void zend_set_timeout(long seconds, int reset_signals) /* {{{ */
 		 */
 		zend_init_timeout_thread();
 	}
-	PostThreadMessage(timeout_thread_id, WM_REGISTER_ZEND_TIMEOUT, (WPARAM) GetCurrentThreadId(), (LPARAM) seconds);
+	if(seconds) PostThreadMessage(timeout_thread_id, WM_REGISTER_ZEND_TIMEOUT, (WPARAM) GetCurrentThreadId(), (LPARAM) seconds);
 #else
 #	ifdef HAVE_SETITIMER
 	{
 		struct itimerval t_r;		/* timeout requested */
 		sigset_t sigset;
 
-		t_r.it_value.tv_sec = seconds;
-		t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
+		if(seconds) {
+			t_r.it_value.tv_sec = seconds;
+			t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
 
 #	ifdef __CYGWIN__
-		setitimer(ITIMER_REAL, &t_r, NULL);
+			setitimer(ITIMER_REAL, &t_r, NULL);
+		}
 		if(reset_signals) {
 			signal(SIGALRM, zend_timeout);
 			sigemptyset(&sigset);
 			sigaddset(&sigset, SIGALRM);
 		}
 #	else
-		setitimer(ITIMER_PROF, &t_r, NULL);
+			setitimer(ITIMER_PROF, &t_r, NULL);
+		}
 		if(reset_signals) {
 			signal(SIGPROF, zend_timeout);
 			sigemptyset(&sigset);
