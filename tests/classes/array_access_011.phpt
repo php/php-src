@@ -112,9 +112,9 @@ string(6) "FooBar"
 string(9) "FooBarBaz"
 ===ArrayOverloading===
 ArrayAccessReferenceProxy::__construct(0)
-object(ArrayAccessReferenceProxy)#1 (3) {
+object(ArrayAccessReferenceProxy)#%d (3) {
   ["object:private"]=>
-  object(Peoples)#2 (1) {
+  object(Peoples)#%d (1) {
     ["person"]=>
     &array(1) {
       [0]=>
@@ -157,9 +157,9 @@ string(12) "FooBarBarBaz"
 ArrayAccessReferenceProxy::__construct(0)
 ArrayAccessReferenceProxy::offsetUnset(0, name)
 ArrayAccessReferenceProxy::__construct(0)
-object(ArrayAccessReferenceProxy)#1 (3) {
+object(ArrayAccessReferenceProxy)#%d (3) {
   ["object:private"]=>
-  object(Peoples)#2 (1) {
+  object(Peoples)#%d (1) {
     ["person"]=>
     &array(1) {
       [0]=>
