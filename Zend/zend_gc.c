@@ -305,7 +305,9 @@ static void zval_scan_black(zval *pz TSRMLS_DC)
 
 static int children_scan_black(zval **pz TSRMLS_DC)
 {
-	(*pz)->refcount__gc++;
+	if (Z_TYPE_PP(pz) != IS_ARRAY || Z_ARRVAL_PP(pz) != &EG(symbol_table)) {
+		(*pz)->refcount__gc++;
+	}
 
 	if (GC_ZVAL_GET_COLOR(*pz) != GC_BLACK) {
 		zval_scan_black(*pz TSRMLS_CC);
@@ -349,7 +351,9 @@ static void zval_mark_grey(zval *pz TSRMLS_DC)
 
 static int children_mark_grey(zval **pz TSRMLS_DC)
 {
-	(*pz)->refcount__gc--;
+	if (Z_TYPE_PP(pz) != IS_ARRAY || Z_ARRVAL_PP(pz) != &EG(symbol_table)) {
+		(*pz)->refcount__gc--;
+	}
 	zval_mark_grey(*pz TSRMLS_CC);
 	return 0;
 }
