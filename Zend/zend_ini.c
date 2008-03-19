@@ -556,7 +556,7 @@ ZEND_API ZEND_INI_MH(OnUpdateLong) /* {{{ */
 
 	p = (long *) (base+(size_t) mh_arg1);
 
-	*p = zend_atoi(new_value, new_value_length);
+	*p = zend_atol(new_value, new_value_length);
 	return SUCCESS;
 }
 /* }}} */
@@ -572,7 +572,7 @@ ZEND_API ZEND_INI_MH(OnUpdateLongGEZero) /* {{{ */
 	base = (char *) ts_resource(*((int *) mh_arg2));
 #endif
 
-	tmp = zend_atoi(new_value, new_value_length);
+	tmp = zend_atol(new_value, new_value_length);
 	if (tmp < 0) {
 		return FAILURE;
 	}
