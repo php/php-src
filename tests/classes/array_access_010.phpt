@@ -105,9 +105,9 @@ string(9) "FooBarBaz"
 
 Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::__construct(Array)
-object(ArrayReferenceProxy)#1 (2) {
+object(ArrayReferenceProxy)#%d (2) {
   ["object":"ArrayReferenceProxy":private]=>
-  object(Peoples)#2 (1) {
+  object(Peoples)#%d (1) {
     ["person"]=>
     array(1) {
       [0]=>
@@ -181,9 +181,9 @@ ArrayReferenceProxy::offsetUnset(Array, name)
 
 Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::__construct(Array)
-object(ArrayReferenceProxy)#1 (2) {
+object(ArrayReferenceProxy)#%d (2) {
   ["object":"ArrayReferenceProxy":private]=>
-  object(Peoples)#2 (1) {
+  object(Peoples)#%d (1) {
     ["person"]=>
     array(1) {
       [0]=>
@@ -224,9 +224,9 @@ unicode(9) "FooBarBaz"
 
 Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::__construct(Array)
-object(ArrayReferenceProxy)#1 (2) {
+object(ArrayReferenceProxy)#%d (2) {
   [u"object":u"ArrayReferenceProxy":private]=>
-  object(Peoples)#2 (1) {
+  object(Peoples)#%d (1) {
     [u"person"]=>
     array(1) {
       [0]=>
@@ -300,9 +300,9 @@ ArrayReferenceProxy::offsetUnset(Array, name)
 
 Notice: Array to string conversion in %s on line %d
 ArrayReferenceProxy::__construct(Array)
-object(ArrayReferenceProxy)#1 (2) {
+object(ArrayReferenceProxy)#%d (2) {
   [u"object":u"ArrayReferenceProxy":private]=>
-  object(Peoples)#2 (1) {
+  object(Peoples)#%d (1) {
     [u"person"]=>
     array(1) {
       [0]=>
