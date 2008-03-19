@@ -1,3 +1,466 @@
+2008-03-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/filter/logical_filters.c
+      ext/filter/logical_filters.c
+      ext/filter/tests/bug44445.phpt
+      ext/filter/tests/bug44445.phpt:
+      
+      MFB: Bug #44445 (email validator does not handle domains starting/ending
+      with a -)
+
+    * (PHP_5_3)
+      ext/filter/logical_filters.c
+      ext/filter/tests/bug44445.phpt
+      ext/filter/tests/bug44445.phpt
+      ext/filter/tests/bug44445.phpt:
+      
+      Fixed bug #44445 (email validator does not handle domains
+      starting/ending with a -)
+
+2008-03-18  Elizabeth Marie Smith  <emsmith@elizabethmariesmith.com>
+
+    * (PHP_5_3)
+      .cvsignore:
+      Correct name for the file
+
+2008-03-18  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_3)
+      sapi/aolserver/aolserver.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache_hooks/mod_php5.c
+      sapi/caudium/caudium.c
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c
+      sapi/continuity/capi.c
+      sapi/embed/php_embed.c
+      sapi/isapi/php5isapi.c
+      sapi/milter/php_milter.c
+      sapi/nsapi/nsapi.c
+      sapi/phttpd/phttpd.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/roxen/roxen.c
+      sapi/thttpd/thttpd.c
+      sapi/tux/php_tux.c
+      sapi/webjames/webjames.c:
+      Add new empty child terminate sapi hook to the rest of the sapis
+
+    * (PHP_5_3)
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      main/SAPI.c
+      main/SAPI.h
+      main/main.c
+      main/php_globals.h
+      sapi/apache/mod_php5.c:
+      exit_on_timeout patch
+      
+      After the sigsetjmp change, this is patch #2 in an effort to get some
+      sanity restored to signal handling in PHP.
+      
+      This patch does two things.  First, it makes it possible to reset the
+      timeout without resetting the signal handlers.  This is important for
+      cases where an extension may have deferred signals in its MINIT in order
+      to implement critical sections. It also lays the groundwork for cleaning
+      up our signal handling and perhaps eventually implementing our own
+      signal deferring mechanism so we can have true critical sections.
+      
+      The second thing this does is to make it possible to terminate the current
+      child process (only for Apache1 at the moment) on a timeout.  There are
+      a number of extensions that are unhappy about being longjmp'ed out of
+      and when this happens on a timeout they are left in an inconsistent state.
+      By turning on exit_on_timeout you can now force the process to terminate
+      on a timeout which will clean up any hanging locks and/or memory left
+      hanging after the longjmp.
+
+    * (PHP_5_3)
+      ZendEngine2/Zend.m4
+      ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_globals.h
+      win32/build/config.w32.h.in:
+      Make the sigsetjmp change more robust.  On systems that don't have
+      sigsetjmp use setjmp.  Windows is of course weird in that it seems to
+      have sigsetjmp but not sigjmp_buf (??) so force it to use setjmp in
+      config.w32.h.in
+
+    * (PHP_5_3)
+      ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_globals.h:
+      Use sigsetjmp and siglongjmp instead of setjmp/longjmp in order to be
+      consistent in how we deal with the signal mask.  POSIX doesn't specify
+      what to do with the signal mask in setjmp/longjmp which has resulted in
+      the signal mask getting saved on *BSD and not getting saved on Linux.
+      Making the behaviour explicit via sigsetjmp/siglongjmp gives us
+      consistency and saves expensive sigprocmask() syscalls on *BSD.
+
+2008-03-18  Elizabeth Marie Smith  <emsmith@elizabethmariesmith.com>
+
+    * (PHP_5_3)
+      .cvsignore:
+      Ignore steph's pretty batch file
+
+2008-03-18  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/mysqli.c:
+      MFB : fix the build
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli.c:
+      Fix the build
+
+2008-03-18  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/config.w32:
+      Generic function for binary probes, kill the other two. And get rid of the
+      annoying double check for CL.
+
+2008-03-18  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_driver.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/mysqli_report.c
+      ext/mysqli/mysqli_warning.c
+      ext/mysqli/php_mysqli_structs.h
+      ext/mysqli/tests/057.phpt
+      ext/mysqli/tests/bug34810.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_driver_interface.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_driver_reflection.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_interface.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_reflection.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_result_interface.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_result_reflection.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_stmt_interface.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_warning_reflection.phpt
+      ext/mysqli/tests/mysqli_connect_oo.phpt
+      ext/mysqli/tests/mysqli_constants.phpt
+      ext/mysqli/tests/mysqli_debug.phpt
+      ext/mysqli/tests/mysqli_debug_append.phpt
+      ext/mysqli/tests/mysqli_debug_control_string.phpt
+      ext/mysqli/tests/mysqli_debug_ini.phpt
+      ext/mysqli/tests/mysqli_debug_mysqlnd_control_string.phpt
+      ext/mysqli/tests/mysqli_debug_mysqlnd_only.phpt
+      ext/mysqli/tests/mysqli_kill.phpt
+      ext/mysqli/tests/mysqli_options.phpt
+      ext/mysqli/tests/mysqli_real_connect.phpt
+      ext/mysqli/tests/mysqli_result_references.phpt
+      ext/mysqli/tests/mysqli_stmt_attr_get.phpt
+      ext/mysqlnd/mysqlnd_priv.h:
+      MFB - Bug #44352 mysqli_connect_error() false negative for host errors
+
+    * (PHP_5_3)
+      NEWS
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_driver.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/mysqli_warning.c
+      ext/mysqli/php_mysqli_structs.h
+      ext/mysqli/tests/057.phpt
+      ext/mysqli/tests/bug34810.phpt
+      ext/mysqli/tests/connect.inc
+      ext/mysqli/tests/mysqli_class_mysqli_driver_interface.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_driver_reflection.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_interface.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_reflection.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_result_interface.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_result_reflection.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_stmt_interface.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_warning_reflection.phpt
+      ext/mysqli/tests/mysqli_connect_oo.phpt
+      ext/mysqli/tests/mysqli_constants.phpt
+      ext/mysqli/tests/mysqli_debug.phpt
+      ext/mysqli/tests/mysqli_debug_append.phpt
+      ext/mysqli/tests/mysqli_debug_control_string.phpt
+      ext/mysqli/tests/mysqli_debug_ini.phpt
+      ext/mysqli/tests/mysqli_debug_mysqlnd_control_string.phpt
+      ext/mysqli/tests/mysqli_debug_mysqlnd_only.phpt
+      ext/mysqli/tests/mysqli_kill.phpt
+      ext/mysqli/tests/mysqli_options.phpt
+      ext/mysqli/tests/mysqli_real_connect.phpt
+      ext/mysqli/tests/mysqli_result_references.phpt
+      ext/mysqli/tests/mysqli_stmt_attr_get.phpt
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd_priv.h:
+      Fixed a bunch of bugs reported in
+      Bug #44352 mysqli_connect_error() false negative for host errors
+      From now on the mysqli object doesn't have that magic properties, like
+      error, which were readable but not visible through isset(),
+      property_exists()
+      and var_dump(). All other ext/mysqli classes were fixed too.
+      Now it will be easier to debug mysqli based applications.
+
+2008-03-18  Robin Fernandes  <robin_fernandes@uk.ibm.com>
+
+    * ext/standard/tests/serialize/005.phpt
+      ext/standard/tests/serialize/005.phpt
+      ext/standard/tests/serialize/005.phpt
+      ext/standard/tests/serialize/serialization_arrays_001.phpt
+      ext/standard/tests/serialize/serialization_arrays_001.phpt
+      ext/standard/tests/serialize/serialization_arrays_002.phpt
+      ext/standard/tests/serialize/serialization_arrays_002.phpt
+      ext/standard/tests/serialize/serialization_arrays_003.phpt
+      ext/standard/tests/serialize/serialization_arrays_003.phpt
+      ext/standard/tests/serialize/serialization_arrays_004.phpt
+      ext/standard/tests/serialize/serialization_arrays_004.phpt
+      ext/standard/tests/serialize/serialization_arrays_005.phpt
+      ext/standard/tests/serialize/serialization_arrays_005.phpt
+      ext/standard/tests/serialize/serialization_error_001.phpt
+      ext/standard/tests/serialize/serialization_error_001.phpt
+      ext/standard/tests/serialize/serialization_miscTypes_001.phpt
+      ext/standard/tests/serialize/serialization_miscTypes_001.phpt
+      ext/standard/tests/serialize/serialization_objects_001.phpt
+      ext/standard/tests/serialize/serialization_objects_001.phpt
+      ext/standard/tests/serialize/serialization_objects_002.phpt
+      ext/standard/tests/serialize/serialization_objects_002.phpt
+      ext/standard/tests/serialize/serialization_objects_003.phpt
+      ext/standard/tests/serialize/serialization_objects_003.phpt
+      ext/standard/tests/serialize/serialization_objects_004.phpt
+      ext/standard/tests/serialize/serialization_objects_004.phpt
+      ext/standard/tests/serialize/serialization_objects_005.phpt
+      ext/standard/tests/serialize/serialization_objects_005.phpt
+      ext/standard/tests/serialize/serialization_objects_006.phpt
+      ext/standard/tests/serialize/serialization_objects_006.phpt
+      ext/standard/tests/serialize/serialization_objects_007.phpt
+      ext/standard/tests/serialize/serialization_objects_007.phpt
+      ext/standard/tests/serialize/serialization_objects_008.phpt
+      ext/standard/tests/serialize/serialization_objects_008.phpt
+      ext/standard/tests/serialize/serialization_objects_009.phpt
+      ext/standard/tests/serialize/serialization_objects_009.phpt
+      ext/standard/tests/serialize/serialization_objects_010.phpt
+      ext/standard/tests/serialize/serialization_objects_010.phpt
+      ext/standard/tests/serialize/serialization_objects_011.phpt
+      ext/standard/tests/serialize/serialization_objects_011.phpt
+      ext/standard/tests/serialize/serialization_objects_012.phpt
+      ext/standard/tests/serialize/serialization_objects_012.phpt
+      ext/standard/tests/serialize/serialization_objects_013.phpt
+      ext/standard/tests/serialize/serialization_objects_013.phpt
+      ext/standard/tests/serialize/serialization_objects_014.phpt
+      ext/standard/tests/serialize/serialization_objects_014.phpt
+      ext/standard/tests/serialize/serialization_objects_015.phpt
+      ext/standard/tests/serialize/serialization_objects_015.phpt
+      ext/standard/tests/serialize/serialization_precision_001.phpt
+      ext/standard/tests/serialize/serialization_precision_001.phpt
+      ext/standard/tests/serialize/serialization_precision_002.phpt
+      ext/standard/tests/serialize/serialization_precision_002.phpt
+      ext/standard/tests/serialize/serialization_resources_001.phpt
+      ext/standard/tests/serialize/serialization_resources_001.phpt:
+      Adding more tests for serialize() and unserialize().
+
+    * ext/standard/tests/serialize/serialization_arrays_001.phpt
+      ext/standard/tests/serialize/serialization_arrays_001.phpt
+      ext/standard/tests/serialize/serialization_arrays_001.phpt
+      ext/standard/tests/serialize/serialization_arrays_002.phpt
+      ext/standard/tests/serialize/serialization_arrays_002.phpt
+      ext/standard/tests/serialize/serialization_arrays_002.phpt
+      ext/standard/tests/serialize/serialization_arrays_003.phpt
+      ext/standard/tests/serialize/serialization_arrays_003.phpt
+      ext/standard/tests/serialize/serialization_arrays_003.phpt
+      ext/standard/tests/serialize/serialization_arrays_004.phpt
+      ext/standard/tests/serialize/serialization_arrays_004.phpt
+      ext/standard/tests/serialize/serialization_arrays_004.phpt
+      ext/standard/tests/serialize/serialization_arrays_005.phpt
+      ext/standard/tests/serialize/serialization_arrays_005.phpt
+      ext/standard/tests/serialize/serialization_arrays_005.phpt
+      ext/standard/tests/serialize/serialization_error_001.phpt
+      ext/standard/tests/serialize/serialization_error_001.phpt
+      ext/standard/tests/serialize/serialization_error_001.phpt
+      ext/standard/tests/serialize/serialization_miscTypes_001.phpt
+      ext/standard/tests/serialize/serialization_miscTypes_001.phpt
+      ext/standard/tests/serialize/serialization_miscTypes_001.phpt
+      ext/standard/tests/serialize/serialization_objects_001.phpt
+      ext/standard/tests/serialize/serialization_objects_001.phpt
+      ext/standard/tests/serialize/serialization_objects_001.phpt
+      ext/standard/tests/serialize/serialization_objects_002.phpt
+      ext/standard/tests/serialize/serialization_objects_002.phpt
+      ext/standard/tests/serialize/serialization_objects_002.phpt
+      ext/standard/tests/serialize/serialization_objects_003.phpt
+      ext/standard/tests/serialize/serialization_objects_003.phpt
+      ext/standard/tests/serialize/serialization_objects_003.phpt
+      ext/standard/tests/serialize/serialization_objects_004.phpt
+      ext/standard/tests/serialize/serialization_objects_004.phpt
+      ext/standard/tests/serialize/serialization_objects_004.phpt
+      ext/standard/tests/serialize/serialization_objects_005.phpt
+      ext/standard/tests/serialize/serialization_objects_005.phpt
+      ext/standard/tests/serialize/serialization_objects_005.phpt
+      ext/standard/tests/serialize/serialization_objects_006.phpt
+      ext/standard/tests/serialize/serialization_objects_006.phpt
+      ext/standard/tests/serialize/serialization_objects_006.phpt
+      ext/standard/tests/serialize/serialization_objects_007.phpt
+      ext/standard/tests/serialize/serialization_objects_007.phpt
+      ext/standard/tests/serialize/serialization_objects_007.phpt
+      ext/standard/tests/serialize/serialization_objects_008.phpt
+      ext/standard/tests/serialize/serialization_objects_008.phpt
+      ext/standard/tests/serialize/serialization_objects_008.phpt
+      ext/standard/tests/serialize/serialization_objects_009.phpt
+      ext/standard/tests/serialize/serialization_objects_009.phpt
+      ext/standard/tests/serialize/serialization_objects_009.phpt
+      ext/standard/tests/serialize/serialization_objects_010.phpt
+      ext/standard/tests/serialize/serialization_objects_010.phpt
+      ext/standard/tests/serialize/serialization_objects_010.phpt
+      ext/standard/tests/serialize/serialization_objects_011.phpt
+      ext/standard/tests/serialize/serialization_objects_011.phpt
+      ext/standard/tests/serialize/serialization_objects_011.phpt
+      ext/standard/tests/serialize/serialization_objects_012.phpt
+      ext/standard/tests/serialize/serialization_objects_012.phpt
+      ext/standard/tests/serialize/serialization_objects_012.phpt
+      ext/standard/tests/serialize/serialization_objects_013.phpt
+      ext/standard/tests/serialize/serialization_objects_013.phpt
+      ext/standard/tests/serialize/serialization_objects_013.phpt
+      ext/standard/tests/serialize/serialization_objects_014.phpt
+      ext/standard/tests/serialize/serialization_objects_014.phpt
+      ext/standard/tests/serialize/serialization_objects_014.phpt
+      ext/standard/tests/serialize/serialization_objects_015.phpt
+      ext/standard/tests/serialize/serialization_objects_015.phpt
+      ext/standard/tests/serialize/serialization_objects_015.phpt
+      ext/standard/tests/serialize/serialization_precision_001.phpt
+      ext/standard/tests/serialize/serialization_precision_001.phpt
+      ext/standard/tests/serialize/serialization_precision_001.phpt
+      ext/standard/tests/serialize/serialization_precision_002.phpt
+      ext/standard/tests/serialize/serialization_precision_002.phpt
+      ext/standard/tests/serialize/serialization_precision_002.phpt
+      ext/standard/tests/serialize/serialization_resources_001.phpt
+      ext/standard/tests/serialize/serialization_resources_001.phpt
+      ext/standard/tests/serialize/serialization_resources_001.phpt:
+        1.1.4;
+      file serialization_arrays_001.phpt was initially added on branch PHP_5_2.
+
+2008-03-18  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/bug42119.phpt
+      ZendEngine2/tests/clone_uncloneable.phpt:
+      remove ze1_compat tests
+
+    * (PHP_5_3)
+      ext/xmlreader/php_xmlreader.c:
+      one more forgotten ze1_compat leftover
+
+    * (PHP_5_3)
+      ext/pdo/pdo_dbh.c:
+      remove ze1_compat leftovers
+
+2008-03-18  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug30332.phpt
+      ZendEngine2/tests/bug31828.phpt
+      ZendEngine2/tests/bug32080.phpt
+      ZendEngine2/tests/bug32852.phpt
+      ZendEngine2/tests/bug33243.phpt
+      ZendEngine2/tests/bug34712.phpt
+      ZendEngine2/tests/bug34767.phpt
+      ext/dom/php_dom.c
+      ext/simplexml/simplexml.c
+      main/main.c:
+      MFH: Dropped zend.ze1_compatibility_mode
+      [DOC]
+
+2008-03-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c:
+      Removed hack (we don't need to modify class name).
+      (the problem is covered by Zend/tests/ns_056.phpt)
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend.c
+      ZendEngine2/zend.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/zend_vm_opcodes.h
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c
+      sapi/cli/php_cli.c
+      sapi/milter/php_milter.c
+      sapi/milter/php_milter.c:
+      Implemented concept of "delayed early binding" that allows opcode caches to
+      perform class declaration (early and/or run-time binding) in exactly the
+      same order as vanila php.
+      The following pseudo-code explains how it should be used in opcode cache.
+      
+      function cache_compile_file($filename) {
+              if (!is_cached($filename)) {
+                      ...
+                      orig_compiler_options = CG(compiler_optins);
+                      CG(compiler_options) |=
+      ZEND_COMPILE_IGNORE_INTERNAL_CLASSES |
+                                              ZEND_COMPILE_DELAYED_BINDING;
+                      $op_array = orig_compile_file($filename);
+                      CG(compiler_options) = orig_copiler_options;
+                      ...
+              } else {
+                      $op_array = restore_from_cache($filename);
+              }
+              zend_do_delayed_early_binding($op_array);
+      }
+
+    * ZendEngine2/tests/array_unshift_COW.phpt
+      ext/mysql/tests/mysql_fetch_row.phpt
+      ext/pdo/tests/bug_43663.phpt
+      ext/standard/tests/file/fgetss_variation2.phpt
+      ext/standard/tests/file/unlink_error-win32.phpt
+      ext/standard/tests/strings/implode1.phpt:
+      Fixed test
+
+2008-03-18  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/buildconf.js:
+      You might as well have 'the Steph special' too :-)
+      I can never remember the cscript line, so let's just have 'configure'
+      instead.
+
+    * (PHP_5_3)
+      win32/build/Makefile
+      win32/build/config.w32:
+      re2c checking.
+      If it's not installed, the least scary of messages goes out.
+      If it's installed but older than the required version, the download link
+      is given.
+
+2008-03-18  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/zend_compile.c
+      ext/standard/exec.c
+      ext/standard/exec.c
+      ext/standard/exec.c:
+      Fix build
+
 2008-03-17  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_2)
