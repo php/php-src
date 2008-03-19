@@ -1534,13 +1534,16 @@ void zend_set_timeout(long seconds, int reset_signals) /* {{{ */
 	EG(timeout_seconds) = seconds;
 
 #ifdef ZEND_WIN32
+	if(!seconds) {
+		return;
+	}
 	if (timeout_thread_initialized == 0 && InterlockedIncrement(&timeout_thread_initialized) == 1) {
 		/* We start up this process-wide thread here and not in zend_startup(), because if Zend
 		 * is initialized inside a DllMain(), you're not supposed to start threads from it.
 		 */
 		zend_init_timeout_thread();
 	}
-	if(seconds) PostThreadMessage(timeout_thread_id, WM_REGISTER_ZEND_TIMEOUT, (WPARAM) GetCurrentThreadId(), (LPARAM) seconds);
+	PostThreadMessage(timeout_thread_id, WM_REGISTER_ZEND_TIMEOUT, (WPARAM) GetCurrentThreadId(), (LPARAM) seconds);
 #else
 #	ifdef HAVE_SETITIMER
 	{
