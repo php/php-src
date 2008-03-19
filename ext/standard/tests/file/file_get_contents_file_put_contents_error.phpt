@@ -83,6 +83,8 @@ Warning: file_get_contents() expects at least 1 parameter, 0 given in %s on line
 
 Warning: file_put_contents() expects at least 2 parameters, 0 given in %s on line %d
 
+Warning: file_put_contents() expects at least 2 parameters, 1 given in %s on line %d
+
 -- Testing No.of arguments greater than expected --
 
 Warning: file_put_contents() expects at most 4 parameters, 5 given in %s on line %d
