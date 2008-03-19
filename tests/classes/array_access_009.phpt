@@ -129,9 +129,9 @@ string(6) "FooBar"
 string(9) "FooBarBaz"
 ===ArrayOverloading===
 ArrayProxy::__construct(0)
-object(ArrayProxy)#1 (2) {
+object(ArrayProxy)#%d (2) {
   ["object":"ArrayProxy":private]=>
-  object(Peoples)#2 (1) {
+  object(Peoples)#%d (1) {
     ["person"]=>
     array(1) {
       [0]=>
@@ -166,9 +166,9 @@ string(12) "FooBarBarBaz"
 ArrayProxy::__construct(0)
 ArrayProxy::offsetUnset(0, name)
 ArrayProxy::__construct(0)
-object(ArrayProxy)#1 (2) {
+object(ArrayProxy)#%d (2) {
   ["object":"ArrayProxy":private]=>
-  object(Peoples)#2 (1) {
+  object(Peoples)#%d (1) {
     ["person"]=>
     array(1) {
       [0]=>
@@ -194,9 +194,9 @@ unicode(6) "FooBar"
 unicode(9) "FooBarBaz"
 ===ArrayOverloading===
 ArrayProxy::__construct(0)
-object(ArrayProxy)#1 (2) {
+object(ArrayProxy)#%d (2) {
   [u"object":u"ArrayProxy":private]=>
-  object(Peoples)#2 (1) {
+  object(Peoples)#%d (1) {
     [u"person"]=>
     array(1) {
       [0]=>
@@ -231,9 +231,9 @@ unicode(12) "FooBarBarBaz"
 ArrayProxy::__construct(0)
 ArrayProxy::offsetUnset(0, name)
 ArrayProxy::__construct(0)
-object(ArrayProxy)#1 (2) {
+object(ArrayProxy)#%d (2) {
   [u"object":u"ArrayProxy":private]=>
-  object(Peoples)#2 (1) {
+  object(Peoples)#%d (1) {
     [u"person"]=>
     array(1) {
       [0]=>
