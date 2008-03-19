@@ -143,7 +143,7 @@ f2 called
 NULL
 
 Change callback function using assert_options and test return value 
-unicode(2) "f2"
+string(2) "f2"
 assert_options(ASSERT_CALLBACK) => [f3]
 ini.get("assert.callback") => [f2]
 f3 called
