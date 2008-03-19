@@ -1,3 +1,133 @@
+2008-03-18  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_3)
+      zend_execute.h
+      zend_execute_API.c:
+      exit_on_timeout patch
+      
+      After the sigsetjmp change, this is patch #2 in an effort to get some
+      sanity restored to signal handling in PHP.
+      
+      This patch does two things.  First, it makes it possible to reset the
+      timeout without resetting the signal handlers.  This is important for
+      cases where an extension may have deferred signals in its MINIT in order
+      to implement critical sections. It also lays the groundwork for cleaning
+      up our signal handling and perhaps eventually implementing our own
+      signal deferring mechanism so we can have true critical sections.
+      
+      The second thing this does is to make it possible to terminate the current
+      child process (only for Apache1 at the moment) on a timeout.  There are
+      a number of extensions that are unhappy about being longjmp'ed out of
+      and when this happens on a timeout they are left in an inconsistent state.
+      By turning on exit_on_timeout you can now force the process to terminate
+      on a timeout which will clean up any hanging locks and/or memory left
+      hanging after the longjmp.
+
+    * (PHP_5_3)
+      Zend.m4
+      zend.c
+      zend.h
+      zend_globals.h:
+      Make the sigsetjmp change more robust.  On systems that don't have
+      sigsetjmp use setjmp.  Windows is of course weird in that it seems to
+      have sigsetjmp but not sigjmp_buf (??) so force it to use setjmp in
+      config.w32.h.in
+
+    * (PHP_5_3)
+      zend.c
+      zend.h
+      zend_globals.h:
+      Use sigsetjmp and siglongjmp instead of setjmp/longjmp in order to be
+      consistent in how we deal with the signal mask.  POSIX doesn't specify
+      what to do with the signal mask in setjmp/longjmp which has resulted in
+      the signal mask getting saved on *BSD and not getting saved on Linux.
+      Making the behaviour explicit via sigsetjmp/siglongjmp gives us
+      consistency and saves expensive sigprocmask() syscalls on *BSD.
+
+2008-03-18  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      tests/bug42119.phpt
+      tests/clone_uncloneable.phpt:
+      remove ze1_compat tests
+
+2008-03-18  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      zend.c
+      zend_API.c
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_globals.h
+      zend_objects.c
+      zend_operators.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug30332.phpt
+      tests/bug31828.phpt
+      tests/bug32080.phpt
+      tests/bug32852.phpt
+      tests/bug33243.phpt
+      tests/bug34712.phpt
+      tests/bug34767.phpt:
+      MFH: Dropped zend.ze1_compatibility_mode
+      [DOC]
+
+2008-03-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c:
+      Removed hack (we don't need to modify class name).
+      (the problem is covered by Zend/tests/ns_056.phpt)
+
+    * zend.c
+      zend.c
+      zend_compile.c
+      zend_compile.c
+      zend_compile.h
+      zend_compile.h
+      zend_execute_API.c
+      zend_execute_API.c
+      zend_globals.h
+      zend_globals.h
+      zend_opcode.c
+      zend_opcode.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      zend_vm_opcodes.h:
+      Implemented concept of "delayed early binding" that allows opcode caches to
+      perform class declaration (early and/or run-time binding) in exactly the
+      same order as vanila php.
+      The following pseudo-code explains how it should be used in opcode cache.
+      
+      function cache_compile_file($filename) {
+              if (!is_cached($filename)) {
+                      ...
+                      orig_compiler_options = CG(compiler_optins);
+                      CG(compiler_options) |=
+      ZEND_COMPILE_IGNORE_INTERNAL_CLASSES |
+                                              ZEND_COMPILE_DELAYED_BINDING;
+                      $op_array = orig_compile_file($filename);
+                      CG(compiler_options) = orig_copiler_options;
+                      ...
+              } else {
+                      $op_array = restore_from_cache($filename);
+              }
+              zend_do_delayed_early_binding($op_array);
+      }
+
+    * tests/array_unshift_COW.phpt:
+      Fixed test
+
+2008-03-18  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_compile.c:
+      Fix build
+
 2008-03-17  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * (PHP_5_3)
