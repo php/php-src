@@ -1,3 +1,53 @@
+2008-03-19  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_3)
+      zend_ini_scanner.c
+      zend_ini_scanner_defs.h
+      zend_language_scanner.c
+      zend_language_scanner_defs.h:
+      fix gcov build
+
+2008-03-19  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * Zend.m4
+      zend.c
+      zend.h
+      zend_execute.h
+      zend_execute_API.c
+      zend_globals.h:
+      MFB
+      
+      Here are the signal changes from the 5.3 branch that optimizes signal
+      handler registration and switches from longjmp to siglongjmp in order
+      to make signal mask handling consistent across different UNIX operating
+      systems.
+
+    * (PHP_5_3)
+      zend_execute_API.c:
+      On Windows I guess there is no point starting the timeout thread until
+      we actually have a timeout value.
+
+    * (PHP_5_3)
+      zend_execute_API.c:
+      Make sure we set the signal handler when reset_signals is true, regardless
+      of the actual timeout value.
+
+2008-03-19  Antony Dovgal  <tony@daylessday.org>
+
+    * zend_operators.h:
+      fix typo
+
+    * zend_ini.c
+      zend_operators.c
+      zend_operators.h:
+      add zend_atol() and use it instead of zend_atoi() where applicable
+
+2008-03-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      zend_gc.c:
+      Disabled $GLOBALS' refcount modification
+
 2008-03-18  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * (PHP_5_3)
