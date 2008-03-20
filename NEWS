@@ -129,6 +129,7 @@ PHP                                                                        NEWS
   . Added support for OpenSSL cipher functions
   . Added access to internal values of DSA, RSA and DH keys
 - Improved md5() implementation. (Solar Designer, Dmitry)
+- Allowed user-level access for short_open_tag. (Stas)
 
 - Upgraded bundled sqlite to version 3.5.6. (Scott)
 
