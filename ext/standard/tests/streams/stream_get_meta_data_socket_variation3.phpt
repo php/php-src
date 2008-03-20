@@ -30,7 +30,7 @@ fclose($server);
 --EXPECT--
 array(7) {
   ["stream_type"]=>
-  string(10) "tcp_socket"
+  string(%d) "tcp_socke%s"
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>
@@ -50,7 +50,7 @@ Set blocking to false:
 bool(true)
 array(7) {
   ["stream_type"]=>
-  string(10) "tcp_socket"
+  string(%d) "tcp_socke%s"
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>
@@ -70,7 +70,7 @@ Set blocking to true:
 bool(true)
 array(7) {
   ["stream_type"]=>
-  string(10) "tcp_socket"
+  string(%d) "tcp_socke%s"
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>

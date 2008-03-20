@@ -35,7 +35,7 @@ fclose($server);
 --EXPECT--
 array(7) {
   ["stream_type"]=>
-  string(10) "tcp_socket"
+  string(%d) "tcp_socke%s"
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>
@@ -54,7 +54,7 @@ array(7) {
 Set a timeout on the client and attempt a read:
 array(7) {
   ["stream_type"]=>
-  string(10) "tcp_socket"
+  string(%d) "tcp_socke%s"
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>
@@ -73,7 +73,7 @@ array(7) {
 Write some data from the server:
 array(7) {
   ["stream_type"]=>
-  string(10) "tcp_socket"
+  string(%d) "tcp_socke%s"
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>
@@ -92,7 +92,7 @@ array(7) {
 Read some data from the client:
 array(7) {
   ["stream_type"]=>
-  string(10) "tcp_socket"
+  string(%d) "tcp_socke%s"
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>
