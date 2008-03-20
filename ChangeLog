@@ -1,3 +1,377 @@
+2008-03-19  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/standard/tests/streams/.cvsignore:
+      add
+
+    * ext/standard/tests/streams/.cvsignore
+      ext/standard/tests/streams/.cvsignore:
+      
+      file .cvsignore was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      Makefile.frag
+      ZendEngine2/zend_ini_scanner.c
+      ZendEngine2/zend_ini_scanner_defs.h
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner_defs.h:
+      fix gcov build
+
+2008-03-19  Steve Seear  <steve.seear@uk.ibm.com>
+
+    * (PHP_5_2)
+      tests/lang/empty_variation.phpt
+      tests/lang/empty_variation.phpt
+      tests/lang/inc_throw.inc
+      tests/lang/inc_throw.inc
+      tests/lang/include_variation1.phpt
+      tests/lang/include_variation1.phpt
+      tests/lang/include_variation2.phpt
+      tests/lang/include_variation2.phpt
+      tests/lang/include_variation3.phpt
+      tests/lang/include_variation3.phpt
+      tests/lang/throw_variation_001.phpt
+      tests/lang/throw_variation_001.phpt
+      tests/lang/include_files/echo.inc
+      tests/lang/include_files/echo.inc
+      tests/lang/include_files/eval.inc
+      tests/lang/include_files/eval.inc
+      tests/lang/include_files/function.inc
+      tests/lang/include_files/function.inc:
+      Adding language tests.
+
+    * tests/lang/empty_variation.phpt
+      tests/lang/empty_variation.phpt
+      tests/lang/empty_variation.phpt
+      tests/lang/inc_throw.inc
+      tests/lang/inc_throw.inc
+      tests/lang/inc_throw.inc
+      tests/lang/include_variation1.phpt
+      tests/lang/include_variation1.phpt
+      tests/lang/include_variation1.phpt
+      tests/lang/include_variation2.phpt
+      tests/lang/include_variation2.phpt
+      tests/lang/include_variation2.phpt
+      tests/lang/include_variation3.phpt
+      tests/lang/include_variation3.phpt
+      tests/lang/include_variation3.phpt
+      tests/lang/throw_variation_001.phpt
+      tests/lang/throw_variation_001.phpt
+      tests/lang/throw_variation_001.phpt
+      tests/lang/include_files/echo.inc
+      tests/lang/include_files/echo.inc
+      tests/lang/include_files/echo.inc
+      tests/lang/include_files/eval.inc
+      tests/lang/include_files/eval.inc
+      tests/lang/include_files/eval.inc
+      tests/lang/include_files/function.inc
+      tests/lang/include_files/function.inc
+      tests/lang/include_files/function.inc:
+        1.1.4;
+      Adding language tests.
+
+    * tests/classes/array_access_009.phpt
+      tests/classes/array_access_009.phpt
+      tests/classes/array_access_009.phpt
+      tests/classes/array_access_010.phpt
+      tests/classes/array_access_010.phpt
+      tests/classes/array_access_010.phpt
+      tests/classes/array_access_011.phpt
+      tests/classes/array_access_011.phpt
+      tests/classes/array_access_011.phpt
+      tests/classes/interface_optional_arg_002.phpt
+      tests/classes/interface_optional_arg_002.phpt
+      tests/classes/interface_optional_arg_002.phpt
+      tests/classes/interface_optional_arg_002.phpt
+      tests/classes/interface_optional_arg_002.phpt
+      tests/classes/method_override_optional_arg_001.phpt
+      tests/classes/method_override_optional_arg_001.phpt
+      tests/classes/method_override_optional_arg_001.phpt
+      tests/classes/method_override_optional_arg_001.phpt
+      tests/classes/method_override_optional_arg_001.phpt
+      tests/classes/method_override_optional_arg_002.phpt
+      tests/classes/method_override_optional_arg_002.phpt
+      tests/classes/method_override_optional_arg_002.phpt
+      tests/classes/method_override_optional_arg_002.phpt
+      tests/classes/method_override_optional_arg_002.phpt:
+      Added some class tests; Replaced some hardcoded instance ids with %d.
+
+    * (PHP_5_2)
+      ext/tokenizer/tests/token_get_all_variation19.phpt
+      ext/tokenizer/tests/token_get_all_variation19.phpt:
+      Adding tokenizer test
+
+    * ext/tokenizer/tests/token_get_all_variation19.phpt
+      ext/tokenizer/tests/token_get_all_variation19.phpt
+      ext/tokenizer/tests/token_get_all_variation19.phpt:
+        1.1.4;
+      Adding tokenizer test
+
+    * (PHP_5_2)
+      ext/standard/tests/streams/stream_get_meta_data_dir_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_dir_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_error.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_error.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_variation1.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_variation1.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_variation2.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_variation2.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_variation4.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_variation4.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_variation5.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_variation5.phpt
+      ext/standard/tests/streams/stream_get_meta_data_process_basic-win32.phpt
+      ext/standard/tests/streams/stream_get_meta_data_process_basic-win32.phpt
+      ext/standard/tests/streams/stream_get_meta_data_process_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_process_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation1.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation1.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation2.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation2.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation3.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation3.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation4.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation4.phpt
+      ext/standard/tests/streams/stream_set_timeout_error.phpt
+      ext/standard/tests/streams/stream_set_timeout_error.phpt:
+      Adding streams tests
+
+    * ext/standard/tests/streams/stream_get_meta_data_dir_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_dir_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_dir_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_error.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_error.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_error.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_variation1.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_variation1.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_variation1.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_variation2.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_variation2.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_variation2.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_variation4.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_variation4.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_variation4.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_variation5.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_variation5.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_variation5.phpt
+      ext/standard/tests/streams/stream_get_meta_data_process_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_process_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_process_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation1.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation1.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation1.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation2.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation2.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation2.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation3.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation3.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation3.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation4.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation4.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation4.phpt
+      ext/standard/tests/streams/stream_set_timeout_error.phpt
+      ext/standard/tests/streams/stream_set_timeout_error.phpt
+      ext/standard/tests/streams/stream_set_timeout_error.phpt:
+        1.1.4;
+      Adding streams tests
+
+    * ext/standard/tests/file/fopen_variation1.phpt
+      ext/standard/tests/file/fopen_variation1.phpt
+      ext/standard/tests/file/fread_socket_variation1.phpt
+      ext/standard/tests/file/fread_socket_variation1.phpt
+      ext/standard/tests/file/fseek_dir_basic.phpt
+      ext/standard/tests/file/fseek_dir_basic.phpt
+      ext/standard/tests/file/glob_variation2.phpt
+      ext/standard/tests/file/glob_variation2.phpt
+      ext/standard/tests/file/parse_ini_file_error.phpt
+      ext/standard/tests/file/parse_ini_file_error.phpt
+      ext/standard/tests/file/realpath_basic2.phpt
+      ext/standard/tests/file/realpath_basic2.phpt
+      ext/standard/tests/file/realpath_basic3.phpt
+      ext/standard/tests/file/realpath_basic3.phpt:
+      Adding filesystem tests
+
+    * ext/standard/tests/file/fopen_variation1.phpt
+      ext/standard/tests/file/fopen_variation1.phpt
+      ext/standard/tests/file/fopen_variation1.phpt
+      ext/standard/tests/file/fread_socket_variation1.phpt
+      ext/standard/tests/file/fread_socket_variation1.phpt
+      ext/standard/tests/file/fread_socket_variation1.phpt
+      ext/standard/tests/file/fseek_dir_basic.phpt
+      ext/standard/tests/file/fseek_dir_basic.phpt
+      ext/standard/tests/file/fseek_dir_basic.phpt
+      ext/standard/tests/file/glob_variation2.phpt
+      ext/standard/tests/file/glob_variation2.phpt
+      ext/standard/tests/file/glob_variation2.phpt
+      ext/standard/tests/file/parse_ini_file_error.phpt
+      ext/standard/tests/file/parse_ini_file_error.phpt
+      ext/standard/tests/file/parse_ini_file_error.phpt
+      ext/standard/tests/file/realpath_basic2.phpt
+      ext/standard/tests/file/realpath_basic2.phpt
+      ext/standard/tests/file/realpath_basic2.phpt
+      ext/standard/tests/file/realpath_basic3.phpt
+      ext/standard/tests/file/realpath_basic3.phpt
+      ext/standard/tests/file/realpath_basic3.phpt:
+        1.1.4;
+      file fopen_variation1.phpt was initially added on branch PHP_5_2.
+
+2008-03-19  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ZendEngine2/Zend.m4
+      ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      main/SAPI.c
+      main/SAPI.h
+      main/main.c
+      main/php_globals.h
+      sapi/aolserver/aolserver.c
+      sapi/apache/mod_php.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache_hooks/mod_php5.c
+      sapi/caudium/caudium.c
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c
+      sapi/continuity/capi.c
+      sapi/embed/php_embed.c
+      sapi/isapi/php5isapi.c
+      sapi/milter/php_milter.c
+      sapi/nsapi/nsapi.c
+      sapi/phttpd/phttpd.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/roxen/roxen.c
+      sapi/thttpd/thttpd.c
+      sapi/tux/php_tux.c
+      sapi/webjames/webjames.c
+      win32/build/config.w32.h.in:
+      MFB
+      
+      Here are the signal changes from the 5.3 branch that optimizes signal
+      handler registration and switches from longjmp to siglongjmp in order
+      to make signal mask handling consistent across different UNIX operating
+      systems.
+
+    * (PHP_5_3)
+      sapi/continuity/capi.c:
+      Typo (I wonder if anybody would ever have noticed this)
+
+2008-03-19  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/general_functions/bug44394.phpt:
+      Cosmetic
+
+2008-03-19  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_execute_API.c:
+      On Windows I guess there is no point starting the timeout thread until
+      we actually have a timeout value.
+
+    * (PHP_5_3)
+      ZendEngine2/zend_execute_API.c:
+      Make sure we set the signal handler when reset_signals is true, regardless
+      of the actual timeout value.
+
+2008-03-19  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/assert/assert_basic2.phpt
+      ext/standard/tests/assert/assert_variation.phpt:
+      Fixed tests
+
+    * ext/standard/tests/array/array_combine_variation3.phpt
+      ext/standard/tests/array/array_combine_variation4.phpt
+      ext/standard/tests/array/array_combine_variation5.phpt
+      ext/standard/tests/file/file_get_contents_file_put_contents_error.phpt
+      sapi/cli/tests/006.phpt:
+      Fixed test
+
+    * ext/pcre/tests/bug44214.phpt
+      ext/pcre/tests/bug44214_2.phpt:
+      Added UEXPECT
+
+    * ext/spl/spl_iterators.c:
+      Fixed error message (%s -> %v)
+
+2008-03-19  Antony Dovgal  <tony@daylessday.org>
+
+    * ZendEngine2/zend_operators.h:
+      fix typo
+
+    * ext/standard/basic_functions.c
+      main/main.c:
+      make use of zend_atol()
+
+    * ZendEngine2/zend_ini.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h:
+      add zend_atol() and use it instead of zend_atoi() where applicable
+
+    * (PHP_5_3)
+      ext/standard/tests/file/fopencookie.phpt
+      ext/standard/tests/serialize/serialization_miscTypes_001.phpt
+      ext/standard/tests/serialize/serialization_miscTypes_001.phpt
+      ext/standard/tests/serialize/serialization_miscTypes_001.phpt
+      tests/lang/bug25547.phpt:
+      fix test
+
+2008-03-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      php.ini-dist
+      php.ini-recommended:
+      
+      Removed ze1_compatibility_mode INI options
+
+2008-03-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_gc.c:
+      Disabled $GLOBALS' refcount modification
+
+    * (PHP_5_2)
+      ext/standard/tests/serialize/serialization_arrays_001.phpt
+      ext/standard/tests/serialize/serialization_arrays_004.phpt
+      ext/standard/tests/serialize/serialization_arrays_005.phpt:
+      Fixed test
+
+2008-03-19  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_push_error2.phpt:
+      Remove accidental change
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/standard/var_unserializer.re
+      ext/standard/tests/array/array_push_error2.phpt
+      ext/standard/tests/serialize/bug43614.phpt
+      ext/standard/tests/serialize/bug43614.phpt:
+      MFB: Fixed bug #43614 (incorrect processing of numerical string keys of
+      array in arbitrary serialized data)
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/standard/tests/serialize/bug43614.phpt
+      ext/standard/tests/serialize/bug43614.phpt
+      ext/standard/tests/serialize/bug43614.phpt:
+      Fixed bug #43614 (incorrect processing of numerical string keys of array in
+      arbitrary serialized data)
+
 2008-03-18  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
