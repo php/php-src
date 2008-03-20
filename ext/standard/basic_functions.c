@@ -5172,8 +5172,10 @@ PHP_FUNCTION(call_user_method)
 
 	convert_to_string(callback);
 
-	if (call_user_function_ex(EG(function_table), &object, callback, &retval_ptr, n_params, params, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
-		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
+	if (call_user_function_ex(EG(function_table), &object, callback, &retval_ptr, n_params, params, 0, NULL TSRMLS_CC) == SUCCESS) {
+		if (retval_ptr) {
+			COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
+		}
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s()", Z_STRVAL_P(callback));
 	}
@@ -5214,8 +5216,10 @@ PHP_FUNCTION(call_user_method_array)
 		element++;
 	}
 
-	if (call_user_function_ex(EG(function_table), &object, callback, &retval_ptr, num_elems, method_args, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
-		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
+	if (call_user_function_ex(EG(function_table), &object, callback, &retval_ptr, num_elems, method_args, 0, NULL TSRMLS_CC) == SUCCESS) {
+		if (retval_ptr) {
+			COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
+		}
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s()", Z_STRVAL_P(callback));
 	}
