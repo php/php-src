@@ -11,7 +11,7 @@ fclose($tcp_socket);
 --EXPECT--
 array(8) {
   ["stream_type"]=>
-  string(10) "tcp_socket"
+  string(%d) "tcp_socke%s"
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>
@@ -30,7 +30,7 @@ array(8) {
 --UEXPECT--
 array(8) {
   [u"stream_type"]=>
-  unicode(10) "tcp_socket"
+  unicode(%d) "tcp_socke%s"
   [u"mode"]=>
   unicode(2) "r+"
   [u"unread_bytes"]=>
