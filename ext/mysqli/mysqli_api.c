@@ -749,8 +749,10 @@ PHP_FUNCTION(mysqli_stmt_execute)
 				switch (stmt->stmt->params[i].buffer_type) {
 					case MYSQL_TYPE_VAR_STRING:
 						if (UG(unicode) && Z_TYPE_P(the_var) == IS_UNICODE) {
-							php_mysqli_stmt_copy_it(&copies, stmt->param.vars[i], stmt->param.var_cnt, i);
-							the_var = copies[i];
+							if (the_var == stmt->param.vars[i]) { 
+								php_mysqli_stmt_copy_it(&copies, stmt->param.vars[i], stmt->param.var_cnt, i);
+								the_var = copies[i];
+							}
 							zval_unicode_to_string_ex(the_var, UG(utf8_conv) TSRMLS_CC);
 						} else {
 							if (the_var == stmt->param.vars[i] && Z_TYPE_P(stmt->param.vars[i]) != IS_STRING) {
