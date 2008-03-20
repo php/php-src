@@ -434,19 +434,12 @@ static void change_node_zval(xmlNodePtr node, zval *value TSRMLS_DC)
 			convert_to_string_with_converter(value, UG(utf8_conv));
 			/* break missing intentionally */
 		case IS_STRING:
-			if (node->type == XML_ATTRIBUTE_NODE) {
-				buffer = xmlEncodeEntitiesReentrant(node->doc, (xmlChar *)Z_STRVAL_P(value));
-				buffer_len = xmlStrlen(buffer);
-			} else {
-				buffer = (xmlChar *)Z_STRVAL_P(value);
-				buffer_len = Z_STRLEN_P(value);
-			}
+			buffer = xmlEncodeEntitiesReentrant(node->doc, (xmlChar *)Z_STRVAL_P(value));
+			buffer_len = xmlStrlen(buffer);
 			/* check for NULL buffer in case of memory error in xmlEncodeEntitiesReentrant */
 			if (buffer) {
 				xmlNodeSetContentLen(node, buffer, buffer_len);
-				if (node->type == XML_ATTRIBUTE_NODE) {
-					xmlFree(buffer);
-				}
+				xmlFree(buffer);
 			}
 			if (value == &value_copy) {
 				zval_dtor(value);
