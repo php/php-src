@@ -650,14 +650,30 @@ void _mysqlnd_init_ps_subsystem()
 /* }}} */
 
 
+/* {{{ mysqlnd_stmt_copy_it */
+static void
+mysqlnd_stmt_copy_it(zval *** copies, zval *original, uint param_count, uint current)
+{
+	if (!*copies) {
+		*copies = ecalloc(param_count, sizeof(zval *));					
+	}
+	MAKE_STD_ZVAL((*copies)[current]);
+	*(*copies)[current] = *original;
+	Z_SET_REFCOUNT_P((*copies)[current], 1);
+	zval_copy_ctor((*copies)[current]);
+}
+/* }}} */
+
+
 /* {{{ mysqlnd_stmt_execute_store_params */
-void
+static void
 mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uchar **p,
 								  size_t *buf_len, unsigned int null_byte_offset TSRMLS_DC)
 {
 	unsigned int i = 0;
 	unsigned left = (*buf_len - (*p - *buf));
 	unsigned int data_size = 0;
+	zval **copies = NULL;/* if there are different types */
 
 /* 1. Store type information */
 	if (stmt->send_types_to_server) {
@@ -689,26 +705,44 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 /* 2. Store data */
 	/* 2.1 Calculate how much space we need */
 	for (i = 0; i < stmt->param_count; i++) {
+		unsigned int j;
+		zval *the_var = stmt->param_bind[i].zv;
 		if (stmt->param_bind[i].zv &&
 			Z_TYPE_P(stmt->param_bind[i].zv) == IS_NULL) {
 			continue;
+		}
+		for (j = i + 1; j < stmt->param_count; j++) {
+			if (stmt->param_bind[j].zv == stmt->param_bind[i].zv) {
+				/* Double binding of the same zval, make a copy */
+				mysqlnd_stmt_copy_it(&copies, stmt->param_bind[i].zv, stmt->param_count, i);
+				break; 
+			}
 		}
 
 		switch (stmt->param_bind[i].type) {
 			case MYSQL_TYPE_DOUBLE:
 				data_size += 8;
+				if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_DOUBLE) {
+					if (!copies || !copies[i]) {
+						mysqlnd_stmt_copy_it(&copies, stmt->param_bind[i].zv, stmt->param_count, i);
+					}
+				}
 				break;
 #if SIZEOF_LONG==8  
 			case MYSQL_TYPE_LONGLONG:
 				data_size += 8;
-				break;
 #elif SIZEOF_LONG==4
 			case MYSQL_TYPE_LONG:
 				data_size += 4;
-				break;
 #else
 #error "Should not happen"
 #endif
+				if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_LONG) {
+					if (!copies || !copies[i]) {
+						mysqlnd_stmt_copy_it(&copies, stmt->param_bind[i].zv, stmt->param_count, i);
+					}
+				}
+				break;
 			case MYSQL_TYPE_LONG_BLOB:
 				if (!(stmt->param_bind[i].flags & MYSQLND_PARAM_BIND_BLOB_USED)) {
 					/*
@@ -721,8 +755,25 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 				break;
 			case MYSQL_TYPE_VAR_STRING:
 				data_size += 8; /* max 8 bytes for size */
-				convert_to_string_ex(&stmt->param_bind[i].zv);
-				data_size += Z_STRLEN_P(stmt->param_bind[i].zv);
+#if PHP_MAJOR_VERSION < 6
+				if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_STRING)
+#elif PHP_MAJOR_VERSION >= 6
+				if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_STRING || 
+					(UG(unicode) && Z_TYPE_P(stmt->param_bind[i].zv) == IS_UNICODE))
+#endif
+				{
+					if (!copies || !copies[i]) {
+						mysqlnd_stmt_copy_it(&copies, stmt->param_bind[i].zv, stmt->param_count, i);
+					}
+					the_var = copies[i];
+#if PHP_MAJOR_VERSION >= 6
+					if (UG(unicode) && Z_TYPE_P(the_var) == IS_UNICODE) {
+						zval_unicode_to_string_ex(the_var, UG(utf8_conv) TSRMLS_CC);
+					}
+#endif
+				}
+				convert_to_string_ex(&the_var);
+				data_size += Z_STRLEN_P(the_var);
 				break;
 		}
 
@@ -743,7 +794,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 
 	/* 2.3 Store the actual data */
 	for (i = 0; i < stmt->param_count; i++) {
-		zval *data = stmt->param_bind[i].zv;
+		zval *data = copies && copies[i]? copies[i]: stmt->param_bind[i].zv;
 		/* Handle long data */
 		if (stmt->param_bind[i].zv && Z_TYPE_P(data) == IS_NULL) {
 			(*buf + null_byte_offset)[i/8] |= (zend_uchar) (1 << (i & 7));
@@ -791,7 +842,6 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 						memcpy(*p, Z_STRVAL_P(data), len);
 						(*p) += len;
 					}
-
 					break;
 				default:
 					/* Won't happen, but set to NULL */
@@ -799,6 +849,14 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 					break;
 			}
 		}
+	}
+	if (copies) {
+		for (i = 0; i < stmt->param_count; i++) {
+			if (copies[i]) {
+				zval_ptr_dtor(&copies[i]);
+			}
+		}
+		efree(copies);	
 	}
 }
 /* }}} */

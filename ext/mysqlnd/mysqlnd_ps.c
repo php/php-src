@@ -522,6 +522,7 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const stmt TSRMLS_DC)
 		if (CONN_GET_STATE(conn) == CONN_QUIT_SENT) {
 			/* close the statement here, the connection has been closed */
 		}
+		stmt->state = MYSQLND_STMT_PREPARED;
 	} else {
 		SET_EMPTY_ERROR(stmt->error_info);
 		SET_EMPTY_ERROR(stmt->conn->error_info);
