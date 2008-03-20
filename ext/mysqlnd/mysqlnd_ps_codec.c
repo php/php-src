@@ -828,14 +828,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 						*p = php_mysqlnd_net_store_length(*p, 0);
 					}
 					break;
-				case MYSQL_TYPE_VAR_STRING:
-					/*
-					  If the user uses refs, it could be that the type has
-					  has changed and we need to convert, again. Which is noop,
-					  if the type hasn't changed.
-					*/
-					convert_to_string_ex(&stmt->param_bind[i].zv);
-					{
+				case MYSQL_TYPE_VAR_STRING:{
 						unsigned int len = Z_STRLEN_P(data);
 						/* to is after p. The latter hasn't been moved */
 						*p = php_mysqlnd_net_store_length(*p, len);
