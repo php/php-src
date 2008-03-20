@@ -273,8 +273,13 @@ char *php_escape_shell_cmd(char *str) {
 	cmd = safe_emalloc(2, l, 1);
 	
 	for (x = 0, y = 0; x < l; x++) {
+		int mb_len = php_mblen(str + x, (l - x));
+
 		/* skip non-valid multibyte characters */
-		if (php_mblen(str + x, (l - x)) < 0) {
+		if (mb_len < 0) {
+			continue;
+		} else if (mb_len > 1) {
+			x += mb_len - 1;
 			continue;
 		}
 
@@ -349,6 +354,16 @@ char *php_escape_shell_arg(char *str) {
 #endif
 
 	for (x = 0; x < l; x++) {
+		int mb_len = php_mblen(str + x, (l - x));
+
+		/* skip non-valid multibyte characters */
+		if (mb_len < 0) {
+			continue;
+		} else if (mb_len > 1) {
+			x += mb_len - 1;
+			continue;
+		}
+
 		switch (str[x]) {
 #ifdef PHP_WIN32
 		case '"':
