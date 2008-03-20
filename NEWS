@@ -18,6 +18,8 @@ PHP                                                                        NEWS
   again...). (Felipe)
 - Fixed bug #41828 (Failing to call RecursiveIteratorIterator::__construct() 
   causes a sefault). (Etienne)
+- Fixed bug #44487 (call_user_method_array issues a warning when throwing
+   an exception). (David Soria Parra)
 
 06 Mar 2008, PHP 5.2.6RC2
 - Fixed bug #44333 (SEGFAULT when using mysql_pconnect() with client_flags).
