@@ -23,7 +23,7 @@ function probe_binary(EXE, what)
 			return 1;
 		}
 	} else {
-		if (version.match(/(\d+\.\d+\.\d+(\.\d+)?)/)) {
+		if (version.match(/(\d+\.\d+(\.\d+)?(\.\d+)?)/)) {
 			return RegExp.$1;
 		}
 	}
