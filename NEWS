@@ -4,6 +4,10 @@ PHP                                                                        NEWS
 - Properly address incomplete multibyte chars inside escapeshellcmd() (Ilia,
   Stefan Esser)
 - Fix integer overflow in printf(). (Stas, Maksymilian Aciemowicz)
+- Fixed bug #44487 (call_user_method_array issues a warning when throwing
+   an exception). (David Soria Parra)
+- Fixed bug #44478 (Inconsistent behaviour when assigning new nodes). 
+  (Rob, Felipe)
 - Fixed bug #44445 (email validator does not handle domains starting/ending 
   with a -). (Ilia)
 - Fixed bug #44440 (st_blocks undefined under BeOS). (Felipe)
@@ -18,8 +22,6 @@ PHP                                                                        NEWS
   again...). (Felipe)
 - Fixed bug #41828 (Failing to call RecursiveIteratorIterator::__construct() 
   causes a sefault). (Etienne)
-- Fixed bug #44487 (call_user_method_array issues a warning when throwing
-   an exception). (David Soria Parra)
 
 06 Mar 2008, PHP 5.2.6RC2
 - Fixed bug #44333 (SEGFAULT when using mysql_pconnect() with client_flags).
