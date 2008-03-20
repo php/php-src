@@ -32,7 +32,7 @@ fclose($socket);
 fclose($server);
 
 ?>
---EXPECT--
+--EXPECTF--
 array(8) {
   ["stream_type"]=>
   string(%d) "tcp_socke%s"

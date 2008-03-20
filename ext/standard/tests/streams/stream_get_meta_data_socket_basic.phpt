@@ -8,7 +8,7 @@ var_dump(stream_get_meta_data($tcp_socket));
 fclose($tcp_socket);
 
 ?>
---EXPECT--
+--EXPECTF--
 array(8) {
   ["stream_type"]=>
   string(%d) "tcp_socke%s"
@@ -27,7 +27,7 @@ array(8) {
   ["eof"]=>
   bool(false)
 }
---UEXPECT--
+--UEXPECTF--
 array(8) {
   [u"stream_type"]=>
   unicode(%d) "tcp_socke%s"
