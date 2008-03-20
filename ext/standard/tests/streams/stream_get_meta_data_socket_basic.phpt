@@ -8,7 +8,7 @@ var_dump(stream_get_meta_data($tcp_socket));
 fclose($tcp_socket);
 
 ?>
---EXPECT--
+--EXPECTF--
 array(7) {
   ["stream_type"]=>
   string(%d) "tcp_socke%s"
