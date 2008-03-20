@@ -35,7 +35,7 @@ fclose($server);
 --EXPECT--
 array(8) {
   ["stream_type"]=>
-  string(10) "tcp_socket"
+  string(%d) "tcp_socke%s"
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>
@@ -56,7 +56,7 @@ array(8) {
 Set a timeout on the client and attempt a read:
 array(8) {
   ["stream_type"]=>
-  string(10) "tcp_socket"
+  string(%d) "tcp_socke%s"
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>
@@ -77,7 +77,7 @@ array(8) {
 Write some data from the server:
 array(8) {
   ["stream_type"]=>
-  string(10) "tcp_socket"
+  string(%d) "tcp_socke%s"
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>
@@ -98,7 +98,7 @@ array(8) {
 Read some data from the client:
 array(8) {
   ["stream_type"]=>
-  string(10) "tcp_socket"
+  string(%d) "tcp_socke%s"
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>
@@ -117,7 +117,7 @@ array(8) {
 --UEXPECTF--
 array(8) {
   [u"stream_type"]=>
-  unicode(10) "tcp_socket"
+  unicode(%d) "tcp_socke%s"
   [u"mode"]=>
   unicode(2) "r+"
   [u"unread_bytes"]=>
@@ -138,7 +138,7 @@ array(8) {
 Set a timeout on the client and attempt a read:
 array(8) {
   [u"stream_type"]=>
-  unicode(10) "tcp_socket"
+  unicode(%d) "tcp_socke%s"
   [u"mode"]=>
   unicode(2) "r+"
   [u"unread_bytes"]=>
@@ -161,7 +161,7 @@ Write some data from the server:
 Notice: fwrite(): 5 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 array(8) {
   [u"stream_type"]=>
-  unicode(10) "tcp_socket"
+  unicode(%d) "tcp_socke%s"
   [u"mode"]=>
   unicode(2) "r+"
   [u"unread_bytes"]=>
@@ -182,7 +182,7 @@ array(8) {
 Read some data from the client:
 array(8) {
   [u"stream_type"]=>
-  unicode(10) "tcp_socket"
+  unicode(%d) "tcp_socke%s"
   [u"mode"]=>
   unicode(2) "r+"
   [u"unread_bytes"]=>
