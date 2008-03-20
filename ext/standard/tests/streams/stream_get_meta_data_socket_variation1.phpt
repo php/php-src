@@ -33,7 +33,7 @@ while(!feof($client)) {
 var_dump(stream_get_meta_data($client));
 
 ?>
---EXPECT--
+--EXPECTF--
 Write some data:
 array(7) {
   ["stream_type"]=>
