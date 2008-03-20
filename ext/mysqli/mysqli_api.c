@@ -697,6 +697,22 @@ PHP_FUNCTION(mysqli_error)
 }
 /* }}} */
 
+#ifndef MYSQLI_USE_MYSQLND
+/* {{{ php_mysqli_stmt_copy_it */
+static void
+php_mysqli_stmt_copy_it(zval *** copies, zval *original, uint param_count, uint current)
+{
+	if (!*copies) {
+		*copies = ecalloc(param_count, sizeof(zval *));					
+	}
+	MAKE_STD_ZVAL((*copies)[current]);
+	*(*copies)[current] = *original;
+	Z_SET_REFCOUNT_P((*copies)[current], 1);
+	zval_copy_ctor((*copies)[current]);
+}
+/* }}} */
+#endif
+
 /* {{{ proto bool mysqli_stmt_execute(object stmt) U
    Execute a prepared statement */
 PHP_FUNCTION(mysqli_stmt_execute)
@@ -705,6 +721,7 @@ PHP_FUNCTION(mysqli_stmt_execute)
 	zval		*mysql_stmt;
 #ifndef MYSQLI_USE_MYSQLND
 	unsigned int	i;
+	zval		**copies = NULL;
 #endif
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
@@ -713,30 +730,54 @@ PHP_FUNCTION(mysqli_stmt_execute)
 	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt", MYSQLI_STATUS_VALID);
 
 #ifndef MYSQLI_USE_MYSQLND
+	if (stmt->param.var_cnt) {
+		int j;
+		for (i = 0; i < stmt->param.var_cnt; i++) {
+			for (j = i + 1; j < stmt->param.var_cnt; j++) {
+				/* Oops, someone binding the same variable - clone */
+				if (stmt->param.vars[j] == stmt->param.vars[i]) {
+					php_mysqli_stmt_copy_it(&copies, stmt->param.vars[i], stmt->param.var_cnt, i);
+					break;
+				}
+			}
+		}
+	}
 	for (i = 0; i < stmt->param.var_cnt; i++) {
 		if (stmt->param.vars[i]) {
 			if ( !(stmt->param.is_null[i] = (stmt->param.vars[i]->type == IS_NULL)) ) {
+				zval *the_var = copies && copies[i]? copies[i]:stmt->param.vars[i];
 				switch (stmt->stmt->params[i].buffer_type) {
 					case MYSQL_TYPE_VAR_STRING:
-						if (UG(unicode) && Z_TYPE_P(stmt->param.vars[i]) == IS_UNICODE) {
-							zend_unicode_to_string(UG(utf8_conv), (char **)&stmt->stmt->params[i].buffer, (int *)&stmt->stmt->params[i].buffer_length,
-													  Z_USTRVAL_PP(&stmt->param.vars[i]), Z_USTRLEN_PP(&stmt->param.vars[i]) TSRMLS_CC);
+						if (UG(unicode) && Z_TYPE_P(the_var) == IS_UNICODE) {
+							php_mysqli_stmt_copy_it(&copies, stmt->param.vars[i], stmt->param.var_cnt, i);
+							the_var = copies[i];
+							zval_unicode_to_string_ex(the_var, UG(utf8_conv) TSRMLS_CC);
 						} else {
-							if (Z_TYPE_P(stmt->param.vars[i]) != IS_STRING) {
-								convert_to_string_ex(&stmt->param.vars[i]);
+							if (the_var == stmt->param.vars[i] && Z_TYPE_P(stmt->param.vars[i]) != IS_STRING) {
+								php_mysqli_stmt_copy_it(&copies, stmt->param.vars[i], stmt->param.var_cnt, i);
+								the_var = copies[i];
 							}
-							stmt->stmt->params[i].buffer = Z_STRVAL_PP(&stmt->param.vars[i]);
-							stmt->stmt->params[i].buffer_length = Z_STRLEN_PP(&stmt->param.vars[i]);
+							convert_to_string_ex(&the_var);
 						}
+						stmt->stmt->params[i].buffer = Z_STRVAL_P(the_var);
+						stmt->stmt->params[i].buffer_length = Z_STRLEN_P(the_var);
 						break;
 					case MYSQL_TYPE_DOUBLE:
-						convert_to_double_ex(&stmt->param.vars[i]);
-						stmt->stmt->params[i].buffer = &Z_LVAL_PP(&stmt->param.vars[i]);
+						if (the_var == stmt->param.vars[i] && Z_TYPE_P(stmt->param.vars[i]) != IS_DOUBLE) {
+							php_mysqli_stmt_copy_it(&copies, stmt->param.vars[i], stmt->param.var_cnt, i);
+							the_var = copies[i];
+						}
+						convert_to_double_ex(&the_var);
+						stmt->stmt->params[i].buffer = &Z_LVAL_P(the_var);
 						break;
 					case MYSQL_TYPE_LONGLONG:
 					case MYSQL_TYPE_LONG:
-						convert_to_long_ex(&stmt->param.vars[i]);
-						stmt->stmt->params[i].buffer = &Z_LVAL_PP(&stmt->param.vars[i]);
+						if (the_var == stmt->param.vars[i] && Z_TYPE_P(stmt->param.vars[i]) != IS_LONG) {
+							php_mysqli_stmt_copy_it(&copies, stmt->param.vars[i], stmt->param.var_cnt, i);
+							the_var = copies[i];
+						}
+						convert_to_long_ex(&the_var);
+						stmt->stmt->params[i].buffer = &Z_LVAL_P(the_var);
 						break;
 					default:
 						break;
@@ -753,20 +794,20 @@ PHP_FUNCTION(mysqli_stmt_execute)
 		RETVAL_TRUE;
 	}
 
+#ifndef MYSQLI_USE_MYSQLND
+	if (copies) {
+		for (i = 0; i < stmt->param.var_cnt; i++) {
+			if (copies[i]) {
+				zval_ptr_dtor(&copies[i]);
+			}
+		}
+		efree(copies);
+	}
+#endif
+
 	if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
 		php_mysqli_report_index(stmt->query, mysqli_stmt_server_status(stmt->stmt) TSRMLS_CC);
 	}
-
-#ifndef MYSQLI_USE_MYSQLND
-	/* free converted utf8 strings */
-	if (UG(unicode)) {
-		for (i = 0; i < stmt->param.var_cnt; i++) {
-			if (stmt->stmt->params[i].buffer_type == MYSQL_TYPE_VAR_STRING && Z_TYPE_P(stmt->param.vars[i]) == IS_UNICODE) {
-				efree(stmt->stmt->params[i].buffer);
-			}
-		}
-	}
-#endif
 }
 /* }}} */
 
