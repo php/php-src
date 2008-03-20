@@ -342,6 +342,9 @@ BEGIN_EXTERN_C()
 
 int phar_has_bz2;
 int phar_has_zlib;
+#if PHP_VERSION_ID >= 50300
+char *(*phar_save_resolve_path)(const char *filename, int filename_len TSRMLS_DC);
+#endif
 
 #ifdef PHP_WIN32
 char *tsrm_strtok_r(char *s, const char *delim, char **last);
@@ -378,7 +381,7 @@ char * phar_compress_filter(phar_entry_info * entry, int return_unknown);
 
 void phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool compress TSRMLS_DC);
 int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, char *path, int path_len TSRMLS_DC);
-char *phar_find_in_include_path(char *file, phar_archive_data **phar TSRMLS_DC);
+char *phar_find_in_include_path(char *file, int file_len, phar_archive_data **pphar TSRMLS_DC);
 char *phar_fix_filepath(char *path, int *new_len, int use_cwd TSRMLS_DC);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, php_stream *fp,
 				      char **error, int for_write TSRMLS_DC);

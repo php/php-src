@@ -134,9 +134,8 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 			if (!IS_ABSOLUTE_PATH(filename, filename_len)) {
 				/* retrieving a file defaults to within the current directory, so use this if possible */
 				if (SUCCESS == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
-					name = entry;
 					if (use_include_path) {
-						if (!(entry = phar_find_in_include_path(entry, pphar TSRMLS_CC))) {
+						if (!(entry = phar_find_in_include_path(entry, entry_len, NULL TSRMLS_CC))) {
 							/* this file is not in the phar, use the original path */
 							efree(arch);
 							efree(old);
@@ -243,10 +242,12 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 			/* retrieving a file defaults to within the current directory, so use this if possible */
 			if (SUCCESS == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
 				if (use_include_path) {
-					if (!(entry = phar_find_in_include_path(entry, pphar TSRMLS_CC))) {
+					name = entry;
+					if (!(entry = phar_find_in_include_path(entry, entry_len, NULL TSRMLS_CC))) {
 						/* this file is not in the phar, use the original path */
 						efree(old);
 						efree(arch);
+						efree(name);
 						goto skip_phar;
 					}
 					efree(old);
