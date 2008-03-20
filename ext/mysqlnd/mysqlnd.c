@@ -591,6 +591,7 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 		if (hashed_details) {
 			mnd_efree(hashed_details);
 		}
+		errcode = CR_CONNECTION_ERROR;
 		goto err;
 	}
 
@@ -748,7 +749,7 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 		conn->net.cmd_buffer.length = 128L*1024L;
 		conn->net.cmd_buffer.buffer = mnd_pemalloc(conn->net.cmd_buffer.length, conn->persistent);
 
-        mysqlnd_local_infile_default(conn);
+		mysqlnd_local_infile_default(conn);
 		{
 			uint buf_size;
 			buf_size = MYSQLND_G(net_read_buffer_size); /* this is long, cast to uint*/
@@ -805,14 +806,14 @@ err:
 
 	if (errstr) {
 		DBG_ERR_FMT("[%d] %.64s (trying to connect via %s)", errcode, errstr, conn->scheme);
-		SET_CLIENT_ERROR(conn->error_info, errcode, UNKNOWN_SQLSTATE, errstr);
-
+		SET_CLIENT_ERROR(conn->error_info, errcode? errcode:CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, errstr);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "[%d] %.64s (trying to connect via %s)", errcode, errstr, conn->scheme);
-
-		mnd_efree(errstr);
+		/* no mnd_ since we don't allocate it */
+		efree(errstr);
 	}
 	if (conn->scheme) {
-		mnd_pefree(conn->scheme, conn->persistent);
+		/* no mnd_ since we don't allocate it */
+		pefree(conn->scheme, conn->persistent);
 		conn->scheme = NULL;
 	}
 
@@ -1316,7 +1317,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn, get_state)(MYSQLND * const conn TSRMLS_DC)
 {
 	enum mysqlnd_connection_state state;
 	DBG_ENTER("mysqlnd_conn::get_state");
- 	tsrm_mutex_lock(conn->LOCK_state);
+	tsrm_mutex_lock(conn->LOCK_state);
 	state = conn->state;
 	tsrm_mutex_unlock(conn->LOCK_state);
 	DBG_RETURN(state);

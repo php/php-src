@@ -297,7 +297,9 @@ mysqlnd_stmt_read_prepare_response(MYSQLND_STMT *stmt TSRMLS_DC)
 
 	stmt->stmt_id = prepare_resp.stmt_id;
 	stmt->warning_count = stmt->conn->upsert_status.warning_count = prepare_resp.warning_count;
-	stmt->field_count = stmt->conn->field_count = prepare_resp.field_count;
+	stmt->upsert_status.affected_rows = 0;
+	stmt->field_count =  prepare_resp.field_count;
+	stmt->conn->field_count = 0;
 	stmt->param_count = prepare_resp.param_count;
 	PACKET_FREE_ALLOCA(prepare_resp);
 
@@ -522,17 +524,14 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const stmt TSRMLS_DC)
 		if (CONN_GET_STATE(conn) == CONN_QUIT_SENT) {
 			/* close the statement here, the connection has been closed */
 		}
+		stmt->state = MYSQLND_STMT_PREPARED;
 	} else {
 		SET_EMPTY_ERROR(stmt->error_info);
 		SET_EMPTY_ERROR(stmt->conn->error_info);
 		stmt->send_types_to_server = 0;
 		stmt->upsert_status = conn->upsert_status;
 		stmt->state = MYSQLND_STMT_EXECUTED;
-		if (conn->last_query_type == QUERY_UPSERT) {
-			stmt->upsert_status = conn->upsert_status;
-			DBG_INF("PASS");
-			DBG_RETURN(PASS);
-		} else if (conn->last_query_type == QUERY_LOAD_LOCAL) {
+		if (conn->last_query_type == QUERY_UPSERT || conn->last_query_type == QUERY_LOAD_LOCAL) {
 			DBG_INF("PASS");
 			DBG_RETURN(PASS);
 		}
