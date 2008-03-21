@@ -48,7 +48,7 @@
 #include "tsrm_config_common.h"
 
 #define YYCTYPE   unsigned char
-#define YYFILL(n) { if (n == 1) return 0; }
+#define YYFILL(n) { if (YYCURSOR >= YYLIMIT) return 0; }
 #define YYCURSOR  SCNG(yy_cursor)
 #define YYLIMIT   SCNG(yy_limit)
 #define YYMARKER  SCNG(yy_marker)
