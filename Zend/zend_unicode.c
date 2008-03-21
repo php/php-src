@@ -47,16 +47,16 @@ void zend_set_converter_error_mode(UConverter *conv, zend_conv_direction directi
 
 		case ZEND_CONV_ERROR_SKIP:
 			if (direction == ZEND_FROM_UNICODE)
-				ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_SKIP, UCNV_SKIP_STOP_ON_ILLEGAL, NULL, NULL, &status);
+				ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_SKIP, NULL, NULL, NULL, &status);
 			else
-				ucnv_setToUCallBack(conv, UCNV_TO_U_CALLBACK_SKIP, UCNV_SKIP_STOP_ON_ILLEGAL, NULL, NULL, &status);
+				ucnv_setToUCallBack(conv, UCNV_TO_U_CALLBACK_SKIP, NULL, NULL, NULL, &status);
 			break;
 
 		case ZEND_CONV_ERROR_SUBST:
 			if (direction == ZEND_FROM_UNICODE)
-				ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_SUBSTITUTE, UCNV_SUB_STOP_ON_ILLEGAL, NULL, NULL, &status);
+				ucnv_setFromUCallBack(conv, UCNV_FROM_U_CALLBACK_SUBSTITUTE, NULL, NULL, NULL, &status);
 			else
-				ucnv_setToUCallBack(conv, UCNV_TO_U_CALLBACK_SUBSTITUTE, UCNV_SUB_STOP_ON_ILLEGAL, NULL, NULL, &status);
+				ucnv_setToUCallBack(conv, UCNV_TO_U_CALLBACK_SUBSTITUTE, NULL, NULL, NULL, &status);
 			break;
 
 		case ZEND_CONV_ERROR_ESCAPE_UNICODE:
