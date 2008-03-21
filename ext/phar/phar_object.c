@@ -2442,8 +2442,7 @@ PHP_METHOD(Phar, compressAllFilesGZ)
 	}
 
 	phar_obj->arc.archive->is_modified = 1;
-/* EXPERIMENT: REMOVING THIS LINE TO SEE THE IMPACT ON VALGRIND RESULTS, WILL BREAK TESTS */
-	/* phar_rename_archive(phar_obj->arc.archive, NULL, 1 TSRMLS_CC); */
+	phar_rename_archive(phar_obj->arc.archive, NULL, 1 TSRMLS_CC);
 
 	phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 	if (error) {

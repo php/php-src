@@ -77,6 +77,7 @@ void phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool compress 
 	char *oldname = NULL, *oldpath = NULL;
 	char *basename = NULL, *basepath = NULL;
 	char *newname = NULL, *newpath = NULL;
+	dtor_func_t save;
 
 	if (phar->flags && compress) {
 		char *error;
@@ -158,6 +159,12 @@ void phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool compress 
 		zend_hash_update(&(PHAR_GLOBALS->phar_alias_map), newpath, strlen(newpath), (void*)&phar, sizeof(phar_archive_data*), NULL);
 	}
 
+	/* remove old guy, add new guy */
+	save = PHAR_GLOBALS->phar_fname_map.pDestructor;
+	/* don't destruct, we are only renaming */
+	PHAR_GLOBALS->phar_fname_map.pDestructor = NULL;
+	zend_hash_del(&(PHAR_GLOBALS->phar_fname_map), oldpath, phar->fname_len);
+	PHAR_GLOBALS->phar_fname_map.pDestructor = save;
 	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), newpath, strlen(newpath), (void*)&phar, sizeof(phar_archive_data*), NULL);
 
 	efree(phar->fname);
