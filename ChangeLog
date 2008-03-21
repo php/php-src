@@ -1,3 +1,159 @@
+2008-03-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/exec.c
+      ext/standard/exec.c:
+      
+      MFB: Refine fix for multibyte char hanling inside command names and args
+
+    * (PHP_5_3)
+      ext/standard/exec.c:
+      Refine fix for multibyte char hanling inside command names and args
+
+2008-03-20  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/date/php_date.c:
+      - MFH: Fix the DateTimeZone::getTransitions() algorithm.
+
+    * ext/date/php_date.c:
+      - Fix the DateTimeZone::getTransitions() algorithm.
+
+2008-03-20  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      NEWS:
+      document the change
+
+    * main/main.c:
+      MF5: make short_open_tag user-accessible
+
+    * (PHP_5_3)
+      main/main.c:
+      [DOC] make short_open_tag user-accessible
+
+2008-03-20  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+      re-order
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug44478.phpt
+      ext/simplexml/tests/bug44478.phpt:
+      MFH: fix bug #44478 (Inconsistent behaviour when assigning new nodes)
+      add test
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug44478.phpt
+      ext/simplexml/tests/bug44478.phpt
+      ext/simplexml/tests/bug44478.phpt:
+      fix bug #44478 (Inconsistent behaviour when assigning new nodes)
+      add test
+
+2008-03-20  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      NEWS:
+      News entry
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/tests/mysqli_stmt_bind_param_check_param_no_change.phpt
+      ext/mysqlnd/mysqlnd_ps_codec.c:
+      Small fix and a test case to prove it
+
+    * ext/mysqli/tests/mysqli_stmt_bind_param_check_param_no_change.phpt
+      ext/mysqli/tests/mysqli_stmt_bind_param_check_param_no_change.phpt
+      ext/mysqlnd/mysqlnd_ps_codec.c:
+      
+      file mysqli_stmt_bind_param_check_param_no_change.phpt was initially added
+      on branch PHP_5_3.
+
+2008-03-20  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/config.w32:
+      Allow Elizabeth's favourite function to accept 2-4 sets of digits in
+      version.
+
+2008-03-20  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/tests/mysqli_stmt_datatype_change.phpt
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_ps_codec.c:
+      - Don't modify the variables which are passed for parameter binding.
+        We need to clone them, if there will be a transformation
+      (convert_to_xxx)
+        which will change the origin
+        (bug#44390 bind_param / bind_result and Object member variables)
+      - Make mysqlnd more compatible to libmysql, in this case if the execute of
+        a statement fails set the state of the statement back to PREPARED
+      - A test case to check the case of a failing statement.
+
+    * ext/mysqli/mysqli_api.c:
+      Missing lines from the param-bind-non-changing fix
+
+    * ext/mysqli/tests/mysqli_stmt_datatype_change.phpt
+      ext/mysqli/tests/mysqli_stmt_datatype_change.phpt
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_ps_codec.c
+      ext/mysqlnd/mysqlnd_result.c:
+      
+      - Don't modify the variables which are passed for parameter binding.
+        We need to clone them, if there will be a transformation
+      (convert_to_xxx)
+        which will change the origin.
+      - Make mysqlnd more compatible to libmysql, in this case if the execute of
+        a statement fails set the state of the statement back to PREPARED
+      - A test case to check the case of a failing statement.
+
+2008-03-20  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/tests/streams/stream_get_meta_data_socket_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation1.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation2.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation3.phpt:
+      expect->expectf
+
+    * (PHP_5_2)
+      ext/standard/tests/streams/stream_get_meta_data_socket_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation1.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation2.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation3.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation4.phpt:
+      fix tests
+
+    * ext/standard/tests/streams/stream_get_meta_data_socket_basic.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation1.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation2.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation3.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation4.phpt:
+      fix tests (tcp_socket is tcp_socket/ssl when/if openssl is enabled)
+
+2008-03-20  David Soria Parra  <dsoria@gmx.net>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/bug44487.phpt
+      ext/standard/tests/general_functions/bug44487.phpt:
+      MFH: Fix bug #44487 (call_user_method_array issues a warning when throwing
+      an exception).
+
+    * ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/bug44487.phpt
+      ext/standard/tests/general_functions/bug44487.phpt
+      ext/standard/tests/general_functions/bug44487.phpt:
+      Fix bug #44487 (call_user_method_array issues a warning when throwing an
+      exception).
+
 2008-03-19  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * ext/standard/tests/streams/.cvsignore:
