@@ -9,13 +9,13 @@ phar.readonly=0
 $fname = dirname(__FILE__) . '/tempmanifest1.phar.php';
 $a = new Phar($fname);
 $a['index.php'] = '<?php
-set_include_path(".");
 Phar::mount("testit", dirname(Phar::getRunningPhar()) . "/testit");
 include "testit/extfile.php";
 include "testit/extfile2.php";
 ?>';
 $a->setStub('<?php
-include "phar://" . __FILE__ . "/index.php";
+set_include_path("phar://" . __FILE__);
+include "index.php";
 __HALT_COMPILER();');
 unset($a);
 mkdir(dirname(__FILE__) . '/testit');

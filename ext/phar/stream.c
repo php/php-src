@@ -605,8 +605,58 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 				break;
 			}
 		}
+		/* check for mounted directories */
+		if (phar->mounted_dirs.arBuckets && zend_hash_num_elements(&phar->mounted_dirs)) {
+			char *key;
+			ulong unused;
+			uint keylen;
+	
+			zend_hash_internal_pointer_reset(&phar->mounted_dirs);
+			while (FAILURE != zend_hash_has_more_elements(&phar->mounted_dirs)) {
+				if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(&phar->mounted_dirs, &key, &keylen, &unused, 0, NULL)) {
+					break;
+				}
+				if ((int)keylen >= internal_file_len || strncmp(key, internal_file, keylen)) {
+					continue;
+				} else {
+					char *test;
+					int test_len;
+					phar_entry_info *entry;
+					php_stream_statbuf ssbi;
+	
+					if (SUCCESS != zend_hash_find(&phar->manifest, key, keylen, (void **) &entry)) {
+						php_stream_wrapper_log_error(wrapper, flags TSRMLS_CC, "phar internal error: mounted path \"%s\" could not be retrieved from manifest", key);
+						goto free_resource;
+					}
+					if (!entry->link || !entry->is_mounted) {
+						php_stream_wrapper_log_error(wrapper, flags TSRMLS_CC, "phar internal error: mounted path \"%s\" is not properly initialized as a mounted path", key);
+						goto free_resource;
+					}
+					test_len = spprintf(&test, MAXPATHLEN, "%s%s", entry->link, internal_file + keylen);
+					if (SUCCESS != php_stream_stat_path(test, &ssbi)) {
+						efree(test);
+						continue;
+					}
+					/* mount the file/directory just in time */
+					if (SUCCESS != phar_mount_entry(phar, test, test_len, internal_file, internal_file_len TSRMLS_CC)) {
+						efree(test);
+						php_stream_wrapper_log_error(wrapper, flags TSRMLS_CC, "phar error: path \"%s\" exists as file \"%s\" and could not be mounted", internal_file, test);
+						goto free_resource;
+					}
+					efree(test);
+					if (SUCCESS != zend_hash_find(&phar->manifest, internal_file, internal_file_len, (void**)&entry)) {
+						php_stream_wrapper_log_error(wrapper, flags TSRMLS_CC, "phar error: path \"%s\" exists as file \"%s\" and could not be retrieved after being mounted", internal_file, test);
+						goto free_resource;
+					}
+					phar_dostat(phar, entry, ssb, 0, phar->alias, phar->alias_len TSRMLS_CC);
+					php_url_free(resource);
+					return SUCCESS;
+				}
+			}
+		}
 	}
 
+free_resource:
 	php_url_free(resource);
 	return FAILURE;
 }
