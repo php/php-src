@@ -1842,7 +1842,7 @@ void zend_do_fetch_class_name(znode *result, znode *class_name_entry, znode *cla
 		*result = *class_name_entry;
 	}
 
-	length = sizeof("::")-1 + Z_USTRLEN(result->u.constant) + Z_USTRLEN(class_name->u.constant);
+	length = sizeof("::")-1 + Z_UNILEN(result->u.constant) + Z_UNILEN(class_name->u.constant);
 	if (Z_TYPE(result->u.constant) == IS_UNICODE) {
 		Z_USTRVAL(result->u.constant) = erealloc(Z_USTRVAL(result->u.constant), UBYTES(length+1));
 		Z_USTRVAL(result->u.constant)[Z_USTRLEN(result->u.constant)] = ':';
@@ -1855,7 +1855,7 @@ void zend_do_fetch_class_name(znode *result, znode *class_name_entry, znode *cla
 		memcpy(&Z_STRVAL(result->u.constant)[Z_STRLEN(result->u.constant) + sizeof("::")-1], Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant)+1);
 		STR_FREE(Z_STRVAL(class_name->u.constant));
 	}
-	Z_STRLEN(result->u.constant) = length;
+	Z_UNILEN(result->u.constant) = length;
 }
 /* }}} */
 
@@ -5238,24 +5238,8 @@ void zend_do_build_namespace_name(znode *result, znode *prefix, znode *name TSRM
 		Z_UNIVAL(result->u.constant) = NULL_ZSTR;
 		Z_UNILEN(result->u.constant) = 0;
 	}
-	len = Z_UNILEN(result->u.constant) + 2 + Z_UNILEN(name->u.constant);
-	if (UG(unicode)) {
-		Z_USTRVAL(result->u.constant) = eurealloc(Z_USTRVAL(result->u.constant), len + 1);
-		Z_USTRVAL(result->u.constant)[Z_USTRLEN(result->u.constant)] = ':';
-		Z_USTRVAL(result->u.constant)[Z_USTRLEN(result->u.constant)+1] = ':';
-		memcpy(Z_USTRVAL(result->u.constant)+Z_USTRLEN(result->u.constant)+2,
-			Z_USTRVAL(name->u.constant),
-			UBYTES(Z_USTRLEN(name->u.constant)+1));
-	} else {
-		Z_USTRVAL(result->u.constant) = erealloc(Z_STRVAL(result->u.constant), len + 1);
-		Z_STRVAL(result->u.constant)[Z_STRLEN(result->u.constant)] = ':';
-		Z_STRVAL(result->u.constant)[Z_STRLEN(result->u.constant)+1] = ':';
-		memcpy(Z_STRVAL(result->u.constant)+Z_STRLEN(result->u.constant)+2,
-			Z_STRVAL(name->u.constant),
-			Z_USTRLEN(name->u.constant)+1);
-	}
-	Z_UNILEN(result->u.constant) = len;
-	zval_dtor(&name->u.constant);
+	/* prefix = result */
+	zend_do_fetch_class_name(NULL, result, name TSRMLS_CC);
 }
 /* }}} */
 
