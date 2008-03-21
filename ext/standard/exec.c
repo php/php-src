@@ -341,6 +341,7 @@ char *php_escape_shell_cmd(char *str) {
 char *php_escape_shell_arg(char *str) {
 	int x, y, l;
 	char *cmd;
+	TSRMLS_FETCH();
 
 	y = 0;
 	l = strlen(str);
