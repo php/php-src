@@ -411,6 +411,8 @@ class PharCommand extends CLICommand
                 if (substr($hashbang, -1) != "\n") {
                     $hashbang .= "\n";
                 }
+            } else {
+            	$hashbang = "";
             }
 
             if (isset($loader)) {
@@ -427,9 +429,9 @@ class PharCommand extends CLICommand
                 $s .= '?>';
                 $s .= $c;
 
-                $phar->setStub($hasbang . $s);
+                $phar->setStub($hashbang . $s);
             } else {
-                $phar->setStub($hasbang . $c);
+                $phar->setStub($hashbang . $c);
             }
             return new SplFileInfo($stub);
         }
