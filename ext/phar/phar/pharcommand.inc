@@ -236,7 +236,7 @@ class PharCommand extends CLICommand
     {
         $arg = self::cli_arg_typ_filenew($arg, $cfg, $key);
         if (!Phar::isValidPharFilename($arg)) {
-            self::error("Phar files must have file extension '.phar', '.phar.php', '.phar.bz2' or 'phar.gz'.\n");
+            self::error("Phar files must have file extension '.phar', '.phar.php', '.phar.bz2' or '.phar.gz'.\n");
         }
         return $arg;
     }
@@ -1381,7 +1381,8 @@ class PharCommand extends CLICommand
         $ucount  = 0;
         $mcount  = 0;
         $compalg = array('GZ'=>0, 'BZ2'=>0);
-
+var_dump($phar);
+try {
         foreach(new RecursiveIteratorIterator($phar) as $ent) {
             $count++;
             if ($ent->isCompressed()) {
@@ -1403,7 +1404,7 @@ class PharCommand extends CLICommand
                 $mcount++;
             }
         }
-
+} catch(Exception $e) {echo $e;}
         $infos['Entries']            = $count;
         $infos['Uncompressed-files'] = $ucount;
         $infos['Compressed-files']   = $ccount;
