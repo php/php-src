@@ -1384,7 +1384,7 @@ class PharCommand extends CLICommand
         $mcount  = 0;
         $compalg = array('GZ'=>0, 'BZ2'=>0);
 var_dump($phar);
-try {
+
         foreach(new RecursiveIteratorIterator($phar) as $ent) {
             $count++;
             if ($ent->isCompressed()) {
@@ -1406,7 +1406,7 @@ try {
                 $mcount++;
             }
         }
-} catch(Exception $e) {echo $e;}
+
         $infos['Entries']            = $count;
         $infos['Uncompressed-files'] = $ucount;
         $infos['Compressed-files']   = $ccount;
