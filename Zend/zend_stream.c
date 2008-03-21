@@ -154,6 +154,7 @@ static size_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_t 
 ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t *len TSRMLS_DC) /* {{{ */
 {
 	size_t size;
+	zend_stream_type old_type;
 
 	if (file_handle->type == ZEND_HANDLE_FILENAME) {
 		if (zend_stream_open(file_handle->filename, file_handle TSRMLS_CC) == FAILURE) {
@@ -196,9 +197,10 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 		return FAILURE;
 	}
 
+	old_type = file_handle->type;
 	file_handle->type = ZEND_HANDLE_STREAM;  /* we might still be _FP but we need fsize() work */
 
-	if (!file_handle->handle.stream.isatty && size) {
+	if (old_type == ZEND_HANDLE_FP && !file_handle->handle.stream.isatty && size) {
 #if HAVE_MMAP
 		if (file_handle->handle.fp && size) {
 			/*  *buf[size] is zeroed automatically by the kernel */
