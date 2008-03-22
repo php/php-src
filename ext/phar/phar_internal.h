@@ -75,6 +75,8 @@
 #define E_RECOVERABLE_ERROR E_ERROR
 #endif
 
+/* PHP_ because this is public information via MINFO */
+#define PHP_PHAR_API_VERSION      "1.1.1"
 /* x.y.z maps to 0xyz0 */
 #define PHAR_API_VERSION          0x1110
 /* if we bump PHAR_API_VERSION, change this from 0x1100 to PHAR_API_VERSION */
