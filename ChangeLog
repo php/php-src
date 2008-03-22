@@ -1,3 +1,73 @@
+2008-03-21  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/zend_compile.c:
+      - Simplify zend_do_build_namespace_name()
+      - Fix macro (Z_USTRLEN/Z_STRLEN -> Z_UNILEN) in zend_do_fetch_class_name()
+
+2008-03-21  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      main/streams/mmap.c:
+      - MFH Settle to 4 MB, see internals@ archives
+
+    * main/streams/mmap.c:
+      - Settle to 4 MB, see internals@ archives
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l:
+      - Fix YYFILL()
+
+    * main/streams/mmap.c:
+      - Fix comment
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c:
+      - Simplify
+
+    * (PHP_5_3)
+      ZendEngine2/zend_stream.c:
+      - Fix streams handling logic, only real FPs can be mmaped here
+
+    * main/streams/mmap.c:
+      - Increase max mmap size to 8 MB
+
+2008-03-21  Antony Dovgal  <tony@daylessday.org>
+
+    * main/main.c:
+      [DOC] revert short tags to their previous state
+
+2008-03-21  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_ini_scanner.c
+      ZendEngine2/zend_ini_scanner.l:
+      - Bugfix 44461
+
+    * ext/standard/tests/general_functions/bug44461.phpt
+      ext/standard/tests/general_functions/bug44461.phpt:
+      
+      - Add new test
+
+2008-03-21  Antony Dovgal  <tony@daylessday.org>
+
+    * ZendEngine2/zend_unicode.c
+      ZendEngine2/tests/bug43477.phpt:
+      fix #43477 (Error mode ignored in unicode_decode())
+      patch by Stephen Bach
+
+    * TSRM/tsrm_virtual_cwd.c:
+      sync with 5_3
+
+    * (PHP_5_2)
+      ext/standard/tests/streams/.cvsignore:
+      add missing .cvsignore
+
+    * ext/standard/exec.c
+      ext/standard/exec.c
+      ext/standard/exec.c:
+      fix ZTS build
+
 2008-03-20  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/exec.c

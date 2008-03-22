@@ -1,3 +1,36 @@
+2008-03-21  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_compile.c:
+      - Simplify zend_do_build_namespace_name()
+      - Fix macro (Z_USTRLEN/Z_STRLEN -> Z_UNILEN) in zend_do_fetch_class_name()
+
+2008-03-21  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      zend_language_scanner.c
+      zend_language_scanner.l:
+      - Fix YYFILL()
+
+    * (PHP_5_3)
+      zend_compile.c:
+      - Simplify
+
+    * (PHP_5_3)
+      zend_stream.c:
+      - Fix streams handling logic, only real FPs can be mmaped here
+
+    * (PHP_5_3)
+      zend_ini_scanner.c
+      zend_ini_scanner.l:
+      - Bugfix 44461
+
+2008-03-21  Antony Dovgal  <tony@daylessday.org>
+
+    * zend_unicode.c
+      tests/bug43477.phpt:
+      fix #43477 (Error mode ignored in unicode_decode())
+      patch by Stephen Bach
+
 2008-03-19  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * (PHP_5_3)
