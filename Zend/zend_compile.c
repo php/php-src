@@ -30,8 +30,6 @@
 ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
 ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, char *filename TSRMLS_DC);
 
-void zend_resolve_class_name(znode *class_name, ulong *fetch_type, int check_ns_name TSRMLS_DC);
-
 #ifndef ZTS
 ZEND_API zend_compiler_globals compiler_globals;
 ZEND_API zend_executor_globals executor_globals;
@@ -1832,28 +1830,28 @@ void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-void zend_do_fetch_class_name(znode *result, znode *class_name_entry, znode *class_name TSRMLS_DC) /* {{{ */
+void zend_do_build_full_name(znode *result, znode *prefix, znode *name TSRMLS_DC) /* {{{ */
 {
 	zend_uint length;
 
 	if (!result) {
-		result = class_name_entry;
+		result = prefix;
 	} else {
-		*result = *class_name_entry;
+		*result = *prefix;
 	}
 
-	length = sizeof("::")-1 + Z_UNILEN(result->u.constant) + Z_UNILEN(class_name->u.constant);
+	length = sizeof("::")-1 + Z_UNILEN(result->u.constant) + Z_UNILEN(name->u.constant);
 	if (Z_TYPE(result->u.constant) == IS_UNICODE) {
 		Z_USTRVAL(result->u.constant) = erealloc(Z_USTRVAL(result->u.constant), UBYTES(length+1));
 		Z_USTRVAL(result->u.constant)[Z_USTRLEN(result->u.constant)] = ':';
 		Z_USTRVAL(result->u.constant)[Z_USTRLEN(result->u.constant)+1] = ':';
-		memcpy(&Z_USTRVAL(result->u.constant)[Z_USTRLEN(result->u.constant) + sizeof("::")-1], Z_STRVAL(class_name->u.constant), UBYTES(Z_USTRLEN(class_name->u.constant)+1));
-		STR_FREE(Z_USTRVAL(class_name->u.constant));
+		memcpy(&Z_USTRVAL(result->u.constant)[Z_USTRLEN(result->u.constant) + sizeof("::")-1], Z_STRVAL(name->u.constant), UBYTES(Z_USTRLEN(name->u.constant)+1));
+		STR_FREE(Z_USTRVAL(name->u.constant));
 	} else {
 		Z_STRVAL(result->u.constant) = erealloc(Z_STRVAL(result->u.constant), length+1);
 		memcpy(&Z_STRVAL(result->u.constant)[Z_STRLEN(result->u.constant)], "::", sizeof("::")-1);
-		memcpy(&Z_STRVAL(result->u.constant)[Z_STRLEN(result->u.constant) + sizeof("::")-1], Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant)+1);
-		STR_FREE(Z_STRVAL(class_name->u.constant));
+		memcpy(&Z_STRVAL(result->u.constant)[Z_STRLEN(result->u.constant) + sizeof("::")-1], Z_STRVAL(name->u.constant), Z_STRLEN(name->u.constant)+1);
+		STR_FREE(Z_STRVAL(name->u.constant));
 	}
 	Z_UNILEN(result->u.constant) = length;
 }
@@ -3912,7 +3910,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 				} else if (ZEND_FETCH_CLASS_DEFAULT == type) {
 					zend_resolve_class_name(constant_container, &fetch_type, 1 TSRMLS_CC);
 				}
-				zend_do_fetch_class_name(NULL, constant_container, constant_name TSRMLS_CC);
+				zend_do_build_full_name(NULL, constant_container, constant_name TSRMLS_CC);
 				*result = *constant_container;
 				result->u.constant.type = IS_CONSTANT | fetch_type;
 			} else if (fetch_type || !zend_constant_ct_subst(result, &constant_name->u.constant TSRMLS_CC)) {
@@ -5239,7 +5237,7 @@ void zend_do_build_namespace_name(znode *result, znode *prefix, znode *name TSRM
 		Z_UNILEN(result->u.constant) = 0;
 	}
 	/* prefix = result */
-	zend_do_fetch_class_name(NULL, result, name TSRMLS_CC);
+	zend_do_build_full_name(NULL, result, name TSRMLS_CC);
 }
 /* }}} */
 
