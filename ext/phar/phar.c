@@ -978,7 +978,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
  */
 int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int alias_len, char *objname, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
-	char *ext_str;
+	const char *ext_str;
 	int ext_len, is_data = 0, zip = 0, tar = 0;
 
 	if (error) {
@@ -1354,7 +1354,7 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 }
 /* }}} */
 
-int phar_detect_phar_fname_ext(const char *filename, int check_length, char **ext_str, int *ext_len) /* {{{ */
+int phar_detect_phar_fname_ext(const char *filename, int check_length, const char **ext_str, int *ext_len) /* {{{ */
 {
 	char end;
 	char *pos_t = strstr(filename, ".tar");
@@ -1591,7 +1591,7 @@ char *phar_fix_filepath(char *path, int *new_len, int use_cwd TSRMLS_DC) /* {{{ 
  */
 int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_len, char **entry, int *entry_len TSRMLS_DC) /* {{{ */
 {
-	char *ext_str;
+	const char *ext_str;
 	int ext_len;
 
 	if (!strncasecmp(filename, "phar://", 7)) {
