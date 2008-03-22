@@ -537,7 +537,7 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 				if (stmt->dbh->stringify || new_type == PDO_PARAM_STR) {
 					char *buf = NULL;
 					size_t len;
-					len = php_stream_copy_to_mem((php_stream*)value, &buf, PHP_STREAM_COPY_ALL, 0);
+					len = php_stream_copy_to_mem((php_stream*)value, (void *)&buf, PHP_STREAM_COPY_ALL, 0);
 					if(buf == NULL) {
 						ZVAL_EMPTY_STRING(dest);
 					} else {
@@ -2672,12 +2672,12 @@ static zend_class_entry *row_get_ce(zval *object TSRMLS_DC)
 	return pdo_dbstmt_ce;
 }
 
-static int row_get_classname(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
+static int row_get_classname(zval *object,  zstr *class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
 {
 	if (parent) {
 		return FAILURE;
 	} else {
-		*class_name = UG(unicode) ? USTR_MAKE("PDORow") : estrndup("PDORow", sizeof("PDORow")-1);
+		*class_name = ezstrndup(ZEND_STR_TYPE, ZSTR("PDORow"), sizeof("PDORow") - 1);
 		*class_name_len = sizeof("PDORow")-1;
 		return SUCCESS;
 	}
