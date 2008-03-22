@@ -25,3 +25,12 @@ var_dump(preg_match('/^\w{6}$/', 'aאבחיט'));
 int(0)
 int(1)
 int(0)
+--UEXPECTF--
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+int(0)
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+int(1)
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+int(0)

@@ -51,3 +51,27 @@ Array
     [precision] => 0
     [pdo_type] => 2
 )
+--UEXPECTF--
+object(PDOStatement)#%d (1) {
+  [u"queryString"]=>
+  unicode(18) "SELECT * from test"
+}
+Array
+(
+    [bar] => 1
+    [0] => 1
+)
+Array
+(
+    [native_type] => LONG
+    [flags] => Array
+        (
+            [0] => not_null
+        )
+
+    [table] => test
+    [name] => bar
+    [len] => 11
+    [precision] => 0
+    [pdo_type] => 2
+)

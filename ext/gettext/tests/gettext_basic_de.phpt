@@ -30,7 +30,8 @@ string(14) "Einfacher Test"
 string(14) "Einfacher Test"
 string(8) "messages"
 string(8) "messages"
---UEXPECT--
+--UEXPECTF--
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 string(14) "Einfacher Test"
 string(14) "Einfacher Test"
 unicode(8) "messages"
