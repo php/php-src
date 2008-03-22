@@ -258,34 +258,44 @@ typedef struct { /* php_oci_out_column {{{ */
 	} while (0)
 
 #define PHP_OCI_HANDLE_ERROR(connection, errcode) \
-	do { \
-		switch (errcode) { \
-			case  1013: \
-				zend_bailout(); \
-				break;  \
-			case    22: \
-			case   378: \
-			case   602: \
-			case   603: \
-			case   604: \
-			case   609: \
-			case  1012: \
-			case  1033: \
-			case  1041: \
-			case  1043: \
-			case  1089: \
-			case  1090: \
-			case  1092: \
-			case  3113: \
-			case  3114: \
-			case  3122: \
-			case  3135: \
-			case 12153: \
-			case 27146: \
-			case 28511: \
-				connection->is_open = 0; \
-				break;  \
-		} \
+	do {										  \
+		switch (errcode) {						  \
+			case  1013:							  \
+				zend_bailout();					  \
+				break;							  \
+			case    22:							  \
+			case   378:							  \
+			case   602:							  \
+			case   603:							  \
+			case   604:							  \
+			case   609:							  \
+			case  1012:							  \
+			case  1033:							  \
+			case  1041:							  \
+			case  1043:							  \
+			case  1089:							  \
+			case  1090:							  \
+			case  1092:							  \
+			case  3113:							  \
+			case  3114:							  \
+			case  3122:							  \
+			case  3135:							  \
+			case 12153:							  \
+			case 27146:							  \
+			case 28511:							  \
+				(connection)->is_open = 0;		  \
+				break;							  \
+			default:										\
+			{ /* do both numeric checks (above) and the status check for maximum version compatibility */ \
+				ub4 serverStatus = OCI_SERVER_NORMAL;		\
+				PHP_OCI_CALL(OCIAttrGet, ((dvoid *)(connection)->server, OCI_HTYPE_SERVER, (dvoid *)&serverStatus, \
+										  (ub4 *)0, OCI_ATTR_SERVER_STATUS, (connection)->err)); \
+				if (serverStatus != OCI_SERVER_NORMAL) {	\
+					(connection)->is_open = 0;				\
+				}											\
+			}												\
+			break;											\
+		}													\
 	} while (0)
 
 #define PHP_OCI_REGISTER_RESOURCE(resource, le_resource) \
@@ -453,6 +463,7 @@ ZEND_BEGIN_MODULE_GLOBALS(oci) /* {{{ */
 	zend_bool	 old_oci_close_semantics;		/* old_oci_close_semantics flag (to determine the way oci_close() should behave) */
 
 	int			 shutdown;						/* in shutdown flag */
+	int			 request_shutdown;				/* in request shutdown flag */
 
 	OCIEnv		*env;							/* global environment handle */
 
