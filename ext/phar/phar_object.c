@@ -1063,7 +1063,8 @@ PHP_METHOD(Phar, canWrite)
  * Returns whether the given filename is a valid phar filename */
 PHP_METHOD(Phar, isValidPharFilename)
 {
-	char *fname, *ext_str;
+	char *fname;
+	const char *ext_str;
 	int fname_len, ext_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &fname, &fname_len) == FAILURE) {

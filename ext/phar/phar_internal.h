@@ -419,7 +419,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, char *mode, char allow_dir, char **error TSRMLS_DC);
 int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char *path, int path_len, char *mode, char allow_dir, char **error TSRMLS_DC);
 int phar_flush(phar_archive_data *archive, char *user_stub, long len, int convert, char **error TSRMLS_DC);
-int phar_detect_phar_fname_ext(const char *filename, int check_length, char **ext_str, int *ext_len);
+int phar_detect_phar_fname_ext(const char *filename, int check_length, const char **ext_str, int *ext_len);
 int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_len, char **entry, int *entry_len TSRMLS_DC);
 
 typedef enum {
