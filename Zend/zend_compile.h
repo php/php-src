@@ -334,6 +334,8 @@ void init_compiler(TSRMLS_D);
 void shutdown_compiler(TSRMLS_D);
 void zend_init_compiler_data_structures(TSRMLS_D);
 
+void zend_resolve_class_name(znode *class_name, ulong *fetch_type, int check_ns_name TSRMLS_DC);
+
 extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
 extern ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, char *filename TSRMLS_DC);
 
@@ -421,7 +423,7 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC);
 void zend_do_clone(znode *result, znode *expr TSRMLS_DC);
 void zend_do_begin_dynamic_function_call(znode *function_name, int prefix_len TSRMLS_DC);
 void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC);
-void zend_do_fetch_class_name(znode *result, znode *class_entry, znode *class_name TSRMLS_DC);
+void zend_do_build_full_name(znode *result, znode *prefix, znode *name TSRMLS_DC);
 int zend_do_begin_class_member_function_call(znode *class_name, znode *method_name TSRMLS_DC);
 void zend_do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method, int is_dynamic_fcall TSRMLS_DC);
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
