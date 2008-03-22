@@ -16,3 +16,5 @@ if ($test === false) {
 ?>
 --EXPECT--
 string(1) "x"
+--UEXPECT--
+unicode(1) "x"

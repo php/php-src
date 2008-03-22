@@ -23,4 +23,6 @@ if (($db_make=dba_open($db_file, "n", 'cdb_make'))!==FALSE) {
 ===DONE===
 --EXPECTF--
 string(32) "1f34b74bde3744265acfc21e0f30af95"
+--UEXPECTF--
+unicode(32) "1f34b74bde3744265acfc21e0f30af95"
 ===DONE===

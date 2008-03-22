@@ -24,3 +24,7 @@ var_dump(json_encode($bar1));
 --EXPECT--
 string(13) "[100.1,"bar"]"
 string(21) "{"a":100.1,"b":"foo"}"
+--UEXPECTF--
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+unicode(13) "[100.1,"bar"]"
+unicode(21) "{"a":100.1,"b":"foo"}"

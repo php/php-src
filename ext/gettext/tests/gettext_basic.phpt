@@ -25,3 +25,7 @@ echo _("Basic test"), "\n";
 --EXPECT--
 Perustesti
 Perustesti
+--UEXPECTF--
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+Perustesti
+Perustesti

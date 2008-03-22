@@ -69,3 +69,47 @@ string(4) "July"
 string(6) "Tishri"
 string(0) ""
 Done
+--UEXPECTF--	
+unicode(3) "Jan"
+unicode(7) "January"
+unicode(3) "Jan"
+unicode(7) "January"
+unicode(6) "Shevat"
+unicode(0) ""
+unicode(3) "Jan"
+unicode(7) "January"
+unicode(3) "Dec"
+unicode(8) "December"
+unicode(5) "Tevet"
+unicode(0) ""
+unicode(0) ""
+unicode(0) ""
+unicode(0) ""
+unicode(0) ""
+unicode(0) ""
+unicode(0) ""
+
+Warning: jdmonthname() expects parameter 1 to be long, array given in %s on line %d
+bool(false)
+
+Warning: jdmonthname() expects parameter 1 to be long, array given in %s on line %d
+bool(false)
+
+Warning: jdmonthname() expects parameter 1 to be long, array given in %s on line %d
+bool(false)
+
+Warning: jdmonthname() expects parameter 1 to be long, array given in %s on line %d
+bool(false)
+
+Warning: jdmonthname() expects parameter 1 to be long, array given in %s on line %d
+bool(false)
+
+Warning: jdmonthname() expects parameter 1 to be long, array given in %s on line %d
+bool(false)
+unicode(3) "Dec"
+unicode(8) "December"
+unicode(3) "Jul"
+unicode(4) "July"
+unicode(6) "Tishri"
+unicode(0) ""
+Done

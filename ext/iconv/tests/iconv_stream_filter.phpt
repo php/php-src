@@ -39,3 +39,15 @@ Warning: fread(): iconv stream filter ("ISO-2022-JP"=>"EUC-JP"): invalid multiby
 string(0) ""
 string(0) ""
 string(0) ""
+--UEXPECTF--
+unicode(20) "1b244224332473244b24"
+unicode(10) "41244f1b28"
+unicode(2) "42"
+unicode(20) "a4b3a4f3a4cba4c1a4cf"
+unicode(10) "69636f6e76"
+unicode(2) "0a"
+
+Warning: fread(): iconv stream filter ("ISO-2022-JP"=>"EUC-JP"): invalid multibyte sequence in %s on line %d
+unicode(0) ""
+unicode(0) ""
+unicode(0) ""

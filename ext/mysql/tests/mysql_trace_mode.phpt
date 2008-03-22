@@ -26,9 +26,9 @@ mysql_close($link);
 print "done!\n";
 ?>
 --EXPECTF--
-Deprecated: mysql_db_query(): This function is deprecated; use mysql_query() instead%sin %s on line %d
+Deprecated: mysql_db_query(): use mysql_query() instead in %s on line %d
 
-Deprecated: mysql_escape_string(): This function is deprecated; use mysql_real_escape_string() instead. in %s on line %d
+Deprecated: mysql_escape_string(): use mysql_real_escape_string() instead. in %s on line %d
 I don\'t mind character sets, do I?\n
 Warning: mysql_query(): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'BOGUS_SQL' at line 1 in %s on line %d
 done!
