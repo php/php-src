@@ -79,7 +79,7 @@ static int phar_dir_seek(php_stream *stream, off_t offset, int whence, off_t *ne
 		} else {
 			*newoffset = 0;
 			while (*newoffset < offset && zend_hash_move_forward(data) == SUCCESS) {
-				(*newoffset)++;
+				++(*newoffset);
 			}
 			return 0;
 		}

@@ -141,7 +141,7 @@ ZEND_INI_DISP(phar_ini_extract_list_disp) /*void name(zend_ini_entry *ini_entry,
 	
 			if (val) {	
 				*val++ = '\0';
-				for (q = key; *q; q++) {
+				for (q = key; *q; ++q) {
 					*q = tolower(*q);
 				}
 				if (sapi_module.phpinfo_as_text) {
@@ -554,10 +554,10 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 			if (EOF == (nextchar = php_stream_getc(fp)) || (char)nextchar != '\n') {
 				MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated manifest at stub end)")
 			}
-			halt_offset++;
+			++halt_offset;
 		}
 		if ((char) nextchar == '\n') {
-			halt_offset++;
+			++halt_offset;
 		}
 	}
 	/* make sure we are at the right location to read the manifest */
@@ -862,7 +862,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 	entry.phar = mydata;
 	entry.fp_type = PHAR_FP;
 
-	for (manifest_index = 0; manifest_index < manifest_count; manifest_index++) {
+	for (manifest_index = 0; manifest_index < manifest_count; ++manifest_index) {
 		if (buffer + 4 > endbuffer) {
 			MAPPHAR_FAIL("internal corruption of phar \"%s\" (truncated manifest entry)")
 		}
@@ -1436,7 +1436,7 @@ static inline int in_character_class(char ch, const char *delim)
 		if (*delim == ch) {
 			return 1;
 		}
-		delim++;
+		++delim;
 	}
 	return 0;
 }
@@ -1450,7 +1450,7 @@ char *tsrm_strtok_r(char *s, const char *delim, char **last)
 	}
 
 	while (*s && in_character_class(*s, delim)) {
-		s++;
+		++s;
 	}
 	if (!*s) {
 		return NULL;
@@ -1459,7 +1459,7 @@ char *tsrm_strtok_r(char *s, const char *delim, char **last)
 	token = s;
 
 	while (*s && !in_character_class(*s, delim)) {
-		s++;
+		++s;
 	}
 	if (!*s) {
 		*last = s;
@@ -1540,8 +1540,7 @@ char *phar_fix_filepath(char *path, int *new_len, int use_cwd TSRMLS_DC) /* {{{ 
 	if (new_phar_len == 0) {
 		new_phar = (char *) erealloc(new_phar, new_phar_len+1+1);
 		new_phar[new_phar_len] = '/';
-		new_phar[new_phar_len+1] = '\0';
-		new_phar_len++;
+		new_phar[++new_phar_len] = '\0';
 	}
 	*new_len = new_phar_len;
 	return new_phar;
@@ -2042,7 +2041,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		}
 		newcrc32 = ~0;
 		mytime = entry->uncompressed_filesize;
-		for (loc = 0;loc < mytime; loc++) {
+		for (loc = 0;loc < mytime; ++loc) {
 			CRC32(newcrc32, php_stream_getc(file));
 		}
 		entry->crc32 = ~newcrc32;

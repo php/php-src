@@ -233,7 +233,7 @@ foundit:
 			return FAILURE
 
 	/* add each central directory item to the manifest */
-	for (i = 0; i < locator.count; i++) {
+	for (i = 0; i < locator.count; ++i) {
 		phar_zip_central_dir_file zipentry;
 
 		if (sizeof(zipentry) != php_stream_read(fp, (char *) &zipentry, sizeof(zipentry))) {
@@ -485,7 +485,7 @@ static int phar_zip_changed_apply(void *data, void *arg TSRMLS_DC) /* {{{ */
 		efp = phar_get_efp(entry TSRMLS_CC);
 
 		newcrc32 = ~0;
-		for (loc = 0;loc < entry->uncompressed_filesize; loc++) {
+		for (loc = 0;loc < entry->uncompressed_filesize; ++loc) {
 			CRC32(newcrc32, php_stream_getc(efp));
 		}
 		entry->crc32 = ~newcrc32;
