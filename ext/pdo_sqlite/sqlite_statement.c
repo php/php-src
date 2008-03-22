@@ -127,7 +127,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 								SEPARATE_ZVAL(&param->parameter);
 								Z_TYPE_P(param->parameter) = IS_STRING;
 								Z_STRLEN_P(param->parameter) = php_stream_copy_to_mem(stm,
-									&Z_STRVAL_P(param->parameter), PHP_STREAM_COPY_ALL, 0);
+									(void *)&Z_STRVAL_P(param->parameter), PHP_STREAM_COPY_ALL, 0);
 							} else {
 								pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource" TSRMLS_CC);
 								return 0;
