@@ -361,10 +361,7 @@ doit:
 		}
 	}
 	/* test for stream wrappers and return */
-	for (p = filename; p - filename < filename_len && (isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'); p++) {
-		n++;
-	}
-
+	for (p = filename; p - filename < filename_len && (isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'); p++, n++);
 	if (n < filename_len - 3 && (*p == ':') && (!strncmp("//", p+1, 2) || ( filename_len > 4 && !memcmp("data", filename, 4)))) {
 		/* found stream wrapper, this is an absolute path until stream wrappers implement realpath */
 		return estrndup(filename, filename_len);
@@ -381,9 +378,7 @@ doit:
 			maybe_stream = 0;
 			goto not_stream;
 		}
-		for (p = ptr, n = 0; p < end && (isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'); p++) {
-			n++;
-		}
+		for (p = ptr, n = 0; p < end && (isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'); p++, n++);
 
 		if (n == end - ptr && *p && !strncmp("//", p+1, 2)) {
 			is_stream_wrapper = 1;
@@ -480,9 +475,7 @@ not_stream:
 			memcpy(trypath+exec_fname_length + 1, filename, filename_len+1);
 
 			/* search for stream wrapper */
-			for (p = trypath; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++) {
-				n++;
-			}
+			for (p = trypath; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++, n++);
 			if (n < exec_fname_length - 3 && (*p == ':') && (n > 1) && (!strncmp("//", p+1, 2) || !memcmp("data", trypath, 4))) {
 				char *actual;
 	
