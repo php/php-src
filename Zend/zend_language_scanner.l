@@ -723,7 +723,7 @@ ZEND_API int zend_multibyte_yyinput(zend_file_handle *file_handle, char *buf, si
 
 	/* TODO: support widechars */
 
-	for (n = 0; n < sizeof(buf) && (c = zend_stream_getc(yyin TSRMLS_CC)) != EOF && c != '\n'; ++n) {
+	for (n = 0; n < len && (c = zend_stream_getc(yyin TSRMLS_CC)) != EOF && c != '\n'; ++n) {
 		buf[n] = (char)c;
 	}
 	if (c == '\n') {
@@ -731,8 +731,8 @@ ZEND_API int zend_multibyte_yyinput(zend_file_handle *file_handle, char *buf, si
 	}
 
 	SCNG(script_org_size) = n;
-	SCNG(script_org) = (char*)emalloc(SCNG(script_org_size)+1);
-	memcpy(SCNG(script_org)+SCNG(script_org_size)-n, buf, n);
+	SCNG(script_org) = (char*)emalloc(SCNG(script_org_size) + 1);
+	memcpy(SCNG(script_org), buf, n);
 
 	return n;
 }
@@ -749,29 +749,18 @@ ZEND_API int zend_multibyte_read_script(TSRMLS_D)
 	SCNG(script_org) = NULL;
 	SCNG(script_org_size) = 0;
 
-	for (;;) {
-		n = zend_stream_read(yyin, buf, sizeof(buf) TSRMLS_CC);
-		if (n <= 0) {
-			break;
-		}
-
+	for (; (n = zend_stream_read(yyin, buf, sizeof(buf) TSRMLS_CC)) > 0; ) {
 		SCNG(script_org_size) += n;
-		if (SCNG(script_org)) {
-			SCNG(script_org) = (char*)erealloc(SCNG(script_org), SCNG(script_org_size)+1);
-		} else {
-			SCNG(script_org) = (char*)emalloc(SCNG(script_org_size)+1);
-		}
-		memcpy(SCNG(script_org)+SCNG(script_org_size)-n, buf, n);
+		SCNG(script_org) = (char*)erealloc(SCNG(script_org), SCNG(script_org_size));
+		memcpy(SCNG(script_org) + SCNG(script_org_size) - n, buf, n);
 	}
 
 	if (n < 0) {
 		return -1;
 	}
 
-	if (!SCNG(script_org)) {
-		SCNG(script_org) = emalloc(SCNG(script_org_size)+1);
-	}
-	*(SCNG(script_org)+SCNG(script_org_size)) = (char)NULL;
+	SCNG(script_org) = (char*)erealloc(SCNG(script_org), SCNG(script_org_size) + 1);
+	*(SCNG(script_org)+SCNG(script_org_size)) = '\0';
 
 	return 0;
 }
