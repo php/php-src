@@ -21,6 +21,9 @@
 /* $Id$ */
 
 #include "phar_internal.h"
+#if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
+extern php_stream_wrapper php_stream_phar_wrapper;
+#endif
 
 /* retrieve a phar_entry_info's current file pointer for reading contents */
 php_stream *phar_get_efp(phar_entry_info *entry TSRMLS_DC)
