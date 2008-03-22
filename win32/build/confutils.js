@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.3 2008-02-17 01:26:15 pajoye Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.4 2008-03-22 09:07:59 sfox Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -835,14 +835,23 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 /* emits rule to generate version info for a SAPI
  * or extension.  Returns the name of the .res file
  * that will be generated */
-function generate_version_info_resource(makefiletarget, creditspath)
+function generate_version_info_resource(makefiletarget, basename, creditspath, sapi)
 {
 	var resname = makefiletarget + ".res";
-	var res_desc = "PHP " + makefiletarget;
-	var res_prod_name = res_desc;
+	var res_desc = makefiletarget;
 	var credits;
 	var thanks = "";
 	var logo = "";
+	var debug = "";
+	var project_url = "http://www.php.net";
+	var project_header = creditspath + "/php_" + basename + ".h";
+	var versioning = "";
+
+	if (sapi) {
+		var internal_name = basename.toUpperCase() + " SAPI";
+	} else {
+		var internal_name = basename.toUpperCase() + " extension";
+	}
 
 	if (FSO.FileExists(creditspath + '/CREDITS')) {
 		credits = FSO.OpenTextFile(creditspath + '/CREDITS', 1);
@@ -860,8 +869,30 @@ function generate_version_info_resource(makefiletarget, creditspath)
 		credits.Close();
 	}
 
+	if (creditspath.match(new RegExp("pecl"))) {
+		project_url = "http://pecl.php.net/" + basename;
+
+		/* keep independent versioning PECL-specific for now */
+		if (FSO.FileExists(project_header)) {
+			if (header = FSO.OpenTextFile(project_header, 1)) {
+				contents = header.ReadAll();
+				/* allowed: x.x.x[-dev|-alpha|-beta][RCx] */
+				if (contents.match(new RegExp('PHP_' + basename.toUpperCase() + '_VERSION(\\s+)"((\\d+\.\\d+(\.\\d+)?)(\-[a-z]{3,5})?(RC\\d+)?)'))) {
+					project_version = RegExp.$2;
+					file_version = RegExp.$3.split('.');
+					versioning = '\\"" /d EXT_FILE_VERSION=' + file_version[0] + ',' + file_version[1] + ',' + file_version[2] + ' /d EXT_VERSION="\\"' + project_version;
+				}
+				header.Close();
+			}
+		}
+	}
+
 	if (makefiletarget.match(new RegExp("\\.exe$"))) {
-		logo = " /D WANT_LOGO ";
+		logo = " /d WANT_LOGO ";
+	}
+
+	if (PHP_DEBUG != "no") {
+		debug = " /d _DEBUG";
 	}
 
 	/**
@@ -869,20 +900,22 @@ function generate_version_info_resource(makefiletarget, creditspath)
 	 */
 	if (FSO.FileExists(creditspath + '\\template.rc')) {
 		MFO.WriteLine("$(BUILD_DIR)\\" + resname + ": " + creditspath + "\\template.rc");
-		MFO.WriteLine("\t$(RC) /fo $(BUILD_DIR)\\" + resname + logo +
-		   	' /d FILE_DESCRIPTION="\\"' + res_desc + '\\"" /d FILE_NAME="\\"' + makefiletarget +
-	   		'\\"" /d PRODUCT_NAME="\\"' + res_prod_name + '\\"" /d THANKS_GUYS="\\"' +
-			thanks + '\\"" ' + creditspath + '\\template.rc');
+		MFO.WriteLine("\t$(RC) /n /fo $(BUILD_DIR)\\" + resname + logo + debug +
+			' /d FILE_DESCRIPTION="\\"' + res_desc + '\\"" /d FILE_NAME="\\"'
+			+ makefiletarget + '\\"" /d URL="\\"' + project_url
+			+ '\\"" /d INTERNAL_NAME="\\"' + internal_name + versioning + 
+			'\\"" /d THANKS_GUYS="\\"' + thanks + '\\"" ' + creditspath + 
+			'\\template.rc');
 		return resname;
 	}
 
 	MFO.WriteLine("$(BUILD_DIR)\\" + resname + ": win32\\build\\template.rc");
-	MFO.WriteLine("\t$(RC) /fo $(BUILD_DIR)\\" + resname + logo +
-	   	' /d FILE_DESCRIPTION="\\"' + res_desc + '\\"" /d FILE_NAME="\\"' + makefiletarget +
-	   	'\\"" /d PRODUCT_NAME="\\"' + res_prod_name + '\\"" /d THANKS_GUYS="\\"' +
-		thanks + '\\"" win32\\build\\template.rc');
+	MFO.WriteLine("\t$(RC) /n /fo $(BUILD_DIR)\\" + resname + logo + debug +
+		' /d FILE_DESCRIPTION="\\"' + res_desc + '\\"" /d FILE_NAME="\\"'
+		+ makefiletarget + '\\"" /d URL="\\"' + project_url + 
+		'\\"" /d INTERNAL_NAME="\\"' + internal_name + versioning + 
+		'\\"" /d THANKS_GUYS="\\"' + thanks + '\\"" win32\\build\\template.rc');
 	MFO.WriteBlankLines(1);
-	
 	return resname;
 }
 
@@ -916,7 +949,7 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 	MFO.WriteBlankLines(1);
 
 	/* generate a .res file containing version information */
-	resname = generate_version_info_resource(makefiletarget, configure_module_dirname);
+	resname = generate_version_info_resource(makefiletarget, sapiname, configure_module_dirname, true);
 	
 	MFO.WriteLine(makefiletarget + ": $(BUILD_DIR)\\" + makefiletarget);
 	MFO.WriteLine("\t@echo SAPI " + sapiname_for_printing + " build complete");
@@ -1065,7 +1098,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		}
 		var libname = dllname.substring(0, dllname.length-4) + ".lib";
 
-		var resname = generate_version_info_resource(dllname, configure_module_dirname);
+		var resname = generate_version_info_resource(dllname, extname, configure_module_dirname, false);
 		var ld = "@$(CC)";
 
 		MFO.WriteLine("$(BUILD_DIR)\\" + libname + ": $(BUILD_DIR)\\" + dllname);
