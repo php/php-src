@@ -484,7 +484,7 @@ PHP_FUNCTION(shell_exec)
 	}
 
 	stream = php_stream_fopen_from_pipe(in, "rb");
-	total_readbytes = php_stream_copy_to_mem(stream, &ret, PHP_STREAM_COPY_ALL, 0);
+	total_readbytes = php_stream_copy_to_mem(stream, (void *)&ret, PHP_STREAM_COPY_ALL, 0);
 	php_stream_close(stream);
 
 	if (total_readbytes > 0) {

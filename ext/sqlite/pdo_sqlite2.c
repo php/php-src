@@ -374,7 +374,7 @@ static long sqlite2_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TS
 	}
 }
 
-static char *pdo_sqlite2_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned int *len TSRMLS_DC)
+static char *pdo_sqlite2_last_insert_id(pdo_dbh_t *dbh, const char *name, int *len TSRMLS_DC)
 {
 	pdo_sqlite2_db_handle *H = (pdo_sqlite2_db_handle *)dbh->driver_data;
 	char *id;
@@ -515,7 +515,8 @@ static struct pdo_dbh_methods sqlite2_methods = {
 	pdo_sqlite2_fetch_error_func,
 	pdo_sqlite2_get_attribute,
 	NULL,	/* check_liveness: not needed */
-	get_driver_methods
+	get_driver_methods,
+	NULL
 };
 
 static char *make_filename_safe(const char *filename TSRMLS_DC)
