@@ -92,13 +92,15 @@ static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char 
 		zval *temp; 
 		char newname[] = "PHAR_PATH_INFO";
 
-		path_info = Z_STRVAL_PP(stuff); 
-		code = Z_STRLEN_PP(stuff); 
-		ZVAL_STRINGL(*stuff, Z_STRVAL_PP(stuff) + entry_len, Z_STRLEN_PP(stuff) - entry_len - request_uri_len, 1);
+		path_info = Z_STRVAL_PP(stuff);
+		code = Z_STRLEN_PP(stuff);
+		if (Z_STRLEN_PP(stuff) > entry_len && !memcmp(Z_STRVAL_PP(stuff), entry, entry_len)) {
+			ZVAL_STRINGL(*stuff, Z_STRVAL_PP(stuff) + entry_len, Z_STRLEN_PP(stuff) - entry_len - request_uri_len, 1);
 
-		MAKE_STD_ZVAL(temp); 
-		ZVAL_STRINGL(temp, path_info, code, 0);
-		zend_hash_update(Z_ARRVAL_PP(_SERVER), newname, sizeof(newname), (void *) &temp, sizeof(zval **), NULL); 
+			MAKE_STD_ZVAL(temp); 
+			ZVAL_STRINGL(temp, path_info, code, 0);
+			zend_hash_update(Z_ARRVAL_PP(_SERVER), newname, sizeof(newname), (void *) &temp, sizeof(zval **), NULL);
+		}
 	}
 	if (SUCCESS == zend_hash_find(Z_ARRVAL_PP(_SERVER), "PATH_TRANSLATED", sizeof("PATH_TRANSLATED"), (void **) &stuff)) { 
 		int code; 
@@ -124,11 +126,13 @@ static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char 
 
 			path_info = Z_STRVAL_PP(stuff);
 			code = Z_STRLEN_PP(stuff);
-			ZVAL_STRINGL(*stuff, Z_STRVAL_PP(stuff) + basename_len, Z_STRLEN_PP(stuff) - basename_len, 1);
+			if (Z_STRLEN_PP(stuff) > basename_len && !memcmp(Z_STRVAL_PP(stuff), basename, basename_len)) {
+				ZVAL_STRINGL(*stuff, Z_STRVAL_PP(stuff) + basename_len, Z_STRLEN_PP(stuff) - basename_len, 1);
 
-			MAKE_STD_ZVAL(temp);
-			ZVAL_STRINGL(temp, path_info, code, 0);
-			zend_hash_update(Z_ARRVAL_PP(_SERVER), newname, sizeof(newname), (void *) &temp, sizeof(zval **), NULL);
+				MAKE_STD_ZVAL(temp);
+				ZVAL_STRINGL(temp, path_info, code, 0);
+				zend_hash_update(Z_ARRVAL_PP(_SERVER), newname, sizeof(newname), (void *) &temp, sizeof(zval **), NULL);
+			}
 		}
 	}
 	if (zend_hash_exists(&(PHAR_GLOBALS->phar_SERVER_mung_list), "PHP_SELF", sizeof("PHP_SELF")-1)) {
@@ -139,11 +143,13 @@ static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char 
 
 			path_info = Z_STRVAL_PP(stuff);
 			code = Z_STRLEN_PP(stuff);
-			ZVAL_STRINGL(*stuff, Z_STRVAL_PP(stuff) + basename_len, Z_STRLEN_PP(stuff) - basename_len, 1);
+			if (Z_STRLEN_PP(stuff) > basename_len && !memcmp(Z_STRVAL_PP(stuff), basename, basename_len)) {
+				ZVAL_STRINGL(*stuff, Z_STRVAL_PP(stuff) + basename_len, Z_STRLEN_PP(stuff) - basename_len, 1);
 
-			MAKE_STD_ZVAL(temp);
-			ZVAL_STRINGL(temp, path_info, code, 0);
-			zend_hash_update(Z_ARRVAL_PP(_SERVER), newname, sizeof(newname), (void *) &temp, sizeof(zval **), NULL);
+				MAKE_STD_ZVAL(temp);
+				ZVAL_STRINGL(temp, path_info, code, 0);
+				zend_hash_update(Z_ARRVAL_PP(_SERVER), newname, sizeof(newname), (void *) &temp, sizeof(zval **), NULL);
+			}
 		}
 	}
 

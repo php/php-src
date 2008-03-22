@@ -1,5 +1,5 @@
 --TEST--
-Phar front controller include from cwd test 1
+Phar front controller with generic action router test
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
@@ -11,3 +11,5 @@ files/frontcontroller14.phar
 --EXPECTHEADERS--
 Content-type: text/html
 --EXPECTF--
+string(9) "/hi/there"
+string(%d) "phar://%sfrontcontroller23.php/html/index.php"
