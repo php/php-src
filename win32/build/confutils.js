@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.5 2008-03-22 09:33:31 sfox Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.6 2008-03-22 22:16:55 sfox Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -880,6 +880,9 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 				if (contents.match(new RegExp('PHP_' + basename.toUpperCase() + '_VERSION(\\s+)"((\\d+\.\\d+(\.\\d+)?)(\-[a-z]{3,5})?(RC\\d+)?(\-dev)?)'))) {
 					project_version = RegExp.$2;
 					file_version = RegExp.$3.split('.');
+					if (!file_version[2]) {
+						file_version[2] = 0;
+					}
 					versioning = '\\"" /d EXT_FILE_VERSION=' + file_version[0] + ',' + file_version[1] + ',' + file_version[2] + ' /d EXT_VERSION="\\"' + project_version;
 				}
 				header.Close();
