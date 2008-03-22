@@ -294,7 +294,7 @@ restart:
 	}
 
 /*!re2c
-
+re2c:yyfill:check = 0;
 LNUM [0-9]+
 DNUM ([0-9]*[\.][0-9]+)|([0-9]+[\.][0-9]*)
 NUMBER [-]?{LNUM}|{DNUM}
