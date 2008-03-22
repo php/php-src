@@ -2555,21 +2555,13 @@ static long stream_fteller_for_zend(void *handle TSRMLS_DC) /* {{{ */
 zend_op_array *(*phar_orig_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
 #if PHP_VERSION_ID >= 50300
 #define phar_orig_zend_open zend_stream_open_function
-#else
-int (*phar_orig_zend_open)(const char *filename, zend_file_handle *handle TSRMLS_DC);
-#endif
-
-/*
- Used to add the fake CWD to include_path prior to parsing it in PHP 5.3+
- Does complete include_path scan for file in PHP 5.2
-
- This is only called in PHP 5.2 if we know for certain that we are running within
- a phar, and only supports phar stream wrapper in 5.2.
- */
 char *phar_resolve_path(const char *filename, int filename_len TSRMLS_DC)
 {
 	return phar_find_in_include_path((char *) filename, filename_len, NULL TSRMLS_CC);
 }
+#else
+int (*phar_orig_zend_open)(const char *filename, zend_file_handle *handle TSRMLS_DC);
+#endif
 
 static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC) /* {{{ */
 {
@@ -2668,6 +2660,9 @@ int phar_zend_open(const char *filename, zend_file_handle *handle TSRMLS_DC) /* 
 		if (SUCCESS == phar_orig_zend_open(entry, handle TSRMLS_CC)) {
 			if (!handle->opened_path) {
 				handle->opened_path = entry;
+			}
+			if (entry != filename) {
+				handle->free_filename = 1;
 			}
 			return SUCCESS;
 		}
