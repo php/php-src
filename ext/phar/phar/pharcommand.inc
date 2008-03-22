@@ -1383,7 +1383,6 @@ class PharCommand extends CLICommand
         $ucount  = 0;
         $mcount  = 0;
         $compalg = array('GZ'=>0, 'BZ2'=>0);
-var_dump($phar);
 
         foreach(new RecursiveIteratorIterator($phar) as $ent) {
             $count++;
