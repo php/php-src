@@ -66,7 +66,7 @@ static int phar_file_type(HashTable *mimes, char *file, char **mime_type TSRMLS_
 		/* no file extension = assume text/plain */
 		return PHAR_MIME_OTHER;
 	}
-	ext++;
+	++ext;
 	if (SUCCESS != zend_hash_find(mimes, ext, strlen(ext), (void **) &mime)) {
 		*mime_type = "application/octet-stream";
 		return PHAR_MIME_OTHER;
@@ -392,7 +392,7 @@ static void phar_postprocess_ru_web(char *fname, int fname_len, char **entry, in
 			if (u) {
 				u[0] = '/';
 				*ru = estrndup(u, u_len+1);
-				u_len++;
+				++u_len;
 				u[0] = '\0';
 			} else {
 				*ru = NULL;
@@ -534,7 +534,7 @@ PHP_METHOD(Phar, webPhar)
 	if (!basename) {
 		basename = fname;
 	} else {
-		basename++;
+		++basename;
 	}
 
 	if ((strlen(sapi_module.name) == sizeof("cgi-fcgi")-1 && !strncmp(sapi_module.name, "cgi-fcgi", sizeof("cgi-fcgi")-1))
@@ -598,7 +598,7 @@ PHP_METHOD(Phar, webPhar)
 		fci.param_count = 1;
 		fci.params = zp;
 #if PHP_VERSION_ID < 50300
-		params->refcount++;
+		++(params->refcount);
 #else
 		Z_ADDREF_P(params);
 #endif
@@ -657,7 +657,7 @@ PHP_METHOD(Phar, webPhar)
 			entry_len = index_php_len;
 			if (entry[0] != '/') {
 				spprintf(&entry, 0, "/%s", index_php);
-				entry_len++;
+				++entry_len;
 			}
 		} else {
 			/* assume "index.php" is starting point */
@@ -1094,7 +1094,7 @@ static void phar_spl_foreign_clone(spl_filesystem_object *src, spl_filesystem_ob
 {
 	phar_archive_data *phar_data = (phar_archive_data *) dst->oth;
 
-	phar_data->refcount++;
+	++(phar_data->refcount);
 }
 /* }}} */
 
@@ -1179,7 +1179,7 @@ PHP_METHOD(Phar, __construct)
 	}
 
 	is_data = phar_data->is_data;
-	phar_data->refcount++;
+	++(phar_data->refcount);
 	phar_obj->arc.archive = phar_data;
 	phar_obj->spl.oth_handler = &phar_spl_foreign_handler;
 

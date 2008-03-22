@@ -337,7 +337,7 @@ void phar_fancy_stat(struct stat *stat_sb, int type, zval *return_value TSRMLS_D
 			if(groups > 0) {
 				gids=(gid_t *)safe_emalloc(groups, sizeof(gid_t), 0);
 				n=getgroups(groups, gids);
-				for(i=0;i<n;i++){
+				for(i=0;i<n;++i){
 					if(stat_sb->st_gid==gids[i]) {
 						rmask=S_IRGRP;
 						wmask=S_IWGRP;
