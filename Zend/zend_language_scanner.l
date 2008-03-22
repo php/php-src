@@ -596,7 +596,7 @@ yymore_restart:
 	}
 
 /*!re2c
-
+re2c:yyfill:check = 0;
 LNUM	[0-9]+
 DNUM	([0-9]*"."[0-9]+)|([0-9]+"."[0-9]*)
 EXPONENT_DNUM	(({LNUM}|{DNUM})[eE][+-]?{LNUM})
