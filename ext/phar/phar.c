@@ -1356,71 +1356,42 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 
 int phar_detect_phar_fname_ext(const char *filename, int check_length, const char **ext_str, int *ext_len) /* {{{ */
 {
+	int i;
 	char end;
-	char *pos_t = strstr(filename, ".tar");
-	char *pos_tgz = strstr(filename, ".tgz");
-	char *pos_z = strstr(filename, ".zip");
-	char *pos_tg = strstr(filename, ".tar.gz");
-	char *pos_tb = strstr(filename, ".tar.bz2");
-	char *pos_pg = strstr(filename, ".phar.gz");
-	char *pos_pb = strstr(filename, ".phar.bz2");
-	char *pos_pp = strstr(filename, ".phar.php");
-	char *pos_pt = strstr(filename, ".phar.tar");
-	char *pos_pz = strstr(filename, ".phar.zip");
-	char *pos_ptg = strstr(filename, ".phar.tar.gz");
-	char *pos_ptb = strstr(filename, ".phar.tar.bz2");
-	char *pos_ptp = strstr(filename, ".phar.tar.php");
-	char *pos_pzp = strstr(filename, ".phar.zip.php");
+	const char *pos;
+#define EXTINF(check, ext) { check, ext, sizeof(ext)-1 }
+	const struct {
+		int check;
+		const char * const ext;
+		int len;
+	} ext_info[] = {
+		/* longer exts must be specified later */
+		EXTINF(1, ".php"),
+		EXTINF(0, ".phar"),
+		EXTINF(0, ".tgz"),
+		EXTINF(0, ".zip"),
+		EXTINF(0, ".tar"),
+		EXTINF(0, ".tar.gz"),
+		EXTINF(0, ".tar.bz2"),
+		EXTINF(0, ".phar.gz"),
+		EXTINF(0, ".phar.bz2"),
+		EXTINF(0, ".phar.php"),
+		EXTINF(0, ".phar.tar"),
+		EXTINF(0, ".phar.zip"),
+		EXTINF(0, ".phar.tar.gz"),
+		EXTINF(0, ".phar.tar.bz2"),
+		EXTINF(0, ".phar.tar.php"),
+		EXTINF(0, ".phar.zip.php")};
 
-	if (pos_pzp) {
-		*ext_str = pos_pzp;
-		*ext_len = 13;
-	} else if (pos_ptp) {
-		*ext_str = pos_ptp;
-		*ext_len = 13;
-	} else if (pos_ptb) {
-		*ext_str = pos_ptb;
-		*ext_len = 13;
-	} else if (pos_ptg) {
-		*ext_str = pos_ptg;
-		*ext_len = 12;
-	} else if (pos_pz) {
-		*ext_str = pos_pz;
-		*ext_len = 9;
-	} else if (pos_pt) {
-		*ext_str = pos_pt;
-		*ext_len = 9;
-	} else if (pos_pp) {
-		*ext_str = pos_pp;
-		*ext_len = 9;
-	} else if (pos_pb) {
-		*ext_str = pos_pb;
-		*ext_len = 9;
-	} else if (pos_pg) {
-		*ext_str = pos_pg;
-		*ext_len = 8;
-	} else if (pos_tb) {
-		*ext_str = pos_tb;
-		*ext_len = 8;
-	} else if (pos_tg) {
-		*ext_str = pos_tg;
-		*ext_len = 7;
-	} else if (pos_z) {
-		*ext_str = pos_z;
-		*ext_len = 4;
-	} else if (pos_tgz) {
-		*ext_str = pos_tgz;
-		*ext_len = 4;
-	} else if (pos_t) {
-		*ext_str = pos_t;
-		*ext_len = 4;
-	} else if ((pos_pp = strstr(filename, ".phar")) != NULL && pos_pp[4] != '\0') {
-		*ext_str = pos_pp;
-		*ext_len = 5;
-	} else if ((pos_pp = strstr(filename, ".php")) != NULL && pos_pp[4] != '\0') {
-		*ext_str = pos_pp;
-		*ext_len = 4;
-	} else {
+	*ext_str = NULL;
+	for (i = 0; i < sizeof(ext_info) / sizeof(ext_info[0]); ++i) {
+		pos = strstr(filename, ext_info[i].ext);
+		if (pos && (!ext_info[i].check || pos[ext_info[i].len] != '\0') && (!*ext_str || pos <= *ext_str)) {
+			*ext_str = pos;
+			*ext_len = ext_info[i].len;
+		}
+	}
+	if (!*ext_str) {
 		/* We have an alias with no extension, so locate the first / and fail */
 		*ext_str = strstr(filename, "/");
 		if (*ext_str) {
