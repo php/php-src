@@ -423,7 +423,7 @@ int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_len, int
 		if (!is_data) {
 			/* prevent any ".phar" without a stub getting through */
 			if (!phar->halt_offset && !phar->is_brandnew) {
-				if (FAILURE == zend_hash_find(&(phar->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1, (void **)&stub)) {
+				if (PHAR_G(readonly) && FAILURE == zend_hash_find(&(phar->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1, (void **)&stub)) {
 					spprintf(error, 0, "'%s' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive", fname);
 					return FAILURE;
 				}
