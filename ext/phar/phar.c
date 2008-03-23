@@ -2652,7 +2652,7 @@ int phar_zend_open(const char *filename, zend_file_handle *handle TSRMLS_DC) /* 
 			}
 		}
 		/* retrieving an include within the current directory, so use this if possible */
-		if (!(entry = phar_find_in_include_path((char *) filename, strlen(filename), pphar TSRMLS_CC))) {
+		if (!(entry = phar_find_in_include_path((char *) filename, strlen(filename), NULL TSRMLS_CC))) {
 			/* this file is not in the phar, use the original path */
 			goto skip_phar;
 		}
@@ -2692,13 +2692,13 @@ int phar_zend_open(const char *filename, zend_file_handle *handle TSRMLS_DC) /* 
 			}
 			entry_len = strlen(entry);
 			if (!IS_ABSOLUTE_PATH(entry, entry_len)) {
-				phar_archive_data **pphar;
+				phar_archive_data *pphar = NULL;
 				/* retrieving an include within the current directory, so use this if possible */
 				if (SUCCESS == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
-					if (!(entry = phar_find_in_include_path(entry, entry_len, pphar TSRMLS_CC))) {
+					if (!(entry = phar_find_in_include_path(entry, entry_len, &phar TSRMLS_CC))) {
 						/* this file is not in the phar, use the original path */
 						if (SUCCESS == phar_orig_zend_open(filename, handle TSRMLS_CC)) {
-							if (SUCCESS == phar_mount_entry(*pphar, handle->opened_path ? handle->opened_path : (char *) filename, strlen(handle->opened_path ? handle->opened_path : filename), (char *) filename, strlen(filename) TSRMLS_CC)) {
+							if (SUCCESS == phar_mount_entry(phar, handle->opened_path ? handle->opened_path : (char *) filename, strlen(handle->opened_path ? handle->opened_path : filename), (char *) filename, strlen(filename) TSRMLS_CC)) {
 								if (handle->opened_path) {
 									efree(handle->opened_path);
 								}
