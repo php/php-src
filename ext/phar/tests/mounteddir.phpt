@@ -9,7 +9,7 @@ phar.readonly=0
 $fname = dirname(__FILE__) . '/tempmanifest1.phar.php';
 $a = new Phar($fname);
 $a['index.php'] = '<?php
-Phar::mount("testit", dirname(Phar::getRunningPhar()) . "/testit");
+Phar::mount("testit", dirname(Phar::running(0)) . "/testit");
 include "testit/extfile.php";
 include "testit/extfile2.php";
 ?>';
