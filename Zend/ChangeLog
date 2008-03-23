@@ -1,3 +1,26 @@
+2008-03-22  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_compile.c
+      zend_compile.h:
+      - Renamed zend_do_fetch_class_name() to zend_do_build_full_name() (It is
+      not used only for classes)
+      - Moved zend_resolve_class_name prototype to zend_compile.h
+
+2008-03-22  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_2)
+      zend_language_scanner.l:
+      - Make multibyte a tad bit less crappy
+
+    * (PHP_5_3)
+      zend_ini_scanner.c
+      zend_ini_scanner.l
+      zend_ini_scanner_defs.h
+      zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner_defs.h:
+      - Another re2c version bump and scanner regeneration
+
 2008-03-21  Felipe Pena  <felipensp@gmail.com>
 
     * zend_compile.c:

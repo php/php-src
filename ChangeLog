@@ -1,3 +1,101 @@
+2008-03-22  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      Don't break PECL extensions that are oh-so-nearly doing The Right Thing
+      [TM]
+      (mcve, runkit, win32ps)
+
+2008-03-22  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/pdo/pdo_sql_parser.re
+      ext/pdo_sqlite/sqlite_statement.c
+      ext/sqlite/pdo_sqlite2.c
+      ext/standard/exec.c:
+      - Fixed compilation warnings
+
+    * ext/pdo/pdo_stmt.c:
+      Fixed compilation warnings
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h:
+      - Renamed zend_do_fetch_class_name() to zend_do_build_full_name() (It is
+      not used only for classes)
+      - Moved zend_resolve_class_name prototype to zend_compile.h
+
+2008-03-22  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_language_scanner.l:
+      - Make multibyte a tad bit less crappy
+
+    * (PHP_5_3)
+      acinclude.m4
+      ZendEngine2/zend_ini_scanner.c
+      ZendEngine2/zend_ini_scanner.l
+      ZendEngine2/zend_ini_scanner_defs.h
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner_defs.h
+      win32/build/config.w32:
+      - Another re2c version bump and scanner regeneration
+
+    * (PHP_5_3)
+      acinclude.m4:
+      - Require 0.13.3
+
+2008-03-22  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/calendar/tests/jdtojewish.phpt
+      ext/calendar/tests/jdtomonthname.phpt
+      ext/dba/tests/bug38698.phpt
+      ext/dbase/tests/001.phpt
+      ext/gettext/tests/gettext_basic.phpt
+      ext/gettext/tests/gettext_basic_de.phpt
+      ext/iconv/tests/bug37773.phpt
+      ext/iconv/tests/iconv_stream_filter.phpt
+      ext/iconv/tests/iconv_substr.phpt
+      ext/json/tests/bug42785.phpt
+      ext/mysql/tests/mysql_trace_mode.phpt
+      ext/pcre/tests/locales.phpt
+      ext/pdo_mysql/tests/bug_33689.phpt
+      ext/simplexml/tests/bug36611.phpt:
+      - Added some UEXPECTs
+      - Fixed some tests
+
+2008-03-22  Antony Dovgal  <tony@daylessday.org>
+
+    * main/main.c
+      main/main.c:
+      use correct flags
+
+2008-03-22  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      Allow Stas his "1.0.0RC1-dev"
+
+    * (PHP_5_3)
+      win32/build/confutils.js
+      win32/build/template.rc:
+      Independent versioning for PECL extensions (and only PECL, for now)
+      This affects the RC template used to ship information with the DLL in
+      Windows distributions - nothing else.
+      It will potentially affect 13 PECL modules at present (and yes I do know
+      which ones!)
+
+2008-03-22  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_3)
+      ext/oci8/oci8.c
+      ext/oci8/oci8_collection.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/drcp_cclass1.phpt
+      ext/oci8/tests/drcp_connect1.phpt:
+      Further improvements to error handling
+
 2008-03-21  Felipe Pena  <felipensp@gmail.com>
 
     * ZendEngine2/zend_compile.c:
