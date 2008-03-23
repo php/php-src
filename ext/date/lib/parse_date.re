@@ -1074,7 +1074,6 @@ relativetext = reltextnumber space reltextunit;
 
 	mssqltime
 	{
-		int tz_not_found;
 		DEBUG_OUTPUT("mssqltime");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_TIME();
