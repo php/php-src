@@ -2020,6 +2020,17 @@ PHP_METHOD(Phar, getAlias)
 }
 /* }}} */
 
+/* {{{ proto int Phar::getPath()
+ * Returns the real path to the phar archive on disk
+ */
+PHP_METHOD(Phar, getPath)
+{
+	PHAR_ARCHIVE_OBJECT();
+
+	RETURN_STRINGL(phar_obj->arc.archive->fname, phar_obj->arc.archive->fname_len, 1);
+}
+/* }}} */
+
 /* {{{ proto bool Phar::setAlias(string alias)
  * Sets the alias for a Phar archive. The default value is the full path
  * to the archive.
@@ -3598,6 +3609,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, delete,                arginfo_phar_delete,       ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, delMetadata,           NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getAlias,              NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, getPath,               NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getMetadata,           NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getModified,           NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getSignature,          NULL,                      ZEND_ACC_PUBLIC)
