@@ -1496,7 +1496,7 @@ PHP_METHOD(Phar, buildFromIterator)
 	} pass;
 	PHAR_ARCHIVE_OBJECT();
 
-	if (PHAR_G(readonly)) {
+	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"Cannot write out phar archive, phar is read-only");
 		return;
@@ -1687,12 +1687,19 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 
 	if (!phar->is_data) {
 		if (phar->alias) {
-			efree(phar->alias);
-			phar->alias = estrndup(newpath, strlen(newpath));
-			phar->alias_len = strlen(newpath);
-			phar->is_temporary_alias = 1;
-			zend_hash_update(&(PHAR_GLOBALS->phar_alias_map), newpath, phar->fname_len, (void*)&phar, sizeof(phar_archive_data*), NULL);
+			if (phar->is_temporary_alias) {
+				phar->alias = NULL;
+				phar->alias_len = 0;
+			} else {
+				phar->alias = estrndup(newpath, strlen(newpath));
+				phar->alias_len = strlen(newpath);
+				phar->is_temporary_alias = 1;
+				zend_hash_update(&(PHAR_GLOBALS->phar_alias_map), newpath, phar->fname_len, (void*)&phar, sizeof(phar_archive_data*), NULL);
+			}
 		}
+	} else {
+		phar->alias = NULL;
+		phar->alias_len = 0;
 	}
 
 	
@@ -1755,6 +1762,7 @@ static zval *phar_convert_to_other(phar_archive_data *source, int convert, char 
 	phar->fname = source->fname;
 	phar->fname_len = source->fname_len;
 	phar->is_temporary_alias = source->is_temporary_alias;
+	phar->alias = source->alias;
 	/* first copy each file's uncompressed contents to a temporary file and set per-file flags */
 	for (zend_hash_internal_pointer_reset(&source->manifest); SUCCESS == zend_hash_has_more_elements(&source->manifest); zend_hash_move_forward(&source->manifest)) {
 
@@ -1824,7 +1832,7 @@ static zval *phar_convert_to_other(phar_archive_data *source, int convert, char 
 PHP_METHOD(Phar, convertToTar)
 {
 	char *ext = NULL;
-	int ext_len = 0;
+	int ext_len = 0, save;
 	zval *ret;
 	PHAR_ARCHIVE_OBJECT();
 
@@ -1836,12 +1844,12 @@ PHP_METHOD(Phar, convertToTar)
 		RETURN_TRUE;
 	}
 	if (PHAR_G(readonly)) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-			"Cannot write out phar archive, phar is read-only");
-		return;
+		save = phar_obj->arc.archive->is_data;
+		phar_obj->arc.archive->is_data = 1;
 	}
 
 	ret = phar_convert_to_other(phar_obj->arc.archive, 1, ext, phar_obj->arc.archive->flags TSRMLS_CC);
+	phar_obj->arc.archive->is_data = save;
 	if (ret) {
 		RETURN_ZVAL(ret, 1, 1);
 	} else {
@@ -1858,7 +1866,7 @@ PHP_METHOD(Phar, convertToTar)
 PHP_METHOD(Phar, convertToZip)
 {
 	char *ext = NULL;
-	int ext_len = 0;
+	int ext_len = 0, save;
 	zval *ret;
 	PHAR_ARCHIVE_OBJECT();
 
@@ -1871,12 +1879,12 @@ PHP_METHOD(Phar, convertToZip)
 	}
 
 	if (PHAR_G(readonly)) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-			"Cannot write out phar archive, phar is read-only");
-		return;
+		save = phar_obj->arc.archive->is_data;
+		phar_obj->arc.archive->is_data = 1;
 	}
 
 	ret = phar_convert_to_other(phar_obj->arc.archive, 2, ext, PHAR_FILE_COMPRESSED_NONE TSRMLS_CC);
+	phar_obj->arc.archive->is_data = save;
 	if (ret) {
 		RETURN_ZVAL(ret, 1, 1);
 	} else {
@@ -2054,12 +2062,6 @@ PHP_METHOD(Phar, convertToData)
 		RETURN_TRUE;
 	}
 
-	if (PHAR_G(readonly)) { /* Don't override this one for is_data */
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-			"Cannot convert phar archive to executable format, phar is read-only");
-		return;
-	}
-
 	phar_obj->arc.archive->is_data = 1;
 	if (phar_obj->arc.archive->is_tar) {
 		ret = phar_convert_to_other(phar_obj->arc.archive, 1, ext, phar_obj->arc.archive->flags TSRMLS_CC);
@@ -2103,7 +2105,7 @@ PHP_METHOD(Phar, delete)
 	phar_entry_info *entry;
 	PHAR_ARCHIVE_OBJECT();
 
-	if (PHAR_G(readonly)) {
+	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"Cannot write out phar archive, phar is read-only");
 		return;
@@ -2174,7 +2176,7 @@ PHP_METHOD(Phar, setAlias)
 	int alias_len, oldalias_len, old_temp, readd = 0;
 	PHAR_ARCHIVE_OBJECT();
 
-	if (PHAR_G(readonly)) {
+	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"Cannot write out phar archive, phar is read-only");
 		RETURN_FALSE;
@@ -2281,7 +2283,7 @@ PHP_METHOD(Phar, stopBuffering)
 	char *error;
 	PHAR_ARCHIVE_OBJECT();
 
-	if (PHAR_G(readonly)) {
+	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"Cannot write out phar archive, phar is read-only");
 		return;
@@ -2310,7 +2312,7 @@ PHP_METHOD(Phar, setStub)
 	php_stream *stream;
 	PHAR_ARCHIVE_OBJECT();
 
-	if (PHAR_G(readonly)) {
+	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"Cannot change stub, phar is read-only");
 		return;
@@ -2437,7 +2439,7 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 	char *error;
 	PHAR_ARCHIVE_OBJECT();
 	
-	if (PHAR_G(readonly)) {
+	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"Cannot set signature algorithm, phar is read-only");
 		return;
@@ -2585,7 +2587,7 @@ PHP_METHOD(Phar, compressAllFilesGZ)
 	char *error;
 	PHAR_ARCHIVE_OBJECT();
 
-	if (PHAR_G(readonly)) {
+	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Phar is readonly, cannot change compression");
 		return;
@@ -2625,7 +2627,7 @@ PHP_METHOD(Phar, compressAllFilesBZIP2)
 	char *error;
 	PHAR_ARCHIVE_OBJECT();
 
-	if (PHAR_G(readonly)) {
+	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Phar is readonly, cannot change compression");
 		return;
@@ -2665,7 +2667,7 @@ PHP_METHOD(Phar, uncompressAllFiles)
 	char *error;
 	PHAR_ARCHIVE_OBJECT();
 
-	if (PHAR_G(readonly)) {
+	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Phar is readonly, cannot change compression");
 		return;
@@ -2707,7 +2709,7 @@ PHP_METHOD(Phar, copy)
 		return;
 	}
 
-	if (PHAR_G(readonly)) {
+	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"Cannot copy \"%s\" to \"%s\", phar is read-only", oldfile, newfile);
 		RETURN_FALSE;
@@ -2851,7 +2853,7 @@ PHP_METHOD(Phar, offsetSet)
 	php_stream *contents_file;
 	PHAR_ARCHIVE_OBJECT();
 
-	if (PHAR_G(readonly)) {
+	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by INI setting");
 		return;
 	}
@@ -2918,7 +2920,7 @@ PHP_METHOD(Phar, offsetUnset)
 	phar_entry_info *entry;
 	PHAR_ARCHIVE_OBJECT();
 
-	if (PHAR_G(readonly)) {
+	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by INI setting");
 		return;
 	}
@@ -3069,7 +3071,7 @@ PHP_METHOD(Phar, setMetadata)
 	zval *metadata;
 	PHAR_ARCHIVE_OBJECT();
 
-	if (PHAR_G(readonly)) {
+	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by INI setting");
 		return;
 	}
@@ -3106,8 +3108,13 @@ PHP_METHOD(Phar, delMetadata)
 	char *error;
 	PHAR_ARCHIVE_OBJECT();
 
-	if (PHAR_G(readonly)) {
+	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by INI setting");
+		return;
+	}
+	if (phar_obj->arc.archive->is_tar) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Cannot delete metadata, not possible with tar-based phar archives");
 		return;
 	}
 	if (phar_obj->arc.archive->metadata) {
@@ -3321,7 +3328,7 @@ PHP_METHOD(PharFileInfo, chmod)
 			"Phar entry is a directory, cannot chmod"); \
 		return;
 	}
-	if (PHAR_G(readonly)) {
+	if (PHAR_G(readonly) && !entry_obj->ent.entry->phar->is_data) {
 		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Cannot modify permissions for file \"%s\" in phar \"%s\", write operations are prohibited", entry_obj->ent.entry->filename, entry_obj->ent.entry->phar->fname);
 		return;
 	}
@@ -3387,7 +3394,7 @@ PHP_METHOD(PharFileInfo, setMetadata)
 	zval *metadata;
 	PHAR_ENTRY_OBJECT();
 
-	if (PHAR_G(readonly)) {
+	if (PHAR_G(readonly) && !entry_obj->ent.entry->phar->is_data) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by INI setting");
 		return;
 	}
@@ -3429,8 +3436,13 @@ PHP_METHOD(PharFileInfo, delMetadata)
 	char *error;
 	PHAR_ENTRY_OBJECT();
 
-	if (PHAR_G(readonly)) {
+	if (PHAR_G(readonly) && !entry_obj->ent.entry->phar->is_data) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by INI setting");
+		return;
+	}
+	if (entry_obj->ent.entry->is_tar) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Cannot delete metadata, not possible with tar-based phar archives");
 		return;
 	}
 	if (entry_obj->ent.entry->is_temp_dir) {
@@ -3476,7 +3488,7 @@ PHP_METHOD(PharFileInfo, setCompressedGZ)
 		RETURN_TRUE;
 		return;
 	}
-	if (PHAR_G(readonly)) {
+	if (PHAR_G(readonly) && !entry_obj->ent.entry->phar->is_data) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Phar is readonly, cannot change compression");
 		return;
@@ -3514,11 +3526,6 @@ PHP_METHOD(PharFileInfo, setCompressedBZIP2)
 	char *error;
 	PHAR_ENTRY_OBJECT();
 
-	if (entry_obj->ent.entry->is_zip) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Cannot compress with Bzip2 compression, not possible with zip-based phar archives");
-		return;
-	}
 	if (entry_obj->ent.entry->is_tar) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot compress with Bzip2 compression, not possible with tar-based phar archives");
@@ -3537,7 +3544,7 @@ PHP_METHOD(PharFileInfo, setCompressedBZIP2)
 	if (entry_obj->ent.entry->flags & PHAR_ENT_COMPRESSED_BZ2) {
 		RETURN_TRUE;
 	}
-	if (PHAR_G(readonly)) {
+	if (PHAR_G(readonly) && !entry_obj->ent.entry->phar->is_data) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Phar is readonly, cannot change compression");
 		return;
@@ -3580,7 +3587,7 @@ PHP_METHOD(PharFileInfo, setUncompressed)
 		RETURN_TRUE;
 		return;
 	}
-	if (PHAR_G(readonly)) {
+	if (PHAR_G(readonly) && !entry_obj->ent.entry->phar->is_data) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Phar is readonly, cannot change compression");
 		return;

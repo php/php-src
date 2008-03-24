@@ -28,7 +28,7 @@ var_dump($phar->isTar());
 var_dump($phar->isCompressed());
 var_dump($phar->getStub());
 
-$phar->convertToTar(Phar::BZ2);
+$phar = $phar->convertToTar()->compress(Phar::BZ2);
 var_dump($phar->isTar());
 var_dump($phar->isCompressed());
 var_dump($phar->getStub());
@@ -46,6 +46,8 @@ var_dump($phar->getStub());
 <?php 
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.bz2');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.tar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 __HALT_COMPILER();
 ?>
 --EXPECT--

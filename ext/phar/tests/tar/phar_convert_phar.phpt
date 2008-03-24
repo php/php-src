@@ -10,23 +10,24 @@ phar.readonly=0
 
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar';
 $fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '2.phar';
+$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.3.phar';
 
 $phar = new Phar($fname);
 $phar->stopBuffering();
 var_dump($phar->isTar());
 var_dump(strlen($phar->getStub()));
 
-$phar->convertToTar();
+$phar = $phar->convertToTar();
 var_dump($phar->isTar());
 var_dump($phar->getStub());
 
 $phar['a'] = 'hi there';
 
-$phar->convertToPhar();
+$phar = $phar->convertToPhar('.3.phar');
 var_dump($phar->isPhar());
 var_dump(strlen($phar->getStub()));
 
-copy($fname, $fname2);
+copy($fname3, $fname2);
 
 $phar = new Phar($fname2);
 var_dump($phar->isPhar());
@@ -37,7 +38,10 @@ var_dump(strlen($phar->getStub()));
 --CLEAN--
 <?php 
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.3.phar');
 __HALT_COMPILER();
 ?>
 --EXPECT--

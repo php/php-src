@@ -3,7 +3,7 @@ PharData::convertToZip|Tar|Phar() repeated (phardata_based archives)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
-phar.readonly=0
+phar.readonly=1
 --FILE--
 <?php
 
@@ -54,7 +54,7 @@ try {
 
 echo "================ convertToTar(GZ) ====================\n";
 
-$phar = $phar->convertToTar()->compress(Phar::GZ);
+$phar = $phar->convertToTar('.2.tar')->compress(Phar::GZ);
 var_dump($phar->isPhar());
 var_dump($phar->isTar());
 var_dump($phar->isZip());
@@ -78,16 +78,14 @@ try {
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.gz');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.gz');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar.gz');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.tar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.zip');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.1.zip');
 ?>
---EXPECTF--
+--EXPECT--
 =================== new PharData() ==================
 bool(false)
 bool(false)
@@ -107,23 +105,13 @@ bool(true)
 string(0) ""
 NULL
 ================= convertToPhar() ====================
-bool(true)
-bool(false)
-bool(false)
-int(6651)
-NULL
+Cannot write out phar archive, phar is read-only
 ================ convertToTar(GZ) ====================
 bool(false)
 bool(true)
 bool(false)
-string(60) "<?php // tar-based phar archive stub file
-__HALT_COMPILER();"
+string(0) ""
 NULL
 ================= convertToPhar() ====================
-bool(true)
-bool(false)
-bool(false)
-int(6651)
-NULL
+Cannot write out phar archive, phar is read-only
 ===DONE===
-

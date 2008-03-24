@@ -1827,7 +1827,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		*error = NULL;
 	}
 
-	if (PHAR_G(readonly)) {
+	if (PHAR_G(readonly) && !phar->is_data) {
 		return EOF;
 	}
 
