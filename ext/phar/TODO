@@ -67,7 +67,7 @@ Version 2.0.0
    access, or a string representing a file within the archive to access. If
    unknown, the callback should return the original request uri [Greg]
  * rework filename detection so that alias is always checked first
- * make aliases containing '/' or '\' invalid
+ X make aliases containing '/' or '\' invalid [Greg]
  X implement manual mounting of external phar archives to locations inside a
    phar path, $phar->mount('/path/to/external.phar', 'internal/path');
    this would traverse external.phar's manifest, and add each entry as a

@@ -2177,13 +2177,13 @@ PHP_METHOD(Phar, setAlias)
 	if (PHAR_G(readonly)) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"Cannot write out phar archive, phar is read-only");
-		return;
+		RETURN_FALSE;
 	}
 
 	if (phar_obj->arc.archive->is_data) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"A Phar alias cannot be set in a plain %s archive", phar_obj->arc.archive->is_tar ? "tar" : "zip");
-		return;
+		RETURN_FALSE;
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &alias, &alias_len) == SUCCESS) {
@@ -2194,6 +2194,11 @@ PHP_METHOD(Phar, setAlias)
 			spprintf(&error, 0, "alias \"%s\" is already used for archive \"%s\" and cannot be used for other archives", alias, (*fd_ptr)->fname);
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 			efree(error);
+			RETURN_FALSE;
+		}
+		if (!phar_validate_alias(alias, alias_len)) {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+				"Invalid alias \"%s\" specified for phar \"%s\"", alias, phar_obj->arc.archive->fname);
 			RETURN_FALSE;
 		}
 		if (phar_obj->arc.archive->alias_len && SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), phar_obj->arc.archive->alias, phar_obj->arc.archive->alias_len, (void**)&fd_ptr)) {
@@ -2222,7 +2227,7 @@ PHP_METHOD(Phar, setAlias)
 				zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), oldalias, oldalias_len, (void*)&(phar_obj->arc.archive), sizeof(phar_archive_data*), NULL);
 			}
 			efree(error);
-			return;
+			RETURN_FALSE;
 		}
 		zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&(phar_obj->arc.archive), sizeof(phar_archive_data*), NULL);
 		if (oldalias) {
