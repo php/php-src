@@ -1386,8 +1386,15 @@ int phar_detect_phar_fname_ext(const char *filename, int check_length, const cha
 	*ext_str = NULL;
 	for (i = 0; i < sizeof(ext_info) / sizeof(ext_info[0]); ++i) {
 		pos = strstr(filename, ext_info[i].ext);
-		/* Marcus, I don't understand the next line, can you add explanatory comments? XXOO Greg */
-		if (pos && (!ext_info[i].check || pos[ext_info[i].len] != '\0') && (!*ext_str || pos <= *ext_str)) {
+		/* If pos is not NULL then we found the extension. But we have to check
+		 * to more things. First some extensions cannot be the end of the string
+		 * (e.g. .php). Second when we already found an extension at an earlier
+		 * position, we ignore the new one. In case we found one at the same
+		 * place, we probably found a longer one. As the list is ordered that
+		 * way we do not need to check for a greater length.
+		 */
+		if (pos && (/*1*/ !ext_info[i].check || pos[ext_info[i].len] != '\0')
+		        && (/*2*/ !*ext_str || pos <= *ext_str)) {
 			*ext_str = pos;
 			*ext_len = ext_info[i].len;
 		}
