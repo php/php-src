@@ -16,7 +16,7 @@ $fname3 = dirname(__FILE__) . '/tar_makegz_b.phar.tar.gz';
 $phar = new Phar($fname);
 $phar['test'] = 'hi';
 var_dump($phar->isTar());
-$phar->compressAllFilesGZ();
+$phar = $phar->compress(Phar::GZ);
 
 copy($fname2, $fname3);
 
@@ -28,6 +28,7 @@ var_dump($phar2->isCompressed() == Phar::GZ);
 ===DONE===
 --CLEAN--
 <?php
+@unlink(dirname(__FILE__) . '/tar_makegz.phar.tar');
 @unlink(dirname(__FILE__) . '/tar_makegz.phar.tar.gz');
 @unlink(dirname(__FILE__) . '/tar_makegz_b.phar.tar.gz');
 ?>

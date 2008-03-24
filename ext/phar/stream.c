@@ -109,7 +109,12 @@ php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, 
 			return resource;
 		}
 		if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
-			if (PHAR_G(readonly)) {
+			phar_archive_data **pphar = NULL;
+
+			if (PHAR_GLOBALS->request_init && PHAR_GLOBALS->phar_fname_map.arBuckets && FAILURE == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **)&pphar)) {
+				pphar = NULL;
+			}
+			if (PHAR_G(readonly) && (!pphar || !(*pphar)->is_data)) {
 				if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
 					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by INI setting");
 				}
@@ -670,6 +675,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	php_url *resource;
 	char *internal_file, *error, *plain_map;
 	phar_entry_data *idata;
+	phar_archive_data **pphar;
 	uint host_len;
 	int retval;
 
@@ -703,7 +709,10 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 		return retval;
 	}
 
-	if (PHAR_G(readonly)) {
+	if (FAILURE == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), resource->host, strlen(resource->host), (void **) &pphar)) {
+		pphar = NULL;
+	}
+	if (PHAR_G(readonly) && (!pphar || !(*pphar)->is_data)) {
 		php_url_free(resource);
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by INI setting");
 		return 0;
@@ -753,15 +762,11 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 {
 	php_url *resource_from, *resource_to;
 	char *error, *plain_map;
-	phar_archive_data *phar;
+	phar_archive_data *phar, *pfrom, *pto;
 	phar_entry_info *entry;
 	uint host_len;
 
 	error = NULL;
-	if (PHAR_G(readonly)) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by INI setting");
-		return 0;
-	}
 
 	if ((resource_from = phar_open_url(wrapper, url_from, "r+b", options TSRMLS_CC)) == NULL) {
 		return 0;
@@ -769,6 +774,17 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 	
 	if ((resource_to = phar_open_url(wrapper, url_to, "wb", options TSRMLS_CC)) == NULL) {
 		php_url_free(resource_from);
+		return 0;
+	}
+
+	if (SUCCESS != phar_get_archive(&pfrom, resource_from->host, strlen(resource_from->host), NULL, 0, &error TSRMLS_CC)) {
+		pfrom = NULL;
+	}
+	if (SUCCESS != phar_get_archive(&pto, resource_to->host, strlen(resource_to->host), NULL, 0, &error TSRMLS_CC)) {
+		pto = NULL;
+	}
+	if (PHAR_G(readonly) && ((!pfrom || !pfrom->is_data) || (!pto || !pto->is_data))) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by INI setting");
 		return 0;
 	}
 

@@ -12,7 +12,7 @@ phar.readonly=0
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar.gz';
-$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
+$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.tar';
 $stub = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
 $file = $stub;
 
@@ -28,7 +28,7 @@ var_dump($phar->isTar());
 var_dump($phar->isCompressed());
 var_dump($phar->getStub());
 
-$phar->convertToTar(Phar::GZ);
+$phar = $phar->convertToTar()->compress(Phar::GZ);
 var_dump($phar->isTar());
 var_dump($phar->isCompressed());
 var_dump($phar->getStub());
@@ -46,6 +46,8 @@ var_dump($phar->getStub());
 <?php 
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.gz');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.tar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 ?>
 --EXPECT--
 bool(false)

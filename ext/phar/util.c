@@ -420,13 +420,13 @@ int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char 
 	if (error) {
 		*error = NULL;
 	}
-	if (for_write && PHAR_G(readonly)) {
+	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, error TSRMLS_CC)) {
+		return FAILURE;
+	}
+	if (for_write && PHAR_G(readonly) && !phar->is_data) {
 		if (error) {
 			spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be opened for writing, disabled by ini setting", path, fname);
 		}
-		return FAILURE;
-	}
-	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, error TSRMLS_CC)) {
 		return FAILURE;
 	}
 	if (!path_len) {
@@ -436,15 +436,15 @@ int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char 
 		return FAILURE;
 	}
 	if (allow_dir) {
-		if ((entry = phar_get_entry_info_dir(phar, path, path_len, 2, for_create && !PHAR_G(readonly) ? NULL : error TSRMLS_CC)) == NULL) {
-			if (for_create && !PHAR_G(readonly)) {
+		if ((entry = phar_get_entry_info_dir(phar, path, path_len, 2, for_create && !PHAR_G(readonly) && !phar->is_data ? NULL : error TSRMLS_CC)) == NULL) {
+			if (for_create && (!PHAR_G(readonly) || phar->is_data)) {
 				return SUCCESS;
 			}
 			return FAILURE;
 		}
 	} else {
-		if ((entry = phar_get_entry_info(phar, path, path_len, for_create && !PHAR_G(readonly) ? NULL : error TSRMLS_CC)) == NULL) {
-			if (for_create && !PHAR_G(readonly)) {
+		if ((entry = phar_get_entry_info(phar, path, path_len, for_create && !PHAR_G(readonly) && !phar->is_data ? NULL : error TSRMLS_CC)) == NULL) {
+			if (for_create && (!PHAR_G(readonly) || phar->is_data)) {
 				return SUCCESS;
 			}
 			return FAILURE;

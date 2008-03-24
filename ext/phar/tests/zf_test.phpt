@@ -10,12 +10,11 @@ phar.readonly=0
 $file = "zfapp";
 $orig_file = dirname(__FILE__) . "/files/$file.tgz";
 $tgz_file = dirname(__FILE__) . "/$file.tgz";
-$phar_file = dirname(__FILE__) . "/$file.phar";
+$phar_file = dirname(__FILE__) . "/$file.phar.tar.gz";
 copy($orig_file, $tgz_file);
 
 $phar = new PharData($tgz_file);
-$phar->convertToPhar();
-$phar->stopBuffering();
+$phar = $phar->convertToExecutable();
 
 $phar = new Phar($phar_file);
 $phar->startBuffering();
@@ -39,10 +38,11 @@ foreach(new RecursiveIteratorIterator($phar) as $path) {
 unlink(dirname(__FILE__) . '/zfapp.phar');
 ?>
 --EXPECTF--
-phar://%szfapp.phar/application/default/controllers/ErrorController.php
-phar://%szfapp.phar/application/default/controllers/IndexController.php
-phar://%szfapp.phar/application/default/views/scripts/error/error.phtml
-phar://%szfapp.phar/application/default/views/scripts/index/index.phtml
-phar://%szfapp.phar/html/.htaccess
-phar://%szfapp.phar/html/index.php
+phar://%szfapp.phar.tar.gz/.phar/stub.php
+phar://%szfapp.phar.tar.gz/application/default/controllers/ErrorController.php
+phar://%szfapp.phar.tar.gz/application/default/controllers/IndexController.php
+phar://%szfapp.phar.tar.gz/application/default/views/scripts/error/error.phtml
+phar://%szfapp.phar.tar.gz/application/default/views/scripts/index/index.phtml
+phar://%szfapp.phar.tar.gz/html/.htaccess
+phar://%szfapp.phar.tar.gz/html/index.php
 ===DONE===

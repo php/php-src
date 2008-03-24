@@ -418,13 +418,23 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char 
 int phar_wrapper_mkdir(php_stream_wrapper *wrapper, char *url_from, int mode, int options, php_stream_context *context TSRMLS_DC) /* {{{ */
 {
 	phar_entry_info entry, *e;
-	phar_archive_data *phar;
-	char *error;
+	phar_archive_data *phar = NULL;
+	char *error, *arch, *entry2;
+	int arch_len, entry_len;
 	char *plain_map;
 	php_url *resource = NULL;
 	uint host_len;
 
-	if (PHAR_G(readonly)) {
+	/* pre-readonly check, we need to know if this is a data phar */
+	if (FAILURE == phar_split_fname(url_from, strlen(url_from), &arch, &arch_len, &entry2, &entry_len TSRMLS_CC)) {
+		return FAILURE;
+	}
+	if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {
+		phar = NULL;
+	}
+	efree(arch);
+	efree(entry2);
+	if (PHAR_G(readonly) && (!phar || !phar->is_data)) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\", write operations disabled", url_from);
 		return FAILURE;
 	}
@@ -519,13 +529,23 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, char *url_from, int mode, in
 int phar_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC) /* {{{ */
 {
 	phar_entry_info *entry;
-	phar_archive_data *phar;
-	char *error;
+	phar_archive_data *phar = NULL;
+	char *error, *arch, *entry2;
+	int arch_len, entry_len;
 	char *plain_map;
 	php_url *resource = NULL;
 	uint host_len;
 
-	if (PHAR_G(readonly)) {
+	/* pre-readonly check, we need to know if this is a data phar */
+	if (FAILURE == phar_split_fname(url, strlen(url), &arch, &arch_len, &entry2, &entry_len TSRMLS_CC)) {
+		return FAILURE;
+	}
+	if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {
+		phar = NULL;
+	}
+	efree(arch);
+	efree(entry2);
+	if (PHAR_G(readonly) && (!phar || !phar->is_data)) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rmdir directory \"%s\", write operations disabled", url);
 		return FAILURE;
 	}

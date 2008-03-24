@@ -32,7 +32,7 @@ var_dump($phar->getAlias());
 
 echo "================= convertToTar() =====================\n";
 
-$phar->convertToTar();
+$phar = $phar->convertToTar();
 var_dump($phar->isPhar());
 var_dump($phar->isTar());
 var_dump($phar->isZip());
@@ -41,7 +41,7 @@ var_dump($phar->getAlias());
 
 echo "================= convertToZip() =====================\n";
 
-$phar->convertToZip();
+$phar = $phar->convertToZip();
 var_dump($phar->isPhar());
 var_dump($phar->isTar());
 var_dump($phar->isZip());
@@ -50,7 +50,7 @@ var_dump($phar->getAlias());
 
 echo "================= convertToPhar() ====================\n";
 
-$phar->convertToPhar();
+$phar = $phar->convertToPhar('.2.phar');
 var_dump($phar->isPhar());
 var_dump($phar->isTar());
 var_dump($phar->isZip());
@@ -59,7 +59,7 @@ var_dump($phar->getAlias());
 
 echo "================= convertToZip() =====================\n";
 
-$phar->convertToZip();
+$phar = $phar->convertToZip('.2.phar.zip');
 var_dump($phar->isPhar());
 var_dump($phar->isTar());
 var_dump($phar->isZip());
@@ -68,7 +68,7 @@ var_dump($phar->getAlias());
 
 echo "================= convertToTar() =====================\n";
 
-$phar->convertToTar();
+$phar = $phar->convertToTar('2.phar.tar');
 var_dump($phar->isPhar());
 var_dump($phar->isTar());
 var_dump($phar->isZip());
@@ -77,7 +77,7 @@ var_dump($phar->getAlias());
 
 echo "================= convertToZip() =====================\n";
 
-$phar->convertToZip();
+$phar = $phar->convertToZip('3.phar.zip');
 var_dump($phar->isPhar());
 var_dump($phar->isTar());
 var_dump($phar->isZip());
@@ -89,6 +89,14 @@ var_dump($phar->getAlias());
 --CLEAN--
 <?php 
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.zip');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.tar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.3.phar.zip');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.3.phar.tar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.3.phar');
 ?>
 --EXPECTF--
 =================== new Phar() =======================
@@ -110,32 +118,32 @@ bool(false)
 bool(true)
 string(60) "<?php // zip-based phar archive stub file
 __HALT_COMPILER();"
-string(%d) "%sphar_convert_repeated.phar.zip"
+NULL
 ================= convertToPhar() ====================
 bool(true)
 bool(false)
 bool(false)
 int(6651)
-string(%d) "%sphar_convert_repeated.phar"
+NULL
 ================= convertToZip() =====================
 bool(false)
 bool(false)
 bool(true)
 string(60) "<?php // zip-based phar archive stub file
 __HALT_COMPILER();"
-string(%d) "%sphar_convert_repeated.phar.zip"
+NULL
 ================= convertToTar() =====================
 bool(false)
 bool(true)
 bool(false)
 string(60) "<?php // tar-based phar archive stub file
 __HALT_COMPILER();"
-string(%d) "%sphar_convert_repeated.phar.tar"
+NULL
 ================= convertToZip() =====================
 bool(false)
 bool(false)
 bool(true)
 string(60) "<?php // zip-based phar archive stub file
 __HALT_COMPILER();"
-string(%d) "%sphar_convert_repeated.phar.zip"
+NULL
 ===DONE===

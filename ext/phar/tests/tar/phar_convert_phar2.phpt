@@ -17,13 +17,13 @@ $phar->stopBuffering();
 var_dump($phar->isTar());
 var_dump(strlen($phar->getStub()));
 
-$phar->convertToTar();
+$phar = $phar->convertToTar();
 var_dump($phar->isTar());
 var_dump($phar->getStub());
 
 $phar['a'] = 'hi there';
 
-$phar->convertToPhar(Phar::GZ);
+$phar = $phar->compress(Phar::GZ)->convertToPhar();
 var_dump($phar->isPhar());
 var_dump($phar->isCompressed());
 var_dump(strlen($phar->getStub()));
@@ -39,7 +39,10 @@ var_dump(strlen($phar->getStub()));
 ===DONE===
 --CLEAN--
 <?php 
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.gz');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.gz');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar');
 __HALT_COMPILER();
 ?>
