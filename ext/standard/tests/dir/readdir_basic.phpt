@@ -23,13 +23,23 @@ create_files($path, 3);
 
 echo "\n-- Call readdir() with \$path argument --\n";
 var_dump($dh = opendir($path));
+$a = array();
 while( FALSE !== ($file = readdir($dh)) ) {
+	$a[] = $file;
+}
+sort($a);
+foreach($a as $file) {
 	var_dump($file);
 }
 
 echo "\n-- Call readdir() without \$path argument --\n";
 var_dump($dh = opendir($path));
+$a = array();
 while( FALSE !== ( $file = readdir() ) ) {
+	$a[] = $file;
+}
+sort($a);
+foreach($a as $file) {
 	var_dump($file);
 }
 

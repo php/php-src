@@ -31,12 +31,22 @@ $dir_handle1 = opendir($dir_path);
 opendir($dir_path);
 
 echo "\n-- Reading Directory Contents with Previous Handle --\n";
+$a = array();
 while (FALSE !== ($file = readdir($dir_handle1))) {
+	$a[] = $file;
+}
+sort($a);
+foreach ($a as $file) {
 	var_dump($file);
 }
 
 echo "\n-- Reading Directory Contents with Current Handle (no arguments supplied) --\n";
+$a = array();
 while (FALSE !== ($file = readdir())) {
+	$a[] = $file;
+}
+sort($a);
+foreach ($a as $file) {
 	var_dump($file);
 }
 
