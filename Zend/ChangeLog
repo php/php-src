@@ -1,3 +1,17 @@
+2008-03-23  Marcus Boerger  <php@marcus-boerger.de>
+
+    * tests/multibyte/.cvsignore
+      tests/multibyte/.cvsignore
+      tests/multibyte/.cvsignore:
+        1.1.4;
+      - Add .cvsignore
+
+    * (PHP_5_2)
+      tests/multibyte/multibyte_encoding_001.phpt
+      tests/multibyte/multibyte_encoding_001.phpt:
+      file multibyte_encoding_001.phpt was added on branch PHP_5_2 on 2008-03-23
+      13:39:27 +0000
+
 2008-03-22  Felipe Pena  <felipensp@gmail.com>
 
     * zend_compile.c

@@ -1,3 +1,38 @@
+2008-03-23  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      - Extend that regexp (again)
+      - Revert the changes affecting external template.rc files
+
+2008-03-23  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ZendEngine2/tests/multibyte/.cvsignore
+      ZendEngine2/tests/multibyte/.cvsignore
+      ZendEngine2/tests/multibyte/.cvsignore:
+        1.1.4;
+      - Add .cvsignore
+
+2008-03-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      
+      MFB: removed unused var
+
+    * (PHP_5_3)
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      Removed unused variable
+
+2008-03-23  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/multibyte/multibyte_encoding_001.phpt
+      ZendEngine2/tests/multibyte/multibyte_encoding_001.phpt:
+      file multibyte_encoding_001.phpt was added on branch PHP_5_2 on 2008-03-23
+      13:39:27 +0000
+
 2008-03-22  Steph Fox  <steph.fox@virgin.net>
 
     * (PHP_5_3)
