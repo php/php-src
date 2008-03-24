@@ -1386,6 +1386,7 @@ int phar_detect_phar_fname_ext(const char *filename, int check_length, const cha
 	*ext_str = NULL;
 	for (i = 0; i < sizeof(ext_info) / sizeof(ext_info[0]); ++i) {
 		pos = strstr(filename, ext_info[i].ext);
+		/* Marcus, I don't understand the next line, can you add explanatory comments? XXOO Greg */
 		if (pos && (!ext_info[i].check || pos[ext_info[i].len] != '\0') && (!*ext_str || pos <= *ext_str)) {
 			*ext_str = pos;
 			*ext_len = ext_info[i].len;
