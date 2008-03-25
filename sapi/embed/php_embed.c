@@ -25,13 +25,13 @@
 #include <fcntl.h>
 #endif
 
-#define HARDCODED_INI			\
-	"html_errors=0\n"			\
-	"register_argc_argv=1\n"	\
-	"implicit_flush=1\n"		\
-	"output_buffering=0\n"		\
-	"max_execution_time=0\n"	\
-	"max_input_time=-1\n"
+const char HARDCODED_INI[] =
+	"html_errors=0\n"
+	"register_argc_argv=1\n"
+	"implicit_flush=1\n"
+	"output_buffering=0\n"
+	"max_execution_time=0\n"
+	"max_input_time=-1\n\0";
 
 static char* php_embed_read_cookies(TSRMLS_D)
 {
@@ -158,7 +158,6 @@ int php_embed_init(int argc, char **argv PTSRMLS_DC)
 #ifdef ZTS
 	void ***tsrm_ls = NULL;
 #endif
-	int ini_entries_len = 0;
 
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
@@ -171,6 +170,14 @@ int php_embed_init(int argc, char **argv PTSRMLS_DC)
 #endif
 #endif
 
+#ifdef ZTS
+  tsrm_startup(1, 1, 0, NULL);
+  tsrm_ls = ts_resource(0);
+  *ptsrm_ls = tsrm_ls;
+#endif
+
+  sapi_startup(&php_embed_module);
+
 #ifdef PHP_WIN32
   _fmode = _O_BINARY;			/*sets default for file streams to binary */
   setmode(_fileno(stdin), O_BINARY);		/* make the stdio mode be binary */
@@ -178,20 +185,10 @@ int php_embed_init(int argc, char **argv PTSRMLS_DC)
   setmode(_fileno(stderr), O_BINARY);		/* make the stdio mode be binary */
 #endif
 
-#ifdef ZTS
-  tsrm_startup(1, 1, 0, NULL);
-  tsrm_ls = ts_resource(0);
-  *ptsrm_ls = tsrm_ls;
-#endif
+  php_embed_module.ini_entries = malloc(sizeof(HARDCODED_INI));
+  memcpy(php_embed_module.ini_entries, HARDCODED_INI, sizeof(HARDCODED_INI));
 
   php_embed_module.additional_functions = additional_functions;
-
-  ini_entries_len = strlen(HARDCODED_INI);
-  php_embed_module.ini_entries = malloc(ini_entries_len+2);
-  memcpy(php_embed_module.ini_entries, HARDCODED_INI, ini_entries_len+1);
-  php_embed_module.ini_entries[ini_entries_len+1] = 0;
-
-  sapi_startup(&php_embed_module);
 
   if (argv) {
 	php_embed_module.executable_location = argv[0];
