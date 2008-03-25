@@ -40,7 +40,7 @@ var_dump($r);
 
 echo "Test 3\n";
 
-$s = oci_parse($c, "select cclass_name from v\$cpool_cc_stats where cclass_name like '%.cc__$t'");
+$s = oci_parse($c, "select cclass_name from v\$cpool_cc_stats where cclass_name like '%.cc__$t' order by cclass_name");
 oci_execute($s);
 oci_fetch_all($s, $r);
 var_dump($r);
