@@ -1,3 +1,67 @@
+2008-03-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/dir/rewinddir_basic.phpt:
+      
+      MFB: Fixed test on systems where . and .. order not guaranteed
+
+    * (PHP_5_3)
+      ext/standard/tests/dir/rewinddir_basic.phpt:
+      Fixed test on systems where . and .. order not guaranteed
+
+2008-03-24  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      main/streams/streams.c
+      main/streams/streams.c:
+      MFH: disabled mmap() when copying files to memory
+
+    * main/streams/streams.c:
+      Change streams to not use mmap() when reading files (aka copying to
+      memory).
+      
+      There are two problems with mmap() in this case:
+      1) there is no performance gain since we allocate the memory anyways;
+      2) memcpy() may crash if somebody truncates this file at the same moment
+      (see http://dev.daylessday.org/diff/mmap.phps for example);
+      
+      It seems to work fine with fpassthru(), though why it is so should be
+      investigated.
+      
+      Thanks to Andrey Vasilishin for the report and Anight for pressing this
+      through =)
+
+2008-03-24  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      Another thing version_compare() allows...
+
+2008-03-24  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h:
+      - Updated to version 2008.2 (2008b)
+
+2008-03-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/006.phpt
+      ext/standard/tests/strings/007.phpt:
+      Fixed tests
+
+    * main/fopen_wrappers.c
+      main/fopen_wrappers.c:
+      Fixed ws and comment
+
+    * ext/standard/tests/dir/readdir_basic.phpt
+      ext/standard/tests/dir/readdir_basic.phpt
+      ext/standard/tests/dir/readdir_basic.phpt
+      ext/standard/tests/dir/readdir_variation6.phpt
+      ext/standard/tests/dir/readdir_variation6.phpt
+      ext/standard/tests/dir/readdir_variation6.phpt:
+      Fixed tests (file order is undefined, so we need to sort() them)
+
 2008-03-23  Steph Fox  <steph.fox@virgin.net>
 
     * (PHP_5_3)
