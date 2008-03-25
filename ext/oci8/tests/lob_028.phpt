@@ -70,15 +70,15 @@ object(OCI-Lob)#%d (1) {
   resource(%d) of type (oci8 descriptor)
 }
 
-Warning: oci_new_descriptor(): Unknown descriptor type %d. in %s on line %d
+Warning: oci_new_descriptor(): Unknown descriptor type %d in %s on line %d
 NULL
 
-Warning: oci_new_descriptor(): Unknown descriptor type %d. in %s on line %d
+Warning: oci_new_descriptor(): Unknown descriptor type %d in %s on line %d
 NULL
 
-Warning: oci_new_descriptor(): Unknown descriptor type %d. in %s on line %d
+Warning: oci_new_descriptor(): Unknown descriptor type %d in %s on line %d
 NULL
 
-Warning: oci_new_descriptor(): Unknown descriptor type %d. in %s on line %d
+Warning: oci_new_descriptor(): Unknown descriptor type %d in %s on line %d
 NULL
 Done
