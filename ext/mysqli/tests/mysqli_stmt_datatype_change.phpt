@@ -1,5 +1,5 @@
 --TEST--
-mysqli_stmt_bind_param() - playing with references
+Playing with datatype change between prepare and execute
 --SKIPIF--
 <?php
 require_once('skipif.inc');
@@ -28,7 +28,6 @@ require_once('skipifconnectfailure.inc');
 	$c1->query("create table type_change(a int, b char(10))");
 	$c1->query("insert into type_change values (1, 'one'), (2, 'two')"); 
 	$s1 = $c1->prepare("select a from type_change order by a");
-	var_dump($s1);
 	var_dump($s1->execute(), $s1->bind_result($col1));
 	echo "---- Row 1\n";
 	var_dump($s1->fetch());
@@ -58,26 +57,6 @@ require_once('skipifconnectfailure.inc');
 	echo "done!";
 ?>
 --EXPECTF--
-object(mysqli_stmt)#%d (%d) {
-  ["affected_rows"]=>
-  int(0)
-  ["insert_id"]=>
-  int(0)
-  ["num_rows"]=>
-  int(0)
-  ["param_count"]=>
-  int(0)
-  ["field_count"]=>
-  int(1)
-  ["errno"]=>
-  int(0)
-  ["error"]=>
-  string(0) ""
-  ["sqlstate"]=>
-  string(5) "00000"
-  ["id"]=>
-  int(1)
-}
 bool(true)
 bool(true)
 ---- Row 1
@@ -104,26 +83,6 @@ bool(false)
 ----
 done!
 --UEXPECTF--
-object(mysqli_stmt)#%d (%d) {
-  [u"affected_rows"]=>
-  int(0)
-  [u"insert_id"]=>
-  int(0)
-  [u"num_rows"]=>
-  int(0)
-  [u"param_count"]=>
-  int(0)
-  [u"field_count"]=>
-  int(1)
-  [u"errno"]=>
-  int(0)
-  [u"error"]=>
-  unicode(0) ""
-  [u"sqlstate"]=>
-  unicode(5) "00000"
-  [u"id"]=>
-  int(1)
-}
 bool(true)
 bool(true)
 ---- Row 1
