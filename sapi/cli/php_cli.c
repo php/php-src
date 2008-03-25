@@ -111,13 +111,13 @@ PHPAPI extern char *php_ini_scanned_files;
 #define PHP_MODE_REFLECTION_EXT_INFO    11
 #define PHP_MODE_SHOW_INI_CONFIG        12
 
-#define HARDCODED_INI			\
-	"html_errors=0\n"			\
-	"register_argc_argv=1\n"	\
-	"implicit_flush=1\n"		\
-	"output_buffering=0\n"		\
-	"max_execution_time=0\n"	\
-	"max_input_time=-1\n"
+const char HARDCODED_INI[] =
+	"html_errors=0\n"
+	"register_argc_argv=1\n"
+	"implicit_flush=1\n"
+	"output_buffering=0\n"
+	"max_execution_time=0\n"
+	"max_input_time=-1\n\0";
 
 static char *php_optarg = NULL;
 static int php_optind = 1;
@@ -659,10 +659,9 @@ int main(int argc, char *argv[])
 	setmode(_fileno(stderr), O_BINARY);		/* make the stdio mode be binary */
 #endif
 
-	ini_entries_len = strlen(HARDCODED_INI);
-	cli_sapi_module.ini_entries = malloc(ini_entries_len+2);
-	memcpy(cli_sapi_module.ini_entries, HARDCODED_INI, ini_entries_len+1);
-	cli_sapi_module.ini_entries[ini_entries_len+1] = 0;
+	ini_entries_len = sizeof(HARDCODED_INI)-2;
+	cli_sapi_module.ini_entries = malloc(sizeof(HARDCODED_INI));
+	memcpy(cli_sapi_module.ini_entries, HARDCODED_INI, sizeof(HARDCODED_INI));
 
 	while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2))!=-1) {
 		switch (c) {
