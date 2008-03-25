@@ -1637,10 +1637,8 @@ PHP_FUNCTION(oci_error)
 	sb4 errcode = 0;
 	sword error = OCI_SUCCESS;
 	dvoid *errh = NULL;
-#ifdef HAVE_OCI8_ATTR_STATEMENT
 	ub2 error_offset = 0;
 	zstr sqltext = NULL_ZSTR;
-#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &arg) == FAILURE) {
 		return;
@@ -1653,11 +1651,9 @@ PHP_FUNCTION(oci_error)
 			errh = statement->err;
 			error = statement->errcode;
 
-#ifdef HAVE_OCI8_ATTR_STATEMENT
 			if (php_oci_fetch_sqltext_offset(statement, &sqltext, &error_offset TSRMLS_CC)) {
 				RETURN_FALSE;
 			}
-#endif
 			goto go_out;
 		}
 
@@ -1695,14 +1691,12 @@ go_out:
 		array_init(return_value);
 		add_ascii_assoc_long(return_value, "code", errcode);
 		add_ascii_assoc_text(return_value, "message", ZSTR((char *)errbuf), 0);
-#ifdef HAVE_OCI8_ATTR_STATEMENT
 		add_ascii_assoc_long(return_value, "offset", error_offset);
 		if (sqltext.v) {
 			add_ascii_assoc_text(return_value, "sqltext", sqltext, 1);
 		} else {
 			add_ascii_assoc_ascii_string(return_value, "sqltext", "", 1);
 		}
-#endif
 	} else {
 		RETURN_FALSE;
 	}
