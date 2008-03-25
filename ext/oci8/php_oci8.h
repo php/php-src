@@ -35,6 +35,12 @@
 # include "TSRM.h"
 #endif
 
+
+/* 
+ * The version of the OCI8 extension.
+ */
+#define PHP_OCI8_VERSION "1.3.1 Beta"
+
 extern zend_module_entry oci8_module_entry;
 #define phpext_oci8_ptr &oci8_module_entry
 

@@ -715,7 +715,7 @@ PHP_MINFO_FUNCTION(oci)
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "OCI8 Support", "enabled");
-	php_info_print_table_row(2, "Version", "1.3.1 Beta");
+	php_info_print_table_row(2, "Version", PHP_OCI8_VERSION);
 	php_info_print_table_row(2, "Revision", "$Revision$");
 
 	snprintf(buf, sizeof(buf), "%ld", OCI_G(num_persistent));
@@ -724,7 +724,7 @@ PHP_MINFO_FUNCTION(oci)
 	php_info_print_table_row(2, "Active Connections", buf);
 
 #if !defined(PHP_WIN32) && !defined(HAVE_OCI_INSTANT_CLIENT)
-	php_info_print_table_row(2, "Oracle Version", PHP_OCI8_VERSION );
+	php_info_print_table_row(2, "Oracle Version", PHP_OCI8_ORACLE_VERSION );
 	php_info_print_table_row(2, "Compile-time ORACLE_HOME", PHP_OCI8_DIR );
 	php_info_print_table_row(2, "Libraries Used", PHP_OCI8_SHARED_LIBADD );
 #else
@@ -1019,7 +1019,6 @@ sb4 php_oci_fetch_errmsg(OCIError *error_handle, text **error_buf TSRMLS_DC)
 	return error_code;
 } /* }}} */
 
-#ifdef HAVE_OCI8_ATTR_STATEMENT
 /* {{{ php_oci_fetch_sqltext_offset()
  Compute offset in the SQL statement */
 int php_oci_fetch_sqltext_offset(php_oci_statement *statement, text **sqltext, ub2 *error_offset TSRMLS_DC)
@@ -1044,7 +1043,6 @@ int php_oci_fetch_sqltext_offset(php_oci_statement *statement, text **sqltext, u
 	}
 	return 0;
 } /* }}} */
-#endif
 
 /* {{{ php_oci_do_connect()
  Connect wrapper */

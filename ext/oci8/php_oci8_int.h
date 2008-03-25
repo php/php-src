@@ -349,9 +349,7 @@ int php_oci_descriptor_delete_from_hash(void *data, void *id TSRMLS_DC);
 
 sb4 php_oci_error (OCIError *, sword TSRMLS_DC);
 sb4 php_oci_fetch_errmsg(OCIError *, text ** TSRMLS_DC);
-#ifdef HAVE_OCI8_ATTR_STATEMENT
 int php_oci_fetch_sqltext_offset(php_oci_statement *, text **, ub2 * TSRMLS_DC);
-#endif
 
 void php_oci_do_connect (INTERNAL_FUNCTION_PARAMETERS, int , int);
 php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, char *dbname, int dbname_len, char *charset, long session_mode, int persistent, int exclusive TSRMLS_DC);
