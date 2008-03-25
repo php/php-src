@@ -19,6 +19,7 @@ $a1 = array();
 $a2 = array( 'key1' => &$a1 );
 $a1 = array_merge_recursive( $a1, $a2 );
 $a1 = array_merge_recursive( $a1, $a2 );
+$a1['key1'] = null;
 unset( $a1, $a2 );
 
 $x = 'foo';
