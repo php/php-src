@@ -151,7 +151,7 @@ PHP                                                                        NEWS
   (Nuno, Scott)
 - Fixed bug #43960 (strtotime() returns timestamp in the future when given a
   bogus string).
-- Fixed bug #43832 (mysqi_get_charset() doesn't expose charset comment).
+- Fixed bug #43832 (mysqli_get_charset() doesn't expose charset comment).
   (Andrey)
 - Fixed bug #43808 (date_create never fails (even when it should)). (Derick)
 - Fixed bug #43527 (DateTime created from a timestamp reports environment
