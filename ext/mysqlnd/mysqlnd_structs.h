@@ -124,13 +124,14 @@ typedef struct st_mysqlnd_infile_info
 /* character set information */
 typedef struct st_mysqlnd_charset
 {
-	uint	nr;
-	char	*name;
-	char	*collation;
-	uint	char_minlen;
-	uint	char_maxlen;
-	uint 	(*mb_charlen)(uint c);
-	uint 	(*mb_valid)(const char *start, const char *end);
+	uint		nr;
+	const char	*name;
+	const char	*collation;
+	uint		char_minlen;
+	uint		char_maxlen;
+	const char	*comment;
+	uint 		(*mb_charlen)(uint c);
+	uint 		(*mb_valid)(const char *start, const char *end);
 } MYSQLND_CHARSET;
 
 

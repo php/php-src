@@ -297,9 +297,7 @@ mysqlnd_stmt_read_prepare_response(MYSQLND_STMT *stmt TSRMLS_DC)
 
 	stmt->stmt_id = prepare_resp.stmt_id;
 	stmt->warning_count = stmt->conn->upsert_status.warning_count = prepare_resp.warning_count;
-	stmt->upsert_status.affected_rows = 0;
-	stmt->field_count =  prepare_resp.field_count;
-	stmt->conn->field_count = 0;
+	stmt->field_count = stmt->conn->field_count = prepare_resp.field_count;
 	stmt->param_count = prepare_resp.param_count;
 	PACKET_FREE_ALLOCA(prepare_resp);
 
