@@ -62,7 +62,7 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, long typ
 			/* these three are allowed */
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown descriptor type %ld.", type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown descriptor type %ld", type);
 			return NULL;
 			break;
 	}
