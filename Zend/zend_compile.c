@@ -4677,8 +4677,6 @@ ZEND_API char* zend_get_compiled_variable_name(zend_op_array *op_array, zend_uin
 
 void zend_do_build_namespace_name(znode *result, znode *prefix, znode *name TSRMLS_DC) /* {{{ */
 {
-	int len;
-
 	if (prefix) {
 		*result = *prefix;
 		if (Z_TYPE(result->u.constant) == IS_STRING &&
