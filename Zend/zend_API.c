@@ -2627,8 +2627,7 @@ ZEND_API zend_bool zend_make_callable(zval *callable, char **callable_name TSRML
 
 ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_info *fci, zend_fcall_info_cache *fcc, char **callable_name, char **error TSRMLS_DC) /* {{{ */
 {
-	int lc_len;
-	char *lcname;
+	int len;
 	zend_class_entry *ce;
 	zend_function *func;
 	zval **obj;
@@ -2647,22 +2646,23 @@ ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_i
 	fci->no_separation = 1;
 	fci->symbol_table = NULL;
 
-	lc_len = strlen(func->common.function_name);
-	lcname = zend_str_tolower_dup(func->common.function_name, lc_len);
-	if ((lc_len == sizeof(ZEND_CALL_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME) - 1)) ||
-		(lc_len == sizeof(ZEND_CALLSTATIC_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_CALLSTATIC_FUNC_NAME, sizeof(ZEND_CALLSTATIC_FUNC_NAME) - 1))
-	) {
-		fcc->initialized = 0;
-		fcc->function_handler = NULL;
-		fcc->calling_scope = NULL;
-		fcc->object_pp = NULL;
-	} else {
-		fcc->initialized = 1;
-		fcc->function_handler = func;
-		fcc->calling_scope = ce;
-		fcc->object_pp = obj;
+	if (ce) {
+		len = strlen(func->common.function_name);
+		if ((len == sizeof(ZEND_CALL_FUNC_NAME) - 1 && !zend_binary_strcasecmp(func->common.function_name, len, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME) - 1)) ||
+			(len == sizeof(ZEND_CALLSTATIC_FUNC_NAME) - 1 && !zend_binary_strcasecmp(func->common.function_name, len, ZEND_CALLSTATIC_FUNC_NAME, sizeof(ZEND_CALLSTATIC_FUNC_NAME) - 1))
+		) {
+			fcc->initialized = 0;
+			fcc->function_handler = NULL;
+			fcc->calling_scope = NULL;
+			fcc->object_pp = NULL;
+			return SUCCESS;
+		}
 	}
-	efree(lcname);
+
+	fcc->initialized = 1;
+	fcc->function_handler = func;
+	fcc->calling_scope = ce;
+	fcc->object_pp = obj;
 
 	return SUCCESS;
 }
