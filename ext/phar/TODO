@@ -78,7 +78,6 @@ Version 2.0.0
    template files in a location external to the phar.  Copy of the files
    would need to be performed in an installation step, phar would not attempt
    to do this for performance and security reasons. [Greg]
- * implement write support for mounted files even if phar.readonly=1
  X implement opendir support for mounted paths [Greg]
  X make convertToZip/convertToTar rename files [Steph]
  X make convertTo*() with full file compression rename to append .gz or .bz2
@@ -106,6 +105,7 @@ Version 2.0.0
  X clean crap paths like phar://blah.phar/file//../to\\here.php [Greg]
 
 Version 2.1.0
+ * implement write support for mounted files even if phar.readonly=1
  * implement automatic "mounting" of internal phar archives so that
    phar:///path/to/archive.phar/internal.phar/file opens internal.phar and
    maps its manifest inside archive.phar. The manifest entry inside
