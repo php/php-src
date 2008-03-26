@@ -596,6 +596,13 @@ PHP_FUNCTION(file_put_contents)
 	if (flags & PHP_FILE_APPEND) {
 		mode[0] = 'a';
 	} else if (flags & LOCK_EX) {
+		/* check to make sure we are dealing with a regular file */
+		if (php_memnstr(filename, "://", sizeof("://") - 1, filename + filename_len)) {
+			if (strncasecmp(filename, "file://", sizeof("file://") - 1)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Exclusive locks may only be set for regular files");
+				RETURN_FALSE;
+			}
+		}
 		mode[0] = 'c';
 	}
 	mode[2] = '\0';
