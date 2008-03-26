@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.7.0" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.7.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>phar</name>
  <channel>pecl.php.net</channel>
  <summary>allows running of complete applications out of .phar files (like Java .jar files)</summary>
@@ -29,37 +29,40 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
   <email>helly@php.net</email>
   <active>yes</active>
  </lead>
- <date>2008-01-19</date>
- <time>12:40:11</time>
+ <date>2008-03-25</date>
+ <time>22:54:44</time>
  <version>
-  <release>2.0.0</release>
+  <release>2.0.0a1</release>
   <api>1.1.1</api>
  </version>
  <stability>
-  <release>stable</release>
-  <api>stable</api>
+  <release>alpha</release>
+  <api>alpha</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
  <notes>
 
 Major feature functionality release
- * new default stub allows running of phar-based phars without phar extension
+ * new default stub allows running of phar-based phars without phar extension [Greg/Steph]
  * add support for tar-based and zip-based phar archives [Greg]
  * add Phar::isTar(), Phar::isZip(), and Phar::isPhar() [Greg]
  * add Phar::convertToTar(), Phar::convertToZip(), and Phar::convertToPhar() [Greg]
+ * add Phar::compress() [Greg]
+ * conversion to compressed or to other file formats automatically copies the archive
+   to a new extension (i.e. &quot;.phar&quot; to &quot;.phar.tar&quot; or &quot;.tar&quot; to &quot;.tar.gz&quot;) [Steph]
  * add Phar::webPhar() for running a web-based application unmodified
    directly from a phar archive [Greg]
  * file functions (fopen-based and stat-based) can be instructed to only look for
    relative paths within a phar via Phar::interceptFileFuncs()
- * include works unmodified within a phar [Greg]
+ * add PharData class to allow manipulation/creation of non-executable tar and zip archives. [Steph]
+   non-executable tar/zip manipulation is allowed even when phar.readonly=1 [Greg]
  * paths with . and .. work (phar://blah.phar/a/../b.php =&gt; phar://blah.phar/b.php) [Greg]
  * add support for mkdir()/rmdir() and support for empty directories to phar file format [Greg]
  * add option to compress the entire phar file for phar/tar file format [Greg]
  * implement Phar::isCompressed() returning 0, Phar::GZ or Phar::BZ2 [Greg]
  * implement Phar::copy(string $from, string $to) [Greg]
  * implement Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
- * add mapping of include/require from within a phar to location within phar [Greg]
-   solves the include_path issue without code munging
+ * implement Phar::mount() for mounting external paths or files to locations inside a phar [Greg]
  * add Phar::delete() [Greg]
 
  </notes>
@@ -75,7 +78,75 @@ Major feature functionality release
     <file name="pharcommand.inc" role="src" />
    </dir> <!-- /phar -->
    <dir name="tests">
+    <dir name="files">
+     <file name="extracted.inc" role="test" />
+     <file name="frontcontroller.phar" role="test" />
+     <file name="frontcontroller.phar.inc" role="test" />
+     <file name="frontcontroller2.phar" role="test" />
+     <file name="frontcontroller2.phar.inc" role="test" />
+     <file name="frontcontroller3.phar" role="test" />
+     <file name="frontcontroller3.phar.inc" role="test" />
+     <file name="frontcontroller4.phar" role="test" />
+     <file name="frontcontroller4.phar.inc" role="test" />
+     <file name="frontcontroller5.phar" role="test" />
+     <file name="frontcontroller5.phar.inc" role="test" />
+     <file name="frontcontroller6.phar" role="test" />
+     <file name="frontcontroller6.phar.inc" role="test" />
+     <file name="frontcontroller7.phar" role="test" />
+     <file name="frontcontroller7.phar.inc" role="test" />
+     <file name="frontcontroller8.phar" role="test" />
+     <file name="frontcontroller8.phar.inc" role="test" />
+     <file name="frontcontroller9.phar" role="test" />
+     <file name="frontcontroller9.phar.inc" role="test" />
+     <file name="frontcontroller10.phar" role="test" />
+     <file name="frontcontroller10.phar.inc" role="test" />
+     <file name="frontcontroller11.phar" role="test" />
+     <file name="frontcontroller11.phar.inc" role="test" />
+     <file name="frontcontroller12.phar" role="test" />
+     <file name="frontcontroller12.phar.inc" role="test" />
+     <file name="frontcontroller13.phar" role="test" />
+     <file name="frontcontroller13.phar.inc" role="test" />
+     <file name="frontcontroller14.phar" role="test" />
+     <file name="frontcontroller14.phar.inc" role="test" />
+     <file name="md5.phar" role="test" />
+     <file name="nophar.phar" role="test" />
+     <file name="nophar.phar.inc" role="test" />
+     <file name="phar_oo_test.inc" role="test" />
+     <file name="phar_test.inc" role="test" />
+     <file name="sha1.phar" role="test" />
+     <file name="sha256.phar" role="test" />
+     <file name="sha512.phar" role="test" />
+     <file name="zfapp.tgz" role="test" />
+    </dir> <!-- /tests/files -->
     <dir name="tar">
+     <dir name="files">
+      <file name="frontcontroller.phar.inc" role="test" />
+      <file name="frontcontroller.phar.tar" role="test" />
+      <file name="frontcontroller2.phar.inc" role="test" />
+      <file name="frontcontroller2.phar.tar" role="test" />
+      <file name="frontcontroller3.phar.inc" role="test" />
+      <file name="frontcontroller3.phar.tar" role="test" />
+      <file name="frontcontroller4.phar.inc" role="test" />
+      <file name="frontcontroller4.phar.tar" role="test" />
+      <file name="frontcontroller5.phar.inc" role="test" />
+      <file name="frontcontroller5.phar.tar" role="test" />
+      <file name="frontcontroller6.phar.inc" role="test" />
+      <file name="frontcontroller6.phar.tar" role="test" />
+      <file name="frontcontroller7.phar.inc" role="test" />
+      <file name="frontcontroller7.phar.tar" role="test" />
+      <file name="frontcontroller8.phar.inc" role="test" />
+      <file name="frontcontroller8.phar.tar" role="test" />
+      <file name="frontcontroller9.phar.inc" role="test" />
+      <file name="frontcontroller9.phar.tar" role="test" />
+      <file name="frontcontroller10.phar.inc" role="test" />
+      <file name="frontcontroller10.phar.tar" role="test" />
+      <file name="frontcontroller11.phar.inc" role="test" />
+      <file name="frontcontroller11.phar.tar" role="test" />
+      <file name="frontcontroller12.phar.inc" role="test" />
+      <file name="frontcontroller12.phar.tar" role="test" />
+      <file name="make_invalid_tar.php.inc" role="test" />
+      <file name="tarmaker.php.inc" role="test" />
+     </dir> <!-- /tests/tar/files -->
      <file name="033.phpt" role="test" />
      <file name="033a.phpt" role="test" />
      <file name="create_new_and_modify.phpt" role="test" />
@@ -85,42 +156,18 @@ Major feature functionality release
      <file name="delete_in_phar_b.phpt" role="test" />
      <file name="delete_in_phar_confirm.phpt" role="test" />
      <file name="dir.phpt" role="test" />
-     <file name="frontcontroller.phar.inc" role="test" />
-     <file name="frontcontroller.phar.tar" role="test" />
      <file name="frontcontroller1.phar.phpt" role="test" />
-     <file name="frontcontroller2.phar.inc" role="test" />
      <file name="frontcontroller2.phar.phpt" role="test" />
-     <file name="frontcontroller2.phar.tar" role="test" />
-     <file name="frontcontroller3.phar.inc" role="test" />
      <file name="frontcontroller3.phar.phpt" role="test" />
-     <file name="frontcontroller3.phar.tar" role="test" />
-     <file name="frontcontroller4.phar.inc" role="test" />
      <file name="frontcontroller4.phar.phpt" role="test" />
-     <file name="frontcontroller4.phar.tar" role="test" />
-     <file name="frontcontroller5.phar.inc" role="test" />
      <file name="frontcontroller5.phar.phpt" role="test" />
-     <file name="frontcontroller5.phar.tar" role="test" />
-     <file name="frontcontroller6.phar.inc" role="test" />
      <file name="frontcontroller6.phar.phpt" role="test" />
-     <file name="frontcontroller6.phar.tar" role="test" />
-     <file name="frontcontroller7.phar.inc" role="test" />
      <file name="frontcontroller7.phar.phpt" role="test" />
-     <file name="frontcontroller7.phar.tar" role="test" />
-     <file name="frontcontroller8.phar.inc" role="test" />
      <file name="frontcontroller8.phar.phpt" role="test" />
-     <file name="frontcontroller8.phar.tar" role="test" />
-     <file name="frontcontroller9.phar.inc" role="test" />
      <file name="frontcontroller9.phar.phpt" role="test" />
-     <file name="frontcontroller9.phar.tar" role="test" />
-     <file name="frontcontroller10.phar.inc" role="test" />
      <file name="frontcontroller10.phar.phpt" role="test" />
-     <file name="frontcontroller10.phar.tar" role="test" />
-     <file name="frontcontroller11.phar.inc" role="test" />
      <file name="frontcontroller11.phar.phpt" role="test" />
-     <file name="frontcontroller11.phar.tar" role="test" />
-     <file name="frontcontroller12.phar.inc" role="test" />
      <file name="frontcontroller12.phar.phpt" role="test" />
-     <file name="frontcontroller12.phar.tar" role="test" />
      <file name="frontcontroller13.phar.phpt" role="test" />
      <file name="frontcontroller14.phar.phpt" role="test" />
      <file name="frontcontroller15.phar.phpt" role="test" />
@@ -130,7 +177,6 @@ Major feature functionality release
      <file name="frontcontroller19.phar.phpt" role="test" />
      <file name="frontcontroller20.phar.phpt" role="test" />
      <file name="frontcontroller21.phar.phpt" role="test" />
-     <file name="make_invalid_tar.php.inc" role="test" />
      <file name="open_for_write_existing.phpt" role="test" />
      <file name="open_for_write_existing_b.phpt" role="test" />
      <file name="open_for_write_existing_c.phpt" role="test" />
@@ -152,11 +198,11 @@ Major feature functionality release
      <file name="phar_magic.phpt" role="test" />
      <file name="phar_setalias.phpt" role="test" />
      <file name="phar_setalias2.phpt" role="test" />
+     <file name="phar_setdefaultstub.phpt" role="test" />
      <file name="phar_stub_error.phpt" role="test" />
      <file name="refcount1.phpt" role="test" />
      <file name="refcount1_5_2.phpt" role="test" />
      <file name="rename.phpt" role="test" />
-     <file name="tarmaker.php.inc" role="test" />
      <file name="tar_001.phpt" role="test" />
      <file name="tar_002.phpt" role="test" />
      <file name="tar_003.phpt" role="test" />
@@ -168,6 +214,34 @@ Major feature functionality release
      <file name="tar_nostub.phpt" role="test" />
     </dir> <!-- /tests/tar -->
     <dir name="zip">
+     <dir name="files">
+      <file name="frontcontroller.phar.inc" role="test" />
+      <file name="frontcontroller.phar.zip" role="test" />
+      <file name="frontcontroller2.phar.inc" role="test" />
+      <file name="frontcontroller2.phar.zip" role="test" />
+      <file name="frontcontroller3.phar.inc" role="test" />
+      <file name="frontcontroller3.phar.zip" role="test" />
+      <file name="frontcontroller4.phar.inc" role="test" />
+      <file name="frontcontroller4.phar.zip" role="test" />
+      <file name="frontcontroller5.phar.inc" role="test" />
+      <file name="frontcontroller5.phar.zip" role="test" />
+      <file name="frontcontroller6.phar.inc" role="test" />
+      <file name="frontcontroller6.phar.zip" role="test" />
+      <file name="frontcontroller7.phar.inc" role="test" />
+      <file name="frontcontroller7.phar.zip" role="test" />
+      <file name="frontcontroller8.phar.inc" role="test" />
+      <file name="frontcontroller8.phar.zip" role="test" />
+      <file name="frontcontroller9.phar.inc" role="test" />
+      <file name="frontcontroller9.phar.zip" role="test" />
+      <file name="frontcontroller10.phar.inc" role="test" />
+      <file name="frontcontroller10.phar.zip" role="test" />
+      <file name="frontcontroller11.phar.inc" role="test" />
+      <file name="frontcontroller11.phar.zip" role="test" />
+      <file name="frontcontroller12.phar.inc" role="test" />
+      <file name="frontcontroller12.phar.zip" role="test" />
+      <file name="make_invalid_tar.php.inc" role="test" />
+      <file name="zipmaker.php.inc" role="test" />
+     </dir> <!-- /tests/zip/files -->
      <file name="033.phpt" role="test" />
      <file name="033a.phpt" role="test" />
      <file name="create_new_and_modify.phpt" role="test" />
@@ -177,42 +251,18 @@ Major feature functionality release
      <file name="delete_in_phar_b.phpt" role="test" />
      <file name="delete_in_phar_confirm.phpt" role="test" />
      <file name="dir.phpt" role="test" />
-     <file name="frontcontroller.phar.inc" role="test" />
-     <file name="frontcontroller.phar.zip" role="test" />
      <file name="frontcontroller1.phar.phpt" role="test" />
-     <file name="frontcontroller2.phar.inc" role="test" />
      <file name="frontcontroller2.phar.phpt" role="test" />
-     <file name="frontcontroller2.phar.zip" role="test" />
-     <file name="frontcontroller3.phar.inc" role="test" />
      <file name="frontcontroller3.phar.phpt" role="test" />
-     <file name="frontcontroller3.phar.zip" role="test" />
-     <file name="frontcontroller4.phar.inc" role="test" />
      <file name="frontcontroller4.phar.phpt" role="test" />
-     <file name="frontcontroller4.phar.zip" role="test" />
-     <file name="frontcontroller5.phar.inc" role="test" />
      <file name="frontcontroller5.phar.phpt" role="test" />
-     <file name="frontcontroller5.phar.zip" role="test" />
-     <file name="frontcontroller6.phar.inc" role="test" />
      <file name="frontcontroller6.phar.phpt" role="test" />
-     <file name="frontcontroller6.phar.zip" role="test" />
-     <file name="frontcontroller7.phar.inc" role="test" />
      <file name="frontcontroller7.phar.phpt" role="test" />
-     <file name="frontcontroller7.phar.zip" role="test" />
-     <file name="frontcontroller8.phar.inc" role="test" />
      <file name="frontcontroller8.phar.phpt" role="test" />
-     <file name="frontcontroller8.phar.zip" role="test" />
-     <file name="frontcontroller9.phar.inc" role="test" />
      <file name="frontcontroller9.phar.phpt" role="test" />
-     <file name="frontcontroller9.phar.zip" role="test" />
-     <file name="frontcontroller10.phar.inc" role="test" />
      <file name="frontcontroller10.phar.phpt" role="test" />
-     <file name="frontcontroller10.phar.zip" role="test" />
-     <file name="frontcontroller11.phar.inc" role="test" />
      <file name="frontcontroller11.phar.phpt" role="test" />
-     <file name="frontcontroller11.phar.zip" role="test" />
-     <file name="frontcontroller12.phar.inc" role="test" />
      <file name="frontcontroller12.phar.phpt" role="test" />
-     <file name="frontcontroller12.phar.zip" role="test" />
      <file name="frontcontroller13.phar.phpt" role="test" />
      <file name="frontcontroller14.phar.phpt" role="test" />
      <file name="frontcontroller15.phar.phpt" role="test" />
@@ -222,7 +272,6 @@ Major feature functionality release
      <file name="frontcontroller19.phar.phpt" role="test" />
      <file name="frontcontroller20.phar.phpt" role="test" />
      <file name="frontcontroller21.phar.phpt" role="test" />
-     <file name="make_invalid_tar.php.inc" role="test" />
      <file name="open_for_write_existing.phpt" role="test" />
      <file name="open_for_write_existing_b.phpt" role="test" />
      <file name="open_for_write_existing_c.phpt" role="test" />
@@ -242,12 +291,11 @@ Major feature functionality release
      <file name="phar_magic.phpt" role="test" />
      <file name="phar_setalias.phpt" role="test" />
      <file name="phar_setalias2.phpt" role="test" />
+     <file name="phar_setdefaultstub.phpt" role="test" />
      <file name="phar_stub_error.phpt" role="test" />
      <file name="refcount1.phpt" role="test" />
      <file name="refcount1_5_2.phpt" role="test" />
      <file name="rename.phpt" role="test" />
-     <file name="tarmaker.php.inc" role="test" />
-     <file name="test_works_without_zip.phpt" role="test" />
     </dir> <!-- /tests/zip -->
     <file name="001.phpt" role="test" />
     <file name="002.phpt" role="test" />
@@ -298,46 +346,19 @@ Major feature functionality release
     <file name="delete_in_phar_b.phpt" role="test" />
     <file name="delete_in_phar_confirm.phpt" role="test" />
     <file name="dir.phpt" role="test" />
-    <file name="extracted.inc" role="test" />
     <file name="extracted_001.phpt" role="test" />
-    <file name="frontcontroller.phar" role="test" />
-    <file name="frontcontroller.phar.inc" role="test" />
     <file name="frontcontroller1.phpt" role="test" />
-    <file name="frontcontroller2.phar" role="test" />
-    <file name="frontcontroller2.phar.inc" role="test" />
     <file name="frontcontroller2.phpt" role="test" />
-    <file name="frontcontroller3.phar" role="test" />
-    <file name="frontcontroller3.phar.inc" role="test" />
     <file name="frontcontroller3.phpt" role="test" />
-    <file name="frontcontroller4.phar" role="test" />
-    <file name="frontcontroller4.phar.inc" role="test" />
     <file name="frontcontroller4.phpt" role="test" />
-    <file name="frontcontroller5.phar" role="test" />
-    <file name="frontcontroller5.phar.inc" role="test" />
     <file name="frontcontroller5.phpt" role="test" />
-    <file name="frontcontroller6.phar" role="test" />
-    <file name="frontcontroller6.phar.inc" role="test" />
     <file name="frontcontroller6.phpt" role="test" />
-    <file name="frontcontroller7.phar" role="test" />
-    <file name="frontcontroller7.phar.inc" role="test" />
     <file name="frontcontroller7.phpt" role="test" />
-    <file name="frontcontroller8.phar" role="test" />
-    <file name="frontcontroller8.phar.inc" role="test" />
     <file name="frontcontroller8.phpt" role="test" />
-    <file name="frontcontroller9.phar" role="test" />
-    <file name="frontcontroller9.phar.inc" role="test" />
     <file name="frontcontroller9.phpt" role="test" />
-    <file name="frontcontroller10.phar" role="test" />
-    <file name="frontcontroller10.phar.inc" role="test" />
     <file name="frontcontroller10.phpt" role="test" />
-    <file name="frontcontroller11.phar" role="test" />
-    <file name="frontcontroller11.phar.inc" role="test" />
     <file name="frontcontroller11.phpt" role="test" />
-    <file name="frontcontroller12.phar" role="test" />
-    <file name="frontcontroller12.phar.inc" role="test" />
     <file name="frontcontroller12.phpt" role="test" />
-    <file name="frontcontroller13.phar" role="test" />
-    <file name="frontcontroller13.phar.inc" role="test" />
     <file name="frontcontroller13.phpt" role="test" />
     <file name="frontcontroller14.phpt" role="test" />
     <file name="frontcontroller15.phpt" role="test" />
@@ -348,15 +369,18 @@ Major feature functionality release
     <file name="frontcontroller20.phpt" role="test" />
     <file name="frontcontroller21.phpt" role="test" />
     <file name="frontcontroller22.phpt" role="test" />
+    <file name="frontcontroller23.phpt" role="test" />
+    <file name="include_path.phpt" role="test" />
     <file name="ini_set.phpt" role="test" />
     <file name="ini_set_off.phpt" role="test" />
-    <file name="md5.phar" role="test" />
+    <file name="invalid_alias.phpt" role="test" />
+    <file name="invalid_setstubalias.phpt" role="test" />
     <file name="metadata_read.phpt" role="test" />
     <file name="metadata_write.phpt" role="test" />
     <file name="metadata_write_commit.phpt" role="test" />
-    <file name="nophar.phar" role="test" />
-    <file name="nophar.phar.inc" role="test" />
+    <file name="mounteddir.phpt" role="test" />
     <file name="nophar.phpt" role="test" />
+    <file name="nophar_web.phpt" role="test" />
     <file name="open_for_write_existing.phpt" role="test" />
     <file name="open_for_write_existing_b.phpt" role="test" />
     <file name="open_for_write_existing_c.phpt" role="test" />
@@ -375,6 +399,8 @@ Major feature functionality release
     <file name="phar_buildfromiterator9.phpt" role="test" />
     <file name="phar_bz2.phpt" role="test" />
     <file name="phar_commitwrite.phpt" role="test" />
+    <file name="phar_convert_repeated.phpt" role="test" />
+    <file name="phar_convert_repeated_b.phpt" role="test" />
     <file name="phar_convert_tar.phpt" role="test" />
     <file name="phar_convert_tar2.phpt" role="test" />
     <file name="phar_convert_tar3.phpt" role="test" />
@@ -388,8 +414,8 @@ Major feature functionality release
     <file name="phar_get_supportedcomp2.phpt" role="test" />
     <file name="phar_get_supportedcomp3.phpt" role="test" />
     <file name="phar_get_supportedcomp4.phpt" role="test" />
-    <file name="phar_get_suppoted_signatures_001.phpt" role="test" />
-    <file name="phar_get_suppoted_signatures_002.phpt" role="test" />
+    <file name="phar_get_supported_signatures_001.phpt" role="test" />
+    <file name="phar_get_supported_signatures_002.phpt" role="test" />
     <file name="phar_gzip.phpt" role="test" />
     <file name="phar_magic.phpt" role="test" />
     <file name="phar_metadata_read.phpt" role="test" />
@@ -418,25 +444,23 @@ Major feature functionality release
     <file name="phar_oo_compressed_002b.phpt" role="test" />
     <file name="phar_oo_getmodified.phpt" role="test" />
     <file name="phar_oo_nosig.phpt" role="test" />
-    <file name="phar_oo_test.inc" role="test" />
     <file name="phar_oo_uncompressall.phpt" role="test" />
     <file name="phar_setalias.phpt" role="test" />
     <file name="phar_setalias2.phpt" role="test" />
+    <file name="phar_setdefaultstub.phpt" role="test" />
     <file name="phar_setsignaturealgo1.phpt" role="test" />
     <file name="phar_setsignaturealgo2.phpt" role="test" />
     <file name="phar_stub.phpt" role="test" />
     <file name="phar_stub_error.phpt" role="test" />
     <file name="phar_stub_write.phpt" role="test" />
     <file name="phar_stub_write_file.phpt" role="test" />
-    <file name="phar_test.inc" role="test" />
     <file name="refcount1.phpt" role="test" />
     <file name="refcount1_5_2.phpt" role="test" />
     <file name="rename.phpt" role="test" />
-    <file name="sha1.phar" role="test" />
-    <file name="sha256.phar" role="test" />
-    <file name="sha512.phar" role="test" />
     <file name="test_signaturealgos.phpt" role="test" />
     <file name="withphar.phpt" role="test" />
+    <file name="withphar_web.phpt" role="test" />
+    <file name="zf_test.phpt" role="test" />
    </dir> <!-- /tests -->
    <file name="build_precommand.php" role="php" />
    <file name="config.m4" role="src" />
@@ -452,6 +476,7 @@ Major feature functionality release
    <file name="makestub.php" role="php" />
    <file name="phar.c" role="src" />
    <file name="phar.phar" role="script" />
+   <file name="pharzip.h" role="src" />
    <file name="phar_internal.h" role="src" />
    <file name="phar_object.c" role="src" />
    <file name="phar_path_check.c" role="src" />
@@ -465,6 +490,7 @@ Major feature functionality release
    <file name="tar.c" role="src" />
    <file name="tar.h" role="src" />
    <file name="TODO" role="doc" />
+   <file name="util.c" role="src" />
    <file name="zip.c" role="src" />
   </dir> <!-- / -->
  </contents>
@@ -488,12 +514,6 @@ Major feature functionality release
     <channel>pecl.php.net</channel>
     <providesextension>hash</providesextension>
    </package>
-   <package>
-    <name>zip</name>
-    <channel>pecl.php.net</channel>
-    <min>1.8.11</min>
-    <providesextension>zip</providesextension>
-   </package>
    <extension>
     <name>spl</name>
    </extension>
@@ -507,35 +527,38 @@ Major feature functionality release
  <changelog>
   <release>
    <version>
-    <release>2.0.0</release>
+    <release>2.0.0a1</release>
     <api>1.1.1</api>
    </version>
    <stability>
-    <release>stable</release>
-    <api>stable</api>
+    <release>alpha</release>
+    <api>alpha</api>
    </stability>
-   <date>2008-01-19</date>
+   <date>2008-03-25</date>
    <license uri="http://www.php.net/license">PHP License</license>
    <notes>
 
 Major feature functionality release
- * new default stub allows running of phar-based phars without phar extension
+ * new default stub allows running of phar-based phars without phar extension [Greg/Steph]
  * add support for tar-based and zip-based phar archives [Greg]
  * add Phar::isTar(), Phar::isZip(), and Phar::isPhar() [Greg]
  * add Phar::convertToTar(), Phar::convertToZip(), and Phar::convertToPhar() [Greg]
+ * add Phar::compress() [Greg]
+ * conversion to compressed or to other file formats automatically copies the archive
+   to a new extension (i.e. &quot;.phar&quot; to &quot;.phar.tar&quot; or &quot;.tar&quot; to &quot;.tar.gz&quot;) [Steph]
  * add Phar::webPhar() for running a web-based application unmodified
    directly from a phar archive [Greg]
  * file functions (fopen-based and stat-based) can be instructed to only look for
    relative paths within a phar via Phar::interceptFileFuncs()
- * include works unmodified within a phar [Greg]
+ * add PharData class to allow manipulation/creation of non-executable tar and zip archives. [Steph]
+   non-executable tar/zip manipulation is allowed even when phar.readonly=1 [Greg]
  * paths with . and .. work (phar://blah.phar/a/../b.php =&gt; phar://blah.phar/b.php) [Greg]
  * add support for mkdir()/rmdir() and support for empty directories to phar file format [Greg]
  * add option to compress the entire phar file for phar/tar file format [Greg]
  * implement Phar::isCompressed() returning 0, Phar::GZ or Phar::BZ2 [Greg]
  * implement Phar::copy(string $from, string $to) [Greg]
  * implement Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
- * add mapping of include/require from within a phar to location within phar [Greg]
-   solves the include_path issue without code munging
+ * implement Phar::mount() for mounting external paths or files to locations inside a phar [Greg]
  * add Phar::delete() [Greg]
 
    </notes>

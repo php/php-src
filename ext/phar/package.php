@@ -2,29 +2,33 @@
 
 $notes = '
 Major feature functionality release
- * new default stub allows running of phar-based phars without phar extension
+ * new default stub allows running of phar-based phars without phar extension [Greg/Steph]
  * add support for tar-based and zip-based phar archives [Greg]
  * add Phar::isTar(), Phar::isZip(), and Phar::isPhar() [Greg]
  * add Phar::convertToTar(), Phar::convertToZip(), and Phar::convertToPhar() [Greg]
+ * add Phar::compress() [Greg]
+ * conversion to compressed or to other file formats automatically copies the archive
+   to a new extension (i.e. ".phar" to ".phar.tar" or ".tar" to ".tar.gz") [Steph]
  * add Phar::webPhar() for running a web-based application unmodified
    directly from a phar archive [Greg]
  * file functions (fopen-based and stat-based) can be instructed to only look for
    relative paths within a phar via Phar::interceptFileFuncs()
- * include works unmodified within a phar [Greg]
+ * add PharData class to allow manipulation/creation of non-executable tar and zip archives. [Steph]
+   non-executable tar/zip manipulation is allowed even when phar.readonly=1 [Greg]
  * paths with . and .. work (phar://blah.phar/a/../b.php => phar://blah.phar/b.php) [Greg]
  * add support for mkdir()/rmdir() and support for empty directories to phar file format [Greg]
  * add option to compress the entire phar file for phar/tar file format [Greg]
  * implement Phar::isCompressed() returning 0, Phar::GZ or Phar::BZ2 [Greg]
  * implement Phar::copy(string $from, string $to) [Greg]
  * implement Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
- * add mapping of include/require from within a phar to location within phar [Greg]
-   solves the include_path issue without code munging
+ * implement Phar::mount() for mounting external paths or files to locations inside a phar [Greg]
  * add Phar::delete() [Greg]
 ';
 
 if (!class_exists("Phar") && !extension_loaded("Phar")) {
 	die("Extension phar not present");
 }
+error_reporting(E_ALL & ~E_DEPRECATED);
 
 require_once 'PEAR/PackageFileManager2.php';
 
@@ -65,15 +69,14 @@ $package->addPackageDepWithChannel('optional', 'bz2', 'pecl.php.net', false, fal
 // all this false business sets the <providesextension> tag that allows us to have hash built
 // in statically
 $package->addPackageDepWithChannel('optional', 'hash', 'pecl.php.net', false, false, false, false, 'hash');
-$package->addPackageDepWithChannel('optional', 'zip', 'pecl.php.net', '1.8.11', false, false, false, 'zip');
 $package->addExtensionDep('optional', 'spl');
 $package->addExtensionDep('optional', 'zlib');
 $package->setPackageType('extsrc');
 $package->addRelease();
 $package->setReleaseVersion(phpversion('phar'));
 $package->setAPIVersion(Phar::apiVersion());
-$package->setReleaseStability('stable');
-$package->setAPIStability('stable');
+$package->setReleaseStability('alpha');
+$package->setAPIStability('alpha');
 $package->setNotes("\n$notes\n");
 //$package->addGlobalReplacement('package-info', '@package_version@', 'version');
 $package->generateContents();
