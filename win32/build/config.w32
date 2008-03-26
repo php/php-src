@@ -56,10 +56,40 @@ PATH_PROG('lib', null, 'MAKE_LIB');
 if (!PATH_PROG('bison')) {
 	ERROR('bison is required')
 }
-if (!PATH_PROG('flex')) {
-	ERROR('flex is required')
+
+// There's a minimum requirement for re2c..
+MINRE2C = "0.13.4";
+
+function probe_re2c_version(RE2C)
+{
+	var command = "cmd /c " + RE2C + " -v";
+	var version = execute(command + '" 2>&1"');
+
+	if (version.match(/((\d+)\.(\d+)\.(\d+))/)) {
+		return RegExp.$1;
+	}
+	return 0;
 }
-PATH_PROG('re2c');
+
+RE2C = PATH_PROG('re2c');
+if (RE2C) {
+	var intvers, intmin;
+	var pattern = /\./g;
+
+	RE2CVERS = probe_re2c_version(RE2C);
+	intvers = RE2CVERS.replace(pattern, '') - 0;
+	intmin = MINRE2C.replace(pattern, '') - 0;
+
+	if (intvers < intmin) {
+		STDOUT.WriteLine('WARNING: The minimum RE2C version requirement is ' + MINRE2C + ', ' + RE2CVERS + ' detected');
+		STDOUT.WriteLine('Parsers will not be generated. Upgrade your copy at http://sf.net/projects/re2c');
+		DEFINE('RE2C', '');
+	} else {
+		DEFINE('RE2C_FLAGS', '');
+	}
+} else {
+	STDOUT.WriteLine('Parsers will not be regenerated');
+}
 PATH_PROG('zip');
 PATH_PROG('lemon');
 

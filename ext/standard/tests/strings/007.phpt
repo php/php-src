@@ -1,5 +1,7 @@
 --TEST--
 php_strip_whitespace() and output buffer
+--INI--
+log_errors_max_len=4096
 --FILE--
 <?php
 

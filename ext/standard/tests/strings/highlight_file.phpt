@@ -6,6 +6,7 @@ highlight.comment=#FF9900
 highlight.keyword=#007700
 highlight.default=#0000BB
 highlight.html=#000000
+allow_url_include=1
 --FILE--
 <?php
 
@@ -14,19 +15,9 @@ $filename = dirname(__FILE__)."/highlight_file.dat";
 var_dump(highlight_file());
 var_dump(highlight_file($filename));
 
-$data = <<<DATA
-<?php echo "test"; ?>
-DATA;
+var_dump(highlight_file('data:,<?php echo "test"; ?>'));
 
-file_put_contents($filename, $data);
-var_dump(highlight_file($filename));
-
-$data = <<<DATA
-<?php echo "test ?>
-DATA;
-
-file_put_contents($filename, $data);
-var_dump(highlight_file($filename));
+var_dump(highlight_file('data:,<?php echo "test ?>'));
 
 $data = '
 <?php 
@@ -57,7 +48,7 @@ bool(false)
 </span>
 </code>bool(true)
 <code><span style="color: #000000">
-<span style="color: #0000BB">&lt;?php&nbsp;</span><span style="color: #007700">echo&nbsp;</span><span style="color: #DD0000">"test&nbsp;?&gt;</span>
+<span style="color: #0000BB">&lt;?php&nbsp;</span><span style="color: #007700">echo&nbsp;</span><span style="color: #FF9900">"test&nbsp;?&gt;</span>
 </span>
 </code>bool(true)
 <code><span style="color: #000000">
