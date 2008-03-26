@@ -95,15 +95,16 @@ ZEND_API int zend_stack_is_empty(zend_stack *stack) /* {{{ */
 
 ZEND_API int zend_stack_destroy(zend_stack *stack) /* {{{ */
 {
-	register int i;
-
-	for (i = 0; i < stack->top; i++) {
-		efree(stack->elements[i]);
-	}
+	int i;
 
 	if (stack->elements) {
+		for (i = 0; i < stack->top; i++) {
+			efree(stack->elements[i]);
+		}
+
 		efree(stack->elements);
 	}
+
 	return SUCCESS;
 }
 /* }}} */

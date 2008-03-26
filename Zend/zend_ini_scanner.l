@@ -1,4 +1,3 @@
-%{
 /*
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
@@ -15,18 +14,41 @@
    +----------------------------------------------------------------------+
    | Authors: Zeev Suraski <zeev@zend.com>                                |
    |          Jani Taskinen <jani@php.net>                                |
+   |          Marcus Boerger <helly@php.net>                              |
+   |          Nuno Lopes <nlopess@php.net>                                |
+   |          Scott MacVicar <scottmac@php.net>                           |
    +----------------------------------------------------------------------+
 */
 
 /* $Id$ */
 
-#define DEBUG_CFG_SCANNER 0
 
-#define yyleng SCNG(yy_leng)
-#define yytext SCNG(yy_text)
-#define yytext_ptr SCNG(yy_text)
-#define yyin SCNG(yy_in)
-#define yyout SCNG(yy_out)
+#if 0
+# define YYDEBUG(s, c) printf("state: %d char: %c\n", s, c)
+#else
+# define YYDEBUG(s, c)
+#endif
+
+#include "zend_ini_scanner_defs.h"
+
+#define YYCTYPE   unsigned char
+#define YYFILL(n) { if (YYCURSOR >= YYLIMIT) return 0; }
+#define YYCURSOR  SCNG(yy_cursor)
+#define YYLIMIT   SCNG(yy_limit)
+#define YYMARKER  SCNG(yy_marker)
+
+#define YYGETCONDITION()  SCNG(yy_state)
+#define YYSETCONDITION(s) SCNG(yy_state) = s
+
+#define STATE(name)  yyc##name
+
+/* emulate flex constructs */
+#define BEGIN(state) YYSETCONDITION(STATE(state))
+#define YYSTATE      YYGETCONDITION()
+#define yytext       ((char*)SCNG(yy_text))
+#define yyleng       SCNG(yy_leng)
+#define yyless(x)    YYCURSOR = yytext + x
+/* #define yymore()     goto yymore_restart */
 
 /* How it works (for the core ini directives):
  * ===========================================
@@ -47,7 +69,7 @@
  * 5. User defined ini files (like .htaccess for apache) are parsed for each request and
  *    stored in separate hash defined by SAPI.
  */
- 
+
 /* TODO: (ordered by importance :-)
  * ===============================================================================
  *
@@ -58,46 +80,18 @@
  *
  */
 
-/* These are not needed when yymore() is not used */
-/*
-#define yy_last_accepting_state SCNG(_yy_last_accepting_state)
-#define yy_last_accepting_cpos SCNG(_yy_last_accepting_cpos)
-#define yy_more_flag SCNG(_yy_more_flag)
-#define yy_more_len SCNG(_yy_more_len)
-*/
-
-%}
-
-%x ST_DOUBLE_QUOTES
-%x ST_OFFSET
-%x ST_RAW
-%x ST_SECTION_RAW
-%x ST_SECTION_VALUE
-%x ST_VALUE
-%x ST_VARNAME
-%option stack
-
-%{
-
 #include <errno.h>
 #include "zend.h"
 #include "zend_globals.h"
 #include <zend_ini_parser.h>
 #include "zend_ini_scanner.h"
 
-#define YY_DECL int ini_lex(zval *ini_lval TSRMLS_DC)
-
-#define YY_INPUT(buf, result, max_size)                                    \
-	if ( ((result = zend_stream_read(yyin, buf, max_size TSRMLS_CC)) == 0) \
-		&& zend_stream_ferror( yyin TSRMLS_CC) )                           \
-		YY_FATAL_ERROR( "input in flex scanner failed" );
-
 /* Globals Macros */
 #define SCNG	INI_SCNG
 #ifdef ZTS
 ZEND_API ts_rsrc_id ini_scanner_globals_id;
 #else
-ZEND_API zend_scanner_globals ini_scanner_globals;
+ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 #endif
 
 /* Eat trailing whitespace + extra char */
@@ -110,7 +104,6 @@ ZEND_API zend_scanner_globals ini_scanner_globals;
 		yytext[yyleng - 1] == ' ')                  \
 	) {                                             \
 		yyleng--;                                   \
-		yytext[yyleng]=0;                           \
 	}
 
 /* Eat trailing whitespace */
@@ -127,7 +120,30 @@ ZEND_API zend_scanner_globals ini_scanner_globals;
 	return type;                                 \
 }
 
-static char *ini_filename;
+static void _yy_push_state(int new_state TSRMLS_DC)
+{
+	zend_stack_push(&SCNG(state_stack), (void *) &YYGETCONDITION(), sizeof(int));
+	YYSETCONDITION(new_state);
+}
+
+#define yy_push_state(state_and_tsrm) _yy_push_state(yyc##state_and_tsrm)
+
+static void yy_pop_state(TSRMLS_D)
+{
+	int *stack_state;
+	zend_stack_top(&SCNG(state_stack), (void **) &stack_state);
+	YYSETCONDITION(*stack_state);
+	zend_stack_del_top(&SCNG(state_stack));
+}
+
+static void yy_scan_buffer(char *str, unsigned int len TSRMLS_DC)
+{
+	YYCURSOR = (YYCTYPE*)str;
+	SCNG(yy_start) = YYCURSOR;
+	YYLIMIT  = YYCURSOR + len;
+}
+
+#define ini_filename SCNG(filename)
 
 /* {{{ init_ini_scanner()
 */
@@ -135,9 +151,8 @@ static void init_ini_scanner(TSRMLS_D)
 {
 	SCNG(lineno) = 1;
 	SCNG(scanner_mode) = ZEND_INI_SCANNER_NORMAL;
-	SCNG(yy_start_stack_ptr) = 0;
-	SCNG(yy_start_stack_depth) = 0;
-	SCNG(current_buffer) = NULL;
+	zend_stack_init(&SCNG(state_stack));
+	BEGIN(INITIAL);
 }
 /* }}} */
 
@@ -145,11 +160,7 @@ static void init_ini_scanner(TSRMLS_D)
 */
 void shutdown_ini_scanner(TSRMLS_D)
 {
-	if (SCNG(yy_start_stack)) {
-		yy_flex_free(SCNG(yy_start_stack));
-		SCNG(yy_start_stack) = NULL;
-	}
-	yy_delete_buffer(SCNG(current_buffer) TSRMLS_CC);
+	zend_stack_destroy(&SCNG(state_stack));
 	if (ini_filename) {
 		free(ini_filename);
 	}
@@ -176,14 +187,17 @@ char *zend_ini_scanner_get_filename(TSRMLS_D)
 */
 int zend_ini_open_file_for_scanning(zend_file_handle *fh, int scanner_mode TSRMLS_DC)
 {
-	if (FAILURE == zend_stream_fixup(fh TSRMLS_CC)) {
+	char *buf;
+	size_t size;
+
+	if (zend_stream_fixup(fh, &buf, &size TSRMLS_CC) == FAILURE) {
 		return FAILURE;
 	}
 
 	init_ini_scanner(TSRMLS_C);
 	SCNG(scanner_mode) = scanner_mode;
-	yyin = fh;
-	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE TSRMLS_CC) TSRMLS_CC);
+	SCNG(yy_in) = fh;
+	yy_scan_buffer(buf, size TSRMLS_CC);
 	ini_filename = zend_strndup(fh->filename, strlen(fh->filename));
 	return SUCCESS;
 }
@@ -197,18 +211,10 @@ int zend_ini_prepare_string_for_scanning(char *str, int scanner_mode TSRMLS_DC)
 
 	init_ini_scanner(TSRMLS_C);
 	SCNG(scanner_mode) = scanner_mode;
-	yyin = NULL;
-	yy_scan_buffer(str, len + 2 TSRMLS_CC);
+	SCNG(yy_in) = NULL;
+	yy_scan_buffer(str, len TSRMLS_CC);
 	ini_filename = NULL;
 	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ zend_ini_close_file()
-*/
-void zend_ini_close_file(zend_file_handle *fh TSRMLS_DC)
-{
-	zend_stream_close(fh);
 }
 /* }}} */
 
@@ -272,8 +278,23 @@ static void zend_ini_escape_string(zval *lval, char *str, int len, char quote_ty
 }
 /* }}} */
 
-%}
+int ini_lex(zval *ini_lval TSRMLS_DC)
+{
+restart:
+	SCNG(yy_text) = YYCURSOR;
 
+/* yymore_restart: */
+	/* detect EOF */
+	if (YYCURSOR >= YYLIMIT) {
+		if (YYSTATE == STATE(ST_VALUE) || YYSTATE == STATE(ST_RAW)) {
+			BEGIN(INITIAL);
+			return 0;
+		}
+		return 0;
+	}
+
+/*!re2c
+re2c:yyfill:check = 0;
 LNUM [0-9]+
 DNUM ([0-9]*[\.][0-9]+)|([0-9]+[\.][0-9]*)
 NUMBER [-]?{LNUM}|{DNUM}
@@ -292,20 +313,12 @@ SINGLE_QUOTED_CHARS [^']
 RAW_VALUE_CHARS [^=\n\r;]
 
 /* Allow using ${foobar} in sections, quoted strings and values */
-LITERAL_DOLLAR ("$"([^a-zA-Z0-9{]|("\\"{ANY_CHAR})))
-VALUE_CHARS         ([^$= \t\n\r;&|~()!"']|{LITERAL_DOLLAR})
+LITERAL_DOLLAR ("$"([^a-zA-Z0-9{\000]|("\\"{ANY_CHAR})))
+VALUE_CHARS         ([^$= \t\n\r;&|~()!"'\000]|{LITERAL_DOLLAR})
 SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 
-/* " */
-
-%option nounput
-%option noyywrap
-%option noyylineno
-%option noyy_top_state
-%option never-interactive
-
-%%
++<!*> := yyleng = YYCURSOR - SCNG(yy_text);
 
 <INITIAL>"[" { /* Section start */
 	/* Enter section data lookup state */
@@ -320,9 +333,8 @@ DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 <ST_VALUE,ST_SECTION_VALUE,ST_OFFSET>"'"{SINGLE_QUOTED_CHARS}+"'" { /* Raw string */
 	/* Eat leading and trailing single quotes */
 	if (yytext[0] == '\'' && yytext[yyleng - 1] == '\'') {
-		yytext++;
+		SCNG(yy_text)++;
 		yyleng = yyleng - 2;
-		yytext[yyleng] = 0; 
 	}
 	RETURN_TOKEN(TC_RAW, yytext, yyleng);
 }
@@ -339,7 +351,7 @@ DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 
 	/* Enter offset lookup state */
 	yy_push_state(ST_OFFSET TSRMLS_CC);
-	
+
 	RETURN_TOKEN(TC_OFFSET, yytext, yyleng);
 }
 
@@ -374,7 +386,7 @@ DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 	RETURN_TOKEN(TC_LABEL, yytext, yyleng);
 }
 
-<INITIAL>{TABS_AND_SPACES}*[=]{TABS_AND_SPACES}* { /* Start option value */ 
+<INITIAL>{TABS_AND_SPACES}*[=]{TABS_AND_SPACES}* { /* Start option value */
 	if (SCNG(scanner_mode) == ZEND_INI_SCANNER_RAW) {
 		yy_push_state(ST_RAW TSRMLS_CC);
 	} else {
@@ -386,9 +398,9 @@ DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 <ST_RAW>{RAW_VALUE_CHARS}+ { /* Raw value, only used when SCNG(scanner_mode) == ZEND_INI_SCANNER_RAW. */
 	/* Eat leading and trailing double quotes */
 	if (yytext[0] == '"' && yytext[yyleng - 1] == '"') {
-		yytext++;
+		SCNG(yy_text)++;
 		yyleng = yyleng - 2;
-		yytext[yyleng] = 0; 
+		yytext[yyleng] = 0;
 	}
 	RETURN_TOKEN(TC_RAW, yytext, yyleng);
 }
@@ -420,7 +432,7 @@ DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 }
 
 <ST_VALUE>[=] { /* Make = used in option value to trigger error */
-	yyless(yyleng - 1);
+	yyless(0);
 	BEGIN(INITIAL);
 	return END_OF_LINE;
 }
@@ -454,6 +466,7 @@ DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 
 <INITIAL,ST_RAW>{TABS_AND_SPACES}+ {
 	/* eat whitespace */
+	goto restart;
 }
 
 <INITIAL>{TABS_AND_SPACES}*{NEWLINE} {
@@ -467,52 +480,14 @@ DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 	return END_OF_LINE;
 }
 
-<ST_VALUE,ST_RAW><<EOF>> { /* End of option value (if EOF is reached before EOL */
+<ST_VALUE,ST_RAW>[^] { /* End of option value (if EOF is reached before EOL) */
 	BEGIN(INITIAL);
-	return END_OF_LINE;
+	return 0;
 }
 
-<<EOF>> {
-#if DEBUG_CFG_SCANNER
-	while (YYSTATE != INITIAL) {
-		switch (YYSTATE) {
-		case INITIAL:
-			break;
+<*>[^] {
+	return 0;
+}
 
-		case ST_DOUBLE_QUOTES:
-			fprintf(stderr, "ERROR: Unterminated ini option value double quotes\n");
-			break;
-
-		case ST_OFFSET:
-			fprintf(stderr, "ERROR: Unterminated ini option offset\n");
-			break;
-
-		case ST_RAW:
-			fprintf(stderr, "ERROR: Unterminated raw ini option value\n");
-			break;
-
-		case ST_SECTION_RAW:
-			fprintf(stderr, "ERROR: Unterminated raw ini section value\n");
-			break;
-
-		case ST_SECTION_VALUE:
-			fprintf(stderr, "ERROR: Unterminated ini section value\n");
-			break;
-
-		case ST_VALUE:
-			fprintf(stderr, "ERROR: Unterminated ini option value\n");
-			break;
-
-		case ST_VARNAME:
-			fprintf(stderr, "ERROR: Unterminated ini variable\n");
-			break;
-
-		default:
-			fprintf(stderr, "BUG: Unknown state (%d)\n", YYSTATE);
-			break;
-		}
-		yy_pop_state(TSRMLS_C);
-	}
-#endif
-	yyterminate();
+*/
 }

@@ -243,37 +243,45 @@ struct _zend_executor_globals {
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 
-struct _zend_scanner_globals {
+struct _zend_ini_scanner_globals {
 	zend_file_handle *yy_in;
 	zend_file_handle *yy_out;
-	int yy_leng;
-	char *yy_text;
-	struct yy_buffer_state *current_buffer;
-	char *c_buf_p;
-	int init;
-	int start;
+
+	unsigned int yy_leng;
+	unsigned char *yy_start;
+	unsigned char *yy_text;
+	unsigned char *yy_cursor;
+	unsigned char *yy_marker;
+	unsigned char *yy_limit;
+	int yy_state;
+	zend_stack state_stack;
+	char *filename;
 	int lineno;
-	char _yy_hold_char;
-	int yy_n_chars;
-	int _yy_did_buffer_switch_on_eof;
-	int _yy_last_accepting_state; /* Must be of the same type as yy_state_type,
-								   * if for whatever reason it's no longer int!
-								   */
-	char *_yy_last_accepting_cpos;
-	int _yy_more_flag;
-	int _yy_more_len;
-	int yy_start_stack_ptr;
-	int yy_start_stack_depth;
-	int *yy_start_stack;
+
+	/* Modes are: ZEND_INI_SCANNER_NORMAL, ZEND_INI_SCANNER_RAW */
+	int scanner_mode;
+};
+
+struct _zend_php_scanner_globals {
+	zend_file_handle *yy_in;
+	zend_file_handle *yy_out;
+
+	unsigned int yy_leng;
+	unsigned char *yy_start;
+	unsigned char *yy_text;
+	unsigned char *yy_cursor;
+	unsigned char *yy_marker;
+	unsigned char *yy_limit;
+	int yy_state;
+	zend_stack state_stack;
+	
+	zend_llist used_state_stacks;
 
 	UConverter *input_conv;     /* converter for flex input */
 	UConverter *output_conv;    /* converter for data from flex output */
 	zend_bool encoding_checked;
 	char* rest_str;
 	int rest_len;
-
-	/* For ini scanner. Modes are: ZEND_INI_SCANNER_NORMAL, ZEND_INI_SCANNER_RAW */
-	int scanner_mode;
 };
 
 struct _zend_unicode_globals {

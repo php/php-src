@@ -2730,7 +2730,7 @@ ZEND_API double zend_oct_strtod(const char *str, char **endptr) /* {{{ */
     s++;
 
     while ((c = *s++)) {
-        if (c > '7') {
+	if (c < '0' || c > '7') {
             /* break and return the current value if the number is not well-formed
              * that's what Linux strtol() does
              */

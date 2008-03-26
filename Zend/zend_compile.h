@@ -554,7 +554,6 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC);
 ZEND_API void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size TSRMLS_DC);
 ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC);
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle TSRMLS_DC);
-ZEND_API void zend_file_handle_dtor(zend_file_handle *fh);
 ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC);
 ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC);
 ZEND_API int zend_cleanup_function_data_full(zend_function *function TSRMLS_DC);
@@ -693,14 +692,6 @@ int zendlex(znode *zendlval TSRMLS_DC);
 
 #define ZEND_CT	(1<<0)
 #define ZEND_RT (1<<1)
-
-
-#define ZEND_HANDLE_FILENAME		0
-#define ZEND_HANDLE_FD				1
-#define ZEND_HANDLE_FP				2
-#define ZEND_HANDLE_STDIOSTREAM		3
-#define ZEND_HANDLE_FSTREAM			4
-#define ZEND_HANDLE_STREAM			5
 
 #define ZEND_FETCH_STANDARD		0
 #define ZEND_FETCH_ADD_LOCK		(1<<0)

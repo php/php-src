@@ -3176,7 +3176,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 						new_op_array = zend_compile_file(&file_handle, (Z_LVAL(opline->op2.u.constant)==ZEND_INCLUDE_ONCE?ZEND_INCLUDE:ZEND_REQUIRE) TSRMLS_CC);
 						zend_destroy_file_handle(&file_handle TSRMLS_CC);
 					} else {
-						zend_file_handle_dtor(&file_handle);
+						zend_file_handle_dtor(&file_handle TSRMLS_CC);
 						failure_retval=1;
 					}
 				} else {
