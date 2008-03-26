@@ -29,8 +29,8 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
   <email>helly@php.net</email>
   <active>yes</active>
  </lead>
- <date>2008-03-25</date>
- <time>22:54:44</time>
+ <date>2008-03-26</date>
+ <time>00:20:32</time>
  <version>
   <release>2.0.0a1</release>
   <api>1.1.1</api>
@@ -534,7 +534,7 @@ Major feature functionality release
     <release>alpha</release>
     <api>alpha</api>
    </stability>
-   <date>2008-03-25</date>
+   <date>2008-03-26</date>
    <license uri="http://www.php.net/license">PHP License</license>
    <notes>
 
