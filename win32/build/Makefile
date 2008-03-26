@@ -21,6 +21,7 @@ CC="$(CL)"
 LD="$(LINK)"
 MC="$(MC)"
 MT="$(MT)"
+RE2C="$(RE2C)"
 
 MCFILE=$(BUILD_DIR)\wsyslog.rc
 
@@ -28,10 +29,16 @@ all: generated_files $(EXT_TARGETS) $(PECL_TARGETS) $(SAPI_TARGETS)
 
 build_dirs: $(BUILD_DIR) $(BUILD_DIRS_SUB)
 
+!if $(RE2C) == ""
+generated_files: build_dirs Zend\zend_ini_parser.c \
+	Zend\zend_language_parser.c \
+	$(PHPDEF) $(MCFILE)
+!else
 generated_files: build_dirs Zend\zend_ini_parser.c \
 	Zend\zend_language_parser.c Zend\zend_ini_scanner.c \
 	Zend\zend_language_scanner.c \
 	$(PHPDEF) $(MCFILE)
+!endif
 
 $(BUILD_DIR)\$(PHPDLL).def: $(PHP_DLL_DEF_SOURCES)
 	type $(PHP_DLL_DEF_SOURCES) > $(BUILD_DIR)\$(PHPDLL).def
@@ -42,11 +49,13 @@ Zend\zend_ini_parser.c Zend\zend_ini_parser.h: Zend\zend_ini_parser.y
 Zend\zend_language_parser.c Zend\zend_language_parser.h: Zend\zend_language_parser.y
 	$(BISON) --output=Zend/zend_language_parser.c -v -d -p zend Zend/zend_language_parser.y
 
+!if $(RE2C) != ""
 Zend\zend_ini_scanner.c: Zend\flex.skl Zend\zend_ini_scanner.l
-	$(FLEX) -B -i -SZend/flex.skl -Pini_ -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l
+	$(RE2C) $(RE2C_FLAGS) --case-inverted -cbdFt Zend/zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l
 
 Zend\zend_language_scanner.c: Zend\flex.skl Zend\zend_language_scanner.l
-	$(FLEX) -i -SZend/flex.skl -Pzend -oZend/zend_language_scanner.c Zend/zend_language_scanner.l
+	$(RE2C) $(RE2C_FLAGS) --case-inverted -cbdFt Zend/zend_language_scanner_defs.h -oZend/zend_language_scanner.c Zend/zend_language_scanner.l
+!endif
 
 PHPDLL_RES=$(BUILD_DIR)\$(PHPDLL).res
 

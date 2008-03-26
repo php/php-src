@@ -566,6 +566,9 @@ static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file,
 
 	*lineno = 1;
 
+	file_handle->type = ZEND_HANDLE_FP;
+	file_handle->opened_path = NULL;
+	file_handle->free_filename = 0;
 	if (!(file_handle->handle.fp = VCWD_FOPEN(script_file, "rb"))) {
 		php_printf("Could not open input file: %s\n", script_file);
 		return FAILURE;
@@ -1182,7 +1185,7 @@ int main(int argc, char *argv[])
 		case PHP_MODE_INDENT:
 			open_file_for_scanning(&file_handle TSRMLS_CC);
 			zend_indent();
-			fclose(file_handle.handle.fp);
+			zend_file_handle_dtor(file_handle.handle TSRMLS_CC);
 			goto out;
 			break;
 #endif

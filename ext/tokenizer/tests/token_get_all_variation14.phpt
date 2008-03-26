@@ -516,22 +516,13 @@ echo "hello world"; ?>"
   }
 }
 -- with invalid PHP tags and tokens --
-array(2) {
+array(1) {
   [0]=>
   array(3) {
     [0]=>
     int(313)
     [1]=>
-    string(18) "<PDP display  $a; "
-    [2]=>
-    int(1)
-  }
-  [1]=>
-  array(3) {
-    [0]=>
-    int(313)
-    [1]=>
-    string(1) "<"
+    string(19) "<PDP display  $a; <"
     [2]=>
     int(1)
   }
