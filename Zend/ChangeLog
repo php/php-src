@@ -1,3 +1,25 @@
+2008-03-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      zend_compile.c:
+      Removed unused variable
+
+2008-03-25  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      zend_compile.c
+      zend_compile.h:
+      MFH:
+      - Renamed zend_do_fetch_class_name() to zend_do_build_full_name() (It is
+      not used only for classes)
+      - Moved zend_resolve_class_name prototype to zend_compile.h
+
+2008-03-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c
+      zend_API.c:
+      Optimized detection of "__call" and "__callstatic" methods.
+
 2008-03-23  Marcus Boerger  <php@marcus-boerger.de>
 
     * tests/multibyte/.cvsignore

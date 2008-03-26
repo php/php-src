@@ -1,3 +1,117 @@
+2008-03-25  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      sapi/embed/php_embed.c:
+      MFH:
+      - Fix memory leak found by Osman
+      - Merge strlen to sizof change from CLI
+
+    * sapi/embed/php_embed.c:
+      - Fix memory leak found by Osman
+      - Merge strlen to sizof change from CLI
+
+    * (PHP_5_3)
+      sapi/cli/php_cli.c:
+      - MFH Use sizeof rather than strlen and cleanup
+
+    * sapi/cli/php_cli.c:
+      - Use sizeof rather than strlen and cleanup
+
+2008-03-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c:
+      Removed unused variable
+
+2008-03-25  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      NEWS:
+      Fix typo, thank Jani :)
+
+    * (PHP_5_3)
+      NEWS:
+      news entry
+
+    * ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/tests/mysqli_stmt_datatype_change.phpt
+      ext/mysqlnd/mysqlnd_charset.c
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_structs.h:
+      MFB : Fix for Bug #43832 mysqi_get_charset() doesn't expose charset comment
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/tests/mysqli_stmt_datatype_change.phpt
+      ext/mysqlnd/mysqlnd_charset.c
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_structs.h:
+      Small updates & a fix for
+      Bug #43832 mysqi_get_charset() doesn't expose charset comment
+
+2008-03-25  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h:
+      MFH:
+      - Renamed zend_do_fetch_class_name() to zend_do_build_full_name() (It is
+      not used only for classes)
+      - Moved zend_resolve_class_name prototype to zend_compile.h
+
+2008-03-25  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_3)
+      ext/oci8/oci8_statement.c:
+      revert stmt release on connection error change (and sync with PHP 6)
+
+    * (PHP_5_3)
+      ext/oci8/oci8_lob.c
+      ext/oci8/tests/lob_028.phpt:
+      Remove trailing period from error thus syncing with PHP 6
+
+2008-03-25  Johannes Schlüter  <johannes@schlueters.de>
+
+    * main/logos.h:
+      - New egg
+
+2008-03-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c:
+      Optimized detection of "__call" and "__callstatic" methods.
+
+    * (PHP_5_2)
+      ext/standard/tests/array/bug42177.phpt:
+      Fixed test (removed leaks becaue of cyrcular references)
+
+2008-03-25  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/oci8/config.m4
+      ext/oci8/config.w32
+      ext/oci8/oci8.c
+      ext/oci8/oci8_collection.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8.h
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/drcp_cclass1.phpt
+      ext/oci8/tests/drcp_connect1.phpt
+      main/build-defs.h.in:
+      oci8: Sync with 5.3 - version macro updates and DRCP tweaks
+
+    * (PHP_5_3)
+      ext/oci8/config.m4
+      ext/oci8/config.w32
+      ext/oci8/oci8.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/php_oci8.h
+      ext/oci8/php_oci8_int.h
+      main/build-defs.h.in:
+      rename PHP_OCI8_VERSION in preparation for peclversioning RFC.  Remove
+      obsolete HAVE_OCI8_ATTR_STATEMENT macro
+
 2008-03-24  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/tests/dir/rewinddir_basic.phpt:
