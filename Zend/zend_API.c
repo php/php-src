@@ -476,7 +476,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 							*p = Z_STRVAL_PP(arg);
 							*pl = Z_STRLEN_PP(arg);
 							break;
-						} else if (c == 'S') {
+						} else if (c == 'S' && Z_TYPE_PP(arg) != IS_NULL /* NULL is ok */) {
 							return "strictly a binary string";
 						}
 						/* fall through */
