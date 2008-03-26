@@ -204,7 +204,7 @@ ZEND_API int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_erro
 
 	CG(ini_parser_unbuffered_errors) = unbuffered_errors;
 	retval = ini_parse(TSRMLS_C);
-	zend_ini_close_file(fh TSRMLS_CC);
+	zend_file_handle_dtor(fh TSRMLS_CC);
 
 	shutdown_ini_scanner(TSRMLS_C);
 	

@@ -23,8 +23,15 @@
 #define ZEND_SCANNER_H
 
 typedef struct _zend_lex_state {
-	YY_BUFFER_STATE buffer_state;
-	int state;
+	unsigned int yy_leng;
+	unsigned char *yy_start;
+	unsigned char *yy_text;
+	unsigned char *yy_cursor;
+	unsigned char *yy_marker;
+	unsigned char *yy_limit;
+	int yy_state;
+	zend_stack state_stack;
+
 	zend_file_handle *in;
 	uint lineno;
 	char *filename;
@@ -38,7 +45,6 @@ typedef struct _zend_lex_state {
 } zend_lex_state;
 
 
-void zend_fatal_scanner_error(char *);
 BEGIN_EXTERN_C()
 int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2);
 ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state TSRMLS_DC);

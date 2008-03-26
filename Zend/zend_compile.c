@@ -87,7 +87,7 @@ static void build_runtime_defined_function_key(zval *result, zend_uchar type, zs
 	char *filename;
 	uint filename_length;
 
-	char_pos_len = zend_sprintf(char_pos_buf, "%p", LANG_SCNG(_yy_last_accepting_cpos));
+	char_pos_len = zend_sprintf(char_pos_buf, "%p", LANG_SCNG(yy_text));
 	if (CG(active_op_array)->filename) {
 		filename = CG(active_op_array)->filename;
 	} else {
@@ -169,6 +169,14 @@ void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
+ZEND_API void file_handle_dtor(zend_file_handle *fh) /* {{{ */
+{
+	TSRMLS_FETCH();
+ 
+	zend_file_handle_dtor(fh TSRMLS_CC);
+}
+/* }}} */
+
 void init_compiler(TSRMLS_D) /* {{{ */
 {
 	CG(auto_globals_cache) = emalloc(sizeof(zval**) * zend_hash_num_elements(CG(auto_globals)));
@@ -177,7 +185,7 @@ void init_compiler(TSRMLS_D) /* {{{ */
 	zend_init_rsrc_list(TSRMLS_C);
 	zend_hash_init(&CG(filenames_table), 5, NULL, (dtor_func_t) free_estring, 0);
 	zend_hash_init(&CG(script_encodings_table), 5, NULL, (dtor_func_t) free_estring, 0);
-	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) zend_file_handle_dtor, 0);
+	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) file_handle_dtor, 0);
 	CG(unclean_shutdown) = 0;
 }
 /* }}} */
