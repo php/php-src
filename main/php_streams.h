@@ -622,6 +622,9 @@ END_EXTERN_C()
 /* don't check allow_url_fopen and allow_url_include */
 #define STREAM_DISABLE_URL_PROTECTION   0x00002000
 
+/* assume the path passed in exists and is fully expanded, avoiding syscalls */
+#define STREAM_ASSUME_REALPATH          0x00004000
+
 /* Antique - no longer has meaning */
 #define IGNORE_URL_WIN 0
 
