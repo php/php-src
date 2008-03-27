@@ -12,25 +12,28 @@ create_files($path, 3);
 
 echo "call readdir():\n";
 var_dump($dh = opendir($path));
-while( FALSE !== ($file = readdir($dh)) ) {
-	var_dump($file);
-}
+$files = array();
+while( FALSE !== ($files[] = readdir($dh)) ) {}
+sort($files);
+var_dump($files);
+$files = array();
 
 echo "\ncall fseek() on directory resource:\n";
 var_dump(fseek($dh, 20));
 
 echo "call readdir():\n";
-while( FALSE !== ($file = readdir($dh)) ) {
-	var_dump($file);
-}
+while( FALSE !== ($files[] = readdir($dh)) ) {}
+sort($files);
+var_dump($files);
+$files = array();
 
 echo "\ncall fseek() with different arguments on directory resource:\n";
 var_dump(fseek($dh, 20, SEEK_END));
 
 echo "call readdir():\n";
-while( FALSE !== ($file = readdir($dh)) ) {
-	var_dump($file);
-}
+while( FALSE !== ($files[] = readdir($dh)) ) {}
+sort($files);
+var_dump($files);
 
 delete_files($path, 3);
 closedir($dh);
@@ -39,55 +42,109 @@ var_dump(rmdir($path));
 ?>
 --EXPECTF--
 call readdir():
-resource(%d) of type (stream)
-string(1) "."
-string(2) ".."
-string(9) "file1.tmp"
-string(9) "file2.tmp"
-string(9) "file3.tmp"
+resource(12) of type (stream)
+array(6) {
+  [0]=>
+  bool(false)
+  [1]=>
+  string(1) "."
+  [2]=>
+  string(2) ".."
+  [3]=>
+  string(9) "file1.tmp"
+  [4]=>
+  string(9) "file2.tmp"
+  [5]=>
+  string(9) "file3.tmp"
+}
 
 call fseek() on directory resource:
 int(0)
 call readdir():
-string(1) "."
-string(2) ".."
-string(9) "file1.tmp"
-string(9) "file2.tmp"
-string(9) "file3.tmp"
+array(6) {
+  [0]=>
+  bool(false)
+  [1]=>
+  string(1) "."
+  [2]=>
+  string(2) ".."
+  [3]=>
+  string(9) "file1.tmp"
+  [4]=>
+  string(9) "file2.tmp"
+  [5]=>
+  string(9) "file3.tmp"
+}
 
 call fseek() with different arguments on directory resource:
 int(0)
 call readdir():
-string(1) "."
-string(2) ".."
-string(9) "file1.tmp"
-string(9) "file2.tmp"
-string(9) "file3.tmp"
+array(6) {
+  [0]=>
+  bool(false)
+  [1]=>
+  string(1) "."
+  [2]=>
+  string(2) ".."
+  [3]=>
+  string(9) "file1.tmp"
+  [4]=>
+  string(9) "file2.tmp"
+  [5]=>
+  string(9) "file3.tmp"
+}
 bool(true)
 --UEXPECTF--
 call readdir():
-resource(%d) of type (stream)
-unicode(1) "."
-unicode(2) ".."
-unicode(9) "file1.tmp"
-unicode(9) "file2.tmp"
-unicode(9) "file3.tmp"
+resource(12) of type (stream)
+array(6) {
+  [0]=>
+  bool(false)
+  [1]=>
+  unicode(1) "."
+  [2]=>
+  unicode(2) ".."
+  [3]=>
+  unicode(9) "file1.tmp"
+  [4]=>
+  unicode(9) "file2.tmp"
+  [5]=>
+  unicode(9) "file3.tmp"
+}
 
 call fseek() on directory resource:
 int(0)
 call readdir():
-unicode(1) "."
-unicode(2) ".."
-unicode(9) "file1.tmp"
-unicode(9) "file2.tmp"
-unicode(9) "file3.tmp"
+array(6) {
+  [0]=>
+  bool(false)
+  [1]=>
+  unicode(1) "."
+  [2]=>
+  unicode(2) ".."
+  [3]=>
+  unicode(9) "file1.tmp"
+  [4]=>
+  unicode(9) "file2.tmp"
+  [5]=>
+  unicode(9) "file3.tmp"
+}
 
 call fseek() with different arguments on directory resource:
 int(0)
 call readdir():
-unicode(1) "."
-unicode(2) ".."
-unicode(9) "file1.tmp"
-unicode(9) "file2.tmp"
-unicode(9) "file3.tmp"
+array(6) {
+  [0]=>
+  bool(false)
+  [1]=>
+  unicode(1) "."
+  [2]=>
+  unicode(2) ".."
+  [3]=>
+  unicode(9) "file1.tmp"
+  [4]=>
+  unicode(9) "file2.tmp"
+  [5]=>
+  unicode(9) "file3.tmp"
+}
 bool(true)
