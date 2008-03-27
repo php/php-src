@@ -5,8 +5,6 @@ PHP                                                                        NEWS
 
 - Changed dl() to be disabled by default. Enabled only when explicitly
   registered by the SAPI layer. Enabled only with CLI, CGI and EMBED. (Dmitry)
-- Changed "instanceof" and "catch" operators, is_a() and is_subclass_of()
-  functions to not call __autoload(). (Dmitry)
 - Changed opendir/dir/scandir to use default context
   when no context argument is passed. (Sara)
 - Changed open_basedir to allow tightening in runtime contexts. (Sara)
