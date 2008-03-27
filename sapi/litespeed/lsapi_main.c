@@ -76,7 +76,8 @@ zend_module_entry litespeed_module_entry;
  */
 static int php_lsapi_startup(sapi_module_struct *sapi_module)
 {
-    if (php_module_startup(sapi_module, NULL, 0)==FAILURE) {
+    if (php_module_startup(sapi_module, NULL, 0)==FAILURE) 
+	{
         return FAILURE;
     }
     return SUCCESS;
@@ -127,7 +128,9 @@ static void sapi_lsapi_flush( void * server_context )
     if ( lsapi_mode )
     {
         if ( LSAPI_Flush() == -1)
+		{
             php_handle_aborted_connection();
+		}
     }
 }
 /* }}} */
@@ -150,9 +153,13 @@ static int sapi_lsapi_deactivate(TSRMLS_D)
 static char *sapi_lsapi_getenv( char * name, size_t name_len TSRMLS_DC )
 {
     if ( lsapi_mode )
+	{
         return LSAPI_GetEnv( name );
-    else
-        return getenv( name );
+    }
+	else
+    {
+		return getenv( name );
+	}
 }
 /* }}} */
 
@@ -204,7 +211,9 @@ static int sapi_lsapi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
         return LSAPI_ReadReqBody( buffer, count_bytes );
     }
     else
+	{
         return 0;
+	}
 }
 /* }}} */
 
@@ -216,9 +225,14 @@ static int sapi_lsapi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 static char *sapi_lsapi_read_cookies(TSRMLS_D)
 {
     if ( lsapi_mode )
+	{
         return LSAPI_GetHeader( H_COOKIE );
-    else
-        return NULL;
+    }
+	else
+    {
+		return NULL;
+
+	}
 }
 /* }}} */
 
@@ -234,10 +248,13 @@ static int sapi_lsapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
         LSAPI_SetRespStatus( SG(sapi_headers).http_response_code );
 
         h = zend_llist_get_first_ex(&sapi_headers->headers, &pos);
-        while (h) {
+        while (h) 
+		{
             if ( h->header_len > 0 )
+			{
                 LSAPI_AppendRespHeader(h->header, h->header_len);
-            h = zend_llist_get_next_ex(&sapi_headers->headers, &pos);
+            }
+			h = zend_llist_get_next_ex(&sapi_headers->headers, &pos);
         }
         if (SG(sapi_headers).send_default_content_type)
         {
@@ -339,8 +356,10 @@ static int lsapi_module_main(int show_source TSRMLS_DC)
     zend_file_handle file_handle = {0};
 
     if (php_request_startup(TSRMLS_C) == FAILURE )
+	{
         return -1;
-    if (show_source)
+    }
+	if (show_source)
     {
         zend_syntax_highlighter_ini syntax_highlighter_ini;
 
@@ -373,8 +392,10 @@ static int alter_ini( const char * pKey, int keyLen, const char * pValue, int va
     {
         ++pKey;
         if ( *pKey == 4 )
+		{
             type = ZEND_INI_SYSTEM;
-        ++pKey;
+        }
+		++pKey;
         --keyLen;
         zend_alter_ini_entry((char *)pKey, keyLen,
                              (char *)pValue, valLen,
@@ -404,8 +425,9 @@ static int processReq( TSRMLS_D )
         override_ini();
 
         if ( lsapi_module_main( source_highlight TSRMLS_CC ) == -1 )
+		{
             ret = -1;
-
+		}
     } zend_end_try();
     return ret;
 }
@@ -478,8 +500,10 @@ static int parse_opt( int argc, char * argv[], int *climode,
         }
     }
     if ( p - argv < argc )
+	{
         *climode = 1;
-    return 0;
+    }
+	return 0;
 }
 
 static int cli_main( int argc, char * argv[] )
@@ -689,7 +713,9 @@ void start_children( int children )
             }
         } 
         if ( s_stop )
+		{
             break;
+		}
         pid = wait( &status );
         running--;
     }
@@ -724,11 +750,15 @@ int main( int argc, char * argv[] )
     if (argc > 1 )
     {
         if ( parse_opt( argc, argv, &climode, &php_ini_path, &php_bind ) == -1 )
+		{
             return 1;
+		}
     }
     if ( climode )
+	{
         lsapi_sapi_module.phpinfo_as_text = 1;
-    sapi_startup(&lsapi_sapi_module);
+    }
+	sapi_startup(&lsapi_sapi_module);
 
 #ifdef ZTS
     compiler_globals = ts_resource(compiler_globals_id);
@@ -743,9 +773,12 @@ int main( int argc, char * argv[] )
     lsapi_sapi_module.executable_location = argv[0];
 
     if ( php_ini_path )
+	{
         lsapi_sapi_module.php_ini_path_override = php_ini_path;
+	}
 
-    if (php_module_startup(&lsapi_sapi_module, &litespeed_module_entry, 1) == FAILURE) {
+    if (php_module_startup(&lsapi_sapi_module, &litespeed_module_entry, 1) == FAILURE) 
+	{
 #ifdef ZTS
         tsrm_shutdown();
 #endif
@@ -779,14 +812,18 @@ int main( int argc, char * argv[] )
     LSAPI_Init_Env_Parameters( NULL );
 
     if ( php_bind )
+	{
         LSAPI_No_Check_ppid();
+	}
 
     while( LSAPI_Prefork_Accept_r( &g_req ) >= 0 )
     {
         ret = processReq(TSRMLS_C);
         LSAPI_Finish();
         if ( ret )
+		{
             break;
+		}
     }
     php_module_shutdown(TSRMLS_C);
 
@@ -854,7 +891,8 @@ static int add_associate_array( const char * pKey, int keyLen, const char * pVal
 PHP_FUNCTION(litespeed_request_headers)
 {
     //TODO:
-    if (ZEND_NUM_ARGS() > 0) {
+    if (ZEND_NUM_ARGS() > 0) 
+	{
         WRONG_PARAM_COUNT;
     }
     array_init(return_value);
@@ -876,11 +914,13 @@ PHP_FUNCTION(litespeed_response_headers)
     int          len;
     char         headerBuf[SAPI_LSAPI_MAX_HEADER_LENGTH];
 
-    if (ZEND_NUM_ARGS() > 0) {
+    if (ZEND_NUM_ARGS() > 0) 
+	{
 		WRONG_PARAM_COUNT;
 	}
 
-	if (!&SG(sapi_headers).headers) {
+	if (!&SG(sapi_headers).headers) 
+	{
 		RETURN_FALSE;
 	}
 	array_init(return_value);
@@ -896,7 +936,9 @@ PHP_FUNCTION(litespeed_response_headers)
             {
                 memmove( headerBuf, h->header, len );
                 while( len > 0 && (isspace( headerBuf[len-1])) )
+				{
                     --len;
+				}
                 headerBuf[len] = 0;
                 if ( len )
                 {
