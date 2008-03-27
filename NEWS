@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Mar 2008 , PHP 5.2.6
+27 Mar 2008 , PHP 5.2.6RC3
 - Properly address incomplete multibyte chars inside escapeshellcmd() (Ilia,
   Stefan Esser)
 - Fix integer overflow in printf(). (Stas, Maksymilian Aciemowicz)
