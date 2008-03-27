@@ -23,6 +23,8 @@ Major feature functionality release
  * implement Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
  * implement Phar::mount() for mounting external paths or files to locations inside a phar [Greg]
  * add Phar::delete() [Greg]
+
+Changes since 2.0.0a1: fix build in PHP 5.2
 ';
 
 if (!class_exists("Phar") && !extension_loaded("Phar")) {
