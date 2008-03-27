@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 - Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
 - Dropped zend.ze1_compatibility_mode (Dmitry)
 
+- Added ability to use stream wrappers in include_path (Gregory, Dmitry)
 - Added concept of "delayed early binding" that allows opcode caches to perform
   class declaration (early and/or run-time binding) in exactly the same order
   as vanila php. (Dmitry)
