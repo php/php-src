@@ -889,9 +889,13 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 		}
 		return NULL;
 	}
-	
-	if ((realpath = expand_filepath(filename, NULL TSRMLS_CC)) == NULL) {
-		return NULL;
+
+	if (options & STREAM_ASSUME_REALPATH) {
+		realpath = estrdup(filename);
+	} else {
+		if ((realpath = expand_filepath(filename, NULL TSRMLS_CC)) == NULL) {
+			return NULL;
+		}
 	}
 
 	if (persistent) {

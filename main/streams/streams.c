@@ -2356,6 +2356,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	php_stream_wrapper *wrapper = NULL;
 	char *path_to_open;
 	int persistent = options & STREAM_OPEN_PERSISTENT;
+	char *resolved_path = NULL;
 	char *copy_of_path = NULL;
 	char implicit_mode[16];
 	int modelen = strlen(mode);
@@ -2368,11 +2369,24 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		return NULL;
 	}
 
+	if (options & USE_PATH) {
+		resolved_path = php_resolve_path(path, strlen(path), PG(include_path) TSRMLS_CC);
+		if (resolved_path) {
+			path = resolved_path;
+			/* we've found this file, don't re-check include_path or run realpath */
+			options |= STREAM_ASSUME_REALPATH;
+			options &= ~USE_PATH;
+		}
+	}
+
 	path_to_open = path;
 
 	wrapper = php_stream_locate_url_wrapper(path, &path_to_open, options TSRMLS_CC);
 	if (options & STREAM_USE_URL && (!wrapper || !wrapper->is_url)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This function may only be used against URLs");
+		if (resolved_path) {
+			efree(resolved_path);
+		}
 		return NULL;
 	}
 
@@ -2412,6 +2426,10 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	}
 
 	if (stream) {
+		if (opened_path && !*opened_path && resolved_path) {
+			*opened_path = resolved_path;
+			resolved_path = NULL;
+		}
 		if (stream->orig_path) {
 			pefree(stream->orig_path, persistent);
 		}
@@ -2430,12 +2448,18 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 					(options & STREAM_WILL_CAST)
 						? PHP_STREAM_PREFER_STDIO : PHP_STREAM_NO_PREFERENCE)) {
 			case PHP_STREAM_UNCHANGED:
+				if (resolved_path) {
+					efree(resolved_path);
+				}
 				return stream;
 			case PHP_STREAM_RELEASED:
 				if (newstream->orig_path) {
 					pefree(newstream->orig_path, persistent);
 				}
 				newstream->orig_path = pestrdup(path, persistent);
+				if (resolved_path) {
+					efree(resolved_path);
+				}
 				return newstream;
 			default:
 				php_stream_close(stream);
@@ -2478,6 +2502,9 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	}
 #endif
 
+	if (resolved_path) {
+		efree(resolved_path);
+	}
 	return stream;
 }
 /* }}} */

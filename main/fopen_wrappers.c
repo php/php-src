@@ -455,14 +455,22 @@ PHPAPI char *php_resolve_path(const char *filename, int filename_length, const c
 	char resolved_path[MAXPATHLEN];
 	char trypath[MAXPATHLEN];
 	const char *ptr, *end, *p;
+	char *actual_path;
+	php_stream_wrapper *wrapper;
 
 	if (!filename) {
 		return NULL;
 	}
 
-	/* Don't resolve paths which contain protocol */
+	/* Don't resolve paths which contain protocol (except of file://) */
 	for (p = filename; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++);
 	if ((*p == ':') && (p - filename > 1) && (p[1] == '/') && (p[2] == '/')) {
+		wrapper = php_stream_locate_url_wrapper(filename, &actual_path, STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
+		if (wrapper == &php_plain_files_wrapper) {
+			if (tsrm_realpath(actual_path, resolved_path TSRMLS_CC)) {
+				return estrdup(resolved_path);
+			}
+		}
 		return NULL;
 	}
 
@@ -481,7 +489,18 @@ PHPAPI char *php_resolve_path(const char *filename, int filename_length, const c
 
 	ptr = path;
 	while (ptr && *ptr) {
-		end = strchr(ptr, DEFAULT_DIR_SEPARATOR);
+		/* Check for stream wrapper */
+		int is_stream_wrapper = 0;
+
+		for (p = ptr; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++);
+		if ((*p == ':') && (p - ptr > 1) && (p[1] == '/') && (p[2] == '/')) {
+			/* .:// or ..:// is not a stream wrapper */
+			if (p[-1] != '.' || p[-2] != '.' || p - 2 != ptr) {
+				p += 3;
+				is_stream_wrapper = 1;
+			}
+		}
+		end = strchr(p, DEFAULT_DIR_SEPARATOR);
 		if (end) {
 			if ((end-ptr) + 1 + filename_length + 1 >= MAXPATHLEN) {
 				ptr = end + 1;
@@ -502,7 +521,23 @@ PHPAPI char *php_resolve_path(const char *filename, int filename_length, const c
 			memcpy(trypath+len+1, filename, filename_length+1);
 			ptr = NULL;
 		}
-		if (tsrm_realpath(trypath, resolved_path TSRMLS_CC)) {
+		actual_path = trypath;
+		if (is_stream_wrapper) {
+			wrapper = php_stream_locate_url_wrapper(trypath, &actual_path, STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
+			if (!wrapper) {
+				continue;
+			} else if (wrapper != &php_plain_files_wrapper) {
+				if (wrapper->wops->url_stat) {
+					php_stream_statbuf ssb;
+
+					if (SUCCESS == wrapper->wops->url_stat(wrapper, trypath, 0, &ssb, NULL TSRMLS_CC)) {
+						return estrdup(trypath);
+					}
+				}
+				continue;
+			}
+		}
+		if (tsrm_realpath(actual_path, resolved_path TSRMLS_CC)) {
 			return estrdup(resolved_path);
 		}
 	} /* end provided path */
@@ -519,7 +554,27 @@ PHPAPI char *php_resolve_path(const char *filename, int filename_length, const c
 		    exec_fname_length + 1 + filename_length + 1 < MAXPATHLEN) {
 			memcpy(trypath, exec_fname, exec_fname_length + 1);
 			memcpy(trypath+exec_fname_length + 1, filename, filename_length+1);
-			if (tsrm_realpath(trypath, resolved_path TSRMLS_CC)) {
+			actual_path = trypath;
+
+			/* Check for stream wrapper */
+			for (p = trypath; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++);
+			if ((*p == ':') && (p - trypath > 1) && (p[1] == '/') && (p[2] == '/')) {
+				wrapper = php_stream_locate_url_wrapper(trypath, &actual_path, STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
+				if (!wrapper) {
+					return NULL;
+				} else if (wrapper != &php_plain_files_wrapper) {
+					if (wrapper->wops->url_stat) {
+						php_stream_statbuf ssb;
+
+						if (SUCCESS == wrapper->wops->url_stat(wrapper, trypath, 0, &ssb, NULL TSRMLS_CC)) {
+							return estrdup(trypath);
+						}
+					}
+					return NULL;
+				}
+			}
+
+			if (tsrm_realpath(actual_path, resolved_path TSRMLS_CC)) {
 				return estrdup(resolved_path);
 			}
 		}
