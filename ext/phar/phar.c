@@ -2678,6 +2678,7 @@ int phar_zend_open(const char *filename, zend_file_handle *handle TSRMLS_DC) /* 
 		}
 		return FAILURE;
 	}
+#if HELLY_0
 	if (0 && zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
 		char *fname = NULL;
 		int fname_len;
@@ -2737,6 +2738,7 @@ dopharthing:
 			return FAILURE;
 		}
 	}
+#endif
 skip_phar:
 	return phar_orig_zend_open(filename, handle TSRMLS_CC);
 }
