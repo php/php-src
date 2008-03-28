@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2008, PHP 5.2.6
+- Fixed bug #44557 (Crash in imap_setacl when supplied integer as username)
+  (Thomas Jarosch)
 
 27 Mar 2008, PHP 5.2.6RC3
 - Properly address incomplete multibyte chars inside escapeshellcmd() (Ilia,

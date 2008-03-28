@@ -1051,6 +1051,7 @@ PHP_FUNCTION(imap_setacl)
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
 
 	convert_to_string_ex(mailbox);
+	convert_to_string_ex(id);
 	convert_to_string_ex(rights);
 
 	RETURN_BOOL(imap_setacl(imap_le_struct->imap_stream, Z_STRVAL_PP(mailbox), Z_STRVAL_PP(id), Z_STRVAL_PP(rights)));
