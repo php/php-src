@@ -40,7 +40,6 @@ PHP                                                                        NEWS
     mhash_keygen.
 
 - Added runtime JIT auto-globals fetching and caching. (Dmitry, Sara)
-- Added "jump label" operator (limited "goto"). (Dmitry, Sara)
 - Added E_STRICT to E_ALL. (Dmitry)
 - Added streams features:
   . Second optional parameter to stream_context_create() to
