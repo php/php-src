@@ -450,8 +450,8 @@ PHPAPI char *php_url_encode(char const *s, int len, int *new_length)
 	unsigned char *to, *start;
 	unsigned char const *from, *end;
 	
-	from = s;
-	end = s + len;
+	from = (unsigned char *)s;
+	end = (unsigned char *)s + len;
 	start = to = (unsigned char *) safe_emalloc(3, len, 1);
 
 	while (from < end) {
