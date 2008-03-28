@@ -30,7 +30,7 @@ static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, php_ui
 			return FAILURE;
 		}
 		/* clean up header for big-endian systems */
-		if (h.header.tag[0] != 'n' || h.header.tag[1] != 'u') {
+		if (h.header.tag[0] != 'u' || h.header.tag[1] != 'n') {
 			/* skip to next header */
 			php_stream_seek(fp, h.header.size, SEEK_CUR);
 			len -= h.header.size + 4;
