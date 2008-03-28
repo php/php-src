@@ -390,6 +390,11 @@ int pass_two(zend_op_array *op_array TSRMLS_DC)
 			Z_SET_REFCOUNT(opline->op2.u.constant, 2);
 		}
 		switch (opline->opcode) {
+			case ZEND_GOTO:
+				if (Z_TYPE(opline->op2.u.constant) != IS_LONG) {
+					zend_resolve_goto_label(op_array, opline, 1 TSRMLS_CC);
+				}
+				/* break omitted intentionally */
 			case ZEND_JMP:
 				opline->op1.u.jmp_addr = &op_array->opcodes[opline->op1.u.opline_num];
 				break;

@@ -131,6 +131,9 @@ struct _zend_compiler_globals {
 	zval      *current_namespace;
 	HashTable *current_import;
 
+	HashTable *labels;
+	zend_stack labels_stack;
+
 #ifdef ZTS
 	HashTable **static_members;
 	int last_static_member;
