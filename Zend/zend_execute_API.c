@@ -1371,6 +1371,11 @@ void execute_new_code(TSRMLS_D) /* {{{ */
 			Z_SET_REFCOUNT(opline->op2.u.constant, 2);
 		}
 		switch (opline->opcode) {
+			case ZEND_GOTO:
+				if (Z_TYPE(opline->op2.u.constant) != IS_LONG) {
+					zend_resolve_goto_label(CG(active_op_array), opline, 1 TSRMLS_CC);
+				}
+				/* break omitted intentionally */
 			case ZEND_JMP:
 				opline->op1.u.jmp_addr = &CG(active_op_array)->opcodes[opline->op1.u.opline_num];
 				break;
@@ -1385,7 +1390,9 @@ void execute_new_code(TSRMLS_D) /* {{{ */
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;
 	}
-
+	
+	zend_release_labels(TSRMLS_C);
+	
 	EG(return_value_ptr_ptr) = &local_retval;
 	EG(active_op_array) = CG(active_op_array);
 	zend_execute(CG(active_op_array) TSRMLS_CC);

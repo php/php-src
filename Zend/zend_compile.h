@@ -95,6 +95,10 @@ typedef struct _zend_brk_cont_element {
 	int parent;
 } zend_brk_cont_element;
 
+typedef struct _zend_label {
+	int brk_cont;
+	zend_uint opline_num;
+} zend_label;
 
 typedef struct _zend_try_catch_element {
 	zend_uint try_op;
@@ -519,6 +523,11 @@ void zend_do_build_namespace_name(znode *result, znode *prefix, znode *name TSRM
 void zend_do_namespace(znode *name TSRMLS_DC);
 void zend_do_use(znode *name, znode *new_name, int is_global TSRMLS_DC);
 void zend_do_end_compilation(TSRMLS_D);
+
+void zend_do_label(znode *label TSRMLS_DC);
+void zend_do_goto(znode *label TSRMLS_DC);
+void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2 TSRMLS_DC);
+void zend_release_labels(TSRMLS_D);
 
 ZEND_API void function_add_ref(zend_function *function);
 
