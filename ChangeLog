@@ -1,3 +1,73 @@
+2008-03-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.2.6RC3
+
+2008-03-27  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/tests/file/fseek_dir_basic.phpt:
+      MFB: fix test
+
+2008-03-27  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_2)
+      ext/standard/credits_ext.h:
+      Recreate
+
+2008-03-27  Antony Dovgal  <tony@daylessday.org>
+
+    * ZendEngine2/.cvsignore:
+      don't ignore pre-generated files
+
+2008-03-27  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/fseek_dir_basic.phpt:
+      MF53:- Fix test (readdir() does not sort the results..)
+
+    * (PHP_5_3)
+      ext/standard/tests/file/fseek_dir_basic.phpt:
+      - Fix test (readdir() does not sort the results..)
+
+2008-03-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/tests/file/include_streams.phpt
+      ext/standard/tests/file/include_streams.phpt
+      main/fopen_wrappers.c
+      main/php_streams.h
+      main/streams/plain_wrapper.c
+      main/streams/streams.c:
+      
+      file include_streams.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      ext/standard/tests/file/include_streams.phpt
+      main/fopen_wrappers.c
+      main/php_streams.h
+      main/streams/plain_wrapper.c
+      main/streams/streams.c:
+      Added ability to use stream wrappers in include_path
+
+2008-03-27  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/tokenizer/Makefile.frag:
+      add missing EOL and fix build
+
+2008-03-27  Felipe Pena  <felipensp@gmail.com>
+
+    * NEWS:
+      This was done in 5.1
+
 2008-03-26  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_3)
