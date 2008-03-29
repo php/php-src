@@ -1,3 +1,70 @@
+2008-03-28  Felipe Pena  <felipensp@gmail.com>
+
+    * NEWS:
+      Merged into 5_3
+
+2008-03-28  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/ldap/tests/.cvsignore
+      ext/standard/tests/class_object/.cvsignore
+      ext/standard/tests/class_object/.cvsignore:
+      ignore generated files
+
+    * ext/ldap/tests/.cvsignore
+      ext/ldap/tests/.cvsignore
+      ext/standard/tests/class_object/.cvsignore:
+      
+      file .cvsignore was initially added on branch PHP_5_3.
+
+2008-03-28  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.c:
+      MFB: Fixed bug #44557 (Crash in imap_setacl when supplied integer as
+      username)
+
+    * (PHP_5_2)
+      NEWS
+      ext/imap/php_imap.c:
+      Fixed bug #44557 (Crash in imap_setacl when supplied integer as username)
+      (patch by Thomas Jarosch)
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner_defs.h
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/jump01.phpt
+      ZendEngine2/tests/jump02.phpt
+      ZendEngine2/tests/jump03.phpt
+      ZendEngine2/tests/jump04.phpt
+      ZendEngine2/tests/jump05.phpt
+      ZendEngine2/tests/jump06.phpt
+      ZendEngine2/tests/jump07.phpt
+      ZendEngine2/tests/jump08.phpt
+      ZendEngine2/tests/jump09.phpt
+      ZendEngine2/tests/jump10.phpt
+      ZendEngine2/tests/jump11.phpt
+      ZendEngine2/tests/jump12.phpt
+      ZendEngine2/tests/jump13.phpt
+      ext/standard/url_scanner_ex.c:
+      MFH: Implemented "jump label" operator (limited "goto")
+      [DOC]
+
+2008-03-28  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/standard/url.c:
+      fix compile warnings
+
 2008-03-27  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
