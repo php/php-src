@@ -208,8 +208,8 @@ struct _zend_op_array {
 	zend_uint T;
 
 	zend_brk_cont_element *brk_cont_array;
-	zend_uint last_brk_cont;
-	zend_uint current_brk_cont;
+	int last_brk_cont;
+	int current_brk_cont;
 
 	zend_try_catch_element *try_catch_array;
 	int last_try_catch;
