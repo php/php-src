@@ -1,3 +1,34 @@
+2008-03-28  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      zend_compile.c
+      zend_compile.h
+      zend_execute_API.c
+      zend_globals.h
+      zend_language_parser.y
+      zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner_defs.h
+      zend_opcode.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/jump01.phpt
+      tests/jump02.phpt
+      tests/jump03.phpt
+      tests/jump04.phpt
+      tests/jump05.phpt
+      tests/jump06.phpt
+      tests/jump07.phpt
+      tests/jump08.phpt
+      tests/jump09.phpt
+      tests/jump10.phpt
+      tests/jump11.phpt
+      tests/jump12.phpt
+      tests/jump13.phpt:
+      MFH: Implemented "jump label" operator (limited "goto")
+      [DOC]
+
 2008-03-27  Antony Dovgal  <tony@daylessday.org>
 
     * .cvsignore:
