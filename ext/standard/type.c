@@ -179,13 +179,14 @@ PHP_FUNCTION(intval)
    Get the float value of a variable */
 PHP_FUNCTION(floatval)
 {
-	double retval;
+	zval **num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &retval) == FAILURE) {
-		return;
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
+		WRONG_PARAM_COUNT;
 	}
 
-	RETURN_DOUBLE(retval);
+	RETVAL_ZVAL(*num, 1, 0);
+	convert_to_double(return_value);
 }
 /* }}} */
 
