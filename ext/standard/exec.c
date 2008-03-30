@@ -265,6 +265,8 @@ PHPAPI char *php_escape_shell_cmd(char *str)
 		if (mb_len < 0) {
 			continue;
 		} else if (mb_len > 1) {
+			memcpy(cmd + y, str + x, mb_len);
+			y += mb_len;
 			x += mb_len - 1;
 			continue;
 		}
@@ -353,6 +355,8 @@ PHPAPI char *php_escape_shell_arg(char *str)
 		if (mb_len < 0) {
 			continue;
 		} else if (mb_len > 1) {
+			memcpy(cmd + y, str + x, mb_len);
+			y += mb_len;
 			x += mb_len - 1;
 			continue;
 		}
