@@ -1,3 +1,14 @@
+2008-03-29  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/type.c:
+      - Fixed bug #44533 (floatval() issues E_NOTICE "non well formed numeric
+      value")
+      (Keep the old behavior, as other related functions)
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.h:
+      Fix for segfault on 64bit platform
+
 2008-03-28  Felipe Pena  <felipensp@gmail.com>
 
     * NEWS:

@@ -1,3 +1,9 @@
+2008-03-29  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      zend_compile.h:
+      Fix for segfault on 64bit platform
+
 2008-03-28  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
