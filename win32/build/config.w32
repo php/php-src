@@ -58,7 +58,7 @@ if (!PATH_PROG('bison')) {
 }
 
 // There's a minimum requirement for re2c..
-MINRE2C = "0.13.4";
+MINRE2C = "0.13.3";
 
 RE2C = PATH_PROG('re2c');
 if (RE2C) {
