@@ -868,9 +868,9 @@ static char *date_format(char *format, int format_len, int *return_len, timelib_
 			offset->abbr = strdup(t->tz_abbr);
 		} else if (t->zone_type == TIMELIB_ZONETYPE_OFFSET) {
 			offset = timelib_time_offset_ctor();
-			offset->offset = (t->z - (t->dst * 60)) * -60;
+			offset->offset = (t->z) * -60;
 			offset->leap_secs = 0;
-			offset->is_dst = t->dst;
+			offset->is_dst = 0;
 			offset->abbr = malloc(9); /* GMT±xxxx\0 */
 			snprintf(offset->abbr, 9, "GMT%c%02d%02d", 
 			                          localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
