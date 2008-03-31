@@ -225,7 +225,7 @@ zend_module_entry fileinfo_module_entry = {
 	NULL,
 	PHP_MINFO(fileinfo),
 #if ZEND_MODULE_API_NO >= 20010901
-	"0.1", /* Replace with version number for your extension */
+	PHP_FILEINFO_VERSION,
 #endif
 	STANDARD_MODULE_PROPERTIES
 };
@@ -241,6 +241,7 @@ PHP_MINFO_FUNCTION(fileinfo)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "fileinfo support", "enabled");
+	php_info_print_table_row(2, "version", PHP_FILEINFO_VERSION);
 	php_info_print_table_end();
 }
 /* }}} */
