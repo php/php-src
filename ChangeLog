@@ -1,3 +1,59 @@
+2008-03-30  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/tokenizer/tokenizer_data.c:
+      Fix WS.
+
+    * (PHP_5_3)
+      ext/tokenizer/tokenizer_data.c
+      ext/tokenizer/tests/token_get_all_basic.phpt
+      ext/tokenizer/tests/token_get_all_variation10.phpt
+      ext/tokenizer/tests/token_get_all_variation11.phpt
+      ext/tokenizer/tests/token_get_all_variation12.phpt
+      ext/tokenizer/tests/token_get_all_variation13.phpt
+      ext/tokenizer/tests/token_get_all_variation14.phpt
+      ext/tokenizer/tests/token_get_all_variation15.phpt
+      ext/tokenizer/tests/token_get_all_variation16.phpt
+      ext/tokenizer/tests/token_get_all_variation17.phpt
+      ext/tokenizer/tests/token_get_all_variation18.phpt
+      ext/tokenizer/tests/token_get_all_variation2.phpt
+      ext/tokenizer/tests/token_get_all_variation3.phpt
+      ext/tokenizer/tests/token_get_all_variation4.phpt
+      ext/tokenizer/tests/token_get_all_variation5.phpt
+      ext/tokenizer/tests/token_get_all_variation6.phpt
+      ext/tokenizer/tests/token_get_all_variation7.phpt
+      ext/tokenizer/tests/token_get_all_variation8.phpt
+      ext/tokenizer/tests/token_get_all_variation9.phpt:
+      - Added T_GOTO
+      - Fixed tests
+
+    * ext/standard/file.c:
+      - Fix build
+
+2008-03-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/file.c:
+      MFB:  Added a warning message
+
+    * (PHP_5_3)
+      ext/standard/file.c:
+      Added a warning message
+
+2008-03-30  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/exec.c
+      ext/standard/exec.c
+      sapi/cli/tests/bug44564.phpt
+      sapi/cli/tests/bug44564.phpt:
+      MFB: Fixed bug #44564 (escapeshellarg removes UTF-8 multi-byte characters)
+
+    * (PHP_5_2)
+      ext/standard/exec.c
+      sapi/cli/tests/bug44564.phpt
+      sapi/cli/tests/bug44564.phpt
+      sapi/cli/tests/bug44564.phpt:
+      Fixed bug #44564 (escapeshellarg removes UTF-8 multi-byte characters)
+
 2008-03-29  Felipe Pena  <felipensp@gmail.com>
 
     * ext/standard/type.c:
