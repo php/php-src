@@ -622,8 +622,8 @@ PHP_FUNCTION(file_put_contents)
 	long flags = ((argc < 3) && UG(unicode)) ? PHP_FILE_TEXT : 0;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
+	char mode[3] = { 'w', 0, 0 };
 	php_stream *srcstream = NULL;
-	char mode[3] = "wb";
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "Zz/|lr!", &ppfilename, &data, &flags, &zcontext) == FAILURE) {
 		return;
@@ -657,10 +657,6 @@ PHP_FUNCTION(file_put_contents)
 		php_stream_close(stream);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Exclusive locks are not supported for this stream");
 		RETURN_FALSE;
-	}
-
-	if (mode[0] = 'c') {
-		php_stream_truncate_set_size(stream, 0);
 	}
 
 	switch (Z_TYPE_P(data)) {
