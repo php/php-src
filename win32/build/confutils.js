@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.8 2008-03-24 15:11:46 sfox Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.9 2008-03-31 09:17:25 sfox Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -846,6 +846,7 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 	var debug = "";
 	var project_url = "http://www.php.net";
 	var project_header = creditspath + "/php_" + basename + ".h";
+	var headerfile = "";
 	var versioning = "";
 
 	if (sapi) {
@@ -871,9 +872,22 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 	}
 
 	if (creditspath.match(new RegExp("pecl"))) {
+		/* PECL project url */
 		project_url = "http://pecl.php.net/" + basename;
 
 		/* keep independent versioning PECL-specific for now */
+		if (!FSO.FileExists(project_header)) { /* pick up a dozen renegades */
+			if (basename == "doublemetaphone") headerfile = "/double_metaphone.h";
+			if (basename == "flitetts") headerfile = "/php_flite.h";
+			if (basename == "gopher") headerfile = "/gopher_fopen_wrapper.h";
+			if (basename == "ingres") headerfile = "/php_ii.h";
+			if (basename == "iisfunc" || basename == "ixsfunc") headerfile = "/setup.h";
+			if (basename == "satellite") headerfile = "/php_orbit.h";
+			if (basename == "stats") headerfile = "/php_statistics.h";
+			if (!headerfile) headerfile = "/" + basename + ".h";
+			project_header = creditspath + headerfile;
+		}
+
 		if (FSO.FileExists(project_header)) {
 			if (header = FSO.OpenTextFile(project_header, 1)) {
 				contents = header.ReadAll();
