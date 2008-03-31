@@ -103,7 +103,7 @@ zend_module_entry enchant_module_entry = {
 	NULL,	/* Replace with NULL if there's nothing to do at request end */
 	PHP_MINFO(enchant),
 #if ZEND_MODULE_API_NO >= 20010901
-	"0.1", /* Replace with version number for your extension */
+	PHP_ENCHANT_VERSION,
 #endif
 	STANDARD_MODULE_PROPERTIES
 };
@@ -256,7 +256,7 @@ PHP_MINFO_FUNCTION(enchant)
 	pbroker = enchant_broker_init();
 	php_info_print_table_start();
 	php_info_print_table_header(2, "enchant support", "enabled");
-	php_info_print_table_row(2, "Version", "@package_version@");
+	php_info_print_table_row(2, "Version", PHP_ENCHANT_VERSION);
 	php_info_print_table_row(2, "Revision", "$Revision$");
 	php_info_print_table_end();
 

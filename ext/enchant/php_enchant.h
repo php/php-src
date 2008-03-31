@@ -24,6 +24,8 @@
 extern zend_module_entry enchant_module_entry;
 #define phpext_enchant_ptr &enchant_module_entry
 
+#define PHP_ENCHANT_VERSION "1.0.2-dev"
+
 #ifdef PHP_WIN32
 #define PHP_ENCHANT_API __declspec(dllexport)
 #else
