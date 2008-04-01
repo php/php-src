@@ -409,7 +409,7 @@ zend_module_entry oci8_module_entry = {
 	PHP_RINIT(oci),		  /* per-request startup function */
 	PHP_RSHUTDOWN(oci),	  /* per-request shutdown function */
 	PHP_MINFO(oci),		  /* information function */
-	"1.3.1",
+	PHP_OCI8_VERSION,
 #if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
 	/* This check allows PECL builds from this file to be portable to older PHP releases */
 	PHP_MODULE_GLOBALS(oci),  /* globals descriptor */
@@ -724,7 +724,9 @@ PHP_MINFO_FUNCTION(oci)
 	php_info_print_table_row(2, "Active Connections", buf);
 
 #if !defined(PHP_WIN32) && !defined(HAVE_OCI_INSTANT_CLIENT)
+#ifdef PHP_OCI8_ORACLE_VERSION
 	php_info_print_table_row(2, "Oracle Version", PHP_OCI8_ORACLE_VERSION );
+#endif
 	php_info_print_table_row(2, "Compile-time ORACLE_HOME", PHP_OCI8_DIR );
 	php_info_print_table_row(2, "Libraries Used", PHP_OCI8_SHARED_LIBADD );
 #else
