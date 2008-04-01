@@ -386,7 +386,7 @@ zend_module_entry oci8_module_entry = {
 	PHP_RINIT(oci),		  /* per-request startup function */
 	PHP_RSHUTDOWN(oci),	  /* per-request shutdown function */
 	PHP_MINFO(oci),		  /* information function */
-	"1.3.1",
+	PHP_OCI8_VERSION,
 	PHP_MODULE_GLOBALS(oci),  /* globals descriptor */
 	PHP_GINIT(oci),			  /* globals ctor */
 	NULL,					  /* globals dtor */
