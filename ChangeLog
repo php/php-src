@@ -1,3 +1,44 @@
+2008-03-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/file.c:
+      Revert unintended bits from "Added a warning message" commit
+
+2008-03-31  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      acinclude.m4:
+      - Don't rely on a version that doesn't exist - that breaks snapshots.
+
+2008-03-31  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      - Allow most of the existing strangely-named headers to get by
+
+2008-03-31  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      ext/date/php_date.c
+      ext/date/php_date.c
+      ext/date/tests/timestamp-in-dst.phpt
+      ext/date/tests/timestamp-in-dst.phpt:
+      - MFH: Fixed a bug in formatting timestamps when DST is active in the
+      default
+        timezone.
+
+    * ext/date/php_date.c
+      ext/date/tests/timestamp-in-dst.phpt
+      ext/date/tests/timestamp-in-dst.phpt
+      ext/date/tests/timestamp-in-dst.phpt:
+      - Fixed a bug in formatting timestamps when DST is active in the default
+        timezone.
+
+2008-03-31  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/config.w32:
+      Revert "minimum version requirement" until there's a version to match it
+
 2008-03-30  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
