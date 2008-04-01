@@ -797,7 +797,7 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (myargc == 5) {
 		convert_to_long_ex(retries);
 		if (retries < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING ,"Retries must be greater or eqaul to 0");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING ,"Retries must be greater or equal to 0");
 		} else {
 			mail_parameters(NIL, SET_MAXLOGINTRIALS, (void *) Z_LVAL_PP(retries));
 		}
