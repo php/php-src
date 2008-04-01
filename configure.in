@@ -767,7 +767,7 @@ if test "$PHP_DEBUG" = "yes"; then
 else
   dnl Finish the Darwin hack
   if test "$php_did_darwin9_cheat" -eq 1; then
-    CFLAGS=`echo "$CFLAGS" | $SED -e 's/-gstabs//g'`
+    CFLAGS=`echo "-O2 $CFLAGS" | /usr/bin/sed -e 's/-gstabs//g'`
   fi
   PHP_DEBUG=0
   ZEND_DEBUG=no
