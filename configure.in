@@ -1260,9 +1260,9 @@ CC=$old_CC
 dnl Finish the Darwin hack
 if test "$php_did_darwin9_cheat" -eq 1; then
   if test "$PHP_DEBUG" = "yes"; then
-    CFLAGS=`echo "-O2 $CFLAGS" | $SED -e 's/-gstabs/-g/g'`
+    CFLAGS=`echo "$CFLAGS" | $SED -e 's/-gstabs/-g/g'`
   else
-    CFLAGS=`echo "$CFLAGS" | $SED -e 's/-gstabs//g'`
+    CFLAGS=`echo "-O2 $CFLAGS" | $SED -e 's/-gstabs//g'`
   fi
 fi
 
