@@ -780,7 +780,11 @@ void php_oci_statement_free(php_oci_statement *statement TSRMLS_DC)
 		zend_hash_destroy(statement->defines);
 		efree(statement->defines);
 	}
-	
+
+	if (statement->parent_stmtid) {
+		zend_list_delete(statement->parent_stmtid);
+	}
+
 	zend_list_delete(statement->connection->rsrc_id);
 	efree(statement);
 	
