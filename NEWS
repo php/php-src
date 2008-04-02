@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2008, PHP 5.2.6
+- Fixed bug #44613 (Crash inside imap_headerinfo()). (Ilia, jmessa)
+- Fixed bug #44594 (imap_open() does not validate # of retries parameter).
+  (Ilia)
 - Fixed bug #44557 (Crash in imap_setacl when supplied integer as username)
   (Thomas Jarosch)
 

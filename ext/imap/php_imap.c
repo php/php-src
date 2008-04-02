@@ -792,7 +792,11 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #ifdef SET_MAXLOGINTRIALS
 	if (myargc == 5) {
 		convert_to_long_ex(retries);
-		mail_parameters(NIL, SET_MAXLOGINTRIALS, (void *) Z_LVAL_PP(retries));
+		if (retries < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING ,"Retries must be greater or equal to 0");
+		} else {
+			mail_parameters(NIL, SET_MAXLOGINTRIALS, (void *) Z_LVAL_PP(retries));
+		}
 	}
 #endif
 
@@ -1583,8 +1587,8 @@ PHP_FUNCTION(imap_headerinfo)
 	convert_to_long_ex(msgno);
 	if (myargc >= 3) {
 		convert_to_long_ex(fromlength);
-		if (Z_LVAL_PP(fromlength) < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "From length has to be greater than or equal to 0");
+		if (Z_LVAL_PP(fromlength) < 0 || Z_LVAL_PP(fromlength) >= MAILTMPLEN) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "From length has to be between 1 and %i", MAILTMPLEN);
 			RETURN_FALSE;
 		}
 	} else {
@@ -1592,8 +1596,8 @@ PHP_FUNCTION(imap_headerinfo)
 	}
 	if (myargc >= 4) {
 		convert_to_long_ex(subjectlength);
-		if (Z_LVAL_PP(subjectlength) < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Subject length has to be greater than or equal to 0");
+		if (Z_LVAL_PP(subjectlength) < 0 || Z_LVAL_PP(subjectlength) >= MAILTMPLEN) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Subject length has to be between 1 and %i", MAILTMPLEN);
 			RETURN_FALSE;
 		}
 	} else {
