@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2008, PHP 5.2.6
+- Fixed possible stack buffer overflow in FastCGI SAPI. (Andrey Nigmatulin)
+- Fixed sending of uninitialized paddings which may contain some information.
+  (Andrey Nigmatulin)
 - Fixed bug #44613 (Crash inside imap_headerinfo()). (Ilia, jmessa)
 - Fixed bug #44594 (imap_open() does not validate # of retries parameter).
   (Ilia)

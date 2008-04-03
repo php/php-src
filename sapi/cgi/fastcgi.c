@@ -593,6 +593,9 @@ static inline int fcgi_make_header(fcgi_header *hdr, fcgi_request_type type, int
 	hdr->reserved = 0;
 	hdr->type = type;
 	hdr->version = FCGI_VERSION_1;
+	if (pad) {
+		memset(((unsigned char*)hdr) + sizeof(fcgi_header) + len, 0, pad);
+	}
 	return pad;
 }
 
@@ -777,7 +780,7 @@ int fcgi_read(fcgi_request *req, char *str, int len)
 {
 	int ret, n, rest;
 	fcgi_header hdr;
-	unsigned char buf[8];
+	unsigned char buf[255];
 
 	n = 0;
 	rest = len;
