@@ -1,3 +1,29 @@
+2008-04-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/imap/php_imap.c:
+      MFB: imap bug fixes
+
+    * ext/imap/php_imap.c:
+      
+      MFB: Fixed bug #44613 (Crash inside imap_headerinfo())
+
+    * (PHP_5_3)
+      ext/imap/php_imap.c:
+      
+      Fixed bug #44613 (Crash inside imap_headerinfo())
+
+2008-04-02  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/oci8/oci8_interface.c
+      ext/oci8/oci8_statement.c:
+      decrement parent's refcount only when destroying the child, not when
+      decrementing child's refcount
+
+    * ext/openssl/openssl.c:
+      initialize variable
+
 2008-04-01  Felipe Pena  <felipensp@gmail.com>
 
     * ext/imap/php_imap.c
