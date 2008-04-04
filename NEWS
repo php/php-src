@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Apr 2008, PHP 5.2.6
+03 Apr 2008, PHP 5.2.6RC4
 - Fixed possible stack buffer overflow in FastCGI SAPI. (Andrei Nigmatulin)
 - Fixed sending of uninitialized paddings which may contain some information.
   (Andrei Nigmatulin)
