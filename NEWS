@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2008, PHP 5.2.6
+- Fixed bug #44591 (imagegif's filename parameter). (Felipe)
 
 03 Apr 2008, PHP 5.2.6RC4
 - Fixed possible stack buffer overflow in FastCGI SAPI. (Andrei Nigmatulin)
