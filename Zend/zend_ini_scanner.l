@@ -22,6 +22,11 @@
 
 /* $Id$ */
 
+#include <errno.h>
+#include "zend.h"
+#include "zend_globals.h"
+#include <zend_ini_parser.h>
+#include "zend_ini_scanner.h"
 
 #if 0
 # define YYDEBUG(s, c) printf("state: %d char: %c\n", s, c)
@@ -49,6 +54,14 @@
 #define yyleng       SCNG(yy_leng)
 #define yyless(x)    YYCURSOR = yytext + x
 /* #define yymore()     goto yymore_restart */
+
+/* perform sanity check. If this message is triggered you should
+   increase the ZEND_MMAP_AHEAD value in the zend_streams.h file */
+/*!max:re2c */
+#if ZEND_MMAP_AHEAD < YYMAXFILL
+# error ZEND_MMAP_AHEAD should be greater than or equal to YYMAXFILL
+#endif
+
 
 /* How it works (for the core ini directives):
  * ===========================================
@@ -79,12 +92,6 @@
  *  - Allow variables to refer to options also when using parse_ini_file()
  *
  */
-
-#include <errno.h>
-#include "zend.h"
-#include "zend_globals.h"
-#include <zend_ini_parser.h>
-#include "zend_ini_scanner.h"
 
 /* Globals Macros */
 #define SCNG	INI_SCNG

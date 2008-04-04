@@ -66,6 +66,13 @@
 #define yyless(x)    YYCURSOR = yytext + x
 #define yymore()     goto yymore_restart
 
+/* perform sanity check. If this message is triggered you should
+   increase the ZEND_MMAP_AHEAD value in the zend_streams.h file */
+/*!max:re2c */
+#if ZEND_MMAP_AHEAD < YYMAXFILL
+# error ZEND_MMAP_AHEAD should be greater than or equal to YYMAXFILL
+#endif
+
 #ifdef HAVE_STDARG_H
 # include <stdarg.h>
 #endif
@@ -356,9 +363,9 @@ zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC)
 ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_DC)
 {
 	/* enforce two trailing NULLs for flex... */
-	STR_REALLOC(str->value.str.val, str->value.str.len+2);
+	str->value.str.val = safe_erealloc(str->value.str.val, 1, str->value.str.len, ZEND_MMAP_AHEAD);
 
-	str->value.str.val[str->value.str.len+1]=0;
+	memset(str->value.str.val + str->value.str.len, 0, ZEND_MMAP_AHEAD);
 
 	SCNG(yy_in)=NULL;
 
