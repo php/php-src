@@ -2812,7 +2812,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 		}
 	}
 
-	if ((argc == 2) || (argc > 2 && Z_STRLEN_PP(file))) {
+	if (argc >= 2 && Z_STRLEN_PP(file)) {
 		PHP_GD_CHECK_OPEN_BASEDIR(fn, "Invalid filename");
 
 		fp = VCWD_FOPEN(fn, "wb");
