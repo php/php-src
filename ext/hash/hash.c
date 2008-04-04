@@ -37,7 +37,7 @@ HashTable php_hash_hashtable;
 
 /* Hash Registry Access */
 
-PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_len)
+PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_len) /* {{{ */
 {
 	php_hash_ops *ops;
 	char *lower = estrndup(algo, algo_len);
@@ -50,8 +50,9 @@ PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_l
 
 	return ops;
 }
+/* }}} */
 
-PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops)
+PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops) /* {{{ */
 {
 	int algo_len = strlen(algo);
 	char *lower = estrndup(algo, algo_len);
@@ -60,10 +61,11 @@ PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *o
 	zend_hash_add(&php_hash_hashtable, lower, algo_len + 1, (void*)ops, sizeof(php_hash_ops), NULL);
 	efree(lower);
 }
+/* }}} */
 
 /* Userspace */
 
-static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
+static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename) /* {{{ */
 {
 	char *algo, *data, *digest;
 	int algo_len, data_len;
@@ -157,11 +159,13 @@ hash_done:
 		efree(data);
 	}
 }
+/* }}} */
 
 /* {{{ proto string hash(string algo, string data[, bool raw_output = false]) U
 Generate a hash of a given input string
 Returns lowercase hexits by default */
-PHP_FUNCTION(hash) {
+PHP_FUNCTION(hash)
+{
 	php_hash_do_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
@@ -169,12 +173,13 @@ PHP_FUNCTION(hash) {
 /* {{{ proto string hash_file(string algo, string filename[, bool raw_output = false]) U
 Generate a hash of a given file
 Returns lowercase hexits by default */
-PHP_FUNCTION(hash_file) {
+PHP_FUNCTION(hash_file)
+{
 	php_hash_do_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename)
+static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename) /* {{{ */
 {
 	char *algo, *data, *digest, *key, *K;
 	int algo_len, data_len, key_len, i;
@@ -317,11 +322,13 @@ hmac_done:
 		efree(key);
 	}
 }
+/* }}} */
 
 /* {{{ proto string hash_hmac(string algo, string data, string key[, bool raw_output = false]) U
 Generate a hash of a given input string with a key using HMAC
 Returns lowercase hexits by default */
-PHP_FUNCTION(hash_hmac) {
+PHP_FUNCTION(hash_hmac)
+{
 	php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
@@ -329,7 +336,8 @@ PHP_FUNCTION(hash_hmac) {
 /* {{{ proto string hash_hmac_file(string algo, string filename, string key[, bool raw_output = false]) U
 Generate a hash of a given file with a key using HMAC
 Returns lowercase hexits by default */
-PHP_FUNCTION(hash_hmac_file) {
+PHP_FUNCTION(hash_hmac_file)
+{
 	php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
@@ -659,7 +667,7 @@ PHP_FUNCTION(hash_algos)
 
 /* Module Housekeeping */
 
-static void php_hash_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static void php_hash_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
 {
 	php_hash_data *hash = (php_hash_data*)rsrc->ptr;
 
@@ -677,6 +685,7 @@ static void php_hash_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	}
 	efree(hash);
 }
+/* }}} */
 
 #define PHP_HASH_HAVAL_REGISTER(p,b)	php_hash_register_algo("haval" #b "," #p , &php_hash_##p##haval##b##_ops);
 
