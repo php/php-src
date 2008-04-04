@@ -1,3 +1,26 @@
+2008-04-03  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/array/array_reverse_variation5.phpt
+      ext/standard/tests/array/array_unshift_variation5.phpt:
+      - Fixed tests
+
+2008-04-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      fixed name
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      - Fixed possible stack buffer overflow in FastCGI SAPI. (Andrey Nigmatulin)
+      - Fixed sending of uninitialized paddings which may contain some
+      information.
+        (Andrey Nigmatulin)
+
 2008-04-02  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
