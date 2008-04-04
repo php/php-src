@@ -29,7 +29,7 @@ typedef size_t (*zend_stream_fsizer_t)(void* handle TSRMLS_DC);
 typedef size_t (*zend_stream_reader_t)(void* handle, char *buf, size_t len TSRMLS_DC);
 typedef void   (*zend_stream_closer_t)(void* handle TSRMLS_DC);
 
-#define ZEND_MMAP_AHEAD 32
+#define ZEND_MMAP_AHEAD 16
 
 typedef enum {
 	ZEND_HANDLE_FILENAME,
