@@ -2436,11 +2436,12 @@ inline_char_handler:
 	return T_BINARY_DOUBLE;
 }
 
-<ST_IN_SCRIPTING>b"<<<"{TABS_AND_SPACES}{LABEL}{NEWLINE} {
+<ST_IN_SCRIPTING>b"<<<"{TABS_AND_SPACES}({LABEL}|["]{LABEL}["]){NEWLINE} {
 	char *s;
+	int quotes  = (yytext[4] == '"') ? 2 : 0;
 	CG(zend_lineno)++;
-	CG(heredoc_len) = yyleng-4-1-(yytext[yyleng-2]=='\r'?1:0);
-	s = yytext+4;
+	CG(heredoc_len) = yyleng-4-quotes-1-(yytext[yyleng-2]=='\r'?1:0);
+	s = yytext+4+(quotes ? 1 : 0);
 	while ((*s == ' ') || (*s == '\t')) {
 		s++;
 		CG(heredoc_len)--;
@@ -2451,11 +2452,12 @@ inline_char_handler:
 }
 
 
-<ST_IN_SCRIPTING>"<<<"{TABS_AND_SPACES}{LABEL}{NEWLINE} {
+<ST_IN_SCRIPTING>"<<<"{TABS_AND_SPACES}({LABEL}|["]{LABEL}["]){NEWLINE} {
 	char *s;
+	int quotes  = (yytext[3] == '"') ? 2 : 0;
 	CG(zend_lineno)++;
-	CG(heredoc_len) = yyleng-3-1-(yytext[yyleng-2]=='\r'?1:0);
-	s = yytext+3;
+	CG(heredoc_len) = yyleng-3-quotes-1-(yytext[yyleng-2]=='\r'?1:0);
+	s = yytext+3+(quotes ? 1 : 0);
 	while ((*s == ' ') || (*s == '\t')) {
 		s++;
 		CG(heredoc_len)--;
