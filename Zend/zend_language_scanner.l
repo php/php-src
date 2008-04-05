@@ -1656,13 +1656,14 @@ inline_char_handler:
 }
 
 
-<ST_IN_SCRIPTING>b?"<<<"{TABS_AND_SPACES}{LABEL}{NEWLINE} {
+<ST_IN_SCRIPTING>b?"<<<"{TABS_AND_SPACES}({LABEL}|["]{LABEL}["]){NEWLINE} {
 	char *s;
 	int bprefix = (yytext[0] != '<') ? 1 : 0;
+	int quotes  = (yytext[bprefix + 3] == '"') ? 2 : 0;
 
 	CG(zend_lineno)++;
-	CG(heredoc_len) = yyleng-bprefix-3-1-(yytext[yyleng-2]=='\r'?1:0);
-	s = yytext+bprefix+3;
+	CG(heredoc_len) = yyleng-bprefix-3-quotes-1-(yytext[yyleng-2]=='\r'?1:0);
+	s = yytext+bprefix+3+(quotes ? 1 : 0);
 	while ((*s == ' ') || (*s == '\t')) {
 		s++;
 		CG(heredoc_len)--;
