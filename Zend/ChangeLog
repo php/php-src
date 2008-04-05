@@ -1,3 +1,32 @@
+2008-04-04  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * zend_stream.c:
+      MFB: remove redundant test
+
+    * (PHP_5_3)
+      zend_stream.c:
+      remove redundant test for file size
+
+    * zend_ini_scanner.c
+      zend_ini_scanner.l
+      zend_ini_scanner_defs.h
+      zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner_defs.h
+      zend_stream.h:
+      MFB: add sanity check for ZEND_MMAP_AHEAD
+
+    * (PHP_5_3)
+      zend_ini_scanner.c
+      zend_ini_scanner.l
+      zend_ini_scanner_defs.h
+      zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner_defs.h
+      zend_stream.h:
+      add sanity checks for ZEND_MMAP_AHEAD and reduce the value from 32 to 16
+      (lowest safe value)
+
 2008-03-29  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
