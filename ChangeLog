@@ -1,3 +1,84 @@
+2008-04-04  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/gd/gd.c:
+      MFB: Fixed bug #44591 (imagegif's filename parameter).
+
+    * (PHP_5_2)
+      NEWS
+      ext/gd/gd.c:
+      Fixed bug #44591 (imagegif's filename parameter)
+
+2008-04-04  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ZendEngine2/zend_stream.c:
+      MFB: remove redundant test
+
+    * (PHP_5_3)
+      ZendEngine2/zend_stream.c:
+      remove redundant test for file size
+
+    * ZendEngine2/zend_ini_scanner.c
+      ZendEngine2/zend_ini_scanner.l
+      ZendEngine2/zend_ini_scanner_defs.h
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner_defs.h
+      ZendEngine2/zend_stream.h:
+      MFB: add sanity check for ZEND_MMAP_AHEAD
+
+    * (PHP_5_3)
+      ZendEngine2/zend_ini_scanner.c
+      ZendEngine2/zend_ini_scanner.l
+      ZendEngine2/zend_ini_scanner_defs.h
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner_defs.h
+      ZendEngine2/zend_stream.h:
+      add sanity checks for ZEND_MMAP_AHEAD and reduce the value from 32 to 16
+      (lowest safe value)
+
+2008-04-04  Joe Orton  <jorton@redhat.com>
+
+    * (PHP_5_3)
+      ext/openssl/xp_ssl.c
+      ext/soap/php_http.c:
+      MFH: Fixed bug #32979 (OpenSSL stream->fd casts broken in 64-bit build)
+         (stotty at tvnet dot hu)
+      MFH: Fix another case of a broken stream->fd cast in 64-bit builds.
+
+    * ext/soap/php_http.c:
+      Fix another case of a broken stream->fd cast in 64-bit builds.
+
+    * ext/openssl/xp_ssl.c:
+      Fixed bug #32979 (OpenSSL stream->fd casts broken in 64-bit build)
+       (stotty at tvnet dot hu)
+
+2008-04-04  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/hash/hash.c:
+      fix folding
+
+2008-04-04  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      configure.in:
+      - Fixed typo.
+
+2008-04-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.2.6RC4
+
 2008-04-03  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
