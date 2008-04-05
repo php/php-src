@@ -13,6 +13,7 @@ PHP                                                                        NEWS
   dropped in future PHP versions. (Lars Strojny, Felipe, Marcus)
 - Added and improved PHP syntax and semantics:
   . Added NOWDOC. (Gwynne Raskind, Stas, Dmitry)
+  . Added HEREDOC syntax with double quotes. (Lars Strojny, Felipe)
   . Added "?:" operator. (Marcus)
   . Added support for namespaces. (Dmitry, Stas, Gregory)
   . Added support for Late Static Binding. (Dmitry, Etienne Kneuss)
