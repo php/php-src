@@ -1,3 +1,31 @@
+2008-04-05  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner_defs.h
+      tests/heredoc_012.phpt
+      tests/heredoc_013.phpt
+      tests/heredoc_014.phpt:
+      MFB:
+      - Allow HEREDOC syntax with double quotes [DOC]
+      (http://wiki.php.net/rfc/heredoc-with-double-quotes)
+
+    * tests/heredoc_012.phpt
+      tests/heredoc_012.phpt
+      tests/heredoc_013.phpt
+      tests/heredoc_013.phpt
+      tests/heredoc_014.phpt
+      tests/heredoc_014.phpt:
+      
+      file heredoc_012.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner_defs.h:
+      - Allow HEREDOC syntax with double quotes
+      (http://wiki.php.net/rfc/heredoc-with-double-quotes)
+
 2008-04-04  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * zend_stream.c:

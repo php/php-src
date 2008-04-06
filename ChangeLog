@@ -1,3 +1,35 @@
+2008-04-05  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      - HEREDOC syntax with double quotes
+
+    * ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner_defs.h
+      ZendEngine2/tests/heredoc_012.phpt
+      ZendEngine2/tests/heredoc_013.phpt
+      ZendEngine2/tests/heredoc_014.phpt:
+      MFB:
+      - Allow HEREDOC syntax with double quotes [DOC]
+      (http://wiki.php.net/rfc/heredoc-with-double-quotes)
+
+    * ZendEngine2/tests/heredoc_012.phpt
+      ZendEngine2/tests/heredoc_012.phpt
+      ZendEngine2/tests/heredoc_013.phpt
+      ZendEngine2/tests/heredoc_013.phpt
+      ZendEngine2/tests/heredoc_014.phpt
+      ZendEngine2/tests/heredoc_014.phpt:
+      
+      file heredoc_012.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner_defs.h:
+      - Allow HEREDOC syntax with double quotes
+      (http://wiki.php.net/rfc/heredoc-with-double-quotes)
+
 2008-04-04  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
