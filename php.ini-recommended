@@ -280,6 +280,8 @@ memory_limit = 128M      ; Maximum amount of memory a script may consume (128M)
 ; E_USER_ERROR      - user-generated error message
 ; E_USER_WARNING    - user-generated warning message
 ; E_USER_NOTICE     - user-generated notice message
+; E_DEPRECATED      - warn about code that will not work in future versions
+;                     of PHP
 ;
 ; Examples:
 ;
