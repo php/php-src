@@ -84,6 +84,8 @@ PHP_FUNCTION(call_user_func);
 PHP_FUNCTION(call_user_func_array);
 PHP_FUNCTION(call_user_method);
 PHP_FUNCTION(call_user_method_array);
+PHP_FUNCTION(forward_static_call);
+PHP_FUNCTION(forward_static_call_array);
 
 PHP_FUNCTION(register_shutdown_function);
 PHP_FUNCTION(highlight_file);
