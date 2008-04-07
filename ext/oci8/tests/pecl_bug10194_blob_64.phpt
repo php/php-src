@@ -1,17 +1,17 @@
 --TEST--
 PECL Bug #10194 (segfault in Instant Client when memory_limit is reached inside the callback) 
 --SKIPIF--
-<?php
+<?php 
 if (!extension_loaded('oci8')) die("skip no oci8 extension"); 
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --INI--
-memory_limit=9M
+memory_limit=6M
 --FILE--
 <?php
 
 // This test is dependent on the behavior of the memory manager
-	
+    
 require dirname(__FILE__).'/connect.inc';
 require dirname(__FILE__).'/create_table.inc';
 
@@ -30,7 +30,7 @@ $row = oci_fetch_assoc($statement);
 $string = str_repeat("test", 32768*4*4);
 
 for ($i = 0; $i < 8; $i++) {
-	$row['BLOB']->write($string);
+    $row['BLOB']->write($string);
 }
 
 oci_commit($c);
@@ -48,7 +48,7 @@ require dirname(__FILE__).'/drop_table.inc';
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF-- 
 Before load()
 
 Fatal error: Allowed memory size of %d bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
