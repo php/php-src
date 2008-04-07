@@ -298,7 +298,7 @@ Refine DRCP connection pooling functionality
  <dependencies>
   <required>
    <php>
-    <min>4.3.11</min>
+    <min>4.3.9</min>
     <max>6.0.0</max>
     <exclude>6.0.0</exclude>
    </php>
@@ -309,7 +309,7 @@ Refine DRCP connection pooling functionality
  </dependencies>
  <providesextension>oci8</providesextension>
  <extsrcrelease>
-  <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to ORACLE_HOME dir. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
+  <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
 
