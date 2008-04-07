@@ -1,3 +1,14 @@
+2008-04-06  Marcus Boerger  <php@marcus-boerger.de>
+
+    * tests/multibyte/multibyte_encoding_002.phpt
+      tests/multibyte/multibyte_encoding_002.phpt
+      tests/multibyte/multibyte_encoding_002.phpt
+      tests/multibyte/multibyte_encoding_003.phpt
+      tests/multibyte/multibyte_encoding_003.phpt
+      tests/multibyte/multibyte_encoding_003.phpt:
+        1.1.4;
+      - add new tests
+
 2008-04-05  Felipe Pena  <felipensp@gmail.com>
 
     * zend_language_scanner.c
