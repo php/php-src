@@ -134,8 +134,8 @@ if test "$PHP_OCI8" != "no"; then
   IFS=$ac_IFS
   oci8_php_version=`expr [$]1 \* 1000000 + [$]2 \* 1000 + [$]3`
 
-  if test "$oci8_php_version" -le "4003010"; then
-    AC_MSG_ERROR([You need at least PHP 4.3.10 to be able to use this version of OCI8. PHP $php_version found])
+  if test "$oci8_php_version" -lt "4003009"; then
+    AC_MSG_ERROR([You need at least PHP 4.3.9 to be able to use this version of OCI8. PHP $php_version found])
   else
     AC_MSG_RESULT([$php_version, ok])
   fi
@@ -328,7 +328,7 @@ dnl version in /usr/lib
   AC_MSG_CHECKING([Oracle Instant Client SDK header directory])
 
 dnl Header directory for Instant Client SDK RPM install
-  OCISDKRPMINC=`echo "$PHP_OCI8_INSTANT_CLIENT" | $PHP_OCI8_SED -e 's!^/usr/lib/oracle/\(.*\)/client/lib[/]*$!/usr/include/oracle/\1/client!'`
+  OCISDKRPMINC=`echo "$PHP_OCI8_INSTANT_CLIENT" | $PHP_OCI8_SED -e 's!^/usr/lib/oracle/\(.*\)/client\('${LIBDIR_SUFFIX}'\)*/lib[/]*$!/usr/include/oracle/\1/client\2!'`
 
 dnl Header directory for Instant Client SDK zip file install
   OCISDKZIPINC=$PHP_OCI8_INSTANT_CLIENT/sdk/include
