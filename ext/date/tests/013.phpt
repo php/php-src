@@ -20,7 +20,13 @@ var_dump($dto->format("Y.m.d H:i:s"));
 echo "Done\n";
 ?>
 --EXPECTF--
-object(DateTime)#%d (0) {
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "2006-12-12 00:00:00"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(3) "UTC"
 }
 string(19) "2006.12.12 00:00:00"
 
@@ -37,7 +43,13 @@ NULL
 string(19) "2008.01.29 00:00:00"
 Done
 --UEXPECTF--
-object(DateTime)#%d (0) {
+object(DateTime)#%d (3) {
+  [u"date"]=>
+  unicode(19) "2006-12-12 00:00:00"
+  [u"timezone_type"]=>
+  int(3)
+  [u"timezone"]=>
+  string(3) "UTC"
 }
 unicode(19) "2006.12.12 00:00:00"
 
