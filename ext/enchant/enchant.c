@@ -22,7 +22,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include "enchant.h"
+#include <enchant.h>
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
@@ -40,14 +40,14 @@ typedef struct _broker_struct {
 	EnchantBroker	*pbroker;
 	enchant_dict	**dict;
 	unsigned int	dictcnt;
-	zval			*rsrc_id;
+	long			rsrc_id;
 } _enchant_broker;
 
 typedef struct _dict_struct {
 	unsigned int	id;
 	EnchantDict		*pdict;
 	enchant_broker	*pbroker;
-	zval			*rsrc_id;
+	long			rsrc_id;
 	enchant_dict	*next;
 	enchant_dict	*prev;
 } _enchant_dict;
@@ -186,7 +186,7 @@ static void php_enchant_broker_free(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{
 						int total, tofree;
 						tofree = total = broker->dictcnt-1;
 						do {
-							zend_list_delete(Z_RESVAL_P(broker->dict[total]->rsrc_id));
+							zend_list_delete(broker->dict[total]->rsrc_id);
 							efree(broker->dict[total]);
 							total--;
 						} while (total>=0);
@@ -210,10 +210,12 @@ static void php_enchant_dict_free(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ *
 		if (pdict) {
 			if (pdict->pdict && pdict->pbroker) {
 				enchant_broker_free_dict(pdict->pbroker->pbroker, pdict->pdict);
+				if (pdict->id) {
+					pdict->pbroker->dict[pdict->id-1]->next = NULL;
+				}
+				zend_list_delete(pdict->pbroker->rsrc_id);
 			}
-			if (pdict->id) {
-				pdict->pbroker->dict[pdict->id-1]->next = NULL;
-			}
+
 		}
 	}
 }
@@ -223,8 +225,8 @@ static void php_enchant_dict_free(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ *
  */
 PHP_MINIT_FUNCTION(enchant)
 {
-	le_enchant_broker = zend_register_list_destructors_ex(php_enchant_broker_free, NULL, "enchant broker", module_number);
-	le_enchant_dict = zend_register_list_destructors_ex(php_enchant_dict_free, NULL, "enchant dict", module_number);
+	le_enchant_broker = zend_register_list_destructors_ex(php_enchant_broker_free, NULL, "enchant_broker", module_number);
+	le_enchant_dict = zend_register_list_destructors_ex(php_enchant_dict_free, NULL, "enchant_dict", module_number);
 
 	return SUCCESS;
 }
@@ -275,7 +277,7 @@ PHP_MINFO_FUNCTION(enchant)
 	}
 
 #define PHP_ENCHANT_GET_DICT	\
-	ZEND_FETCH_RESOURCE(pdict, enchant_dict *, &dict, -1, "enchant dict", le_enchant_dict);	\
+	ZEND_FETCH_RESOURCE(pdict, enchant_dict *, &dict, -1, "enchant_dict", le_enchant_dict);	\
 	if (!pdict || !pdict->pdict) {	\
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", "Invalid dictionary resource.");	\
 		RETURN_FALSE;	\
@@ -299,8 +301,7 @@ PHP_FUNCTION(enchant_broker_init)
 		broker->pbroker = pbroker;
 		broker->dict = NULL;
 		broker->dictcnt = 0;
-		ZEND_REGISTER_RESOURCE(return_value, broker, le_enchant_broker);
-		broker->rsrc_id = return_value;
+		broker->rsrc_id = ZEND_REGISTER_RESOURCE(return_value, broker, le_enchant_broker);
 	} else {
 		RETURN_FALSE;
 	}
@@ -400,7 +401,6 @@ PHP_FUNCTION(enchant_broker_request_dict)
 		dict->id = pos;
 		dict->pbroker = pbroker;
 		dict->pdict = d;
-		dict->rsrc_id = return_value;
 		dict->prev = pos ? pbroker->dict[pos-1] : NULL;
 		dict->next = NULL;
 		pbroker->dict[pos] = dict;
@@ -409,7 +409,8 @@ PHP_FUNCTION(enchant_broker_request_dict)
 			pbroker->dict[pos-1]->next = dict;
 		}
 
-		ZEND_REGISTER_RESOURCE(return_value, dict, le_enchant_dict);
+		dict->rsrc_id = ZEND_REGISTER_RESOURCE(return_value, dict, le_enchant_dict);
+		zend_list_addref(pbroker->rsrc_id);
 	} else {
 		RETURN_FALSE;
 	}
@@ -453,14 +454,13 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 		dict->id = pos;
 		dict->pbroker = pbroker;
 		dict->pdict = d;
-		dict->rsrc_id = return_value;
 		dict->prev = pos?pbroker->dict[pos-1]:NULL;
 		dict->next = NULL;
 		pbroker->dict[pos] = dict;
 		if (pos) {
 			pbroker->dict[pos-1]->next = dict;
 		}
-		ZEND_REGISTER_RESOURCE(return_value, dict, le_enchant_dict);
+		dict->rsrc_id = ZEND_REGISTER_RESOURCE(return_value, dict, le_enchant_dict);
 	} else {
 		RETURN_FALSE;
 	}
