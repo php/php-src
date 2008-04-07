@@ -319,7 +319,7 @@ SECTION_RAW_CHARS [^\]\n\r]
 SINGLE_QUOTED_CHARS [^']
 RAW_VALUE_CHARS [^=\n\r;]
 
-LITERAL_DOLLAR ("$"([^a-zA-Z0-9{\000]|("\\"{ANY_CHAR})))
+LITERAL_DOLLAR ("$"([^{\000]|("\\"{ANY_CHAR})))
 VALUE_CHARS         ([^$= \t\n\r;&|~()!"'\000]|{LITERAL_DOLLAR})
 SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
@@ -488,7 +488,7 @@ DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 
 <ST_VALUE,ST_RAW>[^] { /* End of option value (if EOF is reached before EOL */
 	BEGIN(INITIAL);
-	return 0;
+	return END_OF_LINE;
 }
 
 <*>[^] {
