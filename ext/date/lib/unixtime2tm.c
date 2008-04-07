@@ -76,12 +76,18 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 		*/
 
 		while (tmp_days <= 0) {
-			cur_year--;
-			DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
-			if (timelib_is_leap(cur_year)) {
-				tmp_days += DAYS_PER_LYEAR;
+			if (tmp_days < -1460970) {
+				cur_year -= 4000;
+				DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
+				tmp_days += 1460970;
 			} else {
-				tmp_days += DAYS_PER_YEAR;
+				cur_year--;
+				DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
+				if (timelib_is_leap(cur_year)) {
+					tmp_days += DAYS_PER_LYEAR;
+				} else {
+					tmp_days += DAYS_PER_YEAR;
+				}
 			}
 		}
 		remainder += SECS_PER_DAY;
