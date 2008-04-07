@@ -86,6 +86,7 @@ PHP                                                                        NEWS
 - Added PREG_BAD_UTF8_OFFSET_ERROR constant. (Nuno)
 - Added request_order INI variable to control specifically $_REQUEST 
   behavior. (Stas)
+- Added forward_static_call(_array) to complete LSB. (Mike Lively)
 
 - Improved PHP runtime speed and memory usage:
   . Replaced flex based scanner with re2c based scanner. (Marcus, Nuno, Scott)
