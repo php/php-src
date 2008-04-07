@@ -1436,7 +1436,7 @@ static int php_oci_connection_ping(php_oci_connection *connection TSRMLS_DC)
 	 * successfully performed a roundtrip and validated the
 	 * connection. Use OCIServerVersion for Pre-10.2 clients
 	 */
-#if ( (OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION > 2)) )	/* OCIPing available 10.2 onwards */
+#if ( (OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)) )	/* OCIPing available 10.2 onwards */
 	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIPing, (connection->svc, OCI_G(err), OCI_DEFAULT));
 #else
 	char version[256];
