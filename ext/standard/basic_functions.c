@@ -809,6 +809,19 @@ ZEND_BEGIN_ARG_INFO(arginfo_call_user_method_array, 0)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_forward_static_call, 0, 0, 1)
+	ZEND_ARG_INFO(0, function_name)
+	ZEND_ARG_INFO(0, parameter)
+	ZEND_ARG_INFO(0, ...)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_forward_static_call_array, 0, 0, 2)
+	ZEND_ARG_INFO(0, function_name)
+	ZEND_ARG_INFO(0, parameters) /* ARRAY_INFO(0, parameters, 1) */
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO(arginfo_register_shutdown_function, 0)
 	ZEND_ARG_INFO(0, function_name)
 ZEND_END_ARG_INFO()
@@ -3398,6 +3411,8 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(call_user_func_array,											arginfo_call_user_func_array)
 	PHP_DEP_FE(call_user_method,											arginfo_call_user_method)
 	PHP_DEP_FE(call_user_method_array,										arginfo_call_user_method_array)
+	PHP_FE(forward_static_call,											arginfo_forward_static_call)
+	PHP_FE(forward_static_call_array,										arginfo_forward_static_call_array)
 	PHP_FE(serialize,														arginfo_serialize)
 	PHP_FE(unserialize,														arginfo_unserialize)
 
@@ -5194,6 +5209,67 @@ PHP_FUNCTION(call_user_method_array)
 	}
 
 	efree(method_args);
+}
+/* }}} */
+
+/* {{{ proto mixed forward_static_call(mixed function_name [, mixed parmeter] [, mixed ...]) U
+   Call a user function which is the first parameter */
+PHP_FUNCTION(forward_static_call)
+{
+	zval *retval_ptr = NULL;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "f*", &fci, &fci_cache, &fci.params, &fci.param_count) == FAILURE) {
+		return;
+	}
+
+	if (!EG(active_op_array)->scope) {
+		zend_error(E_ERROR, "Cannot call forward_static_call() when no class scope is active");
+	}
+
+	fci.retval_ptr_ptr = &retval_ptr;
+
+	if (EG(called_scope) &&
+		instanceof_function(EG(called_scope), fci_cache.calling_scope TSRMLS_CC)) {
+			fci_cache.calling_scope = EG(called_scope);
+	}
+	
+	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && fci.retval_ptr_ptr && *fci.retval_ptr_ptr) {
+		COPY_PZVAL_TO_ZVAL(*return_value, *fci.retval_ptr_ptr);
+	}
+
+	if (fci.params) {
+		efree(fci.params);
+	}
+}
+/* }}} */
+
+/* {{{ proto mixed call_user_func_array(string function_name, array parameters) U
+   Call a user function which is the first parameter with the arguments contained in array */
+PHP_FUNCTION(forward_static_call_array)
+{
+	zval *params, *retval_ptr = NULL;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "fa/", &fci, &fci_cache, &params) == FAILURE) {
+		return;
+	}
+
+	zend_fcall_info_args(&fci, params TSRMLS_CC);
+	fci.retval_ptr_ptr = &retval_ptr;
+
+	if (EG(called_scope) &&
+		instanceof_function(EG(called_scope), fci_cache.calling_scope TSRMLS_CC)) {
+			fci_cache.calling_scope = EG(called_scope);
+	}
+
+	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && fci.retval_ptr_ptr && *fci.retval_ptr_ptr) {
+		COPY_PZVAL_TO_ZVAL(*return_value, *fci.retval_ptr_ptr);
+	}
+
+	zend_fcall_info_args_clear(&fci, 1);
 }
 /* }}} */
 
