@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2008, PHP 5.2.6
+- Fixed bug #44667 (proc_open() does not handle pipes with the mode 'wb'
+  correctly). (Jani)
 - Fixed bug #44591 (imagegif's filename parameter). (Felipe)
 
 03 Apr 2008, PHP 5.2.6RC4
