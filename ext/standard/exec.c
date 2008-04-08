@@ -400,18 +400,19 @@ char *php_escape_shell_arg(char *str) {
    Escape shell metacharacters */
 PHP_FUNCTION(escapeshellcmd)
 {
-	zval **arg1;
+	char *command;
+	int command_len;
 	char *cmd = NULL;
 
-	if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &command, &command_len) == FAILURE) {
+		return;
 	}
-	
-	convert_to_string_ex(arg1);
-	if (Z_STRLEN_PP(arg1)) {
-		cmd = php_escape_shell_cmd(Z_STRVAL_PP(arg1));
-		RETVAL_STRING(cmd, 1);
-		efree(cmd);
+
+	if (command_len) {
+		cmd = php_escape_shell_cmd(command);
+		RETVAL_STRING(cmd, 0);
+	} else {
+		RETVAL_EMPTY_STRING();
 	}
 }
 /* }}} */

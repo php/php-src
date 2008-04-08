@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? Apr 2008, PHP 5.2.6
 - Fixed bug #44667 (proc_open() does not handle pipes with the mode 'wb'
   correctly). (Jani)
+- Fixed bug #44650 (escaepshellscmd() does not check arg count). (Ilia)
 - Fixed bug #44591 (imagegif's filename parameter). (Felipe)
 - Fixed bug #32979 (OpenSSL stream->fd casts broken in 64-bit build)
   (stotty at tvnet dot hu)
