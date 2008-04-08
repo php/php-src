@@ -600,7 +600,7 @@ PHP_FUNCTION(proc_open)
 					goto exit_fail;
 				}
 
-				if (strcmp(Z_STRVAL_PP(zmode), "w") != 0) {
+				if (strncmp(Z_STRVAL_PP(zmode), "w", 1) != 0) {
 					descriptors[ndesc].parentend = newpipe[1];
 					descriptors[ndesc].childend = newpipe[0];
 					descriptors[ndesc].mode |= DESC_PARENT_MODE_WRITE;
