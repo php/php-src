@@ -42,7 +42,13 @@ array(12) {
   bool(false)
 }
 bool(false)
-object(DateTime)#1 (0) {
+object(DateTime)#1 (3) {
+  ["date"]=>
+  string(20) "-0001-11-30 00:00:00"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(3) "UTC"
 }
 -0001-11-30T00:00:00+0000
 --UEXPECT--
@@ -75,6 +81,12 @@ array(12) {
   bool(false)
 }
 bool(false)
-object(DateTime)#1 (0) {
+object(DateTime)#1 (3) {
+  [u"date"]=>
+  unicode(20) "-0001-11-30 00:00:00"
+  [u"timezone_type"]=>
+  int(3)
+  [u"timezone"]=>
+  string(3) "UTC"
 }
 -0001-11-30T00:00:00+0000
