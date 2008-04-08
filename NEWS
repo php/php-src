@@ -7,7 +7,11 @@ PHP                                                                        NEWS
 - Fixed possible stack buffer overflow in FastCGI SAPI. (Andrei Nigmatulin)
 - Fixed sending of uninitialized paddings which may contain some information.
   (Andrei Nigmatulin)
+- Fixed bug #44663 (Crash in imap_mail_compose if "body" parameter invalid).
+  (Ilia)
 - Fixed bug #44613 (Crash inside imap_headerinfo()). (Ilia, jmessa)
+- Fixed bug #44603 (Order issues with Content-Type/Length headers on
+  POST). (Ilia)
 - Fixed bug #44594 (imap_open() does not validate # of retries parameter).
   (Ilia)
 - Fixed bug #44557 (Crash in imap_setacl when supplied integer as username)
