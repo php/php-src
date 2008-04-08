@@ -89,6 +89,11 @@ test=test4
 file_put_contents($filename, $ini);
 var_dump(parse_ini_file($filename, true));
 
+/* From bug #44574 */
+$ini = "[section1]\nname = value";
+file_put_contents($filename, $ini);
+var_dump(parse_ini_file($filename, true));
+
 @unlink($filename);
 echo "Done\n";
 ?>
@@ -169,5 +174,12 @@ array(1) {
 array(1) {
   ["test"]=>
   string(5) "test4"
+}
+array(1) {
+  ["section1"]=>
+  array(1) {
+    ["name"]=>
+    string(5) "value"
+  }
 }
 Done
