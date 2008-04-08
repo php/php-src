@@ -3047,8 +3047,8 @@ PHP_FUNCTION(imap_mail_compose)
 	}
 
 	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(body));
-	if (zend_hash_get_current_data(Z_ARRVAL_PP(body), (void **) &data) != SUCCESS) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "body parameter cannot be empty");
+	if (zend_hash_get_current_data(Z_ARRVAL_PP(body), (void **) &data) != SUCCESS || Z_TYPE_PP(data) != IS_ARRAY) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "body parameter must be a non-empty array");
 		RETURN_FALSE;
 	}
 
