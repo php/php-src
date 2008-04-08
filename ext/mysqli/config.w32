@@ -21,20 +21,22 @@ if (PHP_MYSQLI != "no") {
 		"mysqli_report.c " +
 		"mysqli_warning.c";
 
-	if (PHP_MYSQLI != "mysqlnd") {
+	if (PHP_MYSQLI == "yes" || PHP_MYSQLI == "mysqlnd") {
+		EXTENSION("mysqli", mysqli_source);
+		AC_DEFINE('MYSQLI_USE_MYSQLND', 1, 'Using MySQL native driver');
+		AC_DEFINE('HAVE_MYSQLILIB', 1, 'Have MySQLi library');
+		ADD_EXTENSION_DEP('mysqli', 'mysqlnd', true);
+		STDOUT.WriteLine("INFO: mysqlnd build");
+	} else {
 		if (CHECK_LIB("libmysql.lib", "mysqli", PHP_MYSQLI) &&
 			CHECK_HEADER_ADD_INCLUDE("mysql.h", "CFLAGS_MYSQLI", PHP_MYSQLI + 
 										"\\include;" + PHP_PHP_BUILD +
 										"\\include\\mysql;" + PHP_MYSQLI)) {
 			EXTENSION("mysqli", mysqli_source);
 			AC_DEFINE('HAVE_MYSQLILIB', 1, 'Have MySQLi library');
+			STDOUT.WriteLine("INFO: libmysql build");
 		} else {
 			WARNING("mysqli not enabled; libraries and headers not found");
 		}
-	} else {
-		EXTENSION("mysqli", mysqli_source);
-		AC_DEFINE('MYSQLI_USE_MYSQLND', 1, 'MySQLi with native driver support enabled');
-		AC_DEFINE('HAVE_MYSQLILIB', 1, 'Have MySQLi library');
-		ADD_EXTENSION_DEP('mysqli', 'mysqlnd', true);
 	}
 }
