@@ -1,3 +1,14 @@
+2008-04-07  Scott MacVicar  <scott@macvicar.net>
+
+    * zend_ini_scanner.c
+      zend_ini_scanner.l:
+      MFB: Fixed bug #44609 (Dollar in ini variables are not parsed correctly)
+
+    * (PHP_5_3)
+      zend_ini_scanner.c
+      zend_ini_scanner.l:
+      Fixed bug #44609 (Dollar in ini variables are not parsed correctly)
+
 2008-04-06  Marcus Boerger  <php@marcus-boerger.de>
 
     * tests/multibyte/multibyte_encoding_002.phpt

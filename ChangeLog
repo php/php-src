@@ -1,3 +1,107 @@
+2008-04-07  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/oci8/config.m4:
+      MFB: PECL #13523 (x86_64 build) and versioning sync
+
+    * ext/oci8/oci8.c:
+      MFB: Fix OCIPing 10.2 macro
+
+    * ext/oci8/tests/pecl_bug10194_blob.phpt
+      ext/oci8/tests/pecl_bug10194_blob_64.phpt
+      ext/oci8/tests/testping.phpt:
+      MFB: Test updates
+
+    * (PHP_5_3)
+      ext/oci8/tests/pecl_bug10194_blob.phpt
+      ext/oci8/tests/pecl_bug10194_blob_64.phpt
+      ext/oci8/tests/pecl_bug10194_blob_64.phpt
+      ext/oci8/tests/testping.phpt
+      ext/oci8/tests/testping.phpt:
+      Test updates
+
+    * (PHP_5_3)
+      ext/oci8/oci8.c:
+      Fix OCIPing 10.2 macro
+
+    * (PHP_5_3)
+      ext/oci8/config.m4
+      ext/oci8/oci8_collection.c
+      ext/oci8/package2.xml:
+      PECL #13523 (x86_64 build).  Make OCI8 buildable with PHP 4.3.9.
+
+    * php.ini-dist
+      php.ini-recommended:
+      Add E_DEPRECATED comment
+
+2008-04-07  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      acinclude.m4:
+      - Reset back to 0.13.4 now that it released.
+
+    * (PHP_5_3)
+      ext/date/lib/parse_tz.c
+      ext/date/lib/unixtime2tm.c:
+      - MFH: Fixing returned offset.
+      - MFH: Algorithm optimization.
+
+    * ext/date/lib/parse_tz.c
+      ext/date/lib/unixtime2tm.c:
+      - Fixing returned offset.
+      - Algorithm optimization.
+
+    * ext/date/tests/013.phpt
+      ext/date/tests/014.phpt
+      ext/date/tests/bug41523-64bit.phpt:
+      - Fixed testcases.
+
+2008-04-07  Antony Dovgal  <tony@daylessday.org>
+
+    * sapi/cli/tests/bug44564.phpt
+      sapi/cli/tests/bug44564.phpt:
+      fix test
+
+2008-04-07  Scott MacVicar  <scott@macvicar.net>
+
+    * ZendEngine2/zend_ini_scanner.c
+      ZendEngine2/zend_ini_scanner.l:
+      MFB: Fixed bug #44609 (Dollar in ini variables are not parsed correctly)
+
+    * (PHP_5_3)
+      ZendEngine2/zend_ini_scanner.c
+      ZendEngine2/zend_ini_scanner.l:
+      Fixed bug #44609 (Dollar in ini variables are not parsed correctly)
+
+2008-04-07  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/tests/class_object/forward_static_call_001.phpt
+      ext/standard/tests/class_object/forward_static_call_002.phpt
+      ext/standard/tests/class_object/forward_static_call_003.phpt:
+      MFH: Implement forward_static_call(_array) to complete LSB. Patch by Mike
+      Lively
+
+2008-04-07  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c:
+      initialize variable
+
+2008-04-07  Etienne Kneuss  <php@colder.ch>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/tests/class_object/forward_static_call_001.phpt
+      ext/standard/tests/class_object/forward_static_call_001.phpt
+      ext/standard/tests/class_object/forward_static_call_002.phpt
+      ext/standard/tests/class_object/forward_static_call_002.phpt
+      ext/standard/tests/class_object/forward_static_call_003.phpt
+      ext/standard/tests/class_object/forward_static_call_003.phpt:
+      Implement forward_static_call(_array) to complete LSB. Patch by Mike Lively
+
 2008-04-06  Marcus Boerger  <php@marcus-boerger.de>
 
     * ZendEngine2/tests/multibyte/multibyte_encoding_002.phpt
