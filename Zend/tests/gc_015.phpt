@@ -1,5 +1,5 @@
 --TEST--
-GC  015: Object as root of cycle
+GC 015: Object as root of cycle
 --FILE--
 <?php
 $a = new stdClass();

@@ -1,5 +1,5 @@
 --TEST--
-GC  014: Too many cycles in one object
+GC 014: Too many cycles in one object
 --FILE--
 <?php
 $a = new stdClass();
