@@ -85,7 +85,7 @@ struct _zend_compiler_globals {
 	char *compiled_filename;
 
 	int zend_lineno;
-	int comment_start_line;
+
 	char *heredoc;
 	int heredoc_len;
 
