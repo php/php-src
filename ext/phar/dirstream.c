@@ -471,11 +471,23 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, char *url_from, int mode, in
 		return FAILURE;
 	}
 
-	if ((e = phar_get_entry_info_dir(phar, resource->path + 1, strlen(resource->path + 1), 1, &error TSRMLS_CC))) {
+	if ((e = phar_get_entry_info_dir(phar, resource->path + 1, strlen(resource->path + 1), 2, &error TSRMLS_CC))) {
 		/* directory exists, or is a subdirectory of an existing file */
 		efree(e->filename);
 		efree(e);
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", directory already exists", resource->path+1, resource->host);
+		php_url_free(resource);
+		return FAILURE;
+	}
+	if (error) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", resource->path+1, resource->host, error);
+		efree(error);
+		php_url_free(resource);
+		return FAILURE;
+	}
+	if ((e = phar_get_entry_info_dir(phar, resource->path + 1, strlen(resource->path + 1), 0, &error TSRMLS_CC))) {
+		/* entry exists as a file */
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", file already exists", resource->path+1, resource->host);
 		php_url_free(resource);
 		return FAILURE;
 	}
@@ -582,7 +594,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_
 		return FAILURE;
 	}
 
-	if (!(entry = phar_get_entry_info_dir(phar, resource->path + 1, strlen(resource->path + 1), 1, &error TSRMLS_CC))) {
+	if (!(entry = phar_get_entry_info_dir(phar, resource->path + 1, strlen(resource->path + 1), 2, &error TSRMLS_CC))) {
 		if (error) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot remove directory \"%s\" in phar \"%s\", %s", resource->path+1, resource->host, error);
 			efree(error);

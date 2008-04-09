@@ -2827,7 +2827,7 @@ PHP_METHOD(Phar, offsetGet)
 		return;
 	}
 	
-	if (!phar_get_entry_info_dir(phar_obj->arc.archive, fname, fname_len, 2, &error TSRMLS_CC)) {
+	if (!phar_get_entry_info_dir(phar_obj->arc.archive, fname, fname_len, 1, &error TSRMLS_CC)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist%s%s", fname, error?", ":"", error?error:"");
 	} else {
 		fname_len = spprintf(&fname, 0, "phar://%s/%s", phar_obj->arc.archive->fname, fname);
@@ -2840,17 +2840,91 @@ PHP_METHOD(Phar, offsetGet)
 }
 /* }}} */
 
+/* {{{ add a file within the phar archive from a string or resource
+ */
+static void phar_add_file(phar_archive_data *phar, char *filename, int filename_len, char *cont_str, int cont_len, zval *zresource TSRMLS_DC)
+{
+	char *error;
+	long contents_len;
+	phar_entry_data *data;
+	php_stream *contents_file;
+
+	if (!(data = phar_get_or_create_entry_data(phar->fname, phar->fname_len, filename, filename_len, "w+b", 0, &error TSRMLS_CC))) {
+		if (error) {
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist and cannot be created: %s", filename, error);
+			efree(error);
+		} else {
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist and cannot be created", filename);
+		}
+		return;
+	} else {
+		if (error) {
+			efree(error);
+		}
+		if (!data->internal_file->is_dir) {
+			if (cont_str) {
+				contents_len = php_stream_write(data->fp, cont_str, cont_len);
+				if (contents_len != cont_len) {
+					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", filename);
+					return;
+				}
+			} else {
+				if (!(php_stream_from_zval_no_verify(contents_file, &zresource))) {
+					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", filename);
+					return;
+				}
+				contents_len = php_stream_copy_to_stream(contents_file, data->fp, PHP_STREAM_COPY_ALL);
+			}
+			data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
+		}
+		phar_entry_delref(data TSRMLS_CC);
+		phar_flush(phar, 0, 0, 0, &error TSRMLS_CC);
+		if (error) {
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+			efree(error);
+		}
+	}
+}
+/* }}} */
+
+/* {{{ create a directory within the phar archive
+ */
+static void phar_mkdir(phar_archive_data *phar, char *dirname, int dirname_len TSRMLS_DC)
+{
+	char *error;
+	phar_entry_data *data;
+
+	if (!(data = phar_get_or_create_entry_data(phar->fname, phar->fname_len, dirname, dirname_len, "w+b", 2, &error TSRMLS_CC))) {
+		if (error) {
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Directory %s does not exist and cannot be created: %s", dirname, error);
+			efree(error);
+		} else {
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Directory %s does not exist and cannot be created", dirname);
+		}
+		return;
+	} else {
+		if (error) {
+			efree(error);
+		}
+		phar_entry_delref(data TSRMLS_CC);
+		phar_flush(phar, 0, 0, 0, &error TSRMLS_CC);
+		if (error) {
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+			efree(error);
+		}
+	}
+}
+/* }}} */
+
+
 /* {{{ proto int Phar::offsetSet(string entry, string value)
  * set the contents of an internal file to those of an external file
  */
 PHP_METHOD(Phar, offsetSet)
 {
-	char *fname, *cont_str = NULL, *error;
+	char *fname, *cont_str = NULL;
 	int fname_len, cont_len;
 	zval *zresource;
-	long contents_len;
-	phar_entry_data *data;
-	php_stream *contents_file;
 	PHAR_ARCHIVE_OBJECT();
 
 	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
@@ -2872,41 +2946,7 @@ PHP_METHOD(Phar, offsetSet)
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Cannot set alias \".phar/alias.txt\" directly in phar \"%s\", use setAlias", phar_obj->arc.archive->fname);
 		return;
 	}
-	if (!(data = phar_get_or_create_entry_data(phar_obj->arc.archive->fname, phar_obj->arc.archive->fname_len, fname, fname_len, "w+b", 2, &error TSRMLS_CC))) {
-		if (error) {
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist and cannot be created: %s", fname, error);
-			efree(error);
-		} else {
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist and cannot be created", fname);
-		}
-		return;
-	} else {
-		if (error) {
-			efree(error);
-		}
-		if (!data->internal_file->is_dir) {
-			if (cont_str) {
-				contents_len = php_stream_write(data->fp, cont_str, cont_len);
-				if (contents_len != cont_len) {
-					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
-					return;
-				}
-			} else {
-				if (!(php_stream_from_zval_no_verify(contents_file, &zresource))) {
-					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", fname);
-					return;
-				}
-				contents_len = php_stream_copy_to_stream(contents_file, data->fp, PHP_STREAM_COPY_ALL);
-			}
-			data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
-		}
-		phar_entry_delref(data TSRMLS_CC);
-		phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
-		if (error) {
-			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
-			efree(error);
-		}
-	}
+	phar_add_file(phar_obj->arc.archive, fname, fname_len, cont_str, cont_len, zresource);
 }
 /* }}} */
 
@@ -2924,7 +2964,7 @@ PHP_METHOD(Phar, offsetUnset)
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by INI setting");
 		return;
 	}
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &fname, &fname_len) == FAILURE) {
 		return;
 	}
@@ -2948,6 +2988,71 @@ PHP_METHOD(Phar, offsetUnset)
 	} else {
 		RETURN_FALSE;
 	}
+}
+/* }}} */
+
+/* {{{ proto string Phar::addEmptyDir(string dirname)
+ * Adds an empty directory to the phar archive
+ */
+PHP_METHOD(Phar, addEmptyDir)
+{
+	char *dirname;
+	int dirname_len;
+	PHAR_ARCHIVE_OBJECT();
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &dirname, &dirname_len) == FAILURE) {
+		return;
+	}
+
+	phar_mkdir(phar_obj->arc.archive, dirname, dirname_len);
+}
+/* }}} */
+
+/* {{{ proto string Phar::addFile(string filename[, string localname])
+ * Adds a file to the archive using the filename, or the second parameter as the name within the archive
+ */
+PHP_METHOD(Phar, addFile)
+{
+	char *fname, *localname = NULL;
+	int fname_len, localname_len;
+	php_stream *resource;
+	zval *zresource;
+	PHAR_ARCHIVE_OBJECT();
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &fname, &fname_len, &localname, &localname_len) == FAILURE) {
+		return;
+	}
+
+	if (!(resource = php_stream_open_wrapper(fname, "rb", 0, NULL))) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "phar error: unable to open file \"%s\" to add to phar archive", fname);
+		return;
+	}
+	if (localname) {
+		fname = localname;
+		fname_len = localname_len;
+	}
+
+	MAKE_STD_ZVAL(zresource);
+	php_stream_to_zval(resource, zresource);
+	phar_add_file(phar_obj->arc.archive, fname, fname_len, NULL, 0, zresource);
+	efree(zresource);
+}
+/* }}} */
+
+/* {{{ proto string Phar::addFromString(string localname, string contents)
+ * Adds a file to the archive using its contents as a string
+ */
+PHP_METHOD(Phar, addFromString)
+{
+	char *localname, *cont_str;
+	int localname_len, cont_len;
+	PHAR_ARCHIVE_OBJECT();
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &localname, &localname_len, &cont_str, &cont_len) == FAILURE) {
+		return;
+	}
+
+	phar_add_file(phar_obj->arc.archive, localname, localname_len, cont_str, cont_len, NULL);
 }
 /* }}} */
 
@@ -3772,6 +3877,23 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_running, 0, 0, 1)
 	ZEND_ARG_INFO(0, retphar)
 ZEND_END_ARG_INFO();
 
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_emptydir, 0, 0, 0)
+	ZEND_ARG_INFO(0, dirname)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_addfile, 0, 0, 1)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, localname)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_fromstring, 0, 0, 1)
+	ZEND_ARG_INFO(0, localname)
+	ZEND_ARG_INFO(0, contents)
+ZEND_END_ARG_INFO();
+
 #endif /* HAVE_SPL */
 
 zend_function_entry php_archive_methods[] = {
@@ -3779,6 +3901,9 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, __construct,           arginfo_phar___construct,  ZEND_ACC_PRIVATE)
 #else
 	PHP_ME(Phar, __construct,           arginfo_phar___construct,  ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, addEmptyDir,           arginfo_phar_emptydir,     ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, addFile,               arginfo_phar_addfile,      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, addFromString,         arginfo_phar_fromstring,   ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, buildFromIterator,     arginfo_phar_build,        ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, compress,              arginfo_phar_comp,         ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, compressAllFilesBZIP2, NULL,                      ZEND_ACC_PUBLIC)

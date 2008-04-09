@@ -436,7 +436,7 @@ int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char 
 		return FAILURE;
 	}
 	if (allow_dir) {
-		if ((entry = phar_get_entry_info_dir(phar, path, path_len, 2, for_create && !PHAR_G(readonly) && !phar->is_data ? NULL : error TSRMLS_CC)) == NULL) {
+		if ((entry = phar_get_entry_info_dir(phar, path, path_len, allow_dir, for_create && !PHAR_G(readonly) && !phar->is_data ? NULL : error TSRMLS_CC)) == NULL) {
 			if (for_create && (!PHAR_G(readonly) || phar->is_data)) {
 				return SUCCESS;
 			}
@@ -564,11 +564,13 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 	}
 	etemp.fp_refcount = 1;
 
-	if (is_dir) {
+	if (allow_dir == 2) {
 		etemp.is_dir = 1;
 		etemp.flags = etemp.old_flags = PHAR_ENT_PERM_DEF_DIR;
-		etemp.filename_len--; /* strip trailing / */
-		path_len--;
+		if (is_dir) {
+			etemp.filename_len--; /* strip trailing / */
+			path_len--;
+		}
 	} else {
 		etemp.flags = etemp.old_flags = PHAR_ENT_PERM_DEF_FILE;
 	}
@@ -1015,7 +1017,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 			}
 			return NULL;
 		}
-		if (!entry->is_dir && is_dir) {
+		if (!entry->is_dir && dir == 2) {
 			/* user requested a directory, we must return one */
 			if (error) {
 				spprintf(error, 4096, "phar error: path \"%s\" exists and is a not a directory", path);

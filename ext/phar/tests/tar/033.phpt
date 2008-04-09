@@ -14,7 +14,7 @@ $alias = 'phar://hio';
 $phar = new Phar($fname);
 $phar['a.php'] = '<?php echo "This is a\n"; include "'.$alias.'/b.php"; ?>';
 $phar->setAlias('hio');
-$phar['test/'] = '';
+$phar->addEmptyDir('test');
 $phar->stopBuffering();
 
 try {
