@@ -63,7 +63,8 @@
 #define YYSTATE      YYGETCONDITION()
 #define yytext       ((char*)SCNG(yy_text))
 #define yyleng       SCNG(yy_leng)
-#define yyless(x)    YYCURSOR = yytext + x
+#define yyless(x)    do { YYCURSOR = (unsigned char*)yytext + x; \
+                          yyleng   = (unsigned int)x; } while(0)
 #define yymore()     goto yymore_restart
 
 /* perform sanity check. If this message is triggered you should
@@ -1432,8 +1433,7 @@ inline_char_handler:
  * and "->" will be taken literally
  */
 <ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"->"[a-zA-Z_\x7f-\xff] {
-	yyleng -= 3;
-	yyless(yyleng);
+	yyless(yyleng - 3);
 	yy_push_state(ST_LOOKING_FOR_PROPERTY TSRMLS_CC);
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
 	zendlval->type = IS_STRING;
@@ -1443,8 +1443,7 @@ inline_char_handler:
 /* A [ always designates a variable offset, regardless of what follows
  */
 <ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"[" {
-	yyleng--;
-	yyless(yyleng);
+	yyless(yyleng - 1);
 	yy_push_state(ST_VAR_OFFSET TSRMLS_CC);
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
 	zendlval->type = IS_STRING;
@@ -1470,7 +1469,6 @@ inline_char_handler:
 <ST_VAR_OFFSET>[ \n\r\t\\'#] {
 	/* Invalid rule to return a more explicit parse error with proper line number */
 	yyless(0);
-	yyleng = 0;
 	yy_pop_state(TSRMLS_C);
 	ZVAL_EMPTY_STRING(zendlval); /* Empty since it won't be used */
 	return T_ENCAPSED_AND_WHITESPACE;
@@ -1524,8 +1522,7 @@ inline_char_handler:
 		zendlval->value.str.val = yytext; /* no copying - intentional */
 		zendlval->value.str.len = yyleng-2;
 		zendlval->type = IS_STRING;
-		yyleng -= 2;
-		yyless(yyleng);
+		yyless(yyleng - 2);
 		BEGIN(ST_IN_SCRIPTING);
 		return T_COMMENT;
 	} else {
@@ -1585,7 +1582,6 @@ inline_char_handler:
 		return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 	} else {
 		yyless(1);
-		yyleng = 1;
 		return yytext[0];
 	}
 }
@@ -1693,7 +1689,6 @@ inline_char_handler:
 	}
 
 	yyless(label_len);
-	yyleng = label_len;
 
 	if (label_len==CG(heredoc_len) && !memcmp(yytext, CG(heredoc), label_len)) {
 		zendlval->value.str.val = CG(heredoc);
@@ -1781,11 +1776,10 @@ inline_char_handler:
  * (("{"+|"$"+)["]) handles { or $ at the end of a string
  *
  * Same for backquotes and heredocs, except the second case doesn't apply to
- * heredocs. yyleng--/yyless() is used to correct taking one character too many
+ * heredocs. yyless(yyleng - 1) is used to correct taking one character too many
  */
 <ST_DOUBLE_QUOTES>{DOUBLE_QUOTES_CHARS}*("{"{2,}|"$"{2,}|(("{"+|"$"+)["])) {
-	yyleng--;
-	yyless(yyleng);
+	yyless(yyleng - 1);
 	zend_scan_escape_string(zendlval, yytext, yyleng, '"' TSRMLS_CC);
 	return T_ENCAPSED_AND_WHITESPACE;
 }
@@ -1797,8 +1791,7 @@ inline_char_handler:
 }
 
 <ST_BACKQUOTE>{BACKQUOTE_CHARS}*("{"{2,}|"$"{2,}|(("{"+|"$"+)[`])) {
-	yyleng--;
-	yyless(yyleng);
+	yyless(yyleng - 1);
 	zend_scan_escape_string(zendlval, yytext, yyleng, '`' TSRMLS_CC);
 	return T_ENCAPSED_AND_WHITESPACE;
 }
@@ -1817,8 +1810,7 @@ inline_char_handler:
 }
 
 <ST_HEREDOC>{HEREDOC_CHARS}*({HEREDOC_NEWLINE}+({LABEL}";"?)?)?("{"{2,}|"$"{2,}) {
-	yyleng--;
-	yyless(yyleng);
+	yyless(yyleng - 1);
 	zend_scan_escape_string(zendlval, yytext, yyleng, 0 TSRMLS_CC);
 	return T_ENCAPSED_AND_WHITESPACE;
 }
