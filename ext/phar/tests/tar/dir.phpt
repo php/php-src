@@ -16,7 +16,7 @@ $pname3 = 'phar://' . $fname3;
 $phar = new Phar($fname);
 var_dump($phar->isTar());
 
-$phar['test/'] = '';
+$phar->addEmptyDir('test');
 var_dump($phar['test']->isDir());
 var_dump($phar['test/']->isDir());
 copy($fname, $fname2);
