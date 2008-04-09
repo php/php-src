@@ -1331,7 +1331,7 @@ yymore_restart:
 	if (YYCURSOR >= YYLIMIT) {
 		/* special case */
 		if (YYSTATE == STATE(ST_COMMENT) || YYSTATE == STATE(ST_DOC_COMMENT)) {
-			zend_error(E_COMPILE_WARNING,"Unterminated comment starting line %d", CG(comment_start_line));
+			zend_error(E_COMPILE_WARNING, "Unterminated comment starting line %d", CG(zend_lineno));
 		}
 		return 0;
 	}
@@ -1556,9 +1556,12 @@ NOWDOC_CHARS		({NEWLINE}*(([^a-zA-Z_\x7f-\xff\n\r][^\n\r]*)|({LABEL}[^a-zA-Z0-9_
 	return T_OBJECT_OPERATOR;
 }
 
-<ST_LOOKING_FOR_PROPERTY>{WHITESPACE}+ {
-	/* do nothing */
-	goto restart;
+<ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY>{WHITESPACE}+ {
+	Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
+	Z_STRLEN_P(zendlval) = yyleng;
+	Z_TYPE_P(zendlval) = IS_STRING;
+	HANDLE_NEWLINES(yytext, yyleng);
+	return T_WHITESPACE;
 }
 
 <ST_LOOKING_FOR_PROPERTY>"->" {
@@ -1841,7 +1844,6 @@ NOWDOC_CHARS		({NEWLINE}*(([^a-zA-Z_\x7f-\xff\n\r][^\n\r]*)|({LABEL}[^a-zA-Z0-9_
 
 <ST_IN_SCRIPTING>"}" {
 	RESET_DOC_COMMENT();
-	/* This is a temporary fix which is dependant on flex and it's implementation */
 	if (!zend_stack_is_empty(&SCNG(state_stack))) {
 		yy_pop_state(TSRMLS_C);
 	}
@@ -1871,45 +1873,45 @@ NOWDOC_CHARS		({NEWLINE}*(([^a-zA-Z_\x7f-\xff\n\r][^\n\r]*)|({LABEL}[^a-zA-Z0-9_
 
 
 <ST_IN_SCRIPTING>{LNUM} {
-    if (yyleng < MAX_LENGTH_OF_LONG - 1) { /* Won't overflow */
-        zendlval->value.lval = strtol(yytext, NULL, 0);
-    } else {
-        errno = 0;
-        zendlval->value.lval = strtol(yytext, NULL, 0);
-        if (errno == ERANGE) { /* Overflow */
-            if (yytext[0] == '0') { /* octal overflow */
-                zendlval->value.dval = zend_oct_strtod(yytext, NULL);
-            } else {
-                zendlval->value.dval = zend_strtod(yytext, NULL);
-            }
-            zendlval->type = IS_DOUBLE;
-            return T_DNUMBER;
-        }
-    }
+	if (yyleng < MAX_LENGTH_OF_LONG - 1) { /* Won't overflow */
+		Z_LVAL_P(zendlval) = strtol(yytext, NULL, 0);
+	} else {
+		errno = 0;
+		Z_LVAL_P(zendlval) = strtol(yytext, NULL, 0);
+		if (errno == ERANGE) { /* Overflow */
+			if (yytext[0] == '0') { /* octal overflow */
+				Z_DVAL_P(zendlval) = zend_oct_strtod(yytext, NULL);
+			} else {
+				Z_DVAL_P(zendlval) = zend_strtod(yytext, NULL);
+			}
+			Z_TYPE_P(zendlval) = IS_DOUBLE;
+			return T_DNUMBER;
+		}
+	}
 
-    zendlval->type = IS_LONG;
-    return T_LNUMBER;
+	Z_TYPE_P(zendlval) = IS_LONG;
+	return T_LNUMBER;
 }
 
 <ST_IN_SCRIPTING>{HNUM} {
-    char *hex = yytext + 2; /* Skip "0x" */
-    int len = yyleng - 2;
+	char *hex = yytext + 2; /* Skip "0x" */
+	int len = yyleng - 2;
 
-    /* Skip any leading 0s */
-    while (*hex == '0') {
-        hex++;
-        len--;
-    }
+	/* Skip any leading 0s */
+	while (*hex == '0') {
+		hex++;
+		len--;
+	}
 
-    if (len < SIZEOF_LONG * 2 || (len == SIZEOF_LONG * 2 && *hex <= '7')) {
-        zendlval->value.lval = strtol(hex, NULL, 16);
-        zendlval->type = IS_LONG;
-        return T_LNUMBER;
-    } else {
-        zendlval->value.dval = zend_hex_strtod(hex, NULL);
-        zendlval->type = IS_DOUBLE;
-        return T_DNUMBER;
-    }
+	if (len < SIZEOF_LONG * 2 || (len == SIZEOF_LONG * 2 && *hex <= '7')) {
+		Z_LVAL_P(zendlval) = strtol(hex, NULL, 16);
+		Z_TYPE_P(zendlval) = IS_LONG;
+		return T_LNUMBER;
+	} else {
+		Z_DVAL_P(zendlval) = zend_hex_strtod(hex, NULL);
+		Z_TYPE_P(zendlval) = IS_DOUBLE;
+		return T_DNUMBER;
+	}
 }
 
 <ST_VAR_OFFSET>[0]|([1-9][0-9]*) { /* Offset could be treated as a long */
@@ -2196,10 +2198,11 @@ inline_char_handler:
  * and "->" will be taken literally
  */
 <ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"->"[a-zA-Z_\x7f-\xff] {
-	yyless(yyleng - 3);
+	yyleng -= 3;
+	yyless(yyleng);
 	yy_push_state(ST_LOOKING_FOR_PROPERTY TSRMLS_CC);
 
-	if (!zend_copy_scanner_string(zendlval, (yytext+1), (yyleng-4), UG(unicode)?IS_UNICODE:IS_STRING, SCNG(output_conv) TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, (yytext+1), (yyleng-1), UG(unicode)?IS_UNICODE:IS_STRING, SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
 	if (UG(unicode) && !zend_check_and_normalize_identifier(zendlval)) {
@@ -2211,10 +2214,11 @@ inline_char_handler:
 /* A [ always designates a variable offset, regardless of what follows
  */
 <ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"[" {
-	yyless(yyleng - 1);
+	yyleng--;
+	yyless(yyleng);
 	yy_push_state(ST_VAR_OFFSET TSRMLS_CC);
 
-	if (!zend_copy_scanner_string(zendlval, (yytext+1), (yyleng-2), UG(unicode)?IS_UNICODE:IS_STRING, SCNG(output_conv) TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, (yytext+1), (yyleng-1), UG(unicode)?IS_UNICODE:IS_STRING, SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
 	if (UG(unicode) && !zend_check_and_normalize_identifier(zendlval)) {
@@ -2246,6 +2250,7 @@ inline_char_handler:
 <ST_VAR_OFFSET>[ \n\r\t\\'#] {
 	/* Invalid rule to return a more explicit parse error with proper line number */
 	yyless(0);
+	yyleng = 0;
 	yy_pop_state(TSRMLS_C);
 	ZVAL_EMPTY_TEXT(zendlval); /* Empty since it won't be used */
 	return T_ENCAPSED_AND_WHITESPACE;
@@ -2266,15 +2271,6 @@ inline_char_handler:
 		return 0;
 	}
 	return T_STRING;
-}
-
-
-<ST_IN_SCRIPTING>{WHITESPACE} {
-	Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
-	Z_STRLEN_P(zendlval) = yyleng;
-	Z_TYPE_P(zendlval) = IS_STRING;
-	HANDLE_NEWLINES(yytext, yyleng);
-	return T_WHITESPACE;
 }
 
 
@@ -2329,14 +2325,12 @@ inline_char_handler:
 }
 
 <ST_IN_SCRIPTING>"/**"{WHITESPACE} {
-	CG(comment_start_line) = CG(zend_lineno);
 	RESET_DOC_COMMENT();
 	BEGIN(ST_DOC_COMMENT);
 	yymore();
 }
 
 <ST_IN_SCRIPTING>"/*" {
-	CG(comment_start_line) = CG(zend_lineno);
 	BEGIN(ST_COMMENT);
 	yymore();
 }
@@ -2387,6 +2381,7 @@ inline_char_handler:
 		return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 	} else {
 		yyless(1);
+		yyleng = 1;
 		return yytext[0];
 	}
 }
@@ -2438,13 +2433,18 @@ inline_char_handler:
 
 <ST_IN_SCRIPTING>b"<<<"{TABS_AND_SPACES}({LABEL}|["]{LABEL}["]){NEWLINE} {
 	char *s;
-	int quotes  = (yytext[4] == '"') ? 2 : 0;
+
 	CG(zend_lineno)++;
-	CG(heredoc_len) = yyleng-4-quotes-1-(yytext[yyleng-2]=='\r'?1:0);
-	s = yytext+4+(quotes ? 1 : 0);
+	CG(heredoc_len) = yyleng-4-1-(yytext[yyleng-2]=='\r'?1:0);
+	s = yytext+4;
 	while ((*s == ' ') || (*s == '\t')) {
 		s++;
 		CG(heredoc_len)--;
+	}
+
+	if (*s == '"') {
+		s++;
+		CG(heredoc_len) -= 2;
 	}
 	CG(heredoc) = estrndup(s, CG(heredoc_len));
 	BEGIN(ST_START_HEREDOC);
@@ -2454,13 +2454,18 @@ inline_char_handler:
 
 <ST_IN_SCRIPTING>"<<<"{TABS_AND_SPACES}({LABEL}|["]{LABEL}["]){NEWLINE} {
 	char *s;
-	int quotes  = (yytext[3] == '"') ? 2 : 0;
+
 	CG(zend_lineno)++;
-	CG(heredoc_len) = yyleng-3-quotes-1-(yytext[yyleng-2]=='\r'?1:0);
-	s = yytext+3+(quotes ? 1 : 0);
+	CG(heredoc_len) = yyleng-3-1-(yytext[yyleng-2]=='\r'?1:0);
+	s = yytext+3;
 	while ((*s == ' ') || (*s == '\t')) {
 		s++;
 		CG(heredoc_len)--;
+	}
+
+	if (*s == '"') {
+		s++;
+		CG(heredoc_len) -= 2;
 	}
 	CG(heredoc) = estrndup(s, CG(heredoc_len));
 	BEGIN(ST_START_HEREDOC);
@@ -2488,6 +2493,7 @@ inline_char_handler:
 	}
 
 	yyless(label_len);
+	yyleng = label_len;
 
 	if (label_len==CG(heredoc_len) && !memcmp(yytext, CG(heredoc), label_len)) {
 		Z_STRVAL_P(zendlval) = CG(heredoc);
@@ -2519,16 +2525,22 @@ inline_char_handler:
 	if (yyleng > CG(heredoc_len) && !memcmp(end - CG(heredoc_len), CG(heredoc), CG(heredoc_len))) {
 		int len = yyleng - CG(heredoc_len) - 2; /* 2 for newline before and after label */
 
-		if (len > 0 && yytext[len - 1] == '\r' && yytext[len] == '\n') {
-			len--;
+		/* May have matched fooLABEL; make sure there's a newline before it */
+		if (yytext[len] != '\n') {
+			if (yytext[len] != '\r') {
+				yyless(yyleng - 1);
+				yymore();
+			}
+		} else if (len > 0 && yytext[len - 1] == '\r') {
+			len--; /* Windows newline */
 		}
 
 		/* Go back before last label char, to match in ST_END_HEREDOC state */
 		yyless(yyleng - 2);
 
-		/* Subtract the remaining label length. yyleng must include newline
+		/* Subtract the label/newline length. yyleng must include newline
 		 * before label, for zend_highlight/strip, tokenizer, etc. */
-		yyleng = yyleng - CG(heredoc_len) - 1;
+		yyleng -= CG(heredoc_len) + 1;
 
 		CG(increment_lineno) = 1; /* For newline before label */
 		BEGIN(ST_END_HEREDOC);
@@ -2548,10 +2560,8 @@ inline_char_handler:
 }
 
 <ST_END_HEREDOC>{ANY_CHAR} {
-	Z_STRVAL_P(zendlval) = CG(heredoc);
-	Z_STRLEN_P(zendlval) = CG(heredoc_len);
-	SCNG(yy_text) = Z_STRVAL_P(zendlval);
-	yyleng = Z_STRLEN_P(zendlval);
+	SCNG(yy_text) = Z_STRVAL_P(zendlval) = CG(heredoc);
+	SCNG(yy_leng) = Z_STRLEN_P(zendlval) = CG(heredoc_len);
 	CG(heredoc) = NULL;
 	CG(heredoc_len) = 0;
 	BEGIN(ST_IN_SCRIPTING);
@@ -2559,10 +2569,10 @@ inline_char_handler:
 }
 
 
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$" {
+/* Will only match when $ follows: "{$" */
+<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{" {
 	Z_LVAL_P(zendlval) = (long) '{';
 	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
-	yyless(1);
 	return T_CURLY_OPEN;
 }
 
@@ -2580,11 +2590,11 @@ inline_char_handler:
  * (("{"+|"$"+)["]) handles { or $ at the end of a string
  *
  * Same for backquotes and heredocs, except the second case doesn't apply to
- * heredocs. yyless(yyleng - 1) is used to correct taking one character too many
+ * heredocs. yyleng--/yyless() is used to correct taking one character too many
  */
 <ST_DOUBLE_QUOTES>{DOUBLE_QUOTES_CHARS}*("{"{2,}|"$"{2,}|(("{"+|"$"+)["])) {
-	yyless(yyleng - 1);
-	if (yytext[yyleng-1] == '"') --yyleng;
+	yyleng--;
+	yyless(yyleng);
 
 	if (CG(literal_type) == IS_UNICODE) {
 		return zend_scan_unicode_escape_string(zendlval, yytext, yyleng, 0x22 /*'"'*/, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
@@ -2605,7 +2615,8 @@ inline_char_handler:
 }
 
 <ST_BACKQUOTE>{BACKQUOTE_CHARS}*("{"{2,}|"$"{2,}|(("{"+|"$"+)[`])) {
-	yyless(yyleng - 1);
+	yyleng--;
+	yyless(yyleng);
 
 	if (CG(literal_type) == IS_UNICODE) {
 		return zend_scan_unicode_escape_string(zendlval, yytext, yyleng, 0x60 /*'`'*/, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
@@ -2633,7 +2644,8 @@ inline_char_handler:
 }
 
 <ST_HEREDOC>{HEREDOC_CHARS}*({HEREDOC_NEWLINE}+({LABEL}";"?)?)?("{"{2,}|"$"{2,}) {
-	yyless(yyleng - 1);
+	yyleng--;
+	yyless(yyleng);
 
 	if (CG(literal_type) == IS_UNICODE) {
 		return zend_scan_unicode_escape_string(zendlval, yytext, yyleng, 0, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
@@ -2706,16 +2718,22 @@ inline_char_handler:
 	if (yyleng > CG(heredoc_len) && !memcmp(end - CG(heredoc_len), CG(heredoc), CG(heredoc_len))) {
 		int len = yyleng - CG(heredoc_len) - 2; /* 2 for newline before and after label */
 
-		if (len > 0 && yytext[len - 1] == '\r' && yytext[len] == '\n') {
-			len--;
+		/* May have matched fooLABEL; make sure there's a newline before it */
+		if (yytext[len] != '\n') {
+			if (yytext[len] != '\r') {
+				yyless(yyleng - 1);
+				yymore();
+			}
+		} else if (len > 0 && yytext[len - 1] == '\r') {
+			len--; /* Windows newline */
 		}
 
-		/* Go back before last label char, to match in ST_END_HEREDOC state */
+		/* Go back before last label char, to match in ST_END_NOWDOC state */
 		yyless(yyleng - 2);
 
-		/* Subtract the remaining label length. yyleng must include newline
+		/* Subtract the label/newline length. yyleng must include newline
 		 * before label, for zend_highlight/strip, tokenizer, etc. */
-		yyleng = yyleng - CG(heredoc_len) - 1;
+		yyleng -= CG(heredoc_len) + 1;
 
 		CG(increment_lineno) = 1; /* For newline before label */
 		BEGIN(ST_END_NOWDOC);
@@ -2727,17 +2745,15 @@ inline_char_handler:
 		return T_ENCAPSED_AND_WHITESPACE;
 	} else {
 		/* Go back to end of label, so the next match works correctly in case of
-		 * a variable or another label at the beginning of the next line */
+		 * another label at the beginning of the next line */
 		yyless(yyleng - 1);
 		yymore();
 	}
 }
 
 <ST_END_NOWDOC>{ANY_CHAR} {
-	Z_STRVAL_P(zendlval) = CG(heredoc);
-	Z_STRLEN_P(zendlval) = CG(heredoc_len);
-	SCNG(yy_text) = CG(heredoc);
-	yyleng = CG(heredoc_len);
+	SCNG(yy_text) = Z_STRVAL_P(zendlval) = CG(heredoc);
+	SCNG(yy_leng) = Z_STRLEN_P(zendlval) = CG(heredoc_len);
 	CG(heredoc) = NULL;
 	CG(heredoc_len) = 0;
 	BEGIN(ST_IN_SCRIPTING);
