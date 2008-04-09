@@ -1597,16 +1597,9 @@ void zend_resolve_class_name(znode *class_name, ulong *fetch_type, int check_ns_
 			zend_class_entry **pce;
 
 			if (check_ns_name) {
-				char *ns_lcname = zend_str_tolower_dup(Z_STRVAL_P(CG(current_namespace)), Z_STRLEN_P(CG(current_namespace)));
-
-				if (Z_STRLEN_P(CG(current_namespace)) == Z_STRLEN(class_name->u.constant) &&
-				    memcmp(lcname, ns_lcname, Z_STRLEN(class_name->u.constant)) == 0) {
-				    /* The given name is equal to name of current namespace.
-				       PHP will need to perform additional cheks at run-time to
-				       determine if we assume namespace or class name. */
-					*fetch_type |= ZEND_FETCH_CLASS_RT_NS_NAME;
-				}
-				efree(ns_lcname);
+			    /* PHP will need to perform additional cheks at run-time to
+			       determine if we assume namespace or class name. */
+				*fetch_type |= ZEND_FETCH_CLASS_RT_NS_NAME;
 			}
 
 			if ((CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES) ||
