@@ -3466,6 +3466,37 @@ PHP_METHOD(PharFileInfo, delMetadata)
 }
 /* }}} */
 
+/* {{{ proto string PharFileInfo::getContents()
+ * return the complete file contents of the entry (like file_get_contents)
+ */
+PHP_METHOD(PharFileInfo, getContents)
+{
+	char *error;
+	php_stream *fp;
+	PHAR_ENTRY_OBJECT();
+
+	if (entry_obj->ent.entry->is_dir) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Phar error: Cannot retrieve contents, \"%s\" in phar \"%s\" is a directory", entry_obj->ent.entry->filename, entry_obj->ent.entry->phar->fname);
+		return;
+	}
+	if (SUCCESS != phar_open_entry_fp(entry_obj->ent.entry, &error TSRMLS_CC)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Phar error: Cannot retrieve contents, \"%s\" in phar \"%s\": %s", entry_obj->ent.entry->filename, entry_obj->ent.entry->phar->fname, error);
+		efree(error);
+		return;
+	}
+	if (!(fp = phar_get_efp(entry_obj->ent.entry TSRMLS_CC))) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+			"Phar error: Cannot retrieve contents of \"%s\" in phar \"%s\"", entry_obj->ent.entry->filename, entry_obj->ent.entry->phar->fname);
+		return;
+	}
+	phar_seek_efp(entry_obj->ent.entry, 0, SEEK_SET, 0 TSRMLS_CC);
+	Z_TYPE_P(return_value) = IS_STRING;
+	Z_STRLEN_P(return_value) = php_stream_copy_to_mem(fp, &(Z_STRVAL_P(return_value)), entry_obj->ent.entry->uncompressed_filesize, 0);
+}
+/* }}} */
+
 /* {{{ proto int PharFileInfo::setCompressedGZ()
  * Instructs the Phar class to compress the current file using zlib
  */
@@ -3822,6 +3853,7 @@ zend_function_entry php_entry_methods[] = {
 	PHP_ME(PharFileInfo, __destruct,         NULL,                       0)
 	PHP_ME(PharFileInfo, chmod,              arginfo_entry_chmod,        0)
 	PHP_ME(PharFileInfo, delMetadata,        NULL,                       0)
+	PHP_ME(PharFileInfo, getContents,        NULL,                       0)
 	PHP_ME(PharFileInfo, getCompressedSize,  NULL,                       0)
 	PHP_ME(PharFileInfo, getCRC32,           NULL,                       0)
 	PHP_ME(PharFileInfo, getMetadata,        NULL,                       0)
