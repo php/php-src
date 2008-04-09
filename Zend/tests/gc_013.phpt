@@ -1,5 +1,5 @@
 --TEST--
-GC  013: Too many cycles in one array
+GC 013: Too many cycles in one array
 --FILE--
 <?php
 $a = array();
