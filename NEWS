@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2008, PHP 5.2.6
+- Fixed incorrect heredoc handling when label is used within the block.
+  (Matt Wilmas)
 - Fixed bug #44673 (With CGI argv/argc starts from arguments, not from script)
   (Dmitry)
 - Fixed bug #44667 (proc_open() does not handle pipes with the mode 'wb'
