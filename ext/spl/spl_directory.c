@@ -236,7 +236,7 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, zend_uchar ty
 	}
 	intern->u.dir.index = 0;
 
-	if (intern->u.dir.dirp == NULL) {
+	if (EG(exception) || intern->u.dir.dirp == NULL) {
 		/* throw exception: should've been already happened */
 		intern->u.dir.entry.d_name[0] = '\0';
 	} else {
