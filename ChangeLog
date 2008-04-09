@@ -1,3 +1,98 @@
+2008-04-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/exec.c:
+      MFB: Bug #44650	escaepshellscmd() does not check arg count (port from 5.3)
+
+2008-04-08  Joe Orton  <jorton@redhat.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/openssl/xp_ssl.c
+      ext/soap/php_http.c:
+      MFH: Fixed bug #32979 (OpenSSL stream->fd casts broken in 64-bit build)
+         (stotty at tvnet dot hu)
+      MFH: Fix another case of a broken stream->fd cast in 64-bit builds.
+
+2008-04-08  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      ext/standard/tests/general_functions/parse_ini_file.phpt:
+      MFH: Missing basic single ini file test (bug #44574)
+
+    * ext/standard/tests/general_functions/parse_ini_file.phpt:
+      - Add missing basic test (see also bug #44574)
+
+    * (PHP_5_3)
+      ext/standard/url_scanner_ex.c
+      ext/standard/var_unserializer.c:
+      - Generated with re2c 0.13.4
+
+    * (PHP_5_3)
+      ext/date/tests/bug41523.phpt:
+      - Fix test.
+
+    * ext/date/tests/bug41523.phpt:
+      - fix test
+
+    * (PHP_5_2)
+      ext/standard/tests/dir/rewinddir_basic.phpt:
+      MFH: Fixed test on systems where order is not guaranteed
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/proc_open.c
+      ext/standard/tests/general_functions/bug44667.phpt:
+      MFH: - Fixed bug #44667 (proc_open() does not handle pipes with the mode
+      "wb" correctly)
+
+    * (PHP_5_2)
+      ext/zlib/tests/bug_40189.phpt
+      ext/zlib/tests/bug_40189_2.phpt
+      ext/zlib/tests/zlib_filter_inflate2.phpt:
+      MF53: Fix tests
+
+    * (PHP_5_3)
+      ext/standard/proc_open.c
+      ext/standard/tests/general_functions/bug44667.phpt:
+      MFH:- Fixed bug #44667 (proc_open does not handle pipes with the mode "wb"
+      correctly)
+
+    * ext/standard/proc_open.c
+      ext/standard/tests/general_functions/bug44667.phpt
+      ext/standard/tests/general_functions/bug44667.phpt
+      ext/standard/tests/general_functions/bug44667.phpt:
+      - Fixed bug #44667 (proc_open does not handle pipes with the mode "wb"
+      correctly)
+
+2008-04-08  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysql/config.w32
+      ext/mysql/config.w32
+      ext/mysqli/config.w32
+      ext/mysqli/config.w32:
+      Fix snapshot build
+
+2008-04-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/imap/php_imap.c
+      ext/standard/http_fopen_wrapper.c:
+      
+      MFB: various bug fixes
+
+    * ext/imap/php_imap.c:
+      
+      MFB: Fixed bug #44663 (Crash in imap_mail_compose if "body" parameter
+      invalid)
+
+    * (PHP_5_3)
+      ext/imap/php_imap.c:
+      
+      Fixed bug #44663 (Crash in imap_mail_compose if "body" parameter invalid)
+
 2008-04-07  Christopher Jones  <christopher.jones@oracle.com>
 
     * ext/oci8/config.m4:
