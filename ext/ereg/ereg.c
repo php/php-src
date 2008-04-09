@@ -644,7 +644,13 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		} else if (subs[0].rm_so == 0 && subs[0].rm_eo == 0) {
 			/* No more matches */
 			regfree(&re);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Regular Expression to split()");
+			
+			if (icase) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Regular Expression to spliti()");
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Regular Expression to split()");
+			}
+			
 			zend_hash_destroy(Z_ARRVAL_P(return_value));
 			efree(Z_ARRVAL_P(return_value));
 			RETURN_FALSE;
