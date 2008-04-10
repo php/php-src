@@ -4680,8 +4680,6 @@ again:
 		case T_END_NOWDOC:
 			efree(Z_STRVAL(zendlval->u.constant));
 			break;
-		case EOF:
-			return EOF;
 	}
 
 	INIT_PZVAL(&zendlval->u.constant);
