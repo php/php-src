@@ -3586,10 +3586,10 @@ PHP_METHOD(PharFileInfo, delMetadata)
 }
 /* }}} */
 
-/* {{{ proto string PharFileInfo::getContents()
+/* {{{ proto string PharFileInfo::getContent()
  * return the complete file contents of the entry (like file_get_contents)
  */
-PHP_METHOD(PharFileInfo, getContents)
+PHP_METHOD(PharFileInfo, getContent)
 {
 	char *error;
 	php_stream *fp;
@@ -3993,7 +3993,7 @@ zend_function_entry php_entry_methods[] = {
 	PHP_ME(PharFileInfo, __destruct,         NULL,                       0)
 	PHP_ME(PharFileInfo, chmod,              arginfo_entry_chmod,        0)
 	PHP_ME(PharFileInfo, delMetadata,        NULL,                       0)
-	PHP_ME(PharFileInfo, getContents,        NULL,                       0)
+	PHP_ME(PharFileInfo, getContent,         NULL,                       0)
 	PHP_ME(PharFileInfo, getCompressedSize,  NULL,                       0)
 	PHP_ME(PharFileInfo, getCRC32,           NULL,                       0)
 	PHP_ME(PharFileInfo, getMetadata,        NULL,                       0)

@@ -1,5 +1,5 @@
 --TEST--
-Phar object: getContents() (verify it works with compression)
+Phar object: getContent() (verify it works with compression)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
@@ -18,7 +18,7 @@ $phar['a']->setCompressedGZ();
 copy($fname, $fname2);
 $phar2 = new Phar($fname2);
 var_dump($phar2['a']->isCompressed());
-echo $phar2['a']->getContents() . "\n";
+echo $phar2['a']->getContent() . "\n";
 ?>
 ===DONE===
 --CLEAN--

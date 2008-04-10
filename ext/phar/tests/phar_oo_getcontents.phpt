@@ -1,5 +1,5 @@
 --TEST--
-Phar object: getContents()
+Phar object: getContent()
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
@@ -12,7 +12,7 @@ $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $phar = new Phar($fname);
 $phar['a'] = 'file contents
 this works';
-echo $phar['a']->getContents() . "\n";
+echo $phar['a']->getContent() . "\n";
 ?>
 ===DONE===
 --CLEAN--
