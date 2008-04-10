@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Apr 2008, PHP 5.2.6
+
 10 Apr 2008, PHP 5.2.6RC5
 - Fixed incorrect heredoc handling when label is used within the block.
   (Matt Wilmas)
