@@ -26,6 +26,21 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(phar)
 
+/**
+ * set's phar->is_writeable based on the current INI value
+ */
+static int phar_set_writeable_bit(void *pDest, void *argument TSRMLS_DC) /* {{{ */
+{
+	zend_bool keep = *(zend_bool *)argument;
+	phar_archive_data *phar = *(phar_archive_data **)pDest;
+
+	if (!phar->is_data) {
+		phar->is_writeable = !keep;
+	}
+	return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
 /* if the original value is 0 (disabled), then allow setting/unsetting at will
    otherwise, only allow 1 (enabled), and error on disabling */
 ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
@@ -63,7 +78,10 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 	}
 
 	if (entry->name_length == 14) {
-		PHAR_G(readonly) = ini; 
+		PHAR_G(readonly) = ini;
+		if (PHAR_GLOBALS->request_init && PHAR_GLOBALS->phar_fname_map.arBuckets) {
+			zend_hash_apply_with_argument(&(PHAR_GLOBALS->phar_fname_map), phar_set_writeable_bit, (void *)&ini TSRMLS_CC);
+		}
 	} else {
 		PHAR_G(require_hash) = ini;
 	} 
