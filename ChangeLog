@@ -1,3 +1,88 @@
+2008-04-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/gc_013.phpt
+      ZendEngine2/tests/gc_014.phpt
+      ZendEngine2/tests/gc_015.phpt:
+      
+      WS
+
+2008-04-09  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner_defs.h:
+      fix the yyless() definition to match flex one and revert part of last patch
+      (so that it remains similar with flex's scan)
+
+2008-04-09  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ext/spl/config.m4:
+      - MFH SPL can no longer be disabld as discussed some time ago (checked back
+      with RM)
+
+    * ext/spl/config.m4:
+      - SPL can no longer be disabld as discussed some time ago (checked back
+      with RM)
+
+2008-04-09  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_language_scanner.l:
+      Fix heredoc handling. (Patch by Matt Wilmas)
+
+    * ZendEngine2/zend_globals.h
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l:
+      MFB:  Fixes to heredoc and cleanup of new re2c scanner. (Patch by Matt
+      Wilmas)
+
+    * (PHP_5_3)
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l:
+      Fixes to heredoc and cleanup of new re2c scanner. (Patch by Matt Wilmas)
+
+2008-04-09  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/spl/spl_directory.c:
+      MFH: Fix #44511 (Ensure no exception was already thrown by
+      php_stream_opendir)
+
+    * ext/spl/spl_directory.c:
+      Fix #44511 (Ensure no exception was already thrown by php_stream_opendir)
+
+2008-04-09  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/ereg/ereg.c
+      ext/ereg/ereg.c:
+      MFB: Fixed bug #44678 (spliti error message includes wrong function name)
+
+    * (PHP_5_2)
+      ext/standard/reg.c:
+      Fixed bug #44678 (spliti error message includes wrong function name)
+
+2008-04-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Fixed bug #44673 (With CGI argv/argc starts from arguments, not from
+      script)
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug44653.phpt
+      ZendEngine2/tests/bug44653.phpt
+      ZendEngine2/tests/bug44653.phpt:
+      Bug #44653 (Invalid namespace name resolution)
+
 2008-04-08  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
