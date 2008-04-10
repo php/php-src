@@ -1,3 +1,48 @@
+2008-04-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      tests/gc_013.phpt
+      tests/gc_014.phpt
+      tests/gc_015.phpt:
+      
+      WS
+
+2008-04-09  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_3)
+      zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner_defs.h:
+      fix the yyless() definition to match flex one and revert part of last patch
+      (so that it remains similar with flex's scan)
+
+2008-04-09  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_2)
+      zend_language_scanner.l:
+      Fix heredoc handling. (Patch by Matt Wilmas)
+
+    * zend_globals.h
+      zend_language_scanner.c
+      zend_language_scanner.l:
+      MFB:  Fixes to heredoc and cleanup of new re2c scanner. (Patch by Matt
+      Wilmas)
+
+    * (PHP_5_3)
+      zend_globals.h
+      zend_language_scanner.c
+      zend_language_scanner.l:
+      Fixes to heredoc and cleanup of new re2c scanner. (Patch by Matt Wilmas)
+
+2008-04-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      tests/bug44653.phpt
+      tests/bug44653.phpt
+      tests/bug44653.phpt:
+      Bug #44653 (Invalid namespace name resolution)
+
 2008-04-07  Scott MacVicar  <scott@macvicar.net>
 
     * zend_ini_scanner.c
