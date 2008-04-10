@@ -1,5 +1,9 @@
 --TEST--
 Bug #44159 (Crash: $pdo->setAttribute(PDO::STATEMENT_ATTR_CLASS, NULL))
+--SKIPIF--
+<?php
+if (!extension_loaded('pdo_sqlite')) die('skip no pdo_sqlite');
+?>
 --FILE--
 <?php
 
