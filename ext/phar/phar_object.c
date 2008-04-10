@@ -1908,7 +1908,7 @@ PHP_METHOD(Phar, compress)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &method) == FAILURE) {
 		return;
 	}
-
+	
 	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"Cannot compress phar archive, phar is read-only");
@@ -1917,7 +1917,7 @@ PHP_METHOD(Phar, compress)
 
 	if (phar_obj->arc.archive->is_zip) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-			"Cannot compress zip-based archives with whole-archive compression");
+			"Cannot compress zipbased archives with whole-archive compression");
 		return;
 	}
 
@@ -1933,7 +1933,7 @@ PHP_METHOD(Phar, compress)
 			}
 			flags = PHAR_FILE_COMPRESSED_GZ;
 			break;
-
+	
 		case PHAR_ENT_COMPRESSED_BZ2:
 			if (!phar_has_bz2) {
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
@@ -1960,6 +1960,7 @@ PHP_METHOD(Phar, compress)
 	}
 }
 /* }}} */
+
 
 /* {{{ proto object Phar::convertToPhar([string file_ext])
  * Convert a phar.tar or phar.zip archive to the phar file format. The 
@@ -2601,23 +2602,50 @@ static int pharobj_cancompress(HashTable *manifest TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto bool Phar::compressAllFilesGZ()
- * compress every file with GZip compression
+/* {{{ proto object Phar::compressFiles(int method)
+ * Compress all files within a phar or zip archive using the specified compression
+ * The parameter can be one of Phar::GZ or Phar::BZ2 to specify
+ * the kind of compression desired
  */
-PHP_METHOD(Phar, compressAllFilesGZ)
+PHP_METHOD(Phar, compressFiles)
 {
 	char *error;
+	php_uint32 flags;
+	long method;
 	PHAR_ARCHIVE_OBJECT();
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &method) == FAILURE) {
+		return;
+	}
 
 	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Phar is readonly, cannot change compression");
 		return;
 	}
-	if (!phar_has_zlib) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Cannot compress with Gzip compression, zlib extension is not enabled");
-		return;
+
+	switch (method) {
+		case PHAR_ENT_COMPRESSED_GZ:
+			if (!phar_has_zlib) {
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+					"Cannot compress files within archive with gzip, enable ext/zlib in php.ini");
+				return;
+			}
+			flags = PHAR_ENT_COMPRESSED_GZ;
+			break;
+
+		case PHAR_ENT_COMPRESSED_BZ2:
+			if (!phar_has_bz2) {
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+					"Cannot compress files within archive with bz2, enable ext/bz2 in php.ini");
+				return;
+			}
+			flags = PHAR_ENT_COMPRESSED_BZ2;
+			break;
+		default:
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+				"Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2");
+			return;
 	}
 	if (phar_obj->arc.archive->is_tar) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
@@ -2625,11 +2653,16 @@ PHP_METHOD(Phar, compressAllFilesGZ)
 		return;
 	}
 	if (!pharobj_cancompress(&phar_obj->arc.archive->manifest TSRMLS_CC)) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Cannot compress all files as Gzip, some are compressed as bzip2 and cannot be uncompressed");
+		if (flags == PHAR_FILE_COMPRESSED_GZ) {
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+				"Cannot compress all files as Gzip, some are compressed as bzip2 and cannot be decompressed");
+		} else {
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+				"Cannot compress all files as Bzip2, some are compressed as gzip and cannot be decompressed");
+		}
 		return;
 	}
-	pharobj_set_compression(&phar_obj->arc.archive->manifest, PHAR_ENT_COMPRESSED_GZ TSRMLS_CC);
+	pharobj_set_compression(&phar_obj->arc.archive->manifest, flags TSRMLS_CC);
 
 	phar_obj->arc.archive->is_modified = 1;
 
@@ -2641,50 +2674,10 @@ PHP_METHOD(Phar, compressAllFilesGZ)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::compressAllFilesBZIP2()
- * compress every file with BZip2 compression
+/* {{{ proto bool Phar::decompressFiles()
+ * decompress every file
  */
-PHP_METHOD(Phar, compressAllFilesBZIP2)
-{
-	char *error;
-	PHAR_ARCHIVE_OBJECT();
-
-	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Phar is readonly, cannot change compression");
-		return;
-	}
-	if (!phar_has_bz2) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Cannot compress with Bzip2 compression, bz2 extension is not enabled");
-		return;
-	}
-	if (phar_obj->arc.archive->is_tar) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Cannot compress with Bzip2 compression, tar archives cannot compress individual files, use compress() to compress the whole archive");
-		return;
-	}
-	if (!pharobj_cancompress(&phar_obj->arc.archive->manifest TSRMLS_CC)) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Cannot compress all files as Bzip2, some are compressed as gzip and cannot be uncompressed");
-		return;
-	}
-	pharobj_set_compression(&phar_obj->arc.archive->manifest, PHAR_ENT_COMPRESSED_BZ2 TSRMLS_CC);
-
-	phar_obj->arc.archive->is_modified = 1;
-
-	phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
-	if (error) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, error);
-		efree(error);
-	}
-}
-/* }}} */
-
-/* {{{ proto bool Phar::uncompressAllFiles()
- * uncompress every file
- */
-PHP_METHOD(Phar, uncompressAllFiles)
+PHP_METHOD(Phar, decompressFiles)
 {
 	char *error;
 	PHAR_ARCHIVE_OBJECT();
@@ -2696,7 +2689,7 @@ PHP_METHOD(Phar, uncompressAllFiles)
 	}
 	if (!pharobj_cancompress(&phar_obj->arc.archive->manifest TSRMLS_CC)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Cannot uncompress all files, some are compressed as bzip2 or gzip and cannot be uncompressed");
+			"Cannot decompress all files, some are compressed as bzip2 or gzip and cannot be decompressed");
 		return;
 	}
 	if (phar_obj->arc.archive->is_tar) {
@@ -3928,8 +3921,8 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, addFromString,         arginfo_phar_fromstring,   ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, buildFromIterator,     arginfo_phar_build,        ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, compress,              arginfo_phar_comp,         ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, compressAllFilesBZIP2, NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, compressAllFilesGZ,    NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, compressFiles,         arginfo_phar_comp,         ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, decompressFiles,       NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, convertToPhar,         arginfo_phar_conv,         ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, convertToTar,          arginfo_phar_conv,         ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, convertToZip,          arginfo_phar_conv,         ZEND_ACC_PUBLIC)
@@ -3964,7 +3957,6 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, setStub,               arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, startBuffering,        NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, stopBuffering,         NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, uncompressAllFiles,    NULL,                      ZEND_ACC_PUBLIC)
 #endif
 	/* static member functions */
 	PHP_ME(Phar, apiVersion,            NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)

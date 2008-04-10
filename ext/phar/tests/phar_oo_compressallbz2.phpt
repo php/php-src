@@ -1,5 +1,5 @@
 --TEST--
-Phar::compressAllFilesBZIP2()
+Phar::compressFiles(Phar::BZ2)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if (!extension_loaded("bz2")) die("skip bz2 not present"); ?>
@@ -29,7 +29,7 @@ var_dump(file_get_contents($pname . '/c'));
 var_dump($phar['c']->isCompressed());
 
 $phar = new Phar($fname);
-$phar->compressAllFilesBZIP2();
+$phar->compressFiles(Phar::BZ2);
 var_dump(file_get_contents($pname . '/a'));
 var_dump($phar['a']->isCompressedGZ());
 var_dump($phar['a']->isCompressedBZIP2());

@@ -21,7 +21,7 @@ include 'files/phar_test.inc';
 
 $phar = new Phar($fname);
 var_dump($phar->getModified());
-$phar->compressAllFilesGZ();
+$phar->compressFiles(Phar::GZ);
 var_dump($phar->getModified());
 ?>
 ===DONE===
