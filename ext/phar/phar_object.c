@@ -2094,6 +2094,28 @@ PHP_METHOD(Phar, isCompressed)
 }
 /* }}} */
 
+/* {{{ proto bool Phar::isWritable()
+ * Returns true if phar.readonly=0 or phar is a PharData AND the actual file is writable.
+ */
+PHP_METHOD(Phar, isWritable)
+{
+	php_stream_statbuf ssb;
+	PHAR_ARCHIVE_OBJECT();
+	
+	if (!phar_obj->arc.archive->is_writeable) {
+		RETURN_FALSE;
+	}
+	if (SUCCESS != php_stream_stat_path(phar_obj->arc.archive->fname, &ssb)) {
+		if (phar_obj->arc.archive->is_brandnew) {
+			/* assume it works if the file doesn't exist yet */
+			RETURN_TRUE;
+		}
+		RETURN_FALSE;
+	}
+	RETURN_BOOL((ssb.sb.st_mode & (S_IWOTH | S_IWGRP | S_IWUSR)) != 0);
+}
+/* }}} */
+
 /* {{{ proto bool Phar::delete(string entry)
  * Deletes a named file within the archive.
  */
@@ -3925,6 +3947,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, hasMetadata,           NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, isBuffering,           NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, isCompressed,          NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, isWritable,            NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, isPhar,                NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, isTar,                 NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, isZip,                 NULL,                      ZEND_ACC_PUBLIC)
