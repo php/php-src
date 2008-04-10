@@ -1,9 +1,8 @@
 --TEST--
 PDO Common: Bug #43663 (__call on classes derived from PDO)
---FILE--
 --SKIPIF--
 <?php # vim:ft=php
-if (!extension_loaded('pdo')) die('skip');
+if (!extension_loaded('pdo_sqlite')) die('skip no pdo_sqlite');
 ?>
 --FILE--
 <?php
