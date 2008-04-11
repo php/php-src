@@ -31,14 +31,14 @@ var_dump($phar['c']->isCompressed());
 $phar = new Phar($fname);
 $phar->compressFiles(Phar::BZ2);
 var_dump(file_get_contents($pname . '/a'));
-var_dump($phar['a']->isCompressedGZ());
-var_dump($phar['a']->isCompressedBZIP2());
+var_dump($phar['a']->isCompressed(Phar::GZ));
+var_dump($phar['a']->isCompressed(Phar::BZ2));
 var_dump(file_get_contents($pname . '/b'));
-var_dump($phar['b']->isCompressedGZ());
-var_dump($phar['b']->isCompressedBZIP2());
+var_dump($phar['b']->isCompressed(Phar::GZ));
+var_dump($phar['b']->isCompressed(Phar::BZ2));
 var_dump(file_get_contents($pname . '/c'));
-var_dump($phar['c']->isCompressedGZ());
-var_dump($phar['b']->isCompressedBZIP2());
+var_dump($phar['c']->isCompressed(Phar::GZ));
+var_dump($phar['b']->isCompressed(Phar::BZ2));
 
 ?>
 ===DONE===
