@@ -3659,10 +3659,10 @@ PHP_METHOD(PharFileInfo, setCompressedBZIP2)
 }
 /* }}} */
 
-/* {{{ proto int PharFileInfo::setUncompressed()
- * Instructs the Phar class to uncompress the current file
+/* {{{ proto int PharFileInfo::decompress()
+ * Instructs the Phar class to decompress the current file
  */
-PHP_METHOD(PharFileInfo, setUncompressed)
+PHP_METHOD(PharFileInfo, decompress)
 {
 	char *fname, *error;
 	int fname_len;
@@ -3689,12 +3689,12 @@ PHP_METHOD(PharFileInfo, setUncompressed)
 	}
 	if (!phar_has_zlib) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Cannot uncompress Gzip-compressed file, zlib extension is not enabled");
+			"Cannot decompress Gzip-compressed file, zlib extension is not enabled");
 		return;
 	}
 	if (!phar_has_bz2) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Cannot uncompress Bzip2-compressed file, bz2 extension is not enabled");
+			"Cannot decompress Bzip2-compressed file, bz2 extension is not enabled");
 		return;
 	}
 	if (!entry_obj->ent.entry->fp) {
@@ -3943,7 +3943,7 @@ zend_function_entry php_entry_methods[] = {
 	PHP_ME(PharFileInfo, setCompressedBZIP2, NULL,                       0)
 	PHP_ME(PharFileInfo, setCompressedGZ,    NULL,                       0)
 	PHP_ME(PharFileInfo, setMetadata,        arginfo_phar_setMetadata,   0)
-	PHP_ME(PharFileInfo, setUncompressed,    NULL,                       0)
+	PHP_ME(PharFileInfo, decompress,         NULL,                       0)
 	{NULL, NULL, NULL}
 };
 #endif /* HAVE_SPL */
