@@ -1,7 +1,7 @@
 To install the PEAR installer, please use go-pear.
 
 On linux:
-$ lynx -source http://go-pear.org/ | php
+$ lynx -source http://pear.php.net/go-pear | php
 
 or save the setup script under go-pear.php and run:
 
