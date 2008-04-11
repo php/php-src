@@ -1,5 +1,5 @@
 --TEST--
-Test posix_strerror() function : usage variations  - <type here specifics of this variation>
+Test posix_strerror() function : usage variations
 --SKIPIF--
 <?php 
 	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
@@ -89,10 +89,10 @@ Arg value 10.5
 string(18) "No child processes"
 
 Arg value -10.5 
-string(24) "Unknown error 4294967286"
+string(%d) "Unknown error %d"
 
 Arg value 101234567000 
-string(24) "Unknown error 2147483647"
+string(%d) "Unknown error %d"
 
 Arg value 1.07654321E-9 
 string(7) "Success"
@@ -181,10 +181,10 @@ Arg value 10.5
 string(18) "No child processes"
 
 Arg value -10.5 
-string(24) "Unknown error 4294967286"
+string(%d) "Unknown error %d"
 
 Arg value 101234567000 
-string(24) "Unknown error 2147483647"
+string(%d) "Unknown error %d"
 
 Arg value 1.07654321E-9 
 string(7) "Success"

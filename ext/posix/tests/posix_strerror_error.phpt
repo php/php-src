@@ -42,5 +42,5 @@ Warning: posix_strerror() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 
 -- Testing posix_strerror() function with invalid error number --
-string(24) "Unknown error 4294966297"
+string(%d) "Unknown error %d"
 Done
