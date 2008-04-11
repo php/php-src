@@ -2,8 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.0
 - Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
-- Dropped zend.ze1_compatibility_mode (Dmitry)
+- Removed zend.ze1_compatibility_mode. (Dmitry)
 
+- Added pcre to list of standard extensions that cannot be disabled. (Marcus)
 - Added "jump label" operator (limited "goto"). (Dmitry, Sara)
 - Added ability to use stream wrappers in include_path (Gregory, Dmitry)
 - Added concept of "delayed early binding" that allows opcode caches to perform
@@ -12,7 +13,7 @@ PHP                                                                        NEWS
 - Added new error mode E_DEPRECATED which is used to inform about stuff to be
   dropped in future PHP versions. (Lars Strojny, Felipe, Marcus)
 - Added and improved PHP syntax and semantics:
-  . Added NOWDOC. (Gwynne Raskind, Stas, Dmitry)
+  . Added NOWDOC syntax. (Gwynne Raskind, Stas, Dmitry)
   . Added HEREDOC syntax with double quotes. (Lars Strojny, Felipe)
   . Added "?:" operator. (Marcus)
   . Added support for namespaces. (Dmitry, Stas, Gregory)
@@ -23,7 +24,7 @@ PHP                                                                        NEWS
   . Improved checks for callbacks. (Marcus)
   . Added __DIR__ constant. (Lars Strojny)
   . Added PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION,
-    PHP_EXTRA_VERSION, PHP_VERSION_ID, PHP_ZTS and PHP_DEBUG constants (Pierre)
+    PHP_EXTRA_VERSION, PHP_VERSION_ID, PHP_ZTS and PHP_DEBUG constants. (Pierre)
 - Added new date/time functionality: (Derick)
   . date_parse_from_format(): Parse date/time strings according to a format.
   . date_create_from_format()/DateTime::createFromFormat(): Create a date/time
@@ -48,6 +49,7 @@ PHP                                                                        NEWS
   . support for date/time strings returned by MS SQL.
   . support for serialization and unserialization of DateTime objects.
 - Added functionality to SPL extension:
+  . Added SPL to list of standard extensions that cannot be disabled. (Marcus)
   . Added ability to store associative information with objects in
     SplObjectStorage. (Marcus)
   . Added ArrayAccess support to SplObjectStorage. (Marcus)
