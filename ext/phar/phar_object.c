@@ -2541,6 +2541,115 @@ static int pharobj_cancompress(HashTable *manifest TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+/* {{{ proto object Phar::compress(int method[, string extension])
+ * Compress a .tar, or .phar.tar with whole-file compression
+ * The parameter can be one of Phar::GZ or Phar::BZ2 to specify
+ * the kind of compression desired
+ */
+PHP_METHOD(Phar, compress)
+{
+	long method = 0;
+	char *ext = NULL;
+	int ext_len;
+	php_uint32 flags;
+	zval *ret;
+	PHAR_ARCHIVE_OBJECT();
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|s", &method, &ext, &ext_len) == FAILURE) {
+		return;
+	}
+	
+	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Cannot compress phar archive, phar is read-only");
+		return;
+	}
+
+	if (phar_obj->arc.archive->is_zip) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Cannot compress zipbased archives with whole-archive compression");
+		return;
+	}
+
+	switch (method) {
+		case 0:
+			flags = PHAR_FILE_COMPRESSED_NONE;
+			break;
+		case PHAR_ENT_COMPRESSED_GZ:
+			if (!phar_has_zlib) {
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+					"Cannot compress entire archive with gzip, enable ext/zlib in php.ini");
+				return;
+			}
+			flags = PHAR_FILE_COMPRESSED_GZ;
+			break;
+	
+		case PHAR_ENT_COMPRESSED_BZ2:
+			if (!phar_has_bz2) {
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+					"Cannot compress entire archive with bz2, enable ext/bz2 in php.ini");
+				return;
+			}
+			flags = PHAR_FILE_COMPRESSED_BZ2;
+			break;
+		default:
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+				"Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2");
+			return;
+	}
+
+	if (phar_obj->arc.archive->is_tar) {
+		ret = phar_convert_to_other(phar_obj->arc.archive, PHAR_FORMAT_TAR, ext, flags TSRMLS_CC);
+	} else {
+		ret = phar_convert_to_other(phar_obj->arc.archive, PHAR_FORMAT_PHAR, ext, flags TSRMLS_CC);
+	}
+	if (ret) {
+		RETURN_ZVAL(ret, 1, 1);
+	} else {
+		RETURN_NULL();
+	}
+}
+/* }}} */
+
+/* {{{ proto object Phar::decompress([string extension])
+ * Decompress a .tar, or .phar.tar with whole-file compression
+ */
+PHP_METHOD(Phar, decompress)
+{
+	char *ext = NULL;
+	int ext_len;
+	zval *ret;
+	PHAR_ARCHIVE_OBJECT();
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &ext, &ext_len) == FAILURE) {
+		return;
+	}
+
+	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Cannot compress phar archive, phar is read-only");
+		return;
+	}
+
+	if (phar_obj->arc.archive->is_zip) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Cannot compress zipbased archives with whole-archive compression");
+		return;
+	}
+
+	if (phar_obj->arc.archive->is_tar) {
+		ret = phar_convert_to_other(phar_obj->arc.archive, PHAR_FORMAT_TAR, ext, PHAR_FILE_COMPRESSED_NONE TSRMLS_CC);
+	} else {
+		ret = phar_convert_to_other(phar_obj->arc.archive, PHAR_FORMAT_PHAR, ext, PHAR_FILE_COMPRESSED_NONE TSRMLS_CC);
+	}
+	if (ret) {
+		RETURN_ZVAL(ret, 1, 1);
+	} else {
+		RETURN_NULL();
+	}
+}
+/* }}} */
+
 /* {{{ proto object Phar::compressFiles(int method)
  * Compress all files within a phar or zip archive using the specified compression
  * The parameter can be one of Phar::GZ or Phar::BZ2 to specify
@@ -3775,6 +3884,17 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_conv, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_comps, 0, 0, 1)
+	ZEND_ARG_INFO(0, compression_type)
+	ZEND_ARG_INFO(0, file_ext)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_decomp, 0, 0, 0)
+	ZEND_ARG_INFO(0, file_ext)
+ZEND_END_ARG_INFO();
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_comp, 0, 0, 1)
 	ZEND_ARG_INFO(0, compression_type)
 ZEND_END_ARG_INFO();
@@ -3862,6 +3982,8 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, buildFromIterator,     arginfo_phar_build,        ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, compressFiles,         arginfo_phar_comp,         ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, decompressFiles,       NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, compress,              arginfo_phar_comps,        ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, decompress,            arginfo_phar_decomp,       ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, convertToExecutable,   arginfo_phar_conv,         ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, convertToData,         arginfo_phar_conv,         ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, copy,                  arginfo_phar_copy,         ZEND_ACC_PUBLIC)
