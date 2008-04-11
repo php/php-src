@@ -106,7 +106,7 @@ array(8) {
 }
 
 Arg value 101234567000 
-Error: 2 - parse_url(): Invalid URL component identifier 2147483647, %s(71)
+Error: 2 - parse_url(): Invalid URL component identifier %d, %s(71)
 bool(false)
 
 Arg value 1.07654321E-9 
@@ -215,7 +215,7 @@ array(8) {
 }
 
 Arg value 101234567000 
-Error: 2 - parse_url(): Invalid URL component identifier 2147483647, %s(71)
+Error: 2 - parse_url(): Invalid URL component identifier %d, %s(71)
 bool(false)
 
 Arg value 1.07654321E-9 
