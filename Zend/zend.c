@@ -1150,7 +1150,6 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 	zend_file_handle *file_handle;
 	zend_op_array *orig_op_array = EG(active_op_array);
 	zval **orig_retval_ptr_ptr = EG(return_value_ptr_ptr);
-	zval *local_retval = NULL;
 
 	va_start(files, file_count);
 	for (i = 0; i < file_count; i++) {
@@ -1165,7 +1164,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 		}
 		zend_destroy_file_handle(file_handle TSRMLS_CC);
 		if (EG(active_op_array)) {
-			EG(return_value_ptr_ptr) = retval ? retval : &local_retval;
+			EG(return_value_ptr_ptr) = retval ? retval : NULL;
 			zend_execute(EG(active_op_array) TSRMLS_CC);
 			if (EG(exception)) {
 				if (EG(user_exception_handler)) {
@@ -1195,13 +1194,6 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 				} else {
 					zend_exception_error(EG(exception) TSRMLS_CC);
 				}
-				if (retval == NULL && *EG(return_value_ptr_ptr) != NULL) {
-					zval_ptr_dtor(EG(return_value_ptr_ptr));
-					local_retval = NULL;
-				}
-			} else if (!retval && *EG(return_value_ptr_ptr)) {
-				zval_ptr_dtor(EG(return_value_ptr_ptr));
-				local_retval = NULL;
 			}
 			destroy_op_array(EG(active_op_array) TSRMLS_CC);
 			efree(EG(active_op_array));
