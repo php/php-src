@@ -14,7 +14,7 @@ $fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.php';
 $phar = new Phar($fname);
 $phar['a'] = 'file contents
 this works';
-$phar['a']->setCompressedGZ();
+$phar['a']->compress(Phar::GZ);
 copy($fname, $fname2);
 $phar2 = new Phar($fname2);
 var_dump($phar2['a']->isCompressed());

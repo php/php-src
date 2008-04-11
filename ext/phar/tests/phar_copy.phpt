@@ -25,7 +25,7 @@ try
 	$p->startBuffering();
 	$p->copy('a', 'b');
 	echo file_get_contents($p['b']->getPathName());
-	$p['a']->setCompressedGZ();
+	$p['a']->compress(Phar::GZ);
 	$p['b']->setMetadata('a');
 	$p->copy('b', 'c');
 	$p->stopBuffering();

@@ -1,5 +1,5 @@
 --TEST--
-Phar::setCompressedGZ()
+Phar: PharFileInfo::compress(Phar::GZ)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if (!extension_loaded("zlib")) die("skip zlib not present"); ?>
@@ -31,7 +31,7 @@ var_dump($phar['c']->isCompressed());
 $phar['a'] = 'new a';
 $phar['a']->decompress();
 $phar['b'] = 'new b';
-$phar['b']->setCompressedGZ();
+$phar['b']->compress(Phar::GZ);
 $phar['d'] = 'new d';
 
 $phar = new Phar($fname);

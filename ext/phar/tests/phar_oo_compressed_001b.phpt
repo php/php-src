@@ -1,5 +1,5 @@
 --TEST--
-Phar::setCompressedBZip2()
+Phar: PharFileInfo::compress(Phar::BZ2)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if (!extension_loaded("bz2")) die("skip bz2 not present"); ?>
@@ -31,7 +31,7 @@ var_dump($phar['c']->isCompressed());
 $phar['a'] = 'new a';
 $phar['a']->decompress();
 $phar['b'] = 'new b';
-$phar['b']->setCompressedBZip2();
+$phar['b']->compress(Phar::BZ2);
 $phar['d'] = 'new d';
 
 $phar = new Phar($fname);
