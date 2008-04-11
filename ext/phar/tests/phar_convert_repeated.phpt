@@ -32,7 +32,7 @@ var_dump($phar->getAlias());
 
 echo "================= convertToTar() =====================\n";
 
-$phar = $phar->convertToTar();
+$phar = $phar->convertToExecutable(Phar::TAR);
 var_dump($phar->isPhar());
 var_dump($phar->isTar());
 var_dump($phar->isZip());
@@ -41,7 +41,7 @@ var_dump($phar->getAlias());
 
 echo "================= convertToZip() =====================\n";
 
-$phar = $phar->convertToZip();
+$phar = $phar->convertToExecutable(Phar::ZIP);
 var_dump($phar->isPhar());
 var_dump($phar->isTar());
 var_dump($phar->isZip());
@@ -50,7 +50,7 @@ var_dump($phar->getAlias());
 
 echo "================= convertToPhar() ====================\n";
 
-$phar = $phar->convertToPhar('.2.phar');
+$phar = $phar->convertToExecutable(Phar::PHAR, Phar::NONE, '.2.phar');
 var_dump($phar->isPhar());
 var_dump($phar->isTar());
 var_dump($phar->isZip());
@@ -59,7 +59,7 @@ var_dump($phar->getAlias());
 
 echo "================= convertToZip() =====================\n";
 
-$phar = $phar->convertToZip('.2.phar.zip');
+$phar = $phar->convertToExecutable(Phar::ZIP, Phar::NONE, '.2.phar.zip');
 var_dump($phar->isPhar());
 var_dump($phar->isTar());
 var_dump($phar->isZip());
@@ -68,7 +68,7 @@ var_dump($phar->getAlias());
 
 echo "================= convertToTar() =====================\n";
 
-$phar = $phar->convertToTar('2.phar.tar');
+$phar = $phar->convertToExecutable(Phar::TAR, Phar::NONE, '2.phar.tar');
 var_dump($phar->isPhar());
 var_dump($phar->isTar());
 var_dump($phar->isZip());
@@ -77,7 +77,7 @@ var_dump($phar->getAlias());
 
 echo "================= convertToZip() =====================\n";
 
-$phar = $phar->convertToZip('3.phar.zip');
+$phar = $phar->convertToExecutable(Phar::ZIP, Phar::NONE, '3.phar.zip');
 var_dump($phar->isPhar());
 var_dump($phar->isTar());
 var_dump($phar->isZip());

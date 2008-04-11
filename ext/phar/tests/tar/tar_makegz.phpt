@@ -16,7 +16,8 @@ $fname3 = dirname(__FILE__) . '/tar_makegz_b.phar.tar.gz';
 $phar = new Phar($fname);
 $phar['test'] = 'hi';
 var_dump($phar->isTar());
-$phar = $phar->compress(Phar::GZ);
+$phar = $phar->convertToExecutable(Phar::TAR, Phar::GZ);
+
 
 copy($fname2, $fname3);
 

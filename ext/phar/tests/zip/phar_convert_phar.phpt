@@ -17,13 +17,13 @@ $phar->stopBuffering();
 var_dump($phar->isZip());
 var_dump(strlen($phar->getStub()));
 
-$phar = $phar->convertToZip();
+$phar = $phar->convertToExecutable(Phar::ZIP);
 var_dump($phar->isZip());
 var_dump($phar->getStub());
 
 $phar['a'] = 'hi there';
 
-$phar = $phar->convertToPhar('.3.phar');
+$phar = $phar->convertToExecutable(Phar::PHAR, Phar::NONE, '.3.phar');
 var_dump($phar->isPhar());
 var_dump(strlen($phar->getStub()));
 

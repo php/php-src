@@ -1744,10 +1744,10 @@ static zval *phar_convert_to_other(phar_archive_data *source, int convert, char 
 
 	phar->is_data = source->is_data;
 	switch (convert) {
-		case 1 :
+		case PHAR_FORMAT_TAR :
 			phar->is_tar = 1;
 			break;
-		case 2 :
+		case PHAR_FORMAT_ZIP :
 			phar->is_zip = 1;
 			break;
 		default :
@@ -1822,110 +1822,65 @@ static zval *phar_convert_to_other(phar_archive_data *source, int convert, char 
 }
 /* }}} */
 
-/* {{{ proto object Phar::convertToTar([string file_ext])
- * Convert a phar or phar.zip archive to the tar file format. The first
- * parameter can be one of Phar::GZ or Phar::BZ2 to specify whole-file
- * compression. The second parameter allows the user to determine the new
- * filename extension (default is phar.tar/phar.tar.bz2/phar.tar.gz).
- * Both parameters are optional.
+/* {{{ proto object Phar::convertToExecutable([int format[, int compression [, string file_ext]]])
+ * Convert a phar.tar or phar.zip archive to the phar file format. The 
+ * optional parameter allows the user to determine the new
+ * filename extension (default is phar).
  */
-PHP_METHOD(Phar, convertToTar)
+PHP_METHOD(Phar, convertToExecutable)
 {
 	char *ext = NULL;
-	int ext_len = 0, save;
-	zval *ret;
-	PHAR_ARCHIVE_OBJECT();
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &ext, &ext_len) == FAILURE) {
-		return;
-	}
-
-	if (phar_obj->arc.archive->is_tar) {
-		RETURN_TRUE;
-	}
-	if (PHAR_G(readonly)) {
-		save = phar_obj->arc.archive->is_data;
-		phar_obj->arc.archive->is_data = 1;
-	}
-
-	ret = phar_convert_to_other(phar_obj->arc.archive, 1, ext, phar_obj->arc.archive->flags TSRMLS_CC);
-	phar_obj->arc.archive->is_data = save;
-	if (ret) {
-		RETURN_ZVAL(ret, 1, 1);
-	} else {
-		RETURN_NULL();
-	}
-}
-/* }}} */
-
-/* {{{ proto object Phar::convertToZip([string file_ext])
- * Convert a phar or phar.tar archive to the zip file format. The single
- * optional argument allows the user to determine the new filename extension
- * (default is phar.zip).
- */
-PHP_METHOD(Phar, convertToZip)
-{
-	char *ext = NULL;
-	int ext_len = 0, save;
-	zval *ret;
-	PHAR_ARCHIVE_OBJECT();
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &ext, &ext_len) == FAILURE) {
-		return;
-	}
-
-	if (phar_obj->arc.archive->is_zip) {
-		RETURN_TRUE;
-	}
-
-	if (PHAR_G(readonly)) {
-		save = phar_obj->arc.archive->is_data;
-		phar_obj->arc.archive->is_data = 1;
-	}
-
-	ret = phar_convert_to_other(phar_obj->arc.archive, 2, ext, PHAR_FILE_COMPRESSED_NONE TSRMLS_CC);
-	phar_obj->arc.archive->is_data = save;
-	if (ret) {
-		RETURN_ZVAL(ret, 1, 1);
-	} else {
-		RETURN_NULL();
-	}
-}
-/* }}} */
-
-/* {{{ proto object Phar::compress(int method)
- * Compress a .tar, or .phar.tar with whole-file compression
- * The parameter can be one of Phar::GZ or Phar::BZ2 to specify
- * the kind of compression desired
- */
-PHP_METHOD(Phar, compress)
-{
-	long method = 0;
+	int is_data, ext_len = 0;
 	php_uint32 flags;
 	zval *ret;
+	/* a number that is not 0, 1 or 2 (Which is also Greg's birthday, so there) */
+	long format = 9021976, method = 9021976;
 	PHAR_ARCHIVE_OBJECT();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &method) == FAILURE) {
-		return;
-	}
-	
-	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-			"Cannot compress phar archive, phar is read-only");
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|lls", &format, &method, &ext, &ext_len) == FAILURE) {
 		return;
 	}
 
-	if (phar_obj->arc.archive->is_zip) {
+	if (PHAR_G(readonly)) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-			"Cannot compress zipbased archives with whole-archive compression");
+			"Cannot write out executable phar archive, phar is read-only");
 		return;
+	}
+
+	switch (format) {
+		case 9021976:
+			/* by default, use the existing format */
+			if (phar_obj->arc.archive->is_tar) {
+				format = PHAR_FORMAT_TAR;
+			} else if (phar_obj->arc.archive->is_zip) {
+				format = PHAR_FORMAT_ZIP;
+			} else {
+				format = PHAR_FORMAT_PHAR;
+			}
+			break;
+		case PHAR_FORMAT_PHAR:
+		case PHAR_FORMAT_TAR:
+		case PHAR_FORMAT_ZIP:
+			break;
+		default:
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+				"Unknown file format specified, please pass one of Phar::PHAR, Phar::TAR or Phar::ZIP");
+			return;
 	}
 
 	switch (method) {
+		case 9021976:
+			flags = phar_obj->arc.archive->flags & PHAR_FILE_COMPRESSION_MASK;
+			break;
 		case 0:
 			flags = PHAR_FILE_COMPRESSED_NONE;
 			break;
 		case PHAR_ENT_COMPRESSED_GZ:
+			if (format == PHAR_FORMAT_ZIP) {
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+					"Cannot compress entire archive with gzip, zip archives do not support whole-archive compression");
+				return;
+			}
 			if (!phar_has_zlib) {
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 					"Cannot compress entire archive with gzip, enable ext/zlib in php.ini");
@@ -1935,6 +1890,11 @@ PHP_METHOD(Phar, compress)
 			break;
 	
 		case PHAR_ENT_COMPRESSED_BZ2:
+			if (format == PHAR_FORMAT_ZIP) {
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+					"Cannot compress entire archive with bz2, zip archives do not support whole-archive compression");
+				return;
+			}
 			if (!phar_has_bz2) {
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 					"Cannot compress entire archive with bz2, enable ext/bz2 in php.ini");
@@ -1948,90 +1908,10 @@ PHP_METHOD(Phar, compress)
 			return;
 	}
 
-	if (phar_obj->arc.archive->is_tar) {
-		ret = phar_convert_to_other(phar_obj->arc.archive, 1, NULL, flags TSRMLS_CC);
-	} else {
-		ret = phar_convert_to_other(phar_obj->arc.archive, 0, NULL, flags TSRMLS_CC);
-	}
-	if (ret) {
-		RETURN_ZVAL(ret, 1, 1);
-	} else {
-		RETURN_NULL();
-	}
-}
-/* }}} */
-
-
-/* {{{ proto object Phar::convertToPhar([string file_ext])
- * Convert a phar.tar or phar.zip archive to the phar file format. The 
- * optional parameter allows the user to determine the new
- * filename extension (default is phar).
- */
-PHP_METHOD(Phar, convertToPhar)
-{
-	char *ext = NULL;
-	int ext_len = 0;
-	zval *ret;
-	PHAR_ARCHIVE_OBJECT();
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &ext, &ext_len) == FAILURE) {
-		return;
-	}
-
-	if (!phar_obj->arc.archive->is_tar && !phar_obj->arc.archive->is_zip) {
-		RETURN_TRUE;
-	}
-
-	if (PHAR_G(readonly)) { /* Don't override this one for is_data */
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-			"Cannot write out phar archive, phar is read-only");
-		return;
-	}
-
-	ret = phar_convert_to_other(phar_obj->arc.archive, 0, ext, phar_obj->arc.archive->flags TSRMLS_CC);
-	if (ret) {
-		RETURN_ZVAL(ret, 1, 1);
-	} else {
-		RETURN_NULL();
-	}
-}
-/* }}} */
-
-/* {{{ proto object Phar::convertToExecutable([string file_ext])
- * Convert a .tar or .zip archive to an executable .phar.tar or .phar.zip.
- * The optional parameter allows the user to determine the new
- * filename extension (default is phar.zip or phar.tar).
- */
-PHP_METHOD(Phar, convertToExecutable)
-{
-	char *ext = NULL;
-	int ext_len = 0;
-	zval *ret;
-	PHAR_ARCHIVE_OBJECT();
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &ext, &ext_len) == FAILURE) {
-		return;
-	}
-
-	if (!phar_obj->arc.archive->is_tar && !phar_obj->arc.archive->is_zip) {
-		RETURN_TRUE;
-	}
-	if (!phar_obj->arc.archive->is_data) {
-		RETURN_TRUE;
-	}
-
-	if (PHAR_G(readonly)) { /* Don't override this one for is_data */
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-			"Cannot convert phar archive to executable format, phar is read-only");
-		return;
-	}
-
+	is_data = phar_obj->arc.archive->is_data;
 	phar_obj->arc.archive->is_data = 0;
-	if (phar_obj->arc.archive->is_tar) {
-		ret = phar_convert_to_other(phar_obj->arc.archive, 1, ext, phar_obj->arc.archive->flags TSRMLS_CC);
-	} else {
-		ret = phar_convert_to_other(phar_obj->arc.archive, 2, ext, phar_obj->arc.archive->flags TSRMLS_CC);
-	}
+	ret = phar_convert_to_other(phar_obj->arc.archive, format, ext, flags TSRMLS_CC);
+	phar_obj->arc.archive->is_data = is_data;
 	if (ret) {
 		RETURN_ZVAL(ret, 1, 1);
 	} else {
@@ -2040,35 +1920,94 @@ PHP_METHOD(Phar, convertToExecutable)
 }
 /* }}} */
 
-/* {{{ proto object Phar::convertToData([string file_ext])
- * Convert a phar.tar or phar.zip archive to a non-executable .tar or .zip.
+/* {{{ proto object Phar::convertToData([int format[, int compression [, string file_ext]]])
+ * Convert an archive to a non-executable .tar or .zip.
  * The optional parameter allows the user to determine the new
  * filename extension (default is .zip or .tar).
  */
 PHP_METHOD(Phar, convertToData)
 {
 	char *ext = NULL;
-	int ext_len = 0;
+	int is_data, ext_len = 0;
+	php_uint32 flags;
 	zval *ret;
+	/* a number that is not 0, 1 or 2 (Which is also Greg's birthday so there) */
+	long format = 9021976, method = 9021976;
 	PHAR_ARCHIVE_OBJECT();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &ext, &ext_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|lls", &format, &method, &ext, &ext_len) == FAILURE) {
 		return;
 	}
 
-	if (!phar_obj->arc.archive->is_tar && !phar_obj->arc.archive->is_zip) {
-		RETURN_TRUE;
-	}
-	if (!phar_obj->arc.archive->is_data) {
-		RETURN_TRUE;
+	switch (format) {
+		case 9021976:
+			/* by default, use the existing format */
+			if (phar_obj->arc.archive->is_tar) {
+				format = PHAR_FORMAT_TAR;
+			} else if (phar_obj->arc.archive->is_zip) {
+				format = PHAR_FORMAT_ZIP;
+			} else {
+				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+					"Cannot write out data phar archive, use Phar::TAR or Phar::ZIP");
+			}
+			break;
+		case PHAR_FORMAT_PHAR:
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+				"Cannot write out data phar archive, use Phar::TAR or Phar::ZIP");
+			return;
+		case PHAR_FORMAT_TAR:
+		case PHAR_FORMAT_ZIP:
+			break;
+		default:
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+				"Unknown file format specified, please pass one of Phar::TAR or Phar::ZIP");
+			return;
 	}
 
-	phar_obj->arc.archive->is_data = 1;
-	if (phar_obj->arc.archive->is_tar) {
-		ret = phar_convert_to_other(phar_obj->arc.archive, 1, ext, phar_obj->arc.archive->flags TSRMLS_CC);
-	} else {
-		ret = phar_convert_to_other(phar_obj->arc.archive, 2, ext, phar_obj->arc.archive->flags TSRMLS_CC);
+	switch (method) {
+		case 9021976:
+			flags = phar_obj->arc.archive->flags & PHAR_FILE_COMPRESSION_MASK;
+			break;
+		case 0:
+			flags = PHAR_FILE_COMPRESSED_NONE;
+			break;
+		case PHAR_ENT_COMPRESSED_GZ:
+			if (format == PHAR_FORMAT_ZIP) {
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+					"Cannot compress entire archive with gzip, zip archives do not support whole-archive compression");
+				return;
+			}
+			if (!phar_has_zlib) {
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+					"Cannot compress entire archive with gzip, enable ext/zlib in php.ini");
+				return;
+			}
+			flags = PHAR_FILE_COMPRESSED_GZ;
+			break;
+	
+		case PHAR_ENT_COMPRESSED_BZ2:
+			if (format == PHAR_FORMAT_ZIP) {
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+					"Cannot compress entire archive with bz2, zip archives do not support whole-archive compression");
+				return;
+			}
+			if (!phar_has_bz2) {
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+					"Cannot compress entire archive with bz2, enable ext/bz2 in php.ini");
+				return;
+			}
+			flags = PHAR_FILE_COMPRESSED_BZ2;
+			break;
+		default:
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+				"Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2");
+			return;
 	}
+
+	is_data = phar_obj->arc.archive->is_data;
+	phar_obj->arc.archive->is_data = 1;
+	ret = phar_convert_to_other(phar_obj->arc.archive, format, ext, flags TSRMLS_CC);
+	phar_obj->arc.archive->is_data = is_data;
 	if (ret) {
 		RETURN_ZVAL(ret, 1, 1);
 	} else {
@@ -3836,6 +3775,8 @@ ZEND_END_ARG_INFO();
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_conv, 0, 0, 0)
+	ZEND_ARG_INFO(0, format)
+	ZEND_ARG_INFO(0, compression_type)
 	ZEND_ARG_INFO(0, file_ext)
 ZEND_END_ARG_INFO();
 
@@ -3920,12 +3861,10 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, addFile,               arginfo_phar_addfile,      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, addFromString,         arginfo_phar_fromstring,   ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, buildFromIterator,     arginfo_phar_build,        ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, compress,              arginfo_phar_comp,         ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, compressFiles,         arginfo_phar_comp,         ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, decompressFiles,       NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, convertToPhar,         arginfo_phar_conv,         ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, convertToTar,          arginfo_phar_conv,         ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, convertToZip,          arginfo_phar_conv,         ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, convertToExecutable,   arginfo_phar_conv,         ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, convertToData,         arginfo_phar_conv,         ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, copy,                  arginfo_phar_copy,         ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, count,                 NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, delete,                arginfo_phar_delete,       ZEND_ACC_PUBLIC)
@@ -3944,8 +3883,6 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, isPhar,                NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, isTar,                 NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, isZip,                 NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, convertToExecutable,   arginfo_phar_conv,         ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, convertToData,         arginfo_phar_conv,         ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetExists,          arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetGet,             arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetSet,             arginfo_phar_offsetSet,    ZEND_ACC_PUBLIC)
@@ -4058,6 +3995,9 @@ void phar_object_init(TSRMLS_D) /* {{{ */
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "BZ2", PHAR_ENT_COMPRESSED_BZ2)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "GZ", PHAR_ENT_COMPRESSED_GZ)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "NONE", PHAR_ENT_COMPRESSED_NONE)
+	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "PHAR", PHAR_FORMAT_PHAR)
+	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "TAR", PHAR_FORMAT_TAR)
+	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "ZIP", PHAR_FORMAT_ZIP)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "COMPRESSED", PHAR_ENT_COMPRESSION_MASK)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "PHP", PHAR_MIME_PHP)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "PHPS", PHAR_MIME_PHPS)
