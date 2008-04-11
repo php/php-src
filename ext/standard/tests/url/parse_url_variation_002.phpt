@@ -1,5 +1,5 @@
 --TEST--
-Test parse_url() function : usage variations  - <type here specifics of this variation>
+Test parse_url() function : usage variations  - unexpected type for arg 2.
 --FILE--
 <?php
 /* Prototype  : proto mixed parse_url(string url, [int url_component])
@@ -106,7 +106,7 @@ array(8) {
 }
 
 Arg value 101234567000 
-Error: 2 - parse_url(): Invalid URL component identifier 2147483647, %s(71)
+Error: 2 - parse_url(): Invalid URL component identifier %d, %s(71)
 bool(false)
 
 Arg value 1.07654321E-9 
