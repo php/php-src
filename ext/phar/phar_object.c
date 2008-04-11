@@ -3889,7 +3889,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, setAlias,              arginfo_phar_setAlias,     ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, setDefaultStub,        arginfo_phar_createDS,     ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, setMetadata,           arginfo_phar_setMetadata,  ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, setSignatureAlgorithm, arginfo_phar_setSigAlgo ,  ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, setSignatureAlgorithm, arginfo_phar_setSigAlgo,   ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, setStub,               arginfo_phar_setStub,      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, startBuffering,        NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, stopBuffering,         NULL,                      ZEND_ACC_PUBLIC)
