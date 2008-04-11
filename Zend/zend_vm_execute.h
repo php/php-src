@@ -222,7 +222,7 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 			zend_u_hash_init(EG(active_symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
 			/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
 		}
-		EG(return_value_ptr_ptr) = &EX_T(opline->result.u.var).var.ptr;
+		EG(return_value_ptr_ptr) = RETURN_VALUE_USED(opline) ? &EX_T(opline->result.u.var).var.ptr : NULL;
 		EG(active_op_array) = (zend_op_array *) EX(function_state).function;
 
 		zend_execute(EG(active_op_array) TSRMLS_CC);
@@ -232,8 +232,6 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 			if (!EG(exception) && !EX_T(opline->result.u.var).var.ptr) {
 				ALLOC_INIT_ZVAL(EX_T(opline->result.u.var).var.ptr);
 			}
-		} else if (EX_T(opline->result.u.var).var.ptr) {
-			zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
 		}
 
 		EG(opline_ptr) = &EX(opline);
@@ -1438,16 +1436,22 @@ static int ZEND_RETURN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			}
 		}
 
-		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr_ptr);
-		Z_ADDREF_PP(retval_ptr_ptr);
+		if (EG(return_value_ptr_ptr)) {
+			SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr_ptr);
+			Z_ADDREF_PP(retval_ptr_ptr);
 
-		(*EG(return_value_ptr_ptr)) = (*retval_ptr_ptr);
+			(*EG(return_value_ptr_ptr)) = (*retval_ptr_ptr);
+		}
 	} else {
 return_by_value:
 
 		retval_ptr = &opline->op1.u.constant;
 
-		if (!0) { /* Not a temp var */
+		if (!EG(return_value_ptr_ptr)) {
+			if (IS_CONST == IS_TMP_VAR) {
+
+			}
+		} else if (!0) { /* Not a temp var */
 			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
 			    (PZVAL_IS_REF(retval_ptr) && Z_REFCOUNT_P(retval_ptr) > 0)) {
 				zval *ret;
@@ -1768,7 +1772,7 @@ skip_compile:
 		zval *saved_object;
 		zend_function *saved_function;
 
-		EG(return_value_ptr_ptr) = EX_T(opline->result.u.var).var.ptr_ptr;
+		EG(return_value_ptr_ptr) = return_value_used ? EX_T(opline->result.u.var).var.ptr_ptr : NULL;
 		EG(active_op_array) = new_op_array;
 		EX_T(opline->result.u.var).var.ptr = NULL;
 
@@ -1783,11 +1787,7 @@ skip_compile:
 		EX(function_state).function = saved_function;
 		EX(object) = saved_object;
 
-		if (!return_value_used) {
-			if (EX_T(opline->result.u.var).var.ptr) {
-				zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
-			}
-		} else { /* return value is used */
+		if (return_value_used) {
 			if (!EX_T(opline->result.u.var).var.ptr) { /* there was no return statement */
 				ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
 				INIT_PZVAL(EX_T(opline->result.u.var).var.ptr);
@@ -4736,16 +4736,22 @@ static int ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			}
 		}
 
-		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr_ptr);
-		Z_ADDREF_PP(retval_ptr_ptr);
+		if (EG(return_value_ptr_ptr)) {
+			SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr_ptr);
+			Z_ADDREF_PP(retval_ptr_ptr);
 
-		(*EG(return_value_ptr_ptr)) = (*retval_ptr_ptr);
+			(*EG(return_value_ptr_ptr)) = (*retval_ptr_ptr);
+		}
 	} else {
 return_by_value:
 
 		retval_ptr = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
-		if (!1) { /* Not a temp var */
+		if (!EG(return_value_ptr_ptr)) {
+			if (IS_TMP_VAR == IS_TMP_VAR) {
+				zval_dtor(free_op1.var);
+			}
+		} else if (!1) { /* Not a temp var */
 			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
 			    (PZVAL_IS_REF(retval_ptr) && Z_REFCOUNT_P(retval_ptr) > 0)) {
 				zval *ret;
@@ -5075,7 +5081,7 @@ skip_compile:
 		zval *saved_object;
 		zend_function *saved_function;
 
-		EG(return_value_ptr_ptr) = EX_T(opline->result.u.var).var.ptr_ptr;
+		EG(return_value_ptr_ptr) = return_value_used ? EX_T(opline->result.u.var).var.ptr_ptr : NULL;
 		EG(active_op_array) = new_op_array;
 		EX_T(opline->result.u.var).var.ptr = NULL;
 
@@ -5090,11 +5096,7 @@ skip_compile:
 		EX(function_state).function = saved_function;
 		EX(object) = saved_object;
 
-		if (!return_value_used) {
-			if (EX_T(opline->result.u.var).var.ptr) {
-				zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
-			}
-		} else { /* return value is used */
+		if (return_value_used) {
 			if (!EX_T(opline->result.u.var).var.ptr) { /* there was no return statement */
 				ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
 				INIT_PZVAL(EX_T(opline->result.u.var).var.ptr);
@@ -7972,16 +7974,22 @@ static int ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			}
 		}
 
-		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr_ptr);
-		Z_ADDREF_PP(retval_ptr_ptr);
+		if (EG(return_value_ptr_ptr)) {
+			SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr_ptr);
+			Z_ADDREF_PP(retval_ptr_ptr);
 
-		(*EG(return_value_ptr_ptr)) = (*retval_ptr_ptr);
+			(*EG(return_value_ptr_ptr)) = (*retval_ptr_ptr);
+		}
 	} else {
 return_by_value:
 
 		retval_ptr = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
-		if (!0) { /* Not a temp var */
+		if (!EG(return_value_ptr_ptr)) {
+			if (IS_VAR == IS_TMP_VAR) {
+				if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+			}
+		} else if (!0) { /* Not a temp var */
 			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
 			    (PZVAL_IS_REF(retval_ptr) && Z_REFCOUNT_P(retval_ptr) > 0)) {
 				zval *ret;
@@ -8416,7 +8424,7 @@ skip_compile:
 		zval *saved_object;
 		zend_function *saved_function;
 
-		EG(return_value_ptr_ptr) = EX_T(opline->result.u.var).var.ptr_ptr;
+		EG(return_value_ptr_ptr) = return_value_used ? EX_T(opline->result.u.var).var.ptr_ptr : NULL;
 		EG(active_op_array) = new_op_array;
 		EX_T(opline->result.u.var).var.ptr = NULL;
 
@@ -8431,11 +8439,7 @@ skip_compile:
 		EX(function_state).function = saved_function;
 		EX(object) = saved_object;
 
-		if (!return_value_used) {
-			if (EX_T(opline->result.u.var).var.ptr) {
-				zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
-			}
-		} else { /* return value is used */
+		if (return_value_used) {
 			if (!EX_T(opline->result.u.var).var.ptr) { /* there was no return statement */
 				ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
 				INIT_PZVAL(EX_T(opline->result.u.var).var.ptr);
@@ -22238,16 +22242,22 @@ static int ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			}
 		}
 
-		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr_ptr);
-		Z_ADDREF_PP(retval_ptr_ptr);
+		if (EG(return_value_ptr_ptr)) {
+			SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr_ptr);
+			Z_ADDREF_PP(retval_ptr_ptr);
 
-		(*EG(return_value_ptr_ptr)) = (*retval_ptr_ptr);
+			(*EG(return_value_ptr_ptr)) = (*retval_ptr_ptr);
+		}
 	} else {
 return_by_value:
 
 		retval_ptr = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 
-		if (!0) { /* Not a temp var */
+		if (!EG(return_value_ptr_ptr)) {
+			if (IS_CV == IS_TMP_VAR) {
+
+			}
+		} else if (!0) { /* Not a temp var */
 			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
 			    (PZVAL_IS_REF(retval_ptr) && Z_REFCOUNT_P(retval_ptr) > 0)) {
 				zval *ret;
@@ -22672,7 +22682,7 @@ skip_compile:
 		zval *saved_object;
 		zend_function *saved_function;
 
-		EG(return_value_ptr_ptr) = EX_T(opline->result.u.var).var.ptr_ptr;
+		EG(return_value_ptr_ptr) = return_value_used ? EX_T(opline->result.u.var).var.ptr_ptr : NULL;
 		EG(active_op_array) = new_op_array;
 		EX_T(opline->result.u.var).var.ptr = NULL;
 
@@ -22687,11 +22697,7 @@ skip_compile:
 		EX(function_state).function = saved_function;
 		EX(object) = saved_object;
 
-		if (!return_value_used) {
-			if (EX_T(opline->result.u.var).var.ptr) {
-				zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
-			}
-		} else { /* return value is used */
+		if (return_value_used) {
 			if (!EX_T(opline->result.u.var).var.ptr) { /* there was no return statement */
 				ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
 				INIT_PZVAL(EX_T(opline->result.u.var).var.ptr);

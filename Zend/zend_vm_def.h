@@ -2229,7 +2229,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			zend_u_hash_init(EG(active_symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
 			/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
 		}
-		EG(return_value_ptr_ptr) = &EX_T(opline->result.u.var).var.ptr;
+		EG(return_value_ptr_ptr) = RETURN_VALUE_USED(opline) ? &EX_T(opline->result.u.var).var.ptr : NULL;
 		EG(active_op_array) = (zend_op_array *) EX(function_state).function;
 
 		zend_execute(EG(active_op_array) TSRMLS_CC);
@@ -2239,8 +2239,6 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			if (!EG(exception) && !EX_T(opline->result.u.var).var.ptr) {
 				ALLOC_INIT_ZVAL(EX_T(opline->result.u.var).var.ptr);
 			}
-		} else if (EX_T(opline->result.u.var).var.ptr) {
-			zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
 		}
 
 		EG(opline_ptr) = &EX(opline);
@@ -2377,16 +2375,22 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 			}
 		}
 
-		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr_ptr);
-		Z_ADDREF_PP(retval_ptr_ptr);
+		if (EG(return_value_ptr_ptr)) {
+			SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr_ptr);
+			Z_ADDREF_PP(retval_ptr_ptr);
 
-		(*EG(return_value_ptr_ptr)) = (*retval_ptr_ptr);
+			(*EG(return_value_ptr_ptr)) = (*retval_ptr_ptr);
+		}
 	} else {
 ZEND_VM_C_LABEL(return_by_value):
 
 		retval_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
-		if (!IS_OP1_TMP_FREE()) { /* Not a temp var */
+		if (!EG(return_value_ptr_ptr)) {
+			if (OP1_TYPE == IS_TMP_VAR) {
+				FREE_OP1();
+			}
+		} else if (!IS_OP1_TMP_FREE()) { /* Not a temp var */
 			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
 			    (PZVAL_IS_REF(retval_ptr) && Z_REFCOUNT_P(retval_ptr) > 0)) {
 				zval *ret;
@@ -3214,7 +3218,7 @@ skip_compile:
 		zval *saved_object;
 		zend_function *saved_function;
 
-		EG(return_value_ptr_ptr) = EX_T(opline->result.u.var).var.ptr_ptr;
+		EG(return_value_ptr_ptr) = return_value_used ? EX_T(opline->result.u.var).var.ptr_ptr : NULL;
 		EG(active_op_array) = new_op_array;
 		EX_T(opline->result.u.var).var.ptr = NULL;
 
@@ -3229,11 +3233,7 @@ skip_compile:
 		EX(function_state).function = saved_function;
 		EX(object) = saved_object;
 
-		if (!return_value_used) {
-			if (EX_T(opline->result.u.var).var.ptr) {
-				zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
-			}
-		} else { /* return value is used */
+		if (return_value_used) {
 			if (!EX_T(opline->result.u.var).var.ptr) { /* there was no return statement */
 				ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
 				INIT_PZVAL(EX_T(opline->result.u.var).var.ptr);

@@ -1423,7 +1423,7 @@ ZEND_API int zend_u_eval_string(zend_uchar type, zstr string, zval *retval_ptr, 
 			u_strcat(Z_USTRVAL(pv), u_semicolon);
 		} else {
 			Z_USTRLEN(pv) = u_strlen(str);
-			Z_USTRVAL(pv) = eustrndup(str, Z_USTRLEN(pv));
+			Z_USTRVAL(pv) = str;
 		}
 	} else {
 		char *str = string.s;
@@ -1436,7 +1436,7 @@ ZEND_API int zend_u_eval_string(zend_uchar type, zstr string, zval *retval_ptr, 
 			strcat(Z_STRVAL(pv), " ;");
 		} else {
 			Z_STRLEN(pv) = strlen(str);
-			Z_STRVAL(pv) = estrndup(str, Z_STRLEN(pv));
+			Z_STRVAL(pv) = str;
 		}
 	}
 	Z_TYPE(pv) = type;
@@ -1481,7 +1481,9 @@ ZEND_API int zend_u_eval_string(zend_uchar type, zstr string, zval *retval_ptr, 
 	} else {
 		retval = FAILURE;
 	}
-	zval_dtor(&pv);
+	if (retval_ptr) {
+		zval_dtor(&pv);
+	}
 	return retval;
 }
 /* }}} */
@@ -1515,7 +1517,6 @@ void execute_new_code(TSRMLS_D) /* {{{ */
 {
 	zend_op *opline, *end;
 	zend_op *ret_opline;
-	zval *local_retval=NULL;
 
 	if (!(CG(active_op_array)->fn_flags & ZEND_ACC_INTERACTIVE)
 		|| CG(active_op_array)->backpatch_count>0
@@ -1569,12 +1570,9 @@ void execute_new_code(TSRMLS_D) /* {{{ */
 
 	zend_release_labels(TSRMLS_C);
 
-	EG(return_value_ptr_ptr) = &local_retval;
+	EG(return_value_ptr_ptr) = NULL;
 	EG(active_op_array) = CG(active_op_array);
 	zend_execute(CG(active_op_array) TSRMLS_CC);
-	if (local_retval) {
-		zval_ptr_dtor(&local_retval);
-	}
 
 	if (EG(exception)) {
 		zend_exception_error(EG(exception) TSRMLS_CC);
