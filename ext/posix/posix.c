@@ -873,7 +873,7 @@ PHP_FUNCTION(posix_getgrgid)
 #if defined(ZTS) && defined(HAVE_GETGRGID_R) && defined(_SC_GETGR_R_SIZE_MAX)
 	int ret;
 	struct group _g;
-	struct group *retgrptr;
+	struct group *retgrptr = NULL;
 	long grbuflen;
 	char *grbuf;
 #endif
@@ -892,7 +892,7 @@ PHP_FUNCTION(posix_getgrgid)
 	grbuf = emalloc(grbuflen);
 
 	ret = getgrgid_r(gid, &_g, grbuf, grbuflen, &retgrptr);
-	if (ret) {
+	if (ret || retgrptr == NULL) {
 		POSIX_G(last_error) = ret;
 		efree(grbuf);
 		RETURN_FALSE;
@@ -1009,7 +1009,7 @@ PHP_FUNCTION(posix_getpwuid)
 	pwbuf = emalloc(pwbuflen);
 
 	ret = getpwuid_r(uid, &_pw, pwbuf, pwbuflen, &retpwptr);
-	if (ret) {
+	if (ret || retpwptr == NULL) {
 		POSIX_G(last_error) = ret;
 		efree(pwbuf);
 		RETURN_FALSE;
