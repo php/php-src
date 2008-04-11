@@ -1,3 +1,12 @@
+2008-04-10  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_3)
+      zend_compile.c
+      zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner_defs.h:
+      fix heredoc+nowdoc
+
 2008-04-09  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_3)
