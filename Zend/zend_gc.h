@@ -103,6 +103,8 @@ typedef struct _zend_gc_globals {
 	gc_root_buffer   *buf;				/* preallocated arrays of buffers   */
 	gc_root_buffer    roots;			/* list of possible roots of cycles */
 	gc_root_buffer   *unused;			/* list of unused buffers           */
+	gc_root_buffer   *first_unused;		/* pointer to first unused buffer   */
+	gc_root_buffer   *last_unused;		/* pointer to last unused buffer    */
 
 	zval_gc_info     *zval_to_free;		/* temporaryt list of zvals to free */
 	zval_gc_info     *free_list;
