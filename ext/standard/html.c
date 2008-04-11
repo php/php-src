@@ -848,7 +848,7 @@ det_charset:
 		
 		/* now walk the charset map and look for the codeset */
 		for (i = 0; charset_map[i].codeset; i++) {
-			if (strncasecmp(charset_hint, charset_map[i].codeset, len) == 0) {
+			if (len == strlen(charset_map[i].codeset) && strncasecmp(charset_hint, charset_map[i].codeset, len) == 0) {
 				charset = charset_map[i].charset;
 				found = 1;
 				break;
