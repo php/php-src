@@ -29,7 +29,7 @@ var_dump(file_get_contents($pname . '/c'));
 var_dump($phar['c']->isCompressed());
 
 $phar['a'] = 'new a';
-$phar['a']->setUncompressed();
+$phar['a']->decompress();
 $phar['b'] = 'new b';
 $phar['b']->setCompressedGZ();
 $phar['d'] = 'new d';
