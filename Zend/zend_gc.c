@@ -111,20 +111,18 @@ ZEND_API void gc_reset(TSRMLS_D)
 	GC_G(zobj_marked_grey) = 0;
 #endif
 
-	if (GC_G(buf) &&
-	    (GC_G(roots).next != &GC_G(roots) ||
-	     GC_G(roots).prev != &GC_G(roots))) {
-
+	if (GC_G(buf)) {
 		GC_G(roots).next = &GC_G(roots);
 		GC_G(roots).prev = &GC_G(roots);
 
-		GC_G(unused) = &GC_G(buf)[0];
-		for (i = 0; i < GC_ROOT_BUFFER_MAX_ENTRIES-1; i++) {
-			GC_G(buf)[i].prev = &GC_G(buf)[i+1];
-		}
-		GC_G(buf)[GC_ROOT_BUFFER_MAX_ENTRIES-1].prev = NULL;
+		GC_G(unused) = NULL;
+		GC_G(first_unused) = GC_G(buf);
 
 		GC_G(zval_to_free) = NULL;
+	} else {
+		GC_G(unused) = NULL;
+		GC_G(first_unused) = NULL;
+		GC_G(last_unused) = NULL;
 	}
 }
 
@@ -132,6 +130,7 @@ ZEND_API void gc_init(TSRMLS_D)
 {
 	if (GC_G(buf) == NULL && GC_G(gc_enabled)) {
 		GC_G(buf) = (gc_root_buffer*) malloc(sizeof(gc_root_buffer) * GC_ROOT_BUFFER_MAX_ENTRIES);
+		GC_G(last_unused) = &GC_G(buf)[GC_ROOT_BUFFER_MAX_ENTRIES];
 		gc_reset(TSRMLS_C);
 	}
 }
@@ -164,7 +163,12 @@ ZEND_API void gc_zval_possible_root(zval *zv TSRMLS_DC)
 		if (!GC_ZVAL_ADDRESS(zv)) {
 			gc_root_buffer *newRoot = GC_G(unused);
 
-			if (!newRoot) {
+			if (newRoot) {
+				GC_G(unused) = newRoot->prev;
+			} else if (GC_G(first_unused) != GC_G(last_unused)) {
+				newRoot = GC_G(first_unused);
+				GC_G(first_unused)++;
+			} else {
 				if (!GC_G(gc_enabled)) {
 					GC_ZVAL_SET_BLACK(zv);
 					return;
@@ -177,9 +181,8 @@ ZEND_API void gc_zval_possible_root(zval *zv TSRMLS_DC)
 					return;
 				}
 				GC_ZVAL_SET_PURPLE(zv);
+				GC_G(unused) = newRoot->prev;
 			}
-
-			GC_G(unused) = newRoot->prev;
 
 			newRoot->next = GC_G(roots).next;
 			newRoot->prev = &GC_G(roots);
@@ -215,7 +218,12 @@ ZEND_API void gc_zobj_possible_root(zval *zv TSRMLS_DC)
 		if (!GC_ADDRESS(obj->buffered)) {
 			gc_root_buffer *newRoot = GC_G(unused);
 
-			if (!newRoot) {
+			if (newRoot) {
+				GC_G(unused) = newRoot->prev;
+			} else if (GC_G(first_unused) != GC_G(last_unused)) {
+				newRoot = GC_G(first_unused);
+				GC_G(first_unused)++;
+			} else {
 				if (!GC_G(gc_enabled)) {
 					GC_ZVAL_SET_BLACK(zv);
 					return;
@@ -229,9 +237,8 @@ ZEND_API void gc_zobj_possible_root(zval *zv TSRMLS_DC)
 				}
 				obj = &EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zv)].bucket.obj;
 				GC_SET_PURPLE(obj->buffered);
+				GC_G(unused) = newRoot->prev;
 			}
-
-			GC_G(unused) = newRoot->prev;
 
 			newRoot->next = GC_G(roots).next;
 			newRoot->prev = &GC_G(roots);
