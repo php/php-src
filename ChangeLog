@@ -1,3 +1,66 @@
+2008-04-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      5.2.6RC5
+
+2008-04-10  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_2)
+      ext/oci8/oci8.c:
+      Bump OCI8 version to 1.2.5 (This change is for 5.2 branch only)
+
+2008-04-10  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ext/pcre/config0.m4:
+      - No longer allow to disable pcre
+
+2008-04-10  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner_defs.h:
+      fix heredoc+nowdoc
+
+    * (PHP_5_2)
+      ext/standard/tests/general_functions/bug44394_2.phpt:
+      MFB53
+
+    * (PHP_5_3)
+      ext/standard/tests/general_functions/bug44394_2.phpt:
+      add SKIPIF
+
+    * (PHP_5_2)
+      ext/pdo/tests/bug_43663.phpt
+      ext/pdo/tests/bug_44159.phpt:
+      MFB5.3: fix SKIPIF
+
+    * ext/pdo/tests/bug_43663.phpt
+      ext/standard/tests/general_functions/bug44394_2.phpt:
+      MFB
+
+    * (PHP_5_3)
+      ext/pdo/tests/bug_43663.phpt
+      ext/pdo/tests/bug_44159.phpt:
+      fix SKIPIFs
+
+2008-04-10  Philip Olson  <philipolson@gmail.com>
+
+    * ext/standard/credits.c:
+      Updated the documentation credits
+
 2008-04-09  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_3)
