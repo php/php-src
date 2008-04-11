@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2008, PHP 5.2.6
+- Fixed bug #44703 (htmlspecialchars() does not detect bad character set argument)
+  (Andy Wharmby)
 
 10 Apr 2008, PHP 5.2.6RC5
 - Fixed incorrect heredoc handling when label is used within the block.
