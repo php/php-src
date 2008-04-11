@@ -1,5 +1,5 @@
 --TEST--
-Test parse_url() function : usage variations  - <type here specifics of this variation>
+Test parse_url() function : usage variations  - unexpected type for arg 1.
 --FILE--
 <?php
 /* Prototype  : proto mixed parse_url(string url, [int url_component])

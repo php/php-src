@@ -1,5 +1,7 @@
 --TEST--
-Test parse_url() function : usage variations  - <type here specifics of this variation>
+Test parse_url() function : usage variations  - unexpected type for arg 2.
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platforms only"); ?>
 --FILE--
 <?php
 /* Prototype  : proto mixed parse_url(string url, [int url_component])
@@ -106,24 +108,8 @@ array(8) {
 }
 
 Arg value 101234567000 
-array(8) {
-  ["scheme"]=>
-  string(4) "http"
-  ["host"]=>
-  string(11) "www.php.net"
-  ["port"]=>
-  int(80)
-  ["user"]=>
-  string(6) "secret"
-  ["pass"]=>
-  string(7) "hideout"
-  ["path"]=>
-  string(10) "/index.php"
-  ["query"]=>
-  string(31) "test=1&test2=char&test3=mixesCI"
-  ["fragment"]=>
-  string(16) "some_page_ref123"
-}
+Error: 2 - parse_url(): Invalid URL component identifier 101234567000, %s(71)
+bool(false)
 
 Arg value 1.07654321E-9 
 string(4) "http"
