@@ -26,7 +26,7 @@ $phar = new Phar($fname);
 var_dump($phar->isZip());
 var_dump($phar->getStub());
 
-$phar = $phar->convertToZip();
+$phar = $phar->convertToExecutable(Phar::ZIP);
 var_dump($phar->isZip());
 var_dump($phar->getStub());
 

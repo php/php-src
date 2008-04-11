@@ -28,7 +28,7 @@ var_dump($phar->isTar());
 var_dump($phar->isCompressed());
 var_dump($phar->getStub());
 
-$phar = $phar->convertToTar()->compress(Phar::GZ);
+$phar = $phar->convertToExecutable(Phar::TAR, Phar::GZ);
 var_dump($phar->isTar());
 var_dump($phar->isCompressed());
 var_dump($phar->getStub());

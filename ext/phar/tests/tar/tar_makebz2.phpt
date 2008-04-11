@@ -16,7 +16,7 @@ $fname3 = dirname(__FILE__) . '/tar_makebz2_b.phar.tar.bz2';
 $phar = new Phar($fname);
 $phar['test'] = 'hi';
 var_dump($phar->isTar());
-$phar = $phar->compress(Phar::BZ2);
+$phar = $phar->convertToExecutable(Phar::TAR, Phar::BZ2);
 
 copy($fname2, $fname3);
 

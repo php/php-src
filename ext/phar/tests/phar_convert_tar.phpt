@@ -26,7 +26,7 @@ $phar = new Phar($fname);
 var_dump($phar->isTar());
 var_dump($phar->getStub());
 
-$phar = $phar->convertToTar();
+$phar = $phar->convertToExecutable(Phar::TAR);
 var_dump($phar->isTar());
 var_dump($phar->getStub());
 

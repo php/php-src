@@ -23,7 +23,7 @@ var_dump($phar->getAlias());
 
 echo "================= convertToTar() =====================\n";
 
-$phar = $phar->convertToTar();
+$phar = $phar->convertToData(Phar::TAR);
 var_dump($phar->isPhar());
 var_dump($phar->isTar());
 var_dump($phar->isZip());
@@ -32,7 +32,7 @@ var_dump($phar->getAlias());
 
 echo "================= convertToZip() =====================\n";
 
-$phar = $phar->convertToZip('.1.zip');
+$phar = $phar->convertToData(Phar::ZIP, Phar::NONE, '.1.zip');
 var_dump($phar->isPhar());
 var_dump($phar->isTar());
 var_dump($phar->isZip());
@@ -42,7 +42,7 @@ var_dump($phar->getAlias());
 echo "================= convertToPhar() ====================\n";
 
 try {
-	$phar = $phar->convertToPhar();
+	$phar = $phar->convertToExecutable(Phar::PHAR);
 	var_dump($phar->isPhar());
 	var_dump($phar->isTar());
 	var_dump($phar->isZip());
@@ -54,7 +54,7 @@ try {
 
 echo "================ convertToTar(GZ) ====================\n";
 
-$phar = $phar->convertToTar('.2.tar')->compress(Phar::GZ);
+$phar = $phar->convertToData(Phar::TAR, Phar::GZ, '.2.tar');
 var_dump($phar->isPhar());
 var_dump($phar->isTar());
 var_dump($phar->isZip());
@@ -64,7 +64,7 @@ var_dump($phar->getAlias());
 echo "================= convertToPhar() ====================\n";
 
 try {
-	$phar = $phar->convertToPhar();
+	$phar = $phar->convertToExecutable(Phar::PHAR);
 	var_dump($phar->isPhar());
 	var_dump($phar->isTar());
 	var_dump($phar->isZip());
@@ -105,7 +105,7 @@ bool(true)
 string(0) ""
 NULL
 ================= convertToPhar() ====================
-Cannot write out phar archive, phar is read-only
+Cannot write out executable phar archive, phar is read-only
 ================ convertToTar(GZ) ====================
 bool(false)
 bool(true)
@@ -113,5 +113,5 @@ bool(false)
 string(0) ""
 NULL
 ================= convertToPhar() ====================
-Cannot write out phar archive, phar is read-only
+Cannot write out executable phar archive, phar is read-only
 ===DONE===

@@ -17,13 +17,13 @@ $phar->stopBuffering();
 var_dump($phar->isTar());
 var_dump(strlen($phar->getStub()));
 
-$phar = $phar->convertToTar();
+$phar = $phar->convertToExecutable(Phar::TAR);
 var_dump($phar->isTar());
 var_dump($phar->getStub());
 
 $phar['a'] = 'hi there';
 
-$phar = $phar->compress(Phar::BZ2)->convertToPhar();
+$phar = $phar->convertToExecutable(Phar::PHAR, Phar::BZ2);
 var_dump($phar->isPhar());
 var_dump($phar->isCompressed());
 var_dump(strlen($phar->getStub()));
