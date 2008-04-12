@@ -604,7 +604,7 @@ PHP_METHOD(Phar, webPhar)
 #else
 		if (FAILURE == zend_fcall_info_init(rewrite, 0, &fci, &fcc, NULL, NULL TSRMLS_CC)) {
 #endif
-			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "phar error: invalid rewrite callback");
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "phar error: invalid rewrite callback");
 			if (free_pathinfo) {
 				efree(path_info);
 			}
@@ -622,7 +622,7 @@ PHP_METHOD(Phar, webPhar)
 
 		if (FAILURE == zend_call_function(&fci, &fcc TSRMLS_CC)) {
 			if (!EG(exception)) {
-				zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "phar error: failed to call rewrite callback");
+				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "phar error: failed to call rewrite callback");
 			}
 			if (free_pathinfo) {
 				efree(path_info);
@@ -633,7 +633,7 @@ PHP_METHOD(Phar, webPhar)
 			if (free_pathinfo) {
 				efree(path_info);
 			}
-			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "phar error: rewrite callback must return a string or false");
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "phar error: rewrite callback must return a string or false");
 			return;
 		}
 		switch (Z_TYPE_P(retval_ptr)) {
@@ -657,7 +657,7 @@ PHP_METHOD(Phar, webPhar)
 				if (free_pathinfo) {
 					efree(path_info);
 				}
-				zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "phar error: rewrite callback must return a string or false");
+				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "phar error: rewrite callback must return a string or false");
 				return;
 		}
 	}
@@ -804,7 +804,7 @@ PHP_METHOD(Phar, webPhar)
 			uint keylen;
 			ulong intkey;
 			if (HASH_KEY_IS_LONG == zend_hash_get_current_key_ex(Z_ARRVAL_P(mimeoverride), &key, &keylen, &intkey, 0, NULL)) {
-				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Key of MIME type overrides array must be a file extension, was \"%d\"", intkey);
+				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Key of MIME type overrides array must be a file extension, was \"%d\"", intkey);
 				phar_entry_delref(phar TSRMLS_CC);
 #ifdef PHP_WIN32
 				efree(fname);
@@ -812,7 +812,7 @@ PHP_METHOD(Phar, webPhar)
 				RETURN_FALSE;
 			}
 			if (FAILURE == zend_hash_get_current_data(Z_ARRVAL_P(mimeoverride), (void **) &val)) {
-				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Failed to retrieve Mime type for extension \"%s\"", key);
+				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Failed to retrieve Mime type for extension \"%s\"", key);
 				phar_entry_delref(phar TSRMLS_CC);
 #ifdef PHP_WIN32
 				efree(fname);
@@ -824,7 +824,7 @@ PHP_METHOD(Phar, webPhar)
 					if (Z_LVAL_PP(val) == PHAR_MIME_PHP || Z_LVAL_PP(val) == PHAR_MIME_PHPS) {
 						PHAR_SET_USER_MIME((char) Z_LVAL_PP(val))
 					} else {
-						zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Unknown mime type specifier used, only Phar::PHP, Phar::PHPS and a mime type string are allowed");
+						zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unknown mime type specifier used, only Phar::PHP, Phar::PHPS and a mime type string are allowed");
 						phar_entry_delref(phar TSRMLS_CC);
 #ifdef PHP_WIN32
 						efree(fname);
@@ -836,7 +836,7 @@ PHP_METHOD(Phar, webPhar)
 					PHAR_SET_USER_MIME(PHAR_MIME_OTHER)
 					break;
 				default :
-					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Unknown mime type specifier used (not a string or int), only Phar::PHP, Phar::PHPS and a mime type string are allowed");
+					zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unknown mime type specifier used (not a string or int), only Phar::PHP, Phar::PHPS and a mime type string are allowed");
 					phar_entry_delref(phar TSRMLS_CC);
 #ifdef PHP_WIN32
 					efree(fname);
@@ -872,11 +872,11 @@ PHP_METHOD(Phar, mungServer)
 	}
 
 	if (!zend_hash_num_elements(Z_ARRVAL_P(mungvalues))) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "No values passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "No values passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
 		return;
 	}
 	if (zend_hash_num_elements(Z_ARRVAL_P(mungvalues)) > 4) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Too many values passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Too many values passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
 		return;
 	}
 
@@ -886,16 +886,16 @@ PHP_METHOD(Phar, mungServer)
 		zval **data = NULL;
 
 		if (SUCCESS != zend_hash_get_current_data(Z_ARRVAL_P(mungvalues), (void **) &data)) {
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "unable to retrieve array value in Phar::mungServer()");
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "unable to retrieve array value in Phar::mungServer()");
 			return;
 		}
 		if (Z_TYPE_PP(data) != IS_STRING) {
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Non-string value passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Non-string value passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
 			return;
 		}
 		if (!php_self && Z_STRLEN_PP(data) == sizeof("PHP_SELF")-1 && !strncmp(Z_STRVAL_PP(data), "PHP_SELF", sizeof("PHP_SELF")-1)) {
 			if (SUCCESS != zend_hash_add_empty_element(&(PHAR_GLOBALS->phar_SERVER_mung_list), "PHP_SELF", sizeof("PHP_SELF")-1)) {
-				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Unable to add PHP_SELF to Phar::mungServer() list of values to mung");
+				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unable to add PHP_SELF to Phar::mungServer() list of values to mung");
 				return;
 			}
 			php_self = 1;
@@ -903,14 +903,14 @@ PHP_METHOD(Phar, mungServer)
 		if (Z_STRLEN_PP(data) == sizeof("REQUEST_URI")-1) {
 			if (!request_uri && !strncmp(Z_STRVAL_PP(data), "REQUEST_URI", sizeof("REQUEST_URI")-1)) {
 				if (SUCCESS != zend_hash_add_empty_element(&(PHAR_GLOBALS->phar_SERVER_mung_list), "REQUEST_URI", sizeof("REQUEST_URI")-1)) {
-					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Unable to add REQUEST_URI to Phar::mungServer() list of values to mung");
+					zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unable to add REQUEST_URI to Phar::mungServer() list of values to mung");
 					return;
 				}
 				request_uri = 1;
 			}
 			if (!script_name && !strncmp(Z_STRVAL_PP(data), "SCRIPT_NAME", sizeof("SCRIPT_NAME")-1)) {
 				if (SUCCESS != zend_hash_add_empty_element(&(PHAR_GLOBALS->phar_SERVER_mung_list), "SCRIPT_NAME", sizeof("SCRIPT_NAME")-1)) {
-					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Unable to add SCRIPT_NAME to Phar::mungServer() list of values to mung");
+					zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unable to add SCRIPT_NAME to Phar::mungServer() list of values to mung");
 					return;
 				}
 				script_name = 1;
@@ -918,7 +918,7 @@ PHP_METHOD(Phar, mungServer)
 		}
 		if (!script_filename && Z_STRLEN_PP(data) == sizeof("SCRIPT_FILENAME")-1 && !strncmp(Z_STRVAL_PP(data), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME")-1)) {
 			if (SUCCESS != zend_hash_add_empty_element(&(PHAR_GLOBALS->phar_SERVER_mung_list), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME")-1)) {
-				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Unable to add SCRIPT_FILENAME to Phar::mungServer() list of values to mung");
+				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unable to add SCRIPT_FILENAME to Phar::mungServer() list of values to mung");
 				return;
 			}
 			script_filename = 1;
@@ -959,7 +959,7 @@ PHP_METHOD(Phar, createDefaultStub)
 	stub = phar_create_default_stub(index, webindex, &stub_len, &error TSRMLS_CC);
 
 	if (error) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, error);
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 		efree(error);
 		return;
 	}
@@ -3868,6 +3868,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_webPhar, 0, 0, 0)
 	ZEND_ARG_INFO(0, rewrites)
 ZEND_END_ARG_INFO();
 
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_running, 0, 0, 1)
+	ZEND_ARG_INFO(0, retphar)
+ZEND_END_ARG_INFO();
+
 #if HAVE_SPL
 
 static
@@ -3945,11 +3950,6 @@ static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_setStub, 0, 0, 1)
 	ZEND_ARG_INFO(0, newstub)
 	ZEND_ARG_INFO(0, maxlen)
-ZEND_END_ARG_INFO();
-
-static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_running, 0, 0, 1)
-	ZEND_ARG_INFO(0, retphar)
 ZEND_END_ARG_INFO();
 
 static
