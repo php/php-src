@@ -51,7 +51,7 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 			char *name;
 
 			efree(entry);
-			entry = filename;
+			entry = estrndup(filename, filename_len);
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = filename_len;
 			if (strstr(entry, "://")) {
@@ -70,11 +70,9 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 			stream = php_stream_opendir(name, REPORT_ERRORS, context);
 			efree(name);
 			if (!stream) {
-				efree(entry);
 				goto skip_phar;
 			}
 			php_stream_to_zval(stream, return_value);
-			efree(entry);
 			return;
 		}
 	}
