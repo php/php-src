@@ -1,3 +1,23 @@
+2008-04-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_gc.c
+      zend_gc.c
+      zend_gc.h
+      zend_gc.h:
+      Speedup GC initialization
+
+    * zend.c
+      zend.c
+      zend_execute_API.c
+      zend_execute_API.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Optimized ZEND_RETURN opcode to not allocate and copy return value if it is
+      not
+      used.
+
 2008-04-10  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * (PHP_5_3)
