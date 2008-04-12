@@ -1,3 +1,545 @@
+2008-04-11  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * win32/build/mkdist.php:
+      Update url for go-pear
+
+    * README.PEAR:
+      Apparenty go-pear no longer exists (bug#44699)
+
+2008-04-11  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/html.c
+      ext/standard/html.c
+      ext/standard/tests/strings/bug44703.phpt
+      ext/standard/tests/strings/bug44703.phpt:
+      MFB: Fixed bug #44703 (htmlspecialchars() does not detect bad character set
+      argument)
+
+    * ext/standard/tests/strings/bug44703.phpt
+      ext/standard/tests/strings/bug44703.phpt
+      ext/standard/tests/strings/bug44703.phpt:
+        1.1.4;
+      file bug44703.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/html.c:
+      Fixed bug #44703 (htmlspecialchars() does not detect bad character set
+      argument) (patch by Andy Wharmby)
+
+2008-04-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_gc.c
+      ZendEngine2/zend_gc.c
+      ZendEngine2/zend_gc.h
+      ZendEngine2/zend_gc.h:
+      Speedup GC initialization
+
+2008-04-11  Robin Fernandes  <robin_fernandes@uk.ibm.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/url/parse_url_variation_001.phpt
+      ext/standard/tests/url/parse_url_variation_001.phpt
+      ext/standard/tests/url/parse_url_variation_002.phpt
+      ext/standard/tests/url/parse_url_variation_002.phpt
+      ext/standard/tests/url/parse_url_variation_002.phpt:
+      Fix test parse_url_variation_002.phpt for 64bit platforms.
+
+    * ext/standard/tests/url/parse_url_variation_002_32bit.phpt
+      ext/standard/tests/url/parse_url_variation_002_32bit.phpt
+      ext/standard/tests/url/parse_url_variation_002_64bit.phpt
+      ext/standard/tests/url/parse_url_variation_002_64bit.phpt:
+      
+      file parse_url_variation_002_32bit.phpt was initially added on branch
+      PHP_5_2.
+
+2008-04-11  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/posix/tests/posix_strerror_error.phpt
+      ext/posix/tests/posix_strerror_error.phpt
+      ext/posix/tests/posix_strerror_error.phpt
+      ext/posix/tests/posix_strerror_variation1.phpt
+      ext/posix/tests/posix_strerror_variation1.phpt
+      ext/posix/tests/posix_strerror_variation1.phpt:
+      fix tests
+
+    * ext/posix/posix.c:
+      fix 2 segfaults in ZTS mode
+
+2008-04-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend.c
+      ZendEngine2/zend.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Optimized ZEND_RETURN opcode to not allocate and copy return value if it is
+      not
+      used.
+
+2008-04-11  Steve Seear  <steve.seear@uk.ibm.com>
+
+    * ext/posix/tests/posix_get_last_error_error.phpt
+      ext/posix/tests/posix_get_last_error_error.phpt
+      ext/posix/tests/posix_getgid_error.phpt
+      ext/posix/tests/posix_getgid_error.phpt
+      ext/posix/tests/posix_getgrgid_error.phpt
+      ext/posix/tests/posix_getgrgid_error.phpt
+      ext/posix/tests/posix_getpgid_error.phpt
+      ext/posix/tests/posix_getpgid_error.phpt
+      ext/posix/tests/posix_getpgrp_error.phpt
+      ext/posix/tests/posix_getpgrp_error.phpt
+      ext/posix/tests/posix_getpid_error.phpt
+      ext/posix/tests/posix_getpid_error.phpt
+      ext/posix/tests/posix_getppid_error.phpt
+      ext/posix/tests/posix_getppid_error.phpt
+      ext/posix/tests/posix_getpwuid_error.phpt
+      ext/posix/tests/posix_getpwuid_error.phpt
+      ext/posix/tests/posix_getuid_error.phpt
+      ext/posix/tests/posix_getuid_error.phpt
+      ext/posix/tests/posix_kill_error.phpt
+      ext/posix/tests/posix_kill_error.phpt
+      ext/posix/tests/posix_strerror_error.phpt
+      ext/posix/tests/posix_strerror_error.phpt
+      ext/posix/tests/posix_times_error.phpt
+      ext/posix/tests/posix_times_error.phpt
+      ext/posix/tests/posix_uname_error.phpt
+      ext/posix/tests/posix_uname_error.phpt:
+      POSIX extension error tests
+
+    * ext/posix/tests/posix_get_last_error_error.phpt
+      ext/posix/tests/posix_get_last_error_error.phpt
+      ext/posix/tests/posix_get_last_error_error.phpt
+      ext/posix/tests/posix_getgid_error.phpt
+      ext/posix/tests/posix_getgid_error.phpt
+      ext/posix/tests/posix_getgid_error.phpt
+      ext/posix/tests/posix_getgrgid_error.phpt
+      ext/posix/tests/posix_getgrgid_error.phpt
+      ext/posix/tests/posix_getgrgid_error.phpt
+      ext/posix/tests/posix_getpgid_error.phpt
+      ext/posix/tests/posix_getpgid_error.phpt
+      ext/posix/tests/posix_getpgid_error.phpt
+      ext/posix/tests/posix_getpgrp_error.phpt
+      ext/posix/tests/posix_getpgrp_error.phpt
+      ext/posix/tests/posix_getpgrp_error.phpt
+      ext/posix/tests/posix_getpid_error.phpt
+      ext/posix/tests/posix_getpid_error.phpt
+      ext/posix/tests/posix_getpid_error.phpt
+      ext/posix/tests/posix_getppid_error.phpt
+      ext/posix/tests/posix_getppid_error.phpt
+      ext/posix/tests/posix_getppid_error.phpt
+      ext/posix/tests/posix_getpwuid_error.phpt
+      ext/posix/tests/posix_getpwuid_error.phpt
+      ext/posix/tests/posix_getpwuid_error.phpt
+      ext/posix/tests/posix_getuid_error.phpt
+      ext/posix/tests/posix_getuid_error.phpt
+      ext/posix/tests/posix_getuid_error.phpt
+      ext/posix/tests/posix_kill_error.phpt
+      ext/posix/tests/posix_kill_error.phpt
+      ext/posix/tests/posix_kill_error.phpt
+      ext/posix/tests/posix_strerror_error.phpt
+      ext/posix/tests/posix_strerror_error.phpt
+      ext/posix/tests/posix_strerror_error.phpt
+      ext/posix/tests/posix_times_error.phpt
+      ext/posix/tests/posix_times_error.phpt
+      ext/posix/tests/posix_times_error.phpt
+      ext/posix/tests/posix_uname_error.phpt
+      ext/posix/tests/posix_uname_error.phpt
+      ext/posix/tests/posix_uname_error.phpt:
+        1.1.4;
+      file posix_get_last_error_error.phpt was initially added on branch
+      PHP_5_2.
+
+    * ext/posix/tests/posix_getgrgid_variation.phpt
+      ext/posix/tests/posix_getpgid_variation.phpt
+      ext/posix/tests/posix_getpwuid_variation.phpt
+      ext/posix/tests/posix_kill_variation1.phpt
+      ext/posix/tests/posix_kill_variation2.phpt
+      ext/posix/tests/posix_strerror_variation1.phpt:
+      POSIX extension variation tests (failing due to spurious array to string
+      conversion notices).
+
+    * (PHP_5_3)
+      ext/posix/tests/posix_getgrgid_variation.phpt
+      ext/posix/tests/posix_getpgid_variation.phpt
+      ext/posix/tests/posix_getpwuid_variation.phpt
+      ext/posix/tests/posix_kill_variation1.phpt
+      ext/posix/tests/posix_kill_variation2.phpt
+      ext/posix/tests/posix_strerror_variation1.phpt:
+      POSIX extension variation tests
+
+    * ext/posix/tests/posix_getgrgid_variation.phpt
+      ext/posix/tests/posix_getgrgid_variation.phpt
+      ext/posix/tests/posix_getgrgid_variation.phpt
+      ext/posix/tests/posix_getpgid_variation.phpt
+      ext/posix/tests/posix_getpgid_variation.phpt
+      ext/posix/tests/posix_getpgid_variation.phpt
+      ext/posix/tests/posix_getpwuid_variation.phpt
+      ext/posix/tests/posix_getpwuid_variation.phpt
+      ext/posix/tests/posix_getpwuid_variation.phpt
+      ext/posix/tests/posix_kill_variation1.phpt
+      ext/posix/tests/posix_kill_variation1.phpt
+      ext/posix/tests/posix_kill_variation1.phpt
+      ext/posix/tests/posix_kill_variation2.phpt
+      ext/posix/tests/posix_kill_variation2.phpt
+      ext/posix/tests/posix_kill_variation2.phpt
+      ext/posix/tests/posix_strerror_variation1.phpt
+      ext/posix/tests/posix_strerror_variation1.phpt
+      ext/posix/tests/posix_strerror_variation1.phpt:
+        1.1.4;
+      file posix_getgrgid_variation.phpt was initially added on branch PHP_5_2.
+
+2008-04-11  Robin Fernandes  <robin_fernandes@uk.ibm.com>
+
+    * (PHP_5_3)
+      ext/ereg/tests/ereg_basic_001.phpt
+      ext/ereg/tests/ereg_basic_002.phpt
+      ext/ereg/tests/ereg_basic_003.phpt
+      ext/ereg/tests/ereg_basic_004.phpt
+      ext/ereg/tests/ereg_error_001.phpt
+      ext/ereg/tests/ereg_error_002.phpt
+      ext/ereg/tests/ereg_replace_basic_001.phpt
+      ext/ereg/tests/ereg_replace_basic_002.phpt
+      ext/ereg/tests/ereg_replace_error_001.phpt
+      ext/ereg/tests/ereg_replace_error_002.phpt
+      ext/ereg/tests/ereg_replace_variation_001.phpt
+      ext/ereg/tests/ereg_replace_variation_002.phpt
+      ext/ereg/tests/ereg_replace_variation_003.phpt
+      ext/ereg/tests/ereg_variation_001.phpt
+      ext/ereg/tests/ereg_variation_002.phpt
+      ext/ereg/tests/ereg_variation_003.phpt
+      ext/ereg/tests/ereg_variation_004.phpt
+      ext/ereg/tests/eregi_basic.phpt
+      ext/ereg/tests/eregi_basic_001.phpt
+      ext/ereg/tests/eregi_basic_002.phpt
+      ext/ereg/tests/eregi_basic_003.phpt
+      ext/ereg/tests/eregi_basic_004.phpt
+      ext/ereg/tests/eregi_error_001.phpt
+      ext/ereg/tests/eregi_error_002.phpt
+      ext/ereg/tests/eregi_replace_basic.phpt
+      ext/ereg/tests/eregi_replace_basic_001.phpt
+      ext/ereg/tests/eregi_replace_basic_002.phpt
+      ext/ereg/tests/eregi_replace_error_001.phpt
+      ext/ereg/tests/eregi_replace_error_002.phpt
+      ext/ereg/tests/eregi_replace_variation_001.phpt
+      ext/ereg/tests/eregi_replace_variation_002.phpt
+      ext/ereg/tests/eregi_replace_variation_003.phpt
+      ext/ereg/tests/eregi_variation_001.phpt
+      ext/ereg/tests/eregi_variation_002.phpt
+      ext/ereg/tests/eregi_variation_003.phpt
+      ext/ereg/tests/eregi_variation_004.phpt
+      ext/ereg/tests/regular_expressions.inc
+      ext/ereg/tests/split_basic_001.phpt
+      ext/ereg/tests/split_basic_002.phpt
+      ext/ereg/tests/split_basic_003.phpt
+      ext/ereg/tests/split_error_001.phpt
+      ext/ereg/tests/split_error_002.phpt
+      ext/ereg/tests/split_variation_001.phpt
+      ext/ereg/tests/split_variation_002.phpt
+      ext/ereg/tests/split_variation_003.phpt
+      ext/ereg/tests/split_variation_004.phpt
+      ext/ereg/tests/spliti_basic_001.phpt
+      ext/ereg/tests/spliti_basic_002.phpt
+      ext/ereg/tests/spliti_basic_003.phpt
+      ext/ereg/tests/spliti_basic_004.phpt
+      ext/ereg/tests/spliti_error_001.phpt
+      ext/ereg/tests/spliti_error_002.phpt
+      ext/ereg/tests/spliti_variation_001.phpt
+      ext/ereg/tests/spliti_variation_002.phpt
+      ext/ereg/tests/spliti_variation_003.phpt
+      ext/ereg/tests/spliti_variation_004.phpt
+      ext/ereg/tests/sql_regcase_basic_001.phpt
+      ext/ereg/tests/sql_regcase_error_001.phpt
+      ext/ereg/tests/sql_regcase_variation_001.phpt
+      ext/standard/tests/url/base64_decode_basic_001.phpt
+      ext/standard/tests/url/base64_decode_basic_001.phpt
+      ext/standard/tests/url/base64_decode_basic_002.phpt
+      ext/standard/tests/url/base64_decode_basic_002.phpt
+      ext/standard/tests/url/base64_decode_error_001.phpt
+      ext/standard/tests/url/base64_decode_error_001.phpt
+      ext/standard/tests/url/base64_decode_variation_001.phpt
+      ext/standard/tests/url/base64_decode_variation_001.phpt
+      ext/standard/tests/url/base64_decode_variation_002.phpt
+      ext/standard/tests/url/base64_decode_variation_002.phpt
+      ext/standard/tests/url/base64_encode_basic_001.phpt
+      ext/standard/tests/url/base64_encode_basic_001.phpt
+      ext/standard/tests/url/base64_encode_error_001.phpt
+      ext/standard/tests/url/base64_encode_error_001.phpt
+      ext/standard/tests/url/base64_encode_variation_001.phpt
+      ext/standard/tests/url/base64_encode_variation_001.phpt
+      ext/standard/tests/url/parse_url_basic_001.phpt
+      ext/standard/tests/url/parse_url_basic_001.phpt
+      ext/standard/tests/url/parse_url_basic_002.phpt
+      ext/standard/tests/url/parse_url_basic_002.phpt
+      ext/standard/tests/url/parse_url_basic_003.phpt
+      ext/standard/tests/url/parse_url_basic_003.phpt
+      ext/standard/tests/url/parse_url_basic_004.phpt
+      ext/standard/tests/url/parse_url_basic_004.phpt
+      ext/standard/tests/url/parse_url_basic_005.phpt
+      ext/standard/tests/url/parse_url_basic_005.phpt
+      ext/standard/tests/url/parse_url_basic_006.phpt
+      ext/standard/tests/url/parse_url_basic_006.phpt
+      ext/standard/tests/url/parse_url_basic_007.phpt
+      ext/standard/tests/url/parse_url_basic_007.phpt
+      ext/standard/tests/url/parse_url_basic_008.phpt
+      ext/standard/tests/url/parse_url_basic_008.phpt
+      ext/standard/tests/url/parse_url_basic_009.phpt
+      ext/standard/tests/url/parse_url_basic_009.phpt
+      ext/standard/tests/url/parse_url_basic_010.phpt
+      ext/standard/tests/url/parse_url_basic_010.phpt
+      ext/standard/tests/url/parse_url_error_001.phpt
+      ext/standard/tests/url/parse_url_error_001.phpt
+      ext/standard/tests/url/parse_url_error_002.phpt
+      ext/standard/tests/url/parse_url_error_002.phpt
+      ext/standard/tests/url/parse_url_variation_001.phpt
+      ext/standard/tests/url/parse_url_variation_001.phpt
+      ext/standard/tests/url/parse_url_variation_002.phpt
+      ext/standard/tests/url/parse_url_variation_002.phpt
+      ext/standard/tests/url/rawurldecode_error_001.phpt
+      ext/standard/tests/url/rawurldecode_error_001.phpt
+      ext/standard/tests/url/rawurldecode_variation_001.phpt
+      ext/standard/tests/url/rawurldecode_variation_001.phpt
+      ext/standard/tests/url/rawurlencode_error_001.phpt
+      ext/standard/tests/url/rawurlencode_error_001.phpt
+      ext/standard/tests/url/rawurlencode_variation_001.phpt
+      ext/standard/tests/url/rawurlencode_variation_001.phpt
+      ext/standard/tests/url/urldecode_error_001.phpt
+      ext/standard/tests/url/urldecode_error_001.phpt
+      ext/standard/tests/url/urldecode_variation_001.phpt
+      ext/standard/tests/url/urldecode_variation_001.phpt
+      ext/standard/tests/url/urlencode_error_001.phpt
+      ext/standard/tests/url/urlencode_error_001.phpt
+      ext/standard/tests/url/urlencode_variation_001.phpt
+      ext/standard/tests/url/urlencode_variation_001.phpt
+      ext/standard/tests/url/urls.inc
+      ext/standard/tests/url/urls.inc:
+      Adding some tests for ereg and url functions.
+
+    * ext/ereg/tests/ereg_basic_001.phpt
+      ext/ereg/tests/ereg_basic_001.phpt
+      ext/ereg/tests/ereg_basic_002.phpt
+      ext/ereg/tests/ereg_basic_002.phpt
+      ext/ereg/tests/ereg_basic_003.phpt
+      ext/ereg/tests/ereg_basic_003.phpt
+      ext/ereg/tests/ereg_basic_004.phpt
+      ext/ereg/tests/ereg_basic_004.phpt
+      ext/ereg/tests/ereg_error_001.phpt
+      ext/ereg/tests/ereg_error_001.phpt
+      ext/ereg/tests/ereg_error_002.phpt
+      ext/ereg/tests/ereg_error_002.phpt
+      ext/ereg/tests/ereg_replace_basic_001.phpt
+      ext/ereg/tests/ereg_replace_basic_001.phpt
+      ext/ereg/tests/ereg_replace_basic_002.phpt
+      ext/ereg/tests/ereg_replace_basic_002.phpt
+      ext/ereg/tests/ereg_replace_error_001.phpt
+      ext/ereg/tests/ereg_replace_error_001.phpt
+      ext/ereg/tests/ereg_replace_error_002.phpt
+      ext/ereg/tests/ereg_replace_error_002.phpt
+      ext/ereg/tests/ereg_replace_variation_001.phpt
+      ext/ereg/tests/ereg_replace_variation_001.phpt
+      ext/ereg/tests/ereg_replace_variation_002.phpt
+      ext/ereg/tests/ereg_replace_variation_002.phpt
+      ext/ereg/tests/ereg_replace_variation_003.phpt
+      ext/ereg/tests/ereg_replace_variation_003.phpt
+      ext/ereg/tests/ereg_variation_001.phpt
+      ext/ereg/tests/ereg_variation_001.phpt
+      ext/ereg/tests/ereg_variation_002.phpt
+      ext/ereg/tests/ereg_variation_002.phpt
+      ext/ereg/tests/ereg_variation_003.phpt
+      ext/ereg/tests/ereg_variation_003.phpt
+      ext/ereg/tests/ereg_variation_004.phpt
+      ext/ereg/tests/ereg_variation_004.phpt
+      ext/ereg/tests/eregi_basic.phpt
+      ext/ereg/tests/eregi_basic.phpt
+      ext/ereg/tests/eregi_basic_001.phpt
+      ext/ereg/tests/eregi_basic_001.phpt
+      ext/ereg/tests/eregi_basic_002.phpt
+      ext/ereg/tests/eregi_basic_002.phpt
+      ext/ereg/tests/eregi_basic_003.phpt
+      ext/ereg/tests/eregi_basic_003.phpt
+      ext/ereg/tests/eregi_basic_004.phpt
+      ext/ereg/tests/eregi_basic_004.phpt
+      ext/ereg/tests/eregi_error_001.phpt
+      ext/ereg/tests/eregi_error_001.phpt
+      ext/ereg/tests/eregi_error_002.phpt
+      ext/ereg/tests/eregi_error_002.phpt
+      ext/ereg/tests/eregi_replace_basic.phpt
+      ext/ereg/tests/eregi_replace_basic.phpt
+      ext/ereg/tests/eregi_replace_basic_001.phpt
+      ext/ereg/tests/eregi_replace_basic_001.phpt
+      ext/ereg/tests/eregi_replace_basic_002.phpt
+      ext/ereg/tests/eregi_replace_basic_002.phpt
+      ext/ereg/tests/eregi_replace_error_001.phpt
+      ext/ereg/tests/eregi_replace_error_001.phpt
+      ext/ereg/tests/eregi_replace_error_002.phpt
+      ext/ereg/tests/eregi_replace_error_002.phpt
+      ext/ereg/tests/eregi_replace_variation_001.phpt
+      ext/ereg/tests/eregi_replace_variation_001.phpt
+      ext/ereg/tests/eregi_replace_variation_002.phpt
+      ext/ereg/tests/eregi_replace_variation_002.phpt
+      ext/ereg/tests/eregi_replace_variation_003.phpt
+      ext/ereg/tests/eregi_replace_variation_003.phpt
+      ext/ereg/tests/eregi_variation_001.phpt
+      ext/ereg/tests/eregi_variation_001.phpt
+      ext/ereg/tests/eregi_variation_002.phpt
+      ext/ereg/tests/eregi_variation_002.phpt
+      ext/ereg/tests/eregi_variation_003.phpt
+      ext/ereg/tests/eregi_variation_003.phpt
+      ext/ereg/tests/eregi_variation_004.phpt
+      ext/ereg/tests/eregi_variation_004.phpt
+      ext/ereg/tests/regular_expressions.inc
+      ext/ereg/tests/regular_expressions.inc
+      ext/ereg/tests/split_basic_001.phpt
+      ext/ereg/tests/split_basic_001.phpt
+      ext/ereg/tests/split_basic_002.phpt
+      ext/ereg/tests/split_basic_002.phpt
+      ext/ereg/tests/split_basic_003.phpt
+      ext/ereg/tests/split_basic_003.phpt
+      ext/ereg/tests/split_error_001.phpt
+      ext/ereg/tests/split_error_001.phpt
+      ext/ereg/tests/split_error_002.phpt
+      ext/ereg/tests/split_error_002.phpt
+      ext/ereg/tests/split_variation_001.phpt
+      ext/ereg/tests/split_variation_001.phpt
+      ext/ereg/tests/split_variation_002.phpt
+      ext/ereg/tests/split_variation_002.phpt
+      ext/ereg/tests/split_variation_003.phpt
+      ext/ereg/tests/split_variation_003.phpt
+      ext/ereg/tests/split_variation_004.phpt
+      ext/ereg/tests/split_variation_004.phpt
+      ext/ereg/tests/spliti_basic_001.phpt
+      ext/ereg/tests/spliti_basic_001.phpt
+      ext/ereg/tests/spliti_basic_002.phpt
+      ext/ereg/tests/spliti_basic_002.phpt
+      ext/ereg/tests/spliti_basic_003.phpt
+      ext/ereg/tests/spliti_basic_003.phpt
+      ext/ereg/tests/spliti_basic_004.phpt
+      ext/ereg/tests/spliti_basic_004.phpt
+      ext/ereg/tests/spliti_error_001.phpt
+      ext/ereg/tests/spliti_error_001.phpt
+      ext/ereg/tests/spliti_error_002.phpt
+      ext/ereg/tests/spliti_error_002.phpt
+      ext/ereg/tests/spliti_variation_001.phpt
+      ext/ereg/tests/spliti_variation_001.phpt
+      ext/ereg/tests/spliti_variation_002.phpt
+      ext/ereg/tests/spliti_variation_002.phpt
+      ext/ereg/tests/spliti_variation_003.phpt
+      ext/ereg/tests/spliti_variation_003.phpt
+      ext/ereg/tests/spliti_variation_004.phpt
+      ext/ereg/tests/spliti_variation_004.phpt
+      ext/ereg/tests/sql_regcase_basic_001.phpt
+      ext/ereg/tests/sql_regcase_basic_001.phpt
+      ext/ereg/tests/sql_regcase_error_001.phpt
+      ext/ereg/tests/sql_regcase_error_001.phpt
+      ext/ereg/tests/sql_regcase_variation_001.phpt
+      ext/ereg/tests/sql_regcase_variation_001.phpt
+      ext/standard/tests/url/base64_decode_basic_001.phpt
+      ext/standard/tests/url/base64_decode_basic_001.phpt
+      ext/standard/tests/url/base64_decode_basic_001.phpt
+      ext/standard/tests/url/base64_decode_basic_002.phpt
+      ext/standard/tests/url/base64_decode_basic_002.phpt
+      ext/standard/tests/url/base64_decode_basic_002.phpt
+      ext/standard/tests/url/base64_decode_error_001.phpt
+      ext/standard/tests/url/base64_decode_error_001.phpt
+      ext/standard/tests/url/base64_decode_error_001.phpt
+      ext/standard/tests/url/base64_decode_variation_001.phpt
+      ext/standard/tests/url/base64_decode_variation_001.phpt
+      ext/standard/tests/url/base64_decode_variation_001.phpt
+      ext/standard/tests/url/base64_decode_variation_002.phpt
+      ext/standard/tests/url/base64_decode_variation_002.phpt
+      ext/standard/tests/url/base64_decode_variation_002.phpt
+      ext/standard/tests/url/base64_encode_basic_001.phpt
+      ext/standard/tests/url/base64_encode_basic_001.phpt
+      ext/standard/tests/url/base64_encode_basic_001.phpt
+      ext/standard/tests/url/base64_encode_error_001.phpt
+      ext/standard/tests/url/base64_encode_error_001.phpt
+      ext/standard/tests/url/base64_encode_error_001.phpt
+      ext/standard/tests/url/base64_encode_variation_001.phpt
+      ext/standard/tests/url/base64_encode_variation_001.phpt
+      ext/standard/tests/url/base64_encode_variation_001.phpt
+      ext/standard/tests/url/parse_url_basic_001.phpt
+      ext/standard/tests/url/parse_url_basic_001.phpt
+      ext/standard/tests/url/parse_url_basic_001.phpt
+      ext/standard/tests/url/parse_url_basic_002.phpt
+      ext/standard/tests/url/parse_url_basic_002.phpt
+      ext/standard/tests/url/parse_url_basic_002.phpt
+      ext/standard/tests/url/parse_url_basic_003.phpt
+      ext/standard/tests/url/parse_url_basic_003.phpt
+      ext/standard/tests/url/parse_url_basic_003.phpt
+      ext/standard/tests/url/parse_url_basic_004.phpt
+      ext/standard/tests/url/parse_url_basic_004.phpt
+      ext/standard/tests/url/parse_url_basic_004.phpt
+      ext/standard/tests/url/parse_url_basic_005.phpt
+      ext/standard/tests/url/parse_url_basic_005.phpt
+      ext/standard/tests/url/parse_url_basic_005.phpt
+      ext/standard/tests/url/parse_url_basic_006.phpt
+      ext/standard/tests/url/parse_url_basic_006.phpt
+      ext/standard/tests/url/parse_url_basic_006.phpt
+      ext/standard/tests/url/parse_url_basic_007.phpt
+      ext/standard/tests/url/parse_url_basic_007.phpt
+      ext/standard/tests/url/parse_url_basic_007.phpt
+      ext/standard/tests/url/parse_url_basic_008.phpt
+      ext/standard/tests/url/parse_url_basic_008.phpt
+      ext/standard/tests/url/parse_url_basic_008.phpt
+      ext/standard/tests/url/parse_url_basic_009.phpt
+      ext/standard/tests/url/parse_url_basic_009.phpt
+      ext/standard/tests/url/parse_url_basic_009.phpt
+      ext/standard/tests/url/parse_url_basic_010.phpt
+      ext/standard/tests/url/parse_url_basic_010.phpt
+      ext/standard/tests/url/parse_url_basic_010.phpt
+      ext/standard/tests/url/parse_url_error_001.phpt
+      ext/standard/tests/url/parse_url_error_001.phpt
+      ext/standard/tests/url/parse_url_error_001.phpt
+      ext/standard/tests/url/parse_url_error_002.phpt
+      ext/standard/tests/url/parse_url_error_002.phpt
+      ext/standard/tests/url/parse_url_error_002.phpt
+      ext/standard/tests/url/parse_url_variation_001.phpt
+      ext/standard/tests/url/parse_url_variation_001.phpt
+      ext/standard/tests/url/parse_url_variation_001.phpt
+      ext/standard/tests/url/parse_url_variation_002.phpt
+      ext/standard/tests/url/parse_url_variation_002.phpt
+      ext/standard/tests/url/parse_url_variation_002.phpt
+      ext/standard/tests/url/rawurldecode_error_001.phpt
+      ext/standard/tests/url/rawurldecode_error_001.phpt
+      ext/standard/tests/url/rawurldecode_error_001.phpt
+      ext/standard/tests/url/rawurldecode_variation_001.phpt
+      ext/standard/tests/url/rawurldecode_variation_001.phpt
+      ext/standard/tests/url/rawurldecode_variation_001.phpt
+      ext/standard/tests/url/rawurlencode_error_001.phpt
+      ext/standard/tests/url/rawurlencode_error_001.phpt
+      ext/standard/tests/url/rawurlencode_error_001.phpt
+      ext/standard/tests/url/rawurlencode_variation_001.phpt
+      ext/standard/tests/url/rawurlencode_variation_001.phpt
+      ext/standard/tests/url/rawurlencode_variation_001.phpt
+      ext/standard/tests/url/urldecode_error_001.phpt
+      ext/standard/tests/url/urldecode_error_001.phpt
+      ext/standard/tests/url/urldecode_error_001.phpt
+      ext/standard/tests/url/urldecode_variation_001.phpt
+      ext/standard/tests/url/urldecode_variation_001.phpt
+      ext/standard/tests/url/urldecode_variation_001.phpt
+      ext/standard/tests/url/urlencode_error_001.phpt
+      ext/standard/tests/url/urlencode_error_001.phpt
+      ext/standard/tests/url/urlencode_error_001.phpt
+      ext/standard/tests/url/urlencode_variation_001.phpt
+      ext/standard/tests/url/urlencode_variation_001.phpt
+      ext/standard/tests/url/urlencode_variation_001.phpt
+      ext/standard/tests/url/urls.inc
+      ext/standard/tests/url/urls.inc
+      ext/standard/tests/url/urls.inc:
+      
+      Adding some tests for ereg and url functions.
+
+2008-04-11  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      NEWS:
+      BFN
+
 2008-04-10  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
