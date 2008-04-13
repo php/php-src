@@ -49,7 +49,7 @@ if ($test_info['error'] != NULL) {
 	exit();
 }
 
-$test_info['proto'] = "proto ".$test_info['return_type']." ". $test_info['name']."(".$test_info['params'].")";
+$test_info['proto'] = $test_info['return_type']." ". $test_info['name']."(".$test_info['params'].")";
 
 
 //Set the test sections array - may want more in this later?
@@ -448,7 +448,7 @@ function gen_variation_test($fn_det, $sections) {
 			$test_case = array();
 
 			$test_case = gen_test_header($name, $proto, $desc, 
-                                     $source_file, "usage variations", " - <type here specifics of this variation>", $alias, $test_case);
+                                     $source_file, "usage variation","", $alias, $test_case);
 
 			// add variation code
 			$test_case['--FILE--'] = gen_variation_diff_arg_values_test($name, $arg_det, $arg_count, $test_case['--FILE--']);
@@ -493,10 +493,6 @@ function gen_test_header($fn_name, $proto, $desc, $source_file, $type_msg, $extr
 					" * Description: $desc",
 					" * Source code: $source_file",
 					" * Alias to functions: $alias",
- 					" */",
- 					"",
- 					"/*",
-					" * add a comment here to say what the test is supposed to do",
  					" */",
  					"",
 					"echo \"*** Testing $fn_name() : $type_msg ***\\n\";",
@@ -558,12 +554,12 @@ function gen_error_test($fn_det, $sections, $test_case) {
 function gen_test_trailer($test_case, $section_key = "--EXPECTF--") {
 	//Complete the --FILE-- section
 	array_push($test_case['--FILE--'], "");
-	array_push($test_case['--FILE--'], "echo \"Done\";", "?>");
+	array_push($test_case['--FILE--'], "?>\n===DONE===");
 
 	//add a new key for the expect section
 	$test_case[$section_key]=array();
 	array_push($test_case[$section_key], "Expected output goes here"); 
-	array_push($test_case[$section_key], "Done"); 
+	array_push($test_case[$section_key], "===DONE==="); 
 
 	return $test_case;
 }
