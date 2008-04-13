@@ -46,6 +46,9 @@ echo "fseek on dir handle\n";
 var_dump(fseek($a, 0, SEEK_END), ftell($a));
 var_dump(fseek($a, -1), ftell($a));
 var_dump(fseek($a, 1), ftell($a));
+echo "fwrite on dir handle\n";
+var_dump(fwrite($a, 'hi'));
+closedir($a);
 ?>
 ===DONE===
 --CLEAN--
@@ -72,4 +75,6 @@ int(-1)
 int(4)
 int(0)
 int(1)
+fwrite on dir handle
+int(0)
 ===DONE===
