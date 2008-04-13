@@ -93,8 +93,6 @@ ZEND_API void gc_globals_dtor(TSRMLS_D)
 
 ZEND_API void gc_reset(TSRMLS_D)
 {
-	int i;
-
 	GC_G(gc_runs) = 0;
 	GC_G(collected) = 0;
 
