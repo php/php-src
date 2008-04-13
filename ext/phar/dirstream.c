@@ -34,7 +34,7 @@ php_stream_ops phar_dir_ops = {
 	"phar dir",
 	phar_dir_seek,  /* seek */
 	NULL,           /* cast */
-	phar_dir_stat,  /* stat */
+	NULL,           /* stat */
 	NULL, /* set option */
 };
 
@@ -132,23 +132,6 @@ static size_t phar_dir_write(php_stream *stream, const char *buf, size_t count T
 static int phar_dir_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 {
 	return EOF;
-}
-/* }}} */
-
-/**
- * Stat a dir in a phar
- */
-static int phar_dir_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC) /* {{{ */
-{
-	phar_entry_data *data = (phar_entry_data *)stream->abstract;
-
-	/* If ssb is NULL then someone is misbehaving */
-	if (!ssb) {
-		return -1;
-	}
-
-	phar_dostat(data->phar, data->internal_file, ssb, 0, data->phar->alias, data->phar->alias_len TSRMLS_CC);
-	return 0;
 }
 /* }}} */
 

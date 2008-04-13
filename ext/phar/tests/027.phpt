@@ -48,6 +48,7 @@ var_dump(fseek($a, -1), ftell($a));
 var_dump(fseek($a, 1), ftell($a));
 echo "fwrite on dir handle\n";
 var_dump(fwrite($a, 'hi'));
+var_dump(fstat($a));
 closedir($a);
 ?>
 ===DONE===
@@ -77,4 +78,5 @@ int(0)
 int(1)
 fwrite on dir handle
 int(0)
+bool(false)
 ===DONE===
