@@ -901,7 +901,11 @@ static int parse_context_params(php_stream_context *context, zval *params)
 		context->notifier->dtor = user_space_stream_notifier_dtor;
 	}
 	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "options", sizeof("options"), (void**)&tmp)) {
-		parse_context_options(context, *tmp);
+		if (Z_TYPE_PP(tmp) == IS_ARRAY) {
+			parse_context_options(context, *tmp);
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid stream/context parameter");
+		}
 	}
 	
 	return ret;
