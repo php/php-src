@@ -976,10 +976,6 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 static php_stream *php_plain_files_stream_opener(php_stream_wrapper *wrapper, char *path, char *mode,
 		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
-	if ((options & USE_PATH) && PG(include_path) != NULL) {
-		return php_stream_fopen_with_path_rel(path, mode, PG(include_path), opened_path, options);
-	}
-
 	if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir(path TSRMLS_CC)) {
 		return NULL;
 	}
