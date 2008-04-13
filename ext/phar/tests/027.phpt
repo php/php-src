@@ -40,6 +40,12 @@ function dump($phar, $base)
 
 dump($pname, '/');
 
+$a = opendir($pname);
+// this may stop working in future versions, but is here for code coverage purposes
+echo "fseek on dir handle\n";
+var_dump(fseek($a, 0, SEEK_END), ftell($a));
+var_dump(fseek($a, -1), ftell($a));
+var_dump(fseek($a, 1), ftell($a));
 ?>
 ===DONE===
 --CLEAN--
@@ -59,4 +65,11 @@ string(6) "/b.php"
 bool(false)
 string(6) "/e.php"
 bool(false)
+fseek on dir handle
+int(0)
+int(4)
+int(-1)
+int(4)
+int(0)
+int(1)
 ===DONE===
