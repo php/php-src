@@ -503,81 +503,79 @@ void phar_file_stat(const char *filename, php_stat_len filename_length, int type
 			entry = (char *)filename;
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = (int) filename_length;
-			if (strstr(entry, "://")) {
+			if (FAILURE == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
 				efree(arch);
 				goto skip_phar;
 			}
-			if (SUCCESS == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
-				entry = phar_fix_filepath(entry, &entry_len, 1 TSRMLS_CC);
-				if (SUCCESS == zend_hash_find(&((*pphar)->manifest), entry, entry_len, (void **) &data)) {
-					efree(entry);
-					goto stat_entry;
-				} else {
-					char *save = PHAR_G(cwd), *save2 = entry;
-					int save_len = PHAR_G(cwd_len), save2_len = entry_len;
+			entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1 TSRMLS_CC);
+			if (SUCCESS == zend_hash_find(&((*pphar)->manifest), entry, entry_len, (void **) &data)) {
+				efree(entry);
+				goto stat_entry;
+			} else {
+				char *save = PHAR_G(cwd), *save2 = entry;
+				int save_len = PHAR_G(cwd_len), save2_len = entry_len;
 
-					/* this file is not in the current directory, use the original path */
-					entry = (char *)filename;
-					PHAR_G(cwd) = "/";
-					PHAR_G(cwd_len) = 0;
-					/* clean path without cwd */
-					entry = phar_fix_filepath(entry, &entry_len, 1 TSRMLS_CC);
-					if (SUCCESS == zend_hash_find(&((*pphar)->manifest), entry, entry_len, (void **) &data)) {
-						PHAR_G(cwd) = save;
-						PHAR_G(cwd_len) = save_len;
-						efree(entry);
-						efree(save2);
-						goto stat_entry;
-					} else {
-						phar_archive_data *phar = *pphar;
-						char *key;
-						uint keylen;
-						ulong unused;
-
-						/* original not found either, this is possibly a directory relative to cwd */
-						zend_hash_internal_pointer_reset(&phar->manifest);
-						while (FAILURE != zend_hash_has_more_elements(&phar->manifest)) {
-							if (HASH_KEY_NON_EXISTANT !=
-									zend_hash_get_current_key_ex(
-										&phar->manifest, &key, &keylen, &unused, 0, NULL)) {
-								if (0 == memcmp(save2, key, save2_len)) {
-									PHAR_G(cwd) = save;
-									PHAR_G(cwd_len) = save_len;
-									efree(save2);
-									efree(entry);
-									/* directory found, all dirs have the same stat */
-									if (key[save2_len] == '/') {
-										sb.st_size = 0;
-										sb.st_mode = 0777;
-										sb.st_mode |= S_IFDIR; /* regular directory */
-#ifdef NETWARE
-										sb.st_mtime.tv_sec = phar->max_timestamp;
-										sb.st_atime.tv_sec = phar->max_timestamp;
-										sb.st_ctime.tv_sec = phar->max_timestamp;
-#else
-										sb.st_mtime = phar->max_timestamp;
-										sb.st_atime = phar->max_timestamp;
-										sb.st_ctime = phar->max_timestamp;
-#endif
-										goto statme_baby;
-									}
-								}
-							}
-							if (SUCCESS != zend_hash_move_forward(&phar->manifest)) {
-								break;
-							}
-						}
-					}
+				/* this file is not in the current directory, use the original path */
+				entry = (char *)filename;
+				PHAR_G(cwd) = "/";
+				PHAR_G(cwd_len) = 0;
+				/* clean path without cwd */
+				entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1 TSRMLS_CC);
+				if (SUCCESS == zend_hash_find(&((*pphar)->manifest), entry + 1, entry_len - 1, (void **) &data)) {
 					PHAR_G(cwd) = save;
 					PHAR_G(cwd_len) = save_len;
 					efree(entry);
 					efree(save2);
-					/* Error Occured */
-					if (!IS_EXISTS_CHECK(type)) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "%sstat failed for %s", IS_LINK_OPERATION(type) ? "L" : "", filename);
+					goto stat_entry;
+				} else {
+					phar_archive_data *phar = *pphar;
+					char *key;
+					uint keylen;
+					ulong unused;
+
+					/* original not found either, this is possibly a directory relative to cwd */
+					zend_hash_internal_pointer_reset(&phar->manifest);
+					while (FAILURE != zend_hash_has_more_elements(&phar->manifest)) {
+						if (HASH_KEY_NON_EXISTANT !=
+								zend_hash_get_current_key_ex(
+									&phar->manifest, &key, &keylen, &unused, 0, NULL)) {
+							if (!memcmp(save2, key, save2_len)) {
+								PHAR_G(cwd) = save;
+								PHAR_G(cwd_len) = save_len;
+								efree(save2);
+								efree(entry);
+								/* directory found, all dirs have the same stat */
+								if (key[save2_len] == '/') {
+									sb.st_size = 0;
+									sb.st_mode = 0777;
+									sb.st_mode |= S_IFDIR; /* regular directory */
+#ifdef NETWARE
+									sb.st_mtime.tv_sec = phar->max_timestamp;
+									sb.st_atime.tv_sec = phar->max_timestamp;
+									sb.st_ctime.tv_sec = phar->max_timestamp;
+#else
+									sb.st_mtime = phar->max_timestamp;
+									sb.st_atime = phar->max_timestamp;
+									sb.st_ctime = phar->max_timestamp;
+#endif
+									goto statme_baby;
+								}
+							}
+						}
+						if (SUCCESS != zend_hash_move_forward(&phar->manifest)) {
+							break;
+						}
 					}
-					RETURN_FALSE;
 				}
+				PHAR_G(cwd) = save;
+				PHAR_G(cwd_len) = save_len;
+				efree(entry);
+				efree(save2);
+				/* Error Occured */
+				if (!IS_EXISTS_CHECK(type)) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "%sstat failed for %s", IS_LINK_OPERATION(type) ? "l" : "", filename);
+				}
+				RETURN_FALSE;
 			}
 stat_entry:
 			if (!data->is_dir) {
@@ -742,7 +740,7 @@ PHAR_FUNC(phar_is_file) /* {{{ */
 	}
 	if (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://")) {
 		char *arch, *entry, *fname;
-		int arch_len, entry_len, fname_len, free_filename = 0;
+		int arch_len, entry_len, fname_len;
 		fname = zend_get_executed_filename(TSRMLS_C);
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
@@ -759,17 +757,10 @@ PHAR_FUNC(phar_is_file) /* {{{ */
 			entry = filename;
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = filename_len;
-			if (strstr(entry, "://")) {
-				efree(arch);
-				if (free_filename) {
-					efree(filename);
-				}
-				goto skip_phar;
-			}
 			/* retrieving a file within the current directory, so use this if possible */
 			if (SUCCESS == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
-				entry = phar_fix_filepath(entry, &entry_len, 1 TSRMLS_CC);
-				if (zend_hash_exists(&((*pphar)->manifest), entry, entry_len)) {
+				entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1 TSRMLS_CC);
+				if (zend_hash_exists(&((*pphar)->manifest), entry + 1, entry_len - 1)) {
 					/* this file is not in the current directory, use the original path */
 					efree(entry);
 					efree(arch);
@@ -797,7 +788,7 @@ PHAR_FUNC(phar_is_link) /* {{{ */
 	}
 	if (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://")) {
 		char *arch, *entry, *fname;
-		int arch_len, entry_len, fname_len, free_filename = 0;
+		int arch_len, entry_len, fname_len;
 		fname = zend_get_executed_filename(TSRMLS_C);
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
@@ -814,19 +805,12 @@ PHAR_FUNC(phar_is_link) /* {{{ */
 			entry = filename;
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = filename_len;
-			if (strstr(entry, "://")) {
-				efree(arch);
-				if (free_filename) {
-					efree(filename);
-				}
-				goto skip_phar;
-			}
 			/* retrieving a file within the current directory, so use this if possible */
 			if (SUCCESS == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
 				phar_entry_info *etemp;
 
-				entry = phar_fix_filepath(entry, &entry_len, 1 TSRMLS_CC);
-				if (SUCCESS == zend_hash_find(&((*pphar)->manifest), entry, entry_len, (void **) &etemp)) {
+				entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1 TSRMLS_CC);
+				if (SUCCESS == zend_hash_find(&((*pphar)->manifest), entry + 1, entry_len - 1, (void **) &etemp)) {
 					/* this file is not in the current directory, use the original path */
 					efree(entry);
 					efree(arch);
