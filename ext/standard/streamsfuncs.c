@@ -972,7 +972,11 @@ static int parse_context_params(php_stream_context *context, zval *params TSRMLS
 		context->notifier->dtor = user_space_stream_notifier_dtor;
 	}
 	if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(params), "options", sizeof("options"), (void**)&tmp)) {
-		parse_context_options(context, *tmp TSRMLS_CC);
+		if (Z_TYPE_PP(tmp) == IS_ARRAY) {
+			parse_context_options(context, *tmp TSRMLS_CC);
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid stream/context parameter");
+		}
 	}
 	if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(params), "encoding", sizeof("encoding"), (void**)&tmp)) {
 		zval strval = **tmp;
