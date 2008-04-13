@@ -74,7 +74,6 @@ static int phar_dir_seek(php_stream *stream, off_t offset, int whence, off_t *ne
 		}
 
 		if (offset < 0) {
-			php_stream_wrapper_log_error(stream->wrapper, stream->flags TSRMLS_CC, "phar error: cannot seek because the resulting seek is negative");
 			return -1;
 		} else {
 			*newoffset = 0;
