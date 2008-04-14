@@ -42,6 +42,10 @@ mkdir('phar://' . dirname(__FILE__) . '/oops.phar/fails');
 
 mkdir('phar://');
 rmdir('phar://');
+rmdir('phar://' . dirname(__FILE__) . '/unknown.phar/hi');
+ini_set('phar.readonly', 1);
+rmdir($pname . '/another/dir');
+ini_set('phar.readonly', 0);
 ?>
 ===DONE===
 --CLEAN--
@@ -72,4 +76,8 @@ Warning: mkdir(): internal corruption of phar "%soops.phar" (truncated manifest 
 Warning: mkdir(): phar error: cannot create directory "phar://", no phar archive specified in %sdir.php on line %d
 
 Warning: rmdir(): phar error: cannot remove directory "phar://", no phar archive specified in %sdir.php on line %d
+
+Warning: rmdir(): phar error: cannot remove directory "hi" in phar "%sunknown.phar", directory does not exist in %sdir.php on line %d
+
+Warning: rmdir(): phar error: cannot rmdir directory "phar://%sdir.phar.php/another/dir", write operations disabled in %sdir.php on line %d
 ===DONE===
