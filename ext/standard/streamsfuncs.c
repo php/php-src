@@ -850,7 +850,7 @@ static void user_space_stream_notifier_dtor(php_stream_notifier *notifier)
 	}
 }
 
-static int parse_context_options(php_stream_context *context, zval *options)
+static int parse_context_options(php_stream_context *context, zval *options TSRMLS_DC)
 {
 	HashPosition pos, opos;
 	zval **wval, **oval;
@@ -874,7 +874,7 @@ static int parse_context_options(php_stream_context *context, zval *options)
 			}
 
 		} else {
-			zend_error(E_WARNING, "options should have the form [\"wrappername\"][\"optionname\"] = $value");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "options should have the form [\"wrappername\"][\"optionname\"] = $value");
 		}
 		zend_hash_move_forward_ex(Z_ARRVAL_P(options), &pos);
 	}
@@ -882,7 +882,7 @@ static int parse_context_options(php_stream_context *context, zval *options)
 	return ret;
 }
 
-static int parse_context_params(php_stream_context *context, zval *params)
+static int parse_context_params(php_stream_context *context, zval *params TSRMLS_DC)
 {
 	int ret = SUCCESS;
 	zval **tmp;
@@ -902,7 +902,7 @@ static int parse_context_params(php_stream_context *context, zval *params)
 	}
 	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "options", sizeof("options"), (void**)&tmp)) {
 		if (Z_TYPE_PP(tmp) == IS_ARRAY) {
-			parse_context_options(context, *tmp);
+			parse_context_options(context, *tmp TSRMLS_CC);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid stream/context parameter");
 		}
@@ -988,7 +988,7 @@ PHP_FUNCTION(stream_context_set_option)
 
 	if (options) {
 		/* handle the array syntax */
-		RETVAL_BOOL(parse_context_options(context, options) == SUCCESS);
+		RETVAL_BOOL(parse_context_options(context, options TSRMLS_CC) == SUCCESS);
 	} else {
 		php_stream_context_set_option(context, wrappername, optionname, zvalue);
 		RETVAL_TRUE;
@@ -1013,7 +1013,7 @@ PHP_FUNCTION(stream_context_set_params)
 		RETURN_FALSE;
 	}
 
-	RETVAL_BOOL(parse_context_params(context, params) == SUCCESS);
+	RETVAL_BOOL(parse_context_params(context, params TSRMLS_CC) == SUCCESS);
 }
 /* }}} */
 
@@ -1034,7 +1034,7 @@ PHP_FUNCTION(stream_context_get_default)
 	context = FG(default_context);
 	
 	if (params) {
-		parse_context_options(context, params);
+		parse_context_options(context, params TSRMLS_CC);
 	}
 	
 	php_stream_context_to_zval(context, return_value);
@@ -1055,7 +1055,7 @@ PHP_FUNCTION(stream_context_create)
 	context = php_stream_context_alloc();
 	
 	if (params) {
-		parse_context_options(context, params);
+		parse_context_options(context, params TSRMLS_CC);
 	}
 	
 	php_stream_context_to_zval(context, return_value);
