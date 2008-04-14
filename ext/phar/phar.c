@@ -25,6 +25,11 @@
 #include "func_interceptors.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(phar)
+int phar_has_bz2;
+int phar_has_zlib;
+#if PHP_VERSION_ID >= 50300
+char *(*phar_save_resolve_path)(const char *filename, int filename_len TSRMLS_DC);
+#endif
 
 /**
  * set's phar->is_writeable based on the current INI value
@@ -2663,7 +2668,7 @@ int phar_zend_open(const char *filename, zend_file_handle *handle TSRMLS_DC) /* 
 
 	/* this code is obsoleted in php 5.3 */
 	entry = (char *) filename;
-	if (!IS_ABSOLUTE_PATH(entry, strlen(entry))) {
+	if (!IS_ABSOLUTE_PATH(entry, strlen(entry)) && !strstr(entry, "://")) {
 		phar_archive_data **pphar = NULL;
 		char *fname;
 		int fname_len;
@@ -2696,67 +2701,6 @@ int phar_zend_open(const char *filename, zend_file_handle *handle TSRMLS_DC) /* 
 		}
 		return FAILURE;
 	}
-#if HELLY_0
-	if (0 && zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
-		char *fname = NULL;
-		int fname_len;
-
-		fname = zend_get_executed_filename(TSRMLS_C);
-		if (strncasecmp(fname, "phar://", 7)) {
-			goto skip_phar;
-		}
-		fname_len = strlen(fname);
-		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
-			char *name, *old;
-
-			old = entry;
-			entry = (char *) filename;
-			/* include within phar, if :// is not in the url, then prepend phar://<archive>/ */
-			if (strstr(entry, "://")) {
-				efree(arch);
-				efree(old);
-				goto skip_phar;
-			}
-			entry_len = strlen(entry);
-			if (!IS_ABSOLUTE_PATH(entry, entry_len)) {
-				phar_archive_data *pphar = NULL;
-				/* retrieving an include within the current directory, so use this if possible */
-				if (SUCCESS == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
-					if (!(entry = phar_find_in_include_path(entry, entry_len, &pphar TSRMLS_CC))) {
-						/* this file is not in the phar, use the original path */
-						if (SUCCESS == phar_orig_zend_open(filename, handle TSRMLS_CC)) {
-							if (SUCCESS == phar_mount_entry(pphar, handle->opened_path ? handle->opened_path : (char *) filename, strlen(handle->opened_path ? handle->opened_path : filename), (char *) filename, strlen(filename) TSRMLS_CC)) {
-								if (handle->opened_path) {
-									efree(handle->opened_path);
-								}
-								entry = (char *) filename;
-								goto dopharthing;
-							}
-						}
-						efree(old);
-						efree(arch);
-						return FAILURE;
-					}
-				}
-			}
-dopharthing:
-			efree(old);
-			/* auto-convert to phar:// */
-			spprintf(&name, 4096, "phar://%s/%s", arch, entry);
-			efree(arch);
-			if (entry != filename) {
-				efree(entry);
-			}
-			if (SUCCESS == phar_orig_zend_open(name, handle TSRMLS_CC)) {
-				if (!handle->opened_path) {
-					handle->opened_path = name;
-				}
-				return SUCCESS;
-			}
-			return FAILURE;
-		}
-	}
-#endif
 skip_phar:
 	return phar_orig_zend_open(filename, handle TSRMLS_CC);
 }
