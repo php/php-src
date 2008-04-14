@@ -746,6 +746,13 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		return 0;
 	}
 
+
+	if (SUCCESS != phar_get_archive(&pfrom, resource_from->host, strlen(resource_from->host), NULL, 0, &error TSRMLS_CC)) {
+		pfrom = NULL;
+		if (error) {
+			efree(error);
+		}
+	}
 	if (PHAR_G(readonly) && (!pfrom || !pfrom->is_data)) {
 		php_url_free(resource_from);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: write operations disabled by phar.readonly INI setting");
@@ -764,10 +771,10 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		return 0;
 	}
 
-	if (SUCCESS != phar_get_archive(&pfrom, resource_from->host, strlen(resource_from->host), NULL, 0, &error TSRMLS_CC)) {
-		pfrom = NULL;
-	}
 	if (SUCCESS != phar_get_archive(&pto, resource_to->host, strlen(resource_to->host), NULL, 0, &error TSRMLS_CC)) {
+		if (error) {
+			efree(error);
+		}
 		pto = NULL;
 	}
 
