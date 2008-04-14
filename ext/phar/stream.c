@@ -19,7 +19,6 @@
 
 #define PHAR_STREAM 1
 #include "phar_internal.h"
-#include "php_stream_unlink.h"
 #include "stream.h"
 #include "dirstream.h"
 
@@ -743,11 +742,13 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 	error = NULL;
 
 	if ((resource_from = phar_open_url(wrapper, url_from, "r+b", options TSRMLS_CC)) == NULL) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\": invalid url \"%s\"", url_from, url_to, url_from);
 		return 0;
 	}
 	
 	if ((resource_to = phar_open_url(wrapper, url_to, "wb", options TSRMLS_CC)) == NULL) {
 		php_url_free(resource_from);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\": invalid url \"%s\"", url_from, url_to, url_to);
 		return 0;
 	}
 
@@ -766,28 +767,28 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 	if (!resource_from->scheme || !resource_from->host || !resource_from->path) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\"", url_from);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\": invalid url \"%s\"", url_from, url_to, url_from);
 		return 0;
 	}
 	
 	if (!resource_to->scheme || !resource_to->host || !resource_to->path) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\"", url_to);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\": invalid url \"%s\"", url_from, url_to, url_to);
 		return 0;
 	}
 
 	if (strcasecmp("phar", resource_from->scheme)) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: not a phar stream url \"%s\"", url_from);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\": not a phar stream url \"%s\"", url_from, url_to, url_from);
 		return 0;
 	}
 
 	if (strcasecmp("phar", resource_to->scheme)) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: not a phar stream url \"%s\"", url_to);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\": not a phar stream url \"%s\"", url_from, url_to, url_to);
 		return 0;
 	}
 
