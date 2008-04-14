@@ -123,7 +123,7 @@ Warning: rename(): phar error: cannot rename "phar://foo.phar/hi" to "phar://": 
 
 Warning: rename(): phar error: cannot rename "phar://%sfopen_edgecases.phar.php/hi" to "phar://foo.phar/hi", not within the same phar archive in %sfopen_edgecases.php on line %d
 
-Warning: rename(): phar error: write operations disabled by INI setting in %sfopen_edgecases.php on line %d
+Warning: rename(): phar error: write operations disabled by phar.readonly INI setting in %sfopen_edgecases.php on line %d
 
 Warning: rename(): phar error: cannot rename "phar://test.phar/fopen_edgecases.php" to "phar://test.phar/hi" from extracted phar archive in %sfopen_edgecases.php on line %d
 
