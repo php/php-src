@@ -1,5 +1,5 @@
 --TEST--
-Phar: fopen/stat/fseek edge cases
+Phar: fopen/stat/fseek/unlink edge cases
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
@@ -9,8 +9,10 @@ phar.require_hash=0
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.php';
+$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.3.phar.php';
 $pname = 'phar://' . $fname;
 $pname2 = 'phar://' . $fname2;
+$pname3 = 'phar://' . $fname3;
 
 // append
 $a = fopen($pname . '/b/c.php', 'a');
@@ -42,6 +44,15 @@ var_dump(is_dir($pname));
 ini_set('phar.extract_list', 'test.phar=' . dirname(__FILE__));
 var_dump(file_exists('phar://test.phar/' . basename(__FILE__)));
 var_dump(file_exists('phar://test.phar/@#$^&*%$#'));
+
+// this tests coverage of the case where the phar exists and has no files
+$phar = new Phar($fname3);
+var_dump(file_exists($pname3 . '/test'));
+
+unlink($pname2 . '/hi');
+unlink('phar://');
+unlink('phar://foo.phar');
+unlink('phar://test.phar/' . basename(__FILE__));
 ?>
 
 ===DONE===
@@ -74,5 +85,20 @@ bool(false)
 bool(true)
 bool(true)
 bool(false)
+bool(false)
+
+Warning: unlink(): internal corruption of phar "%sfopen_edgecases.2.phar.php" (truncated manifest at stub end) in %sfopen_edgecases.php on line %d
+
+Warning: unlink(): phar error: unlink failed in %sfopen_edgecases.php on line %d
+
+Warning: unlink(): phar error: no directory in "phar://", must have at least phar:/// for root directory (always use full path to a new phar) in %sfopen_edgecases.php on line %d
+
+Warning: unlink(): phar error: unlink failed in %sfopen_edgecases.php on line %d
+
+Warning: unlink(): unable to open phar for reading "foo.phar" in %sfopen_edgecases.php on line %d
+
+Warning: unlink(): phar error: unlink failed in %sfopen_edgecases.php on line %d
+
+Warning: unlink(): phar error: "phar://test.phar/fopen_edgecases.php" cannot be unlinked, phar is extracted in plain map in %sfopen_edgecases.php on line %d
 
 ===DONE===
