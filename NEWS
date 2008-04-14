@@ -130,6 +130,7 @@ PHP                                                                        NEWS
   . Added "ignore_errors" option to http fopen wrapper. (David Zulke, Sara)
   . Added context parameter for copy() function. (Sara)
   . Added "glob" stream wrapper. (Marcus)
+  . Added "params" as optional parameter for stream_context_create(). (Sara)
 - Improved ext/soap to support element names in context of XMLShema's <any>.
   (Dmitry)
 - Improved ext/openssl: (Dmitry)
@@ -158,7 +159,7 @@ PHP                                                                        NEWS
 - Fixed bug #44214 (Crash using preg_replace_callback() and global variable).
   (Nuno, Scott)
 - Fixed bug #43960 (strtotime() returns timestamp in the future when given a
-  bogus string).
+  bogus string). (Derick)
 - Fixed bug #43832 (mysqli_get_charset() doesn't expose charset comment).
   (Andrey)
 - Fixed bug #43808 (date_create never fails (even when it should)). (Derick)
