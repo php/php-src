@@ -596,7 +596,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 			if (HASH_KEY_NON_EXISTANT !=
 					zend_hash_get_current_key_ex(
 						&phar->manifest, &key, &keylen, &unused, 0, NULL)) {
-				if (keylen >= internal_file_len && 0 == memcmp(internal_file, key, internal_file_len)) {
+				if (keylen >= (uint)internal_file_len && 0 == memcmp(internal_file, key, internal_file_len)) {
 					/* directory found, all dirs have the same stat */
 					if (key[internal_file_len] == '/') {
 						phar_dostat(phar, NULL, ssb, 1, phar->alias, phar->alias_len TSRMLS_CC);
