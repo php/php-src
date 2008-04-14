@@ -29,6 +29,7 @@ var_dump($phar2->isCompressed() == Phar::GZ);
 ===DONE===
 --CLEAN--
 <?php
+@unlink(dirname(__FILE__) . '/tar_makegz.phar.gz');
 @unlink(dirname(__FILE__) . '/tar_makegz.phar.tar');
 @unlink(dirname(__FILE__) . '/tar_makegz.phar.tar.gz');
 @unlink(dirname(__FILE__) . '/tar_makegz_b.phar.tar.gz');
