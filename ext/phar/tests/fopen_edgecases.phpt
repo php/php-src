@@ -35,6 +35,9 @@ $a = fopen($pname . '/hi', 'r');
 var_dump(fseek($a, 1), ftell($a));
 var_dump(fseek($a, 1, SEEK_CUR), ftell($a));
 fclose($a);
+
+var_dump(stat('phar://'));
+var_dump(stat('phar://foo.phar'));
 ?>
 
 ===DONE===
@@ -58,5 +61,11 @@ int(0)
 int(1)
 int(0)
 int(2)
+
+Warning: stat(): stat failed for phar:// in %sfopen_edgecases.php on line %d
+bool(false)
+
+Warning: stat(): stat failed for phar://foo.phar in %sfopen_edgecases.php on line %d
+bool(false)
 
 ===DONE===

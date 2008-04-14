@@ -81,12 +81,6 @@ php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, 
 				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\" (cannot contain .phar.php and .phar.gz/.phar.bz2)", filename);
 			}
 		}
-		if (arch) {
-			efree(arch);
-		}
-		if (entry) {
-			efree(entry);
-		}
 		return NULL;
 	}
 	resource = ecalloc(1, sizeof(php_url));
@@ -530,20 +524,18 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 	uint host_len;
 	int retval, internal_file_len;
 
-	if ((resource = phar_open_url(wrapper, url, "r", flags TSRMLS_CC)) == NULL) {
+	if ((resource = phar_open_url(wrapper, url, "r", flags|PHP_STREAM_URL_STAT_QUIET TSRMLS_CC)) == NULL) {
 		return FAILURE;
 	}
 
 	/* we must have at the very least phar://alias.phar/internalfile.php */
 	if (!resource->scheme || !resource->host || !resource->path) {
 		php_url_free(resource);
-		php_stream_wrapper_log_error(wrapper, flags TSRMLS_CC, "phar error: invalid url \"%s\"", url);
 		return FAILURE;
 	}
 
 	if (strcasecmp("phar", resource->scheme)) {
 		php_url_free(resource);
-		php_stream_wrapper_log_error(wrapper, flags TSRMLS_CC, "phar error: not a phar url \"%s\"", url);
 		return FAILURE;
 	}
 
@@ -552,9 +544,6 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 	if (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), resource->host, host_len+1, (void **)&plain_map) == SUCCESS) {
 		spprintf(&internal_file, 0, "%s%s", plain_map, resource->path);
 		retval = php_stream_stat_path_ex(internal_file, flags, ssb, context);
-  		if (retval == -1) {
-			php_stream_wrapper_log_error(wrapper, 0/* TODO:options */ TSRMLS_CC, "phar error: file \"%s\" extracted from \"%s\" could not be stated", internal_file, resource->host);
-		}
 		php_url_free(resource);
 		efree(internal_file);
 		return retval;
@@ -565,10 +554,9 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 	if (FAILURE == phar_get_archive(&phar, resource->host, strlen(resource->host), NULL, 0, &error TSRMLS_CC)) {
 		php_url_free(resource);
 		if (error) {
-			php_stream_wrapper_log_error(wrapper, flags TSRMLS_CC, error);
 			efree(error);
 		}
-		return SUCCESS;
+		return FAILURE;
 	}
 	if (error) {
 		efree(error);
@@ -629,11 +617,9 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 					php_stream_statbuf ssbi;
 	
 					if (SUCCESS != zend_hash_find(&phar->manifest, key, keylen, (void **) &entry)) {
-						php_stream_wrapper_log_error(wrapper, flags TSRMLS_CC, "phar internal error: mounted path \"%s\" could not be retrieved from manifest", key);
 						goto free_resource;
 					}
 					if (!entry->link || !entry->is_mounted) {
-						php_stream_wrapper_log_error(wrapper, flags TSRMLS_CC, "phar internal error: mounted path \"%s\" is not properly initialized as a mounted path", key);
 						goto free_resource;
 					}
 					test_len = spprintf(&test, MAXPATHLEN, "%s%s", entry->link, internal_file + keylen);
@@ -644,12 +630,10 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 					/* mount the file/directory just in time */
 					if (SUCCESS != phar_mount_entry(phar, test, test_len, internal_file, internal_file_len TSRMLS_CC)) {
 						efree(test);
-						php_stream_wrapper_log_error(wrapper, flags TSRMLS_CC, "phar error: path \"%s\" exists as file \"%s\" and could not be mounted", internal_file, test);
 						goto free_resource;
 					}
 					efree(test);
 					if (SUCCESS != zend_hash_find(&phar->manifest, internal_file, internal_file_len, (void**)&entry)) {
-						php_stream_wrapper_log_error(wrapper, flags TSRMLS_CC, "phar error: path \"%s\" exists as file \"%s\" and could not be retrieved after being mounted", internal_file, test);
 						goto free_resource;
 					}
 					phar_dostat(phar, entry, ssb, 0, phar->alias, phar->alias_len TSRMLS_CC);
