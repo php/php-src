@@ -247,7 +247,7 @@ static char *php_gethostbyname(char *name)
 
 #if HAVE_RES_SEARCH && !(defined(__BEOS__)||defined(PHP_WIN32) || defined(NETWARE))
 
-/* {{{ proto int dns_check_record(string host [, string type]) U
+/* {{{ proto bool dns_check_record(string host [, string type]) U
    Check DNS records corresponding to a given Internet host name or IP address */
 PHP_FUNCTION(dns_check_record)
 {
