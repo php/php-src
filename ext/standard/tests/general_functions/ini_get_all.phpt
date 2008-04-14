@@ -1,5 +1,8 @@
 --TEST--
 ini_get_all() tests
+--INI--
+pcre.backtrack_limit=100000
+pcre.recursion_limit=100000
 --SKIPIF--
 <?php if (!extension_loaded("reflection")) die("skip"); ?>
 --FILE--
@@ -10,6 +13,8 @@ var_dump(ini_get_all(""));
 var_dump(ini_get_all("nosuchextension"));
 var_dump(ini_get_all("reflection"));
 var_dump(ini_get_all("pcre"));
+var_dump(ini_get_all("pcre", false));
+var_dump(ini_get_all("reflection", false));
 
 var_dump(ini_get_all("", ""));
 
@@ -45,9 +50,17 @@ array(2) {
     int(7)
   }
 }
+array(2) {
+  ["pcre.backtrack_limit"]=>
+  string(6) "100000"
+  ["pcre.recursion_limit"]=>
+  string(6) "100000"
+}
+array(0) {
+}
 
-Warning: ini_get_all() expects at most 1 parameter, 2 given in %s on line %d
-NULL
+Warning: ini_get_all(): Unable to find extension '' in %sini_get_all.php on line %d
+bool(false)
 Done
 --UEXPECTF--
 unicode(5) "array"
@@ -79,7 +92,15 @@ array(2) {
     int(7)
   }
 }
+array(2) {
+  [u"pcre.backtrack_limit"]=>
+  unicode(6) "100000"
+  [u"pcre.recursion_limit"]=>
+  unicode(6) "100000"
+}
+array(0) {
+}
 
-Warning: ini_get_all() expects at most 1 parameter, 2 given in %s on line %d
-NULL
+Warning: ini_get_all(): Unable to find extension '' in %sini_get_all.php on line %d
+bool(false)
 Done

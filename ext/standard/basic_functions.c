@@ -957,10 +957,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_parse_ini_file, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_config_get_hash, 0)
-ZEND_END_ARG_INFO()
-
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_import_request_variables, 0, 0, 1)
 	ZEND_ARG_INFO(0, types)
 	ZEND_ARG_INFO(0, prefix)
@@ -3452,7 +3448,6 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(connection_status,												arginfo_connection_status)
 	PHP_FE(ignore_user_abort,												arginfo_ignore_user_abort)
 	PHP_FE(parse_ini_file,													arginfo_parse_ini_file)
-	PHP_FE(config_get_hash,													arginfo_config_get_hash)
 	PHP_FE(is_uploaded_file,												arginfo_is_uploaded_file)
 	PHP_FE(move_uploaded_file,												arginfo_move_uploaded_file)
 
@@ -5652,6 +5647,7 @@ static int php_ini_get_option(zend_ini_entry *ini_entry, int num_args, va_list a
 {
 	zval *ini_array = va_arg(args, zval *);
 	int module_number = va_arg(args, int);
+	int details = va_arg(args, int);
 	zval *option;
 	TSRMLS_FETCH();
 
@@ -5663,40 +5659,49 @@ static int php_ini_get_option(zend_ini_entry *ini_entry, int num_args, va_list a
 		hash_key->type != IS_STRING ||
 		hash_key->arKey.s[0] != 0
 	) {
-		MAKE_STD_ZVAL(option);
-		array_init(option);
+		if (details) {
+			MAKE_STD_ZVAL(option);
+			array_init(option);
 
-		if (ini_entry->orig_value) {
-			add_ascii_assoc_utf8_stringl(option, "global_value", ini_entry->orig_value, ini_entry->orig_value_length, 1);
-		} else if (ini_entry->value) {
-			add_ascii_assoc_utf8_stringl(option, "global_value", ini_entry->value, ini_entry->value_length, 1);
+			if (ini_entry->orig_value) {
+				add_ascii_assoc_utf8_stringl(option, "global_value", ini_entry->orig_value, ini_entry->orig_value_length, 1);
+			} else if (ini_entry->value) {
+				add_ascii_assoc_utf8_stringl(option, "global_value", ini_entry->value, ini_entry->value_length, 1);
+			} else {
+				add_ascii_assoc_null(option, "global_value");
+			}
+
+			if (ini_entry->value) {
+				add_ascii_assoc_utf8_stringl(option, "local_value", ini_entry->value, ini_entry->value_length, 1);
+			} else {
+				add_ascii_assoc_null(option, "local_value");
+			}
+
+			add_ascii_assoc_long(option, "access", ini_entry->modifiable);
+
+			add_ascii_assoc_zval_ex(ini_array, ini_entry->name, ini_entry->name_length, option);
 		} else {
-			add_ascii_assoc_null(option, "global_value");
+ 			if (ini_entry->value) {
+ 				add_ascii_assoc_utf8_stringl(ini_array, ini_entry->name, ini_entry->value, ini_entry->value_length, 1);
+ 			} else {
+ 				add_ascii_assoc_null(ini_array, ini_entry->name);
+			}
 		}
-
-		if (ini_entry->value) {
-			add_ascii_assoc_utf8_stringl(option, "local_value", ini_entry->value, ini_entry->value_length, 1);
-		} else {
-			add_ascii_assoc_null(option, "local_value");
-		}
-
-		add_ascii_assoc_long(option, "access", ini_entry->modifiable);
-
-		add_ascii_assoc_zval_ex(ini_array, ini_entry->name, ini_entry->name_length, option);
 	}
 	return 0;
 }
 /* }}} */
 
-/* {{{ proto array ini_get_all([string extension]) U
+/* {{{ proto array ini_get_all([string extension[, bool details = true]]) U
    Get all configuration options */
 PHP_FUNCTION(ini_get_all)
 {
 	char *extname = NULL;
 	int extname_len = 0, extnumber = 0;
 	zend_module_entry *module;
+ 	zend_bool details = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&", &extname, &extname_len, UG(ascii_conv)) == FAILURE) {
+ 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&!b", &extname, &extname_len, UG(ascii_conv), &details) == FAILURE) {
 		return;
 	}
 
@@ -5711,7 +5716,7 @@ PHP_FUNCTION(ini_get_all)
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(ini_directives), (apply_func_args_t) php_ini_get_option, 2, return_value, extnumber TSRMLS_CC);
+	zend_hash_apply_with_arguments(EG(ini_directives), (apply_func_args_t) php_ini_get_option, 2, return_value, extnumber, details TSRMLS_CC);
 }
 /* }}} */
 
@@ -6413,17 +6418,6 @@ PHP_FUNCTION(parse_ini_file)
 
 	array_init(return_value);
 	zend_parse_ini_file(&fh, 0, scanner_mode, ini_parser_cb, return_value TSRMLS_CC);
-}
-/* }}} */
-
-/* {{{ proto array config_get_hash(void)
- Return all configuration valus as an array */
-PHP_FUNCTION(config_get_hash)
-{
-	HashTable *hash = php_ini_get_configuration_hash();
-
-	array_init(return_value);
-	zend_hash_apply_with_arguments(hash, (apply_func_args_t) add_config_entry_cb, 1, return_value TSRMLS_CC);
 }
 /* }}} */
 
