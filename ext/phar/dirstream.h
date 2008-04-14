@@ -32,7 +32,6 @@ static size_t phar_dir_read( php_stream *stream, char *buf, size_t count TSRMLS_
 static int    phar_dir_close(php_stream *stream, int close_handle TSRMLS_DC);
 static int    phar_dir_flush(php_stream *stream TSRMLS_DC);
 static int    phar_dir_seek( php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC);
-static int    phar_dir_stat( php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
 #else
 php_stream* phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 #endif
