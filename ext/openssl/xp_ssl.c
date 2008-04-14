@@ -198,13 +198,12 @@ static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size
 				break;
 			}
 		} while(retry);
-		
+
+		if (didwrite > 0) {
+			php_stream_notify_progress_increment(stream->context, didwrite, 0);
+		}
 	} else {
 		didwrite = php_stream_socket_ops.write(stream, buf, count TSRMLS_CC);
-	}
-	
-	if (didwrite > 0) {
-		php_stream_notify_progress_increment(stream->context, didwrite, 0);
 	}
 
 	if (didwrite < 0) {
@@ -234,14 +233,14 @@ static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t coun
 				break;
 			}
 		} while (retry);
+
+		if (nr_bytes > 0) {
+			php_stream_notify_progress_increment(stream->context, nr_bytes, 0);
+		}
 	}
 	else
 	{
 		nr_bytes = php_stream_socket_ops.read(stream, buf, count TSRMLS_CC);
-	}
-
-	if (nr_bytes > 0) {
-		php_stream_notify_progress_increment(stream->context, nr_bytes, 0);
 	}
 
 	if (nr_bytes < 0) {
