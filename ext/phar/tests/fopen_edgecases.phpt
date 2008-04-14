@@ -38,6 +38,9 @@ fclose($a);
 
 var_dump(stat('phar://'));
 var_dump(stat('phar://foo.phar'));
+ini_set('phar.extract_list', 'test.phar=' . dirname(__FILE__));
+var_dump(file_exists('phar://test.phar/' . basename(__FILE__)));
+var_dump(file_exists('phar://test.phar/@#$^&*%$#'));
 ?>
 
 ===DONE===
@@ -66,6 +69,8 @@ Warning: stat(): stat failed for phar:// in %sfopen_edgecases.php on line %d
 bool(false)
 
 Warning: stat(): stat failed for phar://foo.phar in %sfopen_edgecases.php on line %d
+bool(false)
+bool(true)
 bool(false)
 
 ===DONE===
