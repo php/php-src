@@ -21,9 +21,6 @@ $fp = fopen($pname . '/b/c.php', 'wb');
 fwrite($fp, 'extra');
 fclose($fp);
 include $pname . '/b/c.php';
-
-// add edge case test for append
-$a = fopen($pname . '/b/c.php', 'a');
 ?>
 
 ===DONE===
@@ -31,6 +28,4 @@ $a = fopen($pname . '/b/c.php', 'a');
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 extra
-Warning: fopen(phar://%sopen_for_write_existing.phar.php/b/c.php): failed to open stream: phar error: open mode append not supported in %sopen_for_write_existing.php on line %d
-
 ===DONE===

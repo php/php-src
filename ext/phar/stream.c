@@ -63,35 +63,37 @@ php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, 
 	char *arch = NULL, *entry = NULL, *error;
 	int arch_len, entry_len;
 
-	if (!strncasecmp(filename, "phar://", 7)) {
-		if (mode[0] == 'a') {
-			if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: open mode append not supported");
-			}
-			return NULL;			
-		}		
-		if (phar_split_fname(filename, strlen(filename), &arch, &arch_len, &entry, &entry_len TSRMLS_CC) == FAILURE) {
-			if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
-				if (arch && !entry) {
-					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory (always use full path to a new phar)", filename, arch);
-					arch = NULL;
-				} else {
-					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\" (cannot contain .phar.php and .phar.gz/.phar.bz2)", filename);
-				}
-			}
-			if (arch) {
-				efree(arch);
-			}
-			if (entry) {
-				efree(entry);
-			}
-			return NULL;
+	if (strlen(filename) < 7 || strncasecmp(filename, "phar://", 7)) {
+		return NULL;
+	}
+	if (mode[0] == 'a') {
+		if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: open mode append not supported");
 		}
-		resource = ecalloc(1, sizeof(php_url));
-		resource->scheme = estrndup("phar", 4);
-		resource->host = arch;
+		return NULL;			
+	}		
+	if (phar_split_fname(filename, strlen(filename), &arch, &arch_len, &entry, &entry_len TSRMLS_CC) == FAILURE) {
+		if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
+			if (arch && !entry) {
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory (always use full path to a new phar)", filename, arch);
+				arch = NULL;
+			} else {
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\" (cannot contain .phar.php and .phar.gz/.phar.bz2)", filename);
+			}
+		}
+		if (arch) {
+			efree(arch);
+		}
+		if (entry) {
+			efree(entry);
+		}
+		return NULL;
+	}
+	resource = ecalloc(1, sizeof(php_url));
+	resource->scheme = estrndup("phar", 4);
+	resource->host = arch;
 
-		resource->path = entry;
+	resource->path = entry;
 #if MBO_0
 		if (resource) {
 			fprintf(stderr, "Alias:     %s\n", alias);
@@ -105,50 +107,47 @@ php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, 
 /*			fprintf(stderr, "Fragment:  %s\n", resource->fragment);*/
 		}
 #endif
-		if (PHAR_GLOBALS->request_init && PHAR_GLOBALS->phar_plain_map.arBuckets && zend_hash_exists(&(PHAR_GLOBALS->phar_plain_map), arch, arch_len+1)) {
-			return resource;
-		}
-		if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
-			phar_archive_data **pphar = NULL;
-
-			if (PHAR_GLOBALS->request_init && PHAR_GLOBALS->phar_fname_map.arBuckets && FAILURE == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **)&pphar)) {
-				pphar = NULL;
-			}
-			if (PHAR_G(readonly) && (!pphar || !(*pphar)->is_data)) {
-				if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
-					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by INI setting");
-				}
-				php_url_free(resource);
-				return NULL;
-			}
-			if (phar_open_or_create_filename(resource->host, arch_len, NULL, 0, NULL, options, NULL, &error TSRMLS_CC) == FAILURE)
-			{
-				if (error) {
-					if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
-						php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
-					}
-					efree(error);
-				}
-				php_url_free(resource);
-				return NULL;
-			}
-		} else {
-			if (phar_open_filename(resource->host, arch_len, NULL, 0, options, NULL, &error TSRMLS_CC) == FAILURE)
-			{
-				if (error) {
-					if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
-						php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
-					}
-					efree(error);
-				}
-				php_url_free(resource);
-				return NULL;
-			}
-		}	
+	if (PHAR_GLOBALS->request_init && PHAR_GLOBALS->phar_plain_map.arBuckets && zend_hash_exists(&(PHAR_GLOBALS->phar_plain_map), arch, arch_len+1)) {
 		return resource;
 	}
+	if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
+		phar_archive_data **pphar = NULL;
 
-	return NULL;
+		if (PHAR_GLOBALS->request_init && PHAR_GLOBALS->phar_fname_map.arBuckets && FAILURE == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **)&pphar)) {
+			pphar = NULL;
+		}
+		if (PHAR_G(readonly) && (!pphar || !(*pphar)->is_data)) {
+			if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by INI setting");
+			}
+			php_url_free(resource);
+			return NULL;
+		}
+		if (phar_open_or_create_filename(resource->host, arch_len, NULL, 0, NULL, options, NULL, &error TSRMLS_CC) == FAILURE)
+		{
+			if (error) {
+				if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
+					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+				}
+				efree(error);
+			}
+			php_url_free(resource);
+			return NULL;
+		}
+	} else {
+		if (phar_open_filename(resource->host, arch_len, NULL, 0, options, NULL, &error TSRMLS_CC) == FAILURE)
+		{
+			if (error) {
+				if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
+					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+				}
+				efree(error);
+			}
+			php_url_free(resource);
+			return NULL;
+		}
+	}	
+	return resource;
 }
 /* }}} */
 
