@@ -569,7 +569,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 	}
 	if (!phar->manifest.arBuckets) {
 		php_url_free(resource);
-		return SUCCESS;
+		return FAILURE;
 	}
 	internal_file_len = strlen(internal_file);
 	/* search through the manifest of files, and if we have an exact match, it's a file */
@@ -660,9 +660,9 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	phar_entry_data *idata;
 	phar_archive_data **pphar;
 	uint host_len;
-	int retval;
 
 	if ((resource = phar_open_url(wrapper, url, "rb", options TSRMLS_CC)) == NULL) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: unlink failed");
 		return 0;
 	}
 
@@ -682,14 +682,9 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	host_len = strlen(resource->host);
 	phar_request_initialize(TSRMLS_C);
 	if (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), resource->host, host_len+1, (void **)&plain_map) == SUCCESS) {
-		spprintf(&internal_file, 0, "%s%s", plain_map, resource->path);
-		retval = php_stream_unlink(internal_file, options, context);
-		if (!retval) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: file \"%s\" extracted from \"%s\" could not be opened", internal_file, resource->host);
-		}
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: \"%s\" cannot be unlinked, phar is extracted in plain map", url);
 		php_url_free(resource);
-		efree(internal_file);
-		return retval;
+		return 0;
 	}
 
 	if (FAILURE == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), resource->host, strlen(resource->host), (void **) &pphar)) {
