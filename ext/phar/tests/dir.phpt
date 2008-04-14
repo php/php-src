@@ -28,12 +28,17 @@ clearstatcache();
 var_dump(file_exists($pname . '/another/dir/'));
 var_dump(file_exists($pname2 . '/test/'));
 var_dump(file_exists($pname3 . '/another/dir/'));
+ini_set('phar.readonly', 1);
+mkdir($pname . '/fails');
+ini_set('phar.readonly', 0);
+mkdir('phar://oops.phar/fails');
 ?>
+===DONE===
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.1.phar.php'); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php'); ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 bool(true)
 bool(true)
@@ -41,3 +46,6 @@ bool(true)
 bool(false)
 bool(true)
 bool(false)
+
+Warning: mkdir(): phar error: cannot create directory "phar://%sdir.phar.php/fails", write operations disabled in %sdir.php on line %d
+===DONE===

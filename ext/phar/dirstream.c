@@ -297,6 +297,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char 
 	uint host_len;
 
 	if ((resource = phar_open_url(wrapper, path, mode, options TSRMLS_CC)) == NULL) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar url \"%s\" is unknown", path);
 		return NULL;
 	}
 
@@ -336,6 +337,8 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char 
 		if (error) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
 			efree(error);
+		} else {
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar file \"%s\" is unknown", resource->host);
 		}
 		php_url_free(resource);
 		return NULL;
@@ -510,7 +513,6 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, char *url_from, int mode, in
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", entry.filename, phar->fname, error);
 		zend_hash_del(&phar->manifest, entry.filename, entry.filename_len);
 		efree(error);
-		efree(entry.filename);
 		return FAILURE;
 	}
 	return SUCCESS;
