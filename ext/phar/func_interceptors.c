@@ -573,7 +573,7 @@ void phar_file_stat(const char *filename, php_stat_len filename_length, int type
 				efree(save2);
 				/* Error Occured */
 				if (!IS_EXISTS_CHECK(type)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "%sstat failed for %s", IS_LINK_OPERATION(type) ? "l" : "", filename);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "%sstat failed for %s", IS_LINK_OPERATION(type) ? "L" : "", filename);
 				}
 				RETURN_FALSE;
 			}
