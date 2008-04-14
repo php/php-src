@@ -40,4 +40,8 @@ bool(false)
 
 Warning: fopen(phar://%sfopen_edgecases.2.phar.php/hi): failed to open stream: internal corruption of phar "%sfopen_edgecases.2.phar.php" (truncated manifest at stub end) in %sfopen_edgecases.php on line %d
 
+Warning: fopen(phar://): failed to open stream: phar error: no directory in "phar://", must have at least phar:/// for root directory (always use full path to a new phar) in %sfopen_edgecases.php on line %d
+
+Warning: fopen(phar://foo.phar): failed to open stream: operation failed in %sfopen_edgecases.php on line %d
+
 ===DONE===
