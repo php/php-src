@@ -27,7 +27,7 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-Warning: options should have the form ["wrappername"]["optionname"] = $value in %s004.php on line 10
+Warning: stream_context_create(): options should have the form ["wrappername"]["optionname"] = $value in %s004.php on line 10
 NULL
 
 Warning: DOMDocument::load(): supplied argument is not a valid Stream-Context resource in %s004.php on line 18
