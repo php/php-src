@@ -1,3 +1,9 @@
+2008-04-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      zend_gc.c:
+      Kill unused var
+
 2008-04-11  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_gc.c

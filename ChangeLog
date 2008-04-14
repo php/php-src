@@ -1,3 +1,53 @@
+2008-04-13  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/standard/streamsfuncs.c
+      ext/standard/tests/streams/bug44712.phpt:
+      MFB5.3: Fixed bug#44712 (stream_context_set_params segfaults on invalid
+      arguments)
+
+    * (PHP_5_3)
+      ext/standard/streamsfuncs.c
+      ext/standard/tests/streams/bug44712.phpt
+      ext/standard/tests/streams/bug44712.phpt:
+      Fixed bug#44712 (stream_context_set_params segfaults on invalid arguments)
+
+2008-04-13  Greg Beaver  <greg@chiaraquartet.net>
+
+    * main/streams/plain_wrapper.c:
+      MFB do not scan include_path with faulty plain_wrapper-based include_path
+      fopen
+      
+
+    * (PHP_5_3)
+      main/streams/plain_wrapper.c:
+      do not scan include_path with faulty plain_wrapper-based include_path fopen
+      
+
+    * ext/standard/tests/strings/highlight_file.phpt:
+      sync fixed test properly with 5.3 branch
+
+    * ext/standard/tests/strings/highlight_file.phpt
+      ext/standard/tests/strings/highlight_file.phpt
+      ext/zlib/tests/bug_40189.phpt
+      ext/zlib/tests/bug_40189.phpt:
+      fix test
+
+2008-04-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_gc.c:
+      Kill unused var
+
+2008-04-13  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * (PHP_5_3)
+      scripts/dev/generate_phpt.php:
+      Fixing:
+      (1) remove proto from start
+      (2)substitute "Done" with ===DONE== after closing tag in FILE section and
+      at end of EXPECTF.
+      (3) Remove "add comment here..."
+
 2008-04-11  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * win32/build/mkdist.php:
