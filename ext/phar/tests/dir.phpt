@@ -31,11 +31,13 @@ var_dump(file_exists($pname3 . '/another/dir/'));
 ini_set('phar.readonly', 1);
 mkdir($pname . '/fails');
 ini_set('phar.readonly', 0);
-mkdir('phar://oops.phar/fails');
+// create new phar by mkdir
+mkdir('phar://' . dirname(__FILE__) . '/ok.phar/fails');
 ?>
 ===DONE===
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(dirname(__FILE__) . '/ok.phar'); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.1.phar.php'); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php'); ?>
 --EXPECTF--

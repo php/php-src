@@ -471,6 +471,7 @@ int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char 
 	if (entry->is_dir) {
 		*ret = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
 		(*ret)->position = 0;
+		(*ret)->fp = NULL;
 		(*ret)->phar = phar;
 		(*ret)->for_write = for_write;
 		(*ret)->internal_file = entry;
