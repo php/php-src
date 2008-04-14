@@ -1,5 +1,5 @@
 --TEST--
-Phar: fopen/stat/fseek/unlink edge cases
+Phar: fopen/stat/fseek/unlink/rename edge cases
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
@@ -54,6 +54,17 @@ unlink('phar://');
 unlink('phar://foo.phar');
 unlink('phar://test.phar/' . basename(__FILE__));
 unlink($pname . '/oops');
+
+rename('phar://', 'phar://');
+rename($pname . '/hi', 'phar://');
+rename('phar://foo.phar/hi', 'phar://');
+rename($pname . '/hi', 'phar://foo.phar/hi');
+
+ini_set('phar.readonly', 1);
+rename($pname . '/hi', $pname . '/there');
+ini_set('phar.readonly', 0);
+
+rename('phar://test.phar/' . basename(__FILE__), 'phar://test.phar/hi');
 ?>
 
 ===DONE===
@@ -103,5 +114,17 @@ Warning: unlink(): phar error: unlink failed in %sfopen_edgecases.php on line %d
 Warning: unlink(): phar error: "phar://test.phar/fopen_edgecases.php" cannot be unlinked, phar is extracted in plain map in %sfopen_edgecases.php on line %d
 
 Warning: unlink(): unlink of "phar://%sfopen_edgecases.phar.php/oops" failed, file does not exist in %sfopen_edgecases.php on line %d
+
+Warning: rename(): phar error: cannot rename "phar://" to "phar://": invalid url "phar://" in %sfopen_edgecases.php on line %d
+
+Warning: rename(): phar error: cannot rename "phar://%sfopen_edgecases.phar.php/hi" to "phar://": invalid url "phar://" in %sfopen_edgecases.php on line %d
+
+Warning: rename(): phar error: cannot rename "phar://foo.phar/hi" to "phar://": invalid url "phar://foo.phar/hi" in %sfopen_edgecases.php on line %d
+
+Warning: rename(): phar error: cannot rename "phar://%sfopen_edgecases.phar.php/hi" to "phar://foo.phar/hi", not within the same phar archive in %sfopen_edgecases.php on line %d
+
+Warning: rename(): phar error: write operations disabled by INI setting in %sfopen_edgecases.php on line %d
+
+Warning: rename(): phar error: cannot rename "phar://test.phar/fopen_edgecases.php" to "phar://test.phar/hi" from extracted phar archive in %sfopen_edgecases.php on line %d
 
 ===DONE===

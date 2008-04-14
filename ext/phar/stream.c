@@ -741,14 +741,26 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 
 	error = NULL;
 
-	if ((resource_from = phar_open_url(wrapper, url_from, "r+b", options TSRMLS_CC)) == NULL) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\": invalid url \"%s\"", url_from, url_to, url_from);
+	if ((resource_from = phar_open_url(wrapper, url_from, "rb", options|PHP_STREAM_URL_STAT_QUIET TSRMLS_CC)) == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid url \"%s\"", url_from, url_to, url_from);
 		return 0;
 	}
-	
-	if ((resource_to = phar_open_url(wrapper, url_to, "wb", options TSRMLS_CC)) == NULL) {
+
+	if (PHAR_G(readonly) && (!pfrom || !pfrom->is_data)) {
 		php_url_free(resource_from);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\": invalid url \"%s\"", url_from, url_to, url_to);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: write operations disabled by phar.readonly INI setting");
+		return 0;
+	}
+	if ((resource_to = phar_open_url(wrapper, url_to, "wb", options|PHP_STREAM_URL_STAT_QUIET TSRMLS_CC)) == NULL) {
+		php_url_free(resource_from);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid url \"%s\"", url_from, url_to, url_to);
+		return 0;
+	}
+
+	if (strcmp(resource_from->host, resource_to->host)) {
+		php_url_free(resource_from);
+		php_url_free(resource_to);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\", not within the same phar archive", url_from, url_to);
 		return 0;
 	}
 
@@ -758,44 +770,33 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 	if (SUCCESS != phar_get_archive(&pto, resource_to->host, strlen(resource_to->host), NULL, 0, &error TSRMLS_CC)) {
 		pto = NULL;
 	}
-	if (PHAR_G(readonly) && ((!pfrom || !pfrom->is_data) || (!pto || !pto->is_data))) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: write operations disabled by INI setting");
-		return 0;
-	}
 
 	/* we must have at the very least phar://alias.phar/internalfile.php */
 	if (!resource_from->scheme || !resource_from->host || !resource_from->path) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\": invalid url \"%s\"", url_from, url_to, url_from);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid url \"%s\"", url_from, url_to, url_from);
 		return 0;
 	}
 	
 	if (!resource_to->scheme || !resource_to->host || !resource_to->path) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\": invalid url \"%s\"", url_from, url_to, url_to);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid url \"%s\"", url_from, url_to, url_to);
 		return 0;
 	}
 
 	if (strcasecmp("phar", resource_from->scheme)) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\": not a phar stream url \"%s\"", url_from, url_to, url_from);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": not a phar stream url \"%s\"", url_from, url_to, url_from);
 		return 0;
 	}
 
 	if (strcasecmp("phar", resource_to->scheme)) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\": not a phar stream url \"%s\"", url_from, url_to, url_to);
-		return 0;
-	}
-
-	if (strcmp(resource_from->host, resource_to->host)) {
-		php_url_free(resource_from);
-		php_url_free(resource_to);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\", not within the same phar archive", url_from, url_to);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": not a phar stream url \"%s\"", url_from, url_to, url_to);
 		return 0;
 	}
 
@@ -805,14 +806,14 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		/*TODO:use php_stream_rename() once available*/
 		php_url_free(resource_from);
 		php_url_free(resource_to);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\" from extracted phar archive", url_from, url_to);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\" from extracted phar archive", url_from, url_to);
 		return 0;
 	}
 
 	if (SUCCESS != phar_get_archive(&phar, resource_from->host, strlen(resource_from->host), NULL, 0, &error TSRMLS_CC)) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\": %s", url_from, url_to, error);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": %s", url_from, url_to, error);
 		efree(error);
 		return 0;
 	}
@@ -824,7 +825,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		if (entry->is_deleted) {
 			php_url_free(resource_from);
 			php_url_free(resource_to);
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\" from extracted phar archive, source has been deleted", url_from, url_to);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\" from extracted phar archive, source has been deleted", url_from, url_to);
 			return 0;
 		}
 		/* transfer all data over to the new entry */
@@ -843,7 +844,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		if (FAILURE == phar_copy_entry_fp(source, entry, &error TSRMLS_CC)) {
 			php_url_free(resource_from);
 			php_url_free(resource_to);
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\": %s", url_from, url_to, error);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": %s", url_from, url_to, error);
 			efree(error);
 			zend_hash_del(&(phar->manifest), entry->filename, strlen(entry->filename));
 			return 0;
@@ -854,7 +855,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		if (error) {
 			php_url_free(resource_from);
 			php_url_free(resource_to);
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rename \"%s\" to \"%s\": %s", url_from, url_to, error);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": %s", url_from, url_to, error);
 			efree(error);
 			zend_hash_del(&(phar->manifest), entry->filename, strlen(entry->filename));
 			return 0;
