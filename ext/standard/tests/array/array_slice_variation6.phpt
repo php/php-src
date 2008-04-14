@@ -133,15 +133,7 @@ array(4) {
 }
 
 -- $length is maximum integer value --
-array(4) {
-  [0]=>
-  string(3) "two"
-  [1]=>
-  string(5) "three"
-  [2]=>
-  string(4) "nine"
-  ["ten"]=>
-  int(10)
+array(0) {
 }
 
 -- $length is minimum integer value --
