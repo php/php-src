@@ -46,6 +46,9 @@ rmdir('phar://' . dirname(__FILE__) . '/unknown.phar/hi');
 ini_set('phar.readonly', 1);
 rmdir($pname . '/another/dir');
 ini_set('phar.readonly', 0);
+rmdir($pname);
+rmdir($pname . '/');
+mkdir($pname . '/');
 ?>
 ===DONE===
 --CLEAN--
@@ -80,4 +83,10 @@ Warning: rmdir(): phar error: cannot remove directory "phar://", no phar archive
 Warning: rmdir(): phar error: cannot remove directory "hi" in phar "%sunknown.phar", directory does not exist in %sdir.php on line %d
 
 Warning: rmdir(): phar error: cannot rmdir directory "phar://%sdir.phar.php/another/dir", write operations disabled in %sdir.php on line %d
+
+Warning: rmdir(): phar error: cannot remove directory "" in phar "%sdir.phar.php", directory does not exist in %sdir.php on line %d
+
+Warning: rmdir(): phar error: cannot remove directory "" in phar "%sdir.phar.php", directory does not exist in %sdir.php on line %d
+
+Warning: mkdir(): phar error: cannot create directory "" in phar "%sdir.phar.php", phar error: invalid path "" must not be empty in %sdir.php on line %d
 ===DONE===

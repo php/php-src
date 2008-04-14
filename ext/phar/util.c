@@ -982,7 +982,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 {
 	const char *pcr_error;
 	phar_entry_info *entry;
-	char is_dir = (path[path_len - 1] == '/');
+	char is_dir = path_len && (path[path_len - 1] == '/');
 
 	if (error) {
 		*error = NULL;
