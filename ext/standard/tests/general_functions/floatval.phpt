@@ -157,29 +157,17 @@ float(-5000000)
 *** Testing floatval() on non floating types ***
 float(-2147483648)
 float(2147483648)
-
-Warning: floatval() expects parameter 1 to be double, resource given in %s on line %d
-NULL
-
-Warning: floatval() expects parameter 1 to be double, resource given in %s on line %d
-NULL
+float(5)
+float(6)
 float(0)
 float(1)
 float(-1300)
-
-Warning: floatval() expects parameter 1 to be double, string given in %s on line %d
-NULL
-
-Notice: A non well formed numeric value encountered in %s on line %d
+float(0)
 float(10)
-
-Notice: A non well formed numeric value encountered in %s on line %d
 float(10.2)
 float(11)
 float(11)
-
-Warning: floatval() expects parameter 1 to be double, string given in %s on line %d
-NULL
+float(0)
 float(1)
 float(0)
 float(0)
@@ -187,45 +175,33 @@ float(0)
 *** Testing doubleval() on non floating types ***
 float(-2147483648)
 float(2147483648)
-
-Warning: doubleval() expects parameter 1 to be double, resource given in %s on line %d
-NULL
-
-Warning: doubleval() expects parameter 1 to be double, resource given in %s on line %d
-NULL
+float(5)
+float(6)
 float(0)
 float(1)
 float(-1300)
-
-Warning: doubleval() expects parameter 1 to be double, string given in %s on line %d
-NULL
-
-Notice: A non well formed numeric value encountered in %s on line %d
+float(0)
 float(10)
-
-Notice: A non well formed numeric value encountered in %s on line %d
 float(10.2)
 float(11)
 float(11)
-
-Warning: doubleval() expects parameter 1 to be double, string given in %s on line %d
-NULL
+float(0)
 float(1)
 float(0)
 float(0)
 
 *** Testing error conditions ***
 
-Warning: floatval() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: Wrong parameter count for floatval() in %s on line %d
 NULL
 
-Warning: doubleval() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: Wrong parameter count for doubleval() in %s on line %d
 NULL
 
-Warning: floatval() expects exactly 1 parameter, 2 given in %s on line %d
+Warning: Wrong parameter count for floatval() in %s on line %d
 NULL
 
-Warning: doubleval() expects exactly 1 parameter, 2 given in %s on line %d
+Warning: Wrong parameter count for doubleval() in %s on line %d
 NULL
 
 Done
@@ -279,29 +255,17 @@ float(-5000000)
 *** Testing floatval() on non floating types ***
 float(-2147483648)
 float(2147483648)
-
-Warning: floatval() expects parameter 1 to be double, resource given in %s on line %d
-NULL
-
-Warning: floatval() expects parameter 1 to be double, resource given in %s on line %d
-NULL
+float(5)
+float(6)
 float(0)
 float(1)
 float(-1300)
-
-Warning: floatval() expects parameter 1 to be double, Unicode string given in %s on line %d
-NULL
-
-Notice: A non well formed numeric value encountered in %s on line %d
+float(0)
 float(10)
-
-Notice: A non well formed numeric value encountered in %s on line %d
 float(10.2)
 float(11)
 float(11)
-
-Warning: floatval() expects parameter 1 to be double, Unicode string given in %s on line %d
-NULL
+float(0)
 float(1)
 float(0)
 float(0)
@@ -309,45 +273,33 @@ float(0)
 *** Testing doubleval() on non floating types ***
 float(-2147483648)
 float(2147483648)
-
-Warning: doubleval() expects parameter 1 to be double, resource given in %s on line %d
-NULL
-
-Warning: doubleval() expects parameter 1 to be double, resource given in %s on line %d
-NULL
+float(5)
+float(6)
 float(0)
 float(1)
 float(-1300)
-
-Warning: doubleval() expects parameter 1 to be double, Unicode string given in %s on line %d
-NULL
-
-Notice: A non well formed numeric value encountered in %s on line %d
+float(0)
 float(10)
-
-Notice: A non well formed numeric value encountered in %s on line %d
 float(10.2)
 float(11)
 float(11)
-
-Warning: doubleval() expects parameter 1 to be double, Unicode string given in %s on line %d
-NULL
+float(0)
 float(1)
 float(0)
 float(0)
 
 *** Testing error conditions ***
 
-Warning: floatval() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: Wrong parameter count for floatval() in %s on line %d
 NULL
 
-Warning: doubleval() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: Wrong parameter count for doubleval() in %s on line %d
 NULL
 
-Warning: floatval() expects exactly 1 parameter, 2 given in %s on line %d
+Warning: Wrong parameter count for floatval() in %s on line %d
 NULL
 
-Warning: doubleval() expects exactly 1 parameter, 2 given in %s on line %d
+Warning: Wrong parameter count for doubleval() in %s on line %d
 NULL
 
 Done
