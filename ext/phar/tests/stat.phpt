@@ -71,7 +71,7 @@ array(26) {
   [0]=>
   int(12)
   [1]=>
-  int(51855)
+  int(%d)
   [2]=>
   int(33206)
   [3]=>
@@ -97,7 +97,7 @@ array(26) {
   ["dev"]=>
   int(12)
   ["ino"]=>
-  int(51855)
+  int(%d)
   ["mode"]=>
   int(33206)
   ["nlink"]=>
@@ -126,7 +126,7 @@ array(26) {
   [0]=>
   int(12)
   [1]=>
-  int(51855)
+  int(%d)
   [2]=>
   int(33206)
   [3]=>
@@ -152,7 +152,7 @@ array(26) {
   ["dev"]=>
   int(12)
   ["ino"]=>
-  int(51855)
+  int(%d)
   ["mode"]=>
   int(33206)
   ["nlink"]=>
@@ -179,7 +179,7 @@ array(26) {
 fileperms
 int(33206)
 fileinode
-int(51855)
+int(%d)
 filesize
 int(2)
 fileowner
