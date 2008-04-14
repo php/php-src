@@ -1041,21 +1041,25 @@ PHP_FUNCTION(stream_context_get_default)
 }
 /* }}} */
 
-/* {{{ proto resource stream_context_create([array options])
+/* {{{ proto resource stream_context_create([array options[, array params]])
    Create a file context and optionally set parameters */
 PHP_FUNCTION(stream_context_create)
 {
-	zval *params = NULL;
+	zval *options = NULL, *params = NULL;
 	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a", &params) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a!a!", &options, &params) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
 	context = php_stream_context_alloc();
 	
+	if (options) {
+		parse_context_options(context, options TSRMLS_CC);
+	}
+
 	if (params) {
-		parse_context_options(context, params TSRMLS_CC);
+		parse_context_params(context, params TSRMLS_CC);
 	}
 	
 	php_stream_context_to_zval(context, return_value);
