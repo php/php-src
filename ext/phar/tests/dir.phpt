@@ -33,11 +33,15 @@ mkdir($pname . '/fails');
 ini_set('phar.readonly', 0);
 // create new phar by mkdir
 mkdir('phar://' . dirname(__FILE__) . '/ok.phar/fails');
+mkdir('phar://' . dirname(__FILE__) . '/ok.phar/fails');
+file_put_contents(dirname(__FILE__) . '/oops.phar', '<?php this should screw em up __HALT_COMPILER();');
+mkdir('phar://' . dirname(__FILE__) . '/oops.phar/fails');
 ?>
 ===DONE===
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php unlink(dirname(__FILE__) . '/ok.phar'); ?>
+<?php unlink(dirname(__FILE__) . '/oops.phar'); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.1.phar.php'); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php'); ?>
 --EXPECTF--
@@ -50,4 +54,8 @@ bool(true)
 bool(false)
 
 Warning: mkdir(): phar error: cannot create directory "phar://%sdir.phar.php/fails", write operations disabled in %sdir.php on line %d
+
+Warning: mkdir(): phar error: cannot create directory "fails" in phar "%sok.phar", directory already exists in %sdir.php on line %d
+
+Warning: mkdir(): internal corruption of phar "%soops.phar" (truncated manifest at stub end) in %sdir.php on line %d
 ===DONE===
