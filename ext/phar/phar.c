@@ -2045,7 +2045,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		offset += 4 + entry->filename_len + sizeof(entry_buffer) + entry->metadata_str.len + (entry->is_dir ? 1 : 0);
 
 		/* compress and rehash as necessary */
-		if (oldfile && !entry->is_modified) {
+		if ((oldfile && !entry->is_modified) || entry->is_dir) {
 			continue;
 		}
 		if (!phar_get_efp(entry TSRMLS_CC)) {
@@ -2302,7 +2302,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		if (zend_hash_get_current_data(&phar->manifest, (void **)&entry) == FAILURE) {
 			continue;
 		}
-		if (entry->is_deleted) {
+		if (entry->is_deleted || entry->is_dir) {
 			continue;
 		}
 		if (entry->cfp) {
