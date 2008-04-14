@@ -701,8 +701,10 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	if (FAILURE == phar_get_entry_data(&idata, resource->host, strlen(resource->host), internal_file, strlen(internal_file), "r", 0, &error TSRMLS_CC)) {
 		/* constraints of fp refcount were not met */
 		if (error) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "unlink of \"%s\" failed: %s", url, error);
 			efree(error);
+		} else {
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "unlink of \"%s\" failed, file does not exist", url);
 		}
 		efree(internal_file);
 		php_url_free(resource);
@@ -710,12 +712,6 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	}
 	if (error) {
 		efree(error);
-	}
-	if (!idata) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: \"%s\" is not a file in phar \"%s\", cannot unlink", internal_file, resource->host);
-		efree(internal_file);
-		php_url_free(resource);
-		return 0;
 	}
 	if (idata->internal_file->fp_refcount > 1) {
 		/* more than just our fp resource is open for this file */ 

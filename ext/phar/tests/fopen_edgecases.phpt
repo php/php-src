@@ -53,6 +53,7 @@ unlink($pname2 . '/hi');
 unlink('phar://');
 unlink('phar://foo.phar');
 unlink('phar://test.phar/' . basename(__FILE__));
+unlink($pname . '/oops');
 ?>
 
 ===DONE===
@@ -100,5 +101,7 @@ Warning: unlink(): unable to open phar for reading "foo.phar" in %sfopen_edgecas
 Warning: unlink(): phar error: unlink failed in %sfopen_edgecases.php on line %d
 
 Warning: unlink(): phar error: "phar://test.phar/fopen_edgecases.php" cannot be unlinked, phar is extracted in plain map in %sfopen_edgecases.php on line %d
+
+Warning: unlink(): unlink of "phar://%sfopen_edgecases.phar.php/oops" failed, file does not exist in %sfopen_edgecases.php on line %d
 
 ===DONE===
