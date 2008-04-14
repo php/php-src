@@ -1,5 +1,5 @@
 --TEST--
-Phar: fopen/stat edge cases
+Phar: fopen/stat/fseek edge cases
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
@@ -29,6 +29,12 @@ $a = fopen('phar://foo.phar', 'r');
 
 ini_set('phar.extract_list', 'test.phar=' . dirname(__FILE__) . '/ump');
 $a = fopen('phar://test.phar/oops', 'r');
+
+file_put_contents($pname . '/hi', 'hi');
+$a = fopen($pname . '/hi', 'r');
+var_dump(fseek($a, 1), ftell($a));
+var_dump(fseek($a, 1, SEEK_CUR), ftell($a));
+fclose($a);
 ?>
 
 ===DONE===
@@ -48,5 +54,9 @@ Warning: fopen(phar://): failed to open stream: phar error: no directory in "pha
 Warning: fopen(phar://foo.phar): failed to open stream: operation failed in %sfopen_edgecases.php on line %d
 
 Warning: fopen(phar://test.phar/oops): failed to open stream: phar error: file "oops" extracted from "test.phar" could not be opened in %sfopen_edgecases.php on line %d
+int(0)
+int(1)
+int(0)
+int(2)
 
 ===DONE===
