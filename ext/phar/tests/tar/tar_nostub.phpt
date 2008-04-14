@@ -43,5 +43,6 @@ try {
 ?>
 --EXPECTF--
 RecursiveDirectoryIterator::__construct(phar://%star_004.phar.tar/): failed to open dir: '%star_004.phar.tar' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive
+phar url "phar://%star_004.phar.tar/" is unknown
 string(0) ""
 ===DONE===

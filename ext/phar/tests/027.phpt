@@ -84,7 +84,8 @@ int(0)
 bool(false)
 opendir edge cases
 
-Warning: opendir(phar://): failed to open dir: phar error: no directory in "phar://", must have at least phar:/// for root directory (always use full path to a new phar) in %s027.php on line %d
+Warning: opendir(phar://): failed to open dir: phar error: no directory in "phar://", must have at least phar:/// for root directory (always use full path to a new phar)
+phar url "phar://" is unknown in %s027.php on line %d
 bool(false)
 
 Warning: opendir(phar://foo.phar/hi): failed to open dir: phar url "phar://foo.phar/hi" is unknown in %s027.php on line %d

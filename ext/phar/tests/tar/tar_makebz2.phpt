@@ -28,6 +28,7 @@ var_dump($phar2->isCompressed() == Phar::BZ2);
 ===DONE===
 --CLEAN--
 <?php
+@unlink(dirname(__FILE__) . '/tar_makebz2.phar.bz2');
 @unlink(dirname(__FILE__) . '/tar_makebz2.phar.tar');
 @unlink(dirname(__FILE__) . '/tar_makebz2.phar.tar.bz2');
 @unlink(dirname(__FILE__) . '/tar_makebz2_b.phar.tar.bz2');
