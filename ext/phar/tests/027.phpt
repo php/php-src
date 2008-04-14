@@ -63,6 +63,7 @@ $b = opendir('phar://test.phar/');
 while (false !== ($c = readdir($b))) {
 	echo "$c\n";
 }
+closedir($b);
 unlink($a . '/test1.txt');
 unlink($a . '/test2.txt');
 unlink($a . '/test3.txt');
