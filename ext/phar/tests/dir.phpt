@@ -49,6 +49,13 @@ ini_set('phar.readonly', 0);
 rmdir($pname);
 rmdir($pname . '/');
 mkdir($pname . '/');
+
+// test extract_list with rmdir/mkdir
+ini_set('phar.extract_list', 'test.phar=' . dirname(__FILE__) . '/ump');
+mkdir($a = dirname(__FILE__) . '/ump');
+mkdir('phar://test.phar/test');
+rmdir('phar://test.phar/test');
+rmdir($a);
 ?>
 ===DONE===
 --CLEAN--
@@ -89,4 +96,8 @@ Warning: rmdir(): phar error: cannot remove directory "" in phar "%sdir.phar.php
 Warning: rmdir(): phar error: cannot remove directory "" in phar "%sdir.phar.php", directory does not exist in %sdir.php on line %d
 
 Warning: mkdir(): phar error: cannot create directory "" in phar "%sdir.phar.php", phar error: invalid path "" must not be empty in %sdir.php on line %d
+
+Warning: mkdir(): phar error: directory "test" cannot be created in phar "test.phar", phar is extracted in plain map in %sdir.php on line %d
+
+Warning: rmdir(): phar error: directory "test" cannot be removed in phar "test.phar", phar is extracted in plain map in %sdir.php on line %d
 ===DONE===
