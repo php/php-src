@@ -53,6 +53,20 @@ closedir($a);
 echo "opendir edge cases\n";
 var_dump(opendir("phar://"));
 var_dump(opendir("phar://foo.phar/hi"));
+echo "extract_list test\n";
+ini_set('phar.extract_list', 'test.phar=' . dirname(__FILE__) . '/ump');
+mkdir($a = dirname(__FILE__) . '/ump');
+file_put_contents($a . '/test1.txt', 'hi');
+file_put_contents($a . '/test2.txt', 'hi');
+file_put_contents($a . '/test3.txt', 'hi');
+$b = opendir('phar://test.phar/');
+while (false !== ($c = readdir($b))) {
+	echo "$c\n";
+}
+unlink($a . '/test1.txt');
+unlink($a . '/test2.txt');
+unlink($a . '/test3.txt');
+rmdir($a);
 ?>
 ===DONE===
 --CLEAN--
@@ -90,4 +104,10 @@ bool(false)
 
 Warning: opendir(phar://foo.phar/hi): failed to open dir: phar url "phar://foo.phar/hi" is unknown in %s027.php on line %d
 bool(false)
+extract_list test
+.
+..
+test1.txt
+test2.txt
+test3.txt
 ===DONE===
