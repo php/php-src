@@ -6,10 +6,10 @@ ARG_WITH('apache-hooks', 'Build Apache 1.3.x (hooks) version of PHP', 'no');
 if (PHP_APACHE_HOOKS != "no") {
 	if (CHECK_HEADER_ADD_INCLUDE("httpd.h", "CFLAGS_APACHE_HOOKS", php_usual_include_suspects +
 				";" + PROGRAM_FILES + "\\Apache Group\\Apache\\include" +
-				";..\\php_build\\apache\\src\\include") &&
+				";" + PHP_PHP_BUILD + "\\apache\\src\\include") &&
 			CHECK_LIB("ApacheCore.lib", "apache_hooks", php_usual_lib_suspects +
 				';' + PROGRAM_FILES + '\\Apache Group\\Apache\\libexec' +
-				';..\\php_build\\apache\\src\\corer')) {
+				";" + PHP_PHP_BUILD + "\\apache\\src\\corer")) {
 		// We need to play tricks to get our readdir.h used by apache
 		// headers
 		SAPI('apache_hooks', 'mod_php5.c sapi_apache.c php_apache.c',
