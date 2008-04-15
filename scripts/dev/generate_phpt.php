@@ -323,70 +323,72 @@ function gen_array_with_diff_values($var_type,  $array_name, $code_block) {
 
 	// integer values
 	$variation_array['int'] = array(
-		"0",
-  		"1",
-  		"12345",
-  		"-2345"
+		"'int 0' => 0",
+  		"'int 1' => 1",
+  		"'int 12345' => 12345",
+  		"'int -12345' => -2345"
 		);
 
 	// float values
 	$variation_array['float'] = array(
-  		"10.5",
-  		"-10.5",
-  		"10.1234567e10",
-  		"10.7654321E-10",
-  		".5"
+  		"'float 10.5' => 10.5",
+  		"'float -10.5' => -10.5",
+  		"'float 12.3456789000e10' => 12.3456789000e10",
+  		"'float -12.3456789000e10' => -12.3456789000e10",
+  		"'float .5' => .5"
 		);
 
 	// array values
 	$variation_array['array'] = array(
-		"array()",
-		"array(0)",
-		"array(1)",
-		"array(1, 2)",
-		"array('color' => 'red', 'item' => 'pen')"
+		"'empty array' => array()",
+		"'int indexed array' => \$index_array",
+		"'associative array' => \$assoc_array",
+		"'nested arrays' => array('foo', \$index_array, \$assoc_array)",
 		);
 
 	// null vlaues
 	$variation_array['null'] = array(
-		"NULL",
-		"null"
+		"'uppercase NULL' => NULL",
+		"'lowercase null' => null"
 		);
 
 	// boolean values
 	$variation_array['boolean'] = array(
-		"true",
-		"false",
-		"TRUE",
-		"FALSE"
+		"'lowercase true' => true",
+		"'lowercase false' =>false",
+		"'uppercase TRUE' =>TRUE",
+		"'uppercase FALSE' =>FALSE"
 		);
 
-	// empty string
+	// empty data
 	$variation_array['empty'] = array(
-		"\"\"",
-		"''",
+		"'empty string DQ' => \"\"",
+		"'empty string SQ' => ''"
 		);
 
 	// string values
 	$variation_array['string'] = array(
-		"\"string\"",
-		"'string'",
+		"'string DQ' => \"string\"",
+		"'string SQ' => 'string'",
+		"'mixed case string' => \"sTrInG\"",
+		"'heredoc' => \$heredoc"
 		);
 
-	// objects
+	// object data
 	$variation_array['object'] = array(
-  		"new stdclass()"
+		"'instance of classWithToString' => new classWithToString()",
+		"'instance of classWithoutToString' => new classWithoutToString()"
 		);
 
 
 	// undefined variable
 	$variation_array['undefined'] = array(
-  		'$undefined_var'
+  		"'undefined var' => @\$undefined_var"	
 		);
 
 	// unset variable
 	$variation_array['unset'] = array(
-		'$unset_var'
+		"'unset var' => @\$unset_var"
 		);
 
 
@@ -611,6 +613,9 @@ function gen_variation_diff_arg_values_test($fn_name, $arg_det, $which_arg, $cod
 
 	// decrement the $which_arg so that its matches with  the index of $types
 	$which_arg--;
+	
+	//generate code to define error handler
+	$code_block = add_error_handler($code_block);
 
 	// generate code to initialise arguments that won't be substituted
 	array_push($code_block, "// Initialise function arguments not being substituted (if any)");
@@ -621,16 +626,34 @@ function gen_variation_diff_arg_values_test($fn_name, $arg_det, $which_arg, $cod
 		}
 	}
 	array_push($code_block, $blank_line);
+	
 
 	// generate code to unset a variable
 	array_push($code_block, "//get an unset variable");
 	array_push($code_block, "\$unset_var = 10;");
 	array_push($code_block, "unset (\$unset_var);");
 	array_push($code_block, $blank_line);
+	
+	//define some classes
+	$code_block = define_classes($code_block);
+	
+	//add heredoc string
+	array_push($code_block, "// heredoc string");
+	array_push($code_block, "\$heredoc = <<<EOT");
+	array_push($code_block, "hello world");
+	array_push($code_block, "EOT;");
+	array_push($code_block, $blank_line);
+	
+	//add arrays
+	array_push($code_block, "// add arrays");
+	array_push($code_block, "\$index_array = array (1, 2, 3);");
+	array_push($code_block, "\$assoc_array = array ('one' => 1, 'two' => 2);");
+	array_push($code_block, $blank_line);
+	
 
 	//generate code for an array of values to iterate over
 	array_push($code_block, "//array of values to iterate over");
-	$code_block = gen_array_with_diff_values($types[$which_arg], 'values', $code_block);
+	$code_block = gen_array_with_diff_values($types[$which_arg], 'inputs', $code_block);
 
 	//generate code for loop to iterate over array values
 	array_push($code_block, $blank_line);
@@ -638,8 +661,8 @@ function gen_variation_diff_arg_values_test($fn_name, $arg_det, $which_arg, $cod
 	array_push($code_block, "// loop through each element of the array for $names[$which_arg]");
 	array_push($code_block, $blank_line);
 	
-	array_push($code_block, "foreach(\$values as \$value) {");
-	array_push($code_block, "      echo \"\\nArg value \$value \\n\";");
+	array_push($code_block, "foreach(\$inputs as \$key =>\$value) {");
+	array_push($code_block, "      echo \"\\n--\$key--\\n\";");
 
         // prepare the function call
 
@@ -1090,5 +1113,36 @@ function get_loc_proto($all_c, $fname, $source) {
 		}
 	}
 	return $test_info;
+}
+function add_error_handler($cb) {
+	array_push($cb, "// Define error handler");
+	array_push($cb, "function test_error_handler(\$err_no, \$err_msg, \$filename, \$linenum, \$vars) {");
+	array_push($cb, "	if (error_reporting() != 0) {");
+	array_push($cb, "		// report non-silenced errors");
+	array_push($cb, "		echo \"Error: \$err_no - \$err_msg, \$filename(\$linenum)\\n\";");
+	array_push($cb, "	}");
+	array_push($cb, "}");
+	array_push($cb, "set_error_handler('test_error_handler');");
+	array_push($cb, "");
+	
+	return $cb;
+	
+}
+
+function define_classes($cb) {
+	array_push($cb,"// define some classes");
+	array_push($cb,"class classWithToString");
+	array_push($cb,"{");
+	array_push($cb,"	public function __toString() {");
+	array_push($cb,"		return \"Class A object\";");
+	array_push($cb,"	}");
+	array_push($cb,"}");
+	array_push($cb,"");
+	array_push($cb,"class classWithoutToString");
+	array_push($cb,"{");
+	array_push($cb,"}");
+	array_push($cb,"");
+	
+	return $cb;
 }
 ?>
