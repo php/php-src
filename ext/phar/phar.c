@@ -399,6 +399,12 @@ void phar_entry_remove(phar_entry_data *idata, char **error TSRMLS_DC) /* {{{ */
 	var = ((((unsigned char*)(buffer))[1]) <<  8) \
 		| (((unsigned char*)(buffer))[0]); \
 	(buffer) += 2
+# define PHAR_ZIP_32(buffer) ((((unsigned char*)(buffer))[3]) << 24) \
+		| ((((unsigned char*)(buffer))[2]) << 16) \
+		| ((((unsigned char*)(buffer))[1]) <<  8) \
+		| (((unsigned char*)(buffer))[0])
+# define PHAR_ZIP_16(buffer) ((((unsigned char*)(buffer))[1]) <<  8) \
+		| (((unsigned char*)(buffer))[0])
 #else
 # define PHAR_GET_32(buffer, var) \
 	var = *(php_uint32*)(buffer); \
@@ -406,6 +412,8 @@ void phar_entry_remove(phar_entry_data *idata, char **error TSRMLS_DC) /* {{{ */
 # define PHAR_GET_16(buffer, var) \
 	var = *(php_uint16*)(buffer); \
 	buffer += 2
+# define PHAR_ZIP_32(buffer) buffer
+# define PHAR_ZIP_16(buffer) buffer
 #endif
 
 /**
@@ -1720,11 +1728,11 @@ int phar_postprocess_file(php_stream_wrapper *wrapper, int options, phar_entry_d
 		}
 		/* fix up for big-endian systems */
 		/* verify local header if not yet verified */
-		if (entry->filename_len != local.filename_len || entry->crc32 != local.crc32 || entry->uncompressed_filesize != local.uncompsize || entry->compressed_filesize != local.compsize) {
+		if (entry->filename_len != PHAR_ZIP_16(local.filename_len) || entry->crc32 != PHAR_ZIP_32(local.crc32) || entry->uncompressed_filesize != PHAR_ZIP_32(local.uncompsize) || entry->compressed_filesize != PHAR_ZIP_32(local.compsize)) {
 			spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (local head of file \"%s\" does not match central directory)", idata->phar->fname, entry->filename);
 			return FAILURE;
 		}
-		if (-1 == php_stream_seek(idata->phar->fp, local.filename_len + local.extra_len, SEEK_CUR)) {
+		if (-1 == php_stream_seek(idata->phar->fp, PHAR_ZIP_16(local.filename_len) + PHAR_ZIP_16(local.extra_len), SEEK_CUR)) {
 			spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (cannot seek to start of file data for file \"%s\")", idata->phar->fname, entry->filename);
 			return FAILURE;
 		}
