@@ -50,6 +50,8 @@ typedef struct _php_extension_lists {
 static int is_special_section = 0;
 static HashTable *active_ini_hash;
 static HashTable configuration_hash;
+static int has_per_dir_config = 0;
+static int has_per_host_config = 0;
 PHPAPI char *php_ini_opened_path=NULL;
 static php_extension_lists extension_lists;
 PHPAPI char *php_ini_scanned_files=NULL;
@@ -264,6 +266,7 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 					key = key + sizeof("PATH") - 1;
 					key_len = Z_STRLEN_P(arg1) - sizeof("PATH") + 1;
 					is_special_section = 1;
+					has_per_dir_config = 1;
 
 				/* HOST sections */
 				} else if (!strncasecmp(Z_STRVAL_P(arg1), "HOST", sizeof("HOST") - 1)) {
@@ -271,6 +274,8 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 					key = key + sizeof("HOST") - 1;
 					key_len = Z_STRLEN_P(arg1) - sizeof("HOST") + 1;
 					is_special_section = 1;
+					has_per_host_config = 1;
+
 				} else {
 					is_special_section = 0;
 				}
@@ -733,6 +738,14 @@ PHPAPI void php_ini_activate_config(HashTable *source_hash, int modify_type, int
 }
 /* }}} */
 
+/* {{{ php_ini_has_per_dir_config
+ */
+PHPAPI int php_ini_has_per_dir_config(void)
+{
+	return has_per_dir_config;
+}
+/* }}} */
+
 /* {{{ php_ini_activate_per_dir_config
  */
 PHPAPI void php_ini_activate_per_dir_config(char *path, uint path_len TSRMLS_DC)
@@ -741,7 +754,7 @@ PHPAPI void php_ini_activate_per_dir_config(char *path, uint path_len TSRMLS_DC)
 	char *ptr;
 
 	/* Walk through each directory in path and apply any found per-dir-system-configuration from configuration_hash */
-	if (path && path_len) {
+	if (has_per_dir_config && path && path_len) {
 		ptr = path + 1;
 		while ((ptr = strchr(ptr, DEFAULT_SLASH)) != NULL) {
 			*ptr = 0;
@@ -756,13 +769,21 @@ PHPAPI void php_ini_activate_per_dir_config(char *path, uint path_len TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ php_ini_has_per_host_config
+ */
+PHPAPI int php_ini_has_per_host_config(void)
+{
+	return has_per_host_config;
+}
+/* }}} */
+
 /* {{{ php_ini_activate_per_host_config
  */
 PHPAPI void php_ini_activate_per_host_config(char *host, uint host_len TSRMLS_DC)
 {
 	zval *tmp;
 
-	if (host && host_len) {
+	if (has_per_host_config && host && host_len) {
 		/* Search for source array matching the host from configuration_hash */
 		if (zend_hash_find(&configuration_hash, host, host_len, (void **) &tmp) == SUCCESS) {
 			php_ini_activate_config(Z_ARRVAL_P(tmp), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE TSRMLS_CC);

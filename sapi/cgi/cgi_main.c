@@ -708,42 +708,47 @@ static int sapi_cgi_activate(TSRMLS_D)
 		return FAILURE;
 	}
 
-	doc_root = sapi_cgibin_getenv("DOCUMENT_ROOT", sizeof("DOCUMENT_ROOT") - 1 TSRMLS_CC);
-	server_name = sapi_cgibin_getenv("SERVER_NAME", sizeof("SERVER_NAME") - 1 TSRMLS_CC);
-
-	/* DOCUMENT_ROOT and SERVER_NAME should also be defined at this stage..but better check it anyway */
-	if (!doc_root || !server_name) {
-		return FAILURE;
-	}
-	doc_root_len = strlen(doc_root);
-	if (doc_root[doc_root_len - 1] == '/') {
-		--doc_root_len;
+	if (php_ini_has_per_host_config()) {
+		/* Activate per-host-system-configuration defined in php.ini and stored into configuration_hash during startup */
+		server_name = sapi_cgibin_getenv("SERVER_NAME", sizeof("SERVER_NAME") - 1 TSRMLS_CC);
+		/* SERVER_NAME should also be defined at this stage..but better check it anyway */
+		if (server_name) {
+			php_ini_activate_per_host_config(server_name, strlen(server_name) + 1 TSRMLS_CC);
+		}
 	}
 
-	/* Prepare search path */
-	path_len = strlen(SG(request_info).path_translated);
-	path = zend_strndup(SG(request_info).path_translated, path_len);
-	php_dirname(path, path_len);
-	path_len = strlen(path);
+	if (php_ini_has_per_dir_config() || 
+	    (PG(user_ini_filename) && *PG(user_ini_filename))) {
+		/* Prepare search path */
+		path_len = strlen(SG(request_info).path_translated);
+		path = estrndup(SG(request_info).path_translated, path_len);
+		path_len = zend_dirname(path, path_len);
 
-	/* Make sure we have trailing slash! */
-	if (!IS_SLASH(path[path_len])) {
-		path[path_len++] = DEFAULT_SLASH;
+		/* Make sure we have trailing slash! */
+		if (!IS_SLASH(path[path_len])) {
+			path[path_len++] = DEFAULT_SLASH;
+		}
+		path[path_len] = 0;
+
+		/* Activate per-dir-system-configuration defined in php.ini and stored into configuration_hash during startup */
+		php_ini_activate_per_dir_config(path, path_len TSRMLS_CC); /* Note: for global settings sake we check from root to path */
+
+		/* Load and activate user ini files in path starting from DOCUMENT_ROOT */
+		if (PG(user_ini_filename) && *PG(user_ini_filename)) {
+			doc_root = sapi_cgibin_getenv("DOCUMENT_ROOT", sizeof("DOCUMENT_ROOT") - 1 TSRMLS_CC);
+			/* DOCUMENT_ROOT should also be defined at this stage..but better check it anyway */
+			if (doc_root) {
+				doc_root_len = strlen(doc_root);
+				if (doc_root[doc_root_len - 1] == '/') {
+					--doc_root_len;
+				}
+				php_cgi_ini_activate_user_config(path, path_len, doc_root_len - 1 TSRMLS_CC);
+			}
+		}
+
+		efree(path);
 	}
-	path[path_len] = 0;
 
-	/* Activate per-dir-system-configuration defined in php.ini and stored into configuration_hash during startup */
-	php_ini_activate_per_dir_config(path, path_len TSRMLS_CC); /* Note: for global settings sake we check from root to path */
-
-	/* Activate per-host-system-configuration defined in php.ini and stored into configuration_hash during startup */
-	php_ini_activate_per_host_config(server_name, strlen(server_name) + 1 TSRMLS_CC);
-
-	/* Load and activate user ini files in path starting from DOCUMENT_ROOT */
-	if (strlen(PG(user_ini_filename))) {
-		php_cgi_ini_activate_user_config(path, path_len, doc_root_len - 1 TSRMLS_CC);
-	}
-
-	free(path);
 	return SUCCESS;
 }
 
