@@ -179,6 +179,27 @@ static inline void lsapi_buildPacketHeader( struct lsapi_packet_header * pHeader
     pHeader->m_packetLen.m_iLen = len;
 }
 
+static  int lsapi_set_nblock( int fd, int nonblock )
+{
+    int val = fcntl( fd, F_GETFL, 0 );
+    if ( nonblock )
+    {
+        if (!( val & O_NONBLOCK ))
+        {
+            return fcntl( fd, F_SETFL, val | O_NONBLOCK );
+        }
+    }
+    else
+    {
+        if ( val & O_NONBLOCK )
+        {
+            return fcntl( fd, F_SETFL, val &(~O_NONBLOCK) );
+        }
+    }
+    return 0;
+}
+
+
 static int lsapi_close( int fd )
 {
     int ret;
@@ -602,6 +623,7 @@ int LSAPI_InitRequest( LSAPI_Request * pReq, int fd )
     } else {
         pReq->m_fdListen = fd;
         pReq->m_fd = -1;
+        lsapi_set_nblock( fd, 1 );
     }
     return 0;
 }
@@ -643,6 +665,7 @@ int LSAPI_Accept_r( LSAPI_Request * pReq )
                         return -1;
                     }
                 } else {
+                    lsapi_set_nblock( pReq->m_fd , 0 );
                     if (((struct sockaddr *)&achPeer)->sa_family == AF_INET ) {    
                         setsockopt(pReq->m_fd, IPPROTO_TCP, TCP_NODELAY,
                                 (char *)&nodelay, sizeof(nodelay));
@@ -1837,9 +1860,9 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer, LSAPI_Re
                 }
                 /* perror( "select()" ); */
                 break;
+            } else {
+                continue;
             }
-        } else {
-            continue;
         }
 
         pReq->m_fd = lsapi_accept( pServer->m_fd );
@@ -1852,6 +1875,7 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer, LSAPI_Re
                 s_req_processed = 0;
                 s_pChildStatus = child_status;
                 child_status->m_iKillSent = 0;
+                lsapi_set_nblock( pReq->m_fd, 0 );
 
                 /* don't catch our signals */
                 sigaction( SIGCHLD, &old_child, 0 );
@@ -1966,7 +1990,11 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
                             pReq->m_fd = lsapi_accept( pReq->m_fdListen );
                             if ( pReq->m_fd != -1 ) {
                                 fd = pReq->m_fd;
+                                lsapi_set_nblock( fd, 0 );
                             } else {
+                                if (( errno == EINTR )||( errno == EAGAIN)) {
+                                    continue;
+								}
                                 return -1;
                             }
                         } else {
