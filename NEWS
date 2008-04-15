@@ -158,6 +158,8 @@ PHP                                                                        NEWS
   (Derick, iuri dot fiedoruk at hp dot com).
 - Fixed bug #44214 (Crash using preg_replace_callback() and global variable).
   (Nuno, Scott)
+- Fixed bug #44034 (FILE_IGNORE_NEW_LINES in file() does not work as expected
+  when lines end in \r\n). (Ilia)
 - Fixed bug #43960 (strtotime() returns timestamp in the future when given a
   bogus string). (Derick)
 - Fixed bug #43832 (mysqli_get_charset() doesn't expose charset comment).
