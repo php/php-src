@@ -2753,7 +2753,7 @@ PHP_MSHUTDOWN_FUNCTION(phar) /* {{{ */
 		zend_compile_file = phar_orig_compile_file;
 	} else if (zend_hash_exists(&module_registry, "apc", sizeof("apc"))) {
 		zval magic;
-		if (zend_get_constant("\000apc_magic", sizeof("\000apc_magic"), &magic TSRMLS_CC)) {
+		if (zend_get_constant("\000apc_magic", sizeof("\000apc_magic")-1, &magic TSRMLS_CC)) {
 			compile_hook *set_compile_hook;
 
 			set_compile_hook = (compile_hook *) Z_LVAL(magic);
