@@ -35,10 +35,8 @@ foreach(new RecursiveIteratorIterator($phar) as $path) {
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/zfapp.phar');
+unlink(dirname(__FILE__) . '/zfapp.tgz');
 unlink(dirname(__FILE__) . '/zfapp.phar.tar.gz');
-unlink(dirname(__FILE__) . '/zfapp.phar.tar.php');
-unlink(dirname(__FILE__) . '/zfapp.phar.gz');
 ?>
 --EXPECTF--
 phar://%szfapp.phar.tar.gz/.phar/stub.php
