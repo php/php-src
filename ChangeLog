@@ -1,3 +1,70 @@
+2008-04-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_slice_variation6.phpt:
+      
+      Fixed test
+
+2008-04-14  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      - Workarounds are no longer needed - thanks PECLers!
+
+2008-04-14  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/general_functions/floatval.phpt:
+      - Fixed test (bug #44533)
+
+    * (PHP_5_3)
+      ext/libxml/tests/004.phpt
+      ext/standard/tests/strings/007.phpt:
+      - Fixed test
+
+2008-04-14  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/standard/dns.c:
+      MFH: Fix dns_check_proto (related to #44723)
+
+    * ext/standard/dns.c:
+      Fix dns_check_proto (related to #44723)
+
+2008-04-14  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/ini_get_all.phpt:
+      MFB5.3: Remove config_get_hash() & and add new boolean parameter to
+      ini_get_all() to list ini entries key=>current_value like
+      config_get_hash()
+       did.
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/tests/general_functions/ini_get_all.phpt:
+      [DOC] Remove config_get_hash() & and add new boolean parameter to
+      ini_get_all()
+      to list ini entries key=>current_value like config_get_hash() did.
+
+    * ext/openssl/xp_ssl.c:
+      MFB53: Fixed bug#44716 (Progress notifications incorrect)
+
+    * (PHP_5_3)
+      ext/openssl/xp_ssl.c:
+      Fixed bug#44716 (Progress notifications incorrect)
+
+    * (PHP_5_3)
+      NEWS
+      ext/standard/streamsfuncs.c:
+      MFH: Add "params" argument to stream_context_create()
+
+2008-04-14  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/standard/streamsfuncs.c:
+      fix ZTS build and sync with HEAD
+
 2008-04-13  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * ext/standard/streamsfuncs.c
