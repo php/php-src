@@ -52,6 +52,7 @@ chmod($fname2, 000);
 clearstatcache();
 var_dump($a->isWritable());
 var_dump($b->isWritable());
+chmod($fname2, 0666);
 ?>
 ===DONE===
 --CLEAN--
