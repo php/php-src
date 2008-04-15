@@ -199,6 +199,83 @@ skip_phar:
 }
 /* }}} */
 
+PHAR_FUNC(phar_readfile) /* {{{ */
+{
+	char *filename;
+	int filename_len;
+	int size = 0;
+	zend_bool use_include_path = 0;
+	zval *zcontext = NULL;
+	php_stream *stream;
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s|br!", &filename, &filename_len, &use_include_path, &zcontext) == FAILURE) {
+		goto skip_phar;
+	}
+	if (use_include_path || (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://"))) {
+		char *arch, *entry, *fname;
+		int arch_len, entry_len, fname_len;
+		php_stream_context *context = NULL;
+		char *name;
+		phar_archive_data **pphar;
+		fname = zend_get_executed_filename(TSRMLS_C);
+
+		if (strncasecmp(fname, "phar://", 7)) {
+			goto skip_phar;
+		}
+		fname_len = strlen(fname);
+		if (FAILURE == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
+			goto skip_phar;
+		}
+
+		efree(entry);
+		entry = filename;
+		/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
+		entry_len = filename_len;
+		/* retrieving a file defaults to within the current directory, so use this if possible */
+		if (FAILURE == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
+			efree(arch);
+			goto skip_phar;
+		}
+		if (use_include_path) {
+			if (!(entry = phar_find_in_include_path(entry, entry_len, NULL TSRMLS_CC))) {
+				/* this file is not in the phar, use the original path */
+				efree(arch);
+				goto skip_phar;
+			} else {
+				name = entry;
+			}
+		} else {
+			entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1 TSRMLS_CC);
+			if (!zend_hash_exists(&((*pphar)->manifest), entry + 1, entry_len - 1)) {
+				/* this file is not in the phar, use the original path */
+				efree(entry);
+				efree(arch);
+				goto skip_phar;
+			}
+			/* auto-convert to phar:// */
+			spprintf(&name, 4096, "phar://%s%s", arch, entry);
+			efree(entry);
+		}
+
+		efree(arch);
+		context = php_stream_context_from_zval(zcontext, 0);
+		stream = php_stream_open_wrapper_ex(name, "rb", 0 | REPORT_ERRORS, NULL, context);
+		efree(name);
+		if (stream == NULL) {
+			RETURN_FALSE;
+		}
+		size = php_stream_passthru(stream);
+		php_stream_close(stream);
+		RETURN_LONG(size);
+	}
+
+skip_phar:
+	PHAR_G(orig_readfile)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	return;
+
+}
+/* }}} */
+
 PHAR_FUNC(phar_fopen) /* {{{ */
 {
 	char *filename, *mode;
@@ -878,6 +955,7 @@ void phar_intercept_functions(TSRMLS_D)
 	PHAR_INTERCEPT(is_executable);
 	PHAR_INTERCEPT(lstat);
 	PHAR_INTERCEPT(stat);
+	PHAR_INTERCEPT(readfile);
 }
 /* }}} */
 
@@ -912,6 +990,7 @@ void phar_release_functions(TSRMLS_D)
 	PHAR_RELEASE(is_executable);
 	PHAR_RELEASE(lstat);
 	PHAR_RELEASE(stat);
+	PHAR_RELEASE(readfile);
 }
 /* }}} */
 

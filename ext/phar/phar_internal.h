@@ -164,6 +164,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	void        (*orig_is_readable)(INTERNAL_FUNCTION_PARAMETERS);
 	void        (*orig_is_executable)(INTERNAL_FUNCTION_PARAMETERS);
 	void        (*orig_lstat)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_readfile)(INTERNAL_FUNCTION_PARAMETERS);
 	void        (*orig_stat)(INTERNAL_FUNCTION_PARAMETERS);
 	/* used for includes with . in them inside front controller */
 	char*       cwd;
