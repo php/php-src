@@ -212,7 +212,7 @@ dnl activate some gcc specific optimizations for gcc >= 4
 if test "$GCC" = "yes"; then
   case $host_alias in
   *darwin*)
-    GCC_MAJOR_VERSION=`$CC -dumpversion | $SED -nE '1s/([[0-9]]+)\.[[0-9]]+\..*/\1/;1p'`
+    GCC_MAJOR_VERSION=`$CC -dumpversion | /usr/bin/sed -nE '1s/([[0-9]]+)\.[[0-9]]+\..*/\1/;1p'`
     ;;
   *)
     GCC_MAJOR_VERSION=`$CC --version | $SED -n '1s/[[^0-9]]*\([[0-9]]\+\)\.[[0-9]]\+\..*/\1/;1p'`
