@@ -956,6 +956,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_parse_ini_file, 0, 0, 1)
 	ZEND_ARG_INFO(0, scanner_mode)
 ZEND_END_ARG_INFO()
 
+#if ZEND_DEBUG
+static
+ZEND_BEGIN_ARG_INFO(arginfo_config_get_hash, 0)
+ZEND_END_ARG_INFO()
+#endif
+ 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_import_request_variables, 0, 0, 1)
 	ZEND_ARG_INFO(0, types)
@@ -6420,6 +6426,19 @@ PHP_FUNCTION(parse_ini_file)
 	zend_parse_ini_file(&fh, 0, scanner_mode, ini_parser_cb, return_value TSRMLS_CC);
 }
 /* }}} */
+
+#if ZEND_DEBUG
+/* This function returns an array of ALL valid ini options with values and 
+ *  is not the same as ini_get_all() which returns only registered ini options. Only useful for devs to debug php.ini scanner/parser! */
+PHP_FUNCTION(config_get_hash) /* {{{ */
+{
+	HashTable *hash = php_ini_get_configuration_hash();
+
+	array_init(return_value);
+	zend_hash_apply_with_arguments(hash, (apply_func_args_t) add_config_entry_cb, 1, return_value TSRMLS_CC);
+}
+/* }}} */
+#endif
 
 static int copy_request_variable(void *pDest, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
