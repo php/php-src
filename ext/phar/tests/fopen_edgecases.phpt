@@ -81,7 +81,7 @@ Warning: fopen(phar://%sfopen_edgecases.2.phar.php/hi): failed to open stream: i
 
 Warning: fopen(phar://): failed to open stream: phar error: no directory in "phar://", must have at least phar:/// for root directory (always use full path to a new phar) in %sfopen_edgecases.php on line %d
 
-Warning: fopen(phar://foo.phar): failed to open stream: operation failed in %sfopen_edgecases.php on line %d
+Warning: fopen(phar://foo.phar): failed to open stream: %s in %sfopen_edgecases.php on line %d
 
 Warning: fopen(phar://test.phar/oops): failed to open stream: phar error: file "oops" extracted from "test.phar" could not be opened in %sfopen_edgecases.php on line %d
 int(0)
