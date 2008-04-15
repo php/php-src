@@ -161,7 +161,7 @@ if test "\$PHP_$EXTNAME" != "no"; then
   dnl ],[
   dnl   AC_MSG_ERROR([wrong $extname lib version or lib not found])
   dnl ],[
-  dnl   -L\$${EXTNAME}_DIR/lib -lm -ldl
+  dnl   -L\$${EXTNAME}_DIR/lib -lm
   dnl ])
   dnl
   dnl PHP_SUBST(${EXTNAME}_SHARED_LIBADD)
