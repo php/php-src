@@ -158,14 +158,10 @@ Warning: crc32() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration 15 --
-
-Warning: crc32() expects parameter 1 to be strictly a binary string, null given in %s on line %d
-NULL
+int(0)
 
 -- Iteration 16 --
-
-Warning: crc32() expects parameter 1 to be strictly a binary string, null given in %s on line %d
-NULL
+int(0)
 
 -- Iteration 17 --
 int(-2082672713)
@@ -189,14 +185,10 @@ int(0)
 int(-1465013268)
 
 -- Iteration 24 --
-
-Warning: crc32() expects parameter 1 to be strictly a binary string, null given in %s on line %d
-NULL
+int(0)
 
 -- Iteration 25 --
-
-Warning: crc32() expects parameter 1 to be strictly a binary string, null given in %s on line %d
-NULL
+int(0)
 
 -- Iteration 26 --
 
@@ -263,14 +255,10 @@ Warning: crc32() expects parameter 1 to be binary string, array given in %s on l
 NULL
 
 -- Iteration 15 --
-
-Warning: crc32() expects parameter 1 to be strictly a binary string, null given in %s on line %d
-NULL
+int(0)
 
 -- Iteration 16 --
-
-Warning: crc32() expects parameter 1 to be strictly a binary string, null given in %s on line %d
-NULL
+int(0)
 
 -- Iteration 17 --
 int(-2082672713)
@@ -298,14 +286,10 @@ NULL
 int(-1465013268)
 
 -- Iteration 24 --
-
-Warning: crc32() expects parameter 1 to be strictly a binary string, null given in %s on line %d
-NULL
+int(0)
 
 -- Iteration 25 --
-
-Warning: crc32() expects parameter 1 to be strictly a binary string, null given in %s on line %d
-NULL
+int(0)
 
 -- Iteration 26 --
 
