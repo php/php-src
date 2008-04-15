@@ -1626,7 +1626,7 @@ static PHP_FUNCTION(session_regenerate_id)
    Return the current cache limiter. If new_cache_limited is given, the current cache_limiter is replaced with new_cache_limiter */
 static PHP_FUNCTION(session_cache_limiter)
 {
-	char *limiter;
+	char *limiter = NULL;
 	int limiter_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&", &limiter, &limiter_len, UG(utf8_conv)) == FAILURE) {
@@ -1646,7 +1646,7 @@ static PHP_FUNCTION(session_cache_limiter)
 static PHP_FUNCTION(session_cache_expire)
 {
 	/* Expires is really a numeric, but the alter_ini_entry method wants a string */
-	char *expires;
+	char *expires = NULL;
 	int expires_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&", &expires, &expires_len, UG(utf8_conv)) == FAILURE) {
