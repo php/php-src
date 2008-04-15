@@ -18,6 +18,10 @@ var_dump(file_get_contents($pname . '/files/extracted.inc'));
 
 include $pname . '/files/extracted.inc';
 
+// for code coverage;
+ini_set('phar.extract_list', 'phar_test.phar='.dirname(__FILE__).',another.phar='. dirname(__FILE__));
+
+var_dump(file_get_contents('phar://another.phar/files/extracted.inc'));
 ?>
 ===DONE===
 --EXPECTF--
@@ -32,4 +36,6 @@ array(1) {
 string(%d) "<?php var_dump(__FILE__); ?>
 "
 string(%d) "%sextracted.inc"
+string(%d) "<?php var_dump(__FILE__); ?>
+"
 ===DONE===
