@@ -1,3 +1,9 @@
+2008-04-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.h
+      zend_execute.h:
+      Selected better initial VM stack size
+
 2008-04-13  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_3)
