@@ -1,3 +1,98 @@
+2008-04-15  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * (PHP_5_3)
+      scripts/dev/generate_phpt.php:
+      Changes to the code that generates variations (Robin & Josie)
+
+2008-04-15  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/filter/tests/008.phpt
+      ext/standard/tests/strings/006.phpt:
+      - Fixed test
+
+    * ext/standard/tests/strings/addcslashes_003.phpt
+      ext/standard/tests/strings/crc32_variation1.phpt:
+      - Fixed tests (NULL is allowed where binary string is expected)
+
+2008-04-15  Elizabeth Marie Smith  <emsmith@elizabethmariesmith.com>
+
+    * sapi/apache/config.w32
+      sapi/apache_hooks/config.w32:
+      MFB
+
+    * (PHP_5_3)
+      sapi/apache/config.w32
+      sapi/apache_hooks/config.w32:
+      These are really old config.w32 files - now they use PHP_PHP_BUILD
+      correctly instead of hard coding the path to the libraries
+
+2008-04-15  Gwynne Raskind  <gwynne@wanderingknights.org>
+
+    * (PHP_5_3)
+      configure.in:
+      MFH: force use of BSD sed for OS X hack (patch by Alexey Zakhlestin)
+
+    * configure.in:
+      force use of BSD sed for OS X hack (patch by Alexey Zakhlestin)
+
+2008-04-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute.h:
+      Selected better initial VM stack size
+
+2008-04-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      NEWS
+      ext/standard/file.c:
+      MFB: Fixed bug #44034 (FILE_IGNORE_NEW_LINES in file() does not work as
+      expected when lines end in \r\n)
+
+2008-04-15  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/ext_skel:
+      remove -ldl - it doesn't seem to be required on Linux and it's not present
+      on FreeBSD
+
+2008-04-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * main/php_ini.c
+      main/php_ini.h
+      sapi/cgi/cgi_main.c:
+      Optimized request startup sequence for php.ini without per dir and per host
+      conf
+      igurations
+
+    * (PHP_5_3)
+      main/php_ini.c
+      main/php_ini.h
+      sapi/cgi/cgi_main.c:
+      Optimized request startup sequence for php.ini without per dir and per host
+      configurations
+
+2008-04-15  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/basic_functions.c:
+      - missed one line
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      - Readd config_get_has(). No need to document, it is only available for
+      debug builds.
+
+2008-04-15  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/session/session.c:
+      Fixed bug #44720 (Prevent infinite recursion within session_register)
+
+    * ext/session/session.c:
+      Fixed bug #44719 (More uninitialised values causing wierd errors)
+
+    * ext/session/session.c:
+      Fixed bug #44722 (Segfault setting a null session path)
+
 2008-04-14  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_3)
