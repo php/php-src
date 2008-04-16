@@ -168,6 +168,9 @@ int phar_open_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, i
 			php_stream_close(fp);
 			return FAILURE;
 		}
+		if (*p == 'P' && !memcmp(p + 1, "K\5\6", 3)) {
+			goto copybuf;
+		}
 		while ((p=(char *) memchr(p + 1, 'P', (size_t)(buf - (p+1) + 8192 - 4 + 1))) != NULL) {
 			if (!memcmp(p + 1, "K\5\6", 3)) {
 				if (p - buf < sizeof(locator)) {
@@ -178,6 +181,7 @@ int phar_open_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, i
 						return FAILURE;
 					}
 				} else {
+copybuf:
 					memcpy((void *)&locator, (void *) p, sizeof(locator));
 				}
 				goto foundit;
