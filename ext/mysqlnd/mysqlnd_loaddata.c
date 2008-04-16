@@ -58,7 +58,7 @@ int mysqlnd_local_infile_init(void **ptr, char *filename, void **userdata TSRMLS
 
 	DBG_ENTER("mysqlnd_local_infile_init");
 
-	*ptr= info= ((MYSQLND_INFILE_INFO *)mnd_ecalloc(1, sizeof(MYSQLND_INFILE_INFO)));
+	*ptr = info = ((MYSQLND_INFILE_INFO *)mnd_ecalloc(1, sizeof(MYSQLND_INFILE_INFO)));
 
 	/* check open_basedir */
 	if (PG(open_basedir)) {
@@ -88,7 +88,7 @@ static
 int mysqlnd_local_infile_read(void *ptr, char *buf, uint buf_len TSRMLS_DC)
 {
 	MYSQLND_INFILE_INFO	*info = (MYSQLND_INFILE_INFO *)ptr;
-	int			count;
+	int count;
 
     DBG_ENTER("mysqlnd_local_infile_read");
 

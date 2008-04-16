@@ -199,8 +199,10 @@ static PHP_RINIT_FUNCTION(mysqlnd)
 	return SUCCESS;
 }
 /* }}} */
+#endif
 
 
+#if defined(PHP_DEBUG)
 /* {{{ PHP_RSHUTDOWN_FUNCTION
  */
 static PHP_RSHUTDOWN_FUNCTION(mysqlnd)
