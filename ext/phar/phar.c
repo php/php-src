@@ -521,7 +521,9 @@ int phar_parse_metadata(char **buffer, zval **metadata, int zip_metadata_len TSR
 	} else {
 		*metadata = NULL;
 	}
-	*buffer += buf_len;
+	if (!zip_metadata_len) {
+		*buffer += buf_len;
+	}
 	return SUCCESS;
 }
 /* }}}*/
