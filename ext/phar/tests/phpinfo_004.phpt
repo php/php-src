@@ -26,7 +26,7 @@ phpinfo(INFO_MODULES);
 <tr class="h"><th>Phar: PHP Archive support</th><th>enabled</th></tr>
 <tr><td class="e">Phar EXT version </td><td class="v">%s </td></tr>
 <tr><td class="e">Phar API version </td><td class="v">1.1.1 </td></tr>
-<tr><td class="e">CVS revision </td><td class="v">$Revision$ </td></tr>
+<tr><td class="e">CVS revision </td><td class="v">%sRevision: %s $ </td></tr>
 <tr><td class="e">Phar-based phar archives </td><td class="v">enabled </td></tr>
 <tr><td class="e">Tar-based phar archives </td><td class="v">enabled </td></tr>
 <tr><td class="e">ZIP-based phar archives </td><td class="v">enabled </td></tr>
@@ -49,7 +49,7 @@ Phar based on pear/PHP_Archive, original concept by Davey Shafik.<br />Phar full
 <tr class="h"><th>Phar: PHP Archive support</th><th>enabled</th></tr>
 <tr><td class="e">Phar EXT version </td><td class="v">%s </td></tr>
 <tr><td class="e">Phar API version </td><td class="v">1.1.1 </td></tr>
-<tr><td class="e">CVS revision </td><td class="v">$Revision$ </td></tr>
+<tr><td class="e">CVS revision </td><td class="v">%sRevision: %s $ </td></tr>
 <tr><td class="e">Phar-based phar archives </td><td class="v">enabled </td></tr>
 <tr><td class="e">Tar-based phar archives </td><td class="v">enabled </td></tr>
 <tr><td class="e">ZIP-based phar archives </td><td class="v">enabled </td></tr>

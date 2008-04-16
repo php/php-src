@@ -23,7 +23,7 @@ phpinfo(INFO_MODULES);
 Phar: PHP Archive support => enabled
 Phar EXT version => %s
 Phar API version => 1.1.1
-CVS revision => $Revision$
+CVS revision => %sRevision: %s $
 Phar-based phar archives => enabled
 Tar-based phar archives => enabled
 ZIP-based phar archives => enabled
@@ -44,7 +44,7 @@ Phar
 Phar: PHP Archive support => enabled
 Phar EXT version => %s
 Phar API version => 1.1.1
-CVS revision => $Revision$
+CVS revision => %sRevision: %s $
 Phar-based phar archives => enabled
 Tar-based phar archives => enabled
 ZIP-based phar archives => enabled
