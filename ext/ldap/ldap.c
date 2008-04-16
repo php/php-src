@@ -1425,6 +1425,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 	for (i = 0; i < num_attribs; i++) {
 		ldap_mods[i] = emalloc(sizeof(LDAPMod));
 		ldap_mods[i]->mod_op = oper | LDAP_MOD_BVALUES;
+		ldap_mods[i]->mod_type = NULL;
 
 		if (zend_hash_get_current_key(Z_ARRVAL_PP(entry), &attribute, &index, 0) == HASH_KEY_IS_STRING) {
 			ldap_mods[i]->mod_type = estrdup(attribute);
@@ -1432,7 +1433,11 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown attribute in the data");
 			/* Free allocated memory */
 			while (i >= 0) {
-				efree(ldap_mods[i--]);
+				if (ldap_mods[i]->mod_type) {
+					efree(ldap_mods[i]->mod_type);
+				}
+				efree(ldap_mods[i]);
+				i--;
 			}
 			efree(num_berval);
 			efree(ldap_mods);	
