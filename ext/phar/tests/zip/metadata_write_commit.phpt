@@ -24,6 +24,7 @@ foreach($files as $name => $cont) {
 	var_dump(file_get_contents($p2name.'/'.$name));
 }
 
+copy($f2name, $fname);
 $phar = new Phar($fname);
 $phar->startBuffering();
 $phar['a']->setMetadata(42);
@@ -38,9 +39,7 @@ $phar->stopBuffering();
 
 unset($phar);
 
-copy($f2name, $fname);
-
-$phar = new Phar($fname2);
+$phar = new Phar($fname);
 
 foreach($files as $name => $cont) {
 	var_dump(file_get_contents($pname.'/'.$name));
