@@ -194,7 +194,7 @@ void mysqlnd_free_buffered_data(MYSQLND_RES *result TSRMLS_DC)
 		MYSQLND_MEMORY_POOL_CHUNK *current_buffer = set->row_buffers[row];
 		int col;
 
-		for (col = field_count - 1; col >=0 ; col--) {
+		for (col = field_count - 1; col >= 0; --col) {
 			zend_bool copy_ctor_called;
 			if (current_row[0] == NULL) {
 				break;/* row that was never initialized */
@@ -518,8 +518,8 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 				conn->last_query_type = QUERY_SELECT;
 				CONN_SET_STATE(conn, CONN_FETCHING_DATA);
 				/* PS has already allocated it */
-				conn->field_count = rset_header.field_count;
 				if (!stmt) {
+					conn->field_count = rset_header.field_count;
 					result =
 						conn->current_result=
 							mysqlnd_result_init(rset_header.field_count,
@@ -533,6 +533,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 						  prepared statements can't send result set metadata for these queries
 						  on prepare stage. Read it now.
 						*/
+						conn->field_count = rset_header.field_count;
 						result =
 							stmt->result =
 								mysqlnd_result_init(rset_header.field_count,
@@ -816,10 +817,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flag
 {
 	enum_func_status		ret;
 	zval 					*row = (zval *) param;
-	unsigned int			i,
-							field_count = result->field_count;
 	php_mysql_packet_row	*row_packet = result->row_packet;
-	unsigned long			*lengths = result->lengths;
 
 	DBG_ENTER("mysqlnd_fetch_row_unbuffered");
 	DBG_INF_FMT("flags=%d", flags);
@@ -859,10 +857,12 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flag
 			HashTable *row_ht = Z_ARRVAL_P(row);
 			MYSQLND_FIELD *field = result->meta->fields;
 			struct mysqlnd_field_hash_key *zend_hash_key = result->meta->zend_hash_keys;
+			unsigned int i, field_count = result->field_count;
+			unsigned long *lengths = result->lengths;
 
 			result->m.row_decoder(result->unbuf->last_row_buffer,
 								  result->unbuf->last_row_data,
-								  row_packet->field_count,
+								  field_count,
 								  row_packet->fields_metadata,
 								  result->conn TSRMLS_CC);
 
@@ -1199,7 +1199,6 @@ mysqlnd_store_result_fetch_data(MYSQLND * const conn, MYSQLND_RES *result,
 	row_packet->skip_extraction = TRUE; /* let php_mysqlnd_rowp_read() not allocate row_packet->fields, we will do it */
 
 	while (FAIL != (ret = PACKET_READ(row_packet, conn)) && !row_packet->eof) {
-
 		if (!free_rows) {
 			uint64 total_rows = free_rows = next_extend = next_extend * 5 / 3; /* extend with 33% */
 			total_rows += set->row_count;
@@ -1312,7 +1311,6 @@ static enum_func_status
 mysqlnd_fetch_row_async_buffered(MYSQLND_RES *result, void *param, unsigned int flags,
 								 zend_bool *fetched_anything TSRMLS_DC)
 {
-	unsigned int i;
 	zval *row = (zval *) param;
 	MYSQLND_RES_BG_BUFFERED *set = result->bg_stored_data;
 
@@ -1349,6 +1347,7 @@ mysqlnd_fetch_row_async_buffered(MYSQLND_RES *result, void *param, unsigned int 
 		/* If there was no decoding in background, we have to decode here */
 		if (set->decode_in_foreground == TRUE) {
 			MYSQLND_MEMORY_POOL_CHUNK *current_buffer = set->row_buffers[row_num];
+			unsigned int i;
 			result->m.row_decoder(current_buffer,
 								  current_row,
 								  result->meta->field_count,
@@ -1713,7 +1712,7 @@ MYSQLND_METHOD(mysqlnd_res, num_fields)(const MYSQLND_RES * const result)
 
 
 /* {{{ mysqlnd_res::fetch_field */
-static MYSQLND_FIELD *
+static const MYSQLND_FIELD *
 MYSQLND_METHOD(mysqlnd_res, fetch_field)(MYSQLND_RES * const result TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_res::fetch_field");
@@ -1730,7 +1729,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field)(MYSQLND_RES * const result TSRMLS_DC)
 
 
 /* {{{ mysqlnd_res::fetch_field_direct */
-static MYSQLND_FIELD *
+static const MYSQLND_FIELD *
 MYSQLND_METHOD(mysqlnd_res, fetch_field_direct)(MYSQLND_RES * const result,
 												MYSQLND_FIELD_OFFSET fieldnr TSRMLS_DC)
 {
@@ -1746,6 +1745,24 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_direct)(MYSQLND_RES * const result,
 	DBG_RETURN(NULL);
 }
 /* }}} */
+
+
+/* {{{ mysqlnd_res::fetch_field */
+static const MYSQLND_FIELD *
+MYSQLND_METHOD(mysqlnd_res, fetch_fields)(MYSQLND_RES * const result TSRMLS_DC)
+{
+	DBG_ENTER("mysqlnd_res::fetch_fields");
+	if (result->meta) {
+		if (result->stored_data && (result->stored_data->initialized_rows < result->stored_data->row_count)) {
+			/* we have to initialize the rest to get the updated max length */
+			mysqlnd_res_initialize_result_set_rest(result TSRMLS_CC);
+		}
+		DBG_RETURN(result->meta->m->fetch_fields(result->meta TSRMLS_CC));
+	}
+	DBG_RETURN(NULL);
+}
+/* }}} */
+
 
 
 /* {{{ mysqlnd_res::field_seek */
@@ -1944,6 +1961,7 @@ MYSQLND_RES *mysqlnd_result_init(unsigned int field_count, MYSQLND_THD_ZVAL_PCAC
 	ret->m.field_tell	= MYSQLND_METHOD(mysqlnd_res, field_tell);
 	ret->m.fetch_field	= MYSQLND_METHOD(mysqlnd_res, fetch_field);
 	ret->m.fetch_field_direct = MYSQLND_METHOD(mysqlnd_res, fetch_field_direct);
+	ret->m.fetch_fields	= MYSQLND_METHOD(mysqlnd_res, fetch_fields);
 
 	ret->m.skip_result	= MYSQLND_METHOD(mysqlnd_res, skip_result);
 	ret->m.free_result_buffers	= MYSQLND_METHOD(mysqlnd_res, free_result_buffers);
