@@ -18,12 +18,12 @@ $p['big2'] = str_repeat(str_repeat('hi', 100), 1000);
 
 copy($fname, $fname2);
 $p2 = new Phar($fname2);
-var_dump(strlen($p2['big']));
+var_dump(strlen($p2['big']->getContent()));
 ?>
 ===DONE===
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php'); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.zip.php'); ?>
 --EXPECT--
-int(100000)
+int(200000)
 ===DONE===
