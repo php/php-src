@@ -24,9 +24,22 @@ set_include_path("phar://" . __FILE__);
 include "index.php";
 __HALT_COMPILER();');
 include $fname;
+echo "\n";
+opendir('phar://');
+opendir('phar://hi.phar');
+ini_set('phar.extract_list', 'hi.phar='.dirname(__FILE__));
+opendir('phar://hi.phar/oopsie/daisy/');
 ?>
 ===DONE===
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
-file1.txtfile2.txtfile3.txt===DONE===
+file1.txtfile2.txtfile3.txt
+
+Warning: opendir(phar://): failed to open dir: phar error: no directory in "phar://", must have at least phar:/// for root directory (always use full path to a new phar)
+phar url "phar://" is unknown in %sopendir.php on line %d
+
+Warning: opendir(phar://hi.phar): failed to open dir: phar url "phar://hi.phar" is unknown in %sopendir.php on line %d
+
+Warning: opendir(phar://hi.phar/oopsie/daisy/): failed to open dir: phar error: file "%soopsie/daisy" extracted from "hi.phar" could not be opened in %sopendir.php on line %d
+===DONE===
