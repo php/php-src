@@ -1,8 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2008, PHP 5.2.6
-- Fixed bug #44703 (htmlspecialchars() does not detect bad character set argument)
-  (Andy Wharmby)
+- Fixed bug #44703 (htmlspecialchars() does not detect bad character set
+  argument). (Andy Wharmby)
+- Fixed bug #44742 (timezone_offset_get() causes segmentation faults). (Derick)
 
 10 Apr 2008, PHP 5.2.6RC5
 - Fixed incorrect heredoc handling when label is used within the block.
@@ -29,6 +30,9 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed bug #44557 (Crash in imap_setacl when supplied integer as username)
   (Thomas Jarosch)
+- Fixed a bug in formatting timestamps when DST is active in the default
+  timezone (Derick)
+
 
 27 Mar 2008, PHP 5.2.6RC3
 - Properly address incomplete multibyte chars inside escapeshellcmd() (Ilia,
