@@ -143,13 +143,14 @@ static void phar_zip_u2d_time(time_t time, php_uint16 *dtime, php_uint16 *ddate)
  */
 int phar_open_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
-	char buf[8192], *metadata;
 	phar_zip_dir_end locator;
+	char buf[sizeof(locator) + 65536], *metadata;
 	long size;
 	size_t read;
 	php_uint16 i;
 	phar_archive_data *mydata = NULL;
 	phar_entry_info entry = {0};
+	char *p = buf;
 
 	size = php_stream_tell(fp);
 	if (size > sizeof(locator) + 65536) {
@@ -162,32 +163,16 @@ int phar_open_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, i
 	} else {
 		php_stream_seek(fp, 0, SEEK_SET);
 	}
-	do {
-		char *p = buf;
-		if (!(read = php_stream_read(fp, buf, 8192))) {
-			php_stream_close(fp);
-			return FAILURE;
+	if (!(read = php_stream_read(fp, buf, size))) {
+		php_stream_close(fp);
+		return FAILURE;
+	}
+	while ((p=(char *) memchr(p + 1, 'P', (size_t)(buf - (p+1) + sizeof(locator) + 65536 - 4 + 1))) != NULL) {
+		if (!memcmp(p + 1, "K\5\6", 3)) {
+			memcpy((void *)&locator, (void *) p, sizeof(locator));
+			goto foundit;
 		}
-		if (*p == 'P' && !memcmp(p + 1, "K\5\6", 3)) {
-			goto copybuf;
-		}
-		while ((p=(char *) memchr(p + 1, 'P', (size_t)(buf - (p+1) + 8192 - 4 + 1))) != NULL) {
-			if (!memcmp(p + 1, "K\5\6", 3)) {
-				if (p - buf < sizeof(locator)) {
-					/* didn't read in the whole thing, back up */
-					php_stream_seek(fp, 8192 - (p - buf), SEEK_CUR);
-					if (sizeof(locator) != php_stream_read(fp, (char *) &locator, sizeof(locator))) {
-						php_stream_close(fp);
-						return FAILURE;
-					}
-				} else {
-copybuf:
-					memcpy((void *)&locator, (void *) p, sizeof(locator));
-				}
-				goto foundit;
-			}
-		}
-	} while (read == 8192);
+	}
 	php_stream_close(fp);
 	return FAILURE;
 foundit:
