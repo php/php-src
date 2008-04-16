@@ -156,14 +156,6 @@ void ps_fetch_int8(zval *zv, const MYSQLND_FIELD * const field,
 				   zend_bool as_unicode TSRMLS_DC)
 {
 	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 1 TSRMLS_CC);
-#if 0
-	if (field->flags & UNSIGNED_FLAG) {
-		ZVAL_LONG(zv, *(my_uint8*)*row);
-	} else {
-		ZVAL_LONG(zv, *(my_int8*)*row);
-	}
-	(*row)++;
-#endif
 }
 /* }}} */
 
@@ -175,14 +167,6 @@ void ps_fetch_int16(zval *zv, const MYSQLND_FIELD * const field,
 					zend_bool as_unicode TSRMLS_DC)
 {
 	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 2 TSRMLS_CC);
-#if 0
-	if (field->flags & UNSIGNED_FLAG) {
-		ZVAL_LONG(zv, (my_uint16) sint2korr(*row));
-	} else {
-		ZVAL_LONG(zv, (my_int16) sint2korr(*row));	
-	}
-	(*row)+= 2;
-#endif
 }
 /* }}} */
 
@@ -194,44 +178,6 @@ void ps_fetch_int32(zval *zv, const MYSQLND_FIELD * const field,
 					zend_bool as_unicode TSRMLS_DC)
 {
 	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 4 TSRMLS_CC);
-#if 0
-
-	if (field->flags & UNSIGNED_FLAG) {
-		my_uint32 uval;
-
-		/* unsigned int (11) */
-		uval= (my_uint32) sint4korr(*row);
-#if SIZEOF_LONG==4
-		if (uval > INT_MAX) {
-			char *tmp, *p;
-			int j=10;
-			tmp= mnd_emalloc(11);
-			p= &tmp[9];
-			do { 
-				*p-- = (uval % 10) + 48;
-				uval = uval / 10;							
-			} while (--j > 0);
-			tmp[10]= '\0';
-			/* unsigned int > INT_MAX is 10 digits - ALWAYS */
-#if PHP_MAJOR_VERSION >= 6
-			if (!as_unicode) {
-#endif
-				ZVAL_STRING(zv, tmp, 0);
-#if PHP_MAJOR_VERSION >= 6
-			} else {
-				ZVAL_UTF8_STRINGL(zv, tmp, 10, ZSTR_AUTOFREE);
-			}
-#endif /* PHP_MAJOR_VERSION >= 6 */
-		} else 
-#endif /* #if SIZEOF_LONG==4 */
-		{
-			ZVAL_LONG(zv, uval);
-		}
-	} else {
-		ZVAL_LONG(zv, (my_int32) sint4korr(*row));
-	}
-	(*row)+= 4;
-#endif /* 0 */
 }
 /* }}} */
 
@@ -243,40 +189,6 @@ void ps_fetch_int64(zval *zv, const MYSQLND_FIELD * const field,
 					zend_bool as_unicode TSRMLS_DC)
 {
 	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 8 TSRMLS_CC);
-#if 0
-
-	uint64 llval = (uint64) sint8korr(*row);
-	zend_bool uns = field->flags & UNSIGNED_FLAG? TRUE:FALSE;
-	
-#if SIZEOF_LONG==8  
-	if (uns == TRUE && llval > 9223372036854775807L) {
-#elif SIZEOF_LONG==4
-	if ((uns == TRUE && llval > L64(2147483647)) || 
-	    (uns == FALSE && ((L64( 2147483647) < (int64) llval) ||
-						  (L64(-2147483648) > (int64) llval))))
-	{
-#endif
-		char tmp[22];
-		/* even though lval is declared as unsigned, the value
-		 * may be negative. Therefor we cannot use MYSQLND_LLU_SPEC and must
-		 * use MYSQLND_LL_SPEC.
-		 */
-		sprintf((char *)&tmp, uns == TRUE? MYSQLND_LLU_SPEC : MYSQLND_LL_SPEC, llval);
-#if PHP_MAJOR_VERSION >= 6
-		if (!as_unicode) {
-#endif		
-			ZVAL_STRING(zv, tmp, 1);
-#if PHP_MAJOR_VERSION >= 6
-		} else {
-			ZVAL_UTF8_STRING(zv, tmp, ZSTR_DUPLICATE);
-		}
-#endif
-	} else {
-		/* This cast is safe, as we have checked the values above */
-		ZVAL_LONG(zv, (long) llval);
-	}
-  	(*row)+= 8;
-#endif /* 0 */
 }
 /* }}} */
 
@@ -707,14 +619,15 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 	for (i = 0; i < stmt->param_count; i++) {
 		unsigned int j;
 		zval *the_var = stmt->param_bind[i].zv;
-		if (stmt->param_bind[i].zv &&
-			Z_TYPE_P(stmt->param_bind[i].zv) == IS_NULL) {
+
+		if (!the_var || (stmt->param_bind[i].type != MYSQL_TYPE_LONG_BLOB &&
+						 Z_TYPE_P(the_var) == IS_NULL)) {
 			continue;
 		}
 		for (j = i + 1; j < stmt->param_count; j++) {
-			if (stmt->param_bind[j].zv == stmt->param_bind[i].zv) {
+			if (stmt->param_bind[j].zv == the_var) {
 				/* Double binding of the same zval, make a copy */
-				mysqlnd_stmt_copy_it(&copies, stmt->param_bind[i].zv, stmt->param_count, i);
+				mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i);
 				break; 
 			}
 		}
@@ -722,9 +635,9 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 		switch (stmt->param_bind[i].type) {
 			case MYSQL_TYPE_DOUBLE:
 				data_size += 8;
-				if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_DOUBLE) {
+				if (Z_TYPE_P(the_var) != IS_DOUBLE) {
 					if (!copies || !copies[i]) {
-						mysqlnd_stmt_copy_it(&copies, stmt->param_bind[i].zv, stmt->param_count, i);
+						mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i);
 					}
 				}
 				break;
@@ -737,9 +650,9 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 #else
 #error "Should not happen"
 #endif
-				if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_LONG) {
+				if (Z_TYPE_P(the_var) != IS_LONG) {
 					if (!copies || !copies[i]) {
-						mysqlnd_stmt_copy_it(&copies, stmt->param_bind[i].zv, stmt->param_count, i);
+						mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i);
 					}
 				}
 				break;
@@ -748,7 +661,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 					/*
 					  User hasn't sent anything, we will send empty string.
 					  Empty string has length of 0, encoded in 1 byte. No real
-					  data will follow after it.
+					  data will follows after it.
 					*/
 					data_size++;
 				}
@@ -756,14 +669,13 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 			case MYSQL_TYPE_VAR_STRING:
 				data_size += 8; /* max 8 bytes for size */
 #if PHP_MAJOR_VERSION < 6
-				if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_STRING)
+				if (Z_TYPE_P(the_var) != IS_STRING)
 #elif PHP_MAJOR_VERSION >= 6
-				if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_STRING || 
-					(UG(unicode) && Z_TYPE_P(stmt->param_bind[i].zv) == IS_UNICODE))
+				if (Z_TYPE_P(the_var) != IS_STRING || (UG(unicode) && Z_TYPE_P(the_var) == IS_UNICODE))
 #endif
 				{
 					if (!copies || !copies[i]) {
-						mysqlnd_stmt_copy_it(&copies, stmt->param_bind[i].zv, stmt->param_count, i);
+						mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i);
 					}
 					the_var = copies[i];
 #if PHP_MAJOR_VERSION >= 6

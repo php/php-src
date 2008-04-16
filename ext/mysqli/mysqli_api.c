@@ -166,7 +166,7 @@ int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int argc, unsigned in
 	if (argc == start) {
 		return PASS;
 	}
-	params = emalloc((argc - start) * sizeof(MYSQLND_PARAM_BIND));
+	params = safe_emalloc(argc - start, sizeof(MYSQLND_PARAM_BIND), 0);
 	for (i = 0; i < (argc - start); i++) {
 		zend_uchar type;
 		switch (types[i]) {
@@ -445,7 +445,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 	unsigned int i;
 	MYSQLND_RESULT_BIND *params;
 
-	params = emalloc((argc - start) * sizeof(MYSQLND_RESULT_BIND));
+	params = safe_emalloc(argc - start, sizeof(MYSQLND_RESULT_BIND), 0);
 	for (i = 0; i < (argc - start); i++) {
 		params[i].zv = *(args[i + start]);
 	}
@@ -1038,7 +1038,7 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 /* }}} */
 
 /* {{{  php_add_field_properties */
-static void php_add_field_properties(zval *value, MYSQL_FIELD *field TSRMLS_DC)
+static void php_add_field_properties(zval *value, const MYSQL_FIELD *field TSRMLS_DC)
 {
 	add_property_utf8_string(value, "name",(field->name ? field->name : ""), ZSTR_DUPLICATE);
 	add_property_utf8_string(value, "orgname",(field->org_name ? field->org_name : ""), ZSTR_DUPLICATE);
@@ -1061,7 +1061,7 @@ PHP_FUNCTION(mysqli_fetch_field)
 {
 	MYSQL_RES	*result;
 	zval		*mysql_result;
-	MYSQL_FIELD	*field;
+	const MYSQL_FIELD	*field;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_result, mysqli_result_class_entry) == FAILURE) {
 		return;
@@ -1084,9 +1084,7 @@ PHP_FUNCTION(mysqli_fetch_fields)
 {
 	MYSQL_RES	*result;
 	zval		*mysql_result;
-	MYSQL_FIELD	*field;
 	zval		*obj;
-
 	unsigned int i;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_result, mysqli_result_class_entry) == FAILURE) {
@@ -1098,7 +1096,7 @@ PHP_FUNCTION(mysqli_fetch_fields)
 	array_init(return_value);
 
 	for (i = 0; i < mysql_num_fields(result); i++) {
-		field = mysql_fetch_field_direct(result, i);
+		const MYSQL_FIELD *field = mysql_fetch_field_direct(result, i);
 
 		MAKE_STD_ZVAL(obj);
 		object_init(obj);
@@ -1115,7 +1113,7 @@ PHP_FUNCTION(mysqli_fetch_field_direct)
 {
 	MYSQL_RES	*result;
 	zval		*mysql_result;
-	MYSQL_FIELD	*field;
+	const MYSQL_FIELD *field;
 	long		offset;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &mysql_result, mysqli_result_class_entry, &offset) == FAILURE) {

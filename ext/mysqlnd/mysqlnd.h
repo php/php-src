@@ -147,6 +147,7 @@ void _mysqlnd_debug(const char *mode TSRMLS_DC);
 #define mysqlnd_field_tell(result)				(result)->meta? (result)->meta->current_field:0)
 #define mysqlnd_fetch_field(result)				(result)->m.fetch_field((result) TSRMLS_CC)
 #define mysqlnd_fetch_field_direct(result,fnr)	((result)->meta? &((result)->meta->fields[(fnr)]):NULL)
+#define mysqlnd_fetch_fields(result)			((result)->meta? (result)->meta->fields: NULL)
 
 /* mysqlnd metadata */
 #define mysqlnd_get_client_info()		MYSQLND_VERSION
@@ -197,6 +198,7 @@ PHPAPI unsigned long * mysqlnd_fetch_lengths(MYSQLND_RES * const result);
 #define mysqlnd_field_tell(result)				(result)->m.field_tell((result))
 #define mysqlnd_fetch_field(result)				(result)->m.fetch_field((result) TSRMLS_CC)
 #define mysqlnd_fetch_field_direct(result,fnr)	(result)->m.fetch_field_direct((result), (fnr) TSRMLS_CC)
+#define mysqlnd_fetch_fields(result)			(result)->m.fetch_fields((result) TSRMLS_CC)
 
 /* mysqlnd metadata */
 PHPAPI const char *	mysqlnd_get_client_info();
@@ -215,6 +217,9 @@ PHPAPI unsigned int	mysqlnd_get_client_version();
 #endif /* MYSQLND_USE_OPTIMISATIONS */
 /*****************************************************************************************************/
 
+
+PHPAPI void mysqlnd_efree_param_bind_dtor(MYSQLND_PARAM_BIND * param_bind);
+PHPAPI void mysqlnd_efree_result_bind_dtor(MYSQLND_RESULT_BIND * result_bind);
 
 
 PHPAPI const char * mysqlnd_field_type_name(enum mysqlnd_field_types field_type);
@@ -261,9 +266,12 @@ PHPAPI ulong mysqlnd_old_escape_string(char *newstr, const char *escapestr, size
 #define mysqlnd_stmt_prepare(stmt, q, qlen)	(stmt)->m->prepare((stmt), (q), (qlen) TSRMLS_CC)
 #define mysqlnd_stmt_execute(stmt) 			(stmt)->m->execute((stmt) TSRMLS_CC)
 #define mysqlnd_stmt_send_long_data(s,p,d,l) (s)->m->send_long_data((s), (p), (d), (l) TSRMLS_CC)
-#define mysqlnd_stmt_bind_param(stmt,bind)	(stmt)->m->bind_param((stmt), (bind) TSRMLS_CC)
+#define mysqlnd_stmt_bind_param(stmt,bind)	(stmt)->m->bind_parameters((stmt), (bind) TSRMLS_CC)
+#define mysqlnd_stmt_bind_one_param(s,n,z,t)	(s)->m->bind_one_parameter((s), (n), (z), (t) TSRMLS_CC)
 #define mysqlnd_stmt_refresh_bind_param(s)	(s)->m->refresh_bind_param((s) TSRMLS_CC)
+#define mysqlnd_stmt_set_param_bind_dtor(s,d)	(s)->m->set_param_bind_dtor((s), (d) TSRMLS_CC)
 #define mysqlnd_stmt_bind_result(stmt,bind)	(stmt)->m->bind_result((stmt), (bind) TSRMLS_CC)
+#define mysqlnd_stmt_set_result_bind_dtor(s,d)	(s)->m->set_result_bind_dtor((s), (d) TSRMLS_CC)
 #define mysqlnd_stmt_param_metadata(stmt)	(stmt)->m->get_parameter_metadata((stmt))
 #define mysqlnd_stmt_result_metadata(stmt)	(stmt)->m->get_result_metadata((stmt) TSRMLS_CC)
 

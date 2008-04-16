@@ -1882,7 +1882,7 @@ PHP_FUNCTION(mysql_result)
 		switch(Z_TYPE_PP(field)) {
 			case IS_STRING: {
 					int i=0;
-					MYSQL_FIELD *tmp_field;
+					const MYSQL_FIELD *tmp_field;
 					char *table_name, *field_name, *tmp;
 
 					if ((tmp=strchr(Z_STRVAL_PP(field), '.'))) {
@@ -2412,7 +2412,7 @@ PHP_FUNCTION(mysql_fetch_field)
 {
 	zval **result, **field=NULL;
 	MYSQL_RES *mysql_result;
-	MYSQL_FIELD *mysql_field;
+	const MYSQL_FIELD *mysql_field;
 	
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -2497,7 +2497,7 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
 	zval **result, **field;
 	MYSQL_RES *mysql_result;
-	MYSQL_FIELD *mysql_field = {0};
+	const MYSQL_FIELD *mysql_field = {0};
 	char buf[512];
 	int  len;
 

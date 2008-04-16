@@ -529,7 +529,7 @@ static enum_func_status
 php_mysqlnd_greet_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 {
 	zend_uchar buf[512];
-	zend_uchar *p= buf;
+	zend_uchar *p = buf;
 	zend_uchar *begin = buf;
 	php_mysql_packet_greet *packet= (php_mysql_packet_greet *) _packet;
 
@@ -623,7 +623,7 @@ void php_mysqlnd_greet_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 static
 void php_mysqlnd_crypt(zend_uchar *buffer, const zend_uchar *s1, const zend_uchar *s2, size_t len)
 {
-	const unsigned char *s1_end= s1 + len;
+	const unsigned char *s1_end = s1 + len;
 	while (s1 < s1_end) {
 		*buffer++= *s1++ ^ *s2++;
 	}
@@ -754,7 +754,7 @@ php_mysqlnd_ok_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "OK");
 
 	/* Should be always 0x0 or 0xFF for error */
-	packet->field_count= uint1korr(p);
+	packet->field_count = uint1korr(p);
 	p++;
 
 	if (0xFF == packet->field_count) {
@@ -825,7 +825,7 @@ php_mysqlnd_eof_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	*/
 	php_mysql_packet_eof *packet= (php_mysql_packet_eof *) _packet;
 	zend_uchar buf[5 + 10 + sizeof(packet->sqlstate) + sizeof(packet->error)];
-	zend_uchar *p= buf;
+	zend_uchar *p = buf;
 	zend_uchar *begin = buf;
 
 	DBG_ENTER("php_mysqlnd_eof_read");
@@ -833,7 +833,7 @@ php_mysqlnd_eof_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "EOF");
 
 	/* Should be always 0xFE */
-	packet->field_count= uint1korr(p);
+	packet->field_count = uint1korr(p);
 	p++;
 
 	if (0xFF == packet->field_count) {
