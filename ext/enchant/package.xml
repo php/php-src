@@ -59,6 +59,7 @@ see www.abisource.com/enchant/
         <file name="broker_request_dict.phpt" role="test"/>
         <file name="hindi_correct.txt" role="test"/>
         <file name="hindi_incorrect.txt" role="test"/>
+        <file name="bug13181.phpt" role="test"/>
       </dir>
     </dir>
     <!-- / -->
