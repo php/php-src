@@ -1,0 +1,56 @@
+$Id$
+
+PHP Data Objects
+================
+
+Concept: Data Access Abstraction
+
+Goals:
+
+1/  Be light-weight
+2/  Provide common API for common database operations
+3/  Be performant
+4/  Keep majority of PHP specific stuff in the PDO core (such as persistent
+    resource management); drivers should only have to worry about getting the
+    data and not about PHP internals.
+
+
+Transactions and autocommit
+===========================
+
+When you create a database handle, you *should* specify the autocommit
+behaviour that you require.  PDO will default to autocommit on.
+
+$dbh = new PDO("...", $user, $pass, array(PDO_ATTR_AUTOCOMMIT => true));
+
+When auto-commit is on, the driver will implicitly commit each query as it is
+executed.  This works fine for most simple tasks but can be significantly
+slower when you are making a large number of udpates.
+
+$dbh = new PDO("...", $user, $pass, array(PDO_ATTR_AUTOCOMMIT => false));
+
+When auto-commit is off, you must then use $dbh->beginTransaction() to
+initiate a transaction.  When your work is done, you then call $dbh->commit()
+or $dbh->rollBack() to persist or abort your changes respectively.  Not all
+databases support transactions.
+
+You can change the auto-commit mode at run-time:
+
+$dbh->setAttribute(PDO_ATTR_AUTOCOMMIT, false);
+
+Regardless of the error handling mode set on the database handle, if the
+autocommit mode cannot be changed, an exception will be thrown.
+
+Some drivers will allow you to temporarily disable autocommit if you call
+$dbh->beginTransaction().  When you commit() or rollBack() such a transaction,
+the handle will switch back to autocommit mode again.  If the mode could not
+be changed, an exception will be raised, as noted above.
+
+When the database handle is closed or destroyed (or at request end for
+persistent handles), the driver will implicitly rollBack().  It is your
+responsibility to call commit() when you are done making changes and
+autocommit is turned off.
+
+vim:tw=78:et
+
+
