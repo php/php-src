@@ -495,16 +495,16 @@ int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_len, int
  * 
  * data is the serialized zval
  */
-int phar_parse_metadata(char **buffer, zval **metadata, int is_zip TSRMLS_DC) /* {{{ */
+int phar_parse_metadata(char **buffer, zval **metadata, int zip_metadata_len TSRMLS_DC) /* {{{ */
 {
 	const unsigned char *p;
 	php_uint32 buf_len;
 	php_unserialize_data_t var_hash;
 
-	if (!is_zip) {
+	if (!zip_metadata_len) {
 		PHAR_GET_32(*buffer, buf_len);
 	} else {
-		buf_len = is_zip;
+		buf_len = zip_metadata_len;
 	}
 	
 	if (buf_len) {
