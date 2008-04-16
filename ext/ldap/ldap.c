@@ -1322,6 +1322,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 	for (i = 0; i < num_attribs; i++) {
 		ldap_mods[i] = emalloc(sizeof(LDAPMod));
 		ldap_mods[i]->mod_op = oper | LDAP_MOD_BVALUES;
+		ldap_mods[i]->mod_type = NULL;
 
 		res = zend_hash_get_current_key_ex(Z_ARRVAL_P(entry), &attribute, &attribute_len, &index, 0, NULL);
 		if (res == HASH_KEY_IS_STRING) {
@@ -1331,7 +1332,6 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 			if (tmp) {
 				ldap_mods[i]->mod_type = estrdup(tmp);
 			} else {
-				ldap_mods[i]->mod_type = NULL;
 				goto error_out;
 			}
 		} else {
