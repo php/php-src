@@ -682,7 +682,7 @@ int phar_open_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC)
 			return FAILURE;
 		}
 	}
-	if (!(entry->flags & PHAR_ENT_COMPRESSION_MASK)) {
+	if ((entry->old_flags && !(entry->old_flags & PHAR_ENT_COMPRESSION_MASK)) || !(entry->flags & PHAR_ENT_COMPRESSION_MASK)) {
 		return SUCCESS;
 	}
 	if (!phar->ufp) {
