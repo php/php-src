@@ -25,9 +25,9 @@ see www.abisource.com/enchant/
     <email>ilia@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2006-03-21</date>
+  <date>2008-04-16</date>
   <version>
-    <release>1.0.1</release>
+    <release>1.0.2</release>
     <api>1.1.0</api>
   </version>
   <stability>
@@ -35,34 +35,33 @@ see www.abisource.com/enchant/
     <api>stable</api>
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
-  <notes>- add enchant_broker_list_dicts to get a list of available dictionaries
-- fix compilation warnings
-- add examples
-- add tests</notes>
+  <notes>- #13181, Leaving a context frees the dictionnary resources
+- Fix protos descriptions in the sources
+</notes>
   <contents>
     <dir name="/">
       <dir name="docs">
         <dir name="examples">
           <file name="example1.php" role="doc"/>
         </dir>
-<!-- //docs/examples -->
+        <!-- //docs/examples -->
       </dir>
-<!-- //docs -->
+      <!-- //docs -->
       <file name="config.m4" role="src"/>
       <file name="config.w32" role="src"/>
       <file name="CREDITS" role="doc"/>
       <file name="enchant.c" role="src"/>
       <file name="php_enchant.h" role="src"/>
       <dir name="tests">
-	      <file name="broker_describe.phpt" role="test"/>
-	      <file name="broker_free.phpt" role="test"/>
-	      <file name="broker_init.phpt" role="test"/>
-	      <file name="broker_request_dict.phpt" role="test"/>
-	      <file name="hindi_correct.txt" role="test"/>
-	      <file name="hindi_incorrect.txt" role="test"/>
+        <file name="broker_describe.phpt" role="test"/>
+        <file name="broker_free.phpt" role="test"/>
+        <file name="broker_init.phpt" role="test"/>
+        <file name="broker_request_dict.phpt" role="test"/>
+        <file name="hindi_correct.txt" role="test"/>
+        <file name="hindi_incorrect.txt" role="test"/>
       </dir>
     </dir>
-<!-- / -->
+    <!-- / -->
   </contents>
   <dependencies>
     <required>
@@ -79,6 +78,22 @@ see www.abisource.com/enchant/
     <configureoption default="shared" name="with-enchant" prompt="libenchant prefix?"/>
   </extsrcrelease>
   <changelog>
+    <release>
+      <date>2006-03-21</date>
+      <version>
+        <release>1.0.1</release>
+        <api>1.1.0</api>
+      </version>
+      <stability>
+        <release>stable</release>
+        <api>stable</api>
+      </stability>
+      <license uri="http://www.php.net/license">PHP</license>
+      <notes>- add enchant_broker_list_dicts to get a list of available dictionaries
+- fix compilation warnings
+- add examples
+- add tests</notes>
+    </release>
     <release>
       <date>2004-08-11</date>
       <version>
