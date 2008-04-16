@@ -28,6 +28,11 @@ try {
 } catch (Exception $e) {
 	echo $e->getMessage() . "\n";
 }
+try {
+	$b = new Phar(dirname(__FILE__) . '/nope.phar', 0, 'test');
+} catch (Exception $e) {
+	echo $e->getMessage() . "\n";
+}
 ?>
 ===DONE===
 --CLEAN--
@@ -41,4 +46,5 @@ __HALT_COMPILER();
 hio
 test
 alias "test" is already used for archive "%sphar_setalias2.phar.php" and cannot be used for other archives
+archive "%snope.phar" cannot be associated with alias "test", already in use
 ===DONE===
