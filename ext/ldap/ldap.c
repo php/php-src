@@ -1294,9 +1294,10 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 	ldap_linkdata *ld;
 	char *dn;
 	LDAPMod **ldap_mods;
-	int i, j, num_attribs, num_values, dn_len;
+	int i, j, num_attribs, num_values, dn_len, res;
+	unsigned int attribute_len;
 	int *num_berval;
-	char *attribute;
+	zstr attribute;
 	ulong index;
 	int is_full_add=0; /* flag for full add operation so ldap_mod_add can be put back into oper, gerrit THomson */
 
@@ -1322,13 +1323,27 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 		ldap_mods[i] = emalloc(sizeof(LDAPMod));
 		ldap_mods[i]->mod_op = oper | LDAP_MOD_BVALUES;
 
-		if (zend_hash_get_current_key(Z_ARRVAL_P(entry), &attribute, &index, 0) == HASH_KEY_IS_STRING) {
-			ldap_mods[i]->mod_type = estrdup(attribute);
+		res = zend_hash_get_current_key_ex(Z_ARRVAL_P(entry), &attribute, &attribute_len, &index, 0, NULL);
+		if (res == HASH_KEY_IS_STRING) {
+			ldap_mods[i]->mod_type = estrndup(attribute.s, attribute_len - 1);
+		} else if (res == HASH_KEY_IS_UNICODE) {
+			char *tmp = zend_unicode_to_ascii(attribute.u, attribute_len - 1 TSRMLS_CC);
+			if (tmp) {
+				ldap_mods[i]->mod_type = estrdup(tmp);
+			} else {
+				ldap_mods[i]->mod_type = NULL;
+				goto error_out;
+			}
 		} else {
+error_out:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown attribute in the data");
 			/* Free allocated memory */
 			while (i >= 0) {
-				efree(ldap_mods[i--]);
+				if (ldap_mods[i]->mod_type) {
+					efree(ldap_mods[i]->mod_type);
+				}
+				efree(ldap_mods[i]);
+				i--;
 			}
 			efree(num_berval);
 			efree(ldap_mods);	
