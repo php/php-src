@@ -89,8 +89,6 @@ char *	mysqlnd_get_backtrace(TSRMLS_D);
 #define DBG_RETURN(value)	do { if (MYSQLND_G(dbg)) MYSQLND_G(dbg)->m->func_leave(MYSQLND_G(dbg), __LINE__, __FILE__); return (value); } while (0)
 #define DBG_VOID_RETURN		do { if (MYSQLND_G(dbg)) MYSQLND_G(dbg)->m->func_leave(MYSQLND_G(dbg), __LINE__, __FILE__); return; } while (0)
 
-
-
 #elif MYSQLND_DBG_ENABLED == 0
 
 

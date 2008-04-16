@@ -171,7 +171,7 @@ MYSQLND_METHOD(mysqlnd_conn, free_contents)(MYSQLND *conn TSRMLS_DC)
 	}
 	if (conn->options.num_commands) {
 		unsigned int i;
-		for (i=0; i < conn->options.num_commands; i++) {
+		for (i = 0; i < conn->options.num_commands; i++) {
 			mnd_pefree(conn->options.init_commands[i], pers);
 		}
 		mnd_pefree(conn->options.init_commands, pers);
@@ -477,7 +477,7 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 {
 	char *transport = NULL, *errstr = NULL;
 	char *hashed_details = NULL;
-	int transport_len, hashed_details_len, errcode = 0;
+	int transport_len, hashed_details_len, errcode = 0, host_len;
 	unsigned int streams_options = ENFORCE_SAFE_MODE;
 	unsigned int streams_flags = STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT;
 	zend_bool self_alloced = FALSE;
@@ -530,8 +530,9 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 	if (!port && !socket) {
 		port = 3306;
 	}
+	host_len = strlen(host);
 #ifndef PHP_WIN32
-	if (!strncasecmp(host, "localhost", sizeof("localhost") - 1)) {
+	if (host_len == sizeof("localhost") - 1 && !strncasecmp(host, "localhost", host_len)) {
 		if (!socket) {
 			socket = "/tmp/mysql.sock";
 		}
@@ -555,14 +556,6 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 	}
 
 	if (conn->persistent) {
-#if 0
-		struct timeval tv;
-		gettimeofday(&tv, NULL);
-		/* We should generate something unique */
-		hashed_details_len = spprintf(&hashed_details, 0, "%s@%s@%s@%ld@%ld@%0.8F",
-									  transport, user, db, tv.tv_sec, (long int)tv.tv_usec,
-									  php_combined_lcg(TSRMLS_C) * 10);
-#endif
 		hashed_details_len = spprintf(&hashed_details, 0, "%p", conn);
 		DBG_INF_FMT("hashed_details=%s", hashed_details);
 	} 

@@ -369,7 +369,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * co
 /* }}} */
 
 /* {{{ mysqlnd_res_meta::fetch_field */
-static MYSQLND_FIELD *
+static const MYSQLND_FIELD *
 MYSQLND_METHOD(mysqlnd_res_meta, fetch_field)(MYSQLND_RES_METADATA * const meta TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_res_meta::fetch_field");
@@ -382,13 +382,23 @@ MYSQLND_METHOD(mysqlnd_res_meta, fetch_field)(MYSQLND_RES_METADATA * const meta 
 
 
 /* {{{ mysqlnd_res_meta::fetch_field_direct */
-static MYSQLND_FIELD *
+static const MYSQLND_FIELD *
 MYSQLND_METHOD(mysqlnd_res_meta, fetch_field_direct)(const MYSQLND_RES_METADATA * const meta,
 													 MYSQLND_FIELD_OFFSET fieldnr TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_res_meta::fetch_field_direct");
 	DBG_INF_FMT("fieldnr=%d", fieldnr);
 	DBG_RETURN(&meta->fields[fieldnr]);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_res_meta::fetch_fields */
+static const MYSQLND_FIELD *
+MYSQLND_METHOD(mysqlnd_res_meta, fetch_fields)(MYSQLND_RES_METADATA * const meta TSRMLS_DC)
+{
+	DBG_ENTER("mysqlnd_res_meta::fetch_fields");
+	DBG_RETURN(meta->fields);
 }
 /* }}} */
 
@@ -405,6 +415,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, field_tell)(const MYSQLND_RES_METADATA * const 
 MYSQLND_CLASS_METHODS_START(mysqlnd_res_meta)
 	MYSQLND_METHOD(mysqlnd_res_meta, fetch_field),
 	MYSQLND_METHOD(mysqlnd_res_meta, fetch_field_direct),
+	MYSQLND_METHOD(mysqlnd_res_meta, fetch_fields),
 	MYSQLND_METHOD(mysqlnd_res_meta, field_tell),
 	MYSQLND_METHOD(mysqlnd_res_meta, read_metadata),
 	MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata),
@@ -413,7 +424,8 @@ MYSQLND_CLASS_METHODS_END;
 
 
 /* {{{ mysqlnd_result_meta_init */
-MYSQLND_RES_METADATA *mysqlnd_result_meta_init(unsigned int field_count TSRMLS_DC)
+MYSQLND_RES_METADATA *
+mysqlnd_result_meta_init(unsigned int field_count TSRMLS_DC)
 {
 	MYSQLND_RES_METADATA *ret;
 	DBG_ENTER("mysqlnd_result_meta_init");
