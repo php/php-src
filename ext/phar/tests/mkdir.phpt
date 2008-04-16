@@ -1,0 +1,30 @@
+--TEST--
+phar: mkdir edge cases
+--SKIPIF--
+<?php if (!extension_loaded("phar")) die("skip"); ?>
+--INI--
+phar.readonly=0
+--FILE--
+<?php
+$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$pname = 'phar://' . $fname;
+Phar::interceptFileFuncs();
+mkdir('phar://');
+mkdir('phar://foo.phar');
+$a = new Phar($fname);
+$a['a'] = 'hi';
+mkdir($pname . '/a');
+?>
+===DONE===
+--CLEAN--
+<?php 
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
+__HALT_COMPILER();
+?>
+--EXPECTF--
+Warning: mkdir(): phar error: cannot create directory "phar://", no phar archive specified in %smkdir.php on line %d
+
+Warning: mkdir(): phar error: cannot create directory "" in phar "foo.phar", phar error: invalid path "" must not be empty in %smkdir.php on line %d
+
+Warning: mkdir(): phar error: cannot create directory "a" in phar "%smkdir.phar.php", phar error: path "a" exists and is a not a directory in %smkdir.php on line %d
+===DONE===
