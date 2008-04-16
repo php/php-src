@@ -60,7 +60,12 @@ file_put_contents($a . '/test1.txt', 'hi');
 file_put_contents($a . '/test2.txt', 'hi');
 file_put_contents($a . '/test3.txt', 'hi');
 $b = opendir('phar://test.phar/');
+$z = array();
 while (false !== ($c = readdir($b))) {
+	$z[] = $c;
+}
+sort($z);
+foreach ($z as $c) {
 	echo "$c\n";
 }
 closedir($b);
