@@ -33,7 +33,7 @@ opendir('phar://hi.phar/oopsie/daisy/');
 ===DONE===
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
---EXPECT--
+--EXPECTF--
 file1.txtfile2.txtfile3.txt
 
 Warning: opendir(phar://): failed to open dir: phar error: no directory in "phar://", must have at least phar:/// for root directory (always use full path to a new phar)
