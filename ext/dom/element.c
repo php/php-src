@@ -187,8 +187,8 @@ PHP_METHOD(domelement, __construct)
 		php_std_error_handling();
 		return;
 	}
-
 	php_std_error_handling();
+
 	name_valid = xmlValidateName((xmlChar *) name, 0);
 	if (name_valid != 0) {
 		php_dom_throw_error(INVALID_CHARACTER_ERR, 1 TSRMLS_CC);
@@ -270,7 +270,7 @@ int dom_element_tag_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ns = nodep->ns;
 	if (ns != NULL && ns->prefix) {
 		qname = xmlStrdup(ns->prefix);
-		qname = xmlStrcat(qname, ":");
+		qname = xmlStrcat(qname, (xmlChar *)":");
 		qname = xmlStrcat(qname, nodep->name);
 		ZVAL_STRING(*retval, (char *)qname, 1);
 		xmlFree(qname);
@@ -307,7 +307,7 @@ static xmlNodePtr dom_get_dom1_attribute(xmlNodePtr elem, xmlChar *name) {
 	if (nqname != NULL) {
 		xmlNsPtr ns;
 		xmlChar *prefix = xmlStrndup(name, len);
-		if (prefix && xmlStrEqual(prefix, "xmlns")) {
+		if (prefix && xmlStrEqual(prefix, (xmlChar *)"xmlns")) {
 			ns = elem->nsDef;
 			while (ns) {
 				if (xmlStrEqual(ns->prefix, nqname)) {
@@ -326,7 +326,7 @@ static xmlNodePtr dom_get_dom1_attribute(xmlNodePtr elem, xmlChar *name) {
 			return (xmlNodePtr)xmlHasNsProp(elem, nqname, ns->href);
 		}
 	} else {
-		if (xmlStrEqual(name, "xmlns")) {
+		if (xmlStrEqual(name, (xmlChar *)"xmlns")) {
 			xmlNsPtr nsPtr = elem->nsDef;
 			while (nsPtr) {
 				if (nsPtr->prefix == NULL) {
@@ -348,7 +348,8 @@ PHP_FUNCTION(dom_element_get_attribute)
 {
 	zval *id;
 	xmlNode *nodep;
-	char *name, *value = NULL;
+	char *name;
+	xmlChar *value = NULL;
 	dom_object *intern;
 	xmlNodePtr attr;
 	int name_len;
@@ -363,20 +364,20 @@ PHP_FUNCTION(dom_element_get_attribute)
 	if (attr) {
 		switch (attr->type) {
 			case XML_ATTRIBUTE_NODE:
-			value = xmlNodeListGetString(attr->doc, attr->children, 1);
+				value = xmlNodeListGetString(attr->doc, attr->children, 1);
 				break;
 			case XML_NAMESPACE_DECL:
 				value = xmlStrdup(((xmlNsPtr)attr)->href);
 				break;
 			default:
-			value = xmlStrdup(((xmlAttributePtr)attr)->defaultValue);
+				value = xmlStrdup(((xmlAttributePtr)attr)->defaultValue);
 		}
 	}
 	
 	if (value == NULL) {
 		RETURN_EMPTY_STRING();
 	} else {
-		RETVAL_STRING(value, 1);
+		RETVAL_STRING((char *)value, 1);
 		xmlFree(value);
 	}
 }
@@ -392,7 +393,7 @@ PHP_FUNCTION(dom_element_set_attribute)
 	zval *id, *rv = NULL;
 	xmlNode *nodep;
 	xmlNodePtr attr = NULL;
-	int ret, name_len, value_len;
+	int ret, name_len, value_len, name_valid;
 	dom_object *intern;
 	char *name, *value;
 
@@ -402,6 +403,12 @@ PHP_FUNCTION(dom_element_set_attribute)
 
 	if (name_len == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attribute Name is required");
+		RETURN_FALSE;
+	}
+
+	name_valid = xmlValidateName((xmlChar *) name, 0);
+	if (name_valid != 0) {
+		php_dom_throw_error(INVALID_CHARACTER_ERR, 1 TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -416,7 +423,7 @@ PHP_FUNCTION(dom_element_set_attribute)
 	if (attr != NULL) {
 		switch (attr->type) {
 			case XML_ATTRIBUTE_NODE:
-		node_list_unlink(attr->children TSRMLS_CC);
+				node_list_unlink(attr->children TSRMLS_CC);
 				break;
 			case XML_NAMESPACE_DECL:
 				RETURN_FALSE;
@@ -426,12 +433,12 @@ PHP_FUNCTION(dom_element_set_attribute)
 
 	}
 
-	if (xmlStrEqual((xmlChar *)name, "xmlns")) {
+	if (xmlStrEqual((xmlChar *)name, (xmlChar *)"xmlns")) {
 		if (xmlNewNs(nodep, (xmlChar *)value, NULL)) {
 			RETURN_TRUE;
 		}
 	} else {
-		attr = (xmlNodePtr)xmlSetProp(nodep, (xmlChar *) name, value);
+		attr = (xmlNodePtr)xmlSetProp(nodep, (xmlChar *) name, (xmlChar *)value);
 	}
 	if (!attr) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such attribute '%s'", name);
@@ -528,7 +535,7 @@ PHP_FUNCTION(dom_element_get_attribute_node)
 		if (attrp->children) {
 			attrp = xmlNewDocNode(nodep->doc, NULL, (xmlChar *) attrp->children, attrp->name);
 		} else {
-			attrp = xmlNewDocNode(nodep->doc, NULL, "xmlns", attrp->name);
+			attrp = xmlNewDocNode(nodep->doc, NULL, (xmlChar *)"xmlns", attrp->name);
 		}
 		attrp->type = XML_NAMESPACE_DECL;
 		attrp->parent = nsparent;
@@ -679,7 +686,8 @@ PHP_FUNCTION(dom_element_get_attribute_ns)
 	xmlNsPtr nsptr;
 	dom_object *intern;
 	int uri_len = 0, name_len = 0;
-	char *uri, *name, *strattr;
+	char *uri, *name;
+	xmlChar *strattr;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!s", &id, dom_element_class_entry, &uri, &uri_len, &name, &name_len) == FAILURE) {
 		return;
@@ -690,11 +698,11 @@ PHP_FUNCTION(dom_element_get_attribute_ns)
 	strattr = xmlGetNsProp(elemp, (xmlChar *) name, (xmlChar *) uri);
 
 	if (strattr != NULL) {
-		RETVAL_STRING(strattr, 1);
+		RETVAL_STRING((char *)strattr, 1);
 		xmlFree(strattr);
 	} else {
-		if (xmlStrEqual((xmlChar *) uri, DOM_XMLNS_NAMESPACE)) {
-			nsptr = dom_get_nsdecl(elemp, name);
+		if (xmlStrEqual((xmlChar *) uri, (xmlChar *)DOM_XMLNS_NAMESPACE)) {
+			nsptr = dom_get_nsdecl(elemp, (xmlChar *)name);
 			if (nsptr != NULL) {
 				RETVAL_STRING((char *) nsptr->href, 1);
 			} else {
@@ -759,7 +767,7 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 	char *uri, *name, *value;
 	char *localname = NULL, *prefix = NULL;
 	dom_object *intern;
-	int errorcode = 0, stricterror, is_xmlns = 0;
+	int errorcode = 0, stricterror, is_xmlns = 0, name_valid;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!ss", &id, dom_element_class_entry, &uri, &uri_len, &name, &name_len, &value, &value_len) == FAILURE) {
 		return;
@@ -788,11 +796,11 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 				node_list_unlink(nodep->children TSRMLS_CC);
 			}
 
-			if (xmlStrEqual((xmlChar *) prefix,"xmlns") && xmlStrEqual((xmlChar *) uri, DOM_XMLNS_NAMESPACE)) {
+			if (xmlStrEqual((xmlChar *) prefix, (xmlChar *)"xmlns") && xmlStrEqual((xmlChar *) uri, (xmlChar *)DOM_XMLNS_NAMESPACE)) {
 				is_xmlns = 1;
-				nsptr = dom_get_nsdecl(elemp, localname);
+				nsptr = dom_get_nsdecl(elemp, (xmlChar *)localname);
 			} else {
-				nsptr = xmlSearchNsByHref(elemp->doc, elemp, uri);
+				nsptr = xmlSearchNsByHref(elemp->doc, elemp, (xmlChar *)uri);
 				if (nsptr && nsptr->prefix == NULL) {
 					xmlNsPtr tmpnsptr;
 
@@ -816,7 +824,7 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 					errorcode = NAMESPACE_ERR;
 				} else {
 					if (is_xmlns == 1) {
-						xmlNewNs(elemp, value, localname);
+						xmlNewNs(elemp, (xmlChar *)value, (xmlChar *)localname);
 					} else {
 						nsptr = dom_get_ns(elemp, uri, &errorcode, prefix);
 					}
@@ -827,19 +835,25 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 					if (nsptr->href) {
 						xmlFree((xmlChar *) nsptr->href);
 					}
-					nsptr->href = xmlStrdup(value);
+					nsptr->href = xmlStrdup((xmlChar *)value);
 				}
 			}
 
 			if (errorcode == 0 && is_xmlns == 0) {
-				attr = xmlSetNsProp(elemp, nsptr, localname, value);
+				attr = xmlSetNsProp(elemp, nsptr, (xmlChar *)localname, (xmlChar *)value);
 			}
 		} else {
-			attr = xmlHasProp(elemp, localname);
-			if (attr != NULL && attr->type != XML_ATTRIBUTE_DECL) {
-				node_list_unlink(attr->children TSRMLS_CC);
+			name_valid = xmlValidateName((xmlChar *) localname, 0);
+			if (name_valid != 0) {
+				errorcode = INVALID_CHARACTER_ERR;
+				stricterror = 1;
+			} else {
+				attr = xmlHasProp(elemp, (xmlChar *)localname);
+				if (attr != NULL && attr->type != XML_ATTRIBUTE_DECL) {
+					node_list_unlink(attr->children TSRMLS_CC);
+				}
+				attr = xmlSetProp(elemp, (xmlChar *)localname, (xmlChar *)value);
 			}
-			attr = xmlSetProp(elemp, localname, value);
 		}
 	}
 
@@ -934,7 +948,7 @@ PHP_FUNCTION(dom_element_get_attribute_node_ns)
 
 	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
 
-	attrp = xmlHasNsProp(elemp, name, uri);
+	attrp = xmlHasNsProp(elemp, (xmlChar *)name, (xmlChar *)uri);
 
 	if (attrp == NULL) {
 		RETURN_NULL();
@@ -1101,8 +1115,8 @@ PHP_FUNCTION(dom_element_has_attribute_ns)
 		xmlFree(value);
 		RETURN_TRUE;
 	} else {
-		if (xmlStrEqual(uri, DOM_XMLNS_NAMESPACE)) {
-			nsp = dom_get_nsdecl(elemp, name);
+		if (xmlStrEqual((xmlChar *)uri, (xmlChar *)DOM_XMLNS_NAMESPACE)) {
+			nsp = dom_get_nsdecl(elemp, (xmlChar *)name);
 			if (nsp != NULL) {
 				RETURN_TRUE;
 			}
@@ -1157,7 +1171,7 @@ PHP_FUNCTION(dom_element_set_id_attribute)
 		RETURN_NULL();
 	}
 
-	attrp = xmlHasNsProp(nodep, name, NULL);
+	attrp = xmlHasNsProp(nodep, (xmlChar *)name, NULL);
 	if (attrp == NULL || attrp->type == XML_ATTRIBUTE_DECL) {
 		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
 	} else {
