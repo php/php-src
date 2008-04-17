@@ -654,23 +654,6 @@ void zend_register_default_exception(TSRMLS_D) /* {{{ */
 {
 	zend_class_entry ce;
 
-	memset(EG(exception_op), 0, sizeof(EG(exception_op)));
-	EG(exception_op)[0].opcode = ZEND_HANDLE_EXCEPTION;
-	EG(exception_op)[0].op1.op_type = IS_UNUSED;
-	EG(exception_op)[0].op2.op_type = IS_UNUSED;
-	EG(exception_op)[0].result.op_type = IS_UNUSED;
-	ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op));
-	EG(exception_op)[1].opcode = ZEND_HANDLE_EXCEPTION;
-	EG(exception_op)[1].op1.op_type = IS_UNUSED;
-	EG(exception_op)[1].op2.op_type = IS_UNUSED;
-	EG(exception_op)[1].result.op_type = IS_UNUSED;
-	ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op)+1);
-	EG(exception_op)[2].opcode = ZEND_HANDLE_EXCEPTION;
-	EG(exception_op)[2].op1.op_type = IS_UNUSED;
-	EG(exception_op)[2].op2.op_type = IS_UNUSED;
-	EG(exception_op)[2].result.op_type = IS_UNUSED;
-	ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op)+2);
-
 	INIT_CLASS_ENTRY(ce, "Exception", default_exception_functions);
 	default_exception_ce = zend_register_internal_class(&ce TSRMLS_CC);
 	default_exception_ce->create_object = zend_default_exception_new;

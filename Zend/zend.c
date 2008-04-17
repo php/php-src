@@ -28,6 +28,7 @@
 #include "zend_exceptions.h"
 #include "zend_builtin_functions.h"
 #include "zend_ini.h"
+#include "zend_vm.h"
 #include "zend_unicode.h"
 
 #ifdef ZTS
@@ -829,6 +830,27 @@ static void class_to_unicode(zend_class_entry **ce TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+static void zend_init_exception_op(TSRMLS_D) /* {{{ */
+{
+	memset(EG(exception_op), 0, sizeof(EG(exception_op)));
+	EG(exception_op)[0].opcode = ZEND_HANDLE_EXCEPTION;
+	EG(exception_op)[0].op1.op_type = IS_UNUSED;
+	EG(exception_op)[0].op2.op_type = IS_UNUSED;
+	EG(exception_op)[0].result.op_type = IS_UNUSED;
+	ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op));
+	EG(exception_op)[1].opcode = ZEND_HANDLE_EXCEPTION;
+	EG(exception_op)[1].op1.op_type = IS_UNUSED;
+	EG(exception_op)[1].op2.op_type = IS_UNUSED;
+	EG(exception_op)[1].result.op_type = IS_UNUSED;
+	ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op)+1);
+	EG(exception_op)[2].opcode = ZEND_HANDLE_EXCEPTION;
+	EG(exception_op)[2].op1.op_type = IS_UNUSED;
+	EG(exception_op)[2].op2.op_type = IS_UNUSED;
+	EG(exception_op)[2].result.op_type = IS_UNUSED;
+	ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op)+2);
+}
+/* }}} */
+
 #ifdef ZTS
 static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS_DC) /* {{{ */
 {
@@ -889,6 +911,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS
 	zend_startup_constants(TSRMLS_C);
 	zend_copy_constants(EG(zend_constants), GLOBAL_CONSTANTS_TABLE);
 	zend_init_rsrc_plist(TSRMLS_C);
+	zend_init_exception_op(TSRMLS_C);
 	EG(lambda_count) = 0;
 	EG(user_error_handler) = NULL;
 	EG(user_exception_handler) = NULL;
@@ -1131,6 +1154,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 
 #ifndef ZTS
 	zend_init_rsrc_plist(TSRMLS_C);
+	zend_init_exception_op(TSRMLS_C);
 #endif
 
 	if (start_builtin_functions) {
