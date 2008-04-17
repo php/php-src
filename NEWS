@@ -147,6 +147,7 @@ PHP                                                                        NEWS
 - Fixed possible crash in ext/soap because of uninitialized value. (Zdash Urf)
 - Fixed PECL bug #12431 (OCI8 ping functionality is broken). (Oracle Corp.)
 
+- Fixed bug #44648 (Attribute names not checked for wellformedness). (Rob)
 - Fixed bug #44414 (Incomplete reporting about abstract methods). (Dmitry)
 - Fixed bug #44390 (mysqli_bind_param/bind_result and Object member variables)
   (Andrey)
