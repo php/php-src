@@ -1,3 +1,86 @@
+2008-04-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/hash/EXPERIMENTAL:
+      Hash extension is no longer experimental
+
+2008-04-16  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/php_date.c
+      ext/date/tests/bug44742.phpt:
+      - MF52: Fixed bug #44703 (htmlspecialchars() does not detect bad character
+      set
+        argument).
+
+    * ext/date/tests/bug44742.phpt
+      ext/date/tests/bug44742.phpt:
+      
+      file bug44742.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/php_date.c:
+      - Fixed bug #44703 (htmlspecialchars() does not detect bad character set
+        argument).
+
+2008-04-16  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/ldap/ldap.c:
+      plug minor memleak
+
+    * ext/ldap/ldap.c:
+      always initialize mod_type
+
+    * ext/ldap/ldap.c:
+      unicode support and minor leak fix
+
+    * ext/ldap/ldap.c
+      ext/ldap/php_ldap.h:
+      convert ext/ldap to use new parameter parsing API
+      also restructure the extension to get rid of some garbage
+
+2008-04-16  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_debug.h
+      ext/mysqlnd/mysqlnd_libmysql_compat.h
+      ext/mysqlnd/mysqlnd_loaddata.c
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_ps_codec.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_result_meta.c
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqlnd/php_mysqlnd.c:
+      MFB: Update CVS from the development tree
+
+    * ext/mysql/php_mysql.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_debug.h
+      ext/mysqlnd/mysqlnd_libmysql_compat.h
+      ext/mysqlnd/mysqlnd_loaddata.c
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_ps_codec.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_result_meta.c
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqlnd/php_mysqlnd.c:
+      Update ext/mysql, ext/mysqli and ext/mysqlnd from development tree
+
+2008-04-16  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/mysql/php_mysql.c:
+      change %d to %ld and silence the warning
+
 2008-04-15  Zoe Slattery  <zoe.slattery@googlemail.com>
 
     * (PHP_5_3)
