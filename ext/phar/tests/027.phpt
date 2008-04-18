@@ -108,7 +108,8 @@ Warning: opendir(phar://): failed to open dir: phar error: no directory in "phar
 phar url "phar://" is unknown in %s027.php on line %d
 bool(false)
 
-Warning: opendir(phar://foo.phar/hi): failed to open dir: phar url "phar://foo.phar/hi" is unknown in %s027.php on line %d
+Warning: opendir(phar://foo.phar/hi): failed to open dir: phar error: invalid url or non-existent phar "phar://foo.phar/hi"
+phar url "phar://foo.phar/hi" is unknown in %s027.php on line %d
 bool(false)
 extract_list test
 .

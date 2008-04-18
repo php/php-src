@@ -442,7 +442,7 @@ PHP_METHOD(Phar, running)
 	fname = zend_get_executed_filename(TSRMLS_C);
 	fname_len = strlen(fname);
 
-	if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
+	if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
 		efree(entry);
 		if (retphar) {
 			RETVAL_STRINGL(fname, arch_len + 7, 1);
@@ -475,7 +475,7 @@ PHP_METHOD(Phar, mount)
 	fname = zend_get_executed_filename(TSRMLS_C);
 	fname_len = strlen(fname);
 
-	if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
+	if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
 		efree(entry);
 		if (SUCCESS != zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **)&pphar)) {
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s is not a phar archive, cannot mount", arch);
@@ -1076,19 +1076,21 @@ PHP_METHOD(Phar, canWrite)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::isValidPharFilename(string filename)
+/* {{{ proto bool Phar::isValidPharFilename(string filename[, bool executable = true])
  * Returns whether the given filename is a valid phar filename */
 PHP_METHOD(Phar, isValidPharFilename)
 {
 	char *fname;
 	const char *ext_str;
 	int fname_len, ext_len;
+	zend_bool executable = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &fname, &fname_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &fname, &fname_len, &executable) == FAILURE) {
 		return;
 	}
 
-	RETURN_BOOL(phar_detect_phar_fname_ext(fname, 1, &ext_str, &ext_len) == SUCCESS);
+	fname_len = executable;
+	RETURN_BOOL(phar_detect_phar_fname_ext(fname, 1, &ext_str, &ext_len, fname_len, 1, 1) == SUCCESS);
 }
 /* }}} */
 
@@ -1148,7 +1150,18 @@ PHP_METHOD(Phar, __construct)
 		return;
 	}
 
-	if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
+#if PHP_VERSION_ID >= 60000
+	objname = phar_obj->std.ce->name.s;
+#else
+	objname = phar_obj->std.ce->name;
+#endif
+	if (!strncmp(objname, "PharData", 8)) {
+		is_data = 1;
+	} else {
+		is_data = 0;
+	}
+
+	if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, !is_data, 2 TSRMLS_CC)) {
 		/* use arch (the basename for the archive) for fname instead of fname */
 		/* this allows support for RecursiveDirectoryIterator of subdirectories */
 		save_fname = fname;
@@ -1166,13 +1179,7 @@ PHP_METHOD(Phar, __construct)
 #endif
 	}
 
-#if PHP_VERSION_ID >= 60000
-	objname = phar_obj->std.ce->name.s;
-#else
-	objname = phar_obj->std.ce->name;
-#endif
-
-	if (phar_open_or_create_filename(fname, fname_len, alias, alias_len, objname, REPORT_ERRORS, &phar_data, &error TSRMLS_CC) == FAILURE) {
+	if (phar_open_or_create_filename(fname, fname_len, alias, alias_len, is_data, REPORT_ERRORS, &phar_data, &error TSRMLS_CC) == FAILURE) {
 
 		if (fname == arch) {
 			efree(arch);
@@ -3326,7 +3333,7 @@ PHP_METHOD(PharFileInfo, __construct)
 		return;
 	}
 
-	if (phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC) == FAILURE) {
+	if (phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC) == FAILURE) {
 		efree(arch);
 		efree(entry);
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,

@@ -411,7 +411,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, char *url_from, int mode, in
 	uint host_len;
 
 	/* pre-readonly check, we need to know if this is a data phar */
-	if (FAILURE == phar_split_fname(url_from, strlen(url_from), &arch, &arch_len, &entry2, &entry_len TSRMLS_CC)) {
+	if (FAILURE == phar_split_fname(url_from, strlen(url_from), &arch, &arch_len, &entry2, &entry_len, 2, 2 TSRMLS_CC)) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\", no phar archive specified", url_from);
 		return FAILURE;
 	}
@@ -536,8 +536,8 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_
 	uint host_len;
 
 	/* pre-readonly check, we need to know if this is a data phar */
-	if (FAILURE == phar_split_fname(url, strlen(url), &arch, &arch_len, &entry2, &entry_len TSRMLS_CC)) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot remove directory \"%s\", no phar archive specified", url);
+	if (FAILURE == phar_split_fname(url, strlen(url), &arch, &arch_len, &entry2, &entry_len, 2, 2 TSRMLS_CC)) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot remove directory \"%s\", no phar archive specified, or phar archive does not exist", url);
 		return FAILURE;
 	}
 	if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {

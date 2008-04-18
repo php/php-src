@@ -85,7 +85,7 @@ Warning: mkdir(): internal corruption of phar "%soops.phar" (truncated manifest 
 
 Warning: mkdir(): phar error: cannot create directory "phar://", no phar archive specified in %sdir.php on line %d
 
-Warning: rmdir(): phar error: cannot remove directory "phar://", no phar archive specified in %sdir.php on line %d
+Warning: rmdir(): phar error: cannot remove directory "phar://", no phar archive specified, or phar archive does not exist in %sdir.php on line %d
 
 Warning: rmdir(): phar error: cannot remove directory "hi" in phar "%sunknown.phar", directory does not exist in %sdir.php on line %d
 
