@@ -5,7 +5,7 @@ Bug #44113 (New collection creation can fail with OCI-22303)
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
+require(dirname(__FILE__).'/connect.inc');
 
 // Initialization
 
@@ -22,8 +22,7 @@ foreach ($stmtarray as $stmt) {
 // The test can take some time to complete and can exceed PHP's test
 // timout limit on slow networks.
 
-for ($x = 0; $x < 70000; $x++)
-{
+for ($x = 0; $x < 70000; $x++) {
 	if (!($var = oci_new_collection($c, 'BUG44113_LIST_T'))) {
 		print "Failed new collection creation on $x\n";
 		break;
