@@ -207,10 +207,9 @@ these steps:
 
 6.2.0 Important: if Oracle Database 11.1.0.6 with DRCP connections is
     used, then the Oracle database patch for bug 6474441 must be
-    applied (see section 6.5) or a workaround below used.  Without
-    this patch, "ORA-01000: maximum open cursors exceeded", "ORA-01001
-    invalid cursor" or "ORA-01002 fetch out of sequence" errors may
-    occur.
+    applied (see section 6.5).  Without this patch, "ORA-01000:
+    maximum open cursors exceeded", "ORA-01001 invalid cursor" or
+    "ORA-01002 fetch out of sequence" errors may occur.
 
     If the Oracle 11.1.0.6 database patch cannot be applied, one of
     the following three workarounds can be used to disable statement
@@ -325,7 +324,20 @@ Changing a password over DRCP connections will fail with the error
 "ORA-56609: Usage not supported with DRCP".  This is an documented
 restriction of Oracle Database 11g.
 
-6.4.2 LOGON Triggers can be used to set session properties
+6.4.2 Closing Connections
+
+With the PHP 5.3 OCI8 Beta extension, persistent connections can now
+be closed by the user, allowing greater control over connection
+resource usage.  Persistent connections will now also be closed
+automatically when there is no PHP variable referencing them, such as
+at the end of scope of a PHP user function.  This will rollback any
+uncommitted transaction.  These changes to persistent connections make
+them behave similarly to non-persistent connections, simplifying the
+interface, allowing for greater application consistency and
+predictability.  Use oci8.old_oci_close_semantics=1 to retain the
+historical behavior.
+
+6.4.3 LOGON Triggers can be used to set session properties
 
 The patch for Oracle Database 11.1.0.6 bug 6474441 (see section 6.5)
 allows PHP applications with DRCP connection to use a database LOGON

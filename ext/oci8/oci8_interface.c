@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 6                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2008 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -491,7 +491,7 @@ PHP_FUNCTION(oci_lob_seek)
 		case PHP_OCI_SEEK_END:
 			if ((descriptor->lob_size + offset) >= 0) {
 				descriptor->lob_current_position = descriptor->lob_size + offset;
-			} 
+			}
 			else {
 				descriptor->lob_current_position = 0;
 			}
@@ -540,7 +540,7 @@ PHP_FUNCTION(oci_lob_write)
 	zval **tmp, *z_descriptor = getThis();
 	php_oci_descriptor *descriptor;
 	int data_len;
-	long write_len = 0; 
+	long write_len = 0;
 	ub4 bytes_written;
 	zstr data;
 	zend_uchar data_type;
@@ -1065,7 +1065,7 @@ PHP_FUNCTION(oci_lob_close)
 	RETURN_TRUE;
 }
 /* }}} */
-#endif 
+#endif
 
 /* {{{ proto object oci_new_descriptor(resource connection [, int type]) U
    Initialize a new empty descriptor LOB/FILE (LOB is default) */
@@ -1288,7 +1288,7 @@ PHP_FUNCTION(oci_field_type_raw)
 {
 	php_oci_out_column *column;
 
-	column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0); 
+	column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 	if (column) {
 		RETURN_LONG(column->data_type);
 	}
@@ -1494,7 +1494,7 @@ PHP_FUNCTION(oci_fetch_all)
 		
 		efree(columns);
 		efree(outarrs);
-	} 
+	}
 
 	RETURN_LONG(rows);
 }
@@ -1558,17 +1558,15 @@ PHP_FUNCTION(oci_free_statement)
    Disconnect from database */
 PHP_FUNCTION(oci_close)
 {
-	/* oci_close for pconnect (if old_oci_close_semantics not set) would 
-	 * release the connection back to the client-side session pool (and to the 
+	/* oci_close for pconnect (if old_oci_close_semantics not set) would
+	 * release the connection back to the client-side session pool (and to the
 	 * server-side pool if Database Resident Connection Pool is being used).
 	 * Subsequent pconnects in the same script are not guaranteed to get the
-	 * same database session. When a persistent connection goes out-of-scope, 
-	 * the connection is not released to the session pool and is kept in the Plist
+	 * same database session.
 	 */
 
 	zval *z_connection;
 	php_oci_connection *connection;
-	int dummy_type = -1;
 
 	if (OCI_G(old_oci_close_semantics)) {
 		/* do nothing to keep BC */
@@ -1581,16 +1579,6 @@ PHP_FUNCTION(oci_close)
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 	zend_list_delete(connection->rsrc_id);
-
-	/* If refcount has fallen to zero(resource id removed from the list), 
-	 * Release the OCI session associated with this connection structure back 
-	 * to the underlying pool. The connection would be cached in the plist as a 
-	 * stub 
-	 */
-	if(connection->is_persistent && connection->using_spool && !zend_list_find(connection->rsrc_id, &dummy_type)) {
-
-		php_oci_connection_release(connection TSRMLS_CC);
-	}
 
 	ZVAL_NULL(z_connection);
 	
@@ -2228,7 +2216,7 @@ PHP_FUNCTION(oci_new_collection)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rT|T", &z_connection, &tdo, &tdo_len, &tdo_type, &schema, &schema_len, &schema_type) == FAILURE) {
 		return;
 	}
-    
+
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 	
 	if ( (collection = php_oci_collection_create(connection, tdo, tdo_len, schema, schema_len TSRMLS_CC)) ) {

@@ -1,9 +1,9 @@
 --TEST--
 PECL Bug #10194 (segfault in Instant Client when memory_limit is reached inside the callback) 
 --SKIPIF--
-<?php
+<?php 
 if (!extension_loaded('oci8')) die("skip no oci8 extension"); 
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platforms only");
 ?>
 --INI--
 memory_limit=9M
