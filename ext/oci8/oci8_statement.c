@@ -41,7 +41,7 @@
 #include "php_oci8.h"
 #include "php_oci8_int.h"
 
-/* {{{ php_oci_statement_create() 
+/* {{{ php_oci_statement_create()
  Create statemend handle and allocate necessary resources */
 php_oci_statement *php_oci_statement_create (php_oci_connection *connection, char *query, int query_len TSRMLS_DC)
 {
@@ -62,7 +62,7 @@ php_oci_statement *php_oci_statement_create (php_oci_connection *connection, cha
 	
 	if (query_len > 0) {
 #if HAVE_OCI_STMT_PREPARE2
-		PHP_OCI_CALL_RETURN(connection->errcode, OCIStmtPrepare2, 
+		PHP_OCI_CALL_RETURN(connection->errcode, OCIStmtPrepare2,
 				(
 				 connection->svc,
 				 &(statement->stmt),
@@ -124,7 +124,7 @@ php_oci_statement *php_oci_statement_create (php_oci_connection *connection, cha
 /* {{{ php_oci_statement_set_prefetch()
  Set prefetch buffer size for the statement (we're assuming that one row is ~1K sized) */
 int php_oci_statement_set_prefetch(php_oci_statement *statement, long size TSRMLS_DC)
-{ 
+{
 	ub4 prefetch = size;
 
 	if (size < 1) {
@@ -144,7 +144,7 @@ int php_oci_statement_set_prefetch(php_oci_statement *statement, long size TSRML
 }
 /* }}} */
 
-/* {{{ php_oci_statement_fetch() 
+/* {{{ php_oci_statement_fetch()
  Fetch a row from the statement */
 int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows TSRMLS_DC)
 {
@@ -192,7 +192,7 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows TSRMLS_DC)
 	while (statement->errcode == OCI_NEED_DATA) {
 		if (piecewisecols) {
 			PHP_OCI_CALL_RETURN(statement->errcode,
-				OCIStmtGetPieceInfo, 
+				OCIStmtGetPieceInfo,
 				   (
 					statement->stmt,
 					statement->err,
@@ -233,7 +233,7 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows TSRMLS_DC)
 			}
 		}
 
-		PHP_OCI_CALL_RETURN(statement->errcode,  OCIStmtFetch, (statement->stmt, statement->err, nrows, OCI_FETCH_NEXT, OCI_DEFAULT));
+		PHP_OCI_CALL_RETURN(statement->errcode,	 OCIStmtFetch, (statement->stmt, statement->err, nrows, OCI_FETCH_NEXT, OCI_DEFAULT));
 
 		if (piecewisecols) {
 			for (i = 0; i < statement->ncolumns; i++) {
@@ -275,7 +275,7 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ php_oci_statement_get_column() 
+/* {{{ php_oci_statement_get_column()
  Get column from the result set */
 php_oci_out_column *php_oci_statement_get_column(php_oci_statement *statement, long column_index, char *column_name, int column_name_len TSRMLS_DC)
 {
@@ -323,7 +323,7 @@ sb4 php_oci_define_callback(dvoid *ctx, OCIDefine *define, ub4 iter, dvoid **buf
 				php_oci_statement *nested_stmt;
 				TSRMLS_FETCH();
 
-				nested_stmt = php_oci_statement_create(outcol->statement->connection, NULL, 0 TSRMLS_CC); 
+				nested_stmt = php_oci_statement_create(outcol->statement->connection, NULL, 0 TSRMLS_CC);
 				if (!nested_stmt) {
 					return OCI_ERROR;
 				}
@@ -341,7 +341,7 @@ sb4 php_oci_define_callback(dvoid *ctx, OCIDefine *define, ub4 iter, dvoid **buf
 			}
 			break;
 		case SQLT_RDD:
-		case SQLT_BLOB: 
+		case SQLT_BLOB:
 		case SQLT_CLOB:
 		case SQLT_BFILE: {
 				php_oci_descriptor *descr;
@@ -377,7 +377,7 @@ sb4 php_oci_define_callback(dvoid *ctx, OCIDefine *define, ub4 iter, dvoid **buf
 }
 /* }}} */
 
-/* {{{ php_oci_statement_execute() 
+/* {{{ php_oci_statement_execute()
  Execute statement */
 int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 {
@@ -421,8 +421,8 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 		iters = 1;
 	}
 	
-	if (statement->last_query) { 
-		/* if we execute refcursors we don't have a query and 
+	if (statement->last_query) {
+		/* if we execute refcursors we don't have a query and
 		   we don't want to execute!!! */
 
 		if (statement->binds) {
@@ -464,7 +464,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 		if (statement->errcode != OCI_SUCCESS) {
 			statement->errcode = php_oci_error(statement->err, statement->errcode TSRMLS_CC);
 			PHP_OCI_HANDLE_ERROR(statement->connection, statement->errcode);
-			return 1; 
+			return 1;
 		}
 
 		statement->ncolumns = colcount;
@@ -476,7 +476,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 				efree(statement->columns);
 				/* out of memory */
 				return 1;
-			} 
+			}
 			
 			/* get column */
 			PHP_OCI_CALL_RETURN(statement->errcode, OCIParamGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, statement->err, (dvoid**)&param, counter));
@@ -507,7 +507,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 				return 1;
 			}
 	
-			/* get character set id  */
+			/* get character set id	 */
 			PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrGet, ((dvoid *)param, OCI_DTYPE_PARAM, (dvoid *)&outcol->charset_id, (ub4 *)0, OCI_ATTR_CHARSET_ID, statement->err));
 
 			if (statement->errcode != OCI_SUCCESS) {
@@ -524,7 +524,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 				PHP_OCI_CALL(OCIDescriptorFree, (param, OCI_DTYPE_PARAM));
 				statement->errcode = php_oci_error(statement->err, statement->errcode TSRMLS_CC);
 				PHP_OCI_HANDLE_ERROR(statement->connection, statement->errcode);
-				return 1; 
+				return 1;
 			}
 
 			outcol->storage_size4 = outcol->data_size;
@@ -584,9 +584,9 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 					dynamic = OCI_DYNAMIC_FETCH;
 					break;
 
-			 	case SQLT_RDD:	 /* ROWID */
-				case SQLT_BLOB:  /* binary LOB */
-				case SQLT_CLOB:  /* character LOB */
+				case SQLT_RDD:	 /* ROWID */
+				case SQLT_BLOB:	 /* binary LOB */
+				case SQLT_CLOB:	 /* character LOB */
 				case SQLT_BFILE: /* binary file LOB */
 					outcol->statement = statement; /* parent handle */
 
@@ -649,7 +649,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 			}
 
 			if (dynamic == OCI_DYNAMIC_FETCH) {
-				PHP_OCI_CALL_RETURN(statement->errcode, 
+				PHP_OCI_CALL_RETURN(statement->errcode,
 					OCIDefineByPos,
 					(
 						statement->stmt,							/* IN/OUT handle to the requested SQL query */
@@ -667,10 +667,10 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 				);
 
 			} else {
-				PHP_OCI_CALL_RETURN(statement->errcode, 
+				PHP_OCI_CALL_RETURN(statement->errcode,
 					OCIDefineByPos,
 					(
-						statement->stmt,							/* IN/OUT handle to the requested SQL query */ 
+						statement->stmt,							/* IN/OUT handle to the requested SQL query */
 						(OCIDefine **)&outcol->oci_define,			/* IN/OUT pointer to a pointer to a define handle */
 						statement->err,								/* IN/OUT An error handle  */
 						counter,									/* IN	  position in the select list */
@@ -695,11 +695,11 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 			/* additional OCIDefineDynamic() call */
 			switch (outcol->data_type) {
 				case SQLT_RSET:
-			 	case SQLT_RDD:
-				case SQLT_BLOB: 
+				case SQLT_RDD:
+				case SQLT_BLOB:
 				case SQLT_CLOB:
 				case SQLT_BFILE:
-					PHP_OCI_CALL_RETURN(statement->errcode, 
+					PHP_OCI_CALL_RETURN(statement->errcode,
 						OCIDefineDynamic,
 						(
 							outcol->oci_define,
@@ -718,7 +718,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ php_oci_statement_cancel() 
+/* {{{ php_oci_statement_cancel()
  Cancel statement */
 int php_oci_statement_cancel(php_oci_statement *statement TSRMLS_DC)
 {
@@ -727,11 +727,11 @@ int php_oci_statement_cancel(php_oci_statement *statement TSRMLS_DC)
 		
 } /* }}} */
 
-/* {{{ php_oci_statement_free() 
+/* {{{ php_oci_statement_free()
  Destroy statement handle and free associated resources */
 void php_oci_statement_free(php_oci_statement *statement TSRMLS_DC)
 {
- 	if (statement->stmt) {
+	if (statement->stmt) {
 #if HAVE_OCI_STMT_PREPARE2
 		if (statement->last_query_len) { /* FIXME: magical */
 			PHP_OCI_CALL(OCIStmtRelease, (statement->stmt, statement->err, NULL, 0, statement->errcode ? OCI_STRLS_CACHE_DELETE : OCI_DEFAULT));
@@ -778,7 +778,7 @@ void php_oci_statement_free(php_oci_statement *statement TSRMLS_DC)
 	OCI_G(num_statements)--;
 } /* }}} */
 
-/* {{{ php_oci_bind_pre_exec() 
+/* {{{ php_oci_bind_pre_exec()
  Helper function */
 int php_oci_bind_pre_exec(void *data TSRMLS_DC)
 {
@@ -786,13 +786,13 @@ int php_oci_bind_pre_exec(void *data TSRMLS_DC)
 
 	/* reset all bind stuff to a normal state..-. */
 
-	bind->indicator = 0; 
+	bind->indicator = 0;
 
 	return 0;
 }
 /* }}} */
 
-/* {{{ php_oci_bind_post_exec() 
+/* {{{ php_oci_bind_post_exec()
  Helper function */
 int php_oci_bind_post_exec(void *data TSRMLS_DC)
 {
@@ -898,19 +898,19 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ php_oci_bind_by_name() 
+/* {{{ php_oci_bind_by_name()
  Bind zval to the given placeholder */
 int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len, zval* var, long maxlength, long type TSRMLS_DC)
 {
-#ifdef PHP_OCI8_HAVE_COLLECTIONS 
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
 	php_oci_collection *bind_collection = NULL;
 #endif
 	php_oci_descriptor *bind_descriptor = NULL;
-	php_oci_statement  *bind_statement  = NULL;
-	dvoid *oci_desc                 = NULL;
-	/* dvoid *php_oci_collection           = NULL; */
-	OCIStmt *oci_stmt               = NULL;
-	dvoid *bind_data                = NULL;
+	php_oci_statement  *bind_statement	= NULL;
+	dvoid *oci_desc					= NULL;
+	/* dvoid *php_oci_collection		   = NULL; */
+	OCIStmt *oci_stmt				= NULL;
+	dvoid *bind_data				= NULL;
 	php_oci_bind bind, *old_bind, *bindp;
 	int mode = OCI_DATA_AT_EXEC;
 	sb4 value_sz = -1;
@@ -1001,7 +1001,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 			break;
 	}
 	
-	if (value_sz == 0) { 
+	if (value_sz == 0) {
 		value_sz = 1;
 	}
 	
@@ -1024,25 +1024,25 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 	bindp->statement = oci_stmt;
 	bindp->parent_statement = statement;
 	bindp->zval = var;
-	zval_add_ref(&var); 
+	zval_add_ref(&var);
 	
-	PHP_OCI_CALL_RETURN(statement->errcode, 
+	PHP_OCI_CALL_RETURN(statement->errcode,
 		OCIBindByName,
 		(
-			statement->stmt,                /* statement handle */
-			(OCIBind **)&bindp->bind,       /* bind hdl (will alloc) */
-			statement->err,               /* error handle */
-			(text*) name,                    /* placeholder name */					  
-			name_len,                        /* placeholder length */
-			(dvoid *)bind_data,              /* in/out data */
+			statement->stmt,				/* statement handle */
+			(OCIBind **)&bindp->bind,		/* bind hdl (will alloc) */
+			statement->err,				  /* error handle */
+			(text*) name,					 /* placeholder name */					
+			name_len,						 /* placeholder length */
+			(dvoid *)bind_data,				 /* in/out data */
 			value_sz, /* PHP_OCI_MAX_DATA_SIZE, */ /* max size of input/output data */
-			(ub2)type,                       /* in/out data type */
-			(dvoid *)&bindp->indicator,      /* indicator (ignored) */
-			(ub2 *)0,                        /* size array (ignored) */
-			(ub2 *)&bindp->retcode,          /* return code (ignored) */
-			(ub4)0,                          /* maxarr_len (PL/SQL only?) */
-			(ub4 *)0,                        /* actual array size (PL/SQL only?) */
-			mode                             /* mode */
+			(ub2)type,						 /* in/out data type */
+			(dvoid *)&bindp->indicator,		 /* indicator (ignored) */
+			(ub2 *)0,						 /* size array (ignored) */
+			(ub2 *)&bindp->retcode,			 /* return code (ignored) */
+			(ub4)0,							 /* maxarr_len (PL/SQL only?) */
+			(ub4 *)0,						 /* actual array size (PL/SQL only?) */
+			mode							 /* mode */
 		)
 	);
 
@@ -1053,7 +1053,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 	}
 
 	if (mode == OCI_DATA_AT_EXEC) {
-		PHP_OCI_CALL_RETURN(statement->errcode, OCIBindDynamic, 
+		PHP_OCI_CALL_RETURN(statement->errcode, OCIBindDynamic,
 				(
 				 bindp->bind,
 				 statement->err,
@@ -1074,7 +1074,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 #ifdef PHP_OCI8_HAVE_COLLECTIONS
 	if (type == SQLT_NTY) {
 		/* Bind object */
-		PHP_OCI_CALL_RETURN(statement->errcode, OCIBindObject, 
+		PHP_OCI_CALL_RETURN(statement->errcode, OCIBindObject,
 				(
 				 bindp->bind,
 				 statement->err,
@@ -1097,17 +1097,17 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 	return 0;
 } /* }}} */
 
-/* {{{ php_oci_bind_in_callback() 
+/* {{{ php_oci_bind_in_callback()
  Callback used when binding LOBs and VARCHARs */
 sb4 php_oci_bind_in_callback(
-					dvoid *ictxp,     /* context pointer */
-					OCIBind *bindp,   /* bind handle */
-					ub4 iter,         /* 0-based execute iteration value */
-					ub4 index,        /* index of current array for PL/SQL or row index for SQL */
-					dvoid **bufpp,    /* pointer to data */
-					ub4 *alenp,       /* size after value/piece has been read */
-					ub1 *piecep,      /* which piece */
-					dvoid **indpp)    /* indicator value */
+					dvoid *ictxp,	  /* context pointer */
+					OCIBind *bindp,	  /* bind handle */
+					ub4 iter,		  /* 0-based execute iteration value */
+					ub4 index,		  /* index of current array for PL/SQL or row index for SQL */
+					dvoid **bufpp,	  /* pointer to data */
+					ub4 *alenp,		  /* size after value/piece has been read */
+					ub1 *piecep,	  /* which piece */
+					dvoid **indpp)	  /* indicator value */
 {
 	php_oci_bind *phpbind;
 	zval *val;
@@ -1124,9 +1124,9 @@ sb4 php_oci_bind_in_callback(
 		*bufpp = 0;
 		*alenp = -1;
 		*indpp = (dvoid *)&phpbind->indicator;
-	} else 	if ((phpbind->descriptor == 0) && (phpbind->statement == 0)) {
+	} else	if ((phpbind->descriptor == 0) && (phpbind->statement == 0)) {
 		/* "normal string bind */
-		convert_to_string(val); 
+		convert_to_string(val);
 
 		*bufpp = Z_STRVAL_P(val);
 		*alenp = Z_STRLEN_P(val);
@@ -1136,7 +1136,7 @@ sb4 php_oci_bind_in_callback(
 		*bufpp = phpbind->statement;
 		*alenp = -1;		/* seems to be allright */
 		*indpp = (dvoid *)&phpbind->indicator;
-	} else { 
+	} else {
 		/* descriptor bind */
 		*bufpp = phpbind->descriptor;
 		*alenp = -1;		/* seems to be allright */
@@ -1151,15 +1151,15 @@ sb4 php_oci_bind_in_callback(
 /* {{{ php_oci_bind_out_callback()
  Callback used when binding LOBs and VARCHARs */
 sb4 php_oci_bind_out_callback(
-					dvoid *octxp,      /* context pointer */
-					OCIBind *bindp,    /* bind handle */
-					ub4 iter,          /* 0-based execute iteration value */
-					ub4 index,         /* index of current array for PL/SQL or row index for SQL */
-					dvoid **bufpp,     /* pointer to data */
-					ub4 **alenpp,      /* size after value/piece has been read */
-					ub1 *piecep,       /* which piece */
-					dvoid **indpp,     /* indicator value */
-					ub2 **rcodepp)     /* return code */
+					dvoid *octxp,	   /* context pointer */
+					OCIBind *bindp,	   /* bind handle */
+					ub4 iter,		   /* 0-based execute iteration value */
+					ub4 index,		   /* index of current array for PL/SQL or row index for SQL */
+					dvoid **bufpp,	   /* pointer to data */
+					ub4 **alenpp,	   /* size after value/piece has been read */
+					ub1 *piecep,	   /* which piece */
+					dvoid **indpp,	   /* indicator value */
+					ub2 **rcodepp)	   /* return code */
 {
 	php_oci_bind *phpbind;
 	zval *val;
@@ -1199,7 +1199,7 @@ sb4 php_oci_bind_out_callback(
 		Z_STRVAL_P(val) = ecalloc(1, Z_STRLEN_P(phpbind->zval) + 1);
 		
 		/* XXX we assume that zend-zval len has 4 bytes */
-		*alenpp = (ub4*) &Z_STRLEN_P(phpbind->zval); 
+		*alenpp = (ub4*) &Z_STRLEN_P(phpbind->zval);
 		*bufpp = Z_STRVAL_P(phpbind->zval);
 		*piecep = OCI_ONE_PIECE;
 		*rcodepp = &phpbind->retcode;
@@ -1211,7 +1211,7 @@ sb4 php_oci_bind_out_callback(
 }
 /* }}} */
 
-/* {{{ php_oci_statement_get_column_helper() 
+/* {{{ php_oci_statement_get_column_helper()
  Helper function to get column by name and index */
 php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAMETERS, int need_data)
 {
@@ -1277,7 +1277,7 @@ int php_oci_statement_get_type(php_oci_statement *statement, ub2 *type TSRMLS_DC
 	return 0;
 } /* }}} */
 
-/* {{{ php_oci_statement_get_numrows() 
+/* {{{ php_oci_statement_get_numrows()
  Get the number of rows fetched to the clientside (NOT the number of rows in the result set) */
 int php_oci_statement_get_numrows(php_oci_statement *statement, ub4 *numrows TSRMLS_DC)
 {
@@ -1298,7 +1298,7 @@ int php_oci_statement_get_numrows(php_oci_statement *statement, ub4 *numrows TSR
 	return 0;
 } /* }}} */
 
-/* {{{ php_oci_bind_array_by_name() 
+/* {{{ php_oci_bind_array_by_name()
  Bind arrays to PL/SQL types */
 int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int name_len, zval* var, long max_table_length, long maxlength, long type TSRMLS_DC)
 {
@@ -1363,15 +1363,15 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int nam
 	bindp->array.type = type;
 	zval_add_ref(&var);
 
-	PHP_OCI_CALL_RETURN(statement->errcode, 
-							OCIBindByName, 
+	PHP_OCI_CALL_RETURN(statement->errcode,
+							OCIBindByName,
 							(
 								statement->stmt,
 								(OCIBind **)&bindp->bind,
 								statement->err,
 								(text *)name,
 								name_len,
-								(dvoid *) bindp->array.elements, 
+								(dvoid *) bindp->array.elements,
 								(sb4) bind->array.max_length,
 								type,
 								(dvoid *)bindp->array.indicators,
@@ -1394,7 +1394,7 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, int nam
 	return 0;
 } /* }}} */
 
-/* {{{ php_oci_bind_array_helper_string() 
+/* {{{ php_oci_bind_array_helper_string()
  Bind arrays to PL/SQL types */
 php_oci_bind *php_oci_bind_array_helper_string(zval* var, long max_table_length, long maxlength TSRMLS_DC)
 {
@@ -1432,7 +1432,7 @@ php_oci_bind *php_oci_bind_array_helper_string(zval* var, long max_table_length,
 	for (i = 0; i < bind->array.current_length; i++) {
 		if (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE) {
 			convert_to_string_ex(entry);
-			bind->array.element_lengths[i] = Z_STRLEN_PP(entry); 
+			bind->array.element_lengths[i] = Z_STRLEN_PP(entry);
 			if (Z_STRLEN_PP(entry) == 0) {
 				bind->array.indicators[i] = -1;
 			}
@@ -1445,7 +1445,7 @@ php_oci_bind *php_oci_bind_array_helper_string(zval* var, long max_table_length,
 	zend_hash_internal_pointer_reset(hash);
 	for (i = 0; i < max_table_length; i++) {
 		if ((i < bind->array.current_length) && (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE)) {
-			int element_length; 
+			int element_length;
 			
 			convert_to_string_ex(entry);
 			element_length = (maxlength > Z_STRLEN_PP(entry)) ? Z_STRLEN_PP(entry) : maxlength;
@@ -1463,7 +1463,7 @@ php_oci_bind *php_oci_bind_array_helper_string(zval* var, long max_table_length,
 	return bind;
 } /* }}} */
 
-/* {{{ php_oci_bind_array_helper_number() 
+/* {{{ php_oci_bind_array_helper_number()
  Bind arrays to PL/SQL types */
 php_oci_bind *php_oci_bind_array_helper_number(zval* var, long max_table_length TSRMLS_DC)
 {
@@ -1501,7 +1501,7 @@ php_oci_bind *php_oci_bind_array_helper_number(zval* var, long max_table_length 
 	return bind;
 } /* }}} */
 
-/* {{{ php_oci_bind_array_helper_double() 
+/* {{{ php_oci_bind_array_helper_double()
  Bind arrays to PL/SQL types */
 php_oci_bind *php_oci_bind_array_helper_double(zval* var, long max_table_length TSRMLS_DC)
 {
@@ -1539,7 +1539,7 @@ php_oci_bind *php_oci_bind_array_helper_double(zval* var, long max_table_length 
 	return bind;
 } /* }}} */
 
-/* {{{ php_oci_bind_array_helper_date() 
+/* {{{ php_oci_bind_array_helper_date()
  Bind arrays to PL/SQL types */
 php_oci_bind *php_oci_bind_array_helper_date(zval* var, long max_table_length, php_oci_connection *connection TSRMLS_DC)
 {

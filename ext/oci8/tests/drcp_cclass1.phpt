@@ -3,14 +3,14 @@ DRCP: Test setting connection class inline
 --SKIPIF--
 <?php 
 if (!extension_loaded('oci8')) die ("skip no oci8 extension"); 
-require(__DIR__."/details.inc");
+require(dirname(__FILE__)."/details.inc");
 if (!$test_drcp) die("skip testing DRCP connection class only works in DRCP mode");
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user"); 
 ?>
 --FILE--
 <?php
 
-require(__DIR__."/details.inc");
+require(dirname(__FILE__)."/details.inc");
 
 // Initialization
 

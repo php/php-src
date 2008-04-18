@@ -1,11 +1,7 @@
 --TEST--
 DRCP: oci_connect()
 --SKIPIF--
-<?php
-if (!extension_loaded('oci8')) die("skip no oci8 extension");
-require(dirname(__FILE__)."/details.inc");
-if (!$test_drcp) die("skip expected test results are only valid for DRCP Mode");
-?>
+<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
 --INI--
 oci8.connection_class=test
 oci8.old_oci_close_semantics=0
