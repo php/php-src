@@ -1,3 +1,60 @@
+2008-04-17  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_3)
+      NEWS:
+      BFN
+
+    * (PHP_5_3)
+      ext/dom/element.c
+      ext/dom/tests/bug44648.phpt:
+      MFH: fix bug #44648 (Attribute names not checked for wellformedness)
+      add test
+      fix some warnings
+
+    * ext/dom/tests/bug44648.phpt
+      ext/dom/tests/bug44648.phpt:
+      
+      fix bug #44648 (Attribute names not checked for wellformedness)
+      fix some warnings
+
+    * ext/dom/element.c:
+      fix bug #44648 (Attribute names not checked for wellformedness)
+      fix some warnings
+
+2008-04-17  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/tests/023.phpt:
+      - New test
+
+    * ZendEngine2/tests/023.phpt
+      ZendEngine2/tests/023.phpt:
+      
+      file 023.phpt was initially added on branch PHP_5_3.
+
+2008-04-17  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      NEWS:
+      make Matt happy =)
+
+2008-04-17  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.c:
+      - Fixed typo
+
+    * (PHP_5_2)
+      ext/imap/php_imap.c:
+      - Fix typo
+
+2008-04-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.c:
+      Fixed bug #44226 (Throwing an exception causes crash in multithreaded SAPI)
+
 2008-04-16  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_3)

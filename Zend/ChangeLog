@@ -1,3 +1,21 @@
+2008-04-17  Felipe Pena  <felipensp@gmail.com>
+
+    * tests/023.phpt:
+      - New test
+
+    * tests/023.phpt
+      tests/023.phpt:
+      
+      file 023.phpt was initially added on branch PHP_5_3.
+
+2008-04-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.c
+      zend.c
+      zend_exceptions.c
+      zend_exceptions.c:
+      Fixed bug #44226 (Throwing an exception causes crash in multithreaded SAPI)
+
 2008-04-15  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute.h
