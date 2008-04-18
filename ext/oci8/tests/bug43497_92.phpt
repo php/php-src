@@ -6,9 +6,9 @@ if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 ob_start();
 phpinfo(INFO_MODULES);
 $phpinfo = ob_get_clean();
-$ov = preg_match('/Oracle Version => 9/', $phpinfo);
-if ($ov === 1) {
-	die ("skip expected output only valid for Oracle clients from 10g onwards");
+$ov = preg_match('/Oracle Version => 9.2/', $phpinfo);
+if ($ov !== 1) {
+	die ("skip expected output only valid for Oracle 9.2 clients");
 }
 ?>
 --FILE--
@@ -182,122 +182,122 @@ Temporary LOBs   = 0
 Loop count check = 100
 
 Run              = 2
-Temporary LOBs   = 0
+Temporary LOBs   = 100
 Loop count check = 100
 
 Run              = 3
-Temporary LOBs   = 0
+Temporary LOBs   = 200
 Loop count check = 100
 
 Run              = 4
-Temporary LOBs   = 0
+Temporary LOBs   = 300
 Loop count check = 100
 
 Run              = 5
-Temporary LOBs   = 0
+Temporary LOBs   = 400
 Loop count check = 100
 
 Run              = 6
-Temporary LOBs   = 0
+Temporary LOBs   = 500
 Loop count check = 100
 
 Run              = 7
-Temporary LOBs   = 0
+Temporary LOBs   = 600
 Loop count check = 100
 
 Run              = 8
-Temporary LOBs   = 0
+Temporary LOBs   = 700
 Loop count check = 100
 
 Run              = 9
-Temporary LOBs   = 0
+Temporary LOBs   = 800
 Loop count check = 100
 
 Run              = 10
-Temporary LOBs   = 0
+Temporary LOBs   = 900
 Loop count check = 100
 
 Implicit LOB use
 
 Run              = 1
-Temporary LOBs   = 0
+Temporary LOBs   = 1000
 Loop count check = 100
 
 Run              = 2
-Temporary LOBs   = 0
+Temporary LOBs   = 1100
 Loop count check = 100
 
 Run              = 3
-Temporary LOBs   = 0
+Temporary LOBs   = 1200
 Loop count check = 100
 
 Run              = 4
-Temporary LOBs   = 0
+Temporary LOBs   = 1300
 Loop count check = 100
 
 Run              = 5
-Temporary LOBs   = 0
+Temporary LOBs   = 1400
 Loop count check = 100
 
 Run              = 6
-Temporary LOBs   = 0
+Temporary LOBs   = 1500
 Loop count check = 100
 
 Run              = 7
-Temporary LOBs   = 0
+Temporary LOBs   = 1600
 Loop count check = 100
 
 Run              = 8
-Temporary LOBs   = 0
+Temporary LOBs   = 1700
 Loop count check = 100
 
 Run              = 9
-Temporary LOBs   = 0
+Temporary LOBs   = 1800
 Loop count check = 100
 
 Run              = 10
-Temporary LOBs   = 0
+Temporary LOBs   = 1900
 Loop count check = 100
 
 Explicit LOB with no free (i.e. a temp lob leak)
 
 Run              = 1
-Temporary LOBs   = 0
+Temporary LOBs   = 2000
 Loop count check = 100
 
 Run              = 2
-Temporary LOBs   = 99
+Temporary LOBs   = 2100
 Loop count check = 100
 
 Run              = 3
-Temporary LOBs   = 198
+Temporary LOBs   = 2200
 Loop count check = 100
 
 Run              = 4
-Temporary LOBs   = 297
+Temporary LOBs   = 2300
 Loop count check = 100
 
 Run              = 5
-Temporary LOBs   = 396
+Temporary LOBs   = 2400
 Loop count check = 100
 
 Run              = 6
-Temporary LOBs   = 495
+Temporary LOBs   = 2500
 Loop count check = 100
 
 Run              = 7
-Temporary LOBs   = 594
+Temporary LOBs   = 2600
 Loop count check = 100
 
 Run              = 8
-Temporary LOBs   = 693
+Temporary LOBs   = 2700
 Loop count check = 100
 
 Run              = 9
-Temporary LOBs   = 792
+Temporary LOBs   = 2800
 Loop count check = 100
 
 Run              = 10
-Temporary LOBs   = 891
+Temporary LOBs   = 2900
 Loop count check = 100
 Done

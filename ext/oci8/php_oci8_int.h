@@ -267,13 +267,22 @@ typedef struct { /* php_oci_out_column {{{ */
 		OCI_G(in_call) = 0; \
 	} while (0)
 
+/* Check for errors that indicate the connection to the DB is no
+ * longer valid.  If it isn't, then the PHP connection is marked to be
+ * reopened by the next PHP OCI8 connect command.  This is most useful
+ * for persistent connections.	The error number list is not
+ * exclusive.  The error number comparisons and the
+ * OCI_ATTR_SERVER_STATUS check are done for maximum cross-version
+ * compatibility. In the far future, only the attribute check will be
+ * needed.
+ */
 #define PHP_OCI_HANDLE_ERROR(connection, errcode) \
 	do {										  \
 		switch (errcode) {						  \
 			case  1013:							  \
 				zend_bailout();					  \
 				break;							  \
-			case    22:							  \
+			case	22:							  \
 			case   378:							  \
 			case   602:							  \
 			case   603:							  \
@@ -296,7 +305,7 @@ typedef struct { /* php_oci_out_column {{{ */
 				(connection)->is_open = 0;		  \
 				break;							  \
 			default:										\
-			{ /* do both numeric checks (above) and the status check for maximum version compatibility */ \
+			{												\
 				ub4 serverStatus = OCI_SERVER_NORMAL;		\
 				PHP_OCI_CALL(OCIAttrGet, ((dvoid *)(connection)->server, OCI_HTYPE_SERVER, (dvoid *)&serverStatus, \
 										  (ub4 *)0, OCI_ATTR_SERVER_STATUS, (connection)->err)); \
@@ -472,7 +481,6 @@ ZEND_BEGIN_MODULE_GLOBALS(oci) /* {{{ */
 	zend_bool	 old_oci_close_semantics;		/* old_oci_close_semantics flag (to determine the way oci_close() should behave) */
 
 	int			 shutdown;						/* in shutdown flag */
-	int			 request_shutdown;				/* in request shutdown flag */
 
 	OCIEnv		*env;							/* global environment handle */
 
