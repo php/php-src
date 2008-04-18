@@ -1014,60 +1014,53 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 /**
  * Create or open a phar for writing
  */
-int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int alias_len, char *objname, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
+int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
-	const char *ext_str;
-	int ext_len, is_data = 0, zip = 0, tar = 0;
+	const char *ext_str, *z;
+	int ext_len;
 
 	if (error) {
 		*error = NULL;
 	}
 
-	if (phar_detect_phar_fname_ext(fname, 1, &ext_str, &ext_len) == SUCCESS) {
-
-		if (ext_len >= sizeof(".zip")-1 && !memcmp((void *) ext_str, (void *) ".zip", sizeof(".zip")-1)) {
-			zip = 1;
+	/* first try to open an existing file */
+	if (phar_detect_phar_fname_ext(fname, 1, &ext_str, &ext_len, !is_data, 0, 1 TSRMLS_CC) == SUCCESS) {
+		goto check_file;
+	}
+	/* next try to create a new file */
+	if (FAILURE == phar_detect_phar_fname_ext(fname, 1, &ext_str, &ext_len, !is_data, 1, 1 TSRMLS_CC)) {
+		if (error) {
+			spprintf(error, 0, "Cannot create phar '%s', file extension (or combination) not recognised", fname);
 		}
-
-		if ((ext_len >= sizeof(".tar")-1 && !memcmp((void *) ext_str, (void *) ".tar", sizeof(".tar")-1)) || (ext_len >= sizeof(".tgz")-1 && !memcmp((void *) ext_str, (void *) ".tgz", sizeof(".tgz")-1))) {
-			tar = 1;
-		}
-
-		if (tar || zip) {
-			if (objname && strncmp(objname, "PharData", 8) != 0) {
-				/* Nested exception causes memleak here */
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot open '%s' as a Phar object. Use PharData::__construct() for a standard %s archive", fname, tar ? "tar" : "zip");
-				return FAILURE;
-			}
-			is_data = 1;
-		} else {
-			if (objname && strncmp(objname, "PharData", 8) == 0) {
-				/* Nested exception causes memleak here */
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot open '%s' as a PharData object. Use Phar::__construct() for archives named other than .zip or .tar", fname);
-				return FAILURE;
-			}
-		}
-
-	} else {
-
-		/* Nested exception causes memleak here */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot open '%s' as a %s object, file extension (or combination) not recognised", fname, objname);
 		return FAILURE;
 	}
 
+check_file:
 	if (phar_open_loaded(fname, fname_len, alias, alias_len, is_data, options, pphar, 0 TSRMLS_CC) == SUCCESS) {
+		if (is_data && !((*pphar)->is_tar || (*pphar)->is_zip)) {
+			if (error) {
+				spprintf(error, 0, "Cannot open '%s' as a PharData object. Use Phar::__construct() for executable archives", fname);
+			}
+		}
+		if (PHAR_G(readonly) && !is_data && ((*pphar)->is_tar || (*pphar)->is_zip)) {
+			phar_entry_info *stub;
+			if (FAILURE == zend_hash_find(&((*pphar)->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1, (void **)&stub)) {
+				spprintf(error, 0, "'%s' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive", fname);
+				return FAILURE;
+			}
+		}
 		if (pphar && (!PHAR_G(readonly) || is_data)) {
 			(*pphar)->is_writeable = 1;
 		}
 		return SUCCESS;
 	}
 
-	if ((ext_len >= sizeof(".phar.zip")-1 && !memcmp((void *) ext_str, (void *) ".phar.zip", sizeof(".phar.zip")-1)) || zip) {
+	if (ext_len > 3 && (z = memchr(ext_str, 'z', ext_len)) && ((ext_str + ext_len) - z >= 2) && !memcmp(z + 1, "ip", 2)) {
 		// assume zip-based phar
 		return phar_open_or_create_zip(fname, fname_len, alias, alias_len, is_data, options, pphar, error TSRMLS_CC);
 	}
 
-	if ((ext_len >= sizeof(".phar.tar")-1 && !memcmp((void *) ext_str, (void *) ".phar.tar", sizeof(".phar.tar")-1)) || tar) {
+	if (ext_len > 3 && (z = memchr(ext_str, 't', ext_len)) && ((ext_str + ext_len) - z >= 2) && !memcmp(z + 1, "ar", 2)) {
 		// assume tar-based phar
 		return phar_open_or_create_tar(fname, fname_len, alias, alias_len, is_data, options, pphar, error TSRMLS_CC);
 	}
@@ -1399,67 +1392,234 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 }
 /* }}} */
 
-int phar_detect_phar_fname_ext(const char *filename, int check_length, const char **ext_str, int *ext_len) /* {{{ */
+/*
+ * given the location of the file extension and the start of the file path,
+ * determine the end of the portion of the path (i.e. /path/to/file.ext/blah
+ * grabs "/path/to/file.ext" as does the straight /path/to/file.ext),
+ * stat it to determine if it exists.
+ * if so, check to see if it is a directory and fail if so
+ * if not, check to see if its dirname() exists (i.e. "/path/to") and is a directory
+ * succeed if we are creating the file, otherwise fail.
+ */
+static int phar_analyze_path(const char *fname, const char *ext, int ext_len, int for_create TSRMLS_DC)
 {
-	int i;
-	char end;
+	php_stream_statbuf ssb;
+	char *realpath, old, *a = (char *)(ext + ext_len);
+
+	old = *a;
+	*a = '\0';
+	if ((realpath = expand_filepath(fname, NULL TSRMLS_CC))) {
+		if (zend_hash_exists(&(PHAR_GLOBALS->phar_fname_map), realpath, strlen(realpath))) {
+			*a = old;
+			efree(realpath);
+			return SUCCESS;
+		}
+		efree(realpath);
+	}
+	if (SUCCESS == php_stream_stat_path((char *) fname, &ssb)) {
+		*a = old;
+		if (ssb.sb.st_mode & S_IFDIR) {
+			return FAILURE;
+		}
+		if (for_create == 1) {
+			return FAILURE;
+		}
+		return SUCCESS;
+	} else {
+		char *slash;
+
+		if (!for_create) {
+			*a = old;
+			return FAILURE;
+		}
+		slash = (char *) strrchr(fname, '/');
+		*a = old;
+		if (slash) {
+			old = *slash;
+			*slash = '\0';
+		}
+		if (SUCCESS != php_stream_stat_path((char *) fname, &ssb)) {
+			if (slash) {
+				*slash = old;
+			} else {
+				if (!(realpath = expand_filepath(fname, NULL TSRMLS_CC))) {
+					return FAILURE;
+				}
+				a = strstr(realpath, fname) + ((ext - fname) + ext_len);
+				*a = '\0';
+				slash = strrchr(realpath, '/');
+				if (slash) {
+					*slash = '\0';
+				} else {
+					efree(realpath);
+					return FAILURE;
+				}
+				if (SUCCESS != php_stream_stat_path(realpath, &ssb)) {
+					efree(realpath);
+					return FAILURE;
+				}
+				efree(realpath);
+				if (ssb.sb.st_mode & S_IFDIR) {
+					return SUCCESS;
+				}
+			}
+			return FAILURE;
+		}
+		if (slash) {
+			*slash = old;
+		}
+		if (ssb.sb.st_mode & S_IFDIR) {
+			return SUCCESS;
+		}
+		return FAILURE;
+	}
+}
+
+/* check for ".phar" in extension */
+static int phar_check_str(const char *fname, const char *ext_str, int ext_len, int executable, int for_create TSRMLS_DC)
+{
+	char test[51];
 	const char *pos;
-#define EXTINF(check, ext) { check, ext, sizeof(ext)-1 }
-	const struct {
-		int check;
-		const char * const ext;
-		int len;
-	} ext_info[] = {
-		/* longer exts must be specified later */
-		EXTINF(1, ".php"),
-		EXTINF(0, ".phar"),
-		EXTINF(0, ".tgz"),
-		EXTINF(0, ".zip"),
-		EXTINF(0, ".tar"),
-		EXTINF(0, ".tar.gz"),
-		EXTINF(0, ".tar.bz2"),
-		EXTINF(0, ".phar.gz"),
-		EXTINF(0, ".phar.bz2"),
-		EXTINF(0, ".phar.php"),
-		EXTINF(0, ".phar.tar"),
-		EXTINF(0, ".phar.zip"),
-		EXTINF(0, ".phar.tar.gz"),
-		EXTINF(0, ".phar.tar.bz2"),
-		EXTINF(0, ".phar.tar.php"),
-		EXTINF(0, ".phar.zip.php")};
+
+	if (ext_len >= 50) {
+		return FAILURE;
+	}
+	if (executable == 1) {
+		/* copy "." as well */
+		memcpy(test, ext_str - 1, ext_len + 1);
+		test[ext_len + 1] = '\0';
+		/* executable phars must contain ".phar" as a valid extension (phar://.pharmy/oops is invalid) */
+		/* (phar://hi/there/.phar/oops is also invalid) */
+		if ((pos = strstr(test, ".phar")) && (*(pos - 1) != '/')
+				&& (pos += 5) && (*pos == '\0' || *pos == '/' || *pos == '.')) {
+			return phar_analyze_path(fname, ext_str, ext_len, for_create TSRMLS_CC);
+		} else {
+			return FAILURE;
+		}
+	}
+	/* data phars need only contain a single non-"." to be valid */
+	if (*(ext_str + 1) != '.' && *(ext_str + 1) != '/' && *(ext_str + 1) != '\0') {
+		return phar_analyze_path(fname, ext_str, ext_len, for_create TSRMLS_CC);
+	}
+	return FAILURE;
+}
+
+/*
+ * if executable is 1, only returns SUCCESS if the extension is one of the tar/zip .phar extensions
+ * if executable is 0, it returns SUCCESS only if the filename does *not* contain ".phar" anywhere, and treats
+ * the first extension as the filename extension
+ *
+ * if an extension is found, it sets ext_str to the location of the file extension in filename,
+ * and ext_len to the length of the extension.
+ * for urls like "phar://alias/oops" it instead sets ext_len to -1 and returns FAILURE, which tells
+ * the calling function to use "alias" as the phar alias
+ *
+ * the last parameter should be set to tell the thing to assume that filename is the full path, and only to check the
+ * extension rules, not to iterate.
+ */
+int phar_detect_phar_fname_ext(const char *filename, int check_length, const char **ext_str, int *ext_len, int executable, int for_create, int is_complete TSRMLS_DC) /* {{{ */
+{
+	const char *pos, *slash;
+	int filename_len = strlen(filename);
 
 	*ext_str = NULL;
-	for (i = 0; i < sizeof(ext_info) / sizeof(ext_info[0]); ++i) {
-		pos = strstr(filename, ext_info[i].ext);
-		/* If pos is not NULL then we found the extension. But we have to check
-		 * to more things. First some extensions cannot be the end of the string
-		 * (e.g. .php). Second when we already found an extension at an earlier
-		 * position, we ignore the new one. In case we found one at the same
-		 * place, we probably found a longer one. As the list is ordered that
-		 * way we do not need to check for a greater length.
-		 */
-		if (pos && (/*1*/ !ext_info[i].check || pos[ext_info[i].len] != '\0')
-		        && (/*2*/ !*ext_str || pos <= *ext_str)) {
+
+	if (!filename_len || filename_len == 1) {
+		return FAILURE;
+	}
+	phar_request_initialize(TSRMLS_C);
+	/* first check for extract_list */
+	if (zend_hash_num_elements(&(PHAR_GLOBALS->phar_plain_map))) {
+		for (zend_hash_internal_pointer_reset(&(PHAR_GLOBALS->phar_plain_map));
+		zend_hash_has_more_elements(&(PHAR_GLOBALS->phar_plain_map)) == SUCCESS;
+		zend_hash_move_forward(&(PHAR_GLOBALS->phar_plain_map))) {
+			char *key;
+			uint keylen;
+			ulong intkey;
+
+			if (HASH_KEY_IS_STRING != zend_hash_get_current_key_ex(&(PHAR_GLOBALS->phar_plain_map), &key, &keylen, &intkey, 0, NULL)) {
+				continue;
+			}
+
+			if (keylen <= filename_len && !memcmp(key, filename, keylen - 1)) {
+				/* found plain map, so we grab the extension, if any */
+				if (is_complete && keylen != filename_len + 1) {
+					continue;
+				}
+				if (for_create == 1) {
+					return FAILURE;
+				}
+				if (!executable == 1) {
+					return FAILURE;
+				}
+				pos = strrchr(key, '/');
+				if (pos) {
+					pos = filename + (pos - key);
+					slash = strchr(pos, '.');
+					if (slash) {
+						*ext_str = slash;
+						*ext_len = keylen - (slash - filename);
+						return SUCCESS;
+					}
+					*ext_str = pos;
+					*ext_len = -1;
+					return FAILURE;
+				}
+				*ext_str = filename + keylen - 1;
+				*ext_len = -1;
+				return FAILURE;
+			}
+		}
+	}
+	/* next check for alias in first segment */
+	pos = strchr(filename, '/');
+	if (pos) {
+		if (zend_hash_exists(&(PHAR_GLOBALS->phar_alias_map), filename, pos - filename)) {
 			*ext_str = pos;
-			*ext_len = ext_info[i].len;
-		}
-	}
-	if (!*ext_str) {
-		/* We have an alias with no extension, so locate the first / and fail */
-		*ext_str = strstr(filename, "/");
-		if (*ext_str) {
 			*ext_len = -1;
+			return FAILURE;
 		}
+	}
+
+	pos = strchr(filename + 1, '.');
+next_extension:
+	if (!pos) {
 		return FAILURE;
 	}
-	if (check_length && (*ext_str)[*ext_len] != '\0') {
-		return FAILURE;
+
+	slash = strchr(pos, '/');
+	if (!slash) {
+		/* this is a url like "phar://blah.phar" with no directory */
+		*ext_str = pos;
+		*ext_len = strlen(pos);
+		/* file extension must contain "phar" */
+		switch (phar_check_str(filename, *ext_str, *ext_len, executable, for_create TSRMLS_CC)) {
+			case SUCCESS :
+				return SUCCESS;
+			case FAILURE :
+				/* we are at the end of the string, so we fail */
+				return FAILURE;
+		}
 	}
-	end = (*ext_str)[*ext_len];
-	if (end != '\0' && end != '/' && end != '\\') {
-		return FAILURE;
+	/* we've found an extension that ends at a directory separator */
+	*ext_str = pos;
+	*ext_len = slash - pos;
+	switch (phar_check_str(filename, *ext_str, *ext_len, executable, for_create TSRMLS_CC)) {
+		case SUCCESS :
+			return SUCCESS;
+		case FAILURE :
+			/* look for more extensions */
+			if (is_complete) {
+				return FAILURE;
+			}
+			pos = strchr(pos + 1, '.');
+			if (pos) {
+				*ext_str = NULL;
+				*ext_len = 0;
+			}
+			goto next_extension;
 	}
-	return SUCCESS;
+	return FAILURE;
 }
 /* }}} */
 
@@ -1612,7 +1772,7 @@ char *phar_fix_filepath(char *path, int *new_len, int use_cwd TSRMLS_DC) /* {{{ 
  *
  * This is used by phar_open_url()
  */
-int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_len, char **entry, int *entry_len TSRMLS_DC) /* {{{ */
+int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_len, char **entry, int *entry_len, int executable, int for_create TSRMLS_DC) /* {{{ */
 {
 	const char *ext_str;
 	int ext_len;
@@ -1623,7 +1783,7 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 	}
 
 	ext_len = 0;
-	if (phar_detect_phar_fname_ext(filename, 0, &ext_str, &ext_len) == FAILURE) {
+	if (phar_detect_phar_fname_ext(filename, 0, &ext_str, &ext_len, executable, for_create, 0) == FAILURE) {
 		if (ext_len != -1) {
 			if (!ext_str) {
 				/* no / detected, restore arch for error message */
@@ -2698,7 +2858,7 @@ int phar_zend_open(const char *filename, zend_file_handle *handle TSRMLS_DC) /* 
 		fname = zend_get_executed_filename(TSRMLS_C);
 		fname_len = strlen(fname);
 		if (fname_len > 7 && !strncasecmp(fname, "phar://", 7)) {
-			if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
+			if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 1, 0 TSRMLS_CC)) {
 				zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar);
 				efree(arch);
 				efree(entry);

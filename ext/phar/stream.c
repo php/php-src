@@ -71,13 +71,13 @@ php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, 
 		}
 		return NULL;			
 	}		
-	if (phar_split_fname(filename, strlen(filename), &arch, &arch_len, &entry, &entry_len TSRMLS_CC) == FAILURE) {
+	if (phar_split_fname(filename, strlen(filename), &arch, &arch_len, &entry, &entry_len, 2, (mode[0] == 'w' ? 2 : 0) TSRMLS_CC) == FAILURE) {
 		if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
 			if (arch && !entry) {
 				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory (always use full path to a new phar)", filename, arch);
 				arch = NULL;
 			} else {
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\" (cannot contain .phar.php and .phar.gz/.phar.bz2)", filename);
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url or non-existent phar \"%s\"", filename);
 			}
 		}
 		return NULL;
@@ -116,7 +116,7 @@ php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, 
 			php_url_free(resource);
 			return NULL;
 		}
-		if (phar_open_or_create_filename(resource->host, arch_len, NULL, 0, NULL, options, NULL, &error TSRMLS_CC) == FAILURE)
+		if (phar_open_or_create_filename(resource->host, arch_len, NULL, 0, 0, options, NULL, &error TSRMLS_CC) == FAILURE)
 		{
 			if (error) {
 				if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
@@ -741,12 +741,10 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 
 	error = NULL;
 
-	if ((resource_from = phar_open_url(wrapper, url_from, "rb", options|PHP_STREAM_URL_STAT_QUIET TSRMLS_CC)) == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid url \"%s\"", url_from, url_to, url_from);
+	if ((resource_from = phar_open_url(wrapper, url_from, "wb", options|PHP_STREAM_URL_STAT_QUIET TSRMLS_CC)) == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid or non-writable url \"%s\"", url_from, url_to, url_from);
 		return 0;
 	}
-
-
 	if (SUCCESS != phar_get_archive(&pfrom, resource_from->host, strlen(resource_from->host), NULL, 0, &error TSRMLS_CC)) {
 		pfrom = NULL;
 		if (error) {
@@ -758,9 +756,21 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: write operations disabled by phar.readonly INI setting");
 		return 0;
 	}
+
 	if ((resource_to = phar_open_url(wrapper, url_to, "wb", options|PHP_STREAM_URL_STAT_QUIET TSRMLS_CC)) == NULL) {
 		php_url_free(resource_from);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid url \"%s\"", url_from, url_to, url_to);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid or non-writable url \"%s\"", url_from, url_to, url_to);
+		return 0;
+	}
+	if (SUCCESS != phar_get_archive(&pto, resource_to->host, strlen(resource_to->host), NULL, 0, &error TSRMLS_CC)) {
+		if (error) {
+			efree(error);
+		}
+		pto = NULL;
+	}
+	if (PHAR_G(readonly) && (!pto || !pto->is_data)) {
+		php_url_free(resource_from);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: write operations disabled by phar.readonly INI setting");
 		return 0;
 	}
 
@@ -769,13 +779,6 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		php_url_free(resource_to);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\", not within the same phar archive", url_from, url_to);
 		return 0;
-	}
-
-	if (SUCCESS != phar_get_archive(&pto, resource_to->host, strlen(resource_to->host), NULL, 0, &error TSRMLS_CC)) {
-		if (error) {
-			efree(error);
-		}
-		pto = NULL;
 	}
 
 	/* we must have at the very least phar://alias.phar/internalfile.php */

@@ -45,7 +45,7 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 			goto skip_phar;
 		}
 		fname_len = strlen(fname);
-		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
+		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
 			php_stream_context *context = NULL;
 			php_stream *stream;
 			char *name;
@@ -109,7 +109,7 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 			goto skip_phar;
 		}
 		fname_len = strlen(fname);
-		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
+		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
 			char *name, *old;
 			phar_archive_data **pphar;
 
@@ -223,7 +223,7 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 			goto skip_phar;
 		}
 		fname_len = strlen(fname);
-		if (FAILURE == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
+		if (FAILURE == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
 			goto skip_phar;
 		}
 
@@ -303,7 +303,7 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 			goto skip_phar;
 		}
 		fname_len = strlen(fname);
-		if (FAILURE == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
+		if (FAILURE == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
 			goto skip_phar;
 		}
 
@@ -573,7 +573,7 @@ void phar_file_stat(const char *filename, php_stat_len filename_length, int type
 			goto skip_phar;
 		}
 		fname_len = strlen(fname);
-		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
+		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
 			phar_archive_data **pphar;
 
 			efree(entry);
@@ -827,7 +827,7 @@ PHAR_FUNC(phar_is_file) /* {{{ */
 			goto skip_phar;
 		}
 		fname_len = strlen(fname);
-		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
+		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
 			phar_archive_data **pphar;
 
 			efree(entry);
@@ -875,7 +875,7 @@ PHAR_FUNC(phar_is_link) /* {{{ */
 			goto skip_phar;
 		}
 		fname_len = strlen(fname);
-		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len TSRMLS_CC)) {
+		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
 			phar_archive_data **pphar;
 
 			efree(entry);
