@@ -5,8 +5,8 @@ http://pear.php.net/dtd/package-2.0
 http://pear.php.net/dtd/package-2.0.xsd">
  <name>oci8</name>
  <channel>pecl.php.net</channel>
- <summary>OCI8 functions</summary>
- <description>These functions allow you to access Oracle database servers using the Oracle Call Interface (OCI8).
+ <summary>Extension for Oracle Database</summary>
+ <description>This extension allows you to access Oracle databases using the Oracle Call Interface (OCI8). It can be built using Oracle 9.2, 10.2 or 11.1 client libraries, and allows Oracle's standard cross-version connectivity.
  </description>
  <lead>
   <name>Antony Dovgal</name>
