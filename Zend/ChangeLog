@@ -1,3 +1,32 @@
+2008-04-18  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      tests/024.phpt
+      tests/025.phpt
+      tests/026.phpt
+      tests/027.phpt
+      tests/028.phpt
+      tests/029.phpt
+      tests/030.phpt:
+      - New tests
+
+    * tests/024.phpt
+      tests/024.phpt
+      tests/025.phpt
+      tests/025.phpt
+      tests/026.phpt
+      tests/026.phpt
+      tests/027.phpt
+      tests/027.phpt
+      tests/028.phpt
+      tests/028.phpt
+      tests/029.phpt
+      tests/029.phpt
+      tests/030.phpt
+      tests/030.phpt:
+      
+      - New tests
+
 2008-04-17  Felipe Pena  <felipensp@gmail.com>
 
     * tests/023.phpt:
