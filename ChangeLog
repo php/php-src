@@ -1,3 +1,168 @@
+2008-04-18  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/024.phpt
+      ZendEngine2/tests/025.phpt
+      ZendEngine2/tests/026.phpt
+      ZendEngine2/tests/027.phpt
+      ZendEngine2/tests/028.phpt
+      ZendEngine2/tests/029.phpt
+      ZendEngine2/tests/030.phpt:
+      - New tests
+
+    * ZendEngine2/tests/024.phpt
+      ZendEngine2/tests/024.phpt
+      ZendEngine2/tests/025.phpt
+      ZendEngine2/tests/025.phpt
+      ZendEngine2/tests/026.phpt
+      ZendEngine2/tests/026.phpt
+      ZendEngine2/tests/027.phpt
+      ZendEngine2/tests/027.phpt
+      ZendEngine2/tests/028.phpt
+      ZendEngine2/tests/028.phpt
+      ZendEngine2/tests/029.phpt
+      ZendEngine2/tests/029.phpt
+      ZendEngine2/tests/030.phpt
+      ZendEngine2/tests/030.phpt:
+      
+      - New tests
+
+2008-04-18  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/date/tests/bug44742.phpt:
+      fix test
+
+2008-04-18  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/oci8/php_oci8.h:
+      MFB: Set extension status back to dev
+
+    * (PHP_5_3)
+      ext/oci8/php_oci8.h:
+      Set extension status back to dev
+
+    * (PHP_5_3)
+      ext/oci8/package2.xml:
+      Update description
+
+2008-04-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+2008-04-18  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_3)
+      ext/oci8/CREDITS
+      ext/oci8/README
+      ext/oci8/oci8.c
+      ext/oci8/oci8_collection.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/package2.xml
+      ext/oci8/php_oci8.h
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/bug43497.phpt
+      ext/oci8/tests/bug43497_92.phpt
+      ext/oci8/tests/bug44113.phpt
+      ext/oci8/tests/drcp_cclass1.phpt
+      ext/oci8/tests/drcp_connect1.phpt
+      ext/oci8/tests/drcp_scope1.phpt
+      ext/oci8/tests/drcp_scope2.phpt
+      ext/oci8/tests/drcp_scope3.phpt
+      ext/oci8/tests/drcp_scope4.phpt
+      ext/oci8/tests/drcp_scope5.phpt
+      ext/oci8/tests/password.phpt
+      ext/oci8/tests/password_2.phpt
+      ext/oci8/tests/password_new.phpt
+      ext/oci8/tests/password_old.phpt
+      ext/oci8/tests/pecl_bug10194_blob.phpt
+      ext/oci8/tests/pecl_bug10194_blob_64.phpt
+      ext/oci8/tests/testping.phpt:
+      MFH
+      
+      Code:
+        - Do scope-end release for oci_pconnect (oci8.old_oci_close_semantics=1
+      gives old behavior)
+        - Fix session reuse with 10.2 client libs
+        - Fix the Ping macro version check for 10.2
+        - Add type check associated with zend_list_find
+        - Code connection re-organized for reuse
+        - Format comments
+        - WS changes
+        - Prepare for new PECL release
+      Tests:
+        - Add new tests
+        - Rationalize password tests
+        - Revert use of __DIR__ so tests will work with PHP 5.2
+        - Update some skipifs to make tests more portable
+
+    * ext/oci8/tests/bug43497_92.phpt
+      ext/oci8/tests/bug43497_92.phpt
+      ext/oci8/tests/drcp_scope2.phpt
+      ext/oci8/tests/drcp_scope3.phpt
+      ext/oci8/tests/drcp_scope3.phpt
+      ext/oci8/tests/drcp_scope4.phpt
+      ext/oci8/tests/drcp_scope4.phpt
+      ext/oci8/tests/drcp_scope5.phpt
+      ext/oci8/tests/drcp_scope5.phpt
+      ext/oci8/tests/password.phpt
+      ext/oci8/tests/password_2.phpt
+      ext/oci8/tests/password_new.phpt
+      ext/oci8/tests/password_old.phpt
+      ext/oci8/tests/pecl_bug10194_blob.phpt
+      ext/oci8/tests/pecl_bug10194_blob_64.phpt
+      ext/oci8/tests/testping.phpt:
+      
+      Code:
+        - Do scope-end release for oci_pconnect (oci8.old_oci_close_semantics=1
+      gives old behavior)
+        - Fix session reuse with 10.2 client libs
+        - Fix the Ping macro version check for 10.2
+        - Add type check associated with zend_list_find
+        - Code connection re-organized for reuse
+        - Format comments
+        - WS changes
+        - Prepare for new PECL release
+      Tests:
+        - Add new tests
+        - Rationalize password tests
+        - Revert use of __DIR__ so tests will work with PHP 5.2
+        - Update some skipifs to make tests more portable
+
+    * ext/oci8/CREDITS
+      ext/oci8/README
+      ext/oci8/oci8.c
+      ext/oci8/oci8_collection.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8.h
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/bug43497.phpt
+      ext/oci8/tests/bug44113.phpt
+      ext/oci8/tests/drcp_cclass1.phpt
+      ext/oci8/tests/drcp_connect1.phpt
+      ext/oci8/tests/drcp_scope1.phpt:
+      Code:
+        - Do scope-end release for oci_pconnect (oci8.old_oci_close_semantics=1
+      gives old behavior)
+        - Fix session reuse with 10.2 client libs
+        - Fix the Ping macro version check for 10.2
+        - Add type check associated with zend_list_find
+        - Code connection re-organized for reuse
+        - Format comments
+        - WS changes
+        - Prepare for new PECL release
+      Tests:
+        - Add new tests
+        - Rationalize password tests
+        - Revert use of __DIR__ so tests will work with PHP 5.2
+        - Update some skipifs to make tests more portable
+
 2008-04-17  Rob Richards  <rrichards@ctindustries.net>
 
     * (PHP_5_3)
