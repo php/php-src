@@ -1541,7 +1541,7 @@ int phar_detect_phar_fname_ext(const char *filename, int check_length, const cha
 				continue;
 			}
 
-			if (keylen <= filename_len && !memcmp(key, filename, keylen - 1)) {
+			if (keylen <= (uint) filename_len && !memcmp(key, filename, keylen - 1)) {
 				/* found plain map, so we grab the extension, if any */
 				if (is_complete && keylen != filename_len + 1) {
 					continue;
@@ -1574,7 +1574,7 @@ int phar_detect_phar_fname_ext(const char *filename, int check_length, const cha
 	/* next check for alias in first segment */
 	pos = strchr(filename, '/');
 	if (pos) {
-		if (zend_hash_exists(&(PHAR_GLOBALS->phar_alias_map), filename, pos - filename)) {
+		if (zend_hash_exists(&(PHAR_GLOBALS->phar_alias_map), (char *) filename, pos - filename)) {
 			*ext_str = pos;
 			*ext_len = -1;
 			return FAILURE;
@@ -1783,7 +1783,7 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 	}
 
 	ext_len = 0;
-	if (phar_detect_phar_fname_ext(filename, 0, &ext_str, &ext_len, executable, for_create, 0) == FAILURE) {
+	if (phar_detect_phar_fname_ext(filename, 0, &ext_str, &ext_len, executable, for_create, 0 TSRMLS_CC) == FAILURE) {
 		if (ext_len != -1) {
 			if (!ext_str) {
 				/* no / detected, restore arch for error message */
