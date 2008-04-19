@@ -68,31 +68,31 @@ object(Exception)#2 (6) {
 ok
 --UEXPECTF--
 object(Exception)#2 (6) {
-  ["message":protected]=>
-  string(3) "foo"
-  ["string":"Exception":private]=>
-  string(0) ""
-  ["code":protected]=>
+  [u"message":protected]=>
+  unicode(3) "foo"
+  [u"string":u"Exception":private]=>
+  unicode(0) ""
+  [u"code":protected]=>
   int(0)
-  ["file":protected]=>
-  string(32) "%s"
-  ["line":protected]=>
+  [u"file":protected]=>
+  unicode(%d) "%s"
+  [u"line":protected]=>
   int(%d)
-  ["trace":"Exception":private]=>
+  [u"trace":u"Exception":private]=>
   array(1) {
     [0]=>
     array(6) {
-      ["file"]=>
-      string(32) "%s"
-      ["line"]=>
+      [u"file"]=>
+      unicode(%d) "%s"
+      [u"line"]=>
       int(%d)
-      ["function"]=>
-      string(3) "bar"
-      ["class"]=>
-      string(3) "foo"
-      ["type"]=>
-      string(2) "->"
-      ["args"]=>
+      [u"function"]=>
+      unicode(3) "bar"
+      [u"class"]=>
+      unicode(3) "foo"
+      [u"type"]=>
+      unicode(2) "->"
+      [u"args"]=>
       array(0) {
       }
     }
