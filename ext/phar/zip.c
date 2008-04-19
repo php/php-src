@@ -212,9 +212,13 @@ foundit:
 	if (locator.comment_len) {
 		metadata = (char *) emalloc(PHAR_GET_16(locator.comment_len));
 		if (locator.comment_len != php_stream_read(fp, metadata, PHAR_GET_16(locator.comment_len))) {
+			if (error) {
+				spprintf(error, 4096, "phar error: corrupt zip archive, zip file comment truncated in zip-based phar \"%s\"", fname);
+			}
 			php_stream_close(fp);
 			efree(mydata->fname);
 			efree(mydata);
+			efree(metadata);
 			return FAILURE;
 		}
 		if (phar_parse_metadata(&metadata, &mydata->metadata, PHAR_GET_16(locator.comment_len) TSRMLS_CC) == FAILURE) {
