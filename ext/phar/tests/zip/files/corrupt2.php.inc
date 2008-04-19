@@ -4,4 +4,8 @@ $a = new corrupt_zipmaker;
 $a->addFile('hi', null, 'hii');
 $a->addFile('hi2', null, 'hii2', null, null, 'encrypt', 'encrypt');
 $a->writeZip(dirname(__FILE__) . '/encrypted.zip');
+$a = new corrupt_zipmaker;
+$a->addFile('hi', null, 'hii');
+$a->addFile('', null, 'stdin');
+$a->writeZip(dirname(__FILE__) . '/stdin.zip');
 ?>
