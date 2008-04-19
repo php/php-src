@@ -261,16 +261,16 @@ class corrupt_zipmaker
 					$this->offset, strlen($this->start),
 					strlen($this->comment)) . $this->comment;
 				break;
-			case 'cdir_len' :
+			case 'cdir_offset' :
 				$write .= "PK\x05\x06\x00\x00\x00\x00" .
 					pack("vvVVv", $this->count, $this->count,
 					$this->offset, strlen($this->start) - 3,
 					strlen($this->comment)) . $this->comment;
 				break;
-			case 'cdir_offset' :
+			case 'cdir_len' :
 				$write .= "PK\x05\x06\x00\x00\x00\x00" .
 					pack("vvVVv", $this->count, $this->count,
-					$this->offset + 1, strlen($this->start),
+					$this->offset - 5, strlen($this->start),
 					strlen($this->comment)) . $this->comment;
 				break;
 			case 'comment' :
