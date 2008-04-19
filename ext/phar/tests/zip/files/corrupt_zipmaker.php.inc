@@ -279,6 +279,7 @@ class corrupt_zipmaker
 					strlen($this->start), $this->offset + 1,
 					strlen($this->comment) + 1) . $this->comment;
 				break;
+			case 'none' :
 		}
 		file_put_contents($zipfile, $write);
 	}
