@@ -1090,7 +1090,7 @@ PHP_METHOD(Phar, isValidPharFilename)
 	}
 
 	fname_len = executable;
-	RETURN_BOOL(phar_detect_phar_fname_ext(fname, 1, &ext_str, &ext_len, fname_len, 1, 1) == SUCCESS);
+	RETURN_BOOL(phar_detect_phar_fname_ext(fname, 1, &ext_str, &ext_len, fname_len, executable, 1 TSRMLS_CC) == SUCCESS);
 }
 /* }}} */
 
