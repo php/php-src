@@ -1775,7 +1775,7 @@ char *phar_fix_filepath(char *path, int *new_len, int use_cwd TSRMLS_DC) /* {{{ 
 int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_len, char **entry, int *entry_len, int executable, int for_create TSRMLS_DC) /* {{{ */
 {
 	const char *ext_str;
-	int ext_len;
+	int ext_len, free_filename = 0;
 
 	if (!strncasecmp(filename, "phar://", 7)) {
 		filename += 7;
@@ -1783,11 +1783,19 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 	}
 
 	ext_len = 0;
+#ifdef PHP_WIN32
+	free_filename = 1;
+	filename = estrndup(filename, filename_len);
+	phar_unixify_path_separators(filename, filename_len);
+#endif
 	if (phar_detect_phar_fname_ext(filename, 0, &ext_str, &ext_len, executable, for_create, 0 TSRMLS_CC) == FAILURE) {
 		if (ext_len != -1) {
 			if (!ext_str) {
 				/* no / detected, restore arch for error message */
 				*arch = filename;
+			}
+			if (free_filename) {
+				efree(filename);
 			}
 			return FAILURE;
 		}
@@ -1797,9 +1805,6 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 
 	*arch_len = ext_str - filename + ext_len;
 	*arch = estrndup(filename, *arch_len);
-#ifdef PHP_WIN32
-	phar_unixify_path_separators(*arch, *arch_len);
-#endif
 	if (ext_str[ext_len]) {
 		*entry_len = filename_len - *arch_len;
 		*entry = estrndup(ext_str+ext_len, *entry_len);
@@ -1810,6 +1815,9 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 	} else {
 		*entry_len = 1;
 		*entry = estrndup("/", 1);
+	}
+	if (free_filename) {
+		efree(filename);
 	}
 	return SUCCESS;
 }
