@@ -304,6 +304,7 @@ foundit:
 		if (PHAR_GET_16(zipentry.extra_len)) {
 			off_t loc = php_stream_tell(fp);
 			if (FAILURE == phar_zip_process_extra(fp, &entry, PHAR_GET_16(zipentry.extra_len) TSRMLS_CC)) {
+				efree(entry.filename);
 				PHAR_ZIP_FAIL("Unable to process extra field header for file in central directory");
 			}
 			php_stream_seek(fp, loc + PHAR_GET_16(zipentry.extra_len), SEEK_SET);
@@ -324,8 +325,45 @@ foundit:
 					PHAR_ZIP_FAIL("bzip2 extension is required");
 				}
 				break;
+			case 1 :
+				efree(entry.filename);
+				PHAR_ZIP_FAIL("unsupported compression method (Shrunk) used in this zip");
+			case 2 :
+			case 3 :
+			case 4 :
+			case 5 :
+				efree(entry.filename);
+				PHAR_ZIP_FAIL("unsupported compression method (Reduce) used in this zip");
+			case 6 :
+				efree(entry.filename);
+				PHAR_ZIP_FAIL("unsupported compression method (Implode) used in this zip");
+			case 7 :
+				efree(entry.filename);
+				PHAR_ZIP_FAIL("unsupported compression method (Tokenize) used in this zip");
+			case 9 :
+				efree(entry.filename);
+				PHAR_ZIP_FAIL("unsupported compression method (Deflate64) used in this zip");
+			case 10 :
+				efree(entry.filename);
+				PHAR_ZIP_FAIL("unsupported compression method (PKWare Implode/old IBM TERSE) used in this zip");
+			case 14 :
+				efree(entry.filename);
+				PHAR_ZIP_FAIL("unsupported compression method (LZMA) used in this zip");
+			case 18 :
+				efree(entry.filename);
+				PHAR_ZIP_FAIL("unsupported compression method (IBM TERSE) used in this zip");
+			case 19 :
+				efree(entry.filename);
+				PHAR_ZIP_FAIL("unsupported compression method (IBM LZ77) used in this zip");
+			case 97 :
+				efree(entry.filename);
+				PHAR_ZIP_FAIL("unsupported compression method (WavPack) used in this zip");
+			case 98 :
+				efree(entry.filename);
+				PHAR_ZIP_FAIL("unsupported compression method (PPMd) used in this zip");
 			default :
-				PHAR_ZIP_FAIL("unsupported compression method used in this zip");
+				efree(entry.filename);
+				PHAR_ZIP_FAIL("unsupported compression method (unknown) used in this zip");
 		}
 		/* get file metadata */
 		if (zipentry.comment_len) {

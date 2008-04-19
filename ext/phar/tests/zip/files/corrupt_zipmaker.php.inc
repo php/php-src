@@ -84,11 +84,18 @@ class corrupt_zipmaker
 		return $mtime;
 	}
 
-	private function getFileEntry($compmethod, $mtime, $crc32, $complength, $uncomplength, $filename, $data, $corrupt)
+	private function getFileEntry($compmethod, $mtime, $crc32, $complength, $uncomplength, $filename, $data, $corrupt, $fakecomp)
 	{
 		switch ($corrupt) {
 			case null :
 				$file = "PK\x03\x04\x14\x00\x00\x00" . pack('v', $compmethod) .
+						$mtime .
+						pack("VVVvv", $crc32, $complength, $uncomplength, strlen($filename), 0x00) .
+						$filename .
+						$data;
+				break;
+			case 'compress' :
+				$file = "PK\x03\x04\x14\x00\x00\x00" . pack('v', $fakecomp) .
 						$mtime .
 						pack("VVVvv", $crc32, $complength, $uncomplength, strlen($filename), 0x00) .
 						$filename .
@@ -154,7 +161,7 @@ class corrupt_zipmaker
 		return $file;
 	}
 
-	private function getCentralEntry($compmethod, $mtime, $crc32, $complength, $uncomplength, $filename, $comment, $corrupt, &$offset)
+	private function getCentralEntry($compmethod, $mtime, $crc32, $complength, $uncomplength, $filename, $comment, $corrupt, &$offset, $fakecomp)
 	{
 		settype($comment, 'string');
 		switch ($corrupt) {
@@ -168,6 +175,14 @@ class corrupt_zipmaker
 				break;
 			case 'encrypt' :
 				$central = "PK\x01\x02\x00\x00\x14\x00\x01\x00" . pack('v', $compmethod) .
+						$mtime .
+						pack("VVVvvvvvVV", $crc32, $complength, $uncomplength, strlen($filename), 0x00,strlen($comment),0x00,0x00,
+							0x0000, $this->offset).
+						$filename . $comment;
+				$offset = strlen($central);
+				break;
+			case 'compress' :
+				$central = "PK\x01\x02\x00\x00\x14\x00\x00\x00" . pack('v', $fakecomp) .
 						$mtime .
 						pack("VVVvvvvvVV", $crc32, $complength, $uncomplength, strlen($filename), 0x00,strlen($comment),0x00,0x00,
 							0x0000, $this->offset).
@@ -226,7 +241,7 @@ class corrupt_zipmaker
 		return $central;
 	}
 
-	function addFile($filename, $mtime, $data, $comment = null, $compress = null, $filecorrupt = null, $centralcorrupt = null)
+	function addFile($filename, $mtime, $data, $comment = null, $compress = null, $filecorrupt = null, $centralcorrupt = null, $fakecomp = 1)
 	{
 		$mtime = $this->getMTime($mtime ? $mtime : null);
 
@@ -245,10 +260,10 @@ class corrupt_zipmaker
 		}
 		$complength = strlen($data);
 
-		$this->start .= ($file = $this->getFileEntry($compmethod, $mtime, $crc32, $complength, $uncomplength, $filename, $data, $filecorrupt));
+		$this->start .= ($file = $this->getFileEntry($compmethod, $mtime, $crc32, $complength, $uncomplength, $filename, $data, $filecorrupt, $fakecomp));
 
 		$offset = 0;
-		$this->central .= $this->getCentralEntry($compmethod, $mtime, $crc32, $complength, $uncomplength, $filename, $comment, $centralcorrupt, $offset);
+		$this->central .= $this->getCentralEntry($compmethod, $mtime, $crc32, $complength, $uncomplength, $filename, $comment, $centralcorrupt, $offset, $fakecomp);
 
 		$this->offset += $offset;
 		$this->count++;
