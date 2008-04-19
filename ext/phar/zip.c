@@ -158,6 +158,9 @@ int phar_open_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, i
 		size = sizeof(locator) + 65536;
 		if (FAILURE == php_stream_seek(fp, -size, SEEK_END)) {
 			php_stream_close(fp);
+			if (error) {
+				spprintf(error, 4096, "phar error: unable to search for end of central directory in zip-based phar \"%s\"", fname);
+			}
 			return FAILURE;
 		}
 	} else {
@@ -165,6 +168,9 @@ int phar_open_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, i
 	}
 	if (!(read = php_stream_read(fp, buf, size))) {
 		php_stream_close(fp);
+		if (error) {
+			spprintf(error, 4096, "phar error: unable to read in data to search for end of central directory in zip-based phar \"%s\"", fname);
+		}
 		return FAILURE;
 	}
 	while ((p=(char *) memchr(p + 1, 'P', (size_t)(buf - (p+1) + sizeof(locator) + 65536 - 4 + 1))) != NULL) {
@@ -174,10 +180,23 @@ int phar_open_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, i
 		}
 	}
 	php_stream_close(fp);
+	if (error) {
+		spprintf(error, 4096, "phar error: end of central directory not found in zip-based phar \"%s\"", fname);
+	}
 	return FAILURE;
 foundit:
 	if (locator.centraldisk != 0 || locator.disknumber != 0) {
 		/* split archives not handled */
+		php_stream_close(fp);
+		if (error) {
+			spprintf(error, 4096, "phar error: split archives spanning multiple zips cannot be processed in zip-based phar \"%s\"", fname);
+		}
+		return FAILURE;
+	}
+	if (locator.counthere != locator.count) {
+		if (error) {
+			spprintf(error, 4096, "phar error: corrupt zip archive, conflicting file count in end of central directory record in zip-based phar \"%s\"", fname);
+		}
 		php_stream_close(fp);
 		return FAILURE;
 	}
