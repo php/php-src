@@ -37,12 +37,12 @@ array(2) {
 
 --> Pattern: '()'; match: ''
 
-Warning: split(): Invalid Regular Expression to split() in %s on line 19
+Warning: split(): Invalid Regular Expression in %s on line 19
 bool(false)
 
 --> Pattern: '()'; match: 'abcdef'
 
-Warning: split(): Invalid Regular Expression to split() in %s on line 19
+Warning: split(): Invalid Regular Expression in %s on line 19
 bool(false)
 
 --> Pattern: '[x]|[^x]'; match: 'abcdef'
