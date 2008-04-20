@@ -1409,6 +1409,9 @@ static int phar_analyze_path(const char *fname, const char *ext, int ext_len, in
 	old = *a;
 	*a = '\0';
 	if ((realpath = expand_filepath(fname, NULL TSRMLS_CC))) {
+#ifdef PHP_WIN32
+		phar_unixify_path_separators(realpath, strlen(realpath));
+#endif
 		if (zend_hash_exists(&(PHAR_GLOBALS->phar_fname_map), realpath, strlen(realpath))) {
 			*a = old;
 			efree(realpath);
