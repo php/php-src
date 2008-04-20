@@ -164,7 +164,7 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 	read = php_stream_read(fp, buf, sizeof(buf));
 	if (read != sizeof(buf)) {
 		if (error) {
-			spprintf(error, 4096, "phar error: \"%s\" is not a tar file", fname);
+			spprintf(error, 4096, "phar error: \"%s\" is not a tar file or is truncated", fname);
 		}
 		php_stream_close(fp);
 		return FAILURE;
@@ -187,7 +187,7 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 	do {
 		if (read != sizeof(buf)) {
 			if (error) {
-				spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file", fname);
+				spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 			}
 			php_stream_close(fp);
 			zend_hash_destroy(&myphar->manifest);
