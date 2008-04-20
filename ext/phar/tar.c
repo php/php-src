@@ -152,7 +152,7 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 {
 	char buf[512], *actual_alias = NULL;
 	phar_entry_info entry = {0};
-	size_t pos = 0, read;
+	size_t pos = 0, read, totalsize;
 	tar_header *hdr;
 	php_uint32 sum1, sum2, size, old;
 	phar_archive_data *myphar, **actual;
@@ -161,6 +161,9 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 		*error = NULL;
 	}
 
+	php_stream_seek(fp, 0, SEEK_END);
+	totalsize = php_stream_tell(fp);
+	php_stream_seek(fp, 0, SEEK_SET);
 	read = php_stream_read(fp, buf, sizeof(buf));
 	if (read != sizeof(buf)) {
 		if (error) {
@@ -185,18 +188,6 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 	entry.is_crc_checked = 1;
 	entry.phar = myphar;
 	do {
-		if (read != sizeof(buf)) {
-			if (error) {
-				spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
-			}
-			php_stream_close(fp);
-			zend_hash_destroy(&myphar->manifest);
-			myphar->manifest.arBuckets = 0;
-			zend_hash_destroy(&myphar->mounted_dirs);
-			myphar->mounted_dirs.arBuckets = 0;
-			efree(myphar);
-			return FAILURE;
-		}
 		pos += sizeof(buf);
 		hdr = (tar_header*) buf;
 		sum1 = phar_tar_number(hdr->checksum, sizeof(hdr->checksum));
@@ -304,9 +295,34 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 		size = (size+511)&~511;
 		pos += size;
 		if (((hdr->typeflag == 0) || (hdr->typeflag == TAR_FILE)) && size > 0) {
+			/* this is not good enough - seek succeeds even on truncated tars */
 			php_stream_seek(fp, size, SEEK_CUR);
+			if (php_stream_tell(fp) > totalsize) {
+				if (error) {
+					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
+				}
+				php_stream_close(fp);
+				zend_hash_destroy(&myphar->manifest);
+				myphar->manifest.arBuckets = 0;
+				zend_hash_destroy(&myphar->mounted_dirs);
+				myphar->mounted_dirs.arBuckets = 0;
+				efree(myphar);
+				return FAILURE;
+			}
 		}
 		read = php_stream_read(fp, buf, sizeof(buf));
+		if (read != sizeof(buf)) {
+			if (error) {
+				spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
+			}
+			php_stream_close(fp);
+			zend_hash_destroy(&myphar->manifest);
+			myphar->manifest.arBuckets = 0;
+			zend_hash_destroy(&myphar->mounted_dirs);
+			myphar->mounted_dirs.arBuckets = 0;
+			efree(myphar);
+			return FAILURE;
+		}
 	} while (read != 0);
 	myphar->fname = estrndup(fname, fname_len);
 #ifdef PHP_WIN32
