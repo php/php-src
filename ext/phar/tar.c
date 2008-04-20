@@ -97,7 +97,7 @@ static php_uint32 phar_tar_checksum(char *buf, int len) /* {{{ */
 }
 /* }}} */
 
-int phar_is_tar(char *buf)
+int phar_is_tar(char *buf, char *fname)
 {
 	tar_header *header = (tar_header *) buf;
 	php_uint32 checksum = phar_tar_number(header->checksum, sizeof(header->checksum));
@@ -113,6 +113,10 @@ int phar_is_tar(char *buf)
 	memset(header->checksum, ' ', sizeof(header->checksum));
 	ret = (checksum == phar_tar_checksum(buf, 512));
 	memcpy(header->checksum, save, sizeof(header->checksum));
+	if (!ret && strstr(fname, ".tar")) {
+		/* probably a corrupted tar - so we will pretend it is one */
+		return 1;
+	}
 	return ret;
 }
 
@@ -196,18 +200,6 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 		}
 		memset(hdr->checksum, ' ', sizeof(hdr->checksum));
 		sum2 = phar_tar_checksum(buf, old?sizeof(old_tar_header):sizeof(tar_header));
-		if (sum1 != sum2) {
-			if (error) {
-				spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file", fname);
-			}
-			php_stream_close(fp);
-			zend_hash_destroy(&myphar->manifest);
-			myphar->manifest.arBuckets = 0;
-			zend_hash_destroy(&myphar->mounted_dirs);
-			myphar->mounted_dirs.arBuckets = 0;
-			efree(myphar);
-			return FAILURE;
-		}
 
 		size = entry.uncompressed_filesize = entry.compressed_filesize =
 			phar_tar_number(hdr->size, sizeof(hdr->size));
@@ -231,6 +223,19 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 				entry.filename[entry.filename_len - 1] = '\0';
 				entry.filename_len--;
 			}
+		}
+		if (sum1 != sum2) {
+			if (error) {
+				spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (checksum mismatch of file \"%s\")", fname, entry.filename);
+			}
+			efree(entry.filename);
+			php_stream_close(fp);
+			zend_hash_destroy(&myphar->manifest);
+			myphar->manifest.arBuckets = 0;
+			zend_hash_destroy(&myphar->mounted_dirs);
+			myphar->mounted_dirs.arBuckets = 0;
+			efree(myphar);
+			return FAILURE;
 		}
 
 		entry.tar_type = ((old & (hdr->typeflag == 0))?'0':hdr->typeflag);
@@ -257,6 +262,7 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 				if (error) {
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file - symbolic link to non-existent file", fname);
 				}
+				efree(entry.filename);
 				php_stream_close(fp);
 				zend_hash_destroy(&myphar->manifest);
 				myphar->manifest.arBuckets = 0;
