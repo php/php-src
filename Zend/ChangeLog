@@ -1,3 +1,8 @@
+2008-04-19  Felipe Pena  <felipensp@gmail.com>
+
+    * tests/030.phpt:
+      - Fixed tests
+
 2008-04-18  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)

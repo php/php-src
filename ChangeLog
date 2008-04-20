@@ -1,3 +1,10 @@
+2008-04-19  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/tests/030.phpt
+      ext/standard/tests/array/natcasesort_variation3.phpt
+      ext/standard/tests/network/ip_x86_64.phpt:
+      - Fixed tests
+
 2008-04-18  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
