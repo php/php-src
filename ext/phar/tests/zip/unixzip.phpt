@@ -19,8 +19,8 @@ if (isset($a['notempty/hi.txt'])) {
 ?>
 ===DONE===
 --EXPECTF--
-dir phar://%szip.zip/empty
-phar://%szip.zip/hi.txt
-dir phar://%szip.zip/notempty
+dir phar://%szip.zip%cempty
+phar://%szip.zip%chi.txt
+dir phar://%szip.zip%cnotempty
 phar://%szip.zip/notempty/hi.txt
 ===DONE===
