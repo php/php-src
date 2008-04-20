@@ -4,37 +4,14 @@ Phar: tar with hard link and symbolic link
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.tar';
-$pname = 'phar://' . $fname;
-
-include dirname(__FILE__) . '/files/corrupt_tarmaker.php.inc';
-$a = new corrupt_tarmaker($fname, 'none');
-$a->init();
-$a->addFile('symlink', 'internal/file.txt', array(
-                    'mode' => 0xA000 + 0644,
-                    'uid' => 0,
-                    'gid' => 0,
-                    'size' => strlen('internal/file.txt'),
-                    'mtime' => time(),
-                ), 'symlink');
-$a->addFile('hardlink', 'internal/file.txt', array(
-                    'mode' => 0xA000 + 0644,
-                    'uid' => 0,
-                    'gid' => 0,
-                    'size' => strlen('internal/file.txt'),
-                    'mtime' => time(),
-                ));
-$a->addFile('internal/file.txt', 'hi there');
-$a->close();
-
 try {
-	$p = new PharData($fname);
+	$p = new PharData(dirname(__FILE__) . '/files/links.tar');
 } catch (Exception $e) {
 	echo $e->getMessage() . "\n";
 }
-var_dump($p['symlink']->getContent());
-var_dump($p['hardlink']->getContent());
-var_dump($p['internal/file.txt']->getContent());
+var_dump($p['testit/link']->getContent());
+var_dump($p['testit/hard']->getContent());
+var_dump($p['testit/file']->getContent());
 ?>
 ===DONE===
 --CLEAN--
@@ -42,7 +19,7 @@ var_dump($p['internal/file.txt']->getContent());
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar');
 ?>
 --EXPECTF--
-string(17) "internal/file.txt"
-string(17) "internal/file.txt"
-string(8) "hi there"
+string(2) "hi"
+string(2) "hi"
+string(2) "hi"
 ===DONE===
