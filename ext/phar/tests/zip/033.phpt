@@ -9,6 +9,7 @@ phar.require_hash=0
 <?php
 
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip';
+$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.zip';
 $alias = 'phar://hio';
 
 $phar = new Phar($fname);
@@ -20,7 +21,9 @@ $phar->stopBuffering();
 try {
 	var_dump($phar['a.php']->isExecutable());
 	$phar['a.php']->chmod(0777);
-	var_dump($phar['a.php']->isExecutable());
+	copy($fname, $fname2);
+	$phar2 = new Phar($fname2);
+	var_dump($phar2['a.php']->isExecutable());
 	$phar['a.php']->chmod(0666);
 	var_dump($phar['a.php']->isExecutable());
 	echo "test dir\n";
@@ -36,8 +39,9 @@ try {
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.zip');
 ?>
 --EXPECT--
 bool(false)
