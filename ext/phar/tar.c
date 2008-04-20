@@ -260,7 +260,7 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 		if (entry.tar_type == TAR_LINK) {
 			if (!zend_hash_exists(&myphar->manifest, hdr->linkname, strlen(hdr->linkname))) {
 				if (error) {
-					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file - symbolic link to non-existent file", fname);
+					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file - hard link to non-existent file", fname);
 				}
 				efree(entry.filename);
 				php_stream_close(fp);

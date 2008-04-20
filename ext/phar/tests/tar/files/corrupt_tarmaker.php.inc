@@ -60,6 +60,9 @@ class corrupt_tarmaker
             $type = 5;        // Directory
         } else if ($stat['mode'] & 0x8000) {
             $type = 0;        // Regular
+        } else if ($stat['mode'] & 0xA000 && $corrupt = 'symlink') {
+            $type = 2;        // Symbolic Link
+            $link = 'file1.txt';
         } else if ($stat['mode'] & 0xA000) {
             $type = 1;        // Link
             $link = 'file1.txt';
