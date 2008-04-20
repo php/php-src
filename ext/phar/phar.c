@@ -1373,7 +1373,7 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 				return phar_open_zipfile(fp, fname, fname_len, alias, alias_len, pphar, error TSRMLS_CC);
 			}
 			if (got > 512) {
-				if (phar_is_tar(pos)) {
+				if (phar_is_tar(pos, fname)) {
 					php_stream_rewind(fp);
 					return phar_open_tarfile(fp, fname, fname_len, alias, alias_len, options, pphar, compression, error TSRMLS_CC);
 				}

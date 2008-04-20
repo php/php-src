@@ -413,7 +413,7 @@ int phar_separate_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC);
 int phar_open_archive_fp(phar_archive_data *phar TSRMLS_DC);
 
 /* tar functions in tar.c */
-int phar_is_tar(char *buf);
+int phar_is_tar(char *buf, char *fname);
 int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, php_uint32 compression, char **error TSRMLS_DC);
 int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
 int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defaultstub, char **error TSRMLS_DC);
