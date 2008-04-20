@@ -6045,6 +6045,7 @@ PHP_FUNCTION(register_tick_function)
 {
 	user_tick_function_entry tick_fe;
 	int i;
+	char *function_name = NULL;
 
 	tick_fe.calling = 0;
 	tick_fe.arg_count = ZEND_NUM_ARGS();
@@ -6058,6 +6059,13 @@ PHP_FUNCTION(register_tick_function)
 	if (zend_get_parameters_array(ht, tick_fe.arg_count, tick_fe.arguments) == FAILURE) {
 		efree(tick_fe.arguments);
 		RETURN_FALSE;
+	}
+
+	if (!zend_is_callable(tick_fe.arguments[0], 0, &function_name)) {
+	  efree(tick_fe.arguments);
+	  php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid shutdown callback '%s' passed", function_name);
+	  efree(function_name);
+	  RETURN_FALSE;
 	}
 
 	if (Z_TYPE_P(tick_fe.arguments[0]) != IS_ARRAY) {
