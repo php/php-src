@@ -2,7 +2,7 @@
 Phar: test fopen() interception
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip");?>
-<?php if (substr(phpversion(), 0, 3) == '5.2') die("skip PHP >= 5.3 required for this test");?>
+<?php if (substr(phpversion(), 0, 3) != '5.2') die("skip PHP 5.2 required for this test");?>
 --INI--
 phar.require_hash=1
 phar.readonly=0
@@ -37,7 +37,7 @@ include $fname;
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
-Warning: fopen() expects at least 2 parameters, 0 given in %sfopen.php on line %d
+Warning: fopen() expects at least 2 parameters, 0 given in %sfopen5.2.php on line %d
 hihi
-Warning: fopen(notfound.txt): failed to open stream: No such file or directory in phar://%sfopen.phar.php/index.php on line %d
+Warning: fopen(phar://%sfopen5.2.phar.php/notfound.txt): failed to open stream: phar error: "notfound.txt" is not a file in phar "%sfopen5.2.phar.php" in phar://%sfopen5.2.phar.php/index.php on line %d
 ===DONE===
