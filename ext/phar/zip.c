@@ -144,7 +144,7 @@ static void phar_zip_u2d_time(time_t time, php_uint16 *dtime, php_uint16 *ddate)
 int phar_open_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_zip_dir_end locator;
-	char buf[sizeof(locator) + 65536], *metadata;
+	char buf[sizeof(locator) + 65536];
 	long size;
 	size_t read;
 	php_uint16 i;
@@ -176,6 +176,44 @@ int phar_open_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, i
 	while ((p=(char *) memchr(p + 1, 'P', (size_t)(buf - (p+1) + sizeof(locator) + 65536 - 4 + 1))) != NULL) {
 		if (!memcmp(p + 1, "K\5\6", 3)) {
 			memcpy((void *)&locator, (void *) p, sizeof(locator));
+			if (locator.centraldisk != 0 || locator.disknumber != 0) {
+				/* split archives not handled */
+				php_stream_close(fp);
+				if (error) {
+					spprintf(error, 4096, "phar error: split archives spanning multiple zips cannot be processed in zip-based phar \"%s\"", fname);
+				}
+				return FAILURE;
+			}
+			if (locator.counthere != locator.count) {
+				if (error) {
+					spprintf(error, 4096, "phar error: corrupt zip archive, conflicting file count in end of central directory record in zip-based phar \"%s\"", fname);
+				}
+				php_stream_close(fp);
+				return FAILURE;
+			}
+			mydata = ecalloc(sizeof(phar_archive_data), 1);
+
+			/* read in archive comment, if any */
+			if (locator.comment_len) {
+				char *metadata;
+
+				metadata = p + sizeof(locator);
+				if (PHAR_GET_16(locator.comment_len) != size - (metadata - buf)) {
+					if (error) {
+						spprintf(error, 4096, "phar error: corrupt zip archive, zip file comment truncated in zip-based phar \"%s\"", fname);
+					}
+					php_stream_close(fp);
+					efree(mydata);
+					return FAILURE;
+				}
+				if (phar_parse_metadata(&metadata, &mydata->metadata, PHAR_GET_16(locator.comment_len) TSRMLS_CC) == FAILURE) {
+					/* if not valid serialized data, it is a regular string */
+					ALLOC_INIT_ZVAL(mydata->metadata);
+					ZVAL_STRINGL(mydata->metadata, metadata, PHAR_GET_16(locator.comment_len), 1);
+				}
+			} else {
+				mydata->metadata = NULL;
+			}
 			goto foundit;
 		}
 	}
@@ -185,22 +223,6 @@ int phar_open_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, i
 	}
 	return FAILURE;
 foundit:
-	if (locator.centraldisk != 0 || locator.disknumber != 0) {
-		/* split archives not handled */
-		php_stream_close(fp);
-		if (error) {
-			spprintf(error, 4096, "phar error: split archives spanning multiple zips cannot be processed in zip-based phar \"%s\"", fname);
-		}
-		return FAILURE;
-	}
-	if (locator.counthere != locator.count) {
-		if (error) {
-			spprintf(error, 4096, "phar error: corrupt zip archive, conflicting file count in end of central directory record in zip-based phar \"%s\"", fname);
-		}
-		php_stream_close(fp);
-		return FAILURE;
-	}
-	mydata = ecalloc(sizeof(phar_archive_data), 1);
 	mydata->fname = estrndup(fname, fname_len);
 #ifdef PHP_WIN32
 	phar_unixify_path_separators(mydata->fname, fname_len);
@@ -208,29 +230,6 @@ foundit:
 	mydata->is_zip = 1;
 	mydata->fname_len = fname_len;
 	/* clean up on big-endian systems */
-	/* read in archive comment, if any */
-	if (locator.comment_len) {
-		metadata = (char *) emalloc(PHAR_GET_16(locator.comment_len));
-		if (locator.comment_len != php_stream_read(fp, metadata, PHAR_GET_16(locator.comment_len))) {
-			if (error) {
-				spprintf(error, 4096, "phar error: corrupt zip archive, zip file comment truncated in zip-based phar \"%s\"", fname);
-			}
-			php_stream_close(fp);
-			efree(mydata->fname);
-			efree(mydata);
-			efree(metadata);
-			return FAILURE;
-		}
-		if (phar_parse_metadata(&metadata, &mydata->metadata, PHAR_GET_16(locator.comment_len) TSRMLS_CC) == FAILURE) {
-			/* if not valid serialized data, it is a regular string */
-			ALLOC_INIT_ZVAL(mydata->metadata);
-			Z_STRVAL_P(mydata->metadata) = metadata;
-			Z_STRLEN_P(mydata->metadata) = PHAR_GET_16(locator.comment_len);
-			Z_TYPE_P(mydata->metadata) = IS_STRING;
-		}
-	} else {
-		mydata->metadata = NULL;
-	}
 	/* seek to central directory */
 	php_stream_seek(fp, PHAR_GET_32(locator.cdir_offset), SEEK_SET);
 	/* read in central directory */
@@ -367,18 +366,14 @@ foundit:
 		}
 		/* get file metadata */
 		if (zipentry.comment_len) {
-			metadata = (char *) emalloc(PHAR_GET_16(zipentry.comment_len));
-			if (PHAR_GET_16(zipentry.comment_len) != php_stream_read(fp, metadata, PHAR_GET_16(zipentry.comment_len))) {
+			if (PHAR_GET_16(zipentry.comment_len) != php_stream_read(fp, buf, PHAR_GET_16(zipentry.comment_len))) {
 				PHAR_ZIP_FAIL("unable to read in file comment, truncated");
 			}
-			if (phar_parse_metadata(&metadata, &(entry.metadata), PHAR_GET_16(zipentry.comment_len) TSRMLS_CC) == FAILURE) {
+			p = buf;
+			if (phar_parse_metadata(&p, &(entry.metadata), PHAR_GET_16(zipentry.comment_len) TSRMLS_CC) == FAILURE) {
 				/* if not valid serialized data, it is a regular string */
 				ALLOC_INIT_ZVAL(entry.metadata);
-				Z_STRVAL_P(entry.metadata) = metadata;
-				Z_STRLEN_P(entry.metadata) = PHAR_GET_16(zipentry.comment_len);
-				Z_TYPE_P(entry.metadata) = IS_STRING;
-			} else {
-				efree(metadata);
+				ZVAL_STRINGL(entry.metadata, buf, PHAR_GET_16(zipentry.comment_len), 1);
 			}
 		} else {
 			entry.metadata = NULL;
