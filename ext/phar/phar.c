@@ -1964,20 +1964,6 @@ static inline void phar_set_32(char *buffer, int var) /* {{{ */
 #endif
 } /* }}} */
 
-/**
- * The only purpose of this is to store the API version, which was stored bigendian for some reason
- * in the original PHP_Archive, so we will do the same
- */
-static inline void phar_set_16(char *buffer, int var) /* {{{ */
-{
-#ifdef WORDS_BIGENDIAN
-	*((buffer) + 1) = (unsigned char) (((var) >> 8) & 0xFF); \
-	*(buffer) = (unsigned char) ((var) & 0xFF);
-#else
-	*(php_uint16 *)(buffer) = (php_uint16)(var);
-#endif
-} /* }}} */
-
 static int phar_flush_clean_deleted_apply(void *data TSRMLS_DC) /* {{{ */
 {
 	phar_entry_info *entry = (phar_entry_info *)data;
