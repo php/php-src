@@ -70,6 +70,7 @@ const php_hash_ops php_hash_sha1_ops = {
 	(php_hash_init_func_t) PHP_SHA1Init,
 	(php_hash_update_func_t) PHP_SHA1Update,
 	(php_hash_final_func_t) PHP_SHA1Final,
+	(php_hash_copy_func_t) php_hash_copy,
 	20,
 	64,
 	sizeof(PHP_SHA1_CTX)
@@ -411,6 +412,7 @@ const php_hash_ops php_hash_sha256_ops = {
 	(php_hash_init_func_t) PHP_SHA256Init,
 	(php_hash_update_func_t) PHP_SHA256Update,
 	(php_hash_final_func_t) PHP_SHA256Final,
+	(php_hash_copy_func_t) php_hash_copy,
 	32,
 	64,
 	sizeof(PHP_SHA256_CTX)
@@ -806,6 +808,7 @@ const php_hash_ops php_hash_sha384_ops = {
 	(php_hash_init_func_t) PHP_SHA384Init,
 	(php_hash_update_func_t) PHP_SHA384Update,
 	(php_hash_final_func_t) PHP_SHA384Final,
+	(php_hash_copy_func_t) php_hash_copy,
 	48,
 	128,
 	sizeof(PHP_SHA384_CTX)
@@ -919,6 +922,7 @@ const php_hash_ops php_hash_sha512_ops = {
 	(php_hash_init_func_t) PHP_SHA512Init,
 	(php_hash_update_func_t) PHP_SHA512Update,
 	(php_hash_final_func_t) PHP_SHA512Final,
+	(php_hash_copy_func_t) php_hash_copy,
 	64,
 	128,
 	sizeof(PHP_SHA512_CTX)

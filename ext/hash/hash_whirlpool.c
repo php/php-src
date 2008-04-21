@@ -437,6 +437,7 @@ const php_hash_ops php_hash_whirlpool_ops = {
 	(php_hash_init_func_t) PHP_WHIRLPOOLInit,
 	(php_hash_update_func_t) PHP_WHIRLPOOLUpdate,
 	(php_hash_final_func_t) PHP_WHIRLPOOLFinal,
+	(php_hash_copy_func_t) php_hash_copy,
 	64,
 	64,
 	sizeof(PHP_WHIRLPOOL_CTX)
