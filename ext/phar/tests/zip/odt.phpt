@@ -13,6 +13,12 @@ foreach (new RecursiveIteratorIterator($a, RecursiveIteratorIterator::LEAVES_ONL
 		echo $b->getPathName() . "\n";
 	}
 }
+// this next line is for increased code coverage
+try {
+	$b = new Phar(dirname(__FILE__) . '/files/odt.odt');
+} catch (Exception $e) {
+	echo $e->getMessage() . "\n";
+}
 ?>
 ===DONE===
 --EXPECTF--
@@ -24,4 +30,5 @@ phar://%sodt.odt%cmeta.xml
 phar://%sodt.odt%cmimetype
 phar://%sodt.odt%csettings.xml
 phar://%sodt.odt%cstyles.xml
+Cannot create phar '%sodt.odt', file extension (or combination) not recognised
 ===DONE===
