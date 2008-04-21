@@ -2453,23 +2453,18 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 			phar_set_32(entry_buffer, entry->filename_len);
 		}
 		if (4 != php_stream_write(newfile, entry_buffer, 4)
-		|| entry->filename_len != php_stream_write(newfile, entry->filename, entry->filename_len)) {
+		|| entry->filename_len != php_stream_write(newfile, entry->filename, entry->filename_len)
+		|| (entry->is_dir && 1 != php_stream_write(newfile, "/", 1))) {
 			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}
 			php_stream_close(newfile);
 			if (error) {
-				spprintf(error, 0, "unable to write filename of file \"%s\" to manifest of new phar \"%s\"", entry->filename, phar->fname);
-			}
-			return EOF;
-		}
-		if (entry->is_dir && 1 != php_stream_write(newfile, "/", 1)) {
-			if (closeoldfile) {
-				php_stream_close(oldfile);
-			}
-			php_stream_close(newfile);
-			if (error) {
-				spprintf(error, 0, "unable to write filename of directory \"%s\" to manifest of new phar \"%s\"", entry->filename, phar->fname);
+				if (entry->is_dir) {
+					spprintf(error, 0, "unable to write filename of directory \"%s\" to manifest of new phar \"%s\"", entry->filename, phar->fname);
+				} else {
+					spprintf(error, 0, "unable to write filename of file \"%s\" to manifest of new phar \"%s\"", entry->filename, phar->fname);
+				}
 			}
 			return EOF;
 		}
