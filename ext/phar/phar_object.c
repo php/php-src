@@ -419,6 +419,12 @@ static void phar_postprocess_ru_web(char *fname, int fname_len, char **entry, in
 		u[0] = '\0';
 		u_len = strlen(u + 1);
 		e_len -= u_len + 1;
+		if (e_len < 0) {
+			if (saveu) {
+				saveu[0] = '/';
+			}
+			return;
+		}
 	} while (1);
 }
 /* }}} */
