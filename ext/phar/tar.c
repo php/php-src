@@ -260,7 +260,7 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 		if (entry.tar_type == TAR_LINK) {
 			if (!zend_hash_exists(&myphar->manifest, hdr->linkname, strlen(hdr->linkname))) {
 				if (error) {
-					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file - hard link to non-existent file", fname);
+					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file - hard link to non-existent file \"%s\"", fname, hdr->linkname);
 				}
 				efree(entry.filename);
 				php_stream_close(fp);
@@ -436,24 +436,26 @@ int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC)
 	pos = php_stream_tell(fp->new); /* save start of file within tar */
 
 	/* write contents */
-	if (FAILURE == phar_open_entry_fp(entry, fp->error TSRMLS_CC)) {
-		return ZEND_HASH_APPLY_STOP;
-	}
-	if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0 TSRMLS_CC)) {
-		if (fp->error) {
-			spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, contents of file \"%s\" could not be written, seek failed", entry->phar->fname, entry->filename);
+	if (entry->uncompressed_filesize) {
+		if (FAILURE == phar_open_entry_fp(entry, fp->error, 0 TSRMLS_CC)) {
+			return ZEND_HASH_APPLY_STOP;
 		}
-		return ZEND_HASH_APPLY_STOP;
-	}
-	if (entry->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(entry TSRMLS_CC), fp->new, entry->uncompressed_filesize)) {
-		if (fp->error) {
-			spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, contents of file \"%s\" could not be written", entry->phar->fname, entry->filename);
+		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 0 TSRMLS_CC)) {
+			if (fp->error) {
+				spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, contents of file \"%s\" could not be written, seek failed", entry->phar->fname, entry->filename);
+			}
+			return ZEND_HASH_APPLY_STOP;
 		}
-		return ZEND_HASH_APPLY_STOP;
+		if (entry->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(entry, 0 TSRMLS_CC), fp->new, entry->uncompressed_filesize)) {
+			if (fp->error) {
+				spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, contents of file \"%s\" could not be written", entry->phar->fname, entry->filename);
+			}
+			return ZEND_HASH_APPLY_STOP;
+		}
+	
+		memset(padding, 0, 512);
+		php_stream_write(fp->new, padding, ((entry->uncompressed_filesize +511)&~511) - entry->uncompressed_filesize);
 	}
-
-	memset(padding, 0, 512);
-	php_stream_write(fp->new, padding, ((entry->uncompressed_filesize +511)&~511) - entry->uncompressed_filesize);
 
 	entry->is_modified = 0;
 	if (entry->fp_type == PHAR_MOD && entry->fp != entry->phar->fp && entry->fp != entry->phar->ufp) {

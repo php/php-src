@@ -18,8 +18,11 @@ var_dump($p['testit/file']->getContent());
 <?php
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar');
 ?>
---EXPECTF--
-string(2) "hi"
-string(2) "hi"
-string(2) "hi"
+--EXPECT--
+string(3) "hi
+"
+string(3) "hi
+"
+string(3) "hi
+"
 ===DONE===

@@ -25,9 +25,61 @@
 extern php_stream_wrapper php_stream_phar_wrapper;
 #endif
 
-/* retrieve a phar_entry_info's current file pointer for reading contents */
-php_stream *phar_get_efp(phar_entry_info *entry TSRMLS_DC)
+/* for links to relative location, prepend cwd of the entry */
+static char *phar_get_link_location(phar_entry_info *entry TSRMLS_DC)
 {
+	char *tmp, *ret, *p;
+	if (!entry->link) {
+		return NULL;
+	}
+	if (entry->link[0] == '/') {
+		return entry->link;
+	}
+	tmp = estrndup(entry->filename, entry->filename_len);
+	p = strrchr(tmp, '/');
+	if (p) {
+		*p = '\0';
+		spprintf(&ret, 0, "%s/%s", tmp, entry->link);
+		efree(tmp);
+		return ret;
+	}
+	efree(ret);
+	return entry->link;
+}
+
+phar_entry_info *phar_get_link_source(phar_entry_info *entry TSRMLS_DC)
+{
+	phar_entry_info *link_entry;
+	char *link = phar_get_link_location(entry);
+
+	if (!entry->link) {
+		return entry;
+	}
+
+	if (SUCCESS == zend_hash_find(&(entry->phar->manifest), entry->link, strlen(entry->link), (void **)&link_entry) ||
+		SUCCESS == zend_hash_find(&(entry->phar->manifest), link, strlen(link), (void **)&link_entry)) {
+		if (link != entry->link) {
+			efree(link);
+		}
+		return phar_get_link_source(link_entry TSRMLS_CC);
+	} else {
+		if (link != entry->link) {
+			efree(link);
+		}
+		return NULL;
+	}
+}
+
+/* retrieve a phar_entry_info's current file pointer for reading contents */
+php_stream *phar_get_efp(phar_entry_info *entry, int follow_links TSRMLS_DC)
+{
+	if (follow_links && entry->link) {
+		phar_entry_info *link_entry = phar_get_link_source(entry TSRMLS_CC);
+
+		if (link_entry && link_entry != entry) {
+			return phar_get_efp(link_entry, 1 TSRMLS_CC);
+		}
+	}
 	if (entry->fp_type == PHAR_FP) {
 		if (!entry->phar->fp) {
 			/* re-open just in time for cases where our refcount reached 0 on the phar archive */
@@ -41,17 +93,24 @@ php_stream *phar_get_efp(phar_entry_info *entry TSRMLS_DC)
 	} else {
 		/* temporary manifest entry */
 		if (!entry->fp) {
-			entry->fp = php_stream_open_wrapper(entry->link, "rb", STREAM_MUST_SEEK|0, NULL);
+			entry->fp = php_stream_open_wrapper(entry->tmp, "rb", STREAM_MUST_SEEK|0, NULL);
 		}
 		return entry->fp;
 	}
 }
 
-int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t position TSRMLS_DC)
+int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t position, int follow_links TSRMLS_DC)
 {
-	php_stream *fp = phar_get_efp(entry TSRMLS_CC);
+	php_stream *fp = phar_get_efp(entry, follow_links TSRMLS_CC);
 	off_t temp;
 
+	if (follow_links) {
+		phar_entry_info *t;
+		t = phar_get_link_source(entry TSRMLS_CC);
+		if (t) {
+			entry = t;
+		}
+	}
 	if (entry->is_dir) {
 		return 0;
 	}
@@ -94,26 +153,26 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 #endif
 	entry.filename_len = path_len;
 	if (strstr(filename, "phar://")) {
-		entry.link = estrndup(filename, filename_len);
+		entry.tmp = estrndup(filename, filename_len);
 	} else {
-		entry.link = expand_filepath(filename, NULL TSRMLS_CC);
-		if (!entry.link) {
-			entry.link = estrndup(filename, filename_len);
+		entry.tmp = expand_filepath(filename, NULL TSRMLS_CC);
+		if (!entry.tmp) {
+			entry.tmp = estrndup(filename, filename_len);
 		}
 	}
 #if PHP_MAJOR_VERSION < 6
-	if (PG(safe_mode) && !strstr(filename, "phar://") && (!php_checkuid(entry.link, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
-		efree(entry.link);
+	if (PG(safe_mode) && !strstr(filename, "phar://") && (!php_checkuid(entry.tmp, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
+		efree(entry.tmp);
 		efree(entry.filename);
 		return FAILURE;
 	}
 #endif
 
-	filename_len = strlen(entry.link);
-	filename = entry.link;
+	filename_len = strlen(entry.tmp);
+	filename = entry.tmp;
 	/* only check openbasedir for files, not for phar streams */
 	if (!strstr(filename, "phar://") && php_check_open_basedir(filename TSRMLS_CC)) {
-		efree(entry.link);
+		efree(entry.tmp);
 		efree(entry.filename);
 		return FAILURE;
 	}
@@ -122,7 +181,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 	entry.fp_type = PHAR_TMP;
 
 	if (SUCCESS != php_stream_stat_path(filename, &ssb)) {
-		efree(entry.link);
+		efree(entry.tmp);
 		efree(entry.filename);
 		return FAILURE;
 	}
@@ -130,7 +189,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 		entry.is_dir = 1;
 		if (SUCCESS != zend_hash_add(&phar->mounted_dirs, entry.filename, path_len, (void *)&(entry.filename), sizeof(char *), NULL)) {
 			/* directory already mounted */
-			efree(entry.link);
+			efree(entry.tmp);
 			efree(entry.filename);
 			return FAILURE;
 		}
@@ -142,7 +201,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 	if (SUCCESS == zend_hash_add(&phar->manifest, entry.filename, path_len, (void*)&entry, sizeof(phar_entry_info), NULL)) {
 		return SUCCESS;
 	}
-	efree(entry.link);
+	efree(entry.tmp);
 	efree(entry.filename);
 	return FAILURE;
 }
@@ -487,9 +546,14 @@ int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char 
 				return FAILURE;
 			}
 		} else if (for_append) {
-			phar_seek_efp(entry, 0, SEEK_END, 0 TSRMLS_CC);
+			phar_seek_efp(entry, 0, SEEK_END, 0, 0 TSRMLS_CC);
 		}
 	} else {
+		if (entry->link) {
+			efree(entry->link);
+			entry->link = NULL;
+			entry->tar_type = (entry->tar_type ? TAR_FILE : 0);
+		}
 		if (for_write) {
 			if (for_trunc) {
 				if (FAILURE == phar_create_writeable_entry(phar, entry, error TSRMLS_CC)) {
@@ -501,7 +565,7 @@ int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char 
 				}
 			}
 		} else {
-			if (FAILURE == phar_open_entry_fp(entry, error TSRMLS_CC)) {
+			if (FAILURE == phar_open_entry_fp(entry, error, 1 TSRMLS_CC)) {
 				return FAILURE;
 			}
 		}
@@ -513,7 +577,7 @@ int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char 
 	(*ret)->internal_file = entry;
 	(*ret)->is_zip = entry->is_zip;
 	(*ret)->is_tar = entry->is_tar;
-	(*ret)->fp = phar_get_efp(entry TSRMLS_CC);
+	(*ret)->fp = phar_get_efp(entry, 1 TSRMLS_CC);
 	(*ret)->zero = entry->offset;
 	++(entry->fp_refcount);
 	++(entry->phar->refcount);
@@ -637,16 +701,27 @@ int phar_open_archive_fp(phar_archive_data *phar TSRMLS_DC)
 /* copy file data from an existing to a new phar_entry_info that is not in the manifest */
 int phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **error TSRMLS_DC)
 {
-	if (FAILURE == phar_open_entry_fp(source, error TSRMLS_CC)) {
+	phar_entry_info *link;
+
+	if (FAILURE == phar_open_entry_fp(source, error, 1 TSRMLS_CC)) {
 		return FAILURE;
+	}
+	if (dest->link) {
+		efree(dest->link);
+		dest->link = NULL;
+		dest->tar_type = (dest->tar_type ? TAR_FILE : 0);
 	}
 	dest->fp_type = PHAR_MOD;
 	dest->offset = 0;
 	dest->is_modified = 1;
 	dest->fp = php_stream_fopen_tmpfile();
 
-	phar_seek_efp(source, 0, SEEK_SET, 0 TSRMLS_CC);
-	if (source->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(source TSRMLS_CC), dest->fp, source->uncompressed_filesize)) {
+	phar_seek_efp(source, 0, SEEK_SET, 0, 1 TSRMLS_CC);
+	link = phar_get_link_source(source TSRMLS_CC);
+	if (!link) {
+		link = source;
+	}
+	if (link->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(link, 0 TSRMLS_CC), dest->fp, link->uncompressed_filesize)) {
 		php_stream_close(dest->fp);
 		dest->fp_type = PHAR_FP;
 		if (error) {
@@ -659,16 +734,23 @@ int phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **er
 
 /* open and decompress a compressed phar entry
  */
-int phar_open_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC) 
+int phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_links TSRMLS_DC) 
 {
 	php_stream_filter *filter;
 	phar_archive_data *phar = entry->phar;
 	char *filtername;
 	off_t loc;
 
+	if (follow_links && entry->link) {
+		phar_entry_info *link_entry = phar_get_link_source(entry TSRMLS_CC);
+
+		if (link_entry && link_entry != entry) {
+			return phar_open_entry_fp(link_entry, error, 1 TSRMLS_CC);
+		}
+	}
 	if (entry->fp_type == PHAR_TMP) {
 		if (!entry->fp) {
-			entry->fp = php_stream_open_wrapper(entry->link, "rb", STREAM_MUST_SEEK|0, NULL);
+			entry->fp = php_stream_open_wrapper(entry->tmp, "rb", STREAM_MUST_SEEK|0, NULL);
 		}
 		return SUCCESS;
 	}
@@ -786,6 +868,11 @@ int phar_create_writeable_entry(phar_archive_data *phar, phar_entry_info *entry,
 		*error = NULL;
 	}
 	/* open a new temp file for writing */
+	if (entry->link) {
+		efree(entry->link);
+		entry->link = NULL;
+		entry->tar_type = (entry->tar_type ? TAR_FILE : 0);
+	}
 	entry->fp = php_stream_fopen_tmpfile();
 	if (!entry->fp) {
 		if (error) {
@@ -810,8 +897,9 @@ int phar_create_writeable_entry(phar_archive_data *phar, phar_entry_info *entry,
 int phar_separate_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC)
 {
 	php_stream *fp;
+	phar_entry_info *link;
 
-	if (FAILURE == phar_open_entry_fp(entry, error TSRMLS_CC)) {
+	if (FAILURE == phar_open_entry_fp(entry, error, 1 TSRMLS_CC)) {
 		return FAILURE;
 	}
 
@@ -820,12 +908,22 @@ int phar_separate_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC)
 	}
 
 	fp = php_stream_fopen_tmpfile();
-	phar_seek_efp(entry, 0, SEEK_SET, 0 TSRMLS_CC);
-	if (entry->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(entry TSRMLS_CC), fp, entry->uncompressed_filesize)) {
+	phar_seek_efp(entry, 0, SEEK_SET, 0, 1 TSRMLS_CC);
+	link = phar_get_link_source(entry TSRMLS_CC);
+	if (!link) {
+		link = entry;
+	}
+	if (link->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(link, 0 TSRMLS_CC), fp, link->uncompressed_filesize)) {
 		if (error) {
 			spprintf(error, 4096, "phar error: cannot separate entry file \"%s\" contents in phar archive \"%s\" for write access", entry->filename, entry->phar->fname);
 		}
 		return FAILURE;
+	}
+
+	if (entry->link) {
+		efree(entry->link);
+		entry->link = NULL;
+		entry->tar_type = (entry->tar_type ? TAR_FILE : 0);
 	}
 
 	entry->offset = 0;
@@ -845,10 +943,10 @@ phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry,
 		*error = NULL;
 	}
 	/* seek to start of internal file and read it */
-	if (FAILURE == phar_open_entry_fp(entry, error TSRMLS_CC)) {
+	if (FAILURE == phar_open_entry_fp(entry, error, 1 TSRMLS_CC)) {
 		return NULL;
 	}
-	if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0 TSRMLS_CC)) {
+	if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 1 TSRMLS_CC)) {
 		spprintf(error, 4096, "phar error: cannot seek to start of file \"%s\" in phar \"%s\"", entry->filename, phar->fname);
 		return NULL;
 	}
@@ -1050,13 +1148,13 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 					}
 					return NULL;
 				}
-				if (!entry->link || !entry->is_mounted) {
+				if (!entry->tmp || !entry->is_mounted) {
 					if (error) {
 						spprintf(error, 4096, "phar internal error: mounted path \"%s\" is not properly initialized as a mounted path", key);
 					}
 					return NULL;
 				}
-				test_len = spprintf(&test, MAXPATHLEN, "%s%s", entry->link, path + keylen);
+				test_len = spprintf(&test, MAXPATHLEN, "%s%s", entry->tmp, path + keylen);
 				if (SUCCESS != php_stream_stat_path(test, &ssb)) {
 					efree(test);
 					return NULL;

@@ -618,10 +618,10 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 					if (SUCCESS != zend_hash_find(&phar->manifest, key, keylen, (void **) &entry)) {
 						goto free_resource;
 					}
-					if (!entry->link || !entry->is_mounted) {
+					if (!entry->tmp || !entry->is_mounted) {
 						goto free_resource;
 					}
-					test_len = spprintf(&test, MAXPATHLEN, "%s%s", entry->link, internal_file + keylen);
+					test_len = spprintf(&test, MAXPATHLEN, "%s%s", entry->tmp, internal_file + keylen);
 					if (SUCCESS != php_stream_stat_path(test, &ssbi)) {
 						efree(test);
 						continue;
@@ -844,7 +844,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		entry->is_deleted = 1;
 		entry->fp = NULL;
 		entry->metadata = 0;
-		entry->link = NULL;
+		entry->link = entry->tmp = NULL;
 		source = entry;
 
 		/* add to the manifest, and then store the pointer to the new guy in entry */

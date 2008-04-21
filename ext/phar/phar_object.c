@@ -237,7 +237,7 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 			}
 
 			/* prepare to output  */
-			if (!phar_get_efp(phar->internal_file TSRMLS_CC)) {
+			if (!phar_get_efp(phar->internal_file, 1 TSRMLS_CC)) {
 				char *error;
 				if (!phar_open_jit(phar->phar, phar->internal_file, phar->phar->fp, &error, 0 TSRMLS_CC)) {
 					if (error) {
@@ -246,10 +246,10 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 					}
 					return -1;
 				}
-				phar->fp = phar_get_efp(phar->internal_file TSRMLS_CC);
+				phar->fp = phar_get_efp(phar->internal_file, 1 TSRMLS_CC);
 				phar->zero = phar->internal_file->offset;
 			}
-			phar_seek_efp(phar->internal_file, 0, SEEK_SET, 0 TSRMLS_CC);
+			phar_seek_efp(phar->internal_file, 0, SEEK_SET, 0, 1 TSRMLS_CC);
 			do {
 				got = php_stream_read(phar->fp, buf, MIN(8192, phar->internal_file->uncompressed_filesize - phar->position));
 				PHPWRITE(buf, got);
@@ -1580,8 +1580,9 @@ static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp TSRMLS
 {
 	char *error;
 	off_t offset;
+	phar_entry_info *link;
 
-	if (FAILURE == phar_open_entry_fp(entry, &error TSRMLS_CC)) {
+	if (FAILURE == phar_open_entry_fp(entry, &error, 1 TSRMLS_CC)) {
 		if (error) {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 				"Cannot convert phar archive \"%s\", unable to open entry \"%s\" contents: %s", entry->phar->fname, entry->filename, error);
@@ -1593,9 +1594,13 @@ static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp TSRMLS
 		return FAILURE;
 	}
 	/* copy old contents in entirety */
-	phar_seek_efp(entry, 0, SEEK_SET, 0 TSRMLS_CC);
+	phar_seek_efp(entry, 0, SEEK_SET, 0, 1 TSRMLS_CC);
 	offset = php_stream_tell(fp);
-	if (entry->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(entry TSRMLS_CC), fp, entry->uncompressed_filesize)) {
+	link = phar_get_link_source(entry TSRMLS_CC);
+	if (!link) {
+		link = entry;
+	}
+	if (link->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(link, 0 TSRMLS_CC), fp, link->uncompressed_filesize)) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"Cannot convert phar archive \"%s\", unable to copy entry \"%s\" contents", entry->phar->fname, entry->filename);
 		return FAILURE;
@@ -3642,6 +3647,7 @@ PHP_METHOD(PharFileInfo, getContent)
 {
 	char *error;
 	php_stream *fp;
+	phar_entry_info *link;
 	PHAR_ENTRY_OBJECT();
 
 	if (entry_obj->ent.entry->is_dir) {
@@ -3649,20 +3655,27 @@ PHP_METHOD(PharFileInfo, getContent)
 			"Phar error: Cannot retrieve contents, \"%s\" in phar \"%s\" is a directory", entry_obj->ent.entry->filename, entry_obj->ent.entry->phar->fname);
 		return;
 	}
-	if (SUCCESS != phar_open_entry_fp(entry_obj->ent.entry, &error TSRMLS_CC)) {
+	link = phar_get_link_source(entry_obj->ent.entry TSRMLS_CC);
+	if (!link) {
+		link = entry_obj->ent.entry;
+	}
+	if (SUCCESS != phar_open_entry_fp(link, &error, 0 TSRMLS_CC)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Phar error: Cannot retrieve contents, \"%s\" in phar \"%s\": %s", entry_obj->ent.entry->filename, entry_obj->ent.entry->phar->fname, error);
 		efree(error);
 		return;
 	}
-	if (!(fp = phar_get_efp(entry_obj->ent.entry TSRMLS_CC))) {
+	if (!(fp = phar_get_efp(link, 0 TSRMLS_CC))) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Phar error: Cannot retrieve contents of \"%s\" in phar \"%s\"", entry_obj->ent.entry->filename, entry_obj->ent.entry->phar->fname);
 		return;
 	}
-	phar_seek_efp(entry_obj->ent.entry, 0, SEEK_SET, 0 TSRMLS_CC);
+	phar_seek_efp(link, 0, SEEK_SET, 0, 0 TSRMLS_CC);
 	Z_TYPE_P(return_value) = IS_STRING;
-	Z_STRLEN_P(return_value) = php_stream_copy_to_mem(fp, &(Z_STRVAL_P(return_value)), entry_obj->ent.entry->uncompressed_filesize, 0);
+	Z_STRLEN_P(return_value) = php_stream_copy_to_mem(fp, &(Z_STRVAL_P(return_value)), link->uncompressed_filesize, 0);
+	if (!Z_STRVAL_P(return_value)) {
+		Z_STRVAL_P(return_value) = estrndup("", 0);
+	}
 }
 /* }}} */
 
@@ -3713,7 +3726,7 @@ PHP_METHOD(PharFileInfo, compress)
 					return;
 				}
 				/* decompress this file indirectly */
-				if (SUCCESS != phar_open_entry_fp(entry_obj->ent.entry, &error TSRMLS_CC)) {
+				if (SUCCESS != phar_open_entry_fp(entry_obj->ent.entry, &error, 1 TSRMLS_CC)) {
 					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 						"Phar error: Cannot decompress bzip2-compressed file \"%s\" in phar \"%s\" in order to compress with gzip: %s", entry_obj->ent.entry->filename, entry_obj->ent.entry->phar->fname, error);
 					efree(error);
@@ -3741,7 +3754,7 @@ PHP_METHOD(PharFileInfo, compress)
 					return;
 				}
 				/* decompress this file indirectly */
-				if (SUCCESS != phar_open_entry_fp(entry_obj->ent.entry, &error TSRMLS_CC)) {
+				if (SUCCESS != phar_open_entry_fp(entry_obj->ent.entry, &error, 1 TSRMLS_CC)) {
 					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 						"Phar error: Cannot decompress gzip-compressed file \"%s\" in phar \"%s\" in order to compress with bzip2: %s", entry_obj->ent.entry->filename, entry_obj->ent.entry->phar->fname, error);
 					efree(error);
