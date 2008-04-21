@@ -2184,10 +2184,9 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 	zend_ptr_stack_3_pop(&EG(arg_types_stack), (void*)&EX(called_scope), (void**)&ex_object, (void**)&EX(fbc));
 	EX(function_state).arguments = zend_vm_stack_push_args(opline->extended_value TSRMLS_CC);
 
-	EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
-
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {
 		ALLOC_INIT_ZVAL(EX_T(opline->result.u.var).var.ptr);
+		EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
 		EX_T(opline->result.u.var).var.fcall_returned_reference = EX(function_state).function->common.return_reference;
 
 		if (EX(function_state).function->common.arg_info) {
@@ -2207,20 +2206,12 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			zend_execute_internal(EXECUTE_DATA, RETURN_VALUE_USED(opline) TSRMLS_CC);
 		}
 
-/*	We shouldn't fix bad extensions here,
-    because it can break proper ones (Bug #34045)
-		if (!EX(function_state).function->common.return_reference) {
-			Z_UNSET_ISREF_P(EX_T(opline->result.u.var).var.ptr);
-			Z_SET_REFCOUNT_P(EX_T(opline->result.u.var).var.ptr, 1);
-		}
-*/
 		if (!RETURN_VALUE_USED(opline)) {
 			zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
 		}
 	} else if (EX(function_state).function->type == ZEND_USER_FUNCTION) {
 		zval **original_return_value = EG(return_value_ptr_ptr);
 
-		EX_T(opline->result.u.var).var.ptr = NULL;
 		if (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
 			/*printf("Cache hit!  Reusing %x\n", symtable_cache[symtable_cache_ptr]);*/
 			EG(active_symbol_table) = *(EG(symtable_cache_ptr)--);
@@ -2229,17 +2220,16 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			zend_u_hash_init(EG(active_symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
 			/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
 		}
-		EG(return_value_ptr_ptr) = RETURN_VALUE_USED(opline) ? &EX_T(opline->result.u.var).var.ptr : NULL;
-		EG(active_op_array) = (zend_op_array *) EX(function_state).function;
+		EG(active_op_array) = &EX(function_state).function->op_array;
+		EG(return_value_ptr_ptr) = NULL;
+		if (RETURN_VALUE_USED(opline)) {			
+			EG(return_value_ptr_ptr) = &EX_T(opline->result.u.var).var.ptr;
+			EX_T(opline->result.u.var).var.ptr = NULL;
+			EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
+			EX_T(opline->result.u.var).var.fcall_returned_reference = EX(function_state).function->common.return_reference;
+		}
 
 		zend_execute(EG(active_op_array) TSRMLS_CC);
-		EX_T(opline->result.u.var).var.fcall_returned_reference = EG(active_op_array)->return_reference;
-
-		if (RETURN_VALUE_USED(opline)) {
-			if (!EG(exception) && !EX_T(opline->result.u.var).var.ptr) {
-				ALLOC_INIT_ZVAL(EX_T(opline->result.u.var).var.ptr);
-			}
-		}
 
 		EG(opline_ptr) = &EX(opline);
 		EG(active_op_array) = EX(op_array);
@@ -2275,34 +2265,32 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			Z_UNSET_ISREF_P(EX_T(opline->result.u.var).var.ptr);
 			Z_SET_REFCOUNT_P(EX_T(opline->result.u.var).var.ptr, 1);
 			EX_T(opline->result.u.var).var.fcall_returned_reference = 0;
+			EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
 		}
 	}
 
 	EX(function_state).function = (zend_function *) EX(op_array);
 	EX(function_state).arguments = NULL;
 
-	if (EG(This)) {
-		if (EG(exception) && IS_CTOR_CALL(EX(called_scope))) {
-			if (IS_CTOR_USED(EX(called_scope))) {
-				Z_DELREF_P(EG(This));
+	if (should_change_scope) {
+		if (EG(This)) {
+			if (EG(exception) && IS_CTOR_CALL(EX(called_scope))) {
+				if (IS_CTOR_USED(EX(called_scope))) {
+					Z_DELREF_P(EG(This));
+				}
+				if (Z_REFCOUNT_P(EG(This)) == 1) {
+					zend_object_store_ctor_failed(EG(This) TSRMLS_CC);
+				}
 			}
-			if (Z_REFCOUNT_P(EG(This)) == 1) {
-				zend_object_store_ctor_failed(EG(This) TSRMLS_CC);
-			}
-		}
-		if (should_change_scope) {
 			zval_ptr_dtor(&EG(This));
 		}
-	}
-
-	EX(object) = ex_object;
-	EX(called_scope) = DECODE_CTOR(EX(called_scope));
-
-	if (should_change_scope) {
 		EG(This) = current_this;
 		EG(scope) = current_scope;
 		EG(called_scope) = current_called_scope;
 	}
+
+	EX(object) = ex_object;
+	EX(called_scope) = DECODE_CTOR(EX(called_scope));
 
 	zend_vm_stack_clear_multiple(TSRMLS_C);
 
