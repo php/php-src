@@ -2163,31 +2163,34 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 			efree(user_stub);
 		}
 	} else {
+		size_t written;
+
 		if (!user_stub && phar->halt_offset && oldfile && !phar->is_brandnew) {
-			if (phar->halt_offset != php_stream_copy_to_stream(oldfile, newfile, phar->halt_offset)) {
-				if (closeoldfile) {
-					php_stream_close(oldfile);
-				}
-				php_stream_close(newfile);
-				if (error) {
-					spprintf(error, 0, "unable to copy stub of old phar to new phar \"%s\"", phar->fname);
-				}
-				return EOF;
-			}
+			written = php_stream_copy_to_stream(oldfile, newfile, phar->halt_offset);
+			newstub = NULL;
 		} else {
 			/* this is either a brand new phar or a default stub overwrite */
 			newstub = phar_create_default_stub(NULL, NULL, &(phar->halt_offset), NULL TSRMLS_CC);
-			if (phar->halt_offset != php_stream_write(newfile, newstub, phar->halt_offset)) {
-				efree(newstub);
-				if (closeoldfile) {
-					php_stream_close(oldfile);
-				}
-				php_stream_close(newfile);
-				if (error) {
-					spprintf(error, 0, "unable to create stub in new phar \"%s\"", phar->fname);
-				}
-				return EOF;
+			written = php_stream_write(newfile, newstub, phar->halt_offset);
+		}
+		if (phar->halt_offset != written) {
+			if (closeoldfile) {
+				php_stream_close(oldfile);
 			}
+			php_stream_close(newfile);
+			if (error) {
+				if (newstub) {
+					spprintf(error, 0, "unable to create stub in new phar \"%s\"", phar->fname);
+				} else {
+					spprintf(error, 0, "unable to copy stub of old phar to new phar \"%s\"", phar->fname);
+				}
+			}
+			if (newstub) {
+				efree(newstub);
+			}
+			return EOF;
+		}
+		if (newstub) {
 			efree(newstub);
 		}
 	}
