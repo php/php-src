@@ -1,3 +1,27 @@
+2008-04-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c:
+      Fixed a bug #44403 (register_tick_function() does not check for a valid
+      callback)
+
+2008-04-20  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/ereg/tests/split_basic_001.phpt
+      ext/ereg/tests/split_basic_001.phpt
+      ext/ereg/tests/split_basic_002.phpt
+      ext/ereg/tests/split_basic_002.phpt
+      ext/ereg/tests/spliti_basic_001.phpt
+      ext/ereg/tests/spliti_basic_001.phpt
+      ext/ereg/tests/spliti_basic_002.phpt
+      ext/ereg/tests/spliti_basic_002.phpt:
+      - Fixed tests
+
+    * ext/ereg/ereg.c
+      ext/ereg/ereg.c
+      ext/standard/reg.c:
+      - Better error message
+
 2008-04-19  Felipe Pena  <felipensp@gmail.com>
 
     * ZendEngine2/tests/030.phpt
