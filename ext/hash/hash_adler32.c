@@ -49,10 +49,17 @@ PHP_HASH_API void PHP_ADLER32Final(unsigned char digest[4], PHP_ADLER32_CTX *con
 	context->state = 0;
 }
 
+PHP_HASH_API int PHP_ADLER32Copy(const php_hash_ops *ops, PHP_ADLER32_CTX *orig_context, PHP_ADLER32_CTX *copy_context)
+{
+	copy_context->state = orig_context->state;
+	return SUCCESS;
+}
+
 const php_hash_ops php_hash_adler32_ops = {
 	(php_hash_init_func_t) PHP_ADLER32Init,
 	(php_hash_update_func_t) PHP_ADLER32Update,
 	(php_hash_final_func_t) PHP_ADLER32Final,
+	(php_hash_copy_func_t) PHP_ADLER32Copy,
 	4, /* what to say here? */
 	4,
 	sizeof(PHP_ADLER32_CTX)
