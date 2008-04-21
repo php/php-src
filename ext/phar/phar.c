@@ -2402,34 +2402,19 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 	phar->alias_len = restore_alias_len;
 	
 	phar_set_32(manifest, main_metadata_str.len);
-	if (main_metadata_str.len) {
-		if (4 != php_stream_write(newfile, manifest, 4) ||
-		main_metadata_str.len != php_stream_write(newfile, main_metadata_str.c, main_metadata_str.len)) {
-			smart_str_free(&main_metadata_str);
-			if (closeoldfile) {
-				php_stream_close(oldfile);
-			}
-			php_stream_close(newfile);
-			phar->alias_len = restore_alias_len;
-			if (error) {
-				spprintf(error, 0, "unable to write manifest meta-data of new phar \"%s\"", phar->fname);
-			}
-			return EOF;
-		} 
-	} else {
-		if (4 != php_stream_write(newfile, manifest, 4)) {
-			smart_str_free(&main_metadata_str);
-			if (closeoldfile) {
-				php_stream_close(oldfile);
-			}
-			php_stream_close(newfile);
-			phar->alias_len = restore_alias_len;
-			if (error) {
-				spprintf(error, 0, "unable to write manifest header of new phar \"%s\"", phar->fname);
-			}
-			return EOF;
+	if (4 != php_stream_write(newfile, manifest, 4) || (main_metadata_str.len
+	&& main_metadata_str.len != php_stream_write(newfile, main_metadata_str.c, main_metadata_str.len))) {
+		smart_str_free(&main_metadata_str);
+		if (closeoldfile) {
+			php_stream_close(oldfile);
 		}
-	}
+		php_stream_close(newfile);
+		phar->alias_len = restore_alias_len;
+		if (error) {
+			spprintf(error, 0, "unable to write manifest meta-data of new phar \"%s\"", phar->fname);
+		}
+		return EOF;
+	} 
 	smart_str_free(&main_metadata_str);
 	
 	/* re-calculate the manifest location to simplify later code */
