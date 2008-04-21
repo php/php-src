@@ -37,11 +37,13 @@
 typedef void (*php_hash_init_func_t)(void *context);
 typedef void (*php_hash_update_func_t)(void *context, const unsigned char *buf, unsigned int count);
 typedef void (*php_hash_final_func_t)(unsigned char *digest, void *context);
+typedef int  (*php_hash_copy_func_t)(const void *ops, void *orig_context, void *dest_context);
 
 typedef struct _php_hash_ops {
 	php_hash_init_func_t hash_init;
 	php_hash_update_func_t hash_update;
 	php_hash_final_func_t hash_final;
+	php_hash_copy_func_t hash_copy;
 
 	int digest_size;
 	int block_size;
@@ -128,6 +130,7 @@ PHP_FUNCTION(hash_algos);
 
 PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_len);
 PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops);
+PHP_HASH_API int php_hash_copy(const void *ops, void *orig_context, void *dest_context);
 
 static inline void php_hash_bin2hex(char *out, const unsigned char *in, int in_len)
 {

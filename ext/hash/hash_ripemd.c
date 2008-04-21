@@ -29,6 +29,7 @@ const php_hash_ops php_hash_ripemd128_ops = {
 	(php_hash_init_func_t) PHP_RIPEMD128Init,
 	(php_hash_update_func_t) PHP_RIPEMD128Update,
 	(php_hash_final_func_t) PHP_RIPEMD128Final,
+	(php_hash_copy_func_t) php_hash_copy,
 	16,
 	64,
 	sizeof(PHP_RIPEMD128_CTX)
@@ -38,6 +39,7 @@ const php_hash_ops php_hash_ripemd160_ops = {
 	(php_hash_init_func_t) PHP_RIPEMD160Init,
 	(php_hash_update_func_t) PHP_RIPEMD160Update,
 	(php_hash_final_func_t) PHP_RIPEMD160Final,
+	(php_hash_copy_func_t) php_hash_copy,
 	20,
 	64,
 	sizeof(PHP_RIPEMD160_CTX)
@@ -47,6 +49,7 @@ const php_hash_ops php_hash_ripemd256_ops = {
 	(php_hash_init_func_t) PHP_RIPEMD256Init,
 	(php_hash_update_func_t) PHP_RIPEMD256Update,
 	(php_hash_final_func_t) PHP_RIPEMD256Final,
+	(php_hash_copy_func_t) php_hash_copy,
 	32,
 	64,
 	sizeof(PHP_RIPEMD256_CTX)
@@ -56,6 +59,7 @@ const php_hash_ops php_hash_ripemd320_ops = {
 	(php_hash_init_func_t) PHP_RIPEMD320Init,
 	(php_hash_update_func_t) PHP_RIPEMD320Update,
 	(php_hash_final_func_t) PHP_RIPEMD320Final,
+	(php_hash_copy_func_t) php_hash_copy,
 	40,
 	64,
 	sizeof(PHP_RIPEMD320_CTX)

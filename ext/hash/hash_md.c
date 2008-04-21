@@ -25,6 +25,7 @@ const php_hash_ops php_hash_md5_ops = {
 	(php_hash_init_func_t) PHP_MD5Init,
 	(php_hash_update_func_t) PHP_MD5Update,
 	(php_hash_final_func_t) PHP_MD5Final,
+	(php_hash_copy_func_t) php_hash_copy,
 	16,
 	64,
 	sizeof(PHP_MD5_CTX)
@@ -34,6 +35,7 @@ const php_hash_ops php_hash_md4_ops = {
 	(php_hash_init_func_t) PHP_MD4Init,
 	(php_hash_update_func_t) PHP_MD4Update,
 	(php_hash_final_func_t) PHP_MD4Final,
+	(php_hash_copy_func_t) php_hash_copy,
 	16,
 	64,
 	sizeof(PHP_MD4_CTX)
@@ -43,6 +45,7 @@ const php_hash_ops php_hash_md2_ops = {
 	(php_hash_init_func_t) PHP_MD2Init,
 	(php_hash_update_func_t) PHP_MD2Update,
 	(php_hash_final_func_t) PHP_MD2Final,
+	(php_hash_copy_func_t) php_hash_copy,
 	16,
 	16,
 	sizeof(PHP_MD2_CTX)
@@ -338,7 +341,6 @@ PHP_HASH_API void PHP_MD2Final(unsigned char output[16], PHP_MD2_CTX *context)
 
 	memcpy(output, context->state, 16);
 }
-
 
 /*
  * Local variables:

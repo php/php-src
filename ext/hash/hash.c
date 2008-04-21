@@ -63,6 +63,15 @@ PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *o
 }
 /* }}} */
 
+PHP_HASH_API int php_hash_copy(const void *ops, void *orig_context, void *dest_context) /* {{{ */
+{
+	php_hash_ops *hash_ops = (php_hash_ops *)ops;
+
+	memcpy(dest_context, orig_context, hash_ops->context_size);
+	return SUCCESS;
+}
+/* }}} */
+
 /* Userspace */
 
 static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename) /* {{{ */
@@ -378,7 +387,7 @@ PHP_FUNCTION(hash_init)
 	}
 
 #if PHP_MAJOR_VERSION >= 6
-	if (key_type == IS_UNICODE) {
+	if (key && key_type == IS_UNICODE) {
 		key = zend_unicode_to_ascii((UChar*)key, key_len TSRMLS_CC);
 		if (!key) {
 			/* Non-ASCII Unicode key passed for raw hashing */
@@ -422,7 +431,7 @@ PHP_FUNCTION(hash_init)
 	}
 
 #if PHP_MAJOR_VERSION >= 6
-	if (key_type == IS_UNICODE) {
+	if (key && key_type == IS_UNICODE) {
 		efree(key);
 	}
 #endif
@@ -635,6 +644,41 @@ PHP_FUNCTION(hash_final)
 		RETURN_STRINGL(hex_digest, 2 * digest_len, 0);
 #endif
 	}
+}
+/* }}} */
+
+/* {{{ proto resource hash_copy(resource context) U
+Copy hash resource */
+PHP_FUNCTION(hash_copy)
+{
+	zval *zhash;
+	php_hash_data *hash, *copy_hash;
+	void *context;
+	int res;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zhash) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(hash, php_hash_data*, &zhash, -1, PHP_HASH_RESNAME, php_hash_le_hash);
+
+
+	context = emalloc(hash->ops->context_size);
+	hash->ops->hash_init(context);
+
+	res = hash->ops->hash_copy(hash->ops, hash->context, context);
+	if (res != SUCCESS) {
+		efree(context);
+		RETURN_FALSE;
+	}
+
+	copy_hash = emalloc(sizeof(php_hash_data));
+	copy_hash->ops = hash->ops;
+	copy_hash->context = context;
+	copy_hash->options = hash->options;
+	copy_hash->key = hash->key;
+	
+	ZEND_REGISTER_RESOURCE(return_value, copy_hash, php_hash_le_hash);
 }
 /* }}} */
 
@@ -854,6 +898,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_final, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO(arginfo_hash_copy, 0)
+	ZEND_ARG_INFO(0, context)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO(arginfo_hash_algos, 0)
 ZEND_END_ARG_INFO()
 
@@ -877,6 +926,7 @@ const zend_function_entry hash_functions[] = {
 	PHP_HASH_FE(hash_update_stream)
 	PHP_HASH_FE(hash_update_file)
 	PHP_HASH_FE(hash_final)
+ 	PHP_HASH_FE(hash_copy)
 
 	PHP_HASH_FE(hash_algos)
 
