@@ -453,7 +453,7 @@ PHP_METHOD(Phar, running)
 	fname = zend_get_executed_filename(TSRMLS_C);
 	fname_len = strlen(fname);
 
-	if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
+	if (fname_len > 7 && !memcmp(fname, "phar://", 7) && SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
 		efree(entry);
 		if (retphar) {
 			RETVAL_STRINGL(fname, arch_len + 7, 1);
@@ -463,7 +463,7 @@ PHP_METHOD(Phar, running)
 			RETURN_STRINGL(arch, arch_len, 0);
 		}
 	}
-	RETURN_STRING("", 0);
+	RETURN_STRINGL("", 0, 1);
 }
 /* }}} */
 
