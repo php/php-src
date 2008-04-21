@@ -361,11 +361,10 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char 
 		php_url_free(resource);
 		return NULL;
 	} else if (entry && entry->is_dir) {
-		/*if (entry->is_mounted) {
-			 external directory, TODO: construct an internal dirstream based on this actual dir's dirstream
+		if (entry->is_mounted) {
 			php_url_free(resource);
 			return php_stream_opendir(entry->tmp, options, context);
-		}*/
+		}
 		internal_file = estrdup(internal_file);
 		php_url_free(resource);
 		return phar_make_dirstream(internal_file, &phar->manifest TSRMLS_CC);
