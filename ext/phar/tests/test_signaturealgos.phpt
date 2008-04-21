@@ -2,22 +2,22 @@
 Phar: verify signature parsing works
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if ( extension_loaded("hash")) die("skip extension hash conflicts"); ?>
+<?php if (!extension_loaded("hash")) die("skip extension hash conflicts"); ?>
 --INI--
 phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$a = new Phar('files/sha1.phar');
+$a = new Phar(dirname(__FILE__) . '/files/sha1.phar');
 $r = $a->getSignature();
 var_dump($r['hash_type']);
-$a = new Phar('files/sha512.phar');
+$a = new Phar(dirname(__FILE__) . '/files/sha512.phar');
 $r = $a->getSignature();
 var_dump($r['hash_type']);
-$a = new Phar('files/sha256.phar');
+$a = new Phar(dirname(__FILE__) . '/files/sha256.phar');
 $r = $a->getSignature();
 var_dump($r['hash_type']);
-$a = new Phar('files/md5.phar');
+$a = new Phar(dirname(__FILE__) . '/files/md5.phar');
 $r = $a->getSignature();
 var_dump($r['hash_type']);
 ?>
