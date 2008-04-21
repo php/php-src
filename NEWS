@@ -6,6 +6,7 @@ PHP                                                                        NEWS
 
 - Added pcre to list of standard extensions that cannot be disabled. (Marcus)
 - Added "jump label" operator (limited "goto"). (Dmitry, Sara)
+- Added hash_copy() function. (Tony)
 - Added ability to use stream wrappers in include_path (Gregory, Dmitry)
 - Added concept of "delayed early binding" that allows opcode caches to perform
   class declaration (early and/or run-time binding) in exactly the same order
