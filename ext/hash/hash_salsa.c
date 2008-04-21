@@ -198,6 +198,7 @@ const php_hash_ops php_hash_salsa10_ops = {
 	(php_hash_init_func_t) PHP_SALSA10Init,
 	(php_hash_update_func_t) PHP_SALSAUpdate,
 	(php_hash_final_func_t) PHP_SALSAFinal,
+	(php_hash_copy_func_t) php_hash_copy,
 	64,
 	64,
 	sizeof(PHP_SALSA_CTX)
@@ -207,6 +208,7 @@ const php_hash_ops php_hash_salsa20_ops = {
 	(php_hash_init_func_t) PHP_SALSA20Init,
 	(php_hash_update_func_t) PHP_SALSAUpdate,
 	(php_hash_final_func_t) PHP_SALSAFinal,
+	(php_hash_copy_func_t) php_hash_copy,
 	64,
 	64,
 	sizeof(PHP_SALSA_CTX)

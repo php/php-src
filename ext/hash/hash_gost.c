@@ -306,6 +306,7 @@ const php_hash_ops php_hash_gost_ops = {
 	(php_hash_init_func_t) PHP_GOSTInit,
 	(php_hash_update_func_t) PHP_GOSTUpdate,
 	(php_hash_final_func_t) PHP_GOSTFinal,
+	(php_hash_copy_func_t) php_hash_copy,
 	32,
 	32,
 	sizeof(PHP_GOST_CTX)
