@@ -6062,10 +6062,12 @@ PHP_FUNCTION(register_tick_function)
 	}
 
 	if (!zend_is_callable(tick_fe.arguments[0], 0, &function_name)) {
-	  efree(tick_fe.arguments);
-	  php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid shutdown callback '%s' passed", function_name);
-	  efree(function_name);
-	  RETURN_FALSE;
+		efree(tick_fe.arguments);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid tick callback '%s' passed", function_name);
+		efree(function_name);
+		RETURN_FALSE;
+	} else if (function_name) {
+		efree(function_name);
 	}
 
 	if (Z_TYPE_P(tick_fe.arguments[0]) != IS_ARRAY) {
