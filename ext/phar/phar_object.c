@@ -221,7 +221,6 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 			efree(arch);
 #endif
 			zend_bailout();
-			return PHAR_MIME_PHPS;
 		case PHAR_MIME_OTHER:
 			/* send headers, output file contents */
 			efree(basename);
@@ -261,7 +260,6 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 
 			phar_entry_delref(phar TSRMLS_CC);
 			zend_bailout();
-			return PHAR_MIME_OTHER;
 		case PHAR_MIME_PHP:
 			if (basename) {
 				phar_mung_server_vars(arch, entry, entry_len, basename, basename_len, ru, ru_len TSRMLS_CC);

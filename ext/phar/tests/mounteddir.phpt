@@ -7,6 +7,8 @@ phar.readonly=0
 --FILE--
 <?php
 $fname = dirname(__FILE__) . '/tempmanifest1.phar.php';
+$pname = 'phar://' . $fname;
+
 $a = new Phar($fname);
 $a['index.php'] = '<?php
 Phar::mount("testit", dirname(Phar::running(0)) . "/testit");
@@ -27,6 +29,24 @@ var_dump(__FILE__);
 ?>');
 include dirname(__FILE__) . '/testit/extfile.php';
 include $fname;
+
+$a = opendir($pname . '/testit');
+$out = array();
+while (false !== ($b = readdir($a))) {
+	$out[] = $b;
+}
+sort($out);
+foreach ($out as $b) {
+	echo "$b\n";
+}
+$out = array();
+foreach (new Phar($pname . '/testit') as $b) {
+	$out[] = $b->getPathName();
+}
+sort($out);
+foreach ($out as $b) {
+	echo "$b\n";
+}
 ?>
 ===DONE===
 --CLEAN--
@@ -41,4 +61,10 @@ include $fname;
 string(%d) "%sextfile.php"
 string(%d) "phar://%sextfile.php"
 string(%d) "phar://%sextfile2.php"
+.
+..
+extfile.php
+extfile2.php
+phar://%stempmanifest1.phar.php/testit%cextfile.php
+phar://%stempmanifest1.phar.php/testit%cextfile2.php
 ===DONE===
