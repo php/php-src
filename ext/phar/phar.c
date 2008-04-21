@@ -330,6 +330,10 @@ void destroy_phar_manifest_entry(void *pDest) /* {{{ */
 		efree(entry->link);
 		entry->link = 0;
 	}
+	if (entry->tmp) {
+		efree(entry->tmp);
+		entry->tmp = 0;
+	}
 }
 /* }}} */
 
@@ -1781,7 +1785,9 @@ char *phar_fix_filepath(char *path, int *new_len, int use_cwd TSRMLS_DC) /* {{{ 
 int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_len, char **entry, int *entry_len, int executable, int for_create TSRMLS_DC) /* {{{ */
 {
 	const char *ext_str;
+#ifdef PHP_WIN32
 	char *save;
+#endif
 	int ext_len, free_filename = 0;
 
 	if (!strncasecmp(filename, "phar://", 7)) {
@@ -1800,7 +1806,11 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 		if (ext_len != -1) {
 			if (!ext_str) {
 				/* no / detected, restore arch for error message */
+#ifdef PHP_WIN32
 				*arch = save;
+#else
+				*arch = filename;
+#endif
 			}
 			if (free_filename) {
 				efree(filename);
@@ -2246,7 +2256,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		if ((oldfile && !entry->is_modified) || entry->is_dir) {
 			continue;
 		}
-		if (!phar_get_efp(entry TSRMLS_CC)) {
+		if (!phar_get_efp(entry, 0 TSRMLS_CC)) {
 			/* re-open internal file pointer just-in-time */
 			newentry = phar_open_jit(phar, entry, oldfile, error, 0 TSRMLS_CC);
 			if (!newentry) {
@@ -2257,8 +2267,8 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 			}
 			entry = newentry;
 		}
-		file = phar_get_efp(entry TSRMLS_CC);
-		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0 TSRMLS_CC)) {
+		file = phar_get_efp(entry, 0 TSRMLS_CC);
+		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 1 TSRMLS_CC)) {
 			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}
@@ -2313,7 +2323,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 			return EOF;
 		}
 		php_stream_flush(file);
-		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0 TSRMLS_CC)) {
+		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 0 TSRMLS_CC)) {
 			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}
@@ -2507,8 +2517,8 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 			file = entry->cfp;
 			php_stream_rewind(file);
 		} else {
-			file = phar_get_efp(entry TSRMLS_CC);
-			if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0 TSRMLS_CC)) {
+			file = phar_get_efp(entry, 0 TSRMLS_CC);
+			if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 0 TSRMLS_CC)) {
 				if (closeoldfile) {
 					php_stream_close(oldfile);
 				}

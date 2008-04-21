@@ -56,16 +56,20 @@ class corrupt_tarmaker
         }
 
         $link = null;
-        if ($stat['mode'] & 0x4000) {
+        if ($stat['mode'] & 0xA000 && $corrupt === 'symlink') {
+            $type = 2;        // Symbolic Link
+            $link = $fileOrStream;
+            $stat['size'] = 0;
+            $fileOrStream = '';
+        } else if ($stat['mode'] & 0xA000) {
+            $type = 1;        // Link
+            $link = $fileOrStream;
+            $stat['size'] = 0;
+            $fileOrStream = '';
+        } else if ($stat['mode'] & 0x4000) {
             $type = 5;        // Directory
         } else if ($stat['mode'] & 0x8000) {
             $type = 0;        // Regular
-        } else if ($stat['mode'] & 0xA000 && $corrupt = 'symlink') {
-            $type = 2;        // Symbolic Link
-            $link = 'file1.txt';
-        } else if ($stat['mode'] & 0xA000) {
-            $type = 1;        // Link
-            $link = 'file1.txt';
         } else {
             $type = 9;        // Unknown
         }
@@ -108,7 +112,7 @@ class corrupt_tarmaker
         $checksum = 256; // 8 * ord(' ');
         $checksum += array_reduce($checkheader, '_pear2tarchecksum');
 
-	if ($corrupt == 'checksum') $checksum++;
+	if ($corrupt === 'checksum') $checksum++;
         $checksum = pack('a8', sprintf('%6s ', decoct($checksum)));
 
         fwrite($this->tmp, $block . $checksum . $blockend, 512);
@@ -119,7 +123,7 @@ class corrupt_tarmaker
             }
         } else {
             fwrite($this->tmp, $fileOrStream);
-            if (strlen($fileOrStream) % 512) {
+            if (strlen($fileOrStream) && !isset($link) && strlen($fileOrStream) % 512) {
                 fwrite($this->tmp, str_repeat("\0", 512 - strlen($fileOrStream) % 512));
             }
         }

@@ -364,7 +364,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char 
 		/*if (entry->is_mounted) {
 			 external directory, TODO: construct an internal dirstream based on this actual dir's dirstream
 			php_url_free(resource);
-			return php_stream_opendir(entry->link, options, context);
+			return php_stream_opendir(entry->tmp, options, context);
 		}*/
 		internal_file = estrdup(internal_file);
 		php_url_free(resource);
