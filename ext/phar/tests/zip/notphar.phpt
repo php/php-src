@@ -1,5 +1,5 @@
 --TEST--
-phar: a non-executable zip with no stub named .phar.zip
+Phar: a non-executable zip with no stub named .phar.zip
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE--
