@@ -12,3 +12,4 @@ files/frontcontroller8.phar
 Content-type: text/html
 --EXPECTF--
 string(42) "/frontcontroller25.php/a1.phps/extra/stuff"
+string(12) "/extra/stuff"
