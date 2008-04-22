@@ -922,6 +922,7 @@ static PHP_METHOD(PDO, exec)
 	}
 
 	if (!statement_len) {
+		pdo_raise_impl_error(dbh, NULL, "HY000",  "trying to execute and empty query" TSRMLS_CC);
 		RETURN_FALSE;
 	}
 	PDO_DBH_CLEAR_ERR();
