@@ -9,7 +9,10 @@ Test spliti() function : usage variations  - unexpected type for arg 3
  */
 
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+	if (error_reporting() != 0) {
+		// report non-silenced errors
+		echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+	}
 }
 set_error_handler('test_error_handler');
 echo "*** Testing spliti() : usage variations ***\n";
@@ -28,7 +31,6 @@ $values = array(
       // float data
       10.5,
       -10.5,
-      10.1234567e10,
       10.7654321E-10,
       .5,
 
@@ -61,10 +63,10 @@ $values = array(
       new stdclass(),
 
       // undefined data
-      $undefined_var,
+      @$undefined_var,
 
       // unset data
-      $unset_var,
+      @$unset_var,
 );
 
 // loop through each element of the array for limit
@@ -78,8 +80,6 @@ echo "Done";
 ?>
 --EXPECTF--
 *** Testing spliti() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s(61)
-Error: 8 - Undefined variable: unset_var, %s(64)
 
 Arg value 10.5 
 array(5) {
@@ -101,20 +101,6 @@ array(1) {
   string(9) "1 2 3 4 5"
 }
 
-Arg value 101234567000 
-array(5) {
-  [0]=>
-  string(1) "1"
-  [1]=>
-  string(1) "2"
-  [2]=>
-  string(1) "3"
-  [3]=>
-  string(1) "4"
-  [4]=>
-  string(1) "5"
-}
-
 Arg value 1.07654321E-9 
 array(1) {
   [0]=>
@@ -126,35 +112,35 @@ array(1) {
   [0]=>
   string(9) "1 2 3 4 5"
 }
-Error: 8 - Array to string conversion, %s(70)
+Error: 8 - Array to string conversion, %s(72)
 
 Arg value Array 
 array(1) {
   [0]=>
   string(9) "1 2 3 4 5"
 }
-Error: 8 - Array to string conversion, %s(70)
+Error: 8 - Array to string conversion, %s(72)
 
 Arg value Array 
 array(1) {
   [0]=>
   string(9) "1 2 3 4 5"
 }
-Error: 8 - Array to string conversion, %s(70)
+Error: 8 - Array to string conversion, %s(72)
 
 Arg value Array 
 array(1) {
   [0]=>
   string(9) "1 2 3 4 5"
 }
-Error: 8 - Array to string conversion, %s(70)
+Error: 8 - Array to string conversion, %s(72)
 
 Arg value Array 
 array(1) {
   [0]=>
   string(9) "1 2 3 4 5"
 }
-Error: 8 - Array to string conversion, %s(70)
+Error: 8 - Array to string conversion, %s(72)
 
 Arg value Array 
 array(1) {
@@ -221,10 +207,10 @@ array(1) {
   [0]=>
   string(9) "1 2 3 4 5"
 }
-Error: 4096 - Object of class stdClass could not be converted to string, %s(70)
+Error: 4096 - Object of class stdClass could not be converted to string, %s(72)
 
 Arg value  
-Error: 8 - Object of class stdClass could not be converted to int, %s(71)
+Error: 8 - Object of class stdClass could not be converted to int, %s(73)
 array(1) {
   [0]=>
   string(9) "1 2 3 4 5"
