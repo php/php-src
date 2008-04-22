@@ -10,6 +10,7 @@ $a['404.php'] = 'My 404 is rawesome';
 $a['noext'] = 'hi';
 $a['unknown.ext'] = '<?php var_dump("hi");';
 $a['bigfile.txt'] = str_repeat('a', 8193);
+$a['fatalerror.phps'] = '<?php oopsie_daisy();';
 $a->setStub('<?php
 Phar::webPhar("whatever", "index.php", "404.php", array("jpg" => "foo/bar", "phps" => Phar::PHP, "php" => Phar::PHPS));
 echo "oops did not run\n";
