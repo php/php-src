@@ -270,9 +270,6 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 				efree(name);
 				return -1;
 			}
-			if (!file_handle.opened_path) {
-				file_handle.opened_path = estrndup(name, name_len);
-			}
 			PHAR_G(cwd) = NULL;
 			PHAR_G(cwd_len) = 0;
 			if (zend_hash_add(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
