@@ -313,13 +313,13 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 						}
 					}
 				} zend_catch {
-					if (PHAR_G(cwd)) {
-						efree(PHAR_G(cwd));
-						PHAR_G(cwd) = NULL;
-						PHAR_G(cwd_len) = 0;
-					}
-					efree(name);
 				} zend_end_try();
+				if (PHAR_G(cwd)) {
+					efree(PHAR_G(cwd));
+					PHAR_G(cwd) = NULL;
+					PHAR_G(cwd_len) = 0;
+				}
+				efree(name);
 				zend_bailout();
 			}
 			return PHAR_MIME_PHP;
