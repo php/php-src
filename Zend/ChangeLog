@@ -1,3 +1,11 @@
+2008-04-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Optimized function call helper
+
 2008-04-19  Felipe Pena  <felipensp@gmail.com>
 
     * tests/030.phpt:

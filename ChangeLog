@@ -1,3 +1,66 @@
+2008-04-21  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      NEWS:
+      add news entry
+
+    * ext/hash/hash.c
+      ext/hash/hash.c
+      ext/hash/hash_adler32.c
+      ext/hash/hash_adler32.c
+      ext/hash/hash_crc32.c
+      ext/hash/hash_crc32.c
+      ext/hash/hash_gost.c
+      ext/hash/hash_gost.c
+      ext/hash/hash_haval.c
+      ext/hash/hash_haval.c
+      ext/hash/hash_md.c
+      ext/hash/hash_md.c
+      ext/hash/hash_ripemd.c
+      ext/hash/hash_ripemd.c
+      ext/hash/hash_salsa.c
+      ext/hash/hash_salsa.c
+      ext/hash/hash_sha.c
+      ext/hash/hash_sha.c
+      ext/hash/hash_snefru.c
+      ext/hash/hash_snefru.c
+      ext/hash/hash_tiger.c
+      ext/hash/hash_tiger.c
+      ext/hash/hash_whirlpool.c
+      ext/hash/hash_whirlpool.c
+      ext/hash/php_hash.h
+      ext/hash/php_hash.h
+      ext/hash/php_hash_adler32.h
+      ext/hash/php_hash_adler32.h
+      ext/hash/php_hash_crc32.h
+      ext/hash/php_hash_crc32.h
+      ext/hash/tests/hash_copy_001.phpt
+      ext/hash/tests/hash_copy_001.phpt
+      ext/hash/tests/hash_copy_001.phpt
+      ext/hash/tests/hash_copy_002.phpt
+      ext/hash/tests/hash_copy_002.phpt
+      ext/hash/tests/hash_copy_002.phpt:
+      [DOC] add hash_copy() to be able to copy hash resource
+
+2008-04-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c:
+      Fixed error verbiage and free function_name on success
+
+2008-04-21  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/strings/str_replace.phpt:
+      - Added UEXPECTF
+
+2008-04-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Optimized function call helper
+
 2008-04-20  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_3)
