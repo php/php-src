@@ -9,6 +9,6 @@ PATH_INFO=/fatalerror.phps
 --FILE_EXTERNAL--
 files/frontcontroller8.phar
 --EXPECTHEADERS--
-Content-type: text/plain
+Content-type: text/html
 --EXPECTF--
 Fatal error: Call to undefined function oopsie_daisy() in phar://%sfatalerror.phps on line 1
