@@ -16,7 +16,7 @@ set_error_handler('test_error_handler');
 echo "*** Testing ereg_replace() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$pattern = 'ell';
+$pattern = b'ell';
 $string = 'hello!';
 
 //get an unset variable
@@ -103,7 +103,7 @@ Arg value -10.5
 string(8) "h%F6o%21"
 
 Arg value 101234567000 
-string(8) "h%FFo%21"
+string(%d) "h%so%21"
 
 Arg value 1.07654321E-9 
 string(5) "ho%21"
