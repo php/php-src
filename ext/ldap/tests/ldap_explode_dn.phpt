@@ -86,9 +86,9 @@ array(5) {
 bool(false)
 bool(false)
 
-Warning: Wrong parameter count for ldap_explode_dn() in %s on line %d
+Warning: ldap_explode_dn() expects exactly 2 parameters, 1 given in %s on line %d
 
-Warning: Wrong parameter count for ldap_explode_dn() in %s on line %d
+Warning: ldap_explode_dn() expects exactly 2 parameters, 3 given in %s on line %d
 bool(false)
 bool(false)
 Done
