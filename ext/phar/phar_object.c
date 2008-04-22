@@ -56,10 +56,6 @@ static int phar_file_type(HashTable *mimes, char *file, char **mime_type TSRMLS_
 {
 	char *ext;
 	phar_mime_type *mime;
-	if (!mime_type) {
-		/* assume PHP */
-		return 0;
-	}
 	ext = strrchr(file, '.');
 	if (!ext) {
 		*mime_type = "text/plain";
