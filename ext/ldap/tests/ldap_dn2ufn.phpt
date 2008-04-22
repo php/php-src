@@ -28,6 +28,6 @@ string(16) "bob, example.com"
 string(23) "bob, users, example.com"
 bool(false)
 
-Warning: Wrong parameter count for ldap_dn2ufn() in %s on line %d
+Warning: ldap_dn2ufn() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 Done
