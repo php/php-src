@@ -91,7 +91,7 @@ static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char 
 		path_info = Z_STRVAL_PP(stuff);
 		code = Z_STRLEN_PP(stuff);
 		if (Z_STRLEN_PP(stuff) > entry_len && !memcmp(Z_STRVAL_PP(stuff), entry, entry_len)) {
-			ZVAL_STRINGL(*stuff, Z_STRVAL_PP(stuff) + entry_len, Z_STRLEN_PP(stuff) - entry_len - request_uri_len, 1);
+			ZVAL_STRINGL(*stuff, Z_STRVAL_PP(stuff) + entry_len, request_uri_len, 1);
 
 			MAKE_STD_ZVAL(temp); 
 			ZVAL_STRINGL(temp, path_info, code, 0);
