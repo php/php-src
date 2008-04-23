@@ -121,9 +121,10 @@
 #define PHAR_ENT_PERM_DEF_FILE    0x000001B6
 #define PHAR_ENT_PERM_DEF_DIR     0x000001FF
 
-#define PHAR_FORMAT_PHAR    0
-#define PHAR_FORMAT_TAR     1
-#define PHAR_FORMAT_ZIP     2
+#define PHAR_FORMAT_SAME    0
+#define PHAR_FORMAT_PHAR    1
+#define PHAR_FORMAT_TAR     2
+#define PHAR_FORMAT_ZIP     3
 
 #define TAR_FILE    '0'
 #define TAR_LINK    '1'

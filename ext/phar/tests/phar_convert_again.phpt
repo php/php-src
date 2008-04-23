@@ -41,7 +41,13 @@ $phar = $tbz->convertToExecutable(Phar::PHAR, Phar::NONE);
 echo $phar->getPath() . "\n";
 $phar['a'] = 'hi';
 $phar['a']->setMetadata('hi');
+$zip = $phar->convertToExecutable(Phar::ZIP);
+echo $zip->getPath() . "\n";
+echo $zip['a']->getMetadata() . "\n";
 $tar = $phar->convertToExecutable(Phar::TAR);
+echo $tar->getPath() . "\n";
+$tgz = $tar->convertToExecutable(null, Phar::GZ);
+echo $tgz->getPath() . "\n";
 ?>
 ===DONE===
 --CLEAN--
@@ -52,7 +58,9 @@ unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar.gz');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar.bz2');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.tbz');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.tar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar.tar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar.zip');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar.tar.gz');
 __HALT_COMPILER();
 ?>
 --EXPECTF--
@@ -61,4 +69,8 @@ __HALT_COMPILER();
 %sphar_convert_again.tar.bz2
 Unable to add newly converted phar "%sphar_convert_again.phar" to the list of phars, a phar with that name already exists
 %sphar_convert_again2.phar
+%sphar_convert_again2.phar.zip
+hi
+%sphar_convert_again2.phar.tar
+%sphar_convert_again2.phar.tar.gz
 ===DONE===
