@@ -1976,6 +1976,7 @@ PHP_METHOD(Phar, convertToData)
 			} else {
 				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 					"Cannot write out data phar archive, use Phar::TAR or Phar::ZIP");
+				return;
 			}
 			break;
 		case PHAR_FORMAT_PHAR:
