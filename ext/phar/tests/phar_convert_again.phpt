@@ -39,6 +39,9 @@ copy($tbz->getPath(), $fname2);
 $tbz = new PharData($fname2);
 $phar = $tbz->convertToExecutable(Phar::PHAR, Phar::NONE);
 echo $phar->getPath() . "\n";
+$phar['a'] = 'hi';
+$phar['a']->setMetadata('hi');
+$tar = $phar->convertToExecutable(Phar::TAR);
 ?>
 ===DONE===
 --CLEAN--
@@ -49,6 +52,7 @@ unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar.gz');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar.bz2');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.tbz');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.tar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--
