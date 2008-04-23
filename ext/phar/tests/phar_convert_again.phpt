@@ -48,6 +48,11 @@ $tar = $phar->convertToExecutable(Phar::TAR);
 echo $tar->getPath() . "\n";
 $tgz = $tar->convertToExecutable(null, Phar::GZ);
 echo $tgz->getPath() . "\n";
+try {
+$tgz->convertToExecutable(25);
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
 ?>
 ===DONE===
 --CLEAN--
@@ -73,4 +78,5 @@ Unable to add newly converted phar "%sphar_convert_again.phar" to the list of ph
 hi
 %sphar_convert_again2.phar.tar
 %sphar_convert_again2.phar.tar.gz
+Unknown file format specified, please pass one of Phar::PHAR, Phar::TAR or Phar::ZIP
 ===DONE===
