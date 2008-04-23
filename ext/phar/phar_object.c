@@ -1095,12 +1095,12 @@ PHP_METHOD(Phar, isValidPharFilename)
 	int fname_len, ext_len;
 	zend_bool executable = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &fname, &fname_len, &executable) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &fname, &fname_len, &executable) == FAILURE) {
 		return;
 	}
 
 	fname_len = executable;
-	RETURN_BOOL(phar_detect_phar_fname_ext(fname, 1, &ext_str, &ext_len, fname_len, executable, 1 TSRMLS_CC) == SUCCESS);
+	RETVAL_BOOL(phar_detect_phar_fname_ext(fname, 1, &ext_str, &ext_len, fname_len, 2, 1 TSRMLS_CC) == SUCCESS);
 }
 /* }}} */
 

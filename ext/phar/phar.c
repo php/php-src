@@ -1500,7 +1500,8 @@ static int phar_check_str(const char *fname, const char *ext_str, int ext_len, i
 		test[ext_len + 1] = '\0';
 		/* executable phars must contain ".phar" as a valid extension (phar://.pharmy/oops is invalid) */
 		/* (phar://hi/there/.phar/oops is also invalid) */
-		if ((pos = strstr(test, ".phar")) && (*(pos - 1) != '/')
+		pos = strstr(test, ".phar");
+		if (pos && (*(pos - 1) != '/')
 				&& (pos += 5) && (*pos == '\0' || *pos == '/' || *pos == '.')) {
 			return phar_analyze_path(fname, ext_str, ext_len, for_create TSRMLS_CC);
 		} else {
@@ -1508,7 +1509,9 @@ static int phar_check_str(const char *fname, const char *ext_str, int ext_len, i
 		}
 	}
 	/* data phars need only contain a single non-"." to be valid */
-	if (*(ext_str + 1) != '.' && *(ext_str + 1) != '/' && *(ext_str + 1) != '\0') {
+	pos = strstr(ext_str, ".phar");
+	if (!(pos && (*(pos - 1) != '/')
+				&& (pos += 5) && (*pos == '\0' || *pos == '/' || *pos == '.')) && *(ext_str + 1) != '.' && *(ext_str + 1) != '/' && *(ext_str + 1) != '\0') {
 		return phar_analyze_path(fname, ext_str, ext_len, for_create TSRMLS_CC);
 	}
 	return FAILURE;
@@ -1595,6 +1598,12 @@ int phar_detect_phar_fname_ext(const char *filename, int check_length, const cha
 next_extension:
 	if (!pos) {
 		return FAILURE;
+	}
+	if (pos != filename && (*(pos - 1) == '/' || *(pos - 1) == '\0')) {
+		pos = strchr(pos + 1, '.');
+		if (!pos) {
+			return FAILURE;
+		}
 	}
 
 	slash = strchr(pos, '/');
