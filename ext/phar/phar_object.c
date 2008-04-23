@@ -700,16 +700,12 @@ PHP_METHOD(Phar, webPhar)
 			entry = estrndup("/index.php", sizeof("/index.php"));
 			entry_len = sizeof("/index.php")-1;
 		}
-		if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", 0, &error TSRMLS_CC)) {
-			if (error) {
-				efree(error);
-			}
+		if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", 0, NULL TSRMLS_CC)) {
 			phar_do_404(fname, fname_len, f404, f404_len, entry, entry_len TSRMLS_CC);
 			if (free_pathinfo) {
 				efree(path_info);
 			}
 			zend_bailout();
-			return;
 		} else {
 			char *tmp, sa;
 			sapi_header_line ctr = {0};
@@ -740,7 +736,6 @@ PHP_METHOD(Phar, webPhar)
 			phar_entry_delref(phar TSRMLS_CC);
 			efree(ctr.line);
 			zend_bailout();
-			return;
 		}
 	}
 
@@ -750,7 +745,6 @@ PHP_METHOD(Phar, webPhar)
 		efree(fname);
 #endif
 		zend_bailout();
-		return;
 	}
 
 	/* set up mime types */
@@ -868,12 +862,8 @@ PHP_METHOD(Phar, webPhar)
 
 no_mimes:
 	code = phar_file_type(&mimetypes, entry, &mime_type TSRMLS_CC);
-	ret = phar_file_action(phar, mime_type, code, entry, entry_len, fname, fname_len, pt, strlen(pt), ru, ru_len TSRMLS_CC);
 	zend_hash_destroy(&mimetypes);
-#ifdef PHP_WIN32
-	efree(fname);
-#endif
-	RETURN_LONG(ret);
+	ret = phar_file_action(phar, mime_type, code, entry, entry_len, fname, fname_len, pt, strlen(pt), ru, ru_len TSRMLS_CC);
 }
 /* }}} */
 
