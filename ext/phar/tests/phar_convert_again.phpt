@@ -46,6 +46,17 @@ echo $zip->getPath() . "\n";
 echo $zip['a']->getMetadata() . "\n";
 $data = $zip->convertToData();
 echo $data->getPath() . "\n";
+// extra code coverage
+try {
+$data->setStub('hi');
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
+try {
+$data->setAlias('hi');
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
 $tar = $phar->convertToExecutable(Phar::TAR);
 echo $tar->getPath() . "\n";
 $data = $tar->convertToData();
@@ -102,6 +113,17 @@ $tgz->convertToData(Phar::TAR, 25);
 } catch (Exception $e) {
 echo $e->getMessage() . "\n";
 }
+// extra code coverage
+try {
+$data->setStub('hi');
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
+try {
+$data->setAlias('hi');
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
 ?>
 ===DONE===
 --CLEAN--
@@ -128,6 +150,8 @@ Unable to add newly converted phar "%sphar_convert_again.phar" to the list of ph
 %sphar_convert_again2.phar.zip
 hi
 %sphar_convert_again2.zip
+A Phar stub cannot be set in a plain zip archive
+A Phar alias cannot be set in a plain zip archive
 %sphar_convert_again2.phar.tar
 %sphar_convert_again2.tar
 %sphar_convert_again2.phar.tar.gz
@@ -141,4 +165,6 @@ Cannot compress entire archive with gzip, zip archives do not support whole-arch
 Cannot compress entire archive with bz2, zip archives do not support whole-archive compression
 Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2
 Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2
+A Phar stub cannot be set in a plain tar archive
+A Phar alias cannot be set in a plain tar archive
 ===DONE===
