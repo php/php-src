@@ -93,7 +93,7 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND *conn,
 #define mysqlnd_change_user(conn, user, passwd, db)		(conn)->m->change_user((conn), (user), (passwd), (db) TSRMLS_CC)
 
 #define mysqlnd_debug(x)								_mysqlnd_debug((x) TSRMLS_CC)
-void _mysqlnd_debug(const char *mode TSRMLS_DC);
+PHPAPI void _mysqlnd_debug(const char *mode TSRMLS_DC);
 
 /* Query */
 #define mysqlnd_fetch_into(result, flags, ret_val, ext)	(result)->m.fetch_into((result), (flags), (ret_val), (ext) TSRMLS_CC ZEND_FILE_LINE_CC)
