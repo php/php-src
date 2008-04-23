@@ -44,8 +44,12 @@ $phar['a']->setMetadata('hi');
 $zip = $phar->convertToExecutable(Phar::ZIP);
 echo $zip->getPath() . "\n";
 echo $zip['a']->getMetadata() . "\n";
+$data = $zip->convertToData();
+echo $data->getPath() . "\n";
 $tar = $phar->convertToExecutable(Phar::TAR);
 echo $tar->getPath() . "\n";
+$data = $tar->convertToData();
+echo $data->getPath() . "\n";
 $tgz = $tar->convertToExecutable(null, Phar::GZ);
 echo $tgz->getPath() . "\n";
 try {
@@ -63,6 +67,41 @@ $tgz->convertToExecutable(Phar::ZIP, Phar::BZ2);
 } catch (Exception $e) {
 echo $e->getMessage() . "\n";
 }
+try {
+$phar->convertToData();
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
+try {
+$tgz->convertToData(Phar::PHAR);
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
+try {
+$tgz->convertToData(25);
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
+try {
+$tgz->convertToData(Phar::ZIP, Phar::GZ);
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
+try {
+$tgz->convertToData(Phar::ZIP, Phar::BZ2);
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
+try {
+$tgz->convertToExecutable(Phar::TAR, 25);
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
+try {
+$tgz->convertToData(Phar::TAR, 25);
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
 ?>
 ===DONE===
 --CLEAN--
@@ -74,7 +113,9 @@ unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar.bz2');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.tbz');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar.tar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.tar');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar.zip');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.zip');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar.tar.gz');
 __HALT_COMPILER();
 ?>
@@ -86,9 +127,18 @@ Unable to add newly converted phar "%sphar_convert_again.phar" to the list of ph
 %sphar_convert_again2.phar
 %sphar_convert_again2.phar.zip
 hi
+%sphar_convert_again2.zip
 %sphar_convert_again2.phar.tar
+%sphar_convert_again2.tar
 %sphar_convert_again2.phar.tar.gz
 Unknown file format specified, please pass one of Phar::PHAR, Phar::TAR or Phar::ZIP
 Cannot compress entire archive with gzip, zip archives do not support whole-archive compression
 Cannot compress entire archive with bz2, zip archives do not support whole-archive compression
+Cannot write out data phar archive, use Phar::TAR or Phar::ZIP
+Cannot write out data phar archive, use Phar::TAR or Phar::ZIP
+Unknown file format specified, please pass one of Phar::TAR or Phar::ZIP
+Cannot compress entire archive with gzip, zip archives do not support whole-archive compression
+Cannot compress entire archive with bz2, zip archives do not support whole-archive compression
+Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2
+Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2
 ===DONE===
