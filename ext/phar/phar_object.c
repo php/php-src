@@ -560,7 +560,6 @@ PHP_METHOD(Phar, webPhar)
 	if (!(SG(request_info).request_method && SG(request_info).request_uri && (!strcmp(SG(request_info).request_method, "GET") || !strcmp(SG(request_info).request_method, "POST")))) {
 		return;
 	}
-
 #ifdef PHP_WIN32
 	fname = estrndup(fname, fname_len);
 	phar_unixify_path_separators(fname, fname_len);
