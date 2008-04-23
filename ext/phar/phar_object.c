@@ -647,7 +647,7 @@ PHP_METHOD(Phar, webPhar)
 			}
 			return;
 		}
-		if (!retval_ptr) {
+		if (!fci.retval_ptr_ptr || !retval_ptr) {
 			if (free_pathinfo) {
 				efree(path_info);
 			}
@@ -657,8 +657,13 @@ PHP_METHOD(Phar, webPhar)
 		switch (Z_TYPE_P(retval_ptr)) {
 			case IS_STRING :
 				efree(entry);
-				entry = Z_STRVAL_P(retval_ptr);
-				entry_len = Z_STRLEN_P(retval_ptr);
+				if (fci.retval_ptr_ptr != &retval_ptr) {
+					entry = estrndup(Z_STRVAL_PP(fci.retval_ptr_ptr), Z_STRLEN_PP(fci.retval_ptr_ptr));
+					entry_len = Z_STRLEN_PP(fci.retval_ptr_ptr);
+				} else {
+					entry = Z_STRVAL_P(retval_ptr);
+					entry_len = Z_STRLEN_P(retval_ptr);
+				}
 				break;
 			case IS_BOOL :
 				phar_do_403(entry, entry_len TSRMLS_CC);
@@ -667,9 +672,6 @@ PHP_METHOD(Phar, webPhar)
 				}
 				zend_bailout();
 				return;
-			case IS_NULL :
-				/* just use what we have now */
-				break;
 			default:
 				efree(retval_ptr);
 				if (free_pathinfo) {
