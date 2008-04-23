@@ -41,6 +41,8 @@ var_dump($a['a.php']->isReadable());
 archive
 <?php
 ini_set('phar.readonly',0);
+$p = new Phar('doesnotexisthere.phar');
+var_dump($p->isWritable());
 clearstatcache();
 var_dump($a->isWritable());
 var_dump($b->isWritable());
@@ -72,6 +74,7 @@ bool(true)
 bool(true)
 bool(true)
 archive
+bool(true)
 bool(true)
 bool(true)
 bool(false)
