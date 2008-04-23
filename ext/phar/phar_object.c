@@ -1699,10 +1699,12 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 	efree(newname);
 
 	if (zend_hash_exists(&(PHAR_GLOBALS->phar_fname_map), newpath, phar->fname_len)) {
+		efree(oldpath);
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Unable to add newly converted phar \"%s\" to the list of phars, a phar with that name already exists", phar->fname);
 		return NULL;
 	}
 	if (SUCCESS != zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), newpath, phar->fname_len, (void*)&phar, sizeof(phar_archive_data*), NULL)) {
+		efree(oldpath);
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Unable to add newly converted phar \"%s\" to the list of phars", phar->fname);
 		return NULL;
 	}
@@ -1729,6 +1731,7 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 	if (error) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, error);
 		efree(error);
+		efree(oldpath);
 		return NULL;
 	}
 
