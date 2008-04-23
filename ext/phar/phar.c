@@ -1509,10 +1509,16 @@ static int phar_check_str(const char *fname, const char *ext_str, int ext_len, i
 		}
 	}
 	/* data phars need only contain a single non-"." to be valid */
-	pos = strstr(ext_str, ".phar");
-	if (!(pos && (*(pos - 1) != '/')
-				&& (pos += 5) && (*pos == '\0' || *pos == '/' || *pos == '.')) && *(ext_str + 1) != '.' && *(ext_str + 1) != '/' && *(ext_str + 1) != '\0') {
-		return phar_analyze_path(fname, ext_str, ext_len, for_create TSRMLS_CC);
+	if (!executable) {
+		pos = strstr(ext_str, ".phar");
+		if (!(pos && (*(pos - 1) != '/')
+					&& (pos += 5) && (*pos == '\0' || *pos == '/' || *pos == '.')) && *(ext_str + 1) != '.' && *(ext_str + 1) != '/' && *(ext_str + 1) != '\0') {
+			return phar_analyze_path(fname, ext_str, ext_len, for_create TSRMLS_CC);
+		}
+	} else {
+		if (*(ext_str + 1) != '.' && *(ext_str + 1) != '/' && *(ext_str + 1) != '\0') {
+			return phar_analyze_path(fname, ext_str, ext_len, for_create TSRMLS_CC);
+		}
 	}
 	return FAILURE;
 }
@@ -1599,7 +1605,7 @@ next_extension:
 	if (!pos) {
 		return FAILURE;
 	}
-	if (pos != filename && (*(pos - 1) == '/' || *(pos - 1) == '\0')) {
+	while (pos != filename && (*(pos - 1) == '/' || *(pos - 1) == '\0')) {
 		pos = strchr(pos + 1, '.');
 		if (!pos) {
 			return FAILURE;
