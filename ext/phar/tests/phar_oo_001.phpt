@@ -5,6 +5,7 @@ Phar object: basics
 <?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 --INI--
 phar.require_hash=0
+phar.readonly=0
 --FILE--
 <?php
 
@@ -30,6 +31,13 @@ catch (BadMethodCallException $e)
 {
 	var_dump($e->getMessage());
 }
+try {
+	$phar = new Phar('test.phar');
+	$phar->__construct('oops');
+} catch (BadMethodCallException $e)
+{
+	var_dump($e->getMessage());
+}
 
 ?>
 ===DONE===
@@ -42,4 +50,5 @@ __halt_compiler();
 string(5) "1.0.0"
 int(5)
 string(50) "Cannot call method on an uninitialized Phar object"
+string(29) "Cannot call constructor twice"
 ===DONE===
