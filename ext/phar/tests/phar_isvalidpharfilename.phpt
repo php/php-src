@@ -72,6 +72,11 @@ var_dump(Phar::isValidPharFilename('myphar.phar'));
 var_dump(Phar::isValidPharFilename('myphar.phar', true));
 var_dump(Phar::isValidPharFilename('myphar.phar', false));
 
+echo "\ndir.phar.php\n";
+var_dump(Phar::isValidPharFilename('dir.phar.php'));
+var_dump(Phar::isValidPharFilename('dir.phar.php', true));
+var_dump(Phar::isValidPharFilename('dir.phar.php', false));
+
 ?>
 ===DONE===
 --CLEAN--
@@ -135,6 +140,11 @@ bool(true)
 bool(false)
 
 myphar.phar
+bool(true)
+bool(true)
+bool(false)
+
+dir.phar.php
 bool(true)
 bool(true)
 bool(false)
