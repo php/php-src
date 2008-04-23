@@ -1874,6 +1874,7 @@ PHP_METHOD(Phar, convertToExecutable)
 
 	switch (format) {
 		case 9021976:
+		case PHAR_FORMAT_SAME: /* null is converted to 0 */
 			/* by default, use the existing format */
 			if (phar_obj->arc.archive->is_tar) {
 				format = PHAR_FORMAT_TAR;
@@ -1966,6 +1967,7 @@ PHP_METHOD(Phar, convertToData)
 
 	switch (format) {
 		case 9021976:
+		case PHAR_FORMAT_SAME: /* null is converted to 0 */
 			/* by default, use the existing format */
 			if (phar_obj->arc.archive->is_tar) {
 				format = PHAR_FORMAT_TAR;
