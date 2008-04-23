@@ -53,6 +53,11 @@ $tgz->convertToExecutable(25);
 } catch (Exception $e) {
 echo $e->getMessage() . "\n";
 }
+try {
+$tgz->convertToExecutable(Phar::ZIP, Phar::GZ);
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
 ?>
 ===DONE===
 --CLEAN--
@@ -79,4 +84,5 @@ hi
 %sphar_convert_again2.phar.tar
 %sphar_convert_again2.phar.tar.gz
 Unknown file format specified, please pass one of Phar::PHAR, Phar::TAR or Phar::ZIP
+Cannot compress entire archive with gzip, zip archives do not support whole-archive compression
 ===DONE===
