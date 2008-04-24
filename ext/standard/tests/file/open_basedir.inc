@@ -43,7 +43,7 @@ function recursive_delete_directory($directory) {
                 if (is_dir($path) == TRUE) {
                     recursive_delete_directory($path);
                 } else {
-					chmod($path, 0777);
+					@chmod($path, 0777);
                     unlink($path);
                 }
             }
@@ -51,7 +51,7 @@ function recursive_delete_directory($directory) {
     }
 
     closedir($handle);
-	chmod($directory, 0777);
+	@chmod($directory, 0777);
     rmdir($directory);
 
     return TRUE;
