@@ -2258,6 +2258,10 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 
 		/* compress and rehash as necessary */
 		if ((oldfile && !entry->is_modified) || entry->is_dir) {
+			if (entry->fp_type == PHAR_UFP) {
+				/* reset so we can copy the compressed data over */
+				entry->fp_type = PHAR_FP;
+			}
 			continue;
 		}
 		if (!phar_get_efp(entry, 0 TSRMLS_CC)) {
