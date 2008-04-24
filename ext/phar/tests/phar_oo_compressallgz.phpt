@@ -39,7 +39,11 @@ var_dump($phar['b']->isCompressed(Phar::BZ2));
 var_dump(file_get_contents($pname . '/c'));
 var_dump($phar['c']->isCompressed(Phar::GZ));
 var_dump($phar['b']->isCompressed(Phar::BZ2));
-
+try {
+$phar->compressFiles(25);
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
 ?>
 ===DONE===
 --CLEAN--
@@ -63,4 +67,5 @@ bool(false)
 string(1) "c"
 bool(true)
 bool(false)
+Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2
 ===DONE===
