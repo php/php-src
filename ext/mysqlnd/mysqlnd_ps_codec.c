@@ -771,9 +771,9 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 zend_uchar* mysqlnd_stmt_execute_generate_request(MYSQLND_STMT *stmt, size_t *request_len,
 												  zend_bool *free_buffer TSRMLS_DC)
 {
-	zend_uchar	*p = stmt->cmd_buffer.buffer,
-				*cmd_buffer = stmt->cmd_buffer.buffer;
-	size_t cmd_buffer_length = stmt->cmd_buffer.length;
+	zend_uchar	*p = stmt->execute_cmd_buffer.buffer,
+				*cmd_buffer = stmt->execute_cmd_buffer.buffer;
+	size_t cmd_buffer_length = stmt->execute_cmd_buffer.length;
 	unsigned int	null_byte_offset,
 					null_count= (stmt->param_count + 7) / 8;
 
@@ -801,7 +801,7 @@ zend_uchar* mysqlnd_stmt_execute_generate_request(MYSQLND_STMT *stmt, size_t *re
 
 	mysqlnd_stmt_execute_store_params(stmt, &cmd_buffer, &p, &cmd_buffer_length, null_byte_offset TSRMLS_CC);
 
-	*free_buffer = (cmd_buffer != stmt->cmd_buffer.buffer);
+	*free_buffer = (cmd_buffer != stmt->execute_cmd_buffer.buffer);
 	*request_len = (p - cmd_buffer);
 	return cmd_buffer;
 }

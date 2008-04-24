@@ -477,6 +477,8 @@ PHP_FUNCTION(mysqli_stmt_get_result);
 PHP_FUNCTION(mysqli_stmt_get_warnings);
 PHP_FUNCTION(mysqli_stmt_reset);
 PHP_FUNCTION(mysqli_stmt_insert_id);
+PHP_FUNCTION(mysqli_stmt_more_results);
+PHP_FUNCTION(mysqli_stmt_next_result);
 PHP_FUNCTION(mysqli_stmt_num_rows);
 PHP_FUNCTION(mysqli_stmt_sqlstate);
 PHP_FUNCTION(mysqli_stmt_store_result);

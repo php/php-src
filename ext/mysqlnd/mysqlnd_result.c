@@ -177,6 +177,7 @@ void mysqlnd_unbuffered_free_last_data(MYSQLND_RES *result TSRMLS_DC)
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_free_buffered_data */
 void mysqlnd_free_buffered_data(MYSQLND_RES *result TSRMLS_DC)
 {
@@ -230,6 +231,7 @@ void mysqlnd_free_buffered_data(MYSQLND_RES *result TSRMLS_DC)
 	DBG_VOID_RETURN;
 }
 /* }}} */
+
 
 #ifdef MYSQLND_THREADED
 /* {{{ mysqlnd_free_background_buffered_data */
@@ -309,8 +311,9 @@ void mysqlnd_free_background_buffered_data(MYSQLND_RES *result TSRMLS_DC)
 /* }}} */
 #endif /* MYSQL_THREADING */
 
+
 /* {{{ mysqlnd_res::free_result_buffers */
-void
+static void
 MYSQLND_METHOD(mysqlnd_res, free_result_buffers)(MYSQLND_RES *result TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_res::free_result_buffers");
@@ -580,8 +583,15 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 						stmt->state = MYSQLND_STMT_INITTED;
 					}
 				} else {
-					DBG_INF_FMT("warns=%u status=%u", fields_eof.warning_count, fields_eof.server_status);
+					DBG_INF_FMT("warnings=%u server_status=%u", fields_eof.warning_count, fields_eof.server_status);
 					conn->upsert_status.warning_count = fields_eof.warning_count;
+					/*
+					  If SERVER_MORE_RESULTS_EXISTS is set then this is either MULTI_QUERY or a CALL()
+					  The first packet after sending the query/com_execute has the bit set only
+					  in this cases. Not sure why it's a needed but it marks that the whole stream
+					  will include many result sets. What actually matters are the bits set at the end
+					  of every result set (the EOF packet).
+					*/
 					conn->upsert_status.server_status = fields_eof.server_status;
 					if (fields_eof.server_status & MYSQLND_SERVER_QUERY_NO_GOOD_INDEX_USED) {
 						stat = STAT_BAD_INDEX_USED;
@@ -789,7 +799,7 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES *result TSRMLS_DC)
 		result->unbuf->eof_reached = TRUE; /* so next time we won't get an error */
 	} else if (row_packet->eof) {
 		/* Mark the connection as usable again */
-		DBG_INF_FMT("warns=%u status=%u", row_packet->warning_count, row_packet->server_status);
+		DBG_INF_FMT("warningss=%u server_status=%u", row_packet->warning_count, row_packet->server_status);
 		result->unbuf->eof_reached = TRUE;
 		result->conn->upsert_status.warning_count = row_packet->warning_count;
 		result->conn->upsert_status.server_status = row_packet->server_status;
@@ -929,7 +939,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flag
 		result->unbuf->eof_reached = TRUE; /* so next time we won't get an error */
 	} else if (row_packet->eof) {
 		/* Mark the connection as usable again */
-		DBG_INF_FMT("warns=%u status=%u", row_packet->warning_count, row_packet->server_status);
+		DBG_INF_FMT("warnings=%u server_status=%u", row_packet->warning_count, row_packet->server_status);
 		result->unbuf->eof_reached = TRUE;
 		result->conn->upsert_status.warning_count = row_packet->warning_count;
 		result->conn->upsert_status.server_status = row_packet->server_status;
@@ -1261,7 +1271,7 @@ mysqlnd_store_result_fetch_data(MYSQLND * const conn, MYSQLND_RES *result,
 	}
 	PACKET_FREE(row_packet);
 
-	DBG_INF_FMT("ret=%s row_count=%u warns=%u status=%u", ret == PASS? "PASS":"FAIL",
+	DBG_INF_FMT("ret=%s row_count=%u warnings=%u server_status=%u", ret == PASS? "PASS":"FAIL",
 				set->row_count, conn->upsert_status.warning_count, conn->upsert_status.server_status);
 	DBG_RETURN(ret);
 }
@@ -1281,7 +1291,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 	DBG_INF_FMT("conn=%d ps_protocol=%d", conn->thread_id, ps_protocol);
 
 	/* We need the conn because we are doing lazy zval initialization in buffered_fetch_row */
-	result->conn 			= conn->m->get_reference(conn);
+	result->conn 			= conn->m->get_reference(conn TSRMLS_CC);
 	result->type			= MYSQLND_RES_NORMAL;
 	result->m.fetch_row		= result->m.fetch_row_normal_buffered;
 	result->m.fetch_lengths	= mysqlnd_fetch_lengths_buffered;
@@ -1304,6 +1314,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 	DBG_RETURN(result);
 }
 /* }}} */
+
 
 #ifdef MYSQLND_THREADED
 /* {{{ mysqlnd_fetch_row_async_buffered */
@@ -1432,6 +1443,7 @@ mysqlnd_fetch_row_async_buffered(MYSQLND_RES *result, void *param, unsigned int 
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_background_store_result_fetch_data */
 enum_func_status
 mysqlnd_background_store_result_fetch_data(MYSQLND_RES *result TSRMLS_DC)
@@ -1465,7 +1477,9 @@ mysqlnd_background_store_result_fetch_data(MYSQLND_RES *result TSRMLS_DC)
 			old_size = set->data_size;
 			set->data_size = total_rows;
 			set->data = mnd_perealloc(set->data, set->data_size * sizeof(zval **), set->persistent);
-//			memset(set->data + old_size, 0, (set->data_size - old_size) * sizeof(zval **));
+#if 0
+			memset(set->data + old_size, 0, (set->data_size - old_size) * sizeof(zval **));
+#endif
 			set->row_buffers = mnd_perealloc(set->row_buffers,
 											 total_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *),
 											 set->persistent);
@@ -1511,11 +1525,12 @@ mysqlnd_background_store_result_fetch_data(MYSQLND_RES *result TSRMLS_DC)
 		  transfered above. 
 		*/
 	}
-//	MYSQLND_INC_CONN_STATISTIC_W_VALUE(&conn->stats,
-//									   binary_protocol? STAT_ROWS_BUFFERED_FROM_CLIENT_PS:
-//														STAT_ROWS_BUFFERED_FROM_CLIENT_NORMAL,
-//									   set->row_count);
-
+#if 0
+	MYSQLND_INC_CONN_STATISTIC_W_VALUE(&conn->stats,
+									   binary_protocol? STAT_ROWS_BUFFERED_FROM_CLIENT_PS:
+														STAT_ROWS_BUFFERED_FROM_CLIENT_NORMAL,
+									   set->row_count);
+#endif
 	tsrm_mutex_lock(set->LOCK);
 	/* Finally clean */
 	if (row_packet->eof) {
@@ -1551,7 +1566,7 @@ mysqlnd_background_store_result_fetch_data(MYSQLND_RES *result TSRMLS_DC)
 	} else {
 		CONN_SET_STATE(conn, CONN_READY);
 	}
-	DBG_INF_FMT("ret=%s row_count=%u warns=%u status=%u", ret == PASS? "PASS":"FAIL",
+	DBG_INF_FMT("ret=%s row_count=%u warnings=%u server_status=%u", ret == PASS? "PASS":"FAIL",
 				set->row_count, conn->upsert_status.warning_count, conn->upsert_status.server_status);
 	DBG_RETURN(ret);
 }
@@ -1560,7 +1575,7 @@ mysqlnd_background_store_result_fetch_data(MYSQLND_RES *result TSRMLS_DC)
 
 
 /* {{{ mysqlnd_res::background_store_result */
-MYSQLND_RES *
+static MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_res, background_store_result)(MYSQLND_RES * result, MYSQLND * const conn, zend_bool ps TSRMLS_DC)
 {
 #ifndef MYSQLND_THREADED
@@ -1573,7 +1588,7 @@ MYSQLND_METHOD(mysqlnd_res, background_store_result)(MYSQLND_RES * result, MYSQL
 	DBG_INF_FMT("conn=%d ps_protocol=%d", conn->thread_id, ps);
 
 	/* We need the conn because we are doing lazy zval initialization in buffered_fetch_row */
-	result->conn 			= conn->m->get_reference(conn);
+	result->conn 			= conn->m->get_reference(conn TSRMLS_CC);
 	result->type			= MYSQLND_RES_NORMAL;
 	result->m.fetch_row		= mysqlnd_fetch_row_async_buffered;
 	result->m.fetch_lengths	= mysqlnd_fetch_lengths_async_buffered;

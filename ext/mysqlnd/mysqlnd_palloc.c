@@ -132,7 +132,6 @@ PHPAPI MYSQLND_THD_ZVAL_PCACHE* _mysqlnd_palloc_init_thd_cache(MYSQLND_ZVAL_PCAC
 	MYSQLND_THD_ZVAL_PCACHE *ret = calloc(1, sizeof(MYSQLND_THD_ZVAL_PCACHE));
 	DBG_ENTER("_mysqlnd_palloc_init_thd_cache");
 	DBG_INF_FMT("ret = %p", ret);
-
 	ret->parent = mysqlnd_palloc_get_cache_reference(cache);
 
 #ifdef ZTS
@@ -151,14 +150,16 @@ PHPAPI MYSQLND_THD_ZVAL_PCACHE* _mysqlnd_palloc_init_thd_cache(MYSQLND_ZVAL_PCAC
 /* }}} */
 
 
-/* {{{ mysqlnd_palloc_get_thd_cache_reference */
-MYSQLND_THD_ZVAL_PCACHE* mysqlnd_palloc_get_thd_cache_reference(MYSQLND_THD_ZVAL_PCACHE * const cache)
+/* {{{ _mysqlnd_palloc_get_thd_cache_reference */
+MYSQLND_THD_ZVAL_PCACHE* _mysqlnd_palloc_get_thd_cache_reference(MYSQLND_THD_ZVAL_PCACHE * const cache TSRMLS_DC)
 {
+	DBG_ENTER("_mysqlnd_palloc_get_thd_cache_reference");
 	if (cache) {
 		++cache->references;
+		DBG_INF_FMT("cache=%p new_refc=%d", *cache, cache->references);
 		mysqlnd_palloc_get_cache_reference(cache->parent);
 	}
-	return cache;
+	DBG_RETURN(cache);
 }
 /* }}} */
 
@@ -190,8 +191,8 @@ PHPAPI void _mysqlnd_palloc_free_thd_cache_reference(MYSQLND_THD_ZVAL_PCACHE **c
 {
 	DBG_ENTER("_mysqlnd_palloc_free_thd_cache_reference");
 	if (*cache) {
-		DBG_INF_FMT("cache=%p refs=%d", *cache, (*cache)->references);
 		--(*cache)->parent->references;
+		DBG_INF_FMT("cache=%p references_left=%d", *cache, (*cache)->references);
 
 		if (--(*cache)->references == 0) {
 			mysqlnd_palloc_free_thd_cache(*cache TSRMLS_CC);
@@ -493,7 +494,7 @@ PHPAPI void _mysqlnd_palloc_rshutdown(MYSQLND_THD_ZVAL_PCACHE * thd_cache TSRMLS
 		++cache->free_items;
 #ifdef ZTS
 		memset(&((*p)->thread_id), 0, sizeof(THREAD_T));
-#endif	
+#endif
 		p++;
 	}
 	UNLOCK_PCACHE(cache);

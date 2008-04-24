@@ -1529,6 +1529,48 @@ PHP_FUNCTION(mysqli_next_result) {
 }
 /* }}} */
 
+
+#ifdef MYSQLI_USE_MYSQLND
+/* {{{ proto bool mysqli_stmt_next_result(object link)
+   check if there any more query results from a multi query */
+PHP_FUNCTION(mysqli_stmt_more_results)
+{
+	MY_STMT		*stmt;
+	zval		*mysql_stmt;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt", MYSQLI_STATUS_VALID);
+
+	RETURN_BOOL(mysqlnd_stmt_more_results(stmt->stmt));
+}
+/* }}} */
+
+
+/* {{{ proto bool mysqli_stmt_next_result(object link)
+   read next result from multi_query */
+PHP_FUNCTION(mysqli_stmt_next_result) {
+	MY_STMT		*stmt;
+	zval		*mysql_stmt;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt", MYSQLI_STATUS_VALID);
+
+	if (!mysqlnd_stmt_more_results(stmt->stmt)) {
+		php_error_docref(NULL TSRMLS_CC, E_STRICT, "There is no next result set. "
+						"Please, call mysqli_stmt_more_results()/mysqli_stmt::more_results() to check "
+						"whether to call this function/method");
+	}
+
+	RETURN_BOOL(!mysqlnd_stmt_next_result(stmt->stmt));
+}
+/* }}} */
+#endif
+
+
 /* {{{ proto int mysqli_num_fields(object result) U
    Get number of fields in result */
 PHP_FUNCTION(mysqli_num_fields)

@@ -241,7 +241,7 @@ struct st_mysqlnd_conn_methods
 	MYSQLND_RES *		(*store_result)(MYSQLND * const conn TSRMLS_DC);
 	MYSQLND_RES *		(*background_store_result)(MYSQLND * const conn TSRMLS_DC);
 	enum_func_status	(*next_result)(MYSQLND * const conn TSRMLS_DC);
-	zend_bool			(*more_results)(const MYSQLND * const conn);
+	zend_bool			(*more_results)(const MYSQLND * const conn TSRMLS_DC);
 
 	MYSQLND_STMT *		(*stmt_init)(MYSQLND * const conn TSRMLS_DC);
 
@@ -282,7 +282,7 @@ struct st_mysqlnd_conn_methods
 	enum_func_status	(*close)(MYSQLND *conn, enum_connection_close_type close_type TSRMLS_DC);
 	void				(*dtor)(MYSQLND *conn TSRMLS_DC);	/* private */
 
-	MYSQLND *			(*get_reference)(MYSQLND * const conn);
+	MYSQLND *			(*get_reference)(MYSQLND * const conn TSRMLS_DC);
 	enum_func_status	(*free_reference)(MYSQLND * const conn TSRMLS_DC);
 	enum mysqlnd_connection_state (*get_state)(MYSQLND * const conn TSRMLS_DC);
 	void				(*set_state)(MYSQLND * const conn, enum mysqlnd_connection_state new_state TSRMLS_DC);
@@ -344,10 +344,12 @@ struct st_mysqlnd_stmt_methods
 	MYSQLND_RES *		(*store_result)(MYSQLND_STMT * const stmt TSRMLS_DC);
 	MYSQLND_RES *		(*background_store_result)(MYSQLND_STMT * const stmt TSRMLS_DC);
 	MYSQLND_RES *		(*get_result)(MYSQLND_STMT * const stmt TSRMLS_DC);
+	zend_bool			(*more_results)(const MYSQLND_STMT * const stmt TSRMLS_DC);
+	enum_func_status	(*next_result)(MYSQLND_STMT * const stmt TSRMLS_DC);
 	enum_func_status	(*free_result)(MYSQLND_STMT * const stmt TSRMLS_DC);
 	enum_func_status	(*seek_data)(const MYSQLND_STMT * const stmt, uint64 row TSRMLS_DC);
 	enum_func_status	(*reset)(MYSQLND_STMT * const stmt TSRMLS_DC);
-	enum_func_status	(*close)(MYSQLND_STMT * const stmt, zend_bool implicit TSRMLS_DC); /* private */
+	enum_func_status	(*net_close)(MYSQLND_STMT * const stmt, zend_bool implicit TSRMLS_DC); /* private */
 	enum_func_status	(*dtor)(MYSQLND_STMT * const stmt, zend_bool implicit TSRMLS_DC); /* use this for mysqlnd_stmt_close */
 
 	enum_func_status	(*fetch)(MYSQLND_STMT * const stmt, zend_bool * const fetched_anything TSRMLS_DC);
@@ -357,6 +359,7 @@ struct st_mysqlnd_stmt_methods
 	enum_func_status	(*refresh_bind_param)(MYSQLND_STMT * const stmt TSRMLS_DC);
 	void				(*set_param_bind_dtor)(MYSQLND_STMT * const stmt, void (*param_bind_dtor)(MYSQLND_PARAM_BIND *)  TSRMLS_DC);
 	enum_func_status	(*bind_result)(MYSQLND_STMT * const stmt, MYSQLND_RESULT_BIND * const result_bind TSRMLS_DC);
+	enum_func_status	(*bind_one_result)(MYSQLND_STMT * const stmt, uint param_no TSRMLS_DC);
 	void				(*set_result_bind_dtor)(MYSQLND_STMT * const stmt, void (*result_bind_dtor)(MYSQLND_RESULT_BIND *) TSRMLS_DC);
 	enum_func_status	(*send_long_data)(MYSQLND_STMT * const stmt, unsigned int param_num,
 										  const char * const data, unsigned long length TSRMLS_DC);
@@ -375,7 +378,7 @@ struct st_mysqlnd_stmt_methods
 	const char *		(*get_error_str)(const MYSQLND_STMT * const stmt);
 	const char *		(*get_sqlstate)(const MYSQLND_STMT * const stmt);
 
-	enum_func_status	(*get_attribute)(MYSQLND_STMT * const stmt, enum mysqlnd_stmt_attr attr_type, void * const value TSRMLS_DC);
+	enum_func_status	(*get_attribute)(const MYSQLND_STMT * const stmt, enum mysqlnd_stmt_attr attr_type, void * const value TSRMLS_DC);
 	enum_func_status	(*set_attribute)(MYSQLND_STMT * const stmt, enum mysqlnd_stmt_attr attr_type, const void * const value TSRMLS_DC);
 };
 
@@ -587,7 +590,6 @@ struct st_mysqlnd_param_bind
 struct st_mysqlnd_result_bind
 {
 	zval		*zv;
-	zend_uchar	original_type;
 	zend_bool	bound;
 };
 
@@ -617,7 +619,7 @@ struct st_mysqlnd_stmt
 	zend_bool					cursor_exists;
 	mysqlnd_stmt_use_or_store_func default_rset_handler;
 
-	MYSQLND_CMD_BUFFER			cmd_buffer;
+	MYSQLND_CMD_BUFFER			execute_cmd_buffer;
 	unsigned int				execute_count;/* count how many times the stmt was executed */
 
 	void 						(*param_bind_dtor)(MYSQLND_PARAM_BIND *);

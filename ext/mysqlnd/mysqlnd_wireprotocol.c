@@ -587,6 +587,13 @@ php_mysqlnd_greet_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	} else {
 		packet->pre41 = TRUE;
 	}
+
+	DBG_INF_FMT("proto=%d server=%s thread_id=%ld",
+				packet->protocol_version, packet->server_version, packet->thread_id);
+
+	DBG_INF_FMT("server_capabilities=%d charset_no=%d server_status=%d",
+				packet->server_capabilities, packet->charset_no, packet->server_status);
+
 	if (p - begin > packet->header.size) {
 		DBG_ERR_FMT("GREET packet %d bytes shorter than expected", p - begin - packet->header.size);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "GREET packet %d bytes shorter than expected. PID=%d",
@@ -783,8 +790,8 @@ php_mysqlnd_ok_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	}
 
 	DBG_INF_FMT("OK packet: aff_rows=%lld last_ins_id=%ld server_status=%d warnings=%d",
-					packet->affected_rows, packet->last_insert_id, packet->server_status,
-					packet->warning_count);
+				packet->affected_rows, packet->last_insert_id, packet->server_status,
+				packet->warning_count);
 
 	if (p - begin > packet->header.size) {
 		DBG_ERR_FMT("OK packet %d bytes shorter than expected", p - begin - packet->header.size);
@@ -865,7 +872,8 @@ php_mysqlnd_eof_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 						 p - begin - packet->header.size, getpid());
 	}
 	
-	DBG_INF_FMT("EOF packet: status=%d warnings=%d", packet->server_status, packet->warning_count);
+	DBG_INF_FMT("EOF packet: fields=%d status=%d warnings=%d",
+				packet->field_count, packet->server_status, packet->warning_count);
 
 	DBG_RETURN(PASS);
 }
@@ -986,6 +994,7 @@ php_mysqlnd_rset_header_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	packet->field_count= php_mysqlnd_net_field_length(&p);
 	switch (packet->field_count) {
 		case MYSQLND_NULL_LENGTH:
+			DBG_INF("LOAD LOCAL");
 			/*
 			  First byte in the packet is the field count.
 			  Thus, the name is size - 1. And we add 1 for a trailing \0.
@@ -997,6 +1006,7 @@ php_mysqlnd_rset_header_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 			packet->info_or_local_file_len = len;
 			break;
 		case 0x00:
+			DBG_INF("UPSERT");
 			packet->affected_rows = php_mysqlnd_net_field_length_ll(&p);
 			packet->last_insert_id= php_mysqlnd_net_field_length_ll(&p);
 			packet->server_status = uint2korr(p);
@@ -1010,13 +1020,17 @@ php_mysqlnd_rset_header_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 				packet->info_or_local_file[len] = '\0';
 				packet->info_or_local_file_len = len;
 			}
+			DBG_INF_FMT("affected_rows=%llu last_insert_id=%llu server_status=%d warning_count=%d",
+						packet->affected_rows, packet->last_insert_id,
+						packet->server_status, packet->warning_count);
 			break;
 		default:
+			DBG_INF("SELECT");
 			/* Result set */
 			break;
 	}
 	if (p - begin > packet->header.size) {
-		DBG_ERR_FMT("GREET packet %d bytes shorter than expected", p - begin - packet->header.size);
+		DBG_ERR_FMT("RSET_HEADER packet %d bytes shorter than expected", p - begin - packet->header.size);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "GREET packet %d bytes shorter than expected. PID=%d",
 						 p - begin - packet->header.size, getpid());
 	}
@@ -1097,7 +1111,7 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 				*(unsigned int *)(((char*)meta) + rset_field_offsets[i+1]) = 0;
 				break;
 			case MYSQLND_NULL_LENGTH:
-				goto faulty_fake;
+				goto faulty_or_fake;
 			default:
 				*(char **)(((char *)meta) + rset_field_offsets[i]) = (char *)p;
 				*(unsigned int *)(((char*)meta) + rset_field_offsets[i+1]) = len;
@@ -1156,7 +1170,7 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	}
 
 	if (p - begin > packet->header.size) {
-		DBG_ERR_FMT("Result set field packet %d bytes shorter than expected", p - begin - packet->header.size);
+		DBG_ERR_FMT("RSET field packet %d bytes shorter than expected", p - begin - packet->header.size);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Result set field packet %d bytes "
 						 "shorter than expected. PID=%d", p - begin - packet->header.size, getpid());
 	}
@@ -1210,7 +1224,7 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 */
 	DBG_RETURN(PASS);
 
-faulty_fake:
+faulty_or_fake:
 	DBG_ERR_FMT("Protocol error. Server sent NULL_LENGTH. The server is faulty");
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Protocol error. Server sent NULL_LENGTH."
 					 " The server is faulty");
@@ -1629,6 +1643,8 @@ php_mysqlnd_rowp_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 			p += 2;
 			packet->server_status = uint2korr(p);
 			/* Seems we have 3 bytes reserved for future use */
+			DBG_INF_FMT("server_status=%d warning_count=%d",
+						packet->server_status, packet->warning_count);
 		}
 	} else {
 		MYSQLND_INC_CONN_STATISTIC(&conn->stats,

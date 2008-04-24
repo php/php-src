@@ -198,9 +198,9 @@ if (!function_exists('mysqli_fetch_all'))
 	func_mysqli_fetch_all_oo($link, $engine, "BIGINT UNSIGNED", 18446744073709551615, "18446744073709551615", 270);
 	func_mysqli_fetch_all_oo($link, $engine, "BIGINT UNSIGNED", NULL, NULL, 280);
 
-	func_mysqli_fetch_all_oo($link, $engine, "FLOAT", -9223372036854775808 - 1.1, "-9.22337e+18", 290, "/-9\.22337e\+[0]?18/iu");
+	func_mysqli_fetch_all_oo($link, $engine, "FLOAT", -9223372036854775808 - 1.1, "-9.22337e+18", 290, "/-9\.22337e\+?[0]?18/iu");
 	func_mysqli_fetch_all_oo($link, $engine, "FLOAT", NULL, NULL, 300);
-	func_mysqli_fetch_all_oo($link, $engine, "FLOAT UNSIGNED", 18446744073709551615 + 1.1, "1.84467e+19", 310, "/1\.84467e\+[0]?19/iu");
+	func_mysqli_fetch_all_oo($link, $engine, "FLOAT UNSIGNED", 18446744073709551615 + 1.1, "1.84467e+?19", 310, "/1\.84467e\+?[0]?19/iu");
 	func_mysqli_fetch_all_oo($link, $engine, "FLOAT UNSIGNED ", NULL, NULL, 320);
 
 	func_mysqli_fetch_all_oo($link, $engine, "DOUBLE(10,2)", -99999999.99, "-99999999.99", 330);

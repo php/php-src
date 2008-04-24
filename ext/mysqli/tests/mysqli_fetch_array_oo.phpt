@@ -175,9 +175,9 @@ require_once('skipifconnectfailure.inc');
 		func_mysqli_fetch_array($mysqli, $engine, "BIGINT UNSIGNED", NULL, NULL, 280);
 	}
 
-	func_mysqli_fetch_array($mysqli, $engine, "FLOAT", -9223372036854775808 - 1.1, "-9.22337e+18", 290, "/-9\.22337e\+[0]?18/iu");
+	func_mysqli_fetch_array($mysqli, $engine, "FLOAT", -9223372036854775808 - 1.1, "-9.22337e+18", 290, "/-9\.22337e\+?[0]?18/iu");
 	func_mysqli_fetch_array($mysqli, $engine, "FLOAT", NULL, NULL, 300);
-	func_mysqli_fetch_array($mysqli, $engine, "FLOAT UNSIGNED", 18446744073709551615 + 1.1, "1.84467e+19", 310, "/1\.84467e\+[0]?19/iu");
+	func_mysqli_fetch_array($mysqli, $engine, "FLOAT UNSIGNED", 18446744073709551615 + 1.1, "1.84467e+?19", 310, "/1\.84467e\+?[0]?19/iu");
 	func_mysqli_fetch_array($mysqli, $engine, "FLOAT UNSIGNED ", NULL, NULL, 320);
 
 	func_mysqli_fetch_array($mysqli, $engine, "DOUBLE(10,2)", -99999999.99, "-99999999.99", 330);
