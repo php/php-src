@@ -303,7 +303,7 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 		if (((hdr->typeflag == 0) || (hdr->typeflag == TAR_FILE)) && size > 0) {
 			/* this is not good enough - seek succeeds even on truncated tars */
 			php_stream_seek(fp, size, SEEK_CUR);
-			if (php_stream_tell(fp) > totalsize) {
+			if ((uint)php_stream_tell(fp) > totalsize) {
 				if (error) {
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 				}
