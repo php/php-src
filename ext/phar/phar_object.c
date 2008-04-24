@@ -3348,11 +3348,9 @@ PHP_METHOD(PharFileInfo, __construct)
 		return;
 	}
 
-	if (phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC) == FAILURE) {
-		efree(arch);
-		efree(entry);
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-			"Cannot access phar file entry '%s'", fname);
+	if (fname_len < 7 || memcmp(fname, "phar://", 7) || phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC) == FAILURE) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
+			"'%s' is not a valid phar archive URL (must have at least phar://filename.phar)", fname);
 		return;
 	}
 
@@ -3360,18 +3358,18 @@ PHP_METHOD(PharFileInfo, __construct)
 		efree(arch);
 		efree(entry);
 		if (error) {
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
 				"Cannot open phar file '%s': %s", fname, error);
 			efree(error);
 		} else {
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
 				"Cannot open phar file '%s'", fname);
 		}
 		return;
 	}
 
 	if ((entry_info = phar_get_entry_info_dir(phar_data, entry, entry_len, 1, &error TSRMLS_CC)) == NULL) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
 			"Cannot access phar file entry '%s' in archive '%s'%s%s", entry, arch, error?", ":"", error?error:"");
 		efree(arch);
 		efree(entry);
