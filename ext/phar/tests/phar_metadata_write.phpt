@@ -25,6 +25,7 @@ foreach($files as $name => $cont) {
 $phar = new Phar($fname);
 var_dump($phar->getMetadata());
 $phar->setMetadata(array('my' => 'friend'));
+$phar->setMetadata(array('my' => 'friend'));
 var_dump($phar->getMetadata());
 $phar['a']->setMetadata(42);
 $phar['b']->setMetadata(NULL);
