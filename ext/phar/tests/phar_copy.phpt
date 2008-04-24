@@ -42,7 +42,21 @@ $p2 = new Phar($fname2);
 echo "\n";
 echo 'a: ' , file_get_contents($p2['a']->getPathName());
 echo 'b: ' ,file_get_contents($p2['b']->getPathName());
-echo 'c: ' ,file_get_contents($p2['c']->getPathName()), $p2['c']->getMetaData();
+echo 'c: ' ,file_get_contents($p2['c']->getPathName()), $p2['c']->getMetaData(), "\n";
+ini_set('phar.readonly', 0);
+try {
+$p2->copy('notexisting', 'another');
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
+try {
+$p2->copy('a', 'b');
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
+$p2['a']->compress(Phar::GZ);
+$p2->copy('a', 'd');
+echo $p2['d']->getContent() . "\n";
 ?>
 ===DONE===
 --CLEAN--
@@ -51,4 +65,8 @@ echo 'c: ' ,file_get_contents($p2['c']->getPathName()), $p2['c']->getMetaData();
 --EXPECTF--
 hihifile "/error/.." contains invalid characters upper directory reference, cannot be copied from "a" in phar %s
 
-a: hib: hic: hia===DONE===
+a: hib: hic: hia
+file "notexisting" cannot be copied to file "another", file does not exist in %sphar_copy2.phar.php
+file "a" cannot be copied to file "b", file must not already exist in phar %sphar_copy2.phar.php
+hi
+===DONE===
