@@ -57,15 +57,61 @@ require_once('skipifconnectfailure.inc');
 	if (true !== ($tmp = mysqli_stmt_execute($stmt)))
 		printf("[012] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
+	// calling reset between executions
+	mysqli_stmt_close($stmt);
+	if (!$stmt = mysqli_stmt_init($link))
+		printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	if (!mysqli_stmt_prepare($stmt, "SELECT id FROM test ORDER BY id LIMIT 1"))
+		printf("[014] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	if (true !== ($tmp = mysqli_stmt_execute($stmt)))
+		printf("[015] Expecting boolean/true, got %s/%s. [%d] %s\n",
+			gettype($tmp), $tmp, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	$id = null;
+	if (!mysqli_stmt_bind_result($stmt, $id) || !mysqli_stmt_fetch($stmt))
+		printf("[016] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	if ($id !== 1)
+		printf("[017] Expecting int/1 got %s/%s\n", gettype($id), $id);
+
+	if (true !== ($tmp = mysqli_stmt_reset($stmt)))
+		printf("[018] Expecting boolean/true, got %s/%s. [%d] %s\n",
+			gettype($tmp), $tmp, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	printf("Don't know what we should expect\n");
+	var_dump(mysqli_stmt_execute($stmt));
+	var_dump(mysqli_stmt_fetch($stmt));
+
+	mysqli_stmt_close($stmt);
+	if (!$stmt = mysqli_stmt_init($link))
+		printf("[019] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+	if (!mysqli_stmt_prepare($stmt, "SELECT id FROM test ORDER BY id LIMIT 1"))
+		printf("[020] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	if (true !== ($tmp = mysqli_stmt_execute($stmt)))
+		printf("[021] Expecting boolean/true, got %s/%s. [%d] %s\n",
+			gettype($tmp), $tmp, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	if (true !== ($tmp = mysqli_stmt_reset($stmt)))
+		printf("[022] Expecting boolean/true, got %s/%s. [%d] %s\n",
+			gettype($tmp), $tmp, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	printf("Don't know what we should expect\n");
+	var_dump(mysqli_stmt_execute($stmt));
+	var_dump(mysqli_stmt_fetch($stmt));
+
 	mysqli_kill($link, mysqli_thread_id($link));
 
 	if (false !== ($tmp = mysqli_stmt_execute($stmt)))
-		printf("[014] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+		printf("[023] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_stmt_close($stmt);
 
 	if (NULL !== ($tmp = mysqli_stmt_execute($stmt)))
-		printf("[015] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+		printf("[024] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_close($link);
 	print "done!";

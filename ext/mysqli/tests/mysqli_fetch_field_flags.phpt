@@ -5,10 +5,21 @@ mysqli_fetch_field() - flags/field->flags
 require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
+
+require_once('connect.inc');
+if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+		die(printf("skip: [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+
+if (mysqli_get_server_version($link) < 50041)
+	die("skip: Due to many MySQL Server differences, the test requires 5.0.41+");
+
+mysqli_close($link);
 ?>
 --FILE--
 <?php
 	include "connect.inc";
+
+/* TODO: mysqli.c needs to export a few more constants - see all the defined() calls! */
 
 	$flags = array(
 		MYSQLI_NOT_NULL_FLAG => 'NOT_NULL',
@@ -23,12 +34,19 @@ require_once('skipifconnectfailure.inc');
 		MYSQLI_SET_FLAG	=> 'SET',
 		MYSQLI_NUM_FLAG => 'NUM',
 		MYSQLI_PART_KEY_FLAG => 'PART_KEY',
-		MYSQLI_GROUP_FLAG => 'MYSQLI_GROUP_FLAG'
-		// MYSQLI_NO_DEFAULT_VALUE_FLAG
-		// MYSQLI_BINARY_FLAG
-		// MYSQLI_ENUM_FLAG
+		// MYSQLI_GROUP_FLAG => 'MYSQLI_GROUP_FLAG' - internal usage only
+		(defined('MYSQLI_NO_DEFAULT_VALUE_FLAG') ? MYSQLI_NO_DEFAULT_VALUE_FLAG : 4096) => 'NO_DEFAULT_VALUE',
+		(defined('MYSQLI_BINARY_FLAG') ? MYSQLI_BINARY_FLAG : 128) => 'BINARY',
+		(defined('MYSQLI_ENUM_FLAG') ? MYSQLI_ENUM_FLAG : 256) => 'ENUM',
 		// MYSQLI_BINCMP_FLAG
 	);
+
+	// 5.1.24 / 6.0.4+
+	if (defined('MYSQLI_ON_UPDATE_NOW'))
+		$flags[MYSQLI_ON_UPDATE_NOW] = 'ON_UPDATE_NOW';
+	else
+		$flags[8192] = 'ON_UPDATE_NOW';
+
 	krsort($flags);
 
 	$columns = array(
@@ -37,13 +55,13 @@ require_once('skipifconnectfailure.inc');
 		'INT NOT NULL DEFAULT 1' => 'NOT_NULL NUM',
 		'INT UNSIGNED DEFAULT NULL' => 'UNSIGNED NUM',
 		'INT UNSIGNED NOT NULL'	=> 'NOT_NULL UNSIGNED NO_DEFAULT_VALUE NUM',
-		'INT UNSIGNED NOT NULL DEFAULT 1' => 'NOT_NULL UNSIGNED NULL',
+		'INT UNSIGNED NOT NULL DEFAULT 1' => 'NOT_NULL UNSIGNED NUM',
 		'INT UNSIGNED ZEROFILL DEFAULT NULL' => 'UNSIGNED ZEROFILL NUM',
 		'INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY' => 'NOT_NULL PRI_KEY UNSIGNED AUTO_INCREMENT NUM PART_KEY',
 		'CHAR(1) DEFAULT NULL'	=> '',
 		'CHAR(1) NOT NULL' => 'NOT_NULL NO_DEFAULT_VALUE',
 		'TIMESTAMP NOT NULL' => 'NOT_NULL UNSIGNED ZEROFILL BINARY TIMESTAMP',
-		'VARBINARY(127) DEFAULT NULL' => 'NOT_NULL BINARY',
+		'VARBINARY(127) DEFAULT NULL' => 'BINARY',
 		'BLOB'	=> 'BLOB BINARY',
 		'TINYBLOB'	=> 'BLOB BINARY',
 		'MEDIUMBLOB'	=> 'BLOB BINARY',
@@ -67,10 +85,9 @@ require_once('skipifconnectfailure.inc');
 	);
 
 	function checkFlags($reported_flags, $expected_flags, $flags) {
-
 		$found_flags = $unexpected_flags = '';
 		foreach ($flags as $code => $name) {
-			if ($code >= $reported_flags) {
+			if ($reported_flags >= $code) {
 				$reported_flags -= $code;
 				$found_flags .= $name . ' ';
 				if (stristr($expected_flags, $name)) {
@@ -118,13 +135,57 @@ require_once('skipifconnectfailure.inc');
 			continue;
 		}
 
+		/*
+		TODO
+		Unfortunately different server versions give you slightly different
+		results.The test does not yet fully reflect all server changes/bugs etc.
+		*/
+		switch ($column_def) {
+			case 'TIMESTAMP NOT NULL':
+				// http://bugs.mysql.com/bug.php?id=30081 - new flag introduced in 5.1.24/6.0.4
+				$version = mysqli_get_server_version($link);
+				if ((($version >  50122) && ($version < 60000)) ||
+						($version >= 60004)) {
+					// new flag ON_UPDATE_NOW_FLAG (8192)
+					$expected_flags .= ' ON_UPDATE_NOW';
+				}
+				break;
+
+			case 'INT UNSIGNED NOT NULL':
+			case 'INT NOT NULL':
+			case 'CHAR(1) NOT NULL':
+			case 'SET("one", "two") NOT NULL':
+			case 'ENUM("one", "two") NOT NULL':
+				$version = mysqli_get_server_version($link);
+				if ($version < 50000) {
+					// TODO - check exact version!
+					$expected_flags = trim(str_replace('NO_DEFAULT_VALUE', '', $expected_flags));
+				}
+				break;
+
+			case 'BIT':
+				$version = mysqli_get_server_version($link);
+				if ($version <= 50105) {
+					// TODO - check exact version!
+					$expected_flags = trim(str_replace('UNSIGNED', '', $expected_flags));
+				}
+
+			default:
+				break;
+		}
+
 		list($missing_flags, $unexpected_flags, $flags_found) = checkFlags($field->flags, $expected_flags, $flags);
-		if ($unexpected_flags)
+		if ($unexpected_flags) {
 			printf("[006] Found unexpected flags '%s' for %s, found '%s'\n",
 				$unexpected_flags, $column_def, $flags_found);
-		if ($missing_flags)
+		}
+		if ($missing_flags) {
 			printf("[007] The flags '%s' have not been reported for %s, found '%s'\n",
 				$missing_flags, $column_def, $flags_found);
+			var_dump($create);
+			var_dump(mysqli_get_server_version($link));
+			die($missing_flags);
+		}
 
 		mysqli_free_result($res);
 	}

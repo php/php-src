@@ -41,8 +41,11 @@ Interface of the class mysqli_stmt
 		'store_result'      => true,
 	);
 
-	if ($IS_MYSQLND)
+	if ($IS_MYSQLND) {
 		$expected_methods['get_result'] = true;
+		$expected_methods['more_results'] = true;
+		$expected_methods['next_result'] = true;
+	}
 
 	foreach ($methods as $k => $method) {
 	if (isset($expected_methods[$method])) {
