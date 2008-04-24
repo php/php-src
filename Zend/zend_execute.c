@@ -814,14 +814,6 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 }
 /* }}} */
 
-static inline void zend_receive(zval **variable_ptr_ptr, zval *value TSRMLS_DC) /* {{{ */
-{
-	Z_DELREF_PP(variable_ptr_ptr);
-	*variable_ptr_ptr = value;
-	Z_ADDREF_P(value);
-}
-/* }}} */
-
 /* Utility Functions for Extensions */
 static void zend_extension_statement_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC) /* {{{ */
 {
