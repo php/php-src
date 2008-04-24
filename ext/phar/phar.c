@@ -1562,7 +1562,7 @@ int phar_detect_phar_fname_ext(const char *filename, int check_length, const cha
 
 			if (keylen <= (uint) filename_len && !memcmp(key, filename, keylen - 1)) {
 				/* found plain map, so we grab the extension, if any */
-				if (is_complete && keylen != filename_len + 1) {
+				if (is_complete && keylen != (uint)filename_len + 1) {
 					continue;
 				}
 				if (for_create == 1) {
