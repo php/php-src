@@ -3741,7 +3741,7 @@ PHP_METHOD(PharFileInfo, compress)
 					return;
 				}
 			}
-			if ((entry_obj->ent.entry->flags & PHAR_ENT_COMPRESSED_GZ) != 0 && !phar_has_zlib) {
+			if (!phar_has_zlib) {
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 					"Cannot compress with gzip compression, zlib extension is not enabled");
 				return;
@@ -3769,6 +3769,11 @@ PHP_METHOD(PharFileInfo, compress)
 					return;
 				}
 			}
+			if (!phar_has_bz2) {
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
+					"Cannot compress with bzip2 compression, bz2 extension is not enabled");
+				return;
+			}
 			entry_obj->ent.entry->old_flags = entry_obj->ent.entry->flags;
 			entry_obj->ent.entry->flags &= ~PHAR_ENT_COMPRESSION_MASK;
 			entry_obj->ent.entry->flags |= PHAR_ENT_COMPRESSED_BZ2;
@@ -3795,8 +3800,7 @@ PHP_METHOD(PharFileInfo, compress)
  */
 PHP_METHOD(PharFileInfo, decompress)
 {
-	char *fname, *error;
-	int fname_len;
+	char *error;
 	PHAR_ENTRY_OBJECT();
 
 	if (entry_obj->ent.entry->is_dir) {
@@ -3810,7 +3814,7 @@ PHP_METHOD(PharFileInfo, decompress)
 	}
 	if (PHAR_G(readonly) && !entry_obj->ent.entry->phar->is_data) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Phar is readonly, cannot change compression");
+			"Phar is readonly, cannot decompress");
 		return;
 	}
 	if (entry_obj->ent.entry->is_deleted) {
@@ -3829,9 +3833,11 @@ PHP_METHOD(PharFileInfo, decompress)
 		return;
 	}
 	if (!entry_obj->ent.entry->fp) {
-		fname_len = spprintf(&fname, 0, "phar://%s/%s", entry_obj->ent.entry->phar->fname, entry_obj->ent.entry->filename);
-		entry_obj->ent.entry->fp = php_stream_open_wrapper_ex(fname, "rb", 0, 0, 0);
-		efree(fname);
+		if (FAILURE == phar_open_archive_fp(entry_obj->ent.entry->phar TSRMLS_CC)) {
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Cannot decompress entry \"%s\", phar error: Cannot open phar archive \"%s\" for reading", entry_obj->ent.entry->filename, entry_obj->ent.entry->phar->fname);
+			return;
+		}
+		entry_obj->ent.entry->fp_type = PHAR_FP;
 	}
 	entry_obj->ent.entry->old_flags = entry_obj->ent.entry->flags;
 	entry_obj->ent.entry->flags &= ~PHAR_ENT_COMPRESSION_MASK;
