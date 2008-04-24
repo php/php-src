@@ -55,18 +55,20 @@ var_dump($b->compress(Phar::BZ2));
 
 echo "decompress\n";
 
+ini_set('phar.readonly', 1);
 try {
 $phar['a/b']->decompress();
 } catch (Exception $e) {
 echo $e->getMessage() . "\n";
 }
-ini_set('phar.readonly', 1);
+ini_set('phar.readonly', 0);
 try {
-$b->decompress();
+$phar['a']->decompress();
 } catch (Exception $e) {
 echo $e->getMessage() . "\n";
 }
-ini_set('phar.readonly', 0);
+var_dump($b->decompress());
+var_dump($b->decompress());
 
 ?>
 ===DONE===
@@ -85,4 +87,8 @@ bool(true)
 bool(true)
 bool(true)
 decompress
+Phar is readonly, cannot decompress
+Phar entry is a directory, cannot set compression
+bool(true)
+bool(true)
 ===DONE===
