@@ -268,7 +268,7 @@ CWD_API void realpath_cache_del(const char *path, int path_len TSRMLS_DC);
 #define VCWD_RENAME(oldname, newname) virtual_rename(oldname, newname TSRMLS_CC)
 #define VCWD_STAT(path, buff) virtual_stat(path, buff TSRMLS_CC)
 #if !defined(TSRM_WIN32)
-#define VCWD_LSTAT(path, buff) virtual_lstat(path, buff TSRMLS_CC)
+# define VCWD_LSTAT(path, buff) virtual_lstat(path, buff TSRMLS_CC)
 #endif
 #define VCWD_UNLINK(path) virtual_unlink(path TSRMLS_CC)
 #define VCWD_MKDIR(pathname, mode) virtual_mkdir(pathname, mode TSRMLS_CC)
@@ -294,7 +294,13 @@ CWD_API void realpath_cache_del(const char *path, int path_len TSRMLS_DC);
 #define VCWD_OPEN(path, flags) open(path, flags)
 #define VCWD_OPEN_MODE(path, flags, mode)	open(path, flags, mode)
 #define VCWD_CREAT(path, mode) creat(path, mode)
-#define VCWD_RENAME(oldname, newname) rename(oldname, newname)
+/* rename on windows will fail if newname already exists.
+   MoveFileEx has to be used */
+#if defined(TSRM_WIN32)
+# define VCWD_RENAME(oldname, newname) MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING)
+#else
+# define VCWD_RENAME(oldname, newname) rename(oldname, newname)
+#endif
 #define VCWD_CHDIR(path) chdir(path)
 #define VCWD_CHDIR_FILE(path) virtual_chdir_file(path, chdir)
 #define VCWD_GETWD(buf) getwd(buf)
