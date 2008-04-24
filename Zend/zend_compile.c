@@ -5213,8 +5213,6 @@ void zend_release_labels(TSRMLS_D) /* {{{ */
 
 void zend_do_build_namespace_name(znode *result, znode *prefix, znode *name TSRMLS_DC) /* {{{ */
 {
-	int len;
-
 	if (prefix) {
 		*result = *prefix;
 		if (Z_TYPE(result->u.constant) == ZEND_STR_TYPE &&
