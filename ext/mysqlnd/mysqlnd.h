@@ -112,7 +112,7 @@ PHPAPI void _mysqlnd_debug(const char *mode TSRMLS_DC);
 #define mysqlnd_store_result(conn)		(conn)->m->store_result((conn) TSRMLS_CC)
 #define mysqlnd_bg_store_result(conn) 	(conn)->m->background_store_result((conn) TSRMLS_CC)
 #define mysqlnd_next_result(conn)		(conn)->m->next_result((conn) TSRMLS_CC)
-#define mysqlnd_more_results(conn)		(conn)->m->more_results((conn))
+#define mysqlnd_more_results(conn)		(conn)->m->more_results((conn) TSRMLS_CC)
 #define mysqlnd_free_result(r,e_or_i)	((MYSQLND_RES*)r)->m.free_result(((MYSQLND_RES*)(r)), (e_or_i) TSRMLS_CC)
 #define mysqlnd_data_seek(result, row)	(result)->m.seek_data((result), (row) TSRMLS_CC)
 
@@ -262,6 +262,8 @@ PHPAPI ulong mysqlnd_old_escape_string(char *newstr, const char *escapestr, size
 #define mysqlnd_stmt_store_result(stmt)		(!mysqlnd_stmt_field_count((stmt)) ? PASS:((stmt)->m->store_result((stmt) TSRMLS_CC)? PASS:FAIL))
 #define mysqlnd_stmt_bg_store_result(stmt)	(!mysqlnd_stmt_field_count((stmt)) ? PASS:((stmt)->m->background_store_result((stmt) TSRMLS_CC)? PASS:FAIL))
 #define mysqlnd_stmt_get_result(stmt)		(stmt)->m->get_result((stmt) TSRMLS_CC)
+#define mysqlnd_stmt_more_results(stmt)		(stmt)->m->more_results((stmt) TSRMLS_CC)
+#define mysqlnd_stmt_next_result(stmt)		(stmt)->m->next_result((stmt) TSRMLS_CC)
 #define mysqlnd_stmt_data_seek(stmt, row)	(stmt)->m->seek_data((stmt), (row) TSRMLS_CC)
 #define mysqlnd_stmt_prepare(stmt, q, qlen)	(stmt)->m->prepare((stmt), (q), (qlen) TSRMLS_CC)
 #define mysqlnd_stmt_execute(stmt) 			(stmt)->m->execute((stmt) TSRMLS_CC)
@@ -271,6 +273,7 @@ PHPAPI ulong mysqlnd_old_escape_string(char *newstr, const char *escapestr, size
 #define mysqlnd_stmt_refresh_bind_param(s)	(s)->m->refresh_bind_param((s) TSRMLS_CC)
 #define mysqlnd_stmt_set_param_bind_dtor(s,d)	(s)->m->set_param_bind_dtor((s), (d) TSRMLS_CC)
 #define mysqlnd_stmt_bind_result(stmt,bind)	(stmt)->m->bind_result((stmt), (bind) TSRMLS_CC)
+#define mysqlnd_stmt_bind_one_result(s,no)	(s)->m->bind_one_result((s), (no) TSRMLS_CC)
 #define mysqlnd_stmt_set_result_bind_dtor(s,d)	(s)->m->set_result_bind_dtor((s), (d) TSRMLS_CC)
 #define mysqlnd_stmt_param_metadata(stmt)	(stmt)->m->get_parameter_metadata((stmt))
 #define mysqlnd_stmt_result_metadata(stmt)	(stmt)->m->get_result_metadata((stmt) TSRMLS_CC)
@@ -305,9 +308,10 @@ PHPAPI void						 _mysqlnd_palloc_rshutdown(MYSQLND_THD_ZVAL_PCACHE * cache TSRM
 
 #define mysqlnd_palloc_init_thd_cache(cache) 			_mysqlnd_palloc_init_thd_cache((cache) TSRMLS_CC)
 #define mysqlnd_palloc_free_thd_cache_reference(cache)	_mysqlnd_palloc_free_thd_cache_reference((cache) TSRMLS_CC)
+#define mysqlnd_palloc_get_thd_cache_reference(cache)	_mysqlnd_palloc_get_thd_cache_reference((cache) TSRMLS_CC)
 
 PHPAPI MYSQLND_THD_ZVAL_PCACHE*	_mysqlnd_palloc_init_thd_cache(MYSQLND_ZVAL_PCACHE * const cache TSRMLS_DC);
-MYSQLND_THD_ZVAL_PCACHE*		mysqlnd_palloc_get_thd_cache_reference(MYSQLND_THD_ZVAL_PCACHE * const cache);
+MYSQLND_THD_ZVAL_PCACHE*		_mysqlnd_palloc_get_thd_cache_reference(MYSQLND_THD_ZVAL_PCACHE * const cache TSRMLS_DC);
 PHPAPI void						_mysqlnd_palloc_free_thd_cache_reference(MYSQLND_THD_ZVAL_PCACHE **cache TSRMLS_DC);
 
 

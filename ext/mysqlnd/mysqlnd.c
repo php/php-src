@@ -1274,10 +1274,12 @@ MYSQLND_METHOD(mysqlnd_conn, close)(MYSQLND * conn, enum_connection_close_type c
 
 /* {{{ mysqlnd_conn::get_reference */
 static MYSQLND *
-MYSQLND_METHOD_PRIVATE(mysqlnd_conn, get_reference)(MYSQLND * const conn)
+MYSQLND_METHOD_PRIVATE(mysqlnd_conn, get_reference)(MYSQLND * const conn TSRMLS_DC)
 {
+	DBG_ENTER("mysqlnd_conn::get_reference");
 	++conn->refcount;
-	return conn;
+	DBG_INF_FMT("conn=%llu new_refcount=%u", conn->thread_id, conn->refcount);
+	DBG_RETURN(conn);
 }
 /* }}} */
 
@@ -1288,7 +1290,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn, free_reference)(MYSQLND * const conn TSRMLS
 {
 	enum_func_status ret = PASS;
 	DBG_ENTER("mysqlnd_conn::free_reference");
-	DBG_INF_FMT("conn=%llu conn->refcount=%u", conn->thread_id, conn->refcount);
+	DBG_INF_FMT("conn=%llu old_refcount=%u", conn->thread_id, conn->refcount);
 	if (!(--conn->refcount)) {
 		/*
 		  No multithreading issues as we don't share the connection :)
@@ -1474,10 +1476,11 @@ MYSQLND_METHOD(mysqlnd_conn, get_server_version)(const MYSQLND * const conn)
 
 /* {{{ mysqlnd_conn::more_results */
 static zend_bool
-MYSQLND_METHOD(mysqlnd_conn,more_results)(const MYSQLND * const conn)
+MYSQLND_METHOD(mysqlnd_conn, more_results)(const MYSQLND * const conn TSRMLS_DC)
 {
+	DBG_ENTER("mysqlnd_conn::more_results");
 	/* (conn->state == CONN_NEXT_RESULT_PENDING) too */
-	return conn->upsert_status.server_status & SERVER_MORE_RESULTS_EXISTS? TRUE:FALSE;
+	DBG_RETURN(conn->upsert_status.server_status & SERVER_MORE_RESULTS_EXISTS? TRUE:FALSE);
 }
 /* }}} */
 
@@ -1792,7 +1795,7 @@ MYSQLND_METHOD(mysqlnd_conn, use_result)(MYSQLND * const conn TSRMLS_DC)
 
 	result = conn->current_result;
 	conn->current_result = NULL;
-	result->conn = conn->m->get_reference(conn);
+	result->conn = conn->m->get_reference(conn TSRMLS_CC);
 
 	result = result->m.use_result(result, FALSE TSRMLS_CC);
 	DBG_RETURN(result);
@@ -1956,7 +1959,7 @@ PHPAPI MYSQLND *_mysqlnd_init(zend_bool persistent TSRMLS_DC)
 	ret->persistent = persistent;
 
 	ret->m = & mysqlnd_mysqlnd_conn_methods;
-	ret->m->get_reference(ret);
+	ret->m->get_reference(ret TSRMLS_CC);
 
 #ifdef MYSQLND_THREADED
 	ret->LOCK_state = tsrm_mutex_alloc();

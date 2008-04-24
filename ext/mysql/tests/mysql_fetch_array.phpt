@@ -184,9 +184,9 @@ func_mysql_fetch_array($link, $engine, "BIGINT", NULL, NULL, 260);
 // func_mysql_fetch_array($link, $engine, "BIGINT UNSIGNED", 18446744073709551615, "1.84467e+019", 270, "/1\.84467e\+[0]?19/iu");
 func_mysql_fetch_array($link, $engine, "BIGINT UNSIGNED", NULL, NULL, 280);
 
-func_mysql_fetch_array($link, $engine, "FLOAT", -9223372036854775808 - 1.1, "-9.22337e+18", 290, "/-9\.22337e\+[0]?18/iu");
+func_mysql_fetch_array($link, $engine, "FLOAT", -9223372036854775808 - 1.1, "-9.22337e+18", 290, "/-9\.22337e\+?[0]?18/iu");
 func_mysql_fetch_array($link, $engine, "FLOAT", NULL, NULL, 300);
-func_mysql_fetch_array($link, $engine, "FLOAT UNSIGNED", 18446744073709551615 + 1.1, "1.84467e+19", 310, "/1\.84467e\+[0]?19/iu");
+func_mysql_fetch_array($link, $engine, "FLOAT UNSIGNED", 18446744073709551615 + 1.1, "1.84467e+19", 310, "/1\.84467e\+?[0]?19/iu");
 func_mysql_fetch_array($link, $engine, "FLOAT UNSIGNED ", NULL, NULL, 320);
 
 func_mysql_fetch_array($link, $engine, "DOUBLE(10,2)", -99999999.99, "-99999999.99", 330);
