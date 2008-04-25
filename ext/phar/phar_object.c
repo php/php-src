@@ -1183,6 +1183,7 @@ PHP_METHOD(Phar, __construct)
 #ifdef PHP_WIN32
 	} else {
 		arch = estrndup(fname, fname_len);
+		arch_len = fname_len;
 		save_fname = fname;
 		fname = arch;
 		phar_unixify_path_separators(arch, arch_len);
@@ -2906,15 +2907,20 @@ PHP_METHOD(Phar, offsetGet)
 	char *fname, *error;
 	int fname_len;
 	zval *zfname;
+	phar_entry_info *entry;
 	PHAR_ARCHIVE_OBJECT();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &fname, &fname_len) == FAILURE) {
 		return;
 	}
 	
-	if (!phar_get_entry_info_dir(phar_obj->arc.archive, fname, fname_len, 1, &error TSRMLS_CC)) {
+	if (!(entry = phar_get_entry_info_dir(phar_obj->arc.archive, fname, fname_len, 1, &error TSRMLS_CC))) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist%s%s", fname, error?", ":"", error?error:"");
 	} else {
+		if (entry->is_temp_dir) {
+			efree(entry->filename);
+			efree(entry);
+		}
 		fname_len = spprintf(&fname, 0, "phar://%s/%s", phar_obj->arc.archive->fname, fname);
 		MAKE_STD_ZVAL(zfname);
 		ZVAL_STRINGL(zfname, fname, fname_len, 0);
