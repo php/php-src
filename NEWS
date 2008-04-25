@@ -49,6 +49,11 @@ PHP                                                                        NEWS
   . support for "first/last day of <month>" style texts.
   . support for date/time strings returned by MS SQL.
   . support for serialization and unserialization of DateTime objects.
+  . support for diffing date/times through date_diff() / DateTime::diff().
+  . added DateInterval class to represent the difference between two date/times.
+  . support for parsing ISO intervals for use with DateInterval.
+  . date_add() / DateTime::add(), date_sub() / DateTime::sub() for applying an
+    interval to an existing date/time.
 - Added functionality to SPL extension:
   . Added SPL to list of standard extensions that cannot be disabled. (Marcus)
   . Added ability to store associative information with objects in
@@ -149,6 +154,7 @@ PHP                                                                        NEWS
 - Fixed PECL bug #12431 (OCI8 ping functionality is broken). (Oracle Corp.)
 
 - Fixed bug #44805 (rename() function is not portable to Windows). (Pierre)
+- Fixed bug #44742 (timezone_offset_get() causes segmentation faults). (Derick)
 - Fixed bug #44648 (Attribute names not checked for wellformedness). (Rob)
 - Fixed bug #44414 (Incomplete reporting about abstract methods). (Dmitry)
 - Fixed bug #44390 (mysqli_bind_param/bind_result and Object member variables)
