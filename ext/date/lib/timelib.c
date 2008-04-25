@@ -38,6 +38,14 @@ timelib_time* timelib_time_ctor(void)
 	return t;
 }
 
+timelib_rel_time* timelib_rel_time_ctor(void)
+{
+	timelib_rel_time *t;
+	t = calloc(1, sizeof(timelib_rel_time));
+
+	return t;
+}
+
 void timelib_time_tz_abbr_update(timelib_time* tm, char* tz_abbr)
 {
 	unsigned int i;
@@ -52,6 +60,11 @@ void timelib_time_tz_abbr_update(timelib_time* tm, char* tz_abbr)
 void timelib_time_dtor(timelib_time* t)
 {
 	TIMELIB_TIME_FREE(t->tz_abbr);
+	TIMELIB_TIME_FREE(t);
+}
+
+void timelib_rel_time_dtor(timelib_rel_time* t)
+{
 	TIMELIB_TIME_FREE(t);
 }
 
@@ -114,6 +127,7 @@ void timelib_tzinfo_dtor(timelib_tzinfo *tz)
 	TIMELIB_TIME_FREE(tz->timezone_abbr);
 	TIMELIB_TIME_FREE(tz->leap_times);
 	TIMELIB_TIME_FREE(tz);
+	tz = NULL;
 }
 
 char *timelib_get_tz_abbr_ptr(timelib_time *t)
@@ -223,6 +237,23 @@ void timelib_dump_date(timelib_time *d, int options)
 					printf(" / %lld weekday", d->special.amount);
 					break;
 			}
+		}
+	}
+	printf("\n");
+}
+
+void timelib_dump_rel_time(timelib_rel_time *d)
+{
+	printf("%3lldY %3lldM %3lldD / %3lldH %3lldM %3lldS (days: %lld)%s", 
+		d->y, d->m, d->d, d->h, d->i, d->s, d->days, d->invert ? " inverted" : "");
+	if (d->first_last_day_of != 0) {
+		switch (d->first_last_day_of) {
+			case 1:
+				printf(" / first day of");
+				break;
+			case 2:
+				printf(" / last day of");
+				break;
 		}
 	}
 	printf("\n");

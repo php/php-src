@@ -49,6 +49,41 @@ static int do_range_limit(timelib_sll start, timelib_sll end, timelib_sll adj, t
 	return 0;
 }
 
+static int do_range_limit_days_relative(timelib_sll *base_y, timelib_sll *base_m, timelib_sll *y, timelib_sll *m, timelib_sll *d)
+{
+	timelib_sll leapyear;
+	timelib_sll days_this_month;
+	timelib_sll next_month, next_year;
+	timelib_sll days_next_month;
+
+	do_range_limit(1, 13, 12, base_m, base_y);
+
+	leapyear = timelib_is_leap(*base_y);
+	days_this_month = leapyear ? days_in_month_leap[*base_m] : days_in_month[*base_m];
+	next_month = (*base_m) + 1;
+
+	if (next_month > 12) {
+		next_month -= 12;
+		next_year = (*base_y) + 1;
+	} else {
+		next_year = (*base_y);
+	}
+	leapyear = timelib_is_leap(next_year);
+	days_next_month = leapyear ? days_in_month_leap[next_month] : days_in_month[next_month];
+
+	if (*d < 0) {
+		*d += days_this_month;
+		(*m)--;
+		return 1;
+	}
+	if (*d > days_next_month) {
+		*d -= days_next_month;
+		(*m)++;
+		return 1;
+	}
+	return 0;
+}
+
 static int do_range_limit_days(timelib_sll *y, timelib_sll *m, timelib_sll *d)
 {
 	timelib_sll leapyear;
@@ -99,6 +134,17 @@ static void do_adjust_for_weekday(timelib_time* time)
 		time->d -= (7 - (abs(time->relative.weekday) - current_dow));
 	}
 	time->have_weekday_relative = 0;
+}
+
+void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt)
+{
+	do {} while (do_range_limit(0, 60, 60, &rt->s, &rt->i));
+	do {} while (do_range_limit(0, 60, 60, &rt->i, &rt->h));
+	do {} while (do_range_limit(0, 24, 24, &rt->h, &rt->d));
+	do {} while (do_range_limit(0, 12, 12, &rt->m, &rt->y));
+
+	do {} while (do_range_limit_days_relative(&base->y, &base->m, &rt->y, &rt->m, &rt->d));
+	do {} while (do_range_limit(0, 12, 12, &rt->m, &rt->y));
 }
 
 static void do_normalize(timelib_time* time)
@@ -293,7 +339,20 @@ static timelib_sll do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi)
 				}
 				timelib_time_offset_dtor(before);
 				timelib_time_offset_dtor(after);
-				
+
+				{
+					timelib_time_offset *gmt_offset;
+
+					gmt_offset = timelib_get_time_zone_info(tz->sse + tmp, tzi);
+					tz->z = gmt_offset->offset;
+
+					tz->dst = gmt_offset->is_dst;
+					if (tz->tz_abbr) {
+						free(tz->tz_abbr);
+					}
+					tz->tz_abbr = strdup(gmt_offset->abbr);
+					timelib_time_offset_dtor(gmt_offset);
+				}
 				return tmp;
 			}
 	}

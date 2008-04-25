@@ -124,6 +124,8 @@ typedef struct timelib_rel_time {
 	int weekday_behavior; /* 0: the current day should *not* be counted when advancing forwards; 1: the current day *should* be counted */
 
 	int first_last_day_of;
+	int invert; /* Whether the difference should be inverted */
+	timelib_sll days; /* Contains the number of *days*, instead of Y-M-D differences */
 } timelib_rel_time;
 
 typedef struct timelib_time_offset {
