@@ -10,9 +10,20 @@ phar.readonly=0
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 
 $phar = new Phar($fname);
-$phar['a'] = 'file contents
+$phar['a/b'] = 'file contents
 this works';
-echo $phar['a']->getContent() . "\n";
+$phar->addEmptyDir('hi');
+echo $phar['a/b']->getContent() . "\n";
+try {
+echo $phar['a']->getContent(), "\n";
+} catch (Exception $e) {
+echo $e->getMessage(), "\n";
+}
+try {
+echo $phar['hi']->getContent(), "\n";
+} catch (Exception $e) {
+echo $e->getMessage(), "\n";
+}
 ?>
 ===DONE===
 --CLEAN--
@@ -20,7 +31,9 @@ echo $phar['a']->getContent() . "\n";
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 __halt_compiler();
 ?>
---EXPECT--
+--EXPECTF--
 file contents
 this works
+Phar error: Cannot retrieve contents, "a" in phar "%sphar_oo_getcontents.phar.php" is a directory
+Phar error: Cannot retrieve contents, "hi" in phar "%sphar_oo_getcontents.phar.php" is a directory
 ===DONE===

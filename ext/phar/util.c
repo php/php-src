@@ -1228,6 +1228,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 				entry->is_temp_dir = entry->is_dir = 1;
 				entry->filename = (char *) estrndup(path, path_len + 1);
 				entry->filename_len = path_len;
+				entry->phar = phar;
 				return entry;
 			}
 		}
