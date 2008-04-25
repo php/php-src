@@ -208,7 +208,12 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 			char name[256];
 
 			strcpy(name, hdr->prefix);
-			strcat(name, hdr->name);
+			/* remove potential buffer overflow */
+			if (hdr->name[99]) {
+				strncat(name, hdr->name, 100);
+			} else {
+				strcat(name, hdr->name);
+			}
 			entry.filename_len = strlen(hdr->prefix) + 100;
 			if (name[entry.filename_len - 1] == '/') {
 				/* some tar programs store directories with trailing slash */
