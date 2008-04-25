@@ -24,7 +24,12 @@ echo("\n Written Files($i)\n");
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
+$dirName = dirname(__FILE__);
+$fileDir="$dirName/test_data";
+for($i=0; $i<16*1024; $i++){
+	unlink("$fileDir/$i");
+} 	
+rmdir($fileDir);
 __HALT_COMPILER();
 ?>
 --EXPECT--
