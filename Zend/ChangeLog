@@ -1,3 +1,19 @@
+2008-04-24  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_compile.c
+      zend_gc.c:
+      - Removed unused variables
+
+2008-04-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Optimized handlers for ZEND_RECV and ZEND_RECV_INIT opocdes
+
 2008-04-21  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_vm_def.h

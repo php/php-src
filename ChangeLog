@@ -1,3 +1,120 @@
+2008-04-24  Ant Phillips  <antphill@uk.ibm.com>
+
+    * ext/standard/tests/file/open_basedir_copy_variation1.phpt
+      ext/standard/tests/file/open_basedir_copy_variation1.phpt:
+      Extra open_basedir tests
+
+    * ext/standard/tests/file/open_basedir_copy_variation1.phpt
+      ext/standard/tests/file/open_basedir_copy_variation1.phpt
+      ext/standard/tests/file/open_basedir_copy_variation1.phpt:
+        1.1.4;
+      file open_basedir_copy_variation1.phpt was initially added on branch
+      PHP_5_2.
+
+2008-04-24  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_gc.c:
+      - Removed unused variables
+
+2008-04-24  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/config.w32:
+      - re2c requirement update
+      (sorry, I thought I'd committed this ages ago)
+
+2008-04-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Optimized handlers for ZEND_RECV and ZEND_RECV_INIT opocdes
+
+2008-04-24  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysql/tests/connect.inc
+      ext/mysql/tests/mysql_fetch_array.phpt
+      ext/mysql/tests/mysql_fetch_array.phpt
+      ext/mysql/tests/mysql_phpinfo.phpt
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli_structs.h
+      ext/mysqli/php_mysqli_structs.h
+      ext/mysqli/tests/mysqli_class_mysqli_interface.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_stmt_interface.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_stmt_interface.phpt
+      ext/mysqli/tests/mysqli_fetch_all.phpt
+      ext/mysqli/tests/mysqli_fetch_all.phpt
+      ext/mysqli/tests/mysqli_fetch_all_oo.phpt
+      ext/mysqli/tests/mysqli_fetch_all_oo.phpt
+      ext/mysqli/tests/mysqli_fetch_array.phpt
+      ext/mysqli/tests/mysqli_fetch_array.phpt
+      ext/mysqli/tests/mysqli_fetch_array_oo.phpt
+      ext/mysqli/tests/mysqli_fetch_array_oo.phpt
+      ext/mysqli/tests/mysqli_fetch_field_flags.phpt
+      ext/mysqli/tests/mysqli_fetch_field_flags.phpt
+      ext/mysqli/tests/mysqli_stmt_execute.phpt
+      ext/mysqli/tests/mysqli_stmt_execute.phpt
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_enum_n_def.h
+      ext/mysqlnd/mysqlnd_enum_n_def.h
+      ext/mysqlnd/mysqlnd_palloc.c
+      ext/mysqlnd/mysqlnd_palloc.c
+      ext/mysqlnd/mysqlnd_priv.h
+      ext/mysqlnd/mysqlnd_priv.h
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_ps_codec.c
+      ext/mysqlnd/mysqlnd_ps_codec.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqlnd/mysqlnd_wireprotocol.c:
+      Update ext/mysql's and ext/mysqli's tests
+      Add mysqli_stmt_more_result()/mysqli_stmt_next_result(), but only in
+      mysqlnd builds as libmysql doesn't support this feature.
+
+2008-04-24  Ant Phillips  <antphill@uk.ibm.com>
+
+    * ext/standard/tests/file/open_basedir.inc
+      ext/standard/tests/file/open_basedir.inc
+      ext/standard/tests/file/open_basedir.inc:
+      Allow for chmod() to fail on symbolic links
+
+2008-04-24  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/file/bug44805.phpt:
+      - MFH: improve test and remove files on exit
+
+    * ext/standard/tests/file/bug44805.phpt:
+      - improve test and remove files on exit
+
+2008-04-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.h
+      TSRM/tsrm_virtual_cwd.h
+      ext/standard/tests/file/bug44805.phpt
+      ext/standard/tests/file/bug44805.phpt
+      ext/standard/tests/file/bug44805.phpt:
+      Fixed bug #44805 (rename() function is not portable to Windows). (Pierre)
+
 2008-04-23  Johannes Schlüter  <johannes@schlueters.de>
 
     * ext/mysqlnd/mysqlnd.h
