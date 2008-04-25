@@ -75,7 +75,7 @@ var_dump($b->decompress());
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar'); ?>
---EXPECT--
+--EXPECTF--
 Warning: PharFileInfo::isCompressed() expects parameter 1 to be long, array given in %spharfileinfo_compression.php on line 11
 Unknown compression type specified
 Unknown compression type specified
