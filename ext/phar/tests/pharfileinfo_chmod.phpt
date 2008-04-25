@@ -2,8 +2,6 @@
 Phar: PharFileInfo::chmod extra code coverage
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zlib")) die("skip no zlib"); ?>
-<?php if (!extension_loaded("bz2")) die("skip no bz2"); ?>
 --INI--
 phar.readonly=0
 --FILE--
