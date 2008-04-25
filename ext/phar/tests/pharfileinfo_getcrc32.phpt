@@ -42,8 +42,8 @@ echo $e->getMessage() . "\n";
 ===DONE===
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
---EXPECT--
+--EXPECTF--
 Phar entry is a directory, does not have a CRC
 Phar entry was not CRC checked
-int(3904355907)
+int(%s)
 ===DONE===
