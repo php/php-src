@@ -6,7 +6,7 @@ sinclude(lib/timelib.m4)
 
 PHP_DATE_CFLAGS="-I@ext_builddir@/lib"
 timelib_sources="lib/astro.c lib/dow.c lib/parse_date.c lib/parse_tz.c 
-                 lib/timelib.c lib/tm2unixtime.c lib/unixtime2tm.c"
+                 lib/timelib.c lib/tm2unixtime.c lib/unixtime2tm.c lib/parse_iso_intervals.c lib/interval.c"
 
 PHP_NEW_EXTENSION(date, php_date.c $timelib_sources, no,, $PHP_DATE_CFLAGS)
 
