@@ -1382,7 +1382,11 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 						goto phar_spl_fileinfo;
 					case SPL_FS_INFO:
 					case SPL_FS_FILE:
-						return ZEND_HASH_APPLY_KEEP;
+						/* FIXME: memleak here */
+						fname = expand_filepath(intern->file_name, NULL TSRMLS_CC);
+						fname_len = strlen(fname);
+						is_splfileinfo = 1;
+						goto phar_spl_fileinfo;
 				}
 			}
 			/* fall-through */
@@ -1396,6 +1400,9 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 
 phar_spl_fileinfo:
 	if (base_len) {
+		/* FIXME: memleak here */
+		base = expand_filepath(base, NULL TSRMLS_CC);
+		base_len = strlen(base);
 		if (strstr(fname, base)) {
 			str_key_len = fname_len - base_len;
 			if (str_key_len <= 0) {
@@ -1488,6 +1495,101 @@ after_open_fp:
 	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
+
+/* {{{ proto array Phar::buildFromDirectory(string directory[, string regex])
+ * Construct a phar archive from an existing directory, recursively.
+ * Optional second parameter is a regular expression for filtering directory contents.
+ * 
+ * Return value is an array mapping phar index to actual files added.
+ */
+PHP_METHOD(Phar, buildFromDirectory)
+{
+	char *dir, *regex, *error;
+	int dir_len, regex_len;
+	zend_bool apply_reg = 0;
+	zval arg, arg2, *iter, *iteriter, *regexiter = NULL;
+	struct {
+		phar_archive_object *p;
+		zend_class_entry *c;
+		char *b;
+		uint l;
+		zval *ret;
+	} pass;
+
+	PHAR_ARCHIVE_OBJECT();
+
+	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"Cannot write to archive - write operations restricted by INI setting");
+		return;
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &dir, &dir_len, &regex, &regex_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	MAKE_STD_ZVAL(iter);
+
+	if (SUCCESS != object_init_ex(iter, spl_ce_RecursiveDirectoryIterator)) {
+		zval_dtor(iter);
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Unable to instantiate directory iterator for %s", phar_obj->arc.archive->fname);
+		RETURN_FALSE;
+	}
+
+	INIT_PZVAL(&arg);
+	ZVAL_STRINGL(&arg, dir, dir_len, 0);
+
+	zend_call_method_with_1_params(&iter, spl_ce_RecursiveDirectoryIterator, 
+			&spl_ce_RecursiveDirectoryIterator->constructor, "__construct", NULL, &arg);
+
+	MAKE_STD_ZVAL(iteriter);
+
+	if (SUCCESS != object_init_ex(iteriter, spl_ce_RecursiveIteratorIterator)) {
+		zval_dtor(iteriter);
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Unable to instantiate directory iterator for %s", phar_obj->arc.archive->fname);
+		RETURN_FALSE;
+	}
+
+	zend_call_method_with_1_params(&iteriter, spl_ce_RecursiveIteratorIterator, 
+			&spl_ce_RecursiveIteratorIterator->constructor, "__construct", NULL, iter);
+
+	zval_ptr_dtor(&iter);
+
+	if (regex_len > 0) {
+		apply_reg = 1;
+		MAKE_STD_ZVAL(regexiter);
+
+		if (SUCCESS != object_init_ex(regexiter, spl_ce_RegexIterator)) {
+			zval_dtor(regexiter);
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Unable to instantiate regex iterator for %s", phar_obj->arc.archive->fname);
+			RETURN_FALSE;
+		}
+
+		INIT_PZVAL(&arg2);
+		ZVAL_STRINGL(&arg2, regex, regex_len, 0);
+
+		zend_call_method_with_2_params(&regexiter, spl_ce_RegexIterator, 
+			&spl_ce_RegexIterator->constructor, "__construct", NULL, iteriter, &arg2);
+	}
+
+	array_init(return_value);
+
+	pass.c = apply_reg ? Z_OBJCE_P(regexiter) : Z_OBJCE_P(iteriter);
+	pass.p = phar_obj;
+	pass.b = dir;
+	pass.l = dir_len;
+	pass.ret = return_value;
+
+	if (SUCCESS == spl_iterator_apply((apply_reg ? regexiter : iteriter), (spl_iterator_apply_func_t) phar_build, (void *) &pass TSRMLS_CC)) {
+		zval_ptr_dtor(&iteriter);
+		if (apply_reg) zval_ptr_dtor(&regexiter);
+		phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
+		if (error) {
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+			efree(error);
+		}
+	}
+}
 
 /* {{{ proto array Phar::buildFromIterator(Iterator iter[, string base_directory])
  * Construct a phar archive from an iterator.  The iterator must return a series of strings
@@ -3964,6 +4066,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_delete, 0, 0, 1)
 ZEND_END_ARG_INFO();
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_fromdir, 0, 0, 1)
+	ZEND_ARG_INFO(0, dir_path)
+	ZEND_ARG_INFO(0, regex)
+ZEND_END_ARG_INFO();
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_offsetExists, 0, 0, 1)
 	ZEND_ARG_INFO(0, entry)
 ZEND_END_ARG_INFO();
@@ -4022,6 +4130,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, addEmptyDir,           arginfo_phar_emptydir,     ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, addFile,               arginfo_phar_addfile,      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, addFromString,         arginfo_phar_fromstring,   ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, buildFromDirectory,    arginfo_phar_fromdir,      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, buildFromIterator,     arginfo_phar_build,        ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, compressFiles,         arginfo_phar_comp,         ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, decompressFiles,       NULL,                      ZEND_ACC_PUBLIC)
