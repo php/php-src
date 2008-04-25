@@ -3583,7 +3583,7 @@ PHP_METHOD(PharFileInfo, setMetadata)
 	PHAR_ENTRY_OBJECT();
 
 	if (PHAR_G(readonly) && !entry_obj->ent.entry->phar->is_data) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by INI setting");
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by phar.readonly INI setting");
 		return;
 	}
 	if (entry_obj->ent.entry->is_tar) {
@@ -3591,9 +3591,9 @@ PHP_METHOD(PharFileInfo, setMetadata)
 			"Cannot set metadata, not possible with tar-based phar archives");
 		return;
 	}
-	if (entry_obj->ent.entry->is_dir) {
+	if (entry_obj->ent.entry->is_temp_dir) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
-			"Phar entry is a directory, cannot set metadata"); \
+			"Phar entry is a temporary directory (not an actual entry in the archive), cannot set metadata"); \
 		return;
 	}
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &metadata) == FAILURE) {
@@ -3625,7 +3625,7 @@ PHP_METHOD(PharFileInfo, delMetadata)
 	PHAR_ENTRY_OBJECT();
 
 	if (PHAR_G(readonly) && !entry_obj->ent.entry->phar->is_data) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by INI setting");
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by phar.readonly INI setting");
 		return;
 	}
 	if (entry_obj->ent.entry->is_tar) {
@@ -3634,7 +3634,9 @@ PHP_METHOD(PharFileInfo, delMetadata)
 		return;
 	}
 	if (entry_obj->ent.entry->is_temp_dir) {
-		RETURN_FALSE;
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
+			"Phar entry is a temporary directory (not an actual entry in the archive), cannot delete metadata"); \
+		return;
 	}
 	if (entry_obj->ent.entry->metadata) {
 		zval_ptr_dtor(&entry_obj->ent.entry->metadata);
