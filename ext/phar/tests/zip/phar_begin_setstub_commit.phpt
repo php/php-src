@@ -43,6 +43,7 @@ fclose($a);
 --CLEAN--
 <?php 
 unlink(dirname(__FILE__) . '/brandnewphar.phar.zip');
+unlink(dirname(__FILE__) . '/myfakestub.php');
 ?>
 --EXPECT--
 bool(true)
