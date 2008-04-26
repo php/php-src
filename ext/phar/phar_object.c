@@ -1304,7 +1304,7 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 	phar_entry_data *data;
 	php_stream *fp;
 	long contents_len;
-	char *fname, *error, *str_key, *base = p_obj->b, *opened, *save = NULL;
+	char *fname, *error, *str_key, *base = p_obj->b, *opened, *save = NULL, *temp = NULL;
 	zend_class_entry *ce = p_obj->c;
 	phar_archive_object *phar_obj = p_obj->p;
 	char *str = "[stream]";
@@ -1382,9 +1382,9 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 						goto phar_spl_fileinfo;
 					case SPL_FS_INFO:
 					case SPL_FS_FILE:
-						/* FIXME: memleak here */
 						fname = expand_filepath(intern->file_name, NULL TSRMLS_CC);
 						fname_len = strlen(fname);
+						save = fname;
 						is_splfileinfo = 1;
 						goto phar_spl_fileinfo;
 				}
@@ -1400,14 +1400,15 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 
 phar_spl_fileinfo:
 	if (base_len) {
-		/* FIXME: memleak here */
-		base = expand_filepath(base, NULL TSRMLS_CC);
+		temp = expand_filepath(base, NULL TSRMLS_CC);
+		base = temp;
 		base_len = strlen(base);
 		if (strstr(fname, base)) {
 			str_key_len = fname_len - base_len;
 			if (str_key_len <= 0) {
 				if (save) {
 					efree(save);
+					efree(temp);
 				}
 				return ZEND_HASH_APPLY_KEEP;
 			}
@@ -1416,6 +1417,7 @@ phar_spl_fileinfo:
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned a path \"%s\" that is not in the base directory \"%s\"", ce->name, fname, base);
 			if (save) {
 				efree(save);
+				efree(temp);
 			}
 			return ZEND_HASH_APPLY_STOP;
 		}
@@ -1442,6 +1444,9 @@ phar_spl_fileinfo:
 		if (save) {
 			efree(save);
 		}
+		if (temp) {
+			efree(temp);
+		}
 		return ZEND_HASH_APPLY_STOP;
 	}
 #endif
@@ -1450,6 +1455,9 @@ phar_spl_fileinfo:
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned a path \"%s\" that open_basedir prevents opening", ce->name, fname);
 		if (save) {
 			efree(save);
+		}
+		if (temp) {
+			efree(temp);
 		}
 		return ZEND_HASH_APPLY_STOP;
 	}
@@ -1461,6 +1469,9 @@ phar_spl_fileinfo:
 		if (save) {
 			efree(save);
 		}
+		if (temp) {
+			efree(temp);
+		}
 		return ZEND_HASH_APPLY_STOP;
 	}
 
@@ -1470,6 +1481,9 @@ after_open_fp:
 		efree(error);
 		if (save) {
 			efree(save);
+		}
+		if (temp) {
+			efree(temp);
 		}
 		if (close_fp) {
 			php_stream_close(fp);
@@ -1486,8 +1500,12 @@ after_open_fp:
 	}
 
 	add_assoc_string(p_obj->ret, str_key, opened, 0);
+
 	if (save) {
 		efree(save);
+	}
+	if (temp) {
+		efree(temp);
 	}
 
 	data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
