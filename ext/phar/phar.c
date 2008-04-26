@@ -2914,7 +2914,7 @@ PHP_MINIT_FUNCTION(phar) /* {{{ */
 	phar_has_zlib = zend_hash_exists(&module_registry, "zlib", sizeof("zlib"));
 	if (zend_hash_exists(&module_registry, "apc", sizeof("apc"))) {
 		zval magic;
-		if (zend_get_constant("\000apc_magic", sizeof("\000apc_magic"), &magic TSRMLS_CC)) {
+		if (zend_get_constant("\000apc_magic", sizeof("\000apc_magic")-1, &magic TSRMLS_CC)) {
 			compile_hook *set_compile_hook;
 
 			set_compile_hook = (compile_hook *) Z_LVAL(magic);
