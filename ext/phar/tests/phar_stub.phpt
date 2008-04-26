@@ -64,6 +64,16 @@ if (fread($fp, strlen('booya')) == 'booya') {
 	echo 'failed - copied booya';
 }
 fclose($fp);
+$phar['testing'] = 'hi';
+
+// ensure stub is not overwritten
+$fp = fopen($fname, 'rb');
+echo fread($fp, strlen($file)) . "\n";
+if (fread($fp, strlen('booya')) == 'booya') {
+	echo 'failed - copied booya';
+}
+fclose($fp);
+
 ?>
 ===DONE===
 --CLEAN--
@@ -77,5 +87,6 @@ __HALT_COMPILER();
 <?php echo "second stub\n"; __HALT_COMPILER(); ?>
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>booya
+<?php echo "third stub\n"; __HALT_COMPILER(); ?>
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>
 ===DONE===
