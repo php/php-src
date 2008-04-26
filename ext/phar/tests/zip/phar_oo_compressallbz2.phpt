@@ -34,6 +34,7 @@ var_dump($phar['b']->isCompressed(Phar::BZ2));
 var_dump(file_get_contents($pname . '/c'));
 var_dump($phar['c']->isCompressed(Phar::GZ));
 var_dump($phar['b']->isCompressed(Phar::BZ2));
+$phar['d'] = 'hi'; // increases code coverage by having ufp open
 copy($fname, $fname2);
 $c = new Phar($fname2);
 var_dump(file_get_contents($pname2 . '/a'));
