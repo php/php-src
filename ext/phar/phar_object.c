@@ -1417,6 +1417,10 @@ phar_spl_fileinfo:
 				return ZEND_HASH_APPLY_KEEP;
 			}
 			str_key = fname + base_len;
+			if (*str_key == '/' || *str_key == '\\') {
+				str_key++;
+				str_key_len--;
+			}
 		} else {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned a path \"%s\" that is not in the base directory \"%s\"", ce->name, fname, base);
 			if (save) {
