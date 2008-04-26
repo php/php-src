@@ -1,5 +1,5 @@
 --TEST--
-test broken app
+Phar: test broken app
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--

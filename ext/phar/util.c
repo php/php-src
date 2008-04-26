@@ -139,12 +139,14 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 {
 	phar_entry_info entry = {0};
 	php_stream_statbuf ssb;
+	int is_phar;
 	const char *err;
 
 	if (phar_path_check(&path, &path_len, &err) > pcr_is_ok) {
 		return FAILURE;
 	}
 
+	is_phar = (filename_len > 7 && !memcmp(filename, "phar://", 7));
 
 	entry.phar = phar;
 	entry.filename = estrndup(path, path_len);
@@ -152,7 +154,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 	phar_unixify_path_separators(entry.filename, path_len);
 #endif
 	entry.filename_len = path_len;
-	if (strstr(filename, "phar://")) {
+	if (is_phar) {
 		entry.tmp = estrndup(filename, filename_len);
 	} else {
 		entry.tmp = expand_filepath(filename, NULL TSRMLS_CC);
@@ -161,7 +163,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 		}
 	}
 #if PHP_MAJOR_VERSION < 6
-	if (PG(safe_mode) && !strstr(filename, "phar://") && (!php_checkuid(entry.tmp, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
+	if (PG(safe_mode) && !is_phar && (!php_checkuid(entry.tmp, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		efree(entry.tmp);
 		efree(entry.filename);
 		return FAILURE;
@@ -171,7 +173,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 	filename_len = strlen(entry.tmp);
 	filename = entry.tmp;
 	/* only check openbasedir for files, not for phar streams */
-	if (!strstr(filename, "phar://") && php_check_open_basedir(filename TSRMLS_CC)) {
+	if (!is_phar && php_check_open_basedir(filename TSRMLS_CC)) {
 		efree(entry.tmp);
 		efree(entry.filename);
 		return FAILURE;
@@ -1178,7 +1180,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 					}
 					return NULL;
 				}
-				if (ssb.sb.st_mode & S_IFDIR && dir) {
+				if ((ssb.sb.st_mode & S_IFDIR) == 0 && dir) {
 					efree(test);
 					/* user requested a directory, we must return one */
 					if (error) {
