@@ -80,7 +80,7 @@ echo $e->getMessage(), "\n";
 --CLEAN--
 <?php
 @unlink(dirname(__FILE__) . '/oops');
-@unlink(dirname(__FILE__) . '/oops1');
+@rmdir(dirname(__FILE__) . '/oops1');
 @unlink(dirname(__FILE__) . '/tempmanifest1.phar.php');
 $e = dirname(__FILE__) . '/extract/';
 @unlink($e . 'file1.txt');
@@ -91,11 +91,13 @@ $e = dirname(__FILE__) . '/extract/';
 @rmdir($e . 'one/level');
 @rmdir($e . 'one');
 @rmdir($e);
-$e = dirname($e) . '/extract1/';
+$e = dirname(__FILE__) . '/extract1/';
 @unlink($e . 'file1.txt');
 @unlink($e . 'subdir/ectory/file.txt');
-@unlink($e);
-$e = dirname($e) . '/extract2/';
+@rmdir($e . 'subdir/ectory');
+@rmdir($e . 'subdir');
+@rmdir($e);
+$e = dirname(__FILE__) . '/extract2/';
 @unlink($e . 'file2.txt');
 @rmdir($e . 'one/level');
 @rmdir($e . 'one');
