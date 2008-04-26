@@ -1600,7 +1600,9 @@ PHP_METHOD(Phar, buildFromDirectory)
 
 	if (SUCCESS == spl_iterator_apply((apply_reg ? regexiter : iteriter), (spl_iterator_apply_func_t) phar_build, (void *) &pass TSRMLS_CC)) {
 		zval_ptr_dtor(&iteriter);
-		if (apply_reg) zval_ptr_dtor(&regexiter);
+		if (apply_reg) {
+			zval_ptr_dtor(&regexiter);
+		}
 		phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
