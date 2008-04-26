@@ -29,6 +29,12 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
   <email>helly@php.net</email>
   <active>yes</active>
  </lead>
+ <developer>
+  <name>Steph Fox</name>
+  <user>sfox</user>
+  <email>sfox@php.net</email>
+  <active>yes</active>
+ </developer>
  <date>2008-03-27</date>
  <time>01:38:33</time>
  <version>

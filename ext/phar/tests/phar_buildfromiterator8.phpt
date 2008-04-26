@@ -1,5 +1,5 @@
 --TEST--
-Phar::buildFromIterator() iterator, SplFileInfo as current
+Phar::buildFromIterator() RegexIterator(DirectoryIterator), SplFileInfo as current
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
