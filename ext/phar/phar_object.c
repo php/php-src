@@ -1518,7 +1518,7 @@ after_open_fp:
 }
 /* }}} */
 
-/* {{{ proto array Phar::buildFromDirectory(string directory[, string regex])
+/* {{{ proto array Phar::buildFromDirectory(string base_dir[, string regex])
  * Construct a phar archive from an existing directory, recursively.
  * Optional second parameter is a regular expression for filtering directory contents.
  * 
@@ -4323,7 +4323,7 @@ ZEND_END_ARG_INFO();
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_fromdir, 0, 0, 1)
-	ZEND_ARG_INFO(0, dir_path)
+	ZEND_ARG_INFO(0, base_dir)
 	ZEND_ARG_INFO(0, regex)
 ZEND_END_ARG_INFO();
 
