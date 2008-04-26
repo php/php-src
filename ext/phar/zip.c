@@ -606,6 +606,7 @@ static int phar_zip_changed_apply(void *data, void *arg TSRMLS_DC) /* {{{ */
 		php_stream_filter_remove(filter, 1 TSRMLS_CC);
 		php_stream_seek(entry->cfp, 0, SEEK_END);
 		entry->compressed_filesize = (php_uint32) php_stream_tell(entry->cfp);
+		central.compsize = local.compsize = PHAR_SET_32(entry->compressed_filesize);
 		/* generate crc on compressed file */
 		php_stream_rewind(entry->cfp);
 		entry->old_flags = entry->flags;

@@ -41,15 +41,16 @@ $phar->setAlias('unused');
 $p2 = new Phar($fname2);
 echo $p2->getAlias(), "\n";
 $p2->compressFiles(Phar::BZ2);
-copy($fname3, $fname3);
+copy($fname2, $fname3);
 $p2->setAlias('unused2');
 $p3 = new Phar($fname3);
 echo $p3->getAlias(), "\n";
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar.zip');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phartmp.zip');
 __HALT_COMPILER();
 ?>
