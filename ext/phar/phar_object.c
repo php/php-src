@@ -274,6 +274,7 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 			PHAR_G(cwd_len) = 0;
 			if (zend_hash_add(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
 				if ((cwd = strrchr(entry, '/'))) {
+					PHAR_G(cwd_init) = 1;
 					if (entry == cwd) {
 						/* root directory */
 						PHAR_G(cwd_len) = 0;
@@ -319,6 +320,7 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 					PHAR_G(cwd) = NULL;
 					PHAR_G(cwd_len) = 0;
 				}
+				PHAR_G(cwd_init) = 0;
 				efree(name);
 				zend_bailout();
 			}
@@ -494,10 +496,12 @@ carry_on2:
 		}
 carry_on:
 		if (SUCCESS != phar_mount_entry(*pphar, actual, actual_len, path, path_len TSRMLS_CC)) {
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Mounting of %s to %s within phar %s failed", path, actual, arch);
 			if (path && path == entry) {
 				efree(entry);
 			}
-			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Mounting of %s to %s within phar %s failed", path, actual, arch);
+			efree(arch);
+			return;
 		}
 		if (path && path == entry) {
 			efree(entry);
@@ -3453,6 +3457,238 @@ PHP_METHOD(Phar, delMetadata)
 	}
 }
 /* }}} */
+#if (PHP_MAJOR_VERSION < 6)
+#define OPENBASEDIR_CHECKPATH(filename) \
+	(PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename TSRMLS_CC)
+#else 
+#define OPENBASEDIR_CHECKPATH(filename) \
+	php_check_open_basedir(filename TSRMLS_CC)
+#endif
+
+static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *dest, int dest_len, char **error TSRMLS_DC)
+{
+	php_stream_statbuf ssb;
+	int len;
+	php_stream *fp;
+	char *fullpath, *slash;
+
+	len = spprintf(&fullpath, 0, "%s/%s", dest, entry->filename);
+	if (len >= MAXPATHLEN) {
+		char *tmp;
+		/* truncate for error message */
+		fullpath[50] = '\0';
+		if (entry->filename_len > 50) {
+			tmp = estrndup(entry->filename, 50);
+			spprintf(error, 4096, "Cannot extract \"%s...\" to \"%s...\", extracted filename is too long for filesystem", tmp, fullpath);
+			efree(tmp);
+		} else {
+			spprintf(error, 4096, "Cannot extract \"%s\" to \"%s...\", extracted filename is too long for filesystem", entry->filename, fullpath);
+		}
+		efree(fullpath);
+		return FAILURE;
+	}
+	if (!len) {
+		spprintf(error, 4096, "Cannot extract \"%s\", internal error", entry->filename);
+		efree(fullpath);
+		return FAILURE;
+	}
+
+	if (OPENBASEDIR_CHECKPATH(fullpath)) {
+		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", openbasedir/safe mode restrictions in effect", entry->filename, fullpath);
+		efree(fullpath);
+		return FAILURE;
+	}
+
+	/* let see if the path already exists */
+	if (!overwrite && SUCCESS == php_stream_stat_path(fullpath, &ssb)) {
+		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", path already exists", entry->filename, fullpath);
+		efree(fullpath);
+		return FAILURE;
+	}
+	/* perform dirname */
+	slash = strrchr(entry->filename, '/');
+	if (slash) {
+		fullpath[dest_len + (slash - entry->filename) + 1] = '\0';
+	} else {
+		fullpath[dest_len] = '\0';
+	}
+	if (FAILURE == php_stream_stat_path(fullpath, &ssb)) {
+		if (!php_stream_mkdir(fullpath, 0777,  PHP_STREAM_MKDIR_RECURSIVE, NULL)) {
+			spprintf(error, 4096, "Cannot extract \"%s\", could not create directory \"%s\"", entry->filename, fullpath);
+			efree(fullpath);
+			return FAILURE;
+		}
+	}
+	if (slash) {
+		fullpath[dest_len + (slash - entry->filename) + 1] = '/';
+	} else {
+		fullpath[dest_len] = '/';
+	}
+
+	/* it is a standalone directory, job done */
+	if (entry->is_dir) {
+		efree(fullpath);
+		return SUCCESS;
+	}
+
+	fp = php_stream_open_wrapper(fullpath, "w+b", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
+	if (!fp) {
+		spprintf(error, 4096, "Cannot extract \"%s\", could not open for writing \"%s\"", entry->filename, fullpath);
+		efree(fullpath);
+		return FAILURE;
+	}
+	if (!phar_get_efp(entry, 0 TSRMLS_CC)) {
+		if (FAILURE == phar_open_entry_fp(entry, error, 1 TSRMLS_CC)) {
+			if (error) {
+				spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", unable to open internal file pointer: %s", entry->filename, fullpath, *error);
+			} else {
+				spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", unable to open internal file pointer", entry->filename, fullpath);
+			}
+			efree(fullpath);
+			php_stream_close(fp);
+			return FAILURE;
+		}
+	}
+	if (FAILURE == phar_seek_efp(entry, 0, SEEK_SET, 0, 0 TSRMLS_CC)) {
+		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", unable to seek internal file pointer", entry->filename, fullpath);
+		efree(fullpath);
+		php_stream_close(fp);
+		return FAILURE;
+	}
+	if (entry->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(entry, 0 TSRMLS_CC), fp, entry->uncompressed_filesize)) {
+		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", copying contents failed", entry->filename, fullpath);
+		efree(fullpath);
+		php_stream_close(fp);
+		return FAILURE;
+	}
+	efree(fullpath);
+	php_stream_close(fp);
+	return SUCCESS;
+}
+
+/* {{{ proto bool Phar::extractTo(string pathto[[, mixed files], bool overwrite])
+ * Extract one or more file from a phar archive, optionally overwriting existing files
+ */
+PHP_METHOD(Phar, extractTo)
+{
+	char *error = NULL;
+	php_stream_statbuf ssb;
+	phar_entry_info *entry;
+	char *pathto, *filename;
+	int pathto_len, filename_len;
+	int ret, i;
+	int nelems;
+	zval *zval_files = NULL;
+	zend_bool overwrite = 0;
+	PHAR_ARCHIVE_OBJECT();
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zb", &pathto, &pathto_len, &zval_files, &overwrite) == FAILURE) {
+		return;
+	}
+
+	if (pathto_len < 1) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
+			"Invalid argument, extraction path must be non-zero length");
+		return;
+	}
+	if (pathto_len >= MAXPATHLEN) {
+		char *tmp = estrndup(pathto, 50);
+		/* truncate for error message */
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "Cannot extract to \"%s...\", destination directory is too long for filesystem", tmp);
+		efree(tmp);
+		return;
+	}
+
+	if (php_stream_stat_path(pathto, &ssb) < 0) {
+		ret = php_stream_mkdir(pathto, 0777,  PHP_STREAM_MKDIR_RECURSIVE, NULL);
+		if (!ret) {
+			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
+				"Unable to create path \"%s\" for extraction", pathto);
+			return;
+		}
+	} else if (!(ssb.sb.st_mode & S_IFDIR)) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
+			"Unable to use path \"%s\" for extraction, it is a file, must be a directory", pathto);
+		return;
+	}
+
+	if (zval_files) {
+		switch (Z_TYPE_P(zval_files)) {
+			case IS_STRING:
+				filename = Z_STRVAL_P(zval_files);
+				filename_len = Z_STRLEN_P(zval_files);
+				break;
+			case IS_ARRAY:
+				nelems = zend_hash_num_elements(Z_ARRVAL_P(zval_files));
+				if (nelems == 0 ) {
+					RETURN_FALSE;
+				}
+				for (i = 0; i < nelems; i++) {
+					zval **zval_file;
+					if (zend_hash_index_find(Z_ARRVAL_P(zval_files), i, (void **) &zval_file) == SUCCESS) {
+						switch (Z_TYPE_PP(zval_file)) {
+							case IS_STRING:
+								break;
+							default:
+								zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
+									"Invalid argument, array of filenames to extract contains non-string value");
+								return;
+						}
+						if (FAILURE == zend_hash_find(&phar_obj->arc.archive->manifest, Z_STRVAL_PP(zval_file), Z_STRLEN_PP(zval_file), (void **)&entry)) {
+							zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC,
+								"Phar Error: attempted to extract non-existent file \"%s\" from phar \"%s\"", Z_STRVAL_PP(zval_file), phar_obj->arc.archive->fname);
+						}
+						if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, &error TSRMLS_CC)) {
+							zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC,
+								"Extraction from phar \"%s\" failed: %s", phar_obj->arc.archive->fname, error);
+							efree(error);
+							return;
+						}
+					}
+				}
+				RETURN_TRUE;
+			default:
+				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
+					"Invalid argument, expected a filename (string) or array of filenames");
+				return;
+		}
+		if (FAILURE == zend_hash_find(&phar_obj->arc.archive->manifest, filename, filename_len, (void **)&entry)) {
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC,
+				"Phar Error: attempted to extract non-existent file \"%s\" from phar \"%s\"", filename, phar_obj->arc.archive->fname);
+			return;
+		}
+		if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, &error TSRMLS_CC)) {
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC,
+				"Extraction from phar \"%s\" failed: %s", phar_obj->arc.archive->fname, error);
+			efree(error);
+			return;
+		}
+	} else {
+		phar_archive_data *phar = phar_obj->arc.archive;
+		/* Extract all files */
+		if (!zend_hash_num_elements(&(phar->manifest))) {
+			RETURN_TRUE;
+		}
+
+		for (zend_hash_internal_pointer_reset(&phar->manifest);
+		zend_hash_has_more_elements(&phar->manifest) == SUCCESS;
+		zend_hash_move_forward(&phar->manifest)) {
+			phar_entry_info *entry;
+			if (zend_hash_get_current_data(&phar->manifest, (void **)&entry) == FAILURE) {
+				continue;
+			}
+			if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, &error TSRMLS_CC)) {
+				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC,
+					"Extraction from phar \"%s\" failed: %s", phar->fname, error);
+				efree(error);
+				return;
+			}
+		}
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+
 
 /* {{{ proto void PharFileInfo::__construct(string entry)
  * Construct a Phar entry object
@@ -4129,6 +4365,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_emptydir, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_extract, 0, 0, 1)
+	ZEND_ARG_INFO(0, pathto)
+	ZEND_ARG_INFO(0, files)
+	ZEND_ARG_INFO(0, overwrite)
+ZEND_END_ARG_INFO();
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_addfile, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, localname)
@@ -4162,6 +4405,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, count,                 NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, delete,                arginfo_phar_delete,       ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, delMetadata,           NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, extractTo,             arginfo_phar_extract,      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getAlias,              NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getPath,               NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, getMetadata,           NULL,                      ZEND_ACC_PUBLIC)
