@@ -284,8 +284,39 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 		if (!actual_alias && entry.filename_len == sizeof(".phar/alias.txt")-1 && !strncmp(entry.filename, ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
 			size_t read;
 			/* found explicit alias */
+			if (size > 511) {
+				if (error) {
+					spprintf(error, 4096, "phar error: tar-based phar \"%s\" has alias that is larger than 511 bytes, cannot process", fname);
+				}
+				php_stream_close(fp);
+				zend_hash_destroy(&myphar->manifest);
+				myphar->manifest.arBuckets = 0;
+				zend_hash_destroy(&myphar->mounted_dirs);
+				myphar->mounted_dirs.arBuckets = 0;
+				efree(myphar);
+				return FAILURE;
+			}
 			read = php_stream_read(fp, buf, size);
 			if (read == size) {
+				buf[size] = '\0';
+				if (!phar_validate_alias(buf, size)) {
+					if (size > 50) {
+						buf[50] = '.';
+						buf[51] = '.';
+						buf[52] = '.';
+						buf[53] = '\0';
+					}
+					if (error) {
+						spprintf(error, 4096, "phar error: invalid alias \"%s\" in tar-based phar \"%s\"", buf, fname);
+					}
+					php_stream_close(fp);
+					zend_hash_destroy(&myphar->manifest);
+					myphar->manifest.arBuckets = 0;
+					zend_hash_destroy(&myphar->mounted_dirs);
+					myphar->mounted_dirs.arBuckets = 0;
+					efree(myphar);
+					return FAILURE;
+				}
 				actual_alias = estrndup(buf, size);
 				myphar->alias = actual_alias;
 				myphar->alias_len = size;
