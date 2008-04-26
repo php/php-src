@@ -1,3 +1,57 @@
+2008-04-25  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/config.m4
+      ext/date/php_date.c
+      ext/date/php_date.h
+      ext/date/lib/README
+      ext/date/lib/interval.c
+      ext/date/lib/parse_iso_intervals.c
+      ext/date/lib/parse_iso_intervals.re
+      ext/date/lib/timelib.c
+      ext/date/lib/timelib.h
+      ext/date/lib/timelib_structs.h
+      ext/date/lib/tm2unixtime.c:
+      - MF53: Added new date/time functionality:
+        . support for diffing date/times through date_diff() / DateTime::diff().
+        . added DateInterval class to represent the difference between two
+      date/times.
+        . support for parsing ISO intervals for use with DateInterval.
+        . date_add() / DateTime::add(), date_sub() / DateTime::sub() for
+      applying an
+          interval to an existing date/time.
+
+    * ext/date/lib/parse_iso_intervals.c
+      ext/date/lib/parse_iso_intervals.c
+      ext/date/lib/parse_iso_intervals.re
+      ext/date/lib/parse_iso_intervals.re
+      ext/date/lib/timelib.c
+      ext/date/lib/timelib.h:
+      
+      file parse_iso_intervals.c was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/config.m4
+      ext/date/php_date.c
+      ext/date/php_date.h
+      ext/date/lib/README
+      ext/date/lib/interval.c
+      ext/date/lib/interval.c
+      ext/date/lib/parse_date.c
+      ext/date/lib/timelib_structs.h
+      ext/date/lib/tm2unixtime.c
+      ext/date/tests/bug44742.phpt:
+      - Added new date/time functionality:
+        . support for diffing date/times through date_diff() / DateTime::diff().
+        . added DateInterval class to represent the difference between two
+      date/times.
+        . support for parsing ISO intervals for use with DateInterval.
+        . date_add() / DateTime::add(), date_sub() / DateTime::sub() for
+      applying an
+          interval to an existing date/time.
+      - MFH: Fixed bug #44742 (timezone_offset_get() causes segmentation
+      faults).
+
 2008-04-24  Ant Phillips  <antphill@uk.ibm.com>
 
     * ext/standard/tests/file/open_basedir_copy_variation1.phpt
