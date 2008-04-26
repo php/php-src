@@ -317,12 +317,14 @@ foundit:
 			case PHAR_ZIP_COMP_DEFLATE :
 				entry.flags |= PHAR_ENT_COMPRESSED_GZ;
 				if (!phar_has_zlib) {
+					efree(entry.filename);
 					PHAR_ZIP_FAIL("zlib extension is required");
 				}
 				break;
 			case PHAR_ZIP_COMP_BZIP2 :
 				entry.flags |= PHAR_ENT_COMPRESSED_BZ2;
 				if (!phar_has_bz2) {
+					efree(entry.filename);
 					PHAR_ZIP_FAIL("bzip2 extension is required");
 				}
 				break;
@@ -369,6 +371,7 @@ foundit:
 		/* get file metadata */
 		if (zipentry.comment_len) {
 			if (PHAR_GET_16(zipentry.comment_len) != php_stream_read(fp, buf, PHAR_GET_16(zipentry.comment_len))) {
+				efree(entry.filename);
 				PHAR_ZIP_FAIL("unable to read in file comment, truncated");
 			}
 			p = buf;
@@ -391,10 +394,12 @@ foundit:
 			if (entry.flags & PHAR_ENT_COMPRESSED_GZ) {
 				filter = php_stream_filter_create("zlib.inflate", NULL, php_stream_is_persistent(fp) TSRMLS_CC);
 				if (!filter) {
+					efree(entry.filename);
 					PHAR_ZIP_FAIL("unable to decompress alias, zlib filter creation failed");
 				}
 				php_stream_filter_append(&fp->readfilters, filter);
 				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &(mydata->alias), entry.uncompressed_filesize, 0)) || !mydata->alias) {
+					efree(entry.filename);
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
 				php_stream_filter_flush(filter, 1);
@@ -403,23 +408,30 @@ foundit:
 				php_stream_filter *filter;
 				filter = php_stream_filter_create("bzip2.decompress", NULL, php_stream_is_persistent(fp) TSRMLS_CC);
 				if (!filter) {
+					efree(entry.filename);
 					PHAR_ZIP_FAIL("unable to read in alias, bzip2 filter creation failed");
 				}
 				php_stream_filter_append(&fp->readfilters, filter);
 				php_stream_filter_append(&fp->readfilters, filter);
 				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &(mydata->alias), entry.uncompressed_filesize, 0)) || !mydata->alias) {
+					efree(entry.filename);
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
 				php_stream_filter_flush(filter, 1);
 				php_stream_filter_remove(filter, 1 TSRMLS_CC);
 			} else {
 				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &(mydata->alias), entry.uncompressed_filesize, 0)) || !mydata->alias) {
+					efree(entry.filename);
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
 			}
 
 			mydata->is_temporary_alias = 0;
 			mydata->alias_len = PHAR_GET_32(zipentry.uncompsize);
+			if (!phar_validate_alias(mydata->alias, mydata->alias_len)) {
+				efree(entry.filename);
+				PHAR_ZIP_FAIL("invalid alias");
+			}
 			zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), mydata->alias, mydata->alias_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
 			/* return to central directory parsing */
 			php_stream_seek(fp, saveloc, SEEK_SET);
