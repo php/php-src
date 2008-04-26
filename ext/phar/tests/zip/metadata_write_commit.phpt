@@ -31,6 +31,7 @@ $phar['a']->setMetadata(42);
 $phar['b']->setMetadata(NULL);
 $phar['c']->setMetadata(array(25, 'foo'=>'bar'));
 $phar['d']->setMetadata(true);
+$phar->setMetadata('hi');
 
 foreach($files as $name => $cont) {
 	var_dump($phar[$name]->getMetadata());
@@ -48,6 +49,7 @@ foreach($files as $name => $cont) {
 foreach($files as $name => $cont) {
 	var_dump($phar[$name]->getMetadata());
 }
+var_dump($phar->getMetadata());
 ?>
 ===DONE===
 --CLEAN--
@@ -79,4 +81,5 @@ array(2) {
   string(3) "bar"
 }
 bool(true)
+string(2) "hi"
 ===DONE===
