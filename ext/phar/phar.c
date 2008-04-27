@@ -2061,7 +2061,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 	php_stream_filter *filter;
 	php_serialize_data_t metadata_hash;
 	smart_str main_metadata_str = {0};
-	int free_user_stub;
+	int free_user_stub, free_fp = 1, free_ufp = 1;
 
 	if (error) {
 		*error = NULL;
@@ -2228,6 +2228,18 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		if (entry->is_deleted) {
 			/* remove this from the new phar */
 			continue;
+		}
+		if (!entry->is_modified && entry->fp_refcount) {
+			/* open file pointers refer to this fp, do not free the stream */
+			switch (entry->fp_type) {
+				case PHAR_FP:
+					free_fp = 0;
+					break;
+				case PHAR_UFP:
+					free_ufp = 0;
+				default:
+					break;
+			}
 		}
 		/* after excluding deleted files, calculate manifest size in bytes and number of entries */
 		++new_manifest_count;
@@ -2655,11 +2667,13 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 	/* finally, close the temp file, rename the original phar,
 	   move the temp to the old phar, unlink the old phar, and reload it into memory
 	*/
-	if (phar->fp) {
+	if (phar->fp && free_fp) {
 		php_stream_close(phar->fp);
 	}
 	if (phar->ufp) {
-		php_stream_close(phar->ufp);
+		if (free_ufp) {
+			php_stream_close(phar->ufp);
+		}
 		phar->ufp = NULL;
 	}
 	if (closeoldfile) {
