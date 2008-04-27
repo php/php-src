@@ -51,7 +51,7 @@ echo $p3->getAlias(), "\n";
 <?php
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phartmp.zip');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '3.phar.zip');
 __HALT_COMPILER();
 ?>
 --EXPECT--

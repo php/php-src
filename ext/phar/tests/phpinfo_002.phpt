@@ -5,6 +5,8 @@ Phar: phpinfo display 2
 <?php if (!extension_loaded("zlib")) die("skip zlib not loaded"); ?>
 <?php if (!extension_loaded("bz2")) die("skip bz2 not loaded"); ?>
 --INI--
+phar.readonly=1
+phar.require_hash=1
 --FILE--
 <?php
 phpinfo(INFO_MODULES);

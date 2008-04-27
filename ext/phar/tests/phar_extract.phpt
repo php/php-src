@@ -105,7 +105,7 @@ $e = dirname(__FILE__) . '/extract2/';
 @rmdir($e);
 ?>
 --EXPECTF--
-%sextract/file1.txt
+%sextract%cfile1.txt
 %sextract%cfile2.txt
 %sextract%cone
 %sextract%csubdir
@@ -125,5 +125,5 @@ Extraction from phar "%stempmanifest1.phar.php" failed: Cannot extract "file1.tx
 string(5) "first"
 string(2) "hi"
 Cannot extract to "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...", destination directory is too long for filesystem
-Extraction from phar "%stempmanifest1.phar.php" failed: Cannot extract "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..." to "%sextract...", extracted filename is too long for filesystem
+Extraction from phar "%stempmanifest1.phar.php" failed: Cannot extract "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..." to "%sextract%s...", extracted filename is too long for filesystem
 ===DONE===
