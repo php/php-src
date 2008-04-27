@@ -54,6 +54,10 @@ PHP                                                                        NEWS
   . support for parsing ISO intervals for use with DateInterval.
   . date_add() / DateTime::add(), date_sub() / DateTime::sub() for applying an
     interval to an existing date/time.
+  . proper support for "this week", "previous week"/"last week" and "next week"
+    phrases so that they actually mean the week and not a seven day period
+    around the current day.
+
 - Added functionality to SPL extension:
   . Added SPL to list of standard extensions that cannot be disabled. (Marcus)
   . Added ability to store associative information with objects in
