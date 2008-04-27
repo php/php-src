@@ -4063,7 +4063,7 @@ PHP_METHOD(PharFileInfo, getContent)
  */
 PHP_METHOD(PharFileInfo, compress)
 {
-	long method = 9021976;
+	long method;
 	char *error;
 	PHAR_ENTRY_OBJECT();
 
