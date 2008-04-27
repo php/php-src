@@ -530,7 +530,7 @@ PHP_METHOD(Phar, webPhar)
 	HashTable mimetypes;
 	phar_mime_type mime;
 	zval *mimeoverride = NULL, *rewrite = NULL;
-	char *alias = NULL, *error, *plain_map, *index_php, *f404 = NULL, *ru = NULL;
+	char *alias = NULL, *error, *plain_map, *index_php = NULL, *f404 = NULL, *ru = NULL;
 	int alias_len = 0, ret, f404_len = 0, free_pathinfo = 0, ru_len = 0;
 	char *fname, *basename, *path_info, *mime_type, *entry, *pt;
 	int fname_len, entry_len, code, index_php_len = 0, not_cgi;
@@ -963,7 +963,7 @@ PHP_METHOD(Phar, interceptFileFuncs)
 PHP_METHOD(Phar, createDefaultStub)
 {
 	char *index = NULL, *webindex = NULL, *stub, *error;
-	int index_len, webindex_len;
+	int index_len = 0, webindex_len = 0;
 	size_t stub_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ss", &index, &index_len, &webindex, &webindex_len) == FAILURE) {
@@ -987,7 +987,7 @@ PHP_METHOD(Phar, mapPhar)
 {
 	char *fname, *alias = NULL, *error, *plain_map;
 	int fname_len, alias_len = 0;
-	long dataoffset;
+	long dataoffset = 0;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!l", &alias, &alias_len, &dataoffset) == FAILURE) {
 		return;
 	}
@@ -1530,8 +1530,8 @@ after_open_fp:
  */
 PHP_METHOD(Phar, buildFromDirectory)
 {
-	char *dir, *regex, *error;
-	int dir_len, regex_len;
+	char *dir, *error, *regex = NULL;
+	int dir_len, regex_len = 0;
 	zend_bool apply_reg = 0;
 	zval arg, arg2, *iter, *iteriter, *regexiter = NULL;
 	struct {
@@ -1634,7 +1634,7 @@ PHP_METHOD(Phar, buildFromIterator)
 	zval *obj;
 	char *error;
 	uint base_len = 0;
-	char *base;
+	char *base = NULL;
 	struct {
 		phar_archive_object *p;
 		zend_class_entry *c;
@@ -2707,9 +2707,9 @@ static int pharobj_cancompress(HashTable *manifest TSRMLS_DC) /* {{{ */
  */
 PHP_METHOD(Phar, compress)
 {
-	long method = 0;
+	long method;
 	char *ext = NULL;
-	int ext_len;
+	int ext_len = 0;
 	php_uint32 flags;
 	zval *ret;
 	PHAR_ARCHIVE_OBJECT();
@@ -2776,7 +2776,7 @@ PHP_METHOD(Phar, compress)
 PHP_METHOD(Phar, decompress)
 {
 	char *ext = NULL;
-	int ext_len;
+	int ext_len = 0;
 	zval *ret;
 	PHAR_ARCHIVE_OBJECT();
 
@@ -3235,7 +3235,7 @@ PHP_METHOD(Phar, addEmptyDir)
 PHP_METHOD(Phar, addFile)
 {
 	char *fname, *localname = NULL;
-	int fname_len, localname_len;
+	int fname_len, localname_len = 0;
 	php_stream *resource;
 	zval *zresource;
 	PHAR_ARCHIVE_OBJECT();
