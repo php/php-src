@@ -3244,6 +3244,18 @@ PHP_METHOD(Phar, addFile)
 		return;
 	}
 
+#if PHP_MAJOR_VERSION < 6
+	if (PG(safe_mode) && (!php_checkuid(fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "phar error: unable to open file \"%s\" to add to phar archive, safe_mode restrictions prevent this", fname);
+		return;
+	}
+#endif
+
+	if (!strstr(fname, "://") && php_check_open_basedir(fname TSRMLS_CC)) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "phar error: unable to open file \"%s\" to add to phar archive, open_basedir restrictions prevent this", fname);
+		return;
+	}
+
 	if (!(resource = php_stream_open_wrapper(fname, "rb", 0, NULL))) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "phar error: unable to open file \"%s\" to add to phar archive", fname);
 		return;
