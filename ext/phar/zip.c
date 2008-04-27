@@ -487,6 +487,8 @@ struct _phar_zip_pass {
 	php_stream *filefp;
 	php_stream *centralfp;
 	php_stream *old;
+	int free_fp;
+	int free_ufp;
 	char **error;
 };
 /* perform final modification of zip contents for each file in the manifest before saving */
@@ -703,6 +705,18 @@ continue_dir:
 		}
 		entry->is_modified = 0;
 	} else {
+		if (entry->fp_refcount) {
+			/* open file pointers refer to this fp, do not free the stream */
+			switch (entry->fp_type) {
+				case PHAR_FP:
+					p->free_fp = 0;
+					break;
+				case PHAR_UFP:
+					p->free_ufp = 0;
+				default:
+					break;
+			}
+		}
 		if (!entry->is_dir && entry->compressed_filesize && entry->compressed_filesize != php_stream_copy_to_stream(p->old, p->filefp, entry->compressed_filesize)) {
 			spprintf(p->error, 0, "unable to copy contents of file \"%s\" while creating zip-based phar \"%s\"", entry->filename, entry->phar->fname);
 			return ZEND_HASH_APPLY_STOP;
@@ -916,6 +930,7 @@ nostub:
 		}
 		return EOF;
 	}
+	pass.free_fp = pass.free_ufp = 1;
 	memset(&eocd, 0, sizeof(eocd));
 
 	strncpy(eocd.signature, "PK\5\6", 4);
@@ -978,11 +993,13 @@ nostub:
 		}
 		smart_str_free(&main_metadata_str);
 	}
-	if (phar->fp) {
+	if (phar->fp && pass.free_fp) {
 		php_stream_close(phar->fp);
 	}
 	if (phar->ufp) {
-		php_stream_close(phar->ufp);
+		if (pass.free_ufp) {
+			php_stream_close(phar->ufp);
+		}
 		phar->ufp = NULL;
 	}
 	/* re-open */

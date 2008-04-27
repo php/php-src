@@ -34,7 +34,7 @@ $a->extractTo(dirname(__FILE__) . '/extract2', array('file2.txt', 'one/level'));
 var_dump(file_get_contents(dirname(__FILE__) . '/extract2/file2.txt'));
 var_dump(is_dir(dirname(__FILE__) . '/extract2/one/level'));
 try {
-$a->extractTo('whatever', 134);
+$a->extractTo(dirname(__FILE__) . '/whatever', 134);
 } catch (Exception $e) {
 echo $e->getMessage(), "\n";
 }
@@ -79,6 +79,7 @@ echo $e->getMessage(), "\n";
 ===DONE===
 --CLEAN--
 <?php
+@rmdir(dirname(__FILE__) . '/whatever');
 @unlink(dirname(__FILE__) . '/oops');
 @rmdir(dirname(__FILE__) . '/oops1');
 @unlink(dirname(__FILE__) . '/tempmanifest1.phar.php');

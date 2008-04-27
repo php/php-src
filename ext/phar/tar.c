@@ -404,6 +404,8 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 struct _phar_pass_tar_info {
 	php_stream *old;
 	php_stream *new;
+	int free_fp;
+	int free_ufp;
 	char **error;
 };
 
@@ -491,6 +493,18 @@ int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC)
 	
 		memset(padding, 0, 512);
 		php_stream_write(fp->new, padding, ((entry->uncompressed_filesize +511)&~511) - entry->uncompressed_filesize);
+	}
+	if (!entry->is_modified && entry->fp_refcount) {
+		/* open file pointers refer to this fp, do not free the stream */
+		switch (entry->fp_type) {
+			case PHAR_FP:
+				fp->free_fp = 0;
+				break;
+			case PHAR_UFP:
+				fp->free_ufp = 0;
+			default:
+				break;
+		}
 	}
 
 	entry->is_modified = 0;
@@ -676,6 +690,8 @@ nostub:
 	pass.old = oldfile;
 	pass.new = newfile;
 	pass.error = error;
+	pass.free_fp = 1;
+	pass.free_ufp = 1;
 
 	zend_hash_apply_with_argument(&phar->manifest, (apply_func_arg_t) phar_tar_writeheaders, (void *) &pass TSRMLS_CC);
 
@@ -692,11 +708,13 @@ nostub:
 		php_stream_close(newfile);
 		return EOF;
 	}
-	if (phar->fp) {
+	if (phar->fp && pass.free_fp) {
 		php_stream_close(phar->fp);
 	}
 	if (phar->ufp) {
-		php_stream_close(phar->ufp);
+		if (pass.free_ufp) {
+			php_stream_close(phar->ufp);
+		}
 		phar->ufp = NULL;
 	}
 
