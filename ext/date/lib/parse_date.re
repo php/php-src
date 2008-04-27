@@ -105,7 +105,7 @@ typedef unsigned char uchar;
 #define TIMELIB_UNHAVE_TIME() { s->time->have_time = 0; s->time->h = 0; s->time->i = 0; s->time->s = 0; s->time->f = 0; }
 #define TIMELIB_HAVE_DATE() { if (s->time->have_date) { add_error(s, "Double date specification"); timelib_string_free(str); return TIMELIB_ERROR; } else { s->time->have_date = 1; } }
 #define TIMELIB_UNHAVE_DATE() { s->time->have_date = 0; s->time->d = 0; s->time->m = 0; s->time->y = 0; }
-#define TIMELIB_HAVE_RELATIVE() { s->time->have_relative = 1; s->time->relative.weekday_behavior = 1; }
+#define TIMELIB_HAVE_RELATIVE() { s->time->have_relative = 1; }
 #define TIMELIB_HAVE_WEEKDAY_RELATIVE() { s->time->have_weekday_relative = 1; }
 #define TIMELIB_HAVE_SPECIAL_RELATIVE() { s->time->have_special_relative = 1; }
 #define TIMELIB_HAVE_TZ() { s->cur = cursor; if (s->time->have_zone) { s->time->have_zone > 1 ? add_error(s, "Double timezone specification") : add_warning(s, "Double timezone specification"); timelib_string_free(str); s->time->have_zone++; return TIMELIB_ERROR; } else { s->time->have_zone++; } }
@@ -947,12 +947,14 @@ dateshortwithtimelongtz = datenoyear iso8601normtz;
 /*
  * Relative regexps
  */
-reltextnumber = 'first'|'next'|'second'|'third'|'fourth'|'fifth'|'sixth'|'seventh'|'eight'|'ninth'|'tenth'|'eleventh'|'twelfth'|'last'|'previous'|'this';
-reltextunit = (('sec'|'second'|'min'|'minute'|'hour'|'day'|'week'|'fortnight'|'forthnight'|'month'|'year') 's'?) | daytext;
+reltextnumber = 'first'|'second'|'third'|'fourth'|'fifth'|'sixth'|'seventh'|'eight'|'ninth'|'tenth'|'eleventh'|'twelfth';
+reltexttext = 'next'|'last'|'previous'|'this';
+reltextunit = (('sec'|'second'|'min'|'minute'|'hour'|'day'|'fortnight'|'forthnight'|'month'|'year') 's'?) | 'weeks' | daytext;
 
 relnumber = ([+-]*[ \t]*[0-9]+);
-relative = relnumber space? reltextunit;
-relativetext = reltextnumber space reltextunit;
+relative = relnumber space? (reltextunit | 'week' );
+relativetext = (reltextnumber|reltexttext) space reltextunit;
+relativetextweek = reltexttext space 'week';
 
 */
 
@@ -1495,6 +1497,9 @@ relativetext = reltextnumber space reltextunit;
 		s->time->relative.i = 0 - s->time->relative.i;
 		s->time->relative.s = 0 - s->time->relative.s;
 		s->time->relative.weekday = 0 - s->time->relative.weekday;
+		if (s->time->relative.weekday == 0) {
+			s->time->relative.weekday = -7;
+		}
 		if (s->time->have_special_relative && s->time->special.type == TIMELIB_SPECIAL_WEEKDAY) {
 			s->time->special.amount = 0 - s->time->special.amount;
 		}
@@ -1512,10 +1517,36 @@ relativetext = reltextnumber space reltextunit;
 		TIMELIB_UNHAVE_TIME();
 		relunit = timelib_lookup_relunit((char**) &ptr);
 		s->time->relative.weekday = relunit->multiplier;
-		s->time->relative.weekday_behavior = 1;
+		if (s->time->relative.weekday_behavior != 2) {
+			s->time->relative.weekday_behavior = 1;
+		}
 		
 		TIMELIB_DEINIT;
 		return TIMELIB_WEEKDAY;
+	}
+
+	relativetextweek
+	{
+		timelib_sll i;
+		int         behavior = 0;
+		DEBUG_OUTPUT("relativetextweek");
+		TIMELIB_INIT;
+		TIMELIB_HAVE_RELATIVE();
+
+		while(*ptr) {
+			i = timelib_get_relative_text((char **) &ptr, &behavior);
+			timelib_eat_spaces((char **) &ptr);
+			timelib_set_relative((char **) &ptr, i, behavior, s);
+			s->time->relative.weekday_behavior = 2;
+
+			/* to handle the format weekday + last/this/next week */
+			if (s->time->have_weekday_relative == 0) {
+				TIMELIB_HAVE_WEEKDAY_RELATIVE();
+				s->time->relative.weekday = 1;
+			}
+		}
+		TIMELIB_DEINIT;
+		return TIMELIB_RELATIVE;
 	}
 
 	relativetext
