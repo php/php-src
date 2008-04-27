@@ -125,5 +125,5 @@ Extraction from phar "%stempmanifest1.phar.php" failed: Cannot extract "file1.tx
 string(5) "first"
 string(2) "hi"
 Cannot extract to "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...", destination directory is too long for filesystem
-Extraction from phar "%stempmanifest1.phar.php" failed: Cannot extract "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..." to "%sextract%s...", extracted filename is too long for filesystem
+Extraction from phar "%stempmanifest1.phar.php" failed: Cannot extract "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..." to "%sextrac%s...", extracted filename is too long for filesystem
 ===DONE===
