@@ -1247,6 +1247,27 @@ int phar_open_filename(char *fname, int fname_len, char *alias, int alias_len, i
 }
 /* }}}*/
 
+static inline char *phar_strnstr(const char *buf, int buf_len, const char *search, int search_len)
+{
+	const char *c;
+	int so_far = 0;
+
+	/* this assumes buf_len > search_len */
+	c = buf - 1;
+	do {
+		if (!(c = memchr(c + 1, search[0], buf_len - search_len - so_far))) {
+			return (char *) NULL;
+		}
+		so_far = c - buf;
+		if (so_far >= (buf_len - search_len)) {
+			return (char *) NULL;
+		}
+		if (!memcmp(c, search, search_len)) {
+			return (char *) c;
+		}
+	} while (1);
+}
+
 /**
  * Scan an open fp for the required __HALT_COMPILER(); ?> token and verify
  * that the manifest is proper, then pass it to phar_open_file().  SUCCESS
@@ -1383,7 +1404,7 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 				}
 			}
 		}
-		if ((pos = strstr(buffer, token)) != NULL) {
+		if ((pos = phar_strnstr(buffer, 1024 + sizeof(token), token, sizeof(token)-1)) != NULL) {
 			halt_offset += (pos - buffer); /* no -tokenlen+tokenlen here */
 			return phar_open_file(fp, fname, fname_len, alias, alias_len, halt_offset, pphar, compression, error TSRMLS_CC);
 		}
