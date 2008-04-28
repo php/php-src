@@ -1,3 +1,21 @@
+2008-04-27  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/lib/parse_iso_intervals.c
+      ext/date/lib/tm2unixtime.c:
+      - MFH: Fixed "this week", "previous week"/"last week" and "next week"
+      phrases
+        by actually meaning the week.
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/lib/tm2unixtime.c:
+      - Fixed "this week", "previous week"/"last week" and "next week" phrases by
+        actually meaning the week.
+
 2008-04-25  Derick Rethans  <php@derickrethans.nl>
 
     * ext/date/config.m4
