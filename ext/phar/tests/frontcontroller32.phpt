@@ -10,5 +10,4 @@ Content-type: text/html
 --FILE_EXTERNAL--
 files/frontcontroller17.phar
 --EXPECTF--
-Warning: Parameter 1 to sort() expected to be a reference, value given in %sfrontcontroller32.php on line 3
-phar error: failed to call rewrite callback
+%ahar error: failed to call rewrite callback
