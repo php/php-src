@@ -234,6 +234,7 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 			return phar_save_resolve_path(filename, filename_len TSRMLS_CC);
 		}
 		efree(entry);
+		try_len = filename_len;
 		test = phar_fix_filepath(estrndup(filename, filename_len), &try_len, 1 TSRMLS_CC);
 		if (zend_hash_exists(&((*pphar)->manifest), test + 1, try_len - 1)) {
 			spprintf(&ret, 0, "phar://%s%s", arch, test);
@@ -294,6 +295,7 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 			goto doit;
 		}
 		efree(entry);
+		try_len = filename_len;
 		test = phar_fix_filepath(estrndup(filename, filename_len), &try_len, 1 TSRMLS_CC);
 		if (zend_hash_exists(&((*pphar)->manifest), test + 1, try_len - 1)) {
 			spprintf(&ret, 0, "phar://%s%s", arch, test);
