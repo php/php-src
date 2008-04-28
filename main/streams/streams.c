@@ -164,7 +164,11 @@ void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *
 
 			free_msg = 1;
 		} else {
-			msg = strerror(errno);
+			if (wrapper == &php_plain_files_wrapper) {
+				msg = strerror(errno);
+			} else {
+				msg = "operation failed";
+			}
 		}
 	} else {
 		msg = "no suitable wrapper could be found";
