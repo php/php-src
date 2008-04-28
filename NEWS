@@ -136,6 +136,7 @@ PHP                                                                        NEWS
   . Added CGI SAPI -T option which can be used to measure execution
     time of script repeated several times. (Dmitry)
 - Improved streams:
+  . Fixed potentially confusing error message on failure when no errors are logged (Greg)
   . Added stream_supports_lock() function. (Benjamin Schulz)
   . Added "ignore_errors" option to http fopen wrapper. (David Zulke, Sara)
   . Added context parameter for copy() function. (Sara)
