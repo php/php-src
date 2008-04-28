@@ -56,6 +56,7 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 			entry_len = filename_len;
 			if (strstr(entry, "://")) {
 				efree(arch);
+				efree(entry);
 				goto skip_phar;
 			}
 			/* retrieving a file within the current directory, so use this if possible */
@@ -577,14 +578,14 @@ void phar_file_stat(const char *filename, php_stat_len filename_length, int type
 			phar_archive_data **pphar;
 
 			efree(entry);
-			entry = (char *)filename;
+			entry = estrndup(filename, filename_length);
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = (int) filename_length;
 			if (FAILURE == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
 				efree(arch);
 				goto skip_phar;
 			}
-			entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1 TSRMLS_CC);
+			entry = phar_fix_filepath(entry, &entry_len, 1 TSRMLS_CC);
 			if (SUCCESS == zend_hash_find(&((*pphar)->manifest), entry, entry_len, (void **) &data)) {
 				efree(entry);
 				goto stat_entry;
@@ -593,11 +594,11 @@ void phar_file_stat(const char *filename, php_stat_len filename_length, int type
 				int save_len = PHAR_G(cwd_len), save2_len = entry_len;
 
 				/* this file is not in the current directory, use the original path */
-				entry = (char *)filename;
+				entry = estrndup(filename, filename_length);
 				PHAR_G(cwd) = "/";
 				PHAR_G(cwd_len) = 0;
 				/* clean path without cwd */
-				entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1 TSRMLS_CC);
+				entry = phar_fix_filepath(entry, &entry_len, 1 TSRMLS_CC);
 				if (SUCCESS == zend_hash_find(&((*pphar)->manifest), entry + 1, entry_len - 1, (void **) &data)) {
 					PHAR_G(cwd) = save;
 					PHAR_G(cwd_len) = save_len;
