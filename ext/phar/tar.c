@@ -434,14 +434,14 @@ int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC)
 	} else {
 		memcpy(header.name, entry->filename, entry->filename_len);
 	}
-	phar_tar_octal(header.mode, entry->flags & PHAR_ENT_PERM_MASK, sizeof(header.mode));
+	phar_tar_octal(header.mode, entry->flags & PHAR_ENT_PERM_MASK, sizeof(header.mode)-1);
 	if (FAILURE == phar_tar_octal(header.size, entry->uncompressed_filesize, sizeof(header.size))) {
 		if (fp->error) {
 			spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, filename \"%s\" is too large for tar file format", entry->phar->fname, entry->filename);
 		}
 		return ZEND_HASH_APPLY_STOP;
 	}
-	if (FAILURE == phar_tar_octal(header.mtime, entry->timestamp, sizeof(header.mtime))) {
+	if (FAILURE == phar_tar_octal(header.mtime, entry->timestamp, sizeof(header.mtime)-1)) {
 		if (fp->error) {
 			spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, file modification time of file \"%s\" is too large for tar file format", entry->phar->fname, entry->filename);
 		}
