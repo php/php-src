@@ -317,7 +317,7 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 				}
 				PHAR_G(cwd_init) = 0;
 				efree(name);
-				if (EG(return_value_ptr_ptr)) {
+				if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
 					zval_ptr_dtor(EG(return_value_ptr_ptr));
 				}
 				if (EG(exception)) {
