@@ -8,20 +8,21 @@ output_handler=
 
 	$php = getenv('TEST_PHP_EXECUTABLE');
 	$tmpfile = tempnam('/tmp', 'phpt');
+	$args = ' -n -dsafe_mode=off ';
 	
 	/* Regular Data Test */
-	passthru($php . ' -n -r " echo \"HELLO\"; "');
+	passthru($php . $args . ' -r " echo \"HELLO\"; "');
 
 	echo "\n";
 
 	/* Binary Data Test */
 	
 	if (substr(PHP_OS, 0, 3) != 'WIN') {
-		$cmd = $php . ' -n -r \"readfile(@getenv(\'TEST_PHP_EXECUTABLE\')); \"';
-		$cmd = $php . ' -n -r \' passthru("'.$cmd.'"); \' > '.$tmpfile ;
+		$cmd = $php . $args . ' -r \"readfile(@getenv(\'TEST_PHP_EXECUTABLE\')); \"';
+		$cmd = $php . $args . ' -r \' passthru("'.$cmd.'"); \' > '.$tmpfile ;
 	} else {
-		$cmd = $php . ' -n -r \"readfile(@getenv(\\\\\\"TEST_PHP_EXECUTABLE\\\\\\")); \"';
-		$cmd = $php . ' -n -r " passthru(\''.$cmd.'\');" > '.$tmpfile ;
+		$cmd = $php . $args . ' -r \"readfile(@getenv(\\\\\\"TEST_PHP_EXECUTABLE\\\\\\")); \"';
+		$cmd = $php . $args . ' -r " passthru(\''.$cmd.'\');" > '.$tmpfile ;
 	}
 	exec($cmd);
 
