@@ -236,11 +236,20 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 		efree(entry);
 		try_len = filename_len;
 		test = phar_fix_filepath(estrndup(filename, filename_len), &try_len, 1 TSRMLS_CC);
-		if (zend_hash_exists(&((*pphar)->manifest), test + 1, try_len - 1)) {
-			spprintf(&ret, 0, "phar://%s%s", arch, test);
-			efree(arch);
-			efree(test);
-			return ret;
+		if (*test == '/') {
+			if (zend_hash_exists(&((*pphar)->manifest), test + 1, try_len - 1)) {
+				spprintf(&ret, 0, "phar://%s%s", arch, test);
+				efree(arch);
+				efree(test);
+				return ret;
+			}
+		} else {
+			if (zend_hash_exists(&((*pphar)->manifest), test, try_len)) {
+				spprintf(&ret, 0, "phar://%s/%s", arch, test);
+				efree(arch);
+				efree(test);
+				return ret;
+			}
 		}
 	}
 	efree(entry);
