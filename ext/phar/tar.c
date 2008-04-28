@@ -435,7 +435,7 @@ int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC)
 		memcpy(header.name, entry->filename, entry->filename_len);
 	}
 	phar_tar_octal(header.mode, entry->flags & PHAR_ENT_PERM_MASK, sizeof(header.mode)-1);
-	if (FAILURE == phar_tar_octal(header.size, entry->uncompressed_filesize, sizeof(header.size))) {
+	if (FAILURE == phar_tar_octal(header.size, entry->uncompressed_filesize, sizeof(header.size)-1)) {
 		if (fp->error) {
 			spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, filename \"%s\" is too large for tar file format", entry->phar->fname, entry->filename);
 		}
@@ -450,13 +450,13 @@ int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC)
 	/* calc checksum */
 	header.typeflag = entry->tar_type;
 	if (entry->link) {
-		strcpy(header.linkname, entry->link);
+		strncpy(header.linkname, entry->link, strlen(entry->link));
 	}
-	strcpy(header.magic, "ustar");
-	strcpy(header.version, "00");
-	strcpy(header.checksum, "        ");
+	strncpy(header.magic, "ustar", sizeof("ustar")-1);
+	strncpy(header.version, "00", sizeof("00")-1);
+	strncpy(header.checksum, "        ", sizeof("        ")-1);
 	entry->crc32 = phar_tar_checksum((char *)&header, sizeof(header));
-	if (FAILURE == phar_tar_octal(header.checksum, entry->crc32, sizeof(header.checksum))) {
+	if (FAILURE == phar_tar_octal(header.checksum, entry->crc32, sizeof(header.checksum)-1)) {
 		if (fp->error) {
 			spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, checksum of file \"%s\" is too large for tar file format", entry->phar->fname, entry->filename);
 		}

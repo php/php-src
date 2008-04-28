@@ -306,15 +306,10 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 
 				zend_try {
 					zend_execute(new_op_array TSRMLS_CC);
-					destroy_op_array(new_op_array TSRMLS_CC);
-					efree(new_op_array);
-					if (!EG(exception)) {
-						if (EG(return_value_ptr_ptr)) {
-							zval_ptr_dtor(EG(return_value_ptr_ptr));
-						}
-					}
 				} zend_catch {
 				} zend_end_try();
+				destroy_op_array(new_op_array TSRMLS_CC);
+				efree(new_op_array);
 				if (PHAR_G(cwd)) {
 					efree(PHAR_G(cwd));
 					PHAR_G(cwd) = NULL;
@@ -322,6 +317,12 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 				}
 				PHAR_G(cwd_init) = 0;
 				efree(name);
+				if (EG(return_value_ptr_ptr)) {
+					zval_ptr_dtor(EG(return_value_ptr_ptr));
+				}
+				if (EG(exception)) {
+					zend_throw_exception_internal(NULL TSRMLS_CC);
+				}
 				zend_bailout();
 			}
 			return PHAR_MIME_PHP;
