@@ -236,11 +236,11 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 			}
 		}
 		file_handle->handle.stream.mmap.map = 0;
-		file_handle->handle.stream.mmap.buf = *buf;
 		file_handle->handle.stream.mmap.len = size;
 		if (size && remain < ZEND_MMAP_AHEAD) {
 			*buf = safe_erealloc(*buf, size, 1, ZEND_MMAP_AHEAD);
 		}
+		file_handle->handle.stream.mmap.buf = *buf;
 	}
 
 	if (file_handle->handle.stream.mmap.len == 0) {
