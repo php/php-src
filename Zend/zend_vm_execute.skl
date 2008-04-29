@@ -14,12 +14,12 @@ ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 	/* Initialize execute_data */
 	execute_data = (zend_execute_data *)zend_vm_stack_alloc(
 		sizeof(zend_execute_data) +
-		sizeof(zval**) * op_array->last_var +
+		sizeof(zval**) * op_array->last_var * (EG(active_symbol_table) ? 1 : 2) +
 		sizeof(temp_variable) * op_array->T TSRMLS_CC);
 
 	EX(CVs) = (zval***)((char*)execute_data + sizeof(zend_execute_data));
 	memset(EX(CVs), 0, sizeof(zval**) * op_array->last_var);
-	EX(Ts) = (temp_variable *)(EX(CVs) + op_array->last_var);
+	EX(Ts) = (temp_variable *)(EX(CVs) + op_array->last_var * (EG(active_symbol_table) ? 1 : 2));
 	EX(fbc) = NULL;
 	EX(called_scope) = NULL;
 	EX(object) = NULL;
@@ -37,7 +37,7 @@ ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 		ZEND_VM_SET_OPCODE(op_array->opcodes);
 	}
 
-	if (op_array->uses_this && EG(This)) {
+	if (op_array->uses_this && EG(This) && EG(active_symbol_table)) {
 		Z_ADDREF_P(EG(This)); /* For $this pointer */
 		if (zend_ascii_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), NULL)==FAILURE) {
 			Z_DELREF_P(EG(This));

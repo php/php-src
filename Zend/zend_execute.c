@@ -173,15 +173,6 @@ ZEND_API zval** zend_get_compiled_variable_value(zend_execute_data *execute_data
 }
 /* }}} */
 
-static inline void zend_get_cv_address(zend_uchar utype, zend_compiled_variable *cv, zval ***ptr, temp_variable *Ts TSRMLS_DC) /* {{{ */
-{
-	zval *new_zval = &EG(uninitialized_zval);
-
-	Z_ADDREF_P(new_zval);
-	zend_u_hash_quick_update(EG(active_symbol_table), utype, cv->name, cv->name_len+1, cv->hash_value, &new_zval, sizeof(zval *), (void **)ptr);
-}
-/* }}} */
-
 static inline zval *_get_zval_ptr_tmp(znode *node, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC) /* {{{ */
 {
 	return should_free->var = &T(node->u.var).tmp_var;
@@ -246,7 +237,8 @@ static inline zval *_get_zval_ptr_cv(znode *node, temp_variable *Ts, int type TS
 		zend_compiled_variable *cv = &CV_DEF_OF(node->u.var);
 		zend_uchar utype = UG(unicode)?IS_UNICODE:IS_STRING;
 
-		if (zend_u_hash_quick_find(EG(active_symbol_table), utype, cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
+		if (!EG(active_symbol_table) ||
+		    zend_u_hash_quick_find(EG(active_symbol_table), utype, cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
 			switch (type) {
 				case BP_VAR_R:
 				case BP_VAR_UNSET:
@@ -259,7 +251,13 @@ static inline zval *_get_zval_ptr_cv(znode *node, temp_variable *Ts, int type TS
 					zend_error(E_NOTICE, "Undefined variable: %v", cv->name);
 					/* break missing intentionally */
 				case BP_VAR_W:
-					zend_get_cv_address(utype, cv, ptr, Ts TSRMLS_CC);
+					Z_ADDREF(EG(uninitialized_zval));
+					if (!EG(active_symbol_table)) {
+						*ptr = (zval**)EG(current_execute_data)->CVs + (EG(active_op_array)->last_var + node->u.var);
+						**ptr = &EG(uninitialized_zval);
+					} else {
+						zend_u_hash_quick_update(EG(active_symbol_table), utype, cv->name, cv->name_len+1, cv->hash_value, &EG(uninitialized_zval_ptr), sizeof(zval *), (void **)ptr);
+					}
 					break;
 			}
 		}
@@ -319,7 +317,8 @@ static inline zval **_get_zval_ptr_ptr_cv(znode *node, temp_variable *Ts, int ty
 		zend_compiled_variable *cv = &CV_DEF_OF(node->u.var);
 		zend_uchar utype = UG(unicode)?IS_UNICODE:IS_STRING;
 
-		if (zend_u_hash_quick_find(EG(active_symbol_table), utype, cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
+		if (!EG(active_symbol_table) ||
+		    zend_u_hash_quick_find(EG(active_symbol_table), utype, cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
 			switch (type) {
 				case BP_VAR_R:
 				case BP_VAR_UNSET:
@@ -332,7 +331,13 @@ static inline zval **_get_zval_ptr_ptr_cv(znode *node, temp_variable *Ts, int ty
 					zend_error(E_NOTICE, "Undefined variable: %v", cv->name);
 					/* break missing intentionally */
 				case BP_VAR_W:
-					zend_get_cv_address(utype, cv, ptr, Ts TSRMLS_CC);
+					Z_ADDREF(EG(uninitialized_zval));
+					if (!EG(active_symbol_table)) {
+						*ptr = (zval**)EG(current_execute_data)->CVs + (EG(active_op_array)->last_var + node->u.var);
+						**ptr = &EG(uninitialized_zval);
+					} else {
+						zend_u_hash_quick_update(EG(active_symbol_table), utype, cv->name, cv->name_len+1, cv->hash_value, &EG(uninitialized_zval_ptr), sizeof(zval *), (void **)ptr);
+					}
 					break;
 			}
 		}
@@ -843,6 +848,9 @@ static inline HashTable *zend_get_target_symbol_table(zend_op *opline, temp_vari
 {
 	switch (opline->op2.u.EA.type) {
 		case ZEND_FETCH_LOCAL:
+			if (!EG(active_symbol_table)) {
+				zend_rebuild_symbol_table(TSRMLS_C);
+			}
 			return EG(active_symbol_table);
 			break;
 		case ZEND_FETCH_GLOBAL:
@@ -1408,11 +1416,21 @@ ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, int return_v
 #define ZEND_VM_INC_OPCODE() \
 	EX(opline)++
 
-#define ZEND_VM_EXIT_FROM_EXECUTE_LOOP() \
-	EG(in_execution) = EX(original_in_execution); \
-	EG(current_execute_data) = EX(prev_execute_data); \
-	EG(opline_ptr) = NULL; \
-	zend_vm_stack_free(execute_data TSRMLS_CC);
+#define ZEND_VM_EXIT_FROM_EXECUTE_LOOP() do { \
+		EG(in_execution) = EX(original_in_execution); \
+		EG(current_execute_data) = EX(prev_execute_data); \
+		EG(opline_ptr) = NULL; \
+		if (!EG(active_symbol_table)) { \
+			int n = EX(op_array)->last_var; \
+			while (n > 0) { \
+				--n; \
+				if (EX(CVs)[n]) { \
+					zval_ptr_dtor(EX(CVs)[n]); \
+				} \
+			} \
+		} \
+		zend_vm_stack_free(execute_data TSRMLS_CC); \
+	} while (0);
 
 #define ZEND_VM_RETURN_FROM_EXECUTE_LOOP() \
 	ZEND_VM_EXIT_FROM_EXECUTE_LOOP(); \

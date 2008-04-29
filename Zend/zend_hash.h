@@ -36,6 +36,7 @@
 
 #define HASH_DEL_KEY 0
 #define HASH_DEL_INDEX 1
+#define HASH_DEL_KEY_QUICK 2
 
 
 
@@ -195,8 +196,12 @@ ZEND_API int zend_utf8_hash_del(HashTable *ht, const char *arKey, uint nKeyLengt
 ZEND_API int zend_u_hash_del_key_or_index(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, ulong h, int flag);
 #define zend_hash_del(ht, arKey, nKeyLength) \
 		zend_hash_del_key_or_index(ht, arKey, nKeyLength, 0, HASH_DEL_KEY)
+#define zend_hash_quick_del(ht, arKey, nKeyLength, h) \
+		zend_hash_del_key_or_index(ht, arKey, nKeyLength, h, HASH_DEL_KEY_QUICK)
 #define zend_u_hash_del(ht, type, arKey, nKeyLength) \
 		zend_u_hash_del_key_or_index(ht, type, arKey, nKeyLength, 0, HASH_DEL_KEY)
+#define zend_u_hash_quick_del(ht, type, arKey, nKeyLength, h) \
+		zend_u_hash_del_key_or_index(ht, type, arKey, nKeyLength, h, HASH_DEL_KEY_QUICK)
 #define zend_hash_index_del(ht, h) \
 		zend_hash_del_key_or_index(ht, NULL, 0, h, HASH_DEL_INDEX)
 

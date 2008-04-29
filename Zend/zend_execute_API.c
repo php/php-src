@@ -1996,7 +1996,7 @@ ZEND_API int zend_u_delete_global_variable(zend_uchar type, zstr name, int name_
 				}
 			}
 		}
-		return zend_u_hash_del(&EG(symbol_table), type, name, name_len + 1);
+		return zend_u_hash_quick_del(&EG(symbol_table), type, name, name_len + 1, hash_value);
 	}
 	return FAILURE;
 }
@@ -2005,6 +2005,45 @@ ZEND_API int zend_u_delete_global_variable(zend_uchar type, zstr name, int name_
 ZEND_API int zend_delete_global_variable(char *name, int name_len TSRMLS_DC) /* {{{ */
 {
 	return zend_u_delete_global_variable(IS_STRING, ZSTR(name), name_len TSRMLS_CC);
+}
+/* }}} */
+
+ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
+{
+	zend_uchar type = ZEND_STR_TYPE;
+	zend_uint i;
+
+	if (!EG(active_symbol_table)) {
+		if (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
+			/*printf("Cache hit!  Reusing %x\n", symtable_cache[symtable_cache_ptr]);*/
+			EG(active_symbol_table) = *(EG(symtable_cache_ptr)--);
+		} else {
+			ALLOC_HASHTABLE(EG(active_symbol_table));
+			zend_hash_init(EG(active_symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
+			/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
+		}
+		if (EG(current_execute_data) && EG(current_execute_data)->op_array) {
+			EG(current_execute_data)->symbol_table = EG(active_symbol_table);
+			if (EG(current_execute_data)->op_array->uses_this && EG(This)) {
+				Z_ADDREF_P(EG(This)); /* For $this pointer */
+				if (zend_ascii_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), NULL)==FAILURE) {
+					Z_DELREF_P(EG(This));
+				}
+			}
+			for (i = 0; i < EG(current_execute_data)->op_array->last_var; i++) {
+				if (EG(current_execute_data)->CVs[i]) {
+					zend_u_hash_quick_update(EG(active_symbol_table),
+						type,
+						EG(current_execute_data)->op_array->vars[i].name,
+						EG(current_execute_data)->op_array->vars[i].name_len + 1,
+						EG(current_execute_data)->op_array->vars[i].hash_value,
+						(void**)EG(current_execute_data)->CVs[i],
+						sizeof(zval*),
+						(void**)&EG(current_execute_data)->CVs[i]);
+				}
+			}
+		}
+	}
 }
 /* }}} */
 
