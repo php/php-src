@@ -72,6 +72,9 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, zval *track_vars_arra
 	if (track_vars_array) {
 		symtable1 = Z_ARRVAL_P(track_vars_array);
 	} else if (PG(register_globals)) {
+		if (!EG(active_symbol_table)) {
+			zend_rebuild_symbol_table(TSRMLS_C);
+		}
 		symtable1 = EG(active_symbol_table);
 	}
 	if (!symtable1) {

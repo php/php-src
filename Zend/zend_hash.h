@@ -35,6 +35,7 @@
 
 #define HASH_DEL_KEY 0
 #define HASH_DEL_INDEX 1
+#define HASH_DEL_KEY_QUICK 2
 
 typedef ulong (*hash_func_t)(const char *arKey, uint nKeyLength);
 typedef int  (*compare_func_t)(const void *, const void * TSRMLS_DC);
@@ -147,6 +148,8 @@ ZEND_API void zend_hash_reverse_apply(HashTable *ht, apply_func_t apply_func TSR
 ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, int flag);
 #define zend_hash_del(ht, arKey, nKeyLength) \
 		zend_hash_del_key_or_index(ht, arKey, nKeyLength, 0, HASH_DEL_KEY)
+#define zend_hash_quick_del(ht, arKey, nKeyLength, h) \
+		zend_hash_del_key_or_index(ht, arKey, nKeyLength, h, HASH_DEL_KEY_QUICK)
 #define zend_hash_index_del(ht, h) \
 		zend_hash_del_key_or_index(ht, NULL, 0, h, HASH_DEL_INDEX)
 

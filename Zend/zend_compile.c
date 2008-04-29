@@ -2178,7 +2178,9 @@ void zend_do_begin_catch(znode *try_token, znode *class_name, znode *catch_var, 
 	opline->opcode = ZEND_CATCH;
 	opline->op1 = catch_class;
 /*	SET_UNUSED(opline->op1); */ /* FIXME: Define IS_CLASS or something like that */
-	opline->op2 = *catch_var;
+	opline->op2.op_type = IS_CV;
+	opline->op2.u.var = lookup_cv(CG(active_op_array), catch_var->u.constant.value.str.val, catch_var->u.constant.value.str.len);
+	opline->op2.u.EA.type = 0;
 	opline->op1.u.EA.type = 0; /* 1 means it's the last catch in the block */
 
 	try_token->u.opline_num = catch_op_number;
@@ -2529,7 +2531,7 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 	
 				if (zend_hash_quick_find(&parent_ce->default_properties, parent_info->name, parent_info->name_length+1, parent_info->h, (void **) &pvalue) == SUCCESS) {
 					Z_ADDREF_PP(pvalue);
-					zend_hash_del(&ce->default_properties, child_info->name, child_info->name_length+1);
+					zend_hash_quick_del(&ce->default_properties, child_info->name, child_info->name_length+1, parent_info->h);
 					zend_hash_quick_update(&ce->default_properties, parent_info->name, parent_info->name_length+1, parent_info->h, pvalue, sizeof(zval *), NULL);
 				}
 			}
@@ -4124,10 +4126,7 @@ void zend_do_unset(znode *variable TSRMLS_DC)
 	if (variable->op_type == IS_CV) {
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		opline->opcode = ZEND_UNSET_VAR;
-		opline->op1.op_type = IS_CONST;
-		opline->op1.u.constant.type = IS_STRING;
-		opline->op1.u.constant.value.str.len = CG(active_op_array)->vars[variable->u.var].name_len;
-		opline->op1.u.constant.value.str.val = estrdup(CG(active_op_array)->vars[variable->u.var].name);
+		opline->op1 = *variable;
 		SET_UNUSED(opline->op2);
 		opline->op2.u.EA.type = ZEND_FETCH_LOCAL;
 		SET_UNUSED(opline->result);
@@ -4161,10 +4160,7 @@ void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC
 	if (variable->op_type == IS_CV) {
 		last_op = get_next_op(CG(active_op_array) TSRMLS_CC);
 		last_op->opcode = ZEND_ISSET_ISEMPTY_VAR;
-		last_op->op1.op_type = IS_CONST;
-		last_op->op1.u.constant.type = IS_STRING;
-		last_op->op1.u.constant.value.str.len = CG(active_op_array)->vars[variable->u.var].name_len;
-		last_op->op1.u.constant.value.str.val = estrdup(CG(active_op_array)->vars[variable->u.var].name);
+		last_op->op1 = *variable;
 		SET_UNUSED(last_op->op2);
 		last_op->op2.u.EA.type = ZEND_FETCH_LOCAL;
 		last_op->result.u.var = get_temporary_variable(CG(active_op_array));

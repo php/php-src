@@ -101,6 +101,7 @@ PHP                                                                        NEWS
 - Added forward_static_call(_array) to complete LSB. (Mike Lively)
 
 - Improved PHP runtime speed and memory usage:
+  . Lazy EG(active_symbol_table) initialization. (Dmitry)
   . Optimized ZEND_RETURN opcode to not allocate and copy return value if it is
     not used. (Dmitry)
   . Replaced flex based scanner with re2c based scanner. (Marcus, Nuno, Scott)
