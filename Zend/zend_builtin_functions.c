@@ -1501,6 +1501,10 @@ ZEND_FUNCTION(get_defined_vars)
 
 	array_init(return_value);
 
+	if (!EG(active_symbol_table)) {
+		zend_rebuild_symbol_table(TSRMLS_C);
+	}
+
 	zend_hash_copy(Z_ARRVAL_P(return_value), EG(active_symbol_table),
 					(copy_ctor_func_t)zval_add_ref, &tmp, sizeof(zval *));
 }

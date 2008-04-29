@@ -6265,8 +6265,11 @@ PHP_FUNCTION(parse_str)
 
 	if (argCount == 1) {
 		zval tmp;
-		Z_ARRVAL(tmp) = EG(active_symbol_table);
 
+		if (!EG(active_symbol_table)) {
+			zend_rebuild_symbol_table(TSRMLS_C);
+		}
+		Z_ARRVAL(tmp) = EG(active_symbol_table);
 		sapi_module.treat_data(PARSE_STRING, res, &tmp TSRMLS_CC);
 	} else 	{
 		/* Clear out the array that was passed in. */

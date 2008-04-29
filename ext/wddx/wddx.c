@@ -660,6 +660,9 @@ static void php_wddx_add_var(wddx_packet *packet, zval *name_var)
 	
 	if (Z_TYPE_P(name_var) == IS_STRING)
 	{
+		if (!EG(active_symbol_table)) {
+			zend_rebuild_symbol_table(TSRMLS_C);
+		}
 		if (zend_hash_find(EG(active_symbol_table), Z_STRVAL_P(name_var),
 							Z_STRLEN_P(name_var)+1, (void**)&val) != FAILURE) {
 			php_wddx_serialize_var(packet, *val, Z_STRVAL_P(name_var), Z_STRLEN_P(name_var) TSRMLS_CC);

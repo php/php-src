@@ -1589,6 +1589,9 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 			Z_LVAL_P(z_error_lineno) = error_lineno;
 			Z_TYPE_P(z_error_lineno) = IS_LONG;
 
+			if (!EG(active_symbol_table)) {
+				zend_rebuild_symbol_table(TSRMLS_C);
+			}
 			Z_ARRVAL_P(z_context) = EG(active_symbol_table);
 			Z_TYPE_P(z_context) = IS_ARRAY;
 			zval_copy_ctor(z_context);

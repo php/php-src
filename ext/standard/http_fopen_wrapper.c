@@ -537,6 +537,10 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 
 	location[0] = '\0';
 
+	if (!EG(active_symbol_table)) {
+		zend_rebuild_symbol_table(TSRMLS_C);
+	}
+
 	if (header_init) {
 		zval *tmp;
 		MAKE_STD_ZVAL(tmp);
