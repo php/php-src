@@ -2092,7 +2092,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		return EOF;
 	}
 
-	if (!zend_hash_num_elements(&phar->manifest)) {
+	if (!zend_hash_num_elements(&phar->manifest) && !user_stub) {
 		return EOF;
 	}
 
