@@ -23,6 +23,8 @@ echo "*** Testing session_save_path() : variation ***\n";
 $directory = dirname(__FILE__);
 $sessions = ($directory."/sessions");
 
+chdir($directory);
+
 // Delete the existing directory
 if (file_exists($sessions) === TRUE) {
 	@rmdir($sessions);
