@@ -46,12 +46,12 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 	/* Initialize execute_data */
 	execute_data = (zend_execute_data *)zend_vm_stack_alloc(
 		sizeof(zend_execute_data) +
-		sizeof(zval**) * op_array->last_var +
+		sizeof(zval**) * op_array->last_var * (EG(active_symbol_table) ? 1 : 2) +
 		sizeof(temp_variable) * op_array->T TSRMLS_CC);
 
 	EX(CVs) = (zval***)((char*)execute_data + sizeof(zend_execute_data));
 	memset(EX(CVs), 0, sizeof(zval**) * op_array->last_var);
-	EX(Ts) = (temp_variable *)(EX(CVs) + op_array->last_var);
+	EX(Ts) = (temp_variable *)(EX(CVs) + op_array->last_var * (EG(active_symbol_table) ? 1 : 2));
 	EX(fbc) = NULL;
 	EX(called_scope) = NULL;
 	EX(object) = NULL;
@@ -69,7 +69,7 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 		ZEND_VM_SET_OPCODE(op_array->opcodes);
 	}
 
-	if (op_array->uses_this && EG(This)) {
+	if (op_array->uses_this && EG(This) && EG(active_symbol_table)) {
 		Z_ADDREF_P(EG(This)); /* For $this pointer */
 		if (zend_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), NULL)==FAILURE) {
 			Z_DELREF_P(EG(This));
@@ -197,15 +197,7 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 	} else if (EX(function_state).function->type == ZEND_USER_FUNCTION) {
 		zval **original_return_value = EG(return_value_ptr_ptr);
 
-		if (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
-			/*printf("Cache hit!  Reusing %x\n", symtable_cache[symtable_cache_ptr]);*/
-			EG(active_symbol_table) = *(EG(symtable_cache_ptr)--);
-		} else {
-			ALLOC_HASHTABLE(EG(active_symbol_table));
-			zend_hash_init(EG(active_symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
-			/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
-		}
-
+		EG(active_symbol_table) = NULL;
 		EG(active_op_array) = &EX(function_state).function->op_array;
 		EG(return_value_ptr_ptr) = NULL;
 		if (RETURN_VALUE_USED(opline)) {
@@ -220,14 +212,16 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		EG(opline_ptr) = &EX(opline);
 		EG(active_op_array) = EX(op_array);
 		EG(return_value_ptr_ptr)=original_return_value;
-		if (EG(symtable_cache_ptr)>=EG(symtable_cache_limit)) {
-			zend_hash_destroy(EG(active_symbol_table));
-			FREE_HASHTABLE(EG(active_symbol_table));
-		} else {
-			/* clean before putting into the cache, since clean
-			   could call dtors, which could use cached hash */
-			zend_hash_clean(EG(active_symbol_table));
-			*(++EG(symtable_cache_ptr)) = EG(active_symbol_table);
+		if (EG(active_symbol_table)) {
+			if (EG(symtable_cache_ptr)>=EG(symtable_cache_limit)) {
+				zend_hash_destroy(EG(active_symbol_table));
+				FREE_HASHTABLE(EG(active_symbol_table));
+			} else {
+				/* clean before putting into the cache, since clean
+				   could call dtors, which could use cached hash */
+				zend_hash_clean(EG(active_symbol_table));
+				*(++EG(symtable_cache_ptr)) = EG(active_symbol_table);
+			}
 		}
 		EG(active_symbol_table) = EX(symbol_table);
 	} else { /* ZEND_OVERLOADED_FUNCTION */
@@ -294,34 +288,6 @@ static int ZEND_DO_FCALL_BY_NAME_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	EX(function_state).function = EX(fbc);
 	return zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-}
-
-static int ZEND_CATCH_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zend_class_entry *ce;
-
-	/* Check whether an exception has been thrown, if not, jump over code */
-	if (EG(exception) == NULL) {
-		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->extended_value]);
-		ZEND_VM_CONTINUE(); /* CHECK_ME */
-	}
-	ce = Z_OBJCE_P(EG(exception));
-	if (ce != EX_T(opline->op1.u.var).class_entry) {
-		if (!instanceof_function(ce, EX_T(opline->op1.u.var).class_entry TSRMLS_CC)) {
-			if (opline->op1.u.EA.type) {
-				zend_throw_exception_internal(NULL TSRMLS_CC);
-				ZEND_VM_NEXT_OPCODE();
-			}
-			ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->extended_value]);
-			ZEND_VM_CONTINUE(); /* CHECK_ME */
-		}
-	}
-
-	zend_hash_update(EG(active_symbol_table), opline->op2.u.constant.value.str.val,
-		opline->op2.u.constant.value.str.len+1, &EG(exception), sizeof(zval *), (void **) NULL);
-	EG(exception) = NULL;
-	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_RECV_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -504,10 +470,8 @@ static int ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	int catched = 0;
 	zval restored_error_reporting;
 
-	void **stack_frame = (void**)execute_data +
-		(sizeof(zend_execute_data) +
-		 sizeof(zval**) * EX(op_array)->last_var +
-		 sizeof(temp_variable) * EX(op_array)->T) / sizeof(void*);
+	void **stack_frame = (void**)EX(Ts) +
+		(sizeof(temp_variable) * EX(op_array)->T) / sizeof(void*);
 
 	while (zend_vm_stack_top(TSRMLS_C) != stack_frame) {
 		zval *stack_zval_p = zend_vm_stack_pop(TSRMLS_C);
@@ -1075,6 +1039,43 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+
+static int ZEND_CATCH_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	zend_class_entry *ce;
+
+	/* Check whether an exception has been thrown, if not, jump over code */
+	if (EG(exception) == NULL) {
+		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->extended_value]);
+		ZEND_VM_CONTINUE(); /* CHECK_ME */
+	}
+	ce = Z_OBJCE_P(EG(exception));
+	if (ce != EX_T(opline->op1.u.var).class_entry) {
+		if (!instanceof_function(ce, EX_T(opline->op1.u.var).class_entry TSRMLS_CC)) {
+			if (opline->op1.u.EA.type) {
+				zend_throw_exception_internal(NULL TSRMLS_CC);
+				ZEND_VM_NEXT_OPCODE();
+			}
+			ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->extended_value]);
+			ZEND_VM_CONTINUE(); /* CHECK_ME */
+		}
+	}
+
+	if (!EG(active_symbol_table)) {
+		if (EX(CVs)[opline->op2.u.var]) {
+			zval_ptr_dtor(EX(CVs)[opline->op2.u.var]);
+		}
+		EX(CVs)[opline->op2.u.var] = (zval**)EX(CVs) + (EX(op_array)->last_var + opline->op2.u.var);
+		*EX(CVs)[opline->op2.u.var] = EG(exception);
+	} else {
+		zend_compiled_variable *cv = &CV_DEF_OF(opline->op2.u.var);
+		zend_hash_quick_update(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value,
+		    &EG(exception), sizeof(zval *), NULL);
+	}
+	EG(exception) = NULL;
+	ZEND_VM_NEXT_OPCODE();
+}
 
 static int ZEND_BRK_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
@@ -1727,6 +1728,10 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		EX(function_state).function = (zend_function *) new_op_array;
 		EX(object) = NULL;
 
+		if (!EG(active_symbol_table)) {
+			zend_rebuild_symbol_table(TSRMLS_C);
+		}
+
 		zend_execute(new_op_array TSRMLS_CC);
 
 		EX(function_state).function = saved_function;
@@ -1768,6 +1773,36 @@ static int ZEND_UNSET_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	HashTable *target_symbol_table;
 
 
+	if (IS_CONST == IS_CV) {
+		if (EG(active_symbol_table)) {
+			zend_execute_data *ex = EX(prev_execute_data);
+			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
+
+			if (zend_hash_quick_del(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value) == SUCCESS) {
+				while (ex && ex->symbol_table == EG(active_symbol_table)) {
+					int i;
+
+					if (ex->op_array) {
+						for (i = 0; i < ex->op_array->last_var; i++) {
+							if (ex->op_array->vars[i].hash_value == cv->hash_value &&
+								ex->op_array->vars[i].name_len == cv->name_len &&
+								!memcmp(ex->op_array->vars[i].name, cv->name, cv->name_len)) {
+								ex->CVs[i] = NULL;
+								break;
+							}
+						}
+					}
+					ex = ex->prev_execute_data;
+				}
+			}
+			EX(CVs)[opline->op1.u.var] = NULL;
+		} else if (EX(CVs)[opline->op1.u.var]) {
+			zval_ptr_dtor(EX(CVs)[opline->op1.u.var]);
+			EX(CVs)[opline->op1.u.var] = NULL;
+		}
+		ZEND_VM_NEXT_OPCODE();
+	}
+
 	varname = &opline->op1.u.constant;
 
 	if (Z_TYPE_P(varname) != IS_STRING) {
@@ -1775,17 +1810,18 @@ static int ZEND_UNSET_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
 		varname = &tmp;
-	} else if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+	} else if (IS_CONST == IS_VAR) {
 		Z_ADDREF_P(varname);
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
 		zend_std_unset_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname) TSRMLS_CC);
 	} else {
+		ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
+
 		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
-		if (zend_hash_del(target_symbol_table, varname->value.str.val, varname->value.str.len+1) == SUCCESS) {
+		if (zend_hash_quick_del(target_symbol_table, varname->value.str.val, varname->value.str.len+1, hash_value) == SUCCESS) {
 			zend_execute_data *ex = execute_data;
-			ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
 
 			do {
 				int i;
@@ -1807,7 +1843,7 @@ static int ZEND_UNSET_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (varname == &tmp) {
 		zval_dtor(&tmp);
-	} else if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+	} else if (IS_CONST == IS_VAR) {
 		zval_ptr_dtor(&varname);
 	}
 
@@ -1969,29 +2005,49 @@ static int ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
-
-	zval tmp, *varname = &opline->op1.u.constant;
 	zval **value;
 	zend_bool isset = 1;
-	HashTable *target_symbol_table;
 
-	if (Z_TYPE_P(varname) != IS_STRING) {
-		tmp = *varname;
-		zval_copy_ctor(&tmp);
-		convert_to_string(&tmp);
-		varname = &tmp;
-	}
+	if (IS_CONST == IS_CV) {
+		if (EX(CVs)[opline->op1.u.var]) {
+			value = EX(CVs)[opline->op1.u.var];
+		} else if (EG(active_symbol_table)) {
+			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
 
-	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
-		value = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 1 TSRMLS_CC);
-		if (!value) {
+			if (zend_hash_quick_find(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, (void **) &value) == FAILURE) {
+				isset = 0;
+			}
+		} else {
 			isset = 0;
 		}
 	} else {
-		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
-		if (zend_hash_find(target_symbol_table, varname->value.str.val, varname->value.str.len+1, (void **) &value) == FAILURE) {
-			isset = 0;
+		HashTable *target_symbol_table;
+
+		zval tmp, *varname = &opline->op1.u.constant;
+
+		if (Z_TYPE_P(varname) != IS_STRING) {
+			tmp = *varname;
+			zval_copy_ctor(&tmp);
+			convert_to_string(&tmp);
+			varname = &tmp;
 		}
+
+		if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
+			value = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 1 TSRMLS_CC);
+			if (!value) {
+				isset = 0;
+			}
+		} else {
+			target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
+			if (zend_hash_find(target_symbol_table, varname->value.str.val, varname->value.str.len+1, (void **) &value) == FAILURE) {
+				isset = 0;
+			}
+		}
+
+		if (varname == &tmp) {
+			zval_dtor(&tmp);
+		}
+
 	}
 
 	Z_TYPE(EX_T(opline->result.u.var).tmp_var) = IS_BOOL;
@@ -2011,10 +2067,6 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				Z_LVAL(EX_T(opline->result.u.var).tmp_var) = 0;
 			}
 			break;
-	}
-
-	if (varname == &tmp) {
-		zval_dtor(&tmp);
 	}
 
 	ZEND_VM_NEXT_OPCODE();
@@ -4896,6 +4948,10 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		EX(function_state).function = (zend_function *) new_op_array;
 		EX(object) = NULL;
 
+		if (!EG(active_symbol_table)) {
+			zend_rebuild_symbol_table(TSRMLS_C);
+		}
+
 		zend_execute(new_op_array TSRMLS_CC);
 
 		EX(function_state).function = saved_function;
@@ -4937,6 +4993,36 @@ static int ZEND_UNSET_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	HashTable *target_symbol_table;
 	zend_free_op free_op1;
 
+	if (IS_TMP_VAR == IS_CV) {
+		if (EG(active_symbol_table)) {
+			zend_execute_data *ex = EX(prev_execute_data);
+			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
+
+			if (zend_hash_quick_del(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value) == SUCCESS) {
+				while (ex && ex->symbol_table == EG(active_symbol_table)) {
+					int i;
+
+					if (ex->op_array) {
+						for (i = 0; i < ex->op_array->last_var; i++) {
+							if (ex->op_array->vars[i].hash_value == cv->hash_value &&
+								ex->op_array->vars[i].name_len == cv->name_len &&
+								!memcmp(ex->op_array->vars[i].name, cv->name, cv->name_len)) {
+								ex->CVs[i] = NULL;
+								break;
+							}
+						}
+					}
+					ex = ex->prev_execute_data;
+				}
+			}
+			EX(CVs)[opline->op1.u.var] = NULL;
+		} else if (EX(CVs)[opline->op1.u.var]) {
+			zval_ptr_dtor(EX(CVs)[opline->op1.u.var]);
+			EX(CVs)[opline->op1.u.var] = NULL;
+		}
+		ZEND_VM_NEXT_OPCODE();
+	}
+
 	varname = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
 	if (Z_TYPE_P(varname) != IS_STRING) {
@@ -4944,17 +5030,18 @@ static int ZEND_UNSET_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
 		varname = &tmp;
-	} else if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+	} else if (IS_TMP_VAR == IS_VAR) {
 		Z_ADDREF_P(varname);
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
 		zend_std_unset_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname) TSRMLS_CC);
 	} else {
+		ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
+
 		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
-		if (zend_hash_del(target_symbol_table, varname->value.str.val, varname->value.str.len+1) == SUCCESS) {
+		if (zend_hash_quick_del(target_symbol_table, varname->value.str.val, varname->value.str.len+1, hash_value) == SUCCESS) {
 			zend_execute_data *ex = execute_data;
-			ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
 
 			do {
 				int i;
@@ -4976,7 +5063,7 @@ static int ZEND_UNSET_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (varname == &tmp) {
 		zval_dtor(&tmp);
-	} else if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+	} else if (IS_TMP_VAR == IS_VAR) {
 		zval_ptr_dtor(&varname);
 	}
 	zval_dtor(free_op1.var);
@@ -5138,29 +5225,49 @@ static int ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
-	zend_free_op free_op1;
-	zval tmp, *varname = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 	zval **value;
 	zend_bool isset = 1;
-	HashTable *target_symbol_table;
 
-	if (Z_TYPE_P(varname) != IS_STRING) {
-		tmp = *varname;
-		zval_copy_ctor(&tmp);
-		convert_to_string(&tmp);
-		varname = &tmp;
-	}
+	if (IS_TMP_VAR == IS_CV) {
+		if (EX(CVs)[opline->op1.u.var]) {
+			value = EX(CVs)[opline->op1.u.var];
+		} else if (EG(active_symbol_table)) {
+			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
 
-	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
-		value = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 1 TSRMLS_CC);
-		if (!value) {
+			if (zend_hash_quick_find(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, (void **) &value) == FAILURE) {
+				isset = 0;
+			}
+		} else {
 			isset = 0;
 		}
 	} else {
-		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
-		if (zend_hash_find(target_symbol_table, varname->value.str.val, varname->value.str.len+1, (void **) &value) == FAILURE) {
-			isset = 0;
+		HashTable *target_symbol_table;
+		zend_free_op free_op1;
+		zval tmp, *varname = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
+
+		if (Z_TYPE_P(varname) != IS_STRING) {
+			tmp = *varname;
+			zval_copy_ctor(&tmp);
+			convert_to_string(&tmp);
+			varname = &tmp;
 		}
+
+		if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
+			value = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 1 TSRMLS_CC);
+			if (!value) {
+				isset = 0;
+			}
+		} else {
+			target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
+			if (zend_hash_find(target_symbol_table, varname->value.str.val, varname->value.str.len+1, (void **) &value) == FAILURE) {
+				isset = 0;
+			}
+		}
+
+		if (varname == &tmp) {
+			zval_dtor(&tmp);
+		}
+		zval_dtor(free_op1.var);
 	}
 
 	Z_TYPE(EX_T(opline->result.u.var).tmp_var) = IS_BOOL;
@@ -5181,11 +5288,6 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			}
 			break;
 	}
-
-	if (varname == &tmp) {
-		zval_dtor(&tmp);
-	}
-	zval_dtor(free_op1.var);
 
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -8096,6 +8198,10 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		EX(function_state).function = (zend_function *) new_op_array;
 		EX(object) = NULL;
 
+		if (!EG(active_symbol_table)) {
+			zend_rebuild_symbol_table(TSRMLS_C);
+		}
+
 		zend_execute(new_op_array TSRMLS_CC);
 
 		EX(function_state).function = saved_function;
@@ -8137,6 +8243,36 @@ static int ZEND_UNSET_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	HashTable *target_symbol_table;
 	zend_free_op free_op1;
 
+	if (IS_VAR == IS_CV) {
+		if (EG(active_symbol_table)) {
+			zend_execute_data *ex = EX(prev_execute_data);
+			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
+
+			if (zend_hash_quick_del(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value) == SUCCESS) {
+				while (ex && ex->symbol_table == EG(active_symbol_table)) {
+					int i;
+
+					if (ex->op_array) {
+						for (i = 0; i < ex->op_array->last_var; i++) {
+							if (ex->op_array->vars[i].hash_value == cv->hash_value &&
+								ex->op_array->vars[i].name_len == cv->name_len &&
+								!memcmp(ex->op_array->vars[i].name, cv->name, cv->name_len)) {
+								ex->CVs[i] = NULL;
+								break;
+							}
+						}
+					}
+					ex = ex->prev_execute_data;
+				}
+			}
+			EX(CVs)[opline->op1.u.var] = NULL;
+		} else if (EX(CVs)[opline->op1.u.var]) {
+			zval_ptr_dtor(EX(CVs)[opline->op1.u.var]);
+			EX(CVs)[opline->op1.u.var] = NULL;
+		}
+		ZEND_VM_NEXT_OPCODE();
+	}
+
 	varname = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
 	if (Z_TYPE_P(varname) != IS_STRING) {
@@ -8144,17 +8280,18 @@ static int ZEND_UNSET_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
 		varname = &tmp;
-	} else if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+	} else if (IS_VAR == IS_VAR) {
 		Z_ADDREF_P(varname);
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
 		zend_std_unset_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname) TSRMLS_CC);
 	} else {
+		ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
+
 		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
-		if (zend_hash_del(target_symbol_table, varname->value.str.val, varname->value.str.len+1) == SUCCESS) {
+		if (zend_hash_quick_del(target_symbol_table, varname->value.str.val, varname->value.str.len+1, hash_value) == SUCCESS) {
 			zend_execute_data *ex = execute_data;
-			ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
 
 			do {
 				int i;
@@ -8176,7 +8313,7 @@ static int ZEND_UNSET_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (varname == &tmp) {
 		zval_dtor(&tmp);
-	} else if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+	} else if (IS_VAR == IS_VAR) {
 		zval_ptr_dtor(&varname);
 	}
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
@@ -8484,29 +8621,49 @@ static int ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
-	zend_free_op free_op1;
-	zval tmp, *varname = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 	zval **value;
 	zend_bool isset = 1;
-	HashTable *target_symbol_table;
 
-	if (Z_TYPE_P(varname) != IS_STRING) {
-		tmp = *varname;
-		zval_copy_ctor(&tmp);
-		convert_to_string(&tmp);
-		varname = &tmp;
-	}
+	if (IS_VAR == IS_CV) {
+		if (EX(CVs)[opline->op1.u.var]) {
+			value = EX(CVs)[opline->op1.u.var];
+		} else if (EG(active_symbol_table)) {
+			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
 
-	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
-		value = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 1 TSRMLS_CC);
-		if (!value) {
+			if (zend_hash_quick_find(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, (void **) &value) == FAILURE) {
+				isset = 0;
+			}
+		} else {
 			isset = 0;
 		}
 	} else {
-		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
-		if (zend_hash_find(target_symbol_table, varname->value.str.val, varname->value.str.len+1, (void **) &value) == FAILURE) {
-			isset = 0;
+		HashTable *target_symbol_table;
+		zend_free_op free_op1;
+		zval tmp, *varname = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
+
+		if (Z_TYPE_P(varname) != IS_STRING) {
+			tmp = *varname;
+			zval_copy_ctor(&tmp);
+			convert_to_string(&tmp);
+			varname = &tmp;
 		}
+
+		if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
+			value = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 1 TSRMLS_CC);
+			if (!value) {
+				isset = 0;
+			}
+		} else {
+			target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
+			if (zend_hash_find(target_symbol_table, varname->value.str.val, varname->value.str.len+1, (void **) &value) == FAILURE) {
+				isset = 0;
+			}
+		}
+
+		if (varname == &tmp) {
+			zval_dtor(&tmp);
+		}
+		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	}
 
 	Z_TYPE(EX_T(opline->result.u.var).tmp_var) = IS_BOOL;
@@ -8527,11 +8684,6 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			}
 			break;
 	}
-
-	if (varname == &tmp) {
-		zval_dtor(&tmp);
-	}
-	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -21760,6 +21912,10 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		EX(function_state).function = (zend_function *) new_op_array;
 		EX(object) = NULL;
 
+		if (!EG(active_symbol_table)) {
+			zend_rebuild_symbol_table(TSRMLS_C);
+		}
+
 		zend_execute(new_op_array TSRMLS_CC);
 
 		EX(function_state).function = saved_function;
@@ -21801,6 +21957,36 @@ static int ZEND_UNSET_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	HashTable *target_symbol_table;
 
 
+	if (IS_CV == IS_CV) {
+		if (EG(active_symbol_table)) {
+			zend_execute_data *ex = EX(prev_execute_data);
+			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
+
+			if (zend_hash_quick_del(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value) == SUCCESS) {
+				while (ex && ex->symbol_table == EG(active_symbol_table)) {
+					int i;
+
+					if (ex->op_array) {
+						for (i = 0; i < ex->op_array->last_var; i++) {
+							if (ex->op_array->vars[i].hash_value == cv->hash_value &&
+								ex->op_array->vars[i].name_len == cv->name_len &&
+								!memcmp(ex->op_array->vars[i].name, cv->name, cv->name_len)) {
+								ex->CVs[i] = NULL;
+								break;
+							}
+						}
+					}
+					ex = ex->prev_execute_data;
+				}
+			}
+			EX(CVs)[opline->op1.u.var] = NULL;
+		} else if (EX(CVs)[opline->op1.u.var]) {
+			zval_ptr_dtor(EX(CVs)[opline->op1.u.var]);
+			EX(CVs)[opline->op1.u.var] = NULL;
+		}
+		ZEND_VM_NEXT_OPCODE();
+	}
+
 	varname = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 
 	if (Z_TYPE_P(varname) != IS_STRING) {
@@ -21808,17 +21994,18 @@ static int ZEND_UNSET_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
 		varname = &tmp;
-	} else if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+	} else if (IS_CV == IS_VAR) {
 		Z_ADDREF_P(varname);
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
 		zend_std_unset_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname) TSRMLS_CC);
 	} else {
+		ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
+
 		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
-		if (zend_hash_del(target_symbol_table, varname->value.str.val, varname->value.str.len+1) == SUCCESS) {
+		if (zend_hash_quick_del(target_symbol_table, varname->value.str.val, varname->value.str.len+1, hash_value) == SUCCESS) {
 			zend_execute_data *ex = execute_data;
-			ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
 
 			do {
 				int i;
@@ -21840,7 +22027,7 @@ static int ZEND_UNSET_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (varname == &tmp) {
 		zval_dtor(&tmp);
-	} else if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+	} else if (IS_CV == IS_VAR) {
 		zval_ptr_dtor(&varname);
 	}
 
@@ -22002,29 +22189,49 @@ static int ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
-
-	zval tmp, *varname = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_IS TSRMLS_CC);
 	zval **value;
 	zend_bool isset = 1;
-	HashTable *target_symbol_table;
 
-	if (Z_TYPE_P(varname) != IS_STRING) {
-		tmp = *varname;
-		zval_copy_ctor(&tmp);
-		convert_to_string(&tmp);
-		varname = &tmp;
-	}
+	if (IS_CV == IS_CV) {
+		if (EX(CVs)[opline->op1.u.var]) {
+			value = EX(CVs)[opline->op1.u.var];
+		} else if (EG(active_symbol_table)) {
+			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
 
-	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
-		value = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 1 TSRMLS_CC);
-		if (!value) {
+			if (zend_hash_quick_find(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, (void **) &value) == FAILURE) {
+				isset = 0;
+			}
+		} else {
 			isset = 0;
 		}
 	} else {
-		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
-		if (zend_hash_find(target_symbol_table, varname->value.str.val, varname->value.str.len+1, (void **) &value) == FAILURE) {
-			isset = 0;
+		HashTable *target_symbol_table;
+
+		zval tmp, *varname = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_IS TSRMLS_CC);
+
+		if (Z_TYPE_P(varname) != IS_STRING) {
+			tmp = *varname;
+			zval_copy_ctor(&tmp);
+			convert_to_string(&tmp);
+			varname = &tmp;
 		}
+
+		if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
+			value = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 1 TSRMLS_CC);
+			if (!value) {
+				isset = 0;
+			}
+		} else {
+			target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
+			if (zend_hash_find(target_symbol_table, varname->value.str.val, varname->value.str.len+1, (void **) &value) == FAILURE) {
+				isset = 0;
+			}
+		}
+
+		if (varname == &tmp) {
+			zval_dtor(&tmp);
+		}
+
 	}
 
 	Z_TYPE(EX_T(opline->result.u.var).tmp_var) = IS_BOOL;
@@ -22044,10 +22251,6 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				Z_LVAL(EX_T(opline->result.u.var).tmp_var) = 0;
 			}
 			break;
-	}
-
-	if (varname == &tmp) {
-		zval_dtor(&tmp);
 	}
 
 	ZEND_VM_NEXT_OPCODE();
@@ -31985,31 +32188,31 @@ void zend_init_opcodes_handlers(void)
   	ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER,
   	ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER,
   	ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_CATCH_SPEC_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_CATCH_SPEC_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_CATCH_SPEC_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_CATCH_SPEC_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_CATCH_SPEC_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_CATCH_SPEC_CV_HANDLER,
   	ZEND_THROW_SPEC_CONST_HANDLER,
   	ZEND_THROW_SPEC_CONST_HANDLER,
   	ZEND_THROW_SPEC_CONST_HANDLER,

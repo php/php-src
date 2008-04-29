@@ -612,7 +612,7 @@ static void zend_std_unset_property(zval *object, zval *member TSRMLS_DC) /* {{{
 
 	property_info = zend_get_property_info(zobj->ce, member, (zobj->ce->__unset != NULL) TSRMLS_CC);
 
-	if (!property_info || zend_hash_del(zobj->properties, property_info->name, property_info->name_length+1) == FAILURE) {
+	if (!property_info || zend_hash_quick_del(zobj->properties, property_info->name, property_info->name_length+1, property_info->h) == FAILURE) {
 		zend_guard *guard;
 
 		if (zobj->ce->__unset &&

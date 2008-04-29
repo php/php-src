@@ -64,6 +64,9 @@ static size_t on_data_available(char *data, size_t size, size_t nmemb, void *ctx
 	if (curlstream->readbuffer.writepos == 0) {
 		zval *sym;
 
+		if (!EG(active_symbol_table)) {
+			zend_rebuild_symbol_table(TSRMLS_C);
+		}
 		MAKE_STD_ZVAL(sym);
 		*sym = *curlstream->headers;
 		zval_copy_ctor(sym);
