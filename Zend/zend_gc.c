@@ -137,15 +137,12 @@ ZEND_API void gc_zval_possible_root(zval *zv TSRMLS_DC)
 {
 	if (UNEXPECTED(GC_G(free_list) != NULL &&
 	               GC_ZVAL_ADDRESS(zv) != NULL &&
-		           GC_ZVAL_GET_COLOR(zv) == GC_BLACK)) {
-		zval_gc_info **p = &GC_G(free_list);
-
-		while (*p != NULL) {
-			if (*p == (zval_gc_info*)zv) {
-				return;
-			}
-			p = &(*p)->u.next;
-		}
+		           GC_ZVAL_GET_COLOR(zv) == GC_BLACK) &&
+		           (GC_ZVAL_ADDRESS(zv) < GC_G(buf) ||
+		            GC_ZVAL_ADDRESS(zv) >= GC_G(last_unused))) {
+		/* The given zval is a gurbage that is going to be delated by
+		 * currently running GC */
+		return;
 	}
 
 	if (zv->type == IS_OBJECT) {
@@ -261,19 +258,15 @@ ZEND_API void gc_remove_zval_from_buffer(zval *zv)
 	TSRMLS_FETCH();
 
 	if (UNEXPECTED(GC_G(free_list) != NULL &&
-		           GC_ZVAL_GET_COLOR(zv) == GC_BLACK)) {
-		zval_gc_info **p = &GC_G(free_list);
-
-		while (*p != NULL) {
-			if (*p == (zval_gc_info*)zv) {
-				if (GC_G(next_to_free) == (zval_gc_info*)zv) {
-					GC_G(next_to_free) = ((zval_gc_info*)zv)->u.next;
-				}
-				*p = (*p)->u.next;
-				return;
-			}
-			p = &(*p)->u.next;
+		           GC_ZVAL_GET_COLOR(zv) == GC_BLACK) &&
+		           (GC_ZVAL_ADDRESS(zv) < GC_G(buf) ||
+		            GC_ZVAL_ADDRESS(zv) >= GC_G(last_unused))) {
+		/* The given zval is a gurbage that is going to be delated by
+		 * currently running GC */
+		if (GC_G(next_to_free) == (zval_gc_info*)zv) {
+			GC_G(next_to_free) = ((zval_gc_info*)zv)->u.next;
 		}
+		return;
 	}
 	GC_BENCH_INC(zval_remove_from_buffer);
 	GC_REMOVE_FROM_BUFFER(root_buffer);
