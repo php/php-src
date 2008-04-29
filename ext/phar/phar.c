@@ -2092,6 +2092,10 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		return EOF;
 	}
 
+	if (!zend_hash_num_elements(&phar->manifest)) {
+		return EOF;
+	}
+
 	if (phar->is_zip) {
 		return phar_zip_flush(phar, user_stub, len, convert, error TSRMLS_CC);
 	}
