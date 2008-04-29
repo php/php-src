@@ -15,8 +15,8 @@ $a = new Phar(array());
 $a = new Phar(dirname(__FILE__) . '/files/frontcontroller10.phar');
 $a->convertToExecutable(array());
 $a->convertToData(array());
-$b = new PharData('whatever.tar');
-$c = new PharData('whatever.zip');
+$b = new PharData(dirname(__FILE__) . '/whatever.tar');
+$c = new PharData(dirname(__FILE__) . '/whatever.zip');
 $b->delete(array());
 try {
 $a->delete('oops');
@@ -143,6 +143,10 @@ echo $e->getMessage() . "\n";
 }
 ?>
 ===DONE===
+--CLEAN--
+<?php 
+unlink(dirname(__FILE__) . '/whatever.tar');
+?>
 --EXPECTF--
 Warning: Phar::mungServer() expects parameter 1 to be array, string given in %sbadparameters.php on line %d
 
