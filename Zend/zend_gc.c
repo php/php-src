@@ -140,7 +140,7 @@ ZEND_API void gc_zval_possible_root(zval *zv TSRMLS_DC)
 		           GC_ZVAL_GET_COLOR(zv) == GC_BLACK) &&
 		           (GC_ZVAL_ADDRESS(zv) < GC_G(buf) ||
 		            GC_ZVAL_ADDRESS(zv) >= GC_G(last_unused))) {
-		/* The given zval is a gurbage that is going to be delated by
+		/* The given zval is a garbage that is going to be deleted by
 		 * currently running GC */
 		return;
 	}
@@ -261,7 +261,7 @@ ZEND_API void gc_remove_zval_from_buffer(zval *zv)
 		           GC_ZVAL_GET_COLOR(zv) == GC_BLACK) &&
 		           (GC_ZVAL_ADDRESS(zv) < GC_G(buf) ||
 		            GC_ZVAL_ADDRESS(zv) >= GC_G(last_unused))) {
-		/* The given zval is a gurbage that is going to be delated by
+		/* The given zval is a garbage that is going to be deleted by
 		 * currently running GC */
 		if (GC_G(next_to_free) == (zval_gc_info*)zv) {
 			GC_G(next_to_free) = ((zval_gc_info*)zv)->u.next;
