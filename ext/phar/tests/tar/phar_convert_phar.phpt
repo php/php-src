@@ -13,6 +13,7 @@ $fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '2.phar';
 $fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.3.phar';
 
 $phar = new Phar($fname);
+$phar['a.txt'] = 'some text';
 $phar->stopBuffering();
 var_dump($phar->isTar());
 var_dump(strlen($phar->getStub()));
