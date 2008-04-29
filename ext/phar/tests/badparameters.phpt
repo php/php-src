@@ -143,10 +143,6 @@ echo $e->getMessage() . "\n";
 }
 ?>
 ===DONE===
---CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/whatever.tar');
-?>
 --EXPECTF--
 Warning: Phar::mungServer() expects parameter 1 to be array, string given in %sbadparameters.php on line %d
 
