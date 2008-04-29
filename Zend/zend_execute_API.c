@@ -1292,6 +1292,9 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSR
 		EG(return_value_ptr_ptr) = &local_retval_ptr;
 		EG(active_op_array) = new_op_array;
 		EG(no_extensions)=1;
+		if (!EG(active_symbol_table)) {
+			zend_rebuild_symbol_table(TSRMLS_C);
+		}
 
 		zend_execute(new_op_array TSRMLS_CC);
 

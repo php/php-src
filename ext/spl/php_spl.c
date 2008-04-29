@@ -243,6 +243,9 @@ static int spl_autoload(const char *class_name, const char * lc_name, int class_
 		if (new_op_array) {
 			EG(return_value_ptr_ptr) = &result;
 			EG(active_op_array) = new_op_array;
+			if (!EG(active_symbol_table)) {
+				zend_rebuild_symbol_table(TSRMLS_C);
+			}
 
 			zend_execute(new_op_array TSRMLS_CC);
 	
