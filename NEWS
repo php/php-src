@@ -2,9 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Apr 2008, PHP 5.2.6
 - Fixed two possible crashes inside posix extension (Tony)
+- Fixed bug #44742 (timezone_offset_get() causes segmentation faults). (Derick)
+- Fixed bug #44720 (Prevent crash within session_register()). (Scott)
 - Fixed bug #44703 (htmlspecialchars() does not detect bad character set
   argument). (Andy Wharmby)
-- Fixed bug #44742 (timezone_offset_get() causes segmentation faults). (Derick)
 
 10 Apr 2008, PHP 5.2.6RC5
 - Fixed incorrect heredoc handling when label is used within the block.
