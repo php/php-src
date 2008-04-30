@@ -1,0 +1,11 @@
+#!/bin/sh
+export SCRIPT_NAME=/frontcontroller29.php
+export PATH_INFO=/fatalerror.phps
+export SCRIPT_FILENAME=/home/cellog/workspace/php5/ext/phar/tests/frontcontroller29.php
+export PATH_TRANSLATED=/home/cellog/workspace/php5/ext/phar/tests/frontcontroller29.php
+export REDIRECT_STATUS=1
+export REQUEST_METHOD=GET
+export REQUEST_URI=/frontcontroller29.php/fatalerror.phps
+cd /home/cellog/workspace/php5/
+ddd sapi/cgi/php-cgi &
+cd /home/cellog/workspace/php5/ext/phar
