@@ -1,76 +1,14 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Apr 2008, PHP 5.2.6
+01 May 2008, PHP 5.2.6
 - Fixed two possible crashes inside posix extension (Tony)
-- Fixed bug #44742 (timezone_offset_get() causes segmentation faults). (Derick)
-- Fixed bug #44720 (Prevent crash within session_register()). (Scott)
-- Fixed bug #44703 (htmlspecialchars() does not detect bad character set
-  argument). (Andy Wharmby)
-
-10 Apr 2008, PHP 5.2.6RC5
-- Fixed incorrect heredoc handling when label is used within the block.
+- Fixed incorrect heredoc handling when label is used within the block. 
   (Matt)
-- Fixed bug #44673 (With CGI argv/argc starts from arguments, not from script)
-  (Dmitry)
-- Fixed bug #44667 (proc_open() does not handle pipes with the mode 'wb'
-  correctly). (Jani)
-- Fixed bug #44650 (escaepshellscmd() does not check arg count). (Ilia)
-- Fixed bug #44591 (imagegif's filename parameter). (Felipe)
-- Fixed bug #32979 (OpenSSL stream->fd casts broken in 64-bit build)
-  (stotty at tvnet dot hu)
-
-03 Apr 2008, PHP 5.2.6RC4
 - Fixed possible stack buffer overflow in FastCGI SAPI. (Andrei Nigmatulin)
-- Fixed sending of uninitialized paddings which may contain some information.
-  (Andrei Nigmatulin)
-- Fixed bug #44663 (Crash in imap_mail_compose if "body" parameter invalid).
-  (Ilia)
-- Fixed bug #44613 (Crash inside imap_headerinfo()). (Ilia, jmessa)
-- Fixed bug #44603 (Order issues with Content-Type/Length headers on
-  POST). (Ilia)
-- Fixed bug #44594 (imap_open() does not validate # of retries parameter).
-  (Ilia)
-- Fixed bug #44557 (Crash in imap_setacl when supplied integer as username)
-  (Thomas Jarosch)
-- Fixed a bug in formatting timestamps when DST is active in the default
-  timezone (Derick)
-
-
-27 Mar 2008, PHP 5.2.6RC3
-- Properly address incomplete multibyte chars inside escapeshellcmd() (Ilia,
-  Stefan Esser)
+- Fixed sending of uninitialized paddings which may contain some information. (Andrei Nigmatulin)
+- Fixed a bug in formatting timestamps when DST is active in the default timezone (Derick)
+- Properly address incomplete multibyte chars inside escapeshellcmd() (Ilia, Stefan Esser)
 - Fix integer overflow in printf(). (Stas, Maksymilian Aciemowicz)
-- Fixed bug #44487 (call_user_method_array issues a warning when throwing
-   an exception). (David Soria Parra)
-- Fixed bug #44478 (Inconsistent behaviour when assigning new nodes). 
-  (Rob, Felipe)
-- Fixed bug #44445 (email validator does not handle domains starting/ending 
-  with a -). (Ilia)
-- Fixed bug #44440 (st_blocks undefined under BeOS). (Felipe)
-- Fixed bug #44394 (Last two bytes missing from output). (Felipe)
-- Fixed bug #44388 (Crash inside exif_read_data() on invalid images) (Ilia)
-- Fixed bug #44373 (PDO_OCI extension compile failed). (Felipe)
-- Fixed bug #43677 (Inconsistent behaviour of include_path set with
-  php_value). (manuel at mausz dot at)
-- Fixed bug #43614 (incorrect processing of numerical string keys of array in 
-  arbitrary serialized data). (Dmitriy Buldakov, Felipe)
-- Fixed bug #42177 (Warning "array_merge_recursive(): recursion detected" comes 
-  again...). (Felipe)
-- Fixed bug #41828 (Failing to call RecursiveIteratorIterator::__construct() 
-  causes a sefault). (Etienne)
-
-06 Mar 2008, PHP 5.2.6RC2
-- Fixed bug #44333 (SEGFAULT when using mysql_pconnect() with client_flags).
-  (Felipe)
-- Fixed bug #44306 (Better detection of MIPS processors on Windows). (Ilia)
-- Fixed bug #44166 (Parameter handling flaw in PDO::getAvailableDrivers()).
-  (Ilia)
-- Fixed bug #42505 (new sendmail default breaks on Netware platform) 
-  (Guenter Knauf)
-- Fixed bug #40013 (php_uname() does not return nodename on Netware
-  (Guenter Knauf)
-
-27 Feb 2008, PHP 5.2.6RC1
 - Fixed security issue detailed in CVE-2008-0599. (Rasmus)
 - Fixed potential memleak in stream filter parameter for zlib filter. (Greg)
 - Added Reflection API metadata for the methods of the DOM classes. (Sebastian)
@@ -81,155 +19,128 @@ PHP                                                                        NEWS
   which to group by data is specified. (Ilia)
 - Fixed segfault in filter extension when using callbacks. (Arnar Mar Sig,
   Felipe)
+- Fixed faulty fix for bug #40189 (endless loop in zlib.inflate stream filter). (Greg)
 - Upgraded PCRE to version 7.6 (Nuno)
 
-
+- Fixed bug #44742 (timezone_offset_get() causes segmentation faults). (Derick)
+- Fixed bug #44720 (Prevent crash within session_register()). (Scott)
+- Fixed bug #44703 (htmlspecialchars() does not detect bad character set argument). (Andy Wharmby)
+- Fixed bug #44673 (With CGI argv/argc starts from arguments, not from script) (Dmitry)
+- Fixed bug #44667 (proc_open() does not handle pipes with the mode 'wb' correctly). (Jani)
+- Fixed bug #44663 (Crash in imap_mail_compose if "body" parameter invalid). (Ilia)
+- Fixed bug #44650 (escaepshellscmd() does not check arg count). (Ilia)
+- Fixed bug #44613 (Crash inside imap_headerinfo()). (Ilia, jmessa)
+- Fixed bug #44603 (Order issues with Content-Type/Length headers on POST). (Ilia)
+- Fixed bug #44594 (imap_open() does not validate # of retries parameter). (Ilia)
+- Fixed bug #44591 (imagegif's filename parameter). (Felipe)
+- Fixed bug #44557 (Crash in imap_setacl when supplied integer as username) (Thomas Jarosch)
+- Fixed bug #44487 (call_user_method_array issues a warning when throwing an exception). (David Soria Parra)
+- Fixed bug #44478 (Inconsistent behaviour when assigning new nodes). (Rob, Felipe)
+- Fixed bug #44445 (email validator does not handle domains starting/ending with a -). (Ilia)
+- Fixed bug #44440 (st_blocks undefined under BeOS). (Felipe)
+- Fixed bug #44394 (Last two bytes missing from output). (Felipe)
+- Fixed bug #44388 (Crash inside exif_read_data() on invalid images) (Ilia)
+- Fixed bug #44373 (PDO_OCI extension compile failed). (Felipe)
+- Fixed bug #44333 (SEGFAULT when using mysql_pconnect() with client_flags). (Felipe)
+- Fixed bug #44306 (Better detection of MIPS processors on Windows). (Ilia)
 - Fixed bug #44242 (metaphone('CMXFXM') crashes PHP). (Felipe)
-- Fixed bug #44233 (MSG_PEEK undefined under BeOS R5). (jonathonfreeman at
-  gmail dot com, Ilia)
+- Fixed bug #44233 (MSG_PEEK undefined under BeOS R5). (jonathonfreeman at gmail dot com, Ilia)
 - Fixed bug #44216 (strftime segfaults on large negative value). (Derick)
-- Fixed bug #44200 (A crash in PDO when no bound targets exists and yet 
-  bound parameters are present). (Ilia)
-- Fixed bug #44209 (strtotime() doesn't support 64 bit timestamps on 64 bit
-  platforms). (Derick)
-- Fixed bug #44206 (OCI8 selecting ref cursors leads to ORA-1000 maximum
-  open cursors reached). (Oracle Corp.)
+- Fixed bug #44209 (strtotime() doesn't support 64 bit timestamps on 64 bit platforms). (Derick)
+- Fixed bug #44206 (OCI8 selecting ref cursors leads to ORA-1000 maximum open cursors reached). (Oracle Corp.)
+- Fixed bug #44200 (A crash in PDO when no bound targets exists and yet bound parameters are present). (Ilia)
 - Fixed bug #44197 (socket array keys lost on socket_select). (Felipe)
 - Fixed bug #44191 (preg_grep messes up array index). (Felipe)
-- Fixed bug #44189 (PDO setAttribute() does not properly validate values for 
-  native numeric options). (Ilia)
+- Fixed bug #44189 (PDO setAttribute() does not properly validate values for native numeric options). (Ilia)
 - Fixed bug #44184 (Double free of loop-variable on exception). (Dmitry)
 - Fixed bug #44171 (Invalid FETCH_COLUMN index does not raise an error). (Ilia)
-- Fixed bug #44159 (Crash: $pdo->setAttribute(PDO::STATEMENT_ATTR_CLASS, NULL)).
-  (Felipe)
+- Fixed bug #44166 (Parameter handling flaw in PDO::getAvailableDrivers()). (Ilia)
+- Fixed bug #44159 (Crash: $pdo->setAttribute(PDO::STATEMENT_ATTR_CLASS, NULL)). (Felipe)
 - Fixed bug #44152 (Possible crash with syslog logging on ZTS builds). (Ilia)
-- Fixed bug #44141 (private parent constructor callable through static
-  function). (Dmitry)
-- Fixed bug #44113 (OCI8 new collection creation can fail with OCI-22303).
-  (Oracle Corp.)
-- Fixed bug #44069 (Huge memory usage with concatenation using . instead of
-  .=). (Dmitry)
-- Fixed bug #44046 (crash inside array_slice() function with an invalid
-  by-ref offset). (Ilia)
-- Fixed bug #44028 (crash inside stream_socket_enable_crypto() when enabling
-  encryption without crypto type). (Ilia)
+- Fixed bug #44141 (private parent constructor callable through static function). (Dmitry)
+- Fixed bug #44113 (OCI8 new collection creation can fail with OCI-22303). (Oracle Corp.)
+- Fixed bug #44069 (Huge memory usage with concatenation using . instead of .=). (Dmitry)
+- Fixed bug #44046 (crash inside array_slice() function with an invalid by-ref offset). (Ilia)
+- Fixed bug #44028 (crash inside stream_socket_enable_crypto() when enabling encryption without crypto type). (Ilia)
 - Fixed bug #44018 (RecursiveDirectoryIterator options inconsistancy). (Marcus)
-- Fixed bug #44008 (OCI8 incorrect usage of OCI-Lob->close crashes PHP).
-  (Oracle Corp.)
-- Fixed bug #43998 (Two error messages returned for incorrect encoding for
-  mb_strto[upper|lower]). (Rui)
+- Fixed bug #44008 (OCI8 incorrect usage of OCI-Lob->close crashes PHP). (Oracle Corp.)
+- Fixed bug #43998 (Two error messages returned for incorrect encoding for mb_strto[upper|lower]). (Rui)
 - Fixed bug #43994 (mb_ereg 'successfully' matching incorrect). (Rui)
-- Fixed bug #43954 (Memory leak when sending the same HTTP status code
-  multiple times). (Scott)
-- Fixed bug #43927 (koi8r is missing from html_entity_decode()).
-  (andy at demos dot su, Tony)
-- Fixed faulty fix for bug #40189 (endless loop in zlib.inflate stream filter).
-  (Greg)
-- Fixed bug #43912 (Interbase column names are truncated to 31 characters).
-  (Ilia)
-- Fixed bug #43875 (Two error messages returned for $new and $flag argument
-  in mysql_connect()). (Hannes)
-- Fixed bug #43863 (str_word_count() breaks on cyrillic "ya" in locale cp1251).
-  (phprus at gmail dot com, Tony)
+- Fixed bug #43954 (Memory leak when sending the same HTTP status code multiple times). (Scott)
+- Fixed bug #43927 (koi8r is missing from html_entity_decode()). (andy at demos dot su, Tony)
+- Fixed bug #43912 (Interbase column names are truncated to 31 characters). (Ilia)
+- Fixed bug #43875 (Two error messages returned for $new and $flag argument in mysql_connect()). (Hannes)
+- Fixed bug #43863 (str_word_count() breaks on cyrillic "ya" in locale cp1251). (phprus at gmail dot com, Tony)
 - Fixed bug #43841 (mb_strrpos offset is byte count for negative values). (Rui)
-- Fixed bug #43840 (mb_strpos bounds check is byte count rather than a character
-  count). (Rui)
+- Fixed bug #43840 (mb_strpos bounds check is byte count rather than a character count). (Rui)
 - Fixed bug #43808 (date_create never fails (even when it should)). (Derick)
-- Fixed bug #43793 (zlib filter is unable to auto-detect gzip/zlib file headers).
-  (Greg)
+- Fixed bug #43793 (zlib filter is unable to auto-detect gzip/zlib file headers). (Greg)
 - Fixed bug #43703 (Signature compatibility check broken). (Dmitry)
-- Fixed bug #43663 (Extending PDO class with a __call() function doesn't work).
-  (David Soria Parra)
+- Fixed bug #43677 (Inconsistent behaviour of include_path set with php_value). (manuel at mausz dot at)
+- Fixed bug #43663 (Extending PDO class with a __call() function doesn't work). (David Soria Parra)
 - Fixed bug #43647 (Make FindFile use PATH_SEPARATOR instead of ";"). (Ilia)
-- Fixed bug #43635 (mysql extension ingores INI settings on NULL values
-  passed to mysql_connect()). (Ilia)
-- Fixed bug #43620 (Workaround for a bug inside libcurl 7.16.2 that can result
-  in a crash). (Ilia)
-- Fixed bug #43606 (define missing depencies of the exif extension).
-  (crrodriguez at suse dot de)
+- Fixed bug #43635 (mysql extension ingores INI settings on NULL values passed to mysql_connect()). (Ilia)
+- Fixed bug #43620 (Workaround for a bug inside libcurl 7.16.2 that can result in a crash). (Ilia)
+- Fixed bug #43614 (incorrect processing of numerical string keys of array in arbitrary serialized data). (Dmitriy Buldakov, Felipe)
+- Fixed bug #43606 (define missing depencies of the exif extension). (crrodriguez at suse dot de)
 - Fixed bug #43589 (a possible infinite loop in bz2_filter.c). (Greg)
-- Fixed bug #43580 (removed bogus declaration of a non-existent php_is_url()
-  function). (Ilia)
-- Fixed bug #43559 (array_merge_recursive() doesn't behave as expected with
-  duplicate NULL values). (Felipe, Tony)
+- Fixed bug #43580 (removed bogus declaration of a non-existent php_is_url() function). (Ilia)
+- Fixed bug #43559 (array_merge_recursive() doesn't behave as expected with duplicate NULL values). (Felipe, Tony)
 - Fixed bug #43533 (escapeshellarg('') returns null). (Ilia)
-- Fixed bug #43527 (DateTime created from a timestamp reports environment
-  timezone). (Derick)
-- Fixed bug #43522 (stream_get_line() eats additional characters). (Felipe,
-  Ilia, Tony)
-- Fixed bug #43507 (SOAPFault HTTP Status 500 - would like to be able to set
-  the HTTP Status). (Dmitry)
+- Fixed bug #43527 (DateTime created from a timestamp reports environment timezone). (Derick)
+- Fixed bug #43522 (stream_get_line() eats additional characters). (Felipe, Ilia, Tony)
+- Fixed bug #43507 (SOAPFault HTTP Status 500 - would like to be able to set the HTTP Status). (Dmitry)
 - Fixed bug #43505 (Assign by reference bug). (Dmitry)
-- Fixed bug #43497 (OCI8 XML/getClobVal aka temporary LOBs leak UGA memory).
-  (Chris)
-- Fixed bug #43495 (array_merge_recursive() crashes with recursive arrays).
-  (Ilia)
-- Fixed bug #43498 (file_exists() on a proftpd server got SIZE not
-  allowed in ASCII mode). (Ilia, crrodriguez at suse dot de)
-- Fixed bug #43493 (pdo_pgsql does not send username on connect when password
-  is not available). (Ilia)
-- Fixed bug #43491 (Under certain conditions, file_exists() never returns).
-  (Dmitry)
-- Fixed bug #43483 (get_class_methods() does not list all visible methods).
-  (Dmitry)
-- Fixed bug #43482 (array_pad() does not warn on very small pad numbers).
-  (Ilia)
-- Fixed bug #43457 (Prepared statement with incorrect parms doesn't throw
-  exception with pdo_pgsql driver). (Ilia)
-- Fixed bug #43450 (Memory leak on some functions with implicit object
-  __toString() call). (David C.)
+- Fixed bug #43498 (file_exists() on a proftpd server got SIZE not allowed in ASCII mode). (Ilia, crrodriguez at suse dot de)
+- Fixed bug #43497 (OCI8 XML/getClobVal aka temporary LOBs leak UGA memory). (Chris)
+- Fixed bug #43495 (array_merge_recursive() crashes with recursive arrays). (Ilia)
+- Fixed bug #43493 (pdo_pgsql does not send username on connect when password is not available). (Ilia)
+- Fixed bug #43491 (Under certain conditions, file_exists() never returns). (Dmitry)
+- Fixed bug #43483 (get_class_methods() does not list all visible methods). (Dmitry)
+- Fixed bug #43482 (array_pad() does not warn on very small pad numbers). (Ilia)
+- Fixed bug #43457 (Prepared statement with incorrect parms doesn't throw exception with pdo_pgsql driver). (Ilia)
+- Fixed bug #43450 (Memory leak on some functions with implicit object __toString() call). (David C.)
 - Fixed bug #43386 (array_globals not reset to 0 properly on init). (Ilia)
 - Fixed bug #43377 (PHP crashes with invalid argument for DateTimeZone). (Ilia)
 - Fixed bug #43373 (pcntl_fork() should not raise E_ERROR on error). (Ilia)
-- Fixed bug #43364 (recursive xincludes don't remove internal xml nodes
-  properly). (Rob, patch from ddb@bitxtender.de)
-- Fixed bug #43092 (curl_copy_handle() crashes with > 32 chars long URL).
-  (Jani)
-- Fixed bug #43301 (mb_ereg*_replace() crashes when replacement string is
-  invalid PHP expression and 'e' option is used). (Jani)
-- Fixed bug #43003 (Invalid timezone reported for DateTime objects constructed
-  using a timestamp). (Derick)
-- Fixed bug #43295 (crash because of uninitialized SG(sapi_headers).mimetype).
-  (Dmitry)
+- Fixed bug #43364 (recursive xincludes don't remove internal xml nodes properly). (Rob, patch from ddb@bitxtender.de)
+- Fixed bug #43301 (mb_ereg*_replace() crashes when replacement string is invalid PHP expression and 'e' option is used). (Jani)
+- Fixed bug #43295 (crash because of uninitialized SG(sapi_headers).mimetype). (Dmitry)
 - Fixed bug #43293 (Multiple segfaults in getopt()). (Hannes)
-- Fixed bug #43279 (pg_send_query_params() converts all elements in 'params'
-  to strings). (Ilia)
-- Fixed bug #43276 (Incomplete fix for bug #42739, mkdir() under safe_mode).
-  (Ilia)
+- Fixed bug #43279 (pg_send_query_params() converts all elements in 'params' to strings). (Ilia)
+- Fixed bug #43276 (Incomplete fix for bug #42739, mkdir() under safe_mode). (Ilia)
 - Fixed bug #43248 (backward compatibility break in realpath()). (Dmitry)
 - Fixed bug #43221 (SimpleXML adding default namespace in addAttribute). (Rob)
 - Fixed bug #43216 (stream_is_local() returns false on "file://"). (Dmitry)
 - Fixed bug #43201 (Crash on using uninitialized vals and __get/__set). (Dmitry)
-- Fixed bug #43182 (file_put_contents() LOCK_EX does not work properly on file
-  truncation). (Ilia)
-- Fixed bug #43175 (__destruct() throwing an exception with __call() causes
-  segfault). (Dmitry)
+- Fixed bug #43182 (file_put_contents() LOCK_EX does not work properly on file truncation). (Ilia)
+- Fixed bug #43175 (__destruct() throwing an exception with __call() causes segfault). (Dmitry)
 - Fixed bug #43128 (Very long class name causes segfault). (Dmitry)
 - Fixed bug #43105 (PHP seems to fail to close open files). (Hannes)
-- Fixed bug #42978 (mismatch between number of bound params and values causes
-  a crash in pdo_pgsql). (Ilia)
+- Fixed bug #43092 (curl_copy_handle() crashes with > 32 chars long URL). (Jani)
+- Fixed bug #43003 (Invalid timezone reported for DateTime objects constructed using a timestamp). (Derick)
+- Fixed bug #42978 (mismatch between number of bound params and values causes a crash in pdo_pgsql). (Ilia)
 - Fixed bug #42945 (preg_split() swallows part of the string). (Nuno)
-- Fixed bug #42937 (__call() method not invoked when methods are called on
-  parent from child class). (Dmitry)
+- Fixed bug #42937 (__call() method not invoked when methods are called on parent from child class). (Dmitry)
 - Fixed bug #42841 (REF CURSOR and oci_new_cursor() crash PHP). (Chris)
-- Fixed Bug #42838 (Wrong results in array_diff_uassoc) (Felipe)
-- Fixed bug #42779 (Incorrect forcing from HTTP/1.0 request to HTTP/1.1
-  response). (Ilia)
+- Fixed bug #42838 (Wrong results in array_diff_uassoc) (Felipe)
+- Fixed bug #42779 (Incorrect forcing from HTTP/1.0 request to HTTP/1.1 response). (Ilia)
 - Fixed bug #42736 (xmlrpc_server_call_method() crashes). (Tony)
-- Fixed bug #42692 (Procedure 'int1' not present with doc/lit SoapServer).
-  (Dmitry)
+- Fixed bug #42692 (Procedure 'int1' not present with doc/lit SoapServer). (Dmitry)
 - Fixed bug #42548 (mysqli PROCEDURE calls can't return result sets). (Hartmut)
-- Fixed bug #42369 (Implicit conversion to string leaks memory).
-  (David C., Rob).
+- Fixed bug #42505 (new sendmail default breaks on Netware platform) (Guenter Knauf)
+- Fixed bug #42369 (Implicit conversion to string leaks memory). (David C., Rob).
 - Fixed bug #42272 (var_export() incorrectly escapes char(0)). (Derick)
-- Fixed bug #42261 (Incorrect lengths for date and boolean data types).
-  (Ilia)
-- Fixed bug #42190 (Constructing DateTime with TimeZone Indicator invalidates
-  DateTimeZone). (Derick)
+- Fixed bug #42261 (Incorrect lengths for date and boolean data types). (Ilia)
+- Fixed bug #42190 (Constructing DateTime with TimeZone Indicator invalidates DateTimeZone). (Derick)
+- Fixed bug #42177 (Warning "array_merge_recursive(): recursion detected" comes again...). (Felipe)
 - Fixed bug #41941 (oci8 extension not lib64 savvy). (Chris)
+- Fixed bug #41828 (Failing to call RecursiveIteratorIterator::__construct() causes a sefault). (Etienne)
 - Fixed bug #41599 (setTime() fails after modify() is used). (Derick)
 - Fixed bug #41562 (SimpleXML memory issue). (Rob)
+- Fixed bug #40013 (php_uname() does not return nodename on Netware (Guenter Knauf)
 - Fixed bug #38468 (Unexpected creation of cycle). (Dmitry)
+- Fixed bug #32979 (OpenSSL stream->fd casts broken in 64-bit build) (stotty at tvnet dot hu)
 
 08 Nov 2007, PHP 5.2.5
 - Upgraded PCRE to version 7.3 (Nuno)
