@@ -320,10 +320,6 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 				if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
 					zval_ptr_dtor(EG(return_value_ptr_ptr));
 				}
-				/*
-				if (EG(exception)) {
-					zend_throw_exception_internal(NULL TSRMLS_CC);
-				} */
 				zend_bailout();
 			}
 			return PHAR_MIME_PHP;
