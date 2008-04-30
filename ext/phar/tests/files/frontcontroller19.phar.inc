@@ -1,6 +1,6 @@
 <?php
-@unlink(dirname(__FILE__) . '/frontcontroller18.phar');
-$a = new Phar(dirname(__FILE__) . '/frontcontroller18.phar');
+@unlink(dirname(__FILE__) . '/frontcontroller19.phar');
+$a = new Phar(dirname(__FILE__) . '/frontcontroller19.phar');
 $a['start/index.php'] = '<?php
 echo "start/index.php\n";
 include "./another.php";
