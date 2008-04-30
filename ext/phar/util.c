@@ -315,7 +315,6 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 		efree(test);
 	}
 	efree(arch);
-	efree(entry);
 
 doit:
 	if (*filename == '.' ||
