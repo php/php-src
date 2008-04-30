@@ -1,5 +1,8 @@
 --TEST--
 Test session_module_name() function : variation
+--INI--
+session.save_path=
+session.name=PHPSESSID
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
