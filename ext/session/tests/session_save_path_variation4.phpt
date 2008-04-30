@@ -8,6 +8,8 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 --INI--
 open_basedir=.
 session.save_handler=files
+session.save_path=
+session.name=PHPSESSID
 --FILE--
 <?php
 
