@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2008, PHP 5.2.7
+
 01 May 2008, PHP 5.2.6
 - Fixed two possible crashes inside posix extension (Tony)
 - Fixed incorrect heredoc handling when label is used within the block. 
