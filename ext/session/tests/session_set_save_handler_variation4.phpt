@@ -6,6 +6,8 @@ Test session_set_save_handler() function : variation
 session.gc_probability=1
 session.gc_divisor=1
 session.gc_maxlifetime=0
+session.save_path=
+session.name=PHPSESSID
 --FILE--
 <?php
 
