@@ -1,3 +1,151 @@
+2008-04-29  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_2)
+      NEWS
+      ext/session/session.c:
+      MFH Fixed bug #44720 (Prevent infinite recursion within session_register)
+
+2008-04-29  Antony Dovgal  <tony@daylessday.org>
+
+    * ZendEngine2/zend_gc.c
+      ZendEngine2/zend_gc.c:
+      fix spelling
+
+2008-04-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_gc.c
+      ZendEngine2/zend_gc.c:
+      Fixed GC slowdown
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ext/spl/php_spl.c
+      ext/spl/php_spl.c:
+      Added missing lazy initialization
+
+2008-04-29  Ant Phillips  <antphill@uk.ibm.com>
+
+    * (PHP_5_2)
+      ext/session/tests/session_decode_variation3.phpt
+      ext/session/tests/session_decode_variation4.phpt
+      ext/session/tests/session_encode_variation7.phpt
+      ext/session/tests/session_encode_variation8.phpt
+      ext/session/tests/session_id_error4.phpt
+      ext/session/tests/session_id_variation1.phpt
+      ext/session/tests/session_id_variation2.phpt
+      ext/session/tests/session_module_name_variation4.phpt
+      ext/session/tests/session_save_path_variation4.phpt
+      ext/session/tests/session_save_path_variation4.phpt
+      ext/session/tests/session_save_path_variation4.phpt
+      ext/session/tests/session_save_path_variation4.phpt
+      ext/session/tests/session_save_path_variation5.phpt
+      ext/session/tests/session_save_path_variation5.phpt
+      ext/session/tests/session_save_path_variation5.phpt
+      ext/session/tests/session_save_path_variation5.phpt
+      ext/session/tests/session_set_save_handler_variation4.phpt:
+      More session tests to improve code coverage for untested extension code
+
+    * ext/session/tests/session_decode_variation3.phpt
+      ext/session/tests/session_decode_variation3.phpt
+      ext/session/tests/session_decode_variation4.phpt
+      ext/session/tests/session_decode_variation4.phpt
+      ext/session/tests/session_encode_variation7.phpt
+      ext/session/tests/session_encode_variation7.phpt
+      ext/session/tests/session_encode_variation8.phpt
+      ext/session/tests/session_encode_variation8.phpt
+      ext/session/tests/session_id_error4.phpt
+      ext/session/tests/session_id_error4.phpt
+      ext/session/tests/session_id_variation1.phpt
+      ext/session/tests/session_id_variation1.phpt
+      ext/session/tests/session_id_variation2.phpt
+      ext/session/tests/session_id_variation2.phpt
+      ext/session/tests/session_module_name_variation4.phpt
+      ext/session/tests/session_module_name_variation4.phpt
+      ext/session/tests/session_save_path_variation4.phpt
+      ext/session/tests/session_save_path_variation4.phpt
+      ext/session/tests/session_save_path_variation5.phpt
+      ext/session/tests/session_save_path_variation5.phpt
+      ext/session/tests/session_set_save_handler_variation4.phpt
+      ext/session/tests/session_set_save_handler_variation4.phpt:
+      
+      More session tests to improve code coverage for untested extension code
+
+    * ext/session/tests/session_decode_variation3.phpt
+      ext/session/tests/session_decode_variation3.phpt
+      ext/session/tests/session_decode_variation4.phpt
+      ext/session/tests/session_decode_variation4.phpt
+      ext/session/tests/session_encode_variation7.phpt
+      ext/session/tests/session_encode_variation7.phpt
+      ext/session/tests/session_encode_variation8.phpt
+      ext/session/tests/session_encode_variation8.phpt
+      ext/session/tests/session_id_error4.phpt
+      ext/session/tests/session_id_error4.phpt
+      ext/session/tests/session_id_variation1.phpt
+      ext/session/tests/session_id_variation1.phpt
+      ext/session/tests/session_id_variation2.phpt
+      ext/session/tests/session_id_variation2.phpt
+      ext/session/tests/session_module_name_variation4.phpt
+      ext/session/tests/session_module_name_variation4.phpt
+      ext/session/tests/session_save_path_variation4.phpt
+      ext/session/tests/session_save_path_variation4.phpt
+      ext/session/tests/session_save_path_variation5.phpt
+      ext/session/tests/session_save_path_variation5.phpt
+      ext/session/tests/session_set_save_handler_variation4.phpt
+      ext/session/tests/session_set_save_handler_variation4.phpt:
+      
+      file session_decode_variation3.phpt was initially added on branch PHP_5_3.
+
+2008-04-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend.c
+      ZendEngine2/zend.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_hash.h
+      ZendEngine2/zend_hash.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.skl
+      ZendEngine2/zend_vm_execute.skl
+      ext/curl/streams.c
+      ext/curl/streams.c
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/string.c
+      ext/standard/string.c
+      ext/wddx/wddx.c
+      ext/wddx/wddx.c
+      main/php_variables.c:
+      Lazy EG(active_symbol_table) initialization
+
+2008-04-29  Antony Dovgal  <tony@daylessday.org>
+
+    * ZendEngine2/zend_stream.c:
+      lexer fix by Greg
+
+    * ext/reflection/tests/026.phpt:
+      cosmetic enhancements
+
+    * ext/date/tests/bug44742.phpt
+      ext/date/tests/bug44742.phpt:
+      fix test
+
 2008-04-28  Greg Beaver  <greg@chiaraquartet.net>
 
     * main/streams/streams.c:

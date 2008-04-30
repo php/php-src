@@ -1,3 +1,48 @@
+2008-04-29  Antony Dovgal  <tony@daylessday.org>
+
+    * zend_gc.c
+      zend_gc.c:
+      fix spelling
+
+2008-04-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_gc.c
+      zend_gc.c:
+      Fixed GC slowdown
+
+    * zend_execute_API.c
+      zend_execute_API.c:
+      Added missing lazy initialization
+
+    * zend.c
+      zend.c
+      zend_API.h
+      zend_API.h
+      zend_builtin_functions.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.c
+      zend_execute.c
+      zend_execute.c
+      zend_execute_API.c
+      zend_execute_API.c
+      zend_hash.h
+      zend_hash.h
+      zend_object_handlers.c
+      zend_object_handlers.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_execute.skl
+      zend_vm_execute.skl:
+      Lazy EG(active_symbol_table) initialization
+
+2008-04-29  Antony Dovgal  <tony@daylessday.org>
+
+    * zend_stream.c:
+      lexer fix by Greg
+
 2008-04-24  Felipe Pena  <felipensp@gmail.com>
 
     * zend_compile.c
