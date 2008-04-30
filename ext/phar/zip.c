@@ -175,7 +175,7 @@ int phar_open_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, i
 		}
 		return FAILURE;
 	}
-	while ((p=(char *) memchr(p + 1, 'P', (size_t)(buf - (p+1) + sizeof(locator) + 65536 - 4 + 1))) != NULL) {
+	while ((p=(char *) memchr(p + 1, 'P', (size_t) (size - (p + 1 - buf)))) != NULL) {
 		if (!memcmp(p + 1, "K\5\6", 3)) {
 			memcpy((void *)&locator, (void *) p, sizeof(locator));
 			if (locator.centraldisk != 0 || locator.disknumber != 0) {
