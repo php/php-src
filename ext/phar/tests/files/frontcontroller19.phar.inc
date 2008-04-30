@@ -7,7 +7,7 @@ include "./another.php";
 ';
 $a['start/another.php'] = '<?php
 echo "start/another.php\n";
-include "another.php";
+include "../another.php";
 ?>';
 $a['another.php'] = '<?php
 echo "another.php\n";
