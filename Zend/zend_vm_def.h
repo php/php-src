@@ -2374,7 +2374,8 @@ ZEND_VM_C_LABEL(return_by_value):
 				FREE_OP1();
 			}
 		} else if (!IS_OP1_TMP_FREE()) { /* Not a temp var */
-			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
+			if (OP1_TYPE == IS_CONST ||
+			    EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
 			    (PZVAL_IS_REF(retval_ptr) && Z_REFCOUNT_P(retval_ptr) > 0)) {
 				zval *ret;
 
@@ -2964,7 +2965,7 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
 			Z_ADDREF_P(expr_ptr);
 		} else
 #endif
-		if (PZVAL_IS_REF(expr_ptr)) {
+		if (OP1_TYPE == IS_CONST || PZVAL_IS_REF(expr_ptr)) {
 			zval *new_expr;
 
 			ALLOC_ZVAL(new_expr);
