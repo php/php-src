@@ -45,12 +45,12 @@ string(1) "0"
 string(1) "0"
 string(0) ""
 bool(true)
-string(32) "%s"
+string(%d) "%s"
 bool(true)
 string(1) "0"
 string(0) ""
 bool(true)
-string(40) "%s"
+string(%d) "%s"
 bool(true)
 bool(true)
 Done
@@ -62,12 +62,12 @@ unicode(1) "0"
 unicode(1) "0"
 string(0) ""
 bool(true)
-string(32) "%s"
+string(%d) "%s"
 bool(true)
 unicode(1) "0"
 string(0) ""
 bool(true)
-string(40) "%s"
+string(%d) "%s"
 bool(true)
 bool(true)
 Done

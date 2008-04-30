@@ -35,12 +35,12 @@ ob_end_flush();
 string(1) "0"
 string(0) ""
 bool(true)
-string(32) "%s"
+string(%d) "%s"
 bool(true)
 string(1) "0"
 string(0) ""
 bool(true)
-string(40) "%s"
+string(%d) "%s"
 bool(true)
 Done
 --UEXPECTF--
@@ -48,12 +48,12 @@ Done
 unicode(1) "0"
 string(0) ""
 bool(true)
-string(32) "%s"
+string(%d) "%s"
 bool(true)
 unicode(1) "0"
 string(0) ""
 bool(true)
-string(40) "%s"
+string(%d) "%s"
 bool(true)
 Done
 
