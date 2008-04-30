@@ -104,6 +104,9 @@ int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t positi
 	php_stream *fp = phar_get_efp(entry, follow_links TSRMLS_CC);
 	off_t temp;
 
+	if (!fp) {
+		return -1;
+	}
 	if (follow_links) {
 		phar_entry_info *t;
 		t = phar_get_link_source(entry TSRMLS_CC);

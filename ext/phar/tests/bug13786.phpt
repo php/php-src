@@ -8,6 +8,7 @@ phar.readonly=0
 --FILE--
 <?php
 
+try {
 for ($i = 0; $i < 2; $i++) {
 	$fname = "DataArchive.phar";
 	$path = dirname(__FILE__) . DIRECTORY_SEPARATOR . $fname;
@@ -19,12 +20,13 @@ for ($i = 0; $i < 2; $i++) {
 }
 
 echo("\nWritten files: $i\n");
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 string(26) "file 0 in DataArchive.phar"
-string(26) "file 1 in DataArchive.phar"
-
-Written files: 2
+unable to seek to start of file "0" while creating new phar "%sDataArchive.phar"
 ===DONE===
