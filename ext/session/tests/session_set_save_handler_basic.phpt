@@ -1,5 +1,8 @@
 --TEST--
 Test session_set_save_handler() function : basic functionality
+--INI--
+session.save_path=
+session.name=PHPSESSID
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
