@@ -99,6 +99,7 @@ timelib_tzinfo* timelib_tzinfo_clone(timelib_tzinfo *tz);
 
 timelib_rel_time* timelib_rel_time_ctor(void);
 void timelib_rel_time_dtor(timelib_rel_time* t);
+timelib_rel_time* timelib_rel_time_clone(timelib_rel_time *tz);
 
 timelib_time* timelib_time_ctor(void);
 void timelib_time_set_option(timelib_time* tm, int option, void* option_value);
