@@ -66,8 +66,8 @@ Warning: opendir(): open_basedir restriction in effect. File(%s/test/bad/../bad/
 
 Warning: opendir(%s/test/bad/../bad/bad.txt): failed to open dir: Operation not permitted in %s on line %d
 bool(false)
-resource(8) of type (stream)
-resource(9) of type (stream)
-resource(10) of type (stream)
+resource(%d) of type (stream)
+resource(%d) of type (stream)
+resource(%d) of type (stream)
 *** Finished testing open_basedir configuration [opendir] ***
 
