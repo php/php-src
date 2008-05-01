@@ -1,3 +1,17 @@
+2008-04-30  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      IS_CONST operands are always have is_ref==1 and refcount==2, so we can
+      eliminate
+       unnecessary checks at specialization/compilation stage
+
+    * (PHP_5_3)
+      zend_vm_def.h
+      zend_vm_execute.h:
+      IS_CONST operands are always have is_ref==1 and refcount==2, so we can
+      eliminate unnecessary checks at specialization/compilation stage
+
 2008-04-29  Antony Dovgal  <tony@daylessday.org>
 
     * zend_gc.c

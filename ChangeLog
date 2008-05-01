@@ -1,3 +1,118 @@
+2008-04-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      5.2.6
+
+2008-04-30  Ant Phillips  <antphill@uk.ibm.com>
+
+    * ext/session/tests/session_id_variation1.phpt
+      ext/session/tests/session_id_variation1.phpt
+      ext/session/tests/session_id_variation1.phpt
+      ext/session/tests/session_id_variation2.phpt
+      ext/session/tests/session_id_variation2.phpt
+      ext/session/tests/session_id_variation2.phpt
+      ext/session/tests/session_module_name_variation3.phpt
+      ext/session/tests/session_module_name_variation3.phpt
+      ext/session/tests/session_module_name_variation3.phpt
+      ext/session/tests/session_name_basic.phpt
+      ext/session/tests/session_name_basic.phpt
+      ext/session/tests/session_name_basic.phpt
+      ext/session/tests/session_name_error.phpt
+      ext/session/tests/session_name_error.phpt
+      ext/session/tests/session_name_error.phpt
+      ext/session/tests/session_name_variation1.phpt
+      ext/session/tests/session_name_variation1.phpt
+      ext/session/tests/session_name_variation1.phpt
+      ext/session/tests/session_save_path_basic.phpt
+      ext/session/tests/session_save_path_basic.phpt
+      ext/session/tests/session_save_path_basic.phpt
+      ext/session/tests/session_save_path_error.phpt
+      ext/session/tests/session_save_path_error.phpt
+      ext/session/tests/session_save_path_error.phpt
+      ext/session/tests/session_save_path_variation1.phpt
+      ext/session/tests/session_save_path_variation1.phpt
+      ext/session/tests/session_save_path_variation1.phpt
+      ext/session/tests/session_save_path_variation4.phpt
+      ext/session/tests/session_save_path_variation4.phpt
+      ext/session/tests/session_save_path_variation4.phpt
+      ext/session/tests/session_save_path_variation5.phpt
+      ext/session/tests/session_save_path_variation5.phpt
+      ext/session/tests/session_save_path_variation5.phpt
+      ext/session/tests/session_set_save_handler_basic.phpt
+      ext/session/tests/session_set_save_handler_basic.phpt
+      ext/session/tests/session_set_save_handler_basic.phpt
+      ext/session/tests/session_set_save_handler_error3.phpt
+      ext/session/tests/session_set_save_handler_error3.phpt
+      ext/session/tests/session_set_save_handler_error3.phpt
+      ext/session/tests/session_set_save_handler_variation4.phpt
+      ext/session/tests/session_set_save_handler_variation4.phpt
+      ext/session/tests/session_set_save_handler_variation4.phpt:
+      Fix session test failures as reported by Antony Dovgal.
+      
+      These were caused by the tests assuming default values for some session
+      configuration settings, in particular session.save_path and session.name.
+      The tests now explicitly set these settings in the --INI-- section.
+
+    * ext/standard/tests/file/rename_basic.phpt
+      ext/standard/tests/file/rename_basic.phpt
+      ext/standard/tests/file/rename_basic.phpt
+      ext/standard/tests/file/rename_variation-win32.phpt
+      ext/standard/tests/file/rename_variation-win32.phpt
+      ext/standard/tests/file/rename_variation-win32.phpt
+      ext/standard/tests/file/rename_variation1-win32.phpt
+      ext/standard/tests/file/rename_variation1-win32.phpt
+      ext/standard/tests/file/rename_variation1-win32.phpt
+      ext/standard/tests/file/rename_variation2-win32.phpt
+      ext/standard/tests/file/rename_variation2-win32.phpt
+      ext/standard/tests/file/rename_variation2-win32.phpt
+      ext/standard/tests/file/rename_variation3-win32.phpt
+      ext/standard/tests/file/rename_variation3-win32.phpt
+      ext/standard/tests/file/rename_variation3-win32.phpt
+      ext/standard/tests/file/rename_variation8.phpt
+      ext/standard/tests/file/rename_variation8.phpt
+      ext/standard/tests/file/rename_variation8.phpt
+      ext/standard/tests/file/rename_variation9.phpt
+      ext/standard/tests/file/rename_variation9.phpt
+      ext/standard/tests/file/rename_variation9.phpt:
+      Break up complicated rename tests into some smaller more consumable chunks
+
+    * ext/standard/tests/file/rename_variation1-win32.phpt
+      ext/standard/tests/file/rename_variation1-win32.phpt
+      ext/standard/tests/file/rename_variation2-win32.phpt
+      ext/standard/tests/file/rename_variation2-win32.phpt
+      ext/standard/tests/file/rename_variation3-win32.phpt
+      ext/standard/tests/file/rename_variation3-win32.phpt
+      ext/standard/tests/file/rename_variation8.phpt
+      ext/standard/tests/file/rename_variation8.phpt
+      ext/standard/tests/file/rename_variation9.phpt
+      ext/standard/tests/file/rename_variation9.phpt:
+      
+      file rename_variation1-win32.phpt was initially added on branch PHP_5_2.
+
+2008-04-30  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      IS_CONST operands are always have is_ref==1 and refcount==2, so we can
+      eliminate
+       unnecessary checks at specialization/compilation stage
+
+    * (PHP_5_3)
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      IS_CONST operands are always have is_ref==1 and refcount==2, so we can
+      eliminate unnecessary checks at specialization/compilation stage
+
 2008-04-29  Scott MacVicar  <scott@macvicar.net>
 
     * (PHP_5_2)
