@@ -106,8 +106,8 @@ typedef unsigned char uchar;
 #define TIMELIB_HAVE_DATE() { if (s->time->have_date) { add_error(s, "Double date specification"); timelib_string_free(str); return TIMELIB_ERROR; } else { s->time->have_date = 1; } }
 #define TIMELIB_UNHAVE_DATE() { s->time->have_date = 0; s->time->d = 0; s->time->m = 0; s->time->y = 0; }
 #define TIMELIB_HAVE_RELATIVE() { s->time->have_relative = 1; }
-#define TIMELIB_HAVE_WEEKDAY_RELATIVE() { s->time->have_weekday_relative = 1; }
-#define TIMELIB_HAVE_SPECIAL_RELATIVE() { s->time->have_special_relative = 1; }
+#define TIMELIB_HAVE_WEEKDAY_RELATIVE() { s->time->have_relative = 1; s->time->relative.have_weekday_relative = 1; }
+#define TIMELIB_HAVE_SPECIAL_RELATIVE() { s->time->have_relative = 1; s->time->relative.have_special_relative = 1; }
 #define TIMELIB_HAVE_TZ() { s->cur = cursor; if (s->time->have_zone) { s->time->have_zone > 1 ? add_error(s, "Double timezone specification") : add_warning(s, "Double timezone specification"); timelib_string_free(str); s->time->have_zone++; return TIMELIB_ERROR; } else { s->time->have_zone++; } }
 
 #define TIMELIB_INIT  s->cur = cursor; str = timelib_string(s); ptr = str
@@ -679,8 +679,8 @@ static void timelib_set_relative(char **ptr, timelib_sll amount, int behavior, S
 		case TIMELIB_SPECIAL:
 			TIMELIB_HAVE_SPECIAL_RELATIVE();
 			TIMELIB_UNHAVE_TIME();
-			s->time->special.type = relunit->multiplier;
-			s->time->special.amount = amount;
+			s->time->relative.special.type = relunit->multiplier;
+			s->time->relative.special.amount = amount;
 	}
 }
 
@@ -1500,8 +1500,8 @@ relativetextweek = reltexttext space 'week';
 		if (s->time->relative.weekday == 0) {
 			s->time->relative.weekday = -7;
 		}
-		if (s->time->have_special_relative && s->time->special.type == TIMELIB_SPECIAL_WEEKDAY) {
-			s->time->special.amount = 0 - s->time->special.amount;
+		if (s->time->relative.have_special_relative && s->time->relative.special.type == TIMELIB_SPECIAL_WEEKDAY) {
+			s->time->relative.special.amount = 0 - s->time->relative.special.amount;
 		}
 		TIMELIB_DEINIT;
 		return TIMELIB_AGO;
@@ -1540,7 +1540,7 @@ relativetextweek = reltexttext space 'week';
 			s->time->relative.weekday_behavior = 2;
 
 			/* to handle the format weekday + last/this/next week */
-			if (s->time->have_weekday_relative == 0) {
+			if (s->time->relative.have_weekday_relative == 0) {
 				TIMELIB_HAVE_WEEKDAY_RELATIVE();
 				s->time->relative.weekday = 1;
 			}

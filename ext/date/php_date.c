@@ -2345,7 +2345,7 @@ static int date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int 
 	timelib_fill_holes(dateobj->time, now, 0);
 	timelib_update_ts(dateobj->time, tzi);
 
-	dateobj->time->have_weekday_relative = dateobj->time->have_relative = 0;
+	dateobj->time->have_relative = 0;
 
 	if (type == TIMELIB_ZONETYPE_ID && now->tz_info != tzi) {
 		timelib_tzinfo_dtor(now->tz_info);
@@ -2596,17 +2596,15 @@ void php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAMETERS, timelib_time *
 		add_ascii_assoc_long(element, "hour",   parsed_time->relative.h);
 		add_ascii_assoc_long(element, "minute", parsed_time->relative.i);
 		add_ascii_assoc_long(element, "second", parsed_time->relative.s);
-	}
-	if (parsed_time->have_weekday_relative) {
-		add_ascii_assoc_long(element, "weekday", parsed_time->relative.weekday);
-	}
-	if (parsed_time->have_special_relative && (parsed_time->special.type == TIMELIB_SPECIAL_WEEKDAY)) {
-		add_ascii_assoc_long(element, "weekdays", parsed_time->special.amount);
-	}
-	if (parsed_time->relative.first_last_day_of) {
-		add_ascii_assoc_bool(element, parsed_time->relative.first_last_day_of == 1 ? "first_day_of_month" : "last_day_of_month", 1);
-	}
-	if (parsed_time->have_relative || parsed_time->have_weekday_relative || parsed_time->have_special_relative || parsed_time->relative.first_last_day_of) {
+		if (parsed_time->have_weekday_relative) {
+			add_ascii_assoc_long(element, "weekday", parsed_time->relative.weekday);
+		}
+		if (parsed_time->have_special_relative && (parsed_time->special.type == TIMELIB_SPECIAL_WEEKDAY)) {
+			add_ascii_assoc_long(element, "weekdays", parsed_time->special.amount);
+		}
+		if (parsed_time->relative.first_last_day_of) {
+			add_ascii_assoc_bool(element, parsed_time->relative.first_last_day_of == 1 ? "first_day_of_month" : "last_day_of_month", 1);
+		}
 		add_ascii_assoc_zval(return_value, "relative", element);
 	}
 	timelib_time_dtor(parsed_time);
@@ -2723,7 +2721,7 @@ PHP_FUNCTION(date_modify)
 	dateobj->time->relative.s = tmp_time->relative.s;
 	dateobj->time->relative.weekday = tmp_time->relative.weekday;
 	dateobj->time->have_relative = tmp_time->have_relative;
-	dateobj->time->have_weekday_relative = tmp_time->have_weekday_relative;
+	dateobj->time->relative.have_weekday_relative = tmp_time->relative.have_weekday_relative;
 	dateobj->time->sse_uptodate = 0;
 	timelib_time_dtor(tmp_time);
 
@@ -2760,9 +2758,9 @@ PHP_FUNCTION(date_add)
 	dateobj->time->relative.h = intobj->diff->h * bias;
 	dateobj->time->relative.i = intobj->diff->i * bias;
 	dateobj->time->relative.s = intobj->diff->s * bias;
-	dateobj->time->relative.weekday = 0;
 	dateobj->time->have_relative = 1;
-	dateobj->time->have_weekday_relative = 0;
+	dateobj->time->relative.weekday = 0;
+	dateobj->time->relative.have_weekday_relative = 0;
 	dateobj->time->sse_uptodate = 0;
 
 	timelib_update_ts(dateobj->time, NULL);
@@ -2798,9 +2796,9 @@ PHP_FUNCTION(date_sub)
 	dateobj->time->relative.h = 0 - (intobj->diff->h * bias);
 	dateobj->time->relative.i = 0 - (intobj->diff->i * bias);
 	dateobj->time->relative.s = 0 - (intobj->diff->s * bias);
-	dateobj->time->relative.weekday = 0;
 	dateobj->time->have_relative = 1;
-	dateobj->time->have_weekday_relative = 0;
+	dateobj->time->relative.weekday = 0;
+	dateobj->time->relative.have_weekday_relative = 0;
 	dateobj->time->sse_uptodate = 0;
 
 	timelib_update_ts(dateobj->time, NULL);
