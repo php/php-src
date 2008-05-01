@@ -86,6 +86,8 @@ PHP_METHOD(timezone, abbreviations_list);
 PHP_METHOD(DateInterval, __construct);
 PHP_FUNCTION(date_interval_format);
 
+PHP_METHOD(DatePeriod, __construct);
+
 /* Options and Configuration */
 PHP_FUNCTION(date_default_timezone_set);
 PHP_FUNCTION(date_default_timezone_get);
