@@ -142,7 +142,7 @@ static void do_adjust_for_weekday(timelib_time* time)
 	} else {
 		time->d -= (7 - (abs(time->relative.weekday) - current_dow));
 	}
-	time->have_weekday_relative = 0;
+	time->relative.have_weekday_relative = 0;
 }
 
 void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt)
@@ -169,7 +169,7 @@ static void do_normalize(timelib_time* time)
 
 static void do_adjust_relative(timelib_time* time)
 {
-	if (time->have_weekday_relative) {
+	if (time->relative.have_weekday_relative) {
 		do_adjust_for_weekday(time);
 	}
 	do_normalize(time);
@@ -203,7 +203,7 @@ static void do_adjust_special_weekday(timelib_time* time)
 	timelib_sll current_dow, this_weekday = 0, count;
 
 	current_dow = timelib_day_of_week(time->y, time->m, time->d);
-	count = time->special.amount;
+	count = time->relative.special.amount;
 	if (count == 0) {
 		if (current_dow == 6) {
 			this_weekday = 2;
@@ -233,15 +233,15 @@ static void do_adjust_special_weekday(timelib_time* time)
 
 static void do_adjust_special(timelib_time* time)
 {
-	if (time->have_special_relative) {
-		switch (time->special.type) {
+	if (time->relative.have_special_relative) {
+		switch (time->relative.special.type) {
 			case TIMELIB_SPECIAL_WEEKDAY:
 				do_adjust_special_weekday(time);
 				break;
 		}
 	}
 	do_normalize(time);
-	memset(&(time->special), 0, sizeof(time->special));
+	memset(&(time->relative.special), 0, sizeof(time->relative.special));
 }
 
 static timelib_sll do_years(timelib_sll year)
