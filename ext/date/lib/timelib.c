@@ -46,6 +46,13 @@ timelib_rel_time* timelib_rel_time_ctor(void)
 	return t;
 }
 
+timelib_rel_time* timelib_rel_time_clone(timelib_rel_time *rel)
+{
+	timelib_rel_time *tmp = timelib_rel_time_ctor();
+	memcpy(tmp, rel, sizeof(timelib_rel_time));
+	return tmp;
+}
+
 void timelib_time_tz_abbr_update(timelib_time* tm, char* tz_abbr)
 {
 	unsigned int i;

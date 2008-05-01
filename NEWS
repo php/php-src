@@ -57,6 +57,8 @@ PHP                                                                        NEWS
   . proper support for "this week", "previous week"/"last week" and "next week"
     phrases so that they actually mean the week and not a seven day period
     around the current day.
+  . added the DatePeriod class, that supports iterating over a DateTime object
+    applying a DateInterval on each iteration.
 
 - Added functionality to SPL extension:
   . Added SPL to list of standard extensions that cannot be disabled. (Marcus)
