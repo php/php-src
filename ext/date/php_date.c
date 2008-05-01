@@ -333,6 +333,7 @@ struct _php_period_obj {
 	timelib_rel_time *interval;
 	int               recurrences;
 	int               initialized;
+	int               include_start_date;
 };
 
 #define DATE_SET_CONTEXT \
@@ -1696,6 +1697,8 @@ PHP_FUNCTION(getdate)
 #define PHP_DATE_TIMEZONE_GROUP_ALL        0x07FF
 #define PHP_DATE_TIMEZONE_GROUP_ALL_W_BC   0x0FFF
 
+#define PHP_DATE_PERIOD_EXCLUDE_START_DATE 0x0001
+
 
 /* define an overloaded iterator structure */
 typedef struct {
@@ -1750,18 +1753,20 @@ static void date_period_it_current_data(zend_object_iterator *iter, zval ***data
 	timelib_time     *it_time = object->start;
 	php_date_obj     *newdateobj;
 
-	/* apply modification */
-	it_time->relative.y = object->interval->y;
-	it_time->relative.m = object->interval->m;
-	it_time->relative.d = object->interval->d;
-	it_time->relative.h = object->interval->h;
-	it_time->relative.i = object->interval->i;
-	it_time->relative.s = object->interval->s;
-	it_time->relative.weekday = object->interval->weekday;
-	it_time->have_relative = 1;
-	it_time->sse_uptodate = 0;
-	timelib_update_ts(it_time, NULL);
-	timelib_update_from_sse(it_time);
+	/* apply modification if it's not the first iteration */
+	if (!object->include_start_date || iterator->current_index > 0) {
+		it_time->relative.y = object->interval->y;
+		it_time->relative.m = object->interval->m;
+		it_time->relative.d = object->interval->d;
+		it_time->relative.h = object->interval->h;
+		it_time->relative.i = object->interval->i;
+		it_time->relative.s = object->interval->s;
+		it_time->relative.weekday = object->interval->weekday;
+		it_time->have_relative = 1;
+		it_time->sse_uptodate = 0;
+		timelib_update_ts(it_time, NULL);
+		timelib_update_from_sse(it_time);
+	}
 
 	/* Create new object */
 	MAKE_STD_ZVAL(iterator->current);
@@ -1915,6 +1920,11 @@ static void date_register_classes(TSRMLS_D)
 	zend_class_implements(date_ce_period TSRMLS_CC, 1, zend_ce_traversable);
 	memcpy(&date_object_handlers_period, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	date_object_handlers_period.clone_obj = date_object_clone_period;
+
+#define REGISTER_PERIOD_CLASS_CONST_STRING(const_name, value) \
+	zend_declare_class_constant_long(date_ce_period, const_name, sizeof(const_name)-1, value TSRMLS_CC);
+
+	REGISTER_PERIOD_CLASS_CONST_STRING("EXCLUDE_START_DATE", PHP_DATE_PERIOD_EXCLUDE_START_DATE);
 }
 
 static inline zend_object_value date_object_new_date_ex(zend_class_entry *class_type, php_date_obj **ptr TSRMLS_DC)
@@ -3514,11 +3524,11 @@ PHP_METHOD(DatePeriod, __construct)
 	php_date_obj     *dateobj;
 	php_interval_obj *intobj;
 	zval *start, *interval;
-	long  recurrences;
+	long  recurrences, options = 0;
 	timelib_time *clone;
 	
 	php_set_error_handling(EH_THROW, NULL TSRMLS_CC);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "OOl", &start, date_ce_date, &interval, date_ce_interval, &recurrences) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "OOl|l", &start, date_ce_date, &interval, date_ce_interval, &recurrences, &options) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -3537,8 +3547,9 @@ PHP_METHOD(DatePeriod, __construct)
 	dpobj = zend_object_store_get_object(getThis() TSRMLS_CC);
 	dpobj->interval = timelib_rel_time_clone(intobj->diff);
 	dpobj->start    = clone;
-	dpobj->recurrences = recurrences;
 	dpobj->initialized = 1;
+	dpobj->include_start_date = !(options & PHP_DATE_PERIOD_EXCLUDE_START_DATE);
+	dpobj->recurrences = recurrences + dpobj->include_start_date;
 
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 }
