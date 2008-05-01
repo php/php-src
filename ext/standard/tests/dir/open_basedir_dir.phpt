@@ -66,19 +66,19 @@ Warning: dir(): open_basedir restriction in effect. File(%s/test/bad/../bad/bad.
 
 Warning: dir(%s/test/bad/../bad/bad.txt): failed to open dir: Operation not permitted in %s on line %d
 bool(false)
-object(Directory)#1 (2) {
+object(Directory)#%d (2) {
   ["path"]=>
   string(%d) "%s/test/ok/"
   ["handle"]=>
   resource(%d) of type (stream)
 }
-object(Directory)#1 (2) {
+object(Directory)#%d (2) {
   ["path"]=>
   string(%d) "%s/test/ok"
   ["handle"]=>
   resource(%d) of type (stream)
 }
-object(Directory)#1 (2) {
+object(Directory)#%d (2) {
   ["path"]=>
   string(%d) "%s/test/ok/../ok"
   ["handle"]=>
@@ -132,19 +132,19 @@ Warning: dir(): open_basedir restriction in effect. File(%s/test/bad/../bad/bad.
 
 Warning: dir(%s/test/bad/../bad/bad.txt): failed to open dir: Operation not permitted in %s on line %d
 bool(false)
-object(Directory)#1 (2) {
+object(Directory)#%d (2) {
   [u"path"]=>
   unicode(%d) "%s/test/ok/"
   [u"handle"]=>
   resource(%d) of type (stream)
 }
-object(Directory)#1 (2) {
+object(Directory)#%d (2) {
   [u"path"]=>
   unicode(%d) "%s/test/ok"
   [u"handle"]=>
   resource(%d) of type (stream)
 }
-object(Directory)#1 (2) {
+object(Directory)#%d (2) {
   [u"path"]=>
   unicode(%d) "%s/test/ok/../ok"
   [u"handle"]=>
