@@ -1,5 +1,5 @@
 // $Id$
 // vim:ft=javascript
 
-EXTENSION("reflection", "php_reflection.c");
+EXTENSION("reflection", "php_reflection.c", false /* never shared */);
 AC_DEFINE('HAVE_REFLECTION', 1, 'Reflection support enabled');
