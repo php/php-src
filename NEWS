@@ -160,6 +160,8 @@ PHP                                                                        NEWS
   to different characters with cp1251 and cp866. (Scott)
 - Fixed possible crash in ext/soap because of uninitialized value. (Zdash Urf)
 - Fixed PECL bug #12431 (OCI8 ping functionality is broken). (Oracle Corp.)
+- Fixed an issue in date() where a : was printed for the O modifier after a P
+  modifier was used. (Derick)
 
 - Fixed bug #44805 (rename() function is not portable to Windows). (Pierre)
 - Fixed bug #44742 (timezone_offset_get() causes segmentation faults). (Derick)
