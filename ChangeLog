@@ -1,3 +1,87 @@
+2008-05-01  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/date/php_date.c
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/lib/timelib.c
+      ext/date/lib/timelib_structs.h
+      ext/date/lib/tm2unixtime.c:
+      - MFH: Rearranged some structures to allow for more powerfull
+      period/intervals.
+
+    * ext/date/php_date.c
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/lib/timelib.c
+      ext/date/lib/timelib_structs.h
+      ext/date/lib/tm2unixtime.c:
+      - Rearranged some structures to allow for more powerfull period/intervals.
+
+    * (PHP_5_3)
+      ext/date/php_date.c:
+      - MFH: Include the starting date by default in the iterator output, but add
+      an
+        option to disable this behavior.
+
+    * ext/date/php_date.c:
+      - Include the starting date by default in the iterator output, but add an
+        option to disable this behavior.
+
+2008-05-01  Ant Phillips  <antphill@uk.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/dir/open_basedir.inc
+      ext/standard/tests/dir/open_basedir.inc
+      ext/standard/tests/dir/open_basedir_dir.phpt
+      ext/standard/tests/dir/open_basedir_dir.phpt
+      ext/standard/tests/dir/open_basedir_dir.phpt
+      ext/standard/tests/dir/open_basedir_dir.phpt
+      ext/standard/tests/dir/open_basedir_dir.phpt
+      ext/standard/tests/dir/open_basedir_opendir.phpt
+      ext/standard/tests/dir/open_basedir_opendir.phpt
+      ext/standard/tests/dir/open_basedir_opendir.phpt
+      ext/standard/tests/dir/open_basedir_opendir.phpt
+      ext/standard/tests/dir/open_basedir_opendir.phpt
+      ext/standard/tests/dir/open_basedir_scandir.phpt
+      ext/standard/tests/dir/open_basedir_scandir.phpt:
+      open_basedir tests for directory functions
+
+    * ext/standard/tests/dir/open_basedir.inc
+      ext/standard/tests/dir/open_basedir.inc
+      ext/standard/tests/dir/open_basedir.inc
+      ext/standard/tests/dir/open_basedir_dir.phpt
+      ext/standard/tests/dir/open_basedir_dir.phpt
+      ext/standard/tests/dir/open_basedir_dir.phpt
+      ext/standard/tests/dir/open_basedir_opendir.phpt
+      ext/standard/tests/dir/open_basedir_opendir.phpt
+      ext/standard/tests/dir/open_basedir_opendir.phpt
+      ext/standard/tests/dir/open_basedir_scandir.phpt
+      ext/standard/tests/dir/open_basedir_scandir.phpt
+      ext/standard/tests/dir/open_basedir_scandir.phpt:
+        1.1.4;
+      open_basedir tests for directory functions
+
+2008-05-01  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/php_date.c
+      ext/date/php_date.h
+      ext/date/lib/timelib.c
+      ext/date/lib/timelib.h:
+      - MFH: Added the DatePeriod class/iterator that iterates over a date time
+        object for a specific number of iterators and applies a DateInterval
+      each
+        time.
+
+    * ext/date/php_date.c
+      ext/date/php_date.h
+      ext/date/lib/timelib.c
+      ext/date/lib/timelib.h:
+      - Added the DatePeriod class/iterator that iterates over a date time object
+        for a specific number of iterators and applies a DateInterval each time.
+
 2008-04-30  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
