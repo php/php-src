@@ -28,7 +28,7 @@ try
 	$p->stopBuffering();
 	echo file_get_contents($p['c']->getPathName());
 	copy($fname, $fname2);
-	var_dump($p->isZip());
+	var_dump($p->isFileFormat(Phar::ZIP));
 	$p->copy('a', $ename);
 }
 catch(Exception $e)
@@ -37,7 +37,7 @@ catch(Exception $e)
 }
 ini_set('phar.readonly',1);
 $p2 = new Phar($fname2);
-var_dump($p2->isZip());
+var_dump($p2->isFileFormat(Phar::ZIP));
 echo "\n";
 echo 'a: ' , file_get_contents($p2['a']->getPathName());
 echo 'b: ' ,file_get_contents($p2['b']->getPathName());

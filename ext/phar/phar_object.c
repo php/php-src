@@ -1682,36 +1682,28 @@ PHP_METHOD(Phar, count)
 }
 /* }}} */
 
-/* {{{ proto bool Phar::isTar()
- * Returns true if the phar archive is based on the tar file format
+/* {{{ proto bool Phar::isFileFormat(int format)
+ * Returns true if the phar archive is based on the tar/zip/phar file format depending
+ * on whether Phar::TAR, Phar::ZIP or Phar::PHAR was passed in
  */
-PHP_METHOD(Phar, isTar)
+PHP_METHOD(Phar, isFileFormat)
 {
+	long type;
 	PHAR_ARCHIVE_OBJECT();
-	
-	RETURN_BOOL(phar_obj->arc.archive->is_tar);
-}
-/* }}} */
 
-/* {{{ proto bool Phar::isZip()
- * Returns true if the phar archive is based on the Zip file format
- */
-PHP_METHOD(Phar, isZip)
-{
-	PHAR_ARCHIVE_OBJECT();
-	
-	RETURN_BOOL(phar_obj->arc.archive->is_zip);
-}
-/* }}} */
-
-/* {{{ proto bool Phar::isPhar()
- * Returns true if the phar archive is based on the phar file format
- */
-PHP_METHOD(Phar, isPhar)
-{
-	PHAR_ARCHIVE_OBJECT();
-	
-	RETURN_BOOL(!phar_obj->arc.archive->is_tar && !phar_obj->arc.archive->is_zip);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &type) == FAILURE) {
+		RETURN_FALSE;
+	}
+	switch (type) {
+		case PHAR_FORMAT_TAR:
+			RETURN_BOOL(phar_obj->arc.archive->is_tar);
+		case PHAR_FORMAT_ZIP:
+			RETURN_BOOL(phar_obj->arc.archive->is_zip);
+		case PHAR_FORMAT_PHAR:
+			RETURN_BOOL(!phar_obj->arc.archive->is_tar && !phar_obj->arc.archive->is_zip);
+		default:
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unknown file format specified");
+	}
 }
 /* }}} */
 
@@ -4414,6 +4406,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_fromstring, 0, 0, 1)
 	ZEND_ARG_INFO(0, contents)
 ZEND_END_ARG_INFO();
 
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_isff, 0, 0, 1)
+	ZEND_ARG_INFO(0, fileformat)
+ZEND_END_ARG_INFO();
+
 #endif /* HAVE_SPL */
 
 zend_function_entry php_archive_methods[] = {
@@ -4447,10 +4444,8 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, hasMetadata,           NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, isBuffering,           NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, isCompressed,          NULL,                      ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, isFileFormat,          arginfo_phar_isff,         ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, isWritable,            NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, isPhar,                NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, isTar,                 NULL,                      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, isZip,                 NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetExists,          arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetGet,             arginfo_phar_offsetExists, ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, offsetSet,             arginfo_phar_offsetSet,    ZEND_ACC_PUBLIC)

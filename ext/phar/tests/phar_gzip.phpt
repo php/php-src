@@ -36,7 +36,7 @@ $a = new Phar($fname);
 $a['test'] = 'hi';
 copy($fname, $fname2);
 $b = new Phar($fname2);
-var_dump($b->isPhar());
+var_dump($b->isFileFormat(Phar::PHAR));
 var_dump($b->isCompressed() == Phar::GZ);
 ?>
 ===DONE===

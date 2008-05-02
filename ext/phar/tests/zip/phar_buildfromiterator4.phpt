@@ -39,7 +39,7 @@ try {
 	chdir(dirname(__FILE__));
 	$phar = new Phar(dirname(__FILE__) . '/buildfromiterator.phar.zip');
 	var_dump($phar->buildFromIterator(new myIterator(array('a' => basename(__FILE__, 'php') . 'phpt'))));
-	var_dump($phar->isZip());
+	var_dump($phar->isFileFormat(Phar::ZIP));
 } catch (Exception $e) {
 	var_dump(get_class($e));
 	echo $e->getMessage() . "\n";

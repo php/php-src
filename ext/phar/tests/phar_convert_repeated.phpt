@@ -24,63 +24,63 @@ include 'files/phar_test.inc';
 
 echo "=================== new Phar() =======================\n";
 $phar = new Phar($fname);
-var_dump($phar->isPhar());
-var_dump($phar->isTar());
-var_dump($phar->isZip());
+var_dump($phar->isFileFormat(Phar::PHAR));
+var_dump($phar->isFileFormat(Phar::TAR));
+var_dump($phar->isFileFormat(Phar::ZIP));
 var_dump($phar->getStub());
 var_dump($phar->getAlias());
 
 echo "================= convertToTar() =====================\n";
 
 $phar = $phar->convertToExecutable(Phar::TAR);
-var_dump($phar->isPhar());
-var_dump($phar->isTar());
-var_dump($phar->isZip());
+var_dump($phar->isFileFormat(Phar::PHAR));
+var_dump($phar->isFileFormat(Phar::TAR));
+var_dump($phar->isFileFormat(Phar::ZIP));
 var_dump($phar->getStub());
 var_dump($phar->getAlias());
 
 echo "================= convertToZip() =====================\n";
 
 $phar = $phar->convertToExecutable(Phar::ZIP);
-var_dump($phar->isPhar());
-var_dump($phar->isTar());
-var_dump($phar->isZip());
+var_dump($phar->isFileFormat(Phar::PHAR));
+var_dump($phar->isFileFormat(Phar::TAR));
+var_dump($phar->isFileFormat(Phar::ZIP));
 var_dump($phar->getStub());
 var_dump($phar->getAlias());
 
 echo "================= convertToPhar() ====================\n";
 
 $phar = $phar->convertToExecutable(Phar::PHAR, Phar::NONE, '.2.phar');
-var_dump($phar->isPhar());
-var_dump($phar->isTar());
-var_dump($phar->isZip());
+var_dump($phar->isFileFormat(Phar::PHAR));
+var_dump($phar->isFileFormat(Phar::TAR));
+var_dump($phar->isFileFormat(Phar::ZIP));
 var_dump(strlen($phar->getStub()));
 var_dump($phar->getAlias());
 
 echo "================= convertToZip() =====================\n";
 
 $phar = $phar->convertToExecutable(Phar::ZIP, Phar::NONE, '.2.phar.zip');
-var_dump($phar->isPhar());
-var_dump($phar->isTar());
-var_dump($phar->isZip());
+var_dump($phar->isFileFormat(Phar::PHAR));
+var_dump($phar->isFileFormat(Phar::TAR));
+var_dump($phar->isFileFormat(Phar::ZIP));
 var_dump($phar->getStub());
 var_dump($phar->getAlias());
 
 echo "================= convertToTar() =====================\n";
 
 $phar = $phar->convertToExecutable(Phar::TAR, Phar::NONE, '2.phar.tar');
-var_dump($phar->isPhar());
-var_dump($phar->isTar());
-var_dump($phar->isZip());
+var_dump($phar->isFileFormat(Phar::PHAR));
+var_dump($phar->isFileFormat(Phar::TAR));
+var_dump($phar->isFileFormat(Phar::ZIP));
 var_dump($phar->getStub());
 var_dump($phar->getAlias());
 
 echo "================= convertToZip() =====================\n";
 
 $phar = $phar->convertToExecutable(Phar::ZIP, Phar::NONE, '3.phar.zip');
-var_dump($phar->isPhar());
-var_dump($phar->isTar());
-var_dump($phar->isZip());
+var_dump($phar->isFileFormat(Phar::PHAR));
+var_dump($phar->isFileFormat(Phar::TAR));
+var_dump($phar->isFileFormat(Phar::ZIP));
 var_dump($phar->getStub());
 var_dump($phar->getAlias());
 

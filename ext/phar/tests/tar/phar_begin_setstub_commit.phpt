@@ -7,7 +7,7 @@ phar.readonly=0
 --FILE--
 <?php
 $p = new Phar(dirname(__FILE__) . '/brandnewphar.phar.tar', 0, 'brandnewphar.phar');
-var_dump($p->isTar());
+var_dump($p->isFileFormat(Phar::TAR));
 //var_dump($p->getStub());
 var_dump($p->isBuffering());
 $p->startBuffering();

@@ -7,7 +7,7 @@ phar.readonly=0
 --FILE--
 <?php
 $p = new Phar(dirname(__FILE__) . '/brandnewphar.phar.zip', 0, 'brandnewphar.phar');
-var_dump($p->isZip());
+var_dump($p->isFileFormat(Phar::ZIP));
 //var_dump($p->getStub());
 var_dump($p->isBuffering());
 $p->startBuffering();
