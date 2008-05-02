@@ -805,7 +805,7 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 	char                 buffer[33];
 	timelib_time_offset *offset = NULL;
 	timelib_sll          isoweek, isoyear;
-	int                  rfc_colon = 0;
+	int                  rfc_colon;
 
 	if (!format_len) {
 		return estrdup("");
@@ -835,6 +835,7 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 	timelib_isoweek_from_date(t->y, t->m, t->d, &isoweek, &isoyear);
 
 	for (i = 0; i < format_len; i++) {
+		rfc_colon = 0;
 		switch (format[i]) {
 			/* day */
 			case 'd': length = slprintf(buffer, 32, "%02d", (int) t->d); break;
