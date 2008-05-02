@@ -3527,10 +3527,18 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 		fullpath[dest_len] = '\0';
 	}
 	if (FAILURE == php_stream_stat_path(fullpath, &ssb)) {
-		if (!php_stream_mkdir(fullpath, 0777,  PHP_STREAM_MKDIR_RECURSIVE, NULL)) {
-			spprintf(error, 4096, "Cannot extract \"%s\", could not create directory \"%s\"", entry->filename, fullpath);
-			efree(fullpath);
-			return FAILURE;
+		if (entry->is_dir) {
+			if (!php_stream_mkdir(fullpath, entry->flags & PHAR_ENT_PERM_MASK,  PHP_STREAM_MKDIR_RECURSIVE, NULL)) {
+				spprintf(error, 4096, "Cannot extract \"%s\", could not create directory \"%s\"", entry->filename, fullpath);
+				efree(fullpath);
+				return FAILURE;
+			}
+		} else {
+			if (!php_stream_mkdir(fullpath, 0777,  PHP_STREAM_MKDIR_RECURSIVE, NULL)) {
+				spprintf(error, 4096, "Cannot extract \"%s\", could not create directory \"%s\"", entry->filename, fullpath);
+				efree(fullpath);
+				return FAILURE;
+			}
 		}
 	}
 	if (slash) {
@@ -3575,8 +3583,13 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 		php_stream_close(fp);
 		return FAILURE;
 	}
-	efree(fullpath);
 	php_stream_close(fp);
+	if (-1 == VCWD_CHMOD(fullpath, entry->flags & PHAR_ENT_PERM_MASK)) {
+		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", setting file permissions failed", entry->filename, fullpath);
+		efree(fullpath);
+		return FAILURE;
+	}
+	efree(fullpath);
 	return SUCCESS;
 }
 
@@ -3628,6 +3641,8 @@ PHP_METHOD(Phar, extractTo)
 
 	if (zval_files) {
 		switch (Z_TYPE_P(zval_files)) {
+			case IS_NULL:
+				goto all_files;
 			case IS_STRING:
 				filename = Z_STRVAL_P(zval_files);
 				filename_len = Z_STRLEN_P(zval_files);
@@ -3679,6 +3694,8 @@ PHP_METHOD(Phar, extractTo)
 		}
 	} else {
 		phar_archive_data *phar = phar_obj->arc.archive;
+
+all_files:
 		/* Extract all files */
 		if (!zend_hash_num_elements(&(phar->manifest))) {
 			RETURN_TRUE;
@@ -4480,18 +4497,18 @@ zend_function_entry php_entry_methods[] = {
 	PHP_ME(PharFileInfo, __construct,        arginfo_entry___construct,  ZEND_ACC_PUBLIC)
 	PHP_ME(PharFileInfo, __destruct,         NULL,                       ZEND_ACC_PUBLIC)
 	PHP_ME(PharFileInfo, chmod,              arginfo_entry_chmod,        ZEND_ACC_PUBLIC)
+	PHP_ME(PharFileInfo, compress,           arginfo_phar_comp,          ZEND_ACC_PUBLIC)
+	PHP_ME(PharFileInfo, decompress,         NULL,                       ZEND_ACC_PUBLIC)
 	PHP_ME(PharFileInfo, delMetadata,        NULL,                       ZEND_ACC_PUBLIC)
-	PHP_ME(PharFileInfo, getContent,         NULL,                       ZEND_ACC_PUBLIC)
 	PHP_ME(PharFileInfo, getCompressedSize,  NULL,                       ZEND_ACC_PUBLIC)
 	PHP_ME(PharFileInfo, getCRC32,           NULL,                       ZEND_ACC_PUBLIC)
+	PHP_ME(PharFileInfo, getContent,         NULL,                       ZEND_ACC_PUBLIC)
 	PHP_ME(PharFileInfo, getMetadata,        NULL,                       ZEND_ACC_PUBLIC)
 	PHP_ME(PharFileInfo, getPharFlags,       NULL,                       ZEND_ACC_PUBLIC)
 	PHP_ME(PharFileInfo, hasMetadata,        NULL,                       ZEND_ACC_PUBLIC)
 	PHP_ME(PharFileInfo, isCompressed,       arginfo_phar_compo,         ZEND_ACC_PUBLIC)
 	PHP_ME(PharFileInfo, isCRCChecked,       NULL,                       ZEND_ACC_PUBLIC)
-	PHP_ME(PharFileInfo, compress,           arginfo_phar_comp,          ZEND_ACC_PUBLIC)
 	PHP_ME(PharFileInfo, setMetadata,        arginfo_phar_setMetadata,   ZEND_ACC_PUBLIC)
-	PHP_ME(PharFileInfo, decompress,         NULL,                       ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 #endif /* HAVE_SPL */
