@@ -297,9 +297,9 @@ CWD_API void realpath_cache_del(const char *path, int path_len TSRMLS_DC);
 /* rename on windows will fail if newname already exists.
    MoveFileEx has to be used */
 #if defined(TSRM_WIN32)
-# define VCWD_RENAME(oldname, newname) MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING)
-#else
 # define VCWD_RENAME(oldname, newname) (MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING) == 0 ? -1 : 0)
+#else
+# define VCWD_RENAME(oldname, newname) rename(oldname, newname)
 #endif
 #define VCWD_CHDIR(path) chdir(path)
 #define VCWD_CHDIR_FILE(path) virtual_chdir_file(path, chdir)
