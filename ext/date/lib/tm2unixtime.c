@@ -193,9 +193,6 @@ static void do_adjust_relative(timelib_time* time)
 			break;
 	}
 	do_normalize(time);
-
-	memset(&(time->relative), 0, sizeof(time->relative));
-	time->have_relative = 0;
 }
 
 static void do_adjust_special_weekday(timelib_time* time)

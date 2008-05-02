@@ -198,6 +198,7 @@ const zend_function_entry date_functions[] = {
 	PHP_FE(timezone_identifiers_list, NULL)
 	PHP_FE(timezone_abbreviations_list, NULL)
 
+	PHP_FE(date_interval_create_from_date_string, NULL)
 	PHP_FE(date_interval_format, NULL)
 
 	/* Options and Configuration */
@@ -242,10 +243,11 @@ const zend_function_entry date_funcs_timezone[] = {
 	PHP_ME_MAPPING(listIdentifiers,   timezone_identifiers_list,   NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	{NULL, NULL, NULL}
 };
-  
+
 const zend_function_entry date_funcs_interval[] = {
 	PHP_ME(DateInterval,              __construct,                 NULL, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(format,            date_interval_format,        NULL, 0)
+	PHP_ME_MAPPING(createFromDateString, date_interval_create_from_date_string,	NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	{NULL, NULL, NULL}
 };
 
@@ -1755,6 +1757,7 @@ static void date_period_it_current_data(zend_object_iterator *iter, zval ***data
 
 	/* apply modification if it's not the first iteration */
 	if (!object->include_start_date || iterator->current_index > 0) {
+		it_time->have_relative = 1;
 		it_time->relative.y = object->interval->y;
 		it_time->relative.m = object->interval->m;
 		it_time->relative.d = object->interval->d;
@@ -1762,7 +1765,9 @@ static void date_period_it_current_data(zend_object_iterator *iter, zval ***data
 		it_time->relative.i = object->interval->i;
 		it_time->relative.s = object->interval->s;
 		it_time->relative.weekday = object->interval->weekday;
-		it_time->have_relative = 1;
+		it_time->relative.special = object->interval->special;
+		it_time->relative.have_weekday_relative = object->interval->have_weekday_relative;
+		it_time->relative.have_special_relative = object->interval->have_special_relative;
 		it_time->sse_uptodate = 0;
 		timelib_update_ts(it_time, NULL);
 		timelib_update_from_sse(it_time);
@@ -2378,8 +2383,8 @@ PHP_FUNCTION(date_create)
 }
 /* }}} */
 
-/* {{{ proto DateTime date_create(string format, string time[, DateTimeZone object])
-   Returns new DateTime object
+/* {{{ proto DateTime date_create_from_format(string format, string time[, DateTimeZone object])
+   Returns new DateTime object formatted according to the specified format
 */
 PHP_FUNCTION(date_create_from_format)
 {
@@ -2585,22 +2590,20 @@ void php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAMETERS, timelib_time *
 				break;
 		}
 	}
-	if (parsed_time->have_relative || parsed_time->have_weekday_relative || parsed_time->have_special_relative || parsed_time->relative.first_last_day_of) {
+	if (parsed_time->have_relative) {
 		MAKE_STD_ZVAL(element);
 		array_init(element);
-	}
-	if (parsed_time->have_relative) {
 		add_ascii_assoc_long(element, "year",   parsed_time->relative.y);
 		add_ascii_assoc_long(element, "month",  parsed_time->relative.m);
 		add_ascii_assoc_long(element, "day",    parsed_time->relative.d);
 		add_ascii_assoc_long(element, "hour",   parsed_time->relative.h);
 		add_ascii_assoc_long(element, "minute", parsed_time->relative.i);
 		add_ascii_assoc_long(element, "second", parsed_time->relative.s);
-		if (parsed_time->have_weekday_relative) {
+		if (parsed_time->relative.have_weekday_relative) {
 			add_ascii_assoc_long(element, "weekday", parsed_time->relative.weekday);
 		}
-		if (parsed_time->have_special_relative && (parsed_time->special.type == TIMELIB_SPECIAL_WEEKDAY)) {
-			add_ascii_assoc_long(element, "weekdays", parsed_time->special.amount);
+		if (parsed_time->relative.have_special_relative && (parsed_time->relative.special.type == TIMELIB_SPECIAL_WEEKDAY)) {
+			add_ascii_assoc_long(element, "weekdays", parsed_time->relative.special.amount);
 		}
 		if (parsed_time->relative.first_last_day_of) {
 			add_ascii_assoc_bool(element, parsed_time->relative.first_last_day_of == 1 ? "first_day_of_month" : "last_day_of_month", 1);
@@ -3260,7 +3263,7 @@ PHP_FUNCTION(timezone_transitions_get)
 #define add_last() add(tzobj->tzi.tz->timecnt - 1, timestamp_begin)
 
 	array_init(return_value);
-  
+
 	if (timestamp_begin == LONG_MIN) {
 		add_nominal();
 		begin = 0;
@@ -3434,6 +3437,31 @@ PHP_METHOD(DateInterval, __construct)
 		}
 	}
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto DateInterval date_interval_create_from_date_string(string time)
+   Uses the normal date parsers and sets up a DateInterval from the relative parts of the parsed string
+*/
+PHP_FUNCTION(date_interval_create_from_date_string)
+{
+	char           *time_str = NULL;
+	int             time_str_len = 0;
+	timelib_time   *time;
+	timelib_error_container *err = NULL;
+	php_interval_obj *diobj;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &time_str, &time_str_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	date_instantiate(date_ce_interval, return_value TSRMLS_CC);
+
+	time = timelib_strtotime(time_str, time_str_len, &err, DATE_TIMEZONEDB);
+	diobj = (php_interval_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
+	diobj->diff = timelib_rel_time_clone(&time->relative);
+	timelib_time_dtor(time);
+	timelib_error_container_dtor(err);
 }
 /* }}} */
 
