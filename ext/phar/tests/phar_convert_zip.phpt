@@ -23,17 +23,17 @@ $files['c'] = 'c';
 include 'files/phar_test.inc';
 
 $phar = new Phar($fname);
-var_dump($phar->isZip());
+var_dump($phar->isFileFormat(Phar::ZIP));
 var_dump($phar->getStub());
 
 $phar = $phar->convertToExecutable(Phar::ZIP);
-var_dump($phar->isZip());
+var_dump($phar->isFileFormat(Phar::ZIP));
 var_dump($phar->getStub());
 
 copy($fname2, $fname3);
 
 $phar = new Phar($fname3);
-var_dump($phar->isZip());
+var_dump($phar->isFileFormat(Phar::ZIP));
 var_dump($phar->getStub());
 
 ?>

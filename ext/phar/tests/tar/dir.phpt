@@ -14,7 +14,7 @@ $pname2 = 'phar://' . $fname2;
 $fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.php';
 $pname3 = 'phar://' . $fname3;
 $phar = new Phar($fname);
-var_dump($phar->isTar());
+var_dump($phar->isFileFormat(Phar::TAR));
 
 $phar->addEmptyDir('test');
 var_dump($phar['test']->isDir());

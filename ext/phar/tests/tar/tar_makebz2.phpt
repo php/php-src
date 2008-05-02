@@ -15,13 +15,13 @@ $fname3 = dirname(__FILE__) . '/tar_makebz2_b.phar.tar.bz2';
 
 $phar = new Phar($fname);
 $phar['test'] = 'hi';
-var_dump($phar->isTar());
+var_dump($phar->isFileFormat(Phar::TAR));
 $phar = $phar->compress(Phar::BZ2);
 
 copy($fname2, $fname3);
 
 $phar2 = new Phar($fname3);
-var_dump($phar2->isTar());
+var_dump($phar2->isFileFormat(Phar::TAR));
 var_dump($phar2->isCompressed() == Phar::BZ2);
 
 ?>

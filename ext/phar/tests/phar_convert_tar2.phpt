@@ -24,19 +24,19 @@ $files['c'] = 'c';
 include 'files/phar_test.inc';
 
 $phar = new Phar($fname);
-var_dump($phar->isTar());
+var_dump($phar->isFileFormat(Phar::TAR));
 var_dump($phar->isCompressed());
 var_dump($phar->getStub());
 
 $phar = $phar->convertToExecutable(Phar::TAR, Phar::GZ);
-var_dump($phar->isTar());
+var_dump($phar->isFileFormat(Phar::TAR));
 var_dump($phar->isCompressed());
 var_dump($phar->getStub());
 
 copy($fname2, $fname3);
 
 $phar = new Phar($fname3);
-var_dump($phar->isTar());
+var_dump($phar->isFileFormat(Phar::TAR));
 var_dump($phar->isCompressed() == Phar::GZ);
 var_dump($phar->getStub());
 

@@ -36,7 +36,7 @@ $phar['test'] = 'hi';
 copy($fname, $fname2);
 
 $phar2 = new Phar($fname2);
-var_dump($phar2->isTar());
+var_dump($phar2->isFileFormat(Phar::TAR));
 var_dump($phar2->isCompressed() == Phar::BZ2);
 
 ?>

@@ -16,7 +16,7 @@ $pname = 'phar://' . $fname;
 file_put_contents($pname . '/a.php', "brand new!\n");
 
 $phar = new Phar($fname);
-var_dump($phar->isTar());
+var_dump($phar->isFileFormat(Phar::TAR));
 $sig1 = md5_file($fname);
 
 include $pname . '/a.php';

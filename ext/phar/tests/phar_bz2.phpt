@@ -35,8 +35,15 @@ $a = new Phar($fname);
 $a['test'] = 'hi';
 copy($fname, $fname2);
 $b = new Phar($fname2);
-var_dump($b->isPhar());
+var_dump($b->isFileFormat(Phar::PHAR));
 var_dump($b->isCompressed() == Phar::BZ2);
+// additional code coverage
+$b->isFileFormat(array());
+try {
+$b->isFileFormat(25);
+} catch (Exception $e) {
+echo $e->getMessage(),"\n";
+}
 ?>
 ===DONE===
 --CLEAN--
@@ -49,4 +56,7 @@ string(9) "it worked"
 string(%d) "phar://%sphar_bz2.phar/tar_004.php"
 bool(true)
 bool(true)
+
+Warning: Phar::isFileFormat() expects parameter 1 to be long, array given in %sphar_bz2.php on line %d
+Unknown file format specified
 ===DONE===

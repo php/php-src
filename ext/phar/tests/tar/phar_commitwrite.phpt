@@ -21,7 +21,7 @@ include 'phar://brandnewphar.phar/startup.php';
 __HALT_COMPILER();
 ?>");
 var_dump($p->getStub());
-var_dump($p->isTar());
+var_dump($p->isFileFormat(Phar::TAR));
 ?>
 ===DONE===
 --CLEAN--
