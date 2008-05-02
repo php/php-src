@@ -81,6 +81,7 @@ PHP_FUNCTION(timezone_abbreviations_list);
 
 PHP_METHOD(DateInterval, __construct);
 PHP_FUNCTION(date_interval_format);
+PHP_FUNCTION(date_interval_create_from_date_string);
 
 PHP_METHOD(DatePeriod, __construct);
 
