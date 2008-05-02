@@ -903,7 +903,7 @@ static char *date_format(char *format, int format_len, int *return_len, timelib_
 	timelib_time_offset *offset = NULL;
 	timelib_sll          isoweek, isoyear;
 	php_locale_data *loc_dat;
-	int                  rfc_colon = 0;
+	int                  rfc_colon;
 
 	if (!format_len) {
 		if (UG(unicode)) {
@@ -940,6 +940,7 @@ static char *date_format(char *format, int format_len, int *return_len, timelib_
 
 	for (i = 0; i < format_len; i++) {
 		no_free = 0;
+		rfc_colon = 0;
 		switch (format[i]) {
 			/* day */
 			case 'd': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (int) t->d); break;
