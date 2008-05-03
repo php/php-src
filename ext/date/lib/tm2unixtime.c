@@ -197,35 +197,55 @@ static void do_adjust_relative(timelib_time* time)
 
 static void do_adjust_special_weekday(timelib_time* time)
 {
-	timelib_sll current_dow, this_weekday = 0, count;
+	timelib_sll current_dow, count;
+
+	count = time->relative.special.amount;
 
 	current_dow = timelib_day_of_week(time->y, time->m, time->d);
-	count = time->relative.special.amount;
 	if (count == 0) {
+		// skip over saturday and sunday
 		if (current_dow == 6) {
-			this_weekday = 2;
+			time->d += 2;
 		}
+		// skip over sunday
 		if (current_dow == 0) {
-			this_weekday = 1;
+			time->d += 1;
 		}
-		time->d += this_weekday;
-		return;
 	} else if (count > 0) {
+		// skip over saturday and sunday
 		if (current_dow == 5) {
-			this_weekday = 2;
+			time->d += 2;
 		}
+		// skip over sunday
 		if (current_dow == 6) {
-			this_weekday = 1;
+			time->d += 1;
+		}
+		// add increments of 5 weekdays as a week
+		time->d += (count / 5) * 7;
+		// if current DOW plus the remainder > 5, add two days
+		current_dow = timelib_day_of_week(time->y, time->m, time->d);
+		time->d += (count % 5);
+		if ((count % 5) + current_dow > 5) {
+			time->d += 2;
 		}
 	} else if (count < 0) {
-		if (current_dow == 0) {
-			this_weekday = -1;
-		}
+		// skip over sunday and saturday
 		if (current_dow == 1) {
-			this_weekday = -2;
+			time->d -= 2;
+		}
+		// skip over satruday
+		if (current_dow == 0 ) {
+			time->d -= 1;
+		}
+		// subtract increments of 5 weekdays as a week
+		time->d += (count / 5) * 7;
+		// if current DOW minus the remainder < 0, subtract two days
+		current_dow = timelib_day_of_week(time->y, time->m, time->d);
+		time->d += (count % 5);
+		if ((count % 5) + current_dow < 1) {
+			time->d -= 2;
 		}
 	}
-	time->d += this_weekday + ((count / 5) * 7) + (count % 5);
 }
 
 static void do_adjust_special(timelib_time* time)
