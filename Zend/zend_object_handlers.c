@@ -1148,14 +1148,20 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists 
 			if (rv) {
 				result = zend_is_true(rv);
 				zval_ptr_dtor(&rv);
-				if (has_set_exists && result && !EG(exception) && zobj->ce->__get && !guard->in_get) {
-					guard->in_get = 1;
-					rv = zend_std_call_getter(object, member TSRMLS_CC);
-					guard->in_get = 0;
-					if (rv) {
-						Z_ADDREF_P(rv);
-						result = i_zend_is_true(rv);
-						zval_ptr_dtor(&rv);
+				if (has_set_exists && result) {
+					if (!EG(exception) && zobj->ce->__get && !guard->in_get) {
+						guard->in_get = 1;
+						rv = zend_std_call_getter(object, member TSRMLS_CC);
+						guard->in_get = 0;
+						if (rv) {
+							Z_ADDREF_P(rv);
+							result = i_zend_is_true(rv);
+							zval_ptr_dtor(&rv);
+						} else {
+							result = 0;
+						}
+					} else {
+						result = 0;
 					}
 				}
 			}
