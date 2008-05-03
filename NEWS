@@ -60,7 +60,8 @@ PHP                                                                        NEWS
     phrases so that they actually mean the week and not a seven day period
     around the current day.
   . added the DatePeriod class, that supports iterating over a DateTime object
-    applying a DateInterval on each iteration.
+	applying a DateInterval on each iteration, up to an end date or limited by
+	a maximum number of occurences.
 
 - Added functionality to SPL extension:
   . Added SPL to list of standard extensions that cannot be disabled. (Marcus)
