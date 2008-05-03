@@ -3517,6 +3517,7 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 	int len;
 	php_stream *fp;
 	char *fullpath, *slash;
+	mode_t mode;
 
 	len = spprintf(&fullpath, 0, "%s/%s", dest, entry->filename);
 	if (len >= MAXPATHLEN) {
@@ -3586,11 +3587,13 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 	}
 
 	fp = php_stream_open_wrapper(fullpath, "w+b", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
+
 	if (!fp) {
 		spprintf(error, 4096, "Cannot extract \"%s\", could not open for writing \"%s\"", entry->filename, fullpath);
 		efree(fullpath);
 		return FAILURE;
 	}
+
 	if (!phar_get_efp(entry, 0 TSRMLS_CC)) {
 		if (FAILURE == phar_open_entry_fp(entry, error, 1 TSRMLS_CC)) {
 			if (error) {
@@ -3603,24 +3606,30 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 			return FAILURE;
 		}
 	}
+
 	if (FAILURE == phar_seek_efp(entry, 0, SEEK_SET, 0, 0 TSRMLS_CC)) {
 		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", unable to seek internal file pointer", entry->filename, fullpath);
 		efree(fullpath);
 		php_stream_close(fp);
 		return FAILURE;
 	}
+
 	if (entry->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(entry, 0 TSRMLS_CC), fp, entry->uncompressed_filesize)) {
 		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", copying contents failed", entry->filename, fullpath);
 		efree(fullpath);
 		php_stream_close(fp);
 		return FAILURE;
 	}
+
 	php_stream_close(fp);
-	if (-1 == VCWD_CHMOD(fullpath, entry->flags & PHAR_ENT_PERM_MASK)) {
+	mode = (mode_t) entry->flags & PHAR_ENT_PERM_MASK;
+
+	if (FAILURE == VCWD_CHMOD(fullpath, mode)) {
 		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", setting file permissions failed", entry->filename, fullpath);
 		efree(fullpath);
 		return FAILURE;
 	}
+
 	efree(fullpath);
 	return SUCCESS;
 }
