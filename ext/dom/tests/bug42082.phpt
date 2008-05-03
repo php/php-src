@@ -8,7 +8,7 @@ $nodes = $xpath->query('*');
 var_dump($nodes);
 var_dump($nodes->length);
 $length = $nodes->length;
-var_dump(empty($nodes->length), empty($lenght));
+var_dump(empty($nodes->length), empty($length));
 
 $doc->loadXML("<element></element>");
 var_dump($doc->firstChild->nodeValue, empty($doc->firstChild->nodeValue), isset($doc->firstChild->nodeValue));
@@ -24,4 +24,4 @@ string(0) ""
 bool(true)
 bool(true)
 bool(false)
-bool(false)
+bool(false) 
