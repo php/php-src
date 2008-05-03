@@ -50,6 +50,8 @@ PHP                                                                        NEWS
   . support for date/time strings returned by MS SQL.
   . support for serialization and unserialization of DateTime objects.
   . support for diffing date/times through date_diff() / DateTime::diff().
+  . support for adding/subtracting weekdays with strtotime() and
+    DateTime::modify().
   . added DateInterval class to represent the difference between two date/times.
   . support for parsing ISO intervals for use with DateInterval.
   . date_add() / DateTime::add(), date_sub() / DateTime::sub() for applying an
