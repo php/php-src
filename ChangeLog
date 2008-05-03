@@ -1,3 +1,89 @@
+2008-05-02  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/reflection/config.m4
+      ext/reflection/config.m4:
+      fix build
+
+2008-05-02  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/php_date.c:
+      - MFH: Fixed an issue in date() where a : was printed for the O modifier
+      after
+        a P modifier was used.
+
+    * ext/date/php_date.c
+      ext/date/php_date.c:
+      - Fixed an issue in date() where a : was printed for the O modifier after a
+      P
+        modifier was used.
+
+    * TSRM/tsrm_virtual_cwd.h:
+      - More coffee required...
+
+2008-05-02  Elizabeth Marie Smith  <emsmith@elizabethmariesmith.com>
+
+    * ext/pcre/config.w32
+      ext/reflection/config.w32
+      ext/spl/config.w32:
+      MFB
+
+2008-05-02  Derick Rethans  <php@derickrethans.nl>
+
+    * TSRM/tsrm_virtual_cwd.h:
+      - MF53: fix for bug #44870: rename() on directory deletes same named file.
+        (Patch by Pierre)
+
+    * (PHP_5_3)
+      TSRM/tsrm_virtual_cwd.h:
+      - Fix for bug #44870: rename() on directory deletes same named file. (Patch
+      by
+        Pierre)
+
+2008-05-02  Elizabeth Marie Smith  <emsmith@elizabethmariesmith.com>
+
+    * (PHP_5_3)
+      ext/pcre/config.w32
+      ext/reflection/config.w32
+      ext/spl/config.w32:
+      Fix reflection (always static, never shared) and disable turning off pcre
+      and spl (also always static, never shared)
+
+2008-05-02  Lars Strojny  <lars@strojny.net>
+
+    * ext/reflection/config.m4
+      ext/reflection/config.m4
+      ext/reflection/config.w32
+      ext/reflection/config.w32:
+      Hard enabling it for Windows, readding define for UNIX [DOC]
+
+    * ext/reflection/config.m4:
+      Hard enabling ext/reflection on UNIX too [DOC]
+
+    * (PHP_5_3)
+      ext/reflection/config.m4:
+      Hard enabling ext/reflection on UNIX too  [DOC]
+
+2008-05-02  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/date/php_date.c
+      ext/date/php_date.h
+      ext/date/lib/tm2unixtime.c:
+      - MFH: Added DateInterval::createFromDateString() that creates an interval
+        from the relative parts of a date/time string.
+      - MFH: Fixed an issue where special relative bits were not applied.
+
+    * ext/date/php_date.c
+      ext/date/php_date.h
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/lib/tm2unixtime.c:
+      - Added DateInterval::createFromDateString() that creates an interval
+        from the relative parts of a date/time string.
+      - Fixed an issue where special relative bits were not applied.
+
 2008-05-01  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_5_3)
