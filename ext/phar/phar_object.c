@@ -1279,6 +1279,46 @@ PHP_METHOD(Phar, getSupportedCompression)
 }
 /* }}} */
 
+/* {{{ proto array Phar::unlinkArchive(string archive)
+ * Completely remove a phar archive from memory and disk
+ */
+PHP_METHOD(Phar, unlinkArchive)
+{
+	char *fname, *error;
+	int fname_len;
+	phar_archive_data *phar;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &fname, &fname_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (!fname_len) {
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unknown phar archive \"\"");
+		return;
+	}
+
+	if (FAILURE == phar_open_filename(fname, fname_len, NULL, 0, REPORT_ERRORS, &phar, &error TSRMLS_CC)) {
+		if (error) {
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unknown phar archive \"%s\": %s", fname, error);
+			efree(error);
+		} else {
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unknown phar archive \"%s\"", fname);
+		}
+		return;
+	}
+
+	if (phar->refcount) {
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "phar archive \"%s\" has open file handles or objects.  fclose() all file handles, and unset() all objects prior to calling unlinkArchive()", fname);
+		return;
+	}
+	fname = estrndup(phar->fname, phar->fname_len);
+	phar_archive_delref(phar TSRMLS_CC);
+	unlink(fname);
+	efree(fname);
+	RETURN_TRUE;
+}
+/* }}} */
+
 #if HAVE_SPL
 
 #define PHAR_ARCHIVE_OBJECT() \
@@ -4297,6 +4337,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_running, 0, 0, 1)
 	ZEND_ARG_INFO(0, retphar)
 ZEND_END_ARG_INFO();
 
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_ua, 0, 0, 1)
+	ZEND_ARG_INFO(0, archive)
+ZEND_END_ARG_INFO();
+
 #if HAVE_SPL
 
 static
@@ -4473,6 +4518,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, running,               arginfo_phar_running,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, mount,                 arginfo_phar_mount,        ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, mungServer,            arginfo_phar_mungServer,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
+	PHP_ME(Phar, unlinkArchive,         arginfo_phar_ua,           ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, webPhar,               arginfo_phar_webPhar,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	{NULL, NULL, NULL}
 };
