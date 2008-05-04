@@ -471,7 +471,7 @@ static int _get_lderrno(LDAP *ldap)
 }
 /* }}} */
 
-/* {{{ proto bool ldap_bind(resource link [, string dn, string password])
+/* {{{ proto bool ldap_bind(resource link [, string dn [, string password]])
    Bind to LDAP directory */
 PHP_FUNCTION(ldap_bind)
 {
@@ -581,7 +581,7 @@ static int _php_sasl_interact(LDAP *ld, unsigned flags, void *defaults, void *in
 }
 /* }}} */
 
-/* {{{ proto bool ldap_sasl_bind(resource link [, string binddn, string password, string sasl_mech, string sasl_realm, string sasl_authc_id, string sasl_authz_id, string props])
+/* {{{ proto bool ldap_sasl_bind(resource link [, string binddn [, string password [, string sasl_mech [, string sasl_realm [, string sasl_authc_id [, string sasl_authz_id [, string props]]]]]]])
    Bind to LDAP directory using SASL */
 PHP_FUNCTION(ldap_sasl_bind)
 {
