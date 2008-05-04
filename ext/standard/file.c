@@ -1118,7 +1118,7 @@ PHPAPI PHP_FUNCTION(fgetc)
 }
 /* }}} */
 
-/* {{{ proto string fgetss(resource fp [, int length, string allowable_tags])
+/* {{{ proto string fgetss(resource fp [, int length [, string allowable_tags]])
    Get a line from file pointer and strip HTML tags */
 PHPAPI PHP_FUNCTION(fgetss)
 {
