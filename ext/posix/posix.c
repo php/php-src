@@ -152,10 +152,11 @@ static PHP_MINFO_FUNCTION(posix)
 }
 /* }}} */
 
-static PHP_GINIT_FUNCTION(posix)
+static PHP_GINIT_FUNCTION(posix) /* {{{ */
 {
 	posix_globals->last_error = 0;
 }
+/* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION(posix)
  */
@@ -528,7 +529,7 @@ PHP_FUNCTION(posix_ctermid)
 /* }}} */
 
 /* Checks if the provides resource is a stream and if it provides a file descriptor */
-static int php_posix_stream_get_fd(zval *zfp, int *fd TSRMLS_DC)
+static int php_posix_stream_get_fd(zval *zfp, int *fd TSRMLS_DC) /* {{{ */
 {
 	php_stream *stream;
 
@@ -547,6 +548,7 @@ static int php_posix_stream_get_fd(zval *zfp, int *fd TSRMLS_DC)
 	}
 	return 1;
 }
+/* }}} */
 
 /* {{{ proto string posix_ttyname(int fd)
    Determine terminal device name (POSIX.1, 4.7.2) */
@@ -744,7 +746,8 @@ PHP_FUNCTION(posix_mknod)
 
 /* Takes a pointer to posix group and a pointer to an already initialized ZVAL
  * array container and fills the array with the posix group member data. */
-int php_posix_group_to_array(struct group *g, zval *array_group) {
+int php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ */
+{
 	zval *array_members;
 	int count;
 
@@ -766,6 +769,7 @@ int php_posix_group_to_array(struct group *g, zval *array_group) {
 	add_assoc_long(array_group, "gid", g->gr_gid);
 	return 1;
 }
+/* }}} */
 
 /*
 	POSIX.1, 5.5.1 unlink()
@@ -919,7 +923,8 @@ PHP_FUNCTION(posix_getgrgid)
 }
 /* }}} */
 
-int php_posix_passwd_to_array(struct passwd *pw, zval *return_value) {
+int php_posix_passwd_to_array(struct passwd *pw, zval *return_value) /* {{{ */
+{
 	if (NULL == pw)
 		return 0;
 	if (NULL == return_value || Z_TYPE_P(return_value) != IS_ARRAY)
@@ -934,6 +939,7 @@ int php_posix_passwd_to_array(struct passwd *pw, zval *return_value) {
 	add_assoc_string(return_value, "shell",     pw->pw_shell, 1);
 	return 1;
 }
+/* }}} */
 
 /* {{{ proto array posix_getpwnam(string groupname) 
    User database access (POSIX.1, 9.2.2) */
