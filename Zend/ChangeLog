@@ -1,3 +1,20 @@
+2008-05-03  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      zend_object_handlers.c
+      tests/bug44899.phpt
+      tests/bug44899_2.phpt:
+      - MFH: Fixed bug #44899 (__isset usage changes behavior of empty()) (patch
+      by Etienne Kneuss)
+
+    * zend_object_handlers.c
+      tests/bug44899.phpt
+      tests/bug44899.phpt
+      tests/bug44899_2.phpt
+      tests/bug44899_2.phpt:
+      - Fixed bug #44899 (__isset usage changes behavior of empty()) (patch by
+      Etienne Kneuss)
+
 2008-04-30  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_vm_def.h
