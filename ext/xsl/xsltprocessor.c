@@ -287,7 +287,9 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 				}
 				break;
 			default:
-			ZVAL_STRING(args[i], xmlXPathCastToString(obj), 1);
+				str = xmlXPathCastToString(obj);
+				ZVAL_STRING(args[i], str, 1);
+				xmlFree(str);
 		}
 		xmlXPathFreeObject(obj);
 		fci.params[i] = &args[i];
