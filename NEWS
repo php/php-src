@@ -59,6 +59,8 @@ PHP                                                                        NEWS
   . proper support for "this week", "previous week"/"last week" and "next week"
     phrases so that they actually mean the week and not a seven day period
     around the current day.
+  . support for "<xth> <weekday of" and "last <weekday> of" phrases to be used
+    with months - like in "last saturday of februari 2008".
   . added the DatePeriod class, that supports iterating over a DateTime object
     applying a DateInterval on each iteration, up to an end date or limited by
     a maximum number of occurences.
