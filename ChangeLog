@@ -1,3 +1,81 @@
+2008-05-03  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/Makefile:
+      - Introducing nmake clean-all
+      - This should probably be merged with nmake clean, but I've no way to test
+      the impact on distro builds.
+
+2008-05-03  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * ext/dom/tests/bug42082.phpt
+      ext/dom/tests/bug42082.phpt
+      ext/dom/tests/bug42082.phpt:
+      Committing corrected test from Eric Stewart
+
+2008-05-03  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      BFN: #44899
+
+2008-05-03  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/spl_directory.c
+      ext/spl/spl_directory.c:
+      MFB: Fix #44838 (static class reference restricting overwriting)
+
+    * (PHP_5_3)
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/035.phpt:
+      MFH: Fix #44484 (define SimpleXMLElement::__toString())
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/035.phpt
+      ext/simplexml/tests/035.phpt:
+      Fix #44484 (define SimpleXMLElement::__toString())
+
+2008-05-03  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      NEWS:
+      - Tabs to spaces.
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/php_date.c:
+      - Added support for using an end date to limit the amount of recursions
+        with the DatePeriod iterator.
+
+    * ext/date/php_date.c:
+      - Added support for using an end date to limit the amount of recursions
+        with the DatePeriod iterator.
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/lib/tm2unixtime.c:
+      - MFH: Fixed weekdays adding/subtracting algorithm.
+
+    * ext/date/lib/tm2unixtime.c:
+      - Fixed weekdays algorithm.
+
+2008-05-03  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug44899.phpt
+      ZendEngine2/tests/bug44899_2.phpt:
+      - MFH: Fixed bug #44899 (__isset usage changes behavior of empty()) (patch
+      by Etienne Kneuss)
+
+    * ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug44899.phpt
+      ZendEngine2/tests/bug44899.phpt
+      ZendEngine2/tests/bug44899_2.phpt
+      ZendEngine2/tests/bug44899_2.phpt:
+      - Fixed bug #44899 (__isset usage changes behavior of empty()) (patch by
+      Etienne Kneuss)
+
 2008-05-02  Antony Dovgal  <tony@daylessday.org>
 
     * ext/reflection/config.m4
