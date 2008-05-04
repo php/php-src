@@ -38,7 +38,7 @@
 #include "php_lcg.h"
 #include "uniqid.h"
 
-/* {{{ proto string uniqid([string prefix , bool more_entropy])
+/* {{{ proto string uniqid([string prefix [, bool more_entropy]])
    Generates a unique ID */
 #ifdef HAVE_GETTIMEOFDAY
 PHP_FUNCTION(uniqid)
