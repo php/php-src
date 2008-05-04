@@ -242,6 +242,12 @@ void timelib_dump_date(timelib_time *d, int options)
 					case TIMELIB_SPECIAL_WEEKDAY:
 						printf(" / %lld weekday", d->relative.special.amount);
 						break;
+					case TIMELIB_SPECIAL_DAY_OF_WEEK_IN_MONTH:
+						printf(" / x y of z month");
+						break;
+					case TIMELIB_SPECIAL_LAST_DAY_OF_WEEK_IN_MONTH:
+						printf(" / last y of z month");
+						break;
 				}
 			}
 		}
