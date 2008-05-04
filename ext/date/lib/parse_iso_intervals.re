@@ -452,11 +452,11 @@ void timelib_strtointerval(char *s, int len,
 	in.begin->h = TIMELIB_UNSET;
 	in.begin->i = TIMELIB_UNSET;
 	in.begin->s = TIMELIB_UNSET;
-	in.begin->f = TIMELIB_UNSET;
-	in.begin->z = TIMELIB_UNSET;
-	in.begin->dst = TIMELIB_UNSET;
+	in.begin->f = 0;
+	in.begin->z = 0;
+	in.begin->dst = 0;
 	in.begin->is_localtime = 0;
-	in.begin->zone_type = 0;
+	in.begin->zone_type = TIMELIB_ZONETYPE_OFFSET;
 
 	in.end = timelib_time_ctor();
 	in.end->y = TIMELIB_UNSET;
@@ -465,11 +465,11 @@ void timelib_strtointerval(char *s, int len,
 	in.end->h = TIMELIB_UNSET;
 	in.end->i = TIMELIB_UNSET;
 	in.end->s = TIMELIB_UNSET;
-	in.end->f = TIMELIB_UNSET;
-	in.end->z = TIMELIB_UNSET;
-	in.end->dst = TIMELIB_UNSET;
+	in.end->f = 0;
+	in.end->z = 0;
+	in.end->dst = 0;
 	in.end->is_localtime = 0;
-	in.end->zone_type = 0;
+	in.end->zone_type = TIMELIB_ZONETYPE_OFFSET;
 
 	in.period = timelib_rel_time_ctor();
 	in.period->y = 0;

@@ -3538,6 +3538,30 @@ PHP_FUNCTION(date_interval_format)
 }
 /* }}} */
 
+static int date_period_initialize(timelib_time **st, timelib_time **et, timelib_rel_time **d, int *recurrences, /*const*/ char *format, int format_length TSRMLS_DC)
+{
+	timelib_time     *b = NULL, *e = NULL;
+	timelib_rel_time *p = NULL;
+	int               r = 0;
+	int               retval = 0;
+	struct timelib_error_container *errors;
+
+	timelib_strtointerval(format, format_length, &b, &e, &p, &r, &errors);
+	
+	if (errors->error_count > 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown or bad format (%s)", format);
+		retval = FAILURE;
+	} else {
+		*st = b;
+		*et = e;
+		*d  = p;
+		*recurrences = r;
+		retval = SUCCESS;
+	}
+	timelib_error_container_dtor(errors);
+	return retval;
+}
+
 /* {{{ proto DatePeriod::__construct(DateTime $start, DateInterval $interval, int recurrences|DateTime $end)
    Creates new DatePeriod object.
 */
@@ -3548,38 +3572,44 @@ PHP_METHOD(DatePeriod, __construct)
 	php_interval_obj *intobj;
 	zval *start, *end = NULL, *interval;
 	long  recurrences = 0, options = 0;
+	char *isostr = NULL;
+	int   isostr_len;
 	timelib_time *clone;
 	
 	php_set_error_handling(EH_THROW, NULL TSRMLS_CC);
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "OOl|l", &start, date_ce_date, &interval, date_ce_interval, &recurrences, &options) == FAILURE) {
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "OOO|l", &start, date_ce_date, &interval, date_ce_interval, &end, date_ce_date, &options) == FAILURE) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "This constructor accepts either (DateTime, DateInterval, int) OR (DateTime, DateInterval, DateTime) as arguments.");
-			return;
+			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &isostr, &isostr_len, &options) == FAILURE) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "This constructor accepts either (DateTime, DateInterval, int) OR (DateTime, DateInterval, DateTime) OR (string) as arguments.");
+				return;
+			}
 		}
 	}
 
-	/* init */
-	intobj  = (php_interval_obj *) zend_object_store_get_object(interval TSRMLS_CC);
 	dpobj = zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	/* start date */
-	dateobj = (php_date_obj *) zend_object_store_get_object(start TSRMLS_CC);
-	clone = timelib_time_ctor();
-	memcpy(clone, dateobj->time, sizeof(timelib_time));
-	if (dateobj->time->tz_abbr) {
-		clone->tz_abbr = strdup(dateobj->time->tz_abbr);
-	}
-	if (dateobj->time->tz_info) {
-		clone->tz_info = timelib_tzinfo_clone(dateobj->time->tz_info);
-	}
-	dpobj->start = clone;
+	if (isostr_len) {
+		date_period_initialize(&(dpobj->start), &(dpobj->end), &(dpobj->interval), (int*) &recurrences, isostr, isostr_len TSRMLS_CC);
+		if (dpobj->start == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The ISO interval '%s' did not contain a start date.", isostr);
+		}
+		if (dpobj->interval == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The ISO interval '%s' did not contain an interval.", isostr);
+		}
+		if (dpobj->end == NULL && recurrences == 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The ISO interval '%s' did not contain an end date or a recurrence count.", isostr);
+		}
 
-	/* interval */
-	dpobj->interval = timelib_rel_time_clone(intobj->diff);
+		timelib_update_ts(dpobj->start, NULL);
+		if (dpobj->end) {
+			timelib_update_ts(dpobj->end, NULL);
+		}
+	} else {
+		/* init */
+		intobj  = (php_interval_obj *) zend_object_store_get_object(interval TSRMLS_CC);
 
-	/* end date */
-	if (end) {
-		dateobj = (php_date_obj *) zend_object_store_get_object(end TSRMLS_CC);
+		/* start date */
+		dateobj = (php_date_obj *) zend_object_store_get_object(start TSRMLS_CC);
 		clone = timelib_time_ctor();
 		memcpy(clone, dateobj->time, sizeof(timelib_time));
 		if (dateobj->time->tz_abbr) {
@@ -3588,7 +3618,24 @@ PHP_METHOD(DatePeriod, __construct)
 		if (dateobj->time->tz_info) {
 			clone->tz_info = timelib_tzinfo_clone(dateobj->time->tz_info);
 		}
-		dpobj->end = clone;
+		dpobj->start = clone;
+
+		/* interval */
+		dpobj->interval = timelib_rel_time_clone(intobj->diff);
+
+		/* end date */
+		if (end) {
+			dateobj = (php_date_obj *) zend_object_store_get_object(end TSRMLS_CC);
+			clone = timelib_time_ctor();
+			memcpy(clone, dateobj->time, sizeof(timelib_time));
+			if (dateobj->time->tz_abbr) {
+				clone->tz_abbr = strdup(dateobj->time->tz_abbr);
+			}
+			if (dateobj->time->tz_info) {
+				clone->tz_info = timelib_tzinfo_clone(dateobj->time->tz_info);
+			}
+			dpobj->end = clone;
+		}
 	}
 
 	/* options */
