@@ -2176,7 +2176,7 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto bool openssl_csr_new(array dn, resource &privkey [, array configargs, array extraattribs])
+/* {{{ proto bool openssl_csr_new(array dn, resource &privkey [, array configargs [, array extraattribs]])
    Generates a privkey and CSR */
 PHP_FUNCTION(openssl_csr_new)
 {
