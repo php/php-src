@@ -152,10 +152,11 @@ static PHP_MINFO_FUNCTION(posix)
 }
 /* }}} */
 
-static PHP_GINIT_FUNCTION(posix)
+static PHP_GINIT_FUNCTION(posix) /* {{{ */
 {
 	posix_globals->last_error = 0;
 }
+/* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION(posix)
  */
