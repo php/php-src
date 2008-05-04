@@ -79,6 +79,7 @@
 #define TIMELIB_TIME24_WITH_ZONE 278
 #define TIMELIB_ISO_WEEK       279
 #define TIMELIB_LF_DAY_OF_MONTH 280
+#define TIMELIB_WEEK_DAY_OF_MONTH 281
 
 #define TIMELIB_TIMEZONE       300
 #define TIMELIB_AGO            301
@@ -956,6 +957,8 @@ relative = relnumber space? (reltextunit | 'week' );
 relativetext = (reltextnumber|reltexttext) space reltextunit;
 relativetextweek = reltexttext space 'week';
 
+weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) ' of';
+
 */
 
 /*!re2c
@@ -1055,6 +1058,29 @@ relativetextweek = reltexttext space 'week';
 
 		TIMELIB_DEINIT;
 		return TIMELIB_LF_DAY_OF_MONTH;
+	}
+
+	weekdayof
+	{
+		timelib_sll i;
+		int         behavior = 0;
+		DEBUG_OUTPUT("weekdayof");
+		TIMELIB_INIT;
+		TIMELIB_HAVE_RELATIVE();
+		TIMELIB_HAVE_SPECIAL_RELATIVE();
+
+		i = timelib_get_relative_text((char **) &ptr, &behavior);
+		timelib_eat_spaces((char **) &ptr);
+		timelib_set_relative((char **) &ptr, i, behavior, s);
+		if (i > 0) { /* first, second... etc */
+			s->time->relative.special.type = TIMELIB_SPECIAL_DAY_OF_WEEK_IN_MONTH;
+			timelib_set_relative((char **) &ptr, i, behavior, s);
+		} else { /* last */
+			s->time->relative.special.type = TIMELIB_SPECIAL_LAST_DAY_OF_WEEK_IN_MONTH;
+			timelib_set_relative((char **) &ptr, -i, behavior, s);
+		}
+		TIMELIB_DEINIT;
+		return TIMELIB_WEEK_DAY_OF_MONTH;
 	}
 
 	timetiny12 | timeshort12 | timelong12
