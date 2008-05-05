@@ -1,3 +1,77 @@
+2008-05-04  Etienne Kneuss  <php@colder.ch>
+
+    * ext/gd/gd.c
+      ext/ldap/ldap.c
+      ext/openssl/openssl.c
+      ext/standard/file.c
+      ext/standard/streamsfuncs.c
+      ext/standard/uniqid.c:
+      Fix protos
+
+2008-05-04  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/lib/timelib.c
+      ext/date/lib/timelib.h
+      ext/date/lib/tm2unixtime.c:
+      - MFH: Added support for "<xth> <weekday of" and "last <weekday> of"
+      phrases to
+        be used with months - like in "last saturday of februari 2008".
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/lib/timelib.c
+      ext/date/lib/timelib.h
+      ext/date/lib/tm2unixtime.c:
+      - Added support for "<xth> <weekday of" and "last <weekday> of" phrases to
+      be
+        used with months - like in "last saturday of februari 2008".
+
+2008-05-04  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/xsl/xsltprocessor.c
+      ext/xsl/xsltprocessor.c:
+      MFH: fix bug #44891 Memory leak using registerPHPFunctions and XSLT
+      Variable
+
+    * ext/xsl/xsltprocessor.c:
+      fix bug #44891 Memory leak using registerPHPFunctions and XSLT Variable
+
+2008-05-04  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/standard/array.c:
+      fix compile warnings
+
+2008-05-04  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/date/php_date.c
+      ext/date/lib/parse_iso_intervals.c
+      ext/date/lib/parse_iso_intervals.re:
+      - MFH: Added support for using ISO 8601 time intervals to define a
+      DatePeriod
+        iterator.
+
+    * ext/date/php_date.c
+      ext/date/lib/parse_iso_intervals.c
+      ext/date/lib/parse_iso_intervals.re:
+      - Added support for using ISO 8601 time intervals to define a DatePeriod
+        iterator.
+
+2008-05-04  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/posix/posix.c:
+      fix folding
+
 2008-05-03  Steph Fox  <steph.fox@virgin.net>
 
     * (PHP_5_3)
