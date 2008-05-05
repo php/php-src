@@ -360,7 +360,7 @@ PHP_FUNCTION(asinh)
 
 /* {{{ proto float acosh(float number)
    Returns the inverse hyperbolic cosine of the number, i.e. the value whose hyperbolic cosine is number */
-PHP_FUNCTION(php_acosh)
+PHP_FUNCTION(acosh)
 {
 	double num;
 	
