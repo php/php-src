@@ -3277,6 +3277,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(asin,															arginfo_asin)
 	PHP_FE(acos,															arginfo_acos)
 	PHP_FE(atan,															arginfo_atan)
+	PHP_FE(atanh,															arginfo_atanh)
 	PHP_FE(atan2,															arginfo_atan2)
 	PHP_FE(sinh,															arginfo_sinh)
 	PHP_FE(cosh,															arginfo_cosh)
