@@ -1792,7 +1792,13 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 
 	if (scope) {
 		class_name_len = strlen(scope->name);
-		lc_class_name = zend_str_tolower_dup(scope->name, class_name_len);
+		if ((lc_class_name = zend_memrchr(scope->name, ':', class_name_len))) {
+			lc_class_name++;
+			class_name_len -= (lc_class_name - scope->name);
+			lc_class_name = zend_str_tolower_dup(lc_class_name, class_name_len);
+		} else {
+			lc_class_name = zend_str_tolower_dup(scope->name, class_name_len);
+		}
 	}
 
 	while (ptr->fname) {
