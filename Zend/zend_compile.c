@@ -1238,9 +1238,6 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	op_array.line_start = zend_get_compiled_lineno(TSRMLS_C);
 
 	if (is_method) {
-		zstr short_class_name = CG(active_class_entry)->name;
-		unsigned int short_class_name_length = CG(active_class_entry)->name_length;
-
 		if (zend_u_hash_add(&CG(active_class_entry)->function_table, Z_TYPE(function_name->u.constant), lcname, lcname_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array)) == FAILURE) {
 			zend_op_array *child_op_array, *parent_op_array;
 			if (CG(active_class_entry)->parent
@@ -1263,10 +1260,31 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		}
 
 		if (!(CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE)) {
-			short_class_name = zend_u_str_case_fold(UG(unicode)?IS_UNICODE:IS_STRING, CG(active_class_entry)->name, short_class_name_length, 0, &short_class_name_length);
+			zstr short_class_name;
+			unsigned int short_class_name_length;
+			zstr short_class_lcname;
+
+			if (UG(unicode)) {
+				if ((short_class_name.u = u_memrchr(CG(active_class_entry)->name.u, ':', CG(active_class_entry)->name_length))) {
+					short_class_name.u++;
+					short_class_name_length = CG(active_class_entry)->name_length - (short_class_name.u - CG(active_class_entry)->name.u);
+				} else {
+					short_class_name = CG(active_class_entry)->name;
+					short_class_name_length = CG(active_class_entry)->name_length;
+				}
+			} else {
+				if ((short_class_name.s = zend_memrchr(CG(active_class_entry)->name.s, ':', CG(active_class_entry)->name_length))) {
+					short_class_name.s++;
+					short_class_name_length = CG(active_class_entry)->name_length - (short_class_name.s - CG(active_class_entry)->name.s);
+				} else {
+					short_class_name = CG(active_class_entry)->name;
+					short_class_name_length = CG(active_class_entry)->name_length;
+				}
+			}
+			short_class_lcname = zend_u_str_case_fold(UG(unicode)?IS_UNICODE:IS_STRING, short_class_name, short_class_name_length, 0, &short_class_name_length);
 			/* Improve after RC: cache the lowercase class name */
 
-			if ((short_class_name_length == name_len) && (!memcmp(short_class_name.v, lcname.v, UG(unicode)?UBYTES(lcname_len):lcname_len))) {
+			if ((short_class_name_length == name_len) && (!memcmp(short_class_lcname.v, lcname.v, UG(unicode)?UBYTES(lcname_len):lcname_len))) {
 				if (CG(active_class_entry)->constructor) {
 					zend_error(E_STRICT, "Redefining already defined constructor for class %v", CG(active_class_entry)->name);
 				} else {
@@ -1298,7 +1316,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			} else if (!(fn_flags & ZEND_ACC_STATIC)) {
 				CG(active_op_array)->fn_flags |= ZEND_ACC_ALLOW_STATIC;
 			}
-			efree(short_class_name.v);
+			efree(short_class_lcname.v);
 		}
 
 		efree(lcname.v);
