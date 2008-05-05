@@ -523,10 +523,14 @@ static int ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 				switch (brk_opline->opcode) {
 					case ZEND_SWITCH_FREE:
-						zend_switch_free(&EX_T(brk_opline->op1.u.var), brk_opline->op1.op_type, brk_opline->extended_value TSRMLS_CC);
+						if (brk_opline->op1.u.EA.type != EXT_TYPE_FREE_ON_RETURN) {
+							zend_switch_free(&EX_T(brk_opline->op1.u.var), brk_opline->extended_value TSRMLS_CC);
+						}
 						break;
 					case ZEND_FREE:
-						zendi_zval_dtor(EX_T(brk_opline->op1.u.var).tmp_var);
+						if (brk_opline->op1.u.EA.type != EXT_TYPE_FREE_ON_RETURN) {
+							zendi_zval_dtor(EX_T(brk_opline->op1.u.var).tmp_var);
+						}
 						break;
 				}
 			}
@@ -733,10 +737,14 @@ static int ZEND_GOTO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	switch (brk_opline->opcode) {
 		case ZEND_SWITCH_FREE:
-			zend_switch_free(&EX_T(brk_opline->op1.u.var), brk_opline->op1.op_type, brk_opline->extended_value TSRMLS_CC);
+			if (brk_opline->op1.u.EA.type != EXT_TYPE_FREE_ON_RETURN) {
+				zend_switch_free(&EX_T(brk_opline->op1.u.var), brk_opline->extended_value TSRMLS_CC);
+			}
 			break;
 		case ZEND_FREE:
-			zendi_zval_dtor(EX_T(brk_opline->op1.u.var).tmp_var);
+			if (brk_opline->op1.u.EA.type != EXT_TYPE_FREE_ON_RETURN) {
+				zendi_zval_dtor(EX_T(brk_opline->op1.u.var).tmp_var);
+			}
 			break;
 	}
 	ZEND_VM_JMP(opline->op1.u.jmp_addr);
@@ -4868,14 +4876,6 @@ static int ZEND_BOOL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_SWITCH_FREE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-
-	zend_switch_free(&EX_T(opline->op1.u.var), IS_TMP_VAR, opline->extended_value TSRMLS_CC);
-	ZEND_VM_NEXT_OPCODE();
-}
-
 static int ZEND_CLONE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -8266,7 +8266,7 @@ static int ZEND_SWITCH_FREE_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 
-	zend_switch_free(&EX_T(opline->op1.u.var), IS_VAR, opline->extended_value TSRMLS_CC);
+	zend_switch_free(&EX_T(opline->op1.u.var), opline->extended_value TSRMLS_CC);
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -31948,11 +31948,11 @@ void zend_init_opcodes_handlers(void)
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_SWITCH_FREE_SPEC_TMP_HANDLER,
-  	ZEND_SWITCH_FREE_SPEC_TMP_HANDLER,
-  	ZEND_SWITCH_FREE_SPEC_TMP_HANDLER,
-  	ZEND_SWITCH_FREE_SPEC_TMP_HANDLER,
-  	ZEND_SWITCH_FREE_SPEC_TMP_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_SWITCH_FREE_SPEC_VAR_HANDLER,
   	ZEND_SWITCH_FREE_SPEC_VAR_HANDLER,
   	ZEND_SWITCH_FREE_SPEC_VAR_HANDLER,

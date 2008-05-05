@@ -412,22 +412,18 @@ static inline zval *_get_obj_zval_ptr(znode *op, temp_variable *Ts, zend_free_op
 }
 /* }}} */
 
-static inline void zend_switch_free(temp_variable *T, int type, int extended_value TSRMLS_DC) /* {{{ */
+static inline void zend_switch_free(temp_variable *T, int extended_value TSRMLS_DC) /* {{{ */
 {
-	if (type == IS_VAR) {
-		if (T->var.ptr) {
-			if (extended_value & ZEND_FE_RESET_VARIABLE) { /* foreach() free */
-				Z_DELREF_P(T->var.ptr);
-			}
-			zval_ptr_dtor(&T->var.ptr);
-		} else if (!T->var.ptr_ptr) {
-			/* perform the equivalent of equivalent of a
-			 * quick & silent get_zval_ptr, and FREE_OP
-			 */
-			PZVAL_UNLOCK_FREE(T->str_offset.str);
+	if (T->var.ptr) {
+		if (extended_value & ZEND_FE_RESET_VARIABLE) { /* foreach() free */
+			Z_DELREF_P(T->var.ptr);
 		}
-	} else { /* IS_TMP_VAR */
-		zendi_zval_dtor(T->tmp_var);
+		zval_ptr_dtor(&T->var.ptr);
+	} else if (!T->var.ptr_ptr) {
+		/* perform the equivalent of equivalent of a
+		 * quick & silent get_zval_ptr, and FREE_OP
+		 */
+		PZVAL_UNLOCK_FREE(T->str_offset.str);
 	}
 }
 /* }}} */
@@ -1347,10 +1343,14 @@ static inline zend_brk_cont_element* zend_brk_cont(int nest_levels, int array_of
 
 			switch (brk_opline->opcode) {
 				case ZEND_SWITCH_FREE:
-					zend_switch_free(&T(brk_opline->op1.u.var), brk_opline->op1.op_type, brk_opline->extended_value TSRMLS_CC);
+					if (brk_opline->op1.u.EA.type != EXT_TYPE_FREE_ON_RETURN) {
+						zend_switch_free(&T(brk_opline->op1.u.var), brk_opline->extended_value TSRMLS_CC);
+					}
 					break;
 				case ZEND_FREE:
-					zendi_zval_dtor(T(brk_opline->op1.u.var).tmp_var);
+					if (brk_opline->op1.u.EA.type != EXT_TYPE_FREE_ON_RETURN) {
+						zendi_zval_dtor(T(brk_opline->op1.u.var).tmp_var);
+					}
 					break;
 			}
 		}

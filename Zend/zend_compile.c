@@ -2129,7 +2129,7 @@ static int generate_free_switch_expr(zend_switch_entry *switch_entry TSRMLS_DC) 
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	opline->opcode = ZEND_SWITCH_FREE;
+	opline->opcode = (switch_entry->cond.op_type == IS_TMP_VAR) ? ZEND_FREE : ZEND_SWITCH_FREE;
 	opline->op1 = switch_entry->cond;
 	SET_UNUSED(opline->op2);
 	opline->extended_value = 0;
@@ -2148,7 +2148,7 @@ static int generate_free_foreach_copy(zend_op *foreach_copy TSRMLS_DC) /* {{{ */
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	opline->opcode = ZEND_SWITCH_FREE;
+	opline->opcode = (foreach_copy->result.op_type == IS_TMP_VAR) ? ZEND_FREE : ZEND_SWITCH_FREE;
 	opline->op1 = foreach_copy->result;
 	SET_UNUSED(opline->op2);
 	opline->extended_value = 1;
@@ -2156,7 +2156,7 @@ static int generate_free_foreach_copy(zend_op *foreach_copy TSRMLS_DC) /* {{{ */
 	if (foreach_copy->op1.op_type != IS_UNUSED) {
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-		opline->opcode = ZEND_SWITCH_FREE;
+		opline->opcode = (foreach_copy->op1.op_type == IS_TMP_VAR) ? ZEND_FREE : ZEND_SWITCH_FREE;
 		opline->op1 = foreach_copy->op1;
 		SET_UNUSED(opline->op2);
 		opline->extended_value = 0;
@@ -2169,6 +2169,7 @@ static int generate_free_foreach_copy(zend_op *foreach_copy TSRMLS_DC) /* {{{ */
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
+	int start_op_number, end_op_number;
 
 	if (do_end_vparse) {
 		if (CG(active_op_array)->return_reference && !zend_is_function_or_method_call(expr)) {
@@ -2178,6 +2179,8 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 		}
 	}
 
+	start_op_number = get_next_op_number(CG(active_op_array));
+
 #ifdef ZTS
 	zend_stack_apply_with_argument(&CG(switch_cond_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element, void *)) generate_free_switch_expr TSRMLS_CC);
 	zend_stack_apply_with_argument(&CG(foreach_copy_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element, void *)) generate_free_foreach_copy TSRMLS_CC);
@@ -2185,6 +2188,12 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 	zend_stack_apply(&CG(switch_cond_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element)) generate_free_switch_expr);
 	zend_stack_apply(&CG(foreach_copy_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element)) generate_free_foreach_copy);
 #endif
+
+	end_op_number = get_next_op_number(CG(active_op_array));
+	while (start_op_number < end_op_number) {
+		CG(active_op_array)->opcodes[start_op_number].op1.u.EA.type = EXT_TYPE_FREE_ON_RETURN;
+		start_op_number++;
+	}
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -3225,7 +3234,7 @@ void zend_do_switch_end(znode *case_list TSRMLS_DC) /* {{{ */
 	if (switch_entry_ptr->cond.op_type==IS_VAR || switch_entry_ptr->cond.op_type==IS_TMP_VAR) {
 		/* emit free for the switch condition*/
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-		opline->opcode = ZEND_SWITCH_FREE;
+		opline->opcode = (switch_entry_ptr->cond.op_type == IS_TMP_VAR) ? ZEND_FREE : ZEND_SWITCH_FREE;
 		opline->op1 = switch_entry_ptr->cond;
 		SET_UNUSED(opline->op2);
 	}
