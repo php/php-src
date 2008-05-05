@@ -29,6 +29,7 @@
 #include "ext/standard/info.h"
 #include "php_mysqli.h"
 
+#ifdef HAVE_LIBMYSQL_REPLICATION
 /* {{{ proto void mysqli_disable_reads_from_master(object link)
 */
 PHP_FUNCTION(mysqli_disable_reads_from_master)
@@ -210,6 +211,8 @@ PHP_FUNCTION(mysqli_slave_query)
 	RETURN_TRUE;
 }
 /* }}} */
+
+#endif /* HAVE_LIBMYSQL_REPLICATION */
 
 /*
  * Local variables:

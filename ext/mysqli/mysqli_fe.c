@@ -62,11 +62,15 @@ zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_connect_error,						NULL)
 	PHP_FE(mysqli_data_seek,							NULL)
 	PHP_FE(mysqli_debug,								NULL)
+#ifdef HAVE_LIBMYSQL_REPLICATION
 	PHP_FE(mysqli_disable_reads_from_master,			NULL)
 	PHP_FE(mysqli_disable_rpl_parse,					NULL)
+#endif
 	PHP_FE(mysqli_dump_debug_info,						NULL)
+#ifdef HAVE_LIBMYSQL_REPLICATION
 	PHP_FE(mysqli_enable_reads_from_master,				NULL)
 	PHP_FE(mysqli_enable_rpl_parse,						NULL)
+#endif
 	PHP_FE(mysqli_embedded_server_end,					NULL)
 	PHP_FE(mysqli_embedded_server_start,				NULL)
 	PHP_FE(mysqli_errno,								NULL)
@@ -101,7 +105,9 @@ zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_kill,									NULL)
 	PHP_FE(mysqli_set_local_infile_default,				NULL)
 	PHP_FE(mysqli_set_local_infile_handler,				NULL)
+#ifdef HAVE_LIBMYSQL_REPLICATION
 	PHP_FE(mysqli_master_query,							NULL)
+#endif
 	PHP_FE(mysqli_more_results,							NULL)
 	PHP_FE(mysqli_multi_query, 							NULL)
 	PHP_FE(mysqli_next_result,							NULL)
@@ -116,9 +122,11 @@ zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_real_escape_string,					NULL)
 	PHP_FE(mysqli_real_query,							NULL)
 	PHP_FE(mysqli_rollback,								NULL)
+#ifdef HAVE_LIBMYSQL_REPLICATION
 	PHP_FE(mysqli_rpl_parse_enabled,					NULL)
 	PHP_FE(mysqli_rpl_probe,							NULL)
 	PHP_FE(mysqli_rpl_query_type,						NULL)
+#endif
 	PHP_FE(mysqli_select_db,							NULL)
 #ifdef HAVE_MYSQLI_SET_CHARSET
 	PHP_FE(mysqli_set_charset,							NULL)
@@ -138,8 +146,10 @@ zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_stmt_insert_id,						NULL)
 	PHP_FE(mysqli_stmt_reset,							NULL)
 	PHP_FE(mysqli_stmt_param_count,						NULL)
+#ifdef HAVE_LIBMYSQL_REPLICATION
 	PHP_FE(mysqli_send_query,							NULL)
 	PHP_FE(mysqli_slave_query,							NULL)
+#endif
 	PHP_FE(mysqli_sqlstate,   							NULL)
 	PHP_FE(mysqli_ssl_set,								NULL)
 	PHP_FE(mysqli_stat,									NULL)
@@ -185,11 +195,15 @@ zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(commit,mysqli_commit,NULL)
 	PHP_FALIAS(connect,mysqli_connect,NULL)
 	PHP_FALIAS(debug,mysqli_debug,NULL)
+#ifdef HAVE_LIBMYSQL_REPLICATION
 	PHP_FALIAS(disable_reads_from_master,mysqli_disable_reads_from_master,NULL)
 	PHP_FALIAS(disable_rpl_parse,mysqli_disable_rpl_parse,NULL)
+#endif
 	PHP_FALIAS(dump_debug_info,mysqli_dump_debug_info,NULL)
+#ifdef HAVE_LIBMYSQL_REPLICATION
 	PHP_FALIAS(enable_reads_from_master,mysqli_enable_reads_from_master,NULL)
 	PHP_FALIAS(enable_rpl_parse,mysqli_enable_rpl_parse,NULL)
+#endif
 #ifdef HAVE_MYSQLI_GET_CHARSET 
 	PHP_FALIAS(get_charset,mysqli_get_charset,NULL)
 #endif
@@ -200,7 +214,9 @@ zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(kill,mysqli_kill,NULL)
 	PHP_FALIAS(set_local_infile_default,mysqli_set_local_infile_default,NULL)
 	PHP_FALIAS(set_local_infile_handler,mysqli_set_local_infile_handler,NULL)
+#ifdef HAVE_LIBMYSQL_REPLICATION
 	PHP_FALIAS(master_query,mysqli_master_query,NULL)
+#endif
 	PHP_FALIAS(multi_query,mysqli_multi_query,NULL)
 	PHP_FALIAS(mysqli,mysqli_connect,NULL)
 	PHP_FALIAS(more_results,mysqli_more_results, NULL)
@@ -214,15 +230,20 @@ zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(escape_string, mysqli_real_escape_string,NULL)
 	PHP_FALIAS(real_query,mysqli_real_query,NULL)
 	PHP_FALIAS(rollback,mysqli_rollback,NULL)
+#ifdef HAVE_LIBMYSQL_REPLICATION
 	PHP_FALIAS(rpl_parse_enabled,mysqli_rpl_parse_enabled,NULL)
 	PHP_FALIAS(rpl_probe,mysqli_rpl_probe,NULL)
 	PHP_FALIAS(rpl_query_type,mysqli_rpl_query_type,NULL)
+#endif
 	PHP_FALIAS(select_db,mysqli_select_db,NULL)
 #ifdef HAVE_MYSQLI_SET_CHARSET
 	PHP_FALIAS(set_charset,mysqli_set_charset,NULL)
 #endif
 	PHP_FALIAS(set_opt, mysqli_options,NULL)
+#ifdef HAVE_LIBMYSQL_REPLICATION
+	PHP_FALIAS(send_query,mysqli_send_query,NULL)
 	PHP_FALIAS(slave_query,mysqli_slave_query,NULL)
+#endif
 	PHP_FALIAS(ssl_set,mysqli_ssl_set,NULL)
 	PHP_FALIAS(stat,mysqli_stat,NULL)
 	PHP_FALIAS(stmt_init,mysqli_stmt_init, NULL)

@@ -301,6 +301,11 @@ if ((MyG(report_mode) & MYSQLI_REPORT_ERROR) && stmt->last_errno) { \
 	php_mysqli_report_error(stmt->sqlstate, stmt->last_errno, stmt->last_error TSRMLS_CC); \
 }
 
+#if MYSQL_VERSION_ID > 32300 && MYSQL_VERSION_ID < 60000
+#define HAVE_LIBMYSQL_REPLICATION
+#endif
+
+
 PHP_MYSQLI_API void mysqli_register_link(zval *return_value, void *link TSRMLS_DC);
 PHP_MYSQLI_API void mysqli_register_stmt(zval *return_value, void *stmt TSRMLS_DC);
 PHP_MYSQLI_API void mysqli_register_result(zval *return_value, void *result TSRMLS_DC);

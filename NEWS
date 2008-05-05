@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2008, PHP 5.2.7
+- Fixed build failure of ext/mysqli with libmysql 6.0 - missing rpl
+  functions. (Andrey)
 - Fixed bug #44891 Memory leak using registerPHPFunctions and XSLT Variable 
   as function parameter. (Rob)
 
