@@ -2642,10 +2642,14 @@ ZEND_VM_HANDLER(100, ZEND_GOTO, ANY, CONST)
 
 	switch (brk_opline->opcode) {
 		case ZEND_SWITCH_FREE:
-			zend_switch_free(&EX_T(brk_opline->op1.u.var), brk_opline->op1.op_type, brk_opline->extended_value TSRMLS_CC);
+			if (brk_opline->op1.u.EA.type != EXT_TYPE_FREE_ON_RETURN) {
+				zend_switch_free(&EX_T(brk_opline->op1.u.var), brk_opline->extended_value TSRMLS_CC);
+			}
 			break;
 		case ZEND_FREE:
-			zendi_zval_dtor(EX_T(brk_opline->op1.u.var).tmp_var);
+			if (brk_opline->op1.u.EA.type != EXT_TYPE_FREE_ON_RETURN) {
+				zendi_zval_dtor(EX_T(brk_opline->op1.u.var).tmp_var);
+			}
 			break;
 	}
 	ZEND_VM_JMP(opline->op1.u.jmp_addr);
@@ -2683,11 +2687,11 @@ ZEND_VM_HANDLER(48, ZEND_CASE, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(49, ZEND_SWITCH_FREE, TMP|VAR, ANY)
+ZEND_VM_HANDLER(49, ZEND_SWITCH_FREE, VAR, ANY)
 {
 	zend_op *opline = EX(opline);
 
-	zend_switch_free(&EX_T(opline->op1.u.var), OP1_TYPE, opline->extended_value TSRMLS_CC);
+	zend_switch_free(&EX_T(opline->op1.u.var), opline->extended_value TSRMLS_CC);
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -4123,10 +4127,14 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 
 				switch (brk_opline->opcode) {
 					case ZEND_SWITCH_FREE:
-						zend_switch_free(&EX_T(brk_opline->op1.u.var), brk_opline->op1.op_type, brk_opline->extended_value TSRMLS_CC);
+						if (brk_opline->op1.u.EA.type != EXT_TYPE_FREE_ON_RETURN) {
+							zend_switch_free(&EX_T(brk_opline->op1.u.var), brk_opline->extended_value TSRMLS_CC);
+						}
 						break;
 					case ZEND_FREE:
-						zendi_zval_dtor(EX_T(brk_opline->op1.u.var).tmp_var);
+						if (brk_opline->op1.u.EA.type != EXT_TYPE_FREE_ON_RETURN) {
+							zendi_zval_dtor(EX_T(brk_opline->op1.u.var).tmp_var);
+						}
 						break;
 				}
 			}
