@@ -2118,7 +2118,23 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	internal_function->module = EG(current_module);
 
 	if (scope) {
-		lc_class_name = zend_u_str_case_fold(ZEND_STR_TYPE, scope->name, scope->name_length, 0, &lc_class_name_len);
+		lc_class_name_len = scope->name_length;
+		if (UG(unicode)) {
+			if ((lc_class_name.u = u_memrchr(scope->name.u, ':', lc_class_name_len))) {
+				lc_class_name.u++;
+				lc_class_name_len -= (lc_class_name.u - scope->name.u);
+			} else {
+				lc_class_name = scope->name;
+			}
+		} else {
+			if ((lc_class_name.s = zend_memrchr(scope->name.s, ':', lc_class_name_len))) {
+				lc_class_name.s++;
+				lc_class_name_len -= (lc_class_name.s - scope->name.s);
+			} else {
+				lc_class_name = scope->name;
+			}
+		}
+		lc_class_name = zend_u_str_case_fold(ZEND_STR_TYPE, lc_class_name, lc_class_name_len, 0, &lc_class_name_len);
 	}
 
 	while (ptr->fname) {
