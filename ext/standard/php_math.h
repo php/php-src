@@ -69,23 +69,15 @@ PHP_FUNCTION(rad2deg);
    */
 PHP_FUNCTION(hypot);
 PHP_FUNCTION(expm1);
-#ifdef HAVE_LOG1P
 PHP_FUNCTION(log1p);
-#endif
 
 PHP_FUNCTION(sinh);
 PHP_FUNCTION(cosh);
 PHP_FUNCTION(tanh);
 
-#ifdef HAVE_ASINH
 PHP_FUNCTION(asinh);
-#endif
-#ifdef HAVE_ACOSH
 PHP_FUNCTION(acosh);
-#endif
-#ifdef HAVE_ATANH
 PHP_FUNCTION(atanh);
-#endif
 
 #include <math.h>
 
