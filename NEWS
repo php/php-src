@@ -1,4 +1,4 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.0
 - Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
@@ -106,6 +106,7 @@ PHP                                                                        NEWS
 - Added request_order INI variable to control specifically $_REQUEST 
   behavior. (Stas)
 - Added forward_static_call(_array) to complete LSB. (Mike Lively)
+- Added Windows support for asinh(), acosh(), atanh(), log1p() and expm1() (Kalle)
 
 - Improved PHP runtime speed and memory usage:
   . Lazy EG(active_symbol_table) initialization. (Dmitry)

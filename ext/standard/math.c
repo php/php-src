@@ -49,6 +49,67 @@
 	val = !zend_isnan(tmp_val) ? tmp_val : val;	\
 }							\
 
+
+/* {{{ php_asinh
+*/
+double php_asinh(double z)
+{
+#ifdef HAVE_ASINH
+	return(asinh(z));
+#else
+	return(log(z + sqrt(1 + pow(z, 2))) / log(M_E));
+#endif
+}
+/* }}} */
+
+/* {{{ php_acosh
+*/
+double php_acosh(double x)
+{
+#ifdef HAVE_ACOSH
+	return(acosh(x));
+#else
+	return(log(x + sqrt(x * x - 1)));
+#endif
+}
+/* }}} */
+
+/* {{{ php_atanh
+*/
+double php_atanh(double z)
+{
+#ifdef HAVE_ATANH
+	return(atanh(z));
+#else
+	return(0.5 * log((1 + z) / (1 - z)));
+#endif
+}
+/* }}} */
+
+/* {{{ php_log1p
+*/
+double php_log1p(double x)
+{
+#ifdef HAVE_LOG1P
+	return(log1p(x));
+#else
+	return(log(1 + x));
+#endif
+}
+/* }}} */
+
+/* {{{ php_expm1
+*/
+double php_expm1(double x)
+{
+#if !defined(PHP_WIN32) && !defined(NETWARE)
+	return(expm1(x));
+#else
+	return(exp(x) - 1);
+#endif
+}
+/* }}}*/
+
 /* {{{ proto int abs(int number)
    Return the absolute value of the number */
 PHP_FUNCTION(abs) 
@@ -284,8 +345,6 @@ PHP_FUNCTION(tanh)
 }
 /* }}} */
 
-#if !defined(PHP_WIN32) && !defined(NETWARE)
-#ifdef HAVE_ASINH
 /* {{{ proto float asinh(float number)
    Returns the inverse hyperbolic sine of the number, i.e. the value whose hyperbolic sine is number */
 PHP_FUNCTION(asinh)
@@ -298,24 +357,20 @@ PHP_FUNCTION(asinh)
 	RETURN_DOUBLE(asinh(num));
 }
 /* }}} */
-#endif /* HAVE_ASINH */
 
-#ifdef HAVE_ACOSH
 /* {{{ proto float acosh(float number)
    Returns the inverse hyperbolic cosine of the number, i.e. the value whose hyperbolic cosine is number */
-PHP_FUNCTION(acosh)
+PHP_FUNCTION(php_acosh)
 {
 	double num;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
 		return;
 	}
-	RETURN_DOUBLE(acosh(num));
+	RETURN_DOUBLE(php_acosh(num));
 }
 /* }}} */
-#endif /* HAVE_ACOSH */
 
-#ifdef HAVE_ATANH
 /* {{{ proto float atanh(float number)
    Returns the inverse hyperbolic tangent of the number, i.e. the value whose hyperbolic tangent is number */
 PHP_FUNCTION(atanh)
@@ -325,11 +380,9 @@ PHP_FUNCTION(atanh)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
 		return;
 	}
-	RETURN_DOUBLE(atanh(num));
+	RETURN_DOUBLE(php_atanh(num));
 }
 /* }}} */
-#endif /* HAVE_ATANH */
-#endif /* !defined(PHP_WIN32) && !defined(NETWARE) */
 
 /* {{{ proto float pi(void)
    Returns an approximation of pi */
@@ -442,7 +495,6 @@ PHP_FUNCTION(exp)
 }
 /* }}} */
 
-#if !defined(PHP_WIN32) && !defined(NETWARE)
 /* {{{ proto float expm1(float number)
    Returns exp(number) - 1, computed in a way that accurate even when the value of number is close to zero */
 /*
@@ -456,11 +508,10 @@ PHP_FUNCTION(expm1)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
 		return;
 	}
-	RETURN_DOUBLE(expm1(num));
+	RETURN_DOUBLE(php_expm1(num));
 }
 /* }}} */
 
-#ifdef HAVE_LOG1P
 /* {{{ proto float log1p(float number)
    Returns log(1 + number), computed in a way that accurate even when the value of number is close to zero */ 
 /*
@@ -474,11 +525,9 @@ PHP_FUNCTION(log1p)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
 		return;
 	}
-	RETURN_DOUBLE(log1p(num));
+	RETURN_DOUBLE(php_log1p(num));
 }
 /* }}} */
-#endif /* HAVE_LOG1P */
-#endif /* !defined(PHP_WIN32) && !defined(NETWARE) */
 
 /* {{{ proto float log(float number, [float base])
    Returns the natural logarithm of the number, or the base log if base is specified */
