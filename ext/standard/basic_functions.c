@@ -1923,26 +1923,20 @@ ZEND_BEGIN_ARG_INFO(arginfo_tanh, 0)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
 
-#ifdef HAVE_ASINH
 static
 ZEND_BEGIN_ARG_INFO(arginfo_asinh, 0)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
-#endif
 
-#ifdef HAVE_ACOSH
 static
 ZEND_BEGIN_ARG_INFO(arginfo_acosh, 0)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
-#endif
 
-#ifdef HAVE_ATANH
 static
 ZEND_BEGIN_ARG_INFO(arginfo_atanh, 0)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
-#endif
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_pi, 0)
@@ -1974,19 +1968,15 @@ ZEND_BEGIN_ARG_INFO(arginfo_exp, 0)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
 
-#if !defined(PHP_WIN32) && !defined(NETWARE)
 static
 ZEND_BEGIN_ARG_INFO(arginfo_expm1, 0)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
 
-# ifdef HAVE_LOG1P
 static
 ZEND_BEGIN_ARG_INFO(arginfo_log1p, 0)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
-# endif
-#endif /* !defined(PHP_WIN32) && !defined(NETWARE) */
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_log, 0, 0, 1)
@@ -3330,23 +3320,11 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(sinh,															arginfo_sinh)
 	PHP_FE(cosh,															arginfo_cosh)
 	PHP_FE(tanh,															arginfo_tanh)
-
-#ifdef HAVE_ASINH
 	PHP_FE(asinh,															arginfo_asinh)
-#endif
-#ifdef HAVE_ACOSH
 	PHP_FE(acosh,															arginfo_acosh)
-#endif
-#ifdef HAVE_ATANH
 	PHP_FE(atanh,															arginfo_atanh)
-#endif
-#if !defined(PHP_WIN32) && !defined(NETWARE)
 	PHP_FE(expm1,															arginfo_expm1)
-# ifdef HAVE_LOG1P
 	PHP_FE(log1p,															arginfo_log1p)
-# endif
-#endif
-
 	PHP_FE(pi,																arginfo_pi)
 	PHP_FE(is_finite,														arginfo_is_finite)
 	PHP_FE(is_nan,															arginfo_is_nan)
