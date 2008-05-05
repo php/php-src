@@ -1,5 +1,7 @@
 --TEST--
 Test vsprintf() function : usage variations - string formats with non-string values
+--INI--
+precision=14
 --FILE--
 <?php
 /* Prototype  : string vsprintf(string format, array args)
