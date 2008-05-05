@@ -324,7 +324,8 @@ struct _zend_execute_data {
 #define IS_UNUSED	(1<<3)	/* Unused variable */
 #define IS_CV		(1<<4)	/* Compiled variable */
 
-#define EXT_TYPE_UNUSED		(1<<0)
+#define EXT_TYPE_UNUSED				(1<<0)
+#define EXT_TYPE_FREE_ON_RETURN		(2<<0)
 
 #include "zend_globals.h"
 
