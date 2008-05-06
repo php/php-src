@@ -1194,8 +1194,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		if (fci->symbol_table) {
 			EG(active_symbol_table) = fci->symbol_table;
 		} else {
-			ALLOC_HASHTABLE(EG(active_symbol_table));
-			zend_u_hash_init(EG(active_symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
+			EG(active_symbol_table) = NULL;
 		}
 
 		original_return_value = EG(return_value_ptr_ptr);
@@ -1204,9 +1203,16 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		EG(active_op_array) = (zend_op_array *) EX(function_state).function;
 		original_opline_ptr = EG(opline_ptr);
 		zend_execute(EG(active_op_array) TSRMLS_CC);
-		if (!fci->symbol_table) {
-			zend_hash_destroy(EG(active_symbol_table));
-			FREE_HASHTABLE(EG(active_symbol_table));
+		if (!fci->symbol_table && EG(active_symbol_table)) {
+			if (EG(symtable_cache_ptr)>=EG(symtable_cache_limit)) {
+				zend_hash_destroy(EG(active_symbol_table));
+				FREE_HASHTABLE(EG(active_symbol_table));
+			} else {
+				/* clean before putting into the cache, since clean
+				   could call dtors, which could use cached hash */
+				zend_hash_clean(EG(active_symbol_table));
+				*(++EG(symtable_cache_ptr)) = EG(active_symbol_table);
+			}
 		}
 		EG(active_symbol_table) = calling_symbol_table;
 		EG(active_op_array) = original_op_array;
