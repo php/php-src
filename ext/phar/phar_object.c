@@ -1595,7 +1595,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 	MAKE_STD_ZVAL(iter);
 
 	if (SUCCESS != object_init_ex(iter, spl_ce_RecursiveDirectoryIterator)) {
-		zval_dtor(iter);
+		zval_ptr_dtor(&iter);
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Unable to instantiate directory iterator for %s", phar_obj->arc.archive->fname);
 		RETURN_FALSE;
 	}
@@ -1606,16 +1606,27 @@ PHP_METHOD(Phar, buildFromDirectory)
 	zend_call_method_with_1_params(&iter, spl_ce_RecursiveDirectoryIterator, 
 			&spl_ce_RecursiveDirectoryIterator->constructor, "__construct", NULL, &arg);
 
+	if (EG(exception)) {
+		zval_ptr_dtor(&iter);
+		RETURN_FALSE;
+	}
+
 	MAKE_STD_ZVAL(iteriter);
 
 	if (SUCCESS != object_init_ex(iteriter, spl_ce_RecursiveIteratorIterator)) {
-		zval_dtor(iteriter);
+		zval_ptr_dtor(&iter);
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Unable to instantiate directory iterator for %s", phar_obj->arc.archive->fname);
 		RETURN_FALSE;
 	}
 
 	zend_call_method_with_1_params(&iteriter, spl_ce_RecursiveIteratorIterator, 
 			&spl_ce_RecursiveIteratorIterator->constructor, "__construct", NULL, iter);
+
+	if (EG(exception)) {
+		zval_ptr_dtor(&iter);
+		zval_ptr_dtor(&iteriter);
+		RETURN_FALSE;
+	}
 
 	zval_ptr_dtor(&iter);
 
