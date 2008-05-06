@@ -1,3 +1,126 @@
+2008-05-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/vsprintf_variation8.phpt:
+      MFB: Specify the necessary precision
+
+    * (PHP_5_2)
+      NEWS
+      ext/simplexml/simplexml.c:
+      
+      MFB: Fixed bug #44798 (Memory leak assigning value to attribute).
+
+2008-05-05  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/posix/posix.c:
+      No domainname element in utsname on OSX
+
+    * (PHP_5_3)
+      ext/posix/posix.c:
+      There is no domainname element in utsname on OSX
+
+2008-05-05  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_repl.c
+      ext/mysqli/php_mysqli.h:
+      Fix build with libmysql 6.0.x
+
+2008-05-05  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c:
+      add atanh() for real
+
+2008-05-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug44913.phpt:
+      - Use ZEND_FREE() opcode instead of ZEND_SWITCH_FREE(IS_TMP_VAR)
+      - Fixed bug #44913 (Segfault when using return in combination with nested
+      loops
+      and continue 2)
+
+    * ZendEngine2/tests/bug44913.phpt
+      ZendEngine2/tests/bug44913.phpt:
+      
+      - Use ZEND_FREE() opcode instead of ZEND_SWITCH_FREE(IS_TMP_VAR)
+      - Fixed bug #44913 (Segfault when using return in combination with nested
+      loops and continue 2)
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - Use ZEND_FREE() opcode instead of ZEND_SWITCH_FREE(IS_TMP_VAR)
+      - Fixed bug #44913 (Segfault when using return in combination with nested
+      loops and continue 2)
+
+2008-05-05  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/standard/math.c:
+      - Fixed build.
+
+2008-05-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/ns_063.phpt
+      ZendEngine2/tests/ns_063.phpt
+      ZendEngine2/tests/ns_063.phpt:
+      Support for old-style constructors in namespaces
+
+2008-05-05  Kalle Sommer Nielsen  <kalle@zesix.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/math.c
+      ext/standard/php_math.h
+      ext/standard/tests/math/acosh_basic.phpt
+      ext/standard/tests/math/acosh_error.phpt
+      ext/standard/tests/math/acosh_variation.phpt
+      ext/standard/tests/math/asinh_basic.phpt
+      ext/standard/tests/math/asinh_error.phpt
+      ext/standard/tests/math/asinh_variation.phpt
+      ext/standard/tests/math/atanh_basic.phpt
+      ext/standard/tests/math/atanh_error.phpt
+      ext/standard/tests/math/atanh_variation.phpt:
+      Merge PHP_5_3 - Implemented Windows support for asinh(), acosh(), atanh(),
+      log1p() and expm1()
+      
+      [DOC] Merge_5_3
+
+    * ext/standard/basic_functions.c
+      ext/standard/math.c
+      ext/standard/php_math.h
+      ext/standard/tests/math/acosh_basic.phpt
+      ext/standard/tests/math/acosh_error.phpt
+      ext/standard/tests/math/acosh_variation.phpt
+      ext/standard/tests/math/asinh_basic.phpt
+      ext/standard/tests/math/asinh_error.phpt
+      ext/standard/tests/math/asinh_variation.phpt
+      ext/standard/tests/math/atanh_basic.phpt
+      ext/standard/tests/math/atanh_error.phpt
+      ext/standard/tests/math/atanh_variation.phpt:
+      Implemented Windows support for asinh(), acosh(), atanh(), log1p() and
+      expm1() + removed Windows check on tests
+      
+      [DOC] Windows support for asinh(), acosh(), atanh(), log1p() and expm1()
+
 2008-05-04  Etienne Kneuss  <php@colder.ch>
 
     * ext/gd/gd.c

@@ -1,3 +1,42 @@
+2008-05-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug44913.phpt:
+      - Use ZEND_FREE() opcode instead of ZEND_SWITCH_FREE(IS_TMP_VAR)
+      - Fixed bug #44913 (Segfault when using return in combination with nested
+      loops
+      and continue 2)
+
+    * tests/bug44913.phpt
+      tests/bug44913.phpt:
+      
+      - Use ZEND_FREE() opcode instead of ZEND_SWITCH_FREE(IS_TMP_VAR)
+      - Fixed bug #44913 (Segfault when using return in combination with nested
+      loops and continue 2)
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - Use ZEND_FREE() opcode instead of ZEND_SWITCH_FREE(IS_TMP_VAR)
+      - Fixed bug #44913 (Segfault when using return in combination with nested
+      loops and continue 2)
+
+    * zend_API.c
+      zend_API.c
+      zend_compile.c
+      zend_compile.c
+      tests/ns_063.phpt
+      tests/ns_063.phpt
+      tests/ns_063.phpt:
+      Support for old-style constructors in namespaces
+
 2008-05-03  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
