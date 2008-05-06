@@ -445,9 +445,13 @@ ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC) /* {{{ */
 #endif
 	Z_DELREF_PP(zval_ptr);
 	if (Z_REFCOUNT_PP(zval_ptr) == 0) {
-		GC_REMOVE_ZVAL_FROM_BUFFER(*zval_ptr);
-		zval_dtor(*zval_ptr);
-		safe_free_zval_ptr_rel(*zval_ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC);
+		TSRMLS_FETCH();
+
+		if (*zval_ptr != &EG(uninitialized_zval)) {
+			GC_REMOVE_ZVAL_FROM_BUFFER(*zval_ptr);
+			zval_dtor(*zval_ptr);
+			efree_rel(*zval_ptr);
+		}
 	} else {
 		TSRMLS_FETCH();
 

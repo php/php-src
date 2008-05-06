@@ -85,9 +85,13 @@ static inline void zend_pzval_unlock_func(zval *z, zend_free_op *should_free, in
 static inline void zend_pzval_unlock_free_func(zval *z) /* {{{ */
 {
 	if (!Z_DELREF_P(z)) {
-		GC_REMOVE_ZVAL_FROM_BUFFER(z);
-		zval_dtor(z);
-		safe_free_zval_ptr(z);
+		TSRMLS_FETCH();
+
+		if (z != &EG(uninitialized_zval)) {
+			GC_REMOVE_ZVAL_FROM_BUFFER(z);
+			zval_dtor(z);
+			efree(z);
+		}
 	}
 }
 /* }}} */
@@ -778,9 +782,11 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 				} else {
 					Z_ADDREF_P(value);
 					*variable_ptr_ptr = value;
-					GC_REMOVE_ZVAL_FROM_BUFFER(variable_ptr);
-					zendi_zval_dtor(*variable_ptr);
-					safe_free_zval_ptr(variable_ptr);
+					if (variable_ptr != &EG(uninitialized_zval)) {
+						GC_REMOVE_ZVAL_FROM_BUFFER(variable_ptr);
+						zval_dtor(variable_ptr);
+						efree(variable_ptr);
+					}
 					return value;
 				}
 			} else {
