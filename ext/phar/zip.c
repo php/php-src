@@ -386,6 +386,7 @@ foundit:
 		if (entry.filename_len == sizeof(".phar/alias.txt")-1 && !strncmp(entry.filename, ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
 			php_stream_filter *filter;
 			off_t saveloc;
+			phar_archive_data **fd_ptr;
 
 			/* archive alias found, seek to file contents, do not validate local header.  Potentially risky, but
 			   not very. */
@@ -431,6 +432,11 @@ foundit:
 			if (!phar_validate_alias(mydata->alias, mydata->alias_len)) {
 				efree(entry.filename);
 				PHAR_ZIP_FAIL("invalid alias");
+			}
+			if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void **)&fd_ptr)) {
+				if (SUCCESS != phar_free_alias(*fd_ptr, alias, alias_len)) {
+					PHAR_ZIP_FAIL("alias is already in use by existing archive");
+				}
 			}
 			zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), mydata->alias, mydata->alias_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
 			/* return to central directory parsing */

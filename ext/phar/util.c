@@ -983,6 +983,19 @@ phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry,
 	return entry;
 }
 
+int phar_free_alias(phar_archive_data *phar, char *alias, int alias_len TSRMLS_DC) /* {{{ */
+{
+	if (phar->refcount) {
+		return FAILURE;
+	}
+	/* this archive has no open references, so emit an E_STRICT and remove it */
+	if (zend_hash_del(&(PHAR_GLOBALS->phar_fname_map), phar->fname, phar->fname_len) != SUCCESS) {
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+/* }}} */
+
 /**
  * Looks up a phar archive in the filename map, connecting it to the alias
  * (if any) or returns null
@@ -1005,6 +1018,10 @@ int phar_get_archive(phar_archive_data **archive, char *fname, int fname_len, ch
 				if (error) {
 					spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, (*fd_ptr)->fname, fname);
 				}
+				if (SUCCESS == phar_free_alias(*fd_ptr, alias, alias_len TSRMLS_CC)) {
+					efree(*error);
+					*error = NULL;
+				}
 				return FAILURE;
 			}
 			*archive = *fd_ptr;
@@ -1019,6 +1036,9 @@ int phar_get_archive(phar_archive_data **archive, char *fname, int fname_len, ch
 			*archive = *fd_ptr;
 			fd = *fd_ptr;
 			if (alias && alias_len) {
+				if (fd->alias_len && SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), fd->alias, fd->alias_len, (void**)&fd_ptr)) {
+					zend_hash_del(&(PHAR_GLOBALS->phar_alias_map), fd->alias, fd->alias_len);
+				}
 				zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&fd,   sizeof(phar_archive_data*), NULL);
 			}
 			return SUCCESS;

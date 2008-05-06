@@ -254,6 +254,14 @@ int phar_archive_delref(phar_archive_data *phar TSRMLS_DC) /* {{{ */
 			php_stream_close(phar->fp);
 			phar->fp = NULL;
 		}
+		if (!zend_hash_num_elements(&phar->manifest)) {
+			/* this is a new phar that has perhaps had an alias/metadata set, but has never
+			been flushed */
+			if (zend_hash_del(&(PHAR_GLOBALS->phar_fname_map), phar->fname, phar->fname_len) != SUCCESS) {
+				phar_destroy_phar_data(phar TSRMLS_CC);
+			}
+			return 1;
+		}
 	}
 	return 0;
 }
@@ -381,7 +389,9 @@ void phar_entry_remove(phar_entry_data *idata, char **error TSRMLS_DC) /* {{{ */
 /* }}} */
 
 #define MAPPHAR_ALLOC_FAIL(msg) \
-	php_stream_close(fp);\
+	if (fp) {\
+		php_stream_close(fp);\
+	}\
 	if (error) {\
 		spprintf(error, 0, msg, fname);\
 	}\
@@ -857,7 +867,6 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 		if (alias && alias_len && (alias_len != (int)tmp_len || strncmp(alias, buffer, tmp_len)))
 		{
 			buffer[tmp_len] = '\0';
-			efree(savebuf);
 			php_stream_close(fp);
 			if (signature) {
 				efree(signature);
@@ -865,6 +874,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 			if (error) {
 				spprintf(error, 0, "cannot load phar \"%s\" with implicit alias \"%s\" under different alias \"%s\"", fname, buffer, alias);
 			}
+			efree(savebuf);
 			return FAILURE;
 		}
 		alias_len = tmp_len;
@@ -998,13 +1008,27 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 	mydata->sig_len = sig_len;
 	mydata->signature = signature;
 	phar_request_initialize(TSRMLS_C);
-	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len, (void*)&mydata, sizeof(phar_archive_data*),  NULL);
 	if (register_alias) {
+		phar_archive_data **fd_ptr;
+
 		mydata->is_temporary_alias = temp_alias;
+		if (!phar_validate_alias(mydata->alias, mydata->alias_len)) {
+			signature = NULL;
+			fp = NULL;
+			MAPPHAR_FAIL("Cannot open archive \"%s\", invalid alias");
+		}
+		if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void **)&fd_ptr)) {
+			if (SUCCESS != phar_free_alias(*fd_ptr, alias, alias_len)) {
+				signature = NULL;
+				fp = NULL;
+				MAPPHAR_FAIL("Cannot open archive \"%s\", alias is already in use by existing archive");
+			}
+		}
 		zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
 	} else {
 		mydata->is_temporary_alias = 1;
 	}
+	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len, (void*)&mydata, sizeof(phar_archive_data*),  NULL);
 	efree(savebuf);
 	
 	if (pphar) {
