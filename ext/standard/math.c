@@ -52,7 +52,7 @@
 
 /* {{{ php_asinh
 */
-double php_asinh(double z)
+static double php_asinh(double z)
 {
 #ifdef HAVE_ASINH
 	return(asinh(z));
@@ -64,7 +64,7 @@ double php_asinh(double z)
 
 /* {{{ php_acosh
 */
-double php_acosh(double x)
+static double php_acosh(double x)
 {
 #ifdef HAVE_ACOSH
 	return(acosh(x));
@@ -76,7 +76,7 @@ double php_acosh(double x)
 
 /* {{{ php_atanh
 */
-double php_atanh(double z)
+static double php_atanh(double z)
 {
 #ifdef HAVE_ATANH
 	return(atanh(z));
@@ -88,7 +88,7 @@ double php_atanh(double z)
 
 /* {{{ php_log1p
 */
-double php_log1p(double x)
+static double php_log1p(double x)
 {
 #ifdef HAVE_LOG1P
 	return(log1p(x));
@@ -100,7 +100,7 @@ double php_log1p(double x)
 
 /* {{{ php_expm1
 */
-double php_expm1(double x)
+static double php_expm1(double x)
 {
 #if !defined(PHP_WIN32) && !defined(NETWARE)
 	return(expm1(x));
