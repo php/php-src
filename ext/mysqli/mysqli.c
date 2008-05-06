@@ -512,6 +512,7 @@ static int mysqli_object_has_property(zval *object, zval *member, int has_set_ex
 } /* }}} */
 
 
+#if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3
 HashTable * mysqli_object_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 {
 	mysqli_object *obj = (mysqli_object *)zend_objects_get_address(object TSRMLS_CC);
@@ -539,7 +540,7 @@ HashTable * mysqli_object_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 	*is_temp = 1;
 	return retval;
 }
-
+#endif
 
 /* {{{ mysqli_objects_new
  */
@@ -708,7 +709,9 @@ PHP_MINIT_FUNCTION(mysqli)
 	mysqli_object_handlers.get_property_ptr_ptr = std_hnd->get_property_ptr_ptr;
 	mysqli_object_handlers.get_constructor = php_mysqli_constructor_get;
 	mysqli_object_handlers.has_property = mysqli_object_has_property;
+#if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3
 	mysqli_object_handlers.get_debug_info = mysqli_object_get_debug_info;
+#endif
 
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
 

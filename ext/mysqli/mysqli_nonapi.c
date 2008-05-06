@@ -33,6 +33,11 @@
 
 #define SAFE_STR(a) ((a)?a:"")
 
+#ifndef zend_parse_parameters_none
+#define zend_parse_parameters_none()	\
+        zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "")
+#endif
+
 /* {{{ php_mysqli_set_error
  */
 static void php_mysqli_set_error(long mysql_errno, char *mysql_err TSRMLS_DC)
