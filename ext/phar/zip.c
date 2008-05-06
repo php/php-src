@@ -633,6 +633,7 @@ continue_dir:
 	/* set file metadata */
 	if (entry->metadata) {
 		php_serialize_data_t metadata_hash;
+
 		if (entry->metadata_str.c) {
 			smart_str_free(&entry->metadata_str);
 		}
@@ -958,7 +959,6 @@ nostub:
 	/* save zip */
 	eocd.cdir_size = php_stream_tell(pass.centralfp);
 	eocd.cdir_offset = php_stream_tell(pass.filefp);
-	/* implement metadata here */
 	php_stream_seek(pass.centralfp, 0, SEEK_SET);
 	if (eocd.cdir_size != php_stream_copy_to_stream(pass.centralfp, pass.filefp, PHP_STREAM_COPY_ALL)) {
 		php_stream_close(pass.filefp);
@@ -972,21 +972,23 @@ nostub:
 		return EOF;
 	}
 	php_stream_close(pass.centralfp);
-	if (sizeof(eocd) != php_stream_write(pass.filefp, (char *)&eocd, sizeof(eocd))) {
-		php_stream_close(pass.filefp);
-		if (error) {
-			spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write end of central-directory", phar->fname);
-		}
-		if (closeoldfile) {
-			php_stream_close(oldfile);
-		}
-		return EOF;
-	}
 	if (phar->metadata) {
 		/* set phar metadata */
 		PHP_VAR_SERIALIZE_INIT(metadata_hash);
 		php_var_serialize(&main_metadata_str, &phar->metadata, &metadata_hash TSRMLS_CC);
 		PHP_VAR_SERIALIZE_DESTROY(metadata_hash);
+		eocd.comment_len = PHAR_SET_16(main_metadata_str.len);
+		if (sizeof(eocd) != php_stream_write(pass.filefp, (char *)&eocd, sizeof(eocd))) {
+			php_stream_close(pass.filefp);
+			if (error) {
+				spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write end of central-directory", phar->fname);
+			}
+			if (closeoldfile) {
+				php_stream_close(oldfile);
+			}
+			smart_str_free(&main_metadata_str);
+			return EOF;
+		}
 		if (main_metadata_str.len != php_stream_write(pass.filefp, main_metadata_str.c, main_metadata_str.len)) {
 			php_stream_close(pass.filefp);
 			if (error) {
@@ -995,9 +997,21 @@ nostub:
 			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}
+			smart_str_free(&main_metadata_str);
 			return EOF;
 		}
 		smart_str_free(&main_metadata_str);
+	} else {
+		if (sizeof(eocd) != php_stream_write(pass.filefp, (char *)&eocd, sizeof(eocd))) {
+			php_stream_close(pass.filefp);
+			if (error) {
+				spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write end of central-directory", phar->fname);
+			}
+			if (closeoldfile) {
+				php_stream_close(oldfile);
+			}
+			return EOF;
+		}
 	}
 	if (phar->fp && pass.free_fp) {
 		php_stream_close(phar->fp);
