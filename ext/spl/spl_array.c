@@ -47,6 +47,7 @@ PHPAPI zend_class_entry  *spl_ce_RecursiveArrayIterator;
 
 #define SPL_ARRAY_STD_PROP_LIST      0x00000001
 #define SPL_ARRAY_ARRAY_AS_PROPS     0x00000002
+#define SPL_ARRAY_CHILD_ARRAYS_ONLY  0x00000004
 #define SPL_ARRAY_OVERLOADED_REWIND  0x00010000
 #define SPL_ARRAY_OVERLOADED_VALID   0x00020000
 #define SPL_ARRAY_OVERLOADED_KEY     0x00040000
@@ -122,7 +123,7 @@ static void spl_array_object_free_storage(void *object TSRMLS_DC)
 
 zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
 
-/* {{{ spl_array_object_new */
+/* {{{ spl_array_object_new_ex */
 static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, spl_array_object **obj, zval *orig, int clone_orig TSRMLS_DC)
 {
 	zend_object_value retval;
@@ -1391,7 +1392,7 @@ SPL_METHOD(Array, hasChildren)
 		RETURN_FALSE;
 	}
 
-	RETURN_BOOL(Z_TYPE_PP(entry) == IS_ARRAY || Z_TYPE_PP(entry) == IS_OBJECT);
+	RETURN_BOOL(Z_TYPE_PP(entry) == IS_ARRAY || (Z_TYPE_PP(entry) == IS_OBJECT && (intern->ar_flags & SPL_ARRAY_CHILD_ARRAYS_ONLY) == 0));
 }
 /* }}} */
 
@@ -1417,12 +1418,18 @@ SPL_METHOD(Array, getChildren)
 		return;
 	}
 
-	if (Z_TYPE_PP(entry) == IS_OBJECT && instanceof_function(Z_OBJCE_PP(entry), intern->std.ce TSRMLS_CC)) {
-		RETURN_ZVAL(*entry, 0, 0);
+	if (Z_TYPE_PP(entry) == IS_OBJECT) {
+		if ((intern->ar_flags & SPL_ARRAY_CHILD_ARRAYS_ONLY) != 0) {
+			return;
+		}
+		if (instanceof_function(Z_OBJCE_PP(entry), Z_OBJCE_P(getThis()) TSRMLS_CC)) {
+			RETURN_ZVAL(*entry, 0, 0);
+		}
 	}
 
-  MAKE_STD_ZVAL(flags);
-  ZVAL_LONG(flags, SPL_ARRAY_USE_OTHER);
+	MAKE_STD_ZVAL(flags);
+	ZVAL_LONG(flags, SPL_ARRAY_USE_OTHER | intern->ar_flags);
+
 	spl_instantiate_arg_ex2(intern->std.ce, &return_value, 0, *entry, flags TSRMLS_CC);
 	zval_ptr_dtor(&flags);
 }
@@ -1730,6 +1737,9 @@ PHP_MINIT_FUNCTION(spl_array)
 
 	REGISTER_SPL_CLASS_CONST_LONG(ArrayIterator, "STD_PROP_LIST",    SPL_ARRAY_STD_PROP_LIST);
 	REGISTER_SPL_CLASS_CONST_LONG(ArrayIterator, "ARRAY_AS_PROPS",   SPL_ARRAY_ARRAY_AS_PROPS);
+
+	REGISTER_SPL_CLASS_CONST_LONG(RecursiveArrayIterator, "CHILD_ARRAYS_ONLY", SPL_ARRAY_CHILD_ARRAYS_ONLY);
+
 	return SUCCESS;
 }
 /* }}} */
