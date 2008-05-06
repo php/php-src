@@ -81,8 +81,8 @@ $array = array(
 
 test_array($array, 'Protected Property');
 
-test_array($array, 'Public Property New', ArrayIterator::CHILD_ARRAYS_ONLY);
-test_array($array, 'Protected Property New', ArrayIterator::CHILD_ARRAYS_ONLY);
+test_array($array, 'Public Property New', RecursiveArrayIterator::CHILD_ARRAYS_ONLY);
+test_array($array, 'Protected Property New', RecursiveArrayIterator::CHILD_ARRAYS_ONLY);
 ?>
 ===DONE===
 <?php exit(0); ?>
