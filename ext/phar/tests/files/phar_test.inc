@@ -48,7 +48,7 @@ foreach($files as $name => $cont)
 	$files[$name] = $comp;
 }
 
-$alias = 'hio';
+if (!isset($alias)) $alias = 'hio';
 
 if (isset($pmeta)) $pmeta = serialize($pmeta); else $pmeta = '';
 $manifest = pack('VnVV', count($files), isset($hasdir) ? 0x1110 : 0x1000, $gflags, strlen($alias)) . $alias . pack('V', strlen($pmeta)) . $pmeta . $manifest;

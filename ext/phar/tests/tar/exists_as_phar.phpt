@@ -18,6 +18,7 @@ $phar->setAlias('hio');
 $phar->addEmptyDir('test');
 $phar->stopBuffering();
 copy($fname, $tname);
+$phar->setAlias('hio2');
 
 try {
 	$p = new Phar($tname);

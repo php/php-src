@@ -22,6 +22,7 @@ $phar = new Phar($fname);
 echo $phar->getAlias() . "\n";
 $phar->setAlias('test');
 echo $phar->getAlias() . "\n";
+$b = $phar;
 $phar = new Phar(dirname(__FILE__) . '/notphar.phar');
 try {
 	$phar->setAlias('test');

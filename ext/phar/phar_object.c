@@ -2345,6 +2345,10 @@ PHP_METHOD(Phar, setAlias)
 		}
 		if (alias_len && SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void**)&fd_ptr)) {
 			spprintf(&error, 0, "alias \"%s\" is already used for archive \"%s\" and cannot be used for other archives", alias, (*fd_ptr)->fname);
+			if (SUCCESS == phar_free_alias(*fd_ptr, alias, alias_len TSRMLS_CC)) {
+				efree(error);
+				goto valid_alias;
+			}
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 			efree(error);
 			RETURN_FALSE;
@@ -2354,6 +2358,7 @@ PHP_METHOD(Phar, setAlias)
 				"Invalid alias \"%s\" specified for phar \"%s\"", alias, phar_obj->arc.archive->fname);
 			RETURN_FALSE;
 		}
+valid_alias:
 		if (phar_obj->arc.archive->alias_len && SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), phar_obj->arc.archive->alias, phar_obj->arc.archive->alias_len, (void**)&fd_ptr)) {
 			zend_hash_del(&(PHAR_GLOBALS->phar_alias_map), phar_obj->arc.archive->alias, phar_obj->arc.archive->alias_len);
 			readd = 1;

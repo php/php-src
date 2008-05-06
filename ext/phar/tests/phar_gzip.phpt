@@ -35,6 +35,7 @@ include $fname;
 $a = new Phar($fname);
 $a['test'] = 'hi';
 copy($fname, $fname2);
+$a->setAlias('another');
 $b = new Phar($fname2);
 var_dump($b->isFileFormat(Phar::PHAR));
 var_dump($b->isCompressed() == Phar::GZ);

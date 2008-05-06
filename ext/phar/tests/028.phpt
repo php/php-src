@@ -9,6 +9,7 @@ phar.require_hash=0
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://hio';
 $file = '<?php include "' . $pname . '/a.php"; __HALT_COMPILER(); ?>';
+$alias = '';
 
 $files = array();
 $files['a.php']   = '<?php echo "This is a\n"; include "'.$pname.'/b.php"; ?>';      

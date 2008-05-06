@@ -9,6 +9,7 @@ phar.require_hash=0
 $fname1 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.1.phar.php';
 $fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.php';
 $fname = $fname1;
+$alias = '';
 $pname = 'phar://hio';
 $file = '<?php include "' . $pname . '/a.php"; __HALT_COMPILER(); ?>';
 
@@ -21,10 +22,11 @@ $files['e.php']   = '<?php echo "This is e\n"; ?>';
 
 include 'files/phar_test.inc';
 
-file_put_contents($fname2, $file);
+copy($fname1, $fname2);
 
 var_dump(Phar::loadPhar($fname1, 'hio'));
 var_dump(Phar::loadPhar($fname1, 'copy'));
+$a = new Phar($fname1);
 try
 {
 	var_dump(Phar::loadPhar($fname2, 'copy'));
