@@ -5,7 +5,10 @@ PHP                                                                        NEWS
   functions. (Andrey)
 - Fixed bug #44891 Memory leak using registerPHPFunctions and XSLT Variable 
   as function parameter. (Rob)
+- Fixed bug #44836 (putenv() crashes, avoid direct reference of environ in    
+  POSIX systems). (Ilia, delphij at FreeBSD dot org)
 - Fixed bug #44798 (Memory leak assigning value to attribute). (Ilia)
+
 
 01 May 2008, PHP 5.2.6
 - Fixed two possible crashes inside posix extension (Tony)
