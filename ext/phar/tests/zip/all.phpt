@@ -53,7 +53,7 @@ string(3) "hi3"
 bool(false)
 bool(true)
 bool(true)
-string(4) "0444"
+string(6) "100444"
 string(32) "<?php ok __HALT_COMPILER(); ?>
 "
 string(4) "hime"
