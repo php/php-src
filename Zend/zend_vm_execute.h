@@ -680,7 +680,7 @@ static int ZEND_RECV_INIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_uint arg_num = Z_LVAL(opline->op1.u.constant);
 	zend_free_op free_res;
 	zval **param = zend_vm_stack_get_arg(arg_num TSRMLS_CC);
-	zval **var_ptr = get_zval_ptr_ptr(&opline->result, EX(Ts), &free_res, BP_VAR_W);;
+	zval **var_ptr;
 
 	if (param == NULL) {
 		ALLOC_ZVAL(assignment_value);
@@ -698,6 +698,7 @@ static int ZEND_RECV_INIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, assignment_value, opline->extended_value TSRMLS_CC);
+	var_ptr = get_zval_ptr_ptr(&opline->result, EX(Ts), &free_res, BP_VAR_W);
 	Z_DELREF_PP(var_ptr);
 	*var_ptr = assignment_value;
 
