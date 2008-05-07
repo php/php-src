@@ -1728,7 +1728,6 @@ static void date_period_it_invalidate_current(zend_object_iterator *iter TSRMLS_
 static void date_period_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
 	date_period_it *iterator = (date_period_it *)iter;
-	zval        *intern = (zval*)iterator->intern.data;
 
 	date_period_it_invalidate_current(iter TSRMLS_CC);
 
@@ -1792,7 +1791,6 @@ static void date_period_it_current_data(zend_object_iterator *iter, zval ***data
 static int date_period_it_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
 	date_period_it   *iterator = (date_period_it *)iter;
-	php_period_obj   *object   = iterator->object;
 	*int_key = iterator->current_index;
 	return HASH_KEY_IS_LONG;
 }
@@ -1803,7 +1801,6 @@ static int date_period_it_current_key(zend_object_iterator *iter, char **str_key
 static void date_period_it_move_forward(zend_object_iterator *iter TSRMLS_DC)
 {
 	date_period_it   *iterator = (date_period_it *)iter;
-	php_period_obj   *object   = iterator->object;
 
 	iterator->current_index++;
 	date_period_it_invalidate_current(iter TSRMLS_CC);
@@ -1815,7 +1812,6 @@ static void date_period_it_move_forward(zend_object_iterator *iter TSRMLS_DC)
 static void date_period_it_rewind(zend_object_iterator *iter TSRMLS_DC)
 {
 	date_period_it   *iterator = (date_period_it *)iter;
-	php_period_obj   *object   = iterator->object;
 
 	iterator->current_index = 0;
 	date_period_it_invalidate_current(iter TSRMLS_CC);
