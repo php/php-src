@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 - Fixed bug #44811 (Improve error message when creating a new SoapClient that 
   contains invalid data). (Markus Fischer, David C)
 - Fixed bug #44798 (Memory leak assigning value to attribute). (Ilia)
+- Fixed bug #44716 (Progress notifications incorrect). (Hannes)
+- Fixed bug #44712 (stream_context_set_params segfaults on invalid arguments). (Hannes)
 
 
 01 May 2008, PHP 5.2.6
