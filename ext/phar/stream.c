@@ -100,9 +100,6 @@ php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, 
 /*			fprintf(stderr, "Fragment:  %s\n", resource->fragment);*/
 		}
 #endif
-	if (PHAR_GLOBALS->request_init && PHAR_GLOBALS->phar_plain_map.arBuckets && zend_hash_exists(&(PHAR_GLOBALS->phar_plain_map), arch, arch_len+1)) {
-		return resource;
-	}
 	if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
 		phar_archive_data **pphar = NULL;
 
@@ -152,10 +149,9 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 	phar_entry_data *idata;
 	char *internal_file;
 	char *error;
-	char *plain_map;
 	HashTable *pharcontext;
 	php_url *resource = NULL;
-	php_stream *fp, *fpf;
+	php_stream *fpf;
 	zval **pzoption, *metadata;
 	uint host_len;
 
@@ -178,16 +174,6 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 
 	host_len = strlen(resource->host);
 	phar_request_initialize(TSRMLS_C);
-	if (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), resource->host, host_len+1, (void **)&plain_map) == SUCCESS) {
-		spprintf(&internal_file, 0, "%s%s", plain_map, resource->path);
-		fp = php_stream_open_wrapper_ex(internal_file, mode, options, opened_path, context);
-		efree(internal_file);
-		if (!fp) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: file \"%s\" extracted from \"%s\" could not be opened", resource->path+1, resource->host);
-		}
-		php_url_free(resource);
-		return fp;
-	}
 
 	/* strip leading "/" */
 	internal_file = estrdup(resource->path + 1);
@@ -515,13 +501,13 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 				  php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC) /* {{{ */
 {
 	php_url *resource = NULL;
-	char *internal_file, *key, *error, *plain_map;
+	char *internal_file, *key, *error;
 	uint keylen;
 	ulong unused;
 	phar_archive_data *phar;
 	phar_entry_info *entry;
 	uint host_len;
-	int retval, internal_file_len;
+	int internal_file_len;
 
 	if ((resource = phar_open_url(wrapper, url, "r", flags|PHP_STREAM_URL_STAT_QUIET TSRMLS_CC)) == NULL) {
 		return FAILURE;
@@ -540,13 +526,6 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 
 	host_len = strlen(resource->host);
 	phar_request_initialize(TSRMLS_C);
-	if (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), resource->host, host_len+1, (void **)&plain_map) == SUCCESS) {
-		spprintf(&internal_file, 0, "%s%s", plain_map, resource->path);
-		retval = php_stream_stat_path_ex(internal_file, flags, ssb, context);
-		php_url_free(resource);
-		efree(internal_file);
-		return retval;
-	}
 
 	internal_file = resource->path + 1; /* strip leading "/" */
 	/* find the phar in our trusty global hash indexed by alias (host of phar://blah.phar/file.whatever) */
@@ -655,7 +634,7 @@ free_resource:
 static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC) /* {{{ */
 {
 	php_url *resource;
-	char *internal_file, *error, *plain_map;
+	char *internal_file, *error;
 	phar_entry_data *idata;
 	phar_archive_data **pphar;
 	uint host_len;
@@ -680,11 +659,6 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 
 	host_len = strlen(resource->host);
 	phar_request_initialize(TSRMLS_C);
-	if (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), resource->host, host_len+1, (void **)&plain_map) == SUCCESS) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: \"%s\" cannot be unlinked, phar is extracted in plain map", url);
-		php_url_free(resource);
-		return 0;
-	}
 
 	if (FAILURE == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), resource->host, strlen(resource->host), (void **) &pphar)) {
 		pphar = NULL;
@@ -734,7 +708,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char *url_to, int options, php_stream_context *context TSRMLS_DC) /* {{{ */
 {
 	php_url *resource_from, *resource_to;
-	char *error, *plain_map;
+	char *error;
 	phar_archive_data *phar, *pfrom, *pto;
 	phar_entry_info *entry;
 	uint host_len;
@@ -812,13 +786,6 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 
 	host_len = strlen(resource_from->host);
 	phar_request_initialize(TSRMLS_C);
-	if (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), resource_from->host, host_len+1, (void **)&plain_map) == SUCCESS) {
-		/*TODO:use php_stream_rename() once available*/
-		php_url_free(resource_from);
-		php_url_free(resource_to);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\" from extracted phar archive", url_from, url_to);
-		return 0;
-	}
 
 	if (SUCCESS != phar_get_archive(&phar, resource_from->host, strlen(resource_from->host), NULL, 0, &error TSRMLS_CC)) {
 		php_url_free(resource_from);

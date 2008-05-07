@@ -94,103 +94,9 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 }
 /* }}}*/
 
-static void phar_split_extract_list(TSRMLS_D)
-{
-	char *tmp = estrdup(PHAR_GLOBALS->extract_list);
-	char *key;
-	char *lasts;
-	char *q;
-	int keylen;
-
-	zend_hash_clean(&(PHAR_GLOBALS->phar_plain_map));
-
-	for (key = php_strtok_r(tmp, ",", &lasts);
-			key;
-			key = php_strtok_r(NULL, ",", &lasts))
-	{
-		char *val = strchr(key, '=');
-
-		if (val) {	
-			*val++ = '\0';
-			for (q = key; *q; q++) {
-				*q = tolower(*q);
-			}
-			keylen = q - key + 1;
-			zend_hash_add(&(PHAR_GLOBALS->phar_plain_map), key, keylen, val, strlen(val)+1, NULL);
-		}
-	}
-	efree(tmp);
-}
-/* }}} */
-
-ZEND_INI_MH(phar_ini_extract_list) /* {{{ */
-{
-	PHAR_G(extract_list) = new_value;
-
-	if (stage == ZEND_INI_STAGE_RUNTIME) {
-		phar_request_initialize(TSRMLS_C);
-		phar_split_extract_list(TSRMLS_C);
-	}
-
-	return SUCCESS;
-}
-/* }}} */
-
-ZEND_INI_DISP(phar_ini_extract_list_disp) /*void name(zend_ini_entry *ini_entry, int type) {{{ */
-{
-	char *value;
-
-	if (type==ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ini_entry->orig_value;
-	} else if (ini_entry->value) {
-		value = ini_entry->value;
-	} else {
-		value = NULL;
-	}
-
-	if (value) {
-		char *tmp = strdup(value);
-		char *key;
-		char *lasts;
-		char *q;
-		int started = 0;
-	
-		if (!sapi_module.phpinfo_as_text) {
-			php_printf("<ul>");
-		}
-		for (key = php_strtok_r(tmp, ",", &lasts);
-				key;
-				key = php_strtok_r(NULL, ",", &lasts))
-		{
-			char *val = strchr(key, '=');
-
-			if (val) {	
-				*val++ = '\0';
-				for (q = key; *q; ++q) {
-					*q = tolower(*q);
-				}
-				if (sapi_module.phpinfo_as_text) {
-					if (started++) {
-						php_printf(",");
-					}
-					php_printf("[%s = %s]", key, val);
-				} else {
-					php_printf("<li>%s => %s</li>", key, val);
-				}
-			}
-		}
-		if (!sapi_module.phpinfo_as_text) {
-			php_printf("</ul>");
-		}
-		free(tmp);
-	}
-}
-/* }}} */
-
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN( "phar.readonly",     "1", PHP_INI_ALL, phar_ini_modify_handler, readonly,     zend_phar_globals, phar_globals)
 	STD_PHP_INI_BOOLEAN( "phar.require_hash", "1", PHP_INI_ALL, phar_ini_modify_handler, require_hash, zend_phar_globals, phar_globals)
-	STD_PHP_INI_ENTRY_EX("phar.extract_list", "",  PHP_INI_ALL, phar_ini_extract_list,   extract_list, zend_phar_globals, phar_globals, phar_ini_extract_list_disp)
 PHP_INI_END()
 
 /**
@@ -1592,50 +1498,7 @@ int phar_detect_phar_fname_ext(const char *filename, int check_length, const cha
 		return FAILURE;
 	}
 	phar_request_initialize(TSRMLS_C);
-	/* first check for extract_list */
-	if (zend_hash_num_elements(&(PHAR_GLOBALS->phar_plain_map))) {
-		for (zend_hash_internal_pointer_reset(&(PHAR_GLOBALS->phar_plain_map));
-		zend_hash_has_more_elements(&(PHAR_GLOBALS->phar_plain_map)) == SUCCESS;
-		zend_hash_move_forward(&(PHAR_GLOBALS->phar_plain_map))) {
-			char *key;
-			uint keylen;
-			ulong intkey;
-
-			if (HASH_KEY_IS_STRING != zend_hash_get_current_key_ex(&(PHAR_GLOBALS->phar_plain_map), &key, &keylen, &intkey, 0, NULL)) {
-				continue;
-			}
-
-			if (keylen <= (uint) filename_len && !memcmp(key, filename, keylen - 1)) {
-				/* found plain map, so we grab the extension, if any */
-				if (is_complete && keylen != (uint)filename_len + 1) {
-					continue;
-				}
-				if (for_create == 1) {
-					return FAILURE;
-				}
-				if (!executable == 1) {
-					return FAILURE;
-				}
-				pos = strrchr(key, '/');
-				if (pos) {
-					pos = filename + (pos - key);
-					slash = strchr(pos, '.');
-					if (slash) {
-						*ext_str = slash;
-						*ext_len = keylen - (slash - filename);
-						return SUCCESS;
-					}
-					*ext_str = pos;
-					*ext_len = -1;
-					return FAILURE;
-				}
-				*ext_str = filename + keylen - 1;
-				*ext_len = -1;
-				return FAILURE;
-			}
-		}
-	}
-	/* next check for alias in first segment */
+	/* first check for alias in first segment */
 	pos = strchr(filename, '/');
 	if (pos) {
 		if (zend_hash_exists(&(PHAR_GLOBALS->phar_alias_map), (char *) filename, pos - filename)) {
@@ -3016,9 +2879,7 @@ void phar_request_initialize(TSRMLS_D) /* {{{ */
 		PHAR_GLOBALS->request_done = 0;
 		zend_hash_init(&(PHAR_GLOBALS->phar_fname_map), sizeof(phar_archive_data*), zend_get_hash_value, destroy_phar_data,  0);
 		zend_hash_init(&(PHAR_GLOBALS->phar_alias_map), sizeof(phar_archive_data*), zend_get_hash_value, NULL, 0);
-		zend_hash_init(&(PHAR_GLOBALS->phar_plain_map), sizeof(const char *),       zend_get_hash_value, NULL, 0);
 		zend_hash_init(&(PHAR_GLOBALS->phar_SERVER_mung_list), sizeof(const char *),       zend_get_hash_value, NULL, 0);
-		phar_split_extract_list(TSRMLS_C);
 		PHAR_G(cwd) = NULL;
 		PHAR_G(cwd_len) = 0;
 		PHAR_G(cwd_init) = 0;
@@ -3037,8 +2898,6 @@ PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 		PHAR_GLOBALS->phar_alias_map.arBuckets = NULL;
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_fname_map));
 		PHAR_GLOBALS->phar_fname_map.arBuckets = NULL;
-		zend_hash_destroy(&(PHAR_GLOBALS->phar_plain_map));
-		PHAR_GLOBALS->phar_plain_map.arBuckets = NULL;
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_SERVER_mung_list));
 		PHAR_GLOBALS->phar_SERVER_mung_list.arBuckets = NULL;
 		PHAR_GLOBALS->request_init = 0;
