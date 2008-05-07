@@ -1,12 +1,20 @@
 <?php
 
 $notes = '
+BC BREAKING RELEASE
+ BC breaks:
+ * Phar object Compression API is rewritten.  Use Phar::compress() and decompress(),
+   Phar::compressFiles()/decompressFiles() and PharFileInfo->compress()/decompress().
+ * phar.extract_list and Phar::getExtractList() are removed
+
 Major feature functionality release
  * new default stub allows running of phar-based phars without phar extension [Greg/Steph]
  * add support for tar-based and zip-based phar archives [Greg]
  * add Phar::isTar(), Phar::isZip(), and Phar::isPhar() [Greg]
- * add Phar::convertToTar(), Phar::convertToZip(), and Phar::convertToPhar() [Greg]
+ * add Phar::convertToExecutable(), Phar::convertToData() [Greg]
  * add Phar::compress() [Greg]
+ * rename Phar::compressAllFiles() to compressFiles(), uncompressAllFiles() to
+   decompressFiles() [Greg]
  * conversion to compressed or to other file formats automatically copies the archive
    to a new extension (i.e. ".phar" to ".phar.tar" or ".tar" to ".tar.gz") [Steph]
  * add Phar::webPhar() for running a web-based application unmodified
@@ -24,7 +32,12 @@ Major feature functionality release
  * implement Phar::mount() for mounting external paths or files to locations inside a phar [Greg]
  * add Phar::delete() [Greg]
 
-Changes since 2.0.0a1: fix build in PHP 5.2
+Security addition
+ * aliases are validated so that they contain no directory separators as intended
+ * on conversion to other formats, user-supplied aliases are validated
+
+Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression API refactored,
+ conversion API refactored
 ';
 
 if (!class_exists("Phar") && !extension_loaded("Phar")) {
@@ -77,8 +90,8 @@ $package->setPackageType('extsrc');
 $package->addRelease();
 $package->setReleaseVersion(phpversion('phar'));
 $package->setAPIVersion(Phar::apiVersion());
-$package->setReleaseStability('alpha');
-$package->setAPIStability('alpha');
+$package->setReleaseStability('beta');
+$package->setAPIStability('beta');
 $package->setNotes("\n$notes\n");
 //$package->addGlobalReplacement('package-info', '@package_version@', 'version');
 $package->generateContents();

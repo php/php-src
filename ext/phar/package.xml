@@ -11,12 +11,19 @@ zlib or bz2 extension.
 is available, a Phar object can be used as an array to iterate over a phar&apos;s contents
 or to read files directly from the phar.
 
-Phar archives can be created using the streams API or with the Phar class, if
+Phar supports tar and zip file formats as well as the native phar file format, and can also be
+used to create data-only tar and zip archives with the PharData class, even if
+write access is disabled by the phar.readonly ini variable.
+
+Executable phar archives can be created using the streams API or with the Phar class, if
 the phar.readonly ini variable is set to false.
 
 Full support for MD5 and SHA1 signatures is possible. Signatures can be required 
 if the ini variable phar.require_hash is set to true. When PECL extension hash is
-avaiable then SHA-256 and SHA-512 signatures are supported as well.</description>
+available then SHA-256 and SHA-512 signatures are supported as well.
+
+Phar is APC-compatible, the latest APC will cache files within a phar archive, resulting in
+a 6x speedup measured running phpMyAdmin as a phar archive.</description>
  <lead>
   <name>Greg Beaver</name>
   <user>cellog</user>
@@ -35,25 +42,33 @@ avaiable then SHA-256 and SHA-512 signatures are supported as well.</description
   <email>sfox@php.net</email>
   <active>yes</active>
  </developer>
- <date>2008-03-27</date>
- <time>01:38:33</time>
+ <date>2008-05-07</date>
+ <time>01:42:47</time>
  <version>
-  <release>2.0.0a2</release>
+  <release>2.0.0b1</release>
   <api>1.1.1</api>
  </version>
  <stability>
-  <release>alpha</release>
-  <api>alpha</api>
+  <release>beta</release>
+  <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
  <notes>
+
+BC BREAKING RELEASE
+ BC breaks:
+ * Phar object Compression API is rewritten.  Use Phar::compress() and decompress(),
+   Phar::compressFiles()/decompressFiles() and PharFileInfo-&gt;compress()/decompress().
+ * phar.extract_list and Phar::getExtractList() are removed
 
 Major feature functionality release
  * new default stub allows running of phar-based phars without phar extension [Greg/Steph]
  * add support for tar-based and zip-based phar archives [Greg]
  * add Phar::isTar(), Phar::isZip(), and Phar::isPhar() [Greg]
- * add Phar::convertToTar(), Phar::convertToZip(), and Phar::convertToPhar() [Greg]
+ * add Phar::convertToExecutable(), Phar::convertToData() [Greg]
  * add Phar::compress() [Greg]
+ * rename Phar::compressAllFiles() to compressFiles(), uncompressAllFiles() to
+   decompressFiles() [Greg]
  * conversion to compressed or to other file formats automatically copies the archive
    to a new extension (i.e. &quot;.phar&quot; to &quot;.phar.tar&quot; or &quot;.tar&quot; to &quot;.tar.gz&quot;) [Steph]
  * add Phar::webPhar() for running a web-based application unmodified
@@ -71,7 +86,12 @@ Major feature functionality release
  * implement Phar::mount() for mounting external paths or files to locations inside a phar [Greg]
  * add Phar::delete() [Greg]
 
-Changes since 2.0.0a1: fix build in PHP 5.2
+Security addition
+ * aliases are validated so that they contain no directory separators as intended
+ * on conversion to other formats, user-supplied aliases are validated
+
+Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression API refactored,
+ conversion API refactored
 
  </notes>
  <contents>
@@ -116,6 +136,14 @@ Changes since 2.0.0a1: fix build in PHP 5.2
      <file name="frontcontroller13.phar.inc" role="test" />
      <file name="frontcontroller14.phar" role="test" />
      <file name="frontcontroller14.phar.inc" role="test" />
+     <file name="frontcontroller16.phar" role="test" />
+     <file name="frontcontroller16.phar.inc" role="test" />
+     <file name="frontcontroller17.phar" role="test" />
+     <file name="frontcontroller17.phar.inc" role="test" />
+     <file name="frontcontroller18.phar" role="test" />
+     <file name="frontcontroller18.phar.inc" role="test" />
+     <file name="frontcontroller19.phar" role="test" />
+     <file name="frontcontroller19.phar.inc" role="test" />
      <file name="md5.phar" role="test" />
      <file name="nophar.phar" role="test" />
      <file name="nophar.phar.inc" role="test" />
@@ -128,6 +156,12 @@ Changes since 2.0.0a1: fix build in PHP 5.2
     </dir> <!-- /tests/files -->
     <dir name="tar">
      <dir name="files">
+      <file name="badalias1.phar.tar" role="test" />
+      <file name="badalias2.phar.tar" role="test" />
+      <file name="badalias3.phar.tar" role="test" />
+      <file name="badalias4.phar.tar" role="test" />
+      <file name="badalias5.phar.tar" role="test" />
+      <file name="corrupt_tarmaker.php.inc" role="test" />
       <file name="frontcontroller.phar.inc" role="test" />
       <file name="frontcontroller.phar.tar" role="test" />
       <file name="frontcontroller2.phar.inc" role="test" />
@@ -152,11 +186,16 @@ Changes since 2.0.0a1: fix build in PHP 5.2
       <file name="frontcontroller11.phar.tar" role="test" />
       <file name="frontcontroller12.phar.inc" role="test" />
       <file name="frontcontroller12.phar.tar" role="test" />
+      <file name="links.tar" role="test" />
       <file name="make_invalid_tar.php.inc" role="test" />
       <file name="tarmaker.php.inc" role="test" />
+      <file name="trunc.tar" role="test" />
      </dir> <!-- /tests/tar/files -->
      <file name="033.phpt" role="test" />
      <file name="033a.phpt" role="test" />
+     <file name="badalias.phpt" role="test" />
+     <file name="badchecksum.phpt" role="test" />
+     <file name="bignames.phpt" role="test" />
      <file name="create_new_and_modify.phpt" role="test" />
      <file name="create_new_phar_b.phpt" role="test" />
      <file name="delete.phpt" role="test" />
@@ -164,6 +203,7 @@ Changes since 2.0.0a1: fix build in PHP 5.2
      <file name="delete_in_phar_b.phpt" role="test" />
      <file name="delete_in_phar_confirm.phpt" role="test" />
      <file name="dir.phpt" role="test" />
+     <file name="exists_as_phar.phpt" role="test" />
      <file name="frontcontroller1.phar.phpt" role="test" />
      <file name="frontcontroller2.phar.phpt" role="test" />
      <file name="frontcontroller3.phar.phpt" role="test" />
@@ -185,6 +225,8 @@ Changes since 2.0.0a1: fix build in PHP 5.2
      <file name="frontcontroller19.phar.phpt" role="test" />
      <file name="frontcontroller20.phar.phpt" role="test" />
      <file name="frontcontroller21.phar.phpt" role="test" />
+     <file name="links.phpt" role="test" />
+     <file name="links2.phpt" role="test" />
      <file name="open_for_write_existing.phpt" role="test" />
      <file name="open_for_write_existing_b.phpt" role="test" />
      <file name="open_for_write_existing_c.phpt" role="test" />
@@ -207,6 +249,7 @@ Changes since 2.0.0a1: fix build in PHP 5.2
      <file name="phar_setalias.phpt" role="test" />
      <file name="phar_setalias2.phpt" role="test" />
      <file name="phar_setdefaultstub.phpt" role="test" />
+     <file name="phar_stub.phpt" role="test" />
      <file name="phar_stub_error.phpt" role="test" />
      <file name="refcount1.phpt" role="test" />
      <file name="refcount1_5_2.phpt" role="test" />
@@ -220,9 +263,38 @@ Changes since 2.0.0a1: fix build in PHP 5.2
      <file name="tar_makebz2.phpt" role="test" />
      <file name="tar_makegz.phpt" role="test" />
      <file name="tar_nostub.phpt" role="test" />
+     <file name="truncated.phpt" role="test" />
     </dir> <!-- /tests/tar -->
     <dir name="zip">
      <dir name="files">
+      <file name="badalias1.phar.zip" role="test" />
+      <file name="badalias2.phar.zip" role="test" />
+      <file name="badalias3.phar.zip" role="test" />
+      <file name="badalias4.phar.zip" role="test" />
+      <file name="badalias5.phar.zip" role="test" />
+      <file name="cdir_offset.zip" role="test" />
+      <file name="compress_unsup1.zip" role="test" />
+      <file name="compress_unsup2.zip" role="test" />
+      <file name="compress_unsup3.zip" role="test" />
+      <file name="compress_unsup4.zip" role="test" />
+      <file name="compress_unsup5.zip" role="test" />
+      <file name="compress_unsup6.zip" role="test" />
+      <file name="compress_unsup7.zip" role="test" />
+      <file name="compress_unsup9.zip" role="test" />
+      <file name="compress_unsup10.zip" role="test" />
+      <file name="compress_unsup14.zip" role="test" />
+      <file name="compress_unsup18.zip" role="test" />
+      <file name="compress_unsup19.zip" role="test" />
+      <file name="compress_unsup97.zip" role="test" />
+      <file name="compress_unsup98.zip" role="test" />
+      <file name="compress_unsupunknown.zip" role="test" />
+      <file name="corrupt2.php.inc" role="test" />
+      <file name="corrupt_count1.php.inc" role="test" />
+      <file name="corrupt_zipmaker.php.inc" role="test" />
+      <file name="count1.zip" role="test" />
+      <file name="count2.zip" role="test" />
+      <file name="encrypted.zip" role="test" />
+      <file name="filecomment.zip" role="test" />
       <file name="frontcontroller.phar.inc" role="test" />
       <file name="frontcontroller.phar.zip" role="test" />
       <file name="frontcontroller2.phar.inc" role="test" />
@@ -248,10 +320,27 @@ Changes since 2.0.0a1: fix build in PHP 5.2
       <file name="frontcontroller12.phar.inc" role="test" />
       <file name="frontcontroller12.phar.zip" role="test" />
       <file name="make_invalid_tar.php.inc" role="test" />
+      <file name="metadata.phar.inc" role="test" />
+      <file name="metadata.phar.zip" role="test" />
+      <file name="nozipend.zip" role="test" />
+      <file name="odt.odt" role="test" />
+      <file name="stdin.zip" role="test" />
+      <file name="truncfilename.zip" role="test" />
+      <file name="zip.zip" role="test" />
       <file name="zipmaker.php.inc" role="test" />
      </dir> <!-- /tests/zip/files -->
      <file name="033.phpt" role="test" />
      <file name="033a.phpt" role="test" />
+     <file name="all.phpt" role="test" />
+     <file name="badalias.phpt" role="test" />
+     <file name="corrupt_001.phpt" role="test" />
+     <file name="corrupt_002.phpt" role="test" />
+     <file name="corrupt_003.phpt" role="test" />
+     <file name="corrupt_004.phpt" role="test" />
+     <file name="corrupt_005.phpt" role="test" />
+     <file name="corrupt_006.phpt" role="test" />
+     <file name="corrupt_007.phpt" role="test" />
+     <file name="corrupt_008.phpt" role="test" />
      <file name="create_new_and_modify.phpt" role="test" />
      <file name="create_new_phar_b.phpt" role="test" />
      <file name="delete.phpt" role="test" />
@@ -259,6 +348,7 @@ Changes since 2.0.0a1: fix build in PHP 5.2
      <file name="delete_in_phar_b.phpt" role="test" />
      <file name="delete_in_phar_confirm.phpt" role="test" />
      <file name="dir.phpt" role="test" />
+     <file name="exists_as_phar.phpt" role="test" />
      <file name="frontcontroller1.phar.phpt" role="test" />
      <file name="frontcontroller2.phar.phpt" role="test" />
      <file name="frontcontroller3.phar.phpt" role="test" />
@@ -280,6 +370,10 @@ Changes since 2.0.0a1: fix build in PHP 5.2
      <file name="frontcontroller19.phar.phpt" role="test" />
      <file name="frontcontroller20.phar.phpt" role="test" />
      <file name="frontcontroller21.phar.phpt" role="test" />
+     <file name="largezip.phpt" role="test" />
+     <file name="metadata_write_commit.phpt" role="test" />
+     <file name="notphar.phpt" role="test" />
+     <file name="odt.phpt" role="test" />
      <file name="open_for_write_existing.phpt" role="test" />
      <file name="open_for_write_existing_b.phpt" role="test" />
      <file name="open_for_write_existing_c.phpt" role="test" />
@@ -297,13 +391,17 @@ Changes since 2.0.0a1: fix build in PHP 5.2
      <file name="phar_convert_phar.phpt" role="test" />
      <file name="phar_copy.phpt" role="test" />
      <file name="phar_magic.phpt" role="test" />
+     <file name="phar_oo_compressallbz2.phpt" role="test" />
+     <file name="phar_oo_compressallgz.phpt" role="test" />
      <file name="phar_setalias.phpt" role="test" />
      <file name="phar_setalias2.phpt" role="test" />
      <file name="phar_setdefaultstub.phpt" role="test" />
+     <file name="phar_stub.phpt" role="test" />
      <file name="phar_stub_error.phpt" role="test" />
      <file name="refcount1.phpt" role="test" />
      <file name="refcount1_5_2.phpt" role="test" />
      <file name="rename.phpt" role="test" />
+     <file name="unixzip.phpt" role="test" />
     </dir> <!-- /tests/zip -->
     <file name="001.phpt" role="test" />
     <file name="002.phpt" role="test" />
@@ -344,6 +442,10 @@ Changes since 2.0.0a1: fix build in PHP 5.2
     <file name="032.phpt" role="test" />
     <file name="033.phpt" role="test" />
     <file name="033a.phpt" role="test" />
+    <file name="addfuncs.phpt" role="test" />
+    <file name="badparameters.phpt" role="test" />
+    <file name="bug13727.phpt" role="test" />
+    <file name="bug13786.phpt" role="test" />
     <file name="create_new_and_modify.phpt" role="test" />
     <file name="create_new_phar.phpt" role="test" />
     <file name="create_new_phar_b.phpt" role="test" />
@@ -354,7 +456,10 @@ Changes since 2.0.0a1: fix build in PHP 5.2
     <file name="delete_in_phar_b.phpt" role="test" />
     <file name="delete_in_phar_confirm.phpt" role="test" />
     <file name="dir.phpt" role="test" />
-    <file name="extracted_001.phpt" role="test" />
+    <file name="file_get_contents.phpt" role="test" />
+    <file name="fopen.phpt" role="test" />
+    <file name="fopen5.2.phpt" role="test" />
+    <file name="fopen_edgecases.phpt" role="test" />
     <file name="frontcontroller1.phpt" role="test" />
     <file name="frontcontroller2.phpt" role="test" />
     <file name="frontcontroller3.phpt" role="test" />
@@ -378,6 +483,17 @@ Changes since 2.0.0a1: fix build in PHP 5.2
     <file name="frontcontroller21.phpt" role="test" />
     <file name="frontcontroller22.phpt" role="test" />
     <file name="frontcontroller23.phpt" role="test" />
+    <file name="frontcontroller24.phpt" role="test" />
+    <file name="frontcontroller25.phpt" role="test" />
+    <file name="frontcontroller26.phpt" role="test" />
+    <file name="frontcontroller27.phpt" role="test" />
+    <file name="frontcontroller28.phpt" role="test" />
+    <file name="frontcontroller29.phpt" role="test" />
+    <file name="frontcontroller30.phpt" role="test" />
+    <file name="frontcontroller31.phpt" role="test" />
+    <file name="frontcontroller32.phpt" role="test" />
+    <file name="frontcontroller33.phpt" role="test" />
+    <file name="frontcontroller34.phpt" role="test" />
     <file name="include_path.phpt" role="test" />
     <file name="ini_set.phpt" role="test" />
     <file name="ini_set_off.phpt" role="test" />
@@ -386,16 +502,30 @@ Changes since 2.0.0a1: fix build in PHP 5.2
     <file name="metadata_read.phpt" role="test" />
     <file name="metadata_write.phpt" role="test" />
     <file name="metadata_write_commit.phpt" role="test" />
+    <file name="mkdir.phpt" role="test" />
     <file name="mounteddir.phpt" role="test" />
     <file name="nophar.phpt" role="test" />
     <file name="nophar_web.phpt" role="test" />
+    <file name="opendir.phpt" role="test" />
     <file name="open_for_write_existing.phpt" role="test" />
     <file name="open_for_write_existing_b.phpt" role="test" />
     <file name="open_for_write_existing_c.phpt" role="test" />
     <file name="open_for_write_newfile.phpt" role="test" />
     <file name="open_for_write_newfile_b.phpt" role="test" />
     <file name="open_for_write_newfile_c.phpt" role="test" />
+    <file name="pharfileinfo_chmod.phpt" role="test" />
+    <file name="pharfileinfo_compression.phpt" role="test" />
+    <file name="pharfileinfo_construct.phpt" role="test" />
+    <file name="pharfileinfo_destruct.phpt" role="test" />
+    <file name="pharfileinfo_getcrc32.phpt" role="test" />
+    <file name="pharfileinfo_setmetadata.phpt" role="test" />
     <file name="phar_begin_setstub_commit.phpt" role="test" />
+    <file name="phar_buildfromdirectory1.phpt" role="test" />
+    <file name="phar_buildfromdirectory2.phpt" role="test" />
+    <file name="phar_buildfromdirectory3.phpt" role="test" />
+    <file name="phar_buildfromdirectory4.phpt" role="test" />
+    <file name="phar_buildfromdirectory5.phpt" role="test" />
+    <file name="phar_buildfromdirectory6.phpt" role="test" />
     <file name="phar_buildfromiterator1.phpt" role="test" />
     <file name="phar_buildfromiterator2.phpt" role="test" />
     <file name="phar_buildfromiterator3.phpt" role="test" />
@@ -405,8 +535,10 @@ Changes since 2.0.0a1: fix build in PHP 5.2
     <file name="phar_buildfromiterator7.phpt" role="test" />
     <file name="phar_buildfromiterator8.phpt" role="test" />
     <file name="phar_buildfromiterator9.phpt" role="test" />
+    <file name="phar_buildfromiterator10.phpt" role="test" />
     <file name="phar_bz2.phpt" role="test" />
     <file name="phar_commitwrite.phpt" role="test" />
+    <file name="phar_convert_again.phpt" role="test" />
     <file name="phar_convert_repeated.phpt" role="test" />
     <file name="phar_convert_repeated_b.phpt" role="test" />
     <file name="phar_convert_tar.phpt" role="test" />
@@ -417,7 +549,9 @@ Changes since 2.0.0a1: fix build in PHP 5.2
     <file name="phar_createdefaultstub.phpt" role="test" />
     <file name="phar_create_in_cwd.phpt" role="test" />
     <file name="phar_ctx_001.phpt" role="test" />
+    <file name="phar_decompress.phpt" role="test" />
     <file name="phar_dir_iterate.phpt" role="test" />
+    <file name="phar_extract.phpt" role="test" />
     <file name="phar_get_supportedcomp1.phpt" role="test" />
     <file name="phar_get_supportedcomp2.phpt" role="test" />
     <file name="phar_get_supportedcomp3.phpt" role="test" />
@@ -425,9 +559,11 @@ Changes since 2.0.0a1: fix build in PHP 5.2
     <file name="phar_get_supported_signatures_001.phpt" role="test" />
     <file name="phar_get_supported_signatures_002.phpt" role="test" />
     <file name="phar_gzip.phpt" role="test" />
+    <file name="phar_isvalidpharfilename.phpt" role="test" />
     <file name="phar_magic.phpt" role="test" />
     <file name="phar_metadata_read.phpt" role="test" />
     <file name="phar_metadata_write.phpt" role="test" />
+    <file name="phar_mount.phpt" role="test" />
     <file name="phar_offset_get_error.phpt" role="test" />
     <file name="phar_oo_001.phpt" role="test" />
     <file name="phar_oo_002.phpt" role="test" />
@@ -450,9 +586,13 @@ Changes since 2.0.0a1: fix build in PHP 5.2
     <file name="phar_oo_compressed_001b.phpt" role="test" />
     <file name="phar_oo_compressed_002.phpt" role="test" />
     <file name="phar_oo_compressed_002b.phpt" role="test" />
+    <file name="phar_oo_getcontents.phpt" role="test" />
+    <file name="phar_oo_getcontentsgz.phpt" role="test" />
     <file name="phar_oo_getmodified.phpt" role="test" />
+    <file name="phar_oo_iswriteable.phpt" role="test" />
     <file name="phar_oo_nosig.phpt" role="test" />
     <file name="phar_oo_uncompressall.phpt" role="test" />
+    <file name="phar_running.phpt" role="test" />
     <file name="phar_setalias.phpt" role="test" />
     <file name="phar_setalias2.phpt" role="test" />
     <file name="phar_setdefaultstub.phpt" role="test" />
@@ -462,15 +602,26 @@ Changes since 2.0.0a1: fix build in PHP 5.2
     <file name="phar_stub_error.phpt" role="test" />
     <file name="phar_stub_write.phpt" role="test" />
     <file name="phar_stub_write_file.phpt" role="test" />
+    <file name="phar_unlinkarchive.phpt" role="test" />
+    <file name="phpinfo_001.phpt" role="test" />
+    <file name="phpinfo_002.phpt" role="test" />
+    <file name="phpinfo_003.phpt" role="test" />
+    <file name="phpinfo_004.phpt" role="test" />
+    <file name="readfile.phpt" role="test" />
     <file name="refcount1.phpt" role="test" />
     <file name="refcount1_5_2.phpt" role="test" />
     <file name="rename.phpt" role="test" />
+    <file name="stat.phpt" role="test" />
+    <file name="test_alias_unset.phpt" role="test" />
     <file name="test_signaturealgos.phpt" role="test" />
+    <file name="test_unset.phpt" role="test" />
+    <file name="webphar_compilefail.phpt" role="test" />
     <file name="withphar.phpt" role="test" />
     <file name="withphar_web.phpt" role="test" />
     <file name="zf_test.phpt" role="test" />
    </dir> <!-- /tests -->
    <file name="build_precommand.php" role="php" />
+   <file name="cgidebug" role="data" />
    <file name="config.m4" role="src" />
    <file name="config.w32" role="src" />
    <file name="CREDITS" role="doc" />
@@ -490,7 +641,6 @@ Changes since 2.0.0a1: fix build in PHP 5.2
    <file name="phar_path_check.c" role="src" />
    <file name="phar_path_check.re" role="src" />
    <file name="php_phar.h" role="src" />
-   <file name="php_stream_unlink.h" role="src" />
    <file name="shortarc.php" role="php" />
    <file name="stream.c" role="src" />
    <file name="stream.h" role="src" />
@@ -535,6 +685,59 @@ Changes since 2.0.0a1: fix build in PHP 5.2
  <changelog>
   <release>
    <version>
+    <release>2.0.0b1</release>
+    <api>1.1.1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2008-05-07</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>
+
+BC BREAKING RELEASE
+ BC breaks:
+ * Phar object Compression API is rewritten.  Use Phar::compress() and decompress(),
+   Phar::compressFiles()/decompressFiles() and PharFileInfo-&gt;compress()/decompress().
+ * phar.extract_list and Phar::getExtractList() are removed
+
+Major feature functionality release
+ * new default stub allows running of phar-based phars without phar extension [Greg/Steph]
+ * add support for tar-based and zip-based phar archives [Greg]
+ * add Phar::isTar(), Phar::isZip(), and Phar::isPhar() [Greg]
+ * add Phar::convertToExecutable(), Phar::convertToData() [Greg]
+ * add Phar::compress() [Greg]
+ * rename Phar::compressAllFiles() to compressFiles(), uncompressAllFiles() to
+   decompressFiles() [Greg]
+ * conversion to compressed or to other file formats automatically copies the archive
+   to a new extension (i.e. &quot;.phar&quot; to &quot;.phar.tar&quot; or &quot;.tar&quot; to &quot;.tar.gz&quot;) [Steph]
+ * add Phar::webPhar() for running a web-based application unmodified
+   directly from a phar archive [Greg]
+ * file functions (fopen-based and stat-based) can be instructed to only look for
+   relative paths within a phar via Phar::interceptFileFuncs()
+ * add PharData class to allow manipulation/creation of non-executable tar and zip archives. [Steph]
+   non-executable tar/zip manipulation is allowed even when phar.readonly=1 [Greg]
+ * paths with . and .. work (phar://blah.phar/a/../b.php =&gt; phar://blah.phar/b.php) [Greg]
+ * add support for mkdir()/rmdir() and support for empty directories to phar file format [Greg]
+ * add option to compress the entire phar file for phar/tar file format [Greg]
+ * implement Phar::isCompressed() returning 0, Phar::GZ or Phar::BZ2 [Greg]
+ * implement Phar::copy(string $from, string $to) [Greg]
+ * implement Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
+ * implement Phar::mount() for mounting external paths or files to locations inside a phar [Greg]
+ * add Phar::delete() [Greg]
+
+Security addition
+ * aliases are validated so that they contain no directory separators as intended
+ * on conversion to other formats, user-supplied aliases are validated
+
+Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression API refactored,
+ conversion API refactored
+
+   </notes>
+  </release>
+  <release>
+   <version>
     <release>2.0.0a2</release>
     <api>1.1.1</api>
    </version>
@@ -544,9 +747,7 @@ Changes since 2.0.0a1: fix build in PHP 5.2
    </stability>
    <date>2008-03-27</date>
    <license uri="http://www.php.net/license">PHP License</license>
-   <notes>
-
-Major feature functionality release
+   <notes>Major feature functionality release
  * new default stub allows running of phar-based phars without phar extension [Greg/Steph]
  * add support for tar-based and zip-based phar archives [Greg]
  * add Phar::isTar(), Phar::isZip(), and Phar::isPhar() [Greg]
@@ -569,9 +770,7 @@ Major feature functionality release
  * implement Phar::mount() for mounting external paths or files to locations inside a phar [Greg]
  * add Phar::delete() [Greg]
 
-Changes since 2.0.0a1: fix build in PHP 5.2
-
-   </notes>
+Changes since 2.0.0a1: fix build in PHP 5.2</notes>
   </release>
   <release>
    <version>
