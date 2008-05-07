@@ -167,8 +167,11 @@ echo $e->getMessage() . "\n";
 --CLEAN--
 <?php
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.gz');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.zip');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar.gz');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar.bz2');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.tbz');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar');
