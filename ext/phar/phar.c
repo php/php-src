@@ -380,7 +380,9 @@ int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_len, int
 			/* prevent any ".phar" without a stub getting through */
 			if (!phar->halt_offset && !phar->is_brandnew) {
 				if (PHAR_G(readonly) && FAILURE == zend_hash_find(&(phar->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1, (void **)&stub)) {
-					spprintf(error, 0, "'%s' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive", fname);
+					if (error) {
+						spprintf(error, 0, "'%s' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive", fname);
+					}
 					return FAILURE;
 				}
 			}
@@ -908,6 +910,16 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 	phar_unixify_path_separators(mydata->fname, fname_len);
 #endif
 	mydata->fname_len = fname_len;
+	endbuffer = strrchr(mydata->fname, '/');
+	if (endbuffer) {
+		mydata->ext = memchr(endbuffer, '.', (mydata->fname + fname_len) - endbuffer);
+		if (mydata->ext == endbuffer) {
+			mydata->ext = memchr(endbuffer + 1, '.', (mydata->fname + fname_len) - endbuffer - 1);
+		}
+		if (mydata->ext) {
+			mydata->ext_len = (mydata->fname + mydata->fname_len) - mydata->ext;
+		}
+	}
 	mydata->alias = alias ? estrndup(alias, alias_len) : estrndup(mydata->fname, fname_len);
 	mydata->alias_len = alias ? alias_len : fname_len;
 	mydata->sig_flags = sig_flags;
@@ -1008,7 +1020,7 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 	phar_archive_data *mydata;
 	int register_alias;
 	php_stream *fp;
-	char *actual = NULL;
+	char *actual = NULL, *p;
 
 	if (!pphar) {
 		pphar = &mydata;
@@ -1068,7 +1080,17 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 #ifdef PHP_WIN32
 	phar_unixify_path_separators(mydata->fname, fname_len);
 #endif
-	
+	p = strrchr(mydata->fname, '/');
+	if (p) {
+		mydata->ext = memchr(p, '.', (mydata->fname + fname_len) - p);
+		if (mydata->ext == p) {
+			mydata->ext = memchr(p + 1, '.', (mydata->fname + fname_len) - p - 1);
+		}
+		if (mydata->ext) {
+			mydata->ext_len = (mydata->fname + fname_len) - mydata->ext;
+		}
+	}
+
 	if (pphar) {
 		*pphar = mydata;
 	}
@@ -1505,6 +1527,53 @@ int phar_detect_phar_fname_ext(const char *filename, int check_length, const cha
 			*ext_str = pos;
 			*ext_len = -1;
 			return FAILURE;
+		}
+	}
+
+	if (zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
+		phar_archive_data **pphar;
+
+		if (is_complete) {
+			if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), filename, filename_len, (void **)&pphar)) {
+				*ext_str = filename + (filename_len - (*pphar)->ext_len);
+woohoo:
+				*ext_len = (*pphar)->ext_len;
+				if (executable == 2) {
+					return SUCCESS;
+				}
+				if (executable == 1 && !(*pphar)->is_data) {
+					return SUCCESS;
+				}
+				if (!executable && (*pphar)->is_data) {
+					return SUCCESS;
+				}
+				return FAILURE;
+			}
+		} else {
+			char *key;
+			uint keylen;
+			ulong unused;
+
+			zend_hash_internal_pointer_reset(&(PHAR_GLOBALS->phar_fname_map));
+			while (FAILURE != zend_hash_has_more_elements(&(PHAR_GLOBALS->phar_fname_map))) {
+				if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(&(PHAR_GLOBALS->phar_fname_map), &key, &keylen, &unused, 0, NULL)) {
+					break;
+				}
+
+				if (keylen > filename_len) {
+					zend_hash_move_forward(&(PHAR_GLOBALS->phar_fname_map));
+					continue;
+				}
+				if (!memcmp(filename, key, keylen) && (filename_len == keylen
+					|| filename[keylen] == '/' || filename[keylen] == '\0')) {
+					if (FAILURE == zend_hash_get_current_data(&(PHAR_GLOBALS->phar_fname_map), (void **) &pphar)) {
+						break;
+					}
+					*ext_str = filename + (keylen - (*pphar)->ext_len);
+					goto woohoo;
+				}
+				zend_hash_move_forward(&(PHAR_GLOBALS->phar_fname_map));
+			}
 		}
 	}
 

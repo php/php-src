@@ -154,7 +154,7 @@ int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_l
 
 int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, php_uint32 compression, char **error TSRMLS_DC) /* {{{ */
 {
-	char buf[512], *actual_alias = NULL;
+	char buf[512], *actual_alias = NULL, *p;
 	phar_entry_info entry = {0};
 	size_t pos = 0, read, totalsize;
 	tar_header *hdr;
@@ -371,6 +371,16 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 	phar_unixify_path_separators(myphar->fname, fname_len);
 #endif
 	myphar->fname_len = fname_len;
+	p = strrchr(myphar->fname, '/');
+	if (p) {
+		myphar->ext = memchr(p, '.', (myphar->fname + fname_len) - p);
+		if (myphar->ext == p) {
+			myphar->ext = memchr(p + 1, '.', (myphar->fname + fname_len) - p - 1);
+		}
+		if (myphar->ext) {
+			myphar->ext_len = (myphar->fname + fname_len) - p;
+		}
+	}
 	myphar->fp = fp;
 	phar_request_initialize(TSRMLS_C);
 	if (SUCCESS != zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), myphar->fname, fname_len, (void*)&myphar, sizeof(phar_archive_data*), (void **)&actual)) {

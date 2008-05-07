@@ -152,7 +152,7 @@ int phar_open_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, i
 	php_uint16 i;
 	phar_archive_data *mydata = NULL;
 	phar_entry_info entry = {0};
-	char *p = buf;
+	char *p = buf, *ext;
 
 	size = php_stream_tell(fp);
 	if (size > sizeof(locator) + 65536) {
@@ -231,6 +231,16 @@ foundit:
 #endif
 	mydata->is_zip = 1;
 	mydata->fname_len = fname_len;
+	ext = strrchr(mydata->fname, '/');
+	if (ext) {
+		mydata->ext = memchr(ext, '.', (mydata->fname + fname_len) - ext);
+		if (mydata->ext == ext) {
+			mydata->ext = memchr(ext + 1, '.', (mydata->fname + fname_len) - ext - 1);
+		}
+		if (mydata->ext) {
+			mydata->ext_len = (mydata->fname + fname_len) - mydata->ext;
+		}
+	}
 	/* clean up on big-endian systems */
 	/* seek to central directory */
 	php_stream_seek(fp, PHAR_GET_32(locator.cdir_offset), SEEK_SET);

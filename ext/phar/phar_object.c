@@ -1837,7 +1837,7 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 	}
 
 	if (!phar->is_data) {
-		if (SUCCESS != phar_detect_phar_fname_ext(newpath, phar->fname_len, (const char **) &ext, &ext_len, 1, 1, 1 TSRMLS_CC)) {
+		if (SUCCESS != phar_detect_phar_fname_ext(newpath, phar->fname_len, (const char **) &(phar->ext), &(phar->ext_len), 1, 1, 1 TSRMLS_CC)) {
 			efree(oldpath);
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "phar \"%s\" has invalid extension %s", phar->fname, ext);
 			return NULL;
@@ -1854,7 +1854,7 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 			}
 		}
 	} else {
-		if (SUCCESS != phar_detect_phar_fname_ext(newpath, phar->fname_len, (const char **) &ext, &ext_len, 0, 1, 1 TSRMLS_CC)) {
+		if (SUCCESS != phar_detect_phar_fname_ext(newpath, phar->fname_len, (const char **) &(phar->ext), &(phar->ext_len), 0, 1, 1 TSRMLS_CC)) {
 			efree(oldpath);
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "data phar \"%s\" has invalid extension %s", phar->fname, ext);
 			return NULL;
