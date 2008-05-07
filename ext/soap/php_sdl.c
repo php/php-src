@@ -240,7 +240,12 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include TSRMLS_DC)
 	wsdl = soap_xmlParseFile(struri TSRMLS_CC);
 	
 	if (!wsdl) {
-		soap_error1(E_ERROR, "Parsing WSDL: Couldn't load from '%s'", struri);
+		xmlErrorPtr xmlErrorPtr = xmlGetLastError();
+		if (xmlErrorPtr) {
+			soap_error2(E_ERROR, "Parsing WSDL: Couldn't load from '%s' : %s", struri, xmlErrorPtr->message);
+		} else {
+			soap_error1(E_ERROR, "Parsing WSDL: Couldn't load from '%s'", struri);
+		}
 	}
 
 	zend_hash_add(&ctx->docs, struri, strlen(struri)+1, (void**)&wsdl, sizeof(xmlDocPtr), NULL);
