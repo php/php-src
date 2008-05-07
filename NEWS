@@ -264,8 +264,6 @@ PHP                                                                        NEWS
   (Tony)
 - Fixed bug #27372 (parse error loading browscap.ini at apache startup).
   (Jani)
-- Fixed bug #44811 (Improve error message when creating a new SoapClient that 
-  contains invalid data). (Markus Fischer, David C)
 
 30 Aug 2007, PHP 5.2.4
 - Removed --enable-versioning configure option. (Jani)
