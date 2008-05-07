@@ -1,3 +1,26 @@
+2008-05-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c
+      zend_execute_API.c:
+      Use lazy symbol table initialization for op_arrays called from internal php
+      functions
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Fixed possible memory leak
+
+    * zend_execute.c
+      zend_execute.c
+      zend_execute_API.c
+      zend_execute_API.c:
+      GC fix
+
+    * (PHP_5_3)
+      zend_vm_execute.h:
+      Regenerate zend_vm_execute.h
+
 2008-05-05  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_3)
