@@ -38,10 +38,6 @@
 #define MYSQL_ERRMSG_SIZE		MYSQLND_ERRMSG_SIZE
 #define SQLSTATE_LENGTH			MYSQLND_SQLSTATE_LENGTH
 
-#define SERVER_QUERY_NO_GOOD_INDEX_USED	MYSQLND_SERVER_QUERY_NO_GOOD_INDEX_USED	
-#define SERVER_QUERY_NO_INDEX_USED		MYSQLND_SERVER_QUERY_NO_INDEX_USED
-
-
 /* functions */
 #define mysql_affected_rows(r)			mysqlnd_affected_rows((r))
 #define mysql_autocommit(r,m)			mysqlnd_autocommit((r),(m))
