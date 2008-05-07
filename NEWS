@@ -109,6 +109,7 @@ PHP                                                                        NEWS
 - Added native support for asinh(), acosh(), atanh(), log1p() and expm1() (Kalle)
 
 - Improved PHP runtime speed and memory usage:
+  . Use IS_CV for direct access to $this variable. (Dmitry)
   . Use ZEND_FREE() opcode instead of ZEND_SWITCH_FREE(IS_TMP_VAR). (Dmitry)
   . Lazy EG(active_symbol_table) initialization. (Dmitry)
   . Optimized ZEND_RETURN opcode to not allocate and copy return value if it is
