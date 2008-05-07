@@ -144,6 +144,24 @@ $data->setSignatureAlgorithm(Phar::MD5);
 } catch (Exception $e) {
 echo $e->getMessage() . "\n";
 }
+
+try {
+$tgz->convertToData(Phar::TAR, Phar::GZ, '.phar.tgz.oops');
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
+
+try {
+$phar->convertToExecutable(Phar::TAR, Phar::GZ, '.tgz.oops');
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
+
+try {
+$tgz->convertToData(Phar::TAR, Phar::GZ, '.phar/.tgz.oops');
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
 ?>
 ===DONE===
 --CLEAN--
@@ -191,4 +209,7 @@ A Phar stub cannot be set in a plain tar archive
 A Phar alias cannot be set in a plain tar archive
 A Phar stub cannot be set in a plain tar archive
 Cannot set signature algorithm, not possible with tar-based phar archives
+data phar "%sphar_convert_again2.phar.tgz.oops" has invalid extension .phar.tgz.oops
+phar "%sphar_convert_again2.tgz.oops" has invalid extension .tgz.oops
+data phar "%sphar_convert_again2.phar/.tgz.oops" has invalid extension .phar/.tgz.oops
 ===DONE===
