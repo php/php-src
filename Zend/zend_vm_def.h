@@ -2454,7 +2454,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, ANY, CV)
 	} else {
 		zend_compiled_variable *cv = &CV_DEF_OF(opline->op2.u.var);
 		zend_u_hash_quick_update(EG(active_symbol_table), ZEND_STR_TYPE, cv->name, cv->name_len+1, cv->hash_value,
-		    &EG(exception), sizeof(zval *), NULL);
+		    &EG(exception), sizeof(zval *), (void**)&EX(CVs)[opline->op2.u.var]);
 	}
 	EG(exception) = NULL;
 	ZEND_VM_NEXT_OPCODE();

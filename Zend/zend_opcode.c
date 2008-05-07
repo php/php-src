@@ -101,7 +101,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->return_reference = 0;
 	op_array->done_pass_two = 0;
 
-	op_array->uses_this = 0;
+	op_array->this_var = -1;
 
 	op_array->start_op = NULL;
 

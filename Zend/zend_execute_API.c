@@ -2037,12 +2037,13 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 		}
 		if (EG(current_execute_data) && EG(current_execute_data)->op_array) {
 			EG(current_execute_data)->symbol_table = EG(active_symbol_table);
-			if (EG(current_execute_data)->op_array->uses_this && EG(This)) {
-				Z_ADDREF_P(EG(This)); /* For $this pointer */
-				if (zend_ascii_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), NULL)==FAILURE) {
-					Z_DELREF_P(EG(This));
-				}
-			}
+
+			if (EG(current_execute_data)->op_array->this_var != -1 &&
+			    !EG(current_execute_data)->CVs[EG(current_execute_data)->op_array->this_var] &&
+			    EG(This)) {
+				EG(current_execute_data)->CVs[EG(current_execute_data)->op_array->this_var] = (zval**)EG(current_execute_data)->CVs + EG(current_execute_data)->op_array->last_var + EG(current_execute_data)->op_array->this_var;
+				*EG(current_execute_data)->CVs[EG(current_execute_data)->op_array->this_var] = EG(This);
+ 			}
 			for (i = 0; i < EG(current_execute_data)->op_array->last_var; i++) {
 				if (EG(current_execute_data)->CVs[i]) {
 					zend_u_hash_quick_update(EG(active_symbol_table),
