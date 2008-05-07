@@ -23,8 +23,8 @@
 #ifndef MYSQLND_H
 #define MYSQLND_H
 
-#define MYSQLND_VERSION "mysqlnd 5.0.3-dev - 080129 - $Revision$"
-#define MYSQLND_VERSION_ID 50002
+#define MYSQLND_VERSION "mysqlnd 5.0.4-dev - 080501 - $Revision$"
+#define MYSQLND_VERSION_ID 50004
 
 /* This forces inlining of some accessor functions */
 #define MYSQLND_USE_OPTIMISATIONS 0
@@ -138,13 +138,13 @@ PHPAPI void _mysqlnd_debug(const char *mode TSRMLS_DC);
 #define mysqlnd_get_proto_info(conn)	(conn)->protocol_version
 #define mysqlnd_thread_id(conn)			(conn)->thread_id
 
-#define mysqlnd_num_rows(result)		((result)->data? (result)->data->row_count:0)
+#define mysqlnd_num_rows(result)		((result)->stored_data? (result)->stored_data->row_count:0)
 #define mysqlnd_num_fields(result)		(result)->field_count
 
 #define mysqlnd_fetch_lengths(result)	((result)->m.fetch_lengths? (result)->m.fetch_lengths((result)):NULL)
 
 #define mysqlnd_field_seek(result, ofs)			(result)->m.seek_field((result), (ofs))
-#define mysqlnd_field_tell(result)				(result)->meta? (result)->meta->current_field:0)
+#define mysqlnd_field_tell(result)				((result)->meta? (result)->meta->current_field:0)
 #define mysqlnd_fetch_field(result)				(result)->m.fetch_field((result) TSRMLS_CC)
 #define mysqlnd_fetch_field_direct(result,fnr)	((result)->meta? &((result)->meta->fields[(fnr)]):NULL)
 #define mysqlnd_fetch_fields(result)			((result)->meta? (result)->meta->fields: NULL)
@@ -358,6 +358,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	MYSQLND_DEBUG	*dbg;	/* The DBG object */
 	long			net_cmd_buffer_size;
 	long			net_read_buffer_size;
+	long			log_mask;
 #ifdef MYSQLND_THREADED
 	THREAD_T		thread_id;
 #endif
