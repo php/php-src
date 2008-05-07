@@ -260,6 +260,9 @@ typedef struct _phar_entry_info {
 struct _phar_archive_data {
 	char                     *fname;
 	int                      fname_len;
+	/* for phar_detect_fname_ext, this stores the location of the file extension within fname */
+	char                     *ext;
+	int                      ext_len;
 	char                     *alias;
 	int                      alias_len;
 	char                     version[12];
