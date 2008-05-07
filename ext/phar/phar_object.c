@@ -1758,6 +1758,8 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 	zval *ret, arg1;
 	zend_class_entry *ce;
 	char *error;
+	const char *pcr_error;
+	int ext_len = ext ? strlen(ext) : 0;
 
 	if (!ext) {
 		if (phar->is_zip) {
@@ -1801,6 +1803,13 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 					ext = "phar";
 			}
 		}
+	} else if (phar_path_check(&ext, &ext_len, &pcr_error) > pcr_is_ok) {
+		if (phar->is_data) {
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "data phar converted from \"%s\" has invalid extension %s", phar->fname, ext);
+		} else {
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "phar converted from \"%s\" has invalid extension %s", phar->fname, ext);
+		}
+		return NULL;
 	}
 
 	if (ext[0] == '.') {
@@ -1826,13 +1835,13 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Unable to add newly converted phar \"%s\" to the list of phars, a phar with that name already exists", phar->fname);
 		return NULL;
 	}
-	if (SUCCESS != zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), newpath, phar->fname_len, (void*)&phar, sizeof(phar_archive_data*), NULL)) {
-		efree(oldpath);
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Unable to add newly converted phar \"%s\" to the list of phars", phar->fname);
-		return NULL;
-	}
 
 	if (!phar->is_data) {
+		if (SUCCESS != phar_detect_phar_fname_ext(newpath, phar->fname_len, (const char **) &ext, &ext_len, 1, 1, 1 TSRMLS_CC)) {
+			efree(oldpath);
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "phar \"%s\" has invalid extension %s", phar->fname, ext);
+			return NULL;
+		}
 		if (phar->alias) {
 			if (phar->is_temporary_alias) {
 				phar->alias = NULL;
@@ -1845,11 +1854,21 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 			}
 		}
 	} else {
+		if (SUCCESS != phar_detect_phar_fname_ext(newpath, phar->fname_len, (const char **) &ext, &ext_len, 0, 1, 1 TSRMLS_CC)) {
+			efree(oldpath);
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "data phar \"%s\" has invalid extension %s", phar->fname, ext);
+			return NULL;
+		}
 		phar->alias = NULL;
 		phar->alias_len = 0;
 	}
 
-	
+	if (SUCCESS != zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), newpath, phar->fname_len, (void*)&phar, sizeof(phar_archive_data*), NULL)) {
+		efree(oldpath);
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Unable to add newly converted phar \"%s\" to the list of phars", phar->fname);
+		return NULL;
+	}
+
 	phar_flush(phar, 0, 0, 1, &error TSRMLS_CC);
 	if (error) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, error);
