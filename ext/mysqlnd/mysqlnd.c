@@ -1390,7 +1390,7 @@ MYSQLND_METHOD(mysqlnd_conn, info)(const MYSQLND * const conn)
 }
 /* }}} */
 
-
+#if !defined(MYSQLND_USE_OPTIMISATIONS) || MYSQLND_USE_OPTIMISATIONS == 0
 /* {{{ mysqlnd_get_client_info */
 PHPAPI const char * mysqlnd_get_client_info()
 {
@@ -1405,7 +1405,7 @@ PHPAPI unsigned int mysqlnd_get_client_version()
 	return MYSQLND_VERSION_ID;
 }
 /* }}} */
-
+#endif
 
 /* {{{ mysqlnd_conn::get_server_info */
 static const char *

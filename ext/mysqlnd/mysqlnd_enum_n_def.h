@@ -31,8 +31,8 @@
 #define SERVER_STATUS_IN_TRANS					1	/* Transaction has started */
 #define SERVER_STATUS_AUTOCOMMIT				2	/* Server in auto_commit mode */
 #define SERVER_MORE_RESULTS_EXISTS				8	/* Multi query - next query exists */
-#define MYSQLND_SERVER_QUERY_NO_GOOD_INDEX_USED	16
-#define MYSQLND_SERVER_QUERY_NO_INDEX_USED		32
+#define SERVER_QUERY_NO_GOOD_INDEX_USED	16
+#define SERVER_QUERY_NO_INDEX_USED		32
 /*
   The server was able to fulfill the clients request and opened a
   read-only non-scrollable cursor for a query. This flag comes
@@ -47,7 +47,6 @@
 #define SERVER_STATUS_DB_DROPPED				256 /* A database was dropped */
 #define SERVER_STATUS_NO_BACKSLASH_ESCAPES		512
 #define SERVER_QUERY_WAS_SLOW					1024
-
 
 #define MYSQLND_NO_DATA			100
 #define MYSQLND_DATA_TRUNCATED	101
@@ -316,6 +315,7 @@ typedef enum mysqlnd_collected_stats
 	STAT_NON_RSET_QUERY,
 	STAT_NO_INDEX_USED,
 	STAT_BAD_INDEX_USED,
+	STAT_QUERY_WAS_SLOW,
 	STAT_BUFFERED_SETS,
 	STAT_UNBUFFERED_SETS,
 	STAT_PS_BUFFERED_SETS,
