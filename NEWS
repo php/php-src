@@ -51,4 +51,5 @@ PHP                                                                        NEWS
 - Added ext/hash support to ext/session's ID generator. (Sara)
 
 - Fixed bug #40325 (Vary: header missing in gzip output handlers). (Mike)
-
+- Fixed bug #44811 (Improve error message when creating a new SoapClient that 
+  contains invalid data). (Markus Fischer, David C)
