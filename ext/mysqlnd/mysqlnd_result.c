@@ -583,6 +583,8 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 						stmt->state = MYSQLND_STMT_INITTED;
 					}
 				} else {
+					unsigned int to_log = MYSQLND_G(log_mask);
+					to_log &= fields_eof.server_status;
 					DBG_INF_FMT("warnings=%u server_status=%u", fields_eof.warning_count, fields_eof.server_status);
 					conn->upsert_status.warning_count = fields_eof.warning_count;
 					/*
@@ -593,12 +595,14 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 					  of every result set (the EOF packet).
 					*/
 					conn->upsert_status.server_status = fields_eof.server_status;
-					if (fields_eof.server_status & MYSQLND_SERVER_QUERY_NO_GOOD_INDEX_USED) {
+					if (fields_eof.server_status & SERVER_QUERY_NO_GOOD_INDEX_USED) {
 						stat = STAT_BAD_INDEX_USED;
-					} else if (fields_eof.server_status & MYSQLND_SERVER_QUERY_NO_INDEX_USED) {
+					} else if (fields_eof.server_status & SERVER_QUERY_NO_INDEX_USED) {
 						stat = STAT_NO_INDEX_USED;
+					} else if (fields_eof.server_status & SERVER_QUERY_WAS_SLOW) {
+						stat = STAT_QUERY_WAS_SLOW;
 					}
-					if (stat != STAT_LAST) {
+					if (to_log) {
 #if A0
 						char *backtrace = mysqlnd_get_backtrace(TSRMLS_C);
 						php_log_err(backtrace TSRMLS_CC);
@@ -706,14 +710,14 @@ unsigned long * mysqlnd_fetch_lengths_unbuffered(MYSQLND_RES * const result)
 }
 /* }}} */
 
-
+#if !defined(MYSQLND_USE_OPTIMISATIONS) || MYSQLND_USE_OPTIMISATIONS == 0
 /* {{{ mysqlnd_res::fetch_lengths */
 PHPAPI unsigned long * mysqlnd_fetch_lengths(MYSQLND_RES * const result)
 {
 	return result->m.fetch_lengths? result->m.fetch_lengths(result):NULL;
 }
 /* }}} */
-
+#endif
 
 /* {{{ mysqlnd_fetch_row_unbuffered_c */
 static MYSQLND_ROW_C

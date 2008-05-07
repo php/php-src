@@ -42,6 +42,7 @@ const MYSQLND_STRING mysqlnd_stats_values_names[STAT_LAST] =
 	{ STR_W_LEN("non_result_set_queries") },
 	{ STR_W_LEN("no_index_used") },
 	{ STR_W_LEN("bad_index_used") },
+	{ STR_W_LEN("slow_queries") },
 	{ STR_W_LEN("buffered_sets") },
 	{ STR_W_LEN("unbuffered_sets") },
 	{ STR_W_LEN("ps_buffered_sets") },
