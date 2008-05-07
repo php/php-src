@@ -11,11 +11,9 @@ phar.require_hash=0
 a=b
 --FILE--
 <?php
-ini_set('phar.extract_list', 'phar_test.phar='.dirname(__FILE__).',another.phar='. dirname(__FILE__));
 phpinfo(INFO_MODULES);
 ini_set('phar.readonly',1);
 ini_set('phar.require_hash',1);
-ini_set('phar.extract_list', '');
 phpinfo(INFO_MODULES);
 ?>
 ===DONE===
@@ -39,7 +37,6 @@ Phar based on pear/PHP_Archive, original concept by Davey Shafik.<br />Phar full
 </table><br />
 <table border="0" cellpadding="3" width="600">
 <tr class="h"><th>Directive</th><th>Local Value</th><th>Master Value</th></tr>
-<tr><td class="e">phar.extract_list</td><td class="v"><ul><li>phar_test.phar => %stests</li><li>another.phar => %stests</li></ul></td><td class="v"><ul></ul></td></tr>
 <tr><td class="e">phar.readonly</td><td class="v">Off</td><td class="v">Off</td></tr>
 <tr><td class="e">phar.require_hash</td><td class="v">Off</td><td class="v">Off</td></tr>
 </table><br />
@@ -62,7 +59,6 @@ Phar based on pear/PHP_Archive, original concept by Davey Shafik.<br />Phar full
 </table><br />
 <table border="0" cellpadding="3" width="600">
 <tr class="h"><th>Directive</th><th>Local Value</th><th>Master Value</th></tr>
-<tr><td class="e">phar.extract_list</td><td class="v"><ul></ul></td><td class="v"><ul></ul></td></tr>
 <tr><td class="e">phar.readonly</td><td class="v">On</td><td class="v">Off</td></tr>
 <tr><td class="e">phar.require_hash</td><td class="v">On</td><td class="v">Off</td></tr>
 </table><br />

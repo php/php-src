@@ -65,13 +65,6 @@ var_dump(Phar::isValidPharFilename('phar.zip.phar'));
 var_dump(Phar::isValidPharFilename('phar.zip.phar', true));
 var_dump(Phar::isValidPharFilename('phar.zip.phar', false));
 
-ini_set('phar.extract_list', 'myphar.phar=' . dirname(__FILE__));
-
-echo "\nmyphar.phar\n";
-var_dump(Phar::isValidPharFilename('myphar.phar'));
-var_dump(Phar::isValidPharFilename('myphar.phar', true));
-var_dump(Phar::isValidPharFilename('myphar.phar', false));
-
 echo "\ndir.phar.php\n";
 var_dump(Phar::isValidPharFilename('dir.phar.php'));
 var_dump(Phar::isValidPharFilename('dir.phar.php', true));
@@ -135,11 +128,6 @@ bool(false)
 bool(true)
 
 phar.zip.phar
-bool(true)
-bool(true)
-bool(false)
-
-myphar.phar
 bool(true)
 bool(true)
 bool(false)

@@ -27,8 +27,6 @@ include $fname;
 echo "\n";
 opendir('phar://');
 opendir('phar://hi.phar');
-ini_set('phar.extract_list', 'hi.phar='.dirname(__FILE__));
-opendir('phar://hi.phar/oopsie/daisy/');
 ?>
 ===DONE===
 --CLEAN--
@@ -41,6 +39,4 @@ phar url "phar://" is unknown in %sopendir.php on line %d
 
 Warning: opendir(phar://hi.phar): failed to open dir: phar error: invalid url or non-existent phar "phar://hi.phar"
 phar url "phar://hi.phar" is unknown in %sopendir.php on line %d
-
-Warning: opendir(phar://hi.phar/oopsie/daisy/): failed to open dir: phar error: file "%soopsie/daisy" extracted from "hi.phar" could not be opened in %sopendir.php on line %d
 ===DONE===

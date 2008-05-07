@@ -27,9 +27,7 @@ unlink(dirname(__FILE__) . '/buildfromiterator.phar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--
-array(34) {
-  ["extracted_001.phpt"]=>
-  string(%d) "%sextracted_001.phpt"
+array(33) {
   ["phar_ctx_001.phpt"]=>
   string(%d) "%sphar_ctx_001.phpt"
   ["phar_get_supported_signatures_001.phpt"]=>

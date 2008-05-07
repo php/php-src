@@ -30,28 +30,6 @@ static zend_class_entry *phar_ce_PharException;
 static zend_class_entry *phar_ce_entry;
 #endif
 
-static int phar_get_extract_list(void *pDest, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
-{
-	zval *return_value = va_arg(args, zval*);
-
-	add_assoc_string_ex(return_value, *(char**)&hash_key->arKey, hash_key->nKeyLength, (char*)pDest, 1);
-	
-	return ZEND_HASH_APPLY_KEEP;
-}
-/* }}} */
-
-/* {{{ proto array Phar::getExtractList()
- * Return array of extract list
- */
-PHP_METHOD(Phar, getExtractList)
-{
-	array_init(return_value);
-
-	phar_request_initialize(TSRMLS_C);
-	zend_hash_apply_with_arguments(&PHAR_G(phar_plain_map), phar_get_extract_list, 1, return_value);
-}
-/* }}} */
-
 static int phar_file_type(HashTable *mimes, char *file, char **mime_type TSRMLS_DC) /* {{{ */
 {
 	char *ext;
@@ -528,7 +506,7 @@ PHP_METHOD(Phar, webPhar)
 	HashTable mimetypes;
 	phar_mime_type mime;
 	zval *mimeoverride = NULL, *rewrite = NULL;
-	char *alias = NULL, *error, *plain_map, *index_php = NULL, *f404 = NULL, *ru = NULL;
+	char *alias = NULL, *error, *index_php = NULL, *f404 = NULL, *ru = NULL;
 	int alias_len = 0, ret, f404_len = 0, free_pathinfo = 0, ru_len = 0;
 	char *fname, *basename, *path_info, *mime_type, *entry, *pt;
 	int fname_len, entry_len, code, index_php_len = 0, not_cgi;
@@ -541,15 +519,6 @@ PHP_METHOD(Phar, webPhar)
 	phar_request_initialize(TSRMLS_C);
 	fname = zend_get_executed_filename(TSRMLS_C);
 	fname_len = strlen(fname);
-	if (zend_hash_num_elements(&(PHAR_GLOBALS->phar_plain_map))) {
-		if((alias && 
-		    zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), alias, alias_len+1, (void **)&plain_map) == SUCCESS)
-		|| (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), fname, fname_len+1, (void **)&plain_map) == SUCCESS)
-		) {
-			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Cannot use Phar::webPhar() from an extracted phar archive, simply use the extracted files directly");
-			return;
-		}
-	}
 	if (phar_open_compiled_file(alias, alias_len, &error TSRMLS_CC) != SUCCESS) {
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
@@ -983,24 +952,14 @@ PHP_METHOD(Phar, createDefaultStub)
  * Reads the currently executed file (a phar) and registers its manifest */
 PHP_METHOD(Phar, mapPhar)
 {
-	char *fname, *alias = NULL, *error, *plain_map;
-	int fname_len, alias_len = 0;
+	char *alias = NULL, *error;
+	int alias_len = 0;
 	long dataoffset = 0;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!l", &alias, &alias_len, &dataoffset) == FAILURE) {
 		return;
 	}
 
 	phar_request_initialize(TSRMLS_C);
-	if (zend_hash_num_elements(&(PHAR_GLOBALS->phar_plain_map))) {
-		fname = zend_get_executed_filename(TSRMLS_C);
-		fname_len = strlen(fname);
-		if((alias && 
-		    zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), alias, alias_len+1, (void **)&plain_map) == SUCCESS)
-		|| (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), fname, fname_len+1, (void **)&plain_map) == SUCCESS)
-		) {
-			RETURN_STRING(plain_map, 1);
-		}
-	}
 
 	RETVAL_BOOL(phar_open_compiled_file(alias, alias_len, &error TSRMLS_CC) == SUCCESS);
 	if (error) {
@@ -1013,7 +972,7 @@ PHP_METHOD(Phar, mapPhar)
  * Loads any phar archive with an alias */
 PHP_METHOD(Phar, loadPhar)
 {
-	char *fname, *alias = NULL, *error, *plain_map;
+	char *fname, *alias = NULL, *error;
 	int fname_len, alias_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!", &fname, &fname_len, &alias, &alias_len) == FAILURE) {
@@ -1021,14 +980,6 @@ PHP_METHOD(Phar, loadPhar)
 	}
 
 	phar_request_initialize(TSRMLS_C);
-	if (zend_hash_num_elements(&(PHAR_GLOBALS->phar_plain_map))) {
-		if((alias && 
-		    zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), alias, alias_len+1, (void **)&plain_map) == SUCCESS)
-		|| (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), fname, fname_len+1, (void **)&plain_map) == SUCCESS)
-		) {
-			RETURN_STRING(plain_map, 1);
-		}
-	}
 
 	RETVAL_BOOL(phar_open_filename(fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, &error TSRMLS_CC) == SUCCESS);
 	if (error) {
@@ -4533,7 +4484,6 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, canCompress,           NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, canWrite,              NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, createDefaultStub,     arginfo_phar_createDS,     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, getExtractList,        NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, getSupportedCompression,NULL,                     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, getSupportedSignatures,NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	PHP_ME(Phar, interceptFileFuncs,    NULL,                      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)

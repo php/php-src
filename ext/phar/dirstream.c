@@ -289,7 +289,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char 
 {
 	php_url *resource = NULL;
 	php_stream *ret;
-	char *internal_file, *key, *error, *plain_map;
+	char *internal_file, *key, *error;
 	uint keylen;
 	ulong unused;
 	phar_archive_data *phar;
@@ -321,16 +321,6 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char 
 
 	host_len = strlen(resource->host);
 	phar_request_initialize(TSRMLS_C);
-	if (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), resource->host, host_len+1, (void **)&plain_map) == SUCCESS) {
-		spprintf(&internal_file, 0, "%s%s", plain_map, resource->path);
-		ret = php_stream_opendir(internal_file, options, context);
-		if (!ret) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: file \"%s\" extracted from \"%s\" could not be opened", internal_file, resource->host);
-		}
-		php_url_free(resource);
-		efree(internal_file);
-		return ret;
-	}
 
 	internal_file = resource->path + 1; /* strip leading "/" */
 	if (FAILURE == phar_get_archive(&phar, resource->host, host_len, NULL, 0, &error TSRMLS_CC)) {
@@ -405,7 +395,6 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, char *url_from, int mode, in
 	phar_archive_data *phar = NULL;
 	char *error, *arch, *entry2;
 	int arch_len, entry_len;
-	char *plain_map;
 	php_url *resource = NULL;
 	uint host_len;
 
@@ -443,11 +432,6 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, char *url_from, int mode, in
 
 	host_len = strlen(resource->host);
 	phar_request_initialize(TSRMLS_C);
-	if (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), resource->host, host_len+1, (void **)&plain_map) == SUCCESS) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: directory \"%s\" cannot be created in phar \"%s\", phar is extracted in plain map", resource->path+1, resource->host);
-		php_url_free(resource);
-		return FAILURE;
-	}
 
 	if (FAILURE == phar_get_archive(&phar, resource->host, host_len, NULL, 0, &error TSRMLS_CC)) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", error retrieving phar information: %s", resource->path+1, resource->host, error);
@@ -530,7 +514,6 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_
 	phar_archive_data *phar = NULL;
 	char *error, *arch, *entry2;
 	int arch_len, entry_len;
-	char *plain_map;
 	php_url *resource = NULL;
 	uint host_len;
 
@@ -568,11 +551,6 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_
 
 	host_len = strlen(resource->host);
 	phar_request_initialize(TSRMLS_C);
-	if (zend_hash_find(&(PHAR_GLOBALS->phar_plain_map), resource->host, host_len+1, (void **)&plain_map) == SUCCESS) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: directory \"%s\" cannot be removed in phar \"%s\", phar is extracted in plain map", resource->path+1, resource->host);
-		php_url_free(resource);
-		return FAILURE;
-	}
 
 	if (FAILURE == phar_get_archive(&phar, resource->host, host_len, NULL, 0, &error TSRMLS_CC)) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot remove directory \"%s\" in phar \"%s\", error retrieving phar information: %s", resource->path+1, resource->host, error);
