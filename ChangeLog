@@ -1,3 +1,83 @@
+2008-05-06  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/spl/spl_array.c
+      ext/spl/tests/bug38618.phpt:
+      Add consistency with the flag
+
+    * ext/spl/spl_array.c:
+      Add a flag that defines whether the objects should get iterated through or
+      not
+
+2008-05-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/basic_functions.c:
+      MFB: Fixed bug #44836 (putenv() crashes, avoid direct reference of environ
+      in POSIX systems).
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/basic_functions.c:
+      
+      MFB: Fixed bug #44836 (putenv() crashes, avoid direct reference of environ
+      in POSIX systems).
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c:
+      Fixed bug #44836 (putenv() crashes, avoid direct reference of environ in
+      POSIX systems)
+      
+
+2008-05-06  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_nonapi.c:
+      Make mysqli compilable in a 5_2 environment. Some want to use
+      mysqlnd+mysqli
+      with 5_2. This won't hurt 5_2 in any way. Won't be MFB-ed because HEAD is
+      completely different.
+
+2008-05-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c:
+      Use lazy symbol table initialization for op_arrays called from internal php
+      functions
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Fixed possible memory leak
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c:
+      GC fix
+
+2008-05-06  Kalle Sommer Nielsen  <kalle@zesix.com>
+
+    * (PHP_5_3)
+      NEWS:
+      Fixed odd errors caused by last commit
+
+    * ext/standard/math.c:
+      Changed php_*h() + php_log1p() + php_expm1() to be static
+
+    * (PHP_5_3)
+      NEWS
+      ext/standard/math.c:
+      - Changed php_*h() to be static
+      * Changed NEWS entry to be say 'native' insted of 'Windows' (ref. *h())
+
+2008-05-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_vm_execute.h:
+      Regenerate zend_vm_execute.h
+
 2008-05-05  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
