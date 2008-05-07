@@ -5,8 +5,6 @@ Check various LOB error messages
 --FILE--
 <?php
 
-// test some LOB error messages
-	
 require(dirname(__FILE__).'/connect.inc');
 require(dirname(__FILE__).'/create_table.inc');
 

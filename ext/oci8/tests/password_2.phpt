@@ -4,6 +4,7 @@ oci_password_change() for persistent connections
 <?php 
 if (!extension_loaded('oci8')) die("skip no oci8 extension"); 
 require(dirname(__FILE__)."/details.inc");
+if (empty($dbase)) die ("skip requires database connection string be set");
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user"); 
 ?>
 --FILE--
@@ -27,34 +28,19 @@ foreach ($stmts as $sql) {
 // Connect (persistent) and change the password
 $c1 = oci_pconnect("testuser", "testuserpwd", $dbase);
 var_dump($c1);
-
-ob_start();
-var_dump($c1);
-$r1 = ob_get_clean();
-preg_match("/resource\(([0-9])\) of.*/", $r1, $matches);
-$rn1 = $matches[1]; /* resource number */
+$rn1 = (int)$c1;
 
 oci_password_change($c1, "testuser", "testuserpwd", "testuserpwd2");
 
 // Second connect should return a new resource because the hash string will be different from $c1
 $c2 = oci_pconnect("testuser", "testuserpwd2", $dbase);
 var_dump($c2);
-
-ob_start();
-var_dump($c2);
-$r2 = ob_get_clean();
-preg_match("/resource\(([0-9])\) of.*/", $r2, $matches);
-$rn2 = $matches[1]; /* resource number */
+$rn2 = (int)$c2;
 
 // Despite using the old password this connect should succeed and return the original resource
 $c3 = oci_pconnect("testuser", "testuserpwd", $dbase);  
 var_dump($c3);
-
-ob_start();
-var_dump($c3);
-$r3 = ob_get_clean();
-preg_match("/resource\(([0-9])\) of.*/", $r3, $matches);
-$rn3 = $matches[1]; /* resource number */
+$rn3 = (int)$c3;
 
 // Connections should differ
 if ($rn1 == $rn2) {
@@ -76,10 +62,12 @@ else {
 }
 
 // Clean up
-// Can't drop a user that is connected and can't close a persistent
-// connection.  So this test will leave the dummy user around, but the
-// schema will not be usable..
-$s = oci_parse($c0, "revoke connect, create session from testuser");
+oci_close($c1);
+oci_close($c2);
+oci_close($c3);
+
+// Clean up
+$s = oci_parse($c0, "drop user cascade testuser");
 @oci_execute($s);
 
 echo "Done\n";
