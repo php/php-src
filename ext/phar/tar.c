@@ -378,7 +378,7 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 			myphar->ext = memchr(p + 1, '.', (myphar->fname + fname_len) - p - 1);
 		}
 		if (myphar->ext) {
-			myphar->ext_len = (myphar->fname + fname_len) - p;
+			myphar->ext_len = (myphar->fname + fname_len) - myphar->ext;
 		}
 	}
 	myphar->fp = fp;
