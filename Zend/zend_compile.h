@@ -197,6 +197,8 @@ struct _zend_op_array {
 	unsigned char return_reference;
 	/* END of common elements */
 
+	zend_bool done_pass_two;
+
 	zend_uint *refcount;
 
 	zend_op *opcodes;
@@ -220,8 +222,7 @@ struct _zend_op_array {
 	zend_op *start_op;
 	int backpatch_count;
 
-	zend_bool done_pass_two;
-	zend_bool uses_this;
+	zend_uint this_var;
 
 	char *filename;
 	char *script_encoding;
@@ -405,7 +406,7 @@ void zend_do_pre_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC);
 void zend_do_post_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC);
 
 void zend_do_begin_variable_parse(TSRMLS_D);
-void zend_do_end_variable_parse(int type, int arg_offset TSRMLS_DC);
+void zend_do_end_variable_parse(znode *variable, int type, int arg_offset TSRMLS_DC);
 
 void zend_check_writable_variable(znode *variable);
 

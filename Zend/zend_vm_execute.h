@@ -69,10 +69,15 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 		ZEND_VM_SET_OPCODE(op_array->opcodes);
 	}
 
-	if (op_array->uses_this && EG(This) && EG(active_symbol_table)) {
-		Z_ADDREF_P(EG(This)); /* For $this pointer */
-		if (zend_ascii_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), NULL)==FAILURE) {
-			Z_DELREF_P(EG(This));
+	if (op_array->this_var != -1 && EG(This)) {
+ 		Z_ADDREF_P(EG(This)); /* For $this pointer */
+		if (!EG(active_symbol_table)) {
+			EX(CVs)[op_array->this_var] = (zval**)EX(CVs) + (op_array->last_var + op_array->this_var);
+			*EX(CVs)[op_array->this_var] = EG(This);
+		} else {
+			if (zend_ascii_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), (void**)&EX(CVs)[op_array->this_var])==FAILURE) {
+				Z_DELREF_P(EG(This));
+			}
 		}
 	}
 
@@ -1060,7 +1065,7 @@ static int ZEND_CATCH_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	} else {
 		zend_compiled_variable *cv = &CV_DEF_OF(opline->op2.u.var);
 		zend_u_hash_quick_update(EG(active_symbol_table), ZEND_STR_TYPE, cv->name, cv->name_len+1, cv->hash_value,
-		    &EG(exception), sizeof(zval *), NULL);
+		    &EG(exception), sizeof(zval *), (void**)&EX(CVs)[opline->op2.u.var]);
 	}
 	EG(exception) = NULL;
 	ZEND_VM_NEXT_OPCODE();
