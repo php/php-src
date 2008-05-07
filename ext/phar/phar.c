@@ -2975,21 +2975,8 @@ PHP_MINIT_FUNCTION(phar) /* {{{ */
 
 	phar_has_bz2 = zend_hash_exists(&module_registry, "bz2", sizeof("bz2"));
 	phar_has_zlib = zend_hash_exists(&module_registry, "zlib", sizeof("zlib"));
-	if (zend_hash_exists(&module_registry, "apc", sizeof("apc"))) {
-		zval magic;
-		if (zend_get_constant("\000apc_magic", sizeof("\000apc_magic")-1, &magic TSRMLS_CC)) {
-			compile_hook *set_compile_hook;
-
-			set_compile_hook = (compile_hook *) Z_LVAL(magic);
-			phar_orig_compile_file = set_compile_hook(phar_compile_file);
-		} else {
-			phar_orig_compile_file = zend_compile_file;
-			zend_compile_file = phar_compile_file;
-		}
-	} else {
-		phar_orig_compile_file = zend_compile_file;
-		zend_compile_file = phar_compile_file;
-	}
+	phar_orig_compile_file = zend_compile_file;
+	zend_compile_file = phar_compile_file;
 
 #if PHP_VERSION_ID >= 50300
 	phar_save_resolve_path = zend_resolve_path;
@@ -3010,14 +2997,6 @@ PHP_MSHUTDOWN_FUNCTION(phar) /* {{{ */
 	return php_unregister_url_stream_wrapper("phar" TSRMLS_CC);
 	if (zend_compile_file == phar_compile_file) {
 		zend_compile_file = phar_orig_compile_file;
-	} else if (zend_hash_exists(&module_registry, "apc", sizeof("apc"))) {
-		zval magic;
-		if (zend_get_constant("\000apc_magic", sizeof("\000apc_magic")-1, &magic TSRMLS_CC)) {
-			compile_hook *set_compile_hook;
-
-			set_compile_hook = (compile_hook *) Z_LVAL(magic);
-			set_compile_hook(NULL);
-		}
 	}
 
 #if PHP_VERSION_ID < 50300
