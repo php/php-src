@@ -141,6 +141,8 @@ PHP                                                                        NEWS
     mode of INI_SCANNER_NORMAL or INI_SCANNER_RAW. In raw mode option values
     and section values are treated as-is
   . Fixed get_cfg_var() to be able to return "array" ini options
+  . Added optional parameter to ini_get_all() to only retrieve the current
+    value. (Hannes)
 - Improved and cleaned CGI code:
   . FastCGI is now always enabled and can not be disabled.
     See sapi/cgi/CHANGES for more details. (Dmitry)
