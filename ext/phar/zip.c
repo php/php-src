@@ -444,7 +444,7 @@ foundit:
 				PHAR_ZIP_FAIL("invalid alias");
 			}
 			if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void **)&fd_ptr)) {
-				if (SUCCESS != phar_free_alias(*fd_ptr, alias, alias_len)) {
+				if (SUCCESS != phar_free_alias(*fd_ptr, alias, alias_len TSRMLS_CC)) {
 					PHAR_ZIP_FAIL("alias is already in use by existing archive");
 				}
 			}

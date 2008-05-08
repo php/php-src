@@ -401,7 +401,7 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 
 		myphar->is_temporary_alias = 0;
 		if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void **)&fd_ptr)) {
-			if (SUCCESS != phar_free_alias(*fd_ptr, alias, alias_len)) {
+			if (SUCCESS != phar_free_alias(*fd_ptr, alias, alias_len TSRMLS_CC)) {
 				if (error) {
 					spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\", alias is already in use", fname);
 				}
