@@ -2890,7 +2890,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *c
 			{
 				zend_class_entry *ce = NULL;
 				zval **method;
-				zval **obj;
+				zval **obj = NULL;
 
 				if (zend_hash_num_elements(Z_ARRVAL_P(callable)) == 2 &&
 					zend_hash_index_find(Z_ARRVAL_P(callable), 0, (void **) &obj) == SUCCESS &&
