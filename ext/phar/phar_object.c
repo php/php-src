@@ -491,6 +491,7 @@ carry_on:
 		path_len = entry_len;
 		goto carry_on2;
 	}
+	zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Mounting of %s to %s failed", path, actual);
 }
 /* }}} */
 
@@ -3505,6 +3506,10 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 	char *fullpath, *slash;
 	mode_t mode;
 
+	if (entry->is_mounted) {
+		/* silently ignore mounted entries */
+		return SUCCESS;
+	}
 	len = spprintf(&fullpath, 0, "%s/%s", dest, entry->filename);
 	if (len >= MAXPATHLEN) {
 		char *tmp;

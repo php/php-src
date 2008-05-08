@@ -520,6 +520,9 @@ static int phar_zip_changed_apply(void *data, void *arg TSRMLS_DC) /* {{{ */
 
 	entry = (phar_entry_info *)data;
 	p = (struct _phar_zip_pass*) arg;
+	if (entry->is_mounted) {
+		return ZEND_HASH_APPLY_KEEP;
+	}
 	if (entry->is_deleted) {
 		if (entry->fp_refcount <= 0) {
 			return ZEND_HASH_APPLY_REMOVE;
