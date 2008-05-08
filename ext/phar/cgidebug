@@ -5,7 +5,7 @@ export SCRIPT_FILENAME=/home/cellog/workspace/php5/ext/phar/tests/frontcontrolle
 export PATH_TRANSLATED=/home/cellog/workspace/php5/ext/phar/tests/frontcontroller34.php
 export REDIRECT_STATUS=1
 export REQUEST_METHOD=GET
-export REQUEST_URI=/frontcontroller29.php/fatalerror.phps
+export REQUEST_URI=/frontcontroller34.php/start/index.php
 cd /home/cellog/workspace/php5/
 ddd sapi/cgi/php-cgi &
 cd /home/cellog/workspace/php5/ext/phar
