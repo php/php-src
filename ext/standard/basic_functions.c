@@ -3345,10 +3345,10 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(set_time_limit,													arginfo_set_time_limit)
 	PHP_FE(get_cfg_var,														arginfo_get_cfg_var)
 
-	PHP_FALIAS(magic_quotes_runtime,	set_magic_quotes_runtime,			NULL)
-	PHP_FE(set_magic_quotes_runtime,										NULL)
-	PHP_FE(get_magic_quotes_gpc,											NULL)
-	PHP_FE(get_magic_quotes_runtime,										NULL)
+	PHP_DEP_FALIAS(magic_quotes_runtime,	set_magic_quotes_runtime,		NULL)
+	PHP_DEP_FE(set_magic_quotes_runtime,									NULL)
+	PHP_DEP_FE(get_magic_quotes_gpc,										NULL)
+	PHP_DEP_FE(get_magic_quotes_runtime,									NULL)
 
 	PHP_FE(import_request_variables,										arginfo_import_request_variables)
 	PHP_FE(error_log,														arginfo_error_log)
@@ -4927,8 +4927,6 @@ PHP_FUNCTION(set_magic_quotes_runtime)
 		RETURN_FALSE;
 	}
 
-	php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "This function is deprecated and removed in PHP 6. See http://php.net/{migrate}#set_magic_quotes_runtime for details.");
-
 	convert_to_boolean_ex(new_setting);
 
 	PG(magic_quotes_runtime) = (zend_bool) Z_LVAL_PP(new_setting);
@@ -4940,7 +4938,6 @@ PHP_FUNCTION(set_magic_quotes_runtime)
    Get the current active configuration setting of magic_quotes_runtime */
 PHP_FUNCTION(get_magic_quotes_runtime)
 {
-	php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "This function is deprecated and removed in PHP 6. See http://php.net/{migrate}#get_magic_quotes_runtime for details.");
 	RETURN_LONG(PG(magic_quotes_runtime));
 }
 /* }}} */
@@ -4949,7 +4946,6 @@ PHP_FUNCTION(get_magic_quotes_runtime)
    Get the current active configuration setting of magic_quotes_gpc */
 PHP_FUNCTION(get_magic_quotes_gpc)
 {
-	php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "This function is deprecated and removed in PHP 6. See http://php.net/{migrate}#get_magic_quotes_gpc for details.");
 	RETURN_LONG(PG(magic_quotes_gpc));
 }
 /* }}} */
