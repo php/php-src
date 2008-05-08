@@ -1,3 +1,168 @@
+2008-05-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/date/php_date.c:
+      
+      MFB: kill unused vars
+
+    * (PHP_5_3)
+      ext/date/php_date.c:
+      Kill unused vars
+
+2008-05-07  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      new ini_get_all() parameter
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/standard/streamsfuncs.c:
+      MFH: Fixed bug #44712 (stream_context_set_params segfaults on invalid
+      arguments).
+
+    * (PHP_5_2)
+      ext/openssl/xp_ssl.c:
+      MFH: Fixed bug #44716 (Progress notifications incorrect)
+
+2008-05-07  Antony Dovgal  <tony@daylessday.org>
+
+    * NEWS:
+      no need to add this entry - it's in 5_2 already
+
+2008-05-07  David Coallier  <david.coallier@gmail.com>
+
+    * NEWS:
+      - Added news item to the NEWS (Fixed bug 44811)
+
+    * ext/soap/tests/bugs/bug44811.phpt:
+      - Test for bug #44811
+
+    * ext/soap/php_sdl.c:
+      - Fixed bug #44811 (Improve error message when creating new SoapClient
+                          that contains invalid data)
+
+2008-05-07  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/oci8/tests/connect_scope1.phpt
+      ext/oci8/tests/connect_scope2.phpt
+      ext/oci8/tests/connect_scope_try1.phpt
+      ext/oci8/tests/connect_scope_try2.phpt
+      ext/oci8/tests/connect_scope_try3.phpt
+      ext/oci8/tests/connect_scope_try4.phpt
+      ext/oci8/tests/connect_scope_try5.phpt
+      ext/oci8/tests/connect_scope_try6.phpt:
+      
+      file connect_scope1.phpt was initially added on branch PHP_5_2.
+
+2008-05-07  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/soap/tests/bugs/44811.phpt
+      ext/soap/tests/bugs/bug44811.phpt:
+      rename the test
+
+    * (PHP_5_2)
+      ext/soap/tests/bugs/bug44811.phpt:
+      fix test title
+
+2008-05-07  David Coallier  <david.coallier@gmail.com>
+
+    * (PHP_5_3)
+      ext/soap/php_sdl.c:
+      - Fixed bug #44811 (Improve error message when creating a new SoapClient
+      that contains invalid data)
+
+2008-05-07  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_enum_n_def.h
+      ext/mysqlnd/mysqlnd_libmysql_compat.h
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_statistics.c
+      ext/mysqlnd/php_mysqlnd.c:
+      Update mysqlnd - new ini variable
+
+    * (PHP_5_3)
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_enum_n_def.h
+      ext/mysqlnd/mysqlnd_libmysql_compat.h
+      ext/mysqlnd/mysqlnd_palloc.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_statistics.c
+      ext/mysqlnd/php_mysqlnd.c:
+      Update mysqlnd
+
+2008-05-07  David Coallier  <david.coallier@gmail.com>
+
+    * ext/soap/tests/bugs/44811.phpt
+      ext/soap/tests/bugs/44811.phpt:
+      
+      file 44811.phpt was initially added on branch PHP_5_3.
+
+2008-05-07  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      NEWS:
+      reorder
+
+2008-05-07  David Coallier  <david.coallier@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      NEWS:
+      - Added NEWS item for fixation of bug 44811
+
+    * (PHP_5_2)
+      ext/soap/php_sdl.c:
+      - Fixed Bug #44811: Improved error message when creating a new
+                          SoapClient has invalid data.
+
+    * ext/soap/tests/bugs/bug44811.phpt
+      ext/soap/tests/bugs/bug44811.phpt:
+        1.1.4;
+      file bug44811.phpt was initially added on branch PHP_5_2.
+
+2008-05-07  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/ns_064.phpt
+      ZendEngine2/tests/objects_021.phpt:
+      - New tests
+
+    * ZendEngine2/tests/ns_064.phpt
+      ZendEngine2/tests/ns_064.phpt
+      ZendEngine2/tests/objects_021.phpt
+      ZendEngine2/tests/objects_021.phpt:
+      
+      - New tests
+
+2008-05-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.skl
+      ZendEngine2/zend_vm_execute.skl:
+      Use IS_CV for dirrent access to $this variable
+
 2008-05-06  Etienne Kneuss  <php@colder.ch>
 
     * (PHP_5_3)

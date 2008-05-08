@@ -1,3 +1,37 @@
+2008-05-07  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      tests/ns_064.phpt
+      tests/objects_021.phpt:
+      - New tests
+
+    * tests/ns_064.phpt
+      tests/ns_064.phpt
+      tests/objects_021.phpt
+      tests/objects_021.phpt:
+      
+      - New tests
+
+2008-05-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      zend_compile.h
+      zend_compile.h
+      zend_execute_API.c
+      zend_execute_API.c
+      zend_language_parser.y
+      zend_language_parser.y
+      zend_opcode.c
+      zend_opcode.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_execute.skl
+      zend_vm_execute.skl:
+      Use IS_CV for dirrent access to $this variable
+
 2008-05-06  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute_API.c
