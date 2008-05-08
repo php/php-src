@@ -13,8 +13,10 @@ $a = new Phar($fname);
 $a['file1.txt'] = 'hi';
 $a['file2.txt'] = 'hi2';
 $a['subdir/ectory/file.txt'] = 'hi3';
+$a->mount($pname . '/mount', __FILE__);
 $a->addEmptyDir('one/level');
 
+$a->extractTo(dirname(__FILE__) . '/extract', 'mount');
 $a->extractTo(dirname(__FILE__) . '/extract');
 $out = array();
 foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(dirname(__FILE__) . '/extract'), RecursiveIteratorIterator::CHILD_FIRST) as $p => $b) {
@@ -117,7 +119,7 @@ string(3) "hi2"
 bool(false)
 Invalid argument, expected a filename (string) or array of filenames
 
-Warning: Phar::extractTo() expects parameter 1 to be string, array given in %sphar_extract.php on line 34
+Warning: Phar::extractTo() expects parameter 1 to be string, array given in %sphar_extract.php on line %d
 Invalid argument, extraction path must be non-zero length
 Unable to use path "%soops" for extraction, it is a file, must be a directory
 Invalid argument, array of filenames to extract contains non-string value

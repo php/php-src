@@ -438,8 +438,16 @@ int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC)
 	struct _phar_pass_tar_info *fp = (struct _phar_pass_tar_info *)argument;
 	char padding[512];
 
+	if (entry->is_mounted) {
+		return ZEND_HASH_APPLY_KEEP;
+	}
 	if (entry->is_deleted) {
-		return ZEND_HASH_APPLY_REMOVE;
+		if (entry->fp_refcount <= 0) {
+			return ZEND_HASH_APPLY_REMOVE;
+		} else {
+			/* we can't delete this in-memory until it is closed */
+			return ZEND_HASH_APPLY_KEEP;
+		}
 	}
 
 	memset((char *) &header, 0, sizeof(header));

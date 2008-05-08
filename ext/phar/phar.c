@@ -2208,7 +2208,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 			php_stream_close(entry->cfp);
 			entry->cfp = 0;
 		}
-		if (entry->is_deleted) {
+		if (entry->is_deleted || entry->is_mounted) {
 			/* remove this from the new phar */
 			continue;
 		}
@@ -2430,8 +2430,8 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		if (zend_hash_get_current_data(&phar->manifest, (void **)&entry) == FAILURE) {
 			continue;
 		}
-		if (entry->is_deleted) {
-			/* remove this from the new phar */
+		if (entry->is_deleted || entry->is_mounted) {
+			/* remove this from the new phar if deleted, ignore if mounted */
 			continue;
 		}
 		if (entry->is_dir) {
@@ -2493,7 +2493,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		if (zend_hash_get_current_data(&phar->manifest, (void **)&entry) == FAILURE) {
 			continue;
 		}
-		if (entry->is_deleted || entry->is_dir) {
+		if (entry->is_deleted || entry->is_dir || entry->is_mounted) {
 			continue;
 		}
 		if (entry->cfp) {
