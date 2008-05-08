@@ -50,10 +50,10 @@ Zend\zend_language_parser.c Zend\zend_language_parser.h: Zend\zend_language_pars
 	$(BISON) --output=Zend/zend_language_parser.c -v -d -p zend Zend/zend_language_parser.y
 
 !if $(RE2C) != ""
-Zend\zend_ini_scanner.c: Zend\flex.skl Zend\zend_ini_scanner.l
+Zend\zend_ini_scanner.c: Zend\zend_ini_scanner.l
 	$(RE2C) $(RE2C_FLAGS) --case-inverted -cbdFt Zend/zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l
 
-Zend\zend_language_scanner.c: Zend\flex.skl Zend\zend_language_scanner.l
+Zend\zend_language_scanner.c: Zend\zend_language_scanner.l
 	$(RE2C) $(RE2C_FLAGS) --case-inverted -cbdFt Zend/zend_language_scanner_defs.h -oZend/zend_language_scanner.c Zend/zend_language_scanner.l
 !endif
 
