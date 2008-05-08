@@ -378,7 +378,7 @@ int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_len, int
 
 		if (!is_data) {
 			/* prevent any ".phar" without a stub getting through */
-			if (!phar->halt_offset && !phar->is_brandnew) {
+			if (!phar->halt_offset && !phar->is_brandnew && (phar->is_tar || phar->is_zip)) {
 				if (PHAR_G(readonly) && FAILURE == zend_hash_find(&(phar->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1, (void **)&stub)) {
 					if (error) {
 						spprintf(error, 0, "'%s' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive", fname);
@@ -387,7 +387,7 @@ int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_len, int
 				}
 			}
 		}
-		phar->is_data = is_data;
+		phar->is_data = is_data && (phar->is_tar || phar->is_zip);
 		if (pphar) {
 			*pphar = phar;
 		}
@@ -964,7 +964,9 @@ int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int al
 {
 	const char *ext_str, *z;
 	int ext_len;
+	phar_archive_data **test, *unused = NULL;
 
+	test = &unused;
 	if (error) {
 		*error = NULL;
 	}
@@ -982,21 +984,25 @@ int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int al
 	}
 
 check_file:
-	if (phar_open_loaded(fname, fname_len, alias, alias_len, is_data, options, pphar, 0 TSRMLS_CC) == SUCCESS) {
-		if (is_data && !((*pphar)->is_tar || (*pphar)->is_zip)) {
+	if (phar_open_loaded(fname, fname_len, alias, alias_len, is_data, options, test, 0 TSRMLS_CC) == SUCCESS) {
+		if (pphar) {
+			*pphar = *test;
+		}
+		if ((*test)->is_data && !(*test)->is_tar && !(*test)->is_zip) {
 			if (error) {
 				spprintf(error, 0, "Cannot open '%s' as a PharData object. Use Phar::__construct() for executable archives", fname);
 			}
+			return FAILURE;
 		}
-		if (PHAR_G(readonly) && !is_data && ((*pphar)->is_tar || (*pphar)->is_zip)) {
+		if (PHAR_G(readonly) && !(*test)->is_data && ((*test)->is_tar || (*test)->is_zip)) {
 			phar_entry_info *stub;
-			if (FAILURE == zend_hash_find(&((*pphar)->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1, (void **)&stub)) {
+			if (FAILURE == zend_hash_find(&((*test)->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1, (void **)&stub)) {
 				spprintf(error, 0, "'%s' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive", fname);
 				return FAILURE;
 			}
 		}
-		if (pphar && (!PHAR_G(readonly) || is_data)) {
-			(*pphar)->is_writeable = 1;
+		if (!PHAR_G(readonly) || (*test)->is_data) {
+			(*test)->is_writeable = 1;
 		}
 		return SUCCESS;
 	}
@@ -1044,7 +1050,7 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 
 	if (fp) {
 		if (phar_open_fp(fp, fname, fname_len, alias, alias_len, options, pphar, error TSRMLS_CC) == SUCCESS) {
-			if (is_data || !PHAR_G(readonly)) {
+			if ((*pphar)->is_data || !PHAR_G(readonly)) {
 				(*pphar)->is_writeable = 1;
 			}
 			if (actual) {
@@ -1522,7 +1528,7 @@ int phar_detect_phar_fname_ext(const char *filename, int check_length, const cha
 	phar_request_initialize(TSRMLS_C);
 	/* first check for alias in first segment */
 	pos = strchr(filename, '/');
-	if (pos) {
+	if (pos && pos != filename) {
 		if (zend_hash_exists(&(PHAR_GLOBALS->phar_alias_map), (char *) filename, pos - filename)) {
 			*ext_str = pos;
 			*ext_len = -1;
@@ -1843,7 +1849,7 @@ int phar_open_compiled_file(char *alias, int alias_len, char **error TSRMLS_DC) 
 	long halt_offset;
 	zval *halt_constant;
 	php_stream *fp;
-	int fname_len, is_data = 0;
+	int fname_len;
 
 	if (error) {
 		*error = NULL;
@@ -1851,11 +1857,7 @@ int phar_open_compiled_file(char *alias, int alias_len, char **error TSRMLS_DC) 
 	fname = zend_get_executed_filename(TSRMLS_C);
 	fname_len = strlen(fname);
 
-	if (!strstr(fname, ".phar")) {
-		is_data = 1;
-	}
-
-	if (phar_open_loaded(fname, fname_len, alias, alias_len, is_data, REPORT_ERRORS, NULL, 0 TSRMLS_CC) == SUCCESS) {
+	if (phar_open_loaded(fname, fname_len, alias, alias_len, 0, REPORT_ERRORS, NULL, 0 TSRMLS_CC) == SUCCESS) {
 		return SUCCESS;
 	}
 

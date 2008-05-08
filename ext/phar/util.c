@@ -225,7 +225,7 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 		return phar_save_resolve_path(filename, filename_len TSRMLS_CC);
 	}
 	fname = zend_get_executed_filename(TSRMLS_C);
-	if (SUCCESS != phar_split_fname(fname, strlen(fname), &arch, &arch_len, &entry, &entry_len, 0, 0 TSRMLS_CC)) {
+	if (SUCCESS != phar_split_fname(fname, strlen(fname), &arch, &arch_len, &entry, &entry_len, 1, 0 TSRMLS_CC)) {
 		return phar_save_resolve_path(filename, filename_len TSRMLS_CC);
 	}
 	if (*filename == '.') {
@@ -267,7 +267,7 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 		ret_len = strlen(ret);
 		/* found phar:// */
 
-		if (SUCCESS != phar_split_fname(ret, ret_len, &arch, &arch_len, &entry, &entry_len, 0, 0 TSRMLS_CC)) {
+		if (SUCCESS != phar_split_fname(ret, ret_len, &arch, &arch_len, &entry, &entry_len, 1, 0 TSRMLS_CC)) {
 			return ret;
 		}
 		zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar);
@@ -293,7 +293,7 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 		goto doit;
 	}
 	fname = zend_get_executed_filename(TSRMLS_C);
-	if (SUCCESS != phar_split_fname(fname, strlen(fname), &arch, &arch_len, &entry, &entry_len, 0, 0 TSRMLS_CC)) {
+	if (SUCCESS != phar_split_fname(fname, strlen(fname), &arch, &arch_len, &entry, &entry_len, 1, 0 TSRMLS_CC)) {
 		goto doit;
 	}
 
@@ -416,7 +416,7 @@ not_stream:
 							ret_len = strlen(trypath);
 							/* found phar:// */
 
-							if (SUCCESS != phar_split_fname(trypath, ret_len, &arch, &arch_len, &entry, &entry_len, 0, 0 TSRMLS_CC)) {
+							if (SUCCESS != phar_split_fname(trypath, ret_len, &arch, &arch_len, &entry, &entry_len, 1, 0 TSRMLS_CC)) {
 								return estrndup(trypath, ret_len);
 							}
 							zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar);
