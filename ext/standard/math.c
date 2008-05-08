@@ -354,7 +354,7 @@ PHP_FUNCTION(asinh)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
 		return;
 	}
-	RETURN_DOUBLE(asinh(num));
+	RETURN_DOUBLE(php_asinh(num));
 }
 /* }}} */
 
