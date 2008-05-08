@@ -148,11 +148,11 @@ Warning: uasort() expects parameter 2 to be a valid callback, array must have ex
 NULL
 -- Iteration 13 --
 
-Warning: uasort() expects parameter 2 to be a valid callback, second array member is not a valid method in %s on line %d
+Warning: uasort() expects parameter 2 to be a valid callback, first array member is not a valid class name or object in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: uasort() expects parameter 2 to be a valid callback, second array member is not a valid method in %s on line %d
+Warning: uasort() expects parameter 2 to be a valid callback, first array member is not a valid class name or object in %s on line %d
 NULL
 -- Iteration 15 --
 
@@ -263,11 +263,11 @@ Warning: uasort() expects parameter 2 to be a valid callback, array must have ex
 NULL
 -- Iteration 13 --
 
-Warning: uasort() expects parameter 2 to be a valid callback, second array member is not a valid method in %s on line %d
+Warning: uasort() expects parameter 2 to be a valid callback, first array member is not a valid class name or object in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: uasort() expects parameter 2 to be a valid callback, second array member is not a valid method in %s on line %d
+Warning: uasort() expects parameter 2 to be a valid callback, first array member is not a valid class name or object in %s on line %d
 NULL
 -- Iteration 15 --
 

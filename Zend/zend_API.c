@@ -3035,7 +3035,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *c
 					}
 				} else {
 					if (zend_hash_num_elements(Z_ARRVAL_P(callable)) == 2) {
-						if (!obj) {
+						if (!obj || (Z_TYPE_PP(obj) != IS_OBJECT && Z_TYPE_PP(obj) != IS_STRING && Z_TYPE_PP(obj) != IS_UNICODE)) {
 							if (error) zend_spprintf(error, 0, "first array member is not a valid class name or object");
 						} else {
 							if (error) zend_spprintf(error, 0, "second array member is not a valid method");
