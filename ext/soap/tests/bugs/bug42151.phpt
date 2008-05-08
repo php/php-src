@@ -26,6 +26,6 @@ try {
 echo "ok\n";
 ?>
 --EXPECT--
-SOAP-ERROR: Parsing WSDL: Couldn't load from 'httpx://'
+SOAP-ERROR: Parsing WSDL: Couldn't load from 'httpx://' : failed to load external entity "httpx://"
 ok
 I don't get executed either.
