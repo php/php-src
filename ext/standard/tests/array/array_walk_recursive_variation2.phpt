@@ -179,10 +179,10 @@ Warning: array_walk_recursive() expects parameter 2 to be a valid callback, arra
 NULL
 -- Iteration 13 --
 
-Warning: array_walk_recursive() expects parameter 2 to be a valid callback, second array member is not a valid method in %s on line %d
+Warning: array_walk_recursive() expects parameter 2 to be a valid callback, first array member is not a valid class name or object in %s on line %d
 NULL
 
-Warning: array_walk_recursive() expects parameter 2 to be a valid callback, second array member is not a valid method in %s on line %d
+Warning: array_walk_recursive() expects parameter 2 to be a valid callback, first array member is not a valid class name or object in %s on line %d
 NULL
 -- Iteration 14 --
 
@@ -357,10 +357,10 @@ Warning: array_walk_recursive() expects parameter 2 to be a valid callback, arra
 NULL
 -- Iteration 13 --
 
-Warning: array_walk_recursive() expects parameter 2 to be a valid callback, second array member is not a valid method in %s on line %d
+Warning: array_walk_recursive() expects parameter 2 to be a valid callback, first array member is not a valid class name or object in %s on line %d
 NULL
 
-Warning: array_walk_recursive() expects parameter 2 to be a valid callback, second array member is not a valid method in %s on line %d
+Warning: array_walk_recursive() expects parameter 2 to be a valid callback, first array member is not a valid class name or object in %s on line %d
 NULL
 -- Iteration 14 --
 
