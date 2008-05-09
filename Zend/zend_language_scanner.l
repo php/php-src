@@ -986,9 +986,6 @@ static int zend_scan_unicode_escape_string(zval *zendlval, char *str, int len, U
 		if (*s==0x5C /*'\\'*/) {
 			s++;
 			c = *s;
-			if (s>=end) {
-				continue;
-			}
 
 			min_digits = 0;
 			codepoint = 0;
@@ -1150,9 +1147,7 @@ static int zend_scan_unicode_single_string(zval *zendlval TSRMLS_DC)
 	while (s<end) {
 		if (*s==0x5C /*'\\'*/) {
 			s++;
-			if (s>=end) {
-				continue;
-			}
+
 			switch(*s) {
 				case 0x5C: /*'\\'*/
 				case 0x27: /*'\''*/
@@ -1191,9 +1186,7 @@ static void zend_scan_binary_escape_string(zval *zendlval, char *str, int len, c
 	while (s<end) {
 		if (*s=='\\') {
 			s++;
-			if (s>=end) {
-				continue;
-			}
+
 			switch(*s) {
 				case 'n':
 					*t++ = '\n';
@@ -1293,9 +1286,7 @@ static void zend_scan_binary_single_string(zval *zendlval, char *str, int len TS
 	while (s<end) {
 		if (*s=='\\') {
 			s++;
-			if (s>=end) {
-				continue;
-			}
+
 			switch(*s) {
 				case '\\':
 				case '\'':
