@@ -7,6 +7,7 @@ PHP                                                                        NEWS
   as function parameter. (Rob)
 - Fixed bug #44836 (putenv() crashes, avoid direct reference of environ in    
   POSIX systems). (Ilia, delphij at FreeBSD dot org)
+- Fixed bug #44830 (Very minor issue with backslash in heredoc). (Matt)
 - Fixed bug #44811 (Improve error message when creating a new SoapClient that 
   contains invalid data). (Markus Fischer, David C)
 - Fixed bug #44798 (Memory leak assigning value to attribute). (Ilia)

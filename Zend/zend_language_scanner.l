@@ -792,9 +792,7 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 	while (s<end) {
 		if (*s=='\\') {
 			s++;
-			if (s>=end) {
-				continue;
-			}
+
 			switch(*s) {
 				case 'n':
 					*t++ = '\n';
@@ -1808,9 +1806,7 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 	while (s<end) {
 		if (*s=='\\') {
 			s++;
-			if (s>=end) {
-				continue;
-			}
+
 			switch(*s) {
 				case '\\':
 				case '\'':
