@@ -1,3 +1,18 @@
+2008-05-08  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      zend_API.c
+      tests/bug31720.phpt:
+      - MFH: Fixed detection of invalid class name
+
+    * zend_API.c
+      tests/bug31720.phpt:
+      - Fixed detection of invalid class name
+
+    * zend_API.c:
+      - Fix valgrind report (Conditional jump or move depends on uninitialised
+      value)
+
 2008-05-07  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
