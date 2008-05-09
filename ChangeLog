@@ -1,3 +1,71 @@
+2008-05-08  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c
+      ext/standard/tests/file/magic_quotes.phpt:
+      - Use PHP_DEP_FE and PHP_DEP_FALIAS (magic_quotes related functions)
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.c
+      ZendEngine2/tests/bug31720.phpt
+      ext/standard/tests/array/array_filter_variation2.phpt
+      ext/standard/tests/array/array_map_variation17.phpt
+      ext/standard/tests/array/uasort_variation2.phpt:
+      - MFH: Fixed detection of invalid class name
+
+    * ext/standard/user_filters.c:
+      - Fix data size
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/tests/bug31720.phpt
+      ext/standard/tests/array/array_filter_variation2.phpt
+      ext/standard/tests/array/array_map_variation17.phpt
+      ext/standard/tests/array/array_walk_recursive_variation2.phpt
+      ext/standard/tests/array/array_walk_variation2.phpt
+      ext/standard/tests/array/uasort_variation2.phpt:
+      - Fixed detection of invalid class name
+
+    * ZendEngine2/zend_API.c:
+      - Fix valgrind report (Conditional jump or move depends on uninitialised
+      value)
+
+2008-05-08  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/tests/bug38618.phpt:
+      Sync spl tests with 5.3
+
+    * (PHP_5_3)
+      ext/spl/tests/array_023.phpt:
+      Sync spl tests with HEAD
+
+2008-05-08  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/imap/php_imap.c:
+      - Fixed double free
+
+2008-05-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/tests/bugs/bug42151.phpt
+      ext/soap/tests/bugs/bug42151.phpt
+      ext/soap/tests/bugs/bug42151.phpt:
+      Fixed test
+
+2008-05-08  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/soap/tests/bugs/bug42151.phpt
+      ext/soap/tests/bugs/bug42151.phpt
+      ext/soap/tests/bugs/bug42151.phpt:
+      fix test
+
+2008-05-08  Matt Wilmas  <php_lists@realplain.com>
+
+    * win32/build/Makefile:
+      Remove old references to flex.skl
+
+    * (PHP_5_3)
+      ext/standard/math.c:
+      Fix build
+
 2008-05-07  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/date/php_date.c:
