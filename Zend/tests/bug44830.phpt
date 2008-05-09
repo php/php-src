@@ -12,6 +12,5 @@ var_dump($backslash);
 ?>
 --EXPECT--
 string(1) "\"
-
 --UEXPECT--
 unicode(1) "\"
