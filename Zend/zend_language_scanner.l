@@ -498,9 +498,7 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 	while (s<end) {
 		if (*s=='\\') {
 			s++;
-			if (s>=end) {
-				continue;
-			}
+
 			switch(*s) {
 				case 'n':
 					*t++ = '\n';
@@ -1612,9 +1610,7 @@ inline_char_handler:
 	while (s<end) {
 		if (*s=='\\') {
 			s++;
-			if (s>=end) {
-				continue;
-			}
+
 			switch(*s) {
 				case '\\':
 				case '\'':
