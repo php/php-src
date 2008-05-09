@@ -934,13 +934,13 @@ fetch_string_dim:
 				efree(offset_key.v);
 			}
 			break;
-		case IS_RESOURCE:
-			zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", Z_LVAL_P(dim), Z_LVAL_P(dim));
-			/* Fall Through */
 		case IS_DOUBLE:
 			index = (long)Z_DVAL_P(dim);
 			goto num_index;
 
+		case IS_RESOURCE:
+			zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", Z_LVAL_P(dim), Z_LVAL_P(dim));
+			/* Fall Through */
 		case IS_BOOL:
 		case IS_LONG:
 			index = Z_LVAL_P(dim);
