@@ -627,14 +627,12 @@ PHP_FUNCTION(nl_langinfo)
 #endif
 #ifdef DECIMAL_POINT
 		case DECIMAL_POINT:
-#endif
-#ifdef RADIXCHAR
+#elif defined(RADIXCHAR)
 		case RADIXCHAR:
 #endif
 #ifdef THOUSANDS_SEP
 		case THOUSANDS_SEP:
-#endif
-#ifdef THOUSEP
+#elif defined(THOUSEP)
 		case THOUSEP:
 #endif
 #ifdef GROUPING
