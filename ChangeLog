@@ -1,3 +1,477 @@
+2008-05-09  Matt Wilmas  <php_lists@realplain.com>
+
+    * ZendEngine2/tests/bug44830.phpt:
+      Fix Windows newlines (missed that detail when adding :-/)
+
+2008-05-09  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/isset_001.phpt
+      ZendEngine2/tests/isset_001.phpt
+      ZendEngine2/tests/isset_002.phpt
+      ZendEngine2/tests/isset_002.phpt
+      ZendEngine2/tests/isset_003.phpt
+      ZendEngine2/tests/isset_003.phpt:
+      - New tests
+
+    * ZendEngine2/tests/isset_001.phpt
+      ZendEngine2/tests/isset_001.phpt
+      ZendEngine2/tests/isset_001.phpt
+      ZendEngine2/tests/isset_002.phpt
+      ZendEngine2/tests/isset_002.phpt
+      ZendEngine2/tests/isset_002.phpt
+      ZendEngine2/tests/isset_003.phpt
+      ZendEngine2/tests/isset_003.phpt
+      ZendEngine2/tests/isset_003.phpt:
+        1.1.4;
+      - New tests
+
+2008-05-09  Steve Seear  <steve.seear@uk.ibm.com>
+
+    * scripts/dev/find_tested.php
+      scripts/dev/find_tested.php:
+      
+      file find_tested.php was initially added on branch PHP_5_3.
+
+2008-05-09  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_2)
+      ext/standard/string.c
+      ext/standard/string.c:
+      MFH: Fix compile error if _GNU_SOURCE is defined
+
+    * ext/standard/string.c:
+      Fix compile error if _GNU_SOURCE is defined
+
+2008-05-09  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/Makefile:
+      - s/rmdir/rd
+      - Patch supplied by Richard Quadling
+
+2008-05-09  Matt Wilmas  <php_lists@realplain.com>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/bug44830.phpt
+      ZendEngine2/tests/bug44830.phpt:
+      MFH: Test for loss of backslash at end of heredoc; For bug #44830 (Very
+      minor issue with backslash in heredoc)
+
+    * ZendEngine2/tests/bug44830.phpt
+      ZendEngine2/tests/bug44830.phpt
+      ZendEngine2/tests/bug44830.phpt:
+        1.1.4;
+      Test for loss of backslash at end of heredoc; For bug #44830 (Very minor
+      issue with backslash in heredoc)
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner.l:
+      MFH: Fix loss of backslash at end of heredoc; For bug #44830 (Very minor
+      issue with backslash in heredoc)
+
+    * ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l:
+      Fix loss of backslash at end of heredoc; For bug #44830 (Very minor issue
+      with backslash in heredoc)
+
+    * (PHP_5_3)
+      ZendEngine2/zend_execute.c:
+      MFH: Fixed bug #44681 (Resources used as array keys get converted to 0)
+
+    * ZendEngine2/zend_execute.c:
+      Fixed bug #44681 (Resources used as array keys get converted to 0)
+
+2008-05-09  Ant Phillips  <antphill@uk.ibm.com>
+
+    * ext/standard/tests/dir/open_basedir.inc
+      ext/standard/tests/dir/open_basedir.inc
+      ext/standard/tests/dir/open_basedir.inc
+      ext/standard/tests/dir/open_basedir_dir.phpt
+      ext/standard/tests/dir/open_basedir_dir.phpt
+      ext/standard/tests/dir/open_basedir_dir.phpt
+      ext/standard/tests/dir/open_basedir_opendir.phpt
+      ext/standard/tests/dir/open_basedir_opendir.phpt
+      ext/standard/tests/dir/open_basedir_opendir.phpt
+      ext/standard/tests/dir/open_basedir_scandir.phpt
+      ext/standard/tests/dir/open_basedir_scandir.phpt
+      ext/standard/tests/dir/open_basedir_scandir.phpt
+      ext/standard/tests/file/open_basedir.inc
+      ext/standard/tests/file/open_basedir.inc
+      ext/standard/tests/file/open_basedir.inc
+      ext/standard/tests/file/open_basedir_chdir.phpt
+      ext/standard/tests/file/open_basedir_chdir.phpt
+      ext/standard/tests/file/open_basedir_chdir.phpt
+      ext/standard/tests/file/open_basedir_chmod.phpt
+      ext/standard/tests/file/open_basedir_chmod.phpt
+      ext/standard/tests/file/open_basedir_chmod.phpt
+      ext/standard/tests/file/open_basedir_copy.phpt
+      ext/standard/tests/file/open_basedir_copy.phpt
+      ext/standard/tests/file/open_basedir_copy.phpt
+      ext/standard/tests/file/open_basedir_copy_variation1.phpt
+      ext/standard/tests/file/open_basedir_copy_variation1.phpt
+      ext/standard/tests/file/open_basedir_copy_variation1.phpt
+      ext/standard/tests/file/open_basedir_disk_free_space.phpt
+      ext/standard/tests/file/open_basedir_disk_free_space.phpt
+      ext/standard/tests/file/open_basedir_disk_free_space.phpt
+      ext/standard/tests/file/open_basedir_file.phpt
+      ext/standard/tests/file/open_basedir_file.phpt
+      ext/standard/tests/file/open_basedir_file.phpt
+      ext/standard/tests/file/open_basedir_file_exists.phpt
+      ext/standard/tests/file/open_basedir_file_exists.phpt
+      ext/standard/tests/file/open_basedir_file_exists.phpt
+      ext/standard/tests/file/open_basedir_file_get_contents.phpt
+      ext/standard/tests/file/open_basedir_file_get_contents.phpt
+      ext/standard/tests/file/open_basedir_file_get_contents.phpt
+      ext/standard/tests/file/open_basedir_file_put_contents.phpt
+      ext/standard/tests/file/open_basedir_file_put_contents.phpt
+      ext/standard/tests/file/open_basedir_file_put_contents.phpt
+      ext/standard/tests/file/open_basedir_fileatime.phpt
+      ext/standard/tests/file/open_basedir_fileatime.phpt
+      ext/standard/tests/file/open_basedir_fileatime.phpt
+      ext/standard/tests/file/open_basedir_filectime.phpt
+      ext/standard/tests/file/open_basedir_filectime.phpt
+      ext/standard/tests/file/open_basedir_filectime.phpt
+      ext/standard/tests/file/open_basedir_filegroup.phpt
+      ext/standard/tests/file/open_basedir_filegroup.phpt
+      ext/standard/tests/file/open_basedir_filegroup.phpt
+      ext/standard/tests/file/open_basedir_fileinode.phpt
+      ext/standard/tests/file/open_basedir_fileinode.phpt
+      ext/standard/tests/file/open_basedir_fileinode.phpt
+      ext/standard/tests/file/open_basedir_filemtime.phpt
+      ext/standard/tests/file/open_basedir_filemtime.phpt
+      ext/standard/tests/file/open_basedir_filemtime.phpt
+      ext/standard/tests/file/open_basedir_fileowner.phpt
+      ext/standard/tests/file/open_basedir_fileowner.phpt
+      ext/standard/tests/file/open_basedir_fileowner.phpt
+      ext/standard/tests/file/open_basedir_fileperms.phpt
+      ext/standard/tests/file/open_basedir_fileperms.phpt
+      ext/standard/tests/file/open_basedir_fileperms.phpt
+      ext/standard/tests/file/open_basedir_filesize.phpt
+      ext/standard/tests/file/open_basedir_filesize.phpt
+      ext/standard/tests/file/open_basedir_filesize.phpt
+      ext/standard/tests/file/open_basedir_filetype.phpt
+      ext/standard/tests/file/open_basedir_filetype.phpt
+      ext/standard/tests/file/open_basedir_filetype.phpt
+      ext/standard/tests/file/open_basedir_fopen.phpt
+      ext/standard/tests/file/open_basedir_fopen.phpt
+      ext/standard/tests/file/open_basedir_fopen.phpt
+      ext/standard/tests/file/open_basedir_glob-win32.phpt
+      ext/standard/tests/file/open_basedir_glob-win32.phpt
+      ext/standard/tests/file/open_basedir_glob-win32.phpt
+      ext/standard/tests/file/open_basedir_glob.phpt
+      ext/standard/tests/file/open_basedir_glob.phpt
+      ext/standard/tests/file/open_basedir_glob.phpt
+      ext/standard/tests/file/open_basedir_is_dir.phpt
+      ext/standard/tests/file/open_basedir_is_dir.phpt
+      ext/standard/tests/file/open_basedir_is_dir.phpt
+      ext/standard/tests/file/open_basedir_is_executable.phpt
+      ext/standard/tests/file/open_basedir_is_executable.phpt
+      ext/standard/tests/file/open_basedir_is_executable.phpt
+      ext/standard/tests/file/open_basedir_is_file.phpt
+      ext/standard/tests/file/open_basedir_is_file.phpt
+      ext/standard/tests/file/open_basedir_is_file.phpt
+      ext/standard/tests/file/open_basedir_is_link.phpt
+      ext/standard/tests/file/open_basedir_is_link.phpt
+      ext/standard/tests/file/open_basedir_is_link.phpt
+      ext/standard/tests/file/open_basedir_is_readable.phpt
+      ext/standard/tests/file/open_basedir_is_readable.phpt
+      ext/standard/tests/file/open_basedir_is_readable.phpt
+      ext/standard/tests/file/open_basedir_is_writable.phpt
+      ext/standard/tests/file/open_basedir_is_writable.phpt
+      ext/standard/tests/file/open_basedir_is_writable.phpt
+      ext/standard/tests/file/open_basedir_link.phpt
+      ext/standard/tests/file/open_basedir_link.phpt
+      ext/standard/tests/file/open_basedir_link.phpt
+      ext/standard/tests/file/open_basedir_linkinfo.phpt
+      ext/standard/tests/file/open_basedir_linkinfo.phpt
+      ext/standard/tests/file/open_basedir_linkinfo.phpt
+      ext/standard/tests/file/open_basedir_lstat.phpt
+      ext/standard/tests/file/open_basedir_lstat.phpt
+      ext/standard/tests/file/open_basedir_lstat.phpt
+      ext/standard/tests/file/open_basedir_mkdir.phpt
+      ext/standard/tests/file/open_basedir_mkdir.phpt
+      ext/standard/tests/file/open_basedir_mkdir.phpt
+      ext/standard/tests/file/open_basedir_parse_ini_file.phpt
+      ext/standard/tests/file/open_basedir_parse_ini_file.phpt
+      ext/standard/tests/file/open_basedir_parse_ini_file.phpt
+      ext/standard/tests/file/open_basedir_readlink.phpt
+      ext/standard/tests/file/open_basedir_readlink.phpt
+      ext/standard/tests/file/open_basedir_readlink.phpt
+      ext/standard/tests/file/open_basedir_realpath.phpt
+      ext/standard/tests/file/open_basedir_realpath.phpt
+      ext/standard/tests/file/open_basedir_realpath.phpt
+      ext/standard/tests/file/open_basedir_rename.phpt
+      ext/standard/tests/file/open_basedir_rename.phpt
+      ext/standard/tests/file/open_basedir_rename.phpt
+      ext/standard/tests/file/open_basedir_rmdir.phpt
+      ext/standard/tests/file/open_basedir_rmdir.phpt
+      ext/standard/tests/file/open_basedir_rmdir.phpt
+      ext/standard/tests/file/open_basedir_stat.phpt
+      ext/standard/tests/file/open_basedir_stat.phpt
+      ext/standard/tests/file/open_basedir_stat.phpt
+      ext/standard/tests/file/open_basedir_symlink.phpt
+      ext/standard/tests/file/open_basedir_symlink.phpt
+      ext/standard/tests/file/open_basedir_symlink.phpt
+      ext/standard/tests/file/open_basedir_tempnam.phpt
+      ext/standard/tests/file/open_basedir_tempnam.phpt
+      ext/standard/tests/file/open_basedir_tempnam.phpt
+      ext/standard/tests/file/open_basedir_touch.phpt
+      ext/standard/tests/file/open_basedir_touch.phpt
+      ext/standard/tests/file/open_basedir_touch.phpt
+      ext/standard/tests/file/open_basedir_unlink.phpt
+      ext/standard/tests/file/open_basedir_unlink.phpt
+      ext/standard/tests/file/open_basedir_unlink.phpt
+      tests/security/open_basedir.inc
+      tests/security/open_basedir.inc
+      tests/security/open_basedir_chdir.phpt
+      tests/security/open_basedir_chdir.phpt
+      tests/security/open_basedir_chmod.phpt
+      tests/security/open_basedir_chmod.phpt
+      tests/security/open_basedir_copy.phpt
+      tests/security/open_basedir_copy.phpt
+      tests/security/open_basedir_copy_variation1.phpt
+      tests/security/open_basedir_copy_variation1.phpt
+      tests/security/open_basedir_dir.phpt
+      tests/security/open_basedir_dir.phpt
+      tests/security/open_basedir_disk_free_space.phpt
+      tests/security/open_basedir_disk_free_space.phpt
+      tests/security/open_basedir_error_log.phpt
+      tests/security/open_basedir_error_log.phpt
+      tests/security/open_basedir_error_log_variation.phpt
+      tests/security/open_basedir_error_log_variation.phpt
+      tests/security/open_basedir_file.phpt
+      tests/security/open_basedir_file.phpt
+      tests/security/open_basedir_file_exists.phpt
+      tests/security/open_basedir_file_exists.phpt
+      tests/security/open_basedir_file_get_contents.phpt
+      tests/security/open_basedir_file_get_contents.phpt
+      tests/security/open_basedir_file_put_contents.phpt
+      tests/security/open_basedir_file_put_contents.phpt
+      tests/security/open_basedir_fileatime.phpt
+      tests/security/open_basedir_fileatime.phpt
+      tests/security/open_basedir_filectime.phpt
+      tests/security/open_basedir_filectime.phpt
+      tests/security/open_basedir_filegroup.phpt
+      tests/security/open_basedir_filegroup.phpt
+      tests/security/open_basedir_fileinode.phpt
+      tests/security/open_basedir_fileinode.phpt
+      tests/security/open_basedir_filemtime.phpt
+      tests/security/open_basedir_filemtime.phpt
+      tests/security/open_basedir_fileowner.phpt
+      tests/security/open_basedir_fileowner.phpt
+      tests/security/open_basedir_fileperms.phpt
+      tests/security/open_basedir_fileperms.phpt
+      tests/security/open_basedir_filesize.phpt
+      tests/security/open_basedir_filesize.phpt
+      tests/security/open_basedir_filetype.phpt
+      tests/security/open_basedir_filetype.phpt
+      tests/security/open_basedir_fopen.phpt
+      tests/security/open_basedir_fopen.phpt
+      tests/security/open_basedir_glob-win32.phpt
+      tests/security/open_basedir_glob-win32.phpt
+      tests/security/open_basedir_glob.phpt
+      tests/security/open_basedir_glob.phpt
+      tests/security/open_basedir_is_dir.phpt
+      tests/security/open_basedir_is_dir.phpt
+      tests/security/open_basedir_is_executable.phpt
+      tests/security/open_basedir_is_executable.phpt
+      tests/security/open_basedir_is_file.phpt
+      tests/security/open_basedir_is_file.phpt
+      tests/security/open_basedir_is_link.phpt
+      tests/security/open_basedir_is_link.phpt
+      tests/security/open_basedir_is_readable.phpt
+      tests/security/open_basedir_is_readable.phpt
+      tests/security/open_basedir_is_writable.phpt
+      tests/security/open_basedir_is_writable.phpt
+      tests/security/open_basedir_link.phpt
+      tests/security/open_basedir_link.phpt
+      tests/security/open_basedir_linkinfo.phpt
+      tests/security/open_basedir_linkinfo.phpt
+      tests/security/open_basedir_lstat.phpt
+      tests/security/open_basedir_lstat.phpt
+      tests/security/open_basedir_mkdir.phpt
+      tests/security/open_basedir_mkdir.phpt
+      tests/security/open_basedir_opendir.phpt
+      tests/security/open_basedir_opendir.phpt
+      tests/security/open_basedir_parse_ini_file.phpt
+      tests/security/open_basedir_parse_ini_file.phpt
+      tests/security/open_basedir_readlink.phpt
+      tests/security/open_basedir_readlink.phpt
+      tests/security/open_basedir_realpath.phpt
+      tests/security/open_basedir_realpath.phpt
+      tests/security/open_basedir_rename.phpt
+      tests/security/open_basedir_rename.phpt
+      tests/security/open_basedir_rmdir.phpt
+      tests/security/open_basedir_rmdir.phpt
+      tests/security/open_basedir_scandir.phpt
+      tests/security/open_basedir_scandir.phpt
+      tests/security/open_basedir_stat.phpt
+      tests/security/open_basedir_stat.phpt
+      tests/security/open_basedir_symlink.phpt
+      tests/security/open_basedir_symlink.phpt
+      tests/security/open_basedir_tempnam.phpt
+      tests/security/open_basedir_tempnam.phpt
+      tests/security/open_basedir_touch.phpt
+      tests/security/open_basedir_touch.phpt
+      tests/security/open_basedir_unlink.phpt
+      tests/security/open_basedir_unlink.phpt:
+      Collect all the open_basedir security tests into one place
+
+    * tests/security/open_basedir_chdir.phpt
+      tests/security/open_basedir_chdir.phpt
+      tests/security/open_basedir_chdir.phpt
+      tests/security/open_basedir_chmod.phpt
+      tests/security/open_basedir_chmod.phpt
+      tests/security/open_basedir_chmod.phpt
+      tests/security/open_basedir_copy.phpt
+      tests/security/open_basedir_copy.phpt
+      tests/security/open_basedir_copy.phpt
+      tests/security/open_basedir_dir.phpt
+      tests/security/open_basedir_dir.phpt
+      tests/security/open_basedir_dir.phpt
+      tests/security/open_basedir_file.phpt
+      tests/security/open_basedir_file.phpt
+      tests/security/open_basedir_file.phpt
+      tests/security/open_basedir_file_put_contents.phpt
+      tests/security/open_basedir_file_put_contents.phpt
+      tests/security/open_basedir_file_put_contents.phpt
+      tests/security/open_basedir_filemtime.phpt
+      tests/security/open_basedir_filemtime.phpt
+      tests/security/open_basedir_filemtime.phpt
+      tests/security/open_basedir_fileowner.phpt
+      tests/security/open_basedir_fileowner.phpt
+      tests/security/open_basedir_fileowner.phpt
+      tests/security/open_basedir_filetype.phpt
+      tests/security/open_basedir_filetype.phpt
+      tests/security/open_basedir_filetype.phpt
+      tests/security/open_basedir_fopen.phpt
+      tests/security/open_basedir_fopen.phpt
+      tests/security/open_basedir_fopen.phpt
+      tests/security/open_basedir_glob.phpt
+      tests/security/open_basedir_glob.phpt
+      tests/security/open_basedir_glob.phpt
+      tests/security/open_basedir_is_executable.phpt
+      tests/security/open_basedir_is_executable.phpt
+      tests/security/open_basedir_is_executable.phpt
+      tests/security/open_basedir_is_link.phpt
+      tests/security/open_basedir_is_link.phpt
+      tests/security/open_basedir_is_link.phpt
+      tests/security/open_basedir_is_writable.phpt
+      tests/security/open_basedir_is_writable.phpt
+      tests/security/open_basedir_is_writable.phpt
+      tests/security/open_basedir_link.phpt
+      tests/security/open_basedir_link.phpt
+      tests/security/open_basedir_link.phpt
+      tests/security/open_basedir_parse_ini_file.phpt
+      tests/security/open_basedir_parse_ini_file.phpt
+      tests/security/open_basedir_parse_ini_file.phpt
+      tests/security/open_basedir_rename.phpt
+      tests/security/open_basedir_rename.phpt
+      tests/security/open_basedir_rename.phpt
+      tests/security/open_basedir_rmdir.phpt
+      tests/security/open_basedir_rmdir.phpt
+      tests/security/open_basedir_rmdir.phpt
+      tests/security/open_basedir_symlink.phpt
+      tests/security/open_basedir_symlink.phpt
+      tests/security/open_basedir_symlink.phpt
+      tests/security/open_basedir_unlink.phpt
+      tests/security/open_basedir_unlink.phpt
+      tests/security/open_basedir_unlink.phpt:
+        1.1.4;
+      file open_basedir_chdir.phpt was initially added on branch PHP_5_2.
+
+    * tests/security/open_basedir_copy_variation1.phpt
+      tests/security/open_basedir_copy_variation1.phpt
+      tests/security/open_basedir_copy_variation1.phpt
+      tests/security/open_basedir_disk_free_space.phpt
+      tests/security/open_basedir_disk_free_space.phpt
+      tests/security/open_basedir_disk_free_space.phpt
+      tests/security/open_basedir_file_exists.phpt
+      tests/security/open_basedir_file_exists.phpt
+      tests/security/open_basedir_file_exists.phpt
+      tests/security/open_basedir_file_get_contents.phpt
+      tests/security/open_basedir_file_get_contents.phpt
+      tests/security/open_basedir_file_get_contents.phpt
+      tests/security/open_basedir_fileatime.phpt
+      tests/security/open_basedir_fileatime.phpt
+      tests/security/open_basedir_fileatime.phpt
+      tests/security/open_basedir_filectime.phpt
+      tests/security/open_basedir_filectime.phpt
+      tests/security/open_basedir_filectime.phpt
+      tests/security/open_basedir_filegroup.phpt
+      tests/security/open_basedir_filegroup.phpt
+      tests/security/open_basedir_filegroup.phpt
+      tests/security/open_basedir_fileinode.phpt
+      tests/security/open_basedir_fileinode.phpt
+      tests/security/open_basedir_fileinode.phpt
+      tests/security/open_basedir_fileperms.phpt
+      tests/security/open_basedir_fileperms.phpt
+      tests/security/open_basedir_fileperms.phpt
+      tests/security/open_basedir_filesize.phpt
+      tests/security/open_basedir_filesize.phpt
+      tests/security/open_basedir_filesize.phpt
+      tests/security/open_basedir_glob-win32.phpt
+      tests/security/open_basedir_glob-win32.phpt
+      tests/security/open_basedir_glob-win32.phpt
+      tests/security/open_basedir_is_dir.phpt
+      tests/security/open_basedir_is_dir.phpt
+      tests/security/open_basedir_is_dir.phpt
+      tests/security/open_basedir_is_file.phpt
+      tests/security/open_basedir_is_file.phpt
+      tests/security/open_basedir_is_file.phpt
+      tests/security/open_basedir_is_readable.phpt
+      tests/security/open_basedir_is_readable.phpt
+      tests/security/open_basedir_is_readable.phpt
+      tests/security/open_basedir_linkinfo.phpt
+      tests/security/open_basedir_linkinfo.phpt
+      tests/security/open_basedir_linkinfo.phpt
+      tests/security/open_basedir_lstat.phpt
+      tests/security/open_basedir_lstat.phpt
+      tests/security/open_basedir_lstat.phpt
+      tests/security/open_basedir_mkdir.phpt
+      tests/security/open_basedir_mkdir.phpt
+      tests/security/open_basedir_mkdir.phpt
+      tests/security/open_basedir_opendir.phpt
+      tests/security/open_basedir_opendir.phpt
+      tests/security/open_basedir_opendir.phpt
+      tests/security/open_basedir_readlink.phpt
+      tests/security/open_basedir_readlink.phpt
+      tests/security/open_basedir_readlink.phpt
+      tests/security/open_basedir_realpath.phpt
+      tests/security/open_basedir_realpath.phpt
+      tests/security/open_basedir_realpath.phpt
+      tests/security/open_basedir_scandir.phpt
+      tests/security/open_basedir_scandir.phpt
+      tests/security/open_basedir_scandir.phpt
+      tests/security/open_basedir_stat.phpt
+      tests/security/open_basedir_stat.phpt
+      tests/security/open_basedir_stat.phpt
+      tests/security/open_basedir_tempnam.phpt
+      tests/security/open_basedir_tempnam.phpt
+      tests/security/open_basedir_tempnam.phpt
+      tests/security/open_basedir_touch.phpt
+      tests/security/open_basedir_touch.phpt
+      tests/security/open_basedir_touch.phpt:
+        1.1.4;
+      file open_basedir_copy_variation1.phpt was initially added on branch
+      PHP_5_2.
+
+    * tests/security/open_basedir.inc
+      tests/security/open_basedir.inc
+      tests/security/open_basedir.inc
+      tests/security/open_basedir_error_log.phpt
+      tests/security/open_basedir_error_log.phpt
+      tests/security/open_basedir_error_log.phpt
+      tests/security/open_basedir_error_log_variation.phpt
+      tests/security/open_basedir_error_log_variation.phpt
+      tests/security/open_basedir_error_log_variation.phpt:
+        1.1.4;
+      file open_basedir.inc was initially added on branch PHP_5_2.
+
 2008-05-08  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
