@@ -792,6 +792,10 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 	while (s<end) {
 		if (*s=='\\') {
 			s++;
+			if (s >= end) {
+				*t++ = '\\';
+				break;
+			}
 
 			switch(*s) {
 				case 'n':
