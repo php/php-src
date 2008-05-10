@@ -1,3 +1,65 @@
+2008-05-09  Matt Wilmas  <php_lists@realplain.com>
+
+    * tests/bug44830.phpt:
+      Fix Windows newlines (missed that detail when adding :-/)
+
+2008-05-09  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      tests/isset_001.phpt
+      tests/isset_001.phpt
+      tests/isset_002.phpt
+      tests/isset_002.phpt
+      tests/isset_003.phpt
+      tests/isset_003.phpt:
+      - New tests
+
+    * tests/isset_001.phpt
+      tests/isset_001.phpt
+      tests/isset_001.phpt
+      tests/isset_002.phpt
+      tests/isset_002.phpt
+      tests/isset_002.phpt
+      tests/isset_003.phpt
+      tests/isset_003.phpt
+      tests/isset_003.phpt:
+        1.1.4;
+      - New tests
+
+2008-05-09  Matt Wilmas  <php_lists@realplain.com>
+
+    * (PHP_5_2)
+      tests/bug44830.phpt
+      tests/bug44830.phpt:
+      MFH: Test for loss of backslash at end of heredoc; For bug #44830 (Very
+      minor issue with backslash in heredoc)
+
+    * tests/bug44830.phpt
+      tests/bug44830.phpt
+      tests/bug44830.phpt:
+        1.1.4;
+      Test for loss of backslash at end of heredoc; For bug #44830 (Very minor
+      issue with backslash in heredoc)
+
+    * (PHP_5_3)
+      zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner.l:
+      MFH: Fix loss of backslash at end of heredoc; For bug #44830 (Very minor
+      issue with backslash in heredoc)
+
+    * zend_language_scanner.c
+      zend_language_scanner.l:
+      Fix loss of backslash at end of heredoc; For bug #44830 (Very minor issue
+      with backslash in heredoc)
+
+    * (PHP_5_3)
+      zend_execute.c:
+      MFH: Fixed bug #44681 (Resources used as array keys get converted to 0)
+
+    * zend_execute.c:
+      Fixed bug #44681 (Resources used as array keys get converted to 0)
+
 2008-05-08  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
