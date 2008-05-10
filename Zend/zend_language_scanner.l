@@ -986,6 +986,10 @@ static int zend_scan_unicode_escape_string(zval *zendlval, char *str, int len, U
 		if (*s==0x5C /*'\\'*/) {
 			s++;
 			c = *s;
+			if (s >= end) {
+				*t++ = 0x5C; /*'\\'*/
+				break;
+			}
 
 			min_digits = 0;
 			codepoint = 0;
@@ -1186,6 +1190,10 @@ static void zend_scan_binary_escape_string(zval *zendlval, char *str, int len, c
 	while (s<end) {
 		if (*s=='\\') {
 			s++;
+			if (s >= end) {
+				*t++ = '\\';
+				break;
+			}
 
 			switch(*s) {
 				case 'n':
