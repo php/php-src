@@ -65,6 +65,16 @@ Phar::unlinkArchive($fname);
 var_dump(file_exists($fname));
 $phar = new Phar($fname);
 var_dump(count($phar));
+$phar['evil.php'] = '<?php
+try {
+Phar::unlinkArchive(Phar::running(false));
+} catch (Exception $e) {echo $e->getMessage(),"\n";}
+var_dump(Phar::running(false));
+include Phar::running(true) . "/another.php";
+?>';
+$phar['another.php'] = "hi\n";
+unset($phar);
+include $pname . '/evil.php';
 ?>
 ===DONE===
 --CLEAN--
@@ -92,4 +102,7 @@ string(60) "<?php // zip-based phar archive stub file
 __HALT_COMPILER();"
 bool(false)
 int(0)
+phar archive "%sphar_unlinkarchive.phar" cannot be unlinked from within itself
+string(%d) "%sphar_unlinkarchive.phar"
+hi
 ===DONE===

@@ -1236,8 +1236,8 @@ PHP_METHOD(Phar, getSupportedCompression)
  */
 PHP_METHOD(Phar, unlinkArchive)
 {
-	char *fname, *error;
-	int fname_len;
+	char *fname, *error, *zname, *arch, *entry;
+	int fname_len, zname_len, arch_len, entry_len;
 	phar_archive_data *phar;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &fname, &fname_len) == FAILURE) {
@@ -1257,6 +1257,20 @@ PHP_METHOD(Phar, unlinkArchive)
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unknown phar archive \"%s\"", fname);
 		}
 		return;
+	}
+
+	zname = zend_get_executed_filename(TSRMLS_C);
+	zname_len = strlen(zname);
+
+	if (zname_len > 7 && !memcmp(zname, "phar://", 7) && SUCCESS == phar_split_fname(zname, zname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
+		if (arch_len == fname_len && !memcmp(arch, fname, arch_len)) {
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "phar archive \"%s\" cannot be unlinked from within itself", fname);
+			efree(arch);
+			efree(entry);
+			return;
+		}
+		efree(arch);
+		efree(entry);
 	}
 
 	if (phar->refcount) {
