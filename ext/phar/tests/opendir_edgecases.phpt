@@ -42,5 +42,5 @@ Warning: opendir() expects parameter 1 to be string, array given in %sopendir_ed
 ..
 foo
 
-Warning: opendir(phar://%sopendir_edgecases.phar.php/oops): failed to open dir: No such file or directory in phar://%sopendir_edgecases.phar.php/foo on line %d
+Warning: opendir(phar://%sopendir_edgecases.phar.php/oops): failed to open dir: %s in phar://%sopendir_edgecases.phar.php/foo on line %d
 ===DONE===
