@@ -633,6 +633,7 @@ notfound:
 				actual_len = entry[0] == '/' ? (entry_len - 1) : entry_len;
 				/* this file is not in the current directory, use the original path */
 				entry = estrndup(filename, filename_length);
+				entry_len = filename_length;
 				PHAR_G(cwd) = "/";
 				PHAR_G(cwd_len) = 0;
 				/* clean path without cwd */
