@@ -29,6 +29,9 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 	int filename_len;
 	zval *zcontext = NULL;
 
+	if (!zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
+		goto skip_phar;
+	}
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &filename, &filename_len, &zcontext) == FAILURE) {
 		return;
 	}
@@ -94,6 +97,9 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 	long maxlen = PHP_STREAM_COPY_ALL;
 	zval *zcontext = NULL;
 
+	if (!zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
+		goto skip_phar;
+	}
 	/* Parse arguments */
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s|br!ll", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen) == FAILURE) {
 		return;
@@ -216,6 +222,9 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 	zval *zcontext = NULL;
 	php_stream *stream;
 
+	if (!zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
+		goto skip_phar;
+	}
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s|br!", &filename, &filename_len, &use_include_path, &zcontext) == FAILURE) {
 		goto skip_phar;
 	}
@@ -858,6 +867,9 @@ PHAR_FUNC(phar_is_file) /* {{{ */
 	char *filename;
 	int filename_len;
 
+	if (!zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
+		goto skip_phar;
+	}
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
 		goto skip_phar;
 	}
@@ -915,6 +927,9 @@ PHAR_FUNC(phar_is_link) /* {{{ */
 	char *filename;
 	int filename_len;
 
+	if (!zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
+		goto skip_phar;
+	}
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
 		goto skip_phar;
 	}
