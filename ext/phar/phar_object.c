@@ -1959,6 +1959,11 @@ static zval *phar_convert_to_other(phar_archive_data *source, int convert, char 
 		newentry = *entry;
 		if (newentry.link) {
 			newentry.link = estrdup(newentry.link);
+			goto no_copy;
+		}
+		if (newentry.tmp) {
+			newentry.tmp = estrdup(newentry.tmp);
+			goto no_copy;
 		}
 		if (FAILURE == phar_copy_file_contents(&newentry, phar->fp TSRMLS_CC)) {
 			zend_hash_destroy(&(phar->manifest));
@@ -1967,6 +1972,7 @@ static zval *phar_convert_to_other(phar_archive_data *source, int convert, char 
 			/* exception already thrown */
 			return NULL;
 		}
+no_copy:
 		newentry.filename = estrndup(newentry.filename, newentry.filename_len);
 		if (newentry.metadata) {
 			zval *t;
