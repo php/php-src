@@ -1,3 +1,16 @@
+2008-05-10  Matt Wilmas  <php_lists@realplain.com>
+
+    * (PHP_5_3)
+      zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner.l:
+      MFH: Restore end check for "escape" strings
+
+    * zend_language_scanner.c
+      zend_language_scanner.l:
+      Restore end check for "escape" strings (not needed for single-quoted
+      strings as they can't have an unescaped backslash at the end)
+
 2008-05-09  Matt Wilmas  <php_lists@realplain.com>
 
     * tests/bug44830.phpt:
