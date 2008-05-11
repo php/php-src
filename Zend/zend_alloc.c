@@ -1151,7 +1151,7 @@ ZEND_API zend_mm_heap *zend_mm_startup(void) /* {{{ */
 	if (tmp) {
 		seg_size = zend_atoi(tmp, 0);
 		if (zend_mm_low_bit(seg_size) != zend_mm_high_bit(seg_size)) {
-			fprintf(stderr, "ZEND_MM_SEG_SIZE must be a power ow two.\n");
+			fprintf(stderr, "ZEND_MM_SEG_SIZE must be a power of two\n");
 			exit(255);
 		}
 	} else {
