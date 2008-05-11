@@ -1,8 +1,8 @@
 --TEST--
-Phar: test stat function interceptions and is_file/is_link edge cases (PHP 5.2)
+Phar: test stat function interceptions and is_file/is_link edge cases (PHP 5.3+)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip");?>
-<?php if (substr(phpversion(), 0, 3) != '5.2') die("skip PHP 5.2 required for this test");?>
+<?php if (substr(phpversion(), 0, 3) == '5.2') die("skip PHP 5.3+ required for this test");?>
 --INI--
 phar.readonly=0
 --FILE--
@@ -16,7 +16,7 @@ $fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.tar';
 $fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
 copy(dirname(__FILE__) . '/tar/files/links.tar', $fname2);
 $a = new PharData($fname2);
-$b = $a->convertToExecutable();
+$b = $a->convertToExecutable(Phar::TAR, Phar::NONE, '.3.phar.tar');
 unset($a);
 Phar::unlinkArchive($fname2);
 $b['foo/stat.php'] = '<?php
@@ -39,9 +39,9 @@ include $fname3;
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar'); ?>
 --EXPECTF--
-Warning: Wrong parameter count for is_file() in %sstat2.php on line %d
+Warning: is_file() expects exactly 1 parameter, 0 given in %sstat2_5.3.php on line %d
 
-Warning: Wrong parameter count for is_link() in %sstat2.php on line %d
+Warning: is_link() expects exactly 1 parameter, 0 given in %sstat2_5.3.php on line %d
 bool(true)
 is_link
 bool(false)
