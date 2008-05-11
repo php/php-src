@@ -28,22 +28,19 @@ extern php_stream_wrapper php_stream_phar_wrapper;
 /* for links to relative location, prepend cwd of the entry */
 static char *phar_get_link_location(phar_entry_info *entry TSRMLS_DC)
 {
-	char *tmp, *p, *ret = NULL;
+	char *p, *ret = NULL;
 	if (!entry->link) {
 		return NULL;
 	}
 	if (entry->link[0] == '/') {
 		return estrdup(entry->link + 1);
 	}
-	tmp = estrndup(entry->filename, entry->filename_len);
-	p = strrchr(tmp, '/');
+	p = strrchr(entry->filename, '/');
 	if (p) {
 		*p = '\0';
-		spprintf(&ret, 0, "%s/%s", tmp, entry->link);
-		efree(tmp);
+		spprintf(&ret, 0, "%s/%s", entry->filename, entry->link);
 		return ret;
 	}
-	efree(ret);
 	return entry->link;
 }
 
