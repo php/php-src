@@ -1943,6 +1943,9 @@ static zval *phar_convert_to_other(phar_archive_data *source, int convert, char 
 			return NULL;
 		}
 		newentry = *entry;
+		if (newentry.link) {
+			newentry.link = estrdup(newentry.link);
+		}
 		if (FAILURE == phar_copy_file_contents(&newentry, phar->fp TSRMLS_CC)) {
 			zend_hash_destroy(&(phar->manifest));
 			php_stream_close(phar->fp);

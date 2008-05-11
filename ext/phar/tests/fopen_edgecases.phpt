@@ -59,6 +59,11 @@ rename($pname . '/hi', 'phar://foo.phar/hi');
 ini_set('phar.readonly', 1);
 rename($pname . '/hi', $pname . '/there');
 ini_set('phar.readonly', 0);
+Phar::unlinkArchive($fname);
+file_put_contents($pname . '/test.php', '<?php
+$a = fopen("./notfound.php", "r");
+?>');
+include $pname . '/test.php';
 ?>
 
 ===DONE===
@@ -113,5 +118,7 @@ Warning: rename(): phar error: cannot rename "phar://foo.phar/hi" to "phar://": 
 Warning: rename(): phar error: cannot rename "phar://%sfopen_edgecases.phar.php/hi" to "phar://foo.phar/hi", not within the same phar archive in %sfopen_edgecases.php on line %d
 
 Warning: rename(): phar error: cannot rename "phar://%sfopen_edgecases.phar.php/hi" to "phar://%sfopen_edgecases.phar.php/there": invalid or non-writable url "phar://%sfopen_edgecases.phar.php/hi" in %sfopen_edgecases.php on line %d
+
+Warning: fopen(./notfound.php): failed to open stream: No such file or directory in phar://%sfopen_edgecases.phar.php/test.php on line %d
 
 ===DONE===

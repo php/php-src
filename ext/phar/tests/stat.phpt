@@ -11,6 +11,8 @@ Phar::interceptFileFuncs();
 var_dump(stat(""));
 
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.tar';
+$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
 $a = new Phar($fname);
 $a['index.php'] = '<?php
 echo "stat\n";
