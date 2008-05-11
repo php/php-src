@@ -228,15 +228,14 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 	if (SUCCESS != phar_split_fname(fname, strlen(fname), &arch, &arch_len, &entry, &entry_len, 1, 0 TSRMLS_CC)) {
 		return phar_save_resolve_path(filename, filename_len TSRMLS_CC);
 	}
+	efree(entry);
 	if (*filename == '.') {
 		int try_len;
 
 		if (SUCCESS != (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
 			efree(arch);
-			efree(entry);
 			return phar_save_resolve_path(filename, filename_len TSRMLS_CC);
 		}
-		efree(entry);
 		try_len = filename_len;
 		test = phar_fix_filepath(estrndup(filename, filename_len), &try_len, 1 TSRMLS_CC);
 		if (*test == '/') {
@@ -255,14 +254,13 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 			}
 		}
 	}
-	efree(entry);
 	spprintf(&path, MAXPATHLEN, "phar://%s/%s%c%s", arch, PHAR_G(cwd), DEFAULT_DIR_SEPARATOR, PG(include_path));
 	efree(arch);
 	ret = php_resolve_path(filename, filename_len, path TSRMLS_CC);
 	efree(path);
 	if (ret && strlen(ret) > 8 && !strncmp(ret, "phar://", 7)) {
-		char *arch, *entry;
-		int arch_len, entry_len, ret_len;
+		char *arch;
+		int arch_len, ret_len;
 
 		ret_len = strlen(ret);
 		/* found phar:// */
@@ -297,16 +295,15 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 		goto doit;
 	}
 
+	efree(entry);
 	if (*filename == '.') {
 		phar_archive_data **pphar;
 		int try_len;
 
 		if (SUCCESS != (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
 			efree(arch);
-			efree(entry);
 			goto doit;
 		}
-		efree(entry);
 		try_len = filename_len;
 		test = phar_fix_filepath(estrndup(filename, filename_len), &try_len, 1 TSRMLS_CC);
 		if (*test == '/') {

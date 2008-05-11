@@ -1702,7 +1702,7 @@ char *phar_fix_filepath(char *path, int *new_len, int use_cwd TSRMLS_DC) /* {{{ 
 	int ptr_length, new_phar_len = 1, path_length = *new_len;
 
 	if (PHAR_G(cwd_len) && use_cwd && path_length > 2 && path[0] == '.' && path[1] == '/') {
-		free_path = path = estrndup(path, path_length);
+		free_path = path;
 		new_phar_len = PHAR_G(cwd_len);
 		new_phar = estrndup(PHAR_G(cwd), new_phar_len);
 	} else {
