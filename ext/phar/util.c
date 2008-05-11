@@ -33,7 +33,7 @@ static char *phar_get_link_location(phar_entry_info *entry TSRMLS_DC)
 		return NULL;
 	}
 	if (entry->link[0] == '/') {
-		return entry->link;
+		return estrdup(entry->link + 1);
 	}
 	tmp = estrndup(entry->filename, entry->filename_len);
 	p = strrchr(tmp, '/');
