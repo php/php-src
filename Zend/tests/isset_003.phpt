@@ -23,11 +23,17 @@ var_dump(isset($GLOBALS[1]));
 var_dump(isset($GLOBALS[1]->$GLOBALS));
 
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 bool(true)
 bool(false)
 bool(false)
+
+Notice: Undefined variable: d in %s on line %d
+
+Notice: Undefined variable: c in %s on line %d
+
+Notice: Trying to get property of non-object in %s on line %d
 bool(false)
 bool(true)
 bool(false)
