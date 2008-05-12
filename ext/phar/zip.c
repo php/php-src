@@ -241,6 +241,13 @@ foundit:
 			mydata->ext_len = (mydata->fname + fname_len) - mydata->ext;
 		}
 	}
+	if (!alias_len) {
+		mydata->alias = estrndup(fname, fname_len);
+#ifdef PHP_WIN32
+		phar_unixify_path_separators(mydata->alias, fname_len);
+#endif
+		mydata->alias_len = fname_len;
+	}
 	/* clean up on big-endian systems */
 	/* seek to central directory */
 	php_stream_seek(fp, PHAR_GET_32(locator.cdir_offset), SEEK_SET);
@@ -269,7 +276,7 @@ foundit:
 				efree(mydata->alias); \
 			} \
 			efree(mydata); \
-			return FAILURE
+			return FAILURE;
 
 	/* add each central directory item to the manifest */
 	for (i = 0; i < locator.count; ++i) {
