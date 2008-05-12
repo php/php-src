@@ -17,6 +17,8 @@ mkdir($pname . '/a');
 rmdir('phar://');
 rmdir('phar://foo.phar');
 rmdir($pname . '/a');
+$a->addEmptyDir('bb');
+$a->addEmptyDir('bb');
 ?>
 ===DONE===
 --CLEAN--
