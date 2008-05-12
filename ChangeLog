@@ -1,3 +1,132 @@
+2008-05-11  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/034.phpt
+      ZendEngine2/tests/clone_001.phpt
+      ZendEngine2/tests/clone_001.phpt
+      ZendEngine2/tests/clone_002.phpt
+      ZendEngine2/tests/clone_002.phpt
+      ZendEngine2/tests/clone_003.phpt
+      ZendEngine2/tests/clone_003.phpt
+      ZendEngine2/tests/clone_004.phpt
+      ZendEngine2/tests/clone_004.phpt
+      ZendEngine2/tests/exception_004.phpt
+      ZendEngine2/tests/exception_004.phpt
+      ZendEngine2/tests/inter_04.phpt
+      ZendEngine2/tests/inter_04.phpt
+      ZendEngine2/tests/objects_024.phpt
+      ZendEngine2/tests/objects_024.phpt
+      ZendEngine2/tests/objects_025.phpt
+      ZendEngine2/tests/objects_025.phpt
+      ZendEngine2/tests/objects_026.phpt
+      ZendEngine2/tests/objects_026.phpt
+      ZendEngine2/tests/objects_027.phpt
+      ZendEngine2/tests/objects_027.phpt:
+      file 034.phpt was added on branch PHP_5_3 on 2008-05-11 22:44:56 +0000
+
+2008-05-11  Matt Wilmas  <php_lists@realplain.com>
+
+    * ZendEngine2/zend_alloc.c:
+      Fixed error message typo; also removed end . to be consistent with the
+      others
+
+2008-05-11  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_2)
+      ext/reflection/tests/ReflectionFunction_getExtension.phpt
+      ext/reflection/tests/ReflectionFunction_getExtension.phpt
+      ext/reflection/tests/ReflectionFunction_getExtensionName.phpt
+      ext/reflection/tests/ReflectionFunction_getExtensionName.phpt:
+      MFH: Add tests for ReflectionFunction::getExtension*().
+
+    * ext/reflection/tests/ReflectionFunction_getExtension.phpt
+      ext/reflection/tests/ReflectionFunction_getExtension.phpt
+      ext/reflection/tests/ReflectionFunction_getExtension.phpt
+      ext/reflection/tests/ReflectionFunction_getExtensionName.phpt
+      ext/reflection/tests/ReflectionFunction_getExtensionName.phpt
+      ext/reflection/tests/ReflectionFunction_getExtensionName.phpt:
+        1.1.4;
+      Add tests for ReflectionFunction::getExtension*().
+
+    * ext/reflection/tests/001.phpt
+      ext/reflection/tests/002.phpt
+      ext/reflection/tests/004.phpt
+      ext/reflection/tests/bug26695.phpt
+      ext/reflection/tests/bug29268.phpt
+      ext/reflection/tests/bug29523.phpt
+      ext/reflection/tests/bug29828.phpt
+      ext/reflection/tests/bug30146.phpt
+      ext/reflection/tests/bug30148.phpt
+      ext/reflection/tests/bug30856.phpt
+      ext/reflection/tests/bug30961.phpt
+      ext/reflection/tests/bug33312.phpt
+      ext/reflection/tests/bug37964.phpt
+      ext/reflection/tests/bug38942.phpt
+      ext/reflection/tests/parameters_001.phpt
+      ext/reflection/tests/reflectionClass_constructor_002.phpt
+      ext/reflection/tests/reflectionClass_getConstant_basic.phpt:
+      dos2unix *.phpt
+
+2008-05-11  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/tests/031.phpt
+      ZendEngine2/tests/031.phpt
+      ZendEngine2/tests/032.phpt
+      ZendEngine2/tests/032.phpt
+      ZendEngine2/tests/033.phpt
+      ZendEngine2/tests/033.phpt
+      ZendEngine2/tests/034.phpt
+      ZendEngine2/tests/anonymous_func_001.phpt
+      ZendEngine2/tests/anonymous_func_001.phpt
+      ZendEngine2/tests/anonymous_func_002.phpt
+      ZendEngine2/tests/anonymous_func_002.phpt
+      ZendEngine2/tests/anonymous_func_003.phpt
+      ZendEngine2/tests/anonymous_func_003.phpt
+      ZendEngine2/tests/dynamic_call_001.phpt
+      ZendEngine2/tests/dynamic_call_001.phpt
+      ZendEngine2/tests/dynamic_call_002.phpt
+      ZendEngine2/tests/dynamic_call_002.phpt
+      ZendEngine2/tests/dynamic_call_003.phpt
+      ZendEngine2/tests/dynamic_call_003.phpt
+      ZendEngine2/tests/dynamic_call_004.phpt
+      ZendEngine2/tests/dynamic_call_004.phpt
+      ZendEngine2/tests/exception_001.phpt
+      ZendEngine2/tests/exception_001.phpt
+      ZendEngine2/tests/exception_002.phpt
+      ZendEngine2/tests/exception_002.phpt
+      ZendEngine2/tests/exception_003.phpt
+      ZendEngine2/tests/exception_003.phpt
+      ZendEngine2/tests/heredoc_015.phpt
+      ZendEngine2/tests/heredoc_015.phpt
+      ZendEngine2/tests/heredoc_016.phpt
+      ZendEngine2/tests/heredoc_016.phpt
+      ZendEngine2/tests/heredoc_017.phpt
+      ZendEngine2/tests/heredoc_017.phpt
+      ZendEngine2/tests/instanceof_001.phpt
+      ZendEngine2/tests/instanceof_001.phpt
+      ZendEngine2/tests/instanceof_002.phpt
+      ZendEngine2/tests/instanceof_002.phpt
+      ZendEngine2/tests/jump14.phpt
+      ZendEngine2/tests/jump14.phpt
+      ZendEngine2/tests/list_003.phpt
+      ZendEngine2/tests/list_003.phpt
+      ZendEngine2/tests/list_004.phpt
+      ZendEngine2/tests/list_004.phpt
+      ZendEngine2/tests/list_005.phpt
+      ZendEngine2/tests/list_005.phpt
+      ZendEngine2/tests/nowdoc_016.phpt
+      ZendEngine2/tests/nowdoc_016.phpt
+      ZendEngine2/tests/nowdoc_017.phpt
+      ZendEngine2/tests/nowdoc_017.phpt
+      ZendEngine2/tests/objects_022.phpt
+      ZendEngine2/tests/objects_022.phpt
+      ZendEngine2/tests/objects_023.phpt
+      ZendEngine2/tests/objects_023.phpt
+      ZendEngine2/tests/unicode_001.phpt
+      ZendEngine2/tests/unicode_002.phpt:
+      
+      - New tests
+
 2008-05-10  Matt Wilmas  <php_lists@realplain.com>
 
     * (PHP_5_3)

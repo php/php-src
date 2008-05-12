@@ -1,3 +1,95 @@
+2008-05-11  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      tests/034.phpt
+      tests/clone_001.phpt
+      tests/clone_001.phpt
+      tests/clone_002.phpt
+      tests/clone_002.phpt
+      tests/clone_003.phpt
+      tests/clone_003.phpt
+      tests/clone_004.phpt
+      tests/clone_004.phpt
+      tests/exception_004.phpt
+      tests/exception_004.phpt
+      tests/inter_04.phpt
+      tests/inter_04.phpt
+      tests/objects_024.phpt
+      tests/objects_024.phpt
+      tests/objects_025.phpt
+      tests/objects_025.phpt
+      tests/objects_026.phpt
+      tests/objects_026.phpt
+      tests/objects_027.phpt
+      tests/objects_027.phpt:
+      file 034.phpt was added on branch PHP_5_3 on 2008-05-11 22:44:56 +0000
+
+2008-05-11  Matt Wilmas  <php_lists@realplain.com>
+
+    * zend_alloc.c:
+      Fixed error message typo; also removed end . to be consistent with the
+      others
+
+2008-05-11  Felipe Pena  <felipensp@gmail.com>
+
+    * tests/031.phpt
+      tests/031.phpt
+      tests/032.phpt
+      tests/032.phpt
+      tests/033.phpt
+      tests/033.phpt
+      tests/034.phpt
+      tests/anonymous_func_001.phpt
+      tests/anonymous_func_001.phpt
+      tests/anonymous_func_002.phpt
+      tests/anonymous_func_002.phpt
+      tests/anonymous_func_003.phpt
+      tests/anonymous_func_003.phpt
+      tests/dynamic_call_001.phpt
+      tests/dynamic_call_001.phpt
+      tests/dynamic_call_002.phpt
+      tests/dynamic_call_002.phpt
+      tests/dynamic_call_003.phpt
+      tests/dynamic_call_003.phpt
+      tests/dynamic_call_004.phpt
+      tests/dynamic_call_004.phpt
+      tests/exception_001.phpt
+      tests/exception_001.phpt
+      tests/exception_002.phpt
+      tests/exception_002.phpt
+      tests/exception_003.phpt
+      tests/exception_003.phpt
+      tests/heredoc_015.phpt
+      tests/heredoc_015.phpt
+      tests/heredoc_016.phpt
+      tests/heredoc_016.phpt
+      tests/heredoc_017.phpt
+      tests/heredoc_017.phpt
+      tests/instanceof_001.phpt
+      tests/instanceof_001.phpt
+      tests/instanceof_002.phpt
+      tests/instanceof_002.phpt
+      tests/jump14.phpt
+      tests/jump14.phpt
+      tests/list_003.phpt
+      tests/list_003.phpt
+      tests/list_004.phpt
+      tests/list_004.phpt
+      tests/list_005.phpt
+      tests/list_005.phpt
+      tests/nowdoc_016.phpt
+      tests/nowdoc_016.phpt
+      tests/nowdoc_017.phpt
+      tests/nowdoc_017.phpt
+      tests/objects_022.phpt
+      tests/objects_022.phpt
+      tests/objects_023.phpt
+      tests/objects_023.phpt
+      tests/unicode_001.phpt
+      tests/unicode_002.phpt:
+      
+      - New tests
+
 2008-05-10  Matt Wilmas  <php_lists@realplain.com>
 
     * (PHP_5_3)
