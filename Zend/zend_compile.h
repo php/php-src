@@ -691,6 +691,8 @@ int zendlex(znode *zendlval TSRMLS_DC);
 
 #define ZEND_ISSET				(1<<0)
 #define ZEND_ISEMPTY			(1<<1)
+#define ZEND_ISSET_ISEMPTY_MASK	(ZEND_ISSET | ZEND_ISEMPTY)
+#define ZEND_QUICK_SET			(1<<2)
 
 #define ZEND_CT	(1<<0)
 #define ZEND_RT (1<<1)
