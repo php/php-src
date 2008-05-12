@@ -1,0 +1,114 @@
+Version 1.0.0
+
+ X make permissions in the lowest bits of flags to simplify using them [Greg]
+ X implement ini handler for phar.readonly and phar.require_hash that allows
+   enabling it on PHP_INI_ALL if it is disabled in the system, but does not
+   allow disabling it if it is enabled in the system [Greg]
+ X implement reading in metadata in manifest as <len32><metadata...> [Marcus]
+ X implement writing out of metadata to new manifest [Marcus]
+ X if SPL is disabled, enable only static methods of class Phar and disable
+   class PharFileInfo completely [Marcus]
+ X implement in-phar locking, so that a file that is opened for reading can't
+   have a handle opened for writing [Marcus/Greg]
+ X docs on file format/manifest description [Greg]
+ X docs on uses [Greg]
+ X stream context for specifying compression of a file [Marcus]
+ X stream context for specifying meta-data [Greg]
+ X Phar->begin()/Phar->commit() for specifying a new stub to the phar,
+   and deferring flush until all modifications are complete [Greg]
+ X Phar->getStub() for retrieving the stub of the phar [Marcus]
+ X add setUncompressed(), setCompressedGZ() and setCompressedBZ2() to
+   PharFileInfo class [Greg]
+ X add uncompressAllFiles(), compressAllFilesGZ() and compressAllFilesBZ2()
+   to Phar class [Greg]
+ X add PharFileInfo::setMetaData($metadata) [Marcus]
+ X add PharFileInfo::getMetaData() [Marcus]
+ X always throw exceptions from the Phar object, and E_RECOVERABLE_ERROR from
+   streams interface [Greg]
+ X Phar archive metadata Phar::setMetaData($metadata) Phar::getMetaData()
+   [Greg]
+ X support rename() in stream wrapper [Greg]
+ X update docs to reflect changes in error handling [Greg]
+ X fix 011.phpt, 029.phpt for uncaught exceptions causing bad cleanup
+   [Marcus/Greg]
+
+Version 1.1.0
+
+ X Ability to connect a phar file 'phar://whatever' to a directory. That way
+   all access to that phar archive are directed to the extracted directory.
+   This allows to have the installed files and the archive keep the same
+   includes. [Marcus]
+ X add SHA-2 (256, 512) support [Marcus]
+ X setSignatureAlgorithm() and Phar::MD5 Phar::SHA1 Phar::SHA256 Phar::SHA512
+   Phar::PGP to choose the kind of signature to use (PGP falls back to SHA1)
+   [Greg]
+
+Version 1.2.0
+
+ X add PharFileInfo::hasMetadata(), PharFileInfo::delMetadata() [Marcus]
+ X add Phar::hasMetadata(), Phar::delMetadata() [Marcus]
+ X fix Phar::CanWrite() [Marcus]
+ X add preliminary phar command (phar.php) [Marcus] 
+ X add phar command (phar.phar) [Marcus]
+ X list all available compression methods using
+   Phar::getSupportedCompression() [Marcus]
+ X Remove RINIT [Marcus]
+
+Version 1.2.1
+
+ X Add Phar::getAlias() [Marcus]
+ X Add Phar::setAlias() [Greg]
+ X Make -a optional in pack subcommand of phar.phar [Marcus]
+ X Make Phar::loadPhar() and Phar::mapPhar() ignore extracted archives
+
+Version 2.0.0
+
+ X implement webPhar() rewrite as a callback that returns FALSE to deny
+   access, or a string representing a file within the archive to access. If
+   unknown, the callback should return the original request uri [Greg]
+ X rework filename detection so that alias is always checked first [Greg]
+ X make aliases containing '/' or '\' invalid [Greg]
+ X implement manual mounting of external phar archives to locations inside a
+   phar path, $phar->mount('/path/to/external.phar', 'internal/path');
+   this would traverse external.phar's manifest, and add each entry as a
+   virtual entry just like automatic mounting of internal phars [Greg]
+ X implement manual mounting of external paths to a directory inside a phar
+   path.  Because the mapping would be to an external directory, write access
+   would be allowed always.  This allows storing sqlite databases, cache, or
+   template files in a location external to the phar.  Copy of the files
+   would need to be performed in an installation step, phar would not attempt
+   to do this for performance and security reasons. [Greg]
+ X implement opendir support for mounted paths [Greg]
+ X make convertToZip/convertToTar rename files [Steph]
+ X make convertTo*() with full file compression rename to append .gz or .bz2
+   [Steph]
+ X don't automatically add a stub to .zip or .tar files [Steph]
+ X don't allow a stub or alias to be added to a .zip/.tar that does not have
+   ".phar" in the filename (or already have stub/alias) [Steph]
+ X allow read/write on .tar/.zip files that do not contain a stub or alias [Steph/Greg]
+ X prevent manual addition of stub via $a['.phar/stub.php'] = '<?php my stub'; [Greg]
+ X investigate potential collision between SPL's DirectoryIterator flags and
+   those in phar_archive_data [Steph]
+ X compression should work for non-phar archives [Steph]
+ X implement initial support for simple zip/tar archives (PharData) [Steph]
+ X make createDefaultStub() setDefaultStub() and have it file format-specific
+   [Steph]
+ X convertTo*() should always use the default stub [Steph]
+ X ability to store empty directories [Greg]
+ X tar support [Greg]
+ X zip support [Greg]
+ X Phar::copy($from, $to); [Greg]
+ X Phar::delete($what) [Greg]
+ X Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
+ X Layout: Option to compress all content rather than single files. (tar/phar
+   only) [Greg]
+ X clean crap paths like phar://blah.phar/file//../to\\here.php [Greg]
+
+Version 2.1.0
+ * implement write support for mounted files even if phar.readonly=1
+ * implement automatic "mounting" of internal phar archives so that
+   phar:///path/to/archive.phar/internal.phar/file opens internal.phar and
+   maps its manifest inside archive.phar. The manifest entry inside
+   archive.phar would be named "internal.phar/file". Write access to internal
+   files inside an internal phar would be denied, as the entire archive must
+   be added or removed at the same time.
