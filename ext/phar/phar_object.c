@@ -1157,6 +1157,9 @@ PHP_METHOD(Phar, __construct)
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 				"%s", error);
 			efree(error);
+		} else {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+				"Phar creation or opening failed");
 		}
 		return;
 	}

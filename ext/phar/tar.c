@@ -400,8 +400,8 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 		phar_archive_data **fd_ptr;
 
 		myphar->is_temporary_alias = 0;
-		if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void **)&fd_ptr)) {
-			if (SUCCESS != phar_free_alias(*fd_ptr, alias, alias_len TSRMLS_CC)) {
+		if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), actual_alias, myphar->alias_len, (void **)&fd_ptr)) {
+			if (SUCCESS != phar_free_alias(*fd_ptr, actual_alias, myphar->alias_len TSRMLS_CC)) {
 				if (error) {
 					spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\", alias is already in use", fname);
 				}
@@ -411,8 +411,25 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 		}
 		zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), actual_alias, myphar->alias_len, (void*)&myphar, sizeof(phar_archive_data*), NULL);
 	} else {
-		myphar->alias = estrndup(myphar->fname, fname_len);
-		myphar->alias_len = fname_len;
+		phar_archive_data **fd_ptr;
+
+		if (alias_len) {
+			if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void **)&fd_ptr)) {
+				if (SUCCESS != phar_free_alias(*fd_ptr, alias, alias_len TSRMLS_CC)) {
+					if (error) {
+						spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\", alias is already in use", fname);
+					}
+					zend_hash_del(&(PHAR_GLOBALS->phar_fname_map), myphar->fname, fname_len);
+					return FAILURE;
+				}
+			}
+			zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), actual_alias, myphar->alias_len, (void*)&myphar, sizeof(phar_archive_data*), NULL);
+			myphar->alias = estrndup(alias, alias_len);
+			myphar->alias_len = alias_len;
+		} else {
+			myphar->alias = estrndup(myphar->fname, fname_len);
+			myphar->alias_len = fname_len;
+		}
 		myphar->is_temporary_alias = 1;
 	}
 	if (pphar) {

@@ -17,9 +17,9 @@ echo $ee->getMessage(), "\n";
 ?>
 ===DONE===
 --EXPECTF--
-phar error: invalid alias in zip-based phar "%sbadalias1.phar.zip"
-phar error: invalid alias in zip-based phar "%sbadalias2.phar.zip"
-phar error: invalid alias in zip-based phar "%sbadalias3.phar.zip"
-phar error: invalid alias in zip-based phar "%sbadalias4.phar.zip"
-phar error: invalid alias in zip-based phar "%sbadalias5.phar.zip"
+phar error: invalid alias "hi/there" in zip-based phar "%sbadalias1.phar.zip"
+phar error: invalid alias "hi\there" in zip-based phar "%sbadalias2.phar.zip"
+phar error: invalid alias "hi\there" in zip-based phar "%sbadalias3.phar.zip"
+phar error: invalid alias "hi;there" in zip-based phar "%sbadalias4.phar.zip"
+phar error: invalid alias "hi:there" in zip-based phar "%sbadalias5.phar.zip"
 ===DONE===
