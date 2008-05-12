@@ -4,14 +4,18 @@ Phar: tar with hard link and symbolic link
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE--
 <?php
+$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.tar';
+copy(dirname(__FILE__) . '/files/links.tar', $fname);
 try {
-	$p = new PharData(dirname(__FILE__) . '/files/links.tar');
+	$p = new PharData($fname);
 } catch (Exception $e) {
 	echo $e->getMessage() . "\n";
 }
 var_dump($p['testit/link']->getContent());
 var_dump($p['testit/hard']->getContent());
 var_dump($p['testit/file']->getContent());
+$p['testit/link'] = 'overwriting';
+var_dump($p['testit/link']->getContent());
 ?>
 ===DONE===
 --CLEAN--
@@ -25,4 +29,5 @@ string(3) "hi
 "
 string(3) "hi
 "
+string(11) "overwriting"
 ===DONE===
