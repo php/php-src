@@ -416,6 +416,8 @@ foundit:
 					PHAR_ZIP_FAIL("unable to decompress alias, zlib filter creation failed");
 				}
 				php_stream_filter_append(&fp->readfilters, filter);
+				efree(mydata->alias);
+				mydata->alias = NULL;
 				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &(mydata->alias), entry.uncompressed_filesize, 0)) || !mydata->alias) {
 					efree(entry.filename);
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
@@ -431,6 +433,8 @@ foundit:
 				}
 				php_stream_filter_append(&fp->readfilters, filter);
 				php_stream_filter_append(&fp->readfilters, filter);
+				efree(mydata->alias);
+				mydata->alias = NULL;
 				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &(mydata->alias), entry.uncompressed_filesize, 0)) || !mydata->alias) {
 					efree(entry.filename);
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
@@ -438,6 +442,8 @@ foundit:
 				php_stream_filter_flush(filter, 1);
 				php_stream_filter_remove(filter, 1 TSRMLS_CC);
 			} else {
+				efree(mydata->alias);
+				mydata->alias = NULL;
 				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &(mydata->alias), entry.uncompressed_filesize, 0)) || !mydata->alias) {
 					efree(entry.filename);
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
