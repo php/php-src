@@ -3159,7 +3159,7 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, ANY)
 	HashTable *target_symbol_table;
 	zend_free_op free_op1;
 
-	if (OP1_TYPE == IS_CV) {
+	if (OP1_TYPE == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EG(active_symbol_table)) {
 			zend_execute_data *ex = EX(prev_execute_data);
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
@@ -3196,7 +3196,7 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, ANY)
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
 		varname = &tmp;
-	} else if (OP1_TYPE == IS_VAR) {
+	} else if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
 		Z_ADDREF_P(varname);
 	}
 
@@ -3229,7 +3229,7 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, ANY)
 
 	if (varname == &tmp) {
 		zval_dtor(&tmp);
-	} else if (OP1_TYPE == IS_VAR) {
+	} else if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
 		zval_ptr_dtor(&varname);
 	}
 	FREE_OP1();
@@ -3666,7 +3666,7 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, ANY)
 	zval **value;
 	zend_bool isset = 1;
 
-	if (OP1_TYPE == IS_CV) {
+	if (OP1_TYPE == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EX(CVs)[opline->op1.u.var]) {
 			value = EX(CVs)[opline->op1.u.var];
 		} else if (EG(active_symbol_table)) {
@@ -3710,7 +3710,7 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, ANY)
 
 	Z_TYPE(EX_T(opline->result.u.var).tmp_var) = IS_BOOL;
 
-	switch (opline->extended_value) {
+	switch (opline->extended_value & ZEND_ISSET_ISEMPTY_MASK) {
 		case ZEND_ISSET:
 			if (isset && Z_TYPE_PP(value) == IS_NULL) {
 				Z_LVAL(EX_T(opline->result.u.var).tmp_var) = 0;

@@ -1788,7 +1788,7 @@ static int ZEND_UNSET_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	HashTable *target_symbol_table;
 
 
-	if (IS_CONST == IS_CV) {
+	if (IS_CONST == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EG(active_symbol_table)) {
 			zend_execute_data *ex = EX(prev_execute_data);
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
@@ -1825,7 +1825,7 @@ static int ZEND_UNSET_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
 		varname = &tmp;
-	} else if (IS_CONST == IS_VAR) {
+	} else if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
 		Z_ADDREF_P(varname);
 	}
 
@@ -1858,7 +1858,7 @@ static int ZEND_UNSET_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (varname == &tmp) {
 		zval_dtor(&tmp);
-	} else if (IS_CONST == IS_VAR) {
+	} else if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
 		zval_ptr_dtor(&varname);
 	}
 
@@ -2023,7 +2023,7 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval **value;
 	zend_bool isset = 1;
 
-	if (IS_CONST == IS_CV) {
+	if (IS_CONST == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EX(CVs)[opline->op1.u.var]) {
 			value = EX(CVs)[opline->op1.u.var];
 		} else if (EG(active_symbol_table)) {
@@ -2067,7 +2067,7 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	Z_TYPE(EX_T(opline->result.u.var).tmp_var) = IS_BOOL;
 
-	switch (opline->extended_value) {
+	switch (opline->extended_value & ZEND_ISSET_ISEMPTY_MASK) {
 		case ZEND_ISSET:
 			if (isset && Z_TYPE_PP(value) == IS_NULL) {
 				Z_LVAL(EX_T(opline->result.u.var).tmp_var) = 0;
@@ -5001,7 +5001,7 @@ static int ZEND_UNSET_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	HashTable *target_symbol_table;
 	zend_free_op free_op1;
 
-	if (IS_TMP_VAR == IS_CV) {
+	if (IS_TMP_VAR == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EG(active_symbol_table)) {
 			zend_execute_data *ex = EX(prev_execute_data);
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
@@ -5038,7 +5038,7 @@ static int ZEND_UNSET_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
 		varname = &tmp;
-	} else if (IS_TMP_VAR == IS_VAR) {
+	} else if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
 		Z_ADDREF_P(varname);
 	}
 
@@ -5071,7 +5071,7 @@ static int ZEND_UNSET_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (varname == &tmp) {
 		zval_dtor(&tmp);
-	} else if (IS_TMP_VAR == IS_VAR) {
+	} else if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
 		zval_ptr_dtor(&varname);
 	}
 	zval_dtor(free_op1.var);
@@ -5236,7 +5236,7 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval **value;
 	zend_bool isset = 1;
 
-	if (IS_TMP_VAR == IS_CV) {
+	if (IS_TMP_VAR == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EX(CVs)[opline->op1.u.var]) {
 			value = EX(CVs)[opline->op1.u.var];
 		} else if (EG(active_symbol_table)) {
@@ -5280,7 +5280,7 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	Z_TYPE(EX_T(opline->result.u.var).tmp_var) = IS_BOOL;
 
-	switch (opline->extended_value) {
+	switch (opline->extended_value & ZEND_ISSET_ISEMPTY_MASK) {
 		case ZEND_ISSET:
 			if (isset && Z_TYPE_PP(value) == IS_NULL) {
 				Z_LVAL(EX_T(opline->result.u.var).tmp_var) = 0;
@@ -8252,7 +8252,7 @@ static int ZEND_UNSET_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	HashTable *target_symbol_table;
 	zend_free_op free_op1;
 
-	if (IS_VAR == IS_CV) {
+	if (IS_VAR == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EG(active_symbol_table)) {
 			zend_execute_data *ex = EX(prev_execute_data);
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
@@ -8289,7 +8289,7 @@ static int ZEND_UNSET_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
 		varname = &tmp;
-	} else if (IS_VAR == IS_VAR) {
+	} else if (IS_VAR == IS_VAR || IS_VAR == IS_CV) {
 		Z_ADDREF_P(varname);
 	}
 
@@ -8322,7 +8322,7 @@ static int ZEND_UNSET_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (varname == &tmp) {
 		zval_dtor(&tmp);
-	} else if (IS_VAR == IS_VAR) {
+	} else if (IS_VAR == IS_VAR || IS_VAR == IS_CV) {
 		zval_ptr_dtor(&varname);
 	}
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
@@ -8633,7 +8633,7 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval **value;
 	zend_bool isset = 1;
 
-	if (IS_VAR == IS_CV) {
+	if (IS_VAR == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EX(CVs)[opline->op1.u.var]) {
 			value = EX(CVs)[opline->op1.u.var];
 		} else if (EG(active_symbol_table)) {
@@ -8677,7 +8677,7 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	Z_TYPE(EX_T(opline->result.u.var).tmp_var) = IS_BOOL;
 
-	switch (opline->extended_value) {
+	switch (opline->extended_value & ZEND_ISSET_ISEMPTY_MASK) {
 		case ZEND_ISSET:
 			if (isset && Z_TYPE_PP(value) == IS_NULL) {
 				Z_LVAL(EX_T(opline->result.u.var).tmp_var) = 0;
@@ -21967,7 +21967,7 @@ static int ZEND_UNSET_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	HashTable *target_symbol_table;
 
 
-	if (IS_CV == IS_CV) {
+	if (IS_CV == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EG(active_symbol_table)) {
 			zend_execute_data *ex = EX(prev_execute_data);
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
@@ -22004,7 +22004,7 @@ static int ZEND_UNSET_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
 		varname = &tmp;
-	} else if (IS_CV == IS_VAR) {
+	} else if (IS_CV == IS_VAR || IS_CV == IS_CV) {
 		Z_ADDREF_P(varname);
 	}
 
@@ -22037,7 +22037,7 @@ static int ZEND_UNSET_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (varname == &tmp) {
 		zval_dtor(&tmp);
-	} else if (IS_CV == IS_VAR) {
+	} else if (IS_CV == IS_VAR || IS_CV == IS_CV) {
 		zval_ptr_dtor(&varname);
 	}
 
@@ -22202,7 +22202,7 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval **value;
 	zend_bool isset = 1;
 
-	if (IS_CV == IS_CV) {
+	if (IS_CV == IS_CV && (opline->extended_value & ZEND_QUICK_SET)) {
 		if (EX(CVs)[opline->op1.u.var]) {
 			value = EX(CVs)[opline->op1.u.var];
 		} else if (EG(active_symbol_table)) {
@@ -22246,7 +22246,7 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	Z_TYPE(EX_T(opline->result.u.var).tmp_var) = IS_BOOL;
 
-	switch (opline->extended_value) {
+	switch (opline->extended_value & ZEND_ISSET_ISEMPTY_MASK) {
 		case ZEND_ISSET:
 			if (isset && Z_TYPE_PP(value) == IS_NULL) {
 				Z_LVAL(EX_T(opline->result.u.var).tmp_var) = 0;
