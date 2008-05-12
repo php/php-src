@@ -197,6 +197,24 @@ static int phar_unalias_apply(void *pDest, void *argument TSRMLS_DC) /* {{{ */
 /* }}} */
 
 /**
+ * Delete aliases to phar's that got kicked out of the global table
+ */
+static int phar_tmpclose_apply(void *pDest TSRMLS_DC) /* {{{ */
+{
+	phar_entry_info *entry = (phar_entry_info *) pDest;
+
+	if (entry->fp_type != PHAR_TMP) {
+		return ZEND_HASH_APPLY_KEEP;
+	}
+	if (entry->fp && !entry->fp_refcount) {
+		php_stream_close(entry->fp);
+		entry->fp = NULL;
+	}
+	return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
+/**
  * Filename map destructor
  */
 static void destroy_phar_data(void *pDest) /* {{{ */
@@ -205,6 +223,9 @@ static void destroy_phar_data(void *pDest) /* {{{ */
 	TSRMLS_FETCH();
 
 	if (PHAR_GLOBALS->request_ends) {
+		/* first, iterate over the manifest and close all PHAR_TMP entry fp handles,
+		this prevents unnecessary unfreed stream resources */
+		zend_hash_apply(&(phar_data->manifest), phar_tmpclose_apply TSRMLS_CC);
 		destroy_phar_data_only(pDest);
 		return;
 	}

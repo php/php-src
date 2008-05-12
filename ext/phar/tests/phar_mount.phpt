@@ -41,6 +41,13 @@ include $fname2;
 } catch (Exception $e) {
 echo $e->getMessage(),"\n";
 }
+try {
+Phar::mount($pname . '/oops', '/home/oops/../../etc/passwd:');
+} catch (Exception $e) {
+echo $e->getMessage(),"\n";
+}
+Phar::mount($pname . '/testit2', $pname . '/testit1');
+echo substr($a['testit2']->getContent(),0, 50),"\n";
 ?>
 ===DONE===
 --CLEAN--
@@ -50,4 +57,7 @@ echo $e->getMessage(),"\n";
 Mounting of testit to %sphar_mount.php within phar %sphar_mount.phar.php failed
 Can only mount internal paths within a phar archive, use a relative path instead of "phar://%sphar_mount.phar.php/testit1"
 Mounting of testit to %sphar_mount.php within phar %sphar_mount.phar.tar failed
+Mounting of /oops to /home/oops/../../etc/passwd: within phar %sphar_mount.phar.php failed
+<?php
+$fname = dirname(__FILE__) . '/' . basename(
 ===DONE===
