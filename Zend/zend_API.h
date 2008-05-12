@@ -40,6 +40,8 @@ typedef struct _zend_function_entry {
 	zend_uint flags;
 } zend_function_entry;
 
+#define ZEND_NS_NAME(ns, name)			ns"::"name
+
 #define ZEND_FN(name) zif_##name
 #define ZEND_MN(name) zim_##name
 #define ZEND_NAMED_FUNCTION(name)		void name(INTERNAL_FUNCTION_PARAMETERS)
@@ -62,6 +64,17 @@ typedef struct _zend_function_entry {
 #define ZEND_MALIAS(classname, name, alias, arg_info, flags) \
                                                     ZEND_FENTRY(name, ZEND_MN(classname##_##alias), arg_info, flags)
 #define ZEND_ME_MAPPING(name, func_name, arg_types, flags) ZEND_NAMED_ME(name, ZEND_FN(func_name), arg_types, flags)
+
+#define ZEND_NS_FENTRY(ns, zend_name, name, arg_info, flags)		ZEND_RAW_FENTRY(ZEND_NS_NAME(ns, #zend_name), name, arg_info, flags)
+
+#define ZEND_NS_RAW_FENTRY(ns, zend_name, name, arg_info, flags)	ZEND_RAW_FENTRY(ZEND_NS_NAME(ns, zend_name), name, arg_info, flags)
+#define ZEND_NS_RAW_NAMED_FE(ns, zend_name, name, arg_info)			ZEND_NS_RAW_FENTRY(ns, #zend_name, name, arg_info, 0)
+
+#define ZEND_NS_NAMED_FE(ns, zend_name, name, arg_info)
+#define ZEND_NS_FE(ns, name, arg_info)					ZEND_NS_FENTRY(ns, name, ZEND_FN(name), arg_info, 0)
+#define ZEND_NS_DEP_FE(ns, name, arg_info)				ZEND_NS_FENTRY(ns, name, ZEND_FN(name), arg_info, ZEND_ACC_DEPRECATED)
+#define ZEND_NS_FALIAS(ns, name, alias, arg_info)		ZEND_NS_FENTRY(ns, name, ZEND_FN(alias), arg_info, 0)
+#define ZEND_NS_DEP_FALIAS(ns, name, alias, arg_info)	ZEND_NS_FENTRY(ns, name, ZEND_FN(alias), arg_info, ZEND_ACC_DEPRECATED)
 
 #define ZEND_ARG_INFO(pass_by_ref, name)							{ {#name}, sizeof(#name)-1, {NULL}, 0, 0, 0, pass_by_ref, 0, 0 },
 #define ZEND_ARG_PASS_INFO(pass_by_ref)								{ {NULL}, 0, {NULL}, 0, 0, 0, pass_by_ref, 0, 0 },
@@ -171,6 +184,13 @@ typedef struct _zend_function_entry {
 #define INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset) \
 	INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, sizeof(class_name)-1, functions, handle_fcall, handle_propget, handle_propset, NULL, NULL)
 
+#define INIT_NS_CLASS_ENTRY(class_container, ns, class_name, functions) \
+	INIT_CLASS_ENTRY(class_container, ZEND_NS_NAME(ns, class_name), functions)
+#define INIT_OVERLOADED_NS_CLASS_ENTRY_EX(class_container, ns, class_name, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
+	INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, ZEND_NS_NAME(ns, class_name), sizeof(ZEND_NS_NAME(ns, class_name))-1, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset)
+#define INIT_OVERLOADED_NS_CLASS_ENTRY(class_container, ns, class_name, functions, handle_fcall, handle_propget, handle_propset) \
+	INIT_OVERLOADED_CLASS_ENTRY(class_container, ZEND_NS_NAME(ns, class_name), functions, handle_fcall, handle_propget, handle_propset)
+
 #ifdef ZTS
 #	define CE_STATIC_MEMBERS(ce) (((ce)->type==ZEND_USER_CLASS)?(ce)->static_members:CG(static_members)[(zend_intptr_t)(ce)->static_members])
 #else
@@ -223,6 +243,14 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_
 ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce, char *parent_name TSRMLS_DC);
 ZEND_API zend_class_entry *zend_register_internal_interface(zend_class_entry *orig_class_entry TSRMLS_DC);
 ZEND_API void zend_class_implements(zend_class_entry *class_entry TSRMLS_DC, int num_interfaces, ...);
+
+ZEND_API int zend_register_class_alias_ex(char *name, int name_len, zend_class_entry *ce TSRMLS_DC);
+ZEND_API int zend_u_register_class_alias_ex(zend_uchar utype, zstr name, int name_len, zend_class_entry *ce TSRMLS_DC);
+
+#define zend_register_class_alias(name, ce) \
+	zend_register_class_alias_ex(name, sizeof(name)-1, ce TSRMLS_DC)
+#define zend_register_ns_class_alias(ns, name, ce) \
+	zend_register_class_alias_ex(ZEND_NS_NAME(ns, name), sizeof(ZEND_NS_NAME(ns, name))-1, ce TSRMLS_DC)
 
 ZEND_API int zend_disable_function(char *function_name, uint function_name_length TSRMLS_DC);
 ZEND_API int zend_disable_class(char *class_name, uint class_name_length TSRMLS_DC);
