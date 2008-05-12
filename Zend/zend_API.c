@@ -2583,6 +2583,35 @@ ZEND_API zend_class_entry *zend_register_internal_interface(zend_class_entry *or
 }
 /* }}} */
 
+ZEND_API int zend_u_register_class_alias_ex(zend_uchar utype, zstr name, int name_len, zend_class_entry *ce TSRMLS_DC) /* {{{ */
+{
+	unsigned int lcname_len;
+	zstr lcname = zend_u_str_case_fold(utype, name, name_len, 1, &lcname_len);
+	int ret;
+
+	ret = zend_u_hash_add(CG(class_table), utype, lcname, lcname_len+1, &ce, sizeof(zend_class_entry *), NULL);
+	efree(lcname.v);
+	if (ret == SUCCESS) {
+		ce->refcount++;
+	}
+	return ret;
+}
+/* }}} */
+
+ZEND_API int zend_register_class_alias_ex(char *name, int name_len, zend_class_entry *ce TSRMLS_DC) /* {{{ */
+{
+	char *lcname = zend_str_tolower_dup(name, name_len);
+	int ret;
+
+	ret = zend_ascii_hash_add(CG(class_table), lcname, name_len+1, &ce, sizeof(zend_class_entry *), NULL);
+	efree(lcname);
+	if (ret == SUCCESS) {
+		ce->refcount++;
+	}
+	return ret;
+}
+/* }}} */
+
 ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length, zend_bool is_ref, int num_symbol_tables, ...) /* {{{ */
 {
 	HashTable *symbol_table;

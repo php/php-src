@@ -50,6 +50,7 @@ static ZEND_FUNCTION(property_exists);
 static ZEND_FUNCTION(class_exists);
 static ZEND_FUNCTION(interface_exists);
 static ZEND_FUNCTION(function_exists);
+static ZEND_FUNCTION(class_alias);
 #if ZEND_DEBUG
 static ZEND_FUNCTION(leak);
 #ifdef ZEND_TEST_EXCEPTIONS
@@ -115,6 +116,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(class_exists,		NULL)
 	ZEND_FE(interface_exists,	NULL)
 	ZEND_FE(function_exists,	NULL)
+	ZEND_FE(class_alias,		NULL)
 #if ZEND_DEBUG
 	ZEND_FE(leak,				NULL)
 #ifdef ZEND_TEST_EXCEPTIONS
@@ -1142,6 +1144,48 @@ ZEND_FUNCTION(function_exists)
 	}
 
 	RETURN_BOOL(retval);
+}
+/* }}} */
+
+/* {{{ proto bool class_alias(string user_class_name , string alias_name [, bool autoload])
+   Creates an alias for user defined class */
+ZEND_FUNCTION(class_alias)
+{
+	zend_uchar class_type, alias_type;
+	zstr class_name, lc_name, alias_name;
+	zend_class_entry **ce;
+	unsigned int lc_name_len;
+	int class_name_len, alias_name_len;
+	int found;
+	zend_bool autoload = 1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tt|b", &class_name, &class_name_len, &class_type, &alias_name, &alias_name_len, &alias_type, &autoload) == FAILURE) {
+		return;
+	}
+
+	if (!autoload) {
+		lc_name = zend_u_str_case_fold(class_type, class_name, class_name_len, 1, &lc_name_len);	
+		found = zend_u_hash_find(EG(class_table), class_type, lc_name, lc_name_len+1, (void **) &ce);
+		efree(lc_name.v);
+	} else {
+		found = zend_u_lookup_class(class_type, class_name, class_name_len, &ce TSRMLS_CC);
+	}
+	if (found == SUCCESS) {
+		if ((*ce)->type == ZEND_USER_CLASS) { 
+			if (zend_u_register_class_alias_ex(alias_type, alias_name, alias_name_len, *ce TSRMLS_CC) == SUCCESS) {
+				RETURN_TRUE;
+			} else {
+				zend_error(E_WARNING, "Cannot redeclare class %R", alias_type, alias_name);
+				RETURN_FALSE;
+			}
+		} else {
+			zend_error(E_WARNING, "First argument of class_alias() must be a name of user defined class");
+			RETURN_FALSE;
+		}
+	} else {
+		zend_error(E_WARNING, "Class '%R' not found", class_type, class_name);
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
