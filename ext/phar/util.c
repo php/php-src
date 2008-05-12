@@ -212,7 +212,7 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 {
 #if PHP_VERSION_ID >= 50300
 	char *path, *fname, *arch, *entry, *ret, *test;
-	int arch_len, entry_len;
+	int arch_len, entry_len, fname_len;
 
 	if (pphar) {
 		*pphar = NULL;
@@ -222,7 +222,9 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 		return phar_save_resolve_path(filename, filename_len TSRMLS_CC);
 	}
 	fname = zend_get_executed_filename(TSRMLS_C);
-	if (SUCCESS != phar_split_fname(fname, strlen(fname), &arch, &arch_len, &entry, &entry_len, 1, 0 TSRMLS_CC)) {
+	fname_len = strlen(fname);
+
+	if (fname_len < 7 || memcmp(fname, "phar://", 7) || SUCCESS != phar_split_fname(fname, strlen(fname), &arch, &arch_len, &entry, &entry_len, 1, 0 TSRMLS_CC)) {
 		return phar_save_resolve_path(filename, filename_len TSRMLS_CC);
 	}
 	efree(entry);
