@@ -420,10 +420,8 @@ int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_len, int
 		if (pphar) {
 			*pphar = NULL;
 		}
-		if (phar && alias && (options & REPORT_ERRORS)) {
-			if (error) {
-				spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, phar->fname, fname);
-			}
+		if (phar && error && !(options & REPORT_ERRORS)) {
+			efree(error);
 		}
 		return FAILURE;
 	}
@@ -984,6 +982,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
 	const char *ext_str, *z;
+	char *my_error;
 	int ext_len;
 	phar_archive_data **test, *unused = NULL;
 
@@ -1005,7 +1004,7 @@ int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int al
 	}
 
 check_file:
-	if (phar_open_loaded(fname, fname_len, alias, alias_len, is_data, options, test, 0 TSRMLS_CC) == SUCCESS) {
+	if (phar_open_loaded(fname, fname_len, alias, alias_len, is_data, options, test, &my_error TSRMLS_CC) == SUCCESS) {
 		if (pphar) {
 			*pphar = *test;
 		}
@@ -1026,6 +1025,13 @@ check_file:
 			(*test)->is_writeable = 1;
 		}
 		return SUCCESS;
+	} else if (my_error) {
+		if (error) {
+			*error = my_error;
+		} else {
+			efree(my_error);
+		}
+		return FAILURE;
 	}
 
 	if (ext_len > 3 && (z = memchr(ext_str, 'z', ext_len)) && ((ext_str + ext_len) - z >= 2) && !memcmp(z + 1, "ip", 2)) {
@@ -1045,7 +1051,6 @@ check_file:
 int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *mydata;
-	int register_alias;
 	php_stream *fp;
 	char *actual = NULL, *p;
 
@@ -1126,35 +1131,45 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 	zend_hash_init(&mydata->mounted_dirs, sizeof(char *),
 		zend_get_hash_value, NULL, 0);
 	mydata->fname_len = fname_len;
-	if (is_data) {
-		alias = NULL;
-		alias_len = 0;
-	} else {
-		mydata->alias = alias ? estrndup(alias, alias_len) : estrndup(mydata->fname, fname_len);
-		mydata->alias_len = alias ? alias_len : fname_len;
-	}
 	snprintf(mydata->version, sizeof(mydata->version), "%s", PHP_PHAR_API_VERSION);
 	mydata->is_temporary_alias = alias ? 0 : 1;
 	mydata->internal_file_start = -1;
 	mydata->fp = NULL;
 	mydata->is_writeable = 1;
 	mydata->is_brandnew = 1;
-	if (!alias_len || !alias) {
-		/* if we neither have an explicit nor an implicit alias, we use the filename */
-		alias = NULL;
-		alias_len = 0;
-		register_alias = 0;
-	} else {
-		register_alias = 1;
-	}
 	phar_request_initialize(TSRMLS_C);
 	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len, (void*)&mydata, sizeof(phar_archive_data*),  NULL);
-	if (register_alias) {
+	if (is_data) {
+		alias = NULL;
+		alias_len = 0;
+	} else {
+		phar_archive_data **fd_ptr;
+
+		if (alias && SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void **)&fd_ptr)) {
+			if (SUCCESS != phar_free_alias(*fd_ptr, alias, alias_len TSRMLS_CC)) {
+				if (error) {
+					spprintf(error, 4096, "phar error: phar \"%s\" cannot set alias \"%s\", already in use by another phar archive", mydata->fname, alias);
+				}
+				zend_hash_del(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len);
+				if (pphar) {
+					*pphar = NULL;
+				}
+				return FAILURE;
+			}
+		}
+		mydata->alias = alias ? estrndup(alias, alias_len) : estrndup(mydata->fname, fname_len);
+		mydata->alias_len = alias ? alias_len : fname_len;
+	}
+	if (alias_len && alias) {
 		if (FAILURE == zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&mydata, sizeof(phar_archive_data*), NULL)) {
 			if (options & REPORT_ERRORS) {
 				if (error) {
 					spprintf(error, 0, "archive \"%s\" cannot be associated with alias \"%s\", already in use", fname, alias);
 				}
+			}
+			zend_hash_del(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len);
+			if (pphar) {
+				*pphar = NULL;
 			}
 			return FAILURE;
 		}

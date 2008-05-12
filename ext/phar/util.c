@@ -1032,6 +1032,12 @@ int phar_get_archive(phar_archive_data **archive, char *fname, int fname_len, ch
 			*archive = *fd_ptr;
 			fd = *fd_ptr;
 			if (alias && alias_len) {
+				if (!fd->is_temporary_alias && (alias_len != fd->alias_len || memcmp(fd->alias, alias, alias_len))) {
+					if (error) {
+						spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, (*fd_ptr)->fname, fname);
+					}
+					return FAILURE;
+				}
 				if (fd->alias_len && SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), fd->alias, fd->alias_len, (void**)&fd_ptr)) {
 					zend_hash_del(&(PHAR_GLOBALS->phar_alias_map), fd->alias, fd->alias_len);
 				}

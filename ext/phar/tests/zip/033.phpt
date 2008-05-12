@@ -22,6 +22,7 @@ try {
 	var_dump($phar['a.php']->isExecutable());
 	$phar['a.php']->chmod(0777);
 	copy($fname, $fname2);
+	$phar->setAlias('unused');
 	$phar2 = new Phar($fname2);
 	var_dump($phar2['a.php']->isExecutable());
 	$phar['a.php']->chmod(0666);

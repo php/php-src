@@ -152,7 +152,7 @@ int phar_open_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, i
 	php_uint16 i;
 	phar_archive_data *mydata = NULL;
 	phar_entry_info entry = {0};
-	char *p = buf, *ext;
+	char *p = buf, *ext, *actual_alias = NULL;
 
 	size = php_stream_tell(fp);
 	if (size > sizeof(locator) + 65536) {
@@ -240,13 +240,6 @@ foundit:
 		if (mydata->ext) {
 			mydata->ext_len = (mydata->fname + fname_len) - mydata->ext;
 		}
-	}
-	if (!alias_len) {
-		mydata->alias = estrndup(fname, fname_len);
-#ifdef PHP_WIN32
-		phar_unixify_path_separators(mydata->alias, fname_len);
-#endif
-		mydata->alias_len = fname_len;
 	}
 	/* clean up on big-endian systems */
 	/* seek to central directory */
@@ -400,15 +393,15 @@ foundit:
 		} else {
 			entry.metadata = NULL;
 		}
-		if (entry.filename_len == sizeof(".phar/alias.txt")-1 && !strncmp(entry.filename, ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
+		if (!actual_alias && entry.filename_len == sizeof(".phar/alias.txt")-1 && !strncmp(entry.filename, ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
 			php_stream_filter *filter;
 			off_t saveloc;
-			phar_archive_data **fd_ptr;
 
 			/* archive alias found, seek to file contents, do not validate local header.  Potentially risky, but
 			   not very. */
 			saveloc = php_stream_tell(fp);
 			php_stream_seek(fp, PHAR_GET_32(zipentry.offset) + sizeof(phar_zip_file_header) + entry.filename_len + PHAR_GET_16(zipentry.extra_len), SEEK_SET);
+			mydata->alias_len = entry.uncompressed_filesize;
 			if (entry.flags & PHAR_ENT_COMPRESSED_GZ) {
 				filter = php_stream_filter_create("zlib.inflate", NULL, php_stream_is_persistent(fp) TSRMLS_CC);
 				if (!filter) {
@@ -416,9 +409,7 @@ foundit:
 					PHAR_ZIP_FAIL("unable to decompress alias, zlib filter creation failed");
 				}
 				php_stream_filter_append(&fp->readfilters, filter);
-				efree(mydata->alias);
-				mydata->alias = NULL;
-				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &(mydata->alias), entry.uncompressed_filesize, 0)) || !mydata->alias) {
+				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &actual_alias, entry.uncompressed_filesize, 0)) || !actual_alias) {
 					efree(entry.filename);
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
@@ -433,35 +424,19 @@ foundit:
 				}
 				php_stream_filter_append(&fp->readfilters, filter);
 				php_stream_filter_append(&fp->readfilters, filter);
-				efree(mydata->alias);
-				mydata->alias = NULL;
-				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &(mydata->alias), entry.uncompressed_filesize, 0)) || !mydata->alias) {
+				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &actual_alias, entry.uncompressed_filesize, 0)) || !actual_alias) {
 					efree(entry.filename);
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
 				php_stream_filter_flush(filter, 1);
 				php_stream_filter_remove(filter, 1 TSRMLS_CC);
 			} else {
-				efree(mydata->alias);
-				mydata->alias = NULL;
-				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &(mydata->alias), entry.uncompressed_filesize, 0)) || !mydata->alias) {
+				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &actual_alias, entry.uncompressed_filesize, 0)) || !actual_alias) {
 					efree(entry.filename);
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
 			}
 
-			mydata->is_temporary_alias = 0;
-			mydata->alias_len = PHAR_GET_32(zipentry.uncompsize);
-			if (!phar_validate_alias(mydata->alias, mydata->alias_len)) {
-				efree(entry.filename);
-				PHAR_ZIP_FAIL("invalid alias");
-			}
-			if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void **)&fd_ptr)) {
-				if (SUCCESS != phar_free_alias(*fd_ptr, alias, alias_len TSRMLS_CC)) {
-					PHAR_ZIP_FAIL("alias is already in use by existing archive");
-				}
-			}
-			zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), mydata->alias, mydata->alias_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
 			/* return to central directory parsing */
 			php_stream_seek(fp, saveloc, SEEK_SET);
 		}
@@ -469,6 +444,52 @@ foundit:
 	}
 	mydata->fp = fp;
 	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
+	if (actual_alias) {
+		phar_archive_data **fd_ptr;
+
+		if (!phar_validate_alias(actual_alias, mydata->alias_len)) {
+			if (error) {
+				spprintf(error, 4096, "phar error: invalid alias \"%s\" in zip-based phar \"%s\"", actual_alias, fname);
+			}
+			efree(actual_alias);
+			zend_hash_del(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len);
+			return FAILURE;
+		}
+		mydata->is_temporary_alias = 0;
+		if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), actual_alias, mydata->alias_len, (void **)&fd_ptr)) {
+			if (SUCCESS != phar_free_alias(*fd_ptr, actual_alias, mydata->alias_len TSRMLS_CC)) {
+				if (error) {
+					spprintf(error, 4096, "phar error: Unable to add zip-based phar \"%s\" with implicit alias, alias is already in use", fname);
+				}
+				efree(actual_alias);
+				zend_hash_del(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len);
+				return FAILURE;
+			}
+		}
+		mydata->alias = actual_alias;
+		zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), actual_alias, mydata->alias_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
+	} else {
+		phar_archive_data **fd_ptr;
+
+		if (alias_len) {
+			if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void **)&fd_ptr)) {
+				if (SUCCESS != phar_free_alias(*fd_ptr, alias, alias_len TSRMLS_CC)) {
+					if (error) {
+						spprintf(error, 4096, "phar error: Unable to add zip-based phar \"%s\" with explicit alias, alias is already in use", fname);
+					}
+					zend_hash_del(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len);
+					return FAILURE;
+				}
+			}
+			zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), actual_alias, mydata->alias_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
+			mydata->alias = estrndup(alias, alias_len);
+			mydata->alias_len = alias_len;
+		} else {
+			mydata->alias = estrndup(mydata->fname, fname_len);
+			mydata->alias_len = fname_len;
+		}
+		mydata->is_temporary_alias = 1;
+	}
 	if (pphar) {
 		*pphar = mydata;
 	}
