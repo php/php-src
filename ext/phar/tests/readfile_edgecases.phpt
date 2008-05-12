@@ -41,7 +41,7 @@ blah
 readfile("foo/" . basename(__FILE__));
 $context = stream_context_create();
 readfile("foob");
-set_include_path("/home/cellog/workspace/php5/ext/phar/tests");
+set_include_path("%stests");
 readfile("foob", true);
 readfile("./hi", 0, $context);
 readfile("../oops");
@@ -52,7 +52,7 @@ test
 readfile("foo/" . basename(__FILE__));
 $context = stream_context_create();
 readfile("foob");
-set_include_path("/home/cellog/workspace/php5/ext/phar/tests");
+set_include_path("%stests");
 readfile("foob", true);
 readfile("./hi", 0, $context);
 readfile("../oops");
