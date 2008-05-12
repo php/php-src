@@ -10,7 +10,7 @@ BC BREAKING RELEASE
 Major feature functionality release
  * new default stub allows running of phar-based phars without phar extension [Greg/Steph]
  * add support for tar-based and zip-based phar archives [Greg]
- * add Phar::isTar(), Phar::isZip(), and Phar::isPhar() [Greg]
+ * add Phar::isFileFormat() [Greg]
  * add Phar::convertToExecutable(), Phar::convertToData() [Greg]
  * add Phar::compress() [Greg]
  * rename Phar::compressAllFiles() to compressFiles(), uncompressAllFiles() to
@@ -28,9 +28,12 @@ Major feature functionality release
  * add option to compress the entire phar file for phar/tar file format [Greg]
  * implement Phar::isCompressed() returning 0, Phar::GZ or Phar::BZ2 [Greg]
  * implement Phar::copy(string $from, string $to) [Greg]
+ * implement Phar::running(), returns path or URL to currently executed phar
  * implement Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
+ * implement Phar::buildFromDirectory(string $base_directory[, string $regex]) [Steph]
  * implement Phar::mount() for mounting external paths or files to locations inside a phar [Greg]
  * add Phar::delete() [Greg]
+ * implement Phar::unlinkArchive() [Greg]
 
 Security addition
  * aliases are validated so that they contain no directory separators as intended
