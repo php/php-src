@@ -42,8 +42,8 @@ a 6x speedup measured running phpMyAdmin as a phar archive.</description>
   <email>sfox@php.net</email>
   <active>yes</active>
  </developer>
- <date>2008-05-07</date>
- <time>01:42:47</time>
+ <date>2008-05-12</date>
+ <time>15:42:58</time>
  <version>
   <release>2.0.0b1</release>
   <api>1.1.1</api>
@@ -64,7 +64,7 @@ BC BREAKING RELEASE
 Major feature functionality release
  * new default stub allows running of phar-based phars without phar extension [Greg/Steph]
  * add support for tar-based and zip-based phar archives [Greg]
- * add Phar::isTar(), Phar::isZip(), and Phar::isPhar() [Greg]
+ * add Phar::isFileFormat() [Greg]
  * add Phar::convertToExecutable(), Phar::convertToData() [Greg]
  * add Phar::compress() [Greg]
  * rename Phar::compressAllFiles() to compressFiles(), uncompressAllFiles() to
@@ -82,9 +82,12 @@ Major feature functionality release
  * add option to compress the entire phar file for phar/tar file format [Greg]
  * implement Phar::isCompressed() returning 0, Phar::GZ or Phar::BZ2 [Greg]
  * implement Phar::copy(string $from, string $to) [Greg]
+ * implement Phar::running(), returns path or URL to currently executed phar
  * implement Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
+ * implement Phar::buildFromDirectory(string $base_directory[, string $regex]) [Steph]
  * implement Phar::mount() for mounting external paths or files to locations inside a phar [Greg]
  * add Phar::delete() [Greg]
+ * implement Phar::unlinkArchive() [Greg]
 
 Security addition
  * aliases are validated so that they contain no directory separators as intended
@@ -161,6 +164,7 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
       <file name="badalias3.phar.tar" role="test" />
       <file name="badalias4.phar.tar" role="test" />
       <file name="badalias5.phar.tar" role="test" />
+      <file name="biglink.tar" role="test" />
       <file name="corrupt_tarmaker.php.inc" role="test" />
       <file name="frontcontroller.phar.inc" role="test" />
       <file name="frontcontroller.phar.tar" role="test" />
@@ -188,11 +192,14 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
       <file name="frontcontroller12.phar.tar" role="test" />
       <file name="links.tar" role="test" />
       <file name="make_invalid_tar.php.inc" role="test" />
+      <file name="subdirlink.tar" role="test" />
       <file name="tarmaker.php.inc" role="test" />
+      <file name="tinylink.tar" role="test" />
       <file name="trunc.tar" role="test" />
      </dir> <!-- /tests/tar/files -->
      <file name="033.phpt" role="test" />
      <file name="033a.phpt" role="test" />
+     <file name="alias_acrobatics.phpt" role="test" />
      <file name="badalias.phpt" role="test" />
      <file name="badchecksum.phpt" role="test" />
      <file name="bignames.phpt" role="test" />
@@ -227,6 +234,9 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
      <file name="frontcontroller21.phar.phpt" role="test" />
      <file name="links.phpt" role="test" />
      <file name="links2.phpt" role="test" />
+     <file name="links3.phpt" role="test" />
+     <file name="links4.phpt" role="test" />
+     <file name="links5.phpt" role="test" />
      <file name="open_for_write_existing.phpt" role="test" />
      <file name="open_for_write_existing_b.phpt" role="test" />
      <file name="open_for_write_existing_c.phpt" role="test" />
@@ -331,6 +341,7 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
      </dir> <!-- /tests/zip/files -->
      <file name="033.phpt" role="test" />
      <file name="033a.phpt" role="test" />
+     <file name="alias_acrobatics.phpt" role="test" />
      <file name="all.phpt" role="test" />
      <file name="badalias.phpt" role="test" />
      <file name="corrupt_001.phpt" role="test" />
@@ -370,6 +381,7 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
      <file name="frontcontroller19.phar.phpt" role="test" />
      <file name="frontcontroller20.phar.phpt" role="test" />
      <file name="frontcontroller21.phar.phpt" role="test" />
+     <file name="getalias.phpt" role="test" />
      <file name="largezip.phpt" role="test" />
      <file name="metadata_write_commit.phpt" role="test" />
      <file name="notphar.phpt" role="test" />
@@ -443,6 +455,7 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
     <file name="033.phpt" role="test" />
     <file name="033a.phpt" role="test" />
     <file name="addfuncs.phpt" role="test" />
+    <file name="alias_acrobatics.phpt" role="test" />
     <file name="badparameters.phpt" role="test" />
     <file name="bug13727.phpt" role="test" />
     <file name="bug13786.phpt" role="test" />
@@ -456,10 +469,12 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
     <file name="delete_in_phar_b.phpt" role="test" />
     <file name="delete_in_phar_confirm.phpt" role="test" />
     <file name="dir.phpt" role="test" />
+    <file name="fgc_edgecases.phpt" role="test" />
     <file name="file_get_contents.phpt" role="test" />
     <file name="fopen.phpt" role="test" />
     <file name="fopen5.2.phpt" role="test" />
     <file name="fopen_edgecases.phpt" role="test" />
+    <file name="fopen_edgecases2.phpt" role="test" />
     <file name="frontcontroller1.phpt" role="test" />
     <file name="frontcontroller2.phpt" role="test" />
     <file name="frontcontroller3.phpt" role="test" />
@@ -507,6 +522,7 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
     <file name="nophar.phpt" role="test" />
     <file name="nophar_web.phpt" role="test" />
     <file name="opendir.phpt" role="test" />
+    <file name="opendir_edgecases.phpt" role="test" />
     <file name="open_for_write_existing.phpt" role="test" />
     <file name="open_for_write_existing_b.phpt" role="test" />
     <file name="open_for_write_existing_c.phpt" role="test" />
@@ -558,6 +574,7 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
     <file name="phar_get_supportedcomp4.phpt" role="test" />
     <file name="phar_get_supported_signatures_001.phpt" role="test" />
     <file name="phar_get_supported_signatures_002.phpt" role="test" />
+    <file name="phar_gobyebye.phpt" role="test" />
     <file name="phar_gzip.phpt" role="test" />
     <file name="phar_isvalidpharfilename.phpt" role="test" />
     <file name="phar_magic.phpt" role="test" />
@@ -608,10 +625,14 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
     <file name="phpinfo_003.phpt" role="test" />
     <file name="phpinfo_004.phpt" role="test" />
     <file name="readfile.phpt" role="test" />
+    <file name="readfile_edgecases.phpt" role="test" />
     <file name="refcount1.phpt" role="test" />
     <file name="refcount1_5_2.phpt" role="test" />
     <file name="rename.phpt" role="test" />
+    <file name="security.phpt" role="test" />
     <file name="stat.phpt" role="test" />
+    <file name="stat2.phpt" role="test" />
+    <file name="stat2_5.3.phpt" role="test" />
     <file name="test_alias_unset.phpt" role="test" />
     <file name="test_signaturealgos.phpt" role="test" />
     <file name="test_unset.phpt" role="test" />
@@ -692,7 +713,7 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
     <release>beta</release>
     <api>beta</api>
    </stability>
-   <date>2008-05-07</date>
+   <date>2008-05-12</date>
    <license uri="http://www.php.net/license">PHP License</license>
    <notes>
 
@@ -705,7 +726,7 @@ BC BREAKING RELEASE
 Major feature functionality release
  * new default stub allows running of phar-based phars without phar extension [Greg/Steph]
  * add support for tar-based and zip-based phar archives [Greg]
- * add Phar::isTar(), Phar::isZip(), and Phar::isPhar() [Greg]
+ * add Phar::isFileFormat() [Greg]
  * add Phar::convertToExecutable(), Phar::convertToData() [Greg]
  * add Phar::compress() [Greg]
  * rename Phar::compressAllFiles() to compressFiles(), uncompressAllFiles() to
@@ -723,9 +744,12 @@ Major feature functionality release
  * add option to compress the entire phar file for phar/tar file format [Greg]
  * implement Phar::isCompressed() returning 0, Phar::GZ or Phar::BZ2 [Greg]
  * implement Phar::copy(string $from, string $to) [Greg]
+ * implement Phar::running(), returns path or URL to currently executed phar
  * implement Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
+ * implement Phar::buildFromDirectory(string $base_directory[, string $regex]) [Steph]
  * implement Phar::mount() for mounting external paths or files to locations inside a phar [Greg]
  * add Phar::delete() [Greg]
+ * implement Phar::unlinkArchive() [Greg]
 
 Security addition
  * aliases are validated so that they contain no directory separators as intended
