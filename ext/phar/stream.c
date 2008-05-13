@@ -501,7 +501,8 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 				  php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC) /* {{{ */
 {
 	php_url *resource = NULL;
-	char *internal_file, *key, *error;
+	zstr key;
+	char *internal_file, *error;
 	uint keylen;
 	ulong unused;
 	phar_archive_data *phar;
@@ -562,9 +563,9 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 			if (HASH_KEY_NON_EXISTANT !=
 					zend_hash_get_current_key_ex(
 						&phar->manifest, &key, &keylen, &unused, 0, NULL)) {
-				if (keylen >= (uint)internal_file_len && 0 == memcmp(internal_file, key, internal_file_len)) {
+				if (keylen >= (uint)internal_file_len && 0 == memcmp(internal_file, key.s, internal_file_len)) {
 					/* directory found, all dirs have the same stat */
-					if (key[internal_file_len] == '/') {
+					if (key.s[internal_file_len] == '/') {
 						phar_dostat(phar, NULL, ssb, 1, phar->alias, phar->alias_len TSRMLS_CC);
 						php_url_free(resource);
 						return SUCCESS;
@@ -577,7 +578,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 		}
 		/* check for mounted directories */
 		if (phar->mounted_dirs.arBuckets && zend_hash_num_elements(&phar->mounted_dirs)) {
-			char *key;
+			zstr key;
 			ulong unused;
 			uint keylen;
 	
@@ -586,7 +587,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 				if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(&phar->mounted_dirs, &key, &keylen, &unused, 0, NULL)) {
 					break;
 				}
-				if ((int)keylen >= internal_file_len || strncmp(key, internal_file, keylen)) {
+				if ((int)keylen >= internal_file_len || strncmp(key.s, internal_file, keylen)) {
 					continue;
 				} else {
 					char *test;
@@ -594,7 +595,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 					phar_entry_info *entry;
 					php_stream_statbuf ssbi;
 	
-					if (SUCCESS != zend_hash_find(&phar->manifest, key, keylen, (void **) &entry)) {
+					if (SUCCESS != zend_hash_find(&phar->manifest, key.s, keylen, (void **) &entry)) {
 						goto free_resource;
 					}
 					if (!entry->tmp || !entry->is_mounted) {
