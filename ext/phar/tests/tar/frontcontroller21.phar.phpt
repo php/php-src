@@ -1,5 +1,7 @@
 --TEST--
 Phar front controller $_SERVER munging success tar-based
+--INI--
+default_charset=
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
