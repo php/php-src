@@ -1606,7 +1606,7 @@ woohoo:
 					zend_hash_move_forward(&(PHAR_GLOBALS->phar_fname_map));
 					continue;
 				}
-				if (!memcmp(filename, key.s, keylen) && (filename_len == keylen
+				if (!memcmp(filename, key.s, keylen) && ((uint)filename_len == keylen
 					|| filename[keylen] == '/' || filename[keylen] == '\0')) {
 					if (FAILURE == zend_hash_get_current_data(&(PHAR_GLOBALS->phar_fname_map), (void **) &pphar)) {
 						break;
@@ -1653,9 +1653,6 @@ next_extension:
 			return SUCCESS;
 		case FAILURE :
 			/* look for more extensions */
-			if (is_complete) {
-				return FAILURE;
-			}
 			pos = strchr(pos + 1, '.');
 			if (pos) {
 				*ext_str = NULL;
