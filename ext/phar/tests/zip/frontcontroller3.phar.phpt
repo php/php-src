@@ -1,5 +1,7 @@
 --TEST--
 Phar front controller phps zip-based
+--INI--
+default_charset=
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>

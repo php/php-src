@@ -1,5 +1,7 @@
 --TEST--
 Phar front controller rewrite array zip-based
+--INI--
+default_charset=
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
