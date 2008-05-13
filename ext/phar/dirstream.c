@@ -94,7 +94,7 @@ static size_t phar_dir_read(php_stream *stream, char *buf, size_t count TSRMLS_D
 {
 	size_t to_read;
 	HashTable *data = (HashTable *)stream->abstract;
-	char *key;
+	zstr key;
 	uint keylen;
 	ulong unused;
 
@@ -110,7 +110,7 @@ static size_t phar_dir_read(php_stream *stream, char *buf, size_t count TSRMLS_D
 		return 0;
 	}
 	memset(buf, 0, sizeof(php_stream_dirent));
-	memcpy(((php_stream_dirent *) buf)->d_name, key, to_read);
+	memcpy(((php_stream_dirent *) buf)->d_name, key.s, to_read);
 	((php_stream_dirent *) buf)->d_name[to_read + 1] = '\0';
 
 	return sizeof(php_stream_dirent);
@@ -186,10 +186,11 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 {
 	HashTable *data;
 	int dirlen = strlen(dir);
-	char *save, *found, *key;
+	zstr key;
+	char *entry, *found, *save;
 	uint keylen;
 	ulong unused;
-	char *entry;
+
 	ALLOC_HASHTABLE(data);
 	zend_hash_init(data, 64, zend_get_hash_value, NULL, 0);
 
@@ -204,7 +205,7 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 			break;
 		}
 		if (keylen <= (uint)dirlen) {
-			if (keylen < (uint)dirlen || !strncmp(key, dir, dirlen)) {
+			if (keylen < (uint)dirlen || !strncmp(key.s, dir, dirlen)) {
 				if (SUCCESS != zend_hash_move_forward(manifest)) {
 					break;
 				}
@@ -213,27 +214,27 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 		}
 		if (*dir == '/') {
 			/* root directory */
-			if (NULL != (found = (char *) memchr(key, '/', keylen))) {
+			if (NULL != (found = (char *) memchr(key.s, '/', keylen))) {
 				/* the entry has a path separator and is a subdirectory */
-				entry = (char *) safe_emalloc(found - key, 1, 1);
-				memcpy(entry, key, found - key);
-				keylen = found - key;
+				entry = (char *) safe_emalloc(found - key.s, 1, 1);
+				memcpy(entry, key.s, found - key.s);
+				keylen = found - key.s;
 				entry[keylen] = '\0';
 			} else {
 				entry = (char *) safe_emalloc(keylen, 1, 1);
-				memcpy(entry, key, keylen);
+				memcpy(entry, key.s, keylen);
 				entry[keylen] = '\0';
 			}
 			goto PHAR_ADD_ENTRY;
 		} else {
-			if (0 != memcmp(key, dir, dirlen)) {
+			if (0 != memcmp(key.s, dir, dirlen)) {
 				/* entry in directory not found */
 				if (SUCCESS != zend_hash_move_forward(manifest)) {
 					break;
 				}
 				continue;
 			} else {
-				if (key[dirlen] != '/') {
+				if (key.s[dirlen] != '/') {
 					if (SUCCESS != zend_hash_move_forward(manifest)) {
 						break;
 					}
@@ -241,7 +242,7 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 				}
 			}
 		}
-		save = key;
+		save = key.s;
 		save += dirlen + 1; /* seek to just past the path separator */
 		if (NULL != (found = (char *) memchr(save, '/', keylen - dirlen - 1))) {
 			/* is subdirectory */
@@ -289,7 +290,8 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char 
 {
 	php_url *resource = NULL;
 	php_stream *ret;
-	char *internal_file, *key, *error;
+	char *internal_file, *error;
+	zstr key;
 	uint keylen;
 	ulong unused;
 	phar_archive_data *phar;
@@ -367,7 +369,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char 
 			if (HASH_KEY_NON_EXISTANT != 
 					zend_hash_get_current_key_ex(
 						&phar->manifest, &key, &keylen, &unused, 0, NULL)) {
-				if (keylen > (uint)i_len && 0 == memcmp(key, internal_file, i_len)) {
+				if (keylen > (uint)i_len && 0 == memcmp(key.s, internal_file, i_len)) {
 					/* directory found */
 					internal_file = estrndup(internal_file,
 							i_len);

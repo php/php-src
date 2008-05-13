@@ -655,7 +655,7 @@ notfound:
 					goto stat_entry;
 				} else {
 					phar_archive_data *phar = *pphar;
-					char *key;
+					zstr key;
 					uint keylen;
 					ulong unused;
 
@@ -667,11 +667,11 @@ notfound:
 						if (HASH_KEY_NON_EXISTANT !=
 								zend_hash_get_current_key_ex(
 									&phar->manifest, &key, &keylen, &unused, 0, NULL)) {
-							if (!memcmp(actual, key, actual_len)) {
+							if (!memcmp(actual, key.s, actual_len)) {
 								efree(save2);
 								efree(entry);
 								/* directory found, all dirs have the same stat */
-								if (key[actual_len] == '/') {
+								if (key.s[actual_len] == '/') {
 									sb.st_size = 0;
 									sb.st_mode = 0777;
 									sb.st_mode |= S_IFDIR; /* regular directory */

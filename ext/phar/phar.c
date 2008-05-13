@@ -1592,7 +1592,7 @@ woohoo:
 				return FAILURE;
 			}
 		} else {
-			char *key;
+			zstr key;
 			uint keylen;
 			ulong unused;
 
@@ -1606,7 +1606,7 @@ woohoo:
 					zend_hash_move_forward(&(PHAR_GLOBALS->phar_fname_map));
 					continue;
 				}
-				if (!memcmp(filename, key, keylen) && (filename_len == keylen
+				if (!memcmp(filename, key.s, keylen) && (filename_len == keylen
 					|| filename[keylen] == '/' || filename[keylen] == '\0')) {
 					if (FAILURE == zend_hash_get_current_data(&(PHAR_GLOBALS->phar_fname_map), (void **) &pphar)) {
 						break;
@@ -2850,7 +2850,7 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 				}
 			} else if (phar->flags & PHAR_FILE_COMPRESSION_MASK) {
 				/* compressed phar */
-#if PHP_VERSION_ID >= 50300 && PHP_VERSION_ID < 60000
+#if PHP_VERSION_ID >= 50300
 				file_handle->type = ZEND_HANDLE_STREAM;
 				file_handle->free_filename = 0;
 				file_handle->handle.stream.handle  = phar;
