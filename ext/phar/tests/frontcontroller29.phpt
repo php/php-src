@@ -1,5 +1,7 @@
 --TEST--
 Phar front controller with fatal error in php file
+--INI--
+default_charset=
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--

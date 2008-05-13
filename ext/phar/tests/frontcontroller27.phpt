@@ -1,5 +1,7 @@
 --TEST--
 Phar front controller with no extension
+--INI--
+default_charset=
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--

@@ -1,5 +1,7 @@
 --TEST--
 Phar front controller with invalid callback for rewrites
+--INI--
+default_charset=
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
