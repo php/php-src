@@ -2,6 +2,7 @@
 PharData::convertToZip|Tar|Phar() repeated (phardata_based archives)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
 --INI--
 phar.readonly=1
 --FILE--
