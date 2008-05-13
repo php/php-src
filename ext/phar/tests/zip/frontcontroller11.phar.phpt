@@ -2,6 +2,7 @@
 Phar front controller mime type extension is not a string zip-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller11.phar.php
 REQUEST_URI=/frontcontroller11.phar.php/a.php
