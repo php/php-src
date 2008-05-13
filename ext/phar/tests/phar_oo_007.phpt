@@ -64,9 +64,9 @@ __halt_compiler();
 ?>
 --EXPECTF--
 MyFile::__construct(phar://*/files/phar_oo_test.phar.php/a.php)
-int(1141214400)
-int(1141214400)
-int(1141214400)
+int(%d)
+int(%d)
+int(%d)
 int(0)
 bool(false)
 string(32) "<?php echo "This is a.php\n"; ?>"
