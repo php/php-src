@@ -3,6 +3,7 @@ Phar: create new Phar with broken.dirname in path
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
+default_charset=
 phar.readonly=0
 phar.require_hash=0
 --FILE--

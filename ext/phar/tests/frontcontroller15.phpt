@@ -1,5 +1,7 @@
 --TEST--
 Phar front controller mime type override, Phar::PHPS
+--INI--
+default_charset=
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
