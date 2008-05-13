@@ -2,6 +2,7 @@
 Phar front controller $_SERVER munging failure 3 zip-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller20.phar.php
 REQUEST_URI=/frontcontroller20.phar.php/
