@@ -10,10 +10,15 @@ oci8.old_oci_close_semantics=0
 require dirname(__FILE__)."/drcp_functions.inc";
 require dirname(__FILE__)."/details.inc";
 
-// The test opens a connection within function1 and updates a table
-// (without committing).  Another connection is opened from function
-// 2, and the table queried.  When function1 ends, the txn is rolled
-// back and hence the updated value will not be reflected in function2
+// The default expected behavior of this test is different between PHP
+// 5.2 and PHP 5.3
+//
+// In PHP 5.3, the test opens a connection within function1 and
+// updates a table (without committing).  Another connection is opened
+// from function 2, and the table queried.  When function1 ends, the
+// txn is rolled back and hence the updated value will not be
+// reflected in function2.  Use oci8.old_oci_close_semantics=1 to
+// get old behavior
 
 // Create the table
 $c = oci_new_connect($user,$password,$dbase);
