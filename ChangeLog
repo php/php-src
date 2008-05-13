@@ -1,3 +1,207 @@
+2008-05-12  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/035.phpt
+      ZendEngine2/tests/class_alias_011.phpt
+      ZendEngine2/tests/class_alias_012.phpt
+      ZendEngine2/tests/class_alias_013.phpt
+      ZendEngine2/tests/class_alias_014.phpt
+      ZendEngine2/tests/class_alias_015.phpt
+      ZendEngine2/tests/class_alias_016.phpt
+      ZendEngine2/tests/class_alias_016.phpt
+      ZendEngine2/tests/class_alias_017.phpt
+      ZendEngine2/tests/class_alias_018.phpt
+      ZendEngine2/tests/class_alias_019.phpt
+      ZendEngine2/tests/class_alias_020.phpt
+      ZendEngine2/tests/class_alias_021.phpt
+      ZendEngine2/tests/class_exists_001.phpt
+      ZendEngine2/tests/class_exists_002.phpt
+      ZendEngine2/tests/class_exists_003.phpt
+      ZendEngine2/tests/constants_001.phpt
+      ZendEngine2/tests/constants_002.phpt
+      ZendEngine2/tests/constants_003.phpt
+      ZendEngine2/tests/constants_004.phpt
+      ZendEngine2/tests/each_001.phpt
+      ZendEngine2/tests/each_002.phpt
+      ZendEngine2/tests/each_003.phpt
+      ZendEngine2/tests/exception_005.phpt
+      ZendEngine2/tests/exception_006.phpt
+      ZendEngine2/tests/get_called_class_001.phpt
+      ZendEngine2/tests/get_parent_class_001.phpt
+      ZendEngine2/tests/heredoc_018.phpt
+      ZendEngine2/tests/inter_05.phpt
+      ZendEngine2/tests/inter_06.phpt
+      ZendEngine2/tests/interface_exists_001.phpt
+      ZendEngine2/tests/interface_exists_002.phpt
+      ZendEngine2/tests/list_006.phpt
+      ZendEngine2/tests/objects_028.phpt
+      ZendEngine2/tests/objects_029.phpt
+      ZendEngine2/tests/objects_030.phpt:
+      - New tests
+
+    * ZendEngine2/tests/035.phpt
+      ZendEngine2/tests/035.phpt
+      ZendEngine2/tests/class_alias_001.phpt
+      ZendEngine2/tests/class_alias_021.phpt
+      ZendEngine2/tests/class_alias_021.phpt
+      ZendEngine2/tests/class_exists_001.phpt
+      ZendEngine2/tests/class_exists_001.phpt
+      ZendEngine2/tests/class_exists_002.phpt
+      ZendEngine2/tests/class_exists_002.phpt
+      ZendEngine2/tests/class_exists_003.phpt
+      ZendEngine2/tests/class_exists_003.phpt
+      ZendEngine2/tests/constants_001.phpt
+      ZendEngine2/tests/constants_001.phpt
+      ZendEngine2/tests/constants_002.phpt
+      ZendEngine2/tests/constants_002.phpt
+      ZendEngine2/tests/constants_003.phpt
+      ZendEngine2/tests/constants_003.phpt
+      ZendEngine2/tests/constants_004.phpt
+      ZendEngine2/tests/constants_004.phpt
+      ZendEngine2/tests/each_001.phpt
+      ZendEngine2/tests/each_001.phpt
+      ZendEngine2/tests/each_002.phpt
+      ZendEngine2/tests/each_002.phpt
+      ZendEngine2/tests/each_003.phpt
+      ZendEngine2/tests/each_003.phpt
+      ZendEngine2/tests/exception_005.phpt
+      ZendEngine2/tests/exception_005.phpt
+      ZendEngine2/tests/exception_006.phpt
+      ZendEngine2/tests/exception_006.phpt
+      ZendEngine2/tests/get_called_class_001.phpt
+      ZendEngine2/tests/get_called_class_001.phpt
+      ZendEngine2/tests/get_parent_class_001.phpt
+      ZendEngine2/tests/get_parent_class_001.phpt
+      ZendEngine2/tests/heredoc_018.phpt
+      ZendEngine2/tests/heredoc_018.phpt
+      ZendEngine2/tests/inter_05.phpt
+      ZendEngine2/tests/inter_05.phpt
+      ZendEngine2/tests/inter_06.phpt
+      ZendEngine2/tests/inter_06.phpt
+      ZendEngine2/tests/interface_exists_001.phpt
+      ZendEngine2/tests/interface_exists_001.phpt
+      ZendEngine2/tests/interface_exists_002.phpt
+      ZendEngine2/tests/interface_exists_002.phpt
+      ZendEngine2/tests/list_006.phpt
+      ZendEngine2/tests/list_006.phpt
+      ZendEngine2/tests/objects_028.phpt
+      ZendEngine2/tests/objects_028.phpt
+      ZendEngine2/tests/objects_029.phpt
+      ZendEngine2/tests/objects_029.phpt
+      ZendEngine2/tests/objects_030.phpt
+      ZendEngine2/tests/objects_030.phpt:
+      
+      - New tests
+
+2008-05-12  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/tests/url/.cvsignore
+      ext/standard/tests/url/.cvsignore
+      ext/standard/tests/url/.cvsignore:
+        1.1.4;
+      add missing .cvsignore
+
+2008-05-12  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/tests/class_alias_017.phpt
+      ZendEngine2/tests/class_alias_017.phpt
+      ZendEngine2/tests/class_alias_018.phpt
+      ZendEngine2/tests/class_alias_018.phpt
+      ZendEngine2/tests/class_alias_019.phpt
+      ZendEngine2/tests/class_alias_019.phpt
+      ZendEngine2/tests/class_alias_020.phpt
+      ZendEngine2/tests/class_alias_020.phpt:
+      
+      file class_alias_017.phpt was initially added on branch PHP_5_3.
+
+    * ZendEngine2/tests/class_alias_011.phpt
+      ZendEngine2/tests/class_alias_011.phpt
+      ZendEngine2/tests/class_alias_012.phpt
+      ZendEngine2/tests/class_alias_012.phpt
+      ZendEngine2/tests/class_alias_013.phpt
+      ZendEngine2/tests/class_alias_013.phpt
+      ZendEngine2/tests/class_alias_014.phpt
+      ZendEngine2/tests/class_alias_014.phpt
+      ZendEngine2/tests/class_alias_015.phpt
+      ZendEngine2/tests/class_alias_015.phpt
+      ZendEngine2/tests/class_alias_016.phpt:
+      
+      file class_alias_011.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ZendEngine2/tests/class_alias_001.phpt
+      ZendEngine2/tests/class_alias_002.phpt
+      ZendEngine2/tests/class_alias_002.phpt
+      ZendEngine2/tests/class_alias_003.phpt
+      ZendEngine2/tests/class_alias_003.phpt
+      ZendEngine2/tests/class_alias_004.phpt
+      ZendEngine2/tests/class_alias_004.phpt
+      ZendEngine2/tests/class_alias_005.phpt
+      ZendEngine2/tests/class_alias_005.phpt
+      ZendEngine2/tests/class_alias_006.phpt
+      ZendEngine2/tests/class_alias_006.phpt
+      ZendEngine2/tests/class_alias_007.phpt
+      ZendEngine2/tests/class_alias_007.phpt
+      ZendEngine2/tests/class_alias_008.phpt
+      ZendEngine2/tests/class_alias_008.phpt
+      ZendEngine2/tests/class_alias_009.phpt
+      ZendEngine2/tests/class_alias_009.phpt
+      ZendEngine2/tests/class_alias_010.phpt
+      ZendEngine2/tests/class_alias_010.phpt:
+      file class_alias_001.phpt was added on branch PHP_5_3 on 2008-05-12
+      13:31:36 +0000
+
+    * ZendEngine2/tests/isset_003.phpt
+      ZendEngine2/tests/isset_003.phpt
+      ZendEngine2/tests/isset_003.phpt:
+      - Fixed test
+
+2008-05-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Fixed bug #44952 (isset() does not checks correctly variable variable)
+
+2008-05-12  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c:
+      MFH: revert patch that causes invalid reads/crashes on Linux
+
+    * ext/standard/basic_functions.c:
+      revert patch that causes invalid reads/crashes on Linux
+
+2008-05-12  Steve Seear  <steve.seear@uk.ibm.com>
+
+    * scripts/dev/find_tested.php:
+      Added a script that generates phpt test coverage information for functions
+      and methods.
+
+2008-05-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_constants.h
+      ZendEngine2/zend_constants.h:
+      Added API to use namesapces in internal extensions
+
+2008-05-12  Matt Wilmas  <php_lists@realplain.com>
+
+    * ext/standard/tests/strings/stripslashes_variation2.phpt:
+      Fixed test after fixing bug #44830
+
 2008-05-11  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
