@@ -1,3 +1,173 @@
+2008-05-12  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      tests/035.phpt
+      tests/class_alias_011.phpt
+      tests/class_alias_012.phpt
+      tests/class_alias_013.phpt
+      tests/class_alias_014.phpt
+      tests/class_alias_015.phpt
+      tests/class_alias_016.phpt
+      tests/class_alias_016.phpt
+      tests/class_alias_017.phpt
+      tests/class_alias_018.phpt
+      tests/class_alias_019.phpt
+      tests/class_alias_020.phpt
+      tests/class_alias_021.phpt
+      tests/class_exists_001.phpt
+      tests/class_exists_002.phpt
+      tests/class_exists_003.phpt
+      tests/constants_001.phpt
+      tests/constants_002.phpt
+      tests/constants_003.phpt
+      tests/constants_004.phpt
+      tests/each_001.phpt
+      tests/each_002.phpt
+      tests/each_003.phpt
+      tests/exception_005.phpt
+      tests/exception_006.phpt
+      tests/get_called_class_001.phpt
+      tests/get_parent_class_001.phpt
+      tests/heredoc_018.phpt
+      tests/inter_05.phpt
+      tests/inter_06.phpt
+      tests/interface_exists_001.phpt
+      tests/interface_exists_002.phpt
+      tests/list_006.phpt
+      tests/objects_028.phpt
+      tests/objects_029.phpt
+      tests/objects_030.phpt:
+      - New tests
+
+    * tests/035.phpt
+      tests/035.phpt
+      tests/class_alias_001.phpt
+      tests/class_alias_021.phpt
+      tests/class_alias_021.phpt
+      tests/class_exists_001.phpt
+      tests/class_exists_001.phpt
+      tests/class_exists_002.phpt
+      tests/class_exists_002.phpt
+      tests/class_exists_003.phpt
+      tests/class_exists_003.phpt
+      tests/constants_001.phpt
+      tests/constants_001.phpt
+      tests/constants_002.phpt
+      tests/constants_002.phpt
+      tests/constants_003.phpt
+      tests/constants_003.phpt
+      tests/constants_004.phpt
+      tests/constants_004.phpt
+      tests/each_001.phpt
+      tests/each_001.phpt
+      tests/each_002.phpt
+      tests/each_002.phpt
+      tests/each_003.phpt
+      tests/each_003.phpt
+      tests/exception_005.phpt
+      tests/exception_005.phpt
+      tests/exception_006.phpt
+      tests/exception_006.phpt
+      tests/get_called_class_001.phpt
+      tests/get_called_class_001.phpt
+      tests/get_parent_class_001.phpt
+      tests/get_parent_class_001.phpt
+      tests/heredoc_018.phpt
+      tests/heredoc_018.phpt
+      tests/inter_05.phpt
+      tests/inter_05.phpt
+      tests/inter_06.phpt
+      tests/inter_06.phpt
+      tests/interface_exists_001.phpt
+      tests/interface_exists_001.phpt
+      tests/interface_exists_002.phpt
+      tests/interface_exists_002.phpt
+      tests/list_006.phpt
+      tests/list_006.phpt
+      tests/objects_028.phpt
+      tests/objects_028.phpt
+      tests/objects_029.phpt
+      tests/objects_029.phpt
+      tests/objects_030.phpt
+      tests/objects_030.phpt:
+      
+      - New tests
+
+    * tests/class_alias_017.phpt
+      tests/class_alias_017.phpt
+      tests/class_alias_018.phpt
+      tests/class_alias_018.phpt
+      tests/class_alias_019.phpt
+      tests/class_alias_019.phpt
+      tests/class_alias_020.phpt
+      tests/class_alias_020.phpt:
+      
+      file class_alias_017.phpt was initially added on branch PHP_5_3.
+
+    * tests/class_alias_011.phpt
+      tests/class_alias_011.phpt
+      tests/class_alias_012.phpt
+      tests/class_alias_012.phpt
+      tests/class_alias_013.phpt
+      tests/class_alias_013.phpt
+      tests/class_alias_014.phpt
+      tests/class_alias_014.phpt
+      tests/class_alias_015.phpt
+      tests/class_alias_015.phpt
+      tests/class_alias_016.phpt:
+      
+      file class_alias_011.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      tests/class_alias_001.phpt
+      tests/class_alias_002.phpt
+      tests/class_alias_002.phpt
+      tests/class_alias_003.phpt
+      tests/class_alias_003.phpt
+      tests/class_alias_004.phpt
+      tests/class_alias_004.phpt
+      tests/class_alias_005.phpt
+      tests/class_alias_005.phpt
+      tests/class_alias_006.phpt
+      tests/class_alias_006.phpt
+      tests/class_alias_007.phpt
+      tests/class_alias_007.phpt
+      tests/class_alias_008.phpt
+      tests/class_alias_008.phpt
+      tests/class_alias_009.phpt
+      tests/class_alias_009.phpt
+      tests/class_alias_010.phpt
+      tests/class_alias_010.phpt:
+      file class_alias_001.phpt was added on branch PHP_5_3 on 2008-05-12
+      13:31:36 +0000
+
+    * tests/isset_003.phpt
+      tests/isset_003.phpt
+      tests/isset_003.phpt:
+      - Fixed test
+
+2008-05-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      zend_compile.h
+      zend_compile.h
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Fixed bug #44952 (isset() does not checks correctly variable variable)
+
+    * zend_API.c
+      zend_API.c
+      zend_API.h
+      zend_API.h
+      zend_builtin_functions.c
+      zend_builtin_functions.c
+      zend_constants.h
+      zend_constants.h:
+      Added API to use namesapces in internal extensions
+
 2008-05-11  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
