@@ -1,5 +1,5 @@
 --TEST--
-Bug #42866 str_split() returns extra char when given string size is not mulitple of lenth
+Bug #42866 (str_split() returns extra char when given string size is not multiple of length)
 --FILE--
 <?php
 $str = 'Testing str_split()';
