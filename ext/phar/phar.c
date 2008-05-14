@@ -817,7 +817,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 		register_alias = 1;
 		temp_alias = 1;
 	}
-	
+
 	/* we have 5 32-bit items plus 1 byte at least */
 	if (manifest_count > ((manifest_len - 10 - tmp_len) / (5 * 4 + 1))) {
 		/* prevent serious memory issues */
@@ -1592,7 +1592,8 @@ woohoo:
 				return FAILURE;
 			}
 		} else {
-			zstr key;
+			phar_zstr key;
+			char *str_key;
 			uint keylen;
 			ulong unused;
 
@@ -1602,11 +1603,13 @@ woohoo:
 					break;
 				}
 
+				PHAR_STR(key, str_key);
+
 				if (keylen > (uint) filename_len) {
 					zend_hash_move_forward(&(PHAR_GLOBALS->phar_fname_map));
 					continue;
 				}
-				if (!memcmp(filename, key.s, keylen) && ((uint)filename_len == keylen
+				if (!memcmp(filename, str_key, keylen) && ((uint)filename_len == keylen
 					|| filename[keylen] == '/' || filename[keylen] == '\0')) {
 					if (FAILURE == zend_hash_get_current_data(&(PHAR_GLOBALS->phar_fname_map), (void **) &pphar)) {
 						break;

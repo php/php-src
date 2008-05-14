@@ -34,7 +34,7 @@ echo $e->getMessage() . "\n";
 ?>
 ===DONE===
 --EXPECT--
-string(6651) "<?php
+string(6659) "<?php
 
 $web = 'index.php';
 
@@ -144,7 +144,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'index.php';
-const LEN = 6653;
+const LEN = 6661;
 
 static function go($return = false)
 {
@@ -298,7 +298,7 @@ die("Invalid internal .phar file (size error " . strlen($data) . " != " .
 $stat[7] . ")");
 }
 
-if ($entry[3] != sprintf("%u", crc32($data) & 0xffffffff)) {
+if ($entry[3] != sprintf("%u", crc32((binary)$data) & 0xffffffff)) {
 die("Invalid internal .phar file (checksum error)");
 }
 
@@ -328,7 +328,7 @@ Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
-string(6662) "<?php
+string(6670) "<?php
 
 $web = 'index.php';
 
@@ -438,7 +438,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'my/custom/thingy.php';
-const LEN = 6664;
+const LEN = 6672;
 
 static function go($return = false)
 {
@@ -592,7 +592,7 @@ die("Invalid internal .phar file (size error " . strlen($data) . " != " .
 $stat[7] . ")");
 }
 
-if ($entry[3] != sprintf("%u", crc32($data) & 0xffffffff)) {
+if ($entry[3] != sprintf("%u", crc32((binary)$data) & 0xffffffff)) {
 die("Invalid internal .phar file (checksum error)");
 }
 
@@ -622,7 +622,7 @@ Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
-int(7042)
+int(7050)
 ============================================================================
 ============================================================================
 Illegal filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
@@ -630,7 +630,7 @@ Illegal filename passed in for stub creation, was 401 characters long, and only 
 ============================================================================
 ============================================================================
 ============================================================================
-string(6664) "<?php
+string(6672) "<?php
 
 $web = 'the/web.php';
 
@@ -740,7 +740,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'my/custom/thingy.php';
-const LEN = 6666;
+const LEN = 6674;
 
 static function go($return = false)
 {
@@ -894,7 +894,7 @@ die("Invalid internal .phar file (size error " . strlen($data) . " != " .
 $stat[7] . ")");
 }
 
-if ($entry[3] != sprintf("%u", crc32($data) & 0xffffffff)) {
+if ($entry[3] != sprintf("%u", crc32((binary)$data) & 0xffffffff)) {
 die("Invalid internal .phar file (checksum error)");
 }
 
@@ -924,6 +924,6 @@ Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
-int(7042)
+int(7050)
 Illegal web filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
 ===DONE===

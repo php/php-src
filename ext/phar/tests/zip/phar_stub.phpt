@@ -31,7 +31,7 @@ echo $phar->getStub();
 $fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phartmp.php';
 $file = '<?php echo "third stub\n"; __HALT_COMPILER(); ?>';
 $fp = fopen($fname3, 'wb');
-fwrite($fp, $file);
+fwrite($fp, (binary)$file);
 fclose($fp);
 $fp = fopen($fname3, 'rb');
 
@@ -42,7 +42,7 @@ fclose($fp);
 echo $phar->getStub();
 
 $fp = fopen($fname3, 'ab');
-fwrite($fp, 'booya');
+fwrite($fp, (binary)'booya');
 fclose($fp);
 echo file_get_contents($fname3) . "\n";
 

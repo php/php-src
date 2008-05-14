@@ -12,7 +12,7 @@ $file = "<?php
 Phar::mapPhar('hio');
 __HALT_COMPILER(); ?>";
 
-// compressed file length does not match incompressed lentgh for an uncompressed file
+// compressed file length does not match incompressed length for an uncompressed file
 
 $files = array();
 $files['a'] = array('cont'=>'a','ulen'=>1,'clen'=>2);;
