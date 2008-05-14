@@ -2714,10 +2714,12 @@ zend_object_handlers pdo_row_object_handlers = {
 
 void pdo_row_free_storage(pdo_stmt_t *stmt TSRMLS_DC)
 {
-	ZVAL_NULL(&stmt->lazy_object_ref);
-	
-	if (--stmt->refcount == 0) {
-		free_statement(stmt TSRMLS_CC);
+	if (stmt) {
+		ZVAL_NULL(&stmt->lazy_object_ref);
+		
+		if (--stmt->refcount == 0) {
+			free_statement(stmt TSRMLS_CC);
+		}
 	}
 }
 
