@@ -1,5 +1,5 @@
 --TEST--
-Bug #42272: var_export() incorrectly escapes char(0).
+Bug #42272 (var_export() incorrectly escapes char(0))
 --FILE--
 <?php
 $foo = var_export("\0", true );
