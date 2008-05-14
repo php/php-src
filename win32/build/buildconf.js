@@ -16,12 +16,13 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id: buildconf.js,v 1.16 2007-01-29 04:40:46 iliaa Exp $ */
+/* $Id: buildconf.js,v 1.17 2008-05-14 11:32:28 mattwil Exp $ */
 // This generates a configure script for win32 build
 
 WScript.StdOut.WriteLine("Rebuilding configure.js");
 var FSO = WScript.CreateObject("Scripting.FileSystemObject");
 var C = FSO.CreateTextFile("configure.js", true);
+var B = FSO.CreateTextFile("configure.bat", true);
 
 var modules = "";
 var MODULES = WScript.CreateObject("Scripting.Dictionary");
@@ -259,5 +260,6 @@ C.Write(modules);
 C.WriteBlankLines(1);
 C.Write(file_get_contents("win32/build/configure.tail"));
 
-WScript.StdOut.WriteLine("Now run 'cscript /nologo configure.js --help'");
-
+B.WriteLine("@echo off");
+B.WriteLine("cscript /nologo configure.js %*");
+WScript.StdOut.WriteLine("Now run 'configure --help'");
