@@ -19,18 +19,32 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 0 ICON win32\build\php.ico
 #endif
 
-#define XSTRVER4(maj, min, rel, build) #maj "." #min "." #rel "." #build
-#define XSTRVER3(maj, min, rel) #maj "." #min "." #rel
-#define STRVER4(maj, min, rel, build) XSTRVER4(maj, min, rel, build)
-#define STRVER3(maj, min, rel) XSTRVER3(maj, min, rel)
+#ifndef INTERNAL_NAME /* e.g. 'PHAR extension', 'CGI SAPI' */
+# ifdef FILE_DESCRIPTION
+#define INTERNAL_NAME FILE_DESCRIPTION /* e.g. 'PHP Script Interpreter', 'GD imaging' */
+# else
+#define INTERNAL_NAME FILE_NAME /* e.g. 'php5ts.dll', 'php_bz2.dll' */
+# endif
+#endif
 
-//Version
+#ifndef URL
+#define URL "http://www.php.net"
+#endif
+
+#ifndef EXT_VERSION
+#define EXT_VERSION PHP_VERSION
+#endif
+
+#ifndef EXT_FILE_VERSION
+#define EXT_FILE_VERSION PHP_MAJOR_VERSION,PHP_MINOR_VERSION,PHP_RELEASE_VERSION
+#endif
+
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION PHP_MAJOR_VERSION,PHP_MINOR_VERSION,PHP_RELEASE_VERSION,PHP_RELEASE_VERSION
- PRODUCTVERSION PHP_MAJOR_VERSION,PHP_MINOR_VERSION,PHP_RELEASE_VERSION,0
+ FILEVERSION EXT_FILE_VERSION
+ PRODUCTVERSION PHP_MAJOR_VERSION,PHP_MINOR_VERSION,PHP_RELEASE_VERSION
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
- FILEFLAGS VS_FF_DEBUG
+ FILEFLAGS (VS_FF_DEBUG|VS_FF_SPECIALBUILD)
 #else
  FILEFLAGS 0x0L
 #endif
@@ -42,19 +56,24 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", THANKS_GUYS "\0"
-            VALUE "CompanyName", "The PHP Group\0"
-            VALUE "FileDescription", FILE_DESCRIPTION "\0"
-            VALUE "FileVersion", STRVER4(PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION, PHP_RELEASE_VERSION)
-            VALUE "InternalName", FILE_NAME "\0"
-            VALUE "LegalCopyright", "Copyright © 1997-2007 The PHP Group\0"
-            VALUE "LegalTrademarks", "PHP\0"
-            VALUE "OriginalFilename", FILE_NAME "\0"
-            VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", PRODUCT_NAME "\0"
-            VALUE "ProductVersion", STRVER3(PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION)
-            VALUE "SpecialBuild", PHP_EXTRA_VERSION "\0"
-			VALUE "URL", "http://www.php.net"
+            VALUE "Comments", THANKS_GUYS
+            VALUE "CompanyName", "The PHP Group"
+#ifdef _DEBUG
+            VALUE "FileDescription", FILE_DESCRIPTION " (DEBUG)"
+#else
+            VALUE "FileDescription", FILE_DESCRIPTION
+#endif
+            VALUE "FileVersion", EXT_VERSION
+            VALUE "InternalName", INTERNAL_NAME
+            VALUE "LegalCopyright", "Copyright © 1997-2008 The PHP Group"
+            VALUE "LegalTrademarks", "PHP"
+            VALUE "OriginalFilename", FILE_NAME
+            VALUE "ProductName", "PHP"
+            VALUE "ProductVersion", PHP_VERSION
+#ifdef _DEBUG
+            VALUE "SpecialBuild", "Debug build"
+#endif
+            VALUE "URL", URL
         END
     END
     BLOCK "VarFileInfo"
@@ -66,4 +85,3 @@ END
 #ifdef MC_INCLUDE
 #include MC_INCLUDE
 #endif
-
