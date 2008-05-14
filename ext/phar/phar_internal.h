@@ -354,8 +354,17 @@ extern char *(*phar_save_resolve_path)(const char *filename, int filename_len TS
 # endif
 #endif
 
-BEGIN_EXTERN_C()
+#if PHP_VERSION_ID >= 60000
+typedef zstr phar_zstr;
+#define PHAR_STR(a, b)	\
+	spprintf(&b, 0, "%r", a.s);
+#else
+typedef char *phar_zstr;
+#define PHAR_STR(a, b)	\
+	b = a;
+#endif
 
+BEGIN_EXTERN_C()
 
 #ifdef PHP_WIN32
 char *tsrm_strtok_r(char *s, const char *delim, char **last);
