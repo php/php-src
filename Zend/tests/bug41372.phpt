@@ -1,5 +1,5 @@
 --TEST--
-Bug #41372 Internal pointer of source array resets during array copying 
+Bug #41372 (Internal pointer of source array resets during array copying)
 --FILE--
 <?php
 $Foo = array('val1', 'val2', 'val3');

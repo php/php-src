@@ -1,5 +1,5 @@
 --TEST--
-Bug #43957 - utf8_decode() bogus conversion on multibyte indicator near end of string
+Bug #43957 (utf8_decode() bogus conversion on multibyte indicator near end of string)
 --SKIPIF--
 <?php
 require_once("skipif.inc");

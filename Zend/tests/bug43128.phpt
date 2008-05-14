@@ -1,5 +1,5 @@
 --TEST--
-Bug #43128 Very long class name causes segfault 
+Bug #43128 (Very long class name causes segfault)
 --FILE--
 <?php
 
