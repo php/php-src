@@ -268,7 +268,7 @@ class Extract_Phar
                 $stat[7] . ")");
         }
 
-        if ($entry[3] != sprintf("%u", crc32($data) & 0xffffffff)) {
+        if ($entry[3] != sprintf("%u", crc32((binary)$data) & 0xffffffff)) {
             die("Invalid internal .phar file (checksum error)");
         }
 
