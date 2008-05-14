@@ -1,7 +1,11 @@
 // $Id$
 // vim:ft=javascript
 
-EXTENSION("ereg", "ereg.c", false /* never shared */, "-Dregexec=php_regexec -Dregerror=php_regerror -Dregfree=php_regfree -Dregcomp=php_regcomp -Iext/ereg/regex");
-ADD_SOURCES("ext/ereg/regex", "regcomp.c regexec.c regerror.c regfree.c", "ereg");
-AC_DEFINE('REGEX', 1, 'Bundled regex');
-AC_DEFINE('HSREGEX', 1, 'Bundled regex');
+ARG_WITH("ereg", "POSIX extended regular expressions", "yes");
+if (PHP_EREG != "no") {
+
+	EXTENSION("ereg", "ereg.c", false /* never shared */, "-Dregexec=php_regexec -Dregerror=php_regerror -Dregfree=php_regfree -Dregcomp=php_regcomp -Iext/ereg/regex");
+	ADD_SOURCES("ext/ereg/regex", "regcomp.c regexec.c regerror.c regfree.c", "ereg");
+	AC_DEFINE('REGEX', 1, 'Bundled regex');
+	AC_DEFINE('HSREGEX', 1, 'Bundled regex');
+}

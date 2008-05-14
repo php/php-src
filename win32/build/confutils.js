@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.10 2008-04-14 17:55:02 sfox Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.11 2008-05-14 03:13:17 auroraeosrose Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -585,6 +585,17 @@ function CHECK_LIB(libnames, target, path_to_check, common_name)
 
 	// libnames can be ; separated list of accepted library names
 	libnames = libnames.split(';');
+
+	// for debug builds, lib may have _debug appended, we want that first
+	if (PHP_DEBUG == "yes") {
+		var length = libnames.length;
+		for (var i = 0; i < length; i++) {
+			var name = new String(libnames[i]);
+			rExp = /.lib$/i;
+			name = name.replace(rExp,"_debug.lib");
+			libnames.unshift(name);
+		}
+	}
 
 	var i, j, k, libname;
 	var location = false;
