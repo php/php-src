@@ -1183,7 +1183,8 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 		}
 		return entry;
 	} else if (phar->mounted_dirs.arBuckets && zend_hash_num_elements(&phar->mounted_dirs)) {
-		zstr key;
+		phar_zstr key;
+		char *str_key;
 		ulong unused;
 		uint keylen;
 
@@ -1192,7 +1193,10 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 			if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(&phar->mounted_dirs, &key, &keylen, &unused, 0, NULL)) {
 				break;
 			}
-			if ((int)keylen >= path_len || strncmp(key.s, path, keylen)) {
+
+			PHAR_STR(key, str_key);
+
+			if ((int)keylen >= path_len || strncmp(str_key, path, keylen)) {
 				continue;
 			} else {
 				char *test;
@@ -1200,15 +1204,15 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 				phar_entry_info *entry;
 				php_stream_statbuf ssb;
 
-				if (SUCCESS != zend_hash_find(&phar->manifest, key.s, keylen, (void **) &entry)) {
+				if (SUCCESS != zend_hash_find(&phar->manifest, str_key, keylen, (void **) &entry)) {
 					if (error) {
-						spprintf(error, 4096, "phar internal error: mounted path \"%s\" could not be retrieved from manifest", key.s);
+						spprintf(error, 4096, "phar internal error: mounted path \"%s\" could not be retrieved from manifest", str_key);
 					}
 					return NULL;
 				}
 				if (!entry->tmp || !entry->is_mounted) {
 					if (error) {
-						spprintf(error, 4096, "phar internal error: mounted path \"%s\" is not properly initialized as a mounted path", key.s);
+						spprintf(error, 4096, "phar internal error: mounted path \"%s\" is not properly initialized as a mounted path", str_key);
 					}
 					return NULL;
 				}
@@ -1254,7 +1258,8 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 	if (dir) {
 		/* try to find a directory */
 		HashTable *manifest;
-		zstr key;
+		phar_zstr key;
+		char *str_key;
 		uint keylen;
 		ulong unused;
 
@@ -1267,14 +1272,17 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 			if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(manifest, &key, &keylen, &unused, 0, NULL)) {
 				break;
 			}
-			if (0 != memcmp(key.s, path, path_len)) {
+
+			PHAR_STR(key, str_key);
+
+			if (0 != memcmp(str_key, path, path_len)) {
 				/* entry in directory not found */
 				if (SUCCESS != zend_hash_move_forward(manifest)) {
 					break;
 				}
 				continue;
 			} else {
-				if (key.s[path_len] != '/') {
+				if (str_key[path_len] != '/') {
 					if (SUCCESS != zend_hash_move_forward(manifest)) {
 						break;
 					}

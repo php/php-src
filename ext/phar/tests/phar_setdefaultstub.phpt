@@ -54,7 +54,7 @@ try {
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
 ?>
 --EXPECT--
-string(6653) "<?php
+string(6661) "<?php
 
 $web = 'index.php';
 
@@ -164,7 +164,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'index.php';
-const LEN = 6653;
+const LEN = 6661;
 
 static function go($return = false)
 {
@@ -318,7 +318,7 @@ die("Invalid internal .phar file (size error " . strlen($data) . " != " .
 $stat[7] . ")");
 }
 
-if ($entry[3] != sprintf("%u", crc32($data) & 0xffffffff)) {
+if ($entry[3] != sprintf("%u", crc32((binary)$data) & 0xffffffff)) {
 die("Invalid internal .phar file (checksum error)");
 }
 
@@ -349,7 +349,7 @@ __HALT_COMPILER(); ?>
 "
 ============================================================================
 ============================================================================
-string(6664) "<?php
+string(6672) "<?php
 
 $web = 'index.php';
 
@@ -459,7 +459,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'my/custom/thingy.php';
-const LEN = 6664;
+const LEN = 6672;
 
 static function go($return = false)
 {
@@ -613,7 +613,7 @@ die("Invalid internal .phar file (size error " . strlen($data) . " != " .
 $stat[7] . ")");
 }
 
-if ($entry[3] != sprintf("%u", crc32($data) & 0xffffffff)) {
+if ($entry[3] != sprintf("%u", crc32((binary)$data) & 0xffffffff)) {
 die("Invalid internal .phar file (checksum error)");
 }
 
@@ -644,7 +644,7 @@ __HALT_COMPILER(); ?>
 "
 ============================================================================
 ============================================================================
-string(6666) "<?php
+string(6674) "<?php
 
 $web = 'the/web.php';
 
@@ -754,7 +754,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'my/custom/thingy.php';
-const LEN = 6666;
+const LEN = 6674;
 
 static function go($return = false)
 {
@@ -908,7 +908,7 @@ die("Invalid internal .phar file (size error " . strlen($data) . " != " .
 $stat[7] . ")");
 }
 
-if ($entry[3] != sprintf("%u", crc32($data) & 0xffffffff)) {
+if ($entry[3] != sprintf("%u", crc32((binary)$data) & 0xffffffff)) {
 die("Invalid internal .phar file (checksum error)");
 }
 
@@ -939,6 +939,6 @@ __HALT_COMPILER(); ?>
 "
 ============================================================================
 ============================================================================
-int(7044)
+int(7052)
 Illegal filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
 ===DONE===

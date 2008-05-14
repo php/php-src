@@ -778,7 +778,7 @@ PHP_METHOD(Phar, webPhar)
 			mime.len = Z_STRLEN_PP(val); \
 		} \
 		mime.type = ret; \
-		zend_hash_update(&mimetypes, key.s, keylen-1, (void *)&mime, sizeof(phar_mime_type), NULL);
+		zend_hash_update(&mimetypes, str_key, keylen-1, (void *)&mime, sizeof(phar_mime_type), NULL);
 
 	if (mimeoverride) {
 		if (!zend_hash_num_elements(Z_ARRVAL_P(mimeoverride))) {
@@ -786,9 +786,11 @@ PHP_METHOD(Phar, webPhar)
 		}
 		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(mimeoverride)); SUCCESS == zend_hash_has_more_elements(Z_ARRVAL_P(mimeoverride)); zend_hash_move_forward(Z_ARRVAL_P(mimeoverride))) {
 			zval **val;
-			zstr key;
+			phar_zstr key;
+			char *str_key;
 			uint keylen;
 			ulong intkey;
+
 			if (HASH_KEY_IS_LONG == zend_hash_get_current_key_ex(Z_ARRVAL_P(mimeoverride), &key, &keylen, &intkey, 0, NULL)) {
 				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Key of MIME type overrides array must be a file extension, was \"%d\"", intkey);
 				phar_entry_delref(phar TSRMLS_CC);
@@ -797,8 +799,11 @@ PHP_METHOD(Phar, webPhar)
 #endif
 				RETURN_FALSE;
 			}
+
+			PHAR_STR(key, str_key);
+
 			if (FAILURE == zend_hash_get_current_data(Z_ARRVAL_P(mimeoverride), (void **) &val)) {
-				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Failed to retrieve Mime type for extension \"%s\"", key.s);
+				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Failed to retrieve Mime type for extension \"%s\"", str_key);
 				phar_entry_delref(phar TSRMLS_CC);
 #ifdef PHP_WIN32
 				efree(fname);
@@ -1114,11 +1119,8 @@ PHP_METHOD(Phar, __construct)
 		return;
 	}
 
-#if PHP_VERSION_ID >= 60000
-	objname = phar_obj->std.ce->name.s;
-#else
-	objname = phar_obj->std.ce->name;
-#endif
+	PHAR_STR(phar_obj->std.ce->name, objname);
+
 	if (!strncmp(objname, "PharData", 8)) {
 		is_data = 1;
 	} else {
@@ -1316,7 +1318,8 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 	php_stream *fp;
 	long contents_len;
 	char *fname, *error, *base = p_obj->b, *opened, *save = NULL, *temp = NULL;
-	zstr str_key;
+	phar_zstr key;
+	char *str_key;
 	zend_class_entry *ce = p_obj->c;
 	phar_archive_object *phar_obj = p_obj->p;
 	char *str = "[stream]";
@@ -1340,16 +1343,20 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 				return ZEND_HASH_APPLY_STOP;
 			}
 			if (iter->funcs->get_current_key) {
-				key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
+				key_type = iter->funcs->get_current_key(iter, &key, &str_key_len, &int_key TSRMLS_CC);
+
 				if (EG(exception)) {
 					return ZEND_HASH_APPLY_STOP;
 				}
+
+				PHAR_STR(key, str_key);
+
 				if (key_type == HASH_KEY_IS_LONG) {
 					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned an invalid key (must return a string)", ce->name);
 					return ZEND_HASH_APPLY_STOP;
 				}
-				save = str_key.s;
-				if (str_key.s[str_key_len - 1] == '\0') str_key_len--;
+				save = str_key;
+				if (str_key[str_key_len - 1] == '\0') str_key_len--;
 			} else {
 				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned an invalid key (must return a string)", ce->name);
 				return ZEND_HASH_APPLY_STOP;
@@ -1424,9 +1431,9 @@ phar_spl_fileinfo:
 				}
 				return ZEND_HASH_APPLY_KEEP;
 			}
-			str_key.s = fname + base_len;
-			if (*str_key.s == '/' || *str_key.s == '\\') {
-				str_key.s++;
+			str_key = fname + base_len;
+			if (*str_key == '/' || *str_key == '\\') {
+				str_key++;
 				str_key_len--;
 			}
 		} else {
@@ -1439,16 +1446,20 @@ phar_spl_fileinfo:
 		}
 	} else {
 		if (iter->funcs->get_current_key) {
-			key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
+			key_type = iter->funcs->get_current_key(iter, &key, &str_key_len, &int_key TSRMLS_CC);
+
 			if (EG(exception)) {
 				return ZEND_HASH_APPLY_STOP;
 			}
+
+			PHAR_STR(key, str_key);
+
 			if (key_type == HASH_KEY_IS_LONG) {
 				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned an invalid key (must return a string)", ce->name);
 				return ZEND_HASH_APPLY_STOP;
 			}
-			save = str_key.s;
-			if (str_key.s[str_key_len - 1] == '\0') str_key_len--;
+			save = str_key;
+			if (str_key[str_key_len - 1] == '\0') str_key_len--;
 		} else {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned an invalid key (must return a string)", ce->name);
 			return ZEND_HASH_APPLY_STOP;
@@ -1492,8 +1503,8 @@ phar_spl_fileinfo:
 	}
 
 after_open_fp:
-	if (!(data = phar_get_or_create_entry_data(phar_obj->arc.archive->fname, phar_obj->arc.archive->fname_len, str_key.s, str_key_len, "w+b", 0, &error TSRMLS_CC))) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s cannot be created: %s", str_key.s, error);
+	if (!(data = phar_get_or_create_entry_data(phar_obj->arc.archive->fname, phar_obj->arc.archive->fname_len, str_key, str_key_len, "w+b", 0, &error TSRMLS_CC))) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s cannot be created: %s", str_key, error);
 		efree(error);
 		if (save) {
 			efree(save);
@@ -1515,7 +1526,7 @@ after_open_fp:
 		php_stream_close(fp);
 	}
 
-	add_assoc_string(p_obj->ret, str_key.s, opened, 0);
+	add_assoc_string(p_obj->ret, str_key, opened, 0);
 
 	if (save) {
 		efree(save);

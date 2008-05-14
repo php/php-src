@@ -43,7 +43,7 @@ unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip')
 __HALT_COMPILER();
 ?>
 --EXPECTF--
-string(50) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>
+unicode(50) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>
 "
 string(50) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>
 "
