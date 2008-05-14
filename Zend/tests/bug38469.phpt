@@ -1,5 +1,5 @@
 --TEST--
-Bug #38469 Unexpected creation of cycle
+Bug #38469 (Unexpected creation of cycle)
 --FILE--
 <?php
 $a = array();

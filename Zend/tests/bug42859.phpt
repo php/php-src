@@ -1,5 +1,5 @@
 --TEST--
-Bug #42859 import always conflicts with internal classes
+Bug #42859 (import always conflicts with internal classes)
 --FILE--
 <?php
 namespace Foo;
