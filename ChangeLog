@@ -1,3 +1,205 @@
+2008-05-13  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/phar/tests/frontcontroller10.phpt
+      ext/phar/tests/frontcontroller10.phpt
+      ext/phar/tests/frontcontroller11.phpt
+      ext/phar/tests/frontcontroller11.phpt
+      ext/phar/tests/frontcontroller12.phpt
+      ext/phar/tests/frontcontroller12.phpt
+      ext/phar/tests/frontcontroller13.phpt
+      ext/phar/tests/frontcontroller13.phpt
+      ext/phar/tests/frontcontroller15.phpt
+      ext/phar/tests/frontcontroller15.phpt
+      ext/phar/tests/frontcontroller16.phpt
+      ext/phar/tests/frontcontroller16.phpt
+      ext/phar/tests/frontcontroller2.phpt
+      ext/phar/tests/frontcontroller2.phpt
+      ext/phar/tests/frontcontroller21.phpt
+      ext/phar/tests/frontcontroller21.phpt
+      ext/phar/tests/frontcontroller22.phpt
+      ext/phar/tests/frontcontroller22.phpt
+      ext/phar/tests/frontcontroller23.phpt
+      ext/phar/tests/frontcontroller23.phpt
+      ext/phar/tests/frontcontroller24.phpt
+      ext/phar/tests/frontcontroller24.phpt
+      ext/phar/tests/frontcontroller25.phpt
+      ext/phar/tests/frontcontroller25.phpt
+      ext/phar/tests/frontcontroller27.phpt
+      ext/phar/tests/frontcontroller27.phpt
+      ext/phar/tests/frontcontroller28.phpt
+      ext/phar/tests/frontcontroller28.phpt
+      ext/phar/tests/frontcontroller29.phpt
+      ext/phar/tests/frontcontroller29.phpt
+      ext/phar/tests/frontcontroller3.phpt
+      ext/phar/tests/frontcontroller3.phpt
+      ext/phar/tests/frontcontroller31.phpt
+      ext/phar/tests/frontcontroller31.phpt
+      ext/phar/tests/frontcontroller32.phpt
+      ext/phar/tests/frontcontroller32.phpt
+      ext/phar/tests/frontcontroller33.phpt
+      ext/phar/tests/frontcontroller33.phpt
+      ext/phar/tests/frontcontroller34.phpt
+      ext/phar/tests/frontcontroller34.phpt
+      ext/phar/tests/frontcontroller9.phpt
+      ext/phar/tests/frontcontroller9.phpt
+      ext/phar/tests/phar_dotted_path.phpt
+      ext/phar/tests/phar_dotted_path.phpt
+      ext/phar/tests/withphar_web.phpt
+      ext/phar/tests/withphar_web.phpt
+      ext/phar/tests/tar/frontcontroller10.phar.phpt
+      ext/phar/tests/tar/frontcontroller10.phar.phpt
+      ext/phar/tests/tar/frontcontroller11.phar.phpt
+      ext/phar/tests/tar/frontcontroller11.phar.phpt
+      ext/phar/tests/tar/frontcontroller12.phar.phpt
+      ext/phar/tests/tar/frontcontroller12.phar.phpt
+      ext/phar/tests/tar/frontcontroller13.phar.phpt
+      ext/phar/tests/tar/frontcontroller13.phar.phpt
+      ext/phar/tests/tar/frontcontroller15.phar.phpt
+      ext/phar/tests/tar/frontcontroller15.phar.phpt
+      ext/phar/tests/tar/frontcontroller16.phar.phpt
+      ext/phar/tests/tar/frontcontroller16.phar.phpt
+      ext/phar/tests/tar/frontcontroller2.phar.phpt
+      ext/phar/tests/tar/frontcontroller2.phar.phpt
+      ext/phar/tests/tar/frontcontroller21.phar.phpt
+      ext/phar/tests/tar/frontcontroller21.phar.phpt
+      ext/phar/tests/tar/frontcontroller3.phar.phpt
+      ext/phar/tests/tar/frontcontroller3.phar.phpt
+      ext/phar/tests/tar/frontcontroller9.phar.phpt
+      ext/phar/tests/tar/frontcontroller9.phar.phpt
+      ext/phar/tests/zip/frontcontroller10.phar.phpt
+      ext/phar/tests/zip/frontcontroller10.phar.phpt
+      ext/phar/tests/zip/frontcontroller11.phar.phpt
+      ext/phar/tests/zip/frontcontroller11.phar.phpt
+      ext/phar/tests/zip/frontcontroller12.phar.phpt
+      ext/phar/tests/zip/frontcontroller12.phar.phpt
+      ext/phar/tests/zip/frontcontroller13.phar.phpt
+      ext/phar/tests/zip/frontcontroller13.phar.phpt
+      ext/phar/tests/zip/frontcontroller15.phar.phpt
+      ext/phar/tests/zip/frontcontroller15.phar.phpt
+      ext/phar/tests/zip/frontcontroller16.phar.phpt
+      ext/phar/tests/zip/frontcontroller16.phar.phpt
+      ext/phar/tests/zip/frontcontroller2.phar.phpt
+      ext/phar/tests/zip/frontcontroller2.phar.phpt
+      ext/phar/tests/zip/frontcontroller21.phar.phpt
+      ext/phar/tests/zip/frontcontroller21.phar.phpt
+      ext/phar/tests/zip/frontcontroller3.phar.phpt
+      ext/phar/tests/zip/frontcontroller3.phar.phpt
+      ext/phar/tests/zip/frontcontroller9.phar.phpt
+      ext/phar/tests/zip/frontcontroller9.phar.phpt:
+      - Fixed tests (added default_charset=)
+
+2008-05-13  Steph Fox  <steph.fox@virgin.net>
+
+    * ext/phar/phar.c
+      ext/phar/tests/phar_dotted_path.phpt:
+      - MF53 dotted.path support
+
+2008-05-13  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/tests/phar_oo_002.phpt
+      ext/phar/tests/phar_oo_007.phpt:
+      MFB fix tests
+
+2008-05-13  Steph Fox  <steph.fox@virgin.net>
+
+    * ext/phar/dirstream.c
+      ext/phar/func_interceptors.c
+      ext/phar/phar.c
+      ext/phar/phar_object.c
+      ext/phar/stream.c
+      ext/phar/util.c
+      ext/phar/tests/files/phar_test.inc:
+      - 'It builds on my box'.
+      - Don't expect any tests to pass.
+
+2008-05-13  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/tests/phar_oo_002.phpt
+      ext/phar/tests/phar_oo_007.phpt:
+      fix test
+
+2008-05-13  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/phar/tests/phar_convert_repeated_b.phpt
+      ext/phar/tests/phar_convert_repeated_b.phpt
+      ext/phar/tests/zf_test.phpt
+      ext/phar/tests/zf_test.phpt
+      ext/phar/tests/zip/frontcontroller1.phar.phpt
+      ext/phar/tests/zip/frontcontroller1.phar.phpt
+      ext/phar/tests/zip/frontcontroller11.phar.phpt
+      ext/phar/tests/zip/frontcontroller11.phar.phpt
+      ext/phar/tests/zip/frontcontroller12.phar.phpt
+      ext/phar/tests/zip/frontcontroller12.phar.phpt
+      ext/phar/tests/zip/frontcontroller13.phar.phpt
+      ext/phar/tests/zip/frontcontroller13.phar.phpt
+      ext/phar/tests/zip/frontcontroller14.phar.phpt
+      ext/phar/tests/zip/frontcontroller14.phar.phpt
+      ext/phar/tests/zip/frontcontroller15.phar.phpt
+      ext/phar/tests/zip/frontcontroller15.phar.phpt
+      ext/phar/tests/zip/frontcontroller16.phar.phpt
+      ext/phar/tests/zip/frontcontroller16.phar.phpt
+      ext/phar/tests/zip/frontcontroller17.phar.phpt
+      ext/phar/tests/zip/frontcontroller17.phar.phpt
+      ext/phar/tests/zip/frontcontroller18.phar.phpt
+      ext/phar/tests/zip/frontcontroller18.phar.phpt
+      ext/phar/tests/zip/frontcontroller19.phar.phpt
+      ext/phar/tests/zip/frontcontroller19.phar.phpt
+      ext/phar/tests/zip/frontcontroller2.phar.phpt
+      ext/phar/tests/zip/frontcontroller2.phar.phpt
+      ext/phar/tests/zip/frontcontroller20.phar.phpt
+      ext/phar/tests/zip/frontcontroller20.phar.phpt
+      ext/phar/tests/zip/frontcontroller21.phar.phpt
+      ext/phar/tests/zip/frontcontroller21.phar.phpt
+      ext/phar/tests/zip/frontcontroller3.phar.phpt
+      ext/phar/tests/zip/frontcontroller3.phar.phpt
+      ext/phar/tests/zip/frontcontroller4.phar.phpt
+      ext/phar/tests/zip/frontcontroller4.phar.phpt
+      ext/phar/tests/zip/frontcontroller5.phar.phpt
+      ext/phar/tests/zip/frontcontroller5.phar.phpt
+      ext/phar/tests/zip/frontcontroller6.phar.phpt
+      ext/phar/tests/zip/frontcontroller6.phar.phpt
+      ext/phar/tests/zip/frontcontroller7.phar.phpt
+      ext/phar/tests/zip/frontcontroller7.phar.phpt
+      ext/phar/tests/zip/odt.phpt
+      ext/phar/tests/zip/odt.phpt:
+      - Added SKIPIF
+
+2008-05-13  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/tests/phar_dotted_path.phpt
+      ext/phar/tests/phar_dotted_path.phpt:
+      - Allow broken.dirnames to use phar too
+      - Add test
+      - Kill MSVC compiler warning
+
+2008-05-13  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/oci8/tests/connect_scope1.phpt
+      ext/oci8/tests/connect_scope1.phpt
+      ext/oci8/tests/connect_scope2.phpt
+      ext/oci8/tests/connect_scope2.phpt
+      ext/oci8/tests/connect_scope_try1.phpt
+      ext/oci8/tests/connect_scope_try1.phpt
+      ext/oci8/tests/connect_scope_try2.phpt
+      ext/oci8/tests/connect_scope_try2.phpt
+      ext/oci8/tests/connect_scope_try3.phpt
+      ext/oci8/tests/connect_scope_try3.phpt
+      ext/oci8/tests/connect_scope_try4.phpt
+      ext/oci8/tests/connect_scope_try4.phpt
+      ext/oci8/tests/connect_scope_try5.phpt
+      ext/oci8/tests/connect_scope_try5.phpt
+      ext/oci8/tests/connect_scope_try6.phpt
+      ext/oci8/tests/connect_scope_try6.phpt
+      ext/oci8/tests/drcp_scope4.phpt
+      ext/oci8/tests/minfo.phpt
+      ext/oci8/tests/minfo.phpt
+      ext/oci8/tests/minfo.phpt:
+      
+      New/updated tests
+
 2008-05-12  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
