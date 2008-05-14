@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2008, PHP 5.2.7
+- Fixed a crash inside PDO when trying instantiate PDORow manually (Felipe)
 - Fixed build failure of ext/mysqli with libmysql 6.0 - missing rpl
   functions. (Andrey)
 - Fixed bug #44891 Memory leak using registerPHPFunctions and XSLT Variable 
