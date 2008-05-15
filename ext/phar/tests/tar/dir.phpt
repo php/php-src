@@ -17,6 +17,7 @@ $phar = new Phar($fname);
 var_dump($phar->isFileFormat(Phar::TAR));
 
 $phar->addEmptyDir('test');
+var_dump(isset($phar['.phar/stub.php']));
 var_dump($phar['test']->isDir());
 var_dump($phar['test/']->isDir());
 copy($fname, $fname2);
@@ -35,6 +36,7 @@ var_dump(file_exists($pname3 . '/another/dir/'));
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php'); ?>
 --EXPECT--
 bool(true)
+bool(false)
 bool(true)
 bool(true)
 bool(true)

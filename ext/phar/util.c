@@ -146,6 +146,11 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 		return FAILURE;
 	}
 
+	if (path_len >= sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
+		/* no creating magic phar files by mounting them */
+		return FAILURE;
+	}
+
 	is_phar = (filename_len > 7 && !memcmp(filename, "phar://", 7));
 
 	entry.phar = phar;
@@ -483,7 +488,7 @@ not_stream:
  * appended, truncated, or read.  For read, if the entry is marked unmodified, it is
  * assumed that the file pointer, if present, is opened for reading
  */
-int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char *path, int path_len, char *mode, char allow_dir, char **error TSRMLS_DC) /* {{{ */
+int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char *path, int path_len, char *mode, char allow_dir, char **error, int security TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry;
@@ -515,14 +520,14 @@ int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char 
 		return FAILURE;
 	}
 	if (allow_dir) {
-		if ((entry = phar_get_entry_info_dir(phar, path, path_len, allow_dir, for_create && !PHAR_G(readonly) && !phar->is_data ? NULL : error TSRMLS_CC)) == NULL) {
+		if ((entry = phar_get_entry_info_dir(phar, path, path_len, allow_dir, for_create && !PHAR_G(readonly) && !phar->is_data ? NULL : error, security TSRMLS_CC)) == NULL) {
 			if (for_create && (!PHAR_G(readonly) || phar->is_data)) {
 				return SUCCESS;
 			}
 			return FAILURE;
 		}
 	} else {
-		if ((entry = phar_get_entry_info(phar, path, path_len, for_create && !PHAR_G(readonly) && !phar->is_data ? NULL : error TSRMLS_CC)) == NULL) {
+		if ((entry = phar_get_entry_info(phar, path, path_len, for_create && !PHAR_G(readonly) && !phar->is_data ? NULL : error, security TSRMLS_CC)) == NULL) {
 			if (for_create && (!PHAR_G(readonly) || phar->is_data)) {
 				return SUCCESS;
 			}
@@ -608,7 +613,7 @@ int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char 
 /**
  * Create a new dummy file slot within a writeable phar for a newly created file
  */
-phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, char *mode, char allow_dir, char **error TSRMLS_DC) /* {{{ */
+phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, char *mode, char allow_dir, char **error, int security TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry, etemp;
@@ -626,7 +631,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 		return NULL;
 	}
 
-	if (FAILURE == phar_get_entry_data(&ret, fname, fname_len, path, path_len, mode, allow_dir, error TSRMLS_CC)) {
+	if (FAILURE == phar_get_entry_data(&ret, fname, fname_len, path, path_len, mode, allow_dir, error, security TSRMLS_CC)) {
 		return NULL;
 	} else if (ret) {
 		return ret;
@@ -1118,9 +1123,9 @@ char * phar_decompress_filter(phar_entry_info * entry, int return_unknown) /* {{
 /**
  * retrieve information on a file contained within a phar, or null if it ain't there
  */
-phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int path_len, char **error TSRMLS_DC) /* {{{ */
+phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int path_len, char **error, int security TSRMLS_DC) /* {{{ */
 {
-	return phar_get_entry_info_dir(phar, path, path_len, 0, error TSRMLS_CC);
+	return phar_get_entry_info_dir(phar, path, path_len, 0, error, security TSRMLS_CC);
 }
 /* }}} */
 /**
@@ -1128,7 +1133,7 @@ phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int pa
  * allow_dir is 0 for none, 1 for both empty directories in the phar and temp directories, and 2 for only
  * valid pre-existing empty directory entries
  */
-phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, int path_len, char dir, char **error TSRMLS_DC) /* {{{ */
+phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, int path_len, char dir, char **error, int security TSRMLS_DC) /* {{{ */
 {
 	const char *pcr_error;
 	phar_entry_info *entry;
@@ -1144,6 +1149,12 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 		*error = NULL;
 	}
 
+	if (security && path_len >= sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
+		if (error) {
+			spprintf(error, 4096, "phar error: cannot directly access magic \".phar\" directory or files within it");
+		}
+		return NULL;
+	}
 	if (!path_len && !dir) {
 		if (error) {
 			spprintf(error, 4096, "phar error: invalid path \"%s\" must not be empty", path);

@@ -40,7 +40,6 @@ unlink(dirname(__FILE__) . '/zfapp.tgz');
 unlink(dirname(__FILE__) . '/zfapp.phar.tar.gz');
 ?>
 --EXPECTF--
-phar://%szfapp.phar.tar.gz/.phar/stub.php
 phar://%szfapp.phar.tar.gz/application/default/controllers/ErrorController.php
 phar://%szfapp.phar.tar.gz/application/default/controllers/IndexController.php
 phar://%szfapp.phar.tar.gz/application/default/views/scripts/error/error.phtml
