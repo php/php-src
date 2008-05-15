@@ -1,3 +1,21 @@
+2008-05-14  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      tests/bug38469.phpt
+      tests/bug41372.phpt
+      tests/bug43128.phpt:
+      fix test titles
+
+    * tests/bug38469.phpt
+      tests/bug38469.phpt
+      tests/bug41372.phpt
+      tests/bug41372.phpt
+      tests/bug42859.phpt
+      tests/bug42859.phpt
+      tests/bug43128.phpt
+      tests/bug43128.phpt:
+      fix test names
+
 2008-05-12  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)

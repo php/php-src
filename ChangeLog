@@ -1,3 +1,155 @@
+2008-05-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      
+      BFn
+
+2008-05-14  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      ext/phar/dirstream.c
+      ext/phar/func_interceptors.c
+      ext/phar/phar.c
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/shortarc.php
+      ext/phar/stream.c
+      ext/phar/stub.h
+      ext/phar/util.c
+      ext/phar/tests/phar_commitwrite.phpt
+      ext/phar/tests/phar_convert_repeated.phpt
+      ext/phar/tests/phar_create_in_cwd.phpt
+      ext/phar/tests/phar_createdefaultstub.phpt
+      ext/phar/tests/phar_setdefaultstub.phpt
+      ext/phar/tests/files/phar_test.inc
+      ext/phar/tests/tar/phar_convert_phar.phpt
+      ext/phar/tests/tar/phar_convert_phar2.phpt
+      ext/phar/tests/zip/phar_convert_phar.phpt:
+      - MFH
+      - Make internal code forward-compatible. This included a binary cast in
+      the default stub, hence test updates.
+
+    * ext/phar/dirstream.c
+      ext/phar/func_interceptors.c
+      ext/phar/phar.c
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/shortarc.php
+      ext/phar/stream.c
+      ext/phar/stub.h
+      ext/phar/util.c
+      ext/phar/tests/010.phpt
+      ext/phar/tests/011.phpt
+      ext/phar/tests/014.phpt
+      ext/phar/tests/phar_commitwrite.phpt
+      ext/phar/tests/phar_convert_repeated.phpt
+      ext/phar/tests/phar_create_in_cwd.phpt
+      ext/phar/tests/phar_createdefaultstub.phpt
+      ext/phar/tests/phar_setdefaultstub.phpt
+      ext/phar/tests/tar/phar_convert_phar.phpt
+      ext/phar/tests/tar/phar_convert_phar2.phpt
+      ext/phar/tests/zip/phar_convert_phar.phpt
+      ext/phar/tests/zip/phar_stub.phpt
+      ext/phar/tests/zip/phar_stub_error.phpt
+      ext/phar/tests/zip/refcount1.phpt
+      ext/phar/tests/zip/files/corrupt_zipmaker.php.inc:
+      - Make internal code back-compatible. This included a binary cast in the
+      default stub, hence many test updates.
+      - Just over a third of tests pass. Test manifests are broken currently.
+
+2008-05-14  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/tests/strings/bug42866.phpt:
+      and the last one..
+
+    * (PHP_5_2)
+      ext/soap/tests/bugs/bug42151.phpt
+      ext/standard/tests/array/bug42850.phpt
+      ext/standard/tests/file/bug43248.phpt
+      ext/standard/tests/general_functions/bug42272.phpt:
+      fixed more titles
+
+    * (PHP_5_2)
+      ZendEngine2/tests/bug38469.phpt
+      ZendEngine2/tests/bug41372.phpt
+      ZendEngine2/tests/bug43128.phpt
+      ext/dom/tests/bug34276.phpt
+      ext/dom/tests/bug35342.phpt
+      ext/soap/tests/bugs/bug42214.phpt
+      ext/standard/tests/general_functions/bug44394.phpt
+      ext/xml/tests/bug43957.phpt:
+      fix test titles
+
+    * ZendEngine2/tests/bug38469.phpt
+      ZendEngine2/tests/bug38469.phpt
+      ZendEngine2/tests/bug41372.phpt
+      ZendEngine2/tests/bug41372.phpt
+      ZendEngine2/tests/bug42859.phpt
+      ZendEngine2/tests/bug42859.phpt
+      ZendEngine2/tests/bug43128.phpt
+      ZendEngine2/tests/bug43128.phpt
+      ext/dom/tests/bug34276.phpt
+      ext/dom/tests/bug34276.phpt
+      ext/dom/tests/bug35342.phpt
+      ext/dom/tests/bug35342.phpt
+      ext/soap/tests/bugs/bug42214.phpt
+      ext/soap/tests/bugs/bug42214.phpt
+      ext/standard/tests/general_functions/bug44394.phpt
+      ext/xml/tests/bug43957.phpt
+      ext/xml/tests/bug43957.phpt:
+      fix test names
+
+2008-05-14  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/pdo/pdo_stmt.c
+      ext/pdo/pdo_stmt.c
+      ext/pdo/tests/pdorow.phpt
+      ext/pdo/tests/pdorow.phpt:
+      - MFH: Add check for avoid segfault when trying instantiate PDORow manually
+
+    * ext/pdo/pdo_stmt.c
+      ext/pdo/tests/pdorow.phpt
+      ext/pdo/tests/pdorow.phpt
+      ext/pdo/tests/pdorow.phpt:
+      - Add check for avoid segfault when trying instantiate PDORow manually
+
+2008-05-14  Matt Wilmas  <php_lists@realplain.com>
+
+    * win32/build/buildconf.js:
+      MFB: The "Steph special" :-) to allow plain 'configure' to be used
+
+    * win32/build/template.rc:
+      MFB: Steph's changes; to fix build failure after confutils.js changes
+      (PRODUCT_NAME being undefined)
+
+2008-05-14  Elizabeth Marie Smith  <emsmith@elizabethmariesmith.com>
+
+    * ext/ereg/config.w32
+      ext/libxml/config.w32
+      ext/mysqlnd/config.w32
+      ext/zlib/config.w32
+      sapi/apache2filter/config.w32
+      sapi/apache2handler/config.w32
+      sapi/isapi/config.w32
+      win32/build/confutils.js:
+      MFB and steph's pecl fixes into confutils
+
+    * (PHP_5_3)
+      ext/ereg/config.w32
+      ext/libxml/config.w32
+      ext/mysqlnd/config.w32
+      ext/zlib/config.w32
+      sapi/apache2filter/config.w32
+      sapi/apache2handler/config.w32
+      sapi/isapi/config.w32
+      win32/build/confutils.js:
+      Windows configure fixes, a few additional lib names allowed, apache2 only
+      on for zts builds since apache on win is always threaded, isapi no longer
+      stops configure in non-zts mode, look for _debug for debug libraries when
+      debug is enabled
+
 2008-05-13  Felipe Pena  <felipensp@gmail.com>
 
     * ext/phar/tests/frontcontroller10.phpt
