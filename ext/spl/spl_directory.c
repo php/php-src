@@ -298,6 +298,7 @@ static zend_object_value spl_filesystem_object_clone(zval *zobject TSRMLS_DC)
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 	spl_filesystem_object *intern;
 	spl_filesystem_object *source;
+	int index;
 
 	old_object = zend_objects_get_address(zobject TSRMLS_CC);
 	source = (spl_filesystem_object*)old_object;
@@ -316,6 +317,11 @@ static zend_object_value spl_filesystem_object_clone(zval *zobject TSRMLS_DC)
 		break;
 	case SPL_FS_DIR:
 		spl_filesystem_dir_open(intern, source->_path_type, source->_path, source->_path_len TSRMLS_CC);
+		/* read until we hit the position in which we were before */
+		for(index = 0; index < source->u.dir.index; ++index) {
+			spl_filesystem_dir_read(intern TSRMLS_CC);
+		}
+		intern->u.dir.index = index;
 		break;
 	case SPL_FS_FILE:
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "An object of class %v cannot be cloned", old_object->ce->name);
