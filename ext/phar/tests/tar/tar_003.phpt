@@ -55,16 +55,12 @@ closedir($tar);
 --EXPECT--
 hi there!
 dir
-.phar
-dir
 dir
 dir
 internal
 file
 tar_003.phpt
 second round
-dir
-.phar
 dir
 dir
 dir
