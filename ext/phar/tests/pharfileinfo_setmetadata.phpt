@@ -16,16 +16,6 @@ $tar = $phar->convertToData(Phar::TAR);
 
 $b = $phar['a/b'];
 try {
-$tar['a/b']->setMetadata('hi');
-} catch (Exception $e) {
-echo $e->getMessage(), "\n";
-}
-try {
-$tar['a/b']->delMetadata();
-} catch (Exception $e) {
-echo $e->getMessage(), "\n";
-}
-try {
 $phar['a']->setMetadata('hi');
 } catch (Exception $e) {
 echo $e->getMessage(), "\n";
@@ -54,8 +44,6 @@ $b->setMetadata(1,2,3);
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar'); ?>
 --EXPECTF--
-Cannot set metadata, not possible with tar-based phar archives
-Cannot delete metadata, not possible with tar-based phar archives
 Phar entry is a temporary directory (not an actual entry in the archive), cannot set metadata
 Phar entry is a temporary directory (not an actual entry in the archive), cannot delete metadata
 Write operations disabled by phar.readonly INI setting
