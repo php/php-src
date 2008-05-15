@@ -1999,6 +1999,7 @@ static zval *phar_convert_to_other(phar_archive_data *source, int convert, char 
 			newentry.tmp = estrdup(newentry.tmp);
 			goto no_copy;
 		}
+		newentry.metadata_str.c = 0;
 		if (FAILURE == phar_copy_file_contents(&newentry, phar->fp TSRMLS_CC)) {
 			zend_hash_destroy(&(phar->manifest));
 			php_stream_close(phar->fp);
@@ -3537,11 +3538,7 @@ PHP_METHOD(Phar, setMetadata)
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by INI setting");
 		return;
 	}
-	if (phar_obj->arc.archive->is_tar) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Cannot set metadata, not possible with tar-based phar archives");
-		return;
-	}
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &metadata) == FAILURE) {
 		return;
 	}
@@ -3553,6 +3550,7 @@ PHP_METHOD(Phar, setMetadata)
 
 	MAKE_STD_ZVAL(phar_obj->arc.archive->metadata);
 	ZVAL_ZVAL(phar_obj->arc.archive->metadata, metadata, 1, 0);
+	phar_obj->arc.archive->is_modified = 1;
 
 	phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 	if (error) {
@@ -3574,14 +3572,11 @@ PHP_METHOD(Phar, delMetadata)
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by INI setting");
 		return;
 	}
-	if (phar_obj->arc.archive->is_tar) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Cannot delete metadata, not possible with tar-based phar archives");
-		return;
-	}
+
 	if (phar_obj->arc.archive->metadata) {
 		zval_ptr_dtor(&phar_obj->arc.archive->metadata);
 		phar_obj->arc.archive->metadata = NULL;
+		phar_obj->arc.archive->is_modified = 1;
 
 		phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 		if (error) {
@@ -4117,11 +4112,6 @@ PHP_METHOD(PharFileInfo, setMetadata)
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by phar.readonly INI setting");
 		return;
 	}
-	if (entry_obj->ent.entry->is_tar) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Cannot set metadata, not possible with tar-based phar archives");
-		return;
-	}
 	if (entry_obj->ent.entry->is_temp_dir) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
 			"Phar entry is a temporary directory (not an actual entry in the archive), cannot set metadata"); \
@@ -4139,6 +4129,8 @@ PHP_METHOD(PharFileInfo, setMetadata)
 	MAKE_STD_ZVAL(entry_obj->ent.entry->metadata);
 	ZVAL_ZVAL(entry_obj->ent.entry->metadata, metadata, 1, 0);
 
+	entry_obj->ent.entry->is_modified = 1;
+	entry_obj->ent.entry->phar->is_modified = 1;
 	phar_flush(entry_obj->ent.entry->phar, 0, 0, 0, &error TSRMLS_CC);
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
@@ -4159,11 +4151,6 @@ PHP_METHOD(PharFileInfo, delMetadata)
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Write operations disabled by phar.readonly INI setting");
 		return;
 	}
-	if (entry_obj->ent.entry->is_tar) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Cannot delete metadata, not possible with tar-based phar archives");
-		return;
-	}
 	if (entry_obj->ent.entry->is_temp_dir) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
 			"Phar entry is a temporary directory (not an actual entry in the archive), cannot delete metadata"); \
@@ -4172,6 +4159,8 @@ PHP_METHOD(PharFileInfo, delMetadata)
 	if (entry_obj->ent.entry->metadata) {
 		zval_ptr_dtor(&entry_obj->ent.entry->metadata);
 		entry_obj->ent.entry->metadata = NULL;
+		entry_obj->ent.entry->is_modified = 1;
+		entry_obj->ent.entry->phar->is_modified = 1;
 
 		phar_flush(entry_obj->ent.entry->phar, 0, 0, 0, &error TSRMLS_CC);
 		if (error) {

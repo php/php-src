@@ -123,21 +123,11 @@ $a->setMetadata('a');
 } catch (Exception $e) {
 echo $e->getMessage() . "\n";
 }
-try {
-$b->setMetadata('a');
-} catch (Exception $e) {
-echo $e->getMessage() . "\n";
-}
 ini_set('phar.readonly', 0);
 $a->setMetadata(1,2);
 ini_set('phar.readonly', 1);
 try {
 $a->delMetadata();
-} catch (Exception $e) {
-echo $e->getMessage() . "\n";
-}
-try {
-$b->delMetadata();
 } catch (Exception $e) {
 echo $e->getMessage() . "\n";
 }
@@ -202,9 +192,7 @@ Warning: Phar::addFile() expects parameter 1 to be string, array given in %sbadp
 
 Warning: Phar::addFromString() expects exactly 2 parameters, 1 given in %sbadparameters.php on line %d
 Write operations disabled by INI setting
-Cannot set metadata, not possible with tar-based phar archives
 
 Warning: Phar::setMetadata() expects exactly 1 parameter, 2 given in %sbadparameters.php on line %d
 Write operations disabled by INI setting
-Cannot delete metadata, not possible with tar-based phar archives
 ===DONE===
