@@ -5,6 +5,7 @@ SPL: SplPriorityQueue: std operations and extract flags
 --FILE--
 <?php
 $pq = new SplPriorityQueue();
+echo $pq->getExtractFlags()."\n";
 
 // errors
 try {
@@ -25,6 +26,7 @@ echo "EXTR_BOTH\n";
 
 $pq1 = new SplPriorityQueue();
 $pq1->setExtractFlags(SplPriorityQueue::EXTR_BOTH);
+echo $pq1->getExtractFlags()."\n";
 
 $pq1->insert("a", 1);
 $pq1->insert("b", 2);
@@ -38,6 +40,7 @@ echo "EXTR_DATA\n";
 
 $pq2 = new SplPriorityQueue();
 $pq2->setExtractFlags(SplPriorityQueue::EXTR_DATA);
+echo $pq2->getExtractFlags()."\n";
 
 $pq2->insert("a", 1);
 $pq2->insert("b", 2);
@@ -51,6 +54,7 @@ echo "EXTR_PRIORITY\n";
 
 $pq3 = new SplPriorityQueue();
 $pq3->setExtractFlags(SplPriorityQueue::EXTR_PRIORITY);
+echo $pq3->getExtractFlags()."\n";
 
 $pq3->insert("a", 1);
 $pq3->insert("b", 2);
@@ -64,11 +68,13 @@ foreach ($pq3 as $k=>$v) {
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
+1
 Exception: Can't extract from an empty heap
 3=>b
 2=>a
 1=>c
 EXTR_BOTH
+3
 3=>Array
 (
     [data] => b
@@ -88,10 +94,12 @@ EXTR_BOTH
 )
 
 EXTR_DATA
+1
 3=>b
 2=>a
 1=>c
 EXTR_PRIORITY
+2
 3=>2
 2=>1
 1=>0
