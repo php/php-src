@@ -38,7 +38,14 @@ class myIterator implements Iterator
 try {
 	chdir(dirname(__FILE__));
 	$phar = new Phar(dirname(__FILE__) . '/buildfromiterator.phar');
-	var_dump($phar->buildFromIterator(new myIterator(array('a' => basename(__FILE__, 'php') . 'phpt'))));
+	var_dump($phar->buildFromIterator(new myIterator(
+		array(
+			'a' => basename(__FILE__, 'php') . 'phpt',
+			// demonstrate that none of these are added
+			'.phar/stub.php' => basename(__FILE__, 'php') . 'phpt',
+			'.phar/alias.txt' => basename(__FILE__, 'php') . 'phpt',
+			'.phar/oops' => basename(__FILE__, 'php') . 'phpt',
+		))));
 } catch (Exception $e) {
 	var_dump(get_class($e));
 	echo $e->getMessage() . "\n";
@@ -52,6 +59,18 @@ __HALT_COMPILER();
 ?>
 --EXPECTF--
 rewind
+valid
+current
+key
+next
+valid
+current
+key
+next
+valid
+current
+key
+next
 valid
 current
 key

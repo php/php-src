@@ -196,8 +196,9 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 	ALLOC_HASHTABLE(data);
 	zend_hash_init(data, 64, zend_get_hash_value, NULL, 0);
 
-	if (*dir == '/' && dirlen == 1 && (manifest->nNumOfElements == 0)) {
+	if ((*dir == '/' && dirlen == 1 && (manifest->nNumOfElements == 0)) || (dirlen >= sizeof(".phar")-1 && !memcmp(dir, ".phar", sizeof(".phar")-1))) {
 		/* make empty root directory for empty phar */
+		/* make empty directory for .phar magic directory */
 		efree(dir);
 		return php_stream_alloc(&phar_dir_ops, data, NULL, "r");
 	}
@@ -217,6 +218,13 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 		}
 		if (*dir == '/') {
 			/* root directory */
+			if (keylen >= sizeof(".phar")-1 && !memcmp(str_key, ".phar", sizeof(".phar")-1)) {
+				/* do not add any magic entries to this directory */
+				if (SUCCESS != zend_hash_move_forward(manifest)) {
+					break;
+				}
+				continue;
+			}
 			if (NULL != (found = (char *) memchr(str_key, '/', keylen))) {
 				/* the entry has a path separator and is a subdirectory */
 				entry = (char *) safe_emalloc(found - str_key, 1, 1);
@@ -446,7 +454,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, char *url_from, int mode, in
 		return FAILURE;
 	}
 
-	if ((e = phar_get_entry_info_dir(phar, resource->path + 1, strlen(resource->path + 1), 2, &error TSRMLS_CC))) {
+	if ((e = phar_get_entry_info_dir(phar, resource->path + 1, strlen(resource->path + 1), 2, &error, 1 TSRMLS_CC))) {
 		/* directory exists, or is a subdirectory of an existing file */
 		if (e->is_temp_dir) {
 			efree(e->filename);
@@ -462,7 +470,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, char *url_from, int mode, in
 		php_url_free(resource);
 		return FAILURE;
 	}
-	if ((e = phar_get_entry_info_dir(phar, resource->path + 1, strlen(resource->path + 1), 0, &error TSRMLS_CC))) {
+	if ((e = phar_get_entry_info_dir(phar, resource->path + 1, strlen(resource->path + 1), 0, &error, 1 TSRMLS_CC))) {
 		/* entry exists as a file */
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", file already exists", resource->path+1, resource->host);
 		php_url_free(resource);
@@ -565,7 +573,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_
 		return FAILURE;
 	}
 
-	if (!(entry = phar_get_entry_info_dir(phar, resource->path + 1, strlen(resource->path) - 1, 2, &error TSRMLS_CC))) {
+	if (!(entry = phar_get_entry_info_dir(phar, resource->path + 1, strlen(resource->path) - 1, 2, &error, 1 TSRMLS_CC))) {
 		if (error) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot remove directory \"%s\" in phar \"%s\", %s", resource->path+1, resource->host, error);
 			efree(error);

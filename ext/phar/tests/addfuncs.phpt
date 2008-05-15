@@ -28,6 +28,16 @@ $phar->addFile(dirname(__FILE__) . '/does/not/exist');
 } catch (Exception $e) {
 echo $e->getMessage() . "\n";
 }
+try {
+$phar->addFile($pname . '/a', '.phar/stub.php');
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
+try {
+$phar->addFromString('.phar/stub.php', 'hi');
+} catch (Exception $e) {
+echo $e->getMessage() . "\n";
+}
 ?>
 ===DONE===
 --CLEAN--
@@ -38,4 +48,6 @@ hi
 Entry phar://%saddfuncs.phar.php/a does not exist and cannot be created: phar error: invalid path "phar://%saddfuncs.phar.php/a" contains double slash
 Entry a does not exist and cannot be created: phar error: file "a" in phar "%saddfuncs.phar.php" cannot be opened for writing, readable file pointers are open
 phar error: unable to open file "%s/does/not/exist" to add to phar archive
+Cannot create any files in magic ".phar" directory
+Cannot create any files in magic ".phar" directory
 ===DONE===

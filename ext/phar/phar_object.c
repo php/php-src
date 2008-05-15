@@ -327,7 +327,7 @@ static void phar_do_404(char *fname, int fname_len, char *f404, int f404_len, ch
 	phar_entry_data *phar;
 	char *error;
 	if (f404_len) {
-		if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, f404, f404_len, "r", 0, &error TSRMLS_CC)) {
+		if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, f404, f404_len, "r", 0, &error, 1 TSRMLS_CC)) {
 			if (error) {
 				efree(error);
 			}
@@ -672,7 +672,7 @@ PHP_METHOD(Phar, webPhar)
 			entry = estrndup("/index.php", sizeof("/index.php"));
 			entry_len = sizeof("/index.php")-1;
 		}
-		if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", 0, NULL TSRMLS_CC)) {
+		if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", 0, NULL, 1 TSRMLS_CC)) {
 			phar_do_404(fname, fname_len, f404, f404_len, entry, entry_len TSRMLS_CC);
 			if (free_pathinfo) {
 				efree(path_info);
@@ -711,7 +711,7 @@ PHP_METHOD(Phar, webPhar)
 		}
 	}
 
-	if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", 0, &error TSRMLS_CC)) {
+	if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", 0, &error, 1 TSRMLS_CC)) {
 		phar_do_404(fname, fname_len, f404, f404_len, entry, entry_len TSRMLS_CC);
 #ifdef PHP_WIN32
 		efree(fname);
@@ -1503,11 +1503,30 @@ phar_spl_fileinfo:
 	}
 
 after_open_fp:
-	if (!(data = phar_get_or_create_entry_data(phar_obj->arc.archive->fname, phar_obj->arc.archive->fname_len, str_key, str_key_len, "w+b", 0, &error TSRMLS_CC))) {
+	if (str_key_len >= sizeof(".phar")-1 && !memcmp(str_key, ".phar", sizeof(".phar")-1)) {
+		/* silently skip any files that would be added to the magic .phar directory */
+		if (save) {
+			efree(save);
+		}
+		if (temp) {
+			efree(temp);
+		}
+		if (opened) {
+			efree(opened);
+		}
+		if (close_fp) {
+			php_stream_close(fp);
+		}
+		return ZEND_HASH_APPLY_KEEP;
+	}
+	if (!(data = phar_get_or_create_entry_data(phar_obj->arc.archive->fname, phar_obj->arc.archive->fname_len, str_key, str_key_len, "w+b", 0, &error, 1 TSRMLS_CC))) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s cannot be created: %s", str_key, error);
 		efree(error);
 		if (save) {
 			efree(save);
+		}
+		if (opened) {
+			efree(opened);
 		}
 		if (temp) {
 			efree(temp);
@@ -2992,6 +3011,20 @@ PHP_METHOD(Phar, copy)
 		RETURN_FALSE;
 	}
 
+	if (oldfile_len >= sizeof(".phar")-1 && !memcmp(oldfile, ".phar", sizeof(".phar")-1)) {
+		/* can't copy a meta file */
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"file \"%s\" cannot be copied to file \"%s\", cannot copy Phar meta-file in %s", oldfile, newfile, phar_obj->arc.archive->fname);
+		RETURN_FALSE;
+	}
+
+	if (newfile_len >= sizeof(".phar")-1 && !memcmp(newfile, ".phar", sizeof(".phar")-1)) {
+		/* can't copy a meta file */
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+			"file \"%s\" cannot be copied to file \"%s\", cannot copy to Phar meta-file in %s", oldfile, newfile, phar_obj->arc.archive->fname);
+		RETURN_FALSE;
+	}
+
 	if (!zend_hash_exists(&phar_obj->arc.archive->manifest, oldfile, (uint) oldfile_len) || SUCCESS != zend_hash_find(&phar_obj->arc.archive->manifest, oldfile, (uint) oldfile_len, (void**)&oldentry) || oldentry->is_deleted) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"file \"%s\" cannot be copied to file \"%s\", file does not exist in %s", oldfile, newfile, phar_obj->arc.archive->fname);
@@ -3077,6 +3110,11 @@ PHP_METHOD(Phar, offsetExists)
 				RETURN_FALSE;
 			}
 		}
+
+		if (fname_len >= sizeof(".phar")-1 && !memcmp(fname, ".phar", sizeof(".phar")-1)) {
+			/* none of these are real files, so they don't exist */
+			RETURN_FALSE;
+		}
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -3098,10 +3136,26 @@ PHP_METHOD(Phar, offsetGet)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &fname, &fname_len) == FAILURE) {
 		return;
 	}
-	
-	if (!(entry = phar_get_entry_info_dir(phar_obj->arc.archive, fname, fname_len, 1, &error TSRMLS_CC))) {
+
+	/* security is 0 here so that we can get a better error message than "entry doesn't exist" */
+	if (!(entry = phar_get_entry_info_dir(phar_obj->arc.archive, fname, fname_len, 1, &error, 0 TSRMLS_CC))) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist%s%s", fname, error?", ":"", error?error:"");
 	} else {
+		if (fname_len == sizeof(".phar/stub.php")-1 && !memcmp(fname, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Cannot get stub \".phar/stub.php\" directly in phar \"%s\", use getStub", phar_obj->arc.archive->fname);
+			return;
+		}
+	
+		if (fname_len == sizeof(".phar/alias.txt")-1 && !memcmp(fname, ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Cannot get alias \".phar/alias.txt\" directly in phar \"%s\", use getAlias", phar_obj->arc.archive->fname);
+			return;
+		}
+	
+		if (fname_len >= sizeof(".phar")-1 && !memcmp(fname, ".phar", sizeof(".phar")-1)) {
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Cannot directly get any files or directories in magic \".phar\" directory", phar_obj->arc.archive->fname);
+			return;
+		}
+
 		if (entry->is_temp_dir) {
 			efree(entry->filename);
 			efree(entry);
@@ -3125,7 +3179,12 @@ static void phar_add_file(phar_archive_data *phar, char *filename, int filename_
 	phar_entry_data *data;
 	php_stream *contents_file;
 
-	if (!(data = phar_get_or_create_entry_data(phar->fname, phar->fname_len, filename, filename_len, "w+b", 0, &error TSRMLS_CC))) {
+	if (filename_len >= sizeof(".phar")-1 && !memcmp(filename, ".phar", sizeof(".phar")-1)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Cannot create any files in magic \".phar\" directory", phar->fname);
+		return;
+	}
+
+	if (!(data = phar_get_or_create_entry_data(phar->fname, phar->fname_len, filename, filename_len, "w+b", 0, &error, 1 TSRMLS_CC))) {
 		if (error) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s does not exist and cannot be created: %s", filename, error);
 			efree(error);
@@ -3170,7 +3229,7 @@ static void phar_mkdir(phar_archive_data *phar, char *dirname, int dirname_len T
 	char *error;
 	phar_entry_data *data;
 
-	if (!(data = phar_get_or_create_entry_data(phar->fname, phar->fname_len, dirname, dirname_len, "w+b", 2, &error TSRMLS_CC))) {
+	if (!(data = phar_get_or_create_entry_data(phar->fname, phar->fname_len, dirname, dirname_len, "w+b", 2, &error, 1 TSRMLS_CC))) {
 		if (error) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Directory %s does not exist and cannot be created: %s", dirname, error);
 			efree(error);
@@ -3213,13 +3272,18 @@ PHP_METHOD(Phar, offsetSet)
 		return;
 	}
 
-	if ((phar_obj->arc.archive->is_tar || phar_obj->arc.archive->is_zip) && fname_len == sizeof(".phar/stub.php")-1 && !memcmp(fname, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
+	if (fname_len == sizeof(".phar/stub.php")-1 && !memcmp(fname, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Cannot set stub \".phar/stub.php\" directly in phar \"%s\", use setStub", phar_obj->arc.archive->fname);
 		return;
 	}
 
-	if ((phar_obj->arc.archive->is_tar || phar_obj->arc.archive->is_zip) && fname_len == sizeof(".phar/alias.txt")-1 && !memcmp(fname, ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
+	if (fname_len == sizeof(".phar/alias.txt")-1 && !memcmp(fname, ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Cannot set alias \".phar/alias.txt\" directly in phar \"%s\", use setAlias", phar_obj->arc.archive->fname);
+		return;
+	}
+
+	if (fname_len >= sizeof(".phar")-1 && !memcmp(fname, ".phar", sizeof(".phar")-1)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Cannot set any files or directories in magic \".phar\" directory", phar_obj->arc.archive->fname);
 		return;
 	}
 	phar_add_file(phar_obj->arc.archive, fname, fname_len, cont_str, cont_len, zresource TSRMLS_CC);
@@ -3280,6 +3344,10 @@ PHP_METHOD(Phar, addEmptyDir)
 		return;
 	}
 
+	if (dirname_len >= sizeof(".phar")-1 && !memcmp(dirname, ".phar", sizeof(".phar")-1)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Cannot create a directory in magic \".phar\" directory");
+		return;
+	}
 	phar_mkdir(phar_obj->arc.archive, dirname, dirname_len TSRMLS_CC);
 }
 /* }}} */
@@ -3546,6 +3614,9 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 
 	if (entry->is_mounted) {
 		/* silently ignore mounted entries */
+		return SUCCESS;
+	}
+	if (entry->filename_len >= sizeof(".phar")-1 && !memcmp(entry->filename, ".phar", sizeof(".phar")-1)) {
 		return SUCCESS;
 	}
 	len = spprintf(&fullpath, 0, "%s/%s", dest, entry->filename);
@@ -3834,7 +3905,7 @@ PHP_METHOD(PharFileInfo, __construct)
 		return;
 	}
 
-	if ((entry_info = phar_get_entry_info_dir(phar_data, entry, entry_len, 1, &error TSRMLS_CC)) == NULL) {
+	if ((entry_info = phar_get_entry_info_dir(phar_data, entry, entry_len, 1, &error, 1 TSRMLS_CC)) == NULL) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC,
 			"Cannot access phar file entry '%s' in archive '%s'%s%s", entry, arch, error?", ":"", error?error:"");
 		efree(arch);

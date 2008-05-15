@@ -33,16 +33,6 @@ foreach ($extracted as $out) {
 	echo "$out\n";
 }
 
-$variations = array('phar', '.phar', '/phar', '/.phar', '.phar/stub.php', '.phar/alias.txt', '/stub.php', '/alias.txt', 'stub.php', 'alias.txt');
-
-foreach ($variations as $var) {
-	try {
-		$phar->extractTo(dirname(__FILE__) . '/extract1', $var);
-	} catch (Exception $e) {
-		echo $e->getMessage()."\n";
-	}
-}
-
 ?>
 ===DONE===
 --CLEAN--
@@ -67,14 +57,4 @@ $dir = dirname(__FILE__) . '/extract1/';
 %sextract%csubdir
 %sextract%csubdir%cectory
 %sextract%csubdir%cectory%cfile.txt
-Phar Error: attempted to extract non-existent file "phar" from phar "%stempmanifest2.phar.php"
-Phar Error: attempted to extract non-existent file ".phar" from phar "%stempmanifest2.phar.php"
-Phar Error: attempted to extract non-existent file "/phar" from phar "%stempmanifest2.phar.php"
-Phar Error: attempted to extract non-existent file "/.phar" from phar "%stempmanifest2.phar.php"
-Phar Error: attempted to extract non-existent file ".phar/stub.php" from phar "%stempmanifest2.phar.php"
-Phar Error: attempted to extract non-existent file ".phar/alias.txt" from phar "%stempmanifest2.phar.php"
-Phar Error: attempted to extract non-existent file "/stub.php" from phar "%stempmanifest2.phar.php"
-Phar Error: attempted to extract non-existent file "/alias.txt" from phar "%stempmanifest2.phar.php"
-Phar Error: attempted to extract non-existent file "stub.php" from phar "%stempmanifest2.phar.php"
-Phar Error: attempted to extract non-existent file "alias.txt" from phar "%stempmanifest2.phar.php"
 ===DONE===
