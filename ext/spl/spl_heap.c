@@ -737,7 +737,7 @@ SPL_METHOD(SplPriorityQueue, top)
 }
 /* }}} */
 
-/* {{{ proto int SplPriorityQueue::setIteratorMode($flags) U
+/* {{{ proto int SplPriorityQueue::setExtractFlags($flags) U
  Set the flags of extraction*/
 SPL_METHOD(SplPriorityQueue, setExtractFlags)
 {
@@ -753,6 +753,22 @@ SPL_METHOD(SplPriorityQueue, setExtractFlags)
 	intern->flags = value & SPL_PQUEUE_EXTR_MASK;
 
 	RETURN_LONG(intern->flags);
+}
+/* }}} */
+/* {{{ proto int SplPriorityQueue::getExtractFlags($flags) U
+ Set the flags of extraction*/
+SPL_METHOD(SplPriorityQueue, getExtractFlags)
+{
+	long value;
+	spl_heap_object *intern;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
+	}
+
+	intern = (spl_heap_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	RETURN_LONG(intern->flags & SPL_PQUEUE_EXTR_MASK;);
 }
 /* }}} */
 
@@ -1119,6 +1135,7 @@ static const zend_function_entry spl_funcs_SplPriorityQueue[] = {
 	SPL_ME(SplPriorityQueue, compare,               arginfo_heap_compare,    ZEND_ACC_PUBLIC)
 	SPL_ME(SplPriorityQueue, insert,                arginfo_pqueue_insert,   ZEND_ACC_PUBLIC)
 	SPL_ME(SplPriorityQueue, setExtractFlags,       arginfo_pqueue_setflags, ZEND_ACC_PUBLIC)
+	SPL_ME(SplPriorityQueue, getExtractFlags,       NULL,                    ZEND_ACC_PUBLIC)
 	SPL_ME(SplPriorityQueue, top,                   NULL,                    ZEND_ACC_PUBLIC)
 	SPL_ME(SplPriorityQueue, extract,               NULL,                    ZEND_ACC_PUBLIC)
 	SPL_ME(SplHeap,          count,                 NULL,                    ZEND_ACC_PUBLIC)
