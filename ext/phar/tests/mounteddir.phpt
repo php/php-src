@@ -17,6 +17,11 @@ echo file_get_contents(Phar::running(1) . "/testit/directory"), "\n";
 echo file_get_contents(Phar::running(1) . "/testit/existing.txt"), "\n";
 include "testit/extfile.php";
 include "testit/extfile2.php";
+try {
+Phar::mount(".phar/stub.php", dirname(Phar::running(0)) . "/testit/extfile.php");
+} catch (Exception $e) {
+echo $e->getMessage(),"\n";
+}
 ?>';
 $a['testit/existing.txt'] = 'oops';
 $a->setStub('<?php
@@ -94,6 +99,7 @@ Warning: file_get_contents(phar://%stempmanifest1.phar.php/testit/directory): fa
 oops
 string(%d) "phar://%sextfile.php"
 string(%d) "phar://%sextfile2.php"
+Mounting of .phar/stub.php to %sextfile.php within phar %stests/tempmanifest1.phar.php failed
 .
 ..
 directory

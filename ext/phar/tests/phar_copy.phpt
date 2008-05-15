@@ -57,6 +57,16 @@ echo $e->getMessage() . "\n";
 $p2['a']->compress(Phar::GZ);
 $p2->copy('a', 'd');
 echo $p2['d']->getContent() . "\n";
+try {
+$p2->copy('d', '.phar/stub.php');
+} catch (Exception $e) {
+echo $e->getMessage(),"\n";
+}
+try {
+$p2->copy('.phar/stub.php', 'd');
+} catch (Exception $e) {
+echo $e->getMessage(),"\n";
+}
 ?>
 ===DONE===
 --CLEAN--
@@ -69,4 +79,6 @@ a: hib: hic: hia
 file "notexisting" cannot be copied to file "another", file does not exist in %sphar_copy2.phar.php
 file "a" cannot be copied to file "b", file must not already exist in phar %sphar_copy2.phar.php
 hi
+file "d" cannot be copied to file ".phar/stub.php", cannot copy to Phar meta-file in %sphar_copy2.phar.php
+file ".phar/stub.php" cannot be copied to file "d", cannot copy Phar meta-file in %sphar_copy2.phar.php
 ===DONE===

@@ -27,6 +27,18 @@ catch(Exception $e)
 }
 
 include($pname . $iname);
+
+// extra coverage
+try {
+$p['.phar/oops'] = 'hi';
+} catch (Exception $e) {
+echo $e->getMessage(),"\n";
+}
+try {
+$a = $p['.phar/stub.php'];
+} catch (Exception $e) {
+echo $e->getMessage(),"\n";
+}
 ?>
 ===DONE===
 --CLEAN--
@@ -34,4 +46,6 @@ include($pname . $iname);
 --EXPECT--
 Entry /error/.. does not exist and cannot be created: phar error: invalid path "/error/.." contains upper directory reference
 foobar
+Cannot set any files or directories in magic ".phar" directory
+Entry .phar/stub.php does not exist
 ===DONE===
