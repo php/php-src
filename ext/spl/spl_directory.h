@@ -117,6 +117,7 @@ static inline spl_filesystem_object* spl_filesystem_iterator_to_object(spl_files
 #define SPL_FILE_OBJECT_READ_AHEAD         0x00000002 /* read on rewind/next */
 #define SPL_FILE_OBJECT_SKIP_EMPTY         0x00000006 /* skip empty lines */
 #define SPL_FILE_OBJECT_READ_CSV           0x00000008 /* read via fgetcsv */
+#define SPL_FILE_OBJECT_MASK               0x0000000F /* mask */
 
 #define SPL_FILE_DIR_CURRENT_AS_FILEINFO   0x00000000 /* make RecursiveDirectoryTree::current() return SplFileInfo */
 #define SPL_FILE_DIR_CURRENT_AS_SELF       0x00000010 /* make RecursiveDirectoryTree::current() return getSelf() */
@@ -128,6 +129,9 @@ static inline spl_filesystem_object* spl_filesystem_iterator_to_object(spl_files
 #define SPL_FILE_DIR_KEY_AS_FILENAME       0x00000100 /* make RecursiveDirectoryTree::key() return getFilename() */
 #define SPL_FILE_DIR_KEY_MODE_MASK         0x00000F00 /* mask RecursiveDirectoryTree::key() */
 #define SPL_FILE_DIR_KEY(intern,mode)      ((intern->flags&SPL_FILE_DIR_KEY_MODE_MASK)==mode)
+
+
+#define SPL_FILE_DIR_SKIPDOTS              0x00001000 /* Tells whether it should skip dots or not */
 
 #endif /* SPL_DIRECTORY_H */
 
