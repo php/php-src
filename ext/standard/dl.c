@@ -54,15 +54,14 @@
    Load a PHP extension at runtime */
 PHP_FUNCTION(dl)
 {
-	zval *filename;
+	char *filename;
+	int filename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/", &filename) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &filename, &filename_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv))) == FAILURE) {
 		return;
 	}
-	
-	convert_to_string(filename);
 
-	if (Z_STRLEN_P(filename) >= MAXPATHLEN) {
+	if (filename_len >= MAXPATHLEN) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "File name exceeds the maximum allowed length of %d characters", MAXPATHLEN);
 		RETURN_FALSE;
 	}
@@ -72,10 +71,10 @@ PHP_FUNCTION(dl)
 		(strncmp(sapi_module.name, "embed", 5) != 0)
 	) {
 #ifdef ZTS
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not supported in multithreaded Web servers - use extension=%s in your php.ini", Z_STRVAL_P(filename));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not supported in multithreaded Web servers - use extension=%s in your php.ini", filename);
 		RETURN_FALSE;
 #else
-		php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "dl() is deprecated - use extension=%s in your php.ini", Z_STRVAL_P(filename));
+		php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "dl() is deprecated - use extension=%s in your php.ini", filename);
 #endif
 	}
 
@@ -243,28 +242,13 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now TSRMLS_DC)
 
 /* {{{ php_dl
  */
-PHPAPI void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
+PHPAPI void php_dl(char *file, int type, zval *return_value, int start_now TSRMLS_DC)
 {
-	char *filename;
-	int filename_len;
-	
-	if (Z_TYPE_P(file) == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &filename, &filename_len, Z_USTRVAL_P(file), Z_USTRLEN_P(file), REPORT_ERRORS, FG(default_context))) {
-			return;
-		}
-	} else {
-		filename = Z_STRVAL_P(file);
-	}
-
 	/* Load extension */
-	if (php_load_extension(filename, type, start_now TSRMLS_CC) == FAILURE) {
+	if (php_load_extension(file, type, start_now TSRMLS_CC) == FAILURE) {
 		RETVAL_FALSE;
 	} else {
 		RETVAL_TRUE;
-	}
-
-	if (Z_TYPE_P(file) == IS_UNICODE) {
-		efree(filename);
 	}
 }
 /* }}} */
@@ -276,9 +260,9 @@ PHP_MINFO_FUNCTION(dl)
 
 #else
 
-PHPAPI void php_dl(zval *file, int type, zval *return_value, int start_now TSRMLS_DC)
+PHPAPI void php_dl(char *file, int type, zval *return_value, int start_now TSRMLS_DC)
 {
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot dynamically load %R - dynamic modules are not supported", Z_TYPE_P(file), Z_UNIVAL_P(file));
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", file);
 	RETURN_FALSE;
 }
 
