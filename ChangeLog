@@ -1,3 +1,116 @@
+2008-05-15  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/phar_object.c
+      ext/phar/tar.c
+      ext/phar/tests/badparameters.phpt
+      ext/phar/tests/pharfileinfo_setmetadata.phpt
+      ext/phar/tests/tar/all.phpt:
+      MFB: add full metadata support for tar-based archives and test
+
+    * ext/phar/tests/tar/all.phpt
+      ext/phar/tests/tar/all.phpt:
+      
+      file all.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/phar/phar_object.c
+      ext/phar/tar.c
+      ext/phar/tests/badparameters.phpt
+      ext/phar/tests/pharfileinfo_setmetadata.phpt:
+      add full metadata support for tar-based archives and test
+
+2008-05-15  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/spl_directory.c:
+      Replace the iterator correctly after being cloned (related to #44964)
+
+    * ext/spl/spl_heap.c
+      ext/spl/tests/pqueue_001.phpt:
+      Implement SplPriorityQueue::getExtractFlags()
+
+2008-05-15  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/dirstream.c
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/stream.c
+      ext/phar/util.c
+      ext/phar/tests/030.phpt
+      ext/phar/tests/addfuncs.phpt
+      ext/phar/tests/mkdir.phpt
+      ext/phar/tests/mounteddir.phpt
+      ext/phar/tests/phar_buildfromiterator4.phpt
+      ext/phar/tests/phar_copy.phpt
+      ext/phar/tests/phar_extract2.phpt
+      ext/phar/tests/phar_offset_check.phpt
+      ext/phar/tests/phar_offset_get_error.phpt
+      ext/phar/tests/zf_test.phpt
+      ext/phar/tests/tar/dir.phpt
+      ext/phar/tests/tar/tar_003.phpt:
+      MFB: plug security hole of unfettered creation access to .phar magic
+      directory
+
+    * (PHP_5_3)
+      ext/phar/dirstream.c
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/stream.c
+      ext/phar/util.c
+      ext/phar/tests/030.phpt
+      ext/phar/tests/addfuncs.phpt
+      ext/phar/tests/mkdir.phpt
+      ext/phar/tests/mounteddir.phpt
+      ext/phar/tests/phar_buildfromiterator4.phpt
+      ext/phar/tests/phar_copy.phpt
+      ext/phar/tests/phar_extract2.phpt
+      ext/phar/tests/phar_offset_check.phpt
+      ext/phar/tests/phar_offset_get_error.phpt
+      ext/phar/tests/zf_test.phpt
+      ext/phar/tests/tar/dir.phpt
+      ext/phar/tests/tar/tar_003.phpt:
+      fix potentially major security hole: modification/creation of files in
+      .phar directory enabled in many locations
+      which then allows easy creation of tar/zip-based phar archives with a
+      simple rename even when phar.readonly=1.  Plug the hole very tightly,
+      allowing read access to
+      files, and also excluding them from opendir() output
+
+    * (PHP_5_3)
+      ext/phar/tests/phar_extract2.phpt:
+      make test OS-agnostic
+
+2008-05-15  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * ext/dom/tests/DOMDocument_createAttribute_basic.phpt
+      ext/dom/tests/DOMDocument_createAttribute_error.phpt
+      ext/dom/tests/DOMDocument_createAttribute_error1.phpt
+      ext/dom/tests/DOMDocument_createAttribute_variation.phpt:
+      Tests from Testfest 2008
+
+2008-05-15  Steph Fox  <steph.fox@virgin.net>
+
+    * ext/phar/tests/phar_extract2.phpt
+      ext/phar/tests/phar_extract2.phpt
+      ext/phar/tests/phar_offset_check.phpt
+      ext/phar/tests/phar_offset_check.phpt
+      ext/phar/tests/tar/phar_convert_phar3.phpt:
+      
+      file phar_extract2.phpt was initially added on branch PHP_5_3.
+
+2008-05-15  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * ext/dom/DOMDocument_createAttribute_basic.phpt
+      ext/dom/DOMDocument_createAttribute_basic.phpt
+      ext/dom/DOMDocument_createAttribute_error.phpt
+      ext/dom/DOMDocument_createAttribute_error.phpt
+      ext/dom/DOMDocument_createAttribute_error1.phpt
+      ext/dom/DOMDocument_createAttribute_error1.phpt
+      ext/dom/DOMDocument_createAttribute_variation.phpt
+      ext/dom/DOMDocument_createAttribute_variation.phpt:
+      
+      file DOMDocument_createAttribute_basic.phpt was initially added on branch
+      PHP_5_3.
+
 2008-05-14  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
