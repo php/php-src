@@ -1,7 +1,7 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_ENABLE("phar", "enable phar support", "no");
+ARG_ENABLE("phar", "disable phar support", "shared");
 
 if (PHP_PHAR != "no") {
 	EXTENSION("phar", "dirstream.c func_interceptors.c phar.c phar_object.c phar_path_check.c stream.c tar.c util.c zip.c");
