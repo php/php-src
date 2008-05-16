@@ -1,5 +1,7 @@
 <?php
-date_default_timezone_set("UTC");
+if (function_exists("date_default_timezone_set")) {
+	date_default_timezone_set("UTC");
+}
 
 function simple() {
   $a = 0;
