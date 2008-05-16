@@ -55,9 +55,11 @@ PHP_FUNCTION(dl)
 {
 	zval *filename;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &filename) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/", &filename) == FAILURE) {
 		return;
 	}
+	
+	convert_to_string(filename);
 
 	if (!PG(enable_dl)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Dynamically loaded extensions aren't enabled");
