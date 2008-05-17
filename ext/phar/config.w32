@@ -8,7 +8,5 @@ if (PHP_PHAR != "no") {
 	if (PHP_PHAR_SHARED) {
 		ADD_FLAG("CFLAGS_PHAR", "/D COMPILE_DL_PHAR ");
 	}
-	ADD_EXTENSION_DEP('phar', 'bz2', true);
 	ADD_EXTENSION_DEP('phar', 'spl', true);
-	ADD_EXTENSION_DEP('phar', 'zlib', true);
 }
