@@ -1,3 +1,9 @@
+2008-05-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      bench.php:
+      Make it backward compatibility
+
 2008-05-14  Antony Dovgal  <tony@daylessday.org>
 
     * (PHP_5_2)

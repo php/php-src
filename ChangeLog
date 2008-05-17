@@ -1,3 +1,78 @@
+2008-05-16  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * ext/dom/tests/DOMDocumentFragment_appendXML_hasChildNodes_basic.phpt
+      ext/dom/tests/DOMDocument_loadHTML_basic.phpt
+      ext/dom/tests/DOMDocument_save_basic.phpt
+      ext/dom/tests/DOMNode_hasChildNodes_basic.phpt
+      ext/dom/tests/DOMNode_replaceChild_basic.phpt:
+      Tests from Testfest 2008
+
+    * ext/dom/tests/DOMDocumentFragment_appendXML_hasChildNodes_basic.phpt
+      ext/dom/tests/DOMDocumentFragment_appendXML_hasChildNodes_basic.phpt
+      ext/dom/tests/DOMDocument_loadHTML_basic.phpt
+      ext/dom/tests/DOMDocument_loadHTML_basic.phpt
+      ext/dom/tests/DOMDocument_save_basic.phpt
+      ext/dom/tests/DOMDocument_save_basic.phpt
+      ext/dom/tests/DOMNode_hasChildNodes_basic.phpt
+      ext/dom/tests/DOMNode_hasChildNodes_basic.phpt
+      ext/dom/tests/DOMNode_replaceChild_basic.phpt
+      ext/dom/tests/DOMNode_replaceChild_basic.phpt:
+      
+      file DOMDocumentFragment_appendXML_hasChildNodes_basic.phpt was initially
+      added on branch PHP_5_3.
+
+2008-05-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ZendEngine2/bench.php:
+      Make it backward compatibility
+
+2008-05-16  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/spl_directory.c
+      ext/spl/spl_directory.h
+      ext/spl/tests/dit_004.phpt
+      ext/spl/tests/dit_005.phpt:
+      Fix FilesystemIterator with ./..
+
+2008-05-16  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/file.c:
+      - Changed 'Z' to 's' (parameter parsing), the code didn't check if the
+      parameter is a string.
+
+    * (PHP_5_3)
+      ext/standard/dl.c
+      ext/standard/dl.h:
+      - MFH: Improved fix (used 's' in parameter parsing)
+
+    * ext/standard/dl.c
+      ext/standard/dl.h:
+      - Improved fix (used 's' in parameter parsing)
+
+    * ext/standard/dl.c:
+      - MFB: Added conversion to string.
+
+    * (PHP_5_3)
+      ext/standard/dl.c:
+      - Added conversion to string.
+
+2008-05-16  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/config.m4:
+      cosmetics
+
+    * (PHP_5_3)
+      ext/phar/config.m4
+      ext/phar/config.w32:
+      as discussed on internals, enable phar by default for testing purposes.
+      Phar is enabled as a shared extension by default in order to allow
+      zlib/bz2 to be built shared.  If phar is statically built,
+      both zlib and bz2 must be statically built in order for phar to use them,
+      so default compile as shared is much more flexible
+
 2008-05-15  Greg Beaver  <greg@chiaraquartet.net>
 
     * ext/phar/phar_object.c
