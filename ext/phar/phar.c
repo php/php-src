@@ -25,8 +25,6 @@
 #include "func_interceptors.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(phar)
-int phar_has_bz2;
-int phar_has_zlib;
 #if PHP_VERSION_ID >= 50300
 char *(*phar_save_resolve_path)(const char *filename, int filename_len TSRMLS_DC);
 #endif
@@ -886,7 +884,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 		offset += entry.compressed_filesize;
 		switch (entry.flags & PHAR_ENT_COMPRESSION_MASK) {
 		case PHAR_ENT_COMPRESSED_GZ:
-			if (!phar_has_zlib) {
+			if (!PHAR_G(has_zlib)) {
 				if (entry.metadata) {
 					zval_ptr_dtor(&entry.metadata);
 				}
@@ -895,7 +893,7 @@ int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int 
 			}
 			break;
 		case PHAR_ENT_COMPRESSED_BZ2:
-			if (!phar_has_bz2) {
+			if (!PHAR_G(has_bz2)) {
 				if (entry.metadata) {
 					zval_ptr_dtor(&entry.metadata);
 				}
@@ -1307,7 +1305,7 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 				/* to properly decompress, we have to tell zlib to look for a zlib or gzip header */
 				zval filterparams;
 
-				if (!phar_has_zlib) {
+				if (!PHAR_G(has_zlib)) {
 					MAPPHAR_ALLOC_FAIL("unable to decompress gzipped phar archive \"%s\" to temporary file, enable zlib extension in php.ini")
 				}
 				array_init(&filterparams);
@@ -1358,7 +1356,7 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 				php_stream_filter *filter;
 				php_stream *temp;
 
-				if (!phar_has_bz2) {
+				if (!PHAR_G(has_bz2)) {
 					MAPPHAR_ALLOC_FAIL("unable to decompress bzipped phar archive \"%s\" to temporary file, enable bz2 extension in php.ini")
 				}
 				/* entire file is bzip-compressed, uncompress to temporary file */
@@ -2943,8 +2941,6 @@ PHP_MINIT_FUNCTION(phar) /* {{{ */
 	ZEND_INIT_MODULE_GLOBALS(phar, php_phar_init_globals_module, NULL);
 	REGISTER_INI_ENTRIES();
 
-	phar_has_bz2 = zend_hash_exists(&module_registry, "bz2", sizeof("bz2"));
-	phar_has_zlib = zend_hash_exists(&module_registry, "zlib", sizeof("zlib"));
 	phar_orig_compile_file = zend_compile_file;
 	zend_compile_file = phar_compile_file;
 
@@ -2981,6 +2977,8 @@ void phar_request_initialize(TSRMLS_D) /* {{{ */
 {
 	if (!PHAR_GLOBALS->request_init)
 	{
+		PHAR_G(has_bz2) = zend_hash_exists(&module_registry, "bz2", sizeof("bz2"));
+		PHAR_G(has_zlib) = zend_hash_exists(&module_registry, "zlib", sizeof("zlib"));
 		PHAR_GLOBALS->request_init = 1;
 		PHAR_GLOBALS->request_ends = 0;
 		PHAR_GLOBALS->request_done = 0;
@@ -3022,6 +3020,7 @@ PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 
 PHP_MINFO_FUNCTION(phar) /* {{{ */
 {
+	phar_request_initialize(TSRMLS_C);
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Phar: PHP Archive support", "enabled");
 	php_info_print_table_row(2, "Phar EXT version", PHP_PHAR_VERSION);
@@ -3030,12 +3029,12 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 	php_info_print_table_row(2, "Phar-based phar archives", "enabled");
 	php_info_print_table_row(2, "Tar-based phar archives", "enabled");
 	php_info_print_table_row(2, "ZIP-based phar archives", "enabled");
-	if (phar_has_zlib) {
+	if (PHAR_G(has_zlib)) {
 		php_info_print_table_row(2, "gzip compression", "enabled");
 	} else {
 		php_info_print_table_row(2, "gzip compression", "disabled (install ext/zlib)");
 	}
-	if (phar_has_bz2) {
+	if (PHAR_G(has_bz2)) {
 		php_info_print_table_row(2, "bzip2 compression", "enabled");
 	} else {
 		php_info_print_table_row(2, "bzip2 compression", "disabled (install pecl/bz2)");
@@ -3058,8 +3057,6 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
  */
 static zend_module_dep phar_deps[] = {
 	ZEND_MOD_OPTIONAL("apc")
-	ZEND_MOD_OPTIONAL("zlib")
-	ZEND_MOD_OPTIONAL("bz2")
 #if HAVE_SPL
 	ZEND_MOD_REQUIRED("spl")
 #endif

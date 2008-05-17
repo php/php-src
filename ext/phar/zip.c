@@ -326,14 +326,14 @@ foundit:
 				break;
 			case PHAR_ZIP_COMP_DEFLATE :
 				entry.flags |= PHAR_ENT_COMPRESSED_GZ;
-				if (!phar_has_zlib) {
+				if (!PHAR_G(has_zlib)) {
 					efree(entry.filename);
 					PHAR_ZIP_FAIL("zlib extension is required");
 				}
 				break;
 			case PHAR_ZIP_COMP_BZIP2 :
 				entry.flags |= PHAR_ENT_COMPRESSED_BZ2;
-				if (!phar_has_bz2) {
+				if (!PHAR_G(has_bz2)) {
 					efree(entry.filename);
 					PHAR_ZIP_FAIL("bzip2 extension is required");
 				}
