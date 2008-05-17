@@ -137,6 +137,8 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	HashTable   phar_alias_map;
 	HashTable   phar_SERVER_mung_list;
 	int         readonly;
+	int         has_zlib;
+	int         has_bz2;
 	zend_bool   readonly_orig;
 	zend_bool   require_hash_orig;
 	int         request_init;
@@ -347,8 +349,6 @@ union _phar_entry_object {
 #endif
 
 #ifndef PHAR_MAIN
-extern int phar_has_bz2;
-extern int phar_has_zlib;
 # if PHP_VERSION_ID >= 50300
 extern char *(*phar_save_resolve_path)(const char *filename, int filename_len TSRMLS_DC);
 # endif

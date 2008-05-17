@@ -1012,23 +1012,24 @@ PHP_METHOD(Phar, canCompress)
 		return;
 	}
 
+	phar_request_initialize(TSRMLS_C);
 	switch (method) {
 	case PHAR_ENT_COMPRESSED_GZ:
-		if (phar_has_zlib) {
+		if (PHAR_G(has_zlib)) {
 			RETURN_TRUE;
 		} else {
 			RETURN_FALSE;
 		}
 
 	case PHAR_ENT_COMPRESSED_BZ2:
-		if (phar_has_bz2) {
+		if (PHAR_G(has_bz2)) {
 			RETURN_TRUE;
 		} else {
 			RETURN_FALSE;
 		}
 
 	default:
-		if (phar_has_zlib || phar_has_bz2) {
+		if (PHAR_G(has_zlib) || PHAR_G(has_bz2)) {
 			RETURN_TRUE;
 		} else {
 			RETURN_FALSE;
@@ -1227,10 +1228,11 @@ PHP_METHOD(Phar, getSupportedCompression)
 {
 	array_init(return_value);
 
-	if (phar_has_zlib) {
+	phar_request_initialize(TSRMLS_C);
+	if (PHAR_G(has_zlib)) {
 		add_next_index_stringl(return_value, "GZ", 2, 1);
 	}
-	if (phar_has_bz2) {
+	if (PHAR_G(has_bz2)) {
 		add_next_index_stringl(return_value, "BZIP2", 5, 1);
 	}
 }
@@ -2108,7 +2110,7 @@ PHP_METHOD(Phar, convertToExecutable)
 					"Cannot compress entire archive with gzip, zip archives do not support whole-archive compression");
 				return;
 			}
-			if (!phar_has_zlib) {
+			if (!PHAR_G(has_zlib)) {
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 					"Cannot compress entire archive with gzip, enable ext/zlib in php.ini");
 				return;
@@ -2122,7 +2124,7 @@ PHP_METHOD(Phar, convertToExecutable)
 					"Cannot compress entire archive with bz2, zip archives do not support whole-archive compression");
 				return;
 			}
-			if (!phar_has_bz2) {
+			if (!PHAR_G(has_bz2)) {
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 					"Cannot compress entire archive with bz2, enable ext/bz2 in php.ini");
 				return;
@@ -2206,7 +2208,7 @@ PHP_METHOD(Phar, convertToData)
 					"Cannot compress entire archive with gzip, zip archives do not support whole-archive compression");
 				return;
 			}
-			if (!phar_has_zlib) {
+			if (!PHAR_G(has_zlib)) {
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 					"Cannot compress entire archive with gzip, enable ext/zlib in php.ini");
 				return;
@@ -2220,7 +2222,7 @@ PHP_METHOD(Phar, convertToData)
 					"Cannot compress entire archive with bz2, zip archives do not support whole-archive compression");
 				return;
 			}
-			if (!phar_has_bz2) {
+			if (!PHAR_G(has_bz2)) {
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 					"Cannot compress entire archive with bz2, enable ext/bz2 in php.ini");
 				return;
@@ -2746,12 +2748,12 @@ static int phar_test_compression(void *pDest, void *argument TSRMLS_DC) /* {{{ *
 	if (entry->is_deleted) {
 		return ZEND_HASH_APPLY_KEEP;
 	}
-	if (!phar_has_bz2) {
+	if (!PHAR_G(has_bz2)) {
 		if (entry->flags & PHAR_ENT_COMPRESSED_BZ2) {
 			*(int *) argument = 0;
 		}
 	}
-	if (!phar_has_zlib) {
+	if (!PHAR_G(has_zlib)) {
 		if (entry->flags & PHAR_ENT_COMPRESSED_GZ) {
 			*(int *) argument = 0;
 		}
@@ -2810,7 +2812,7 @@ PHP_METHOD(Phar, compress)
 			flags = PHAR_FILE_COMPRESSED_NONE;
 			break;
 		case PHAR_ENT_COMPRESSED_GZ:
-			if (!phar_has_zlib) {
+			if (!PHAR_G(has_zlib)) {
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 					"Cannot compress entire archive with gzip, enable ext/zlib in php.ini");
 				return;
@@ -2819,7 +2821,7 @@ PHP_METHOD(Phar, compress)
 			break;
 	
 		case PHAR_ENT_COMPRESSED_BZ2:
-			if (!phar_has_bz2) {
+			if (!PHAR_G(has_bz2)) {
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 					"Cannot compress entire archive with bz2, enable ext/bz2 in php.ini");
 				return;
@@ -2908,7 +2910,7 @@ PHP_METHOD(Phar, compressFiles)
 
 	switch (method) {
 		case PHAR_ENT_COMPRESSED_GZ:
-			if (!phar_has_zlib) {
+			if (!PHAR_G(has_zlib)) {
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 					"Cannot compress files within archive with gzip, enable ext/zlib in php.ini");
 				return;
@@ -2917,7 +2919,7 @@ PHP_METHOD(Phar, compressFiles)
 			break;
 
 		case PHAR_ENT_COMPRESSED_BZ2:
-			if (!phar_has_bz2) {
+			if (!PHAR_G(has_bz2)) {
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 					"Cannot compress files within archive with bz2, enable ext/bz2 in php.ini");
 				return;
@@ -4256,7 +4258,7 @@ PHP_METHOD(PharFileInfo, compress)
 				return;
 			}
 			if ((entry_obj->ent.entry->flags & PHAR_ENT_COMPRESSED_BZ2) != 0) {
-				if (!phar_has_bz2) {
+				if (!PHAR_G(has_bz2)) {
 					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 						"Cannot compress with gzip compression, file is already compressed with bzip2 compression and bz2 extension is not enabled, cannot decompress");
 					return;
@@ -4269,7 +4271,7 @@ PHP_METHOD(PharFileInfo, compress)
 					return;
 				}
 			}
-			if (!phar_has_zlib) {
+			if (!PHAR_G(has_zlib)) {
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 					"Cannot compress with gzip compression, zlib extension is not enabled");
 				return;
@@ -4284,7 +4286,7 @@ PHP_METHOD(PharFileInfo, compress)
 				return;
 			}
 			if ((entry_obj->ent.entry->flags & PHAR_ENT_COMPRESSED_GZ) != 0) {
-				if (!phar_has_zlib) {
+				if (!PHAR_G(has_zlib)) {
 					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 						"Cannot compress with bzip2 compression, file is already compressed with gzip compression and zlib extension is not enabled, cannot decompress");
 					return;
@@ -4297,7 +4299,7 @@ PHP_METHOD(PharFileInfo, compress)
 					return;
 				}
 			}
-			if (!phar_has_bz2) {
+			if (!PHAR_G(has_bz2)) {
 				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 					"Cannot compress with bzip2 compression, bz2 extension is not enabled");
 				return;
@@ -4350,12 +4352,12 @@ PHP_METHOD(PharFileInfo, decompress)
 			"Cannot compress deleted file");
 		return;
 	}
-	if ((entry_obj->ent.entry->flags & PHAR_ENT_COMPRESSED_GZ) != 0 && !phar_has_zlib) {
+	if ((entry_obj->ent.entry->flags & PHAR_ENT_COMPRESSED_GZ) != 0 && !PHAR_G(has_zlib)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot decompress Gzip-compressed file, zlib extension is not enabled");
 		return;
 	}
-	if ((entry_obj->ent.entry->flags & PHAR_ENT_COMPRESSED_BZ2) != 0 && !phar_has_bz2) {
+	if ((entry_obj->ent.entry->flags & PHAR_ENT_COMPRESSED_BZ2) != 0 && !PHAR_G(has_bz2)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot decompress Bzip2-compressed file, bz2 extension is not enabled");
 		return;
