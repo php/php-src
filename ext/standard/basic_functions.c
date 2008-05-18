@@ -3859,17 +3859,9 @@ static void php_putenv_destructor(putenv_entry *pe)
 		SetEnvironmentVariable(pe->key, "bugbug");
 #endif
 		putenv(pe->previous_value);
-<<<<<<< basic_functions.c
-#if defined(PHP_WIN32) || (defined (__FreeBSD__) && (__FreeBSD__ < 7))
-=======
 # if defined(PHP_WIN32)
->>>>>>> 1.725.2.31.2.71
 		efree(pe->previous_value);
-<<<<<<< basic_functions.c
-#endif
-=======
 # endif
->>>>>>> 1.725.2.31.2.71
 	} else {
 # if HAVE_UNSETENV
 		unsetenv(pe->key);
@@ -4469,13 +4461,8 @@ PHP_FUNCTION(putenv)
 		pe.previous_value = NULL;
 		for (env = environ; env != NULL && *env != NULL; env++) {
 			if (!strncmp(*env, pe.key, pe.key_len) && (*env)[pe.key_len] == '=') {	/* found it */
-<<<<<<< basic_functions.c
-#if defined(PHP_WIN32) || (defined (__FreeBSD__) && (__FreeBSD__ < 7))
-				/* must copy previous value because putenv can free the string without notice */
-=======
 #if defined(PHP_WIN32)
 				/* must copy previous value because MSVCRT's putenv can free the string without notice */
->>>>>>> 1.725.2.31.2.71
 				pe.previous_value = estrdup(*env);
 #else
 				pe.previous_value = *env;
