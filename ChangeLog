@@ -1,3 +1,219 @@
+2008-05-17  David Soria Parra  <dsoria@gmx.net>
+
+    * (PHP_5_2)
+      ext/mcrypt/tests/mcrypt_cbc.phpt
+      ext/mcrypt/tests/mcrypt_cbc.phpt
+      ext/mcrypt/tests/mcrypt_cbf.phpt
+      ext/mcrypt/tests/mcrypt_cbf.phpt
+      ext/mcrypt/tests/mcrypt_create_iv.phpt
+      ext/mcrypt/tests/mcrypt_create_iv.phpt
+      ext/mcrypt/tests/mcrypt_create_iv.phpt~
+      ext/mcrypt/tests/mcrypt_decrypt.phpt
+      ext/mcrypt/tests/mcrypt_ecb.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_algorithms_name.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_block_size.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_iv_size.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_key_size.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_mode_name.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_supported_key_sizes.phpt
+      ext/mcrypt/tests/mcrypt_enc_is_block_algorithm.phpt
+      ext/mcrypt/tests/mcrypt_enc_is_block_algorithm_mode.phpt
+      ext/mcrypt/tests/mcrypt_enc_is_block_mode.phpt
+      ext/mcrypt/tests/mcrypt_enc_self_test.phpt
+      ext/mcrypt/tests/mcrypt_get_block_size.phpt
+      ext/mcrypt/tests/mcrypt_get_cipher_name.phpt
+      ext/mcrypt/tests/mcrypt_get_iv_size.phpt
+      ext/mcrypt/tests/mcrypt_get_key_size.phpt
+      ext/mcrypt/tests/mcrypt_list_algorithms.phpt
+      ext/mcrypt/tests/mcrypt_list_modes.phpt
+      ext/mcrypt/tests/mcrypt_module_get_algo_block_size.phpt
+      ext/mcrypt/tests/mcrypt_module_get_algo_key_size.phpt
+      ext/mcrypt/tests/mcrypt_module_get_supported_key_sizes.phpt
+      ext/mcrypt/tests/mcrypt_module_is_block_algorithm.phpt
+      ext/mcrypt/tests/mcrypt_module_is_block_algorithm_mode.phpt
+      ext/mcrypt/tests/mcrypt_module_is_block_mode.phpt
+      ext/mcrypt/tests/mcrypt_module_open.phpt
+      ext/mcrypt/tests/mcrypt_module_self_test.phpt
+      ext/mcrypt/tests/mcrypt_ofb.phpt:
+      MFH: Tests from Munich PHP Testfest 2008
+
+    * ext/mcrypt/tests/mcrypt_create_iv.phpt~
+      ext/mcrypt/tests/mcrypt_create_iv.phpt~
+      ext/mcrypt/tests/mcrypt_create_iv.phpt~
+      ext/mcrypt/tests/mcrypt_decrypt.phpt
+      ext/mcrypt/tests/mcrypt_ecb.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_algorithms_name.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_block_size.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_iv_size.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_key_size.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_mode_name.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_supported_key_sizes.phpt
+      ext/mcrypt/tests/mcrypt_enc_is_block_algorithm.phpt
+      ext/mcrypt/tests/mcrypt_enc_is_block_algorithm_mode.phpt
+      ext/mcrypt/tests/mcrypt_enc_is_block_mode.phpt
+      ext/mcrypt/tests/mcrypt_enc_self_test.phpt
+      ext/mcrypt/tests/mcrypt_get_block_size.phpt
+      ext/mcrypt/tests/mcrypt_get_cipher_name.phpt
+      ext/mcrypt/tests/mcrypt_get_iv_size.phpt
+      ext/mcrypt/tests/mcrypt_get_key_size.phpt
+      ext/mcrypt/tests/mcrypt_list_algorithms.phpt
+      ext/mcrypt/tests/mcrypt_list_modes.phpt
+      ext/mcrypt/tests/mcrypt_module_get_algo_block_size.phpt
+      ext/mcrypt/tests/mcrypt_module_get_algo_key_size.phpt
+      ext/mcrypt/tests/mcrypt_module_get_supported_key_sizes.phpt
+      ext/mcrypt/tests/mcrypt_module_is_block_algorithm.phpt
+      ext/mcrypt/tests/mcrypt_module_is_block_algorithm_mode.phpt
+      ext/mcrypt/tests/mcrypt_module_is_block_mode.phpt
+      ext/mcrypt/tests/mcrypt_module_open.phpt
+      ext/mcrypt/tests/mcrypt_module_self_test.phpt
+      ext/mcrypt/tests/mcrypt_ofb.phpt:
+        1.1.4;
+      file mcrypt_create_iv.phpt~ was initially added on branch PHP_5_3.
+
+    * ext/mcrypt/tests/mcrypt_cbc.phpt
+      ext/mcrypt/tests/mcrypt_cbc.phpt
+      ext/mcrypt/tests/mcrypt_cbc.phpt
+      ext/mcrypt/tests/mcrypt_cbf.phpt
+      ext/mcrypt/tests/mcrypt_cbf.phpt
+      ext/mcrypt/tests/mcrypt_cbf.phpt
+      ext/mcrypt/tests/mcrypt_create_iv.phpt
+      ext/mcrypt/tests/mcrypt_create_iv.phpt
+      ext/mcrypt/tests/mcrypt_create_iv.phpt
+      ext/mcrypt/tests/mcrypt_decrypt.phpt
+      ext/mcrypt/tests/mcrypt_decrypt.phpt
+      ext/mcrypt/tests/mcrypt_decrypt.phpt
+      ext/mcrypt/tests/mcrypt_ecb.phpt
+      ext/mcrypt/tests/mcrypt_ecb.phpt
+      ext/mcrypt/tests/mcrypt_ecb.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_algorithms_name.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_algorithms_name.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_algorithms_name.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_block_size.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_block_size.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_block_size.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_iv_size.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_iv_size.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_iv_size.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_key_size.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_key_size.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_key_size.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_mode_name.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_mode_name.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_mode_name.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_supported_key_sizes.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_supported_key_sizes.phpt
+      ext/mcrypt/tests/mcrypt_enc_get_supported_key_sizes.phpt
+      ext/mcrypt/tests/mcrypt_enc_is_block_algorithm.phpt
+      ext/mcrypt/tests/mcrypt_enc_is_block_algorithm.phpt
+      ext/mcrypt/tests/mcrypt_enc_is_block_algorithm.phpt
+      ext/mcrypt/tests/mcrypt_enc_is_block_algorithm_mode.phpt
+      ext/mcrypt/tests/mcrypt_enc_is_block_algorithm_mode.phpt
+      ext/mcrypt/tests/mcrypt_enc_is_block_algorithm_mode.phpt
+      ext/mcrypt/tests/mcrypt_enc_is_block_mode.phpt
+      ext/mcrypt/tests/mcrypt_enc_is_block_mode.phpt
+      ext/mcrypt/tests/mcrypt_enc_is_block_mode.phpt
+      ext/mcrypt/tests/mcrypt_enc_self_test.phpt
+      ext/mcrypt/tests/mcrypt_enc_self_test.phpt
+      ext/mcrypt/tests/mcrypt_enc_self_test.phpt
+      ext/mcrypt/tests/mcrypt_get_block_size.phpt
+      ext/mcrypt/tests/mcrypt_get_block_size.phpt
+      ext/mcrypt/tests/mcrypt_get_block_size.phpt
+      ext/mcrypt/tests/mcrypt_get_cipher_name.phpt
+      ext/mcrypt/tests/mcrypt_get_cipher_name.phpt
+      ext/mcrypt/tests/mcrypt_get_cipher_name.phpt
+      ext/mcrypt/tests/mcrypt_get_iv_size.phpt
+      ext/mcrypt/tests/mcrypt_get_iv_size.phpt
+      ext/mcrypt/tests/mcrypt_get_iv_size.phpt
+      ext/mcrypt/tests/mcrypt_get_key_size.phpt
+      ext/mcrypt/tests/mcrypt_get_key_size.phpt
+      ext/mcrypt/tests/mcrypt_get_key_size.phpt
+      ext/mcrypt/tests/mcrypt_list_algorithms.phpt
+      ext/mcrypt/tests/mcrypt_list_algorithms.phpt
+      ext/mcrypt/tests/mcrypt_list_algorithms.phpt
+      ext/mcrypt/tests/mcrypt_list_modes.phpt
+      ext/mcrypt/tests/mcrypt_list_modes.phpt
+      ext/mcrypt/tests/mcrypt_list_modes.phpt
+      ext/mcrypt/tests/mcrypt_module_get_algo_block_size.phpt
+      ext/mcrypt/tests/mcrypt_module_get_algo_block_size.phpt
+      ext/mcrypt/tests/mcrypt_module_get_algo_block_size.phpt
+      ext/mcrypt/tests/mcrypt_module_get_algo_key_size.phpt
+      ext/mcrypt/tests/mcrypt_module_get_algo_key_size.phpt
+      ext/mcrypt/tests/mcrypt_module_get_algo_key_size.phpt
+      ext/mcrypt/tests/mcrypt_module_get_supported_key_sizes.phpt
+      ext/mcrypt/tests/mcrypt_module_get_supported_key_sizes.phpt
+      ext/mcrypt/tests/mcrypt_module_get_supported_key_sizes.phpt
+      ext/mcrypt/tests/mcrypt_module_is_block_algorithm.phpt
+      ext/mcrypt/tests/mcrypt_module_is_block_algorithm.phpt
+      ext/mcrypt/tests/mcrypt_module_is_block_algorithm.phpt
+      ext/mcrypt/tests/mcrypt_module_is_block_algorithm_mode.phpt
+      ext/mcrypt/tests/mcrypt_module_is_block_algorithm_mode.phpt
+      ext/mcrypt/tests/mcrypt_module_is_block_algorithm_mode.phpt
+      ext/mcrypt/tests/mcrypt_module_is_block_mode.phpt
+      ext/mcrypt/tests/mcrypt_module_is_block_mode.phpt
+      ext/mcrypt/tests/mcrypt_module_is_block_mode.phpt
+      ext/mcrypt/tests/mcrypt_module_open.phpt
+      ext/mcrypt/tests/mcrypt_module_open.phpt
+      ext/mcrypt/tests/mcrypt_module_open.phpt
+      ext/mcrypt/tests/mcrypt_module_self_test.phpt
+      ext/mcrypt/tests/mcrypt_module_self_test.phpt
+      ext/mcrypt/tests/mcrypt_module_self_test.phpt
+      ext/mcrypt/tests/mcrypt_ofb.phpt
+      ext/mcrypt/tests/mcrypt_ofb.phpt
+      ext/mcrypt/tests/mcrypt_ofb.phpt:
+        1.1.4;
+      Tests from Munich PHP Testfest 2008
+
+2008-05-17  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/config.m4
+      ext/phar/config.m4
+      ext/phar/config.w32
+      ext/phar/config.w32
+      ext/phar/phar.c
+      ext/phar/phar.c
+      ext/phar/phar_internal.h
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/phar_object.c
+      ext/phar/zip.c
+      ext/phar/zip.c:
+      enable by default statically instead of shared
+      this is done by removing zlib/bz2 explicit dependencies because they are
+      unnecessary
+      we only ever use the stream filter, and the check for existence has
+      been moved to runtime where it is after startup
+
+    * ext/phar/tests/phpinfo_003.phpt:
+      MFB fix test (again)
+
+    * (PHP_5_3)
+      ext/phar/tests/phpinfo_003.phpt:
+      fix test (again)
+
+    * ext/phar/tests/phpinfo_003.phpt:
+      MFB fix test
+
+    * (PHP_5_3)
+      ext/phar/tests/phpinfo_003.phpt:
+      fix test
+
+2008-05-17  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * ext/dom/tests/DOMComment_replaceData_basic.phpt
+      ext/dom/tests/DOMComment_replaceData_error1.phpt
+      ext/dom/tests/DOMComment_replaceData_error2.phpt:
+      Tests from London test fest 2008
+
+    * ext/dom/tests/DOMComment_replaceData_basic.phpt
+      ext/dom/tests/DOMComment_replaceData_basic.phpt
+      ext/dom/tests/DOMComment_replaceData_error1.phpt
+      ext/dom/tests/DOMComment_replaceData_error1.phpt
+      ext/dom/tests/DOMComment_replaceData_error2.phpt
+      ext/dom/tests/DOMComment_replaceData_error2.phpt:
+      
+      file DOMComment_replaceData_basic.phpt was initially added on branch
+      PHP_5_3.
+
 2008-05-16  Zoe Slattery  <zoe.slattery@googlemail.com>
 
     * ext/dom/tests/DOMDocumentFragment_appendXML_hasChildNodes_basic.phpt
