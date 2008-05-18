@@ -555,16 +555,18 @@ PHP_METHOD(Phar, webPhar)
 
 		testit = sapi_getenv("SCRIPT_NAME", sizeof("SCRIPT_NAME")-1 TSRMLS_CC);
 		if (!(pt = strstr(testit, basename))) {
+			efree(testit);
 			return;
 		}
 		path_info = sapi_getenv("PATH_INFO", sizeof("PATH_INFO")-1 TSRMLS_CC);
 		if (path_info) {
-			entry = estrdup(path_info);
+			entry = path_info;
 			entry_len = strlen(entry);
 			spprintf(&path_info, 0, "%s%s", testit, path_info);
 			free_pathinfo = 1;
 		} else {
 			path_info = testit;
+			free_pathinfo = 1;
 			entry = estrndup("", 0);
 			entry_len = 0;
 		}
