@@ -445,7 +445,7 @@ PHP_METHOD(Phar, running)
  */
 PHP_METHOD(Phar, mount)
 {
-	char *fname, *arch, *entry, *path, *actual;
+	char *fname, *arch = NULL, *entry = NULL, *path, *actual;
 	int fname_len, arch_len, entry_len, path_len, actual_len;
 	phar_archive_data **pphar;
 
@@ -467,7 +467,9 @@ PHP_METHOD(Phar, mount)
 carry_on2:
 		if (SUCCESS != zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **)&pphar)) {
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s is not a phar archive, cannot mount", arch);
-			efree(arch);
+			if (arch) {
+				efree(arch);
+			}
 			return;
 		}
 carry_on:
@@ -476,13 +478,17 @@ carry_on:
 			if (path && path == entry) {
 				efree(entry);
 			}
-			efree(arch);
+			if (arch) {
+				efree(arch);
+			}
 			return;
 		}
-		if (path && path == entry) {
+		if (entry && path && path == entry) {
 			efree(entry);
 		}
-		efree(arch);
+		if (arch) {
+			efree(arch);
+		}
 		return;
 	} else if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void **)&pphar)) {
 		goto carry_on;
