@@ -200,10 +200,18 @@ static int spl_filesystem_dir_read(spl_filesystem_object *intern TSRMLS_DC) /* {
 
 #define IS_SLASH_AT(zs, pos) (IS_SLASH(zs[pos]))
 
+static inline int spl_filesystem_is_dot(const char * d_name) /* {{{ */
+{
+	return !strcmp(d_name, ".") || !strcmp(d_name, "..");
+}
+/* }}} */
+
 /* {{{ spl_filesystem_dir_open */
 /* open a directory resource */
 static void spl_filesystem_dir_open(spl_filesystem_object* intern, char *path TSRMLS_DC)
 {
+	int skip_dots = intern->flags & SPL_FILE_DIR_SKIPDOTS;
+
 	intern->type = SPL_FS_DIR;
 	intern->_path_len = strlen(path);
 	intern->u.dir.dirp = php_stream_opendir(path, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
@@ -219,7 +227,9 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, char *path TS
 		/* throw exception: should've been already happened */
 		intern->u.dir.entry.d_name[0] = '\0';
 	} else {
-		spl_filesystem_dir_read(intern TSRMLS_CC);
+		do {
+			spl_filesystem_dir_read(intern TSRMLS_CC);
+		} while (skip_dots && spl_filesystem_is_dot(intern->u.dir.entry.d_name));
 	}
 }
 /* }}} */
@@ -277,12 +287,15 @@ static zend_object_value spl_filesystem_object_clone(zval *zobject TSRMLS_DC)
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 	spl_filesystem_object *intern;
 	spl_filesystem_object *source;
+	int index, skip_dots;
 
 	old_object = zend_objects_get_address(zobject TSRMLS_CC);
 	source = (spl_filesystem_object*)old_object;
 
 	new_obj_val = spl_filesystem_object_new_ex(old_object->ce, &intern TSRMLS_CC);
 	new_object = &intern->std;
+
+	intern->flags = source->flags;
 
 	switch (source->type) {
 	case SPL_FS_INFO:
@@ -293,6 +306,14 @@ static zend_object_value spl_filesystem_object_clone(zval *zobject TSRMLS_DC)
 		break;
 	case SPL_FS_DIR:
 		spl_filesystem_dir_open(intern, source->_path TSRMLS_CC);
+		/* read until we hit the position in which we were before */
+		skip_dots = source->flags & SPL_FILE_DIR_SKIPDOTS;
+		for(index = 0; index < source->u.dir.index; ++index) {
+			do {
+				spl_filesystem_dir_read(intern TSRMLS_CC);
+			} while (skip_dots && spl_filesystem_is_dot(intern->u.dir.entry.d_name));
+		}
+		intern->u.dir.index = index;
 		break;
 	case SPL_FS_FILE:
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "An object of class %s cannot be cloned", old_object->ce->name);
@@ -301,7 +322,6 @@ static zend_object_value spl_filesystem_object_clone(zval *zobject TSRMLS_DC)
 	
 	intern->file_class = source->file_class;
 	intern->info_class = source->info_class;
-	intern->flags = source->flags;
 	intern->oth = source->oth;
 	intern->oth_handler = source->oth_handler;
 
@@ -468,12 +488,6 @@ static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_fil
 	return NULL;
 } /* }}} */
 
-static inline int spl_filesystem_is_dot(const char * d_name) /* {{{ */
-{
-	return !strcmp(d_name, ".") || !strcmp(d_name, "..");
-}
-/* }}} */
-
 static int spl_filesystem_is_invalid_or_dot(const char * d_name) /* {{{ */
 {
 	return d_name[0] == '\0' || spl_filesystem_is_dot(d_name);
@@ -562,6 +576,9 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, int ctor_flag
 		flags = SPL_FILE_DIR_KEY_AS_PATHNAME|SPL_FILE_DIR_CURRENT_AS_SELF;
 		parsed = zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &path, &len);
 	}
+	if (ctor_flags & SPL_FILE_DIR_SKIPDOTS) {
+		flags |= SPL_FILE_DIR_SKIPDOTS;
+	}
 	if (parsed == FAILURE) {
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 		return;
@@ -573,6 +590,7 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, int ctor_flag
 	}
 
 	intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern->flags = flags;
 	if ((ctor_flags & DIT_CTOR_GLOB) && strstr(path, "glob://") != path) {
 		spprintf(&path, 0, "glob://%s", path);
 		spl_filesystem_dir_open(intern, path TSRMLS_CC);
@@ -582,7 +600,6 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, int ctor_flag
 	}
 
 	intern->u.dir.is_recursive = instanceof_function(intern->std.ce, spl_ce_RecursiveDirectoryIterator TSRMLS_CC) ? 1 : 0;
-	intern->flags = flags;
 
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 }
@@ -637,9 +654,12 @@ SPL_METHOD(DirectoryIterator, current)
 SPL_METHOD(DirectoryIterator, next)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	int skip_dots = intern->flags & SPL_FILE_DIR_SKIPDOTS;
 
 	intern->u.dir.index++;
-	spl_filesystem_dir_read(intern TSRMLS_CC);
+	do {
+		spl_filesystem_dir_read(intern TSRMLS_CC);
+	} while (skip_dots && spl_filesystem_is_dot(intern->u.dir.entry.d_name));
 	if (intern->file_name) {
 		efree(intern->file_name);
 		intern->file_name = NULL;
@@ -1071,7 +1091,7 @@ SPL_METHOD(SplFileInfo, getPathInfo)
  Cronstructs a new dir iterator from a path. */
 SPL_METHOD(FilesystemIterator, __construct)
 {
-	spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIT_CTOR_FLAGS);
+	spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIT_CTOR_FLAGS | SPL_FILE_DIR_SKIPDOTS);
 }
 /* }}} */
 
@@ -1091,30 +1111,13 @@ SPL_METHOD(FilesystemIterator, rewind)
 }
 /* }}} */
 
-/* {{{ proto void FilesystemIterator::next()
-   Move to next entry */
-SPL_METHOD(FilesystemIterator, next)
-{
-	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-
-	intern->u.dir.index++;
-	do {
-		spl_filesystem_dir_read(intern TSRMLS_CC);
-	} while (spl_filesystem_is_dot(intern->u.dir.entry.d_name));
-	if (intern->file_name) {
-		efree(intern->file_name);
-		intern->file_name = NULL;
-	}
-}
-/* }}} */
-
 /* {{{ proto int FilesystemIterator::getFlags()
    Get handling flags */
 SPL_METHOD(FilesystemIterator, getFlags)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	RETURN_LONG(intern->flags);
+	RETURN_LONG(intern->flags & (SPL_FILE_DIR_KEY_MODE_MASK | SPL_FILE_DIR_CURRENT_MODE_MASK));
 } /* }}} */
 
 /* {{{ proto void FilesystemIterator::setFlags(long $flags)
@@ -1609,7 +1612,7 @@ ZEND_END_ARG_INFO()
 static const zend_function_entry spl_FilesystemIterator_functions[] = {
 	SPL_ME(FilesystemIterator, __construct,   arginfo_r_dir___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(FilesystemIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(FilesystemIterator, next,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator,  next,          NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(FilesystemIterator, key,           NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(FilesystemIterator, current,       NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(FilesystemIterator, getFlags,      NULL, ZEND_ACC_PUBLIC)
@@ -2033,7 +2036,7 @@ SPL_METHOD(SplFileObject, getFlags)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	RETURN_LONG(intern->flags);
+	RETURN_LONG(intern->flags & SPL_FILE_OBJECT_MASK);
 } /* }}} */
 
 /* {{{ proto void SplFileObject::setMaxLineLen(int max_len)
