@@ -2350,7 +2350,7 @@ PHP_FUNCTION(array_slice)
 	/* ..and the length */
 	if (length < 0) {
 		length = num_in - offset + length;
-	} else if (((unsigned) offset + (unsigned) length) > (unsigned) num_in) {
+	} else if (((unsigned long) offset + (unsigned long) length) > (unsigned) num_in) {
 		length = num_in - offset;
 	}
 
