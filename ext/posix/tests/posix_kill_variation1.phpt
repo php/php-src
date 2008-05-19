@@ -101,25 +101,35 @@ bool(false)
 Arg value 0.5 
 bool(false)
 
-Arg value Array 
-
-Warning: posix_kill() expects parameter 1 to be long, array given in %s on line %d
-bool(false)
+Notice: Array to string conversion in %s on line %d
 
 Arg value Array 
 
 Warning: posix_kill() expects parameter 1 to be long, array given in %s on line %d
 bool(false)
 
-Arg value Array 
-
-Warning: posix_kill() expects parameter 1 to be long, array given in %s on line %d
-bool(false)
+Notice: Array to string conversion in %s on line %d
 
 Arg value Array 
 
 Warning: posix_kill() expects parameter 1 to be long, array given in %s on line %d
 bool(false)
+
+Notice: Array to string conversion in %s on line %d
+
+Arg value Array 
+
+Warning: posix_kill() expects parameter 1 to be long, array given in %s on line %d
+bool(false)
+
+Notice: Array to string conversion in %s on line %d
+
+Arg value Array 
+
+Warning: posix_kill() expects parameter 1 to be long, array given in %s on line %d
+bool(false)
+
+Notice: Array to string conversion in %s on line %d
 
 Arg value Array 
 
@@ -193,25 +203,35 @@ bool(false)
 Arg value 0.5 
 bool(false)
 
-Arg value Array 
-
-Warning: posix_kill() expects parameter 1 to be long, array given in %s on line %d
-bool(false)
+Notice: Array to string conversion in %s on line %d
 
 Arg value Array 
 
 Warning: posix_kill() expects parameter 1 to be long, array given in %s on line %d
 bool(false)
 
-Arg value Array 
-
-Warning: posix_kill() expects parameter 1 to be long, array given in %s on line %d
-bool(false)
+Notice: Array to string conversion in %s on line %d
 
 Arg value Array 
 
 Warning: posix_kill() expects parameter 1 to be long, array given in %s on line %d
 bool(false)
+
+Notice: Array to string conversion in %s on line %d
+
+Arg value Array 
+
+Warning: posix_kill() expects parameter 1 to be long, array given in %s on line %d
+bool(false)
+
+Notice: Array to string conversion in %s on line %d
+
+Arg value Array 
+
+Warning: posix_kill() expects parameter 1 to be long, array given in %s on line %d
+bool(false)
+
+Notice: Array to string conversion in %s on line %d
 
 Arg value Array 
 
