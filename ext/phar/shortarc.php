@@ -114,15 +114,15 @@ class Extract_Phar
     {
         $fp = fopen(__FILE__, 'rb');
         fseek($fp, self::LEN);
-        $L = unpack('V', $a = fread($fp, 4));
-        $m = '';
+        $L = unpack('V', $a = (binary)fread($fp, 4));
+        $m = (binary)'';
 
         do {
             $read = 8192;
             if ($L[1] - strlen($m) < 8192) {
                 $read = $L[1] - strlen($m);
             }
-            $last = fread($fp, $read);
+            $last = (binary)fread($fp, $read);
             $m .= $last;
         } while (strlen($last) && strlen($m) < $L[1]);
 

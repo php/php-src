@@ -9,7 +9,7 @@ phar.readonly=0
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$file = "<?php __HALT_COMPILER(); ?>";
+$file = (binary)"<?php __HALT_COMPILER(); ?>";
 
 $files = array();
 $files['a'] = array('cont' => 'a');
@@ -59,8 +59,8 @@ NULL
 array(2) {
   [0]=>
   int(25)
-  ["foo"]=>
-  string(3) "bar"
+  [u"foo"]=>
+  unicode(3) "bar"
 }
 bool(true)
 string(1) "a"
@@ -72,8 +72,8 @@ NULL
 array(2) {
   [0]=>
   int(25)
-  ["foo"]=>
-  string(3) "bar"
+  [u"foo"]=>
+  unicode(3) "bar"
 }
 bool(true)
 ===DONE===

@@ -23,6 +23,6 @@ unlink(dirname(__FILE__) . '/buildfromdirectory.phar');
 __HALT_COMPILER();
 ?>
 --EXPECT--
-string(24) "UnexpectedValueException"
+unicode(24) "UnexpectedValueException"
 Cannot write to archive - write operations restricted by INI setting
 ===DONE===

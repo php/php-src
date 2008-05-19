@@ -23,6 +23,6 @@ unlink(dirname(__FILE__) . '/buildfromiterator.phar');
 __HALT_COMPILER();
 ?>
 --EXPECT--
-string(24) "UnexpectedValueException"
+unicode(24) "UnexpectedValueException"
 Cannot write out phar archive, phar is read-only
 ===DONE===

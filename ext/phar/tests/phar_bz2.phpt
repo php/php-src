@@ -14,7 +14,7 @@ $pname = 'phar://' . $fname;
 $fname2 = dirname(__FILE__) . '/phar_bz2.2.phar';
 $pname2 = 'phar://' . $fname2;
 
-$file = '<?php
+$file = (binary)'<?php
 Phar::mapPhar();
 var_dump("it worked");
 include "phar://" . __FILE__ . "/tar_004.php";
@@ -53,8 +53,8 @@ echo $e->getMessage(),"\n";
 @unlink(dirname(__FILE__) . '/phar_bz2.2.phar');
 ?>
 --EXPECTF--
-string(9) "it worked"
-string(%d) "phar://%sphar_bz2.phar/tar_004.php"
+unicode(9) "it worked"
+unicode(%d) "phar://%sphar_bz2.phar/tar_004.php"
 bool(true)
 bool(true)
 

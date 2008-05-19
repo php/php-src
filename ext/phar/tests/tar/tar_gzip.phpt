@@ -44,8 +44,8 @@ var_dump($b->isCompressed() == Phar::GZ);
 @unlink(dirname(__FILE__) . '/tar_gzip.phar.tar');
 ?>
 --EXPECTF--
-string(9) "it worked"
-string(%d) "phar://%star_gzip.phar/tar_004.php"
+unicode(9) "it worked"
+unicode(%d) "phar://%star_gzip.phar/tar_004.php"
 bool(true)
 bool(true)
 ===DONE===

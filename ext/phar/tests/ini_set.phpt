@@ -18,11 +18,11 @@ var_dump(ini_get('phar.readonly'));
 __HALT_COMPILER();
 ?>
 --EXPECT--
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
+unicode(1) "1"
+unicode(1) "1"
+unicode(1) "1"
+unicode(1) "1"
+unicode(1) "1"
+unicode(1) "1"
+unicode(1) "1"
+unicode(1) "1"

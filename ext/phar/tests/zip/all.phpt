@@ -53,10 +53,10 @@ string(3) "hi3"
 bool(false)
 bool(true)
 bool(true)
-string(6) "100444"
+unicode(6) "100444"
 string(32) "<?php ok __HALT_COMPILER(); ?>
 "
 string(4) "hime"
-string(8) "hi there"
-string(6) "a meta"
+unicode(8) "hi there"
+unicode(6) "a meta"
 ===DONE===

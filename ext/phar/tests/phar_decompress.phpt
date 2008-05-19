@@ -11,7 +11,7 @@ phar.readonly=0
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '2.phar.gz';
 $pname = 'phar://' . $fname;
-$file = '<?php __HALT_COMPILER(); ?>';
+$file = (binary)'<?php __HALT_COMPILER(); ?>';
 
 $files = array();
 $files['a'] = 'a';
@@ -63,7 +63,7 @@ int(4096)
 %sphar_decompress.phar
 %sphar_decompress.hooba.phar
 
-Warning: Phar::decompress() expects parameter 1 to be string, array given in %sphar_decompress.php on line %d
+Warning: Phar::decompress() expects parameter 1 to be binary string, array given in %sphar_decompress.php on line %d
 Cannot decompress phar archive, phar is read-only
 Cannot decompress zip-based archives with whole-archive compression
 ===DONE===

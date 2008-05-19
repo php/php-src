@@ -37,7 +37,9 @@ include $pname . '/foo';
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php rmdir(dirname(__FILE__) . '/poo');
 --EXPECTF--
-Warning: opendir() expects parameter 1 to be string, array given in %sopendir_edgecases.php on line %d
+Notice: Array to string conversion in %sopendir_edgecases.php on line %d
+
+Warning: opendir(Array): failed to open dir: No such file or directory in %sopendir_edgecases.php on line %d
 .
 ..
 foo

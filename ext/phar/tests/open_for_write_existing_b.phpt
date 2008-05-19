@@ -9,7 +9,7 @@ phar.require_hash=0
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$file = "<?php __HALT_COMPILER(); ?>";
+$file = (binary)"<?php __HALT_COMPILER(); ?>";
 
 $files = array();
 $files['a.php'] = '<?php echo "This is a\n"; ?>';
@@ -24,7 +24,7 @@ function err_handler($errno, $errstr, $errfile, $errline) {
 set_error_handler("err_handler", E_RECOVERABLE_ERROR);
 
 $fp = fopen($pname . '/b/c.php', 'wb');
-fwrite($fp, 'extra');
+fwrite($fp, (binary)'extra');
 fclose($fp);
 include $pname . '/b/c.php';
 ?>
@@ -32,11 +32,10 @@ include $pname . '/b/c.php';
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
-
 Warning: fopen(phar://%sopen_for_write_existing_b.phar.php/b/c.php): failed to open stream: phar error: write operations disabled by INI setting in %sopen_for_write_existing_b.php on line %d
 
-Warning: fwrite(): supplied argument is not a valid stream resource in %spen_for_write_existing_b.php on line %d
+Warning: fwrite() expects parameter 1 to be resource, boolean given in %sopen_for_write_existing_b.php on line %d
 
-Warning: fclose(): supplied argument is not a valid stream resource in %spen_for_write_existing_b.php on line %d
+Warning: fclose(): supplied argument is not a valid stream resource in %sopen_for_write_existing_b.php on line %d
 This is b/c
 ===DONE===

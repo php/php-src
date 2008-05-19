@@ -107,16 +107,16 @@ class tarmaker
 
         $checksum = pack('a8', sprintf('%6s ', decoct($checksum)));
 
-        fwrite($this->tmp, $block . $checksum . $blockend, 512);
+        fwrite($this->tmp, (binary)$block . $checksum . $blockend, 512);
         if (is_resource($fileOrStream)) {
             stream_copy_to_stream($fileOrStream, $this->tmp);
             if ($stat['size'] % 512) {
-                fwrite($this->tmp, str_repeat("\0", 512 - $stat['size'] % 512));
+                fwrite($this->tmp, (binary)str_repeat("\0", 512 - $stat['size'] % 512));
             }
         } else {
-            fwrite($this->tmp, $fileOrStream);
+            fwrite($this->tmp, (binary)$fileOrStream);
             if (strlen($fileOrStream) % 512) {
-                fwrite($this->tmp, str_repeat("\0", 512 - strlen($fileOrStream) % 512));
+                fwrite($this->tmp, (binary)str_repeat("\0", 512 - strlen($fileOrStream) % 512));
             }
         }
     }
@@ -163,7 +163,7 @@ class tarmaker
      */
     function close()
     {
-        fwrite($this->tmp, pack('a1024', ''));
+        fwrite($this->tmp, (binary)pack('a1024', ''));
         fclose($this->tmp);
     }
 }

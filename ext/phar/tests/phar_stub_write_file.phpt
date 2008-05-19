@@ -10,7 +10,7 @@ allow_url_fopen=1
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$stub = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
+$stub = (binary)'<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
 $file = $stub;
 
 $files = array();
@@ -25,7 +25,7 @@ var_dump($stub);
 var_dump($phar->getStub());
 var_dump($phar->getStub() == $stub);
 
-$stub = '<?php echo "second stub\n"; __HALT_COMPILER(); ?>';
+$stub = (binary)'<?php echo "second stub\n"; __HALT_COMPILER(); ?>';
 $sexp = $stub . "\r\n";
 $stub = fopen('data://,'.$stub, 'r');
 $phar->setStub($stub);

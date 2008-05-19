@@ -13,8 +13,7 @@ phar.readonly=0
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar';
 $fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '2.tbz';
 $pname = 'phar://' . $fname;
-$stub = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
-$file = $stub;
+$file = (binary)'<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
 
 $files = array();
 $files['a'] = 'a';

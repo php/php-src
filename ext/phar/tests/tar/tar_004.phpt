@@ -33,6 +33,6 @@ include $fname;
 @unlink(dirname(__FILE__) . '/tar_004.phar.tar');
 ?>
 --EXPECTF--
-string(9) "it worked"
-string(%d) "phar://%star_004.phar.tar/tar_004.php"
+unicode(9) "it worked"
+unicode(%d) "phar://%star_004.phar.tar/tar_004.php"
 ===DONE===

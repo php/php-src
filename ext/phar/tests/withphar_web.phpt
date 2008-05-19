@@ -11,6 +11,6 @@ PATH_INFO=/web.php
 --FILE_EXTERNAL--
 files/nophar.phar
 --EXPECTHEADERS--
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 --EXPECT--
 web

@@ -635,7 +635,12 @@ PHP_METHOD(Phar, webPhar)
 			return;
 		}
 		switch (Z_TYPE_P(retval_ptr)) {
-			case IS_STRING :
+#if PHP_VERSION_ID >= 60000
+			case IS_UNICODE:
+				zval_unicode_to_string(retval_ptr TSRMLS_CC);
+				/* break intentionally omitted */
+#endif
+			case IS_STRING:
 				efree(entry);
 				if (fci.retval_ptr_ptr != &retval_ptr) {
 					entry = estrndup(Z_STRVAL_PP(fci.retval_ptr_ptr), Z_STRLEN_PP(fci.retval_ptr_ptr));
@@ -831,7 +836,12 @@ PHP_METHOD(Phar, webPhar)
 						RETURN_FALSE;
 					}
 					break;
-				case IS_STRING :
+#if PHP_VERSION_ID >= 60000
+				case IS_UNICODE:
+					zval_unicode_to_string(*(val) TSRMLS_CC);
+					/* break intentionally omitted */
+#endif
+				case IS_STRING:
 					PHAR_SET_USER_MIME(PHAR_MIME_OTHER)
 					break;
 				default :
@@ -884,10 +894,18 @@ PHP_METHOD(Phar, mungServer)
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "unable to retrieve array value in Phar::mungServer()");
 			return;
 		}
+
+#if PHP_VERSION_ID >= 60000
+		if (Z_TYPE_PP(data) == IS_UNICODE) {
+			zval_unicode_to_string(*(data) TSRMLS_CC);
+		}
+#endif
+
 		if (Z_TYPE_PP(data) != IS_STRING) {
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Non-string value passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
 			return;
 		}
+
 		if (!php_self && Z_STRLEN_PP(data) == sizeof("PHP_SELF")-1 && !strncmp(Z_STRVAL_PP(data), "PHP_SELF", sizeof("PHP_SELF")-1)) {
 			if (SUCCESS != zend_hash_add_empty_element(&(PHAR_GLOBALS->phar_SERVER_mung_list), "PHP_SELF", sizeof("PHP_SELF")-1)) {
 				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unable to add PHP_SELF to Phar::mungServer() list of values to mung");
@@ -1340,16 +1358,21 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 	}
 	if (!value) {
 		/* failure in get_current_data */
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned no value", ce->name);
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %v returned no value", ce->name);
 		return ZEND_HASH_APPLY_STOP;
 	}
 	switch (Z_TYPE_PP(value)) {
-		case IS_STRING :
+#if PHP_VERSION_ID >= 60000
+		case IS_UNICODE:
+			zval_unicode_to_string(*(value) TSRMLS_CC);
+			/* break intentionally omitted */
+#endif
+		case IS_STRING:
 			break;
-		case IS_RESOURCE :
+		case IS_RESOURCE:
 			php_stream_from_zval_no_verify(fp, value);
 			if (!fp) {
-				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Iterator %s returned an invalid stream handle", ce->name);
+				zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Iterator %v returned an invalid stream handle", ce->name);
 				return ZEND_HASH_APPLY_STOP;
 			}
 			if (iter->funcs->get_current_key) {
@@ -1359,29 +1382,28 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 					return ZEND_HASH_APPLY_STOP;
 				}
 
-				PHAR_STR(key, str_key);
-
 				if (key_type == HASH_KEY_IS_LONG) {
-					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned an invalid key (must return a string)", ce->name);
+					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %v returned an invalid key (must return a string)", ce->name);
 					return ZEND_HASH_APPLY_STOP;
 				}
+				PHAR_STR(key, str_key);
 				save = str_key;
 				if (str_key[str_key_len - 1] == '\0') str_key_len--;
 			} else {
-				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned an invalid key (must return a string)", ce->name);
+				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %v returned an invalid key (must return a string)", ce->name);
 				return ZEND_HASH_APPLY_STOP;
 			}
 			close_fp = 0;
 			opened = (char *) estrndup(str, sizeof("[stream]") + 1);
 			goto after_open_fp;
-		case IS_OBJECT :
+		case IS_OBJECT:
 			if (instanceof_function(Z_OBJCE_PP(value), spl_ce_SplFileInfo TSRMLS_CC)) {
 				char *test = NULL;
 				zval dummy;
 				spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(*value TSRMLS_CC);
 
 				if (!base_len) {
-					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Iterator %s returns an SplFileInfo object, so base directory must be specified", ce->name);
+					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Iterator %v returns an SplFileInfo object, so base directory must be specified", ce->name);
 					return ZEND_HASH_APPLY_STOP;
 				}
 				switch (intern->type) {
@@ -1411,7 +1433,11 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 						goto phar_spl_fileinfo;
 					case SPL_FS_INFO:
 					case SPL_FS_FILE:
+#if PHP_VERSION_ID >= 60000
 						fname = expand_filepath(intern->file_name.s, NULL TSRMLS_CC);
+#else
+						fname = expand_filepath(intern->file_name, NULL TSRMLS_CC);
+#endif
 						fname_len = strlen(fname);
 						save = fname;
 						is_splfileinfo = 1;
@@ -1420,7 +1446,7 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 			}
 			/* fall-through */
 		default :
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned an invalid value (must return a string)", ce->name);
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %v returned an invalid value (must return a string)", ce->name);
 			return ZEND_HASH_APPLY_STOP;
 	}
 
@@ -1447,7 +1473,7 @@ phar_spl_fileinfo:
 				str_key_len--;
 			}
 		} else {
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned a path \"%s\" that is not in the base directory \"%s\"", ce->name, fname, base);
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %v returned a path \"%s\" that is not in the base directory \"%s\"", ce->name, fname, base);
 			if (save) {
 				efree(save);
 				efree(temp);
@@ -1462,22 +1488,21 @@ phar_spl_fileinfo:
 				return ZEND_HASH_APPLY_STOP;
 			}
 
-			PHAR_STR(key, str_key);
-
 			if (key_type == HASH_KEY_IS_LONG) {
-				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned an invalid key (must return a string)", ce->name);
+				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %v returned an invalid key (must return a string)", ce->name);
 				return ZEND_HASH_APPLY_STOP;
 			}
+			PHAR_STR(key, str_key);
 			save = str_key;
 			if (str_key[str_key_len - 1] == '\0') str_key_len--;
 		} else {
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned an invalid key (must return a string)", ce->name);
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %v returned an invalid key (must return a string)", ce->name);
 			return ZEND_HASH_APPLY_STOP;
 		}
 	}
 #if PHP_MAJOR_VERSION < 6
 	if (PG(safe_mode) && (!php_checkuid(fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned a path \"%s\" that safe mode prevents opening", ce->name, fname);
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %v returned a path \"%s\" that safe mode prevents opening", ce->name, fname);
 		if (save) {
 			efree(save);
 		}
@@ -1489,7 +1514,7 @@ phar_spl_fileinfo:
 #endif
 
 	if (php_check_open_basedir(fname TSRMLS_CC)) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned a path \"%s\" that open_basedir prevents opening", ce->name, fname);
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %v returned a path \"%s\" that open_basedir prevents opening", ce->name, fname);
 		if (save) {
 			efree(save);
 		}
@@ -1502,7 +1527,7 @@ phar_spl_fileinfo:
 	/* try to open source file, then create internal phar file and copy contents */
 	fp = php_stream_open_wrapper(fname, "rb", STREAM_MUST_SEEK|0, &opened);
 	if (!fp) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %s returned a file that could not be opened \"%s\"", ce->name, fname);
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %v returned a file that could not be opened \"%s\"", ce->name, fname);
 		if (save) {
 			efree(save);
 		}
@@ -3789,6 +3814,11 @@ PHP_METHOD(Phar, extractTo)
 		switch (Z_TYPE_P(zval_files)) {
 			case IS_NULL:
 				goto all_files;
+#if PHP_VERSION_ID >= 60000
+			case IS_UNICODE:
+				zval_unicode_to_string(zval_files TSRMLS_CC);
+				/* break intentionally omitted */
+#endif
 			case IS_STRING:
 				filename = Z_STRVAL_P(zval_files);
 				filename_len = Z_STRLEN_P(zval_files);
@@ -3802,6 +3832,11 @@ PHP_METHOD(Phar, extractTo)
 					zval **zval_file;
 					if (zend_hash_index_find(Z_ARRVAL_P(zval_files), i, (void **) &zval_file) == SUCCESS) {
 						switch (Z_TYPE_PP(zval_file)) {
+#if PHP_VERSION_ID >= 60000
+							case IS_UNICODE:
+								zval_unicode_to_string(*(zval_file) TSRMLS_CC);
+								/* break intentionally omitted */
+#endif
 							case IS_STRING:
 								break;
 							default:

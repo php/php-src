@@ -10,7 +10,7 @@ phar.readonly=0
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$file = '<?php __HALT_COMPILER(); ?>';
+$file = (binary)'<?php __HALT_COMPILER(); ?>';
 
 $files = array();
 $files['a'] = 'a';

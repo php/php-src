@@ -50,5 +50,5 @@ unlink(dirname(__FILE__) . '/buildfromiterator.phar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--
-Warning: Phar::buildFromIterator() expects parameter 2 to be string, object given in %sphar_buildfromiterator3.php on line %d
+Warning: Phar::buildFromIterator() expects parameter 2 to be binary string, object given in %sphar_buildfromiterator3.php on line %d
 ===DONE===
