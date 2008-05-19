@@ -192,7 +192,6 @@ ZEND_INI_BEGIN()
 	STD_ZEND_INI_BOOLEAN("zend.enable_gc",				"1",	ZEND_INI_ALL,		OnUpdateGCEnabled,      gc_enabled,     zend_gc_globals,        gc_globals)
 
 	/* Unicode .ini entries */
-	STD_ZEND_INI_BOOLEAN("unicode.semantics",			"0",	ZEND_INI_SYSTEM, OnUpdateBool, unicode, zend_unicode_globals, unicode_globals)
 	STD_ZEND_INI_ENTRY("unicode.fallback_encoding",		NULL,	ZEND_INI_ALL, OnUpdateEncoding, fallback_encoding_conv, zend_unicode_globals, unicode_globals)
 	STD_ZEND_INI_ENTRY("unicode.runtime_encoding",		NULL,	ZEND_INI_ALL, OnUpdateEncoding, runtime_encoding_conv, zend_unicode_globals, unicode_globals)
 	STD_ZEND_INI_ENTRY("unicode.script_encoding",		NULL,	ZEND_INI_ALL, OnUpdateEncoding, script_encoding_conv, zend_unicode_globals, unicode_globals)
@@ -965,7 +964,7 @@ static void php_scanner_globals_ctor(zend_php_scanner_globals *scanner_globals_p
 
 static void unicode_globals_ctor(zend_unicode_globals *unicode_globals TSRMLS_DC) /* {{{ */
 {
-	unicode_globals->unicode = 0;
+	unicode_globals->unicode = 1;
 	unicode_globals->utf8_conv = NULL;
 	unicode_globals->ascii_conv = NULL;
 	unicode_globals->fallback_encoding_conv = NULL;
