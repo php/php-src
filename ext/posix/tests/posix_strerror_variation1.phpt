@@ -100,25 +100,35 @@ string(7) "Success"
 Arg value 0.5 
 string(7) "Success"
 
-Arg value Array 
-
-Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
-bool(false)
+Notice: Array to string conversion in %s on line %d
 
 Arg value Array 
 
 Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
 bool(false)
 
-Arg value Array 
-
-Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
-bool(false)
+Notice: Array to string conversion in %s on line %d
 
 Arg value Array 
 
 Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
 bool(false)
+
+Notice: Array to string conversion in %s on line %d
+
+Arg value Array 
+
+Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
+bool(false)
+
+Notice: Array to string conversion in %s on line %d
+
+Arg value Array 
+
+Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
+bool(false)
+
+Notice: Array to string conversion in %s on line %d
 
 Arg value Array 
 
@@ -192,25 +202,35 @@ string(7) "Success"
 Arg value 0.5 
 string(7) "Success"
 
-Arg value Array 
-
-Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
-bool(false)
+Notice: Array to string conversion in %s on line %d
 
 Arg value Array 
 
 Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
 bool(false)
 
-Arg value Array 
-
-Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
-bool(false)
+Notice: Array to string conversion in %s on line %d
 
 Arg value Array 
 
 Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
 bool(false)
+
+Notice: Array to string conversion in %s on line %d
+
+Arg value Array 
+
+Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
+bool(false)
+
+Notice: Array to string conversion in %s on line %d
+
+Arg value Array 
+
+Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
+bool(false)
+
+Notice: Array to string conversion in %s on line %d
 
 Arg value Array 
 
