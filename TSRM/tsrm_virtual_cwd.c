@@ -743,7 +743,7 @@ no_realpath:
 
 	/* Store existent file in realpath cache. */
 #ifdef TSRM_WIN32
-	if (use_cache && !is_unc) {
+	if (use_cache && !is_unc && (use_realpath == CWD_REALPATH)) {
 #else
 	if (use_cache && (use_realpath == CWD_REALPATH)) {
 #endif
