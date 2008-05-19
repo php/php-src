@@ -26,8 +26,9 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 int(1)
-int(1)
+
 Strict Standards: Creating default object from empty value in %s on line %d
+int(1)
 Done
 --UEXPECTF--
 int(1)
