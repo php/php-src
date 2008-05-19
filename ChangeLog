@@ -1,3 +1,125 @@
+2008-05-18  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/phar_object.c
+      ext/phar/tests/config.xml
+      ext/phar/tests/front.phar.phpt
+      ext/phar/tests/files/blog.phar:
+      MFH fix mem leak, add test for previous segfault fix
+
+    * (PHP_5_3)
+      ext/phar/cgidebug
+      ext/phar/phar_object.c
+      ext/phar/tests/config.xml
+      ext/phar/tests/config.xml
+      ext/phar/tests/front.phar.phpt
+      ext/phar/tests/front.phar.phpt
+      ext/phar/tests/files/blog.phar
+      ext/phar/tests/files/blog.phar:
+      fix memleak, add test for previous segfault fix
+
+    * ext/phar/cgidebug
+      ext/phar/phar_object.c:
+      MFB fix segfault
+
+    * (PHP_5_3)
+      ext/phar/phar_object.c:
+      fix segfault, test coming shortly
+
+2008-05-18  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c:
+      - Reverted the accidental previous commit
+
+    * (PHP_5_3)
+      NEWS:
+      - Removed "short_open_tag" entry (the related patch was reverted)
+
+2008-05-18  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      ext/phar/shortarc.php
+      ext/phar/stub.h
+      ext/phar/tests/phar_commitwrite.phpt
+      ext/phar/tests/phar_convert_repeated.phpt
+      ext/phar/tests/phar_create_in_cwd.phpt
+      ext/phar/tests/phar_createdefaultstub.phpt
+      ext/phar/tests/phar_offset_check.phpt
+      ext/phar/tests/phar_setdefaultstub.phpt
+      ext/phar/tests/files/nophar.phar
+      ext/phar/tests/files/phar_test.inc
+      ext/phar/tests/tar/phar_convert_phar.phpt
+      ext/phar/tests/tar/phar_convert_phar2.phpt
+      ext/phar/tests/tar/phar_convert_phar3.phpt
+      ext/phar/tests/tar/files/make_invalid_tar.php.inc
+      ext/phar/tests/tar/files/tarmaker.php.inc
+      ext/phar/tests/zip/phar_convert_phar.phpt:
+      - Keep 5_3 stub and creation files in sync with what I have in CVS HEAD
+      (MFB will likely be tomorrow now)
+
+2008-05-18  David Soria Parra  <dsoria@gmx.net>
+
+    * ext/mcrypt/mcrypt.c
+      ext/mcrypt/mcrypt.c
+      ext/mcrypt/tests/mcrypt_enc_self_test.phpt
+      ext/mcrypt/tests/mcrypt_enc_self_test.phpt:
+      Revert.
+
+    * ext/mcrypt/mcrypt.c
+      ext/mcrypt/tests/mcrypt_enc_self_test.phpt:
+      MFB: Make mcrypt_enc_self_test() return value compatible with documentation
+      and mcrypt_module_self_test()
+
+    * (PHP_5_3)
+      ext/mcrypt/mcrypt.c
+      ext/mcrypt/tests/mcrypt_enc_self_test.phpt:
+      Make mcrypt_enc_self_test() return value compatible with documentation and
+      mcrypt _module_self_test()
+
+2008-05-18  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/basic_functions.c:
+      - MFB: Making compatible with 64bit platform
+
+    * (PHP_5_3)
+      ext/standard/array.c
+      ext/standard/tests/array/array_slice_variation6.phpt:
+      - Making compatible with 64bit plataform
+
+2008-05-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      tests/basic/021.phpt:
+      
+      MFB: Added missing INI handler
+
+    * (PHP_5_3)
+      tests/basic/021.phpt:
+      Added missing INI handler
+
+2008-05-18  David Soria Parra  <dsoria@gmx.net>
+
+    * (PHP_5_2)
+      ext/mcrypt/tests/mcrypt_create_iv.phpt~
+      ext/mcrypt/tests/mcrypt_create_iv.phpt~:
+      Wrong file
+
+2008-05-18  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/spl/spl_directory.c
+      ext/spl/spl_directory.h
+      ext/spl/tests/dit_004.phpt
+      ext/spl/tests/dit_005.phpt:
+      MFH: Fix filesystemiterator with ./.. + add cloning tests
+
+2008-05-18  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/phar/tests/zip/refcount1.phpt:
+      - Added UEXPECTF
+
 2008-05-17  David Soria Parra  <dsoria@gmx.net>
 
     * (PHP_5_2)
