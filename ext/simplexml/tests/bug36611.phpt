@@ -24,9 +24,10 @@ var_dump($val) ;
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECTF--	
 int(1)
 int(1)
+Strict Standards: Creating default object from empty value in %s on line %d
 Done
 --UEXPECTF--
 int(1)
