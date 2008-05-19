@@ -50,9 +50,9 @@ include $alias . '/b/c.php';
 --EXPECTF--
 ===CLOSE===
 object(PharFileInfo)#%d (2) {
-  ["pathName":"SplFileInfo":private]=>
+  [u"pathName":u"SplFileInfo":private]=>
   string(%d) "phar://%srefcount1.phar.zip/b"
-  ["fileName":"SplFileInfo":private]=>
+  [u"fileName":u"SplFileInfo":private]=>
   string(%d) "phar://%srefcount1.phar.zip/b/c.php"
 }
 string(5) "extra"
@@ -60,9 +60,9 @@ string(5) "extra"
 
 Warning: unlink(): phar error: "b/c.php" in phar "%srefcount1.phar.zip", has open file pointers, cannot unlink in %srefcount1.php on line %d
 object(PharFileInfo)#%d (2) {
-  ["pathName":"SplFileInfo":private]=>
+  [u"pathName":u"SplFileInfo":private]=>
   string(%d) "phar://%srefcount1.phar.zip/b"
-  ["fileName":"SplFileInfo":private]=>
+  [u"fileName":u"SplFileInfo":private]=>
   string(%s) "phar://%srefcount1.phar.zip/b/c.php"
 }
 string(5) "extra"
