@@ -1,7 +1,7 @@
 --TEST--
 Phar front controller mime type override, Phar::PHPS tar-based
 --INI--
-default_charset=
+default_charset=UTF-8
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
@@ -11,7 +11,7 @@ PATH_INFO=/a.php
 --FILE_EXTERNAL--
 files/frontcontroller8.phar.tar
 --EXPECTHEADERS--
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 --EXPECT--
 <code><span style="color: #000000">
 <span style="color: #0000BB">&lt;?php&nbsp;</span><span style="color: #007700">function&nbsp;</span><span style="color: #0000BB">hio</span><span style="color: #007700">(){}</span>

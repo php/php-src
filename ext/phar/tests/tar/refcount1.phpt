@@ -15,7 +15,7 @@ $alias = 'phar://' . $fname;
 
 $tar = new tarmaker($fname, 'none');
 $tar->init();
-$tar->addFile('.phar/stub.php', "<?php __HALT_COMPILER(); ?>");
+$tar->addFile('.phar/stub.php', (binary)"<?php __HALT_COMPILER(); ?>");
 
 $files = array();
 
@@ -31,7 +31,7 @@ foreach ($files as $n => $file) {
 $tar->close();
 
 $fp = fopen($alias . '/b/c.php', 'wb');
-fwrite($fp, "extra");
+fwrite($fp, (binary)"extra");
 fclose($fp);
 echo "===CLOSE===\n";
 $phar = new Phar($fname);
@@ -54,9 +54,9 @@ include $alias . '/b/c.php';
 --EXPECTF--
 ===CLOSE===
 object(PharFileInfo)#%d (2) {
-  ["pathName":"SplFileInfo":private]=>
+  [u"pathName":u"SplFileInfo":private]=>
   string(%d) "phar://%srefcount1.phar.tar/b"
-  ["fileName":"SplFileInfo":private]=>
+  [u"fileName":u"SplFileInfo":private]=>
   string(%d) "phar://%srefcount1.phar.tar/b/c.php"
 }
 string(5) "extra"
@@ -64,9 +64,9 @@ string(5) "extra"
 
 Warning: unlink(): phar error: "b/c.php" in phar "%srefcount1.phar.tar", has open file pointers, cannot unlink in %srefcount1.php on line %d
 object(PharFileInfo)#%d (2) {
-  ["pathName":"SplFileInfo":private]=>
+  [u"pathName":u"SplFileInfo":private]=>
   string(%d) "phar://%srefcount1.phar.tar/b"
-  ["fileName":"SplFileInfo":private]=>
+  [u"fileName":u"SplFileInfo":private]=>
   string(%s) "phar://%srefcount1.phar.tar/b/c.php"
 }
 string(5) "extra"

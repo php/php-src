@@ -13,8 +13,7 @@ $dir = dirname(__FILE__) . '/broken.dirname';
 mkdir($dir, 0777);
 
 $fname = $dir . '/dotted_path.phar';
-$stub = Phar::createDefaultStub();
-$file = $stub;
+$file = (binary)Phar::createDefaultStub();
 
 $files = array();
 $files['a'] = 'this is a';

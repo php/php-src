@@ -13,8 +13,7 @@ $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar.gz';
 $fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.tar';
-$stub = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
-$file = $stub;
+$file = (binary)'<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
 
 $files = array();
 $files['a'] = 'a';

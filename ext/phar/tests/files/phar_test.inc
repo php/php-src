@@ -4,7 +4,7 @@ if (function_exists('date_default_timezone_set')) {
 	date_default_timezone_set('UTC');
 }
 
-$manifest = '';
+$manifest = (binary)'';
 $glags = 0;
 
 foreach($files as $name => $cont)
@@ -40,8 +40,8 @@ foreach($files as $name => $cont)
 	if (isset($meta)) $meta = serialize($meta);
 
 	// write manifest entry
-	$manifest .= pack('V', strlen($name)) . $name;
-	$manifest .= pack('VVVVVV', $ulen, $time, $clen, $crc32, $flags|$perm, strlen($meta)) . $meta;
+	$manifest .= pack('V', strlen($name)) . (binary)$name;
+	$manifest .= pack('VVVVVV', $ulen, $time, $clen, $crc32, $flags|$perm, strlen($meta)) . (binary)$meta;
 
 	// globals
 	$gflags |= $flags;
@@ -51,12 +51,14 @@ foreach($files as $name => $cont)
 if (!isset($alias)) $alias = 'hio';
 
 if (isset($pmeta)) $pmeta = serialize($pmeta); else $pmeta = '';
-$manifest = pack('VnVV', count($files), isset($hasdir) ? 0x1110 : 0x1000, $gflags, strlen($alias)) . $alias . pack('V', strlen($pmeta)) . $pmeta . $manifest;
+
+$manifest = pack('VnVV', count($files), isset($hasdir) ? 0x1110 : 0x1000, $gflags, strlen($alias)) . (binary)$alias . pack('V', strlen($pmeta)) . (binary)$pmeta . $manifest;
+$file = (binary)$file;
 $file .= pack('V', strlen($manifest)) . $manifest;
 
 foreach($files as $cont)
 {
-	$file .= $cont;
+	$file .= (binary)$cont;
 }
 
 file_put_contents($fname, $file);

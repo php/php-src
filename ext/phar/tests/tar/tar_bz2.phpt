@@ -47,8 +47,8 @@ var_dump($phar2->isCompressed() == Phar::BZ2);
 @unlink(dirname(__FILE__) . '/tar_bz2.phar.tar');
 ?>
 --EXPECTF--
-string(9) "it worked"
-string(%d) "phar://%star_bz2.phar/tar_004.php"
+unicode(9) "it worked"
+unicode(%d) "phar://%star_bz2.phar/tar_004.php"
 bool(true)
 bool(true)
 ===DONE===

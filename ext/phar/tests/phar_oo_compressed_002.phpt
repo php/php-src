@@ -10,7 +10,7 @@ phar.require_hash=0
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$file = '<?php __HALT_COMPILER(); ?>';
+$file = (binary)'<?php __HALT_COMPILER(); ?>';
 
 $files = array();
 $files['a'] = 'a';
@@ -30,10 +30,10 @@ var_dump($phar['c']->isCompressed());
 
 $context = stream_context_create(array('phar'=>array('compress'=>Phar::GZ)));
 
-file_put_contents($pname . '/b', 'new b');
-file_put_contents($pname . '/c', 'new c', 0, $context);
-file_put_contents($pname . '/d', 'new d');
-file_put_contents($pname . '/e', 'new e', 0, $context);
+file_put_contents($pname . '/b', (binary)'new b');
+file_put_contents($pname . '/c', (binary)'new c', 0, $context);
+file_put_contents($pname . '/d', (binary)'new d');
+file_put_contents($pname . '/e', (binary)'new e', 0, $context);
 
 $phar = new Phar($fname);
 var_dump(file_get_contents($pname . '/a'));

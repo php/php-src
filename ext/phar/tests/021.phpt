@@ -8,7 +8,7 @@ phar.require_hash=0
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$file = "<?php
+$file = (binary)"<?php
 Phar::mapPhar('hio');
 __HALT_COMPILER(); ?>";
 
@@ -56,30 +56,30 @@ array(26) {
   int(-1)
   [12]=>
   int(-1)
-  ["dev"]=>
+  [u"dev"]=>
   int(12)
-  ["ino"]=>
+  [u"ino"]=>
   int(%d)
-  ["mode"]=>
+  [u"mode"]=>
   int(33060)
-  ["nlink"]=>
+  [u"nlink"]=>
   int(1)
-  ["uid"]=>
+  [u"uid"]=>
   int(0)
-  ["gid"]=>
+  [u"gid"]=>
   int(0)
-  ["rdev"]=>
+  [u"rdev"]=>
   int(-1)
-  ["size"]=>
+  [u"size"]=>
   int(1)
-  ["atime"]=>
+  [u"atime"]=>
   int(%d)
-  ["mtime"]=>
+  [u"mtime"]=>
   int(%d)
-  ["ctime"]=>
+  [u"ctime"]=>
   int(%d)
-  ["blksize"]=>
+  [u"blksize"]=>
   int(-1)
-  ["blocks"]=>
+  [u"blocks"]=>
   int(-1)
 }

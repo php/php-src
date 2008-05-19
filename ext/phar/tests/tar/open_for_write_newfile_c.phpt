@@ -28,7 +28,7 @@ $phar->stopBuffering();
 ini_set('phar.readonly', 1);
 
 $fp = fopen($alias . '/b/new.php', 'wb');
-fwrite($fp, 'extra');
+fwrite($fp, (binary)'extra');
 fclose($fp);
 include $alias . '/b/c.php';
 include $alias . '/b/new.php';
@@ -39,10 +39,9 @@ include $alias . '/b/new.php';
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECTF--
-
 Warning: fopen(phar://%sopen_for_write_newfile_c.phar.tar/b/new.php): failed to open stream: phar error: write operations disabled by INI setting in %sopen_for_write_newfile_c.php on line %d
 
-Warning: fwrite(): supplied argument is not a valid stream resource in %sopen_for_write_newfile_c.php on line %d
+Warning: fwrite() expects parameter 1 to be resource, boolean given in %sopen_for_write_newfile_c.php on line %d
 
 Warning: fclose(): supplied argument is not a valid stream resource in %sopen_for_write_newfile_c.php on line %d
 This is b/c

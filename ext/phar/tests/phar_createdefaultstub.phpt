@@ -34,7 +34,7 @@ echo $e->getMessage() . "\n";
 ?>
 ===DONE===
 --EXPECT--
-string(6659) "<?php
+string(6683) "<?php
 
 $web = 'index.php';
 
@@ -144,21 +144,21 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'index.php';
-const LEN = 6661;
+const LEN = 6685;
 
 static function go($return = false)
 {
 $fp = fopen(__FILE__, 'rb');
 fseek($fp, self::LEN);
-$L = unpack('V', $a = fread($fp, 4));
-$m = '';
+$L = unpack('V', $a = (binary)fread($fp, 4));
+$m = (binary)'';
 
 do {
 $read = 8192;
 if ($L[1] - strlen($m) < 8192) {
 $read = $L[1] - strlen($m);
 }
-$last = fread($fp, $read);
+$last = (binary)fread($fp, $read);
 $m .= $last;
 } while (strlen($last) && strlen($m) < $L[1]);
 
@@ -328,7 +328,7 @@ Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
-string(6670) "<?php
+string(6694) "<?php
 
 $web = 'index.php';
 
@@ -438,21 +438,21 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'my/custom/thingy.php';
-const LEN = 6672;
+const LEN = 6696;
 
 static function go($return = false)
 {
 $fp = fopen(__FILE__, 'rb');
 fseek($fp, self::LEN);
-$L = unpack('V', $a = fread($fp, 4));
-$m = '';
+$L = unpack('V', $a = (binary)fread($fp, 4));
+$m = (binary)'';
 
 do {
 $read = 8192;
 if ($L[1] - strlen($m) < 8192) {
 $read = $L[1] - strlen($m);
 }
-$last = fread($fp, $read);
+$last = (binary)fread($fp, $read);
 $m .= $last;
 } while (strlen($last) && strlen($m) < $L[1]);
 
@@ -622,7 +622,7 @@ Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
-int(7050)
+int(7074)
 ============================================================================
 ============================================================================
 Illegal filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
@@ -630,7 +630,7 @@ Illegal filename passed in for stub creation, was 401 characters long, and only 
 ============================================================================
 ============================================================================
 ============================================================================
-string(6672) "<?php
+string(6696) "<?php
 
 $web = 'the/web.php';
 
@@ -740,21 +740,21 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'my/custom/thingy.php';
-const LEN = 6674;
+const LEN = 6698;
 
 static function go($return = false)
 {
 $fp = fopen(__FILE__, 'rb');
 fseek($fp, self::LEN);
-$L = unpack('V', $a = fread($fp, 4));
-$m = '';
+$L = unpack('V', $a = (binary)fread($fp, 4));
+$m = (binary)'';
 
 do {
 $read = 8192;
 if ($L[1] - strlen($m) < 8192) {
 $read = $L[1] - strlen($m);
 }
-$last = fread($fp, $read);
+$last = (binary)fread($fp, $read);
 $m .= $last;
 } while (strlen($last) && strlen($m) < $L[1]);
 
@@ -924,6 +924,6 @@ Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
-int(7050)
+int(7074)
 Illegal web filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
 ===DONE===

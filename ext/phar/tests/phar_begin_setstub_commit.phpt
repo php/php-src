@@ -35,16 +35,16 @@ unlink(dirname(__FILE__) . '/brandnewphar.phar');
 --EXPECT--
 bool(true)
 bool(false)
-string(5) "Hello"
+unicode(5) "Hello"
 string(84) "<?php var_dump("First"); Phar::mapPhar("brandnewphar.phar"); __HALT_COMPILER(); ?>
 "
-string(5) "World"
+unicode(5) "World"
 string(85) "<?php var_dump("Second"); Phar::mapPhar("brandnewphar.phar"); __HALT_COMPILER(); ?>
 "
 ===COMMIT===
 bool(true)
-string(5) "Hello"
-string(5) "World"
+unicode(5) "Hello"
+unicode(5) "World"
 string(85) "<?php var_dump("Second"); Phar::mapPhar("brandnewphar.phar"); __HALT_COMPILER(); ?>
 "
 ===DONE===

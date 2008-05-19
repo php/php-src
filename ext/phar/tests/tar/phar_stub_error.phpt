@@ -16,11 +16,11 @@ $phar->setAlias('hio');
 $phar['a'] = 'a';
 $phar->stopBuffering();
 
-var_dump($stub);
+var_dump((binary)$stub);
 var_dump($phar->getStub());
 var_dump($phar->getStub() == $stub);
 
-$newstub = '<?php echo "second stub\n"; _x_HALT_COMPILER(); ?>';
+$newstub = (binary)'<?php echo "second stub\n"; _x_HALT_COMPILER(); ?>';
 
 try {
 	$phar->setStub($newstub);

@@ -64,8 +64,8 @@ NULL
 array(2) {
   [0]=>
   int(25)
-  ["foo"]=>
-  string(3) "bar"
+  [u"foo"]=>
+  unicode(3) "bar"
 }
 bool(true)
 string(1) "a"
@@ -77,9 +77,9 @@ NULL
 array(2) {
   [0]=>
   int(25)
-  ["foo"]=>
-  string(3) "bar"
+  [u"foo"]=>
+  unicode(3) "bar"
 }
 bool(true)
-string(2) "hi"
+unicode(2) "hi"
 ===DONE===

@@ -27,7 +27,6 @@ echo file_get_contents("foob", true);
 echo file_get_contents("./hi", 0, $context);
 echo file_get_contents("../oops");
 echo file_get_contents("./hi", 0, $context, 50000);
-ini_set("magic_quotes_runtime", 1);
 echo file_get_contents("./hi");
 echo file_get_contents("./hi", 0, $context, 0, 0);
 ?>
@@ -40,7 +39,9 @@ include $pname . '/foo/hi';
 <?php rmdir(dirname(__FILE__) . '/poo'); ?>
 <?php unlink(dirname(__FILE__) . '/foob'); ?>
 --EXPECTF--
-Warning: file_get_contents() expects parameter 1 to be string, array given in %sfgc_edgecases.php on line %d
+Notice: Array to string conversion in %sfgc_edgecases.php on line %d
+
+Warning: file_get_contents(Array): failed to open stream: No such file or directory in %sfgc_edgecases.php on line %d
 blah
 <?php
 echo file_get_contents("foo/" . basename(__FILE__));
@@ -52,7 +53,6 @@ echo file_get_contents("foob", true);
 echo file_get_contents("./hi", 0, $context);
 echo file_get_contents("../oops");
 echo file_get_contents("./hi", 0, $context, 50000);
-ini_set("magic_quotes_runtime", 1);
 echo file_get_contents("./hi");
 echo file_get_contents("./hi", 0, $context, 0, 0);
 ?>
@@ -70,7 +70,6 @@ echo file_get_contents("foob", true);
 echo file_get_contents("./hi", 0, $context);
 echo file_get_contents("../oops");
 echo file_get_contents("./hi", 0, $context, 50000);
-ini_set("magic_quotes_runtime", 1);
 echo file_get_contents("./hi");
 echo file_get_contents("./hi", 0, $context, 0, 0);
 ?>
@@ -79,17 +78,16 @@ Warning: file_get_contents(phar://%sfgc_edgecases.phar.php/oops): failed to open
 
 Warning: file_get_contents(): Failed to seek to position 50000 in the stream in phar://%sfgc_edgecases.phar.php/foo/hi on line %d
 <?php
-echo file_get_contents(\"foo/\" . basename(__FILE__));
+echo file_get_contents("foo/" . basename(__FILE__));
 $context = stream_context_create();
-file_get_contents(\"./hi\", 0, $context, 0, -1);
-echo file_get_contents(\"foob\");
-set_include_path(\"%stests\");
-echo file_get_contents(\"foob\", true);
-echo file_get_contents(\"./hi\", 0, $context);
-echo file_get_contents(\"../oops\");
-echo file_get_contents(\"./hi\", 0, $context, 50000);
-ini_set(\"magic_quotes_runtime\", 1);
-echo file_get_contents(\"./hi\");
-echo file_get_contents(\"./hi\", 0, $context, 0, 0);
+file_get_contents("./hi", 0, $context, 0, -1);
+echo file_get_contents("foob");
+set_include_path("%stests");
+echo file_get_contents("foob", true);
+echo file_get_contents("./hi", 0, $context);
+echo file_get_contents("../oops");
+echo file_get_contents("./hi", 0, $context, 50000);
+echo file_get_contents("./hi");
+echo file_get_contents("./hi", 0, $context, 0, 0);
 ?>
 ===DONE===

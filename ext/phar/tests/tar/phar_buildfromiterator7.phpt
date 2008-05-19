@@ -55,6 +55,6 @@ rewind
 valid
 current
 key
-string(24) "UnexpectedValueException"
+unicode(24) "UnexpectedValueException"
 Iterator myIterator returned a file that could not be opened "phar_buildfromiterator7./oopsie/there.phpt"
 ===DONE===

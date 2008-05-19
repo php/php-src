@@ -35,7 +35,9 @@ include $pname . '/foo/hi';
 <?php rmdir(dirname(__FILE__) . '/poo'); ?>
 <?php unlink(dirname(__FILE__) . '/foob'); ?>
 --EXPECTF--
-Warning: fopen() expects parameter 1 to be string, array given in %sfopen_edgecases2.php on line %d
+Notice: Array to string conversion in %sfopen_edgecases2.php on line %d
+
+Warning: fopen(Array): failed to open stream: No such file or directory in %sfopen_edgecases2.php on line %d
 blah
 test
 

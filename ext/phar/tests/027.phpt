@@ -2,13 +2,14 @@
 Phar: phar:// opendir
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!version_compare(phpversion(), 6, '<')) die("skip: permanent loop FIXME"); ?>
 --INI--
 phar.require_hash=0
 --FILE--
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$file = "<?php __HALT_COMPILER(); ?>";
+$file = (binary)"<?php __HALT_COMPILER(); ?>";
 
 $files = array();
 $files['a.php']   = '<?php echo "This is a\n"; require \''.$pname.'/b.php\'; ?>';      

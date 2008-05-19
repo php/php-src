@@ -134,35 +134,35 @@ echo $e->getMessage() . "\n";
 ?>
 ===DONE===
 --EXPECTF--
-Warning: Phar::mungServer() expects parameter 1 to be array, string given in %sbadparameters.php on line %d
+Warning: Phar::mungServer() expects parameter 1 to be array, Unicode string given in %sbadparameters.php on line %d
 
-Warning: Phar::createDefaultStub() expects parameter 1 to be string, array given in %sbadparameters.php on line %d
+Warning: Phar::createDefaultStub() expects parameter 1 to be binary string, array given in %sbadparameters.php on line %d
 
-Warning: Phar::loadPhar() expects parameter 1 to be string, array given in %sbadparameters.php on line %d
+Warning: Phar::loadPhar() expects parameter 1 to be binary string, array given in %sbadparameters.php on line %d
 
-Warning: Phar::canCompress() expects parameter 1 to be long, string given in %sbadparameters.php on line %d
+Warning: Phar::canCompress() expects parameter 1 to be long, Unicode string given in %sbadparameters.php on line %d
 
-Warning: Phar::__construct() expects parameter 1 to be string, array given in %sbadparameters.php on line %d
+Warning: Phar::__construct() expects parameter 1 to be binary string, array given in %sbadparameters.php on line %d
 
 Warning: Phar::convertToExecutable() expects parameter 1 to be long, array given in %sbadparameters.php on line %d
 
 Warning: Phar::convertToData() expects parameter 1 to be long, array given in %sbadparameters.php on line %d
 
-Warning: PharData::delete() expects parameter 1 to be string, array given in %sbadparameters.php on line %d
+Warning: PharData::delete() expects parameter 1 to be binary string, array given in %sbadparameters.php on line %d
 Cannot write out phar archive, phar is read-only
 Entry oops does not exist and cannot be deleted
 %sfiles/frontcontroller10.phar
 Cannot write out phar archive, phar is read-only
 A Phar alias cannot be set in a plain tar archive
 
-Warning: Phar::setAlias() expects parameter 1 to be string, array given in %sbadparameters.php on line %d
+Warning: Phar::setAlias() expects parameter 1 to be binary string, array given in %sbadparameters.php on line %d
 Cannot change stub, phar is read-only
 A Phar stub cannot be set in a plain tar archive
 
-Warning: Phar::setStub() expects parameter 1 to be string, array given in %sbadparameters.php on line %d
+Warning: Phar::setStub() expects parameter 1 to be binary string, array given in %sbadparameters.php on line %d
 A Phar stub cannot be set in a plain tar archive
 
-Warning: Phar::setDefaultStub() expects parameter 1 to be string, array given in %sbadparameters.php on line %d
+Warning: Phar::setDefaultStub() expects parameter 1 to be binary string, array given in %sbadparameters.php on line %d
 Cannot change stub: phar.readonly=1
 Cannot set signature algorithm, phar is read-only
 Cannot set signature algorithm, not possible with tar-based phar archives
@@ -177,18 +177,18 @@ Phar is readonly, cannot change compression
 Warning: Phar::copy() expects exactly 2 parameters, 1 given in %sbadparameters.php on line %d
 Cannot copy "a" to "b", phar is read-only
 
-Warning: Phar::offsetExists() expects parameter 1 to be string, array given in %sbadparameters.php on line %d
+Warning: Phar::offsetExists() expects parameter 1 to be binary string, array given in %sbadparameters.php on line %d
 
-Warning: Phar::offsetGet() expects parameter 1 to be string, array given in %sbadparameters.php on line %d
+Warning: Phar::offsetGet() expects parameter 1 to be binary string, array given in %sbadparameters.php on line %d
 
 Warning: Phar::offsetSet() expects exactly 2 parameters, 1 given in %sbadparameters.php on line %d
 
-Warning: PharData::offsetUnset() expects parameter 1 to be string, array given in %sbadparameters.php on line %d
+Warning: PharData::offsetUnset() expects parameter 1 to be binary string, array given in %sbadparameters.php on line %d
 Write operations disabled by INI setting
 
-Warning: Phar::addEmptyDir() expects parameter 1 to be string, array given in %sbadparameters.php on line %d
+Warning: Phar::addEmptyDir() expects parameter 1 to be binary string, array given in %sbadparameters.php on line %d
 
-Warning: Phar::addFile() expects parameter 1 to be string, array given in %sbadparameters.php on line %d
+Warning: Phar::addFile() expects parameter 1 to be binary string, array given in %sbadparameters.php on line %d
 
 Warning: Phar::addFromString() expects exactly 2 parameters, 1 given in %sbadparameters.php on line %d
 Write operations disabled by INI setting

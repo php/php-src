@@ -53,33 +53,33 @@ var_dump(ini_get('phar.readonly'));
 ?>
 ===DONE===
 --EXPECT--
-string(1) "0"
-string(1) "0"
-string(1) "1"
-string(1) "1"
+unicode(1) "0"
+unicode(1) "0"
+unicode(1) "1"
+unicode(1) "1"
 bool(true)
 yes
-string(1) "0"
-string(1) "0"
-string(3) "yes"
-string(3) "yes"
+unicode(1) "0"
+unicode(1) "0"
+unicode(3) "yes"
+unicode(3) "yes"
 bool(false)
 on
-string(1) "0"
-string(1) "0"
-string(2) "on"
-string(2) "on"
+unicode(1) "0"
+unicode(1) "0"
+unicode(2) "on"
+unicode(2) "on"
 bool(false)
 true
-string(1) "0"
-string(1) "0"
+unicode(1) "0"
+unicode(1) "0"
 bool(false)
-string(4) "true"
-string(4) "true"
+unicode(4) "true"
+unicode(4) "true"
 0
-string(4) "true"
-string(4) "true"
+unicode(4) "true"
+unicode(4) "true"
 bool(true)
-string(1) "0"
-string(1) "0"
+unicode(1) "0"
+unicode(1) "0"
 ===DONE===

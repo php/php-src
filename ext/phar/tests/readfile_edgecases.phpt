@@ -35,7 +35,9 @@ include $pname . '/foo/hi';
 <?php rmdir(dirname(__FILE__) . '/poo'); ?>
 <?php unlink(dirname(__FILE__) . '/foob'); ?>
 --EXPECTF--
-Warning: readfile() expects parameter 1 to be string, array given in %sreadfile_edgecases.php on line %d
+Notice: Array to string conversion in %sreadfile_edgecases.php on line %d
+
+Warning: readfile(Array): failed to open stream: No such file or directory in %sreadfile_edgecases.php on line %d
 blah
 <?php
 readfile("foo/" . basename(__FILE__));

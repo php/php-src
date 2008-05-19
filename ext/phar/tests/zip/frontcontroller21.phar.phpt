@@ -1,7 +1,7 @@
 --TEST--
 Phar front controller $_SERVER munging success zip-based
 --INI--
-default_charset=
+default_charset=UTF-8
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
@@ -13,7 +13,7 @@ QUERY_STRING=test=hi
 --FILE_EXTERNAL--
 files/frontcontroller12.phar.zip
 --EXPECTHEADERS--
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 --EXPECTF--
 string(10) "/index.php"
 string(10) "/index.php"

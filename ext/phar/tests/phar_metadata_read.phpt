@@ -9,7 +9,7 @@ phar.require_hash=0
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$file = "<?php __HALT_COMPILER(); ?>";
+$file = (binary)"<?php __HALT_COMPILER(); ?>";
 
 $files = array();
 $pmeta = 'hi there';
@@ -53,7 +53,7 @@ string(1) "b"
 string(1) "c"
 string(1) "d"
 bool(true)
-string(8) "hi there"
+unicode(8) "hi there"
 bool(true)
 NULL
 bool(true)
@@ -72,19 +72,19 @@ NULL
 bool(true)
 array(2) {
   [0]=>
-  string(2) "hi"
+  unicode(2) "hi"
   [1]=>
-  string(5) "there"
+  unicode(5) "there"
 }
 bool(true)
 NULL
   meta d
 bool(true)
 array(2) {
-  ["hi"]=>
-  string(5) "there"
-  ["foo"]=>
-  string(3) "bar"
+  [u"hi"]=>
+  unicode(5) "there"
+  [u"foo"]=>
+  unicode(3) "bar"
 }
 bool(true)
 NULL
