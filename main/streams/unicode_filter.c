@@ -153,7 +153,7 @@ static php_stream_filter_status_t php_unicode_from_string_filter(
 			ucnv_toUnicode(data->conv, &destp, (UChar*)((char*)destbuf + destlen), (const char**)&src, src + remaining, NULL, FALSE, &errCode);
 
 			if (errCode != U_ZERO_ERROR) {
-				pefree(destp, data->is_persistent);
+				pefree(destbuf, data->is_persistent);
 				break;
 			}
 
