@@ -2851,8 +2851,9 @@ PHP_METHOD(SoapClient, SoapClient)
 
 		if (zend_ascii_hash_find(ht, "connection_timeout", sizeof("connection_timeout"), (void**)&tmp) == SUCCESS) {
 			convert_to_long(*tmp);
-			if(Z_LVAL_PP(tmp) >= 0) 
+			if(Z_LVAL_PP(tmp) >= 0) {
 		    		client->connection_timeout = Z_LVAL_PP(tmp);
+			}
 		}
 
 		if (context) {
