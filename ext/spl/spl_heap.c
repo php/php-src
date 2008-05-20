@@ -755,11 +755,11 @@ SPL_METHOD(SplPriorityQueue, setExtractFlags)
 	RETURN_LONG(intern->flags);
 }
 /* }}} */
+
 /* {{{ proto int SplPriorityQueue::getExtractFlags($flags) U
  Set the flags of extraction*/
 SPL_METHOD(SplPriorityQueue, getExtractFlags)
 {
-	long value;
 	spl_heap_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
