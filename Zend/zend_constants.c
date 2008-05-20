@@ -337,18 +337,18 @@ ZEND_API int zend_u_get_constant_ex(zend_uchar type, zstr name, uint name_len, z
 		flags &= ZEND_FETCH_CLASS_SILENT;
 	}
 
-	if ((UG(unicode) && (colon.u = u_memrchr(name.u, ':', name_len)) && colon.u > name.u && *(colon.u-1) == ':') ||
-	    (!UG(unicode) && (colon.s = zend_memrchr(name.s, ':', name_len))&& colon.s > name.s && *(colon.s-1) == ':')) {
+	if ((type == IS_UNICODE && (colon.u = u_memrchr(name.u, ':', name_len)) && colon.u > name.u && *(colon.u-1) == ':') ||
+	    (!type == IS_STRING && (colon.s = zend_memrchr(name.s, ':', name_len))&& colon.s > name.s && *(colon.s-1) == ':')) {
 		/* compound constant name */
 		zend_class_entry *ce = NULL;
-		int class_name_len = UG(unicode)?colon.u-name.u-1:colon.s-name.s-1;
+		int class_name_len = (type == IS_UNICODE) ? colon.u-name.u-1 : colon.s-name.s-1;
 		int const_name_len = name_len - class_name_len - 2;
 		zstr constant_name, class_name;
 		zval **ret_constant;
 		zstr lcname;
 		unsigned int lcname_len;
 
-		if (UG(unicode)) {
+		if (type == IS_UNICODE) {
 			constant_name.u = colon.u + 1;
 		} else {
 			constant_name.s = colon.s + 1;
@@ -362,7 +362,7 @@ ZEND_API int zend_u_get_constant_ex(zend_uchar type, zstr name, uint name_len, z
 			}
 		}
 
-		if (UG(unicode)) {
+		if (type == IS_UNICODE) {
 			class_name.u = eustrndup(name.u, class_name_len);
 		} else {
 			class_name.s = estrndup(name.s, class_name_len);
@@ -403,7 +403,7 @@ ZEND_API int zend_u_get_constant_ex(zend_uchar type, zstr name, uint name_len, z
 			unsigned int nsname_len;
 
 			/* Concatenate lowercase namespace name and constant name */
-			if (UG(unicode)) {
+			if (type == IS_UNICODE) {
 				lcname.u = erealloc(lcname.u, UBYTES(lcname_len + 2 + const_name_len + 1));
 				lcname.u[lcname_len] = ':';
 				lcname.u[lcname_len+1] = ':';
@@ -420,7 +420,7 @@ ZEND_API int zend_u_get_constant_ex(zend_uchar type, zstr name, uint name_len, z
 			nsname_len = lcname_len;
 			if (flags & ZEND_FETCH_CLASS_RT_NS_NAME) {
 				/* Remove namespace name */
-				if (UG(unicode)) {
+				if (type == IS_UNICODE) {
 					nsname.u = u_memchr(nsname.u, ':', nsname_len) + 2;
 					nsname_len -= (nsname.u - lcname.u);
 				} else {
