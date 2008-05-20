@@ -5,4 +5,4 @@ __DIR__ constant used with eval()
 eval('echo __DIR__ . "\n";');
 ?>
 --EXPECTF--
-%s/tests/constants
+%stests%sconstants
