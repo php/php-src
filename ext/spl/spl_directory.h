@@ -65,6 +65,7 @@ struct _spl_filesystem_object {
 	spl_other_handler  *oth_handler;
 	char               *_path;
 	int                _path_len;
+	char               *orig_path;
 	char               *file_name;
 	int                file_name_len;
 	SPL_FS_OBJ_TYPE    type;
