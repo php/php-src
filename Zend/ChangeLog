@@ -1,3 +1,9 @@
+2008-05-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend.c:
+      Crossing the Rubicon: remove the unicode.semantics switch and default
+      unicode mode to On.
+
 2008-05-16  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_3)

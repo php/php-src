@@ -1,3 +1,309 @@
+2008-05-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend.c:
+      Crossing the Rubicon: remove the unicode.semantics switch and default
+      unicode mode to On.
+
+2008-05-19  Steph Fox  <steph.fox@virgin.net>
+
+    * ext/phar/tests/zip/refcount1.phpt:
+      - unicodify expected output
+
+    * ext/phar/phar_object.c
+      ext/phar/shortarc.php
+      ext/phar/stub.h
+      ext/phar/tests/008.phpt
+      ext/phar/tests/009.phpt
+      ext/phar/tests/010.phpt
+      ext/phar/tests/011.phpt
+      ext/phar/tests/012.phpt
+      ext/phar/tests/013.phpt
+      ext/phar/tests/014.phpt
+      ext/phar/tests/015.phpt
+      ext/phar/tests/015b.phpt
+      ext/phar/tests/016.phpt
+      ext/phar/tests/016b.phpt
+      ext/phar/tests/017.phpt
+      ext/phar/tests/018.phpt
+      ext/phar/tests/019.phpt
+      ext/phar/tests/019b.phpt
+      ext/phar/tests/019c.phpt
+      ext/phar/tests/020.phpt
+      ext/phar/tests/021.phpt
+      ext/phar/tests/022.phpt
+      ext/phar/tests/023.phpt
+      ext/phar/tests/024.phpt
+      ext/phar/tests/025.phpt
+      ext/phar/tests/026.phpt
+      ext/phar/tests/027.phpt
+      ext/phar/tests/028.phpt
+      ext/phar/tests/029.phpt
+      ext/phar/tests/030.phpt
+      ext/phar/tests/033.phpt
+      ext/phar/tests/033a.phpt
+      ext/phar/tests/badparameters.phpt
+      ext/phar/tests/delete.phpt
+      ext/phar/tests/delete_in_phar.phpt
+      ext/phar/tests/delete_in_phar_b.phpt
+      ext/phar/tests/delete_in_phar_confirm.phpt
+      ext/phar/tests/dir.phpt
+      ext/phar/tests/fgc_edgecases.phpt
+      ext/phar/tests/fopen_edgecases2.phpt
+      ext/phar/tests/frontcontroller10.phpt
+      ext/phar/tests/frontcontroller11.phpt
+      ext/phar/tests/frontcontroller12.phpt
+      ext/phar/tests/frontcontroller13.phpt
+      ext/phar/tests/frontcontroller15.phpt
+      ext/phar/tests/frontcontroller16.phpt
+      ext/phar/tests/frontcontroller2.phpt
+      ext/phar/tests/frontcontroller21.phpt
+      ext/phar/tests/frontcontroller22.phpt
+      ext/phar/tests/frontcontroller23.phpt
+      ext/phar/tests/frontcontroller24.phpt
+      ext/phar/tests/frontcontroller25.phpt
+      ext/phar/tests/frontcontroller26.phpt
+      ext/phar/tests/frontcontroller27.phpt
+      ext/phar/tests/frontcontroller28.phpt
+      ext/phar/tests/frontcontroller29.phpt
+      ext/phar/tests/frontcontroller3.phpt
+      ext/phar/tests/frontcontroller30.phpt
+      ext/phar/tests/frontcontroller31.phpt
+      ext/phar/tests/frontcontroller32.phpt
+      ext/phar/tests/frontcontroller33.phpt
+      ext/phar/tests/frontcontroller34.phpt
+      ext/phar/tests/frontcontroller6.phpt
+      ext/phar/tests/frontcontroller8.phpt
+      ext/phar/tests/frontcontroller9.phpt
+      ext/phar/tests/include_path.phpt
+      ext/phar/tests/ini_set.phpt
+      ext/phar/tests/ini_set_off.phpt
+      ext/phar/tests/invalid_alias.phpt
+      ext/phar/tests/invalid_setstubalias.phpt
+      ext/phar/tests/metadata_read.phpt
+      ext/phar/tests/metadata_write.phpt
+      ext/phar/tests/metadata_write_commit.phpt
+      ext/phar/tests/mkdir.phpt
+      ext/phar/tests/mounteddir.phpt
+      ext/phar/tests/open_for_write_existing.phpt
+      ext/phar/tests/open_for_write_existing_b.phpt
+      ext/phar/tests/open_for_write_existing_c.phpt
+      ext/phar/tests/open_for_write_newfile.phpt
+      ext/phar/tests/open_for_write_newfile_b.phpt
+      ext/phar/tests/open_for_write_newfile_c.phpt
+      ext/phar/tests/opendir.phpt
+      ext/phar/tests/opendir_edgecases.phpt
+      ext/phar/tests/phar_begin_setstub_commit.phpt
+      ext/phar/tests/phar_buildfromdirectory1.phpt
+      ext/phar/tests/phar_buildfromdirectory2.phpt
+      ext/phar/tests/phar_buildfromdirectory3.phpt
+      ext/phar/tests/phar_buildfromiterator1.phpt
+      ext/phar/tests/phar_buildfromiterator3.phpt
+      ext/phar/tests/phar_buildfromiterator5.phpt
+      ext/phar/tests/phar_buildfromiterator6.phpt
+      ext/phar/tests/phar_buildfromiterator7.phpt
+      ext/phar/tests/phar_bz2.phpt
+      ext/phar/tests/phar_commitwrite.phpt
+      ext/phar/tests/phar_convert_again.phpt
+      ext/phar/tests/phar_convert_repeated.phpt
+      ext/phar/tests/phar_convert_tar.phpt
+      ext/phar/tests/phar_convert_tar2.phpt
+      ext/phar/tests/phar_convert_tar3.phpt
+      ext/phar/tests/phar_convert_zip.phpt
+      ext/phar/tests/phar_create_in_cwd.phpt
+      ext/phar/tests/phar_createdefaultstub.phpt
+      ext/phar/tests/phar_ctx_001.phpt
+      ext/phar/tests/phar_decompress.phpt
+      ext/phar/tests/phar_dotted_path.phpt
+      ext/phar/tests/phar_extract.phpt
+      ext/phar/tests/phar_gzip.phpt
+      ext/phar/tests/phar_isvalidpharfilename.phpt
+      ext/phar/tests/phar_metadata_read.phpt
+      ext/phar/tests/phar_metadata_write.phpt
+      ext/phar/tests/phar_offset_check.phpt
+      ext/phar/tests/phar_oo_001.phpt
+      ext/phar/tests/phar_oo_compressallbz2.phpt
+      ext/phar/tests/phar_oo_compressallgz.phpt
+      ext/phar/tests/phar_oo_compressed_001.phpt
+      ext/phar/tests/phar_oo_compressed_001b.phpt
+      ext/phar/tests/phar_oo_compressed_002.phpt
+      ext/phar/tests/phar_oo_compressed_002b.phpt
+      ext/phar/tests/phar_oo_getmodified.phpt
+      ext/phar/tests/phar_oo_iswriteable.phpt
+      ext/phar/tests/phar_oo_uncompressall.phpt
+      ext/phar/tests/phar_setalias.phpt
+      ext/phar/tests/phar_setalias2.phpt
+      ext/phar/tests/phar_setdefaultstub.phpt
+      ext/phar/tests/phar_stub.phpt
+      ext/phar/tests/phar_stub_error.phpt
+      ext/phar/tests/phar_stub_write.phpt
+      ext/phar/tests/phar_stub_write_file.phpt
+      ext/phar/tests/phar_unlinkarchive.phpt
+      ext/phar/tests/pharfileinfo_construct.phpt
+      ext/phar/tests/pharfileinfo_getcrc32.phpt
+      ext/phar/tests/readfile_edgecases.phpt
+      ext/phar/tests/refcount1.phpt
+      ext/phar/tests/rename.phpt
+      ext/phar/tests/withphar_web.phpt
+      ext/phar/tests/files/nophar.phar
+      ext/phar/tests/files/phar_oo_test.inc
+      ext/phar/tests/files/phar_test.inc
+      ext/phar/tests/tar/all.phpt
+      ext/phar/tests/tar/frontcontroller10.phar.phpt
+      ext/phar/tests/tar/frontcontroller11.phar.phpt
+      ext/phar/tests/tar/frontcontroller12.phar.phpt
+      ext/phar/tests/tar/frontcontroller13.phar.phpt
+      ext/phar/tests/tar/frontcontroller15.phar.phpt
+      ext/phar/tests/tar/frontcontroller16.phar.phpt
+      ext/phar/tests/tar/frontcontroller2.phar.phpt
+      ext/phar/tests/tar/frontcontroller21.phar.phpt
+      ext/phar/tests/tar/frontcontroller3.phar.phpt
+      ext/phar/tests/tar/frontcontroller9.phar.phpt
+      ext/phar/tests/tar/open_for_write_existing.phpt
+      ext/phar/tests/tar/open_for_write_existing_b.phpt
+      ext/phar/tests/tar/open_for_write_existing_c.phpt
+      ext/phar/tests/tar/open_for_write_newfile.phpt
+      ext/phar/tests/tar/open_for_write_newfile_b.phpt
+      ext/phar/tests/tar/open_for_write_newfile_c.phpt
+      ext/phar/tests/tar/phar_begin_setstub_commit.phpt
+      ext/phar/tests/tar/phar_buildfromiterator5.phpt
+      ext/phar/tests/tar/phar_buildfromiterator6.phpt
+      ext/phar/tests/tar/phar_buildfromiterator7.phpt
+      ext/phar/tests/tar/phar_convert_phar.phpt
+      ext/phar/tests/tar/phar_convert_phar2.phpt
+      ext/phar/tests/tar/phar_convert_phar3.phpt
+      ext/phar/tests/tar/phar_stub.phpt
+      ext/phar/tests/tar/phar_stub_error.phpt
+      ext/phar/tests/tar/refcount1.phpt
+      ext/phar/tests/tar/tar_003.phpt
+      ext/phar/tests/tar/tar_004.phpt
+      ext/phar/tests/tar/tar_bz2.phpt
+      ext/phar/tests/tar/tar_gzip.phpt
+      ext/phar/tests/tar/files/make_invalid_tar.php.inc
+      ext/phar/tests/tar/files/tarmaker.php.inc
+      ext/phar/tests/zip/all.phpt
+      ext/phar/tests/zip/frontcontroller10.phar.phpt
+      ext/phar/tests/zip/frontcontroller11.phar.phpt
+      ext/phar/tests/zip/frontcontroller12.phar.phpt
+      ext/phar/tests/zip/frontcontroller13.phar.phpt
+      ext/phar/tests/zip/frontcontroller15.phar.phpt
+      ext/phar/tests/zip/frontcontroller16.phar.phpt
+      ext/phar/tests/zip/frontcontroller2.phar.phpt
+      ext/phar/tests/zip/frontcontroller21.phar.phpt
+      ext/phar/tests/zip/frontcontroller3.phar.phpt
+      ext/phar/tests/zip/frontcontroller9.phar.phpt
+      ext/phar/tests/zip/metadata_write_commit.phpt
+      ext/phar/tests/zip/open_for_write_existing.phpt
+      ext/phar/tests/zip/open_for_write_existing_b.phpt
+      ext/phar/tests/zip/open_for_write_existing_c.phpt
+      ext/phar/tests/zip/open_for_write_newfile.phpt
+      ext/phar/tests/zip/open_for_write_newfile_b.phpt
+      ext/phar/tests/zip/open_for_write_newfile_c.phpt
+      ext/phar/tests/zip/phar_begin_setstub_commit.phpt
+      ext/phar/tests/zip/phar_buildfromiterator5.phpt
+      ext/phar/tests/zip/phar_buildfromiterator6.phpt
+      ext/phar/tests/zip/phar_buildfromiterator7.phpt
+      ext/phar/tests/zip/phar_convert_phar.phpt:
+      - IS_UNICODE checks and conversions
+      - stub and creation file updates
+      - far too many test updates to think about
+
+2008-05-19  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/simplexml/tests/bug36611.phpt:
+      - Fixed wrong fix
+
+    * ext/simplexml/tests/bug36611.phpt:
+      - Fixed test
+
+2008-05-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pgsql/pgsql.c
+      ext/pgsql/pgsql.c:
+      
+      MFB: Fixed bug #45004 (pg_insert() does not accept 4 digit timezone
+      format)
+
+2008-05-19  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/gmp/tests/012.phpt:
+      - Fixed test (duplicated UEXPECTF section)
+
+2008-05-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/pgsql/pgsql.c:
+      Fixed bug #45004 (pg_insert() does not accept 4 digit timezone format)
+
+2008-05-19  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/posix/tests/posix_getgrgid_variation.phpt
+      ext/posix/tests/posix_getpgid_variation.phpt
+      ext/posix/tests/posix_getpwuid_variation.phpt
+      ext/posix/tests/posix_kill_variation1.phpt
+      ext/posix/tests/posix_kill_variation2.phpt
+      ext/posix/tests/posix_strerror_variation1.phpt:
+      - Fixed tests
+
+2008-05-19  Steve Seear  <steve.seear@uk.ibm.com>
+
+    * ext/dom/tests/DOMComment_insertData_basic.phpt
+      ext/dom/tests/DOMComment_insertData_basic.phpt
+      ext/dom/tests/DOMComment_insertData_error1.phpt
+      ext/dom/tests/DOMComment_insertData_error1.phpt
+      ext/dom/tests/DOMComment_insertData_error2.phpt
+      ext/dom/tests/DOMComment_insertData_error2.phpt:
+      
+      file DOMComment_insertData_basic.phpt was initially added on branch
+      PHP_5_3.
+
+    * ext/dom/DOMComment_appendData_basic.phpt
+      ext/dom/DOMComment_appendData_basic.phpt
+      ext/dom/DOMDocument_createAttribute_basic.phpt
+      ext/dom/DOMDocument_createAttribute_error.phpt
+      ext/dom/DOMDocument_createAttribute_error1.phpt
+      ext/dom/DOMDocument_createAttribute_variation.phpt
+      ext/dom/DOMElement_hasAttributes_basic.phpt
+      ext/dom/DOMElement_hasAttributes_basic.phpt
+      ext/dom/tests/DOMComment_appendData_basic.phpt
+      ext/dom/tests/DOMComment_appendData_basic.phpt
+      ext/dom/tests/DOMDocument_createAttribute_basic.phpt
+      ext/dom/tests/DOMDocument_createAttribute_error.phpt
+      ext/dom/tests/DOMDocument_createAttribute_error1.phpt
+      ext/dom/tests/DOMDocument_createAttribute_variation.phpt
+      ext/dom/tests/DOMElement_hasAttributes_basic.phpt:
+      Moving DOM tests to correct folder.
+
+    * ext/dom/tests/DOMElement_hasAttributes_basic.phpt
+      ext/dom/tests/DOMElement_hasAttributes_basic.phpt:
+      
+      file DOMElement_hasAttributes_basic.phpt was initially added on branch
+      PHP_5_3.
+
+    * ext/dom/DOMComment_appendData_basic.phpt
+      ext/dom/DOMElement_hasAttributes_basic.phpt
+      ext/dom/tests/DOMComment_insertData_basic.phpt
+      ext/dom/tests/DOMComment_insertData_error1.phpt
+      ext/dom/tests/DOMComment_insertData_error2.phpt:
+      Tests from PHP London TestFest 2008
+
+    * ext/dom/DOMComment_appendData_basic.phpt
+      ext/dom/DOMComment_appendData_basic.phpt
+      ext/dom/DOMElement_hasAttributes_basic.phpt
+      ext/dom/DOMElement_hasAttributes_basic.phpt
+      ext/dom/tests/DOMComment_appendData_basic.phpt:
+      
+      file DOMComment_appendData_basic.phpt was initially added on branch
+      PHP_5_3.
+
+2008-05-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c:
+      Fixed win32 related realpath cache bug
+
 2008-05-18  Greg Beaver  <greg@chiaraquartet.net>
 
     * ext/phar/phar_object.c
