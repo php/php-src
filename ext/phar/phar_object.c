@@ -1915,7 +1915,7 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 	efree(basepath);
 	efree(newname);
 
-	if (SUCCESS == zend_hash_exists(&(PHAR_GLOBALS->phar_fname_map), newpath, phar->fname_len, (void **) &pphar)) {
+	if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), newpath, phar->fname_len, (void **) &pphar)) {
 		if (*pphar == phar) {
 			if (!zend_hash_num_elements(&phar->manifest)) {
 				goto its_ok;
