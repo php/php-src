@@ -109,6 +109,9 @@ static void spl_filesystem_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 			if (intern->u.file.open_mode) {
 				efree(intern->u.file.open_mode);
 			}
+			if (intern->orig_path) {
+				efree(intern->orig_path);
+			}
 		}
 		spl_filesystem_file_free_line(intern TSRMLS_CC);
 		break;
@@ -256,6 +259,8 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 	if (intern->file_name_len && IS_SLASH_AT(intern->file_name, intern->file_name_len-1)) {
 		intern->file_name_len--;
 	}
+
+	intern->orig_path = estrndup(intern->u.file.stream->orig_path, strlen(intern->u.file.stream->orig_path));
 
 	intern->file_name = estrndup(intern->file_name, intern->file_name_len);
 	intern->u.file.open_mode = estrndup(intern->u.file.open_mode, intern->u.file.open_mode_len);
@@ -985,14 +990,22 @@ SPL_METHOD(SplFileInfo, getRealPath)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	char buff[MAXPATHLEN];
+	char *filename;
 
 	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
 
 	if (intern->type == SPL_FS_DIR && !intern->file_name && intern->u.dir.entry.d_name[0]) {
 		spl_filesystem_object_get_file_name(intern TSRMLS_CC);
 	}
+	
+	if (intern->orig_path) {
+		filename = intern->orig_path;
+	} else { 
+		filename = intern->file_name;
+	}
 
-	if (intern->file_name && VCWD_REALPATH(intern->file_name, buff)) {
+
+	if (filename && VCWD_REALPATH(filename, buff)) {
 #ifdef ZTS
 		if (VCWD_ACCESS(buff, F_OK)) {
 			RETVAL_FALSE;
@@ -1866,6 +1879,8 @@ SPL_METHOD(SplFileObject, __construct)
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	zend_bool use_include_path = 0;
 	char *p1, *p2;
+	char *tmp_path;
+	int   tmp_path_len;
 
 	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
 
@@ -1881,18 +1896,29 @@ SPL_METHOD(SplFileObject, __construct)
 	}
 	
 	if (spl_filesystem_file_open(intern, use_include_path, 0 TSRMLS_CC) == SUCCESS) {
-		p1 = strrchr(intern->file_name, '/');
+		tmp_path_len = strlen(intern->u.file.stream->orig_path);
+
+		if (tmp_path_len && IS_SLASH_AT(intern->u.file.stream->orig_path, tmp_path_len-1)) {
+			tmp_path_len--;
+		}
+
+		tmp_path = estrndup(intern->u.file.stream->orig_path, tmp_path_len);
+
+		p1 = strrchr(tmp_path, '/');
 #if defined(PHP_WIN32) || defined(NETWARE)
-		p2 = strrchr(intern->file_name, '\\');
+		p2 = strrchr(tmp_path, '\\');
 #else
 		p2 = 0;
 #endif
 		if (p1 || p2) {
-			intern->_path_len = (p1 > p2 ? p1 : p2) - intern->file_name;
+			intern->_path_len = (p1 > p2 ? p1 : p2) - tmp_path;
 		} else {
 			intern->_path_len = 0;
 		}
-		intern->_path = estrndup(intern->file_name, intern->_path_len);
+
+		efree(tmp_path);
+
+		intern->_path = estrndup(intern->u.file.stream->orig_path, intern->_path_len);
 	}
 
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
