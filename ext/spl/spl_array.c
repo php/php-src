@@ -1443,8 +1443,7 @@ SPL_METHOD(Array, serialize)
 	zval *object = getThis();
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 	HashTable *aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
-	zval **entry, members, *pmembers;
-	HashPosition  pos;
+	zval members, *pmembers;
 	php_serialize_data_t var_hash;
 	smart_str buf = {0};
 
@@ -1494,7 +1493,7 @@ SPL_METHOD(Array, unserialize)
 	int buf_len;
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
-	zval *pentry, *pmembers, *pflags = NULL;
+	zval *pmembers, *pflags = NULL;
 	long flags;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
