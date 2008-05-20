@@ -2758,8 +2758,8 @@ PHP_METHOD(SoapClient, SoapClient)
 			} else {
 		    	client->proxy_host = soap_unicode_to_string(Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp) TSRMLS_CC);
 		    }
-			if (zend_ascii_hash_find(ht, "proxy_port", sizeof("proxy_port"), (void**)&tmp) == SUCCESS &&
-			    Z_TYPE_PP(tmp) == IS_LONG) {
+			if (zend_ascii_hash_find(ht, "proxy_port", sizeof("proxy_port"), (void**)&tmp) == SUCCESS) {
+				convert_to_long(*tmp); 
 				client->proxy_port = Z_LVAL_PP(tmp);
 			}
 			if (zend_ascii_hash_find(ht, "proxy_login", sizeof("proxy_login"), (void**)&tmp) == SUCCESS &&
@@ -2849,9 +2849,10 @@ PHP_METHOD(SoapClient, SoapClient)
 			client->features = Z_LVAL_PP(tmp);
 	    }
 
-		if (zend_ascii_hash_find(ht, "connection_timeout", sizeof("connection_timeout"), (void**)&tmp) == SUCCESS &&
-		    Z_TYPE_PP(tmp) == IS_LONG && Z_LVAL_PP(tmp) >= 0) {
-		    client->connection_timeout = Z_LVAL_PP(tmp);
+		if (zend_ascii_hash_find(ht, "connection_timeout", sizeof("connection_timeout"), (void**)&tmp) == SUCCESS) {
+			convert_to_long(*tmp);
+			if(Z_LVAL_PP(tmp) >= 0) 
+		    		client->connection_timeout = Z_LVAL_PP(tmp);
 		}
 
 		if (context) {
