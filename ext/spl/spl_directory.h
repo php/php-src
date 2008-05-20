@@ -65,6 +65,7 @@ struct _spl_filesystem_object {
 	zend_uchar         _path_type;
 	zstr               _path;
 	int                _path_len;
+	char               *orig_path;
 	zend_uchar         file_name_type;
 	zstr               file_name;
 	int                file_name_len;

@@ -109,6 +109,9 @@ static void spl_filesystem_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 			if (intern->u.file.open_mode) {
 				efree(intern->u.file.open_mode);
 			}
+			if (intern->orig_path) {
+				efree(intern->orig_path);
+			}
 		}
 		spl_filesystem_file_free_line(intern TSRMLS_CC);
 		break;
@@ -276,6 +279,10 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 	if (intern->file_name_len && IS_SLASH_AT(intern->file_name_type, intern->file_name, intern->file_name_len-1)) {
 		intern->file_name_len--;
 	}
+
+	/* NOTE: Works as long as stream->orig_path is not unicode aware, might
+	 * break later. */
+	intern->orig_path = estrndup(intern->u.file.stream->orig_path, strlen(intern->u.file.stream->orig_path));
 
 	intern->file_name = ezstrndup(intern->file_name_type, intern->file_name, intern->file_name_len);
 	intern->u.file.open_mode = estrndup(intern->u.file.open_mode, intern->u.file.open_mode_len);
@@ -1082,10 +1089,14 @@ SPL_METHOD(SplFileInfo, getRealPath)
 		spl_filesystem_object_get_file_name(intern TSRMLS_CC);
 	}
 
-	if (intern->file_name_type == IS_UNICODE) {
-		php_stream_path_encode(NULL, &filename, &filename_len, intern->file_name.u, intern->file_name_len, REPORT_ERRORS, FG(default_context));
+	if (intern->orig_path) {
+		filename = intern->orig_path;
 	} else {
-		filename = intern->file_name.s;
+		if (intern->file_name_type == IS_UNICODE) {
+			php_stream_path_encode(NULL, &filename, &filename_len, intern->file_name.u, intern->file_name_len, REPORT_ERRORS, FG(default_context));
+		} else {
+			filename = intern->file_name.s;
+		}
 	}
 
 	if (filename && VCWD_REALPATH(filename, buff)) {
@@ -1994,6 +2005,8 @@ SPL_METHOD(SplFileObject, __construct)
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	zend_bool use_include_path = 0;
 	zstr p1, p2;
+	char *tmp_path;
+	int   tmp_path_len;
 
 	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
 
@@ -2009,31 +2022,31 @@ SPL_METHOD(SplFileObject, __construct)
 	}
 	
 	if (spl_filesystem_file_open(intern, use_include_path, 0 TSRMLS_CC) == SUCCESS) {
-		if (intern->file_name_type == IS_UNICODE) {
-			p1.u = u_strrchr(intern->file_name.u, '/');
-		} else {
-			p1.s = strrchr(intern->file_name.s, '/');
+		tmp_path_len  = strlen(intern->u.file.stream->orig_path);
+
+		if (tmp_path_len && IS_SLASH_AT(IS_STRING, ZSTR(intern->u.file.stream->orig_path), tmp_path_len-1)) {
+			tmp_path_len--;
 		}
+
+		tmp_path = estrndup(intern->u.file.stream->orig_path, tmp_path_len);
+
+		p1.s = strrchr(tmp_path, '/');
 #if defined(PHP_WIN32) || defined(NETWARE)
-		if (intern->file_name_type == IS_UNICODE) {
-			p2.u = u_strrchr(intern->file_name.u, '\\');
-		} else {
-			p2.s = strrchr(intern->file_name.s, '\\');
-		}
+		p2.s = strrchr(tmp_path, '\\');
 #else
 		p2.v = 0;
 #endif
+
 		if (p1.v || p2.v) {
-			if (intern->file_name_type == IS_UNICODE) {
-				intern->_path_len = (p1.u > p2.u ? p1.u : p2.u) - intern->file_name.u;
-			} else {
-				intern->_path_len = (p1.s > p2.s ? p1.s : p2.s) - intern->file_name.s;
-			}
+			intern->_path_len = (p1.s > p2.s ? p1.s : p2.s) - tmp_path;
 		} else {
 			intern->_path_len = 0;
 		}
-		intern->_path_type = intern->file_name_type;
-		intern->_path = ezstrndup(intern->file_name_type, intern->file_name, intern->_path_len);
+
+		efree(tmp_path);
+
+		intern->_path      = ZSTR(estrndup(intern->u.file.stream->orig_path, intern->_path_len));
+		intern->_path_type = IS_STRING;
 	}
 
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
