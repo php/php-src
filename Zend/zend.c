@@ -1004,19 +1004,29 @@ static void unicode_globals_dtor(zend_unicode_globals *unicode_globals TSRMLS_DC
 	if (unicode_globals->root_search) {
 		usearch_close(unicode_globals->root_search);
 	}
-	if (unicode_globals->fallback_encoding_conv) {
+	if (unicode_globals->fallback_encoding_conv &&
+		unicode_globals->fallback_encoding_conv != unicode_globals->utf8_conv &&
+		unicode_globals->fallback_encoding_conv != unicode_globals->ascii_conv) {
 		ucnv_close(unicode_globals->fallback_encoding_conv);
 	}
-	if (unicode_globals->runtime_encoding_conv) {
+	if (unicode_globals->runtime_encoding_conv &&
+		unicode_globals->runtime_encoding_conv != unicode_globals->utf8_conv &&
+		unicode_globals->runtime_encoding_conv != unicode_globals->ascii_conv) {
 		ucnv_close(unicode_globals->runtime_encoding_conv);
 	}
-	if (unicode_globals->output_encoding_conv) {
+	if (unicode_globals->output_encoding_conv &&
+		unicode_globals->output_encoding_conv != unicode_globals->utf8_conv &&
+		unicode_globals->output_encoding_conv != unicode_globals->ascii_conv) {
 		ucnv_close(unicode_globals->output_encoding_conv);
 	}
-	if (unicode_globals->script_encoding_conv) {
+	if (unicode_globals->script_encoding_conv &&
+		unicode_globals->script_encoding_conv != unicode_globals->utf8_conv &&
+		unicode_globals->script_encoding_conv != unicode_globals->ascii_conv) {
 		ucnv_close(unicode_globals->script_encoding_conv);
 	}
-	if (unicode_globals->http_input_encoding_conv) {
+	if (unicode_globals->http_input_encoding_conv &&
+		unicode_globals->http_input_encoding_conv != unicode_globals->utf8_conv &&
+		unicode_globals->http_input_encoding_conv != unicode_globals->ascii_conv) {
 		ucnv_close(unicode_globals->http_input_encoding_conv);
 	}
 	if (unicode_globals->utf8_conv) {
