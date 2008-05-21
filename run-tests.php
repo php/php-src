@@ -920,12 +920,12 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 		0 => array('pipe', 'r'),
 		1 => array('pipe', 'w'),
 		2 => array('pipe', 'w')
-		), $pipes, null, $env, array("suppress_errors" => true));
+		), $pipes, null, $env, array("suppress_errors" => true, "binary_pipes" => true));
 
 	if (!$proc)
 		return false;
 
-	if (is_string($stdin)) {
+	if (!is_null($stdin)) {
 		fwrite($pipes[0], $stdin);
 	}
 	fclose($pipes[0]);
@@ -1655,7 +1655,7 @@ COMMAND $cmd
 		$wanted = trim($section_text['EXPECT']);
 		if ($unicode_semantics && is_unicode($wanted)) {
 			/* workaround until preg_replace() or str_replace() are upgraded */
-			$wanted = unicode_encode($wanted, ini_get('unicode.output_encoding'));
+			$wanted = unicode_encode($wanted, ini_get('unicode.output_encoding') ?: 'utf-8');
 		}
 		$wanted = preg_replace('/\r\n/',"\n",$wanted);
 		show_file_block('exp', $wanted);
