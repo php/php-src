@@ -117,18 +117,41 @@ static void zend_ini_get_constant(zval *result, zval *name TSRMLS_DC)
 {
 	zval z_constant;
 
-	/* If name contains ':' it is not a constant. Bug #26893. */
-	if (!memchr(Z_STRVAL_P(name), ':', Z_STRLEN_P(name))
-		   	&& zend_get_constant(Z_STRVAL_P(name), Z_STRLEN_P(name), &z_constant TSRMLS_CC)) {
-		/* z_constant is emalloc()'d */
-		convert_to_string(&z_constant);
-		Z_STRVAL_P(result) = zend_strndup(Z_STRVAL(z_constant), Z_STRLEN(z_constant));
-		Z_STRLEN_P(result) = Z_STRLEN(z_constant);
-		Z_TYPE_P(result) = Z_TYPE(z_constant);
-		zval_dtor(&z_constant);
-		free(Z_STRVAL_P(name));
+	/* in Unicode mode all constants are registered as Unicode */
+	if (UG(unicode)) {
+		UChar *u_name;
+
+		u_name = malloc(UBYTES(Z_STRLEN_P(name) + 1));
+		u_charsToUChars(Z_STRVAL_P(name), u_name, Z_STRLEN_P(name) + 1);
+
+		/* If name contains ':' it is not a constant. Bug #26893. */
+		if (!u_memchr(u_name, ':', Z_STRLEN_P(name))
+				&& zend_u_get_constant_ex(IS_UNICODE, ZSTR(u_name), Z_STRLEN_P(name), &z_constant, NULL, 0 TSRMLS_CC)) {
+			/* z_constant is emalloc()'d */
+			convert_to_string(&z_constant);
+			Z_STRVAL_P(result) = zend_strndup(Z_STRVAL(z_constant), Z_STRLEN(z_constant));
+			Z_STRLEN_P(result) = Z_STRLEN(z_constant);
+			Z_TYPE_P(result) = Z_TYPE(z_constant);
+			zval_dtor(&z_constant);
+			free(Z_STRVAL_P(name));
+		} else {
+			*result = *name;
+		}
+		free(u_name);
 	} else {
-		*result = *name;
+		/* If name contains ':' it is not a constant. Bug #26893. */
+		if (!memchr(Z_STRVAL_P(name), ':', Z_STRLEN_P(name))
+				&& zend_get_constant(Z_STRVAL_P(name), Z_STRLEN_P(name), &z_constant TSRMLS_CC)) {
+			/* z_constant is emalloc()'d */
+			convert_to_string(&z_constant);
+			Z_STRVAL_P(result) = zend_strndup(Z_STRVAL(z_constant), Z_STRLEN(z_constant));
+			Z_STRLEN_P(result) = Z_STRLEN(z_constant);
+			Z_TYPE_P(result) = Z_TYPE(z_constant);
+			zval_dtor(&z_constant);
+			free(Z_STRVAL_P(name));
+		} else {
+			*result = *name;
+		}
 	}
 }
 /* }}} */
