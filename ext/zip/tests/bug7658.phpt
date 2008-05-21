@@ -7,6 +7,23 @@ if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php
+$expect = array(
+	"mimetype",
+	"Configurations2/statusbar/",
+	"Configurations2/accelerator/current.xml",
+	"Configurations2/floater/",
+	"Configurations2/popupmenu/",
+	"Configurations2/progressbar/",
+	"Configurations2/menubar/",
+	"Configurations2/toolbar/",
+	"Configurations2/images/Bitmaps/",
+	"content.xml",
+	"styles.xml",
+	"meta.xml",
+	"Thumbnails/thumbnail.png",
+	"settings.xml",
+	"META-INF/manifest.xml",
+);
 $dirname = dirname(__FILE__) . '/';
 include $dirname . 'utils.inc';
 $file = $dirname . '__tmp_bug7658.odt';
@@ -16,45 +33,22 @@ if(!$zip->open($file)) {
 	echo 'failed';
 }
 
-dump_entries_name($zip);
 
 $zip->deleteName('content.xml');
 $zip->addFile($dirname . "bug7658.xml","content.xml");
 $zip->close();
 echo "\n";
 $zip->open($file);
-dump_entries_name($zip);
+
+for($i=0; $i < $zip->numFiles; $i++) {
+	$sb = $zip->statIndex($i);
+	$found[] = $sb['name'];
+}
+$ar = array_diff($found, $expect);
+
+var_dump($ar);
 @unlink($file);
 ?>
---EXPECT--
-0 mimetype
-1 Configurations2/statusbar/
-2 Configurations2/accelerator/current.xml
-3 Configurations2/floater/
-4 Configurations2/popupmenu/
-5 Configurations2/progressbar/
-6 Configurations2/menubar/
-7 Configurations2/toolbar/
-8 Configurations2/images/Bitmaps/
-9 content.xml
-10 styles.xml
-11 meta.xml
-12 Thumbnails/thumbnail.png
-13 settings.xml
-14 META-INF/manifest.xml
-
-0 mimetype
-1 Configurations2/statusbar/
-2 Configurations2/accelerator/current.xml
-3 Configurations2/floater/
-4 Configurations2/popupmenu/
-5 Configurations2/progressbar/
-6 Configurations2/menubar/
-7 Configurations2/toolbar/
-8 Configurations2/images/Bitmaps/
-9 styles.xml
-10 meta.xml
-11 Thumbnails/thumbnail.png
-12 settings.xml
-13 META-INF/manifest.xml
-14 content.xml
+--EXPECTF--
+array(0) {
+}

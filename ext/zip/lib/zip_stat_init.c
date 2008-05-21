@@ -1,11 +1,9 @@
 /*
-  $NiH: zip_stat_init.c,v 1.1 2006/10/31 12:03:04 dillo Exp $
-
   zip_stat_init.c -- initialize struct zip_stat.
-  Copyright (C) 2006 Dieter Baron and Thomas Klausner
+  Copyright (C) 2006-2007 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
-  The authors can be contacted at <nih@giga.or.at>
+  The authors can be contacted at <libzip@nih.at>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -39,7 +37,7 @@
 
 
 
-PHPZIPAPI void
+ZIP_EXTERN(void)
 zip_stat_init(struct zip_stat *st)
 {
     st->name = NULL;

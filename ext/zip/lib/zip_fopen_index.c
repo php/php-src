@@ -1,11 +1,9 @@
 /*
-  $NiH: zip_fopen_index.c,v 1.24 2005/05/20 21:54:53 wiz Exp $
-
   zip_fopen_index.c -- open file in zip archive for reading by index
-  Copyright (C) 1999, 2004, 2005 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2007 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
-  The authors can be contacted at <nih@giga.or.at>
+  The authors can be contacted at <libzip@nih.at>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -39,14 +37,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "zip.h"
 #include "zipint.h"
 
 static struct zip_file *_zip_file_new(struct zip *za);
 
 
 
-PHPZIPAPI struct zip_file *
+ZIP_EXTERN(struct zip_file *)
 zip_fopen_index(struct zip *za, int fileno, int flags)
 {
     int len, ret;
@@ -141,7 +138,7 @@ zip_fopen_index(struct zip *za, int fileno, int flags)
 
 
 
-PHPZIPAPI int
+int
 _zip_file_fillbuf(void *buf, size_t buflen, struct zip_file *zf)
 {
     int i, j;
@@ -152,7 +149,7 @@ _zip_file_fillbuf(void *buf, size_t buflen, struct zip_file *zf)
     if ((zf->flags & ZIP_ZF_EOF) || zf->cbytes_left <= 0 || buflen <= 0)
 	return 0;
     
-    if (fseek(zf->za->zp, zf->fpos, SEEK_SET) < 0) {
+    if (fseeko(zf->za->zp, zf->fpos, SEEK_SET) < 0) {
 	_zip_error_set(&zf->error, ZIP_ER_SEEK, errno);
 	return -1;
     }

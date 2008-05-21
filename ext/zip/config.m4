@@ -3,12 +3,15 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(zip, for zip archive read/writesupport,
-[  --enable-zip            Include Zip read/write support])
+[  --enable-zip        Include Zip read/write support.])
 
 if test -z "$PHP_ZLIB_DIR"; then
 PHP_ARG_WITH(zlib-dir, for the location of libz,
-[  --with-zlib-dir[=DIR]     ZIP: Set the path to libz install prefix], no, no)
+[  --with-zlib-dir[=DIR]   zip: Set the path to libz install prefix.], no, no)
 fi
+
+PHP_ARG_WITH(pcre-dir, pcre install prefix,
+[  --with-pcre-dir           FILTER: pcre install prefix], no, no)
 
 if test "$PHP_ZIP" != "no"; then
 
@@ -43,6 +46,32 @@ if test "$PHP_ZIP" != "no"; then
 		PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR/$PHP_LIBDIR, ZIP_SHARED_LIBADD)
 		PHP_ADD_INCLUDE($PHP_ZLIB_INCDIR)
 	fi
+
+
+	dnl This is PECL build, check if bundled PCRE library is used
+	old_CPPFLAGS=$CPPFLAGS
+	CPPFLAGS=$INCLUDES
+	AC_EGREP_CPP(yes,[
+#include <main/php_config.h>
+#if defined(HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
+yes
+#endif
+    ],[
+      PHP_PCRE_REGEX=yes
+    ],[
+      AC_EGREP_CPP(yes,[
+#include <main/php_config.h>
+#if defined(HAVE_PCRE) && !defined(COMPILE_DL_PCRE)
+yes
+#endif
+      ],[
+        PHP_PCRE_REGEX=pecl
+      ],[
+        PHP_PCRE_REGEX=no
+      ])
+    ])
+	CPPFLAGS=$old_CPPFLAGS
+
 
 	PHP_ZIP_SOURCES="$PHP_ZIP_SOURCES lib/zip_add.c lib/zip_error.c lib/zip_fclose.c \
                          lib/zip_fread.c lib/zip_open.c lib/zip_source_filep.c  \

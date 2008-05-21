@@ -1,11 +1,9 @@
 /*
-  $NiH: zip_close.c,v 1.60 2006/05/09 17:21:47 wiz Exp $
-
   zip_close.c -- close zip archive and update changes
-  Copyright (C) 1999, 2004, 2005 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2008 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
-  The authors can be contacted at <nih@giga.or.at>
+  The authors can be contacted at <libzip@nih.at>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -32,17 +30,16 @@
   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#ifndef _MSC_VER
-#include <unistd.h>
-#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "zip.h"
 #include "zipint.h"
 
 static int add_data(struct zip *, int, struct zip_dirent *, FILE *);
@@ -56,7 +53,9 @@ static int _zip_cdir_set_comment(struct zip_cdir *, struct zip *);
 static int _zip_changed(struct zip *, int *);
 static char *_zip_create_temp_output(struct zip *, FILE **);
 
-PHPZIPAPI int
+
+
+ZIP_EXTERN(int)
 zip_close(struct zip *za)
 {
     int survivors;
@@ -66,7 +65,12 @@ zip_close(struct zip *za)
     mode_t mask;
     struct zip_cdir *cd;
     struct zip_dirent de;
-		int rename_error = 0;
+    int reopen_on_error;
+
+    reopen_on_error = 0;
+
+    if (za == NULL)
+	return -1;
 
     if (!_zip_changed(za, &survivors)) {
 	_zip_free(za);
@@ -130,7 +134,7 @@ zip_close(struct zip *za)
 	}
 	else {
 	    /* copy existing directory entries */
-	    if (fseek(za->zp, za->cdir->entry[i].offset, SEEK_SET) != 0) {
+	    if (fseeko(za->zp, za->cdir->entry[i].offset, SEEK_SET) != 0) {
 		_zip_error_set(&za->error, ZIP_ER_SEEK, errno);
 		error = 1;
 		break;
@@ -139,12 +143,12 @@ zip_close(struct zip *za)
 		error = 1;
 		break;
 	    }
-
-		if (de.bitflags & ZIP_GPBF_USE_DATA_DESCRIPTOR) {
-			de.crc = (za->cdir->entry+i)->crc;
-			de.comp_size = (za->cdir->entry+i)->comp_size;
-			de.uncomp_size = (za->cdir->entry+i)->uncomp_size;
-		}
+	    if (de.bitflags & ZIP_GPBF_DATA_DESCRIPTOR) {
+		de.crc = za->cdir->entry[i].crc;
+		de.comp_size = za->cdir->entry[i].comp_size;
+		de.uncomp_size = za->cdir->entry[i].uncomp_size;
+		//de.bitflags &= ~ZIP_GPBF_DATA_DESCRIPTOR;
+	    }
 	    memcpy(cd->entry+j, za->cdir->entry+i, sizeof(cd->entry[j]));
 	}
 
@@ -165,14 +169,13 @@ zip_close(struct zip *za)
 	    cd->entry[j].comment_len = za->entry[i].ch_comment_len;
 	}
 
-	cd->entry[j].offset = ftell(out);
+	cd->entry[j].offset = ftello(out);
 
 	if (ZIP_ENTRY_DATA_CHANGED(za->entry+i)) {
 	    if (add_data(za, i, &de, out) < 0) {
 		error = 1;
 		break;
 	    }
-
 	    cd->entry[j].last_mod = de.last_mod;
 	    cd->entry[j].comp_method = de.comp_method;
 	    cd->entry[j].comp_size = de.comp_size;
@@ -185,7 +188,8 @@ zip_close(struct zip *za)
 		break;
 	    }
 	    /* we just read the local dirent, file is at correct position */
-	    if (copy_data(za->zp, de.comp_size, out, &za->error) < 0) {
+	    if (copy_data(za->zp, cd->entry[j].comp_size, out,
+			  &za->error) < 0) {
 		error = 1;
 		break;
 	    }
@@ -220,34 +224,28 @@ zip_close(struct zip *za)
 	return -1;
     }
 
-   if (za->zp) {
+    if (za->zp) {
 	fclose(za->zp);
 	za->zp = NULL;
+	reopen_on_error = 1;
     }
-
-#ifdef PHP_WIN32 
-	if (!MoveFileEx(temp, za->zn, MOVEFILE_REPLACE_EXISTING)) {
-		rename_error = -1;
+    if (_zip_rename(temp, za->zn) != 0) {
+	_zip_error_set(&za->error, ZIP_ER_RENAME, errno);
+	remove(temp);
+	free(temp);
+	if (reopen_on_error) {
+	    /* ignore errors, since we're already in an error case */
+	    za->zp = fopen(za->zn, "rb");
 	}
-#else
-	if (rename(temp, za->zn) != 0) {
-		rename_error = -1;
-	}
-#endif
-
-	if (rename_error < 0) {
-		_zip_error_set(&za->error, ZIP_ER_RENAME, errno);
-		remove(temp);
-		free(temp);
-		return -1;
-	}
-
+	return -1;
+    }
     mask = umask(0);
     umask(mask);
     chmod(za->zn, 0666&~mask);
 
     _zip_free(za);
-	free(temp);
+    free(temp);
+
     return 0;
 }
 
@@ -274,7 +272,7 @@ add_data(struct zip *za, int idx, struct zip_dirent *de, FILE *ft)
 	return -1;
     }
 
-    offstart = ftell(ft);
+    offstart = ftello(ft);
 
     if (_zip_dirent_write(de, ft, 1, &za->error) < 0)
 	return -1;
@@ -293,9 +291,9 @@ add_data(struct zip *za, int idx, struct zip_dirent *de, FILE *ft)
 	return -1;
     }
 
-    offend = ftell(ft);
+    offend = ftello(ft);
 
-    if (fseek(ft, offstart, SEEK_SET) < 0) {
+    if (fseeko(ft, offstart, SEEK_SET) < 0) {
 	_zip_error_set(&za->error, ZIP_ER_SEEK, errno);
 	return -1;
     }
@@ -309,7 +307,7 @@ add_data(struct zip *za, int idx, struct zip_dirent *de, FILE *ft)
     if (_zip_dirent_write(de, ft, 1, &za->error) < 0)
 	return -1;
 
-    if (fseek(ft, offend, SEEK_SET) < 0) {
+    if (fseeko(ft, offend, SEEK_SET) < 0) {
 	_zip_error_set(&za->error, ZIP_ER_SEEK, errno);
 	return -1;
     }
@@ -527,14 +525,13 @@ _zip_create_temp_output(struct zip *za, FILE **outp)
     char *temp;
     int tfd;
     FILE *tfp;
-    int len = strlen(za->zn) + 8;
 
-    if ((temp=(char *)malloc(len)) == NULL) {
+    if ((temp=(char *)malloc(strlen(za->zn)+8)) == NULL) {
 	_zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
 	return NULL;
     }
 
-    snprintf(temp, len, "%s.XXXXXX", za->zn);
+    sprintf(temp, "%s.XXXXXX", za->zn);
 
     if ((tfd=mkstemp(temp)) == -1) {
 	_zip_error_set(&za->error, ZIP_ER_TMPOPEN, errno);
@@ -549,9 +546,6 @@ _zip_create_temp_output(struct zip *za, FILE **outp)
 	free(temp);
 	return NULL;
     }
-#ifdef PHP_WIN32
-	_setmode(_fileno(tfp), _O_BINARY );
-#endif
 
     *outp = tfp;
     return temp;
