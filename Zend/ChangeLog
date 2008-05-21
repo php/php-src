@@ -1,3 +1,26 @@
+2008-05-20  Antony Dovgal  <tony@daylessday.org>
+
+    * zend_constants.c:
+      use correct check for unicode
+      strings may be still strings, even in Unicode mode
+
+    * zend.c:
+      make sure that converters are not equal to utf8 & ascii before destroying
+      them, or we may end up with double free
+
+    * tests/constants/dir-constant-eval.phpt
+      tests/constants/dir-constant-includes.phpt
+      tests/constants/dir-constant-nested_includes.phpt
+      tests/constants/dir-constant-normal.phpt:
+      fix tests
+
+    * (PHP_5_3)
+      tests/constants/dir-constant-eval.phpt
+      tests/constants/dir-constant-includes.phpt
+      tests/constants/dir-constant-nested_includes.phpt
+      tests/constants/dir-constant-normal.phpt:
+      fix tests (say hello to disk C:\)
+
 2008-05-19  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend.c:
