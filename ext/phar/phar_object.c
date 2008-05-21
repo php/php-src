@@ -1916,7 +1916,7 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 	efree(newname);
 
 	if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), newpath, phar->fname_len, (void **) &pphar)) {
-		if (*pphar == phar) {
+		if ((*pphar)->fname_len == phar->fname_len && !memcmp((*pphar)->fname, phar->fname, phar->fname_len)) {
 			if (!zend_hash_num_elements(&phar->manifest)) {
 				goto its_ok;
 			}
@@ -1954,7 +1954,7 @@ its_ok:
 		phar->alias_len = 0;
 	}
 
-	if (SUCCESS != zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), newpath, phar->fname_len, (void*)&phar, sizeof(phar_archive_data*), NULL)) {
+	if (SUCCESS != zend_hash_update(&(PHAR_GLOBALS->phar_fname_map), newpath, phar->fname_len, (void*)&phar, sizeof(phar_archive_data*), NULL)) {
 		efree(oldpath);
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Unable to add newly converted phar \"%s\" to the list of phars", phar->fname);
 		return NULL;
