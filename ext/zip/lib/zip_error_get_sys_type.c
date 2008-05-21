@@ -1,11 +1,9 @@
 /*
-  $NiH: zip_error_get_sys_type.c,v 1.1 2004/12/22 15:49:18 wiz Exp $
-
   zip_error_get_sys_type.c -- return type of system error code
-  Copyright (C) 1999, 2003 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2007 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
-  The authors can be contacted at <nih@giga.or.at>
+  The authors can be contacted at <libzip@nih.at>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -35,12 +33,11 @@
 
 
 
-#include "zip.h"
 #include "zipint.h"
 
 
 
-PHPZIPAPI int
+ZIP_EXTERN(int)
 zip_error_get_sys_type(int ze)
 {
     if (ze < 0 || ze >= _zip_nerr_str)

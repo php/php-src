@@ -1,10 +1,9 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_ENABLE("zip", "ZIP support", "no");
+ARG_ENABLE("zip", "ZIP support", "yes");
 
 if (PHP_ZIP != "no") {
-
 	if (CHECK_HEADER_ADD_INCLUDE("zlib.h", "CFLAGS_ZIP", "..\\zlib;" + php_usual_include_suspects + ";" + PHP_ZIP)) {
 		if (PHP_ZLIB_SHARED) {
 			CHECK_LIB("zlib.lib", "zip", PHP_ZIP);

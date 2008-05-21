@@ -1,11 +1,9 @@
 /*
-  $NiH: zip_source_buffer.c,v 1.8 2006/04/23 14:50:49 wiz Exp $
-
   zip_source_buffer.c -- create zip data source from buffer
-  Copyright (C) 1999-2008 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2007 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
-  The authors can be contacted at <nih@giga.or.at>
+  The authors can be contacted at <libzip@nih.at>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -38,7 +36,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zip.h"
 #include "zipint.h"
 
 struct read_data {
@@ -52,7 +49,7 @@ static ssize_t read_data(void *state, void *data, size_t len,
 
 
 
-PHPZIPAPI struct zip_source *
+ZIP_EXTERN(struct zip_source *)
 zip_source_buffer(struct zip *za, const void *data, off_t len, int freep)
 {
     struct read_data *f;
@@ -84,6 +81,8 @@ zip_source_buffer(struct zip *za, const void *data, off_t len, int freep)
     return zs;
 }
 
+
+
 static ssize_t
 read_data(void *state, void *data, size_t len, enum zip_source_cmd cmd)
 {
@@ -103,8 +102,6 @@ read_data(void *state, void *data, size_t len, enum zip_source_cmd cmd)
 	n = z->end - z->buf;
 	if (n > len)
 	    n = len;
-	if (n < 0)
-	    n = 0;
 
 	if (n) {
 	    memcpy(buf, z->buf, n);

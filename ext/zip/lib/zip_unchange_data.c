@@ -1,11 +1,11 @@
 /*
-  $NiH: zip_unchange_data.c,v 1.15 2004/12/22 16:32:00 dillo Exp $
+  $NiH: zip_unchange_data.c,v 1.14 2004/11/30 23:02:47 wiz Exp $
 
   zip_unchange_data.c -- undo helper function
   Copyright (C) 1999, 2004 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
-  The authors can be contacted at <nih@giga.or.at>
+  The authors can be contacted at <libzip@nih.at>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -39,7 +39,7 @@
 
 #include "zipint.h"
 
-PHPZIPAPI void
+void
 _zip_unchange_data(struct zip_entry *ze)
 {
     if (ze->source) {

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2008 The PHP Group                                |
+  | Copyright (c) 1997-2007 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -24,13 +24,30 @@
 extern zend_module_entry zip_module_entry;
 #define phpext_zip_ptr &zip_module_entry
 
+#ifdef PHP_WIN32
+#define PHP_ZIP_API __declspec(dllexport)
+#else
+#define PHP_ZIP_API
+#endif
+
 #ifdef ZTS
 #include "TSRM.h"
 #endif
 
 #include "lib/zip.h"
 
-#define PHP_ZIP_VERSION_STRING "1.8.11"
+#ifndef ZEND_ENGINE_2_1
+# if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 0) || PHP_MAJOR_VERSION == 6
+#  define ZEND_ENGINE_2_1
+# endif
+#endif
+
+#ifndef  Z_SET_REFCOUNT_P
+# if PHP_MAJOR_VERSION < 6 && (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 3)
+#  define Z_SET_REFCOUNT_P(pz, rc)  pz->refcount = rc 
+#  define Z_UNSET_ISREF_P(pz) pz->is_ref = 0 
+# endif
+#endif
 
 /* {{{ OPENBASEDIR_CHECKPATH(filename) */
 #if (PHP_MAJOR_VERSION < 6)
@@ -55,6 +72,7 @@ typedef struct _ze_zip_read_rsrc {
 	struct zip_stat sb;
 } zip_read_rsrc;
 
+#ifdef ZEND_ENGINE_2_1
 #define ZIPARCHIVE_ME(name, arg_info, flags)	ZEND_FENTRY(name, c_ziparchive_ ##name, arg_info, flags)
 #define ZIPARCHIVE_METHOD(name)	ZEND_NAMED_FUNCTION(c_ziparchive_##name)
 
@@ -73,6 +91,19 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper, char *path, char 
 php_stream *php_stream_zip_open(char *filename, char *path, char *mode STREAMS_DC TSRMLS_DC);
 
 extern php_stream_wrapper php_stream_zip_wrapper;
+#endif
+
+/* zip_open is a macro for renaming libzip zipopen, so we need to use PHP_NAMED_FUNCTION */
+static PHP_NAMED_FUNCTION(zif_zip_open);
+static PHP_NAMED_FUNCTION(zif_zip_read);
+static PHP_NAMED_FUNCTION(zif_zip_close);
+static PHP_NAMED_FUNCTION(zif_zip_entry_read);
+static PHP_NAMED_FUNCTION(zif_zip_entry_filesize);
+static PHP_NAMED_FUNCTION(zif_zip_entry_name);
+static PHP_NAMED_FUNCTION(zif_zip_entry_compressedsize);
+static PHP_NAMED_FUNCTION(zif_zip_entry_compressionmethod);
+static PHP_NAMED_FUNCTION(zif_zip_entry_open);
+static PHP_NAMED_FUNCTION(zif_zip_entry_close);
 
 #endif	/* PHP_ZIP_H */
 

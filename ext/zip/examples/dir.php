@@ -1,4 +1,8 @@
 <?php
+if (!extension_loaded('zip')) {
+    dl('zip.so');
+}
+
 $za = new ZipArchive();
 
 $za->open('test_with_comment.zip');
