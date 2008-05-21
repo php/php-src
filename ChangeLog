@@ -1,3 +1,86 @@
+2008-05-20  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/spl/spl_directory.c
+      ext/spl/spl_directory.h
+      ext/spl/tests/fileobject_004.phpt:
+      MFH: Fix path lookup when include_path is used
+
+    * ext/spl/spl_directory.c
+      ext/spl/spl_directory.h
+      ext/spl/tests/fileobject_004.phpt
+      ext/spl/tests/fileobject_004.phpt:
+      Fix path lookup when include_path is used
+
+2008-05-20  Antony Dovgal  <tony@daylessday.org>
+
+    * ZendEngine2/zend_constants.c:
+      use correct check for unicode
+      strings may be still strings, even in Unicode mode
+
+    * ZendEngine2/zend.c:
+      make sure that converters are not equal to utf8 & ascii before destroying
+      them, or we may end up with double free
+
+    * ZendEngine2/tests/constants/dir-constant-eval.phpt
+      ZendEngine2/tests/constants/dir-constant-includes.phpt
+      ZendEngine2/tests/constants/dir-constant-nested_includes.phpt
+      ZendEngine2/tests/constants/dir-constant-normal.phpt:
+      fix tests
+
+    * (PHP_5_3)
+      ZendEngine2/tests/constants/dir-constant-eval.phpt
+      ZendEngine2/tests/constants/dir-constant-includes.phpt
+      ZendEngine2/tests/constants/dir-constant-nested_includes.phpt
+      ZendEngine2/tests/constants/dir-constant-normal.phpt:
+      fix tests (say hello to disk C:\)
+
+2008-05-20  David Soria Parra  <dsoria@gmx.net>
+
+    * ext/soap/soap.c
+      ext/soap/soap.c:
+      Coding style
+
+    * (PHP_5_3)
+      ext/soap/soap.c:
+      MFH: Allow non-long values for proxy_port, connection_timeout and convert
+      them
+
+    * ext/soap/soap.c:
+      Allow non-long values for proxy_port, connection_timeout and convert them
+
+2008-05-20  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/date/php_date.c:
+      fix function signature and silence compile warning
+
+    * ext/spl/spl_array.c
+      ext/spl/spl_heap.c:
+      nuke unused variables
+
+    * main/streams/unicode_filter.c:
+      fix invalid free in Unicode filter
+
+2008-05-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c:
+      proper fix
+
+2008-05-20  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/phar_object.c:
+      s/zend_hash_exists/zend_hash_find/
+
+    * ext/phar/phar_object.c:
+      MFB relax rename requirements
+
+    * (PHP_5_3)
+      ext/phar/phar_object.c:
+      relax conversion, so that if a phar has no files, we can convert it to
+      another format without changing the extension
+
 2008-05-19  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ZendEngine2/zend.c:
