@@ -211,8 +211,8 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 	}
 	@unlink($info_file);
 
-	$unicode = `$php $pass_options $info_params -r "echo ini_get('unicode.semantics');"`;
-	define('TESTED_UNICODE', strcasecmp($unicode,"on") == 0 || $unicode == 1);
+	$unicode = 1;
+	define('TESTED_UNICODE', 1);
 
 	// load list of enabled extensions
 	save_text($info_file, '<?php echo join(",",get_loaded_extensions()); ?>');
