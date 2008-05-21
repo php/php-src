@@ -1899,7 +1899,7 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 				(*pphar)->flags = phar->flags;
 				(*pphar)->fp = phar->fp;
 				phar->fp = NULL;
-				phar_destroy_phar_data(phar);
+				phar_destroy_phar_data(phar TSRMLS_CC);
 				phar = *pphar;
 				newpath = oldpath;
 				goto its_ok;
