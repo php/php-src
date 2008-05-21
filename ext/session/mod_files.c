@@ -127,7 +127,7 @@ static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, cons
 		int newlen;
 		UErrorCode status = U_ZERO_ERROR;
 
-		zend_convert_encodings(UG(filesystem_encoding_conv), UG(utf8_conv), &newbuf, &newlen, buf, n, &status);
+		zend_convert_encodings(ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), UG(utf8_conv), &newbuf, &newlen, buf, n, &status);
 
 		if (status != U_ZERO_ERROR) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Failure converting savepath to local filesystem encoding, attempting to use utf8");
