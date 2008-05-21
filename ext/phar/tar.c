@@ -225,10 +225,11 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 	entry.is_tar = 1;
 	entry.is_crc_checked = 1;
 	entry.phar = myphar;
+	pos += sizeof(buf);
 	do {
 		phar_entry_info *newentry;
 
-		pos += sizeof(buf);
+		pos = php_stream_tell(fp);
 		hdr = (tar_header*) buf;
 		sum1 = phar_tar_number(hdr->checksum, sizeof(hdr->checksum));
 		if (sum1 == 0 && phar_tar_checksum(buf, sizeof(buf)) == 0) {
@@ -385,7 +386,6 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 			}
 		}
 		size = (size+511)&~511;
-		pos += size;
 		if (((hdr->typeflag == 0) || (hdr->typeflag == TAR_FILE)) && size > 0) {
 			/* this is not good enough - seek succeeds even on truncated tars */
 			php_stream_seek(fp, size, SEEK_CUR);
