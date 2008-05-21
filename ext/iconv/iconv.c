@@ -228,7 +228,7 @@ static php_iconv_err_t php_iconv_stream_filter_unregister_factory(TSRMLS_D);
 /* }}} */
 
 /* {{{ static globals */
-static char _generic_superset_name[] = "UCS-4LE";
+static char _generic_superset_name[] = ICONV_UCS4_ENCODING;
 #define GENERIC_SUPERSET_NAME _generic_superset_name
 #define GENERIC_SUPERSET_NBYTES 4
 /* }}} */
