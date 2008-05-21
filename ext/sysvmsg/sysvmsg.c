@@ -413,7 +413,7 @@ PHP_FUNCTION(msg_send)
 		char *p = NULL;
 		switch (Z_TYPE_P(message)) {
 			case IS_UNICODE:
-				if (SUCCESS != zend_unicode_to_string(UG(runtime_encoding_conv), &p, &message_len, Z_USTRVAL_P(message), Z_USTRLEN_P(message) TSRMLS_CC)) {
+				if (SUCCESS != zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &p, &message_len, Z_USTRVAL_P(message), Z_USTRLEN_P(message) TSRMLS_CC)) {
 					RETURN_FALSE;
 				}
 				break;
