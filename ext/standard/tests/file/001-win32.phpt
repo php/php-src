@@ -52,7 +52,7 @@ for ($i = 0; $i <= 12; $i++) {
     }
 }
 echo "test.file is " . filetype('test.file') . "\n";
-echo "test.link is " . filetype('test.link') . "\n";
+echo "test.link is <" . filetype('test.link') . ">\n";
 printf ("test.file permissions are 0%o\n", 0777 & fileperms('test.file'));
 echo "test.file size is " . filesize('test.file') . "\n";
 if (is_writeable('test.file')) {
@@ -103,7 +103,7 @@ if (file_exists('test.file')) {
     echo "test.file does not exist\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
 test.file does not exist
 test.file exists
 test.link does not exist
@@ -111,7 +111,9 @@ test.file is not a symlink
 test.link is not a symlink
 test.file exists
 test.file is file
-test.link is file
+
+Warning: filetype(): Lstat failed for test.link in %s
+test.link is <>
 test.file permissions are 0666
 test.file size is 0
 test.file is writeable
