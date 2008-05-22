@@ -1,3 +1,8 @@
+2008-05-21  Antony Dovgal  <tony@daylessday.org>
+
+    * zend_ini_parser.y:
+      looks for Unicode constants in Unicode mode
+
 2008-05-20  Antony Dovgal  <tony@daylessday.org>
 
     * zend_constants.c:

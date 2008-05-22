@@ -1,3 +1,195 @@
+2008-05-21  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/phar/phar_object.c:
+      - Fix build (ZTS)
+
+2008-05-21  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/tar.c:
+      fix offset detection in tar files
+
+    * ext/phar/phar_object.c:
+      MFB fix convertTo\*() for same-named archives with no files
+
+    * (PHP_5_3)
+      ext/phar/phar_object.c:
+      fix convertTo\*() for same-named archives with no files
+
+2008-05-21  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/file/001-win32.phpt
+      ext/standard/tests/file/copy_variation12-win32.phpt:
+      - fix test
+
+    * (PHP_5_3)
+      main/main.c:
+      - actually disable the ASSERT error dialog box (affects debug mode only),
+      helps to run the tests and coverage analyze
+
+2008-05-21  Josie Messa  <jdmessa@gmail.com>
+
+    * ext/dom/tests/DOMCharacterData_appendData_basic.phpt
+      ext/dom/tests/DOMComment_appendData_basic_Sullivan.phpt
+      ext/dom/tests/DOMNode_issamenode_basic.phpt
+      ext/dom/tests/DOMText_appendData_basic.phpt:
+      - Committing tests reviewed after London TestFest 08
+      - Credits to: Mike Sullivan and James Lewis
+
+2008-05-21  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/iconv/iconv.c
+      ext/iconv/php_iconv.h:
+      use macros instead of hardcoded encoding names
+      (%$#@# AIX is totally broken..)
+
+2008-05-21  Josie Messa  <jdmessa@gmail.com>
+
+    * ext/dom/tests/DOMCharacterData_appendData_basic.phpt
+      ext/dom/tests/DOMCharacterData_appendData_basic.phpt
+      ext/dom/tests/DOMComment_appendData_basic_Sullivan.phpt
+      ext/dom/tests/DOMComment_appendData_basic_Sullivan.phpt
+      ext/dom/tests/DOMNode_issamenode_basic.phpt
+      ext/dom/tests/DOMNode_issamenode_basic.phpt
+      ext/dom/tests/DOMText_appendData_basic.phpt
+      ext/dom/tests/DOMText_appendData_basic.phpt:
+      
+      file DOMCharacterData_appendData_basic.phpt was initially added on branch
+      PHP_5_3.
+
+2008-05-21  Felipe Pena  <felipensp@gmail.com>
+
+    * run-tests.php:
+      - Remove check for unicode.semantics
+
+2008-05-21  Antony Dovgal  <tony@daylessday.org>
+
+    * run-tests.php:
+      fix run-tests.php (Felipe)
+
+    * tests/security/.cvsignore
+      tests/security/.cvsignore
+      tests/security/.cvsignore:
+        1.1.4;
+      add missing .cvsignore
+
+    * ext/session/mod_files.c
+      ext/sysvmsg/sysvmsg.c:
+      use ZEND_U_CONVERTER() macro to prevent segfaults when the converter is not
+      set (i.e. NULL)
+
+    * ZendEngine2/zend_ini_parser.y:
+      looks for Unicode constants in Unicode mode
+
+2008-05-21  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/zip/.cvsignore
+      ext/zip/config.m4
+      ext/zip/config.w32
+      ext/zip/php_zip.c
+      ext/zip/php_zip.h
+      ext/zip/examples/create.php
+      ext/zip/examples/dir.php
+      ext/zip/examples/extract.php
+      ext/zip/examples/fopen.php
+      ext/zip/examples/im.php
+      ext/zip/examples/odt.php
+      ext/zip/examples/test.zip
+      ext/zip/lib/mkstemp.c
+      ext/zip/lib/unistd.h
+      ext/zip/lib/zip.h
+      ext/zip/lib/zip_add.c
+      ext/zip/lib/zip_add_dir.c
+      ext/zip/lib/zip_alias.h
+      ext/zip/lib/zip_close.c
+      ext/zip/lib/zip_delete.c
+      ext/zip/lib/zip_dirent.c
+      ext/zip/lib/zip_entry_free.c
+      ext/zip/lib/zip_entry_new.c
+      ext/zip/lib/zip_err_str.c
+      ext/zip/lib/zip_error.c
+      ext/zip/lib/zip_error_clear.c
+      ext/zip/lib/zip_error_get.c
+      ext/zip/lib/zip_error_get_sys_type.c
+      ext/zip/lib/zip_error_strerror.c
+      ext/zip/lib/zip_error_to_str.c
+      ext/zip/lib/zip_fclose.c
+      ext/zip/lib/zip_file_error_clear.c
+      ext/zip/lib/zip_file_error_get.c
+      ext/zip/lib/zip_file_get_offset.c
+      ext/zip/lib/zip_file_strerror.c
+      ext/zip/lib/zip_fopen.c
+      ext/zip/lib/zip_fopen_index.c
+      ext/zip/lib/zip_fread.c
+      ext/zip/lib/zip_free.c
+      ext/zip/lib/zip_get_archive_comment.c
+      ext/zip/lib/zip_get_file_comment.c
+      ext/zip/lib/zip_get_name.c
+      ext/zip/lib/zip_get_num_files.c
+      ext/zip/lib/zip_memdup.c
+      ext/zip/lib/zip_name_locate.c
+      ext/zip/lib/zip_new.c
+      ext/zip/lib/zip_open.c
+      ext/zip/lib/zip_rename.c
+      ext/zip/lib/zip_replace.c
+      ext/zip/lib/zip_set_archive_comment.c
+      ext/zip/lib/zip_set_file_comment.c
+      ext/zip/lib/zip_set_name.c
+      ext/zip/lib/zip_source_buffer.c
+      ext/zip/lib/zip_source_file.c
+      ext/zip/lib/zip_source_filep.c
+      ext/zip/lib/zip_source_free.c
+      ext/zip/lib/zip_source_function.c
+      ext/zip/lib/zip_source_zip.c
+      ext/zip/lib/zip_stat.c
+      ext/zip/lib/zip_stat_index.c
+      ext/zip/lib/zip_stat_init.c
+      ext/zip/lib/zip_strerror.c
+      ext/zip/lib/zip_unchange.c
+      ext/zip/lib/zip_unchange_all.c
+      ext/zip/lib/zip_unchange_archive.c
+      ext/zip/lib/zip_unchange_data.c
+      ext/zip/lib/zip_win32.h
+      ext/zip/lib/zipint.h
+      ext/zip/lib/zipint_alias.h
+      ext/zip/tests/bug11216.phpt
+      ext/zip/tests/bug38943.phpt
+      ext/zip/tests/bug7214.phpt
+      ext/zip/tests/bug7658.phpt
+      ext/zip/tests/bug8009.phpt
+      ext/zip/tests/bug8700.phpt
+      ext/zip/tests/oo_addemptydir.phpt
+      ext/zip/tests/oo_addfile.phpt
+      ext/zip/tests/oo_close.phpt
+      ext/zip/tests/oo_delete.phpt
+      ext/zip/tests/oo_ext_zip.phpt
+      ext/zip/tests/oo_extract.phpt
+      ext/zip/tests/oo_getcomment.phpt
+      ext/zip/tests/oo_getnameindex.phpt
+      ext/zip/tests/oo_namelocate.phpt
+      ext/zip/tests/oo_open.phpt
+      ext/zip/tests/oo_properties.phpt
+      ext/zip/tests/oo_rename.phpt
+      ext/zip/tests/oo_setcomment.phpt
+      ext/zip/tests/oo_stream.phpt
+      ext/zip/tests/utils.inc
+      ext/zip/tests/zip_close.phpt
+      ext/zip/tests/zip_entry_compressedsize.phpt
+      ext/zip/tests/zip_entry_compressionmethod.phpt
+      ext/zip/tests/zip_entry_filesize.phpt
+      ext/zip/tests/zip_entry_name.phpt
+      ext/zip/tests/zip_entry_open.phpt
+      ext/zip/tests/zip_entry_read.phpt
+      ext/zip/tests/zip_open.phpt
+      ext/zip/tests/zip_read.phpt:
+      - sync with PECL HEAD
+
 2008-05-20  Etienne Kneuss  <php@colder.ch>
 
     * (PHP_5_3)
