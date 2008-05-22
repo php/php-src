@@ -107,6 +107,7 @@ PHP                                                                        NEWS
   behavior. (Stas)
 - Added forward_static_call(_array) to complete LSB. (Mike Lively)
 - Added native support for asinh(), acosh(), atanh(), log1p() and expm1() (Kalle)
+- inet_pton() and inet_ntop() is now available on Windows platforms (Kalle)
 
 - Improved PHP runtime speed and memory usage:
   . Use IS_CV for direct access to $this variable. (Dmitry)
