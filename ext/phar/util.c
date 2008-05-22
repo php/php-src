@@ -1172,6 +1172,9 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 		return NULL;
 	}
 	if (is_dir) {
+		if (!path_len || path_len == 1) {
+			return NULL;
+		}
 		path_len--;
 	}
 	if (SUCCESS == zend_hash_find(&phar->manifest, path, path_len, (void**)&entry)) {
