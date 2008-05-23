@@ -22,6 +22,7 @@
 
 /* {{{ includes */
 #include "php.h"
+#include "php_network.h"
 
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
