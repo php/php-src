@@ -1,5 +1,10 @@
 --TEST--
 ReflectionClass::getConstructor()
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip - reflection extension not loaded'); ?>
+--CREDITS--
+Michelangelo van Dam <dragonbe@gmail.com>
+#testfest roosendaal on 2008-05-10
 --FILE--
 <?php
 class NewCtor {
@@ -61,26 +66,9 @@ foreach ($classes as $class) {
 	}
 	
 }				 
-				
+				 
 ?>
 --EXPECTF--
-
-Strict Standards: Redefining already defined constructor for class OldAndNewCtor in %s on line 26
-
-Strict Standards: %s for class NewAndOldCtor in %s on line 31
-Constructor of NewCtor: __construct
-Constructor of ExtendsNewCtor: __construct
-Constructor of OldCtor: OldCtor
-Constructor of ExtendsOldCtor: OldCtor
-Constructor of OldAndNewCtor: __construct
-Constructor of NewAndOldCtor: __construct
-Constructor of B: B
-Constructor of C: C
-Constructor of D1: __construct
-Constructor of D2: C
-No constructor for X
-No constructor for Y
---UEXPECTF--
 
 Strict Standards: Redefining already defined constructor for class OldAndNewCtor in %s on line 26
 
