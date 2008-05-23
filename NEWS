@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2008, PHP 5.2.7
+- When dumping entire document to file via asXml() don't lose the encoding.
+  (Ilia)
 - Fixed a crash inside PDO when trying instantiate PDORow manually (Felipe)
 - Fixed build failure of ext/mysqli with libmysql 6.0 - missing rpl
   functions. (Andrey)
