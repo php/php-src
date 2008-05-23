@@ -1,5 +1,7 @@
 --TEST--
 ReflectionClass::getParentClass()
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip - reflection extension not loaded'); ?>
 --CREDITS--
 Michelangelo van Dam <dragonbe@gmail.com>
 #testfest roosendaal on 2008-05-10
