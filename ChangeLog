@@ -1,3 +1,62 @@
+2008-05-22  Kalle Sommer Nielsen  <kalle@zesix.com>
+
+    * ext/standard/config.w32:
+      Enable inet_pton() and inet_ntop() on Windows in HEAD
+
+    * (PHP_5_3)
+      NEWS
+      ext/standard/config.w32:
+      [DOC] enable inet_pton() and inet_ntop() on Windows
+
+2008-05-22  Robin Fernandes  <robin@soal.org>
+
+    * ext/reflection/tests/reflectionClass_getModifiers_basic.phpt
+      ext/reflection/tests/reflectionClass_getParentClass.phpt
+      ext/reflection/tests/reflectionClass_hasConstant_basic.phpt
+      ext/reflection/tests/reflectionClass_hasMethod_basic.phpt
+      ext/reflection/tests/reflectionClass_hasProperty_basic.phpt
+      ext/reflection/tests/reflectionClass_isInterface_basic.phpt
+      ext/reflection/tests/reflectionClass_isIterateable_basic.phpt
+      ext/reflection/tests/reflectionClass_isIterateable_variation1.phpt:
+      Basic ReflectionClass tests (from Dutch TestFest)
+
+    * ext/reflection/tests/reflectionClass_getModifiers_basic.phpt
+      ext/reflection/tests/reflectionClass_getModifiers_basic.phpt
+      ext/reflection/tests/reflectionClass_getParentClass.phpt
+      ext/reflection/tests/reflectionClass_getParentClass.phpt
+      ext/reflection/tests/reflectionClass_hasConstant_basic.phpt
+      ext/reflection/tests/reflectionClass_hasConstant_basic.phpt
+      ext/reflection/tests/reflectionClass_hasMethod_basic.phpt
+      ext/reflection/tests/reflectionClass_hasMethod_basic.phpt
+      ext/reflection/tests/reflectionClass_hasProperty_basic.phpt
+      ext/reflection/tests/reflectionClass_hasProperty_basic.phpt
+      ext/reflection/tests/reflectionClass_isInterface_basic.phpt
+      ext/reflection/tests/reflectionClass_isInterface_basic.phpt
+      ext/reflection/tests/reflectionClass_isIterateable_basic.phpt
+      ext/reflection/tests/reflectionClass_isIterateable_basic.phpt
+      ext/reflection/tests/reflectionClass_isIterateable_variation1.phpt
+      ext/reflection/tests/reflectionClass_isIterateable_variation1.phpt:
+      
+      file reflectionClass_getModifiers_basic.phpt was initially added on branch
+      PHP_5_3.
+
+2008-05-22  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/phar_object.c
+      ext/phar/tar.c
+      ext/phar/util.c
+      ext/phar/zip.c:
+      major fixes
+       * found felipe's segfault in util.c and fixed the segfault (3 tests fail
+      due to odd behavior of . and .. on this machine)
+       * fixed serious flaws in the setting/resetting of is_data - now it works
+      properly.  Assume
+         all new PharData are tar-based, and allow passing Phar::ZIP to PharData
+      constructor to override this
+       * fix broken earlier commit, introduced segfault that broke 20 tests here
+
 2008-05-21  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
