@@ -1,5 +1,5 @@
 --TEST--
-ReflectionClass::getParentClass()
+ReflectionClass::getInterfaceNames()
 --SKIPIF--
 <?php extension_loaded('reflection') or die('skip - reflection extension not loaded'); ?>
 --CREDITS--
@@ -7,17 +7,19 @@ Michelangelo van Dam <dragonbe@gmail.com>
 #testfest roosendaal on 2008-05-10
 --FILE--
 <?php
+interface Foo { }
 
-class Foo {}
+interface Bar { }
 
-class Bar extends Foo {}
+class Baz implements Foo, Bar { }
 
-$rc1 = new ReflectionClass("Bar");
-var_dump($rc1->getParentClass());
+$rc1 = new ReflectionClass("Baz");
+var_dump($rc1->getInterfaceNames());
 ?>
-
---EXPECTF--
-object(ReflectionClass)#%d (1) {
-  ["name"]=>
+--EXPECT--
+array(2) {
+  [0]=>
   string(3) "Foo"
+  [1]=>
+  string(3) "Bar"
 }
