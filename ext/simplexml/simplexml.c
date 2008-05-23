@@ -1392,7 +1392,7 @@ SXE_METHOD(asXML)
 
 	if (node) {
 		if (node->parent && (XML_DOCUMENT_NODE == node->parent->type)) {
-			xmlDocDumpMemory((xmlDocPtr) sxe->document->ptr, &strval, &strval_len);
+			xmlDocDumpMemoryEnc((xmlDocPtr) sxe->document->ptr, &strval, &strval_len, ((xmlDocPtr) sxe->document->ptr)->encoding);
 			RETVAL_STRINGL((char *)strval, strval_len, 1);
 			xmlFree(strval);
 		} else {
