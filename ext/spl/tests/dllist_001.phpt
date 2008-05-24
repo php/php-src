@@ -1,7 +1,5 @@
 --TEST--
 SPL: DoublyLinkedList: std operations
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 $dll = new SplDoublyLinkedList();

@@ -1,7 +1,5 @@
 --TEST--
 SPL: ArrayObject::exchangeArray($this)
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

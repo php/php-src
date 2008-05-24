@@ -1,7 +1,5 @@
 --TEST--
 SPL: ArrayObject/Iterator from IteratorAggregate
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

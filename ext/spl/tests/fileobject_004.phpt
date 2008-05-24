@@ -1,7 +1,5 @@
 --TEST--
 SPL: SplFileObject realpath and include_path
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

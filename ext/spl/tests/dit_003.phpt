@@ -1,7 +1,5 @@
 --TEST--
 SPL: FilesystemIterator and foreach
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 $count = 0;

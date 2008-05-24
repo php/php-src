@@ -1,7 +1,5 @@
 --TEST--
 SPL: spl_autoload() with exceptions
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --INI--
 include_path=.
 --FILE--

@@ -1,7 +1,5 @@
 --TEST--
 SPL: SplMaxHeap: std operations
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 $h = new SplMaxHeap();

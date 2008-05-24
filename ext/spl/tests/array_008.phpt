@@ -1,7 +1,5 @@
 --TEST--
 SPL: ArrayIterator and foreach reference
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --INI--
 error_reporting=2047
 --FILE--

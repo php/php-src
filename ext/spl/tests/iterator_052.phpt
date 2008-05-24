@@ -1,7 +1,5 @@
 --TEST--
 SPL: RegexIterator::ALL_MATCHES
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

@@ -1,7 +1,5 @@
 --TEST--
 SPL: CachingIterator and __toString and flags = 0
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

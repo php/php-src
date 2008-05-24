@@ -1,7 +1,5 @@
 --TEST--
 Bug #36287 (Segfault with SplFileInfo conversion)
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

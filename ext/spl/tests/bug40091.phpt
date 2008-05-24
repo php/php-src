@@ -1,7 +1,5 @@
 --TEST--
 Bug #40091 (issue with spl_autoload_register() and 2 instances of the same class)
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 class MyAutoloader {

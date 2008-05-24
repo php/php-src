@@ -1,7 +1,5 @@
 --TEST--
 Bug #36258 (SplFileObject::getPath() may lead to segfault)
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 
