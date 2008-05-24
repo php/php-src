@@ -13,4 +13,13 @@ Content-type: text/html
 --FILE_EXTERNAL--
 files/blog.phar
 --EXPECT--
-string(0) ""
+string(167) "<xml version="1.0" encoding="UTF-8">
+<config>
+ <database>
+  <host>localhost</name>
+  <user>squirrel</user>
+  <pass>nuts</pass>
+  <db>hoard</db>
+ </database>
+</config>
+"
