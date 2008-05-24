@@ -1,3 +1,85 @@
+2008-05-23  Robin Fernandes  <robin@soal.org>
+
+    * ext/reflection/tests/reflectionClass_getConstructor_basic.phpt
+      ext/reflection/tests/reflectionClass_getExtensionName_basic.phpt
+      ext/reflection/tests/reflectionClass_getExtensionName_basic.phpt
+      ext/reflection/tests/reflectionClass_getExtensionName_basic.phpt
+      ext/reflection/tests/reflectionClass_getExtensionName_variation.phpt
+      ext/reflection/tests/reflectionClass_getExtensionName_variation.phpt
+      ext/reflection/tests/reflectionClass_getExtensionName_variation.phpt
+      ext/reflection/tests/reflectionClass_getExtension_basic.phpt
+      ext/reflection/tests/reflectionClass_getExtension_basic.phpt
+      ext/reflection/tests/reflectionClass_getExtension_basic.phpt
+      ext/reflection/tests/reflectionClass_getExtension_variation.phpt
+      ext/reflection/tests/reflectionClass_getExtension_variation.phpt
+      ext/reflection/tests/reflectionClass_getExtension_variation.phpt
+      ext/reflection/tests/reflectionClass_getInterfaceNames_basic.phpt
+      ext/reflection/tests/reflectionClass_getInterfaceNames_basic.phpt
+      ext/reflection/tests/reflectionClass_getInterfaceNames_basic.phpt
+      ext/reflection/tests/reflectionClass_getModifiers_basic.phpt
+      ext/reflection/tests/reflectionClass_getModifiers_basic.phpt
+      ext/reflection/tests/reflectionClass_getParentClass.phpt
+      ext/reflection/tests/reflectionClass_getParentClass.phpt
+      ext/reflection/tests/reflectionClass_hasConstant_basic.phpt
+      ext/reflection/tests/reflectionClass_hasConstant_basic.phpt
+      ext/reflection/tests/reflectionClass_hasMethod_basic.phpt
+      ext/reflection/tests/reflectionClass_hasMethod_basic.phpt
+      ext/reflection/tests/reflectionClass_hasProperty_basic.phpt
+      ext/reflection/tests/reflectionClass_hasProperty_basic.phpt
+      ext/reflection/tests/reflectionClass_isAbstract_basic.phpt
+      ext/reflection/tests/reflectionClass_isAbstract_basic.phpt
+      ext/reflection/tests/reflectionClass_isAbstract_basic.phpt
+      ext/reflection/tests/reflectionClass_isFinal_basic.phpt
+      ext/reflection/tests/reflectionClass_isFinal_basic.phpt
+      ext/reflection/tests/reflectionClass_isFinal_basic.phpt
+      ext/reflection/tests/reflectionClass_isInterface_basic.phpt
+      ext/reflection/tests/reflectionClass_isInterface_basic.phpt
+      ext/reflection/tests/reflectionClass_isIterateable_basic.phpt
+      ext/reflection/tests/reflectionClass_isIterateable_basic.phpt
+      ext/reflection/tests/reflectionClass_isIterateable_variation1.phpt
+      ext/reflection/tests/reflectionClass_isIterateable_variation1.phpt:
+      More basic ReflectionClass tests from Dutch TestFest.
+
+2008-05-23  Antony Dovgal  <tony@daylessday.org>
+
+    * configure.in:
+      improve regexp to support b0rked SED versions (i.e. Solaris)
+
+    * (PHP_5_3)
+      ext/pcre/config0.m4:
+      MFH: use bundled PCRE library when both yes & no passed as argument,
+      look for headers and the lib otherwise
+
+    * ext/pcre/config0.m4:
+      use bundled PCRE library when both yes & no passed as argument,
+      look for headers and the lib otherwise
+
+2008-05-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/simplexml/simplexml.c:
+      
+      When dumping entire document to file via asXml() don't lose the encoding
+
+    * ext/simplexml/simplexml.c:
+      
+      MFB:When dumping entire document to file via asXml() don't lose the
+      encoding
+
+    * (PHP_5_3)
+      ext/simplexml/simplexml.c:
+      When dumping entire document to file via asXml() don't lose the encoding
+
+2008-05-23  Matt Wilmas  <php_lists@realplain.com>
+
+    * (PHP_5_3)
+      ext/standard/dns.c:
+      MFH: Fixed Windows build now that HAVE_INET_PTON is defined
+
+    * ext/standard/dns.c:
+      Fixed Windows build now that HAVE_INET_PTON is defined
+
 2008-05-22  Kalle Sommer Nielsen  <kalle@zesix.com>
 
     * ext/standard/config.w32:
