@@ -1,7 +1,5 @@
 --TEST--
 ReflectionMethod class getName(), isInternal() and isUserDefined() methods
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

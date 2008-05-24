@@ -1,7 +1,5 @@
 --TEST--
 Reflection and inheriting static properties
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

@@ -1,7 +1,5 @@
 --TEST--
 Reflection Bug #30148 (ReflectionMethod->isConstructor() fails for inherited classes)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

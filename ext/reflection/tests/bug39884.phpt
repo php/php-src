@@ -1,7 +1,5 @@
 --TEST--
 Bug #39884 (ReflectionParameter::getClass() throws exception for type hint self)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 class stubParamTest

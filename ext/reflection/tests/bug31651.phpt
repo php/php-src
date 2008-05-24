@@ -1,7 +1,5 @@
 --TEST--
 Reflection Bug #31651 (ReflectionClass::getDefaultProperties segfaults with arrays.)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

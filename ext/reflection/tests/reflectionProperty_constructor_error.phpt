@@ -1,7 +1,5 @@
 --TEST--
 Test ReflectionProperty class constructor errors.
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

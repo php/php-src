@@ -1,7 +1,5 @@
 --TEST--
 Reflection Bug #36337 (ReflectionProperty fails to return correct visibility)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 
