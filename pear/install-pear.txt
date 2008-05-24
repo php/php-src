@@ -5,7 +5,7 @@
 |   PEAR: PHP Extension and Application Repository                     |
 |                                                                      |
 | To install these components,                                         |
-| download http://pear.php.net/install-pear.phar to php-src/pear/      |
+| download http://pear.php.net/go-pear.phar to php-src/pear/           |
 | become the superuser and execute:                                    |
 |                                                                      |
 |   # make install-su                                                  |
