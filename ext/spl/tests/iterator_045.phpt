@@ -1,7 +1,5 @@
 --TEST--
 SPL: CachingIterator and offsetSet/Unset, getCache using flag FULL_CACHE
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

@@ -2,8 +2,7 @@
 SPL: spl_autoload_functions()
 --SKIPIF--
 <?php 
-	if (!extension_loaded("spl")) die("skip");
-	if (spl_autoload_functions() !== false) die('skip __autoload() registered by php.ini'); 
+if (spl_autoload_functions() !== false) die('skip __autoload() registered by php.ini'); 
 ?>
 --FILE--
 <?php

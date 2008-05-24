@@ -2,10 +2,8 @@
 SPL: SimpleXMLIterator and recursion
 --SKIPIF--
 <?php 
-if (!extension_loaded("spl")) print "skip";
 if (!extension_loaded('simplexml')) print 'skip';
 if (!extension_loaded("libxml")) print "skip LibXML not present";
-if (!class_exists('RecursiveIteratorIterator')) print 'skip RecursiveIteratorIterator not available';
 ?>
 --FILE--
 <?php 

@@ -1,7 +1,5 @@
 --TEST--
 SPL: DirectoryIterator defaults
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

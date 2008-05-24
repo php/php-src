@@ -1,7 +1,5 @@
 --TEST--
 SPL: DirectoryIterator and clone
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 $a = new DirectoryIterator(__DIR__);

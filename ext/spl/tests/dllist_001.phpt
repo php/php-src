@@ -1,7 +1,5 @@
 --TEST--
 SPL: DoublyLinkedList: std operations
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --INI--
 allow_call_time_pass_reference=1
 --FILE--

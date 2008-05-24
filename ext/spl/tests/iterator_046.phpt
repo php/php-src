@@ -1,7 +1,5 @@
 --TEST--
 SPL: CachingIterator and __toString using bypassed string keys
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

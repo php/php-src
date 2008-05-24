@@ -1,7 +1,5 @@
 --TEST--
 SPL: ArrayObject::seek() and exceptions
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

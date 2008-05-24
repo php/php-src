@@ -1,7 +1,5 @@
 --TEST--
 SPL: SplPriorityQueue: exceptions
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 class myPQueue extends SplPriorityQueue {

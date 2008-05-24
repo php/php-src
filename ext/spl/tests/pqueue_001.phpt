@@ -1,7 +1,5 @@
 --TEST--
 SPL: SplPriorityQueue: std operations and extract flags
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 $pq = new SplPriorityQueue();

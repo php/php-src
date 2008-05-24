@@ -1,7 +1,5 @@
 --TEST--
 Bug #40036 (empty() does not work correctly with ArrayObject when using ARRAY_AS_PROPS)
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 class View extends ArrayObject

@@ -1,7 +1,5 @@
 --TEST--
 Bug #42364 (Crash when using getRealPath with DirectoryIterator)
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 $it = new DirectoryIterator(dirname(__FILE__));

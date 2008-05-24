@@ -1,7 +1,5 @@
 --TEST--
 SPL: ArrayIterator and values assigned by reference
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 	

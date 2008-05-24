@@ -1,7 +1,5 @@
 --TEST--
 SPL: RecursiveIteratorIterator and break deep
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 
