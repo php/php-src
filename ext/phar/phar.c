@@ -406,7 +406,6 @@ int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_len, int
 				}
 			}
 		}
-		phar->is_data = is_data && (phar->is_tar || phar->is_zip);
 		if (pphar) {
 			*pphar = phar;
 		}
@@ -1033,12 +1032,12 @@ check_file:
 	}
 
 	if (ext_len > 3 && (z = memchr(ext_str, 'z', ext_len)) && ((ext_str + ext_len) - z >= 2) && !memcmp(z + 1, "ip", 2)) {
-		// assume zip-based phar
+		/* assume zip-based phar */
 		return phar_open_or_create_zip(fname, fname_len, alias, alias_len, is_data, options, pphar, error TSRMLS_CC);
 	}
 
 	if (ext_len > 3 && (z = memchr(ext_str, 't', ext_len)) && ((ext_str + ext_len) - z >= 2) && !memcmp(z + 1, "ar", 2)) {
-		// assume tar-based phar
+		/* assume tar-based phar */
 		return phar_open_or_create_tar(fname, fname_len, alias, alias_len, is_data, options, pphar, error TSRMLS_CC);
 	}
 
@@ -1140,6 +1139,9 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 	if (is_data) {
 		alias = NULL;
 		alias_len = 0;
+		mydata->is_data = 1;
+		/* assume tar format, PharData can specify other */
+		mydata->is_tar = 1;
 	} else {
 		phar_archive_data **fd_ptr;
 

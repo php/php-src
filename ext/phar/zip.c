@@ -443,6 +443,13 @@ foundit:
 		zend_hash_add(&mydata->manifest, entry.filename, entry.filename_len, (void *)&entry,sizeof(phar_entry_info), NULL);
 	}
 	mydata->fp = fp;
+
+	if (zend_hash_exists(&(mydata->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
+		mydata->is_data = 0;
+	} else {
+		mydata->is_data = 1;
+	}
+
 	zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
 	if (actual_alias) {
 		phar_archive_data **fd_ptr;
@@ -522,6 +529,7 @@ int phar_open_or_create_zip(char *fname, int fname_len, char *alias, int alias_l
 	if (phar->is_brandnew) {
 		phar->internal_file_start = 0;
 		phar->is_zip = 1;
+		phar->is_tar = 0;
 		return SUCCESS;
 	}
 

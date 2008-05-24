@@ -141,6 +141,7 @@ int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_l
 
 	if (phar->is_brandnew) {
 		phar->is_tar = 1;
+		phar->is_zip = 0;
 		phar->internal_file_start = 0;
 		return SUCCESS;
 	}
@@ -422,6 +423,13 @@ int phar_open_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, i
 #endif
 	myphar->fname_len = fname_len;
 	p = strrchr(myphar->fname, '/');
+
+	if (zend_hash_exists(&(myphar->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
+		myphar->is_data = 0;
+	} else {
+		myphar->is_data = 1;
+	}
+
 	if (p) {
 		myphar->ext = memchr(p, '.', (myphar->fname + fname_len) - p);
 		if (myphar->ext == p) {
