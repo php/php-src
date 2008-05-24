@@ -1,7 +1,5 @@
 --TEST--
 SPL: RecursiveCachingIterator and uninitialized getChildren()
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

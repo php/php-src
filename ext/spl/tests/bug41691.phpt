@@ -1,7 +1,5 @@
 --TEST--
 Bug #41691 (ArrayObject::exchangeArray hangs Apache)
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

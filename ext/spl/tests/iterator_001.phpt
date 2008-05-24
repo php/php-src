@@ -1,7 +1,5 @@
 --TEST--
 SPL: Iterator aggregating inner iterator's methods
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

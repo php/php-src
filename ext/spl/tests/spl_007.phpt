@@ -1,7 +1,5 @@
 --TEST--
 SPL: iterator_apply() with callback using __call()
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

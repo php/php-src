@@ -1,7 +1,5 @@
 --TEST--
 SPL: EmptyIterator access
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

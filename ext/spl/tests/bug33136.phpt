@@ -1,7 +1,5 @@
 --TEST--
 Bug #33136 (method offsetSet in class extended from ArrayObject crash PHP)
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

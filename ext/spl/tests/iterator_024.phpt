@@ -1,7 +1,5 @@
 --TEST--
 SPL: RecursiveIteratorIterator with custom iterator class
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

@@ -1,7 +1,5 @@
 --TEST--
 SPL: SplMinHeap: large unordered input iterated
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 $input = range(1,100);

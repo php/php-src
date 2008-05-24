@@ -1,7 +1,5 @@
 --TEST--
 SPL: RecursiveIteratorIterator and setMaxDepth()
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

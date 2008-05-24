@@ -1,7 +1,5 @@
 --TEST--
 SPL: ArrayIterator without ArrayObject
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --INI--
 error_reporting=2047
 --FILE--
