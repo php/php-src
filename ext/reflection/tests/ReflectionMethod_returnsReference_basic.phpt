@@ -1,7 +1,5 @@
 --TEST--
 ReflectionMethod::returnsReference()
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

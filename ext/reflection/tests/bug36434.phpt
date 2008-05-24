@@ -1,7 +1,5 @@
 --TEST--
 Reflection Bug #36434 (Properties from parent class fail to indetify their true origin)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 class ancester

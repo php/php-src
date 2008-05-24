@@ -1,7 +1,5 @@
 --TEST--
 ReflectionClass::isIterateable() variations
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip - reflection extension not loaded'); ?>
 --CREDITS--
 Felix De Vliegher <felix.devliegher@gmail.com>
 --FILE--

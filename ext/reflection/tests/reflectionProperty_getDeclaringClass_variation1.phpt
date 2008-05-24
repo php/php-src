@@ -1,7 +1,5 @@
 --TEST--
 Test ReflectionProperty::getDeclaringClass() with inherited properties.
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

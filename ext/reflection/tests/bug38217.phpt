@@ -1,7 +1,5 @@
 --TEST--
 Bug #38217 (ReflectionClass::newInstanceArgs() tries to allocate too much memory)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

@@ -1,7 +1,5 @@
 --TEST--
 Test usage of ReflectionProperty methods isDefault(), getModifiers(), getDeclaringClass() and getDocComment().
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

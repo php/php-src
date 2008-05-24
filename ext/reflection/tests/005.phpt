@@ -1,7 +1,5 @@
 --TEST--
 ReflectionMethod::getDocComment() uses wrong comment block
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

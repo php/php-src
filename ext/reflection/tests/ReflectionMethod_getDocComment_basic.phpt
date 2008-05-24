@@ -1,7 +1,5 @@
 --TEST--
 ReflectionMethod::getDocComment()
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 /**

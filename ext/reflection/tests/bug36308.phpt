@@ -1,7 +1,5 @@
 --TEST--
 Reflection Bug #36308 (ReflectionProperty::getDocComment() does not reflect extended class commentary)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 class Base {
