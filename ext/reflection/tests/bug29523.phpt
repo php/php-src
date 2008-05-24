@@ -1,7 +1,5 @@
 --TEST--
 Reflection Bug #29523 (ReflectionParameter::isOptional() is incorrect)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

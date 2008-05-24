@@ -1,7 +1,5 @@
 --TEST--
 ReflectionParameter::getClass(), getDeclaringClass(), getDeclaringFunction()
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

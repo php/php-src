@@ -1,7 +1,5 @@
 --TEST--
 ReflectionMethod::getStaticVariables()
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

@@ -1,7 +1,5 @@
 --TEST--
 ReflectionMethod class getFileName(), getStartLine() and getEndLine() methods
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

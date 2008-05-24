@@ -1,7 +1,5 @@
 --TEST--
 Bug #39067 (getDeclaringClass() and private properties)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

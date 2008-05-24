@@ -1,7 +1,5 @@
 --TEST--
 ReflectionExtension::info()
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 $r = new ReflectionExtension("reflection");

@@ -1,7 +1,5 @@
 --TEST--
 Reflection and property_exists()
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

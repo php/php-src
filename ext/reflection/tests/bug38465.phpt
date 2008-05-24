@@ -1,7 +1,5 @@
 --TEST--
 Bug #38465 (ReflectionParameter fails on access to self::)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 class Baz {

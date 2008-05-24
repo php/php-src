@@ -1,7 +1,5 @@
 --TEST--
 Test ReflectionProperty::setValue() error cases.
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

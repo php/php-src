@@ -1,7 +1,5 @@
 --TEST--
 Reflection Bug #33389 (double free() when exporting a ReflectionClass)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 define ('foobar', 1);

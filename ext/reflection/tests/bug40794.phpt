@@ -1,11 +1,5 @@
 --TEST--
 Bug #40794 (ReflectionObject::getValues() may crash when used with dynamic properties)
---SKIPIF--
-<?php
-if (!extension_loaded("reflection")) {
-	die("skip");
-}
-?>
 --FILE--
 <?php
 

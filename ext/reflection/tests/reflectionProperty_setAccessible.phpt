@@ -1,7 +1,5 @@
 --TEST--
 Test ReflectionProperty::setAccessible().
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

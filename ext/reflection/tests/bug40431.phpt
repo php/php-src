@@ -1,7 +1,5 @@
 --TEST--
 Bug #40431 (dynamic properties may cause crash in ReflectionProperty methods)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

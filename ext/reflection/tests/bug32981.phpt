@@ -1,7 +1,5 @@
 --TEST--
 Reflection Bug #32981 (ReflectionMethod::getStaticVariables() causes apache2.0.54 seg fault)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

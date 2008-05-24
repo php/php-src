@@ -1,7 +1,5 @@
 --TEST--
 ReflectionParameter Check for parameter being optional
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 
