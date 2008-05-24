@@ -456,6 +456,10 @@ PHP_METHOD(Phar, mount)
 	fname = zend_get_executed_filename(TSRMLS_C);
 	fname_len = strlen(fname);
 
+#ifdef PHP_WIN32
+	phar_unixify_path_separators(fname, fname_len);
+#endif
+
 	if (fname_len > 7 && !memcmp(fname, "phar://", 7) && SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
 		efree(entry);
 		entry = NULL;
