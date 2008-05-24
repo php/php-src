@@ -1,7 +1,5 @@
 --TEST--
 SPL: RegexIterator::getFlags() and setFlags() basic tests
---SKIPIF--
-<?php extension_loaded('spl') or die('skip'); ?>
 --CREDITS--
 Felix De Vliegher <felix.devliegher@gmail.com>
 --FILE--
