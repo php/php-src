@@ -1,7 +1,5 @@
 --TEST--
 ReflectionClass::hasProperty()
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip - reflection extension not loaded'); ?>
 --CREDITS--
 Marc Veldman <marc@ibuildings.nl>
 #testfest roosendaal on 2008-05-10

@@ -1,7 +1,5 @@
 --TEST--
 Bug #39001 (ReflectionProperty returns incorrect declaring class for protected properties)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

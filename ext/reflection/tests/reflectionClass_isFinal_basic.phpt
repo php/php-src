@@ -1,7 +1,5 @@
 --TEST--
 ReflectionClass::isFinal() method
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip - reflection extension not loaded'); ?>
 --CREDITS--
 Felix De Vliegher <felix.devliegher@gmail.com>
 #testfest roosendaal on 2008-05-10

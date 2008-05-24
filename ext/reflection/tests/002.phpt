@@ -1,7 +1,5 @@
 --TEST--
 Reflection properties are read only
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

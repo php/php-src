@@ -1,7 +1,5 @@
 --TEST--
 Reflection Bug #26695 (Reflection API does not recognize mixed-case class hints)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

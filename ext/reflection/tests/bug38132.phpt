@@ -1,7 +1,5 @@
 --TEST--
 Reflection Bug #38132 (ReflectionClass::getStaticProperties() retains \0 in key names)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 class foo {

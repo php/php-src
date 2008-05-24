@@ -1,7 +1,5 @@
 --TEST--
 Reflection Bug #29268 (__autoload() not called with reflectionProperty->getClass())
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 function __autoload($classname) {

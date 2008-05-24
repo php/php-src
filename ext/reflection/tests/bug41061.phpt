@@ -1,7 +1,5 @@
 --TEST--
 Reflection Bug #41061 ("visibility error" in ReflectionFunction::export())
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

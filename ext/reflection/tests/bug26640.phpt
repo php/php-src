@@ -1,7 +1,5 @@
 --TEST--
 Reflection Bug #26640 (__autoload() not invoked by Reflection classes)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 
