@@ -1120,7 +1120,7 @@ static spl_other_handler phar_spl_foreign_handler = {
 
 /* {{{ proto void Phar::__construct(string fname [, int flags [, string alias]])
  * Construct a Phar archive object
- * {{{ proto void PharData::__construct(string fname [, int flags [, string alias]])
+ * {{{ proto void PharData::__construct(string fname [[, int flags [, string alias]], int file format = Phar::TAR])
  * Construct a PharData archive object
  */
 PHP_METHOD(Phar, __construct)
@@ -1130,21 +1130,12 @@ PHP_METHOD(Phar, __construct)
 #else
 	char *fname, *alias = NULL, *error, *arch = NULL, *entry = NULL, *save_fname, *objname;
 	int fname_len, alias_len = 0, arch_len, entry_len, is_data;
-	long flags = 0;
+	long flags = 0, format = 0;
 	phar_archive_object *phar_obj;
 	phar_archive_data   *phar_data;
 	zval *zobj = getThis(), arg1, arg2;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls!", &fname, &fname_len, &flags, &alias, &alias_len) == FAILURE) {
-		return;
-	}
-
 	phar_obj = (phar_archive_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-
-	if (phar_obj->arc.archive) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Cannot call constructor twice");
-		return;
-	}
 
 	PHAR_STR(phar_obj->std.ce->name, objname);
 
@@ -1152,6 +1143,21 @@ PHP_METHOD(Phar, __construct)
 		is_data = 1;
 	} else {
 		is_data = 0;
+	}
+
+	if (is_data) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls!l", &fname, &fname_len, &flags, &alias, &alias_len, &format) == FAILURE) {
+			return;
+		}
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls!", &fname, &fname_len, &flags, &alias, &alias_len) == FAILURE) {
+			return;
+		}
+	}
+
+	if (phar_obj->arc.archive) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Cannot call constructor twice");
+		return;
 	}
 
 	if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, !is_data, 2 TSRMLS_CC)) {
@@ -1193,9 +1199,26 @@ PHP_METHOD(Phar, __construct)
 		return;
 	}
 
+	if (is_data && phar_data->is_tar && phar_data->is_brandnew && format == PHAR_FORMAT_ZIP) {
+		phar_data->is_zip = 1;
+		phar_data->is_tar = 0;
+	}
+
 	if (fname == arch) {
 		efree(arch);
 		fname = save_fname;
+	}
+
+	if ((is_data && !phar_data->is_data) || (!is_data && phar_data->is_data)) {
+		if (is_data) {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+				"PharData class can only be used for non-executable tar and zip archives");
+		} else {
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
+				"Phar class can only be used for executable tar and zip archives");
+		}
+		efree(entry);
+		return;
 	}
 
 	is_data = phar_data->is_data;
@@ -1844,7 +1867,7 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 	char *error;
 	const char *pcr_error;
 	int ext_len = ext ? strlen(ext) : 0;
-	phar_archive_data **pphar;
+	phar_archive_data **pphar = NULL;
 
 	if (!ext) {
 		if (phar->is_zip) {
@@ -1912,6 +1935,7 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 	basepath = estrndup(oldpath, strlen(oldpath) - strlen(oldname));
 	phar->fname_len = spprintf(&newpath, 0, "%s%s", basepath, newname);
 	phar->fname = newpath;
+	phar->ext = newpath + phar->fname_len - strlen(ext) - 1;
 	efree(basepath);
 	efree(newname);
 
@@ -1926,6 +1950,7 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 				phar->fp = NULL;
 				phar_destroy_phar_data(phar TSRMLS_CC);
 				phar = *pphar;
+				phar->refcount++;
 				newpath = oldpath;
 				goto its_ok;
 			}
@@ -1963,7 +1988,7 @@ its_ok:
 		phar->alias_len = 0;
 	}
 
-	if (SUCCESS != zend_hash_update(&(PHAR_GLOBALS->phar_fname_map), newpath, phar->fname_len, (void*)&phar, sizeof(phar_archive_data*), NULL)) {
+	if ((!pphar || phar == *pphar) && SUCCESS != zend_hash_update(&(PHAR_GLOBALS->phar_fname_map), newpath, phar->fname_len, (void*)&phar, sizeof(phar_archive_data*), NULL)) {
 		efree(oldpath);
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Unable to add newly converted phar \"%s\" to the list of phars", phar->fname);
 		return NULL;
@@ -4451,6 +4476,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, flags)
 	ZEND_ARG_INFO(0, alias)
+	ZEND_ARG_INFO(0, fileformat)
 ZEND_END_ARG_INFO();
 
 static
