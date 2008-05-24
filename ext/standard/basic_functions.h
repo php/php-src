@@ -71,7 +71,6 @@ PHP_FUNCTION(get_current_user);
 PHP_FUNCTION(set_time_limit);
 
 PHP_FUNCTION(get_cfg_var);
-PHP_FUNCTION(set_magic_quotes_runtime);
 PHP_FUNCTION(get_magic_quotes_runtime);
 PHP_FUNCTION(get_magic_quotes_gpc);
 
