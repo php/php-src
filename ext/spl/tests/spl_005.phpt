@@ -1,7 +1,5 @@
 --TEST--
 SPL: spl_object_hash()
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

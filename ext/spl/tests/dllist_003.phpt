@@ -1,7 +1,5 @@
 --TEST--
 SPL: DoublyLinkedList: iterator modes
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 $dll = new SplDoublyLinkedList();

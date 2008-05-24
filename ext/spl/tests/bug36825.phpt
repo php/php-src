@@ -1,7 +1,5 @@
 --TEST--
 Bug #36825 (Exceptions thrown in ArrayObject::offsetGet cause segfault)
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

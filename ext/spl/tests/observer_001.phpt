@@ -1,7 +1,5 @@
 --TEST--
 SPL: SplObserver and SplSubject (empty notify)
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

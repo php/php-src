@@ -1,7 +1,5 @@
 --TEST--
 SPL: RecursiveRegexIterator and exception in has/getChildren
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

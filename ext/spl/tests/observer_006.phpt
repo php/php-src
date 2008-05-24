@@ -1,7 +1,5 @@
 --TEST--
 SPL: SplObjectStorage with accociatied information
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

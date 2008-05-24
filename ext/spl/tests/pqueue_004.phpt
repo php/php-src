@@ -1,7 +1,5 @@
 --TEST--
 SPL: SplPriorityQueue: var_dump
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 $pq = new SplPriorityQueue();

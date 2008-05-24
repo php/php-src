@@ -1,7 +1,5 @@
 --TEST--
 SPL: ArrayObject and \0
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 

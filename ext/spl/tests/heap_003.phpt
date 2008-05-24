@@ -1,7 +1,5 @@
 --TEST--
 SPL: SplHeap: comparison callback
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 class myHeap extends SplHeap {
