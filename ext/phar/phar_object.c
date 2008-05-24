@@ -1918,6 +1918,15 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 	if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), newpath, phar->fname_len, (void **) &pphar)) {
 		if ((*pphar)->fname_len == phar->fname_len && !memcmp((*pphar)->fname, phar->fname, phar->fname_len)) {
 			if (!zend_hash_num_elements(&phar->manifest)) {
+				(*pphar)->is_tar = phar->is_tar;
+				(*pphar)->is_zip = phar->is_zip;
+				(*pphar)->is_data = phar->is_data;
+				(*pphar)->flags = phar->flags;
+				(*pphar)->fp = phar->fp;
+				phar->fp = NULL;
+				phar_destroy_phar_data(phar TSRMLS_CC);
+				phar = *pphar;
+				newpath = oldpath;
 				goto its_ok;
 			}
 		}
