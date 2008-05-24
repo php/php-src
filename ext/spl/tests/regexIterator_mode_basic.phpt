@@ -1,7 +1,5 @@
 --TEST--
 SPL: RegexIterator::getMode() and setMode() basic tests
---SKIPIF--
-<?php extension_loaded('spl') or die('skip'); ?>
 --CREDITS--
 Felix De Vliegher <felix.devliegher@gmail.com>
 --FILE--
