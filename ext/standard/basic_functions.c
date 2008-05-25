@@ -3347,8 +3347,8 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 
 	PHP_DEP_FALIAS(magic_quotes_runtime,	set_magic_quotes_runtime,		NULL)
 	PHP_DEP_FE(set_magic_quotes_runtime,									NULL)
-	PHP_DEP_FE(get_magic_quotes_gpc,										NULL)
-	PHP_DEP_FE(get_magic_quotes_runtime,									NULL)
+	PHP_FE(get_magic_quotes_gpc,										NULL)
+	PHP_FE(get_magic_quotes_runtime,									NULL)
 
 	PHP_FE(import_request_variables,										arginfo_import_request_variables)
 	PHP_FE(error_log,														arginfo_error_log)
