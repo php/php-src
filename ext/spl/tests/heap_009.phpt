@@ -3,8 +3,6 @@ SPL: SplHeap and friends, throw: An iterator cannot be used with foreach by refe
 --CREDITS--
 Thomas Koch <thomas@koch.ro>
 #Hackday Webtuesday 2008-05-24
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 function testForException( $heap )
