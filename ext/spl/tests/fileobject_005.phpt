@@ -1,7 +1,5 @@
 --TEST--
 SPL: SplFileObject truncate tests
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --CREDITS--
 Mark Ammann
 #Hackday Webtuesday 2008-05-24
