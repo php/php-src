@@ -43,36 +43,25 @@ var_dump(file_get_contents($filename));
 echo "Done\n";
 ?>
 --EXPECTF-- 
-Deprecated: Function get_magic_quotes_runtime() is deprecated in %s on line %d
 int(0)
-
-Deprecated: Function get_magic_quotes_runtime() is deprecated in %s on line %d
 int(0)
 
 Deprecated: Function set_magic_quotes_runtime() is deprecated in %s on line %d
 bool(true)
-
-Deprecated: Function get_magic_quotes_runtime() is deprecated in %s on line %d
 int(1)
 
 Deprecated: Function set_magic_quotes_runtime() is deprecated in %s on line %d
 bool(true)
-
-Deprecated: Function get_magic_quotes_runtime() is deprecated in %s on line %d
 int(1)
 string(30) "some\'content\'here\"and}there"
 
 Deprecated: Function set_magic_quotes_runtime() is deprecated in %s on line %d
 bool(true)
-
-Deprecated: Function get_magic_quotes_runtime() is deprecated in %s on line %d
 int(0)
 string(27) "some'content'here"and}there"
 
 Deprecated: Function set_magic_quotes_runtime() is deprecated in %s on line %d
 bool(true)
-
-Deprecated: Function get_magic_quotes_runtime() is deprecated in %s on line %d
 int(1)
 string(30) "some\'content\'here\"and}there"
 
@@ -81,8 +70,6 @@ bool(true)
 
 Deprecated: Function set_magic_quotes_runtime() is deprecated in %s on line %d
 bool(false)
-
-Deprecated: Function get_magic_quotes_runtime() is deprecated in %s on line %d
 int(0)
 string(27) "some'content'here"and}there"
 Done
