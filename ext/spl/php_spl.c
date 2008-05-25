@@ -393,7 +393,14 @@ PHP_FUNCTION(spl_autoload_call)
 	zval_ptr_dtor(&zclass_name);
 } /* }}} */
 
-/* {{{ proto bool spl_autoload_register([mixed autoload_function = "spl_autoload" [, throw = true]]) U
+#define HT_MOVE_TAIL_TO_HEAD(ht)						\
+	(ht)->pListTail->pListNext = (ht)->pListHead;			\
+	(ht)->pListHead = (ht)->pListTail;						\
+	(ht)->pListTail = (ht)->pListHead->pListLast;			\
+	(ht)->pListTail->pListNext = NULL;					\
+	(ht)->pListHead->pListLast = NULL;
+
+/* {{{ proto bool spl_autoload_register([mixed autoload_function = "spl_autoload" [, throw = true [, prepend = false]]]) U
  Register given function as __autoload() implementation */
 PHP_FUNCTION(spl_autoload_register)
 {
@@ -401,11 +408,12 @@ PHP_FUNCTION(spl_autoload_register)
 	zval zfunc_name, ztmp;
 	zval *zcallable = NULL;
 	zend_bool do_throw = 1;
+	zend_bool prepend = 0;
 	zend_function *spl_func_ptr;
 	autoload_func_info alfi;
 	zval **obj_ptr;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "|zb", &zcallable, &do_throw) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "|zbb", &zcallable, &do_throw, &prepend) == FAILURE) {
 		return;
 	}
 
@@ -517,9 +525,17 @@ PHP_FUNCTION(spl_autoload_register)
 			spl_alfi.obj = NULL;
 			spl_alfi.ce = NULL;
 			zend_hash_add(SPL_G(autoload_functions), "spl_autoload", sizeof("spl_autoload"), &spl_alfi, sizeof(autoload_func_info), NULL);
+			if (prepend && SPL_G(autoload_functions)->nNumOfElements > 1) {
+				/* Move the newly created element to the head of the hashtable */
+				HT_MOVE_TAIL_TO_HEAD(SPL_G(autoload_functions));
+			}
 		}
 
 		zend_u_hash_add(SPL_G(autoload_functions), Z_TYPE(zfunc_name), Z_UNIVAL(zfunc_name), Z_UNILEN(zfunc_name)+1, &alfi, sizeof(autoload_func_info), NULL);
+		if (prepend && SPL_G(autoload_functions)->nNumOfElements > 1) {
+			/* Move the newly created element to the head of the hashtable */
+			HT_MOVE_TAIL_TO_HEAD(SPL_G(autoload_functions));
+		}
 skip:
 		zval_dtor(&zfunc_name);
 	}
