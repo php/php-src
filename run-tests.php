@@ -251,7 +251,7 @@ VALGRIND    : " . ($leak_check ? $valgrind_header : 'Not used') . "
 $test_files = array();
 $redir_tests = array();
 $test_results = array();
-$PHP_FAILED_TESTS = array('BORKED' => array(), 'FAILED' => array(), 'WARNED' => array(), 'LEAKED' => array());
+$PHP_FAILED_TESTS = array('BORKED' => array(), 'FAILED' => array(), 'WARNED' => array(), 'LEAKED' => array(), 'XFAILED' => array());
 
 // If parameters given assume they represent selected tests to run.
 $failed_tests_file= false;
@@ -717,7 +717,7 @@ define('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
 /* We got failed Tests, offer the user to send an e-mail to QA team, unless NO_INTERACTION is set */
 if (!getenv('NO_INTERACTION')) {
 	$fp = fopen("php://stdin", "r+");
-	if ($sum_results['FAILED'] || $sum_results['BORKED'] || $sum_results['WARNED'] || $sum_results['LEAKED']) {
+	if ($sum_results['FAILED'] || $sum_results['BORKED'] || $sum_results['WARNED'] || $sum_results['LEAKED']|| $sum_results['XFAILED']) {
 		echo "\nYou may have found a problem in PHP.";
 	}
 	echo "\nWe would like to send this report automatically to the\n";
@@ -996,7 +996,7 @@ function run_all_tests($test_files, $env, $redir_tested = NULL)
 			{
 				$pu = $unicode_and_native && $unicode_semantics ? '.u' : '';
 				$test_results[$index.$pu] = $result;
-				if ($failed_tests_file && ($result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED'))
+				if ($failed_tests_file && ($result== 'XFAILED' || $result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED'))
 				{
 					fwrite($failed_tests_file, "$index\n");
 				}
@@ -1693,7 +1693,11 @@ COMMAND $cmd
 		$restype[] = 'WARN';
 	}
 	if (!$passed) {
-		$restype[] = 'FAIL';
+		if(isset($section_text['XFAIL'])) {
+                        $restype[] = 'XFAIL';
+                }else{
+                        $restype[] = 'FAIL';
+                }
 	}
 
 	if (!$passed) {
@@ -1907,7 +1911,7 @@ function compute_summary()
 
 	$n_total = count($test_results);
 	$n_total += $ignored_by_ext;
-	$sum_results = array('PASSED'=>0, 'WARNED'=>0, 'SKIPPED'=>0, 'FAILED'=>0, 'BORKED'=>0, 'LEAKED'=>0);
+	$sum_results = array('PASSED'=>0, 'WARNED'=>0, 'SKIPPED'=>0, 'FAILED'=>0, 'BORKED'=>0, 'LEAKED'=>0, 'XFAILED' => 0);
 	foreach ($test_results as $v) {
 		$sum_results[$v]++;
 	}
@@ -1926,10 +1930,11 @@ function get_summary($show_ext_summary, $show_html)
 	if ($x_total) {
 		$x_warned = (100.0 * $sum_results['WARNED']) / $x_total;
 		$x_failed = (100.0 * $sum_results['FAILED']) / $x_total;
+		$x_xfailed = (100.0 * $sum_results['XFAILED']) / $x_total;
 		$x_leaked = (100.0 * $sum_results['LEAKED']) / $x_total;
 		$x_passed = (100.0 * $sum_results['PASSED']) / $x_total;
 	} else {
-		$x_warned = $x_failed = $x_passed = $x_leaked = 0;
+		$x_warned = $x_failed = $x_passed = $x_leaked  = $x_failed = 0;
 	}
 
 	$summary = "";
@@ -1953,7 +1958,9 @@ Tests borked    : " . sprintf("%4d (%5.1f%%)",$sum_results['BORKED'],$percent_re
 	$summary .= "
 Tests skipped   : " . sprintf("%4d (%5.1f%%)",$sum_results['SKIPPED'],$percent_results['SKIPPED']) . " --------
 Tests warned    : " . sprintf("%4d (%5.1f%%)",$sum_results['WARNED'], $percent_results['WARNED']) . " " . sprintf("(%5.1f%%)",$x_warned) . "
-Tests failed    : " . sprintf("%4d (%5.1f%%)",$sum_results['FAILED'], $percent_results['FAILED']) . " " . sprintf("(%5.1f%%)",$x_failed);
+Tests failed    : " . sprintf("%4d (%5.1f%%)",$sum_results['FAILED'], $percent_results['FAILED']) . " " . sprintf("(%5.1f%%)",$x_failed) . "
+Expected fail   : " . sprintf("%4d (%5.1f%%)",$sum_results['XFAILED'], $percent_results['XFAILED']) . " " . sprintf("(%5.1f%%)",$x_xfailed);
+
 	if ($leak_check) {
 		$summary .= "
 Tests leaked    : " . sprintf("%4d (%5.1f%%)",$sum_results['LEAKED'], $percent_results['LEAKED']) . " " . sprintf("(%5.1f%%)",$x_leaked);
@@ -1984,6 +1991,18 @@ FAILED TEST SUMMARY
 ---------------------------------------------------------------------
 ";
 		foreach ($PHP_FAILED_TESTS['FAILED'] as $test_data) {
+			$failed_test_summary .= ($test_data['unicode']?'U:':'N:') . $test_data['test_name'] . $test_data['info'] . "\n";
+		}
+		$failed_test_summary .=  "=====================================================================\n";
+	}
+
+	if (count($PHP_FAILED_TESTS['XFAILED'])) {
+		$failed_test_summary .= "
+=====================================================================
+EXPECTED FAILED TEST SUMMARY
+---------------------------------------------------------------------
+";
+		foreach ($PHP_FAILED_TESTS['XFAILED'] as $test_data) {
 			$failed_test_summary .= ($test_data['unicode']?'U:':'N:') . $test_data['test_name'] . $test_data['info'] . "\n";
 		}
 		$failed_test_summary .=  "=====================================================================\n";
