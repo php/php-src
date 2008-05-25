@@ -401,7 +401,14 @@ PHP_FUNCTION(spl_autoload_call)
 	}
 } /* }}} */
 
-/* {{{ proto bool spl_autoload_register([mixed autoload_function = "spl_autoload" [, throw = true]])
+#define HT_MOVE_TAIL_TO_HEAD(ht)							\
+	(ht)->pListTail->pListNext = (ht)->pListHead;			\
+	(ht)->pListHead = (ht)->pListTail;						\
+	(ht)->pListTail = (ht)->pListHead->pListLast;			\
+	(ht)->pListTail->pListNext = NULL;						\
+	(ht)->pListHead->pListLast = NULL;
+
+/* {{{ proto bool spl_autoload_register([mixed autoload_function = "spl_autoload" [, throw = true [, prepend]]])
  Register given function as __autoload() implementation */
 PHP_FUNCTION(spl_autoload_register)
 {
@@ -410,11 +417,12 @@ PHP_FUNCTION(spl_autoload_register)
 	char *lc_name = NULL;
 	zval *zcallable = NULL;
 	zend_bool do_throw = 1;
+	zend_bool prepend  = 0;
 	zend_function *spl_func_ptr;
 	autoload_func_info alfi;
 	zval **obj_ptr;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "|zb", &zcallable, &do_throw) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "|zbb", &zcallable, &do_throw, &prepend) == FAILURE) {
 		return;
 	}
 
@@ -507,9 +515,17 @@ PHP_FUNCTION(spl_autoload_register)
 			spl_alfi.obj = NULL;
 			spl_alfi.ce = NULL;
 			zend_hash_add(SPL_G(autoload_functions), "spl_autoload", sizeof("spl_autoload"), &spl_alfi, sizeof(autoload_func_info), NULL);
+			if (prepend && SPL_G(autoload_functions)->nNumOfElements > 1) {
+				/* Move the newly created element to the head of the hashtable */
+				HT_MOVE_TAIL_TO_HEAD(SPL_G(autoload_functions));
+			}
 		}
 
 		zend_hash_add(SPL_G(autoload_functions), lc_name, func_name_len+1, &alfi.func_ptr, sizeof(autoload_func_info), NULL);
+		if (prepend && SPL_G(autoload_functions)->nNumOfElements > 1) {
+			/* Move the newly created element to the head of the hashtable */
+			HT_MOVE_TAIL_TO_HEAD(SPL_G(autoload_functions));
+		}
 skip:
 		efree(lc_name);
 	}
