@@ -105,32 +105,3 @@ resource(%d) of type (stream)
 bool(true)
 resource(%d) of type (stream)
 ===DONE===
---UEXPECTF--
-*** Testing opendir() : usage variation ***
-
--- $path = './level_one': --
-bool(true)
-resource(%d) of type (stream)
-
--- $path = 'level_one/level_two': --
-bool(true)
-resource(%d) of type (stream)
-
--- $path = '..': --
-resource(%d) of type (stream)
-
--- $path = 'level_two', '.': --
-bool(true)
-resource(%d) of type (stream)
-
--- $path = '../': --
-resource(%d) of type (stream)
-
--- $path = './': --
-bool(true)
-resource(%d) of type (stream)
-
--- $path = '../../'level_one': --
-bool(true)
-resource(%d) of type (stream)
-===DONE===

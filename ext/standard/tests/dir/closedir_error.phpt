@@ -43,11 +43,3 @@ rmdir($dir_path);
 Warning: Wrong parameter count for closedir() in %s on line %d
 NULL
 ===DONE===
---UEXPECTF--
-*** Testing closedir() : error conditions ***
-
--- Testing closedir() function with more than expected no. of arguments --
-
-Warning: Wrong parameter count for closedir() in %s on line %d
-NULL
-===DONE===

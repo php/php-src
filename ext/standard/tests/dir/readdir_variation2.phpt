@@ -30,14 +30,7 @@ closedir($dir_handle);
 $path = dirname(__FILE__) . '/readdir_variation2';
 rmdir($path);
 ?>
---EXPECTF--
-*** Testing readdir() : usage variations ***
-
--- Pass an empty directory to readdir() --
-string(1) "."
-string(2) ".."
-===DONE===
---UEXPECTF--
+--EXPECT--
 *** Testing readdir() : usage variations ***
 
 -- Pass an empty directory to readdir() --

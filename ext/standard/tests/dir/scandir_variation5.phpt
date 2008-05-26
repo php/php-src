@@ -96,20 +96,3 @@ Warning: scandir(%s/scandir_variation5/sub_dir/child_dir): failed to open dir: %
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)
 ===DONE===
---UEXPECTF--
-*** Testing scandir() : usage variations ***
-
--- After restricting 1st level parent directory --
-
-Warning: scandir(%s/scandir_variation5/sub_dir/child_dir): failed to open dir: %s in %s on line %d
-
-Warning: scandir(): (errno %d): %s in %s on line %d
-bool(false)
-
--- After restricting parent directory --
-
-Warning: scandir(%s/scandir_variation5/sub_dir/child_dir): failed to open dir: %s in %s on line %d
-
-Warning: scandir(): (errno %d): %s in %s on line %d
-bool(false)
-===DONE===

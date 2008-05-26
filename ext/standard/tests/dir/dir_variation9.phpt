@@ -71,49 +71,6 @@ rmdir($dir_path2);
 
 -- With valid paths --
 object(Directory)#%d (2) {
-  ["path"]=>
-  string(%d) "%s/dir_variation91/sub_dir11/sub_dir111/.."
-  ["handle"]=>
-  resource(%d) of type (stream)
-}
-object(Directory)#%d (2) {
-  ["path"]=>
-  string(%d) "%s/dir_variation92/sub_dir21/../../dir_variation91"
-  ["handle"]=>
-  resource(%d) of type (stream)
-}
-object(Directory)#%d (2) {
-  ["path"]=>
-  string(%d) "%s/dir_variation92/sub_dir21/../../dir_variation91/sub_dir11/.."
-  ["handle"]=>
-  resource(%d) of type (stream)
-}
-object(Directory)#%d (2) {
-  ["path"]=>
-  string(%d) "%s/dir_variation91/sub_dir11/sub_dir111/../../../dir_variation92/sub_dir21/.."
-  ["handle"]=>
-  resource(%d) of type (stream)
-}
-
--- With invalid paths --
-
-Warning: dir(%s/dir_variation91/sub_dir12/sub_dir111/..): failed to open dir: %s in %s on line %d
-bool(false)
-
-Warning: dir(%s/dir_variation92/sub_dir21/../dir_variation91): failed to open dir: %s in %s on line %d
-bool(false)
-
-Warning: dir(%s/dir_variation92/sub_dir21/../../dir_variation91/sub_dir12/..): failed to open dir: %s in %s on line %d
-bool(false)
-
-Warning: dir(%s/dir_variation91/sub_dir11/sub_dir111/../../dir_variation92/sub_dir21/..): failed to open dir: %s in %s on line %d
-bool(false)
-Done
---UEXPECTF--
-*** Testing dir() : checking with valid and invalid paths ***
-
--- With valid paths --
-object(Directory)#%d (2) {
   [u"path"]=>
   unicode(%d) "%s/dir_variation91/sub_dir11/sub_dir111/.."
   [u"handle"]=>

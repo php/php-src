@@ -40,11 +40,3 @@ rmdir($dir_path);
 Warning: Wrong parameter count for rewinddir() in %s on line %d
 NULL
 ===DONE===
---UEXPECTF--
-*** Testing rewinddir() : error conditions ***
-
--- Testing rewinddir() function with more than expected no. of arguments --
-
-Warning: Wrong parameter count for rewinddir() in %s on line %d
-NULL
-===DONE===

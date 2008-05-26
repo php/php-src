@@ -37,16 +37,3 @@ NULL
 Warning: chdir() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 ===DONE===
---UEXPECTF--
-*** Testing chdir() : error conditions ***
-
--- Testing chdir() function with Zero arguments --
-
-Warning: chdir() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
--- Testing chdir() function with more than expected no. of arguments --
-
-Warning: chdir() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-===DONE===

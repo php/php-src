@@ -27,9 +27,3 @@ echo "Done";
 Warning: dir(%s): failed to open dir: %s in %s on line %d
 bool(false)
 Done
---UEXPECTF--
-*** Testing dir() : open a file instead of a directory ***
-
-Warning: dir(%s): failed to open dir: %s in %s on line %d
-bool(false)
-Done

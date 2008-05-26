@@ -35,16 +35,3 @@ bool(false)
 Warning: opendir(idonotexist): failed to open dir: %s in %s on line %d
 bool(false)
 ===DONE===
---UEXPECTF--
-*** Testing opendir() : error conditions ***
-
--- Pass a non-existent absolute path: --
-
-Warning: opendir(%s/idonotexist): failed to open dir: %s in %s on line %d
-bool(false)
-
--- Pass a non-existent relative path: --
-
-Warning: opendir(idonotexist): failed to open dir: %s in %s on line %d
-bool(false)
-===DONE===

@@ -61,20 +61,3 @@ bool(false)
 Warning: dir(%s/dir_variation81/sub?dir1): failed to open dir: %s in %s on line %d
 bool(false)
 Done
---UEXPECTF--
-*** Testing dir() : checking with wildcard characters ***
--- wildcard = '*' --
-
-Warning: dir(%s/dir_var*): failed to open dir: %s in %s on line %d
-bool(false)
-
-Warning: dir(%s/*): failed to open dir: %s in %s on line %d
-bool(false)
--- wildcard = '?' --
-
-Warning: dir(%s/dir_variation81/sub_dir?): failed to open dir: %s in %s on line %d
-bool(false)
-
-Warning: dir(%s/dir_variation81/sub?dir1): failed to open dir: %s in %s on line %d
-bool(false)
-Done

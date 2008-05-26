@@ -50,22 +50,7 @@ $path_sub = $path_top . '/sub_folder';
 rmdir($path_sub);
 rmdir($path_top);
 ?>
---EXPECTF--
-*** Testing readdir() : usage variations ***
-array(5) {
-  [0]=>
-  string(1) "."
-  [1]=>
-  string(2) ".."
-  [2]=>
-  string(9) "file1.tmp"
-  [3]=>
-  string(9) "file2.tmp"
-  [4]=>
-  string(10) "sub_folder"
-}
-===DONE===
---UEXPECTF--
+--EXPECT--
 *** Testing readdir() : usage variations ***
 array(5) {
   [0]=>

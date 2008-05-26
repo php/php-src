@@ -27,11 +27,3 @@ var_dump( getcwd($extra_arg) );
 Warning: getcwd() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 ===DONE===
---UEXPECTF--
-*** Testing getcwd() : error conditions ***
-
--- Testing getcwd() function with one argument --
-
-Warning: getcwd() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
-===DONE===

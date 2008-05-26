@@ -36,18 +36,6 @@ rmdir($dir_path);
 
 -- Create the directory handle, read and close the directory --
 resource(%d) of type (stream)
-string(1) "."
-
--- Call to rewinddir() --
-
-Warning: rewinddir(): %d is not a valid Directory resource in %s on line %d
-bool(false)
-===DONE===
---UEXPECTF--
-*** Testing rewinddir() : usage variations ***
-
--- Create the directory handle, read and close the directory --
-resource(%d) of type (stream)
 unicode(1) "."
 
 -- Call to rewinddir() --

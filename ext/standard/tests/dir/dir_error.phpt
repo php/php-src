@@ -32,14 +32,3 @@ NULL
 Warning: dir() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing dir() : error conditions ***
-
--- Testing dir() function with zero arguments --
-Warning: dir() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
--- Testing dir() function with one more than expected number of arguments --
-Warning: dir() expects at most 2 parameters, 3 given in %s on line %d
-NULL
-Done

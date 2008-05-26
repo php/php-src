@@ -41,11 +41,3 @@ rmdir($path);
 Warning: Wrong parameter count for readdir() in %s on line %d
 NULL
 ===DONE===
---UEXPECTF--
-*** Testing readdir() : error conditions ***
-
--- Testing readdir() function with more than expected no. of arguments --
-
-Warning: Wrong parameter count for readdir() in %s on line %d
-NULL
-===DONE===

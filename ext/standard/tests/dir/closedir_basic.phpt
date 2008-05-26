@@ -54,16 +54,3 @@ NULL
 -- Check Directory Handle: --
 resource(%d) of type (Unknown)
 ===DONE===
---UEXPECTF--
-*** Testing closedir() : basic functionality ***
-
--- Call closedir() with no arguments: --
-NULL
--- Check Directory Handle: --
-resource(%d) of type (Unknown)
-
--- Call closedir() with $dir_handle argument supplied: --
-NULL
--- Check Directory Handle: --
-resource(%d) of type (Unknown)
-===DONE===

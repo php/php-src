@@ -60,17 +60,3 @@ resource(%d) of type (stream)
 resource(%d) of type (Unknown)
 resource(%d) of type (Unknown)
 ===DONE===
---UEXPECTF--
-*** Testing opendir() : basic functionality ***
-
--- Testing opendir() with absolute path: --
-resource(%d) of type (stream)
-
--- Testing opendir() with relative paths: --
-bool(true)
-resource(%d) of type (stream)
-
--- Close directory handles: --
-resource(%d) of type (Unknown)
-resource(%d) of type (Unknown)
-===DONE===

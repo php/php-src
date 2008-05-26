@@ -45,16 +45,3 @@ NULL
 Warning: opendir() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 ===DONE===
---UEXPECTF--
-*** Testing opendir() : error conditions ***
-
--- Testing opendir() function with Zero arguments --
-
-Warning: opendir() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
--- Testing opendir() function with more than expected no. of arguments --
-
-Warning: opendir() expects at most 2 parameters, 3 given in %s on line %d
-NULL
-===DONE===

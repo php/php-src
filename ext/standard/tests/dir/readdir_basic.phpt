@@ -56,25 +56,6 @@ rmdir($path);
 
 -- Call readdir() with $path argument --
 resource(%d) of type (stream)
-string(1) "."
-string(2) ".."
-string(18) "readdir_basic1.tmp"
-string(18) "readdir_basic2.tmp"
-string(18) "readdir_basic3.tmp"
-
--- Call readdir() without $path argument --
-resource(%d) of type (stream)
-string(1) "."
-string(2) ".."
-string(18) "readdir_basic1.tmp"
-string(18) "readdir_basic2.tmp"
-string(18) "readdir_basic3.tmp"
-===DONE===
---UEXPECTF--
-*** Testing readdir() : basic functionality ***
-
--- Call readdir() with $path argument --
-resource(%d) of type (stream)
 unicode(1) "."
 unicode(2) ".."
 unicode(18) "readdir_basic1.tmp"

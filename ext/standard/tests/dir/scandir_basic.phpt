@@ -37,38 +37,7 @@ delete_files($directory, 3);
 $directory = dirname(__FILE__) . '/scandir_basic';
 rmdir($directory);
 ?>
---EXPECTF--
-*** Testing scandir() : basic functionality ***
-
--- scandir() with mandatory arguments --
-array(5) {
-  [0]=>
-  string(1) "."
-  [1]=>
-  string(2) ".."
-  [2]=>
-  string(9) "file1.tmp"
-  [3]=>
-  string(9) "file2.tmp"
-  [4]=>
-  string(9) "file3.tmp"
-}
-
--- scandir() with all arguments --
-array(5) {
-  [0]=>
-  string(9) "file3.tmp"
-  [1]=>
-  string(9) "file2.tmp"
-  [2]=>
-  string(9) "file1.tmp"
-  [3]=>
-  string(2) ".."
-  [4]=>
-  string(1) "."
-}
-===DONE===
---UEXPECTF--
+--EXPECT--
 *** Testing scandir() : basic functionality ***
 
 -- scandir() with mandatory arguments --
