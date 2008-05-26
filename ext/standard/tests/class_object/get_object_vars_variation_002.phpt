@@ -23,29 +23,7 @@ $arr['val'] = 'changed.val';
 
 var_dump($arr, $obj, $a);
 ?>
---EXPECTF--
-array(0) {
-}
-array(2) {
-  ["ref"]=>
-  &string(10) "original.a"
-  ["val"]=>
-  string(10) "original.a"
-}
-array(2) {
-  ["ref"]=>
-  &string(11) "changed.ref"
-  ["val"]=>
-  string(11) "changed.val"
-}
-object(stdClass)#1 (2) {
-  ["ref"]=>
-  &string(11) "changed.ref"
-  ["val"]=>
-  string(10) "original.a"
-}
-string(11) "changed.ref"
---UEXPECTF--
+--EXPECT--
 array(0) {
 }
 array(2) {

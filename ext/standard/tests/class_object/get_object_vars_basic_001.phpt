@@ -58,54 +58,7 @@ A::test($b);
 echo "\n---( Unrelated class: )---\n";
 X::test($b);
 ?>
---EXPECTF--
-
----( Global scope: )---
-array(1) {
-  ["pub"]=>
-  string(6) "B::pub"
-}
-
----( Declaring class: )---
-B::test
-array(4) {
-  ["hiddenPriv"]=>
-  string(13) "B::hiddenPriv"
-  ["priv"]=>
-  string(7) "B::priv"
-  ["prot"]=>
-  string(7) "B::prot"
-  ["pub"]=>
-  string(6) "B::pub"
-}
-
----( Subclass: )---
-C::test
-array(2) {
-  ["prot"]=>
-  string(7) "B::prot"
-  ["pub"]=>
-  string(6) "B::pub"
-}
-
----( Superclass: )---
-A::test
-array(3) {
-  ["prot"]=>
-  string(7) "B::prot"
-  ["pub"]=>
-  string(6) "B::pub"
-  ["hiddenPriv"]=>
-  string(13) "A::hiddenPriv"
-}
-
----( Unrelated class: )---
-X::test
-array(1) {
-  ["pub"]=>
-  string(6) "B::pub"
-}
---UEXPECTF--
+--EXPECT--
 
 ---( Global scope: )---
 array(1) {

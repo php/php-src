@@ -49,7 +49,7 @@ foreach ($methods as $method) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 
  ---(Using string class name)---
 Does C::inherit_pub exist? bool(true)
