@@ -48,4 +48,3 @@ bool(false)
 Warning: chdir(): open_basedir restriction in effect. File(./../.) is not within the allowed path(s): (.) in %s on line %d
 bool(false)
 *** Finished testing open_basedir configuration [chdir] ***
-

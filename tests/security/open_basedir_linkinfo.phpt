@@ -61,4 +61,3 @@ int(%d)
 Warning: unlink(): open_basedir restriction in effect. File(%s/test/ok/symlink.txt) is not within the allowed path(s): (.) in %s on line %d
 bool(false)
 *** Finished testing open_basedir configuration [linkinfo] ***
-

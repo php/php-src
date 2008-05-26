@@ -8,6 +8,6 @@ if($a==0) {
 } else {
 	echo "good";
 }
-?>	
+?>
 --EXPECT--
 good

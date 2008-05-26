@@ -24,4 +24,3 @@ $foo->bar();
 ?>
 --EXPECT--
 foo
-

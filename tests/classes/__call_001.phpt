@@ -26,26 +26,6 @@ array(4) {
   [0]=>
   int(1)
   [1]=>
-  string(1) "2"
-  [2]=>
-  float(3.4)
-  [3]=>
-  bool(true)
-}
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
---UEXPECT--
-Method test called:
-array(4) {
-  [0]=>
-  int(1)
-  [1]=>
   unicode(1) "2"
   [2]=>
   float(3.4)

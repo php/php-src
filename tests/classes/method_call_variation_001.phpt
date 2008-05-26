@@ -30,7 +30,7 @@ In $a->$b[Y](), $b[Y] represents a method name on $a. But in $a->X[Y](), $a->X[Y
   $c->functions[0](5, 6);
   $c->functions[1][2][3][4](7, 8);
 ?>
---EXPECTF--
+--EXPECT--
 Called C::foo(1, 2)
 Called C::foo(3, 4)
 Called global foo(5, 6)

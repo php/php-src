@@ -21,11 +21,6 @@ var_dump($wrong);
 
 ?>
 --EXPECT--
-string(6) "abcdef"
-string(6) "abcdef"
-string(6) "a*c*e*"
-string(6) "a*c*e*"
---UEXPECT--
 unicode(6) "abcdef"
 unicode(6) "abcdef"
 unicode(6) "a*c*e*"

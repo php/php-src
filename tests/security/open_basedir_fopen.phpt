@@ -83,4 +83,3 @@ resource(%d) of type (stream)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
 *** Finished testing open_basedir configuration [fopen] ***
-

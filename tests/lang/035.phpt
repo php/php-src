@@ -28,7 +28,7 @@ try {
 }
 
 try {
-	ThrowException();	
+	ThrowException();
 } catch (MyException $exception) {
 	print "There was an exception: " . $exception->getException();
 	print "\n";

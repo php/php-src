@@ -40,7 +40,7 @@ Check for inherited old-style constructor.
   echo "Is C::C() callable?\n";
   var_dump(is_callable(array($c, "C")));
 ?>
---EXPECTF--
+--EXPECT--
 About to construct new B: 
 In A::A
 Is B::B() callable?

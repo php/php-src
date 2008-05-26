@@ -55,6 +55,4 @@ $x->getdrunk('The old Tavern');
 var_dump($x->bars[0]->whosdrunk());
 ?>
 --EXPECT--
-string(14) "The old Tavern"
---UEXPECT--
 unicode(14) "The old Tavern"

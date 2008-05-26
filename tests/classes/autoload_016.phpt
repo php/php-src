@@ -18,9 +18,6 @@ Ensure ReflectionClass::getProperty() triggers autoload
       echo $e->getMessage();
   }
 ?>
---EXPECTF--
-In autoload: string(6) "undefc"
-Class undefc does not exist
---UEXPECTF--
+--EXPECT--
 In autoload: unicode(6) "undefc"
 Class undefc does not exist

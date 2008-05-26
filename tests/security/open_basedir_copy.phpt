@@ -76,4 +76,3 @@ bool(false)
 bool(true)
 bool(true)
 *** Finished testing open_basedir configuration [copy] ***
-

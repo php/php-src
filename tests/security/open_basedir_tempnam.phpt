@@ -51,35 +51,6 @@ bool(false)
 
 Warning: tempnam(): open_basedir restriction in effect. File(./../.) is not within the allowed path(s): (.) in %s on line %d
 bool(false)
-string(%d) "%s"
-bool(true)
-*** Finished testing open_basedir configuration [tempnam] ***
---UEXPECTF--
-*** Testing open_basedir configuration [tempnam] ***
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-
-Warning: tempnam(): open_basedir restriction in effect. File(../bad) is not within the allowed path(s): (.) in %s on line %d
-bool(false)
-
-Warning: tempnam(): open_basedir restriction in effect. File(..) is not within the allowed path(s): (.) in %s on line %d
-bool(false)
-
-Warning: tempnam(): open_basedir restriction in effect. File(../) is not within the allowed path(s): (.) in %s on line %d
-bool(false)
-
-Warning: tempnam(): open_basedir restriction in effect. File(/) is not within the allowed path(s): (.) in %s on line %d
-bool(false)
-
-Warning: tempnam(): open_basedir restriction in effect. File(../bad/.) is not within the allowed path(s): (.) in %s on line %d
-bool(false)
-
-Warning: tempnam(): open_basedir restriction in effect. File(./../.) is not within the allowed path(s): (.) in %s on line %d
-bool(false)
 unicode(%d) "%s"
 bool(true)
 *** Finished testing open_basedir configuration [tempnam] ***
-

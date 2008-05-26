@@ -1,7 +1,5 @@
 --TEST--
 Unicode identifiers normalization (indirect function call)
---SKIPIF--
-<?php if (!unicode_semantics()) die('skip unicode.semantics=off'); ?>
 --FILE--
 <?php
 declare(encoding = "ISO-8859-1");

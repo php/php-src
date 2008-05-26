@@ -29,5 +29,5 @@ class fail extends same {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Done

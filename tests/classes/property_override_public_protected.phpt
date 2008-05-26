@@ -31,4 +31,3 @@ Redeclare inherited public property as protected.
 --EXPECTF--
 
 Fatal error: Access level to B::$p must be public (as in class A) in %s on line 18
-

@@ -8,7 +8,7 @@ $boundary = 64*1024;
 $limit    = $boundary+42;
 
 
-function test($a,$b)
+function test($a, $b)
 {
 	var_dump($a === $b);
 	test2($a,$b);

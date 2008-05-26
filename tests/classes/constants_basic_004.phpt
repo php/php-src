@@ -45,61 +45,6 @@ Test properties with array default values using class constants as keys and valu
 
 Static properties:
 array(1) {
-  ["key"]=>
-  string(5) "value"
-}
-array(1) {
-  ["key"]=>
-  string(5) "value"
-}
-array(1) {
-  ["key"]=>
-  string(5) "value"
-}
-array(1) {
-  ["key"]=>
-  string(5) "value"
-}
-array(1) {
-  ["key"]=>
-  string(5) "value"
-}
-
-Instance properties:
-object(X)#%d (1) {
-  ["a_x"]=>
-  array(1) {
-    ["key"]=>
-    string(5) "value"
-  }
-}
-object(B)#%d (1) {
-  ["a_b"]=>
-  array(1) {
-    ["key"]=>
-    string(5) "value"
-  }
-}
-object(C)#%d (3) {
-  ["a_c_parent"]=>
-  array(1) {
-    ["key"]=>
-    string(5) "value"
-  }
-  ["a_c_self"]=>
-  array(1) {
-    ["key"]=>
-    string(5) "value"
-  }
-  ["a_b"]=>
-  array(1) {
-    ["key"]=>
-    string(5) "value"
-  }
-}
---UEXPECTF--
-Static properties:
-array(1) {
   [u"key"]=>
   unicode(5) "value"
 }

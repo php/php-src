@@ -45,4 +45,3 @@ Warning: error_log(%s/bad.txt): failed to open stream: Operation not permitted i
 bool(false)
 bool(true)
 *** Finished testing open_basedir configuration [error_log] ***
-

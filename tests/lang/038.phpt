@@ -35,11 +35,7 @@ catch (Exception $e)
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
-string(15) "Error2Exception"
-string(5) "fopen"
-===DONE===
---UEXPECTF--
+--EXPECT--
 unicode(15) "Error2Exception"
 unicode(5) "fopen"
 ===DONE===

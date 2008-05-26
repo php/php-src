@@ -46,17 +46,6 @@ var_dump($obj[2]);
 ===DONE===
 --EXPECTF--
 object::offsetGet(1)
-string(6) "fooBar"
-object::offsetGet(2)
-int(1)
-object::offsetGet(2)
-
-Notice: Indirect modification of overloaded element of object has no effect in %sarray_access_004.php on line 39
-object::offsetGet(2)
-int(1)
-===DONE===
---UEXPECTF--
-object::offsetGet(1)
 unicode(6) "fooBar"
 object::offsetGet(2)
 int(1)

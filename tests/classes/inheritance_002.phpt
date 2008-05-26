@@ -58,19 +58,6 @@ $cm= new Child_mx2();
 ?>
 --EXPECT--
 ### PHP 4 style
-string(17) "Child constructor"
-string(16) "Base constructor"
-### PHP 5 style
-string(17) "Child constructor"
-string(16) "Base constructor"
-### Mixed style 1
-string(17) "Child constructor"
-string(16) "Base constructor"
-### Mixed style 2
-string(17) "Child constructor"
-string(16) "Base constructor"
---UEXPECT--
-### PHP 4 style
 unicode(17) "Child constructor"
 unicode(16) "Base constructor"
 ### PHP 5 style
