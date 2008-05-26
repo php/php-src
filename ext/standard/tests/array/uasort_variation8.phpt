@@ -42,45 +42,6 @@ echo "Done"
 -- Testing uasort() with built-in 'cmp_function': strcasecmp() --
 bool(true)
 array(5) {
-  ["a"]=>
-  string(5) "apple"
-  ["b"]=>
-  string(6) "Banana"
-  ["m"]=>
-  string(5) "Mango"
-  ["o"]=>
-  string(6) "orange"
-  ["p"]=>
-  string(9) "Pineapple"
-}
--- Testing uasort() with built-in 'cmp_function': strcmp() --
-bool(true)
-array(5) {
-  ["b"]=>
-  string(6) "Banana"
-  ["m"]=>
-  string(5) "Mango"
-  ["p"]=>
-  string(9) "Pineapple"
-  ["a"]=>
-  string(5) "apple"
-  ["o"]=>
-  string(6) "orange"
-}
--- Testing uasort() with language construct as 'cmp_function' --
-
-Warning: uasort() expects parameter 2 to be a valid callback, function 'echo' not found or invalid function name in %s on line %d
-NULL
--- Testing uasort() with language construct as 'cmp_function' --
-
-Warning: uasort() expects parameter 2 to be a valid callback, function 'exit' not found or invalid function name in %s on line %d
-NULL
-Done
---UEXPECTF--
-*** Testing uasort() : built in function as 'cmp_function' ***
--- Testing uasort() with built-in 'cmp_function': strcasecmp() --
-bool(true)
-array(5) {
   [u"a"]=>
   unicode(5) "apple"
   [u"b"]=>

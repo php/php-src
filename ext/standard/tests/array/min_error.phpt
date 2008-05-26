@@ -31,19 +31,3 @@ bool(false)
 
 Warning: Wrong parameter count for min() in %s on line %d
 NULL
---UEXPECTF--
-
-*** Testing Error Conditions ***
-
-Warning: min(): At least one %s on line %d
-NULL
-
-Warning: Wrong parameter count for min() in %s on line %d
-NULL
-
-Warning: min(): Array must contain at least one element in %s on line %d
-bool(false)
-
-Warning: Wrong parameter count for min() in %s on line %d
-NULL
-

@@ -23,39 +23,7 @@ var_dump($array);
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing natcasesort() : basic functionality ***
-
--- Before sorting: --
-array(5) {
-  [0]=>
-  string(3) "A01"
-  [1]=>
-  string(2) "a1"
-  [2]=>
-  string(3) "b10"
-  [3]=>
-  string(3) "a01"
-  [4]=>
-  string(3) "b01"
-}
-
--- After Sorting: --
-bool(true)
-array(5) {
-  [3]=>
-  string(3) "a01"
-  [0]=>
-  string(3) "A01"
-  [1]=>
-  string(2) "a1"
-  [4]=>
-  string(3) "b01"
-  [2]=>
-  string(3) "b10"
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing natcasesort() : basic functionality ***
 
 -- Before sorting: --

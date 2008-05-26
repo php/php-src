@@ -16,45 +16,7 @@ var_dump(
 
 echo "Done\n";
 ?>
---EXPECT--	
-array(2) {
-  [0]=>
-  int(2)
-  [1]=>
-  int(3)
-}
-array(2) {
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
-array(2) {
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
-array(2) {
-  ["b"]=>
-  int(1)
-  ["c"]=>
-  int(2)
-}
-array(2) {
-  ["b"]=>
-  int(1)
-  ["c"]=>
-  int(2)
-}
-array(2) {
-  ["b"]=>
-  int(1)
-  ["c"]=>
-  int(2)
-}
-Done
---UEXPECT--
+--EXPECT--
 array(2) {
   [0]=>
   int(2)

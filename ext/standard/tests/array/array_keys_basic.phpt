@@ -10,22 +10,7 @@ var_dump(array_keys($basic_arr));
 
 echo "Done\n";
 ?>
---EXPECTF--
-*** Testing array_keys() on basic array operation ***
-array(5) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  int(2)
-  [3]=>
-  int(-23)
-  [4]=>
-  int(3)
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_keys() on basic array operation ***
 array(5) {
   [0]=>

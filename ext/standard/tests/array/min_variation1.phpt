@@ -35,17 +35,3 @@ int(-2147483647)
 int(0)
 
 Done
---UEXPECTF--
-
-*** Testing boundary conditions ***
-int(2147483645)
-int(2147483647)
-int(2147483646)
-int(-2147483647)
-%s(-2147483648)
-%s(-2147483649)
-
-*** Testing large number of arguments ***
-int(0)
-
-Done

@@ -34,7 +34,7 @@ echo "this should be 4->...." . count(array_intersect($arr1, $arr2)) . "\n";
 $bigarray = range(1, 400);
 shuffle($bigarray);
 echo "this should be 400->...." . count($bigarray) . "\n";
-echo "*** testing pass by reference  \n";
+echo "*** testing pass by reference...\n";
 $original = $bigarray;
 shuffle($bigarray);
 $diffarray = array_diff_assoc($original, $bigarray);
@@ -46,7 +46,7 @@ if (count($diffarray) < 350) {
     var_dump($original);
     var_dump($bigarray);
 } else {
-    echo "test passed \n";
+    echo "test passed\n";
 }
 ?>
 --EXPECT--
@@ -95,5 +95,5 @@ array(4) {
 this should be 0->....0
 this should be 4->....4
 this should be 400->....400
-*** testing pass by reference  
-test passed 
+*** testing pass by reference...
+test passed

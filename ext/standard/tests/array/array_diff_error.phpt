@@ -38,16 +38,3 @@ NULL
 Warning: array_diff(): at least 2 parameters are required, 1 given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing array_diff() : error conditions ***
-
--- Testing array_diff() function with zero arguments --
-
-Warning: array_diff(): at least 2 parameters are required, 0 given in %s on line %d
-NULL
-
--- Testing array_diff() function with less than expected no. of arguments --
-
-Warning: array_diff(): at least 2 parameters are required, 1 given in %s on line %d
-NULL
-Done

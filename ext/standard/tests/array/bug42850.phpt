@@ -25,40 +25,6 @@ var_dump($data);
 
 --EXPECT--
 array(2) {
-  ["key1"]=>
-  string(4) "val1"
-  [0]=>
-  array(1) {
-    ["key2"]=>
-    string(4) "val2"
-  }
-}
-array(2) {
-  ["key1"]=>
-  string(4) "val1"
-  [0]=>
-  array(1) {
-    ["key2"]=>
-    string(4) "val2"
-  }
-}
-array(2) {
-  ["key1"]=>
-  string(4) "val1"
-  [0]=>
-  string(7) "altered"
-}
-array(2) {
-  ["key1"]=>
-  string(4) "val1"
-  [0]=>
-  array(1) {
-    ["key2"]=>
-    string(4) "val2"
-  }
-}
---UEXPECT--
-array(2) {
   [u"key1"]=>
   unicode(4) "val1"
   [0]=>

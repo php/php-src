@@ -39,46 +39,7 @@ var_dump( array_intersect($arr_associative, $arr_default_keys, $arr3, $arr_assoc
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing array_intersect() : basic functionality ***
-array(4) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  string(5) "hello"
-  [3]=>
-  string(5) "world"
-}
-array(2) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-}
-array(2) {
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-}
-array(2) {
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-}
-array(1) {
-  [1]=>
-  int(2)
-}
-array(1) {
-  ["two"]=>
-  int(2)
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_intersect() : basic functionality ***
 array(4) {
   [0]=>

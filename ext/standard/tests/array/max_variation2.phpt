@@ -34,31 +34,6 @@ echo "\nDone\n";
 int(2)
 int(2)
 float(2.11)
-string(1) "t"
-bool(true)
-bool(true)
-int(1)
-bool(true)
-array(2) {
-  [0]=>
-  int(2)
-  [1]=>
-  int(3)
-}
-int(2147483646)
-%s(2147483648)
-%s(2147483648)
-int(-2147483646)
-int(-2147483647)
-int(-2147483647)
-
-Done
---UEXPECTF--
-
-*** Testing arrays  ***
-int(2)
-int(2)
-float(2.11)
 unicode(1) "t"
 bool(true)
 bool(true)

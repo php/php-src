@@ -9,7 +9,7 @@ Test sort() function : object functionality - sorting objects with diff. accessi
 */
 
 /*
- * testing sort() by providing integer/string object arrays with flag values are defualt, SORT_REGULAR
+ * testing sort() by providing integer/string object arrays with flag values are default, SORT_REGULAR
 */
 
 echo "*** Testing sort() : object functionality ***\n";
@@ -66,14 +66,14 @@ $unsorted_str_obj = array (
 );
 
 
-echo "\n-- Testing sort() by supplying various object arrays, 'flag' value is defualt --\n";
+echo "\n-- Testing sort() by supplying various object arrays, 'flag' value is default --\n";
 
-// testing sort() function by supplying integer object array, flag value is defualt
+// testing sort() function by supplying integer object array, flag value is default
 $temp_array = $unsorted_int_obj;
 var_dump(sort($temp_array) );
 var_dump($temp_array);
 
-// testing sort() function by supplying string object array, flag value is defualt
+// testing sort() function by supplying string object array, flag value is default
 $temp_array = $unsorted_str_obj;
 var_dump(sort($temp_array) );
 var_dump($temp_array);
@@ -94,170 +94,7 @@ echo "Done\n";
 --EXPECTF--
 *** Testing sort() : object functionality ***
 
--- Testing sort() by supplying various object arrays, 'flag' value is defualt --
-bool(true)
-array(4) {
-  [0]=>
-  object(for_integer_sort)#%d (3) {
-    ["public_class_value"]=>
-    int(-88)
-    ["private_class_value":"for_integer_sort":private]=>
-    int(-5)
-    ["protected_class_value":protected]=>
-    int(5)
-  }
-  [1]=>
-  object(for_integer_sort)#%d (3) {
-    ["public_class_value"]=>
-    float(0.001)
-    ["private_class_value":"for_integer_sort":private]=>
-    float(99.5)
-    ["protected_class_value":protected]=>
-    float(0.1)
-  }
-  [2]=>
-  object(for_integer_sort)#%d (3) {
-    ["public_class_value"]=>
-    int(11)
-    ["private_class_value":"for_integer_sort":private]=>
-    int(33)
-    ["protected_class_value":protected]=>
-    int(30)
-  }
-  [3]=>
-  object(for_integer_sort)#%d (3) {
-    ["public_class_value"]=>
-    int(66)
-    ["private_class_value":"for_integer_sort":private]=>
-    int(44)
-    ["protected_class_value":protected]=>
-    int(4)
-  }
-}
-bool(true)
-array(4) {
-  [0]=>
-  object(for_string_sort)#%d (3) {
-    ["public_class_value"]=>
-    string(3) "axx"
-    ["private_class_value":"for_string_sort":private]=>
-    string(3) "AXX"
-    ["protected_class_value":protected]=>
-    string(3) "ass"
-  }
-  [1]=>
-  object(for_string_sort)#%d (3) {
-    ["public_class_value"]=>
-    string(2) "py"
-    ["private_class_value":"for_string_sort":private]=>
-    string(2) "PY"
-    ["protected_class_value":protected]=>
-    string(2) "pt"
-  }
-  [2]=>
-  object(for_string_sort)#%d (3) {
-    ["public_class_value"]=>
-    string(1) "t"
-    ["private_class_value":"for_string_sort":private]=>
-    string(3) "eee"
-    ["protected_class_value":protected]=>
-    string(3) "abb"
-  }
-  [3]=>
-  object(for_string_sort)#%d (3) {
-    ["public_class_value"]=>
-    string(1) "w"
-    ["private_class_value":"for_string_sort":private]=>
-    string(1) "W"
-    ["protected_class_value":protected]=>
-    string(1) "c"
-  }
-}
-
--- Testing sort() by supplying various object arrays, 'flag' value is SORT_REGULAR --
-bool(true)
-array(4) {
-  [0]=>
-  object(for_integer_sort)#%d (3) {
-    ["public_class_value"]=>
-    int(-88)
-    ["private_class_value":"for_integer_sort":private]=>
-    int(-5)
-    ["protected_class_value":protected]=>
-    int(5)
-  }
-  [1]=>
-  object(for_integer_sort)#%d (3) {
-    ["public_class_value"]=>
-    float(0.001)
-    ["private_class_value":"for_integer_sort":private]=>
-    float(99.5)
-    ["protected_class_value":protected]=>
-    float(0.1)
-  }
-  [2]=>
-  object(for_integer_sort)#%d (3) {
-    ["public_class_value"]=>
-    int(11)
-    ["private_class_value":"for_integer_sort":private]=>
-    int(33)
-    ["protected_class_value":protected]=>
-    int(30)
-  }
-  [3]=>
-  object(for_integer_sort)#%d (3) {
-    ["public_class_value"]=>
-    int(66)
-    ["private_class_value":"for_integer_sort":private]=>
-    int(44)
-    ["protected_class_value":protected]=>
-    int(4)
-  }
-}
-bool(true)
-array(4) {
-  [0]=>
-  object(for_string_sort)#%d (3) {
-    ["public_class_value"]=>
-    string(3) "axx"
-    ["private_class_value":"for_string_sort":private]=>
-    string(3) "AXX"
-    ["protected_class_value":protected]=>
-    string(3) "ass"
-  }
-  [1]=>
-  object(for_string_sort)#%d (3) {
-    ["public_class_value"]=>
-    string(2) "py"
-    ["private_class_value":"for_string_sort":private]=>
-    string(2) "PY"
-    ["protected_class_value":protected]=>
-    string(2) "pt"
-  }
-  [2]=>
-  object(for_string_sort)#%d (3) {
-    ["public_class_value"]=>
-    string(1) "t"
-    ["private_class_value":"for_string_sort":private]=>
-    string(3) "eee"
-    ["protected_class_value":protected]=>
-    string(3) "abb"
-  }
-  [3]=>
-  object(for_string_sort)#%d (3) {
-    ["public_class_value"]=>
-    string(1) "w"
-    ["private_class_value":"for_string_sort":private]=>
-    string(1) "W"
-    ["protected_class_value":protected]=>
-    string(1) "c"
-  }
-}
-Done
---UEXPECTF--
-*** Testing sort() : object functionality ***
-
--- Testing sort() by supplying various object arrays, 'flag' value is defualt --
+-- Testing sort() by supplying various object arrays, 'flag' value is default --
 bool(true)
 array(4) {
   [0]=>

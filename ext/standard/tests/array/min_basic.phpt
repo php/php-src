@@ -27,20 +27,6 @@ echo "\nDone\n";
 int(1)
 int(-2)
 float(2.09)
-string(0) ""
-bool(false)
-bool(false)
-bool(false)
-int(0)
-int(0)
-
-Done
---UEXPECT--
-
-*** Testing sequences of numbers ***
-int(1)
-int(-2)
-float(2.09)
 unicode(0) ""
 bool(false)
 bool(false)

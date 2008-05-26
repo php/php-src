@@ -30,28 +30,7 @@ var_dump( array_intersect($arr_binary, $arr_binary) );
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing array_intersect() : binary safe checking ***
-array(2) {
-  [0]=>
-  string(5) "hello"
-  [1]=>
-  string(5) "world"
-}
-array(2) {
-  [0]=>
-  string(5) "hello"
-  [1]=>
-  string(5) "world"
-}
-array(2) {
-  [0]=>
-  string(5) "hello"
-  [1]=>
-  string(5) "world"
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_intersect() : binary safe checking ***
 array(2) {
   [0]=>

@@ -57,54 +57,6 @@ bool(true)
 array(8) {
   [4]=>
   object(for_string_natcasesort)#%d (1) {
-    ["class_value"]=>
-    string(5) "apple"
-  }
-  [7]=>
-  object(for_string_natcasesort)#%d (1) {
-    ["class_value"]=>
-    string(5) "aPPle"
-  }
-  [0]=>
-  object(for_string_natcasesort)#%d (1) {
-    ["class_value"]=>
-    string(3) "axx"
-  }
-  [6]=>
-  object(for_string_natcasesort)#%d (1) {
-    ["class_value"]=>
-    string(5) "Lemon"
-  }
-  [5]=>
-  object(for_string_natcasesort)#%d (1) {
-    ["class_value"]=>
-    string(6) "Orange"
-  }
-  [3]=>
-  object(for_string_natcasesort)#%d (1) {
-    ["class_value"]=>
-    string(2) "py"
-  }
-  [1]=>
-  object(for_string_natcasesort)#%d (1) {
-    ["class_value"]=>
-    string(1) "t"
-  }
-  [2]=>
-  object(for_string_natcasesort)#%d (1) {
-    ["class_value"]=>
-    string(1) "w"
-  }
-}
-Done
---UEXPECTF--
-*** Testing natcasesort() : object functionality ***
-
--- Testing natcasesort() by supplying various object arrays --
-bool(true)
-array(8) {
-  [4]=>
-  object(for_string_natcasesort)#%d (1) {
     [u"class_value"]=>
     unicode(5) "apple"
   }

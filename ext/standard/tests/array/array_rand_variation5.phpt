@@ -72,33 +72,3 @@ NULL
 Warning: array_rand(): Second argument has to be between 1 and the number of elements in the array in %s on line %d
 NULL
 Done
-
---UEXPECTF--
-*** Testing array_rand() : with invalid values for 'req_num' ***
-
--- With default num_req value --
-int(%d)
-
--- With num_req = 1 --
-int(%d)
-
--- With num_req = 0 --
-
-Warning: array_rand(): Second argument has to be between 1 and the number of elements in the array in %s on line %d
-NULL
-
--- With num_req = -1 --
-
-Warning: array_rand(): Second argument has to be between 1 and the number of elements in the array in %s on line %d
-NULL
-
--- With num_req = -2 --
-
-Warning: array_rand(): Second argument has to be between 1 and the number of elements in the array in %s on line %d
-NULL
-
--- With num_req more than number of members in 'input' array --
-
-Warning: array_rand(): Second argument has to be between 1 and the number of elements in the array in %s on line %d
-NULL
-Done

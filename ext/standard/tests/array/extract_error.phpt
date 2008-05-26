@@ -48,32 +48,6 @@ NULL
 Warning: extract() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
-Warning: extract() expects parameter 1 to be array, string given in %s on line %d
-NULL
-
-Warning: extract() expects at most 3 parameters, 4 given in %s on line %d
-NULL
-
-Warning: extract(): specified extract type requires the prefix parameter in %s on line %d
-NULL
-Done
---UEXPECTF--
-*** Testing Error Conditions ***
-
-Warning: extract() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Notice: A non well formed numeric value encountered in %s on line %d
-
-Warning: extract(): Invalid extract type in %s on line %d
-NULL
-
-Warning: extract(): Invalid extract type in %s on line %d
-NULL
-
-Warning: extract() expects parameter 1 to be array, integer given in %s on line %d
-NULL
-
 Warning: extract() expects parameter 1 to be array, Unicode string given in %s on line %d
 NULL
 

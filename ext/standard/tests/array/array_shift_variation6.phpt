@@ -37,51 +37,7 @@ var_dump($copied_array);
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing array_shift() : usage variations ***
-
--- Variable is referenced array --
-Result: string(4) "zero"
-
-$original_array:
-array(2) {
-  [0]=>
-  string(3) "one"
-  [1]=>
-  string(3) "two"
-}
-
-$copied_array:
-array(2) {
-  [0]=>
-  string(3) "one"
-  [1]=>
-  string(3) "two"
-}
-
--- Element is referenced array --
-Result: string(3) "one"
-
-$new_array:
-array(3) {
-  [0]=>
-  &array(1) {
-    [0]=>
-    string(3) "two"
-  }
-  [1]=>
-  int(1)
-  [2]=>
-  string(3) "two"
-}
-
-$copied_array
-array(1) {
-  [0]=>
-  string(3) "two"
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_shift() : usage variations ***
 
 -- Variable is referenced array --

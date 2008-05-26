@@ -20,7 +20,7 @@ echo "result for arr2: ".array_reduce($arr2,'CommaSeperatedList')."\n";
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 result for arr1: 1,2,3
 result for arr2: 1
 result for arr1: 1,2,3

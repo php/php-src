@@ -10,7 +10,7 @@ Test krsort() function : usage variations - sort strings
 /*
  * testing krsort() by providing array of string values for $array argument with
  * following flag values:
- *  1.flag value as defualt
+ *  1.flag value as default
  *  2.SORT_REGULAR - compare items normally
  *  3.SORT_STRING  - compare items as strings
 */
@@ -40,7 +40,7 @@ echo "\n-- Testing krsort() by supplying various string arrays --\n";
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
-  echo "- With defualt sort flag -\n";
+  echo "- With default sort flag -\n";
   $temp_array = $array;
   var_dump(krsort($temp_array) ); // expecting : bool(true)
   var_dump($temp_array);
@@ -57,190 +57,13 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing krsort() : usage variations ***
 
 -- Testing krsort() by supplying various string arrays --
 
 -- Iteration 1 --
-- With defualt sort flag -
-bool(true)
-array(11) {
-  ["\xhh"]=>
-  string(4) "\xhh"
-  ["\e"]=>
-  string(2) "\e"
-  ["\ddd"]=>
-  string(4) "\ddd"
-  ["\cx"]=>
-  string(3) "\cx"
-  ["\a"]=>
-  string(2) "\a"
-  ["
-"]=>
-  string(1) "
-"
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  ["
-"]=>
-  string(1) "
-"
-  ["	"]=>
-  string(1) "	"
-  [""]=>
-  NULL
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(11) {
-  ["\xhh"]=>
-  string(4) "\xhh"
-  ["\e"]=>
-  string(2) "\e"
-  ["\ddd"]=>
-  string(4) "\ddd"
-  ["\cx"]=>
-  string(3) "\cx"
-  ["\a"]=>
-  string(2) "\a"
-  ["
-"]=>
-  string(1) "
-"
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  ["
-"]=>
-  string(1) "
-"
-  ["	"]=>
-  string(1) "	"
-  [""]=>
-  NULL
-}
-- Sort flag = SORT_STRING -
-bool(true)
-array(11) {
-  ["\xhh"]=>
-  string(4) "\xhh"
-  ["\e"]=>
-  string(2) "\e"
-  ["\ddd"]=>
-  string(4) "\ddd"
-  ["\cx"]=>
-  string(3) "\cx"
-  ["\a"]=>
-  string(2) "\a"
-  ["
-"]=>
-  string(1) "
-"
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  ["
-"]=>
-  string(1) "
-"
-  ["	"]=>
-  string(1) "	"
-  [""]=>
-  NULL
-}
-
--- Iteration 2 --
-- With defualt sort flag -
-bool(true)
-array(11) {
-  ["x"]=>
-  string(1) "X"
-  ["te"]=>
-  string(4) "Test"
-  ["t"]=>
-  string(4) "TTTT"
-  ["o"]=>
-  string(6) "Orange"
-  ["X"]=>
-  string(1) "x"
-  ["W"]=>
-  string(2) "ww"
-  ["T"]=>
-  string(3) "ttt"
-  ["O"]=>
-  string(6) "oraNGe"
-  ["Lemon"]=>
-  string(5) "lemoN"
-  ["B"]=>
-  string(6) "BANANA"
-  ["Apple"]=>
-  string(5) "apple"
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(11) {
-  ["x"]=>
-  string(1) "X"
-  ["te"]=>
-  string(4) "Test"
-  ["t"]=>
-  string(4) "TTTT"
-  ["o"]=>
-  string(6) "Orange"
-  ["X"]=>
-  string(1) "x"
-  ["W"]=>
-  string(2) "ww"
-  ["T"]=>
-  string(3) "ttt"
-  ["O"]=>
-  string(6) "oraNGe"
-  ["Lemon"]=>
-  string(5) "lemoN"
-  ["B"]=>
-  string(6) "BANANA"
-  ["Apple"]=>
-  string(5) "apple"
-}
-- Sort flag = SORT_STRING -
-bool(true)
-array(11) {
-  ["x"]=>
-  string(1) "X"
-  ["te"]=>
-  string(4) "Test"
-  ["t"]=>
-  string(4) "TTTT"
-  ["o"]=>
-  string(6) "Orange"
-  ["X"]=>
-  string(1) "x"
-  ["W"]=>
-  string(2) "ww"
-  ["T"]=>
-  string(3) "ttt"
-  ["O"]=>
-  string(6) "oraNGe"
-  ["Lemon"]=>
-  string(5) "lemoN"
-  ["B"]=>
-  string(6) "BANANA"
-  ["Apple"]=>
-  string(5) "apple"
-}
-Done
---UEXPECTF--
-*** Testing krsort() : usage variations ***
-
--- Testing krsort() by supplying various string arrays --
-
--- Iteration 1 --
-- With defualt sort flag -
+- With default sort flag -
 bool(true)
 array(11) {
   [u"\xhh"]=>
@@ -332,7 +155,7 @@ array(11) {
 }
 
 -- Iteration 2 --
-- With defualt sort flag -
+- With default sort flag -
 bool(true)
 array(11) {
   [u"x"]=>

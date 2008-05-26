@@ -41,57 +41,6 @@ echo "Done";
 
 -- input array before shuffle() function is applied --
 array(9) {
-  ["one"]=>
-  int(1)
-  [2]=>
-  int(2)
-  ["three"]=>
-  int(3)
-  [4]=>
-  int(4)
-  ["#5"]=>
-  int(5)
-  ["SIX"]=>
-  int(6)
-  ["seven"]=>
-  int(7)
-  ["#8"]=>
-  int(10)
-  ["nine"]=>
-  int(9)
-}
-
--- return value from shuffle() function --
-bool(true)
-
--- resultant array after shuffle() function is applied --
-array(9) {
-  [0]=>
-  int(%d)
-  [1]=>
-  int(%d)
-  [2]=>
-  int(%d)
-  [3]=>
-  int(%d)
-  [4]=>
-  int(%d)
-  [5]=>
-  int(%d)
-  [6]=>
-  int(%d)
-  [7]=>
-  int(%d)
-  [8]=>
-  int(%d)
-}
-Done
-
---UEXPECTF--
-*** Testing shuffle() : with associative array ***
-
--- input array before shuffle() function is applied --
-array(9) {
   [u"one"]=>
   int(1)
   [2]=>

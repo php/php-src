@@ -38,7 +38,7 @@ $count = 1;
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
-  echo "- With Defualt sort flag -\n"; 
+  echo "- With default sort flag -\n"; 
   $temp_array = $array; 
   var_dump(rsort($temp_array) );
   var_dump($temp_array);
@@ -56,11 +56,11 @@ foreach ($various_arrays as $array) {
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing rsort() : variation ***
 
 -- Iteration 1 --
-- With Defualt sort flag -
+- With default sort flag -
 bool(true)
 array(9) {
   [0]=>
@@ -128,7 +128,7 @@ array(9) {
 }
 
 -- Iteration 2 --
-- With Defualt sort flag -
+- With default sort flag -
 bool(true)
 array(7) {
   [0]=>
@@ -184,7 +184,7 @@ array(7) {
 }
 
 -- Iteration 3 --
-- With Defualt sort flag -
+- With default sort flag -
 bool(true)
 array(11) {
   [0]=>
@@ -264,270 +264,7 @@ array(11) {
 }
 
 -- Iteration 4 --
-- With Defualt sort flag -
-bool(true)
-array(7) {
-  [0]=>
-  float(2147483648)
-  [1]=>
-  int(2147483647)
-  [2]=>
-  int(0)
-  [3]=>
-  int(0)
-  [4]=>
-  int(-2147483647)
-  [5]=>
-  float(-2147483648)
-  [6]=>
-  float(-2147483649)
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(7) {
-  [0]=>
-  float(2147483648)
-  [1]=>
-  int(2147483647)
-  [2]=>
-  int(0)
-  [3]=>
-  int(0)
-  [4]=>
-  int(-2147483647)
-  [5]=>
-  float(-2147483648)
-  [6]=>
-  float(-2147483649)
-}
-- Sort flag = SORT_NUMERIC -
-bool(true)
-array(7) {
-  [0]=>
-  float(2147483648)
-  [1]=>
-  int(2147483647)
-  [2]=>
-  int(0)
-  [3]=>
-  int(0)
-  [4]=>
-  int(-2147483647)
-  [5]=>
-  float(-2147483648)
-  [6]=>
-  float(-2147483649)
-}
-Done
---UEXPECTF--
-*** Testing rsort() : variation ***
-
--- Iteration 1 --
-- With Defualt sort flag -
-bool(true)
-array(9) {
-  [0]=>
-  int(41)
-  [1]=>
-  int(31)
-  [2]=>
-  int(21)
-  [3]=>
-  int(11)
-  [4]=>
-  int(0)
-  [5]=>
-  int(-11)
-  [6]=>
-  int(-21)
-  [7]=>
-  int(-31)
-  [8]=>
-  int(-41)
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(9) {
-  [0]=>
-  int(41)
-  [1]=>
-  int(31)
-  [2]=>
-  int(21)
-  [3]=>
-  int(11)
-  [4]=>
-  int(0)
-  [5]=>
-  int(-11)
-  [6]=>
-  int(-21)
-  [7]=>
-  int(-31)
-  [8]=>
-  int(-41)
-}
-- Sort flag = SORT_NUMERIC -
-bool(true)
-array(9) {
-  [0]=>
-  int(41)
-  [1]=>
-  int(31)
-  [2]=>
-  int(21)
-  [3]=>
-  int(11)
-  [4]=>
-  int(0)
-  [5]=>
-  int(-11)
-  [6]=>
-  int(-21)
-  [7]=>
-  int(-31)
-  [8]=>
-  int(-41)
-}
-
--- Iteration 2 --
-- With Defualt sort flag -
-bool(true)
-array(7) {
-  [0]=>
-  float(1050)
-  [1]=>
-  float(10.5)
-  [2]=>
-  float(0.5)
-  [3]=>
-  float(0.106)
-  [4]=>
-  float(0.01)
-  [5]=>
-  float(-0.1)
-  [6]=>
-  float(-10.5)
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(7) {
-  [0]=>
-  float(1050)
-  [1]=>
-  float(10.5)
-  [2]=>
-  float(0.5)
-  [3]=>
-  float(0.106)
-  [4]=>
-  float(0.01)
-  [5]=>
-  float(-0.1)
-  [6]=>
-  float(-10.5)
-}
-- Sort flag = SORT_NUMERIC -
-bool(true)
-array(7) {
-  [0]=>
-  float(1050)
-  [1]=>
-  float(10.5)
-  [2]=>
-  float(0.5)
-  [3]=>
-  float(0.106)
-  [4]=>
-  float(0.01)
-  [5]=>
-  float(-0.1)
-  [6]=>
-  float(-10.5)
-}
-
--- Iteration 3 --
-- With Defualt sort flag -
-bool(true)
-array(11) {
-  [0]=>
-  int(33)
-  [1]=>
-  int(2)
-  [2]=>
-  float(0.106)
-  [3]=>
-  float(0.09)
-  [4]=>
-  float(0.0021)
-  [5]=>
-  float(0.0001)
-  [6]=>
-  int(0)
-  [7]=>
-  float(-0.01)
-  [8]=>
-  float(-0.106)
-  [9]=>
-  float(-0.9)
-  [10]=>
-  int(-1)
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(11) {
-  [0]=>
-  int(33)
-  [1]=>
-  int(2)
-  [2]=>
-  float(0.106)
-  [3]=>
-  float(0.09)
-  [4]=>
-  float(0.0021)
-  [5]=>
-  float(0.0001)
-  [6]=>
-  int(0)
-  [7]=>
-  float(-0.01)
-  [8]=>
-  float(-0.106)
-  [9]=>
-  float(-0.9)
-  [10]=>
-  int(-1)
-}
-- Sort flag = SORT_NUMERIC -
-bool(true)
-array(11) {
-  [0]=>
-  int(33)
-  [1]=>
-  int(2)
-  [2]=>
-  float(0.106)
-  [3]=>
-  float(0.09)
-  [4]=>
-  float(0.0021)
-  [5]=>
-  float(0.0001)
-  [6]=>
-  int(0)
-  [7]=>
-  float(-0.01)
-  [8]=>
-  float(-0.106)
-  [9]=>
-  float(-0.9)
-  [10]=>
-  int(-1)
-}
-
--- Iteration 4 --
-- With Defualt sort flag -
+- With default sort flag -
 bool(true)
 array(7) {
   [0]=>

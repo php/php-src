@@ -31,18 +31,7 @@ var_dump(array_diff($array2, $array1));
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing array_diff() : usage variations ***
-array(1) {
-  [0]=>
-  string(1) "1"
-}
-array(1) {
-  [4]=>
-  string(4) "test"
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_diff() : usage variations ***
 array(1) {
   [0]=>

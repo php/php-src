@@ -9,7 +9,7 @@ Test ksort() function : usage variations - sort bool values
 
 /*
  * testing ksort() by providing array of boolean values for $array argument with following flag values:
- *  1.flag value as defualt
+ *  1.flag value as default
  *  2.SORT_REGULAR - compare items normally
 */
 
@@ -18,7 +18,7 @@ echo "*** Testing ksort() : usage variations ***\n";
 // bool value array
 $bool_values = array (true => true, false => false, TRUE => TRUE, FALSE => FALSE);
 
-echo "\n-- Testing ksort() by supplying boolean value array, 'flag' value is defualt --\n";
+echo "\n-- Testing ksort() by supplying boolean value array, 'flag' value is default --\n";
 $temp_array = $bool_values;
 var_dump(ksort($temp_array) );
 var_dump($temp_array);
@@ -40,49 +40,10 @@ var_dump($temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ksort() : usage variations ***
 
--- Testing ksort() by supplying boolean value array, 'flag' value is defualt --
-bool(true)
-array(2) {
-  [0]=>
-  bool(false)
-  [1]=>
-  bool(true)
-}
-
--- Testing ksort() by supplying boolean value array, 'flag' value is SORT_REGULAR --
-bool(true)
-array(2) {
-  [0]=>
-  bool(false)
-  [1]=>
-  bool(true)
-}
-
--- Testing ksort() by supplying boolean value array, 'flag' value is SORT_NUMERIC  --
-bool(true)
-array(2) {
-  [0]=>
-  bool(false)
-  [1]=>
-  bool(true)
-}
-
--- Testing ksort() by supplying boolean value array, 'flag' value is SORT_STRING --
-bool(true)
-array(2) {
-  [0]=>
-  bool(false)
-  [1]=>
-  bool(true)
-}
-Done
---UEXPECTF--
-*** Testing ksort() : usage variations ***
-
--- Testing ksort() by supplying boolean value array, 'flag' value is defualt --
+-- Testing ksort() by supplying boolean value array, 'flag' value is default --
 bool(true)
 array(2) {
   [0]=>

@@ -17,13 +17,6 @@ var_dump(array_intersect_ukey($array1, $array2, 'key_compare_func'));
 ?>
 --EXPECT--
 array(2) {
-  ["blue"]=>
-  int(1)
-  ["green"]=>
-  int(3)
-}
---UEXPECT--
-array(2) {
   [u"blue"]=>
   int(1)
   [u"green"]=>

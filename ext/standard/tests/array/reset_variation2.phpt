@@ -23,16 +23,7 @@ unset($array[0]);
 var_dump(reset($array));
 ?>
 ===DONE===
---EXPECTF--
-*** Testing reset() : usage variations ***
-
--- Initial Position: --
-a => 0
-
--- Unset First element in array and check reset() --
-string(1) "b"
-===DONE===
---UEXPECTF--
+--EXPECT--
 *** Testing reset() : usage variations ***
 
 -- Initial Position: --

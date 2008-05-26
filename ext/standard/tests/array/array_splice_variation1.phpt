@@ -69,68 +69,6 @@ array(3) {
   int(4)
   [1]=>
   &int(5)
-  ["six"]=>
-  &int(6)
-}
-array(7) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-  [2]=>
-  &int(2)
-  ["three"]=>
-  &int(3)
-  [3]=>
-  int(7)
-  [4]=>
-  &int(8)
-  ["nine"]=>
-  &int(9)
-}
-Test behaviour of replacement array containing references 
-array(4) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-  [2]=>
-  &int(3)
-  [3]=>
-  &int(4)
-}
-Test behaviour of replacement which is part of reference set 
-array(2) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(3)
-}
-Done
---UEXPECT--
-test behaviour when input array is in a reference set
-array(1) {
-  [0]=>
-  int(2)
-}
-array(2) {
-  [0]=>
-  &array(1) {
-    [0]=>
-    int(1)
-  }
-  [1]=>
-  &array(1) {
-    [0]=>
-    int(1)
-  }
-}
-Test behaviour of input arrays containing references 
-array(3) {
-  [0]=>
-  int(4)
-  [1]=>
-  &int(5)
   [u"six"]=>
   &int(6)
 }

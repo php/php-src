@@ -54,58 +54,7 @@ var_dump( array_map('callback_without_ret', $array1));
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing array_map() : callback with diff return value ***
--- with integer return value --
-array(3) {
-  [0]=>
-  int(4)
-  [1]=>
-  int(6)
-  [2]=>
-  int(8)
-}
--- with string return value --
-array(3) {
-  [0]=>
-  string(2) "13"
-  [1]=>
-  string(2) "24"
-  [2]=>
-  string(2) "35"
-}
--- with bool return value --
-array(3) {
-  [0]=>
-  bool(true)
-  [1]=>
-  bool(true)
-  [2]=>
-  bool(true)
-}
--- with null return value --
-array(3) {
-  [0]=>
-  NULL
-  [1]=>
-  NULL
-  [2]=>
-  NULL
-}
--- with no return value --
-callback_without_ret called
-callback_without_ret called
-callback_without_ret called
-array(3) {
-  [0]=>
-  NULL
-  [1]=>
-  NULL
-  [2]=>
-  NULL
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_map() : callback with diff return value ***
 -- with integer return value --
 array(3) {

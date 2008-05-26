@@ -16,7 +16,7 @@ echo "*** Testing rsort() : variation ***\n";
 // bool value array
 $bool_values = array (true, false, TRUE, FALSE);
 
-echo "\n-- 'flag' value is defualt --\n";
+echo "\n-- 'flag' value is default --\n";
 $temp_array = $bool_values;
 var_dump(rsort($temp_array) );
 var_dump($temp_array);
@@ -39,65 +39,10 @@ var_dump($temp_array);
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing rsort() : variation ***
 
--- 'flag' value is defualt --
-bool(true)
-array(4) {
-  [0]=>
-  bool(true)
-  [1]=>
-  bool(true)
-  [2]=>
-  bool(false)
-  [3]=>
-  bool(false)
-}
-
--- 'flag' value is SORT_REGULAR --
-bool(true)
-array(4) {
-  [0]=>
-  bool(true)
-  [1]=>
-  bool(true)
-  [2]=>
-  bool(false)
-  [3]=>
-  bool(false)
-}
-
--- 'flag' value is SORT_NUMERIC  --
-bool(true)
-array(4) {
-  [0]=>
-  bool(true)
-  [1]=>
-  bool(true)
-  [2]=>
-  bool(false)
-  [3]=>
-  bool(false)
-}
-
--- 'flag' value is SORT_STRING --
-bool(true)
-array(4) {
-  [0]=>
-  bool(true)
-  [1]=>
-  bool(true)
-  [2]=>
-  bool(false)
-  [3]=>
-  bool(false)
-}
-Done
---UEXPECTF--
-*** Testing rsort() : variation ***
-
--- 'flag' value is defualt --
+-- 'flag' value is default --
 bool(true)
 array(4) {
   [0]=>

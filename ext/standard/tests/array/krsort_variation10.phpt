@@ -10,7 +10,7 @@ Test krsort() function : usage variations - sort heredoc strings
 /*
  * testing krsort() by providing array of heredoc strings for $array argument with
  * following flag values:
- *  1.flag value as defualt
+ *  1.flag value as default
  *  2.SORT_REGULAR - compare items normally
  *  3.SORT_STRING  - compare items as strings
 */
@@ -37,7 +37,7 @@ $array = array (
   $multiline_heredoc => "heredoc string\twith!@# and 123\nTest this!!!"
 );
 
-echo "\n-- Testing krsort() by supplying heredoc string array, 'flag' value is defualt --\n";
+echo "\n-- Testing krsort() by supplying heredoc string array, 'flag' value is default --\n";
 $temp_array = $array;
 var_dump(krsort($temp_array) ); // expecting : bool(true)
 var_dump($temp_array);
@@ -54,52 +54,10 @@ var_dump($temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing krsort() : usage variations ***
 
--- Testing krsort() by supplying heredoc string array, 'flag' value is defualt --
-bool(true)
-array(3) {
-  ["heredoc string	with!@# and 123
-Test this!!!"]=>
-  string(43) "heredoc string	with!@# and 123
-Test this!!!"
-  ["Heredoc"]=>
-  string(7) "Heredoc"
-  ["HEREDOC"]=>
-  string(7) "HEREDOC"
-}
-
--- Testing krsort() by supplying heredoc string array, 'flag' = SORT_REGULAR --
-bool(true)
-array(3) {
-  ["heredoc string	with!@# and 123
-Test this!!!"]=>
-  string(43) "heredoc string	with!@# and 123
-Test this!!!"
-  ["Heredoc"]=>
-  string(7) "Heredoc"
-  ["HEREDOC"]=>
-  string(7) "HEREDOC"
-}
-
--- Testing krsort() by supplying heredoc string array, 'flag' = SORT_STRING --
-bool(true)
-array(3) {
-  ["heredoc string	with!@# and 123
-Test this!!!"]=>
-  string(43) "heredoc string	with!@# and 123
-Test this!!!"
-  ["Heredoc"]=>
-  string(7) "Heredoc"
-  ["HEREDOC"]=>
-  string(7) "HEREDOC"
-}
-Done
---UEXPECTF--
-*** Testing krsort() : usage variations ***
-
--- Testing krsort() by supplying heredoc string array, 'flag' value is defualt --
+-- Testing krsort() by supplying heredoc string array, 'flag' value is default --
 bool(true)
 array(3) {
   [u"heredoc string	with!@# and 123

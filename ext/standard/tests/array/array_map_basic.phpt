@@ -40,35 +40,7 @@ var_dump( array_map('concatenate', $arr1, $arr2) );
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing array_map() : basic functionality ***
--- With two integer array --
-array(3) {
-  [0]=>
-  int(4)
-  [1]=>
-  int(10)
-  [2]=>
-  int(18)
-}
--- With single integer array --
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(4)
-  [2]=>
-  int(9)
-}
--- With string array --
-array(2) {
-  [0]=>
-  string(12) "one = single"
-  [1]=>
-  string(12) "two = double"
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_map() : basic functionality ***
 -- With two integer array --
 array(3) {

@@ -28,63 +28,7 @@ foreach ($inputs as $array_arg) {
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing natcasesort() : usage variation ***
-bool(true)
-array(11) {
-  [6]=>
-  string(1) "
-"
-  [7]=>
-  string(1) "	"
-  [10]=>
-  string(1) ""
-  [0]=>
-  NULL
-  [5]=>
-  string(1) ""
-  [1]=>
-  NULL
-  [2]=>
-  string(2) "\a"
-  [3]=>
-  string(3) "\cx"
-  [9]=>
-  string(4) "\ddd"
-  [4]=>
-  string(2) "\e"
-  [8]=>
-  string(4) "\xhh"
-}
-bool(true)
-array(12) {
-  [3]=>
-  string(5) "apple"
-  [11]=>
-  string(6) "BANANA"
-  [2]=>
-  string(6) "banana"
-  [0]=>
-  string(5) "lemoN"
-  [10]=>
-  string(6) "oraNGe"
-  [1]=>
-  string(6) "Orange"
-  [4]=>
-  string(4) "Test"
-  [6]=>
-  string(3) "ttt"
-  [5]=>
-  string(4) "TTTT"
-  [7]=>
-  string(2) "ww"
-  [8]=>
-  string(1) "x"
-  [9]=>
-  string(1) "X"
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing natcasesort() : usage variation ***
 bool(true)
 array(11) {

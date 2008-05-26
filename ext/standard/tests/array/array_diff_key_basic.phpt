@@ -12,13 +12,6 @@ var_dump(array_diff_key($array1, $array2));
 ?>
 --EXPECT--
 array(2) {
-  ["red"]=>
-  int(2)
-  ["purple"]=>
-  int(4)
-}
---UEXPECT--
-array(2) {
   [u"red"]=>
   int(2)
   [u"purple"]=>

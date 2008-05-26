@@ -38,19 +38,6 @@ echo "Done";
 Strict Standards: Only variables should be passed by reference in %s on line %d
 
 Strict Standards: Only variables should be passed by reference in %s on line %d
-string(4) "zero"
-
--- Correct Method: --
-string(4) "zero"
-Done
---UEXPECTF--
-*** Testing array_shift() : usage variations ***
-
--- Incorrect Method: --
-
-Strict Standards: Only variables should be passed by reference in %s on line %d
-
-Strict Standards: Only variables should be passed by reference in %s on line %d
 unicode(4) "zero"
 
 -- Correct Method: --

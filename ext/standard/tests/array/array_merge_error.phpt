@@ -28,11 +28,3 @@ echo "Done";
 Warning: Wrong parameter count for array_merge() in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing array_merge() : error conditions ***
-
--- Testing array_merge() function with less than expected no. of arguments --
-
-Warning: Wrong parameter count for array_merge() in %s on line %d
-NULL
-Done

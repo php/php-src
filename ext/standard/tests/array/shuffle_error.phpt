@@ -47,28 +47,6 @@ bool(false)
 array(2) {
   [0]=>
   int(1)
-  ["two"]=>
-  int(2)
-}
-Done
-
---UEXPECTF--
-*** Testing shuffle() : error conditions ***
-
--- Testing shuffle() function with Zero arguments --
-
-Warning: shuffle() expects exactly 1 parameter, 0 given in %s on line %d
-bool(false)
-
--- Testing shuffle() function with more than expected no. of arguments --
-
-Warning: shuffle() expects exactly 1 parameter, 2 given in %s on line %d
-bool(false)
-
--- original input array --
-array(2) {
-  [0]=>
-  int(1)
   [u"two"]=>
   int(2)
 }

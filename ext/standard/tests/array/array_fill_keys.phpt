@@ -12,38 +12,6 @@ precision=14
 ?>
 --EXPECTF--
 
-Warning: array_fill_keys() expects parameter 1 to be array, string given in %s on line %d
-NULL
-array(0) {
-}
-array(2) {
-  ["foo"]=>
-  NULL
-  ["bar"]=>
-  NULL
-}
-array(4) {
-  [5]=>
-  int(123)
-  ["foo"]=>
-  int(123)
-  [10]=>
-  int(123)
-  ["1.23"]=>
-  int(123)
-}
-array(4) {
-  ["test"]=>
-  string(0) ""
-  [1]=>
-  string(0) ""
-  [10]=>
-  string(0) ""
-  [100]=>
-  string(0) ""
-}
---UEXPECTF--
-
 Warning: array_fill_keys() expects parameter 1 to be array, Unicode string given in %s on line %d
 NULL
 array(0) {

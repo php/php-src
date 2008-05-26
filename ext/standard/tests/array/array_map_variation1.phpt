@@ -24,38 +24,6 @@ echo "Done";
 --EXPECT--
 *** Testing array_map() : string keys ***
 array(1) {
-  ["stringkey"]=>
-  array(1) {
-    [0]=>
-    string(5) "value"
-  }
-}
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    string(5) "value"
-    [1]=>
-    string(5) "value"
-  }
-}
-array(1) {
-  ["stringkey"]=>
-  string(5) "value"
-}
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    string(5) "value"
-    [1]=>
-    string(5) "value"
-  }
-}
-Done
---UEXPECT--
-*** Testing array_map() : string keys ***
-array(1) {
   [u"stringkey"]=>
   array(1) {
     [0]=>

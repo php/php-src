@@ -25,16 +25,7 @@ echo key($input) . " => " . current ($input) . "\n";
 echo "Done";
 ?>
 
---EXPECTF--
-*** Testing array_key_exists() : usage variations ***
-
--- Call array_key_exists() --
-bool(true)
-
--- Position of Internal Pointer in Original Array: --
-one => un
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_key_exists() : usage variations ***
 
 -- Call array_key_exists() --

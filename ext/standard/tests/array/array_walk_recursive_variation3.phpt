@@ -61,67 +61,7 @@ for($count = 0; $count < count($input_values); $count++) {
 }  
 echo "Done"
 ?>
---EXPECTF--
-*** Testing array_walk_recursive() : 'input' array with different values***
-
--- Iteration 1 --
-1 : 0 1
-1 : 1 0
-1 : 2 -10
-1 : 0 19
-1 : 1 -33
-1 : 0 90
-1 : 1 31
-1 : 2 -110
-bool(true)
-
--- Iteration 2 --
-2 : 0 3.4
-2 : 1 0.8
-2 : 2 -2.9
-2 : 0 625
-2 : 1 0.0082
-bool(true)
-
--- Iteration 3 --
-3 : 0 Mango
-3 : 0 Apple
-3 : 1 Orange
-3 : 2 Lemon
-bool(true)
-
--- Iteration 4 --
-4 : 0 1
-4 : 1 
-4 : 0 1
-4 : 1 
-bool(true)
-
--- Iteration 5 --
-5 : 0 
-5 : 0 
-bool(true)
-
--- Iteration 6 --
-bool(true)
-
--- Iteration 7 --
-7 : 0 binary
-bool(true)
-
--- Iteration 8 --
-8 : 0 16
-8 : 1 8.345
-8 : 0 Fruits
-8 : 0 1
-8 : 1 
-8 : 0 
-8 : 0 -98
-8 : 1 0.005
-8 : 2 banana
-bool(true)
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_walk_recursive() : 'input' array with different values***
 
 -- Iteration 1 --

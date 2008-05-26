@@ -23,12 +23,3 @@ echo "Done";
 Warning: Wrong parameter count for array_merge_recursive() in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing array_merge_recursive() : error conditions ***
-
--- Testing array_merge_recursive() function with Zero arguments --
-
-Warning: Wrong parameter count for array_merge_recursive() in %s on line %d
-NULL
-Done
-

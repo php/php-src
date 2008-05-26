@@ -31,66 +31,7 @@ var_dump( array_pad($input, 3, $pad_value) );
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing array_pad() : basic functionality ***
--- Positive pad_size --
-array(8) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-  [3]=>
-  int(-3)
-  [4]=>
-  int(-3)
-  [5]=>
-  int(-3)
-  [6]=>
-  int(-3)
-  [7]=>
-  int(-3)
-}
--- Negative pad_size --
-array(8) {
-  [0]=>
-  int(-3)
-  [1]=>
-  int(-3)
-  [2]=>
-  int(-3)
-  [3]=>
-  int(-3)
-  [4]=>
-  int(-3)
-  [5]=>
-  int(1)
-  [6]=>
-  int(2)
-  [7]=>
-  int(3)
-}
--- Pad_size lesser than array_size --
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
--- Pad_size equal to array_size --
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_pad() : basic functionality ***
 -- Positive pad_size --
 array(8) {

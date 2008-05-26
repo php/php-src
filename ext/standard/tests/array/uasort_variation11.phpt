@@ -47,40 +47,7 @@ var_dump($array_arg);
 
 echo "Done"
 ?>
---EXPECTF--
-*** Testing uasort() : Sorting different associative arrays ***
--- Array with duplicate keys --
-bool(true)
-array(7) {
-  [0]=>
-  int(1)
-  [5]=>
-  int(2)
-  ["z"]=>
-  int(3)
-  [3]=>
-  int(3)
-  ["o"]=>
-  int(6)
-  ["a"]=>
-  int(8)
-  ["d"]=>
-  int(9)
-}
--- Array with default/assigned keys --
-bool(true)
-array(4) {
-  [2]=>
-  string(5) "Apple"
-  [0]=>
-  string(6) "Banana"
-  [1]=>
-  string(5) "Mango"
-  [3]=>
-  string(9) "Pineapple"
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing uasort() : Sorting different associative arrays ***
 -- Array with duplicate keys --
 bool(true)

@@ -8,7 +8,7 @@ Test krsort() function : object functionality - sort objects
 */
 /*
  * testing krsort() by providing array of integer/string objects with following flag values:
- *  1.Defualt flag value
+ *  1.default flag value
  *  2.SORT_REGULAR - compare items normally
 */
 
@@ -56,14 +56,14 @@ $unsorted_str_obj = array (
 );
 
 
-echo "\n-- Testing krsort() by supplying various object arrays, 'flag' value is defualt --\n";
+echo "\n-- Testing krsort() by supplying various object arrays, 'flag' value is default --\n";
 
-// testing krsort() function by supplying integer object array, flag value is defualt
+// testing krsort() function by supplying integer object array, flag value is default
 $temp_array = $unsorted_int_obj;
 var_dump(krsort($temp_array) );
 var_dump($temp_array);
 
-// testing krsort() function by supplying string object array, flag value is defualt
+// testing krsort() function by supplying string object array, flag value is default
 $temp_array = $unsorted_str_obj;
 var_dump(krsort($temp_array) );
 var_dump($temp_array);
@@ -84,166 +84,7 @@ echo "Done\n";
 --EXPECTF--
 *** Testing krsort() : object functionality ***
 
--- Testing krsort() by supplying various object arrays, 'flag' value is defualt --
-bool(true)
-array(6) {
-  [50]=>
-  object(Integer)#%d (1) {
-    ["class_value"]=>
-    float(0.001)
-  }
-  [20]=>
-  object(Integer)#%d (1) {
-    ["class_value"]=>
-    int(66)
-  }
-  [10]=>
-  object(Integer)#%d (1) {
-    ["class_value"]=>
-    int(11)
-  }
-  [6]=>
-  object(Integer)#%d (1) {
-    ["class_value"]=>
-    int(0)
-  }
-  [4]=>
-  object(Integer)#%d (1) {
-    ["class_value"]=>
-    int(-5)
-  }
-  [3]=>
-  object(Integer)#%d (1) {
-    ["class_value"]=>
-    int(23)
-  }
-}
-bool(true)
-array(8) {
-  ["w"]=>
-  object(String)#%d (1) {
-    ["class_value"]=>
-    string(1) "w"
-  }
-  ["t"]=>
-  object(String)#%d (1) {
-    ["class_value"]=>
-    string(1) "t"
-  }
-  ["py"]=>
-  object(String)#%d (1) {
-    ["class_value"]=>
-    string(2) "py"
-  }
-  ["axx"]=>
-  object(String)#%d (1) {
-    ["class_value"]=>
-    string(3) "axx"
-  }
-  ["apple"]=>
-  object(String)#%d (1) {
-    ["class_value"]=>
-    string(5) "apple"
-  }
-  ["aPPle"]=>
-  object(String)#%d (1) {
-    ["class_value"]=>
-    string(5) "aPPle"
-  }
-  ["Orange"]=>
-  object(String)#%d (1) {
-    ["class_value"]=>
-    string(6) "Orange"
-  }
-  ["Lemon"]=>
-  object(String)#%d (1) {
-    ["class_value"]=>
-    string(5) "Lemon"
-  }
-}
-
--- Testing krsort() by supplying various object arrays, 'flag' value is SORT_REGULAR --
-bool(true)
-array(6) {
-  [50]=>
-  object(Integer)#%d (1) {
-    ["class_value"]=>
-    float(0.001)
-  }
-  [20]=>
-  object(Integer)#%d (1) {
-    ["class_value"]=>
-    int(66)
-  }
-  [10]=>
-  object(Integer)#%d (1) {
-    ["class_value"]=>
-    int(11)
-  }
-  [6]=>
-  object(Integer)#%d (1) {
-    ["class_value"]=>
-    int(0)
-  }
-  [4]=>
-  object(Integer)#%d (1) {
-    ["class_value"]=>
-    int(-5)
-  }
-  [3]=>
-  object(Integer)#%d (1) {
-    ["class_value"]=>
-    int(23)
-  }
-}
-bool(true)
-array(8) {
-  ["w"]=>
-  object(String)#%d (1) {
-    ["class_value"]=>
-    string(1) "w"
-  }
-  ["t"]=>
-  object(String)#%d (1) {
-    ["class_value"]=>
-    string(1) "t"
-  }
-  ["py"]=>
-  object(String)#%d (1) {
-    ["class_value"]=>
-    string(2) "py"
-  }
-  ["axx"]=>
-  object(String)#%d (1) {
-    ["class_value"]=>
-    string(3) "axx"
-  }
-  ["apple"]=>
-  object(String)#%d (1) {
-    ["class_value"]=>
-    string(5) "apple"
-  }
-  ["aPPle"]=>
-  object(String)#%d (1) {
-    ["class_value"]=>
-    string(5) "aPPle"
-  }
-  ["Orange"]=>
-  object(String)#%d (1) {
-    ["class_value"]=>
-    string(6) "Orange"
-  }
-  ["Lemon"]=>
-  object(String)#%d (1) {
-    ["class_value"]=>
-    string(5) "Lemon"
-  }
-}
-Done
---UEXPECTF--
-*** Testing krsort() : object functionality ***
-
--- Testing krsort() by supplying various object arrays, 'flag' value is defualt --
+-- Testing krsort() by supplying various object arrays, 'flag' value is default --
 bool(true)
 array(6) {
   [50]=>

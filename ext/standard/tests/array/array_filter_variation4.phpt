@@ -58,44 +58,7 @@ var_dump( array_filter($input, "callback4") );
 
 echo "Done"
 ?>
---EXPECTF--
-*** Testing array_filter() : usage variation - different 'callback' functions***
--- Callback function without parameter and with return --
-array(8) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(-1)
-  [2]=>
-  int(2)
-  [3]=>
-  float(0.0034)
-  [4]=>
-  string(5) "hello"
-  [5]=>
-  string(5) "value"
-  ["key"]=>
-  int(4)
-  ["null"]=>
-  NULL
-}
--- Callback funciton with parameter and without return --
-array(0) {
-}
--- Callback function without parameter and return --
-array(0) {
-}
--- Callback function with parameter and return --
-array(3) {
-  [2]=>
-  int(2)
-  [3]=>
-  float(0.0034)
-  ["key"]=>
-  int(4)
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_filter() : usage variation - different 'callback' functions***
 -- Callback function without parameter and with return --
 array(8) {

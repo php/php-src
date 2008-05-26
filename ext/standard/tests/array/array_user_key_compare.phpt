@@ -16,6 +16,4 @@ var_dump($a);
 
 ?>
 --EXPECTF--
-string(1) "A"
---UEXPECTF--
 unicode(1) "A"

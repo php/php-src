@@ -40,16 +40,3 @@ NULL
 Warning: Wrong parameter count for each() in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing each() : error conditions ***
-
--- Testing each() function with Zero arguments --
-
-Warning: Wrong parameter count for each() in %s on line %d
-NULL
-
--- Testing each() function with more than expected no. of arguments --
-
-Warning: Wrong parameter count for each() in %s on line %d
-NULL
-Done

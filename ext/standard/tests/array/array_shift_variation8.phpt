@@ -48,14 +48,3 @@ a = 1, b = 2
 -- Reference first element before array_shift: --
 a = 2, b = 2
 Done
---UEXPECTF--
-*** Testing array_shift() : usage variations ***
-
--- Reference result of array_shift: --
-
-Strict Standards: Only variables should be assigned by reference in %s on line %d
-a = 1, b = 2
-
--- Reference first element before array_shift: --
-a = 2, b = 2
-Done

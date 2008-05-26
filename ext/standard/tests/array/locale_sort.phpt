@@ -28,36 +28,7 @@ $table = array("AB" => "Alberta",
 asort($table, SORT_LOCALE_STRING);
 var_dump($table);
 ?>
---EXPECT--
-array(13) {
-  ["AB"]=>
-  string(7) "Alberta"
-  ["BC"]=>
-  string(20) "Colombie-Britannique"
-  ["PE"]=>
-  string(21) "Île-du-Prince-Édouard"
-  ["MB"]=>
-  string(8) "Manitoba"
-  ["NB"]=>
-  string(17) "Nouveau-Brunswick"
-  ["NS"]=>
-  string(15) "Nouvelle-Écosse"
-  ["NU"]=>
-  string(7) "Nunavut"
-  ["ON"]=>
-  string(7) "Ontario"
-  ["QC"]=>
-  string(6) "Québec"
-  ["SK"]=>
-  string(12) "Saskatchewan"
-  ["NL"]=>
-  string(23) "Terre-Neuve-et-Labrador"
-  ["YT"]=>
-  string(19) "Territoire du Yukon"
-  ["NT"]=>
-  string(25) "Territoires du Nord-Ouest"
-}
---UEXPECTF--
+--EXPECTF--
 Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 array(13) {
   [u"AB"]=>

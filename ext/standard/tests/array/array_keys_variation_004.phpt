@@ -25,48 +25,7 @@ foreach ($values as $value){
 
 echo "Done\n";
 ?>
---EXPECTF--
-*** Testing array_keys() on all the types other than arrays ***
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
-array(1) {
-  [0]=>
-  int(1)
-}
-array(1) {
-  [0]=>
-  int(0)
-}
-array(1) {
-  [0]=>
-  int(-1)
-}
-array(1) {
-  [0]=>
-  int(2)
-}
-array(1) {
-  [0]=>
-  int(3)
-}
-array(1) {
-  [0]=>
-  string(3) "php"
-}
-array(1) {
-  [0]=>
-  string(0) ""
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_keys() on all the types other than arrays ***
 array(0) {
 }

@@ -25,38 +25,7 @@ var_dump(array_merge($array2, $array1));
 echo "Done";
 ?>
 
---EXPECTF--
-*** Testing array_merge() : basic functionality ***
-array(6) {
-  [0]=>
-  string(4) "zero"
-  [1]=>
-  string(3) "one"
-  [2]=>
-  string(3) "two"
-  ["a"]=>
-  int(1)
-  ["b"]=>
-  int(2)
-  ["c"]=>
-  int(3)
-}
-array(6) {
-  ["a"]=>
-  int(1)
-  ["b"]=>
-  int(2)
-  ["c"]=>
-  int(3)
-  [0]=>
-  string(4) "zero"
-  [1]=>
-  string(3) "one"
-  [2]=>
-  string(3) "two"
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_merge() : basic functionality ***
 array(6) {
   [0]=>

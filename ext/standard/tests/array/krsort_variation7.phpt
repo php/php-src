@@ -10,7 +10,7 @@ Test krsort() function : usage variations - sort array with diff. sub arrays
 /*
  * testing krsort() by providing arrays contains sub arrays for $array argument 
  * with flowing flag values
- *  1.flag  value as defualt
+ *  1.flag  value as default
  *  2.SORT_REGULAR - compare items normally
 */
 
@@ -40,7 +40,7 @@ echo "\n-- Testing krsort() by supplying various arrays containing sub arrays --
 foreach ($various_arrays as $array) {
  
   echo "\n-- Iteration $count --\n"; 
-  echo "- With defualt sort flag -\n";
+  echo "- With default sort flag -\n";
   $temp_array = $array;
   var_dump( krsort($temp_array) );
   var_dump($temp_array);
@@ -60,7 +60,7 @@ echo "Done\n";
 -- Testing krsort() by supplying various arrays containing sub arrays --
 
 -- Iteration 1 --
-- With defualt sort flag -
+- With default sort flag -
 bool(true)
 array(0) {
 }
@@ -70,7 +70,7 @@ array(0) {
 }
 
 -- Iteration 2 --
-- With defualt sort flag -
+- With default sort flag -
 bool(true)
 array(1) {
   [1]=>
@@ -86,7 +86,7 @@ array(1) {
 }
 
 -- Iteration 3 --
-- With defualt sort flag -
+- With default sort flag -
 bool(true)
 array(3) {
   [4]=>
@@ -118,128 +118,7 @@ array(3) {
 }
 
 -- Iteration 4 --
-- With defualt sort flag -
-bool(true)
-array(4) {
-  [3]=>
-  array(3) {
-    [0]=>
-    int(33)
-    [1]=>
-    int(-5)
-    [2]=>
-    int(6)
-  }
-  [2]=>
-  array(2) {
-    [0]=>
-    int(22)
-    [1]=>
-    int(-55)
-  }
-  [1]=>
-  array(1) {
-    [0]=>
-    int(11)
-  }
-  [0]=>
-  array(0) {
-  }
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(4) {
-  [3]=>
-  array(3) {
-    [0]=>
-    int(33)
-    [1]=>
-    int(-5)
-    [2]=>
-    int(6)
-  }
-  [2]=>
-  array(2) {
-    [0]=>
-    int(22)
-    [1]=>
-    int(-55)
-  }
-  [1]=>
-  array(1) {
-    [0]=>
-    int(11)
-  }
-  [0]=>
-  array(0) {
-  }
-}
-Done
---UEXPECTF--
-*** Testing krsort() : usage variations ***
-
--- Testing krsort() by supplying various arrays containing sub arrays --
-
--- Iteration 1 --
-- With defualt sort flag -
-bool(true)
-array(0) {
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(0) {
-}
-
--- Iteration 2 --
-- With defualt sort flag -
-bool(true)
-array(1) {
-  [1]=>
-  array(0) {
-  }
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(1) {
-  [1]=>
-  array(0) {
-  }
-}
-
--- Iteration 3 --
-- With defualt sort flag -
-bool(true)
-array(3) {
-  [4]=>
-  int(44)
-  [3]=>
-  array(2) {
-    [0]=>
-    int(64)
-    [1]=>
-    int(61)
-  }
-  [1]=>
-  int(11)
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(3) {
-  [4]=>
-  int(44)
-  [3]=>
-  array(2) {
-    [0]=>
-    int(64)
-    [1]=>
-    int(61)
-  }
-  [1]=>
-  int(11)
-}
-
--- Iteration 4 --
-- With defualt sort flag -
+- With default sort flag -
 bool(true)
 array(4) {
   [3]=>

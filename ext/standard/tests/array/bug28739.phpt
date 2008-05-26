@@ -18,45 +18,6 @@ echo "Now diffing:\n";
 print_r(array_udiff($p1,$p2, 'b'));
 ?>
 --EXPECT--
-string(1) "a"
-string(1) "a"
-Array
-(
-    [2] => p Object
-        (
-            [x] => 0
-        )
-
-    [1] => p Object
-        (
-            [x] => 1
-        )
-
-    [0] => p Object
-        (
-            [x] => 2
-        )
-
-)
-Now diffing:
-string(1) "b"
-string(1) "b"
-string(1) "b"
-string(1) "b"
-string(1) "b"
-string(1) "b"
-string(1) "b"
-string(1) "b"
-string(1) "b"
-Array
-(
-    [1] => p Object
-        (
-            [x] => 1
-        )
-
-)
---UEXPECT--
 unicode(1) "a"
 unicode(1) "a"
 Array

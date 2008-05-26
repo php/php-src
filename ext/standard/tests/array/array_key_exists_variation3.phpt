@@ -58,30 +58,3 @@ bool(false)
 Cast float to int:
 bool(true)
 Done
---UEXPECTF--
-*** Testing array_key_exists() : usage variations ***
-
--- Iteration 1 --
-Pass float as $key:
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
-Cast float to int:
-bool(true)
-
--- Iteration 1 --
-Pass float as $key:
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
-Cast float to int:
-bool(true)
-
--- Iteration 1 --
-Pass float as $key:
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
-Cast float to int:
-bool(true)
-Done

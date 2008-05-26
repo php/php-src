@@ -37,14 +37,3 @@ int(4)
 Warning: count(): recursion detected in %s on line %d
 int(12)
 Done
---UEXPECTF--
-*** Testing count() : usage variations ***
-
--- $mode not set: --
-int(4)
-
--- $mode = 1: --
-
-Warning: count(): recursion detected in %s on line %d
-int(12)
-Done

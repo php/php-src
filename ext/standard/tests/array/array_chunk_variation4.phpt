@@ -23,7 +23,7 @@ $input_array = array (
   "array3" =>  array(1) 
 );
 
-echo "\n-- Testing array_chunk() by supplying an array containing different sub arrays & 'preserve_key' as defualt --\n"; 
+echo "\n-- Testing array_chunk() by supplying an array containing different sub arrays & 'preserve_key' as default --\n"; 
 var_dump( array_chunk($input_array, $size) );
 
 echo "\n-- Testing array_chunk() by supplying an array containing different sub arrays & 'preserve_key' = true --\n"; 
@@ -37,91 +37,7 @@ echo "Done";
 --EXPECTF--
 *** Testing array_chunk() : usage variations ***
 
--- Testing array_chunk() by supplying an array containing different sub arrays & 'preserve_key' as defualt --
-array(2) {
-  [0]=>
-  array(2) {
-    [0]=>
-    array(0) {
-    }
-    [1]=>
-    array(3) {
-      [0]=>
-      int(1)
-      [1]=>
-      int(2)
-      [2]=>
-      int(3)
-    }
-  }
-  [1]=>
-  array(1) {
-    [0]=>
-    array(1) {
-      [0]=>
-      int(1)
-    }
-  }
-}
-
--- Testing array_chunk() by supplying an array containing different sub arrays & 'preserve_key' = true --
-array(2) {
-  [0]=>
-  array(2) {
-    ["array1"]=>
-    array(0) {
-    }
-    ["array2"]=>
-    array(3) {
-      [0]=>
-      int(1)
-      [1]=>
-      int(2)
-      [2]=>
-      int(3)
-    }
-  }
-  [1]=>
-  array(1) {
-    ["array3"]=>
-    array(1) {
-      [0]=>
-      int(1)
-    }
-  }
-}
-
--- Testing array_chunk() by supplying an array containing different sub arrays & 'preserve_key' = false --
-array(2) {
-  [0]=>
-  array(2) {
-    [0]=>
-    array(0) {
-    }
-    [1]=>
-    array(3) {
-      [0]=>
-      int(1)
-      [1]=>
-      int(2)
-      [2]=>
-      int(3)
-    }
-  }
-  [1]=>
-  array(1) {
-    [0]=>
-    array(1) {
-      [0]=>
-      int(1)
-    }
-  }
-}
-Done
---UEXPECTF--
-*** Testing array_chunk() : usage variations ***
-
--- Testing array_chunk() by supplying an array containing different sub arrays & 'preserve_key' as defualt --
+-- Testing array_chunk() by supplying an array containing different sub arrays & 'preserve_key' as default --
 array(2) {
   [0]=>
   array(2) {

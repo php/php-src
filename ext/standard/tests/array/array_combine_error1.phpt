@@ -46,21 +46,3 @@ NULL
 Warning: array_combine() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing array_combine() : error conditions ***
-
--- Testing array_combine() function with Zero arguments --
-
-Warning: array_combine() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
--- Testing array_combine() function with more than expected no. of arguments --
-
-Warning: array_combine() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
--- Testing array_combine() function with less than expected no. of arguments --
-
-Warning: array_combine() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-Done

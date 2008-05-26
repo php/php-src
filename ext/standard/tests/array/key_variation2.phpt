@@ -104,56 +104,7 @@ foreach($inputs as $key => $input) {
 };
 ?>
 ===DONE===
---EXPECTF--
-*** Testing key() : usage variations ***
-
--- Iteration 1 : int data --
-int(0)
-int(1)
-int(12345)
-int(-2345)
-
--- Iteration 2 : float data --
-int(10)
-int(-10)
-int(0)
-
--- Iteration 3 : extreme floats data --
-int(12345678)
-int(0)
-
--- Iteration 4 : null uppercase data --
-string(0) ""
-
--- Iteration 5 : null lowercase data --
-string(0) ""
-
--- Iteration 6 : bool lowercase data --
-int(1)
-int(0)
-
--- Iteration 7 : bool uppercase data --
-int(1)
-int(0)
-
--- Iteration 8 : empty double quotes data --
-string(0) ""
-
--- Iteration 9 : empty single quotes data --
-string(0) ""
-
--- Iteration 10 : string data --
-string(7) "stringd"
-string(7) "strings"
-string(11) "hello world"
-
--- Iteration 11 : undefined data --
-string(0) ""
-
--- Iteration 12 : unset data --
-string(0) ""
-===DONE===
---UEXPECTF--
+--EXPECT--
 *** Testing key() : usage variations ***
 
 -- Iteration 1 : int data --

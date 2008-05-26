@@ -44,21 +44,3 @@ NULL
 Warning: array_chunk() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing array_chunk() : error conditions ***
-
--- Testing array_chunk() function with zero arguments --
-
-Warning: array_chunk() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
--- Testing array_chunk() function with more than expected no. of arguments --
-
-Warning: array_chunk() expects at most 3 parameters, 4 given in %s on line %d
-NULL
-
--- Testing array_chunk() function with less than expected no. of arguments --
-
-Warning: array_chunk() expects at least 2 parameters, 1 given in %s on line %d
-NULL
-Done

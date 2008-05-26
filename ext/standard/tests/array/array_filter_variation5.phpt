@@ -65,49 +65,7 @@ var_dump( array_filter($input, 'always_false') );
 
 echo "Done"
 ?>
---EXPECTF--
-*** Testing array_filter() : usage variations - different false elements in 'input' ***
-array(0) {
-}
-array(16) {
-  [0]=>
-  bool(false)
-  [1]=>
-  bool(false)
-  [2]=>
-  string(0) ""
-  [3]=>
-  string(0) ""
-  [4]=>
-  int(0)
-  [5]=>
-  float(0)
-  [6]=>
-  NULL
-  [7]=>
-  NULL
-  [8]=>
-  string(1) "0"
-  [9]=>
-  string(1) "0"
-  [10]=>
-  array(0) {
-  }
-  [11]=>
-  bool(false)
-  [12]=>
-  bool(false)
-  [13]=>
-  string(0) ""
-  [14]=>
-  NULL
-  [15]=>
-  NULL
-}
-array(0) {
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_filter() : usage variations - different false elements in 'input' ***
 array(0) {
 }

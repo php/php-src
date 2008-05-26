@@ -92,63 +92,7 @@ var_dump($array_arg);
 
 echo "Done"
 ?>
---EXPECTF--
-*** Testing uasort() : object functionality ***
-bool(true)
-array(4) {
-  [1]=>
-  object(SimpleClass1)#2 (1) {
-    ["int_value":"SimpleClass1":private]=>
-    int(1)
-  }
-  [0]=>
-  object(SimpleClass1)#1 (1) {
-    ["int_value":"SimpleClass1":private]=>
-    int(10)
-  }
-  [3]=>
-  object(SimpleClass1)#4 (1) {
-    ["int_value":"SimpleClass1":private]=>
-    int(50)
-  }
-  [2]=>
-  object(SimpleClass1)#3 (1) {
-    ["int_value":"SimpleClass1":private]=>
-    int(100)
-  }
-}
-bool(true)
-array(3) {
-  [0]=>
-  object(SimpleClass2)#5 (3) {
-    ["int_value":"SimpleClass2":private]=>
-    int(2)
-    ["float_value":protected]=>
-    float(3.4)
-    ["string_value"]=>
-    string(5) "mango"
-  }
-  [2]=>
-  object(SimpleClass2)#7 (3) {
-    ["int_value":"SimpleClass2":private]=>
-    int(5)
-    ["float_value":protected]=>
-    float(2.5)
-    ["string_value"]=>
-    string(6) "orange"
-  }
-  [1]=>
-  object(SimpleClass2)#6 (3) {
-    ["int_value":"SimpleClass2":private]=>
-    int(10)
-    ["float_value":protected]=>
-    float(1.2)
-    ["string_value"]=>
-    string(5) "apple"
-  }
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing uasort() : object functionality ***
 bool(true)
 array(4) {

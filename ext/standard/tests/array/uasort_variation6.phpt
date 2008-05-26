@@ -51,71 +51,7 @@ var_dump($temp_array);
 
 echo "Done"
 ?>
---EXPECTF--
-*** Testing uasort() : Array with different subarrays ***
-bool(true)
-array(8) {
-  [2]=>
-  array(0) {
-  }
-  [4]=>
-  array(1) {
-    [0]=>
-    int(-1)
-  }
-  [6]=>
-  array(1) {
-    [0]=>
-    string(0) ""
-  }
-  [3]=>
-  array(1) {
-    [0]=>
-    int(0)
-  }
-  [1]=>
-  array(1) {
-    [0]=>
-    int(100)
-  }
-  [0]=>
-  array(3) {
-    [0]=>
-    int(2)
-    [1]=>
-    int(10)
-    [2]=>
-    int(-1)
-  }
-  [5]=>
-  array(5) {
-    [0]=>
-    int(-9)
-    [1]=>
-    int(34)
-    [2]=>
-    int(54)
-    [3]=>
-    int(0)
-    [4]=>
-    int(20)
-  }
-  [7]=>
-  array(5) {
-    [0]=>
-    string(5) "apple"
-    [1]=>
-    string(5) "Apple"
-    [2]=>
-    string(5) "APPLE"
-    [3]=>
-    string(5) "aPPle"
-    [4]=>
-    string(5) "aPpLe"
-  }
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing uasort() : Array with different subarrays ***
 bool(true)
 array(8) {

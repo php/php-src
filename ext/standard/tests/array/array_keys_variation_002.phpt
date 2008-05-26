@@ -25,32 +25,7 @@ var_dump(array_keys(array()));  // null array
 
 echo "Done\n";
 ?>
---EXPECTF--
-*** Testing array_keys() on range of values ***
-array(4) {
-  [0]=>
-  int(2147483647)
-  [1]=>
-  int(-2147483648)
-  [2]=>
-  int(-2147483647)
-  [3]=>
-  int(0)
-}
-
-*** Testing array_keys() on an array created on the fly ***
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
-array(0) {
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_keys() on range of values ***
 array(4) {
   [0]=>

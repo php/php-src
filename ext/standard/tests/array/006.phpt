@@ -27,30 +27,6 @@ var_dump($c);
 fubar
 array(3) {
   [0]=>
-  string(3) "foo"
-  [1]=>
-  string(3) "bar"
-  [2]=>
-  string(6) "foobar"
-}
-fubar
-array(2) {
-  [3]=>
-  string(3) "foo"
-  [4]=>
-  string(3) "bar"
-}
-fubar
-array(2) {
-  ["a"]=>
-  string(3) "foo"
-  ["b"]=>
-  string(3) "bar"
-}
---UEXPECT--
-fubar
-array(3) {
-  [0]=>
   unicode(3) "foo"
   [1]=>
   unicode(3) "bar"

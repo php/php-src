@@ -97,46 +97,7 @@ for($i = 0; $i < count($objects); $i++)
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing sizeof() : object functionality ***
---- Testing sizeof() with objects which doesn't implement Countable interface ---
--- Iteration 1 --
-Default Mode: int(1)
-
-COUNT_NORMAL Mode: int(1)
-
-COUNT_RECURSIVE Mode: int(1)
-
--- Iteration 2 --
-Default Mode: int(1)
-
-COUNT_NORMAL Mode: int(1)
-
-COUNT_RECURSIVE Mode: int(1)
-
--- Iteration 3 --
-Default Mode: int(1)
-
-COUNT_NORMAL Mode: int(1)
-
-COUNT_RECURSIVE Mode: int(1)
-
--- Iteration 4 --
-Default Mode: int(1)
-
-COUNT_NORMAL Mode: int(1)
-
-COUNT_RECURSIVE Mode: int(1)
-
--- Iteration 5 --
-Default Mode: int(1)
-
-COUNT_NORMAL Mode: int(1)
-
-COUNT_RECURSIVE Mode: int(1)
-
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing sizeof() : object functionality ***
 --- Testing sizeof() with objects which doesn't implement Countable interface ---
 -- Iteration 1 --

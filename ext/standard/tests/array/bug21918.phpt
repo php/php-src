@@ -33,29 +33,6 @@ echo "==Done==\n";
 --EXPECT--
 ==Mixed==
 int(-1)
-string(1) "a"
-int(-2)
-string(1) "b"
-int(3)
-string(1) "c"
-int(4)
-string(1) "d"
-int(5)
-string(1) "e"
-int(6001)
-string(1) "f"
-string(2) "07"
-string(1) "g"
-==Normal==
-int(0)
-string(1) "a"
-==Negative==
-int(-2)
-string(1) "a"
-==Done==
---UEXPECT--
-==Mixed==
-int(-1)
 unicode(1) "a"
 int(-2)
 unicode(1) "b"

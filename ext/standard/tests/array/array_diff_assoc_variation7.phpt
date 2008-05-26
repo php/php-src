@@ -47,59 +47,8 @@ var_dump(array_diff_assoc($arr2, $arr1));
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 
-*** Testing array_diff_assoc() : usage variations ***
--- Results when $a = a: --
-array(3) {
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-  [3]=>
-  string(1) "a"
-}
-array(3) {
-  ["a"]=>
-  int(1)
-  ["b"]=>
-  int(2)
-  ["c"]=>
-  int(3)
-}
--- Results when $a has been changed to 4: --
-array(4) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-  [3]=>
-  string(1) "a"
-}
-array(4) {
-  ["a"]=>
-  int(1)
-  ["b"]=>
-  int(2)
-  ["c"]=>
-  int(3)
-  [0]=>
-  &int(4)
-}
--- Results when $arr2 is referenced to $arr1 --
-array(0) {
-}
-array(0) {
-}
--- Results when $arr1 is changed --
-array(0) {
-}
-array(0) {
-}
-Done
---UEXPECTF--
 *** Testing array_diff_assoc() : usage variations ***
 -- Results when $a = a: --
 array(3) {

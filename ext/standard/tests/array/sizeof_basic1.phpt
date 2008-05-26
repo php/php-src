@@ -42,23 +42,7 @@ var_dump( sizeof($floatval, COUNT_RECURSIVE) );
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing sizeof() : basic functionality ***
--- Testing sizeof() for integer type in default, COUNT_NORMAL and COUNT_RECURSIVE modes --
-default mode: int(1)
-
-COUNT_NORMAL mode: int(1)
-
-COUNT_RECURSIVE mode: int(1)
-
--- Testing sizeof() for float  type in default, COUNT_NORMAL and COUNT_RECURSIVE modes --
-default mode: int(1)
-
-COUNT_NORMAL mode: int(1)
-
-COUNT_RECURSIVE mode: int(1)
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing sizeof() : basic functionality ***
 -- Testing sizeof() for integer type in default, COUNT_NORMAL and COUNT_RECURSIVE modes --
 default mode: int(1)

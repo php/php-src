@@ -29,22 +29,7 @@ var_dump(array_diff($array_assoc, $array_index));
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing array_diff() : usage variations ***
-array(1) {
-  [0]=>
-  string(1) "d"
-}
-array(3) {
-  [0]=>
-  string(1) "a"
-  ["b"]=>
-  string(1) "3"
-  ["c"]=>
-  int(2)
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_diff() : usage variations ***
 array(1) {
   [0]=>

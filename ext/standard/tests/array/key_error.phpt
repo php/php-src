@@ -37,16 +37,3 @@ NULL
 Warning: key() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 ===DONE===
---UEXPECTF--
-*** Testing key() : error conditions ***
-
--- Testing key() function with Zero arguments --
-
-Warning: key() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
--- Testing key() function with more than expected no. of arguments --
-
-Warning: key() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-===DONE===

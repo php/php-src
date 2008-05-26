@@ -17,35 +17,6 @@ var_dump($result);
 array(4) {
   [0]=>
   array(2) {
-    ["b"]=>
-    string(5) "brown"
-    ["c"]=>
-    string(4) "blue"
-  }
-  [1]=>
-  array(2) {
-    ["b"]=>
-    string(5) "brown"
-    ["c"]=>
-    string(4) "blue"
-  }
-  [2]=>
-  array(1) {
-    [2]=>
-    bool(true)
-  }
-  [3]=>
-  array(2) {
-    ["b"]=>
-    string(5) "brown"
-    ["c"]=>
-    string(4) "blue"
-  }
-}
---UEXPECTF--
-array(4) {
-  [0]=>
-  array(2) {
     [u"b"]=>
     unicode(5) "brown"
     [u"c"]=>

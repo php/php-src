@@ -118,7 +118,7 @@ var_dump(array_key_exists("var", $key_check_obj->arr)); //found,  key is in memb
 var_dump( array_key_exists($key_check_obj, $key_check_obj) );
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 *** Testing basic functionalities ***
 -- Iteration 1 --
 bool(true)

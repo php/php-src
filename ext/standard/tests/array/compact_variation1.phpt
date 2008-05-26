@@ -34,33 +34,6 @@ echo "Done";
 
 Warning: compact(): recursion detected in %s on line %d
 array(1) {
-  ["a"]=>
-  int(1)
-}
-
-Warning: compact(): recursion detected in %s on line %d
-
-Warning: compact(): recursion detected in %s on line %d
-
-Warning: compact(): recursion detected in %s on line %d
-
-Warning: compact(): recursion detected in %s on line %d
-array(2) {
-  ["a"]=>
-  int(1)
-  ["b"]=>
-  int(2)
-}
-array(1) {
-  ["c"]=>
-  int(3)
-}
-Done
---UEXPECTF--
-*** Testing compact() : usage variations  - arrays containg references ***
-
-Warning: compact(): recursion detected in %s on line %d
-array(1) {
   [u"a"]=>
   int(1)
 }

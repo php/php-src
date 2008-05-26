@@ -42,16 +42,3 @@ NULL
 Warning: array_key_exists() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing array_key_exists() : error conditions ***
-
--- Testing array_key_exists() function with more than expected no. of arguments --
-
-Warning: array_key_exists() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
--- Testing array_key_exists() function with less than expected no. of arguments --
-
-Warning: array_key_exists() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-Done

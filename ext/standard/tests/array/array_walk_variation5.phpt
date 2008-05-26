@@ -40,29 +40,7 @@ var_dump( array_walk($input, "callback"));
 
 echo "Done"
 ?>
---EXPECTF--
-*** Testing array_walk() : array with references ***
-int(0)
-int(10)
-
-int(1)
-int(-20)
-
-int(2)
-int(-35)
-
-int(3)
-int(10)
-
-int(4)
-int(0)
-
-int(5)
-int(50)
-
-bool(true)
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_walk() : array with references ***
 int(0)
 int(10)

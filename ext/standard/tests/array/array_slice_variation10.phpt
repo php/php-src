@@ -26,23 +26,7 @@ echo key($input) . " => " . current ($input) . "\n";
 echo "Done";
 ?>
 
---EXPECTF--
-*** Testing array_slice() : usage variations ***
-
--- Call array_slice() --
-array(2) {
-  [0]=>
-  string(12) "twenty-three"
-  [1]=>
-  string(4) "zero"
-}
--- Position of Internal Pointer in Result: --
-0 => twenty-three
-
--- Position of Internal Pointer in Original Array: --
-one => un
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_slice() : usage variations ***
 
 -- Call array_slice() --

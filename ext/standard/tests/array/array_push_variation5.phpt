@@ -24,18 +24,7 @@ echo key($stack) . " => " . current ($stack) . "\n";
 
 echo "Done";
 ?>
---EXPECTF--
-
-*** Testing array_push() : usage variations ***
-
--- Call array_push() --
-int(3)
-
--- Position of Internal Pointer in Original Array: --
-one => un
-Done
-
---UEXPECTF--
+--EXPECT--
 
 *** Testing array_push() : usage variations ***
 

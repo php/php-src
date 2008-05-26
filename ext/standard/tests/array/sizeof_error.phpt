@@ -39,18 +39,3 @@ NULL
 Warning: sizeof() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing sizeof() : error conditions ***
--- Testing sizeof() with zero arguments --
-
-Warning: sizeof() expects at least 1 parameter, 0 given in %s on line %d
-NULL
--- Testing sizeof() function with more than two arguments under COUNT_NORMAL mode --
-
-Warning: sizeof() expects at most 2 parameters, 3 given in %s on line %d
-NULL
--- Testing sizeof() function with more than two arguments under COUNT_RECURSIVE mode --
-
-Warning: sizeof() expects at most 2 parameters, 3 given in %s on line %d
-NULL
-Done

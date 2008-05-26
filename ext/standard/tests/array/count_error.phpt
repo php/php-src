@@ -39,16 +39,3 @@ NULL
 Warning: count() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing count() : error conditions ***
-
--- Testing count() function with Zero arguments --
-
-Warning: count() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
--- Testing count() function with more than expected no. of arguments --
-
-Warning: count() expects at most 2 parameters, 3 given in %s on line %d
-NULL
-Done

@@ -28,11 +28,3 @@ echo "Done";
 Warning: Wrong parameter count for array_push() in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing array_push() : error conditions ***
-
--- Testing array_push() function with less than expected no. of arguments --
-
-Warning: Wrong parameter count for array_push() in %s on line %d
-NULL
-Done

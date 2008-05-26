@@ -60,39 +60,6 @@ bool(false)
 $key = var3:
 bool(false)
 $class1:
-object(myClass)#%d (3) {
-  ["var1"]=>
-  string(1) "a"
-  ["var2":protected]=>
-  string(1) "b"
-  ["var3":"myClass":private]=>
-  NULL
-}
-
--- Assign a value to $class2->var3 --
-$key = var3:
-bool(false)
-$class2:
-object(myClass)#%d (3) {
-  ["var1"]=>
-  string(1) "x"
-  ["var2":protected]=>
-  string(1) "y"
-  ["var3":"myClass":private]=>
-  string(1) "z"
-}
-Done
---UEXPECTF--
-*** Testing array_key_exists() : object functionality ***
-
--- Do not assign a value to $class1->var3 --
-$key = var1:
-bool(true)
-$key = var2:
-bool(false)
-$key = var3:
-bool(false)
-$class1:
 object(myClass)#1 (3) {
   [u"var1"]=>
   unicode(1) "a"

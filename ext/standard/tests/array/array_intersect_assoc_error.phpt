@@ -34,17 +34,3 @@ NULL
 Warning: array_intersect_assoc(): at least 2 parameters are required, 1 given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing array_intersect_assoc() : error conditions ***
-
--- Testing array_intersect_assoc() function with Zero arguments --
-
-Warning: array_intersect_assoc(): at least 2 parameters are required, 0 given in %s on line %d
-NULL
-
--- Testing array_intersect_assoc() function with less than expected no. of arguments --
-
-Warning: array_intersect_assoc(): at least 2 parameters are required, 1 given in %s on line %d
-NULL
-Done
-

@@ -62,7 +62,7 @@ function comp_func($a, $b) {
 
 }
 ?>
---EXPECTF--
+--EXPECT--
 ------ Test 1 --------
 array(4) {
   [1]=>

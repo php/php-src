@@ -37,16 +37,3 @@ NULL
 Warning: reset() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 ===DONE===
---UEXPECTF--
-*** Testing reset() : error conditions ***
-
--- Testing reset() function with Zero arguments --
-
-Warning: reset() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
--- Testing reset() function with more than expected no. of arguments --
-
-Warning: reset() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-===DONE===

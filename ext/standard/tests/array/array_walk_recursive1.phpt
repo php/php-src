@@ -30,31 +30,7 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: array_walk_recursive() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: array_walk_recursive() expects parameter 2 to be a valid callback, no array or string given in %s on line %d
-NULL
-
-Warning: array_walk_recursive() expects parameter 2 to be a valid callback, function '' not found or invalid function name in %s on line %d
-NULL
-int(1)
-int(0)
-string(4) "data"
-int(2)
-int(1)
-string(4) "data"
-int(2)
-int(0)
-string(4) "data"
-int(3)
-int(1)
-string(4) "data"
-bool(true)
-string(4) "data"
-Done
---UEXPECTF--
+--EXPECTF--
 Warning: array_walk_recursive() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 

@@ -27,48 +27,7 @@ var_dump($array);
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing array_push() : usage variations ***
-
--- Pass array as $var argument --
-int(4)
-array(4) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-  [3]=>
-  array(2) {
-    [0]=>
-    string(3) "one"
-    [1]=>
-    string(3) "two"
-  }
-}
-
--- Pass sub-array as $stack argument --
-int(3)
-array(4) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-  [3]=>
-  array(3) {
-    [0]=>
-    string(3) "one"
-    [1]=>
-    string(3) "two"
-    [2]=>
-    string(1) "a"
-  }
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_push() : usage variations ***
 
 -- Pass array as $var argument --

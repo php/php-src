@@ -28,22 +28,7 @@ echo "\n-- Call to reset() --\n";
 var_dump(reset($array));
 ?>
 ===DONE===
---EXPECTF--
-*** Testing reset() : basic functionality ***
-
--- Initial Position: --
-0 => zero
-
--- Call to next() --
-string(3) "one"
-
--- Current Position: --
-1 => one
-
--- Call to reset() --
-string(4) "zero"
-===DONE===
---UEXPECTF--
+--EXPECT--
 *** Testing reset() : basic functionality ***
 
 -- Initial Position: --

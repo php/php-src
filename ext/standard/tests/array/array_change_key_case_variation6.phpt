@@ -31,50 +31,6 @@ echo "Done";
 
 -- Pass a two-dimensional array as $input argument --
 array(3) {
-  ["ENGLISH"]=>
-  array(3) {
-    ["one"]=>
-    int(1)
-    ["two"]=>
-    int(2)
-    ["three"]=>
-    int(3)
-  }
-  ["FRENCH"]=>
-  array(3) {
-    ["un"]=>
-    int(1)
-    ["deux"]=>
-    int(2)
-    ["trois"]=>
-    int(3)
-  }
-  ["GERMAN"]=>
-  array(3) {
-    ["eins"]=>
-    int(1)
-    ["zwei"]=>
-    int(2)
-    ["drei"]=>
-    int(3)
-  }
-}
-
--- Pass a sub-arry as $input argument --
-array(3) {
-  ["ONE"]=>
-  int(1)
-  ["TWO"]=>
-  int(2)
-  ["THREE"]=>
-  int(3)
-}
-Done
---UEXPECTF--
-*** Testing array_change_key_case() : usage variations ***
-
--- Pass a two-dimensional array as $input argument --
-array(3) {
   [u"ENGLISH"]=>
   array(3) {
     [u"one"]=>

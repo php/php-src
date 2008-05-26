@@ -30,39 +30,6 @@ echo "Done";
 array(4) {
   [0]=>
   float(13.33)
-  ["string"]=>
-  string(4) "blue"
-  [1]=>
-  string(6) "number"
-  ["a"]=>
-  string(5) "hello"
-}
-array(4) {
-  [10]=>
-  float(13.33)
-  ["string"]=>
-  string(4) "blue"
-  [123]=>
-  string(6) "number"
-  ["a"]=>
-  string(5) "hello"
-}
-array(4) {
-  [0]=>
-  float(13.33)
-  ["string"]=>
-  string(4) "blue"
-  [1]=>
-  string(6) "number"
-  ["a"]=>
-  string(5) "hello"
-}
-Done
---UEXPECTF--
-*** Testing array_reverse() : basic functionality ***
-array(4) {
-  [0]=>
-  float(13.33)
   [u"string"]=>
   unicode(4) "blue"
   [1]=>

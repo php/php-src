@@ -57,59 +57,6 @@ array(2) {
 array(2) {
   [0]=>
   array(2) {
-    ["one"]=>
-    &int(1)
-    ["two"]=>
-    &int(2)
-  }
-  [1]=>
-  array(2) {
-    ["three"]=>
-    &int(3)
-    ["four"]=>
-    &int(4)
-  }
-}
-array(2) {
-  [0]=>
-  array(2) {
-    [0]=>
-    &int(1)
-    [1]=>
-    &int(2)
-  }
-  [1]=>
-  array(2) {
-    [0]=>
-    &int(3)
-    [1]=>
-    &int(4)
-  }
-}
-Done
---UEXPECTF--
-*** Testing array_chunk() : usage variations ***
-
--- Testing array_chunk(), input array containing references 
-array(2) {
-  [0]=>
-  array(2) {
-    [0]=>
-    &int(1)
-    [1]=>
-    &int(2)
-  }
-  [1]=>
-  array(2) {
-    [0]=>
-    &int(3)
-    [1]=>
-    &int(4)
-  }
-}
-array(2) {
-  [0]=>
-  array(2) {
     [u"one"]=>
     &int(1)
     [u"two"]=>

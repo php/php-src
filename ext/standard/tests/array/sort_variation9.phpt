@@ -1,5 +1,5 @@
 --TEST--
-Test sort() function : usage variations - sort diff. associative arrays, 'sort_flags' as defualt/SORT_REGULAR
+Test sort() function : usage variations - sort diff. associative arrays, 'sort_flags' as default/SORT_REGULAR
 --FILE--
 <?php
 /* Prototype  : bool sort ( array &$array [, int $sort_flags] )
@@ -11,7 +11,7 @@ Test sort() function : usage variations - sort diff. associative arrays, 'sort_f
 /*
  * Testing sort() by providing arrays  with key values for $array argument
  * with following flag values.
- * 1.flag value as defualt
+ * 1.flag value as default
  * 2.SORT_REGULAR - compare items normally
  * To test the new keys for the elements in the sorted array.
  */
@@ -38,7 +38,7 @@ echo "\n-- Testing sort() by supplying various arrays with key values --\n";
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
-  echo "- With Defualt sort flag -\n";
+  echo "- With default sort flag -\n";
   $temp_array = $array;
   var_dump(sort($temp_array) );
   var_dump($temp_array);
@@ -52,13 +52,13 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sort() : usage variations ***
 
 -- Testing sort() by supplying various arrays with key values --
 
 -- Iteration 1 --
-- With Defualt sort flag -
+- With default sort flag -
 bool(true)
 array(5) {
   [0]=>
@@ -88,212 +88,7 @@ array(5) {
 }
 
 -- Iteration 2 --
-- With Defualt sort flag -
-bool(true)
-array(3) {
-  [0]=>
-  array(3) {
-    [0]=>
-    string(5) "first"
-    [5]=>
-    string(6) "second"
-    [6]=>
-    string(5) "third"
-  }
-  [1]=>
-  array(3) {
-    ["a"]=>
-    string(6) "orange"
-    ["b"]=>
-    string(6) "banana"
-    ["c"]=>
-    string(5) "apple"
-  }
-  [2]=>
-  array(6) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-    [3]=>
-    int(4)
-    [4]=>
-    int(5)
-    [5]=>
-    int(6)
-  }
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(3) {
-  [0]=>
-  array(3) {
-    [0]=>
-    string(5) "first"
-    [5]=>
-    string(6) "second"
-    [6]=>
-    string(5) "third"
-  }
-  [1]=>
-  array(3) {
-    ["a"]=>
-    string(6) "orange"
-    ["b"]=>
-    string(6) "banana"
-    ["c"]=>
-    string(5) "apple"
-  }
-  [2]=>
-  array(6) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-    [3]=>
-    int(4)
-    [4]=>
-    int(5)
-    [5]=>
-    int(6)
-  }
-}
-
--- Iteration 3 --
-- With Defualt sort flag -
-bool(true)
-array(6) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(1)
-  [2]=>
-  int(1)
-  [3]=>
-  int(1)
-  [4]=>
-  int(13)
-  [5]=>
-  int(19)
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(6) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(1)
-  [2]=>
-  int(1)
-  [3]=>
-  int(1)
-  [4]=>
-  int(13)
-  [5]=>
-  int(19)
-}
-
--- Iteration 4 --
-- With Defualt sort flag -
-bool(true)
-array(2) {
-  [0]=>
-  string(3) "baz"
-  [1]=>
-  int(1)
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(2) {
-  [0]=>
-  string(3) "baz"
-  [1]=>
-  int(1)
-}
-
--- Iteration 5 --
-- With Defualt sort flag -
-bool(true)
-array(4) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(5)
-  [2]=>
-  array(1) {
-    ["g"]=>
-    int(4)
-  }
-  [3]=>
-  array(2) {
-    ["e"]=>
-    int(2)
-    ["f"]=>
-    int(3)
-  }
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(4) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(5)
-  [2]=>
-  array(1) {
-    ["g"]=>
-    int(4)
-  }
-  [3]=>
-  array(2) {
-    ["e"]=>
-    int(2)
-    ["f"]=>
-    int(3)
-  }
-}
-Done
---UEXPECTF--
-*** Testing sort() : usage variations ***
-
--- Testing sort() by supplying various arrays with key values --
-
--- Iteration 1 --
-- With Defualt sort flag -
-bool(true)
-array(5) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-  [3]=>
-  int(55)
-  [4]=>
-  int(66)
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(5) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(22)
-  [2]=>
-  int(33)
-  [3]=>
-  int(55)
-  [4]=>
-  int(66)
-}
-
--- Iteration 2 --
-- With Defualt sort flag -
+- With default sort flag -
 bool(true)
 array(3) {
   [0]=>
@@ -369,7 +164,7 @@ array(3) {
 }
 
 -- Iteration 3 --
-- With Defualt sort flag -
+- With default sort flag -
 bool(true)
 array(6) {
   [0]=>
@@ -403,7 +198,7 @@ array(6) {
 }
 
 -- Iteration 4 --
-- With Defualt sort flag -
+- With default sort flag -
 bool(true)
 array(2) {
   [0]=>
@@ -421,7 +216,7 @@ array(2) {
 }
 
 -- Iteration 5 --
-- With Defualt sort flag -
+- With default sort flag -
 bool(true)
 array(4) {
   [0]=>

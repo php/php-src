@@ -41,39 +41,6 @@ Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 -- $input is an array made up of referenced variables: --
 array(3) {
   [0]=>
-  &string(3) "one"
-  [1]=>
-  &string(3) "two"
-  [2]=>
-  &string(5) "three"
-}
-Change $val2 and check result of array_values():
-array(3) {
-  [0]=>
-  &string(3) "one"
-  [1]=>
-  &string(4) "deux"
-  [2]=>
-  &string(5) "three"
-}
-
--- Pass $input argument by reference --
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
-Done
---UEXPECTF--
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
-*** Testing array_values() : usage variations ***
-
--- $input is an array made up of referenced variables: --
-array(3) {
-  [0]=>
   &unicode(3) "one"
   [1]=>
   &unicode(3) "two"

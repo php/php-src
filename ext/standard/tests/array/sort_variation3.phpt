@@ -11,7 +11,7 @@ Test sort() function : usage variations - sort integer/float values
 /*
  * Testing sort() by providing different integer/float value arrays for $array argument
  * with following flag values
- * 1. flag  value as defualt
+ * 1. flag  value as default
  * 2. SORT_REGULAR - compare items normally
  * 3. SORT_NUMERIC - compare items numerically
  * 4. SORT_STRING - compare items as strings
@@ -44,7 +44,7 @@ echo "\n-- Testing sort() by supplying various integer/float arrays --\n";
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
-  echo "- With Defualt sort flag -\n"; 
+  echo "- With default sort flag -\n"; 
   $temp_array = $array; 
   var_dump(sort($temp_array) );
   var_dump($temp_array);
@@ -67,7 +67,7 @@ echo "Done\n";
 -- Testing sort() by supplying various integer/float arrays --
 
 -- Iteration 1 --
-- With Defualt sort flag -
+- With default sort flag -
 bool(true)
 array(9) {
   [0]=>
@@ -135,7 +135,7 @@ array(9) {
 }
 
 -- Iteration 2 --
-- With Defualt sort flag -
+- With default sort flag -
 bool(true)
 array(7) {
   [0]=>
@@ -191,7 +191,7 @@ array(7) {
 }
 
 -- Iteration 3 --
-- With Defualt sort flag -
+- With default sort flag -
 bool(true)
 array(11) {
   [0]=>
@@ -271,272 +271,7 @@ array(11) {
 }
 
 -- Iteration 4 --
-- With Defualt sort flag -
-bool(true)
-array(7) {
-  [0]=>
-  %s(-2147483649)
-  [1]=>
-  %s(-2147483648)
-  [2]=>
-  int(-2147483647)
-  [3]=>
-  int(0)
-  [4]=>
-  int(0)
-  [5]=>
-  int(2147483647)
-  [6]=>
-  %s(2147483648)
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(7) {
-  [0]=>
-  %s(-2147483649)
-  [1]=>
-  %s(-2147483648)
-  [2]=>
-  int(-2147483647)
-  [3]=>
-  int(0)
-  [4]=>
-  int(0)
-  [5]=>
-  int(2147483647)
-  [6]=>
-  %s(2147483648)
-}
-- Sort flag = SORT_NUMERIC -
-bool(true)
-array(7) {
-  [0]=>
-  %s(-2147483649)
-  [1]=>
-  %s(-2147483648)
-  [2]=>
-  int(-2147483647)
-  [3]=>
-  int(0)
-  [4]=>
-  int(0)
-  [5]=>
-  int(2147483647)
-  [6]=>
-  %s(2147483648)
-}
-Done
---UEXPECTF--
-*** Testing sort() : usage variations ***
-
--- Testing sort() by supplying various integer/float arrays --
-
--- Iteration 1 --
-- With Defualt sort flag -
-bool(true)
-array(9) {
-  [0]=>
-  int(-41)
-  [1]=>
-  int(-31)
-  [2]=>
-  int(-21)
-  [3]=>
-  int(-11)
-  [4]=>
-  int(0)
-  [5]=>
-  int(11)
-  [6]=>
-  int(21)
-  [7]=>
-  int(31)
-  [8]=>
-  int(41)
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(9) {
-  [0]=>
-  int(-41)
-  [1]=>
-  int(-31)
-  [2]=>
-  int(-21)
-  [3]=>
-  int(-11)
-  [4]=>
-  int(0)
-  [5]=>
-  int(11)
-  [6]=>
-  int(21)
-  [7]=>
-  int(31)
-  [8]=>
-  int(41)
-}
-- Sort flag = SORT_NUMERIC -
-bool(true)
-array(9) {
-  [0]=>
-  int(-41)
-  [1]=>
-  int(-31)
-  [2]=>
-  int(-21)
-  [3]=>
-  int(-11)
-  [4]=>
-  int(0)
-  [5]=>
-  int(11)
-  [6]=>
-  int(21)
-  [7]=>
-  int(31)
-  [8]=>
-  int(41)
-}
-
--- Iteration 2 --
-- With Defualt sort flag -
-bool(true)
-array(7) {
-  [0]=>
-  float(-10.5)
-  [1]=>
-  float(-0.1)
-  [2]=>
-  float(0.01)
-  [3]=>
-  float(0.106)
-  [4]=>
-  float(0.5)
-  [5]=>
-  float(10.5)
-  [6]=>
-  float(1050)
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(7) {
-  [0]=>
-  float(-10.5)
-  [1]=>
-  float(-0.1)
-  [2]=>
-  float(0.01)
-  [3]=>
-  float(0.106)
-  [4]=>
-  float(0.5)
-  [5]=>
-  float(10.5)
-  [6]=>
-  float(1050)
-}
-- Sort flag = SORT_NUMERIC -
-bool(true)
-array(7) {
-  [0]=>
-  float(-10.5)
-  [1]=>
-  float(-0.1)
-  [2]=>
-  float(0.01)
-  [3]=>
-  float(0.106)
-  [4]=>
-  float(0.5)
-  [5]=>
-  float(10.5)
-  [6]=>
-  float(1050)
-}
-
--- Iteration 3 --
-- With Defualt sort flag -
-bool(true)
-array(11) {
-  [0]=>
-  int(-1)
-  [1]=>
-  float(-0.9)
-  [2]=>
-  float(-0.106)
-  [3]=>
-  float(-0.01)
-  [4]=>
-  int(0)
-  [5]=>
-  float(0.0001)
-  [6]=>
-  float(0.0021)
-  [7]=>
-  float(0.09)
-  [8]=>
-  float(0.106)
-  [9]=>
-  int(2)
-  [10]=>
-  int(33)
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(11) {
-  [0]=>
-  int(-1)
-  [1]=>
-  float(-0.9)
-  [2]=>
-  float(-0.106)
-  [3]=>
-  float(-0.01)
-  [4]=>
-  int(0)
-  [5]=>
-  float(0.0001)
-  [6]=>
-  float(0.0021)
-  [7]=>
-  float(0.09)
-  [8]=>
-  float(0.106)
-  [9]=>
-  int(2)
-  [10]=>
-  int(33)
-}
-- Sort flag = SORT_NUMERIC -
-bool(true)
-array(11) {
-  [0]=>
-  int(-1)
-  [1]=>
-  float(-0.9)
-  [2]=>
-  float(-0.106)
-  [3]=>
-  float(-0.01)
-  [4]=>
-  int(0)
-  [5]=>
-  float(0.0001)
-  [6]=>
-  float(0.0021)
-  [7]=>
-  float(0.09)
-  [8]=>
-  float(0.106)
-  [9]=>
-  int(2)
-  [10]=>
-  int(33)
-}
-
--- Iteration 4 --
-- With Defualt sort flag -
+- With default sort flag -
 bool(true)
 array(7) {
   [0]=>

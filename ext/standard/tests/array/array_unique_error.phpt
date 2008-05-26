@@ -34,16 +34,3 @@ NULL
 Warning: array_unique() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing array_unique() : error conditions ***
-
--- Testing array_unique() function with zero arguments --
-
-Warning: array_unique() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
--- Testing array_unique() function with more than expected no. of arguments --
-
-Warning: array_unique() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-Done

@@ -22,18 +22,7 @@ foreach ($tests as $v) {
 	var_dump(array_product($v));
 }
 ?>
---EXPECTF--	
-Warning: array_product() expects parameter 1 to be array, string given in %s on line %d
-NULL
-int(0)
-int(0)
-int(3)
-int(9)
-float(1)
-int(9999999800000001)
-float(1.219953680145E+30)
-float(3.6893488147419E+19)
---UEXPECTF--
+--EXPECTF--
 Warning: array_product() expects parameter 1 to be array, Unicode string given in %s on line %d
 NULL
 int(0)

@@ -36,32 +36,7 @@ var_dump($temp_array);
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing array_unshift() : basic functionality with default key array ***
-int(3)
-array(3) {
-  [0]=>
-  int(10)
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-}
-int(5)
-array(5) {
-  [0]=>
-  int(222)
-  [1]=>
-  string(5) "hello"
-  [2]=>
-  float(12.33)
-  [3]=>
-  int(1)
-  [4]=>
-  int(2)
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_unshift() : basic functionality with default key array ***
 int(3)
 array(3) {

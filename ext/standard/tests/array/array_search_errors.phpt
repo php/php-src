@@ -36,24 +36,6 @@ NULL
 Warning: array_search() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: array_search() expects parameter 2 to be array, string given in %s on line %d
-NULL
-
-Warning: array_search() expects parameter 2 to be array, integer given in %s on line %d
-NULL
-Done
---UEXPECTF--
-*** Testing error conditions of array_search() ***
-
-Warning: array_search() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: array_search() expects at most 3 parameters, 4 given in %s on line %d
-NULL
-
-Warning: array_search() expects at least 2 parameters, 1 given in %s on line %d
-NULL
-
 Warning: array_search() expects parameter 2 to be array, Unicode string given in %s on line %d
 NULL
 

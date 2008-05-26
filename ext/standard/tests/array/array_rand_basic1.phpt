@@ -50,26 +50,3 @@ array(%d) {
 -- with default argument --
 int(%d)
 Done
-
---UEXPECTF--
-*** Testing array_rand() : array with default keys ***
-
--- with all default and optional arguments --
-array(%d) {
-  [0]=>
-  int(%d)
-  [1]=>
-  int(%d)
-  [2]=>
-  int(%d)
-  [3]=>
-  int(%d)
-  [4]=>
-  int(%d)
-  [5]=>
-  int(%d)
-}
-
--- with default argument --
-int(%d)
-Done

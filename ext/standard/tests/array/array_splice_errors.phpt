@@ -39,22 +39,3 @@ NULL
 Warning: array_splice() expects parameter 1 to be array, object given in %s on line %d
 NULL
 Done
---UEXPECTF--
-
-*** Testing error conditions of array_splice() ***
-
-Warning: array_splice() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: array_splice() expects at least 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: array_splice() expects at least 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: array_splice() expects parameter 1 to be array, integer given in %s on line %d
-NULL
-
-Warning: array_splice() expects parameter 1 to be array, object given in %s on line %d
-NULL
-Done

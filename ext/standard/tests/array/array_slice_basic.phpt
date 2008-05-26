@@ -30,26 +30,7 @@ var_dump( array_slice($input, $offset) );
 echo "Done";
 ?>
 
---EXPECTF--
-*** Testing array_slice() : basic functionality ***
-
--- All arguments --
-array(2) {
-  [0]=>
-  int(3)
-  [23]=>
-  int(4)
-}
-
--- Mandatory arguments --
-array(2) {
-  [0]=>
-  int(3)
-  [1]=>
-  int(4)
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_slice() : basic functionality ***
 
 -- All arguments --
