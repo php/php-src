@@ -42,12 +42,3 @@ bool(false)
 
 Warning: Wrong parameter count for assert() in %s on line 22
 NULL
---UEXPECTF--
-Warning: Wrong parameter count for assert_options() in %s on line 14
-NULL
-
-Warning: assert_options(): Unknown value 0 in %s on line 18
-bool(false)
-
-Warning: Wrong parameter count for assert() in %s on line 22
-NULL

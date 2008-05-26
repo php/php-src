@@ -21,14 +21,7 @@ var_dump($r2=assert($sa));
 //Non string assert 
 var_dump($r2=assert(0));
 var_dump($r2=assert(1));
---EXPECTF--
-f1 called
-NULL
-bool(true)
-f1 called
-NULL
-bool(true)
---UEXPECTF--
+--EXPECT--
 f1 called
 NULL
 bool(true)
