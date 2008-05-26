@@ -44,47 +44,7 @@ var_dump(count(get_extension_funcs("zend")));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: Wrong parameter count for get_resource_type() in %s on line %d
-NULL
-
-Warning: Supplied argument is not a valid resource handle in %s on line %d
-bool(false)
-string(6) "stream"
-string(7) "Unknown"
-string(5) "array"
-int(%d)
-string(5) "array"
-int(%d)
-
-Warning: get_loaded_extensions() expects at most 1 parameter, 2 given in %s line %d
-NULL
-
-Warning: get_defined_constants() expects at most 1 parameter, 2 given in %s on line %d
-NULL
-string(5) "array"
-string(5) "array"
-int(%d)
-
-Warning: get_defined_functions() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
-string(5) "array"
-int(%d)
-
-Warning: get_declared_interfaces() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
-string(5) "array"
-int(%d)
-
-Warning: get_extension_funcs() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-bool(false)
-string(5) "array"
-int(%d)
-string(5) "array"
-int(%d)
-Done
---UEXPECTF--
+--EXPECTF--
 Warning: Wrong parameter count for get_resource_type() in %s on line %d
 NULL
 

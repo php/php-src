@@ -8,5 +8,5 @@ isset($foo->bar->bar);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 Done

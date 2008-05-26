@@ -20,20 +20,6 @@ var_dump($foo, $x);
 array(2) {
   [0]=>
   object(stdClass)#1 (1) {
-    ["a"]=>
-    &int(2)
-  }
-  [1]=>
-  object(stdClass)#2 (1) {
-    ["a"]=>
-    &int(2)
-  }
-}
-string(3) "foo"
---UEXPECT--
-array(2) {
-  [0]=>
-  object(stdClass)#1 (1) {
     [u"a"]=>
     &int(2)
   }

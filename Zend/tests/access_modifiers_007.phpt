@@ -9,5 +9,5 @@ class test {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Cannot use the final modifier on an abstract class member in %s on line %d

@@ -12,5 +12,5 @@ var_dump($c);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Unsupported operand types in %s on line %d

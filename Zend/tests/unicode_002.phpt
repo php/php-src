@@ -9,6 +9,4 @@ var_dump(isset($GLOBALS['Å']));
 
 ?>
 --EXPECT--
-bool(false)
---UEXPECT--
 bool(true)

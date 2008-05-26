@@ -34,12 +34,6 @@ var_dump(gc_collect_cycles());
 echo "ok\n"
 ?>
 --EXPECTF--
-string(1) "%s"
-string(1) "%s"
-string(1) "%s"
-int(10)
-ok
---UEXPECTF--
 unicode(1) "%s"
 unicode(1) "%s"
 unicode(1) "%s"

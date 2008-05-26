@@ -9,4 +9,4 @@ class Foo implements static {
 ?>
 ==DONE==
 --EXPECTF--
-Parse error: syntax error, unexpected T_STATIC, expecting T_STRING or T_PAAMAYIM_NEKUDOTAYIM or T_NAMESPACE in %s on line %d
+Parse error: parse error, expecting `T_STRING' or `T_PAAMAYIM_NEKUDOTAYIM' or `T_NAMESPACE' in %slsb_007.php on line %d

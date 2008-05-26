@@ -29,22 +29,7 @@ var_dump(get_class($f2));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Strict Standards: Non-static method foo::bar() should not be called statically in %s on line %d
-string(3) "foo"
-
-Strict Standards: Non-static method foo::bar() should not be called statically in %s on line %d
-string(3) "foo"
-string(3) "foo"
-string(3) "foo"
-
-Warning: get_class() called without object from outside a class in %s on line %d
-bool(false)
-bool(false)
-string(3) "foo"
-string(4) "foo2"
-Done
---UEXPECTF--
+--EXPECTF--
 Strict Standards: Non-static method foo::bar() should not be called statically in %s on line %d
 unicode(3) "foo"
 

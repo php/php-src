@@ -19,20 +19,7 @@ var_dump($_SERVER);
 
 echo "Done\n";
 ?>
---EXPECTF--	
-bool(true)
-bool(false)
-string(5) "array"
-int(%d)
-string(%d) "%s"
-
-Notice: Undefined index: PHP_SELF in %s on line %d
-NULL
-
-Notice: Undefined variable: _SERVER in %s on line %d
-NULL
-Done
---UEXPECTF--
+--EXPECTF--
 bool(true)
 bool(false)
 unicode(5) "array"

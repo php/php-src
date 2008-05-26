@@ -12,7 +12,7 @@ foreach($foo as $key => &$val) {
 }
 var_dump($foo);
 ?>
---EXPECT--	
+--EXPECT--
 array(4) {
   [0]=>
   int(2)

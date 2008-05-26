@@ -38,7 +38,7 @@ foreach ($vars as $var) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 float(0)
 float(8754456)
 float(0)

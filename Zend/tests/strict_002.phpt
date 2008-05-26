@@ -18,14 +18,7 @@ var_dump($t);
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Strict Standards: Accessing static property test::$foo as non static in %s on line %d
-object(test)#%d (1) {
-  ["foo"]=>
-  int(5)
-}
-Done
---UEXPECTF--
+--EXPECTF--
 Strict Standards: Accessing static property test::$foo as non static in %s on line %d
 object(test)#%d (1) {
   [u"foo"]=>

@@ -18,7 +18,7 @@ var_dump(class_exists("stdClass"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: class_exists() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 bool(false)

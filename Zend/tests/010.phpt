@@ -41,23 +41,7 @@ var_dump(get_parent_class(1));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-bool(false)
-bool(false)
-string(3) "foo"
-string(3) "foo"
-bool(false)
-string(3) "foo"
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-Done
---UEXPECTF--
+--EXPECT--
 bool(false)
 bool(false)
 unicode(3) "foo"

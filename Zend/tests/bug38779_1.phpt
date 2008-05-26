@@ -38,14 +38,11 @@ fwrite($fp1, "<"."?php blah blah?".">");
 fclose($fp1);
 
 include $filename;
-
-echo "Done\n";
 ?>
---EXPECTF--	
-Parse error: %s error%sin %s on line %d
-string(6) "flush!"
-string(6) "close!"
---UEXPECTF--
+===DONE===
+--CLEAN--
+<?php unlink(dirname(__FILE__) . '/bug38779.txt'); ?>
+--EXPECTF--
 Parse error: %s error%sin %s on line %d
 unicode(6) "flush!"
 unicode(6) "close!"

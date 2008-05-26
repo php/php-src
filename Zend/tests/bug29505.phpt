@@ -14,23 +14,6 @@ var_dump(get_class_vars('Test'));
 ===DONE===
 --EXPECT--
 array(2) {
-  ["empty"]=>
-  array(0) {
-  }
-  ["three"]=>
-  array(3) {
-    [0]=>
-    int(1)
-    ["b"]=>
-    string(1) "c"
-    [3]=>
-    array(0) {
-    }
-  }
-}
-===DONE===
---UEXPECT--
-array(2) {
   [u"empty"]=>
   array(0) {
   }

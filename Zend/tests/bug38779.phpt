@@ -30,5 +30,5 @@ require 'Loader://qqq.php';
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Parse error: %s error%sin Loader://qqq.php on line %d

@@ -36,43 +36,6 @@ var_dump(get_object_vars(new Child));
 --EXPECT--
 Base::__construct
 array(3) {
-  ["Foo"]=>
-  int(1)
-  ["Bar"]=>
-  int(2)
-  ["Baz"]=>
-  int(3)
-}
-array(1) {
-  ["Foo"]=>
-  int(1)
-}
-Base::__construct
-array(3) {
-  ["Foo"]=>
-  int(1)
-  ["Bar"]=>
-  int(2)
-  ["Baz"]=>
-  int(3)
-}
-Child::__construct
-array(3) {
-  ["Baz"]=>
-  int(4)
-  ["Foo"]=>
-  int(1)
-  ["Bar"]=>
-  int(2)
-}
-array(1) {
-  ["Foo"]=>
-  int(1)
-}
-===DONE===
---UEXPECT--
-Base::__construct
-array(3) {
   [u"Foo"]=>
   int(1)
   [u"Bar"]=>

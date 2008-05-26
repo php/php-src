@@ -36,7 +36,7 @@ var_dump(func_get_args());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(0) {
 }
 array(1) {

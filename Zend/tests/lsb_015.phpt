@@ -68,7 +68,7 @@ echo "via B:\n";
 B::myCatch();
 ?>
 ==DONE==
---EXPECTF--
+--EXPECT--
 via A:
 A
 A

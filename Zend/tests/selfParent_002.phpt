@@ -23,8 +23,5 @@ B::test();
 A::test();
 ?>
 --EXPECT--
-string(10) "const in A"
-string(10) "const in A"
---UEXPECT--
 unicode(10) "const in A"
 unicode(10) "const in A"

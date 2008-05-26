@@ -42,5 +42,3 @@ Strict Standards: Non-static method foo::test() should not be called statically 
 Strict Standards: Non-static method bar::show() should not be called statically in %s on line %d
 object(bar)#%d (0) {
 }
-
-

@@ -29,49 +29,7 @@ var_dump($c);
 
 echo "Done\n";
 ?>
---EXPECTF--	
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
-array(3) {
-  ["a"]=>
-  string(3) "aaa"
-  [0]=>
-  int(2)
-  [1]=>
-  int(3)
-}
-array(3) {
-  ["a"]=>
-  string(3) "aaa"
-  [0]=>
-  int(2)
-  [1]=>
-  int(3)
-}
-array(3) {
-  ["a"]=>
-  string(3) "aaa"
-  [0]=>
-  int(2)
-  [1]=>
-  int(3)
-}
-Done
---UEXPECTF--
+--EXPECT--
 array(3) {
   [0]=>
   int(1)

@@ -13,7 +13,7 @@ var_dump($c);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Notice: Object of class stdClass could not be converted to int in %s on line %d
 
 Fatal error: Unsupported operand types in %s on line %d

@@ -13,5 +13,5 @@ class test extends test1 {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 Done

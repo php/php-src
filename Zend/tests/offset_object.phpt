@@ -7,5 +7,5 @@ $object = new stdClass;
 var_dump($object[1]);
 
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Cannot use object of type stdClass as array in %s on line %d

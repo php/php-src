@@ -21,47 +21,7 @@ var_dump(each($a));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: Wrong parameter count for each() in %s on line %d
-NULL
-
-Warning: Variable passed to each() is not an array or object in %s on line %d
-NULL
-
-Warning: Variable passed to each() is not an array or object in %s on line %d
-NULL
-array(4) {
-  [1]=>
-  int(1)
-  ["value"]=>
-  int(1)
-  [0]=>
-  int(0)
-  ["key"]=>
-  int(0)
-}
-array(4) {
-  [1]=>
-  int(1)
-  ["value"]=>
-  int(1)
-  [0]=>
-  string(1) "a"
-  ["key"]=>
-  string(1) "a"
-}
-array(4) {
-  [1]=>
-  int(1)
-  ["value"]=>
-  int(1)
-  [0]=>
-  int(0)
-  ["key"]=>
-  int(0)
-}
-Done
---UEXPECTF--
+--EXPECTF--
 Warning: Wrong parameter count for each() in %s on line %d
 NULL
 

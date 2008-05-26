@@ -7,5 +7,5 @@ $x['x']['y'] += 1;
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Cannot use string offset as an array in %s on line %d

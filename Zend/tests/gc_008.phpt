@@ -13,17 +13,6 @@ echo "ok\n"
 ?>
 --EXPECT--
 object(stdClass)#2 (1) {
-  ["a"]=>
-  object(stdClass)#2 (1) {
-    ["a"]=>
-    *RECURSION*
-  }
-}
-int(0)
-int(1)
-ok
---UEXPECT--
-object(stdClass)#2 (1) {
   [u"a"]=>
   object(stdClass)#2 (1) {
     [u"a"]=>

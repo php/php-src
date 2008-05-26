@@ -13,5 +13,5 @@ $t->__clone();
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Cannot call __clone() method on objects - use 'clone $obj' instead in %s on line %d

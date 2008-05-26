@@ -8,5 +8,5 @@ $foo[0]->bar = "xyz";
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Cannot use string offset as an array in %s on line %d

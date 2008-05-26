@@ -52,7 +52,7 @@ $bar->test();
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: Wrong parameter count for property_exists() in %s on line %d
 NULL
 

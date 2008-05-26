@@ -16,7 +16,5 @@ throw new test();
 
 echo "Done\n";
 ?>
---EXPECTF--	
-string(12) "test thrown!"
---UEXPECTF--
+--EXPECT--
 unicode(12) "test thrown!"

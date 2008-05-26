@@ -9,7 +9,7 @@ echo $a;
 echo $b;
 echo "ok\n";
 ?>
---EXPECTF--
+--EXPECT--
 ok
 ok
 ok

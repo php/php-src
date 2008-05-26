@@ -10,5 +10,5 @@ foo(1);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Only variables can be passed by reference in %s on line %d

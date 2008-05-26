@@ -34,7 +34,7 @@ $o->a = "b";
 echo $o->a;
 ?>
 ==DONE==
---EXPECTF--
+--EXPECT--
 TestChild
 TestChild
 TestChild

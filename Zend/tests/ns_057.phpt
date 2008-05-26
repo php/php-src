@@ -43,7 +43,7 @@ echo namespace::f1();
 echo namespace::f2();
 echo namespace::f3(new namespace::foo());
 ?>
---EXPECTF--
+--EXPECT--
 const ok
 func ok
 const ok

@@ -11,7 +11,7 @@ var_dump($c);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: Division by zero in %s on line %d
 bool(false)
 Done

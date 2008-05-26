@@ -48,7 +48,7 @@ echo ChildClass2::testClassConst() . "\n";
 echo ChildClass2::testStaticFunction() . "\n";
 ?>
 ==DONE==
---EXPECTF--
+--EXPECT--
 TestClassStatic
 TestClassConst
 TestClassFunction

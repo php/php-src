@@ -28,7 +28,7 @@ unset($bar);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 Foo::__construct
 Caught exception!
 ===DONE===

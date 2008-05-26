@@ -8,5 +8,5 @@ class stdclass {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Cannot redeclare class stdclass in %s on line %d

@@ -15,21 +15,7 @@ var_dump(strncasecmp("01", "01", 1000));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: strncasecmp() expects exactly 3 parameters, 1 given in %s on line %d
-NULL
-
-Warning: Length must be greater than or equal to 0 in %s on line %d
-bool(false)
-int(0)
-int(-3)
-int(0)
-int(0)
-int(2)
-int(0)
-int(0)
-Done
---UEXPECTF--
+--EXPECTF--
 Warning: strncasecmp() expects exactly 3 parameters, 1 given in %s on line %d
 NULL
 

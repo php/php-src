@@ -12,5 +12,5 @@ class Impl extends Test {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Non-abstract method Impl::Foo() must contain body in %s on line %d

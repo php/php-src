@@ -19,40 +19,6 @@ var_dump($arr);
 array(1) {
   [0]=>
   object(stdClass)#1 (1) {
-    ["a"]=>
-    object(stdClass)#2 (0) {
-    }
-  }
-}
-array(1) {
-  [0]=>
-  object(stdClass)#1 (2) {
-    ["a"]=>
-    object(stdClass)#2 (0) {
-    }
-    ["b"]=>
-    object(stdClass)#3 (0) {
-    }
-  }
-}
-array(1) {
-  [0]=>
-  object(stdClass)#1 (3) {
-    ["a"]=>
-    object(stdClass)#2 (0) {
-    }
-    ["b"]=>
-    object(stdClass)#3 (0) {
-    }
-    ["c"]=>
-    object(stdClass)#2 (0) {
-    }
-  }
-}
---UEXPECT--
-array(1) {
-  [0]=>
-  object(stdClass)#1 (1) {
     [u"a"]=>
     object(stdClass)#2 (0) {
     }

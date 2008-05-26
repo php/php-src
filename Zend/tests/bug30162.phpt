@@ -45,15 +45,6 @@ var_dump($db);
 Notice: Undefined variable: db in %sbug30162.php on line 35
 NULL
 object(hariCow)#1 (2) {
-  ["x"]=>
-  string(1) "x"
-  ["y"]=>
-  string(1) "y"
-}
---UEXPECTF--
-Notice: Undefined variable: db in %sbug30162.php on line 35
-NULL
-object(hariCow)#1 (2) {
   [u"x"]=>
   unicode(1) "x"
   [u"y"]=>

@@ -11,5 +11,5 @@ class test {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Clone method test::__clone() cannot be static in %s on line %d

@@ -14,8 +14,3 @@ array(1) {
   [0]=>
   int(1)
 }
---UEXPECT--	
-array(1) {
-  [0]=>
-  int(1)
-}
