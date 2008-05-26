@@ -21,7 +21,7 @@ var_dump($v);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 str
 5

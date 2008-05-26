@@ -12,11 +12,7 @@ var_dump($var1);
 
 echo "Done\n";
 ?>
---EXPECTF--	
-string(1) "g"
-string(1) "g"
-Done
---UEXPECTF--
+--EXPECT--
 unicode(1) "g"
 unicode(1) "g"
 Done

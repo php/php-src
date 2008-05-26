@@ -19,5 +19,5 @@ class test3 extends test {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Declaration of test3::foo() must be compatible with that of test::foo() in %s on line %d

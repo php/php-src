@@ -20,5 +20,5 @@ test($obj);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Catchable fatal error: Argument 1 passed to test() must be an instance of OtherClassName, instance of ClassName given, called in %s on line %d and defined in %s on line %d

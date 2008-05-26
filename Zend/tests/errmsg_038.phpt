@@ -9,5 +9,5 @@ class test {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Cannot declare property test::$var final, the final modifier is allowed only for methods and classes in %s on line %d

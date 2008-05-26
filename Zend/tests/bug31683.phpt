@@ -69,33 +69,6 @@ for ($i=0; $i < 2; $i++) {
 }
 ?>
 --EXPECT--
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-NULL
-string(2) "ok"
-string(2) "ok"
----
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-string(2) "ok"
-NULL
-string(2) "ok"
-string(2) "ok"
----
---UEXPECT--
 unicode(2) "ok"
 unicode(2) "ok"
 unicode(2) "ok"

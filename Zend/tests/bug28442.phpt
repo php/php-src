@@ -45,25 +45,7 @@ var_dump(ClassC::$prop);
 
 ?>
 ===DONE===
---EXPECTF--
-===INIT===
-string(1) "A"
-string(1) "C"
-string(1) "C"
-===SetA===
-string(2) "A2"
-string(1) "C"
-string(1) "C"
-===SetB===
-string(2) "A2"
-string(2) "B2"
-string(2) "B2"
-===SetC===
-string(2) "A2"
-string(2) "C2"
-string(2) "C2"
-===DONE===
---UEXPECTF--
+--EXPECT--
 ===INIT===
 unicode(1) "A"
 unicode(1) "C"

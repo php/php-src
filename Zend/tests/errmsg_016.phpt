@@ -10,5 +10,5 @@ class test {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Method test::__isset() must take exactly 1 argument in %s on line %d

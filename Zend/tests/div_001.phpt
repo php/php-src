@@ -25,7 +25,7 @@ var_dump($c);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 float(394758.39454545)
 float(394758.39454545)
 float(394758.39454545)

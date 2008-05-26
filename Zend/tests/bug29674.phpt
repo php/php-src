@@ -31,16 +31,6 @@ $obj->printVars();
 ===DONE===
 --EXPECTF--
 ===BASE===
-string(4) "Base"
-
-Notice: Undefined property: BaseClass::$private_child in %sbug29674.php on line %d
-NULL
-===CHILD===
-string(4) "Base"
-
-Fatal error: Cannot access private property ChildClass::$private_child in %sbug29674.php on line %d
---UEXPECTF--
-===BASE===
 unicode(4) "Base"
 
 Notice: Undefined property: BaseClass::$private_child in %sbug29674.php on line %d

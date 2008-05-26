@@ -13,6 +13,6 @@ Bug #27669 (PHP 5 didn't support all possibilities for calling static methods dy
 	A::$y[0]();
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 Hello World
 ===DONE===

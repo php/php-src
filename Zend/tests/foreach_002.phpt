@@ -12,17 +12,6 @@ foreach (($a = array('a' => array('a' => &$a))) as $a) {
 ?>
 --EXPECT--
 array(1) {
-  ["a"]=>
-  &array(1) {
-    ["a"]=>
-    &array(1) {
-      ["a"]=>
-      *RECURSION*
-    }
-  }
-}
---UEXPECT--
-array(1) {
   [u"a"]=>
   &array(1) {
     [u"a"]=>

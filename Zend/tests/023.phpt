@@ -41,10 +41,5 @@ var_dump($$$$d('foo'));
 --EXPECT--
 Test
 foo!
-string(4) "bar!"
-string(3) "FOO"
---UEXPECT--
-Test
-foo!
 unicode(4) "bar!"
 unicode(3) "FOO"

@@ -64,70 +64,7 @@ func1();
 
 echo "\n--- Done ---";
 ?> 
---EXPECTF--
-*** Displaying various variables through the array captured by the get_defined_vars function call ***
-int(1)
-float(22.33)
-string(13) "sample string"
-array(6) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-  [3]=>
-  int(3)
-  [4]=>
-  int(5)
-  [5]=>
-  int(8)
-}
-array(5) {
-  ["a"]=>
-  int(97)
-  ["c"]=>
-  int(99)
-  ["A"]=>
-  int(65)
-  ["C"]=>
-  int(67)
-  [1]=>
-  string(7) "string1"
-}
-bool(true)
-object(sample)#1 (2) {
-  ["number"]=>
-  int(233)
-  ["string"]=>
-  string(7) "string2"
-}
-
-*** Checking for output when get_defined_vars called in local function ***
-array(1) {
-  ["string33"]=>
-  int(22)
-}
-
-*** Checking for output when get_defined_vars called in function of a class ***
-array(1) {
-  ["local_var"]=>
-  int(2)
-}
-
-*** Checking for output when get_defined_vars called in nested functions ***
-array(1) {
-  ["func1_var"]=>
-  int(2)
-}
-array(1) {
-  ["func2_var"]=>
-  int(3)
-}
-
---- Done ---
-
---UEXPECTF--
+--EXPECT--
 *** Displaying various variables through the array captured by the get_defined_vars function call ***
 int(1)
 float(22.33)

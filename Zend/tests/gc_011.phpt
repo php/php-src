@@ -17,17 +17,6 @@ echo "ok\n"
 ?>
 --EXPECT--
 object(Foo)#1 (1) {
-  ["a"]=>
-  object(Foo)#1 (1) {
-    ["a"]=>
-    *RECURSION*
-  }
-}
-__destruct
-int(1)
-ok
---UEXPECT--
-object(Foo)#1 (1) {
   [u"a"]=>
   object(Foo)#1 (1) {
     [u"a"]=>

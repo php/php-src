@@ -14,5 +14,5 @@ $t->$func();
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Method test::__callstatic() cannot take arguments by reference in %s on line %d

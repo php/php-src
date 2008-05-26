@@ -14,6 +14,6 @@ class test {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Strict Standards: Redefining already defined constructor for class test in %s on line %d
 Done

@@ -21,5 +21,5 @@ $op->x = 'test';
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 Done

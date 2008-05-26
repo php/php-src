@@ -24,21 +24,6 @@ var_dump($x);
 ?>
 --EXPECT--
 object(bar)#1 (6) {
-  ["c1"]=>
-  int(1)
-  ["c2"]=>
-  int(2)
-  ["c3"]=>
-  int(1)
-  ["c4"]=>
-  int(2)
-  ["c5"]=>
-  int(1)
-  ["c6"]=>
-  int(1)
-}
---UEXPECT--
-object(bar)#1 (6) {
   [u"c1"]=>
   int(1)
   [u"c2"]=>

@@ -25,15 +25,6 @@ var_dump($c);
 
 ?>
 --EXPECT--
-string(50) "Object of class a could not be converted to string"
-
-string(50) "Object of class a could not be converted to string"
-
-object(a)#2 (1) {
-  ["a"]=>
-  int(4)
-}
---UEXPECT--
 unicode(50) "Object of class a could not be converted to string"
 
 unicode(50) "Object of class a could not be converted to string"

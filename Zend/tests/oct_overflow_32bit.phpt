@@ -22,7 +22,7 @@ foreach ($doubles as $d) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 float(4308640384%d)
 float(3545655%d)
 float(262143)

@@ -22,6 +22,6 @@ var_dump(error_reporting());
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 int(16383)
 Done

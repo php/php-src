@@ -23,13 +23,7 @@ var_dump($tmp);
 
 echo "Done\n";
 ?>
---EXPECTF--	
-string(32) "binary stringone more bin string"
-string(24) "binary stringtest string"
-string(24) "test stringone more test"
-string(30) "test stringone more bin string"
-Done
---UEXPECTF--
+--EXPECT--
 string(32) "binary stringone more bin string"
 unicode(24) "binary stringtest string"
 unicode(24) "test stringone more test"

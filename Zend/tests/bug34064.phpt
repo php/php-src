@@ -28,13 +28,6 @@ $o->run();
 --EXPECTF--
 array(1) {
   [0]=>
-  string(2) "ok"
-}
-
-Fatal error: Cannot use [] for reading in %sbug34064.php on line 18
---UEXPECTF--
-array(1) {
-  [0]=>
   unicode(2) "ok"
 }
 

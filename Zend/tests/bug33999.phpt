@@ -19,17 +19,6 @@ var_dump($baz);
 ?>
 --EXPECTF--
 object(Foo)#1 (1) {
-  ["bar"]=>
-  string(3) "bat"
-}
-
-Notice: Object of class Foo could not be converted to int in %sbug33999.php on line 9
-int(1)
-
-Notice: Object of class Foo could not be converted to double in %sbug33999.php on line 12
-float(1)
---UEXPECTF--
-object(Foo)#1 (1) {
   [u"bar"]=>
   unicode(3) "bat"
 }

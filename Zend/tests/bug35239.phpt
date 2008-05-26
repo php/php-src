@@ -14,33 +14,6 @@ echo $a->x0;
 ?>
 --EXPECT--
 object(stdClass)#1 (1) {
-  ["x0"]=>
-  &object(stdClass)#2 (3) {
-    ["y0"]=>
-    string(1) "b"
-    ["y1"]=>
-    &object(stdClass)#2 (3) {
-      ["y0"]=>
-      string(1) "b"
-      ["y1"]=>
-      *RECURSION*
-      ["y2"]=>
-      *RECURSION*
-    }
-    ["y2"]=>
-    &object(stdClass)#2 (3) {
-      ["y0"]=>
-      string(1) "b"
-      ["y1"]=>
-      *RECURSION*
-      ["y2"]=>
-      *RECURSION*
-    }
-  }
-}
-ok
---UEXPECT--
-object(stdClass)#1 (1) {
   [u"x0"]=>
   &object(stdClass)#2 (3) {
     [u"y0"]=>

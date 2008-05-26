@@ -17,4 +17,4 @@ print e::E . "\n";
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected T_START_HEREDOC in %sheredoc_011.php on line 8
+Parse error: parse error in %sheredoc_011.php on line %d

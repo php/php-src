@@ -14,5 +14,5 @@ set_exception_handler("ehandle::exh");
 throw new Exception ("Whiii");
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 foo

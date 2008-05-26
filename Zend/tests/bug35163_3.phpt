@@ -13,32 +13,6 @@ $a = null;
 ?>
 --EXPECT--
 object(stdClass)#1 (1) {
-  ["b"]=>
-  &array(3) {
-    [0]=>
-    int(2)
-    [1]=>
-    &array(3) {
-      [0]=>
-      int(2)
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
-    [2]=>
-    &array(3) {
-      [0]=>
-      int(2)
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
-  }
-}
---UEXPECT--
-object(stdClass)#1 (1) {
   [u"b"]=>
   &array(3) {
     [0]=>

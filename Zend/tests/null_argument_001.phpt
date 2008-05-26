@@ -16,23 +16,7 @@ var_dump(urldecode($fp));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-string(0) ""
-string(0) ""
-string(0) ""
-
-Warning: urldecode() expects parameter 1 to be string, array given in %s on line %d
-NULL
-string(1) "1"
-string(0) ""
-
-Warning: urldecode() expects parameter 1 to be string, object given in %s on line %d
-NULL
-
-Warning: urldecode() expects parameter 1 to be string, resource given in %s on line %d
-NULL
-Done
---UEXPECTF--
+--EXPECTF--
 string(0) ""
 string(0) ""
 

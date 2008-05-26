@@ -19,7 +19,7 @@ foo(1,2);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 bool(false)
 
 Warning: func_get_arg():  Called from the global scope - no function context in %s on line %d

@@ -9,5 +9,5 @@ class test {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Static function test::foo() cannot be abstract in %s on line %d

@@ -16,25 +16,6 @@ var_dump($$test);
 --EXPECTF--
 Strict Standards: Creating default object from empty value in %s on line %d
 object(stdClass)#1 (2) {
-  ["a"]=>
-  &object(stdClass)#1 (2) {
-    ["a"]=>
-    *RECURSION*
-    ["b"]=>
-    array(1) {
-      [0]=>
-      int(2)
-    }
-  }
-  ["b"]=>
-  array(1) {
-    [0]=>
-    int(2)
-  }
-}
---UEXPECTF--
-Strict Standards: Creating default object from empty value in %s on line %d
-object(stdClass)#1 (2) {
   [u"a"]=>
   &object(stdClass)#1 (2) {
     [u"a"]=>

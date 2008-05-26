@@ -12,4 +12,3 @@ Exception::bar();
 ok
 
 Fatal error: Call to undefined method Exception::bar() in %sns_038.php on line 7
-

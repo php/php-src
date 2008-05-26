@@ -35,7 +35,7 @@ var_dump(func_num_args());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(0)
 int(1)
 

@@ -47,28 +47,6 @@ array(2) {
   int(2)
 }
 object(ArrayObject)#%d (1) {
-  ["storage":"ArrayObject":private]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-}
---UEXPECTF--
-array(2) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-}
-array(2) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-}
-object(ArrayObject)#%d (1) {
   [u"storage":u"ArrayObject":private]=>
   array(2) {
     [0]=>

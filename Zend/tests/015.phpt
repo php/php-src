@@ -12,7 +12,7 @@ var_dump(trigger_error("error", E_USER_WARNING));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: Wrong parameter count for trigger_error() in %s on line %d
 NULL
 

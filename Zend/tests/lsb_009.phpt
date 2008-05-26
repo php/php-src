@@ -5,4 +5,4 @@ ZE2 Late Static Binding interface name "static"
 interface static {
 }
 --EXPECTF--
-Parse error: syntax error, unexpected T_STATIC, expecting T_STRING in %slsb_009.php on line 2
+Parse error: parse error, expecting `T_STRING' in %slsb_009.php on line %d

@@ -13,5 +13,5 @@ class test extends test1 {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Access level to test::$var must be protected (as in class test1) or weaker in %s on line %d

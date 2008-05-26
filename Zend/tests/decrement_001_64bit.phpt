@@ -32,33 +32,7 @@ foreach ($a as $var) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
-int(-1)
-int(0)
-float(1.5)
-int(-1)
-string(6) "string"
-int(122)
-float(1.5)
-NULL
-bool(true)
-bool(false)
-object(stdClass)#%d (0) {
-}
-array(0) {
-}
-float(-9.2233720368548E+18)
-float(-9.2233720368548E+18)
-Done
---UEXPECTF--	
+--EXPECTF--
 array(3) {
   [0]=>
   int(1)

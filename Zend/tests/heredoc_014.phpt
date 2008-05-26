@@ -9,4 +9,4 @@ MYLABEL;
 echo $var;
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected T_SL in %sheredoc_014.php on line %d
+Parse error: parse error in %sheredoc_014.php on line 3

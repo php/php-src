@@ -16,11 +16,7 @@ var_dump(bin2hex($s1));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-int(-24)
-string(8) "8c90929a"
-Done
---UEXPECTF--	
+--EXPECT--
 int(-24)
 unicode(8) "8c90929a"
 Done

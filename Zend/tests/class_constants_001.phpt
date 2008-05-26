@@ -15,12 +15,7 @@ var_dump(test::val3);
 
 echo "Done\n";
 ?>
---EXPECTF--	
-string(6) "string"
-int(1)
-
-Fatal error: Undefined class constant 'val3' in %s on line %d
---UEXPECTF--
+--EXPECTF--
 unicode(6) "string"
 int(1)
 

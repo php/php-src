@@ -9,5 +9,5 @@ class test {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Arrays are not allowed in class constants in %s on line %d
