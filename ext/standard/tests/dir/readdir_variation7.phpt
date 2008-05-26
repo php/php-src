@@ -33,10 +33,3 @@ resource(%d) of type (stream)
 
 Warning: readdir(): %d is not a valid Directory resource in %s on line %d
 bool(false)
-===DONE===
---UEXPECTF--
-*** Testing readdir() : usage variations ***
-resource(%d) of type (stream)
-
-Warning: readdir(): %d is not a valid Directory resource in %s on line %d
-bool(false)

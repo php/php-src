@@ -69,35 +69,6 @@ resource(%d) of type (stream)
 resource(%d) of type (stream)
 
 -- Read and rewind first directory (argument supplied) --
-array(3) {
-  [0]=>
-  string(1) "."
-  [1]=>
-  string(2) ".."
-  [2]=>
-  string(9) "file1.tmp"
-}
-NULL
-string(1) "."
-
--- Read and rewind second directory (no argument supplied) --
-array(3) {
-  [0]=>
-  string(1) "."
-  [1]=>
-  string(2) ".."
-  [2]=>
-  string(9) "file2.tmp"
-}
-NULL
-string(1) "."
-===DONE===
---UEXPECTF--
-*** Testing rewinddir() : basic functionality ***
-resource(%d) of type (stream)
-resource(%d) of type (stream)
-
--- Read and rewind first directory (argument supplied) --
 unicode(1) "."
 unicode(2) ".."
 unicode(9) "file1.tmp"

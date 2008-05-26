@@ -48,14 +48,3 @@ resource(%d) of type (stream)
 
 New resource created
 ===DONE===
---UEXPECTF--
-*** Testing opendir() : usage variation ***
-
--- Open directory first time: --
-resource(%d) of type (stream)
-
--- Open directory second time: --
-resource(%d) of type (stream)
-
-New resource created
-===DONE===

@@ -29,11 +29,6 @@ rmdir($directory);
 ?>
 --EXPECTF--
 *** Testing getcwd() : basic functionality ***
-string(%d) "%s"
-string(%d) "%s%egetcwd_basic"
-===DONE===
---UEXPECTF--
-*** Testing getcwd() : basic functionality ***
 unicode(%d) "%s"
 unicode(%d) "%s%egetcwd_basic"
 ===DONE===

@@ -42,17 +42,3 @@ bool(false)
 -- Check file pointer: --
 resource(%d) of type (stream)
 ===DONE===
---UEXPECTF--
-*** Testing closedir() : usage variations ***
-
--- Open a file using fopen() --
-resource(%d) of type (stream)
-
--- Try to close the file pointer using closedir() --
-
-Warning: closedir(): %d is not a valid Directory resource in %s on line %d
-bool(false)
-
--- Check file pointer: --
-resource(%d) of type (stream)
-===DONE===

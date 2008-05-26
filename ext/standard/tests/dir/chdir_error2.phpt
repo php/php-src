@@ -24,9 +24,3 @@ var_dump(chdir($directory));
 Warning: chdir(): %s (errno %d) in %s on line %d
 bool(false)
 ===DONE===
---UEXPECTF--
-*** Testing chdir() : error conditions ***
-
-Warning: chdir(): %s (errno %d) in %s on line %d
-bool(false)
-===DONE===

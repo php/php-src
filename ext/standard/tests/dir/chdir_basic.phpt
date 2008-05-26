@@ -45,17 +45,6 @@ rmdir("$file_path/level_one");
 
 -- Testing chdir() with absolute path: --
 bool(true)
-string(%d) "%slevel_one"
-
--- Testing chdir() with relative paths: --
-bool(true)
-string(%d) "%slevel_one%elevel_two"
-===DONE===
---UEXPECTF--
-*** Testing chdir() : basic functionality ***
-
--- Testing chdir() with absolute path: --
-bool(true)
 unicode(%d) "%slevel_one"
 
 -- Testing chdir() with relative paths: --

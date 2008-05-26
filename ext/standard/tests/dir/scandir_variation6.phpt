@@ -68,30 +68,3 @@ Warning: scandir(%s/scandir_variation6/sub?dir1): failed to open dir: %s in %s o
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)
 ===DONE===
---UEXPECTF--
-*** Testing scandir() : usage variations ***
-
--- Wildcard = '*' --
-
-Warning: scandir(%s/scandir_var*): failed to open dir: %s in %s on line %d
-
-Warning: scandir(): (errno %d): %s in %s on line %d
-bool(false)
-
-Warning: scandir(%s/*): failed to open dir: %s in %s on line %d
-
-Warning: scandir(): (errno %d): %s in %s on line %d
-bool(false)
-
--- Wildcard = '?' --
-
-Warning: scandir(%s/scandir_variation6/sub_dir?): failed to open dir: %s in %s on line %d
-
-Warning: scandir(): (errno %d): %s in %s on line %d
-bool(false)
-
-Warning: scandir(%s/scandir_variation6/sub?dir1): failed to open dir: %s in %s on line %d
-
-Warning: scandir(): (errno %d): %s in %s on line %d
-bool(false)
-===DONE===

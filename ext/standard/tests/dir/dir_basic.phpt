@@ -56,38 +56,6 @@ rmdir($dir_path);
 *** Testing dir() : basic functionality ***
 Get Directory instance:
 object(Directory)#%d (2) {
-  ["path"]=>
-  string(%d) "%s/dir_basic"
-  ["handle"]=>
-  resource(%d) of type (stream)
-}
-
-Read and rewind:
-string(%d) "%s"
-string(%d) "%s"
-NULL
-
-Test using handle directly:
-string(%d) "%s"
-string(%d) "%s"
-
-Close directory:
-NULL
-object(Directory)#%d (2) {
-  ["path"]=>
-  string(%d) "%s/dir_basic"
-  ["handle"]=>
-  resource(%d) of type (Unknown)
-}
-
-Test read after closing the dir:
-Warning: Directory::read(): %d is not a valid Directory resource in %s on line %d
-bool(false)
-Done
---UEXPECTF--
-*** Testing dir() : basic functionality ***
-Get Directory instance:
-object(Directory)#%d (2) {
   [u"path"]=>
   unicode(%d) "%s/dir_basic"
   [u"handle"]=>

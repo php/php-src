@@ -49,16 +49,3 @@ Warning: closedir(): %d is not a valid Directory resource in %s on line %d
 bool(false)
 Directory Handle: resource(%d) of type (Unknown)
 ===DONE===
---UEXPECTF--
-*** Testing closedir() : usage variations ***
-
--- Close directory handle first time: --
-NULL
-Directory Handle: resource(%d) of type (Unknown)
-
--- Close directory handle second time: --
-
-Warning: closedir(): %d is not a valid Directory resource in %s on line %d
-bool(false)
-Directory Handle: resource(%d) of type (Unknown)
-===DONE===

@@ -45,16 +45,3 @@ NULL
 Warning: scandir() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 ===DONE===
---UEXPECTF--
-*** Testing scandir() : error conditions ***
-
--- Testing scandir() function with Zero arguments --
-
-Warning: scandir() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
--- Testing scandir() function with more than expected no. of arguments --
-
-Warning: scandir() expects at most 3 parameters, 4 given in %s on line %d
-NULL
-===DONE===
