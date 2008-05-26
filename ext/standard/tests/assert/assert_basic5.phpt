@@ -30,11 +30,3 @@ Warning: assert(): Assertion "0 != 0" failed in %s on line 10
 NULL
 bool(true)
 int(1)
---UEXPECTF--
-int(0)
-f1 called
-
-Warning: assert(): Assertion "0 != 0" failed in %s on line 10
-NULL
-bool(true)
-int(1)

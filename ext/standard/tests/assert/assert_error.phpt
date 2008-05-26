@@ -25,8 +25,3 @@ Notice: Use of undefined constant threemeninaboat - assumed 'threemeninaboat' in
 bool(true)
 int(0)
 bool(true)
---UEXPECTF--
-Notice: Use of undefined constant threemeninaboat - assumed 'threemeninaboat' in %s(9) : assert code on line 1
-bool(true)
-int(0)
-bool(true)

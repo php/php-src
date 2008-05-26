@@ -77,65 +77,6 @@ f1 called
 NULL
 
 Change callback function using ini.set and test return value 
-string(2) "f1"
-assert_options(ASSERT_CALLBACK) => [f2]
-ini.get("assert.callback") => [f2]
-f2 called
-NULL
-
-Change callback function using assert_options and test return value 
-string(2) "f2"
-assert_options(ASSERT_CALLBACK) => [f3]
-ini.get("assert.callback") => [f2]
-f3 called
-NULL
-
-Reset the name of the callback routine to a class method and check that it works
-string(2) "f3"
-assert_options(ASSERT_CALLBACK) => [c1]
-ini.get("assert.callback") => [f2]
-NULL
-
-Reset callback options to use a class method 
-string(2) "c1"
-array(2) {
-  [0]=>
-  string(2) "c1"
-  [1]=>
-  string(6) "assert"
-}
-ini.get("assert.callback") => [f2]
-
-
-Strict Standards: Non-static method c1::assert() should not be called statically in %s on line %d
-Class assertion failed 53, "0 != 0"
-NULL
-
-Reset callback options to use an object method 
-array(2) {
-  [0]=>
-  string(2) "c1"
-  [1]=>
-  string(6) "assert"
-}
-array(2) {
-  [0]=>
-  &object(c1)#1 (0) {
-  }
-  [1]=>
-  string(6) "assert"
-}
-ini.get("assert.callback") => [f2]
-
-Class assertion failed 61, "0 != 0"
-NULL
---UEXPECTF--
-Initial values: assert_options(ASSERT_CALLBACK) => [f1]
-Initial values: ini.get("assert.callback") => [f1]
-f1 called
-NULL
-
-Change callback function using ini.set and test return value 
 unicode(2) "f1"
 assert_options(ASSERT_CALLBACK) => [f2]
 ini.get("assert.callback") => [f2]
