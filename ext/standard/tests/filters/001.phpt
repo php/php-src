@@ -12,24 +12,7 @@ var_dump(stream_filter_register("", array()));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: stream_filter_register(): Filter name cannot be empty in %s on line %d
-bool(false)
-
-Warning: stream_filter_register(): Class name cannot be empty in %s on line %d
-bool(false)
-
-Warning: stream_filter_register(): Filter name cannot be empty in %s on line %d
-bool(false)
-bool(true)
-
-Warning: stream_filter_register() expects parameter 1 to be string, array given in %s on line %d
-bool(false)
-
-Warning: stream_filter_register() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
-bool(false)
-Done
---UEXPECTF--
+--EXPECTF--
 Warning: stream_filter_register(): Filter name cannot be empty in %s on line %d
 bool(false)
 

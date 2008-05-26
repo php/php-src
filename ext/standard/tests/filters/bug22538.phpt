@@ -40,10 +40,5 @@ unlink($path2);
 --EXPECT--
 int(65529)
 int(65529)
-string(32) "e10e3d1ae81b084b822e8592d019b57a"
-string(32) "931f0fbf8a72312e3bab9965b1d1081c"
---UEXPECT--
-int(65529)
-int(65529)
 unicode(32) "e10e3d1ae81b084b822e8592d019b57a"
 unicode(32) "931f0fbf8a72312e3bab9965b1d1081c"
