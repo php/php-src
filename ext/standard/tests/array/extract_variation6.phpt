@@ -16,17 +16,7 @@ var_dump($a);
 
 echo "Done\n";
 ?>
---EXPECTF--
-int(1)
-string(3) "aaa"
-int(1)
-string(3) "bbb"
-array(1) {
-  ["foo"]=>
-  &string(3) "bbb"
-}
-Done
---UEXPECTF--
+--EXPECT--
 int(1)
 unicode(3) "aaa"
 int(1)

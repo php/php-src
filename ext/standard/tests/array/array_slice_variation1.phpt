@@ -21,45 +21,7 @@ var_dump($a);
 
 ?>
 
---EXPECTF--
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
-array(0) {
-}
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
-array(1) {
-  [0]=>
-  int(3)
-}
-array(1) {
-  [2]=>
-  int(3)
-}
-array(0) {
-}
-array(0) {
-}
-string(3) "foo"
---UEXPECTF--
+--EXPECT--
 array(3) {
   [0]=>
   int(1)

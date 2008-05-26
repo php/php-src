@@ -44,21 +44,6 @@ echo "Done\n";
 --EXPECTF--
 *** Testing sub-arrays with array_search() ***
 int(4)
-string(5) "three"
-int(5)
-
-*** Testing objects with array_search() ***
-
-Warning: array_search() expects parameter 2 to be array, object given in %s on line %d
-NULL
-
-Warning: array_search() expects parameter 2 to be array, object given in %s on line %d
-NULL
-int(1)
-Done
---UEXPECTF--
-*** Testing sub-arrays with array_search() ***
-int(4)
 unicode(5) "three"
 int(5)
 

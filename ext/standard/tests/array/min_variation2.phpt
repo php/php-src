@@ -34,26 +34,6 @@ echo "\nDone\n";
 int(1)
 int(-2)
 float(2.09)
-string(0) ""
-bool(false)
-bool(false)
-bool(false)
-int(0)
-int(0)
-int(2147483645)
-int(2147483647)
-int(2147483646)
-int(-2147483647)
-%s(-2147483648)
-%s(-2147483649)
-
-Done
---UEXPECTF--
-
-*** Testing arrays  ***
-int(1)
-int(-2)
-float(2.09)
 unicode(0) ""
 bool(false)
 bool(false)

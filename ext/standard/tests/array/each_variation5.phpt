@@ -33,68 +33,7 @@ var_dump( each($arr[2]));
 echo "Done";
 ?>
 
---EXPECTF--
-*** Testing each() : usage variations ***
-
--- Pass each() a two-dimensional array --
-array(4) {
-  [1]=>
-  string(4) "zero"
-  ["value"]=>
-  string(4) "zero"
-  [0]=>
-  int(0)
-  ["key"]=>
-  int(0)
-}
-array(4) {
-  [1]=>
-  array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["value"]=>
-  array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  [0]=>
-  int(1)
-  ["key"]=>
-  int(1)
-}
-array(4) {
-  [1]=>
-  string(2) "un"
-  ["value"]=>
-  string(2) "un"
-  [0]=>
-  string(3) "one"
-  ["key"]=>
-  string(3) "one"
-}
-
--- Pass each() a sub-array --
-array(4) {
-  [1]=>
-  string(1) "a"
-  ["value"]=>
-  string(1) "a"
-  [0]=>
-  int(0)
-  ["key"]=>
-  int(0)
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing each() : usage variations ***
 
 -- Pass each() a two-dimensional array --

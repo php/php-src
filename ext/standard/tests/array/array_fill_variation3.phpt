@@ -69,51 +69,6 @@ echo"Done";
 -- Iteration 1 --
 array(2) {
   [0]=>
-  string(0) ""
-  [1]=>
-  string(0) ""
-}
--- Iteration 2 --
-array(2) {
-  [0]=>
-  string(0) ""
-  [1]=>
-  string(0) ""
-}
--- Iteration 3 --
-array(2) {
-  [0]=>
-  object(test)#%d (1) {
-    ["t"]=>
-    int(10)
-  }
-  [1]=>
-  object(test)#%d (1) {
-    ["t"]=>
-    int(10)
-  }
-}
--- Iteration 4 --
-array(2) {
-  [0]=>
-  NULL
-  [1]=>
-  NULL
-}
--- Iteration 5 --
-array(2) {
-  [0]=>
-  NULL
-  [1]=>
-  NULL
-}
-Done
---UEXPECTF--
-*** Testing array_fill() : usage variations ***
---- Testing array_fill() with different values for 'val' argument ---
--- Iteration 1 --
-array(2) {
-  [0]=>
   unicode(0) ""
   [1]=>
   unicode(0) ""

@@ -79,26 +79,3 @@ NULL
 Warning: uasort() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing uasort() : error conditions ***
--- Testing uasort() function with Zero argument --
-
-Warning: uasort() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
--- Testing uasort() function with more than expected no. of arguments --
-
-Warning: uasort() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
--- Testing uasort() function with less than expected no. of arguments --
-
-Warning: uasort() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
--- Testing uasort() function with non-existent compare function --
-
-Warning: uasort() expects parameter 2 to be a valid callback, function 'non_existent' not found or invalid function name in %s on line %d
-NULL
--- Testing uasort() function with non-existent compare function and extra argument --
-
-Warning: uasort() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-Done

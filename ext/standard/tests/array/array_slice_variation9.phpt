@@ -43,42 +43,6 @@ Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 -- Array of referenced variables ($preserve_keys = default) --
 array(2) {
   [0]=>
-  &string(3) "two"
-  [1]=>
-  &string(5) "three"
-}
--- Change $val2 ($preserve_keys = TRUE) --
-array(2) {
-  [2]=>
-  &string(12) "hello, world"
-  [1]=>
-  &string(5) "three"
-}
-
--- Pass array by reference --
-array(2) {
-  [0]=>
-  int(2)
-  [1]=>
-  int(3)
-}
--- Check passed array: --
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
-Done
---UEXPECTF--
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
-*** Testing array_slice() : usage variations ***
-
--- Array of referenced variables ($preserve_keys = default) --
-array(2) {
-  [0]=>
   &unicode(3) "two"
   [1]=>
   &unicode(5) "three"

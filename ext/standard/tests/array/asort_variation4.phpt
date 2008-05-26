@@ -41,43 +41,7 @@ var_dump( $temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
-*** Testing asort() :usage variations  ***
-
--- Testing asort() by supplying reference variable array, 'flag' value is default --
-bool(true)
-array(3) {
-  [2]=>
-  &int(33)
-  [1]=>
-  &int(100)
-  [3]=>
-  &int(555)
-}
-
--- Testing asort() by supplying reference variable array, 'flag' = SORT_REGULAR --
-bool(true)
-array(3) {
-  [2]=>
-  &int(33)
-  [1]=>
-  &int(100)
-  [3]=>
-  &int(555)
-}
-
--- Testing asort() by supplying reference variable array, 'flag' = SORT_NUMERIC --
-bool(true)
-array(3) {
-  [2]=>
-  &int(33)
-  [1]=>
-  &int(100)
-  [3]=>
-  &int(555)
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing asort() :usage variations  ***
 
 -- Testing asort() by supplying reference variable array, 'flag' value is default --

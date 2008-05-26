@@ -29,28 +29,7 @@ var_dump( array_combine($keys_array, $values_array) );
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing array_combine() : basic functionality ***
-array(2) {
-  [1]=>
-  int(3)
-  [2]=>
-  int(4)
-}
-array(2) {
-  ["a"]=>
-  string(1) "c"
-  ["b"]=>
-  string(1) "d"
-}
-array(2) {
-  [1]=>
-  string(1) "c"
-  ["b"]=>
-  int(4)
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_combine() : basic functionality ***
 array(2) {
   [1]=>

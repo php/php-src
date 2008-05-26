@@ -47,40 +47,7 @@ var_dump($string_values);
 
 echo "Done"
 ?>
---EXPECTF--
-*** Testing uasort() : 'cmp_function' with reference arguments ***
--- Passing integer values to 'cmp_function' --
-bool(true)
-array(7) {
-  [0]=>
-  int(1)
-  [4]=>
-  int(2)
-  [3]=>
-  int(3)
-  [5]=>
-  int(6)
-  [6]=>
-  int(7)
-  [1]=>
-  int(8)
-  [2]=>
-  int(9)
-}
--- Passing string values to 'cmp_function' --
-bool(true)
-array(4) {
-  [1]=>
-  string(5) "Apple"
-  [3]=>
-  string(6) "Banana"
-  [0]=>
-  string(5) "Mango"
-  [2]=>
-  string(6) "Orange"
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing uasort() : 'cmp_function' with reference arguments ***
 -- Passing integer values to 'cmp_function' --
 bool(true)

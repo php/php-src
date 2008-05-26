@@ -10,7 +10,7 @@ Test arsort() function : usage variations - sort strings
 
 /*
  * testing arsort() by providing different string arrays for $array argument with following flag values
- *  flag value as defualt
+ *  flag value as default
  *  SORT_REGULAR - compare items normally
  *  SORT_STRING  - compare items as strings
 */
@@ -57,196 +57,7 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECTF--
-*** Testing arsort() : usage variations ***
-
--- Testing arsort() by supplying various string arrays --
-
--- Iteration 1 --
-- With default sort_flag -
-bool(true)
-array(12) {
-  ["\xhh"]=>
-  string(4) "\xhh"
-  ["\e"]=>
-  string(2) "\e"
-  ["\ddd"]=>
-  string(4) "\ddd"
-  ["\cx"]=>
-  string(3) "\cx"
-  ["\a"]=>
-  string(2) "\a"
-  ["
-"]=>
-  string(1) "
-"
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  ["
-"]=>
-  string(1) "
-"
-  ["	"]=>
-  string(1) "	"
-  ["null"]=>
-  NULL
-  ["NULL"]=>
-  NULL
-}
-- Sort_flag = SORT_REGULAR -
-bool(true)
-array(12) {
-  ["\xhh"]=>
-  string(4) "\xhh"
-  ["\e"]=>
-  string(2) "\e"
-  ["\ddd"]=>
-  string(4) "\ddd"
-  ["\cx"]=>
-  string(3) "\cx"
-  ["\a"]=>
-  string(2) "\a"
-  ["
-"]=>
-  string(1) "
-"
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  ["
-"]=>
-  string(1) "
-"
-  ["	"]=>
-  string(1) "	"
-  ["null"]=>
-  NULL
-  ["NULL"]=>
-  NULL
-}
-- Sort_flag = SORT_STRING -
-bool(true)
-array(12) {
-  ["\xhh"]=>
-  string(4) "\xhh"
-  ["\e"]=>
-  string(2) "\e"
-  ["\ddd"]=>
-  string(4) "\ddd"
-  ["\cx"]=>
-  string(3) "\cx"
-  ["\a"]=>
-  string(2) "\a"
-  ["
-"]=>
-  string(1) "
-"
-  [""]=>
-  string(1) ""
-  [""]=>
-  string(1) ""
-  ["
-"]=>
-  string(1) "
-"
-  ["	"]=>
-  string(1) "	"
-  ["null"]=>
-  NULL
-  ["NULL"]=>
-  NULL
-}
-
--- Iteration 2 --
-- With default sort_flag -
-bool(true)
-array(12) {
-  ["x"]=>
-  string(1) "x"
-  ["w"]=>
-  string(2) "ww"
-  ["t"]=>
-  string(3) "ttt"
-  ["o"]=>
-  string(6) "oraNGe"
-  ["l"]=>
-  string(5) "lemoN"
-  ["b"]=>
-  string(6) "banana"
-  ["a"]=>
-  string(5) "apple"
-  ["X"]=>
-  string(1) "X"
-  ["Te"]=>
-  string(4) "Test"
-  ["T"]=>
-  string(4) "TTTT"
-  ["O"]=>
-  string(6) "Orange"
-  ["B"]=>
-  string(6) "BANANA"
-}
-- Sort_flag = SORT_REGULAR -
-bool(true)
-array(12) {
-  ["x"]=>
-  string(1) "x"
-  ["w"]=>
-  string(2) "ww"
-  ["t"]=>
-  string(3) "ttt"
-  ["o"]=>
-  string(6) "oraNGe"
-  ["l"]=>
-  string(5) "lemoN"
-  ["b"]=>
-  string(6) "banana"
-  ["a"]=>
-  string(5) "apple"
-  ["X"]=>
-  string(1) "X"
-  ["Te"]=>
-  string(4) "Test"
-  ["T"]=>
-  string(4) "TTTT"
-  ["O"]=>
-  string(6) "Orange"
-  ["B"]=>
-  string(6) "BANANA"
-}
-- Sort_flag = SORT_STRING -
-bool(true)
-array(12) {
-  ["x"]=>
-  string(1) "x"
-  ["w"]=>
-  string(2) "ww"
-  ["t"]=>
-  string(3) "ttt"
-  ["o"]=>
-  string(6) "oraNGe"
-  ["l"]=>
-  string(5) "lemoN"
-  ["b"]=>
-  string(6) "banana"
-  ["a"]=>
-  string(5) "apple"
-  ["X"]=>
-  string(1) "X"
-  ["Te"]=>
-  string(4) "Test"
-  ["T"]=>
-  string(4) "TTTT"
-  ["O"]=>
-  string(6) "Orange"
-  ["B"]=>
-  string(6) "BANANA"
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing arsort() : usage variations ***
 
 -- Testing arsort() by supplying various string arrays --

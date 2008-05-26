@@ -46,30 +46,7 @@ var_dump(current($multi_array[3][3][3]));
 var_dump(current($multi_array[3][3][3][1]));
 ?>
 ===DONE===
---EXPECTF--
-*** Testing current() : usage variations ***
-
--- Two Dimensional Array --
-Initial Position: string(4) "zero"
-Next Position:    array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
-End Position:     string(3) "two"
-
--- Access an Array Within an Array --
-Initial Position: int(1)
-
--- Recursive, Multidimensional Array --
-Current Position: string(3) "two"
-string(3) "two"
-int(1)
-===DONE===
---UEXPECTF--
+--EXPECT--
 *** Testing current() : usage variations ***
 
 -- Two Dimensional Array --

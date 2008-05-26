@@ -31,24 +31,6 @@ echo "Done";
 
 -- Call array_change_key_case() --
 array(3) {
-  ["ONE"]=>
-  string(2) "un"
-  ["TWO"]=>
-  string(4) "deux"
-  ["THREE"]=>
-  string(5) "trois"
-}
--- Position of Internal Pointer in Result: --
-ONE => un
-
--- Position of Internal Pointer in Original Array: --
-one => un
-Done
---UEXPECTF--
-*** Testing array_change_key_case() : usage variations ***
-
--- Call array_change_key_case() --
-array(3) {
   [u"ONE"]=>
   unicode(2) "un"
   [u"TWO"]=>

@@ -29,32 +29,7 @@ var_dump($array);
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing natcasesort() : usage variation ***
-
--- Initial test --
-bool(true)
-array(3) {
-  [1]=>
-  &int(33)
-  [0]=>
-  &int(100)
-  [2]=>
-  &int(555)
-}
-
--- Change $value1 --
-bool(true)
-array(3) {
-  [0]=>
-  &int(-29)
-  [1]=>
-  &int(33)
-  [2]=>
-  &int(555)
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing natcasesort() : usage variation ***
 
 -- Initial test --

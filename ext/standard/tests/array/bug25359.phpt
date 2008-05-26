@@ -20,19 +20,6 @@ does_not_work();
 --EXPECT--
 array(5) {
   [0]=>
-  string(5) "first"
-  [1]=>
-  string(6) "second"
-  [2]=>
-  string(5) "third"
-  [3]=>
-  string(5) "forth"
-  [4]=>
-  string(5) "fifth"
-}
---UEXPECT--
-array(5) {
-  [0]=>
   unicode(5) "first"
   [1]=>
   unicode(6) "second"

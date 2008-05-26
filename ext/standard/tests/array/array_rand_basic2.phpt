@@ -39,29 +39,6 @@ echo "Done";
 -- with all default and optional arguments --
 array(6) {
   [0]=>
-  string(%d) "%s"
-  [1]=>
-  string(%d) "%s"
-  [2]=>
-  string(%d) "%s"
-  [3]=>
-  string(%d) "%s"
-  [4]=>
-  string(%d) "%s"
-  [5]=>
-  string(%d) "%s"
-}
-
--- with default argument --
-string(%d) "%s"
-Done
-
---UEXPECTF--
-*** Testing array_rand() : with associative array ***
-
--- with all default and optional arguments --
-array(6) {
-  [0]=>
   unicode(%d) "%s"
   [1]=>
   unicode(%d) "%s"

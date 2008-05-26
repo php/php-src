@@ -85,48 +85,6 @@ bool\(true\)
 The output array is:
 array\(6\) {
   \[0\]=>
-  string\([0-9]*\) "[0-9 a-z \n \0 \t]*"
-  \[1\]=>
-  string\([0-9]*\) "[0-9 a-z \n \0 \t]*"
-  \[2\]=>
-  string\([0-9]*\) "[0-9 a-z \n \0 \t]*"
-  \[3\]=>
-  string\([0-9]*\) "[0-9 a-z \n \0 \t]*"
-  \[4\]=>
-  string\([0-9]*\) "[0-9 a-z \n \0 \t]*"
-  \[5\]=>
-  string\([0-9]*\) "[0-9 a-z \n \0 \t]*"
-}
-
--- with array having heredoc strings as keys --
-bool\(true\)
-
-The output array is:
-array\(6\) {
-  \[0\]=>
-  string\(8\) "[heredoc 1-5]*"
-  \[1\]=>
-  string\(8\) "[heredoc 1-5]*"
-  \[2\]=>
-  string\(8\) "[heredoc 1-5]*"
-  \[3\]=>
-  string\(8\) "[heredoc 1-5]*"
-  \[4\]=>
-  string\(8\) "[heredoc 1-5]*"
-  \[5\]=>
-  string\(8\) "[heredoc 1-5]*"
-}
-Done
-
---UEXPECTREGEX--
-\*\*\* Testing shuffle\(\) : with array containing heredoc strings \*\*\*
-
--- with array of heredoc strings --
-bool\(true\)
-
-The output array is:
-array\(6\) {
-  \[0\]=>
   unicode\([0-9]*\) "[0-9 a-z \n \0 \t]*"
   \[1\]=>
   unicode\([0-9]*\) "[0-9 a-z \n \0 \t]*"

@@ -31,17 +31,7 @@ echo "\$array2: ";
 var_dump(key($array2));
 ?>
 ===DONE===
---EXPECTF--
-*** Testing key() : usage variations ***
-
--- Initial position of internal pointer --
-int(0)
-
--- Position after calling next() --
-$array1: int(1)
-$array2: int(1)
-===DONE===
---UEXPECTF--
+--EXPECT--
 *** Testing key() : usage variations ***
 
 -- Initial position of internal pointer --

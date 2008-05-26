@@ -13,13 +13,7 @@ foo($state);
 reset($state);
 var_dump( key($state), current($state) );
 ?>
---EXPECT--	
-three => 3
-two => 2
-one => 1
-string(3) "one"
-int(1)
---UEXPECT--	
+--EXPECT--
 three => 3
 two => 2
 one => 1

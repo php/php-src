@@ -1,5 +1,5 @@
 --TEST--
-Test sort() function : usage variations - sort array with diff. sub arrays, 'sort_flags' as defualt/SORT_REGULAR 
+Test sort() function : usage variations - sort array with diff. sub arrays, 'sort_flags' as default/SORT_REGULAR 
 --FILE--
 <?php
 /* Prototype  : bool sort ( array &$array [, int $sort_flags] )
@@ -10,7 +10,7 @@ Test sort() function : usage variations - sort array with diff. sub arrays, 'sor
 
 /*
  * testing sort() by providing arrays contains sub arrays for $array argument with flowing flag values
- * flag value as defualt
+ * flag value as default
  * SORT_REGULAR - compare items normally
 */
 
@@ -39,8 +39,8 @@ echo "\n-- Testing sort() by supplying various arrays containing sub arrays --\n
 foreach ($various_arrays as $array) {
  
   echo "\n-- Iteration $count --\n"; 
-  // testing sort() function by supplying different arrays, flag value is defualt
-  echo "- With Defualt sort flag -\n";
+  // testing sort() function by supplying different arrays, flag value is default
+  echo "- With default sort flag -\n";
   $temp_array = $array;
   var_dump(sort($temp_array) );
   var_dump($temp_array);
@@ -55,13 +55,13 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sort() : usage variations ***
 
 -- Testing sort() by supplying various arrays containing sub arrays --
 
 -- Iteration 1 --
-- With Defualt sort flag -
+- With default sort flag -
 bool(true)
 array(0) {
 }
@@ -71,7 +71,7 @@ array(0) {
 }
 
 -- Iteration 2 --
-- With Defualt sort flag -
+- With default sort flag -
 bool(true)
 array(1) {
   [0]=>
@@ -87,7 +87,7 @@ array(1) {
 }
 
 -- Iteration 3 --
-- With Defualt sort flag -
+- With default sort flag -
 bool(true)
 array(3) {
   [0]=>
@@ -119,128 +119,7 @@ array(3) {
 }
 
 -- Iteration 4 --
-- With Defualt sort flag -
-bool(true)
-array(4) {
-  [0]=>
-  array(0) {
-  }
-  [1]=>
-  array(1) {
-    [0]=>
-    int(11)
-  }
-  [2]=>
-  array(2) {
-    [0]=>
-    int(22)
-    [1]=>
-    int(-55)
-  }
-  [3]=>
-  array(3) {
-    [0]=>
-    int(33)
-    [1]=>
-    int(-5)
-    [2]=>
-    int(6)
-  }
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(4) {
-  [0]=>
-  array(0) {
-  }
-  [1]=>
-  array(1) {
-    [0]=>
-    int(11)
-  }
-  [2]=>
-  array(2) {
-    [0]=>
-    int(22)
-    [1]=>
-    int(-55)
-  }
-  [3]=>
-  array(3) {
-    [0]=>
-    int(33)
-    [1]=>
-    int(-5)
-    [2]=>
-    int(6)
-  }
-}
-Done
---UEXPECTF--
-*** Testing sort() : usage variations ***
-
--- Testing sort() by supplying various arrays containing sub arrays --
-
--- Iteration 1 --
-- With Defualt sort flag -
-bool(true)
-array(0) {
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(0) {
-}
-
--- Iteration 2 --
-- With Defualt sort flag -
-bool(true)
-array(1) {
-  [0]=>
-  array(0) {
-  }
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(1) {
-  [0]=>
-  array(0) {
-  }
-}
-
--- Iteration 3 --
-- With Defualt sort flag -
-bool(true)
-array(3) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(44)
-  [2]=>
-  array(2) {
-    [0]=>
-    int(64)
-    [1]=>
-    int(61)
-  }
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(3) {
-  [0]=>
-  int(11)
-  [1]=>
-  int(44)
-  [2]=>
-  array(2) {
-    [0]=>
-    int(64)
-    [1]=>
-    int(61)
-  }
-}
-
--- Iteration 4 --
-- With Defualt sort flag -
+- With default sort flag -
 bool(true)
 array(4) {
   [0]=>

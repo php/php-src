@@ -32,17 +32,3 @@ NULL
 Warning: Wrong parameter count for array_unshift() in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing array_unshift() : error conditions ***
-
--- Testing array_unshift() function with Zero arguments --
-
-Warning: Wrong parameter count for array_unshift() in %s on line %d
-NULL
-
--- Testing array_unshift() function with less than expected no. of arguments --
-
-Warning: Wrong parameter count for array_unshift() in %s on line %d
-NULL
-Done
-

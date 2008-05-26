@@ -65,71 +65,7 @@ fclose($fp);
   
 echo "Done";
 ?>
---EXPECTF--
-*** Testing array_unique() : assoc. array with diff. values to $input argument ***
--- Iteration 1 --
-array(1) {
-  [0]=>
-  int(0)
-}
--- Iteration 2 --
-array(2) {
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-}
--- Iteration 3 --
-array(1) {
-  ["float1"]=>
-  float(2.3333)
-}
--- Iteration 4 --
-array(3) {
-  ["f1"]=>
-  float(1.2)
-  ["f2"]=>
-  float(3.33)
-  [3]=>
-  float(4.8999992284)
-}
--- Iteration 5 --
-array(3) {
-  [111]=>
-  string(6) "	Hello"
-  ["red"]=>
-  string(6) "col	or"
-  [2]=>
-  string(7) "world"
-}
--- Iteration 6 --
-array(3) {
-  [111]=>
-  string(7) "\tHello"
-  ["red"]=>
-  string(7) "col\tor"
-  [2]=>
-  string(9) "\v\fworld"
-}
--- Iteration 7 --
-array(2) {
-  [1]=>
-  string(5) "hello"
-  ["heredoc"]=>
-  string(11) "Hello world"
-}
--- Iteration 8 --
-array(3) {
-  [11]=>
-  object(classA)#%d (0) {
-  }
-  ["unset"]=>
-  NULL
-  ["resource"]=>
-  resource(%d) of type (stream)
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_unique() : assoc. array with diff. values to $input argument ***
 -- Iteration 1 --
 array(1) {

@@ -11,7 +11,7 @@ Test sort() function : usage variations - sort strings
 /*
  * testing sort() by providing different string arrays for $array argument with
  * following flag values
- *  flag value as defualt
+ *  flag value as default
  *  SORT_REGULAR - compare items normally
  *  SORT_STRING  - compare items as strings
 */
@@ -52,190 +52,7 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECTF--
-*** Testing sort() : usage variations ***
-
--- Testing sort() by supplying various string arrays --
-
--- Iteration 1 --
-- With Default sort flag -
-bool(true)
-array(12) {
-  [0]=>
-  NULL
-  [1]=>
-  NULL
-  [2]=>
-  string(1) "	"
-  [3]=>
-  string(1) "
-"
-  [4]=>
-  string(1) ""
-  [5]=>
-  string(1) ""
-  [6]=>
-  string(1) "
-"
-  [7]=>
-  string(2) "\a"
-  [8]=>
-  string(3) "\cx"
-  [9]=>
-  string(4) "\ddd"
-  [10]=>
-  string(2) "\e"
-  [11]=>
-  string(4) "\xhh"
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(12) {
-  [0]=>
-  NULL
-  [1]=>
-  NULL
-  [2]=>
-  string(1) "	"
-  [3]=>
-  string(1) "
-"
-  [4]=>
-  string(1) ""
-  [5]=>
-  string(1) ""
-  [6]=>
-  string(1) "
-"
-  [7]=>
-  string(2) "\a"
-  [8]=>
-  string(3) "\cx"
-  [9]=>
-  string(4) "\ddd"
-  [10]=>
-  string(2) "\e"
-  [11]=>
-  string(4) "\xhh"
-}
-- Sort flag = SORT_STRING -
-bool(true)
-array(12) {
-  [0]=>
-  NULL
-  [1]=>
-  NULL
-  [2]=>
-  string(1) "	"
-  [3]=>
-  string(1) "
-"
-  [4]=>
-  string(1) ""
-  [5]=>
-  string(1) ""
-  [6]=>
-  string(1) "
-"
-  [7]=>
-  string(2) "\a"
-  [8]=>
-  string(3) "\cx"
-  [9]=>
-  string(4) "\ddd"
-  [10]=>
-  string(2) "\e"
-  [11]=>
-  string(4) "\xhh"
-}
-
--- Iteration 2 --
-- With Default sort flag -
-bool(true)
-array(12) {
-  [0]=>
-  string(6) "BANANA"
-  [1]=>
-  string(6) "Orange"
-  [2]=>
-  string(4) "TTTT"
-  [3]=>
-  string(4) "Test"
-  [4]=>
-  string(1) "X"
-  [5]=>
-  string(5) "apple"
-  [6]=>
-  string(6) "banana"
-  [7]=>
-  string(5) "lemoN"
-  [8]=>
-  string(6) "oraNGe"
-  [9]=>
-  string(3) "ttt"
-  [10]=>
-  string(2) "ww"
-  [11]=>
-  string(1) "x"
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(12) {
-  [0]=>
-  string(6) "BANANA"
-  [1]=>
-  string(6) "Orange"
-  [2]=>
-  string(4) "TTTT"
-  [3]=>
-  string(4) "Test"
-  [4]=>
-  string(1) "X"
-  [5]=>
-  string(5) "apple"
-  [6]=>
-  string(6) "banana"
-  [7]=>
-  string(5) "lemoN"
-  [8]=>
-  string(6) "oraNGe"
-  [9]=>
-  string(3) "ttt"
-  [10]=>
-  string(2) "ww"
-  [11]=>
-  string(1) "x"
-}
-- Sort flag = SORT_STRING -
-bool(true)
-array(12) {
-  [0]=>
-  string(6) "BANANA"
-  [1]=>
-  string(6) "Orange"
-  [2]=>
-  string(4) "TTTT"
-  [3]=>
-  string(4) "Test"
-  [4]=>
-  string(1) "X"
-  [5]=>
-  string(5) "apple"
-  [6]=>
-  string(6) "banana"
-  [7]=>
-  string(5) "lemoN"
-  [8]=>
-  string(6) "oraNGe"
-  [9]=>
-  string(3) "ttt"
-  [10]=>
-  string(2) "ww"
-  [11]=>
-  string(1) "x"
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing sort() : usage variations ***
 
 -- Testing sort() by supplying various string arrays --

@@ -28,28 +28,7 @@ echo key($arr) . " => " . current($arr) . "\n";
 echo "Done";
 ?>
 
---EXPECTF--
-*** Testing each() : usage variations ***
-
--- Current position: --
-0 => zero
-
--- Call to each(): --
-array(4) {
-  [1]=>
-  string(4) "zero"
-  ["value"]=>
-  string(4) "zero"
-  [0]=>
-  int(0)
-  ["key"]=>
-  int(0)
-}
-
--- New position: --
-1 => one
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing each() : usage variations ***
 
 -- Current position: --

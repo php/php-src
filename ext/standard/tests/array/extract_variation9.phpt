@@ -14,7 +14,7 @@ var_dump ( extract(get_object_vars($A),EXTR_REFS));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing for object ***
 int(1)
 Done

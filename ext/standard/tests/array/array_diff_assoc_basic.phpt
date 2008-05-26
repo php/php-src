@@ -36,60 +36,7 @@ var_dump(array_diff_assoc($array_string_key, $array_numeric_key));
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing array_diff_assoc() : basic functionality ***
--- Compare Default keys to numeric keys --
-array(3) {
-  [0]=>
-  string(3) "one"
-  [1]=>
-  int(2)
-  [2]=>
-  string(5) "three"
-}
-array(2) {
-  [1]=>
-  string(3) "one"
-  [2]=>
-  string(3) "two"
-}
-
--- Compare Default keys to string keys --
-array(3) {
-  [0]=>
-  string(3) "one"
-  [1]=>
-  int(2)
-  [2]=>
-  string(5) "three"
-}
-array(2) {
-  [1]=>
-  string(3) "one"
-  [2]=>
-  string(3) "two"
-}
-
--- Compare numeric keys to string keys --
-array(3) {
-  [1]=>
-  string(3) "one"
-  [2]=>
-  string(3) "two"
-  [3]=>
-  int(4)
-}
-array(3) {
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  string(1) "2"
-  [3]=>
-  string(5) "three"
-}
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing array_diff_assoc() : basic functionality ***
 -- Compare Default keys to numeric keys --
 array(3) {

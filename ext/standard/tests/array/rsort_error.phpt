@@ -49,22 +49,3 @@ array(2) {
   int(2)
 }
 Done
---UEXPECTF--
-*** Testing rsort() : error conditions ***
-
--- Testing rsort() function with Zero arguments --
-
-Warning: rsort() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
-
--- Testing rsort() function with more than expected no. of arguments --
-
-Warning: rsort() expects at most 2 parameters, 3 given in %s on line %d
-bool(false)
-array(2) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-}
-Done

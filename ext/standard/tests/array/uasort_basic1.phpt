@@ -55,66 +55,7 @@ var_dump($string_key_arg);
 
 echo "Done"
 ?>
---EXPECTF--
-*** Testing uasort() : basic functionality ***
--- Numeric array with default keys --
-bool(true)
-array(7) {
-  [0]=>
-  int(1)
-  [4]=>
-  int(2)
-  [3]=>
-  int(3)
-  [5]=>
-  int(6)
-  [6]=>
-  int(7)
-  [1]=>
-  int(8)
-  [2]=>
-  int(9)
-}
--- String array with default keys --
-bool(true)
-array(4) {
-  [0]=>
-  string(4) "This"
-  [2]=>
-  string(1) "a"
-  [1]=>
-  string(2) "is"
-  [3]=>
-  string(4) "test"
-}
--- Associative array with numeric keys --
-bool(true)
-array(5) {
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-  [5]=>
-  int(4)
-  [3]=>
-  int(7)
-  [4]=>
-  int(9)
-}
--- Associative array with string keys --
-bool(true)
-array(4) {
-  ["three"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-  ["one"]=>
-  int(4)
-  ["four"]=>
-  int(10)
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing uasort() : basic functionality ***
 -- Numeric array with default keys --
 bool(true)

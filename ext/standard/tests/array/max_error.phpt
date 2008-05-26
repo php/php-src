@@ -31,18 +31,3 @@ bool(false)
 
 Warning: Wrong parameter count for max() in %s on line %d
 NULL
---UEXPECTF--
-
-*** Testing Error Conditions ***
-
-Warning: max(): At least one %s on line %d
-NULL
-
-Warning: Wrong parameter count for max() in %s on line %d
-NULL
-
-Warning: max(): Array must contain at least one element in %s on line %d
-bool(false)
-
-Warning: Wrong parameter count for max() in %s on line %d
-NULL

@@ -25,16 +25,3 @@ array(3) {
   int(2)
 }
 Done
---UEXPECTF--
-
-Warning: array_splice() expects at most 4 parameters, 10 given in %s on line %d
-NULL
-array(3) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-}
-Done

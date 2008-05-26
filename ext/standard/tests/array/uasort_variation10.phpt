@@ -55,24 +55,7 @@ var_dump($array_arg);
 
 echo "Done"
 ?>
---EXPECTF--
-*** Testing uasort() : 'array_arg' with elements as reference ***
--- Sorting 'array_arg' containing different references --
-bool(true)
-array(5) {
-  [1]=>
-  &int(-5)
-  [4]=>
-  &int(0)
-  [0]=>
-  int(10)
-  [2]=>
-  &int(100)
-  [3]=>
-  int(200)
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing uasort() : 'array_arg' with elements as reference ***
 -- Sorting 'array_arg' containing different references --
 bool(true)

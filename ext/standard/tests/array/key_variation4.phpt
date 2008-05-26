@@ -45,23 +45,7 @@ var_dump(key($multi_array[3][3][3]));
 var_dump(key($multi_array[3][3][3][1]));
 ?>
 ===DONE===
---EXPECTF--
-*** Testing key() : usage variations ***
-
--- Two Dimensional Array --
-Initial Position: int(0)
-Next Position:    int(1)
-End Position:     int(2)
-
--- Access an Array Within an Array --
-Initial Position: int(0)
-
--- Recursive, Multidimensional Array --
-Current Position: int(2)
-int(2)
-int(0)
-===DONE===
---UEXPECTF--
+--EXPECT--
 *** Testing key() : usage variations ***
 
 -- Two Dimensional Array --

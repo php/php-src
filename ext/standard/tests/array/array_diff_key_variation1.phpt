@@ -29,7 +29,7 @@ print "Result of comparing strings containing integers and strings containing fl
 print_r(array_diff_key($arr3, $arr4));
 print_r(array_diff_key($arr4, $arr3));
 ?>
---EXPECTF--
+--EXPECT--
 Result of comparing integers and floating point value:
 Array
 (

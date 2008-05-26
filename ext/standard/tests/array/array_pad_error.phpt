@@ -51,24 +51,3 @@ NULL
 Warning: array_pad() expects exactly 3 parameters, 1 given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing array_pad() : error conditions ***
-
--- Testing array_pad() function with Zero arguments --
-
-Warning: array_pad() expects exactly 3 parameters, 0 given in %s on line %d
-NULL
-
--- Testing array_pad() function with more than expected no. of arguments --
-
-Warning: array_pad() expects exactly 3 parameters, 4 given in %s on line %d
-NULL
-
--- Testing array_pad() function with less than expected no. of arguments --
-
-Warning: array_pad() expects exactly 3 parameters, 2 given in %s on line %d
-NULL
-
-Warning: array_pad() expects exactly 3 parameters, 1 given in %s on line %d
-NULL
-Done

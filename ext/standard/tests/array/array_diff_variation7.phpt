@@ -45,55 +45,7 @@ var_dump(array_diff($arr2, $arr1));
 echo "Done";
 ?>
 
---EXPECTF--
-
-*** Testing array_diff() : usage variations ***
--- Basic Comparison --
-array(3) {
-  [0]=>
-  string(2) "&a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
--- $a changed --
-array(3) {
-  [0]=>
-  string(2) "&a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
--- Arrays referenced to each other --
-array(0) {
-}
-array(0) {
-}
--- $arr1 changed --
-array(0) {
-}
-array(0) {
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_diff() : usage variations ***
 -- Basic Comparison --
 array(3) {

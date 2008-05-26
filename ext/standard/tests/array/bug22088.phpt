@@ -17,23 +17,6 @@ var_dump($a);
 --EXPECT--
 array(3) {
   [0]=>
-  string(1) "b"
-  [1]=>
-  string(1) "c"
-  [2]=>
-  string(1) "a"
-}
-array(3) {
-  ["b"]=>
-  int(2)
-  ["c"]=>
-  int(3)
-  [0]=>
-  string(1) "a"
-}
---UEXPECT--
-array(3) {
-  [0]=>
   unicode(1) "b"
   [1]=>
   unicode(1) "c"

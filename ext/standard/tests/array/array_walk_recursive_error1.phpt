@@ -46,18 +46,3 @@ NULL
 Warning: array_walk_recursive() expects parameter 2 to be a valid callback, function 'non_existent' not found or invalid function name in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing array_walk_recursive() : error conditions ***
--- Testing array_walk_recursive() function with zero arguments --
-
-Warning: array_walk_recursive() expects at least 2 parameters, 0 given in %s on line %d
-NULL
--- Testing array_walk_recursive() function with one argument --
-
-Warning: array_walk_recursive() expects at least 2 parameters, 1 given in %s on line %d
-NULL
--- Testing array_walk_recursive() function with non existent callback function  --
-
-Warning: array_walk_recursive() expects parameter 2 to be a valid callback, function 'non_existent' not found or invalid function name in %s on line %d
-NULL
-Done

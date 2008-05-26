@@ -40,14 +40,3 @@ bool(true)
 Warning: array_walk_recursive() expects parameter 2 to be a valid callback, function 'echo' not found or invalid function name in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing array_walk_recursive() : built-in function as callback ***
--- With 'pow' built-in function --
-bool(true)
--- With 'min' built-in function --
-bool(true)
--- With 'echo' language construct --
-
-Warning: array_walk_recursive() expects parameter 2 to be a valid callback, function 'echo' not found or invalid function name in %s on line %d
-NULL
-Done

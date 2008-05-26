@@ -47,20 +47,3 @@ bool(true)
 -- Both arguments are referenced variables --
 bool(true)
 Done
---UEXPECTF--
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
-
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
-
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
-*** Testing array_key_exists() : usage variations ***
-
--- $search is a reference to $array --
-bool(true)
-
--- $key is a referenced variable --
-bool(true)
-
--- Both arguments are referenced variables --
-bool(true)
-Done

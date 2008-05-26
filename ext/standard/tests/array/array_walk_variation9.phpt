@@ -50,54 +50,7 @@ var_dump( array_walk($input, 'callback_two_parameter', 10));
 
 echo "Done"
 ?>
---EXPECTF--
-*** Testing array_walk() : callback function variation ***
--- callback function with both parameters --
-int(0)
-string(5) "Apple"
-
-int(1)
-string(6) "Banana"
-
-int(2)
-string(5) "Mango"
-
-int(3)
-string(6) "Orange"
-
-bool(true)
--- callback function with only one parameter --
-string(5) "Apple"
-
-string(6) "Banana"
-
-string(5) "Mango"
-
-string(6) "Orange"
-
-bool(true)
--- callback function without parameters --
-callback3() called
-callback3() called
-callback3() called
-callback3() called
-bool(true)
--- passing one more parameter to function with two parameters --
-int(0)
-string(5) "Apple"
-
-int(1)
-string(6) "Banana"
-
-int(2)
-string(5) "Mango"
-
-int(3)
-string(6) "Orange"
-
-bool(true)
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_walk() : callback function variation ***
 -- callback function with both parameters --
 int(0)

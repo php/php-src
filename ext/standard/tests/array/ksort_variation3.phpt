@@ -10,7 +10,7 @@ Test ksort() function : usage variations - sort integer/float values
 /*
  * Testing ksort() by providing array of integer/float/mixed values for $array argument
  * with following flag  values:
- *  1. flag value as defualt
+ *  1. flag value as default
  *  2. SORT_REGULAR - compare items normally
  *  3. SORT_NUMERIC - compare items numerically
 */
@@ -40,7 +40,7 @@ echo "\n-- Testing ksort() by supplying various integer/float arrays --\n";
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
-  echo "- With defualt sort flag -\n"; 
+  echo "- With default sort flag -\n"; 
   $temp_array = $array; 
   var_dump(ksort($temp_array) );
   var_dump($temp_array);
@@ -57,13 +57,13 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ksort() : usage variations ***
 
 -- Testing ksort() by supplying various integer/float arrays --
 
 -- Iteration 1 --
-- With defualt sort flag -
+- With default sort flag -
 bool(true)
 array(9) {
   [-10]=>
@@ -131,7 +131,7 @@ array(9) {
 }
 
 -- Iteration 2 --
-- With defualt sort flag -
+- With default sort flag -
 bool(true)
 array(6) {
   [-7]=>
@@ -181,210 +181,7 @@ array(6) {
 }
 
 -- Iteration 3 --
-- With defualt sort flag -
-bool(true)
-array(11) {
-  [-10]=>
-  float(-0.106)
-  [-8]=>
-  float(-0.9)
-  [-3]=>
-  float(-0.01)
-  [1]=>
-  float(0.0001)
-  [2]=>
-  float(0.0021)
-  [4]=>
-  int(-1)
-  [5]=>
-  int(0)
-  [6]=>
-  float(0.09)
-  [7]=>
-  int(2)
-  [9]=>
-  float(0.106)
-  [11]=>
-  int(33)
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(11) {
-  [-10]=>
-  float(-0.106)
-  [-8]=>
-  float(-0.9)
-  [-3]=>
-  float(-0.01)
-  [1]=>
-  float(0.0001)
-  [2]=>
-  float(0.0021)
-  [4]=>
-  int(-1)
-  [5]=>
-  int(0)
-  [6]=>
-  float(0.09)
-  [7]=>
-  int(2)
-  [9]=>
-  float(0.106)
-  [11]=>
-  int(33)
-}
-- Sort flag = SORT_NUMERIC -
-bool(true)
-array(11) {
-  [-10]=>
-  float(-0.106)
-  [-8]=>
-  float(-0.9)
-  [-3]=>
-  float(-0.01)
-  [1]=>
-  float(0.0001)
-  [2]=>
-  float(0.0021)
-  [4]=>
-  int(-1)
-  [5]=>
-  int(0)
-  [6]=>
-  float(0.09)
-  [7]=>
-  int(2)
-  [9]=>
-  float(0.106)
-  [11]=>
-  int(33)
-}
-Done
---UEXPECTF--
-*** Testing ksort() : usage variations ***
-
--- Testing ksort() by supplying various integer/float arrays --
-
--- Iteration 1 --
-- With defualt sort flag -
-bool(true)
-array(9) {
-  [-10]=>
-  int(-41)
-  [-6]=>
-  int(-31)
-  [-4]=>
-  int(-21)
-  [-2]=>
-  int(-11)
-  [1]=>
-  int(11)
-  [3]=>
-  int(21)
-  [5]=>
-  int(31)
-  [7]=>
-  int(0)
-  [8]=>
-  int(41)
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(9) {
-  [-10]=>
-  int(-41)
-  [-6]=>
-  int(-31)
-  [-4]=>
-  int(-21)
-  [-2]=>
-  int(-11)
-  [1]=>
-  int(11)
-  [3]=>
-  int(21)
-  [5]=>
-  int(31)
-  [7]=>
-  int(0)
-  [8]=>
-  int(41)
-}
-- Sort flag = SORT_NUMERIC -
-bool(true)
-array(9) {
-  [-10]=>
-  int(-41)
-  [-6]=>
-  int(-31)
-  [-4]=>
-  int(-21)
-  [-2]=>
-  int(-11)
-  [1]=>
-  int(11)
-  [3]=>
-  int(21)
-  [5]=>
-  int(31)
-  [7]=>
-  int(0)
-  [8]=>
-  int(41)
-}
-
--- Iteration 2 --
-- With defualt sort flag -
-bool(true)
-array(6) {
-  [-7]=>
-  float(-0.1)
-  [0]=>
-  float(0.5)
-  [1]=>
-  float(10.5)
-  [3]=>
-  float(1050)
-  [4]=>
-  float(0.106)
-  [6]=>
-  float(0.0001)
-}
-- Sort flag = SORT_REGULAR -
-bool(true)
-array(6) {
-  [-7]=>
-  float(-0.1)
-  [0]=>
-  float(0.5)
-  [1]=>
-  float(10.5)
-  [3]=>
-  float(1050)
-  [4]=>
-  float(0.106)
-  [6]=>
-  float(0.0001)
-}
-- Sort flag = SORT_NUMERIC -
-bool(true)
-array(6) {
-  [-7]=>
-  float(-0.1)
-  [0]=>
-  float(0.5)
-  [1]=>
-  float(10.5)
-  [3]=>
-  float(1050)
-  [4]=>
-  float(0.106)
-  [6]=>
-  float(0.0001)
-}
-
--- Iteration 3 --
-- With defualt sort flag -
+- With default sort flag -
 bool(true)
 array(11) {
   [-10]=>

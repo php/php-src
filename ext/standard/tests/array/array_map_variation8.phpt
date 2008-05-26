@@ -46,40 +46,7 @@ var_dump( array_map('callback_cat', $arr1, $arr1) );
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing array_map() : array with references for 'arr1' argument ***
--- with one array --
-array(6) {
-  [0]=>
-  int(0)
-  [1]=>
-  string(5) "hello"
-  [2]=>
-  string(5) "hello"
-  [3]=>
-  string(5) "hello"
-  [4]=>
-  int(0)
-  ["hello"]=>
-  string(5) "hello"
-}
--- with two arrays --
-array(6) {
-  [0]=>
-  string(2) "00"
-  [1]=>
-  string(10) "hellohello"
-  [2]=>
-  string(10) "hellohello"
-  [3]=>
-  string(10) "hellohello"
-  [4]=>
-  string(2) "00"
-  [5]=>
-  string(10) "hellohello"
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_map() : array with references for 'arr1' argument ***
 -- with one array --
 array(6) {

@@ -30,24 +30,7 @@ var_dump(array_diff_assoc($array_assoc, $array_index));
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing array_diff_assoc() : variation ***
-array(2) {
-  [0]=>
-  string(1) "d"
-  [3]=>
-  string(1) "b"
-}
-array(3) {
-  [0]=>
-  string(1) "a"
-  ["b"]=>
-  string(1) "3"
-  ["c"]=>
-  int(2)
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_diff_assoc() : variation ***
 array(2) {
   [0]=>

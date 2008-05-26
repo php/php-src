@@ -32,11 +32,7 @@ var_dump( array_sum($input) );
 
 echo "Done"
 ?>
---EXPECTF--
-*** Testing array_sum() : array with elements as reference ***
-int(305)
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_sum() : array with elements as reference ***
 int(305)
 Done

@@ -33,51 +33,6 @@ array(6) {
   [1]=>
   int(10)
   [2]=>
-  string(4) "blue"
-  [3]=>
-  string(3) "red"
-  [4]=>
-  string(5) "green"
-  [5]=>
-  string(1) "a"
-}
-array(6) {
-  [5]=>
-  float(13.33)
-  [4]=>
-  int(10)
-  [3]=>
-  string(4) "blue"
-  [2]=>
-  string(3) "red"
-  [1]=>
-  string(5) "green"
-  [0]=>
-  string(1) "a"
-}
-array(6) {
-  [0]=>
-  float(13.33)
-  [1]=>
-  int(10)
-  [2]=>
-  string(4) "blue"
-  [3]=>
-  string(3) "red"
-  [4]=>
-  string(5) "green"
-  [5]=>
-  string(1) "a"
-}
-Done
---UEXPECTF--
-*** Testing array_reverse() : basic functionality ***
-array(6) {
-  [0]=>
-  float(13.33)
-  [1]=>
-  int(10)
-  [2]=>
   unicode(4) "blue"
   [3]=>
   unicode(3) "red"

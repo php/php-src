@@ -51,7 +51,7 @@ $inputs = array (
 	          '1' => 1, 
 	          '0' => 0),
 	          
-//defualt keys => float values
+//default keys => float values
 /*7*/	array(2.00000000000001, 1.00, 0.01E-9),
 	          
 //numeric keys => float values
@@ -75,126 +75,7 @@ foreach($inputs as $input) {
 };
 echo "Done";
 ?>
---EXPECTF--
-*** Testing array_diff_assoc() : usage variations ***
-
--- Iteration 1 --
-array(2) {
-  [0]=>
-  string(4) "zero"
-  ["two"]=>
-  float(2)
-}
-array(3) {
-  [0]=>
-  string(16) "2.00000000000001"
-  [2]=>
-  string(4) "zero"
-  [3]=>
-  string(1) "a"
-}
-
--- Iteration 2 --
-array(1) {
-  ["two"]=>
-  float(2)
-}
-array(2) {
-  [2]=>
-  string(16) "2.00000000000001"
-  [3]=>
-  string(1) "a"
-}
-
--- Iteration 3 --
-array(1) {
-  ["two"]=>
-  float(2)
-}
-array(2) {
-  [2]=>
-  string(16) "2.00000000000001"
-  [3]=>
-  string(1) "a"
-}
-
--- Iteration 4 --
-array(2) {
-  [0]=>
-  string(4) "zero"
-  ["two"]=>
-  float(2)
-}
-array(2) {
-  [0]=>
-  int(2)
-  [2]=>
-  int(0)
-}
-
--- Iteration 5 --
-array(2) {
-  [0]=>
-  string(4) "zero"
-  ["two"]=>
-  float(2)
-}
-array(2) {
-  [2]=>
-  int(2)
-  [0]=>
-  int(0)
-}
-
--- Iteration 6 --
-array(1) {
-  [0]=>
-  string(4) "zero"
-}
-array(1) {
-  [0]=>
-  int(0)
-}
-
--- Iteration 7 --
-array(2) {
-  [0]=>
-  string(4) "zero"
-  ["two"]=>
-  float(2)
-}
-array(2) {
-  [0]=>
-  float(2)
-  [2]=>
-  float(1.0E-11)
-}
-
--- Iteration 8 --
-array(2) {
-  [0]=>
-  string(4) "zero"
-  ["two"]=>
-  float(2)
-}
-array(2) {
-  [2]=>
-  float(2)
-  [0]=>
-  float(1.0E-11)
-}
-
--- Iteration 9 --
-array(1) {
-  [0]=>
-  string(4) "zero"
-}
-array(1) {
-  [0]=>
-  float(1.0E-11)
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_diff_assoc() : usage variations ***
 
 -- Iteration 1 --

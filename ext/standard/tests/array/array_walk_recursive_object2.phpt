@@ -79,32 +79,7 @@ var_dump( array_walk_recursive($input, "callback_protected"));
 
 echo "Done"
 ?>
---EXPECTF--
-*** Testing array_walk_recursive() : array of objects ***
--- For private member --
-value : int(3)
-key : int(0)
-value : int(10)
-key : int(1)
-value : int(20)
-key : int(1)
-value : int(-10)
-key : int(0)
-bool(true)
--- For public member --
-value : int(3)
-value : int(10)
-value : int(20)
-value : int(-10)
-bool(true)
--- For protected member --
-value : int(3)
-value : int(10)
-value : int(20)
-value : int(-10)
-bool(true)
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_walk_recursive() : array of objects ***
 -- For private member --
 value : int(3)

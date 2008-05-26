@@ -41,16 +41,3 @@ NULL
 Warning: array_slice() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing array_slice() : error conditions ***
-
--- Testing array_slice() function with more than expected no. of arguments --
-
-Warning: array_slice() expects at most 4 parameters, 5 given in %s on line %d
-NULL
-
--- Testing array_slice() function with less than expected no. of arguments --
-
-Warning: array_slice() expects at least 2 parameters, 1 given in %s on line %d
-NULL
-Done

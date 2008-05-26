@@ -132,43 +132,6 @@ NULL
 bool(true)
 
 -- Iteration 5 : empty string data --
-string(0) ""
-
--- Iteration 6 : empty array data --
-bool(false)
-
--- Iteration 7 : string data --
-string(6) "string"
-
--- Iteration 8 : object data --
-object(classA)#%d (0) {
-}
-
--- Iteration 9 : undefined data --
-NULL
-
--- Iteration 10 : unset data --
-NULL
-
--- Iteration 11 : resource data --
-resource(%d) of type (stream)
-===DONE===
---UEXPECTF--
-*** Testing current() : usage variations ***
-
--- Iteration 1 : int data --
-int(0)
-
--- Iteration 2 : float data --
-float(10.5)
-
--- Iteration 3 : null data --
-NULL
-
--- Iteration 4 : bool data --
-bool(true)
-
--- Iteration 5 : empty string data --
 unicode(0) ""
 
 -- Iteration 6 : empty array data --

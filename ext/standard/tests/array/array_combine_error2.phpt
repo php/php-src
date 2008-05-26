@@ -51,26 +51,3 @@ bool(false)
 Warning: array_combine(): Both parameters should have an equal number of elements in %s on line %d
 bool(false)
 Done
---UEXPECTF--
-*** Testing array_combine() : error conditions specific to array_combine() ***
-
--- Testing array_combine() function with empty arrays --
-
-Warning: array_combine(): Both parameters should have at least 1 element in %s on line %d
-bool(false)
-
--- Testing array_combine() function with empty array for $keys argument --
-
-Warning: array_combine(): Both parameters should have an equal number of elements in %s on line %d
-bool(false)
-
--- Testing array_combine() function with empty array for $values argument --
-
-Warning: array_combine(): Both parameters should have an equal number of elements in %s on line %d
-bool(false)
-
--- Testing array_combine() function by passing array with unequal number of elements --
-
-Warning: array_combine(): Both parameters should have an equal number of elements in %s on line %d
-bool(false)
-Done

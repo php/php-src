@@ -26,53 +26,7 @@ var_dump(array_merge($arr2, $arr1[3]));
 echo "Done";
 ?>
 
---EXPECTF--
-*** Testing array_merge() : usage variations ***
-
--- Merge a two-dimensional and a one-dimensional array --
-array(7) {
-  [0]=>
-  string(4) "zero"
-  [1]=>
-  string(3) "one"
-  [2]=>
-  string(3) "two"
-  [3]=>
-  array(1) {
-    [0]=>
-    int(0)
-  }
-  [4]=>
-  int(1)
-  [5]=>
-  int(2)
-  [6]=>
-  int(3)
-}
-
--- Merge an array and a sub-array --
-array(4) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-  [3]=>
-  int(3)
-}
-array(4) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-  [3]=>
-  int(0)
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_merge() : usage variations ***
 
 -- Merge a two-dimensional and a one-dimensional array --

@@ -49,58 +49,7 @@ foreach($array_type as $type) {
 
 echo "Done\n";
 ?>
---EXPECTF--
-*** Testing in_array() with different haystack values ***
--- Iteration 1 --
-bool(true)
-bool(true)
-bool(true)
--- Iteration 2 --
-bool(true)
-bool(true)
-bool(true)
--- Iteration 3 --
-bool(true)
-bool(false)
-bool(true)
--- Iteration 4 --
-bool(true)
-bool(true)
-bool(true)
--- Iteration 5 --
-bool(true)
-bool(false)
-bool(true)
--- Iteration 6 --
-bool(true)
-bool(false)
-bool(true)
--- Iteration 7 --
-bool(true)
-bool(false)
-bool(true)
--- Iteration 8 --
-bool(true)
-bool(false)
-bool(true)
--- Iteration 9 --
-bool(true)
-bool(true)
-bool(true)
--- Iteration 10 --
-bool(true)
-bool(false)
-bool(true)
--- Iteration 11 --
-bool(true)
-bool(false)
-bool(true)
--- Iteration 12 --
-bool(true)
-bool(true)
-bool(true)
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing in_array() with different haystack values ***
 -- Iteration 1 --
 bool(true)

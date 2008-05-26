@@ -42,17 +42,7 @@ var_dump( array_sum($float_input) );
                      
 echo "Done"
 ?>
---EXPECTF--
-*** Testing array_sum() : array with different float values ***
--- simple float array --
-float(1.3)
--- float array with scientific notations e and E --
-float(23630.021)
-float(23180.021)
--- Mixed float array --
-float(6531.5458)
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_sum() : array with different float values ***
 -- simple float array --
 float(1.3)

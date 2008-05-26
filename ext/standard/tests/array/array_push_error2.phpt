@@ -28,29 +28,6 @@ echo "Done";
 *** Testing array_push() : error conditions ***
 int(3)
 array(3) {
-  [-%d]=>
-  string(3) "min"
-  [%d]=>
-  string(3) "max"
-  [-%d]=>
-  string(3) "new"
-}
-
-Warning: array_push(): Cannot add element to the array as the next element is already occupied in %s on line %d
-bool(false)
-array(3) {
-  [-%d]=>
-  string(3) "min"
-  [%d]=>
-  string(3) "max"
-  [-%d]=>
-  string(3) "new"
-}
-Done
---UEXPECTF--
-*** Testing array_push() : error conditions ***
-int(3)
-array(3) {
   [-2147483647]=>
   unicode(3) "min"
   [2147483647]=>

@@ -32,34 +32,6 @@ echo "Done";
 -- Slice a two-dimensional array --
 array(3) {
   [0]=>
-  string(3) "one"
-  [1]=>
-  array(3) {
-    [0]=>
-    string(4) "zero"
-    [1]=>
-    string(2) "un"
-    [2]=>
-    string(4) "deux"
-  }
-  [2]=>
-  string(4) "nine"
-}
-
--- $input is a sub-array --
-array(2) {
-  [0]=>
-  string(2) "un"
-  [1]=>
-  string(4) "deux"
-}
-Done
---UEXPECTF--
-*** Testing array_slice() : usage variations ***
-
--- Slice a two-dimensional array --
-array(3) {
-  [0]=>
   unicode(3) "one"
   [1]=>
   array(3) {

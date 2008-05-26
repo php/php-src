@@ -23,26 +23,6 @@ Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
 Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
 array(6) {
   [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-  [0]=>
-  string(1) "z"
-  ["G"]=>
-  int(0)
-  ["h"]=>
-  int(1)
-  ["i"]=>
-  int(2)
-}
---UEXPECTF--
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
-
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
-
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
-array(6) {
-  [1]=>
   unicode(1) "b"
   [2]=>
   unicode(1) "c"

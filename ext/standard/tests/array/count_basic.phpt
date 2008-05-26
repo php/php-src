@@ -31,19 +31,7 @@ var_dump(count($array_multi, 1));
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing count() : basic functionality ***
-
--- One Dimensional Array: --
-int(3)
-
--- Two Dimensional Array: --
-$mode = COUNT_NORMAL:    int(3)
-$mode = 0:               int(3)
-$mode = COUNT_RECURSIVE: int(6)
-$mode = 1:               int(6)
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing count() : basic functionality ***
 
 -- One Dimensional Array: --

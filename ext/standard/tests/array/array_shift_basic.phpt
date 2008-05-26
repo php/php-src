@@ -25,34 +25,7 @@ var_dump($array);
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing array_shift() : basic functionality ***
-
--- Before shift: --
-array(4) {
-  [0]=>
-  string(4) "zero"
-  [1]=>
-  string(3) "one"
-  [3]=>
-  string(5) "three"
-  ["four"]=>
-  int(4)
-}
-
--- After shift: --
-Returned value:	string(4) "zero"
-New array:
-array(3) {
-  [0]=>
-  string(3) "one"
-  [1]=>
-  string(5) "three"
-  ["four"]=>
-  int(4)
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_shift() : basic functionality ***
 
 -- Before shift: --

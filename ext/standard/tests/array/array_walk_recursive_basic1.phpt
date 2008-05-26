@@ -46,41 +46,6 @@ echo "Done";
 --EXPECT--
 *** Testing array_walk_recursive() : basic functionality ***
 -- Using array_walk_recursive() with default parameters to show array contents --
-string(5) "lemon"
-int(0)
-
-string(6) "orange"
-int(0)
-
-string(6) "banana"
-int(1)
-
-string(5) "apple"
-int(0)
-
-bool(true)
--- Using array_walk_recursive() with all parameters --
-string(5) "lemon"
-int(0)
-string(5) "Added"
-
-string(6) "orange"
-int(0)
-string(5) "Added"
-
-string(6) "banana"
-int(1)
-string(5) "Added"
-
-string(5) "apple"
-int(0)
-string(5) "Added"
-
-bool(true)
-Done
---UEXPECTF--
-*** Testing array_walk_recursive() : basic functionality ***
--- Using array_walk_recursive() with default parameters to show array contents --
 unicode(5) "lemon"
 int(0)
 

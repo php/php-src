@@ -46,41 +46,6 @@ echo "Done";
 --EXPECT--
 *** Testing array_walk() : basic functionality ***
 -- Using array_walk() with default parameters to show array contents --
-string(5) "lemon"
-int(0)
-
-string(6) "orange"
-int(1)
-
-string(6) "banana"
-int(2)
-
-string(5) "apple"
-int(3)
-
-bool(true)
--- Using array_walk() with all parameters --
-string(5) "lemon"
-int(0)
-string(5) "Added"
-
-string(6) "orange"
-int(1)
-string(5) "Added"
-
-string(6) "banana"
-int(2)
-string(5) "Added"
-
-string(5) "apple"
-int(3)
-string(5) "Added"
-
-bool(true)
-Done
---UEXPECTF--
-*** Testing array_walk() : basic functionality ***
--- Using array_walk() with default parameters to show array contents --
 unicode(5) "lemon"
 int(0)
 

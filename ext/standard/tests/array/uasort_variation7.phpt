@@ -30,36 +30,7 @@ var_dump($array_arg);
 
 echo "Done"
 ?>
---EXPECTF--
-*** Testing uasort() : anonymous function as 'cmp_function' ***
--- Anonymous 'cmp_function' with parameters passed by value --
-bool(true)
-array(5) {
-  [2]=>
-  int(-70)
-  [1]=>
-  int(3)
-  [3]=>
-  int(24)
-  [4]=>
-  int(90)
-  [0]=>
-  int(100)
-}
--- Anonymous 'cmp_function' with parameters passed by reference --
-bool(true)
-array(4) {
-  ["a"]=>
-  string(5) "Apple"
-  ["b"]=>
-  string(6) "Banana"
-  ["m"]=>
-  string(5) "Mango"
-  ["p"]=>
-  string(9) "Pineapple"
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing uasort() : anonymous function as 'cmp_function' ***
 -- Anonymous 'cmp_function' with parameters passed by value --
 bool(true)

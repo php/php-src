@@ -28,42 +28,6 @@ var_dump($c);
 natcasesort success!
 array(6) {
   [0]=>
-  string(2) "aa"
-  [1]=>
-  string(2) "aa"
-  [3]=>
-  string(2) "bb"
-  [2]=>
-  string(2) "bb"
-  [5]=>
-  string(2) "cc"
-  [6]=>
-  string(2) "cc"
-}
-Array
-(
-    [1] => foo
-    [2] => bar
-    [3] => bar
-)
-array(6) {
-  [4]=>
-  int(0)
-  [3]=>
-  int(0)
-  [2]=>
-  int(0)
-  [1]=>
-  int(0)
-  [5]=>
-  string(3) "foo"
-  [6]=>
-  string(3) "bar"
-}
---UEXPECT--
-natcasesort success!
-array(6) {
-  [0]=>
   unicode(2) "aa"
   [1]=>
   unicode(2) "aa"

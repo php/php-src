@@ -16,14 +16,6 @@ var_dump(key($a));
 ?>
 --EXPECT--
 int(0)
-string(1) "c"
-int(0)
-string(1) "b"
-int(0)
-string(1) "a"
-NULL
---UEXPECT--
-int(0)
 unicode(1) "c"
 int(0)
 unicode(1) "b"

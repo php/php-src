@@ -34,26 +34,7 @@ var_dump( array_filter($input) );
 
 echo "Done"
 ?>
---EXPECTF--
-*** Testing array_filter() : basic functionality ***
-array(2) {
-  [1]=>
-  int(2)
-  [3]=>
-  int(0)
-}
-array(4) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-  [4]=>
-  int(-1)
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_filter() : basic functionality ***
 array(2) {
   [1]=>

@@ -15,7 +15,7 @@ var_dump ( extract($b, EXTR_PREFIX_ALL, "diff"));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing for EXTR_PREFIX_ALL called twice with same prefix string ***
 int(5)
 int(11)

@@ -42,59 +42,6 @@ Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 -- $input argument is a reference to array --
 Result:
 array(3) {
-  ["ONE"]=>
-  int(1)
-  ["TWO"]=>
-  int(2)
-  ["ABC"]=>
-  string(3) "xyz"
-}
-Original:
-array(3) {
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-  ["ABC"]=>
-  string(3) "xyz"
-}
-Referenced:
-array(3) {
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-  ["ABC"]=>
-  string(3) "xyz"
-}
-
--- $input is an array passed by reference --
-Result:
-array(3) {
-  ["ONE"]=>
-  int(1)
-  ["TWO"]=>
-  int(2)
-  ["ABC"]=>
-  string(3) "xyz"
-}
-Original:
-array(3) {
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-  ["ABC"]=>
-  string(3) "xyz"
-}
-Done
---UEXPECTF--
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
-*** Testing array_change_key_case() : usage variations ***
-
--- $input argument is a reference to array --
-Result:
-array(3) {
   [u"ONE"]=>
   int(1)
   [u"TWO"]=>

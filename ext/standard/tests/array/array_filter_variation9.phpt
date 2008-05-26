@@ -59,47 +59,6 @@ array(8) {
   [5]=>
   int(1000)
   [6]=>
-  string(5) "Hello"
-  [7]=>
-  NULL
-}
-
-Warning: array_filter() expects parameter 2 to be a valid callback, function 'echo' not found or invalid function name in %s on line %d
-NULL
-
-Warning: array_filter() expects parameter 2 to be a valid callback, function 'exit' not found or invalid function name in %s on line %d
-NULL
-Done
---UEXPECTF--
-*** Testing array_filter() : usage variations - built-in functions as 'callback' argument ***
-array(6) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-  [2]=>
-  int(-1)
-  [3]=>
-  int(10)
-  [4]=>
-  int(100)
-  [5]=>
-  int(1000)
-}
-array(8) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-  [2]=>
-  int(-1)
-  [3]=>
-  int(10)
-  [4]=>
-  int(100)
-  [5]=>
-  int(1000)
-  [6]=>
   unicode(5) "Hello"
   [7]=>
   NULL

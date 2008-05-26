@@ -26,25 +26,7 @@ echo key($input) . " => " . current ($input) . "\n";
 echo "Done";
 ?>
 
---EXPECTF--
-*** Testing array_values() : usage variations ***
-
--- Call array_values() --
-array(3) {
-  [0]=>
-  string(2) "un"
-  [1]=>
-  string(4) "deux"
-  [2]=>
-  string(5) "trois"
-}
--- Position of Internal Pointer in Result: --
-0 => un
-
--- Position of Internal Pointer in Original Array: --
-one => un
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_values() : usage variations ***
 
 -- Call array_values() --

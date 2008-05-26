@@ -57,26 +57,3 @@ bool(true)
 Warning: array_walk_recursive() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing array_walk_recursive() : error conditions - callback parameters ***
-
-Warning: Missing argument 3 for callback1() in %s on line %d
-
-callback1() invoked 
-bool(true)
-
-Warning: Missing argument 4 for callback2() in %s on line %d
-
-callback2() invoked 
-bool(true)
-
-callback1() invoked 
-bool(true)
-
-callback2() invoked 
-bool(true)
--- Testing array_walk_recursive() function with too many callback parameters --
-
-Warning: array_walk_recursive() expects at most 3 parameters, 4 given in %s on line %d
-NULL
-Done

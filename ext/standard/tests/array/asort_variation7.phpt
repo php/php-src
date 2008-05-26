@@ -42,62 +42,7 @@ var_dump($temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
-*** Testing asort() : usage variations ***
-
--- Testing asort() by supplying bool value array, 'flag' value is default --
-bool(true)
-array(4) {
-  [4]=>
-  bool(false)
-  [2]=>
-  bool(false)
-  [1]=>
-  bool(true)
-  [3]=>
-  bool(true)
-}
-
--- Testing asort() by supplying bool value array, 'flag' value is SORT_REGULAR --
-bool(true)
-array(4) {
-  [4]=>
-  bool(false)
-  [2]=>
-  bool(false)
-  [1]=>
-  bool(true)
-  [3]=>
-  bool(true)
-}
-
--- Testing asort() by supplying bool value array, 'flag' value is SORT_NUMERIC  --
-bool(true)
-array(4) {
-  [4]=>
-  bool(false)
-  [2]=>
-  bool(false)
-  [1]=>
-  bool(true)
-  [3]=>
-  bool(true)
-}
-
--- Testing asort() by supplying bool value array, 'flag' value is SORT_STRING --
-bool(true)
-array(4) {
-  [4]=>
-  bool(false)
-  [2]=>
-  bool(false)
-  [1]=>
-  bool(true)
-  [3]=>
-  bool(true)
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing asort() : usage variations ***
 
 -- Testing asort() by supplying bool value array, 'flag' value is default --

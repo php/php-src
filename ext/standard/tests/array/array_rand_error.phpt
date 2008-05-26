@@ -35,17 +35,3 @@ NULL
 Warning: array_rand() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 Done
-
---UEXPECTF--
-*** Testing array_rand() : error conditions ***
-
--- Testing array_rand() function with Zero arguments --
-
-Warning: array_rand() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
--- Testing array_rand() function with more than expected no. of arguments --
-
-Warning: array_rand() expects at most 2 parameters, 3 given in %s on line %d
-NULL
-Done

@@ -43,56 +43,7 @@ var_dump( array_filter($input) );
 
 echo "Done"
 ?>
---EXPECTF--
-*** Testing array_filter() : usage variations - 'input' containing references ***
-array(3) {
-  [0]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(8)
-  }
-  [1]=>
-  int(10)
-  [2]=>
-  &array(3) {
-    [0]=>
-    int(5)
-    [1]=>
-    int(6)
-    [2]=>
-    int(4)
-  }
-}
-array(4) {
-  [0]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(8)
-  }
-  [1]=>
-  int(10)
-  [2]=>
-  &array(3) {
-    [0]=>
-    int(5)
-    [1]=>
-    int(6)
-    [2]=>
-    int(4)
-  }
-  [3]=>
-  string(5) "value"
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_filter() : usage variations - 'input' containing references ***
 array(3) {
   [0]=>

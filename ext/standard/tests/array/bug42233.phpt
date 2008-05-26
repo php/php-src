@@ -19,20 +19,6 @@ echo "Done.\n";
 ?>
 --EXPECT--
 array(3) {
-  ["a"]=>
-  string(1) "1"
-  ["æ"]=>
-  string(1) "2"
-  ["æøåäö"]=>
-  string(1) "3"
-}
-int(3)
-string(1) "1"
-string(1) "2"
-string(1) "3"
-Done.
---UEXPECT--
-array(3) {
   [u"a"]=>
   unicode(1) "1"
   [u"æ"]=>

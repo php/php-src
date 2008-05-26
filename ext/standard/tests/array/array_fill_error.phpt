@@ -59,24 +59,3 @@ bool(false)
 Warning: array_fill(): Number of elements must be positive in %s on line %d
 bool(false)
 Done
---UEXPECTF--
-*** Testing array_fill() : error conditions ***
--- Testing array_fill() function with Zero arguments --
-
-Warning: array_fill() expects exactly 3 parameters, 0 given in %s on line %d
-NULL
--- Testing array_fill() function with more than expected no. of arguments --
-
-Warning: array_fill() expects exactly 3 parameters, 4 given in %s on line %d
-NULL
--- Testing array_fill() function with less than expected no. of arguments --
-
-Warning: array_fill() expects exactly 3 parameters, 2 given in %s on line %d
-NULL
-
-Warning: array_fill(): Number of elements must be positive in %s on line %d
-bool(false)
-
-Warning: array_fill(): Number of elements must be positive in %s on line %d
-bool(false)
-Done

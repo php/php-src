@@ -38,16 +38,3 @@ NULL
 Warning: natcasesort() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing natcasesort() : error conditions ***
-
--- Testing natcasesort() function with Zero arguments --
-
-Warning: natcasesort() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
--- Testing natcasesort() function with more than expected no. of arguments --
-
-Warning: natcasesort() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-Done

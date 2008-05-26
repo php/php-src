@@ -58,34 +58,3 @@ array(3) {
 Warning: array_map() expects parameter 1 to be a valid callback, function 'echo' not found or invalid function name in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing array_map() : built-in function ***
--- with built-in function 'pow' and two parameters --
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(16)
-  [2]=>
-  int(243)
-}
--- with built-in function 'pow' and one parameter --
-
-Warning: pow() expects exactly 2 parameters, 1 given in %s on line %d
-
-Warning: pow() expects exactly 2 parameters, 1 given in %s on line %d
-
-Warning: pow() expects exactly 2 parameters, 1 given in %s on line %d
-array(3) {
-  [0]=>
-  NULL
-  [1]=>
-  NULL
-  [2]=>
-  NULL
-}
--- with language construct --
-
-Warning: array_map() expects parameter 1 to be a valid callback, function 'echo' not found or invalid function name in %s on line %d
-NULL
-Done

@@ -24,46 +24,7 @@ var_dump(array_merge($arr2, $arr1));
 echo "Done";
 ?>
 
---EXPECTF--
-*** Testing array_merge() : usage variations ***
-array(8) {
-  [0]=>
-  string(4) "zero"
-  [1]=>
-  string(6) "twenty"
-  ["thirty"]=>
-  int(30)
-  [2]=>
-  string(4) "bool"
-  [3]=>
-  string(5) "float"
-  [4]=>
-  int(1)
-  [5]=>
-  int(2)
-  [""]=>
-  string(4) "null"
-}
-array(8) {
-  [0]=>
-  string(5) "float"
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-  [""]=>
-  string(4) "null"
-  [3]=>
-  string(4) "zero"
-  [4]=>
-  string(6) "twenty"
-  ["thirty"]=>
-  int(30)
-  [5]=>
-  string(4) "bool"
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_merge() : usage variations ***
 array(8) {
   [0]=>

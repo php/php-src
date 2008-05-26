@@ -46,55 +46,6 @@ Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 -- Call each until at the end of the array: --
 array(4) {
   [1]=>
-  string(3) "foo"
-  ["value"]=>
-  string(3) "foo"
-  [0]=>
-  string(3) "one"
-  ["key"]=>
-  string(3) "one"
-}
-array(4) {
-  [1]=>
-  string(3) "bar"
-  ["value"]=>
-  string(3) "bar"
-  [0]=>
-  int(0)
-  ["key"]=>
-  int(0)
-}
-bool(false)
-
--- Pass an array by reference to each(): --
-array(4) {
-  [1]=>
-  string(4) "zero"
-  ["value"]=>
-  string(4) "zero"
-  [0]=>
-  int(0)
-  ["key"]=>
-  int(0)
-}
--- Check original array: --
-array(3) {
-  [0]=>
-  string(4) "zero"
-  [1]=>
-  string(3) "one"
-  [2]=>
-  string(3) "two"
-}
-Done
---UEXPECTF--
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
-*** Testing each() : usage variations ***
-
--- Array made up of referenced variables: --
--- Call each until at the end of the array: --
-array(4) {
-  [1]=>
   unicode(3) "foo"
   [u"value"]=>
   unicode(3) "foo"

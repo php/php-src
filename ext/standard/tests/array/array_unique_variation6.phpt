@@ -33,16 +33,7 @@ var_dump( array_unique($input) );
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing array_unique() : array with reference variables for $input argument ***
-array(2) {
-  [0]=>
-  int(0)
-  [1]=>
-  &string(5) "hello"
-}
-Done
---UEXPECT--
+--EXPECT--
 *** Testing array_unique() : array with reference variables for $input argument ***
 array(2) {
   [0]=>

@@ -23,43 +23,6 @@ var_dump($data);
 --EXPECT--
 array(5) {
   [0]=>
-  string(5) "Test1"
-  ["teST2"]=>
-  int(0)
-  [5]=>
-  string(5) "test2"
-  ["abc"]=>
-  string(6) "test10"
-  [6]=>
-  string(6) "test21"
-}
-array(5) {
-  ["teST2"]=>
-  int(0)
-  [0]=>
-  string(5) "Test1"
-  [5]=>
-  string(5) "test2"
-  ["abc"]=>
-  string(6) "test10"
-  [6]=>
-  string(6) "test21"
-}
-array(5) {
-  ["teST2"]=>
-  int(0)
-  [0]=>
-  string(5) "Test1"
-  [5]=>
-  string(5) "test2"
-  ["abc"]=>
-  string(6) "test10"
-  [6]=>
-  string(6) "test21"
-}
---UEXPECT--
-array(5) {
-  [0]=>
   unicode(5) "Test1"
   [u"teST2"]=>
   int(0)

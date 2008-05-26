@@ -19,11 +19,6 @@ var_dump($result);
 ?>
 --EXPECT--
 array(1) {
-  ["a"]=>
-  string(5) "green"
-}
---UEXPECT--
-array(1) {
   [u"a"]=>
   unicode(5) "green"
 }

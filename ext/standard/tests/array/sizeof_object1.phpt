@@ -43,17 +43,7 @@ var_dump( sizeof($obj, COUNT_RECURSIVE) );
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing sizeof() with object functionality ***
--- Testing sizeof() with an object which implements Countable interface --
--- Testing sizeof() in default mode --
-int(3)
--- Testing sizeof() in COUNT_NORMAL mode --
-int(3)
--- Testing sizeof() in COUNT_RECURSIVE mode --
-int(3)
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing sizeof() with object functionality ***
 -- Testing sizeof() with an object which implements Countable interface --
 -- Testing sizeof() in default mode --

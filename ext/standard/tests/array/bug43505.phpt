@@ -26,15 +26,6 @@ var_dump($a);
 ?>
 --EXPECT--
 array(1) {
-  ["test"]=>
-  &NULL
-}
-array(1) {
-  ["test"]=>
-  &NULL
-}
---UEXPECT--
-array(1) {
   [u"test"]=>
   &NULL
 }

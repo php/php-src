@@ -18,33 +18,6 @@ echo "Done\n";
 Warning: array_keys() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
-Warning: array_keys() expects parameter 1 to be array, string given in %s on line %d
-NULL
-
-Warning: array_keys() expects parameter 1 to be array, object given in %s on line %d
-NULL
-
-Warning: array_keys() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: array_keys() expects at most 3 parameters, 4 given in %s on line %d
-NULL
-
-Warning: Illegal offset type in %s on line %d
-array(3) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-}
-Done
---UEXPECTF--
-*** Testing error conditions ***
-Warning: array_keys() expects parameter 1 to be array, integer given in %s on line %d
-NULL
-
 Warning: array_keys() expects parameter 1 to be array, Unicode string given in %s on line %d
 NULL
 

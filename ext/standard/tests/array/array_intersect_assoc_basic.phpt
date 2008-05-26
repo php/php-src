@@ -48,33 +48,6 @@ array(4) {
   [1]=>
   int(2)
   [2]=>
-  string(5) "hello"
-  [3]=>
-  string(5) "world"
-}
-array(0) {
-}
-array(0) {
-}
-array(2) {
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-}
-array(0) {
-}
-array(0) {
-}
-Done
---UEXPECTF--
-*** Testing array_intersect_assoc() : basic functionality ***
-array(4) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
   unicode(5) "hello"
   [3]=>
   unicode(5) "world"

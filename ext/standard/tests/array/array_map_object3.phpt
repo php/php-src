@@ -90,32 +90,3 @@ array(3) {
 Warning: array_map() expects parameter 1 to be a valid callback, class 'ParentClass' does not have a method 'staticchild' in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing array_map() : class methods as callback function ***
--- accessing parent method from child class --
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(5)
-  [2]=>
-  int(7)
-}
--- accessing child method from parent class --
-
-Warning: array_map() expects parameter 1 to be a valid callback, class 'ParentClass' does not have a method 'staticchild' in %s on line %d
-NULL
--- accessing parent method using child class object --
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(5)
-  [2]=>
-  int(7)
-}
--- accessing child method using parent class object --
-
-Warning: array_map() expects parameter 1 to be a valid callback, class 'ParentClass' does not have a method 'staticchild' in %s on line %d
-NULL
-Done

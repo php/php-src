@@ -40,29 +40,7 @@ var_dump( array_walk_recursive($input, "callback"));
 
 echo "Done"
 ?>
---EXPECTF--
-*** Testing array_walk_recursive() : array with references ***
-int(0)
-int(10)
-
-int(0)
-int(-20)
-
-int(1)
-int(-35)
-
-int(0)
-int(10)
-
-int(1)
-int(0)
-
-int(0)
-int(50)
-
-bool(true)
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_walk_recursive() : array with references ***
 int(0)
 int(10)

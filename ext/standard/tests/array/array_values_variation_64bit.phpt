@@ -34,7 +34,7 @@ var_dump( array_values(array(1,2,3)) );
 var_dump( array_values(array()) );  // null array
 
 ?>
---EXPECTF--	
+--EXPECTF--
 *** Testing array_values() with resource type ***
 array(2) {
   [0]=>

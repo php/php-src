@@ -19,27 +19,7 @@ var_dump(min(0, true, false, true));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: min(): At least one value should be passed in %s on line %d
-NULL
-
-Warning: Wrong parameter count for min() in %s on line %d
-NULL
-
-Warning: min(): Array must contain at least one element in %s on line %d
-bool(false)
-
-Warning: Wrong parameter count for min() in %s on line %d
-NULL
-int(1)
-float(2.09)
-string(0) ""
-bool(false)
-bool(false)
-bool(false)
-int(0)
-Done
---UEXPECTF--
+--EXPECTF--
 Warning: min(): At least one value should be passed in %s on line %d
 NULL
 

@@ -22,12 +22,7 @@ var_dump(array_key_exists($key2, $search));
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing array_key_exists() : basic functionality ***
-bool(true)
-bool(false)
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_key_exists() : basic functionality ***
 bool(true)
 bool(false)

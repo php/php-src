@@ -33,52 +33,7 @@ var_dump( array_filter($input, create_function('$input', null) ) );
 
 echo "Done"
 ?>
---EXPECTF--
-*** Testing array_filter() : usage variations - Anonymous callback functions ***
-Anonymous callback function with regular parameter and statement
-array(3) {
-  [3]=>
-  int(10)
-  [4]=>
-  int(100)
-  [5]=>
-  int(1000)
-}
-Anonymous callback function with reference parameter
-array(4) {
-  [0]=>
-  int(0)
-  [2]=>
-  int(-1)
-  [6]=>
-  string(5) "Hello"
-  [7]=>
-  NULL
-}
-Anonymous callback funciton with null argument
-array(8) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-  [2]=>
-  int(-1)
-  [3]=>
-  int(10)
-  [4]=>
-  int(100)
-  [5]=>
-  int(1000)
-  [6]=>
-  string(5) "Hello"
-  [7]=>
-  NULL
-}
-Anonymous callback function with regular argument and null statement
-array(0) {
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing array_filter() : usage variations - Anonymous callback functions ***
 Anonymous callback function with regular parameter and statement
 array(3) {

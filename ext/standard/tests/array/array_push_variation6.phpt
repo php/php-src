@@ -106,59 +106,7 @@ foreach($inputs as $key => $input) {
 echo "Done";
 ?>
 
---EXPECTF--
-*** Testing array_push() : usage variations ***
-
--- Iteration 1 : int data --
-Before : int(4)
-After  : int(5)
-
--- Iteration 2 : float data --
-Before : int(3)
-After  : int(4)
-
--- Iteration 3 : extreme floats data --
-Before : int(2)
-After  : int(3)
-
--- Iteration 4 : null uppercase data --
-Before : int(1)
-After  : int(2)
-
--- Iteration 5 : null lowercase data --
-Before : int(1)
-After  : int(2)
-
--- Iteration 6 : bool lowercase data --
-Before : int(2)
-After  : int(3)
-
--- Iteration 7 : bool uppercase data --
-Before : int(2)
-After  : int(3)
-
--- Iteration 8 : empty double quotes data --
-Before : int(1)
-After  : int(2)
-
--- Iteration 9 : empty single quotes data --
-Before : int(1)
-After  : int(2)
-
--- Iteration 10 : string data --
-Before : int(3)
-After  : int(4)
-
--- Iteration 11 : undefined data --
-Before : int(1)
-After  : int(2)
-
--- Iteration 12 : unset data --
-Before : int(1)
-After  : int(2)
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing array_push() : usage variations ***
 
 -- Iteration 1 : int data --

@@ -37,55 +37,6 @@ echo "Done";
 --EXPECT--
 *** Testing compact() : basic functionality ***
 array(6) {
-  ["a"]=>
-  int(1)
-  ["b"]=>
-  float(0.2)
-  ["c"]=>
-  bool(true)
-  ["d"]=>
-  array(1) {
-    ["key"]=>
-    string(3) "val"
-  }
-  ["e"]=>
-  NULL
-  ["f"]=>
-  string(6) "string"
-}
-array(6) {
-  ["a"]=>
-  int(1)
-  ["b"]=>
-  float(0.2)
-  ["c"]=>
-  bool(true)
-  ["d"]=>
-  array(1) {
-    ["key"]=>
-    string(3) "val"
-  }
-  ["e"]=>
-  NULL
-  ["f"]=>
-  string(6) "string"
-}
-array(2) {
-  ["a"]=>
-  int(1)
-  ["b"]=>
-  float(0.2)
-}
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
-Done
---UEXPECT--
-*** Testing compact() : basic functionality ***
-array(6) {
   [u"a"]=>
   int(1)
   [u"b"]=>

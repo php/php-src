@@ -37,16 +37,3 @@ NULL
 Warning: next() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 ===DONE===
---UEXPECTF--
-*** Testing next() : error conditions ***
-
--- Testing next() function with Zero arguments --
-
-Warning: next() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
--- Testing next() function with more than expected no. of arguments --
-
-Warning: next() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-===DONE===

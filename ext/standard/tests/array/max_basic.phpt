@@ -27,25 +27,6 @@ echo "\nDone\n";
 int(2)
 int(2)
 float(2.11)
-string(1) "t"
-bool(true)
-bool(true)
-int(1)
-bool(true)
-array(2) {
-  [0]=>
-  int(2)
-  [1]=>
-  int(3)
-}
-
-Done
---UEXPECT--
-
-*** Testing sequences of numbers ***
-int(2)
-int(2)
-float(2.11)
 unicode(1) "t"
 bool(true)
 bool(true)

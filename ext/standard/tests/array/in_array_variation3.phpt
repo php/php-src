@@ -59,18 +59,3 @@ Warning: in_array() expects parameter 2 to be array, object given in %s on line 
 NULL
 bool(true)
 Done
---UEXPECTF--
-*** Testing sub-arrays with in_array() ***
-bool(true)
-bool(true)
-bool(true)
-
-*** Testing objects with in_array() ***
-
-Warning: in_array() expects parameter 2 to be array, object given in %s on line %d
-NULL
-
-Warning: in_array() expects parameter 2 to be array, object given in %s on line %d
-NULL
-bool(true)
-Done

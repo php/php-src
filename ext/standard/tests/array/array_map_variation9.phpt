@@ -42,59 +42,6 @@ array(4) {
   [1]=>
   string(5) "world"
   [2]=>
-  string(1) "1"
-  [3]=>
-  string(5) "22.22"
-}
--- checking binary safe array with two parameter callback function --
-
-Warning: Missing argument 2 for callback2() in %s on line %d%d
-
-Notice: Undefined variable: b in %s on line %d%d
-
-Warning: Missing argument 2 for callback2() in %s on line %d%d
-
-Notice: Undefined variable: b in %s on line %d%d
-
-Warning: Missing argument 2 for callback2() in %s on line %d%d
-
-Notice: Undefined variable: b in %s on line %d%d
-
-Warning: Missing argument 2 for callback2() in %s on line %d%d
-
-Notice: Undefined variable: b in %s on line %d%d
-array(4) {
-  [0]=>
-  array(1) {
-    ["hello"]=>
-    NULL
-  }
-  [1]=>
-  array(1) {
-    ["world"]=>
-    NULL
-  }
-  [2]=>
-  array(1) {
-    [1]=>
-    NULL
-  }
-  [3]=>
-  array(1) {
-    ["22.22"]=>
-    NULL
-  }
-}
-Done
---UEXPECTF--
-*** Testing array_map() : array with binary data for 'arr1' argument ***
--- checking binary safe array with one parameter callback function --
-array(4) {
-  [0]=>
-  string(5) "hello"
-  [1]=>
-  string(5) "world"
-  [2]=>
   unicode(1) "1"
   [3]=>
   string(5) "22.22"

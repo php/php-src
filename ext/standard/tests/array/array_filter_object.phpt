@@ -103,61 +103,6 @@ echo "Done"
 array(5) {
   [0]=>
   object(SimpleClass)#%d (1) {
-    ["var1"]=>
-    int(10)
-  }
-  [1]=>
-  object(EmptyClass)#%d (0) {
-  }
-  [2]=>
-  object(ChildClass)#%d (2) {
-    ["var3":"ChildClass":private]=>
-    NULL
-    ["var2":protected]=>
-    int(5)
-  }
-  [3]=>
-  object(FinalClass)#%d (1) {
-    ["var4":"FinalClass":private]=>
-    NULL
-  }
-  [4]=>
-  object(StaticClass)#%d (0) {
-  }
-}
-array(5) {
-  [0]=>
-  object(SimpleClass)#%d (1) {
-    ["var1"]=>
-    int(10)
-  }
-  [1]=>
-  object(EmptyClass)#%d (0) {
-  }
-  [2]=>
-  object(ChildClass)#%d (2) {
-    ["var3":"ChildClass":private]=>
-    NULL
-    ["var2":protected]=>
-    int(5)
-  }
-  [3]=>
-  object(FinalClass)#%d (1) {
-    ["var4":"FinalClass":private]=>
-    NULL
-  }
-  [4]=>
-  object(StaticClass)#%d (0) {
-  }
-}
-array(0) {
-}
-Done
---UEXPECTF--
-*** Testing array_filter() : object functionality ***
-array(5) {
-  [0]=>
-  object(SimpleClass)#%d (1) {
     [u"var1"]=>
     int(10)
   }

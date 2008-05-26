@@ -19,35 +19,7 @@ var_dump($unsorted_hex_array);
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing natcasesort() : usage variation ***
-bool(true)
-array(11) {
-  [8]=>
-  int(-255)
-  [10]=>
-  int(-682)
-  [9]=>
-  int(0)
-  [2]=>
-  int(15)
-  [5]=>
-  int(187)
-  [3]=>
-  int(255)
-  [7]=>
-  int(255)
-  [0]=>
-  int(427)
-  [6]=>
-  int(427)
-  [4]=>
-  int(682)
-  [1]=>
-  int(4095)
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing natcasesort() : usage variation ***
 bool(true)
 array(11) {

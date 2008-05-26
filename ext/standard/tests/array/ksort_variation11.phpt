@@ -10,7 +10,7 @@ Test ksort() function : usage variations - sort heredoc strings
 /*
  * testing ksort() by providing array of heredoc strings for $array argument with
  * following flag values:
- *  1.flag value as defualt
+ *  1.flag value as default
  *  2.SORT_REGULAR - compare items normally
  *  3.SORT_STRING  - compare items as strings
 */
@@ -37,7 +37,7 @@ $array = array (
   $multiline_heredoc => "heredoc string\twith!@# and 123\nTest this!!!"
 );
 
-echo "\n-- Testing ksort() by supplying heredoc string array, 'flag' value is defualt --\n";
+echo "\n-- Testing ksort() by supplying heredoc string array, 'flag' value is default --\n";
 $temp_array = $array;
 var_dump(ksort($temp_array) ); // expecting : bool(true)
 var_dump($temp_array);
@@ -54,52 +54,10 @@ var_dump($temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ksort() : usage variations ***
 
--- Testing ksort() by supplying heredoc string array, 'flag' value is defualt --
-bool(true)
-array(3) {
-  ["HEREDOC"]=>
-  string(7) "HEREDOC"
-  ["Heredoc"]=>
-  string(7) "Heredoc"
-  ["heredoc string	with!@# and 123
-Test this!!!"]=>
-  string(43) "heredoc string	with!@# and 123
-Test this!!!"
-}
-
--- Testing ksort() by supplying heredoc string array, 'flag' = SORT_REGULAR --
-bool(true)
-array(3) {
-  ["HEREDOC"]=>
-  string(7) "HEREDOC"
-  ["Heredoc"]=>
-  string(7) "Heredoc"
-  ["heredoc string	with!@# and 123
-Test this!!!"]=>
-  string(43) "heredoc string	with!@# and 123
-Test this!!!"
-}
-
--- Testing ksort() by supplying heredoc string array, 'flag' = SORT_STRING --
-bool(true)
-array(3) {
-  ["HEREDOC"]=>
-  string(7) "HEREDOC"
-  ["Heredoc"]=>
-  string(7) "Heredoc"
-  ["heredoc string	with!@# and 123
-Test this!!!"]=>
-  string(43) "heredoc string	with!@# and 123
-Test this!!!"
-}
-Done
---UEXPECTF--
-*** Testing ksort() : usage variations ***
-
--- Testing ksort() by supplying heredoc string array, 'flag' value is defualt --
+-- Testing ksort() by supplying heredoc string array, 'flag' value is default --
 bool(true)
 array(3) {
   [u"HEREDOC"]=>
