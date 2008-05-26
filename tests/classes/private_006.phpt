@@ -34,7 +34,7 @@ class fail extends third {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Call show()
 Call show()
 Call show()

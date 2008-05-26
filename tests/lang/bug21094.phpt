@@ -14,4 +14,3 @@ trigger_error("test");
 ?>
 --EXPECTF--
 [1024] errstr: test, errfile: %s, errline: %d
-

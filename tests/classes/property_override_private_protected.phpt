@@ -28,7 +28,7 @@ Redeclare inherited private property as protected.
   $b->showA();
   $b->showB();
 ?>
---EXPECTF--
+--EXPECT--
 A::p
 A::p
 B::p

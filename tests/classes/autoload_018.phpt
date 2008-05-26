@@ -19,7 +19,7 @@ Ensure __autoload() allows for recursive calls if the class name differs.
   
   var_dump(class_exists('UndefinedClass0'));
 ?>
---EXPECTF--
+--EXPECT--
 IN:  __autoload(UndefinedClass0)
 IN:  __autoload(UndefinedClass1)
 IN:  __autoload(UndefinedClass2)
@@ -45,4 +45,3 @@ OUT: __autoload(UndefinedClass2)
 OUT: __autoload(UndefinedClass1)
 OUT: __autoload(UndefinedClass0)
 bool(false)
-

@@ -11,15 +11,6 @@ var_dump($_POST['a']);
 --EXPECT--
 array(3) {
   [0]=>
-  string(1) "1"
-  [1]=>
-  string(1) "3"
-  ["["]=>
-  string(1) "4"
-}
---UEXPECT--
-array(3) {
-  [0]=>
   unicode(1) "1"
   [1]=>
   unicode(1) "3"

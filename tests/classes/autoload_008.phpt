@@ -22,5 +22,5 @@ Ensure catch blocks for unknown exception types do not trigger autoload.
       echo "In Exception catch block. Autoload should not have been triggered.\n";
   }
 ?>
---EXPECTF--
+--EXPECT--
 In Exception catch block. Autoload should not have been triggered.

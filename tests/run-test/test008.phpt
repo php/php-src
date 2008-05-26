@@ -24,15 +24,6 @@ var_dump($php_errormsg);
 ?>
 --EXPECTF--
 %s: %sivision by zero in %s on line %d
-string(1) "1"
-string(4) "4095"
-string(1) "0"
-string(1) "1"
-string(1) "0"
-string(%d) "%sivision by zer%s"
-string(%d) "%sivision by zer%s"
---UEXPECTF--
-%s: %sivision by zero in %s on line %d
 unicode(1) "1"
 unicode(4) "4095"
 unicode(1) "0"

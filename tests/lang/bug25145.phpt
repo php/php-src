@@ -16,17 +16,7 @@ array(1) {
   [123]=>
   array(1) {
     [0]=>
-    string(4) "SEGV"
-  }
-}
-Done
---UEXPECT--
-array(1) {
-  [123]=>
-  array(1) {
-    [0]=>
     unicode(4) "SEGV"
   }
 }
 Done
-

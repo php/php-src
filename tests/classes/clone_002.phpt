@@ -26,26 +26,6 @@ echo "Done\n";
 --EXPECT--
 Object
 object(test)#1 (3) {
-  ["p1"]=>
-  int(1)
-  ["p2"]=>
-  string(1) "A"
-  ["p3"]=>
-  string(1) "B"
-}
-Clown
-object(test)#2 (3) {
-  ["p1"]=>
-  int(1)
-  ["p2"]=>
-  string(1) "A"
-  ["p3"]=>
-  string(1) "C"
-}
-Done
---UEXPECT--
-Object
-object(test)#1 (3) {
   [u"p1"]=>
   int(1)
   [u"p2"]=>

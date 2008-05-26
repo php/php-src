@@ -10,13 +10,6 @@ var_dump($_POST['a']);
 ?>
 --EXPECT--
 array(2) {
-  ["a["]=>
-  string(1) "1"
-  ["b["]=>
-  string(1) "3"
-}
---UEXPECT--
-array(2) {
   [u"a["]=>
   unicode(1) "1"
   [u"b["]=>

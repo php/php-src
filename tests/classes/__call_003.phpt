@@ -21,16 +21,7 @@ Force pass-by-reference to __call
   
   var_dump($a, $b);
 ?>
---EXPECTF--
-array(1) {
-  [0]=>
-  string(8) "original"
-}
-array(1) {
-  [0]=>
-  &string(7) "changed"
-}
---UEXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   unicode(8) "original"

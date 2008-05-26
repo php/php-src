@@ -37,26 +37,6 @@ bool(false)
 
 Warning: ini_set(): open_basedir restriction in effect. File(%s/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 bool(false)
-string(0) ""
-string(%d) "%s/test/ok/ok.txt"
-*** Finished testing open_basedir configuration [error_log] ***
---UEXPECTF--
-*** Testing open_basedir configuration [error_log] ***
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-
-Warning: ini_set(): open_basedir restriction in effect. File(%s/test/bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
-bool(false)
-
-Warning: ini_set(): open_basedir restriction in effect. File(%s/test/bad.txt) is not within the allowed path(s): (.) in %s on line %d
-bool(false)
-
-Warning: ini_set(): open_basedir restriction in effect. File(%s/bad.txt) is not within the allowed path(s): (.) in %s on line %d
-bool(false)
 unicode(0) ""
 unicode(%d) "%s/test/ok/ok.txt"
 *** Finished testing open_basedir configuration [error_log] ***
-

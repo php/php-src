@@ -14,31 +14,6 @@ array(2) {
   [0]=>
   array(1) {
     [0]=>
-    string(1) "1"
-  }
-  [1]=>
-  array(1) {
-    [0]=>
-    string(1) "3"
-  }
-}
-array(1) {
-  ["a"]=>
-  array(1) {
-    ["b"]=>
-    array(2) {
-      ["c"]=>
-      string(1) "1"
-      ["d"]=>
-      string(1) "1"
-    }
-  }
-}
---UEXPECT--
-array(2) {
-  [0]=>
-  array(1) {
-    [0]=>
     unicode(1) "1"
   }
   [1]=>

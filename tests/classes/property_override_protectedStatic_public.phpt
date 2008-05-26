@@ -30,4 +30,3 @@ Redeclare inherited protected static property as public.
 --EXPECTF--
 
 Fatal error: Cannot redeclare static A::$p as non static B::$p in %s on line 18
-

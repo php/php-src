@@ -14,4 +14,3 @@ Bug #28800 (Incorrect string to number conversion for strings starting with 'inf
 0
 0
 0
-

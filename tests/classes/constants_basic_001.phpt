@@ -64,36 +64,6 @@ Notice: Undefined variable: undef in %s on line 5
 Attempt to access various kinds of class constants:
 
 Notice: Use of undefined constant UNDEFINED - assumed 'UNDEFINED' in %s on line %d
-string(9) "UNDEFINED"
-int(1)
-float(1.5)
-int(1)
-float(1.5)
-int(-1)
-float(-1.5)
-int(15)
-string(%d) "%s"
-string(1) "C"
-string(1) "C"
-string(0) ""
-int(1234)
-int(456)
-NULL
-string(6) "hello1"
-string(6) "hello2"
-string(6) "hello2"
-string(6) "hello2"
-
-Expecting fatal error:
-
-Fatal error: Undefined class constant 'c19' in %s on line 53
---UEXPECTF--
-
-Notice: Undefined variable: undef in %s on line 5
-
-Attempt to access various kinds of class constants:
-
-Notice: Use of undefined constant UNDEFINED - assumed 'UNDEFINED' in %s on line %d
 unicode(9) "UNDEFINED"
 int(1)
 float(1.5)

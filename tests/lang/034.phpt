@@ -15,8 +15,6 @@ setlocale(LC_NUMERIC, "de_DE", "de", "german", "ge", "de_DE.ISO8859-1");
 
 echo (float)"3.14", "\n";
 ?>
---EXPECT--
-3,14
---UEXPECTF--
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+--EXPECTF--
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s034.php on line %d
 3,14

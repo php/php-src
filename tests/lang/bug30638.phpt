@@ -17,10 +17,7 @@ $lc = localeconv();
 printf("decimal_point: %s\n", $lc['decimal_point']);
 printf("thousands_sep: %s\n", $lc['thousands_sep']);
 ?>
---EXPECT--
-decimal_point: ,
-thousands_sep: .
---UEXPECTF--
+--EXPECTF--
 Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 
 Deprecated: localeconv(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d

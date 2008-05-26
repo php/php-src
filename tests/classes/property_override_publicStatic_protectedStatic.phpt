@@ -29,4 +29,3 @@ Redeclare inherited public static property as protected static.
 --EXPECTF--
 
 Fatal error: Access level to B::$p must be public (as in class A) in %s on line 18
-

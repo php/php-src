@@ -24,6 +24,3 @@ var_dump( $a ); // 1A
 --EXPECT--
 string(2) "2B"
 string(2) "1A"
---UEXPECT--
-string(2) "2B"
-string(2) "1A"

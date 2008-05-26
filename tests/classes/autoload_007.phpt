@@ -11,5 +11,5 @@ Ensure instanceof does not trigger autoload.
   $a = new stdClass;
   var_dump($a instanceof UndefC);
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)

@@ -17,4 +17,3 @@ echo "Done\n";
 ?>
 --EXPECTF--
 Fatal error: Call to private test::__destruct() from context '' in %sfactory_and_singleton_006.php on line %d
-

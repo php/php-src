@@ -85,4 +85,3 @@ array(1) {
   string(12) "Hello World!"
 }
 *** Finished testing open_basedir configuration [file] ***
-

@@ -19,7 +19,4 @@ var_dump(str_replace("\0", '\0', $data));
 ?>
 --EXPECTF--
 Notice: serialize(): "no_such" returned as member variable from __sleep() but does not exist in %s on line %d
-string(130) "O:3:"foo":4:{S:12:"\0foo\0private";S:7:"private";S:12:"\0*\0protected";S:9:"protected";S:6:"public";S:6:"public";S:7:"no_such";N;}"
---UEXPECTF--
-Notice: serialize(): "no_such" returned as member variable from __sleep() but does not exist in %s on line %d
 unicode(130) "O:3:"foo":4:{U:12:"\0foo\0private";U:7:"private";U:12:"\0*\0protected";U:9:"protected";U:6:"public";U:6:"public";U:7:"no_such";N;}"

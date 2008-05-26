@@ -10,11 +10,6 @@ Ensure callback methods in unknown classes trigger autoload.
   call_user_func("UndefC::test");
 ?>
 --EXPECTF--
-In autoload: string(6) "UndefC"
-
-Warning: call_user_func() expects parameter 1 to be a valid callback, class 'UndefC' not found in %s on line %d
-
---UEXPECTF--
 In autoload: unicode(6) "UndefC"
 
 Warning: call_user_func() expects parameter 1 to be a valid callback, class 'UndefC' not found in %s on line %d

@@ -22,13 +22,6 @@ var_dump(get_class_methods('autoload_root'));
 __autoload(autoload_root)
 array(1) {
   [0]=>
-  string(12) "testFunction"
-}
-===DONE===
---UEXPECT--
-__autoload(autoload_root)
-array(1) {
-  [0]=>
   unicode(12) "testFunction"
 }
 ===DONE===

@@ -49,36 +49,6 @@ foreach($tests as $data)
 <?php exit(0); ?>
 --EXPECT--
 ==========
-string(6) "String"
-Test::__construct(String)
-Test::serialize(String)
-Test::unserialize(String)
-object(Test)#1 (1) {
-  ["data"]=>
-  string(6) "String"
-}
-object(Test)#1 (1) {
-  ["data"]=>
-  string(6) "String"
-}
-==========
-NULL
-Test::__construct()
-Test::serialize()
-NULL
-==========
-int(42)
-Test::__construct(42)
-Test::serialize(42)
-Exception: Test::serialize() must return a string or NULL
-==========
-bool(false)
-Test::__construct()
-Test::serialize()
-Exception: Test::serialize() must return a string or NULL
-===DONE===
---UEXPECT--
-==========
 unicode(6) "String"
 Test::__construct(String)
 Test::serialize(String)

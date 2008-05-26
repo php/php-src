@@ -56,21 +56,6 @@ AutoGen::__get
 Test::__set
 AutoGen::__get
 object(Test)#%d (1) {
-  ["x":protected]=>
-  array(1) {
-    ["baz"]=>
-    string(5) "Check"
-  }
-}
-AutoGen::__get
-Test::__get
-string(5) "Check"
-===DONE===
---UEXPECTF--
-AutoGen::__get
-Test::__set
-AutoGen::__get
-object(Test)#%d (1) {
   [u"x":protected]=>
   array(1) {
     [u"baz"]=>

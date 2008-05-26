@@ -25,28 +25,6 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-string(%d) "%s\test\bad"
-string(%d) "%s\test\bad\bad.txt"
-string(%d) "%s\test"
-string(%d) "%s\test"
-string(%d) "%s"
-string(%d) "%s\test\bad"
-string(%d) "%s\test\bad\bad.txt"
-string(%d) "%s\test\bad\bad.txt"
-string(%d) "%s\test"
-string(%d) "%s\test\ok"
-string(%d) "%s\test\ok\ok.txt"
-string(%d) "%s\test\ok\ok.txt"
-string(%d) "%s\test\ok\ok.txt"
-string(%d) "%s\test\ok\ok.txt"
-*** Finished testing open_basedir configuration [realpath] ***
---UEXPECTF--
-*** Testing open_basedir configuration [realpath] ***
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
 unicode(%d) "%s\test\bad"
 unicode(%d) "%s\test\bad\bad.txt"
 unicode(%d) "%s\test"
@@ -62,4 +40,3 @@ unicode(%d) "%s\test\ok\ok.txt"
 unicode(%d) "%s\test\ok\ok.txt"
 unicode(%d) "%s\test\ok\ok.txt"
 *** Finished testing open_basedir configuration [realpath] ***
-

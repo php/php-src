@@ -8,15 +8,6 @@ var_dump($_COOKIE);
 ?>
 --EXPECT--
 array(3) {
-  ["c_o_o_k_i_e"]=>
-  string(5) "value"
-  ["name"]=>
-  string(24) ""value","value",UEhQIQ=="
-  ["UEhQIQ"]=>
-  string(4) "=foo"
-}
---UEXPECT--
-array(3) {
   [u"c_o_o_k_i_e"]=>
   unicode(1) "v"
   [u"name"]=>

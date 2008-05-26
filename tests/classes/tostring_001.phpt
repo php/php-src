@@ -81,60 +81,6 @@ echo $o;
 test1 Object
 (
 )
-string(54) "Object of class test1 could not be converted to string"
-string(0) ""
-object(test1)#%d (0) {
-}
-====test2====
-test2 Object
-(
-)
-test2::__toString()
-Converted
-object(test2)#%d (0) {
-}
-====test3====
-test2::__toString()
-Converted
-====test4====
-test2::__toString()
-string:Converted
-====test5====
-test2::__toString()
-1Converted
-1test2::__toString()
-Converted
-====test6====
-test2::__toString()
-test2::__toString()
-Converted
-Converted
-test2::__toString()
-Converted
-test2::__toString()
-Converted
-====test7====
-test2::__toString()
-string(19) "Illegal offset type"
-====test8====
-test2::__toString()
-string(9) "Converted"
-test2::__toString()
-string(9) "Converted"
-====test9====
-test2::__toString()
-Converted
-====test10====
-object(test3)#%d (0) {
-}
-test3::__toString()
-string(53) "Method test3::__toString() must return a string value"
-====DONE====
---UEXPECTF--
-====test1====
-test1 Object
-(
-)
 unicode(54) "Object of class test1 could not be converted to string"
 unicode(0) ""
 object(test1)#%d (0) {

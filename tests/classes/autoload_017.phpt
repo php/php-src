@@ -18,9 +18,6 @@ Ensure ReflectionClass::implementsInterface triggers autoload.
     echo $e->getMessage();
   }
 ?>
---EXPECTF--
-In autoload: string(6) "UndefI"
-Interface UndefI does not exist
---UEXPECTF--
+--EXPECT--
 In autoload: unicode(6) "UndefI"
 Interface UndefI does not exist

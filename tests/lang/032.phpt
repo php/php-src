@@ -33,4 +33,3 @@ echo "OK\n";
 ?>
 --EXPECT--
 OK
-

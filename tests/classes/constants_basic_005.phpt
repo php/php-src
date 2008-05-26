@@ -10,9 +10,6 @@ Test constants with default values based on other constants.
   }
   var_dump(C::CONST_1, C::CONST_2);
 ?>
---EXPECTF--
-string(5) "hello"
-string(5) "hello"
---UEXPECTF--
+--EXPECT--
 unicode(5) "hello"
 unicode(5) "hello"

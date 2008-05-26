@@ -37,44 +37,6 @@ bool(false)
 bool(false)
 array(1) {
   [0]=>
-  string(5) "../ok"
-}
-array(1) {
-  [0]=>
-  string(6) "ok.txt"
-}
-array(1) {
-  [0]=>
-  string(12) "../ok/ok.txt"
-}
-array(1) {
-  [0]=>
-  string(%d) "%s/test/ok/ok.txt"
-}
-array(1) {
-  [0]=>
-  string(%d) "%s/test/ok/../ok/ok.txt"
-}
-*** Finished testing open_basedir configuration [glob] ***
---UEXPECTF--
-*** Testing open_basedir configuration [glob] ***
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-bool(false)
-array(0) {
-}
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-array(1) {
-  [0]=>
   unicode(5) "../ok"
 }
 array(1) {
@@ -94,4 +56,3 @@ array(1) {
   unicode(%d) "%s/test/ok/../ok/ok.txt"
 }
 *** Finished testing open_basedir configuration [glob] ***
-

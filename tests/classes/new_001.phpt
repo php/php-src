@@ -33,24 +33,6 @@ Deprecated: Assigning the return value of new by reference is deprecated in %s o
 Compile-time strict error message should precede this.
 $f initially points to the first object:
 object(Inc)#%d (1) {
-  ["id"]=>
-  int(1)
-}
-Assigning new object directly to $k affects $f:
-object(Inc)#%d (1) {
-  ["id"]=>
-  int(2)
-}
-Assigning new object by ref to $k removes it from $f's reference set, so $f is unchanged:
-object(Inc)#%d (1) {
-  ["id"]=>
-  int(2)
-}
---UEXPECTF--
-Deprecated: Assigning the return value of new by reference is deprecated in %s on line 23
-Compile-time strict error message should precede this.
-$f initially points to the first object:
-object(Inc)#%d (1) {
   [u"id"]=>
   int(1)
 }

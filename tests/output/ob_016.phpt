@@ -10,11 +10,8 @@ echo "-aäoöuüsß-";
 $s = ob_get_clean();
 
 var_dump($s);
-var_dump(unicode_decode($s, unicode_semantics()?"utf8":"latin1"));
+var_dump(unicode_decode($s, "utf8"));
 ?>
 --EXPECTF--
-string(10) "%s"
-unicode(10) "%s"
---UEXPECTF--
 string(14) "%s"
 unicode(10) "%s"

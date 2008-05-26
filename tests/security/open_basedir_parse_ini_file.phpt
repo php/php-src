@@ -79,4 +79,3 @@ Warning: parse_ini_file(%s\test): failed to open stream: Operation not permitted
 array(0) {
 }
 *** Finished testing open_basedir configuration [parse_ini_file] ***
-

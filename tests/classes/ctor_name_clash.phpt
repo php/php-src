@@ -17,6 +17,6 @@ class derived extends base {
 $obj = new derived();
 $obj->base();
 ?>
---EXPECTF--
+--EXPECT--
 base::base
 derived::base

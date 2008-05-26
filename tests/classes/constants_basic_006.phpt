@@ -19,29 +19,7 @@ Ensure class constants are not evaluated when a class is looked up to resolve in
   
   var_dump(C::X, C::$a, D::X, D::$a, E::X, E::$a);
 ?>
---EXPECTF--
-string(5) "hello"
-array(2) {
-  ["nasty"]=>
-  string(4) "test"
-  ["hello"]=>
-  string(5) "nasty"
-}
-string(5) "hello"
-array(2) {
-  ["nasty"]=>
-  string(4) "test"
-  ["hello"]=>
-  string(5) "nasty"
-}
-string(5) "hello"
-array(2) {
-  ["nasty"]=>
-  string(4) "test"
-  ["hello"]=>
-  string(5) "nasty"
-}
---UEXPECTF--
+--EXPECT--
 unicode(5) "hello"
 array(2) {
   [u"nasty"]=>

@@ -35,23 +35,6 @@ var_dump($a, $b, $c, $d, $e);
 $result{-1} = 'a';
 ?>
 --EXPECT--
-string(5) "* *-*"
-string(7) "* *-* *"
-string(7) "*4*-* *"
-string(7) "*4*s* *"
-string(8) "*4*s* *0"
-string(8) "*-*-* *0"
-string(8) "*-*s*s*0"
-string(8) "4-4s4s*0"
-string(9) "4-4s4s505"
-string(9) "454s4s505"
-string(1) "-"
-string(1) "s"
-string(1) "4"
-string(1) "5"
-string(1) "5"
-[Illegal string offset:  -1]
---UEXPECT--
 unicode(5) "* *-*"
 unicode(7) "* *-* *"
 unicode(7) "*4*-* *"

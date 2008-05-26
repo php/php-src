@@ -25,21 +25,6 @@ array(5) {
   [0]=>
   int(4096)
   [1]=>
-  string(%d) "Argument 1 passed to blah() must be an instance of Foo, instance of stdClass given, called in %scatchable_error_002.php on line %d and defined"
-  [2]=>
-  string(%d) "%scatchable_error_002.php"
-  [3]=>
-  int(5)
-  [4]=>
-  array(0) {
-  }
-}
-ALIVE!
---UEXPECTF--
-array(5) {
-  [0]=>
-  int(4096)
-  [1]=>
   unicode(%d) "Argument 1 passed to blah() must be an instance of Foo, instance of stdClass given, called in %scatchable_error_002.php on line %d and defined"
   [2]=>
   unicode(%d) "%scatchable_error_002.php"
