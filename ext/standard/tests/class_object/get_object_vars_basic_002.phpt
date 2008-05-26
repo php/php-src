@@ -37,32 +37,7 @@ echo "\n---( Superclass: )---\n";
 $b->testA($b);
 
 ?>
---EXPECTF--
-
----( Declaring class: )---
-B::testB
-array(4) {
-  ["hiddenPriv"]=>
-  string(13) "B::hiddenPriv"
-  ["priv"]=>
-  string(7) "B::priv"
-  ["prot"]=>
-  string(7) "B::prot"
-  ["pub"]=>
-  string(6) "B::pub"
-}
-
----( Superclass: )---
-A::testA
-array(3) {
-  ["prot"]=>
-  string(7) "B::prot"
-  ["pub"]=>
-  string(6) "B::pub"
-  ["hiddenPriv"]=>
-  string(13) "A::hiddenPriv"
-}
---UEXPECTF--
+--EXPECT--
 
 ---( Declaring class: )---
 B::testB

@@ -40,41 +40,7 @@ var_dump(get_class_methods("C"));
 C::testFromC();
 echo "Done";
 ?>
---EXPECTF--
-Accessing I from global scope:
-array(1) {
-  [0]=>
-  string(4) "pubI"
-}
-Accessing C from global scope:
-array(3) {
-  [0]=>
-  string(4) "pubI"
-  [1]=>
-  string(4) "pubC"
-  [2]=>
-  string(9) "testFromC"
-}
-Accessing I from C:
-array(1) {
-  [0]=>
-  string(4) "pubI"
-}
-Accessing C from C:
-array(5) {
-  [0]=>
-  string(4) "pubI"
-  [1]=>
-  string(5) "privC"
-  [2]=>
-  string(5) "protC"
-  [3]=>
-  string(4) "pubC"
-  [4]=>
-  string(9) "testFromC"
-}
-Done
---UEXPECTF--
+--EXPECT--
 Accessing I from global scope:
 array(1) {
   [0]=>

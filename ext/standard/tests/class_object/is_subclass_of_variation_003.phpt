@@ -19,7 +19,7 @@ var_dump(is_subclass_of('caseSensitivityTestCHILD', 'caseSensitivityTEST'));
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_subclass_of() : usage variations ***
 *** Testing is_a() : usage variations ***
 bool(true)

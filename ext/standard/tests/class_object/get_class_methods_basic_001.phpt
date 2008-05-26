@@ -35,33 +35,7 @@ var_dump( get_class_methods("NonExistent") );
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing get_class_methods() : basic functionality ***
-Argument is class name:
-array(3) {
-  [0]=>
-  string(1) "f"
-  [1]=>
-  string(1) "g"
-  [2]=>
-  string(1) "h"
-}
-Argument is class instance:
-array(3) {
-  [0]=>
-  string(1) "f"
-  [1]=>
-  string(1) "g"
-  [2]=>
-  string(1) "h"
-}
-Argument is name of class which has no methods:
-array(0) {
-}
-Argument is non existent class:
-NULL
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing get_class_methods() : basic functionality ***
 Argument is class name:
 array(3) {
