@@ -981,7 +981,7 @@ function run_all_tests($test_files, $env, $redir_tested = NULL)
 		if (!is_array($name) && $result != 'REDIR')
 		{
 			$test_results[$index] = $result;
-			if ($failed_tests_file && ($result = 'XFAILED' || $result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED'))
+			if ($failed_tests_file && ($result == 'XFAILED' || $result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED'))
 			{
 				fwrite($failed_tests_file, "$index\n");
 			}
