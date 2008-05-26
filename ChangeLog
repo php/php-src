@@ -1,3 +1,43 @@
+2008-05-25  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * run-tests.php
+      run-tests.php:
+      Added --XFAIL-- section
+
+2008-05-25  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c
+      ext/standard/tests/file/magic_quotes.phpt:
+      Remove E_DEPRECATED from get_magic_quotes_*()
+
+2008-05-25  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/php_spl.c:
+      ws
+
+    * (PHP_5_3)
+      ext/spl/php_spl.c
+      ext/spl/tests/spl_autoload_010.phpt
+      ext/spl/tests/spl_autoload_011.phpt:
+      MFH: Add a prepend param to spl_autoload_register
+
+    * ext/spl/php_spl.c
+      ext/spl/tests/spl_autoload_010.phpt
+      ext/spl/tests/spl_autoload_010.phpt
+      ext/spl/tests/spl_autoload_011.phpt
+      ext/spl/tests/spl_autoload_011.phpt:
+      Add a prepend param to spl_autoload_register
+
+    * ext/spl/tests/heap_009.phpt
+      ext/spl/tests/heap_009.phpt:
+      remove the skipif
+
+2008-05-25  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/spl/tests/fileobject_005.phpt:
+      Drop SKIPIF check for ext/spl.
+
 2008-05-24  Etienne Kneuss  <php@colder.ch>
 
     * (PHP_5_3)
