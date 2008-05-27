@@ -250,7 +250,7 @@ ZEND_FUNCTION(func_get_args)
 	p = ex->function_state.arguments;
 	arg_count = (int)(zend_uintptr_t) *p;		/* this is the amount of arguments passed to func_get_args(); */
 
-	array_init(return_value);
+	array_init_size(return_value, arg_count);
 	for (i=0; i<arg_count; i++) {
 		zval *element;
 
@@ -1541,16 +1541,14 @@ ZEND_FUNCTION(get_defined_functions)
    Returns an associative array of names and values of all currently defined variable names (variables in the current scope) */
 ZEND_FUNCTION(get_defined_vars)
 {
-	zval *tmp;
-
-	array_init(return_value);
-
 	if (!EG(active_symbol_table)) {
 		zend_rebuild_symbol_table(TSRMLS_C);
 	}
 
+	array_init_size(return_value, zend_hash_num_elements(EG(active_symbol_table)));
+
 	zend_hash_copy(Z_ARRVAL_P(return_value), EG(active_symbol_table),
-					(copy_ctor_func_t)zval_add_ref, &tmp, sizeof(zval *));
+					(copy_ctor_func_t)zval_add_ref, NULL, sizeof(zval *));
 }
 /* }}} */
 
@@ -1825,7 +1823,7 @@ static zval *debug_backtrace_get_args(void **curpos TSRMLS_DC) /* {{{ */
 	int arg_count = (int)(zend_uintptr_t) *p;
 
 	MAKE_STD_ZVAL(arg_array);
-	array_init(arg_array);
+	array_init_size(arg_array, arg_count);
 	p -= arg_count;
 
 	while (--arg_count >= 0) {
