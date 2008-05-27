@@ -55,22 +55,3 @@ NULL
 Warning: strcspn() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 Done
-
---UEXPECTF--
-*** Testing strcspn() : error conditions ***
-
--- Testing strcspn() function with Zero arguments --
-
-Warning: strcspn() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
--- Testing strcspn() function with more than expected no. of arguments --
-
-Warning: strcspn() expects at most 4 parameters, 5 given in %s on line %d
-NULL
-
--- Testing strcspn() function with less than expected no. of arguments --
-
-Warning: strcspn() expects at least 2 parameters, 1 given in %s on line %d
-NULL
-Done

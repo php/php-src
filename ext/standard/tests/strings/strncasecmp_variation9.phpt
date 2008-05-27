@@ -73,24 +73,7 @@ for($index1 = 0; $index1 < count($strings); $index1++) {
 }
 echo "*** Done ***\n";
 ?>
---EXPECTF--
-*** Test strncasecmp() function: with here-doc strings ***
-int(0)
-int(63)
-int(0)
-int(84)
-int(0)
-int(-1)
-int(0)
-int(0)
-int(0)
-int(1)
-int(0)
-int(0)
-int(0)
-int(0)
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Test strncasecmp() function: with here-doc strings ***
 int(0)
 int(1)

@@ -24,15 +24,7 @@ var_dump( strrpos($control_char_str, "\t", 15) );
 
 echo "*** Done ***";
 ?>
---EXPECTF--
-*** Testing strrpos() function: with heredoc strings ***
--- With heredoc string containing escape characters --
-int(13)
-int(19)
-int(13)
-int(19)
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Testing strrpos() function: with heredoc strings ***
 -- With heredoc string containing escape characters --
 int(13)

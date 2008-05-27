@@ -39,7 +39,7 @@ var_dump(php_strip_whitespace($filename));
 @unlink($filename);
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: php_strip_whitespace() expects exactly 1 parameter, 0 given in %s on line %d
 bool(false)
 

@@ -36,22 +36,7 @@ var_dump( chunk_split($str) );
 	
 echo "Done"   
 ?>
---EXPECTF--
-*** Testing chunk_split() : basic functionality ***
--- Testing chunk_split() with all possible arguments --
-string(15) "Te##st##in##g##"
--- Testing chunk_split() with default ending string --
-string(15) "Te
-st
-in
-g
-"
--- Testing chunk_split() with default chunklen and ending string --
-string(9) "Testing
-"
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing chunk_split() : basic functionality ***
 -- Testing chunk_split() with all possible arguments --
 unicode(15) "Te##st##in##g##"

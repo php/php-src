@@ -27,22 +27,7 @@ for($index = 0; $index < count($needles); $index++ ) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
-*** Test stripos() function: binary safe ***
-int(1)
-int(1)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-int(1)
-bool(false)
-int(0)
-bool(false)
-int(1)
-bool(false)
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Test stripos() function: binary safe ***
 int(1)
 int(1)

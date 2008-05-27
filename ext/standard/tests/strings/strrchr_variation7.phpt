@@ -33,18 +33,7 @@ foreach($needles as $needle) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
-*** Testing strrchr() function: with heredoc strings ***
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Testing strrchr() function: with heredoc strings ***
 bool(false)
 bool(false)

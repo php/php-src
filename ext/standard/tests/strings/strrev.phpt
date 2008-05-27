@@ -14,10 +14,6 @@ strrev() function
 	var_dump(strrev(""));
 ?>
 --EXPECT--
-string(32) "ec6df70f2569891eae50321a9179eb82"
-string(0) ""
-string(0) ""
---UEXPECT--
 unicode(32) "ec6df70f2569891eae50321a9179eb82"
 unicode(0) ""
 unicode(0) ""

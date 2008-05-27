@@ -16,49 +16,6 @@ nl2br() function
 	
 ?>
 --EXPECT--
-string(4) "test"
-string(0) ""
-string(0) ""
-string(8) "<br />
-"
-string(7) "<br />
-"
-string(7) "<br />
-"
-string(8) "<br />
-
-"
-string(44) "<br />
-
-<br />
-<br />
-<br />
-<br />
-<br />
-"
-string(47) "<br />
-
-<br />
-<br />
-
-<br />
-
-<br />
-<br />
-"
-string(66) "<br />
-
-<br />
-<br />
-<br />
-<br />
-
-<br />
-<br />
-<br />
-<br />
-"
---UEXPECT--
 unicode(4) "test"
 unicode(0) ""
 unicode(0) ""

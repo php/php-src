@@ -39,35 +39,6 @@ echo "Done";
 
 -- Testing sprintf() function with Zero arguments --
 
-Warning: Wrong parameter count for sprintf() in %s on line %d%d
-bool(false)
-
--- Testing sprintf() function with less than expected no. of arguments --
-
-Warning: sprintf(): Too few arguments in %s on line %d%d
-bool(false)
-
-Warning: sprintf(): Too few arguments in %s on line %d%d
-bool(false)
-
-Warning: sprintf(): Too few arguments in %s on line %d%d
-bool(false)
-
-Warning: sprintf(): Too few arguments in %s on line %d%d
-bool(false)
-
-Warning: sprintf(): Too few arguments in %s on line %d%d
-bool(false)
-
-Warning: sprintf(): Too few arguments in %s on line %d%d
-bool(false)
-Done
-
---UEXPECTF--
-*** Testing sprintf() : error conditions ***
-
--- Testing sprintf() function with Zero arguments --
-
 Warning: Wrong parameter count for sprintf() in %s on line %d
 bool(false)
 

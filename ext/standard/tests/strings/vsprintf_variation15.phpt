@@ -48,25 +48,7 @@ foreach($formats as $format) {
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing vsprintf() : unsigned formats and unsigned values ***
-
--- Iteration 1 --
-string(16) "1234567 342391 0"
-
--- Iteration 2 --
-string(23) "2147483647 u 1234 12345"
-
--- Iteration 3 --
-string(25) "   1234000 2147483647 120"
-
--- Iteration 4 --
-string(10) "#1 0 $0 10"
-
--- Iteration 5 --
-string(7) "1 2 3 4"
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing vsprintf() : unsigned formats and unsigned values ***
 
 -- Iteration 1 --

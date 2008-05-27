@@ -56,33 +56,3 @@ NULL
 Warning: basename() expects parameter 2 to be string (Unicode or binary), object given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing error conditions ***
-
-Warning: basename() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: basename() expects at most 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: basename() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: basename() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: basename() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: basename() expects parameter 1 to be string (Unicode or binary), object given in %s on line %d
-NULL
-
-Warning: basename() expects parameter 1 to be string (Unicode or binary), object given in %s on line %d
-NULL
-
-Warning: basename() expects parameter 1 to be string (Unicode or binary), object given in %s on line %d
-NULL
-
-Warning: basename() expects parameter 2 to be string (Unicode or binary), object given in %s on line %d
-NULL
-Done

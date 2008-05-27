@@ -69,34 +69,7 @@ for($index =0; $index < count($heredoc_strings); $index ++) {
 
 echo "Done\n";
 ?>
---EXPECTF--
-*** Testing ucwords() : usage variations ***
--- Iteration 1 --
-string(0) ""
--- Iteration 2 --
-string(0) ""
--- Iteration 3 --
-string(52) "Testing Ucword() With
-Multiline String Using
-Heredoc"
--- Iteration 4 --
-string(93) "Testing
-Ucword(str)	With
-Multiline   String		Using
-Heredoc
-String.withDifferentWhiteSpaces"
--- Iteration 5 --
-string(53) "12sting 123string 4567
-String	123string
-12 Test
-5test"
--- Iteration 6 --
-string(108) "It's Bright,but I Cann't See It.
-"things In Double Quote"
-'things In Single Quote'
-This\line Is /with\slashs"
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing ucwords() : usage variations ***
 -- Iteration 1 --
 unicode(0) ""

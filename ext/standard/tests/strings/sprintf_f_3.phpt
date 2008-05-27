@@ -18,12 +18,6 @@ var_dump(sprintf("%01.2f", $money));
 var_dump(sprintf("%.3e", $money));
 ?>
 --EXPECT--
-string(7) "100,426"
-string(6) "100,43"
-string(11) "100,426000'"
-string(6) "123,10"
-string(8) "1.231e+2"
---UEXPECT--
 unicode(7) "100,426"
 unicode(6) "100,43"
 unicode(11) "100,426000'"

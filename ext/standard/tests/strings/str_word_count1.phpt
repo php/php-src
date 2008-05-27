@@ -10,7 +10,7 @@ var_dump($a);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(0)
 
 Warning: str_word_count(): Invalid format value -1 in %s on line %d

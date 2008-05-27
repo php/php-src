@@ -36,33 +36,7 @@ var_dump(sprintf("%s", $tempstring, $tempstring, $tempstring));
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing sprintf() : with  typical format strings ***
-
--- Testing for '%%%.2f' as the format parameter --
-string(15) "%12345678900.00"
-
--- Testing for '%%' as the format parameter --
-string(1) "%"
-
--- Testing for precision value more than maximum --
-string(52) "12345678900.0000000000000000000000000000000000000000"
-
--- Testing for invalid width(-15) specifier --
-string(3) "15s"
-
--- Testing for '%X' as the format parameter --
-string(1) "C"
-
--- Testing for multiple format parameters --
-string(39) "12345  abcdefghjklmnpqrstuvwxyz  12345
-"
-
--- Testing for excess of mixed type arguments  --
-string(24) "abcdefghjklmnpqrstuvwxyz"
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing sprintf() : with  typical format strings ***
 
 -- Testing for '%%%.2f' as the format parameter --

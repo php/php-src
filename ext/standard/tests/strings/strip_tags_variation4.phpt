@@ -45,34 +45,7 @@ foreach($strings as $string_value)
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing strip_tags() : usage variations ***
--- Iteration 1 --
-string(32) "hello 		world... strip_tags_test"
--- Iteration 2 --
-string(34) "hello \t\tworld... strip_tags_test"
--- Iteration 3 --
-string(0) ""
--- Iteration 4 --
-string(0) ""
--- Iteration 5 --
-string(18) "<htmL>hello</htmL>"
--- Iteration 6 --
-string(18) "<htmL>hello</htmL>"
--- Iteration 7 --
-string(9) "HtMl text"
--- Iteration 8 --
-string(9) "HtMl text"
--- Iteration 9 --
-string(26) "I am not a valid html text"
--- Iteration 10 --
-string(26) "I am not a valid html text"
--- Iteration 11 --
-string(62) "I am a quoted (") string with special chars like $,\!,\@,\%,\&"
--- Iteration 12 --
-string(64) "I am a quoted (\") string with special chars like \$,\!,\@,\%,\&"
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
 unicode(32) "hello 		world... strip_tags_test"

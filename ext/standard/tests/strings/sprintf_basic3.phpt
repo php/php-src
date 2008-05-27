@@ -41,18 +41,7 @@ var_dump( sprintf($format33, $arg1, $arg2, $arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing sprintf() : basic functionality - using float format ***
-string(6) "format"
-string(9) "11.110000"
-string(9) "11.110000"
-string(19) "11.110000 22.220000"
-string(19) "11.110000 22.220000"
-string(29) "11.110000 22.220000 33.330000"
-string(29) "11.110000 22.220000 33.330000"
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing sprintf() : basic functionality - using float format ***
 unicode(6) "format"
 unicode(9) "11.110000"

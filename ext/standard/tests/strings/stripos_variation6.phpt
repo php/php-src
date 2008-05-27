@@ -23,15 +23,7 @@ var_dump( stripos($quote_char_str, 'things', 0) );
 var_dump( stripos($quote_char_str, "things", 20) );
 echo "*** Done ***";
 ?>
---EXPECTF--
-*** Testing stripos() function: with heredoc strings ***
--- With heredoc string containing quote & slash chars --
-int(88)
-int(34)
-int(34)
-int(34)
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Testing stripos() function: with heredoc strings ***
 -- With heredoc string containing quote & slash chars --
 int(88)

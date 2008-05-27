@@ -57,32 +57,6 @@ do {
 
 ?>
 --EXPECT--
-string(1) "1"
-string(1) "2"
-
-----
-string(1) "1"
-string(3) "2-3"
-
-----
-string(1) "1"
-string(1) "2"
-string(2) "-3"
-
-----
-string(1) "1"
-string(3) "2-3"
-
-----
-string(1) "1"
-string(4) "
-2-3"
-
-----
-string(1) "1"
-string(2) "--"
-string(3) "2-3"
---UEXPECT--
 unicode(1) "1"
 unicode(1) "2"
 

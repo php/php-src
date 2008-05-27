@@ -50,31 +50,6 @@ echo "Done";
 *** Testing sprintf() : integer formats with resource values ***
 
 -- Iteration 1 --
-string(%d) "%d"
-string(1) "d"
-string(%d) " %d"
-string(%d) "	%d"
-string(%d) "
-%d"
-string(%d) "%s%d"
-string(%d) "0-9]"
-string(1) "d"
-
--- Iteration 2 --
-string(%d) "%d"
-string(1) "d"
-string(%d) " %d"
-string(%d) "	%d"
-string(%d) "
-%d"
-string(%d) "%s%d"
-string(%d) "0-9]"
-string(1) "d"
-Done
---UEXPECTF--
-*** Testing sprintf() : integer formats with resource values ***
-
--- Iteration 1 --
 unicode(%d) "%d"
 unicode(1) "d"
 unicode(%d) " %d"

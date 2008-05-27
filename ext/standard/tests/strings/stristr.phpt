@@ -32,30 +32,6 @@ bool(false)
 
 Notice: Array to string conversion in %s on line %d
 bool(false)
-string(11) "tEsT sTrInG"
-string(6) "sTrInG"
-string(6) "sTrInG"
-string(8) "T sTrInG"
-string(1) "G"
-string(32) "7272696018bdeb2c9a3f8d01fc2a9273"
-bool(false)
-bool(false)
-bool(false)
-string(32) "6ec19f52f0766c463f3bb240f4396913"
-string(7) " sTrInG"
-string(4) "tEsT"
---UEXPECTF--
-Warning: stristr() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
-Notice: Array to string conversion in %s on line %d
-
-Warning: stristr(): Empty delimiter in %s on line %d
-bool(false)
-bool(false)
-
-Notice: Array to string conversion in %s on line %d
-bool(false)
 unicode(11) "tEsT sTrInG"
 unicode(6) "sTrInG"
 unicode(6) "sTrInG"

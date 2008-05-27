@@ -26,42 +26,7 @@ var_dump(chunk_split("abcde", $v, "abc"));
 var_dump(substr("abcde", $v, $v));
 
 ?>
---EXPECTF--	
-string(4) "bcde"
-string(6) "abcdex"
-bool(false)
-bool(false)
-
-Warning: substr_count(): Offset value 2147483647 exceeds string length in %s on line %d
-bool(false)
-
-Warning: substr_compare(): The start position cannot exceed initial string length in %s on line %d
-bool(false)
-
-Warning: stripos(): Offset not contained in string in %s on line %d
-bool(false)
-
-Warning: substr_count(): Offset value 2147483647 exceeds string length in %s on line %d
-bool(false)
-
-Warning: substr_count(): Length value 2147483647 exceeds string length in %s on line %d
-bool(false)
-
-Warning: strpos(): Offset not contained in string in %s on line %d
-bool(false)
-
-Warning: stripos(): Offset not contained in string in %s on line %d
-bool(false)
-
-Notice: strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
-
-Notice: strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
-int(2)
-string(8) "abcdeabc"
-bool(false)
---UEXPECTF--	
+--EXPECTF--
 unicode(4) "bcde"
 unicode(6) "abcdex"
 bool(false)

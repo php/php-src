@@ -32,15 +32,7 @@ var_dump( sprintf($format3, $arg1, $arg2, $arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing sprintf() : basic functionality - using string format ***
-string(6) "format"
-string(13) "arg1 argument"
-string(27) "arg1 argument arg2 argument"
-string(41) "arg1 argument arg2 argument arg3 argument"
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing sprintf() : basic functionality - using string format ***
 unicode(6) "format"
 unicode(13) "arg1 argument"

@@ -39,18 +39,3 @@ NULL
 Warning: Wrong parameter count for strtr() in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing strtr() : error conditions ***
-
--- Testing strtr() function with Zero arguments --
-Warning: Wrong parameter count for strtr() in %s on line %d
-NULL
-
--- Testing strtr() function with less than expected no. of arguments --
-Warning: Wrong parameter count for strtr() in %s on line %d
-NULL
-
--- Testing strtr() function with more than expected no. of arguments --
-Warning: Wrong parameter count for strtr() in %s on line %d
-NULL
-Done

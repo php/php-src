@@ -9,7 +9,7 @@ foreach (array('N','I','l') as $v) {
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 Array
 (
     [1] => -30000

@@ -33,18 +33,3 @@ NULL
 Warning: stripos() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 *** Done ***
---UEXPECTF--
-*** Testing stripos() function: error conditions ***
-
--- With Zero arguments --
-Warning: stripos() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
--- With less than expected number of arguments --
-Warning: stripos() expects at least 2 parameters, 1 given in %s on line %d
-NULL
-
--- With more than expected number of arguments --
-Warning: stripos() expects at most 3 parameters, 4 given in %s on line %d
-NULL
-*** Done ***

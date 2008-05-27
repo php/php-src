@@ -37,19 +37,5 @@ NULL
 
 Warning: ucwords() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
-string(10) "string_val"
-Done
---UEXPECTF--
-*** Testing ucwords() : error conditions ***
-
--- Testing ucwords() function with Zero arguments --
-
-Warning: ucwords() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
--- Testing ucwords() function with more than expected no. of arguments --
-
-Warning: ucwords() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
 unicode(10) "string_val"
 Done

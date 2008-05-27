@@ -51,34 +51,6 @@ Warning: ltrim() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 
 *** Testing with heredoc string ***
-string(17) "ng heredoc string"
-
-*** Testing Normal Behaviour ***
-string(10) "ltrim test"
-string(13) "   ltrim test"
-string(18) "        ltrim test"
-string(18) "        ltrim test"
-string(10) "ltrim test"
-string(11) " ltrim test"
-string(10) "ltrim test"
-string(10) "ltrim test"
-string(10) "ltrim test"
-
-*** Testing for  scalar argument ***
-string(5) "12345"
-
-*** Testing for  NULL argument ***
-string(0) ""
-
-Done
---UEXPECTF--
-Warning: ltrim() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: ltrim() expects at most 2 parameters, 3 given in %s on line %d
-NULL
-
-*** Testing with heredoc string ***
 unicode(17) "ng heredoc string"
 
 *** Testing Normal Behaviour ***

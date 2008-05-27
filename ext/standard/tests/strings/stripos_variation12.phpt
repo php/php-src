@@ -26,24 +26,7 @@ for($index = 0; $index < count($haystacks); $index++ ) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
-*** Test stripos() function: binary safe ***
-int(5)
-int(5)
-int(0)
-bool(false)
-int(11)
-int(11)
-int(0)
-bool(false)
-int(5)
-int(5)
-int(0)
-bool(false)
-int(5)
-bool(false)
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Test stripos() function: binary safe ***
 int(5)
 int(5)

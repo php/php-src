@@ -22,13 +22,7 @@ var_dump( strncasecmp($str4, "Hello,world", 12) );
 
 echo "*** Done ***\n";
 ?>
---EXPECTF--
-*** Test strncasecmp() function: with null terminated strings and binary inputs ***
-int(5)
-int(0)
-int(-119)
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Test strncasecmp() function: with null terminated strings and binary inputs ***
 int(1)
 int(0)

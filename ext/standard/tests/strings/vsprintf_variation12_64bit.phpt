@@ -78,45 +78,7 @@ foreach($args_array as $args) {
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing vsprintf() : octal formats and non-octal values ***
-
--- Iteration 1 --
-string(149) "2 0 12 
-   361100 o 1777777777777777775456 2322
-                          
-   30071 14 1777777777777777777764 1777777777777777416700
-   12 361100 2 0"
-
--- Iteration 2 --
-string(201) "2 1777777777777777777776 2 
-   361100 o 1777777777777720715133 57062645
-                          
-   57060664 4475347 1777777777777721631371 1777777777777720717336
-   2 361100 2 1777777777777777777776"
-
--- Iteration 3 --
-string(99) "0 0 0 
-   173 o 1777777777777777777605 173 
-                          
-   2322 0 $0 _0
-   0 173 0 0"
-
--- Iteration 4 --
-string(75) "1 1 1 
-   1 o    1 1   
-                          
-   #1 1 $1 _1
-   1 1 1 1"
-
--- Iteration 5 --
-string(75) "1 1 0 
-   1 o    0 1   
-                          
-   #0 1 $1 _0
-   0 1 1 1"
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing vsprintf() : octal formats and non-octal values ***
 
 -- Iteration 1 --

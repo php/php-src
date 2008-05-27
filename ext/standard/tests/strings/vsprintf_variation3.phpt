@@ -53,35 +53,7 @@ foreach($formats as $format) {
 echo "Done";
 ?>
 
---EXPECTF--
-*** Testing vsprintf() : int formats with int values ***
-
--- Iteration 1 --
-string(1) "0"
-
--- Iteration 2 --
-string(5) "-1 1 "
-
--- Iteration 3 --
-string(36) "2147483647 d, 2147483640 -2147483640"
-
--- Iteration 4 --
-string(38) "    123456 12345678   -1234567 1234567"
-
--- Iteration 5 --
-string(24) "111 2222 333333 44444444"
-
--- Iteration 6 --
-string(15) "4667 4011 83 10"
-
--- Iteration 7 --
-string(8) "%-5678 d"
-
--- Iteration 8 --
-string(7) "1 2 3 4"
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing vsprintf() : int formats with int values ***
 
 -- Iteration 1 --

@@ -31,38 +31,7 @@ for( $i = 2; $i <=7; $i++ )  {
 
 echo "Done\n";
 ?>
---EXPECTF--
-*** Testing strtok() : basic functionality ***
-
-The Input string is:
-"This testcase test strtok() function."
-
-The token string is:
-" ()."
-
---- Token 1 ---
-string(4) "This"
-
---- Token 2 ---
-string(8) "testcase"
-
---- Token 3 ---
-string(4) "test"
-
---- Token 4 ---
-string(6) "strtok"
-
---- Token 5 ---
-string(8) "function"
-
---- Token 6 ---
-bool(false)
-
---- Token 7 ---
-bool(false)
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing strtok() : basic functionality ***
 
 The Input string is:

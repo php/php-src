@@ -22,32 +22,6 @@ echo "Done"
 --EXPECTF--
 *** Testing parse_url() : error conditions: url component specifier out of range ***
 --> Below range:array(8) {
-  ["scheme"]=>
-  string(4) "http"
-  ["host"]=>
-  string(11) "www.php.net"
-  ["port"]=>
-  int(80)
-  ["user"]=>
-  string(6) "secret"
-  ["pass"]=>
-  string(7) "hideout"
-  ["path"]=>
-  string(10) "/index.php"
-  ["query"]=>
-  string(31) "test=1&test2=char&test3=mixesCI"
-  ["fragment"]=>
-  string(16) "some_page_ref123"
-}
-
-
---> Above range:
-Warning: parse_url(): Invalid URL component identifier 99 in %s on line 15
-bool(false)
-Done
---UEXPECTF--
-*** Testing parse_url() : error conditions: url component specifier out of range ***
---> Below range:array(8) {
   [u"scheme"]=>
   unicode(4) "http"
   [u"host"]=>

@@ -55,45 +55,7 @@ foreach ($array as $html) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
-array(4) {
-  ["author"]=>
-  string(4) "name"
-  ["keywords"]=>
-  string(17) "php documentation"
-  ["description"]=>
-  string(12) "a php manual"
-  ["geo_position"]=>
-  string(12) "49.33;-86.59"
-}
-array(4) {
-  ["author"]=>
-  string(4) "name"
-  ["keywords"]=>
-  string(17) "php documentation"
-  ["description"]=>
-  string(12) "a php manual"
-  ["geo_position"]=>
-  string(12) "49.33;-86.59"
-}
-array(1) {
-  ["keywords"]=>
-  string(17) "php documentation"
-}
-array(1) {
-  ["keywords"]=>
-  string(17) "php documentation"
-}
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
-Done
---UEXPECTF--
+--EXPECT--
 array(4) {
   ["author"]=>
   unicode(4) "name"

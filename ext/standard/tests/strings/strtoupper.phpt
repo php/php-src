@@ -19,8 +19,6 @@ $chars = "הצü";
 setlocale(LC_CTYPE, "de_DE", "de", "german", "ge", "de_DE.ISO8859-1", "ISO8859-1");
 echo strtoupper($chars)."\n";
 ?>
---EXPECT--
-ִײÜ
---UEXPECTF--
+--EXPECTF--
 Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 ִײÜ

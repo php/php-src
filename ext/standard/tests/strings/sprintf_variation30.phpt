@@ -22,7 +22,7 @@ $resource_values = array (
 // array of octal formats
 $octal_formats = array( 
   "%o", "%ho", "%lo", 
-  "%Lo", " %o", "%o ",                        
+  "%Lo", " %o", "%o ",
   "\t%o", "\n%o", "%4o",
   "%30o", "%[0-7]", "%*o"
 );
@@ -44,39 +44,6 @@ closedir($dfp);
 echo "Done";
 ?>
 --EXPECTF--
-*** Testing sprintf() : octal formats with resource values ***
-
--- Iteration 1 --
-string(%d) "%d"
-string(1) "o"
-string(%d) "%d"
-string(1) "o"
-string(%d) " %d"
-string(%d) "%d "
-string(%d) "	%d"
-string(%d) "
-%d"
-string(%d) "%s%d"
-string(%d) "%s%d"
-string(%d) "0-7]"
-string(1) "o"
-
--- Iteration 2 --
-string(%d) "%d"
-string(1) "o"
-string(%d) "%d"
-string(1) "o"
-string(%d) " %d"
-string(%d) "%d "
-string(%d) "	%d"
-string(%d) "
-%d"
-string(%d) "%s%d"
-string(%d) "%s%d"
-string(%d) "0-7]"
-string(1) "o"
-Done
---UEXPECTF--
 *** Testing sprintf() : octal formats with resource values ***
 
 -- Iteration 1 --

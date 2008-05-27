@@ -9,9 +9,6 @@ var_dump($value);
 
 echo "Done\n";
 ?>
---EXPECT--	
-string(6) "bzexbz"
-Done
---UEXPECT--
+--EXPECT--
 unicode(6) "bzexbz"
 Done

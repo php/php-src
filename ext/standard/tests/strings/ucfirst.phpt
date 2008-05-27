@@ -9,8 +9,4 @@ echo ucfirst("ßen"), "\n";
 --EXPECT--
 Peren
 Appelen
-ßen
---UEXPECT--
-Peren
-Appelen
 SSen

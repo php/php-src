@@ -32,16 +32,7 @@ foreach($needles as $needle) {
 
 echo "*** Done ***";
 ?>
---EXPECTF--
-*** Testing strrchr() function: with heredoc strings ***
-string(19) "ing heredoc syntax."
-bool(false)
-string(8) " syntax."
-string(63) "Example of string
-spanning multiple lines
-using heredoc syntax."
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Testing strrchr() function: with heredoc strings ***
 unicode(19) "ing heredoc syntax."
 bool(false)

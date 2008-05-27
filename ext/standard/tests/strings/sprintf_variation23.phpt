@@ -43,41 +43,7 @@ fclose($dfp);
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing sprintf() : char formats with resource values ***
-
--- Iteration 1 --
-string(1) ""
-string(1) "c"
-string(1) ""
-string(1) "c"
-string(2) " "
-string(2) " "
-string(2) "	"
-string(2) "
-"
-string(1) ""
-string(1) ""
-string(11) "a-bA-B@#$&]"
-string(1) "c"
-
--- Iteration 2 --
-string(1) ""
-string(1) "c"
-string(1) ""
-string(1) "c"
-string(2) " "
-string(2) " "
-string(2) "	"
-string(2) "
-"
-string(1) ""
-string(1) ""
-string(11) "a-bA-B@#$&]"
-string(1) "c"
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing sprintf() : char formats with resource values ***
 
 -- Iteration 1 --

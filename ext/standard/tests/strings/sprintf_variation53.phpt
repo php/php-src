@@ -32,44 +32,7 @@ foreach($formats as $format) {
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing sprintf() : with  white spaces in format strings ***
-string(4) "1234"
-string(4) "1234"
-string(4) "1234"
-string(11) "1234.000000"
-string(11) "1234.000000"
-string(11) "1234.000000"
-string(11) "1234.000000"
-string(11) "1234.000000"
-string(11) "1234.000000"
-string(11) "10011010010"
-string(11) "10011010010"
-string(11) "10011010010"
-string(1) "Ò"
-string(1) "Ò"
-string(1) "Ò"
-string(11) "1.234000e+3"
-string(11) "1.234000e+3"
-string(11) "1.234000e+3"
-string(4) "1234"
-string(4) "1234"
-string(4) "1234"
-string(4) "2322"
-string(4) "2322"
-string(4) "2322"
-string(3) "4d2"
-string(3) "4d2"
-string(3) "4d2"
-string(3) "4D2"
-string(3) "4D2"
-string(3) "4D2"
-string(11) "1.234000E+3"
-string(11) "1.234000E+3"
-string(11) "1.234000E+3"
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing sprintf() : with  white spaces in format strings ***
 unicode(4) "1234"
 unicode(4) "1234"

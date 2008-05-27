@@ -65,44 +65,7 @@ for($index = 0; $index < count($str_arr); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
-*** Testing strtr() : string containing escape sequences for 'str' arg ***
--- Iteration 1 --
-string(9) "SesSTsttE"
-string(9) "	es	\stt
-"
--- Iteration 2 --
-string(12) "TtestTTstrtr"
-string(12) "\test\\strtr"
--- Iteration 3 --
-string(12) "TtestETstrtr"
-string(11) "ttestTstrtr"
--- Iteration 4 --
-string(9) "$variable"
-string(9) "$variable"
--- Iteration 5 --
-string(7) ""quotes"
-string(7) ""quotes"
--- Iteration 6 --
-string(12) "TtesTtTsttTr"
-string(12) "\tes\t\stt\r"
--- Iteration 7 --
-string(12) "TtestTTstrtr"
-string(12) "\test\\strtr"
--- Iteration 8 --
-string(15) "TntestTrTnstrtr"
-string(15) "\ntest\r\nstrtr"
--- Iteration 9 --
-string(10) "T$variable"
-string(10) "\$variable"
--- Iteration 10 --
-string(8) "T"quotes"
-string(8) "\"quotes"
--- Iteration 11 --
-string(54) "SesSTsttETTtestTTstrtrTTtestETstrtrT$variableTT"quotes"
-string(52) "	es	\sttT\test\\strtrtttestTstrtrt$variablet\"quotes"
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Testing strtr() : string containing escape sequences for 'str' arg ***
 -- Iteration 1 --
 unicode(9) "SesSTsttE"

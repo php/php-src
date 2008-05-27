@@ -45,17 +45,3 @@ NULL
 Warning: crc32() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 Done
-
---UEXPECTF--
-*** Testing crc32() : error conditions ***
-
--- Testing crc32() function with Zero arguments --
-
-Warning: crc32() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
--- Testing crc32() function with more than expected no. of arguments --
-
-Warning: crc32() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-Done

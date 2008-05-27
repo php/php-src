@@ -77,33 +77,7 @@ for($index =0; $index < count($res_heredoc_strings); $index ++) {
 
 echo "Done\n";
 ?>
---EXPECTF--
-*** Testing strip_tags() : usage variations ***
--- Iteration 1 --
-string(0) ""
--- Iteration 2 --
-string(0) ""
--- Iteration 3 --
-string(67) "<html>hello world</html>
-13 &lt; 25
-
-This is a double quoted string"
--- Iteration 4 --
-string(44) "<html>hello
- world	
-1111		 != 2222</html>
-"
--- Iteration 5 --
-string(56) "<html>11 < 12. 123 >22</html>
-string 1111	 0000	 = 0000
-"
--- Iteration 6 --
-string(150) "<html>This's a string with quotes:</html>
-"strings in double quote";
-'strings in single quote';
-<html>this\line is single quoted /with\slashes </html>"
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
 unicode(0) ""

@@ -32,20 +32,7 @@ var_dump( strrev('Hello, World\n') );
 var_dump( strrev($heredoc) );
 echo "*** Done ***";
 ?>
---EXPECTF--
-*** Testing strrev() : basic functionality ***
-string(12) "dlroW ,olleH"
-string(12) "dlroW ,olleH"
-string(1) "H"
-string(1) "H"
-string(6) "HHHHHH"
-string(6) "HhhhhH"
-string(13) "
-dlroW ,olleH"
-string(14) "n\dlroW ,olleH"
-string(12) "dlrow ,olleH"
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Testing strrev() : basic functionality ***
 unicode(12) "dlroW ,olleH"
 unicode(12) "dlroW ,olleH"

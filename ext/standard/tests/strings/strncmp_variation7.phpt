@@ -20,9 +20,5 @@ echo "*** Done ***\n";
 ?>
 --EXPECTF--
 *** Test strncmp() function: Checking with the null terminated strings ***
-int(5)
-*** Done ***
---UEXPECTF--
-*** Test strncmp() function: Checking with the null terminated strings ***
 int(1)
 *** Done ***

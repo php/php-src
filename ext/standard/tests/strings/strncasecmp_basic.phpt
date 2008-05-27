@@ -44,18 +44,3 @@ int\(0\)
 int\(-[1-9][0-9]*\)
 int\([1-9][0-9]*\)
 \*\*\* Done \*\*\*
---UEXPECTREGEX--
-\*\*\* Testing strncasecmp\(\) function: basic functionality \*\*\*
--- Testing strncasecmp\(\) with single quoted string --
-int\(0\)
-int\(-[1-9][0-9]*\)
-int\([1-9][0-9]*\)
--- Testing strncasecmp\(\) with double quoted string --
-int\(0\)
-int\(-[1-9][0-9]*\)
-int\([1-9][0-9]*\)
--- Testing strncasecmp\(\) with here-doc string --
-int\(0\)
-int\(-[1-9][0-9]*\)
-int\([1-9][0-9]*\)
-\*\*\* Done \*\*\*

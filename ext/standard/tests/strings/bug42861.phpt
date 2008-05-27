@@ -15,17 +15,7 @@ var_dump( strtr("hello", null, "string") );
 
 echo "Done\n";
 ?>
---EXPECTF--	
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-string(5) "hello"
-string(5) "hello"
-string(5) "hello"
-string(5) "hello"
-Done
---UEXPECTF--
+--EXPECT--
 unicode(5) "hello"
 unicode(5) "hello"
 unicode(5) "hello"

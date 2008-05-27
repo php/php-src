@@ -68,51 +68,6 @@ int(2)
 
 -- 3rd or 4th arg as NULL --
 
-Warning: substr_count() expects parameter 3 to be long, string given in %s on line %d
-NULL
-
-Warning: substr_count() expects parameter 3 to be long, string given in %s on line %d
-NULL
-
-Warning: substr_count() expects parameter 3 to be long, string given in %s on line %d
-NULL
-int(0)
-int(2)
-
--- overlapped substrings --
-int(2)
-int(2)
-
--- complex strings containing other than 7-bit chars --
-int(2)
-int(2)
-int(1)
-
--- heredoc string --
-int(14)
-int(16)
-
--- heredoc null string --
-int(0)
-int(0)
-int(0)
-Done
---UEXPECTF--
-*** Testing possible variations ***
--- 3rd or 4th arg as string --
-int(1)
-int(1)
-
-Notice: A non well formed numeric value encountered in %s on line %d
-int(2)
-
-Notice: A non well formed numeric value encountered in %s on line %d
-
-Notice: A non well formed numeric value encountered in %s on line %d
-int(2)
-
--- 3rd or 4th arg as NULL --
-
 Warning: substr_count() expects parameter 3 to be long, Unicode string given in %s on line %d
 NULL
 

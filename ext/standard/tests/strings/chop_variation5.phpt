@@ -25,20 +25,7 @@ echo "*** Testing chop() : with miscellaneous arguments ***\n";
 
 echo "Done\n";
 ?>
---EXPECTF--
-*** Testing chop() : with miscellaneous arguments ***
-string(9) "chop test"
-string(12) "chop test   "
-string(17) "chop test        "
-string(17) "chop test        "
-string(9) "chop test"
-string(10) "chop test "
-string(9) "chop test"
-string(9) "chop test"
-string(9) "chop test"
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing chop() : with miscellaneous arguments ***
 unicode(9) "chop test"
 unicode(12) "chop test   "

@@ -34,22 +34,7 @@ var_dump( strrpos((unicode)"Hello, World", ",") );
 
 echo "*** Done ***";
 ?>
---EXPECTF--
-*** Testing strrpos() function: basic functionality ***
--- With default arguments --
-int(0)
-bool(false)
-int(7)
-bool(false)
-int(8)
-int(5)
-int(0)
-int(0)
-int(0)
-int(8)
-int(5)
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Testing strrpos() function: basic functionality ***
 -- With default arguments --
 int(0)

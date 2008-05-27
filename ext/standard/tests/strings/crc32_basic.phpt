@@ -34,13 +34,7 @@ printf("%u\n", crc32($str) );
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing crc32() : basic functionality ***
-bool(true)
-256895812
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing crc32() : basic functionality ***
 bool(true)
 256895812

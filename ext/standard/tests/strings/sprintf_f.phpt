@@ -22,23 +22,6 @@ var_dump(sprintf("%3.4f", 1.2345678e99));
 
 ?>
 --EXPECTF--
-string(4) "1.20"
-string(4) "1.20"
-string(4) "1.20"
-string(4) "1.20"
-
-string(5) " 3.40"
-string(5) "3.40 "
-string(5) "03.40"
-string(5) "3.400"
-
-string(7) "  -5.60"
-string(7) "-5.60  "
-string(7) "-005.60"
-string(7) "-5.6000"
-
-string(105) "1234567%d.0000"
---UEXPECTF--
 unicode(4) "1.20"
 unicode(4) "1.20"
 unicode(4) "1.20"

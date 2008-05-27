@@ -25,21 +25,7 @@ foreach($array as $str) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: metaphone() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-string(0) ""
-string(0) ""
-bool(false)
-bool(false)
-string(6) "FLTFRS"
-string(6) "FLTFRS"
-string(26) "0FLFRWRTKRFLNKHTLSLN0KLTR0"
-string(56) "BT0XTFHRRHLTNTRTRNTPSNKLWRNRFTBF0MSWPNK0FNRKW0TSFSTLWNKS"
-string(69) "ANT0NTWSKNFLYNKBKTMRTRW00SPTF0R0FSRNNTBHNTT0WNTRRTWLFNK0TTMRXSBRNTBLK"
-string(56) "0NKTWSTSFRS0YKLTPRSFNT0TSTNTMNSF0MNTNSWSTPLTW00FTFLMNLFT"
-Done
---UEXPECTF--
+--EXPECTF--
 Warning: metaphone() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 unicode(0) ""

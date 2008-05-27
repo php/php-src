@@ -7,9 +7,5 @@ Bug #22207 (missing 0 when using the e notation in *printf functions)
 ?>
 --EXPECT--
 1.10000e+0
-string(11) "1.10000e+0
-"
---UEXPECT--
-1.10000e+0
 unicode(11) "1.10000e+0
 "

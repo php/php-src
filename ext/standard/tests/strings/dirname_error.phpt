@@ -23,12 +23,3 @@ NULL
 Warning: dirname() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing error conditions ***
-
-Warning: dirname() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: dirname() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-Done

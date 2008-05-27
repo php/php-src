@@ -50,26 +50,3 @@ int\([1-9][0-9]*\)
 int\([1-9][0-9]*\)
 int\(0\)
 \*\*\* Done \*\*\*
---UEXPECTREGEX--
-\*\*\* Test strncasecmp\(\) function: with single quoted strings \*\*\*
--- Iteration 1 --
-int\(0\)
-int\(0\)
-int\(0\)
-int\(-[1-9][0-9]*\)
--- Iteration 2 --
-int\(0\)
-int\(0\)
-int\(0\)
-int\(-[1-9][0-9]*\)
--- Iteration 3 --
-int\(0\)
-int\(0\)
-int\(0\)
-int\(-[1-9][0-9]*\)
--- Iteration 4 --
-int\([1-9][0-9]*\)
-int\([1-9][0-9]*\)
-int\([1-9][0-9]*\)
-int\(0\)
-\*\*\* Done \*\*\*

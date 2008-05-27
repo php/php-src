@@ -17,11 +17,6 @@ var_dump( money_format("X%nY", 3.1415));
 var_dump(money_format("AAAAA%n%n%n%n", NULL));
 ?>
 --EXPECTF--
-string(7) "X$3.14Y"
-
-Warning: money_format(): Only a single %ci or %cn token can be used in %s on line %d
-bool(false)
---UEXPECTF--
 Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 unicode(7) "X$3.14Y"
 
