@@ -26,31 +26,6 @@ image_type_to_mime_type()
 ?>
 --EXPECT--
 array(11) {
-  ["test1pix.bmp"]=>
-  string(9) "image/bmp"
-  ["test1pix.jp2"]=>
-  string(9) "image/jp2"
-  ["test1pix.jpc"]=>
-  string(24) "application/octet-stream"
-  ["test1pix.jpg"]=>
-  string(10) "image/jpeg"
-  ["test2pix.gif"]=>
-  string(9) "image/gif"
-  ["test4pix.gif"]=>
-  string(9) "image/gif"
-  ["test4pix.iff"]=>
-  string(9) "image/iff"
-  ["test4pix.png"]=>
-  string(9) "image/png"
-  ["test4pix.psd"]=>
-  string(9) "image/psd"
-  ["test4pix.swf"]=>
-  string(29) "application/x-shockwave-flash"
-  ["test4pix.tif"]=>
-  string(10) "image/tiff"
-}
---UEXPECT--
-array(11) {
   [u"test1pix.bmp"]=>
   unicode(9) "image/bmp"
   [u"test1pix.jp2"]=>
