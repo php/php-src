@@ -45,26 +45,6 @@ float(-0.5328330203)
 float(-0.1117112391)
 float(-0.1117112391)
 
-Warning: cos() expects parameter 1 to be double, string given in %s on line 27
-NULL
-float(0.5623790763)
-
-Notice: A non well formed numeric value encountered in %s on line 27
-float(0.5623790763)
-float(1)
-float(0.5403023059)
-float(1)
---UEXPECTF--
-float(-0.5328330203)
-float(-0.5328330203)
-float(-0.1117112391)
-float(-0.1117112391)
-float(-0.5328330203)
-float(-0.5328330203)
-float(-0.5328330203)
-float(-0.1117112391)
-float(-0.1117112391)
-
 Warning: cos() expects parameter 1 to be double, Unicode string given in %s on line 27
 NULL
 float(0.5623790763)

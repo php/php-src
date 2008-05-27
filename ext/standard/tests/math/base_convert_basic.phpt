@@ -29,7 +29,7 @@ for ($f= 0; $f < count($frombase); $f++) {
 }
 ?>
 
---EXPECTF--
+--EXPECT--
 ...from base is 2
 ......to base is 2
 .........value= 10 res = 10

@@ -45,26 +45,6 @@ float(0.401425728)
 float(0.4092797096)
 float(0.4092797096)
 
-Warning: deg2rad() expects parameter 1 to be double, string given in %s on line 27
-NULL
-float(17.45329252)
-
-Notice: A non well formed numeric value encountered in %s on line 27
-float(17.45329252)
-float(0)
-float(0.01745329252)
-float(0)
---UEXPECTF--
-float(0.401425728)
-float(-0.401425728)
-float(0.4092797096)
-float(-0.4092797096)
-float(0.401425728)
-float(0.401425728)
-float(0.401425728)
-float(0.4092797096)
-float(0.4092797096)
-
 Warning: deg2rad() expects parameter 1 to be double, Unicode string given in %s on line 27
 NULL
 float(17.45329252)

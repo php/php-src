@@ -32,22 +32,6 @@ var_dump(unserialize(serialize($f)));
 ?>
 --EXPECTF--
 float(1%f)
-string(%d) "d:1%s;"
-float(1%f)
-float(-1%f)
-string(%d) "d:-1%s;"
-float(-1%f)
-float(-INF)
-string(7) "d:-INF;"
-float(-INF)
-float(INF)
-string(6) "d:INF;"
-float(INF)
-float(NAN)
-string(6) "d:NAN;"
-float(NAN)
---UEXPECTF--
-float(1%f)
 unicode(%d) "d:1%s;"
 float(1%f)
 float(-1%f)

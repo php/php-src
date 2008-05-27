@@ -13,7 +13,7 @@ var_dump(srand(true));
 var_dump(srand(false));
 var_dump(srand(NULL));
 ?>
---EXPECTF--
+--EXPECT--
 NULL
 NULL
 NULL

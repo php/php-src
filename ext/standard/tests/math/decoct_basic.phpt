@@ -23,20 +23,6 @@ for ($i = 0; $i < count($values); $i++) {
 }
 ?>
 --EXPECTF--
-string(2) "12"
-string(4) "7556"
-string(4) "7556"
-string(1) "3"
-string(3) "137"
-string(2) "12"
-string(4) "7556"
-string(1) "3"
-string(2) "47"
-string(1) "0"
-string(1) "1"
-string(1) "0"
-string(1) "0"
---UEXPECTF--
 unicode(2) "12"
 unicode(4) "7556"
 unicode(4) "7556"
