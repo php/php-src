@@ -24,19 +24,6 @@ bool(false)
 Warning: openssl_seal(): Fourth argument to openssl_seal() must be a non-empty array in %s on line %d
 bool(false)
 
-Warning: openssl_seal() expects parameter 1 to be string, array given in %s on line %d
-NULL
-
-Warning: openssl_seal() expects parameter 1 to be string, array given in %s on line %d
-NULL
-Done
---UEXPECTF--
-Warning: openssl_seal(): not a public key (0th member of pubkeys) in %s on line %d
-bool(false)
-
-Warning: openssl_seal(): Fourth argument to openssl_seal() must be a non-empty array in %s on line %d
-bool(false)
-
 Warning: openssl_seal() expects parameter 1 to be binary string, array given in %s on line %d
 NULL
 

@@ -14,39 +14,6 @@ var_dump(preg_match('@^(/(?:[a-z]+))+$@', '/a/abcde', $m)); var_dump($m);
 int(1)
 array(3) {
   [0]=>
-  string(7) "//abcde"
-  [1]=>
-  string(6) "/abcde"
-  [2]=>
-  string(5) "abcde"
-}
-int(1)
-array(2) {
-  [0]=>
-  string(7) "//abcde"
-  [1]=>
-  string(6) "/abcde"
-}
-int(1)
-array(3) {
-  [0]=>
-  string(8) "/a/abcde"
-  [1]=>
-  string(6) "/abcde"
-  [2]=>
-  string(5) "abcde"
-}
-int(1)
-array(2) {
-  [0]=>
-  string(8) "/a/abcde"
-  [1]=>
-  string(6) "/abcde"
-}
---UEXPECT--
-int(1)
-array(3) {
-  [0]=>
   unicode(7) "//abcde"
   [1]=>
   unicode(6) "/abcde"

@@ -15,15 +15,6 @@ var_dump(preg_match('/^[tT]\w{6} - ' . preg_quote($string_before, '/') . ' [a-z]
 var_dump($matches1);
 ?>
 --EXPECT--
-
-$string_before looks like: /this *-has \ metacharacters^ in $
-$string_after looks like: \/this \*-has \\ metacharacters\^ in \$, with metacharacters and / (set as delimiter) escaped
-int(1)
-array(1) {
-  [0]=>
-  string(58) "testing - /this *-has \ metacharacters^ in $ should   work"
-}
---UEXPECTF--
 $string_before looks like: /this *-has \ metacharacters^ in $
 $string_after looks like: \/this \*-has \\ metacharacters\^ in \$, with metacharacters and / (set as delimiter) escaped
 int(1)

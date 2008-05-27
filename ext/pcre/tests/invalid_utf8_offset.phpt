@@ -29,7 +29,7 @@ bool(true)
 int(1)
 array(1) {
   [0]=>
-  string(28) " uma string utf8 bem formada"
+  unicode(28) " uma string utf8 bem formada"
 }
 bool(true)
 Done

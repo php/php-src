@@ -26,22 +26,6 @@ var_dump(openssl_pkcs7_decrypt($a, $b, 0, 0));
 echo "Done\n";
 ?>
 --EXPECTF--	
-string(57) "Object of class stdClass could not be converted to string"
-string(45) "Object of class stdClass to string conversion"
-string(66) "openssl_pkcs7_decrypt(): unable to coerce parameter 3 to x509 cert"
-bool(false)
-object(stdClass)#1 (0) {
-}
-string(66) "openssl_pkcs7_decrypt(): unable to coerce parameter 3 to x509 cert"
-bool(false)
-string(66) "openssl_pkcs7_decrypt(): unable to coerce parameter 3 to x509 cert"
-bool(false)
-string(66) "openssl_pkcs7_decrypt(): unable to coerce parameter 3 to x509 cert"
-bool(false)
-string(66) "openssl_pkcs7_decrypt(): unable to coerce parameter 3 to x509 cert"
-bool(false)
-Done
---UEXPECTF--
 unicode(64) "Object of class stdClass could not be converted to binary string"
 unicode(45) "Object of class stdClass to string conversion"
 unicode(66) "openssl_pkcs7_decrypt(): unable to coerce parameter 3 to x509 cert"

@@ -56,46 +56,6 @@ bool(false)
 Arg value is /[a-zA-Z]/
 array(3) {
   [0]=>
-  string(4) "1 2 "
-  [1]=>
-  string(5) " 3 4 "
-  [2]=>
-  string(4) " 5 6"
-}
-
-Warning: preg_split() expects parameter 1 to be string (Unicode or binary), object given in %spreg_split_error1.php on line %d
-bool(false)
---UEXPECTF--
-*** Testing preg_split() : error conditions ***
-
-Arg value is abcdef
-
-Warning: preg_split(): Delimiter must not be alphanumeric or backslash in %spreg_split_error1.php on line %d
-bool(false)
-
-Arg value is /[a-zA-Z]
-
-Warning: preg_split(): No ending delimiter '/' found in %spreg_split_error1.php on line %d
-bool(false)
-
-Arg value is [a-zA-Z]/
-
-Warning: preg_split(): Unknown modifier '/' in %spreg_split_error1.php on line %d
-bool(false)
-
-Arg value is /[a-zA-Z]/F
-
-Warning: preg_split(): Unknown modifier 'F' in %spreg_split_error1.php on line %d
-bool(false)
-
-Arg value is Array
-
-Warning: preg_split() expects parameter 1 to be string (Unicode or binary), array given in %spreg_split_error1.php on line %d
-bool(false)
-
-Arg value is /[a-zA-Z]/
-array(3) {
-  [0]=>
   unicode(4) "1 2 "
   [1]=>
   unicode(5) " 3 4 "

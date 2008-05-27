@@ -26,69 +26,6 @@ array(1) {
     [0]=>
     array(2) {
       [0]=>
-      string(1) "3"
-      [1]=>
-      int(61)
-    }
-  }
-}
-int(2)
-array(2) {
-  [0]=>
-  array(2) {
-    [0]=>
-    string(15) "This is a test."
-    [1]=>
-    string(5) " test"
-  }
-  [1]=>
-  array(2) {
-    [0]=>
-    string(21) "This is another test."
-    [1]=>
-    string(11) "nother test"
-  }
-}
-int(1)
-array(2) {
-  [0]=>
-  array(1) {
-    [0]=>
-    string(21) ". \[4]. 34534 string."
-  }
-  [1]=>
-  array(1) {
-    [0]=>
-    string(17) "[4]. 34534 string"
-  }
-}
-int(0)
-array(1) {
-  [0]=>
-  array(0) {
-  }
-}
-int(0)
-array(3) {
-  [0]=>
-  array(0) {
-  }
-  [1]=>
-  array(0) {
-  }
-  [2]=>
-  array(0) {
-  }
-}
-
---UEXPECTF--
-int(1)
-array(1) {
-  [0]=>
-  array(1) {
-    [0]=>
-    array(2) {
-      [0]=>
       unicode(1) "3"
       [1]=>
       int(61)

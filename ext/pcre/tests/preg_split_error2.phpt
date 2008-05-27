@@ -32,14 +32,3 @@ bool(false)
 Warning: preg_split() expects parameter 2 to be string (Unicode or binary), object given in %spreg_split_error2.php on line %d
 bool(false)
 Done
---UEXPECTF--
-*** Testing preg_split() : error conditions ***
-
-Arg value is: Array
-
-Warning: preg_split() expects parameter 2 to be string (Unicode or binary), array given in %spreg_split_error2.php on line %d
-bool(false)
-
-Warning: preg_split() expects parameter 2 to be string (Unicode or binary), object given in %spreg_split_error2.php on line %d
-bool(false)
-Done

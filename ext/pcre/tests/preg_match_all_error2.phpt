@@ -42,36 +42,6 @@ array(1) {
   [0]=>
   array(4) {
     [0]=>
-    string(1) "t"
-    [1]=>
-    string(1) "e"
-    [2]=>
-    string(1) "s"
-    [3]=>
-    string(1) "t"
-  }
-}
-Done
-
---UEXPECTF--
-*** Testing preg_match_all() : error conditions ***
-
-Warning: preg_match_all() expects parameter 2 to be string (Unicode or binary), object given in %spreg_match_all_error2.php on line %d
-bool(false)
-NULL
-
-Arg value is: Array
-
-Warning: preg_match_all() expects parameter 2 to be string (Unicode or binary), array given in %spreg_match_all_error2.php on line %d
-bool(false)
-NULL
-
-Arg value is: test
-int(4)
-array(1) {
-  [0]=>
-  array(4) {
-    [0]=>
     unicode(1) "t"
     [1]=>
     unicode(1) "e"

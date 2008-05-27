@@ -43,21 +43,3 @@ NULL
 Warning: preg_replace() expects at least 3 parameters, 2 given in %spreg_replace_error.php on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing preg_replace() : error conditions ***
-
--- Testing preg_replace() function with zero arguments --
-
-Warning: preg_replace() expects at least 3 parameters, 0 given in %spreg_replace_error.php on line %d
-NULL
-
--- Testing preg_replace() function with more than expected no. of arguments --
-
-Warning: preg_replace() expects at most 5 parameters, 6 given in %spreg_replace_error.php on line %d
-NULL
-
--- Testing preg_replace() function with less than expected no. of arguments --
-
-Warning: preg_replace() expects at least 3 parameters, 2 given in %spreg_replace_error.php on line %d
-NULL
-Done

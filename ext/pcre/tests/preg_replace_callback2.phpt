@@ -24,22 +24,6 @@ var_dump(preg_replace_callback('~\A.~', create_function('$m', 'return strtolower
 --EXPECTF--
 array(3) {
   [0]=>
-  string(12) "'a' 'b3' bcd"
-  ["v"]=>
-  string(6) "aksfjk"
-  [12]=>
-  string(9) "'aa' 'bb'"
-}
-
-Notice: Array to string conversion in %spreg_replace_callback2.php on line 17
-array(1) {
-  [0]=>
-  string(7) "'A'rray"
-}
-string(3) "aBC"
---UEXPECTF--
-array(3) {
-  [0]=>
   unicode(12) "'a' 'b3' bcd"
   [u"v"]=>
   unicode(6) "aksfjk"

@@ -30,15 +30,6 @@ var_dump(preg_replace($regex, '...', $string, -1));
 var_dump($count);
 ?>
 --EXPECT--
-string(56) "xxxx xxxx 1-a-3-4 1-2-a-4 1-2-3-a a-a-a-a xxxx xxxx-xxxx"
-int(5)
-string(41) "Hxxxx xxxx xxxx xxxx xxxx 42 xxxx 13 xxxx"
-int(7)
-string(25) "... ... ... ... v1c0d1/|/"
-int(4)
-string(25) "... ... ... ... v1c0d1/|/"
-NULL
---UEXPECT--
 unicode(56) "xxxx xxxx 1-a-3-4 1-2-a-4 1-2-3-a a-a-a-a xxxx xxxx-xxxx"
 int(5)
 unicode(41) "Hxxxx xxxx xxxx xxxx xxxx 42 xxxx 13 xxxx"
