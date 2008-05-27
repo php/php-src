@@ -38,15 +38,6 @@ var_dump($client->qwebGetHostInfo());
 ?>
 --EXPECT--
 array(3) {
-  ["name"]=>
-  string(25) "blah blah some name field"
-  ["shortDescription"]=>
-  string(42) "This is a description. more blah blah blah"
-  ["ipAddress"]=>
-  string(9) "127.0.0.1"
-}
---UEXPECT--
-array(3) {
   [u"name"]=>
   unicode(25) "blah blah some name field"
   [u"shortDescription"]=>

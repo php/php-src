@@ -38,10 +38,6 @@ var_dump("¦è¥");
 echo "ok\n";
 ?>
 --EXPECT--
-string(3) "¦è¥"
-string(3) "¦è¥"
-ok
---UEXPECT--
 unicode(3) "¦è¥"
 unicode(3) "¦è¥"
 ok

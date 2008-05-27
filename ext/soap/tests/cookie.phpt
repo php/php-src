@@ -37,16 +37,6 @@ dump_cookies($client);
 --EXPECT--
 Cookie:
 Cookie: var1=val1;
-  string("var1") => string("val1")
-Cookie: var1=val1;var2=val2;
-  string("var1") => string("val1")
-  string("var2") => string("val2")
-Cookie: var2=val3;
-  string("var2") => string("val3")
-Cookie:
---UEXPECT--
-Cookie:
-Cookie: var1=val1;
   unicode("var1") => unicode("val1")
 Cookie: var1=val1;var2=val2;
   unicode("var1") => unicode("val1")
