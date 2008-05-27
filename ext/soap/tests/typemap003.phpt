@@ -48,14 +48,6 @@ echo "ok\n";
 ?>
 --EXPECTF--
 object(book)#%d (2) {
-  ["a"]=>
-  string(3) "foo"
-  ["b"]=>
-  string(3) "bar"
-}
-ok
---UEXPECTF--
-object(book)#%d (2) {
   [u"a"]=>
   unicode(3) "foo"
   [u"b"]=>

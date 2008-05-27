@@ -19,14 +19,6 @@ echo "ok\n";
 --EXPECT--
 array(2) {
   [0]=>
-  string(3) "Sub"
-  [1]=>
-  string(3) "Add"
-}
-ok
---UEXPECT--
-array(2) {
-  [0]=>
   unicode(3) "Sub"
   [1]=>
   unicode(3) "Add"

@@ -96,36 +96,6 @@ class IVREvents {
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://testurl/Message" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><SOAP-ENV:Body><ns1:ivrEvents version="1.0" activityId="101" messageId="12345" source="IVR"><ns1:logOffEvent audienceMemberId="34567" timestamp="2005-11-08T11:22:07+03:00" smokeStatus="Smoked" callInitiator="IVR"/><ns1:logOnEvent xsi:nil="true"/></ns1:ivrEvents></SOAP-ENV:Body></SOAP-ENV:Envelope>
 
 object(IVREvents)#5 (6) {
-  ["version"]=>
-  string(3) "1.0"
-  ["activityId"]=>
-  int(101)
-  ["messageId"]=>
-  int(12345)
-  ["source"]=>
-  string(3) "IVR"
-  ["logOnEvent"]=>
-  NULL
-  ["logOffEvent"]=>
-  array(1) {
-    [0]=>
-    object(LogOffEvent)#6 (4) {
-      ["audienceMemberId"]=>
-      int(34567)
-      ["timestamp"]=>
-      string(25) "2005-11-08T11:22:07+03:00"
-      ["smokeStatus"]=>
-      string(6) "Smoked"
-      ["callInitiator"]=>
-      string(3) "IVR"
-    }
-  }
-}
---UEXPECT--
-<?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://testurl/Message" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><SOAP-ENV:Body><ns1:ivrEvents version="1.0" activityId="101" messageId="12345" source="IVR"><ns1:logOffEvent audienceMemberId="34567" timestamp="2005-11-08T11:22:07+03:00" smokeStatus="Smoked" callInitiator="IVR"/><ns1:logOnEvent xsi:nil="true"/></ns1:ivrEvents></SOAP-ENV:Body></SOAP-ENV:Envelope>
-
-object(IVREvents)#5 (6) {
   [u"version"]=>
   unicode(3) "1.0"
   [u"activityId"]=>

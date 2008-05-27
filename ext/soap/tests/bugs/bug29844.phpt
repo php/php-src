@@ -35,6 +35,4 @@ $client = new LocalSoapClient(dirname(__FILE__)."/bug29844.wsdl", array("trace"=
 var_dump($client->hello('davey'));
 ?>
 --EXPECT--
-string(11) "Hello davey"
---UEXPECT--
 unicode(11) "Hello davey"

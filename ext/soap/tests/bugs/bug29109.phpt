@@ -12,15 +12,6 @@ var_dump($client->__getFunctions());
 --EXPECT--
 array(3) {
   [0]=>
-  string(53) "HelloWorldResponse HelloWorld(HelloWorld $parameters)"
-  [1]=>
-  string(19) "string HelloWorld()"
-  [2]=>
-  string(19) "string HelloWorld()"
-}
---UEXPECT--
-array(3) {
-  [0]=>
   unicode(53) "HelloWorldResponse HelloWorld(HelloWorld $parameters)"
   [1]=>
   unicode(19) "string HelloWorld()"

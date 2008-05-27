@@ -40,28 +40,6 @@ echo "ok\n";
 ?>
 --EXPECT--
 object(stdClass)#1 (2) {
-  ["service.EchoServiceException"]=>
-  object(SoapVar)#8 (4) {
-    ["enc_type"]=>
-    int(0)
-    ["enc_value"]=>
-    object(stdClass)#7 (2) {
-      ["intParameter"]=>
-      int(105)
-      ["parameter"]=>
-      string(12) "string param"
-    }
-    ["enc_stype"]=>
-    string(20) "EchoServiceException"
-    ["enc_ns"]=>
-    string(23) "urn:service.EchoService"
-  }
-  ["hostname"]=>
-  string(9) "steckovic"
-}
-ok
---UEXPECT--
-object(stdClass)#1 (2) {
   [u"service.EchoServiceException"]=>
   object(SoapVar)#8 (4) {
     [u"enc_type"]=>

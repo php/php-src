@@ -38,14 +38,6 @@ echo "ok\n";
 ?>
 --EXPECT--
 object(book)#2 (2) {
-  ["a"]=>
-  string(5) "Blaat"
-  ["b"]=>
-  string(3) "aap"
-}
-ok
---UEXPECT--
-object(book)#2 (2) {
   [u"a"]=>
   unicode(5) "Blaat"
   [u"b"]=>

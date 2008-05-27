@@ -56,41 +56,6 @@ var_dump($ret);
 ?>
 --EXPECT--
 object(stdClass)#5 (1) {
-  ["inputAny"]=>
-  object(stdClass)#6 (1) {
-    ["any"]=>
-    array(1) {
-      ["SOAPComplexType"]=>
-      object(SOAPComplexType)#7 (3) {
-        ["varInt"]=>
-        int(34)
-        ["varString"]=>
-        string(3) "arg"
-        ["varFloat"]=>
-        float(325.325)
-      }
-    }
-  }
-}
-object(stdClass)#8 (1) {
-  ["return"]=>
-  object(stdClass)#9 (1) {
-    ["any"]=>
-    array(1) {
-      ["SOAPComplexType"]=>
-      object(SOAPComplexType)#10 (3) {
-        ["varInt"]=>
-        int(34)
-        ["varString"]=>
-        string(3) "arg"
-        ["varFloat"]=>
-        float(325.325)
-      }
-    }
-  }
-}
---UEXPECT--
-object(stdClass)#5 (1) {
   [u"inputAny"]=>
   object(stdClass)#6 (1) {
     [u"any"]=>
