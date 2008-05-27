@@ -19,21 +19,6 @@ sqlite_close($db);
 ?>
 --EXPECT--
 array(6) {
-  ["foo.c1"]=>
-  string(1) "1"
-  ["foo.c2"]=>
-  string(1) "2"
-  ["foo.c3"]=>
-  string(1) "3"
-  ["bar.c1"]=>
-  string(1) "4"
-  ["bar.c2"]=>
-  string(1) "5"
-  ["bar.c3"]=>
-  string(1) "6"
-}
---UEXPECT--
-array(6) {
   [u"foo.c1"]=>
   unicode(1) "1"
   [u"foo.c2"]=>

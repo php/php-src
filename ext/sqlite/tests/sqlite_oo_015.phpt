@@ -31,25 +31,6 @@ array(3) {
   [0]=>
   array(1) {
     [0]=>
-    string(3) "one"
-  }
-  [1]=>
-  array(1) {
-    [0]=>
-    string(3) "two"
-  }
-  [2]=>
-  array(1) {
-    [0]=>
-    string(5) "three"
-  }
-}
-DONE!
---UEXPECTF--
-array(3) {
-  [0]=>
-  array(1) {
-    [0]=>
     unicode(3) "one"
   }
   [1]=>

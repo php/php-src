@@ -15,25 +15,6 @@ var_dump($h);
 <?php exit(0); ?>
 --EXPECTF--
 object(SplMaxHeap)#1 (3) {
-  ["flags":"SplHeap":private]=>
-  int(0)
-  ["isCorrupted":"SplHeap":private]=>
-  bool(false)
-  ["heap":"SplHeap":private]=>
-  array(4) {
-    [0]=>
-    int(5)
-    [1]=>
-    int(4)
-    [2]=>
-    int(0)
-    [3]=>
-    int(1)
-  }
-}
-===DONE===
---UEXPECTF--
-object(SplMaxHeap)#1 (3) {
   [u"flags":u"SplHeap":private]=>
   int(0)
   [u"isCorrupted":u"SplHeap":private]=>

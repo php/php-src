@@ -38,55 +38,6 @@ var_dump($a->var);
 ?>
 --EXPECT--
 object(Name)#1 (4) {
-  ["var"]=>
-  string(1) "a"
-  ["bar":protected]=>
-  string(1) "b"
-  ["foo":"Name":private]=>
-  string(1) "c"
-  ["storage":"ArrayObject":private]=>
-  array(0) {
-  }
-}
-string(1) "a"
-object(Name)#2 (4) {
-  ["var"]=>
-  string(1) "a"
-  ["bar":protected]=>
-  string(1) "b"
-  ["foo":"Name":private]=>
-  string(1) "c"
-  ["storage":"ArrayObject":private]=>
-  array(0) {
-  }
-}
-string(1) "a"
-object(Bla)#1 (4) {
-  ["var"]=>
-  string(3) "aaa"
-  ["bar":protected]=>
-  string(3) "bbb"
-  ["foo":"Bla":private]=>
-  string(3) "ccc"
-  ["storage":"ArrayObject":private]=>
-  array(0) {
-  }
-}
-string(3) "aaa"
-object(Bla)#2 (4) {
-  ["var"]=>
-  string(3) "aaa"
-  ["bar":protected]=>
-  string(3) "bbb"
-  ["foo":"Bla":private]=>
-  string(3) "ccc"
-  ["storage":"ArrayObject":private]=>
-  array(0) {
-  }
-}
-string(3) "aaa"
---UEXPECT--
-object(Name)#1 (4) {
   [u"var"]=>
   unicode(1) "a"
   [u"bar":protected]=>

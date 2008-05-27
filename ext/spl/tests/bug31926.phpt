@@ -13,7 +13,4 @@ foreach($it as $key => $val) {
 ?>
 --EXPECT--
 int(0)
-string(5) "world"
---UEXPECT--
-int(0)
 unicode(5) "world"

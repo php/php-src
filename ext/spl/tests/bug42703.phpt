@@ -36,10 +36,6 @@ var_dump($itit->current());
 var_dump($itit->key());
 ?>
 --EXPECT--
-string(3) "boo"
-NULL
-NULL
---UEXPECT--
 unicode(3) "boo"
 NULL
 NULL

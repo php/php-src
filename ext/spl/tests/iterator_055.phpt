@@ -26,41 +26,6 @@ var_dump($ar);
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-string(3) "1,2"
-array(2) {
-  [0]=>
-  string(0) ""
-  [1]=>
-  string(0) ""
-}
-string(5) "1,2,3"
-array(2) {
-  [0]=>
-  string(0) ""
-  [1]=>
-  string(2) ",3"
-}
-object(ArrayIterator)#%d (1) {
-  ["storage":"ArrayIterator":private]=>
-  array(7) {
-    [1]=>
-    int(0)
-    ["1,2"]=>
-    int(1)
-    ["1,2,3"]=>
-    int(2)
-    [0]=>
-    int(3)
-    ["FooBar"]=>
-    int(4)
-    [","]=>
-    int(5)
-    [",,"]=>
-    int(6)
-  }
-}
-===DONE===
---UEXPECTF--
 unicode(3) "1,2"
 array(2) {
   [0]=>

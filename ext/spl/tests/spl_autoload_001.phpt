@@ -105,37 +105,6 @@ catch(Exception $e)
 <?php exit(0); ?>
 --EXPECTF--
 ===EMPTY===
-string(9) ".inc,.php"
-%stestclass.inc
-Exception: Class TestClass could not be loaded
-===()===
-Exception: Class TestClass could not be loaded
-===(1)===
-Exception: Class TestClass could not be loaded
-===(.inc,,.php.inc)===
-%stestclass
-%stestclass.php.inc
-Exception: Class TestClass could not be loaded
-===()===
-Exception: Class TestClass could not be loaded
-Exception: Class TestClass could not be loaded
-===SPL_AUTOLOAD()===
-string(4) ".inc"
-Exception: Class TestClass could not be loaded
-===REGISTER===
-TestFunc1(TestClass)
-TestFunc2(TestClass)
-bool(false)
-===LOAD===
-TestFunc1(TestClass)
-TestFunc2(TestClass)
-%stestclass.class.inc
-bool(true)
-===NOFUNCTION===
-Exception: Function 'unavailable_autoload_function' not found (function 'unavailable_autoload_function' not found or invalid function name)
-===DONE===
---UEXPECTF--
-===EMPTY===
 unicode(9) ".inc,.php"
 %stestclass.inc
 Exception: Class TestClass could not be loaded

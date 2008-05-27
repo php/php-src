@@ -30,27 +30,6 @@ var_dump($vals);
 array(1) {
   [0]=>
   array(5) {
-    ["tag"]=>
-    string(8) "resource"
-    ["type"]=>
-    string(8) "complete"
-    ["level"]=>
-    int(1)
-    ["attributes"]=>
-    array(2) {
-      ["key"]=>
-      string(7) "rSeeYou"
-      ["type"]=>
-      string(7) "literal"
-    }
-    ["value"]=>
-    string(13) "A bient&244;t"
-  }
-}
---UEXPECT--
-array(1) {
-  [0]=>
-  array(5) {
     [u"tag"]=>
     unicode(8) "resource"
     [u"type"]=>

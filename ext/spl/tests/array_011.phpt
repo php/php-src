@@ -16,26 +16,6 @@ foreach (new LimitIterator(new ArrayIterator($a), 1, 3) as $k => $v)
 --EXPECT--
 array(2) {
   [0]=>
-  string(3) "one"
-  [1]=>
-  int(1)
-}
-array(2) {
-  [0]=>
-  string(3) "two"
-  [1]=>
-  int(2)
-}
-array(2) {
-  [0]=>
-  string(5) "three"
-  [1]=>
-  int(3)
-}
-===DONE===
---UEXPECT--
-array(2) {
-  [0]=>
   unicode(3) "one"
   [1]=>
   int(1)

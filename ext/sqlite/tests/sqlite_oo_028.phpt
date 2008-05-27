@@ -14,17 +14,6 @@ var_dump($db->fetchColumnTypes("strings"));
 ?>
 --EXPECT--
 array(4) {
-  ["a"]=>
-  string(0) ""
-  ["b"]=>
-  string(7) "INTEGER"
-  ["c"]=>
-  string(11) "VARCHAR(10)"
-  ["d"]=>
-  string(0) ""
-}
---UEXPECT--
-array(4) {
   [u"a"]=>
   unicode(0) ""
   [u"b"]=>

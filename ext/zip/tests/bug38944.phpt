@@ -25,25 +25,6 @@ int(0)
 int(0)
 string(0) ""
 string(0) ""
-object(ZipArchive)#%d (5) {
-  ["status"]=>
-  int(0)
-  ["statusSys"]=>
-  int(0)
-  ["numFiles"]=>
-  int(0)
-  ["filename"]=>
-  string(0) ""
-  ["comment"]=>
-  string(0) ""
-}
-Done
---UEXPECTF--	
-int(0)
-int(0)
-int(0)
-string(0) ""
-string(0) ""
 object(ZipArchive)#1 (5) {
   [u"status"]=>
   int(0)

@@ -42,20 +42,6 @@ echo "DONE!\n";
 --EXPECT--
 array(1) {
   [0]=>
-  string(7) "one-uno"
-}
-array(1) {
-  [0]=>
-  string(7) "two-dos"
-}
-array(1) {
-  [0]=>
-  string(10) "three-tres"
-}
-DONE!
---UEXPECT--
-array(1) {
-  [0]=>
   unicode(7) "one-uno"
 }
 array(1) {

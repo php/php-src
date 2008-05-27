@@ -63,23 +63,6 @@ for ($sxe->rewind(); $sxe->valid(); $sxe->next()) {
 Warning: Invalid argument supplied for foreach() in %ssxe_003.php on line %d
 ===RESET===
 bool(true)
-string(5) "elem1"
-string(10) "Bla bla 1."
-string(5) "elem2"
-string(17) "SimpleXMLIterator"
-string(28) "Here we have some text data."
-bool(true)
-string(6) "elem11"
-string(10) "Bla bla 2."
-string(7) "elem111"
-string(17) "SimpleXMLIterator"
-string(7) "Foo Bar"
-===DONE===
---UEXPECTF--
-
-Warning: Invalid argument supplied for foreach() in %ssxe_003.php on line %d
-===RESET===
-bool(true)
 unicode(5) "elem1"
 unicode(10) "Bla bla 1."
 unicode(5) "elem2"

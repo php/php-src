@@ -11,8 +11,5 @@ Bug #35248 (sqlite_query does not return parse error message)
 	var_dump($err);
 ?>
 --EXPECT--
-string(30) "near "asdfesdfa": syntax error"
-string(30) "near "asdfesdfa": syntax error"
---UEXPECT--
 unicode(30) "near "asdfesdfa": syntax error"
 unicode(30) "near "asdfesdfa": syntax error"

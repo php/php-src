@@ -45,38 +45,6 @@ echo "DONE!\n";
 ====BUFFERED====
 array(2) {
   [0]=>
-  string(3) "one"
-  [1]=>
-  string(3) "two"
-}
-string(3) "one"
-string(3) "two"
-string(3) "one"
-string(3) "two"
-array(2) {
-  [0]=>
-  string(5) "three"
-  [1]=>
-  string(4) "four"
-}
-string(5) "three"
-string(4) "four"
-string(5) "three"
-string(4) "four"
-====UNBUFFERED====
-string(3) "one"
-string(3) "two"
-NULL
-NULL
-string(5) "three"
-string(4) "four"
-NULL
-NULL
-DONE!
---UEXPECT--
-====BUFFERED====
-array(2) {
-  [0]=>
   unicode(3) "one"
   [1]=>
   unicode(3) "two"

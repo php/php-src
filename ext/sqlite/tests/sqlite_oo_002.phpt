@@ -27,29 +27,6 @@ object(SQLiteResult)#%d (0) {
 }
 array(6) {
   [0]=>
-  string(10) "2002-01-02"
-  ["c1"]=>
-  string(10) "2002-01-02"
-  [1]=>
-  string(8) "12:49:00"
-  ["c2"]=>
-  string(8) "12:49:00"
-  [2]=>
-  NULL
-  ["c3"]=>
-  NULL
-}
---UEXPECTF--
-object(SQLiteDatabase)#%d (0) {
-}
-object(SQLiteResult)#%d (0) {
-}
-object(SQLiteResult)#%d (0) {
-}
-object(SQLiteResult)#%d (0) {
-}
-array(6) {
-  [0]=>
   unicode(10) "2002-01-02"
   [u"c1"]=>
   unicode(10) "2002-01-02"

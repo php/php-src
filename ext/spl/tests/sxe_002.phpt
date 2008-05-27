@@ -51,29 +51,6 @@ var_dump(trim($sxe->elem1));
 ?>
 ===DONE===
 --EXPECT--
-string(5) "elem1"
-string(17) "SimpleXMLIterator"
-string(10) "Bla bla 1."
-string(5) "elem2"
-string(17) "SimpleXMLIterator"
-string(28) "Here we have some text data."
-string(5) "elem3"
-string(17) "SimpleXMLIterator"
-string(19) "And here some more."
-string(5) "elem4"
-string(17) "SimpleXMLIterator"
-string(15) "Wow once again."
-string(6) "elem11"
-string(17) "SimpleXMLIterator"
-string(10) "Bla bla 2."
-string(7) "elem111"
-string(17) "SimpleXMLIterator"
-string(7) "Foo Bar"
-===DUMP===
-string(17) "SimpleXMLIterator"
-string(10) "Bla bla 1."
-===DONE===
---UEXPECT--
 unicode(5) "elem1"
 unicode(17) "SimpleXMLIterator"
 unicode(10) "Bla bla 1."

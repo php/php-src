@@ -24,29 +24,6 @@ var_dump($db->singleQuery("SELECT id FROM test_db WHERE id=5", FALSE));
 echo "DONE!\n";
 ?>
 --EXPECTF--
-string(1) "5"
-string(1) "4"
-string(5) "5data"
-array(4) {
-  [0]=>
-  string(1) "1"
-  [1]=>
-  string(1) "2"
-  [2]=>
-  string(1) "3"
-  [3]=>
-  string(1) "4"
-}
-
-Warning: SQLiteDatabase::singleQuery(): no such table: test in %s on line %d
-bool(false)
-NULL
-array(1) {
-  [0]=>
-  string(1) "5"
-}
-DONE!
---UEXPECTF--
 unicode(1) "5"
 unicode(1) "4"
 unicode(5) "5data"

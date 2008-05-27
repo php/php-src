@@ -27,15 +27,6 @@ EOF
 array(1) {
   [0]=>
   array(1) {
-    ["test"]=>
-    string(11) "Hello World"
-  }
-}
-===DONE===
---UEXPECT--
-array(1) {
-  [0]=>
-  array(1) {
     [u"test"]=>
     string(11) "Hello World"
   }

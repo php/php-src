@@ -27,32 +27,6 @@ array(1) {
   [0]=>
   int(1)
 }
-object(myZip)#1 (%d) {
-  ["test":"myZip":private]=>
-  int(0)
-  ["testp"]=>
-  string(6) "foobar"
-  ["testarray":"myZip":private]=>
-  array(1) {
-    [0]=>
-    int(1)
-  }
-  ["status"]=>
-  int(0)
-  ["statusSys"]=>
-  int(0)
-  ["numFiles"]=>
-  int(0)
-  ["filename"]=>
-  string(0) ""
-  ["comment"]=>
-  string(0) ""
-}
---UEXPECTF--
-array(1) {
-  [0]=>
-  int(1)
-}
 object(myZip)#1 (8) {
   [u"test":u"myZip":private]=>
   int(0)

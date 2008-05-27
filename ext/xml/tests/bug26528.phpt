@@ -16,23 +16,6 @@ require_once("skipif.inc");
 array(1) {
   [0]=>
   array(4) {
-    ["tag"]=>
-    string(4) "TEST"
-    ["type"]=>
-    string(8) "complete"
-    ["level"]=>
-    int(1)
-    ["attributes"]=>
-    array(1) {
-      ["ATTR"]=>
-      string(13) "angle<bracket"
-    }
-  }
-}
---UEXPECT--
-array(1) {
-  [0]=>
-  array(4) {
     [u"tag"]=>
     unicode(4) "TEST"
     [u"type"]=>

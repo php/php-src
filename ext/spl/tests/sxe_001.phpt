@@ -31,38 +31,6 @@ var_dump(simplexml_load_string((binary)$xml, 'SimpleXMLIterator'));
 ===DONE===
 --EXPECTF--
 object(SimpleXMLIterator)#%d (2) {
-  ["@attributes"]=>
-  array(1) {
-    ["id"]=>
-    string(5) "elem1"
-  }
-  ["elem1"]=>
-  object(SimpleXMLIterator)#%d (3) {
-    ["@attributes"]=>
-    array(1) {
-      ["attr1"]=>
-      string(5) "first"
-    }
-    ["comment"]=>
-    object(SimpleXMLIterator)#%d (0) {
-    }
-    ["elem2"]=>
-    object(SimpleXMLIterator)#%d (1) {
-      ["elem3"]=>
-      object(SimpleXMLIterator)#%d (1) {
-        ["elem4"]=>
-        object(SimpleXMLIterator)#%d (1) {
-          ["test"]=>
-          object(SimpleXMLIterator)#%d (0) {
-          }
-        }
-      }
-    }
-  }
-}
-===DONE===
---UEXPECTF--
-object(SimpleXMLIterator)#%d (2) {
   [u"@attributes"]=>
   array(1) {
     [u"id"]=>

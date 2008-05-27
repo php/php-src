@@ -40,22 +40,6 @@ echo "===DONE===\n";
 ?>
 --EXPECT--
 ====FOREACH====
-string(3) "one"
-string(3) "one"
-string(3) "two"
-string(3) "two"
-string(5) "three"
-string(5) "three"
-====FOR====
-string(3) "one"
-bool(true)
-string(3) "two"
-bool(true)
-string(5) "three"
-bool(true)
-===DONE===
---UEXPECT--
-====FOREACH====
 unicode(3) "one"
 unicode(3) "one"
 unicode(3) "two"

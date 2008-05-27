@@ -10,10 +10,6 @@ var_dump($x->body()->child[0]->getParent()->name);
 var_dump($x->root()->getParent());
 ?>
 --EXPECT--
-string(3) "div"
-string(4) "body"
-NULL
---UEXPECT--
 unicode(3) "div"
 unicode(4) "body"
 NULL
