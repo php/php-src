@@ -1,5 +1,11 @@
 --TEST--
 dns_check_record() segfault with empty host
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+    die('skip No windows support');
+}
+?>
 --FILE--
 <?php
 $domains = array( 'php.net', 'ez.no' );
