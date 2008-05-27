@@ -13,23 +13,6 @@ array(7) {
   [2]=>
   int(2)
   [3]=>
-  string(20) "width="1" height="1""
-  ["bits"]=>
-  int(8)
-  ["channels"]=>
-  int(3)
-  ["mime"]=>
-  string(10) "image/jpeg"
-}
---UEXPECT--
-array(7) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-  [3]=>
   unicode(20) "width="1" height="1""
   [u"bits"]=>
   int(8)
