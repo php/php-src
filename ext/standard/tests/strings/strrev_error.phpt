@@ -25,13 +25,3 @@ NULL
 Warning: strrev() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 *** Done ***
---UEXPECTF--
-*** Testing strrev() : error conditions ***
--- Testing strrev() function with Zero arguments --
-Warning: strrev() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
--- Testing strrev() function with more than expected no. of arguments --
-Warning: strrev() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-*** Done ***

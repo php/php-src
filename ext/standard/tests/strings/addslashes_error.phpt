@@ -40,20 +40,5 @@ NULL
 
 Warning: Wrong parameter count for addslashes() in %s on line %d
 NULL
-string(15) ""hello"\"world""
-Done
-
---UEXPECTF--
-*** Testing addslashes() : error conditions ***
-
--- Testing addslashes() function with Zero arguments --
-
-Warning: Wrong parameter count for addslashes() in %s on line %d
-NULL
-
--- Testing addslashes() function with more than expected no. of arguments --
-
-Warning: Wrong parameter count for addslashes() in %s on line %d
-NULL
 unicode(15) ""hello"\"world""
 Done

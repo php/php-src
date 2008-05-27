@@ -53,43 +53,7 @@ foreach($formats as $format) {
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing vsprintf() : with  white spaces in format strings ***
-
--- Iteration 1 --
-string(13) "111  222  333"
-
--- Iteration 2 --
-string(29) "1.100000  0.200000  -0.600000"
-
--- Iteration 3 --
-string(29) "1.120000  -1.130000  0.230000"
-
--- Iteration 4 --
-string(9) "1  10  11"
-
--- Iteration 5 --
-string(7) "A  B  C"
-
--- Iteration 6 --
-string(38) "2.000000e+1  2.000000e-1  -2.000000e+1"
-
--- Iteration 7 --
-string(28) "18446744073709551605  22  33"
-
--- Iteration 8 --
-string(30) "12  1777777777777777777755  23"
-
--- Iteration 9 --
-string(24) "11  ffffffffffffffde  33"
-
--- Iteration 10 --
-string(24) "11  FFFFFFFFFFFFFFDE  33"
-
--- Iteration 11 --
-string(38) "2.000000E+1  2.000000E-1  -2.000000E+1"
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing vsprintf() : with  white spaces in format strings ***
 
 -- Iteration 1 --

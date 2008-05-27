@@ -34,15 +34,7 @@ var_dump( sprintf($format3, $arg1, $arg2, $arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing sprintf() : basic functionality - using octal format ***
-string(6) "format"
-string(2) "21"
-string(25) "21 1777777777777777777431"
-string(29) "21 1777777777777777777431 567"
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing sprintf() : basic functionality - using octal format ***
 unicode(6) "format"
 unicode(2) "21"

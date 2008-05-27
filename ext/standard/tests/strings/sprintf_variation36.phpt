@@ -43,40 +43,6 @@ echo "Done";
 *** Testing sprintf() : hexa formats with resource values ***
 
 -- Iteration 1 --
-string(%d) "%d"
-string(%d) "%dx"
-string(%d) "%d"
-string(1) "x"
-string(%d) " %d"
-string(%d) "%d "
-string(%d) "	%d"
-string(%d) "
-%d"
-string(%d) "   %d"
-string(%d) "                             %d"
-string(10) "0-9A-Fa-f]"
-string(1) "x"
-
--- Iteration 2 --
-string(%d) "%d"
-string(%d) "%dx"
-string(%d) "%d"
-string(1) "x"
-string(%d) " %d"
-string(%d) "%d "
-string(%d) "	%d"
-string(%d) "
-%d"
-string(%d) "   %d"
-string(%d) "                             %d"
-string(10) "0-9A-Fa-f]"
-string(1) "x"
-Done
-
---UEXPECTF--
-*** Testing sprintf() : hexa formats with resource values ***
-
--- Iteration 1 --
 unicode(%d) "%d"
 unicode(%d) "%dx"
 unicode(%d) "%d"

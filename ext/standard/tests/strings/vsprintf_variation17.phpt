@@ -44,26 +44,7 @@ foreach($formats as $format) {
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing vsprintf() : scientific formats and scientific values ***
-
--- Iteration 1 --
-string(36) "0.000000e+0 +1.000000e+0 1.000000e+3"
-
--- Iteration 2 --
-string(38) "2.200000e+2 e 1.000000e+1 1.000000e+10"
-
--- Iteration 3 --
-string(32) "-2.2000e+13 1.0000e+21 1.2000e+2"
-
--- Iteration 4 --
-string(74) "#########1.000000e+1 1.000000e+2 $$$$$$$$-1.000000e+3 _________1.000000e+2"
-
--- Iteration 5 --
-string(47) "1.000000e+3 2.000000e+3 3.000000e+3 4.000000e+3"
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing vsprintf() : scientific formats and scientific values ***
 
 -- Iteration 1 --

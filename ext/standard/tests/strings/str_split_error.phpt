@@ -36,14 +36,3 @@ NULL
 Warning: str_split() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing str_split() : error conditions ***
--- Testing str_split() function with Zero arguments --
-
-Warning: str_split() expects at least 1 parameter, 0 given in %s on line %d
-NULL
--- Testing str_split() function with more than expected no. of arguments --
-
-Warning: str_split() expects at most 2 parameters, 3 given in %s on line %d
-NULL
-Done

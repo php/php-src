@@ -48,39 +48,6 @@ echo "Done";
 *** Testing sprintf() : scientific formats with resource values ***
 
 -- Iteration 1 --
-string(%d) "%f"
-string(1) "e"
-string(%d) "%f"
-string(1) "e"
-string(%d) " %f"
-string(%d) "%f "
-string(%d) "	%f"
-string(%d) "
-%f"
-string(%d) "%f"
-string(%d) "%s%f"
-string(%d) "0-1]"
-string(1) "e"
-
--- Iteration 2 --
-string(%d) "%f"
-string(1) "e"
-string(%d) "%f"
-string(1) "e"
-string(%d) " %f"
-string(%d) "%f "
-string(%d) "	%f"
-string(%d) "
-%f"
-string(%d) "%f"
-string(%d) "%s%f"
-string(%d) "0-1]"
-string(1) "e"
-Done
---UEXPECTF--
-*** Testing sprintf() : scientific formats with resource values ***
-
--- Iteration 1 --
 unicode(%d) "%f"
 unicode(1) "e"
 unicode(%d) "%f"

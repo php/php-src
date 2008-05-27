@@ -57,35 +57,7 @@ foreach($formats as $format) {
 echo "Done";
 ?>
 
---EXPECTF--
-*** Testing vsprintf() : octal formats with octal values ***
-
--- Iteration 1 --
-string(1) "0"
-
--- Iteration 2 --
-string(14) "37777777777 1 "
-
--- Iteration 3 --
-string(38) "20000000000 o, 17777777777 20000000001"
-
--- Iteration 4 --
-string(38) "                      37776543211 0000"
-
--- Iteration 5 --
-string(32) "111 2222 37777444445 37733333334"
-
--- Iteration 6 --
-string(17) "11073 7653 123 12"
-
--- Iteration 7 --
-string(6) "% %o o"
-
--- Iteration 8 --
-string(7) "1 2 3 4"
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing vsprintf() : octal formats with octal values ***
 
 -- Iteration 1 --

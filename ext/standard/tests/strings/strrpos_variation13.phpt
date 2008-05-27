@@ -39,23 +39,6 @@ bool(false)
 int(12)
 int(12)
 bool(false)
-bool(false)
-bool(false)
-bool(false)
-int(0)
-bool(false)
-int(1)
-bool(false)
-*** Done ***
---UEXPECTF--
-*** Test strrpos() function: binary safe ***
-int(1)
-int(1)
-int(0)
-bool(false)
-int(12)
-int(12)
-bool(false)
 
 Notice: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)

@@ -13,7 +13,7 @@ var_dump(strncasecmp("test ", "E", 0));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: Length must be greater than or equal to 0 in %s on line %d
 bool(false)
 int(%d)

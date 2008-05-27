@@ -24,14 +24,7 @@ var_dump( vsprintf($format3,$arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing vsprintf() : basic functionality - using octal format ***
-string(2) "21"
-string(6) "21 347"
-string(10) "21 347 567"
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing vsprintf() : basic functionality - using octal format ***
 unicode(2) "21"
 unicode(6) "21 347"

@@ -26,7 +26,7 @@ $float_values = array(
 // array of octal formats
 $octal_formats = array( 
   "%o", "%ho", "%lo", 
-  "%Lo", " %o", "%o ",                        
+  "%Lo", " %o", "%o ",
   "\t%o", "\n%o", "%4o",
   "%30o", "%[0-7]", "%*o"
 );
@@ -43,131 +43,7 @@ foreach($float_values as $float_value) {
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing sprintf() : octal formats with float values ***
-
--- Iteration 1 --
-string(1) "0"
-string(1) "o"
-string(1) "0"
-string(1) "o"
-string(2) " 0"
-string(2) "0 "
-string(2) "	0"
-string(2) "
-0"
-string(4) "   0"
-string(30) "                             0"
-string(4) "0-7]"
-string(1) "o"
-
--- Iteration 2 --
-string(1) "0"
-string(1) "o"
-string(1) "0"
-string(1) "o"
-string(2) " 0"
-string(2) "0 "
-string(2) "	0"
-string(2) "
-0"
-string(4) "   0"
-string(30) "                             0"
-string(4) "0-7]"
-string(1) "o"
-
--- Iteration 3 --
-string(1) "1"
-string(1) "o"
-string(1) "1"
-string(1) "o"
-string(2) " 1"
-string(2) "1 "
-string(2) "	1"
-string(2) "
-1"
-string(4) "   1"
-string(30) "                             1"
-string(4) "0-7]"
-string(1) "o"
-
--- Iteration 4 --
-string(6) "303240"
-string(1) "o"
-string(6) "303240"
-string(1) "o"
-string(7) " 303240"
-string(7) "303240 "
-string(7) "	303240"
-string(7) "
-303240"
-string(6) "303240"
-string(30) "                        303240"
-string(4) "0-7]"
-string(1) "o"
-
--- Iteration 5 --
-string(22) "1777777777777774136700"
-string(1) "o"
-string(22) "1777777777777774136700"
-string(1) "o"
-string(23) " 1777777777777774136700"
-string(23) "1777777777777774136700 "
-string(23) "	1777777777777774136700"
-string(23) "
-1777777777777774136700"
-string(22) "1777777777777774136700"
-string(30) "        1777777777777774136700"
-string(4) "0-7]"
-string(1) "o"
-
--- Iteration 6 --
-string(9) "575360400"
-string(1) "o"
-string(9) "575360400"
-string(1) "o"
-string(10) " 575360400"
-string(10) "575360400 "
-string(10) "	575360400"
-string(10) "
-575360400"
-string(9) "575360400"
-string(30) "                     575360400"
-string(4) "0-7]"
-string(1) "o"
-
--- Iteration 7 --
-string(22) "1777777777770431233000"
-string(1) "o"
-string(22) "1777777777770431233000"
-string(1) "o"
-string(23) " 1777777777770431233000"
-string(23) "1777777777770431233000 "
-string(23) "	1777777777770431233000"
-string(23) "
-1777777777770431233000"
-string(22) "1777777777770431233000"
-string(30) "        1777777777770431233000"
-string(4) "0-7]"
-string(1) "o"
-
--- Iteration 8 --
-string(7) "4002620"
-string(1) "o"
-string(7) "4002620"
-string(1) "o"
-string(8) " 4002620"
-string(8) "4002620 "
-string(8) "	4002620"
-string(8) "
-4002620"
-string(7) "4002620"
-string(30) "                       4002620"
-string(4) "0-7]"
-string(1) "o"
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing sprintf() : octal formats with float values ***
 
 -- Iteration 1 --

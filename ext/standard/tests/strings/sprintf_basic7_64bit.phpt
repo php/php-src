@@ -35,15 +35,7 @@ var_dump( sprintf($format3, $arg1, $arg2, $arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing sprintf() : basic functionality - using unsigned format ***
-string(6) "format"
-string(20) "18446744073709550505"
-string(41) "18446744073709550505 18446744073708317049"
-string(49) "18446744073709550505 18446744073708317049 2345432"
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing sprintf() : basic functionality - using unsigned format ***
 unicode(6) "format"
 unicode(20) "18446744073709550505"

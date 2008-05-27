@@ -43,32 +43,7 @@ foreach( $strings as $str ){
 }
 echo "Done";
 ?>
---EXPECTF--
-*** Testing nl2br() : usage variations ***
--- Iteration 1 --
-string(2) "\n"
--- Iteration 2 --
-string(2) "\r"
--- Iteration 3 --
-string(4) "\r\n"
--- Iteration 4 --
-string(12) "Hello\nWorld"
--- Iteration 5 --
-string(12) "Hello\rWorld"
--- Iteration 6 --
-string(14) "Hello\r\nWorld"
--- Iteration 7 --
-string(7) "<br />
-"
--- Iteration 8 --
-string(14) "<br />
-<br />
-"
--- Iteration 9 --
-string(17) "Hello<br />
-World"
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing nl2br() : usage variations ***
 -- Iteration 1 --
 unicode(2) "\n"

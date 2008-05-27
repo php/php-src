@@ -25,14 +25,7 @@ var_dump( vsprintf($format3,$arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing vsprintf() : basic functionality - using string format ***
-string(3) "one"
-string(7) "one two"
-string(13) "one two three"
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing vsprintf() : basic functionality - using string format ***
 unicode(3) "one"
 unicode(7) "one two"

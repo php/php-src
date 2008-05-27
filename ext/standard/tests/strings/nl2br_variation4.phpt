@@ -28,20 +28,7 @@ foreach( $strings as $str ){
 }
 echo "Done";
 ?>
---EXPECTF--
-*** Testing nl2br() : usage variations ***
-string(29) "<html>Hello<br />world</html>"
-string(19) "<html><br /></html>"
-string(45) "<html><br />
-Hello<br />
-world<br />
-</html>"
-string(37) "<html><br />
- <br />
- <br />
-</html>"
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing nl2br() : usage variations ***
 unicode(29) "<html>Hello<br />world</html>"
 unicode(19) "<html><br /></html>"

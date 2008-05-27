@@ -38,18 +38,3 @@ NULL
 Warning: strrchr() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 *** Done ***
---UEXPECTF--
-*** Testing strrchr() function: error conditions ***
-
--- Testing strrchr() function with Zero arguments --
-Warning: strrchr() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
--- Testing strrchr() function with less than expected no. of arguments --
-Warning: strrchr() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
--- Testing strrchr() function with more than expected no. of arguments --
-Warning: strrchr() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-*** Done ***

@@ -47,39 +47,6 @@ echo "Done";
 *** Testing sprintf() : string formats with resource values ***
 
 -- Iteration 1 --
-string(%d) "Resource id #%d"
-string(1) "s"
-string(%d) "Resource id #%d"
-string(1) "s"
-string(%d) " Resource id #%d"
-string(%d) "Resource id #%d "
-string(%d) "	Resource id #%d"
-string(%d) "
-Resource id #%d"
-string(%d) "Resource id #%d"
-string(%d) "%sResource id #%d"
-string(%d) "a-zA-Z0-9]"
-string(1) "s"
-
--- Iteration 2 --
-string(%d) "Resource id #%d"
-string(1) "s"
-string(%d) "Resource id #%d"
-string(1) "s"
-string(%d) " Resource id #%d"
-string(%d) "Resource id #%d "
-string(%d) "	Resource id #%d"
-string(%d) "
-Resource id #%d"
-string(%d) "Resource id #%d"
-string(%d) "%sResource id #%d"
-string(%d) "a-zA-Z0-9]"
-string(1) "s"
-Done
---UEXPECTF--
-*** Testing sprintf() : string formats with resource values ***
-
--- Iteration 1 --
 unicode(%d) "Resource id #%d"
 unicode(1) "s"
 unicode(%d) "Resource id #%d"

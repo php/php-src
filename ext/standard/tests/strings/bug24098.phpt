@@ -8,17 +8,6 @@ Bug #24098 (pathinfo() crash)
 ?>
 --EXPECT--
 array(4) {
-  ["dirname"]=>
-  string(1) "/"
-  ["basename"]=>
-  string(8) "dsds.asa"
-  ["extension"]=>
-  string(3) "asa"
-  ["filename"]=>
-  string(4) "dsds"
-}
---UEXPECT--
-array(4) {
   [u"dirname"]=>
   unicode(1) "/"
   [u"basename"]=>

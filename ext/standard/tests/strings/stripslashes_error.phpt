@@ -39,20 +39,5 @@ NULL
 
 Warning: Wrong parameter count for stripslashes() in %s on line %d
 NULL
-string(18) "\"hello\"\"world\""
-Done
-
---UEXPECTF--
-*** Testing stripslashes() : error conditions ***
-
--- Testing stripslashes() function with Zero arguments --
-
-Warning: Wrong parameter count for stripslashes() in %s on line %d
-NULL
-
--- Testing stripslashes() function with more than expected no. of arguments --
-
-Warning: Wrong parameter count for stripslashes() in %s on line %d
-NULL
 unicode(18) "\"hello\"\"world\""
 Done

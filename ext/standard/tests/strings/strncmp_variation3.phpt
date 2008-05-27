@@ -37,20 +37,3 @@ int\(0\)
 int\(0\)
 int\(0\)
 \*\*\* Done \*\*\*
---UEXPECTREGEX--	
-\*\*\* Test strncmp\(\) function: with different lengths \*\*\*
-int\(-[1-9][0-9]*\)
-int\(-[1-9][0-9]*\)
-int\(-[1-9][0-9]*\)
-int\(-[1-9][0-9]*\)
-int\(-[1-9][0-9]*\)
-int\(-[1-9][0-9]*\)
-int\(0\)
-int\(0\)
-int\(0\)
-int\(0\)
-int\(0\)
-int\(0\)
-int\(0\)
-int\(0\)
-\*\*\* Done \*\*\*

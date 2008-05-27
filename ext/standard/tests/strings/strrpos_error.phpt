@@ -32,17 +32,3 @@ bool(false)
 Warning: strrpos() expects at most 3 parameters, 4 given in %s on line %d
 bool(false)
 *** Done ***
---UEXPECTF--
-*** Testing strrpos() function: error conditions ***
--- With Zero arguments --
-Warning: strrpos() expects at least 2 parameters, 0 given in %s on line %d
-bool(false)
-
--- With less than expected number of arguments --
-Warning: strrpos() expects at least 2 parameters, 1 given in %s on line %d
-bool(false)
-
--- With more than expected number of arguments --
-Warning: strrpos() expects at most 3 parameters, 4 given in %s on line %d
-bool(false)
-*** Done ***

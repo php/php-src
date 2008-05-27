@@ -37,22 +37,7 @@ var_dump( strtr('test strtr', $trans2_arr) );
 var_dump( strtr($heredoc_str, $trans1_arr) );
 echo "*** Done ***";
 ?>
---EXPECTF--
-*** Testing strtr() : basic functionality ***
-string(10) "TesT sTrTr"
-string(10) "TesT sTrTr"
-string(10) "TesT sTrTr"
-string(10) "TEST STrTr"
-string(10) "TEST STrTr"
-string(10) "TEST STrTr"
-string(10) "TEST STrTr"
-string(10) "TEST STrTr"
-string(10) "TEST STrTr"
-string(10) "TEST STrTr"
-string(10) "TEST STrTr"
-string(10) "TEST STrTr"
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Testing strtr() : basic functionality ***
 unicode(10) "TesT sTrTr"
 unicode(10) "TesT sTrTr"

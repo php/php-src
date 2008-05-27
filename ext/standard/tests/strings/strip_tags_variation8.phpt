@@ -38,26 +38,7 @@ foreach($quotes as $string_value)
 }
 
 echo "Done";
---EXPECTF--
-*** Testing strip_tags() : usage variations ***
--- Iteration 1 --
-string(33) "hello 	world... strip_tags_test"
--- Iteration 2 --
-string(33) "hello 	world... strip_tags_test"
--- Iteration 3 --
-string(33) "hello 	world... strip_tags_test"
--- Iteration 4 --
-string(33) "hello 	world... strip_tags_test"
--- Iteration 5 --
-string(33) "hello 	world... strip_tags_test"
--- Iteration 6 --
-string(33) "hello 	world... strip_tags_test"
--- Iteration 7 --
-string(46) "<html>hello</html> 	world... strip_tags_test"
--- Iteration 8 --
-string(46) "<html>hello</html> 	world... strip_tags_test"
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
 unicode(33) "hello 	world... strip_tags_test"

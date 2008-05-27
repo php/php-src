@@ -60,35 +60,7 @@ for($index = 0; $index < count($str_arr); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
-*** Testing strtr() : string containing special chars for 'str' arg ***
--- Iteration 1 --
-string(1) "s"
-string(1) "$"
--- Iteration 2 --
-string(3) "pec"
-string(3) "#%*"
--- Iteration 3 --
-string(10) "text i als"
-string(10) "text & @()"
--- Iteration 4 --
-string(1) "s"
-string(1) "$"
--- Iteration 5 --
-string(3) "pec"
-string(3) "#%*"
--- Iteration 6 --
-string(10) "text i als"
-string(10) "text & @()"
--- Iteration 7 --
-string(17) "s
-peci
-text i als"
-string(17) "$
-#%*&
-text & @()"
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Testing strtr() : string containing special chars for 'str' arg ***
 -- Iteration 1 --
 unicode(1) "s"

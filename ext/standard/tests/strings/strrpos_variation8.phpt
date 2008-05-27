@@ -51,39 +51,6 @@ bool(false)
 -- Iteration 12 --
 bool(false)
 -- Iteration 13 --
-bool(false)
--- Iteration 14 --
-bool(false)
--- Iteration 15 --
-bool(false)
-*** Done ***
---UEXPECTF--
-*** Testing strrpos() function: strings repetitive chars ***
--- Iteration 1 --
-int(4)
--- Iteration 2 --
-int(4)
--- Iteration 3 --
-int(4)
--- Iteration 4 --
-int(4)
--- Iteration 5 --
-int(4)
--- Iteration 6 --
-int(4)
--- Iteration 7 --
-bool(false)
--- Iteration 8 --
-bool(false)
--- Iteration 9 --
-bool(false)
--- Iteration 10 --
-bool(false)
--- Iteration 11 --
-bool(false)
--- Iteration 12 --
-bool(false)
--- Iteration 13 --
 
 Notice: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)

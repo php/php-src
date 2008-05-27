@@ -38,28 +38,7 @@ foreach($allowed_tags_array as $tags)
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing strip_tags() : basic functionality ***
--- Iteration 1 --
-string(33) "<html>helloworldOther text</html>"
--- Iteration 2 --
-string(33) "<html>helloworldOther text</html>"
--- Iteration 3 --
-string(27) "<p>hello</p>worldOther text"
--- Iteration 4 --
-string(27) "<p>hello</p>worldOther text"
--- Iteration 5 --
-string(44) "helloworld<a href="#fragment">Other text</a>"
--- Iteration 6 --
-string(44) "helloworld<a href="#fragment">Other text</a>"
--- Iteration 7 --
-string(20) "helloworldOther text"
--- Iteration 8 --
-string(20) "helloworldOther text"
--- Iteration 9 --
-string(64) "<html><p>hello</p>world<a href="#fragment">Other text</a></html>"
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing strip_tags() : basic functionality ***
 -- Iteration 1 --
 unicode(33) "<html>helloworldOther text</html>"

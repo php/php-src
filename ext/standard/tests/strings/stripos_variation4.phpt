@@ -26,18 +26,7 @@ var_dump( stripos($special_chars_str, "(special)") );
 
 echo "*** Done ***";
 ?>
---EXPECTF--
-*** Testing stripos() function: with heredoc strings ***
--- With heredoc string containing special chars --
-int(0)
-bool(false)
-int(38)
-int(39)
-int(55)
-int(55)
-int(57)
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Testing stripos() function: with heredoc strings ***
 -- With heredoc string containing special chars --
 int(0)

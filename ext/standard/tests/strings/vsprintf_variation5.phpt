@@ -53,35 +53,7 @@ foreach($formats as $format) {
 echo "Done";
 ?>
 
---EXPECTF--
-*** Testing vsprintf() : int formats with float values ***
-
--- Iteration 1 --
-string(8) "0.000000"
-
--- Iteration 2 --
-string(28) "-0.100000 0.100000 10.000001"
-
--- Iteration 3 --
-string(57) "2147483649.000000 f, 2147483640.000000 -2147483640.000000"
-
--- Iteration 4 --
-string(45) "200000.0000 0.0000     -200000.000000 -0.0000"
-
--- Iteration 5 --
-string(98) "20000.000000 -1999999999999999879418332743206357172224.000000 0.000000 20000000000000000000.000000"
-
--- Iteration 6 --
-string(43) "4667.000000 4011.000000 83.000000 10.000000"
-
--- Iteration 7 --
-string(15) "%-5678.567800 f"
-
--- Iteration 8 --
-string(35) "1.110000 2.220000 3.330000 4.440000"
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing vsprintf() : int formats with float values ***
 
 -- Iteration 1 --

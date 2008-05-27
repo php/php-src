@@ -20,24 +20,7 @@ for($len = strlen($str1); $len >= 0; $len--) {
 }
 echo "*** Done ***\n";
 ?>
---EXPECTF--	
-*** Test strncasecmp() function: with different lengths ***
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-*** Done ***
---UEXPECTF--	
+--EXPECT--
 *** Test strncasecmp() function: with different lengths ***
 int(0)
 int(0)

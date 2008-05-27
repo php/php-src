@@ -71,38 +71,7 @@ foreach($args_array as $args) {
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing vsprintf() : int formats and non-integer values ***
-
--- Iteration 1 --
-string(111) "2 +0 10 
-   123456 d -1234 1234
-   2147483647 200000     4000 22000000
-   12345 12 -12 -123456
-   10 123456 2 0"
-
--- Iteration 2 --
-string(92) "0 +0 0 
-   123 d -123 123 
-            0 0          123456 0000
-   1234 0 $0 _0
-   0 123 0 0"
-
--- Iteration 3 --
-string(81) "1 +1 1 
-   1 d    1 1   
-            1 1          1 0001
-   #1 1 $1 _1
-   1 1 1 1"
-
--- Iteration 4 --
-string(81) "1 +1 0 
-   1 d    0 1   
-            1 0          1 0000
-   #0 1 $1 _0
-   0 1 1 1"
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing vsprintf() : int formats and non-integer values ***
 
 -- Iteration 1 --
@@ -133,4 +102,3 @@ unicode(81) "1 +1 0
    #0 1 $1 _0
    0 1 1 1"
 Done
-

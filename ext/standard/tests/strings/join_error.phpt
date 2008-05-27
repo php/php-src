@@ -48,21 +48,3 @@ NULL
 Warning: join(): Argument must be an array in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing join() : error conditions ***
-
--- Testing join() function with Zero arguments --
-
-Warning: Wrong parameter count for join() in %s on line %d
-NULL
-
--- Testing join() function with more than expected no. of arguments --
-
-Warning: Wrong parameter count for join() in %s on line %d
-NULL
-
--- Testing join() with less than expected no. of arguments --
-
-Warning: join(): Argument must be an array in %s on line %d
-NULL
-Done

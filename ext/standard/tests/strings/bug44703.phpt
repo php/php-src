@@ -44,5 +44,3 @@ string(8) "&lt;&gt;"
 
 Warning: htmlspecialchars(): charset `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' not supported, assuming iso-8859-1 in %s on line %d
 string(8) "&lt;&gt;"
-
-

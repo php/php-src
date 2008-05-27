@@ -54,46 +54,6 @@ echo "Done"
 Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
 bool(false)
 -- Iteration 2 --
-string(504) "T:::h:::i:::s:::':::s::: :::h:::e:::r:::e:::d:::o:::c::: :::s:::t:::r:::i:::n:::g::: :::w:::i:::t:::h::: :::	::: :::a:::n:::d::: :::
-::: :::w:::h:::i:::t:::e::: :::s:::p:::a:::c:::e::: :::c:::h:::a:::r:::.:::
-:::I:::t::: :::h:::a:::s::: :::_:::s:::p:::e:::c:::i:::@:::l::: :::c:::h:::@:::r:::$::: :::2:::2:::2:::2::: :::!:::!:::!:::N:::o:::w::: :::\:::k::: :::a:::s::: :::e:::s:::c:::a:::p:::e::: :::c:::h:::a:::r::: :::t:::o::: :::t:::e:::s:::t:::
-:::c:::h:::u:::n:::k:::_:::s:::p:::l:::i:::t:::(:::):::"
--- Iteration 3 --
-
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
-bool(false)
--- Iteration 4 --
-string(129) "This's heredoc string with 	 and 
- white space char.
-It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
-chunk_split():::"
--- Iteration 5 --
-string(141) "This's heredoc string with::: 	 and 
- white space char.:::
-It has _speci@l ch@r$ 222:::2 !!!Now \k as escape char::: to test
-chunk_split():::"
--- Iteration 6 --
-string(129) "This's heredoc string with 	 and 
- white space char.
-It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
-chunk_split():::"
--- Iteration 7 --
-string(129) "This's heredoc string with 	 and 
- white space char.
-It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
-chunk_split():::"
--- Iteration 8 --
-
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
-bool(false)
-Done
---UEXPECTF--
-*** Testing chunk_split() : different 'chunklen' with heredoc 'str' ***
--- Iteration 1 --
-
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
-bool(false)
--- Iteration 2 --
 unicode(504) "T:::h:::i:::s:::':::s::: :::h:::e:::r:::e:::d:::o:::c::: :::s:::t:::r:::i:::n:::g::: :::w:::i:::t:::h::: :::	::: :::a:::n:::d::: :::
 ::: :::w:::h:::i:::t:::e::: :::s:::p:::a:::c:::e::: :::c:::h:::a:::r:::.:::
 :::I:::t::: :::h:::a:::s::: :::_:::s:::p:::e:::c:::i:::@:::l::: :::c:::h:::@:::r:::$::: :::2:::2:::2:::2::: :::!:::!:::!:::N:::o:::w::: :::\:::k::: :::a:::s::: :::e:::s:::c:::a:::p:::e::: :::c:::h:::a:::r::: :::t:::o::: :::t:::e:::s:::t:::
@@ -127,4 +87,3 @@ chunk_split():::"
 Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
 bool(false)
 Done
-

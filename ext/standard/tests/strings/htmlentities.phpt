@@ -14,12 +14,7 @@ echo $ent_encoded;
 echo html_entity_decode($sc_encoded);
 echo html_entity_decode($ent_encoded);
 ?>
---EXPECT--
-&lt;&gt;&quot;&amp;åÄ
-&lt;&gt;&quot;&amp;&aring;&Auml;
-<>"&åÄ
-<>"&åÄ
---UEXPECTF--
+--EXPECTF--
 Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 &lt;&gt;&quot;&amp;åÄ
 &lt;&gt;&quot;&amp;&aring;&Auml;

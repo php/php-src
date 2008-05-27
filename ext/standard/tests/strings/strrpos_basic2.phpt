@@ -44,23 +44,6 @@ int(0)
 int(0)
 bool(false)
 int(0)
-bool(false)
-int(8)
-int(8)
-bool(false)
-bool(false)
-*** Done ***
---UEXPECTF--
-*** Testing strrpos() function: basic functionality ***
--- With all arguments --
-int(0)
-bool(false)
-int(7)
-int(7)
-int(0)
-int(0)
-bool(false)
-int(0)
 
 Notice: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)

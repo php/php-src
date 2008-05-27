@@ -36,27 +36,6 @@ Test
 Warning: substr_compare(): The length must be greater than zero in %s on line %d
 bool(false)
 
-Warning: substr_compare() expects parameter 4 to be long, string given in %s on line %d
-bool(false)
-Done
---UEXPECTF--
-int(0)
-int(0)
-int(0)
-int(1)
-int(-1)
-
-Warning: substr_compare(): The start position cannot exceed initial string length in %s on line %d
-bool(false)
-int(0)
-
-Warning: substr_compare() expects parameter 5 to be boolean, object given in %s on line %d
-bool(false)
-Test
-
-Warning: substr_compare(): The length must be greater than zero in %s on line %d
-bool(false)
-
 Warning: substr_compare() expects parameter 4 to be long, Unicode string given in %s on line %d
 bool(false)
 Done

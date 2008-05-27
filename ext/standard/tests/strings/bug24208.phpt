@@ -7,10 +7,6 @@ parse_str("a=1&b=2&c=3");
 var_dump($a, $b, $c);
 ?>
 --EXPECT--
-string(1) "1"
-string(1) "2"
-string(1) "3"
---UEXPECT--
 unicode(1) "1"
 unicode(1) "2"
 unicode(1) "3"

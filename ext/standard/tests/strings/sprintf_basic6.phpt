@@ -32,15 +32,7 @@ var_dump( sprintf($format3, $arg1, $arg2, $arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing sprintf() : basic functionality - using exponential format ***
-string(6) "format"
-string(11) "1.000000e+3"
-string(23) "1.000000E+3 2.000000e+3"
-string(35) "1.000000e+3 2.000000E+3 3.000000e+3"
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing sprintf() : basic functionality - using exponential format ***
 unicode(6) "format"
 unicode(11) "1.000000e+3"

@@ -36,23 +36,7 @@ var_dump( stripos('Hello, World', (unicode)"hello") );
 var_dump( stripos("Hello, World", "ooo") );
 echo "*** Done ***";
 ?>
---EXPECTF--
-*** Testing stripos() function: basic functionality ***
--- With default arguments --
-int(0)
-int(0)
-int(7)
-int(7)
-int(4)
-int(5)
-int(0)
-int(0)
-int(0)
-int(0)
-int(0)
-bool(false)
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Testing stripos() function: basic functionality ***
 -- With default arguments --
 int(0)

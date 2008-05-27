@@ -33,15 +33,7 @@ var_dump( sprintf($format3, $arg1, $arg2, $arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing sprintf() : basic functionality - using integer format ***
-string(6) "format"
-string(3) "111"
-string(7) "111 222"
-string(11) "111 222 333"
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing sprintf() : basic functionality - using integer format ***
 unicode(6) "format"
 unicode(3) "111"

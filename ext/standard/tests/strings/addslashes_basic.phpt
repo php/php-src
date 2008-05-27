@@ -30,15 +30,7 @@ foreach( $str_array as $str )  {
 
 echo "Done\n";
 ?>
---EXPECTF--
-*** Testing addslashes() : basic functionality ***
-string(16) "How\'s everybody"
-string(17) "Are you \"JOHN\"?"
-string(19) "c:\\php\\addslashes"
-string(12) "hello\0world"
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing addslashes() : basic functionality ***
 unicode(16) "How\'s everybody"
 unicode(17) "Are you \"JOHN\"?"

@@ -44,22 +44,3 @@ bool(false)
 Warning: Wrong parameter count for vsprintf() in %s on line %d
 bool(false)
 Done
-
---UEXPECTF--
-*** Testing vsprintf() : error conditions ***
-
--- Testing vsprintf() function with Zero arguments --
-
-Warning: Wrong parameter count for vsprintf() in %s on line %d
-bool(false)
-
--- Testing vsprintf() function with less than expected no. of arguments --
-
-Warning: Wrong parameter count for vsprintf() in %s on line %d
-bool(false)
-
--- testing vsprintf() function with more than expected no. of arguments --
-
-Warning: Wrong parameter count for vsprintf() in %s on line %d
-bool(false)
-Done

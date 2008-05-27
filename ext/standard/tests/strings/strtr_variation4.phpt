@@ -53,31 +53,7 @@ for($index = 0; $index < count($str_arr); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
-*** Testing strtr() : empty string & null for 'str' arg ***
--- Iteration 1 --
-string(0) ""
-string(0) ""
--- Iteration 2 --
-string(0) ""
-string(0) ""
--- Iteration 3 --
-string(0) ""
-string(0) ""
--- Iteration 4 --
-string(0) ""
-string(0) ""
--- Iteration 5 --
-string(0) ""
-string(0) ""
--- Iteration 6 --
-string(0) ""
-string(0) ""
--- Iteration 7 --
-string(0) ""
-string(0) ""
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Testing strtr() : empty string & null for 'str' arg ***
 -- Iteration 1 --
 unicode(0) ""

@@ -13,8 +13,5 @@ var_dump(bin2hex((binary)utf8_decode($str)));
 var_dump(bin2hex((binary)utf8_decode(htmlspecialchars($str, ENT_COMPAT, "UTF-8"))));
 ?>
 --EXPECT--
-string(4) "e0e1"
-string(4) "e0e1"
---UEXPECT--
 unicode(4) "e0e1"
 unicode(4) "e0e1"

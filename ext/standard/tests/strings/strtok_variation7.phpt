@@ -37,77 +37,7 @@ for( $count = 1; $count <=10; $count++ )  {
 
 echo "Done\n";
 ?>
---EXPECTF--
-*** Testing strtok() : with modification of input string in between tokenising ***
-
-*** Testing strtok() when string being tokenised is prefixed with another string in between the process ***
-string(4) "this"
-
--- Token 1 is --
-string(2) "is"
-
--- Input str is "extra string this is a sample string" --
-
--- Token 2 is --
-string(1) "a"
-
--- Input str is "extra string this is a sample string" --
-
--- Token 3 is --
-string(6) "sample"
-
--- Input str is "extra string this is a sample string" --
-
--- Token 4 is --
-string(6) "string"
-
--- Input str is "extra string this is a sample string" --
-
--- Token 5 is --
-bool(false)
-
--- Input str is "extra string this is a sample string" --
-
--- Token 6 is --
-bool(false)
-
--- Input str is "extra string this is a sample string" --
-
-*** Testing strtok() when string being tokenised is suffixed with another string in between the process ***
-string(5) "extra"
-
--- Token 1 is --
-string(6) "string"
-
--- Token 2 is --
-string(4) "this"
-
--- Token 3 is --
-string(2) "is"
-
--- Token 4 is --
-string(1) "a"
-
--- Token 5 is --
-string(6) "sample"
-
--- Token 6 is --
-string(6) "string"
-
--- Token 7 is --
-bool(false)
-
--- Token 8 is --
-bool(false)
-
--- Token 9 is --
-bool(false)
-
--- Token 10 is --
-bool(false)
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing strtok() : with modification of input string in between tokenising ***
 
 *** Testing strtok() when string being tokenised is prefixed with another string in between the process ***

@@ -34,18 +34,7 @@ foreach($strings as $value)
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing strip_tags() : usage variations ***
--- Iteration 1 --
-string(18) " I am html string "
--- Iteration 2 --
-string(18) " I am html string "
--- Iteration 3 --
-string(16) "I am html string"
--- Iteration 4 --
-string(23) "I am html string1000001"
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
 unicode(18) " I am html string "

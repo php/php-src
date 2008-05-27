@@ -30,13 +30,3 @@ bool(false)
 bool(false)
 bool(false)
 *** Done ***
---UEXPECTF--
-*** Testing stripos() function: with heredoc strings ***
--- With empty heredoc string --
-bool(false)
-
-Warning: stripos(): Offset not contained in string in %s on line %d
-bool(false)
-bool(false)
-bool(false)
-*** Done ***

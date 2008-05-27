@@ -24,16 +24,7 @@ var_dump( stripos($multi_line_str, " ") );
 
 echo "*** Done ***";
 ?>
---EXPECTF--
-*** Testing stripos() function: with heredoc strings ***
--- With heredoc string containing multi lines --
-int(14)
-int(23)
-int(23)
-bool(false)
-int(7)
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Testing stripos() function: with heredoc strings ***
 -- With heredoc string containing multi lines --
 int(14)

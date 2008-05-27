@@ -45,44 +45,7 @@ foreach( $strings as $str ){
 }
 echo "Done";
 ?>
---EXPECTF--
-*** Testing nl2br() : usage variations ***
--- Iteration 1 --
-string(17) "Hello<br />
-World"
--- Iteration 2 --
-string(31) "<br />
-Hello<br />
-World<br />
-"
--- Iteration 3 --
-string(17) "Hello<br />
-World"
--- Iteration 4 --
-string(31) "<br />
-Hello<br />
-World<br />
-"
--- Iteration 5 --
-string(18) "Hello<br />
-World"
--- Iteration 6 --
-string(34) "<br />
-Hello<br />
-World<br />
-"
--- Iteration 7 --
-string(7) "<br />
-"
--- Iteration 8 --
-string(14) "<br />
-<br />
-"
--- Iteration 9 --
-string(17) "Hello<br />
-World"
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing nl2br() : usage variations ***
 -- Iteration 1 --
 string(17) "Hello<br />

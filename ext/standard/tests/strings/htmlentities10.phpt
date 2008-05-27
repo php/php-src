@@ -12,9 +12,5 @@ default_charset=cp1252
 ?>
 --EXPECT--
 cp1252
-string(28) "&sbquo;&dagger;&trade;&Yuml;"
-string(32) "&euro;&cent;&pound;&curren;&yen;"
---UEXPECTF--
-cp1252
 unicode(4) ""
 unicode(27) "&cent;&pound;&curren;&yen;"

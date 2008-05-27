@@ -8,8 +8,5 @@ var_dump(strstr($s, "nic"));
 var_dump(strrchr($s," nic"));
 ?>
 --EXPECTREGEX--
-string\(18\) \"nica\x00turska panica\"
-string\(7\) \" panica\"
---UEXPECTREGEX--
 unicode\(18\) \"nica\x00turska panica\"
 unicode\(7\) \" panica\"

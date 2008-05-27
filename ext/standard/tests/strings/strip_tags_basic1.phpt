@@ -42,38 +42,7 @@ foreach($string_array as $string)
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing strip_tags() : basic functionality ***
--- Iteration 1 --
-string(5) "hello"
--- Iteration 2 --
-string(5) "hello"
--- Iteration 3 --
-string(0) ""
--- Iteration 4 --
-string(0) ""
--- Iteration 5 --
-string(0) ""
--- Iteration 6 --
-string(0) ""
--- Iteration 7 --
-string(0) ""
--- Iteration 8 --
-string(0) ""
--- Iteration 9 --
-string(12) " echo hello "
--- Iteration 10 --
-string(12) " echo hello "
--- Iteration 11 --
-string(10) "helloworld"
--- Iteration 12 --
-string(10) "helloworld"
--- Iteration 13 --
-string(0) ""
--- Iteration 14 --
-string(0) ""
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing strip_tags() : basic functionality ***
 -- Iteration 1 --
 unicode(5) "hello"

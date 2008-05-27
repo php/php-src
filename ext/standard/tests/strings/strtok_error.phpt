@@ -47,25 +47,6 @@ NULL
 
 Warning: strtok() expects at most 2 parameters, 3 given in %s on line %d
 NULL
-string(13) "sample string"
-
--- Testing strtok() with less than expected no. of arguments --
-bool(false)
-string(10) "string val"
-Done
-
---UEXPECTF--
-*** Testing strtok() : error conditions ***
-
--- Testing strtok() function with Zero arguments --
-
-Warning: strtok() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
--- Testing strtok() function with more than expected no. of arguments --
-
-Warning: strtok() expects at most 2 parameters, 3 given in %s on line %d
-NULL
 unicode(13) "sample string"
 
 -- Testing strtok() with less than expected no. of arguments --

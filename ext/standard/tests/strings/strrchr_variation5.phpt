@@ -37,32 +37,7 @@ foreach($needles as $needle) {
 
 echo "*** Done ***";
 ?>
---EXPECTF--
-*** Testing strrchr() function: with heredoc strings ***
-string(33) "	 st
-
-ch
- using
-\escape \seque
-ce"
-string(9) "\seque
-ce"
-string(25) "
- using
-\escape \seque
-ce"
-string(9) "\seque
-ce"
-string(3) "
-ce"
-string(33) "	 st
-
-ch
- using
-\escape \seque
-ce"
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Testing strrchr() function: with heredoc strings ***
 unicode(33) "	 st
 

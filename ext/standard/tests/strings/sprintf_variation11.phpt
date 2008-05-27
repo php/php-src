@@ -48,39 +48,6 @@ echo "Done";
 *** Testing sprintf() : float formats with resource values ***
 
 -- Iteration 1 --
-string(%d) "%d.000000"
-string(1) "f"
-string(%d) "%d.000000"
-string(1) "f"
-string(%d) " %d.000000"
-string(%d) "%d.000000 "
-string(%d) "	%d.000000"
-string(%d) "
-%d.000000"
-string(%d) "%d.000000"
-string(%d) "%s%d.000000"
-string(%d) "0-9]"
-string(1) "f"
-
--- Iteration 2 --
-string(%d) "%d.000000"
-string(1) "f"
-string(%d) "%d.000000"
-string(1) "f"
-string(%d) " %d.000000"
-string(%d) "%d.000000 "
-string(%d) "	%d.000000"
-string(%d) "
-%d.000000"
-string(%d) "%d.000000"
-string(%d) "%s%d.000000"
-string(%d) "0-9]"
-string(1) "f"
-Done
---UEXPECTF--
-*** Testing sprintf() : float formats with resource values ***
-
--- Iteration 1 --
 unicode(%d) "%d.000000"
 unicode(1) "f"
 unicode(%d) "%d.000000"

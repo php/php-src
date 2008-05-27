@@ -48,39 +48,6 @@ echo "Done";
 *** Testing sprintf() : unsigned formats with resource values ***
 
 -- Iteration 1 --
-string(%d) "%d"
-string(1) "u"
-string(%d) "%d"
-string(1) "u"
-string(%d) " %d"
-string(%d) "%d "
-string(%d) "	%d"
-string(%d) "
-%d"
-string(%d) "%s%d"
-string(%d) "%s%d"
-string(%d) "0-9]"
-string(1) "u"
-
--- Iteration 2 --
-string(%d) "%d"
-string(1) "u"
-string(%d) "%d"
-string(1) "u"
-string(%d) " %d"
-string(%d) "%d "
-string(%d) "	%d"
-string(%d) "
-%d"
-string(%d) "%s%d"
-string(%d) "%s%d"
-string(%d) "0-9]"
-string(1) "u"
-Done
---UEXPECTF--
-*** Testing sprintf() : unsigned formats with resource values ***
-
--- Iteration 1 --
 unicode(%d) "%d"
 unicode(1) "u"
 unicode(%d) "%d"

@@ -22,7 +22,7 @@ var_dump( strrpos($empty_string, NULL) );
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrpos() function: with heredoc strings ***
 -- With empty heredoc string --
 bool(false)

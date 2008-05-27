@@ -34,14 +34,7 @@ var_dump( join($glue, $pieces) );
 
 echo "Done\n";
 ?>
---EXPECTF--
-*** Testing join() : basic functionality ***
-string(7) "1,2,3,4"
-string(30) "Red, Green, Blue, Black, White"
-string(8) "10:20:40"
-string(21) "Friday/September/2007"
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing join() : basic functionality ***
 unicode(7) "1,2,3,4"
 unicode(30) "Red, Green, Blue, Black, White"

@@ -41,48 +41,7 @@ for($index = 0; $index < count($str_array); $index++) {
 
 echo "Done\n";
 ?>
---EXPECTF--
-*** Testing ucwords() : basic functionality ***
--- Iteration 1 --
-string(15) "Testing Ucwords"
--- Iteration 2 --
-string(15) "Testing Ucwords"
--- Iteration 3 --
-string(16) "Testing\tucwords"
--- Iteration 4 --
-string(15) "Testing	Ucwords"
--- Iteration 5 --
-string(15) "Testing
-Ucwords"
--- Iteration 6 --
-string(16) "Testing\nucwords"
--- Iteration 7 --
-string(15) "TestingUcwords"
--- Iteration 8 --
-string(16) "Testing\vucwords"
--- Iteration 9 --
-string(7) "Testing"
--- Iteration 10 --
-string(7) "Testing"
--- Iteration 11 --
-string(8) " Testing"
--- Iteration 12 --
-string(8) " Testing"
--- Iteration 13 --
-string(16) "Testing  Ucwords"
--- Iteration 14 --
-string(16) "Testing  Ucwords"
--- Iteration 15 --
-string(16) "Testing\rucwords"
--- Iteration 16 --
-string(15) "Testing
-Ucwords"
--- Iteration 17 --
-string(16) "Testing\fucwords"
--- Iteration 18 --
-string(15) "TestingUcwords"
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing ucwords() : basic functionality ***
 -- Iteration 1 --
 unicode(15) "Testing Ucwords"

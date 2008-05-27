@@ -26,16 +26,7 @@ var_dump( strrpos($multi_line_str, " ") );
 
 echo "*** Done ***";
 ?>
---EXPECTF--
-*** Testing strrpos() function: with heredoc strings ***
--- With heredoc string containing multi lines --
-int(44)
-int(44)
-int(44)
-bool(false)
-int(55)
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Testing strrpos() function: with heredoc strings ***
 -- With heredoc string containing multi lines --
 int(44)

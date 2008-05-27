@@ -22,14 +22,7 @@ foreach( $strings as $string )
 	echo strtotitle( $string ), "\n";
 }
 ?>
---EXPECT--
-ßen
-ßen
-Året
-Året
-Året ßen
-Året ßen
---UEXPECTF--
+--EXPECTF--
 Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 SSen
 Ssen

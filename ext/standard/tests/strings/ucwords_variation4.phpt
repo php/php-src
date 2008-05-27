@@ -63,67 +63,7 @@ for($index = 0; $index < count($str_array); $index++) {
 
 echo "Done\n";
 ?>
---EXPECTF--
-*** Testing ucwords() : usage variations ***
--- Iteration 1 --
-string(18) "Testing    Ucwords"
--- Iteration 2 --
-string(30) "T E S T I N G   U C W O R D S "
--- Iteration 3 --
-string(25) "Testing Function(ucwords)"
--- Iteration 4 --
-string(38) "(testing ( Function (ucwords) )a )test"
--- Iteration 5 --
-string(3) "(t)"
--- Iteration 6 --
-string(7) " ( T )t"
--- Iteration 7 --
-string(24) ""testing",ucwords,"test""
--- Iteration 8 --
-string(14) ""t""t",test, T"
--- Iteration 9 --
-string(14) "\'t \'t\',test"
--- Iteration 10 --
-string(10) "Jack's Pen"
--- Iteration 11 --
-string(14) "P't'y 't It's "
--- Iteration 12 --
-string(24) "	Testing	Testing	Ucwords"
--- Iteration 13 --
-string(26) "\ttesting\ttesting	Ucwords"
--- Iteration 14 --
-string(31) "Testing
-Ucwords Testing Ucwords"
--- Iteration 15 --
-string(32) "Testing\rucwords Testing Ucwords"
--- Iteration 16 --
-string(34) "TestingUcwords  Testing 
-Ucwords"
--- Iteration 17 --
-string(36) "Testing\fucwords \f Testing 
-Ucwords"
--- Iteration 18 --
-string(35) "
-Testing
-Ucwords
- Testing 
- Ucwords"
--- Iteration 19 --
-string(39) "\ntesting\nucwords\n Testing \n Ucwords"
--- Iteration 20 --
-string(18) "UsingVerticalTab"
--- Iteration 21 --
-string(20) "Using\vvertical\vtab"
--- Iteration 22 --
-string(42) "T@@#$% %test ^test &test *test +test -test"
--- Iteration 23 --
-string(40) "!test ~test `test` =test= @test@test.com"
--- Iteration 24 --
-string(36) "/test/r	Est\ Ucwords	\y\y \yy\ /uu/"
--- Iteration 25 --
-string(16) "!@#$%^&*()_+=-`~"
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing ucwords() : usage variations ***
 -- Iteration 1 --
 unicode(18) "Testing    Ucwords"
