@@ -193,7 +193,6 @@ PHP_SAPI    : " , PHP_SAPI , "
 PHP_VERSION : " , phpversion() , "
 ZEND_VERSION: " , zend_version() , "
 PHP_OS      : " , PHP_OS , " - " , php_uname() , "
-UNICODE     : " , (ini_get("unicode.semantics") ? "ON" : "OFF") , "
 INI actual  : " , realpath(get_cfg_var("cfg_file_path")) , "
 More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n","", php_ini_scanned_files()) : "** not determined **"); ?>';
 	save_text($info_file, $php_info);
@@ -926,7 +925,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 		return false;
 
 	if (!is_null($stdin)) {
-		fwrite($pipes[0], $stdin);
+		@fwrite($pipes[0], $stdin);
 	}
 	fclose($pipes[0]);
 
@@ -1061,12 +1060,16 @@ TEST $file
 	$bork_info = '';
 	if (!feof($fp)) {
 		$line = fgets($fp);
+		if ($line === false) {
+			$bork_info = "cannot read test";
+			$borked = true;
+		}
 	} else {
-		$bork_info = "empty test [$file]";
+		$bork_info = "empty test";
 		$borked = true;
 	}
-	if (strncmp('--TEST--', $line, 8)) {
-		$bork_info = "tests must start with --TEST-- [$file]";
+	if (!$borked && strncmp('--TEST--', $line, 8)) {
+		$bork_info = "tests must start with --TEST--";
 		$borked = true;
 	}
 	$section = 'TEST';
@@ -1103,40 +1106,42 @@ TEST $file
 
 	// the redirect section allows a set of tests to be reused outside of
 	// a given test dir
-	if (@count($section_text['REDIRECTTEST']) == 1) {
-		if ($IN_REDIRECT) {
-			$borked = true;
-			$bork_info = "Can't redirect a test from within a redirected test";
-		} else {
-			$borked = false;
-		}
-	} else {
-		if (@count($section_text['FILE']) + @count($section_text['FILEEOF']) + @count($section_text['FILE_EXTERNAL']) != 1) {
-			$bork_info = "missing section --FILE--";
-			$borked = true;
-		}
-		if (@count($section_text['FILEEOF']) == 1) {
-			$section_text['FILE'] = preg_replace("/[\r\n]+$/", '', $section_text['FILEEOF']);
-			unset($section_text['FILEEOF']);
-		}
-		if (@count($section_text['FILE_EXTERNAL']) == 1) {
-			// don't allow tests to retrieve files from anywhere but this subdirectory
-			$section_text['FILE_EXTERNAL'] = dirname($file) . '/' . trim(str_replace('..', '', $section_text['FILE_EXTERNAL']));
-			if (@file_exists($section_text['FILE_EXTERNAL'])) {
-				$section_text['FILE'] = file_get_contents($section_text['FILE_EXTERNAL']);
-				unset($section_text['FILE_EXTERNAL']);
+	if (!$borked) {
+		if (@count($section_text['REDIRECTTEST']) == 1) {
+			if ($IN_REDIRECT) {
+				$borked = true;
+				$bork_info = "Can't redirect a test from within a redirected test";
 			} else {
-				$bork_info = "could not load --FILE_EXTERNAL-- " . dirname($file) . '/' . trim($section_text['FILE_EXTERNAL']);
+				$borked = false;
+			}
+		} else {
+			if (@count($section_text['FILE']) + @count($section_text['FILEEOF']) + @count($section_text['FILE_EXTERNAL']) != 1) {
+				$bork_info = "missing section --FILE--";
 				$borked = true;
 			}
-		}
-		if ((@count($section_text['EXPECT']) + @count($section_text['EXPECTF']) + @count($section_text['EXPECTREGEX'])) != 1) {
-			$bork_info = "missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX--";
-			$borked = true;
-		}
-		if ((@count($section_text['UEXPECT']) + @count($section_text['UEXPECTF']) + @count($section_text['UEXPECTREGEX'])) > 1) {
-			$bork_info = "missing section --UEXPECT--, --UEXPECTF-- or --UEXPECTREGEX--";
-			$borked = true;
+			if (@count($section_text['FILEEOF']) == 1) {
+				$section_text['FILE'] = preg_replace("/[\r\n]+$/", '', $section_text['FILEEOF']);
+				unset($section_text['FILEEOF']);
+			}
+			if (@count($section_text['FILE_EXTERNAL']) == 1) {
+				// don't allow tests to retrieve files from anywhere but this subdirectory
+				$section_text['FILE_EXTERNAL'] = dirname($file) . '/' . trim(str_replace('..', '', $section_text['FILE_EXTERNAL']));
+				if (@file_exists($section_text['FILE_EXTERNAL'])) {
+					$section_text['FILE'] = file_get_contents($section_text['FILE_EXTERNAL']);
+					unset($section_text['FILE_EXTERNAL']);
+				} else {
+					$bork_info = "could not load --FILE_EXTERNAL-- " . dirname($file) . '/' . trim($section_text['FILE_EXTERNAL']);
+					$borked = true;
+				}
+			}
+			if ((@count($section_text['EXPECT']) + @count($section_text['EXPECTF']) + @count($section_text['EXPECTREGEX'])) != 1) {
+				$bork_info = "missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX--";
+				$borked = true;
+			}
+			if ((@count($section_text['UEXPECT']) + @count($section_text['UEXPECTF']) + @count($section_text['UEXPECTREGEX'])) > 1) {
+				$bork_info = "missing section --UEXPECT--, --UEXPECTF-- or --UEXPECTREGEX--";
+				$borked = true;
+			}
 		}
 	}
 	fclose($fp);
