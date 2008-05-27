@@ -52,21 +52,6 @@ echo "\nDone";
 ?>
 --EXPECTF--
 --- Testing Abstract Class ---
-string(119) "O:10:"extendName":3:{S:1:"a";i:10;S:1:"b";d:12.2219999999999995310417943983338773250579833984375;S:1:"c";S:6:"string";}"
-object(extendName)#%d (3) {
-  ["a"]=>
-  int(10)
-  ["b"]=>
-  float(12.222)
-  ["c"]=>
-  string(6) "string"
-}
-string(18) "S:10:"extendName";"
-string(10) "extendName"
-
-Done
---UEXPECTF--
---- Testing Abstract Class ---
 unicode(119) "O:10:"extendName":3:{U:1:"a";i:10;U:1:"b";d:12.2219999999999995310417943983338773250579833984375;U:1:"c";U:6:"string";}"
 object(extendName)#%d (3) {
   [u"a"]=>

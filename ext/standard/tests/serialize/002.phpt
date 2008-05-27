@@ -42,32 +42,3 @@ array(3) {
 object(stdClass)#%d (0) {
 }
 ===DONE===
---UEXPECTF--
-bool(false)
-bool(true)
-int(823)
-string(0) ""
-string(3) "foo"
-array(1) {
-  [0]=>
-  string(2) "12"
-}
-array(2) {
-  [0]=>
-  array(0) {
-  }
-  [1]=>
-  array(0) {
-  }
-}
-array(3) {
-  [0]=>
-  string(3) "foo"
-  [1]=>
-  string(3) "bar"
-  [2]=>
-  string(3) "baz"
-}
-object(stdClass)#%d (0) {
-}
-===DONE===

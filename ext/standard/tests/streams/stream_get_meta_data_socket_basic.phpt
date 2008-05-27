@@ -10,25 +10,6 @@ fclose($tcp_socket);
 ?>
 --EXPECTF--
 array(8) {
-  ["stream_type"]=>
-  string(%d) "tcp_socke%s"
-  ["mode"]=>
-  string(2) "r+"
-  ["unread_bytes"]=>
-  int(0)
-  ["unread_chars"]=>
-  int(0)
-  ["seekable"]=>
-  bool(false)
-  ["timed_out"]=>
-  bool(false)
-  ["blocked"]=>
-  bool(true)
-  ["eof"]=>
-  bool(false)
-}
---UEXPECTF--
-array(8) {
   [u"stream_type"]=>
   unicode(%d) "tcp_socke%s"
   [u"mode"]=>

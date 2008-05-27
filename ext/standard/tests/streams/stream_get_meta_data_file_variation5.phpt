@@ -32,55 +32,6 @@ unlink($filename);
 ?>
 --EXPECTF--
 Write some data to the file:
-array(10) {
-  ["wrapper_type"]=>
-  string(9) "plainfile"
-  ["stream_type"]=>
-  string(5) "STDIO"
-  ["mode"]=>
-  string(2) "w+"
-  ["unread_bytes"]=>
-  int(0)
-  ["unread_chars"]=>
-  int(0)
-  ["seekable"]=>
-  bool(true)
-  ["uri"]=>
-  string(%i) "%s"
-  ["timed_out"]=>
-  bool(false)
-  ["blocked"]=>
-  bool(true)
-  ["eof"]=>
-  bool(false)
-}
-
-
-Read entire file:
-array(10) {
-  ["wrapper_type"]=>
-  string(9) "plainfile"
-  ["stream_type"]=>
-  string(5) "STDIO"
-  ["mode"]=>
-  string(2) "w+"
-  ["unread_bytes"]=>
-  int(0)
-  ["unread_chars"]=>
-  int(0)
-  ["seekable"]=>
-  bool(true)
-  ["uri"]=>
-  string(%i) "%s"
-  ["timed_out"]=>
-  bool(false)
-  ["blocked"]=>
-  bool(true)
-  ["eof"]=>
-  bool(true)
-}
---UEXPECTF--
-Write some data to the file:
 
 Notice: fwrite(): 15 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 

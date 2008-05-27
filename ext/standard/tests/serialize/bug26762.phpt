@@ -24,6 +24,4 @@ catch (Exception $e) {
 
 ?>
 --EXPECTF--
-string(3) "FOO"
---UEXPECTF--
 unicode(3) "FOO"

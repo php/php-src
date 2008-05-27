@@ -18,26 +18,6 @@ echo "Done";
 ?>
 --EXPECT--
 array(8) {
-  ["stream_type"]=>
-  string(5) "STDIO"
-  ["mode"]=>
-  string(2) "rb"
-  ["unread_bytes"]=>
-  int(0)
-  ["unread_chars"]=>
-  int(0)
-  ["seekable"]=>
-  bool(false)
-  ["timed_out"]=>
-  bool(false)
-  ["blocked"]=>
-  bool(true)
-  ["eof"]=>
-  bool(false)
-}
-Done
---UEXPECT--
-array(8) {
   [u"stream_type"]=>
   unicode(5) "STDIO"
   [u"mode"]=>
