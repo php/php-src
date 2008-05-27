@@ -25,32 +25,7 @@ var_dump(gmp_xor(array(), array()));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-string(7) "2120329"
-string(6) "476369"
-string(10) "2342340648"
-string(5) "-3334"
-string(5) "-4563"
-string(1) "0"
-string(15) "987657876574716"
-string(21) "987658017016065701376"
-
-Warning: gmp_xor() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: gmp_xor() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: gmp_xor(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_xor(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_xor(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-Done
---UEXPECTF--
+--EXPECTF--
 unicode(7) "2120329"
 unicode(6) "476369"
 unicode(10) "2342340648"

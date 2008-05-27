@@ -29,10 +29,3 @@ echo "Done";
 Warning: mb_regex_encoding(): Unknown encoding "unknown" in %s on line %d
 bool(false)
 Done
-
---UEXPECTF--
-*** Testing mb_regex_encoding() : error conditions ***
-
-Warning: mb_regex_encoding(): Unknown encoding "unknown" in %s on line %d
-bool(false)
-Done

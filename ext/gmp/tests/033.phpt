@@ -41,28 +41,7 @@ gmp_setbit($a,array());
 
 echo "Done\n";
 ?>
---EXPECTF--	
-string(2) "-1"
-
-Warning: gmp_setbit(): Index must be greater than or equal to zero in %s on line %d
-string(1) "5"
-string(1) "1"
-string(1) "7"
-string(12) "100008388608"
-string(12) "100000000000"
-string(12) "100000000008"
-
-Warning: gmp_setbit(): supplied argument is not a valid GMP integer resource in %s on line %d
-
-Warning: gmp_setbit() expects at least 2 parameters, 1 given in %s on line %d
-
-Warning: gmp_setbit() expects at most 3 parameters, 4 given in %s on line %d
-
-Warning: gmp_setbit() expects parameter 2 to be long, array given in %s on line %d
-
-Warning: gmp_setbit() expects parameter 2 to be long, array given in %s on line %d
-Done
---UEXPECTF--
+--EXPECTF--
 unicode(2) "-1"
 
 Warning: gmp_setbit(): Index must be greater than or equal to zero in %s on line %d

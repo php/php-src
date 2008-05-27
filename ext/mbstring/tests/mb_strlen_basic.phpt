@@ -31,18 +31,7 @@ var_dump(mb_strlen($string_mb, 'UTF-8'));
 echo "\nDone";
 ?>
 
---EXPECTF--
-*** Testing mb_strlen() : basic functionality***
-
--- ASCII String --
-int(7)
-
--- Multibyte String --
-int(21)
-
-Done
-
---UEXPECTF--
+--EXPECT--
 *** Testing mb_strlen() : basic functionality***
 
 -- ASCII String --

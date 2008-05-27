@@ -64,6 +64,8 @@ setlocale(LC_CTYPE, $orig);
 --EXPECTF--
 *** Testing ctype_punct() : usage variations ***
 
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_punct_variation3.php on line %d
+
 -- Iteration 1 --
 bool(false)
 
@@ -141,4 +143,6 @@ bool(true)
 
 -- Iteration 26 --
 bool(false)
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_punct_variation3.php on line %d
 ===DONE===

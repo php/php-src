@@ -73,7 +73,7 @@ var_dump(bzopen($fp, "w"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 resource(%d) of type (stream)
 resource(%d) of type (stream)
 resource(%d) of type (stream)

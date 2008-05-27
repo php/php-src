@@ -29,10 +29,3 @@ echo "Done";
 Warning: mb_internal_encoding(): Unknown encoding "unknown-encoding" in %s on line %d
 bool(false)
 Done
-
---UEXPECTF--
-*** Testing mb_internal_encoding() : error conditions ***
-
-Warning: mb_internal_encoding(): Unknown encoding "unknown-encoding" in %s on line %d
-bool(false)
-Done

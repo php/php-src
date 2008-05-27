@@ -46,6 +46,8 @@ setlocale(LC_CTYPE, $orig);
 --EXPECTF--
 *** Testing ctype_lower() : usage variations ***
 
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_lower_variation4.php on line 13
+
 -- Octal Values --
 -- Iteration 1 --
 bool(true)
@@ -65,4 +67,6 @@ bool(true)
 bool(true)
 -- Iteration 4 --
 bool(true)
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_lower_variation4.php on line 34
 ===DONE===

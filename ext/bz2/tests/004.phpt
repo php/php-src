@@ -43,73 +43,7 @@ var_dump(bzerrno($fd2));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-array(2) {
-  ["errno"]=>
-  int(0)
-  ["errstr"]=>
-  string(2) "OK"
-}
-string(2) "OK"
-int(0)
-array(2) {
-  ["errno"]=>
-  int(0)
-  ["errstr"]=>
-  string(2) "OK"
-}
-string(2) "OK"
-int(0)
-string(0) ""
-array(2) {
-  ["errno"]=>
-  int(-5)
-  ["errstr"]=>
-  string(16) "DATA_ERROR_MAGIC"
-}
-string(16) "DATA_ERROR_MAGIC"
-int(-5)
-string(0) ""
-array(2) {
-  ["errno"]=>
-  int(-4)
-  ["errstr"]=>
-  string(10) "DATA_ERROR"
-}
-string(10) "DATA_ERROR"
-int(-4)
-string(0) ""
-array(2) {
-  ["errno"]=>
-  int(-5)
-  ["errstr"]=>
-  string(16) "DATA_ERROR_MAGIC"
-}
-string(16) "DATA_ERROR_MAGIC"
-int(-5)
-string(0) ""
-array(2) {
-  ["errno"]=>
-  int(-4)
-  ["errstr"]=>
-  string(10) "DATA_ERROR"
-}
-string(10) "DATA_ERROR"
-int(-4)
-
-Warning: bzread(): %d is not a valid stream resource in %s on line %d
-bool(false)
-
-Warning: bzerror(): %d is not a valid stream resource in %s on line %d
-bool(false)
-
-Warning: bzerrstr(): %d is not a valid stream resource in %s on line %d
-bool(false)
-
-Warning: bzerrno(): %d is not a valid stream resource in %s on line %d
-bool(false)
-Done
---UEXPECTF--	
+--EXPECTF--
 array(2) {
   [u"errno"]=>
   int(0)

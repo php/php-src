@@ -34,10 +34,3 @@ string(%d) "%s"
 bool(true)
 string(5) "UTF-8"
 Done
-
---UEXPECTF--
-*** Testing mb_internal_encoding() : basic functionality ***
-string(%d) "%s"
-bool(true)
-string(5) "UTF-8"
-Done

@@ -16,7 +16,7 @@ unset($a[0]);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(1) {
   [0]=>
   &array(1) {

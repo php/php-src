@@ -44,16 +44,3 @@ NULL
 Warning: mb_strtolower() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing mb_strtolower() : error conditions***
-
--- Testing mb_strtolower() function with more than expected no. of arguments --
-
-Warning: mb_strtolower() expects at most 2 parameters, 3 given in %s on line %d
-NULL
-
--- Testing mb_strtolower() function with zero arguments --
-
-Warning: mb_strtolower() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-Done

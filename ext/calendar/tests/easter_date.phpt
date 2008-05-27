@@ -6,9 +6,9 @@ date.timezone=UTC
 <?php include 'skipif.inc'; ?>
 --FILE--
 <?php
-echo date("Y-m-d", easter_date(2000))."\n";       
-echo date("Y-m-d", easter_date(2001))."\n";      
-echo date("Y-m-d", easter_date(2002))."\n";      
+echo date("Y-m-d", easter_date(2000))."\n";
+echo date("Y-m-d", easter_date(2001))."\n";
+echo date("Y-m-d", easter_date(2002))."\n";
 echo date("Y-m-d", easter_date(1492))."\n";
 ?>
 --EXPECTF--

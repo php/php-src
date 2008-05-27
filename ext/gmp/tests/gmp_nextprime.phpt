@@ -24,7 +24,7 @@ var_dump(gmp_strval($n));
 	
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 %s(1) "2"
 %s(1) "2"
 %s(4) "-997"

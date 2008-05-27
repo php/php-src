@@ -32,10 +32,3 @@ echo "Done";
 Warning: mb_strlen(): Unknown encoding "unknown-encoding" in %s on line %d
 bool(false)
 Done
-
---UEXPECTF--
-*** Testing mb_strlen() : error ***
-
-Warning: mb_strlen(): Unknown encoding "unknown-encoding" in %s on line %d
-bool(false)
-Done

@@ -22,10 +22,7 @@ echo gettext("Basic test"), "\n";
 echo _("Basic test"), "\n";
 
 ?>
---EXPECT--
-Perustesti
-Perustesti
---UEXPECTF--
+--EXPECTF--
 Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 Perustesti
 Perustesti

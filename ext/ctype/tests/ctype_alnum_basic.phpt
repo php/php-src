@@ -28,6 +28,10 @@ setlocale(LC_CTYPE, $orig);
 ===DONE===
 --EXPECTF--
 *** Testing ctype_alnum() : basic functionality ***
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_alnum_basic.php on line %d
 bool(true)
 bool(false)
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_alnum_basic.php on line %d
 ===DONE===

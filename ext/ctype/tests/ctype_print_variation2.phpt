@@ -33,6 +33,8 @@ setlocale(LC_CTYPE, $orig);
 ===DONE===
 --EXPECTF--
 *** Testing ctype_print() : usage variations ***
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_print_variation2.php on line 14
 character code 32 is a printable character
 character code 33 is a printable character
 character code 34 is a printable character
@@ -223,4 +225,6 @@ character code 252 is a printable character
 character code 253 is a printable character
 character code 254 is a printable character
 character code 255 is a printable character
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_print_variation2.php on line 22
 ===DONE===

@@ -12,10 +12,9 @@ var_dump(json_encode(array("ab\xE0", "ab\xE0c", "abc")));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(5) ""abc""
 string(4) "null"
 string(4) "null"
 string(17) "[null,null,"abc"]"
 Done
-

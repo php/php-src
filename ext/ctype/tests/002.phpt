@@ -34,19 +34,6 @@ ctype_test_002("ctype_xdigit");
 
 ?>
 --EXPECTF--
-LOCALE is '%s'
-ctype_lower 26 26 0
-ctype_upper 26 26 0
-ctype_alpha 52 52 0
-ctype_digit 10 10 0
-ctype_alnum 62 62 0
-ctype_cntrl 33 33 0
-ctype_graph 94 94 94
-ctype_print 95 95 95
-ctype_punct 32 32 0
-ctype_space 6 6 0
-ctype_xdigit 22 22 0
---UEXPECTF--
 Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s002.php on line %d
 
 Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s002.php on line %d

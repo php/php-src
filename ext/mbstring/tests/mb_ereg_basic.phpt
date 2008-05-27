@@ -76,46 +76,7 @@ function base64_encode_var_dump($regs) {
 }
 ?>
 
---EXPECTF--
-*** Testing mb_ereg() : basic functionality ***
-Regex encoding set to utf-8
-
-**-- ASCII String --**
--- Without $regs argument--
-int(1)
-int(1)
---With $regs argument --
-int(36)
-array(2) {
-  [0]=>
-  string(36) "This is an English string. 012345678"
-  [1]=>
-  string(17) "This is an Englis"
-}
-int(17)
-array(1) {
-  [0]=>
-  string(17) "This is an Englis"
-}
-
-**-- Multibyte String --**
--- Without $regs argument --
-int(1)
-bool(false)
--- With $regs argument --
-int(15)
-array(3) {
-  [0]=>
-  string(48) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzQ="
-  [1]=>
-  string(12) "5pel5pys6Kqe"
-  [2]=>
-  string(8) "MTIzNA=="
-}
-bool(false)
-NULL
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing mb_ereg() : basic functionality ***
 Regex encoding set to utf-8
 

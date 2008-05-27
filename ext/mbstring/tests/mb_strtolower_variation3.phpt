@@ -55,14 +55,3 @@ Correctly Converted
 string(40) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC"
 Correctly Converted
 Done
---UEXPECTF--
-*** Testing mb_strtolower() : usage variations ***
-
--- Mixed string (mulitbyte and ASCII characters) --
-string(80) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCcGhwLiAwMTIzNO+8le+8lu+8l++8mO+8meOAgg=="
-Correctly Converted
-
--- Multibyte Only String--
-string(40) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC"
-Correctly Converted
-Done

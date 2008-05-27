@@ -34,12 +34,3 @@ echo "Done";
 Warning: Wrong parameter count for mb_regex_encoding() in %s on line %d
 NULL
 Done
-
---UEXPECTF--
-*** Testing mb_regex_encoding() : error conditions ***
-
--- Testing mb_regex_encoding() function with more than expected no. of arguments --
-
-Warning: Wrong parameter count for mb_regex_encoding() in %s on line %d
-NULL
-Done

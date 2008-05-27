@@ -33,6 +33,8 @@ setlocale(LC_CTYPE, $orig);
 ===DONE===
 --EXPECTF--
 *** Testing ctype_xdigit() : usage variations ***
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_xdigit_variation2.php on line 14
 character code 48 is a hexadecimal 'digit'
 character code 49 is a hexadecimal 'digit'
 character code 50 is a hexadecimal 'digit'
@@ -55,4 +57,6 @@ character code 99 is a hexadecimal 'digit'
 character code 100 is a hexadecimal 'digit'
 character code 101 is a hexadecimal 'digit'
 character code 102 is a hexadecimal 'digit'
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_xdigit_variation2.php on line 22
 ===DONE===

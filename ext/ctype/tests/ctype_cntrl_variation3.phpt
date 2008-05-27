@@ -70,6 +70,8 @@ setlocale(LC_CTYPE, $orig);
 --EXPECTF--
 *** Testing ctype_cntrl() : usage variations ***
 
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_cntrl_variation3.php on line %d
+
 -- Iteration 1 --
 bool(false)
 
@@ -159,4 +161,6 @@ bool(false)
 
 -- Iteration 30 --
 bool(true)
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_cntrl_variation3.php on line %d
 ===DONE===

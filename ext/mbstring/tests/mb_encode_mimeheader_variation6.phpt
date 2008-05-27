@@ -37,21 +37,7 @@ foreach ($linefeeds as $linefeed) {
 echo "Done";
 ?>
 
---EXPECTF--
-*** Testing mb_encode_mimeheader() : usage variations ***
-
--- Iteration 1 --
-string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
- =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
-
--- Iteration 2 --
-string(114) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
- =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
-
--- Iteration 3 --
-string(116) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=--- =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing mb_encode_mimeheader() : usage variations ***
 
 -- Iteration 1 --

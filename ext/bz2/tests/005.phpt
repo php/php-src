@@ -41,38 +41,6 @@ echo "Done\n";
 --EXPECTF--
 Warning: bzcompress() expects at least 1 parameter, 0 given in %s on line %d
 NULL
-string(%d) "BZ%a"
-int(-2)
-int(-2)
-int(-2)
-int(-2)
-
-Warning: bzdecompress() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: bzdecompress() expects at most 2 parameters, 3 given in %s on line %d
-bool(false)
-int(-5)
-int(-5)
-int(-5)
-bool(false)
-string(110) "Life it seems, will fade away
-Drifting further everyday
-Getting lost within myself
-Nothing matters no one else"
-bool(false)
-string(110) "Life it seems, will fade away
-Drifting further everyday
-Getting lost within myself
-Nothing matters no one else"
-string(110) "Life it seems, will fade away
-Drifting further everyday
-Getting lost within myself
-Nothing matters no one else"
-Done
---UEXPECTF--
-Warning: bzcompress() expects at least 1 parameter, 0 given in %s on line %d
-NULL
 unicode(%d) "BZ%a"
 int(-2)
 int(-2)

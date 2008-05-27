@@ -58,29 +58,6 @@ echo "Done\n";
 --EXPECT--
 Simple test of imagepolygon() function
 array(4) {
-  ["red"]=>
-  int(255)
-  ["green"]=>
-  int(0)
-  ["blue"]=>
-  int(0)
-  ["alpha"]=>
-  int(0)
-}
-array(4) {
-  ["red"]=>
-  int(0)
-  ["green"]=>
-  int(0)
-  ["blue"]=>
-  int(0)
-  ["alpha"]=>
-  int(0)
-}
-Done
---UEXPECT--
-Simple test of imagepolygon() function
-array(4) {
   [u"red"]=>
   int(255)
   [u"green"]=>

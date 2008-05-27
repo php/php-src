@@ -37,13 +37,17 @@ setlocale(LC_CTYPE, $orig);
 --EXPECTF--
 *** Testing ctype_space() : error conditions ***
 
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_space_error.php on line 13
+
 -- Testing ctype_space() function with Zero arguments --
 
-Warning: ctype_space() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: ctype_space() expects exactly 1 parameter, 0 given in %sctype_space_error.php on line 17
 NULL
 
 -- Testing ctype_space() function with more than expected no. of arguments --
 
-Warning: ctype_space() expects exactly 1 parameter, 2 given in %s on line %d
+Warning: ctype_space() expects exactly 1 parameter, 2 given in %sctype_space_error.php on line 23
 NULL
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_space_error.php on line 25
 ===DONE===

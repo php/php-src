@@ -38,28 +38,7 @@ foreach ($inputs as $type => $input) {
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing mb_strrpos() : usage variations ***
-
--- Double Quoted String --
--- With fourth encoding argument --
-int(20)
--- Without fourth encoding argument --
-int(20)
-
--- Single Quoted String --
--- With fourth encoding argument --
-int(20)
--- Without fourth encoding argument --
-int(20)
-
--- Heredoc --
--- With fourth encoding argument --
-int(20)
--- Without fourth encoding argument --
-int(20)
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing mb_strrpos() : usage variations ***
 
 -- Double Quoted String --

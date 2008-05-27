@@ -25,12 +25,7 @@ var_dump(textdomain(0));
 var_dump(textdomain(""));
 
 ?>
---EXPECT--
-string(14) "Einfacher Test"
-string(14) "Einfacher Test"
-string(8) "messages"
-string(8) "messages"
---UEXPECTF--
+--EXPECTF--
 Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 string(14) "Einfacher Test"
 string(14) "Einfacher Test"

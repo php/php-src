@@ -40,7 +40,7 @@ var_dump(mb_strrpos($string_mb, $needle2));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_strrpos() : basic ***
 
 -- ASCII string 1 --
@@ -55,21 +55,3 @@ int(20)
 -- Multibyte string 2 --
 bool(false)
 Done
-
-
---UEXPECTF--
-*** Testing mb_strrpos() : basic ***
-
--- ASCII string 1 --
-int(15)
-
--- ASCII string 2 --
-bool(false)
-
--- Multibyte string 1 --
-int(20)
-
--- Multibyte string 2 --
-bool(false)
-Done
-

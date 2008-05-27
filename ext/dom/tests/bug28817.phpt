@@ -27,18 +27,6 @@ var_dump($z->p_variable);
 --EXPECTF--
 array(4) {
   [0]=>
-  string(5) "bonus"
-  [1]=>
-  string(3) "vir"
-  [2]=>
-  string(6) "semper"
-  [3]=>
-  string(4) "tiro"
-}
-string(30) "Cessante causa cessat effectus"
---UEXPECTF--
-array(4) {
-  [0]=>
   unicode(5) "bonus"
   [1]=>
   unicode(3) "vir"

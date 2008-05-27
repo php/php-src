@@ -34,6 +34,8 @@ setlocale(LC_CTYPE, $orig);
 ===DONE===
 --EXPECTF--
 *** Testing ctype_punct() : usage variations ***
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_punct_variation2.php on line 15
 character code 33 is punctuation
 character code 34 is punctuation
 character code 35 is punctuation
@@ -62,4 +64,6 @@ character code 171 is punctuation
 character code 183 is punctuation
 character code 187 is punctuation
 character code 191 is punctuation
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_punct_variation2.php on line 23
 ===DONE===

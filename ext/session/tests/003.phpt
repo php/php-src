@@ -18,11 +18,8 @@ class foo {
 
 session_id("abtest");
 session_start();
-if (ini_get("unicode.semantics")) {
-	session_decode('baz|O:3:"foo":2:{U:3:"bar";U:2:"ok";U:3:"yes";i:1;}arr|a:1:{i:3;O:3:"foo":2:{U:3:"bar";U:2:"ok";U:3:"yes";i:1;}}');
-} else {
-	session_decode('baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}}');
-}
+session_decode('baz|O:3:"foo":2:{U:3:"bar";U:2:"ok";U:3:"yes";i:1;}arr|a:1:{i:3;O:3:"foo":2:{U:3:"bar";U:2:"ok";U:3:"yes";i:1;}}');
+
 $baz = $_SESSION['baz'];
 $arr = $_SESSION['arr'];
 

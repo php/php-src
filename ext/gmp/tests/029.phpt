@@ -25,32 +25,7 @@ var_dump(gmp_and(array(), array()));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-string(6) "106502"
-string(5) "40994"
-string(3) "515"
-string(4) "3333"
-string(4) "4544"
-string(1) "0"
-string(4) "1536"
-string(15) "424703623692768"
-
-Warning: gmp_and() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: gmp_and() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: gmp_and(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_and(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_and(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-Done
---UEXPECTF--
+--EXPECTF--
 unicode(6) "106502"
 unicode(5) "40994"
 unicode(3) "515"

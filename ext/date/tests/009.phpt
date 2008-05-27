@@ -25,26 +25,7 @@ var_dump(gmstrftime("blah", $t));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: strftime() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
-bool(false)
-string(%d) "Tue Tuesday Jun June Tue Jun 27 00:00:00 2006 %s
-%s %"
-string(5) "%q %a"
-string(%d) "%s"
-string(4) "blah"
-
-Warning: gmstrftime() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
-bool(false)
-string(%d) "Mon Monday Jun June Mon Jun 26 21:00:00 2006 %s
-%s %"
-string(5) "%q %a"
-string(%d) "%s"
-string(4) "blah"
-Done
---UEXPECTF--
+--EXPECTF--
 Warning: strftime() expects at least 1 parameter, 0 given in %s on line %d
 bool(false)
 bool(false)

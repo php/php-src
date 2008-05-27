@@ -37,13 +37,17 @@ setlocale(LC_CTYPE, $orig);
 --EXPECTF--
 *** Testing ctype_alnum() : error conditions ***
 
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_alnum_error.php on line %d
+
 -- Testing ctype_alnum() function with Zero arguments --
 
-Warning: ctype_alnum() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: ctype_alnum() expects exactly 1 parameter, 0 given in %sctype_alnum_error.php on line 17
 NULL
 
 -- Testing ctype_alnum() function with more than expected no. of arguments --
 
-Warning: ctype_alnum() expects exactly 1 parameter, 2 given in %s on line %d
+Warning: ctype_alnum() expects exactly 1 parameter, 2 given in %sctype_alnum_error.php on line 23
 NULL
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_alnum_error.php on line %d
 ===DONE===

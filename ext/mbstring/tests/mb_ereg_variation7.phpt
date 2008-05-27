@@ -62,37 +62,7 @@ function base64_encode_var_dump($regs) {
 echo "Done";
 
 ?>
---EXPECTF--
-*** Testing mb_ereg() : usage variations ***
-Regex encoding set to utf-8
-int(38)
-array(5) {
-  [0]=>
-  string(38) "This is an English string. 0123456789."
-  [1]=>
-  string(6) "This i"
-  [2]=>
-  string(2) " i"
-  [3]=>
-  string(5) "56789"
-  [4]=>
-  string(2) "89"
-}
-int(64)
-array(5) {
-  [0]=>
-  string(88) "zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868zrXOvc6/LiAwMTIzNDU2Nzg5Lg=="
-  [1]=>
-  string(16) "zrXOr869zrHOuSA="
-  [2]=>
-  string(4) "zr8="
-  [3]=>
-  string(8) "NTY3ODk="
-  [4]=>
-  string(4) "ODk="
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing mb_ereg() : usage variations ***
 Regex encoding set to utf-8
 int(38)

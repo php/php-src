@@ -22,49 +22,6 @@ $rootNode->appendChild($rootNode);
 --EXPECTF--
 --- Catch exception with try/catch
 object(DOMException)#%d (6) {
-  ["message":protected]=>
-  string(23) "Hierarchy Request Error"
-  ["string":"Exception":private]=>
-  string(0) ""
-  ["file":protected]=>
-  string(%d) "%sdom003.php"
-  ["line":protected]=>
-  int(8)
-  ["trace":"Exception":private]=>
-  array(1) {
-    [0]=>
-    array(6) {
-      ["file"]=>
-      string(%d) "%sdom003.php"
-      ["line"]=>
-      int(8)
-      ["function"]=>
-      string(11) "appendChild"
-      ["class"]=>
-      string(7) "DOMNode"
-      ["type"]=>
-      string(2) "->"
-      ["args"]=>
-      array(1) {
-        [0]=>
-        object(DOMElement)#%d (0) {
-        }
-      }
-    }
-  }
-  ["code"]=>
-  int(3)
-}
---- Don't catch exception with try/catch
-
-Fatal error: Uncaught exception 'DOMException' with message 'Hierarchy Request Error' in %sdom003.php:%d
-Stack trace:
-#0 %sdom003.php(13): DOMNode->appendChild(Object(DOMElement))
-#1 {main}
-  thrown in %sdom003.php on line %d
---UEXPECTF--
---- Catch exception with try/catch
-object(DOMException)#%d (6) {
   [u"message":protected]=>
   unicode(23) "Hierarchy Request Error"
   [u"string":u"Exception":private]=>

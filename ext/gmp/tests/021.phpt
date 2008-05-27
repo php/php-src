@@ -27,29 +27,7 @@ var_dump(gmp_gcd(array(),$n,1));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-string(1) "3"
-string(5) "12387"
-string(3) "224"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "2"
-string(1) "1"
-string(10) "8127346234"
-string(10) "8127346234"
-
-Warning: gmp_gcd() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: gmp_gcd() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: gmp_gcd() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-Done
---UEXPECTF--
+--EXPECTF--
 unicode(1) "3"
 unicode(5) "12387"
 unicode(3) "224"

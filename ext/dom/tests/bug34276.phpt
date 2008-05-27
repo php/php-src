@@ -35,14 +35,6 @@ print $dom->saveXML();
 ?>
 --EXPECT--
 bool(false)
-string(0) ""
-string(8) "attranew"
-string(8) "attrbnew"
-string(5) "attrc"
-<?xml version="1.0" encoding="ISO-8859-1"?>
-<foo xmlns="http://www.example.com/ns/foo" xmlns:fubar="http://www.example.com/ns/fubar" xmlns:default="http://www.example.com/ns/foo" attra="attra" default:attra="attranew" fubar:attrb="attrbnew" default:attrc="attrc"/>
---UEXPECT--
-bool(false)
 unicode(0) ""
 unicode(8) "attranew"
 unicode(8) "attrbnew"

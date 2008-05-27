@@ -35,43 +35,7 @@ var_dump(gmp_div_r(array(), array()));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: gmp_div_r() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: gmp_div_r() expects at least 2 parameters, 1 given in %s on line %d
-NULL
-int(0)
-string(1) "0"
-
-Warning: gmp_div_r(): Zero operand not allowed in %s on line %d
-bool(false)
-int(12653)
-string(5) "12653"
-NULL
-
-Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-int(10)
-string(2) "10"
-int(113)
-string(3) "113"
-int(10)
-string(2) "10"
-int(10)
-string(2) "10"
-int(113)
-string(3) "113"
-int(10)
-string(2) "10"
-
-Warning: gmp_div_r(): supplied resource is not a valid GMP integer resource in %s on line %d
-bool(false)
-
-Warning: gmp_div_r(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-Done
---UEXPECTF--
+--EXPECTF--
 Warning: gmp_div_r() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 

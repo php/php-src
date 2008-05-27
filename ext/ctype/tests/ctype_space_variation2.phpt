@@ -32,6 +32,8 @@ setlocale(LC_CTYPE, $orig);
 ===DONE===
 --EXPECTF--
 *** Testing ctype_space() : usage variations ***
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_space_variation2.php on line 14
 character code 9 is a space character
 character code 10 is a space character
 character code 11 is a space character
@@ -44,4 +46,6 @@ character code 31 is a space character
 character code 32 is a space character
 character code 133 is a space character
 character code 160 is a space character
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_space_variation2.php on line 21
 ===DONE===

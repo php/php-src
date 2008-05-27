@@ -36,8 +36,8 @@ object(variant)#1 (0) {
 123
 456
 789
-string(3) "123"
-string(5) "hello"
-string(3) "789"
+unicode(3) "123"
+unicode(5) "hello"
+unicode(3) "789"
 Got BADINDEX exception OK!
 OK!

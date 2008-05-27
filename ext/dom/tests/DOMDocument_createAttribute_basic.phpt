@@ -21,4 +21,3 @@ echo $doc->saveXML();
 --EXPECT--
 <?xml version="1.0"?>
 <para hahaha=""/>
-

@@ -41,27 +41,6 @@ NULL
 NULL
 
 int(-60)
-string(1) "A"
-
-int(-60)
-string(1) "A"
-
-int(-60)
-string(1) "A"
-
-int(-60)
-string(1) "A"
-
-int(-60)
-string(1) "A"
-
-int(-60)
-string(1) "A"
---UEXPECT--
-NULL
-NULL
-
-int(-60)
 unicode(1) "A"
 
 int(-60)

@@ -33,6 +33,8 @@ setlocale(LC_CTYPE, $orig);
 ===DONE===
 --EXPECTF--
 *** Testing ctype_alpha() : usage variations ***
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_alpha_variation2.php on line 14
 character code 65 is alphabetic
 character code 66 is alphabetic
 character code 67 is alphabetic
@@ -150,4 +152,6 @@ character code 252 is alphabetic
 character code 253 is alphabetic
 character code 254 is alphabetic
 character code 255 is alphabetic
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_alpha_variation2.php on line 22
 ===DONE===

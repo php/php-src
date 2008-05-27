@@ -33,9 +33,3 @@ echo "Done";
 Warning: mb_strrpos(): Unknown encoding "unknown-encoding" in %s on line %d
 bool(false)
 Done
---UEXPECTF--
-*** Testing mb_strrpos() : error conditions ***
-
-Warning: mb_strrpos(): Unknown encoding "unknown-encoding" in %s on line %d
-bool(false)
-Done

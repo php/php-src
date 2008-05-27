@@ -61,6 +61,8 @@ setlocale(LC_CTYPE, $orig);
 --EXPECTF--
 *** Testing ctype_xdigit() : usage variations ***
 
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_xdigit_variation4.php on line 16
+
 -- Octal values --
 'Incorrect' Integers: 
 bool(false)
@@ -84,4 +86,6 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_xdigit_variation4.php on line 49
 ===DONE===

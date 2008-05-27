@@ -35,43 +35,7 @@ var_dump(gmp_powm(10, $n, 10));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-string(1) "0"
-string(1) "5"
-string(1) "5"
-string(1) "5"
-string(1) "5"
-string(3) "533"
-string(3) "331"
-string(3) "171"
-string(3) "371"
-
-Warning: gmp_powm(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_powm(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_powm(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_powm(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_powm() expects exactly 3 parameters, 2 given in %s on line %d
-NULL
-
-Warning: gmp_powm() expects exactly 3 parameters, 1 given in %s on line %d
-NULL
-
-Warning: gmp_powm() expects exactly 3 parameters, 0 given in %s on line %d
-NULL
-
-Warning: gmp_powm(): Second parameter cannot be less than 0 in %s on line %d
-bool(false)
-resource(%d) of type (GMP integer)
-Done
---UEXPECTF--
+--EXPECTF--
 unicode(1) "0"
 unicode(1) "5"
 unicode(1) "5"

@@ -22,12 +22,6 @@ foreach($d as $date) {
 }
 ?>
 --EXPECT--
-string(31) "Fri, 23 May 1997 09:15:28 +0000"
-string(31) "Sun, 31 Dec 2000 18:58:59 +0000"
-string(31) "Wed, 10 Apr 2080 10:10:10 +0000"
-
---UEXPECT--
 unicode(31) "Fri, 23 May 1997 09:15:28 +0000"
 unicode(31) "Sun, 31 Dec 2000 18:58:59 +0000"
 unicode(31) "Wed, 10 Apr 2080 10:10:10 +0000"
-

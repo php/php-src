@@ -28,6 +28,5 @@ echo 'Wrote: ' . $doc->save($temp_filename) . ' bytes'; // Wrote: 72 bytes
 	$temp_filename = dirname(__FILE__)."/DomDocument_save_basic.tmp";
 	unlink($temp_filename);
 ?>
---EXPECTF--
+--EXPECT--
 Wrote: 72 bytes
-
