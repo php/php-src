@@ -42,32 +42,6 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: readfile() expects parameter 3 to be resource, string given in %s on line %d
-bool(false)
-
-Warning: readfile() expects parameter 3 to be resource, boolean given in %s on line %d
-bool(false)
-
--- Testing readfile() with non-existent file --
-
-Warning: readfile(%s/non_existent_file.tmp): failed to open stream: %s in %s on line %d
-bool(false)
-Done
---UEXPECTF--
-*** Test readfile(): error conditions ***
--- Testing readfile() with unexpected no. of arguments --
-
-Warning: readfile() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: readfile() expects at most 3 parameters, 4 given in %s on line %d
-bool(false)
-
--- Testing readfile() with invalid arguments --
-bool(false)
-bool(false)
-bool(false)
-
 Warning: readfile() expects parameter 3 to be resource, Unicode string given in %s on line %d
 bool(false)
 

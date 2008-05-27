@@ -33,22 +33,6 @@ NULL
 Warning: copy() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: copy() expects parameter 3 to be resource, string given in %s on line %d
-NULL
-*** Done ***
-
---UEXPECTF--
-*** Testing copy() function: error conditions --
-
-Warning: copy(/no/file): failed to open stream: No such file or directory in %s on line %d
-bool(false)
-
-Warning: copy() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: copy() expects at least 2 parameters, 1 given in %s on line %d
-NULL
-
 Warning: copy() expects parameter 3 to be resource, Unicode string given in %s on line %d
 NULL
 *** Done ***

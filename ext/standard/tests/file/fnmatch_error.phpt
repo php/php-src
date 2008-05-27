@@ -36,27 +36,6 @@ echo "\n*** Done ***\n";
 ?>
 --EXPECTF--
 *** Testing error conditions for fnmatch() ***
-Warning: fnmatch() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d%d
-NULL
-
-Warning: fnmatch() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d%d
-NULL
-
-Warning: fnmatch() expects parameter 1 to be string (Unicode or binary), object given in %s on line %d%d
-NULL
-
-Warning: fnmatch() expects at least 2 parameters, 1 given in %s on line %d%d
-NULL
-
-Warning: fnmatch() expects at least 2 parameters, 1 given in %s on line %d%d
-NULL
-
-Warning: fnmatch() expects at most 3 parameters, 4 given in %s on line %d%d
-NULL
-
-*** Done ***
---UEXPECTF--
-*** Testing error conditions for fnmatch() ***
 Warning: fnmatch() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
 NULL
 

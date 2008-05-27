@@ -72,36 +72,7 @@ unlink($dirpath."/popen_basic1.tmp");
 rmdir($dirpath);
 ?>
 
---EXPECTF--
-*** Testing popen() and pclose() with different processes ***
--- Testing popen(): reading from the pipe --
-popen_basic.tmp
--- Testing popen(): reading from a file using 'cat' command --
-line
-line of text
-line
-line of text
-line
-line of text
-line
-line of text
-line
-line of text
-line
-line 
-int(100)
-*** Testing popen(): writing to the pipe ***
-aaa
-ddd
-ggg
-sss
-*** Testing for return type of popen() and pclose() functions ***
-bool(true)
-Test String
-bool(true)
-
---- Done ---
---UEXPECTF--
+--EXPECT--
 *** Testing popen() and pclose() with different processes ***
 -- Testing popen(): reading from the pipe --
 popen_basic.tmp

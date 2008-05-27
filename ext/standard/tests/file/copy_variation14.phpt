@@ -46,15 +46,3 @@ bool(false)
 bool(false)
 int(1500)
 *** Done ***
---UEXPECTF--
-*** Test copy() function: Trying to create a copy of non-existing source in existing destination ***
-Warning: copy(%s): %s
-bool(false)
-bool(false)
-
-*** Test copy() function: Trying to create copy of an existing source in non-existing destination ***
-Warning: copy(%s): %s
-bool(false)
-bool(false)
-int(1500)
-*** Done ***

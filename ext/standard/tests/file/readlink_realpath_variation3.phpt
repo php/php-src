@@ -67,41 +67,6 @@ bool(false)
 
 Warning: readlink(): No such file or directory in %s on line %d
 bool(false)
-string(%d) "%s"
--- Iteration4 --
-
-Warning: readlink(): No such file or directory in %s on line %d
-bool(false)
-string(%d) "%s"
--- Iteration5 --
-
-Warning: readlink(): No such file or directory in %s on line %d
-bool(false)
-string(%d) "%s"
--- Iteration6 --
-
-Warning: readlink(): No such file or directory in %s on line %d
-bool(false)
-string(%d) "%s"
-Done
---UEXPECTF--
-*** Testing readlink() and realpath() : usage variations ***
-
-*** Testing readlink() and realpath() with linkname as empty string, NULL and single space ***
--- Iteration1 --
-
-Warning: readlink(): No such file or directory in %s on line %d
-bool(false)
-%s
--- Iteration2 --
-
-Warning: readlink(): No such file or directory in %s on line %d
-bool(false)
-%s
--- Iteration3 --
-
-Warning: readlink(): No such file or directory in %s on line %d
-bool(false)
 unicode(%d) "%s"
 -- Iteration4 --
 

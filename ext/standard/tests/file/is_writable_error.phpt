@@ -43,24 +43,3 @@ NULL
 bool(false)
 bool(false)
 Done
---UEXPECTF--
-*** Testing is_writable(): error conditions ***
-
-Warning: is_writable() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: is_writeable() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-*** Testing is_writeable(): error conditions ***
-
-Warning: is_writable() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: is_writeable() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-*** Testing is_writable() on non-existent file ***
-bool(false)
-bool(false)
-Done

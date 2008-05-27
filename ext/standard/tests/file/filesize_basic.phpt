@@ -30,14 +30,7 @@ $file_path = dirname(__FILE__);
 $file_name = $file_path."/filesize_basic.tmp";
 unlink($file_name);
 ?>
---EXPECTF--	
-*** Testing size of files and directories with filesize() ***
-int(%d)
-int(%d)
-int(0)
-*** Done ***
-
---UEXPECTF--	
+--EXPECTF--
 *** Testing size of files and directories with filesize() ***
 int(%d)
 int(%d)

@@ -98,38 +98,3 @@ array(1) {
 }
 
 *** Done ***
-
---UEXPECT--
-*** Test fscanf(): to read objects from a file ***
-
--- iteration 1 --
-array(1) {
-  [0]=>
-  NULL
-}
-array(1) {
-  [0]=>
-  NULL
-}
-array(1) {
-  [0]=>
-  NULL
-}
-array(1) {
-  [0]=>
-  NULL
-}
-array(1) {
-  [0]=>
-  string(6) "Object"
-}
-array(1) {
-  [0]=>
-  NULL
-}
-array(1) {
-  [0]=>
-  NULL
-}
-
-*** Done ***

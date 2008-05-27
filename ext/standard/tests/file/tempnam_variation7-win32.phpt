@@ -90,36 +90,3 @@ File name is => %s
 File permissions are => 100666
 
 *** Done ***
---UEXPECTF--
-*** Testing tempnam() with invalid/non-existing directory names ***
--- Iteration 1 --
-File name is => %s
-File permissions are => 100666
--- Iteration 2 --
-File name is => %s
-File permissions are => 100666
--- Iteration 3 --
-File name is => %s
-File permissions are => 100666
--- Iteration 4 --
-File name is => %s
-File permissions are => 100666
--- Iteration 5 --
-File name is => %s
-File permissions are => 100666
--- Iteration 6 --
-File name is => %s
-File permissions are => 100666
--- Iteration 7 --
-
-Notice: Array to string conversion in %s on line %d
-File name is => %s
-File permissions are => 100666
--- Iteration 8 --
-File name is => %s
-File permissions are => 100666
--- Iteration 9 --
-File name is => %s
-File permissions are => 100666
-
-*** Done ***

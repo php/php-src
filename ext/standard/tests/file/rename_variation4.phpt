@@ -43,7 +43,7 @@ unlink($file_path."/rename_variation.tmp");
 rmdir($file_path."/rename_variation_dir");
 rmdir($file_path."/12345");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing rename() by renaming a file, link and directory to numeric name ***
 bool(true)
 bool(false)

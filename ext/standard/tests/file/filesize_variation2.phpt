@@ -77,23 +77,6 @@ int(1024)
 int(%d)
 int(%d)
 -- Creating a file inside sub-dir, and checking size of base, subdir and file created --
-int(%d)
-int(%d)
-int(12000)
-*** Done ***
---UEXPECTF--
-*** Testing filesize(): usage variations ***
-
-*** Testing size of a dir, sub-dir and file with filesize() ***
--- Creating a base dir, and checking its size --
-int(%d)
--- Creating a file inside base dir, and checking dir & file size --
-int(%d)
-int(1024)
--- Creating an empty sub-dir in base-dir, and checking size of base and sub dir --
-int(%d)
-int(%d)
--- Creating a file inside sub-dir, and checking size of base, subdir and file created --
 
 Notice: fwrite(): 12000 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 int(%d)

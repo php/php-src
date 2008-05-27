@@ -48,25 +48,6 @@ Warning: disk_total_space(): The system cannot find the path specified.
  in %s on line %d
 bool(false)
 
-Warning: disk_total_space(): The directory name is invalid.
- in %s on line %d
-bool(false)
-
---- Done ---
-
---UEXPECTF--
-*** Testing error conditions ***
-
-Warning: disk_total_space() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: disk_total_space() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: disk_total_space(): The system cannot find the path specified.
- in %s on line %d
-bool(false)
-
 Notice: fwrite(): 36 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 
 Warning: disk_total_space(): The directory name is invalid.

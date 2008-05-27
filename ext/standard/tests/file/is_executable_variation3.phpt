@@ -54,18 +54,3 @@ Warning: is_executable() expects parameter 1 to be string (Unicode or binary), a
 NULL
 bool(false)
 Done
---UEXPECTF--
-*** Testing is_executable(): usage variations ***
-
-*** Testing is_executable() on invalid files ***
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-
-Warning: is_executable() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-bool(false)
-Done

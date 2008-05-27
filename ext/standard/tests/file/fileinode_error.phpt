@@ -42,21 +42,3 @@ Warning: fileinode() expects exactly 1 parameter, 2 given in %s on line 20
 NULL
 
 *** Done ***
---UEXPECTF--
-*** Testing error conditions of fileinode() ***
-Warning: fileinode(): stat failed for /no/such/file/dir in %s on line 10
-bool(false)
-
-Warning: fileinode(): stat failed for string in %s on line 13
-bool(false)
-
-Warning: fileinode(): stat failed for 100 in %s on line 14
-bool(false)
-
-Warning: fileinode() expects exactly 1 parameter, 0 given in %s on line 17
-NULL
-
-Warning: fileinode() expects exactly 1 parameter, 2 given in %s on line 20
-NULL
-
-*** Done ***

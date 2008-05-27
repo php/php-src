@@ -41,11 +41,3 @@ bool(false)
 bool(true)
 bool(false)
 Done
---UEXPECTF--
-*** Testing unlink() on a file when file handle is open ***
-
-Warning: unlink(%s): %s in %s on line %d
-bool(false)
-bool(true)
-bool(false)
-Done

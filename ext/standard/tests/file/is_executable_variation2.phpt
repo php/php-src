@@ -70,35 +70,7 @@ echo "Done\n";
 <?php
 rmdir(dirname(__FILE__)."/is_executable_variation2/");
 ?>
---EXPECTF--
-*** Testing is_executable(): usage variations ***
-
-*** Testing is_executable() on directory without execute permission ***
-bool(false)
-
-*** Testing miscelleneous input for is_executable() function ***
--- Iteration 1 --
-bool(true)
--- Iteration 2 --
-bool(true)
--- Iteration 3 --
-bool(true)
--- Iteration 4 --
-bool(true)
--- Iteration 5 --
-bool(false)
--- Iteration 6 --
-bool(true)
--- Iteration 7 --
-bool(true)
--- Iteration 8 --
-bool(true)
--- Iteration 9 --
-bool(false)
--- Iteration 10 --
-bool(true)
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing is_executable(): usage variations ***
 
 *** Testing is_executable() on directory without execute permission ***

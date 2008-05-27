@@ -38,7 +38,7 @@ var_dump(fgetss($fp, 0));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(18) "askasdfasdfaaaaaa
 "
 string(6) "dddddd"

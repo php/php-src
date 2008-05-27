@@ -74,25 +74,3 @@ Warning: copy(%s): %s
 bool(false)
 bool(false)
 *** Done ***
---UEXPECTF--
-*** Test copy() function: With source file names containing wild-card chars ***
-bool(true)
-bool(true)
-int(1500)
-
-Warning: copy(%s): %s
-bool(false)
-bool(false)
-
-Warning: copy(%s): %s
-bool(false)
-bool(false)
-
-Warning: copy(%s): %s
-bool(false)
-bool(false)
-
-Warning: copy(%s): %s
-bool(false)
-bool(false)
-*** Done ***

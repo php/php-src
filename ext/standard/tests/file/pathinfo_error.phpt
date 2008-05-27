@@ -22,12 +22,3 @@ NULL
 Warning: pathinfo() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing pathinfo() for error conditions ***
-
-Warning: pathinfo() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: pathinfo() expects at most 2 parameters, 3 given in %s on line %d
-NULL
-Done

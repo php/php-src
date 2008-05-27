@@ -38,17 +38,7 @@ $file_path = dirname(__FILE__);
 $filename = "$file_path/fscanf_variation1.tmp";
 unlink($filename); 
 ?>
---EXPECTF--
-*** Testing fscanf(): for its return type without third argument ***
-bool(true)
-array(1) {
-  [0]=>
-  string(11) "hello_world"
-}
-
-*** Done ***
-
---UEXPECTF--
+--EXPECT--
 *** Testing fscanf(): for its return type without third argument ***
 bool(true)
 array(1) {

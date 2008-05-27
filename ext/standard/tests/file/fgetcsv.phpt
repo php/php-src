@@ -25,7 +25,7 @@ various fgetcsv() functionality tests
 		'aaa"\\"a","bbb"'
 	);
 
-	$file = dirname(__FILE__) . 'fgetcsv.csv';
+	$file = dirname(__FILE__) . '/fgetcsv.csv';
 	@unlink($file);
 	foreach ($list as $v) {
 		$fp = fopen($file, "wt");
@@ -34,8 +34,10 @@ various fgetcsv() functionality tests
 
 		var_dump(fgetcsv(fopen($file, "r"), 1024));
 	}
-	@unlink($file);
+
 ?>
+--CLEAN--
+<?php unlink(dirname(__FILE__)."/fgetcsv.csv"); ?>
 --EXPECT--
 array(2) {
   [0]=>

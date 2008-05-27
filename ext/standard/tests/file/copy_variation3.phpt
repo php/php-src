@@ -75,40 +75,7 @@ echo "*** Done ***\n";
 unlink(dirname(__FILE__)."/copy_variation3.tmp");
 ?>
 
---EXPECTF--
-*** Test copy() function: destination file names containing whitespaces ***
-Size of the source file before copy operation => int(1500)
-
--- Now applying copy() on source file to create copies --
--- Iteration 1 --
-Copy operation => bool(true)
-Existence of destination file => bool(true)
-Destination file name => copy variation3.tmp
-Size of source file => int(1500)
-Size of destination file => int(1500)
-
--- Iteration 2 --
-Copy operation => bool(true)
-Existence of destination file => bool(true)
-Destination file name =>  copy_variation3.tmp
-Size of source file => int(1500)
-Size of destination file => int(1500)
-
--- Iteration 3 --
-Copy operation => bool(true)
-Existence of destination file => bool(true)
-Destination file name => copy	variation3.tmp
-Size of source file => int(1500)
-Size of destination file => int(1500)
-
--- Iteration 4 --
-Copy operation => bool(true)
-Existence of destination file => bool(true)
-Destination file name =>  
-Size of source file => int(1500)
-Size of destination file => int(1500)
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Test copy() function: destination file names containing whitespaces ***
 Size of the source file before copy operation => int(1500)
 

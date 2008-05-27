@@ -89,30 +89,6 @@ unlink($file_path."/filesize_variation4_empty.tmp");
 *** Testing filesize() with data written using different file modes and by creating holes in file ***
 -- opening the file in 'w' mode and get the size --
 int(191)
-int(191)
--- opening the file in 'wt' mode and get the size --
-int(191)
-int(192)
--- opening the file in 'a' mode, adding data and checking the file --
-int(204)
--- opening the file in 'at' mode, adding data and checking the file --
-int(218)
--- creating a hole and checking the size --
-bool(true)
-int(220)
--- writing data after hole and checking the size --
-int(226)
--- opening the existing file in write mode --
-int(0)
--- with empty file --
-int(0)
-*** Done ***
---UEXPECTF--
-*** Testing filesize(): usage variations ***
-
-*** Testing filesize() with data written using different file modes and by creating holes in file ***
--- opening the file in 'w' mode and get the size --
-int(191)
 
 Notice: fwrite(): 191 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 int(191)

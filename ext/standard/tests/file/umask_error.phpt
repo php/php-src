@@ -24,9 +24,3 @@ echo "Done\n";
 Warning: Wrong parameter count for umask() in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing umask() : error conditions ***
-
-Warning: Wrong parameter count for umask() in %s on line %d
-NULL
-Done

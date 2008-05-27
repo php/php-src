@@ -73,12 +73,3 @@ Warning: linkinfo(): No such file or directory in %s on line %d
 int(-1)
 bool(false)
 Done
---UEXPECTF--
-*** Testing linkinfo() and is_link() on deleted link ***
-bool(true)
-bool(true)
-
-Warning: linkinfo(): No such file or directory in %s on line %d
-int(-1)
-bool(false)
-Done

@@ -52,15 +52,7 @@ $file_path = dirname(__FILE__);
 unlink("$file_path/lstat_stat_variation3.tmp");
 unlink("$file_path/lstat_stat_variation_link3a.tmp");
 ?>
---EXPECTF--
-*** Testing lstat() for link after being renamed ***
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-
---- Done ---
---UEXPECTF--
+--EXPECT--
 *** Testing lstat() for link after being renamed ***
 bool(true)
 bool(true)

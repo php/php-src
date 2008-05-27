@@ -37,16 +37,3 @@ Warning: filetype() expects exactly 1 parameter, 0 given in %s on line %d
 Warning: filetype() expects exactly 1 parameter, 2 given in %s on line %d
 
 *** Done ***
---UEXPECTF--
-*** Testing error conditions ***
-Warning: filetype(): Lstat failed for /no/such/file/dir in %s on line %d
-
-Warning: filetype(): Lstat failed for string in %s on line %d
-
-Warning: filetype(): Lstat failed for 100 in %s on line %d
-
-Warning: filetype() expects exactly 1 parameter, 0 given in %s on line %d
-
-Warning: filetype() expects exactly 1 parameter, 2 given in %s on line %d
-
-*** Done ***

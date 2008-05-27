@@ -17,10 +17,5 @@ unlink($file);
 --EXPECT--
 array(1) {
   [0]=>
-  string(2) "\n"
-}
---UEXPECT--
-array(1) {
-  [0]=>
   unicode(2) "\n"
 }

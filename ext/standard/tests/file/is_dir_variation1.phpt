@@ -33,15 +33,7 @@ unlink($file_path."/is_dir_variation1.tmp");
 rmdir($dir_name."/is_dir_variation1_sub");
 rmdir($dir_name);
 ?>
---EXPECTF--
--- Testing is_dir() with an empty dir --
-bool(true)
--- Testing is_dir() with a subdir in base dir --
-bool(true)
-bool(true)
-
-*** Done ***
---UEXPECTF--
+--EXPECT--
 -- Testing is_dir() with an empty dir --
 bool(true)
 -- Testing is_dir() with a subdir in base dir --

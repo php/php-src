@@ -45,20 +45,7 @@ var_dump( file_exists($filename) );  // confirm file is deleted
 
 echo "Done\n";
 ?>
---EXPECTF--
-*** Testing unlink() on soft and hard links ***
--- Testing unlink() on soft link --
-bool(true)
-bool(true)
-bool(false)
--- Testing unlink() on hard link --
-bool(true)
-bool(true)
-bool(false)
-bool(true)
-bool(false)
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing unlink() on soft and hard links ***
 -- Testing unlink() on soft link --
 bool(true)

@@ -44,13 +44,3 @@ File name is => %s
 File name is => %s
 
 *** Done ***
---UEXPECTF--
-*** Test tempnam() function: by passing an existing filename as prefix ***
--- Iteration 1 --
-File name is => %s
--- Iteration 2 --
-File name is => %s
--- Iteration 3 --
-File name is => %s
-
-*** Done ***

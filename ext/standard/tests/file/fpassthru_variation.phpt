@@ -75,47 +75,6 @@ echo "\n*** Done ***\n";
 *** Testing fpassthru() function with files ***
 
 --- Testing with different offsets ---
--- Iteration 0 --
-1234567890abcdefghijklmnopqrstuvwxyzint(36)
--- Iteration 1 --
-234567890abcdefghijklmnopqrstuvwxyzint(35)
--- Iteration 2 --
-67890abcdefghijklmnopqrstuvwxyzint(31)
--- Iteration 3 --
-abcdefghijklmnopqrstuvwxyzint(26)
--- Iteration 4 --
-klmnopqrstuvwxyzint(16)
--- Iteration 5 --
-uvwxyzint(6)
--- Iteration 6 --
-zint(1)
--- Iteration 7 --
-int(0)
--- Iteration 8 --
-int(0)
--- Iteration 9 --
-zint(1)
--- Iteration 10 --
-vwxyzint(5)
--- Iteration 11 --
-qrstuvwxyzint(10)
--- Iteration 12 --
-ghijklmnopqrstuvwxyzint(20)
--- Iteration 13 --
-234567890abcdefghijklmnopqrstuvwxyzint(35)
--- Iteration 14 --
-1234567890abcdefghijklmnopqrstuvwxyzint(36)
--- Iteration 15 --
-1234567890abcdefghijklmnopqrstuvwxyzint(36)
-
---- Testing with binary mode file ---
-cdefghijklmnopqrstuvwxyzint(24)
-
-*** Done ***
---UEXPECTF--
-*** Testing fpassthru() function with files ***
-
---- Testing with different offsets ---
 
 Notice: fwrite(): 36 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 -- Iteration 0 --

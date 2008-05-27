@@ -34,15 +34,6 @@ echo "Done\n";
 ?>
 --EXPECTF--
 *** Testing unlink() on a file ***
-bool(true)
-bool(false)
-
-*** Testing unlink() : checking second argument ***
-bool(true)
-bool(false)
-Done
---UEXPECTF--
-*** Testing unlink() on a file ***
 
 Notice: fwrite(): 11 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 bool(true)

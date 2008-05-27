@@ -44,13 +44,3 @@ line
 line of t
 int(50)
 Done
---UEXPECT--
-*** Testing readfile(): checking third argument ***
-line
-line of text
-line
-line of text
-line
-line of t
-int(50)
-Done

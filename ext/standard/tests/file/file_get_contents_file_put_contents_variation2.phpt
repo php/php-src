@@ -47,15 +47,6 @@ rmdir($file_path."/file_get_contents_variation2");
 ?>
 --EXPECTF--
 *** Testing with variation in use_include_path argument ***
-string(240) "text text text text text text text text text text text text text text text text text text text text 22222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222221  Data1 in an array2  Data2 in an array"
-string(240) "text text text text text text text text text text text text text text text text text text text text 22222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222221  Data1 in an array2  Data2 in an array"
-string(235) "text text text text text text text text text text text text text text text text text text text 22222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222221  Data1 in an array2  Data2 in an array"
-string(235) "text text text text text text text text text text text text text text text text text text text 22222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222221  Data1 in an array2  Data2 in an array"
-string(20) "text text text text "
-string(20) "text text text text "
---- Done ---
---UEXPECTF--
-*** Testing with variation in use_include_path argument ***
 
 Notice: file_put_contents(): 100 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 

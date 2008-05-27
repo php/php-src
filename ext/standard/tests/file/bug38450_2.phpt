@@ -101,7 +101,7 @@ var_dump($myvar);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: Missing argument 1 for VariableStream::__construct() in %s on line %d
 
 Warning: fopen(var://myvar): failed to open stream: "VariableStream::stream_open" call failed in %s on line %d

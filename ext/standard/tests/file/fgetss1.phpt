@@ -29,11 +29,11 @@ foreach ($array as $str) {
 	var_dump(fgetss($fp, 10, "<script>,<a>"));
 }
 
-@unlink($filename);
-
-echo "Done\n";
 ?>
---EXPECTF--	
+===DONE===
+--CLEAN--
+<?php unlink(dirname(__FILE__)."/fgetss1.html"); ?>
+--EXPECT--
 string(21) "askasdfasdf<b>aaaaaa
 "
 string(6) "dddddd"
@@ -66,4 +66,4 @@ string(2) "
 "
 string(9) "some anot"
 string(9) "her text "
-Done
+===DONE===

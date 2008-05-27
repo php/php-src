@@ -89,22 +89,3 @@ Warning: linkinfo(): No such file or directory in %s on line %d
 int(-1)
 bool(false)
 Done
---UEXPECTF--
-*** Testing symlink(), linkinfo(), link() and is_link() : basic functionality ***
-
-*** Testing symlink(), linkinfo(), link() and is_link() on directory ***
-
--- Testing on soft links --
-bool(true)
-int(%d)
-bool(true)
-
--- Testing on hard links --
-
-Warning: link(): %s in %s on line %d
-bool(false)
-
-Warning: linkinfo(): No such file or directory in %s on line %d
-int(-1)
-bool(false)
-Done

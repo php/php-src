@@ -50,40 +50,7 @@ $file_path = dirname(__FILE__);
 $dir_name = $file_path."/is_dir_variation4";
 rmdir($dir_name);
 ?>
---EXPECTF--
-*** Testing is_dir() with different notations of dir names ***
--- Iteration 1 --
-bool(true)
-
--- Iteration 2 --
-bool(true)
-
--- Iteration 3 --
-bool(true)
-
--- Iteration 4 --
-bool(true)
-
--- Iteration 5 --
-bool(true)
-
--- Iteration 6 --
-bool(true)
-
--- Iteration 7 --
-bool(true)
-
--- Iteration 8 --
-bool(false)
-
--- Iteration 9 --
-bool(true)
-
--- Iteration 10 --
-bool(true)
-
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Testing is_dir() with different notations of dir names ***
 -- Iteration 1 --
 bool(true)

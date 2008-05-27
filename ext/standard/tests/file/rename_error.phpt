@@ -33,15 +33,3 @@ bool(false)
 Warning: rename() expects at most 3 parameters, 4 given in %s on line %d
 bool(false)
 Done
---UEXPECTF--
-*** Testing rename() for error conditions ***
-
-Warning: rename() expects at least 2 parameters, 0 given in %s on line %d
-bool(false)
-
-Warning: rename() expects at least 2 parameters, 1 given in %s on line %d
-bool(false)
-
-Warning: rename() expects at most 3 parameters, 4 given in %s on line %d
-bool(false)
-Done

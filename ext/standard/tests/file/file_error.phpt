@@ -37,24 +37,6 @@ NULL
 Warning: file() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 
-Warning: file() expects parameter 2 to be long, string given in %s on line %d
-NULL
-array(0) {
-}
-
-Warning: file(temp.tmp): failed to open stream: No such file or directory in %s on line %d
-bool(false)
-
---- Done ---
-
---UEXPECTF--
-*** Testing error conditions ***
-Warning: file() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: file() expects at most 3 parameters, 4 given in %s on line %d
-NULL
-
 Warning: file() expects parameter 2 to be long, Unicode string given in %s on line %d
 NULL
 array(0) {

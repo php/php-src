@@ -50,15 +50,7 @@ echo "\n--- Done ---";
 $file_path = dirname(__FILE__);
 rmdir("$file_path/lstat_stat_variation2a");
 ?>
---EXPECTF--
-*** Testing stat() for directory after being renamed ***
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-
---- Done ---
---UEXPECTF--
+--EXPECT--
 *** Testing stat() for directory after being renamed ***
 bool(true)
 bool(true)

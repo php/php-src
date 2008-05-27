@@ -57,15 +57,6 @@ unlink("$file_path/stat_variation2.tmp");
 --EXPECTF--
 *** Testing stat(): writing to a file ***
 -- Testing stat() on file after data is written in it --
-bool(true)
-bool(true)
-bool(true)
-
-*** Done ***
-
---UEXPECTF--
-*** Testing stat(): writing to a file ***
--- Testing stat() on file after data is written in it --
 
 Notice: fwrite(): 11 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 bool(true)
@@ -73,4 +64,3 @@ bool(true)
 bool(true)
 
 *** Done ***
-

@@ -110,27 +110,3 @@ echo "\n*** Done ***";
 %d
 %d
 *** Done ***
---UEXPECTF--
-*** Testing fileinode() with files, links and directories ***
--- Testing with files --
-%d
-%d
--- Testing with links: hard link --
-%d
-%d
--- Testing with links: soft link --
-%d
-%d
--- Testing after copying a file --
-%d
-%d
--- Testing after renaming the file --
-%d
-%d
--- Testing with directories --
-%d
-%d
--- Testing with binary input --
-%d
-%d
-*** Done ***

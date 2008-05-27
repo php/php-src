@@ -50,14 +50,3 @@ int(%d)
 Warning: filesize(): stat failed for %s/copy_copy_variation12 in %s/copy_variation12.php on line %d
 bool(false)
 *** Done ***
---UEXPECTF--
-*** Test copy() function: Trying to create a copy of an existing dir ***
-
-Warning: copy(): The first argument to copy() function cannot be a directory in %s/copy_variation12.php on line %d
-bool(false)
-bool(false)
-int(%d)
-
-Warning: filesize(): stat failed for %s/copy_copy_variation12 in %s/copy_variation12.php on line %d
-bool(false)
-*** Done ***

@@ -69,21 +69,3 @@ bool(true)
 int(300)
 int(%d)
 *** Done ***
---UEXPECTF--
-*** Test copy() function: Trying to create a copy of source file as a dir ***
-Size of source before copy operation => int(300)
-Size of destination before copy operation => int(%d)
-
--- Now applying copy() operation --
-
-Warning: %s
-bool(false)
-bool(true)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-bool(true)
-int(300)
-int(%d)
-*** Done ***

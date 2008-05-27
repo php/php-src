@@ -29,13 +29,7 @@ echo "*** Done ***\n";
 unlink(dirname(__FILE__)."/copy_variation10.tmp");
 ?>
 
---EXPECTF--
-*** Test copy(): Trying to create a copy of file with the same source name ***
-bool(false)
-bool(true)
-int(1500)
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Test copy(): Trying to create a copy of file with the same source name ***
 bool(false)
 bool(true)

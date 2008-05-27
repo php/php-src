@@ -28,54 +28,7 @@ foreach( $filetypes as $type ) {
 
 echo "\n--- Done ---";
 ?>
---EXPECTF--
-*** Testing file() with basic types of files ***
-Array
-(
-    [0] => 2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222
-)
-Array
-(
-    [0] => text text text text text text text text text text text text text text text text text text text text 
-)
-Array
-(
-)
-Array
-(
-    [0] => line
-
-    [1] => line of text
-
-    [2] => line
-
-    [3] => line of text
-
-    [4] => line
-
-    [5] => line of text
-
-    [6] => line
-
-    [7] => line of text
-
-    [8] => line
-
-    [9] => line of text
-
-    [10] => line
-
-    [11] => line 
-)
-*** Testing for return type of file() function ***
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-
---- Done ---
-
---UEXPECTF--
+--EXPECT--
 *** Testing file() with basic types of files ***
 Array
 (

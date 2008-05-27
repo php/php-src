@@ -64,32 +64,7 @@ echo "Done\n";
 unlink(dirname(__FILE__)."/is_readable_variation1/bar.tmp");
 rmdir(dirname(__FILE__)."/is_readable_variation1/");
 ?>
---EXPECTF--
-*** Testing is_readable(): usage variations ***
--- Iteration 1 --
-bool(true)
--- Iteration 2 --
-bool(%s)
--- Iteration 3 --
-bool(true)
--- Iteration 4 --
-bool(true)
--- Iteration 5 --
-bool(false)
--- Iteration 6 --
-bool(false)
--- Iteration 7 --
-bool(true)
--- Iteration 8 --
-bool(true)
--- Iteration 9 --
-bool(true)
--- Iteration 10 --
-bool(true)
--- Iteration 11 --
-bool(true)
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing is_readable(): usage variations ***
 -- Iteration 1 --
 bool(true)

@@ -75,6 +75,10 @@ class userstream {
 		}
 	}
 
+	function stream_stat()
+	{
+		return array('size' => strlen($this->data));
+	}
 }
 
 stream_wrapper_register("cookietest", "userstream");

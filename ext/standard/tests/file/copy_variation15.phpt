@@ -62,10 +62,3 @@ bool(false)
 bool(false)
 int(300)
 *** Done ***
---UEXPECTF--
-*** Test copy() function: Trying to create a copy of file in a dir which doesn't have write permissions ***
-Warning: copy(%s): %s
-bool(false)
-bool(false)
-int(300)
-*** Done ***

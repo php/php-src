@@ -83,19 +83,3 @@ bool(false)
 bool(true)
 bool(false)
 Done
---UEXPECTF--
-*** Testing unlink() on file inside a directory ***
--- Unlink file having default permission and its dir having read only permission --
-bool(true)
-bool(true)
-bool(false)
-bool(true)
-
--- Unlinking file without write permission, its dir having default permission --
-bool(true)
-
-Warning: unlink(%s/unlink_variation1/unlink_variation1-win32.tmp): Permission denied in %s on line %d
-bool(false)
-bool(true)
-bool(false)
-Done

@@ -64,32 +64,6 @@ rmdir("$name_prefix/");
 *** Testing realpath() on filenames ***
 
 -- Iteration 1 --
-string(%d) "%srealpath_basic%shome%srealpath_basic.tmp"
-
--- Iteration 2 --
-string(%d) "%srealpath_basic%srealpath_basic.tmp"
-
--- Iteration 3 --
-string(%d) "%srealpath_basic%shome%stest%srealpath_basic.tmp"
-
--- Iteration 4 --
-string(%d) "%srealpath_basic%srealpath_basic.tmp"
-
--- Iteration 5 --
-bool(false)
-
--- Iteration 6 --
-bool(false)
-
--- Iteration 7 --
-bool(false)
-Done
---UEXPECTF--
-*** Testing basic functions of realpath() with files ***
-
-*** Testing realpath() on filenames ***
-
--- Iteration 1 --
 unicode(%d) "%srealpath_basic%shome%srealpath_basic.tmp"
 
 -- Iteration 2 --

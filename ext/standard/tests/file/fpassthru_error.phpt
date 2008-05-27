@@ -26,21 +26,6 @@ echo "\n*** Done ***\n";
 --EXPECTF--
 *** Test error conditions of fpassthru() function ***
 
-Warning: fread() expects parameter 1 to be resource, string given in %s on line %d
-
-Warning: fpassthru(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
-
-Warning: Wrong parameter count for fpassthru() in %s on line %d
-NULL
-
-Warning: Wrong parameter count for fpassthru() in %s on line %d
-NULL
-
-*** Done ***
---UEXPECTF--
-*** Test error conditions of fpassthru() function ***
-
 Warning: fread() expects parameter 1 to be resource, Unicode string given in %s on line %d
 
 Warning: fpassthru(): supplied argument is not a valid stream resource in %s on line %d

@@ -217,7 +217,7 @@ echo "*** Done **\n";
 <?php
 unlink(dirname(__FILE__)."/parse.ini");
 ?>
---EXPECTF--
+--EXPECT--
 *** Test parse_ini_file() function:  with various keys and values given in parse.ini file ***
 -- ini file without process_sections optional arg --
 Array

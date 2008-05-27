@@ -73,50 +73,6 @@ bool(false)
 
 Warning: unlink() expects at most 2 parameters, 3 given in %s on line %d
 bool(false)
-bool(true)
-
--- Testing unlink() on invalid arguments --
-
-Warning: unlink(): %s in %s on line %d
-bool(false)
-bool(false)
-
-Warning: unlink(): %s in %s on line %d
-bool(false)
-bool(false)
-
-Warning: unlink(): %s in %s on line %d
-bool(false)
-bool(false)
-
-Warning: unlink() expects parameter 2 to be resource, string given in %s on line %d
-bool(false)
-
-Warning: unlink() expects parameter 2 to be resource, boolean given in %s on line %d
-bool(false)
-
-Warning: unlink() expects parameter 2 to be resource, null given in %s on line %d
-bool(false)
-
--- Testing unlink() on non-existent file --
-
-Warning: unlink(%s/non_existent_file.tmp): No such file or directory in %s on line %d
-bool(false)
-
--- Testing unlink() on directory --
-
-Warning: unlink(%s/unlink_error): %s in %s on line %d
-bool(false)
-Done
---UEXPECTF--
-*** Testing unlink() : error conditions ***
--- Testing unlink() on unexpected no. of arguments --
-
-Warning: unlink() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: unlink() expects at most 2 parameters, 3 given in %s on line %d
-bool(false)
 
 -- Testing unlink() on invalid arguments --
 

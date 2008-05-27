@@ -64,28 +64,3 @@ float(%d)
 float(%d)
 
 -- Done --
-
---UEXPECTF--
-*** Testing error conditions ***
-
-Warning: disk_free_space() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: diskfreespace() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: disk_free_space() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: diskfreespace() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: disk_free_space(): No such file or directory in %s on line %d
-bool(false)
-
-Warning: diskfreespace(): No such file or directory in %s on line %d
-bool(false)
-float(%d)
-float(%d)
-
--- Done --

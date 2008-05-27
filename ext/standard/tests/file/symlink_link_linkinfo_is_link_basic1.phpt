@@ -112,26 +112,3 @@ bool(true)
 int(%d)
 bool(false)
 Done
---UEXPECTF--
-*** Testing symlink(), linkinfo(), link() and is_link() : basic functionality ***
-
--- Iteration 1 --
--- Testing on soft links --
-bool(true)
-int(%d)
-bool(true)
--- Testing on hard links --
-bool(true)
-int(%d)
-bool(false)
-
--- Iteration 2 --
--- Testing on soft links --
-bool(true)
-int(%d)
-bool(true)
--- Testing on hard links --
-bool(true)
-int(%d)
-bool(false)
-Done

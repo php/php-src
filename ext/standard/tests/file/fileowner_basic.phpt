@@ -45,16 +45,6 @@ rmdir($dir_name);
 int(%d)
 int(%d)
 int(%d)
-int(%d)
-int(%d)
-*** Done ***
-
---UEXPECTF--
-*** Testing fileowner(): basic functionality ***
--- Testing with the file or directory created by owner --
-int(%d)
-int(%d)
-int(%d)
 
 Notice: fwrite(): 26 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 int(%d)

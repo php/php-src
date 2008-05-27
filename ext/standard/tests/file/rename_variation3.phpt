@@ -51,7 +51,7 @@ unlink($file_path."/rename_variation_hard_link2.tmp");
 unlink($file_path."/rename_variation.tmp");
 rmdir($file_path."/rename_variation_dir");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing rename() on hard links ***
 bool(true)
 bool(true)

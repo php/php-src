@@ -84,22 +84,3 @@ bool(false)
 bool(true)
 int(3600)
 *** Done ***
---UEXPECTF--
-*** Testing copy() with symlink and hardlink ***
-Size of source files => 
-int(%d)
-int(3600)
--- Now applying copy() on source link to create copies --
--- With symlink --
-bool(true)
-bool(true)
-bool(false)
-bool(true)
-int(3600)
--- With hardlink --
-bool(true)
-bool(true)
-bool(false)
-bool(true)
-int(3600)
-*** Done ***

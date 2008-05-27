@@ -31,23 +31,7 @@ var_dump( fnmatch(NULL, NULL) );
 
 echo "\n*** Done ***\n";
 ?>
---EXPECTF--
-*** Testing fnmatch() with file ***
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(false)
-*** Testing fnmatch() with other than file ***
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Testing fnmatch() with file ***
 bool(true)
 bool(true)

@@ -52,7 +52,7 @@ $dir_name = $file_path."/is_file_variation4";
 unlink($dir_name."/is_file_variation4.tmp");
 rmdir($dir_name);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_file() with different notations of file names ***
 - Iteration 1 -
 bool(true)
