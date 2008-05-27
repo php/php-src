@@ -12,7 +12,7 @@ var_dump(sys_getloadavg());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(3) {
   [0]=>
   float(%f)

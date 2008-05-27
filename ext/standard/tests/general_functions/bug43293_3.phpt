@@ -25,24 +25,5 @@ array(3) {
   [1]=>
   bool(false)
   [2]=>
-  string(1) "f"
-}
---UEXPECT--
-array(1) {
-  ["f"]=>
-  array(2) {
-    [0]=>
-    bool(false)
-    [1]=>
-    bool(false)
-  }
-}
-array(3) {
-  [0]=>
-  bool(true)
-  [1]=>
-  bool(false)
-  [2]=>
   unicode(1) "f"
 }
-

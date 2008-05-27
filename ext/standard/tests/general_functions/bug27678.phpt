@@ -10,5 +10,5 @@ number_format(1e1000, 0, '', ' ');
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 Done

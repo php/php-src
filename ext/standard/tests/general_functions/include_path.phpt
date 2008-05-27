@@ -41,39 +41,7 @@ var_dump(get_include_path());
 
 echo "Done\n";
 ?>
---EXPECTF--	
-string(1) "."
-
-Warning: get_include_path() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
-NULL
-
-Warning: restore_include_path() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
-
-Warning: set_include_path() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-string(1) "."
-string(1) "."
-string(3) "var"
-NULL
-string(1) "."
-string(1) "."
-string(14) ".:/path/to/dir"
-NULL
-string(1) "."
-string(1) "."
-string(1) "."
-NULL
-string(1) "."
-
-Warning: set_include_path() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-string(1) "."
-NULL
-string(1) "."
-Done
---UEXPECTF--
+--EXPECTF--
 unicode(1) "."
 
 Warning: get_include_path() expects exactly 0 parameters, 1 given in %s on line %d

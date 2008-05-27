@@ -32,17 +32,7 @@ test('test2');
 
 ?>
 ===DONE===
---EXPECTF--
-Direct Call
-string(5) "test1" refcount(1)
-User Func
-string(5) "test1" refcount(1)
-Direct Call
-string(5) "test2" refcount(2)
-User Func
-string(5) "test2" refcount(1)
-===DONE===
---UEXPECTF--
+--EXPECT--
 Direct Call
 unicode(5) "test1" { 0074 0065 0073 0074 0031 } refcount(1)
 User Func

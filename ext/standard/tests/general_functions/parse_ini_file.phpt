@@ -97,93 +97,7 @@ var_dump(parse_ini_file($filename, true));
 @unlink($filename);
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: parse_ini_file() expects at least 1 parameter, 0 given in %sparse_ini_file.php on line 6
-bool(false)
-
-Warning: parse_ini_file() expects at most 3 parameters, 4 given in %sparse_ini_file.php on line 7
-bool(false)
-
-Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %sparse_ini_file.php on line 8
-array(0) {
-}
-
-Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %sparse_ini_file.php on line 9
-array(0) {
-}
-array(1) {
-  ["test"]=>
-  string(0) ""
-}
-
-Warning: syntax error, unexpected '=' in %sparse_ini_file.dat on line 2
- in %sparse_ini_file.php on line 20
-array(1) {
-  ["test"]=>
-  string(0) ""
-}
-
-Warning: syntax error, unexpected '=' in %sparse_ini_file.dat on line 2
- in %sparse_ini_file.php on line 26
-array(1) {
-  ["test"]=>
-  string(4) "test"
-}
-array(1) {
-  ["test"]=>
-  string(8) "new
-line"
-}
-array(1) {
-  ["test"]=>
-  string(16) "test const value"
-}
-array(1) {
-  ["section"]=>
-  array(1) {
-    ["test"]=>
-    string(5) "hello"
-  }
-}
-array(1) {
-  ["test"]=>
-  string(5) "hello"
-}
-array(1) {
-  ["section.test"]=>
-  string(5) "hello"
-}
-array(1) {
-  ["section"]=>
-  array(1) {
-    ["section.test"]=>
-    string(5) "hello"
-  }
-}
-array(1) {
-  ["section"]=>
-  array(1) {
-    [1]=>
-    string(1) "2"
-  }
-}
-array(1) {
-  [1]=>
-  string(1) "2"
-}
-array(1) {
-  ["test"]=>
-  string(5) "test4"
-}
-array(1) {
-  ["section1"]=>
-  array(1) {
-    ["name"]=>
-    string(5) "value"
-  }
-}
-Done
---UEXPECTF--	
+--EXPECTF--
 Warning: parse_ini_file() expects at least 1 parameter, 0 given in %sparse_ini_file.php on line 6
 bool(false)
 
@@ -202,14 +116,14 @@ array(1) {
   unicode(0) ""
 }
 
-Warning: syntax error, unexpected '=' in %sparse_ini_file.dat on line 2
+Warning: %s error%sin %sparse_ini_file.dat on line 2
  in %sparse_ini_file.php on line 20
 array(1) {
   [u"test"]=>
   unicode(0) ""
 }
 
-Warning: syntax error, unexpected '=' in %sparse_ini_file.dat on line 2
+Warning: %serror%sin %sparse_ini_file.dat on line 2
  in %sparse_ini_file.php on line 26
 array(1) {
   [u"test"]=>

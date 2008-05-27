@@ -35,45 +35,7 @@ var_dump(parse_ini_file($file));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-array(2) {
-  ["001099030277"]=>
-  array(1) {
-    ["option1"]=>
-    string(1) "1"
-  }
-  ["011099030277"]=>
-  array(1) {
-    ["option2"]=>
-    string(1) "1"
-  }
-}
-array(2) {
-  ["option1"]=>
-  string(1) "1"
-  ["option2"]=>
-  string(1) "1"
-}
-array(2) {
-  ["23.44"]=>
-  array(1) {
-    ["option1"]=>
-    string(1) "1"
-  }
-  ["9633337363542736472364"]=>
-  array(1) {
-    ["option2"]=>
-    string(1) "1"
-  }
-}
-array(2) {
-  ["option1"]=>
-  string(1) "1"
-  ["option2"]=>
-  string(1) "1"
-}
-Done
---UEXPECTF--
+--EXPECT--
 array(2) {
   [u"001099030277"]=>
   array(1) {

@@ -17,16 +17,7 @@ var_dump(getenv($var_name));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-bool(false)
-bool(true)
-string(5) "value"
-bool(true)
-string(0) ""
-bool(true)
-bool(false)
-Done
---UEXPECTF--
+--EXPECTF--
 bool(false)
 bool(true)
 unicode(5) "value"

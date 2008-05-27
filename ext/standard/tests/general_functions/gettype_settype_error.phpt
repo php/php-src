@@ -32,29 +32,7 @@ var_dump( settype( $var, "unknown" ) );
 
 echo "Done\n";
 ?>
---EXPECTF--	
-**** Testing gettype() and settype() functions ****
-
-*** Testing gettype(): error conditions ***
-
-Warning: Wrong parameter count for gettype() in %s on line %d
-NULL
-
-Warning: Wrong parameter count for gettype() in %s on line %d
-NULL
-
-*** Testing settype(): error conditions ***
-
-Warning: Wrong parameter count for settype() in %s on line %d
-NULL
-
-Warning: Wrong parameter count for settype() in %s on line %d
-NULL
-
-Warning: settype(): Invalid type in %s on line %d
-bool(false)
-Done
---UEXPECTF--
+--EXPECTF--
 **** Testing gettype() and settype() functions ****
 
 *** Testing gettype(): error conditions ***

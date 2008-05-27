@@ -19,34 +19,6 @@ NULL
 Warning: error_get_last() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 array(4) {
-  ["type"]=>
-  int(2)
-  ["message"]=>
-  string(54) "error_get_last() expects exactly 0 parameters, 1 given"
-  ["file"]=>
-  string(%d) "%s"
-  ["line"]=>
-  int(%d)
-}
-
-Notice: Undefined variable: b in %s on line %d
-array(4) {
-  ["type"]=>
-  int(8)
-  ["message"]=>
-  string(21) "Undefined variable: b"
-  ["file"]=>
-  string(%d) "%s"
-  ["line"]=>
-  int(%d)
-}
-Done
---UEXPECTF--
-NULL
-
-Warning: error_get_last() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
-array(4) {
   [u"type"]=>
   int(2)
   [u"message"]=>
