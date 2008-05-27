@@ -24,19 +24,6 @@ var_dump($x);
 echo "Done\n";
 ?>
 --EXPECTF--	
-string(9) "x.changed"
-
-Warning: Parameter 1 to C::__construct() expected to be a reference, value given in %sbug42976.php on line 15
-
-Warning: Invocation of C's constructor failed in %sbug42976.php on line 15
-string(10) "x.original"
-
-Warning: Parameter 1 to C::__construct() expected to be a reference, value given in %sbug42976.php on line 18
-
-Warning: Invocation of C's constructor failed in %sbug42976.php on line 18
-string(10) "x.original"
-Done
---UEXPECTF--	
 unicode(9) "x.changed"
 
 Warning: Parameter 1 to C::__construct() expected to be a reference, value given in %sbug42976.php on line 15

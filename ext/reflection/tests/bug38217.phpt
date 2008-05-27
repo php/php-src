@@ -34,20 +34,6 @@ Notice: Undefined variable: var in %s on line %d
 NULL
 object(Object1)#%d (0) {
 }
-string(4) "test"
-object(Object1)#%d (0) {
-}
-Done
---UEXPECTF--
-object(Object)#%d (0) {
-}
-
-Warning: Missing argument 1 for Object1::__construct() in %s on line %d
-
-Notice: Undefined variable: var in %s on line %d
-NULL
-object(Object1)#%d (0) {
-}
 unicode(4) "test"
 object(Object1)#%d (0) {
 }

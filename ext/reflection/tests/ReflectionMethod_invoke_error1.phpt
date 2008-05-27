@@ -59,18 +59,6 @@ try {
 ?>
 --EXPECT--
 invoke() on a non-object:
-string(29) "Non-object passed to Invoke()"
-
-invoke() on a non-instance:
-string(72) "Given object is not an instance of the class this method was declared in"
-
-Private method:
-string(86) "Trying to invoke private method TestClass::privateMethod() from scope ReflectionMethod"
-
-Abstract method:
-string(53) "Trying to invoke abstract method AbstractClass::foo()"
---UEXPECT--
-invoke() on a non-object:
 unicode(29) "Non-object passed to Invoke()"
 
 invoke() on a non-instance:

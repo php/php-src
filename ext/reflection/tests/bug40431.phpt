@@ -83,66 +83,6 @@ Strict Standards: Creating default object from empty value in %s on line %d
 array(1) {
   [0]=>
   &object(ReflectionProperty)#%d (2) {
-    ["name"]=>
-    string(5) "value"
-    ["class"]=>
-    string(8) "stdClass"
-  }
-}
-bool(false)
-bool(false)
-bool(true)
-bool(false)
-=== 2nd test ===
-array(1) {
-  [0]=>
-  &object(ReflectionProperty)#%d (2) {
-    ["name"]=>
-    string(5) "value"
-    ["class"]=>
-    string(5) "test2"
-  }
-}
-bool(false)
-bool(false)
-bool(true)
-bool(false)
-=== 3rd test ===
-array(1) {
-  [0]=>
-  &object(ReflectionProperty)#%d (2) {
-    ["name"]=>
-    string(5) "value"
-    ["class"]=>
-    string(5) "test3"
-  }
-}
-bool(false)
-bool(false)
-bool(true)
-bool(false)
-=== 4th test ===
-array(1) {
-  [0]=>
-  &object(ReflectionProperty)#%d (2) {
-    ["name"]=>
-    string(5) "value"
-    ["class"]=>
-    string(5) "test4"
-  }
-}
-bool(false)
-bool(false)
-bool(true)
-bool(false)
-Done
---UEXPECTF--
-=== 1st test ===
-
-Strict Standards: Creating default object from empty value in %s on line %d
-array(1) {
-  [0]=>
-  &object(ReflectionProperty)#%d (2) {
     [u"name"]=>
     unicode(5) "value"
     [u"class"]=>

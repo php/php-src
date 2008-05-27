@@ -87,43 +87,6 @@ echo "===DONE===\n";
 exit(0);
 ?>
 --EXPECT--
-string(11) "PDODatabase"
-string(12) "PDOStatement"
-===QUERY===
-PDODatabase::query()
-PDOStatementX::__construct()
-PDOStatementX::execute()
-string(13) "PDOStatementX"
-string(11) "PDODatabase"
-===FOREACH===
-array(3) {
-  ["id"]=>
-  string(2) "10"
-  ["val"]=>
-  string(3) "Abc"
-  ["val2"]=>
-  string(3) "zxy"
-}
-array(3) {
-  ["id"]=>
-  string(2) "20"
-  ["val"]=>
-  string(3) "Def"
-  ["val2"]=>
-  string(3) "wvu"
-}
-array(3) {
-  ["id"]=>
-  string(2) "30"
-  ["val"]=>
-  string(3) "Ghi"
-  ["val2"]=>
-  string(3) "tsr"
-}
-===DONE===
-PDOStatementX::__destruct()
-PDODatabase::__destruct()
---UEXPECT--
 unicode(11) "PDODatabase"
 unicode(12) "PDOStatement"
 ===QUERY===

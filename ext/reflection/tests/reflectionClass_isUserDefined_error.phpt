@@ -12,9 +12,3 @@ NULL
 
 Warning: Wrong parameter count for ReflectionClass::isUserDefined() in %s on line 4
 NULL
---UEXPECTF--
-Warning: Wrong parameter count for ReflectionClass::isUserDefined() in %s on line 3
-NULL
-
-Warning: Wrong parameter count for ReflectionClass::isUserDefined() in %s on line 4
-NULL

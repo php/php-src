@@ -14,28 +14,6 @@ foreach ($methods as $method) {
 }
 ?>
 --EXPECTF--
-string(%d) "%s"
-
-Warning: Wrong parameter count for ReflectionClass::getFileName() in %s on line 9
-NULL
-
-Warning: Wrong parameter count for ReflectionClass::getFileName() in %s on line 10
-NULL
-int(2)
-
-Warning: Wrong parameter count for ReflectionClass::getStartLine() in %s on line 9
-NULL
-
-Warning: Wrong parameter count for ReflectionClass::getStartLine() in %s on line 10
-NULL
-int(2)
-
-Warning: Wrong parameter count for ReflectionClass::getEndLine() in %s on line 9
-NULL
-
-Warning: Wrong parameter count for ReflectionClass::getEndLine() in %s on line 10
-NULL
---UEXPECTF--
 unicode(%d) "%s"
 
 Warning: Wrong parameter count for ReflectionClass::getFileName() in %s on line 9

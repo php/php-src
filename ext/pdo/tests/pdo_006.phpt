@@ -30,53 +30,6 @@ var_dump($stmt->fetchAll(PDO::FETCH_ASSOC|PDO::FETCH_GROUP));
 ?>
 --EXPECT--
 array(2) {
-  ["A"]=>
-  array(2) {
-    [0]=>
-    array(1) {
-      [0]=>
-      string(1) "1"
-    }
-    [1]=>
-    array(1) {
-      [0]=>
-      string(1) "2"
-    }
-  }
-  ["C"]=>
-  array(1) {
-    [0]=>
-    array(1) {
-      [0]=>
-      string(1) "3"
-    }
-  }
-}
-array(2) {
-  ["A"]=>
-  array(2) {
-    [0]=>
-    array(1) {
-      ["id"]=>
-      string(1) "1"
-    }
-    [1]=>
-    array(1) {
-      ["id"]=>
-      string(1) "2"
-    }
-  }
-  ["C"]=>
-  array(1) {
-    [0]=>
-    array(1) {
-      ["id"]=>
-      string(1) "3"
-    }
-  }
-}
---UEXPECT--
-array(2) {
   [u"A"]=>
   array(2) {
     [0]=>

@@ -41,35 +41,6 @@ while($stmt->fetch(PDO::FETCH_BOUND)) {
 
 ?>
 --EXPECT--
-string(1) "4"
-array(4) {
-  [0]=>
-  string(7) "String0"
-  [1]=>
-  string(7) "String1"
-  [2]=>
-  string(7) "String2"
-  [3]=>
-  string(7) "String3"
-}
-===WHILE===
-array(1) {
-  [0]=>
-  string(7) "String0"
-}
-array(1) {
-  [1]=>
-  string(7) "String1"
-}
-array(1) {
-  [2]=>
-  string(7) "String2"
-}
-array(1) {
-  [3]=>
-  string(7) "String3"
-}
---UEXPECT--
 unicode(1) "4"
 array(4) {
   [0]=>

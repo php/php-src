@@ -65,23 +65,3 @@ Is? A false, instanceof: false
 Is? C false, instanceof: false
 Is? D false, instanceof: false
 Is? E true, instanceof: true
---UEXPECT--
-Is? A true, instanceof: true
-Is? C false, instanceof: false
-Is? D true, instanceof: true
-Is? E true, instanceof: true
--
-Is? A true, instanceof: true
-Is? C true, instanceof: true
-Is? D true, instanceof: true
-Is? E true, instanceof: true
--
-Is? A false, instanceof: false
-Is? C false, instanceof: false
-Is? D true, instanceof: true
-Is? E true, instanceof: true
--
-Is? A false, instanceof: false
-Is? C false, instanceof: false
-Is? D false, instanceof: false
-Is? E true, instanceof: true

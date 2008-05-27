@@ -14,10 +14,4 @@ NULL
 
 Warning: Wrong parameter count for ReflectionClass::getName() in %s on line 6
 NULL
---UEXPECTF--
-Warning: Wrong parameter count for ReflectionClass::getName() in %s on line 5
-NULL
-
-Warning: Wrong parameter count for ReflectionClass::getName() in %s on line 6
-NULL
  

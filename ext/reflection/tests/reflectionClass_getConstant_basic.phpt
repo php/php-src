@@ -25,22 +25,6 @@ foreach($classes as $class) {
 ?>
 --EXPECTF--
 Reflecting on class C: 
-string(12) "hello from C"
-bool(false)
-Reflecting on class D: 
-string(12) "hello from C"
-bool(false)
-Reflecting on class E: 
-string(12) "hello from C"
-bool(false)
-Reflecting on class F: 
-string(12) "hello from F"
-bool(false)
-Reflecting on class X: 
-bool(false)
-bool(false)
---UEXPECTF--
-Reflecting on class C: 
 unicode(12) "hello from C"
 bool(false)
 Reflecting on class D: 

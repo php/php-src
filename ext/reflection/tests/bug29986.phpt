@@ -22,30 +22,6 @@ Class [ <user> class just_constants ] {
   - Constants [5] {
     Constant [ boolean BOOLEAN_CONSTANT ] { 1 }
     Constant [ null NULL_CONSTANT ] {  }
-    Constant [ string STRING_CONSTANT ] { This is a string }
-    Constant [ integer INTEGER_CONSTANT ] { 1000 }
-    Constant [ double FLOAT_CONSTANT ] { 3.14159265 }
-  }
-
-  - Static properties [0] {
-  }
-
-  - Static methods [0] {
-  }
-
-  - Properties [0] {
-  }
-
-  - Methods [0] {
-  }
-}
---UEXPECTF--
-Class [ <user> class just_constants ] {
-  @@ %s %d-%d
-
-  - Constants [5] {
-    Constant [ boolean BOOLEAN_CONSTANT ] { 1 }
-    Constant [ null NULL_CONSTANT ] {  }
     Constant [ Unicode string STRING_CONSTANT ] { This is a string }
     Constant [ integer INTEGER_CONSTANT ] { 1000 }
     Constant [ double FLOAT_CONSTANT ] { 3.14159265 }

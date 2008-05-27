@@ -11,6 +11,4 @@ Rein Velt <rein@velt.org>
  	var_dump( $rc->getExtensionName()) ;
 ?>
 --EXPECT--
-string(3) "dom"
---UEXPECT--
 unicode(3) "dom"

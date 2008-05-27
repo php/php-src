@@ -14,11 +14,6 @@ var_dump($rc1->getParentClass());
 ?>
 --EXPECTF--
 object(ReflectionClass)#%d (1) {
-  ["name"]=>
-  string(3) "Foo"
-}
---UEXPECTF--
-object(ReflectionClass)#%d (1) {
   [u"name"]=>
   unicode(3) "Foo"
 }

@@ -40,30 +40,6 @@ var_dump($methodInfo->getStaticVariables());
 --EXPECT--
 Public method:
 array(3) {
-  ["c"]=>
-  NULL
-  ["a"]=>
-  int(1)
-  ["b"]=>
-  string(5) "hello"
-}
-
-Private method:
-array(1) {
-  ["a"]=>
-  int(1)
-}
-
-Method with no static variables:
-array(0) {
-}
-
-Internal Method:
-array(0) {
-}
---UEXPECT--
-Public method:
-array(3) {
   [u"c"]=>
   NULL
   [u"a"]=>

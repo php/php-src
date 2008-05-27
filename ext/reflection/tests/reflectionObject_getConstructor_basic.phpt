@@ -80,20 +80,3 @@ Constructor of D1: __construct
 Constructor of D2: C
 No constructor for X
 No constructor for Y
---UEXPECTF--
-
-Strict Standards: Redefining already defined constructor for class OldAndNewCtor in %s on line 26
-
-Strict Standards: %s for class NewAndOldCtor in %s on line 31
-Constructor of NewCtor: __construct
-Constructor of ExtendsNewCtor: __construct
-Constructor of OldCtor: OldCtor
-Constructor of ExtendsOldCtor: OldCtor
-Constructor of OldAndNewCtor: __construct
-Constructor of NewAndOldCtor: __construct
-Constructor of B: B
-Constructor of C: C
-Constructor of D1: __construct
-Constructor of D2: C
-No constructor for X
-No constructor for Y

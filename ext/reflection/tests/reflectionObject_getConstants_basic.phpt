@@ -26,30 +26,6 @@ foreach($classes as $class) {
 --EXPECTF--
 Reflecting on instance of class C: 
 array(1) {
-  ["a"]=>
-  string(12) "hello from C"
-}
-Reflecting on instance of class D: 
-array(1) {
-  ["a"]=>
-  string(12) "hello from C"
-}
-Reflecting on instance of class E: 
-array(1) {
-  ["a"]=>
-  string(12) "hello from C"
-}
-Reflecting on instance of class F: 
-array(1) {
-  ["a"]=>
-  string(12) "hello from F"
-}
-Reflecting on instance of class X: 
-array(0) {
-}
---UEXPECTF--
-Reflecting on instance of class C: 
-array(1) {
   [u"a"]=>
   unicode(12) "hello from C"
 }
