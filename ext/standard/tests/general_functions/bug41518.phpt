@@ -24,7 +24,7 @@ var_dump(file_exists($tmp_file."nosuchfile")); //doesn't exist
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 bool(true)
 bool(false)
 Done

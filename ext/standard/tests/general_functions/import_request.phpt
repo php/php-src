@@ -25,54 +25,7 @@ var_dump($r_a, $r_b, $r_c, $r_ap);
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: import_request_variables() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-NULL
-
-Notice: import_request_variables(): No prefix specified - possible security hazard in %s on line %d
-NULL
-
-Notice: import_request_variables(): No prefix specified - possible security hazard in %s on line %d
-
-Warning: import_request_variables(): Attempted GLOBALS variable overwrite in %s on line %d
-
-Warning: import_request_variables(): Numeric key detected - possible security hazard in %s on line %d
-NULL
-
-Notice: Undefined variable: ap in %s on line %d
-string(1) "1"
-string(3) "heh"
-string(1) "3"
-NULL
-NULL
-
-Notice: Undefined variable: g_ap in %s on line %d
-string(1) "1"
-string(3) "heh"
-string(1) "3"
-NULL
-string(2) "hm"
-NULL
-string(1) "1"
-string(3) "heh"
-string(1) "3"
-string(2) "25"
-string(4) "test"
-string(5) "blah3"
-array(1) {
-  [0]=>
-  string(2) "ar"
-}
-NULL
-
-Notice: Undefined variable: r_ap in %s on line %d
-string(1) "1"
-string(3) "heh"
-string(1) "3"
-NULL
-Done
---UEXPECTF--
+--EXPECTF--
 Warning: import_request_variables() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 NULL

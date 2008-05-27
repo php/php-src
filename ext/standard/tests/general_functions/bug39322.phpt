@@ -24,26 +24,6 @@ echo "Done!\n";
 ?>
 --EXPECTF--
 array(8) {
-  ["command"]=>
-  string(14) "/bin/sleep 120"
-  ["pid"]=>
-  int(%d)
-  ["running"]=>
-  bool(false)
-  ["signaled"]=>
-  bool(true)
-  ["stopped"]=>
-  bool(false)
-  ["exitcode"]=>
-  int(-1)
-  ["termsig"]=>
-  int(15)
-  ["stopsig"]=>
-  int(0)
-}
-Done!
---UEXPECTF--
-array(8) {
   [u"command"]=>
   unicode(14) "/bin/sleep 120"
   [u"pid"]=>

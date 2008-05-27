@@ -11,19 +11,6 @@ variables_order=GPS
 ?>
 --EXPECT--
 array(5) {
-  ["v"]=>
-  bool(false)
-  ["h"]=>
-  bool(false)
-  ["d"]=>
-  string(4) "test"
-  ["m"]=>
-  string(4) "1234"
-  ["t"]=>
-  bool(false)
-}
---UEXPECT--
-array(5) {
   [u"v"]=>
   bool(false)
   [u"h"]=>
