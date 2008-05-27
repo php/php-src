@@ -27,21 +27,6 @@ echo "Done\n";
 --EXPECTF--	
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  string(5) "text1"
-}
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(5) "text1"
-}
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(5) "text1"
-}
-Done
-
---UEXPECTF--	
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
   unicode(5) "text1"
 }
 object(SimpleXMLElement)#%d (1) {

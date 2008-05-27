@@ -54,39 +54,6 @@ Open [%s,PHPSESSID]
 Read [%s,%s]
 GC [0]
 array(3) {
-  ["Blah"]=>
-  string(12) "Hello World!"
-  ["Foo"]=>
-  bool(false)
-  ["Guff"]=>
-  int(1234567890)
-}
-Write [%s,%s,Blah|S:12:"Hello World!";Foo|b:0;Guff|i:1234567890;]
-Close [%s,PHPSESSID]
-NULL
-Open [%s,PHPSESSID]
-Read [%s,%s]
-GC [0]
-array(3) {
-  ["Blah"]=>
-  string(12) "Hello World!"
-  ["Foo"]=>
-  bool(false)
-  ["Guff"]=>
-  int(1234567890)
-}
-Destroy [%s,%s]
-
-Warning: unlink(%s): No such file or directory in %s on line %d
-Close [%s,PHPSESSID]
-bool(true)
---UEXPECTF--
-*** Testing session_set_save_handler() : variation ***
-
-Open [%s,PHPSESSID]
-Read [%s,%s]
-GC [0]
-array(3) {
   [u"Blah"]=>
   unicode(12) "Hello World!"
   [u"Foo"]=>

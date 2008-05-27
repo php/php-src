@@ -39,34 +39,6 @@ bool(true)
 array(0) {
 }
 array(3) {
-  ["foo"]=>
-  int(1234567890)
-  ["bar"]=>
-  string(5) "Blah!"
-  ["guff"]=>
-  float(123.456)
-}
-
-Warning: session_decode(): Unknown session.serialize_handler. Failed to decode session object in %s on line %d
-bool(true)
-array(3) {
-  ["foo"]=>
-  int(1234567890)
-  ["bar"]=>
-  string(5) "Blah!"
-  ["guff"]=>
-  float(123.456)
-}
-bool(true)
-Done
---UEXPECTF--
-*** Testing session_decode() : variation ***
-
-Warning: session_start(): Unknown session.serialize_handler. Failed to decode session object in %s on line %d
-bool(true)
-array(0) {
-}
-array(3) {
   [u"foo"]=>
   int(1234567890)
   [u"bar"]=>

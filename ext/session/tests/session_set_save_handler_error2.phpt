@@ -42,26 +42,6 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_set_save_handler() : error functionality ***
 array(3) {
-  ["Blah"]=>
-  string(12) "Hello World!"
-  ["Foo"]=>
-  bool(false)
-  ["Guff"]=>
-  int(1234567890)
-}
-array(3) {
-  ["Blah"]=>
-  string(12) "Hello World!"
-  ["Foo"]=>
-  bool(false)
-  ["Guff"]=>
-  int(1234567890)
-}
-array(0) {
-}
---UEXPECTF--
-*** Testing session_set_save_handler() : error functionality ***
-array(3) {
   [u"Blah"]=>
   unicode(12) "Hello World!"
   [u"Foo"]=>

@@ -31,16 +31,6 @@ var_dump($sxe->xpath("***"));
 array(1) {
   [0]=>
   object(SimpleXMLElement)#%d (1) {
-    ["test"]=>
-    object(SimpleXMLElement)#%d (0) {
-    }
-  }
-}
-bool(false)
---UEXPECTF--
-array(1) {
-  [0]=>
-  object(SimpleXMLElement)#%d (1) {
     [u"test"]=>
     object(SimpleXMLElement)#%d (0) {
     }

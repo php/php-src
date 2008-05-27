@@ -34,20 +34,6 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_set_cookie_params() : variation ***
-string(5) "/path"
-NULL
-string(4) "/foo"
-bool(true)
-string(4) "/foo"
-NULL
-string(5) "/blah"
-bool(true)
-string(5) "/blah"
-NULL
-string(5) "/guff"
-Done
---UEXPECTF--
-*** Testing session_set_cookie_params() : variation ***
 unicode(5) "/path"
 NULL
 unicode(4) "/foo"

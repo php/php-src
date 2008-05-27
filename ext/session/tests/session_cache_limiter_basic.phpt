@@ -45,29 +45,6 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_cache_limiter() : basic functionality ***
 bool(true)
-string(7) "nocache"
-string(7) "nocache"
-string(6) "public"
-bool(true)
-bool(true)
-string(6) "public"
-string(6) "public"
-string(7) "private"
-bool(true)
-bool(true)
-string(7) "private"
-string(7) "private"
-string(7) "nocache"
-bool(true)
-bool(true)
-string(7) "nocache"
-string(7) "nocache"
-string(17) "private_no_expire"
-bool(true)
-Done
---UEXPECTF--
-*** Testing session_cache_limiter() : basic functionality ***
-bool(true)
 unicode(7) "nocache"
 unicode(7) "nocache"
 unicode(6) "public"

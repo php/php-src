@@ -28,16 +28,6 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_cache_limiter() : variation ***
-string(7) "nocache"
-bool(true)
-string(7) "nocache"
-string(7) "nocache"
-string(6) "public"
-bool(true)
-string(6) "public"
-Done
---UEXPECTF--
-*** Testing session_cache_limiter() : variation ***
 unicode(7) "nocache"
 bool(true)
 unicode(7) "nocache"

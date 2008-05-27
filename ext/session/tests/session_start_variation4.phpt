@@ -28,15 +28,6 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_start() : variation ***
 array(1) {
-  ["blah"]=>
-  string(3) "foo"
-}
-array(0) {
-}
-Done
---UEXPECTF--
-*** Testing session_start() : variation ***
-array(1) {
   [u"blah"]=>
   unicode(3) "foo"
 }

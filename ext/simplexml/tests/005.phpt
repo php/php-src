@@ -34,11 +34,6 @@ echo "---Done---\n";
 
 ?>
 --EXPECT--
-string(28) "Here we have some text data."
-string(19) "And here some more."
-string(15) "Wow once again."
----Done--- 
---UEXPECT--
 unicode(28) "Here we have some text data."
 unicode(19) "And here some more."
 unicode(15) "Wow once again."

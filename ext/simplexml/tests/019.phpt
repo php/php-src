@@ -62,23 +62,6 @@ foreach($sxe->elem1->children() as $name => $data) {
 ?>
 ===DONE===
 --EXPECT--
-string(5) "elem1"
-string(10) "Bla bla 1."
-string(6) "elem11"
-string(10) "Bla bla 2."
-===CLONE===
-string(5) "elem1"
-string(10) "Bla bla 1."
-string(6) "elem11"
-string(10) "Bla bla 2."
-===ELEMENT===
-string(7) "elem111"
-string(7) "Foo Bar"
-===COMMENT===
-string(5) "elem2"
-string(28) "Here we have some text data."
-===DONE===
---UEXPECT--
 unicode(5) "elem1"
 unicode(10) "Bla bla 1."
 unicode(6) "elem11"

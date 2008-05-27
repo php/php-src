@@ -30,20 +30,6 @@ ob_end_flush();
 *** Testing session_unset() : basic functionality ***
 bool(true)
 array(1) {
-  ["foo"]=>
-  string(12) "Hello World!"
-}
-NULL
-array(0) {
-}
-bool(true)
-array(0) {
-}
-Done
---UEXPECTF--
-*** Testing session_unset() : basic functionality ***
-bool(true)
-array(1) {
   [u"foo"]=>
   unicode(12) "Hello World!"
 }

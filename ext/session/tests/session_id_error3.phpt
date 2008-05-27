@@ -49,17 +49,4 @@ string(32) "%s"
 string(2) "
 "
 Done
---UEXPECTF--
-*** Testing session_id() : error functionality ***
-string(32) "%s"
-string(32) "%s"
-string(1) "!"
-string(32) "%s"
-string(32) "%s"
-string(3) "?><"
-string(32) "%s"
-string(32) "%s"
-string(2) "
-"
-Done
 

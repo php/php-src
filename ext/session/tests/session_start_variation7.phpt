@@ -35,32 +35,6 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_start() : variation ***
 array(4) {
-  ["colour"]=>
-  string(5) "green"
-  ["animal"]=>
-  string(3) "cat"
-  ["person"]=>
-  string(5) "julia"
-  ["age"]=>
-  int(6)
-}
-bool(true)
-array(4) {
-  ["colour"]=>
-  string(5) "green"
-  ["animal"]=>
-  string(3) "cat"
-  ["person"]=>
-  string(5) "julia"
-  ["age"]=>
-  int(6)
-}
-array(0) {
-}
-Done
---UEXPECTF--
-*** Testing session_start() : variation ***
-array(4) {
   [u"colour"]=>
   unicode(5) "green"
   [u"animal"]=>

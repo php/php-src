@@ -45,17 +45,6 @@ echo $sxe->asXML();
 ?>
 ===DONE===
 --EXPECTF--
-Warning: SimpleXMLElement::addAttribute(): Attribute already exists in %s031.php on line %d
-
-Warning: SimpleXMLElement::addChild(): Cannot add element to attributes in %s031.php on line %d
-<?xml version="1.0"?>
-<root xmlns:s="urn::test" xmlns:t="urn::test-t" xmlns:v="urn::test-v" s:att1="b" att1="a" v:att11="xxx" att2="no-ns">
-   <child1>test</child1>
-   <child1>test 2</child1>
-   <s:child3/>
-<s:test1>myval</s:test1><m:test2 xmlns:m="urn::testnew">myval</m:test2><test3 xmlns="urn::testnew">myval</test3><test4>myval</test4><test5>myval</test5></root>
-===DONE===
---UEXPECTF--
 Warning: SimpleXMLElement::addAttribute(): Attribute already exists in %s on line %d
 
 Warning: SimpleXMLElement::addChild(): Cannot add element to attributes in %s on line %d

@@ -28,17 +28,6 @@ foreach($people as $person)
 ?>
 ===DONE===
 --EXPECTF--
-string(3) "Joe"
-int(3)
-int(0)
-string(4) "John"
-int(3)
-int(1)
-string(4) "Jane"
-int(3)
-int(0)
-===DONE===
---UEXPECTF--
 unicode(3) "Joe"
 int(3)
 int(0)

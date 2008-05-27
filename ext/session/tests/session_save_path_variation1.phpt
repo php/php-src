@@ -33,16 +33,6 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_save_path() : variation ***
-string(0) ""
-bool(true)
-string(0) ""
-string(0) ""
-string(%d) "%s"
-bool(true)
-string(%d) "%s"
-Done
---UEXPECTF--
-*** Testing session_save_path() : variation ***
 unicode(0) ""
 bool(true)
 unicode(0) ""

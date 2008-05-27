@@ -33,47 +33,6 @@ var_dump($sxe->Body->children('')->businessList);
 ===DONE===
 --EXPECTF--
 array(1) {
-  ["soap"]=>
-  string(41) "http://schemas.xmlsoap.org/soap/envelope/"
-}
-object(SimpleXMLElement)#%s (0) {
-}
-object(SimpleXMLElement)#%s (1) {
-  ["businessList"]=>
-  object(SimpleXMLElement)#%s (2) {
-    ["@attributes"]=>
-    array(1) {
-      ["foo"]=>
-      string(3) "bar"
-    }
-    ["businessInfo"]=>
-    object(SimpleXMLElement)#%s (1) {
-      ["@attributes"]=>
-      array(1) {
-        ["businessKey"]=>
-        string(3) "bla"
-      }
-    }
-  }
-}
-object(SimpleXMLElement)#%s (2) {
-  ["@attributes"]=>
-  array(1) {
-    ["foo"]=>
-    string(3) "bar"
-  }
-  ["businessInfo"]=>
-  object(SimpleXMLElement)#%s (1) {
-    ["@attributes"]=>
-    array(1) {
-      ["businessKey"]=>
-      string(3) "bla"
-    }
-  }
-}
-===DONE===
---UEXPECTF--
-array(1) {
   [u"soap"]=>
   unicode(41) "http://schemas.xmlsoap.org/soap/envelope/"
 }

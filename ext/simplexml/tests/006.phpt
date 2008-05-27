@@ -63,23 +63,6 @@ foreach($sxe->elem1 as $name => $data) {
 ===DONE===
 <?php exit(0); __halt_compiler(); ?>
 --EXPECT--
-string(5) "elem1"
-string(10) "Bla bla 1."
-string(6) "elem11"
-string(10) "Bla bla 2."
-===CLONE===
-string(5) "elem1"
-string(10) "Bla bla 1."
-string(6) "elem11"
-string(10) "Bla bla 2."
-===ELEMENT===
-string(6) "elem11"
-string(10) "Bla bla 2."
-===COMMENT===
-string(5) "elem1"
-string(10) "Bla bla 1."
-===DONE===
---UEXPECT--
 unicode(5) "elem1"
 unicode(10) "Bla bla 1."
 unicode(6) "elem11"

@@ -32,20 +32,6 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_cache_expire() : variation ***
-string(3) "180"
-int(180)
-string(3) "180"
-int(180)
-string(3) "999"
-bool(true)
-int(999)
-string(3) "999"
-bool(true)
-int(999)
-string(3) "999"
-Done
---UEXPECTF--
-*** Testing session_cache_expire() : variation ***
 unicode(3) "180"
 int(180)
 unicode(3) "180"

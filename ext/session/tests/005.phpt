@@ -101,66 +101,6 @@ session_destroy();
 OPEN: PHPSESSID
 READ: abtest
 object(foo)#%d (2) {
-  ["bar"]=>
-  string(2) "ok"
-  ["yes"]=>
-  int(2)
-}
-array(1) {
-  [3]=>
-  object(foo)#%d (2) {
-    ["bar"]=>
-    string(2) "ok"
-    ["yes"]=>
-    int(2)
-  }
-}
-WRITE: abtest, baz|O:3:"foo":2:{S:3:"bar";S:2:"ok";S:3:"yes";i:2;}arr|a:1:{i:3;O:3:"foo":2:{S:3:"bar";S:2:"ok";S:3:"yes";i:2;}}
-CLOSE
-OPEN: PHPSESSID
-READ: abtest
-object(foo)#%d (2) {
-  ["bar"]=>
-  string(2) "ok"
-  ["yes"]=>
-  int(3)
-}
-array(1) {
-  [3]=>
-  object(foo)#%d (2) {
-    ["bar"]=>
-    string(2) "ok"
-    ["yes"]=>
-    int(3)
-  }
-}
-int(123)
-WRITE: abtest, baz|O:3:"foo":2:{S:3:"bar";S:2:"ok";S:3:"yes";i:3;}arr|a:1:{i:3;O:3:"foo":2:{S:3:"bar";S:2:"ok";S:3:"yes";i:3;}}c|i:123;
-CLOSE
-OPEN: PHPSESSID
-READ: abtest
-object(foo)#%d (2) {
-  ["bar"]=>
-  string(2) "ok"
-  ["yes"]=>
-  int(3)
-}
-array(1) {
-  [3]=>
-  object(foo)#%d (2) {
-    ["bar"]=>
-    string(2) "ok"
-    ["yes"]=>
-    int(3)
-  }
-}
-int(123)
-DESTROY: abtest
-CLOSE
---UEXPECTF--
-OPEN: PHPSESSID
-READ: abtest
-object(foo)#%d (2) {
   [u"bar"]=>
   unicode(2) "ok"
   [u"yes"]=>

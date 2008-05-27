@@ -21,23 +21,6 @@ echo "Done\n";
 --EXPECTF--	
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  string(2) "
-
-"
-}
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(2) "
-
-"
-}
-string(15) "<test>
-
-</test>"
-Done
---UEXPECTF--
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
   unicode(2) "
 
 "

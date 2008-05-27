@@ -26,15 +26,6 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_module_name() : basic functionality ***
-string(%d) "%s"
-string(5) "files"
-bool(true)
-string(5) "files"
-bool(true)
-string(5) "files"
-Done
---UEXPECTF--
-*** Testing session_module_name() : basic functionality ***
 unicode(5) "files"
 unicode(5) "files"
 bool(true)

@@ -29,16 +29,6 @@ ob_end_flush();
 Warning: session_module_name(): Cannot find named PHP session module (blah) in %s on line %d
 bool(false)
 bool(true)
-string(%d) "%s"
-bool(true)
-string(%d) "%s"
-Done
---UEXPECTF--
-*** Testing session_module_name() : variation ***
-
-Warning: session_module_name(): Cannot find named PHP session module (blah) in %s on line %d
-bool(false)
-bool(true)
 unicode(5) "files"
 bool(true)
 unicode(5) "files"

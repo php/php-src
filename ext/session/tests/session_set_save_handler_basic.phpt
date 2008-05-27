@@ -50,52 +50,6 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_set_save_handler() : basic functionality ***
 
-string(5) "files"
-
-Warning: session_module_name(): Cannot find named PHP session module () in %s on line %d
-bool(false)
-
-Warning: session_module_name(): Cannot find named PHP session module (blah) in %s on line %d
-bool(false)
-
-Warning: session_module_name(): Cannot find named PHP session module (foo) in %s on line %d
-bool(false)
-Open [%s,PHPSESSID]
-Read [%s,%s]
-array(3) {
-  ["Blah"]=>
-  string(12) "Hello World!"
-  ["Foo"]=>
-  bool(false)
-  ["Guff"]=>
-  int(1234567890)
-}
-Write [%s,%s,Blah|S:12:"Hello World!";Foo|b:0;Guff|i:1234567890;]
-Close [%s,PHPSESSID]
-array(3) {
-  ["Blah"]=>
-  string(12) "Hello World!"
-  ["Foo"]=>
-  bool(false)
-  ["Guff"]=>
-  int(1234567890)
-}
-Starting session again..!
-Open [%s,PHPSESSID]
-Read [%s,%s]
-array(3) {
-  ["Blah"]=>
-  string(12) "Hello World!"
-  ["Foo"]=>
-  bool(false)
-  ["Guff"]=>
-  int(1234567890)
-}
-Write [%s,%s,Blah|S:12:"Hello World!";Foo|b:0;Guff|i:1234567890;]
-Close [%s,PHPSESSID]
---UEXPECTF--
-*** Testing session_set_save_handler() : basic functionality ***
-
 unicode(5) "files"
 
 Warning: session_module_name(): Cannot find named PHP session module () in %s on line %d

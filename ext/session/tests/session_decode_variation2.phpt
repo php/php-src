@@ -34,53 +34,6 @@ bool(true)
 array(0) {
 }
 array(3) {
-  ["foo"]=>
-  int(1234567890)
-  ["bar"]=>
-  string(12) "Hello World!"
-  ["guff"]=>
-  float(123.456)
-}
-bool(true)
-array(4) {
-  ["foo"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["bar"]=>
-  string(12) "Hello World!"
-  ["guff"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["blah"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-}
-bool(true)
-Done
---UEXPECTF--
-*** Testing session_decode() : variation ***
-bool(true)
-array(0) {
-}
-array(3) {
   [u"foo"]=>
   int(1234567890)
   [u"bar"]=>
