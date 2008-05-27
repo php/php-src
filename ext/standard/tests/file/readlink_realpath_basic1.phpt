@@ -77,49 +77,6 @@ rmdir("$name_prefix/");
 *** Testing readlink() and realpath(): with valid and invalid path ***
 
 -- Iteration 1 --
-string(%d) "%s/readlink_realpath_basic1/home/readlink_realpath_basic1.tmp"
-string(%d) "%s/readlink_realpath_basic1/home/readlink_realpath_basic1.tmp"
-
--- Iteration 2 --
-string(%d) "%s/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp"
-string(%d) "%s/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp"
-
--- Iteration 3 --
-string(%d) "%s/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp"
-string(%d) "%s/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp"
-
--- Iteration 4 --
-string(%d) "%s/readlink_realpath_basic1/home/readlink_realpath_basic1.tmp"
-string(%d) "%s/readlink_realpath_basic1/home/readlink_realpath_basic1.tmp"
-
--- Iteration 5 --
-
-Warning: readlink(): No such file or directory in %s on line %d
-bool(false)
-bool(false)
-
--- Iteration 6 --
-
-Warning: readlink(): No such file or directory in %s on line %d
-bool(false)
-bool(false)
-
--- Iteration 7 --
-
-Warning: readlink(): No such file or directory in %s on line %d
-bool(false)
-%s
-
--- Iteration 8 --
-
-Warning: readlink(): %s in %s on line %d
-bool(false)
-%s
-Done
---UEXPECTF--
-*** Testing readlink() and realpath(): with valid and invalid path ***
-
--- Iteration 1 --
 unicode(%d) "%s/readlink_realpath_basic1/home/readlink_realpath_basic1.tmp"
 unicode(%d) "%s/readlink_realpath_basic1/home/readlink_realpath_basic1.tmp"
 

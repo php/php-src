@@ -52,6 +52,8 @@ echo "Done\n";
 --EXPECTF--
 *** Testing fgetc() with file opened in write only mode ***
 -- File opened in mode : w --
+
+Notice: fwrite(): 20 character unicode buffer downcoded for binary stream runtime_encoding in %sfgetc_variation3.php on line %d
 bool(true)
 int(0)
 bool(false)
@@ -59,6 +61,8 @@ bool(false)
 int(0)
 bool(false)
 -- File opened in mode : wb --
+
+Notice: fwrite(): 20 character unicode buffer downcoded for binary stream runtime_encoding in %sfgetc_variation3.php on line %d
 bool(true)
 int(0)
 bool(false)
@@ -73,6 +77,8 @@ bool(false)
 int(0)
 bool(false)
 -- File opened in mode : a --
+
+Notice: fwrite(): 20 character unicode buffer downcoded for binary stream runtime_encoding in %sfgetc_variation3.php on line %d
 bool(true)
 int(0)
 bool(false)
@@ -80,6 +86,8 @@ bool(false)
 int(0)
 bool(false)
 -- File opened in mode : ab --
+
+Notice: fwrite(): 20 character unicode buffer downcoded for binary stream runtime_encoding in %sfgetc_variation3.php on line %d
 bool(true)
 int(0)
 bool(false)
@@ -94,6 +102,8 @@ bool(false)
 int(0)
 bool(false)
 -- File opened in mode : x --
+
+Notice: fwrite(): 20 character unicode buffer downcoded for binary stream runtime_encoding in %sfgetc_variation3.php on line %d
 bool(true)
 int(0)
 bool(false)
@@ -101,6 +111,8 @@ bool(false)
 int(0)
 bool(false)
 -- File opened in mode : xb --
+
+Notice: fwrite(): 20 character unicode buffer downcoded for binary stream runtime_encoding in %sfgetc_variation3.php on line %d
 bool(true)
 int(0)
 bool(false)
@@ -108,72 +120,8 @@ bool(false)
 int(0)
 bool(false)
 -- File opened in mode : xt --
-bool(true)
-int(0)
-bool(false)
-bool(false)
-int(0)
-bool(false)
-Done
---UEXPECTF--
-*** Testing fgetc() with file opened in write only mode ***
--- File opened in mode : w --
-bool(true)
-int(0)
-bool(false)
-bool(false)
-int(0)
-bool(false)
--- File opened in mode : wb --
-bool(true)
-int(0)
-bool(false)
-bool(false)
-int(0)
-bool(false)
--- File opened in mode : wt --
-bool(true)
-int(0)
-bool(false)
-bool(false)
-int(0)
-bool(false)
--- File opened in mode : a --
-bool(true)
-int(0)
-bool(false)
-bool(false)
-int(0)
-bool(false)
--- File opened in mode : ab --
-bool(true)
-int(0)
-bool(false)
-bool(false)
-int(0)
-bool(false)
--- File opened in mode : at --
-bool(true)
-int(0)
-bool(false)
-bool(false)
-int(0)
-bool(false)
--- File opened in mode : x --
-bool(true)
-int(0)
-bool(false)
-bool(false)
-int(0)
-bool(false)
--- File opened in mode : xb --
-bool(true)
-int(0)
-bool(false)
-bool(false)
-int(0)
-bool(false)
--- File opened in mode : xt --
+
+Notice: fwrite(): 20 character unicode buffer downcoded for binary stream runtime_encoding in %sfgetc_variation3.php on line %d
 bool(true)
 int(0)
 bool(false)

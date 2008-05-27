@@ -40,61 +40,7 @@ closedir($dh);
 var_dump(rmdir($path));
 
 ?>
---EXPECTF--
-call readdir():
-resource(12) of type (stream)
-array(6) {
-  [0]=>
-  bool(false)
-  [1]=>
-  string(1) "."
-  [2]=>
-  string(2) ".."
-  [3]=>
-  string(9) "file1.tmp"
-  [4]=>
-  string(9) "file2.tmp"
-  [5]=>
-  string(9) "file3.tmp"
-}
-
-call fseek() on directory resource:
-int(0)
-call readdir():
-array(6) {
-  [0]=>
-  bool(false)
-  [1]=>
-  string(1) "."
-  [2]=>
-  string(2) ".."
-  [3]=>
-  string(9) "file1.tmp"
-  [4]=>
-  string(9) "file2.tmp"
-  [5]=>
-  string(9) "file3.tmp"
-}
-
-call fseek() with different arguments on directory resource:
-int(0)
-call readdir():
-array(6) {
-  [0]=>
-  bool(false)
-  [1]=>
-  string(1) "."
-  [2]=>
-  string(2) ".."
-  [3]=>
-  string(9) "file1.tmp"
-  [4]=>
-  string(9) "file2.tmp"
-  [5]=>
-  string(9) "file3.tmp"
-}
-bool(true)
---UEXPECTF--
+--EXPECT--
 call readdir():
 resource(12) of type (stream)
 array(6) {

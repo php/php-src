@@ -29,7 +29,7 @@ var_dump(filectime("/no/such/file/or/dir"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(%d)
 int(%d)
 int(%d)

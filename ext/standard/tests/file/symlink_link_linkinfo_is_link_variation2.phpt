@@ -49,13 +49,3 @@ Warning: linkinfo(): No such file or directory in %s on line %d
 int(-1)
 bool(false)
 Done
---UEXPECTF--
-*** Creating a hard link to a non-existent file ***
-
-Warning: link(): No such file or directory in %s on line %d
-bool(false)
-
-Warning: linkinfo(): No such file or directory in %s on line %d
-int(-1)
-bool(false)
-Done

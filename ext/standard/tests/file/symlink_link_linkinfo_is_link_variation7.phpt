@@ -92,22 +92,3 @@ bool(true)
 Warning: link(): File exists in %s on line %d
 bool(false)
 Done
---UEXPECTF--
-*** Create soft link to file and then to itself ***
-bool(true)
-
-Warning: symlink(): File exists in %s on line %d
-bool(false)
-
-*** Create soft link to directory and then to itself ***
-bool(true)
-
-Warning: symlink(): File exists in %s on line %d
-bool(false)
-
-*** Create hard link to file and then to itself ***
-bool(true)
-
-Warning: link(): File exists in %s on line %d
-bool(false)
-Done

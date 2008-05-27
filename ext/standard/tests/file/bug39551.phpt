@@ -20,9 +20,7 @@ stream_get_contents($s);
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Done
---UEXPECTF--
+--EXPECTF--
 Done
 
 Notice: Unknown: 0 character unicode buffer downcoded for binary stream runtime_encoding in Unknown on line 0

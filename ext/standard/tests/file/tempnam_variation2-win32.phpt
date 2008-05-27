@@ -95,39 +95,3 @@ File name is => %s
 File permissions are => 100666
 
 *** Done ***
---UEXPECTF--
-*** Testing tempnam() with relative paths ***
-
--- Iteration 1 --
-File name is => %s
-File permissions are => 100666
-
--- Iteration 2 --
-File name is => %s
-File permissions are => 100666
-
--- Iteration 3 --
-File name is => %s
-File permissions are => 100666
-
--- Iteration 4 --
-File name is => %s
-File permissions are => 100666
-
--- Iteration 5 --
-File name is => %s
-File permissions are => 100666
-
--- Iteration 6 --
-File name is => %s
-File permissions are => 100666
-
--- Iteration 7 --
-File name is => %s
-File permissions are => 100666
-
--- Iteration 8 --
-File name is => %s
-File permissions are => 100666
-
-*** Done ***

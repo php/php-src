@@ -46,15 +46,7 @@ echo "\n--- Done ---";
 $file_path = dirname(__FILE__);
 rmdir("$file_path/lstat_stat_variation17");
 ?>
---EXPECTF--
-*** Testing lstat() on a dir after changing its access permission ***
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-
---- Done ---
---UEXPECTF--
+--EXPECT--
 *** Testing lstat() on a dir after changing its access permission ***
 bool(true)
 bool(true)

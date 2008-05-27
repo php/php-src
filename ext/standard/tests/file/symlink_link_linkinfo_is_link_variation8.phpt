@@ -81,16 +81,3 @@ Warning: symlink(): File exists in %s on line %d
 bool(false)
 bool(true)
 Done
---UEXPECTF--
-*** Create hard link in different directory with same filename ***
-
-Warning: link(): File exists in %s on line %d
-bool(false)
-bool(true)
-
-*** Create soft link in different directory with same filename ***
-
-Warning: symlink(): File exists in %s on line %d
-bool(false)
-bool(true)
-Done

@@ -64,28 +64,3 @@ NULL
 bool(false)
 bool(false)
 Done
---UEXPECTF--
-*** Testing is_writable(): usage variations ***
-
-*** Testing is_writable() with invalid filenames ***
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-
-Warning: is_writable() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: is_writeable() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-bool(false)
-bool(false)
-Done

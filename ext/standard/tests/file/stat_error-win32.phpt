@@ -52,28 +52,3 @@ bool(false)
 Warning: stat() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
 NULL
 Done
-
---UEXPECTF--
-*** Testing stat() for error conditions ***
-
-Warning: stat() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: stat() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: stat() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: stat(): stat failed for %s in %s on line %d
-bool(false)
-
-Warning: stat(): stat failed for %s in %s on line %d
-bool(false)
-
-Warning: stat(): stat failed for 22 in %s on line %d
-bool(false)
-
-Warning: stat() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-Done

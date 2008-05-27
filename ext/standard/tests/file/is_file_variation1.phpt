@@ -45,18 +45,6 @@ echo "\n*** Done ***";
 ?>
 --EXPECTF--
 -- Testing is_file() with file containing data --
-bool(true)
-
--- Testing is_file() after truncating filesize to zero bytes --
-bool(true)
-
--- Testing is_file() with an empty file --
-bool(true)
-bool(true)
-
-*** Done ***
---UEXPECTF--
--- Testing is_file() with file containing data --
 
 Notice: fwrite(): 17 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 bool(true)

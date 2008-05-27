@@ -75,23 +75,7 @@ $file_path = dirname(__FILE__);
 unlink("$file_path/stat_variation4.tmp");
 rmdir("$file_path/stat_variation4");
 ?>
---EXPECTF--
-*** Testing stat(): on file and directory after accessing it
-    with is_dir() and is_file() functions ***
--- Testing on Directory --
-bool(true)
-bool(true)
-bool(true)
-bool(true)
--- Testing on file --
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-
-*** Done ***
-
---UEXPECTF--
+--EXPECT--
 *** Testing stat(): on file and directory after accessing it
     with is_dir() and is_file() functions ***
 -- Testing on Directory --

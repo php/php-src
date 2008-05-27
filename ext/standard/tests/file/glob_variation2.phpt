@@ -40,25 +40,6 @@ rmdir("$file_path/glob_test/");
 Testing glob() with relative paths:
 array(1) {
   [0]=>
-  string(11) "./file.text"
-}
-array(1) {
-  [0]=>
-  string(22) "../glob_test/file.text"
-}
-array(1) {
-  [0]=>
-  string(19) "glob_test/file.text"
-}
-array(1) {
-  [0]=>
-  string(9) "glob_test"
-}
-Done
---UEXPECT--
-Testing glob() with relative paths:
-array(1) {
-  [0]=>
   unicode(11) "./file.text"
 }
 array(1) {

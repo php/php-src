@@ -55,62 +55,7 @@ echo "\n*** Done ***\n";
 $file = dirname(__FILE__)."/flock.tmp";
 unlink($file);
 ?>
---EXPECTF--	
-*** Testing error conditions ***
-
---- Iteration 0 ---
-Warning: flock(): Illegal operation argument in %s on line %d
-bool(false)
-
---- Iteration 1 ---
-Warning: flock(): Illegal operation argument in %s on line %d
-bool(false)
-
---- Iteration 2 ---
-Warning: flock(): Illegal operation argument in %s on line %d
-bool(false)
-
---- Iteration 3 ---
-Warning: flock(): Illegal operation argument in %s on line %d
-bool(false)
-
---- Iteration 4 ---
-Warning: flock() expects parameter 2 to be long, array given in %s on line %d
-NULL
-
---- Iteration 5 ---
-Warning: flock() expects parameter 2 to be long, array given in %s on line %d
-NULL
-
---- Iteration 6 ---
-Warning: flock() expects parameter 2 to be long, string given in %s on line %d
-NULL
-
---- Iteration 7 ---
-Warning: flock() expects parameter 2 to be long, string given in %s on line %d
-NULL
-
---- Iteration 8 ---
-Warning: flock() expects parameter 2 to be long, string given in %s on line %d
-NULL
-
-Warning: flock(): 6 is not a valid stream resource in %s on line %d
-bool(false)
-
-Warning: flock() expects parameter 1 to be resource, string given in %s on line %d
-NULL
-
-Warning: flock() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: flock() expects at least 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: flock() expects at most 3 parameters, 4 given in %s on line %d
-NULL
-
-*** Done ***
---UEXPECTF--	
+--EXPECTF--
 *** Testing error conditions ***
 
 --- Iteration 0 ---

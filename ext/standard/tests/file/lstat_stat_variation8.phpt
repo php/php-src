@@ -52,14 +52,7 @@ unlink("$file_path/lstat_stat_variation8/lstat_stat_variation8a.tmp");
 rmdir("$file_path/lstat_stat_variation8/lstat_stat_variation8_subdir/");
 rmdir("$file_path/lstat_stat_variation8");
 ?>
---EXPECTF--
-*** Testing stat() on dir after subdir and file is created in it ***
-bool(true)
-bool(true)
-bool(true)
-
---- Done ---
---UEXPECTF--
+--EXPECT--
 *** Testing stat() on dir after subdir and file is created in it ***
 bool(true)
 bool(true)

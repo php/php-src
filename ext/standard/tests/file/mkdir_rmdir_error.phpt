@@ -56,35 +56,3 @@ bool(false)
 Warning: rmdir(temp): No such file or directory in %s on line %d
 bool(false)
 Done
---UEXPECTF--
-*** Testing mkdir(): error conditions ***
-
-Warning: mkdir() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: mkdir() expects at most 4 parameters, 5 given in %s on line %d
-bool(false)
-
-Notice: Undefined variable: context in %s on line %d
-
-Warning: mkdir() expects at most 4 parameters, 5 given in %s on line %d
-bool(false)
-
-*** Testing rmdir(): error conditions ***
-
-Warning: rmdir() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: rmdir() expects at most 2 parameters, 3 given in %s on line %d
-bool(false)
-
-Notice: Undefined variable: context in %s on line %d
-
-Warning: rmdir() expects at most 2 parameters, 3 given in %s on line %d
-bool(false)
-
-*** Testing rmdir() on non-existent directory ***
-
-Warning: rmdir(temp): No such file or directory in %s on line %d
-bool(false)
-Done

@@ -59,14 +59,7 @@ $file_path = dirname(__FILE__);
 $dirname = "$file_path/lstat_stat_variation9";
 rmdir($dirname);
 ?>
---EXPECTF--
-*** Testing stat() for comparing stats after the deletion of subdir and file ***
-bool(true)
-bool(true)
-bool(true)
-
---- Done ---
---UEXPECTF--
+--EXPECT--
 *** Testing stat() for comparing stats after the deletion of subdir and file ***
 bool(true)
 bool(true)

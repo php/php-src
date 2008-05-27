@@ -98,25 +98,3 @@ Warning: linkinfo(): Permission denied in %s on line %d
 int(-1)
 bool(false)
 Done
---UEXPECTF--
-*** Creating links in a directory without permission to allow the operation ***
-bool(true)
-
--- Working with soft links --
-
-Warning: symlink(): Permission denied in %s on line %d
-bool(false)
-
-Warning: linkinfo(): Permission denied in %s on line %d
-int(-1)
-bool(false)
-
--- Working with hard links --
-
-Warning: link(): Permission denied in %s on line %d
-bool(false)
-
-Warning: linkinfo(): Permission denied in %s on line %d
-int(-1)
-bool(false)
-Done

@@ -34,11 +34,3 @@ unlink (dirname(__FILE__)."/inode.tmp");
 %d
 
 *** Done ***
---UEXPECTF--
-*** Testing fileinode() with file, directory ***
-%d
-%d
-%d
-%d
-
-*** Done ***

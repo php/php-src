@@ -117,7 +117,7 @@ include("data5");
 include_once("data6");
 include_once("data6");
 ?>
---EXPECTF--
+--EXPECT--
 <?php echo __FILE__ . "\n";?>
 test://GLOBALS/data1
 test://GLOBALS/data2
@@ -127,4 +127,3 @@ test://GLOBALS/data4
 <?php echo __FILE__ . "\n";?>
 test://GLOBALS/data5
 test://GLOBALS/data6
-

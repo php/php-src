@@ -134,28 +134,3 @@ bool(true)
 int(%d)
 bool(false)
 Done
---UEXPECTF--
-*** Testing symlink(), link(), linkinfo() and is_link() with linknames stored as members in an object ***
-
--- Working with soft links --
-bool(true)
-int(%d)
-bool(true)
-
--- Working with hard links --
-bool(true)
-int(%d)
-bool(false)
-
-*** Testing symlink(), link(), linkinfo() and is_link() with linknames stored as members of an array ***
-
--- Working with soft links --
-bool(true)
-int(%d)
-bool(true)
-
--- Working with hard links --
-bool(true)
-int(%d)
-bool(false)
-Done

@@ -56,24 +56,7 @@ echo "*** Done ***\n";
 unlink(dirname(__FILE__)."/copy_copy_variation9.tmp");
 unlink(dirname(__FILE__)."/copy_variation9.tmp");
 ?>
---EXPECTF--
-*** Test copy() function: destination with/without write permissions ***
-
--- With write permissions --
-bool(true)
-bool(true)
-bool(true)
-int(1500)
-
--- Without write permissions --
-bool(true)
-
-Warning: %s
-bool(false)
-bool(true)
-int(1500)
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Test copy() function: destination with/without write permissions ***
 
 -- With write permissions --

@@ -101,5 +101,5 @@ var_dump($myvar);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Catchable fatal error: Argument 1 passed to VariableStream::__construct() must be an array, none given in %s on line %d

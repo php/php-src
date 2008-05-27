@@ -41,23 +41,3 @@ Warning: fileowner() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
 *** Done ***
-
---UEXPECTF--
-*** Testing fileowner(): error conditions ***
-
-Warning: fileowner(): stat failed for /no/such/file/dir in %s on line %d
-bool(false)
-
-Warning: fileowner(): stat failed for string in %s on line %d
-bool(false)
-
-Warning: fileowner(): stat failed for 100 in %s on line %d
-bool(false)
-
-Warning: fileowner() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: fileowner() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-*** Done ***

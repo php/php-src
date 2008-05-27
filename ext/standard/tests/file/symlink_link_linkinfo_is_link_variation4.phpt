@@ -91,34 +91,7 @@ unlink($filename);
 
 echo "Done\n";
 ?>
---EXPECTF--
-*** Accessing and updating data of file through hard link ***
-
--- Access data of the file through the hard link --
-bool(true)
-string(80) "texttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttext"
-
--- Check size of hard link and file --
-
-Size of file and hard link are same
-
--- Updating file with data through hard link --
-string(91) "texttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttextHello World"
-
--- Check size of hard link and file --
-
-Size of file and hard link are same
-
--- Updating file with data and check data through hard link --
-string(11) "Hello World"
-
--- Check size of hard link and file --
-int(11)
-int(11)
-
-Size of file and hard link are same
-Done
---UEXPECTF--
+--EXPECT--
 *** Accessing and updating data of file through hard link ***
 
 -- Access data of the file through the hard link --

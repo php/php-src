@@ -109,33 +109,3 @@ Warning: unlink(%s/COPY.TMP): No such file or directory in %s on line %d
 
 Warning: unlink(%s/CopY.TMP): No such file or directory in %s on line %d
 *** Done ***
---UEXPECTF--
-*** Test copy() function: checking case sensitivity in creation of destination file names ***
-Size of the source file before copy operation => int(1500)
-
--- Now applying copy() on source file to create copies --
--- Iteration 1 --
-Copy operation => bool(true)
-Existence of destination file => bool(true)
-Destination file name => %s/COPY.tmp
-Size of source file => int(1500)
-Size of destination file => int(1500)
-
--- Iteration 2 --
-Copy operation => bool(true)
-Existence of destination file => bool(true)
-Destination file name => %s/COPY.TMP
-Size of source file => int(1500)
-Size of destination file => int(1500)
-
--- Iteration 3 --
-Copy operation => bool(true)
-Existence of destination file => bool(true)
-Destination file name => %s/CopY.TMP
-Size of source file => int(1500)
-Size of destination file => int(1500)
-
-Warning: unlink(%s/COPY.TMP): No such file or directory in %s on line %d
-
-Warning: unlink(%s/CopY.TMP): No such file or directory in %s on line %d
-*** Done ***

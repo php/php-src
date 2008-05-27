@@ -41,19 +41,6 @@ Opening
 Closing up!
 array(4) {
   [0]=>
-  string(5) "first"
-  [1]=>
-  string(6) "fourth"
-  [2]=>
-  string(6) "second"
-  [3]=>
-  string(5) "third"
-}
---UEXPECT--
-Opening
-Closing up!
-array(4) {
-  [0]=>
   unicode(5) "first"
   [1]=>
   unicode(6) "fourth"

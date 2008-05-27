@@ -73,23 +73,3 @@ bool(true)
 bool(false)
 bool(true)
 Done
---UEXPECTF--
-*** Testing mkdir() and rmdir() by giving stream context as fourth argument ***
-bool(true)
-bool(true)
-
-*** Testing rmdir() on a non-empty directory ***
-bool(true)
-
-Warning: rmdir(%s/mkdir_variation2/): %s on line %d
-bool(false)
-
-*** Testing mkdir() and rmdir() for binary safe functionality ***
-bool(true)
-bool(true)
-
-*** Testing mkdir() with miscelleneous input ***
-bool(true)
-bool(false)
-bool(true)
-Done

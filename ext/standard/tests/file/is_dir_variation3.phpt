@@ -46,16 +46,3 @@ bool(false)
 bool(false)
 
 *** Done ***
---UEXPECTF--
-*** Testing is_dir() with Invalid arguments: expected bool(false) ***
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-
-Warning: is_dir() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
-NULL
-bool(false)
-bool(false)
-
-*** Done ***

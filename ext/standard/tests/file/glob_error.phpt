@@ -45,24 +45,6 @@ NULL
 
 -- Testing glob() with invalid arguments --
 
-Warning: glob() expects parameter 2 to be long, string given in %s on line %d
-NULL
-
-Warning: glob() expects parameter 2 to be long, string given in %s on line %d
-NULL
-Done
---UEXPECTF--
-*** Testing glob() : error conditions ***
--- Testing glob() with unexpected no. of arguments --
-
-Warning: glob() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: glob() expects at most 2 parameters, 3 given in %s on line %d
-NULL
-
--- Testing glob() with invalid arguments --
-
 Warning: glob() expects parameter 2 to be long, Unicode string given in %s on line %d
 NULL
 

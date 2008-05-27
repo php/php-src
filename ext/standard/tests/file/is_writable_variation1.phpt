@@ -101,39 +101,3 @@ bool(true)
 bool(true)
 bool(true)
 Done
---UEXPECTF--
-*** Testing is_writable(): usage variations ***
--- Iteration 1 --
-bool(true)
-bool(true)
--- Iteration 2 --
-bool(%s)
-bool(%s)
--- Iteration 3 --
-bool(true)
-bool(true)
--- Iteration 4 --
-bool(true)
-bool(true)
--- Iteration 5 --
-bool(false)
-bool(false)
--- Iteration 6 --
-bool(false)
-bool(false)
--- Iteration 7 --
-bool(true)
-bool(true)
--- Iteration 8 --
-bool(true)
-bool(true)
--- Iteration 9 --
-bool(true)
-bool(true)
--- Iteration 10 --
-bool(true)
-bool(true)
--- Iteration 11 --
-bool(true)
-bool(true)
-Done

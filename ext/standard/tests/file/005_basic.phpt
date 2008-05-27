@@ -39,21 +39,7 @@ echo "\n*** Done ***\n";
 unlink(dirname(__FILE__)."/005_basic.tmp");
 unlink(dirname(__FILE__)."/005_basic");
 ?>
---EXPECTF--	
-*** Testing the basic functionality with file ***
-%d:%s:%s:%d:%d:%d
-%d:%s:%s:%d:%d:%d
-%d:%s:%s:%d:%d:%d
-%d:%s:%s:%d:%d:%d
-*** Testing the basic functionality with dir ***
-%d:%s:%s:%d:%d:%d
-%d:%s:%s:%d:%d:%d
-%d:%s:%s:%d:%d:%d
-%d:%s:%s:%d:%d:%d
-
-*** Done ***
-
---UEXPECTF--
+--EXPECTF--
 *** Testing the basic functionality with file ***
 %d:%s:%s:%d:%d:%d
 %d:%s:%s:%d:%d:%d

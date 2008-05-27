@@ -68,20 +68,3 @@ float(%d)
 float(%d)
 
 --- Done ---
---UEXPECTF--
-*** Testing with existing directory ***
-float(%d)
-float(%d)
-*** Testing with newly created directory ***
- 
- Free Space before writing to a file
-float(%d)
-
- Free Space after writing to a file
-float(%d)
-
- Free Space Value Is Correct
-*** Testing with Binary Input ***
-float(%d)
-
---- Done ---

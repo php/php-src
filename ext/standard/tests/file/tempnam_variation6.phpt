@@ -37,13 +37,3 @@ File name is => %s
 File name is => %s
 
 *** Done ***
---UEXPECTF--
-*** Test tempnam(): by passing previously created filenames ***
--- Iteration 1 --
-File name is => %s
--- Iteration 2 --
-File name is => %s
--- Iteration 3 --
-File name is => %s
-
-*** Done ***

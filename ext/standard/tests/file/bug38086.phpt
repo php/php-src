@@ -28,7 +28,7 @@ unlink($new_file);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 int(134)
 string(134) "Nabgure qnl
 Jura gur cnvaf bs yvsr jba'g one zl jnl

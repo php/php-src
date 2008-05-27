@@ -55,17 +55,3 @@ bool(true)
 %d
 %d
 *** Done ***
-
---UEXPECTF--
-*** Testing copy() function: to copy file from source to destination --
-bool(true)
-bool(true)
-bool(true)
--- Checking whether the copy of file exists --
-bool(true)
-bool(true)
--- Checking filepermissions of file and its copies --
-%d
-%d
-%d
-*** Done ***

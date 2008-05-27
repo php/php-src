@@ -55,25 +55,3 @@ Warning: pclose(): supplied argument is not a valid stream resource in %s on lin
 bool(false)
 
 --- Done ---
---UEXPECTF--
-*** Testing for error conditions ***
-
-Warning: popen() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: popen() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-resource(%d) of type (stream)
-'abc.txt' is not recognized as an internal or external command,
-operable program or batch file.
-
-Warning: Wrong parameter count for pclose() in %s on line %d
-NULL
-
-Warning: Wrong parameter count for pclose() in %s on line %d
-NULL
-
-Warning: pclose(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
-
---- Done ---

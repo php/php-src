@@ -17,9 +17,3 @@ echo "*** Done ***\n";
 Warning: clearstatcache() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 *** Done ***
---UEXPECTF--
-*** Testing clearstatcache() function: error conditions ***
-
-Warning: clearstatcache() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
-*** Done ***

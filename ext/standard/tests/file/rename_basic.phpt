@@ -36,10 +36,9 @@ echo "Done\n";
 unlink(dirname(__FILE__)."/rename_basic.tmp");
 unlink(dirname(__FILE__)."/rename_basic_new.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing rename() on non-existing file ***
 bool(true)
 bool(false)
 bool(true)
 Done
-

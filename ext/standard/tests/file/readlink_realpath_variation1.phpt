@@ -79,31 +79,6 @@ rmdir("$name_prefix/");
 
 -- Testing readlink() and realpath() with softlink, linkname stored inside an object --
 bool(true)
-string(%d) "%s/readlink_realpath_variation1/home/tests/link/readlink_realpath_variation1.tmp"
-string(%d) "%s/readlink_realpath_variation1/home/tests/link/readlink_realpath_variation1.tmp"
-bool(true)
-string(%d) "%s/readlink_realpath_variation1/home/tests/link/readlink_realpath_variation1.tmp"
-string(%d) "%s/readlink_realpath_variation1/home/tests/link/readlink_realpath_variation1.tmp"
-
--- Testing readlink() and realpath() with hardlink, linkname stored inside an object --
-bool(true)
-
-Warning: readlink(): Invalid argument in %s on line %d
-bool(false)
-string(%d) "%s/readlink_realpath_variation1/home/readlink_realpath_variation1_link.tmp"
-bool(true)
-
-Warning: readlink(): Invalid argument in %s on line %d
-bool(false)
-string(%d) "%s/readlink_realpath_variation1_link.tmp"
-Done
---UEXPECTF--
-*** Testing readlink() and realpath() : usage variations ***
-
-*** Testing readlink() and realpath() with linkname stored inside a object ***
-
--- Testing readlink() and realpath() with softlink, linkname stored inside an object --
-bool(true)
 unicode(%d) "%s/readlink_realpath_variation1/home/tests/link/readlink_realpath_variation1.tmp"
 unicode(%d) "%s/readlink_realpath_variation1/home/tests/link/readlink_realpath_variation1.tmp"
 bool(true)

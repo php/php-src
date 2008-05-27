@@ -113,38 +113,7 @@ unlink($filename);
 
 echo "Done\n";
 ?>
---EXPECTF--
-*** Accessing and updating data of file through soft link ***
-bool(true)
-
--- Access data of the file through the soft link --
-string(80) "texttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttext"
-
--- Check size of soft link and file --
-int(80)
-int(80)
-
-Soft link size remains same 
-
--- Updating file with data through soft link --
-string(91) "texttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttextHello World"
-
--- Check size of soft link and file --
-int(91)
-int(91)
-
-Soft link size remains same 
-
--- Updating file with data and check data through soft link --
-string(11) "Hello World"
-
--- Check size of soft link and file --
-int(11)
-int(11)
-
-Soft link size remains same 
-Done
---UEXPECTF--
+--EXPECT--
 *** Accessing and updating data of file through soft link ***
 bool(true)
 

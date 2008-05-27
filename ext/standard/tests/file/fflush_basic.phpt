@@ -42,18 +42,6 @@ unlink($filename);
 
 --EXPECTF--
 *** Testing fflush(): writing to a file and reading the contents ***
-int(63)
-bool(true)
-first line of string
-second line of string
-third line of stringint(63)
-
-*** Testing fflush(): for return type ***
-bool(true)
-
-*** Done ***
---UEXPECTF--
-*** Testing fflush(): writing to a file and reading the contents ***
 
 Notice: fwrite(): 63 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 int(63)

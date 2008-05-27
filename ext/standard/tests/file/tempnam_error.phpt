@@ -46,27 +46,3 @@ NULL
 Warning: tempnam() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 *** Done ***
---UEXPECTF--
-*** Testing tempnam() error conditions ***
-
-Warning: tempnam() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: tempnam() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: tempnam() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: tempnam() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: tempnam() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: tempnam() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: tempnam() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-*** Done ***

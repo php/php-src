@@ -55,17 +55,3 @@ bool(false)
 bool(false)
 
 *** Done ***
---UEXPECTF--
-*** Testing Invalid file types ***
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-
-Warning: is_file() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
-NULL
-bool(false)
-bool(false)
-
-*** Done ***

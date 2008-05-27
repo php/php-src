@@ -86,7 +86,7 @@ unlink($new_file);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 int(0)
 string(0) ""
 int(134)

@@ -70,46 +70,6 @@ unlink( dirname(__FILE__)."/006_error.tmp");
 
 Warning: chmod(): %s in %s on line %d
 bool(false)
-100%d44
-
-Warning: chmod(): %s in %s on line %d
-bool(false)
-40755
-
-Warning: chmod(): No such file or directory in %s on line %d
-bool(false)
-
-Warning: fileperms(): stat failed for /no/such/file/dir in %s on line %d
-bool(false)
-
-
-Warning: chmod() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: chmod() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: chmod() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: fileperms() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: chmod() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: fileperms() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: fileperms() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-*** Done ***
---UEXPECTF--
-*** Testing error conditions for fileperms(), chmod() ***
-
-Warning: chmod(): %s in %s on line %d
-bool(false)
 100644
 
 Warning: chmod(): %s in %s on line %d

@@ -61,21 +61,3 @@ line
 line of t
 int(50)
 Done
---UEXPECT--
-*** Testing readfile(): checking second argument, include path ***
-line
-line of text
-line
-line of text
-line
-line of t
-int(50)
-*** Testing readfile(): checking second argument, include path with context specified ***
-line
-line of text
-line
-line of text
-line
-line of t
-int(50)
-Done

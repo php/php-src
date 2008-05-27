@@ -27,15 +27,3 @@ NULL
 *** Testing is_readable() on non-existent file ***
 bool(false)
 Done
---UEXPECTF--
-*** Testing is_readable(): error conditions ***
-
-Warning: is_readable() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: is_readable() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-*** Testing is_readable() on non-existent file ***
-bool(false)
-Done

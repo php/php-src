@@ -35,11 +35,3 @@ bool(false)
 Warning: unlink(%s/unlink_variation4.tmp): %s in %s on line %d
 bool(false)
 Done
---UEXPECTF--
-*** Testing unlink() on deleted file ***
-bool(true)
-bool(false)
-
-Warning: unlink(%s/unlink_variation4.tmp): %s in %s on line %d
-bool(false)
-Done

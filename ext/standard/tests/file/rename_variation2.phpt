@@ -54,7 +54,7 @@ unlink($file_path."/rename_variation_link.tmp");
 unlink($file_path."/rename_variation.tmp");
 rmdir($file_path."/rename_variation_dir");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing rename() on soft links ***
 bool(true)
 bool(true)

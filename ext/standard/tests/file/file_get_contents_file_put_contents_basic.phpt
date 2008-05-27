@@ -39,17 +39,7 @@ $file_path = dirname(__FILE__);
 unlink($file_path."/file_get_contents.tmp");
 unlink($file_path."/file_get_contents1.tmp");
 ?>
---EXPECTF--
-*** Testing the basic functionality ***
--- Testing with simple valid data file --
-string(100) "text text text text text text text text text text text text text text text text text text text text "
-
--- Testing with empty file --
-string(0) ""
-
-*** Done ***
-
---UEXPECTF--
+--EXPECT--
 *** Testing the basic functionality ***
 -- Testing with simple valid data file --
 string(100) "text text text text text text text text text text text text text text text text text text text text "

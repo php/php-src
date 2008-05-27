@@ -38,13 +38,7 @@ unlink($file_path."/is_file_variation2_link.tmp");
 unlink($file_path."/is_file_variation2.tmp");
 ?>
 
---EXPECTF--
-*** Testing is_file() with links ***
-bool(true)
-bool(true)
-
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Testing is_file() with links ***
 bool(true)
 bool(true)

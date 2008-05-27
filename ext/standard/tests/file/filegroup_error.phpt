@@ -41,23 +41,3 @@ Warning: filegroup() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
 *** Done ***
-
---UEXPECTF--
-*** Testing filegroup(): error conditions ***
-
-Warning: filegroup(): stat failed for /no/such/file/dir in %s on line %d
-bool(false)
-
-Warning: filegroup(): stat failed for string in %s on line %d
-bool(false)
-
-Warning: filegroup(): stat failed for 100 in %s on line %d
-bool(false)
-
-Warning: filegroup() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: filegroup() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-*** Done ***

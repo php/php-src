@@ -64,43 +64,6 @@ unlink($filename);
 --EXPECTF--
 *** Testing fscanf() for error conditions ***
 
-Warning: Wrong parameter count for fscanf() in %s on line %d
-NULL
-
-Warning: Wrong parameter count for fscanf() in %s on line %d
-NULL
-
-Warning: fscanf(): %d is not a valid File-Handle resource in %s on line %d
-bool(false)
-
-Warning: fscanf(): Different numbers of variable names and field specifiers in %s on line %d
-int(-1)
-
-Notice: Undefined variable: undefined_var in %s on line %d
-
-Notice: Use of undefined constant undefined_constant - assumed 'undefined_constant' in %s on line %d
-array(0) {
-}
-array(0) {
-}
-
-Warning: fscanf(): Bad scan conversion character " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character "." in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character "m" in %s on line %d
-NULL
-
-*** Done ***
-
---UEXPECTF--
-*** Testing fscanf() for error conditions ***
-
 Notice: fwrite(): 11 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 
 Warning: Wrong parameter count for fscanf() in %s on line %d

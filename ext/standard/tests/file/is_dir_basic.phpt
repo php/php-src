@@ -31,17 +31,7 @@ $dir_name = $file_path."/is_dir_basic";
 rmdir($dir_name);
 ?>
 
---EXPECTF--
-*** Testing is_dir(): basic functionality ***
-bool(true)
-bool(true)
-bool(false)
-bool(true)
-*** Testing is_dir() for its return value type ***
-bool(true)
-bool(true)
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Testing is_dir(): basic functionality ***
 bool(true)
 bool(true)

@@ -43,12 +43,7 @@ echo "*** Done ***\n";
 unlink(dirname(__FILE__)."/copy_copy_variation18.tmp");
 unlink(dirname(__FILE__)."/copy_variation18.tmp");
 ?>
---EXPECTF--
-*** Test copy() function: stat of file before and after copy ***
-Copy operation => bool(true)
-Comparing the stats of file before and after copy operation => bool(true)
-*** Done ***
---UEXPECTF--
+--EXPECT--
 *** Test copy() function: stat of file before and after copy ***
 Copy operation => bool(true)
 Comparing the stats of file before and after copy operation => bool(true)

@@ -33,12 +33,3 @@ Warning: is_dir() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 bool(false)
 *** Done ***
---UEXPECTF--
-*** Testing is_dir() error conditions ***
-Warning: is_dir() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: is_dir() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-bool(false)
-*** Done ***

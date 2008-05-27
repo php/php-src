@@ -46,13 +46,3 @@ Total Space after writing to a file
 float(%d)
 
 -- Done --
---UEXPECTF--
-*** Testing with normal directory ***
-float(%d)
-*** Testing with newly created directory ***
-float(%d)
-
-Total Space after writing to a file
-float(%d)
-
--- Done --

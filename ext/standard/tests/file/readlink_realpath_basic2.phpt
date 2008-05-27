@@ -67,33 +67,6 @@ rmdir("$name_prefix/");
 *** Testing realpath() on filenames ***
 
 -- Iteration 1 --
-string(%d) "%s/readlink_realpath_basic2/home/readlink_realpath_basic2.tmp"
-
--- Iteration 2 --
-string(%d) "%s/readlink_realpath_basic2/readlink_realpath_basic2.tmp"
-
--- Iteration 3 --
-string(%d) "%s/readlink_realpath_basic2/home/test/readlink_realpath_basic2.tmp"
-
--- Iteration 4 --
-string(%d) "%s/readlink_realpath_basic2/readlink_realpath_basic2.tmp"
-
--- Iteration 5 --
-string(%d) "%s/readlink_realpath_basic2/home/readlink_realpath_basic2.tmp"
-
--- Iteration 6 --
-bool(false)
-
--- Iteration 7 --
-bool(false)
-
--- Iteration 8 --
-%s
-Done
---UEXPECTF--
-*** Testing realpath() on filenames ***
-
--- Iteration 1 --
 unicode(%d) "%s/readlink_realpath_basic2/home/readlink_realpath_basic2.tmp"
 
 -- Iteration 2 --

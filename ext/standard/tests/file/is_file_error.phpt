@@ -45,16 +45,3 @@ Warning: is_file() expects parameter 1 to be string (Unicode or binary), resourc
 NULL
 
 *** Done ***
---UEXPECTF--
-*** Testing is_file() error conditions ***
-Warning: is_file() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: is_file() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-bool(false)
-
-Warning: is_file() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
-NULL
-
-*** Done ***

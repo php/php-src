@@ -50,16 +50,3 @@ Notice: Undefined variable: file_handle in %s on line %d
 Warning: fgetc(): supplied argument is not a valid stream resource in %s on line %d
 bool(false)
 Done
---UEXPECTF--
-*** Testing fgetc() : usage variations ***
--- Testing fgetc() with closed handle --
-
-Warning: fgetc(): %d is not a valid stream resource in %s on line %d
-bool(false)
--- Testing fgetc() with unset handle --
-
-Notice: Undefined variable: file_handle in %s on line %d
-
-Warning: fgetc(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
-Done

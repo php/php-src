@@ -71,37 +71,3 @@ NULL
 *** Testing realpath() on a non-existent file ***
 %s
 Done
---UEXPECTF--
-*** Testing readlink(): error conditions ***
-
-Warning: readlink() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: readlink() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-*** Testing readlink() on a non-existent link ***
-
-Warning: readlink(): No such file or directory in %s on line %d
-bool(false)
-
-*** Testing readlink() on existing file ***
-
-Warning: readlink(): Invalid argument in %s on line %d
-bool(false)
-
-*** Testing readlink() on existing directory ***
-
-Warning: readlink(): Invalid argument in %s on line %d
-bool(false)
-*** Testing realpath(): error conditions ***
-
-Warning: realpath() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: realpath() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-*** Testing realpath() on a non-existent file ***
-%s
-Done

@@ -54,18 +54,3 @@ Warning: is_readable() expects parameter 1 to be string (Unicode or binary), arr
 NULL
 bool(false)
 Done
---UEXPECTF--
-*** Testing is_readable(): usage variations ***
-
-*** Testing is_readable() on miscelleneous filenames ***
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-
-Warning: is_readable() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-bool(false)
-Done

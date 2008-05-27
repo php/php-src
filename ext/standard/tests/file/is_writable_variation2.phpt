@@ -75,46 +75,7 @@ echo "Done\n";
 <?php
 rmdir(dirname(__FILE__)."/is_writable_variation2/");
 ?>
---EXPECTF--
-*** Testing is_writable(): usage variations ***
-
-*** Testing is_writable() on directory without write permission ***
-bool(false)
-bool(false)
-
-*** Testing miscelleneous input for is_writable() function ***
--- Iteration 1 --
-bool(true)
-bool(true)
--- Iteration 2 --
-bool(true)
-bool(true)
--- Iteration 3 --
-bool(true)
-bool(true)
--- Iteration 4 --
-bool(false)
-bool(false)
--- Iteration 5 --
-bool(true)
-bool(true)
--- Iteration 6 --
-bool(true)
-bool(true)
--- Iteration 7 --
-bool(false)
-bool(false)
--- Iteration 8 --
-bool(true)
-bool(true)
--- Iteration 9 --
-bool(false)
-bool(false)
--- Iteration 10 --
-bool(false)
-bool(false)
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing is_writable(): usage variations ***
 
 *** Testing is_writable() on directory without write permission ***

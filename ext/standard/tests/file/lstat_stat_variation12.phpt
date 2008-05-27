@@ -55,15 +55,7 @@ $file_path = dirname(__FILE__);
 unlink("$file_path/lstat_stat_variation12_link.tmp");
 unlink("$file_path/lstat_stat_variation12.tmp");
 ?>
---EXPECTF--
-*** Testing stat() on a link after using is_link() on it ***
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-
---- Done ---
---UEXPECTF--
+--EXPECT--
 *** Testing stat() on a link after using is_link() on it ***
 bool(true)
 bool(true)
