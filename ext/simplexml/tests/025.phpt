@@ -50,48 +50,6 @@ var_dump($sxe->getDocNamespaces());
 <?php exit(0); ?>
 --EXPECTF--
 array(1) {
-  ["xhtml"]=>
-  string(31) "http://www.w3.org/TR/REC-html40"
-}
-array(3) {
-  ["xhtml"]=>
-  string(31) "http://www.w3.org/TR/REC-html40"
-  ["html"]=>
-  string(28) "http://www.w3.org/1999/xhtml"
-  ["foo"]=>
-  string(6) "foobar"
-}
-array(2) {
-  ["html"]=>
-  string(28) "http://www.w3.org/1999/xhtml"
-  ["xhtml"]=>
-  string(31) "http://www.w3.org/TR/REC-html40"
-}
-array(4) {
-  ["html"]=>
-  string(28) "http://www.w3.org/1999/xhtml"
-  ["xhtml"]=>
-  string(31) "http://www.w3.org/TR/REC-html40"
-  ["foo"]=>
-  string(6) "foobar"
-  ["baz"]=>
-  string(9) "foobarbaz"
-}
-array(1) {
-  [""]=>
-  string(28) "http://www.w3.org/1999/xhtml"
-}
-array(1) {
-  [""]=>
-  string(28) "http://www.w3.org/1999/xhtml"
-}
-array(0) {
-}
-array(0) {
-}
-===DONE===
---UEXPECTF--
-array(1) {
   [u"xhtml"]=>
   unicode(31) "http://www.w3.org/TR/REC-html40"
 }

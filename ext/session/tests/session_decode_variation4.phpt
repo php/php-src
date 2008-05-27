@@ -35,30 +35,6 @@ bool(true)
 array(0) {
 }
 array(3) {
-  ["foo"]=>
-  int(1234567890)
-  ["bar"]=>
-  string(5) "Blah!"
-  ["guff"]=>
-  float(123.456)
-}
-bool(true)
-array(3) {
-  ["foo"]=>
-  int(1234567890)
-  ["bar"]=>
-  string(5) "Blah!"
-  ["guff"]=>
-  float(123.456)
-}
-bool(true)
-Done
---UEXPECTF--
-*** Testing session_decode() : variation ***
-bool(true)
-array(0) {
-}
-array(3) {
   [u"foo"]=>
   int(1234567890)
   [u"bar"]=>

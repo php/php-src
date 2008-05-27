@@ -71,22 +71,6 @@ $_SESSION['E'] = 'F';
 open: path = /, name = sid
 read: id = %s
 gc: maxlifetime = %d
-write: id = %s, data = A|S:1:"B";
-close
-open: path = /, name = sid
-read: id = %s
-gc: maxlifetime = %d
-destroy: id = %s
-close
-open: path = /, name = sid
-read: id = %s
-gc: maxlifetime = %d
-write: id = %s, data = E|S:1:"F";
-close
---UEXPECTF--
-open: path = /, name = sid
-read: id = %s
-gc: maxlifetime = %d
 write: id = %s, data = A|U:1:"B";
 close
 open: path = /, name = sid

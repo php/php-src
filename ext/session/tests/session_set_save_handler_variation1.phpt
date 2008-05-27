@@ -27,19 +27,6 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_set_save_handler() : variation ***
-string(%d) "%s"
-
-Warning: session_module_name(): Cannot find named PHP session module () in %s on line %d
-bool(false)
-string(%d) "%s"
-
-Warning: session_module_name(): Cannot find named PHP session module (blah) in %s on line %d
-bool(false)
-string(%d) "%s"
-string(%d) "%s"
-string(5) "files"
---UEXPECTF--
-*** Testing session_set_save_handler() : variation ***
 unicode(5) "files"
 
 Warning: session_module_name(): Cannot find named PHP session module () in %s on line %d

@@ -49,55 +49,6 @@ var_dump($a);
 --EXPECTF--
 ===Property===
 object(SimpleXMLElement)#%d (3) {
-  ["@attributes"]=>
-  array(1) {
-    ["attr1"]=>
-    string(5) "first"
-  }
-  ["comment"]=>
-  object(SimpleXMLElement)#%d (0) {
-  }
-  ["elem2"]=>
-  object(SimpleXMLElement)#%d (1) {
-    ["elem3"]=>
-    object(SimpleXMLElement)#%d (1) {
-      ["elem4"]=>
-      object(SimpleXMLElement)#%d (1) {
-        ["test"]=>
-        object(SimpleXMLElement)#%d (0) {
-        }
-      }
-    }
-  }
-}
-===Array===
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(5) "elem1"
-}
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(5) "first"
-}
-===Set===
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(8) "Changed1"
-}
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(2) "12"
-}
-===Unset===
-NULL
-NULL
-===Misc.===
-int(4)
-int(4)
-===Done===
---UEXPECTF--
-===Property===
-object(SimpleXMLElement)#%d (3) {
   [u"@attributes"]=>
   array(1) {
     [u"attr1"]=>

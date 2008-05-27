@@ -32,43 +32,6 @@ var_dump(simplexml_load_string($xml));
 ===DONE===
 --EXPECTF--
 object(SimpleXMLElement)#%d (2) {
-  ["@attributes"]=>
-  array(1) {
-    ["id"]=>
-    string(5) "elem1"
-  }
-  ["elem1"]=>
-  object(SimpleXMLElement)#%d (3) {
-    ["@attributes"]=>
-    array(1) {
-      ["attr1"]=>
-      string(5) "first"
-    }
-    ["comment"]=>
-    object(SimpleXMLElement)#%d (0) {
-    }
-    ["elem2"]=>
-    object(SimpleXMLElement)#%d (1) {
-      ["elem3"]=>
-      object(SimpleXMLElement)#%d (2) {
-        ["included-entity"]=>
-        object(SimpleXMLElement)#%d (1) {
-          ["included-entity"]=>
-          string(36) "This is text included from an entity"
-        }
-        ["elem4"]=>
-        object(SimpleXMLElement)#%d (1) {
-          ["test"]=>
-          object(SimpleXMLElement)#%d (0) {
-          }
-        }
-      }
-    }
-  }
-}
-===DONE===
---UEXPECTF--
-object(SimpleXMLElement)#%d (2) {
   [u"@attributes"]=>
   array(1) {
     [u"id"]=>

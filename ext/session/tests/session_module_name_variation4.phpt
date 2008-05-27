@@ -44,30 +44,6 @@ ob_end_flush();
 *** Testing session_module_name() : variation ***
 
 array(3) {
-  ["Blah"]=>
-  string(12) "Hello World!"
-  ["Foo"]=>
-  bool(false)
-  ["Guff"]=>
-  int(1234567890)
-}
-NULL
-array(3) {
-  ["Blah"]=>
-  string(12) "Hello World!"
-  ["Foo"]=>
-  bool(false)
-  ["Guff"]=>
-  int(1234567890)
-}
-bool(true)
-array(0) {
-}
-bool(true)
---UEXPECTF--
-*** Testing session_module_name() : variation ***
-
-array(3) {
   [u"Blah"]=>
   unicode(12) "Hello World!"
   [u"Foo"]=>

@@ -29,7 +29,5 @@ var_dump(session_encode());
 session_destroy();
 ?>
 --EXPECT--
-string(126) "baz|O:3:"foo":2:{S:3:"bar";S:2:"ok";S:3:"yes";S:4:"done";}arr|a:1:{i:3;O:3:"foo":2:{S:3:"bar";S:2:"ok";S:3:"yes";S:4:"done";}}"
---UEXPECT--
 unicode(126) "baz|O:3:"foo":2:{U:3:"bar";U:2:"ok";U:3:"yes";U:4:"done";}arr|a:1:{i:3;O:3:"foo":2:{U:3:"bar";U:2:"ok";U:3:"yes";U:4:"done";}}"
 

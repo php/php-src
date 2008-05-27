@@ -33,48 +33,6 @@ var_dump($sxe->Body->children('')->businessList);
 <?php exit(0); ?>
 --EXPECTF--
 object(SimpleXMLElement)#%d (1) {
-  ["Body"]=>
-  object(SimpleXMLElement)#%d (0) {
-  }
-}
-object(SimpleXMLElement)#%d (0) {
-}
-object(SimpleXMLElement)#%d (1) {
-  ["businessList"]=>
-  object(SimpleXMLElement)#%d (2) {
-    ["@attributes"]=>
-    array(1) {
-      ["foo"]=>
-      string(3) "bar"
-    }
-    ["businessInfo"]=>
-    object(SimpleXMLElement)#%d (1) {
-      ["@attributes"]=>
-      array(1) {
-        ["businessKey"]=>
-        string(3) "bla"
-      }
-    }
-  }
-}
-object(SimpleXMLElement)#%d (2) {
-  ["@attributes"]=>
-  array(1) {
-    ["foo"]=>
-    string(3) "bar"
-  }
-  ["businessInfo"]=>
-  object(SimpleXMLElement)#%d (1) {
-    ["@attributes"]=>
-    array(1) {
-      ["businessKey"]=>
-      string(3) "bla"
-    }
-  }
-}
-===DONE===
---UEXPECTF--
-object(SimpleXMLElement)#%d (1) {
   [u"Body"]=>
   object(SimpleXMLElement)#%d (0) {
   }

@@ -30,39 +30,6 @@ foreach($sxe->content->file as $file)
 --EXPECTF--
 ===CONTENT===
 object(SimpleXMLElement)#%d (1) {
-  ["file"]=>
-  object(SimpleXMLElement)#%d (1) {
-    ["@attributes"]=>
-    array(1) {
-      ["glob"]=>
-      string(11) "slide_*.xml"
-    }
-  }
-}
-===FILE===
-object(SimpleXMLElement)#%d (1) {
-  ["@attributes"]=>
-  array(1) {
-    ["glob"]=>
-    string(11) "slide_*.xml"
-  }
-}
-===FOREACH===
-object(SimpleXMLElement)#%d (1) {
-  ["@attributes"]=>
-  array(1) {
-    ["glob"]=>
-    string(11) "slide_*.xml"
-  }
-}
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(11) "slide_*.xml"
-}
-===DONE===
---UEXPECTF--
-===CONTENT===
-object(SimpleXMLElement)#%d (1) {
   [u"file"]=>
   object(SimpleXMLElement)#%d (1) {
     [u"@attributes"]=>

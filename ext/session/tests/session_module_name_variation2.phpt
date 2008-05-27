@@ -30,10 +30,6 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_module_name() : variation ***
-string(%d) "%s"
-string(4) "user"
---UEXPECTF--
-*** Testing session_module_name() : variation ***
 unicode(5) "files"
 unicode(4) "user"
 

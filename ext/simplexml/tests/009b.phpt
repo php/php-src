@@ -22,19 +22,6 @@ var_dump($sxe->children());
 <?php exit(0); ?>
 --EXPECTF--
 object(SimpleXMLElement)#%d (3) {
-  ["@attributes"]=>
-  array(1) {
-    ["id"]=>
-    string(5) "elem1"
-  }
-  ["elem1"]=>
-  string(10) "Bla bla 1."
-  ["elem11"]=>
-  string(10) "Bla bla 2."
-}
-===DONE===
---UEXPECTF--
-object(SimpleXMLElement)#%d (3) {
   [u"@attributes"]=>
   array(1) {
     [u"id"]=>

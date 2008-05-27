@@ -32,31 +32,6 @@ var_dump($people->person[0]['age']);
 --EXPECTF--
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  string(3) "Joe"
-}
-NULL
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(3) "XXX"
-}
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(2) "30"
-}
----Unset:---
----Unset?---
-NULL
-bool(false)
----Unsupported---
-NULL
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(1) "5"
-}
-===DONE===
---UEXPECTF--
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
   unicode(3) "Joe"
 }
 NULL

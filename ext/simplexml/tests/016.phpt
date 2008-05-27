@@ -31,33 +31,6 @@ var_dump($people->person[0]['name']);
 --EXPECTF--
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  string(3) "Joe"
-}
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(6) "JoeFoo"
-}
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(9) "JoeFooBar"
-}
----[0]---
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(3) "Joe"
-}
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(6) "JoeFoo"
-}
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(9) "JoeFooBar"
-}
-===DONE===
---UEXPECTF--
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
   unicode(3) "Joe"
 }
 object(SimpleXMLElement)#%d (1) {

@@ -34,20 +34,6 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_set_cookie_params() : variation ***
-string(1) "1"
-NULL
-string(1) "0"
-bool(true)
-string(1) "0"
-NULL
-string(1) "1"
-bool(true)
-string(1) "1"
-NULL
-string(1) "0"
-Done
---UEXPECTF--
-*** Testing session_set_cookie_params() : variation ***
 unicode(1) "1"
 NULL
 unicode(1) "0"

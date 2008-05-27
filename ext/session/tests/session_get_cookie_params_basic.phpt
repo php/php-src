@@ -27,47 +27,6 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_get_cookie_params() : basic functionality ***
 array(5) {
-  ["lifetime"]=>
-  int(0)
-  ["path"]=>
-  string(1) "/"
-  ["domain"]=>
-  string(0) ""
-  ["secure"]=>
-  bool(false)
-  ["httponly"]=>
-  bool(false)
-}
-NULL
-array(5) {
-  ["lifetime"]=>
-  int(3600)
-  ["path"]=>
-  string(5) "/path"
-  ["domain"]=>
-  string(4) "blah"
-  ["secure"]=>
-  bool(false)
-  ["httponly"]=>
-  bool(false)
-}
-NULL
-array(5) {
-  ["lifetime"]=>
-  int(1234567890)
-  ["path"]=>
-  string(5) "/guff"
-  ["domain"]=>
-  string(3) "foo"
-  ["secure"]=>
-  bool(true)
-  ["httponly"]=>
-  bool(true)
-}
-Done
---UEXPECTF--
-*** Testing session_get_cookie_params() : basic functionality ***
-array(5) {
   [u"lifetime"]=>
   int(0)
   [u"path"]=>

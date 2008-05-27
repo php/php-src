@@ -32,19 +32,6 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_id() : variation ***
-string(1) "0"
-string(0) ""
-bool(true)
-string(%d) "%s"
-bool(true)
-string(1) "0"
-string(0) ""
-bool(true)
-string(%d) "%s"
-bool(true)
-Done
---UEXPECTF--
-*** Testing session_id() : variation ***
 unicode(1) "0"
 string(0) ""
 bool(true)
