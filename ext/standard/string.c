@@ -40,8 +40,6 @@
 # include <libintl.h> /* For LC_MESSAGES */
 #endif
 
-#include <math.h>
-
 #include "scanf.h"
 #include "zend_API.h"
 #include "zend_execute.h"
@@ -7865,14 +7863,14 @@ PHP_FUNCTION(str_split)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, ((str_len - 1) / split_length) + 1);
 
 	if (split_length >= str_len) {
 		add_next_index_zstrl(return_value, str_type, str, str_len, 1);
 		return;
 	}
 
-	n_reg_segments = floor(str_len / split_length);
+	n_reg_segments = str_len / split_length;
 	p = str.s;
 	if (str_type == IS_UNICODE) {
 		charsize = 2;

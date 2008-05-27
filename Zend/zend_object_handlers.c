@@ -662,7 +662,7 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 
 	ALLOC_ZVAL(method_args_ptr);
 	INIT_PZVAL(method_args_ptr);
-	array_init(method_args_ptr);
+	array_init_size(method_args_ptr, ZEND_NUM_ARGS());
 
 	if (zend_copy_parameters_array(ZEND_NUM_ARGS(), method_args_ptr TSRMLS_CC) == FAILURE) {
 		zval_dtor(method_args_ptr);
@@ -867,7 +867,7 @@ ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{
 
 	ALLOC_ZVAL(method_args_ptr);
 	INIT_PZVAL(method_args_ptr);
-	array_init(method_args_ptr);
+	array_init_size(method_args_ptr, ZEND_NUM_ARGS());
 
 	if (zend_copy_parameters_array(ZEND_NUM_ARGS(), method_args_ptr TSRMLS_CC) == FAILURE) {
 		zval_dtor(method_args_ptr);

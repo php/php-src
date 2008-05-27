@@ -1625,7 +1625,14 @@ PHP_FUNCTION(compact)
 		zend_rebuild_symbol_table(TSRMLS_C);
 	}
 
-	array_init(return_value);
+	/* compact() is probably most used with a single array of var_names
+	   or multiple string names, rather than a combination of both.
+	   So quickly guess a minimum result size based on that */
+	if (ZEND_NUM_ARGS() == 1 && Z_TYPE_PP(args[0]) == IS_ARRAY) {
+		array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_PP(args[0])));
+	} else {
+		array_init_size(return_value, ZEND_NUM_ARGS());
+	}
 
 	for (i=0; i<ZEND_NUM_ARGS(); i++) {
 		php_compact_var(EG(active_symbol_table), return_value, *args[i] TSRMLS_CC);
@@ -1646,15 +1653,15 @@ PHP_FUNCTION(array_fill)
 		return;
 	}
 
-	num--;
-	if (num < 0) {
+	if (num < 1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of elements must be positive");
 		RETURN_FALSE;
 	}
 
 	/* allocate an array for return */
-	array_init(return_value);
+	array_init_size(return_value, num);
 
+	num--;
 	zval_add_ref(&val);
 	zend_hash_index_update(Z_ARRVAL_P(return_value), start_key, &val, sizeof(zval *), NULL);
 
@@ -1677,7 +1684,7 @@ PHP_FUNCTION(array_fill_keys)
 	}
 
 	/* Initialize return array */
-	array_init(return_value);
+	array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(keys)));
 
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(keys), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(keys), (void **)&entry, &pos) == SUCCESS) {
@@ -2013,7 +2020,7 @@ PHPAPI HashTable* php_splice(HashTable *in_hash, int offset, int length, zval **
 
 	/* Create and initialize output hash */
 	ALLOC_HASHTABLE(out_hash);
-	zend_hash_init(out_hash, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(out_hash, (length > 0 ? num_in - length : 0) + list_count, NULL, ZVAL_PTR_DTOR, 0);
 
 	/* Start at the beginning of the input hash and copy entries to output hash until offset is reached */
 	for (pos = 0, p = in_hash->pListHead; pos < offset && p ; pos++, p = p->pListNext) {
@@ -2257,19 +2264,23 @@ PHP_FUNCTION(array_splice)
 	zval *array,				/* Input array */
 		 *repl_array,			/* Replacement array */
 		 ***repl = NULL;		/* Replacement elements */
-	HashTable *new_hash = NULL;	/* Output array's hash */
+	HashTable *new_hash = NULL,	/* Output array's hash */
+	         **rem_hash = NULL;	/* Removed elements' hash */
 	Bucket *p;					/* Bucket used for traversing hash */
 	long	i,
 			offset,
 			length,
 			repl_num = 0;		/* Number of replacement elements */
+	int		num_in;				/* Number of elements in the input array */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al|lz/", &array, &offset, &length, &repl_array) == FAILURE) {
 		return;
 	}
 
+	num_in = zend_hash_num_elements(Z_ARRVAL_P(array));
+
 	if (ZEND_NUM_ARGS() < 3) {
-		length = zend_hash_num_elements(Z_ARRVAL_P(array));
+		length = num_in;
 	}
 
 	if (ZEND_NUM_ARGS() == 4) {
@@ -2284,11 +2295,32 @@ PHP_FUNCTION(array_splice)
 		}
 	}
 
-	/* Initialize return value */
-	array_init(return_value);
+	/* Don't create the array of removed elements if it's not going
+	 * to be used; e.g. only removing and/or replacing elements */
+	if (return_value_used) {
+		int size;
+
+		/* Clamp the offset.. */
+		if (offset > num_in) {
+			offset = num_in;
+		} else if (offset < 0 && (offset = (num_in + offset)) < 0) {
+			offset = 0;
+		}
+
+		/* ..and the length */
+		if (length < 0) {
+			size = num_in - offset + length;
+		} else if (((unsigned long) offset + (unsigned long) length) > (unsigned) num_in) {
+			size = num_in - offset;
+		}
+
+		/* Initialize return value */
+		array_init_size(return_value, size > 0 ? size : 0);
+		rem_hash = &Z_ARRVAL_P(return_value);
+	}
 
 	/* Perform splice */
-	new_hash = php_splice(Z_ARRVAL_P(array), offset, length, repl, repl_num, &Z_ARRVAL_P(return_value));
+	new_hash = php_splice(Z_ARRVAL_P(array), offset, length, repl, repl_num, rem_hash);
 
 	/* Replace input array's hashtable with the new one */
 	zend_hash_destroy(Z_ARRVAL_P(array));
@@ -2329,7 +2361,7 @@ PHP_FUNCTION(array_slice)
 	/* Get number of entries in the input hash */
 	num_in = zend_hash_num_elements(Z_ARRVAL_P(input));
 
-	/* We want all entries from offset to the end if length is not passed or length is null */
+	/* We want all entries from offset to the end if length is not passed or is null */
 	if (ZEND_NUM_ARGS() < 3 || Z_TYPE_PP(z_length) == IS_NULL) {
 		length = num_in;
 	} else {
@@ -2337,11 +2369,9 @@ PHP_FUNCTION(array_slice)
 		length = Z_LVAL_PP(z_length);
 	}
 
-	/* Initialize returned array */
-	array_init(return_value);
-
 	/* Clamp the offset.. */
 	if (offset > num_in) {
+		array_init(return_value);
 		return;
 	} else if (offset < 0 && (offset = (num_in + offset)) < 0) {
 		offset = 0;
@@ -2354,7 +2384,10 @@ PHP_FUNCTION(array_slice)
 		length = num_in - offset;
 	}
 
-	if (length == 0) {
+	/* Initialize returned array */
+	array_init_size(return_value, length > 0 ? length : 0);
+
+	if (length <= 0) {
 		return;
 	}
 
@@ -2549,7 +2582,11 @@ PHP_FUNCTION(array_keys)
 	}
 
 	/* Initialize return array */
-	array_init(return_value);
+	if (search_value != NULL) {
+		array_init(return_value);
+	} else {
+		array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(input)));
+	}
 	add_key = 1;
 
 	/* Go through input array and add keys to the return array */
@@ -2599,7 +2636,7 @@ PHP_FUNCTION(array_values)
 	}
 
 	/* Initialize return array */
-	array_init(return_value);
+	array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(input)));
 
 	/* Go through input array and add values to the return array */
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(input), &pos);
@@ -2676,7 +2713,7 @@ PHP_FUNCTION(array_reverse)
 	}
 
 	/* Initialize return array */
-	array_init(return_value);
+	array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(input)));
 
 	zend_hash_internal_pointer_end_ex(Z_ARRVAL_P(input), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(input), (void **)&entry, &pos) == SUCCESS) {
@@ -2793,7 +2830,7 @@ PHP_FUNCTION(array_flip)
 	}
 
 	target_hash = HASH_OF(array);
-	array_init(return_value);
+	array_init_size(return_value, zend_hash_num_elements(target_hash));
 
 	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
 	while (zend_hash_get_current_data_ex(target_hash, (void **)&entry, &pos) == SUCCESS) {
@@ -2842,7 +2879,7 @@ PHP_FUNCTION(array_change_key_case)
 		return;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(array)));
 
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(array), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(array), (void **)&entry, &pos) == SUCCESS) {
@@ -2902,7 +2939,7 @@ PHP_FUNCTION(array_unique)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, zend_hash_num_elements(target_hash));
 	zend_hash_copy(Z_ARRVAL_P(return_value), target_hash, (copy_ctor_func_t) zval_add_ref, (void *)&tmp, sizeof(zval*));
 
 	if (target_hash->nNumOfElements <= 1) {	/* nothing to do */
@@ -4101,7 +4138,7 @@ PHP_FUNCTION(array_rand)
 
 	/* Make the return value an array only if we need to pass back more than one result. */
 	if (num_req > 1) {
-		array_init(return_value);
+		array_init_size(return_value, num_req);
 	}
 
 	/* We can't use zend_hash_index_find() because the array may have string keys or gaps. */
@@ -4426,7 +4463,7 @@ PHP_FUNCTION(array_map)
 		return;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, maxlen);
 	params = (zval ***)safe_emalloc(n_arrays, sizeof(zval **), 0);
 	MAKE_STD_ZVAL(null);
 	ZVAL_NULL(null);
@@ -4442,7 +4479,7 @@ PHP_FUNCTION(array_map)
 		 * entries from all arrays. */
 		if (!ZEND_FCI_INITIALIZED(fci)) {
 			MAKE_STD_ZVAL(result);
-			array_init(result);
+			array_init_size(result, n_arrays);
 		}
 
 		for (i = 0; i < n_arrays; i++) {
@@ -4558,7 +4595,7 @@ PHP_FUNCTION(array_key_exists)
    Split array into chunks */
 PHP_FUNCTION(array_chunk)
 {
-	int argc = ZEND_NUM_ARGS(), key_type;
+	int argc = ZEND_NUM_ARGS(), key_type, num_in;
 	long size, current = 0;
 	zstr str_key;
 	uint str_key_len;
@@ -4578,14 +4615,20 @@ PHP_FUNCTION(array_chunk)
 		return;
 	}
 
-	array_init(return_value);
+	num_in = zend_hash_num_elements(Z_ARRVAL_P(input));
+
+	if (size > num_in) {
+		size = num_in > 0 ? num_in : 1;
+	}
+
+	array_init_size(return_value, ((num_in - 1) / size) + 1);
 
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(input), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(input), (void**)&entry, &pos) == SUCCESS) {
 		/* If new chunk, create and initialize it. */
 		if (!chunk) {
 			MAKE_STD_ZVAL(chunk);
-			array_init(chunk);
+			array_init_size(chunk, size);
 		}
 
 		/* Add entry to the chunk, preserving keys if necessary. */
@@ -4655,7 +4698,7 @@ PHP_FUNCTION(array_combine)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, num_keys);
 
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(keys), &pos_keys);
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(values), &pos_values);

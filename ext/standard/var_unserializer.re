@@ -651,10 +651,8 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	}
 
 	INIT_PZVAL(*rval);
-	Z_TYPE_PP(rval) = IS_ARRAY;
-	ALLOC_HASHTABLE(Z_ARRVAL_PP(rval));
 
-	zend_hash_init(Z_ARRVAL_PP(rval), elements + 1, NULL, ZVAL_PTR_DTOR, 0);
+	array_init_size(*rval, elements);
 
 	if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL_PP(rval), elements)) {
 		return 0;
