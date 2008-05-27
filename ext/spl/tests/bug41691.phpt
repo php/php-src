@@ -19,16 +19,6 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 array(3) {
-  ["a"]=>
-  NULL
-  ["b"]=>
-  NULL
-  ["c"]=>
-  NULL
-}
-Done
---UEXPECTF--
-array(3) {
   [u"a"]=>
   NULL
   [u"b"]=>

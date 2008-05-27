@@ -35,28 +35,6 @@ bool(false)
 
 Warning: shm_remove_var(): variable key -10 doesn't exist in %s006.php on line %d
 bool(false)
-string(11) "test string"
-bool(true)
-
-Warning: shm_get_var(): variable key 1 doesn't exist in %s006.php on line %d
-bool(false)
-
-Warning: shm_remove_var(): variable key 1 doesn't exist in %s006.php on line %d
-bool(false)
-
-Warning: shm_get_var(): variable key 1 doesn't exist in %s006.php on line %d
-bool(false)
-Done
---UEXPECTF--
-
-Warning: shm_remove_var() expects exactly 2 parameters, 0 given in %s006.php on line %d
-bool(false)
-
-Warning: shm_remove_var() expects parameter 1 to be resource, integer given in %s006.php on line %d
-bool(false)
-
-Warning: shm_remove_var(): variable key -10 doesn't exist in %s006.php on line %d
-bool(false)
 unicode(11) "test string"
 bool(true)
 

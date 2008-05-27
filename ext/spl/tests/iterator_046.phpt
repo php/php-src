@@ -45,13 +45,6 @@ $it->show();
 --EXPECTF--
 MyCachingIterator::fill()
 MyCachingIterator::show()
-string(1) "0"
-string(3) "foo"
-string(3) "bar"
-===DONE===
---UEXPECTF--
-MyCachingIterator::fill()
-MyCachingIterator::show()
 unicode(1) "0"
 unicode(3) "foo"
 unicode(3) "bar"

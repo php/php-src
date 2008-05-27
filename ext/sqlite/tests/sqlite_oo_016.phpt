@@ -34,14 +34,6 @@ echo "DONE!\n";
 ?>
 --EXPECT--
 ====BUFFERED====
-string(3) "one"
-string(5) "three"
-====UNBUFFERED====
-string(3) "one"
-string(5) "three"
-DONE!
---UEXPECT--
-====BUFFERED====
 unicode(3) "one"
 unicode(5) "three"
 ====UNBUFFERED====

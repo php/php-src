@@ -32,14 +32,3 @@ NULL
 Warning: token_get_all() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing token_get_all() : error conditions ***
--- Testing token_get_all() function with zero arguments --
-
-Warning: token_get_all() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
--- Testing token_get_all() function with more than expected no. of arguments --
-
-Warning: token_get_all() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-Done

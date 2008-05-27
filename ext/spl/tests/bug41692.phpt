@@ -22,48 +22,6 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 object(Bar)#%d (2) {
-  ["foo":"Bar":private]=>
-  array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["storage":"ArrayObject":private]=>
-  array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-}
-object(Bar)#%d (2) {
-  ["foo":"Bar":private]=>
-  array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  ["storage":"ArrayObject":private]=>
-  array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-}
-Done
---UEXPECTF--
-object(Bar)#%d (2) {
   [u"foo":u"Bar":private]=>
   array(3) {
     [0]=>

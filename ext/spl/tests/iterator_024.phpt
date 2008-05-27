@@ -36,24 +36,6 @@ foreach(new RecursiveIteratorIterator($it) as $v) echo "$v\n";
 32
 331
 4
-string(13) "ArrayIterator"
-An instance of RecursiveIterator or IteratorAggregate creating it is required
-===MANUAL===
-string(22) "RecursiveArrayIterator"
-1
-2
-31
-32
-331
-4
-===DONE===
---UEXPECT--
-1
-2
-31
-32
-331
-4
 unicode(13) "ArrayIterator"
 An instance of RecursiveIterator or IteratorAggregate creating it is required
 ===MANUAL===

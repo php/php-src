@@ -92,46 +92,6 @@ catch (Exception $e)
 --EXPECTF--	
 ===1===
 int(1)
-string(1) "1"
-string(1) "2"
-string(1) "3"
-===2===
-int(2)
-string(1) "0"
-string(1) "1"
-string(1) "2"
-===4===
-int(4)
-string(1) "1"
-string(1) "2"
-string(1) "3"
-===8===
-int(8)
-string(3) "0:1"
-string(3) "1:2"
-string(3) "2:3"
-===3===
-Exception: Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
-int(0)
-===5===
-Exception: Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
-int(0)
-===9===
-Exception: Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
-int(0)
-===6===
-Exception: Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
-int(0)
-===10===
-Exception: Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
-int(0)
-===X===
-Exception: Unsetting flag CALL_TO_STRING is not possible
-Exception: Unsetting flag TOSTRING_USE_INNER is not possible
-===DONE===
---UEXPECTF--	
-===1===
-int(1)
 unicode(1) "1"
 unicode(1) "2"
 unicode(1) "3"

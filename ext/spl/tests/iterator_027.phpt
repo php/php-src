@@ -67,34 +67,6 @@ int(1)
 int(32)
 int(3)
 int(4)
-string(3) "foo"
-string(3) "bar"
-string(2) "25"
-bool(false)
-bool(true)
-bool(false)
-bool(true)
-bool(false)
-===REWIND===
-bool(true)
-bool(false)
-bool(false)
-bool(false)
-===DONE===
---UEXPECT--
-0=>1
-1=>2
-0=>31
-1=>32
-0=>331
-3=>4
-===CHECK===
-int(0)
-int(331)
-int(1)
-int(32)
-int(3)
-int(4)
 unicode(3) "foo"
 unicode(3) "bar"
 unicode(2) "25"

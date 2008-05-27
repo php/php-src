@@ -57,17 +57,6 @@ $reader->close();
 ?>
 ===DONE===
 --EXPECT--
-string(0) ""
-NULL
-string(0) ""
-string(0) ""
-===FILE===
-string(0) ""
-NULL
-string(0) ""
-string(0) ""
-===DONE===
---UEXPECT--
 unicode(0) ""
 NULL
 unicode(0) ""

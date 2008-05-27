@@ -13,15 +13,6 @@ Accessing attributes of a node
 ?>
 --EXPECT--
 array(2) {
-  ["bgcolor"]=>
-  string(7) "#FFFFFF"
-  ["alink"]=>
-  string(7) "#000000"
-}
-Attrib 'bgcolor': #FFFFFF
-Attrib 'alink': #000000
---UEXPECT--
-array(2) {
   [u"bgcolor"]=>
   unicode(7) "#FFFFFF"
   [u"alink"]=>

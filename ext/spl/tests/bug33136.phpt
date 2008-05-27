@@ -53,36 +53,6 @@ Initiate Obj
 Assign values
 Collection::offsetSet(NULL,foo)
 Collection::offsetGet(0)
-string(3) "foo"
-Collection::offsetSet(NULL,bar)
-Collection::offsetGet(0)
-string(3) "foo"
-Collection::offsetGet(1)
-string(3) "bar"
-Collection::offsetSet(foo,baz)
-Collection::offsetGet(foo)
-string(3) "baz"
-Collection Object
-(
-    [data:Collection:private] => Array
-        (
-        )
-
-    [storage:ArrayObject:private] => Array
-        (
-            [0] => foo
-            [1] => bar
-            [foo] => baz
-        )
-
-)
-int(3)
-===DONE===
---UEXPECT--
-Initiate Obj
-Assign values
-Collection::offsetSet(NULL,foo)
-Collection::offsetGet(0)
 unicode(3) "foo"
 Collection::offsetSet(NULL,bar)
 Collection::offsetGet(0)

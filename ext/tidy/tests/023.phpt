@@ -33,24 +33,6 @@ var_dump(tidy_get_root($tidy)->child[0]->child[0]->hasChildren());
 object(tidyNode)#1 (0) {
 }
 object(tidy)#1 (2) {
-  ["errorBuffer"]=>
-  NULL
-  ["value"]=>
-  NULL
-}
--------
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
-bool(false)
---UEXPECT--
-object(tidyNode)#1 (0) {
-}
-object(tidy)#1 (2) {
   [u"errorBuffer"]=>
   NULL
   [u"value"]=>

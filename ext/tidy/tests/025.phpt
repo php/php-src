@@ -38,21 +38,6 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-string(0) ""
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-string(16) "<!-- comment -->"
-bool(true)
-float(0)
-int(0)
-bool(true)
---UEXPECT--
-bool(false)
-bool(false)
-bool(false)
-bool(false)
 unicode(0) ""
 bool(true)
 bool(true)

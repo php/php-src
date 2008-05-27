@@ -20,16 +20,6 @@ unicode.script_encoding=latin1
 ?>
 --EXPECTF--
 Current Value of 'tidy-mark': bool(false)
-Current Value of 'error-file': string(0) ""
-Current Value of 'tab-size': int(8)
-
-Warning: tidy::getOpt(): Unknown Tidy Configuration Option 'bogus-opt' in %s007.php on line 10
-bool(false)
-
-Warning: tidy_getopt(): Unknown Tidy Configuration Option 'non-ASCII string рсч' in %s007.php on line 11
-bool(false)
---UEXPECTF--
-Current Value of 'tidy-mark': bool(false)
 Current Value of 'error-file': unicode(0) ""
 Current Value of 'tab-size': int(8)
 

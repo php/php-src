@@ -27,19 +27,6 @@ array(1) {
   [0]=>
   array(2) {
     [0]=>
-    string(12) "MyAutoLoader"
-    [1]=>
-    string(8) "autoLoad"
-  }
-}
-MyAutoLoader::autoLoad(TestClass)
-bool(false)
-===DONE===
---UEXPECTF--
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
     unicode(12) "MyAutoLoader"
     [1]=>
     unicode(8) "autoLoad"

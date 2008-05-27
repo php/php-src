@@ -45,37 +45,6 @@ echo "====DONE!====\n";
 ====class24====
 class24::__construct
 object(class24)#%d (1) {
-  ["a"]=>
-  string(3) "one"
-}
-class24::__construct
-object(class24)#%d (1) {
-  ["a"]=>
-  string(3) "two"
-}
-class24::__construct
-object(class24)#%d (1) {
-  ["a"]=>
-  string(5) "three"
-}
-====stdclass====
-object(stdClass)#%d (1) {
-  ["a"]=>
-  string(3) "one"
-}
-object(stdClass)#%d (1) {
-  ["a"]=>
-  string(3) "two"
-}
-object(stdClass)#%d (1) {
-  ["a"]=>
-  string(5) "three"
-}
-====DONE!====
---UEXPECTF--
-====class24====
-class24::__construct
-object(class24)#%d (1) {
   [u"a"]=>
   unicode(3) "one"
 }
