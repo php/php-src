@@ -45,26 +45,6 @@ float(4872401723)
 float(7641446995)
 float(7641446995)
 
-Warning: sinh() expects parameter 1 to be double, string given in %s on line 27
-NULL
-float(INF)
-
-Notice: A non well formed numeric value encountered in %s on line 27
-float(INF)
-float(0)
-float(1.175201194)
-float(0)
---UEXPECTF--
-float(4872401723)
-float(-4872401723)
-float(7641446995)
-float(-7641446995)
-float(4872401723)
-float(4872401723)
-float(4872401723)
-float(7641446995)
-float(7641446995)
-
 Warning: sinh() expects parameter 1 to be double, Unicode string given in %s on line 27
 NULL
 float(INF)

@@ -45,26 +45,6 @@ float(1.527345431)
 float(1.528178225)
 float(1.528178225)
 
-Warning: atan() expects parameter 1 to be double, string given in %s on line 27
-NULL
-float(1.569796327)
-
-Notice: A non well formed numeric value encountered in %s on line 27
-float(1.569796327)
-float(0)
-float(0.7853981634)
-float(0)
---UEXPECTF--
-float(1.527345431)
-float(-1.527345431)
-float(1.528178225)
-float(-1.528178225)
-float(1.527345431)
-float(1.527345431)
-float(1.527345431)
-float(1.528178225)
-float(1.528178225)
-
 Warning: atan() expects parameter 1 to be double, Unicode string given in %s on line 27
 NULL
 float(1.569796327)

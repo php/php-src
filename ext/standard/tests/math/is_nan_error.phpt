@@ -10,7 +10,3 @@ is_nan(23,2,true);
 Warning: is_nan() expects exactly 1 parameter, 0 given in %s on line 2
 
 Warning: is_nan() expects exactly 1 parameter, 3 given in %s on line 3
-
-
-
-

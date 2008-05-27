@@ -45,26 +45,6 @@ float(1317.802929)
 float(1343.58603)
 float(1343.58603)
 
-Warning: rad2deg() expects parameter 1 to be double, string given in %s on line 27
-NULL
-float(57295.77951)
-
-Notice: A non well formed numeric value encountered in %s on line 27
-float(57295.77951)
-float(0)
-float(57.29577951)
-float(0)
---UEXPECTF--
-float(1317.802929)
-float(-1317.802929)
-float(1343.58603)
-float(-1343.58603)
-float(1317.802929)
-float(1317.802929)
-float(1317.802929)
-float(1343.58603)
-float(1343.58603)
-
 Warning: rad2deg() expects parameter 1 to be double, Unicode string given in %s on line 27
 NULL
 float(57295.77951)

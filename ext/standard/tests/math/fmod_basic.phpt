@@ -38,7 +38,7 @@ for ($i = 0; $i < count($values1); $i++) {
 	}	
 }
 ?>
---EXPECTF--
+--EXPECT--
 
 iteration 0
 float(0)

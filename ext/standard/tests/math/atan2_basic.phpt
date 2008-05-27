@@ -38,7 +38,7 @@ for ($i = 0; $i < count($valuesy); $i++) {
 	}	
 }
 ?>
---EXPECTF--
+--EXPECT--
 Y:23 X:23 float(0.78539816339745)
 Y:23 X:-23 float(2.3561944901923)
 Y:23 X:23.45 float(0.77571063007847)

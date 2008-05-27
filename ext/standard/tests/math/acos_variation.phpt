@@ -45,26 +45,6 @@ float(NAN)
 float(NAN)
 float(NAN)
 
-Warning: acos() expects parameter 1 to be double, string given in %s on line 27
-NULL
-float(NAN)
-
-Notice: A non well formed numeric value encountered in %s on line 27
-float(NAN)
-float(1.570796327)
-float(0)
-float(1.570796327)
---UEXPECTF--
-float(NAN)
-float(NAN)
-float(NAN)
-float(NAN)
-float(NAN)
-float(NAN)
-float(NAN)
-float(NAN)
-float(NAN)
-
 Warning: acos() expects parameter 1 to be double, Unicode string given in %s on line 27
 NULL
 float(NAN)
