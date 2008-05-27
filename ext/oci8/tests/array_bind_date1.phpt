@@ -61,20 +61,6 @@ echo "Done\n";
 --EXPECT--	
 array(5) {
   [0]=>
-  string(9) "05-NOV-05"
-  [1]=>
-  string(9) "26-OCT-17"
-  [2]=>
-  string(9) "21-AUG-91"
-  [3]=>
-  string(9) "10-DEC-80"
-  [4]=>
-  string(9) "06-DEC-05"
-}
-Done
---UEXPECT--
-array(5) {
-  [0]=>
   unicode(9) "05-NOV-05"
   [1]=>
   unicode(9) "26-OCT-17"

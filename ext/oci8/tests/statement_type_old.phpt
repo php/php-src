@@ -40,22 +40,6 @@ echo "Done\n";
 ?>
 --EXPECTF--
 resource(%d) of type (oci8 connection)
-string(6) "SELECT"
-string(6) "DELETE"
-string(6) "INSERT"
-string(6) "UPDATE"
-string(4) "DROP"
-string(6) "CREATE"
-string(6) "CREATE"
-string(5) "ALTER"
-string(5) "BEGIN"
-string(7) "DECLARE"
-string(4) "CALL"
-string(7) "UNKNOWN"
-string(7) "UNKNOWN"
-Done
---UEXPECTF--
-resource(%d) of type (oci8 connection)
 unicode(6) "SELECT"
 unicode(6) "DELETE"
 unicode(6) "INSERT"

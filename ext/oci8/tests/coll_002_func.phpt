@@ -20,16 +20,6 @@ require dirname(__FILE__)."/drop_type.inc";
 ?>
 --EXPECTF--
 object(OCI-Collection)#%d (1) {
-  ["collection"]=>
-  resource(%d) of type (oci8 collection)
-}
-bool(true)
-
-Warning: oci_collection_size(): %d is not a valid oci8 collection resource in %s on line %d
-bool(false)
-Done
---UEXPECTF--
-object(OCI-Collection)#%d (1) {
   [u"collection"]=>
   resource(%d) of type (oci8 collection)
 }

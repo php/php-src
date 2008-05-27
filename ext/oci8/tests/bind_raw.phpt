@@ -34,10 +34,6 @@ echo "Done\n";
 
 ?>
 --EXPECT--
-string(32) "88b274d7a257ac6f70435b83abd4e26e"
-int(300)
-Done
---UEXPECTF--
 unicode(32) "88b274d7a257ac6f70435b83abd4e26e"
 int(300)
 Done

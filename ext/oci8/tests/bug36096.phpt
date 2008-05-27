@@ -23,12 +23,6 @@ echo "Done\n";
 --EXPECT--
 bool(false)
 bool(false)
-string(5) "'ABC'"
-string(4) "CHAR"
-Done
---UEXPECT--
-bool(false)
-bool(false)
 unicode(5) "'ABC'"
 unicode(4) "CHAR"
 Done

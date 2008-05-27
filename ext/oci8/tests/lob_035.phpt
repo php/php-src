@@ -80,33 +80,6 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-int(32)
-
-Warning: oci_lob_copy(): OCI_INVALID_HANDLE in %s on line %d
-bool(false)
-
-Warning: oci_lob_copy(): OCI_INVALID_HANDLE in %s on line %d
-bool(false)
-bool(false)
-
-Warning: oci_lob_copy(): Length parameter must be greater than 0 in %s on line %d
-bool(false)
-bool(true)
-
-Warning: oci_lob_size() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-int(0)
-
-Warning: oci_lob_size(): Unable to find descriptor property in %s on line %d
-bool(false)
-array(2) {
-  [0]=>
-  string(0) ""
-  ["BLOB"]=>
-  string(0) ""
-}
-Done
---UEXPECTF--
 int(64)
 
 Warning: oci_lob_copy(): OCI_INVALID_HANDLE in %s on line %d

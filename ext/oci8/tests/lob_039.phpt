@@ -52,24 +52,6 @@ int(11)
 int(11)
 bool(true)
 array(1) {
-  ["CLOB"]=>
-  array(3) {
-    [0]=>
-    string(11) "clob test 1"
-    [1]=>
-    string(22) "           clob test 2"
-    [2]=>
-    string(33) "                      clob test 3"
-  }
-}
-Done
---UEXPECT--
-Test 1: CLOB
-int(11)
-int(11)
-int(11)
-bool(true)
-array(1) {
   [u"CLOB"]=>
   array(3) {
     [0]=>

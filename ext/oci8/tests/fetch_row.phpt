@@ -45,44 +45,6 @@ echo "Done\n";
 --EXPECT--
 array(5) {
   [0]=>
-  string(1) "1"
-  [1]=>
-  string(1) "1"
-  [2]=>
-  NULL
-  [3]=>
-  NULL
-  [4]=>
-  NULL
-}
-array(5) {
-  [0]=>
-  string(1) "1"
-  [1]=>
-  string(1) "1"
-  [2]=>
-  NULL
-  [3]=>
-  NULL
-  [4]=>
-  NULL
-}
-array(5) {
-  [0]=>
-  string(1) "1"
-  [1]=>
-  string(1) "1"
-  [2]=>
-  NULL
-  [3]=>
-  NULL
-  [4]=>
-  NULL
-}
-Done
---UEXPECT--
-array(5) {
-  [0]=>
   unicode(1) "1"
   [1]=>
   unicode(1) "1"

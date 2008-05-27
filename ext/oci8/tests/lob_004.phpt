@@ -55,31 +55,6 @@ echo "Done\n";
 ?>
 --EXPECTF--
 object(OCI-Lob)#%d (1) {
-  ["descriptor"]=>
-  resource(%d) of type (oci8 descriptor)
-}
-int(4)
-bool(true)
-int(3)
-bool(true)
-array(2) {
-  [0]=>
-  object(OCI-Lob)#%d (1) {
-    ["descriptor"]=>
-    resource(%d) of type (oci8 descriptor)
-  }
-  ["BLOB"]=>
-  object(OCI-Lob)#%d (1) {
-    ["descriptor"]=>
-    resource(%d) of type (oci8 descriptor)
-  }
-}
-bool(true)
-string(4) "strt"
-string(8) "strtstrt"
-Done
---UEXPECTF--
-object(OCI-Lob)#%d (1) {
   [u"descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }

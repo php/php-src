@@ -47,14 +47,6 @@ require dirname(__FILE__).'/drop_table.inc';
 echo "Done\n";
 ?>
 --EXPECT--
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-Done
---UEXPECT--
 unicode(1) "1"
 unicode(1) "1"
 unicode(1) "1"

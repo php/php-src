@@ -82,34 +82,6 @@ bool(true)
 Test 3
 bool(true)
 array(1) {
-  ["NAME"]=>
-  array(2) {
-    [0]=>
-    string(3) "def"
-    [1]=>
-    NULL
-  }
-}
-Test 4
-bool(true)
-array(1) {
-  ["NAME"]=>
-  array(2) {
-    [0]=>
-    NULL
-    [1]=>
-    NULL
-  }
-}
-Done
---UEXPECTF--
-Test 1
-bool(true)
-Test 2
-bool(true)
-Test 3
-bool(true)
-array(1) {
   [u"NAME"]=>
   array(2) {
     [0]=>

@@ -91,35 +91,6 @@ echo "Done\n";
 ?>
 --EXPECT--
 Initial Data
-string(250) "<?xml version="1.0"?>
-		<Xt>
-		  <XtId>1</XtId>
-		  <Size>Big</Size>
-		  <Area>12345</Area>
-		  <Hardness>20</Hardness>
-		  <Lip>Curved</Lip>
-		  <Color>Red</Color>
-		  <Nice>N</Nice>
-		  <Compact>Tiny</Compact>
-		  <Material>Steel</Material>
-		</Xt>"
-Verify
-string(249) "<?xml version="1.0"?>
-<Xt>
-		  <XtId>1</XtId>
-		  <Size>Big</Size>
-		  <Area>12345</Area>
-		  <Hardness>19</Hardness>
-		  <Lip>Curved</Lip>
-		  <Color>Red</Color>
-		  <Nice>Y</Nice>
-		  <Compact>Tiny</Compact>
-		  <Material>Steel</Material>
-		</Xt>
-"
-Done
---UEXPECT--
-Initial Data
 unicode(250) "<?xml version="1.0"?>
 		<Xt>
 		  <XtId>1</XtId>

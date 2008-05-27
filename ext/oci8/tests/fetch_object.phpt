@@ -44,44 +44,6 @@ echo "Done\n";
 ?>
 --EXPECTF--
 object(stdClass)#%d (5) {
-  ["ID"]=>
-  string(1) "1"
-  ["VALUE"]=>
-  string(1) "1"
-  ["BLOB"]=>
-  NULL
-  ["CLOB"]=>
-  NULL
-  ["STRING"]=>
-  NULL
-}
-object(stdClass)#%d (5) {
-  ["ID"]=>
-  string(1) "1"
-  ["VALUE"]=>
-  string(1) "1"
-  ["BLOB"]=>
-  NULL
-  ["CLOB"]=>
-  NULL
-  ["STRING"]=>
-  NULL
-}
-object(stdClass)#%d (5) {
-  ["ID"]=>
-  string(1) "1"
-  ["VALUE"]=>
-  string(1) "1"
-  ["BLOB"]=>
-  NULL
-  ["CLOB"]=>
-  NULL
-  ["STRING"]=>
-  NULL
-}
-Done
---UEXPECTF--
-object(stdClass)#%d (5) {
   [u"ID"]=>
   unicode(1) "1"
   [u"VALUE"]=>

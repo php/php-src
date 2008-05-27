@@ -61,20 +61,6 @@ echo "Done\n";
 --EXPECT--	
 array(5) {
   [0]=>
-  string(4) "five"
-  [1]=>
-  string(4) "four"
-  [2]=>
-  string(5) "three"
-  [3]=>
-  string(3) "two"
-  [4]=>
-  string(3) "one"
-}
-Done
---UEXPECT--
-array(5) {
-  [0]=>
   unicode(4) "five"
   [1]=>
   unicode(4) "four"

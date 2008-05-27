@@ -18,15 +18,6 @@ require dirname(__FILE__)."/drop_type.inc";
 ?>
 --EXPECTF--
 object(OCI-Collection)#%d (1) {
-  ["collection"]=>
-  resource(%d) of type (oci8 collection)
-}
-
-Warning: ocinewcollection(): OCI-22303: type ""."NONEXISTENT" not found in %s on line %d
-bool(false)
-Done
---UEXPECTF--
-object(OCI-Collection)#%d (1) {
   [u"collection"]=>
   resource(%d) of type (oci8 collection)
 }

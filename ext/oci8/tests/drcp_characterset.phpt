@@ -60,14 +60,6 @@ resource(%d) of type (oci8 connection)
 resource(%d) of type (oci8 persistent connection)
 resource(%d) of type (oci8 connection)
 resource(%d) of type (oci8 persistent connection)
-First and third connections are different: OK
-Second and fourth connections are different: OK
-Done
---UEXPECTF--
-resource(%d) of type (oci8 connection)
-resource(%d) of type (oci8 persistent connection)
-resource(%d) of type (oci8 connection)
-resource(%d) of type (oci8 persistent connection)
 First and third connections share a resource: NOT OK
 Second and fourth connections share a resource: NOT OK
 Done

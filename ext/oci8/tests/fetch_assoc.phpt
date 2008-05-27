@@ -44,44 +44,6 @@ echo "Done\n";
 ?>
 --EXPECT--
 array(5) {
-  ["ID"]=>
-  string(1) "1"
-  ["VALUE"]=>
-  string(1) "1"
-  ["BLOB"]=>
-  NULL
-  ["CLOB"]=>
-  NULL
-  ["STRING"]=>
-  NULL
-}
-array(5) {
-  ["ID"]=>
-  string(1) "1"
-  ["VALUE"]=>
-  string(1) "1"
-  ["BLOB"]=>
-  NULL
-  ["CLOB"]=>
-  NULL
-  ["STRING"]=>
-  NULL
-}
-array(5) {
-  ["ID"]=>
-  string(1) "1"
-  ["VALUE"]=>
-  string(1) "1"
-  ["BLOB"]=>
-  NULL
-  ["CLOB"]=>
-  NULL
-  ["STRING"]=>
-  NULL
-}
-Done
---UEXPECT--
-array(5) {
   [u"ID"]=>
   unicode(1) "1"
   [u"VALUE"]=>

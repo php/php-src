@@ -62,46 +62,6 @@ echo "Done\n";
 Warning: oci_new_collection(): OCI-22303: type ""."ABC" not found in %s on line %d
 Normal connection: New Collection error
 array(4) {
-  ["code"]=>
-  int(22303)
-  ["message"]=>
-  string(34) "OCI-22303: type ""."ABC" not found"
-  ["offset"]=>
-  int(0)
-  ["sqltext"]=>
-  string(0) ""
-}
-
-Warning: oci_new_collection(): OCI-22303: type ""."DEF" not found in %s on line %d
-New connection: New Collection error
-array(4) {
-  ["code"]=>
-  int(22303)
-  ["message"]=>
-  string(34) "OCI-22303: type ""."DEF" not found"
-  ["offset"]=>
-  int(0)
-  ["sqltext"]=>
-  string(0) ""
-}
-
-Warning: oci_new_collection(): OCI-22303: type ""."GHI" not found in %s on line %d
-Persistent connection: New Collection error
-array(4) {
-  ["code"]=>
-  int(22303)
-  ["message"]=>
-  string(34) "OCI-22303: type ""."GHI" not found"
-  ["offset"]=>
-  int(0)
-  ["sqltext"]=>
-  string(0) ""
-}
-Done
---UEXPECTF--
-Warning: oci_new_collection(): OCI-22303: type ""."ABC" not found in %s on line %d
-Normal connection: New Collection error
-array(4) {
   [u"code"]=>
   int(22303)
   [u"message"]=>

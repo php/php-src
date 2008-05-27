@@ -64,15 +64,6 @@ Warning: oci_bind_array_by_name(): OCI-21560: argument 3 is null, invalid, or ou
 Warning: oci_execute(): ORA-01008: not all variables bound in %s on line %d
 array(1) {
   [0]=>
-  string(0) ""
-}
-Done
---UEXPECTF--
-Warning: oci_bind_array_by_name(): OCI-21560: argument 3 is null, invalid, or out of range in %s on line %d
-
-Warning: oci_execute(): ORA-01008: not all variables bound in %s on line %d
-array(1) {
-  [0]=>
   unicode(0) ""
 }
 Done

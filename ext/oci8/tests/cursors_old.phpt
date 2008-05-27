@@ -46,24 +46,6 @@ echo "Done\n";
 ?>
 --EXPECTF--
 array(2) {
-  ["ID"]=>
-  string(1) "1"
-  ["VALUE"]=>
-  string(1) "1"
-}
-bool(true)
-
-Warning: ocifetchinto():%sORA-01002: fetch out of sequence in %scursors_old.php on line %d
-array(2) {
-  ["ID"]=>
-  string(1) "1"
-  ["VALUE"]=>
-  string(1) "1"
-}
-bool(true)
-Done
---UEXPECTF--
-array(2) {
   [u"ID"]=>
   unicode(1) "1"
   [u"VALUE"]=>

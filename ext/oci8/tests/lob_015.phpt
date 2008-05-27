@@ -47,23 +47,6 @@ Warning: oci_bind_by_name() expects at least 3 parameters, 1 given in %s on line
 
 Warning: oci_execute(): ORA-00932: inconsistent datatypes: expected NUMBER got BLOB in %s on line %d
 object(OCI-Lob)#%d (1) {
-  ["descriptor"]=>
-  resource(%d) of type (oci8 descriptor)
-}
-Done
---UEXPECTF--
-Warning: oci_new_descriptor() expects at most 2 parameters, 5 given in %s on line %d
-
-Warning: oci_bind_by_name() expects at most 5 parameters, 6 given in %s on line %d
-
-Warning: oci_bind_by_name() expects at most 5 parameters, 7 given in %s on line %d
-
-Warning: oci_bind_by_name() expects at least 3 parameters, 2 given in %s on line %d
-
-Warning: oci_bind_by_name() expects at least 3 parameters, 1 given in %s on line %d
-
-Warning: oci_execute(): ORA-00932: inconsistent datatypes: expected NUMBER got BLOB in %s on line %d
-object(OCI-Lob)#%d (1) {
   [u"descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }

@@ -63,28 +63,6 @@ NULL
 int(5)
 array(2) {
   [0]=>
-  string(1) "1"
-  [1]=>
-  string(1) "1"
-}
-Done
---UEXPECTF--
-Warning: ocifetchinto() expects at least 2 parameters, 1 given in %s on line %d
-NULL
-
-Notice: Undefined variable: all in %s on line %d
-NULL
-
-Warning: ocifetchinto() expects at most 3 parameters, 4 given in %s on line %d
-NULL
-NULL
-
-Warning: ocifetchinto(): supplied resource is not a valid oci8 statement resource in %s on line %d
-bool(false)
-NULL
-int(5)
-array(2) {
-  [0]=>
   unicode(1) "1"
   [1]=>
   unicode(1) "1"

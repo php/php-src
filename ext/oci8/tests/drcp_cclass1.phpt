@@ -53,34 +53,6 @@ echo "Done\n";
 --EXPECTF--
 Test 1
 array(1) {
-  ["DUMMY"]=>
-  array(1) {
-    [0]=>
-    string(1) "X"
-  }
-}
-Test 2
-array(1) {
-  ["DUMMY"]=>
-  array(1) {
-    [0]=>
-    string(1) "X"
-  }
-}
-Test 3
-array(1) {
-  ["CCLASS_NAME"]=>
-  array(2) {
-    [0]=>
-    string(21) "%s.cc1_%d"
-    [1]=>
-    string(21) "%s.cc2_%d"
-  }
-}
-Done
---UEXPECTF--
-Test 1
-array(1) {
   [u"DUMMY"]=>
   array(1) {
     [0]=>
