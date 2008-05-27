@@ -17,13 +17,6 @@ Class C {
 }
 ?>
 --EXPECTF--
-string(%d) "%sreflectionObject_FileInfo_basic.php"
-int(12)
-int(14)
-bool(false)
-bool(false)
-bool(false)
---UEXPECTF--
 unicode(%d) "%sreflectionObject_FileInfo_basic.php"
 int(12)
 int(14)

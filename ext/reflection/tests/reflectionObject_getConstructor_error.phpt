@@ -22,16 +22,3 @@ NULL
 
 Warning: Wrong parameter count for ReflectionClass::getConstructor() in %s on line 7
 NULL
---UEXPECTF--
-
-Warning: Wrong parameter count for ReflectionClass::getConstructor() in %s on line 4
-NULL
-
-Warning: Wrong parameter count for ReflectionClass::getConstructor() in %s on line 5
-NULL
-
-Warning: Wrong parameter count for ReflectionClass::getConstructor() in %s on line 6
-NULL
-
-Warning: Wrong parameter count for ReflectionClass::getConstructor() in %s on line 7
-NULL

@@ -22,11 +22,3 @@ Warning: Wrong parameter count for ReflectionClass::getConstants() in %s on line
 Warning: Wrong parameter count for ReflectionClass::getConstants() in %s on line 10
 
 Warning: Wrong parameter count for ReflectionClass::getConstants() in %s on line 11
---UEXPECTF--
-Warning: Wrong parameter count for ReflectionClass::getConstants() in %s on line 8
-
-Warning: Wrong parameter count for ReflectionClass::getConstants() in %s on line 9
-
-Warning: Wrong parameter count for ReflectionClass::getConstants() in %s on line 10
-
-Warning: Wrong parameter count for ReflectionClass::getConstants() in %s on line 11

@@ -69,35 +69,6 @@ NULL
 Instance without property:
 
 Static property / too many args:
-string(15) "static property"
-
-Static property / wrong type of arg:
-string(15) "static property"
-
-Protected property:
-Cannot access non-public member TestClass::prot
-
-Instance without property:
-NULL
---UEXPECTF--
-Too few args:
-
-Warning: ReflectionProperty::getValue() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Too many args:
-
-Warning: ReflectionProperty::getValue() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-Wrong type of arg:
-
-Warning: ReflectionProperty::getValue() expects parameter 1 to be object, boolean given in %s on line %d
-NULL
-
-Instance without property:
-
-Static property / too many args:
 unicode(15) "static property"
 
 Static property / wrong type of arg:

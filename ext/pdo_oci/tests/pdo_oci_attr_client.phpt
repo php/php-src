@@ -38,10 +38,6 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-ATTR_CLIENT_VERSION: string(%d) "%d.%s"
-Version OK, so far as can be portably checked
-Done
---UEXPECTF--
 ATTR_CLIENT_VERSION: unicode(%d) "%d.%s"
 Version OK, so far as can be portably checked
 Done

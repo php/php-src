@@ -34,7 +34,3 @@ foreach($classes  as $class ) {
 Is C instantiable?  bool(true)
 Is ifaceImpl instantiable?  bool(true)
 Is D instantiable?  bool(true)
---UEXPECTF--
-Is C instantiable?  bool(true)
-Is ifaceImpl instantiable?  bool(true)
-Is D instantiable?  bool(true)

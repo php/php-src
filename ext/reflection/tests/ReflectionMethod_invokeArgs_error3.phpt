@@ -78,46 +78,6 @@ try {
 --EXPECTF--
 Wrong number of parameters:
 
-Warning: ReflectionMethod::invokeArgs() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: ReflectionMethod::invokeArgs() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Non-instance:
-string(72) "Given object is not an instance of the class this method was declared in"
-
-Non-object:
-
-Warning: ReflectionMethod::invokeArgs() expects parameter 1 to be object, boolean given in %s on line %d
-NULL
-
-Static method:
-
-Warning: ReflectionMethod::invokeArgs() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: ReflectionMethod::invokeArgs() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: ReflectionMethod::invokeArgs() expects parameter 1 to be object, boolean given in %s on line %d
-NULL
-Called staticMethod()
-
-Notice: Undefined variable: this in %s on line %d
-NULL
-NULL
-
-Private method:
-string(84) "Trying to invoke private method TestClass::privateMethod from scope ReflectionMethod"
-
-Abstract method:
-string(51) "Trying to invoke abstract method AbstractClass::foo"
-
-Warning: ReflectionMethod::invokeArgs() expects exactly 2 parameters, 1 given in %s on line %d
---UEXPECTF--
-Wrong number of parameters:
-
 Warning: ReflectionMethod::invokeArgs() expects exactly 2 parameters, 0 given in %sReflectionMethod_invokeArgs_error3.php on line %d
 NULL
 

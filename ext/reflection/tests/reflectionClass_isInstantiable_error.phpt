@@ -17,9 +17,3 @@ NULL
 
 Warning: Wrong parameter count for ReflectionClass::isInstantiable() in %s on line 8
 NULL
---UEXPECTF--
-Warning: Wrong parameter count for ReflectionClass::isInstantiable() in %s on line 7
-NULL
-
-Warning: Wrong parameter count for ReflectionClass::isInstantiable() in %s on line 8
-NULL

@@ -61,58 +61,6 @@ foreach($stmt as $obj) {
 ?>
 --EXPECTF--
 object(Test)#%d (3) {
-  ["id"]=>
-  string(2) "10"
-  ["val"]=>
-  string(3) "Abc"
-  ["val2"]=>
-  string(3) "zxy"
-}
-object(Test)#%d (3) {
-  ["id"]=>
-  string(2) "20"
-  ["val"]=>
-  string(3) "Def"
-  ["val2"]=>
-  string(3) "wvu"
-}
-object(Test)#%d (3) {
-  ["id"]=>
-  string(2) "30"
-  ["val"]=>
-  string(3) "Ghi"
-  ["val2"]=>
-  string(3) "tsr"
-}
-object(Test)#%d (3) {
-  ["id"]=>
-  string(2) "40"
-  ["val"]=>
-  string(3) "Jkl"
-  ["val2"]=>
-  string(3) "qpo"
-}
-object(Test)#%d (3) {
-  ["id"]=>
-  string(2) "50"
-  ["val"]=>
-  string(3) "Mno"
-  ["val2"]=>
-  string(3) "nml"
-}
-object(Test)#%d (3) {
-  ["id"]=>
-  string(2) "60"
-  ["val"]=>
-  string(3) "Pqr"
-  ["val2"]=>
-  string(3) "kji"
-}
-===FAIL===
-
-Fatal error: Cannot access protected property Fail::$id in %spdo_025.php on line %d
---UEXPECTF--
-object(Test)#%d (3) {
   [u"id"]=>
   unicode(2) "10"
   [u"val"]=>

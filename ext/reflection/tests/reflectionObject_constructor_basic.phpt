@@ -15,19 +15,6 @@ var_dump($r3);
 ?>
 --EXPECTF--
 object(ReflectionObject)#%d (1) {
-  ["name"]=>
-  string(8) "stdClass"
-}
-object(ReflectionObject)#%d (1) {
-  ["name"]=>
-  string(1) "C"
-}
-object(ReflectionObject)#%d (1) {
-  ["name"]=>
-  string(16) "ReflectionObject"
-}
---UEXPECTF--
-object(ReflectionObject)#%d (1) {
   [u"name"]=>
   unicode(8) "stdClass"
 }

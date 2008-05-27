@@ -82,48 +82,6 @@ NULL
 
 Static property / too few args:
 NULL
-string(11) "A new value"
-
-Warning: ReflectionProperty::setValue() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-string(11) "A new value"
-
-Static property / wrong type of arg:
-NULL
-string(17) "Another new value"
-
-Protected property:
-Cannot access non-public member TestClass::prot
-
-Instance without property:
-NULL
-string(8) "NewValue"
---UEXPECTF--
-Too few args:
-
-Warning: ReflectionProperty::setValue() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: ReflectionProperty::setValue() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Too many args:
-
-Warning: ReflectionProperty::setValue() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
-Wrong type of arg:
-
-Warning: ReflectionProperty::setValue() expects parameter 1 to be object, boolean given in %s on line %d
-NULL
-
-Static property / too many args:
-
-Warning: ReflectionProperty::setValue() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
-Static property / too few args:
-NULL
 unicode(11) "A new value"
 
 Warning: ReflectionProperty::setValue() expects exactly 2 parameters, 0 given in %s on line %d

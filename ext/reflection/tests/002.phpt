@@ -50,19 +50,6 @@ var_dump($r->bar);
 ===DONE===
 --EXPECTF--
 ReflectionMethodEx::__construct
-string(18) "ReflectionMethodEx"
-string(7) "getName"
-string(3) "xyz"
-NULL
-Cannot set read-only property ReflectionMethodEx::$class
-Cannot set read-only property ReflectionMethodEx::$name
-string(18) "ReflectionMethodEx"
-string(7) "getName"
-string(3) "bar"
-string(3) "baz"
-===DONE===
---UEXPECTF--
-ReflectionMethodEx::__construct
 unicode(18) "ReflectionMethodEx"
 unicode(7) "getName"
 unicode(3) "xyz"

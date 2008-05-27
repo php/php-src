@@ -21,8 +21,5 @@ var_dump($class->getName());
 ?>
 ===DONE===
 --EXPECT--
-string(3) "Foo"
-===DONE===
---UEXPECT--
 unicode(3) "Foo"
 ===DONE===

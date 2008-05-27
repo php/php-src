@@ -20,10 +20,6 @@ var_dump($r1->getName(), $r2->getName(), $r3->getName());
 
 ?> 
 --EXPECTF--
-string(8) "stdClass"
-string(8) "stdClass"
-string(10) "TrickClass"
---UEXPECTF--
 unicode(8) "stdClass"
 unicode(8) "stdClass"
 unicode(10) "TrickClass"

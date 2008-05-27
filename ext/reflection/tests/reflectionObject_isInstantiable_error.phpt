@@ -20,9 +20,3 @@ NULL
 
 Warning: Wrong parameter count for ReflectionClass::isInstantiable() in %s on line 11
 NULL
---UEXPECTF--
-Warning: Wrong parameter count for ReflectionClass::isInstantiable() in %s on line 10
-NULL
-
-Warning: Wrong parameter count for ReflectionClass::isInstantiable() in %s on line 11
-NULL

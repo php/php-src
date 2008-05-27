@@ -28,30 +28,6 @@ var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 array(3) {
   [0]=>
   array(2) {
-    ["id"]=>
-    string(1) "1"
-    ["val"]=>
-    string(1) "A"
-  }
-  [1]=>
-  array(2) {
-    ["id"]=>
-    string(1) "2"
-    ["val"]=>
-    string(1) "B"
-  }
-  [2]=>
-  array(2) {
-    ["id"]=>
-    string(1) "3"
-    ["val"]=>
-    string(1) "C"
-  }
-}
---UEXPECT--
-array(3) {
-  [0]=>
-  array(2) {
     [u"id"]=>
     unicode(1) "1"
     [u"val"]=>

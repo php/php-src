@@ -27,19 +27,6 @@ var_dump($stmt->fetchAll(PDO::FETCH_NUM|PDO::FETCH_UNIQUE));
 ?>
 --EXPECT--
 array(2) {
-  ["A"]=>
-  array(1) {
-    [0]=>
-    string(1) "B"
-  }
-  ["C"]=>
-  array(1) {
-    [0]=>
-    string(1) "C"
-  }
-}
---UEXPECT--
-array(2) {
   [u"A"]=>
   array(1) {
     [0]=>

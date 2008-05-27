@@ -15,11 +15,6 @@ var_dump($deps);
 ?>
 --EXPECT--	
 array(1) {
-  ["libxml"]=>
-  string(8) "Required"
-}
---UEXPECT--
-array(1) {
   [u"libxml"]=>
   unicode(8) "Required"
 }

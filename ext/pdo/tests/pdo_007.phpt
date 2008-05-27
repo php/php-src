@@ -30,41 +30,6 @@ var_dump($stmt->fetchAll(PDO::FETCH_ASSOC|PDO::FETCH_UNIQUE));
 ?>
 --EXPECT--
 array(3) {
-  ["A"]=>
-  array(1) {
-    [0]=>
-    string(1) "A"
-  }
-  ["B"]=>
-  array(1) {
-    [0]=>
-    string(1) "A"
-  }
-  ["C"]=>
-  array(1) {
-    [0]=>
-    string(1) "C"
-  }
-}
-array(3) {
-  ["A"]=>
-  array(1) {
-    ["val"]=>
-    string(1) "A"
-  }
-  ["B"]=>
-  array(1) {
-    ["val"]=>
-    string(1) "A"
-  }
-  ["C"]=>
-  array(1) {
-    ["val"]=>
-    string(1) "C"
-  }
-}
---UEXPECT--
-array(3) {
   [u"A"]=>
   array(1) {
     [0]=>

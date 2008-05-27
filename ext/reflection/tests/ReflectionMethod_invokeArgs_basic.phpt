@@ -52,29 +52,6 @@ try {
 Public method:
 Called foo(), property = Hello
 object(TestClass)#%d (1) {
-  ["prop"]=>
-  string(5) "Hello"
-}
-string(10) "Return Val"
-Called foo(), property = Hello
-object(TestClass)#%d (1) {
-  ["prop"]=>
-  string(5) "Hello"
-}
-string(10) "Return Val"
-
-Method with args:
-Called methodWithArgs(1, arg2)
-NULL
-Called methodWithArgs(1, arg2)
-NULL
-
-Method that throws an exception:
-string(18) "Called willThrow()"
---UEXPECTF--
-Public method:
-Called foo(), property = Hello
-object(TestClass)#%d (1) {
   [u"prop"]=>
   unicode(5) "Hello"
 }

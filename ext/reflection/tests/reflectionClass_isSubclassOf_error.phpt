@@ -15,9 +15,3 @@ NULL
 
 Warning: ReflectionClass::isSubclassOf() expects exactly 1 parameter, 2 given in %s on line 6
 NULL
---UEXPECTF--
-Warning: ReflectionClass::isSubclassOf() expects exactly 1 parameter, 0 given in %s on line 5
-NULL
-
-Warning: ReflectionClass::isSubclassOf() expects exactly 1 parameter, 2 given in %s on line 6
-NULL

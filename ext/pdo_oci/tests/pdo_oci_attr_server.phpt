@@ -33,13 +33,6 @@ echo "Done\n";
 ?>
 --EXPECTF--
 Test 1
-ATTR_SERVER_VERSION: string(%d) "%d.%d.%d.%d.%d"
-Test 2
-ATTR_SERVER_INFO
-Found 'Oracle' at position 0 as expected
-Done
---UEXPECTF--
-Test 1
 ATTR_SERVER_VERSION: unicode(%d) "%d.%d.%d.%d.%d"
 Test 2
 ATTR_SERVER_INFO

@@ -17,13 +17,6 @@ var_dump($rc1->getInterfaceNames());
 --EXPECT--
 array(2) {
   [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "Bar"
-}
---UEXPECT--
-array(2) {
-  [0]=>
   unicode(3) "Foo"
   [1]=>
   unicode(3) "Bar"

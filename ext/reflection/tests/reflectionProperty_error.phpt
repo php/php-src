@@ -23,51 +23,6 @@ var_dump($rp->isDefault(1));
 --EXPECTF--
 Warning: ReflectionProperty::__construct() expects exactly 2 parameters, 0 given in %s on line %d
 object(ReflectionProperty)#%d (2) {
-  ["name"]=>
-  string(0) ""
-  ["class"]=>
-  string(0) ""
-}
-
-Warning: ReflectionProperty::__construct() expects exactly 2 parameters, 1 given in %s on line %d
-object(ReflectionProperty)#%d (2) {
-  ["name"]=>
-  string(0) ""
-  ["class"]=>
-  string(0) ""
-}
-
-Warning: ReflectionProperty::__construct() expects exactly 2 parameters, 3 given in %s on line %d
-object(ReflectionProperty)#%d (2) {
-  ["name"]=>
-  string(0) ""
-  ["class"]=>
-  string(0) ""
-}
-
-Warning: Wrong parameter count for ReflectionProperty::getName() in %s on line %d
-NULL
-
-Warning: Wrong parameter count for ReflectionProperty::isPrivate() in %s on line %d
-NULL
-
-Warning: Wrong parameter count for ReflectionProperty::isProtected() in %s on line %d
-NULL
-
-Warning: Wrong parameter count for ReflectionProperty::isPublic() in %s on line %d
-NULL
-
-Warning: Wrong parameter count for ReflectionProperty::isStatic() in %s on line %d
-NULL
-
-Warning: Wrong parameter count for ReflectionProperty::getModifiers() in %s on line %d
-NULL
-
-Warning: Wrong parameter count for ReflectionProperty::isDefault() in %s on line %d
-NULL
---UEXPECTF--
-Warning: ReflectionProperty::__construct() expects exactly 2 parameters, 0 given in %s on line %d
-object(ReflectionProperty)#%d (2) {
   [u"name"]=>
   unicode(0) ""
   [u"class"]=>

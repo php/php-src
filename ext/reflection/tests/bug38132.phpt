@@ -16,22 +16,6 @@ var_dump(isset($properties["bar"]));
 ?>
 --EXPECT--
 array(2) {
-  ["bar"]=>
-  string(3) "baz"
-  ["a"]=>
-  string(1) "a"
-}
-array(2) {
-  [0]=>
-  string(3) "bar"
-  [1]=>
-  string(1) "a"
-}
-bool(false)
-bool(false)
-bool(true)
---UEXPECT--
-array(2) {
   [u"bar"]=>
   unicode(3) "baz"
   [u"a"]=>

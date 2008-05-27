@@ -26,10 +26,6 @@ $foo->testBAR();
 ?>
 ===DONE===
 --EXPECTF--
-string(7) "testBAR"
-string(7) "testBAR"
-===DONE===
---UEXPECTF--
 unicode(7) "testBAR"
 unicode(7) "testBAR"
 ===DONE===

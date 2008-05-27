@@ -15,8 +15,4 @@ $rc->getConstants(true);
 Warning: Wrong parameter count for ReflectionClass::getConstants() in %s on line 7
 
 Warning: Wrong parameter count for ReflectionClass::getConstants() in %s on line 8
---UEXPECTF--
-Warning: Wrong parameter count for ReflectionClass::getConstants() in %s on line 7
-
-Warning: Wrong parameter count for ReflectionClass::getConstants() in %s on line 8
 

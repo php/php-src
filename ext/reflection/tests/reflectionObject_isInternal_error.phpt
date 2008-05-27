@@ -13,9 +13,3 @@ NULL
 
 Warning: Wrong parameter count for ReflectionClass::isInternal() in %s on line 5
 NULL
---UEXPECTF--
-Warning: Wrong parameter count for ReflectionClass::isInternal() in %s on line 4
-NULL
-
-Warning: Wrong parameter count for ReflectionClass::isInternal() in %s on line 5
-NULL
