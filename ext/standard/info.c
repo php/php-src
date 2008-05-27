@@ -48,7 +48,7 @@ ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 ZEND_EXTERN_MODULE_GLOBALS(iconv)
 #endif
 
-f _MSC_VER >= 1500
+#if _MSC_VER >= 1500
 #	define PHP_WINAPI_COMPILER "MSVC9 (2008)"
 #elif _MSC_VER >= 1400
 #	define PHP_WINAPI_COMPILER "MSVC8 (2005)"
@@ -478,7 +478,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 #endif
 
 
-fdef PHP_WIN32
+#ifdef PHP_WIN32
 		php_info_print_table_row(2, "Windows Compiler and Version", PHP_WINAPI_COMPILER );
 #endif
 
