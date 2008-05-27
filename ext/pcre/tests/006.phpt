@@ -15,12 +15,6 @@ var_dump($result);
 echo "Done\n";
 ?>
 --EXPECTF--	
-string(58) "[CODE]&lt;td align=&quot;$stylevar[right]&quot;&gt;[/CODE]"
-NULL
-string(58) "[CODE]&lt;td align=&quot;$stylevar[right]&quot;&gt;[/CODE]"
-NULL
-Done
---UEXPECTF--
 unicode(58) "[CODE]&lt;td align=&quot;$stylevar[right]&quot;&gt;[/CODE]"
 NULL
 unicode(58) "[CODE]&lt;td align=&quot;$stylevar[right]&quot;&gt;[/CODE]"

@@ -18,52 +18,6 @@ var_dump(preg_grep('@^HTTP(.*?)\w{2,}$@i', $array, PREG_GREP_INVERT)); //same as
 --EXPECT--
 array(5) {
   [0]=>
-  string(22) "HTTP://WWW.EXAMPLE.COM"
-  [1]=>
-  string(11) "/index.html"
-  [2]=>
-  string(11) "/info/stat/"
-  [3]=>
-  string(29) "http://test.uk.com/index/html"
-  [4]=>
-  string(17) "/display/dept.php"
-}
-array(2) {
-  [0]=>
-  string(22) "HTTP://WWW.EXAMPLE.COM"
-  [3]=>
-  string(29) "http://test.uk.com/index/html"
-}
-array(5) {
-  [0]=>
-  string(22) "HTTP://WWW.EXAMPLE.COM"
-  [1]=>
-  string(11) "/index.html"
-  [2]=>
-  string(11) "/info/stat/"
-  [3]=>
-  string(29) "http://test.uk.com/index/html"
-  [4]=>
-  string(17) "/display/dept.php"
-}
-array(1) {
-  [3]=>
-  string(29) "http://test.uk.com/index/html"
-}
-array(0) {
-}
-array(3) {
-  [1]=>
-  string(11) "/index.html"
-  [2]=>
-  string(11) "/info/stat/"
-  [4]=>
-  string(17) "/display/dept.php"
-}
-
---UEXPECTF--
-array(5) {
-  [0]=>
   unicode(22) "HTTP://WWW.EXAMPLE.COM"
   [1]=>
   unicode(11) "/index.html"

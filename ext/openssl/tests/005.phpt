@@ -17,23 +17,6 @@ $cn = utf8_decode($out['CN']);
 var_dump($cn);
 --EXPECTF--	
 array(6) {
-  ["C"]=>
-  string(2) "NL"
-  ["ST"]=>
-  string(13) "Noord Brabant"
-  ["L"]=>
-  string(4) "Uden"
-  ["O"]=>
-  string(10) "Triconnect"
-  ["OU"]=>
-  string(10) "Triconnect"
-  ["CN"]=>
-  string(15) "*.triconnect.nl"
-}
-
-string(15) "*.triconnect.nl"
---UEXPECTF--	
-array(6) {
   [u"C"]=>
   unicode(2) "NL"
   [u"ST"]=>

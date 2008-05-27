@@ -24,37 +24,6 @@ var_dump($match5);
 int(1)
 array(1) {
   [0]=>
-  string(7) "Hello, "
-}
-int(0)
-array(0) {
-}
-int(1)
-array(2) {
-  [0]=>
-  string(23) "[*], this is \ a string"
-  [1]=>
-  string(18) "this is \ a string"
-}
-int(1)
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    string(18) "this is \ a string"
-    [1]=>
-    int(19)
-  }
-}
-int(0)
-array(0) {
-}
-
-
---UEXPECTF--
-int(1)
-array(1) {
-  [0]=>
   unicode(7) "Hello, "
 }
 int(0)

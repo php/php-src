@@ -20,17 +20,6 @@ var_dump($dump[0]);
 ?>
 --EXPECT--
 int(1)
-string(1) "a"
-int(1)
-string(1) "a"
-int(1)
-string(1) "i"
-int(1)
-string(5) "aeiou"
-int(1)
-string(5) "aeiou"
---UEXPECT--
-int(1)
 unicode(1) "a"
 int(1)
 unicode(1) "a"

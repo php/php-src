@@ -24,20 +24,6 @@ echo "Done";
 *** Testing preg_quote() : error conditions ***
 
 Arg value is: this is a string
-string(16) "this is a string"
-
-Arg value is: Array
-
-Warning: preg_quote() expects parameter 1 to be string, array given in %spreg_quote_error1.php on line %d
-NULL
-
-Warning: preg_quote() expects parameter 1 to be string, object given in %spreg_quote_error1.php on line %d
-NULL
-Done
---UEXPECTF--
-*** Testing preg_quote() : error conditions ***
-
-Arg value is: this is a string
 unicode(16) "this is a string"
 
 Arg value is: Array

@@ -50,38 +50,6 @@ Warning: preg_replace(): Unknown modifier 'F' in %spreg_replace_error1.php on li
 NULL
 
 Arg value is Array
-string(1) "a"
-
-Arg value is /[a-zA-Z]/
-string(1) "1"
-
-Catchable fatal error: Object of class stdClass could not be converted to string in %spreg_replace_error1.php on line %d
-
-
---UEXPECTF--
-*** Testing preg_replace() : error conditions***
-
-Arg value is abcdef
-
-Warning: preg_replace(): Delimiter must not be alphanumeric or backslash in %spreg_replace_error1.php on line %d
-NULL
-
-Arg value is /[a-zA-Z]
-
-Warning: preg_replace(): No ending delimiter '/' found in %spreg_replace_error1.php on line %d
-NULL
-
-Arg value is [a-zA-Z]/
-
-Warning: preg_replace(): Unknown modifier '/' in %spreg_replace_error1.php on line %d
-NULL
-
-Arg value is /[a-zA-Z]/F
-
-Warning: preg_replace(): Unknown modifier 'F' in %spreg_replace_error1.php on line %d
-NULL
-
-Arg value is Array
 unicode(1) "a"
 
 Arg value is /[a-zA-Z]/

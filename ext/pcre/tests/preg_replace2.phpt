@@ -22,31 +22,6 @@ echo "==done==\n";
 
 ?>
 --EXPECTF--
-Warning: preg_replace(): Parameter mismatch, pattern is a string while replacement is an array in %spreg_replace2.php on line 3
-bool(false)
-string(1) "c"
-array(3) {
-  [0]=>
-  string(1) "x"
-  [1]=>
-  string(2) "aA"
-  [2]=>
-  string(2) "vb"
-}
-array(2) {
-  [0]=>
-  string(1) "$"
-  [1]=>
-  string(1) "$"
-}
-array(2) {
-  [0]=>
-  string(3) "x$y"
-  [1]=>
-  string(1) "$"
-}
-==done==
---UEXPECTF--
 Warning: preg_replace(): Parameter mismatch, pattern is a string while replacement is an array in %s on line %d
 bool(false)
 unicode(1) "c"

@@ -23,6 +23,4 @@ Bug #21758 (preg_replace_callback() not working with class methods)
   $o = new Foo;
 ?>
 --EXPECT--
-string(25) "preg_replace() is working"
---UEXPECT--
 unicode(25) "preg_replace() is working"

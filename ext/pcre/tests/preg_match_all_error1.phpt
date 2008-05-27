@@ -66,59 +66,6 @@ array(1) {
   [0]=>
   array(4) {
     [0]=>
-    string(1) "t"
-    [1]=>
-    string(1) "e"
-    [2]=>
-    string(1) "s"
-    [3]=>
-    string(1) "t"
-  }
-}
-
-Warning: preg_match_all() expects parameter 1 to be string (Unicode or binary), object given in %spreg_match_all_error1.php on line %d
-bool(false)
-NULL
-
---UEXPECTF--
-*** Testing preg_match_all() : error conditions ***
-
-Arg value is abcdef
-
-Warning: preg_match_all(): Delimiter must not be alphanumeric or backslash in %spreg_match_all_error1.php on line %d
-bool(false)
-NULL
-
-Arg value is /[a-zA-Z]
-
-Warning: preg_match_all(): No ending delimiter '/' found in %spreg_match_all_error1.php on line %d
-bool(false)
-NULL
-
-Arg value is [a-zA-Z]/
-
-Warning: preg_match_all(): Unknown modifier '/' in %spreg_match_all_error1.php on line %d
-bool(false)
-NULL
-
-Arg value is /[a-zA-Z]/F
-
-Warning: preg_match_all(): Unknown modifier 'F' in %spreg_match_all_error1.php on line %d
-bool(false)
-NULL
-
-Arg value is Array
-
-Warning: preg_match_all() expects parameter 1 to be string (Unicode or binary), array given in %spreg_match_all_error1.php on line %d
-bool(false)
-NULL
-
-Arg value is /[a-zA-Z]/
-int(4)
-array(1) {
-  [0]=>
-  array(4) {
-    [0]=>
     unicode(1) "t"
     [1]=>
     unicode(1) "e"

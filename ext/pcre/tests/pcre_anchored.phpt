@@ -21,15 +21,6 @@ var_dump(preg_match('/^\P{N}+/A', '123abc'));
 int(1)
 array(1) {
   [0]=>
-  string(3) "abc"
-}
-int(0)
-int(0)
-int(0)
---UEXPECT--
-int(1)
-array(1) {
-  [0]=>
   unicode(3) "abc"
 }
 int(0)

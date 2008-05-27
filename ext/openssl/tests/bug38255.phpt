@@ -38,30 +38,6 @@ bool(false)
 Warning: openssl_verify(): supplied key param cannot be coerced into a public key in %s on line %d
 bool(false)
 
-Warning: openssl_verify() expects parameter 2 to be string, object given in %s on line %d
-NULL
-
-Warning: openssl_verify() expects parameter 2 to be string, object given in %s on line %d
-NULL
-
-Warning: openssl_verify() expects parameter 2 to be string, array given in %s on line %d
-NULL
-
-Warning: openssl_verify() expects at least 3 parameters, 0 given in %s on line %d
-NULL
-
-Warning: openssl_verify() expects parameter 1 to be string, object given in %s on line %d
-NULL
-Done
---UEXPECTF--
-Warning: openssl_verify(): supplied key param cannot be coerced into a public key in %s on line %d
-
-Warning: openssl_verify(): supplied key param cannot be coerced into a public key in %s on line %d
-bool(false)
-
-Warning: openssl_verify(): supplied key param cannot be coerced into a public key in %s on line %d
-bool(false)
-
 Warning: openssl_verify() expects parameter 2 to be binary string, object given in %s on line %d
 NULL
 

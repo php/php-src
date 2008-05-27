@@ -20,28 +20,6 @@ var_dump(preg_replace_callback('|(?P<1>blub)|', 'callback', 'bla blub blah'));
 --EXPECTF--
 array(3) {
   [0]=>
-  string(4) "blub"
-  ["name"]=>
-  string(4) "blub"
-  [1]=>
-  string(4) "blub"
-}
-string(15) "bla blub/4 blah"
-int(1)
-array(3) {
-  [0]=>
-  string(4) "blub"
-  ["name"]=>
-  string(4) "blub"
-  [1]=>
-  string(4) "blub"
-}
-
-Warning: preg_replace_callback(): Numeric named subpatterns are not allowed in %sbug37911.php on line 14
-NULL
---UEXPECTF--
-array(3) {
-  [0]=>
   unicode(4) "blub"
   [u"name"]=>
   unicode(4) "blub"
