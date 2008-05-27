@@ -33,22 +33,7 @@ foreach ($a as $address) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
-string(3) "::1"
-string(3) "::2"
-string(4) "::35"
-string(5) "::255"
-string(6) "::1024"
-
-Warning: inet_pton(): Unrecognized address  in %s on line %d
-
-Warning: inet_ntop(): Invalid in_addr value in %s on line %d
-bool(false)
-string(36) "2001:db8:85a3:8d3:1319:8a2e:370:7344"
-string(15) "2001:db8:1234::"
-string(38) "2001:db8:1234:ffff:ffff:ffff:ffff:ffff"
-Done
---UEXPECTF--
+--EXPECTF--
 unicode(3) "::1"
 unicode(3) "::2"
 unicode(4) "::35"
