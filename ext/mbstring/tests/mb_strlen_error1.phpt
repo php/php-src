@@ -44,17 +44,3 @@ bool(false)
 Warning: mb_strlen() expects at most 2 parameters, 3 given in %s on line %d
 bool(false)
 Done
-
---UEXPECTF--
-*** Testing mb_strlen() : error conditions ***
-
--- Testing mb_strlen() function with Zero arguments --
-
-Warning: mb_strlen() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
-
--- Testing mb_strlen() function with more than expected no. of arguments --
-
-Warning: mb_strlen() expects at most 2 parameters, 3 given in %s on line %d
-bool(false)
-Done

@@ -64,6 +64,8 @@ setlocale(LC_CTYPE, $orig);
 --EXPECTF--
 *** Testing ctype_space() : usage variations ***
 
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_space_variation3.php on line %d
+
 -- Iteration 1 --
 bool(false)
 
@@ -141,4 +143,6 @@ bool(true)
 
 -- Iteration 26 --
 bool(true)
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_space_variation3.php on line %d
 ===DONE===

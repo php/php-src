@@ -35,26 +35,7 @@ gmp_clrbit();
 
 echo "Done\n";
 ?>
---EXPECTF--	
-string(1) "0"
-
-Warning: gmp_clrbit(): Index must be greater than or equal to zero in %s on line %d
-string(2) "-1"
-
-Warning: gmp_clrbit(): Index must be greater than or equal to zero in %s on line %d
-string(7) "1000000"
-string(7) "1000000"
-string(30) "238462734628347239571822592658"
-
-Warning: gmp_clrbit(): supplied argument is not a valid GMP integer resource in %s on line %d
-
-Warning: gmp_clrbit() expects exactly 2 parameters, 3 given in %s on line %d
-
-Warning: gmp_clrbit() expects exactly 2 parameters, 1 given in %s on line %d
-
-Warning: gmp_clrbit() expects exactly 2 parameters, 0 given in %s on line %d
-Done
---UEXPECTF--
+--EXPECTF--
 unicode(1) "0"
 
 Warning: gmp_clrbit(): Index must be greater than or equal to zero in %s on line %d

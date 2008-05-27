@@ -47,18 +47,7 @@ if ($mb == $greek_upper) {
 echo "Done";
 ?>
 
---EXPECTF--
-*** Testing mb_strtoupper() : basic functionality ***
-
--- ASCII String --
-string(26) "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-Correctly converted
-
--- Multibyte String --
-string(64) "zpHOks6TzpTOlc6WzpfOmM6ZzprOm86czp3Ons6fzqDOoc6jzqTOpc6mzqfOqM6p"
-Correctly converted
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing mb_strtoupper() : basic functionality ***
 
 -- ASCII String --

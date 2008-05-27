@@ -96,4 +96,3 @@ string(85) "<foo:child xmlns:foo="urn::foo" foo:bar="2" xml:id="id2">data &amp; 
 <root xmlns:foo="urn::foo"><child1 imported="1"><?php echo 'Hello World'; ?></child1></root>
 
 Output is identical
-

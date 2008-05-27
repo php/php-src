@@ -58,42 +58,7 @@ var_dump(base64_encode(mb_convert_encoding($euc_jp_string, 'UTF-8', 'EUC-JP')));
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing mb_convert_encoding() : basic functionality ***
-
--- Convert to JIS --
-JIS encoded string in base64:
-string(68) "GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4IzkhIxsoQg=="
-Converted Strings:
-string(68) "GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4IzkhIxsoQg=="
-string(68) "GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4IzkhIxsoQg=="
-string(68) "GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4IzkhIxsoQg=="
-
--- Convert to EUC-JP --
-EUC-JP encoded string in base64:
-string(52) "xvzL3LjspcalraW5pcikx6S5oaMwMTIzNKO1o7ajt6O4o7mhow=="
-Converted Strings:
-string(52) "xvzL3LjspcalraW5pcikx6S5oaMwMTIzNKO1o7ajt6O4o7mhow=="
-string(52) "xvzL3LjspcalraW5pcikx6S5oaMwMTIzNKO1o7ajt6O4o7mhow=="
-string(52) "xvzL3LjspcalraW5pcikx6S5oaMwMTIzNKO1o7ajt6O4o7mhow=="
-
--- Convert to SJIS --
-SJIS encoded string in base64:
-string(52) "k/qWe4zqg2WDTINYg2eCxYK3gUIwMTIzNIJUglWCVoJXgliBQg=="
-Converted Strings:
-string(52) "k/qWe4zqg2WDTINYg2eCxYK3gUIwMTIzNIJUglWCVoJXgliBQg=="
-string(52) "k/qWe4zqg2WDTINYg2eCxYK3gUIwMTIzNIJUglWCVoJXgliBQg=="
-string(52) "k/qWe4zqg2WDTINYg2eCxYK3gUIwMTIzNIJUglWCVoJXgliBQg=="
-
--- Convert to UTF-8 --
-UTF-8 encoded string in base64:
-string(72) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
-Converted Strings:
-string(72) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
-string(72) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
-string(72) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing mb_convert_encoding() : basic functionality ***
 
 -- Convert to JIS --

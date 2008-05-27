@@ -15,9 +15,5 @@ var_dump("UTF-8: ".iconv( "ISO-8859-1", "UTF-8", $test ) );
 ?>
 --EXPECT--
 iconv extension is available
-string(15) "ISO-8859-1: æøå"
-string(13) "UTF-8: Ã¦Ã¸Ã¥"
---UEXPECT--
-iconv extension is available
 unicode(15) "ISO-8859-1: æøå"
 unicode(13) "UTF-8: Ã¦Ã¸Ã¥"

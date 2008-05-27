@@ -21,5 +21,5 @@ catch(Exception $e) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 PASS

@@ -38,22 +38,7 @@ var_dump(base64_encode($result_2));
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing mb_substr() : basic functionality ***
-
--- ASCII string 1 --
-string(3) "DEF"
-
--- ASCII string 2 --
-string(3) "DEF"
-
--- Multibyte string 1 --
-string(12) "peacrOiqng=="
-
--- Multibyte string 2 --
-string(28) "6Kqe44OG44Kt44K544OI44Gn44GZ"
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing mb_substr() : basic functionality ***
 
 -- ASCII string 1 --

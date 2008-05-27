@@ -24,7 +24,7 @@ var_dump(gmp_cmp());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(2)
 int(0)
 int(-1)

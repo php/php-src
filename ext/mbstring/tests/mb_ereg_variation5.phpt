@@ -61,26 +61,7 @@ function base64_encode_var_dump($regs) {
 	}
 }
 ?>
---EXPECTF--
-*** Testing mb_ereg() : usage variations ***
-
-ASCII String without $regs arg:		int(1)
-ASCII String with $regs arg:
-int(38)
-array(1) {
-  [0]=>
-  string(38) "This is an English string. 0123456789."
-}
-
-Multibyte String without $regs arg:	int(1)
-Multubyte String with $regs arg:
-int(53)
-array(1) {
-  [0]=>
-  string(72) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
-}
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing mb_ereg() : usage variations ***
 
 ASCII String without $regs arg:		int(1)

@@ -37,28 +37,7 @@ var_dump(gmp_strval($n));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: gmp_testbit(): Index must be greater than or equal to zero in %s on line %d
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(true)
-
-Warning: gmp_testbit(): Index must be greater than or equal to zero in %s on line %d
-bool(false)
-bool(false)
-bool(true)
-string(7) "1000002"
-bool(true)
-string(7) "1000034"
-bool(false)
-bool(true)
-string(30) "238462734628347239571823641266"
-bool(false)
-string(30) "238462734628347239571823641234"
-Done
---UEXPECTF--
+--EXPECTF--
 Warning: gmp_testbit(): Index must be greater than or equal to zero in %s on line %d
 bool(false)
 bool(false)

@@ -44,27 +44,6 @@ echo "\nDone image_type_to_mime_type() test\n";
 --EXPECT--
 Starting image_type_to_mime_type() test
 
-string(9) "image/gif"
-string(10) "image/jpeg"
-string(9) "image/png"
-string(29) "application/x-shockwave-flash"
-string(9) "image/psd"
-string(9) "image/bmp"
-string(10) "image/tiff"
-string(10) "image/tiff"
-string(24) "application/octet-stream"
-string(9) "image/jp2"
-string(24) "application/octet-stream"
-string(24) "application/octet-stream"
-string(9) "image/iff"
-string(18) "image/vnd.wap.wbmp"
-string(24) "application/octet-stream"
-string(9) "image/xbm"
-
-Done image_type_to_mime_type() test
---UEXPECT--
-Starting image_type_to_mime_type() test
-
 unicode(9) "image/gif"
 unicode(10) "image/jpeg"
 unicode(9) "image/png"

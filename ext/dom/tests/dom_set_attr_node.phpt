@@ -32,41 +32,6 @@ try {
 ?>
 --EXPECTF--
 object(DOMException)#%d (6) {
-  ["message":protected]=>
-  string(20) "Wrong Document Error"
-  ["string":"Exception":private]=>
-  string(0) ""
-  ["file":protected]=>
-  string(%d) "%sdom_set_attr_node.php"
-  ["line":protected]=>
-  int(%d)
-  ["trace":"Exception":private]=>
-  array(1) {
-    [0]=>
-    array(6) {
-      ["file"]=>
-      string(%d) "%sdom_set_attr_node.php"
-      ["line"]=>
-      int(%d)
-      ["function"]=>
-      string(16) "setAttributeNode"
-      ["class"]=>
-      string(10) "DOMElement"
-      ["type"]=>
-      string(2) "->"
-      ["args"]=>
-      array(1) {
-        [0]=>
-        object(DOMAttr)#%d (0) {
-        }
-      }
-    }
-  }
-  ["code"]=>
-  int(4)
-}
---UEXPECTF--
-object(DOMException)#%d (6) {
   [u"message":protected]=>
   unicode(20) "Wrong Document Error"
   [u"string":u"Exception":private]=>

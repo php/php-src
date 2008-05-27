@@ -39,22 +39,7 @@ foreach ($uppers as $lang => $sourcestring) {
 echo "Done";
 ?>
 
---EXPECTF--
-*** Testing mb_strtolower() :  usage variations ***
-
--- Basic Latin --
-string(36) "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo="
-Correctly Converted
-
--- Characters With Accents --
-string(64) "w6DDocOiw6PDpMOlw6bDp8Oow6nDqsOrw6zDrcOuw6/DsMOxw7LDs8O0w7XDtg=="
-Correctly Converted
-
--- Russian --
-string(24) "0LDQsdCy0LPQtNC10LbQtw=="
-Correctly Converted
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing mb_strtolower() :  usage variations ***
 
 -- Basic Latin --

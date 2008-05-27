@@ -15,40 +15,6 @@ var_dump( date_get_last_errors() );
 --EXPECT--
 bool(false)
 array(4) {
-  ["warning_count"]=>
-  int(1)
-  ["warnings"]=>
-  array(1) {
-    [6]=>
-    string(29) "Double timezone specification"
-  }
-  ["error_count"]=>
-  int(1)
-  ["errors"]=>
-  array(1) {
-    [0]=>
-    string(47) "The timezone could not be found in the database"
-  }
-}
-array(4) {
-  ["warning_count"]=>
-  int(1)
-  ["warnings"]=>
-  array(1) {
-    [6]=>
-    string(29) "Double timezone specification"
-  }
-  ["error_count"]=>
-  int(1)
-  ["errors"]=>
-  array(1) {
-    [0]=>
-    string(47) "The timezone could not be found in the database"
-  }
-}
---UEXPECT--
-bool(false)
-array(4) {
   [u"warning_count"]=>
   int(1)
   [u"warnings"]=>

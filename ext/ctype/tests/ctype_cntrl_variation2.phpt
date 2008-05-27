@@ -33,6 +33,8 @@ setlocale(LC_CTYPE, $orig);
 ===DONE===
 --EXPECTF--
 *** Testing ctype_cntrl() : usage variations ***
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_cntrl_variation2.php on line 14
 character code 0 is control character
 character code 1 is control character
 character code 2 is control character
@@ -99,4 +101,6 @@ character code 157 is control character
 character code 158 is control character
 character code 159 is control character
 character code 173 is control character
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_cntrl_variation2.php on line 22
 ===DONE===

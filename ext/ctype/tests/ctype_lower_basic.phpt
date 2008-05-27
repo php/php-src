@@ -28,6 +28,10 @@ setlocale(LC_CTYPE, $orig);
 ===DONE===
 --EXPECTF--
 *** Testing ctype_lower() : basic functionality ***
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_lower_basic.php on line 9
 bool(true)
 bool(false)
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_lower_basic.php on line 17
 ===DONE===

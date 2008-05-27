@@ -8,5 +8,5 @@ $attr = $dom->createAttribute('string');
 echo get_class($attr);
 
 ?>
---EXPECTF--
+--EXPECT--
 DOMAttr

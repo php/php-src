@@ -15,14 +15,6 @@ var_dump(
 );
 ?>
 --EXPECT--
-string(0) ""
-string(5) "".."."
-string(1) """
-string(2) """"
-string(4) ""\"""
-string(1) """
-string(2) """"
---UEXPECT--
 unicode(0) ""
 unicode(5) "".."."
 unicode(1) """

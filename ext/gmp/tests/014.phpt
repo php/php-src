@@ -28,35 +28,7 @@ var_dump(gmp_strval(gmp_fact(array())));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-string(1) "1"
-string(1) "1"
-string(1) "1"
-
-Warning: gmp_fact(): Number has to be greater than or equal to 0 in %s on line %d
-string(1) "0"
-
-Warning: gmp_fact(): Number has to be greater than or equal to 0 in %s on line %d
-string(1) "0"
-string(1) "1"
-string(19) "2432902008176640000"
-string(65) "30414093201713378043612608166064768844377641568960512000000000000"
-string(7) "3628800"
-string(1) "1"
-string(11) "87178291200"
-
-Warning: gmp_fact(): Number has to be greater than or equal to 0 in %s on line %d
-string(1) "0"
-
-Warning: gmp_fact() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: gmp_fact() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-resource(%d) of type (GMP integer)
-string(1) "1"
-Done
---UEXPECTF--
+--EXPECTF--
 unicode(1) "1"
 unicode(1) "1"
 unicode(1) "1"

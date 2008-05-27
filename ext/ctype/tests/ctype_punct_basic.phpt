@@ -29,6 +29,10 @@ setlocale(LC_CTYPE, $orig);
 ===DONE===
 --EXPECTF--
 *** Testing ctype_punct() : basic functionality ***
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_punct_basic.php on line %d
 bool(true)
 bool(false)
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_punct_basic.php on line %d
 ===DONE===

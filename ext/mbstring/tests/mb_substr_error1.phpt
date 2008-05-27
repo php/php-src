@@ -47,17 +47,3 @@ NULL
 Warning: Wrong parameter count for mb_substr() in %s on line %d
 NULL
 Done
-
---UEXPECTF--
-*** Testing mb_substr() : error conditions ***
-
--- Testing mb_substr() function with more than expected no. of arguments --
-
-Warning: Wrong parameter count for mb_substr() in %s on line %d
-NULL
-
--- Testing mb_substr() function with less than expected no. of arguments --
-
-Warning: Wrong parameter count for mb_substr() in %s on line %d
-NULL
-Done

@@ -50,59 +50,6 @@ Testing:
 
 DECODE: AS OBJECT
 object(stdClass)#%d (1) {
-  ["JSON Test Pattern pass3"]=>
-  object(stdClass)#%d (2) {
-    ["The outermost value"]=>
-    string(27) "must be an object or array."
-    ["In this test"]=>
-    string(16) "It is an object."
-  }
-}
-DECODE: AS ARRAY
-array(1) {
-  ["JSON Test Pattern pass3"]=>
-  array(2) {
-    ["The outermost value"]=>
-    string(27) "must be an object or array."
-    ["In this test"]=>
-    string(16) "It is an object."
-  }
-}
-ENCODE: FROM OBJECT
-{"JSON Test Pattern pass3":{"The outermost value":"must be an object or array.","In this test":"It is an object."}}
-ENCODE: FROM ARRAY
-{"JSON Test Pattern pass3":{"The outermost value":"must be an object or array.","In this test":"It is an object."}}
-DECODE AGAIN: AS OBJECT
-object(stdClass)#%d (1) {
-  ["JSON Test Pattern pass3"]=>
-  object(stdClass)#%d (2) {
-    ["The outermost value"]=>
-    string(27) "must be an object or array."
-    ["In this test"]=>
-    string(16) "It is an object."
-  }
-}
-DECODE AGAIN: AS ARRAY
-array(1) {
-  ["JSON Test Pattern pass3"]=>
-  array(2) {
-    ["The outermost value"]=>
-    string(27) "must be an object or array."
-    ["In this test"]=>
-    string(16) "It is an object."
-  }
-}
---UEXPECTF--
-Testing: 
-{
-    "JSON Test Pattern pass3": {
-        "The outermost value": "must be an object or array.",
-        "In this test": "It is an object."
-    }
-}
-
-DECODE: AS OBJECT
-object(stdClass)#%d (1) {
   [u"JSON Test Pattern pass3"]=>
   object(stdClass)#%d (2) {
     [u"The outermost value"]=>

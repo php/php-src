@@ -33,6 +33,8 @@ setlocale(LC_CTYPE, $orig);
 ===DONE===
 --EXPECTF--
 *** Testing ctype_alnum() : usage variations ***
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_alnum_variation2.php on line 14
 character code 48 is alpha numeric
 character code 49 is alpha numeric
 character code 50 is alpha numeric
@@ -160,4 +162,6 @@ character code 252 is alpha numeric
 character code 253 is alpha numeric
 character code 254 is alpha numeric
 character code 255 is alpha numeric
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_alnum_variation2.php on line 22
 ===DONE===

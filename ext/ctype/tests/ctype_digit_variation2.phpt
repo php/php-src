@@ -33,6 +33,8 @@ setlocale(LC_CTYPE, $orig);
 ===DONE===
 --EXPECTF--
 *** Testing ctype_digit() : usage variations ***
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_digit_variation2.php on line 14
 character code 48 is a numeric digit
 character code 49 is a numeric digit
 character code 50 is a numeric digit
@@ -43,4 +45,6 @@ character code 54 is a numeric digit
 character code 55 is a numeric digit
 character code 56 is a numeric digit
 character code 57 is a numeric digit
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_digit_variation2.php on line 22
 ===DONE===

@@ -33,10 +33,3 @@ echo "Done";
 Warning: mb_substr(): Unknown encoding "unknown-encoding" in %s on line %d
 bool(false)
 Done
-
---UEXPECTF--
-*** Testing mb_substr() : error conditions ***
-
-Warning: mb_substr(): Unknown encoding "unknown-encoding" in %s on line %d
-bool(false)
-Done

@@ -14,45 +14,6 @@ echo $dt->format( DateTime::ISO8601 ), "\n";
 ?>
 --EXPECT--
 array(12) {
-  ["year"]=>
-  int(0)
-  ["month"]=>
-  int(0)
-  ["day"]=>
-  int(0)
-  ["hour"]=>
-  int(0)
-  ["minute"]=>
-  int(0)
-  ["second"]=>
-  int(0)
-  ["fraction"]=>
-  float(0)
-  ["warning_count"]=>
-  int(0)
-  ["warnings"]=>
-  array(0) {
-  }
-  ["error_count"]=>
-  int(0)
-  ["errors"]=>
-  array(0) {
-  }
-  ["is_localtime"]=>
-  bool(false)
-}
-int(-62169984000)
-object(DateTime)#1 (3) {
-  ["date"]=>
-  string(20) "-0001-11-30 00:00:00"
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(3) "UTC"
-}
--0001-11-30T00:00:00+0000
---UEXPECT--
-array(12) {
   [u"year"]=>
   int(0)
   [u"month"]=>

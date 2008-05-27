@@ -31,46 +31,7 @@ var_dump(gmp_strval(new stdclass, new stdclass));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: gmp_strval() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-bool(false)
-
-Warning: gmp_strval() expects parameter 2 to be long, string given in %s on line %d
-NULL
-
-Warning: gmp_strval(): Bad base for conversion: -1 in %s on line %d
-bool(false)
-
-Warning: gmp_strval() expects parameter 2 to be long, string given in %s on line %d
-NULL
-
-Warning: gmp_strval(): supplied resource is not a valid GMP integer resource in %s on line %d
-bool(false)
-string(7) "9765456"
-
-Warning: gmp_strval(): Bad base for conversion: -1 in %s on line %d
-bool(false)
-
-Warning: gmp_strval(): Bad base for conversion: 100000 in %s on line %d
-bool(false)
-string(7) "9765456"
-string(8) "-3373333"
-
-Warning: gmp_strval(): Bad base for conversion: -1 in %s on line %d
-bool(false)
-
-Warning: gmp_strval(): Bad base for conversion: 100000 in %s on line %d
-bool(false)
-string(8) "-3373333"
-
-Warning: gmp_strval() expects parameter 2 to be long, array given in %s on line %d
-NULL
-
-Warning: gmp_strval() expects parameter 2 to be long, object given in %s on line %d
-NULL
-Done
---UEXPECTF--
+--EXPECTF--
 Warning: gmp_strval() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 bool(false)

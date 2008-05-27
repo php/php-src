@@ -35,11 +35,3 @@ echo "Done";
 Warning: mb_substr_count(): Unknown encoding "unknown-encoding" in %s on line %d
 bool(false)
 Done
---UEXPECTF--
-*** Testing mb_substr_count() : error conditions ***
-
--- Testing mb_substr_count() function with an unknown encoding --
-
-Warning: mb_substr_count(): Unknown encoding "unknown-encoding" in %s on line %d
-bool(false)
-Done

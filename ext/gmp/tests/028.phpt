@@ -19,27 +19,7 @@ var_dump(gmp_random("test"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-string(%d) "%d"
-string(%d) "%d"
-string(1) "0"
-string(%d) "%d"
-string(%d) "%d"
-string(%d) "%d"
-
-Warning: gmp_random() expects parameter 1 to be long, array given in %s on line %d
-NULL
-
-Warning: gmp_random() expects at most 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: gmp_random() expects parameter 1 to be long, string given in %s on line %d
-NULL
-
-Warning: gmp_random() expects parameter 1 to be long, string given in %s on line %d
-NULL
-Done
---UEXPECTF--
+--EXPECTF--
 unicode(%d) "%d"
 unicode(%d) "%d"
 unicode(1) "0"

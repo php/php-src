@@ -47,16 +47,3 @@ NULL
 Warning: mb_substr_count() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing mb_substr_count() : error conditions ***
-
--- Testing mb_substr_count() function with more than expected no. of arguments --
-
-Warning: mb_substr_count() expects at most 3 parameters, 4 given in %s on line %d
-NULL
-
--- Testing mb_substr_count() function with less than expected no. of arguments --
-
-Warning: mb_substr_count() expects at least 2 parameters, 1 given in %s on line %d
-NULL
-Done

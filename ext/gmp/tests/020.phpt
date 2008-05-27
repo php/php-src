@@ -33,7 +33,7 @@ var_dump(gmp_prob_prime(array()));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(0)
 int(2)
 int(2)

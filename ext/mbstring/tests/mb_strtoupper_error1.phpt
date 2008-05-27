@@ -45,16 +45,3 @@ NULL
 Warning: mb_strtoupper() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 Done
---UEXPECTF--
-*** Testing mb_strtoupper() : error conditions ***
-
--- Testing mb_strtoupper() function with more than expected no. of arguments --
-
-Warning: mb_strtoupper() expects at most 2 parameters, 3 given in %s on line %d
-NULL
-
--- Testing mb_strtoupper() function with zero arguments --
-
-Warning: mb_strtoupper() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-Done

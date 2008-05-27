@@ -30,43 +30,7 @@ var_dump(gmp_pow(array(),10));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-string(4) "1024"
-string(4) "1024"
-string(5) "-2048"
-string(4) "1024"
-string(1) "1"
-
-Warning: gmp_pow(): Negative exponent not supported in %s on line %d
-string(1) "0"
-string(4) "1024"
-string(14) "10240000000000"
-string(17) "97656250000000000"
-
-Warning: gmp_pow(): Negative exponent not supported in %s on line %d
-string(1) "0"
-string(14) "10240000000000"
-string(14) "10240000000000"
-
-Warning: gmp_pow() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: gmp_pow() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: gmp_pow() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: gmp_pow() expects parameter 2 to be long, array given in %s on line %d
-NULL
-
-Warning: gmp_pow() expects parameter 2 to be long, array given in %s on line %d
-NULL
-
-Warning: gmp_pow(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-Done
---UEXPECTF--
+--EXPECTF--
 unicode(4) "1024"
 unicode(4) "1024"
 unicode(5) "-2048"

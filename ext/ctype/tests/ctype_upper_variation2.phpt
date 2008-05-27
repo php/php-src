@@ -32,6 +32,8 @@ setlocale(LC_CTYPE, $orig);
 ===DONE===
 --EXPECTF--
 *** Testing ctype_upper() : usage variations ***
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_upper_variation2.php on line 13
 character code 65 is a uppercase character
 character code 66 is a uppercase character
 character code 67 is a uppercase character
@@ -88,4 +90,6 @@ character code 219 is a uppercase character
 character code 220 is a uppercase character
 character code 221 is a uppercase character
 character code 222 is a uppercase character
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_upper_variation2.php on line 21
 ===DONE===

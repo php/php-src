@@ -106,6 +106,8 @@ setlocale(LC_CTYPE, $orig);
 --EXPECTF--
 *** Testing ctype_graph() : usage variations ***
 
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_graph_variation1.php on line %d
+
 -- Iteration 1 --
 bool(false)
 
@@ -180,4 +182,6 @@ bool(false)
 
 -- Iteration 25 --
 bool(false)
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_graph_variation1.php on line %d
 ===DONE===

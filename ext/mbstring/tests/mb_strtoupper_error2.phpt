@@ -34,11 +34,3 @@ Warning: mb_strtoupper(): Illegal character encoding specified in %s on line %d
 Warning: mb_strtoupper(): Unknown encoding "unknown-encoding" in %s on line %d
 bool(false)
 Done
---UEXPECTF--
-*** Testing mb_strtoupper() : error conditions ***
-
-Warning: mb_strtoupper(): Illegal character encoding specified in %s on line %d
-
-Warning: mb_strtoupper(): Unknown encoding "unknown-encoding" in %s on line %d
-bool(false)
-Done

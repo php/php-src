@@ -20,7 +20,7 @@ var_dump(gmp_scan0());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: gmp_scan0(): Starting index must be greater than or equal to zero in %s on line %d
 bool(false)
 int(2)

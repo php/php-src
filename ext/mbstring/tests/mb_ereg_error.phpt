@@ -47,17 +47,3 @@ bool(false)
 Warning: mb_ereg() expects at least 2 parameters, 1 given in %s on line %d
 bool(false)
 Done
-
---UEXPECTF--
-*** Testing mb_ereg() : error conditions ***
-
--- Testing mb_ereg() function with more than expected no. of arguments --
-
-Warning: mb_ereg() expects at most 3 parameters, 4 given in %s on line %d
-bool(false)
-
--- Testing mb_ereg() function with less than expected no. of arguments --
-
-Warning: mb_ereg() expects at least 2 parameters, 1 given in %s on line %d
-bool(false)
-Done

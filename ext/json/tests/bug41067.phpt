@@ -16,8 +16,5 @@ var_dump(bin2hex((binary)$json_decoded[0]));
 
 ?>
 --EXPECT--
-string(8) "f09d8480"
-string(8) "f09d8480"
---UEXPECT--
 unicode(8) "f09d8480"
 unicode(8) "f09d8480"

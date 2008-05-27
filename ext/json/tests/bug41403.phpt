@@ -22,27 +22,7 @@ var_dump(json_decode('[123,13452345]'));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-array(1) {
-  [0]=>
-  float(2,1)
-}
-array(1) {
-  [0]=>
-  float(0,15)
-}
-array(1) {
-  [0]=>
-  float(123,13452345)
-}
-array(2) {
-  [0]=>
-  int(123)
-  [1]=>
-  int(13452345)
-}
-Done
---UEXPECTF--
+--EXPECTF--
 Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 array(1) {
   [0]=>

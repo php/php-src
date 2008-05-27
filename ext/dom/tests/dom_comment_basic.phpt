@@ -32,22 +32,6 @@ bool(true)
 --- child 0 ---
 object(DOMText)#%d (0) {
 }
-string(2) "
-	"
---- child 1 ---
-object(DOMComment)#%d (0) {
-}
-string(14) " Hello World! "
---- child 2 ---
-object(DOMText)#%d (0) {
-}
-string(1) "
-"
---UEXPECTF--
-bool(true)
---- child 0 ---
-object(DOMText)#%d (0) {
-}
 unicode(2) "
 	"
 --- child 1 ---
@@ -59,4 +43,3 @@ object(DOMText)#%d (0) {
 }
 unicode(1) "
 "
-

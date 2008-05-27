@@ -33,16 +33,7 @@ var_dump(mb_substr_count($string_mb, $needle_mb, 'utf-8'));
 
 echo "Done";
 ?>
---EXPECTF--
-*** Testing mb_substr_count() : usage variations ***
-
--- ASCII String --
-int(1)
-
--- Multibyte String --
-int(1)
-Done
---UEXPECTF--
+--EXPECT--
 *** Testing mb_substr_count() : usage variations ***
 
 -- ASCII String --

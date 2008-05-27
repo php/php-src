@@ -48,9 +48,7 @@ class handler {
 
     function __construct()
     {
-        if (ini_get("unicode.semantics")) {
-            $this->data = str_replace('s:', 'U:', $this->data);
-        }
+        $this->data = str_replace('s:', 'U:', $this->data);
     }
 }
 

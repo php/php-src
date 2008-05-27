@@ -48,16 +48,3 @@ bool(false)
 Warning: mb_strrpos() expects at least 2 parameters, 1 given in %s on line %d
 bool(false)
 Done
---UEXPECTF--
-*** Testing mb_strrpos() : error conditions ***
-
--- Testing mb_strrpos() function with more than expected no. of arguments --
-
-Warning: mb_strrpos() expects at most 4 parameters, 5 given in %s on line %d
-bool(false)
-
--- Testing mb_strrpos() function with less than expected no. of arguments --
-
-Warning: mb_strrpos() expects at least 2 parameters, 1 given in %s on line %d
-bool(false)
-Done

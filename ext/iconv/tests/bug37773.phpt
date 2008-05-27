@@ -15,6 +15,4 @@ if ($test === false) {
 	var_dump(iconv_substr('x', 0, 1, 'UTF-8'));
 ?>
 --EXPECT--
-string(1) "x"
---UEXPECT--
 unicode(1) "x"

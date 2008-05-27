@@ -70,32 +70,6 @@ Fatal Error 76: Opening and ending tag mismatch: titles line 4 and title
 --------------------------------------------
 
 object(LibXMLError)#%d (6) {
-  ["level"]=>
-  int(3)
-  ["code"]=>
-  int(76)
-  ["column"]=>
-  int(%d)
-  ["message"]=>
-  string(57) "Opening and ending tag mismatch: titles line 4 and title
-"
-  ["file"]=>
-  string(0) ""
-  ["line"]=>
-  int(4)
-}
-Done
---UEXPECTF--
-bool(false)
-            <titles>PHP: Behind the Parser</title>
-%s
-Fatal Error 76: Opening and ending tag mismatch: titles line 4 and title
-  Line: 4
-  Column: %d
-
---------------------------------------------
-
-object(LibXMLError)#%d (6) {
   [u"level"]=>
   int(3)
   [u"code"]=>

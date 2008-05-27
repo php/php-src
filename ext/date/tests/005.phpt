@@ -20,7 +20,7 @@ var_dump(idate("'"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: idate() expects at least 1 parameter, 0 given in %s on line %d
 bool(false)
 

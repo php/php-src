@@ -33,6 +33,8 @@ setlocale(LC_CTYPE, $orig);
 ===DONE===
 --EXPECTF--
 *** Testing ctype_lower() : usage variations ***
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_lower_variation2.php on line 14
 character code 97 is a lower case character
 character code 98 is a lower case character
 character code 99 is a lower case character
@@ -94,4 +96,6 @@ character code 252 is a lower case character
 character code 253 is a lower case character
 character code 254 is a lower case character
 character code 255 is a lower case character
+
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %sctype_lower_variation2.php on line 22
 ===DONE===

@@ -34,7 +34,7 @@ var_dump(dbase_open($file, 0));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: dbase_open(): Invalid access mode -1 in %s on line %d
 bool(false)
 

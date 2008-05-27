@@ -46,10 +46,8 @@ class handler {
 
     function __construct()
     {
-	if (ini_get("unicode.semantics")) {
-		/* Setup proper deserialization data for unicode.semantics mode */
-	        $this->data = str_replace('s:', 'U:', $this->data);
-	}
+    /* Setup proper deserialization data for unicode.semantics mode */
+        $this->data = str_replace('s:', 'U:', $this->data);
     }
 }
 
