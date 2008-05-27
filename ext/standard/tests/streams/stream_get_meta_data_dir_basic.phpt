@@ -13,47 +13,6 @@ var_dump(stream_get_meta_data($dirObject->handle));
 ?>
 --EXPECT--
 array(9) {
-  ["wrapper_type"]=>
-  string(9) "plainfile"
-  ["stream_type"]=>
-  string(3) "dir"
-  ["mode"]=>
-  string(1) "r"
-  ["unread_bytes"]=>
-  int(0)
-  ["unread_chars"]=>
-  int(0)
-  ["seekable"]=>
-  bool(true)
-  ["timed_out"]=>
-  bool(false)
-  ["blocked"]=>
-  bool(true)
-  ["eof"]=>
-  bool(false)
-}
-array(9) {
-  ["wrapper_type"]=>
-  string(9) "plainfile"
-  ["stream_type"]=>
-  string(3) "dir"
-  ["mode"]=>
-  string(1) "r"
-  ["unread_bytes"]=>
-  int(0)
-  ["unread_chars"]=>
-  int(0)
-  ["seekable"]=>
-  bool(true)
-  ["timed_out"]=>
-  bool(false)
-  ["blocked"]=>
-  bool(true)
-  ["eof"]=>
-  bool(false)
-}
---UEXPECT--
-array(9) {
   [u"wrapper_type"]=>
   unicode(9) "plainfile"
   [u"stream_type"]=>

@@ -18,6 +18,4 @@ serialize_precision=10
 var_dump(serialize(0.1));
 ?>
 --EXPECTF--
-string(6) "d:0.1;"
---UEXPECTF--
 unicode(6) "d:0.1;"

@@ -24,12 +24,6 @@ echo "\nDone";
 ?>
 --EXPECTF--
 --- Testing Resource ---
-string(4) "i:%d;"
-int(%d)
-
-Done
---UEXPECTF--
---- Testing Resource ---
 unicode(4) "i:%d;"
 int(%d)
 

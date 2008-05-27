@@ -19,26 +19,6 @@ var_dump(unserialize(serialize($a)));
 ?>
 --EXPECTF--
 object(a)#%d (1) {
-  ["b"]=>
-  object(b)#%d (1) {
-    ["c"]=>
-    object(c)#%d (1) {
-      ["d"]=>
-      object(a)#%d (1) {
-        ["b"]=>
-        object(b)#%d (1) {
-          ["c"]=>
-          object(c)#%d (1) {
-            ["d"]=>
-            *RECURSION*
-          }
-        }
-      }
-    }
-  }
-}
---UEXPECTF--
-object(a)#%d (1) {
   [u"b"]=>
   object(b)#%d (1) {
     [u"c"]=>

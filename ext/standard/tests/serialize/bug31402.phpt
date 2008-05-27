@@ -35,58 +35,6 @@ var_dump($before, $after);
 ===DONE===
 --EXPECTF--
 object(TestY)#%d (2) {
-  ["A"]=>
-  array(3) {
-    [1]=>
-    object(TestX)#%d (1) {
-      ["i"]=>
-      int(1)
-    }
-    [2]=>
-    &object(TestX)#%d (1) {
-      ["i"]=>
-      int(2)
-    }
-    [3]=>
-    &object(TestX)#%d (1) {
-      ["i"]=>
-      int(2)
-    }
-  }
-  ["B"]=>
-  object(TestX)#%d (1) {
-    ["i"]=>
-    int(1)
-  }
-}
-object(TestY)#%d (2) {
-  ["A"]=>
-  array(3) {
-    [1]=>
-    object(TestX)#%d (1) {
-      ["i"]=>
-      int(1)
-    }
-    [2]=>
-    &object(TestX)#%d (1) {
-      ["i"]=>
-      int(2)
-    }
-    [3]=>
-    &object(TestX)#%d (1) {
-      ["i"]=>
-      int(2)
-    }
-  }
-  ["B"]=>
-  object(TestX)#%d (1) {
-    ["i"]=>
-    int(1)
-  }
-}
-===DONE===
---UEXPECTF--
-object(TestY)#%d (2) {
   [u"A"]=>
   array(3) {
     [1]=>
