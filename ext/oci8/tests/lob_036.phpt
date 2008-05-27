@@ -34,11 +34,6 @@ echo "Done\n";
 
 ?>
 --EXPECT--
-int(4)
-bool(true)
-int(4)
-Done
---UEXPECT--
 int(8)
 bool(true)
 int(8)

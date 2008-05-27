@@ -65,44 +65,6 @@ echo "Done\n";
 ?>
 --EXPECTF--
 object(OCI-Lob)#%d (1) {
-  ["descriptor"]=>
-  resource(%d) of type (oci8 descriptor)
-}
-int(72)
-array(2) {
-  [0]=>
-  object(OCI-Lob)#%d (1) {
-    ["descriptor"]=>
-    resource(%d) of type (oci8 descriptor)
-  }
-  ["BLOB"]=>
-  object(OCI-Lob)#%d (1) {
-    ["descriptor"]=>
-    resource(%d) of type (oci8 descriptor)
-  }
-}
-string(72) "this is a biiiig faaat test string. why are you reading it, I wonder? =)"
-bool(true)
-string(40) "this is a biiiig faaat test string. why "
-bool(true)
-string(30) "this is a biiiig faaat test st"
-bool(true)
-string(20) "this is a biiiig faa"
-bool(true)
-string(10) "this is a "
-bool(true)
-string(0) ""
-
-Warning: OCI-Lob::truncate(): Length must be greater than or equal to zero in %s on line %d
-bool(false)
-string(0) ""
-
-Warning: OCI-Lob::truncate(): Length must be greater than or equal to zero in %s on line %d
-bool(false)
-bool(true)
-Done
---UEXPECTF--
-object(OCI-Lob)#%d (1) {
   [u"descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }

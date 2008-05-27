@@ -39,21 +39,6 @@ echo "Done\n";
 array(2) {
   [0]=>
   object(OCI-Lob)#%d (1) {
-    ["descriptor"]=>
-    resource(%d) of type (oci8 descriptor)
-  }
-  ["BLOB"]=>
-  object(OCI-Lob)#%d (1) {
-    ["descriptor"]=>
-    resource(%d) of type (oci8 descriptor)
-  }
-}
-bool(true)
-Done
---UEXPECTF--
-array(2) {
-  [0]=>
-  object(OCI-Lob)#%d (1) {
     [u"descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }

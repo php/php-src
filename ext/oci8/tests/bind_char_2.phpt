@@ -107,30 +107,6 @@ Test 1.4: Type: AFC:  Length: strlen
     :2008-04-20:
 Test 1.5: Type: AFC.  Length: strlen-1
   Querying:
-    Oci_execute error ORA-1460 Exiting Query
-Test 1.6: Type: AFC.  Length: strlen+1
-  Querying:
-    :1:
-    :2008-04-20:
-Done
---UEXPECT--
-Test 1.1: Type: default.  Length: default
-  Querying:
-    :1:
-    :2008-04-20:
-Test 1.2: Type: AFC.  Length: default
-  Querying:
-    :1:
-    :2008-04-20:
-Test 1.3: Type: AFC:  Length: 0
-  Querying:
-    Oci_execute error ORA-1460 Exiting Query
-Test 1.4: Type: AFC:  Length: strlen
-  Querying:
-    :1:
-    :2008-04-20:
-Test 1.5: Type: AFC.  Length: strlen-1
-  Querying:
     :1:
     :2008-04-20:
 Test 1.6: Type: AFC.  Length: strlen+1

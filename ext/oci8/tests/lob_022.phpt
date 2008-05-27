@@ -73,19 +73,6 @@ Warning: oci_lob_save() expects at least 2 parameters, 0 given in %s on line %d
 Warning: oci_lob_save(): Unable to find descriptor property in %s on line %d
 
 Warning: OCI-Lob::save(): Offset parameter must be greater than or equal to 0 in %s on line %d
-string(4) "data"
-string(9) "long data"
-string(9) "long data"
-string(4) "data"
-Done
---UEXPECTF--
-Warning: OCI-Lob::save() expects at least 1 parameter, 0 given in %s on line %d
-
-Warning: oci_lob_save() expects at least 2 parameters, 0 given in %s on line %d
-
-Warning: oci_lob_save(): Unable to find descriptor property in %s on line %d
-
-Warning: OCI-Lob::save(): Offset parameter must be greater than or equal to 0 in %s on line %d
 unicode(4) "data"
 unicode(9) "long data"
 unicode(9) "long data"

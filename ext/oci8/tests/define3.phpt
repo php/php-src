@@ -75,34 +75,6 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-string(32) "614fcbba1effb7caa27ef0ef25c27fcf"
-string(32) "06d4f219d946c74d748d43932cd9dcb2"
-Test 1
-bool(true)
-object(OCI-Lob)#%d (1) {
-  ["descriptor"]=>
-  resource(%d) of type (oci8 descriptor)
-}
-file md5:614fcbba1effb7caa27ef0ef25c27fcf
-object(OCI-Lob)#%d (1) {
-  ["descriptor"]=>
-  resource(%d) of type (oci8 descriptor)
-}
-file md5:06d4f219d946c74d748d43932cd9dcb2
-Test 2
-bool(true)
-
-Warning: oci_fetch(): ORA-00932: %s on line %d
-Test 3
-bool(true)
-file md5:614fcbba1effb7caa27ef0ef25c27fcf
-file md5:06d4f219d946c74d748d43932cd9dcb2
-Test 4
-bool(true)
-file md5:614fcbba1effb7caa27ef0ef25c27fcf
-file md5:06d4f219d946c74d748d43932cd9dcb2
-Done
---UEXPECTF--
 unicode(32) "614fcbba1effb7caa27ef0ef25c27fcf"
 unicode(32) "06d4f219d946c74d748d43932cd9dcb2"
 Test 1

@@ -48,24 +48,6 @@ echo "Done\n";
 ?>
 --EXPECTF--
 object(OCI-Lob)#%d (1) {
-  ["descriptor"]=>
-  resource(%d) of type (oci8 descriptor)
-}
-int(0)
-
-Warning: OCI-Lob::write() expects parameter 2 to be long, string given in %slob_002.php on line %d
-NULL
-int(4)
-int(40000)
-int(40004)
-
-Warning: OCI-Lob::seek() expects parameter 1 to be long, string given in %slob_002.php on line %d
-NULL
-bool(false)
-int(40004)
-Done
---UEXPECTF--
-object(OCI-Lob)#%d (1) {
   [u"descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }

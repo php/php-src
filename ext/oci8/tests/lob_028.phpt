@@ -46,44 +46,6 @@ echo "Done\n";
 ?>
 --EXPECTF--
 object(OCI-Lob)#%d (1) {
-  ["descriptor"]=>
-  resource(%d) of type (oci8 descriptor)
-}
-object(OCI-Lob)#%d (1) {
-  ["descriptor"]=>
-  resource(%d) of type (oci8 descriptor)
-}
-object(OCI-Lob)#%d (1) {
-  ["descriptor"]=>
-  resource(%d) of type (oci8 descriptor)
-}
-object(OCI-Lob)#%d (1) {
-  ["descriptor"]=>
-  resource(%d) of type (oci8 descriptor)
-}
-object(OCI-Lob)#%d (1) {
-  ["descriptor"]=>
-  resource(%d) of type (oci8 descriptor)
-}
-object(OCI-Lob)#%d (1) {
-  ["descriptor"]=>
-  resource(%d) of type (oci8 descriptor)
-}
-
-Warning: oci_new_descriptor(): Unknown descriptor type %d in %s on line %d
-NULL
-
-Warning: oci_new_descriptor(): Unknown descriptor type %d in %s on line %d
-NULL
-
-Warning: oci_new_descriptor(): Unknown descriptor type %d in %s on line %d
-NULL
-
-Warning: oci_new_descriptor(): Unknown descriptor type %d in %s on line %d
-NULL
-Done
---UEXPECTF--
-object(OCI-Lob)#%d (1) {
   [u"descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }

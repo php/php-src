@@ -86,23 +86,6 @@ Test 1
 Caught Exception: oci_execute(): ORA-00984: %s
 resource(%d) of type (oci8 connection)
 array(1) {
-  ["C1"]=>
-  array(0) {
-  }
-}
-array(1) {
-  ["C1"]=>
-  array(1) {
-    [0]=>
-    string(1) "1"
-  }
-}
-Done
---UEXPECTF--
-Test 1
-Caught Exception: oci_execute(): ORA-00984: %s
-resource(%d) of type (oci8 connection)
-array(1) {
   [u"C1"]=>
   array(0) {
   }

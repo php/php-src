@@ -59,24 +59,6 @@ var_dump($array);
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: oci_execute(): ORA-06550: line %d, column %d:
-PLS-00418: array bind type must match PL/SQL table row type
-ORA-06550: line %d, column %d:
-PL/SQL: Statement ignored in %s on line %d
-array(5) {
-  [0]=>
-  string(1) "1"
-  [1]=>
-  string(1) "2"
-  [2]=>
-  string(1) "3"
-  [3]=>
-  string(1) "4"
-  [4]=>
-  string(1) "5"
-}
-Done
---UEXPECTF--
 Warning: oci_execute(): ORA-06550: line 1, column 28:
 PLS-00418: array bind type must match PL/SQL table row type
 ORA-06550: line 1, column 7:

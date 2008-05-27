@@ -26,16 +26,6 @@ echo "Done\n";
 ?>
 --EXPECTF--
 bool(true)
-string(4) "test"
-bool(true)
-string(2) "te"
-bool(true)
-string(4) "test"
-bool(true)
-string(2) "te"
-Done
---UEXPECTF--
-bool(true)
 unicode(4) "test"
 bool(true)
 unicode(2) "te"

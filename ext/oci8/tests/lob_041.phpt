@@ -76,27 +76,6 @@ test data
 Test 2 - implicit statement close
 test data
 object(OCI-Lob)#%d (1) {
-  ["descriptor"]=>
-  resource(%d) of type (oci8 descriptor)
-}
-
-Test 3 - no preallocated descriptor
-test data
-array(1) {
-  ["C1"]=>
-  object(OCI-Lob)#%d (1) {
-    ["descriptor"]=>
-    resource(%d) of type (oci8 descriptor)
-  }
-}
-Done
---UEXPECTF--
-Test 1 - explicit statement close
-test data
-
-Test 2 - implicit statement close
-test data
-object(OCI-Lob)#%d (1) {
   [u"descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }

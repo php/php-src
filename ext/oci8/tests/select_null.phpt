@@ -19,14 +19,6 @@ echo "Done\n";
 array(2) {
   [0]=>
   NULL
-  ["NULL"]=>
-  NULL
-}
-Done
---UEXPECT--
-array(2) {
-  [0]=>
-  NULL
   [u"NULL"]=>
   NULL
 }

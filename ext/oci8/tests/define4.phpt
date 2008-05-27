@@ -51,23 +51,6 @@ echo "Done\n";
 Test 1
 bool(true)
 Test 2
-string(4) "1234"
-string(4) "some"
-string(4) "some"
-string(4) "some"
-string(4) "1234"
-string(4) "some"
-Test 3
-bool(true)
-string(4) "some"
-
-Warning: oci_result(): %d is not a valid oci8 statement resource in %s on line %d
-bool(false)
-Done
---UEXPECTF--
-Test 1
-bool(true)
-Test 2
 unicode(4) "1234"
 unicode(4) "some"
 unicode(4) "some"

@@ -32,17 +32,6 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 array(1) {
-  ["NC"]=>
-  object(OCI-Lob)#%d (1) {
-    ["descriptor"]=>
-    resource(%d) of type (oci8 descriptor)
-  }
-}
-string(%d) "%s5"
-string(%d) "%sa"
-Done
---UEXPECTF--
-array(1) {
   [u"NC"]=>
   object(OCI-Lob)#%d (1) {
     [u"descriptor"]=>

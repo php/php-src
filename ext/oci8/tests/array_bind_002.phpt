@@ -64,23 +64,6 @@ Warning: oci_bind_array_by_name(): Maximum array length must be greater than zer
 Warning: oci_execute(): ORA-01008: not all variables bound in %s on line %d
 array(5) {
   [0]=>
-  string(9) "06-DEC-05"
-  [1]=>
-  string(9) "10-DEC-80"
-  [2]=>
-  string(9) "21-AUG-91"
-  [3]=>
-  string(9) "26-OCT-17"
-  [4]=>
-  string(9) "05-NOV-05"
-}
-Done
---UEXPECTF--
-Warning: oci_bind_array_by_name(): Maximum array length must be greater than zero in %s on line %d
-
-Warning: oci_execute(): ORA-01008: not all variables bound in %s on line %d
-array(5) {
-  [0]=>
   unicode(9) "06-DEC-05"
   [1]=>
   unicode(9) "10-DEC-80"

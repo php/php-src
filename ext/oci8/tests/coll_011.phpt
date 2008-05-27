@@ -39,11 +39,5 @@ require dirname(__FILE__)."/drop_type.inc";
 bool(true)
 bool(true)
 bool(true)
-string(6) "string"
-Done
---UEXPECT--
-bool(true)
-bool(true)
-bool(true)
 unicode(6) "string"
 Done

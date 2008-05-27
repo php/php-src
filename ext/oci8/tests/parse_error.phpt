@@ -101,48 +101,6 @@ echo "Done\n";
 --EXPECTF--
 Normal connection: Parse error
 array(4) {
-  ["code"]=>
-  int(1756)
-  ["message"]=>
-  string(48) "ORA-01756: quoted string not properly terminated"
-  ["offset"]=>
-  int(0)
-  ["sqltext"]=>
-  string(0) ""
-}
-New connection: Parse error
-array(4) {
-  ["code"]=>
-  int(1756)
-  ["message"]=>
-  string(48) "ORA-01756: quoted string not properly terminated"
-  ["offset"]=>
-  int(0)
-  ["sqltext"]=>
-  string(0) ""
-}
-Persistent connection: Parse error
-array(4) {
-  ["code"]=>
-  int(1756)
-  ["message"]=>
-  string(48) "ORA-01756: quoted string not properly terminated"
-  ["offset"]=>
-  int(0)
-  ["sqltext"]=>
-  string(0) ""
-}
-No connection: error: bool(false)
-Normal connection (take #2): Parse error: ORA-01756: quoted string not properly terminated
-New connection (take #2): Parse error: ORA-01756: quoted string not properly terminated
-Persistent connection (take #2): Parse error: ORA-01756: quoted string not properly terminated
-Normal connection: New Collection error: OCI-22303: type ""."ABC" not found
-New connection (take #3): Parse error: ORA-01756: quoted string not properly terminated
-Persistent connection (take #3): Parse error: ORA-01756: quoted string not properly terminated
-Done
---UEXPECTF--
-Normal connection: Parse error
-array(4) {
   [u"code"]=>
   int(1756)
   [u"message"]=>

@@ -67,26 +67,6 @@ echo "Done\n";
 --EXPECT--
 Initial Data
 array(1) {
-  ["ADDRESS"]=>
-  string(16) "original text #1"
-}
-array(1) {
-  ["ADDRESS"]=>
-  string(16) "original text #2"
-}
-Verify Change
-array(1) {
-  ["ADDRESS"]=>
-  string(13) "Some new text"
-}
-array(1) {
-  ["ADDRESS"]=>
-  string(16) "original text #2"
-}
-Done
---UEXPECT--
-Initial Data
-array(1) {
   [u"ADDRESS"]=>
   unicode(16) "original text #1"
 }

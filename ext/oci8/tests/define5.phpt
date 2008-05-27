@@ -53,20 +53,6 @@ bool(true)
 Test 1 - must do define before execute
 bool(true)
 NULL
-string(4) "some"
-Test 2 - normal define order
-bool(true)
-string(4) "some"
-Test 3 - no new define done
-string(4) "some"
-string(5) "thing"
-Done
---UEXPECT--
-bool(true)
-bool(true)
-Test 1 - must do define before execute
-bool(true)
-NULL
 unicode(4) "some"
 Test 2 - normal define order
 bool(true)

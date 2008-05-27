@@ -43,12 +43,6 @@ echo "Done\n";
 --EXPECT--
 bool(true)
 bool(true)
-string(14) "some text data"
-string(19) "some more text data"
-Done
---UEXPECT--
-bool(true)
-bool(true)
 unicode(14) "some text data"
 unicode(19) "some more text data"
 Done
