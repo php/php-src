@@ -1578,6 +1578,14 @@ PHP_FUNCTION(stream_encoding)
 	if (remove_write_tail) {
 		php_stream_filter_remove(stream->writefilters.tail, 1 TSRMLS_CC);
 	}
+	
+	if (encoding_len == 0) {
+		if (UG(stream_encoding) == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The stream_encoding must be defined");
+			RETURN_FALSE;
+		}
+		encoding = UG(stream_encoding);
+	}
 
 	/* UTODO: Allow overriding error handling for converters */
 	php_stream_encoding_apply(stream, 1, encoding, UG(from_error_mode), UG(from_subst_char));
