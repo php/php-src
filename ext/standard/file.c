@@ -1358,7 +1358,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 	php_stream *stream;
 	zval *zstream, *zstring;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "rz|l", &zstream, &zstring, &write_len) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "rz/|l", &zstream, &zstring, &write_len) == FAILURE) {
 		RETURN_NULL();
 	}
 
