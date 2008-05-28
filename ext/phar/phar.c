@@ -1886,6 +1886,8 @@ int phar_open_compiled_file(char *alias, int alias_len, char **error TSRMLS_DC) 
 	zval *halt_constant;
 	php_stream *fp;
 	int fname_len;
+	char *actual = NULL;
+	int ret;
 
 	if (error) {
 		*error = NULL;
@@ -1915,16 +1917,38 @@ int phar_open_compiled_file(char *alias, int alias_len, char **error TSRMLS_DC) 
 	halt_offset = Z_LVAL(*halt_constant);
 	FREE_ZVAL(halt_constant);
 	
-	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, NULL);
 
-	if (!fp) {
-		if (error) {
-			spprintf(error, 0, "unable to open phar for reading \"%s\"", fname);
-		}
+#if PHP_MAJOR_VERSION < 6
+	if (PG(safe_mode) && (!php_checkuid(fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
+	  return FAILURE;
+ 	}
+#endif
+
+	if (php_check_open_basedir(fname TSRMLS_CC)) {
 		return FAILURE;
-	}
+ 	}
 
-	return phar_open_file(fp, fname, fname_len, alias, alias_len, halt_offset, NULL, PHAR_FILE_COMPRESSED_NONE, error TSRMLS_CC);
+	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, &actual);
+	if (!fp) {
+   		if (error) {
+			spprintf(error, 0, "unable to open phar for reading \"%s\"", fname);
+   		}
+		if (actual) {
+   			efree(actual);
+  		}
+		return FAILURE;
+ 	}
+
+	if (actual) {
+  		fname = actual;
+		fname_len = strlen(actual);
+ 	}
+
+	ret = phar_open_fp(fp, fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, error TSRMLS_CC);
+ 	if (actual) {
+		efree(actual);
+ 	}
+	 return ret;
 }
 /* }}} */
 
