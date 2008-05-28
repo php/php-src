@@ -1,5 +1,7 @@
 --TEST--
 Inconsistencies when accessing protected members
+--XFAIL--
+Discussion: http://marc.info/?l=php-internals&m=120221184420957&w=2
 --FILE--
 <?php
 
