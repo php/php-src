@@ -1,3 +1,20 @@
+2008-05-27  Matt Wilmas  <php_lists@realplain.com>
+
+    * (PHP_5_3)
+      zend_API.c
+      zend_API.h
+      zend_builtin_functions.c
+      zend_object_handlers.c:
+      MFH: Add array_init_size() and use it where array size is known at
+      initialization
+
+    * zend_API.c
+      zend_API.h
+      zend_builtin_functions.c
+      zend_object_handlers.c:
+      Add array_init_size() and use it where array size is known at
+      initialization
+
 2008-05-26  Steph Fox  <steph.fox@virgin.net>
 
     * tests/001.phpt
