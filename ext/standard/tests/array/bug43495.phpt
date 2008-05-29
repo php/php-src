@@ -17,5 +17,5 @@ $b["key1"]["key2"]["key3"] = null;
 echo "Done.\n";
 ?>
 --EXPECTF--
-Warning: array_merge_recursive(): recursion detected in %s/bug43495.php on line %d
+Warning: array_merge_recursive(): recursion detected in %sbug43495.php on line %d
 Done.
