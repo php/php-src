@@ -891,6 +891,11 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 		return FAILURE;			/* division by zero */
 	}
 	if (op1->type == IS_LONG && op2->type == IS_LONG) {
+		if (Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == LONG_MIN) {
+			/* Prevent overflow error/crash */
+			ZVAL_DOUBLE(result, (double) LONG_MIN / -1);
+			return SUCCESS;
+		}
 		if (op1->value.lval % op2->value.lval == 0) { /* integer */
 			result->type = IS_LONG;
 			result->value.lval = op1->value.lval / op2->value.lval;
