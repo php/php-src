@@ -10,7 +10,8 @@ foreach ($a as $b) {
 	if ($b->isDir()) {
 		echo "dir " . $b->getPathName() . "\n";
 	} else {
-		echo $b->getPathName() . "\n";
+		echo $b->getPathName(), "\n";
+		echo file_get_contents($b->getPathName()), "\n";
 	}
 }
 if (isset($a['notempty/hi.txt'])) {
@@ -19,8 +20,10 @@ if (isset($a['notempty/hi.txt'])) {
 ?>
 ===DONE===
 --EXPECTF--
-dir phar://%szip.zip%cempty
-phar://%szip.zip%chi.txt
-dir phar://%szip.zip%cnotempty
-phar://%szip.zip/notempty/hi.txt
+dir phar:///home/cellog/workspace/php5/ext/phar/tests/zip/files/zip.zip/empty
+phar:///home/cellog/workspace/php5/ext/phar/tests/zip/files/zip.zip/hi.txt
+hi there
+
+dir phar:///home/cellog/workspace/php5/ext/phar/tests/zip/files/zip.zip/notempty
+phar:///home/cellog/workspace/php5/ext/phar/tests/zip/files/zip.zip/notempty/hi.txt
 ===DONE===
