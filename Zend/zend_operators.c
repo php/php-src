@@ -1454,6 +1454,10 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 					zend_error(E_WARNING, "Division by zero");
 					ZVAL_BOOL(result, 0);
 					return FAILURE;			/* division by zero */
+				} else if (Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == LONG_MIN) {
+					/* Prevent overflow error/crash */
+					ZVAL_DOUBLE(result, (double) LONG_MIN / -1);
+					return SUCCESS;
 				}
 				if (Z_LVAL_P(op1) % Z_LVAL_P(op2) == 0) { /* integer */
 					ZVAL_LONG(result, Z_LVAL_P(op1) / Z_LVAL_P(op2));
