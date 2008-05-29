@@ -1980,15 +1980,16 @@ int phar_postprocess_file(php_stream_wrapper *wrapper, int options, phar_entry_d
 			spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (cannot read local file header for file \"%s\")", idata->phar->fname, entry->filename);
 			return FAILURE;
 		}
-		/* fix up for big-endian systems */
-		/* verify local header if not yet verified */
+		/* verify local header */
 		if (entry->filename_len != PHAR_ZIP_16(local.filename_len) || entry->crc32 != PHAR_ZIP_32(local.crc32) || entry->uncompressed_filesize != PHAR_ZIP_32(local.uncompsize) || entry->compressed_filesize != PHAR_ZIP_32(local.compsize)) {
 			spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (local head of file \"%s\" does not match central directory)", idata->phar->fname, entry->filename);
 			return FAILURE;
 		}
-		if (-1 == php_stream_seek(idata->phar->fp, PHAR_ZIP_16(local.filename_len) + PHAR_ZIP_16(local.extra_len), SEEK_CUR)) {
-			spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (cannot seek to start of file data for file \"%s\")", idata->phar->fname, entry->filename);
-			return FAILURE;
+		/* construct actual offset to file start - local extra_len can be different from central extra_len */
+		entry->offset = entry->offset_abs =
+			sizeof(local) + entry->header_offset + PHAR_ZIP_16(local.filename_len) + PHAR_ZIP_16(local.extra_len);
+		if (idata->zero != entry->offset_abs) {
+			idata->zero = entry->offset_abs;
 		}
 	}
 	php_stream_seek(fp, idata->zero, SEEK_SET);	
