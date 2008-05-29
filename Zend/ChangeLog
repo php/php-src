@@ -1,3 +1,11 @@
+2008-05-28  Felipe Pena  <felipensp@gmail.com>
+
+    * tests/access_modifiers_008.phpt
+      tests/access_modifiers_008.phpt
+      tests/access_modifiers_009.phpt
+      tests/access_modifiers_009.phpt:
+      - Added XFAIL section in tests to issue under discussion
+
 2008-05-27  Matt Wilmas  <php_lists@realplain.com>
 
     * (PHP_5_3)
