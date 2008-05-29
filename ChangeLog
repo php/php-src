@@ -1,3 +1,32 @@
+2008-05-28  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/phar/phar.c:
+      MF5: Fix code path in phar_open_compiled_file() that tries
+      to open not-yet-loaded phar and fails on compressed files
+
+    * (PHP_5_3)
+      ext/phar/phar.c:
+      Fix code path in phar_open_compiled_file() that tries
+      to open not-yet-loaded phar and fails on compressed files
+
+2008-05-28  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/streamsfuncs.c
+      ext/standard/tests/streams/stream_encoding.phpt:
+      - Added check for encoding optional parameter (avoiding the segfault in
+      filter.c: strlen(encoding))
+        If the parameter is not suplied, it will try to use the
+      UG(stream_enconding)
+
+    * ext/standard/file.c:
+      - Added zval separation (avoid crash when using fwrite($fp, $fp)).
+
+    * ZendEngine2/tests/access_modifiers_008.phpt
+      ZendEngine2/tests/access_modifiers_008.phpt
+      ZendEngine2/tests/access_modifiers_009.phpt
+      ZendEngine2/tests/access_modifiers_009.phpt:
+      - Added XFAIL section in tests to issue under discussion
+
 2008-05-27  Felipe Pena  <felipensp@gmail.com>
 
     * run-tests.php:
