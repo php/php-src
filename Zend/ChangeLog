@@ -1,3 +1,22 @@
+2008-05-29  Matt Wilmas  <php_lists@realplain.com>
+
+    * (PHP_5_2)
+      zend_operators.c
+      zend_operators.c:
+      MFH: Fixed overflow crash (at least on Windows) in div_function with
+      LONG_MIN / -1
+
+    * zend_operators.c:
+      Fixed overflow crash (at least on Windows) in div_function with LONG_MIN /
+      -1
+      To reproduce: (-PHP_INT_MAX - 1) / -1, so op1 is a long
+      Same cause as Bug #27354 for mod_function
+
+    * (PHP_5_2)
+      tests/bug41919.phpt
+      tests/bug41919.phpt:
+      Fixed tests on Windows
+
 2008-05-28  Felipe Pena  <felipensp@gmail.com>
 
     * tests/access_modifiers_008.phpt
