@@ -140,10 +140,10 @@ static void phar_zip_u2d_time(time_t time, php_uint16 *dtime, php_uint16 *ddate)
  * Parse a new one and add it to the cache, returning either SUCCESS or 
  * FAILURE, and setting pphar to the pointer to the manifest entry
  * 
- * This is used by phar_open_fp to process a zip-based phar, but can be called
+ * This is used by phar_open_from_fp to process a zip-based phar, but can be called
  * directly.
  */
-int phar_open_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
+int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_zip_dir_end locator;
 	char buf[sizeof(locator) + 65536];
