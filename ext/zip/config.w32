@@ -30,7 +30,6 @@ if (PHP_ZIP != "no") {
 
 		AC_DEFINE('HAVE_ZLIB', 1);
 		AC_DEFINE('HAVE_ZIP', 1);
-		ADD_FLAG("CFLAGS_ZIP", "/D PHP_ZIP_EXPORTS ");
 	} else {
 		WARNING("zip not enabled; libraries and headers not found");
 	}
