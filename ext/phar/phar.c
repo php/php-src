@@ -1988,7 +1988,7 @@ int phar_postprocess_file(php_stream_wrapper *wrapper, int options, phar_entry_d
 		/* construct actual offset to file start - local extra_len can be different from central extra_len */
 		entry->offset = entry->offset_abs =
 			sizeof(local) + entry->header_offset + PHAR_ZIP_16(local.filename_len) + PHAR_ZIP_16(local.extra_len);
-		if (idata->zero != entry->offset_abs) {
+		if (idata->zero && idata->zero != entry->offset_abs) {
 			idata->zero = entry->offset_abs;
 		}
 	}
