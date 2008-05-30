@@ -1,4 +1,5 @@
 <?php
+
 function usage($argv) {
     echo "Usage:\n";
     printf("\tphp %s <http://example.com/file> <localfile>\n", $argv[0]);
@@ -22,7 +23,7 @@ function stream_notification_callback($notification_code, $severity, $message, $
         break;
 
     case STREAM_NOTIFY_CONNECT:
-        echo "Conntected...\n";
+        echo "Connected...\n";
         break;
 
     case STREAM_NOTIFY_FILE_SIZE_IS:
@@ -58,7 +59,7 @@ if (is_resource($fp) && file_put_contents($argv[2], $fp)) {
 }
 
 $err = error_get_last();
-echo "\nErrrrrorr..\n", $err["message"], "\n";
+echo "\nError..\n", $err["message"], "\n";
 exit(1);
 
 
