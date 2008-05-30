@@ -24,7 +24,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, char *url_from, int mode, in
 int phar_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC);
 
 #ifdef PHAR_DIRSTREAM
-php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, int options TSRMLS_DC);
+php_url* phar_parse_url(php_stream_wrapper *wrapper, char *filename, char *mode, int options TSRMLS_DC);
 
 /* directory handlers */
 static size_t phar_dir_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC);
