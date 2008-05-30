@@ -526,7 +526,7 @@ PHP_METHOD(Phar, webPhar)
 	phar_request_initialize(TSRMLS_C);
 	fname = zend_get_executed_filename(TSRMLS_C);
 	fname_len = strlen(fname);
-	if (phar_open_compiled_file(alias, alias_len, &error TSRMLS_CC) != SUCCESS) {
+	if (phar_open_executed_filename(alias, alias_len, &error TSRMLS_CC) != SUCCESS) {
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 			efree(error);
@@ -993,7 +993,7 @@ PHP_METHOD(Phar, mapPhar)
 
 	phar_request_initialize(TSRMLS_C);
 
-	RETVAL_BOOL(phar_open_compiled_file(alias, alias_len, &error TSRMLS_CC) == SUCCESS);
+	RETVAL_BOOL(phar_open_executed_filename(alias, alias_len, &error TSRMLS_CC) == SUCCESS);
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 		efree(error);
@@ -1013,7 +1013,7 @@ PHP_METHOD(Phar, loadPhar)
 
 	phar_request_initialize(TSRMLS_C);
 
-	RETVAL_BOOL(phar_open_filename(fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, &error TSRMLS_CC) == SUCCESS);
+	RETVAL_BOOL(phar_open_from_filename(fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, &error TSRMLS_CC) == SUCCESS);
 	if (error) {
 		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 		efree(error);
@@ -1305,7 +1305,7 @@ PHP_METHOD(Phar, unlinkArchive)
 		return;
 	}
 
-	if (FAILURE == phar_open_filename(fname, fname_len, NULL, 0, REPORT_ERRORS, &phar, &error TSRMLS_CC)) {
+	if (FAILURE == phar_open_from_filename(fname, fname_len, NULL, 0, REPORT_ERRORS, &phar, &error TSRMLS_CC)) {
 		if (error) {
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unknown phar archive \"%s\": %s", fname, error);
 			efree(error);
@@ -3972,7 +3972,7 @@ PHP_METHOD(PharFileInfo, __construct)
 		return;
 	}
 
-	if (phar_open_filename(arch, arch_len, NULL, 0, REPORT_ERRORS, &phar_data, &error TSRMLS_CC) == FAILURE) {
+	if (phar_open_from_filename(arch, arch_len, NULL, 0, REPORT_ERRORS, &phar_data, &error TSRMLS_CC) == FAILURE) {
 		efree(arch);
 		efree(entry);
 		if (error) {

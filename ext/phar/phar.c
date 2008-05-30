@@ -363,7 +363,7 @@ void phar_entry_remove(phar_entry_data *idata, char **error TSRMLS_DC) /* {{{ */
 /**
  * Open an already loaded phar
  */
-int phar_open_loaded(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
+int phar_open_parsed_phar(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 #ifdef PHP_WIN32
@@ -489,10 +489,10 @@ static int phar_hex_str(const char *digest, size_t digest_len, char ** signature
  * Parse a new one and add it to the cache, returning either SUCCESS or 
  * FAILURE, and setting pphar to the pointer to the manifest entry
  * 
- * This is used by phar_open_filename to process the manifest, but can be called
+ * This is used by phar_open_from_filename to process the manifest, but can be called
  * directly.
  */
-int phar_open_file(php_stream *fp, char *fname, int fname_len, char *alias, int alias_len, long halt_offset, phar_archive_data** pphar, php_uint32 compression, char **error TSRMLS_DC) /* {{{ */
+int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char *alias, int alias_len, long halt_offset, phar_archive_data** pphar, php_uint32 compression, char **error TSRMLS_DC) /* {{{ */
 {
 	char b32[4], *buffer, *endbuffer, *savebuf;
 	phar_archive_data *mydata = NULL;
@@ -1001,7 +1001,7 @@ int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int al
 	}
 
 check_file:
-	if (phar_open_loaded(fname, fname_len, alias, alias_len, is_data, options, test, &my_error TSRMLS_CC) == SUCCESS) {
+	if (phar_open_parsed_phar(fname, fname_len, alias, alias_len, is_data, options, test, &my_error TSRMLS_CC) == SUCCESS) {
 		if (pphar) {
 			*pphar = *test;
 		}
@@ -1072,7 +1072,7 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 	}
 
 	if (fp) {
-		if (phar_open_fp(fp, fname, fname_len, alias, alias_len, options, pphar, error TSRMLS_CC) == SUCCESS) {
+		if (phar_open_from_fp(fp, fname, fname_len, alias, alias_len, options, pphar, error TSRMLS_CC) == SUCCESS) {
 			if ((*pphar)->is_data || !PHAR_G(readonly)) {
 				(*pphar)->is_writeable = 1;
 			}
@@ -1182,10 +1182,10 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
  * Return an already opened filename.
  *
  * Or scan a phar file for the required __HALT_COMPILER(); ?> token and verify
- * that the manifest is proper, then pass it to phar_open_file().  SUCCESS
+ * that the manifest is proper, then pass it to phar_parse_pharfile().  SUCCESS
  * or FAILURE is returned and pphar is set to a pointer to the phar's manifest
  */
-int phar_open_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
+int phar_open_from_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
 	php_stream *fp;
 	char *actual;
@@ -1199,7 +1199,7 @@ int phar_open_filename(char *fname, int fname_len, char *alias, int alias_len, i
 		is_data = 1;
 	}
 
-	if (phar_open_loaded(fname, fname_len, alias, alias_len, is_data, options, pphar, error TSRMLS_CC) == SUCCESS) {
+	if (phar_open_parsed_phar(fname, fname_len, alias, alias_len, is_data, options, pphar, error TSRMLS_CC) == SUCCESS) {
 		return SUCCESS;
 	} else if (error && *error) {
 		return FAILURE;
@@ -1233,7 +1233,7 @@ int phar_open_filename(char *fname, int fname_len, char *alias, int alias_len, i
 		fname_len = strlen(actual);
 	}
 
-	ret =  phar_open_fp(fp, fname, fname_len, alias, alias_len, options, pphar, error TSRMLS_CC);
+	ret =  phar_open_from_fp(fp, fname, fname_len, alias, alias_len, options, pphar, error TSRMLS_CC);
 	if (actual) {
 		efree(actual);
 	}
@@ -1264,10 +1264,10 @@ static inline char *phar_strnstr(const char *buf, int buf_len, const char *searc
 
 /**
  * Scan an open fp for the required __HALT_COMPILER(); ?> token and verify
- * that the manifest is proper, then pass it to phar_open_file().  SUCCESS
+ * that the manifest is proper, then pass it to phar_parse_pharfile().  SUCCESS
  * or FAILURE is returned and pphar is set to a pointer to the phar's manifest
  */
-static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
+static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
 	const char token[] = "__HALT_COMPILER();";
 	const char zip_magic[] = "PK\x03\x04";
@@ -1389,18 +1389,18 @@ static int phar_open_fp(php_stream* fp, char *fname, int fname_len, char *alias,
 			}
 			if (!memcmp(pos, zip_magic, 4)) {
 				php_stream_seek(fp, 0, SEEK_END);
-				return phar_open_zipfile(fp, fname, fname_len, alias, alias_len, pphar, error TSRMLS_CC);
+				return phar_parse_zipfile(fp, fname, fname_len, alias, alias_len, pphar, error TSRMLS_CC);
 			}
 			if (got > 512) {
 				if (phar_is_tar(pos, fname)) {
 					php_stream_rewind(fp);
-					return phar_open_tarfile(fp, fname, fname_len, alias, alias_len, options, pphar, compression, error TSRMLS_CC);
+					return phar_parse_tarfile(fp, fname, fname_len, alias, alias_len, options, pphar, compression, error TSRMLS_CC);
 				}
 			}
 		}
 		if ((pos = phar_strnstr(buffer, 1024 + sizeof(token), token, sizeof(token)-1)) != NULL) {
 			halt_offset += (pos - buffer); /* no -tokenlen+tokenlen here */
-			return phar_open_file(fp, fname, fname_len, alias, alias_len, halt_offset, pphar, compression, error TSRMLS_CC);
+			return phar_parse_pharfile(fp, fname, fname_len, alias, alias_len, halt_offset, pphar, compression, error TSRMLS_CC);
 		}
 
 		halt_offset += got;
@@ -1814,7 +1814,7 @@ char *phar_fix_filepath(char *path, int *new_len, int use_cwd TSRMLS_DC) /* {{{ 
  *
  * Optionally the name might start with 'phar://'
  *
- * This is used by phar_open_url()
+ * This is used by phar_parse_url()
  */
 int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_len, char **entry, int *entry_len, int executable, int for_create TSRMLS_DC) /* {{{ */
 {
@@ -1879,7 +1879,7 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
  * Invoked when a user calls Phar::mapPhar() from within an executing .phar
  * to set up its manifest directly
  */
-int phar_open_compiled_file(char *alias, int alias_len, char **error TSRMLS_DC) /* {{{ */
+int phar_open_executed_filename(char *alias, int alias_len, char **error TSRMLS_DC) /* {{{ */
 {
 	char *fname;
 	long halt_offset;
@@ -1895,7 +1895,7 @@ int phar_open_compiled_file(char *alias, int alias_len, char **error TSRMLS_DC) 
 	fname = zend_get_executed_filename(TSRMLS_C);
 	fname_len = strlen(fname);
 
-	if (phar_open_loaded(fname, fname_len, alias, alias_len, 0, REPORT_ERRORS, NULL, 0 TSRMLS_CC) == SUCCESS) {
+	if (phar_open_parsed_phar(fname, fname_len, alias, alias_len, 0, REPORT_ERRORS, NULL, 0 TSRMLS_CC) == SUCCESS) {
 		return SUCCESS;
 	}
 
@@ -1944,7 +1944,7 @@ int phar_open_compiled_file(char *alias, int alias_len, char **error TSRMLS_DC) 
 		fname_len = strlen(actual);
  	}
 
-	ret = phar_open_fp(fp, fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, error TSRMLS_CC);
+	ret = phar_open_from_fp(fp, fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, error TSRMLS_CC);
  	if (actual) {
 		efree(actual);
  	}
@@ -2855,7 +2855,7 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 	phar_archive_data *phar;
 
 	if (strstr(file_handle->filename, ".phar") && !strstr(file_handle->filename, "://")) {
-		if (SUCCESS == phar_open_filename(file_handle->filename, strlen(file_handle->filename), NULL, 0, 0, &phar, NULL TSRMLS_CC)) {
+		if (SUCCESS == phar_open_from_filename(file_handle->filename, strlen(file_handle->filename), NULL, 0, 0, &phar, NULL TSRMLS_CC)) {
 			if (phar->is_zip || phar->is_tar) {
 				zend_file_handle f = *file_handle;
 
