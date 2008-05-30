@@ -56,7 +56,7 @@ php_stream_wrapper php_stream_phar_wrapper =  {
 /**
  * Open a phar file for streams API
  */
-php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, int options TSRMLS_DC) /* {{{ */
+php_url* phar_parse_url(php_stream_wrapper *wrapper, char *filename, char *mode, int options TSRMLS_DC) /* {{{ */
 {
 	php_url *resource;
 	char *arch = NULL, *entry = NULL, *error;
@@ -125,7 +125,7 @@ php_url* phar_open_url(php_stream_wrapper *wrapper, char *filename, char *mode, 
 			return NULL;
 		}
 	} else {
-		if (phar_open_filename(resource->host, arch_len, NULL, 0, options, NULL, &error TSRMLS_CC) == FAILURE)
+		if (phar_open_from_filename(resource->host, arch_len, NULL, 0, options, NULL, &error TSRMLS_CC) == FAILURE)
 		{
 			if (error) {
 				if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
@@ -155,7 +155,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 	zval **pzoption, *metadata;
 	uint host_len;
 
-	if ((resource = phar_open_url(wrapper, path, mode, options TSRMLS_CC)) == NULL) {
+	if ((resource = phar_parse_url(wrapper, path, mode, options TSRMLS_CC)) == NULL) {
 		return NULL;
 	}
 
@@ -511,7 +511,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 	uint host_len;
 	int internal_file_len;
 
-	if ((resource = phar_open_url(wrapper, url, "r", flags|PHP_STREAM_URL_STAT_QUIET TSRMLS_CC)) == NULL) {
+	if ((resource = phar_parse_url(wrapper, url, "r", flags|PHP_STREAM_URL_STAT_QUIET TSRMLS_CC)) == NULL) {
 		return FAILURE;
 	}
 
@@ -644,7 +644,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	phar_archive_data **pphar;
 	uint host_len;
 
-	if ((resource = phar_open_url(wrapper, url, "rb", options TSRMLS_CC)) == NULL) {
+	if ((resource = phar_parse_url(wrapper, url, "rb", options TSRMLS_CC)) == NULL) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: unlink failed");
 		return 0;
 	}
@@ -720,7 +720,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 
 	error = NULL;
 
-	if ((resource_from = phar_open_url(wrapper, url_from, "wb", options|PHP_STREAM_URL_STAT_QUIET TSRMLS_CC)) == NULL) {
+	if ((resource_from = phar_parse_url(wrapper, url_from, "wb", options|PHP_STREAM_URL_STAT_QUIET TSRMLS_CC)) == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid or non-writable url \"%s\"", url_from, url_to, url_from);
 		return 0;
 	}
@@ -736,7 +736,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		return 0;
 	}
 
-	if ((resource_to = phar_open_url(wrapper, url_to, "wb", options|PHP_STREAM_URL_STAT_QUIET TSRMLS_CC)) == NULL) {
+	if ((resource_to = phar_parse_url(wrapper, url_to, "wb", options|PHP_STREAM_URL_STAT_QUIET TSRMLS_CC)) == NULL) {
 		php_url_free(resource_from);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": invalid or non-writable url \"%s\"", url_from, url_to, url_to);
 		return 0;
