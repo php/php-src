@@ -1,3 +1,65 @@
+2008-05-29  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/phar.c
+      ext/phar/tests/zip/unixzip.phpt:
+      MFB: fix PECL bug #13981: Third-party zips fail entry interrogation
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/tests/zip/unixzip.phpt:
+      fix PECL bug #13981: Third-party zips fail entry interrogation
+
+2008-05-29  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/mysqlnd_result.c:
+      MFB
+
+    * (PHP_5_3)
+      ext/mysqlnd/mysqlnd_result.c:
+      Fix a bug that let PDO fail. It has been long fixed, but locally. Now I
+      know
+      what it fixes :)
+
+2008-05-29  Matt Wilmas  <php_lists@realplain.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.c:
+      MFH: Fixed overflow crash (at least on Windows) in div_function with
+      LONG_MIN / -1
+
+    * ZendEngine2/zend_operators.c:
+      Fixed overflow crash (at least on Windows) in div_function with LONG_MIN /
+      -1
+      To reproduce: (-PHP_INT_MAX - 1) / -1, so op1 is a long
+      Same cause as Bug #27354 for mod_function
+
+2008-05-29  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_2)
+      NEWS
+      TSRM/tsrm_win32.c:
+      MFH: Fix a bug when command is quoted and parameters are quoted during call
+      to exec, the result is that cmd.exe /c strips the first and last quote.
+
+    * (PHP_5_3)
+      TSRM/tsrm_win32.c:
+      MFH: Fix bug when command is quoted and parameters are quoted during call
+      to exec, the result is that cmd.exe /c strips the first and last quote.
+
+    * TSRM/tsrm_win32.c:
+      Fix bug when command is quoted and parameters are quoted during call to
+      exec, the result is that cmd.exe /c strips the first and last quote.
+
+2008-05-29  Matt Wilmas  <php_lists@realplain.com>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/bug41919.phpt
+      ZendEngine2/tests/bug41919.phpt
+      ext/standard/tests/array/bug43495.phpt
+      ext/standard/tests/array/bug43495.phpt:
+      Fixed tests on Windows
+
 2008-05-28  Stanislav Malyshev  <stas@zend.com>
 
     * ext/phar/phar.c:
