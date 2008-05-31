@@ -1,3 +1,98 @@
+2008-05-30  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/phar.c
+      ext/phar/tests/zip/files/frontcontroller.phar.zip
+      ext/phar/tests/zip/files/frontcontroller10.phar.zip
+      ext/phar/tests/zip/files/frontcontroller11.phar.zip
+      ext/phar/tests/zip/files/frontcontroller12.phar.zip
+      ext/phar/tests/zip/files/frontcontroller2.phar.zip
+      ext/phar/tests/zip/files/frontcontroller3.phar.zip
+      ext/phar/tests/zip/files/frontcontroller4.phar.zip
+      ext/phar/tests/zip/files/frontcontroller5.phar.zip
+      ext/phar/tests/zip/files/frontcontroller6.phar.zip
+      ext/phar/tests/zip/files/frontcontroller7.phar.zip
+      ext/phar/tests/zip/files/frontcontroller8.phar.zip
+      ext/phar/tests/zip/files/frontcontroller9.phar.zip:
+      MFB: fix corrupted zips, fix postprocess for compressed zip file
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/tests/zip/files/frontcontroller.phar.zip
+      ext/phar/tests/zip/files/frontcontroller10.phar.zip
+      ext/phar/tests/zip/files/frontcontroller11.phar.zip
+      ext/phar/tests/zip/files/frontcontroller12.phar.zip
+      ext/phar/tests/zip/files/frontcontroller2.phar.zip
+      ext/phar/tests/zip/files/frontcontroller3.phar.zip
+      ext/phar/tests/zip/files/frontcontroller4.phar.zip
+      ext/phar/tests/zip/files/frontcontroller5.phar.zip
+      ext/phar/tests/zip/files/frontcontroller6.phar.zip
+      ext/phar/tests/zip/files/frontcontroller7.phar.zip
+      ext/phar/tests/zip/files/frontcontroller8.phar.zip
+      ext/phar/tests/zip/files/frontcontroller9.phar.zip:
+      fix corrupted zips, fix postprocess for compressed zip file
+
+    * ext/phar/dirstream.c
+      ext/phar/dirstream.h
+      ext/phar/phar.c
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/stream.c
+      ext/phar/stream.h
+      ext/phar/tar.c
+      ext/phar/zip.c:
+      MFB: refactor function names for clarity.  No functionality change
+
+    * (PHP_5_3)
+      ext/phar/dirstream.c
+      ext/phar/dirstream.h
+      ext/phar/phar.c
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/stream.c
+      ext/phar/stream.h
+      ext/phar/tar.c
+      ext/phar/zip.c:
+      refactor function names for clarity.  No functionality change
+
+2008-05-30  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/zip/config.m4
+      ext/zip/config.w32:
+      - not exported
+
+2008-05-30  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/standard/exec.c:
+      MFH Fixed bug #43261
+      (Use ^ as an escape character for Windows escapeshellcmd)
+
+    * ext/standard/exec.c:
+      Fixed bug #43261
+      (Use ^ as an escape character for Windows escapeshellcmd)
+
+2008-05-30  Matt Wilmas  <php_lists@realplain.com>
+
+    * ZendEngine2/zend_hash.c:
+      Fixed memcmp() check with hash_quick_del (realKeyLength would be 0)
+
+    * (PHP_5_2)
+      ext/standard/array.c:
+      MFH: Only check args once in php_array_diff_key/intersect_key, not on each
+      iteration. This also makes sure ALL args are checked (pre-5.2.5 behavior)
+
+    * (PHP_5_3)
+      ext/standard/array.c:
+      MFH: Only check args once in php_array_diff_key/intersect_key, not on each
+      iteration. This also makes sure ALL args are checked (pre-5.2.5 behavior)
+      - Also, use new hash_quick_del function where possible
+
+    * ext/standard/array.c:
+      Only check args once in php_array_diff_key/intersect_key, not on each
+      iteration. This also makes sure ALL args are checked (pre-5.2.5 behavior)
+      - Also, use new hash_quick_del function where possible
+
 2008-05-29  Greg Beaver  <greg@chiaraquartet.net>
 
     * ext/phar/phar.c

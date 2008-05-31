@@ -1,3 +1,8 @@
+2008-05-30  Matt Wilmas  <php_lists@realplain.com>
+
+    * zend_hash.c:
+      Fixed memcmp() check with hash_quick_del (realKeyLength would be 0)
+
 2008-05-29  Matt Wilmas  <php_lists@realplain.com>
 
     * (PHP_5_2)
