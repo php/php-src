@@ -50,7 +50,18 @@ function stream_notification_callback($notification_code, $severity, $message, $
 
 isset($argv[1], $argv[2]) or usage($argv);
 
-$ctx = stream_context_create(null, array("notification" => "stream_notification_callback"));
+if (!isset($_ENV['http_proxy'])) {
+    $copt = null;
+} else {
+    $copt = array(
+        'http' => array(
+            'proxy' => preg_replace('/^http/i', 'tcp', $_ENV['http_proxy']),
+            'request_fulluri' => true,
+        ),
+    );
+}
+
+$ctx = stream_context_create($copt, array("notification" => "stream_notification_callback"));
 
 $fp = fopen($argv[1], "r", false, $ctx);
 if (is_resource($fp) && file_put_contents($argv[2], $fp)) {
