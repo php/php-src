@@ -1437,6 +1437,63 @@ class PharCommand extends CLICommand
         }
     }
     // }}}
+    // {{{ public function cli_cmd_inf_version
+    /**
+     * CLi Command Inf Version
+     *
+     * @return string A description about the info commands.
+     */
+    public function cli_cmd_inf_version()
+    {
+        return "Get information about the PHAR environment and the tool version.";
+    }
+    // }}}
+    // {{{ public function cli_cmd_arg_version
+    /**
+     * Cli Command Arg Version
+     *
+     * @return array The arguments for version command.
+     */
+    public function cli_cmd_arg_version()
+    {
+        return self::phar_args('', NULL);
+    }
+    // }}}
+    // {{{ public function cli_cmd_run_info
+    /**
+     * Cli Command Run Info
+     *
+     * @param args $args
+     */
+    public function cli_cmd_run_version()
+    {
+    	$use_ext = extension_loaded('phar');
+    	$version = array(
+    		'PHP Version' => phpversion(),
+    		'phar.phar version' => '$Revision$',
+    		'Phar EXT version' => $use_ext ? phpversion('phar') : 'Not available',
+			'Phar API version' => Phar::apiVersion(),
+			'Phar-based phar archives' => true,
+			'Tar-based phar archives' => $use_ext,
+			'ZIP-based phar archives' => $use_ext,
+			'gzip compression' => extension_loaded('zlib'),
+			'bzip2 compression' => extension_loaded('bz2'),
+			'supported signatures' => $use_ext ? join(', ', Phar::getSupportedSignatures()) : '',
+			);
+		$klen = 0;
+		foreach($version as $k => $v)
+		{
+			$klen = max($klen, strlen($k));
+		}
+		++$klen;
+		foreach($version as $k => $v) {
+			if (is_bool($v)) {
+				$v = $v ? 'enabled' : 'disabled';
+			}
+			printf("%-${klen}s  %s\n", $k.':', $v);
+		}
+    }
+    // }}}
 }
 // }}}
 ?>
