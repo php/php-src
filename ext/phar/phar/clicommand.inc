@@ -370,11 +370,7 @@ abstract class CLICommand
     function cli_cmd_run_help_list()
     {
         ksort($this->cmds);
-        $lst = '';
-        foreach($this->cmds as $name => $funcs) {
-            $lst .= $name . ' ';
-        }
-        echo substr($lst, 0, -1) . "\n";
+        echo join(' ', array_keys($this->cmds)) . "\n";
     }
 }
 
