@@ -23,3 +23,7 @@ $(builddir)/phar.phar: $(builddir)/phar.php $(srcdir)/phar/*.inc $(srcdir)/phar/
 	$$PHP -d phar.readonly=0 $(srcdir)/phar.php pack -f $(builddir)/phar.phar -a pharcommand -c auto -x CVS -p 0 -s $(srcdir)/phar/phar.php -h sha1 -b "$$BANG"  $(srcdir)/phar/
 	@chmod +x $(builddir)/phar.phar
 
+install-pharcmd: pharcmd
+	-@$(mkinstalldirs) $(INSTALL_ROOT)$(bindir)
+	@$(INSTALL) $(builddir)/phar.phar $(INSTALL_ROOT)$(bindir)
+
