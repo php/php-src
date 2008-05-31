@@ -501,14 +501,14 @@ class PharCommand extends CLICommand
         switch($this->args['c']['val']) {
             case 'gz':
             case 'gzip':
-                $phar->compressAllFilesGZ();
+                $phar->compressFiles(Phar::GZ);
                 break;
             case 'bz2':
             case 'bzip2':
-                $phar->compressAllFilesBZIP2();
+                $phar->compressFiles(Phar::BZ2);
                 break;
             default:
-                $phar->uncompressAllFiles();
+                $phar->compressFiles(Phar::NONE);;
                 break;
         }
 
