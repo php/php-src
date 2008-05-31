@@ -316,6 +316,10 @@ abstract class CLICommand
             
             $which = $which[0];
             if (!array_key_exists($which, $this->cmds)) {
+            	if (strtolower($which) == 'commands') {
+            		self::cli_cmd_run_help_list();
+            		exit(0);
+            	}
                 self::error("Unknown command, cannot retrieve help.\n");
             }
 
