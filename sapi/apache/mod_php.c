@@ -435,7 +435,9 @@ static time_t php_apache_get_request_time(TSRMLS_D)
  */
 static void sapi_apache_child_terminate(TSRMLS_D)
 {
+#ifndef MULTITHREAD
 	ap_child_terminate((request_rec *)SG(server_context));
+#endif
 }
 /* }}} */
 
