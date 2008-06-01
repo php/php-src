@@ -1,3 +1,30 @@
+2008-05-31  Marcus Boerger  <php@marcus-boerger.de>
+
+    * configure.in:
+      - MFB config stuff
+
+    * (PHP_5_3)
+      configure.in
+      ext/phar/Makefile.frag:
+      - Add phar command as installable command
+
+    * (PHP_5_3)
+      configure.in:
+      - MFH Add pharcmd to default targets if present
+
+    * configure.in:
+      - Add pharcmd to default targets if present
+
+    * (PHP_5_3)
+      ext/phar/phar.phar
+      ext/phar/phar/pharcommand.inc:
+      - Add version comand
+
+    * (PHP_5_3)
+      ext/phar/phar.phar
+      ext/phar/phar/pharcommand.inc:
+      - MFH Fix function names after they have been refactored
+
 2008-05-30  Greg Beaver  <greg@chiaraquartet.net>
 
     * ext/phar/phar.c
