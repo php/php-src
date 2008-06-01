@@ -291,7 +291,7 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_private_encrypt, 0, 0, 3)
     ZEND_ARG_INFO(0, data)
-    ZEND_ARG_INFO(0, crypted)
+    ZEND_ARG_INFO(1, crypted)
     ZEND_ARG_INFO(0, key)
     ZEND_ARG_INFO(0, padding)
 ZEND_END_ARG_INFO()
@@ -299,7 +299,7 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_private_decrypt, 0, 0, 3)
     ZEND_ARG_INFO(0, data)
-    ZEND_ARG_INFO(0, crypted)
+    ZEND_ARG_INFO(1, crypted)
     ZEND_ARG_INFO(0, key)
     ZEND_ARG_INFO(0, padding)
 ZEND_END_ARG_INFO()
@@ -307,7 +307,7 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_public_encrypt, 0, 0, 3)
     ZEND_ARG_INFO(0, data)
-    ZEND_ARG_INFO(0, crypted)
+    ZEND_ARG_INFO(1, crypted)
     ZEND_ARG_INFO(0, key)
     ZEND_ARG_INFO(0, padding)
 ZEND_END_ARG_INFO()
@@ -315,7 +315,7 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_public_decrypt, 0, 0, 3)
     ZEND_ARG_INFO(0, data)
-    ZEND_ARG_INFO(0, crypted)
+    ZEND_ARG_INFO(1, crypted)
     ZEND_ARG_INFO(0, key)
     ZEND_ARG_INFO(0, padding)
 ZEND_END_ARG_INFO()
@@ -1526,7 +1526,7 @@ static int check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain, 
 }
 /* }}} */
 
-/* {{{ proto mixed openssl_x509_checkpurpose(mixed x509cert, int purpose, array cainfo [, string untrustedfile])
+/* {{{ proto int openssl_x509_checkpurpose(mixed x509cert, int purpose, array cainfo [, string untrustedfile])
    Checks the CERT to see if it can be used for the purpose in purpose. cainfo holds information about trusted CAs */
 PHP_FUNCTION(openssl_x509_checkpurpose)
 {
