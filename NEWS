@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2008, PHP 5.2.7
+- Fixed bug #45139 (ReflectionProperty returns incorrect declaring class). (Felipe)
 - When dumping entire document to file via asXml() don't lose the encoding.
   (Ilia)
 - Fixed a crash inside PDO when trying instantiate PDORow manually (Felipe)
