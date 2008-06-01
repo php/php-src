@@ -4202,7 +4202,7 @@ ZEND_METHOD(reflection_property, getDeclaringClass)
 	prop_name_len = USTR_LEN(prop_name);
 	ce = tmp_ce = ref->ce;
 	while (tmp_ce && zend_u_hash_find(&tmp_ce->properties_info, UG(unicode)?IS_UNICODE:IS_STRING, prop_name, prop_name_len + 1, (void **) &tmp_info) == SUCCESS) {
-		if (tmp_info->flags & ZEND_ACC_PRIVATE) {
+		if (tmp_info->flags & ZEND_ACC_PRIVATE || tmp_info->flags & ZEND_ACC_SHADOW) {
 			/* it's a private property, so it can't be inherited */
 			break;
 		}
