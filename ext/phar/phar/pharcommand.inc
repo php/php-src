@@ -150,12 +150,14 @@ class PharCommand extends CLICommand
         }
 
         $hash_avail = Phar::getSupportedSignatures();
-        if (in_array('SHA-256', $hash_avail)) {
-            $phar_args['h']['select']['sha256'] = 'SHA256';
-        }
-
-        if (in_array('SHA-512', Phar::getSupportedSignatures())) {
-            $phar_args['h']['select']['sha512'] = 'SHA512';
+        $hash_optional = array('SHA-256' => 'SHA256',
+                               'SHA-512' => 'SHA512',
+                               'OpenSSL' => 'OpenSSL');
+        foreach($hash_optional as $key => $name)
+        {
+        	if (in_array($key, $hash_avail)) {
+            	$phar_args['h']['select'][strtolower($name)] = $name;
+            }
         }
 
         $args = array();
