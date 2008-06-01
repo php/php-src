@@ -754,7 +754,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 }
 /* }}} */
 
-/* {{{ proto int preg_match(string pattern, string subject [, array subpatterns [, int flags [, int offset]]])
+/* {{{ proto int preg_match(string pattern, string subject [, array &subpatterns [, int flags [, int offset]]])
    Perform a Perl-style regular expression match */
 static PHP_FUNCTION(preg_match)
 {
@@ -762,7 +762,7 @@ static PHP_FUNCTION(preg_match)
 }
 /* }}} */
 
-/* {{{ proto int preg_match_all(string pattern, string subject, array subpatterns [, int flags [, int offset]])
+/* {{{ proto int preg_match_all(string pattern, string subject, array &subpatterns [, int flags [, int offset]])
    Perform a Perl-style global regular expression match */
 static PHP_FUNCTION(preg_match_all)
 {
@@ -1378,7 +1378,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 }
 /* }}} */
 
-/* {{{ proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, count]])
+/* {{{ proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, int &count]])
    Perform Perl-style regular expression replacement. */
 static PHP_FUNCTION(preg_replace)
 {
@@ -1386,7 +1386,7 @@ static PHP_FUNCTION(preg_replace)
 }
 /* }}} */
 
-/* {{{ proto string preg_replace_callback(mixed regex, mixed callback, mixed subject [, int limit [, count]])
+/* {{{ proto string preg_replace_callback(mixed regex, mixed callback, mixed subject [, int limit [, int &count]])
    Perform Perl-style regular expression replacement using replacement callback. */
 static PHP_FUNCTION(preg_replace_callback)
 {
@@ -1804,15 +1804,78 @@ static PHP_FUNCTION(preg_last_error)
 
 /* {{{ module definition structures */
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_match, 0, 0, 2)
+    ZEND_ARG_INFO(0, pattern)
+    ZEND_ARG_INFO(0, subject)
+    ZEND_ARG_INFO(1, subpatterns) /* array */
+    ZEND_ARG_INFO(0, flags)
+    ZEND_ARG_INFO(0, offset)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_match_all, 0, 0, 3)
+    ZEND_ARG_INFO(0, pattern)
+    ZEND_ARG_INFO(0, subject)
+    ZEND_ARG_INFO(1, subpatterns) /* array */
+    ZEND_ARG_INFO(0, flags)
+    ZEND_ARG_INFO(0, offset)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_replace, 0, 0, 2)
+    ZEND_ARG_INFO(0, regex)
+    ZEND_ARG_INFO(0, replace)
+    ZEND_ARG_INFO(0, subject)
+    ZEND_ARG_INFO(0, limit)
+    ZEND_ARG_INFO(1, count)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_replace_callback, 0, 0, 3)
+    ZEND_ARG_INFO(0, regex)
+    ZEND_ARG_INFO(0, callback)
+    ZEND_ARG_INFO(0, subject)
+    ZEND_ARG_INFO(0, limit)
+    ZEND_ARG_INFO(1, count)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_split, 0, 0, 2)
+    ZEND_ARG_INFO(0, pattern)
+    ZEND_ARG_INFO(0, subject)
+    ZEND_ARG_INFO(0, limit)
+    ZEND_ARG_INFO(0, flags) 
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_quote, 0, 0, 1)
+    ZEND_ARG_INFO(0, str)
+    ZEND_ARG_INFO(0, delim_char)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_grep, 0, 0, 2)
+    ZEND_ARG_INFO(0, regex)
+    ZEND_ARG_INFO(0, input) /* array */
+    ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_preg_last_error, 0)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 static const zend_function_entry pcre_functions[] = {
-	PHP_FE(preg_match,				third_arg_force_ref)
-	PHP_FE(preg_match_all,			third_arg_force_ref)
-	PHP_FE(preg_replace,			fifth_arg_force_ref)
-	PHP_FE(preg_replace_callback,	fifth_arg_force_ref)
-	PHP_FE(preg_split,				NULL)
-	PHP_FE(preg_quote,				NULL)
-	PHP_FE(preg_grep,				NULL)
-	PHP_FE(preg_last_error,			NULL)
+	PHP_FE(preg_match,				arginfo_preg_match)
+	PHP_FE(preg_match_all,			arginfo_preg_match_all)
+	PHP_FE(preg_replace,			arginfo_preg_replace)
+	PHP_FE(preg_replace_callback,	arginfo_preg_replace_callback)
+	PHP_FE(preg_split,				arginfo_preg_split)
+	PHP_FE(preg_quote,				arginfo_preg_quote)
+	PHP_FE(preg_grep,				arginfo_preg_grep)
+	PHP_FE(preg_last_error,			arginfo_preg_last_error)
 	{NULL, 		NULL,				NULL}
 };
 
