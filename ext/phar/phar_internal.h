@@ -103,7 +103,7 @@
 #define PHAR_SIG_SHA1             0x0002
 #define PHAR_SIG_SHA256           0x0003
 #define PHAR_SIG_SHA512           0x0004
-#define PHAR_SIG_PGP              0x0010
+#define PHAR_SIG_OPENSSL          0x0010
 
 /* flags byte for each file adheres to these bitmasks.
    All unused values are reserved */
@@ -171,6 +171,8 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	char*       cwd;
 	int         cwd_len;
 	int         cwd_init;
+	char        *openssl_privatekey;
+	int         openssl_privatekey_len;
 ZEND_END_MODULE_GLOBALS(phar)
 
 ZEND_EXTERN_MODULE_GLOBALS(phar)

@@ -1251,6 +1251,13 @@ PHP_METHOD(Phar, getSupportedSignatures)
 	add_next_index_stringl(return_value, "SHA-256", 7, 1);
 	add_next_index_stringl(return_value, "SHA-512", 7, 1);
 #endif
+#if PHAR_HAVE_OPENSSL
+	add_next_index_stringl(return_value, "OpenSSL", 7, 1);
+#else
+	if (zend_hash_exists(&module_registry, "openssl", sizeof("openssl"))) {
+		add_next_index_stringl(return_value, "OpenSSL", 7, 1);
+	}
+#endif
 }
 /* }}} */
 
@@ -2675,7 +2682,7 @@ PHP_METHOD(Phar, setStub)
 }
 /* }}} */
 
-/* {{{ proto array Phar::setSignatureAlgorithm(int sigtype)
+/* {{{ proto array Phar::setSignatureAlgorithm(int sigtype[, string privatekey])
  * Sets the signature algorithm for a phar and applies it. The signature
  * algorithm must be one of Phar::MD5, Phar::SHA1, Phar::SHA256,
  * Phar::SHA512, or Phar::PGP (PGP is not yet supported and falls back to
@@ -2685,7 +2692,8 @@ PHP_METHOD(Phar, setStub)
 PHP_METHOD(Phar, setSignatureAlgorithm)
 {
 	long algo;
-	char *error;
+	char *error, *key = NULL;
+	int key_len = 0;
 	PHAR_ARCHIVE_OBJECT();
 	
 	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
@@ -2704,7 +2712,7 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 		return;
 	}
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "l", &algo) != SUCCESS) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "l|s", &algo, &key, &key_len) != SUCCESS) {
 		return;
 	}
 
@@ -2718,9 +2726,11 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 #endif
 		case PHAR_SIG_MD5 :
 		case PHAR_SIG_SHA1 :
-		case PHAR_SIG_PGP :
+		case PHAR_SIG_OPENSSL :
 			phar_obj->arc.archive->sig_flags = algo;
 			phar_obj->arc.archive->is_modified = 1;
+			PHAR_G(openssl_privatekey) = key;
+			PHAR_G(openssl_privatekey_len) = key_len;
 
 			phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
 			if (error) {
@@ -2757,6 +2767,9 @@ PHP_METHOD(Phar, getSignature)
 			break;
 		case PHAR_SIG_SHA512:
 			add_assoc_stringl(return_value, "hash_type", "SHA-512", 7, 1);
+			break;
+		case PHAR_SIG_OPENSSL:
+			add_assoc_stringl(return_value, "hash_type", "OpenSSL", 7, 1);
 			break;
 		}
 	} else {
@@ -4571,6 +4584,7 @@ ZEND_END_ARG_INFO();
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_setSigAlgo, 0, 0, 1)
 	ZEND_ARG_INFO(0, algorithm)
+	ZEND_ARG_INFO(0, privatekey)
 ZEND_END_ARG_INFO();
 
 static
@@ -4759,7 +4773,7 @@ void phar_object_init(TSRMLS_D) /* {{{ */
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "PHP", PHAR_MIME_PHP)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "PHPS", PHAR_MIME_PHPS)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "MD5", PHAR_SIG_MD5)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "PGP", PHAR_SIG_PGP)
+	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "OPENSSL", PHAR_SIG_OPENSSL)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA1", PHAR_SIG_SHA1)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA256", PHAR_SIG_SHA256)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA512", PHAR_SIG_SHA512)
