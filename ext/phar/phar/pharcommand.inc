@@ -136,7 +136,11 @@ class PharCommand extends CLICommand
                 'val' => NULL,
                 'inf' => '<regex>  Regular expression for input files to exclude.'
             ),
-
+            'y' => array(
+            	'typ' => 'string',
+            	'val' => NULL,
+            	'inf' => 'Private key for OpenSSL signing.',
+            ),
         );
 
         if (extension_loaded('zlib')) {
@@ -150,6 +154,9 @@ class PharCommand extends CLICommand
         }
 
         $hash_avail = Phar::getSupportedSignatures();
+        if (!in_array('OpenSSL', $hash_avail)) {
+        	unset($phar_args['y']);
+        }
         $hash_optional = array('SHA-256' => 'SHA256',
                                'SHA-512' => 'SHA512',
                                'OpenSSL' => 'OpenSSL');
@@ -347,6 +354,33 @@ class PharCommand extends CLICommand
         return $arg;
     }
     // }}}
+    // {{{ static function phar_check_hash
+    /**
+     * Check whether hash method is valid.
+     *
+     * @return Hash constant to be used.
+     */
+	function phar_check_hash($hash, $privkey)
+	{
+		switch($hash)
+		{
+			case 'md5':
+				return Phar::MD5;
+			case 'sha1':
+				return Phar::SHA1;
+			case 'sha256':
+				return Phar::SHA256;
+			case 'sha512':
+				return Phar::SHA512;
+			case 'openssl':
+    	    	if (!$privkey)
+        		{
+        			self::error("Cannot use OpenSSL signing without key.\n");
+        		}
+	        	return Phar::OPENSSL;
+        }
+    }
+	// }}}
     // {{{ static function cli_cmd_inf_pack
     /**
      * Information pack
@@ -370,7 +404,7 @@ class PharCommand extends CLICommand
      */
     static function cli_cmd_arg_pack()
     {
-        $args = self::phar_args('abcFhilpsx', 'pharnew');
+        $args = self::phar_args('abcFhilpsxy', 'pharnew');
         
         $args[''] = array(
             'typ'     => 'any',     
@@ -477,12 +511,15 @@ class PharCommand extends CLICommand
         $hashbang = $this->args['b']['val'];
         $archive  = $this->args['f']['val'];
         $hash     = $this->args['h']['val'];
+        $privkey  = $this->args['y']['val'];
         $regex    = $this->args['i']['val'];
         $level    = $this->args['l']['val'];
         $loader   = $this->args['p']['val'];
         $stub     = $this->args['s']['val'];
         $invregex = $this->args['x']['val'];
         $input    = $this->args['']['val'];
+
+		$hash = self::phar_check_hash($hash, $privkey);
 
         $phar  = new Phar($archive, 0, $alias);
 
@@ -510,12 +547,13 @@ class PharCommand extends CLICommand
                 $phar->compressFiles(Phar::BZ2);
                 break;
             default:
-                $phar->compressFiles(Phar::NONE);;
+                $phar->decompressFiles();;
                 break;
         }
 
-        if ($hash) {
-            $phar->setSignatureAlgorithm($hash);
+        if ($hash)
+        {
+            $phar->setSignatureAlgorithm($hash, $privkey);
         }
 
         $phar->stopBuffering();
@@ -594,11 +632,14 @@ class PharCommand extends CLICommand
         switch($compress) {
             case 'gz':
             case 'gzip':
-                $phar[$entry]->setCompressedGZ();
+                $phar[$entry]->compress(Phar::GZ);
                 break;
             case 'bz2':
             case 'bzip2':
-                $phar[$entry]->setCompressedBZIP2();
+                $phar[$entry]->compress(Phar::BZ2);
+                break;
+            case '0':
+                $phar[$entry]->decompress();
                 break;
             default:
                 break;
@@ -1047,24 +1088,24 @@ class PharCommand extends CLICommand
             case 'gz':
             case 'gzip':
                 if (isset($entry)) {
-                    $phar[$entry]->setCompressedGZ();
+                    $phar[$entry]->compress(Phar::GZ);
                 } else {
-                    $phar->compressAllFilesGZ();
+                    $phar->compressFiles(Phar::GZ);
                 }
                 break;
             case 'bz2':
             case 'bzip2':
                 if (isset($entry)) {
-                    $phar[$entry]->setCompressedBZIP2();
+                    $phar[$entry]->compress(Phar::BZ2);
                 } else {
-                    $phar->compressAllFilesBZIP2();
+                    $phar->compressFiles(Phar::BZ2);
                 }
                 break;
             default:
                 if (isset($entry)) {
-                    $phar[$entry]->setUncompressed();
+                    $phar[$entry]->decompress();
                 } else {
-                    $phar->uncompressAllFiles();
+                    $phar->decompressFiles();
                 }
                 break;
         }
@@ -1089,7 +1130,7 @@ class PharCommand extends CLICommand
      */
     public function cli_cmd_arg_sign()
     {
-        return self::phar_args('FH', 'phar');
+        return self::phar_args('FHy', 'phar');
     }
     // }}}
     // {{{ public function cli_cmd_run_sign
@@ -1100,10 +1141,13 @@ class PharCommand extends CLICommand
      */
     public function cli_cmd_run_sign()
     {
-        $phar = $this->args['f']['val'];
-        $hash = $this->args['h']['val'];
+        $phar     = $this->args['f']['val'];
+        $hash     = $this->args['h']['val'];
+        $privkey  = $this->args['y']['val'];
 
-        $phar->setSignatureAlgorithm($hash);
+		$hash = self::phar_check_hash($hash, $privkey);
+
+        $phar->setSignatureAlgorithm($hash, $privkey);
     }
     // }}}
     // {{{ public function cli_cmd_inf_meta_set
@@ -1391,9 +1435,9 @@ class PharCommand extends CLICommand
             if ($ent->isCompressed()) {
                 $ccount++;
                 $csize += $ent->getCompressedSize();
-                if ($ent->isCompressedGZ()) {
+                if ($ent->isCompressed(Phar::GZ)) {
                     $compalg['GZ']++;
-                } elseif ($ent->isCompressedBZIP2()) {
+                } elseif ($ent->isCompressed(Phar::BZ2)) {
                     $compalg['BZ2']++;
                 }
             } else {
