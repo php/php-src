@@ -1275,15 +1275,15 @@ INLINE_CFLAGS="$INLINE_CFLAGS $standard_libtool_flag"
 CXXFLAGS="$CXXFLAGS $standard_libtool_flag"
 
 if test "$PHP_PHAR" != "no" && test "$PHP_CLI" != "no"; then
-  PHARCMD=pharcmd
-  PHARCMD_INSTALL=install-pharcmd
+  pharcmd=pharcmd
+  pharcmd_install=install-pharcmd
 else
-  PHARCMD=
-  PHARCMD_INSTALL=
+  pharcmd=
+  pharcmd_install=
 fi;
 
-all_targets="$lcov_target \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_CLI_TARGET) $PHARCMD"
-install_targets="$install_modules install-build install-headers install-programs $PHARCMD_INSTALL"
+all_targets="$lcov_target \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_CLI_TARGET) $pharcmd"
+install_targets="$install_modules install-build install-headers install-programs $pharcmd_install"
 
 case $PHP_SAPI in
   cli)
