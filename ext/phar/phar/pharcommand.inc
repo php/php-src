@@ -137,7 +137,7 @@ class PharCommand extends CLICommand
                 'inf' => '<regex>  Regular expression for input files to exclude.'
             ),
             'y' => array(
-            	'typ' => 'privke',
+            	'typ' => 'privkey',
             	'val' => NULL,
             	'inf' => 'Private key for OpenSSL signing.',
             ),
