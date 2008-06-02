@@ -1,3 +1,120 @@
+2008-06-01  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/pcre/php_pcre.c:
+      MFB5.3: arginfo & fix protos
+
+    * ext/openssl/openssl.c:
+      MFB: fix arginfo
+
+    * (PHP_5_3)
+      ext/openssl/openssl.c:
+      fix arginfo and proto
+
+    * ext/openssl/openssl.c:
+      MFB: Add arginfo & fix protos
+
+    * (PHP_5_3)
+      ext/openssl/openssl.c
+      ext/pcre/php_pcre.c:
+      Add arginfo & fix protos
+
+2008-06-01  Scott MacVicar  <scott@macvicar.net>
+
+    * ZendEngine2/zend_arg_defs.c:
+      MFB: Back out the previous change as it broke the Windows builds.
+
+    * (PHP_5_3)
+      ZendEngine2/zend_arg_defs.c:
+      Back out the previous change as it broke the Windows builds.
+
+2008-06-01  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ext/phar/phar.phar:
+      - Make work with new API
+
+    * (PHP_5_3)
+      ext/phar/phar/pharcommand.inc:
+      - Fix signature handling (and remaining API change fixes)
+
+    * (PHP_5_3)
+      ext/phar/phar_object.c:
+      - Fix docu
+
+2008-06-01  Scott MacVicar  <scott@macvicar.net>
+
+    * sapi/apache/mod_php.c:
+      MFB: Fixed bug #45144 (ap_child_terminate() isn't available on threaded
+      builds)
+
+    * ZendEngine2/zend_arg_defs.c:
+      MFB: Fix unexported symbols. Patch by Greg
+
+    * (PHP_5_3)
+      sapi/apache/mod_php5.c:
+      Fixed bug #45144 (ap_child_terminate() isn't available on threaded builds)
+
+    * (PHP_5_3)
+      ZendEngine2/zend_arg_defs.c:
+      Fix unexported symbols. Patch by Greg
+
+2008-06-01  Matt Wilmas  <php_lists@realplain.com>
+
+    * sapi/apache2handler/config.w32:
+      Fixed build
+
+2008-06-01  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ext/phar/phar.phar
+      ext/phar/phar/pharcommand.inc:
+      - Add Openssl support
+
+2008-06-01  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/config.m4
+      ext/phar/phar.c
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/tests/phar_get_supported_signatures_001.phpt
+      ext/phar/tests/phar_get_supported_signatures_002.phpt
+      ext/phar/tests/phar_setsignaturealgo2.phpt
+      ext/phar/tests/test_signaturealgos.phpt
+      ext/phar/tests/files/openssl.phar
+      ext/phar/tests/files/openssl.phar
+      ext/phar/tests/files/openssl.phar.pubkey
+      ext/phar/tests/files/openssl.phar.pubkey
+      ext/phar/tests/files/private.pem
+      ext/phar/tests/files/private.pem:
+      add openssl signing support.  This adds an extra parameter
+      for the contents of the exported private key to
+      Phar->setSignatureAlgorithm, and expects the public key to be in
+      a file named blah.phar.pubkey in the same directory as the phar blah.phar.
+       This works with openssl static or
+      shared and fails gracefully if openssl is not present without adding a
+      dependency. config.w32 needs updating to match config.m4 [DOC]
+
+2008-06-01  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/bug45139.phpt
+      ext/reflection/tests/bug45139.phpt:
+      - MFB: Fixed bug #45139 (ReflectionProperty returns incorrect declaring
+      class)
+
+    * ext/reflection/tests/bug45139.phpt
+      ext/reflection/tests/bug45139.phpt
+      ext/reflection/tests/bug45139.phpt:
+        1.1.4;
+      file bug45139.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/reflection/php_reflection.c:
+      - Fixed bug #45139 (ReflectionProperty returns incorrect declaring class)
+
 2008-05-31  Marcus Boerger  <php@marcus-boerger.de>
 
     * configure.in:
