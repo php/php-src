@@ -38,18 +38,21 @@
 
 #include "php.h"
 #include "php_ini.h"
-
 #include <stddef.h>
 
 #include "ext/standard/dl.h"
 #include "php_ldap.h"
 
 #ifdef PHP_WIN32
+/* TODO: check if this file is installed on *nix as well */
+#include <openldap/portable.h>
 #include <string.h>
 #if HAVE_NSLDAP
 #include <winsock2.h>
 #endif
+#ifndef _strdup
 #define strdup _strdup
+#endif
 #undef WINDOWS
 #undef strcasecmp
 #undef strncasecmp
@@ -245,6 +248,12 @@ PHP_MINFO_FUNCTION(ldap)
 		snprintf(tmp, 31, "%ld/%ld", LDAPG(num_links), LDAPG(max_links));
 	}
 	php_info_print_table_row(2, "Total Links", tmp);
+
+	
+#ifdef OPENLDAP_VERSION
+	snprintf(tmp, 31, "%s", OPENLDAP_VERSION);
+	php_info_print_table_row(2, "Version", tmp);
+#endif
 
 #ifdef LDAP_API_VERSION
 	snprintf(tmp, 31, "%d", LDAP_API_VERSION);
