@@ -38,6 +38,7 @@
 
 #include "php.h"
 #include "php_ini.h"
+
 #include <stddef.h>
 
 #include "ext/standard/dl.h"
@@ -48,9 +49,7 @@
 #if HAVE_NSLDAP
 #include <winsock2.h>
 #endif
-#ifndef strdup
-#  define strdup _strdup
-#endif
+#define strdup _strdup
 #undef WINDOWS
 #undef strcasecmp
 #undef strncasecmp
@@ -246,13 +245,6 @@ PHP_MINFO_FUNCTION(ldap)
 		snprintf(tmp, 31, "%ld/%ld", LDAPG(num_links), LDAPG(max_links));
 	}
 	php_info_print_table_row(2, "Total Links", tmp);
-
-	
-#ifdef LDAP_VENDOR_VERSION_MAJOR
-	snprintf(tmp, 31, "%d.%d.%d", LDAP_VENDOR_VERSION_MAJOR, 
-				LDAP_VENDOR_VERSION_MINOR, LDAP_VENDOR_VERSION_PATCH);
-	php_info_print_table_row(2, "Version", tmp);
-#endif
 
 #ifdef LDAP_API_VERSION
 	snprintf(tmp, 31, "%d", LDAP_API_VERSION);
