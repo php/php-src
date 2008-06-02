@@ -50,6 +50,17 @@ PHP_FUNCTION(sha1_file);
 
 #endif /* PHP_HASH_SHA1_NOT_IN_CORE */
 
+/* SHA224 context. */
+typedef struct {
+	php_hash_uint32 state[8];		/* state */
+	php_hash_uint32 count[2];		/* number of bits, modulo 2^64 */
+	unsigned char buffer[64];	/* input buffer */
+} PHP_SHA224_CTX;
+
+PHP_HASH_API void PHP_SHA224Init(PHP_SHA224_CTX *);
+PHP_HASH_API void PHP_SHA224Update(PHP_SHA224_CTX *, const unsigned char *, unsigned int);
+PHP_HASH_API void PHP_SHA224Final(unsigned char[28], PHP_SHA224_CTX *);
+
 /* SHA256 context. */
 typedef struct {
 	php_hash_uint32 state[8];		/* state */
