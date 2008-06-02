@@ -1114,7 +1114,7 @@ PHP_METHOD(Phar, __construct)
 #if !HAVE_SPL
 	zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Cannot instantiate Phar object without SPL extension");
 #else
-	char *fname, *alias = NULL, *error, *arch = NULL, *entry = NULL, *save_fname, *objname;
+	char *fname, *alias = NULL, *error, *arch = NULL, *entry = NULL, *save_fname;
 	int fname_len, alias_len = 0, arch_len, entry_len, is_data;
 	long flags = 0, format = 0;
 	phar_archive_object *phar_obj;
@@ -1123,13 +1123,7 @@ PHP_METHOD(Phar, __construct)
 
 	phar_obj = (phar_archive_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	PHAR_STR(phar_obj->std.ce->name, objname);
-
-	if (!strncmp(objname, "PharData", 8)) {
-		is_data = 1;
-	} else {
-		is_data = 0;
-	}
+	is_data = instanceof_function(Z_OBJCE_P(zobj), phar_ce_data TSRMLS_CC);
 
 	if (is_data) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls!l", &fname, &fname_len, &flags, &alias, &alias_len, &format) == FAILURE) {
@@ -1166,7 +1160,6 @@ PHP_METHOD(Phar, __construct)
 	}
 
 	if (phar_open_or_create_filename(fname, fname_len, alias, alias_len, is_data, REPORT_ERRORS, &phar_data, &error TSRMLS_CC) == FAILURE) {
-
 		if (fname == arch) {
 			efree(arch);
 			fname = save_fname;
