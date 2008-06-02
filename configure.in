@@ -1001,10 +1001,6 @@ if test "$PHP_PEAR" != "no"; then
   dnl
   dnl PEAR dependancies
   dnl
-  if test "$PHP_PCRE_REGEX" = "no"; then
-    pear_error_msg="$pear_error_msg 
-                    PEAR requires PCRE to be enabled.    Add --with-pcre-regex to the configure line. (or --without-pear)"
-  fi
   if test "$PHP_XML" = "no"; then
     pear_error_msg="$pear_error_msg 
                     PEAR requires XML to be enabled.     Add --enable-xml to the configure line. (or --without-pear)"
