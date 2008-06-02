@@ -62,6 +62,7 @@ extern const php_hash_ops php_hash_md2_ops;
 extern const php_hash_ops php_hash_md4_ops;
 extern const php_hash_ops php_hash_md5_ops;
 extern const php_hash_ops php_hash_sha1_ops;
+extern const php_hash_ops php_hash_sha224_ops;
 extern const php_hash_ops php_hash_sha256_ops;
 extern const php_hash_ops php_hash_sha384_ops;
 extern const php_hash_ops php_hash_sha512_ops;
