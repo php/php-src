@@ -2298,7 +2298,7 @@ PHP_FUNCTION(array_splice)
 	/* Don't create the array of removed elements if it's not going
 	 * to be used; e.g. only removing and/or replacing elements */
 	if (return_value_used) {
-		int size;
+		int size = 0;
 
 		/* Clamp the offset.. */
 		if (offset > num_in) {
