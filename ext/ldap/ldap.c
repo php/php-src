@@ -49,9 +49,7 @@
 #if HAVE_NSLDAP
 #include <winsock2.h>
 #endif
-#ifndef strdup
 #define strdup _strdup
-#endif
 #undef WINDOWS
 #undef strcasecmp
 #undef strncasecmp
@@ -256,14 +254,10 @@ PHP_MINFO_FUNCTION(ldap)
 #ifdef LDAP_VENDOR_NAME
 	php_info_print_table_row(2, "Vendor Name", LDAP_VENDOR_NAME);
 #endif
-	
+
 #ifdef LDAP_VENDOR_VERSION
 	snprintf(tmp, 31, "%d", LDAP_VENDOR_VERSION);
 	php_info_print_table_row(2, "Vendor Version", tmp);
-
-	snprintf(tmp, 31, "%d.%d.%d", LDAP_VENDOR_VERSION_MAJOR, 
-				LDAP_VENDOR_VERSION_MINOR, LDAP_VENDOR_VERSION_PATCH);
-	php_info_print_table_row(2, "Vendor Version String", tmp);
 #endif
 
 #if HAVE_NSLDAP
