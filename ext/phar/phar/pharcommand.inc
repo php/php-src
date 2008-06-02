@@ -137,7 +137,7 @@ class PharCommand extends CLICommand
                 'inf' => '<regex>  Regular expression for input files to exclude.'
             ),
             'y' => array(
-            	'typ' => 'string',
+            	'typ' => 'privke',
             	'val' => NULL,
             	'inf' => 'Private key for OpenSSL signing.',
             ),
@@ -154,9 +154,6 @@ class PharCommand extends CLICommand
         }
 
         $hash_avail = Phar::getSupportedSignatures();
-        if (!in_array('OpenSSL', $hash_avail)) {
-        	unset($phar_args['y']);
-        }
         $hash_optional = array('SHA-256' => 'SHA256',
                                'SHA-512' => 'SHA512',
                                'OpenSSL' => 'OpenSSL');
@@ -350,6 +347,27 @@ class PharCommand extends CLICommand
                     $arg = '0';
                 }
                 break;
+        }
+        return $arg;
+    }
+    // }}}
+    // {{{ static function cli_arg_typ_privkey
+    /**
+     * Argument type private key (for OpenSSL signing)
+     *
+     * @param  string $arg  The phar selection
+     * @param  string $cfg  The config option.
+     * @param  string $key  The key information.
+     * @return string $arg  The selected algorithm
+     */
+    static function cli_arg_typ_privkey($arg, $cfg, $key)
+    {
+        $arg = self::cli_arg_typ_string($arg, $cfg, $key);
+        
+        $hash_avail = Phar::getSupportedSignatures();
+        if ($arg && !in_array('OpenSSL', $hash_avail))
+        {
+        	self::error("Cannot specifiy private key without OpenSSL support.\n");
         }
         return $arg;
     }
