@@ -13,7 +13,8 @@ $(builddir)/phar.php: $(srcdir)/build_precommand.php $(srcdir)/phar/*.inc $(srcd
 	$$PHP $(srcdir)/build_precommand.php > $(builddir)/phar.php
 
 $(builddir)/phar.phar: $(builddir)/phar.php $(srcdir)/phar/*.inc $(srcdir)/phar/*.php $(SAPI_CLI_PATH)
-	if test -x "$(PHP_EXECUTABLE)"; then \
+	-@test -f $(builddir)/phar.phar && rm -f $(builddir)/phar.phar
+	-@if test -x "$(PHP_EXECUTABLE)"; then \
 		export PHP="$(PHP_EXECUTABLE)"; \
 		export BANG="$(PHP_EXECUTABLE)"; \
 	else \
