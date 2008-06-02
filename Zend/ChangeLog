@@ -1,3 +1,19 @@
+2008-06-01  Scott MacVicar  <scott@macvicar.net>
+
+    * zend_arg_defs.c:
+      MFB: Back out the previous change as it broke the Windows builds.
+
+    * (PHP_5_3)
+      zend_arg_defs.c:
+      Back out the previous change as it broke the Windows builds.
+
+    * zend_arg_defs.c:
+      MFB: Fix unexported symbols. Patch by Greg
+
+    * (PHP_5_3)
+      zend_arg_defs.c:
+      Fix unexported symbols. Patch by Greg
+
 2008-05-30  Matt Wilmas  <php_lists@realplain.com>
 
     * zend_hash.c:
