@@ -893,7 +893,9 @@ ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{
 ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC) /* {{{ */
 {
 	zend_function *fbc = NULL;
-	char *lc_class_name;
+	char *lc_class_name, *lc_function_name = NULL;
+	
+	lc_function_name = zend_str_tolower_dup(function_name_strval, function_name_strlen);
 
 	if (function_name_strlen == ce->name_length && ce->constructor) {
 		lc_class_name = zend_str_tolower_dup(ce->name, ce->name_length);
@@ -902,7 +904,9 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, char *f
 		}
 		efree(lc_class_name);
 	}
-	if (!fbc && zend_hash_find(&ce->function_table, function_name_strval, function_name_strlen+1, (void **) &fbc)==FAILURE) {
+	if (!fbc && zend_hash_find(&ce->function_table, lc_function_name, function_name_strlen+1, (void **) &fbc)==FAILURE) {
+		efree(lc_function_name);
+
 		if (ce->__call &&
 		    EG(This) &&
 		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
@@ -940,6 +944,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, char *f
 			zend_error(E_ERROR, "Call to undefined method %s::%s()", ce->name ? ce->name : "", function_name_strval);
 		}
 	}
+	efree(lc_function_name);
 
 #if MBO_0
 	/* right now this function is used for non static method lookup too */

@@ -1919,11 +1919,8 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 		    memcmp(lcname, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) == 0) {
 			zval_dtor(&method_name->u.constant);
 			SET_UNUSED(*method_name);
-			efree(lcname);
-		} else {
-			efree(Z_STRVAL(method_name->u.constant));
-			Z_STRVAL(method_name->u.constant) = lcname;
 		}
+		efree(lcname);
 	}
 
 	if (class_name->op_type == IS_CONST &&
