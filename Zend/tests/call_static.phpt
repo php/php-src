@@ -15,6 +15,6 @@ call_user_func(array("Test", "Three"), NULL, 0, false);
 Test::Four(5, 6, 7, 8);
 
 --EXPECT--
-two() called with 2 arguments
-three() called with 3 arguments
-four() called with 4 arguments
+Two() called with 2 arguments
+Three() called with 3 arguments
+Four() called with 4 arguments

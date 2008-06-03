@@ -1999,12 +1999,8 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 				ZEND_U_EQUAL(Z_TYPE(method_name->u.constant), lcname, Z_UNILEN(method_name->u.constant), ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1)) {
 			zval_dtor(&method_name->u.constant);
 			SET_UNUSED(*method_name);
-			efree(lcname.v);
-		} else {
-			efree(Z_USTRVAL(method_name->u.constant));
-			Z_UNIVAL(method_name->u.constant) = lcname;
-			Z_UNILEN(method_name->u.constant) = lcname_len;
 		}
+		efree(lcname.v);
 	}
 
 	if (class_name->op_type == IS_CONST &&
