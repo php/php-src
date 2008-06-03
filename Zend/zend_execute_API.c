@@ -996,15 +996,11 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 					efree(function_name_lc.v);
 				}
 			} else if (calling_scope) {
-				unsigned int lcname_len;
-				zstr lcname = zend_u_str_case_fold(Z_TYPE_P(fci->function_name), fname, fname_len, 1, &lcname_len);
-
 				if (calling_scope->get_static_method) {
-					EX(function_state).function = calling_scope->get_static_method(calling_scope, Z_TYPE_P(fci->function_name), lcname, lcname_len TSRMLS_CC);
+					EX(function_state).function = calling_scope->get_static_method(calling_scope, Z_TYPE_P(fci->function_name), fname, fname_len TSRMLS_CC);
 				} else {
-					EX(function_state).function = zend_std_get_static_method(calling_scope, Z_TYPE_P(fci->function_name), lcname, lcname_len TSRMLS_CC);
+					EX(function_state).function = zend_std_get_static_method(calling_scope, Z_TYPE_P(fci->function_name), fname, fname_len TSRMLS_CC);
 				}
-				efree(lcname.v);
 
 				if (check_scope_or_static && EX(function_state).function
 				&& !(EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)
