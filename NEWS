@@ -173,6 +173,7 @@ PHP                                                                        NEWS
 - Fixed an issue in date() where a : was printed for the O modifier after a P
   modifier was used. (Derick)
 
+- Fixed bug #44769 (declaring private magic methods should throw error). (Felipe)
 - Fixed bug #44913 (Segfault when using return in combination with nested loops
   and continue 2). (Dmitry)
 - Fixed bug #44899 (__isset usage changes behavior of empty()) (Etienne)
