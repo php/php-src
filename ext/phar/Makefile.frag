@@ -4,27 +4,39 @@ $(srcdir)/phar_path_check.c: $(srcdir)/phar_path_check.re
 
 pharcmd: $(builddir)/phar.php $(builddir)/phar.phar
 
-$(builddir)/phar.php: $(srcdir)/build_precommand.php $(srcdir)/phar/*.inc $(srcdir)/phar/*.php $(SAPI_CLI_PATH)
-	if test -x "$(PHP_EXECUTABLE)"; then \
-		export PHP="$(PHP_EXECUTABLE)"; \
+PHP_PHARCMD_SETTINGS = -n -d 'open_basedir=' -d 'output_buffering=0' -d 'memory_limit=-1' -d phar.readonly=0
+PHP_PHARCMD_EXECUTABLE = ` \
+	if test -x "$(top_builddir)/$(SAPI_CLI_PATH)"; then \
+		$(top_srcdir)/build/shtool echo -n -- "$(top_builddir)/$(SAPI_CLI_PATH)"; \
+		if test "x$(PHP_MODULES)" != "x"; then \
+		$(top_srcdir)/build/shtool echo -n -- " -d extension_dir=$(top_builddir)/modules"; \
+		for i in bz2 zlib phar; do \
+			if test -f "$(top_builddir)/modules/$$i.la"; then \
+				. $(top_builddir)/modules/$$i.la; $(top_srcdir)/build/shtool echo -n -- " -d extension=$$dlname"; \
+			fi; \
+		done; \
+		fi; \
 	else \
-		export PHP="$(top_builddir)/$(SAPI_CLI_PATH)"; \
-	fi; \
-	$$PHP $(srcdir)/build_precommand.php > $(builddir)/phar.php
+		$(top_srcdir)/build/shtool echo -n -- "$(PHP_EXECUTABLE)"; \
+	fi;`
+PHP_PHARCMD_BANG = `if test -x "$(PHP_EXECUTABLE)"; then \
+		$(top_srcdir)/build/shtool echo -n -- "$(PHP_EXECUTABLE)"; \
+	else \
+		$(top_srcdir)/build/shtool echo -n -- "$(INSTALL_ROOT)$(bindir)/$(program_prefix)php$(program_suffix)$(EXEEXT)"; \
+	fi; `
+
+$(builddir)/phar.php: $(srcdir)/build_precommand.php $(srcdir)/phar/*.inc $(srcdir)/phar/*.php $(SAPI_CLI_PATH)
+	-@echo "Generating phar.php"
+	@$(PHP_PHARCMD_EXECUTABLE) $(PHP_PHARCMD_SETTINGS) $(srcdir)/build_precommand.php > $(builddir)/phar.php
 
 $(builddir)/phar.phar: $(builddir)/phar.php $(srcdir)/phar/*.inc $(srcdir)/phar/*.php $(SAPI_CLI_PATH)
-	-@test -f $(builddir)/phar.phar && rm -f $(builddir)/phar.phar
-	-@if test -x "$(PHP_EXECUTABLE)"; then \
-		export PHP="$(PHP_EXECUTABLE)"; \
-		export BANG="$(PHP_EXECUTABLE)"; \
-	else \
-		export PHP="$(top_builddir)/$(SAPI_CLI_PATH)"; \
-		export BANG="$(INSTALL_ROOT)$(bindir)/$(program_prefix)php$(program_suffix)$(EXEEXT)"; \
-	fi; \
-	$$PHP -d phar.readonly=0 $(srcdir)/phar.php pack -f $(builddir)/phar.phar -a pharcommand -c auto -x CVS -p 0 -s $(srcdir)/phar/phar.php -h sha1 -b "$$BANG"  $(srcdir)/phar/
-	@chmod +x $(builddir)/phar.phar
+	-@echo "Generating phar.phar"
+	-@rm -f $(top_builddir)/ext/phar/phar.phar
+	-@rm -f $(top_srcdir)/ext/phar/phar.phar
+	@$(PHP_PHARCMD_EXECUTABLE) $(PHP_PHARCMD_SETTINGS) $(srcdir)/phar.php pack -f $(builddir)/phar.phar -a pharcommand -c auto -x CVS -p 0 -s $(srcdir)/phar/phar.php -h sha1 -b "$(PHP_PHARCMD_BANG)"  $(srcdir)/phar/
+	-@chmod +x $(builddir)/phar.phar
 
 install-pharcmd: pharcmd
 	-@$(mkinstalldirs) $(INSTALL_ROOT)$(bindir)
-	@$(INSTALL) $(builddir)/phar.phar $(INSTALL_ROOT)$(bindir)
+	$(INSTALL) $(builddir)/phar.phar $(INSTALL_ROOT)$(bindir)
 
