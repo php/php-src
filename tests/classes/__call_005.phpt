@@ -22,15 +22,4 @@ $b = new B();
 $b->test();
 ?>
 --EXPECTF--
-In A::__call(test1, array(1,a))
-object(B)#1 (0) {
-}
-In A::__call(test2, array(1,a))
-object(B)#1 (0) {
-}
-In A::__call(test3, array(1,a))
-object(B)#1 (0) {
-}
-In A::__call(test4, array(1,a))
-object(B)#1 (0) {
-}
+Fatal error: The magic method __call() must have public visibility and can not be static in %s on line %d
