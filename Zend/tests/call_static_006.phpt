@@ -23,7 +23,10 @@ foo::__construct();
 
 ?>
 --EXPECTF--
+Strict Standards: Non-static method foo::aa() should not be called statically in %s on line %d
 ok
+
+Strict Standards: Non-static method foo::aa() should not be called statically in %s on line %d
 ok
 
 Fatal error: Can not call constructor in %s on line %d
