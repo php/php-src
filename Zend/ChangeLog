@@ -1,3 +1,92 @@
+2008-06-03  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_compile.c
+      zend_execute_API.c
+      zend_object_handlers.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/call_static.phpt:
+      - MFB: Fixed bug #45089 (__callStatic $name case sensitivity)
+
+    * (PHP_5_3)
+      zend_compile.c
+      zend_execute_API.c
+      zend_object_handlers.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/call_static.phpt:
+      - Fixed bug #45089 (__callStatic $name case sensitivity)
+
+    * tests/call_static_006.phpt
+      tests/call_static_006.phpt:
+      - Removed unnecessary XFAIL section
+
+    * tests/call_static_002.phpt
+      tests/call_static_003.phpt
+      tests/call_static_004.phpt
+      tests/call_static_005.phpt
+      tests/call_static_006.phpt
+      tests/call_static_007.phpt:
+      - New tests
+
+    * (PHP_5_3)
+      tests/call_static_004.phpt
+      tests/call_static_006.phpt:
+      - Fixed tests
+
+    * tests/call_static_002.phpt
+      tests/call_static_002.phpt
+      tests/call_static_003.phpt
+      tests/call_static_003.phpt
+      tests/call_static_004.phpt
+      tests/call_static_004.phpt
+      tests/call_static_005.phpt
+      tests/call_static_005.phpt
+      tests/call_static_006.phpt
+      tests/call_static_006.phpt
+      tests/call_static_007.phpt
+      tests/call_static_007.phpt:
+      
+      file call_static_002.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      zend_compile.c
+      tests/magic_methods_001.phpt
+      tests/magic_methods_002.phpt
+      tests/magic_methods_003.phpt
+      tests/magic_methods_004.phpt
+      tests/magic_methods_005.phpt
+      tests/magic_methods_006.phpt
+      tests/magic_methods_007.phpt
+      tests/magic_methods_008.phpt
+      tests/magic_methods_009.phpt
+      tests/magic_methods_010.phpt:
+      - MFH: Fixed bug #44769 (declaring private magic methods should throw
+      error)
+
+    * zend_compile.c
+      tests/magic_methods_001.phpt
+      tests/magic_methods_001.phpt
+      tests/magic_methods_002.phpt
+      tests/magic_methods_002.phpt
+      tests/magic_methods_003.phpt
+      tests/magic_methods_003.phpt
+      tests/magic_methods_004.phpt
+      tests/magic_methods_004.phpt
+      tests/magic_methods_005.phpt
+      tests/magic_methods_005.phpt
+      tests/magic_methods_006.phpt
+      tests/magic_methods_006.phpt
+      tests/magic_methods_007.phpt
+      tests/magic_methods_007.phpt
+      tests/magic_methods_008.phpt
+      tests/magic_methods_008.phpt
+      tests/magic_methods_009.phpt
+      tests/magic_methods_009.phpt
+      tests/magic_methods_010.phpt
+      tests/magic_methods_010.phpt:
+      - Fixed bug #44769 (declaring private magic methods should throw error)
+
 2008-06-01  Scott MacVicar  <scott@macvicar.net>
 
     * zend_arg_defs.c:
