@@ -25,15 +25,19 @@ PHP_PHARCMD_BANG = `if test -x "$(PHP_EXECUTABLE)"; then \
 		$(top_srcdir)/build/shtool echo -n -- "$(INSTALL_ROOT)$(bindir)/$(program_prefix)php$(program_suffix)$(EXEEXT)"; \
 	fi; `
 
+$(builddir)/phar/phar.inc: $(srcdir)/phar/phar.inc
+	-@test -d $(builddir)/phar || mkdir $(builddir)/phar
+	-@test -f $(builddir)/phar/phar.inc || cp $(srcdir)/phar/phar.inc $(builddir)/phar/phar.inc
+
 $(builddir)/phar.php: $(srcdir)/build_precommand.php $(srcdir)/phar/*.inc $(srcdir)/phar/*.php $(SAPI_CLI_PATH)
 	-@echo "Generating phar.php"
 	@$(PHP_PHARCMD_EXECUTABLE) $(PHP_PHARCMD_SETTINGS) $(srcdir)/build_precommand.php > $(builddir)/phar.php
 
-$(builddir)/phar.phar: $(builddir)/phar.php $(srcdir)/phar/*.inc $(srcdir)/phar/*.php $(SAPI_CLI_PATH)
+$(builddir)/phar.phar: $(builddir)/phar.php $(builddir)/phar/phar.inc $(srcdir)/phar/*.inc $(srcdir)/phar/*.php $(SAPI_CLI_PATH)
 	-@echo "Generating phar.phar"
-	-@rm -f $(top_builddir)/ext/phar/phar.phar
-	-@rm -f $(top_srcdir)/ext/phar/phar.phar
-	@$(PHP_PHARCMD_EXECUTABLE) $(PHP_PHARCMD_SETTINGS) $(srcdir)/phar.php pack -f $(builddir)/phar.phar -a pharcommand -c auto -x CVS -p 0 -s $(srcdir)/phar/phar.php -h sha1 -b "$(PHP_PHARCMD_BANG)"  $(srcdir)/phar/
+	-@rm -f $(builddir)/phar.phar
+	-@rm -f $(srcdir)/phar.phar
+	@$(PHP_PHARCMD_EXECUTABLE) $(PHP_PHARCMD_SETTINGS) $(builddir)/phar.php pack -f $(builddir)/phar.phar -a pharcommand -c auto -x CVS -p 0 -s $(srcdir)/phar/phar.php -h sha1 -b "$(PHP_PHARCMD_BANG)"  $(srcdir)/phar/
 	-@chmod +x $(builddir)/phar.phar
 
 install-pharcmd: pharcmd
