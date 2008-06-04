@@ -1,3 +1,133 @@
+2008-06-03  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ext/phar/Makefile.frag:
+      - Prefer current CLI target to build phar.phar
+      - Use php -n
+      - Use shared phar, bz2, zlib automatically
+
+2008-06-03  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/call_static.phpt:
+      - MFB: Fixed bug #45089 (__callStatic $name case sensitivity)
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/call_static.phpt:
+      - Fixed bug #45089 (__callStatic $name case sensitivity)
+
+2008-06-03  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/hash/hash.c:
+      MFB: Add snefru256 as an alias for snefru, since in reality that is the
+      implementation.
+
+    * (PHP_5_3)
+      ext/hash/hash.c:
+      Add snefru256 as an alias for snefru, since in reality that is the
+      implementation.
+
+2008-06-03  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      BFN
+
+    * ZendEngine2/tests/call_static_006.phpt
+      ZendEngine2/tests/call_static_006.phpt:
+      - Removed unnecessary XFAIL section
+
+    * ZendEngine2/tests/call_static_002.phpt
+      ZendEngine2/tests/call_static_003.phpt
+      ZendEngine2/tests/call_static_004.phpt
+      ZendEngine2/tests/call_static_005.phpt
+      ZendEngine2/tests/call_static_006.phpt
+      ZendEngine2/tests/call_static_007.phpt:
+      - New tests
+
+    * (PHP_5_3)
+      ZendEngine2/tests/call_static_004.phpt
+      ZendEngine2/tests/call_static_006.phpt:
+      - Fixed tests
+
+    * ZendEngine2/tests/call_static_002.phpt
+      ZendEngine2/tests/call_static_002.phpt
+      ZendEngine2/tests/call_static_003.phpt
+      ZendEngine2/tests/call_static_003.phpt
+      ZendEngine2/tests/call_static_004.phpt
+      ZendEngine2/tests/call_static_004.phpt
+      ZendEngine2/tests/call_static_005.phpt
+      ZendEngine2/tests/call_static_005.phpt
+      ZendEngine2/tests/call_static_006.phpt
+      ZendEngine2/tests/call_static_006.phpt
+      ZendEngine2/tests/call_static_007.phpt
+      ZendEngine2/tests/call_static_007.phpt:
+      
+      file call_static_002.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/magic_methods_001.phpt
+      ZendEngine2/tests/magic_methods_002.phpt
+      ZendEngine2/tests/magic_methods_003.phpt
+      ZendEngine2/tests/magic_methods_004.phpt
+      ZendEngine2/tests/magic_methods_005.phpt
+      ZendEngine2/tests/magic_methods_006.phpt
+      ZendEngine2/tests/magic_methods_007.phpt
+      ZendEngine2/tests/magic_methods_008.phpt
+      ZendEngine2/tests/magic_methods_009.phpt
+      ZendEngine2/tests/magic_methods_010.phpt
+      tests/classes/__call_005.phpt:
+      - MFH: Fixed bug #44769 (declaring private magic methods should throw
+      error)
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/tests/magic_methods_001.phpt
+      ZendEngine2/tests/magic_methods_001.phpt
+      ZendEngine2/tests/magic_methods_002.phpt
+      ZendEngine2/tests/magic_methods_002.phpt
+      ZendEngine2/tests/magic_methods_003.phpt
+      ZendEngine2/tests/magic_methods_003.phpt
+      ZendEngine2/tests/magic_methods_004.phpt
+      ZendEngine2/tests/magic_methods_004.phpt
+      ZendEngine2/tests/magic_methods_005.phpt
+      ZendEngine2/tests/magic_methods_005.phpt
+      ZendEngine2/tests/magic_methods_006.phpt
+      ZendEngine2/tests/magic_methods_006.phpt
+      ZendEngine2/tests/magic_methods_007.phpt
+      ZendEngine2/tests/magic_methods_007.phpt
+      ZendEngine2/tests/magic_methods_008.phpt
+      ZendEngine2/tests/magic_methods_008.phpt
+      ZendEngine2/tests/magic_methods_009.phpt
+      ZendEngine2/tests/magic_methods_009.phpt
+      ZendEngine2/tests/magic_methods_010.phpt
+      ZendEngine2/tests/magic_methods_010.phpt
+      tests/classes/__call_005.phpt:
+      - Fixed bug #44769 (declaring private magic methods should throw error)
+
+2008-06-03  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * ext/dom/tests/DOMDocument_createProcessingInstruction_basic.phpt
+      ext/dom/tests/DOMDocument_createProcessingInstruction_error.phpt:
+      Tests from London test fest 2008
+
+    * ext/dom/tests/DOMDocument_createProcessingInstruction_basic.phpt
+      ext/dom/tests/DOMDocument_createProcessingInstruction_basic.phpt
+      ext/dom/tests/DOMDocument_createProcessingInstruction_error.phpt
+      ext/dom/tests/DOMDocument_createProcessingInstruction_error.phpt:
+      
+      file DOMDocument_createProcessingInstruction_basic.phpt was initially
+      added on branch PHP_5_3.
+
 2008-06-02  Marcus Boerger  <php@marcus-boerger.de>
 
     * configure.in:
