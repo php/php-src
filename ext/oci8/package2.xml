@@ -365,6 +365,30 @@ Refine DRCP functionality
 
  <release>
  <version>
+  <release>1.2.5</release>
+  <api>1.2.5</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+This release is based on the OCI8 included in PHP 5.2.6, with the addition of the fix for  http://pecl.php.net/bugs/bug.php?id=13523.
+--------
+Fixed bug #42496 (cursor leak selecting LOBs http://bugs.php.net/bug.php?id=42496
+Fixed bug #42841 (crash with REF CURSORS when statement caching enabled) http://bugs.php.net/bug.php?id=42841
+Fixed bug #43497 (Temporary LOB leak) http://bugs.php.net/bug.php?id=43497
+Fixed bug #44206 (OCI8 selecting ref cursors leads to ORA-1000 maximum open cursors reached).
+Fixed bug #44008 (OCI8 incorrect usage of OCI-Lob->close crashes PHP).
+Fixed bug #44113 (new collection creation can fail with OCI-22303) http://bugs.php.net/bug.php?id=44113
+Enhancement - make -with-oci8=instantclient with no directory specified look for RPM install
+Enhancement - compile with 64bit Instant Client RPMs (bug http://bugs.php.net/bug.php?id=41941, http://pecl.php.net/bugs/bug.php?id=13523)
+ </notes>
+ </release>
+
+ <release>
+ <version>
   <release>1.2.4</release>
   <api>1.2.4</api>
  </version>
