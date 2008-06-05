@@ -52,14 +52,10 @@ int le_pconnection;
 int le_statement;
 int le_descriptor;
 int le_psessionpool;
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 int le_collection;
-#endif
 
 zend_class_entry *oci_lob_class_entry_ptr;
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 zend_class_entry *oci_coll_class_entry_ptr;
-#endif
 
 #ifndef SQLT_BFILEE
 #define SQLT_BFILEE 114
@@ -83,9 +79,7 @@ static void php_oci_pconnection_list_np_dtor (zend_rsrc_list_entry * TSRMLS_DC);
 static void php_oci_statement_list_dtor (zend_rsrc_list_entry * TSRMLS_DC);
 static void php_oci_descriptor_list_dtor (zend_rsrc_list_entry * TSRMLS_DC);
 static void php_oci_spool_list_dtor(zend_rsrc_list_entry *entry TSRMLS_DC);
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 static void php_oci_collection_list_dtor (zend_rsrc_list_entry * TSRMLS_DC);
-#endif
 
 static int php_oci_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC);
 #ifdef ZTS
@@ -186,11 +180,8 @@ PHP_FUNCTION(oci_lob_read);
 PHP_FUNCTION(oci_lob_eof);
 PHP_FUNCTION(oci_lob_seek);
 PHP_FUNCTION(oci_lob_size);
-#ifdef HAVE_OCI8_TEMP_LOB
 PHP_FUNCTION(oci_lob_write_temporary);
 PHP_FUNCTION(oci_lob_close);
-#endif
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 PHP_FUNCTION(oci_new_collection);
 PHP_FUNCTION(oci_free_collection);
 PHP_FUNCTION(oci_collection_append);
@@ -200,7 +191,6 @@ PHP_FUNCTION(oci_collection_assign);
 PHP_FUNCTION(oci_collection_size);
 PHP_FUNCTION(oci_collection_max);
 PHP_FUNCTION(oci_collection_trim);
-#endif
 /* }}} */
 
 /* {{{ extension definition structures
@@ -264,7 +254,6 @@ static const zend_function_entry php_oci_functions[] = {
 	PHP_FE(oci_new_descriptor,			NULL)
 	PHP_FE(oci_set_prefetch,			NULL)
 	PHP_FE(oci_password_change,			NULL)
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 	PHP_FE(oci_free_collection,			NULL)
 	PHP_FE(oci_collection_append,		NULL)
 	PHP_FE(oci_collection_element_get,	NULL)
@@ -274,7 +263,6 @@ static const zend_function_entry php_oci_functions[] = {
 	PHP_FE(oci_collection_max,			NULL)
 	PHP_FE(oci_collection_trim,			NULL)
 	PHP_FE(oci_new_collection,			NULL)
-#endif
 
 	PHP_FALIAS(oci_free_cursor,		oci_free_statement,		NULL)
 	PHP_FALIAS(ocifreecursor,		oci_free_statement,		NULL)
@@ -315,7 +303,6 @@ static const zend_function_entry php_oci_functions[] = {
 	PHP_FALIAS(ocinewdescriptor,	oci_new_descriptor,		NULL)
 	PHP_FALIAS(ocisetprefetch,		oci_set_prefetch,		NULL)
 	PHP_FALIAS(ocipasswordchange,	oci_password_change,	NULL)
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 	PHP_FALIAS(ocifreecollection,	oci_free_collection,	NULL)
 	PHP_FALIAS(ocinewcollection,	oci_new_collection,		NULL)
 	PHP_FALIAS(ocicollappend,		oci_collection_append,	NULL)
@@ -324,7 +311,6 @@ static const zend_function_entry php_oci_functions[] = {
 	PHP_FALIAS(ocicollsize,			oci_collection_size,	NULL)
 	PHP_FALIAS(ocicollmax,			oci_collection_max,		NULL)
 	PHP_FALIAS(ocicolltrim,			oci_collection_trim,	NULL)
-#endif
 	{NULL,NULL,NULL}
 };
 
@@ -346,17 +332,14 @@ static const zend_function_entry php_oci_lob_class_functions[] = {
 	PHP_FALIAS(writetofile, oci_lob_export,			NULL)
 	PHP_FALIAS(export,		oci_lob_export,			NULL)
 	PHP_FALIAS(import,		oci_lob_import,			NULL)
-#ifdef HAVE_OCI8_TEMP_LOB
 	PHP_FALIAS(writetemporary,	oci_lob_write_temporary,	NULL)
 	PHP_FALIAS(close,			oci_lob_close,				NULL)
-#endif
 	PHP_FALIAS(save,		oci_lob_save,			NULL)
 	PHP_FALIAS(savefile,	oci_lob_import,			NULL)
 	PHP_FALIAS(free,		oci_free_descriptor,	NULL)
 	{NULL,NULL,NULL}
 };
 
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 static const zend_function_entry php_oci_coll_class_functions[] = {
 	PHP_FALIAS(append,		  oci_collection_append,			NULL)
 	PHP_FALIAS(getelem,		  oci_collection_element_get,		NULL)
@@ -368,7 +351,6 @@ static const zend_function_entry php_oci_coll_class_functions[] = {
 	PHP_FALIAS(free,		  oci_free_collection,				NULL)
 	{NULL,NULL,NULL}
 };
-#endif
 
 zend_module_entry oci8_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -415,7 +397,7 @@ static void php_oci_init_global_handles(TSRMLS_D)
 	sb4 error_code = 0;
 	text tmp_buf[PHP_OCI_ERRBUF_LEN];
 
-	errcode = OCIEnvInit (&OCI_G(env), OCI_DEFAULT, 0, NULL);
+	errcode =  OCIEnvNlsCreate(&OCI_G(env), OCI_DEFAULT, 0, NULL, NULL, NULL, 0, NULL, 0, 0);
 
 	if (errcode == OCI_ERROR) {
 		goto oci_error;
@@ -483,24 +465,14 @@ static PHP_GINIT_FUNCTION(oci)
 PHP_MINIT_FUNCTION(oci)
 {
 	zend_class_entry oci_lob_class_entry;
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 	zend_class_entry oci_coll_class_entry;
-#endif
 
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 #define PHP_OCI_INIT_MODE_TMP OCI_DEFAULT | OCI_OBJECT
-#else
-#define PHP_OCI_INIT_MODE_TMP OCI_DEFAULT
-#endif
 
 #ifdef ZTS
 #define PHP_OCI_INIT_MODE PHP_OCI_INIT_MODE_TMP | OCI_THREADED
 #else
 #define PHP_OCI_INIT_MODE PHP_OCI_INIT_MODE_TMP
-#endif
-
-#if !HAVE_OCI_ENV_CREATE
-	OCIInitialize(PHP_OCI_INIT_MODE, NULL, NULL, NULL, NULL);
 #endif
 
 	REGISTER_INI_ENTRIES();
@@ -510,19 +482,13 @@ PHP_MINIT_FUNCTION(oci)
 	le_pconnection = zend_register_list_destructors_ex(php_oci_pconnection_list_np_dtor, php_oci_pconnection_list_dtor, "oci8 persistent connection", module_number);
 	le_psessionpool = zend_register_list_destructors_ex(NULL, php_oci_spool_list_dtor, "oci8 persistent session pool", module_number);
 	le_descriptor = zend_register_list_destructors_ex(php_oci_descriptor_list_dtor, NULL, "oci8 descriptor", module_number);
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 	le_collection = zend_register_list_destructors_ex(php_oci_collection_list_dtor, NULL, "oci8 collection", module_number);
-#endif
 
 	INIT_CLASS_ENTRY(oci_lob_class_entry, "OCI-Lob", php_oci_lob_class_functions);
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 	INIT_CLASS_ENTRY(oci_coll_class_entry, "OCI-Collection", php_oci_coll_class_functions);
-#endif
 
 	oci_lob_class_entry_ptr = zend_register_internal_class(&oci_lob_class_entry TSRMLS_CC);
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 	oci_coll_class_entry_ptr = zend_register_internal_class(&oci_coll_class_entry TSRMLS_CC);
-#endif
 
 /* thies@thieso.net 990203 i do not think that we will need all of them - just in here for completeness for now! */
 	REGISTER_LONG_CONSTANT("OCI_DEFAULT",OCI_DEFAULT, CONST_CS | CONST_PERSISTENT);
@@ -566,11 +532,9 @@ PHP_MINIT_FUNCTION(oci)
 	REGISTER_LONG_CONSTANT("SQLT_BFLOAT",SQLT_BFLOAT, CONST_CS | CONST_PERSISTENT);
 #endif
 
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 	REGISTER_LONG_CONSTANT("OCI_B_NTY",SQLT_NTY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLT_NTY",SQLT_NTY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("OCI_SYSDATE","SYSDATE", CONST_CS | CONST_PERSISTENT);
-#endif
 
 	REGISTER_LONG_CONSTANT("OCI_B_BFILE",SQLT_BFILEE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OCI_B_CFILEE",SQLT_CFILEE, CONST_CS | CONST_PERSISTENT);
@@ -603,10 +567,8 @@ PHP_MINIT_FUNCTION(oci)
 	REGISTER_LONG_CONSTANT("OCI_D_ROWID",OCI_DTYPE_ROWID, CONST_CS | CONST_PERSISTENT);
 
 /* for OCIWriteTemporaryLob */
-#ifdef HAVE_OCI8_TEMP_LOB
 	REGISTER_LONG_CONSTANT("OCI_TEMP_CLOB",OCI_TEMP_CLOB, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OCI_TEMP_BLOB",OCI_TEMP_BLOB, CONST_CS | CONST_PERSISTENT);
-#endif
 
 	return SUCCESS;
 }
@@ -632,10 +594,6 @@ PHP_MSHUTDOWN_FUNCTION(oci)
 	php_oci_cleanup_global_handles(TSRMLS_C);
 #endif
 
-#if !HAVE_OCI_ENV_CREATE
-	OCITerminate(OCI_DEFAULT);
-#endif
-
 	return SUCCESS;
 }
 
@@ -645,9 +603,7 @@ PHP_RSHUTDOWN_FUNCTION(oci)
 
 #ifdef ZTS
 	zend_hash_apply_with_argument(&EG(regular_list), (apply_func_arg_t) php_oci_list_helper, (void *)le_descriptor TSRMLS_CC);
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 	zend_hash_apply_with_argument(&EG(regular_list), (apply_func_arg_t) php_oci_list_helper, (void *)le_collection TSRMLS_CC);
-#endif
 	while (OCI_G(num_statements)) {
 		zend_hash_apply_with_argument(&EG(regular_list), (apply_func_arg_t) php_oci_list_helper, (void *)le_statement TSRMLS_CC);
 	}
@@ -698,20 +654,9 @@ PHP_MINFO_FUNCTION(oci)
 #endif
 #endif
 
-#ifdef HAVE_OCI8_TEMP_LOB
 	php_info_print_table_row(2, "Temporary Lob support", "enabled");
-#else
-	php_info_print_table_row(2, "Temporary Lob support", "disabled");
-#endif
-
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 	php_info_print_table_row(2, "Collections support", "enabled");
-#else
-	php_info_print_table_row(2, "Collections support", "disabled");
-#endif
-
 	php_info_print_table_end();
-
 	DISPLAY_INI_ENTRIES();
 }
 /* }}} */
@@ -824,7 +769,6 @@ static void php_oci_descriptor_list_dtor(zend_rsrc_list_entry *entry TSRMLS_DC)
 	php_oci_lob_free(descriptor TSRMLS_CC);
 } /* }}} */
 
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 /* {{{ php_oci_collection_list_dtor()
  *
  * Collection destructor
@@ -834,7 +778,6 @@ static void php_oci_collection_list_dtor(zend_rsrc_list_entry *entry TSRMLS_DC)
 	php_oci_collection *collection = (php_oci_collection *)entry->ptr;
 	php_oci_collection_close(collection TSRMLS_CC);
 } /* }}} */
-#endif
 
 /* }}} */
 
@@ -1128,10 +1071,8 @@ php_oci_connection *php_oci_do_connect_ex(zstr username, int username_len, zstr 
 	zend_bool use_spool = 1;	   /* Default is to use client-side session pool */
 	zend_bool ping_done = 0;
 
-#if HAVE_OCI_ENV_NLS_CREATE
 	ub2 charsetid = 0;
 	ub2 charsetid_nls_lang = 0;
-#endif
 
 	switch (session_mode) {
 		case OCI_DEFAULT:
@@ -1193,7 +1134,6 @@ php_oci_connection *php_oci_do_connect_ex(zstr username, int username_len, zstr 
 		php_oci_init_global_handles(TSRMLS_C);
 	}
 
-#if HAVE_OCI_ENV_NLS_CREATE
 	if (!UG(unicode)) {
 		if (charset.s && *charset.s) {
 			PHP_OCI_CALL_RETURN(charsetid, OCINlsCharSetNameToId, (OCI_G(env), (CONST oratext *)charset.s));
@@ -1219,12 +1159,6 @@ php_oci_connection *php_oci_do_connect_ex(zstr username, int username_len, zstr 
 		charsetid = OCI_UTF16ID;
 		smart_str_append_unsigned_ex(&hashed_details, charsetid, 0);
 	}
-
-#else
-	if (charset && *charset) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Your version of Oracle Client doesn't support setting the charset; bad or no charset conversions may result");
-	}
-#endif
 
 	timestamp = time(NULL);
 
@@ -1435,13 +1369,11 @@ php_oci_connection *php_oci_do_connect_ex(zstr username, int username_len, zstr 
 
 	smart_str_free_ex(&hashed_details, 0);
 
-#if HAVE_OCI_ENV_NLS_CREATE
 	if (charsetid) {
 		connection->charset = charsetid;
 	} else {
 		connection->charset = charsetid_nls_lang;
 	}
-#endif
 
 	/* Old session creation semantics when session pool cannot be used Eg: privileged
 	 * connect/password change
@@ -1839,9 +1771,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSR
 
 			lob_fetch_status = php_oci_lob_read(descriptor, -1, 0, &lob_buffer, &lob_length TSRMLS_CC);
 			lob_fetch_status |= (php_oci_lob_get_type(descriptor, &lob_type TSRMLS_CC) > 0);
-#ifdef HAVE_OCI8_TEMP_LOB
 			php_oci_temp_lob_close(descriptor TSRMLS_CC);
-#endif
 			if (lob_fetch_status) {
 				ZVAL_FALSE(value);
 				return 1;
@@ -2193,34 +2123,18 @@ static OCIEnv *php_oci_create_env(ub2 charsetid TSRMLS_DC)
 {
 	OCIEnv *retenv = NULL;
 
-	/* allocate environment handle */
-#if HAVE_OCI_ENV_NLS_CREATE
-#define PHP_OCI_INIT_FUNC_NAME "OCIEnvNlsCreate"
-
-	/* create an environment using the character set id, Oracle 9i+ ONLY */
+	/* create an environment using the character set id */
 	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIEnvNlsCreate, (&retenv, OCI_G(events) ? PHP_OCI_INIT_MODE | OCI_EVENTS : PHP_OCI_INIT_MODE, 0, NULL, NULL, NULL, 0, NULL, charsetid, charsetid));
-
-#elif HAVE_OCI_ENV_CREATE
-#define PHP_OCI_INIT_FUNC_NAME "OCIEnvCreate"
-
-	/* allocate env handle without NLS support */
-	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIEnvCreate, (&retenv, PHP_OCI_INIT_MODE, 0, NULL, NULL, NULL, 0, NULL));
-#else
-#define PHP_OCI_INIT_FUNC_NAME "OCIEnvInit"
-
-	/* the simpliest way */
-	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIEnvInit, (&retenv, OCI_DEFAULT, 0, NULL));
-#endif
 
 	if (OCI_G(errcode) != OCI_SUCCESS) {
 #ifdef HAVE_OCI_INSTANT_CLIENT
 # ifdef PHP_WIN32
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, PHP_OCI_INIT_FUNC_NAME "() failed. There is something wrong with your system - please check that PATH includes the directory with Oracle Instant Client libraries");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that PATH includes the directory with Oracle Instant Client libraries");
 # else
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, PHP_OCI_INIT_FUNC_NAME "() failed. There is something wrong with your system - please check that LD_LIBRARY_PATH includes the directory with Oracle Instant Client libraries");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that LD_LIBRARY_PATH includes the directory with Oracle Instant Client libraries");
 # endif
 #else
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, PHP_OCI_INIT_FUNC_NAME "() failed. There is something wrong with your system - please check that ORACLE_HOME is set and points to the right directory");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that ORACLE_HOME is set and points to the right directory");
 #endif
 		return NULL;
 	}
@@ -2234,6 +2148,8 @@ static OCIEnv *php_oci_create_env(ub2 charsetid TSRMLS_DC)
  */
 static int php_oci_old_create_session(php_oci_connection *connection, zstr dbname, int dbname_len, zstr username, int username_len, zstr password, int password_len, zstr new_password, int new_password_len, int session_mode, zend_uchar type TSRMLS_DC)
 {
+	ub4 statement_cache_size = (OCI_G(statement_cache_size) > 0) ? OCI_G(statement_cache_size) : 0;
+
 	if (OCI_G(debug_mode)) {
 		php_printf ("OCI8 DEBUG: Bypassing client-side session pool for session create at (%s:%d) \n", __FILE__, __LINE__);
 	}
@@ -2339,13 +2255,8 @@ static int php_oci_old_create_session(php_oci_connection *connection, zstr dbnam
 		/* start the session {{{ */
 		switch (session_mode) {
 			case OCI_DEFAULT:
-#if HAVE_OCI_STMT_PREPARE2
 				/* statement caching is suported only in Oracle 9+ */
 				PHP_OCI_CALL_RETURN(OCI_G(errcode), OCISessionBegin, (connection->svc, OCI_G(err), connection->session, (ub4) OCI_CRED_RDBMS, (ub4) OCI_STMT_CACHE));
-#else
-				/* Others cannot use stmt caching, so we call OCISessionBegin() with OCI_DEFAULT */
-				PHP_OCI_CALL_RETURN(OCI_G(errcode), OCISessionBegin, (connection->svc, OCI_G(err), connection->session, (ub4) OCI_CRED_RDBMS, (ub4) OCI_DEFAULT));
-#endif
 				break;
 			case OCI_SYSDBA:
 			case OCI_SYSOPER:
@@ -2375,18 +2286,12 @@ static int php_oci_old_create_session(php_oci_connection *connection, zstr dbnam
 		return 1;
 	}
 
-#if HAVE_OCI_STMT_PREPARE2
-	{
-		ub4 statement_cache_size = (OCI_G(statement_cache_size) > 0) ? OCI_G(statement_cache_size) : 0;
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->svc, (ub4) OCI_HTYPE_SVCCTX, (ub4 *) &statement_cache_size, 0, (ub4) OCI_ATTR_STMTCACHESIZE, OCI_G(err)));
 
-		PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->svc, (ub4) OCI_HTYPE_SVCCTX, (ub4 *) &statement_cache_size, 0, (ub4) OCI_ATTR_STMTCACHESIZE, OCI_G(err)));
-
-		if (OCI_G(errcode) != OCI_SUCCESS) {
-			php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
-			return 1;
-		}
+	if (OCI_G(errcode) != OCI_SUCCESS) {
+		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
+		return 1;
 	}
-#endif
 
   /* Successfully created session */
 	return 0;
@@ -2403,6 +2308,7 @@ static int php_oci_create_session(php_oci_connection *connection, php_oci_spool 
 	ub4 purity = -2;				/* Illegal value to initialize */
 #endif
 	time_t timestamp = time(NULL);
+	ub4 statement_cache_size = (OCI_G(statement_cache_size) > 0) ? OCI_G(statement_cache_size) : 0;
 
 	/* Persistent connections have private session pools */
 	if (connection->is_persistent && !connection->private_spool &&
@@ -2535,18 +2441,12 @@ static int php_oci_create_session(php_oci_connection *connection, php_oci_spool 
 		}	/* If ping applicable */
 	} while (!(connection->svc));
 
-#if HAVE_OCI_STMT_PREPARE2
-	{
-		ub4 statement_cache_size = (OCI_G(statement_cache_size) > 0) ? OCI_G(statement_cache_size) : 0;
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->svc, (ub4) OCI_HTYPE_SVCCTX, (ub4 *) &statement_cache_size, 0, (ub4) OCI_ATTR_STMTCACHESIZE, OCI_G(err)));
 
-		PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->svc, (ub4) OCI_HTYPE_SVCCTX, (ub4 *) &statement_cache_size, 0, (ub4) OCI_ATTR_STMTCACHESIZE, OCI_G(err)));
-
-		if (OCI_G(errcode) != OCI_SUCCESS) {
-			php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
-			return 1;
-		}
+	if (OCI_G(errcode) != OCI_SUCCESS) {
+		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
+		return 1;
 	}
-#endif
 
 	/* Session is now taken from the session pool and attached and open */
 	connection->is_stub = 0;

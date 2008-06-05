@@ -13,15 +13,10 @@ if (PHP_OCI8 != "no") {
 	
 		AC_DEFINE('HAVE_OCI8', 1);
 		AC_DEFINE('HAVE_OCI_INSTANT_CLIENT', 1);
-		AC_DEFINE('HAVE_OCI_ENV_NLS_CREATE', 1);
-		AC_DEFINE('HAVE_OCI_ENV_CREATE', 1);
-		AC_DEFINE('HAVE_OCI_STMT_PREPARE2', 1);
 		AC_DEFINE('HAVE_OCI_LOB_READ2', 1);
-		AC_DEFINE('HAVE_OCI8_TEMP_LOB', 1);
-		AC_DEFINE('PHP_OCI8_HAVE_COLLECTIONS', 1);
 	
 	} else {
-		WARNING("oci8 not enabled; libraries and headers not found");
+		WARNING("oci8 not enabled; Oracle Database libraries or Oracle 10g Instant Client not found");
 	}
 }
 
