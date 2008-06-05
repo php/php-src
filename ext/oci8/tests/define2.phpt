@@ -5,10 +5,17 @@ Test oci_define_by_name types
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require(dirname(__FILE__)."/connect.inc");
 
-$stmt = oci_parse($c, "create table phptestrawtable( id number(10), fileimage raw(1000))");
-oci_execute($stmt);
+$stmtarray = array(
+	"drop table phptestrawtable",
+	"create table phptestrawtable( id number(10), fileimage raw(1000))"
+);
+						 
+foreach ($stmtarray as $stmt) {
+	$s = oci_parse($c, $stmt);
+	@oci_execute($s);
+}
 
 $stmt = oci_parse ($c, "insert into phptestrawtable (id, fileimage) values (:id, :fileimage)");
 $i=1;

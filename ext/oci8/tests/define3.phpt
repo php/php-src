@@ -5,10 +5,17 @@ Test oci_define_by_name() LOB descriptor
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require(dirname(__FILE__)."/connect.inc");
 
-$stmt = oci_parse($c, "create table phpdefblobtable( id number(10), fileimage blob)");
-oci_execute($stmt);
+$stmtarray = array(
+	"drop table phpdefblobtable",
+	"create table phpdefblobtable (id number(10), fileimage blob)"
+);
+						 
+foreach ($stmtarray as $stmt) {
+	$s = oci_parse($c, $stmt);
+	@oci_execute($s);
+}
 
 // Load data
 $stmt = oci_parse ($c, "insert into phpdefblobtable (id, fileimage) values (:id, empty_blob()) returning fileimage into :fileimage");
