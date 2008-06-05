@@ -83,8 +83,10 @@ AC_DEFUN([AC_OCI8_ORACLE_VERSION],[
   elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.11.1; then
     OCI8_ORACLE_VERSION=11.1
   elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.10.1; then
+    dnl There is no case for Oracle 10.2. Oracle 10.2 libraries have a 10.1 suffix for drop-in compatibility with Oracle 10.1
     OCI8_ORACLE_VERSION=10.1    
   elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.9.0; then
+    dnl There is no case for Oracle 9.2. Oracle 9.2 libraries have a 9.0 suffix for drop-in compatibility with Oracle 9.0
     OCI8_ORACLE_VERSION=9.0
   elif test -f $OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME.8.0; then
     OCI8_ORACLE_VERSION=8.1
@@ -97,7 +99,7 @@ AC_DEFUN([AC_OCI8_ORACLE_VERSION],[
       OCI8_ORACLE_VERSION=8.1
     fi
   else
-    AC_MSG_ERROR(Oracle-OCI8 needed libraries not found)
+    AC_MSG_ERROR(Oracle client libraries not found)
   fi
   AC_MSG_RESULT($OCI8_ORACLE_VERSION)
 ])
@@ -204,58 +206,23 @@ if test "$PHP_OCI8" != "no" && test "$PHP_OCI8_INSTANT_CLIENT" = "no"; then
 
   case $OCI8_ORACLE_VERSION in
     7.3|8.0|8.1)
-      AC_MSG_ERROR([Oracle client libraries < 9.0 are not supported any more. Please consider upgrading.])
+      AC_MSG_ERROR([Oracle client libraries < 9.2 are not supported.])
       ;;
 
     9.0)
-      PHP_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
-      PHP_ADD_LIBPATH($OCI8_DIR/$OCI8_LIB_DIR, OCI8_SHARED_LIBADD)
-
-      dnl These functions are only available in version >= 9.2
       PHP_CHECK_LIBRARY(clntsh, OCIEnvNlsCreate,
       [
-        PHP_CHECK_LIBRARY(clntsh, OCINlsCharSetNameToId,
-        [
-          AC_DEFINE(HAVE_OCI_ENV_NLS_CREATE,1,[ ])
-          OCI8_ORACLE_VERSION=9.2
-        ], [], [
-          -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
-        ])
-      ], [], [
-        -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
-      ])
-
-      PHP_CHECK_LIBRARY(clntsh, OCIEnvCreate,
+        OCI8_ORACLE_VERSION=9.2
+      ],
       [
-        AC_DEFINE(HAVE_OCI_ENV_CREATE,1,[ ])
-      ], [], [
-        -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
-      ])
- 
-      PHP_CHECK_LIBRARY(clntsh, OCIStmtPrepare2,
-      [
-        AC_DEFINE(HAVE_OCI_STMT_PREPARE2,1,[ ])
-      ], [], [
-        -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
-      ])
-
-      PHP_CHECK_LIBRARY(clntsh, OCILobRead2,
-      [
-        AC_DEFINE(HAVE_OCI_LOB_READ2,1,[ ])
-      ], [], [
+        AC_MSG_ERROR([Oracle client libraries < 9.2 are not supported.])
+      ], [
         -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
       ])
       ;;
       
-    11.1|10.1)
-      PHP_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
-      PHP_ADD_LIBPATH($OCI8_DIR/$OCI8_LIB_DIR, OCI8_SHARED_LIBADD)
-      AC_DEFINE(HAVE_OCI_ENV_NLS_CREATE,1,[ ])
-      AC_DEFINE(HAVE_OCI_ENV_CREATE,1,[ ])
-      AC_DEFINE(HAVE_OCI_STMT_PREPARE2,1,[ ])
+    10.1|11.1)
       AC_DEFINE(HAVE_OCI_LOB_READ2,1,[ ])
-      AC_DEFINE(HAVE_OCI8_TEMP_LOB,1,[ ])
-      AC_DEFINE(PHP_OCI8_HAVE_COLLECTIONS,1,[ ])
       ;;
 
     *)
@@ -263,39 +230,9 @@ if test "$PHP_OCI8" != "no" && test "$PHP_OCI8_INSTANT_CLIENT" = "no"; then
       ;;
   esac
 
-  dnl
-  dnl Check if we need to add -locijdbc8 
-  dnl
-  PHP_CHECK_LIBRARY(clntsh, OCILobIsTemporary,
-  [
-    AC_DEFINE(HAVE_OCI8_TEMP_LOB,1,[ ])
-  ], [
-    PHP_CHECK_LIBRARY(ocijdbc8, OCILobIsTemporary,
-    [
-      PHP_ADD_LIBRARY(ocijdbc8, 1, OCI8_SHARED_LIBADD)
-      AC_DEFINE(HAVE_OCI8_TEMP_LOB,1,[ ])
-    ], [], [
-      -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
-    ])
-  ], [
-    -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
-  ])
-
-  dnl
-  dnl Check if we have collections
-  dnl
-  PHP_CHECK_LIBRARY(clntsh, OCICollAssign,
-  [
-    AC_DEFINE(PHP_OCI8_HAVE_COLLECTIONS,1,[ ])
-    PHP_NEW_EXTENSION(oci8, oci8.c oci8_lob.c oci8_statement.c oci8_collection.c oci8_interface.c, $ext_shared)
-  ], 
-  [
-    PHP_NEW_EXTENSION(oci8, oci8.c oci8_lob.c oci8_statement.c oci8_interface.c, $ext_shared)
-  ], 
-  [
-    -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
-  ])
-
+  PHP_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
+  PHP_ADD_LIBPATH($OCI8_DIR/$OCI8_LIB_DIR, OCI8_SHARED_LIBADD)
+  PHP_NEW_EXTENSION(oci8, oci8.c oci8_lob.c oci8_statement.c oci8_collection.c oci8_interface.c, $ext_shared)
   AC_DEFINE(HAVE_OCI8,1,[ ])
 
   PHP_SUBST_OLD(OCI8_SHARED_LIBADD)
@@ -359,7 +296,7 @@ dnl Header directory for manual installation
 
   AC_OCI8IC_VERSION($PHP_OCI8_INSTANT_CLIENT)
   case $OCI8_ORACLE_VERSION in
-    11.1|10.1)
+    10.1|11.1)
       PHP_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
       PHP_ADD_LIBPATH($PHP_OCI8_INSTANT_CLIENT, OCI8_SHARED_LIBADD)
       ;;
@@ -370,12 +307,7 @@ dnl Header directory for manual installation
   esac
 
   AC_DEFINE(HAVE_OCI_INSTANT_CLIENT,1,[ ])
-  AC_DEFINE(HAVE_OCI_ENV_NLS_CREATE,1,[ ])
-  AC_DEFINE(HAVE_OCI_ENV_CREATE,1,[ ])
-  AC_DEFINE(HAVE_OCI_STMT_PREPARE2,1,[ ])
   AC_DEFINE(HAVE_OCI_LOB_READ2,1,[ ])
-  AC_DEFINE(HAVE_OCI8_TEMP_LOB,1,[ ])
-  AC_DEFINE(PHP_OCI8_HAVE_COLLECTIONS,1,[ ])
 
   PHP_NEW_EXTENSION(oci8, oci8.c oci8_lob.c oci8_statement.c oci8_collection.c oci8_interface.c, $ext_shared)
   AC_DEFINE(HAVE_OCI8,1,[ ])

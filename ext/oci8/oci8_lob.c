@@ -682,11 +682,9 @@ void php_oci_lob_free (php_oci_descriptor *descriptor TSRMLS_DC)
 		php_oci_lob_flush(descriptor, OCI_LOB_BUFFER_FREE TSRMLS_CC);
 	}
 
-#ifdef HAVE_OCI8_TEMP_LOB
 	if (descriptor->type == OCI_DTYPE_LOB) {
 		php_oci_temp_lob_close(descriptor TSRMLS_CC);
 	}
-#endif
 
 	PHP_OCI_CALL(OCIDescriptorFree, (descriptor->descriptor, descriptor->type));
 

@@ -59,16 +59,12 @@ extern int le_connection;
 extern int le_pconnection;
 extern int le_statement;
 extern int le_descriptor;
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 extern int le_collection;
-#endif
 extern int le_server;
 extern int le_session;
 
 extern zend_class_entry *oci_lob_class_entry_ptr;
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 extern zend_class_entry *oci_coll_class_entry_ptr;
-#endif
 
 /* constants {{{ */
 #define PHP_OCI_SEEK_SET 0
@@ -396,11 +392,9 @@ int php_oci_lob_flush (php_oci_descriptor *, long TSRMLS_DC);
 int php_oci_lob_set_buffering (php_oci_descriptor *, int TSRMLS_DC);
 int php_oci_lob_get_buffering (php_oci_descriptor *);
 int php_oci_lob_copy (php_oci_descriptor *, php_oci_descriptor *, long TSRMLS_DC);
-#ifdef HAVE_OCI8_TEMP_LOB
 int php_oci_lob_close (php_oci_descriptor * TSRMLS_DC);
 int php_oci_temp_lob_close (php_oci_descriptor * TSRMLS_DC);
 int php_oci_lob_write_tmp (php_oci_descriptor *, ub1, zstr, int TSRMLS_DC);
-#endif
 void php_oci_lob_free(php_oci_descriptor * TSRMLS_DC);
 int php_oci_lob_import(php_oci_descriptor *descriptor, char * TSRMLS_DC);
 int php_oci_lob_append (php_oci_descriptor *, php_oci_descriptor * TSRMLS_DC);

@@ -49,19 +49,14 @@ php_oci_statement *php_oci_statement_create (php_oci_connection *connection, zst
 	
 	statement = ecalloc(1,sizeof(php_oci_statement));
 
-#if HAVE_OCI_STMT_PREPARE2
 	if (!query_len) {
 		/* do not allocate stmt handle for refcursors, we'll get it from OCIStmtPrepare2() */
 		PHP_OCI_CALL(OCIHandleAlloc, (connection->env, (dvoid **)&(statement->stmt), OCI_HTYPE_STMT, 0, NULL));
 	}
-#else
-	PHP_OCI_CALL(OCIHandleAlloc, (connection->env, (dvoid **)&(statement->stmt), OCI_HTYPE_STMT, 0, NULL));
-#endif
 			
 	PHP_OCI_CALL(OCIHandleAlloc, (connection->env, (dvoid **)&(statement->err), OCI_HTYPE_ERROR, 0, NULL));
 	
 	if (query_len > 0) {
-#if HAVE_OCI_STMT_PREPARE2
 		PHP_OCI_CALL_RETURN(connection->errcode, OCIStmtPrepare2,
 				(
 				 connection->svc,
@@ -75,19 +70,11 @@ php_oci_statement *php_oci_statement_create (php_oci_connection *connection, zst
 				 OCI_DEFAULT
 				)
 		);
-#else
-		PHP_OCI_CALL_RETURN(connection->errcode, OCIStmtPrepare, (statement->stmt, connection->err, (text *)query, query_len, OCI_NTV_SYNTAX, OCI_DEFAULT));
-#endif		
 		if (connection->errcode != OCI_SUCCESS) {
 			connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 
-#if HAVE_OCI_STMT_PREPARE2
 			PHP_OCI_CALL(OCIStmtRelease, (statement->stmt, statement->err, NULL, 0, statement->errcode ? OCI_STRLS_CACHE_DELETE : OCI_DEFAULT));
 			PHP_OCI_CALL(OCIHandleFree,(statement->err, OCI_HTYPE_ERROR));
-#else
-			PHP_OCI_CALL(OCIHandleFree,(statement->stmt, OCI_HTYPE_STMT));
-			PHP_OCI_CALL(OCIHandleFree,(statement->err, OCI_HTYPE_ERROR));
-#endif
 			
 			efree(statement);
 			PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
@@ -745,15 +732,11 @@ int php_oci_statement_cancel(php_oci_statement *statement TSRMLS_DC)
 void php_oci_statement_free(php_oci_statement *statement TSRMLS_DC)
 {
 	if (statement->stmt) {
-#if HAVE_OCI_STMT_PREPARE2
 		if (statement->last_query_len) { /* FIXME: magical */
 			PHP_OCI_CALL(OCIStmtRelease, (statement->stmt, statement->err, NULL, 0, statement->errcode ? OCI_STRLS_CACHE_DELETE : OCI_DEFAULT));
 		} else {
 			PHP_OCI_CALL(OCIHandleFree, (statement->stmt, OCI_HTYPE_STMT));
 		}
-#else
-		PHP_OCI_CALL(OCIHandleFree, (statement->stmt, OCI_HTYPE_STMT));
-#endif
 		statement->stmt = 0;
 	}
 
@@ -937,9 +920,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
  Bind zval to the given placeholder */
 int php_oci_bind_by_name(php_oci_statement *statement, zstr name, int name_len, zval* var, long maxlength, long type, zend_uchar uni_type TSRMLS_DC)
 {
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 	php_oci_collection *bind_collection = NULL;
-#endif
 	php_oci_descriptor *bind_descriptor = NULL;
 	php_oci_statement  *bind_statement	= NULL;
 	dvoid *oci_desc					= NULL;
@@ -951,7 +932,6 @@ int php_oci_bind_by_name(php_oci_statement *statement, zstr name, int name_len, 
 	sb4 value_sz = -1;
 
 	switch (type) {
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 		case SQLT_NTY:
 		{
 			zval **tmp;
@@ -970,7 +950,6 @@ int php_oci_bind_by_name(php_oci_statement *statement, zstr name, int name_len, 
 			}
 		}
 			break;
-#endif
 		case SQLT_BFILEE:
 		case SQLT_CFILEE:
 		case SQLT_CLOB:
@@ -1116,7 +1095,6 @@ int php_oci_bind_by_name(php_oci_statement *statement, zstr name, int name_len, 
 		}
 	}
 
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 	if (type == SQLT_NTY) {
 		/* Bind object */
 		PHP_OCI_CALL_RETURN(statement->errcode, OCIBindObject,
@@ -1137,7 +1115,6 @@ int php_oci_bind_by_name(php_oci_statement *statement, zstr name, int name_len, 
 			return 1;
 		}
 	}
-#endif
 	
 	return 0;
 } /* }}} */
