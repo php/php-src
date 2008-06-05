@@ -37,7 +37,7 @@
 #include "ext/standard/info.h"
 #include "php_ini.h"
 
-#if HAVE_OCI8 && PHP_OCI8_HAVE_COLLECTIONS
+#if HAVE_OCI8
 
 #include "php_oci8.h"
 #include "php_oci8_int.h"
