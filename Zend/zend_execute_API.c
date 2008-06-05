@@ -1001,6 +1001,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				} else {
 					EX(function_state).function = zend_std_get_static_method(calling_scope, Z_TYPE_P(fci->function_name), fname, fname_len TSRMLS_CC);
 				}
+				
+				if (((zend_internal_function*)EX(function_state).function)->handler == zend_std_call_user_call)  {
+					fci->object_pp = &EG(This);
+				}
 
 				if (check_scope_or_static && EX(function_state).function
 				&& !(EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)
