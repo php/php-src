@@ -6,8 +6,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <name>oci8</name>
  <channel>pecl.php.net</channel>
  <summary>OCI8 functions</summary>
- <description>These functions allow you to access Oracle database servers using 
-the Oracle Call Interface (OCI8).
+ <description>This extension allows you to access Oracle databases using the Oracle Call Interface (OCI8). It can be built using Oracle 9.2, 10.2 or 11.1 client libraries, and allows Oracle's standard cross-version connectivity.
  </description>
  <lead>
   <name>Antony Dovgal</name>
@@ -33,31 +32,28 @@ the Oracle Call Interface (OCI8).
   <email>sixd@php.net</email>
   <active>yes</active>
  </lead>
- <date>2007-09-01</date>
+ <date>2008-05-12</date>
  <time>15:00:00</time>
  <version>
-  <release>1.2.4</release>
-  <api>1.2.4</api>
+  <release>1.2.5</release>
+  <api>1.2.5</api>
  </version>
  <stability>
   <release>stable</release>
   <api>stable</api>
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
- <notes>Added Oracle 11g support.
-Fixed PECL bug #10194 (crash in Oracle client when memory limit reached in the callback).
-Fixed bug #42173 (oci_field_type fixes for INTERVAL and TIMESTAMP types).
-Fixed bug #42134 (oci_error() returns false after oci_new_collection() fails).
-Fixed bug #41917 (oci_field_precision and oci_field_scale datatypes fixed).
-Fixed bug #41711 (Null temporary lobs not supported).
-Fixed bug #41594 (Statement cache is flushed too frequently).
-Fixed bug #40415 (oci_fetch_all and nested cursors, allocate descriptors dynamically)
-Fixed segfault on rebinding and re-executing a statement with LOBs.
-Fixed compile failure in ZTS mode when collections support is missing.
-Allowed statement cache size to be set for non-persistent connections.
-Improved oci_password_change() to close persistent connections on shutdown (to update hashed connection details).
-Changed oci_pconnect() to behave like oci_connect() when SYSDBA and SYSOPER privileges are used.
-Various minor improvements.
+ <notes>
+This release is based on the OCI8 included in PHP 5.2.6, with the addition of the fix for  http://pecl.php.net/bugs/bug.php?id=13523.
+--------
+Fixed bug #42496 (cursor leak selecting LOBs http://bugs.php.net/bug.php?id=42496
+Fixed bug #42841 (crash with REF CURSORS when statement caching enabled) http://bugs.php.net/bug.php?id=42841
+Fixed bug #43497 (Temporary LOB leak) http://bugs.php.net/bug.php?id=43497
+Fixed bug #44206 (OCI8 selecting ref cursors leads to ORA-1000 maximum open cursors reached).
+Fixed bug #44008 (OCI8 incorrect usage of OCI-Lob->close crashes PHP).
+Fixed bug #44113 (new collection creation can fail with OCI-22303) http://bugs.php.net/bug.php?id=44113
+Enhancement - make -with-oci8=instantclient with no directory specified look for RPM install
+Enhancement - compile with 64bit Instant Client RPMs (bug http://bugs.php.net/bug.php?id=41941, http://pecl.php.net/bugs/bug.php?id=13523)
  </notes>
  <contents>
   <dir name="/">
@@ -97,6 +93,7 @@ Various minor improvements.
     <file name="bug35973.phpt" role="test" />
     <file name="bug36010.phpt" role="test" />
     <file name="bug36096.phpt" role="test" />
+    <file name="bug37220.phpt" role="test" />
     <file name="bug37581.phpt" role="test" />
     <file name="bug38161.phpt" role="test" />
     <file name="bug38173.phpt" role="test" />
@@ -104,6 +101,17 @@ Various minor improvements.
     <file name="bug40415.phpt" role="test" />
     <file name="bug42134.phpt" role="test" />
     <file name="bug42173.phpt" role="test" />
+    <file name="bug42496_1.phpt" role="test" />
+    <file name="bug42496_2.phpt" role="test" />
+    <file name="bug42841.phpt" role="test" />
+    <file name="bug43492_2.phpt" role="test" />
+    <file name="bug43492.phpt" role="test" />
+    <file name="bug43497_92.phpt" role="test" />
+    <file name="bug43497.phpt" role="test" />
+    <file name="bug44008.phpt" role="test" />
+    <file name="bug44113.phpt" role="test" />
+    <file name="bug44206.phpt" role="test" />
+    <file name="bug6109.phpt" role="test" />
     <file name="close.phpt" role="test" />
     <file name="coll_001.phpt" role="test" />
     <file name="coll_002_func.phpt" role="test" />
@@ -144,6 +152,14 @@ Various minor improvements.
     <file name="connect.inc" role="test" />
     <file name="connect_old.phpt" role="test" />
     <file name="connect.phpt" role="test" />
+    <file name="connect_scope1.phpt" role="test" />
+    <file name="connect_scope2.phpt" role="test" />
+    <file name="connect_scope_try1.phpt" role="test" />
+    <file name="connect_scope_try2.phpt" role="test" />
+    <file name="connect_scope_try3.phpt" role="test" />
+    <file name="connect_scope_try4.phpt" role="test" />
+    <file name="connect_scope_try5.phpt" role="test" />
+    <file name="connect_scope_try6.phpt" role="test" />
     <file name="connect_with_charset_001.phpt" role="test" />
     <file name="connect_without_oracle_home_old.phpt" role="test" />
     <file name="connect_without_oracle_home.phpt" role="test" />
@@ -166,6 +182,20 @@ Various minor improvements.
     <file name="define.phpt" role="test" />
     <file name="descriptors.phpt" role="test" />
     <file name="details.inc" role="test" />
+    <file name="drcp_characterset.phpt" role="test" />
+    <file name="drcp_conn_close1.phpt" role="test" />
+    <file name="drcp_conn_close2.phpt" role="test" />
+    <file name="drcp_connect1.phpt" role="test" />
+    <file name="drcp_functions.inc" role="test" />
+    <file name="drcp_newconnect.phpt" role="test" />
+    <file name="drcp_pconn_close1.phpt" role="test" />
+    <file name="drcp_pconn_close2.phpt" role="test" />
+    <file name="drcp_privileged.phpt" role="test" />
+    <file name="drcp_scope1.phpt" role="test" />
+    <file name="drcp_scope2.phpt" role="test" />
+    <file name="drcp_scope3.phpt" role="test" />
+    <file name="drcp_scope4.phpt" role="test" />
+    <file name="drcp_scope5.phpt" role="test" />
     <file name="drop_table.inc" role="test" />
     <file name="drop_type.inc" role="test" />
     <file name="error1.phpt" role="test" />
@@ -231,10 +261,13 @@ Various minor improvements.
     <file name="lob_038.phpt" role="test" />
     <file name="lob_039.phpt" role="test" />
     <file name="lob_040.phpt" role="test" />
+    <file name="lob_041.phpt" role="test" />
+    <file name="lob_042.phpt" role="test" />
     <file name="lob_aliases.phpt" role="test" />
     <file name="lob_null.phpt" role="test" />
     <file name="lob_temp1.phpt" role="test" />
     <file name="lob_temp.phpt" role="test" />
+    <file name="minfo.phpt" role="test" />
     <file name="num.phpt" role="test" />
     <file name="oci8safemode.phpt" role="test" />
     <file name="oci_execute_segfault.phpt" role="test" />
@@ -245,6 +278,7 @@ Various minor improvements.
     <file name="password_new.phpt" role="test" />
     <file name="password_old.phpt" role="test" />
     <file name="password.phpt" role="test" />
+    <file name="pecl_bug10194_blob_64.phpt" role="test" />
     <file name="pecl_bug10194_blob.phpt" role="test" />
     <file name="pecl_bug10194.phpt" role="test" />
     <file name="pecl_bug8816.phpt" role="test" />
@@ -253,6 +287,7 @@ Various minor improvements.
     <file name="prefetch.phpt" role="test" />
     <file name="privileged_connect1.phpt" role="test" />
     <file name="privileged_connect.phpt" role="test" />
+    <file name="rowid_bind.phpt" role="test" />
     <file name="select_null.phpt" role="test" />
     <file name="serverversion.phpt" role="test" />
     <file name="skipif.inc" role="test" />
@@ -260,8 +295,10 @@ Various minor improvements.
     <file name="statement_type_old.phpt" role="test" />
     <file name="statement_type.phpt" role="test" />
     <file name="test.gif" role="test" />
+    <file name="testping.phpt" role="test" />
     <file name="test.txt" role="test" />
     <file name="uncommitted.phpt" role="test" />
+    <file name="xmltype_01.phpt" role="test" />
    </dir> <!-- //tests -->
    <file name="config.m4" role="src" />
    <file name="config.w32" role="src" />
@@ -280,7 +317,7 @@ Various minor improvements.
  <dependencies>
   <required>
    <php>
-    <min>4.3.11</min>
+    <min>4.3.10</min>
     <max>6.0.0</max>
     <exclude>6.0.0</exclude>
    </php>
@@ -294,6 +331,31 @@ Various minor improvements.
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to ORACLE_HOME dir. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling against Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+ <release>
+ <version>
+  <release>1.2.4</release>
+  <api>1.2.4</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>Fixed PECL bug #10194 (crash in Oracle client when memory limit reached in the callback)
+Fixed bug #42173 (oci_field_type fixes for INTERVAL and TIMESTAMP types)
+Fixed bug #42134 (oci_error() returns false after oci_new_collection() fails)
+Fixed bug #41917 (oci_field_precision and oci_field_scale datatypes fixed)
+Fixed bug #41711 (Null temporary lobs not supported)
+Fixed bug #41594 (Statement cache is flushed too frequently)
+Fixed bug #40415 (oci_fetch_all and nested cursors, allocate descriptors dynamically)
+Fixed segfault on rebinding and re-executing a statement with LOBs.
+Fixed compile failure in ZTS mode when collections support is missing.
+Allowed statement cache size to be set for non-persistent connections.
+Improved oci_password_change() to close persistent connections on shutdown (to update hashed connection details)
+Changed oci_pconnect() to behave like oci_connect() when SYSDBA and SYSOPER privileges are used.
+Various minor improvements.
+ </notes>
+  </release>
   <release>
    <version>
     <release>1.2.3</release>
@@ -312,6 +374,8 @@ Fixed bug #39732 (oci_bind_array_by_name doesn&apos;t work on Solaris 64bit).
 Fixed PECL bug #8816 (issue in php_oci_statement_fetch with more than one piecewise column).
 Various minor improvements.
    </notes>
+  </release>
+  <release>
    <version>
     <release>1.2.2</release>
     <api>1.2.2</api>
