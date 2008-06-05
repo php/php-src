@@ -2802,14 +2802,27 @@ static int zend_is_callable_check_func(int check_flags, zval ***zobj_ptr_ptr, ze
 		if (*zobj_ptr_ptr && *ce_ptr && (*ce_ptr)->__call != 0) {
 			retval = (*ce_ptr)->__call != NULL;
 			*fptr_ptr = (*ce_ptr)->__call;
-		} else if (!*zobj_ptr_ptr && *ce_ptr && (*ce_ptr)->__callstatic) {
-			retval = 1;
-			*fptr_ptr = (*ce_ptr)->__callstatic;
 		} else {
-			if (*ce_ptr) {
-				if (error) zend_spprintf(error, 0, "class '%v' does not have a method '%v'", (*ce_ptr)->name, lmname);
-			} else {
-				if (error) zend_spprintf(error, 0, "function '%v' does not exist", lmname);
+			if (!*zobj_ptr_ptr && *ce_ptr && ((*ce_ptr)->__callstatic || (*ce_ptr)->__call)) {
+				if ((*ce_ptr)->__call &&
+					EG(This) &&
+		    		Z_OBJ_HT_P(EG(This))->get_class_entry &&
+		    		instanceof_function(Z_OBJCE_P(EG(This)), *ce_ptr TSRMLS_CC)) {
+					retval = 1;
+					*fptr_ptr = (*ce_ptr)->__call;
+					*zobj_ptr_ptr = &EG(This);
+				} else if ((*ce_ptr)->__callstatic) {
+					retval = 1;
+					*fptr_ptr = (*ce_ptr)->__callstatic;
+				}
+			}
+
+			if (retval == 0) {
+				if (*ce_ptr) {
+					if (error) zend_spprintf(error, 0, "class '%v' does not have a method '%v'", (*ce_ptr)->name, lmname);
+				} else {
+					if (error) zend_spprintf(error, 0, "function '%v' does not exist", lmname);
+				}
 			}
 		}
 	} else {
