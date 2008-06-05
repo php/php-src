@@ -963,7 +963,6 @@ PHP_FUNCTION(oci_lob_export)
 }
 /* }}} */
 
-#ifdef HAVE_OCI8_TEMP_LOB
 /* {{{ proto bool oci_lob_write_temporary(string var [, int lob_type])
    Writes temporary blob */
 PHP_FUNCTION(oci_lob_write_temporary)
@@ -1025,7 +1024,6 @@ PHP_FUNCTION(oci_lob_close)
 	RETURN_TRUE;
 }
 /* }}} */
-#endif
 
 /* {{{ proto object oci_new_descriptor(resource connection [, int type])
    Initialize a new empty descriptor LOB/FILE (LOB is default) */
@@ -1903,7 +1901,6 @@ PHP_FUNCTION(oci_num_rows)
 }
 /* }}} */
 
-#ifdef PHP_OCI8_HAVE_COLLECTIONS
 /* {{{ proto bool oci_free_collection()
    Deletes collection object*/
 PHP_FUNCTION(oci_free_collection)
@@ -2187,8 +2184,6 @@ PHP_FUNCTION(oci_new_collection)
 	}
 }
 /* }}} */
-
-#endif
 
 #endif /* HAVE_OCI8 */
 

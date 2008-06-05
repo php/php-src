@@ -11,6 +11,9 @@ Installing OCI8
 1. Common requirements
 ----------------------
 
+This version of PHP OCI8 will build with Oracle 9.2 (or more recent)
+client libraries.
+
 If you use a common Oracle Client installation that comes with the
 Oracle server installation, you MUST set at least the ORACLE_HOME
 environment variable and make it visible for your web-server BEFORE it
