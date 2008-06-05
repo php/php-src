@@ -95,7 +95,7 @@ echo "Testing rawurlencode: ";
 $encoded = rawurlencode($raw);
 $correct = '%20%21%22%23%24%25%26%27%28%29%2A%2B%2C-.%2F0123456789%3A%3B%3C%3D%3E%3F'
          . '%40ABCDEFGHIJKLMNOPQRSTUVWXYZ%5B%5C%5D%5E_'
-         . '%60abcdefghijklmnopqrstuvwxyz%7B%7C%7D%7E'
+         . '%60abcdefghijklmnopqrstuvwxyz%7B%7C%7D~'
          . '%00';
 if ($encoded == $correct) {
 	echo("passed\n");
