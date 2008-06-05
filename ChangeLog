@@ -1,3 +1,66 @@
+2008-06-04  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_3)
+      ext/standard/url.c:
+      MFH: rawurlencode now conforms to rfc 3986 (~ is not encoded) [DOC]
+
+    * ext/standard/url.c:
+      rawurlencode now conforms to rfc 3986 (~ is not encoded) [DOC]
+
+2008-06-04  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/tests/bug45180.phpt:
+      - New test
+
+    * ZendEngine2/tests/bug45180.phpt
+      ZendEngine2/tests/bug45180.phpt:
+      
+      file bug45180.phpt was initially added on branch PHP_5_3.
+
+2008-06-04  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ext/phar/Makefile.frag:
+      - Make phar.phar building work for virtualized builds
+
+    * (PHP_5_3)
+      ext/phar/phar/pharcommand.inc:
+      - Make sure we are not trying to pack directories
+
+2008-06-04  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_4)
+      ext/curl/curl.c:
+      fix open_basedir  handling bug
+
+2008-06-04  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ext/phar/phar.phar:
+      - Update
+
+    * (PHP_5_3)
+      ext/phar/Makefile.frag:
+      - Use -n only for current built PHP
+
+    * (PHP_5_3)
+      ext/phar/phar/pharcommand.inc:
+      - Improve pear usage and PHP_Archive detection
+
+2008-06-04  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/hash/tests/hash_copy_001.phpt:
+      fix test
+      (the test still fails because of broken preg_match())
+
+    * ext/phar/tests/zip/unixzip.phpt:
+      fix test
+
+    * (PHP_5_3)
+      ext/hash/tests/hash_copy_001.phpt
+      ext/phar/tests/zip/unixzip.phpt:
+      fix tests
+
 2008-06-03  Marcus Boerger  <php@marcus-boerger.de>
 
     * (PHP_5_3)
