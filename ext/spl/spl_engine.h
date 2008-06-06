@@ -39,6 +39,8 @@ static inline zend_class_entry *spl_get_class_entry(zval *obj TSRMLS_DC)
 
 PHPAPI void spl_instantiate(zend_class_entry *pce, zval **object, int alloc TSRMLS_DC);
 
+PHPAPI long spl_offset_convert_to_long(zval *offset TSRMLS_DC);
+
 /* {{{ spl_instantiate_arg_ex1 */
 static inline int spl_instantiate_arg_ex1(zend_class_entry *pce, zval **retval, int alloc, zval *arg1 TSRMLS_DC)
 {
