@@ -1,3 +1,32 @@
+2008-06-05  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_API.c:
+      - MFB: Fixed bug #45186 (__call depends on __callstatic in class scope)
+
+    * zend_execute_API.c:
+      - MFB: Fixed bug #45180 ('class::method' works differently than
+      array('class', 'method'))
+
+    * (PHP_5_3)
+      zend_API.c:
+      - Fixed bug #45186 (__call depends on __callstatic in class scope)
+
+    * (PHP_5_3)
+      zend_execute_API.c:
+      - Fixed bug #45180 ('class::method' works differently than array('class',
+      'method'))
+
+    * tests/bug45186.phpt
+      tests/bug45186_2.phpt:
+      - New tests
+
+    * tests/bug45186.phpt
+      tests/bug45186.phpt
+      tests/bug45186_2.phpt
+      tests/bug45186_2.phpt:
+      
+      file bug45186.phpt was initially added on branch PHP_5_3.
+
 2008-06-04  Felipe Pena  <felipensp@gmail.com>
 
     * tests/bug45180.phpt:

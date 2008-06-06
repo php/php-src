@@ -1,3 +1,80 @@
+2008-06-05  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_3)
+      ext/oci8/README
+      ext/oci8/config.m4
+      ext/oci8/config.w32
+      ext/oci8/oci8.c
+      ext/oci8/oci8_collection.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h:
+      MFB: OCI8: Remove macros obsoleted by rev 1.55.2.3.2.11.2.1 when Oracle 8
+      support was dropped
+
+    * (PHP_5_3)
+      ext/oci8/package2.xml:
+      MFB: sync with PECL 1.2.5 release
+
+    * ext/oci8/README
+      ext/oci8/config.m4
+      ext/oci8/config.w32
+      ext/oci8/oci8.c
+      ext/oci8/oci8_collection.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h:
+      OCI8: Remove macros obsoleted by rev 1.71 when Oracle 8 support was dropped
+
+    * (PHP_5_3)
+      ext/oci8/tests/define2.phpt
+      ext/oci8/tests/define3.phpt:
+      MFH: Make tests interruptible; clean up tables at start
+
+    * ext/oci8/tests/define2.phpt
+      ext/oci8/tests/define3.phpt:
+      Make tests interruptible; clean up tables at start
+
+    * (PHP_5_2)
+      ext/oci8/package2.xml:
+      Sync for PECL OCI8 1.2.5 release
+
+2008-06-05  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/zend_API.c:
+      - MFB: Fixed bug #45186 (__call depends on __callstatic in class scope)
+
+    * ZendEngine2/zend_execute_API.c:
+      - MFB: Fixed bug #45180 ('class::method' works differently than
+      array('class', 'method'))
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.c:
+      - Fixed bug #45186 (__call depends on __callstatic in class scope)
+
+    * (PHP_5_3)
+      ZendEngine2/zend_execute_API.c:
+      - Fixed bug #45180 ('class::method' works differently than array('class',
+      'method'))
+
+    * ZendEngine2/tests/bug45186.phpt
+      ZendEngine2/tests/bug45186_2.phpt:
+      - New tests
+
+    * ZendEngine2/tests/bug45186.phpt
+      ZendEngine2/tests/bug45186.phpt
+      ZendEngine2/tests/bug45186_2.phpt
+      ZendEngine2/tests/bug45186_2.phpt:
+      
+      file bug45186.phpt was initially added on branch PHP_5_3.
+
+2008-06-05  Rob Richards  <rrichards@ctindustries.net>
+
+    * tests/strings/001.phpt:
+      fix test
+
 2008-06-04  Rob Richards  <rrichards@ctindustries.net>
 
     * (PHP_5_3)
