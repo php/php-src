@@ -397,8 +397,10 @@ static zend_object_value spl_dllist_object_new_ex(zend_class_entry *class_type, 
 	while (parent) {
 		if (parent == spl_ce_SplStack) {
 			intern->flags |= (SPL_DLLIST_IT_FIX | SPL_DLLIST_IT_LIFO);
+			retval.handlers = &spl_handler_SplDoublyLinkedList;
 		} else if (parent == spl_ce_SplQueue) {
 			intern->flags |= SPL_DLLIST_IT_FIX;
+			retval.handlers = &spl_handler_SplDoublyLinkedList;
 		}
 
 		if (parent == spl_ce_SplDoublyLinkedList) {
@@ -721,26 +723,6 @@ SPL_METHOD(SplDoublyLinkedList, getIteratorMode)
 }
 /* }}} */
 
-static long spl_dllist_offset_convert(zval *offset TSRMLS_DC) /* {{{ */
-{
-	switch(Z_TYPE_P(offset)) {
-	case IS_STRING:
-		ZEND_HANDLE_NUMERIC(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, idx);
-		break;
-	case IS_DOUBLE:
-	case IS_RESOURCE:
-	case IS_BOOL:
-	case IS_LONG:
-		if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			return (long)Z_DVAL_P(offset);
-		} else {
-			return Z_LVAL_P(offset);
-		}
-	}
-	return -1;
-} 
-/* }}} */
-
 /* {{{ proto bool SplDoublyLinkedList::offsetExists(mixed $index) U
  Returns whether the requested $index exists. */
 SPL_METHOD(SplDoublyLinkedList, offsetExists)
@@ -754,7 +736,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetExists)
 	}
 
 	intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	index  = spl_dllist_offset_convert(zindex TSRMLS_CC);
+	index  = spl_offset_convert_to_long(zindex TSRMLS_CC);
 
 	RETURN_BOOL(index >= 0 && index < intern->llist->count);
 } /* }}} */
@@ -773,7 +755,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetGet)
 	}
 
 	intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	index  = spl_dllist_offset_convert(zindex TSRMLS_CC);
+	index  = spl_offset_convert_to_long(zindex TSRMLS_CC);
 
     if (index < 0 || index >= intern->llist->count) {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0 TSRMLS_CC);
@@ -813,7 +795,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 		long                   index;
 		spl_ptr_llist_element *element;
 
-		index = spl_dllist_offset_convert(zindex TSRMLS_CC);
+		index = spl_offset_convert_to_long(zindex TSRMLS_CC);
 
 		if (index < 0 || index >= intern->llist->count) {
 			zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0 TSRMLS_CC);
@@ -859,7 +841,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetUnset)
 	}
 
 	intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	index  = (int)spl_dllist_offset_convert(zindex TSRMLS_CC);
+	index  = (int)spl_offset_convert_to_long(zindex TSRMLS_CC);
     llist  = intern->llist;
 
     if (index < 0 || index >= intern->llist->count) {
@@ -1191,6 +1173,9 @@ PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 
 	REGISTER_SPL_SUB_CLASS_EX(SplQueue,           SplDoublyLinkedList,        spl_dllist_object_new, spl_funcs_SplQueue);
 	REGISTER_SPL_SUB_CLASS_EX(SplStack,           SplDoublyLinkedList,        spl_dllist_object_new, NULL);
+
+	spl_ce_SplQueue->get_iterator = spl_dllist_get_iterator;
+	spl_ce_SplStack->get_iterator = spl_dllist_get_iterator;
 
 	return SUCCESS;
 }
