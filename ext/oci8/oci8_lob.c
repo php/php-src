@@ -302,6 +302,7 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 	}
 
 	if (is_clob) {
+#ifdef OCI_NLS_CHARSET_MAXBYTESZ		
 		PHP_OCI_CALL_RETURN(connection->errcode, OCINlsNumericInfoGet, (connection->env, connection->err, &bytes_per_char, OCI_NLS_CHARSET_MAXBYTESZ));
 
 		if (connection->errcode != OCI_SUCCESS) {
@@ -309,6 +310,10 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 			PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 			return 1;
 		}
+#else
+		/* Oracle 8.1 doesn't define OCI_NLS_CHARSET_MAXBYTESZ, so allocate worst case size */
+		bytes_per_char = 4;
+#endif
 	} else {
 		/* BLOBs don't have encoding, so bytes_per_char == 1 */
 	}
