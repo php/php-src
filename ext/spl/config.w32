@@ -1,5 +1,5 @@
 // $Id$
 // vim:ft=javascript
 
-EXTENSION("spl", "php_spl.c spl_functions.c spl_engine.c spl_iterators.c spl_array.c spl_directory.c spl_sxe.c spl_exceptions.c spl_observer.c spl_dllist.c spl_heap.c", false /* never shared */);
+EXTENSION("spl", "php_spl.c spl_functions.c spl_engine.c spl_iterators.c spl_array.c spl_directory.c spl_sxe.c spl_exceptions.c spl_observer.c spl_dllist.c spl_heap.c spl_fastarray.c", false /* never shared */);
 AC_DEFINE('HAVE_SPL', 1);
