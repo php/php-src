@@ -26,7 +26,7 @@ object(DateTime)#%d (3) {
   [u"timezone_type"]=>
   int(3)
   [u"timezone"]=>
-  string(3) "UTC"
+  unicode(3) "UTC"
 }
 unicode(19) "2006.12.12 00:00:00"
 

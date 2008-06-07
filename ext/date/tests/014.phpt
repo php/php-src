@@ -25,7 +25,7 @@ object(DateTime)#%d (3) {
   [u"timezone_type"]=>
   int(3)
   [u"timezone"]=>
-  string(3) "UTC"
+  unicode(3) "UTC"
 }
 object(DateTimeZone)#%d (0) {
 }
