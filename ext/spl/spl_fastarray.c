@@ -279,24 +279,22 @@ static zend_object_value spl_fastarray_object_clone(zval *zobject TSRMLS_DC) /* 
 static inline zval **spl_fastarray_object_read_dimension_helper(spl_fastarray_object *intern, zval *offset TSRMLS_DC) /* {{{ */
 {
 	long index;
-	zval **retval;
 
 	index = spl_offset_convert_to_long(offset TSRMLS_CC);
 	
 	if (index < 0 || index >= intern->array->size) {
 		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0 TSRMLS_CC);
-		return NULL;
+		return &EG(uninitialized_zval_ptr);
+	} else if(!intern->array->elements[index]) {
+		return &EG(uninitialized_zval_ptr);
 	} else {
-		retval = &intern->array->elements[index];
+		return &intern->array->elements[index];
 	}
-
-	return retval;
 }
 /* }}} */
 
 static zval *spl_fastarray_object_read_dimension(zval *object, zval *offset, int type TSRMLS_DC) /* {{{ */
 {
-	zval                 **value_pp;
 	spl_fastarray_object *intern;
 
 	intern = (spl_fastarray_object *)zend_object_store_get_object(object TSRMLS_CC);
@@ -315,12 +313,7 @@ static zval *spl_fastarray_object_read_dimension(zval *object, zval *offset, int
 		return EG(uninitialized_zval_ptr);
 	}
 
-	value_pp = spl_fastarray_object_read_dimension_helper(intern, offset TSRMLS_CC);
-	if (value_pp) {
-		return *value_pp;
-	} else {
-		return EG(uninitialized_zval_ptr);
-	}
+	return *spl_fastarray_object_read_dimension_helper(intern, offset TSRMLS_CC);
 }
 /* }}} */
 
@@ -574,9 +567,7 @@ SPL_METHOD(SplFastArray, offsetGet)
 	intern    = (spl_fastarray_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
 	value_pp  = spl_fastarray_object_read_dimension_helper(intern, zindex TSRMLS_CC);
 
-	if (value_pp) {
-		RETURN_ZVAL(*value_pp, 1, 0);
-	}
+	RETURN_ZVAL(*value_pp, 1, 0);
 } /* }}} */
 
 /* {{{ proto void SplFastArray::offsetSet(mixed $index, mixed $newval) U
@@ -676,14 +667,16 @@ static void spl_fastarray_it_get_current_data(zend_object_iterator *iter, zval *
 			MAKE_STD_ZVAL(intern->retval);
 			ZVAL_ZVAL(intern->retval, rv, 1, 1);
 			*data = &intern->retval;
+			return;
 		}
+		*data = NULL;
 		return;
 	}
 
 	ALLOC_INIT_ZVAL(zindex);
 	ZVAL_LONG(zindex, iterator->object->current);
 
-	*data  = spl_fastarray_object_read_dimension_helper(iterator->object, zindex TSRMLS_CC);
+	*data = spl_fastarray_object_read_dimension_helper(intern, zindex TSRMLS_CC);
 
 	zval_ptr_dtor(&zindex);
 }
@@ -785,9 +778,7 @@ SPL_METHOD(SplFastArray, current)
 
 	zval_ptr_dtor(&zindex);
 
-	if (value_pp) {
-		RETURN_ZVAL(*value_pp, 1, 0);
-	}
+	RETURN_ZVAL(*value_pp, 1, 0);
 }
 /* }}} */
 
