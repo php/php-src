@@ -1,3 +1,11 @@
+2008-06-06  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner_defs.h:
+      backport the yyless patch from 5.3 branch. it seems I forgot to commit
+      this..
+
 2008-06-05  Felipe Pena  <felipensp@gmail.com>
 
     * zend_API.c:

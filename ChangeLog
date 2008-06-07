@@ -1,3 +1,57 @@
+2008-06-06  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/config.m4
+      ext/spl/config.w32
+      ext/spl/php_spl.c
+      ext/spl/spl_dllist.c
+      ext/spl/spl_engine.c
+      ext/spl/spl_engine.h
+      ext/spl/spl_fastarray.c
+      ext/spl/spl_fastarray.c
+      ext/spl/spl_fastarray.h
+      ext/spl/spl_fastarray.h
+      ext/spl/tests/fastarray_001.phpt
+      ext/spl/tests/fastarray_001.phpt
+      ext/spl/tests/fastarray_002.phpt
+      ext/spl/tests/fastarray_002.phpt
+      ext/spl/tests/fastarray_003.phpt
+      ext/spl/tests/fastarray_003.phpt:
+      Implements C arrays wrapper
+
+2008-06-06  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_2)
+      TSRM/tsrm_win32.c:
+      Backout fix for spaces in both the program name and argument name, this
+      will be fixed in PHP 5.3+ only
+
+2008-06-06  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner_defs.h:
+      backport the yyless patch from 5.3 branch. it seems I forgot to commit
+      this..
+
+2008-06-06  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      sapi/cli/tests/006.phpt:
+      fix test
+
+2008-06-06  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_2)
+      NEWS:
+      Update
+
+    * (PHP_5_2)
+      ext/oci8/oci8_lob.c:
+      (Bugs 41348, 41563, 42456, 42939) Appease the masses and fix
+      compilation with Oracle 8.1.  This gives cleaner support for older
+      releases now that PHP 5.3 is firmly Oracle 9.2+ only.  No plans to
+      MTH.
+
 2008-06-05  Christopher Jones  <christopher.jones@oracle.com>
 
     * (PHP_5_3)
