@@ -16,8 +16,8 @@ echo "Done\n";
 --EXPECTF--
 Warning: timezone_name_from_abbr() expects at least 1 parameter, 0 given in %s on line 3
 bool(false)
-string(13) "Europe/Berlin"
+unicode(13) "Europe/Berlin"
 bool(false)
 bool(false)
-string(12) "Europe/Paris"
+unicode(12) "Europe/Paris"
 Done

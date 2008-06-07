@@ -20,14 +20,14 @@ array(4) {
   [u"warnings"]=>
   array(1) {
     [6]=>
-    string(29) "Double timezone specification"
+    unicode(29) "Double timezone specification"
   }
   [u"error_count"]=>
   int(1)
   [u"errors"]=>
   array(1) {
     [0]=>
-    string(47) "The timezone could not be found in the database"
+    unicode(47) "The timezone could not be found in the database"
   }
 }
 array(4) {
@@ -36,13 +36,13 @@ array(4) {
   [u"warnings"]=>
   array(1) {
     [6]=>
-    string(29) "Double timezone specification"
+    unicode(29) "Double timezone specification"
   }
   [u"error_count"]=>
   int(1)
   [u"errors"]=>
   array(1) {
     [0]=>
-    string(47) "The timezone could not be found in the database"
+    unicode(47) "The timezone could not be found in the database"
   }
 }

@@ -98,7 +98,7 @@ array(15) {
   [u"errors"]=>
   array(1) {
     [7]=>
-    string(20) "Unexpected character"
+    unicode(20) "Unexpected character"
   }
   [u"is_localtime"]=>
   bool(true)
@@ -218,9 +218,9 @@ array(15) {
   [u"errors"]=>
   array(2) {
     [0]=>
-    string(20) "Unexpected character"
+    unicode(20) "Unexpected character"
     [1]=>
-    string(20) "Unexpected character"
+    unicode(20) "Unexpected character"
   }
   [u"is_localtime"]=>
   bool(true)
@@ -256,7 +256,7 @@ array(15) {
   [u"errors"]=>
   array(1) {
     [0]=>
-    string(20) "Unexpected character"
+    unicode(20) "Unexpected character"
   }
   [u"is_localtime"]=>
   bool(true)
@@ -292,7 +292,7 @@ array(12) {
   [u"errors"]=>
   array(1) {
     [0]=>
-    string(12) "Empty string"
+    unicode(12) "Empty string"
   }
   [u"is_localtime"]=>
   bool(false)

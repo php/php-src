@@ -34,9 +34,9 @@ array(11) {
   [u"yday"]=>
   int(177)
   [u"weekday"]=>
-  string(7) "Tuesday"
+  unicode(7) "Tuesday"
   [u"month"]=>
-  string(4) "June"
+  unicode(4) "June"
   [0]=>
   int(1151366400)
 }
@@ -58,9 +58,9 @@ array(11) {
   [u"yday"]=>
   int(%d)
   [u"weekday"]=>
-  string(%d) "%s"
+  unicode(%d) "%s"
   [u"month"]=>
-  string(%d) "%s"
+  unicode(%d) "%s"
   [0]=>
   int(%d)
 }

@@ -48,6 +48,6 @@ object(DateTime)#1 (3) {
   [u"timezone_type"]=>
   int(3)
   [u"timezone"]=>
-  string(3) "UTC"
+  unicode(3) "UTC"
 }
 -0001-11-30T00:00:00+0000
