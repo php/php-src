@@ -13,6 +13,7 @@
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
   | Author: Antony Dovgal <tony@daylessday.org>                          |
+  |         Etienne Kneuss <colder@php.net>                              |
   +----------------------------------------------------------------------+
 */
 
