@@ -1970,7 +1970,7 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 /*		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Adding infos: tag(0x%04X,%12s,L=0x%04X): %s", info_tag, exif_get_tagname(info_tag, buffer, -12, exif_get_tag_table(section_index) TSRMLS_CC), info_data->length, info_data->format==TAG_FMT_STRING?(info_value&&info_value->s?info_value->s:"<no data>"):exif_get_tagformat(info_data->format));*/
 #endif
 			if (info_data->length==0) {
-				add_assoc_null(tmpi, name);
+				add_ascii_assoc_null(tmpi, name);
 			} else {
 				switch (info_data->format) {
 					default:
@@ -1983,9 +1983,9 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 					case TAG_FMT_SBYTE:
 					case TAG_FMT_UNDEFINED:
 						if (!info_value->s) {
-							add_assoc_stringl(tmpi, name, "", 0, 1);
+							add_ascii_assoc_ascii_stringl(tmpi, name, "", 0, 1);
 						} else {
-							add_assoc_stringl(tmpi, name, info_value->s, info_data->length, 1);
+							add_ascii_assoc_ascii_stringl(tmpi, name, info_value->s, info_data->length, 1);
 						}
 						break;
 
@@ -1994,9 +1994,9 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 							val = "";
 						}
 						if (section_index==SECTION_COMMENT) {
-							add_index_string(tmpi, idx++, val, 1);
+							add_index_ascii_string(tmpi, idx++, val, 1);
 						} else {
-							add_assoc_string(tmpi, name, val, 1);
+							add_ascii_assoc_ascii_string(tmpi, name, val, 1);
 						}
 						break;
 
@@ -2032,7 +2032,7 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 								case TAG_FMT_USHORT:
 								case TAG_FMT_ULONG:
 									if (l==1) {
-										add_assoc_long(tmpi, name, (int)info_value->u);
+										add_ascii_assoc_long(tmpi, name, (int)info_value->u);
 									} else {
 										add_index_long(array, ap, (int)info_value->u);
 									}
@@ -2041,9 +2041,9 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 								case TAG_FMT_URATIONAL:
 									snprintf(buffer, sizeof(buffer), "%i/%i", info_value->ur.num, info_value->ur.den);
 									if (l==1) {
-										add_assoc_string(tmpi, name, buffer, 1);
+										add_ascii_assoc_ascii_string(tmpi, name, buffer, 1);
 									} else {
-										add_index_string(array, ap, buffer, 1);
+										add_index_ascii_string(array, ap, buffer, 1);
 									}
 									break;
 
@@ -2058,7 +2058,7 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 								case TAG_FMT_SSHORT:
 								case TAG_FMT_SLONG:
 									if (l==1) {
-										add_assoc_long(tmpi, name, info_value->i);
+										add_ascii_assoc_long(tmpi, name, info_value->i);
 									} else {
 										add_index_long(array, ap, info_value->i);
 									}
@@ -2067,15 +2067,15 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 								case TAG_FMT_SRATIONAL:
 									snprintf(buffer, sizeof(buffer), "%i/%i", info_value->sr.num, info_value->sr.den);
 									if (l==1) {
-										add_assoc_string(tmpi, name, buffer, 1);
+										add_ascii_assoc_ascii_string(tmpi, name, buffer, 1);
 									} else {
-										add_index_string(array, ap, buffer, 1);
+										add_index_ascii_string(array, ap, buffer, 1);
 									}
 									break;
 
 								case TAG_FMT_SINGLE:
 									if (l==1) {
-										add_assoc_double(tmpi, name, info_value->f);
+										add_ascii_assoc_double(tmpi, name, info_value->f);
 									} else {
 										add_index_double(array, ap, info_value->f);
 									}
@@ -2083,7 +2083,7 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 
 								case TAG_FMT_DOUBLE:
 									if (l==1) {
-										add_assoc_double(tmpi, name, info_value->d);
+										add_ascii_assoc_double(tmpi, name, info_value->d);
 									} else {
 										add_index_double(array, ap, info_value->d);
 									}
@@ -2092,14 +2092,14 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 							info_value = &info_data->value.list[ap];
 						}
 						if (l>1) {
-							add_assoc_zval(tmpi, name, array);
+							add_ascii_assoc_zval(tmpi, name, array);
 						}
 						break;
 				}
 			}
 		}
 		if (sub_array) {
-			add_assoc_zval(value, exif_get_sectionname(section_index), tmpi);
+			add_ascii_assoc_zval(value, exif_get_sectionname(section_index), tmpi);
 		}
 	}
 }
@@ -2335,25 +2335,22 @@ static char * exif_get_markername(int marker)
 #endif
 /* }}} */
 
-/* {{{ proto string exif_tagname(index)
+/* {{{ proto string exif_tagname(long index) U
 	Get headername for index or false if not defined */
 PHP_FUNCTION(exif_tagname)
 {
-	zval **p_num;
-	int tag, ac = ZEND_NUM_ARGS();
+	long  tag;
 	char *szTemp;
 
-	if ((ac < 1 || ac > 1) || zend_get_parameters_ex(ac, &p_num) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "l", &tag) == FAILURE) {
+		return;
 	}
 
-	convert_to_long_ex(p_num);
-	tag = Z_LVAL_PP(p_num);
 	szTemp = exif_get_tagname(tag, NULL, 0, tag_table_IFD TSRMLS_CC);
 	if (tag<0 || !szTemp || !szTemp[0]) {
 		RETURN_BOOL(FALSE);
 	} else {
-		RETURN_STRING(szTemp, 1)
+		RETURN_ASCII_STRING(szTemp, 1)
 	}
 }
 /* }}} */
@@ -3893,22 +3890,24 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
    Reads header data from the JPEG/TIFF image filename and optionally reads the internal thumbnails */
 PHP_FUNCTION(exif_read_data)
 {
-	zval **p_name, **p_sections_needed, **p_sub_arrays, **p_read_thumbnail, **p_read_all;
+	zval **p_name, **p_read_all;
 	int i, ac = ZEND_NUM_ARGS(), ret, sections_needed=0, sub_arrays=0, read_thumbnail=0, read_all=0;
 	image_info_type ImageInfo;
-	char tmp[64], *sections_str, *s;
+	char tmp[64], *sections_str=0, *s;
+	char *filename;
+	int filename_len, sections_str_len;
 
 	memset(&ImageInfo, 0, sizeof(ImageInfo));
 
-	if ((ac < 1 || ac > 4) || zend_get_parameters_ex(ac, &p_name, &p_sections_needed, &p_sub_arrays, &p_read_thumbnail, &p_read_all) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|sbb", &p_name, &sections_str, &sections_str_len, &sub_arrays, &read_thumbnail) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(p_name);
+	if (php_stream_path_param_encode(p_name, &filename, &filename_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+		return;
+	}
 
-	if(ac >= 2) {
-		convert_to_string_ex(p_sections_needed);
-		spprintf(&sections_str, 0, ",%s,", Z_STRVAL_PP(p_sections_needed));
+	if (sections_needed) {
 		/* sections_str DOES start with , and SPACES are NOT allowed in names */
 		s = sections_str;
 		while(*++s) {
@@ -3933,14 +3932,7 @@ PHP_FUNCTION(exif_read_data)
 		EFREE_IF(sections_str);
 #endif
 	}
-	if(ac >= 3) {
-		convert_to_long_ex(p_sub_arrays);
-		sub_arrays = Z_LVAL_PP(p_sub_arrays);
-	}
-	if(ac >= 4) {
-		convert_to_long_ex(p_read_thumbnail);
-		read_thumbnail = Z_LVAL_PP(p_read_thumbnail);
-	}
+
 	if(ac >= 5) {
 		convert_to_long_ex(p_read_all);
 		read_all = Z_LVAL_PP(p_read_all);
@@ -3948,7 +3940,7 @@ PHP_FUNCTION(exif_read_data)
 	/* parameters 3,4 will be working in later versions.... */
 	read_all = 0;       /* just to make function work for 4.2 tree */
 
-	ret = exif_read_file(&ImageInfo, Z_STRVAL_PP(p_name), read_thumbnail, read_all TSRMLS_CC);
+	ret = exif_read_file(&ImageInfo, filename, read_thumbnail, read_all TSRMLS_CC);
 
    	sections_str = exif_get_sectionlist(ImageInfo.sections_found TSRMLS_CC);
 
@@ -4076,18 +4068,19 @@ PHP_FUNCTION(exif_read_data)
 	exif_discard_imageinfo(&ImageInfo);
 
 #ifdef EXIF_DEBUG
-	php_error_docref1(NULL TSRMLS_CC, Z_STRVAL_PP(p_name), E_NOTICE, "done");
+	php_error_docref1(NULL TSRMLS_CC, filename, E_NOTICE, "done");
 #endif
 }
 /* }}} */
 
-/* {{{ proto string exif_thumbnail(string filename [, &width, &height [, &imagetype]])
+/* {{{ proto string exif_thumbnail(string filename [, &width, &height [, &imagetype]]) U
    Reads the embedded thumbnail */
 PHP_FUNCTION(exif_thumbnail)
 {
 	zval *p_width = 0, *p_height = 0, *p_imagetype = 0;
-	char *p_name;
-	int p_name_len, ret, arg_c = ZEND_NUM_ARGS();
+	zval **p_name;
+	char *filename;
+	int filename_len, ret, arg_c = ZEND_NUM_ARGS();
 	image_info_type ImageInfo;
 
 	memset(&ImageInfo, 0, sizeof(ImageInfo));
@@ -4096,11 +4089,15 @@ PHP_FUNCTION(exif_thumbnail)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (zend_parse_parameters(arg_c TSRMLS_CC, "s|z/z/z/", &p_name, &p_name_len, &p_width, &p_height, &p_imagetype) == FAILURE) {
+	if (zend_parse_parameters(arg_c TSRMLS_CC, "Z|z/z/z/", &p_name, &p_width, &p_height, &p_imagetype) == FAILURE) {
 		return;
 	}
 
-	ret = exif_read_file(&ImageInfo, p_name, 1, 0 TSRMLS_CC);
+	if (php_stream_path_param_encode(p_name, &filename, &filename_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+		return;
+	}
+
+	ret = exif_read_file(&ImageInfo, filename, 1, 0 TSRMLS_CC);
 	if (ret==FALSE) {
 		exif_discard_imageinfo(&ImageInfo);
 		RETURN_FALSE;
@@ -4140,27 +4137,30 @@ PHP_FUNCTION(exif_thumbnail)
 	exif_discard_imageinfo(&ImageInfo);
 
 #ifdef EXIF_DEBUG
-	php_error_docref1(NULL TSRMLS_CC, p_name, E_NOTICE, "Done");
+	php_error_docref1(NULL TSRMLS_CC, filename, E_NOTICE, "Done");
 #endif
 }
 /* }}} */
 
-/* {{{ proto int exif_imagetype(string imagefile)
+/* {{{ proto int exif_imagetype(string imagefile) U
    Get the type of an image */
 PHP_FUNCTION(exif_imagetype)
 {
 	zval **arg1;
+	char *filename;
+	int filename_len;
 	php_stream * stream;
  	int itype = 0;
 
-	if (ZEND_NUM_ARGS() != 1)
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg1) == FAILURE) {
+		return;
+	}
 
-	if (zend_get_parameters_ex(1, &arg1) == FAILURE)
-		WRONG_PARAM_COUNT;
+	if (php_stream_path_param_encode(arg1, &filename, &filename_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+		return;
+	}
 
-	convert_to_string_ex(arg1);
-	stream = php_stream_open_wrapper(Z_STRVAL_PP(arg1), "rb", IGNORE_PATH|REPORT_ERRORS, NULL);
+	stream = php_stream_open_wrapper(filename, "rb", IGNORE_PATH|REPORT_ERRORS, NULL);
 
 	if (stream == NULL) {
 		RETURN_FALSE;
