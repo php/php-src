@@ -292,7 +292,7 @@ static inline zval **spl_fastarray_object_read_dimension_helper(spl_fastarray_ob
 
 	index = spl_offset_convert_to_long(offset TSRMLS_CC);
 	
-	if (index < 0 || index >= intern->array->size) {
+	if (index < 0 || intern->array == NULL || index >= intern->array->size) {
 		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0 TSRMLS_CC);
 		return NULL;
 	} else if(!intern->array->elements[index]) {
@@ -344,7 +344,7 @@ static inline void spl_fastarray_object_write_dimension_helper(spl_fastarray_obj
 
 	index = spl_offset_convert_to_long(offset TSRMLS_CC);
 
-	if (index < 0 || index >= intern->array->size) {
+	if (index < 0 || intern->array == NULL || index >= intern->array->size) {
 		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0 TSRMLS_CC);
 		return;
 	} else {
@@ -382,7 +382,7 @@ static inline void spl_fastarray_object_unset_dimension_helper(spl_fastarray_obj
 	
 	index = spl_offset_convert_to_long(offset TSRMLS_CC);
 	
-	if (index < 0 || index >= intern->array->size) {
+	if (index < 0 || intern->array == NULL || index >= intern->array->size) {
 		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0 TSRMLS_CC);
 		return;
 	} else {
@@ -419,7 +419,7 @@ static inline int spl_fastarray_object_has_dimension_helper(spl_fastarray_object
 	
 	index = spl_offset_convert_to_long(offset TSRMLS_CC);
 	
-	if (index < 0 || index >= intern->array->size) {
+	if (index < 0 || intern->array == NULL || index >= intern->array->size) {
 		retval = 0;
 	} else {
 		if (!intern->array->elements[index]) {
@@ -468,7 +468,11 @@ static int spl_fastarray_object_count_elements(zval *object, long *count TSRMLS_
 	spl_fastarray_object *intern;
 	
 	intern = (spl_fastarray_object *)zend_object_store_get_object(object TSRMLS_CC);
-	*count = intern->array->size;
+	if (intern->array) {
+		*count = intern->array->size;
+	} else {
+		*count = 0;
+	}
 
 	return SUCCESS;
 }
@@ -515,7 +519,10 @@ SPL_METHOD(SplFastArray, count)
 	}
 
 	intern = (spl_fastarray_object *)zend_object_store_get_object(object TSRMLS_CC);
-	RETURN_LONG(intern->array->size);
+	if (intern->array) {
+		RETURN_LONG(intern->array->size);
+	}
+	RETURN_LONG(0);
 }
 /* }}} */
 
@@ -531,7 +538,10 @@ SPL_METHOD(SplFastArray, getSize)
 	}
 
 	intern = (spl_fastarray_object *)zend_object_store_get_object(object TSRMLS_CC);
-	RETURN_LONG(intern->array->size);
+	if (intern->array) {
+		RETURN_LONG(intern->array->size);
+	}
+	RETURN_LONG(0);
 }
 /* }}} */
 
@@ -553,6 +563,10 @@ SPL_METHOD(SplFastArray, setSize)
 	}
 
 	intern = (spl_fastarray_object *)zend_object_store_get_object(object TSRMLS_CC);
+	if (!intern->array) {
+		intern->array = ecalloc(1, sizeof(spl_fastarray));
+	}
+
 	spl_fastarray_resize(intern->array, size TSRMLS_CC);
 	RETURN_TRUE;
 }
@@ -668,7 +682,7 @@ static int spl_fastarray_it_valid(zend_object_iterator *iter TSRMLS_DC) /* {{{ *
 		return FAILURE;
 	}
 
-	if (iterator->object->current >= 0 && iterator->object->current < iterator->object->array->size) {
+	if (iterator->object->current >= 0 && iterator->object->array && iterator->object->current < iterator->object->array->size) {
 		return SUCCESS;
 	}
 
@@ -777,7 +791,7 @@ SPL_METHOD(SplFastArray, valid)
 {
 	spl_fastarray_object *intern = (spl_fastarray_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	RETURN_BOOL(intern->current >= 0 && intern->current < intern->array->size);
+	RETURN_BOOL(intern->current >= 0 && intern->array && intern->current < intern->array->size);
 }
 /* }}} */
 
