@@ -2499,6 +2499,7 @@ void zval_from_error_container(zval *z, timelib_error_container *error)
 {
 	int   i;
 	zval *element;
+	TSRMLS_FETCH();
 
 	add_ascii_assoc_long(z, "warning_count", error->warning_count);
 	MAKE_STD_ZVAL(element);
