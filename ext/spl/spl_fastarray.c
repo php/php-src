@@ -321,6 +321,12 @@ static inline void spl_fastarray_object_write_dimension_helper(spl_fastarray_obj
 {
 	long index;
 
+	if (!offset) {
+		/* '$array[] = value' syntax is not supported */
+		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0 TSRMLS_CC);
+		return;
+	}
+
 	index = spl_offset_convert_to_long(offset TSRMLS_CC);
 
 	if (index < 0 || index >= intern->array->size) {
