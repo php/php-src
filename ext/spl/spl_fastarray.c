@@ -109,6 +109,7 @@ static void spl_fastarray_resize(spl_fastarray *array, long size TSRMLS_DC) /* {
 
 		if (array->elements) {
 			efree(array->elements);
+			array->elements = NULL;
 		}
 	} else if (size > array->size) {
 		array->elements = erealloc(array->elements, sizeof(zval *) * size);
@@ -147,16 +148,18 @@ static void spl_fastarray_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 	spl_fastarray_object *intern = (spl_fastarray_object *)object;
 	long i;
 
-	for (i = 0; i < intern->array->size; i++) {
-		if (intern->array->elements[i]) {
-			zval_ptr_dtor(&(intern->array->elements[i]));
+	if (intern->array) {
+		for (i = 0; i < intern->array->size; i++) {
+			if (intern->array->elements[i]) {
+				zval_ptr_dtor(&(intern->array->elements[i]));
+			}
 		}
-	}
 
-	if (intern->array->elements) {
-		efree(intern->array->elements);
+		if (intern->array->elements) {
+			efree(intern->array->elements);
+		}
+		efree(intern->array);
 	}
-	efree(intern->array);
 
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
 	zval_ptr_dtor(&intern->retval);
@@ -280,13 +283,20 @@ static inline zval **spl_fastarray_object_read_dimension_helper(spl_fastarray_ob
 {
 	long index;
 
+	/* we have to return NULL on error here to avoid memleak because of 
+	 * ZE duplicating uninitialized_zval_ptr */
+	if (!offset) {
+		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0 TSRMLS_CC);
+		return NULL;
+	}
+
 	index = spl_offset_convert_to_long(offset TSRMLS_CC);
 	
 	if (index < 0 || index >= intern->array->size) {
 		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0 TSRMLS_CC);
-		return &EG(uninitialized_zval_ptr);
+		return NULL;
 	} else if(!intern->array->elements[index]) {
-		return &EG(uninitialized_zval_ptr);
+		return NULL;
 	} else {
 		return &intern->array->elements[index];
 	}
@@ -296,6 +306,7 @@ static inline zval **spl_fastarray_object_read_dimension_helper(spl_fastarray_ob
 static zval *spl_fastarray_object_read_dimension(zval *object, zval *offset, int type TSRMLS_DC) /* {{{ */
 {
 	spl_fastarray_object *intern;
+	zval **retval;
 
 	intern = (spl_fastarray_object *)zend_object_store_get_object(object TSRMLS_CC);
 
@@ -313,7 +324,11 @@ static zval *spl_fastarray_object_read_dimension(zval *object, zval *offset, int
 		return EG(uninitialized_zval_ptr);
 	}
 
-	return *spl_fastarray_object_read_dimension_helper(intern, offset TSRMLS_CC);
+	retval = spl_fastarray_object_read_dimension_helper(intern, offset TSRMLS_CC);
+	if (retval) {
+		return *retval;
+	}
+	return NULL;
 }
 /* }}} */
 
@@ -573,7 +588,10 @@ SPL_METHOD(SplFastArray, offsetGet)
 	intern    = (spl_fastarray_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
 	value_pp  = spl_fastarray_object_read_dimension_helper(intern, zindex TSRMLS_CC);
 
-	RETURN_ZVAL(*value_pp, 1, 0);
+	if (value_pp) {
+		RETURN_ZVAL(*value_pp, 1, 0);
+	}
+	RETURN_NULL();
 } /* }}} */
 
 /* {{{ proto void SplFastArray::offsetSet(mixed $index, mixed $newval) U
@@ -684,6 +702,10 @@ static void spl_fastarray_it_get_current_data(zend_object_iterator *iter, zval *
 
 	*data = spl_fastarray_object_read_dimension_helper(intern, zindex TSRMLS_CC);
 
+	if (*data == NULL) {
+		*data = &EG(uninitialized_zval_ptr);
+	}
+
 	zval_ptr_dtor(&zindex);
 }
 /* }}} */
@@ -784,7 +806,10 @@ SPL_METHOD(SplFastArray, current)
 
 	zval_ptr_dtor(&zindex);
 
-	RETURN_ZVAL(*value_pp, 1, 0);
+	if (value_pp) {
+		RETURN_ZVAL(*value_pp, 1, 0);
+	}
+	RETURN_NULL();
 }
 /* }}} */
 
