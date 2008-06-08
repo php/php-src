@@ -174,12 +174,20 @@ top_statement:
 	|	class_declaration_statement		{ zend_do_early_binding(TSRMLS_C); }
 	|	T_HALT_COMPILER '(' ')' ';'		{ zend_do_halt_compiler_register(TSRMLS_C); YYACCEPT; }
 	|	T_NAMESPACE namespace_name ';'	{ zend_do_namespace(&$2 TSRMLS_CC); }
-	|	T_USE namespace_name ';'		{ zend_do_use(&$2, NULL, 0 TSRMLS_CC); }
-	|	T_USE namespace_name T_AS T_STRING ';'	{ zend_do_use(&$2, &$4, 0 TSRMLS_CC); }
-	|	T_USE T_PAAMAYIM_NEKUDOTAYIM T_STRING ';'		{ zend_do_use(&$3, NULL, 1 TSRMLS_CC); }
-	|	T_USE T_PAAMAYIM_NEKUDOTAYIM T_STRING T_AS T_STRING ';'		{ zend_do_use(&$3, &$5, 1 TSRMLS_CC); }
+	|	T_USE use_declarations ';'
 	|	constant_declaration ';'
 ;
+
+use_declarations:
+		use_declarations ',' use_declaration
+	|	use_declaration
+
+use_declaration:
+		namespace_name 			{ zend_do_use(&$1, NULL, 0 TSRMLS_CC); }
+	|	namespace_name T_AS T_STRING	{ zend_do_use(&$1, &$3, 0 TSRMLS_CC); }
+	|	T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_use(&$2, NULL, 1 TSRMLS_CC); }
+	|	T_PAAMAYIM_NEKUDOTAYIM T_STRING T_AS T_STRING { zend_do_use(&$2, &$4, 1 TSRMLS_CC); }
+
 
 constant_declaration:
 		constant_declaration ',' T_STRING '=' static_scalar	{ zend_do_declare_constant(&$3, &$5 TSRMLS_CC); }
