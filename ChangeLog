@@ -1,3 +1,98 @@
+2008-06-07  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/date/php_date.c:
+      fix ZTS build
+
+    * ext/spl/spl_fastarray.c
+      ext/spl/tests/fastarray_015.phpt
+      ext/spl/tests/fastarray_015.phpt:
+      more checks and tests
+
+2008-06-07  Henrique do Nascimento Angelo  <h.n.angelo@gmail.com>
+
+    * ext/exif/tests/bug34704.phpt
+      ext/exif/tests/exif001.phpt
+      ext/exif/tests/exif004.phpt
+      ext/exif/tests/exif005.phpt:
+      Update exif tests to conform with the unicode functions
+
+    * ext/exif/exif.c:
+      Add Unicode support
+
+    * ext/date/tests/008.phpt
+      ext/date/tests/011.phpt
+      ext/date/tests/013.phpt
+      ext/date/tests/014.phpt
+      ext/date/tests/bug41523-64bit.phpt
+      ext/date/tests/bug41523.phpt
+      ext/date/tests/bug43808.phpt
+      ext/date/tests/date_parse_001.phpt:
+      Update tests to conform with the unicode functions
+
+    * ext/date/php_date.c:
+      Add Unicode support and set as unicode compatible
+
+2008-06-07  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/spl/tests/fastarray_005.phpt
+      ext/spl/tests/fastarray_006.phpt
+      ext/spl/tests/fastarray_007.phpt
+      ext/spl/tests/fastarray_008.phpt
+      ext/spl/tests/fastarray_009.phpt
+      ext/spl/tests/fastarray_010.phpt
+      ext/spl/tests/fastarray_011.phpt
+      ext/spl/tests/fastarray_012.phpt
+      ext/spl/tests/fastarray_013.phpt
+      ext/spl/tests/fastarray_014.phpt:
+      add more tests (Felipe)
+
+    * ext/spl/tests/fastarray_004.phpt
+      ext/spl/tests/fastarray_005.phpt
+      ext/spl/tests/fastarray_005.phpt
+      ext/spl/tests/fastarray_006.phpt
+      ext/spl/tests/fastarray_006.phpt
+      ext/spl/tests/fastarray_007.phpt
+      ext/spl/tests/fastarray_007.phpt
+      ext/spl/tests/fastarray_008.phpt
+      ext/spl/tests/fastarray_008.phpt
+      ext/spl/tests/fastarray_009.phpt
+      ext/spl/tests/fastarray_009.phpt
+      ext/spl/tests/fastarray_010.phpt
+      ext/spl/tests/fastarray_010.phpt
+      ext/spl/tests/fastarray_011.phpt
+      ext/spl/tests/fastarray_011.phpt
+      ext/spl/tests/fastarray_012.phpt
+      ext/spl/tests/fastarray_012.phpt
+      ext/spl/tests/fastarray_013.phpt
+      ext/spl/tests/fastarray_013.phpt
+      ext/spl/tests/fastarray_014.phpt
+      ext/spl/tests/fastarray_014.phpt:
+      more tests (by Felipe)
+
+    * ext/spl/spl_fastarray.c:
+      fix several memleaks and invalid reads
+
+    * ext/spl/tests/fastarray_004.phpt
+      ext/spl/tests/fastarray_004.phpt:
+      
+      file fastarray_004.phpt was initially added on branch PHP_5_3.
+
+    * ext/spl/spl_fastarray.c:
+      disallow $a[] = value syntax
+
+    * ext/spl/spl_fastarray.h:
+      update credits
+
+2008-06-07  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/spl/spl_fastarray.c:
+      MFH: Fix segfault caused by get_current_data on an uninitialized element
+
+    * ext/spl/spl_fastarray.c:
+      Fix segfault caused by get_current_data on an uninitialized element
+
 2008-06-06  Etienne Kneuss  <php@colder.ch>
 
     * ext/spl/config.m4
