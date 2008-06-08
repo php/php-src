@@ -66,12 +66,4 @@ if test "$PHP_ZIP" != "no"; then
 	PHP_NEW_EXTENSION(zip, php_zip.c zip_stream.c $PHP_ZIP_SOURCES, $ext_shared)
 	PHP_ADD_BUILD_DIR($ext_builddir/lib, 1)
 	PHP_SUBST(ZIP_SHARED_LIBADD)
-	ifdef([PHP_INSTALL_HEADERS],
-	[
-	  dnl Sadly, this is a complete NOP for pecl extensions
-	  PHP_INSTALL_HEADERS(ext/zip/lib, [lib/zip.h lib/zipint.h lib/zip_alias.h lib/zipint_alias.h])
-	])
-	
-	dnl so we always include the known-good working hack.
-	PHP_ADD_MAKEFILE_FRAGMENT
 fi
