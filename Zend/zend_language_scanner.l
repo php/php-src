@@ -2532,9 +2532,9 @@ inline_char_handler:
 		/* Go back before last label char, to match in ST_END_HEREDOC state */
 		yyless(yyleng - 2);
 
-		/* Subtract the label/newline length. yyleng must include newline
+		/* Subtract the remaining label length. yyleng must include newline
 		 * before label, for zend_highlight/strip, tokenizer, etc. */
-		yyleng -= CG(heredoc_len) + 1;
+		yyleng -= CG(heredoc_len) - 1;
 
 		CG(increment_lineno) = 1; /* For newline before label */
 		BEGIN(ST_END_HEREDOC);
@@ -2722,9 +2722,9 @@ inline_char_handler:
 		/* Go back before last label char, to match in ST_END_NOWDOC state */
 		yyless(yyleng - 2);
 
-		/* Subtract the label/newline length. yyleng must include newline
+		/* Subtract the remaining label length. yyleng must include newline
 		 * before label, for zend_highlight/strip, tokenizer, etc. */
-		yyleng -= CG(heredoc_len) + 1;
+		yyleng -= CG(heredoc_len) - 1;
 
 		CG(increment_lineno) = 1; /* For newline before label */
 		BEGIN(ST_END_NOWDOC);
