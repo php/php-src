@@ -40,7 +40,9 @@
 
 #endif
 
+#ifndef PHAR_HAVE_OPENSSL
 static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, char *key, int key_len, char **signature, int *signature_len TSRMLS_DC);
+#endif
 
 ZEND_DECLARE_MODULE_GLOBALS(phar)
 #if PHP_VERSION_ID >= 50300
@@ -490,11 +492,11 @@ static const char hexChars[] = "0123456789ABCDEF";
 static int phar_hex_str(const char *digest, size_t digest_len, char ** signature)
 {
 	int pos = -1;
-	size_t len;
+	size_t len = 0;
 
 	*signature = (char*)safe_emalloc(digest_len, 2, 1);
 
-	for(len = 0; len < digest_len; ++len) {
+	for (; len < digest_len; ++len) {
 		(*signature)[++pos] = hexChars[((const unsigned char *)digest)[len] >> 4];
 		(*signature)[++pos] = hexChars[((const unsigned char *)digest)[len] & 0x0F];
 	}
@@ -632,12 +634,13 @@ int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char *alias,
 			EVP_PKEY *key;
 			EVP_MD *mdtype = (EVP_MD *) EVP_sha1();
 			EVP_MD_CTX md_ctx;
+#else
+			int tempsig;
 #endif
 			php_uint32 signature_len, pubkey_len;
 			char *sig, *pubkey = NULL, *pfile;
 			off_t whence;
 			php_stream *pfp;
-			int tempsig;
 
 			if (!zend_hash_exists(&module_registry, "openssl", sizeof("openssl"))) {
 				efree(savebuf);
@@ -765,7 +768,8 @@ int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char *alias,
 			}
 			EVP_MD_CTX_cleanup(&md_ctx);
 #endif
-			sig_len = phar_hex_str((const char*)sig, sig_len, &signature);
+			
+			sig_len = phar_hex_str((const char*)sig, signature_len, &signature);
 			efree(sig);
 		}
 		break;
@@ -2241,6 +2245,7 @@ char *phar_create_default_stub(const char *index_php, const char *web_index, siz
 	return stub;
 }
 
+#ifndef PHAR_HAVE_OPENSSL
 static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, char *key, int key_len, char **signature, int *signature_len TSRMLS_DC)
 {
 	zend_fcall_info fci;
@@ -2350,6 +2355,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 			return FAILURE;
 	}
 }
+#endif /* #ifndef PHAR_HAVE_OPENSSL */
 
 /**
  * Save phar contents to disk
