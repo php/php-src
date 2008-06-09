@@ -2,6 +2,7 @@
 Test open_basedir configuration
 --INI--
 open_basedir=.
+error_log=
 --FILE--
 <?php
 require_once "open_basedir.inc";
