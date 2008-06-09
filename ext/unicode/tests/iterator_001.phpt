@@ -1,7 +1,5 @@
 --TEST--
 Unicode: Basic iterator tests
---SKIPIF--
-<?php if (!unicode_semantics()) die('skip unicode.semantics=off'); ?>
 --FILE--
 <?php
 
