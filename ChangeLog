@@ -1,3 +1,33 @@
+2008-06-08  Stanislav Malyshev  <stas@zend.com>
+
+    * main/streams/streams.c:
+      with unicode buffers, positions are in uchars
+
+2008-06-08  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/Makefile.frag
+      ext/zip/config.m4:
+      - MFB: do not export the api or install the headers
+
+    * (PHP_5_3)
+      ext/zip/Makefile.frag:
+      - should not be called butlet remove it as well
+
+2008-06-08  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_language_parser.y
+      ZendEngine2/tests/ns_065.inc
+      ZendEngine2/tests/ns_065.phpt:
+      MF5: allow aggregating use statements
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/tests/ns_065.inc
+      ZendEngine2/tests/ns_065.inc
+      ZendEngine2/tests/ns_065.phpt
+      ZendEngine2/tests/ns_065.phpt:
+      allow aggregating use statements
+
 2008-06-07  Antony Dovgal  <tony@daylessday.org>
 
     * ext/date/php_date.c:
