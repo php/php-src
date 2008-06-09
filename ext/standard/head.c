@@ -70,12 +70,12 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 	int result;
 	
 	if (name && strpbrk(name, "=,; \t\r\n\013\014") != NULL) {   /* man isspace for \013 and \014 */
-		zend_error( E_WARNING, "Cookie names can not contain any of the folllowing '=,; \\t\\r\\n\\013\\014' (%s)", name );
+		zend_error( E_WARNING, "Cookie names can not contain any of the folllowing '=,; \\t\\r\\n\\013\\014'" );
 		return FAILURE;
 	}
 
 	if (!url_encode && value && strpbrk(value, ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
-		zend_error( E_WARNING, "Cookie values can not contain any of the folllowing ',; \\t\\r\\n\\013\\014' (%s)", value );
+		zend_error( E_WARNING, "Cookie values can not contain any of the folllowing ',; \\t\\r\\n\\013\\014'" );
 		return FAILURE;
 	}
 
