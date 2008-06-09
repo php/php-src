@@ -143,6 +143,49 @@ static void spl_fastarray_copy(spl_fastarray *to, spl_fastarray *from TSRMLS_DC)
 }
 /* }}} */
 
+static HashTable* spl_fastarray_object_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /* {{{{ */
+{
+	spl_fastarray_object *intern  = (spl_fastarray_object*)zend_object_store_get_object(obj TSRMLS_CC);
+	HashTable *rv;
+	zval *tmp, zrv, *fastarray_array;
+	zstr pnstr;
+	int  pnlen;
+	int  i = 0;
+
+	*is_temp = 1;
+
+	ALLOC_HASHTABLE(rv);
+	ZEND_INIT_SYMTABLE_EX(rv, zend_hash_num_elements(intern->std.properties) + 1, 0);
+
+	INIT_PZVAL(&zrv);
+	Z_ARRVAL(zrv) = rv;
+
+	zend_hash_copy(rv, intern->std.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+	ALLOC_INIT_ZVAL(fastarray_array);
+	array_init(fastarray_array);
+
+
+	if (intern->array) {
+		for (i = 0; i < intern->array->size; i++) {
+			if (intern->array->elements[i]) {
+				add_index_zval(fastarray_array, i, (zval *)intern->array->elements[i]);
+				Z_ADDREF_P(intern->array->elements[i]);
+			} else {
+				add_index_zval(fastarray_array, i, (zval *)EG(uninitialized_zval_ptr));
+				Z_ADDREF_P(EG(uninitialized_zval_ptr));
+			}
+		}
+	}
+
+	pnstr = spl_gen_private_prop_name(spl_ce_SplFastArray, "array", sizeof("array")-1, &pnlen TSRMLS_CC);
+	add_u_assoc_zval_ex(&zrv, ZEND_STR_TYPE, pnstr, pnlen+1, fastarray_array);
+	efree(pnstr.v);
+
+	return rv;
+}
+/* }}}} */
+
 static void spl_fastarray_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 {
 	spl_fastarray_object *intern = (spl_fastarray_object *)object;
@@ -724,7 +767,7 @@ static void spl_fastarray_it_get_current_data(zend_object_iterator *iter, zval *
 }
 /* }}} */
 
-static int spl_fastarray_it_get_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC) /* {{{ */
+static int spl_fastarray_it_get_current_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC) /* {{{ */
 {
 	spl_fastarray_it     *iterator = (spl_fastarray_it *)iter;
 	spl_fastarray_object *intern   = iterator->object;
@@ -907,6 +950,7 @@ PHP_MINIT_FUNCTION(spl_fastarray)
 	spl_handler_SplFastArray.unset_dimension = spl_fastarray_object_unset_dimension;
 	spl_handler_SplFastArray.has_dimension   = spl_fastarray_object_has_dimension;
 	spl_handler_SplFastArray.count_elements  = spl_fastarray_object_count_elements;
+	spl_handler_SplFastArray.get_debug_info  = spl_fastarray_object_get_debug_info;
 
 	REGISTER_SPL_IMPLEMENTS(SplFastArray, Iterator);
 	REGISTER_SPL_IMPLEMENTS(SplFastArray, ArrayAccess);
