@@ -1,3 +1,18 @@
+2008-06-08  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_language_parser.y
+      tests/ns_065.inc
+      tests/ns_065.phpt:
+      MF5: allow aggregating use statements
+
+    * (PHP_5_3)
+      zend_language_parser.y
+      tests/ns_065.inc
+      tests/ns_065.inc
+      tests/ns_065.phpt
+      tests/ns_065.phpt:
+      allow aggregating use statements
+
 2008-06-06  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * zend_language_scanner.c
