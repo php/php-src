@@ -1,3 +1,9 @@
+2008-06-09  Matt Wilmas  <php_lists@realplain.com>
+
+    * zend_language_scanner.c
+      zend_language_scanner.l:
+      MFB: Fixed yyleng calculation after the yyless change
+
 2008-06-08  Stanislav Malyshev  <stas@zend.com>
 
     * zend_language_parser.y

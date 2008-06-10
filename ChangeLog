@@ -1,3 +1,145 @@
+2008-06-09  Felipe Pena  <felipensp@gmail.com>
+
+    * Makefile.global:
+      - Removed ntest and utest
+      - Removed -U flag to `make test' just to test once each test
+
+2008-06-09  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/spl/spl_fastarray.c:
+      add get_debug_info
+
+    * ext/spl/spl_fastarray.c:
+      add get_Debug_info + fix proto
+
+2008-06-09  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/phar.phar:
+      fix compile warnings if openssl is enabled statically.  fix dangerous use
+      of wrong length var in openssl signature verification
+
+2008-06-09  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/ctype/tests/ctype_alnum_basic.phpt
+      ext/ctype/tests/ctype_alnum_error.phpt
+      ext/ctype/tests/ctype_alnum_variation1.phpt
+      ext/ctype/tests/ctype_alnum_variation2.phpt
+      ext/ctype/tests/ctype_alnum_variation3.phpt
+      ext/ctype/tests/ctype_alnum_variation4.phpt
+      ext/ctype/tests/ctype_alpha_basic.phpt
+      ext/ctype/tests/ctype_alpha_error.phpt
+      ext/ctype/tests/ctype_alpha_variation1.phpt
+      ext/ctype/tests/ctype_alpha_variation2.phpt
+      ext/ctype/tests/ctype_alpha_variation3.phpt
+      ext/ctype/tests/ctype_alpha_variation4.phpt
+      ext/ctype/tests/ctype_cntrl_basic.phpt
+      ext/ctype/tests/ctype_cntrl_error.phpt
+      ext/ctype/tests/ctype_cntrl_variation1.phpt
+      ext/ctype/tests/ctype_cntrl_variation2.phpt
+      ext/ctype/tests/ctype_cntrl_variation3.phpt
+      ext/ctype/tests/ctype_cntrl_variation4.phpt
+      ext/ctype/tests/ctype_digit_basic.phpt
+      ext/ctype/tests/ctype_digit_error.phpt
+      ext/ctype/tests/ctype_digit_variation1.phpt
+      ext/ctype/tests/ctype_digit_variation2.phpt
+      ext/ctype/tests/ctype_digit_variation3.phpt
+      ext/ctype/tests/ctype_digit_variation4.phpt
+      ext/ctype/tests/ctype_graph_basic.phpt
+      ext/ctype/tests/ctype_graph_error.phpt
+      ext/ctype/tests/ctype_graph_variation1.phpt
+      ext/ctype/tests/ctype_graph_variation2.phpt
+      ext/ctype/tests/ctype_graph_variation3.phpt
+      ext/ctype/tests/ctype_graph_variation4.phpt
+      ext/ctype/tests/ctype_lower_basic.phpt
+      ext/ctype/tests/ctype_lower_error.phpt
+      ext/ctype/tests/ctype_lower_variation1.phpt
+      ext/ctype/tests/ctype_lower_variation2.phpt
+      ext/ctype/tests/ctype_lower_variation3.phpt
+      ext/ctype/tests/ctype_lower_variation4.phpt
+      ext/ctype/tests/ctype_print_basic.phpt
+      ext/ctype/tests/ctype_print_error.phpt
+      ext/ctype/tests/ctype_print_variation1.phpt
+      ext/ctype/tests/ctype_print_variation2.phpt
+      ext/ctype/tests/ctype_print_variation3.phpt
+      ext/ctype/tests/ctype_print_variation4.phpt
+      ext/ctype/tests/ctype_punct_basic.phpt
+      ext/ctype/tests/ctype_punct_error.phpt
+      ext/ctype/tests/ctype_punct_variation1.phpt
+      ext/ctype/tests/ctype_punct_variation2.phpt
+      ext/ctype/tests/ctype_punct_variation3.phpt
+      ext/ctype/tests/ctype_punct_variation4.phpt
+      ext/ctype/tests/ctype_space_basic.phpt
+      ext/ctype/tests/ctype_space_error.phpt
+      ext/ctype/tests/ctype_space_variation1.phpt
+      ext/ctype/tests/ctype_space_variation2.phpt
+      ext/ctype/tests/ctype_space_variation3.phpt
+      ext/ctype/tests/ctype_space_variation4.phpt
+      ext/ctype/tests/ctype_upper_basic.phpt
+      ext/ctype/tests/ctype_upper_error.phpt
+      ext/ctype/tests/ctype_upper_variation1.phpt
+      ext/ctype/tests/ctype_upper_variation2.phpt
+      ext/ctype/tests/ctype_upper_variation3.phpt
+      ext/ctype/tests/ctype_upper_variation4.phpt
+      ext/ctype/tests/ctype_xdigit_basic.phpt
+      ext/ctype/tests/ctype_xdigit_error.phpt
+      ext/ctype/tests/ctype_xdigit_variation1.phpt
+      ext/ctype/tests/ctype_xdigit_variation2.phpt
+      ext/ctype/tests/ctype_xdigit_variation3.phpt
+      ext/ctype/tests/ctype_xdigit_variation4.phpt
+      ext/ereg/tests/001.phpt
+      ext/ereg/tests/002.phpt
+      ext/ereg/tests/003.phpt
+      ext/ereg/tests/004.phpt
+      ext/ereg/tests/005.phpt
+      ext/ereg/tests/006.phpt
+      ext/ereg/tests/007.phpt
+      ext/ereg/tests/008.phpt
+      ext/ereg/tests/009.phpt
+      ext/ereg/tests/010.phpt
+      ext/ereg/tests/011.phpt
+      ext/ereg/tests/012.phpt
+      ext/ereg/tests/013.phpt
+      ext/ereg/tests/014.phpt
+      ext/ereg/tests/015.phpt
+      ext/ereg/tests/016.phpt
+      ext/oci8/tests/connect_with_charset_001.phpt
+      ext/soap/tests/bugs/bug42488.phpt
+      ext/unicode/tests/iterator_001.phpt
+      ext/unicode/tests/iterator_002.phpt:
+      - Removed unnecessary SKIPIF (unicode/tests/*)
+      - Removed non-unicode tests (tests that uses SKIPIF like "die('skip
+      unicode.semantics=on');")
+
+2008-06-09  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/standard/head.c:
+      Merge from PHP_5 - don't echo raw cookie values here
+
+    * (PHP_5_2)
+      ext/standard/head.c:
+      Merge from 5.3 branch - no point in echoeing the raw values here
+
+2008-06-09  Antony Dovgal  <tony@daylessday.org>
+
+    * tests/.cvsignore
+      tests/security/.cvsignore:
+      fix .cvsignore
+
+2008-06-09  Matt Wilmas  <php_lists@realplain.com>
+
+    * ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l:
+      MFB: Fixed yyleng calculation after the yyless change
+
+2008-06-09  Antony Dovgal  <tony@daylessday.org>
+
+    * tests/security/open_basedir_error_log.phpt
+      tests/security/open_basedir_error_log.phpt:
+      fix test
+
 2008-06-08  Stanislav Malyshev  <stas@zend.com>
 
     * main/streams/streams.c:
