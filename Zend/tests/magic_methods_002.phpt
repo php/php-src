@@ -11,4 +11,4 @@ class foo {
 
 ?>
 --EXPECTF--
-Fatal error: The magic method __unset() must have public visibility and can not be static in %s on line %d
+Warning: The magic method __unset() must have public visibility and can not be static in %s on line %d

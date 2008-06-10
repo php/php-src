@@ -1206,31 +1206,31 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		if (CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE) {
 			if ((name_len == sizeof(ZEND_CALL_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1))) {
 				if (fn_flags & ((ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC) ^ ZEND_ACC_PUBLIC)) {
-					zend_error(E_COMPILE_ERROR, "The magic method __call() must have public visibility and can not be static");
+					zend_error(E_WARNING, "The magic method __call() must have public visibility and can not be static");
 				}
 			} else if ((name_len == sizeof(ZEND_CALLSTATIC_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_CALLSTATIC_FUNC_NAME, sizeof(ZEND_CALLSTATIC_FUNC_NAME)-1))) {
 				if ((fn_flags & (ZEND_ACC_PPP_MASK ^ ZEND_ACC_PUBLIC)) || (fn_flags & ZEND_ACC_STATIC) == 0) {
-					zend_error(E_COMPILE_ERROR, "The magic method __callStatic() must have public visibility and be static");
+					zend_error(E_WARNING, "The magic method __callStatic() must have public visibility and be static");
 				}
 			} else if ((name_len == sizeof(ZEND_GET_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_GET_FUNC_NAME, sizeof(ZEND_GET_FUNC_NAME)-1))) {
 				if (fn_flags & ((ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC) ^ ZEND_ACC_PUBLIC)) {
-					zend_error(E_COMPILE_ERROR, "The magic method __get() must have public visibility and can not be static");
+					zend_error(E_WARNING, "The magic method __get() must have public visibility and can not be static");
 				}
 			} else if ((name_len == sizeof(ZEND_SET_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_SET_FUNC_NAME, sizeof(ZEND_SET_FUNC_NAME)-1))) {
 				if (fn_flags & ((ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC) ^ ZEND_ACC_PUBLIC)) {
-					zend_error(E_COMPILE_ERROR, "The magic method __set() must have public visibility and can not be static");
+					zend_error(E_WARNING, "The magic method __set() must have public visibility and can not be static");
 				}
 			} else if ((name_len == sizeof(ZEND_UNSET_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_UNSET_FUNC_NAME, sizeof(ZEND_UNSET_FUNC_NAME)-1))) {
 				if (fn_flags & ((ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC) ^ ZEND_ACC_PUBLIC)) {
-					zend_error(E_COMPILE_ERROR, "The magic method __unset() must have public visibility and can not be static");
+					zend_error(E_WARNING, "The magic method __unset() must have public visibility and can not be static");
 				}
 			} else if ((name_len == sizeof(ZEND_ISSET_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_ISSET_FUNC_NAME, sizeof(ZEND_ISSET_FUNC_NAME)-1))) {
 				if (fn_flags & ((ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC) ^ ZEND_ACC_PUBLIC)) {
-					zend_error(E_COMPILE_ERROR, "The magic method __isset() must have public visibility and can not be static");
+					zend_error(E_WARNING, "The magic method __isset() must have public visibility and can not be static");
 				}
 			} else if ((name_len == sizeof(ZEND_TOSTRING_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_TOSTRING_FUNC_NAME, sizeof(ZEND_TOSTRING_FUNC_NAME)-1))) {
 				if (fn_flags & ((ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC) ^ ZEND_ACC_PUBLIC)) {
-					zend_error(E_COMPILE_ERROR, "The magic method __toString() must have public visibility and can not be static");
+					zend_error(E_WARNING, "The magic method __toString() must have public visibility and can not be static");
 				}
 			}
 		} else {
@@ -1266,37 +1266,37 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 				CG(active_class_entry)->clone = (zend_function *) CG(active_op_array);
 			} else if ((name_len == sizeof(ZEND_CALL_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1))) {
 				if (fn_flags & ((ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC) ^ ZEND_ACC_PUBLIC)) {
-					zend_error(E_COMPILE_ERROR, "The magic method __call() must have public visibility and can not be static");
+					zend_error(E_WARNING, "The magic method __call() must have public visibility and can not be static");
 				}
 				CG(active_class_entry)->__call = (zend_function *) CG(active_op_array);
 			} else if ((name_len == sizeof(ZEND_CALLSTATIC_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_CALLSTATIC_FUNC_NAME, sizeof(ZEND_CALLSTATIC_FUNC_NAME)-1))) {
 				if ((fn_flags & (ZEND_ACC_PPP_MASK ^ ZEND_ACC_PUBLIC)) || (fn_flags & ZEND_ACC_STATIC) == 0) {
-					zend_error(E_COMPILE_ERROR, "The magic method __callStatic() must have public visibility and be static");
+					zend_error(E_WARNING, "The magic method __callStatic() must have public visibility and be static");
 				}
 				CG(active_class_entry)->__callstatic = (zend_function *) CG(active_op_array);
 			} else if ((name_len == sizeof(ZEND_GET_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_GET_FUNC_NAME, sizeof(ZEND_GET_FUNC_NAME)-1))) {
 				if (fn_flags & ((ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC) ^ ZEND_ACC_PUBLIC)) {
-					zend_error(E_COMPILE_ERROR, "The magic method __get() must have public visibility and can not be static");
+					zend_error(E_WARNING, "The magic method __get() must have public visibility and can not be static");
 				}
 				CG(active_class_entry)->__get = (zend_function *) CG(active_op_array);
 			} else if ((name_len == sizeof(ZEND_SET_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_SET_FUNC_NAME, sizeof(ZEND_SET_FUNC_NAME)-1))) {
 				if (fn_flags & ((ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC) ^ ZEND_ACC_PUBLIC)) {
-					zend_error(E_COMPILE_ERROR, "The magic method __set() must have public visibility and can not be static");
+					zend_error(E_WARNING, "The magic method __set() must have public visibility and can not be static");
 				}
 				CG(active_class_entry)->__set = (zend_function *) CG(active_op_array);
 			} else if ((name_len == sizeof(ZEND_UNSET_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_UNSET_FUNC_NAME, sizeof(ZEND_UNSET_FUNC_NAME)-1))) {
 				if (fn_flags & ((ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC) ^ ZEND_ACC_PUBLIC)) {
-					zend_error(E_COMPILE_ERROR, "The magic method __unset() must have public visibility and can not be static");
+					zend_error(E_WARNING, "The magic method __unset() must have public visibility and can not be static");
 				}
 				CG(active_class_entry)->__unset = (zend_function *) CG(active_op_array);
 			} else if ((name_len == sizeof(ZEND_ISSET_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_ISSET_FUNC_NAME, sizeof(ZEND_ISSET_FUNC_NAME)-1))) {
 				if (fn_flags & ((ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC) ^ ZEND_ACC_PUBLIC)) {
-					zend_error(E_COMPILE_ERROR, "The magic method __isset() must have public visibility and can not be static");
+					zend_error(E_WARNING, "The magic method __isset() must have public visibility and can not be static");
 				}
 				CG(active_class_entry)->__isset = (zend_function *) CG(active_op_array);
 			} else if ((name_len == sizeof(ZEND_TOSTRING_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_TOSTRING_FUNC_NAME, sizeof(ZEND_TOSTRING_FUNC_NAME)-1))) {
 				if (fn_flags & ((ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC) ^ ZEND_ACC_PUBLIC)) {
-					zend_error(E_COMPILE_ERROR, "The magic method __toString() must have public visibility and can not be static");
+					zend_error(E_WARNING, "The magic method __toString() must have public visibility and can not be static");
 				}				
 				CG(active_class_entry)->__tostring = (zend_function *) CG(active_op_array);
 			} else if (!(fn_flags & ZEND_ACC_STATIC)) {
