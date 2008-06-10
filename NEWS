@@ -74,6 +74,8 @@ PHP                                                                        NEWS
   . Added FilesystemIterator. (Marcus)
   . Added GlobIterator. (Marcus)
   . Added SplHeap, SplMinHeap, SplMaxHeap, SplPriorityQueue classes. (Etienne)
+  . Added new parameter $prepend to spl_autoload_register(). (Etienne)
+  . Added FastArray. (Etienne, Tony)
 - Added ReflectionProperty::setAccessible() method that allows non-public
   property's values to be read through ::getValue(). (Derick)
 - Added ability to use Traversable objects instead of plain arrays in ext/soap.
