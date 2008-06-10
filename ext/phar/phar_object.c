@@ -1347,12 +1347,13 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 		char *b;
 		uint l;
 		zval *ret;
+		int count;
 	} *p_obj = (struct _t*) puser;
 	uint str_key_len, base_len = p_obj->l, fname_len;
 	phar_entry_data *data;
 	php_stream *fp;
 	long contents_len;
-	char *fname, *error, *base = p_obj->b, *opened, *save = NULL, *temp = NULL;
+	char *fname, *error = NULL, *base = p_obj->b, *opened, *save = NULL, *temp = NULL;
 	phar_zstr key;
 	char *str_key;
 	zend_class_entry *ce = p_obj->c;
@@ -1591,6 +1592,15 @@ after_open_fp:
 
 	data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
 	phar_entry_delref(data TSRMLS_CC);
+	if (++p_obj->count && p_obj->count % 900) {
+		/* every 900 files, flush so we remove open temp file handles, fixes Bug #45218 */
+		phar_flush(p_obj->p->arc.archive, 0, 0, 0, &error TSRMLS_CC);
+		if (error) {
+			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
+			efree(error);
+			return ZEND_HASH_APPLY_STOP;
+		}
+	}
 	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
@@ -1613,6 +1623,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 		char *b;
 		uint l;
 		zval *ret;
+		int count;
 	} pass;
 
 	PHAR_ARCHIVE_OBJECT();
@@ -1688,6 +1699,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 	pass.p = phar_obj;
 	pass.b = dir;
 	pass.l = dir_len;
+	pass.count = 0;
 	pass.ret = return_value;
 
 	if (SUCCESS == spl_iterator_apply((apply_reg ? regexiter : iteriter), (spl_iterator_apply_func_t) phar_build, (void *) &pass TSRMLS_CC)) {
@@ -1725,6 +1737,7 @@ PHP_METHOD(Phar, buildFromIterator)
 		char *b;
 		uint l;
 		zval *ret;
+		int count;
 	} pass;
 	PHAR_ARCHIVE_OBJECT();
 
@@ -1745,6 +1758,7 @@ PHP_METHOD(Phar, buildFromIterator)
 	pass.b = base;
 	pass.l = base_len;
 	pass.ret = return_value;
+	pass.count = 0;
 
 	if (SUCCESS == spl_iterator_apply(obj, (spl_iterator_apply_func_t) phar_build, (void *) &pass TSRMLS_CC)) {
 		phar_flush(phar_obj->arc.archive, 0, 0, 0, &error TSRMLS_CC);
