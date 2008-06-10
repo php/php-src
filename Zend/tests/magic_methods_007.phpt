@@ -9,4 +9,6 @@ abstract class b {
 
 ?>
 --EXPECTF--
-Fatal error: The magic method __set() must have public visibility and can not be static in %s on line %d
+Warning: The magic method __set() must have public visibility and can not be static in %s on line %d
+
+Fatal error: Method b::__set() must take exactly 2 arguments in %s on line %d
