@@ -98,11 +98,11 @@ if (getenv('TEST_PHP_EXECUTABLE')) {
 	$php = getenv('TEST_PHP_EXECUTABLE');
 
 	if ($php=='auto') {
-		$php = $cwd.'/sapi/cli/php';
+		$php = $cwd . '/sapi/cli/php';
 		putenv("TEST_PHP_EXECUTABLE=$php");
 
 		if (!getenv('TEST_PHP_CGI_EXECUTABLE')) {
-			$php_cgi = $cwd.'/sapi/cgi/php-cgi';
+			$php_cgi = $cwd . '/sapi/cgi/php-cgi';
 
 			if (file_exists($php_cgi)) {
 				putenv("TEST_PHP_CGI_EXECUTABLE=$php_cgi");
@@ -118,7 +118,7 @@ if (getenv('TEST_PHP_CGI_EXECUTABLE')) {
 	$php_cgi = getenv('TEST_PHP_CGI_EXECUTABLE');
 
 	if ($php_cgi=='auto') {
-		$php_cgi = $cwd.'/sapi/cgi/php-cgi';
+		$php_cgi = $cwd . '/sapi/cgi/php-cgi';
 		putenv("TEST_PHP_CGI_EXECUTABLE=$php_cgi");
 	}
 
@@ -320,7 +320,7 @@ if (isset($argc) && $argc > 1) {
 				foreach($cfgtypes as $type) {
 					if (strpos($switch, '--' . $type) === 0) {
 						foreach($cfgfiles as $file) {
-							if ($switch == '--' . $type.'-' . $file) {
+							if ($switch == '--' . $type . '-' . $file) {
 								$cfg[$type][$file] = true;
 								$is_switch = false;
 								break;
@@ -445,7 +445,7 @@ if (isset($argc) && $argc > 1) {
 					$html_output = is_resource($html_file);
 					break;
 				case '--version':
-					echo '$Revision$'."\n";
+					echo '$Revision$' . "\n";
 					exit(1);
 				default:
 					echo "Illegal switch specified!\n";
@@ -806,12 +806,12 @@ if ($just_save_results || !getenv('NO_INTERACTION')) {
 
 			/* Try the most common flags for 'version' */
 			$flags = array('-v', '-V', '--version');
-			$cc_status=0;
+			$cc_status = 0;
 
 			foreach($flags AS $flag) {
-				system(getenv('CC')." $flag >/dev/null 2>&1", $cc_status);
+				system(getenv('CC') . " $flag >/dev/null 2>&1", $cc_status);
 				if ($cc_status == 0) {
-					$compiler = shell_exec(getenv('CC')." $flag 2>&1");
+					$compiler = shell_exec(getenv('CC') . " $flag 2>&1");
 					break;
 				}
 			}
@@ -828,11 +828,11 @@ if ($just_save_results || !getenv('NO_INTERACTION')) {
 		$failed_tests_data .= "\n";
 
 		if (isset($user_email)) {
-			$failed_tests_data .= "User's E-mail: " . $user_email."\n\n";
+			$failed_tests_data .= "User's E-mail: " . $user_email . "\n\n";
 		}
 
 		$failed_tests_data .= $sep . "PHPINFO" . $sep;
-		$failed_tests_data .= shell_exec($php.' -dhtml_errors=0 -i');
+		$failed_tests_data .= shell_exec($php . ' -dhtml_errors=0 -i');
 
 		if ($just_save_results || !mail_qa_team($failed_tests_data, $compression, $status)) {
 			file_put_contents($output_file, $failed_tests_data);
@@ -1178,7 +1178,7 @@ TEST $file
 	}
 	fclose($fp);
 
-	$shortname = str_replace($cwd.'/', '', $file);
+	$shortname = str_replace($cwd . '/', '', $file);
 	$tested_file = $shortname;
 
 	if ($borked) {
@@ -1200,17 +1200,17 @@ TEST $file
 
 		if (isset($php_cgi)) {
 			$old_php = $php;
-			$php = $php_cgi .' -C ';
+			$php = $php_cgi . ' -C ';
 
-		} else if (!strncasecmp(PHP_OS, "win", 3) && file_exists(dirname($php) ."/php-cgi.exe")) {
+		} else if (!strncasecmp(PHP_OS, "win", 3) && file_exists(dirname($php) . "/php-cgi.exe")) {
 			$old_php = $php;
-			$php = realpath(dirname($php) ."/php-cgi.exe") .' -C ';
+			$php = realpath(dirname($php) . "/php-cgi.exe") . ' -C ';
 
 		} else {
 
-			if (file_exists(dirname($php)."/../../sapi/cgi/php-cgi")) {
+			if (file_exists(dirname($php) . "/../../sapi/cgi/php-cgi")) {
 				$old_php = $php;
-				$php = realpath(dirname($php)."/../../sapi/cgi/php-cgi") . ' -C ';
+				$php = realpath(dirname($php) . "/../../sapi/cgi/php-cgi") . ' -C ';
 			} else if (file_exists("./sapi/cgi/php-cgi")) {
 				$old_php = $php;
 				$php = realpath("./sapi/cgi/php-cgi") . ' -C ';
@@ -1829,7 +1829,7 @@ $output
 	show_result(implode('&', $restype), $tested, $tested_file, $info, $temp_filenames);
 
 	foreach ($restype as $type) {
-		$PHP_FAILED_TESTS[$type.'ED'][] = array (
+		$PHP_FAILED_TESTS[$type . 'ED'][] = array (
 						'name'      => $file,
 						'test_name' => (is_array($IN_REDIRECT) ? $IN_REDIRECT['via'] : '') . $tested . " [$tested_file]",
 						'output'    => $output_filename,
@@ -1842,7 +1842,7 @@ $output
 		$php = $old_php;
 	}
 
-	return $restype[0].'ED';
+	return $restype[0] . 'ED';
 }
 
 function comp_line($l1, $l2, $is_reg)
