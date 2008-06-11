@@ -1509,6 +1509,15 @@ PHP_FUNCTION(session_set_save_handler)
 
 	zend_alter_ini_entry("session.save_handler", sizeof("session.save_handler"), "user", sizeof("user")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 
+	mdata = PS(mod_data);
+
+	if (mdata) {
+		for (i = 0; i < 6; i++) {
+			zval_ptr_dtor(&mdata->names[i]);
+		}
+		efree(mdata);
+	}
+
 	mdata = emalloc(sizeof(*mdata));
 
 	for (i = 0; i < 6; i++) {
