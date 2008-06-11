@@ -69,16 +69,26 @@ resource(%d) of type (stream)
 resource(%d) of type (stream)
 
 -- Read and rewind first directory (argument supplied) --
-unicode(1) "."
-unicode(2) ".."
-unicode(9) "file1.tmp"
+array(3) {
+  [0]=>
+  unicode(1) "."
+  [1]=>
+  unicode(2) ".."
+  [2]=>
+  unicode(9) "file1.tmp"
+}
 NULL
 unicode(1) "."
 
 -- Read and rewind second directory (no argument supplied) --
-unicode(1) "."
-unicode(2) ".."
-unicode(9) "file2.tmp"
+array(3) {
+  [0]=>
+  unicode(1) "."
+  [1]=>
+  unicode(2) ".."
+  [2]=>
+  unicode(9) "file2.tmp"
+}
 NULL
 unicode(1) "."
 ===DONE===
