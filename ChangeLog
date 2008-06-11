@@ -1,3 +1,72 @@
+2008-06-10  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/magic_methods_002.phpt
+      ZendEngine2/tests/magic_methods_003.phpt
+      ZendEngine2/tests/magic_methods_004.phpt
+      ZendEngine2/tests/magic_methods_005.phpt
+      ZendEngine2/tests/magic_methods_006.phpt
+      ZendEngine2/tests/magic_methods_007.phpt
+      ZendEngine2/tests/magic_methods_008.phpt
+      ZendEngine2/tests/magic_methods_009.phpt
+      ZendEngine2/tests/magic_methods_010.phpt:
+      - Change E_COMPILE_ERROR to E_WARNING (for wrong visibility on magic
+      methods)
+
+2008-06-10  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/tests/phar_get_supported_signatures_001a.phpt
+      ext/phar/tests/phar_get_supported_signatures_001a.phpt
+      ext/phar/tests/phar_get_supported_signatures_002a.phpt
+      ext/phar/tests/phar_get_supported_signatures_002a.phpt:
+      
+      file phar_get_supported_signatures_001a.phpt was initially added on branch
+      PHP_5_3.
+
+    * (PHP_5_3)
+      ext/phar/phar.phar
+      ext/phar/phar_object.c
+      ext/phar/tests/bug45218_SLOWTEST.phpt
+      ext/phar/tests/bug45218_SLOWTEST.phpt:
+      fix PHP Bug #45218: PHAR archive built from directory limited by max open
+      file handles
+
+2008-06-10  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * ext/gd/tests/gd_info_error.phpt
+      ext/gd/tests/image_type_to_mime_type_error.phpt
+      ext/gd/tests/image_type_to_mime_type_variation2.phpt:
+      Written by Sanjay Mantoor and reviewed by Pierre.
+
+    * ext/gd/tests/gd_info_error.phpt
+      ext/gd/tests/gd_info_error.phpt
+      ext/gd/tests/image_type_to_mime_type_error.phpt
+      ext/gd/tests/image_type_to_mime_type_error.phpt
+      ext/gd/tests/image_type_to_mime_type_variation2.phpt
+      ext/gd/tests/image_type_to_mime_type_variation2.phpt:
+      
+      file gd_info_error.phpt was initially added on branch PHP_5_3.
+
+2008-06-10  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/util.c:
+      fix memleak on error
+
+2008-06-10  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      NEWS:
+      - BFN
+
+2008-06-10  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/head.c
+      ext/standard/head.c
+      ext/standard/head.c:
+      fix typo
+
 2008-06-09  Felipe Pena  <felipensp@gmail.com>
 
     * Makefile.global:

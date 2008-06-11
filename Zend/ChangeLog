@@ -1,3 +1,19 @@
+2008-06-10  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      zend_compile.c
+      tests/magic_methods_002.phpt
+      tests/magic_methods_003.phpt
+      tests/magic_methods_004.phpt
+      tests/magic_methods_005.phpt
+      tests/magic_methods_006.phpt
+      tests/magic_methods_007.phpt
+      tests/magic_methods_008.phpt
+      tests/magic_methods_009.phpt
+      tests/magic_methods_010.phpt:
+      - Change E_COMPILE_ERROR to E_WARNING (for wrong visibility on magic
+      methods)
+
 2008-06-09  Matt Wilmas  <php_lists@realplain.com>
 
     * zend_language_scanner.c
