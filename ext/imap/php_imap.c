@@ -1457,7 +1457,7 @@ PHP_FUNCTION(imap_list_full)
 }
 /* }}} */
 
-/* {{{ proto array imap_scan(resource stream_id, string ref, string pattern, string content)
+/* {{{ proto array imap_listscan(resource stream_id, string ref, string pattern, string content)
    Read list of mailboxes containing a certain string */
 PHP_FUNCTION(imap_listscan)
 {
