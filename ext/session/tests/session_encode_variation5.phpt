@@ -24,6 +24,9 @@ $_SESSION["data"] = &$array;
 var_dump(session_encode());
 var_dump(session_destroy());
 
+$array["foo"] = null;
+$array["blah"] = null;
+
 echo "Done";
 ob_end_flush();
 ?>
