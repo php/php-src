@@ -980,6 +980,10 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 				break;
 			}
 
+			if (is_binary($line)) {
+				$data = (binary)$data;
+			}
+
 			$data .= $line;
 		}
 	}
@@ -1601,7 +1605,11 @@ COMMAND $cmd
 	}
 
 	// Does the output match what is expected?
-	$output = str_replace("\r\n", "\n", trim($out));
+	if (is_binary($out)) {
+		$output = preg_replace(b'/\r\n/', b"\n", trim($out));
+	} else {
+		$output = str_replace("\r\n", "\n", trim($out));
+	}
 
 	/* when using CGI, strip the headers from the output */
 	$headers = "";
@@ -1688,8 +1696,14 @@ COMMAND $cmd
 		print(str_repeat('=', 80) . "\n");
 		var_dump($output);
 */
-		if (preg_match("/^$wanted_re\$/s", $output)) {
-			$passed = true;
+		if (is_binary($output)) {
+			if (preg_match((binary)"/^$wanted_re\$/s", $output)) {
+				$passed = true;
+			}
+		} else {
+			if (preg_match("/^$wanted_re\$/s", $output)) {
+				$passed = true;
+			}
 		}
 
 		if ($passed) {
@@ -1711,12 +1725,11 @@ COMMAND $cmd
 
 		$wanted = trim($section_text['EXPECT']);
 
-		if (is_unicode($wanted)) {
-			/* workaround until preg_replace() or str_replace() are upgraded */
-			$wanted = unicode_encode($wanted, ini_get('unicode.output_encoding') ?: 'utf-8');
+		if (is_binary($wanted)) {
+			$wanted = preg_replace(b'/\r\n/', b"\n", (binary)$wanted);
+		} else {
+			$wanted = preg_replace('/\r\n/', "\n", $wanted);
 		}
-
-		$wanted = preg_replace('/\r\n/', "\n", $wanted);
 
 		show_file_block('exp', $wanted);
 
@@ -1789,13 +1802,25 @@ COMMAND $cmd
 		}
 
 		// write .log
-		if (strpos($log_format,'L') !== false && file_put_contents($log_filename, "
+		if (is_binary($output)) {
+			$content = b"
 ---- EXPECTED OUTPUT
 $wanted
 ---- ACTUAL OUTPUT
 $output
 ---- FAILED
-") === false) {
+";
+		} else {
+			$content = "
+---- EXPECTED OUTPUT
+$wanted
+---- ACTUAL OUTPUT
+$output
+---- FAILED
+";
+		}
+
+		if (strpos($log_format, 'L') !== false && file_put_contents($log_filename, $content) === false) {
 			error("Cannot create test log - $log_filename");
 			error_report($file, $log_filename, $tested);
 		}
@@ -1823,8 +1848,19 @@ $output
 function comp_line($l1, $l2, $is_reg)
 {
 	if ($is_reg) {
+
+		if (is_binary($l2)) {
+			return preg_match((binary)"/^$l1\$/s", (binary)$l2);
+		}
+
 		return preg_match("/^$l1$/s", $l2);
+
 	} else {
+
+		if (is_binary($l2)) {
+			return !strcmp((binary)$l1, (binary)$l2);
+		}
+
 		return !strcmp($l1, $l2);
 	}
 }
@@ -1891,14 +1927,34 @@ function generate_array_diff($ar1, $ar2, $is_reg, $w)
 			$c2 = count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $idx2+1, $cnt1,  $cnt2, 10);
 
 			if ($c1 > $c2) {
-				$old1[$idx1] = sprintf("%03d- ", $idx1+1) . $w[$idx1++];
+
+				if (is_binary($w[$idx1])) {
+					$old1[$idx1] = (binary)sprintf("%03d- ", $idx1+1) . $w[$idx1++];
+				} else {
+					$old1[$idx1] = sprintf("%03d- ", $idx1+1) . $w[$idx1++];
+				}
+
 				$last = 1;
+
 			} else if ($c2 > 0) {
-				$old2[$idx2] = sprintf("%03d+ ", $idx2+1) . $ar2[$idx2++];
+
+				if (is_binary($ar2[$idx2])) {
+					$old2[$idx2] = (binary)sprintf("%03d+ ", $idx2+1) . $ar2[$idx2++];
+				} else {
+					$old2[$idx2] = sprintf("%03d+ ", $idx2+1) . $ar2[$idx2++];
+				}
+
 				$last = 2;
+
 			} else {
-				$old1[$idx1] = sprintf("%03d- ", $idx1+1) . $w[$idx1++];
-				$old2[$idx2] = sprintf("%03d+ ", $idx2+1) . $ar2[$idx2++];
+
+				if (is_binary($ar2[$idx2])) {
+					$old1[$idx1] = (binary)sprintf("%03d- ", $idx1+1) . $w[$idx1++];
+					$old2[$idx2] = (binary)sprintf("%03d+ ", $idx2+1) . $ar2[$idx2++];
+				} else {
+					$old1[$idx1] = sprintf("%03d- ", $idx1+1) . $w[$idx1++];
+					$old2[$idx2] = sprintf("%03d+ ", $idx2+1) . $ar2[$idx2++];
+				}
 			}
 		}
 	}
@@ -1940,10 +1996,21 @@ function generate_array_diff($ar1, $ar2, $is_reg, $w)
 
 function generate_diff($wanted, $wanted_re, $output)
 {
-	$w = explode("\n", $wanted);
-	$o = explode("\n", $output);
-	$r = is_null($wanted_re) ? $w : explode("\n", $wanted_re);
+	if (is_binary($output)) {
+		$w = explode(b"\n", $wanted);
+		$o = explode(b"\n", $output);
+		$r = is_null($wanted_re) ? $w : explode(b"\n", $wanted_re);
+	} else {
+		$w = explode("\n", $wanted);
+		$o = explode("\n", $output);
+		$r = is_null($wanted_re) ? $w : explode("\n", $wanted_re);
+	}
+
 	$diff = generate_array_diff($r, $o, !is_null($wanted_re), $w);
+
+	if (is_binary($output)) {
+		return implode(b"\r\n", $diff);
+	}
 
 	return implode("\r\n", $diff);
 }
