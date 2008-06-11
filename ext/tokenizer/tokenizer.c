@@ -170,6 +170,10 @@ PHP_FUNCTION(token_get_all)
 
 	tokenize(return_value TSRMLS_CC);
 	
+	while (!zend_stack_is_empty(&LANG_SCNG(state_stack))) {
+		zend_stack_del_top(&LANG_SCNG(state_stack));
+	}
+
 	zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 	zval_dtor(&source_z);
 }
