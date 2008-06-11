@@ -19,7 +19,7 @@ ob_end_clean();
 if (!stristr($phpinfo, "mysql support"))
 	printf("[001] ext/mysql should have exposed itself.\n");
 
-if (!stristr($phpinfo, "client api library version"))
+if (!stristr($phpinfo, "client api version"))
 	printf("[002] ext/mysql should have exposed the library version.\n");
 
 if (!stristr($phpinfo, "mysql.default_host"))
