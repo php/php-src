@@ -3,6 +3,8 @@
 ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_execute_data *execute_data;
+	zend_bool nested = 0;
+	zend_bool original_in_execution = EG(in_execution);
 	{%HELPER_VARS%}
 
 	{%INTERNAL_LABELS%}
@@ -11,6 +13,9 @@ ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 		return;
 	}
 
+	EG(in_execution) = 1;
+
+zend_vm_enter:
 	/* Initialize execute_data */
 	execute_data = (zend_execute_data *)zend_vm_stack_alloc(
 		sizeof(zend_execute_data) +
@@ -25,12 +30,12 @@ ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 	EX(object) = NULL;
 	EX(old_error_reporting) = NULL;
 	EX(op_array) = op_array;
-	EX(original_in_execution) = EG(in_execution);
 	EX(symbol_table) = EG(active_symbol_table);
 	EX(prev_execute_data) = EG(current_execute_data);
 	EG(current_execute_data) = execute_data;
+	EX(nested) = nested;
+	nested = 1;
 
-	EG(in_execution) = 1;
 	if (op_array->start_op) {
 		ZEND_VM_SET_OPCODE(op_array->start_op);
 	} else {
