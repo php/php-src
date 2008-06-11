@@ -84,11 +84,6 @@ while(@ob_end_clean());
 if (ob_get_level()) echo "Not all buffers were deleted.\n";
 
 error_reporting(E_ALL);
-ini_set('magic_quotes_runtime',0); // this would break tests by modifying EXPECT sections
-
-if (ini_get("unicode.semantics")) {
-	error("It is currently not possible to use run-tests.php with unicode.semantics=On. Please turn it Off and re-run the tests.");
-}
 
 $environment = isset($_ENV) ? $_ENV : array();
 
@@ -183,8 +178,11 @@ $ini_overwrites = array(
 		'error_append_string=',
 		'auto_prepend_file=',
 		'auto_append_file=',
-		'magic_quotes_runtime=0',
 		'ignore_repeated_errors=0',
+		'unicode.runtime_encoding=ISO-8859-1',
+		'unicode.script_encoding=UTF-8',
+		'unicode.output_encoding=UTF-8',
+		'unicode.from_error_mode=U_INVALID_SUBSTITUTE',
 	);
 
 function write_information($show_html)
@@ -217,9 +215,6 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 	}
 
 	@unlink($info_file);
-
-	$unicode = 1;
-	define('TESTED_UNICODE', 1);
 
 	// load list of enabled extensions
 	save_text($info_file, '<?php echo join(",", get_loaded_extensions()); ?>');
@@ -276,8 +271,6 @@ if ($compression) {
 
 $just_save_results = false;
 $leak_check = false;
-$unicode_and_native = false;
-$unicode_testing = false;
 $html_output = false;
 $html_file = null;
 $temp_source = null;
@@ -403,11 +396,6 @@ if (isset($argc) && $argc > 1) {
 					}
 					$pass_option_n = true;
 					break;
-				case 'N':
-					$unicode_and_native = false;
-					$unicode_testing = false;
-					$ini_overwrites[] = 'unicode.semantics=0';
-					break;
 				case '--no-clean':
 					$no_clean = true;
 					break;
@@ -439,17 +427,6 @@ if (isset($argc) && $argc > 1) {
 					break;
 				case '--temp-urlbase':
 					$temp_urlbase = $argv[++$i];
-					break;
-				case 'U':
-					$unicode_and_native = true;
-					// break;
-				case 'u':
-					$unicode_testing = true;
-					$ini_overwrites[] = 'unicode.semantics=1';
-					$ini_overwrites[] = 'unicode.runtime_encoding=iso-8859-1';
-					$ini_overwrites[] = 'unicode.script_encoding=utf-8';
-					$ini_overwrites[] = 'unicode.output_encoding=utf-8';
-					$ini_overwrites[] = 'unicode.from_error_mode=U_INVALID_SUBSTITUTE';
 					break;
 				case 'v':
 				case '--verbose':
@@ -499,13 +476,7 @@ Options:
     -d foo=bar  Pass -d option to the php binary (Define INI entry foo
                 with value 'bar').
 
-    -u          Test with unicode.semantics set on.
-
-    -U          Test in unicode and non unicode mode.
-
     -m          Test for memory leaks with Valgrind.
-
-    -N          Test with unicode.semantics set off.
 
     -p <php>    Specify PHP executable to run.
     
@@ -800,7 +771,7 @@ if ($just_save_results || !getenv('NO_INTERACTION')) {
 		if ($sum_results['FAILED']) {
 
 			foreach ($PHP_FAILED_TESTS['FAILED'] as $test_info) {
-				$failed_tests_data .= $sep . ($test_info['unicode']?'U:':'N:') . $test_info['name'] . $test_info['info'];
+				$failed_tests_data .= $sep . $test_info['name'] . $test_info['info'];
 				$failed_tests_data .= $sep . file_get_contents(realpath($test_info['output']));
 				$failed_tests_data .= $sep . file_get_contents(realpath($test_info['diff']));
 				$failed_tests_data .= $sep . "\n\n";
@@ -1025,11 +996,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 
 function run_all_tests($test_files, $env, $redir_tested = null)
 {
-	global $test_results, $failed_tests_file, $php, $test_cnt, $test_idx, $unicode_and_native, $unicode_testing;
-
-	if ($unicode_and_native && is_null($redir_tested)) {
-		$test_cnt *= 2;
-	}
+	global $test_results, $failed_tests_file, $php, $test_cnt, $test_idx;
 
 	foreach($test_files as $name) {
 
@@ -1046,23 +1013,14 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 			$index = $name;
 		}
 
-		$unicode_semantics = $unicode_and_native ? 0 : ($unicode_testing ? 1 : 0);
-		for(; $unicode_semantics < ($unicode_testing ? 2 : 1); $unicode_semantics++) {
+		$test_idx++;
+		$result = run_test($php, $name, $env);
 
-			$test_idx++;
-			$result = run_test($php, $name, $env, $unicode_semantics);
+		if (!is_array($name) && $result != 'REDIR') {
+			$test_results[$index] = $result;
 
-			if (!is_array($name) && $result != 'REDIR') {
-				$pu = $unicode_and_native && $unicode_semantics ? '.u' : '';
-				$test_results[$index.$pu] = $result;
-
-				if ($failed_tests_file && ($result== 'XFAILED' || $result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED')) {
-					fwrite($failed_tests_file, "$index\n");
-				}
-			}
-
-			if ($result == 'REDIR') {
-				$unicode_semantics = 2;
+			if ($failed_tests_file && ($result== 'XFAILED' || $result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED')) {
+				fwrite($failed_tests_file, "$index\n");
 			}
 		}
 	}
@@ -1090,13 +1048,12 @@ function show_file_block($file, $block, $section = null)
 //
 //  Run an individual test case.
 //
-function run_test($php, $file, $env, $unicode_semantics)
+function run_test($php, $file, $env)
 {
 	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS;
 	global $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx;
 	global $leak_check, $temp_source, $temp_target, $cfg, $environment;
 	global $no_clean;
-	global $unicode_and_native;
 	global $valgrind_version;
 
 	$temp_filenames = null;
@@ -1213,28 +1170,21 @@ TEST $file
 				$bork_info = "missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX--";
 				$borked = true;
 			}
-
-			if ((@count($section_text['UEXPECT']) + @count($section_text['UEXPECTF']) + @count($section_text['UEXPECTREGEX'])) > 1) {
-				$bork_info = "missing section --UEXPECT--, --UEXPECTF-- or --UEXPECTREGEX--";
-				$borked = true;
-			}
 		}
 	}
-
 	fclose($fp);
 
 	$shortname = str_replace($cwd.'/', '', $file);
 	$tested_file = $shortname;
 
 	if ($borked) {
-		show_result("BORK", $bork_info, $tested_file, $unicode_semantics);
+		show_result("BORK", $bork_info, $tested_file);
 		$PHP_FAILED_TESTS['BORKED'][] = array (
 								'name'      => $file,
 								'test_name' => '',
 								'output'    => '',
 								'diff'      => '',
 								'info'      => "$bork_info [$file]",
-								'unicode'   => $unicode_semantics,
 		);
 		return 'BORKED';
 	}
@@ -1267,7 +1217,7 @@ TEST $file
 		}
 	}
 
-	show_test($test_idx, $shortname, $unicode_semantics);
+	show_test($test_idx, $shortname);
 
 	if (is_array($IN_REDIRECT)) {
 		$temp_dir = $test_dir = $IN_REDIRECT['dir'];
@@ -1279,19 +1229,17 @@ TEST $file
 		$temp_dir = str_replace($temp_source, $temp_target, $temp_dir);
 	}
 
-	$pu = $unicode_semantics ? 'u.' : '';
-
-	$diff_filename     = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'diff';
-	$log_filename      = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'log';
-	$exp_filename      = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'exp';
-	$output_filename   = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'out';
-	$memcheck_filename = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'mem';
-	$temp_file         = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt')/*.$pu*/.'php';
-	$test_file         = $test_dir . DIRECTORY_SEPARATOR . basename($file,'phpt')/*.$pu*/.'php';
-	$temp_skipif       = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'skip.php';
-	$test_skipif       = $test_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'skip.php';
-	$temp_clean        = $temp_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'clean.php';
-	$test_clean        = $test_dir . DIRECTORY_SEPARATOR . basename($file,'phpt').$pu.'clean.php';
+	$diff_filename     = $temp_dir . DIRECTORY_SEPARATOR . basename($file, 'phpt') . 'diff';
+	$log_filename      = $temp_dir . DIRECTORY_SEPARATOR . basename($file, 'phpt') . 'log';
+	$exp_filename      = $temp_dir . DIRECTORY_SEPARATOR . basename($file, 'phpt') . 'exp';
+	$output_filename   = $temp_dir . DIRECTORY_SEPARATOR . basename($file, 'phpt') . 'out';
+	$memcheck_filename = $temp_dir . DIRECTORY_SEPARATOR . basename($file, 'phpt') . 'mem';
+	$temp_file         = $temp_dir . DIRECTORY_SEPARATOR . basename($file, 'phpt') . 'php';
+	$test_file         = $test_dir . DIRECTORY_SEPARATOR . basename($file, 'phpt') . 'php';
+	$temp_skipif       = $temp_dir . DIRECTORY_SEPARATOR . basename($file, 'phpt') . 'skip.php';
+	$test_skipif       = $test_dir . DIRECTORY_SEPARATOR . basename($file, 'phpt') . 'skip.php';
+	$temp_clean        = $temp_dir . DIRECTORY_SEPARATOR . basename($file, 'phpt') . 'clean.php';
+	$test_clean        = $test_dir . DIRECTORY_SEPARATOR . basename($file, 'phpt') . 'clean.php';
 	$tmp_post          = $temp_dir . DIRECTORY_SEPARATOR . uniqid('/phpt.');
 	$tmp_relative_file = str_replace(__DIR__ . DIRECTORY_SEPARATOR, '', $test_file) . 't';
 
@@ -1366,10 +1314,6 @@ TEST $file
 	// additional ini overwrites
 	//$ini_overwrites[] = 'setting=value';
 	settings2array($ini_overwrites, $ini_settings);
-	// is this unicode/native per run-tests.php switch?
-	if ($unicode_and_native) {
-		$ini_settings["unicode.semantics"] = $unicode_semantics ? '1' : '0';
-	}
 	// Any special ini settings 
 	// these may overwrite the test defaults...
 	if (array_key_exists('INI', $section_text)) {
@@ -1377,13 +1321,6 @@ TEST $file
 			$section_text['INI'] = str_replace('{PWD}', dirname($file), $section_text['INI']);
 		}
 		settings2array(preg_split( "/[\n\r]+/", $section_text['INI']), $ini_settings);
-		if (isset($ini_settings["unicode.semantics"])) {
-			$unicode_test = strcasecmp($ini_settings["unicode.semantics"],"on") == 0 || $ini_settings["unicode.semantics"] == 1;
-		} else {
-			$unicode_test = TESTED_UNICODE;
-		}
-	} else {
-		$unicode_test = $unicode_and_native ? $unicode_semantics : TESTED_UNICODE;
 	}
 
 	settings2params($ini_settings);
@@ -1400,8 +1337,6 @@ TEST $file
 			$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
 				"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;": "";
 
-			$ini_settings .= " -dunicode.semantics=" . (int)$unicode_test;
-
 			if ($leak_check) {
 				$env['USE_ZEND_ALLOC'] = '0';
 			} else {
@@ -1417,9 +1352,9 @@ TEST $file
 			if (!strncasecmp('skip', ltrim($output), 4)) {
 
 				if (preg_match('/^\s*skip\s*(.+)\s*/i', $output, $m)) {
-					show_result("SKIP", $tested, $tested_file, $unicode_semantics, "reason: $m[1]", $temp_filenames);
+					show_result("SKIP", $tested, $tested_file, "reason: $m[1]", $temp_filenames);
 				} else {
-					show_result("SKIP", $tested, $tested_file, $unicode_semantics, '', $temp_filenames);
+					show_result("SKIP", $tested, $tested_file, '', $temp_filenames);
 				}
 
 				if (isset($old_php)) {
@@ -1469,7 +1404,7 @@ TEST $file
 				}
 			}
 
-			$test_cnt += (count($test_files) - 1) * ($unicode_and_native ? 2 : 1);
+			$test_cnt += (count($test_files) - 1);
 			$test_idx--;
 			show_redirect_start($IN_REDIRECT['TESTS'], $tested, $tested_file);
 
@@ -1488,14 +1423,13 @@ TEST $file
 		} else {
 
 			$bork_info = "Redirect info must contain exactly one TEST string to be used as redirect directory.";
-			show_result("BORK", $bork_info, '', $unicode_semantics, $temp_filenames);
+			show_result("BORK", $bork_info, '', $temp_filenames);
 			$PHP_FAILED_TESTS['BORKED'][] = array (
 									'name' => $file,
 									'test_name' => '',
 									'output' => '',
 									'diff'   => '',
 									'info'   => "$bork_info [$file]",
-									'unicode'=> $unicode_semantics,
 			);
 		}
 	}
@@ -1507,38 +1441,15 @@ TEST $file
 		}
 
 		$bork_info = "Redirected test did not contain redirection info";
-		show_result("BORK", $bork_info, '', $unicode_semantics, $temp_filenames);
+		show_result("BORK", $bork_info, '', $temp_filenames);
 		$PHP_FAILED_TESTS['BORKED'][] = array (
 								'name' => $file,
 								'test_name' => '',
 								'output' => '',
 								'diff'   => '',
 								'info'   => "$bork_info [$file]",
-								'unicode'=> $unicode_semantics,
 		);
 		return 'BORKED';
-	}
-
-	if ($unicode_test) {
-		if (isset($section_text['UEXPECT'])) {
-			unset($section_text['EXPECT']);
-			unset($section_text['EXPECTF']);
-			unset($section_text['EXPECTREGEX']);
-			$section_text['EXPECT'] = $section_text['UEXPECT'];
-			unset($section_text['UEXPECT']);
-		} else if (isset($section_text['UEXPECTF'])) {
-			unset($section_text['EXPECT']);
-			unset($section_text['EXPECTF']);
-			unset($section_text['EXPECTREGEX']);
-			$section_text['EXPECTF'] = $section_text['UEXPECTF'];
-			unset($section_text['UEXPECTF']);
-		} else if (isset($section_text['UEXPECTREGEX'])) {
-			unset($section_text['EXPECT']);
-			unset($section_text['EXPECTF']);
-			unset($section_text['EXPECTREGEX']);
-			$section_text['EXPECTREGEX'] = $section_text['UEXPECTREGEX'];
-			unset($section_text['UEXPECTREGEX']);
-		}
 	}
 
 	// We've satisfied the preconditions - run the test!
@@ -1791,7 +1702,7 @@ COMMAND $cmd
 			}
 
 			if (!$leaked && !$failed_headers) {
-				show_result("PASS", $tested, $tested_file, $unicode_semantics, '', $temp_filenames);
+				show_result("PASS", $tested, $tested_file, '', $temp_filenames);
 				return 'PASSED';
 			}
 		}
@@ -1800,12 +1711,13 @@ COMMAND $cmd
 
 		$wanted = trim($section_text['EXPECT']);
 
-		if ($unicode_semantics && is_unicode($wanted)) {
+		if (is_unicode($wanted)) {
 			/* workaround until preg_replace() or str_replace() are upgraded */
 			$wanted = unicode_encode($wanted, ini_get('unicode.output_encoding') ?: 'utf-8');
 		}
 
-		$wanted = preg_replace('/\r\n/',"\n",$wanted);
+		$wanted = preg_replace('/\r\n/', "\n", $wanted);
+
 		show_file_block('exp', $wanted);
 
 		// compare and leave on success
@@ -1821,7 +1733,7 @@ COMMAND $cmd
 			}
 
 			if (!$leaked && !$failed_headers) {
-				show_result("PASS", $tested, $tested_file, $unicode_semantics, '', $temp_filenames);
+				show_result("PASS", $tested, $tested_file, '', $temp_filenames);
 				return 'PASSED';
 			}
 		}
@@ -1889,7 +1801,7 @@ $output
 		}
 	}
 
-	show_result(implode('&', $restype), $tested, $tested_file, $unicode_semantics, $info, $temp_filenames);
+	show_result(implode('&', $restype), $tested, $tested_file, $info, $temp_filenames);
 
 	foreach ($restype as $type) {
 		$PHP_FAILED_TESTS[$type.'ED'][] = array (
@@ -1898,7 +1810,6 @@ $output
 						'output'    => $output_filename,
 						'diff'      => $diff_filename,
 						'info'      => $info,
-						'unicode'   => $unicode_semantics,
 						);
 	}
 
@@ -2174,7 +2085,7 @@ BORKED TEST SUMMARY
 ---------------------------------------------------------------------
 ";
 		foreach ($PHP_FAILED_TESTS['BORKED'] as $test_data) {
-			$failed_test_summary .= ($test_data['unicode']?'U:':'N:') . $test_data['info'] . "\n";
+			$failed_test_summary .= $test_data['info'] . "\n";
 		}
 
 		$failed_test_summary .=  "=====================================================================\n";
@@ -2187,7 +2098,7 @@ FAILED TEST SUMMARY
 ---------------------------------------------------------------------
 ";
 		foreach ($PHP_FAILED_TESTS['FAILED'] as $test_data) {
-			$failed_test_summary .= ($test_data['unicode']?'U:':'N:') . $test_data['test_name'] . $test_data['info'] . "\n";
+			$failed_test_summary .= $test_data['test_name'] . $test_data['info'] . "\n";
 		}
 
 		$failed_test_summary .=  "=====================================================================\n";
@@ -2200,7 +2111,7 @@ EXPECTED FAILED TEST SUMMARY
 ---------------------------------------------------------------------
 ";
 		foreach ($PHP_FAILED_TESTS['XFAILED'] as $test_data) {
-			$failed_test_summary .= ($test_data['unicode']?'U:':'N:') . $test_data['test_name'] . $test_data['info'] . "\n";
+			$failed_test_summary .= $test_data['test_name'] . $test_data['info'] . "\n";
 		}
 
 		$failed_test_summary .=  "=====================================================================\n";
@@ -2213,7 +2124,7 @@ LEAKED TEST SUMMARY
 ---------------------------------------------------------------------
 ";
 		foreach ($PHP_FAILED_TESTS['LEAKED'] as $test_data) {
-			$failed_test_summary .= ($test_data['unicode']?'U:':'N:') . $test_data['test_name'] . $test_data['info'] . "\n";
+			$failed_test_summary .= $test_data['test_name'] . $test_data['info'] . "\n";
 		}
 
 		$failed_test_summary .=  "=====================================================================\n";
@@ -2287,22 +2198,19 @@ function show_redirect_ends($tests, $tested, $tested_file)
 	echo "---> $tests ($tested [$tested_file]) done\n";
 }
 
-function show_test($test_idx, $shortname, $unicode_semantics)
+function show_test($test_idx, $shortname)
 {
 	global $test_cnt;
 
-	$kind = $unicode_semantics ? ':U' : ':N';
-	echo "TEST$kind $test_idx/$test_cnt [$shortname]\r";
+	echo "TEST $test_idx/$test_cnt [$shortname]\r";
 	flush();
 }
 
-function show_result($result, $tested, $tested_file, $unicode_semantics, $extra = '', $temp_filenames = null)
+function show_result($result, $tested, $tested_file, $extra = '', $temp_filenames = null)
 {
-	global $html_output, $html_file, $temp_target, $temp_urlbase, $unicode_and_native;
+	global $html_output, $html_file, $temp_target, $temp_urlbase;
 
-	$kind = $unicode_semantics ? ':U' : ':N';
-
-	echo "$result$kind $tested [$tested_file] $extra\n";
+	echo "$result $tested [$tested_file] $extra\n";
 
 	if ($html_output) {
 
