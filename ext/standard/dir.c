@@ -282,6 +282,11 @@ PHP_FUNCTION(closedir)
 
 	FETCH_DIRP();
 
+	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a valid Directory resource", dirp->rsrc_id);
+		RETURN_FALSE;
+	}
+
 	rsrc_id = dirp->rsrc_id;
 	zend_list_delete(dirp->rsrc_id);
 
@@ -384,6 +389,11 @@ PHP_FUNCTION(rewinddir)
 	
 	FETCH_DIRP();
 
+	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a valid Directory resource", dirp->rsrc_id);
+		RETURN_FALSE;
+	}
+
 	php_stream_rewinddir(dirp);
 }
 /* }}} */
@@ -397,6 +407,11 @@ PHP_NAMED_FUNCTION(php_if_readdir)
 	php_stream_dirent entry;
 
 	FETCH_DIRP();
+
+	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a valid Directory resource", dirp->rsrc_id);
+		RETURN_FALSE;
+	}
 
 	if (php_stream_readdir(dirp, &entry)) {
 		RETURN_RT_STRINGL(entry.d_name, strlen(entry.d_name), ZSTR_DUPLICATE);
