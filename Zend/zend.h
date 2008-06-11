@@ -177,6 +177,14 @@ char *alloca ();
 # define ZEND_ATTRIBUTE_PTR_FORMAT(type, idx, first)
 #endif
 
+#if defined(__GNUC__) && ZEND_GCC_VERSION >= 3400 && defined(__i386__)
+# define ZEND_FASTCALL __attribute__((fastcall))
+#elif defined(_MSC_VER) && defined(_M_IX86)
+# define ZEND_FASTCALL __fastcall
+#else
+# define ZEND_FASTCALL
+#endif
+
 #if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(ZEND_WIN32)) && !(defined(ZTS) && defined(NETWARE)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
 # define ZEND_ALLOCA_MAX_SIZE (32 * 1024)
 # define ALLOCA_FLAG(name) \

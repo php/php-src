@@ -73,7 +73,8 @@ typedef struct _zend_execute_data zend_execute_data;
 #define ZEND_OPCODE_HANDLER_ARGS zend_execute_data *execute_data TSRMLS_DC
 #define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU execute_data TSRMLS_CC
 
-typedef int (*opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);
+typedef int (*user_opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);
+typedef int (ZEND_FASTCALL *opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);
 
 extern ZEND_API opcode_handler_t *zend_opcode_handlers;
 
@@ -310,10 +311,16 @@ struct _zend_execute_data {
 	zval *object;
 	union _temp_variable *Ts;
 	zval ***CVs;
-	zend_bool original_in_execution;
 	HashTable *symbol_table;
 	struct _zend_execute_data *prev_execute_data;
 	zval *old_error_reporting;
+	zend_bool nested;
+	zval **original_return_value;
+	zend_class_entry *current_scope;
+	zend_class_entry *current_called_scope;
+	zval *current_this;
+	zval *current_object;
+	struct _zend_op *call_opline;
 };
 
 #define EX(element) execute_data.element

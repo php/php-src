@@ -1422,29 +1422,9 @@ ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, int return_v
 #define ZEND_VM_INC_OPCODE() \
 	EX(opline)++
 
-#define ZEND_VM_EXIT_FROM_EXECUTE_LOOP() do { \
-		EG(in_execution) = EX(original_in_execution); \
-		EG(current_execute_data) = EX(prev_execute_data); \
-		EG(opline_ptr) = NULL; \
-		if (!EG(active_symbol_table)) { \
-			int n = EX(op_array)->last_var; \
-			while (n > 0) { \
-				--n; \
-				if (EX(CVs)[n]) { \
-					zval_ptr_dtor(EX(CVs)[n]); \
-				} \
-			} \
-		} \
-		zend_vm_stack_free(execute_data TSRMLS_CC); \
-	} while (0);
-
-#define ZEND_VM_RETURN_FROM_EXECUTE_LOOP() \
-	ZEND_VM_EXIT_FROM_EXECUTE_LOOP(); \
-	ZEND_VM_RETURN()
-
 #include "zend_vm_execute.h"
 
-ZEND_API int zend_set_user_opcode_handler(zend_uchar opcode, opcode_handler_t handler) /* {{{ */
+ZEND_API int zend_set_user_opcode_handler(zend_uchar opcode, user_opcode_handler_t handler) /* {{{ */
 {
 	if (opcode != ZEND_USER_OPCODE) {
 		zend_user_opcodes[opcode] = ZEND_USER_OPCODE;
@@ -1455,7 +1435,7 @@ ZEND_API int zend_set_user_opcode_handler(zend_uchar opcode, opcode_handler_t ha
 }
 /* }}} */
 
-ZEND_API opcode_handler_t zend_get_user_opcode_handler(zend_uchar opcode) /* {{{ */
+ZEND_API user_opcode_handler_t zend_get_user_opcode_handler(zend_uchar opcode) /* {{{ */
 {
 	return zend_user_opcode_handlers[opcode];
 }
