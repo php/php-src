@@ -22,7 +22,7 @@
 # define PHAR_GET_32(buffer) (((((unsigned char*)(buffer))[3]) << 24) \
 		| ((((unsigned char*)(buffer))[2]) << 16) \
 		| ((((unsigned char*)(buffer))[1]) <<  8) \
-		| (((unsigned char*)(buffer))[0])))
+		| (((unsigned char*)(buffer))[0]))
 # define PHAR_GET_16(buffer) (((((unsigned char*)(buffer))[1]) <<  8) \
 		| (((unsigned char*)(buffer))[0]))
 # define PHAR_SET_32(buffer) PHAR_GET_32(buffer)
