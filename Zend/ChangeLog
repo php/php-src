@@ -1,3 +1,34 @@
+2008-06-11  Felipe Pena  <felipensp@gmail.com>
+
+    * tests/bug45147.phpt:
+      - New test
+
+    * tests/bug45147.phpt
+      tests/bug45147.phpt:
+      
+      file bug45147.phpt was initially added on branch PHP_5_3.
+
+2008-06-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.h
+      zend.h
+      zend_compile.h
+      zend_compile.h
+      zend_execute.c
+      zend_execute.c
+      zend_execute.h
+      zend_execute.h
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_execute.skl
+      zend_vm_execute.skl
+      zend_vm_gen.php
+      zend_vm_gen.php:
+      - Removed direct executor recursion.
+      - Use fastcall calling convention in executor on x86.
+
 2008-06-10  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
