@@ -1,5 +1,6 @@
 #!/usr/bin/php
 <?php
+putenv('TEST_PHP_EXECUTABLE=C:/sandbox/php6/Debug_TS/php.exe');
 /*
    +----------------------------------------------------------------------+
    | PHP Version 6                                                        |
@@ -153,7 +154,7 @@ if (getenv('TEST_PHP_DETAILED')) {
 
 // Check whether user test dirs are requested.
 if (getenv('TEST_PHP_USER')) {
-	$user_tests = explode (', ', getenv('TEST_PHP_USER'));
+	$user_tests = explode (',', getenv('TEST_PHP_USER'));
 } else {
 	$user_tests = array();
 }
@@ -448,8 +449,7 @@ if (isset($argc) && $argc > 1) {
 					echo '$Revision$' . "\n";
 					exit(1);
 				default:
-					echo "Illegal switch specified!\n";
-					//break
+					echo "Illegal switch '$switch' specified!\n";
 				case 'h':
 				case '-help':
 				case '--help':
@@ -900,12 +900,12 @@ function save_text($filename, $text, $filename_copy = null)
 	global $DETAILED;
 
 	if ($filename_copy && $filename_copy != $filename) {
-		if (@file_put_contents($filename_copy, $text) === false) {
+		if (@file_put_contents($filename_copy, $text, FILE_BINARY) === false) {
 			error("Cannot open file '" . $filename_copy . "' (save_text)");
 		}
 	}
 
-	if (@file_put_contents($filename, $text) === false) {
+	if (@file_put_contents($filename, $text, FILE_BINARY) === false) {
 		error("Cannot open file '" . $filename . "' (save_text)");
 	}
 
@@ -1725,7 +1725,7 @@ COMMAND $cmd
 
 		$wanted = trim($section_text['EXPECT']);
 
-		if (is_binary($wanted)) {
+		if (is_binary($output)) {
 			$wanted = preg_replace(b'/\r\n/', b"\n", (binary)$wanted);
 		} else {
 			$wanted = preg_replace('/\r\n/', "\n", $wanted);
