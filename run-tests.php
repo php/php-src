@@ -1783,7 +1783,7 @@ COMMAND $cmd
 	if (!$passed) {
 
 		// write .exp
-		if (strpos($log_format, 'E') !== false && file_put_contents($exp_filename, $wanted) === false) {
+		if (strpos($log_format, 'E') !== false && file_put_contents($exp_filename, (binary)$wanted, FILE_BINARY) === false) {
 			error("Cannot create expected test output - $exp_filename");
 		}
 
@@ -1796,7 +1796,7 @@ COMMAND $cmd
 		$diff = generate_diff($wanted, $wanted_re, $output);
 		show_file_block('diff', $diff);
 
-		if (strpos($log_format, 'D') !== false && file_put_contents($diff_filename, $diff) === false) {
+		if (strpos($log_format, 'D') !== false && file_put_contents($diff_filename, (binary)$diff, FILE_BINARY) === false) {
 			error("Cannot create test diff - $diff_filename");
 		}
 
@@ -2008,10 +2008,10 @@ function generate_diff($wanted, $wanted_re, $output)
 	$diff = generate_array_diff($r, $o, !is_null($wanted_re), $w);
 
 	if (is_binary($output)) {
-		return implode(b"\r\n", $diff);
+		return implode(b"\n", $diff);
 	}
 
-	return implode("\r\n", $diff);
+	return implode("\n", $diff);
 }
 
 function error($message)
