@@ -75,6 +75,7 @@ typedef struct _spl_fastarray_it { /* {{{ */
 static void spl_fastarray_init(spl_fastarray *array, long size TSRMLS_DC) /* {{{ */
 {
 	if (size > 0) {
+		array->size = 0; /* reset size in case ecalloc() fails */
 		array->elements = ecalloc(size, sizeof(zval *));
 		array->size = size;
 	} else {
@@ -198,7 +199,7 @@ static void spl_fastarray_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 			}
 		}
 
-		if (intern->array->elements) {
+		if (intern->array->size > 0 && intern->array->elements) {
 			efree(intern->array->elements);
 		}
 		efree(intern->array);
