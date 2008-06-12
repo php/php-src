@@ -137,6 +137,9 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	HashTable   phar_alias_map;
 	HashTable   phar_SERVER_mung_list;
 	int         readonly;
+	char*       cache_list;
+	int         manifest_cached;
+	int         persist;
 	int         has_zlib;
 	int         has_bz2;
 	zend_bool   readonly_orig;
@@ -228,6 +231,7 @@ typedef struct _phar_entry_info {
 	/* when changing compression, save old flags in case fp is NULL */
 	php_uint32               old_flags;
 	zval                     *metadata;
+	int                      metadata_len; /* only used for cached manifests */
 	php_uint32               filename_len;
 	char                     *filename;
 	enum phar_fp_type        fp_type;
@@ -258,6 +262,8 @@ typedef struct _phar_entry_info {
 	char                     tar_type;
 	/* zip-based phar file stuff */
 	int                      is_zip:1;
+	/* for cached phar entries */
+	int                      is_persistent:1;
 } phar_entry_info;
 
 /* information about a phar file (the archive itself) */
@@ -286,6 +292,7 @@ struct _phar_archive_data {
 	int                      sig_len;
 	char                     *signature;
 	zval                     *metadata;
+	int                      metadata_len; /* only used for cached manifests */
 	/* if 1, then this alias was manually specified by the user and is not a permanent alias */
 	int                      is_temporary_alias:1;
 	int                      is_modified:1;
@@ -299,6 +306,8 @@ struct _phar_archive_data {
 	int                      is_tar:1;
 	/* PharData variables       */
 	int                      is_data:1;
+	/* for cached phar manifests */
+	int                      is_persistent:1;
 };
 
 #define PHAR_MIME_PHP '\0'

@@ -214,11 +214,12 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 	hdr = (tar_header*)buf;
 	old = (memcmp(hdr->magic, "ustar", sizeof("ustar")-1) != 0);
 
-	myphar = (phar_archive_data *) ecalloc(1, sizeof(phar_archive_data));
+	myphar = (phar_archive_data *) pecalloc(1, sizeof(phar_archive_data), PHAR_G(persist));
+	myphar->is_persistent = PHAR_G(persist);
 	zend_hash_init(&myphar->manifest, sizeof(phar_entry_info),
-		zend_get_hash_value, destroy_phar_manifest_entry, 0);
+		zend_get_hash_value, destroy_phar_manifest_entry, myphar->is_persistent);
 	zend_hash_init(&myphar->mounted_dirs, sizeof(char *),
-		zend_get_hash_value, NULL, 0);
+		zend_get_hash_value, NULL, myphar->is_persistent);
 	myphar->is_tar = 1;
 	/* remember whether this entire phar was compressed with gz/bzip2 */
 	myphar->flags = compression;
@@ -257,9 +258,9 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 				/* some tar programs store directories with trailing slash */
 				entry.filename_len--;
 			}
-			entry.filename = estrndup(name, entry.filename_len);
+			entry.filename = pestrndup(name, entry.filename_len, myphar->is_persistent);
 		} else {
-			entry.filename = estrdup(hdr->name);
+			entry.filename = pestrdup(hdr->name, myphar->is_persistent);
 			entry.filename_len = strlen(entry.filename);
 			if (entry.filename[entry.filename_len - 1] == '/') {
 				/* some tar programs store directories with trailing slash */
@@ -271,13 +272,13 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 			if (error) {
 				spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (checksum mismatch of file \"%s\")", fname, entry.filename);
 			}
-			efree(entry.filename);
+			pefree(entry.filename, myphar->is_persistent);
 			php_stream_close(fp);
 			zend_hash_destroy(&myphar->manifest);
 			myphar->manifest.arBuckets = 0;
 			zend_hash_destroy(&myphar->mounted_dirs);
 			myphar->mounted_dirs.arBuckets = 0;
-			efree(myphar);
+			pefree(myphar, myphar->is_persistent);
 			return FAILURE;
 		}
 
@@ -286,6 +287,7 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 		entry.fp_type = PHAR_FP;
 		entry.flags = phar_tar_number(hdr->mode, sizeof(hdr->mode)) & PHAR_ENT_PERM_MASK;
 		entry.timestamp = phar_tar_number(hdr->mtime, sizeof(hdr->mtime));
+		entry.is_persistent = myphar->is_persistent;
 
 #ifndef S_ISDIR
 #define S_ISDIR(mode)	(((mode)&S_IFMT) == S_IFDIR)
@@ -305,13 +307,13 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 				if (error) {
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file - hard link to non-existent file \"%s\"", fname, hdr->linkname);
 				}
-				efree(entry.filename);
+				pefree(entry.filename, entry.is_persistent);
 				php_stream_close(fp);
 				zend_hash_destroy(&myphar->manifest);
 				myphar->manifest.arBuckets = 0;
 				zend_hash_destroy(&myphar->mounted_dirs);
 				myphar->mounted_dirs.arBuckets = 0;
-				efree(myphar);
+				pefree(myphar, entry.is_persistent);
 				return FAILURE;
 			}
 			entry.link = estrdup(hdr->linkname);
@@ -329,7 +331,7 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 				myphar->manifest.arBuckets = 0;
 				zend_hash_destroy(&myphar->mounted_dirs);
 				myphar->mounted_dirs.arBuckets = 0;
-				efree(myphar);
+				pefree(myphar, myphar->is_persistent);
 				return FAILURE;
 			}
 		}
@@ -345,7 +347,7 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 				myphar->manifest.arBuckets = 0;
 				zend_hash_destroy(&myphar->mounted_dirs);
 				myphar->mounted_dirs.arBuckets = 0;
-				efree(myphar);
+				pefree(myphar, myphar->is_persistent);
 				return FAILURE;
 			}
 			read = php_stream_read(fp, buf, size);
@@ -366,10 +368,10 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 					myphar->manifest.arBuckets = 0;
 					zend_hash_destroy(&myphar->mounted_dirs);
 					myphar->mounted_dirs.arBuckets = 0;
-					efree(myphar);
+					pefree(myphar, myphar->is_persistent);
 					return FAILURE;
 				}
-				actual_alias = estrndup(buf, size);
+				actual_alias = pestrndup(buf, size, myphar->is_persistent);
 				myphar->alias = actual_alias;
 				myphar->alias_len = size;
 				php_stream_seek(fp, pos, SEEK_SET);
@@ -382,7 +384,7 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 				myphar->manifest.arBuckets = 0;
 				zend_hash_destroy(&myphar->mounted_dirs);
 				myphar->mounted_dirs.arBuckets = 0;
-				efree(myphar);
+				pefree(myphar, myphar->is_persistent);
 				return FAILURE;
 			}
 		}
@@ -399,7 +401,7 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 				myphar->manifest.arBuckets = 0;
 				zend_hash_destroy(&myphar->mounted_dirs);
 				myphar->mounted_dirs.arBuckets = 0;
-				efree(myphar);
+				pefree(myphar, myphar->is_persistent);
 				return FAILURE;
 			}
 		}
@@ -413,11 +415,11 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 			myphar->manifest.arBuckets = 0;
 			zend_hash_destroy(&myphar->mounted_dirs);
 			myphar->mounted_dirs.arBuckets = 0;
-			efree(myphar);
+			pefree(myphar, myphar->is_persistent);
 			return FAILURE;
 		}
 	} while (read != 0);
-	myphar->fname = estrndup(fname, fname_len);
+	myphar->fname = pestrndup(fname, fname_len, myphar->is_persistent);
 #ifdef PHP_WIN32
 	phar_unixify_path_separators(myphar->fname, fname_len);
 #endif
@@ -449,7 +451,7 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 		myphar->manifest.arBuckets = 0;
 		zend_hash_destroy(&myphar->mounted_dirs);
 		myphar->mounted_dirs.arBuckets = 0;
-		efree(myphar);
+		pefree(myphar, myphar->is_persistent);
 		return FAILURE;
 	}
 	myphar = *actual;
@@ -481,10 +483,10 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 				}
 			}
 			zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), actual_alias, myphar->alias_len, (void*)&myphar, sizeof(phar_archive_data*), NULL);
-			myphar->alias = estrndup(alias, alias_len);
+			myphar->alias = pestrndup(alias, alias_len, myphar->is_persistent);
 			myphar->alias_len = alias_len;
 		} else {
-			myphar->alias = estrndup(myphar->fname, fname_len);
+			myphar->alias = pestrndup(myphar->fname, fname_len, myphar->is_persistent);
 			myphar->alias_len = fname_len;
 		}
 		myphar->is_temporary_alias = 1;

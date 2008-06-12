@@ -193,7 +193,8 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 				php_stream_close(fp);
 				return FAILURE;
 			}
-			mydata = ecalloc(sizeof(phar_archive_data), 1);
+			mydata = pecalloc(sizeof(phar_archive_data), 1, PHAR_G(persist));
+			mydata->is_persistent = PHAR_G(persist);
 
 			/* read in archive comment, if any */
 			if (locator.comment_len) {
@@ -205,13 +206,21 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 						spprintf(error, 4096, "phar error: corrupt zip archive, zip file comment truncated in zip-based phar \"%s\"", fname);
 					}
 					php_stream_close(fp);
-					efree(mydata);
+					pefree(mydata, mydata->is_persistent);
 					return FAILURE;
 				}
+				mydata->metadata_len = PHAR_GET_16(locator.comment_len);
 				if (phar_parse_metadata(&metadata, &mydata->metadata, PHAR_GET_16(locator.comment_len) TSRMLS_CC) == FAILURE) {
+					mydata->metadata_len = 0;
 					/* if not valid serialized data, it is a regular string */
-					ALLOC_INIT_ZVAL(mydata->metadata);
-					ZVAL_STRINGL(mydata->metadata, metadata, PHAR_GET_16(locator.comment_len), 1);
+					if (entry.is_persistent) {
+						ALLOC_PERMANENT_ZVAL(mydata->metadata);
+					} else {
+						ALLOC_ZVAL(mydata->metadata);
+					}
+					INIT_ZVAL(*mydata->metadata);
+					metadata = pestrndup(metadata, PHAR_GET_16(locator.comment_len), mydata->is_persistent);
+					ZVAL_STRINGL(mydata->metadata, metadata, PHAR_GET_16(locator.comment_len), 0);
 				}
 			} else {
 				mydata->metadata = NULL;
@@ -225,7 +234,7 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 	}
 	return FAILURE;
 foundit:
-	mydata->fname = estrndup(fname, fname_len);
+	mydata->fname = pestrndup(fname, fname_len, mydata->is_persistent);
 #ifdef PHP_WIN32
 	phar_unixify_path_separators(mydata->fname, fname_len);
 #endif
@@ -246,12 +255,13 @@ foundit:
 	php_stream_seek(fp, PHAR_GET_32(locator.cdir_offset), SEEK_SET);
 	/* read in central directory */
 	zend_hash_init(&mydata->manifest, sizeof(phar_entry_info),
-		zend_get_hash_value, destroy_phar_manifest_entry, 0);
+		zend_get_hash_value, destroy_phar_manifest_entry, mydata->is_persistent);
 	zend_hash_init(&mydata->mounted_dirs, sizeof(char *),
-		zend_get_hash_value, NULL, 0);
+		zend_get_hash_value, NULL, mydata->is_persistent);
 	entry.phar = mydata;
 	entry.is_zip = 1;
 	entry.fp_type = PHAR_FP;
+	entry.is_persistent = mydata->is_persistent;
 #define PHAR_ZIP_FAIL(errmsg) \
 			zend_hash_destroy(&mydata->manifest); \
 			mydata->manifest.arBuckets = 0; \
@@ -264,11 +274,11 @@ foundit:
 			if (error) { \
 				spprintf(error, 4096, "phar error: %s in zip-based phar \"%s\"", errmsg, mydata->fname); \
 			} \
-			efree(mydata->fname); \
+			pefree(mydata->fname, mydata->is_persistent); \
 			if (mydata->alias) { \
-				efree(mydata->alias); \
+				pefree(mydata->alias, mydata->is_persistent); \
 			} \
-			efree(mydata); \
+			pefree(mydata, mydata->is_persistent); \
 			return FAILURE;
 
 	/* add each central directory item to the manifest */
@@ -299,9 +309,9 @@ foundit:
 			PHAR_ZIP_FAIL("Cannot process zips created from stdin (zero-length filename)");
 		}
 		entry.filename_len = PHAR_GET_16(zipentry.filename_len);
-		entry.filename = (char *) emalloc(entry.filename_len + 1);
+		entry.filename = (char *) pemalloc(entry.filename_len + 1, entry.is_persistent);
 		if (entry.filename_len != php_stream_read(fp, entry.filename, entry.filename_len)) {
-			efree(entry.filename);
+			pefree(entry.filename, entry.is_persistent);
 			PHAR_ZIP_FAIL("unable to read in filename from central directory, truncated");
 		}
 		entry.filename[entry.filename_len] = '\0';
@@ -339,56 +349,63 @@ foundit:
 				}
 				break;
 			case 1 :
-				efree(entry.filename);
+				pefree(entry.filename, entry.is_persistent);
 				PHAR_ZIP_FAIL("unsupported compression method (Shrunk) used in this zip");
 			case 2 :
 			case 3 :
 			case 4 :
 			case 5 :
-				efree(entry.filename);
+				pefree(entry.filename, entry.is_persistent);
 				PHAR_ZIP_FAIL("unsupported compression method (Reduce) used in this zip");
 			case 6 :
-				efree(entry.filename);
+				pefree(entry.filename, entry.is_persistent);
 				PHAR_ZIP_FAIL("unsupported compression method (Implode) used in this zip");
 			case 7 :
-				efree(entry.filename);
+				pefree(entry.filename, entry.is_persistent);
 				PHAR_ZIP_FAIL("unsupported compression method (Tokenize) used in this zip");
 			case 9 :
-				efree(entry.filename);
+				pefree(entry.filename, entry.is_persistent);
 				PHAR_ZIP_FAIL("unsupported compression method (Deflate64) used in this zip");
 			case 10 :
-				efree(entry.filename);
+				pefree(entry.filename, entry.is_persistent);
 				PHAR_ZIP_FAIL("unsupported compression method (PKWare Implode/old IBM TERSE) used in this zip");
 			case 14 :
-				efree(entry.filename);
+				pefree(entry.filename, entry.is_persistent);
 				PHAR_ZIP_FAIL("unsupported compression method (LZMA) used in this zip");
 			case 18 :
-				efree(entry.filename);
+				pefree(entry.filename, entry.is_persistent);
 				PHAR_ZIP_FAIL("unsupported compression method (IBM TERSE) used in this zip");
 			case 19 :
-				efree(entry.filename);
+				pefree(entry.filename, entry.is_persistent);
 				PHAR_ZIP_FAIL("unsupported compression method (IBM LZ77) used in this zip");
 			case 97 :
-				efree(entry.filename);
+				pefree(entry.filename, entry.is_persistent);
 				PHAR_ZIP_FAIL("unsupported compression method (WavPack) used in this zip");
 			case 98 :
-				efree(entry.filename);
+				pefree(entry.filename, entry.is_persistent);
 				PHAR_ZIP_FAIL("unsupported compression method (PPMd) used in this zip");
 			default :
-				efree(entry.filename);
+				pefree(entry.filename, entry.is_persistent);
 				PHAR_ZIP_FAIL("unsupported compression method (unknown) used in this zip");
 		}
 		/* get file metadata */
 		if (zipentry.comment_len) {
 			if (PHAR_GET_16(zipentry.comment_len) != php_stream_read(fp, buf, PHAR_GET_16(zipentry.comment_len))) {
-				efree(entry.filename);
+				pefree(entry.filename, entry.is_persistent);
 				PHAR_ZIP_FAIL("unable to read in file comment, truncated");
 			}
 			p = buf;
+			entry.metadata_len = zipentry.comment_len;
 			if (phar_parse_metadata(&p, &(entry.metadata), PHAR_GET_16(zipentry.comment_len) TSRMLS_CC) == FAILURE) {
+				entry.metadata_len = 0;
 				/* if not valid serialized data, it is a regular string */
-				ALLOC_INIT_ZVAL(entry.metadata);
-				ZVAL_STRINGL(entry.metadata, buf, PHAR_GET_16(zipentry.comment_len), 1);
+				if (entry.is_persistent) {
+					ALLOC_PERMANENT_ZVAL(entry.metadata);
+				} else {
+					ALLOC_ZVAL(entry.metadata);
+				}
+				INIT_ZVAL(*entry.metadata);
+				ZVAL_STRINGL(entry.metadata, pestrndup(buf, PHAR_GET_16(zipentry.comment_len), entry.is_persistent), PHAR_GET_16(zipentry.comment_len), 0);
 			}
 		} else {
 			entry.metadata = NULL;
@@ -405,12 +422,12 @@ foundit:
 			if (entry.flags & PHAR_ENT_COMPRESSED_GZ) {
 				filter = php_stream_filter_create("zlib.inflate", NULL, php_stream_is_persistent(fp) TSRMLS_CC);
 				if (!filter) {
-					efree(entry.filename);
+					pefree(entry.filename, entry.is_persistent);
 					PHAR_ZIP_FAIL("unable to decompress alias, zlib filter creation failed");
 				}
 				php_stream_filter_append(&fp->readfilters, filter);
 				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &actual_alias, entry.uncompressed_filesize, 0)) || !actual_alias) {
-					efree(entry.filename);
+					pefree(entry.filename, entry.is_persistent);
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
 				php_stream_filter_flush(filter, 1);
@@ -419,20 +436,20 @@ foundit:
 				php_stream_filter *filter;
 				filter = php_stream_filter_create("bzip2.decompress", NULL, php_stream_is_persistent(fp) TSRMLS_CC);
 				if (!filter) {
-					efree(entry.filename);
+					pefree(entry.filename, entry.is_persistent);
 					PHAR_ZIP_FAIL("unable to read in alias, bzip2 filter creation failed");
 				}
 				php_stream_filter_append(&fp->readfilters, filter);
 				php_stream_filter_append(&fp->readfilters, filter);
 				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &actual_alias, entry.uncompressed_filesize, 0)) || !actual_alias) {
-					efree(entry.filename);
+					pefree(entry.filename, entry.is_persistent);
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
 				php_stream_filter_flush(filter, 1);
 				php_stream_filter_remove(filter, 1 TSRMLS_CC);
 			} else {
 				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &actual_alias, entry.uncompressed_filesize, 0)) || !actual_alias) {
-					efree(entry.filename);
+					pefree(entry.filename, entry.is_persistent);
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
 			}
@@ -471,7 +488,10 @@ foundit:
 				return FAILURE;
 			}
 		}
-		mydata->alias = actual_alias;
+		mydata->alias = entry.is_persistent ? pestrndup(actual_alias, mydata->alias_len, 1) : actual_alias;
+		if (entry.is_persistent) {
+			efree(actual_alias);
+		}
 		zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), actual_alias, mydata->alias_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
 	} else {
 		phar_archive_data **fd_ptr;
@@ -487,10 +507,10 @@ foundit:
 				}
 			}
 			zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), actual_alias, mydata->alias_len, (void*)&mydata, sizeof(phar_archive_data*), NULL);
-			mydata->alias = estrndup(alias, alias_len);
+			mydata->alias = pestrndup(alias, alias_len, mydata->is_persistent);
 			mydata->alias_len = alias_len;
 		} else {
-			mydata->alias = estrndup(mydata->fname, fname_len);
+			mydata->alias = pestrndup(mydata->fname, fname_len, mydata->is_persistent);
 			mydata->alias_len = fname_len;
 		}
 		mydata->is_temporary_alias = 1;

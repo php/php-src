@@ -7,6 +7,7 @@ Phar: phpinfo display 4
 --INI--
 phar.readonly=0
 phar.require_hash=0
+phar.cache_list=
 --POST--
 a=b
 --FILE--
@@ -37,6 +38,7 @@ Phar based on pear/PHP_Archive, original concept by Davey Shafik.<br />Phar full
 </table><br />
 <table border="0" cellpadding="3" width="600">
 <tr class="h"><th>Directive</th><th>Local Value</th><th>Master Value</th></tr>
+<tr><td class="e">phar.cache_list</td><td class="v"><i>no value</i></td><td class="v"><i>no value</i></td></tr>
 <tr><td class="e">phar.readonly</td><td class="v">Off</td><td class="v">Off</td></tr>
 <tr><td class="e">phar.require_hash</td><td class="v">Off</td><td class="v">Off</td></tr>
 </table><br />
@@ -59,6 +61,7 @@ Phar based on pear/PHP_Archive, original concept by Davey Shafik.<br />Phar full
 </table><br />
 <table border="0" cellpadding="3" width="600">
 <tr class="h"><th>Directive</th><th>Local Value</th><th>Master Value</th></tr>
+<tr><td class="e">phar.cache_list</td><td class="v"><i>no value</i></td><td class="v"><i>no value</i></td></tr>
 <tr><td class="e">phar.readonly</td><td class="v">On</td><td class="v">Off</td></tr>
 <tr><td class="e">phar.require_hash</td><td class="v">On</td><td class="v">Off</td></tr>
 </table><br />
