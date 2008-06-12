@@ -7,6 +7,7 @@ Phar: phpinfo display 3
 --INI--
 phar.readonly=1
 phar.require_hash=1
+phar.cache_list=
 --FILE--
 <?php
 phpinfo(INFO_MODULES);
@@ -31,6 +32,7 @@ Phar based on pear/PHP_Archive, original concept by Davey Shafik.
 Phar fully realized by Gregory Beaver and Marcus Boerger.
 Portions of tar implementation Copyright (c) 2003-2007 Tim Kientzle.
 Directive => Local Value => Master Value
+phar.cache_list => no value => no value
 phar.readonly => On => On
 phar.require_hash => On => On
 %a
