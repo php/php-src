@@ -1,3 +1,248 @@
+2008-06-11  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/tests/bug45147.phpt:
+      - New test
+
+    * ZendEngine2/tests/bug45147.phpt
+      ZendEngine2/tests/bug45147.phpt:
+      
+      file bug45147.phpt was initially added on branch PHP_5_3.
+
+2008-06-11  Antony Dovgal  <tony@daylessday.org>
+
+    * tests/bin-info.inc
+      tests/foo
+      tests/foo2
+      tests/foo3
+      tests/foo4
+      tests/odbc-display.php
+      tests/odbc-t1.php
+      tests/odbc-t2.php
+      tests/odbc-t3.php
+      tests/odbc-t4.php
+      tests/odbc-t5.php
+      tests/recurse
+      tests/run.html
+      tests/run.php
+      tests/scan_cases
+      tests/test.pl
+      tests/test_class_inheritance
+      tests/testarray
+      tests/testarray.pl
+      tests/testarray2
+      tests/testarray2.pl
+      tests/testclassfunc
+      tests/testcom
+      tests/testcpdf
+      tests/testcpdfclock
+      tests/testdom
+      tests/testfe
+      tests/testfunc
+      tests/testfunc.pl
+      tests/testfunc2
+      tests/testfunc2.pl
+      tests/testfuncref
+      tests/testhyperwave
+      tests/testinclude
+      tests/testobj
+      tests/testpfpro.php
+      tests/tests.dsp
+      tests/tests.mak
+      tests/testscanf.php
+      tests/testswf:
+      remove 8 years old tests (not used anyway)
+
+2008-06-11  Steph Fox  <steph.fox@virgin.net>
+
+    * run-tests.php:
+      - more cs/ws fixes
+
+    * run-tests.php:
+      - binary safety
+
+    * run-tests.php:
+      - kill unicode.semantics checks
+
+    * run-tests.php:
+      - code beauty (ws/cs)
+
+2008-06-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend.h
+      ZendEngine2/zend.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.skl
+      ZendEngine2/zend_vm_execute.skl
+      ZendEngine2/zend_vm_gen.php
+      ZendEngine2/zend_vm_gen.php:
+      - Removed direct executor recursion.
+      - Use fastcall calling convention in executor on x86.
+
+2008-06-11  Steve Seear  <steve.seear@uk.ibm.com>
+
+    * ext/standard/tests/file/basename_basic-win32.phpt
+      ext/standard/tests/file/basename_basic-win32.phpt
+      ext/standard/tests/file/basename_basic.phpt
+      ext/standard/tests/file/basename_basic.phpt
+      ext/standard/tests/file/basename_basic.phpt
+      ext/standard/tests/file/basename_variation1-win32.phpt
+      ext/standard/tests/file/basename_variation1-win32.phpt
+      ext/standard/tests/file/basename_variation1.phpt
+      ext/standard/tests/file/basename_variation1.phpt
+      ext/standard/tests/file/basename_variation2-win32.phpt
+      ext/standard/tests/file/basename_variation2-win32.phpt
+      ext/standard/tests/file/basename_variation2.phpt
+      ext/standard/tests/file/basename_variation2.phpt
+      ext/standard/tests/file/basename_variation3.phpt
+      ext/standard/tests/file/basename_variation3.phpt
+      ext/standard/tests/file/basename_variation4.phpt
+      ext/standard/tests/file/basename_variation4.phpt
+      ext/standard/tests/file/chmod_basic-win32.phpt
+      ext/standard/tests/file/chmod_basic-win32.phpt
+      ext/standard/tests/file/chmod_basic.phpt
+      ext/standard/tests/file/chmod_basic.phpt
+      ext/standard/tests/file/chmod_error.phpt
+      ext/standard/tests/file/chmod_error.phpt
+      ext/standard/tests/file/chmod_variation1.phpt
+      ext/standard/tests/file/chmod_variation1.phpt
+      ext/standard/tests/file/chmod_variation2-win32.phpt
+      ext/standard/tests/file/chmod_variation2-win32.phpt
+      ext/standard/tests/file/chmod_variation2.phpt
+      ext/standard/tests/file/chmod_variation2.phpt
+      ext/standard/tests/file/file_variation2.phpt
+      ext/standard/tests/file/file_variation2.phpt
+      ext/standard/tests/file/file_variation3.phpt
+      ext/standard/tests/file/file_variation3.phpt
+      ext/standard/tests/file/file_variation4.phpt
+      ext/standard/tests/file/file_variation4.phpt
+      ext/standard/tests/file/file_variation5-win32.phpt
+      ext/standard/tests/file/file_variation5-win32.phpt
+      ext/standard/tests/file/file_variation5.phpt
+      ext/standard/tests/file/file_variation5.phpt
+      ext/standard/tests/file/file_variation6.phpt
+      ext/standard/tests/file/file_variation6.phpt
+      ext/standard/tests/file/file_variation7.phpt
+      ext/standard/tests/file/file_variation7.phpt:
+      Filesystem tests.
+
+    * ext/standard/tests/file/basename_variation1-win32.phpt
+      ext/standard/tests/file/basename_variation1-win32.phpt
+      ext/standard/tests/file/basename_variation1-win32.phpt
+      ext/standard/tests/file/basename_variation2.phpt
+      ext/standard/tests/file/basename_variation2.phpt
+      ext/standard/tests/file/basename_variation2.phpt
+      ext/standard/tests/file/basename_variation4.phpt
+      ext/standard/tests/file/basename_variation4.phpt
+      ext/standard/tests/file/basename_variation4.phpt
+      ext/standard/tests/file/chmod_variation1.phpt
+      ext/standard/tests/file/chmod_variation1.phpt
+      ext/standard/tests/file/chmod_variation1.phpt
+      ext/standard/tests/file/chmod_variation2-win32.phpt
+      ext/standard/tests/file/chmod_variation2-win32.phpt
+      ext/standard/tests/file/chmod_variation2-win32.phpt
+      ext/standard/tests/file/file_variation6.phpt
+      ext/standard/tests/file/file_variation6.phpt
+      ext/standard/tests/file/file_variation6.phpt
+      ext/standard/tests/file/file_variation7.phpt
+      ext/standard/tests/file/file_variation7.phpt
+      ext/standard/tests/file/file_variation7.phpt:
+        1.1.4;
+      file basename_variation1-win32.phpt was initially added on branch PHP_5_2.
+
+    * ext/standard/tests/file/basename_basic-win32.phpt
+      ext/standard/tests/file/basename_basic-win32.phpt
+      ext/standard/tests/file/basename_basic-win32.phpt
+      ext/standard/tests/file/basename_basic.phpt
+      ext/standard/tests/file/basename_basic.phpt
+      ext/standard/tests/file/basename_variation1.phpt
+      ext/standard/tests/file/basename_variation1.phpt
+      ext/standard/tests/file/basename_variation1.phpt
+      ext/standard/tests/file/basename_variation2-win32.phpt
+      ext/standard/tests/file/basename_variation2-win32.phpt
+      ext/standard/tests/file/basename_variation2-win32.phpt
+      ext/standard/tests/file/basename_variation3.phpt
+      ext/standard/tests/file/basename_variation3.phpt
+      ext/standard/tests/file/basename_variation3.phpt
+      ext/standard/tests/file/chmod_basic-win32.phpt
+      ext/standard/tests/file/chmod_basic-win32.phpt
+      ext/standard/tests/file/chmod_basic-win32.phpt
+      ext/standard/tests/file/chmod_basic.phpt
+      ext/standard/tests/file/chmod_basic.phpt
+      ext/standard/tests/file/chmod_basic.phpt
+      ext/standard/tests/file/chmod_error.phpt
+      ext/standard/tests/file/chmod_error.phpt
+      ext/standard/tests/file/chmod_error.phpt
+      ext/standard/tests/file/chmod_variation2.phpt
+      ext/standard/tests/file/chmod_variation2.phpt
+      ext/standard/tests/file/chmod_variation2.phpt
+      ext/standard/tests/file/file_variation2.phpt
+      ext/standard/tests/file/file_variation2.phpt
+      ext/standard/tests/file/file_variation2.phpt
+      ext/standard/tests/file/file_variation3.phpt
+      ext/standard/tests/file/file_variation3.phpt
+      ext/standard/tests/file/file_variation3.phpt
+      ext/standard/tests/file/file_variation4.phpt
+      ext/standard/tests/file/file_variation4.phpt
+      ext/standard/tests/file/file_variation4.phpt
+      ext/standard/tests/file/file_variation5-win32.phpt
+      ext/standard/tests/file/file_variation5-win32.phpt
+      ext/standard/tests/file/file_variation5-win32.phpt
+      ext/standard/tests/file/file_variation5.phpt
+      ext/standard/tests/file/file_variation5.phpt
+      ext/standard/tests/file/file_variation5.phpt:
+        1.1.4;
+      file basename_basic-win32.phpt was initially added on branch PHP_5_2.
+
+2008-06-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/mysql/tests/mysql_phpinfo.phpt
+      ext/mysql/tests/mysql_phpinfo.phpt
+      ext/mysql/tests/mysql_trace_mode.phpt
+      ext/mysql/tests/mysql_trace_mode.phpt
+      tests/classes/__call_005.phpt:
+      Fixed test
+
+    * ext/standard/dir.c
+      ext/standard/dir.c
+      ext/standard/dir.c
+      ext/standard/tests/dir/readdir_variation7.phpt
+      ext/standard/tests/dir/rewinddir_basic.phpt
+      main/php_streams.h
+      main/php_streams.h
+      main/php_streams.h
+      main/streams/streams.c
+      main/streams/streams.c
+      main/streams/streams.c:
+      closeder/readdir/rewinddir must work only with directories
+
+    * (PHP_5_2)
+      ext/session/session.c:
+      Fixed memory leaks
+
+    * (PHP_5_2)
+      ext/session/tests/session_encode_variation5.phpt:
+      Fixed test (5.2 doesn't contain GC)
+
+    * ext/tokenizer/tokenizer.c
+      ext/tokenizer/tokenizer.c:
+      Fixed memory leak
+
+2008-06-11  Philip Olson  <philipolson@gmail.com>
+
+    * ext/imap/php_imap.c:
+      fixed imap_listscan() proto
+
 2008-06-10  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
