@@ -312,6 +312,7 @@ echo "\n\nDone";
 
 ?>
 --EXPECTF--
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 *** Testing var_export() with integer values ***
 
 *** Output for integer values ***
