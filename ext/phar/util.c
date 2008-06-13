@@ -1340,12 +1340,10 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 
 static const char hexChars[] = "0123456789ABCDEF";
 
-static int phar_hex_str(const char *digest, size_t digest_len, char ** signature)
+static int phar_hex_str(const char *digest, size_t digest_len, char **signature TSRMLS_DC)
 {
 	int pos = -1;
 	size_t len = 0;
-	
-	TSRMLS_FETCH();
 
 	*signature = (char*)safe_pemalloc(digest_len, 2, 1, PHAR_G(persist));
 
@@ -1568,7 +1566,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, int sig_type, char
 			EVP_MD_CTX_cleanup(&md_ctx);
 #endif
 			
-			*signature_len = phar_hex_str((const char*)sig, sig_len, signature);
+			*signature_len = phar_hex_str((const char*)sig, sig_len, signature TSRMLS_CC);
 		}
 		break;
 #if HAVE_HASH_EXT
@@ -1599,7 +1597,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, int sig_type, char
 				return FAILURE;
 			}
 
-			*signature_len = phar_hex_str((const char*)digest, sizeof(digest), signature);
+			*signature_len = phar_hex_str((const char*)digest, sizeof(digest), signature TSRMLS_CC);
 			break;
 		}
 		case PHAR_SIG_SHA256: {
@@ -1629,7 +1627,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, int sig_type, char
 				return FAILURE;
 			}
 
-			*signature_len = phar_hex_str((const char*)digest, sizeof(digest), signature);
+			*signature_len = phar_hex_str((const char*)digest, sizeof(digest), signature TSRMLS_CC);
 			break;
 		}
 #else
@@ -1667,7 +1665,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, int sig_type, char
 				return FAILURE;
 			}
 
-			*signature_len = phar_hex_str((const char*)digest, sizeof(digest), signature);
+			*signature_len = phar_hex_str((const char*)digest, sizeof(digest), signature TSRMLS_CC);
 			break;
 		}
 		case PHAR_SIG_MD5: {
@@ -1697,7 +1695,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, int sig_type, char
 				return FAILURE;
 			}
 
-			*signature_len = phar_hex_str((const char*)digest, sizeof(digest), signature);
+			*signature_len = phar_hex_str((const char*)digest, sizeof(digest), signature TSRMLS_CC);
 			break;
 		}
 		default:
@@ -1706,6 +1704,145 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, int sig_type, char
 			}
 			return FAILURE;
 	}
+	return SUCCESS;
+}
+/* }}} */
+
+int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signature, int *signature_length, char **error TSRMLS_DC) /* {{{ */
+{
+	unsigned char buf[1024];
+	int sig_len;
+
+	php_stream_rewind(fp);
+
+	if (phar->signature) {
+		efree(phar->signature);
+		phar->signature = NULL;
+	}
+
+	switch(phar->sig_flags) {
+#if HAVE_HASH_EXT
+		case PHAR_SIG_SHA512: {
+			unsigned char digest[64];
+			PHP_SHA512_CTX  context;
+
+			PHP_SHA512Init(&context);
+			while ((sig_len = php_stream_read(fp, (char*)buf, sizeof(buf))) > 0) {
+				PHP_SHA512Update(&context, buf, sig_len);
+			}
+			PHP_SHA512Final(digest, &context);
+			*signature = estrndup((char *) digest, 64);
+			*signature_length = 64;
+			break;
+		}
+		case PHAR_SIG_SHA256: {
+			unsigned char digest[32];
+			PHP_SHA256_CTX  context;
+	
+			PHP_SHA256Init(&context);
+			while ((sig_len = php_stream_read(fp, (char*)buf, sizeof(buf))) > 0) {
+				PHP_SHA256Update(&context, buf, sig_len);
+			}
+			PHP_SHA256Final(digest, &context);
+			*signature = estrndup((char *) digest, 32);
+			*signature_length = 32;
+			break;
+		}
+#else
+		case PHAR_SIG_SHA512:
+		case PHAR_SIG_SHA256:
+			if (error) {
+				spprintf(error, 0, "unable to write to phar \"%s\" with requested hash type", phar->fname);
+			}
+			return FAILURE;
+#endif
+		case PHAR_SIG_OPENSSL: {
+			int siglen;
+			unsigned char *sigbuf;
+#ifdef PHAR_HAVE_OPENSSL
+			BIO *in;
+			EVP_PKEY *key;
+			EVP_MD *mdtype = (EVP_MD *) EVP_sha1();
+			EVP_MD_CTX md_ctx;
+
+			if (!zend_hash_exists(&module_registry, "openssl", sizeof("openssl"))) {
+				if (error) {
+					spprintf(error, 0, "phar \"%s\" openssl signature cannot be created, openssl not loaded", phar->fname);
+				}
+				return FAILURE;
+			}
+			in = BIO_new_mem_buf(PHAR_G(openssl_privatekey), PHAR_G(openssl_privatekey_len));
+
+			if (in == NULL) {
+				if (error) {
+					spprintf(error, 0, "unable to write to phar \"%s\" with requested openssl signature", phar->fname);
+				}
+				return FAILURE;
+			}
+			key = PEM_read_bio_PrivateKey(in, NULL,NULL, "");
+
+			BIO_free(in);
+			siglen = EVP_PKEY_size(key);
+			sigbuf = emalloc(siglen + 1);
+
+			EVP_SignInit(&md_ctx, mdtype);
+			while ((sig_len = php_stream_read(fp, (char*)buf, sizeof(buf))) > 0) {
+				EVP_SignUpdate(&md_ctx, buf, sig_len);
+			}
+			if (!EVP_SignFinal (&md_ctx, sigbuf,(unsigned int *)&siglen, key)) {
+				efree(sigbuf);
+				if (error) {
+					spprintf(error, 0, "unable to write phar \"%s\" with requested openssl signature", phar->fname);
+				}
+				return FAILURE;
+			}
+			sigbuf[siglen] = '\0';
+			EVP_MD_CTX_cleanup(&md_ctx);
+#else
+			sigbuf = NULL;
+			siglen = 0;
+			php_stream_seek(fp, 0, SEEK_END);
+			if (FAILURE == phar_call_openssl_signverify(1, fp, php_stream_tell(fp), PHAR_G(openssl_privatekey), PHAR_G(openssl_privatekey_len), (char **)&sigbuf, &siglen TSRMLS_CC)) {
+				if (error) {
+					spprintf(error, 0, "unable to write phar \"%s\" with requested openssl signature", phar->fname);
+				}
+				return FAILURE;
+			}
+#endif
+			*signature = (char *) sigbuf;
+			*signature_length = siglen;
+		}
+		break;
+		default:
+			phar->sig_flags = PHAR_SIG_SHA1;
+		case PHAR_SIG_SHA1: {
+			unsigned char digest[20];
+			PHP_SHA1_CTX  context;
+
+			PHP_SHA1Init(&context);
+			while ((sig_len = php_stream_read(fp, (char*)buf, sizeof(buf))) > 0) {
+				PHP_SHA1Update(&context, buf, sig_len);
+			}
+			PHP_SHA1Final(digest, &context);
+			*signature = estrndup((char *) digest, 20);
+			*signature_length = 20;
+			break;
+		}
+		case PHAR_SIG_MD5: {
+			unsigned char digest[16];
+			PHP_MD5_CTX   context;
+
+			PHP_MD5Init(&context);
+			while ((sig_len = php_stream_read(fp, (char*)buf, sizeof(buf))) > 0) {
+				PHP_MD5Update(&context, buf, sig_len);
+			}
+			PHP_MD5Final(digest, &context);
+			*signature = estrndup((char *) digest, 16);
+			*signature_length = 16;
+			break;
+		}
+	}
+	phar->sig_len = phar_hex_str((const char *)*signature, *signature_length, &phar->signature TSRMLS_CC);
 	return SUCCESS;
 }
 /* }}} */
