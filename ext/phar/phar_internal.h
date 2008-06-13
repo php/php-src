@@ -75,6 +75,10 @@
 #define E_RECOVERABLE_ERROR E_ERROR
 #endif
 
+#ifndef pestrndup
+#define pestrndup(s, length, persistent) ((persistent)?zend_strndup((s),(length)):estrndup((s),(length)))
+#endif
+
 /* PHP_ because this is public information via MINFO */
 #define PHP_PHAR_API_VERSION      "1.1.1"
 /* x.y.z maps to 0xyz0 */
