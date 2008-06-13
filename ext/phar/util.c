@@ -1344,6 +1344,8 @@ static int phar_hex_str(const char *digest, size_t digest_len, char ** signature
 {
 	int pos = -1;
 	size_t len = 0;
+	
+	TSRMLS_FETCH();
 
 	*signature = (char*)safe_pemalloc(digest_len, 2, 1, PHAR_G(persist));
 
