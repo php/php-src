@@ -22,7 +22,7 @@ $regexIterator->setMode('foo');
 ?>
 --EXPECTF--
 int(0)
-string(14) "Illegal mode 7"
+unicode(14) "Illegal mode 7"
 int(0)
 
-Warning: RegexIterator::setMode() expects parameter 1 to be long, string given in %s on line %d
+Warning: RegexIterator::setMode() expects parameter 1 to be long, Unicode string given in %s on line %d

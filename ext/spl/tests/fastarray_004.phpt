@@ -14,3 +14,5 @@ try {
 ?>
 ===DONE===
 --EXPECTF--
+unicode(29) "Index invalid or out of range"
+===DONE===
