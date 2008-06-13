@@ -1,3 +1,213 @@
+2008-06-12  Lars Strojny  <lars@strojny.net>
+
+    * ext/standard/tests/general_functions/putenv_error1.phpt
+      ext/standard/tests/general_functions/putenv_error1.phpt
+      ext/standard/tests/general_functions/putenv_error2.phpt
+      ext/standard/tests/general_functions/putenv_error2.phpt:
+      
+      file putenv_error1.phpt was initially added on branch PHP_5_3.
+
+2008-06-12  Henrique do Nascimento Angelo  <h.n.angelo@gmail.com>
+
+    * run-tests.php:
+      Fix the script to correctly determine the extensions to be tested
+
+2008-06-12  Lars Strojny  <lars@strojny.net>
+
+    * (PHP_5_3)
+      ext/reflection/tests/reflectionParameter_export_basic.phpt
+      ext/reflection/tests/reflectionParameter_export_error.phpt
+      ext/reflection/tests/reflectionParameter_export_error2.phpt
+      ext/reflection/tests/reflectionParameter_export_error3.phpt
+      ext/reflection/tests/reflectionParameter_getDeclaringFunction_basic.phpt
+      ext/reflection/tests/reflectionParameter_getPosition_basic.phpt
+      ext/reflection/tests/reflectionParameter_toString_basic.phpt:
+      Testfest: various tests for ReflectionParameter
+
+    * ext/reflection/tests/reflectionParameter_export_basic.phpt
+      ext/reflection/tests/reflectionParameter_export_basic.phpt
+      ext/reflection/tests/reflectionParameter_export_error.phpt
+      ext/reflection/tests/reflectionParameter_export_error.phpt
+      ext/reflection/tests/reflectionParameter_export_error2.phpt
+      ext/reflection/tests/reflectionParameter_export_error2.phpt
+      ext/reflection/tests/reflectionParameter_export_error3.phpt
+      ext/reflection/tests/reflectionParameter_export_error3.phpt
+      ext/reflection/tests/reflectionParameter_getDeclaringFunction_basic.phpt
+      ext/reflection/tests/reflectionParameter_getDeclaringFunction_basic.phpt
+      ext/reflection/tests/reflectionParameter_getPosition_basic.phpt
+      ext/reflection/tests/reflectionParameter_getPosition_basic.phpt
+      ext/reflection/tests/reflectionParameter_toString_basic.phpt
+      ext/reflection/tests/reflectionParameter_toString_basic.phpt:
+      
+      Testfest: various tests for ReflectionParameter
+
+    * ext/reflection/tests/reflectionExtension_constructor_basic.phpt
+      ext/reflection/tests/reflectionExtension_constructor_error.phpt
+      ext/reflection/tests/reflectionExtension_getClassNames_basic.phpt
+      ext/reflection/tests/reflectionExtension_getClassNames_variation1.phpt
+      ext/reflection/tests/reflectionExtension_getClasses_basic.phpt
+      ext/reflection/tests/reflectionExtension_getDependencies_basic.phpt
+      ext/reflection/tests/reflectionExtension_getDependencies_variation2.phpt:
+      Testfest test cases for ReflectionExtension
+
+    * ext/reflection/tests/reflectionExtension_constructor_basic.phpt
+      ext/reflection/tests/reflectionExtension_constructor_basic.phpt
+      ext/reflection/tests/reflectionExtension_constructor_error.phpt
+      ext/reflection/tests/reflectionExtension_constructor_error.phpt
+      ext/reflection/tests/reflectionExtension_getClassNames_basic.phpt
+      ext/reflection/tests/reflectionExtension_getClassNames_basic.phpt
+      ext/reflection/tests/reflectionExtension_getClassNames_variation1.phpt
+      ext/reflection/tests/reflectionExtension_getClassNames_variation1.phpt
+      ext/reflection/tests/reflectionExtension_getClasses_basic.phpt
+      ext/reflection/tests/reflectionExtension_getClasses_basic.phpt
+      ext/reflection/tests/reflectionExtension_getDependencies_basic.phpt
+      ext/reflection/tests/reflectionExtension_getDependencies_basic.phpt
+      ext/reflection/tests/reflectionExtension_getDependencies_variation2.phpt
+      ext/reflection/tests/reflectionExtension_getDependencies_variation2.phpt:
+      
+      file reflectionExtension_constructor_basic.phpt was initially added on
+      branch PHP_5_3.
+
+    * ext/reflection/tests/reflectionExtension_export_basic.phpt
+      ext/reflection/tests/reflectionExtension_getName_basic.phpt
+      ext/reflection/tests/reflectionExtension_getVersion_basic.phpt:
+      Testfest: ReflectionExtension tests by Gerrit te Sligte and Leon Luijkx
+
+    * ext/reflection/tests/reflectionExtension_export_basic.phpt
+      ext/reflection/tests/reflectionExtension_export_basic.phpt
+      ext/reflection/tests/reflectionExtension_getName_basic.phpt
+      ext/reflection/tests/reflectionExtension_getName_basic.phpt
+      ext/reflection/tests/reflectionExtension_getVersion_basic.phpt
+      ext/reflection/tests/reflectionExtension_getVersion_basic.phpt:
+      
+      file reflectionExtension_export_basic.phpt was initially added on branch
+      PHP_5_3.
+
+2008-06-12  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/spl/tests/bug44615.phpt
+      ext/spl/tests/fileobject_checktype_basic.phpt
+      ext/spl/tests/fileobject_getbasename_basic.phpt
+      ext/spl/tests/fileobject_getcurrentline_basic.phpt
+      ext/spl/tests/fileobject_getfileinfo_basic.phpt
+      ext/spl/tests/fileobject_getmaxlinelen_basic.phpt
+      ext/spl/tests/fileobject_getsize_basic.phpt
+      ext/spl/tests/fileobject_setmaxlinelen_basic.phpt:
+      Add tests from testfest
+
+    * ext/spl/tests/bug44615.phpt
+      ext/spl/tests/bug44615.phpt
+      ext/spl/tests/fileobject_checktype_basic.phpt:
+      
+      Add tests from testfest
+
+2008-06-12  Lars Strojny  <lars@strojny.net>
+
+    * (PHP_5_3)
+      ext/reflection/tests/reflectionExtension_info_basic.phpt:
+      Testfest: ReflectionExtension::info()-test by Stefan Koopmanschap
+
+    * ext/reflection/tests/reflectionExtension_info_basic.phpt
+      ext/reflection/tests/reflectionExtension_info_basic.phpt:
+      
+      Testfest: ReflectionExtension::info()-test by Stefan Koopmanschap
+
+2008-06-12  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/spl/tests/fileobject_checktype_basic.phpt
+      ext/spl/tests/fileobject_getbasename_basic.phpt
+      ext/spl/tests/fileobject_getbasename_basic.phpt
+      ext/spl/tests/fileobject_getcurrentline_basic.phpt
+      ext/spl/tests/fileobject_getcurrentline_basic.phpt
+      ext/spl/tests/fileobject_getfileinfo_basic.phpt
+      ext/spl/tests/fileobject_getfileinfo_basic.phpt
+      ext/spl/tests/fileobject_getmaxlinelen_basic.phpt
+      ext/spl/tests/fileobject_getmaxlinelen_basic.phpt
+      ext/spl/tests/fileobject_getsize_basic.phpt
+      ext/spl/tests/fileobject_getsize_basic.phpt
+      ext/spl/tests/fileobject_setmaxlinelen_basic.phpt
+      ext/spl/tests/fileobject_setmaxlinelen_basic.phpt:
+      file fileobject_checktype_basic.phpt was added on branch PHP_5_3 on
+      2008-06-12 20:46:12 +0000
+
+2008-06-12  Lars Strojny  <lars@strojny.net>
+
+    * (PHP_5_3)
+      ext/reflection/tests/reflectionClass_getModifierNames_basic.phpt:
+      Reflection::getModifierNames()-test by Felix De Vliegher (Testfest)
+
+    * ext/reflection/tests/reflectionClass_getModifierNames_basic.phpt
+      ext/reflection/tests/reflectionClass_getModifierNames_basic.phpt:
+      
+      Reflection::getModifierNames()-test by Felix De Vliegher (Testfest)
+
+2008-06-12  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/phar.phar
+      ext/phar/phar_internal.h
+      ext/phar/tar.c
+      ext/phar/zip.c
+      ext/phar/tests/phpinfo_001.phpt
+      ext/phar/tests/phpinfo_002.phpt
+      ext/phar/tests/phpinfo_003.phpt
+      ext/phar/tests/phpinfo_004.phpt:
+      [DOC] add phar.cache_list, a PATH_SEPARATOR-separated list of full paths to
+      phar archives to cache
+      at startup.  This caches the manifest, so that on first access to a phar
+      archive, no file manifest parsing occurs.
+      
+      This could use further tweaking.  For instance, the full copy of the
+      manifest into the current process may be unnecessary if refcounting could
+      be external
+      to the manifest.  This would be another significant gain.  With APC, I
+      measure a slight perf increase to 19 req/sec up from 16 req/sec, without
+      it approaches
+      regular PHP at 3.8 req/sec (regular is 4 req/sec).  This is benching
+      phpMyAdmin
+
+    * (PHP_5_3)
+      ext/phar/func_interceptors.c:
+      ensure we don't try to use an unitialized hash table
+
+2008-06-12  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/spl/spl_fastarray.c:
+      avoid invalid reads when reached memory_limit during initialization
+
+2008-06-12  Steph Fox  <steph.fox@virgin.net>
+
+    * run-tests.php:
+      - Tidy up loose ends in diff and exp output
+      - All test output now has *nix line endings (only diffs didn't in 5_3)
+
+2008-06-12  Antony Dovgal  <tony@daylessday.org>
+
+    * run-tests.php:
+      remove oops
+
+    * ext/phar/zip.c:
+      fix build
+
+    * (PHP_5_3)
+      ext/phar/zip.c:
+      fix build (noticed by Alexey Zakhlestin)
+
+2008-06-12  Steph Fox  <steph.fox@virgin.net>
+
+    * run-tests.php:
+      - Some calls to file_put_contents() need FILE_BINARY, others choke on it.
+      You tell me.
+
+2008-06-12  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/func_interceptors.c:
+      fix error messages
+
 2008-06-11  Felipe Pena  <felipensp@gmail.com>
 
     * ZendEngine2/tests/bug45147.phpt:
