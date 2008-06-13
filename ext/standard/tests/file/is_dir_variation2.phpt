@@ -63,7 +63,7 @@ unlink($file_path."/is_dir_variation2_link.tmp");
 unlink($file_path."/is_dir_variation2.tmp");
 rmdir($file_path."/is_dir_variation2");
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing is_dir() with dir and links to dir ***
 -- With dir --
 bool(true)
