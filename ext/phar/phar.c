@@ -726,8 +726,6 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 	/* The lowest nibble contains the phar wide flags. The compression flags can */
 	/* be ignored on reading because it is being generated anyways. */
 	if (manifest_flags & PHAR_HDR_SIGNATURE) {
-		unsigned char buf[1024];
-		int read_size, len;
 		char sig_buf[8], *sig_ptr = sig_buf;
 		off_t read_len;
 		size_t end_of_phar;
@@ -746,27 +744,10 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 		PHAR_GET_32(sig_ptr, sig_flags);
 		switch(sig_flags) {
 		case PHAR_SIG_OPENSSL: {
-#ifdef PHAR_HAVE_OPENSSL
-			BIO *in;
-			EVP_PKEY *key;
-			EVP_MD *mdtype = (EVP_MD *) EVP_sha1();
-			EVP_MD_CTX md_ctx;
-#else
-			int tempsig;
-#endif
-			php_uint32 signature_len, pubkey_len;
-			char *sig, *pubkey = NULL, *pfile;
+			php_uint32 signature_len;
+			char *sig;
 			off_t whence;
-			php_stream *pfp;
 
-			if (!zend_hash_exists(&module_registry, "openssl", sizeof("openssl"))) {
-				efree(savebuf);
-				php_stream_close(fp);
-				if (error) {
-					spprintf(error, 0, "phar \"%s\" openssl signature cannot be verified, openssl not loaded", fname);
-				}
-				return FAILURE;
-			}
 			/* we store the signature followed by the signature length */
 			if (-1 == php_stream_seek(fp, -12, SEEK_CUR)
 			|| 4 != php_stream_read(fp, sig_buf, 4)) {
@@ -781,7 +762,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 			sig_ptr = sig_buf;
 			PHAR_GET_32(sig_ptr, signature_len);
 
-			sig = (char *)emalloc(signature_len);
+			sig = (char *) emalloc(signature_len);
 
 			whence = signature_len + 4;
 			whence = -whence;
@@ -796,125 +777,27 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 				}
 				return FAILURE;
 			}
-
-			/* use __FILE__ . '.pubkey' for public key file */
-			spprintf(&pfile, 0, "%s.pubkey", fname);
-			pfp = php_stream_open_wrapper(pfile, "rb", 0, NULL);
-			efree(pfile);
-			if (!pfp || !(pubkey_len = php_stream_copy_to_mem(pfp, &pubkey, PHP_STREAM_COPY_ALL, 0)) || !pubkey) {
-				efree(savebuf);
-				efree(sig);
-				if (pubkey) {
-					efree(pubkey);
-				}
-				php_stream_close(fp);
-				if (error) {
-					spprintf(error, 0, "phar \"%s\" openssl public key could not be read", fname);
-				}
-				return FAILURE;
-			}
-			php_stream_close(pfp);
-#ifndef PHAR_HAVE_OPENSSL
-			tempsig = signature_len;
-			if (FAILURE == phar_call_openssl_signverify(0, fp, end_of_phar, pubkey, pubkey_len, &sig, &tempsig TSRMLS_CC)) {
-				efree(savebuf);
-				efree(sig);
-				if (pubkey) {
-					efree(pubkey);
-				}
-				php_stream_close(fp);
-				if (error) {
-					spprintf(error, 0, "phar \"%s\" openssl signature could not be verified", fname);
-				}
-				return FAILURE;
-			}
-			if (pubkey) {
-				efree(pubkey);
-			}
-			signature_len = tempsig;
-#else
-			in = BIO_new_mem_buf(pubkey, pubkey_len);
-			if (NULL == in) {
-				efree(savebuf);
-				efree(sig);
-				efree(pubkey);
-				php_stream_close(fp);
-				if (error) {
-					spprintf(error, 0, "phar \"%s\" openssl signature could not be processed", fname);
-				}
-				return FAILURE;
-			}
-			key = PEM_read_bio_PUBKEY(in, NULL,NULL, NULL);
-			BIO_free(in);
-			efree(pubkey);
-			if (NULL == key) {
+			if (FAILURE == phar_verify_signature(fp, end_of_phar, PHAR_SIG_OPENSSL, sig, signature_len, fname, &signature, &sig_len, error TSRMLS_CC)) {
 				efree(savebuf);
 				efree(sig);
 				php_stream_close(fp);
 				if (error) {
-					spprintf(error, 0, "phar \"%s\" openssl signature could not be processed", fname);
+					char *save = *error;
+					spprintf(error, 0, "phar \"%s\" openssl signature could not be verified: %s", fname, *error);
+					efree(save);
 				}
 				return FAILURE;
 			}
-
-			EVP_VerifyInit(&md_ctx, mdtype);
-
-			read_len -= signature_len + 4;
-			if (read_len > sizeof(buf)) {
-				read_size = sizeof(buf);
-			} else {
-				read_size = (int)read_len;
-			}
-			php_stream_seek(fp, 0, SEEK_SET);
-			while (read_size && (len = php_stream_read(fp, (char*)buf, read_size)) > 0) {
-				EVP_VerifyUpdate (&md_ctx, buf, len);
-				read_len -= (off_t)len;
-				if (read_len < read_size) {
-					read_size = (int)read_len;
-				}
-			}
-			if (!EVP_VerifyFinal (&md_ctx, (unsigned char *)sig, signature_len, key)) {
-				EVP_MD_CTX_cleanup(&md_ctx);
-				efree(sig);
-				efree(savebuf);
-				php_stream_close(fp);
-				if (error) {
-					spprintf(error, 0, "phar \"%s\" has a broken signature", fname);
-				}
-				return FAILURE;
-			}
-			EVP_MD_CTX_cleanup(&md_ctx);
-#endif
-			
-			sig_len = phar_hex_str((const char*)sig, signature_len, &signature);
 			efree(sig);
 		}
 		break;
 #if HAVE_HASH_EXT
 		case PHAR_SIG_SHA512: {
-			unsigned char digest[64], saved[64];
-			PHP_SHA512_CTX  context;
+			unsigned char digest[64];
 
-			php_stream_rewind(fp);
-			PHP_SHA512Init(&context);
-			read_len -= sizeof(digest);
-			if (read_len > sizeof(buf)) {
-				read_size = sizeof(buf);
-			} else {
-				read_size = (int)read_len;
-			}
-			while ((len = php_stream_read(fp, (char*)buf, read_size)) > 0) {
-				PHP_SHA512Update(&context, buf, len);
-				read_len -= (off_t)len;
-				if (read_len < read_size) {
-					read_size = (int)read_len;
-				}
-			}
-			PHP_SHA512Final(digest, &context);
-
-			if (read_len > 0
-			|| php_stream_read(fp, (char*)saved, sizeof(saved)) != sizeof(saved)
-			|| memcmp(digest, saved, sizeof(digest))) {
+			php_stream_seek(fp, -(8 + 64), SEEK_END);
+			read_len = php_stream_tell(fp);
+			if (php_stream_read(fp, (char*)digest, sizeof(digest)) != sizeof(digest)) {
 				efree(savebuf);
 				php_stream_close(fp);
 				if (error) {
@@ -923,33 +806,25 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 				return FAILURE;
 			}
 
-			sig_len = phar_hex_str((const char*)digest, sizeof(digest), &signature);
+			if (FAILURE == phar_verify_signature(fp, read_len, PHAR_SIG_SHA512, (char *)digest, 64, fname, &signature, &sig_len, error TSRMLS_CC)) {
+				efree(savebuf);
+				php_stream_close(fp);
+				if (error) {
+					char *save = *error;
+					spprintf(error, 0, "phar \"%s\" SHA512 signature could not be verified: %s", fname, *error);
+					efree(save);
+				}
+				return FAILURE;
+			}
 			break;
 		}
 		case PHAR_SIG_SHA256: {
-			unsigned char digest[32], saved[32];
-			PHP_SHA256_CTX  context;
+			unsigned char digest[32];
 
-			php_stream_rewind(fp);
-			PHP_SHA256Init(&context);
-			read_len -= sizeof(digest);
-			if (read_len > sizeof(buf)) {
-				read_size = sizeof(buf);
-			} else {
-				read_size = (int)read_len;
-			}
-			while ((len = php_stream_read(fp, (char*)buf, read_size)) > 0) {
-				PHP_SHA256Update(&context, buf, len);
-				read_len -= (off_t)len;
-				if (read_len < read_size) {
-					read_size = (int)read_len;
-				}
-			}
-			PHP_SHA256Final(digest, &context);
+			php_stream_seek(fp, -(8 + 32), SEEK_END);
+			read_len = php_stream_tell(fp);
 
-			if (read_len > 0
-			|| php_stream_read(fp, (char*)saved, sizeof(saved)) != sizeof(saved)
-			|| memcmp(digest, saved, sizeof(digest))) {
+			if (php_stream_read(fp, (char*)digest, sizeof(digest)) != sizeof(digest)) {
 				efree(savebuf);
 				php_stream_close(fp);
 				if (error) {
@@ -958,7 +833,16 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 				return FAILURE;
 			}
 
-			sig_len = phar_hex_str((const char*)digest, sizeof(digest), &signature);
+			if (FAILURE == phar_verify_signature(fp, read_len, PHAR_SIG_SHA256, (char *)digest, 32, fname, &signature, &sig_len, error TSRMLS_CC)) {
+				efree(savebuf);
+				php_stream_close(fp);
+				if (error) {
+					char *save = *error;
+					spprintf(error, 0, "phar \"%s\" SHA256 signature could not be verified: %s", fname, *error);
+					efree(save);
+				}
+				return FAILURE;
+			}
 			break;
 		}
 #else
@@ -972,29 +856,12 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 			return FAILURE;
 #endif
 		case PHAR_SIG_SHA1: {
-			unsigned char digest[20], saved[20];
-			PHP_SHA1_CTX  context;
+			unsigned char digest[20];
 
-			php_stream_rewind(fp);
-			PHP_SHA1Init(&context);
-			read_len -= sizeof(digest);
-			if (read_len > sizeof(buf)) {
-				read_size = sizeof(buf);
-			} else {
-				read_size = (int)read_len;
-			}
-			while ((len = php_stream_read(fp, (char*)buf, read_size)) > 0) {
-				PHP_SHA1Update(&context, buf, len);
-				read_len -= (off_t)len;
-				if (read_len < read_size) {
-					read_size = (int)read_len;
-				}
-			}
-			PHP_SHA1Final(digest, &context);
+			php_stream_seek(fp, -(8 + 20), SEEK_END);
+			read_len = php_stream_tell(fp);
 
-			if (read_len > 0
-			|| php_stream_read(fp, (char*)saved, sizeof(saved)) != sizeof(saved)
-			|| memcmp(digest, saved, sizeof(digest))) {
+			if (php_stream_read(fp, (char*)digest, sizeof(digest)) != sizeof(digest)) {
 				efree(savebuf);
 				php_stream_close(fp);
 				if (error) {
@@ -1003,33 +870,25 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 				return FAILURE;
 			}
 
-			sig_len = phar_hex_str((const char*)digest, sizeof(digest), &signature);
+			if (FAILURE == phar_verify_signature(fp, read_len, PHAR_SIG_SHA1, (char *)digest, 20, fname, &signature, &sig_len, error TSRMLS_CC)) {
+				efree(savebuf);
+				php_stream_close(fp);
+				if (error) {
+					char *save = *error;
+					spprintf(error, 0, "phar \"%s\" SHA1 signature could not be verified: %s", fname, *error);
+					efree(save);
+				}
+				return FAILURE;
+			}
 			break;
 		}
 		case PHAR_SIG_MD5: {
-			unsigned char digest[16], saved[16];
-			PHP_MD5_CTX   context;
+			unsigned char digest[16];
 
-			php_stream_rewind(fp);
-			PHP_MD5Init(&context);
-			read_len -= sizeof(digest);
-			if (read_len > sizeof(buf)) {
-				read_size = sizeof(buf);
-			} else {
-				read_size = (int)read_len;
-			}
-			while ((len = php_stream_read(fp, (char*)buf, read_size)) > 0) {
-				PHP_MD5Update(&context, buf, len);
-				read_len -= (off_t)len;
-				if (read_len < read_size) {
-					read_size = (int)read_len;
-				}
-			}
-			PHP_MD5Final(digest, &context);
+			php_stream_seek(fp, -(8 + 16), SEEK_END);
+			read_len = php_stream_tell(fp);
 
-			if (read_len > 0
-			|| php_stream_read(fp, (char*)saved, sizeof(saved)) != sizeof(saved)
-			|| memcmp(digest, saved, sizeof(digest))) {
+			if (php_stream_read(fp, (char*)digest, sizeof(digest)) != sizeof(digest)) {
 				efree(savebuf);
 				php_stream_close(fp);
 				if (error) {
@@ -1038,7 +897,16 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 				return FAILURE;
 			}
 
-			sig_len = phar_hex_str((const char*)digest, sizeof(digest), &signature);
+			if (FAILURE == phar_verify_signature(fp, read_len, PHAR_SIG_MD5, (char *)digest, 16, fname, &signature, &sig_len, error TSRMLS_CC)) {
+				efree(savebuf);
+				php_stream_close(fp);
+				if (error) {
+					char *save = *error;
+					spprintf(error, 0, "phar \"%s\" MD5 signature could not be verified: %s", fname, *error);
+					efree(save);
+				}
+				return FAILURE;
+			}
 			break;
 		}
 		default:

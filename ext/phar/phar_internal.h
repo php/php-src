@@ -416,6 +416,7 @@ int phar_open_executed_filename(char *alias, int alias_len, char **error TSRMLS_
 int phar_free_alias(phar_archive_data *phar, char *alias, int alias_len TSRMLS_DC);
 int phar_get_archive(phar_archive_data **archive, char *fname, int fname_len, char *alias, int alias_len, char **error TSRMLS_DC);
 int phar_open_parsed_phar(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
+int phar_verify_signature(php_stream *fp, size_t end_of_phar, int sig_type, char *sig, int sig_len, char *fname, char **signature, int *signature_len, char **error TSRMLS_DC);
 
 /* utility functions */
 char *phar_create_default_stub(const char *index_php, const char *web_index, size_t *len, char **error TSRMLS_DC);
