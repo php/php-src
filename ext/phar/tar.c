@@ -1064,7 +1064,7 @@ nostub:
 
 		entry.uncompressed_filesize = entry.compressed_filesize = signature_length + 8;
 		/* throw out return value and write the signature */
-		entry.filename_len = phar_tar_writeheaders((void *)&entry, (void *)&pass);
+		entry.filename_len = phar_tar_writeheaders((void *)&entry, (void *)&pass TSRMLS_CC);
 
 		if (error && *error) {
 			if (closeoldfile) {
