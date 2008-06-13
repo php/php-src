@@ -24,25 +24,6 @@
 #include "SAPI.h"
 #include "func_interceptors.h"
 
-#ifdef PHAR_HAVE_OPENSSL
-
-/* OpenSSL includes */
-#include <openssl/evp.h>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
-#include <openssl/crypto.h>
-#include <openssl/pem.h>
-#include <openssl/err.h>
-#include <openssl/conf.h>
-#include <openssl/rand.h>
-#include <openssl/ssl.h>
-#include <openssl/pkcs12.h>
-
-#endif
-
-#ifndef PHAR_HAVE_OPENSSL
-static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, char *key, int key_len, char **signature, int *signature_len TSRMLS_DC);
-#endif
 static void destroy_phar_data(void *pDest);
 
 ZEND_DECLARE_MODULE_GLOBALS(phar)
@@ -603,25 +584,6 @@ int phar_parse_metadata(char **buffer, zval **metadata, int zip_metadata_len TSR
 	return SUCCESS;
 }
 /* }}}*/
-
-static const char hexChars[] = "0123456789ABCDEF";
-
-static int phar_hex_str(const char *digest, size_t digest_len, char ** signature)
-{
-	int pos = -1;
-	size_t len = 0;
-	
-	TSRMLS_FETCH();
-
-	*signature = (char*)safe_pemalloc(digest_len, 2, 1, PHAR_G(persist));
-
-	for (; len < digest_len; ++len) {
-		(*signature)[++pos] = hexChars[((const unsigned char *)digest)[len] >> 4];
-		(*signature)[++pos] = hexChars[((const unsigned char *)digest)[len] & 0x0F];
-	}
-	(*signature)[++pos] = '\0';
-	return pos;
-}
 
 /**
  * Does not check for a previously opened phar in the cache.
@@ -2917,169 +2879,57 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 
 	/* append signature */
 	if (global_flags & PHAR_HDR_SIGNATURE) {
-		unsigned char buf[1024];
-		int  sig_flags = 0, sig_len;
 		char sig_buf[4];
+
 		php_stream_rewind(newfile);
-		
 		if (phar->signature) {
 			efree(phar->signature);
 			phar->signature = NULL;
 		}
 		
 		switch(phar->sig_flags) {
-#if HAVE_HASH_EXT
-		case PHAR_SIG_SHA512: {
-			unsigned char digest[64];
-			PHP_SHA512_CTX  context;
-
-			PHP_SHA512Init(&context);
-			while ((sig_len = php_stream_read(newfile, (char*)buf, sizeof(buf))) > 0) {
-				PHP_SHA512Update(&context, buf, sig_len);
-			}
-			PHP_SHA512Final(digest, &context);
-			php_stream_write(newfile, (char *) digest, sizeof(digest));
-			sig_flags |= PHAR_SIG_SHA512;
-			phar->sig_len = phar_hex_str((const char*)digest, sizeof(digest), &phar->signature);
-			break;
-		}
-		case PHAR_SIG_SHA256: {
-			unsigned char digest[32];
-			PHP_SHA256_CTX  context;
-
-			PHP_SHA256Init(&context);
-			while ((sig_len = php_stream_read(newfile, (char*)buf, sizeof(buf))) > 0) {
-				PHP_SHA256Update(&context, buf, sig_len);
-			}
-			PHP_SHA256Final(digest, &context);
-			php_stream_write(newfile, (char *) digest, sizeof(digest));
-			sig_flags |= PHAR_SIG_SHA256;
-			phar->sig_len = phar_hex_str((const char*)digest, sizeof(digest), &phar->signature);
-			break;
-		}
-#else
-		case PHAR_SIG_SHA512:
-		case PHAR_SIG_SHA256:
-			if (closeoldfile) {
-				php_stream_close(oldfile);
-			}
-			php_stream_close(newfile);
-			if (error) {
-				spprintf(error, 0, "unable to write contents of file \"%s\" to new phar \"%s\" with requested hash type", entry->filename, phar->fname);
-			}
-			return EOF;
+#if !HAVE_HASH_EXT
+			case PHAR_SIG_SHA512:
+			case PHAR_SIG_SHA256:
+				if (closeoldfile) {
+					php_stream_close(oldfile);
+				}
+				php_stream_close(newfile);
+				if (error) {
+					spprintf(error, 0, "unable to write contents of file \"%s\" to new phar \"%s\" with requested hash type", entry->filename, phar->fname);
+				}
+				return EOF;
 #endif
-		case PHAR_SIG_OPENSSL: {
-			int siglen;
-			unsigned char *sigbuf;
-#ifdef PHAR_HAVE_OPENSSL
-			BIO *in;
-			EVP_PKEY *key;
-			EVP_MD *mdtype = (EVP_MD *) EVP_sha1();
-			EVP_MD_CTX md_ctx;
-			
-			if (!zend_hash_exists(&module_registry, "openssl", sizeof("openssl"))) {
-				if (closeoldfile) {
-					php_stream_close(oldfile);
-				}
-				php_stream_close(newfile);
-				if (error) {
-					spprintf(error, 0, "phar \"%s\" openssl signature cannot be created, openssl not loaded", phar->fname);
-				}
-				return EOF;
-			}
-			in = BIO_new_mem_buf(PHAR_G(openssl_privatekey), PHAR_G(openssl_privatekey_len));
+			default: {
+				char *digest;
+				int digest_len;
 
-			if (in == NULL) {
-				if (closeoldfile) {
-					php_stream_close(oldfile);
+				if (FAILURE == phar_create_signature(phar, newfile, &digest, &digest_len, error TSRMLS_CC)) {
+					if (error) {
+						char *save = *error;
+						spprintf(error, 0, "phar error: unable to write signature: %s", save);
+						efree(save);
+					}
+					efree(digest);
+					if (closeoldfile) {
+						php_stream_close(oldfile);
+					}
+					php_stream_close(newfile);
+					return EOF;
 				}
-				php_stream_close(newfile);
-				if (error) {
-					spprintf(error, 0, "unable to write contents of file \"%s\" to new phar \"%s\" with requested openssl signature", entry->filename, phar->fname);
-				}
-				return EOF;
-			}
-			key = PEM_read_bio_PrivateKey(in, NULL,NULL, "");
 
-			BIO_free(in);
-			siglen = EVP_PKEY_size(key);
-			sigbuf = emalloc(siglen + 1);
-		
-			EVP_SignInit(&md_ctx, mdtype);
-			while ((sig_len = php_stream_read(newfile, (char*)buf, sizeof(buf))) > 0) {
-				EVP_SignUpdate(&md_ctx, buf, sig_len);
-			}
-			if (!EVP_SignFinal (&md_ctx, sigbuf,(unsigned int *)&siglen, key)) {
-				efree(sigbuf);
-				if (closeoldfile) {
-					php_stream_close(oldfile);
+				php_stream_write(newfile, digest, digest_len);
+				efree(digest);
+				if (phar->sig_flags == PHAR_SIG_OPENSSL) {
+					phar_set_32(sig_buf, digest_len);
+					php_stream_write(newfile, sig_buf, 4);
 				}
-				php_stream_close(newfile);
-				if (error) {
-					spprintf(error, 0, "unable to write phar \"%s\" with requested openssl signature", phar->fname);
-				}
-				return EOF;
+				break;
 			}
-			sigbuf[siglen] = '\0';
-			EVP_MD_CTX_cleanup(&md_ctx);
-#else
-			sigbuf = NULL;
-			siglen = 0;
-			php_stream_seek(newfile, 0, SEEK_END);
-			if (FAILURE == phar_call_openssl_signverify(1, newfile, php_stream_tell(newfile), PHAR_G(openssl_privatekey), PHAR_G(openssl_privatekey_len), (char **)&sigbuf, &siglen TSRMLS_CC)) {
-				if (closeoldfile) {
-					php_stream_close(oldfile);
-				}
-				php_stream_close(newfile);
-				if (error) {
-					spprintf(error, 0, "unable to write phar \"%s\" with requested openssl signature", phar->fname);
-				}
-				return EOF;
-			}
-#endif
-			sig_flags |= PHAR_SIG_OPENSSL;
-			phar->sig_len = phar_hex_str((const char *)sigbuf, siglen, &phar->signature);
-			php_stream_write(newfile, (char *) sigbuf, siglen);
-			efree(sigbuf);
-			phar_set_32(sig_buf, siglen);
-			php_stream_write(newfile, sig_buf, 4);
 		}
-		break;
-		default:
-		case PHAR_SIG_SHA1: {
-			unsigned char digest[20];
-			PHP_SHA1_CTX  context;
-
-			PHP_SHA1Init(&context);
-			while ((sig_len = php_stream_read(newfile, (char*)buf, sizeof(buf))) > 0) {
-				PHP_SHA1Update(&context, buf, sig_len);
-			}
-			PHP_SHA1Final(digest, &context);
-			php_stream_write(newfile, (char *) digest, sizeof(digest));
-			sig_flags |= PHAR_SIG_SHA1;
-			phar->sig_len = phar_hex_str((const char*)digest, sizeof(digest), &phar->signature);
-			break;
-		}
-		case PHAR_SIG_MD5: {
-			unsigned char digest[16];
-			PHP_MD5_CTX   context;
-
-			PHP_MD5Init(&context);
-			while ((sig_len = php_stream_read(newfile, (char*)buf, sizeof(buf))) > 0) {
-				PHP_MD5Update(&context, buf, sig_len);
-			}
-			PHP_MD5Final(digest, &context);
-			php_stream_write(newfile, (char *) digest, sizeof(digest));
-			sig_flags |= PHAR_SIG_MD5;
-			phar->sig_len = phar_hex_str((const char*)digest, sizeof(digest), &phar->signature);
-			break;
-		}
-		}
-		phar_set_32(sig_buf, sig_flags);
+		phar_set_32(sig_buf, phar->sig_flags);
 		php_stream_write(newfile, sig_buf, 4);
 		php_stream_write(newfile, "GBMB", 4);
-		phar->sig_flags = sig_flags;
 	}
 
 	/* finally, close the temp file, rename the original phar,
