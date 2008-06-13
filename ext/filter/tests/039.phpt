@@ -58,9 +58,9 @@ array(0) {
 }
 array(2) {
   [0]=>
-  string(1) "1"
-  ["blah"]=>
-  string(4) "hoho"
+  unicode(1) "1"
+  [u"blah"]=>
+  unicode(4) "hoho"
 }
 bool(false)
 bool(false)
@@ -78,16 +78,16 @@ bool(false)
 array(0) {
 }
 array(1) {
-  ["var_name"]=>
+  [u"var_name"]=>
   NULL
 }
 array(1) {
-  ["var_name"]=>
+  [u"var_name"]=>
   NULL
 }
 array(1) {
-  ["var_name"]=>
-  string(0) ""
+  [u"var_name"]=>
+  unicode(0) ""
 }
 -- (5)
 
@@ -98,20 +98,20 @@ Warning: filter_var_array(): Empty keys are not allowed in the definition array 
 bool(false)
 bool(false)
 array(1) {
-  [""]=>
-  string(0) ""
+  [u""]=>
+  unicode(0) ""
 }
 int(-1)
 bool(false)
 array(1) {
-  [""]=>
-  string(0) ""
+  [u""]=>
+  unicode(0) ""
 }
 int(100000)
 bool(false)
 array(1) {
-  [""]=>
-  string(0) ""
+  [u""]=>
+  unicode(0) ""
 }
-string(0) ""
+unicode(0) ""
 Done

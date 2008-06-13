@@ -43,45 +43,6 @@ foreach($values as $value) {
 *** Testing image_type_to_mime_type() : usage variations ***
 
 -- Iteration 1 --
-string(24) "application/octet-stream"
-
--- Iteration 2 --
-string(9) "image/gif"
-
--- Iteration 3 --
-string(24) "application/octet-stream"
-
--- Iteration 4 --
-string(24) "application/octet-stream"
-
--- Iteration 5 --
-string(10) "image/jpeg"
-
--- Iteration 6 --
-string(10) "image/tiff"
-
--- Iteration 7 --
-string(24) "application/octet-stream"
-
--- Iteration 8 --
-string(24) "application/octet-stream"
-
--- Iteration 9 --
-string(24) "application/octet-stream"
-
--- Iteration 10 --
-string(9) "image/gif"
-
--- Iteration 11 --
-string(24) "application/octet-stream"
-
--- Iteration 12 --
-string(24) "application/octet-stream"
-===DONE===
---UEXPECT--
-*** Testing image_type_to_mime_type() : usage variations ***
-
--- Iteration 1 --
 unicode(24) "application/octet-stream"
 
 -- Iteration 2 --
