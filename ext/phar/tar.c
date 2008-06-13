@@ -243,6 +243,86 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 		size = entry.uncompressed_filesize = entry.compressed_filesize =
 			phar_tar_number(hdr->size, sizeof(hdr->size));
 
+		if (((!old && hdr->prefix[0] == 0) || old) && strlen(hdr->name) == sizeof(".phar/signature.bin")-1 && !strncmp(hdr->name, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
+			size_t read;
+			if (size > 511) {
+				if (error) {
+					spprintf(error, 4096, "phar error: tar-based phar \"%s\" has signature that is larger than 511 bytes, cannot process", fname);
+				}
+bail:
+				php_stream_close(fp);
+				zend_hash_destroy(&myphar->manifest);
+				myphar->manifest.arBuckets = 0;
+				zend_hash_destroy(&myphar->mounted_dirs);
+				myphar->mounted_dirs.arBuckets = 0;
+				pefree(myphar, myphar->is_persistent);
+				return FAILURE;
+			}
+			read = php_stream_read(fp, buf, size);
+			if (read != size) {
+				if (error) {
+					spprintf(error, 4096, "phar error: tar-based phar \"%s\" signature cannot be read", fname);
+				}
+				goto bail;
+			}
+#ifdef WORDS_BIGENDIAN
+# define PHAR_GET_32(buffer) \
+	(((((unsigned char*)(buffer))[3]) << 24) \
+		| ((((unsigned char*)(buffer))[2]) << 16) \
+		| ((((unsigned char*)(buffer))[1]) <<  8) \
+		| (((unsigned char*)(buffer))[0]))
+#else
+# define PHAR_GET_32(buffer) (php_uint32) *(buffer)
+#endif
+			if (FAILURE == phar_verify_signature(fp, php_stream_tell(fp) - size - 512, PHAR_GET_32(buf), buf + 8, PHAR_GET_32(buf + 4), fname, &myphar->signature, &myphar->sig_len, error TSRMLS_CC)) {
+				if (error) {
+					char *save = *error;
+					spprintf(error, 4096, "phar error: tar-based phar \"%s\" signature cannot be verified: %s", fname, save);
+					efree(save);
+				}
+				goto bail;
+			}
+			/* signature checked out, let's ensure this is the last file in the phar */
+			size = ((size+511)&~511) + 512;
+			if (((hdr->typeflag == 0) || (hdr->typeflag == TAR_FILE)) && size > 0) {
+				/* this is not good enough - seek succeeds even on truncated tars */
+				php_stream_seek(fp, size, SEEK_CUR);
+				if ((uint)php_stream_tell(fp) > totalsize) {
+					if (error) {
+						spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
+					}
+					php_stream_close(fp);
+					zend_hash_destroy(&myphar->manifest);
+					myphar->manifest.arBuckets = 0;
+					zend_hash_destroy(&myphar->mounted_dirs);
+					myphar->mounted_dirs.arBuckets = 0;
+					pefree(myphar, myphar->is_persistent);
+					return FAILURE;
+				}
+			}
+			read = php_stream_read(fp, buf, sizeof(buf));
+			if (read != sizeof(buf)) {
+				if (error) {
+					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
+				}
+				php_stream_close(fp);
+				zend_hash_destroy(&myphar->manifest);
+				myphar->manifest.arBuckets = 0;
+				zend_hash_destroy(&myphar->mounted_dirs);
+				myphar->mounted_dirs.arBuckets = 0;
+				pefree(myphar, myphar->is_persistent);
+				return FAILURE;
+			}
+			hdr = (tar_header*) buf;
+			sum1 = phar_tar_number(hdr->checksum, sizeof(hdr->checksum));
+			if (sum1 == 0 && phar_tar_checksum(buf, sizeof(buf)) == 0) {
+				break;
+			}
+			if (error) {
+				spprintf(error, 4096, "phar error: \"%s\" has entries after signature, invalid phar", fname);
+			}
+			goto bail;
+		}
 		if (!old && hdr->prefix[0] != 0) {
 			char name[256];
 
@@ -419,6 +499,21 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 			return FAILURE;
 		}
 	} while (read != 0);
+
+	/* ensure signature set */
+	if (PHAR_G(require_hash) && !myphar->signature) {
+		php_stream_close(fp);
+		zend_hash_destroy(&myphar->manifest);
+		myphar->manifest.arBuckets = 0;
+		zend_hash_destroy(&myphar->mounted_dirs);
+		myphar->mounted_dirs.arBuckets = 0;
+		pefree(myphar, myphar->is_persistent);
+		if (error) {
+			spprintf(error, 0, "tar-based phar \"%s\" does not have a signature", fname);
+		}
+		return FAILURE;
+	}
+
 	myphar->fname = pestrndup(fname, fname_len, myphar->is_persistent);
 #ifdef PHP_WIN32
 	phar_unixify_path_separators(myphar->fname, fname_len);
@@ -712,9 +807,9 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 	phar_entry_info entry = {0};
 	static const char newstub[] = "<?php // tar-based phar archive stub file\n__HALT_COMPILER();";
 	php_stream *oldfile, *newfile, *stubfile;
-	int closeoldfile, free_user_stub;
+	int closeoldfile, free_user_stub, signature_length;
 	struct _phar_pass_tar_info pass;
-	char *buf;
+	char *buf, *signature, sigbuf[8];
 
 	entry.flags = PHAR_ENT_PERM_DEF_FILE;
 	entry.timestamp = time(NULL);
@@ -734,7 +829,6 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 		entry.filename = estrndup(".phar/alias.txt", sizeof(".phar/alias.txt")-1);
 		entry.filename_len = sizeof(".phar/alias.txt")-1;
 		entry.fp = php_stream_fopen_tmpfile();
-		entry.crc32 = phar_tar_checksum(phar->alias, phar->alias_len);
 		if (phar->alias_len != (int)php_stream_write(entry.fp, phar->alias, phar->alias_len)) {
 			if (error) {
 				spprintf(error, 0, "unable to set alias in tar-based phar \"%s\"", phar->fname);
@@ -925,6 +1019,62 @@ nostub:
 	}
 
 	zend_hash_apply_with_argument(&phar->manifest, (apply_func_arg_t) phar_tar_writeheaders, (void *) &pass TSRMLS_CC);
+
+	/* add signature for executable tars or tars explicitly set with setSignatureAlgorithm */
+	if (!phar->is_data || phar->sig_flags) {
+		if (FAILURE == phar_create_signature(phar, newfile, &signature, &signature_length, error TSRMLS_CC)) {
+			if (error) {
+				char *save = *error;
+				spprintf(error, 0, "phar error: unable to write signature to tar-based phar: %s", save);
+				efree(save);
+			}
+			if (closeoldfile) {
+				php_stream_close(oldfile);
+			}
+			php_stream_close(newfile);
+			return EOF;
+		}
+		entry.filename = ".phar/signature.bin";
+		entry.filename_len = sizeof(".phar/signature.bin")-1;
+		entry.fp = php_stream_fopen_tmpfile();
+
+#ifdef WORDS_BIGENDIAN
+# define PHAR_SET_32(var, buffer) \
+	*(php_uint32 *)(var) = (((((unsigned char*)(buffer))[3]) << 24) \
+		| ((((unsigned char*)(buffer))[2]) << 16) \
+		| ((((unsigned char*)(buffer))[1]) <<  8) \
+		| (((unsigned char*)(buffer))[0]))
+#else
+# define PHAR_SET_32(var, buffer) *(php_uint32 *)(var) = (php_uint32) (buffer)
+#endif
+		PHAR_SET_32(sigbuf, phar->sig_flags);
+		PHAR_SET_32(sigbuf + 4, signature_length);
+		if (8 != php_stream_write(entry.fp, sigbuf, 8) || signature_length != php_stream_write(entry.fp, signature, signature_length)) {
+			efree(signature);
+			if (error) {
+				spprintf(error, 0, "phar error: unable to write signature to tar-based phar %s", phar->fname);
+			}
+			if (closeoldfile) {
+				php_stream_close(oldfile);
+			}
+			php_stream_close(newfile);
+			return EOF;
+		}
+		efree(signature);
+
+		entry.uncompressed_filesize = entry.compressed_filesize = signature_length + 8;
+		/* throw out return value and write the signature */
+		entry.filename_len = phar_tar_writeheaders((void *)&entry, (void *)&pass);
+
+		if (error && *error) {
+			if (closeoldfile) {
+				php_stream_close(oldfile);
+			}
+			/* error is set by writeheaders */
+			php_stream_close(newfile);
+			return EOF;
+		}
+	} /* signature */
 
 	/* add final zero blocks */
 	buf = (char *) ecalloc(1024, 1);

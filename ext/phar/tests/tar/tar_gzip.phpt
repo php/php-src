@@ -7,6 +7,7 @@ Phar: tar-based phar, gzipped tar
 <?php if (version_compare(phpversion(), '5.2.6', '<')) die("skip zlib is buggy in PHP < 5.2.6"); ?>
 --INI--
 phar.readonly=0
+phar.require_hash=0
 --FILE--
 <?php
 include dirname(__FILE__) . '/files/tarmaker.php.inc';
