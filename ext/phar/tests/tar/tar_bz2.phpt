@@ -6,6 +6,7 @@ Phar: tar-based phar, bzipped tar
 <?php if (!extension_loaded("bz2")) die("skip bz2 not available"); ?>
 --INI--
 phar.readonly=0
+phar.require_hash=0
 --FILE--
 <?php
 include dirname(__FILE__) . '/files/tarmaker.php.inc';

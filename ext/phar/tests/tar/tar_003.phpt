@@ -5,6 +5,7 @@ Phar: tar-based phar, valid 1
 <?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 --INI--
 phar.readonly=0
+phar.require_hash=0
 --FILE--
 <?php
 include dirname(__FILE__) . '/files/tarmaker.php.inc';

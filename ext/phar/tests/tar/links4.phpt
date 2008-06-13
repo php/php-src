@@ -2,6 +2,8 @@
 Phar: tar with link to root directory file from root directory file
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
+--INI--
+phar.require_hash=0
 --FILE--
 <?php
 try {

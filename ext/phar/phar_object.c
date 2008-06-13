@@ -2707,11 +2707,6 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 			"Cannot set signature algorithm, phar is read-only");
 		return;
 	}
-	if (phar_obj->arc.archive->is_tar) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Cannot set signature algorithm, not possible with tar-based phar archives");
-		return;
-	}
 	if (phar_obj->arc.archive->is_zip) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot set signature algorithm, not possible with zip-based phar archives");
