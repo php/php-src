@@ -592,6 +592,10 @@ PHP_FUNCTION(dom_element_set_attribute_node)
 		xmlUnlinkNode((xmlNodePtr) existattrp);
 	}
 
+	if (attrp->parent != NULL) {
+		xmlUnlinkNode((xmlNodePtr) attrp);
+	}
+
 	if (attrp->doc == NULL && nodep->doc != NULL) {
 		attrobj->document = intern->document;
 		php_libxml_increment_doc_ref((php_libxml_node_object *)attrobj, NULL TSRMLS_CC);
@@ -1010,6 +1014,10 @@ PHP_FUNCTION(dom_element_set_attribute_node_ns)
 			RETURN_NULL();
 		}
 		xmlUnlinkNode((xmlNodePtr) existattrp);
+	}
+
+	if (attrp->parent != NULL) {
+		xmlUnlinkNode((xmlNodePtr) attrp);
 	}
 
 	if (attrp->doc == NULL && nodep->doc != NULL) {
