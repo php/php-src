@@ -1,3 +1,194 @@
+2008-06-13  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/phar.phar
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/tar.c
+      ext/phar/util.c
+      ext/phar/tests/badparameters.phpt
+      ext/phar/tests/phar_convert_again.phpt
+      ext/phar/tests/phar_setsignaturealgo2.phpt
+      ext/phar/tests/stat2.phpt
+      ext/phar/tests/stat2_5.3.phpt
+      ext/phar/tests/zf_test.phpt
+      ext/phar/tests/tar/bignames.phpt
+      ext/phar/tests/tar/links.phpt
+      ext/phar/tests/tar/links3.phpt
+      ext/phar/tests/tar/links4.phpt
+      ext/phar/tests/tar/links5.phpt
+      ext/phar/tests/tar/phar_setsignaturealgo2.phpt
+      ext/phar/tests/tar/phar_setsignaturealgo2.phpt
+      ext/phar/tests/tar/require_hash.phpt
+      ext/phar/tests/tar/require_hash.phpt
+      ext/phar/tests/tar/tar_003.phpt
+      ext/phar/tests/tar/tar_004.phpt
+      ext/phar/tests/tar/tar_bz2.phpt
+      ext/phar/tests/tar/tar_gzip.phpt
+      ext/phar/tests/tar/tar_nostub.phpt
+      ext/phar/tests/tar/files/frontcontroller.phar.tar
+      ext/phar/tests/tar/files/frontcontroller10.phar.tar
+      ext/phar/tests/tar/files/frontcontroller11.phar.tar
+      ext/phar/tests/tar/files/frontcontroller12.phar.tar
+      ext/phar/tests/tar/files/frontcontroller2.phar.tar
+      ext/phar/tests/tar/files/frontcontroller3.phar.tar
+      ext/phar/tests/tar/files/frontcontroller4.phar.tar
+      ext/phar/tests/tar/files/frontcontroller5.phar.tar
+      ext/phar/tests/tar/files/frontcontroller6.phar.tar
+      ext/phar/tests/tar/files/frontcontroller7.phar.tar
+      ext/phar/tests/tar/files/frontcontroller8.phar.tar
+      ext/phar/tests/tar/files/frontcontroller9.phar.tar:
+      [DOC] implement full signature support for tar-based archives.  By default,
+      data archives do
+      not have a signature, but can have one set via setSignatureAlgorithm()
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/phar.phar
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/util.c:
+      full refactor of signatures complete - now to implement them for tar as a
+      starting point
+
+2008-06-13  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * ext/gd/tests/gd_info_variation1.phpt:
+      Commited for Sanjay, reviewed by Pierre. Testfest task 5.
+
+2008-06-13  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/phar_internal.h:
+      PHP_5_2 compat - add pestrndup if undefined
+
+2008-06-13  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * ext/gd/tests/gd_info_variation1.phpt
+      ext/gd/tests/gd_info_variation1.phpt:
+      
+      file gd_info_variation1.phpt was initially added on branch PHP_5_3.
+
+    * ext/standard/tests/image/getimagesize_variation_005.phpt
+      ext/standard/tests/image/getimagesize_variation_005.phpt:
+      
+      file getimagesize_variation_005.phpt was initially added on branch
+      PHP_5_3.
+
+2008-06-13  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c:
+      fixed bug #27421 (by david at dfoerster dot de) mbstring.func_overload set
+      in .htaccess becomes global
+
+2008-06-13  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * ext/gd/tests/image_type_to_mime_type_variation1.phpt:
+      Commited for Sanjay, reviewed by Pierre. Testfest task 79.
+
+    * ext/gd/tests/image_type_to_mime_type_variation1.phpt
+      ext/gd/tests/image_type_to_mime_type_variation1.phpt:
+      
+      file image_type_to_mime_type_variation1.phpt was initially added on branch
+      PHP_5_3.
+
+2008-06-13  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/file/is_dir_variation2.phpt
+      ext/standard/tests/file/is_readable_variation1.phpt
+      ext/standard/tests/general_functions/var_export-locale.phpt:
+      - Fixed tests
+
+2008-06-13  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * ext/standard/tests/image/200x100.GIF
+      ext/standard/tests/image/200x100.JPG
+      ext/standard/tests/image/200x100.PNG
+      ext/standard/tests/image/200x100.TIF
+      ext/standard/tests/image/200x100.bmp
+      ext/standard/tests/image/200x100.swf
+      ext/standard/tests/image/getimagesize_basic.phpt
+      ext/standard/tests/image/getimagesize_variation_005.phpt:
+      Commited for Sanjay, reviewed by Pierre. Testfest task 117.
+
+    * ext/standard/tests/image/200x100.GIF
+      ext/standard/tests/image/200x100.GIF
+      ext/standard/tests/image/200x100.JPG
+      ext/standard/tests/image/200x100.JPG
+      ext/standard/tests/image/200x100.PNG
+      ext/standard/tests/image/200x100.PNG
+      ext/standard/tests/image/200x100.TIF
+      ext/standard/tests/image/200x100.TIF
+      ext/standard/tests/image/200x100.bmp
+      ext/standard/tests/image/200x100.bmp
+      ext/standard/tests/image/200x100.swf
+      ext/standard/tests/image/200x100.swf
+      ext/standard/tests/image/getimagesize_basic.phpt
+      ext/standard/tests/image/getimagesize_basic.phpt:
+      
+      file 200x100.GIF was initially added on branch PHP_5_3.
+
+    * ext/standard/tests/image/200x100_unknown.unknown
+      ext/standard/tests/image/blank_file.bmp
+      ext/standard/tests/image/getimagesize_variation_003.phpt
+      ext/standard/tests/image/test.txt:
+      Commited for Sanjay, reviewed by Pierre. Testfest task 118.
+
+    * ext/standard/tests/image/200x100_unknown.unknown
+      ext/standard/tests/image/200x100_unknown.unknown
+      ext/standard/tests/image/blank_file.bmp
+      ext/standard/tests/image/blank_file.bmp
+      ext/standard/tests/image/getimagesize_variation_003.phpt
+      ext/standard/tests/image/getimagesize_variation_003.phpt
+      ext/standard/tests/image/test.txt
+      ext/standard/tests/image/test.txt:
+      
+      file 200x100_unknown.unknown was initially added on branch PHP_5_3.
+
+2008-06-13  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/tar.c
+      ext/phar/util.c:
+      - Fix build (ZTS)
+
+2008-06-13  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/phar.phar
+      ext/phar/phar_internal.h
+      ext/phar/util.c:
+      partial refactor - move signature verification into its own function, in
+      preparation for tar/zip signature support.
+      next is signature creation
+
+2008-06-13  Felipe Pena  <felipensp@gmail.com>
+
+    * sapi/cli/tests/bug44564.phpt:
+      - Removed UEXPECTF
+
+    * ext/filter/tests/007.phpt
+      ext/filter/tests/011.phpt
+      ext/filter/tests/036.phpt
+      ext/filter/tests/039.phpt
+      ext/gd/tests/image_type_to_mime_type_variation2.phpt
+      ext/spl/tests/bug44615.phpt
+      ext/spl/tests/fastarray_004.phpt
+      ext/spl/tests/fastarray_009.phpt
+      ext/spl/tests/fastarray_015.phpt
+      ext/spl/tests/fileobject_004.phpt
+      ext/spl/tests/regexIterator_setMode_error.phpt
+      ext/standard/tests/strings/bug44703.phpt
+      ext/standard/tests/strings/htmlentities-utf.phpt
+      ext/standard/tests/strings/htmlentities01.phpt
+      ext/standard/tests/strings/htmlentities11.phpt
+      ext/standard/tests/strings/htmlentities12.phpt
+      ext/standard/tests/strings/htmlentities18.phpt
+      ext/standard/tests/strings/substr.phpt:
+      - Fixed tests (unicode results, UEXPECT, line endings)
+
 2008-06-12  Lars Strojny  <lars@strojny.net>
 
     * ext/standard/tests/general_functions/putenv_error1.phpt
