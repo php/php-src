@@ -1,7 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2008, PHP 5.2.7
-- Fixed bug #45139 (ReflectionProperty returns incorrect declaring class). (Felipe)
 - When dumping entire document to file via asXml() don't lose the encoding.
   (Ilia)
 - Fixed a crash inside PDO when trying instantiate PDORow manually (Felipe)
@@ -9,6 +8,8 @@ PHP                                                                        NEWS
   functions. (Andrey)
 - Fixed a bug where exec() on Windows would eat the first and last double quotes
   (Scott)
+- Fixed bug #45251 (double free or corruption with setAttributeNode()). (Rob)
+- Fixed bug #45139 (ReflectionProperty returns incorrect declaring class). (Felipe)
 - Fixed bug #45004 (pg_insert() does not accept 4 digit timezone format).
   (Ilia)
 - Fixed bug #44891 Memory leak using registerPHPFunctions and XSLT Variable 
