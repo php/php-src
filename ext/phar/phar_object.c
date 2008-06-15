@@ -2040,6 +2040,10 @@ static zval *phar_convert_to_other(phar_archive_data *source, int convert, char 
 
 	zend_hash_init(&(phar->manifest), sizeof(phar_entry_info),
 		zend_get_hash_value, destroy_phar_manifest_entry, 0);
+	zend_hash_init(&phar->mounted_dirs, sizeof(char *),
+		zend_get_hash_value, NULL, 0);
+	zend_hash_init(&phar->virtual_dirs, sizeof(char *),
+		zend_get_hash_value, NULL, 0);
 
 	phar->fp = php_stream_fopen_tmpfile();
 	phar->fname = source->fname;
@@ -2101,12 +2105,15 @@ no_copy:
 		newentry.phar = phar;
  		newentry.old_flags = newentry.flags & ~PHAR_ENT_COMPRESSION_MASK; /* remove compression from old_flags */
 		zend_hash_add(&(phar->manifest), newentry.filename, newentry.filename_len, (void*)&newentry, sizeof(phar_entry_info), NULL);
+		phar_add_virtual_dirs(phar, newentry.filename, newentry.filename_len TSRMLS_CC);
 	}
 
 	if ((ret = phar_rename_archive(phar, ext, 0 TSRMLS_CC))) {
 		return ret;
 	} else {
 		zend_hash_destroy(&(phar->manifest));
+		zend_hash_destroy(&(phar->mounted_dirs));
+		zend_hash_destroy(&(phar->virtual_dirs));
 		php_stream_close(phar->fp);
 		efree(phar->fname);
 		efree(phar);

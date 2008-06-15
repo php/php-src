@@ -283,6 +283,8 @@ struct _phar_archive_data {
 	size_t                   internal_file_start;
 	size_t                   halt_offset;
 	HashTable                manifest;
+	/* hash of virtual directories, as in path/to/file.txt has path/to and path as virtual directories */
+	HashTable                virtual_dirs;
 	/* hash of mounted directory paths */
 	HashTable                mounted_dirs;
 	php_uint32               flags;
@@ -428,6 +430,8 @@ char *phar_create_default_stub(const char *index_php, const char *web_index, siz
 char *phar_decompress_filter(phar_entry_info * entry, int return_unknown);
 char *phar_compress_filter(phar_entry_info * entry, int return_unknown);
 
+void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, int filename_len TSRMLS_DC);
+void phar_delete_virtual_dirs(phar_archive_data *phar, char *filename, int filename_len TSRMLS_DC);
 int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, char *path, int path_len TSRMLS_DC);
 char *phar_find_in_include_path(char *file, int file_len, phar_archive_data **pphar TSRMLS_DC);
 char *phar_fix_filepath(char *path, int *new_len, int use_cwd TSRMLS_DC);

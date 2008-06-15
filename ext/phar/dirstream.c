@@ -515,6 +515,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, char *url_from, int mode, in
 		efree(error);
 		return FAILURE;
 	}
+	phar_add_virtual_dirs(phar, entry.filename, entry.filename_len TSRMLS_CC);
 	return SUCCESS;
 }
 /* }}} */
@@ -589,12 +590,12 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_
 	entry->is_modified = 1;
 	phar_flush(phar, 0, 0, 0, &error TSRMLS_CC);
 	if (error) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", entry->filename, phar->fname, error);
-		zend_hash_del(&phar->manifest, entry->filename, entry->filename_len);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot remove directory \"%s\" in phar \"%s\", %s", entry->filename, phar->fname, error);
 		php_url_free(resource);
 		efree(error);
 		return FAILURE;
 	}
+	phar_delete_virtual_dirs(phar, resource->path + 1, strlen(resource->path) - 1 TSRMLS_CC);
 	php_url_free(resource);
 	return SUCCESS;
 }

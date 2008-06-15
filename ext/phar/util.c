@@ -689,6 +689,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 	} else {
 		etemp.flags = etemp.old_flags = PHAR_ENT_PERM_DEF_FILE;
 	}
+	phar_add_virtual_dirs(phar, path, path_len TSRMLS_CC);
 	etemp.is_modified = 1;
 	etemp.timestamp = time(0);
 	etemp.is_crc_checked = 1;
@@ -1217,7 +1218,20 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 			return NULL;
 		}
 		return entry;
-	} else if (phar->mounted_dirs.arBuckets && zend_hash_num_elements(&phar->mounted_dirs)) {
+	}
+	if (dir) {
+		if (SUCCESS == zend_hash_find(&phar->virtual_dirs, path, path_len, (void**)&entry)) {
+			/* a file or directory exists in a sub-directory of this path */
+			entry = (phar_entry_info *) ecalloc(1, sizeof(phar_entry_info));
+			/* this next line tells PharFileInfo->__destruct() to efree the filename */
+			entry->is_temp_dir = entry->is_dir = 1;
+			entry->filename = (char *) estrndup(path, path_len + 1);
+			entry->filename_len = path_len;
+			entry->phar = phar;
+			return entry;
+		}
+	}
+	if (phar->mounted_dirs.arBuckets && zend_hash_num_elements(&phar->mounted_dirs)) {
 		phar_zstr key;
 		char *str_key;
 		ulong unused;
@@ -1286,50 +1300,6 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 					}
 					return NULL;
 				}
-				return entry;
-			}
-		}
-	}
-	if (dir) {
-		/* try to find a directory */
-		HashTable *manifest;
-		phar_zstr key;
-		char *str_key;
-		uint keylen;
-		ulong unused;
-
-		if (!path_len) {
-			path = "/";
-		}
-		manifest = &phar->manifest;
-		zend_hash_internal_pointer_reset(manifest);
-		while (FAILURE != zend_hash_has_more_elements(manifest)) {
-			if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(manifest, &key, &keylen, &unused, 0, NULL)) {
-				break;
-			}
-
-			PHAR_STR(key, str_key);
-
-			if (0 != memcmp(str_key, path, path_len)) {
-				/* entry in directory not found */
-				if (SUCCESS != zend_hash_move_forward(manifest)) {
-					break;
-				}
-				continue;
-			} else {
-				if (str_key[path_len] != '/') {
-					if (SUCCESS != zend_hash_move_forward(manifest)) {
-						break;
-					}
-					continue;
-				}
-				/* found a file in this path */
-				entry = (phar_entry_info *) ecalloc(1, sizeof(phar_entry_info));
-				/* this next line tells PharFileInfo->__destruct() to efree the filename */
-				entry->is_temp_dir = entry->is_dir = 1;
-				entry->filename = (char *) estrndup(path, path_len + 1);
-				entry->filename_len = path_len;
-				entry->phar = phar;
 				return entry;
 			}
 		}
@@ -1844,5 +1814,57 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 	}
 	phar->sig_len = phar_hex_str((const char *)*signature, *signature_length, &phar->signature TSRMLS_CC);
 	return SUCCESS;
+}
+/* }}} */
+
+/**
+ * add an empty element with a char * key to a hash table, avoiding duplicates
+ *
+ * This is used to get a unique listing of virtual directories within a phar,
+ * for iterating over opendir()ed phar directories.
+ */
+static int phar_add_empty(HashTable *ht, char *arKey, uint nKeyLength)  /* {{{ */
+{
+	void *dummy = (void *) 1;
+	if (SUCCESS == zend_hash_find(ht, arKey, nKeyLength, (void **)&dummy)) {
+		dummy++;
+	}
+
+	return zend_hash_update(ht, arKey, nKeyLength, &dummy, sizeof(void *), NULL);
+}
+/* }}} */
+
+void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, int filename_len TSRMLS_DC) /* {{{ */
+{
+	char *s = filename;
+
+	/* we use filename_len - 1 to avoid adding a virtual dir for empty directory entries */
+	for (; s - filename < filename_len - 1; s++) {
+		if (*s == '/') {
+			phar_add_empty(&phar->virtual_dirs, filename, s - filename);
+		}
+	}
+}
+/* }}} */
+
+void phar_delete_virtual_dirs(phar_archive_data *phar, char *filename, int filename_len TSRMLS_DC) /* {{{ */
+{
+	char *s = filename;
+
+	/* we use filename_len - 1 to avoid adding a virtual dir for empty directory entries */
+	for (; s - filename < filename_len - 1; s++) {
+		if (*s == '/') {
+			void *dummy;
+			if (FAILURE == zend_hash_find(&phar->virtual_dirs, filename, s - filename, (void **)&dummy)) {
+				continue;
+			}
+
+			if (!--dummy) {
+				zend_hash_del(&phar->virtual_dirs, filename, s - filename);
+			} else {
+				zend_hash_update(&phar->virtual_dirs, filename, s - filename, &dummy, sizeof(void *), NULL);
+			}
+		}
+	}
 }
 /* }}} */

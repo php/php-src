@@ -210,6 +210,10 @@ void phar_destroy_phar_data(phar_archive_data *phar TSRMLS_DC) /* {{{ */
 		zend_hash_destroy(&phar->mounted_dirs);
 		phar->mounted_dirs.arBuckets = NULL;
 	}
+	if (phar->virtual_dirs.arBuckets) {
+		zend_hash_destroy(&phar->virtual_dirs);
+		phar->virtual_dirs.arBuckets = NULL;
+	}
 	if (phar->metadata) {
 		if (phar->is_persistent) {
 			if (phar->metadata_len) {
@@ -408,13 +412,16 @@ void phar_entry_remove(phar_entry_data *idata, char **error TSRMLS_DC) /* {{{ */
 		if (idata->fp && idata->fp != idata->phar->fp && idata->fp != idata->phar->ufp && idata->fp != idata->internal_file->fp) {
 			php_stream_close(idata->fp);
 		}
+		phar_delete_virtual_dirs(idata->phar, idata->internal_file->filename, idata->internal_file->filename_len TSRMLS_CC);
 		zend_hash_del(&idata->phar->manifest, idata->internal_file->filename, idata->internal_file->filename_len);
 		idata->phar->refcount--;
 		efree(idata);
 	} else {
 		idata->internal_file->is_deleted = 1;
+		phar_delete_virtual_dirs(idata->phar, idata->internal_file->filename, idata->internal_file->filename_len TSRMLS_CC);
 		phar_entry_delref(idata TSRMLS_CC);
 	}
+
 	if (!phar->donotflush) {
 		phar_flush(phar, 0, 0, 0, error TSRMLS_CC);
 	}
@@ -959,6 +966,8 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 		zend_get_hash_value, destroy_phar_manifest_entry, mydata->is_persistent);
 	zend_hash_init(&mydata->mounted_dirs, sizeof(char *),
 		zend_get_hash_value, NULL, mydata->is_persistent);
+	zend_hash_init(&mydata->virtual_dirs, sizeof(char *),
+		zend_get_hash_value, NULL, mydata->is_persistent);
 	offset = halt_offset + manifest_len + 4;
 	memset(&entry, 0, sizeof(phar_entry_info));
 	entry.phar = mydata;
@@ -981,6 +990,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 		} else {
 			entry.is_dir = 0;
 		}
+		phar_add_virtual_dirs(mydata, buffer, entry.filename_len TSRMLS_CC);
 		entry.filename = pestrndup(buffer, entry.filename_len, entry.is_persistent);
 		buffer += entry.filename_len;
 		PHAR_GET_32(buffer, entry.uncompressed_filesize);
@@ -1276,6 +1286,8 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 		zend_get_hash_value, destroy_phar_manifest_entry, 0);
 	zend_hash_init(&mydata->mounted_dirs, sizeof(char *),
 		zend_get_hash_value, NULL, 0);
+	zend_hash_init(&mydata->virtual_dirs, sizeof(char *),
+		zend_get_hash_value, NULL, mydata->is_persistent);
 	mydata->fname_len = fname_len;
 	snprintf(mydata->version, sizeof(mydata->version), "%s", PHP_PHAR_API_VERSION);
 	mydata->is_temporary_alias = alias ? 0 : 1;
@@ -3242,6 +3254,7 @@ static void phar_update_cached_entry(void *data, void *argument) /* {{{ */
 	}
 	entry->metadata_str.c = 0;
 	entry->filename = estrndup(entry->filename, entry->filename_len);
+	entry->is_persistent = 0;
 	if (entry->metadata) {
 		if (entry->metadata_len) {
 			/* assume success, we would have failed before */

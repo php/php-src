@@ -629,6 +629,26 @@ void phar_file_stat(const char *filename, php_stat_len filename_length, int type
 			if (SUCCESS == zend_hash_find(&((*pphar)->manifest), entry, entry_len, (void **) &data)) {
 				efree(entry);
 				goto stat_entry;
+			}
+			if (SUCCESS == zend_hash_find(&((*pphar)->virtual_dirs), entry, entry_len, (void **) &data)) {
+				efree(entry);
+				efree(arch);
+				if (IS_EXISTS_CHECK(type)) {
+					RETURN_TRUE;
+				}
+				sb.st_size = 0;
+				sb.st_mode = 0777;
+				sb.st_mode |= S_IFDIR; /* regular directory */
+#ifdef NETWARE
+				sb.st_mtime.tv_sec = (*pphar)->max_timestamp;
+				sb.st_atime.tv_sec = (*pphar)->max_timestamp;
+				sb.st_ctime.tv_sec = (*pphar)->max_timestamp;
+#else
+				sb.st_mtime = (*pphar)->max_timestamp;
+				sb.st_atime = (*pphar)->max_timestamp;
+				sb.st_ctime = (*pphar)->max_timestamp;
+#endif
+				goto statme_baby;
 			} else {
 				char *save, *save2, *actual;
 				int save_len, save2_len, actual_len;
@@ -652,49 +672,36 @@ notfound:
 					PHAR_G(cwd_len) = save_len;
 					efree(entry);
 					efree(save2);
+					if (IS_EXISTS_CHECK(type)) {
+						RETURN_TRUE;
+					}
 					goto stat_entry;
-				} else {
-					phar_archive_data *phar = *pphar;
-					phar_zstr key;
-					char *str_key;
-					uint keylen;
-					ulong unused;
-
+				}
+				if (SUCCESS == zend_hash_find(&((*pphar)->virtual_dirs), entry + 1, entry_len - 1, (void **) &data)) {
 					PHAR_G(cwd) = save;
 					PHAR_G(cwd_len) = save_len;
-					/* original not found either, this is possibly a directory relative to cwd */
-					zend_hash_internal_pointer_reset(&phar->manifest);
-					while (FAILURE != zend_hash_has_more_elements(&phar->manifest)) {
-						if (HASH_KEY_NON_EXISTANT !=
-								zend_hash_get_current_key_ex(
-									&phar->manifest, &key, &keylen, &unused, 0, NULL)) {
-							PHAR_STR(key, str_key);
-							if (!memcmp(actual, str_key, actual_len)) {
-								efree(save2);
-								efree(entry);
-								/* directory found, all dirs have the same stat */
-								if (str_key[actual_len] == '/') {
-									sb.st_size = 0;
-									sb.st_mode = 0777;
-									sb.st_mode |= S_IFDIR; /* regular directory */
-#ifdef NETWARE
-									sb.st_mtime.tv_sec = phar->max_timestamp;
-									sb.st_atime.tv_sec = phar->max_timestamp;
-									sb.st_ctime.tv_sec = phar->max_timestamp;
-#else
-									sb.st_mtime = phar->max_timestamp;
-									sb.st_atime = phar->max_timestamp;
-									sb.st_ctime = phar->max_timestamp;
-#endif
-									goto statme_baby;
-								}
-							}
-						}
-						if (SUCCESS != zend_hash_move_forward(&phar->manifest)) {
-							break;
-						}
+					efree(entry);
+					efree(save2);
+					efree(arch);
+					if (IS_EXISTS_CHECK(type)) {
+						RETURN_TRUE;
 					}
+					sb.st_size = 0;
+					sb.st_mode = 0777;
+					sb.st_mode |= S_IFDIR; /* regular directory */
+#ifdef NETWARE
+					sb.st_mtime.tv_sec = (*pphar)->max_timestamp;
+					sb.st_atime.tv_sec = (*pphar)->max_timestamp;
+					sb.st_ctime.tv_sec = (*pphar)->max_timestamp;
+#else
+					sb.st_mtime = (*pphar)->max_timestamp;
+					sb.st_atime = (*pphar)->max_timestamp;
+					sb.st_ctime = (*pphar)->max_timestamp;
+#endif
+					goto statme_baby;
 				}
+				PHAR_G(cwd) = save;
+				PHAR_G(cwd_len) = save_len;
 				efree(entry);
 				efree(save2);
 				efree(arch);

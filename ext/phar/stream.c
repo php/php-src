@@ -842,6 +842,9 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 			zend_hash_del(&(phar->manifest), entry->filename, strlen(entry->filename));
 			return 0;
 		}
+
+		phar_add_virtual_dirs(phar, resource_to->path+1, strlen(resource_to->path)-1 TSRMLS_CC);
+		phar_delete_virtual_dirs(phar, resource_from->path+1, strlen(resource_from->path)-1 TSRMLS_CC);
 	}
 	php_url_free(resource_from);
 	php_url_free(resource_to);
