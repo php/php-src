@@ -1,3 +1,25 @@
+2008-06-14  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+      fix ordering
+
+    * (PHP_5_2)
+      ext/dom/element.c
+      ext/dom/element.c
+      ext/dom/tests/bug45251.phpt
+      ext/dom/tests/bug45251.phpt:
+      MFH: fixed bug #45251 (double free or corruption with setAttributeNode())
+      add test
+
+    * ext/dom/element.c
+      ext/dom/tests/bug45251.phpt
+      ext/dom/tests/bug45251.phpt
+      ext/dom/tests/bug45251.phpt:
+      fixed bug #45251 (double free or corruption with setAttributeNode())
+      add test
+
 2008-06-13  Greg Beaver  <greg@chiaraquartet.net>
 
     * (PHP_5_3)
