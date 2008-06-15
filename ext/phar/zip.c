@@ -258,6 +258,8 @@ foundit:
 		zend_get_hash_value, destroy_phar_manifest_entry, mydata->is_persistent);
 	zend_hash_init(&mydata->mounted_dirs, sizeof(char *),
 		zend_get_hash_value, NULL, mydata->is_persistent);
+	zend_hash_init(&mydata->virtual_dirs, sizeof(char *),
+		zend_get_hash_value, NULL, mydata->is_persistent);
 	entry.phar = mydata;
 	entry.is_zip = 1;
 	entry.fp_type = PHAR_FP;
@@ -267,6 +269,8 @@ foundit:
 			mydata->manifest.arBuckets = 0; \
 			zend_hash_destroy(&mydata->mounted_dirs); \
 			mydata->mounted_dirs.arBuckets = 0; \
+			zend_hash_destroy(&mydata->virtual_dirs); \
+			mydata->virtual_dirs.arBuckets = 0; \
 			php_stream_close(fp); \
 			if (mydata->metadata) { \
 				zval_dtor(mydata->metadata); \
@@ -322,6 +326,7 @@ foundit:
 		} else {
 			entry.is_dir = 0;
 		}
+		phar_add_virtual_dirs(mydata, entry.filename, entry.filename_len TSRMLS_CC);
 		if (PHAR_GET_16(zipentry.extra_len)) {
 			off_t loc = php_stream_tell(fp);
 			if (FAILURE == phar_zip_process_extra(fp, &entry, PHAR_GET_16(zipentry.extra_len) TSRMLS_CC)) {

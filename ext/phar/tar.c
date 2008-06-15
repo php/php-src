@@ -220,6 +220,8 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 		zend_get_hash_value, destroy_phar_manifest_entry, myphar->is_persistent);
 	zend_hash_init(&myphar->mounted_dirs, sizeof(char *),
 		zend_get_hash_value, NULL, myphar->is_persistent);
+	zend_hash_init(&myphar->virtual_dirs, sizeof(char *),
+		zend_get_hash_value, NULL, myphar->is_persistent);
 	myphar->is_tar = 1;
 	/* remember whether this entire phar was compressed with gz/bzip2 */
 	myphar->flags = compression;
@@ -255,6 +257,8 @@ bail:
 				myphar->manifest.arBuckets = 0;
 				zend_hash_destroy(&myphar->mounted_dirs);
 				myphar->mounted_dirs.arBuckets = 0;
+				zend_hash_destroy(&myphar->virtual_dirs);
+				myphar->virtual_dirs.arBuckets = 0;
 				pefree(myphar, myphar->is_persistent);
 				return FAILURE;
 			}
@@ -296,6 +300,8 @@ bail:
 					myphar->manifest.arBuckets = 0;
 					zend_hash_destroy(&myphar->mounted_dirs);
 					myphar->mounted_dirs.arBuckets = 0;
+					zend_hash_destroy(&myphar->virtual_dirs);
+					myphar->virtual_dirs.arBuckets = 0;
 					pefree(myphar, myphar->is_persistent);
 					return FAILURE;
 				}
@@ -310,6 +316,8 @@ bail:
 				myphar->manifest.arBuckets = 0;
 				zend_hash_destroy(&myphar->mounted_dirs);
 				myphar->mounted_dirs.arBuckets = 0;
+				zend_hash_destroy(&myphar->virtual_dirs);
+				myphar->virtual_dirs.arBuckets = 0;
 				pefree(myphar, myphar->is_persistent);
 				return FAILURE;
 			}
@@ -348,6 +356,7 @@ bail:
 				entry.filename_len--;
 			}
 		}
+		phar_add_virtual_dirs(myphar, entry.filename, entry.filename_len TSRMLS_CC);
 		if (sum1 != sum2) {
 			if (error) {
 				spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (checksum mismatch of file \"%s\")", fname, entry.filename);
@@ -358,6 +367,8 @@ bail:
 			myphar->manifest.arBuckets = 0;
 			zend_hash_destroy(&myphar->mounted_dirs);
 			myphar->mounted_dirs.arBuckets = 0;
+			zend_hash_destroy(&myphar->virtual_dirs);
+			myphar->virtual_dirs.arBuckets = 0;
 			pefree(myphar, myphar->is_persistent);
 			return FAILURE;
 		}
@@ -393,6 +404,8 @@ bail:
 				myphar->manifest.arBuckets = 0;
 				zend_hash_destroy(&myphar->mounted_dirs);
 				myphar->mounted_dirs.arBuckets = 0;
+				zend_hash_destroy(&myphar->virtual_dirs);
+				myphar->virtual_dirs.arBuckets = 0;
 				pefree(myphar, entry.is_persistent);
 				return FAILURE;
 			}
@@ -411,6 +424,8 @@ bail:
 				myphar->manifest.arBuckets = 0;
 				zend_hash_destroy(&myphar->mounted_dirs);
 				myphar->mounted_dirs.arBuckets = 0;
+				zend_hash_destroy(&myphar->virtual_dirs);
+				myphar->virtual_dirs.arBuckets = 0;
 				pefree(myphar, myphar->is_persistent);
 				return FAILURE;
 			}
@@ -427,6 +442,8 @@ bail:
 				myphar->manifest.arBuckets = 0;
 				zend_hash_destroy(&myphar->mounted_dirs);
 				myphar->mounted_dirs.arBuckets = 0;
+				zend_hash_destroy(&myphar->virtual_dirs);
+				myphar->virtual_dirs.arBuckets = 0;
 				pefree(myphar, myphar->is_persistent);
 				return FAILURE;
 			}
@@ -448,6 +465,8 @@ bail:
 					myphar->manifest.arBuckets = 0;
 					zend_hash_destroy(&myphar->mounted_dirs);
 					myphar->mounted_dirs.arBuckets = 0;
+					zend_hash_destroy(&myphar->virtual_dirs);
+					myphar->virtual_dirs.arBuckets = 0;
 					pefree(myphar, myphar->is_persistent);
 					return FAILURE;
 				}
@@ -464,6 +483,8 @@ bail:
 				myphar->manifest.arBuckets = 0;
 				zend_hash_destroy(&myphar->mounted_dirs);
 				myphar->mounted_dirs.arBuckets = 0;
+				zend_hash_destroy(&myphar->virtual_dirs);
+				myphar->virtual_dirs.arBuckets = 0;
 				pefree(myphar, myphar->is_persistent);
 				return FAILURE;
 			}
@@ -481,6 +502,8 @@ bail:
 				myphar->manifest.arBuckets = 0;
 				zend_hash_destroy(&myphar->mounted_dirs);
 				myphar->mounted_dirs.arBuckets = 0;
+				zend_hash_destroy(&myphar->virtual_dirs);
+				myphar->virtual_dirs.arBuckets = 0;
 				pefree(myphar, myphar->is_persistent);
 				return FAILURE;
 			}
@@ -495,6 +518,8 @@ bail:
 			myphar->manifest.arBuckets = 0;
 			zend_hash_destroy(&myphar->mounted_dirs);
 			myphar->mounted_dirs.arBuckets = 0;
+			zend_hash_destroy(&myphar->virtual_dirs);
+			myphar->virtual_dirs.arBuckets = 0;
 			pefree(myphar, myphar->is_persistent);
 			return FAILURE;
 		}
@@ -507,6 +532,8 @@ bail:
 		myphar->manifest.arBuckets = 0;
 		zend_hash_destroy(&myphar->mounted_dirs);
 		myphar->mounted_dirs.arBuckets = 0;
+		zend_hash_destroy(&myphar->virtual_dirs);
+		myphar->virtual_dirs.arBuckets = 0;
 		pefree(myphar, myphar->is_persistent);
 		if (error) {
 			spprintf(error, 0, "tar-based phar \"%s\" does not have a signature", fname);
@@ -546,6 +573,8 @@ bail:
 		myphar->manifest.arBuckets = 0;
 		zend_hash_destroy(&myphar->mounted_dirs);
 		myphar->mounted_dirs.arBuckets = 0;
+		zend_hash_destroy(&myphar->virtual_dirs);
+		myphar->virtual_dirs.arBuckets = 0;
 		pefree(myphar, myphar->is_persistent);
 		return FAILURE;
 	}
