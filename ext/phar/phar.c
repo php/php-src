@@ -1148,11 +1148,11 @@ int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int al
 	}
 
 	/* first try to open an existing file */
-	if (phar_detect_phar_fname_ext(fname, 1, &ext_str, &ext_len, !is_data, 0, 1 TSRMLS_CC) == SUCCESS) {
+	if (phar_detect_phar_fname_ext(fname, fname_len, &ext_str, &ext_len, !is_data, 0, 1 TSRMLS_CC) == SUCCESS) {
 		goto check_file;
 	}
 	/* next try to create a new file */
-	if (FAILURE == phar_detect_phar_fname_ext(fname, 1, &ext_str, &ext_len, !is_data, 1, 1 TSRMLS_CC)) {
+	if (FAILURE == phar_detect_phar_fname_ext(fname, fname_len, &ext_str, &ext_len, !is_data, 1, 1 TSRMLS_CC)) {
 		if (error) {
 			spprintf(error, 0, "Cannot create phar '%s', file extension (or combination) not recognised", fname);
 		}
@@ -1712,10 +1712,9 @@ static int phar_check_str(const char *fname, const char *ext_str, int ext_len, i
  * the last parameter should be set to tell the thing to assume that filename is the full path, and only to check the
  * extension rules, not to iterate.
  */
-int phar_detect_phar_fname_ext(const char *filename, int check_length, const char **ext_str, int *ext_len, int executable, int for_create, int is_complete TSRMLS_DC) /* {{{ */
+int phar_detect_phar_fname_ext(const char *filename, int filename_len, const char **ext_str, int *ext_len, int executable, int for_create, int is_complete TSRMLS_DC) /* {{{ */
 {
 	const char *pos, *slash;
-	int filename_len = strlen(filename);
 
 	*ext_str = NULL;
 
@@ -1724,7 +1723,7 @@ int phar_detect_phar_fname_ext(const char *filename, int check_length, const cha
 	}
 	phar_request_initialize(TSRMLS_C);
 	/* first check for alias in first segment */
-	pos = strchr(filename, '/');
+	pos = memchr(filename, '/', filename_len);
 	if (pos && pos != filename) {
 		if (zend_hash_exists(&(PHAR_GLOBALS->phar_alias_map), (char *) filename, pos - filename)) {
 			*ext_str = pos;
@@ -1783,19 +1782,19 @@ woohoo:
 		}
 	}
 
-	pos = strchr(filename + 1, '.');
+	pos = memchr(filename + 1, '.', filename_len);
 next_extension:
 	if (!pos) {
 		return FAILURE;
 	}
 	while (pos != filename && (*(pos - 1) == '/' || *(pos - 1) == '\0')) {
-		pos = strchr(pos + 1, '.');
+		pos = memchr(pos + 1, '.', filename_len - (pos - filename) + 1);
 		if (!pos) {
 			return FAILURE;
 		}
 	}
 
-	slash = strchr(pos, '/');
+	slash = memchr(pos, '/', filename_len - (pos - filename));
 	if (!slash) {
 		/* this is a url like "phar://blah.phar" with no directory */
 		*ext_str = pos;
@@ -1997,7 +1996,7 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 	filename = estrndup(filename, filename_len);
 	phar_unixify_path_separators(filename, filename_len);
 #endif
-	if (phar_detect_phar_fname_ext(filename, 0, &ext_str, &ext_len, executable, for_create, 0 TSRMLS_CC) == FAILURE) {
+	if (phar_detect_phar_fname_ext(filename, filename_len, &ext_str, &ext_len, executable, for_create, 0 TSRMLS_CC) == FAILURE) {
 		if (ext_len != -1) {
 			if (!ext_str) {
 				/* no / detected, restore arch for error message */
