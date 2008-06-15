@@ -268,6 +268,8 @@ typedef struct _phar_entry_info {
 	int                      is_zip:1;
 	/* for cached phar entries */
 	int                      is_persistent:1;
+	/* for stat */
+	unsigned short           inode;
 } phar_entry_info;
 
 /* information about a phar file (the archive itself) */
@@ -408,6 +410,17 @@ static inline int phar_validate_alias(const char *alias, int alias_len) /* {{{ *
 }
 /* }}} */
 
+static inline void phar_set_inode(phar_entry_info *entry TSRMLS_DC) /* {{{ */
+{
+	char tmp[MAXPATHLEN];
+	int tmp_len;
+
+	tmp_len = entry->filename_len + entry->phar->fname_len;
+	memcpy(tmp, entry->phar->fname, entry->phar->fname_len);
+	memcpy(tmp + entry->phar->fname_len, entry->filename, entry->filename_len);
+	entry->inode = (unsigned short)zend_get_hash_value(tmp, tmp_len);
+}
+/* }}} */
 
 void phar_request_initialize(TSRMLS_D);
 
