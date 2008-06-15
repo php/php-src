@@ -462,6 +462,7 @@ foundit:
 			/* return to central directory parsing */
 			php_stream_seek(fp, saveloc, SEEK_SET);
 		}
+		phar_set_inode(&entry TSRMLS_CC);
 		zend_hash_add(&mydata->manifest, entry.filename, entry.filename_len, (void *)&entry,sizeof(phar_entry_info), NULL);
 	}
 	mydata->fp = fp;

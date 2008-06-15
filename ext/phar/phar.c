@@ -1070,6 +1070,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 		manifest_flags |= (entry.flags & PHAR_ENT_COMPRESSION_MASK);
 		/* if signature matched, no need to check CRC32 for each file */
 		entry.is_crc_checked = (manifest_flags & PHAR_HDR_SIGNATURE ? 1 : 0);
+		phar_set_inode(&entry TSRMLS_CC);
 		zend_hash_add(&mydata->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), NULL);
 	}
 

@@ -413,6 +413,7 @@ bail:
 		} else if (entry.tar_type == TAR_SYMLINK) {
 			entry.link = estrdup(hdr->linkname);
 		}
+		phar_set_inode(&entry TSRMLS_CC);
 		zend_hash_add(&myphar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), (void **) &newentry);
 		if (entry.filename_len >= sizeof(".phar/.metadata")-1 && !memcmp(entry.filename, ".phar/.metadata", sizeof(".phar/.metadata")-1)) {
 			if (FAILURE == phar_tar_process_metadata(newentry, fp TSRMLS_CC)) {

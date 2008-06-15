@@ -2104,6 +2104,7 @@ no_copy:
 		newentry.is_modified = 1;
 		newentry.phar = phar;
  		newentry.old_flags = newentry.flags & ~PHAR_ENT_COMPRESSION_MASK; /* remove compression from old_flags */
+		phar_set_inode(&newentry TSRMLS_CC);
 		zend_hash_add(&(phar->manifest), newentry.filename, newentry.filename_len, (void*)&newentry, sizeof(phar_entry_info), NULL);
 		phar_add_virtual_dirs(phar, newentry.filename, newentry.filename_len TSRMLS_CC);
 	}
