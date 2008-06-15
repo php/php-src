@@ -1894,74 +1894,84 @@ char *tsrm_strtok_r(char *s, const char *delim, char **last)
  */
 char *phar_fix_filepath(char *path, int *new_len, int use_cwd TSRMLS_DC) /* {{{ */
 {
+	char newpath[MAXPATHLEN];
+	int newpath_len;
 	char *ptr, *free_path, *new_phar;
 	char *tok;
 	int ptr_length, new_phar_len = 1, path_length = *new_len;
 
 	if (PHAR_G(cwd_len) && use_cwd && path_length > 2 && path[0] == '.' && path[1] == '/') {
-		free_path = path;
-		new_phar_len = PHAR_G(cwd_len);
-		new_phar = estrndup(PHAR_G(cwd), new_phar_len);
+		newpath_len = PHAR_G(cwd_len);
+		memcpy(newpath, PHAR_G(cwd), newpath_len);
 	} else {
-		free_path = path;
-		new_phar = estrndup("/\0", 2);
+		newpath[0] = '/';
+		newpath_len = 1;
 	}
-	tok = NULL;
-	ptr = tsrm_strtok_r(path, "/", &tok);
-	while (ptr) {
-		ptr_length = strlen(ptr);
-
-		if (IS_DIRECTORY_UP(ptr, ptr_length)) {
-			char save;
-
-			save = '/';
-
-#define PREVIOUS new_phar[new_phar_len - 1]
-
-			while (new_phar_len > 1 &&
-					!IS_BACKSLASH(PREVIOUS)) {
-				save = PREVIOUS;
-				PREVIOUS = '\0';
-				new_phar_len--;
-			}
-
-			if (new_phar[0] != '/') {
-				new_phar[new_phar_len++] = save;
-				new_phar[new_phar_len] = '\0';
-			} else if (new_phar_len > 1) {
-				PREVIOUS = '\0';
-				new_phar_len--;
-			}
-		} else if (!IS_DIRECTORY_CURRENT(ptr, ptr_length)) {
-			if (new_phar_len > 1) {
-				new_phar = (char *) erealloc(new_phar, new_phar_len+ptr_length+1+1);
-				new_phar[new_phar_len++] = '/';
-				memcpy(&new_phar[new_phar_len], ptr, ptr_length+1);
-			} else {
-				new_phar = (char *) erealloc(new_phar, new_phar_len+ptr_length+1);
-				memcpy(&new_phar[new_phar_len], ptr, ptr_length+1);
-			}
-
-			new_phar_len += ptr_length;
+	ptr = path;
+	if (*ptr == '/') ++ptr;
+	tok = ptr;
+	do {
+		ptr = memchr(ptr, '/', path_length - (ptr - path));
+	} while (ptr && ptr - tok == 0 && *ptr == '/' && ++ptr && ++tok);
+	if (!ptr && (path_length - (tok - path))) {
+		switch (path_length - (tok - path)) {
+			case 1 :
+				if (*tok == '.') {
+					efree(path);
+					*new_len = 1;
+					return estrndup("/", 1);
+				}
+				break;
+			case 2 :
+				if (tok[0] == '.' && tok[1] == '.') {
+					efree(path);
+					*new_len = 1;
+					return estrndup("/", 1);
+				}
 		}
-		ptr = tsrm_strtok_r(NULL, "/", &tok);
+		return path;
 	}
+	while (ptr) {
+		ptr_length = ptr - tok;
+last_time:
+		if (IS_DIRECTORY_UP(tok, ptr_length)) {
+#define PREVIOUS newpath[newpath_len - 1]
 
-	if (path[path_length-1] == '/' && new_phar_len > 1) {
-		new_phar = (char*)erealloc(new_phar, new_phar_len + 2);
-		new_phar[new_phar_len++] = '/';
-		new_phar[new_phar_len] = 0;
+			while (newpath_len > 1 && !IS_BACKSLASH(PREVIOUS)) {
+				newpath_len--;
+			}
+
+			if (newpath[0] != '/') {
+				newpath[newpath_len] = '\0';
+			} else if (newpath_len > 1) {
+				--newpath_len;
+			}
+		} else if (!IS_DIRECTORY_CURRENT(tok, ptr_length)) {
+			if (newpath_len > 1) {
+				newpath[newpath_len++] = '/';
+				memcpy(newpath + newpath_len, tok, ptr_length+1);
+			} else {
+				memcpy(newpath + newpath_len, tok, ptr_length+1);
+			}
+
+			newpath_len += ptr_length;
+		}
+		if (ptr == path + path_length) {
+			break;
+		}
+		tok = ++ptr;
+		do {
+			ptr = memchr(ptr, '/', path_length - (ptr - path));
+		} while (ptr && ptr - tok == 0 && *ptr == '/' && ++ptr && ++tok);
+		if (!ptr && (path_length - (tok - path))) {
+			ptr_length = path_length - (tok - path);
+			ptr = path + path_length;
+			goto last_time;
+		}
 	}
-
-	efree(free_path);
-
-	if (new_phar_len == 0) {
-		new_phar = (char *) erealloc(new_phar, new_phar_len+1+1);
-		new_phar[new_phar_len] = '/';
-		new_phar[++new_phar_len] = '\0';
-	}
-	*new_len = new_phar_len;
-	return new_phar;
+	efree(path);
+	*new_len = newpath_len;
+	return estrndup(newpath, newpath_len);
 }
 /* }}} */
 
