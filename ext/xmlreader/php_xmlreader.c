@@ -1180,12 +1180,22 @@ Moves the position of the current instance to the next node in the stream. */
 PHP_METHOD(xmlreader, expand)
 {
 #ifdef HAVE_DOM
-	zval *id, *rv = NULL;
+	zval *id, *rv = NULL, *basenode = NULL;
 	int ret;
 	xmlreader_object *intern;
 	xmlNode *node, *nodec;
+	xmlDocPtr docp = NULL;
+	php_libxml_node_object *domobj = NULL;
 
-	id = getThis();
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|O!", &id, xmlreader_class_entry, &basenode, dom_node_class_entry) == FAILURE) {
+		return;
+	}
+	
+	if (basenode != NULL) {
+		NODE_GET_OBJ(node, basenode, xmlNodePtr, domobj);
+		docp = node->doc;
+	}
+
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
 
 	if (intern && intern->ptr) {
@@ -1195,12 +1205,12 @@ PHP_METHOD(xmlreader, expand)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An Error Occured while expanding");
 			RETURN_FALSE;
 		} else {
-			nodec = xmlCopyNode(node, 1);
+			nodec = xmlDocCopyNode(node, docp, 1);
 			if (nodec == NULL) {
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Cannot expand this node type");
 				RETURN_FALSE;
 			} else {
-				DOM_RET_OBJ(rv, nodec, &ret, NULL);
+				DOM_RET_OBJ(rv, nodec, &ret, (dom_object *)domobj);
 			}
 		}
 	} else {
