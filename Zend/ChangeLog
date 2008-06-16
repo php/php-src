@@ -1,3 +1,17 @@
+2008-06-15  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      zend_compile.c:
+      - MF5.3: Improved warning message to call-time pass-by-reference when used
+      with internal function
+        (http://news.php.net/php.internals/38252)
+
+    * (PHP_5_3)
+      zend_compile.c:
+      - Improved warning message to call-time pass-by-reference when used with
+      internal function
+        (http://news.php.net/php.internals/38252)
+
 2008-06-11  Felipe Pena  <felipensp@gmail.com>
 
     * tests/bug45147.phpt:

@@ -1,3 +1,111 @@
+2008-06-15  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/phar.phar:
+      minor performance improvement
+
+    * (PHP_5_3)
+      ext/phar/util.c:
+      fix memleak
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/phar.phar
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/stream.c
+      ext/phar/tar.c
+      ext/phar/zip.c:
+      another optimization - move inode hash to initial manifest parsing,
+      improves runtime perf of stat slightly
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/phar.phar
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c:
+      minor optimization
+
+2008-06-15  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_compile.c:
+      - MF5.3: Improved warning message to call-time pass-by-reference when used
+      with internal function
+        (http://news.php.net/php.internals/38252)
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c:
+      - Improved warning message to call-time pass-by-reference when used with
+      internal function
+        (http://news.php.net/php.internals/38252)
+
+2008-06-15  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/dirstream.c
+      ext/phar/func_interceptors.c
+      ext/phar/phar.c
+      ext/phar/phar.phar
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/stream.c
+      ext/phar/tar.c
+      ext/phar/util.c
+      ext/phar/zip.c:
+      HUGE speed improvement, from 19 req/sec to 27 req/sec for phpMyAdmin - now
+      speed with apc+phar.cache_list = on-disk speedcvs diff -u |less  This is
+      by generating a list of virtual directories and using those in stat calls
+      instead of scanning the whole manifest hash table.  on-disk phpMyAdmin =
+      28 req/sec
+
+2008-06-15  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/spl/tests/iterator_056.phpt
+      ext/spl/tests/iterator_057.phpt
+      ext/spl/tests/iterator_058.phpt
+      ext/spl/tests/iterator_059.phpt
+      ext/spl/tests/iterator_060.phpt
+      ext/spl/tests/iterator_061.phpt
+      ext/spl/tests/iterator_062.phpt
+      ext/spl/tests/iterator_063.phpt
+      ext/spl/tests/iterator_064.phpt
+      ext/spl/tests/iterator_065.phpt
+      ext/spl/tests/iterator_066.phpt
+      ext/spl/tests/iterator_067.phpt:
+      MFH: Add tests for iterators when instanciated without argument (by
+      Sebastian Schürmann)
+
+    * ext/spl/tests/iterator_056.phpt
+      ext/spl/tests/iterator_056.phpt
+      ext/spl/tests/iterator_057.phpt
+      ext/spl/tests/iterator_057.phpt
+      ext/spl/tests/iterator_058.phpt
+      ext/spl/tests/iterator_058.phpt
+      ext/spl/tests/iterator_059.phpt
+      ext/spl/tests/iterator_059.phpt
+      ext/spl/tests/iterator_060.phpt
+      ext/spl/tests/iterator_060.phpt
+      ext/spl/tests/iterator_061.phpt
+      ext/spl/tests/iterator_061.phpt
+      ext/spl/tests/iterator_062.phpt
+      ext/spl/tests/iterator_062.phpt
+      ext/spl/tests/iterator_063.phpt
+      ext/spl/tests/iterator_063.phpt
+      ext/spl/tests/iterator_064.phpt
+      ext/spl/tests/iterator_064.phpt
+      ext/spl/tests/iterator_065.phpt
+      ext/spl/tests/iterator_065.phpt
+      ext/spl/tests/iterator_066.phpt
+      ext/spl/tests/iterator_066.phpt
+      ext/spl/tests/iterator_067.phpt
+      ext/spl/tests/iterator_067.phpt:
+      
+      Add tests for iterators when instanciated without argument (by Sebastian
+      Schürmann)
+
 2008-06-14  Rob Richards  <rrichards@ctindustries.net>
 
     * (PHP_5_2)
