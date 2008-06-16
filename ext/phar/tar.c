@@ -216,11 +216,12 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 
 	myphar = (phar_archive_data *) pecalloc(1, sizeof(phar_archive_data), PHAR_G(persist));
 	myphar->is_persistent = PHAR_G(persist);
-	zend_hash_init(&myphar->manifest, sizeof(phar_entry_info),
+	/* estimate number of entries, can't be certain with tar files */
+	zend_hash_init(&myphar->manifest, 2 + (totalsize >> 12),
 		zend_get_hash_value, destroy_phar_manifest_entry, myphar->is_persistent);
-	zend_hash_init(&myphar->mounted_dirs, sizeof(char *),
+	zend_hash_init(&myphar->mounted_dirs, 5,
 		zend_get_hash_value, NULL, myphar->is_persistent);
-	zend_hash_init(&myphar->virtual_dirs, sizeof(char *),
+	zend_hash_init(&myphar->virtual_dirs, 4 + (totalsize >> 11),
 		zend_get_hash_value, NULL, myphar->is_persistent);
 	myphar->is_tar = 1;
 	/* remember whether this entire phar was compressed with gz/bzip2 */
