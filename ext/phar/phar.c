@@ -137,6 +137,7 @@ finish_error:
 				PHAR_GLOBALS->persist = 0;
 				PHAR_GLOBALS->manifest_cached = 0;
 				zend_destroy_rsrc_list(&EG(regular_list) TSRMLS_CC);
+				memset(&EG(regular_list), 0, sizeof(HashTable));
 				efree(tmp);
 				zend_hash_destroy(&(PHAR_G(phar_fname_map)));
 				PHAR_GLOBALS->phar_fname_map.arBuckets = 0;
@@ -162,6 +163,7 @@ finish_error:
 	PHAR_GLOBALS->phar_alias_map.arBuckets = 0;
 
 	zend_destroy_rsrc_list(&EG(regular_list) TSRMLS_CC);
+	memset(&EG(regular_list), 0, sizeof(HashTable));
 	efree(tmp);
 }
 /* }}} */
@@ -443,7 +445,7 @@ void phar_entry_remove(phar_entry_data *idata, char **error TSRMLS_DC) /* {{{ */
 		phar_destroy_phar_data(mydata TSRMLS_CC);\
 	}\
 	if (signature) {\
-		pefree(signature, mydata->is_persistent);\
+		pefree(signature, PHAR_G(persist));\
 	}\
 	MAPPHAR_ALLOC_FAIL(msg)
 
@@ -962,11 +964,11 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 	}
 
 	/* set up our manifest */
-	zend_hash_init(&mydata->manifest, sizeof(phar_entry_info),
+	zend_hash_init(&mydata->manifest, manifest_count,
 		zend_get_hash_value, destroy_phar_manifest_entry, mydata->is_persistent);
-	zend_hash_init(&mydata->mounted_dirs, sizeof(char *),
+	zend_hash_init(&mydata->mounted_dirs, 5,
 		zend_get_hash_value, NULL, mydata->is_persistent);
-	zend_hash_init(&mydata->virtual_dirs, sizeof(char *),
+	zend_hash_init(&mydata->virtual_dirs, manifest_count * 2,
 		zend_get_hash_value, NULL, mydata->is_persistent);
 	offset = halt_offset + manifest_len + 4;
 	memset(&entry, 0, sizeof(phar_entry_info));
@@ -1013,8 +1015,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 			entry.flags |= PHAR_ENT_PERM_DEF_DIR;
 		}
 		if (entry.is_persistent) {
-			PHAR_GET_32(buffer, entry.metadata_len);
-			if (phar_parse_metadata(&buffer, &entry.metadata, entry.metadata_len TSRMLS_CC) == FAILURE) {
+			if (phar_parse_metadata(&buffer, &entry.metadata, 0 TSRMLS_CC) == FAILURE) {
 				pefree(entry.filename, entry.is_persistent);
 				MAPPHAR_FAIL("unable to read file metadata in .phar file \"%s\"");
 			}
@@ -1896,9 +1897,9 @@ char *phar_fix_filepath(char *path, int *new_len, int use_cwd TSRMLS_DC) /* {{{ 
 {
 	char newpath[MAXPATHLEN];
 	int newpath_len;
-	char *ptr, *free_path, *new_phar;
+	char *ptr;
 	char *tok;
-	int ptr_length, new_phar_len = 1, path_length = *new_len;
+	int ptr_length, path_length = *new_len;
 
 	if (PHAR_G(cwd_len) && use_cwd && path_length > 2 && path[0] == '.' && path[1] == '/') {
 		newpath_len = PHAR_G(cwd_len);
@@ -3332,6 +3333,9 @@ static void phar_copy_cached_phar(void *data) /* {{{ */
 	phar->manifest = newmanifest;
 	zend_hash_init(&phar->mounted_dirs, sizeof(char *),
 		zend_get_hash_value, NULL, 0);
+	zend_hash_init(&phar->virtual_dirs, sizeof(char *),
+		zend_get_hash_value, NULL, 0);
+	zend_hash_copy(&phar->virtual_dirs, &(*pphar)->virtual_dirs, NULL, NULL, sizeof(void *));
 	*pphar = phar;
 }
 /* }}} */
