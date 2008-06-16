@@ -254,11 +254,11 @@ foundit:
 	/* seek to central directory */
 	php_stream_seek(fp, PHAR_GET_32(locator.cdir_offset), SEEK_SET);
 	/* read in central directory */
-	zend_hash_init(&mydata->manifest, sizeof(phar_entry_info),
+	zend_hash_init(&mydata->manifest, PHAR_GET_16(locator.count),
 		zend_get_hash_value, destroy_phar_manifest_entry, mydata->is_persistent);
-	zend_hash_init(&mydata->mounted_dirs, sizeof(char *),
+	zend_hash_init(&mydata->mounted_dirs, 5,
 		zend_get_hash_value, NULL, mydata->is_persistent);
-	zend_hash_init(&mydata->virtual_dirs, sizeof(char *),
+	zend_hash_init(&mydata->virtual_dirs, PHAR_GET_16(locator.count) * 2,
 		zend_get_hash_value, NULL, mydata->is_persistent);
 	entry.phar = mydata;
 	entry.is_zip = 1;
@@ -286,7 +286,7 @@ foundit:
 			return FAILURE;
 
 	/* add each central directory item to the manifest */
-	for (i = 0; i < locator.count; ++i) {
+	for (i = 0; i < PHAR_GET_16(locator.count); ++i) {
 		phar_zip_central_dir_file zipentry;
 
 		if (sizeof(zipentry) != php_stream_read(fp, (char *) &zipentry, sizeof(zipentry))) {
