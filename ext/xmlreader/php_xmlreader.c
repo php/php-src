@@ -92,7 +92,7 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 	switch (hnd->type) {
 		case IS_STRING:
 			if (retchar) {
-				ZVAL_STRING(*retval, (xmlChar *) retchar, 1);
+				ZVAL_STRING(*retval, (char *) retchar, 1);
 			} else {
 				ZVAL_EMPTY_STRING(*retval);
 			}
@@ -233,8 +233,8 @@ char *_xmlreader_get_valid_file_path(char *source, char *resolved_path, int reso
 	int isFileUri = 0;
 
 	uri = xmlCreateURI();
-	escsource = xmlURIEscapeStr(source, ":");
-	xmlParseURIReference(uri, escsource);
+	escsource = xmlURIEscapeStr((xmlChar *)source, (xmlChar *)":");
+	xmlParseURIReference(uri, (const char *)escsource);
 	xmlFree(escsource);
 
 	if (uri->scheme != NULL) {
@@ -430,7 +430,7 @@ static void php_xmlreader_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_rea
 
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern && intern->ptr) {
-		retchar = internal_function(intern->ptr, name);
+		retchar = (char *)internal_function(intern->ptr, (const unsigned char *)name);
 	}
 	if (retchar) {
 		RETVAL_STRING(retchar, 1);
@@ -473,7 +473,7 @@ static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_
 
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern && intern->ptr) {
-		retchar = internal_function(intern->ptr);
+		retchar = (char *)internal_function(intern->ptr);
 	}
 	if (retchar) {
 		RETVAL_STRING(retchar, 1);
@@ -583,7 +583,7 @@ PHP_METHOD(xmlreader, getAttributeNo)
 
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern && intern->ptr) {
-		retchar = xmlTextReaderGetAttributeNo(intern->ptr,attr_pos);
+		retchar = (char *)xmlTextReaderGetAttributeNo(intern->ptr, attr_pos);
 	}
 	if (retchar) {
 		RETVAL_STRING(retchar, 1);
@@ -617,7 +617,7 @@ PHP_METHOD(xmlreader, getAttributeNs)
 
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern && intern->ptr) {
-		retchar = xmlTextReaderGetAttributeNs(intern->ptr, name, ns_uri);
+		retchar = (char *)xmlTextReaderGetAttributeNs(intern->ptr, (xmlChar *)name, (xmlChar *)ns_uri);
 	}
 	if (retchar) {
 		RETVAL_STRING(retchar, 1);
@@ -697,7 +697,7 @@ PHP_METHOD(xmlreader, moveToAttribute)
 
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern && intern->ptr) {
-		retval = xmlTextReaderMoveToAttribute(intern->ptr, name);
+		retval = xmlTextReaderMoveToAttribute(intern->ptr, (xmlChar *)name);
 		if (retval == 1) {
 			RETURN_TRUE;
 		}
@@ -758,7 +758,7 @@ PHP_METHOD(xmlreader, moveToAttributeNs)
 
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern && intern->ptr) {
-		retval = xmlTextReaderMoveToAttributeNs(intern->ptr, name, ns_uri);
+		retval = xmlTextReaderMoveToAttributeNs(intern->ptr, (xmlChar *)name, (xmlChar *)ns_uri);
 		if (retval == 1) {
 			RETURN_TRUE;
 		}
@@ -841,7 +841,7 @@ PHP_METHOD(xmlreader, next)
 #endif
 		retval = xmlTextReaderNext(intern->ptr);
 		while (name != NULL && retval == 1) {
-			if (xmlStrEqual(xmlTextReaderConstLocalName(intern->ptr), name)) {
+			if (xmlStrEqual(xmlTextReaderConstLocalName(intern->ptr), (xmlChar *)name)) {
 				RETURN_TRUE;
 			}
 			retval = xmlTextReaderNext(intern->ptr); 
@@ -1126,12 +1126,22 @@ Moves the position of the current instance to the next node in the stream. */
 PHP_METHOD(xmlreader, expand)
 {
 #ifdef HAVE_DOM
-	zval *id, *rv = NULL;
+	zval *id, *rv = NULL, *basenode = NULL;
 	int ret;
 	xmlreader_object *intern;
 	xmlNode *node, *nodec;
+	xmlDocPtr docp = NULL;
+	php_libxml_node_object *domobj = NULL;
 
-	id = getThis();
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|O!", &id, xmlreader_class_entry, &basenode, dom_node_class_entry) == FAILURE) {
+		return;
+	}
+	
+	if (basenode != NULL) {
+		NODE_GET_OBJ(node, basenode, xmlNodePtr, domobj);
+		docp = node->doc;
+	}
+
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
 
 	if (intern && intern->ptr) {
@@ -1141,12 +1151,12 @@ PHP_METHOD(xmlreader, expand)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An Error Occured while expanding ");
 			RETURN_FALSE;
 		} else {
-			nodec = xmlCopyNode(node, 1);
+			nodec = xmlDocCopyNode(node, docp, 1);
 			if (nodec == NULL) {
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Cannot expand this node type");
 				RETURN_FALSE;
 			} else {
-				DOM_RET_OBJ(rv, nodec, &ret, NULL);
+				DOM_RET_OBJ(rv, nodec, &ret, (dom_object *)domobj);
 			}
 		}
 	} else {
