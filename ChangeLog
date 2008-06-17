@@ -1,3 +1,52 @@
+2008-06-16  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * ext/gd/tests/imagecolourstotal_basic.phpt:
+      Test committed for felixdv
+
+    * ext/gd/tests/imagecolourstotal_basic.phpt
+      ext/gd/tests/imagecolourstotal_basic.phpt:
+      
+      file imagecolourstotal_basic.phpt was initially added on branch PHP_5_3.
+
+2008-06-16  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_3)
+      ext/xmlreader/php_xmlreader.c
+      ext/xmlreader/tests/expand.phpt:
+      MFH: add parameter allowing node to be exported into existing Document
+      context [DOC]
+      add test
+      fix warnings
+
+    * ext/xmlreader/php_xmlreader.c
+      ext/xmlreader/tests/expand.phpt
+      ext/xmlreader/tests/expand.phpt:
+      add parameter allowing node to be exported into existing Document context
+      add test
+      fix warnings
+
+2008-06-16  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/phar.phar:
+      remove unused variables in phar_fix_filepath
+      copy virtual_dirs to avoid segfault on multi-process
+      fix metadata reading for phar.cache_list
+      initialize manifest to exact size needed (performance increase)
+      fix freeing of signature on error to use the correct persist value (fixes
+      segfault on error in cache.list)
+      reset EG(regular_list) so it is identical to how we found it
+
+    * (PHP_5_3)
+      ext/phar/tar.c:
+      fix hashtable creation for tar to be estimated size needed
+
+    * (PHP_5_3)
+      ext/phar/zip.c:
+      fix hashtable creation for zip to be exact size needed, fix endian issue
+      for loading manifest
+
 2008-06-15  Greg Beaver  <greg@chiaraquartet.net>
 
     * (PHP_5_3)
