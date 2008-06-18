@@ -374,7 +374,7 @@ static inline void phar_set_entrypufp(phar_entry_info *entry, php_stream *fp TSR
 	PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].ufp = fp;
 }
 
-static inline php_stream *phar_get_pharfp(phar_archive_data *phar TSRMLS_CC)
+static inline php_stream *phar_get_pharfp(phar_archive_data *phar TSRMLS_DC)
 {
 	if (!phar->is_persistent) {
 		return phar->fp;
@@ -382,7 +382,7 @@ static inline php_stream *phar_get_pharfp(phar_archive_data *phar TSRMLS_CC)
 	return PHAR_GLOBALS->cached_fp[phar->phar_pos].fp;
 }
 
-static inline php_stream *phar_get_pharufp(phar_archive_data *phar TSRMLS_CC)
+static inline php_stream *phar_get_pharufp(phar_archive_data *phar TSRMLS_DC)
 {
 	if (!phar->is_persistent) {
 		return phar->ufp;
