@@ -721,12 +721,12 @@ static sdlPtr load_wsdl(char *struri TSRMLS_DC)
 					}
 				  trav2 = trav2->next;
 				}
-				if (!address) {
+				if (!address || tmpbinding->bindingType == BINDING_HTTP) {
 					if (has_soap_port || trav->next || i < n-1) {
 						efree(tmpbinding);
 						trav = trav->next;
 						continue;
-					} else {
+					} else if (!address) {
 						soap_error0(E_ERROR, "Parsing WSDL: No address associated with <port>");
 					}
 				}
