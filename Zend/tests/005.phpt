@@ -15,7 +15,7 @@ var_dump(strcasecmp("01", "01"));
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Wrong parameter count for strcasecmp() in %s on line %d
+Warning: strcasecmp() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 int(0)
 int(-3)
