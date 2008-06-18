@@ -1,3 +1,23 @@
+2008-06-17  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/date/tests/date_sub_basic.phpt:
+      Committed for Felix De Vliegher, TestFest Task No: 123, Tested on
+      RHEL5-32bit, WinXP
+
+    * ext/date/tests/date_add_basic.phpt:
+      Committed for Felix De Vliegher, TestFest Task No: 122, Tested on RHEL5,
+      WinXP
+
+    * ext/date/tests/date_sub_basic.phpt
+      ext/date/tests/date_sub_basic.phpt:
+      
+      file date_sub_basic.phpt was initially added on branch PHP_5_3.
+
+    * ext/date/tests/date_add_basic.phpt
+      ext/date/tests/date_add_basic.phpt:
+      
+      file date_add_basic.phpt was initially added on branch PHP_5_3.
+
 2008-06-16  Zoe Slattery  <zoe.slattery@googlemail.com>
 
     * ext/gd/tests/imagecolourstotal_basic.phpt:
