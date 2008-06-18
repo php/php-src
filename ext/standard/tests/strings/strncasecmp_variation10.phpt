@@ -129,34 +129,34 @@ int(-%d)
 int(-%d)
 -- Iteration 15 --
 
-Notice: Array to string conversion in %s on line 88
+Warning: strlen() expects parameter 1 to be string, array given in %s on line 88
 
-Notice: Array to string conversion in %s on line 89
-int(-%d)
+Warning: strncasecmp() expects parameter 1 to be string, array given in %s on line 89
+NULL
 -- Iteration 16 --
 
-Notice: Array to string conversion in %s on line 88
+Warning: strlen() expects parameter 1 to be string, array given in %s on line 88
 
-Notice: Array to string conversion in %s on line 89
-int(-%d)
+Warning: strncasecmp() expects parameter 1 to be string, array given in %s on line 89
+NULL
 -- Iteration 17 --
 
-Notice: Array to string conversion in %s on line 88
+Warning: strlen() expects parameter 1 to be string, array given in %s on line 88
 
-Notice: Array to string conversion in %s on line 89
-int(-%d)
+Warning: strncasecmp() expects parameter 1 to be string, array given in %s on line 89
+NULL
 -- Iteration 18 --
 
-Notice: Array to string conversion in %s on line 88
+Warning: strlen() expects parameter 1 to be string, array given in %s on line 88
 
-Notice: Array to string conversion in %s on line 89
-int(-%d)
+Warning: strncasecmp() expects parameter 1 to be string, array given in %s on line 89
+NULL
 -- Iteration 19 --
 
-Notice: Array to string conversion in %s on line 88
+Warning: strlen() expects parameter 1 to be string, array given in %s on line 88
 
-Notice: Array to string conversion in %s on line 89
-int(-%d)
+Warning: strncasecmp() expects parameter 1 to be string, array given in %s on line 89
+NULL
 -- Iteration 20 --
 int(-%d)
 -- Iteration 21 --
@@ -178,7 +178,11 @@ int(-%d)
 -- Iteration 29 --
 int(-%d)
 -- Iteration 30 --
-int(-%d)
+
+Warning: strlen() expects parameter 1 to be string, resource given in %s on line 88
+
+Warning: strncasecmp() expects parameter 1 to be string, resource given in %s on line 89
+NULL
 -- Iteration 31 --
 int(-%d)
 *** Done ***

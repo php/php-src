@@ -34,13 +34,13 @@ echo "Done";
 
 Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 16
 
-Warning: Wrong parameter count for is_a() in %s on line 16
+Warning: is_a() expects exactly 2 parameters, 3 given in %s on line 16
 NULL
 
 -- Testing is_a() function with less than expected no. of arguments --
 
 Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 21
 
-Warning: Wrong parameter count for is_a() in %s on line 21
+Warning: is_a() expects exactly 2 parameters, 1 given in %s on line 21
 NULL
 Done

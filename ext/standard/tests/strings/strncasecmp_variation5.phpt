@@ -109,15 +109,25 @@ int(0)
 -- Iteration 7 --
 int(0)
 -- Iteration 8 --
-int(0)
+
+Warning: strncasecmp() expects parameter 3 to be long, array given in %s on line %d
+NULL
 -- Iteration 9 --
-int(0)
+
+Warning: strncasecmp() expects parameter 3 to be long, array given in %s on line %d
+NULL
 -- Iteration 10 --
-int(0)
+
+Warning: strncasecmp() expects parameter 3 to be long, array given in %s on line %d
+NULL
 -- Iteration 11 --
-int(0)
+
+Warning: strncasecmp() expects parameter 3 to be long, array given in %s on line %d
+NULL
 -- Iteration 12 --
-int(0)
+
+Warning: strncasecmp() expects parameter 3 to be long, array given in %s on line %d
+NULL
 -- Iteration 13 --
 int(0)
 -- Iteration 14 --
@@ -131,17 +141,23 @@ int(0)
 -- Iteration 18 --
 int(0)
 -- Iteration 19 --
-int(0)
+
+Warning: strncasecmp() expects parameter 3 to be long, string given in %s on line %d
+NULL
 -- Iteration 20 --
-int(0)
+
+Warning: strncasecmp() expects parameter 3 to be long, string given in %s on line %d
+NULL
 -- Iteration 21 --
 int(0)
 -- Iteration 22 --
 int(0)
 -- Iteration 23 --
-int(0)
+
+Warning: strncasecmp() expects parameter 3 to be long, resource given in %s on line %d
+NULL
 -- Iteration 24 --
 
-Notice: Object of class sample could not be converted to int in %s on line %d
-int(0)
+Warning: strncasecmp() expects parameter 3 to be long, object given in %s on line %d
+NULL
 *** Done ***

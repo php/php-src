@@ -115,24 +115,24 @@ Arg value 0.5
 bool(false)
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(77)
-bool(false)
+Error: 2 - is_subclass_of() expects parameter 2 to be string, array given, %s(%d)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(77)
-bool(false)
+Error: 2 - is_subclass_of() expects parameter 2 to be string, array given, %s(%d)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(77)
-bool(false)
+Error: 2 - is_subclass_of() expects parameter 2 to be string, array given, %s(%d)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(77)
-bool(false)
+Error: 2 - is_subclass_of() expects parameter 2 to be string, array given, %s(%d)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(77)
-bool(false)
+Error: 2 - is_subclass_of() expects parameter 2 to be string, array given, %s(%d)
+NULL
 
 Arg value  
 bool(false)
@@ -157,12 +157,11 @@ bool(false)
 
 Arg value  
 bool(false)
-Error: 4096 - Object of class stdClass could not be converted to string, %s(76)
+Error: 4096 - Object of class stdClass could not be converted to string, %s(%d)
 
 Arg value  
-Error: 4096 - Object of class stdClass could not be converted to string, %s(77)
-Error: 8 - Object of class stdClass to string conversion, %s(77)
-bool(false)
+Error: 2 - is_subclass_of() expects parameter 2 to be string, object given, %s(%d)
+NULL
 
 Arg value  
 bool(false)

@@ -79,80 +79,132 @@ Notice: Undefined variable: undefined_var in %s on line 56
 Notice: Undefined variable: unset_var in %s on line 59
 
 Arg value 0 
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, integer given in %s on line %d
+NULL
 
 Arg value 1 
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, integer given in %s on line %d
+NULL
 
 Arg value 12345 
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, integer given in %s on line %d
+NULL
 
 Arg value -2345 
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, integer given in %s on line %d
+NULL
 
 Arg value 10.5 
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, double given in %s on line %d
+NULL
 
 Arg value -10.5 
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, double given in %s on line %d
+NULL
 
 Arg value 101234567000 
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, double given in %s on line %d
+NULL
 
 Arg value 1.07654321E-9 
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, double given in %s on line %d
+NULL
 
 Arg value 0.5 
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, double given in %s on line %d
+NULL
 
 Arg value Array 
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, array given in %s on line %d
+NULL
 
 Arg value Array 
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, array given in %s on line %d
+NULL
 
 Arg value Array 
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, array given in %s on line %d
+NULL
 
 Arg value Array 
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, array given in %s on line %d
+NULL
 
 Arg value Array 
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, array given in %s on line %d
+NULL
 
 Arg value  
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, null given in %s on line %d
+NULL
 
 Arg value  
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, null given in %s on line %d
+NULL
 
 Arg value 1 
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, boolean given in %s on line %d
+NULL
 
 Arg value  
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, boolean given in %s on line %d
+NULL
 
 Arg value 1 
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, boolean given in %s on line %d
+NULL
 
 Arg value  
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, boolean given in %s on line %d
+NULL
 
 Arg value  
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, string given in %s on line %d
+NULL
 
 Arg value  
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, string given in %s on line %d
+NULL
 
 Arg value string 
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, string given in %s on line %d
+NULL
 
 Arg value string 
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, string given in %s on line %d
+NULL
 
 Arg value  
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, null given in %s on line %d
+NULL
 
 Arg value  
-bool(false)
+
+Warning: get_object_vars() expects parameter 1 to be object, null given in %s on line %d
+NULL
 Done
