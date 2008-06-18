@@ -10,11 +10,7 @@ $client = new SoapClient(dirname(__FILE__)."/bug29109.wsdl");
 var_dump($client->__getFunctions()); 
 ?>
 --EXPECT--
-array(3) {
+array(1) {
   [0]=>
   string(53) "HelloWorldResponse HelloWorld(HelloWorld $parameters)"
-  [1]=>
-  string(19) "string HelloWorld()"
-  [2]=>
-  string(19) "string HelloWorld()"
 }
