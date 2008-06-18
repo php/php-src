@@ -1,9 +1,9 @@
 --TEST--
-SPL: FastArray: accessing uninitialized array
+SPL: FixedArray: accessing uninitialized array
 --FILE--
 <?php
 
-$a = new SplFastArray('');
+$a = new SplFixedArray('');
 
 try {
 	var_dump($a[1]);
@@ -40,7 +40,7 @@ try {
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: SplFastArray::__construct() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: SplFixedArray::__construct() expects parameter 1 to be long, Unicode string given in %s on line %d
 Index invalid or out of range
 Index invalid or out of range
 Index invalid or out of range

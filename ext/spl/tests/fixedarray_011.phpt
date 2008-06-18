@@ -1,9 +1,9 @@
 --TEST--
-SPL: FastArray: Testing setSize() with NULL
+SPL: FixedArray: Testing setSize() with NULL
 --FILE--
 <?php
 
-$a = new SplFastArray(100);
+$a = new SplFixedArray(100);
 
 $a->setSize(NULL);
 
