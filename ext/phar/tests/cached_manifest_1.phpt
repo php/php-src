@@ -3,7 +3,7 @@ Phar: phar.cache_list basic read test
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
-phar.cache_list={PWD}/files/nophar.phar
+phar.cache_list={$cwd}/files/nophar.phar
 --FILE--
 <?php
 $pname = 'phar://' . dirname(__FILE__) . '/files/nophar.phar';

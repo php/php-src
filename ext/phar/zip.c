@@ -255,11 +255,11 @@ foundit:
 	php_stream_seek(fp, PHAR_GET_32(locator.cdir_offset), SEEK_SET);
 	/* read in central directory */
 	zend_hash_init(&mydata->manifest, PHAR_GET_16(locator.count),
-		zend_get_hash_value, destroy_phar_manifest_entry, mydata->is_persistent);
+		zend_get_hash_value, destroy_phar_manifest_entry, (zend_bool)mydata->is_persistent);
 	zend_hash_init(&mydata->mounted_dirs, 5,
-		zend_get_hash_value, NULL, mydata->is_persistent);
+		zend_get_hash_value, NULL, (zend_bool)mydata->is_persistent);
 	zend_hash_init(&mydata->virtual_dirs, PHAR_GET_16(locator.count) * 2,
-		zend_get_hash_value, NULL, mydata->is_persistent);
+		zend_get_hash_value, NULL, (zend_bool)mydata->is_persistent);
 	entry.phar = mydata;
 	entry.is_zip = 1;
 	entry.fp_type = PHAR_FP;

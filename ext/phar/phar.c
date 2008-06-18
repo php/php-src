@@ -115,7 +115,7 @@ static void phar_split_cache_list(TSRMLS_D)
 
 	/* fake request startup */
 	PHAR_GLOBALS->request_init = 1;
-	zend_init_rsrc_list(TSRMLS_C);
+	//zend_init_rsrc_list(TSRMLS_C);
 	PHAR_G(has_bz2) = zend_hash_exists(&module_registry, "bz2", sizeof("bz2"));
 	PHAR_G(has_zlib) = zend_hash_exists(&module_registry, "zlib", sizeof("zlib"));
 	/* these two are dummies and will be destroyed later */
@@ -149,8 +149,8 @@ finish_error:
 				PHAR_GLOBALS->phar_alias_map.arBuckets = 0;
 				zend_hash_destroy(&cached_phars);
 				zend_hash_destroy(&cached_alias);
-				zend_destroy_rsrc_list(&EG(regular_list) TSRMLS_CC);
-				memset(&EG(regular_list), 0, sizeof(HashTable));
+				//zend_destroy_rsrc_list(&EG(regular_list) TSRMLS_CC);
+				//memset(&EG(regular_list), 0, sizeof(HashTable));
 				/* free cached manifests */
 				PHAR_GLOBALS->request_init = 0;
 				return;
@@ -172,8 +172,8 @@ finish_error:
 	cached_alias = PHAR_GLOBALS->phar_alias_map;
 	PHAR_GLOBALS->phar_fname_map.arBuckets = 0;
 	PHAR_GLOBALS->phar_alias_map.arBuckets = 0;
-	zend_destroy_rsrc_list(&EG(regular_list) TSRMLS_CC);
-	memset(&EG(regular_list), 0, sizeof(HashTable));
+	//zend_destroy_rsrc_list(&EG(regular_list) TSRMLS_CC);
+	//memset(&EG(regular_list), 0, sizeof(HashTable));
 	efree(tmp);
 }
 /* }}} */
@@ -976,11 +976,11 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 
 	/* set up our manifest */
 	zend_hash_init(&mydata->manifest, manifest_count,
-		zend_get_hash_value, destroy_phar_manifest_entry, mydata->is_persistent);
+		zend_get_hash_value, destroy_phar_manifest_entry, (zend_bool)mydata->is_persistent);
 	zend_hash_init(&mydata->mounted_dirs, 5,
-		zend_get_hash_value, NULL, mydata->is_persistent);
+		zend_get_hash_value, NULL, (zend_bool)mydata->is_persistent);
 	zend_hash_init(&mydata->virtual_dirs, manifest_count * 2,
-		zend_get_hash_value, NULL, mydata->is_persistent);
+		zend_get_hash_value, NULL, (zend_bool)mydata->is_persistent);
 	offset = halt_offset + manifest_len + 4;
 	memset(&entry, 0, sizeof(phar_entry_info));
 	entry.phar = mydata;
@@ -1301,7 +1301,7 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 	zend_hash_init(&mydata->mounted_dirs, sizeof(char *),
 		zend_get_hash_value, NULL, 0);
 	zend_hash_init(&mydata->virtual_dirs, sizeof(char *),
-		zend_get_hash_value, NULL, mydata->is_persistent);
+		zend_get_hash_value, NULL, (zend_bool)mydata->is_persistent);
 	mydata->fname_len = fname_len;
 	snprintf(mydata->version, sizeof(mydata->version), "%s", PHP_PHAR_API_VERSION);
 	mydata->is_temporary_alias = alias ? 0 : 1;
