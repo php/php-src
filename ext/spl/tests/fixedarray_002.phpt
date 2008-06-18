@@ -1,10 +1,10 @@
 --TEST--
-SPL: FastArray: overloading
+SPL: FixedArray: overloading
 --INI--
 allow_call_time_pass_reference=1
 --FILE--
 <?php
-class A extends SplFastArray {
+class A extends SplFixedArray {
     public function count() {
         return 2;
     }

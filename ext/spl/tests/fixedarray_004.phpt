@@ -1,9 +1,9 @@
 --TEST--
-SPL: FastArray: adding new elements
+SPL: FixedArray: adding new elements
 --FILE--
 <?php
 
-$a = new SplFastArray(10);
+$a = new SplFixedArray(10);
 
 try {
 	$a[] = 1;

@@ -1,10 +1,10 @@
 --TEST--
-SPL: FastArray: Assigning objects
+SPL: FixedArray: Assigning objects
 --FILE--
 <?php
 
 $b = 10000;
-$a = new SplFastArray($b);
+$a = new SplFixedArray($b);
 
 try {
 	for ($i = 0; $i < 100; $i++) {

@@ -1,10 +1,10 @@
 --TEST--
-SPL: FastArray: Assigning the itself object
+SPL: FixedArray: Assigning the itself object
 --FILE--
 <?php
 
 $b = 10;
-$a = new SplFastArray($b);
+$a = new SplFixedArray($b);
 
 try {
 	$a[1] = $a;

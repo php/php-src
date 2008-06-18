@@ -1,8 +1,8 @@
 --TEST--
-SPL: FastArray: Iterators
+SPL: FixedArray: Iterators
 --FILE--
 <?php
-class A extends SplFastArray {
+class A extends SplFixedArray {
 
     public function current() {
         echo "A::current\n";
@@ -27,7 +27,7 @@ class A extends SplFastArray {
 }
 
 echo "==Direct instance==\n";
-$a = new SplFastArray(5);
+$a = new SplFixedArray(5);
 $a[0] = "a";
 $a[1] = "c";
 $a[2] = "d";
