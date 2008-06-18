@@ -29,7 +29,8 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 	int filename_len;
 	zval *zcontext = NULL;
 
-	if (!PHAR_GLOBALS->phar_fname_map.arBuckets || !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
+	if ((PHAR_GLOBALS->phar_fname_map.arBuckets && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
+		&& !cached_phars.arBuckets) {
 		goto skip_phar;
 	}
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &filename, &filename_len, &zcontext) == FAILURE) {
@@ -97,7 +98,8 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 	long maxlen = PHP_STREAM_COPY_ALL;
 	zval *zcontext = NULL;
 
-	if (!PHAR_GLOBALS->phar_fname_map.arBuckets || !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
+	if ((PHAR_GLOBALS->phar_fname_map.arBuckets && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
+		&& !cached_phars.arBuckets) {
 		goto skip_phar;
 	}
 	/* Parse arguments */
@@ -131,7 +133,8 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 			}
 
 			/* retrieving a file defaults to within the current directory, so use this if possible */
-			if (FAILURE == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
+			if ((PHAR_GLOBALS->phar_fname_map.arBuckets && FAILURE == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar)))
+				&& (PHAR_G(manifest_cached) && FAILURE == (zend_hash_find(&cached_phars, arch, arch_len, (void **) &pphar)))) {
 				efree(arch);
 				goto skip_phar;
 			}
@@ -222,7 +225,8 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 	zval *zcontext = NULL;
 	php_stream *stream;
 
-	if (!PHAR_GLOBALS->phar_fname_map.arBuckets || !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
+	if ((PHAR_GLOBALS->phar_fname_map.arBuckets && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
+		&& !cached_phars.arBuckets) {
 		goto skip_phar;
 	}
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s|br!", &filename, &filename_len, &use_include_path, &zcontext) == FAILURE) {
@@ -249,7 +253,8 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 		/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 		entry_len = filename_len;
 		/* retrieving a file defaults to within the current directory, so use this if possible */
-		if (FAILURE == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
+		if ((PHAR_GLOBALS->phar_fname_map.arBuckets && FAILURE == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar)))
+			&& (PHAR_G(manifest_cached) && FAILURE == (zend_hash_find(&cached_phars, arch, arch_len, (void **) &pphar)))) {
 			efree(arch);
 			goto skip_phar;
 		}
@@ -312,7 +317,8 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 	zval *zcontext = NULL;
 	php_stream *stream;
 
-	if (!PHAR_GLOBALS->phar_fname_map.arBuckets || !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
+	if ((PHAR_GLOBALS->phar_fname_map.arBuckets && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
+		&& !cached_phars.arBuckets) {
 		/* no need to check, include_path not even specified in fopen/ no active phars */
 		goto skip_phar;
 	}
@@ -340,7 +346,8 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 		/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 		entry_len = filename_len;
 		/* retrieving a file defaults to within the current directory, so use this if possible */
-		if (FAILURE == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
+		if ((PHAR_GLOBALS->phar_fname_map.arBuckets && FAILURE == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar)))
+			&& (PHAR_G(manifest_cached) && FAILURE == (zend_hash_find(&cached_phars, arch, arch_len, (void **) &pphar)))) {
 			efree(arch);
 			goto skip_phar;
 		}
@@ -614,7 +621,8 @@ void phar_file_stat(const char *filename, php_stat_len filename_length, int type
 			entry = estrndup(filename, filename_length);
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = (int) filename_length;
-			if (FAILURE == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
+			if ((PHAR_GLOBALS->phar_fname_map.arBuckets && FAILURE == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar)))
+				&& (PHAR_G(manifest_cached) && FAILURE == (zend_hash_find(&cached_phars, arch, arch_len, (void **) &pphar)))) {
 				efree(arch);
 				goto skip_phar;
 			}
@@ -876,7 +884,8 @@ PHAR_FUNC(phar_is_file) /* {{{ */
 	char *filename;
 	int filename_len;
 
-	if (!PHAR_GLOBALS->phar_fname_map.arBuckets || !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
+	if ((PHAR_GLOBALS->phar_fname_map.arBuckets && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
+		&& !cached_phars.arBuckets) {
 		goto skip_phar;
 	}
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
@@ -902,7 +911,8 @@ PHAR_FUNC(phar_is_file) /* {{{ */
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = filename_len;
 			/* retrieving a file within the current directory, so use this if possible */
-			if (SUCCESS == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
+			if ((PHAR_GLOBALS->phar_fname_map.arBuckets && SUCCESS == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar)))
+				|| (PHAR_G(manifest_cached) && SUCCESS == (zend_hash_find(&cached_phars, arch, arch_len, (void **) &pphar)))) {
 				phar_entry_info *etemp;
 
 				entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1 TSRMLS_CC);
@@ -936,7 +946,8 @@ PHAR_FUNC(phar_is_link) /* {{{ */
 	char *filename;
 	int filename_len;
 
-	if (!PHAR_GLOBALS->phar_fname_map.arBuckets || !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
+	if ((PHAR_GLOBALS->phar_fname_map.arBuckets && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
+		&& !cached_phars.arBuckets) {
 		goto skip_phar;
 	}
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
@@ -962,7 +973,8 @@ PHAR_FUNC(phar_is_link) /* {{{ */
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = filename_len;
 			/* retrieving a file within the current directory, so use this if possible */
-			if (SUCCESS == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
+			if ((PHAR_GLOBALS->phar_fname_map.arBuckets && SUCCESS == (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar)))
+				|| (PHAR_G(manifest_cached) && SUCCESS == (zend_hash_find(&cached_phars, arch, arch_len, (void **) &pphar)))) {
 				phar_entry_info *etemp;
 
 				entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1 TSRMLS_CC);
