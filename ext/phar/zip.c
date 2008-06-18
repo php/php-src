@@ -297,6 +297,7 @@ foundit:
 			/* corrupted entry */
 			PHAR_ZIP_FAIL("corrupted central directory entry, no magic signature");
 		}
+		if (entry.is_persistent) entry.manifest_pos = i;
 		entry.compressed_filesize = PHAR_GET_32(zipentry.compsize);
 		entry.uncompressed_filesize = PHAR_GET_32(zipentry.uncompsize);
 		entry.crc32 = PHAR_GET_32(zipentry.crc32);
@@ -521,6 +522,7 @@ foundit:
 		}
 		mydata->is_temporary_alias = 1;
 	}
+
 	if (pphar) {
 		*pphar = mydata;
 	}
@@ -844,6 +846,12 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 	entry.phar = phar;
 	entry.fp_type = PHAR_MOD;
 
+	if (phar->is_persistent) {
+		if (error) {
+			spprintf(error, 0, "internal error: attempt to flush cached zip-based phar \"%s\"", phar->fname);
+		}
+		return EOF;
+	}
 	if (phar->is_data) {
 		goto nostub;
 	}

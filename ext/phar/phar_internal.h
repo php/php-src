@@ -136,8 +136,12 @@
 #define TAR_DIR     '5'
 #define TAR_NEW     '8'
 
+typedef struct _phar_entry_fp phar_entry_fp;
+
 ZEND_BEGIN_MODULE_GLOBALS(phar)
 	HashTable   phar_fname_map;
+	/* for cached phars, this is a per-process store of fp/ufp */
+	phar_entry_fp *cached_fp;
 	HashTable   phar_alias_map;
 	HashTable   phar_SERVER_mung_list;
 	int         readonly;
@@ -223,6 +227,7 @@ enum phar_fp_type {
 };
 
 typedef struct _phar_archive_data phar_archive_data;
+
 /* entry for one file in a phar file */
 typedef struct _phar_entry_info {
 	/* first bytes are exactly as in file */
@@ -268,6 +273,8 @@ typedef struct _phar_entry_info {
 	int                      is_zip:1;
 	/* for cached phar entries */
 	int                      is_persistent:1;
+	/* position in the manifest */
+	uint                     manifest_pos;
 	/* for stat */
 	unsigned short           inode;
 } phar_entry_info;
@@ -316,7 +323,127 @@ struct _phar_archive_data {
 	int                      is_data:1;
 	/* for cached phar manifests */
 	int                      is_persistent:1;
+	uint                     phar_pos;
 };
+
+typedef struct _phar_entry_fp_info {
+	enum phar_fp_type        fp_type;
+	/* offset within fp of the file contents */
+	long                     offset;
+} phar_entry_fp_info;
+
+struct _phar_entry_fp {
+	php_stream *fp;
+	php_stream *ufp;
+	phar_entry_fp_info *manifest;
+};
+
+static inline php_stream *phar_get_entrypfp(phar_entry_info *entry TSRMLS_DC)
+{
+	if (!entry->is_persistent) {
+		return entry->phar->fp;
+	}
+	return PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].fp;
+}
+
+static inline php_stream *phar_get_entrypufp(phar_entry_info *entry TSRMLS_DC)
+{
+	if (!entry->is_persistent) {
+		return entry->phar->ufp;
+	}
+	return PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].ufp;
+}
+
+static inline void phar_set_entrypfp(phar_entry_info *entry, php_stream *fp TSRMLS_DC)
+{
+	if (!entry->phar->is_persistent) {
+		entry->phar->fp =  fp;
+		return;
+	}
+
+	PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].fp = fp;
+}
+
+static inline void phar_set_entrypufp(phar_entry_info *entry, php_stream *fp TSRMLS_DC)
+{
+	if (!entry->phar->is_persistent) {
+		entry->phar->ufp =  fp;
+		return;
+	}
+
+	PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].ufp = fp;
+}
+
+static inline php_stream *phar_get_pharfp(phar_archive_data *phar TSRMLS_CC)
+{
+	if (!phar->is_persistent) {
+		return phar->fp;
+	}
+	return PHAR_GLOBALS->cached_fp[phar->phar_pos].fp;
+}
+
+static inline php_stream *phar_get_pharufp(phar_archive_data *phar TSRMLS_CC)
+{
+	if (!phar->is_persistent) {
+		return phar->ufp;
+	}
+	return PHAR_GLOBALS->cached_fp[phar->phar_pos].ufp;
+}
+
+static inline void phar_set_pharfp(phar_archive_data *phar, php_stream *fp TSRMLS_DC)
+{
+	if (!phar->is_persistent) {
+		phar->fp =  fp;
+		return;
+	}
+
+	PHAR_GLOBALS->cached_fp[phar->phar_pos].fp = fp;
+}
+
+static inline void phar_set_pharufp(phar_archive_data *phar, php_stream *fp TSRMLS_DC)
+{
+	if (!phar->is_persistent) {
+		phar->ufp =  fp;
+		return;
+	}
+
+	PHAR_GLOBALS->cached_fp[phar->phar_pos].ufp = fp;
+}
+
+static inline void phar_set_fp_type(phar_entry_info *entry, enum phar_fp_type type, off_t offset TSRMLS_DC)
+{
+	phar_entry_fp_info *data;
+
+	if (!entry->is_persistent) {
+		entry->fp_type = type;
+		entry->offset = offset;
+		return;
+	}
+	data = &(PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].manifest[entry->manifest_pos]);
+	data->fp_type = type;
+	data->offset = offset;
+}
+
+static inline enum phar_fp_type phar_get_fp_type(phar_entry_info *entry TSRMLS_DC)
+{
+	if (!entry->is_persistent) {
+		return entry->fp_type;
+	}
+	return PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].manifest[entry->manifest_pos].fp_type;
+}
+
+static inline off_t phar_get_fp_offset(phar_entry_info *entry TSRMLS_DC)
+{
+	if (!entry->is_persistent) {
+		return entry->offset;
+	}
+	if (PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].manifest[entry->manifest_pos].fp_type == PHAR_FP) {
+		if (!PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].manifest[entry->manifest_pos].offset) {
+			PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].manifest[entry->manifest_pos].offset = entry->offset;
+		}
+	}
+	return PHAR_GLOBALS->cached_fp[entry->phar->phar_pos].manifest[entry->manifest_pos].offset;
+}
 
 #define PHAR_MIME_PHP '\0'
 #define PHAR_MIME_PHPS '\1'
@@ -460,6 +587,7 @@ phar_entry_info *phar_get_link_source(phar_entry_info *entry TSRMLS_DC);
 int phar_create_writeable_entry(phar_archive_data *phar, phar_entry_info *entry, char **error TSRMLS_DC);
 int phar_separate_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC);
 int phar_open_archive_fp(phar_archive_data *phar TSRMLS_DC);
+int phar_copy_on_write(phar_archive_data **pphar TSRMLS_DC);
 
 /* tar functions in tar.c */
 int phar_is_tar(char *buf, char *fname);
@@ -475,6 +603,9 @@ int phar_zip_flush(phar_archive_data *archive, char *user_stub, long len, int de
 #ifdef PHAR_MAIN
 static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
 extern php_stream_wrapper php_stream_phar_wrapper;
+#else
+extern HashTable cached_phars;
+extern HashTable cached_alias;
 #endif
 
 int phar_archive_delref(phar_archive_data *phar TSRMLS_DC);

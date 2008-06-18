@@ -101,7 +101,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, char *filename, char *mode,
 		}
 #endif
 	if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
-		phar_archive_data **pphar = NULL;
+		phar_archive_data **pphar = NULL, *phar;
 
 		if (PHAR_GLOBALS->request_init && PHAR_GLOBALS->phar_fname_map.arBuckets && FAILURE == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **)&pphar)) {
 			pphar = NULL;
@@ -113,9 +113,20 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, char *filename, char *mode,
 			php_url_free(resource);
 			return NULL;
 		}
-		if (phar_open_or_create_filename(resource->host, arch_len, NULL, 0, 0, options, NULL, &error TSRMLS_CC) == FAILURE)
+		if (phar_open_or_create_filename(resource->host, arch_len, NULL, 0, 0, options, &phar, &error TSRMLS_CC) == FAILURE)
 		{
 			if (error) {
+				if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
+					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+				}
+				efree(error);
+			}
+			php_url_free(resource);
+			return NULL;
+		}
+		if (phar->is_persistent && FAILURE == phar_copy_on_write(&phar TSRMLS_CC)) {
+			if (error) {
+				spprintf(&error, 0, "Cannot open cached phar '%s' as writeable, copy on write failed", resource->host);
 				if (!(options & PHP_STREAM_URL_STAT_QUIET)) {
 					php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
 				}
@@ -489,10 +500,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 				  php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC) /* {{{ */
 {
 	php_url *resource = NULL;
-	phar_zstr key;
-	char *internal_file, *error, *str_key;
-	uint keylen;
-	ulong unused;
+	char *internal_file, *error;
 	phar_archive_data *phar;
 	phar_entry_info *entry;
 	uint host_len;
@@ -544,72 +552,56 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 		phar_dostat(phar, entry, ssb, 0, phar->alias, phar->alias_len TSRMLS_CC);
 		php_url_free(resource);
 		return SUCCESS;
-	} else {
-		/* search for directory (partial match of a file) */
-		zend_hash_internal_pointer_reset(&phar->manifest);
-		while (FAILURE != zend_hash_has_more_elements(&phar->manifest)) {
-			if (HASH_KEY_NON_EXISTANT !=
-					zend_hash_get_current_key_ex(
-						&phar->manifest, &key, &keylen, &unused, 0, NULL)) {
-				PHAR_STR(key, str_key);
-				if (keylen >= (uint)internal_file_len && 0 == memcmp(internal_file, str_key, internal_file_len)) {
-					/* directory found, all dirs have the same stat */
-					if (str_key[internal_file_len] == '/') {
-						phar_dostat(phar, NULL, ssb, 1, phar->alias, phar->alias_len TSRMLS_CC);
-						php_url_free(resource);
-						return SUCCESS;
-					}
-				}
-			}
-			if (SUCCESS != zend_hash_move_forward(&phar->manifest)) {
+	}
+	if (SUCCESS == zend_hash_find(&(phar->virtual_dirs), internal_file, internal_file_len, (void **) &entry)) {
+		phar_dostat(phar, NULL, ssb, 1, phar->alias, phar->alias_len TSRMLS_CC);
+		php_url_free(resource);
+		return SUCCESS;
+	}
+	/* check for mounted directories */
+	if (phar->mounted_dirs.arBuckets && zend_hash_num_elements(&phar->mounted_dirs)) {
+		phar_zstr key;
+		char *str_key;
+		ulong unused;
+		uint keylen;
+
+		zend_hash_internal_pointer_reset(&phar->mounted_dirs);
+		while (FAILURE != zend_hash_has_more_elements(&phar->mounted_dirs)) {
+			if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(&phar->mounted_dirs, &key, &keylen, &unused, 0, NULL)) {
 				break;
 			}
-		}
-		/* check for mounted directories */
-		if (phar->mounted_dirs.arBuckets && zend_hash_num_elements(&phar->mounted_dirs)) {
-			phar_zstr key;
-			char *str_key;
-			ulong unused;
-			uint keylen;
-	
-			zend_hash_internal_pointer_reset(&phar->mounted_dirs);
-			while (FAILURE != zend_hash_has_more_elements(&phar->mounted_dirs)) {
-				if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(&phar->mounted_dirs, &key, &keylen, &unused, 0, NULL)) {
-					break;
+			PHAR_STR(key, str_key);
+			if ((int)keylen >= internal_file_len || strncmp(str_key, internal_file, keylen)) {
+				continue;
+			} else {
+				char *test;
+				int test_len;
+				phar_entry_info *entry;
+				php_stream_statbuf ssbi;
+
+				if (SUCCESS != zend_hash_find(&phar->manifest, str_key, keylen, (void **) &entry)) {
+					goto free_resource;
 				}
-				PHAR_STR(key, str_key);
-				if ((int)keylen >= internal_file_len || strncmp(str_key, internal_file, keylen)) {
-					continue;
-				} else {
-					char *test;
-					int test_len;
-					phar_entry_info *entry;
-					php_stream_statbuf ssbi;
-	
-					if (SUCCESS != zend_hash_find(&phar->manifest, str_key, keylen, (void **) &entry)) {
-						goto free_resource;
-					}
-					if (!entry->tmp || !entry->is_mounted) {
-						goto free_resource;
-					}
-					test_len = spprintf(&test, MAXPATHLEN, "%s%s", entry->tmp, internal_file + keylen);
-					if (SUCCESS != php_stream_stat_path(test, &ssbi)) {
-						efree(test);
-						continue;
-					}
-					/* mount the file/directory just in time */
-					if (SUCCESS != phar_mount_entry(phar, test, test_len, internal_file, internal_file_len TSRMLS_CC)) {
-						efree(test);
-						goto free_resource;
-					}
+				if (!entry->tmp || !entry->is_mounted) {
+					goto free_resource;
+				}
+				test_len = spprintf(&test, MAXPATHLEN, "%s%s", entry->tmp, internal_file + keylen);
+				if (SUCCESS != php_stream_stat_path(test, &ssbi)) {
 					efree(test);
-					if (SUCCESS != zend_hash_find(&phar->manifest, internal_file, internal_file_len, (void**)&entry)) {
-						goto free_resource;
-					}
-					phar_dostat(phar, entry, ssb, 0, phar->alias, phar->alias_len TSRMLS_CC);
-					php_url_free(resource);
-					return SUCCESS;
+					continue;
 				}
+				/* mount the file/directory just in time */
+				if (SUCCESS != phar_mount_entry(phar, test, test_len, internal_file, internal_file_len TSRMLS_CC)) {
+					efree(test);
+					goto free_resource;
+				}
+				efree(test);
+				if (SUCCESS != zend_hash_find(&phar->manifest, internal_file, internal_file_len, (void**)&entry)) {
+					goto free_resource;
+				}
+				phar_dostat(phar, entry, ssb, 0, phar->alias, phar->alias_len TSRMLS_CC);
+				php_url_free(resource);
+				return SUCCESS;
 			}
 		}
 	}
@@ -777,13 +769,19 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 	}
 
 	host_len = strlen(resource_from->host);
-	phar_request_initialize(TSRMLS_C);
 
 	if (SUCCESS != phar_get_archive(&phar, resource_from->host, strlen(resource_from->host), NULL, 0, &error TSRMLS_CC)) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": %s", url_from, url_to, error);
 		efree(error);
+		return 0;
+	}
+
+	if (phar->is_persistent && FAILURE == phar_copy_on_write(&phar TSRMLS_CC)) {
+		php_url_free(resource_from);
+		php_url_free(resource_to);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": could not make cached phar writeable", url_from, url_to);
 		return 0;
 	}
 

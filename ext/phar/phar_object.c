@@ -161,7 +161,7 @@ static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char 
 }
 /* }}} */
 
-static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, char *entry, int entry_len, char *arch, int arch_len, char *basename, int basename_len, char *ru, int ru_len TSRMLS_DC) /* {{{ */
+static int phar_file_action(phar_entry_data *idata, char *mime_type, int code, char *entry, int entry_len, char *arch, int arch_len, char *basename, int basename_len, char *ru, int ru_len TSRMLS_DC) /* {{{ */
 {
 	char *name = NULL, buf[8192], *cwd;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
@@ -185,7 +185,7 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 
 			highlight_file(name, &syntax_highlighter_ini TSRMLS_CC);
 
-			phar_entry_delref(phar TSRMLS_CC);
+			phar_entry_delref(idata TSRMLS_CC);
 			efree(name);
 #ifdef PHP_WIN32
 			efree(arch);
@@ -197,45 +197,45 @@ static int phar_file_action(phar_entry_data *phar, char *mime_type, int code, ch
 			ctr.line_len = spprintf(&(ctr.line), 0, "Content-type: %s", mime_type);
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 			efree(ctr.line);
-			ctr.line_len = spprintf(&(ctr.line), 0, "Content-length: %d", phar->internal_file->uncompressed_filesize);
+			ctr.line_len = spprintf(&(ctr.line), 0, "Content-length: %d", idata->internal_file->uncompressed_filesize);
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 			efree(ctr.line);
 			if (FAILURE == sapi_send_headers(TSRMLS_C)) {
-				phar_entry_delref(phar TSRMLS_CC);
+				phar_entry_delref(idata TSRMLS_CC);
 				zend_bailout();
 			}
 
 			/* prepare to output  */
-			if (!phar_get_efp(phar->internal_file, 1 TSRMLS_CC)) {
+			if (!phar_get_efp(idata->internal_file, 1 TSRMLS_CC)) {
 				char *error;
-				if (!phar_open_jit(phar->phar, phar->internal_file, phar->phar->fp, &error, 0 TSRMLS_CC)) {
+				if (!phar_open_jit(idata->phar, idata->internal_file, phar_get_pharfp(idata->phar TSRMLS_CC), &error, 0 TSRMLS_CC)) {
 					if (error) {
 						zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 						efree(error);
 					}
 					return -1;
 				}
-				phar->fp = phar_get_efp(phar->internal_file, 1 TSRMLS_CC);
-				phar->zero = phar->internal_file->offset;
+				idata->fp = phar_get_efp(idata->internal_file, 1 TSRMLS_CC);
+				idata->zero = phar_get_fp_offset(idata->internal_file TSRMLS_CC);
 			}
-			phar_seek_efp(phar->internal_file, 0, SEEK_SET, 0, 1 TSRMLS_CC);
+			phar_seek_efp(idata->internal_file, 0, SEEK_SET, 0, 1 TSRMLS_CC);
 			do {
-				got = php_stream_read(phar->fp, buf, MIN(8192, phar->internal_file->uncompressed_filesize - phar->position));
+				got = php_stream_read(idata->fp, buf, MIN(8192, idata->internal_file->uncompressed_filesize - idata->position));
 				PHPWRITE(buf, got);
-				phar->position = php_stream_tell(phar->fp) - phar->zero;
-				if (phar->position == (off_t) phar->internal_file->uncompressed_filesize) {
+				idata->position = php_stream_tell(idata->fp) - idata->zero;
+				if (idata->position == (off_t) idata->internal_file->uncompressed_filesize) {
 					break;
 				}
 			} while (1);
 
-			phar_entry_delref(phar TSRMLS_CC);
+			phar_entry_delref(idata TSRMLS_CC);
 			zend_bailout();
 		case PHAR_MIME_PHP:
 			if (basename) {
 				phar_mung_server_vars(arch, entry, entry_len, basename, basename_len, ru, ru_len TSRMLS_CC);
 				efree(basename);
 			}
-			phar_entry_delref(phar TSRMLS_CC);
+			phar_entry_delref(idata TSRMLS_CC);
 			if (entry[0] == '/') {
 				name_len = spprintf(&name, 4096, "phar://%s%s", arch, entry);
 			} else {
@@ -356,10 +356,13 @@ static void phar_postprocess_ru_web(char *fname, int fname_len, char **entry, in
 {
 	char *e = *entry + 1, *u = NULL, *u1 = NULL, *saveu = NULL;
 	int e_len = *entry_len - 1, u_len = 0;
-	phar_archive_data **pphar;
+	phar_archive_data **pphar = NULL;
 
 	/* we already know we can retrieve the phar if we reach here */
 	zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void **) &pphar);
+	if (!pphar && PHAR_G(manifest_cached)) {
+		zend_hash_find(&cached_phars, fname, fname_len, (void **) &pphar);
+	}
 
 	do {
 		if (zend_hash_exists(&((*pphar)->manifest), e, e_len)) {
@@ -1082,7 +1085,10 @@ PHP_METHOD(Phar, isValidPharFilename)
  */
 static void phar_spl_foreign_dtor(spl_filesystem_object *object TSRMLS_DC) /* {{{ */
 {
-	phar_archive_delref((phar_archive_data *) object->oth TSRMLS_CC);
+	phar_archive_data *phar = (phar_archive_data *) object->oth;
+	if (!phar->is_persistent) {
+		phar_archive_delref(phar TSRMLS_CC);
+	}
 	object->oth = NULL;
 }
 /* }}} */
@@ -1094,7 +1100,9 @@ static void phar_spl_foreign_clone(spl_filesystem_object *src, spl_filesystem_ob
 {
 	phar_archive_data *phar_data = (phar_archive_data *) dst->oth;
 
-	++(phar_data->refcount);
+	if (!phar_data->is_persistent) {
+		++(phar_data->refcount);
+	}
 }
 /* }}} */
 
@@ -1199,7 +1207,9 @@ PHP_METHOD(Phar, __construct)
 		return;
 	}
 	is_data = phar_data->is_data;
-	++(phar_data->refcount);
+	if (!phar_data->is_persistent) {
+		++(phar_data->refcount);
+	}
 	phar_obj->arc.archive = phar_data;
 	phar_obj->spl.oth_handler = &phar_spl_foreign_handler;
 
@@ -1223,7 +1233,9 @@ PHP_METHOD(Phar, __construct)
 			&spl_ce_RecursiveDirectoryIterator->constructor, "__construct", NULL, &arg1);
 	}
 
-	phar_obj->arc.archive->is_data = is_data;
+	if (!phar_data->is_persistent) {
+		phar_obj->arc.archive->is_data = is_data;
+	}
 	phar_obj->spl.info_class = phar_ce_entry;
 
 	efree(fname);
@@ -1313,6 +1325,10 @@ PHP_METHOD(Phar, unlinkArchive)
 		efree(entry);
 	}
 
+	if (phar->is_persistent) {
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "phar archive \"%s\" is in phar.cache_list, cannot unlinkArchive()", fname);
+		return;
+	}
 	if (phar->refcount) {
 		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "phar archive \"%s\" has open file handles or objects.  fclose() all file handles, and unset() all objects prior to calling unlinkArchive()", fname);
 		return;
@@ -1930,6 +1946,11 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 	efree(basepath);
 	efree(newname);
 
+	if (PHAR_G(manifest_cached) && SUCCESS == zend_hash_find(&cached_phars, newpath, phar->fname_len, (void **) &pphar)) {
+		efree(oldpath);
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Unable to add newly converted phar \"%s\" to the list of phars, new phar name is in phar.cache_list", phar->fname);
+		return NULL;
+	}
 	if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), newpath, phar->fname_len, (void **) &pphar)) {
 		if ((*pphar)->fname_len == phar->fname_len && !memcmp((*pphar)->fname, phar->fname, phar->fname_len)) {
 			if (!zend_hash_num_elements(&phar->manifest)) {

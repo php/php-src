@@ -145,9 +145,9 @@ static int phar_dir_flush(php_stream *stream TSRMLS_DC) /* {{{ */
  */
 static int phar_add_empty(HashTable *ht, char *arKey, uint nKeyLength)  /* {{{ */
 {
-	void *dummy = (void *) 1;
+	void *dummy = (char *) 1;
 
-	return zend_hash_update(ht, arKey, nKeyLength, &dummy, sizeof(void *), NULL);
+	return zend_hash_update(ht, arKey, nKeyLength, (void *) &dummy, sizeof(void *), NULL);
 }
 /* }}} */
 
@@ -445,7 +445,6 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, char *url_from, int mode, in
 	}
 
 	host_len = strlen(resource->host);
-	phar_request_initialize(TSRMLS_C);
 
 	if (FAILURE == phar_get_archive(&phar, resource->host, host_len, NULL, 0, &error TSRMLS_CC)) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", error retrieving phar information: %s", resource->path+1, resource->host, error);
@@ -479,6 +478,12 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, char *url_from, int mode, in
 	if (error) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", resource->path+1, resource->host, error);
 		efree(error);
+		php_url_free(resource);
+		return FAILURE;
+	}
+
+	if (phar->is_persistent && FAILURE == phar_copy_on_write(&phar TSRMLS_CC)) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", unable to make cached phar writeable", resource->path+1, resource->host);
 		php_url_free(resource);
 		return FAILURE;
 	}
@@ -565,7 +570,6 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_
 	}
 
 	host_len = strlen(resource->host);
-	phar_request_initialize(TSRMLS_C);
 
 	if (FAILURE == phar_get_archive(&phar, resource->host, host_len, NULL, 0, &error TSRMLS_CC)) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot remove directory \"%s\" in phar \"%s\", error retrieving phar information: %s", resource->path+1, resource->host, error);
@@ -586,6 +590,12 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_
 	}
 
 	/* now for the easy part */
+	if (phar->is_persistent && FAILURE == phar_copy_on_write(&phar TSRMLS_CC)) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot remove directory \"%s\" in phar \"%s\", unable to make cached phar writeable", resource->path+1, resource->host);
+		php_url_free(resource);
+		return FAILURE;
+	}
+
 	entry->is_deleted = 1;
 	entry->is_modified = 1;
 	phar_flush(phar, 0, 0, 0, &error TSRMLS_CC);

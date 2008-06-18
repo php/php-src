@@ -416,6 +416,7 @@ bail:
 		}
 		phar_set_inode(&entry TSRMLS_CC);
 		zend_hash_add(&myphar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info), (void **) &newentry);
+		if (entry.is_persistent) ++entry.manifest_pos;
 		if (entry.filename_len >= sizeof(".phar/.metadata")-1 && !memcmp(entry.filename, ".phar/.metadata", sizeof(".phar/.metadata")-1)) {
 			if (FAILURE == phar_tar_process_metadata(newentry, fp TSRMLS_CC)) {
 				if (error) {
@@ -548,6 +549,7 @@ bail:
 	phar_unixify_path_separators(myphar->fname, fname_len);
 #endif
 	myphar->fname_len = fname_len;
+	myphar->fp = fp;
 	p = strrchr(myphar->fname, '/');
 
 	if (zend_hash_exists(&(myphar->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
@@ -564,7 +566,6 @@ bail:
 			myphar->ext_len = (myphar->fname + fname_len) - myphar->ext;
 		}
 	}
-	myphar->fp = fp;
 	phar_request_initialize(TSRMLS_C);
 	if (SUCCESS != zend_hash_add(&(PHAR_GLOBALS->phar_fname_map), myphar->fname, fname_len, (void*)&myphar, sizeof(phar_archive_data*), (void **)&actual)) {
 		if (error) {
@@ -608,7 +609,7 @@ bail:
 					return FAILURE;
 				}
 			}
-			zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), actual_alias, myphar->alias_len, (void*)&myphar, sizeof(phar_archive_data*), NULL);
+			zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&myphar, sizeof(phar_archive_data*), NULL);
 			myphar->alias = pestrndup(alias, alias_len, myphar->is_persistent);
 			myphar->alias_len = alias_len;
 		} else {
@@ -851,6 +852,12 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 	entry.phar = phar;
 	entry.fp_type = PHAR_MOD;
 
+	if (phar->is_persistent) {
+		if (error) {
+			spprintf(error, 0, "internal error: attempt to flush cached tar-based phar \"%s\"", phar->fname);
+		}
+		return EOF;
+	}
 	if (phar->is_data) {
 		goto nostub;
 	}
