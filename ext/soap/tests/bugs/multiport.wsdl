@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://www.reuters.com/" xmlns:tns="http://www.reuters.com/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:s="http://www.w3.org/2001/XMLSchema">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://www.reuters.com/">
+      <s:element name="GetSessionId">
+        <s:complexType>
+          <s:sequence>
+            <s:element maxOccurs="1" minOccurs="0" name="userId" type="s:string"/>
+            <s:element maxOccurs="1" minOccurs="0" name="password" type="s:string"/>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetSessionIdResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element maxOccurs="1" minOccurs="0" name="GetSessionIdResult" type="s:string"/>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="GetSessionIdHttpGetIn">
+    <wsdl:part name="userId" type="s:string">
+    </wsdl:part>
+    <wsdl:part name="password" type="s:string">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="GetSessionIdHttpGetOut">
+    <wsdl:part name="Body" element="tns:string">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="GetSessionIdSoapOut">
+    <wsdl:part name="parameters" element="tns:GetSessionIdResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="GetSessionIdSoapIn">
+    <wsdl:part name="parameters" element="tns:GetSessionId">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="StocksDataSecureHttpGet">
+    <wsdl:operation name="GetSessionId">
+      <wsdl:input message="tns:GetSessionIdHttpGetIn">
+    </wsdl:input>
+      <wsdl:output message="tns:GetSessionIdHttpGetOut">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="StocksDataSecureSoap">
+    <wsdl:operation name="GetSessionId">
+      <wsdl:input message="tns:GetSessionIdSoapIn">
+    </wsdl:input>
+      <wsdl:output message="tns:GetSessionIdSoapOut">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="StocksDataSecureHttpGet" type="tns:StocksDataSecureHttpGet">
+    <http:binding verb="GET"/>
+    <wsdl:operation name="GetSessionId">
+      <http:operation location="/GetSessionId"/>
+      <wsdl:input>
+        <http:urlEncoded/>
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="StocksDataSecureSoap" type="tns:StocksDataSecureSoap">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="GetSessionId">
+      <soap:operation soapAction="http://www.reuters.com/GetSessionId" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="StocksDataSecure">
+    <wsdl:port name="StocksDataSecureHttpGet" binding="tns:StocksDataSecureHttpGet">
+      <http:address location="test://"/>
+    </wsdl:port>
+    <wsdl:port name="StocksDataSecureSoap" binding="tns:StocksDataSecureSoap">
+      <soap:address location="test://"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
