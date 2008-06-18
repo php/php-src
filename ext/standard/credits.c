@@ -123,7 +123,7 @@ PHPAPI void php_print_credits(int flag TSRMLS_DC) /* {{{ */
 		/* Website Team */
 		php_info_print_table_start();
 		php_info_print_table_header(1, "PHP Website Team");
-		php_info_print_table_row(1, "Hannes Magnusson, Colin Viebrock, Jim Winstead");
+		php_info_print_table_row(1, "Rasmus Lerdorf, Hannes Magnusson, Philip Olson");
 		php_info_print_table_end();
 	}
 
