@@ -1,10 +1,10 @@
 --TEST--
-SPL: FastArray: std operations
+SPL: FixedArray: std operations
 --INI--
 allow_call_time_pass_reference=1
 --FILE--
 <?php
-$a = new SplFastArray(0);
+$a = new SplFixedArray(0);
 // errors
 try {
     $a[0] = "value1";

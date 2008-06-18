@@ -1,10 +1,10 @@
 --TEST--
-SPL: FastArray: Trying to access inexistent item
+SPL: FixedArray: Trying to access inexistent item
 --FILE--
 <?php
 
 try {
-	$a = new SplFastArray(NULL);
+	$a = new SplFixedArray(NULL);
 	echo $a[0]++;
 } catch (Exception $e) {
 	echo $e->getMessage();

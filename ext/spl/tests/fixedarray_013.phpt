@@ -1,12 +1,12 @@
 --TEST--
-SPL: FastArray: Passing the object using [] as parameter
+SPL: FixedArray: Passing the object using [] as parameter
 --FILE--
 <?php
 
-$a = new SplFastArray(100);
+$a = new SplFixedArray(100);
 
 
-function test(SplFastArray &$arr) {
+function test(SplFixedArray &$arr) {
 	print "ok\n";
 }
 
