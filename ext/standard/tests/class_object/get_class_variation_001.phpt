@@ -81,80 +81,132 @@ Notice: Undefined variable: undefined_var in %s on line 58
 Notice: Undefined variable: unset_var in %s on line 61
 
 Arg value: 0 (type: integer)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, integer given in %s on line %d
+NULL
 
 Arg value: 1 (type: integer)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, integer given in %s on line %d
+NULL
 
 Arg value: 12345 (type: integer)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, integer given in %s on line %d
+NULL
 
 Arg value: -2345 (type: integer)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, integer given in %s on line %d
+NULL
 
 Arg value: 10.5 (type: double)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, double given in %s on line %d
+NULL
 
 Arg value: -10.5 (type: double)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, double given in %s on line %d
+NULL
 
 Arg value: 101234567000 (type: double)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, double given in %s on line %d
+NULL
 
 Arg value: 1.07654321E-9 (type: double)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, double given in %s on line %d
+NULL
 
 Arg value: 0.5 (type: double)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, double given in %s on line %d
+NULL
 
 Arg value: Array (type: array)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, array given in %s on line %d
+NULL
 
 Arg value: Array (type: array)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, array given in %s on line %d
+NULL
 
 Arg value: Array (type: array)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, array given in %s on line %d
+NULL
 
 Arg value: Array (type: array)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, array given in %s on line %d
+NULL
 
 Arg value: Array (type: array)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, array given in %s on line %d
+NULL
 
 Arg value:  (type: NULL)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, null given in %s on line %d
+NULL
 
 Arg value:  (type: NULL)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, null given in %s on line %d
+NULL
 
 Arg value: 1 (type: boolean)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, boolean given in %s on line %d
+NULL
 
 Arg value:  (type: boolean)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, boolean given in %s on line %d
+NULL
 
 Arg value: 1 (type: boolean)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, boolean given in %s on line %d
+NULL
 
 Arg value:  (type: boolean)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, boolean given in %s on line %d
+NULL
 
 Arg value:  (type: string)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, string given in %s on line %d
+NULL
 
 Arg value:  (type: string)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, string given in %s on line %d
+NULL
 
 Arg value: string (type: string)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, string given in %s on line %d
+NULL
 
 Arg value: string (type: string)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, string given in %s on line %d
+NULL
 
 Arg value:  (type: NULL)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, null given in %s on line %d
+NULL
 
 Arg value:  (type: NULL)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, null given in %s on line %d
+NULL
 Done

@@ -28,16 +28,16 @@ echo "*** Done ***\n";
 --EXPECTF--
 *** Testing strncmp() function: error conditions ***
 
-Warning: Wrong parameter count for strncmp() in %s on line %d
+Warning: strncmp() expects exactly 3 parameters, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for strncmp() in %s on line %d
+Warning: strncmp() expects exactly 3 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for strncmp() in %s on line %d
+Warning: strncmp() expects exactly 3 parameters, 2 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for strncmp() in %s on line %d
+Warning: strncmp() expects exactly 3 parameters, 4 given in %s on line %d
 NULL
 
 Warning: Length must be greater than or equal to 0 in %s on line %d

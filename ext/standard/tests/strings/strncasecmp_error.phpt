@@ -32,18 +32,18 @@ echo "*** Done ***\n";
 *** Testing strncasecmp() function: error conditions ***
 
 -- Testing strncasecmp() function with Zero arguments --
-Warning: Wrong parameter count for strncasecmp() in %s on line %d
+Warning: strncasecmp() expects exactly 3 parameters, 0 given in %s on line %d
 NULL
 
 -- Testing strncasecmp() function with less than expected number of arguments --
-Warning: Wrong parameter count for strncasecmp() in %s on line %d
+Warning: strncasecmp() expects exactly 3 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for strncasecmp() in %s on line %d
+Warning: strncasecmp() expects exactly 3 parameters, 2 given in %s on line %d
 NULL
 
 -- Testing strncasecmp() function with more than expected number of arguments --
-Warning: Wrong parameter count for strncasecmp() in %s on line %d
+Warning: strncasecmp() expects exactly 3 parameters, 4 given in %s on line %d
 NULL
 
 -- Testing strncasecmp() function with invalid argument --

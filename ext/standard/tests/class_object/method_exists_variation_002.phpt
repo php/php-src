@@ -115,24 +115,24 @@ Arg value 0.5
 bool(false)
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(77)
-bool(false)
+Error: 2 - method_exists() expects parameter 2 to be string, array given, %s(77)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(77)
-bool(false)
+Error: 2 - method_exists() expects parameter 2 to be string, array given, %s(77)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(77)
-bool(false)
+Error: 2 - method_exists() expects parameter 2 to be string, array given, %s(77)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(77)
-bool(false)
+Error: 2 - method_exists() expects parameter 2 to be string, array given, %s(77)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(77)
-bool(false)
+Error: 2 - method_exists() expects parameter 2 to be string, array given, %s(77)
+NULL
 
 Arg value  
 bool(false)
@@ -160,9 +160,8 @@ bool(false)
 Error: 4096 - Object of class stdClass could not be converted to string, %s(76)
 
 Arg value  
-Error: 4096 - Object of class stdClass could not be converted to string, %s(77)
-Error: 8 - Object of class stdClass to string conversion, %s(77)
-bool(false)
+Error: 2 - method_exists() expects parameter 2 to be string, object given, %s(77)
+NULL
 
 Arg value  
 bool(false)

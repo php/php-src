@@ -123,15 +123,25 @@ int(0)
 -- Iteration 10 --
 int(0)
 -- Iteration 11 --
-int(0)
+
+Warning: strncmp() expects parameter 3 to be long, array given in%s on line %d
+NULL
 -- Iteration 12 --
-int(0)
+
+Warning: strncmp() expects parameter 3 to be long, array given in%s on line %d
+NULL
 -- Iteration 13 --
-int(0)
+
+Warning: strncmp() expects parameter 3 to be long, array given in%s on line %d
+NULL
 -- Iteration 14 --
-int(0)
+
+Warning: strncmp() expects parameter 3 to be long, array given in%s on line %d
+NULL
 -- Iteration 15 --
-int(0)
+
+Warning: strncmp() expects parameter 3 to be long, array given in%s on line %d
+NULL
 -- Iteration 16 --
 int(0)
 -- Iteration 17 --
@@ -145,17 +155,23 @@ int(0)
 -- Iteration 21 --
 int(0)
 -- Iteration 22 --
-int(0)
+
+Warning: strncmp() expects parameter 3 to be long, string given in%s on line %d
+NULL
 -- Iteration 23 --
-int(0)
+
+Warning: strncmp() expects parameter 3 to be long, string given in%s on line %d
+NULL
 -- Iteration 24 --
 int(0)
 -- Iteration 25 --
 int(0)
 -- Iteration 26 --
-int(0)
+
+Warning: strncmp() expects parameter 3 to be long, resource given in%s on line %d
+NULL
 -- Iteration 27 --
 
-Notice: Object of class sample could not be converted to int in %s on line %d
-int(0)
+Warning: strncmp() expects parameter 3 to be long, object given in%s on line %d
+NULL
 *** Done ***
