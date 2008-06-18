@@ -1883,7 +1883,7 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
  */
 static int phar_add_empty(HashTable *ht, char *arKey, uint nKeyLength)  /* {{{ */
 {
-	void *dummy = (char *) 1;
+	char *dummy = (char*)1;
 	if (SUCCESS == zend_hash_find(ht, arKey, nKeyLength, (void **)&dummy)) {
 		dummy++;
 	}
@@ -1912,7 +1912,7 @@ void phar_delete_virtual_dirs(phar_archive_data *phar, char *filename, int filen
 	/* we use filename_len - 1 to avoid adding a virtual dir for empty directory entries */
 	for (; s - filename < filename_len - 1; s++) {
 		if (*s == '/') {
-			void *dummy;
+			char *dummy;
 			if (FAILURE == zend_hash_find(&phar->virtual_dirs, filename, s - filename, (void **)&dummy)) {
 				continue;
 			}
