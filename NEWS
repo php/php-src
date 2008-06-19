@@ -169,6 +169,9 @@ PHP                                                                        NEWS
 - Improved md5() implementation. (Solar Designer, Dmitry)
 
 - Upgraded bundled sqlite to version 3.5.6. (Scott)
+- Moved extensions to PECL:
+  . ext/fdpf (Pierre)
+  . ext/ncurses (Pierre)
 
 - Fixed html_entity_decode() incorrectly converting numeric html entities
   to different characters with cp1251 and cp866. (Scott)
