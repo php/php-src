@@ -1,3 +1,238 @@
+2008-06-18  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/each.phpt
+      ext/standard/tests/array/each_error.phpt
+      ext/standard/tests/class_object/get_class_error_001.phpt
+      ext/standard/tests/class_object/get_class_methods_error_001.phpt
+      ext/standard/tests/class_object/get_class_variation_001.phpt
+      ext/standard/tests/class_object/get_object_vars_error_001.phpt
+      ext/standard/tests/class_object/get_object_vars_variation_003.phpt
+      ext/standard/tests/class_object/get_parent_class_error_001.phpt
+      ext/standard/tests/class_object/is_a_error_001.phpt
+      ext/standard/tests/class_object/is_a_variation_002.phpt
+      ext/standard/tests/class_object/is_subclass_of_error_001.phpt
+      ext/standard/tests/class_object/is_subclass_of_variation_002.phpt
+      ext/standard/tests/class_object/method_exists_error_001.phpt
+      ext/standard/tests/class_object/method_exists_variation_002.phpt
+      ext/standard/tests/general_functions/bug41970.phpt
+      ext/standard/tests/strings/strcasecmp.phpt
+      ext/standard/tests/strings/strcmp.phpt
+      ext/standard/tests/strings/strlen.phpt
+      ext/standard/tests/strings/strncasecmp_error.phpt
+      ext/standard/tests/strings/strncasecmp_variation10.phpt
+      ext/standard/tests/strings/strncasecmp_variation11.phpt
+      ext/standard/tests/strings/strncasecmp_variation4.phpt
+      ext/standard/tests/strings/strncasecmp_variation5.phpt
+      ext/standard/tests/strings/strncmp_error.phpt
+      ext/standard/tests/strings/strncmp_variation4.phpt
+      ext/standard/tests/strings/strncmp_variation5.phpt:
+      fix tests for builtin Zend functions using new parsing API
+
+    * (PHP_5_3)
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/tests/004.phpt
+      ZendEngine2/tests/005.phpt
+      ZendEngine2/tests/006.phpt
+      ZendEngine2/tests/007.phpt
+      ZendEngine2/tests/008.phpt
+      ZendEngine2/tests/009.phpt
+      ZendEngine2/tests/011.phpt
+      ZendEngine2/tests/015.phpt
+      ZendEngine2/tests/017.phpt
+      ZendEngine2/tests/020.phpt
+      ZendEngine2/tests/exception_handler_004.phpt:
+      Use new parameter parsing API for builtin functions
+
+2008-06-18  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      ext/phar/tests/zip/unixzip.phpt:
+      - inherited methods don't unixify paths along the way. Allow for it.
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/tar.c
+      ext/phar/zip.c
+      ext/phar/tests/cached_manifest_1.phpt:
+      - Kill 10 MSVC compiler warnings due to type conflict
+      - Make cached manifest test platform agnostic
+      - Comment out zend_(init|destroy)_rsrc_list() and associated references
+      
+
+2008-06-18  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/spl/config.m4
+      ext/spl/config.w32
+      ext/spl/php_spl.c
+      ext/spl/spl_fastarray.c
+      ext/spl/spl_fastarray.h
+      ext/spl/spl_fixedarray.c
+      ext/spl/spl_fixedarray.h
+      ext/spl/tests/fastarray_001.phpt
+      ext/spl/tests/fastarray_002.phpt
+      ext/spl/tests/fastarray_003.phpt
+      ext/spl/tests/fastarray_004.phpt
+      ext/spl/tests/fastarray_005.phpt
+      ext/spl/tests/fastarray_006.phpt
+      ext/spl/tests/fastarray_007.phpt
+      ext/spl/tests/fastarray_008.phpt
+      ext/spl/tests/fastarray_009.phpt
+      ext/spl/tests/fastarray_010.phpt
+      ext/spl/tests/fastarray_011.phpt
+      ext/spl/tests/fastarray_012.phpt
+      ext/spl/tests/fastarray_013.phpt
+      ext/spl/tests/fastarray_014.phpt
+      ext/spl/tests/fastarray_015.phpt
+      ext/spl/tests/fixedarray_001.phpt
+      ext/spl/tests/fixedarray_002.phpt
+      ext/spl/tests/fixedarray_003.phpt
+      ext/spl/tests/fixedarray_004.phpt
+      ext/spl/tests/fixedarray_005.phpt
+      ext/spl/tests/fixedarray_006.phpt
+      ext/spl/tests/fixedarray_007.phpt
+      ext/spl/tests/fixedarray_008.phpt
+      ext/spl/tests/fixedarray_009.phpt
+      ext/spl/tests/fixedarray_010.phpt
+      ext/spl/tests/fixedarray_011.phpt
+      ext/spl/tests/fixedarray_012.phpt
+      ext/spl/tests/fixedarray_013.phpt
+      ext/spl/tests/fixedarray_014.phpt
+      ext/spl/tests/fixedarray_015.phpt:
+      MFH: Rename everything from SplFastArray to SplFixedArray
+
+    * ext/spl/tests/fixedarray_001.phpt
+      ext/spl/tests/fixedarray_001.phpt
+      ext/spl/tests/fixedarray_002.phpt
+      ext/spl/tests/fixedarray_002.phpt
+      ext/spl/tests/fixedarray_003.phpt
+      ext/spl/tests/fixedarray_003.phpt
+      ext/spl/tests/fixedarray_004.phpt
+      ext/spl/tests/fixedarray_004.phpt
+      ext/spl/tests/fixedarray_005.phpt
+      ext/spl/tests/fixedarray_005.phpt
+      ext/spl/tests/fixedarray_006.phpt
+      ext/spl/tests/fixedarray_006.phpt
+      ext/spl/tests/fixedarray_007.phpt
+      ext/spl/tests/fixedarray_007.phpt
+      ext/spl/tests/fixedarray_008.phpt
+      ext/spl/tests/fixedarray_008.phpt
+      ext/spl/tests/fixedarray_009.phpt
+      ext/spl/tests/fixedarray_009.phpt
+      ext/spl/tests/fixedarray_010.phpt
+      ext/spl/tests/fixedarray_010.phpt
+      ext/spl/tests/fixedarray_011.phpt
+      ext/spl/tests/fixedarray_011.phpt
+      ext/spl/tests/fixedarray_012.phpt
+      ext/spl/tests/fixedarray_012.phpt
+      ext/spl/tests/fixedarray_013.phpt
+      ext/spl/tests/fixedarray_013.phpt
+      ext/spl/tests/fixedarray_014.phpt
+      ext/spl/tests/fixedarray_014.phpt
+      ext/spl/tests/fixedarray_015.phpt
+      ext/spl/tests/fixedarray_015.phpt:
+      
+      Rename everything from SplFastArray to SplFixedArray
+
+    * ext/spl/config.m4
+      ext/spl/config.w32
+      ext/spl/php_spl.c
+      ext/spl/spl_fastarray.c
+      ext/spl/spl_fastarray.h
+      ext/spl/spl_fixedarray.c
+      ext/spl/spl_fixedarray.c
+      ext/spl/spl_fixedarray.h
+      ext/spl/spl_fixedarray.h
+      ext/spl/tests/fastarray_001.phpt
+      ext/spl/tests/fastarray_002.phpt
+      ext/spl/tests/fastarray_003.phpt
+      ext/spl/tests/fastarray_004.phpt
+      ext/spl/tests/fastarray_005.phpt
+      ext/spl/tests/fastarray_006.phpt
+      ext/spl/tests/fastarray_007.phpt
+      ext/spl/tests/fastarray_008.phpt
+      ext/spl/tests/fastarray_009.phpt
+      ext/spl/tests/fastarray_010.phpt
+      ext/spl/tests/fastarray_011.phpt
+      ext/spl/tests/fastarray_012.phpt
+      ext/spl/tests/fastarray_013.phpt
+      ext/spl/tests/fastarray_014.phpt
+      ext/spl/tests/fastarray_015.phpt:
+      Rename everything from SplFastArray to SplFixedArray
+
+2008-06-18  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/phar/phar_internal.h
+      ext/phar/util.c:
+      - really fix the windows builds, don't cast many times when only the hash
+      function requires void **
+      - copy/paste evilness with TSRM_CC/DC
+      (tests still pass but would be nice to speed them up...)
+
+2008-06-18  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/spl/spl_directory.c
+      ext/spl/tests/bug45216.phpt:
+      MFH: Fix #45216 (Add a default size for fgetss)
+
+    * ext/spl/tests/bug45216.phpt
+      ext/spl/tests/bug45216.phpt:
+      
+      Fix #45216 (Add a default size for fgetss)
+
+    * ext/spl/spl_directory.c:
+      Fix #45216 (Add a default size for fgetss)
+
+2008-06-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/php_sdl.c
+      ext/soap/php_sdl.c
+      ext/soap/php_sdl.c
+      ext/soap/tests/bugs/bug29109.phpt
+      ext/soap/tests/bugs/bug29109.phpt
+      ext/soap/tests/bugs/bug29109.phpt
+      ext/soap/tests/bugs/multiport.phpt
+      ext/soap/tests/bugs/multiport.phpt
+      ext/soap/tests/bugs/multiport.wsdl
+      ext/soap/tests/bugs/multiport.wsdl:
+      Fixed SOAP binding selection
+
+    * ext/soap/tests/bugs/multiport.phpt
+      ext/soap/tests/bugs/multiport.phpt
+      ext/soap/tests/bugs/multiport.phpt
+      ext/soap/tests/bugs/multiport.wsdl
+      ext/soap/tests/bugs/multiport.wsdl
+      ext/soap/tests/bugs/multiport.wsdl:
+        1.1.4;
+      file multiport.phpt was initially added on branch PHP_5_2.
+
+2008-06-18  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/dirstream.c
+      ext/phar/func_interceptors.c
+      ext/phar/phar.c
+      ext/phar/phar.phar
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/stream.c
+      ext/phar/tar.c
+      ext/phar/util.c
+      ext/phar/zip.c
+      ext/phar/tests/cached_manifest_1.phpt
+      ext/phar/tests/cached_manifest_1.phpt:
+      fix windows build and more performance jumps (these are minor)
+      implement real copy-on-write
+      use virtual_dirs for wrapper stat
+
+2008-06-18  Philip Olson  <philipolson@gmail.com>
+
+    * ext/standard/credits.c:
+      updated website team info
+
 2008-06-17  Raghubansh Kumar  <kraghuba@in.ibm.com>
 
     * ext/date/tests/date_sub_basic.phpt:
