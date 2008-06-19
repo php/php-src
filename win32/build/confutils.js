@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.12 2008-06-19 17:14:43 sfox Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.13 2008-06-19 17:43:38 sfox Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -347,7 +347,7 @@ can be built that way. \
 
 	var snapshot_build_exclusions = new Array(
 		'debug', 'crt-debug', 'lzf-better-compression',
-		 'php-build', 'snapshot-template',
+		 'php-build', 'snapshot-template', 'ereg',
 		 'pcre-regex', 'fastcgi', 'force-cgi-redirect',
 		 'path-info-check', 'zts', 'ipv6', 'memory-limit',
 		 'zend-multibyte', 'fd-setsize', 'memory-manager', 't1lib'
