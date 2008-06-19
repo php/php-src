@@ -1,3 +1,20 @@
+2008-06-18  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      zend_builtin_functions.c
+      tests/004.phpt
+      tests/005.phpt
+      tests/006.phpt
+      tests/007.phpt
+      tests/008.phpt
+      tests/009.phpt
+      tests/011.phpt
+      tests/015.phpt
+      tests/017.phpt
+      tests/020.phpt
+      tests/exception_handler_004.phpt:
+      Use new parameter parsing API for builtin functions
+
 2008-06-15  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
