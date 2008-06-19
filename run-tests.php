@@ -408,6 +408,9 @@ if (isset($argc) && $argc > 1) {
 					$output_file = $argv[++$i];
 					$just_save_results = true;
 					break;
+				case '--set-timeout':
+					$environment['TEST_TIMEOUT'] = $argv[++$i];
+					break;
 				case '--show-all':
 					foreach($cfgfiles as $file) {
 						$cfg['show'][$file] = true;
@@ -430,6 +433,9 @@ if (isset($argc) && $argc > 1) {
 					$DETAILED = true;
 					break;
 				//case 'w'
+				case 'x':
+					$environment['SKIP_SLOW_TESTS'] = 1;
+					break;
 				case '-':
 					// repeat check with full switch
 					$switch = $argv[$i];
@@ -924,18 +930,20 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 	if (is_string($stdin)) {
 		fwrite($pipes[0], $stdin);
 	}
-	fclose($pipes[0]);
+
+	$timeout = $leak_check ? 300 : (isset($env['TEST_TIMEOUT']) ? $env['TEST_TIMEOUT'] : 60);
 
 	while (true) {
 		/* hide errors from interrupted syscalls */
 		$r = $pipes;
 		$w = null;
 		$e = null;
-		$n = @stream_select($r, $w, $e, $leak_check ? 300 : 60);
+		$n = @stream_select($r, $w, $e, $timeout);
 
 		if ($n === 0) {
 			/* timed out */
 			$data .= "\n ** ERROR: process timed out **\n";
+			fclose($pipes[0]);
 			proc_terminate($proc);
 			return $data;
 		} else if ($n > 0) {
@@ -951,6 +959,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 	if ($stat['signaled']) {
 		$data .= "\nTermsig=".$stat['stopsig'];
 	}
+	fclose($pipes[0]);
 	$code = proc_close($proc);
 	return $data;
 }
