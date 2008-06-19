@@ -667,6 +667,7 @@ PHP_FUNCTION(usort)
 		PHP_ARRAY_CMP_FUNC_RESTORE();
 		WRONG_PARAM_COUNT;
 	}
+
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
@@ -675,6 +676,7 @@ PHP_FUNCTION(usort)
 	}
 
 	PHP_ARRAY_CMP_FUNC_CHECK(BG(user_compare_func_name))
+	BG(user_compare_fci_cache).initialized = 0;
 	
 	if (zend_hash_sort(target_hash, zend_qsort, array_user_compare, 1 TSRMLS_CC) == FAILURE) {
 		PHP_ARRAY_CMP_FUNC_RESTORE();
@@ -707,6 +709,7 @@ PHP_FUNCTION(uasort)
 	}
 
 	PHP_ARRAY_CMP_FUNC_CHECK(BG(user_compare_func_name))
+	BG(user_compare_fci_cache).initialized = 0;
 
 	if (zend_hash_sort(target_hash, zend_qsort, array_user_compare, 0 TSRMLS_CC) == FAILURE) {
 		PHP_ARRAY_CMP_FUNC_RESTORE();
@@ -790,6 +793,7 @@ PHP_FUNCTION(uksort)
 	}
 
 	PHP_ARRAY_CMP_FUNC_CHECK(BG(user_compare_func_name))
+	BG(user_compare_fci_cache).initialized = 0;
 
 	if (zend_hash_sort(target_hash, zend_qsort, array_user_key_compare, 0 TSRMLS_CC) == FAILURE) {
 		PHP_ARRAY_CMP_FUNC_RESTORE();
@@ -2988,6 +2992,7 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 		efree(callback_name);
 		intersect_data_compare_func = zval_user_compare;
 		BG(user_compare_func_name) = args[argc];
+		BG(user_compare_fci_cache).initialized = 0;
 	} else if (data_compare_type == INTERSECT_COMP_DATA_INTERNAL) {
 		intersect_data_compare_func = zval_compare;
 	}
@@ -3091,6 +3096,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 			efree(callback_name);
 
 			BG(user_compare_func_name) = args[arr_argc];
+			BG(user_compare_fci_cache).initialized = 0;
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_compare_type is %d. This should never happen. Please report as a bug", data_compare_type);
 			return;
@@ -3152,6 +3158,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 				intersect_key_compare_func = array_user_key_compare;
 				intersect_data_compare_func = array_data_compare;
 				BG(user_compare_func_name) = args[arr_argc];
+				BG(user_compare_fci_cache).initialized = 0;
 		} else if (data_compare_type == INTERSECT_COMP_DATA_USER
 				&&
 				key_compare_type == INTERSECT_COMP_KEY_USER) {
@@ -3179,6 +3186,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 				intersect_key_compare_func = array_user_key_compare;
 				intersect_data_compare_func = array_user_compare;
 				BG(user_compare_func_name) = args[arr_argc + 1];/* data - key */
+				BG(user_compare_fci_cache).initialized = 0;
 		} else {
 			efree(args);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_compare_type is %d. key_compare_type is %d. This should never happen. Please report as a bug", data_compare_type, key_compare_type);
@@ -3237,6 +3245,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	if ((behavior & INTERSECT_NORMAL) && data_compare_type == INTERSECT_COMP_DATA_USER) {
 		/* array_uintersect() */
 		BG(user_compare_func_name) = args[arr_argc];
+		BG(user_compare_fci_cache).initialized = 0;
 	}
 	
 	/* go through the lists and look for common values */
@@ -3246,6 +3255,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 			key_compare_type == INTERSECT_COMP_KEY_USER) {
 
 			BG(user_compare_func_name) = args[argc - 1];
+			BG(user_compare_fci_cache).initialized = 0;
 		}
 
 		for (i = 1; i < arr_argc; i++) {
@@ -3267,11 +3277,13 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 					*/ 
 					if (data_compare_type == INTERSECT_COMP_DATA_USER) {
 						BG(user_compare_func_name) = args[arr_argc];
+						BG(user_compare_fci_cache).initialized = 0;
 					}
 				 	if (intersect_data_compare_func(ptrs[0], ptrs[i] TSRMLS_CC) != 0) {
 				 		c = 1;
 				 		if (key_compare_type == INTERSECT_COMP_KEY_USER) {
 				 			BG(user_compare_func_name) = args[argc - 1];
+							BG(user_compare_fci_cache).initialized = 0;
 				 			/* When KEY_USER, the last parameter is always the callback */
 				 		}
 				 		/* we are going to the break */
@@ -3458,6 +3470,7 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 		efree(callback_name);
 		diff_data_compare_func = zval_user_compare;
 		BG(user_compare_func_name) = args[argc];
+		BG(user_compare_fci_cache).initialized = 0;
 	} else if (data_compare_type == DIFF_COMP_DATA_INTERNAL) {
 		diff_data_compare_func = zval_compare;
 	}
@@ -3561,6 +3574,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			efree(callback_name);
 
 			BG(user_compare_func_name) = args[arr_argc];
+			BG(user_compare_fci_cache).initialized = 0;
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_compare_type is %d. This should never happen. Please report as a bug", data_compare_type);
 			return;		
@@ -3622,6 +3636,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			diff_key_compare_func = array_user_key_compare;
 			diff_data_compare_func = array_data_compare;
 			BG(user_compare_func_name) = args[arr_argc];
+			BG(user_compare_fci_cache).initialized = 0;
 		} else if (data_compare_type == DIFF_COMP_DATA_USER 
 				&& 
 			key_compare_type == DIFF_COMP_KEY_USER) {
@@ -3649,6 +3664,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			diff_key_compare_func = array_user_key_compare;
 			diff_data_compare_func = array_user_compare;
 			BG(user_compare_func_name) = args[arr_argc + 1];/* data - key*/
+			BG(user_compare_fci_cache).initialized = 0;
 		} else {
 			efree(args);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_compare_type is %d. key_compare_type is %d. This should never happen. Please report as a bug", data_compare_type, key_compare_type);
@@ -3707,6 +3723,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 	if (behavior == DIFF_NORMAL && data_compare_type == DIFF_COMP_DATA_USER) {
 		/* array_udiff() */
 		BG(user_compare_func_name) = args[arr_argc];
+		BG(user_compare_fci_cache).initialized = 0;
 	}
 	
 	/* go through the lists and look for values of ptr[0] that are not in the others */
@@ -3716,6 +3733,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			key_compare_type == DIFF_COMP_KEY_USER) {
 			
 			BG(user_compare_func_name) = args[argc - 1];
+			BG(user_compare_fci_cache).initialized = 0;
 		}
 		c = 1;
 		for (i = 1; i < arr_argc; i++) {
@@ -3743,12 +3761,14 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 					if (*ptr) {
 						if (data_compare_type == DIFF_COMP_DATA_USER) {
 							BG(user_compare_func_name) = args[arr_argc];
+							BG(user_compare_fci_cache).initialized = 0;
 						}
 						if (diff_data_compare_func(ptrs[0], ptr TSRMLS_CC) != 0) {
 							/* the data is not the same */
 							c = -1;
 							if (key_compare_type == DIFF_COMP_KEY_USER) {
 								BG(user_compare_func_name) = args[argc - 1];
+								BG(user_compare_fci_cache).initialized = 0;
 							}
 						} else {
 							break;
