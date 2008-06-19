@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.11 2008-05-14 03:13:17 auroraeosrose Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.12 2008-06-19 17:14:43 sfox Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -416,7 +416,11 @@ can be built that way. \
 				}
 			}
 			if (force) {
-				argval = "no";
+				if (arg.defval == '') {
+					argval = '';
+				} else {
+					argval = "no";
+				}
 				shared = false;
 			}
 		}
