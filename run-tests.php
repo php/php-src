@@ -1,6 +1,5 @@
 #!/usr/bin/php
 <?php
-putenv('TEST_PHP_EXECUTABLE=C:/sandbox/php5/Debug_TS/php.exe');
 /*
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
