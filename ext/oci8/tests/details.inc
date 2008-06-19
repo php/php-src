@@ -33,9 +33,17 @@ if (false !== getenv('PHP_OCI8_TEST_DB')) {
 } else {
 	$user						= "system";
 	$password					= "system";
-	$dbase						= "oracle";
-	$oracle_on_localhost		= FALSE;
+	$dbase						= "localhost/XE";
+	$oracle_on_localhost		= TRUE;
 	$test_drcp					= FALSE;
 }
+
+/*
+ * Common object names for scripts to use
+ */
+
+$table_name = "tb".substr(str_replace(Array(".", "-"), "_", php_uname("n")), 0, 5);
+$type_name = strtoupper("tp".substr(str_replace(Array(".", "-"), "_", php_uname("n")), 0, 5));
+$schema = '';
 
 ?>

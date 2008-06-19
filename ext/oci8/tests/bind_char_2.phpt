@@ -1,7 +1,15 @@
 --TEST--
 SELECT oci_bind_by_name with SQLT_AFC aka CHAR and dates
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
+<?php
+if (!extension_loaded('oci8')) die ("skip no oci8 extension");
+require(dirname(__FILE__)."/connect.inc");
+$sv = oci_server_version($c);
+$sv = preg_match('/11.1/', $sv, $matches);
+if ($sv !== 1) {
+	die ("skip expected output only valid when using Oracle 11g database");
+}
+?>
 --FILE--
 <?php
 
