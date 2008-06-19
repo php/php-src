@@ -472,7 +472,8 @@ ZEND_FUNCTION(define)
 {
 	char *name;
 	int name_len;
-	zval *val, *val_free;
+	zval *val;
+	zval *val_free = NULL;
 	zend_bool non_cs = 0;
 	int case_sensitive = CONST_CS;
 	zend_constant c;
