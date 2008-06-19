@@ -169,12 +169,11 @@ directory will contain logs of any failures.
 6. DRCP and FAN Support
 -----------------------
 
-The PHP 6 OCI8 Beta extension has support for the Oracle Database
-Resident Connection Pool (DRCP) and Fast Application Notification
-(FAN).
+The PHP OCI8 extension has support for the Oracle Database Resident
+Connection Pool (DRCP) and Fast Application Notification (FAN).
 
-This release is for Beta testing only.  Questions and issues can be
-raised on the Oracle OTN forum (free registration required)
+Questions and issues can be raised on the Oracle OTN forum (free
+registration required):
 http://www.oracle.com/technology/forums/php.html
 
 
@@ -184,9 +183,9 @@ The OCI8 extension will compile with Oracle libraries from version
 9iR2 onwards.  However, full functionality (e.g. DRCP support) is only
 available when Oracle 11g is used.
 
-For other, general database functionality, the version of the Oracle
-libraries used by PHP does not necessarily have to match the version
-of the database.
+For general database functionality the version of the Oracle libraries
+used by PHP does not necessarily have to match the version of the
+database.
 
 
 6.2. Database Resident Connection Pooling (DRCP)
@@ -329,16 +328,15 @@ restriction of Oracle Database 11g.
 
 6.4.2 Closing Connections
 
-With the PHP 5.3 OCI8 Beta extension, persistent connections can now
-be closed by the user, allowing greater control over connection
-resource usage.  Persistent connections will now also be closed
-automatically when there is no PHP variable referencing them, such as
-at the end of scope of a PHP user function.  This will rollback any
-uncommitted transaction.  These changes to persistent connections make
-them behave similarly to non-persistent connections, simplifying the
-interface, allowing for greater application consistency and
-predictability.  Use oci8.old_oci_close_semantics=1 to retain the
-historical behavior.
+With the PHP 6 OCI8 extension, persistent connections can now be
+closed by the user, allowing greater control over connection resource
+usage.  Persistent connections will now also be closed automatically
+when there is no PHP variable referencing them, such as at the end of
+scope of a PHP user function.  This will rollback any uncommitted
+transaction.  These changes to persistent connections make them behave
+similarly to non-persistent connections, simplifying the interface,
+allowing for greater application consistency and predictability.  Use
+oci8.old_oci_close_semantics=1 to retain the historical behavior.
 
 6.4.3 LOGON Triggers can be used to set session properties
 
