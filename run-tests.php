@@ -875,7 +875,7 @@ function mail_qa_team($data, $compression, $status = FALSE)
 function save_text($filename, $text, $filename_copy = null)
 {
 	global $DETAILED;
-file_put_contents('steph.test.again.php', $text);
+
 	if ($filename_copy && $filename_copy != $filename) {
 		if (@file_put_contents($filename_copy, $text) === false) {
 			error("Cannot open file '" . $filename_copy . "' (save_text)");
