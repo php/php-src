@@ -336,7 +336,7 @@ splitted:
 
 	efree(entry);
 	if (*filename == '.') {
-		phar_archive_data **pphar;
+		phar_archive_data **pphar = NULL;
 		int try_len;
 
 		if (FAILURE == phar_get_archive(pphar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {
