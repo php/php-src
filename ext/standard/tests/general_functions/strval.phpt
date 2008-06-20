@@ -302,9 +302,9 @@ string(0) ""
 
 *** Testing error conditions ***
 
-Warning: Wrong parameter count for strval() in %s on line %d
+Warning: strval() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for strval() in %s on line %d
+Warning: strval() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 Done

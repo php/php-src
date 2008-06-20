@@ -514,26 +514,19 @@ static long php_unpack(char *data, int size, int issigned, int *map)
    Unpack binary string into named array elements according to format argument */
 PHP_FUNCTION(unpack)
 {
-	zval **formatarg;
-	zval **inputarg;
-	char *format;
-	char *input;
-	int formatlen;
-	int inputpos, inputlen;
-	int i;
+	char *format, *input, *formatarg, *inputarg;
+	int formatlen, formatarg_len, inputarg_len;
+	int inputpos, inputlen, i;
 
-	if (ZEND_NUM_ARGS() != 2 || 
-        zend_get_parameters_ex(2, &formatarg, &inputarg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &formatarg, &formatarg_len,
+		&inputarg, &inputarg_len) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(formatarg);
-	convert_to_string_ex(inputarg);
-
-	format = Z_STRVAL_PP(formatarg);
-	formatlen = Z_STRLEN_PP(formatarg);
-	input = Z_STRVAL_PP(inputarg);
-	inputlen = Z_STRLEN_PP(inputarg);
+	format = formatarg;
+	formatlen = formatarg_len;
+	input = inputarg;
+	inputlen = inputarg_len;
 	inputpos = 0;
 
 	array_init(return_value);

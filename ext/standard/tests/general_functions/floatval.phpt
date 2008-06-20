@@ -192,16 +192,16 @@ float(0)
 
 *** Testing error conditions ***
 
-Warning: Wrong parameter count for floatval() in %s on line %d
+Warning: floatval() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for doubleval() in %s on line %d
+Warning: doubleval() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for floatval() in %s on line %d
+Warning: floatval() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for doubleval() in %s on line %d
+Warning: doubleval() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
 Done

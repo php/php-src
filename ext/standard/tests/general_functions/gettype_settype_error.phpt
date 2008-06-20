@@ -37,18 +37,18 @@ echo "Done\n";
 
 *** Testing gettype(): error conditions ***
 
-Warning: Wrong parameter count for gettype() in %s on line %d
+Warning: gettype() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for gettype() in %s on line %d
+Warning: gettype() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
 *** Testing settype(): error conditions ***
 
-Warning: Wrong parameter count for settype() in %s on line %d
+Warning: settype() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for settype() in %s on line %d
+Warning: settype() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
 Warning: settype(): Invalid type in %s on line %d
