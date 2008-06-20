@@ -1160,15 +1160,13 @@ PHPAPI char * php_image_type_to_mime_type(int image_type)
    Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
 PHP_FUNCTION(image_type_to_mime_type)
 {
-	zval **p_image_type;
-	int arg_c = ZEND_NUM_ARGS();
+	long p_image_type;
 
-	if ((arg_c!=1) || zend_get_parameters_ex(arg_c, &p_image_type) == FAILURE) {
-		RETVAL_FALSE;
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &p_image_type) == FAILURE) {
+		return;
 	}
-	convert_to_long_ex(p_image_type);
-	ZVAL_STRING(return_value, (char*)php_image_type_to_mime_type(Z_LVAL_PP(p_image_type)), 1);
+
+	ZVAL_STRING(return_value, (char*)php_image_type_to_mime_type(p_image_type), 1);
 }
 /* }}} */
 
@@ -1300,40 +1298,22 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
    Get the size of an image as 4-element array */
 PHP_FUNCTION(getimagesize)
 {
-	zval **arg1, **info = NULL;
-	int itype = 0;
-	char *temp;
+	zval **info = NULL;
+	char *arg1, *temp;
+	int arg1_len, itype = 0, argc = ZEND_NUM_ARGS();
 	struct gfxinfo *result = NULL;
 	php_stream * stream = NULL;
 
-	switch(ZEND_NUM_ARGS()) {
-
-	case 1:
-		if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
-			RETVAL_FALSE;
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_string_ex(arg1);
-		break;
-
-	case 2:
-		if (zend_get_parameters_ex(2, &arg1, &info) == FAILURE) {
-			RETVAL_FALSE;
-			WRONG_PARAM_COUNT;
-		}
+	if (zend_parse_parameters(argc TSRMLS_CC, "s|Z", &arg1, &arg1_len, &info) == FAILURE) {
+		return;
+	}
+	
+	if (argc == 2) {
 		zval_dtor(*info);
-
 		array_init(*info);
-
-		convert_to_string_ex(arg1);
-		break;
-
-	default:
-		RETVAL_FALSE;
-		WRONG_PARAM_COUNT;
 	}
 
-	stream = php_stream_open_wrapper(Z_STRVAL_PP(arg1), "rb", STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
+	stream = php_stream_open_wrapper(arg1, "rb", STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
 
 	if (!stream) {
 		RETURN_FALSE;
@@ -1342,7 +1322,7 @@ PHP_FUNCTION(getimagesize)
 	itype = php_getimagetype(stream, NULL TSRMLS_CC);
 	switch( itype) {
 		case IMAGE_FILETYPE_GIF:
-			result = php_handle_gif (stream TSRMLS_CC);
+			result = php_handle_gif(stream TSRMLS_CC);
 			break;
 		case IMAGE_FILETYPE_JPEG:
 			if (info) {

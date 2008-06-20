@@ -52,7 +52,7 @@ array(7) {
 NULL
 
 Warning: fopen(data://): failed to open stream: rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
-bool(false)
+NULL
 NULL
 array(7) {
   ["wrapper_type"]=>
@@ -73,15 +73,15 @@ array(7) {
 NULL
 
 Warning: fopen(data://;base64): failed to open stream: rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
-bool(false)
+NULL
 NULL
 
 Warning: fopen(data://foo,): failed to open stream: rfc2397: illegal media type in %sstream_rfc2397_002.php on line %d
-bool(false)
+NULL
 NULL
 
 Warning: fopen(data://foo=bar,): failed to open stream: rfc2397: illegal media type in %sstream_rfc2397_002.php on line %d
-bool(false)
+NULL
 NULL
 array(8) {
   ["wrapper_type"]=>
@@ -104,7 +104,7 @@ array(8) {
 NULL
 
 Warning: fopen(data://text/plain;foo,): failed to open stream: rfc2397: illegal parameter in %sstream_rfc2397_002.php on line %d
-bool(false)
+NULL
 NULL
 array(9) {
   ["wrapper_type"]=>
@@ -129,7 +129,7 @@ array(9) {
 string(3) "bar"
 
 Warning: fopen(data://text/plain;foo=bar;bla,): failed to open stream: rfc2397: illegal parameter in %sstream_rfc2397_002.php on line %d
-bool(false)
+NULL
 NULL
 array(9) {
   ["wrapper_type"]=>
@@ -154,7 +154,7 @@ array(9) {
 string(3) "bar"
 
 Warning: fopen(data://text/plain;foo=bar;bar=baz): failed to open stream: rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
-bool(false)
+NULL
 NULL
 array(10) {
   ["wrapper_type"]=>

@@ -1033,20 +1033,23 @@ PHP_FUNCTION(phpinfo)
 PHP_FUNCTION(phpversion)
 {
 	zval **arg;
+	const char *version;
 	int argc = ZEND_NUM_ARGS();
 
 	if (argc == 0) {
 		RETURN_STRING(PHP_VERSION, 1);
-	} else if (argc == 1 && zend_get_parameters_ex(1, &arg) == SUCCESS) {
-		const char *version;
+	} else {
+		if (zend_parse_parameters(argc TSRMLS_CC, "Z", &arg) == FAILURE) {
+			return;
+		}
+			
 		convert_to_string_ex(arg);
 		version = zend_get_module_version(Z_STRVAL_PP(arg));
+		
 		if (version == NULL) {
 			RETURN_FALSE;
 		}
 		RETURN_STRING(version, 1);
-	} else {
-		WRONG_PARAM_COUNT;
 	}
 }
 /* }}} */

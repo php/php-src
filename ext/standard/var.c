@@ -838,8 +838,8 @@ PHP_FUNCTION(serialize)
 	php_serialize_data_t var_hash;
 	smart_str buf = {0};
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &struc) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &struc) == FAILURE) {
+		return;
 	}
 
 	Z_TYPE_P(return_value) = IS_STRING;
