@@ -474,7 +474,7 @@ PHP_METHOD(Phar, mount)
 carry_on2:
 		if (SUCCESS != zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **)&pphar)) {
 			if (PHAR_G(manifest_cached) && SUCCESS == zend_hash_find(&cached_phars, arch, arch_len, (void **)&pphar)) {
-				if (SUCCESS == phar_copy_on_write(pphar)) {
+				if (SUCCESS == phar_copy_on_write(pphar TSRMLS_CC)) {
 					goto carry_on;
 				}
 			}
@@ -505,7 +505,7 @@ carry_on:
 	} else if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void **)&pphar)) {
 		goto carry_on;
 	} else if (PHAR_G(manifest_cached) && SUCCESS == zend_hash_find(&cached_phars, fname, fname_len, (void **)&pphar)) {
-		if (SUCCESS == phar_copy_on_write(pphar)) {
+		if (SUCCESS == phar_copy_on_write(pphar TSRMLS_CC)) {
 			goto carry_on;
 		}
 		goto carry_on;
