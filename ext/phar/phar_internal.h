@@ -137,6 +137,7 @@
 #define TAR_NEW     '8'
 
 typedef struct _phar_entry_fp phar_entry_fp;
+typedef struct _phar_archive_data phar_archive_data;
 
 ZEND_BEGIN_MODULE_GLOBALS(phar)
 	HashTable   phar_fname_map;
@@ -184,6 +185,12 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	int         cwd_init;
 	char        *openssl_privatekey;
 	int         openssl_privatekey_len;
+	/* phar_get_archive cache */
+	char*       last_phar_name;
+	int         last_phar_name_len;
+	char*       last_alias;
+	int         last_alias_len;
+	phar_archive_data* last_phar;
 ZEND_END_MODULE_GLOBALS(phar)
 
 ZEND_EXTERN_MODULE_GLOBALS(phar)
@@ -225,8 +232,6 @@ enum phar_fp_type {
 	   this entry stores the stream to open in link (normally used for tars, but we steal it here) */
 	PHAR_TMP
 };
-
-typedef struct _phar_archive_data phar_archive_data;
 
 /* entry for one file in a phar file */
 typedef struct _phar_entry_info {

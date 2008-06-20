@@ -237,9 +237,12 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 #if PHP_VERSION_ID >= 50300
 	char *path, *fname, *arch, *entry, *ret, *test;
 	int arch_len, entry_len, fname_len;
+	phar_archive_data *phar;
 
 	if (pphar) {
 		*pphar = NULL;
+	} else {
+		pphar = &phar;
 	}
 
 	if (!zend_is_executing(TSRMLS_C) || !PHAR_G(cwd)) {
@@ -255,22 +258,24 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 	if (*filename == '.') {
 		int try_len;
 
-		if (SUCCESS != zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar) &&
-			PHAR_G(manifest_cached) && SUCCESS != zend_hash_find(&cached_phars, arch, arch_len, (void **) &pphar)) {
+		if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {
 			efree(arch);
 			return phar_save_resolve_path(filename, filename_len TSRMLS_CC);
+		}
+		if (pphar) {
+			*pphar = phar;
 		}
 		try_len = filename_len;
 		test = phar_fix_filepath(estrndup(filename, filename_len), &try_len, 1 TSRMLS_CC);
 		if (*test == '/') {
-			if (zend_hash_exists(&((*pphar)->manifest), test + 1, try_len - 1)) {
+			if (zend_hash_exists(&(phar->manifest), test + 1, try_len - 1)) {
 				spprintf(&ret, 0, "phar://%s%s", arch, test);
 				efree(arch);
 				efree(test);
 				return ret;
 			}
 		} else {
-			if (zend_hash_exists(&((*pphar)->manifest), test, try_len)) {
+			if (zend_hash_exists(&(phar->manifest), test, try_len)) {
 				spprintf(&ret, 0, "phar://%s/%s", arch, test);
 				efree(arch);
 				efree(test);
@@ -293,6 +298,9 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 			return ret;
 		}
 		zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar);
+		if (!pphar && PHAR_G(manifest_cached)) {
+			zend_hash_find(&cached_phars, arch, arch_len, (void **) &pphar);
+		}
 		efree(arch);
 		efree(entry);
 	}
@@ -324,7 +332,7 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 		phar_archive_data **pphar;
 		int try_len;
 
-		if (SUCCESS != (zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar))) {
+		if (FAILURE == phar_get_archive(pphar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {
 			efree(arch);
 			goto doit;
 		}
@@ -441,6 +449,9 @@ not_stream:
 								return estrndup(trypath, ret_len);
 							}
 							zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar);
+							if (!pphar && PHAR_G(manifest_cached)) {
+								zend_hash_find(&cached_phars, arch, arch_len, (void **) &pphar);
+							}
 							efree(arch);
 							efree(entry);
 							return estrndup(trypath, ret_len);
@@ -1042,6 +1053,9 @@ int phar_free_alias(phar_archive_data *phar, char *alias, int alias_len TSRMLS_D
 	if (zend_hash_del(&(PHAR_GLOBALS->phar_fname_map), phar->fname, phar->fname_len) != SUCCESS) {
 		return FAILURE;
 	}
+	/* invalidate phar cache */
+	PHAR_G(last_phar) = NULL;
+	PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
 	return SUCCESS;
 }
 /* }}} */
@@ -1063,6 +1077,30 @@ int phar_get_archive(phar_archive_data **archive, char *fname, int fname_len, ch
 		*error = NULL;
 	}
 	*archive = NULL;
+	if (PHAR_G(last_phar) && fname_len == PHAR_G(last_phar_name_len) && !memcmp(fname, PHAR_G(last_phar_name), fname_len)) {
+		*archive = PHAR_G(last_phar);
+		if (alias && alias_len) {
+			if (!PHAR_G(last_phar)->is_temporary_alias && (alias_len != PHAR_G(last_phar)->alias_len || memcmp(PHAR_G(last_phar)->alias, alias, alias_len))) {
+				if (error) {
+					spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, PHAR_G(last_phar)->fname, fname);
+				}
+				*archive = NULL;
+				return FAILURE;
+			}
+			if (PHAR_G(last_phar)->alias_len && SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), PHAR_G(last_phar)->alias, PHAR_G(last_phar)->alias_len, (void**)&fd_ptr)) {
+				zend_hash_del(&(PHAR_GLOBALS->phar_alias_map), PHAR_G(last_phar)->alias, PHAR_G(last_phar)->alias_len);
+			}
+			zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void*)&(*archive),   sizeof(phar_archive_data*), NULL);
+			PHAR_G(last_alias) = alias;
+			PHAR_G(last_alias_len) = alias_len;
+		}
+		return SUCCESS;
+	}
+	if (alias && alias_len && PHAR_G(last_phar) && alias_len == PHAR_G(last_alias_len) && !memcmp(alias, PHAR_G(last_alias), alias_len)) {
+		fd = PHAR_G(last_phar);
+		fd_ptr = &fd;
+		goto alias_success;
+	}
 	if (alias && alias_len) {
 		ahash = zend_inline_hash_func(alias, alias_len);
 		if (SUCCESS == zend_hash_quick_find(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, ahash, (void**)&fd_ptr)) {
@@ -1078,6 +1116,12 @@ alias_success:
 				return FAILURE;
 			}
 			*archive = *fd_ptr;
+			fd = *fd_ptr;
+			PHAR_G(last_phar) = fd;
+			PHAR_G(last_phar_name) = fd->fname;
+			PHAR_G(last_phar_name_len) = fd->fname_len;
+			PHAR_G(last_alias) = alias;
+			PHAR_G(last_alias_len) = alias_len;
 			return SUCCESS;
 		}
 		if (PHAR_G(manifest_cached) && SUCCESS == zend_hash_quick_find(&cached_alias, alias, alias_len, ahash, (void **)&fd_ptr)) {
@@ -1104,6 +1148,11 @@ alias_success:
 				}
 				zend_hash_quick_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, ahash, (void*)&fd,   sizeof(phar_archive_data*), NULL);
 			}
+			PHAR_G(last_phar) = fd;
+			PHAR_G(last_phar_name) = fd->fname;
+			PHAR_G(last_phar_name_len) = fd->fname_len;
+			PHAR_G(last_alias) = fd->alias;
+			PHAR_G(last_alias_len) = fd->alias_len;
 			return SUCCESS;
 		}
 		if (PHAR_G(manifest_cached) && SUCCESS == zend_hash_quick_find(&cached_phars, fname, fname_len, fhash, (void**)&fd_ptr)) {
@@ -1119,14 +1168,29 @@ alias_success:
 					return FAILURE;
 				}
 			}
+			PHAR_G(last_phar) = fd;
+			PHAR_G(last_phar_name) = fd->fname;
+			PHAR_G(last_phar_name_len) = fd->fname_len;
+			PHAR_G(last_alias) = fd->alias;
+			PHAR_G(last_alias_len) = fd->alias_len;
 			return SUCCESS;
 		}
 		if (SUCCESS == zend_hash_quick_find(&(PHAR_GLOBALS->phar_alias_map), save, save_len, fhash, (void**)&fd_ptr)) {
-			*archive = *fd_ptr;
+			fd = *archive = *fd_ptr;
+			PHAR_G(last_phar) = fd;
+			PHAR_G(last_phar_name) = fd->fname;
+			PHAR_G(last_phar_name_len) = fd->fname_len;
+			PHAR_G(last_alias) = fd->alias;
+			PHAR_G(last_alias_len) = fd->alias_len;
 			return SUCCESS;
 		}
 		if (PHAR_G(manifest_cached) && SUCCESS == zend_hash_quick_find(&cached_alias, save, save_len, fhash, (void**)&fd_ptr)) {
-			*archive = *fd_ptr;
+			fd = *archive = *fd_ptr;
+			PHAR_G(last_phar) = fd;
+			PHAR_G(last_phar_name) = fd->fname;
+			PHAR_G(last_phar_name_len) = fd->fname_len;
+			PHAR_G(last_alias) = fd->alias;
+			PHAR_G(last_alias_len) = fd->alias_len;
 			return SUCCESS;
 		}
 
@@ -1150,6 +1214,11 @@ realpath_success:
 				zend_hash_quick_add(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, ahash, (void*)&fd,   sizeof(phar_archive_data*), NULL);
 			}
 			efree(my_realpath);
+			PHAR_G(last_phar) = fd;
+			PHAR_G(last_phar_name) = fd->fname;
+			PHAR_G(last_phar_name_len) = fd->fname_len;
+			PHAR_G(last_alias) = fd->alias;
+			PHAR_G(last_alias_len) = fd->alias_len;
 			return SUCCESS;
 		}
 		if (PHAR_G(manifest_cached) && SUCCESS == zend_hash_quick_find(&cached_phars, fname, fname_len, fhash, (void**)&fd_ptr)) {
@@ -2025,6 +2094,9 @@ int phar_copy_on_write(phar_archive_data **pphar TSRMLS_DC) /* {{{ */
 
 	*newpphar = *pphar;
 	phar_copy_cached_phar(newpphar TSRMLS_CC);
+	/* invalidate phar cache */
+	PHAR_G(last_phar) = NULL;
+	PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
 	if (newpphar[0]->alias_len && FAILURE == zend_hash_add(&(PHAR_GLOBALS->phar_alias_map), newpphar[0]->alias, newpphar[0]->alias_len, (void*)newpphar, sizeof(phar_archive_data*), NULL)) {
 		zend_hash_del(&(PHAR_GLOBALS->phar_fname_map), (*pphar)->fname, (*pphar)->fname_len);
 		return FAILURE;

@@ -473,6 +473,11 @@ PHP_METHOD(Phar, mount)
 		}
 carry_on2:
 		if (SUCCESS != zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **)&pphar)) {
+			if (PHAR_G(manifest_cached) && SUCCESS == zend_hash_find(&cached_phars, arch, arch_len, (void **)&pphar)) {
+				if (SUCCESS == phar_copy_on_write(pphar)) {
+					goto carry_on;
+				}
+			}
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "%s is not a phar archive, cannot mount", arch);
 			if (arch) {
 				efree(arch);
@@ -498,6 +503,11 @@ carry_on:
 		}
 		return;
 	} else if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void **)&pphar)) {
+		goto carry_on;
+	} else if (PHAR_G(manifest_cached) && SUCCESS == zend_hash_find(&cached_phars, fname, fname_len, (void **)&pphar)) {
+		if (SUCCESS == phar_copy_on_write(pphar)) {
+			goto carry_on;
+		}
 		goto carry_on;
 	} else if (SUCCESS == phar_split_fname(path, path_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
 		path = entry;
@@ -1334,6 +1344,10 @@ PHP_METHOD(Phar, unlinkArchive)
 		return;
 	}
 	fname = estrndup(phar->fname, phar->fname_len);
+	/* invalidate phar cache */
+	PHAR_G(last_phar) = NULL;
+	PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
+
 	phar_archive_delref(phar TSRMLS_CC);
 	unlink(fname);
 	efree(fname);
@@ -2042,6 +2056,10 @@ static zval *phar_convert_to_other(phar_archive_data *source, int convert, char 
 	phar_entry_info *entry, newentry;
 	zval *ret;
 
+	/* invalidate phar cache */
+	PHAR_G(last_phar) = NULL;
+	PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
+
 	phar = (phar_archive_data *) ecalloc(1, sizeof(phar_archive_data));
 	/* set whole-archive compression and type from parameter */
 	phar->flags = flags;
@@ -2468,6 +2486,9 @@ PHP_METHOD(Phar, setAlias)
 			"Cannot write out phar archive, phar is read-only");
 		RETURN_FALSE;
 	}
+	/* invalidate phar cache */
+	PHAR_G(last_phar) = NULL;
+	PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
 
 	if (phar_obj->arc.archive->is_data) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
