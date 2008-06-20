@@ -106,8 +106,8 @@ static void php_pack(zval **val, int size, int *map, char *output)
    Takes one or more arguments and packs them into a binary string according to the format argument */
 PHP_FUNCTION(pack)
 {
-	zval ***argv;
-	int argc, i;
+	zval ***argv = NULL;
+	int num_args, i;
 	int currentarg;
 	char *format;
 	int formatlen;
@@ -117,20 +117,10 @@ PHP_FUNCTION(pack)
 	int outputpos = 0, outputsize = 0;
 	char *output;
 
-	argc = ZEND_NUM_ARGS();
-
-	if (argc < 1) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &argv, &num_args) == FAILURE) {
+		return;
 	}
 
-	argv = safe_emalloc(argc, sizeof(zval **), 0);
-
-	if (zend_get_parameters_array_ex(argc, argv) == FAILURE) {
-		efree(argv);
-		WRONG_PARAM_COUNT;
-	}
-
-	convert_to_string_ex(argv[0]);
 	format = Z_STRVAL_PP(argv[0]);
 	formatlen = Z_STRLEN_PP(argv[0]);
 
@@ -178,7 +168,7 @@ PHP_FUNCTION(pack)
 			case 'A': 
 			case 'h': 
 			case 'H':
-				if (currentarg >= argc) {
+				if (currentarg >= num_args) {
 					efree(argv);
 					efree(formatcodes);
 					efree(formatargs);
@@ -210,12 +200,12 @@ PHP_FUNCTION(pack)
 			case 'f': 
 			case 'd': 
 				if (arg < 0) {
-					arg = argc - currentarg;
+					arg = num_args - currentarg;
 				}
 
 				currentarg += arg;
 
-				if (currentarg > argc) {
+				if (currentarg > num_args) {
 					efree(argv);
 					efree(formatcodes);
 					efree(formatargs);
@@ -236,8 +226,8 @@ PHP_FUNCTION(pack)
 		formatargs[formatcount] = arg;
 	}
 
-	if (currentarg < argc) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d arguments unused", (argc - currentarg));
+	if (currentarg < num_args) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d arguments unused", (num_args - currentarg));
 	}
 
 	/* Calculate output length and upper bound while processing*/
