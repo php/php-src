@@ -2,6 +2,7 @@
 Phar::buildFromIterator() iterator, too many files for open file handles (Bug #45218)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (getenv('SKIP_SLOW_TESTS')) die('skip'); ?>
 --INI--
 phar.require_hash=0
 phar.readonly=0
