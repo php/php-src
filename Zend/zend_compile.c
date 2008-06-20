@@ -4959,6 +4959,7 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 	char *lcname;
 	zval *name, *ns, tmp;
 	zend_bool warn = 0;
+	zend_class_entry **pce;
 
 	if (!CG(current_import)) {
 		CG(current_import) = emalloc(sizeof(HashTable));
@@ -5012,7 +5013,9 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 			efree(tmp);
 		}
 		efree(ns_name);
-	} else if (zend_hash_exists(CG(class_table), lcname, Z_STRLEN_P(name)+1)) {
+	} else if (zend_hash_find(CG(class_table), lcname, Z_STRLEN_P(name)+1, (void**)&pce) == SUCCESS &&
+	           (*pce)->type == ZEND_USER_CLASS &&
+	           (*pce)->filename == CG(compiled_filename)) {
 		char *tmp = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRLEN_P(ns));
 
 		if (Z_STRLEN_P(ns) != Z_STRLEN_P(name) ||
