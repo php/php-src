@@ -380,9 +380,9 @@ bool(false)
 
 *** Testing error conditions ***
 
-Warning: Wrong parameter count for is_numeric() in %s on line %d
+Warning: is_numeric() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for is_numeric() in %s on line %d
+Warning: is_numeric() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 Done
