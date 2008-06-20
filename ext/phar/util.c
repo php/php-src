@@ -251,6 +251,12 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 	fname = zend_get_executed_filename(TSRMLS_C);
 	fname_len = strlen(fname);
 
+	if (PHAR_G(last_phar) && !memcmp(fname, "phar://", 7) && fname_len - 7 >= PHAR_G(last_phar_name_len) && !memcmp(fname + 7, PHAR_G(last_phar_name), PHAR_G(last_phar_name_len))) {
+		arch = estrndup(PHAR_G(last_phar_name), PHAR_G(last_phar_name_len));
+		arch_len = PHAR_G(last_phar_name_len);
+		phar = PHAR_G(last_phar);
+		goto splitted;
+	}
 	if (fname_len < 7 || memcmp(fname, "phar://", 7) || SUCCESS != phar_split_fname(fname, strlen(fname), &arch, &arch_len, &entry, &entry_len, 1, 0 TSRMLS_CC)) {
 		return phar_save_resolve_path(filename, filename_len TSRMLS_CC);
 	}
@@ -262,6 +268,7 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 			efree(arch);
 			return phar_save_resolve_path(filename, filename_len TSRMLS_CC);
 		}
+splitted:
 		if (pphar) {
 			*pphar = phar;
 		}
