@@ -267,6 +267,9 @@ int phar_archive_delref(phar_archive_data *phar TSRMLS_DC) /* {{{ */
 		}
 		return 1;
 	} else if (!phar->refcount) {
+		/* invalidate phar cache */
+		PHAR_G(last_phar) = NULL;
+		PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
 		if (phar->fp && !(phar->flags & PHAR_FILE_COMPRESSION_MASK)) {
 			/* close open file handle - allows removal or rename of
 			the file on windows, which has greedy locking
@@ -1613,6 +1616,11 @@ static int phar_analyze_path(const char *fname, const char *ext, int ext_len, in
 			efree(realpath);
 			return SUCCESS;
 		}
+		if (PHAR_G(manifest_cached) && zend_hash_exists(&cached_phars, realpath, strlen(realpath))) {
+			*a = old;
+			efree(realpath);
+			return SUCCESS;
+		}
 		efree(realpath);
 	}
 	if (SUCCESS == php_stream_stat_path((char *) fname, &ssb)) {
@@ -1746,9 +1754,14 @@ int phar_detect_phar_fname_ext(const char *filename, int filename_len, const cha
 			*ext_len = -1;
 			return FAILURE;
 		}
+		if (PHAR_G(manifest_cached) && zend_hash_exists(&cached_alias, (char *) filename, pos - filename)) {
+			*ext_str = pos;
+			*ext_len = -1;
+			return FAILURE;
+		}
 	}
 
-	if (zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map))) {
+	if (zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)) || PHAR_G(manifest_cached)) {
 		phar_archive_data **pphar;
 
 		if (is_complete) {
@@ -1766,6 +1779,10 @@ woohoo:
 					return SUCCESS;
 				}
 				return FAILURE;
+			}
+			if (PHAR_G(manifest_cached) && SUCCESS == zend_hash_find(&cached_phars, (char *) filename, filename_len, (void **)&pphar)) {
+				*ext_str = filename + (filename_len - (*pphar)->ext_len);
+				goto woohoo;
 			}
 		} else {
 			phar_zstr key;
@@ -1794,6 +1811,30 @@ woohoo:
 					goto woohoo;
 				}
 				zend_hash_move_forward(&(PHAR_GLOBALS->phar_fname_map));
+			}
+			if (PHAR_G(manifest_cached)) {
+				zend_hash_internal_pointer_reset(&cached_phars);
+				while (FAILURE != zend_hash_has_more_elements(&cached_phars)) {
+					if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(&cached_phars, &key, &keylen, &unused, 0, NULL)) {
+						break;
+					}
+	
+					PHAR_STR(key, str_key);
+	
+					if (keylen > (uint) filename_len) {
+						zend_hash_move_forward(&cached_phars);
+						continue;
+					}
+					if (!memcmp(filename, str_key, keylen) && ((uint)filename_len == keylen
+						|| filename[keylen] == '/' || filename[keylen] == '\0')) {
+						if (FAILURE == zend_hash_get_current_data(&cached_phars, (void **) &pphar)) {
+							break;
+						}
+						*ext_str = filename + (keylen - (*pphar)->ext_len);
+						goto woohoo;
+					}
+					zend_hash_move_forward(&cached_phars);
+				}
 			}
 		}
 	}
@@ -3205,6 +3246,9 @@ int phar_zend_open(const char *filename, zend_file_handle *handle TSRMLS_DC) /* 
 		if (fname_len > 7 && !strncasecmp(fname, "phar://", 7)) {
 			if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 1, 0 TSRMLS_CC)) {
 				zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar);
+				if (!pphar && PHAR_G(manifest_cached)) {
+					zend_hash_find(&cached_phars, arch, arch_len, (void **) &pphar);
+				}
 				efree(arch);
 				efree(entry);
 			}
@@ -3281,6 +3325,8 @@ void phar_request_initialize(TSRMLS_D) /* {{{ */
 {
 	if (!PHAR_GLOBALS->request_init)
 	{
+		PHAR_G(last_phar) = NULL;
+		PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
 		PHAR_G(has_bz2) = zend_hash_exists(&module_registry, "bz2", sizeof("bz2"));
 		PHAR_G(has_zlib) = zend_hash_exists(&module_registry, "zlib", sizeof("zlib"));
 		PHAR_GLOBALS->request_init = 1;
