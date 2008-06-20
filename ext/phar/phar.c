@@ -115,7 +115,9 @@ static void phar_split_cache_list(TSRMLS_D)
 
 	/* fake request startup */
 	PHAR_GLOBALS->request_init = 1;
-	//zend_init_rsrc_list(TSRMLS_C);
+	if (zend_hash_init(&EG(regular_list), 0, NULL, list_entry_destructor, 0) == SUCCESS) {
+		EG(regular_list).nNextFreeElement=1;	/* we don't want resource id 0 */
+	}
 	PHAR_G(has_bz2) = zend_hash_exists(&module_registry, "bz2", sizeof("bz2"));
 	PHAR_G(has_zlib) = zend_hash_exists(&module_registry, "zlib", sizeof("zlib"));
 	/* these two are dummies and will be destroyed later */
@@ -149,8 +151,8 @@ finish_error:
 				PHAR_GLOBALS->phar_alias_map.arBuckets = 0;
 				zend_hash_destroy(&cached_phars);
 				zend_hash_destroy(&cached_alias);
-				//zend_destroy_rsrc_list(&EG(regular_list) TSRMLS_CC);
-				//memset(&EG(regular_list), 0, sizeof(HashTable));
+				zend_hash_graceful_reverse_destroy(&EG(regular_list));
+				memset(&EG(regular_list), 0, sizeof(HashTable));
 				/* free cached manifests */
 				PHAR_GLOBALS->request_init = 0;
 				return;
@@ -172,8 +174,8 @@ finish_error:
 	cached_alias = PHAR_GLOBALS->phar_alias_map;
 	PHAR_GLOBALS->phar_fname_map.arBuckets = 0;
 	PHAR_GLOBALS->phar_alias_map.arBuckets = 0;
-	//zend_destroy_rsrc_list(&EG(regular_list) TSRMLS_CC);
-	//memset(&EG(regular_list), 0, sizeof(HashTable));
+	zend_hash_graceful_reverse_destroy(&EG(regular_list));
+	memset(&EG(regular_list), 0, sizeof(HashTable));
 	efree(tmp);
 }
 /* }}} */
