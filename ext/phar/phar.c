@@ -115,7 +115,7 @@ static void phar_split_cache_list(TSRMLS_D)
 
 	/* fake request startup */
 	PHAR_GLOBALS->request_init = 1;
-	if (zend_hash_init(&EG(regular_list), 0, NULL, list_entry_destructor, 0) == SUCCESS) {
+	if (zend_hash_init(&EG(regular_list), 0, NULL, NULL, 0) == SUCCESS) {
 		EG(regular_list).nNextFreeElement=1;	/* we don't want resource id 0 */
 	}
 	PHAR_G(has_bz2) = zend_hash_exists(&module_registry, "bz2", sizeof("bz2"));
