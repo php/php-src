@@ -421,21 +421,21 @@ bool(false)
 
 *** Testing error conditions ***
 
-Warning: is_float(): Only one argument expected in %s on line %d
+Warning: is_float() expects exactly 1 parameter, 0 given in %s on line %d
 bool(false)
 
-Warning: is_double(): Only one argument expected in %s on line %d
+Warning: is_double() expects exactly 1 parameter, 0 given in %s on line %d
 bool(false)
 
-Warning: is_real(): Only one argument expected in %s on line %d
+Warning: is_real() expects exactly 1 parameter, 0 given in %s on line %d
 bool(false)
 
-Warning: is_float(): Only one argument expected in %s on line %d
+Warning: is_float() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 
-Warning: is_double(): Only one argument expected in %s on line %d
+Warning: is_double() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 
-Warning: is_real(): Only one argument expected in %s on line %d
+Warning: is_real() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 Done
