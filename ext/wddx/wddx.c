@@ -1148,20 +1148,12 @@ PHP_FUNCTION(wddx_serialize_value)
    Creates a new packet and serializes given variables into a struct */
 PHP_FUNCTION(wddx_serialize_vars)
 {
-	int argc, i;
+	int num_args, i;
 	wddx_packet *packet;
-	zval ***args;
-		
-	argc = ZEND_NUM_ARGS();
-	if (argc < 1) {
-		WRONG_PARAM_COUNT;
-	}
+	zval ***args = NULL;
 
-	/* Allocate arguments array and get the arguments, checking for errors. */
-	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
-	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &num_args) == FAILURE) {
+		return;
 	}
 		
 	packet = php_wddx_constructor();
@@ -1169,9 +1161,10 @@ PHP_FUNCTION(wddx_serialize_vars)
 	php_wddx_packet_start(packet, NULL, 0);
 	php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
 	
-	for (i=0; i<argc; i++) {
-		if (Z_TYPE_PP(args[i]) != IS_ARRAY && Z_TYPE_PP(args[i]) != IS_OBJECT)
+	for (i=0; i<num_args; i++) {
+		if (Z_TYPE_PP(args[i]) != IS_ARRAY && Z_TYPE_PP(args[i]) != IS_OBJECT) {
 			convert_to_string_ex(args[i]);
+		}
 		php_wddx_add_var(packet, *args[i]);
 	}	
 	
@@ -1256,39 +1249,29 @@ PHP_FUNCTION(wddx_packet_end)
    Serializes given variables and adds them to packet given by packet_id */
 PHP_FUNCTION(wddx_add_vars)
 {
-	int argc, i;
-	zval ***args;
-	zval **packet_id;
+	int num_args, i;
+	zval ***args = NULL;
+	long packet_id;
 	wddx_packet *packet = NULL;
 	
-	argc = ZEND_NUM_ARGS();
-	if (argc < 2) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l+", packet_id, &args, &num_args) == FAILURE) {
+		return;
 	}
-	
-	/* Allocate arguments array and get the arguments, checking for errors. */
-	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
-	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
-	}
-	
-	packet_id = args[0];
 
-	packet = (wddx_packet *)zend_fetch_resource(packet_id TSRMLS_CC, -1, "WDDX packet ID", NULL, 1, le_wddx);
-	if (!packet)
-	{
+	packet = (wddx_packet *)zend_fetch_resource(&packet_id TSRMLS_CC, -1, "WDDX packet ID", NULL, 1, le_wddx);
+	if (!packet) {
 		efree(args);
 		RETURN_FALSE;
 	}
 		
-	for (i=1; i<argc; i++) {
-		if (Z_TYPE_PP(args[i]) != IS_ARRAY && Z_TYPE_PP(args[i]) != IS_OBJECT)
+	for (i=1; i<num_args; i++) {
+		if (Z_TYPE_PP(args[i]) != IS_ARRAY && Z_TYPE_PP(args[i]) != IS_OBJECT) {
 			convert_to_string_ex(args[i]);
+		}
 		php_wddx_add_var(packet, (*args[i]));
 	}
 
-	efree(args);	
+	efree(args);
 	RETURN_TRUE;
 }
 /* }}} */
