@@ -1,3 +1,150 @@
+2008-06-19  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_2)
+      ext/dba/dba.c
+      ext/dba/dba.c
+      ext/dba/dba_db4.c
+      ext/dba/dba_db4.c
+      ext/dba/tests/dba_db4.phpt
+      ext/dba/tests/dba_db4.phpt:
+      MFH:
+      Fix bug #45266 (Fix build with BDB 4)
+      Fix bug #45267 (Revert invalid assumption about BDB 4 locking; let DBA
+      handle locking)
+      Fix bug #45268 (Fix error callback prototype)
+
+    * ext/dba/dba.c
+      ext/dba/dba_db4.c
+      ext/dba/tests/dba_db4.phpt:
+      Fix bug #45266 (Fix build with BDB 4)
+      Fix bug #45267 (Revert invalid assumption about BDB 4 locking; let DBA
+      handle locking)
+      Fix bug #45268 (Fix error callback prototype)
+
+2008-06-19  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      run-tests.php:
+      - remove debug code
+
+2008-06-19  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      run-tests.php:
+      Oops.
+
+    * (PHP_5_3)
+      run-tests.php:
+      Two new options for Travis to come to terms with:
+      - --set-timeout <n> sets the timeout in seconds for the call to
+      stream_select() during system_with_timeout()
+      - -x sets an environmental variable, SKIP_SLOW_TESTS, which can be checked
+      for during a SKIPIF clause
+      
+      and just for a special treat, you can have it from my working branch this
+      time.
+
+    * (PHP_5_3)
+      run-tests.php:
+      Two new options for Travis to come to terms with:
+      - --set-timeout <n> sets the timeout in seconds for the call to
+      stream_select() during system_with_timeout()
+      - -x sets an environmental variable, SKIP_SLOW_TESTS, which can be checked
+      for during a SKIPIF clause
+
+2008-06-19  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/oci8/README
+      ext/oci8/php_oci8.h
+      ext/oci8/tests/bind_char_1.phpt
+      ext/oci8/tests/bind_char_2.phpt
+      ext/oci8/tests/bind_char_3.phpt
+      ext/oci8/tests/bind_char_4.phpt
+      ext/oci8/tests/bug27303.phpt
+      ext/oci8/tests/bug27303_2.phpt
+      ext/oci8/tests/bug27303_4.phpt
+      ext/oci8/tests/connect.inc
+      ext/oci8/tests/debug.phpt
+      ext/oci8/tests/details.inc:
+      MFB: sync with 5.3
+
+    * (PHP_5_3)
+      ext/oci8/README
+      ext/oci8/package2.xml
+      ext/oci8/php_oci8.h
+      ext/oci8/tests/bind_char_1.phpt
+      ext/oci8/tests/bind_char_2.phpt
+      ext/oci8/tests/bind_char_3.phpt
+      ext/oci8/tests/bind_char_4.phpt
+      ext/oci8/tests/bug27303.phpt
+      ext/oci8/tests/bug27303_2.phpt
+      ext/oci8/tests/bug27303_4.phpt
+      ext/oci8/tests/connect.inc
+      ext/oci8/tests/debug.phpt
+      ext/oci8/tests/details.inc:
+      Test updates and bundle 1.3.3
+
+2008-06-19  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      README.EXT_SKEL:
+      update the docs
+
+2008-06-19  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      - ext/standard currently has a dependency on ext/ereg thanks to browscap.c
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      - '' != 'no'
+
+2008-06-19  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      - NEWS for fpdf and ncurses > PECL
+
+    * (PHP_5_3)
+      ext/fdf/.cvsignore
+      ext/fdf/CREDITS
+      ext/fdf/config.m4
+      ext/fdf/config.w32
+      ext/fdf/fdf.c
+      ext/fdf/fdf.dsp
+      ext/fdf/package.xml
+      ext/fdf/php_fdf.h
+      ext/fdf/tests/.cvsignore
+      ext/fdf/tests/01-general.phpt
+      ext/fdf/tests/02-values.phpt
+      ext/fdf/tests/03-read-file.phpt
+      ext/fdf/tests/04-POST.phpt
+      ext/fdf/tests/simple.fdf:
+      - move fpdf to PECL
+
+2008-06-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/tests/array/bug45312.phpt
+      ext/standard/tests/array/bug45312.phpt:
+      Added test for bug #45312
+
+    * ext/standard/tests/array/bug45312.phpt
+      ext/standard/tests/array/bug45312.phpt
+      ext/standard/tests/array/bug45312.phpt:
+        1.1.4;
+      file bug45312.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/array.c:
+      Fixed bug #45312 (Segmentation fault on second request for array
+      functions).
+
+    * (PHP_5_3)
+      ZendEngine2/zend_builtin_functions.c:
+      Fixed #45307 (define() crashes because of uninitialized variable)
+
 2008-06-18  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_3)

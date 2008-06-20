@@ -1,3 +1,9 @@
+2008-06-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      zend_builtin_functions.c:
+      Fixed #45307 (define() crashes because of uninitialized variable)
+
 2008-06-18  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_3)
