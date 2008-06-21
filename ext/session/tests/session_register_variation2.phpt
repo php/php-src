@@ -30,7 +30,9 @@ ob_end_flush();
 bool(true)
 array(0) {
 }
-bool(false)
+
+Warning: session_register() expects at least 1 parameter, 0 given in %s on line %d
+NULL
 array(0) {
 }
 bool(true)

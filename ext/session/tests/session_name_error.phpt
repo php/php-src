@@ -167,6 +167,8 @@ string(12) "Hello World!"
 string(0) ""
 
 -- Iteration 24 --
-string(0) ""
+
+Warning: session_name() expects parameter 1 to be string, resource given in /home/felipe/php5/ext/session/tests/session_name_error.php on line 81
+NULL
 Done
 

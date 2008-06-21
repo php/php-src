@@ -97,8 +97,8 @@ bool(true)
 array(0) {
 }
 
-Notice: Array to string conversion in %s on line %d
-bool(false)
+Warning: session_is_registered() expects parameter 1 to be string, array given in %s on line %d
+NULL
 array(0) {
 }
 bool(true)

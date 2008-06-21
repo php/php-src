@@ -261,7 +261,9 @@ bool(true)
 
 -- Iteration 24 --
 bool(true)
-bool(false)
+
+Warning: session_is_registered() expects parameter 1 to be string, resource given in %s on line %d
+NULL
 array(0) {
 }
 bool(true)
