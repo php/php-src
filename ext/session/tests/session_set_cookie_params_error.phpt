@@ -264,10 +264,10 @@ NULL
 NULL
 NULL
 
-Notice: Object of class classA could not be converted to int in %s on line %d
+Warning: session_set_cookie_params() expects parameter 4 to be boolean, object given in %s on line %d
 NULL
 
-Notice: Object of class classA could not be converted to int in %s on line %d
+Warning: session_set_cookie_params() expects parameter 5 to be boolean, object given in %s on line %d
 NULL
 NULL
 
@@ -289,9 +289,17 @@ NULL
 
 -- Iteration 24 --
 NULL
+
+Warning: session_set_cookie_params() expects parameter 2 to be string, resource given in %s on line %d
 NULL
+
+Warning: session_set_cookie_params() expects parameter 3 to be string, resource given in %s on line %d
 NULL
+
+Warning: session_set_cookie_params() expects parameter 4 to be boolean, resource given in %s on line %d
 NULL
+
+Warning: session_set_cookie_params() expects parameter 5 to be boolean, resource given in %s on line %d
 NULL
 NULL
 Done

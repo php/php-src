@@ -211,6 +211,6 @@ bool(false)
 
 -- Iteration 24 --
 
-Warning: session_module_name(): Cannot find named PHP session module (Resource id #%d) in %s on line %d
-bool(false)
+Warning: session_module_name() expects parameter 1 to be string, resource given in %s on line %d
+NULL
 Done

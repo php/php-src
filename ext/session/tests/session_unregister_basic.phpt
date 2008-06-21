@@ -170,7 +170,9 @@ bool(true)
 bool(true)
 
 -- Iteration 24 --
-bool(true)
+
+Warning: session_unregister() expects parameter 1 to be string, resource given in %s on line %d
+NULL
 bool(true)
 Done
 
