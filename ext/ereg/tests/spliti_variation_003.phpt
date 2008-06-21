@@ -114,34 +114,24 @@ array(1) {
 }
 
 Arg value Array 
-array(1) {
-  [0]=>
-  string(9) "1 2 3 4 5"
-}
+Error: 2 - spliti() expects parameter 3 to be long, array given, %s.php(73)
+NULL
 
 Arg value Array 
-array(1) {
-  [0]=>
-  string(9) "1 2 3 4 5"
-}
+Error: 2 - spliti() expects parameter 3 to be long, array given, %s.php(73)
+NULL
 
 Arg value Array 
-array(1) {
-  [0]=>
-  string(9) "1 2 3 4 5"
-}
+Error: 2 - spliti() expects parameter 3 to be long, array given, %s.php(73)
+NULL
 
 Arg value Array 
-array(1) {
-  [0]=>
-  string(9) "1 2 3 4 5"
-}
+Error: 2 - spliti() expects parameter 3 to be long, array given, %s.php(73)
+NULL
 
 Arg value Array 
-array(1) {
-  [0]=>
-  string(9) "1 2 3 4 5"
-}
+Error: 2 - spliti() expects parameter 3 to be long, array given, %s.php(73)
+NULL
 
 Arg value  
 array(1) {
@@ -180,36 +170,25 @@ array(1) {
 }
 
 Arg value  
-array(1) {
-  [0]=>
-  string(9) "1 2 3 4 5"
-}
+Error: 2 - spliti() expects parameter 3 to be long, string given, %s(73)
+NULL
 
 Arg value  
-array(1) {
-  [0]=>
-  string(9) "1 2 3 4 5"
-}
+Error: 2 - spliti() expects parameter 3 to be long, string given, %s(73)
+NULL
 
 Arg value string 
-array(1) {
-  [0]=>
-  string(9) "1 2 3 4 5"
-}
+Error: 2 - spliti() expects parameter 3 to be long, string given, %s(73)
+NULL
 
 Arg value string 
-array(1) {
-  [0]=>
-  string(9) "1 2 3 4 5"
-}
+Error: 2 - spliti() expects parameter 3 to be long, string given, %s(73)
+NULL
 Error: 4096 - Object of class stdClass could not be converted to string, %s(72)
 
 Arg value  
-Error: 8 - Object of class stdClass could not be converted to int, %s(73)
-array(1) {
-  [0]=>
-  string(9) "1 2 3 4 5"
-}
+Error: 2 - spliti() expects parameter 3 to be long, object given, %s(73)
+NULL
 
 Arg value  
 array(1) {

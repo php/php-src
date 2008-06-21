@@ -145,49 +145,24 @@ array(1) {
 }
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-array(2) {
-  [0]=>
-  string(6) "1 a 1 "
-  [1]=>
-  string(5) " 1 c "
-}
+Error: 2 - split() expects parameter 1 to be string, array given, %s(74)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-array(2) {
-  [0]=>
-  string(6) "1 a 1 "
-  [1]=>
-  string(5) " 1 c "
-}
+Error: 2 - split() expects parameter 1 to be string, array given, %s(74)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-array(2) {
-  [0]=>
-  string(6) "1 a 1 "
-  [1]=>
-  string(5) " 1 c "
-}
+Error: 2 - split() expects parameter 1 to be string, array given, %s(74)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-array(2) {
-  [0]=>
-  string(6) "1 a 1 "
-  [1]=>
-  string(5) " 1 c "
-}
+Error: 2 - split() expects parameter 1 to be string, array given, %s(74)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-array(2) {
-  [0]=>
-  string(6) "1 a 1 "
-  [1]=>
-  string(5) " 1 c "
-}
+Error: 2 - split() expects parameter 1 to be string, array given, %s(74)
+NULL
 
 Arg value  
 Error: 2 - split(): REG_EMPTY, %s(74)
@@ -239,12 +214,8 @@ bool(false)
 Error: 4096 - Object of class stdClass could not be converted to string, %s(73)
 
 Arg value  
-Error: 4096 - Object of class stdClass could not be converted to string, %s(74)
-Error: 8 - Object of class stdClass to string conversion, %s(74)
-array(1) {
-  [0]=>
-  string(16) "1 a 1 Array 1 c "
-}
+Error: 2 - split() expects parameter 1 to be string, object given, %s(74)
+NULL
 
 Arg value  
 Error: 2 - split(): REG_EMPTY, %s(74)

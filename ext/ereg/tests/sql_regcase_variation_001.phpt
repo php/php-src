@@ -110,24 +110,24 @@ Arg value 0.5
 string(3) "0.5"
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(72)
-string(20) "[Aa][Rr][Rr][Aa][Yy]"
+Error: 2 - sql_regcase() expects parameter 1 to be string, array given, %s.php(72)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(72)
-string(20) "[Aa][Rr][Rr][Aa][Yy]"
+Error: 2 - sql_regcase() expects parameter 1 to be string, array given, %s.php(72)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(72)
-string(20) "[Aa][Rr][Rr][Aa][Yy]"
+Error: 2 - sql_regcase() expects parameter 1 to be string, array given, %s.php(72)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(72)
-string(20) "[Aa][Rr][Rr][Aa][Yy]"
+Error: 2 - sql_regcase() expects parameter 1 to be string, array given, %s.php(72)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(72)
-string(20) "[Aa][Rr][Rr][Aa][Yy]"
+Error: 2 - sql_regcase() expects parameter 1 to be string, array given, %s.php(72)
+NULL
 
 Arg value  
 string(0) ""
@@ -155,9 +155,8 @@ string(0) ""
 Error: 4096 - Object of class stdClass could not be converted to string, %s(71)
 
 Arg value  
-Error: 4096 - Object of class stdClass could not be converted to string, %s(72)
-Error: 8 - Object of class stdClass to string conversion, %s(72)
-string(24) "[Oo][Bb][Jj][Ee][Cc][Tt]"
+Error: 2 - sql_regcase() expects parameter 1 to be string, object given, %s.php(72)
+NULL
 
 Arg value  
 string(0) ""

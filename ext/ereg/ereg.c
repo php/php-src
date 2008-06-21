@@ -265,8 +265,9 @@ static void php_ereg_eprint(int err, regex_t *re) {
 static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
 	zval **regex,			/* Regular expression */
-		**findin,		/* String to apply expression to */
 		**array = NULL;		/* Optional register array */
+	char *findin;		/* String to apply expression to */
+	int findin_len;
 	regex_t re;
 	regmatch_t *subs;
 	int err, match_len, string_len;
@@ -276,25 +277,27 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	char *buf = NULL;
 	char *string = NULL;
 	int   argc = ZEND_NUM_ARGS();
-	
-	if (argc < 2 || argc > 3 ||
-		zend_get_parameters_ex(argc, &regex, &findin, &array) == FAILURE) {
-		WRONG_PARAM_COUNT;
+
+	if (zend_parse_parameters(argc TSRMLS_CC, "Zs|Z", &regex, &findin, &findin_len, &array) == FAILURE) {
+		return;
 	}
 
-	if (icase)
+	if (icase) {
 		copts |= REG_ICASE;
+	}
 	
-	if (argc == 2)
+	if (argc == 2) {
 		copts |= REG_NOSUB;
+	}
 
 	/* compile the regular expression from the supplied regex */
 	if (Z_TYPE_PP(regex) == IS_STRING) {
 		err = regcomp(&re, Z_STRVAL_PP(regex), REG_EXTENDED | copts);
 	} else {
 		/* we convert numbers to integers and treat them as a string */
-		if (Z_TYPE_PP(regex) == IS_DOUBLE)
+		if (Z_TYPE_PP(regex) == IS_DOUBLE) {
 			convert_to_long_ex(regex);	/* get rid of decimal places */
+		}
 		convert_to_string_ex(regex);
 		/* don't bother doing an extended regex with just a number */
 		err = regcomp(&re, Z_STRVAL_PP(regex), copts);
@@ -306,8 +309,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	/* make a copy of the string we're looking in */
-	convert_to_string_ex(findin);
-	string = estrndup(Z_STRVAL_PP(findin), Z_STRLEN_PP(findin));
+	string = estrndup(findin, findin_len);
 
 	/* allocate storage for (sub-)expression-matches */
 	subs = (regmatch_t *)ecalloc(sizeof(regmatch_t),re.re_nsub+1);
@@ -324,7 +326,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 	if (array && err != REG_NOMATCH) {
 		match_len = (int) (subs[0].rm_eo - subs[0].rm_so);
-		string_len = Z_STRLEN_PP(findin) + 1;
+		string_len = findin_len + 1;
 
 		buf = emalloc(string_len);
 
@@ -523,23 +525,23 @@ PHPAPI char *php_ereg_replace(const char *pattern, const char *replace, const ch
 static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
 	zval **arg_pattern,
-		**arg_replace,
-		**arg_string;
-	char *pattern;
+		**arg_replace;
+	char *pattern, *arg_string;
 	char *string;
 	char *replace;
 	char *ret;
+	int arg_string_len;
 	
-	if (ZEND_NUM_ARGS() != 3 || 
-		zend_get_parameters_ex(3, &arg_pattern, &arg_replace, &arg_string) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZs", &arg_pattern, &arg_replace, &arg_string, &arg_string_len) == FAILURE) {
+		return;
 	}
 
 	if (Z_TYPE_PP(arg_pattern) == IS_STRING) {
-		if (Z_STRVAL_PP(arg_pattern) && Z_STRLEN_PP(arg_pattern))
+		if (Z_STRVAL_PP(arg_pattern) && Z_STRLEN_PP(arg_pattern)) {
 			pattern = estrndup(Z_STRVAL_PP(arg_pattern), Z_STRLEN_PP(arg_pattern));
-		else
+		} else {
 			pattern = STR_EMPTY_ALLOC();
+		}
 	} else {
 		convert_to_long_ex(arg_pattern);
 		pattern = emalloc(2);
@@ -548,10 +550,11 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	if (Z_TYPE_PP(arg_replace) == IS_STRING) {
-		if (Z_STRVAL_PP(arg_replace) && Z_STRLEN_PP(arg_replace))
+		if (Z_STRVAL_PP(arg_replace) && Z_STRLEN_PP(arg_replace)) {
 			replace = estrndup(Z_STRVAL_PP(arg_replace), Z_STRLEN_PP(arg_replace));
-		else
+		} else {
 			replace = STR_EMPTY_ALLOC();
+		}
 	} else {
 		convert_to_long_ex(arg_replace);
 		replace = emalloc(2);
@@ -559,11 +562,11 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		replace[1] = '\0';
 	}
 
-	convert_to_string_ex(arg_string);
-	if (Z_STRVAL_PP(arg_string) && Z_STRLEN_PP(arg_string))
-		string = estrndup(Z_STRVAL_PP(arg_string), Z_STRLEN_PP(arg_string));
-	else
+	if (arg_string && arg_string_len) {
+		string = estrndup(arg_string, arg_string_len);
+	} else {
 		string = STR_EMPTY_ALLOC();
+	}
 
 	/* do the actual work */
 	ret = php_ereg_replace(pattern, replace, string, icase, 1);
@@ -600,33 +603,30 @@ PHP_FUNCTION(eregi_replace)
  */
 static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
-	zval **spliton, **str, **arg_count = NULL;
+	long arg_count;
 	regex_t re;
 	regmatch_t subs[1];
-	char *strp, *endp;
+	char *spliton, *str, *strp, *endp;
+	int spliton_len, str_len;
 	int err, size, count = -1, copts = 0;
 	int argc = ZEND_NUM_ARGS();
 
-	if (argc < 2 || argc > 3 ||
-		zend_get_parameters_ex(argc, &spliton, &str, &arg_count) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", &spliton, &spliton_len, &str, &str_len, &arg_count) == FAILURE) {
+		return;
 	}
 
 	if (argc > 2) {
-		convert_to_long_ex(arg_count);
-		count = Z_LVAL_PP(arg_count);
+		count = arg_count;
 	}
 
-	if (icase)
+	if (icase) {
 		copts = REG_ICASE;
+	}
 
-	convert_to_string_ex(spliton);
-	convert_to_string_ex(str);
+	strp = str;
+	endp = strp + str_len;
 
-	strp = Z_STRVAL_PP(str);
-	endp = strp + Z_STRLEN_PP(str);
-
-	err = regcomp(&re, Z_STRVAL_PP(spliton), REG_EXTENDED | copts);
+	err = regcomp(&re, spliton, REG_EXTENDED | copts);
 	if (err) {
 		php_ereg_eprint(err, &re);
 		RETURN_FALSE;
@@ -710,21 +710,20 @@ PHP_FUNCTION(spliti)
    Make regular expression for case insensitive match */
 PHPAPI PHP_FUNCTION(sql_regcase)
 {
-	zval **string;
-	char *tmp;
+	char *string, *tmp;
+	int string_len;
 	unsigned char c;
 	register int i, j;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &string, &string_len) == FAILURE) {
+		return;
+	}
 	
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &string)==FAILURE) {
-		WRONG_PARAM_COUNT;
-	}	
-	convert_to_string_ex(string);
+	tmp = safe_emalloc(string_len, 4, 1);
 	
-	tmp = safe_emalloc(Z_STRLEN_PP(string), 4, 1);
-	
-	for (i = j = 0; i < Z_STRLEN_PP(string); i++) {
-		c = (unsigned char) Z_STRVAL_PP(string)[i];
-		if(isalpha(c)) {
+	for (i = j = 0; i < string_len; i++) {
+		c = (unsigned char) string[i];
+		if (isalpha(c)) {
 			tmp[j++] = '[';
 			tmp[j++] = toupper(c);
 			tmp[j++] = tolower(c);

@@ -35,11 +35,11 @@ echo "Done";
 
 -- Testing eregi() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for eregi() in %s on line 21
+Warning: eregi() expects at most 3 parameters, 4 given in %s on line 21
 NULL
 
 -- Testing eregi() function with less than expected no. of arguments --
 
-Warning: Wrong parameter count for eregi() in %s on line 26
+Warning: eregi() expects at least 2 parameters, 1 given in %s on line 26
 NULL
 Done

@@ -112,24 +112,24 @@ Arg value 0.5
 bool(false)
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-bool(false)
+Error: 2 - eregi() expects parameter 2 to be string, array given, %s(74)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-bool(false)
+Error: 2 - eregi() expects parameter 2 to be string, array given, %s(74)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-bool(false)
+Error: 2 - eregi() expects parameter 2 to be string, array given, %s(74)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-bool(false)
+Error: 2 - eregi() expects parameter 2 to be string, array given, %s(74)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-bool(false)
+Error: 2 - eregi() expects parameter 2 to be string, array given, %s(74)
+NULL
 
 Arg value  
 bool(false)
@@ -157,9 +157,8 @@ bool(false)
 Error: 4096 - Object of class stdClass could not be converted to string, %s(73)
 
 Arg value  
-Error: 4096 - Object of class stdClass could not be converted to string, %s(74)
-Error: 8 - Object of class stdClass to string conversion, %s(74)
-bool(false)
+Error: 2 - eregi() expects parameter 2 to be string, object given, %s(74)
+NULL
 
 Arg value  
 bool(false)
