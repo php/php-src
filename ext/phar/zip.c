@@ -333,7 +333,7 @@ foundit:
 		if (PHAR_GET_16(zipentry.extra_len)) {
 			off_t loc = php_stream_tell(fp);
 			if (FAILURE == phar_zip_process_extra(fp, &entry, PHAR_GET_16(zipentry.extra_len) TSRMLS_CC)) {
-				efree(entry.filename);
+				pefree(entry.filename, entry.is_persistent);
 				PHAR_ZIP_FAIL("Unable to process extra field header for file in central directory");
 			}
 			php_stream_seek(fp, loc + PHAR_GET_16(zipentry.extra_len), SEEK_SET);
@@ -345,14 +345,14 @@ foundit:
 			case PHAR_ZIP_COMP_DEFLATE :
 				entry.flags |= PHAR_ENT_COMPRESSED_GZ;
 				if (!PHAR_G(has_zlib)) {
-					efree(entry.filename);
+					pefree(entry.filename, entry.is_persistent);
 					PHAR_ZIP_FAIL("zlib extension is required");
 				}
 				break;
 			case PHAR_ZIP_COMP_BZIP2 :
 				entry.flags |= PHAR_ENT_COMPRESSED_BZ2;
 				if (!PHAR_G(has_bz2)) {
-					efree(entry.filename);
+					pefree(entry.filename, entry.is_persistent);
 					PHAR_ZIP_FAIL("bzip2 extension is required");
 				}
 				break;
