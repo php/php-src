@@ -1178,13 +1178,16 @@ PHP_METHOD(Phar, __construct)
 	}
 
 	if (phar_open_or_create_filename(fname, fname_len, alias, alias_len, is_data, REPORT_ERRORS, &phar_data, &error TSRMLS_CC) == FAILURE) {
+
 		if (fname == arch) {
 			efree(arch);
 			fname = save_fname;
 		}
+
 		if (entry) {
 			efree(entry);
 		}
+
 		if (error) {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 				"%s", error);
@@ -1193,6 +1196,7 @@ PHP_METHOD(Phar, __construct)
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 				"Phar creation or opening failed");
 		}
+
 		return;
 	}
 
@@ -1262,10 +1266,12 @@ PHP_METHOD(Phar, getSupportedSignatures)
 
 	add_next_index_stringl(return_value, "MD5", 3, 1);
 	add_next_index_stringl(return_value, "SHA-1", 5, 1);
+
 #if HAVE_HASH_EXT
 	add_next_index_stringl(return_value, "SHA-256", 7, 1);
 	add_next_index_stringl(return_value, "SHA-512", 7, 1);
 #endif
+
 #if PHAR_HAVE_OPENSSL
 	add_next_index_stringl(return_value, "OpenSSL", 7, 1);
 #else
@@ -1958,6 +1964,7 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Unable to add newly converted phar \"%s\" to the list of phars, new phar name is in phar.cache_list", phar->fname);
 		return NULL;
 	}
+
 	if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), newpath, phar->fname_len, (void **) &pphar)) {
 		if ((*pphar)->fname_len == phar->fname_len && !memcmp((*pphar)->fname, phar->fname, phar->fname_len)) {
 			if (!zend_hash_num_elements(&phar->manifest)) {
@@ -2135,7 +2142,7 @@ no_copy:
 		}
 		newentry.is_modified = 1;
 		newentry.phar = phar;
- 		newentry.old_flags = newentry.flags & ~PHAR_ENT_COMPRESSION_MASK; /* remove compression from old_flags */
+		newentry.old_flags = newentry.flags & ~PHAR_ENT_COMPRESSION_MASK; /* remove compression from old_flags */
 		phar_set_inode(&newentry TSRMLS_CC);
 		zend_hash_add(&(phar->manifest), newentry.filename, newentry.filename_len, (void*)&newentry, sizeof(phar_entry_info), NULL);
 		phar_add_virtual_dirs(phar, newentry.filename, newentry.filename_len TSRMLS_CC);
@@ -2479,6 +2486,7 @@ PHP_METHOD(Phar, setAlias)
 			"Cannot write out phar archive, phar is read-only");
 		RETURN_FALSE;
 	}
+
 	/* invalidate phar cache */
 	PHAR_G(last_phar) = NULL;
 	PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
@@ -2735,7 +2743,7 @@ PHP_METHOD(Phar, setStub)
 /* {{{ proto array Phar::setSignatureAlgorithm(int sigtype[, string privatekey])
  * Sets the signature algorithm for a phar and applies it. The signature
  * algorithm must be one of Phar::MD5, Phar::SHA1, Phar::SHA256,
- * Phar::SHA512, or Phar::OPENSSL. Note that zip- and tar- based phar archives
+ * Phar::SHA512, or Phar::OPENSSL. Note that zip- based phar archives
  * cannot support signatures.
  */
 PHP_METHOD(Phar, setSignatureAlgorithm)
@@ -2744,12 +2752,13 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 	char *error, *key = NULL;
 	int key_len = 0;
 	PHAR_ARCHIVE_OBJECT();
-	
+
 	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"Cannot set signature algorithm, phar is read-only");
 		return;
 	}
+
 	if (phar_obj->arc.archive->is_zip) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
 			"Cannot set signature algorithm, not possible with zip-based phar archives");
