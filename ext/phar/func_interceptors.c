@@ -685,6 +685,7 @@ notfound:
 					efree(entry);
 					efree(save2);
 					if (IS_EXISTS_CHECK(type)) {
+						efree(arch);
 						RETURN_TRUE;
 					}
 					goto stat_entry;
@@ -724,6 +725,7 @@ notfound:
 				RETURN_FALSE;
 			}
 stat_entry:
+			efree(arch);
 			if (!data->is_dir) {
 				sb.st_size = data->uncompressed_filesize;
 				sb.st_mode = data->flags & PHAR_ENT_PERM_MASK;
@@ -762,7 +764,6 @@ stat_entry:
 			}
 
 statme_baby:
-			efree(arch);
 			if (!phar->is_writeable) {
 				sb.st_mode = (sb.st_mode & 0555) | (sb.st_mode & ~0777);
 			}
