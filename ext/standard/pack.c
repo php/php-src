@@ -121,6 +121,8 @@ PHP_FUNCTION(pack)
 		return;
 	}
 
+	convert_to_string_ex(argv[0]);
+
 	format = Z_STRVAL_PP(argv[0]);
 	formatlen = Z_STRLEN_PP(argv[0]);
 
