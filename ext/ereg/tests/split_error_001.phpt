@@ -31,11 +31,11 @@ echo "Done";
 
 -- Testing split() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for split() in %s on line 17
+Warning: split() expects at most 3 parameters, 4 given in %s on line 17
 NULL
 
 -- Testing split() function with less than expected no. of arguments --
 
-Warning: Wrong parameter count for split() in %s on line 22
+Warning: split() expects at least 2 parameters, 1 given in %s on line 22
 NULL
 Done

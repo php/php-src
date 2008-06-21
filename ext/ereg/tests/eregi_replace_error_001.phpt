@@ -32,11 +32,11 @@ echo "Done";
 
 -- Testing eregi_replace() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for eregi_replace() in %s on line 17
+Warning: eregi_replace() expects exactly 3 parameters, 4 given in %s on line 17
 NULL
 
 -- Testing eregi_replace() function with less than expected no. of arguments --
 
-Warning: Wrong parameter count for eregi_replace() in %s on line 23
+Warning: eregi_replace() expects exactly 3 parameters, 2 given in %s on line 23
 NULL
 Done

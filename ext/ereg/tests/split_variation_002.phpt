@@ -141,59 +141,24 @@ array(1) {
 }
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-array(3) {
-  [0]=>
-  string(1) "A"
-  [1]=>
-  string(0) ""
-  [2]=>
-  string(2) "ay"
-}
+Error: 2 - split() expects parameter 2 to be string, array given, %s(74)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-array(3) {
-  [0]=>
-  string(1) "A"
-  [1]=>
-  string(0) ""
-  [2]=>
-  string(2) "ay"
-}
+Error: 2 - split() expects parameter 2 to be string, array given, %s(74)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-array(3) {
-  [0]=>
-  string(1) "A"
-  [1]=>
-  string(0) ""
-  [2]=>
-  string(2) "ay"
-}
+Error: 2 - split() expects parameter 2 to be string, array given, %s(74)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-array(3) {
-  [0]=>
-  string(1) "A"
-  [1]=>
-  string(0) ""
-  [2]=>
-  string(2) "ay"
-}
+Error: 2 - split() expects parameter 2 to be string, array given, %s(74)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-array(3) {
-  [0]=>
-  string(1) "A"
-  [1]=>
-  string(0) ""
-  [2]=>
-  string(2) "ay"
-}
+Error: 2 - split() expects parameter 2 to be string, array given, %s(74)
+NULL
 
 Arg value  
 array(1) {
@@ -245,14 +210,8 @@ array(1) {
 Error: 4096 - Object of class stdClass could not be converted to string, %s(73)
 
 Arg value  
-Error: 4096 - Object of class stdClass could not be converted to string, %s(74)
-Error: 8 - Object of class stdClass to string conversion, %s(74)
-array(2) {
-  [0]=>
-  string(2) "Ob"
-  [1]=>
-  string(3) "ect"
-}
+Error: 2 - split() expects parameter 2 to be string, object given, /home/felipe/php5/ext/ereg/tests/split_variation_002.php(74)
+NULL
 
 Arg value  
 array(1) {

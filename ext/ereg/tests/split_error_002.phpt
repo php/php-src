@@ -61,8 +61,8 @@ bool(false)
 Warning: split(): REG_BADRPT in %s on line 22
 bool(false)
 
-Warning: split(): REG_BADRPT in %s on line 23
-bool(false)
+Warning: split() expects parameter 3 to be long, string given in %s on line 23
+NULL
 
 Warning: split(): REG_BADBR in %s on line 24
 bool(false)
@@ -82,7 +82,7 @@ bool(false)
 Warning: split(): REG_EESCAPE in %s on line 29
 bool(false)
 
-Warning: split(): REG_ERANGE in %s on line 30
-bool(false)
+Warning: split() expects parameter 3 to be long, string given in %s on line 30
+NULL
 string(8) "original"
 Done

@@ -27,11 +27,11 @@ echo "Done";
 
 -- Testing sql_regcase() function with Zero arguments --
 
-Warning: Wrong parameter count for sql_regcase() in %s on line 12
+Warning: sql_regcase() expects exactly 1 parameter, 0 given in %s.php on line 12
 NULL
 
 -- Testing sql_regcase() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for sql_regcase() in %s on line 18
+Warning: sql_regcase() expects exactly 1 parameter, 2 given in %s.php on line 18
 NULL
 Done

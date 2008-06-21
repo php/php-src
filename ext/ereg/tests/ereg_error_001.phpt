@@ -35,11 +35,11 @@ echo "Done";
 
 -- Testing ereg() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for ereg() in %s on line 21
+Warning: ereg() expects at most 3 parameters, 4 given in %s on line 21
 NULL
 
 -- Testing ereg() function with less than expected no. of arguments --
 
-Warning: Wrong parameter count for ereg() in %s on line 26
+Warning: ereg() expects at least 2 parameters, 1 given in %s on line 26
 NULL
 Done

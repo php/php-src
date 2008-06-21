@@ -112,24 +112,24 @@ Arg value 0.5
 string(3) "0.5"
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-string(5) "Array"
+Error: 2 - eregi_replace() expects parameter 3 to be string, array given, %s(74)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-string(5) "Array"
+Error: 2 - eregi_replace() expects parameter 3 to be string, array given, %s(74)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-string(5) "Array"
+Error: 2 - eregi_replace() expects parameter 3 to be string, array given, %s(74)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-string(5) "Array"
+Error: 2 - eregi_replace() expects parameter 3 to be string, array given, %s(74)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-string(5) "Array"
+Error: 2 - eregi_replace() expects parameter 3 to be string, array given, %s(74)
+NULL
 
 Arg value  
 string(0) ""
@@ -157,9 +157,8 @@ string(0) ""
 Error: 4096 - Object of class stdClass could not be converted to string, %s(73)
 
 Arg value  
-Error: 4096 - Object of class stdClass could not be converted to string, %s(74)
-Error: 8 - Object of class stdClass to string conversion, %s(74)
-string(6) "Object"
+Error: 2 - eregi_replace() expects parameter 3 to be string, object given, %s(74)
+NULL
 
 Arg value  
 string(0) ""
