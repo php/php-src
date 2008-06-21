@@ -1,3 +1,21 @@
+2008-06-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      tests/ns_066.phpt
+      tests/ns_067.inc
+      tests/ns_067.phpt:
+      Allowed to override internal classaes with "use"
+
+    * tests/ns_066.phpt
+      tests/ns_066.phpt
+      tests/ns_067.inc
+      tests/ns_067.inc
+      tests/ns_067.phpt
+      tests/ns_067.phpt:
+      
+      file ns_066.phpt was initially added on branch PHP_5_3.
+
 2008-06-19  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_3)

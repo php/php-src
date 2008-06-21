@@ -1,3 +1,151 @@
+2008-06-20  David Coallier  <david.coallier@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/pack.c:
+      - New parsing parameter API cleanups
+
+2008-06-20  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      ext/standard/ftok.c:
+      fix buglet
+
+2008-06-20  Olivier Hill  <olivier.hill@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/var.c
+      ext/standard/tests/general_functions/debug_zval_dump_e.phpt
+      ext/standard/tests/general_functions/var_dump.phpt:
+      - New parameter parsing API for var.c & tests
+
+2008-06-20  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/gettext/gettext.c
+      ext/gettext/tests/dcngettext.phpt
+      ext/standard/ftok.c
+      ext/standard/image.c
+      ext/standard/info.c
+      ext/standard/pack.c
+      ext/standard/quot_print.c
+      ext/standard/streamsfuncs.c
+      ext/standard/type.c
+      ext/standard/var.c
+      ext/standard/tests/file/stream_rfc2397_002.phpt
+      ext/standard/tests/general_functions/floatval.phpt
+      ext/standard/tests/general_functions/gettype_settype_error.phpt
+      ext/standard/tests/general_functions/is_array.phpt
+      ext/standard/tests/general_functions/is_bool.phpt
+      ext/standard/tests/general_functions/is_float.phpt
+      ext/standard/tests/general_functions/is_int.phpt
+      ext/standard/tests/general_functions/is_null.phpt
+      ext/standard/tests/general_functions/is_numeric.phpt
+      ext/standard/tests/general_functions/is_object.phpt
+      ext/standard/tests/general_functions/is_scalar.phpt
+      ext/standard/tests/general_functions/is_string.phpt
+      ext/standard/tests/general_functions/strval.phpt
+      ext/standard/tests/serialize/serialization_error_001.phpt
+      ext/standard/tests/streams/stream_get_meta_data_file_error.phpt
+      ext/standard/tests/streams/stream_set_timeout_error.phpt
+      ext/wddx/wddx.c:
+      - New parameter parsing API
+
+2008-06-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/ns_066.phpt
+      ZendEngine2/tests/ns_067.inc
+      ZendEngine2/tests/ns_067.phpt:
+      Allowed to override internal classaes with "use"
+
+    * ZendEngine2/tests/ns_066.phpt
+      ZendEngine2/tests/ns_066.phpt
+      ZendEngine2/tests/ns_067.inc
+      ZendEngine2/tests/ns_067.inc
+      ZendEngine2/tests/ns_067.phpt
+      ZendEngine2/tests/ns_067.phpt:
+      
+      file ns_066.phpt was initially added on branch PHP_5_3.
+
+2008-06-20  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      ext/phar/util.c
+      ext/phar/zip.c:
+      - 5_2 compatibility stuff (so we can stay in sync with PECL)
+
+    * (PHP_5_3)
+      ext/phar/tests/bug13727.phpt
+      ext/phar/tests/bug45218_SLOWTEST.phpt:
+      - Use SKIP_SLOW_TESTS where it's most useful
+
+    * (PHP_5_3)
+      ext/phar/tar.c:
+      - Kill the last compiler warning under 5.3 (release-only)
+
+    * (PHP_5_3)
+      ext/phar/phar.c:
+      The only reason that particular 'real solution' wasn't applied in the first
+      place was that it also breaks the shared build
+      Maybe we don't need to call a non-existent dtor if we're going to
+      physically apply zend_hash_graceful_reverse_destroy()?
+      - This works on my box, please test under *nix/OSX
+
+2008-06-20  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/xmlrpc/xmlrpc-epi-php.c:
+      - Fix ws
+
+2008-06-20  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      ext/phar/phar_object.c:
+      - Fix ZTS build (not required on HEAD, patch by Uwe Pries)
+
+2008-06-20  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/phar.phar
+      ext/phar/util.c:
+      minor performance improvement
+
+    * (PHP_5_3)
+      ext/phar/func_interceptors.c
+      ext/phar/phar.c
+      ext/phar/phar.phar
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/util.c:
+      making progress - up to 42/phar vs. 48/disk with these optimizations
+
+    * (PHP_5_3)
+      ext/phar/phar.c:
+      revert really bad solution to the
+      zend_init_rsrc_list/zend_destroy_rsrc_list problem, replace with real
+      solution
+
+2008-06-20  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/.cvsignore
+      ext/standard/tests/strings/vfprintf_basic.phpt
+      ext/standard/tests/strings/vfprintf_basic.phpt
+      ext/standard/tests/strings/vfprintf_error1.phpt
+      ext/standard/tests/strings/vfprintf_error1.phpt
+      ext/standard/tests/strings/vfprintf_error2.phpt
+      ext/standard/tests/strings/vfprintf_error2.phpt
+      ext/standard/tests/strings/vfprintf_error3.phpt
+      ext/standard/tests/strings/vfprintf_error3.phpt
+      ext/standard/tests/strings/vfprintf_error4.phpt
+      ext/standard/tests/strings/vfprintf_error4.phpt
+      ext/standard/tests/strings/vfprintf_variation1.phpt
+      ext/standard/tests/strings/vfprintf_variation1.phpt:
+      New testcases for vfprintf(), Committed for Felix De Vliegher, TestFest
+      Task No: 124, Tested on RHEL5 -32bit, WinXP-32bit
+      Added *.txt to .cvsignore
+
 2008-06-19  Christopher Jones  <christopher.jones@oracle.com>
 
     * (PHP_5_2)
