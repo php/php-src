@@ -289,6 +289,7 @@ splitted:
 				return ret;
 			}
 		}
+		efree(test);
 	}
 	spprintf(&path, MAXPATHLEN, "phar://%s/%s%c%s", arch, PHAR_G(cwd), DEFAULT_DIR_SEPARATOR, PG(include_path));
 	efree(arch);
