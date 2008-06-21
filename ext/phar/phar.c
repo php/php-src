@@ -3123,13 +3123,13 @@ static void php_phar_init_globals_module(zend_phar_globals *phar_globals)
 }
 /* }}} */
 
-#if PHP_VERSION_ID >= 50300
 static size_t phar_zend_stream_reader(void *handle, char *buf, size_t len TSRMLS_DC) /* {{{ */
 {
 	return php_stream_read(phar_get_pharfp((phar_archive_data*)handle TSRMLS_CC), buf, len);
 }
 /* }}} */
 
+#if PHP_VERSION_ID >= 50300
 static size_t phar_zend_stream_fsizer(void *handle TSRMLS_DC) /* {{{ */
 {
 	return ((phar_archive_data*)handle)->halt_offset + 32;
@@ -3137,7 +3137,7 @@ static size_t phar_zend_stream_fsizer(void *handle TSRMLS_DC) /* {{{ */
 
 #else /* PHP_VERSION_ID */
 
-static long stream_fteller_for_zend(void *handle TSRMLS_DC) /* {{{ */
+static long phar_stream_fteller_for_zend(void *handle TSRMLS_DC) /* {{{ */
 {
 	return (long)php_stream_tell(phar_get_pharfp((phar_archive_data*)handle TSRMLS_CC));
 }
@@ -3201,9 +3201,9 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 				file_handle->free_filename = 0;
 				/* we do our own reading directly from the phar, don't change the next line */
 				file_handle->handle.stream.handle = phar;
-				file_handle->handle.stream.reader = (zend_stream_reader_t)_php_stream_read;
+				file_handle->handle.stream.reader = phar_zend_stream_reader;
 				file_handle->handle.stream.closer = NULL; /* don't close - let phar handle this one */
-				file_handle->handle.stream.fteller = stream_fteller_for_zend;
+				file_handle->handle.stream.fteller = phar_stream_fteller_for_zend;
 				file_handle->handle.stream.interactive = 0;
 				phar->is_persistent ?
 					php_stream_rewind(PHAR_GLOBALS->cached_fp[phar->phar_pos].fp) :
