@@ -213,15 +213,13 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 				if (phar_parse_metadata(&metadata, &mydata->metadata, PHAR_GET_16(locator.comment_len) TSRMLS_CC) == FAILURE) {
 					mydata->metadata_len = 0;
 					/* if not valid serialized data, it is a regular string */
-#if PHP_VERSION_ID >= 50300
+
 					if (entry.is_persistent) {
 						ALLOC_PERMANENT_ZVAL(mydata->metadata);
 					} else {
 						ALLOC_ZVAL(mydata->metadata);
 					}
-#else
-					ALLOC_ZVAL(mydata->metadata);
-#endif
+
 					INIT_ZVAL(*mydata->metadata);
 					metadata = pestrndup(metadata, PHAR_GET_16(locator.comment_len), mydata->is_persistent);
 					ZVAL_STRINGL(mydata->metadata, metadata, PHAR_GET_16(locator.comment_len), 0);
@@ -409,15 +407,13 @@ foundit:
 			if (phar_parse_metadata(&p, &(entry.metadata), PHAR_GET_16(zipentry.comment_len) TSRMLS_CC) == FAILURE) {
 				entry.metadata_len = 0;
 				/* if not valid serialized data, it is a regular string */
-#if PHP_VERSION_ID >= 50300
+
 				if (entry.is_persistent) {
 					ALLOC_PERMANENT_ZVAL(entry.metadata);
 				} else {
 					ALLOC_ZVAL(entry.metadata);
 				}
-#else
-				ALLOC_ZVAL(entry.metadata);
-#endif
+
 				INIT_ZVAL(*entry.metadata);
 				ZVAL_STRINGL(entry.metadata, pestrndup(buf, PHAR_GET_16(zipentry.comment_len), entry.is_persistent), PHAR_GET_16(zipentry.comment_len), 0);
 			}

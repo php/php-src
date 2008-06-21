@@ -80,7 +80,8 @@
 #endif
 
 #ifndef ALLOC_PERMANENT_ZVAL
-# define ALLOC_PERMANENT_ZVAL (z) = (zval*)malloc(sizeof(zval));
+# define ALLOC_PERMANENT_ZVAL(z) \
+	(z) = (zval*)malloc(sizeof(zval))
 #endif
 
 /* PHP_ because this is public information via MINFO */
