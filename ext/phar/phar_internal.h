@@ -72,11 +72,15 @@
 #endif
 
 #ifndef E_RECOVERABLE_ERROR
-#define E_RECOVERABLE_ERROR E_ERROR
+# define E_RECOVERABLE_ERROR E_ERROR
 #endif
 
 #ifndef pestrndup
-#define pestrndup(s, length, persistent) ((persistent)?zend_strndup((s),(length)):estrndup((s),(length)))
+# define pestrndup(s, length, persistent) ((persistent)?zend_strndup((s),(length)):estrndup((s),(length)))
+#endif
+
+#ifndef ALLOC_PERMANENT_ZVAL
+# define ALLOC_PERMANENT_ZVAL (z) = (zval*)malloc(sizeof(zval));
 #endif
 
 /* PHP_ because this is public information via MINFO */
