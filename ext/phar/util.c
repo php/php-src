@@ -324,6 +324,7 @@ splitted:
 	int n = 0;
 	char *fname, *arch, *entry, *ret, *test;
 	int arch_len, entry_len;
+	phar_archive_data *phar = NULL;
 
 	if (!filename) {
 		return NULL;
@@ -339,24 +340,23 @@ splitted:
 
 	efree(entry);
 	if (*filename == '.') {
-		phar_archive_data **pphar = NULL;
 		int try_len;
 
-		if (FAILURE == phar_get_archive(pphar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {
+		if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {
 			efree(arch);
 			goto doit;
 		}
 		try_len = filename_len;
 		test = phar_fix_filepath(estrndup(filename, filename_len), &try_len, 1 TSRMLS_CC);
 		if (*test == '/') {
-			if (zend_hash_exists(&((*pphar)->manifest), test + 1, try_len - 1)) {
+			if (zend_hash_exists(&(phar->manifest), test + 1, try_len - 1)) {
 				spprintf(&ret, 0, "phar://%s%s", arch, test);
 				efree(arch);
 				efree(test);
 				return ret;
 			}
 		} else {
-			if (zend_hash_exists(&((*pphar)->manifest), test, try_len)) {
+			if (zend_hash_exists(&(phar)->manifest), test, try_len)) {
 				spprintf(&ret, 0, "phar://%s/%s", arch, test);
 				efree(arch);
 				efree(test);
