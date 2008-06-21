@@ -1578,19 +1578,17 @@ int gdImageColorResolve(gdImagePtr im, int r, int g, int b)
    Load a new font */
 PHP_FUNCTION(imageloadfont)
 {
-	zval **file;
-	int hdr_size = sizeof(gdFont) - sizeof(char *);
+	char *file;
+	int file_name, hdr_size = sizeof(gdFont) - sizeof(char *);
 	int ind, body_size, n = 0, b, i, body_size_check;
 	gdFontPtr font;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file, &file_name) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(file);
-
-	stream = php_stream_open_wrapper(Z_STRVAL_PP(file), "rb", ENFORCE_SAFE_MODE | IGNORE_PATH | IGNORE_URL_WIN | REPORT_ERRORS, NULL);
+	stream = php_stream_open_wrapper(file, "rb", ENFORCE_SAFE_MODE | IGNORE_PATH | IGNORE_URL_WIN | REPORT_ERRORS, NULL);
 	if (stream == NULL) {
 		RETURN_FALSE;
 	}
@@ -1676,29 +1674,27 @@ PHP_FUNCTION(imageloadfont)
    Set the line drawing styles for use with imageline and IMG_COLOR_STYLED. */
 PHP_FUNCTION(imagesetstyle)
 {
-	zval **IM, **styles;
+	zval *IM, *styles;
 	gdImagePtr im;
 	int * stylearr;
 	int index;
 	HashPosition pos;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &IM, &styles) == FAILURE)  {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra", &IM, &styles) == FAILURE)  {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
-
-	convert_to_array_ex(styles);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
 	/* copy the style values in the stylearr */
-	stylearr = safe_emalloc(sizeof(int), zend_hash_num_elements(HASH_OF(*styles)), 0);
+	stylearr = safe_emalloc(sizeof(int), zend_hash_num_elements(HASH_OF(styles)), 0);
 
-	zend_hash_internal_pointer_reset_ex(HASH_OF(*styles), &pos);
+	zend_hash_internal_pointer_reset_ex(HASH_OF(styles), &pos);
 
-	for (index = 0;; zend_hash_move_forward_ex(HASH_OF(*styles), &pos))	{
+	for (index = 0;; zend_hash_move_forward_ex(HASH_OF(styles), &pos))	{
 		zval ** item;
 
-		if (zend_hash_get_current_data_ex(HASH_OF(*styles), (void **) &item, &pos) == FAILURE) {
+		if (zend_hash_get_current_data_ex(HASH_OF(styles), (void **) &item, &pos) == FAILURE) {
 			break;
 		}
 
@@ -1720,24 +1716,19 @@ PHP_FUNCTION(imagesetstyle)
    Create a new true color image */
 PHP_FUNCTION(imagecreatetruecolor)
 {
-	zval **x_size, **y_size;
+	long x_size, y_size;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &x_size, &y_size) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &x_size, &y_size) == FAILURE) {
+		return;
 	}
 
-	convert_to_long_ex(x_size);
-	convert_to_long_ex(y_size);
-
-	if (Z_LVAL_PP(x_size) <= 0 || Z_LVAL_PP(y_size) <= 0 ||
-			Z_LVAL_PP(x_size) >= INT_MAX || Z_LVAL_PP(y_size) >= INT_MAX 
-		) {
+	if (x_size <= 0 || y_size <= 0 || x_size >= INT_MAX || y_size >= INT_MAX) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid image dimensions");
 		RETURN_FALSE;
 	}
 
-	im = gdImageCreateTrueColor(Z_LVAL_PP(x_size), Z_LVAL_PP(y_size));
+	im = gdImageCreateTrueColor(x_size, y_size);
 
 	if (!im) {
 		RETURN_FALSE;
@@ -1751,14 +1742,14 @@ PHP_FUNCTION(imagecreatetruecolor)
    return true if the image uses truecolor */
 PHP_FUNCTION(imageistruecolor)
 {
-	zval **IM;
+	zval *IM;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &IM) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &IM) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
 	RETURN_BOOL(im->trueColor);
 }
@@ -1768,23 +1759,22 @@ PHP_FUNCTION(imageistruecolor)
    Convert a true colour image to a palette based image with a number of colours, optionally using dithering. */
 PHP_FUNCTION(imagetruecolortopalette)
 {
-	zval **IM, **dither, **ncolors;
+	zval *IM;
+	zend_bool dither;
+	long ncolors;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &IM, &dither, &ncolors) == FAILURE)  {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rbl", &IM, &dither, &ncolors) == FAILURE)  {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_boolean_ex(dither);
-	convert_to_long_ex(ncolors);
-
-	if (Z_LVAL_PP(ncolors) <= 0) {
+	if (ncolors <= 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of colors has to be greater than zero");
 		RETURN_FALSE;
 	}
-	gdImageTrueColorToPalette(im, Z_LVAL_PP(dither), Z_LVAL_PP(ncolors));
+	gdImageTrueColorToPalette(im, dither, ncolors);
 
 	RETURN_TRUE;
 }
@@ -1795,16 +1785,16 @@ PHP_FUNCTION(imagetruecolortopalette)
    Makes the colors of the palette version of an image more closely match the true color version */
 PHP_FUNCTION(imagecolormatch)
 {
-	zval **IM1, **IM2;
+	zval *IM1, *IM2;
 	gdImagePtr im1, im2;
 	int result;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &IM1, &IM2 ) == FAILURE)  {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr", &IM1, &IM2) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im1, gdImagePtr, IM1, -1, "Image", le_gd);
-	ZEND_FETCH_RESOURCE(im2, gdImagePtr, IM2, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im1, gdImagePtr, &IM1, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im2, gdImagePtr, &IM2, -1, "Image", le_gd);
 
 	result = gdImageColorMatch(im1, im2);
 	switch (result) {
@@ -1835,17 +1825,17 @@ PHP_FUNCTION(imagecolormatch)
    Set line thickness for drawing lines, ellipses, rectangles, polygons etc. */
 PHP_FUNCTION(imagesetthickness)
 {
-	zval **IM, **thick;
+	zval *IM;
+	long thick;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &IM, &thick) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &IM, &thick) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
-	convert_to_long_ex(thick);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	gdImageSetThickness(im, Z_LVAL_PP(thick));
+	gdImageSetThickness(im, thick);
 
 	RETURN_TRUE;
 }
@@ -1855,22 +1845,17 @@ PHP_FUNCTION(imagesetthickness)
    Draw an ellipse */
 PHP_FUNCTION(imagefilledellipse)
 {
-	zval **IM, **cx, **cy, **w, **h, **color;
+	zval *IM;
+	long cx, cy, w, h, color;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &cx, &cy, &w, &h, &color) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlllll", &IM, &cx, &cy, &w, &h, &color) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_long_ex(cx);
-	convert_to_long_ex(cy);
-	convert_to_long_ex(w);
-	convert_to_long_ex(h);
-	convert_to_long_ex(color);
-
-	gdImageFilledEllipse(im, Z_LVAL_PP(cx), Z_LVAL_PP(cy), Z_LVAL_PP(w), Z_LVAL_PP(h), Z_LVAL_PP(color));
+	gdImageFilledEllipse(im, cx, cy, w, h, color);
 
 	RETURN_TRUE;
 }
@@ -1880,36 +1865,28 @@ PHP_FUNCTION(imagefilledellipse)
    Draw a filled partial ellipse */
 PHP_FUNCTION(imagefilledarc)
 {
-	zval **IM, **cx, **cy, **w, **h, **ST, **E, **col, **style;
+	zval *IM;
+	long cx, cy, w, h, ST, E, col, style;
 	gdImagePtr im;
 	int e, st;
-
-	if (ZEND_NUM_ARGS() != 9 || zend_get_parameters_ex(9, &IM, &cx, &cy, &w, &h, &ST, &E, &col, &style) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllllllll", &IM, &cx, &cy, &w, &h, &ST, &E, &col, &style) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_long_ex(cx);
-	convert_to_long_ex(cy);
-	convert_to_long_ex(w);
-	convert_to_long_ex(h);
-	convert_to_long_ex(ST);
-	convert_to_long_ex(E);
-	convert_to_long_ex(col);
-	convert_to_long_ex(style);
-
-	e = Z_LVAL_PP(E);
+	e = E;
 	if (e < 0) {
 		e %= 360;
 	}
 
-	st = Z_LVAL_PP(ST);
+	st = ST;
 	if (st < 0) {
 		st %= 360;
 	}
 
-	gdImageFilledArc(im, Z_LVAL_PP(cx), Z_LVAL_PP(cy), Z_LVAL_PP(w), Z_LVAL_PP(h), st, e, Z_LVAL_PP(col), Z_LVAL_PP(style));
+	gdImageFilledArc(im, cx, cy, w, h, st, e, col, style);
 
 	RETURN_TRUE;
 }
@@ -1919,17 +1896,17 @@ PHP_FUNCTION(imagefilledarc)
    Turn alpha blending mode on or off for the given image */
 PHP_FUNCTION(imagealphablending)
 {
-	zval **IM, **blend;
+	zval *IM;
+	zend_bool blend;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 2 ||	zend_get_parameters_ex(2, &IM, &blend) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb", &IM, &blend) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
-	convert_to_boolean_ex(blend);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	gdImageAlphaBlending(im, Z_LVAL_PP(blend));
+	gdImageAlphaBlending(im, blend);
 
 	RETURN_TRUE;
 }
@@ -1940,17 +1917,17 @@ PHP_FUNCTION(imagealphablending)
    Include alpha channel to a saved image */
 PHP_FUNCTION(imagesavealpha)
 {
-	zval **IM, **save;
+	zval *IM;
+	zend_bool save;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 2 ||	zend_get_parameters_ex(2, &IM, &save) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb", &IM, &save) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
-	convert_to_boolean_ex(save);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	gdImageSaveAlpha(im, Z_LVAL_PP(save));
+	gdImageSaveAlpha(im, save);
 
 	RETURN_TRUE;
 }
@@ -1962,17 +1939,17 @@ PHP_FUNCTION(imagesavealpha)
    Set the alpha blending flag to use the bundled libgd layering effects */
 PHP_FUNCTION(imagelayereffect)
 {
-	zval **IM, **effect;
+	zval *IM;
+	long effect;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 2 ||	zend_get_parameters_ex(2, &IM, &effect) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &IM, &effect) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
-	convert_to_long_ex(effect);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	gdImageAlphaBlending(im, Z_LVAL_PP(effect) );
+	gdImageAlphaBlending(im, effect);
 
 	RETURN_TRUE;
 }
@@ -1988,7 +1965,7 @@ PHP_FUNCTION(imagecolorallocatealpha)
 	gdImagePtr im;
 	int ct = (-1);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zllll", &IM, &red, &green, &blue, &alpha) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllll", &IM, &red, &green, &blue, &alpha) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -2007,21 +1984,17 @@ PHP_FUNCTION(imagecolorallocatealpha)
    Resolve/Allocate a colour with an alpha level.  Works for true colour and palette based images */
 PHP_FUNCTION(imagecolorresolvealpha)
 {
-	zval **IM, ** red, **green, **blue, **alpha;
+	zval *IM;
+	long red, green, blue, alpha;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &IM, &red, &green, &blue, &alpha) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllll", &IM, &red, &green, &blue, &alpha) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_long_ex(red);
-	convert_to_long_ex(green);
-	convert_to_long_ex(blue);
-	convert_to_long_ex(alpha);
-
-	RETURN_LONG(gdImageColorResolveAlpha(im, Z_LVAL_PP(red), Z_LVAL_PP(green), Z_LVAL_PP(blue), Z_LVAL_PP(alpha)));
+	RETURN_LONG(gdImageColorResolveAlpha(im, red, green, blue, alpha));
 }
 /* }}} */
 
@@ -2029,21 +2002,17 @@ PHP_FUNCTION(imagecolorresolvealpha)
    Find the closest matching colour with alpha transparency */
 PHP_FUNCTION(imagecolorclosestalpha)
 {
-	zval **IM, ** red, **green, **blue, **alpha;
+	zval *IM;
+	long red, green, blue, alpha;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &IM, &red, &green, &blue, &alpha) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllll", &IM, &red, &green, &blue, &alpha) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_long_ex(red);
-	convert_to_long_ex(green);
-	convert_to_long_ex(blue);
-	convert_to_long_ex(alpha);
-
-	RETURN_LONG(gdImageColorClosestAlpha(im, Z_LVAL_PP(red), Z_LVAL_PP(green), Z_LVAL_PP(blue), Z_LVAL_PP(alpha)));
+	RETURN_LONG(gdImageColorClosestAlpha(im, red, green, blue, alpha));
 }
 /* }}} */
 
@@ -2051,21 +2020,17 @@ PHP_FUNCTION(imagecolorclosestalpha)
    Find exact match for colour with transparency */
 PHP_FUNCTION(imagecolorexactalpha)
 {
-	zval **IM, **red, **green, **blue, **alpha;
+	zval *IM;
+	long red, green, blue, alpha;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &IM, &red, &green, &blue, &alpha) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllll", &IM, &red, &green, &blue, &alpha) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_long_ex(red);
-	convert_to_long_ex(green);
-	convert_to_long_ex(blue);
-	convert_to_long_ex(alpha);
-
-	RETURN_LONG(gdImageColorExactAlpha(im, Z_LVAL_PP(red), Z_LVAL_PP(green), Z_LVAL_PP(blue), Z_LVAL_PP(alpha)));
+	RETURN_LONG(gdImageColorExactAlpha(im, red, green, blue, alpha));
 }
 /* }}} */
 
@@ -2073,34 +2038,26 @@ PHP_FUNCTION(imagecolorexactalpha)
    Copy and resize part of an image using resampling to help ensure clarity */
 PHP_FUNCTION(imagecopyresampled)
 {
-	zval **SIM, **DIM, **SX, **SY, **SW, **SH, **DX, **DY, **DW, **DH;
+	zval *SIM, *DIM;
+	long SX, SY, SW, SH, DX, DY, DW, DH;
 	gdImagePtr im_dst, im_src;
 	int srcH, srcW, dstH, dstW, srcY, srcX, dstY, dstX;
 
-	if (ZEND_NUM_ARGS() != 10 || zend_get_parameters_ex(10, &DIM, &SIM, &DX, &DY, &SX, &SY, &DW, &DH, &SW, &SH) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrllllllll", &DIM, &SIM, &DX, &DY, &SX, &SY, &DW, &DH, &SW, &SH) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, DIM, -1, "Image", le_gd);
-	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, &DIM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, &SIM, -1, "Image", le_gd);
 
-	convert_to_long_ex(SX);
-	convert_to_long_ex(SY);
-	convert_to_long_ex(SW);
-	convert_to_long_ex(SH);
-	convert_to_long_ex(DX);
-	convert_to_long_ex(DY);
-	convert_to_long_ex(DW);
-	convert_to_long_ex(DH);
-
-	srcX = Z_LVAL_PP(SX);
-	srcY = Z_LVAL_PP(SY);
-	srcH = Z_LVAL_PP(SH);
-	srcW = Z_LVAL_PP(SW);
-	dstX = Z_LVAL_PP(DX);
-	dstY = Z_LVAL_PP(DY);
-	dstH = Z_LVAL_PP(DH);
-	dstW = Z_LVAL_PP(DW);
+	srcX = SX;
+	srcY = SY;
+	srcH = SH;
+	srcW = SW;
+	dstX = DX;
+	dstY = DY;
+	dstH = DH;
+	dstW = DW;
 
 	gdImageCopyResampled(im_dst, im_src, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH);
 
@@ -2218,6 +2175,10 @@ PHP_FUNCTION(imagegrabscreen)
 	gdImagePtr im;
 	hdc		= GetDC(0);
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	if (!hdc) {
 		RETURN_FALSE;
 	}
@@ -2291,15 +2252,15 @@ PHP_FUNCTION(imagerotate)
    Set the tile image to $tile when filling $image with the "IMG_COLOR_TILED" color */
 PHP_FUNCTION(imagesettile)
 {
-	zval **IM, **TILE;
+	zval *IM, *TILE;
 	gdImagePtr im, tile;
 
-	if (ZEND_NUM_ARGS() != 2 ||	zend_get_parameters_ex(2, &IM, &TILE) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr", &IM, &TILE) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
-	ZEND_FETCH_RESOURCE(tile, gdImagePtr, TILE, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(tile, gdImagePtr, &TILE, -1, "Image", le_gd);
 
 	gdImageSetTile(im, tile);
 
@@ -2313,15 +2274,15 @@ PHP_FUNCTION(imagesettile)
    Set the brush image to $brush when filling $image with the "IMG_COLOR_BRUSHED" color */
 PHP_FUNCTION(imagesetbrush)
 {
-	zval **IM, **TILE;
+	zval *IM, *TILE;
 	gdImagePtr im, tile;
 
-	if (ZEND_NUM_ARGS() != 2 ||	zend_get_parameters_ex(2, &IM, &TILE) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr", &IM, &TILE) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
-	ZEND_FETCH_RESOURCE(tile, gdImagePtr, TILE, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(tile, gdImagePtr, &TILE, -1, "Image", le_gd);
 
 	gdImageSetBrush(im, tile);
 
@@ -2334,24 +2295,19 @@ PHP_FUNCTION(imagesetbrush)
    Create a new image */
 PHP_FUNCTION(imagecreate)
 {
-	zval **x_size, **y_size;
+	long x_size, y_size;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &x_size, &y_size) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &x_size, &y_size) == FAILURE) {
+		return;
 	}
 
-	convert_to_long_ex(x_size);
-	convert_to_long_ex(y_size);
-
-	if (Z_LVAL_PP(x_size) <= 0 || Z_LVAL_PP(y_size) <= 0 ||
-			Z_LVAL_PP(x_size) >= INT_MAX || Z_LVAL_PP(y_size) >= INT_MAX
-		) {
+	if (x_size <= 0 || y_size <= 0 || x_size >= INT_MAX || y_size >= INT_MAX) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid image dimensions");
 		RETURN_FALSE;
 	}
 
-	im = gdImageCreate(Z_LVAL_PP(x_size), Z_LVAL_PP(y_size));
+	im = gdImageCreate(x_size, y_size);
 
 	if (!im) {
 		RETURN_FALSE;
@@ -2485,8 +2441,8 @@ PHP_FUNCTION(imagecreatefromstring)
 	int imtype;
 	char sig[8];
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &data) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &data) == FAILURE) {
+		return;
 	}
 
 	convert_to_string_ex(data);
@@ -2782,37 +2738,36 @@ PHP_FUNCTION(imagecreatefromgd2part)
  */
 static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)())
 {
-	zval **imgind, **file, **quality, **type;
+	zval *imgind;
+	char *file = NULL;
+	long quality, type;
 	gdImagePtr im;
 	char *fn = NULL;
 	FILE *fp;
-	int argc = ZEND_NUM_ARGS();
+	int file_len, argc = ZEND_NUM_ARGS();
 	int q = -1, i, t = 1;
 
 	/* The quality parameter for Wbmp stands for the threshold when called from image2wbmp() */
 	/* When called from imagewbmp() the quality parameter stands for the foreground color. Default: black. */
 	/* The quality parameter for gd2 stands for chunk size */
 
-	if (argc < 1 || argc > 4 || zend_get_parameters_ex(argc, &imgind, &file, &quality, &type) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(argc TSRMLS_CC, "r|sll", &imgind, &file, &file_len, &quality, &type) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &imgind, -1, "Image", le_gd);
 
 	if (argc > 1) {
-		convert_to_string_ex(file);
-		fn = Z_STRVAL_PP(file);
+		fn = file;
 		if (argc == 3) {
-			convert_to_long_ex(quality);
-			q = Z_LVAL_PP(quality);
+			q = quality;
 		}
 		if (argc == 4) {
-			convert_to_long_ex(type);
-			t = Z_LVAL_PP(type);
+			t = type;
 		}
 	}
 
-	if (argc >= 2 && Z_STRLEN_PP(file)) {
+	if (argc >= 2 && file_len) {
 		PHP_GD_CHECK_OPEN_BASEDIR(fn, "Invalid filename");
 
 		fp = VCWD_FOPEN(fn, "wb");
@@ -3031,16 +2986,16 @@ PHP_FUNCTION(imagegd2)
    Destroy an image */
 PHP_FUNCTION(imagedestroy)
 {
-	zval **IM;
+	zval *IM;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &IM) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &IM) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	zend_list_delete(Z_LVAL_PP(IM));
+	zend_list_delete(Z_LVAL_P(IM));
 
 	RETURN_TRUE;
 }
@@ -3051,20 +3006,18 @@ PHP_FUNCTION(imagedestroy)
    Allocate a color for an image */
 PHP_FUNCTION(imagecolorallocate)
 {
-	zval **IM, **red, **green, **blue;
+	zval *IM;
+	long red, green, blue;
 	gdImagePtr im;
 	int ct = (-1);
 
-	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &IM, &red, &green, &blue) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlll", &IM, &red, &green, &blue) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_long_ex(red);
-	convert_to_long_ex(green);
-	convert_to_long_ex(blue);
-	ct = gdImageColorAllocate(im, Z_LVAL_PP(red), Z_LVAL_PP(green), Z_LVAL_PP(blue));
+	ct = gdImageColorAllocate(im, red, green, blue);
 	if (ct < 0) {
 		RETURN_FALSE;
 	}
@@ -3077,15 +3030,15 @@ PHP_FUNCTION(imagecolorallocate)
    Copy the palette from the src image onto the dst image */
 PHP_FUNCTION(imagepalettecopy)
 {
-	zval **dstim, **srcim;
+	zval *dstim, *srcim;
 	gdImagePtr dst, src;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &dstim, &srcim) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr", &dstim, &srcim) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(dst, gdImagePtr, dstim, -1, "Image", le_gd);
-	ZEND_FETCH_RESOURCE(src, gdImagePtr, srcim, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(dst, gdImagePtr, &dstim, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(src, gdImagePtr, &srcim, -1, "Image", le_gd);
 
 	gdImagePaletteCopy(dst, src);
 }
@@ -3096,36 +3049,34 @@ PHP_FUNCTION(imagepalettecopy)
    Get the index of the color of a pixel */
 PHP_FUNCTION(imagecolorat)
 {
-	zval **IM, **x, **y;
+	zval *IM;
+	long x, y;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &IM, &x, &y) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rll", &IM, &x, &y) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
-
-	convert_to_long_ex(x);
-	convert_to_long_ex(y);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
 #if HAVE_LIBGD20
 	if (gdImageTrueColor(im)) {
-		if (im->tpixels && gdImageBoundsSafe(im, Z_LVAL_PP(x), Z_LVAL_PP(y))) {
-			RETURN_LONG(gdImageTrueColorPixel(im, Z_LVAL_PP(x), Z_LVAL_PP(y)));
+		if (im->tpixels && gdImageBoundsSafe(im, x, y)) {
+			RETURN_LONG(gdImageTrueColorPixel(im, x, y));
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%ld,%ld is out of bounds", Z_LVAL_PP(x), Z_LVAL_PP(y));
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%ld,%ld is out of bounds", x, y);
 			RETURN_FALSE;
 		}
 	} else {
 #endif
-		if (im->pixels && gdImageBoundsSafe(im, Z_LVAL_PP(x), Z_LVAL_PP(y))) {
+		if (im->pixels && gdImageBoundsSafe(im, x, y)) {
 #if HAVE_LIBGD13
-			RETURN_LONG(im->pixels[Z_LVAL_PP(y)][Z_LVAL_PP(x)]);
+			RETURN_LONG(im->pixels[y][x]);
 #else
-			RETURN_LONG(im->pixels[Z_LVAL_PP(x)][Z_LVAL_PP(y)]);
+			RETURN_LONG(im->pixels[x][y]);
 #endif
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%ld,%ld is out of bounds", Z_LVAL_PP(x), Z_LVAL_PP(y));
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%ld,%ld is out of bounds", x, y);
 			RETURN_FALSE;
 		}
 #if HAVE_LIBGD20
@@ -3138,20 +3089,17 @@ PHP_FUNCTION(imagecolorat)
    Get the index of the closest color to the specified color */
 PHP_FUNCTION(imagecolorclosest)
 {
-	zval **IM, **red, **green, **blue;
+	zval *IM;
+	long red, green, blue;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &IM, &red, &green, &blue) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlll", &IM, &red, &green, &blue) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_long_ex(red);
-	convert_to_long_ex(green);
-	convert_to_long_ex(blue);
-
-	RETURN_LONG(gdImageColorClosest(im, Z_LVAL_PP(red), Z_LVAL_PP(green), Z_LVAL_PP(blue)));
+	RETURN_LONG(gdImageColorClosest(im, red, green, blue));
 }
 /* }}} */
 
@@ -3160,20 +3108,17 @@ PHP_FUNCTION(imagecolorclosest)
    Get the index of the color which has the hue, white and blackness nearest to the given color */
 PHP_FUNCTION(imagecolorclosesthwb)
 {
-	zval **IM, **red, **green, **blue;
+	zval *IM;
+	long red, green, blue;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 4 ||	zend_get_parameters_ex(4, &IM, &red, &green, &blue) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlll", &IM, &red, &green, &blue) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_long_ex(red);
-	convert_to_long_ex(green);
-	convert_to_long_ex(blue);
-
-	RETURN_LONG(gdImageColorClosestHWB(im, Z_LVAL_PP(red), Z_LVAL_PP(green), Z_LVAL_PP(blue)));
+	RETURN_LONG(gdImageColorClosestHWB(im, red, green, blue));
 }
 /* }}} */
 #endif
@@ -3182,15 +3127,16 @@ PHP_FUNCTION(imagecolorclosesthwb)
    De-allocate a color for an image */
 PHP_FUNCTION(imagecolordeallocate)
 {
-	zval **IM, **index;
+	zval *IM;
+	long index;
 	int col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &IM, &index) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &IM, &index) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
 #if HAVE_LIBGD20
 	/* We can return right away for a truecolor image as deallocating colours is meaningless here */
@@ -3199,8 +3145,7 @@ PHP_FUNCTION(imagecolordeallocate)
 	}
 #endif
 
-	convert_to_long_ex(index);
-	col = Z_LVAL_PP(index);
+	col = index;
 
 	if (col >= 0 && col < gdImageColorsTotal(im)) {
 		gdImageColorDeallocate(im, col);
@@ -3216,20 +3161,17 @@ PHP_FUNCTION(imagecolordeallocate)
    Get the index of the specified color or its closest possible alternative */
 PHP_FUNCTION(imagecolorresolve)
 {
-	zval **IM, **red, **green, **blue;
+	zval *IM;
+	long red, green, blue;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &IM, &red, &green, &blue) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlll", &IM, &red, &green, &blue) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_long_ex(red);
-	convert_to_long_ex(green);
-	convert_to_long_ex(blue);
-
-	RETURN_LONG(gdImageColorResolve(im, Z_LVAL_PP(red), Z_LVAL_PP(green), Z_LVAL_PP(blue)));
+	RETURN_LONG(gdImageColorResolve(im, red, green, blue));
 }
 /* }}} */
 
@@ -3237,20 +3179,17 @@ PHP_FUNCTION(imagecolorresolve)
    Get the index of the specified color */
 PHP_FUNCTION(imagecolorexact)
 {
-	zval **IM, **red, **green, **blue;
+	zval *IM;
+	long red, green, blue;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &IM, &red, &green, &blue) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlll", &IM, &red, &green, &blue) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_long_ex(red);
-	convert_to_long_ex(green);
-	convert_to_long_ex(blue);
-
-	RETURN_LONG(gdImageColorExact(im, Z_LVAL_PP(red), Z_LVAL_PP(green), Z_LVAL_PP(blue)));
+	RETURN_LONG(gdImageColorExact(im, red, green, blue));
 }
 /* }}} */
 
@@ -3258,27 +3197,23 @@ PHP_FUNCTION(imagecolorexact)
    Set the color for the specified palette index */
 PHP_FUNCTION(imagecolorset)
 {
-	zval **IM, **color, **red, **green, **blue;
+	zval *IM;
+	long color, red, green, blue;
 	int col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &IM, &color, &red, &green, &blue) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllll", &IM, &color, &red, &green, &blue) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_long_ex(color);
-	convert_to_long_ex(red);
-	convert_to_long_ex(green);
-	convert_to_long_ex(blue);
-
-	col = Z_LVAL_PP(color);
+	col = color;
 
 	if (col >= 0 && col < gdImageColorsTotal(im)) {
-		im->red[col]   = Z_LVAL_PP(red);
-		im->green[col] = Z_LVAL_PP(green);
-		im->blue[col]  = Z_LVAL_PP(blue);
+		im->red[col]   = red;
+		im->green[col] = green;
+		im->blue[col]  = blue;
 	} else {
 		RETURN_FALSE;
 	}
@@ -3289,18 +3224,19 @@ PHP_FUNCTION(imagecolorset)
    Get the colors for an index */
 PHP_FUNCTION(imagecolorsforindex)
 {
-	zval **IM, **index;
+	zval *IM;
+	long index;
 	int col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &IM, &index) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &IM, &index) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_long_ex(index);
-	col = Z_LVAL_PP(index);
+	col = index;
+
 #if HAVE_LIBGD20
 	if ((col >= 0 && gdImageTrueColor(im)) || (!gdImageTrueColor(im) && col >= 0 && col < gdImageColorsTotal(im))) {
 		array_init(return_value);
@@ -3330,22 +3266,17 @@ PHP_FUNCTION(imagecolorsforindex)
    Apply a gamma correction to a GD image */
 PHP_FUNCTION(imagegammacorrect)
 {
-	zval **IM, **inputgamma, **outputgamma;
+	zval *IM;
+	double inputgamma, outputgamma;
 	gdImagePtr im;
 	int i;
 	double input, output;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &IM, &inputgamma, &outputgamma) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rdd", &IM, &input, &output) == FAILURE) {
+		return;
 	}
 
-	convert_to_double_ex(inputgamma);
-	convert_to_double_ex(outputgamma);
-
-	input = Z_DVAL_PP(inputgamma);
-	output = Z_DVAL_PP(outputgamma);
-
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
 #if HAVE_LIBGD20
 	if (gdImageTrueColor(im))	{
@@ -3380,20 +3311,17 @@ PHP_FUNCTION(imagegammacorrect)
    Set a single pixel */
 PHP_FUNCTION(imagesetpixel)
 {
-	zval **IM, **x, **y, **col;
+	zval *IM;
+	long x, y, col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 4 ||	zend_get_parameters_ex(4, &IM, &x, &y, &col) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlll", &IM, &x, &y, &col) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_long_ex(x);
-	convert_to_long_ex(y);
-	convert_to_long_ex(col);
-
-	gdImageSetPixel(im, Z_LVAL_PP(x), Z_LVAL_PP(y), Z_LVAL_PP(col));
+	gdImageSetPixel(im, x, y, col);
 
 	RETURN_TRUE;
 }
@@ -3403,28 +3331,23 @@ PHP_FUNCTION(imagesetpixel)
    Draw a line */
 PHP_FUNCTION(imageline)
 {
-	zval **IM, **x1, **y1, **x2, **y2, **col;
+	zval *IM;
+	long x1, y1, x2, y2, col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlllll", &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
-
-	convert_to_long_ex(x1);
-	convert_to_long_ex(y1);
-	convert_to_long_ex(x2);
-	convert_to_long_ex(y2);
-	convert_to_long_ex(col);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
 #ifdef HAVE_GD_BUNDLED
 	if (im->antialias) {
-		gdImageAALine(im, Z_LVAL_PP(x1), Z_LVAL_PP(y1), Z_LVAL_PP(x2), Z_LVAL_PP(y2), Z_LVAL_PP(col));
+		gdImageAALine(im, x1, y1, x2, y2, col);
 	} else
 #endif
 	{
-		gdImageLine(im, Z_LVAL_PP(x1), Z_LVAL_PP(y1), Z_LVAL_PP(x2), Z_LVAL_PP(y2), Z_LVAL_PP(col));
+		gdImageLine(im, x1, y1, x2, y2, col);
 	}
 	RETURN_TRUE;
 }
@@ -3434,22 +3357,17 @@ PHP_FUNCTION(imageline)
    Draw a dashed line */
 PHP_FUNCTION(imagedashedline)
 {
-	zval **IM, **x1, **y1, **x2, **y2, **col;
+	zval *IM;
+	long x1, y1, x2, y2, col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlllll", &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_long_ex(x1);
-	convert_to_long_ex(y1);
-	convert_to_long_ex(x2);
-	convert_to_long_ex(y2);
-	convert_to_long_ex(col);
-
-	gdImageDashedLine(im, Z_LVAL_PP(x1), Z_LVAL_PP(y1), Z_LVAL_PP(x2), Z_LVAL_PP(y2), Z_LVAL_PP(col));
+	gdImageDashedLine(im, x1, y1, x2, y2, col);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -3458,22 +3376,17 @@ PHP_FUNCTION(imagedashedline)
    Draw a rectangle */
 PHP_FUNCTION(imagerectangle)
 {
-	zval **IM, **x1, **y1, **x2, **y2, **col;
+	zval *IM;
+	long x1, y1, x2, y2, col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlllll", &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_long_ex(x1);
-	convert_to_long_ex(y1);
-	convert_to_long_ex(x2);
-	convert_to_long_ex(y2);
-	convert_to_long_ex(col);
-
-	gdImageRectangle(im, Z_LVAL_PP(x1), Z_LVAL_PP(y1), Z_LVAL_PP(x2), Z_LVAL_PP(y2), Z_LVAL_PP(col));
+	gdImageRectangle(im, x1, y1, x2, y2, col);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -3482,22 +3395,17 @@ PHP_FUNCTION(imagerectangle)
    Draw a filled rectangle */
 PHP_FUNCTION(imagefilledrectangle)
 {
-	zval **IM, **x1, **y1, **x2, **y2, **col;
+	zval *IM;
+	long x1, y1, x2, y2, col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 6 ||	zend_get_parameters_ex(6, &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlllll", &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_long_ex(x1);
-	convert_to_long_ex(y1);
-	convert_to_long_ex(x2);
-	convert_to_long_ex(y2);
-	convert_to_long_ex(col);
-
-	gdImageFilledRectangle(im, Z_LVAL_PP(x1), Z_LVAL_PP(y1), Z_LVAL_PP(x2), Z_LVAL_PP(y2), Z_LVAL_PP(col));
+	gdImageFilledRectangle(im, x1, y1, x2, y2, col);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -3506,35 +3414,28 @@ PHP_FUNCTION(imagefilledrectangle)
    Draw a partial ellipse */
 PHP_FUNCTION(imagearc)
 {
-	zval **IM, **cx, **cy, **w, **h, **ST, **E, **col;
+	zval *IM;
+	long cx, cy, w, h, ST, E, col;
 	gdImagePtr im;
 	int e, st;
 
-	if (ZEND_NUM_ARGS() != 8 ||	zend_get_parameters_ex(8, &IM, &cx, &cy, &w, &h, &ST, &E, &col) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlllllll", &IM, &cx, &cy, &w, &h, &ST, &E, &col) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_long_ex(cx);
-	convert_to_long_ex(cy);
-	convert_to_long_ex(w);
-	convert_to_long_ex(h);
-	convert_to_long_ex(ST);
-	convert_to_long_ex(E);
-	convert_to_long_ex(col);
-
-	e = Z_LVAL_PP(E);
+	e = E;
 	if (e < 0) {
 		e %= 360;
 	}
 
-	st = Z_LVAL_PP(ST);
+	st = ST;
 	if (st < 0) {
 		st %= 360;
 	}
 
-	gdImageArc(im, Z_LVAL_PP(cx), Z_LVAL_PP(cy), Z_LVAL_PP(w), Z_LVAL_PP(h), st, e, Z_LVAL_PP(col));
+	gdImageArc(im, cx, cy, w, h, st, e, col);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -3543,25 +3444,20 @@ PHP_FUNCTION(imagearc)
    Draw an ellipse */
 PHP_FUNCTION(imageellipse)
 {
-	zval **IM, **cx, **cy, **w, **h, **color;
+	zval *IM;
+	long cx, cy, w, h, color;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &cx, &cy, &w, &h, &color) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlllll", &IM, &cx, &cy, &w, &h, &color) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
-
-	convert_to_long_ex(cx);
-	convert_to_long_ex(cy);
-	convert_to_long_ex(w);
-	convert_to_long_ex(h);
-	convert_to_long_ex(color);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
 #ifdef HAVE_GD_IMAGEELLIPSE  /* this function is missing from GD 2.0.1 */
-	gdImageEllipse(im, Z_LVAL_PP(cx), Z_LVAL_PP(cy), Z_LVAL_PP(w), Z_LVAL_PP(h), Z_LVAL_PP(color));
+	gdImageEllipse(im, cx, cy, w, h, color);
 #else
-	gdImageArc(im, Z_LVAL_PP(cx), Z_LVAL_PP(cy), Z_LVAL_PP(w), Z_LVAL_PP(h), 0, 360, Z_LVAL_PP(color));
+	gdImageArc(im, cx, cy, w, h, 0, 360, color);
 #endif
 
 	RETURN_TRUE;
@@ -3572,21 +3468,17 @@ PHP_FUNCTION(imageellipse)
    Flood fill to specific color */
 PHP_FUNCTION(imagefilltoborder)
 {
-	zval **IM, **x, **y, **border, **col;
+	zval *IM;
+	long x, y, border, col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 5 ||	zend_get_parameters_ex(5, &IM, &x, &y, &border, &col) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllll", &IM, &x, &y, &border, &col) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_long_ex(x);
-	convert_to_long_ex(y);
-	convert_to_long_ex(border);
-	convert_to_long_ex(col);
-
-	gdImageFillToBorder(im, Z_LVAL_PP(x), Z_LVAL_PP(y), Z_LVAL_PP(border), Z_LVAL_PP(col));
+	gdImageFillToBorder(im, x, y, border, col);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -3595,20 +3487,17 @@ PHP_FUNCTION(imagefilltoborder)
    Flood fill */
 PHP_FUNCTION(imagefill)
 {
-	zval **IM, **x, **y, **col;
+	zval *IM;
+	long x, y, col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 4 ||	zend_get_parameters_ex(4, &IM, &x, &y, &col) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlll", &IM, &x, &y, &col) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_long_ex(x);
-	convert_to_long_ex(y);
-	convert_to_long_ex(col);
-
-	gdImageFill(im, Z_LVAL_PP(x), Z_LVAL_PP(y), Z_LVAL_PP(col));
+	gdImageFill(im, x, y, col);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -3617,14 +3506,14 @@ PHP_FUNCTION(imagefill)
    Find out the number of colors in an image's palette */
 PHP_FUNCTION(imagecolorstotal)
 {
-	zval **IM;
+	zval *IM;
 	gdImagePtr im;
-
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &IM) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &IM) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
 	RETURN_LONG(gdImageColorsTotal(im));
 }
@@ -3634,29 +3523,19 @@ PHP_FUNCTION(imagecolorstotal)
    Define a color as transparent */
 PHP_FUNCTION(imagecolortransparent)
 {
-	zval **IM, **COL;
+	zval *IM;
+	long COL;
 	gdImagePtr im;
+	int argc = ZEND_NUM_ARGS();
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1, &IM) == FAILURE) {
-				ZEND_WRONG_PARAM_COUNT();
-			}
-			break;
-		case 2:
-			if (zend_get_parameters_ex(2, &IM, &COL) == FAILURE) {
-				ZEND_WRONG_PARAM_COUNT();
-			}
-			convert_to_long_ex(COL);
-			break;
-		default:
-			ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(argc TSRMLS_CC, "r|l", &IM, &COL) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	if (ZEND_NUM_ARGS() > 1) {
-		gdImageColorTransparent(im, Z_LVAL_PP(COL));
+	if (argc > 1) {
+		gdImageColorTransparent(im, COL);
 	}
 
 	RETURN_LONG(gdImageGetTransparent(im));
@@ -3667,29 +3546,19 @@ PHP_FUNCTION(imagecolortransparent)
    Enable or disable interlace */
 PHP_FUNCTION(imageinterlace)
 {
-	zval **IM, **INT;
+	zval *IM;
+	int argc = ZEND_NUM_ARGS();
+	long INT;
 	gdImagePtr im;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1, &IM) == FAILURE) {
-				ZEND_WRONG_PARAM_COUNT();
-			}
-			break;
-		case 2:
-			if (zend_get_parameters_ex(2, &IM, &INT) == FAILURE) {
-				ZEND_WRONG_PARAM_COUNT();
-			}
-			convert_to_long_ex(INT);
-			break;
-		default:
-			ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(argc TSRMLS_CC, "r|l", &IM, &INT) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	if (ZEND_NUM_ARGS() > 1) {
-		gdImageInterlace(im, Z_LVAL_PP(INT));
+	if (argc > 1) {
+		gdImageInterlace(im, INT);
 	}
 
 	RETURN_LONG(gdImageGetInterlaced(im));
@@ -3702,30 +3571,23 @@ PHP_FUNCTION(imageinterlace)
 /* im, points, num_points, col */
 static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 {
-	zval **IM, **POINTS, **NPOINTS, **COL;
+	zval *IM, *POINTS;
+	long NPOINTS, COL;
 	zval **var = NULL;
 	gdImagePtr im;
 	gdPointPtr points;
 	int npoints, col, nelem, i;
 
-	if (ZEND_NUM_ARGS() != 4 ||	zend_get_parameters_ex(4, &IM, &POINTS, &NPOINTS, &COL) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rall", &IM, &POINTS, &NPOINTS, &COL) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_long_ex(NPOINTS);
-	convert_to_long_ex(COL);
+	npoints = NPOINTS;
+	col = COL;
 
-	npoints = Z_LVAL_PP(NPOINTS);
-	col = Z_LVAL_PP(COL);
-
-	if (Z_TYPE_PP(POINTS) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "2nd argument to imagepolygon not an array");
-		RETURN_FALSE;
-	}
-
-	nelem = zend_hash_num_elements(Z_ARRVAL_PP(POINTS));
+	nelem = zend_hash_num_elements(Z_ARRVAL_P(POINTS));
 	if (nelem < 6) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must have at least 3 points in your array");
 		RETURN_FALSE;
@@ -3739,12 +3601,12 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 	points = (gdPointPtr) safe_emalloc(npoints, sizeof(gdPoint), 0);
 
 	for (i = 0; i < npoints; i++) {
-		if (zend_hash_index_find(Z_ARRVAL_PP(POINTS), (i * 2), (void **) &var) == SUCCESS) {
+		if (zend_hash_index_find(Z_ARRVAL_P(POINTS), (i * 2), (void **) &var) == SUCCESS) {
 			SEPARATE_ZVAL((var));
 			convert_to_long(*var);
 			points[i].x = Z_LVAL_PP(var);
 		}
-		if (zend_hash_index_find(Z_ARRVAL_PP(POINTS), (i * 2) + 1, (void **) &var) == SUCCESS) {
+		if (zend_hash_index_find(Z_ARRVAL_P(POINTS), (i * 2) + 1, (void **) &var) == SUCCESS) {
 			SEPARATE_ZVAL(var);
 			convert_to_long(*var);
 			points[i].y = Z_LVAL_PP(var);
@@ -3823,16 +3685,14 @@ static gdFontPtr php_find_gd_font(int size TSRMLS_DC)
  */
 static void php_imagefontsize(INTERNAL_FUNCTION_PARAMETERS, int arg)
 {
-	zval **SIZE;
+	long SIZE;
 	gdFontPtr font;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &SIZE) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &SIZE) == FAILURE) {
+		return;
 	}
 
-	convert_to_long_ex(SIZE);
-
-	font = php_find_gd_font(Z_LVAL_PP(SIZE) TSRMLS_CC);
+	font = php_find_gd_font(SIZE TSRMLS_CC);
 	RETURN_LONG(arg ? font->h : font->w);
 }
 /* }}} */
@@ -3887,36 +3747,33 @@ static void php_gdimagecharup(gdImagePtr im, gdFontPtr f, int x, int y, int c, i
  */
 static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
-	zval **IM, **SIZE, **X, **Y, **C, **COL;
+	zval *IM;
+	long SIZE, X, Y, COL;
+	char *C;
+	int C_len;
 	gdImagePtr im;
 	int ch = 0, col, x, y, size, i, l = 0;
 	unsigned char *str = NULL;
 	gdFontPtr font;
 
-	if (ZEND_NUM_ARGS() != 6 ||	zend_get_parameters_ex(6, &IM, &SIZE, &X, &Y, &C, &COL) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlllsl", &IM, &SIZE, &X, &Y, &C, &C_len, &COL) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_long_ex(SIZE);
-	convert_to_long_ex(X);
-	convert_to_long_ex(Y);
-	convert_to_string_ex(C);
-	convert_to_long_ex(COL);
-
-	col = Z_LVAL_PP(COL);
+	col = COL;
 
 	if (mode < 2) {
-		ch = (int)((unsigned char)*(Z_STRVAL_PP(C)));
+		ch = (int)((unsigned char)*C);
 	} else {
-		str = (unsigned char *) estrndup(Z_STRVAL_PP(C), Z_STRLEN_PP(C));
+		str = (unsigned char *) estrndup(C, C_len);
 		l = strlen((char *)str);
 	}
 
-	y = Z_LVAL_PP(Y);
-	x = Z_LVAL_PP(X);
-	size = Z_LVAL_PP(SIZE);
+	y = Y;
+	x = X;
+	size = SIZE;
 
 	font = php_find_gd_font(size TSRMLS_CC);
 
@@ -3985,30 +3842,24 @@ PHP_FUNCTION(imagestringup)
    Copy part of an image */
 PHP_FUNCTION(imagecopy)
 {
-	zval **SIM, **DIM, **SX, **SY, **SW, **SH, **DX, **DY;
+	zval *SIM, *DIM;
+	long SX, SY, SW, SH, DX, DY;
 	gdImagePtr im_dst, im_src;
 	int srcH, srcW, srcY, srcX, dstY, dstX;
 
-	if (ZEND_NUM_ARGS() != 8 || zend_get_parameters_ex(8, &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrllllll", &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
-	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, DIM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, &SIM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, &DIM, -1, "Image", le_gd);
 
-	convert_to_long_ex(SX);
-	convert_to_long_ex(SY);
-	convert_to_long_ex(SW);
-	convert_to_long_ex(SH);
-	convert_to_long_ex(DX);
-	convert_to_long_ex(DY);
-
-	srcX = Z_LVAL_PP(SX);
-	srcY = Z_LVAL_PP(SY);
-	srcH = Z_LVAL_PP(SH);
-	srcW = Z_LVAL_PP(SW);
-	dstX = Z_LVAL_PP(DX);
-	dstY = Z_LVAL_PP(DY);
+	srcX = SX;
+	srcY = SY;
+	srcH = SH;
+	srcW = SW;
+	dstX = DX;
+	dstY = DY;
 
 	gdImageCopy(im_dst, im_src, dstX, dstY, srcX, srcY, srcW, srcH);
 	RETURN_TRUE;
@@ -4020,32 +3871,25 @@ PHP_FUNCTION(imagecopy)
    Merge one part of an image with another */
 PHP_FUNCTION(imagecopymerge)
 {
-	zval **SIM, **DIM, **SX, **SY, **SW, **SH, **DX, **DY, **PCT;
+	zval *SIM, *DIM;
+	long SX, SY, SW, SH, DX, DY, PCT;
 	gdImagePtr im_dst, im_src;
 	int srcH, srcW, srcY, srcX, dstY, dstX, pct;
 
-	if (ZEND_NUM_ARGS() != 9 || zend_get_parameters_ex(9, &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH, &PCT) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrlllllll", &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH, &PCT) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
-	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, DIM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, &SIM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, &DIM, -1, "Image", le_gd);
 
-	convert_to_long_ex(SX);
-	convert_to_long_ex(SY);
-	convert_to_long_ex(SW);
-	convert_to_long_ex(SH);
-	convert_to_long_ex(DX);
-	convert_to_long_ex(DY);
-	convert_to_long_ex(PCT);
-
-	srcX = Z_LVAL_PP(SX);
-	srcY = Z_LVAL_PP(SY);
-	srcH = Z_LVAL_PP(SH);
-	srcW = Z_LVAL_PP(SW);
-	dstX = Z_LVAL_PP(DX);
-	dstY = Z_LVAL_PP(DY);
-	pct  = Z_LVAL_PP(PCT);
+	srcX = SX;
+	srcY = SY;
+	srcH = SH;
+	srcW = SW;
+	dstX = DX;
+	dstY = DY;
+	pct  = PCT;
 
 	gdImageCopyMerge(im_dst, im_src, dstX, dstY, srcX, srcY, srcW, srcH, pct);
 	RETURN_TRUE;
@@ -4056,32 +3900,25 @@ PHP_FUNCTION(imagecopymerge)
    Merge one part of an image with another */
 PHP_FUNCTION(imagecopymergegray)
 {
-	zval **SIM, **DIM, **SX, **SY, **SW, **SH, **DX, **DY, **PCT;
+	zval *SIM, *DIM;
+	long SX, SY, SW, SH, DX, DY, PCT;
 	gdImagePtr im_dst, im_src;
 	int srcH, srcW, srcY, srcX, dstY, dstX, pct;
 
-	if (ZEND_NUM_ARGS() != 9 ||	zend_get_parameters_ex(9, &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH, &PCT) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrlllllll", &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH, &PCT) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
-	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, DIM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, &SIM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, &DIM, -1, "Image", le_gd);
 
-	convert_to_long_ex(SX);
-	convert_to_long_ex(SY);
-	convert_to_long_ex(SW);
-	convert_to_long_ex(SH);
-	convert_to_long_ex(DX);
-	convert_to_long_ex(DY);
-	convert_to_long_ex(PCT);
-
-	srcX = Z_LVAL_PP(SX);
-	srcY = Z_LVAL_PP(SY);
-	srcH = Z_LVAL_PP(SH);
-	srcW = Z_LVAL_PP(SW);
-	dstX = Z_LVAL_PP(DX);
-	dstY = Z_LVAL_PP(DY);
-	pct  = Z_LVAL_PP(PCT);
+	srcX = SX;
+	srcY = SY;
+	srcH = SH;
+	srcW = SW;
+	dstX = DX;
+	dstY = DY;
+	pct  = PCT;
 
 	gdImageCopyMergeGray(im_dst, im_src, dstX, dstY, srcX, srcY, srcW, srcH, pct);
 	RETURN_TRUE;
@@ -4093,34 +3930,26 @@ PHP_FUNCTION(imagecopymergegray)
    Copy and resize part of an image */
 PHP_FUNCTION(imagecopyresized)
 {
-	zval **SIM, **DIM, **SX, **SY, **SW, **SH, **DX, **DY, **DW, **DH;
+	zval *SIM, *DIM;
+	long SX, SY, SW, SH, DX, DY, DW, DH;
 	gdImagePtr im_dst, im_src;
 	int srcH, srcW, dstH, dstW, srcY, srcX, dstY, dstX;
 
-	if (ZEND_NUM_ARGS() != 10 || zend_get_parameters_ex(10, &DIM, &SIM, &DX, &DY, &SX, &SY, &DW, &DH, &SW, &SH) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrllllllll", &DIM, &SIM, &DX, &DY, &SX, &SY, &DW, &DH, &SW, &SH) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, DIM, -1, "Image", le_gd);
-	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, &DIM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, &SIM, -1, "Image", le_gd);
 
-	convert_to_long_ex(SX);
-	convert_to_long_ex(SY);
-	convert_to_long_ex(SW);
-	convert_to_long_ex(SH);
-	convert_to_long_ex(DX);
-	convert_to_long_ex(DY);
-	convert_to_long_ex(DW);
-	convert_to_long_ex(DH);
-
-	srcX = Z_LVAL_PP(SX);
-	srcY = Z_LVAL_PP(SY);
-	srcH = Z_LVAL_PP(SH);
-	srcW = Z_LVAL_PP(SW);
-	dstX = Z_LVAL_PP(DX);
-	dstY = Z_LVAL_PP(DY);
-	dstH = Z_LVAL_PP(DH);
-	dstW = Z_LVAL_PP(DW);
+	srcX = SX;
+	srcY = SY;
+	srcH = SH;
+	srcW = SW;
+	dstX = DX;
+	dstY = DY;
+	dstH = DH;
+	dstW = DW;
 
 	if (dstW <= 0 || dstH <= 0 || srcW <= 0 || srcH <= 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid image dimensions");
@@ -4136,14 +3965,14 @@ PHP_FUNCTION(imagecopyresized)
    Get image width */
 PHP_FUNCTION(imagesx)
 {
-	zval **IM;
+	zval *IM;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &IM) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &IM) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
 	RETURN_LONG(gdImageSX(im));
 }
@@ -4153,14 +3982,14 @@ PHP_FUNCTION(imagesx)
    Get image height */
 PHP_FUNCTION(imagesy)
 {
-	zval **IM;
+	zval *IM;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &IM) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &IM) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
 	RETURN_LONG(gdImageSY(im));
 }
@@ -4350,26 +4179,24 @@ static void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
    Load a new font from specified file */
 PHP_FUNCTION(imagepsloadfont)
 {
-	zval **file;
-	int f_ind, *font;
+	zval *file;
+	int file_len, f_ind, *font;
 #ifdef PHP_WIN32
 	struct stat st;
 #endif
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file, &file_len) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(file);
-
 #ifdef PHP_WIN32
-	if (VCWD_STAT(Z_STRVAL_PP(file), &st) < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Font file not found (%s)", Z_STRVAL_PP(file));
+	if (VCWD_STAT(file, &st) < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Font file not found (%s)", file);
 		RETURN_FALSE;
 	}
 #endif
 
-	f_ind = T1_AddFont(Z_STRVAL_PP(file));
+	f_ind = T1_AddFont(file);
 
 	if (f_ind < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "T1Lib Error (%i): %s", f_ind, T1_StrError(f_ind));
@@ -4446,16 +4273,16 @@ PHP_FUNCTION(imagepscopyfont)
    Free memory used by a font */
 PHP_FUNCTION(imagepsfreefont)
 {
-	zval **fnt;
+	zval *fnt;
 	int *f_ind;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &fnt) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &fnt) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", le_ps_font);
+	ZEND_FETCH_RESOURCE(f_ind, int *, &fnt, -1, "Type 1 font", le_ps_font);
 
-	zend_list_delete(Z_LVAL_PP(fnt));
+	zend_list_delete(Z_LVAL_P(fnt));
 	RETURN_TRUE;
 }
 /* }}} */
@@ -4464,20 +4291,18 @@ PHP_FUNCTION(imagepsfreefont)
    To change a fonts character encoding vector */
 PHP_FUNCTION(imagepsencodefont)
 {
-	zval **fnt, **enc;
-	char **enc_vector;
-	int *f_ind;
+	zval *fnt;
+	char *enc, **enc_vector;
+	int enc_len, *f_ind;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fnt, &enc) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &fnt, &enc, &enc_len) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(enc);
+	ZEND_FETCH_RESOURCE(f_ind, int *, &fnt, -1, "Type 1 font", le_ps_font);
 
-	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", le_ps_font);
-
-	if ((enc_vector = T1_LoadEncoding(Z_STRVAL_PP(enc))) == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't load encoding vector from %s", Z_STRVAL_PP(enc));
+	if ((enc_vector = T1_LoadEncoding(enc)) == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't load encoding vector from %s", enc);
 		RETURN_FALSE;
 	}
 
@@ -4498,25 +4323,24 @@ PHP_FUNCTION(imagepsencodefont)
    Extend or or condense (if extend < 1) a font */
 PHP_FUNCTION(imagepsextendfont)
 {
-	zval **fnt, **ext;
+	zval *fnt;
+	double ext;
 	int *f_ind;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fnt, &ext) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rd", &fnt, &ext) == FAILURE) {
+		return;
 	}
 
-	convert_to_double_ex(ext);
-
-	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", le_ps_font);
+	ZEND_FETCH_RESOURCE(f_ind, int *, &fnt, -1, "Type 1 font", le_ps_font);
 
 	T1_DeleteAllSizes(*f_ind);
 
-	if (Z_DVAL_PP(ext) <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Second parameter %F out of range (must be > 0)", Z_DVAL_PP(ext));
+	if (ext <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Second parameter %F out of range (must be > 0)", ext);
 		RETURN_FALSE;
 	}
 
-	if (T1_ExtendFont(*f_ind, Z_DVAL_PP(ext)) != 0) {
+	if (T1_ExtendFont(*f_ind, ext) != 0) {
 		RETURN_FALSE;
 	}
 
@@ -4528,18 +4352,17 @@ PHP_FUNCTION(imagepsextendfont)
    Slant a font */
 PHP_FUNCTION(imagepsslantfont)
 {
-	zval **fnt, **slt;
+	zval *fnt;
+	double slt;
 	int *f_ind;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fnt, &slt) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rd", &fnt, &slt) == FAILURE) {
+		return;
 	}
 
-	convert_to_double_ex(slt);
+	ZEND_FETCH_RESOURCE(f_ind, int *, &fnt, -1, "Type 1 font", le_ps_font);
 
-	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", le_ps_font);
-
-	if (T1_SlantFont(*f_ind, Z_DVAL_PP(slt)) != 0) {
+	if (T1_SlantFont(*f_ind, slt) != 0) {
 		RETURN_FALSE;
 	}
 
@@ -4699,48 +4522,40 @@ PHP_FUNCTION(imagepstext)
 }
 /* }}} */
 
-/* {{{ proto array imagepsbbox(string text, resource font, int size [, int space, int tightness, int angle])
+/* {{{ proto array imagepsbbox(string text, resource font, int size [, int space, int tightness, float angle])
    Return the bounding box needed by a string if rasterized */
 PHP_FUNCTION(imagepsbbox)
 {
-	zval **str, **fnt, **sz, **sp, **wd, **ang;
-	int i, space, add_width = 0, char_width, amount_kern;
+	zval *fnt;
+	long sz = 0, sp, wd;
+	char *str;
+	int i, space = 0, add_width = 0, char_width, amount_kern;
 	int cur_x, cur_y, dx, dy;
 	int x1, y1, x2, y2, x3, y3, x4, y4;
 	int *f_ind;
-	int per_char = 0;
+	int str_len, per_char = 0;
+	int argc = ZEND_NUM_ARGS();
 	double angle, sin_a = 0, cos_a = 0;
 	BBox char_bbox, str_bbox = {0, 0, 0, 0};
 
-	switch (ZEND_NUM_ARGS()) {
-		case 3:
-			if (zend_get_parameters_ex(3, &str, &fnt, &sz) == FAILURE) {
-				RETURN_FALSE;
-			}
-			space = 0;
-			break;
-		case 6:
-			if (zend_get_parameters_ex(6, &str, &fnt, &sz, &sp, &wd, &ang) == FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(sp);
-			convert_to_long_ex(wd);
-			convert_to_double_ex(ang);
-			space = Z_LVAL_PP(sp);
-			add_width = Z_LVAL_PP(wd);
-			angle = Z_DVAL_PP(ang) * M_PI / 180;
-			sin_a = sin(angle);
-			cos_a = cos(angle);
-			per_char =  add_width || angle ? 1 : 0;
-			break;
-		default:
-			ZEND_WRONG_PARAM_COUNT();
+	if (argc != 3 && argc != 6) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "srl|lld", &str, &str_len &fnt, &sz, &sp, &wd, &angle) == FAILURE) {
+		return;
+	}
+	
+	if (argc == 6) {
+		space = sp;
+		add_width = wd;
+		angle = angle * M_PI / 180;
+		sin_a = sin(angle);
+		cos_a = cos(angle);
+		per_char =  add_width || angle ? 1 : 0;
 	}
 
-	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", le_ps_font);
-
-	convert_to_string_ex(str);
-	convert_to_long_ex(sz);
+	ZEND_FETCH_RESOURCE(f_ind, int *, &fnt, -1, "Type 1 font", le_ps_font);
 
 #define max(a, b) (a > b ? a : b)
 #define min(a, b) (a < b ? a : b)
@@ -4751,15 +4566,15 @@ PHP_FUNCTION(imagepsbbox)
 		space += T1_GetCharWidth(*f_ind, ' ');
 		cur_x = cur_y = 0;
 
-		for (i = 0; i < Z_STRLEN_PP(str); i++) {
-			if (Z_STRVAL_PP(str)[i] == ' ') {
+		for (i = 0; i < str_len; i++) {
+			if (str[i] == ' ') {
 				char_bbox.llx = char_bbox.lly = char_bbox.ury = 0;
 				char_bbox.urx = char_width = space;
 			} else {
-				char_bbox = T1_GetCharBBox(*f_ind, Z_STRVAL_PP(str)[i]);
-				char_width = T1_GetCharWidth(*f_ind, Z_STRVAL_PP(str)[i]);
+				char_bbox = T1_GetCharBBox(*f_ind, str[i]);
+				char_width = T1_GetCharWidth(*f_ind, str[i]);
 			}
-			amount_kern = i ? T1_GetKerning(*f_ind, Z_STRVAL_PP(str)[i - 1], Z_STRVAL_PP(str)[i]) : 0;
+			amount_kern = i ? T1_GetKerning(*f_ind, str[i - 1], str[i]) : 0;
 
 			/* Transfer character bounding box to right place */
 			x1 = new_x(char_bbox.llx, char_bbox.lly) + cur_x;
@@ -4788,7 +4603,7 @@ PHP_FUNCTION(imagepsbbox)
 		}
 
 	} else {
-		str_bbox = T1_GetStringBBox(*f_ind, Z_STRVAL_PP(str), Z_STRLEN_PP(str), space, T1_KERNING);
+		str_bbox = T1_GetStringBBox(*f_ind, str, str_len, space, T1_KERNING);
 	}
 
 	if (T1_errno) {
@@ -4799,10 +4614,10 @@ PHP_FUNCTION(imagepsbbox)
 	/*
 	printf("%d %d %d %d\n", str_bbox.llx, str_bbox.lly, str_bbox.urx, str_bbox.ury);
 	*/
-	add_next_index_long(return_value, (int) ceil(((double) str_bbox.llx)*Z_LVAL_PP(sz)/1000));
-	add_next_index_long(return_value, (int) ceil(((double) str_bbox.lly)*Z_LVAL_PP(sz)/1000));
-	add_next_index_long(return_value, (int) ceil(((double) str_bbox.urx)*Z_LVAL_PP(sz)/1000));
-	add_next_index_long(return_value, (int) ceil(((double) str_bbox.ury)*Z_LVAL_PP(sz)/1000));
+	add_next_index_long(return_value, (int) ceil(((double) str_bbox.llx)*sz/1000));
+	add_next_index_long(return_value, (int) ceil(((double) str_bbox.lly)*sz/1000));
+	add_next_index_long(return_value, (int) ceil(((double) str_bbox.urx)*sz/1000));
+	add_next_index_long(return_value, (int) ceil(((double) str_bbox.ury)*sz/1000));
 }
 /* }}} */
 #endif
@@ -4899,7 +4714,9 @@ static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold
  * _php_image_convert converts jpeg/png images to wbmp and resizes them as needed  */
 static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 {
-	zval **f_org, **f_dest, **height, **width, **threshold;
+	char *f_org, *f_dest;
+	int f_org_len, f_dest_len;
+	long height, width, threshold;
 	gdImagePtr im_org, im_dest, im_tmp;
 	char *fn_org = NULL;
 	char *fn_dest = NULL;
@@ -4917,21 +4734,15 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
     long ignore_warning;
 #endif
 	
-	if (argc != 5 || zend_get_parameters_ex(argc, &f_org, &f_dest, &height, &width, &threshold) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sslll", &f_org, &f_org_len, &f_dest, &f_dest_len, &height, &width, &threshold) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(f_org);
-	convert_to_string_ex(f_dest);
-	convert_to_long_ex(height);
-	convert_to_long_ex(width);
-	convert_to_long_ex(threshold);
-
-	fn_org  = Z_STRVAL_PP(f_org);
-	fn_dest = Z_STRVAL_PP(f_dest);
-	dest_height = Z_LVAL_PP(height);
-	dest_width = Z_LVAL_PP(width);
-	int_threshold = Z_LVAL_PP(threshold);
+	fn_org  = f_org;
+	fn_dest = f_dest;
+	dest_height = height;
+	dest_width = width;
+	int_threshold = threshold;
 
 	/* Check threshold value */
 	if (int_threshold < 0 || int_threshold > 8) {
@@ -5368,17 +5179,17 @@ PHP_FUNCTION(imageconvolution)
    Should antialiased functions used or not*/
 PHP_FUNCTION(imageantialias)
 {
-	zval **IM, **alias;
+	zval *IM;
+	zend_bool alias;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &IM, &alias) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb", &IM, &alias) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	convert_to_boolean_ex(alias);
-	gdImageAntialias(im, Z_LVAL_PP(alias));
+	gdImageAntialias(im, alias);
 
 	RETURN_TRUE;
 }
