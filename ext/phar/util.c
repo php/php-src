@@ -746,12 +746,12 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 		etemp.tar_type = TAR_FILE;
 	}
 	if (FAILURE == zend_hash_add(&phar->manifest, etemp.filename, path_len, (void*)&etemp, sizeof(phar_entry_info), (void **) &entry)) {
-		efree(ret);
 		php_stream_close(etemp.fp);
-		efree(etemp.filename);
 		if (error) {
 			spprintf(error, 0, "phar error: unable to add new entry \"%s\" to phar \"%s\"", etemp.filename, phar->fname);
 		}
+		efree(ret);
+		efree(etemp.filename);
 		return NULL;
 	}
 	
