@@ -21,8 +21,8 @@
 /* $Id$ */
 
 #include "phar_internal.h"
-#ifdef PHAR_HAVE_OPENSSL
 
+#ifdef PHAR_HAVE_OPENSSL
 /* OpenSSL includes */
 #include <openssl/evp.h>
 #include <openssl/x509.h>
@@ -34,11 +34,10 @@
 #include <openssl/rand.h>
 #include <openssl/ssl.h>
 #include <openssl/pkcs12.h>
-
-#endif
-#ifndef PHAR_HAVE_OPENSSL
+#else
 static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, char *key, int key_len, char **signature, int *signature_len TSRMLS_DC);
 #endif
+
 #if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
 extern php_stream_wrapper php_stream_phar_wrapper;
 #endif
@@ -257,10 +256,13 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 		phar = PHAR_G(last_phar);
 		goto splitted;
 	}
+
 	if (fname_len < 7 || memcmp(fname, "phar://", 7) || SUCCESS != phar_split_fname(fname, strlen(fname), &arch, &arch_len, &entry, &entry_len, 1, 0 TSRMLS_CC)) {
 		return phar_save_resolve_path(filename, filename_len TSRMLS_CC);
 	}
+
 	efree(entry);
+
 	if (*filename == '.') {
 		int try_len;
 
@@ -790,6 +792,7 @@ int phar_open_archive_fp(phar_archive_data *phar TSRMLS_DC)
 	}
 
 	phar_set_pharfp(phar, php_stream_open_wrapper(phar->fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|0, NULL) TSRMLS_CC);
+
 	if (!phar_get_pharfp(phar TSRMLS_CC)) {
 		return FAILURE;
 	}

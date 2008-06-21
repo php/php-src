@@ -43,4 +43,3 @@ $(builddir)/phar.phar: $(builddir)/phar.php $(builddir)/phar/phar.inc $(srcdir)/
 install-pharcmd: pharcmd
 	-@$(mkinstalldirs) $(INSTALL_ROOT)$(bindir)
 	$(INSTALL) $(builddir)/phar.phar $(INSTALL_ROOT)$(bindir)
-

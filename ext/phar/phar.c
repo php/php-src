@@ -1818,9 +1818,9 @@ woohoo:
 					if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(&cached_phars, &key, &keylen, &unused, 0, NULL)) {
 						break;
 					}
-	
+
 					PHAR_STR(key, str_key);
-	
+
 					if (keylen > (uint) filename_len) {
 						zend_hash_move_forward(&cached_phars);
 						continue;
@@ -2143,39 +2143,38 @@ int phar_open_executed_filename(char *alias, int alias_len, char **error TSRMLS_
 	}
 	halt_offset = Z_LVAL(*halt_constant);
 	FREE_ZVAL(halt_constant);
-	
 
 #if PHP_MAJOR_VERSION < 6
 	if (PG(safe_mode) && (!php_checkuid(fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
-	  return FAILURE;
- 	}
+		return FAILURE;
+	}
 #endif
 
 	if (php_check_open_basedir(fname TSRMLS_CC)) {
 		return FAILURE;
- 	}
+	}
 
 	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, &actual);
 	if (!fp) {
-   		if (error) {
+		if (error) {
 			spprintf(error, 0, "unable to open phar for reading \"%s\"", fname);
-   		}
+		}
 		if (actual) {
-   			efree(actual);
-  		}
+			efree(actual);
+		}
 		return FAILURE;
- 	}
+	}
 
 	if (actual) {
-  		fname = actual;
+		fname = actual;
 		fname_len = strlen(actual);
- 	}
+	}
 
 	ret = phar_open_from_fp(fp, fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, error TSRMLS_CC);
- 	if (actual) {
+	if (actual) {
 		efree(actual);
- 	}
-	 return ret;
+	}
+	return ret;
 }
 /* }}} */
 
@@ -2448,6 +2447,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		}
 		return EOF;
 	}
+
 	if (error) {
 		*error = NULL;
 	}
@@ -2459,6 +2459,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 	if (phar->is_zip) {
 		return phar_zip_flush(phar, user_stub, len, convert, error TSRMLS_CC);
 	}
+
 	if (phar->is_tar) {
 		return phar_tar_flush(phar, user_stub, len, convert, error TSRMLS_CC);
 	}
@@ -2966,11 +2967,12 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		char sig_buf[4];
 
 		php_stream_rewind(newfile);
+
 		if (phar->signature) {
 			efree(phar->signature);
 			phar->signature = NULL;
 		}
-		
+
 		switch(phar->sig_flags) {
 #if !HAVE_HASH_EXT
 			case PHAR_SIG_SHA512:
@@ -3348,7 +3350,7 @@ void phar_request_initialize(TSRMLS_D) /* {{{ */
 			}
 			PHAR_GLOBALS->cached_fp = stuff;
 		}
-		zend_hash_init(&(PHAR_GLOBALS->phar_SERVER_mung_list), 5,       zend_get_hash_value, NULL, 0);
+		zend_hash_init(&(PHAR_GLOBALS->phar_SERVER_mung_list), 5, zend_get_hash_value, NULL, 0);
 		PHAR_G(cwd) = NULL;
 		PHAR_G(cwd_len) = 0;
 		PHAR_G(cwd_init) = 0;
@@ -3438,9 +3440,9 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
  */
 static zend_module_dep phar_deps[] = {
 	ZEND_MOD_OPTIONAL("apc")
+	ZEND_MOD_OPTIONAL("bz2")
 	ZEND_MOD_OPTIONAL("openssl")
 	ZEND_MOD_OPTIONAL("zlib")
-	ZEND_MOD_OPTIONAL("bz2")
 #if HAVE_SPL
 	ZEND_MOD_REQUIRED("spl")
 #endif
