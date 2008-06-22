@@ -110,24 +110,24 @@ bool(false)
 bool(false)
 -- Iteration 10 --
 
-Notice: Array to string conversion in %s on line %d
-bool(false)
+Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 11 --
 
-Notice: Array to string conversion in %s on line %d
-bool(false)
+Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 12 --
 
-Notice: Array to string conversion in %s on line %d
-bool(false)
+Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 13 --
 
-Notice: Array to string conversion in %s on line %d
-bool(false)
+Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 14 --
 
-Notice: Array to string conversion in %s on line %d
-bool(false)
+Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 15 --
 bool(false)
 -- Iteration 16 --
@@ -149,7 +149,9 @@ bool(false)
 -- Iteration 23 --
 bool(false)
 -- Iteration 24 --
-%s
+
+Warning: strrchr() expects parameter 1 to be string, resource given in %s on line %d
+NULL
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --

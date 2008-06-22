@@ -33,12 +33,12 @@ echo "Done\n";
 
 -- Testing chop() function with Zero arguments --
 
-Warning: Wrong parameter count for chop() in %s on line %d
+Warning: chop() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
 -- Testing chop() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for chop() in %s on line %d
+Warning: chop() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 string(11) "string_val "
 Done

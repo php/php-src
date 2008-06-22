@@ -52,12 +52,12 @@ echo "\nDone\n";
 
  *** Output for zero argument ***
 
-Warning: Wrong parameter count for ltrim() in %s on line %d
+Warning: ltrim() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
  *** Output for more than valid number of arguments (Valid are 1 or 2 arguments) ***
 
-Warning: Wrong parameter count for ltrim() in %s on line %d
+Warning: ltrim() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 
  *** Using heredoc string ***
