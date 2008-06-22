@@ -223,6 +223,11 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 		zend_get_hash_value, NULL, (zend_bool)myphar->is_persistent);
 	zend_hash_init(&myphar->virtual_dirs, 4 + (totalsize >> 11),
 		zend_get_hash_value, NULL, (zend_bool)myphar->is_persistent);
+	myphar->fname = pestrndup(fname, fname_len, myphar->is_persistent);
+#ifdef PHP_WIN32
+	phar_unixify_path_separators(myphar->fname, fname_len);
+#endif
+	myphar->fname_len = fname_len;
 	myphar->is_tar = 1;
 	/* remember whether this entire phar was compressed with gz/bzip2 */
 	myphar->flags = compression;
@@ -544,11 +549,6 @@ bail:
 		return FAILURE;
 	}
 
-	myphar->fname = pestrndup(fname, fname_len, myphar->is_persistent);
-#ifdef PHP_WIN32
-	phar_unixify_path_separators(myphar->fname, fname_len);
-#endif
-	myphar->fname_len = fname_len;
 	myphar->fp = fp;
 	p = strrchr(myphar->fname, '/');
 
