@@ -305,16 +305,14 @@ PHP_FUNCTION(pcntl_wait)
 PHP_FUNCTION(pcntl_wifexited)
 {
 #ifdef WIFEXITED
-	zval **status;
-	int status_word;
-	
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &status) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	long status_word;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &status_word) == FAILURE) {
+	       return;
 	}
-	
-	status_word = (int) Z_LVAL_PP(status);
-	
-	if (WIFEXITED(status_word)) RETURN_TRUE;
+
+	if (WIFEXITED(status_word))
+		RETURN_TRUE;
 #endif
 	RETURN_FALSE;
 }
@@ -325,16 +323,14 @@ PHP_FUNCTION(pcntl_wifexited)
 PHP_FUNCTION(pcntl_wifstopped)
 {
 #ifdef WIFSTOPPED
-	zval **status;
-	int status_word;
-	
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &status) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	long status_word;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &status_word) == FAILURE) {
+	       return;
 	}
-	
-	status_word = (int) Z_LVAL_PP(status);
-	
-	if (WIFSTOPPED(status_word)) RETURN_TRUE;
+
+	if (WIFSTOPPED(status_word))
+		RETURN_TRUE;
 #endif
 	RETURN_FALSE;
 }
@@ -345,16 +341,14 @@ PHP_FUNCTION(pcntl_wifstopped)
 PHP_FUNCTION(pcntl_wifsignaled)
 {
 #ifdef WIFSIGNALED
-	zval **status;
-	int status_word;
-	
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &status) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	long status_word;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &status_word) == FAILURE) {
+	       return;
 	}
-	
-	status_word = (int) Z_LVAL_PP(status);
-	
-	if (WIFSIGNALED(status_word)) RETURN_TRUE;
+
+	if (WIFSIGNALED(status_word))
+		RETURN_TRUE;
 #endif
 	RETURN_FALSE;
 }
@@ -365,14 +359,11 @@ PHP_FUNCTION(pcntl_wifsignaled)
 PHP_FUNCTION(pcntl_wexitstatus)
 {
 #ifdef WEXITSTATUS
-	zval **status;
-	int status_word;
-	
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &status) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	long status_word;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &status_word) == FAILURE) {
+	       return;
 	}
-	
-	status_word = (int) Z_LVAL_PP(status);
 
 	/* WEXITSTATUS only returns 8 bits so we *MUST* cast this to signed char
 	   if you want to have valid negative exit codes */
@@ -388,15 +379,12 @@ PHP_FUNCTION(pcntl_wexitstatus)
 PHP_FUNCTION(pcntl_wtermsig)
 {
 #ifdef WTERMSIG
-	zval **status;
-	int status_word;
-	
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &status) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	long status_word;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &status_word) == FAILURE) {
+	       return;
 	}
-	
-	status_word = (int) Z_LVAL_PP(status);
-	
+
 	RETURN_LONG(WTERMSIG(status_word));
 #else
 	RETURN_FALSE;
@@ -409,16 +397,13 @@ PHP_FUNCTION(pcntl_wtermsig)
 PHP_FUNCTION(pcntl_wstopsig)
 {
 #ifdef WSTOPSIG
-	zval **status;
-	int status_word;
-   
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &status) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-   
-	status_word = (int) Z_LVAL_PP(status);
+	long status_word;
 
- 	RETURN_LONG(WSTOPSIG(status_word));
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &status_word) == FAILURE) {
+	       return;
+	}
+
+	RETURN_LONG(WSTOPSIG(status_word));
 #else
 	RETURN_FALSE;
 #endif
@@ -439,10 +424,10 @@ PHP_FUNCTION(pcntl_exec)
 	char **current_arg, **pair;
 	int pair_length;
 	char *key;
-	int key_length;
+	uint key_length;
 	char *path;
 	int path_len;
-	long key_num;
+	ulong key_num;
 		
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|aa", &path, &path_len, &args, &envs) == FAILURE) {
 		return;
