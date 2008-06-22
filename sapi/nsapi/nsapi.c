@@ -332,7 +332,7 @@ PHP_FUNCTION(nsapi_virtual)
 	Request *rq;
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &uri, &uri_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &uri, &uri_len, UG(utf8_conv)) == FAILURE) {
 		return;
 	}
 
