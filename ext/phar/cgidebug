@@ -1,11 +1,11 @@
 #!/bin/sh
-export SCRIPT_NAME=/front.phar.php
-export PATH_INFO=/index.php
-export SCRIPT_FILENAME=/home/cellog/workspace/php5/ext/phar/tests/front.phar.php
-export PATH_TRANSLATED=/home/cellog/workspace/php5/ext/phar/tests/front.phar.php
+export SCRIPT_NAME=/frontcontroller9.php
+export PATH_INFO=/hi
+export SCRIPT_FILENAME=/home/cellog/workspace/php5/ext/phar/tests/cache_list/frontcontroller9.php
+export PATH_TRANSLATED=/home/cellog/workspace/php5/ext/phar/tests/cache_list/frontcontroller9.php
 export REDIRECT_STATUS=1
 export REQUEST_METHOD=GET
-export REQUEST_URI=/front.phar.php/index.php
-cd /home/cellog/workspace/php5/
-ddd sapi/cgi/php-cgi &
+export REQUEST_URI=/frontcontroller9.php/hi
+cd /home/cellog/workspace/php5/ext/phar/tests/cache_list
+ddd ../../../../sapi/cgi/php-cgi &
 cd /home/cellog/workspace/php5/ext/phar
