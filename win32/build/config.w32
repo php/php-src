@@ -264,7 +264,7 @@ function probe_basic_headers()
 		ADD_FLAG("LDFLAGS", '/libpath:"' + p + '" ');
 		php_usual_lib_suspects += ";" + p;
 	} else if (!p) {
-		ERROR("We really need that arpa\\nameser.h file - it is part of the win32build package");
+		ERROR("We really need that arpa\\nameser.h file - it is part of the bindlib package");
 	}
 }
 
