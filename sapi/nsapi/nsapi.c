@@ -327,22 +327,20 @@ PHP_MINFO_FUNCTION(nsapi)
  */
 PHP_FUNCTION(nsapi_virtual)
 {
-	zval **uri;
-	int rv;
-	char *value;
+	int uri_len,rv;
+	char *uri,*value;
 	Request *rq;
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &uri) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &uri, &uri_len) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(uri);
 
 	if (!nsapi_servact_service) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include uri '%s' - Sub-requests not supported on this platform", (*uri)->value.str.val);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include uri '%s' - Sub-requests not supported on this platform", uri);
 		RETURN_FALSE;
 	} else if (zend_ini_long("zlib.output_compression", sizeof("zlib.output_compression"), 0)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include uri '%s' - Sub-requests do not work with zlib.output_compression", (*uri)->value.str.val);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include uri '%s' - Sub-requests do not work with zlib.output_compression", uri);
 		RETURN_FALSE;
 	} else {
 		php_end_ob_buffers(1 TSRMLS_CC);
@@ -350,8 +348,8 @@ PHP_FUNCTION(nsapi_virtual)
 
 		/* do the sub-request */
 		/* thanks to Chris Elving from Sun for this code sniplet */
-		if ((rq = request_restart_internal((*uri)->value.str.val, NULL)) == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include uri '%s' - Internal request creation failed", (*uri)->value.str.val);
+		if ((rq = request_restart_internal(uri, NULL)) == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include uri '%s' - Internal request creation failed", uri);
 			RETURN_FALSE;
 		}
 
@@ -383,7 +381,7 @@ PHP_FUNCTION(nsapi_virtual)
 		} while (rv == REQ_RESTART);
 
 		if (rq->status_num != 200) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include uri '%s' - HTTP status code %d during subrequest", (*uri)->value.str.val, rq->status_num);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include uri '%s' - HTTP status code %d during subrequest", uri, rq->status_num);
 			request_free(rq);
 			RETURN_FALSE;
 		}
@@ -402,6 +400,10 @@ PHP_FUNCTION(nsapi_request_headers)
 	register int i;
 	struct pb_entry *entry;
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
+
+	if (ZEND_NUM_ARGS()) {
+		WRONG_PARAM_COUNT;
+	}
 
 	array_init(return_value);
 
@@ -424,6 +426,10 @@ PHP_FUNCTION(nsapi_response_headers)
 	register int i;
 	struct pb_entry *entry;
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
+
+	if (ZEND_NUM_ARGS()) {
+		WRONG_PARAM_COUNT;
+	}
 
 	array_init(return_value);
 
