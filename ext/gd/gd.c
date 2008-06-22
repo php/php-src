@@ -3267,7 +3267,6 @@ PHP_FUNCTION(imagecolorsforindex)
 PHP_FUNCTION(imagegammacorrect)
 {
 	zval *IM;
-	double inputgamma, outputgamma;
 	gdImagePtr im;
 	int i;
 	double input, output;
@@ -4721,7 +4720,6 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 	char *fn_org = NULL;
 	char *fn_dest = NULL;
 	FILE *org, *dest;
-	int argc = ZEND_NUM_ARGS();
 	int dest_height = -1;
 	int dest_width = -1;
 	int org_height, org_width;
