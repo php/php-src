@@ -1346,22 +1346,17 @@ PHP_FUNCTION(xml_set_end_namespace_decl_handler)
 PHP_FUNCTION(xml_parse)
 {
 	xml_parser *parser;
-	zval *pind, **final;
+	zval *pind;
 	char *data;
-	int data_len, argc, isFinal, ret;
+	int data_len, argc, ret;
+	long isFinal = 0;
 
 	argc = ZEND_NUM_ARGS();
 	
-	if (zend_parse_parameters(argc TSRMLS_CC, "rs|l", &pind, &data, &data_len, &final) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "rs|l", &pind, &data, &data_len, &isFinal) == FAILURE) {
 		return;
 	}
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
-
-	if (argc == 3) {
-		isFinal = final;
-	} else {
-		isFinal = 0;
-	}
 
 	parser->isparsing = 1;
 	ret = XML_Parse(parser->parser, data, data_len, isFinal);
