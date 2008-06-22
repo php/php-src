@@ -85,12 +85,12 @@ resource(%d) of type (stream)
 
 Warning: fopen(bz_open_002.txt): failed to open stream: Bad file %s in %s on line %d
 
-Warning: bzopen(): filename cannot be empty in %s on line %d
+Warning: bzopen(): first parameter has to be string or file-resource in %s on line %d
 bool(false)
 
 Warning: fopen(bz_open_002.txt): failed to open stream: Bad file %s in %s on line %d
 
-Warning: bzopen(): filename cannot be empty in %s on line %d
+Warning: bzopen(): first parameter has to be string or file-resource in %s on line %d
 bool(false)
 
 Warning: bzopen(): cannot write to a stream opened in read only mode in %s on line %d
