@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.13 2008-06-19 17:43:38 sfox Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.14 2008-06-22 20:51:57 pajoye Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -26,6 +26,9 @@ var FSO = WScript.CreateObject("Scripting.FileSystemObject");
 var MFO = null;
 var SYSTEM_DRIVE = WshShell.Environment("Process").Item("SystemDrive");
 var PROGRAM_FILES = WshShell.Environment("Process").Item("ProgramFiles");
+
+var extensions_enabled = new Array();
+
 
 if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files";
@@ -1164,6 +1167,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		DEFINE('CFLAGS_' + EXT + '_OBJ', '$(CFLAGS_PHP) $(CFLAGS_' + EXT + ')');
 	}
 	ADD_FLAG("CFLAGS_" + EXT, cflags);
+	extensions_enabled[extensions_enabled.length] = [extname, shared ? 'shared' : 'static'];
 }
 
 function ADD_SOURCES(dir, file_list, target, obj_dir)
@@ -1281,6 +1285,71 @@ function generate_internal_functions()
 	outfile.Close();
 }
 
+function output_as_table(header, ar_out)
+{
+	var l = header.length;
+	var cols = 80;
+	var fixedlenght = "";
+	var t = 0;
+	var i,j,k,m;
+	var out = "| ";
+	var min = new Array(l);
+	var max = new Array(l);
+
+	if (l != ar_out[0].length) {
+		STDOUT.WriteLine("Invalid header argument, can't output the table " + l + " " + ar_out[0].length  );
+		return;
+	}
+
+	for (j=0; j < l; j++) {
+		var tmax, tmin;
+
+		/*Figure out the max length per column */
+		tmin = 0;
+		tmax = 0;
+		for (k = 0; k < ar_out.length; k++) {
+			var t = ar_out[k][j].length;
+			if (t > tmax) tmax = t;
+			else if (t < tmin) tmin = t;
+		}
+		max[j] = tmax;
+		min[j] = tmin;
+	}
+	sep = "";
+	k = max[0] + max[1] + 7;
+	for (j=0; j < k; j++) {
+		sep += "-";
+	}
+
+	out = "|";
+	for (j=0; j < l; j++) {
+		out += " " + header[j];
+		for (var i = 0; i < (max[j] - header[j].length); i++){
+			out += " ";
+		}
+		out += " |";
+	}
+	STDOUT.WriteLine(out);
+
+	STDOUT.WriteLine(sep);
+
+	out = "|";
+	for (i=0; i < ar_out.length; i++) {
+		line = ar_out[i];
+		for (j=0; j < l; j++) {
+			out += " " + line[j];
+			for (var k = 0; k < (max[j] - line[j].length); k++){
+				out += " ";
+			}
+			out += " |";
+		}
+		STDOUT.WriteLine(out);
+		out = "|";
+	}
+
+	STDOUT.WriteLine(sep);
+}
+
 function generate_files()
 {
 	var i, dir, bd, last;
@@ -1312,6 +1381,8 @@ function generate_files()
 	generate_internal_functions();
 	generate_config_h();
 
+	output_as_table(["Extension", "Mode"], extensions_enabled);
+	STDOUT.WriteBlankLines(2);
 
 	STDOUT.WriteLine("Done.");
 	STDOUT.WriteBlankLines(1);
