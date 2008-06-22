@@ -168,7 +168,7 @@ string(0) ""
 
 -- Iteration 24 --
 
-Warning: session_name() expects parameter 1 to be string, resource given in /home/felipe/php5/ext/session/tests/session_name_error.php on line 81
+Warning: session_name() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 Done
 
