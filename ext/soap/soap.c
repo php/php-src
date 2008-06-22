@@ -140,10 +140,6 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	SOAP_GLOBAL(soap_version) = _old_soap_version;
 #endif
 
-#define ZERO_PARAM() \
-	if (ZEND_NUM_ARGS() != 0) \
- 		WRONG_PARAM_COUNT;
-
 #define FETCH_THIS_SDL(ss) \
 	{ \
 		zval **__tmp; \
@@ -1180,59 +1176,54 @@ PHP_METHOD(SoapServer, setPersistence)
 PHP_METHOD(SoapServer, setClass)
 {
 	soapServicePtr service;
+	char *classname;
 #ifdef ZEND_ENGINE_2		
 	zend_class_entry **ce;
 #else
 	zend_class_entry *ce;
 #endif
-	int found, argc;
-	zval ***argv;
+	int classname_len, found, num_args = 0;
+	zval ***argv = NULL;
 
 	SOAP_SERVER_BEGIN_CODE();
 
 	FETCH_THIS_SERVICE(service);
 
-	argc = ZEND_NUM_ARGS();
-	argv = safe_emalloc(argc, sizeof(zval **), 0);
-
-	if (argc < 1 || zend_get_parameters_array_ex(argc, argv) == FAILURE) {
-		efree(argv);
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s*", &classname, &classname_len, &argv, &num_args) == FAILURE) {
+		return;
 	}
 
-	if (Z_TYPE_PP(argv[0]) == IS_STRING) {
 #ifdef ZEND_ENGINE_2		
-		found = zend_lookup_class(Z_STRVAL_PP(argv[0]), Z_STRLEN_PP(argv[0]), &ce TSRMLS_CC);
+	found = zend_lookup_class(classname, classname_len, &ce TSRMLS_CC);
 #else
-		char *class_name = estrdup(Z_STRVAL_PP(argv[0]));
-		found = zend_hash_find(EG(class_table), php_strtolower(class_name, Z_STRLEN_PP(argv[0])), Z_STRLEN_PP(argv[0])	 + 1, (void **)&ce);
-		efree(class_name);
+	char *class_name = estrdup(classname);
+	found = zend_hash_find(EG(class_table), php_strtolower(class_name, classname_len), classname_len + 1, (void **)&ce);
+	efree(class_name);
 #endif
-		if (found != FAILURE) {
-			service->type = SOAP_CLASS;
+	if (found != FAILURE) {
+		service->type = SOAP_CLASS;
 #ifdef ZEND_ENGINE_2
-			service->soap_class.ce = *ce;
+		service->soap_class.ce = *ce;
 #else
-			service->soap_class.ce = ce;
+		service->soap_class.ce = ce;
 #endif
-			service->soap_class.persistance = SOAP_PERSISTENCE_REQUEST;
-			service->soap_class.argc = argc - 1;
-			if (service->soap_class.argc > 0) {
-				int i;
-				service->soap_class.argv = safe_emalloc(sizeof(zval), service->soap_class.argc, 0);
-				for (i = 0;i < service->soap_class.argc;i++) {
-					service->soap_class.argv[i] = *(argv[i + 1]);
-					zval_add_ref(&service->soap_class.argv[i]);
-				}
+		service->soap_class.persistance = SOAP_PERSISTENCE_REQUEST;
+		service->soap_class.argc = num_args;
+		if (service->soap_class.argc > 0) {
+			int i;
+			service->soap_class.argv = safe_emalloc(sizeof(zval), service->soap_class.argc, 0);
+			for (i = 0;i < service->soap_class.argc;i++) {
+				service->soap_class.argv[i] = *(argv[i]);
+				zval_add_ref(&service->soap_class.argv[i]);
 			}
-		} else {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Tried to set a non existant class (%s)", Z_STRVAL_PP(argv[0]));
 		}
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "You must pass in a string");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Tried to set a non existant class (%s)", classname);
 	}
 
-	efree(argv);
+	if (argv) {
+		efree(argv);
+	}
 
 	SOAP_SERVER_END_CODE();
 }
@@ -1275,7 +1266,10 @@ PHP_METHOD(SoapServer, getFunctions)
 
 	SOAP_SERVER_BEGIN_CODE();
 
-	ZERO_PARAM()
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	
 	FETCH_THIS_SERVICE(service);
 
 	array_init(return_value);
@@ -2930,6 +2924,10 @@ PHP_METHOD(SoapClient, __getFunctions)
 
 	FETCH_THIS_SDL(sdl);
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	if (sdl) {
 		smart_str buf = {0};
 		sdlFunctionPtr *function;
@@ -2955,6 +2953,10 @@ PHP_METHOD(SoapClient, __getTypes)
 	HashPosition pos;
 
 	FETCH_THIS_SDL(sdl);
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	if (sdl) {
 		sdlTypePtr *type;
@@ -2980,6 +2982,10 @@ PHP_METHOD(SoapClient, __getTypes)
 PHP_METHOD(SoapClient, __getLastRequest)
 {
 	zval **tmp;
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "__last_request", sizeof("__last_request"), (void **)&tmp) == SUCCESS) {
 		RETURN_STRINGL(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
@@ -2995,6 +3001,10 @@ PHP_METHOD(SoapClient, __getLastResponse)
 {
 	zval **tmp;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "__last_response", sizeof("__last_response"), (void **)&tmp) == SUCCESS) {
 		RETURN_STRINGL(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
 	}
@@ -3008,7 +3018,11 @@ PHP_METHOD(SoapClient, __getLastResponse)
 PHP_METHOD(SoapClient, __getLastRequestHeaders)
 {
 	zval **tmp;
-
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "__last_request_headers", sizeof("__last_request_headers"), (void **)&tmp) == SUCCESS) {
 		RETURN_STRINGL(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
 	}
@@ -3022,6 +3036,10 @@ PHP_METHOD(SoapClient, __getLastRequestHeaders)
 PHP_METHOD(SoapClient, __getLastResponseHeaders)
 {
 	zval **tmp;
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "__last_response_headers", sizeof("__last_response_headers"), (void **)&tmp) == SUCCESS) {
 		RETURN_STRINGL(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
