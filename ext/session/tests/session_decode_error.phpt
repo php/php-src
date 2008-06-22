@@ -214,9 +214,10 @@ array(0) {
 }
 
 -- Iteration 24 --
-bool(true)
+
+Warning: session_decode() expects parameter 1 to be string, resource given in %s on line %d
+NULL
 array(0) {
 }
 bool(true)
 Done
-
