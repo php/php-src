@@ -1372,14 +1372,15 @@ PHP_METHOD(Phar, unlinkArchive)
 	}
 
 struct _phar_t {
-		phar_archive_object *p;
-		zend_class_entry *c;
-		char *b;
-		uint l;
-		zval *ret;
-		int count;
-		php_stream *fp;
-	};
+	phar_archive_object *p;
+	zend_class_entry *c;
+	char *b;
+	uint l;
+	zval *ret;
+	int count;
+	php_stream *fp;
+};
+
 static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ */
 {
 	zval **value;
@@ -1764,6 +1765,7 @@ PHP_METHOD(Phar, buildFromIterator)
 	uint base_len = 0;
 	char *base = NULL;
 	struct _phar_t pass;
+
 	PHAR_ARCHIVE_OBJECT();
 
 	if (PHAR_G(readonly) && !phar_obj->arc.archive->is_data) {
