@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.14 2008-06-22 20:51:57 pajoye Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.15 2008-06-22 23:15:54 pajoye Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -1052,7 +1052,7 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 	
 	if (optional) {
 		if (dep_present == "no")
-			return;
+			return false;
 	}
 
 	var ext_shared = eval("PHP_" + EXT + "_SHARED");
@@ -1060,7 +1060,7 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 	if (dep_shared) {
 		if (!ext_shared) {
 			if (optional) {
-				return;
+				return false;
 			}
 			ERROR("static " + extname + " cannot depend on shared " + dependson);
 		}
@@ -1071,11 +1071,14 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 		if (dep_present == "no") {
 			if (ext_shared) {
 				WARNING(extname + " has a missing dependency: " + dependson);
+				return false;
 			} else {
 				ERROR("Cannot build " + extname + "; " + dependson + " not enabled");
+				return false;
 			}
 		}
-	} // dependency is statically built-in to PHP 
+	} // dependency is statically built-in to PHP
+	return true;
 }
 
 function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
