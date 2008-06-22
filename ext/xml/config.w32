@@ -11,5 +11,3 @@ if (PHP_XML == "yes" && PHP_LIBXML == "yes") {
 	}
 	ADD_EXTENSION_DEP('xml', 'libxml');
 }
-
-
