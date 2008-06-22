@@ -597,98 +597,23 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	char *user, *passwd, *host, *charset, *appname;
 	char *hashed_details;
 	int hashed_details_length;
+	int len;
 	sybase_link *sybase_ptr;
 
-	switch(ZEND_NUM_ARGS()) {
-		case 0: /* defaults */
-			host=user=passwd=charset=appname=NULL;
-			hashed_details_length=6+5;
-			hashed_details = (char *) emalloc(hashed_details_length+1);
-			strcpy(hashed_details, "sybase_____");
-			break;
-		case 1: {
-				zval **yyhost;
-
-				if (zend_get_parameters_ex(1, &yyhost) == FAILURE) {
-					RETURN_FALSE;
-				}
-				convert_to_string_ex(yyhost);
-				host = Z_STRVAL_PP(yyhost);
-				user=passwd=charset=appname=NULL;
-				hashed_details_length = spprintf(&hashed_details, 0, "sybase_%s____", Z_STRVAL_PP(yyhost));
-			}
-			break;
-		case 2: {
-				zval **yyhost, **yyuser;
-
-				if (zend_get_parameters_ex(2, &yyhost, &yyuser) == FAILURE) {
-					RETURN_FALSE;
-				}
-				convert_to_string_ex(yyhost);
-				convert_to_string_ex(yyuser);
-				host = Z_STRVAL_PP(yyhost);
-				user = Z_STRVAL_PP(yyuser);
-				passwd=charset=appname=NULL;
-				hashed_details_length = spprintf(&hashed_details, 0, "sybase_%s_%s___", Z_STRVAL_PP(yyhost), Z_STRVAL_PP(yyuser));
-			}
-			break;
-		case 3: {
-				zval **yyhost, **yyuser, **yypasswd;
-
-				if (zend_get_parameters_ex(3, &yyhost, &yyuser, &yypasswd) == FAILURE) {
-					RETURN_FALSE;
-				}
-				convert_to_string_ex(yyhost);
-				convert_to_string_ex(yyuser);
-				convert_to_string_ex(yypasswd);
-				host = Z_STRVAL_PP(yyhost);
-				user = Z_STRVAL_PP(yyuser);
-				passwd = Z_STRVAL_PP(yypasswd);
-				charset=appname=NULL;
-				hashed_details_length = spprintf(&hashed_details, 0, "sybase_%s_%s_%s__", Z_STRVAL_PP(yyhost), Z_STRVAL_PP(yyuser), Z_STRVAL_PP(yypasswd));
-			}
-			break;
-		case 4: {
-				zval **yyhost, **yyuser, **yypasswd, **yycharset;
-
-				if (zend_get_parameters_ex(4, &yyhost, &yyuser, &yypasswd, &yycharset) == FAILURE) {
-					RETURN_FALSE;
-				}
-				convert_to_string_ex(yyhost);
-				convert_to_string_ex(yyuser);
-				convert_to_string_ex(yypasswd);
-				convert_to_string_ex(yycharset);
-				host = Z_STRVAL_PP(yyhost);
-				user = Z_STRVAL_PP(yyuser);
-				passwd = Z_STRVAL_PP(yypasswd);
-				charset = Z_STRVAL_PP(yycharset);
-				appname=NULL;
-				hashed_details_length = spprintf(&hashed_details, 0, "sybase_%s_%s_%s_%s_", Z_STRVAL_PP(yyhost), Z_STRVAL_PP(yyuser), Z_STRVAL_PP(yypasswd), Z_STRVAL_PP(yycharset));
-			}
-			break;
-		case 5: {
-				zval **yyhost, **yyuser, **yypasswd, **yycharset, **yyappname;
-
-				if (zend_get_parameters_ex(5, &yyhost, &yyuser, &yypasswd, &yycharset, &yyappname) == FAILURE) {
-					RETURN_FALSE;
-				}
-				convert_to_string_ex(yyhost);
-				convert_to_string_ex(yyuser);
-				convert_to_string_ex(yypasswd);
-				convert_to_string_ex(yycharset);
-				convert_to_string_ex(yyappname);
-				host = Z_STRVAL_PP(yyhost);
-				user = Z_STRVAL_PP(yyuser);
-				passwd = Z_STRVAL_PP(yypasswd);
-				charset = Z_STRVAL_PP(yycharset);
-				appname = Z_STRVAL_PP(yyappname);
-				hashed_details_length = spprintf(&hashed_details, 0, "sybase_%s_%s_%s_%s_%s", Z_STRVAL_PP(yyhost), Z_STRVAL_PP(yyuser), Z_STRVAL_PP(yypasswd), Z_STRVAL_PP(yycharset), Z_STRVAL_PP(yyappname));
-			}
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+    host= user= passwd= charset= appname= NULL;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sssss", &host, &len, &user, &len, &passwd, &len, &charset, &len, &appname, &len) == FAILURE) {
+		return;
 	}
+	hashed_details_length = spprintf(
+		&hashed_details, 
+		0, 
+		"sybase_%s_%s_%s_%s_%s",
+		host ? host : "", 
+		user ? user : "", 
+		passwd ? passwd : "", 
+		charset ? charset : "", 
+		appname ? appname : ""
+	);
 
 	if (!SybCtG(allow_persistent)) {
 		persistent=0;
