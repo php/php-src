@@ -1,3 +1,112 @@
+2008-06-21  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/pack.c:
+      - Fix segfault
+
+2008-06-21  Alexey Zakhlestin  <indeyets@gmail.com>
+
+    * (PHP_5_3)
+      ext/curl/interface.c:
+      updated to the new parameter-parsing api
+
+2008-06-21  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      ext/phar/util.c:
+      - Don't free stuff you still need
+
+    * (PHP_5_3)
+      ext/phar/func_interceptors.c:
+      - Kill a couple of double frees and a memleak
+
+    * (PHP_5_3)
+      ext/phar/zip.c:
+      - pefree pemalloc'd filename
+
+    * (PHP_5_3)
+      ext/phar/phar_internal.h
+      ext/phar/zip.c:
+      - Fix macro definition syntax
+      - Remove pre-existing workaround
+
+    * (PHP_5_3)
+      ext/phar/util.c:
+      - fix for segfault in 5.2 (patch from Greg)
+
+    * (PHP_5_3)
+      ext/phar/Makefile.frag
+      ext/phar/phar.c
+      ext/phar/phar_object.c
+      ext/phar/util.c:
+      - ws
+
+2008-06-21  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/ereg/ereg.c
+      ext/ereg/tests/ereg_error_001.phpt
+      ext/ereg/tests/ereg_replace_error_001.phpt
+      ext/ereg/tests/ereg_replace_variation_003.phpt
+      ext/ereg/tests/ereg_variation_002.phpt
+      ext/ereg/tests/eregi_error_001.phpt
+      ext/ereg/tests/eregi_replace_error_001.phpt
+      ext/ereg/tests/eregi_replace_variation_003.phpt
+      ext/ereg/tests/eregi_variation_002.phpt
+      ext/ereg/tests/split_error_001.phpt
+      ext/ereg/tests/split_error_002.phpt
+      ext/ereg/tests/split_variation_001.phpt
+      ext/ereg/tests/split_variation_002.phpt
+      ext/ereg/tests/split_variation_003.phpt
+      ext/ereg/tests/spliti_error_001.phpt
+      ext/ereg/tests/spliti_error_002.phpt
+      ext/ereg/tests/spliti_variation_001.phpt
+      ext/ereg/tests/spliti_variation_002.phpt
+      ext/ereg/tests/spliti_variation_003.phpt
+      ext/ereg/tests/sql_regcase_error_001.phpt
+      ext/ereg/tests/sql_regcase_variation_001.phpt
+      ext/gd/gd.c
+      ext/gd/tests/lines.phpt
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/ReflectionMethod_invoke_basic.phpt
+      ext/session/session.c
+      ext/session/tests/session_cache_limiter_error.phpt
+      ext/session/tests/session_id_error.phpt
+      ext/session/tests/session_is_registered_basic.phpt
+      ext/session/tests/session_is_registered_variation1.phpt
+      ext/session/tests/session_module_name_error.phpt
+      ext/session/tests/session_name_error.phpt
+      ext/session/tests/session_register_variation2.phpt
+      ext/session/tests/session_save_path_error.phpt
+      ext/session/tests/session_set_cookie_params_error.phpt
+      ext/session/tests/session_unregister_basic.phpt
+      main/main.c:
+      - New parameter parsing API
+
+2008-06-21  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/phar_internal.h:
+      define ALLOC_PERMANENT_ZVAL for PHP 5.2
+
+    * (PHP_5_3)
+      ext/phar/phar.c:
+      PHP 5.2 fixes to direct include of compressed archives
+
+    * (PHP_5_3)
+      ext/phar/phar.phar
+      ext/phar/phar_object.c:
+      close stream on failure
+
+    * (PHP_5_3)
+      ext/phar/phar.phar
+      ext/phar/phar_object.c:
+      82x(./profile2) speedup for buildFrom*()
+
+    * (PHP_5_3)
+      ext/phar/util.c:
+      fix leak
+
 2008-06-20  David Coallier  <david.coallier@gmail.com>
 
     * (PHP_5_3)
