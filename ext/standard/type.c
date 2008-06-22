@@ -92,7 +92,6 @@ PHP_FUNCTION(settype)
 {
 	zval **var;
 	char *type;
-	char *new_type;
 	int type_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zs", &var, &type, &type_len) == FAILURE) {
