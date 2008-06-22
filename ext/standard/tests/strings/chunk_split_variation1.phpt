@@ -118,24 +118,24 @@ string(20) "1. 07 65 43 21 E- 9 "
 string(5) "0. 5 "
 -- Iteration 10 --
 
-Notice: Array to string conversion in %s on line 87
-string(8) "Ar ra y "
+Warning: chunk_split() expects parameter 1 to be string, array given in %s on line 87
+NULL
 -- Iteration 11 --
 
-Notice: Array to string conversion in %s on line 87
-string(8) "Ar ra y "
+Warning: chunk_split() expects parameter 1 to be string, array given in %s on line 87
+NULL
 -- Iteration 12 --
 
-Notice: Array to string conversion in %s on line 87
-string(8) "Ar ra y "
+Warning: chunk_split() expects parameter 1 to be string, array given in %s on line 87
+NULL
 -- Iteration 13 --
 
-Notice: Array to string conversion in %s on line 87
-string(8) "Ar ra y "
+Warning: chunk_split() expects parameter 1 to be string, array given in %s on line 87
+NULL
 -- Iteration 14 --
 
-Notice: Array to string conversion in %s on line 87
-string(8) "Ar ra y "
+Warning: chunk_split() expects parameter 1 to be string, array given in %s on line 87
+NULL
 -- Iteration 15 --
 string(1) " "
 -- Iteration 16 --
@@ -163,5 +163,7 @@ string(1) " "
 -- Iteration 27 --
 string(1) " "
 -- Iteration 28 --
-string(%d) "Re so ur ce  i d  #%s "
+
+Warning: chunk_split() expects parameter 1 to be string, resource given in %s on line 87
+NULL
 Done

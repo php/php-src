@@ -27,14 +27,14 @@ echo "*** Done ***";
 *** Testing strrchr() function: error conditions ***
 
 -- Testing strrchr() function with Zero arguments --
-Warning: Wrong parameter count for strrchr() in %s on line %d
+Warning: strrchr() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 
 -- Testing strrchr() function with less than expected no. of arguments --
-Warning: Wrong parameter count for strrchr() in %s on line %d
+Warning: strrchr() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
 -- Testing strrchr() function with more than expected no. of arguments --
-Warning: Wrong parameter count for strrchr() in %s on line %d
+Warning: strrchr() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 *** Done ***

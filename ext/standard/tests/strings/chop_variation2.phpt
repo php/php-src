@@ -128,24 +128,24 @@ string(17) "hello world12345 "
 string(17) "hello world12345 "
 -- Iteration 10 --
 
-Notice: Array to string conversion in %s on line %d
-string(17) "hello world12345 "
+Warning: chop() expects parameter 2 to be string, array given in %s on line %d
+NULL
 -- Iteration 11 --
 
-Notice: Array to string conversion in %s on line %d
-string(17) "hello world12345 "
+Warning: chop() expects parameter 2 to be string, array given in %s on line %d
+NULL
 -- Iteration 12 --
 
-Notice: Array to string conversion in %s on line %d
-string(17) "hello world12345 "
+Warning: chop() expects parameter 2 to be string, array given in %s on line %d
+NULL
 -- Iteration 13 --
 
-Notice: Array to string conversion in %s on line %d
-string(17) "hello world12345 "
+Warning: chop() expects parameter 2 to be string, array given in %s on line %d
+NULL
 -- Iteration 14 --
 
-Notice: Array to string conversion in %s on line %d
-string(17) "hello world12345 "
+Warning: chop() expects parameter 2 to be string, array given in %s on line %d
+NULL
 -- Iteration 15 --
 string(17) "hello world12345 "
 -- Iteration 16 --
@@ -165,7 +165,9 @@ string(17) "hello world12345 "
 -- Iteration 23 --
 string(17) "hello world12345 "
 -- Iteration 24 --
-string(%d) "%s"
+
+Warning: chop() expects parameter 2 to be string, resource given in %s on line %d
+NULL
 -- Iteration 25 --
 string(17) "hello world12345 "
 -- Iteration 26 --
