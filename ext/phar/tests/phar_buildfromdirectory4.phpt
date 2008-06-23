@@ -5,6 +5,7 @@ Phar::buildFromDirectory(), directory exists
 --INI--
 phar.require_hash=0
 phar.readonly=0
+open_basedir=
 --FILE--
 <?php
 

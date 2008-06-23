@@ -1614,7 +1614,16 @@ after_open_fp:
 		if (error) {
 			efree(error);
 		}
-		contents_len = php_stream_copy_to_stream(fp, data->fp, PHP_STREAM_COPY_ALL);
+		/* convert to PHAR_UFP */
+		if (data->internal_file->fp_type == PHAR_MOD) {
+			php_stream_close(data->internal_file->fp);
+		}
+		data->internal_file->fp = NULL;
+		data->internal_file->fp_type = PHAR_UFP;
+		data->internal_file->offset_abs = data->internal_file->offset = php_stream_tell(p_obj->fp);
+		contents_len = php_stream_copy_to_stream(fp, p_obj->fp, PHP_STREAM_COPY_ALL);
+		data->internal_file->uncompressed_filesize = data->internal_file->compressed_filesize =
+			php_stream_tell(p_obj->fp) - data->internal_file->offset;
 	}
 	if (close_fp) {
 		php_stream_close(fp);
@@ -1632,15 +1641,6 @@ after_open_fp:
 	data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
 	phar_entry_delref(data TSRMLS_CC);
 
-	if (++p_obj->count && p_obj->count % 900) {
-		/* every 900 files, flush so we remove open temp file handles, fixes Bug #45218 */
-		phar_flush(p_obj->p->arc.archive, 0, 0, 0, &error TSRMLS_CC);
-		if (error) {
-			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
-			efree(error);
-			return ZEND_HASH_APPLY_STOP;
-		}
-	}
 	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
@@ -1694,6 +1694,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 
 	if (SUCCESS != object_init_ex(iteriter, spl_ce_RecursiveIteratorIterator)) {
 		zval_ptr_dtor(&iter);
+		zval_ptr_dtor(&iteriter);
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Unable to instantiate directory iterator for %s", phar_obj->arc.archive->fname);
 		RETURN_FALSE;
 	}
@@ -1714,6 +1715,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 		MAKE_STD_ZVAL(regexiter);
 
 		if (SUCCESS != object_init_ex(regexiter, spl_ce_RegexIterator)) {
+			zval_ptr_dtor(&iteriter);
 			zval_dtor(regexiter);
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Unable to instantiate regex iterator for %s", phar_obj->arc.archive->fname);
 			RETURN_FALSE;
@@ -1748,6 +1750,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 			efree(error);
 		}
 	} else {
+		zval_ptr_dtor(&iteriter);
 		php_stream_close(pass.fp);
 	}
 }
