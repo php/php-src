@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.16 2008-06-23 08:11:31 pajoye Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.17 2008-06-23 11:44:21 pajoye Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -1562,7 +1562,7 @@ function AC_DEFINE(name, value, comment, quote)
 
 function MESSAGE(msg)
 {
-	STDERR.WriteLine("" + msg);
+	STDOUT.WriteLine("" + msg);
 }
 
 function ERROR(msg)
