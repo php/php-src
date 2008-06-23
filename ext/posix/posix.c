@@ -56,91 +56,284 @@
 ZEND_DECLARE_MODULE_GLOBALS(posix)
 static PHP_MINFO_FUNCTION(posix);
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_kill, 0, 0, 2)
+	ZEND_ARG_INFO(0, pid)
+	ZEND_ARG_INFO(0, sig)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_posix_getpid, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_posix_getppid, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_posix_getuid, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_setuid, 0, 0, 1)
+	ZEND_ARG_INFO(0, uid)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_posix_geteuid, 0)
+ZEND_END_ARG_INFO()
+
+#ifdef HAVE_SETEUID
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_seteuid, 0, 0, 1)
+	ZEND_ARG_INFO(0, uid)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_posix_getgid, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_setgid, 0, 0, 1)
+	ZEND_ARG_INFO(0, gid)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_posix_getegid, 0)
+ZEND_END_ARG_INFO()
+
+#ifdef HAVE_SETEGID
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_setegid, 0, 0, 1)
+	ZEND_ARG_INFO(0, gid)
+ZEND_END_ARG_INFO()
+#endif
+
+#ifdef HAVE_GETGROUPS
+static
+ZEND_BEGIN_ARG_INFO(arginfo_posix_getgroups, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#ifdef HAVE_GETLOGIN
+static
+ZEND_BEGIN_ARG_INFO(arginfo_posix_getlogin, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_posix_getpgrp, 0)
+ZEND_END_ARG_INFO()
+
+#ifdef HAVE_SETSID
+static
+ZEND_BEGIN_ARG_INFO(arginfo_posix_setsid, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_setpgid, 0, 0, 2)
+	ZEND_ARG_INFO(0, pid)
+	ZEND_ARG_INFO(0, pgid)
+ZEND_END_ARG_INFO()
+
+#ifdef HAVE_GETPGID
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getpgid, 0, 0, 1)
+	ZEND_ARG_INFO(0, pid)
+ZEND_END_ARG_INFO()
+#endif
+
+#ifdef HAVE_GETSID
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getsid, 0, 0, 1)
+	ZEND_ARG_INFO(0, pid)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_posix_uname, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_posix_times, 0)
+ZEND_END_ARG_INFO()
+
+#ifdef HAVE_CTERMID
+static
+ZEND_BEGIN_ARG_INFO(arginfo_posix_ctermid, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_ttyname, 0, 0, 1)
+	ZEND_ARG_INFO(0, fd)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_isatty, 0, 0, 1)
+	ZEND_ARG_INFO(0, fd)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_posix_getcwd, 0)
+ZEND_END_ARG_INFO()
+
+#ifdef HAVE_MKFIFO
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_mkfifo, 0, 0, 2)
+	ZEND_ARG_INFO(0, pathname)
+	ZEND_ARG_INFO(0, mode)
+ZEND_END_ARG_INFO()
+#endif
+
+#ifdef HAVE_MKNOD
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_mknod, 0, 0, 2)
+	ZEND_ARG_INFO(0, pathname)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, major)
+	ZEND_ARG_INFO(0, minor)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_access, 0, 0, 1)
+	ZEND_ARG_INFO(0, file)
+	ZEND_ARG_INFO(0, mode)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getgrnam, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getgrgid, 0, 0, 1)
+	ZEND_ARG_INFO(0, gid)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getpwnam, 0, 0, 1)
+	ZEND_ARG_INFO(0, username)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getpwuid, 0, 0, 1)
+	ZEND_ARG_INFO(0, uid)
+ZEND_END_ARG_INFO()
+
+#ifdef HAVE_GETRLIMIT
+static
+ZEND_BEGIN_ARG_INFO(arginfo_posix_getrlimit, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_posix_get_last_error, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_strerror, 0, 0, 1)
+	ZEND_ARG_INFO(0, errno)
+ZEND_END_ARG_INFO()
+
+#ifdef HAVE_INITGROUPS
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_initgroups, 0, 0, 2)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, base_group_id)
+ZEND_END_ARG_INFO()
+#endif
+/* }}} */
+
 /* {{{ posix_functions[]
  */
 const zend_function_entry posix_functions[] = {
     /* POSIX.1, 3.3 */
-	PHP_FE(posix_kill,		NULL)
+	PHP_FE(posix_kill,		arginfo_posix_kill)
 
 	/* POSIX.1, 4.1 */
-	PHP_FE(posix_getpid,	NULL)
-	PHP_FE(posix_getppid,	NULL)
+	PHP_FE(posix_getpid,	arginfo_posix_getpid)
+	PHP_FE(posix_getppid,	arginfo_posix_getppid)
 
 	/* POSIX.1,  4.2 */
-	PHP_FE(posix_getuid,	NULL)
-	PHP_FE(posix_setuid,	NULL)
-	PHP_FE(posix_geteuid,	NULL)
+	PHP_FE(posix_getuid,	arginfo_posix_getuid)
+	PHP_FE(posix_setuid,	arginfo_posix_setuid)
+	PHP_FE(posix_geteuid,	arginfo_posix_geteuid)
 #ifdef HAVE_SETEUID
-	PHP_FE(posix_seteuid,	NULL)
+	PHP_FE(posix_seteuid,	arginfo_posix_seteuid)
 #endif
-	PHP_FE(posix_getgid,	NULL)
-	PHP_FE(posix_setgid,	NULL)
-	PHP_FE(posix_getegid,	NULL)
+	PHP_FE(posix_getgid,	arginfo_posix_getgid)
+	PHP_FE(posix_setgid,	arginfo_posix_setgid)
+	PHP_FE(posix_getegid,	arginfo_posix_getegid)
 #ifdef HAVE_SETEGID
-	PHP_FE(posix_setegid,	NULL)
+	PHP_FE(posix_setegid,	arginfo_posix_setegid)
 #endif
 #ifdef HAVE_GETGROUPS
-	PHP_FE(posix_getgroups,	NULL)
+	PHP_FE(posix_getgroups,	arginfo_posix_getgroups)
 #endif
 #ifdef HAVE_GETLOGIN
-	PHP_FE(posix_getlogin,	NULL)
+	PHP_FE(posix_getlogin,	arginfo_posix_getlogin)
 #endif
 
 	/* POSIX.1, 4.3 */
-	PHP_FE(posix_getpgrp,	NULL)
+	PHP_FE(posix_getpgrp,	arginfo_posix_getpgrp)
 #ifdef HAVE_SETSID
-	PHP_FE(posix_setsid,	NULL)
+	PHP_FE(posix_setsid,	arginfo_posix_setsid)
 #endif
-	PHP_FE(posix_setpgid,	NULL)
+	PHP_FE(posix_setpgid,	arginfo_posix_setpgid)
 	/* Non-Posix functions which are common */
 #ifdef HAVE_GETPGID
-	PHP_FE(posix_getpgid,	NULL)
+	PHP_FE(posix_getpgid,	arginfo_posix_getpgid)
 #endif /* HAVE_GETPGID */
 #ifdef HAVE_GETSID
-	PHP_FE(posix_getsid,	NULL)
+	PHP_FE(posix_getsid,	arginfo_posix_getsid)
 #endif /* HAVE_GETSID */
 
 	/* POSIX.1, 4.4 */
-	PHP_FE(posix_uname,		NULL)
+	PHP_FE(posix_uname,		arginfo_posix_uname)
 
 	/* POSIX.1, 4.5 */
-	PHP_FE(posix_times,		NULL)
+	PHP_FE(posix_times,		arginfo_posix_times)
 
 	/* POSIX.1, 4.7 */
 #ifdef HAVE_CTERMID
-	PHP_FE(posix_ctermid,	NULL)
+	PHP_FE(posix_ctermid,	arginfo_posix_ctermid)
 #endif
-	PHP_FE(posix_ttyname,	NULL)
-	PHP_FE(posix_isatty,	NULL)
+	PHP_FE(posix_ttyname,	arginfo_posix_ttyname)
+	PHP_FE(posix_isatty,	arginfo_posix_isatty)
 
     /* POSIX.1, 5.2 */
-	PHP_FE(posix_getcwd,	NULL)
+	PHP_FE(posix_getcwd,	arginfo_posix_getcwd)
 
 	/* POSIX.1, 5.4 */
 #ifdef HAVE_MKFIFO
-	PHP_FE(posix_mkfifo,	NULL)
+	PHP_FE(posix_mkfifo,	arginfo_posix_mkfifo)
 #endif
 #ifdef HAVE_MKNOD
-	PHP_FE(posix_mknod,	NULL)
+	PHP_FE(posix_mknod,		arginfo_posix_mknod)
 #endif
 
 	/* POSIX.1, 5.6 */
-	PHP_FE(posix_access,	NULL)
+	PHP_FE(posix_access,	arginfo_posix_access)
 	/* POSIX.1, 9.2 */
-	PHP_FE(posix_getgrnam,	NULL)
-	PHP_FE(posix_getgrgid,	NULL)
-	PHP_FE(posix_getpwnam,	NULL)
-	PHP_FE(posix_getpwuid,	NULL)
+	PHP_FE(posix_getgrnam,	arginfo_posix_getgrnam)
+	PHP_FE(posix_getgrgid,	arginfo_posix_getgrgid)
+	PHP_FE(posix_getpwnam,	arginfo_posix_getpwnam)
+	PHP_FE(posix_getpwuid,	arginfo_posix_getpwuid)
 
 #ifdef HAVE_GETRLIMIT
-	PHP_FE(posix_getrlimit,	NULL)
+	PHP_FE(posix_getrlimit,	arginfo_posix_getrlimit)
 #endif
 
-	PHP_FE(posix_get_last_error,					NULL)
+	PHP_FE(posix_get_last_error,					arginfo_posix_get_last_error)
 	PHP_FALIAS(posix_errno, posix_get_last_error,	NULL)
-	PHP_FE(posix_strerror,							NULL)
+	PHP_FE(posix_strerror,							arginfo_posix_strerror)
 #ifdef HAVE_INITGROUPS
-	PHP_FE(posix_initgroups,	NULL)
+	PHP_FE(posix_initgroups,	arginfo_posix_initgroups)
 #endif
 
 	{NULL, NULL, NULL}
