@@ -254,13 +254,7 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 				}
 bail:
 				php_stream_close(fp);
-				zend_hash_destroy(&myphar->manifest);
-				myphar->manifest.arBuckets = 0;
-				zend_hash_destroy(&myphar->mounted_dirs);
-				myphar->mounted_dirs.arBuckets = 0;
-				zend_hash_destroy(&myphar->virtual_dirs);
-				myphar->virtual_dirs.arBuckets = 0;
-				pefree(myphar, myphar->is_persistent);
+				phar_destroy_phar_data(myphar TSRMLS_CC);
 				return FAILURE;
 			}
 			read = php_stream_read(fp, buf, size);
@@ -297,13 +291,7 @@ bail:
 						spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 					}
 					php_stream_close(fp);
-					zend_hash_destroy(&myphar->manifest);
-					myphar->manifest.arBuckets = 0;
-					zend_hash_destroy(&myphar->mounted_dirs);
-					myphar->mounted_dirs.arBuckets = 0;
-					zend_hash_destroy(&myphar->virtual_dirs);
-					myphar->virtual_dirs.arBuckets = 0;
-					pefree(myphar, myphar->is_persistent);
+					phar_destroy_phar_data(myphar TSRMLS_CC);
 					return FAILURE;
 				}
 			}
@@ -313,13 +301,7 @@ bail:
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 				}
 				php_stream_close(fp);
-				zend_hash_destroy(&myphar->manifest);
-				myphar->manifest.arBuckets = 0;
-				zend_hash_destroy(&myphar->mounted_dirs);
-				myphar->mounted_dirs.arBuckets = 0;
-				zend_hash_destroy(&myphar->virtual_dirs);
-				myphar->virtual_dirs.arBuckets = 0;
-				pefree(myphar, myphar->is_persistent);
+				phar_destroy_phar_data(myphar TSRMLS_CC);
 				return FAILURE;
 			}
 			hdr = (tar_header*) buf;
@@ -364,13 +346,7 @@ bail:
 			}
 			pefree(entry.filename, myphar->is_persistent);
 			php_stream_close(fp);
-			zend_hash_destroy(&myphar->manifest);
-			myphar->manifest.arBuckets = 0;
-			zend_hash_destroy(&myphar->mounted_dirs);
-			myphar->mounted_dirs.arBuckets = 0;
-			zend_hash_destroy(&myphar->virtual_dirs);
-			myphar->virtual_dirs.arBuckets = 0;
-			pefree(myphar, myphar->is_persistent);
+			phar_destroy_phar_data(myphar TSRMLS_CC);
 			return FAILURE;
 		}
 
@@ -401,13 +377,7 @@ bail:
 				}
 				pefree(entry.filename, entry.is_persistent);
 				php_stream_close(fp);
-				zend_hash_destroy(&myphar->manifest);
-				myphar->manifest.arBuckets = 0;
-				zend_hash_destroy(&myphar->mounted_dirs);
-				myphar->mounted_dirs.arBuckets = 0;
-				zend_hash_destroy(&myphar->virtual_dirs);
-				myphar->virtual_dirs.arBuckets = 0;
-				pefree(myphar, entry.is_persistent);
+				phar_destroy_phar_data(myphar TSRMLS_CC);
 				return FAILURE;
 			}
 			entry.link = estrdup(hdr->linkname);
@@ -423,13 +393,7 @@ bail:
 					spprintf(error, 4096, "phar error: tar-based phar \"%s\" has invalid metadata in magic file \"%s\"", fname, entry.filename);
 				}
 				php_stream_close(fp);
-				zend_hash_destroy(&myphar->manifest);
-				myphar->manifest.arBuckets = 0;
-				zend_hash_destroy(&myphar->mounted_dirs);
-				myphar->mounted_dirs.arBuckets = 0;
-				zend_hash_destroy(&myphar->virtual_dirs);
-				myphar->virtual_dirs.arBuckets = 0;
-				pefree(myphar, myphar->is_persistent);
+				phar_destroy_phar_data(myphar TSRMLS_CC);
 				return FAILURE;
 			}
 		}
@@ -441,13 +405,7 @@ bail:
 					spprintf(error, 4096, "phar error: tar-based phar \"%s\" has alias that is larger than 511 bytes, cannot process", fname);
 				}
 				php_stream_close(fp);
-				zend_hash_destroy(&myphar->manifest);
-				myphar->manifest.arBuckets = 0;
-				zend_hash_destroy(&myphar->mounted_dirs);
-				myphar->mounted_dirs.arBuckets = 0;
-				zend_hash_destroy(&myphar->virtual_dirs);
-				myphar->virtual_dirs.arBuckets = 0;
-				pefree(myphar, myphar->is_persistent);
+				phar_destroy_phar_data(myphar TSRMLS_CC);
 				return FAILURE;
 			}
 			read = php_stream_read(fp, buf, size);
@@ -464,13 +422,7 @@ bail:
 						spprintf(error, 4096, "phar error: invalid alias \"%s\" in tar-based phar \"%s\"", buf, fname);
 					}
 					php_stream_close(fp);
-					zend_hash_destroy(&myphar->manifest);
-					myphar->manifest.arBuckets = 0;
-					zend_hash_destroy(&myphar->mounted_dirs);
-					myphar->mounted_dirs.arBuckets = 0;
-					zend_hash_destroy(&myphar->virtual_dirs);
-					myphar->virtual_dirs.arBuckets = 0;
-					pefree(myphar, myphar->is_persistent);
+					phar_destroy_phar_data(myphar TSRMLS_CC);
 					return FAILURE;
 				}
 				actual_alias = pestrndup(buf, size, myphar->is_persistent);
@@ -482,13 +434,7 @@ bail:
 					spprintf(error, 4096, "phar error: Unable to read alias from tar-based phar \"%s\"", fname);
 				}
 				php_stream_close(fp);
-				zend_hash_destroy(&myphar->manifest);
-				myphar->manifest.arBuckets = 0;
-				zend_hash_destroy(&myphar->mounted_dirs);
-				myphar->mounted_dirs.arBuckets = 0;
-				zend_hash_destroy(&myphar->virtual_dirs);
-				myphar->virtual_dirs.arBuckets = 0;
-				pefree(myphar, myphar->is_persistent);
+				phar_destroy_phar_data(myphar TSRMLS_CC);
 				return FAILURE;
 			}
 		}
@@ -501,13 +447,7 @@ bail:
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 				}
 				php_stream_close(fp);
-				zend_hash_destroy(&myphar->manifest);
-				myphar->manifest.arBuckets = 0;
-				zend_hash_destroy(&myphar->mounted_dirs);
-				myphar->mounted_dirs.arBuckets = 0;
-				zend_hash_destroy(&myphar->virtual_dirs);
-				myphar->virtual_dirs.arBuckets = 0;
-				pefree(myphar, myphar->is_persistent);
+				phar_destroy_phar_data(myphar TSRMLS_CC);
 				return FAILURE;
 			}
 		}
@@ -517,13 +457,7 @@ bail:
 				spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 			}
 			php_stream_close(fp);
-			zend_hash_destroy(&myphar->manifest);
-			myphar->manifest.arBuckets = 0;
-			zend_hash_destroy(&myphar->mounted_dirs);
-			myphar->mounted_dirs.arBuckets = 0;
-			zend_hash_destroy(&myphar->virtual_dirs);
-			myphar->virtual_dirs.arBuckets = 0;
-			pefree(myphar, myphar->is_persistent);
+			phar_destroy_phar_data(myphar TSRMLS_CC);
 			return FAILURE;
 		}
 	} while (read != 0);
@@ -531,13 +465,7 @@ bail:
 	/* ensure signature set */
 	if (PHAR_G(require_hash) && !myphar->signature) {
 		php_stream_close(fp);
-		zend_hash_destroy(&myphar->manifest);
-		myphar->manifest.arBuckets = 0;
-		zend_hash_destroy(&myphar->mounted_dirs);
-		myphar->mounted_dirs.arBuckets = 0;
-		zend_hash_destroy(&myphar->virtual_dirs);
-		myphar->virtual_dirs.arBuckets = 0;
-		pefree(myphar, myphar->is_persistent);
+		phar_destroy_phar_data(myphar TSRMLS_CC);
 		if (error) {
 			spprintf(error, 0, "tar-based phar \"%s\" does not have a signature", fname);
 		}
@@ -572,13 +500,7 @@ bail:
 			spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\" to phar registry", fname);
 		}
 		php_stream_close(fp);
-		zend_hash_destroy(&myphar->manifest);
-		myphar->manifest.arBuckets = 0;
-		zend_hash_destroy(&myphar->mounted_dirs);
-		myphar->mounted_dirs.arBuckets = 0;
-		zend_hash_destroy(&myphar->virtual_dirs);
-		myphar->virtual_dirs.arBuckets = 0;
-		pefree(myphar, myphar->is_persistent);
+		phar_destroy_phar_data(myphar TSRMLS_CC);
 		return FAILURE;
 	}
 	myphar = *actual;
