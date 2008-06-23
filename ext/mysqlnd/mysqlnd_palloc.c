@@ -132,6 +132,16 @@ PHPAPI MYSQLND_THD_ZVAL_PCACHE* _mysqlnd_palloc_init_thd_cache(MYSQLND_ZVAL_PCAC
 	MYSQLND_THD_ZVAL_PCACHE *ret = calloc(1, sizeof(MYSQLND_THD_ZVAL_PCACHE));
 	DBG_ENTER("_mysqlnd_palloc_init_thd_cache");
 	DBG_INF_FMT("ret = %p", ret);
+	
+#if PHP_DEBUG
+	LOCK_PCACHE(cache);
+	if (cache->references == 1 && cache->max_items != cache->free_items) {
+		UNLOCK_PCACHE(cache);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No references to mysqlnd's zval cache but max_items != free_items");
+	} else {
+		UNLOCK_PCACHE(cache);
+	}
+#endif
 	ret->parent = mysqlnd_palloc_get_cache_reference(cache);
 
 #ifdef ZTS
@@ -304,7 +314,12 @@ void *mysqlnd_palloc_get_zval(MYSQLND_THD_ZVAL_PCACHE * const thd_cache, zend_bo
 	if (thd_cache) {
 		MYSQLND_ZVAL_PCACHE *cache = thd_cache->parent;
 		LOCK_PCACHE(cache);
-		
+
+		DBG_INF_FMT("free_items=%d free_list.ptr_line=%p free_list.last_added=%p *free_list.last_added=%p",
+					cache->free_items, cache->free_list.ptr_line, cache->free_list.last_added,
+					*cache->free_list.last_added);
+
+		/* We have max_items + 1 allocated block for free_list, thus we know if we */
 		if ((ret = *cache->free_list.last_added)) {
 			*cache->free_list.last_added++ = NULL;
 			*allocated = FALSE;
@@ -427,6 +442,18 @@ void mysqlnd_palloc_zval_ptr_dtor(zval **zv, MYSQLND_THD_ZVAL_PCACHE * const thd
 		  shutdown :(.
 		*/
 		LOCK_PCACHE(cache);
+		DBG_INF_FMT("gc_list.ptr_line=%p gc_list.last_added=%p *gc_list.last_added=%p",
+					thd_cache->gc_list.ptr_line,
+					thd_cache->gc_list.last_added,
+					*thd_cache->gc_list.last_added);
+		if ((thd_cache->gc_list.last_added - thd_cache->gc_list.ptr_line) > cache->max_items) {
+			DBG_ERR("Buffer overflow follows");
+			DBG_ERR_FMT("parent->max_items=%d parent->free_items=%d diff=%d",
+						cache->max_items, cache->free_items,
+						thd_cache->gc_list.last_added - thd_cache->gc_list.ptr_line);
+
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "We will get buffer overflow");
+		}
 		++cache->put_misses;
 		*(thd_cache->gc_list.last_added++) = (mysqlnd_zval *)*zv;
 		UNLOCK_PCACHE(cache);
@@ -487,6 +514,7 @@ PHPAPI void _mysqlnd_palloc_rshutdown(MYSQLND_THD_ZVAL_PCACHE * thd_cache TSRMLS
 	}
 
 	p = thd_cache->gc_list.ptr_line;
+
 	LOCK_PCACHE(cache);
 	while (p < thd_cache->gc_list.last_added) {
 		(*p)->point_type = MYSQLND_POINTS_FREE;
