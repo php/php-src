@@ -247,6 +247,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_initgroups, 0, 0, 2)
 	ZEND_ARG_INFO(0, base_group_id)
 ZEND_END_ARG_INFO()
 #endif
+/* }}} */
 
 /* {{{ posix_functions[]
  */

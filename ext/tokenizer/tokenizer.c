@@ -45,7 +45,7 @@ static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_token_name, 0, 0, 1)
 	ZEND_ARG_INFO(0, token)
 ZEND_END_ARG_INFO()
-
+/* }}} */
 
 /* {{{ tokenizer_functions[]
  *
