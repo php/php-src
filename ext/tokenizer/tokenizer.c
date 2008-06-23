@@ -35,13 +35,25 @@
 #define zendtext LANG_SCNG(yy_text)
 #define zendleng LANG_SCNG(yy_leng)
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_token_get_all, 0, 0, 1)
+	ZEND_ARG_INFO(0, source)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_token_name, 0, 0, 1)
+	ZEND_ARG_INFO(0, token)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 /* {{{ tokenizer_functions[]
  *
  * Every user visible function must have an entry in tokenizer_functions[].
  */
 const zend_function_entry tokenizer_functions[] = {
-	PHP_FE(token_get_all,	NULL)
-	PHP_FE(token_name,	NULL)
+	PHP_FE(token_get_all,	arginfo_token_get_all)
+	PHP_FE(token_name,		arginfo_token_name)
 	{NULL, NULL, NULL}	/* Must be the last line in tokenizer_functions[] */
 };
 /* }}} */
