@@ -1,9 +1,13 @@
 --TEST--
 Phar: phpinfo display 2
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zlib")) die("skip zlib not loaded"); ?>
-<?php if (!extension_loaded("bz2")) die("skip bz2 not loaded"); ?>
+<?php
+if (!extension_loaded("phar")) die("skip");
+if (!extension_loaded("zlib")) die("skip zlib not loaded");
+if (!extension_loaded("bz2")) die("skip bz2 not loaded");
+$arr = Phar::getSupportedSignatures();
+if (in_array("OpenSSL", $arr)) die("skip openssl support enabled");
+?>
 --INI--
 phar.readonly=1
 phar.require_hash=1
@@ -26,6 +30,7 @@ Tar-based phar archives => enabled
 ZIP-based phar archives => enabled
 gzip compression => enabled
 bzip2 compression => enabled
+OpenSSL support => disabled (install ext/openssl)
 
 
 Phar based on pear/PHP_Archive, original concept by Davey Shafik.

@@ -2,11 +2,21 @@
 // vim:ft=javascript
 
 ARG_ENABLE("phar", "disable phar support", "yes");
+ARG_ENABLE("phar-ssl", "enable phar with native OpenSSL support", "no");
+
+if (PHP_PHAR_SSL != "no") {
+	PHP_PHAR = PHP_PHAR_SSL;
+	PHP_PHAR_SHARED = PHP_PHAR_SSL_SHARED;
+}
 
 if (PHP_PHAR != "no") {
 	EXTENSION("phar", "dirstream.c func_interceptors.c phar.c phar_object.c phar_path_check.c stream.c tar.c util.c zip.c");
 	if (PHP_PHAR_SHARED) {
 		ADD_FLAG("CFLAGS_PHAR", "/D COMPILE_DL_PHAR ");
+	}
+	if (PHP_PHAR_SSL != "no") {
+		ADD_FLAG("LIBS_PHAR", "libeay32.lib");
+		AC_DEFINE('PHAR_HAVE_OPENSSL', 1);
 	}
 	ADD_EXTENSION_DEP('phar', 'spl', true);
 }
