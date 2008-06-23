@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.15 2008-06-22 23:15:54 pajoye Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.16 2008-06-23 08:11:31 pajoye Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -28,7 +28,7 @@ var SYSTEM_DRIVE = WshShell.Environment("Process").Item("SystemDrive");
 var PROGRAM_FILES = WshShell.Environment("Process").Item("ProgramFiles");
 
 var extensions_enabled = new Array();
-
+var sapi_enabled = new Array();
 
 if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files";
@@ -1008,6 +1008,7 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 	}
 
 	MFO.WriteBlankLines(1);
+	sapi_enabled[sapi_enabled.length] = [sapiname];
 }
 
 function ADD_DIST_FILE(filename)
@@ -1318,12 +1319,19 @@ function output_as_table(header, ar_out)
 		max[j] = tmax;
 		min[j] = tmin;
 	}
+
 	sep = "";
-	k = max[0] + max[1] + 7;
+	k = 0;
+	for (i = 0; i < l; i++) {
+		k += max[i] + 3;
+	}
+	k++;
+
 	for (j=0; j < k; j++) {
 		sep += "-";
 	}
 
+	STDOUT.WriteLine(sep);
 	out = "|";
 	for (j=0; j < l; j++) {
 		out += " " + header[j];
@@ -1384,7 +1392,14 @@ function generate_files()
 	generate_internal_functions();
 	generate_config_h();
 
+	STDOUT.WriteBlankLines(2);
+
+	STDOUT.WriteLine("Enabled extensions:");
 	output_as_table(["Extension", "Mode"], extensions_enabled);
+	STDOUT.WriteBlankLines(2);
+
+	STDOUT.WriteLine("Enabled SAPI:");
+	output_as_table(["Sapi Name"], sapi_enabled);
 	STDOUT.WriteBlankLines(2);
 
 	STDOUT.WriteLine("Done.");
@@ -1543,6 +1558,11 @@ function AC_DEFINE(name, value, comment, quote)
 	} else {
 		configure_hdr.Add(name, item);
 	}
+}
+
+function MESSAGE(msg)
+{
+	STDERR.WriteLine("" + msg);
 }
 
 function ERROR(msg)
