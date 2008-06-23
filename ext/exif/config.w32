@@ -4,7 +4,11 @@
 ARG_ENABLE("exif", "exif", "no");
 
 if (PHP_EXIF == "yes") {
-	EXTENSION("exif", "exif.c");
-	AC_DEFINE('HAVE_EXIF', 1, 'Have exif');
-	ADD_EXTENSION_DEP('exif', 'mbstring');
+	if (ADD_EXTENSION_DEP('exif', 'mbstring')) {
+		EXTENSION("exif", "exif.c");
+		AC_DEFINE('HAVE_EXIF', 1, 'Have exif');
+	} else {
+		WARNING("exif support can't be enabled, libxml is not enabled")
+		PHP_EXIF = "no"
+	}
 }
