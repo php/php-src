@@ -3422,6 +3422,15 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 	} else {
 		php_info_print_table_row(2, "bzip2 compression", "disabled (install pecl/bz2)");
 	}
+#ifdef PHAR_HAVE_OPENSSL
+	php_info_print_table_row(2, "Native OpenSSL support", "enabled");
+#else
+	if (zend_hash_exists(&module_registry, "openssl", sizeof("openssl"))) {
+		php_info_print_table_row(2, "OpenSSL support", "enabled");
+	} else {
+		php_info_print_table_row(2, "OpenSSL support", "disabled (install ext/openssl)");
+	}
+#endif
 	php_info_print_table_end();
 
 	php_info_print_box_start(0);

@@ -1596,13 +1596,14 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 			char *pubkey = NULL, *pfile;
 			php_stream *pfp;
 
+#ifndef PHAR_HAVE_OPENSSL
 			if (!zend_hash_exists(&module_registry, "openssl", sizeof("openssl"))) {
 				if (error) {
 					spprintf(error, 0, "openssl not loaded");
 				}
 				return FAILURE;
 			}
-
+#endif
 			/* use __FILE__ . '.pubkey' for public key file */
 			spprintf(&pfile, 0, "%s.pubkey", fname);
 			pfp = php_stream_open_wrapper(pfile, "rb", 0, NULL);
@@ -1873,12 +1874,6 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 			EVP_MD *mdtype = (EVP_MD *) EVP_sha1();
 			EVP_MD_CTX md_ctx;
 
-			if (!zend_hash_exists(&module_registry, "openssl", sizeof("openssl"))) {
-				if (error) {
-					spprintf(error, 0, "phar \"%s\" openssl signature cannot be created, openssl not loaded", phar->fname);
-				}
-				return FAILURE;
-			}
 			in = BIO_new_mem_buf(PHAR_G(openssl_privatekey), PHAR_G(openssl_privatekey_len));
 
 			if (in == NULL) {
