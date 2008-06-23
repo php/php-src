@@ -1,3 +1,236 @@
+2008-06-22  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/pdo_odbc/config.w32
+      ext/pdo_pgsql/config.w32
+      ext/pdo_sqlite/config.w32
+      ext/xml/config.w32
+      ext/xmlrpc/config.w32:
+      - really check for the dependency, libs and header and don't enable the ext
+      if something is missing
+
+    * (PHP_5_3)
+      win32/build/config.w32:
+      - bindlib has its own package
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      - return true/false when a dep addition was succeeded or not
+
+2008-06-22  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi.c:
+      fix flushing for PHP6 output code
+
+    * sapi/nsapi/nsapi.c:
+      URI should be UTF-8
+
+2008-06-22  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/zlib/config.w32:
+      - don't show zlib as available when libs or headers are missing
+
+    * (PHP_5_3)
+      ext/libxml/config.w32:
+      - do not show libxml as enabled when libs are missing so
+      ADD_EXTENSION_DEP('myext', 'libxml') can do its job
+
+2008-06-22  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/posix/posix.c:
+      - Fix build where __USE_GNU is used instead of _GNU_SOURCE to define
+      utsname.domainname
+
+2008-06-22  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      - add a list of the enabled extensions and how they are built (shared or
+      static
+        list of SAPIs and libs used will follow shortly (to be used as QA check
+      during the builds and as convenience)
+
+    * (PHP_5_3)
+      ext/dba/dba_db1.c:
+      - clean new line (unix only now)
+
+2008-06-22  Olivier Hill  <olivier.hill@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/string.c
+      ext/standard/tests/strings/chop_error.phpt
+      ext/standard/tests/strings/chop_variation1.phpt
+      ext/standard/tests/strings/chop_variation2.phpt
+      ext/standard/tests/strings/chunk_split_variation1.phpt
+      ext/standard/tests/strings/dirname_error.phpt
+      ext/standard/tests/strings/explode1.phpt
+      ext/standard/tests/strings/implode1.phpt
+      ext/standard/tests/strings/join_error.phpt
+      ext/standard/tests/strings/ltrim.phpt
+      ext/standard/tests/strings/rtrim.phpt
+      ext/standard/tests/strings/strpos.phpt
+      ext/standard/tests/strings/strrchr_error.phpt
+      ext/standard/tests/strings/strrchr_variation11.phpt
+      ext/standard/tests/strings/strrchr_variation9.phpt
+      ext/standard/tests/strings/trim1.phpt:
+      New parameter parsing API for string, part I
+
+2008-06-22  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/ereg/tests/split_variation_002.phpt
+      ext/session/tests/session_decode_error.phpt
+      ext/session/tests/session_name_error.phpt:
+      - Fixed tests
+
+2008-06-22  Uwe Schindler  <uwe@thetaphi.de>
+
+    * (PHP_5_2)
+      sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c:
+      MFH: Response to: [PHP-DEV] cleaning up the functions - any volunteers? :)
+
+    * sapi/nsapi/nsapi.c:
+      Response to: [PHP-DEV] cleaning up the functions - any volunteers? :)
+
+2008-06-22  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      ext/phar/phar_object.c:
+      - Revert the two blocks of code that implement the phar_build optimization,
+      causes segfaults under *nix
+      - Leave the new structure in place to make re-implementation trivial
+
+2008-06-22  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/spl/tests/fixedarray_010.phpt
+      ext/spl/tests/fixedarray_017.phpt:
+      MFH: Add some tests to increase code coverage
+
+    * ext/spl/tests/fixedarray_010.phpt
+      ext/spl/tests/fixedarray_017.phpt
+      ext/spl/tests/fixedarray_017.phpt:
+      Add some tests to increase code coverage
+
+2008-06-22  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/soap/soap.c
+      ext/xml/xml.c:
+      - New parameter parsing API
+
+2008-06-22  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      ext/phar/tar.c:
+      - Revert the tar.c part of the inode calculation fix
+      - All tests now pass under win32, please test under *nix/osx (4 known
+      fails at present)
+
+2008-06-22  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_3)
+      ext/xml/xml.c:
+      fix parameter parsing change
+
+2008-06-22  Felix De Vliegher  <felix.devliegher@gmail.com>
+
+    * ext/standard/tests/strings/vfprintf_basic.phpt
+      ext/standard/tests/strings/vfprintf_error1.phpt
+      ext/standard/tests/strings/vfprintf_error2.phpt
+      ext/standard/tests/strings/vfprintf_error3.phpt
+      ext/standard/tests/strings/vfprintf_error4.phpt
+      ext/standard/tests/strings/vfprintf_variation1.phpt:
+      Testcases for vfprintf(), testfest task #133.
+
+2008-06-22  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      ext/phar/phar_object.c
+      ext/phar/util.c:
+      - ws, typo fix
+
+2008-06-22  Felix De Vliegher  <felix.devliegher@gmail.com>
+
+    * ext/standard/tests/general_functions/ob_get_length_basic.phpt:
+      Basic test for ob_get_length(), testfest.php.net task #132
+
+    * ext/standard/tests/general_functions/ob_get_length_basic.phpt
+      ext/standard/tests/general_functions/ob_get_length_basic.phpt:
+      
+      file ob_get_length_basic.phpt was initially added on branch PHP_5_3.
+
+2008-06-22  Alexey Zakhlestin  <indeyets@gmail.com>
+
+    * (PHP_5_3)
+      ext/bz2/bz2.c
+      ext/bz2/tests/001.phpt
+      ext/bz2/tests/002.phpt
+      ext/bz2/tests/005.phpt
+      ext/exif/exif.c
+      ext/pcntl/pcntl.c
+      ext/pcntl/pcntl.c:
+      updated to the new parameter-parsing api
+
+2008-06-22  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/gd/gd.c
+      ext/standard/type.c:
+      - Removed unused variables
+
+2008-06-22  Timm Friebe  <php@thekid.de>
+
+    * (PHP_5_3)
+      ext/sybase_ct/php_sybase_ct.c:
+      - Changed zend_get_parameters_ex -> zend_parse_parameters
+      - Simplified source in php_sybase_do_connect()
+
+2008-06-22  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_3)
+      ext/gd/gd.c:
+      Fix build.
+
+2008-06-22  David Soria Parra  <dsoria@gmx.net>
+
+    * (PHP_5_3)
+      ext/curl/tests/curl_001.phpt
+      ext/curl/tests/curl_002.phpt
+      ext/curl/tests/curl_003.phpt
+      ext/curl/tests/curl_004.phpt
+      ext/curl/tests/curl_005.phpt
+      ext/curl/tests/responder/get.php:
+      Testfest task 93. Written by Sebastian Deutsch.
+
+    * ext/curl/tests/curl_001.phpt
+      ext/curl/tests/curl_001.phpt
+      ext/curl/tests/curl_002.phpt
+      ext/curl/tests/curl_002.phpt
+      ext/curl/tests/curl_003.phpt
+      ext/curl/tests/curl_003.phpt
+      ext/curl/tests/curl_004.phpt
+      ext/curl/tests/curl_004.phpt
+      ext/curl/tests/curl_005.phpt
+      ext/curl/tests/curl_005.phpt
+      ext/curl/tests/responder/get.php
+      ext/curl/tests/responder/get.php:
+      
+      Testfest task 93. Written by Sebastian Deutsch.
+
+2008-06-22  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/cgidebug
+      ext/phar/phar.c
+      ext/phar/phar.phar
+      ext/phar/tar.c:
+      fix inode calculation, we need fname to be set for phar/tar formats prior
+      to manifest parsing
+
 2008-06-21  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
