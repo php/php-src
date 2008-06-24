@@ -813,7 +813,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				}
 			} else {
 #ifdef MYSQL_USE_MYSQLND
-				mysqlnd_restart_psession(mysql->conn);
+				mysqlnd_restart_psession(mysql->conn, MySG(mysqlnd_thd_zval_cache));
 #endif
 			}
 		}
