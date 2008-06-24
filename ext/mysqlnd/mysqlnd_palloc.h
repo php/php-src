@@ -68,6 +68,8 @@ typedef struct st_mysqlnd_zval {
 
 typedef struct st_mysqlnd_ndzval_list {
 	mysqlnd_zval 	**ptr_line;		/* we allocate this, all are pointers to the block */
+	void			*canary1;
+	void			*canary2;
 	mysqlnd_zval	**last_added;	/* this points to the ptr_line, and moves left-right. It's our stack */
 } mysqlnd_ndzval_list;
 
