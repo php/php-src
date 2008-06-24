@@ -67,6 +67,8 @@ PHPAPI MYSQLND_ZVAL_PCACHE* _mysqlnd_palloc_init_cache(unsigned int cache_size T
 	/* One more for empty position of last_added - always 0x0, bounds checking */
 	ret->free_list.ptr_line = calloc(ret->max_items + 1, sizeof(mysqlnd_zval *));
 	ret->free_list.last_added = ret->free_list.ptr_line + ret->max_items;
+	ret->free_list.canary1 = (void*)0xBEEF;
+	ret->free_list.canary2 = (void*)0xAFFE;
 
 	/* 3. Allocate and initialize our zvals and initialize the free list */
 	ret->block = calloc(ret->max_items, sizeof(mysqlnd_zval));
@@ -154,7 +156,10 @@ PHPAPI MYSQLND_THD_ZVAL_PCACHE* _mysqlnd_palloc_init_thd_cache(MYSQLND_ZVAL_PCAC
 	ret->gc_list.ptr_line = calloc(cache->max_items, sizeof(mysqlnd_zval *));
 	/* Backward and forward looping is possible */
 	ret->gc_list.last_added = ret->gc_list.ptr_line;
+	ret->gc_list.canary1 = (void*)0xCAFE;
+	ret->gc_list.canary2 = (void*)0x190280;
 
+	DBG_INF_FMT("ptr_line=%p last_added=%p", ret->gc_list.ptr_line, ret->gc_list.last_added);
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -166,7 +171,8 @@ MYSQLND_THD_ZVAL_PCACHE* _mysqlnd_palloc_get_thd_cache_reference(MYSQLND_THD_ZVA
 	DBG_ENTER("_mysqlnd_palloc_get_thd_cache_reference");
 	if (cache) {
 		++cache->references;
-		DBG_INF_FMT("cache=%p new_refc=%d", *cache, cache->references);
+		DBG_INF_FMT("cache=%p new_refc=%d gc_list.canary1=%p gc_list.canary2=%p",
+					*cache, cache->references, cache->gc_list.canary1, cache->gc_list.canary2);
 		mysqlnd_palloc_get_cache_reference(cache->parent);
 	}
 	DBG_RETURN(cache);
@@ -202,7 +208,10 @@ PHPAPI void _mysqlnd_palloc_free_thd_cache_reference(MYSQLND_THD_ZVAL_PCACHE **c
 	DBG_ENTER("_mysqlnd_palloc_free_thd_cache_reference");
 	if (*cache) {
 		--(*cache)->parent->references;
-		DBG_INF_FMT("cache=%p references_left=%d", *cache, (*cache)->references);
+		DBG_INF_FMT("cache=%p references_left=%d canary1=%p canary2=%p",
+					*cache, (*cache)->references, (*cache)->gc_list.canary1, (*cache)->gc_list.canary2);
+
+		DBG_INF_FMT("gc_list.ptr_line=%p gc_list.last_added=%p", (*cache)->gc_list.ptr_line, (*cache)->gc_list.last_added);
 
 		if (--(*cache)->references == 0) {
 			mysqlnd_palloc_free_thd_cache(*cache TSRMLS_CC);
@@ -309,15 +318,19 @@ void *mysqlnd_palloc_get_zval(MYSQLND_THD_ZVAL_PCACHE * const thd_cache, zend_bo
 		DBG_INF_FMT("cache=%p *last_added=%p free_items=%d",
 					thd_cache, thd_cache->parent->free_list.last_added,
 					thd_cache->parent->free_items);
+		DBG_INF_FMT("gc_list.ptr_line=%p gc_list.last_added=%p gc_list.canary1=%p gc_list.canary2=%p",
+					thd_cache->gc_list.ptr_line, thd_cache->gc_list.last_added,
+					thd_cache->gc_list.canary1, thd_cache->gc_list.canary2);
 	}
 
 	if (thd_cache) {
 		MYSQLND_ZVAL_PCACHE *cache = thd_cache->parent;
 		LOCK_PCACHE(cache);
 
-		DBG_INF_FMT("free_items=%d free_list.ptr_line=%p free_list.last_added=%p *free_list.last_added=%p",
+		DBG_INF_FMT("free_items=%d free_list.ptr_line=%p free_list.last_added=%p *free_list.last_added=%p free_list.canary1=%p free_list.canary2=%p",
 					cache->free_items, cache->free_list.ptr_line, cache->free_list.last_added,
-					*cache->free_list.last_added);
+					*cache->free_list.last_added,
+					cache->free_list.canary1, cache->free_list.canary2);
 
 		/* We have max_items + 1 allocated block for free_list, thus we know if we */
 		if ((ret = *cache->free_list.last_added)) {
@@ -367,6 +380,8 @@ void mysqlnd_palloc_zval_ptr_dtor(zval **zv, MYSQLND_THD_ZVAL_PCACHE * const thd
 					thd_cache->parent->block,
 					thd_cache->parent->last_in_block,
 					*zv, Z_REFCOUNT_PP(zv), type);
+		DBG_INF_FMT("gc_list.ptr_line=%p gc_list.last_added=%p gc_list.canary1=%p gc_list.canary2=%p",
+					thd_cache->gc_list.ptr_line, thd_cache->gc_list.last_added, thd_cache->gc_list.canary1, thd_cache->gc_list.canary2);
 	}
 	*copy_ctor_called = FALSE;
 	/* Check whether cache is used and the zval is from the cache */
@@ -442,10 +457,11 @@ void mysqlnd_palloc_zval_ptr_dtor(zval **zv, MYSQLND_THD_ZVAL_PCACHE * const thd
 		  shutdown :(.
 		*/
 		LOCK_PCACHE(cache);
-		DBG_INF_FMT("gc_list.ptr_line=%p gc_list.last_added=%p *gc_list.last_added=%p",
+		DBG_INF_FMT("gc_list.ptr_line=%p gc_list.last_added=%p *gc_list.last_added=%p free_list.canary1=%p free_list.canary2=%p",
 					thd_cache->gc_list.ptr_line,
 					thd_cache->gc_list.last_added,
-					*thd_cache->gc_list.last_added);
+					*thd_cache->gc_list.last_added,
+					cache->free_list.canary1, cache->free_list.canary2);
 		if ((thd_cache->gc_list.last_added - thd_cache->gc_list.ptr_line) > cache->max_items) {
 			DBG_ERR("Buffer overflow follows");
 			DBG_ERR_FMT("parent->max_items=%d parent->free_items=%d diff=%d",
