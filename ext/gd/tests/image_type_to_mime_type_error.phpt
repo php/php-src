@@ -25,11 +25,11 @@ var_dump( image_type_to_mime_type($imagetype, $extra_arg) );
 
 -- Testing image_type_to_mime_type() function with Zero arguments --
 
-Warning: Wrong parameter count for image_type_to_mime_type() in %s on line %d
-bool(false)
+Warning: image_type_to_mime_type() expects exactly 1 parameter, 0 given in %simage_type_to_mime_type_error.php on line 13
+NULL
 
 -- Testing image_type_to_mime_type() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for image_type_to_mime_type() in %s on line %d
-bool(false)
+Warning: image_type_to_mime_type() expects exactly 1 parameter, 2 given in %simage_type_to_mime_type_error.php on line 17
+NULL
 ===DONE===
