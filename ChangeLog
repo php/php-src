@@ -1,3 +1,140 @@
+2008-06-23  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/mysqlnd_palloc.c
+      ext/mysqlnd/mysqlnd_palloc.c:
+      Added more debug info for tracking problems
+
+2008-06-23  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/sybase/.cvsignore
+      ext/sybase/CREDITS
+      ext/sybase/config.m4
+      ext/sybase/php_sybase_db.c
+      ext/sybase/php_sybase_db.h:
+      - move sybase to pecl
+
+2008-06-23  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      ext/phar/config.w32
+      ext/phar/phar.c
+      ext/phar/util.c
+      ext/phar/tests/phar_get_supported_signatures_002.phpt
+      ext/phar/tests/phar_setsignaturealgo2.phpt
+      ext/phar/tests/phpinfo_001.phpt
+      ext/phar/tests/phpinfo_002.phpt
+      ext/phar/tests/phpinfo_003.phpt
+      ext/phar/tests/phpinfo_004.phpt
+      ext/phar/tests/test_signaturealgos.phpt:
+      - One solution for the openssl issues
+      - config.m4 needs bringing into line with config.w32, there may be broken
+      behaviour under *nix until this is done
+
+2008-06-23  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/dom/config.w32
+      ext/exif/config.w32
+      ext/libxml/config.w32
+      ext/mysql/config.w32
+      ext/mysqli/config.w32
+      ext/odbc/config.w32
+      ext/pdo_odbc/config.w32
+      ext/pdo_sqlite/config.w32
+      ext/simplexml/config.w32
+      ext/soap/config.w32
+      ext/sockets/config.w32
+      ext/xml/config.w32:
+      - do not enable an ext when a lib/header fails
+      - use MESSAGE in mysql*
+      - use correct CFLAGS for ext/libxml headers
+
+2008-06-23  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/posix/posix.c:
+      - MFB: Added arginfo
+
+2008-06-23  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      ext/phar/tests/phar_get_supported_signatures_002a.phpt:
+      - Wrong SKIPIF message
+
+2008-06-23  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/posix/posix.c
+      ext/tokenizer/tokenizer.c:
+      - Fixed folding
+
+    * (PHP_5_3)
+      ext/posix/posix.c
+      ext/tokenizer/tokenizer.c
+      ext/tokenizer/tokenizer.c:
+      - Added arginfo
+
+    * ext/simplexml/tests/034.phpt
+      ext/simplexml/tests/034.phpt:
+      - Added XFAIL
+
+2008-06-23  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      - use stdout for MESSAGE (thx Steph)
+
+2008-06-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Fixed possible buffer overflow
+
+2008-06-23  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/pcre/config.w32
+      ext/reflection/config.w32
+      ext/spl/config.w32:
+      - set PHP_[EXTNAME] to yes for spl, pcre and reflection (always on), this
+      variable is required by ADD_EXTENSION_DEP
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      - add a MESSAGE function
+        [DOC] to be used instead of STDOUT in config.w32, it allows them to be
+      redirected (like in a quiet mode)
+      - add the list of enabled SAPI
+      - improve the table output
+
+    * (PHP_5_3)
+      win32/build/buildconf.js:
+      - fix ADD_EXTENSION_DEP detection so it can match it anywhere in a line
+
+2008-06-23  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/phar.phar
+      ext/phar/phar_object.c
+      ext/phar/tests/phar_buildfromdirectory4.phpt:
+      true fix for potential segfault in phar_build
+
+    * (PHP_5_3)
+      ext/phar/tar.c:
+      fix tar-related failures
+
+2008-06-23  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/imap/php_imap.c
+      ext/imap/tests/imap_utf8.phpt:
+      - New parameter parsing API
+
+    * ext/posix/posix.c:
+      - MFB: Fix build where __USE_GNU is used instead of _GNU_SOURCE to define
+      utsname.domainname
+
 2008-06-22  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * (PHP_5_3)
