@@ -519,6 +519,15 @@ PHPAPI void _mysqlnd_palloc_rshutdown(MYSQLND_THD_ZVAL_PCACHE * thd_cache TSRMLS
 	}
 
 	/*
+	  !!! 080624 !!!
+	  If the user has used Persistent Connections the reference counter
+	  of the cache is not 1 but > 1 . Because the Pconns don't are not signalised
+	  during RSHUT, then we need to take care here to decrease the counter.
+	  A more proper fix will be to array_walk our pconns in RSHUT and ask them to
+	  free their thd reference. This should be implemented sooner or later!
+	*/
+	
+	/*
 	  Keep in mind that for pthreads pthread_equal() should be used to be
 	  fully standard compliant. However, the PHP code all-around, incl. the
 	  the Zend MM uses direct comparison.
@@ -532,6 +541,8 @@ PHPAPI void _mysqlnd_palloc_rshutdown(MYSQLND_THD_ZVAL_PCACHE * thd_cache TSRMLS
 	p = thd_cache->gc_list.ptr_line;
 
 	LOCK_PCACHE(cache);
+	/* We need to decrease Main cache's references as pconns don't clean correctly */
+	cache->references -= (thd_cache->references - 1); /* we start with 1 initial reference */
 	while (p < thd_cache->gc_list.last_added) {
 		(*p)->point_type = MYSQLND_POINTS_FREE;
 		*(--cache->free_list.last_added) = *p;
@@ -543,6 +554,8 @@ PHPAPI void _mysqlnd_palloc_rshutdown(MYSQLND_THD_ZVAL_PCACHE * thd_cache TSRMLS
 	}
 	UNLOCK_PCACHE(cache);
 
+	/* We need to decrease thd cache's references as pconns don't clean correctly. See above! */
+	thd_cache->references = 1;
 	mysqlnd_palloc_free_thd_cache_reference(&thd_cache);
 
 	DBG_VOID_RETURN;

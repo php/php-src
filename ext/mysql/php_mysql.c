@@ -365,6 +365,9 @@ static void _close_mysql_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	void (*handler) (int);
 
 	handler = signal(SIGPIPE, SIG_IGN);
+#ifdef MYSQL_USE_MYSQLND
+	mysqlnd_end_psession(link->conn);
+#endif
 	mysql_close(link->conn);
 	signal(SIGPIPE, handler);
 
@@ -775,11 +778,12 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			/* ensure that the link did not die */
 			if (mysql_ping(mysql->conn)) {
 				if (mysql_errno(mysql->conn) == 2006) {
-#ifndef MYSQL_USE_MYSQLND
-					if (mysql_real_connect(mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL)
-#else
+#ifdef MYSQL_USE_MYSQLND
+					mysqlnd_end_psession(mysql->conn);
 					if (mysqlnd_connect(mysql->conn, host, user, passwd, 0, NULL, 0, 
 										port, socket, client_flags, MySG(mysqlnd_thd_zval_cache) TSRMLS_CC) == NULL)
+#else
+					if (mysql_real_connect(mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL)
 #endif
 					{
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Link to server lost, unable to reconnect");
