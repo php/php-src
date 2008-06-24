@@ -929,6 +929,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 	if (is_string($stdin)) {
 		fwrite($pipes[0], $stdin);
 	}
+	fclose($pipes[0]);
 
 	$timeout = $leak_check ? 300 : (isset($env['TEST_TIMEOUT']) ? $env['TEST_TIMEOUT'] : 60);
 
@@ -942,7 +943,6 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 		if ($n === 0) {
 			/* timed out */
 			$data .= "\n ** ERROR: process timed out **\n";
-			fclose($pipes[0]);
 			proc_terminate($proc);
 			return $data;
 		} else if ($n > 0) {
@@ -958,7 +958,6 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 	if ($stat['signaled']) {
 		$data .= "\nTermsig=".$stat['stopsig'];
 	}
-	fclose($pipes[0]);
 	$code = proc_close($proc);
 	return $data;
 }
