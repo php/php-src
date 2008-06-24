@@ -165,7 +165,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 							if (!mysql_ping(mysql->mysql)) {
 #endif
 #ifdef MYSQLI_USE_MYSQLND
-								mysqlnd_restart_psession(mysql->mysql);
+								mysqlnd_restart_psession(mysql->mysql, MyG(mysqlnd_thd_zval_cache));
 #endif
 								MyG(num_active_persistent)++;
 								goto end;
