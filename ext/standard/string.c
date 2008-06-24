@@ -1291,9 +1291,9 @@ PHP_FUNCTION(strtoupper)
 		return;
 	}
 
-	php_strtoupper(arg, arglen);
-	
-	RETURN_STRINGL(arg, arglen, 1);
+	arg = estrndup(arg, arglen);
+	php_strtoupper(arg, arglen);	
+	RETURN_STRINGL(arg, arglen, 0);
 }
 /* }}} */
 
@@ -1325,8 +1325,9 @@ PHP_FUNCTION(strtolower)
 		return;
 	}
 
+	str = estrndup(str, arglen);
 	php_strtolower(str, arglen);
-	RETURN_STRINGL(str, arglen, 1);
+	RETURN_STRINGL(str, arglen, 0);
 }
 /* }}} */
 
