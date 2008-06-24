@@ -365,9 +365,6 @@ static void _close_mysql_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	void (*handler) (int);
 
 	handler = signal(SIGPIPE, SIG_IGN);
-#ifdef MYSQL_USE_MYSQLND
-	mysqlnd_end_psession(link->conn);
-#endif
 	mysql_close(link->conn);
 	signal(SIGPIPE, handler);
 
@@ -520,6 +517,18 @@ PHP_RINIT_FUNCTION(mysql)
 }
 /* }}} */
 
+
+#ifdef MYSQL_USE_MYSQLND
+static int php_mysql_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC)
+{
+	if (le->type == le_plink) {
+		mysqlnd_end_psession(((php_mysql_conn *) le->ptr)->conn);
+	}
+	return ZEND_HASH_APPLY_KEEP;
+} /* }}} */
+#endif
+
+
 /* {{{ PHP_RSHUTDOWN_FUNCTION
  */
 PHP_RSHUTDOWN_FUNCTION(mysql)
@@ -537,7 +546,9 @@ PHP_RSHUTDOWN_FUNCTION(mysql)
 	if (MySG(connect_error)!=NULL) {
 		efree(MySG(connect_error));
 	}
+
 #ifdef MYSQL_USE_MYSQLND
+	zend_hash_apply(&EG(persistent_list), (apply_func_t) php_mysql_persistent_helper TSRMLS_CC);
 	mysqlnd_palloc_rshutdown(MySG(mysqlnd_thd_zval_cache));
 #endif
 
@@ -734,8 +745,9 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			mysql->conn = mysql_init(persistent);
 #endif
 
-			if (connect_timeout != -1)
+			if (connect_timeout != -1) {
 				mysql_options(mysql->conn, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout);
+			}
 #ifndef MYSQL_USE_MYSQLND
 			if (mysql_real_connect(mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL)
 #else
@@ -778,12 +790,11 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			/* ensure that the link did not die */
 			if (mysql_ping(mysql->conn)) {
 				if (mysql_errno(mysql->conn) == 2006) {
-#ifdef MYSQL_USE_MYSQLND
-					mysqlnd_end_psession(mysql->conn);
+#ifndef MYSQL_USE_MYSQLND
+					if (mysql_real_connect(mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL)
+#else
 					if (mysqlnd_connect(mysql->conn, host, user, passwd, 0, NULL, 0, 
 										port, socket, client_flags, MySG(mysqlnd_thd_zval_cache) TSRMLS_CC) == NULL)
-#else
-					if (mysql_real_connect(mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL)
 #endif
 					{
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Link to server lost, unable to reconnect");

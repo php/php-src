@@ -189,13 +189,43 @@ MYSQLND_THD_ZVAL_PCACHE* _mysqlnd_palloc_get_thd_cache_reference(MYSQLND_THD_ZVA
   constructor of the cache.
 */
 static
-void mysqlnd_palloc_free_thd_cache(MYSQLND_THD_ZVAL_PCACHE *cache TSRMLS_DC)
+void mysqlnd_palloc_free_thd_cache(MYSQLND_THD_ZVAL_PCACHE *thd_cache TSRMLS_DC)
 {
-	DBG_ENTER("mysqlnd_palloc_free_thd_cache");
-	DBG_INF_FMT("cache=%p", cache);
+	MYSQLND_ZVAL_PCACHE *global_cache;
+	mysqlnd_zval **p;
 
-	mnd_free(cache->gc_list.ptr_line);
-	mnd_free(cache);
+	DBG_ENTER("mysqlnd_palloc_free_thd_cache");
+	DBG_INF_FMT("thd_cache=%p", thd_cache);
+
+	if ((global_cache = thd_cache->parent)) {
+		/*
+		  Keep in mind that for pthreads pthread_equal() should be used to be
+		  fully standard compliant. However, the PHP code all-around, incl. the
+		  the Zend MM uses direct comparison.
+		*/
+		p = thd_cache->gc_list.ptr_line;
+		while (p < thd_cache->gc_list.last_added) {
+			zval_dtor(&(*p)->zv);
+			p++;
+		}
+
+		p = thd_cache->gc_list.ptr_line;
+
+		LOCK_PCACHE(global_cache);
+		while (p < thd_cache->gc_list.last_added) {
+			(*p)->point_type = MYSQLND_POINTS_FREE;
+			*(--global_cache->free_list.last_added) = *p;
+			++global_cache->free_items;
+#ifdef ZTS
+			memset(&((*p)->thread_id), 0, sizeof(THREAD_T));
+#endif
+			p++;
+		}
+		UNLOCK_PCACHE(global_cache);
+
+	}
+	mnd_free(thd_cache->gc_list.ptr_line);
+	mnd_free(thd_cache);
 
 	DBG_VOID_RETURN;
 }
@@ -508,56 +538,9 @@ PHPAPI MYSQLND_THD_ZVAL_PCACHE * _mysqlnd_palloc_rinit(MYSQLND_ZVAL_PCACHE * cac
 /* {{{ _mysqlnd_palloc_rshutdown */
 PHPAPI void _mysqlnd_palloc_rshutdown(MYSQLND_THD_ZVAL_PCACHE * thd_cache TSRMLS_DC)
 {
-	MYSQLND_ZVAL_PCACHE *cache;
-	mysqlnd_zval **p;
-
 	DBG_ENTER("_mysqlnd_palloc_rshutdown");
 	DBG_INF_FMT("cache=%p", thd_cache);
-
-	if (!thd_cache || !(cache = thd_cache->parent)) {
-		return;
-	}
-
-	/*
-	  !!! 080624 !!!
-	  If the user has used Persistent Connections the reference counter
-	  of the cache is not 1 but > 1 . Because the Pconns don't are not signalised
-	  during RSHUT, then we need to take care here to decrease the counter.
-	  A more proper fix will be to array_walk our pconns in RSHUT and ask them to
-	  free their thd reference. This should be implemented sooner or later!
-	*/
-	
-	/*
-	  Keep in mind that for pthreads pthread_equal() should be used to be
-	  fully standard compliant. However, the PHP code all-around, incl. the
-	  the Zend MM uses direct comparison.
-	*/
-	p = thd_cache->gc_list.ptr_line;
-	while (p < thd_cache->gc_list.last_added) {
-		zval_dtor(&(*p)->zv);
-		p++;
-	}
-
-	p = thd_cache->gc_list.ptr_line;
-
-	LOCK_PCACHE(cache);
-	/* We need to decrease Main cache's references as pconns don't clean correctly */
-	cache->references -= (thd_cache->references - 1); /* we start with 1 initial reference */
-	while (p < thd_cache->gc_list.last_added) {
-		(*p)->point_type = MYSQLND_POINTS_FREE;
-		*(--cache->free_list.last_added) = *p;
-		++cache->free_items;
-#ifdef ZTS
-		memset(&((*p)->thread_id), 0, sizeof(THREAD_T));
-#endif
-		p++;
-	}
-	UNLOCK_PCACHE(cache);
-
-	/* We need to decrease thd cache's references as pconns don't clean correctly. See above! */
-	thd_cache->references = 1;
 	mysqlnd_palloc_free_thd_cache_reference(&thd_cache);
-
 	DBG_VOID_RETURN;
 }
 /* }}} */

@@ -94,12 +94,8 @@ static int le_pmysqli;
 /* Destructor for mysqli entries in free_links/used_links */
 void php_mysqli_dtor_p_elements(void *data)
 {
-	MYSQL *mysql = (MYSQL *) data;
-#if defined(MYSQLI_USE_MYSQLND)
 	TSRMLS_FETCH();
-
-	mysqlnd_end_psession(mysql);
-#endif
+	MYSQL *mysql = (MYSQL *) data;
 	mysqli_close(mysql, MYSQLI_CLOSE_IMPLICIT);
 }
 
@@ -232,9 +228,6 @@ static void mysqli_link_free_storage(void *object TSRMLS_DC)
 		MY_MYSQL *mysql = (MY_MYSQL *)my_res->ptr;
 		if (mysql->mysql) {
 			if (!mysql->persistent) {
-#ifdef MYSQLI_USE_MYSQLND
-				mysqlnd_end_psession(mysql->mysql);
-#endif
 				mysqli_close(mysql->mysql, MYSQLI_CLOSE_IMPLICIT);
 			} else {
 				zend_rsrc_list_entry *le;
@@ -959,6 +952,26 @@ PHP_RINIT_FUNCTION(mysqli)
 }
 /* }}} */
 
+
+#ifdef MYSQLI_USE_MYSQLND
+static void php_mysqli_persistent_helper_for_every(void *p)
+{
+	TSRMLS_FETCH();
+	mysqlnd_end_psession((MYSQLND *) p);
+} /* }}} */
+
+
+static int php_mysqli_persistent_helper_once(zend_rsrc_list_entry *le TSRMLS_DC)
+{
+	if (le->type == php_le_pmysqli()) {
+		mysqli_plist_entry *plist = (mysqli_plist_entry *) le->ptr;
+		zend_ptr_stack_apply(&plist->free_links, php_mysqli_persistent_helper_for_every);
+	}
+	return ZEND_HASH_APPLY_KEEP;
+} /* }}} */
+#endif
+
+
 /* {{{ PHP_RSHUTDOWN_FUNCTION
  */
 PHP_RSHUTDOWN_FUNCTION(mysqli)
@@ -972,6 +985,7 @@ PHP_RSHUTDOWN_FUNCTION(mysqli)
 		efree(MyG(error_msg));
 	}
 #ifdef MYSQLI_USE_MYSQLND
+	zend_hash_apply(&EG(persistent_list), (apply_func_t) php_mysqli_persistent_helper_once TSRMLS_CC);
 	mysqlnd_palloc_rshutdown(MyG(mysqlnd_thd_zval_cache));
 #endif
 	return SUCCESS;
