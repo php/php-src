@@ -92,10 +92,14 @@ string(24) "application/octet-stream"
 string(24) "application/octet-stream"
 
 -- Iteration 6 --
-string(24) "application/octet-stream"
+
+Warning: image_type_to_mime_type() expects parameter 1 to be long, array given in %s on line %d
+NULL
 
 -- Iteration 7 --
-string(9) "image/gif"
+
+Warning: image_type_to_mime_type() expects parameter 1 to be long, array given in %s on line %d
+NULL
 
 -- Iteration 8 --
 string(24) "application/octet-stream"
@@ -116,19 +120,29 @@ string(9) "image/gif"
 string(24) "application/octet-stream"
 
 -- Iteration 14 --
-string(24) "application/octet-stream"
+
+Warning: image_type_to_mime_type() expects parameter 1 to be long, string given in %s on line %d
+NULL
 
 -- Iteration 15 --
-string(24) "application/octet-stream"
+
+Warning: image_type_to_mime_type() expects parameter 1 to be long, string given in %s on line %d
+NULL
 
 -- Iteration 16 --
-string(24) "application/octet-stream"
+
+Warning: image_type_to_mime_type() expects parameter 1 to be long, string given in %s on line %d
+NULL
 
 -- Iteration 17 --
-string(24) "application/octet-stream"
+
+Warning: image_type_to_mime_type() expects parameter 1 to be long, string given in %s on line %d
+NULL
 
 -- Iteration 18 --
-string(9) "image/gif"
+
+Warning: image_type_to_mime_type() expects parameter 1 to be long, object given in %s on line %d
+NULL
 
 -- Iteration 19 --
 string(24) "application/octet-stream"
