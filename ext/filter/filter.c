@@ -77,16 +77,60 @@ static const filter_list_entry filter_list[] = {
 
 static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC);
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_input, 0, 0, 2)
+	ZEND_ARG_INFO(0, type)
+	ZEND_ARG_INFO(0, variable_name)
+	ZEND_ARG_INFO(0, filter)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_var, 0, 0, 1)
+	ZEND_ARG_INFO(0, variable)
+	ZEND_ARG_INFO(0, filter)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_input_array, 0, 0, 1)
+	ZEND_ARG_INFO(0, type)
+	ZEND_ARG_INFO(0, definition)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_var_array, 0, 0, 1)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, definition)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_filter_list, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_has_var, 0, 0, 2)
+	ZEND_ARG_INFO(0, type)
+	ZEND_ARG_INFO(0, variable_name)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_id, 0, 0, 1)
+	ZEND_ARG_INFO(0, filtername)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 /* {{{ filter_functions[]
  */
 static const zend_function_entry filter_functions[] = {
-	PHP_FE(filter_input,		NULL)
-	PHP_FE(filter_var,		NULL)
-	PHP_FE(filter_input_array,	NULL)
-	PHP_FE(filter_var_array,	NULL)
-	PHP_FE(filter_list,		NULL)
-	PHP_FE(filter_has_var,		NULL)
-	PHP_FE(filter_id,		NULL)
+	PHP_FE(filter_input,		arginfo_filter_input)
+	PHP_FE(filter_var,		arginfo_filter_var)
+	PHP_FE(filter_input_array,	arginfo_filter_input_array)
+	PHP_FE(filter_var_array,	arginfo_filter_var_array)
+	PHP_FE(filter_list,		arginfo_filter_list)
+	PHP_FE(filter_has_var,		arginfo_filter_has_var)
+	PHP_FE(filter_id,		arginfo_filter_id)
 	{NULL, NULL, NULL}
 };
 /* }}} */
