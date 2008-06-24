@@ -1134,7 +1134,7 @@ PHP_METHOD(Phar, __construct)
 #else
 	char *fname, *alias = NULL, *error, *arch = NULL, *entry = NULL, *save_fname;
 	int fname_len, alias_len = 0, arch_len, entry_len, is_data;
-	long flags = 0, format = 0;
+	long flags = SPL_FILE_DIR_SKIPDOTS, format = 0;
 	phar_archive_object *phar_obj;
 	phar_archive_data   *phar_data;
 	zval *zobj = getThis(), arg1, arg2;
@@ -1237,15 +1237,10 @@ PHP_METHOD(Phar, __construct)
 	INIT_PZVAL(&arg1);
 	ZVAL_STRINGL(&arg1, fname, fname_len, 0);
 
-	if (ZEND_NUM_ARGS() > 1) {
-		INIT_PZVAL(&arg2);
-		ZVAL_LONG(&arg2, flags);
-		zend_call_method_with_2_params(&zobj, Z_OBJCE_P(zobj), 
-			&spl_ce_RecursiveDirectoryIterator->constructor, "__construct", NULL, &arg1, &arg2);
-	} else {
-		zend_call_method_with_1_params(&zobj, Z_OBJCE_P(zobj), 
-			&spl_ce_RecursiveDirectoryIterator->constructor, "__construct", NULL, &arg1);
-	}
+	INIT_PZVAL(&arg2);
+	ZVAL_LONG(&arg2, flags);
+	zend_call_method_with_2_params(&zobj, Z_OBJCE_P(zobj), 
+		&spl_ce_RecursiveDirectoryIterator->constructor, "__construct", NULL, &arg1, &arg2);
 
 	if (!phar_data->is_persistent) {
 		phar_obj->arc.archive->is_data = is_data;
@@ -1621,6 +1616,7 @@ after_open_fp:
 		data->internal_file->fp = NULL;
 		data->internal_file->fp_type = PHAR_UFP;
 		data->internal_file->offset_abs = data->internal_file->offset = php_stream_tell(p_obj->fp);
+		data->fp = NULL;
 		contents_len = php_stream_copy_to_stream(fp, p_obj->fp, PHP_STREAM_COPY_ALL);
 		data->internal_file->uncompressed_filesize = data->internal_file->compressed_filesize =
 			php_stream_tell(p_obj->fp) - data->internal_file->offset;
@@ -1681,9 +1677,11 @@ PHP_METHOD(Phar, buildFromDirectory)
 
 	INIT_PZVAL(&arg);
 	ZVAL_STRINGL(&arg, dir, dir_len, 0);
+	INIT_PZVAL(&arg2);
+	ZVAL_LONG(&arg2, SPL_FILE_DIR_SKIPDOTS);
 
-	zend_call_method_with_1_params(&iter, spl_ce_RecursiveDirectoryIterator, 
-			&spl_ce_RecursiveDirectoryIterator->constructor, "__construct", NULL, &arg);
+	zend_call_method_with_2_params(&iter, spl_ce_RecursiveDirectoryIterator, 
+			&spl_ce_RecursiveDirectoryIterator->constructor, "__construct", NULL, &arg, &arg2);
 
 	if (EG(exception)) {
 		zval_ptr_dtor(&iter);

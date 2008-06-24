@@ -19,7 +19,7 @@ $a->addEmptyDir('one/level');
 $a->extractTo(dirname(__FILE__) . '/extract', 'mount');
 $a->extractTo(dirname(__FILE__) . '/extract');
 $out = array();
-foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(dirname(__FILE__) . '/extract'), RecursiveIteratorIterator::CHILD_FIRST) as $p => $b) {
+foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(dirname(__FILE__) . '/extract', 0x00001000), RecursiveIteratorIterator::CHILD_FIRST) as $p => $b) {
 	$out[] = $p;
 }
 sort($out);
