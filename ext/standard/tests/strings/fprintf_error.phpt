@@ -20,12 +20,12 @@ echo "Done\n";
 --EXPECTF--
 *** Testing Error Conditions ***
 
-Warning: Wrong parameter count for fprintf() in %s on line %d
+Warning: fprintf() expects at least %d parameters, %d given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for fprintf() in %s on line %d
+Warning: fprintf() expects at least %d parameters, %d given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for fprintf() in %s on line %d
+Warning: fprintf() expects at least %d parameters, %d given in %s on line %d
 NULL
 Done

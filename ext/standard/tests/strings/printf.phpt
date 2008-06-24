@@ -227,7 +227,7 @@ printf("%d", $tempstring);
 --EXPECTF--
 *** Output for zero argument ***
 
-Warning: Wrong parameter count for printf() in %s on line %d
+Warning: printf() expects at least %d parameter, %d given in %s on line %d
 
 *** Output for insufficient number of arguments ***
 
