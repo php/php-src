@@ -1497,11 +1497,13 @@ PHP_FUNCTION(session_set_save_handler)
 	}
 	
 	if (PS(session_status) != php_session_none) {
+		efree(args);
 		RETURN_FALSE;
 	}
 	
 	for (i = 0; i < 6; i++) {
 		if (!zend_is_callable(*args[i], 0, &name)) {
+			efree(args);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument %d is not a valid callback", i+1);
 			efree(name);
 			RETURN_FALSE;
@@ -1519,6 +1521,7 @@ PHP_FUNCTION(session_set_save_handler)
 		PS(mod_user_names).names[i] = *args[i];
 	}
 	
+	efree(args);
 	RETURN_TRUE;
 }
 /* }}} */
