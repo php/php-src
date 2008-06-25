@@ -1577,6 +1577,8 @@ void php_request_shutdown(void *dummy)
 	EG(opline_ptr) = NULL;
 	EG(active_op_array) = NULL;
 
+	php_deactivate_ticks(TSRMLS_C);
+
 	/* 1. Call all possible __destruct() functions */
 	zend_try {
 		zend_call_destructors(TSRMLS_C);
