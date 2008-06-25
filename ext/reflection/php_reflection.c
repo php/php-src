@@ -2596,6 +2596,78 @@ ZEND_METHOD(reflection_function, isDeprecated)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionFunction::inNamespace()
+   Returns whether this function is defined in namespace */
+ZEND_METHOD(reflection_function, inNamespace)
+{
+	zval **name;
+	zstr colon;
+
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
+	if (zend_hash_find(Z_OBJPROP_P(getThis()), "name", sizeof("name"), (void **) &name) == FAILURE) {
+		RETURN_FALSE;
+	}
+	if (Z_TYPE_PP(name) == IS_STRING &&
+	    (colon.s = zend_memrchr(Z_STRVAL_PP(name), ':', Z_STRLEN_PP(name))) &&
+	    colon.s > Z_STRVAL_PP(name) && *(colon.s-1) == ':') {
+		RETURN_TRUE;
+	} else if (Z_TYPE_PP(name) == IS_UNICODE &&
+	    (colon.u = u_memrchr(Z_USTRVAL_PP(name), ':', Z_USTRLEN_PP(name))) &&
+	    colon.u > Z_USTRVAL_PP(name) && *(colon.u-1) == ':') {
+		RETURN_TRUE;
+    }
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto public string ReflectionFunction::getNamespaceName()
+   Returns the name of namespace where this function is defined */
+ZEND_METHOD(reflection_function, getNamespaceName)
+{
+	zval **name;
+	zstr colon;
+
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
+	if (zend_hash_find(Z_OBJPROP_P(getThis()), "name", sizeof("name"), (void **) &name) == FAILURE) {
+		RETURN_FALSE;
+	}
+	if (Z_TYPE_PP(name) == IS_STRING &&
+	    (colon.s = zend_memrchr(Z_STRVAL_PP(name), ':', Z_STRLEN_PP(name))) &&
+	    colon.s > Z_STRVAL_PP(name) && *(colon.s-1) == ':') {
+		RETURN_STRINGL(Z_STRVAL_PP(name), colon.s - Z_STRVAL_PP(name) - 1, 1);
+	} else if (Z_TYPE_PP(name) == IS_UNICODE &&
+	    (colon.u = u_memrchr(Z_USTRVAL_PP(name), ':', Z_USTRLEN_PP(name))) &&
+	    colon.u > Z_USTRVAL_PP(name) && *(colon.u-1) == ':') {
+		RETURN_UNICODEL(Z_USTRVAL_PP(name), colon.u - Z_USTRVAL_PP(name) - 1, 1);
+    }
+	RETURN_EMPTY_TEXT();
+}
+/* }}} */
+
+/* {{{ proto public string ReflectionFunction::getShortName()
+   Returns the short name of the function (without namespace part) */
+ZEND_METHOD(reflection_function, getShortName)
+{
+	zval **name;
+	zstr colon;
+
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
+	if (zend_hash_find(Z_OBJPROP_P(getThis()), "name", sizeof("name"), (void **) &name) == FAILURE) {
+		RETURN_FALSE;
+	}
+	if (Z_TYPE_PP(name) == IS_STRING &&
+	    (colon.s = zend_memrchr(Z_STRVAL_PP(name), ':', Z_STRLEN_PP(name))) &&
+	    colon.s > Z_STRVAL_PP(name) && *(colon.s-1) == ':') {
+		RETURN_STRINGL(colon.s + 1, Z_STRLEN_PP(name) - (colon.s - Z_STRVAL_PP(name) + 1), 1);
+	} else if (Z_TYPE_PP(name) == IS_UNICODE &&
+	    (colon.u = u_memrchr(Z_USTRVAL_PP(name), ':', Z_USTRLEN_PP(name))) &&
+	    colon.u > Z_USTRVAL_PP(name) && *(colon.u-1) == ':') {
+		RETURN_UNICODEL(colon.u + 1, Z_USTRLEN_PP(name) - (colon.u - Z_USTRVAL_PP(name) + 1), 1);
+    }
+    RETURN_ZVAL(*name, 1, 0);
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionMethod::isConstructor() U
    Returns whether this method is the constructor */
 ZEND_METHOD(reflection_method, isConstructor)
@@ -3842,6 +3914,78 @@ ZEND_METHOD(reflection_class, getExtensionName)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionClass::inNamespace()
+   Returns whether this class is defined in namespace */
+ZEND_METHOD(reflection_class, inNamespace)
+{
+	zval **name;
+	zstr colon;
+
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
+	if (zend_hash_find(Z_OBJPROP_P(getThis()), "name", sizeof("name"), (void **) &name) == FAILURE) {
+		RETURN_FALSE;
+	}
+	if (Z_TYPE_PP(name) == IS_STRING &&
+	    (colon.s = zend_memrchr(Z_STRVAL_PP(name), ':', Z_STRLEN_PP(name))) &&
+	    colon.s > Z_STRVAL_PP(name) && *(colon.s-1) == ':') {
+		RETURN_TRUE;
+	} else if (Z_TYPE_PP(name) == IS_UNICODE &&
+	    (colon.u = u_memrchr(Z_USTRVAL_PP(name), ':', Z_USTRLEN_PP(name))) &&
+	    colon.u > Z_USTRVAL_PP(name) && *(colon.u-1) == ':') {
+		RETURN_TRUE;
+    }
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto public string ReflectionClass::getNamespaceName()
+   Returns the name of namespace where this class is defined */
+ZEND_METHOD(reflection_class, getNamespaceName)
+{
+	zval **name;
+	zstr colon;
+
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
+	if (zend_hash_find(Z_OBJPROP_P(getThis()), "name", sizeof("name"), (void **) &name) == FAILURE) {
+		RETURN_FALSE;
+	}
+	if (Z_TYPE_PP(name) == IS_STRING &&
+	    (colon.s = zend_memrchr(Z_STRVAL_PP(name), ':', Z_STRLEN_PP(name))) &&
+	    colon.s > Z_STRVAL_PP(name) && *(colon.s-1) == ':') {
+		RETURN_STRINGL(Z_STRVAL_PP(name), colon.s - Z_STRVAL_PP(name) - 1, 1);
+	} else if (Z_TYPE_PP(name) == IS_UNICODE &&
+	    (colon.u = u_memrchr(Z_USTRVAL_PP(name), ':', Z_USTRLEN_PP(name))) &&
+	    colon.u > Z_USTRVAL_PP(name) && *(colon.u-1) == ':') {
+		RETURN_UNICODEL(Z_USTRVAL_PP(name), colon.u - Z_USTRVAL_PP(name) - 1, 1);
+    }
+	RETURN_EMPTY_TEXT();
+}
+/* }}} */
+
+/* {{{ proto public string ReflectionClass::getShortName()
+   Returns the short name of the class (without namespace part) */
+ZEND_METHOD(reflection_class, getShortName)
+{
+	zval **name;
+	zstr colon;
+
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
+	if (zend_hash_find(Z_OBJPROP_P(getThis()), "name", sizeof("name"), (void **) &name) == FAILURE) {
+		RETURN_FALSE;
+	}
+	if (Z_TYPE_PP(name) == IS_STRING &&
+	    (colon.s = zend_memrchr(Z_STRVAL_PP(name), ':', Z_STRLEN_PP(name))) &&
+	    colon.s > Z_STRVAL_PP(name) && *(colon.s-1) == ':') {
+		RETURN_STRINGL(colon.s + 1, Z_STRLEN_PP(name) - (colon.s - Z_STRVAL_PP(name) + 1), 1);
+	} else if (Z_TYPE_PP(name) == IS_UNICODE &&
+	    (colon.u = u_memrchr(Z_USTRVAL_PP(name), ':', Z_USTRLEN_PP(name))) &&
+	    colon.u > Z_USTRVAL_PP(name) && *(colon.u-1) == ':') {
+		RETURN_UNICODEL(colon.u + 1, Z_USTRLEN_PP(name) - (colon.u - Z_USTRVAL_PP(name) + 1), 1);
+    }
+    RETURN_ZVAL(*name, 1, 0);
+}
+/* }}} */
+
 /* {{{ proto public static mixed ReflectionObject::export(mixed argument [, bool return]) throws ReflectionException U
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_object, export)
@@ -4626,6 +4770,9 @@ static const zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection_function, getExtension, NULL, 0)
 	ZEND_ME(reflection_function, getExtensionName, NULL, 0)
 	ZEND_ME(reflection_function, isDeprecated, NULL, 0)
+	ZEND_ME(reflection_function, inNamespace, NULL, 0)
+	ZEND_ME(reflection_function, getNamespaceName, NULL, 0)
+	ZEND_ME(reflection_function, getShortName, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
@@ -4815,6 +4962,9 @@ static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, implementsInterface, arginfo_reflection_class_implementsInterface, 0)
 	ZEND_ME(reflection_class, getExtension, NULL, 0)
 	ZEND_ME(reflection_class, getExtensionName, NULL, 0)
+	ZEND_ME(reflection_class, inNamespace, NULL, 0)
+	ZEND_ME(reflection_class, getNamespaceName, NULL, 0)
+	ZEND_ME(reflection_class, getShortName, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
