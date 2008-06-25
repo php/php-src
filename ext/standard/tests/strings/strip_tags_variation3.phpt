@@ -112,34 +112,24 @@ string(7) "1.06E-9"
 string(3) "0.5"
 -- Iteration 10 --
 
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
+Warning: strip_tags() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 11 --
 
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
+Warning: strip_tags() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 12 --
 
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
+Warning: strip_tags() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 13 --
 
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
+Warning: strip_tags() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 14 --
 
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
+Warning: strip_tags() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 15 --
 string(0) ""
 -- Iteration 16 --
@@ -163,5 +153,7 @@ string(0) ""
 -- Iteration 25 --
 string(0) ""
 -- Iteration 26 --
-string(%d) "Resource id #%d"
+
+Warning: strip_tags() expects parameter 1 to be string, resource given in %s on line %d
+NULL
 Done

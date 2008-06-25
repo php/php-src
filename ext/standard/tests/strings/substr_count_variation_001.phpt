@@ -57,13 +57,25 @@ echo "Done\n";
 -- 3rd or 4th arg as string --
 int(1)
 int(1)
+
+Notice: A non well formed numeric value encountered in %s on line %d
 int(2)
+
+Notice: A non well formed numeric value encountered in %s on line %d
+
+Notice: A non well formed numeric value encountered in %s on line %d
 int(2)
 
 -- 3rd or 4th arg as NULL --
-int(2)
-int(0)
-int(2)
+
+Warning: substr_count() expects parameter 3 to be long, string given %s on line %d
+NULL
+
+Warning: substr_count() expects parameter 3 to be long, string given %s on line %d
+NULL
+
+Warning: substr_count() expects parameter 3 to be long, string given %s on line %d
+NULL
 int(0)
 int(2)
 

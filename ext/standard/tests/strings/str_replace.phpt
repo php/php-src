@@ -940,18 +940,18 @@ string(5) "FOUND"
 string(5) "FOUND"
 
 *** Testing error conditions ***
-Warning: Wrong parameter count for str_replace() in %s on line %d
+Warning: str_replace() expects at least 3 parameters, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for str_replace() in %s on line %d
+Warning: str_replace() expects at least 3 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for str_replace() in %s on line %d
+Warning: str_replace() expects at least 3 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for str_replace() in %s on line %d
+Warning: str_replace() expects at least 3 parameters, 2 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for str_replace() in %s on line %d
+Warning: str_replace() expects at most 4 parameters, 5 given in %s on line %d
 NULL
 Done
