@@ -55,9 +55,9 @@ bool(false)
 Warning: dbase_create(): Unable to create database without fields in %s on line %d
 bool(false)
 
-Warning: dbase_create(): Expected array as second parameter in %s on line %d
-bool(false)
+Warning: dbase_create() expects parameter 2 to be array, integer given in %s on line %d
+NULL
 
-Warning: dbase_create(): Expected array as second parameter in %s on line %d
-bool(false)
+Warning: dbase_create() expects parameter 2 to be array, string given in %s on line %d
+NULL
 Done
