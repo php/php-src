@@ -1435,6 +1435,8 @@ void php_request_shutdown(void *dummy)
 	EG(opline_ptr) = NULL;
 	EG(active_op_array) = NULL;
 
+	php_deactivate_ticks(TSRMLS_C);
+
 	/* 1. Call all possible shutdown functions registered with register_shutdown_function() */
 	if (PG(modules_activated)) zend_try {
 		php_call_shutdown_functions(TSRMLS_C);

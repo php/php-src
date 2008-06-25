@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   functions. (Andrey)
 - Fixed a bug where exec() on Windows would eat the first and last double quotes
   (Scott)
+- Fixed bug #45352 (Segmentation fault because of tick function on second
+  request). (Dmitry)
 - Fixed bug #45312 (Segmentation fault on second request for array functions).
   (Dmitry)
 - Fixed bug #45251 (double free or corruption with setAttributeNode()). (Rob)

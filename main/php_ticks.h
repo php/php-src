@@ -22,6 +22,7 @@
 #define PHP_TICKS_H
 
 int php_startup_ticks(TSRMLS_D);
+void php_deactivate_ticks(TSRMLS_D);
 void php_shutdown_ticks(TSRMLS_D);
 void php_run_ticks(int count);
 
