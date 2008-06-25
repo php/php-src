@@ -126,7 +126,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(get_included_files,	NULL)
 	ZEND_FALIAS(get_required_files,	get_included_files,		NULL)
 	ZEND_FE(is_subclass_of,		NULL)
-	ZEND_DEP_FE(is_a,			NULL)
+	ZEND_FE(is_a,				NULL)
 	ZEND_FE(get_class_vars,		NULL)
 	ZEND_FE(get_object_vars,	NULL)
 	ZEND_FE(get_class_methods,	NULL)
