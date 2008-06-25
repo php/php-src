@@ -1,3 +1,173 @@
+2008-06-24  David Coallier  <david.coallier@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/formatted_print.c:
+      - New parsing parameter API
+      - Tests have been adjusted, if you have something else failing
+        let me know now! All tests seem to pass fine at the moment.
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/fprintf_error.phpt
+      ext/standard/tests/strings/printf.phpt
+      ext/standard/tests/strings/sprintf_error.phpt
+      ext/standard/tests/strings/vsprintf_error.phpt:
+      - Tests for parsing parameter api
+
+2008-06-24  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd_palloc.c:
+      Fix remaining valgrind problems with pconn and zval cache
+      HEAD merge will follow tomorrow.
+
+2008-06-24  Timm Friebe  <php@thekid.de>
+
+    * (PHP_5_3)
+      ext/sybase_ct/php_sybase_ct.c:
+      - Migrated all zend_get_parameters_ex calls to zend_parse_parameters()
+      - Fixed prototype declarations to use the type resource instead of int
+      - Fixed sybase_close() not to crash when no connection was previously open
+
+2008-06-24  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/bcmath/bcmath.c:
+      - New parameter parsing API
+
+2008-06-24  Raghubansh Kumar  <kraghuba@in.ibm.com>
+
+    * ext/hash/tests/hash_file_basic.phpt
+      ext/hash/tests/hash_file_error.phpt:
+      New testcases for hash_file(), Committed for Felix De Vliegher, TestFest
+      Task No: 75 & 76, Tested on RHEL5 -32bit, WinXP-32bit
+
+    * ext/hash/tests/hash_file_basic.phpt
+      ext/hash/tests/hash_file_basic.phpt
+      ext/hash/tests/hash_file_error.phpt
+      ext/hash/tests/hash_file_error.phpt:
+      
+      file hash_file_basic.phpt was initially added on branch PHP_5_3.
+
+2008-06-24  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd_palloc.c:
+      Fix double-free, introduced lately
+
+2008-06-24  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/filter/filter.c:
+      MFB: Added arginfo
+
+    * (PHP_5_3)
+      ext/filter/filter.c:
+      - Added arginfo
+
+2008-06-24  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysql/php_mysql.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h:
+      Fix possible bug with persistent  connections
+
+    * (PHP_5_3)
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h:
+      Fix possible bug with persistent connections and mysqlnd
+
+2008-06-24  Felix De Vliegher  <felix.devliegher@gmail.com>
+
+    * ext/standard/tests/general_functions/ob_get_flush_basic.phpt
+      ext/standard/tests/general_functions/ob_get_flush_error.phpt:
+      MFB: tests for ob_get_flush(), testfest task number #131
+
+    * ext/standard/tests/general_functions/ob_get_flush_basic.phpt
+      ext/standard/tests/general_functions/ob_get_flush_basic.phpt
+      ext/standard/tests/general_functions/ob_get_flush_error.phpt
+      ext/standard/tests/general_functions/ob_get_flush_error.phpt:
+      
+      file ob_get_flush_basic.phpt was initially added on branch PHP_5_3.
+
+2008-06-24  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/mysqlnd_palloc.h
+      ext/mysqlnd/mysqlnd_palloc.h:
+      Add missing header
+
+2008-06-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ext/mbstring/tests/mb_strlen.phpt:
+      Fixed test
+
+2008-06-24  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/mysqlnd_palloc.c
+      ext/mysqlnd/mysqlnd_palloc.c:
+      Even more debug info
+
+2008-06-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ext/session/session.c:
+      Fixed memory leaks
+
+    * (PHP_5_3)
+      ext/gd/tests/image_type_to_mime_type_error.phpt
+      ext/gd/tests/image_type_to_mime_type_variation1.phpt:
+      Fixed tests
+
+    * (PHP_5_3)
+      ext/standard/string.c:
+      Fixed strtolower/strtoupper to not modify the passed argument
+
+    * (PHP_5_3)
+      run-tests.php:
+      Reverted part of Steph's patch (stdin stream must be closed to make script
+      finish)
+
+2008-06-24  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_5_3)
+      main/config.w32.h:
+      Not sure why this file was comitted?
+      I was running a CVS update and then I see commit messages with my user id!
+      Reverting the changes.
+
+2008-06-24  Kalle Sommer Nielsen  <kalle@zesix.com>
+
+    * main/php.h:
+      Fix build on Windows NT6
+
+2008-06-24  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_5_3)
+      main/config.w32.h:
+      no message
+
+2008-06-24  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/phar.phar
+      ext/phar/phar_object.c
+      ext/phar/tests/phar_buildfromiterator8.phpt
+      ext/phar/tests/phar_extract.phpt
+      ext/phar/tests/phar_extract2.phpt:
+      fix several issues:
+      1) segfault in phar_buildfromdirectoryiterator8.phpt
+      2) tests failing because SKIPDOTS is default on 64 bit, not on 32
+      3) Marcus, you really need to add SKIPDOTS as a class constant, so we
+      don't have to use 0x00001000
+
 2008-06-23  Andrey Hristov  <php@hristov.com>
 
     * ext/mysqlnd/mysqlnd_palloc.c
