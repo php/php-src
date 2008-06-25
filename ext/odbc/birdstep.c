@@ -104,8 +104,8 @@ ZEND_GET_MODULE(birdstep)
 THREAD_LS birdstep_module php_birdstep_module;
 THREAD_LS static HENV henv;
 
-#define PHP_GET_BIRDSTEP_RES_IDX(id) convert_to_long_ex(id); if (!(res = birdstep_find_result(list, Z_LVAL_PP(id)))) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Not result index (%ld)", Z_LVAL_PP(id)); RETURN_FALSE; } 
-#define PHP_BIRDSTEP_CHK_LNK(id) convert_to_long_ex(id); if (!(conn = birdstep_find_conn(list,Z_LVAL_PP(id)))) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Not connection index (%ld)", Z_LVAL_PP(id)); RETURN_FALSE; }
+#define PHP_GET_BIRDSTEP_RES_IDX(id) if (!(res = birdstep_find_result(list, id))) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Not result index (%ld)", id); RETURN_FALSE; } 
+#define PHP_BIRDSTEP_CHK_LNK(id) if (!(conn = birdstep_find_conn(list, id))) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Not connection index (%ld)", id); RETURN_FALSE; }
                                                         
 
 static void _close_birdstep_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
@@ -231,36 +231,30 @@ static void birdstep_del_result(HashTable *list,int ind)
  */
 PHP_FUNCTION(birdstep_connect)
 {
-	zval **serv,**user,**pass;
-	char *Serv = NULL;
-	char *User = NULL;
-	char *Pass = NULL;
+	char *serv, *user, *pass;
+	int serv_len, user_len, pass_len;
 	RETCODE stat;
 	HDBC hdbc;
 	VConn *new;
 	long ind;
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", &serv, &serv_len, &user, &user_len, &pass, &pass_len) == FAILURE) {
+		return;
+	}
+	
 	if ( php_birdstep_module.max_links != -1 && php_birdstep_module.num_links == php_birdstep_module.max_links ) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Too many open connections (%d)",php_birdstep_module.num_links);
 		RETURN_FALSE;
 	}
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &serv, &user, &pass) == FAILURE ) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string_ex(serv);
-	convert_to_string_ex(user);
-	convert_to_string_ex(pass);
-	Serv = Z_STRVAL_PP(serv);
-	User = Z_STRVAL_PP(user);
-	Pass = Z_STRVAL_PP(pass);
+
 	stat = SQLAllocConnect(henv,&hdbc);
 	if ( stat != SQL_SUCCESS ) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Could not allocate connection handle");
 		RETURN_FALSE;
 	}
-	stat = SQLConnect(hdbc,Serv,SQL_NTS,User,SQL_NTS,Pass,SQL_NTS);
+	stat = SQLConnect(hdbc, serv, SQL_NTS, user, SQL_NTS, pass, SQL_NTS);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Could not connect to server \"%s\" for %s",Serv,User);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Could not connect to server \"%s\" for %s", serv, user);
 		SQLFreeConnect(hdbc);
 		RETURN_FALSE;
 	}
@@ -275,17 +269,18 @@ PHP_FUNCTION(birdstep_connect)
  */
 PHP_FUNCTION(birdstep_close)
 {
-	zval **id;
+	long id;
 	VConn *conn;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &id) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &id) == FAILURE) {
+		return;
 	}
+
 	PHP_BIRDSTEP_CHK_LNK(id);
 
 	SQLDisconnect(conn->hdbc);
 	SQLFreeConnect(conn->hdbc);
-	birdstep_del_conn(list,Z_LVAL_PP(id));
+	birdstep_del_conn(list, id);
 	php_birdstep_module.num_links--;
 	RETURN_TRUE;
 }
@@ -295,22 +290,20 @@ PHP_FUNCTION(birdstep_close)
  */
 PHP_FUNCTION(birdstep_exec)
 {
-	zval **ind, **exec_str;
-	char *query = NULL;
-	int indx;
+	char *query;
+	long ind;
+	int query_len, indx;
 	VConn *conn;
 	Vresult *res;
 	RETCODE stat;
 	SWORD cols,i,colnamelen;
 	SDWORD rows,coldesc;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &ind, &exec_str) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &ind, &query, &query_len) == FAILURE) {
+		return;
 	}
-	PHP_BIRDSTEP_CHK_LNK(ind);
 
-	convert_to_string_ex(exec_str);
-	query = Z_STRVAL_PP(exec_str);
+	PHP_BIRDSTEP_CHK_LNK(ind);
 
 	res = (Vresult *)emalloc(sizeof(Vresult));
 	stat = SQLAllocStmt(conn->hdbc,&res->hstmt);
@@ -378,15 +371,16 @@ PHP_FUNCTION(birdstep_exec)
  */
 PHP_FUNCTION(birdstep_fetch)
 {
-	zval **ind;
+	long ind;
 	Vresult *res;
 	RETCODE stat;
 	UDWORD  row;
 	UWORD   RowStat[1];
 
-	if ( ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &ind) == FAILURE ) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &ind) == FAILURE) {
+		return;
 	}
+
 	PHP_GET_BIRDSTEP_RES_IDX(ind);
 
 	stat = SQLExtendedFetch(res->hstmt,SQL_FETCH_NEXT,1,&row,RowStat);
@@ -406,11 +400,12 @@ PHP_FUNCTION(birdstep_fetch)
 }
 /* }}} */
 
-/* {{{ proto mixed birdstep_result(int index, int col)
+/* {{{ proto mixed birdstep_result(int index, mixed col)
  */
 PHP_FUNCTION(birdstep_result)
 {
-	zval **ind, **col;
+	zval **col;
+	long ind;
 	Vresult *res;
 	RETCODE stat;
 	int i,sql_c_type;
@@ -419,9 +414,10 @@ PHP_FUNCTION(birdstep_result)
 	SWORD indx = -1;
 	char *field = NULL;
 
-	if ( ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &ind, &col) == FAILURE ) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lZ", &ind, &col) == FAILURE) {
+		return;
 	}
+
 	PHP_GET_BIRDSTEP_RES_IDX(ind);
 
 	if ( Z_TYPE_PP(col) == IS_STRING ) {
@@ -502,16 +498,17 @@ l1:
  */
 PHP_FUNCTION(birdstep_freeresult)
 {
-	zval **ind;
+	long ind;
 	Vresult *res;
 
-	if ( ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &ind) == FAILURE ) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &ind) == FAILURE) {
+		return;
 	}
+
 	PHP_GET_BIRDSTEP_RES_IDX(ind);
 
 	SQLFreeStmt(res->hstmt,SQL_DROP);
-	birdstep_del_result(list,Z_LVAL_PP(ind));
+	birdstep_del_result(list, ind);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -520,13 +517,14 @@ PHP_FUNCTION(birdstep_freeresult)
  */
 PHP_FUNCTION(birdstep_autocommit)
 {
-	zval **id;
+	long id;
 	RETCODE stat;
 	VConn *conn;
 
-	if ( ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &id) == FAILURE ) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &id) == FAILURE) {
+		return;
 	}
+
 	PHP_BIRDSTEP_CHK_LNK(id);
 
 	stat = SQLSetConnectOption(conn->hdbc,SQL_AUTOCOMMIT,SQL_AUTOCOMMIT_ON);
@@ -542,13 +540,14 @@ PHP_FUNCTION(birdstep_autocommit)
  */
 PHP_FUNCTION(birdstep_off_autocommit)
 {
-	zval **id;
+	long id;
 	RETCODE stat;
 	VConn *conn;
 
-	if ( ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &id) == FAILURE ) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &id) == FAILURE) {
+		return;
 	}
+
 	PHP_BIRDSTEP_CHK_LNK(id);
 
 	stat = SQLSetConnectOption(conn->hdbc,SQL_AUTOCOMMIT,SQL_AUTOCOMMIT_OFF);
@@ -564,13 +563,14 @@ PHP_FUNCTION(birdstep_off_autocommit)
  */
 PHP_FUNCTION(birdstep_commit)
 {
-	zval **id;
+	long id;
 	RETCODE stat;
 	VConn *conn;
 
-	if ( ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &id) == FAILURE ) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &id) == FAILURE) {
+		return;
 	}
+
 	PHP_BIRDSTEP_CHK_LNK(id)
 
 	stat = SQLTransact(NULL,conn->hdbc,SQL_COMMIT);
@@ -586,13 +586,14 @@ PHP_FUNCTION(birdstep_commit)
  */
 PHP_FUNCTION(birdstep_rollback)
 {
-	zval **id;
+	long id;
 	RETCODE stat;
 	VConn *conn;
 
-	if ( ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &id) == FAILURE ) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &id) == FAILURE) {
+		return;
 	}
+
 	PHP_BIRDSTEP_CHK_LNK(id);
 
 	stat = SQLTransact(NULL,conn->hdbc,SQL_ROLLBACK);
@@ -608,17 +609,17 @@ PHP_FUNCTION(birdstep_rollback)
  */
 PHP_FUNCTION(birdstep_fieldname)
 {
-	zval **ind, **col;
+	long ind, col;
 	Vresult *res;
 	SWORD indx;
 
-	if ( ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &ind, &col) == FAILURE ) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &ind, &col) == FAILURE) {
+		return;
 	}
+
 	PHP_GET_BIRDSTEP_RES_IDX(ind);
 
-	convert_to_long_ex(col);
-	indx = Z_LVAL_PP(col);
+	indx = col;
 	if ( indx < 0 || indx >= res->numcols ) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Field index not in range");
 		RETURN_FALSE;
@@ -631,12 +632,13 @@ PHP_FUNCTION(birdstep_fieldname)
  */
 PHP_FUNCTION(birdstep_fieldnum)
 {
-	zval **ind;
+	long ind;
 	Vresult *res;
 
-	if ( ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &ind) == FAILURE ) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &ind) == FAILURE) {
+		return;
 	}
+
 	PHP_GET_BIRDSTEP_RES_IDX(ind);
 
 	RETURN_LONG(res->numcols);
