@@ -119,28 +119,28 @@ string(3) "5.0"
 
 -- Iterator 10 --
 
-Notice: Array to string conversion in %s on line %d
-string(5) "yarrA"
+Warning: strrev() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 -- Iterator 11 --
 
-Notice: Array to string conversion in %s on line %d
-string(5) "yarrA"
+Warning: strrev() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 -- Iterator 12 --
 
-Notice: Array to string conversion in %s on line %d
-string(5) "yarrA"
+Warning: strrev() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 -- Iterator 13 --
 
-Notice: Array to string conversion in %s on line %d
-string(5) "yarrA"
+Warning: strrev() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 -- Iterator 14 --
 
-Notice: Array to string conversion in %s on line %d
-string(5) "yarrA"
+Warning: strrev() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 -- Iterator 15 --
 string(0) ""
@@ -170,7 +170,9 @@ string(0) ""
 string(6) "tcejbo"
 
 -- Iterator 24 --
-string(%d) "%d# di ecruoseR"
+
+Warning: strrev() expects parameter 1 to be string, resource given in %s on line %d
+NULL
 
 -- Iterator 25 --
 string(0) ""

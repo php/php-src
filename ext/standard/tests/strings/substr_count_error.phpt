@@ -30,12 +30,12 @@ echo "Done\n";
 --EXPECTF--
 *** Testing error conditions ***
 
-Warning: Wrong parameter count for substr_count() in %s on line %d
+Warning: substr_count() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
 Notice: Undefined variable: str in %s on line %d
 
-Warning: Wrong parameter count for substr_count() in %s on line %d
+Warning: substr_count() expects at most 4 parameters, 5 given in %s on line %d
 NULL
 
 Notice: Undefined variable: str in %s on line %d
@@ -55,8 +55,8 @@ bool(false)
 
 Notice: Undefined variable: str in %s on line %d
 
-Warning: substr_count(): Length should be greater than 0 in %s on line %d
-bool(false)
+Warning: substr_count() expects parameter 3 to be long, string given in %s on line %d
+NULL
 
 Notice: Undefined variable: str in %s on line %d
 

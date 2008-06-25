@@ -146,24 +146,24 @@ string(13) "1.07654321E-9"
 string(3) "0.5"
 -- Iteration 16 --
 
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
+Warning: ucwords() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 17 --
 
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
+Warning: ucwords() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 18 --
 
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
+Warning: ucwords() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 19 --
 
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
+Warning: ucwords() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 20 --
 
-Notice: Array to string conversion in %s on line 101
-string(5) "Array"
+Warning: ucwords() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 21 --
 string(1) "1"
 -- Iteration 22 --
@@ -195,5 +195,7 @@ string(0) ""
 -- Iteration 35 --
 string(0) ""
 -- Iteration 36 --
-string(%d) "Resource Id #%d"
+
+Warning: ucwords() expects parameter 1 to be string, resource given in %s on line %d
+NULL
 Done

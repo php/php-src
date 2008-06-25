@@ -19,12 +19,12 @@ echo "Done\n";
 --EXPECTF--
 *** Testing error conditions ***
 
-Warning: Wrong parameter count for addcslashes() in %s on line %d
+Warning: addcslashes() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for addcslashes() in %s on line %d
+Warning: addcslashes() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for addcslashes() in %s on line %d
+Warning: addcslashes() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 Done
