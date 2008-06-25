@@ -27,6 +27,11 @@ int php_startup_ticks(TSRMLS_D)
 	return SUCCESS;
 }
 
+void php_deactivate_ticks(TSRMLS_D)
+{
+	zend_llist_clean(&PG(tick_functions));
+}
+
 void php_shutdown_ticks(TSRMLS_D)
 {
 	zend_llist_destroy(&PG(tick_functions));
