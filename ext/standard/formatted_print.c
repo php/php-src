@@ -373,22 +373,26 @@ php_sprintf_getnumber(char *buffer, int *pos)
 static char *
 php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC)
 {
-	zval ***args = NULL, **z_format;
+	zval ***args, **z_format;
 	int argc, size = 240, inpos = 0, outpos = 0, temppos;
 	int alignment, currarg, adjusting, argnum, width, precision;
 	char *format, *result, padding;
 	int always_sign;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &argc) == FAILURE) {
-		return;
-	}
+	argc = ZEND_NUM_ARGS();
 
 	/* verify the number of args */
 	if ((use_array && argc != (2 + format_offset)) 
 			|| (!use_array && argc < (1 + format_offset))) {
 		WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
 	}
+	args = (zval ***)safe_emalloc(argc, sizeof(zval *), 0);
 
+	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
+		efree(args);
+		WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
+	}
+	
 	if (use_array) {
 		int i = 1;
 		zval ***newargs;
@@ -686,7 +690,6 @@ PHP_FUNCTION(vsprintf)
 	if ((result=php_formatted_print(ht, &len, 1, 0 TSRMLS_CC))==NULL) {
 		RETURN_FALSE;
 	}
-
 	RETVAL_STRINGL(result, len, 0);
 }
 /* }}} */
@@ -728,17 +731,18 @@ PHP_FUNCTION(vprintf)
 PHP_FUNCTION(fprintf)
 {
 	php_stream *stream;
-	zval **arg1 = NULL;
-	zval **args = NULL;
-	int num_args;
+	zval **arg1;
 	char *result;
-	zval **format;
 	int len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z+", &arg1, &args) == FAILURE) {
-		return;
+	
+	if (ZEND_NUM_ARGS() < 2) {
+		WRONG_PARAM_COUNT;
 	}
-
+	
+	if (zend_get_parameters_ex(1, &arg1)==FAILURE) {
+		RETURN_FALSE;
+	}
+	
 	php_stream_from_zval(stream, arg1);
 
 	if ((result=php_formatted_print(ht, &len, 0, 1 TSRMLS_CC))==NULL) {
@@ -760,22 +764,14 @@ PHP_FUNCTION(vfprintf)
 	php_stream *stream;
 	zval **arg1;
 	char *result;
-	int num_args, len;
+	int len;
 	
-	/**
-	 * Here's the deal, I extract the first resource, it's 
-	 * a ressource, then a string and then an array. In theory
-	 * the parsing should be "rsa" however, if I do so, the 
-	 * Argument number checking in php_formatted_print fails.
-	 * I am therefore leaving this check here so I do not break
-	 * php_formatted_print
-	 */
 	if (ZEND_NUM_ARGS() != 3) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z+", &arg1, &num_args) == FAILURE) {
-		return;
+	if (zend_get_parameters_ex(1, &arg1)==FAILURE) {
+		RETURN_FALSE;
 	}
 	
 	php_stream_from_zval(stream, arg1);
