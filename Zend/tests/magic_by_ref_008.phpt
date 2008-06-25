@@ -4,7 +4,7 @@ passing first parameter of __callstatic() by ref
 <?php
 
 class test {
-    function __callstatic(&$name, $args) { }
+    static function __callstatic(&$name, $args) { }
 }
 
 $t = new test;

@@ -30,17 +30,10 @@ var_dump(is_subclass_of($a, "INT"));
 
 var_dump(is_subclass_of("X1", "X2"));
 ?>
---EXPECTF--
-Deprecated: Function is_a() is deprecated in %sis_a.php on line 17
+--EXPECT--
 bool(false)
-
-Deprecated: Function is_a() is deprecated in %sis_a.php on line 18
 bool(true)
-
-Deprecated: Function is_a() is deprecated in %sis_a.php on line 19
 bool(true)
-
-Deprecated: Function is_a() is deprecated in %sis_a.php on line 20
 bool(true)
 bool(false)
 bool(false)
