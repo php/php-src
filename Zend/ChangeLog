@@ -1,3 +1,24 @@
+2008-06-25  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      tests/is_a.phpt:
+      - Fixed test
+
+    * tests/is_a.phpt
+      tests/magic_by_ref_008.phpt
+      tests/magic_by_ref_009.phpt:
+      - Fixed tests
+
+    * zend_builtin_functions.c:
+      - MFB: Removed E_DEPRECATED on is_a()
+        (http://marc.info/?l=php-internals&m=121390431523970&w=2)
+
+    * (PHP_5_3)
+      zend_builtin_functions.c:
+      - Removed E_DEPRECATED on is_a()
+        (http://marc.info/?l=php-internals&m=121390431523970&w=2)
+      [doc]
+
 2008-06-20  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c

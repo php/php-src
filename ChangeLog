@@ -1,3 +1,108 @@
+2008-06-25  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/is_a.phpt:
+      - Fixed test
+
+    * ZendEngine2/tests/is_a.phpt
+      ZendEngine2/tests/magic_by_ref_008.phpt
+      ZendEngine2/tests/magic_by_ref_009.phpt:
+      - Fixed tests
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - MFB: Removed E_DEPRECATED on is_a()
+        (http://marc.info/?l=php-internals&m=121390431523970&w=2)
+
+    * (PHP_5_3)
+      ZendEngine2/zend_builtin_functions.c:
+      - Removed E_DEPRECATED on is_a()
+        (http://marc.info/?l=php-internals&m=121390431523970&w=2)
+      [doc]
+
+    * (PHP_5_3)
+      ext/dbase/dbase.c
+      ext/dbase/tests/001.phpt
+      ext/ming/ming.c
+      ext/odbc/birdstep.c
+      ext/odbc/birdstep.c
+      ext/readline/readline.c
+      ext/readline/readline.c:
+      - New parameter parsing API
+
+2008-06-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/ReflectionFunction_getNamespaceName.phpt
+      ext/reflection/tests/reflectionClass_getNamespaceName.phpt:
+      Added support for namespaces
+
+    * ext/reflection/tests/ReflectionFunction_getNamespaceName.phpt
+      ext/reflection/tests/ReflectionFunction_getNamespaceName.phpt
+      ext/reflection/tests/reflectionClass_getNamespaceName.phpt
+      ext/reflection/tests/reflectionClass_getNamespaceName.phpt:
+      
+      file ReflectionFunction_getNamespaceName.phpt was initially added on
+      branch PHP_5_3.
+
+    * (PHP_5_2)
+      NEWS
+      main/main.c
+      main/main.c
+      main/main.c
+      main/php_ticks.c
+      main/php_ticks.c
+      main/php_ticks.c
+      main/php_ticks.h
+      main/php_ticks.h
+      main/php_ticks.h:
+      Fixed bug #45352 (Segmentation fault because of tick function on second
+      request)
+
+2008-06-25  Olivier Hill  <olivier.hill@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/string.c
+      ext/standard/tests/strings/addcslashes_001.phpt
+      ext/standard/tests/strings/addcslashes_004.phpt
+      ext/standard/tests/strings/addslashes_error.phpt
+      ext/standard/tests/strings/addslashes_variation1.phpt
+      ext/standard/tests/strings/chr_ord.phpt
+      ext/standard/tests/strings/nl2br_error.phpt
+      ext/standard/tests/strings/nl2br_variation5.phpt
+      ext/standard/tests/strings/str_ireplace.phpt
+      ext/standard/tests/strings/str_pad.phpt
+      ext/standard/tests/strings/str_repeat.phpt
+      ext/standard/tests/strings/str_replace.phpt
+      ext/standard/tests/strings/strip_tags_error.phpt
+      ext/standard/tests/strings/strip_tags_variation1.phpt
+      ext/standard/tests/strings/strip_tags_variation3.phpt
+      ext/standard/tests/strings/stripslashes_error.phpt
+      ext/standard/tests/strings/stripslashes_variation1.phpt
+      ext/standard/tests/strings/strrev_error.phpt
+      ext/standard/tests/strings/strrev_variation4.phpt
+      ext/standard/tests/strings/strtr_error.phpt
+      ext/standard/tests/strings/strtr_variation5.phpt
+      ext/standard/tests/strings/strtr_variation7.phpt
+      ext/standard/tests/strings/strtr_variation9.phpt
+      ext/standard/tests/strings/substr.phpt
+      ext/standard/tests/strings/substr_count_error.phpt
+      ext/standard/tests/strings/substr_count_variation_001.phpt
+      ext/standard/tests/strings/ucwords_error.phpt
+      ext/standard/tests/strings/ucwords_variation1.phpt:
+      New parameter parsing API
+
+2008-06-25  David Coallier  <david.coallier@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/formatted_print.c:
+      Reverted zpp API Cleanup patch - memory troubles?
+
+    * (PHP_5_3)
+      ext/standard/formatted_print.c:
+      - Hackish but working parameter parsing, no longer using
+        zend_get* at least
+
 2008-06-24  David Coallier  <david.coallier@gmail.com>
 
     * (PHP_5_3)
