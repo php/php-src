@@ -21,7 +21,5 @@ echo "Done";
 ?>
 --EXPECTF--
 *** Testing is_a() : usage variations ***
-
-Deprecated: Function is_a() is deprecated in %s on line 13
 bool(true)
 Done
