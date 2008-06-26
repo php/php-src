@@ -21,7 +21,5 @@ echo "Done";
 ?>
 --EXPECTF--
 *** Testing is_a() : usage variations ***
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 13
 bool(true)
 Done
