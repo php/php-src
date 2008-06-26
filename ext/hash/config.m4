@@ -4,6 +4,14 @@ dnl config.m4 for extension hash
 PHP_ARG_ENABLE(hash, whether to enable hash support,
 [  --disable-hash          Disable hash support], yes)
 
+if test "$PHP_MHASH" != "no"; then
+  if test "$PHP_HASH" == "no"; then
+    PHP_HASH="yes"
+  fi
+
+  AC_DEFINE(PHP_MHASH_BC, 1, [ ])
+fi
+
 if test "$PHP_HASH" != "no"; then
   AC_DEFINE(HAVE_HASH_EXT,1,[Have HASH Extension])
 

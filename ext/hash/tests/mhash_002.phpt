@@ -2,7 +2,7 @@
 mhash_get_block_size() & mhash_get_hash_name() test
 --SKIPIF--
 <?php
-	include "skip.inc";
+	include "skip_mhash.inc";
 ?>
 --FILE--
 <?php
