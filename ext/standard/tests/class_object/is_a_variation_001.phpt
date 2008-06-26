@@ -84,132 +84,80 @@ Notice: Undefined variable: undefined_var in %s on line 59
 Notice: Undefined variable: unset_var in %s on line 62
 
 Arg value 0 
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value 1 
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value 12345 
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value -2345 
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value 10.5 
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value -10.5 
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value 101234567000 
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value 1.07654321E-9 
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value 0.5 
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value Array 
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value Array 
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value Array 
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value Array 
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value Array 
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value  
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value  
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value 1 
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value  
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value 1 
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value  
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value  
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value  
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value string 
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value String 
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value  
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 
 Arg value  
-
-Deprecated: is_a(): Deprecated. Please use the instanceof operator in %s on line 69
 bool(false)
 Done
