@@ -32,14 +32,10 @@ echo "Done";
 
 -- Testing is_a() function with more than expected no. of arguments --
 
-Deprecated: Function is_a() is deprecated in %s on line 16
-
 Warning: Wrong parameter count for is_a() in %s on line 16
 NULL
 
 -- Testing is_a() function with less than expected no. of arguments --
-
-Deprecated: Function is_a() is deprecated in %s on line 21
 
 Warning: Wrong parameter count for is_a() in %s on line 21
 NULL

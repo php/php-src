@@ -89,55 +89,35 @@ Notice: Undefined variable: undefined_var in %s on line 64
 Notice: Undefined variable: unset_var in %s on line 67
 
 Arg value 0 
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 bool(false)
 
 Arg value 1 
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 bool(false)
 
 Arg value 12345 
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 bool(false)
 
 Arg value -2345 
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 bool(false)
 
 Arg value 10.5 
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 bool(false)
 
 Arg value -10.5 
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 bool(false)
 
 Arg value 101234567000 
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 bool(false)
 
 Arg value 1.07654321E-9 
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 bool(false)
 
 Arg value 0.5 
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 bool(false)
 
 Notice: Array to string conversion in %s on line 73
 
 Arg value Array 
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 
 Notice: Array to string conversion in %s on line 74
 bool(false)
@@ -146,7 +126,12 @@ Notice: Array to string conversion in %s on line 73
 
 Arg value Array 
 
-Deprecated: Function is_a() is deprecated in %s on line 74
+Notice: Array to string conversion in %s on line 74
+bool(false)
+
+Notice: Array to string conversion in %s on line 73
+
+Arg value Array 
 
 Notice: Array to string conversion in %s on line 74
 bool(false)
@@ -155,81 +140,46 @@ Notice: Array to string conversion in %s on line 73
 
 Arg value Array 
 
-Deprecated: Function is_a() is deprecated in %s on line 74
-
 Notice: Array to string conversion in %s on line 74
 bool(false)
 
 Notice: Array to string conversion in %s on line 73
 
 Arg value Array 
-
-Deprecated: Function is_a() is deprecated in %s on line 74
-
-Notice: Array to string conversion in %s on line 74
-bool(false)
-
-Notice: Array to string conversion in %s on line 73
-
-Arg value Array 
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 
 Notice: Array to string conversion in %s on line 74
 bool(false)
 
 Arg value  
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 bool(false)
 
 Arg value  
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 bool(false)
 
 Arg value 1 
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 bool(false)
 
 Arg value  
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 bool(false)
 
 Arg value 1 
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 bool(false)
 
 Arg value  
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 bool(false)
 
 Arg value  
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 bool(false)
 
 Arg value  
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 bool(false)
 
 Arg value C Instance 
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 bool(false)
 
 Arg value  
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 bool(false)
 
 Arg value  
-
-Deprecated: Function is_a() is deprecated in %s on line 74
 bool(false)
 Done
