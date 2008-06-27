@@ -23,7 +23,7 @@ shm_remove($s);
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Wrong parameter count for shm_put_var() in %s on line %d
+Warning: shm_put_var() expects exactly 3 parameters, 0 given in %s on line %d
 NULL
 
 Warning: shm_put_var(): -1 is not a SysV shared memory index in %s on line %d

@@ -18,13 +18,13 @@ var_dump(ftok(__FILE__,"q"));
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Wrong parameter count for ftok() in %s on line %d
+Warning: ftok() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ftok() in %s on line %d
+Warning: ftok() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ftok() in %s on line %d
+Warning: ftok() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
 Warning: ftok(): Pathname is invalid in %s on line %d
@@ -38,5 +38,5 @@ int(-1)
 
 Warning: ftok(): ftok() failed - No such file or directory in %s on line %d
 int(-1)
-int(%d)
+int(1895944710)
 Done

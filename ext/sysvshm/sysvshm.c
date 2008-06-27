@@ -107,7 +107,7 @@ PHP_MINIT_FUNCTION(sysvshm)
    Creates or open a shared memory segment */
 PHP_FUNCTION(shm_attach)
 {
-	zval **arg_key, **arg_size, **arg_flag;
+	long arg_key, arg_size, arg_flag;
 	long shm_size, shm_flag;
 	sysvshm_shm *shm_list_ptr;
 	char *shm_ptr;
@@ -118,21 +118,18 @@ PHP_FUNCTION(shm_attach)
 
 	shm_flag = 0666;
 	shm_size = php_sysvshm.init_mem;
-	
-	if (ac < 1 || ac > 3 || zend_get_parameters_ex(ac, &arg_key, &arg_size, &arg_flag) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
 
-	switch (ac) {
-		case 3:
-			convert_to_long_ex(arg_flag);
-			shm_flag = Z_LVAL_PP(arg_flag);
-		case 2:
-			convert_to_long_ex(arg_size);
-			shm_size= Z_LVAL_PP(arg_size);
-		case 1:
-			convert_to_long_ex(arg_key);
-			shm_key = Z_LVAL_PP(arg_key);
+	if (zend_parse_parameters(ac TSRMLS_CC, "l|ll", &arg_key, &arg_size, &arg_flag) == FAILURE) {
+		return;
+	}
+	
+	shm_key = arg_key;
+
+	if (ac > 1) {
+		shm_size = arg_size;
+		if (ac > 2) {
+			shm_flag = arg_flag;
+		}
 	}
 
 	if (shm_size < 1) {
@@ -184,22 +181,21 @@ PHP_FUNCTION(shm_attach)
    Disconnects from shared memory segment */
 PHP_FUNCTION(shm_detach)
 {
-	zval **arg_id;
+	long arg_id;
 	int type;
 	sysvshm_shm *shm_list_ptr;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg_id) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &arg_id) == FAILURE) {
+		return;
 	}
 
-	convert_to_long_ex(arg_id);
-	shm_list_ptr = (sysvshm_shm *) zend_list_find(Z_LVAL_PP(arg_id), &type);
+	shm_list_ptr = (sysvshm_shm *) zend_list_find(arg_id, &type);
 	if (!shm_list_ptr || type != php_sysvshm.le_shm) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The parameter is not a valid shm_identifier");
 		RETURN_FALSE;
 	}
 
-	zend_list_delete(Z_LVAL_PP(arg_id));
+	zend_list_delete(arg_id);
 
 	RETURN_TRUE;
 }
@@ -209,17 +205,16 @@ PHP_FUNCTION(shm_detach)
    Removes shared memory from Unix systems */
 PHP_FUNCTION(shm_remove)
 {
-	zval **arg_id;
+	long arg_id;
 	long id;
 	int type;
 	sysvshm_shm *shm_list_ptr;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg_id) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &arg_id) == FAILURE) {
+		return;
 	}
 
-	convert_to_long_ex(arg_id);
-	id = Z_LVAL_PP(arg_id);
+	id = arg_id;
 	shm_list_ptr = (sysvshm_shm *) zend_list_find(id, &type);
 
 	if (!shm_list_ptr || type != php_sysvshm.le_shm) {
@@ -240,7 +235,8 @@ PHP_FUNCTION(shm_remove)
    Inserts or updates a variable in shared memory */
 PHP_FUNCTION(shm_put_var)
 {
-	zval **arg_id, **arg_key, **arg_var;
+	long arg_id, arg_key;
+	zval **arg_var;
 	long key, id;
 	sysvshm_shm *shm_list_ptr;
 	int type;
@@ -248,14 +244,12 @@ PHP_FUNCTION(shm_put_var)
 	int ret;	
 	php_serialize_data_t var_hash;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg_id, &arg_key, &arg_var) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "llZ", &arg_id, &arg_key, &arg_var) == FAILURE) {
+		return;
 	}
-			
-	convert_to_long_ex(arg_id);
-	id = Z_LVAL_PP(arg_id);
-	convert_to_long_ex(arg_key);
-	key = Z_LVAL_PP(arg_key);
+
+	id = arg_id;
+	key = arg_key;
 
 	shm_list_ptr = (sysvshm_shm *) zend_list_find(id, &type);
 	if (!shm_list_ptr || type != php_sysvshm.le_shm) {
@@ -286,7 +280,7 @@ PHP_FUNCTION(shm_put_var)
    Returns a variable from shared memory */
 PHP_FUNCTION(shm_get_var)
 {
-	zval **arg_id, **arg_key;
+	long arg_id, arg_key;
 	long key, id;
 	sysvshm_shm *shm_list_ptr;
 	int type;
@@ -294,15 +288,13 @@ PHP_FUNCTION(shm_get_var)
 	long shm_varpos;
 	sysvshm_chunk *shm_var;
 	php_unserialize_data_t var_hash;
-	
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg_id, &arg_key) == FAILURE) {
-		WRONG_PARAM_COUNT;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &arg_id, &arg_key) == FAILURE) {
+		return;
 	}
 
-	convert_to_long_ex(arg_id);
-	id = Z_LVAL_PP(arg_id);
-	convert_to_long_ex(arg_key);
-	key = Z_LVAL_PP(arg_key);
+	id = arg_id;
+	key = arg_key;
 
 	shm_list_ptr = (sysvshm_shm *) zend_list_find(id, &type);
 	if (!shm_list_ptr || type != php_sysvshm.le_shm) {
@@ -335,20 +327,18 @@ PHP_FUNCTION(shm_get_var)
    Removes variable from shared memory */
 PHP_FUNCTION(shm_remove_var)
 {
-	zval **arg_id, **arg_key;
+	long arg_id, arg_key;
 	long key, id;
 	sysvshm_shm *shm_list_ptr;
 	int type;
 	long shm_varpos;
-	
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg_id, &arg_key) == FAILURE) {
-		WRONG_PARAM_COUNT;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &arg_id, &arg_key) == FAILURE) {
+		return;
 	}
 
-	convert_to_long_ex(arg_id);
-	id = Z_LVAL_PP(arg_id);
-	convert_to_long_ex(arg_key);
-	key = Z_LVAL_PP(arg_key);
+	id = arg_id;
+	key = arg_key;
 
 	shm_list_ptr = (sysvshm_shm *) zend_list_find(id, &type);
 	if (!shm_list_ptr || type != php_sysvshm.le_shm) {
