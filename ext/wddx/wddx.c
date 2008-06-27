@@ -102,15 +102,51 @@ typedef struct {
 
 static void php_wddx_process_data(void *user_data, const XML_Char *s, int len);
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_serialize_value, 0, 0, 1)
+	ZEND_ARG_INFO(0, var)
+	ZEND_ARG_INFO(0, comment)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_serialize_vars, 0, 0, 1)
+	ZEND_ARG_INFO(0, var_name)
+	ZEND_ARG_INFO(0, ...)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_serialize_start, 0, 0, 0)
+	ZEND_ARG_INFO(0, comment)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_packet_end, 0, 0, 1)
+	ZEND_ARG_INFO(0, packet_id)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_add_vars, 0, 0, 2)
+	ZEND_ARG_INFO(0, packet_id)
+	ZEND_ARG_INFO(0, var_name)
+	ZEND_ARG_INFO(0, ...)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_deserialize, 0, 0, 1)
+	ZEND_ARG_INFO(0, packet)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 /* {{{ wddx_functions[]
  */
 const zend_function_entry wddx_functions[] = {
-	PHP_FE(wddx_serialize_value, NULL)
-	PHP_FE(wddx_serialize_vars, NULL)
-	PHP_FE(wddx_packet_start, NULL)
-	PHP_FE(wddx_packet_end, NULL)
-	PHP_FE(wddx_add_vars, NULL)
-	PHP_FE(wddx_deserialize, NULL)
+	PHP_FE(wddx_serialize_value, arginfo_wddx_serialize_value)
+	PHP_FE(wddx_serialize_vars,	arginfo_wddx_serialize_vars)
+	PHP_FE(wddx_packet_start,	arginfo_wddx_serialize_start)
+	PHP_FE(wddx_packet_end,		arginfo_wddx_packet_end)
+	PHP_FE(wddx_add_vars,		arginfo_wddx_add_vars)
+	PHP_FE(wddx_deserialize,	arginfo_wddx_deserialize)
 	{NULL, NULL, NULL}
 };
 /* }}} */
