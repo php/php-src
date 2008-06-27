@@ -113,9 +113,15 @@ PHP_FUNCTION(pdo_drivers)
 }
 /* }}} */
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO(arginfo_pdo_drivers, 0)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 /* {{{ pdo_functions[] */
 const zend_function_entry pdo_functions[] = {
-	PHP_FE(pdo_drivers,             NULL)
+	PHP_FE(pdo_drivers,             arginfo_pdo_drivers)
 	{NULL, NULL, NULL}
 };
 /* }}} */

@@ -480,8 +480,15 @@ zend_object_value dom_objects_store_clone_obj(zval *zobject TSRMLS_DC)
 	return retval;
 }
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_import_simplexml, 0, 0, 1)
+	ZEND_ARG_INFO(0, node)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 static const zend_function_entry dom_functions[] = {
-	PHP_FE(dom_import_simplexml, NULL)
+	PHP_FE(dom_import_simplexml, arginfo_dom_import_simplexml)
 	{NULL, NULL, NULL}
 };
 
