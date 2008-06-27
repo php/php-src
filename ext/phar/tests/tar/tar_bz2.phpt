@@ -23,13 +23,16 @@ $tar->addFile('internal/file/here', "hi there!\n");
 $tar->mkDir('internal/dir');
 $tar->mkDir('dir');
 $tar->addFile('.phar/stub.php', '<?php
+var_dump(__FILE__);
+var_dump(substr(__FILE__, 0, 4) != "phar");
 Phar::mapPhar();
 var_dump("it worked");
 include "phar://" . __FILE__ . "/tar_004.php";
+__HALT_COMPILER();
 ');
 $tar->close();
 
-include $fname;
+include $alias;
 
 $phar = new Phar($fname);
 $phar['test'] = 'hi';
@@ -48,6 +51,8 @@ var_dump($phar2->isCompressed() == Phar::BZ2);
 @unlink(dirname(__FILE__) . '/tar_bz2.phar.tar');
 ?>
 --EXPECTF--
+string(%d) "%star_bz2.phar"
+bool(true)
 string(9) "it worked"
 string(%d) "phar://%star_bz2.phar/tar_004.php"
 bool(true)
