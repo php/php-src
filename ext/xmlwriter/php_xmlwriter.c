@@ -171,59 +171,420 @@ static zend_object_value xmlwriter_object_new(zend_class_entry *class_type TSRML
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, __err);	\
 		RETURN_FALSE;	\
 	}	\
+	
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO(arginfo_xmlwriter_void, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_resource, 0, 0, 1)
+	ZEND_ARG_INFO(0, xmlwriter)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_open_uri, 0, 0, 1)
+	ZEND_ARG_INFO(0, uri)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_set_indent, 0, 0, 2)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, indent)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_set_indent, 0, 0, 1)
+	ZEND_ARG_INFO(0, indent)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_set_indent_string, 0, 0, 2)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, indentString)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_set_indent_string, 0, 0, 1)
+	ZEND_ARG_INFO(0, indentString)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_attribute, 0, 0, 2)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_start_attribute, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_attribute_ns, 0, 0, 4)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, prefix)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, uri)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_start_attribute_ns, 0, 0, 3)
+	ZEND_ARG_INFO(0, prefix)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, uri)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_attribute_ns, 0, 0, 5)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, prefix)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, uri)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_attribute_ns, 0, 0, 4)
+	ZEND_ARG_INFO(0, prefix)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, uri)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_attribute, 0, 0, 3)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_attribute, 0, 0, 2)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_element, 0, 0, 2)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_start_element, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_element_ns, 0, 0, 4)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, prefix)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, uri)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_start_element_ns, 0, 0, 3)
+	ZEND_ARG_INFO(0, prefix)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, uri)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_element, 0, 0, 2)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_element, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_element_ns, 0, 0, 4)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, prefix)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, uri)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_element_ns, 0, 0, 3)
+	ZEND_ARG_INFO(0, prefix)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, uri)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_pi, 0, 0, 2)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, target)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_start_pi, 0, 0, 1)
+	ZEND_ARG_INFO(0, target)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_pi, 0, 0, 3)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, target)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_pi, 0, 0, 2)
+	ZEND_ARG_INFO(0, target)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_cdata, 0, 0, 2)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_cdata, 0, 0, 1)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_text, 0, 0, 2)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_text, 0, 0, 1)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_raw, 0, 0, 2)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_raw, 0, 0, 1)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_document, 0, 0, 1)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, version)
+	ZEND_ARG_INFO(0, encoding)
+	ZEND_ARG_INFO(0, standalone)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_start_document, 0, 0, 0)
+	ZEND_ARG_INFO(0, version)
+	ZEND_ARG_INFO(0, encoding)
+	ZEND_ARG_INFO(0, standalone)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_comment, 0, 0, 2)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_comment, 0, 0, 1)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_dtd, 0, 0, 2)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, qualifiedName)
+	ZEND_ARG_INFO(0, publicId)
+	ZEND_ARG_INFO(0, systemId)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_start_dtd, 0, 0, 1)
+	ZEND_ARG_INFO(0, qualifiedName)
+	ZEND_ARG_INFO(0, publicId)
+	ZEND_ARG_INFO(0, systemId)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_dtd, 0, 0, 2)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, publicId)
+	ZEND_ARG_INFO(0, systemId)
+	ZEND_ARG_INFO(0, subset)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_dtd, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, publicId)
+	ZEND_ARG_INFO(0, systemId)
+	ZEND_ARG_INFO(0, subset)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_dtd_element, 0, 0, 2)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, qualifiedName)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_start_dtd_element, 0, 0, 1)
+	ZEND_ARG_INFO(0, qualifiedName)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_dtd_element, 0, 0, 3)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_dtd_element, 0, 0, 2)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_dtd_attlist, 0, 0, 2)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_start_dtd_attlist, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_dtd_attlist, 0, 0, 3)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_dtd_attlist, 0, 0, 2)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_dtd_entity, 0, 0, 3)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, isparam)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_start_dtd_entity, 0, 0, 2)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, isparam)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_dtd_entity, 0, 0, 3)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_dtd_entity, 0, 0, 2)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_output_memory, 0, 0, 1)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, flush)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_output_memory, 0, 0, 0)
+	ZEND_ARG_INFO(0, flush)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_flush, 0, 0, 1)
+	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_INFO(0, empty)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_flush, 0, 0, 0)
+	ZEND_ARG_INFO(0, empty)
+ZEND_END_ARG_INFO()
+/* }}} */
 
 /* {{{ xmlwriter_functions */
 static const zend_function_entry xmlwriter_functions[] = {
-	PHP_FE(xmlwriter_open_uri,			NULL)
-	PHP_FE(xmlwriter_open_memory,		NULL)
+	PHP_FE(xmlwriter_open_uri,			arginfo_xmlwriter_open_uri)
+	PHP_FE(xmlwriter_open_memory,		arginfo_xmlwriter_void)
 #if LIBXML_VERSION >= 20605
-	PHP_FE(xmlwriter_set_indent,		NULL)
-	PHP_FE(xmlwriter_set_indent_string, NULL)
+	PHP_FE(xmlwriter_set_indent,		arginfo_xmlwriter_set_indent)
+	PHP_FE(xmlwriter_set_indent_string, arginfo_xmlwriter_set_indent_string)
 #endif
 #if LIBXML_VERSION >= 20607
-	PHP_FE(xmlwriter_start_comment,		NULL)
-	PHP_FE(xmlwriter_end_comment,		NULL)
+	PHP_FE(xmlwriter_start_comment,		arginfo_xmlwriter_resource)
+	PHP_FE(xmlwriter_end_comment,		arginfo_xmlwriter_resource)
 #endif
-	PHP_FE(xmlwriter_start_attribute,	NULL)
-	PHP_FE(xmlwriter_end_attribute,		NULL)
-	PHP_FE(xmlwriter_write_attribute,	NULL)
+	PHP_FE(xmlwriter_start_attribute,	arginfo_xmlwriter_start_attribute)
+	PHP_FE(xmlwriter_end_attribute,		arginfo_xmlwriter_resource)
+	PHP_FE(xmlwriter_write_attribute,	arginfo_xmlwriter_write_attribute)
 #if LIBXML_VERSION > 20617
-	PHP_FE(xmlwriter_start_attribute_ns,NULL)
-	PHP_FE(xmlwriter_write_attribute_ns,NULL)
+	PHP_FE(xmlwriter_start_attribute_ns,arginfo_xmlwriter_start_attribute_ns)
+	PHP_FE(xmlwriter_write_attribute_ns,arginfo_xmlwriter_write_attribute_ns)
 #endif
-	PHP_FE(xmlwriter_start_element,		NULL)
-	PHP_FE(xmlwriter_end_element,		NULL)
-	PHP_FE(xmlwriter_full_end_element,	NULL)
-	PHP_FE(xmlwriter_start_element_ns,	NULL)
-	PHP_FE(xmlwriter_write_element,		NULL)
-	PHP_FE(xmlwriter_write_element_ns,	NULL)
-	PHP_FE(xmlwriter_start_pi,			NULL)
-	PHP_FE(xmlwriter_end_pi,			NULL)
-	PHP_FE(xmlwriter_write_pi,			NULL)
-	PHP_FE(xmlwriter_start_cdata,		NULL)
-	PHP_FE(xmlwriter_end_cdata,			NULL)
-	PHP_FE(xmlwriter_write_cdata,		NULL)
-	PHP_FE(xmlwriter_text,				NULL)
-	PHP_FE(xmlwriter_write_raw,			NULL)
-	PHP_FE(xmlwriter_start_document,	NULL)
-	PHP_FE(xmlwriter_end_document,		NULL)
-	PHP_FE(xmlwriter_write_comment,		NULL)
-	PHP_FE(xmlwriter_start_dtd,			NULL)
-	PHP_FE(xmlwriter_end_dtd,			NULL)
-	PHP_FE(xmlwriter_write_dtd,			NULL)
-	PHP_FE(xmlwriter_start_dtd_element,	NULL)
-	PHP_FE(xmlwriter_end_dtd_element,	NULL)
-	PHP_FE(xmlwriter_write_dtd_element,	NULL)
+	PHP_FE(xmlwriter_start_element,		arginfo_xmlwriter_start_element)
+	PHP_FE(xmlwriter_end_element,		arginfo_xmlwriter_resource)
+	PHP_FE(xmlwriter_full_end_element,	arginfo_xmlwriter_resource)
+	PHP_FE(xmlwriter_start_element_ns,	arginfo_xmlwriter_start_element_ns)
+	PHP_FE(xmlwriter_write_element,		arginfo_xmlwriter_write_element)
+	PHP_FE(xmlwriter_write_element_ns,	arginfo_xmlwriter_write_element_ns)
+	PHP_FE(xmlwriter_start_pi,			arginfo_xmlwriter_start_pi)
+	PHP_FE(xmlwriter_end_pi,			arginfo_xmlwriter_resource)
+	PHP_FE(xmlwriter_write_pi,			arginfo_xmlwriter_write_pi)
+	PHP_FE(xmlwriter_start_cdata,		arginfo_xmlwriter_resource)
+	PHP_FE(xmlwriter_end_cdata,			arginfo_xmlwriter_resource)
+	PHP_FE(xmlwriter_write_cdata,		arginfo_xmlwriter_write_cdata)
+	PHP_FE(xmlwriter_text,				arginfo_xmlwriter_text)
+	PHP_FE(xmlwriter_write_raw,			arginfo_xmlwriter_write_raw)
+	PHP_FE(xmlwriter_start_document,	arginfo_xmlwriter_start_document)
+	PHP_FE(xmlwriter_end_document,		arginfo_xmlwriter_resource)
+	PHP_FE(xmlwriter_write_comment,		arginfo_xmlwriter_write_comment)
+	PHP_FE(xmlwriter_start_dtd,			arginfo_xmlwriter_start_dtd)
+	PHP_FE(xmlwriter_end_dtd,			arginfo_xmlwriter_resource)
+	PHP_FE(xmlwriter_write_dtd,			arginfo_xmlwriter_write_dtd)
+	PHP_FE(xmlwriter_start_dtd_element,	arginfo_xmlwriter_start_dtd_element)
+	PHP_FE(xmlwriter_end_dtd_element,	arginfo_xmlwriter_resource)
+	PHP_FE(xmlwriter_write_dtd_element,	arginfo_xmlwriter_write_dtd_element)
 #if LIBXML_VERSION > 20608
-	PHP_FE(xmlwriter_start_dtd_attlist,	NULL)
-	PHP_FE(xmlwriter_end_dtd_attlist,	NULL)
-	PHP_FE(xmlwriter_write_dtd_attlist,	NULL)
-	PHP_FE(xmlwriter_start_dtd_entity,	NULL)
-	PHP_FE(xmlwriter_end_dtd_entity,	NULL)
-	PHP_FE(xmlwriter_write_dtd_entity,	NULL)
+	PHP_FE(xmlwriter_start_dtd_attlist,	arginfo_xmlwriter_start_dtd_attlist)
+	PHP_FE(xmlwriter_end_dtd_attlist,	arginfo_xmlwriter_resource)
+	PHP_FE(xmlwriter_write_dtd_attlist,	arginfo_xmlwriter_write_dtd_attlist)
+	PHP_FE(xmlwriter_start_dtd_entity,	arginfo_xmlwriter_start_dtd_entity)
+	PHP_FE(xmlwriter_end_dtd_entity,	arginfo_xmlwriter_resource)
+	PHP_FE(xmlwriter_write_dtd_entity,	arginfo_xmlwriter_write_dtd_entity)
 #endif
-	PHP_FE(xmlwriter_output_memory,		NULL)
-	PHP_FE(xmlwriter_flush,				NULL)
+	PHP_FE(xmlwriter_output_memory,		arginfo_xmlwriter_output_memory)
+	PHP_FE(xmlwriter_flush,				arginfo_xmlwriter_flush)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -235,56 +596,56 @@ static const zend_function_entry xmlwriter_functions[] = {
 #endif
 /* {{{ xmlwriter_class_functions */
 static const zend_function_entry xmlwriter_class_functions[] = {
-	PHP_ME_MAPPING(openUri,		xmlwriter_open_uri,		NULL, 0)
-	PHP_ME_MAPPING(openMemory,	xmlwriter_open_memory, 	NULL, 0)
+	PHP_ME_MAPPING(openUri,		xmlwriter_open_uri,		arginfo_xmlwriter_open_uri, 0)
+	PHP_ME_MAPPING(openMemory,	xmlwriter_open_memory, 	arginfo_xmlwriter_void, 0)
 #if LIBXML_VERSION >= 20605
-	PHP_ME_MAPPING(setIndent,	xmlwriter_set_indent,	NULL, 0)
-	PHP_ME_MAPPING(setIndentString,	xmlwriter_set_indent_string, NULL, 0)
+	PHP_ME_MAPPING(setIndent,	xmlwriter_set_indent,	arginfo_xmlwriter_method_set_indent, 0)
+	PHP_ME_MAPPING(setIndentString,	xmlwriter_set_indent_string, arginfo_xmlwriter_method_set_indent_string, 0)
 #endif
 #if LIBXML_VERSION >= 20607
-	PHP_ME_MAPPING(startComment,	xmlwriter_start_comment,	NULL, 0)
-	PHP_ME_MAPPING(endComment,		xmlwriter_end_comment,		NULL, 0)
+	PHP_ME_MAPPING(startComment,	xmlwriter_start_comment,	arginfo_xmlwriter_void, 0)
+	PHP_ME_MAPPING(endComment,		xmlwriter_end_comment,		arginfo_xmlwriter_void, 0)
 #endif
-	PHP_ME_MAPPING(startAttribute,	xmlwriter_start_attribute,	NULL, 0)
-	PHP_ME_MAPPING(endAttribute,	xmlwriter_end_attribute,	NULL, 0)
-	PHP_ME_MAPPING(writeAttribute,	xmlwriter_write_attribute,	NULL, 0)
+	PHP_ME_MAPPING(startAttribute,	xmlwriter_start_attribute,	arginfo_xmlwriter_method_start_attribute, 0)
+	PHP_ME_MAPPING(endAttribute,	xmlwriter_end_attribute,	arginfo_xmlwriter_void, 0)
+	PHP_ME_MAPPING(writeAttribute,	xmlwriter_write_attribute,	arginfo_xmlwriter_method_write_attribute, 0)
 #if LIBXML_VERSION > 20617
-	PHP_ME_MAPPING(startAttributeNs,	xmlwriter_start_attribute_ns,NULL, 0)
-	PHP_ME_MAPPING(writeAttributeNs,	xmlwriter_write_attribute_ns,NULL, 0)
+	PHP_ME_MAPPING(startAttributeNs,	xmlwriter_start_attribute_ns,arginfo_xmlwriter_method_start_attribute_ns, 0)
+	PHP_ME_MAPPING(writeAttributeNs,	xmlwriter_write_attribute_ns,arginfo_xmlwriter_method_write_attribute_ns, 0)
 #endif
-	PHP_ME_MAPPING(startElement,	xmlwriter_start_element,	NULL, 0)
-	PHP_ME_MAPPING(endElement,		xmlwriter_end_element,		NULL, 0)
-	PHP_ME_MAPPING(fullEndElement,	xmlwriter_full_end_element,	NULL, 0)
-	PHP_ME_MAPPING(startElementNs,	xmlwriter_start_element_ns,	NULL, 0)
-	PHP_ME_MAPPING(writeElement,	xmlwriter_write_element,	NULL, 0)
-	PHP_ME_MAPPING(writeElementNs,	xmlwriter_write_element_ns,	NULL, 0)
-	PHP_ME_MAPPING(startPi,			xmlwriter_start_pi,			NULL, 0)
-	PHP_ME_MAPPING(endPi,			xmlwriter_end_pi,			NULL, 0)
-	PHP_ME_MAPPING(writePi,			xmlwriter_write_pi,			NULL, 0)
-	PHP_ME_MAPPING(startCdata,		xmlwriter_start_cdata,		NULL, 0)
-	PHP_ME_MAPPING(endCdata,		xmlwriter_end_cdata,		NULL, 0)
-	PHP_ME_MAPPING(writeCdata,		xmlwriter_write_cdata,		NULL, 0)
-	PHP_ME_MAPPING(text,			xmlwriter_text,				NULL, 0)
-	PHP_ME_MAPPING(writeRaw,		xmlwriter_write_raw,		NULL, 0)
-	PHP_ME_MAPPING(startDocument,	xmlwriter_start_document,	NULL, 0)
-	PHP_ME_MAPPING(endDocument,		xmlwriter_end_document,		NULL, 0)
-	PHP_ME_MAPPING(writeComment,	xmlwriter_write_comment,	NULL, 0)
-	PHP_ME_MAPPING(startDtd,		xmlwriter_start_dtd,		NULL, 0)
-	PHP_ME_MAPPING(endDtd,			xmlwriter_end_dtd,			NULL, 0)
-	PHP_ME_MAPPING(writeDtd,		xmlwriter_write_dtd,		NULL, 0)
-	PHP_ME_MAPPING(startDtdElement,	xmlwriter_start_dtd_element,	NULL, 0)
-	PHP_ME_MAPPING(endDtdElement,	xmlwriter_end_dtd_element,	NULL, 0)
-	PHP_ME_MAPPING(writeDtdElement,	xmlwriter_write_dtd_element,	NULL, 0)
+	PHP_ME_MAPPING(startElement,	xmlwriter_start_element,	arginfo_xmlwriter_method_start_element, 0)
+	PHP_ME_MAPPING(endElement,		xmlwriter_end_element,		arginfo_xmlwriter_void, 0)
+	PHP_ME_MAPPING(fullEndElement,	xmlwriter_full_end_element,	arginfo_xmlwriter_void, 0)
+	PHP_ME_MAPPING(startElementNs,	xmlwriter_start_element_ns,	arginfo_xmlwriter_method_start_element_ns, 0)
+	PHP_ME_MAPPING(writeElement,	xmlwriter_write_element,	arginfo_xmlwriter_method_write_element, 0)
+	PHP_ME_MAPPING(writeElementNs,	xmlwriter_write_element_ns,	arginfo_xmlwriter_method_write_element_ns, 0)
+	PHP_ME_MAPPING(startPi,			xmlwriter_start_pi,			arginfo_xmlwriter_method_start_pi, 0)
+	PHP_ME_MAPPING(endPi,			xmlwriter_end_pi,			arginfo_xmlwriter_void, 0)
+	PHP_ME_MAPPING(writePi,			xmlwriter_write_pi,			arginfo_xmlwriter_method_write_pi, 0)
+	PHP_ME_MAPPING(startCdata,		xmlwriter_start_cdata,		arginfo_xmlwriter_void, 0)
+	PHP_ME_MAPPING(endCdata,		xmlwriter_end_cdata,		arginfo_xmlwriter_void, 0)
+	PHP_ME_MAPPING(writeCdata,		xmlwriter_write_cdata,		arginfo_xmlwriter_method_write_cdata, 0)
+	PHP_ME_MAPPING(text,			xmlwriter_text,				arginfo_xmlwriter_method_text, 0)
+	PHP_ME_MAPPING(writeRaw,		xmlwriter_write_raw,		arginfo_xmlwriter_method_write_raw, 0)
+	PHP_ME_MAPPING(startDocument,	xmlwriter_start_document,	arginfo_xmlwriter_method_start_document, 0)
+	PHP_ME_MAPPING(endDocument,		xmlwriter_end_document,		arginfo_xmlwriter_void, 0)
+	PHP_ME_MAPPING(writeComment,	xmlwriter_write_comment,	arginfo_xmlwriter_method_write_comment, 0)
+	PHP_ME_MAPPING(startDtd,		xmlwriter_start_dtd,		arginfo_xmlwriter_method_start_dtd, 0)
+	PHP_ME_MAPPING(endDtd,			xmlwriter_end_dtd,			arginfo_xmlwriter_void, 0)
+	PHP_ME_MAPPING(writeDtd,		xmlwriter_write_dtd,		arginfo_xmlwriter_method_write_dtd, 0)
+	PHP_ME_MAPPING(startDtdElement,	xmlwriter_start_dtd_element,arginfo_xmlwriter_method_start_dtd_element, 0)
+	PHP_ME_MAPPING(endDtdElement,	xmlwriter_end_dtd_element,	arginfo_xmlwriter_void, 0)
+	PHP_ME_MAPPING(writeDtdElement,	xmlwriter_write_dtd_element,	arginfo_xmlwriter_method_write_dtd_element, 0)
 #if LIBXML_VERSION > 20608
-	PHP_ME_MAPPING(startDtdAttlist,	xmlwriter_start_dtd_attlist,	NULL, 0)
-	PHP_ME_MAPPING(endDtdAttlist,	xmlwriter_end_dtd_attlist,	NULL, 0)
-	PHP_ME_MAPPING(writeDtdAttlist,	xmlwriter_write_dtd_attlist,	NULL, 0)
-	PHP_ME_MAPPING(startDtdEntity,	xmlwriter_start_dtd_entity,	NULL, 0)
-	PHP_ME_MAPPING(endDtdEntity,	xmlwriter_end_dtd_entity,	NULL, 0)
-	PHP_ME_MAPPING(writeDtdEntity,	xmlwriter_write_dtd_entity,	NULL, 0)
+	PHP_ME_MAPPING(startDtdAttlist,	xmlwriter_start_dtd_attlist,	arginfo_xmlwriter_method_start_dtd_attlist, 0)
+	PHP_ME_MAPPING(endDtdAttlist,	xmlwriter_end_dtd_attlist,	arginfo_xmlwriter_void, 0)
+	PHP_ME_MAPPING(writeDtdAttlist,	xmlwriter_write_dtd_attlist,	arginfo_xmlwriter_method_write_dtd_attlist, 0)
+	PHP_ME_MAPPING(startDtdEntity,	xmlwriter_start_dtd_entity,	arginfo_xmlwriter_method_start_dtd_entity, 0)
+	PHP_ME_MAPPING(endDtdEntity,	xmlwriter_end_dtd_entity,	arginfo_xmlwriter_void, 0)
+	PHP_ME_MAPPING(writeDtdEntity,	xmlwriter_write_dtd_entity,	arginfo_xmlwriter_method_write_dtd_entity, 0)
 #endif
-	PHP_ME_MAPPING(outputMemory,	xmlwriter_output_memory,	NULL, 0)
-	PHP_ME_MAPPING(flush,			xmlwriter_flush,			NULL, 0)
+	PHP_ME_MAPPING(outputMemory,	xmlwriter_output_memory,	arginfo_xmlwriter_method_output_memory, 0)
+	PHP_ME_MAPPING(flush,			xmlwriter_flush,			arginfo_xmlwriter_method_flush, 0)
 	{NULL, NULL, NULL}
 };
 /* }}} */
