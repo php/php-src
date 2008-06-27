@@ -1,3 +1,52 @@
+2008-06-26  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/hash/CREDITS
+      ext/hash/config.m4
+      ext/hash/hash.c
+      ext/hash/tests/mhash_001.phpt
+      ext/hash/tests/mhash_001.phpt
+      ext/hash/tests/mhash_002.phpt
+      ext/hash/tests/mhash_002.phpt
+      ext/hash/tests/mhash_003.phpt
+      ext/hash/tests/mhash_003.phpt
+      ext/hash/tests/skip_mhash.inc
+      ext/hash/tests/skip_mhash.inc
+      ext/mhash/config.m4
+      ext/mhash/mhash.c
+      ext/mhash/mhash.dsp
+      ext/mhash/php_mhash.h
+      ext/mhash/tests/001.phpt
+      ext/mhash/tests/002.phpt
+      ext/mhash/tests/003.phpt
+      ext/mhash/tests/skip.inc:
+      Make the old mhash API a wrapper around hash, this removes a dependency.
+
+2008-06-26  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/class_object/is_a_error_001.phpt
+      ext/standard/tests/class_object/is_a_error_001.phpt
+      ext/standard/tests/class_object/is_a_variation_001.phpt
+      ext/standard/tests/class_object/is_a_variation_001.phpt
+      ext/standard/tests/class_object/is_a_variation_002.phpt
+      ext/standard/tests/class_object/is_a_variation_002.phpt
+      ext/standard/tests/class_object/is_a_variation_003.phpt
+      ext/standard/tests/class_object/is_a_variation_003.phpt:
+      - Fixed tests
+
+2008-06-26  Felix De Vliegher  <felix.devliegher@gmail.com>
+
+    * ext/standard/tests/file/lchown_basic.phpt
+      ext/standard/tests/file/lchown_error.phpt:
+      MFB: tests for lchown(), testfest.php.net task number 129.
+
+    * ext/standard/tests/file/lchown_basic.phpt
+      ext/standard/tests/file/lchown_basic.phpt
+      ext/standard/tests/file/lchown_error.phpt
+      ext/standard/tests/file/lchown_error.phpt:
+      
+      file lchown_basic.phpt was initially added on branch PHP_5_3.
+
 2008-06-25  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
