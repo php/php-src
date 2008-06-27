@@ -2615,7 +2615,7 @@ ZEND_METHOD(reflection_function, inNamespace)
 	    (colon.u = u_memrchr(Z_USTRVAL_PP(name), ':', Z_USTRLEN_PP(name))) &&
 	    colon.u > Z_USTRVAL_PP(name) && *(colon.u-1) == ':') {
 		RETURN_TRUE;
-    }
+	}
 	RETURN_FALSE;
 }
 /* }}} */
@@ -2639,7 +2639,7 @@ ZEND_METHOD(reflection_function, getNamespaceName)
 	    (colon.u = u_memrchr(Z_USTRVAL_PP(name), ':', Z_USTRLEN_PP(name))) &&
 	    colon.u > Z_USTRVAL_PP(name) && *(colon.u-1) == ':') {
 		RETURN_UNICODEL(Z_USTRVAL_PP(name), colon.u - Z_USTRVAL_PP(name) - 1, 1);
-    }
+	}
 	RETURN_EMPTY_TEXT();
 }
 /* }}} */
@@ -2663,8 +2663,8 @@ ZEND_METHOD(reflection_function, getShortName)
 	    (colon.u = u_memrchr(Z_USTRVAL_PP(name), ':', Z_USTRLEN_PP(name))) &&
 	    colon.u > Z_USTRVAL_PP(name) && *(colon.u-1) == ':') {
 		RETURN_UNICODEL(colon.u + 1, Z_USTRLEN_PP(name) - (colon.u - Z_USTRVAL_PP(name) + 1), 1);
-    }
-    RETURN_ZVAL(*name, 1, 0);
+	}
+	RETURN_ZVAL(*name, 1, 0);
 }
 /* }}} */
 
