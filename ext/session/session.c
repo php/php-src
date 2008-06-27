@@ -1772,27 +1772,91 @@ static PHP_FUNCTION(session_write_close)
 }
 /* }}} */
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_session_name, 0, 0, 0)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_session_module_name, 0, 0, 0)
+	ZEND_ARG_INFO(0, module)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_session_save_path, 0, 0, 0)
+	ZEND_ARG_INFO(0, path)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_session_id, 0, 0, 0)
+	ZEND_ARG_INFO(0, id)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_session_regenerate_id, 0, 0, 0)
+	ZEND_ARG_INFO(0, delete_old_session)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_session_decode, 0, 0, 1)
+	ZEND_ARG_INFO(0, data)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_session_void, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_session_set_save_handler, 0, 0, 6)
+	ZEND_ARG_INFO(0, open)
+	ZEND_ARG_INFO(0, close)
+	ZEND_ARG_INFO(0, read)
+	ZEND_ARG_INFO(0, write)
+	ZEND_ARG_INFO(0, destroy)
+	ZEND_ARG_INFO(0, gc)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_session_cache_limiter, 0, 0, 0)
+	ZEND_ARG_INFO(0, cache_limiter)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_session_cache_expire, 0, 0, 0)
+	ZEND_ARG_INFO(0, new_cache_expire)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_session_set_cookie_params, 0, 0, 1)
+	ZEND_ARG_INFO(0, lifetime)
+	ZEND_ARG_INFO(0, path)
+	ZEND_ARG_INFO(0, domain)
+	ZEND_ARG_INFO(0, secure)
+	ZEND_ARG_INFO(0, httponly)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 /* {{{ session_functions[]
  */
 static const zend_function_entry session_functions[] = {
-	PHP_FE(session_name,              NULL)
-	PHP_FE(session_module_name,       NULL)
-	PHP_FE(session_save_path,         NULL)
-	PHP_FE(session_id,                NULL)
-	PHP_FE(session_regenerate_id,     NULL)
-	PHP_FE(session_decode,            NULL)
-	PHP_FE(session_encode,            NULL)
-	PHP_FE(session_start,             NULL)
-	PHP_FE(session_destroy,           NULL)
-	PHP_FE(session_unset,             NULL)
-	PHP_FE(session_set_save_handler,  NULL)
-	PHP_FE(session_cache_limiter,     NULL)
-	PHP_FE(session_cache_expire,      NULL)
-	PHP_FE(session_set_cookie_params, NULL)
-	PHP_FE(session_get_cookie_params, NULL)
-	PHP_FE(session_write_close,       NULL)
-
-	PHP_FALIAS(session_commit, session_write_close, NULL)
+	PHP_FE(session_name,              arginfo_session_name)
+	PHP_FE(session_module_name,       arginfo_session_module_name)
+	PHP_FE(session_save_path,         arginfo_session_save_path)
+	PHP_FE(session_id,                arginfo_session_id)
+	PHP_FE(session_regenerate_id,     arginfo_session_regenerate_id)
+	PHP_FE(session_decode,            arginfo_session_decode)
+	PHP_FE(session_encode,            arginfo_session_void)
+	PHP_FE(session_start,             arginfo_session_void)
+	PHP_FE(session_destroy,           arginfo_session_void)
+	PHP_FE(session_unset,             arginfo_session_void)
+	PHP_FE(session_set_save_handler,  arginfo_session_set_save_handler)
+	PHP_FE(session_cache_limiter,     arginfo_session_cache_limiter)
+	PHP_FE(session_cache_expire,      arginfo_session_cache_expire)
+	PHP_FE(session_set_cookie_params, arginfo_session_set_cookie_params)
+	PHP_FE(session_get_cookie_params, arginfo_session_void)
+	PHP_FE(session_write_close,       arginfo_session_void)
+	PHP_FALIAS(session_commit, session_write_close, arginfo_session_void)
 	{NULL, NULL, NULL} 
 };
 /* }}} */
