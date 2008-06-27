@@ -204,7 +204,7 @@ int zend_next_free_module(void);
 BEGIN_EXTERN_C()
 ZEND_API int zend_get_parameters(int ht, int param_count, ...);
 ZEND_API int _zend_get_parameters_array(int ht, int param_count, zval **argument_array TSRMLS_DC);
-ZEND_API int zend_get_parameters_ex(int param_count, ...);
+ZEND_API int ZEND_ATTRIBUTE_DEPRECATED zend_get_parameters_ex(int param_count, ...);
 ZEND_API int _zend_get_parameters_array_ex(int param_count, zval ***argument_array TSRMLS_DC);
 
 /* internal function to efficiently copy parameters when executing __call() */
