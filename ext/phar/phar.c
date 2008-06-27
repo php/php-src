@@ -3187,7 +3187,6 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 				/* compressed phar */
 #if PHP_VERSION_ID >= 50300
 				file_handle->type = ZEND_HANDLE_STREAM;
-				file_handle->free_filename = 0;
 				/* we do our own reading directly from the phar, don't change the next line */
 				file_handle->handle.stream.handle  = phar;
 				file_handle->handle.stream.reader  = phar_zend_stream_reader;
@@ -3200,7 +3199,6 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 				memset(&file_handle->handle.stream.mmap, 0, sizeof(file_handle->handle.stream.mmap));
 #else /* PHP_VERSION_ID */
 				file_handle->type = ZEND_HANDLE_STREAM;
-				file_handle->free_filename = 0;
 				/* we do our own reading directly from the phar, don't change the next line */
 				file_handle->handle.stream.handle = phar;
 				file_handle->handle.stream.reader = phar_zend_stream_reader;

@@ -157,6 +157,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, char *filename, char *mode,
  */
 static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
 {
+	phar_archive_data *phar;
 	phar_entry_data *idata;
 	char *internal_file;
 	char *error;
@@ -234,8 +235,55 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 		}
 		return fpf;
 	} else {
+		if (!*internal_file && (options & STREAM_OPEN_FOR_INCLUDE)) {
+			/* retrieve the stub */
+			if (FAILURE == phar_get_archive(&phar, resource->host, host_len, NULL, 0, NULL TSRMLS_CC)) {
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "file %s is not a valid phar archive");
+				efree(internal_file);
+				php_url_free(resource);
+				return NULL;
+			}
+			if (phar->is_tar || phar->is_zip) {
+				if ((FAILURE == phar_get_entry_data(&idata, resource->host, host_len, ".phar/stub.php", sizeof(".phar/stub.php")-1, "r", 0, &error, 0 TSRMLS_CC)) || !idata) {
+					goto idata_error;
+				}
+				efree(internal_file);
+				if (opened_path) {
+					spprintf(opened_path, MAXPATHLEN, "%s", phar->fname);
+				}
+				php_url_free(resource);
+				goto phar_stub;
+			} else {
+				phar_entry_info *entry;
+
+				entry = (phar_entry_info *) ecalloc(1, sizeof(phar_entry_info));
+				entry->is_temp_dir = 1;
+				entry->filename = "";
+				entry->filename_len = 0;
+				entry->phar = phar;
+				entry->offset = entry->offset_abs = 0;
+				entry->compressed_filesize = entry->uncompressed_filesize = phar->halt_offset;
+				entry->is_crc_checked = 1;
+
+				idata = (phar_entry_data *) ecalloc(1, sizeof(phar_entry_data));
+				idata->fp = phar_get_pharfp(phar TSRMLS_CC);
+				idata->phar = phar;
+				idata->internal_file = entry;
+				if (!phar->is_persistent) {
+					++(entry->phar->refcount);
+				}
+				++(entry->fp_refcount);
+				php_url_free(resource);
+				if (opened_path) {
+					spprintf(opened_path, MAXPATHLEN, "%s", phar->fname);
+				}
+				efree(internal_file);
+				goto phar_stub;
+			}
+		}
 		/* read-only access is allowed to magic files in .phar directory */
 		if ((FAILURE == phar_get_entry_data(&idata, resource->host, host_len, internal_file, strlen(internal_file), "r", 0, &error, 0 TSRMLS_CC)) || !idata) {
+idata_error:
 			if (error) {
 				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
 				efree(error);
@@ -283,11 +331,12 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 			PHAR_G(cwd) = NULL;
 		}
 	}
-	fpf = php_stream_alloc(&phar_ops, idata, NULL, mode);
 	if (opened_path) {
 		spprintf(opened_path, MAXPATHLEN, "phar://%s/%s", idata->phar->fname, idata->internal_file->filename);
 	}
 	efree(internal_file);
+phar_stub:
+	fpf = php_stream_alloc(&phar_ops, idata, NULL, mode);
 	return fpf;
 }
 /* }}} */
@@ -297,8 +346,14 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
  */
 static int phar_stream_close(php_stream *stream, int close_handle TSRMLS_DC) /* {{{ */
 {
+	phar_entry_info *entry = ((phar_entry_data *)stream->abstract)->internal_file;
+
 	phar_entry_delref((phar_entry_data *)stream->abstract TSRMLS_CC);
 
+	if (entry->is_temp_dir) {
+		/* phar archive stub, free it */
+		efree(entry);
+	}
 	return 0;
 }
 /* }}} */
