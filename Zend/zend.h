@@ -177,6 +177,12 @@ char *alloca ();
 # define ZEND_ATTRIBUTE_PTR_FORMAT(type, idx, first)
 #endif
 
+#if ZEND_GCC_VERSION >= 3001
+# define ZEND_ATTRIBUTE_DEPRECATED  __attribute__((deprecated))
+#else
+# define ZEND_ATTRIBUTE_DEPRECATED
+#endif
+
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 3400 && defined(__i386__)
 # define ZEND_FASTCALL __attribute__((fastcall))
 #elif defined(_MSC_VER) && defined(_M_IX86)
