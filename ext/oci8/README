@@ -1,12 +1,23 @@
 Installing OCI8
 ---------------
 
+0. Overview
 1. Common requirements.
 2. Installing as shared extension.
 3. Installing as statically compiled extension.
 4. Installing from PECL.
 5. Testing OCI8
 6. DRCP and FAN Support
+
+0. Overview
+-----------
+
+The OCI8 extension allows you to access Oracle databases.  It can be
+built using Oracle 9.2, 10.2 or 11.1 client libraries, and allows
+Oracle's standard cross-version connectivity.
+
+The OCI8 extension is not related to or used by PDO_OCI, the PHP Data
+Objects (PDO) extension for Oracle.
 
 1. Common requirements
 ----------------------
