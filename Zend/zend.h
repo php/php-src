@@ -179,6 +179,8 @@ char *alloca ();
 
 #if ZEND_GCC_VERSION >= 3001
 # define ZEND_ATTRIBUTE_DEPRECATED  __attribute__((deprecated))
+#elif defined(ZEND_WIN32) && defined(_MSC_VER) && _MSC_VER >= 1300
+# define ZEND_ATTRIBUTE_DEPRECATED  __declspec(deprecated)
 #else
 # define ZEND_ATTRIBUTE_DEPRECATED
 #endif
