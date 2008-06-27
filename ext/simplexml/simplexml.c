@@ -2463,10 +2463,36 @@ PHP_FUNCTION(simplexml_import_dom)
 }
 /* }}} */
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexml_load_file, 0, 0, 1)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, class_name)
+	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, ns)
+	ZEND_ARG_INFO(0, is_prefix)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexml_load_string, 0, 0, 1)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, class_name)
+	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, ns)
+	ZEND_ARG_INFO(0, is_prefix)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexml_import_dom, 0, 0, 1)
+	ZEND_ARG_INFO(0, node)
+	ZEND_ARG_INFO(0, class_name)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 const zend_function_entry simplexml_functions[] = { /* {{{ */
-	PHP_FE(simplexml_load_file, NULL)
-	PHP_FE(simplexml_load_string, NULL)
-	PHP_FE(simplexml_import_dom, NULL)
+	PHP_FE(simplexml_load_file, 	arginfo_simplexml_load_file)
+	PHP_FE(simplexml_load_string,	arginfo_simplexml_load_string)
+	PHP_FE(simplexml_import_dom,	arginfo_simplexml_import_dom)
 	{NULL, NULL, NULL}
 };
 /* }}} */
