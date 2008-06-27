@@ -38,7 +38,7 @@ shm_remove($s);
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Wrong parameter count for shm_get_var() in %s on line %d
+Warning: shm_get_var() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 
 Warning: shm_get_var(): -1 is not a SysV shared memory index in %s on line %d
@@ -49,10 +49,11 @@ bool(false)
 
 Warning: shm_get_var(): variable key -10000 doesn't exist in %s on line %d
 bool(false)
-object(stdClass)#%d (0) {
-}
+
+Warning: shm_get_var() expects parameter 2 to be long, array given in %s on line %d
+NULL
 string(11) "test string"
-object(stdClass)#%d (0) {
+object(stdClass)#1 (0) {
 }
 array(3) {
   [0]=>

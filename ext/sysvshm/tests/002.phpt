@@ -33,35 +33,35 @@ shm_remove($s);
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Wrong parameter count for shm_attach() in %s/sysvshm/tests/002.php on line %d
+Warning: shm_attach() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for shm_attach() in %s/sysvshm/tests/002.php on line %d
+Warning: shm_attach() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 
-Warning: shm_attach(): Segment size must be greater then zero. in %s/sysvshm/tests/002.php on line %d
+Warning: shm_attach(): Segment size must be greater then zero. in %s on line %d
 bool(false)
 
-Warning: shm_attach(): Segment size must be greater then zero. in %s/sysvshm/tests/002.php on line %d
+Warning: shm_attach(): Segment size must be greater then zero. in %s on line %d
 bool(false)
 
-Warning: shm_attach(): Segment size must be greater then zero. in %s/sysvshm/tests/002.php on line %d
+Warning: shm_attach(): Segment size must be greater then zero. in %s on line %d
 bool(false)
 
-Warning: shm_attach(): Segment size must be greater then zero. in %s/sysvshm/tests/002.php on line %d
+Warning: shm_attach(): Segment size must be greater then zero. in %s on line %d
 bool(false)
 
-Warning: shm_remove(): The parameter is not a valid shm_identifier in %s/sysvshm/tests/002.php on line %d
+Warning: shm_remove(): The parameter is not a valid shm_identifier in %s on line %d
 
-Warning: shm_attach(): Segment size must be greater then zero. in %s/sysvshm/tests/002.php on line %d
+Warning: shm_attach(): Segment size must be greater then zero. in %s on line %d
 bool(false)
 
-Warning: shm_remove(): The parameter is not a valid shm_identifier in %s/sysvshm/tests/002.php on line %d
-int(%d)
+Warning: shm_remove(): The parameter is not a valid shm_identifier in %s on line %d
+int(4)
 
-Warning: shm_remove(): The parameter is not a valid shm_identifier in %s/sysvshm/tests/002.php on line %d
-int(%d)
-int(%d)
-int(%d)
-int(%d)
+Warning: shm_remove(): The parameter is not a valid shm_identifier in %s on line %d
+int(5)
+int(6)
+int(7)
+int(8)
 Done
