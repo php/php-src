@@ -75,21 +75,100 @@
 
 static int le_xmlrpc_server;
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_encode, 0, 0, 1)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_decode, 0, 0, 1)
+	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_decode_request, 0, 0, 2)
+	ZEND_ARG_INFO(0, xml)
+	ZEND_ARG_INFO(1, method)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_encode_request, 0, 0, 2)
+	ZEND_ARG_INFO(0, method)
+	ZEND_ARG_INFO(1, params)
+	ZEND_ARG_INFO(0, output_options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_set_type, 0, 0, 2)
+	ZEND_ARG_INFO(1, value)
+	ZEND_ARG_INFO(0, type)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_is_fault, 0, 0, 1)
+	ZEND_ARG_INFO(0, arg)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_xmlrpc_server_create, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_server_destroy, 0, 0, 1)
+	ZEND_ARG_INFO(0, server)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_server_register_method, 0, 0, 3)
+	ZEND_ARG_INFO(0, server)
+	ZEND_ARG_INFO(0, method_name)
+	ZEND_ARG_INFO(0, function)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_server_call_method, 0, 0, 3)
+	ZEND_ARG_INFO(0, server)
+	ZEND_ARG_INFO(0, xml)
+	ZEND_ARG_INFO(0, user_data)
+	ZEND_ARG_INFO(0, output_options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_parse_method_descriptions, 0, 0, 1)
+	ZEND_ARG_INFO(0, xml)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_server_add_introspection_data, 0, 0, 2)
+	ZEND_ARG_INFO(0, server)
+	ZEND_ARG_INFO(0, desc)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_server_register_introspection_callback, 0, 0, 2)
+	ZEND_ARG_INFO(0, server)
+	ZEND_ARG_INFO(0, function)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 const zend_function_entry xmlrpc_functions[] = {
-	PHP_FE(xmlrpc_encode,									NULL) 
-	PHP_FE(xmlrpc_decode,									NULL)
-	PHP_FE(xmlrpc_decode_request,							second_arg_force_ref)
-	PHP_FE(xmlrpc_encode_request,							NULL)
-	PHP_FE(xmlrpc_get_type,									NULL)
-	PHP_FE(xmlrpc_set_type,									first_arg_force_ref)
-	PHP_FE(xmlrpc_is_fault,									NULL)
-	PHP_FE(xmlrpc_server_create,							NULL)
-	PHP_FE(xmlrpc_server_destroy,							NULL)
-	PHP_FE(xmlrpc_server_register_method,					NULL)
-	PHP_FE(xmlrpc_server_call_method,						NULL)
-	PHP_FE(xmlrpc_parse_method_descriptions,				NULL)
-	PHP_FE(xmlrpc_server_add_introspection_data,			NULL)
-	PHP_FE(xmlrpc_server_register_introspection_callback,	NULL)
+	PHP_FE(xmlrpc_encode,									arginfo_xmlrpc_encode) 
+	PHP_FE(xmlrpc_decode,									arginfo_xmlrpc_decode)
+	PHP_FE(xmlrpc_decode_request,							arginfo_xmlrpc_decode_request)
+	PHP_FE(xmlrpc_encode_request,							arginfo_xmlrpc_encode_request)
+	PHP_FE(xmlrpc_get_type,									arginfo_xmlrpc_encode)
+	PHP_FE(xmlrpc_set_type,									arginfo_xmlrpc_set_type)
+	PHP_FE(xmlrpc_is_fault,									arginfo_xmlrpc_is_fault)
+	PHP_FE(xmlrpc_server_create,							arginfo_xmlrpc_server_create)
+	PHP_FE(xmlrpc_server_destroy,							arginfo_xmlrpc_server_destroy)
+	PHP_FE(xmlrpc_server_register_method,					arginfo_xmlrpc_server_register_method)
+	PHP_FE(xmlrpc_server_call_method,						arginfo_xmlrpc_server_call_method)
+	PHP_FE(xmlrpc_parse_method_descriptions,				arginfo_xmlrpc_parse_method_descriptions)
+	PHP_FE(xmlrpc_server_add_introspection_data,			arginfo_xmlrpc_server_add_introspection_data)
+	PHP_FE(xmlrpc_server_register_introspection_callback,	arginfo_xmlrpc_server_register_introspection_callback)
 	{NULL, NULL, NULL}
 };
 
