@@ -3,6 +3,14 @@
 
 ARG_ENABLE("hash", "enable hash support", "yes");
 
+if (PHP_MHASH != "no") {
+	if (PHP_HASH == "no") {
+		PHP_HASH = "yes";
+	}
+	AC_DEFINE('PHP_MHASH_BC', 1);
+}
+
+
 if (PHP_HASH != "no") {
 	AC_DEFINE('HAVE_HASH_EXT', 1);
 	EXTENSION("hash", "hash.c hash_md.c hash_sha.c hash_ripemd.c hash_haval.c "
