@@ -1,3 +1,20 @@
+2008-06-27  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_API.h
+      zend_API.h:
+      deprecate zend_get_parameters_ex
+
+    * zend.h
+      zend.h:
+      enable on MSVC too
+
+    * zend.h:
+      MFB: allow to deprecate engine functions
+
+    * (PHP_5_3)
+      zend.h:
+      allow deprecating engine functions
+
 2008-06-25  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)

@@ -1,3 +1,94 @@
+2008-06-27  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_API.h
+      ZendEngine2/zend_API.h:
+      deprecate zend_get_parameters_ex
+
+2008-06-27  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/dom/php_dom.c
+      ext/json/json.c
+      ext/pdo/pdo.c
+      ext/session/session.c
+      ext/simplexml/simplexml.c
+      ext/wddx/wddx.c
+      ext/xmlwriter/php_xmlwriter.c:
+      - MFB: Added arginfo
+
+    * (PHP_5_3)
+      ext/dom/php_dom.c
+      ext/json/json.c
+      ext/pdo/pdo.c
+      ext/session/session.c
+      ext/simplexml/simplexml.c
+      ext/wddx/wddx.c
+      ext/xmlwriter/php_xmlwriter.c:
+      - Added arginfo
+
+2008-06-27  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend.h:
+      enable on MSVC too
+
+2008-06-27  Christopher Jones  <christopher.jones@oracle.com>
+
+    * ext/oci8/README:
+      OCI8: (PECL #14219) Improve README
+
+2008-06-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/php_reflection.c:
+      ws
+
+2008-06-27  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/pspell/pspell.c
+      ext/pspell/tests/002.phpt
+      ext/sysvshm/sysvshm.c
+      ext/sysvshm/tests/001.phpt
+      ext/sysvshm/tests/002.phpt
+      ext/sysvshm/tests/003.phpt
+      ext/sysvshm/tests/004.phpt
+      ext/sysvshm/tests/005.phpt
+      ext/sysvshm/tests/006.phpt
+      ext/sysvshm/tests/007.phpt:
+      - New parameter parsing API
+
+2008-06-27  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend.h:
+      MFB: allow to deprecate engine functions
+
+2008-06-27  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/cgidebug
+      ext/phar/phar.c
+      ext/phar/phar.phar
+      ext/phar/stream.c
+      ext/phar/tests/017.phpt
+      ext/phar/tests/tar/tar_bz2.phpt
+      ext/phar/tests/zip/phar_magic.phpt:
+      in preparation for a performance optimization that involves
+      eliminating phar's interception of zend_compile in favor of a new
+      to-be-added hook in PHP 5.3+,
+      allow "include 'phar:///path/to/my.phar';" to work as equivalent to
+      php /path/to/my.phar
+      this slight change in scripting still allows inclusion and execution of
+      phar stub, but removes the need to
+      check and modify path in zend_compile, which allows us to play much nicer
+      with external tools like
+      debuggers/opcode caches
+
+2008-06-27  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend.h:
+      allow deprecating engine functions
+
 2008-06-26  Scott MacVicar  <scott@macvicar.net>
 
     * (PHP_5_3)
