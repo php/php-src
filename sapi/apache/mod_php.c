@@ -243,7 +243,7 @@ static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_
 	table_entry *elts = (table_entry *) arr->elts;
 	zval **path_translated;
 	HashTable *symbol_table;
-	int new_val_len;
+	unsigned int new_val_len;
 
 	for (i = 0; i < arr->nelts; i++) {
 		char *val;
@@ -676,7 +676,7 @@ static int send_parsed_php(request_rec * r)
 	TSRMLS_FETCH();
  
 	ap_table_setn(r->notes, "mod_php_memory_usage",
-		ap_psprintf(r->pool, "%u", zend_memory_peak_usage(1 TSRMLS_CC)));
+		ap_psprintf(r->pool, "%lu", zend_memory_peak_usage(1 TSRMLS_CC)));
 
 	return result;
 }

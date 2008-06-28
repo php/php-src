@@ -141,28 +141,26 @@ PHP_FUNCTION(apache_child_terminate)
    Get and set Apache request notes */
 PHP_FUNCTION(apache_note)
 {
-	zval **arg_name, **arg_val;
-	char *note_val;
+	char *note_name, *note_val;
+	long note_name_len, note_val_len;
+	char *old_val;
 	int arg_count = ZEND_NUM_ARGS();
 
-	if (arg_count<1 || arg_count>2 ||
-		zend_get_parameters_ex(arg_count, &arg_name, &arg_val) ==FAILURE ) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_string_ex(arg_name);
-	note_val = (char *) table_get(((request_rec *)SG(server_context))->notes, (*arg_name)->value.str.val);
-	
-	if (arg_count == 2) {
-		convert_to_string_ex(arg_val);
-		table_set(((request_rec *)SG(server_context))->notes, (*arg_name)->value.str.val, (*arg_val)->value.str.val);
+	if (zend_parse_parameters(arg_count TSRMLS_CC, "s|s", &note_name, &note_name_len, &note_val, &note_val_len) == FAILURE) {
+		return;
 	}
 
-	if (note_val) {
-		RETURN_STRING(note_val, 1);
-	} else {
-		RETURN_FALSE;
+	old_val = (char *) table_get(((request_rec *)SG(server_context))->notes, note_name);
+
+	if (arg_count == 2) {
+		table_set(((request_rec *)SG(server_context))->notes, note_name, note_val);
 	}
+
+	if (old_val) {
+		RETURN_STRING(old_val, 1);
+	}
+
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -310,23 +308,25 @@ PHP_MINFO_FUNCTION(apache)
  */
 PHP_FUNCTION(virtual)
 {
-	zval **filename;
+	char *filename;
+	long filename_len;
 	request_rec *rr = NULL;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(filename);
 	
-	if (!(rr = sub_req_lookup_uri ((*filename)->value.str.val, ((request_rec *) SG(server_context))))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - URI lookup failed", (*filename)->value.str.val);
-		if (rr) destroy_sub_req (rr);
+	if (!(rr = sub_req_lookup_uri (filename, ((request_rec *) SG(server_context))))) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - URI lookup failed", filename);
+		if (rr)
+			destroy_sub_req (rr);
 		RETURN_FALSE;
 	}
 
 	if (rr->status != 200) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - error finding URI", (*filename)->value.str.val);
-		if (rr) destroy_sub_req (rr);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - error finding URI", filename);
+		if (rr)
+			destroy_sub_req (rr);
 		RETURN_FALSE;
 	}
 
@@ -334,13 +334,16 @@ PHP_FUNCTION(virtual)
 	php_header(TSRMLS_C);
 
 	if (run_sub_req(rr)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - request execution failed", (*filename)->value.str.val);
-		if (rr) destroy_sub_req (rr);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - request execution failed", filename);
+		if (rr)
+			destroy_sub_req (rr);
 		RETURN_FALSE;
-	} else {
-		if (rr) destroy_sub_req (rr);
-		RETURN_TRUE;
 	}
+
+	if (rr)
+		destroy_sub_req (rr);
+
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -371,14 +374,14 @@ PHP_FUNCTION(apache_request_headers)
    Fetch all HTTP response headers */
 PHP_FUNCTION(apache_response_headers)
 {
-    array_header *env_arr;
-    table_entry *tenv;
-    int i;
+	array_header *env_arr;
+	table_entry *tenv;
+	int i;
 
-    array_init(return_value);
-    env_arr = table_elts(((request_rec *) SG(server_context))->headers_out);
-    tenv = (table_entry *)env_arr->elts;
-    for (i = 0; i < env_arr->nelts; ++i) {
+	array_init(return_value);
+	env_arr = table_elts(((request_rec *) SG(server_context))->headers_out);
+	tenv = (table_entry *)env_arr->elts;
+	for (i = 0; i < env_arr->nelts; ++i) {
 		if (!tenv[i].key) continue;
 		add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val, 1);
 	}
@@ -389,13 +392,13 @@ PHP_FUNCTION(apache_response_headers)
    Set an Apache subprocess_env variable */
 PHP_FUNCTION(apache_setenv)
 {
-	int var_len, val_len;
+	long var_len, val_len;
 	zend_bool top=0;
 	char *var = NULL, *val = NULL;
 	request_rec *r = (request_rec *) SG(server_context);
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|b", &var, &var_len, &val, &val_len, &top) == FAILURE) {
-        RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|b", &var, &var_len, &val, &val_len, &top) == FAILURE) {
+		return;
 	}
 
 	while(top) {
@@ -412,20 +415,22 @@ PHP_FUNCTION(apache_setenv)
    Perform a partial request of the given URI to obtain information about it */
 PHP_FUNCTION(apache_lookup_uri)
 {
-	zval **filename;
+	char *filename;
+	long filename_len;
 	request_rec *rr=NULL;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(filename);
 
-	if(!(rr = sub_req_lookup_uri((*filename)->value.str.val, ((request_rec *) SG(server_context))))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "URI lookup failed '%s'", (*filename)->value.str.val);
+	if (!(rr = sub_req_lookup_uri(filename, ((request_rec *) SG(server_context))))) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "URI lookup failed '%s'", filename);
 		RETURN_FALSE;
 	}
+
 	object_init(return_value);
 	add_property_long(return_value,"status", rr->status);
+
 	if (rr->the_request) {
 		add_property_string(return_value,"the_request", rr->the_request, 1);
 	}
@@ -456,6 +461,7 @@ PHP_FUNCTION(apache_lookup_uri)
 	if (rr->boundary) {
 		add_property_string(return_value,"boundary", rr->boundary, 1);
 	}
+
 	add_property_long(return_value,"no_cache", rr->no_cache);
 	add_property_long(return_value,"no_local_copy", rr->no_local_copy);
 	add_property_long(return_value,"allowed", rr->allowed);
@@ -486,19 +492,20 @@ This function is most likely a bad idea.  Just playing with it for now.
 
 PHP_FUNCTION(apache_exec_uri)
 {
-	zval **filename;
+	char *filename;
+	long filename_len;
 	request_rec *rr=NULL;
 	TSRMLS_FETCH();
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(filename);
 
-	if(!(rr = ap_sub_req_lookup_uri((*filename)->value.str.val, ((request_rec *) SG(server_context))))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "URI lookup failed", (*filename)->value.str.val);
+	if(!(rr = ap_sub_req_lookup_uri(filename, ((request_rec *) SG(server_context))))) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "URI lookup failed", filename);
 		RETURN_FALSE;
 	}
+
 	RETVAL_LONG(ap_run_sub_req(rr));
 	ap_destroy_sub_req(rr);
 }
@@ -512,9 +519,9 @@ PHP_FUNCTION(apache_get_version)
 
 	if (apv && *apv) {
 		RETURN_STRING(apv, 1);
-	} else {
-		RETURN_FALSE;
 	}
+
+	RETURN_FALSE;
 }
 /* }}} */
 
