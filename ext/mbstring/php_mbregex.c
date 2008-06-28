@@ -487,29 +487,33 @@ _php_mb_regex_init_options(const char *parg, int narg, OnigOptionType *option, O
    Returns the current encoding for regex as a string. */
 PHP_FUNCTION(mb_regex_encoding)
 {
-	zval **arg1;
+	size_t argc = ZEND_NUM_ARGS();
+	char *encoding;
+	long encoding_len;
 	OnigEncoding mbctype;
 
-	if (ZEND_NUM_ARGS() == 0) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &encoding, &encoding_len) == FAILURE) {
+		return;
+	}
+
+	if (argc == 0) {
 		const char *retval = php_mb_regex_mbctype2name(MBSTRG(current_mbctype));
-		if ( retval != NULL ) {
-			RETVAL_STRING((char *)retval, 1);
-		} else {
-			RETVAL_FALSE;
+
+		if (retval == NULL) {
+			RETURN_FALSE;
 		}
-	} else if (ZEND_NUM_ARGS() == 1 &&
-	           zend_get_parameters_ex(1, &arg1) != FAILURE) {
-		convert_to_string_ex(arg1);
-		mbctype = php_mb_regex_name2mbctype(Z_STRVAL_PP(arg1));
+
+		RETURN_STRING((char *)retval, 1);
+	} else if (argc == 1) {
+		mbctype = php_mb_regex_name2mbctype(encoding);
+
 		if (mbctype == ONIG_ENCODING_UNDEF) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(arg1));
-			RETVAL_FALSE;
-		} else {
-			MBSTRG(current_mbctype) = mbctype;
-			RETVAL_TRUE;
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", encoding);
+			RETURN_FALSE;
 		}
-	} else {
-		WRONG_PARAM_COUNT;
+
+		MBSTRG(current_mbctype) = mbctype;
+		RETURN_TRUE;
 	}
 }
 /* }}} */
@@ -940,37 +944,27 @@ PHP_FUNCTION(mb_ereg_match)
 static void
 _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
-	zval **arg_pattern, **arg_options;
+	size_t argc = ZEND_NUM_ARGS();
+	char *arg_pattern, *arg_options;
+	long arg_pattern_len, arg_options_len;
 	int n, i, err, pos, len, beg, end, option;
 	OnigUChar *str;
 	OnigSyntaxType *syntax;
 
-	option = MBSTRG(regex_default_options);
-	switch (ZEND_NUM_ARGS()) {
-	case 0:
-		break;
-	case 1:
-		if (zend_get_parameters_ex(1, &arg_pattern) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		break;
-	case 2:
-		if (zend_get_parameters_ex(2, &arg_pattern, &arg_options) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_string_ex(arg_options);
-		option = 0;
-		_php_mb_regex_init_options(Z_STRVAL_PP(arg_options), Z_STRLEN_PP(arg_options), &option, &syntax, NULL);
-		break;
-	default:
-		WRONG_PARAM_COUNT;
-		break;
+	if (zend_parse_parameters(argc TSRMLS_CC, "|ss", &arg_pattern, &arg_pattern_len, &arg_options, &arg_options_len) == FAILURE) {
+		return;
 	}
-	if (ZEND_NUM_ARGS() > 0) {
-		/* create regex pattern buffer */
-		convert_to_string_ex(arg_pattern);
 
-		if ((MBSTRG(search_re) = php_mbregex_compile_pattern(Z_STRVAL_PP(arg_pattern), Z_STRLEN_PP(arg_pattern), option, MBSTRG(current_mbctype), MBSTRG(regex_default_syntax) TSRMLS_CC)) == NULL) {
+	option = MBSTRG(regex_default_options);
+
+	if (argc == 2) {
+		option = 0;
+		_php_mb_regex_init_options(arg_options, arg_options_len, &option, &syntax, NULL);
+	}
+
+	if (argc > 0) {
+		/* create regex pattern buffer */
+		if ((MBSTRG(search_re) = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, option, MBSTRG(current_mbctype), MBSTRG(regex_default_syntax) TSRMLS_CC)) == NULL) {
 			RETURN_FALSE;
 		}
 	}
@@ -1079,41 +1073,28 @@ PHP_FUNCTION(mb_ereg_search_regs)
    Initialize string and regular expression for search. */
 PHP_FUNCTION(mb_ereg_search_init)
 {
-	zval **arg_str, **arg_pattern, **arg_options;
+	size_t argc = ZEND_NUM_ARGS();
+	zval *arg_str;
+	char *arg_pattern, *arg_options;
+	long arg_pattern_len, arg_options_len;
 	OnigSyntaxType *syntax = NULL;
 	int option;
 
+	if (zend_parse_parameters(argc TSRMLS_CC, "z|ss", &arg_str, &arg_pattern, &arg_pattern_len, &arg_options, &arg_options_len) == FAILURE) {
+		return;
+	}
+
 	option = MBSTRG(regex_default_options);
 	syntax = MBSTRG(regex_default_syntax);
-	switch (ZEND_NUM_ARGS()) {
-	case 1:
-		if (zend_get_parameters_ex(1, &arg_str) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		break;
-	case 2:
-		if (zend_get_parameters_ex(2, &arg_str, &arg_pattern) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		break;
-	case 3:
-		if (zend_get_parameters_ex(3, &arg_str, &arg_pattern, &arg_options) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_string_ex(arg_options);
-		option = 0;
-		_php_mb_regex_init_options(Z_STRVAL_PP(arg_options), Z_STRLEN_PP(arg_options), &option, &syntax, NULL);
-		break;
-	default:
-		WRONG_PARAM_COUNT;
-		break;
-	}
-	convert_to_string_ex(arg_str);
-	if (ZEND_NUM_ARGS() > 1) {
-		/* create regex pattern buffer */
-		convert_to_string_ex(arg_pattern);
 
-		if ((MBSTRG(search_re) = php_mbregex_compile_pattern(Z_STRVAL_PP(arg_pattern), Z_STRLEN_PP(arg_pattern), option, MBSTRG(current_mbctype), syntax TSRMLS_CC)) == NULL) {
+	if (argc == 3) {
+		option = 0;
+		_php_mb_regex_init_options(arg_options, arg_options_len, &option, &syntax, NULL);
+	}
+
+	if (argc > 1) {
+		/* create regex pattern buffer */
+		if ((MBSTRG(search_re) = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, option, MBSTRG(current_mbctype), syntax TSRMLS_CC)) == NULL) {
 			RETURN_FALSE;
 		}
 	}
@@ -1123,7 +1104,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 		MBSTRG(search_str) = (zval *)NULL;
 	}
 
-	MBSTRG(search_str) = *arg_str;
+	MBSTRG(search_str) = arg_str;
 	Z_ADDREF_P(MBSTRG(search_str));
 	SEPARATE_ZVAL_IF_NOT_REF(&MBSTRG(search_str));
 
@@ -1178,22 +1159,21 @@ PHP_FUNCTION(mb_ereg_search_getpos)
    Set search start position */
 PHP_FUNCTION(mb_ereg_search_setpos)
 {
-	zval **arg_pos;
+	long position;
 	int n;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg_pos) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &position) == FAILURE) {
+		return;
 	}
-	convert_to_long_ex(arg_pos);
-	n = Z_LVAL_PP(arg_pos);
-	if (n < 0 || (MBSTRG(search_str) != NULL && Z_TYPE_P(MBSTRG(search_str)) == IS_STRING && n >= Z_STRLEN_P(MBSTRG(search_str)))) {
+
+	if (position < 0 || (MBSTRG(search_str) != NULL && Z_TYPE_P(MBSTRG(search_str)) == IS_STRING && position >= Z_STRLEN_P(MBSTRG(search_str)))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Position is out of range");
 		MBSTRG(search_pos) = 0;
-		RETVAL_FALSE;
-	} else {
-		MBSTRG(search_pos) = n;
-		RETVAL_TRUE;
+		RETURN_FALSE;
 	}
+
+	MBSTRG(search_pos) = position;
+	RETURN_TRUE;
 }
 /* }}} */
 

@@ -39,11 +39,11 @@ echo "Done";
 
 -- Testing mb_substr() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for mb_substr() in %s on line %d
+Warning: mb_substr() expects at most 4 parameters, 5 given in %s on line %d
 NULL
 
 -- Testing mb_substr() function with less than expected no. of arguments --
 
-Warning: Wrong parameter count for mb_substr() in %s on line %d
+Warning: mb_substr() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 Done
