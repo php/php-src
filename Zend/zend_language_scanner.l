@@ -577,6 +577,7 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 END_EXTERN_C()
 
 #ifdef ZEND_MULTIBYTE
+
 BEGIN_EXTERN_C()
 ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter, zend_encoding *old_encoding TSRMLS_DC)
 {
