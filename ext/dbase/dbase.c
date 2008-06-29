@@ -829,20 +829,20 @@ const zend_function_entry dbase_functions[] = {
  */
 PHP_FUNCTION(dbase_get_header_info)
 {
-	zval		**dbh_id, *row;
+	zval		*row;
 	dbfield_t	*dbf, *cur_f;
 	dbhead_t	*dbh;
 	int 		dbh_type;
+	long		dbh_id;
 	DBase_TLS_VARS;	
 
-	if (ZEND_NUM_ARGS() != 1 || (zend_get_parameters_ex(1, &dbh_id) == FAILURE)) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &dbh_id) == FAILURE) {
+		return;
 	}
-	convert_to_long_ex(dbh_id);
 
-	dbh = zend_list_find(Z_LVAL_PP(dbh_id), &dbh_type);
+	dbh = zend_list_find(dbh_id, &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %ld", Z_LVAL_PP(dbh_id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %ld", dbh_id);
 		RETURN_FALSE;
 	}
 
