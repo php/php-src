@@ -421,6 +421,7 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 	SCNG(yy_in)=NULL;
 
 #ifdef ZEND_MULTIBYTE
+
 	SCNG(script_org) = estrdup(str->value.str.val);
 	SCNG(script_org_size) = str->value.str.len;
 
