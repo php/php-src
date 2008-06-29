@@ -62,7 +62,7 @@ ZEND_API int zend_multibyte_internal_encoding_filter(char **to, int *to_length, 
 /* in zend_language_scanner.l */
 ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter, zend_encoding *old_encoding TSRMLS_DC);
 ZEND_API int zend_multibyte_yyinput(zend_file_handle *file_handle, char *buf, size_t len TSRMLS_DC);
-ZEND_API int zend_multibyte_read_script(TSRMLS_D);
+ZEND_API int zend_multibyte_read_script(char *buf, int n TSRMLS_DC);
 END_EXTERN_C()
 
 #endif /* ZEND_MULTIBYTE */

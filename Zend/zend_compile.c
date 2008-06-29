@@ -28,6 +28,10 @@
 #include "zend_exceptions.h"
 #include "tsrm_virtual_cwd.h"
 
+#ifdef ZEND_MULTIBYTE
+#include "zend_multibyte.h"
+#endif /* ZEND_MULTIBYTE */
+
 ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
 ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, char *filename TSRMLS_DC);
 
@@ -80,7 +84,14 @@ static void build_runtime_defined_function_key(zval *result, char *name, int nam
 
 	/* NULL, name length, filename length, last accepting char position length */
 	result->value.str.len = 1+name_length+strlen(filename)+char_pos_len;
+#ifdef ZEND_MULTIBYTE
+ 	/* must be binary safe */
+ 	result->value.str.val = (char *) safe_emalloc(result->value.str.len, 1, 1);
+ 	result->value.str.val[0] = '\0';
+ 	sprintf(result->value.str.val+1, "%s%s%s", name, filename, char_pos_buf);
+#else
 	zend_spprintf(&result->value.str.val, 0, "%c%s%s%s", '\0', name, filename, char_pos_buf);
+#endif /* ZEND_MULTIBYTE */
 	result->type = IS_STRING;
 	Z_SET_REFCOUNT_P(result, 1);
 }
@@ -132,6 +143,15 @@ void zend_init_compiler_data_structures(TSRMLS_D)
 	zend_hash_apply(CG(auto_globals), (apply_func_t) zend_auto_global_arm TSRMLS_CC);
 	zend_stack_init(&CG(labels_stack));
 	CG(labels) = NULL;
+
+#ifdef ZEND_MULTIBYTE
+	CG(script_encoding_list) = NULL;
+	CG(script_encoding_list_size) = 0;
+	CG(internal_encoding) = NULL;
+	CG(encoding_detector) = NULL;
+	CG(encoding_converter) = NULL;
+	CG(encoding_oddlen) = NULL;
+#endif /* ZEND_MULTIBYTE */
 }
 
 
@@ -166,6 +186,12 @@ void shutdown_compiler(TSRMLS_D)
 	zend_hash_destroy(&CG(filenames_table));
 	zend_llist_destroy(&CG(open_files));
 	zend_stack_destroy(&CG(labels_stack));
+
+#ifdef ZEND_MULTIBYTE
+	if (CG(script_encoding_list)) {
+		efree(CG(script_encoding_list));
+	}
+#endif /* ZEND_MULTIBYTE */
 }
 
 
@@ -4512,9 +4538,55 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC)
 	if (!zend_binary_strcasecmp(var->u.constant.value.str.val, var->u.constant.value.str.len, "ticks", sizeof("ticks")-1)) {
 		convert_to_long(&val->u.constant);
 		CG(declarables).ticks = val->u.constant;
+#ifdef ZEND_MULTIBYTE
+	} else if (!zend_binary_strcasecmp(var->u.constant.value.str.val, var->u.constant.value.str.len, "encoding", sizeof("encoding")-1)) {
+		zend_encoding *new_encoding, *old_encoding;
+		zend_encoding_filter old_input_filter;
+
+		if (Z_TYPE(val->u.constant) == IS_CONSTANT) {
+			zend_error(E_COMPILE_ERROR, "Cannot use constants as encoding");
+		}
+
+		/*
+		 * Check that the pragma comes before any opcodes. If the compilation
+		 * got as far as this, the previous portion of the script must have been
+		 * parseable according to the .ini script_encoding setting. We still
+		 * want to tell them to put declare() at the top.
+		 */
+		if (CG(active_op_array)->last > 0) {
+			/* ignore ZEND_EXT_STMT and ZEND_TICKS */
+			int num = CG(active_op_array)->last;
+			while (num > 0 &&
+			       (CG(active_op_array)->opcodes[num-1].opcode == ZEND_EXT_STMT ||
+			        CG(active_op_array)->opcodes[num-1].opcode == ZEND_TICKS)) {
+				--num;
+			}
+			if (num > 0) {
+				zend_error(E_COMPILE_ERROR, "Encoding declaration pragma has to be the very first statement in the script");
+			}
+		}		
+
+		convert_to_string(&val->u.constant);
+		new_encoding = zend_multibyte_fetch_encoding(val->u.constant.value.str.val);
+		if (!new_encoding) {
+			zend_error(E_COMPILE_WARNING, "Unsupported encoding [%s]", val->u.constant.value.str.val);
+		} else {
+			old_input_filter = LANG_SCNG(input_filter);
+			old_encoding = LANG_SCNG(script_encoding);
+			zend_multibyte_set_filter(new_encoding TSRMLS_CC);
+
+			/* need to re-scan if input filter changed */
+			if (old_input_filter != LANG_SCNG(input_filter) ||
+				((old_input_filter == zend_multibyte_script_encoding_filter) &&
+				 (new_encoding != old_encoding))) {
+				zend_multibyte_yyinput_again(old_input_filter, old_encoding TSRMLS_CC);
+			}
+		}
+#else  /* !ZEND_MULTIBYTE */
 	} else if (!zend_binary_strcasecmp(var->u.constant.value.str.val, var->u.constant.value.str.len, "encoding", sizeof("encoding")-1)) {
 		/* Do not generate any kind of warning for encoding declares */
 		/* zend_error(E_COMPILE_WARNING, "Declare encoding [%s] not supported", val->u.constant.value.str.val); */
+#endif /* ZEND_MULTIBYTE */
 		efree(val->u.constant.value.str.val);
 	} else {
 		zend_error(E_COMPILE_WARNING, "Unsupported declare '%s'", var->u.constant.value.str.val);
