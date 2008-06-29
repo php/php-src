@@ -47,37 +47,154 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 
 static void _mssql_bind_hash_dtor(void *data);
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_connect, 0, 0, 0)
+	ZEND_ARG_INFO(0, servername)
+	ZEND_ARG_INFO(0, username)
+	ZEND_ARG_INFO(0, password)
+	ZEND_ARG_INFO(0, newlink)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_close, 0, 0, 0)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_select_db, 0, 0, 1)
+	ZEND_ARG_INFO(0, database_name)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_query, 0, 0, 1)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, link_identifier)
+	ZEND_ARG_INFO(0, batch_size)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_fetch_batch, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_rows_affected, 0, 0, 1)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_mssql_get_last_message, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_fetch_field, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, field_offset)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_fetch_array, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, result_type)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_fetch_assoc, 0, 0, 1)
+	ZEND_ARG_INFO(0, result_id)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_field_length, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, offset)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_data_seek, 0, 0, 2)
+	ZEND_ARG_INFO(0, result_identifier)
+	ZEND_ARG_INFO(0, row_number)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_result, 0, 0, 3)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, row)
+	ZEND_ARG_INFO(0, field)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_min_error_severity, 0, 0, 1)
+	ZEND_ARG_INFO(0, severity)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_init, 0, 0, 1)
+	ZEND_ARG_INFO(0, sp_name)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_bind, 0, 0, 4)
+	ZEND_ARG_INFO(0, stmt)
+	ZEND_ARG_INFO(0, param_name)
+	ZEND_ARG_INFO(1, var)
+	ZEND_ARG_INFO(0, type)
+	ZEND_ARG_INFO(0, is_output)
+	ZEND_ARG_INFO(0, is_null)
+	ZEND_ARG_INFO(0, maxlen)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_execute, 0, 0, 1)
+	ZEND_ARG_INFO(0, stmt)
+	ZEND_ARG_INFO(0, skip_results)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_free_statement, 0, 0, 1)
+	ZEND_ARG_INFO(0, stmt)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_guid_string, 0, 0, 1)
+	ZEND_ARG_INFO(0, binary)
+	ZEND_ARG_INFO(0, short_format)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 const zend_function_entry mssql_functions[] = {
-	PHP_FE(mssql_connect,				NULL)
-	PHP_FE(mssql_pconnect,				NULL)
-	PHP_FE(mssql_close,					NULL)
-	PHP_FE(mssql_select_db,				NULL)
-	PHP_FE(mssql_query,					NULL)
-	PHP_FE(mssql_fetch_batch,			NULL)
-	PHP_FE(mssql_rows_affected,			NULL)
-	PHP_FE(mssql_free_result,			NULL)
-	PHP_FE(mssql_get_last_message,		NULL)
-	PHP_FE(mssql_num_rows,				NULL)
-	PHP_FE(mssql_num_fields,			NULL)
-	PHP_FE(mssql_fetch_field,			NULL)
-	PHP_FE(mssql_fetch_row,				NULL)
-	PHP_FE(mssql_fetch_array,			NULL)
-	PHP_FE(mssql_fetch_assoc,			NULL)
-	PHP_FE(mssql_fetch_object,			NULL)
-	PHP_FE(mssql_field_length,			NULL)
-	PHP_FE(mssql_field_name,			NULL)
-	PHP_FE(mssql_field_type,			NULL)
-	PHP_FE(mssql_data_seek,				NULL)
-	PHP_FE(mssql_field_seek,			NULL)
-	PHP_FE(mssql_result,				NULL)
-	PHP_FE(mssql_next_result,			NULL)
-	PHP_FE(mssql_min_error_severity,	NULL)
-	PHP_FE(mssql_min_message_severity,	NULL)
- 	PHP_FE(mssql_init,					NULL)
- 	PHP_FE(mssql_bind,					third_arg_force_ref)
- 	PHP_FE(mssql_execute,				NULL)
-	PHP_FE(mssql_free_statement,		NULL)
- 	PHP_FE(mssql_guid_string,			NULL)
+	PHP_FE(mssql_connect,				arginfo_mssql_connect)
+	PHP_FE(mssql_pconnect,				arginfo_mssql_connect)
+	PHP_FE(mssql_close,					arginfo_mssql_close)
+	PHP_FE(mssql_select_db,				arginfo_mssql_select_db)
+	PHP_FE(mssql_query,					arginfo_mssql_query)
+	PHP_FE(mssql_fetch_batch,			arginfo_mssql_fetch_batch)
+	PHP_FE(mssql_rows_affected,			arginfo_mssql_rows_affected)
+	PHP_FE(mssql_free_result,			arginfo_mssql_fetch_batch)
+	PHP_FE(mssql_get_last_message,		arginfo_mssql_get_last_message)
+	PHP_FE(mssql_num_rows,				arginfo_mssql_fetch_batch)
+	PHP_FE(mssql_num_fields,			arginfo_mssql_fetch_batch)
+	PHP_FE(mssql_fetch_field,			arginfo_mssql_fetch_field)
+	PHP_FE(mssql_fetch_row,				arginfo_mssql_fetch_batch)
+	PHP_FE(mssql_fetch_array,			arginfo_mssql_fetch_array)
+	PHP_FE(mssql_fetch_assoc,			arginfo_mssql_fetch_assoc)
+	PHP_FE(mssql_fetch_object,			arginfo_mssql_fetch_batch)
+	PHP_FE(mssql_field_length,			arginfo_mssql_field_length)
+	PHP_FE(mssql_field_name,			arginfo_mssql_field_length)
+	PHP_FE(mssql_field_type,			arginfo_mssql_field_length)
+	PHP_FE(mssql_data_seek,				arginfo_mssql_data_seek)
+	PHP_FE(mssql_field_seek,			arginfo_mssql_fetch_field)
+	PHP_FE(mssql_result,				arginfo_mssql_result)
+	PHP_FE(mssql_next_result,			arginfo_mssql_fetch_assoc)
+	PHP_FE(mssql_min_error_severity,	arginfo_mssql_min_error_severity)
+	PHP_FE(mssql_min_message_severity,	arginfo_mssql_min_error_severity)
+ 	PHP_FE(mssql_init,					arginfo_mssql_init)
+ 	PHP_FE(mssql_bind,					arginfo_mssql_bind)
+ 	PHP_FE(mssql_execute,				arginfo_mssql_execute)
+	PHP_FE(mssql_free_statement,		arginfo_mssql_free_statement)
+ 	PHP_FE(mssql_guid_string,			arginfo_mssql_guid_string)
 	{NULL, NULL, NULL}
 };
 
