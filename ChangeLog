@@ -1,3 +1,80 @@
+2008-06-28  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/xmlrpc/xmlrpc-epi-php.c:
+      - MFB: Added arginfo
+
+    * (PHP_5_3)
+      ext/xmlrpc/xmlrpc-epi-php.c:
+      - Added arginfo
+
+    * (PHP_5_3)
+      ext/xmlrpc/xmlrpc-epi-php.c:
+      - New parameter parsing API
+
+2008-06-28  Alexey Zakhlestin  <indeyets@gmail.com>
+
+    * (PHP_5_3)
+      ext/mbstring/mbstring.c
+      ext/mbstring/php_mbregex.c
+      ext/mbstring/tests/mb_ereg2.phpt
+      ext/mbstring/tests/mb_regex_encoding_error1.phpt
+      ext/mbstring/tests/mb_regex_encoding_variation1.phpt
+      ext/mbstring/tests/mb_substr_error1.phpt
+      ext/mbstring/tests/mb_substr_variation1.phpt
+      ext/mbstring/tests/mb_substr_variation2.phpt
+      sapi/apache/php_apache.c:
+      updated to the new parameter-parsing api
+
+    * (PHP_5_3)
+      ext/mbstring/mbstring.c
+      ext/mbstring/php_mbregex.h:
+      added arginfo (fixes #45388)
+
+2008-06-28  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/hash/config.w32
+      ext/mhash/config.w32:
+      MFH: Sort Windows changes for mhash BC layer
+
+    * ext/hash/config.w32
+      ext/mhash/config.w32:
+      Sort Windows changes for mhash BC layer
+
+    * ext/hash/CREDITS
+      ext/hash/config.m4
+      ext/hash/hash.c
+      ext/hash/tests/mhash_001.phpt
+      ext/hash/tests/mhash_002.phpt
+      ext/hash/tests/mhash_003.phpt
+      ext/hash/tests/skip_mhash.inc
+      ext/mhash/config.m4
+      ext/mhash/mhash.c
+      ext/mhash/mhash.dsp
+      ext/mhash/php_mhash.h
+      ext/mhash/tests/001.phpt
+      ext/mhash/tests/002.phpt
+      ext/mhash/tests/003.phpt
+      ext/mhash/tests/skip.inc:
+      MFB: Make the old mhash API a wrapper around hash, this removes a
+      dependency.
+
+2008-06-28  Alexey Zakhlestin  <indeyets@gmail.com>
+
+    * sapi/apache/mod_php.c
+      sapi/apache/php_apache.c:
+      updated to the new parameter-parsing api (port from 5.3)
+
+    * (PHP_5_3)
+      sapi/apache/mod_php5.c:
+      fixed types (no more compiler warnings)
+
+2008-06-28  Henrique do Nascimento Angelo  <h.n.angelo@gmail.com>
+
+    * ext/openssl/openssl.c
+      ext/openssl/openssl.c:
+      Fix a memory leak on openssl_decrypt()
+
 2008-06-27  Stanislav Malyshev  <stas@zend.com>
 
     * ZendEngine2/zend_API.h
