@@ -35,6 +35,10 @@
 #include "zend_objects_API.h"
 #include "zend_modules.h"
 
+#ifdef ZEND_MULTIBYTE
+#include "zend_multibyte.h"
+#endif /* ZEND_MULTIBYTE */
+
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
 
@@ -133,6 +137,19 @@ struct _zend_compiler_globals {
 
 	HashTable *labels;
 	zend_stack labels_stack;
+
+#ifdef ZEND_MULTIBYTE
+	zend_encoding **script_encoding_list;
+	int script_encoding_list_size;
+	zend_bool detect_unicode;
+
+	zend_encoding *internal_encoding;
+
+	/* multibyte utility functions */
+	zend_encoding_detector encoding_detector;
+	zend_encoding_converter encoding_converter;
+	zend_encoding_oddlen encoding_oddlen;
+#endif /* ZEND_MULTIBYTE */
 
 #ifdef ZTS
 	HashTable **static_members;
@@ -271,6 +288,22 @@ struct _zend_php_scanner_globals {
 	zend_stack state_stack;
 	
 	zend_llist used_state_stacks;
+
+#ifdef ZEND_MULTIBYTE
+	/* original (unfiltered) script */
+	char *script_org;
+	int script_org_size;
+
+	/* filtered script */
+	char *script_filtered;
+	int script_filtered_size;
+
+	/* input/ouput filters */
+	zend_encoding_filter input_filter;
+	zend_encoding_filter output_filter;
+	zend_encoding *script_encoding;
+	zend_encoding *internal_encoding;
+#endif /* ZEND_MULTIBYTE */
 };
 
 #endif /* ZEND_GLOBALS_H */
