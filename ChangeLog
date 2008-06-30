@@ -1,3 +1,52 @@
+2008-06-29  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/mssql/php_mssql.c:
+      MFB: - Added arginfo
+
+    * (PHP_5_3)
+      ext/mssql/php_mssql.c:
+      - Added arginfo
+
+    * ext/ldap/ldap.c:
+      MFB:
+      - New parameter parsing API
+      - Added arginfo
+
+    * (PHP_5_3)
+      ext/ldap/ldap.c
+      ext/sysvsem/sysvsem.c:
+      - New parameter parsing API
+      - Added arginfo
+
+    * (PHP_5_3)
+      ext/dbase/dbase.c
+      ext/pgsql/pgsql.c:
+      - New parameter parsing API
+
+2008-06-29  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_scanner.c:
+      touched zend_language_scanner.c
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_scanner.l:
+      update zend_language_scanner.l to maintain the dependencies.
+
+    * (PHP_5_3)
+      ZendEngine2/Zend.m4
+      ZendEngine2/zend.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_highlight.c
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.h
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner_defs.h
+      ZendEngine2/zend_multibyte.h
+      win32/build/config.w32:
+      implemented again zend-multibyte for PHP 5.3
+
 2008-06-28  Felipe Pena  <felipensp@gmail.com>
 
     * ext/xmlrpc/xmlrpc-epi-php.c:
