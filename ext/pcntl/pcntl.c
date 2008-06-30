@@ -44,24 +44,109 @@
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 static PHP_GINIT_FUNCTION(pcntl);
 
-const zend_function_entry pcntl_functions[] = {
-	PHP_FE(pcntl_fork,			NULL)
-	PHP_FE(pcntl_waitpid,		second_arg_force_ref)
-	PHP_FE(pcntl_wait,		first_arg_force_ref)
-	PHP_FE(pcntl_signal,		NULL)
-	PHP_FE(pcntl_wifexited,		NULL)
-	PHP_FE(pcntl_wifstopped,	NULL)
-	PHP_FE(pcntl_wifsignaled,	NULL)
-	PHP_FE(pcntl_wexitstatus,	NULL)
-	PHP_FE(pcntl_wtermsig,		NULL)
-	PHP_FE(pcntl_wstopsig,		NULL)
-	PHP_FE(pcntl_exec,			NULL)
-	PHP_FE(pcntl_alarm,			NULL)
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO(arginfo_pcntl_void, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_waitpid, 0, 0, 2)
+	ZEND_ARG_INFO(0, pid)
+	ZEND_ARG_INFO(1, status)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wait, 0, 0, 1)
+	ZEND_ARG_INFO(1, status)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_signal, 0, 0, 2)
+	ZEND_ARG_INFO(0, signo)
+	ZEND_ARG_INFO(0, handler)
+	ZEND_ARG_INFO(0, restart_syscalls)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifexited, 0, 0, 1)
+	ZEND_ARG_INFO(0, status)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifstopped, 0, 0, 1)
+	ZEND_ARG_INFO(0, status)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifsignaled, 0, 0, 1)
+	ZEND_ARG_INFO(0, status)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifexitstatus, 0, 0, 1)
+	ZEND_ARG_INFO(0, status)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wtermsig, 0, 0, 1)
+	ZEND_ARG_INFO(0, status)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wstopsig, 0, 0, 1)
+	ZEND_ARG_INFO(0, status)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_exec, 0, 0, 1)
+	ZEND_ARG_INFO(0, path)
+	ZEND_ARG_INFO(0, args)
+	ZEND_ARG_INFO(0, envs)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_alarm, 0, 0, 1)
+	ZEND_ARG_INFO(0, seconds)
+ZEND_END_ARG_INFO()
+
 #ifdef HAVE_GETPRIORITY
-	PHP_FE(pcntl_getpriority,	NULL)
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_getpriority, 0, 0, 0)
+	ZEND_ARG_INFO(0, pid)
+	ZEND_ARG_INFO(0, process_identifier)
+ZEND_END_ARG_INFO()
+#endif
+
+#ifdef HAVE_SETPRIORITY
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_setpriority, 0, 0, 1)
+	ZEND_ARG_INFO(0, priority)
+	ZEND_ARG_INFO(0, pid)
+	ZEND_ARG_INFO(0, process_identifier)
+ZEND_END_ARG_INFO()
+#endif
+/* }}} */
+
+const zend_function_entry pcntl_functions[] = {
+	PHP_FE(pcntl_fork,			arginfo_pcntl_void)
+	PHP_FE(pcntl_waitpid,		arginfo_pcntl_waitpid)
+	PHP_FE(pcntl_wait,			arginfo_pcntl_wait)
+	PHP_FE(pcntl_signal,		arginfo_pcntl_signal)
+	PHP_FE(pcntl_wifexited,		arginfo_pcntl_wifexited)
+	PHP_FE(pcntl_wifstopped,	arginfo_pcntl_wifstopped)
+	PHP_FE(pcntl_wifsignaled,	arginfo_pcntl_wifsignaled)
+	PHP_FE(pcntl_wexitstatus,	arginfo_pcntl_wifexitstatus)
+	PHP_FE(pcntl_wtermsig,		arginfo_pcntl_wtermsig)
+	PHP_FE(pcntl_wstopsig,		arginfo_pcntl_wstopsig)
+	PHP_FE(pcntl_exec,			arginfo_pcntl_exec)
+	PHP_FE(pcntl_alarm,			arginfo_pcntl_alarm)
+#ifdef HAVE_GETPRIORITY
+	PHP_FE(pcntl_getpriority,	arginfo_pcntl_getpriority)
 #endif
 #ifdef HAVE_SETPRIORITY
-	PHP_FE(pcntl_setpriority,	NULL)
+	PHP_FE(pcntl_setpriority,	arginfo_pcntl_setpriority)
 #endif
 	{NULL, NULL, NULL}	
 };
@@ -85,9 +170,6 @@ zend_module_entry pcntl_module_entry = {
 
 #ifdef COMPILE_DL_PCNTL
 ZEND_GET_MODULE(pcntl)
-# ifdef PHP_WIN32
-# include "zend_arg_defs.c"
-# endif
 #endif
 
 static void pcntl_signal_handler(int);
