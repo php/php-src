@@ -95,9 +95,6 @@ zend_module_entry sysvmsg_module_entry = {
 
 #ifdef COMPILE_DL_SYSVMSG
 ZEND_GET_MODULE(sysvmsg)
-# ifdef PHP_WIN32
-# include "zend_arg_defs.c"
-# endif
 #endif
 
 static void sysvmsg_release(zend_rsrc_list_entry *rsrc TSRMLS_DC)
