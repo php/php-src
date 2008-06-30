@@ -187,9 +187,6 @@ zend_module_entry xmlrpc_module_entry = {
 
 #ifdef COMPILE_DL_XMLRPC
 ZEND_GET_MODULE(xmlrpc)
-# ifdef PHP_WIN32
-# include "zend_arg_defs.c"
-# endif
 #endif
 
 /*******************************
