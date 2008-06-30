@@ -86,9 +86,6 @@ static int le_link, le_result, le_result_entry;
 
 #ifdef COMPILE_DL_LDAP
 ZEND_GET_MODULE(ldap)
-# ifdef PHP_WIN32
-# include "zend_arg_defs.c"
-# endif
 #endif
 
 static void _close_ldap_link(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */

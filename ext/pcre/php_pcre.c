@@ -1898,9 +1898,6 @@ zend_module_entry pcre_module_entry = {
 
 #ifdef COMPILE_DL_PCRE
 ZEND_GET_MODULE(pcre)
-# ifdef PHP_WIN32
-# include "zend_arg_defs.c"
-# endif
 #endif
 
 /* }}} */
