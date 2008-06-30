@@ -30,16 +30,16 @@ echo "Done"
 
 -- Testing preg_replace() function with zero arguments --
 
-Warning: Wrong parameter count for preg_replace() in %spreg_replace_error.php on line %d
+Warning: preg_replace() expects at least 3 parameters, 0 given in %s on line %d
 NULL
 
 -- Testing preg_replace() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for preg_replace() in %spreg_replace_error.php on line %d
+Warning: preg_replace() expects at most 5 parameters, 6 given in %s on line %d
 NULL
 
 -- Testing preg_replace() function with less than expected no. of arguments --
 
-Warning: Wrong parameter count for preg_replace() in %spreg_replace_error.php on line %d
+Warning: preg_replace() expects at least 3 parameters, 2 given in %s on line %d
 NULL
 Done
