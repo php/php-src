@@ -998,7 +998,7 @@ PHPAPI void php_explode_negative_limit(zval *delim, zval *str, zval *return_valu
 PHP_FUNCTION(explode)
 {
 	zval **str, **delim, **zlimit = NULL;
-	int limit = -1;
+	long limit = -1;
 	int argc = ZEND_NUM_ARGS();
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ|l", &delim, &str, &limit) == FAILURE) {
