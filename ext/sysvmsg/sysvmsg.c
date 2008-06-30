@@ -40,40 +40,69 @@
 /* True global resources - no need for thread safety here */
 static int le_sysvmsg;
 
+/* {{{ arginfo */
 static
-	ZEND_BEGIN_ARG_INFO(sixth_arg_force_ref, 0)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(1)
-	ZEND_END_ARG_INFO();
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_get_queue, 0, 0, 1)
+	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_INFO(0, perms)
+ZEND_END_ARG_INFO()
 
 static
-	ZEND_BEGIN_ARG_INFO(msg_receive_args_force_ref, 0)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(1)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(1)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(1)
-	ZEND_END_ARG_INFO();
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_send, 0, 0, 3)
+	ZEND_ARG_INFO(0, queue)
+	ZEND_ARG_INFO(0, msgtype)
+	ZEND_ARG_INFO(0, message)
+	ZEND_ARG_INFO(0, serialize)
+	ZEND_ARG_INFO(0, blocking)
+	ZEND_ARG_INFO(1, errorcode)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_receive, 0, 0, 5)
+	ZEND_ARG_INFO(0, queue)
+	ZEND_ARG_INFO(0, desiredmsgtype)
+	ZEND_ARG_INFO(1, msgtype)
+	ZEND_ARG_INFO(0, maxsize)
+	ZEND_ARG_INFO(1, message)
+	ZEND_ARG_INFO(0, unserialize)
+	ZEND_ARG_INFO(0, flags)
+	ZEND_ARG_INFO(1, errorcode)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_remove_queue, 0, 0, 1)
+	ZEND_ARG_INFO(0, queue)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_stat_queue, 0, 0, 1)
+	ZEND_ARG_INFO(0, queue)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_set_queue, 0, 0, 2)
+	ZEND_ARG_INFO(0, queue)
+	ZEND_ARG_INFO(0, data)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_queue_exists, 0, 0, 1)
+	ZEND_ARG_INFO(0, key)
+ZEND_END_ARG_INFO()
+/* }}} */
 
 /* {{{ sysvmsg_functions[]
  *
  * Every user visible function must have an entry in sysvmsg_functions[].
  */
 const zend_function_entry sysvmsg_functions[] = {
-	PHP_FE(msg_get_queue,				NULL)
-	PHP_FE(msg_send,					sixth_arg_force_ref)
-	PHP_FE(msg_receive,					msg_receive_args_force_ref)
-	PHP_FE(msg_remove_queue,			NULL)
-	PHP_FE(msg_stat_queue,				NULL)
-	PHP_FE(msg_set_queue,				NULL)
-	PHP_FE(msg_queue_exists,			NULL)
+	PHP_FE(msg_get_queue,				arginfo_msg_get_queue)
+	PHP_FE(msg_send,					arginfo_msg_send)
+	PHP_FE(msg_receive,					arginfo_msg_receive)
+	PHP_FE(msg_remove_queue,			arginfo_msg_remove_queue)
+	PHP_FE(msg_stat_queue,				arginfo_msg_stat_queue)
+	PHP_FE(msg_set_queue,				arginfo_msg_set_queue)
+	PHP_FE(msg_queue_exists,			arginfo_msg_queue_exists)
 	{NULL, NULL, NULL}	/* Must be the last line in sysvmsg_functions[] */
 };
 /* }}} */
