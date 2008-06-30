@@ -1690,7 +1690,7 @@ PHP_FUNCTION(strpos)
 	char *haystack;
 	char *found = NULL;
 	char  needle_char[2];
-	int   offset = 0;
+	long  offset = 0;
 	int   haystack_len;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sZ|l", &haystack, &haystack_len, &needle, &offset) == FAILURE) {
@@ -2124,8 +2124,7 @@ PHP_FUNCTION(chunk_split)
 PHP_FUNCTION(substr)
 {
 	char *str;
-	int l;
-	int f;
+	long l, f;
 	int str_len;
 	int argc = ZEND_NUM_ARGS();
 	
@@ -4457,7 +4456,7 @@ PHP_FUNCTION(str_repeat)
 {
 	char		*input_str;		/* Input string */
 	int 		input_len;
-	int 		mult;			/* Multiplier */
+	long 		mult;			/* Multiplier */
 	char		*result;		/* Resulting string */
 	size_t		result_len;		/* Length of the resulting string */
 	
@@ -4509,7 +4508,7 @@ PHP_FUNCTION(count_chars)
 {
 	char *input;
 	int chars[256];
-	int mymode=0;
+	long mymode=0;
 	unsigned char *buf;
 	int len, inx;
 	char retstr[256];
@@ -4695,8 +4694,7 @@ PHP_FUNCTION(strnatcasecmp)
 PHP_FUNCTION(substr_count)
 {
 	char *haystack, *needle;
-	int offset = 0;
-	int length;
+	long offset = 0, length;
 	int ac = ZEND_NUM_ARGS();
 	int count = 0;
 	int haystack_len, needle_len;
@@ -4763,7 +4761,7 @@ PHP_FUNCTION(str_pad)
 	/* Input arguments */
 	char *input;				/* Input string */
 	int  input_len;
-	int	 pad_length;			/* Length to pad to */
+	long pad_length;			/* Length to pad to */
 	
 	/* Helper variables */
 	int	   num_pad_chars;		/* Number of padding characters (total - input size) */
@@ -4771,7 +4769,7 @@ PHP_FUNCTION(str_pad)
 	int	   result_len = 0;		/* Length of the resulting string */
 	char  *pad_str_val = " ";	/* Pointer to padding string */
 	int    pad_str_len = 1;		/* Length of the padding string */
-	int	   pad_type_val = STR_PAD_RIGHT; /* The padding type value */
+	long   pad_type_val = STR_PAD_RIGHT; /* The padding type value */
 	int	   i, left_pad=0, right_pad=0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|sl", &input, &input_len, &pad_length,
