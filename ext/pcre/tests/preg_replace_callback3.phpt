@@ -18,13 +18,13 @@ var_dump(preg_replace_callback($a,$a,$a,$a,$a));
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Wrong parameter count for preg_replace_callback() in %s on line %d
+Warning: preg_replace_callback() expects at least 3 parameters, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for preg_replace_callback() in %s on line %d
+Warning: preg_replace_callback() expects at least 3 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for preg_replace_callback() in %s on line %d
+Warning: preg_replace_callback() expects at least 3 parameters, 2 given in %s on line %d
 NULL
 
 Warning: preg_replace_callback(): Requires argument 2, '2', to be a valid callback in %s on line %d
@@ -36,10 +36,9 @@ int(3)
 Warning: preg_replace_callback(): Requires argument 2, '2', to be a valid callback in %s on line %d
 int(3)
 
-Warning: preg_replace_callback(): Requires argument 2, '', to be a valid callback in %s on line 1%d
-string(0) ""
+Warning: preg_replace_callback() expects parameter 4 to be long, string given in %s on line %d
+NULL
 
-Warning: preg_replace_callback(): Requires argument 2, 'Array', to be a valid callback in %s on line %d
-array(0) {
-}
+Warning: preg_replace_callback() expects parameter 4 to be long, array given in %s on line %d
+NULL
 Done

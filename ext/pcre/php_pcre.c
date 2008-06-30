@@ -1289,12 +1289,12 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 	zval		   **regex,
 				   **replace,
 				   **subject,
-				   **limit,
 				   **subject_entry,
 				   **zcount;
 	char			*result;
 	int				 result_len;
 	int				 limit_val = -1;
+	long			limit;
 	char			*string_key;
 	ulong			 num_key;
 	char			*callback_name;
@@ -1302,10 +1302,10 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 	int				*replace_count_ptr=NULL; 
 	
 	/* Get function parameters and do error-checking. */
-	if (ZEND_NUM_ARGS() < 3 || ZEND_NUM_ARGS() > 5 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &regex, &replace, &subject, &limit, &zcount) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZZ|lZ", &regex, &replace, &subject, &limit, &zcount) == FAILURE) {
+		return;
 	}
+	
 	if (!is_callable_replace && Z_TYPE_PP(replace) == IS_ARRAY && Z_TYPE_PP(regex) != IS_ARRAY) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameter mismatch, pattern is a string while replacement is an array");
 		RETURN_FALSE;
@@ -1330,8 +1330,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 	SEPARATE_ZVAL(subject);
 
 	if (ZEND_NUM_ARGS() > 3) {
-		convert_to_long_ex(limit);
-		limit_val = Z_LVAL_PP(limit);
+		limit_val = limit;
 	}
 	if (ZEND_NUM_ARGS() > 4) {
 		replace_count_ptr =& replace_count;

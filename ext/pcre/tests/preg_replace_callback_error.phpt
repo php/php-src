@@ -33,16 +33,16 @@ echo "Done";
 
 -- Testing preg_replace_callback() function with Zero arguments --
 
-Warning: Wrong parameter count for preg_replace_callback() in %spreg_replace_callback_error.php on line %d
+Warning: preg_replace_callback() expects at least 3 parameters, 0 given in %s on line %d
 NULL
 
 -- Testing preg_replace_callback() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for preg_replace_callback() in %spreg_replace_callback_error.php on line %d
+Warning: preg_replace_callback() expects at most 5 parameters, 6 given in %s on line %d
 NULL
 
 -- Testing preg_replace_callback() function with less than expected no. of arguments --
 
-Warning: Wrong parameter count for preg_replace_callback() in %spreg_replace_callback_error.php on line %d
+Warning: preg_replace_callback() expects at least 3 parameters, 2 given in %s on line %d
 NULL
 Done
