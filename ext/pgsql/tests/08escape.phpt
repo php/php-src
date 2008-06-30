@@ -61,8 +61,8 @@ else {
 ?>
 --EXPECT--
 pg_escape_string() is NOT Ok
-string(9) "ABC\ABC\'"
-string(12) "ABC\\ABC\\''"
-string(10) "ABC\\ABC\'"
+unicode(9) "ABC\ABC\'"
+unicode(12) "ABC\\ABC\\''"
+unicode(10) "ABC\\ABC\'"
 pg_escape_bytea() is Ok
 pg_escape_bytea() actually works with database
