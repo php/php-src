@@ -12,7 +12,7 @@ $result = pg_exec("SELECT * FROM ".$table_name);
 pg_numrows($result);
 pg_numfields($result);
 pg_fieldname($result, 0);
-pg_fieldsize($result, $field_name);
+pg_fieldsize($result, 0);
 pg_fieldtype($result, 0);
 pg_fieldprtlen($result, 0);
 pg_fieldisnull($result, 0);
