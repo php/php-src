@@ -1584,7 +1584,7 @@ PHP_FUNCTION(ldap_get_option)
 {
 	zval *link, *retval;
 	ldap_linkdata *ld;
-	int option;
+	long option;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz", &link, &option, &retval) != SUCCESS) {
 		return;
@@ -1686,7 +1686,7 @@ PHP_FUNCTION(ldap_set_option)
 	zval *link, **newval;
 	ldap_linkdata *ld;
 	LDAP *ldap;
-	int option;
+	long option;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zlZ", &link, &option, &newval) != SUCCESS) {
 		return;
@@ -2019,7 +2019,7 @@ PHP_FUNCTION(ldap_rename)
 	int dn_len, newrdn_len, newparent_len;
 	zend_bool deleteoldrdn;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rssb", &link, &dn, &dn_len, &newrdn, &newrdn_len, &newparent, &newparent_len, &deleteoldrdn) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsssb", &link, &dn, &dn_len, &newrdn, &newrdn_len, &newparent, &newparent_len, &deleteoldrdn) != SUCCESS) {
 		return;
 	}
 
