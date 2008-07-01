@@ -2108,8 +2108,8 @@ PHP_FUNCTION(mb_substr)
 {
 	size_t argc = ZEND_NUM_ARGS();
 	char *str, *encoding;
-	long str_len, from, len, encoding_len;
-	int mblen;
+	long from, len;
+	int mblen, str_len, encoding_len;
 	mbfl_string string, result, *ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|ls", &str, &str_len, &from, &len, &encoding, &encoding_len) == FAILURE) {
@@ -2181,7 +2181,8 @@ PHP_FUNCTION(mb_strcut)
 {
 	size_t argc = ZEND_NUM_ARGS();
 	char *str, *encoding;
-	long str_len, from, len, encoding_len;
+	long from, len;
+	int str_len, encoding_len;
 	mbfl_string string, result, *ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|ls", &str, &str_len, &from, &len, &encoding, &encoding_len) == FAILURE) {
@@ -2285,7 +2286,8 @@ PHP_FUNCTION(mb_strimwidth)
 {
 	zval **arg1, **arg2, **arg3, **arg4, **arg5;
 	char *str, *trimmarker, *encoding;
-	long str_len, from, width, trimmarker_len, encoding_len;
+	long from, width;
+	int str_len, trimmarker_len, encoding_len;
 	mbfl_string string, result, marker, *ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sll|ss", &str, &str_len, &from, &width, &trimmarker, &trimmarker_len, &encoding, &encoding_len) == FAILURE) {
@@ -2428,7 +2430,7 @@ MBSTRING_API char * php_mb_convert_encoding(char *input, size_t length, char *_t
 PHP_FUNCTION(mb_convert_encoding)
 {
 	char *arg_str, *arg_new;
-	long str_len, new_len;
+	int str_len, new_len;
 	zval *arg_old;
 	int i;
 	size_t size, l, n;
@@ -2571,7 +2573,7 @@ PHP_FUNCTION(mb_strtolower)
 PHP_FUNCTION(mb_detect_encoding)
 {
 	char *str;
-	long str_len;
+	int str_len;
 	zend_bool strict=0;
 	zval *encoding_list;
 
@@ -3189,7 +3191,7 @@ static void
 php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
 	char *str, *encoding;
-	long str_len, encoding_len;
+	int str_len, encoding_len;
 	zval *zconvmap, **hash_entry;
 	HashTable *target_hash;
 	size_t argc = ZEND_NUM_ARGS();
