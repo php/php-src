@@ -3913,7 +3913,7 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 PHP_FUNCTION(exif_read_data)
 {
 	char *p_name, *p_sections_needed;
-	long p_name_len, p_sections_needed_len;
+	int p_name_len, p_sections_needed_len;
 	zend_bool sub_arrays=0, read_thumbnail=0, read_all=0;
 
 	int i, ac = ZEND_NUM_ARGS(), ret, sections_needed=0;
@@ -4155,7 +4155,7 @@ PHP_FUNCTION(exif_thumbnail)
 PHP_FUNCTION(exif_imagetype)
 {
 	char *imagefile;
-	long imagefile_len;
+	int imagefile_len;
 	php_stream * stream;
  	int itype = 0;
 
