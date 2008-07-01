@@ -8,7 +8,7 @@ PHP_ARG_WITH(sybase-ct, for Sybase-CT support,
 
 if test "$PHP_SYBASE_CT" != "no"; then
 
-  if test "$PHP_SYBASE" != "no" && test "$ext_shared" = "no"; then
+  if test "$PHP_SYBASE" && test "$PHP_SYBASE" != "no" && test "$ext_shared" = "no"; then
     AC_MSG_ERROR([You can not use both --with-sybase and --with-sybase-ct in same build!])
   fi
 
