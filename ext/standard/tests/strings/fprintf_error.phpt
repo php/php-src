@@ -20,12 +20,12 @@ echo "Done\n";
 --EXPECTF--
 *** Testing Error Conditions ***
 
-Warning: fprintf() expects at least %d parameters, %d given in %s on line %d
+Warning: Wrong parameter count for fprintf() in %sfprintf_error.php on line %d
 NULL
 
-Warning: fprintf() expects at least %d parameters, %d given in %s on line %d
+Warning: Wrong parameter count for fprintf() in %sfprintf_error.php on line %d
 NULL
 
-Warning: fprintf() expects at least %d parameters, %d given in %s on line %d
+Warning: Wrong parameter count for fprintf() in %sfprintf_error.php on line %d
 NULL
 Done

@@ -379,16 +379,13 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 	char *format, *result, padding;
 	int always_sign;
 
-	argc = ZEND_NUM_ARGS();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &argc) == FAILURE) {
+		return NULL;
+	}
 
 	/* verify the number of args */
 	if ((use_array && argc != (2 + format_offset)) 
 			|| (!use_array && argc < (1 + format_offset))) {
-		WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
-	}
-	args = (zval ***)safe_emalloc(argc, sizeof(zval *), 0);
-
-	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
 	}
