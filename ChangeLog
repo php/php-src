@@ -1,3 +1,70 @@
+2008-06-30  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      convert all built-in functions to new API
+
+2008-06-30  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/pcre/php_pcre.c
+      ext/pcre/tests/preg_replace_callback3.phpt
+      ext/pcre/tests/preg_replace_callback_error.phpt
+      ext/pcre/tests/preg_replace_error.phpt:
+      - New parameter parsing API (to preg_replace*)
+      - Fixed related tests
+
+    * ext/sysvmsg/sysvmsg.c:
+      - MFB: Added arginfo
+
+    * (PHP_5_3)
+      ext/sysvmsg/sysvmsg.c:
+      - Added arginfo
+
+    * ext/ldap/ldap.c
+      ext/pcre/php_pcre.c
+      ext/sysvmsg/sysvmsg.c
+      ext/xmlrpc/xmlrpc-epi-php.c:
+      - MFB: zend_arg_defs.c is unnecessary now
+
+    * ext/pcntl/pcntl.c:
+      MFB:
+      - Added arginfo
+      - Removed #include "zend_arg_defs.c"
+
+    * (PHP_5_3)
+      ext/pcntl/pcntl.c:
+      - Added arginfo
+      - Removed #include "zend_arg_defs.c"
+
+    * (PHP_5_3)
+      ext/ldap/ldap.c
+      ext/pcre/php_pcre.c
+      ext/sysvmsg/sysvmsg.c
+      ext/xmlrpc/xmlrpc-epi-php.c:
+      - zend_arg_defs.c is unnecessary now
+
+2008-06-30  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/standard/string.c:
+      "l" is long, that's why it is "l", not "i"
+
+    * (PHP_5_3)
+      ext/standard/string.c:
+      int -> long
+
+2008-06-30  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/tests/08escape.phpt
+      ext/pgsql/tests/98old_api.phpt:
+      - MFB: New parameter parsing API
+      - Fixed tests
+
+    * (PHP_5_3)
+      ext/pgsql/tests/98old_api.phpt:
+      - Fixed test
+
 2008-06-29  Felipe Pena  <felipensp@gmail.com>
 
     * ext/mssql/php_mssql.c:

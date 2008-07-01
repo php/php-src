@@ -1,3 +1,8 @@
+2008-06-30  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_builtin_functions.c:
+      convert all built-in functions to new API
+
 2008-06-29  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
 
     * (PHP_5_3)
