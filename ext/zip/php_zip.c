@@ -1851,7 +1851,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 		RETURN_FALSE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|z", &pathto_zval, &pathto_len, &zval_files) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|z", &pathto_zval, &zval_files) == FAILURE) {
 		return;
 	}
 
