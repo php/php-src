@@ -1290,7 +1290,7 @@ PHP_FUNCTION(wddx_add_vars)
 	long packet_id;
 	wddx_packet *packet = NULL;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l+", packet_id, &args, &num_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l+", &packet_id, &args, &num_args) == FAILURE) {
 		return;
 	}
 
