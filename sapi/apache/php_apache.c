@@ -118,52 +118,6 @@ zend_module_entry apache_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-/* {{{ proto bool apache_child_terminate(void)
-   Terminate apache process after this request */
-PHP_FUNCTION(apache_child_terminate)
-{
-#ifndef MULTITHREAD
-	if (AP(terminate_child)) {
-		ap_child_terminate( ((request_rec *)SG(server_context)) );
-		RETURN_TRUE;
-	} else { /* tell them to get lost! */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This function is disabled");
-		RETURN_FALSE;
-	}
-#else
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This function is not supported in this build");
-		RETURN_FALSE;
-#endif
-}
-/* }}} */
-
-/* {{{ proto string apache_note(string note_name [, string note_value])
-   Get and set Apache request notes */
-PHP_FUNCTION(apache_note)
-{
-	char *note_name, *note_val;
-	long note_name_len, note_val_len;
-	char *old_val;
-	int arg_count = ZEND_NUM_ARGS();
-
-	if (zend_parse_parameters(arg_count TSRMLS_CC, "s|s", &note_name, &note_name_len, &note_val, &note_val_len) == FAILURE) {
-		return;
-	}
-
-	old_val = (char *) table_get(((request_rec *)SG(server_context))->notes, note_name);
-
-	if (arg_count == 2) {
-		table_set(((request_rec *)SG(server_context))->notes, note_name, note_val);
-	}
-
-	if (old_val) {
-		RETURN_STRING(old_val, 1);
-	}
-
-	RETURN_FALSE;
-}
-/* }}} */
-
 /* {{{ PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(apache)
@@ -296,6 +250,52 @@ PHP_MINFO_FUNCTION(apache)
 }
 /* }}} */
 
+/* {{{ proto bool apache_child_terminate(void)
+   Terminate apache process after this request */
+PHP_FUNCTION(apache_child_terminate)
+{
+#ifndef MULTITHREAD
+	if (AP(terminate_child)) {
+		ap_child_terminate( ((request_rec *)SG(server_context)) );
+		RETURN_TRUE;
+	} else { /* tell them to get lost! */
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This function is disabled");
+		RETURN_FALSE;
+	}
+#else
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This function is not supported in this build");
+		RETURN_FALSE;
+#endif
+}
+/* }}} */
+
+/* {{{ proto string apache_note(string note_name [, string note_value])
+   Get and set Apache request notes */
+PHP_FUNCTION(apache_note)
+{
+	char *note_name, *note_val;
+	int note_name_len, note_val_len;
+	char *old_val;
+	int arg_count = ZEND_NUM_ARGS();
+
+	if (zend_parse_parameters(arg_count TSRMLS_CC, "s|s", &note_name, &note_name_len, &note_val, &note_val_len) == FAILURE) {
+		return;
+	}
+
+	old_val = (char *) table_get(((request_rec *)SG(server_context))->notes, note_name);
+
+	if (arg_count == 2) {
+		table_set(((request_rec *)SG(server_context))->notes, note_name, note_val);
+	}
+
+	if (old_val) {
+		RETURN_STRING(old_val, 1);
+	}
+
+	RETURN_FALSE;
+}
+/* }}} */
+
 /* {{{ proto bool virtual(string filename)
    Perform an Apache sub-request */
 /* This function is equivalent to <!--#include virtual...-->
@@ -309,7 +309,7 @@ PHP_MINFO_FUNCTION(apache)
 PHP_FUNCTION(virtual)
 {
 	char *filename;
-	long filename_len;
+	int filename_len;
 	request_rec *rr = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
@@ -350,6 +350,7 @@ PHP_FUNCTION(virtual)
 /* {{{ proto array getallheaders(void)
    Alias for apache_request_headers() */
 /* }}} */
+
 /* {{{ proto array apache_request_headers(void)
    Fetch all HTTP request headers */
 PHP_FUNCTION(apache_request_headers)
@@ -398,7 +399,7 @@ PHP_FUNCTION(apache_response_headers)
    Set an Apache subprocess_env variable */
 PHP_FUNCTION(apache_setenv)
 {
-	long var_len, val_len;
+	int var_len, val_len;
 	zend_bool top=0;
 	char *var = NULL, *val = NULL;
 	request_rec *r = (request_rec *) SG(server_context);
@@ -422,7 +423,7 @@ PHP_FUNCTION(apache_setenv)
 PHP_FUNCTION(apache_lookup_uri)
 {
 	char *filename;
-	long filename_len;
+	int filename_len;
 	request_rec *rr=NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
@@ -499,7 +500,7 @@ This function is most likely a bad idea.  Just playing with it for now.
 PHP_FUNCTION(apache_exec_uri)
 {
 	char *filename;
-	long filename_len;
+	int filename_len;
 	request_rec *rr=NULL;
 	TSRMLS_FETCH();
 
