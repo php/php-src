@@ -44,49 +44,273 @@ typedef struct _php_mcrypt {
 	zend_bool init;
 } php_mcrypt;
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_open, 0, 0, 4)
+	ZEND_ARG_INFO(0, cipher)
+	ZEND_ARG_INFO(0, cipher_directory)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, mode_directory)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_generic_init, 0, 0, 3)
+	ZEND_ARG_INFO(0, td)
+	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_INFO(0, iv)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_generic, 0, 0, 2)
+	ZEND_ARG_INFO(0, td)
+	ZEND_ARG_INFO(0, data)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mdecrypt_generic, 0, 0, 2)
+	ZEND_ARG_INFO(0, td)
+	ZEND_ARG_INFO(0, data)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_get_supported_key_sizes, 0, 0, 1)
+	ZEND_ARG_INFO(0, td)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_self_test, 0, 0, 1)
+	ZEND_ARG_INFO(0, td)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_close, 0, 0, 1)
+	ZEND_ARG_INFO(0, td)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_generic_deinit, 0, 0, 1)
+	ZEND_ARG_INFO(0, td)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_is_block_algorithm_mode, 0, 0, 1)
+	ZEND_ARG_INFO(0, td)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_is_block_algorithm, 0, 0, 1)
+	ZEND_ARG_INFO(0, td)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_is_block_mode, 0, 0, 1)
+	ZEND_ARG_INFO(0, td)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_get_block_size, 0, 0, 1)
+	ZEND_ARG_INFO(0, td)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_get_key_size, 0, 0, 1)
+	ZEND_ARG_INFO(0, td)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_get_iv_size, 0, 0, 1)
+	ZEND_ARG_INFO(0, td)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_get_algorithms_name, 0, 0, 1)
+	ZEND_ARG_INFO(0, td)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_get_modes_name, 0, 0, 1)
+	ZEND_ARG_INFO(0, td)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_self_test, 0, 0, 1)
+	ZEND_ARG_INFO(0, algorithm)
+	ZEND_ARG_INFO(0, lib_dir)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_is_block_algorithm_mode, 0, 0, 1)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, lib_dir)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_is_block_algorithm, 0, 0, 1)
+	ZEND_ARG_INFO(0, algorithm)
+	ZEND_ARG_INFO(0, lib_dir)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_is_block_mode, 0, 0, 1)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, lib_dir)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_get_algo_block_size, 0, 0, 1)
+	ZEND_ARG_INFO(0, algorithm)
+	ZEND_ARG_INFO(0, lib_dir)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_get_algo_key_size, 0, 0, 1)
+	ZEND_ARG_INFO(0, algorithm)
+	ZEND_ARG_INFO(0, lib_dir)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_get_supported_key_sizes, 0, 0, 1)
+	ZEND_ARG_INFO(0, algorithm)
+	ZEND_ARG_INFO(0, lib_dir)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_list_algorithms, 0, 0, 0)
+	ZEND_ARG_INFO(0, lib_dir)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_list_modes, 0, 0, 0)
+	ZEND_ARG_INFO(0, lib_dir)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_get_key_size, 0, 0, 2)
+	ZEND_ARG_INFO(0, cipher)
+	ZEND_ARG_INFO(0, module)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_get_block_size, 0, 0, 2)
+	ZEND_ARG_INFO(0, cipher)
+	ZEND_ARG_INFO(0, module)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_get_iv_size, 0, 0, 2)
+	ZEND_ARG_INFO(0, cipher)
+	ZEND_ARG_INFO(0, module)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_get_cipher_name, 0, 0, 1)
+	ZEND_ARG_INFO(0, cipher)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_encrypt, 0, 0, 5)
+	ZEND_ARG_INFO(0, cipher)
+	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, iv)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_decrypt, 0, 0, 5)
+	ZEND_ARG_INFO(0, cipher)
+	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, iv)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_ecb, 0, 0, 5)
+	ZEND_ARG_INFO(0, cipher)
+	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, iv)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_cbc, 0, 0, 5)
+	ZEND_ARG_INFO(0, cipher)
+	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, iv)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_cfb, 0, 0, 5)
+	ZEND_ARG_INFO(0, cipher)
+	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, iv)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_ofb, 0, 0, 5)
+	ZEND_ARG_INFO(0, cipher)
+	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, iv)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_create_iv, 0, 0, 2)
+	ZEND_ARG_INFO(0, size)
+	ZEND_ARG_INFO(0, source)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 const zend_function_entry mcrypt_functions[] = { /* {{{ */
-	PHP_FE(mcrypt_ecb, NULL)
-	PHP_FE(mcrypt_cbc, NULL)
-	PHP_FE(mcrypt_cfb, NULL)
-	PHP_FE(mcrypt_ofb, NULL)
-	PHP_FE(mcrypt_get_key_size, NULL)
-	PHP_FE(mcrypt_get_block_size, NULL)
-	PHP_FE(mcrypt_get_cipher_name, NULL)
-	PHP_FE(mcrypt_create_iv, NULL)
+	PHP_FE(mcrypt_ecb, 				arginfo_mcrypt_ecb)
+	PHP_FE(mcrypt_cbc, 				arginfo_mcrypt_cbc)
+	PHP_FE(mcrypt_cfb, 				arginfo_mcrypt_cfb)
+	PHP_FE(mcrypt_ofb, 				arginfo_mcrypt_ofb)
+	PHP_FE(mcrypt_get_key_size, 	arginfo_mcrypt_get_key_size)
+	PHP_FE(mcrypt_get_block_size, 	arginfo_mcrypt_get_block_size)
+	PHP_FE(mcrypt_get_cipher_name, 	arginfo_mcrypt_get_cipher_name)
+	PHP_FE(mcrypt_create_iv, 		arginfo_mcrypt_create_iv)
 
-	PHP_FE(mcrypt_list_algorithms, NULL)
-	PHP_FE(mcrypt_list_modes, NULL)
-	PHP_FE(mcrypt_get_iv_size, NULL)
-	PHP_FE(mcrypt_encrypt, NULL)
-	PHP_FE(mcrypt_decrypt, NULL)
+	PHP_FE(mcrypt_list_algorithms, 	arginfo_mcrypt_list_algorithms)
+	PHP_FE(mcrypt_list_modes, 		arginfo_mcrypt_list_modes)
+	PHP_FE(mcrypt_get_iv_size, 		arginfo_mcrypt_get_iv_size)
+	PHP_FE(mcrypt_encrypt, 			arginfo_mcrypt_encrypt)
+	PHP_FE(mcrypt_decrypt, 			arginfo_mcrypt_decrypt)
 
-	PHP_FE(mcrypt_module_open, NULL)
-	PHP_FE(mcrypt_generic_init, NULL)
-	PHP_FE(mcrypt_generic, NULL)
-	PHP_FE(mdecrypt_generic, NULL)
-	PHP_DEP_FALIAS(mcrypt_generic_end, mcrypt_generic_deinit, NULL)
-	PHP_FE(mcrypt_generic_deinit, NULL)
+	PHP_FE(mcrypt_module_open, 		arginfo_mcrypt_module_open)
+	PHP_FE(mcrypt_generic_init, 	arginfo_mcrypt_generic_init)
+	PHP_FE(mcrypt_generic, 			arginfo_mcrypt_generic)
+	PHP_FE(mdecrypt_generic, 		arginfo_mdecrypt_generic)
+	PHP_DEP_FALIAS(mcrypt_generic_end, mcrypt_generic_deinit, arginfo_mcrypt_generic_deinit)
+	PHP_FE(mcrypt_generic_deinit, 	arginfo_mcrypt_generic_deinit)
 
-	PHP_FE(mcrypt_enc_self_test, NULL)
-	PHP_FE(mcrypt_enc_is_block_algorithm_mode, NULL)
-	PHP_FE(mcrypt_enc_is_block_algorithm, NULL)
-	PHP_FE(mcrypt_enc_is_block_mode, NULL)
-	PHP_FE(mcrypt_enc_get_block_size, NULL)
-	PHP_FE(mcrypt_enc_get_key_size, NULL)
-	PHP_FE(mcrypt_enc_get_supported_key_sizes, NULL)
-	PHP_FE(mcrypt_enc_get_iv_size, NULL)
-	PHP_FE(mcrypt_enc_get_algorithms_name, NULL)
-	PHP_FE(mcrypt_enc_get_modes_name, NULL)
-	PHP_FE(mcrypt_module_self_test, NULL)
+	PHP_FE(mcrypt_enc_self_test, 	arginfo_mcrypt_enc_self_test)
+	PHP_FE(mcrypt_enc_is_block_algorithm_mode, arginfo_mcrypt_enc_is_block_algorithm_mode)
+	PHP_FE(mcrypt_enc_is_block_algorithm, 	arginfo_mcrypt_enc_is_block_algorithm)
+	PHP_FE(mcrypt_enc_is_block_mode, 		arginfo_mcrypt_enc_is_block_mode)
+	PHP_FE(mcrypt_enc_get_block_size, 		arginfo_mcrypt_enc_get_block_size)
+	PHP_FE(mcrypt_enc_get_key_size, 		arginfo_mcrypt_enc_get_key_size)
+	PHP_FE(mcrypt_enc_get_supported_key_sizes, arginfo_mcrypt_enc_get_supported_key_sizes)
+	PHP_FE(mcrypt_enc_get_iv_size, 			arginfo_mcrypt_enc_get_iv_size)
+	PHP_FE(mcrypt_enc_get_algorithms_name, 	arginfo_mcrypt_enc_get_algorithms_name)
+	PHP_FE(mcrypt_enc_get_modes_name, 		arginfo_mcrypt_enc_get_modes_name)
+	PHP_FE(mcrypt_module_self_test, 		arginfo_mcrypt_module_self_test)
 
-	PHP_FE(mcrypt_module_is_block_algorithm_mode, NULL)
-	PHP_FE(mcrypt_module_is_block_algorithm, NULL)
-	PHP_FE(mcrypt_module_is_block_mode, NULL)
-	PHP_FE(mcrypt_module_get_algo_block_size, NULL)
-	PHP_FE(mcrypt_module_get_algo_key_size, NULL)
-	PHP_FE(mcrypt_module_get_supported_key_sizes, NULL)
+	PHP_FE(mcrypt_module_is_block_algorithm_mode, 	arginfo_mcrypt_module_is_block_algorithm_mode)
+	PHP_FE(mcrypt_module_is_block_algorithm, 		arginfo_mcrypt_module_is_block_algorithm)
+	PHP_FE(mcrypt_module_is_block_mode, 			arginfo_mcrypt_module_is_block_mode)
+	PHP_FE(mcrypt_module_get_algo_block_size, 		arginfo_mcrypt_module_get_algo_block_size)
+	PHP_FE(mcrypt_module_get_algo_key_size, 		arginfo_mcrypt_module_get_algo_key_size)
+	PHP_FE(mcrypt_module_get_supported_key_sizes, 	arginfo_mcrypt_module_get_supported_key_sizes)
 
-	PHP_FE(mcrypt_module_close, NULL)
+	PHP_FE(mcrypt_module_close, 					arginfo_mcrypt_module_close)
 	{NULL, NULL, NULL}
 };
 /* }}} */
