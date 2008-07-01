@@ -303,8 +303,8 @@ PHP_FUNCTION(char_get_digit_value)
 {
 	UChar	   *str;
 	int			str_len;
-	int			radix = 0;
 	int			offset = 0;
+	long		radix = 0;
 	UChar32		ch;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u|l", &str, &str_len, &radix) == FAILURE) {
@@ -447,8 +447,8 @@ PHP_FUNCTION(char_is_valid)
    Get the character representation for the specified digit (optionally in the specified radix) */
 PHP_FUNCTION(char_from_digit)
 {
-	int			digit;
-	int			radix = 10;
+	long		digit;
+	long		radix = 10;
 	UChar32		ch;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &digit, &radix) == FAILURE) {
@@ -852,19 +852,19 @@ static UBool php_enum_char_type_range(const void *context,
     return result;
 }
 
-/* {{{ proto bool char_enum_names(callback Callback, int start, int limit[, int extended = false]) U
+/* {{{ proto bool char_enum_names(callback Callback, int start, int limit[, bool extended = false]) U
    Enumerate all assigned Unicode characters between the start and limit code points (start inclusive, limit exclusive) and call a function for each, passing the code point value and the character name. */
 PHP_FUNCTION(char_enum_names)
 {
-    zval			   *callback;
-    long				start, limit;
+	zval			   *callback;
+	long				start, limit;
 	zend_bool			extended = FALSE;
-    zval			   *zcode, *zname, *zextended;
-    char_enum_context_t ectx;
+	zval			   *zcode, *zname, *zextended;
+	char_enum_context_t ectx;
 	UCharNameChoice		choice = U_UNICODE_CHAR_NAME;
-    UErrorCode 			status = U_ZERO_ERROR;
+	UErrorCode 			status = U_ZERO_ERROR;
     
-    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "zll|l", &callback, &start, &limit, &extended)) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "zll|b", &callback, &start, &limit, &extended)) {
         return;               
     }   
     
