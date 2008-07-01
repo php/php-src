@@ -366,7 +366,7 @@ static PHP_FUNCTION(bzopen)
 {
 	zval    **file;   /* The file to open */
 	char     *mode;   /* The mode to open the stream with */
-	long      mode_len;
+	int      mode_len;
 
 	BZFILE   *bz;     /* The compressed file stream */
 	php_stream *stream = NULL;
@@ -488,7 +488,7 @@ static PHP_FUNCTION(bzcompress)
 					  block_size  = 4, /* Block size for compression algorithm */
 					  work_factor = 0, /* Work factor for compression algorithm */
 					  argc;            /* Argument count */
-	long              source_len;      /* Length of the source data */
+	int               source_len;      /* Length of the source data */
 	unsigned int      dest_len;        /* Length of the destination buffer */ 
 
 	argc = ZEND_NUM_ARGS();
