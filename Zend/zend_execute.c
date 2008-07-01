@@ -1153,18 +1153,7 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 	switch (Z_TYPE_P(container)) {
 
 		case IS_ARRAY:
-			if (dim == NULL) {
-				zval *new_zval = &EG(uninitialized_zval);
-
-				Z_ADDREF_P(new_zval);
-				if (zend_hash_next_index_insert(Z_ARRVAL_P(container), &new_zval, sizeof(zval *), (void **) &retval) == FAILURE) {
-					zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-					retval = &EG(error_zval_ptr);
-					Z_DELREF_P(new_zval);
-				}
-			} else {
-				retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, type TSRMLS_CC);
-			}
+			retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, type TSRMLS_CC);
 			if (result) {
 				AI_SET_PTR(result->var, *retval);
 				PZVAL_LOCK(*retval);
@@ -1189,10 +1178,6 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 		case IS_UNICODE:
 		case IS_STRING: {
 				zval tmp;
-
-				if (dim == NULL) {
-					zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
-				}
 
 				if (Z_TYPE_P(dim) != IS_LONG) {
 					switch(Z_TYPE_P(dim)) {
