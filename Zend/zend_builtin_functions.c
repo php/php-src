@@ -1164,7 +1164,7 @@ ZEND_FUNCTION(class_alias)
    Cause an intentional memory leak, for testing/debugging purposes */
 ZEND_FUNCTION(leak)
 {
-	int leakbytes=3;
+	long leakbytes = 3;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &leakbytes) == FAILURE) {
 		return;
@@ -1219,7 +1219,7 @@ ZEND_FUNCTION(get_included_files)
    Generates a user-level error/warning/notice message */
 ZEND_FUNCTION(trigger_error)
 {
-	int error_type = E_USER_NOTICE;
+	long error_type = E_USER_NOTICE;
 	zstr message;
 	int message_len;
 	zend_uchar message_type;
@@ -1239,7 +1239,7 @@ ZEND_FUNCTION(trigger_error)
 			break;
 	}
 
-	zend_error(error_type, "%R", message_type, message);
+	zend_error((int)error_type, "%R", message_type, message);
 	RETURN_TRUE;
 }
 /* }}} */
