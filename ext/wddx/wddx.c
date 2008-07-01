@@ -1237,7 +1237,7 @@ void php_wddx_destructor(wddx_packet *packet)
 }
 /* }}} */
 
-/* {{{ proto int wddx_packet_start([string comment])
+/* {{{ proto resource wddx_packet_start([string comment])
    Starts a WDDX packet with optional comment and returns the packet id */
 PHP_FUNCTION(wddx_packet_start)
 {
@@ -1259,15 +1259,16 @@ PHP_FUNCTION(wddx_packet_start)
 }
 /* }}} */
 
-/* {{{ proto string wddx_packet_end(int packet_id)
+/* {{{ proto string wddx_packet_end(resource packet_id)
    Ends specified WDDX packet and returns the string containing the packet */
 PHP_FUNCTION(wddx_packet_end)
 {
 	zval *packet_id;
 	wddx_packet *packet = NULL;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &packet_id) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &packet_id) == FAILURE) {
 		return;
+	}
 
 	ZEND_FETCH_RESOURCE(packet, wddx_packet *, &packet_id, -1, "WDDX packet ID", le_wddx);
 			
@@ -1281,20 +1282,21 @@ PHP_FUNCTION(wddx_packet_end)
 }
 /* }}} */
 
-/* {{{ proto int wddx_add_vars(int packet_id,  mixed var_names [, mixed ...])
+/* {{{ proto int wddx_add_vars(resource packet_id,  mixed var_names [, mixed ...])
    Serializes given variables and adds them to packet given by packet_id */
 PHP_FUNCTION(wddx_add_vars)
 {
 	int num_args, i;
 	zval ***args = NULL;
-	long packet_id;
+	zval *packet_id;
 	wddx_packet *packet = NULL;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l+", &packet_id, &args, &num_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r+", &packet_id, &args, &num_args) == FAILURE) {
 		return;
 	}
 
-	packet = (wddx_packet *)zend_fetch_resource(&packet_id TSRMLS_CC, -1, "WDDX packet ID", NULL, 1, le_wddx);
+	ZEND_FETCH_RESOURCE(packet, wddx_packet *, &packet_id, -1, "WDDX packet ID", le_wddx);
+	
 	if (!packet) {
 		efree(args);
 		RETURN_FALSE;
