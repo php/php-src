@@ -1068,7 +1068,7 @@ PHP_FUNCTION(number_format)
 {
 	zval *sep1 = NULL, *sep2 = NULL;
 	double num;
-	int dec = 0;
+	long dec = 0;
 	char thousand_sep=',', dec_point='.';
 	char *tmp;
 	
