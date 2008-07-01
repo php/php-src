@@ -658,7 +658,7 @@ PHP_FUNCTION(mhash)
 
 PHP_FUNCTION(mhash_get_hash_name)
 {
-	int algorithm;
+	long algorithm;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &algorithm) == FAILURE) {
 		return;
@@ -683,7 +683,7 @@ PHP_FUNCTION(mhash_count)
 
 PHP_FUNCTION(mhash_get_block_size)
 {
-	int algorithm;
+	long algorithm;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &algorithm) == FAILURE) {
 		return;
@@ -705,7 +705,7 @@ PHP_FUNCTION(mhash_get_block_size)
 
 PHP_FUNCTION(mhash_keygen_s2k)
 {
-	int algorithm, bytes;
+	long algorithm, bytes;
 	char *password, *salt;
 	int password_len, salt_len;
 	char padded_salt[SALT_SIZE];
