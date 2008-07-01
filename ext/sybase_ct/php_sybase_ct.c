@@ -41,30 +41,165 @@ ZEND_DECLARE_MODULE_GLOBALS(sybase)
 static PHP_GINIT_FUNCTION(sybase);
 static PHP_GSHUTDOWN_FUNCTION(sybase);
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_connect, 0, 0, 0)
+	ZEND_ARG_INFO(0, host)
+	ZEND_ARG_INFO(0, user)
+	ZEND_ARG_INFO(0, password)
+	ZEND_ARG_INFO(0, charset)
+	ZEND_ARG_INFO(0, appname)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_pconnect, 0, 0, 0)
+	ZEND_ARG_INFO(0, host)
+	ZEND_ARG_INFO(0, user)
+	ZEND_ARG_INFO(0, password)
+	ZEND_ARG_INFO(0, charset)
+	ZEND_ARG_INFO(0, appname)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_close, 0, 0, 0)
+	ZEND_ARG_INFO(0, link_id)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_select_db, 0, 0, 1)
+	ZEND_ARG_INFO(0, database)
+	ZEND_ARG_INFO(0, link_id)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_query, 0, 0, 1)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, link_id)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_unbuffered_query, 0, 0, 1)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, link_id)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_free_result, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_get_last_message, 0, 0, 1)
+	ZEND_ARG_INFO(0, d)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_num_rows, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_num_fields, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_fetch_row, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_fetch_object, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, object)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_fetch_array, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_fetch_assoc, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_data_seek, 0, 0, 2)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, offset)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_fetch_field, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, offset)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_field_seek, 0, 0, 2)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, offset)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_result, 0, 0, 3)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, row)
+	ZEND_ARG_INFO(0, field)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_affected_rows, 0, 0, 0)
+	ZEND_ARG_INFO(0, link_id)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_min_client_severity, 0, 0, 1)
+	ZEND_ARG_INFO(0, severity)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_min_server_severity, 0, 0, 1)
+	ZEND_ARG_INFO(0, severity)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_deadlock_retry_count, 0, 0, 1)
+	ZEND_ARG_INFO(0, retry_count)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_set_message_handler, 0, 0, 1)
+	ZEND_ARG_INFO(0, error_func)
+	ZEND_ARG_INFO(0, connection)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 const zend_function_entry sybase_functions[] = {
-	PHP_FE(sybase_connect, NULL)
-	PHP_FE(sybase_pconnect, NULL)
-	PHP_FE(sybase_close, NULL)
-	PHP_FE(sybase_select_db, NULL)
-	PHP_FE(sybase_query, NULL)
-	PHP_FE(sybase_unbuffered_query, NULL)
-	PHP_FE(sybase_free_result, NULL)
-	PHP_FE(sybase_get_last_message, NULL)
-	PHP_FE(sybase_num_rows, NULL)
-	PHP_FE(sybase_num_fields, NULL)
-	PHP_FE(sybase_fetch_row, NULL)
-	PHP_FE(sybase_fetch_array, NULL)
-	PHP_FE(sybase_fetch_assoc, NULL)
-	PHP_FE(sybase_fetch_object, NULL)
-	PHP_FE(sybase_data_seek, NULL)
-	PHP_FE(sybase_fetch_field, NULL)
-	PHP_FE(sybase_field_seek, NULL)
-	PHP_FE(sybase_result, NULL)
-	PHP_FE(sybase_affected_rows, NULL)
-	PHP_FE(sybase_min_client_severity, NULL)
-	PHP_FE(sybase_min_server_severity, NULL)
-	PHP_FE(sybase_set_message_handler, NULL)
-	PHP_FE(sybase_deadlock_retry_count, NULL)
+	PHP_FE(sybase_connect,				arginfo_sybase_connect)
+	PHP_FE(sybase_pconnect,				arginfo_sybase_pconnect)
+	PHP_FE(sybase_close, 				arginfo_sybase_close)
+	PHP_FE(sybase_select_db, 			arginfo_sybase_select_db)
+	PHP_FE(sybase_query,				arginfo_sybase_query)
+	PHP_FE(sybase_unbuffered_query,		arginfo_sybase_unbuffered_query)
+	PHP_FE(sybase_free_result,			arginfo_sybase_free_result)
+	PHP_FE(sybase_get_last_message,		arginfo_sybase_get_last_message)
+	PHP_FE(sybase_num_rows,				arginfo_sybase_num_rows)
+	PHP_FE(sybase_num_fields,			arginfo_sybase_num_fields)
+	PHP_FE(sybase_fetch_row,			arginfo_sybase_fetch_row)
+	PHP_FE(sybase_fetch_array,			arginfo_sybase_fetch_array)
+	PHP_FE(sybase_fetch_assoc,			arginfo_sybase_fetch_assoc)
+	PHP_FE(sybase_fetch_object,			arginfo_sybase_fetch_object)
+	PHP_FE(sybase_data_seek,			arginfo_sybase_data_seek)
+	PHP_FE(sybase_fetch_field,			arginfo_sybase_fetch_field)
+	PHP_FE(sybase_field_seek, 			arginfo_sybase_field_seek)
+	PHP_FE(sybase_result,				arginfo_sybase_result)
+	PHP_FE(sybase_affected_rows, 		arginfo_sybase_affected_rows)
+	PHP_FE(sybase_min_client_severity,	arginfo_sybase_min_client_severity)
+	PHP_FE(sybase_min_server_severity,	arginfo_sybase_min_server_severity)
+	PHP_FE(sybase_set_message_handler,	arginfo_sybase_set_message_handler)
+	PHP_FE(sybase_deadlock_retry_count, arginfo_sybase_deadlock_retry_count)
 
 #if !defined(PHP_WIN32) && !defined(HAVE_MSSQL)
 	PHP_FALIAS(mssql_connect, sybase_connect, NULL)
@@ -262,7 +397,7 @@ static CS_RETCODE CS_PUBLIC _client_message_handler(CS_CONTEXT *context, CS_CONN
 	TSRMLS_FETCH();
 
 	if (CS_SEVERITY(errmsg->msgnumber) >= SybCtG(min_client_severity)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Client message:  %s (severity %ld)", errmsg->msgstring, CS_SEVERITY(errmsg->msgnumber));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Client message:  %s (severity %d)", errmsg->msgstring, CS_SEVERITY(errmsg->msgnumber));
 	}
 	STR_FREE(SybCtG(server_message));
 	SybCtG(server_message) = estrdup(errmsg->msgstring);
