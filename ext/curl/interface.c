@@ -1089,17 +1089,17 @@ PHP_FUNCTION(curl_init)
 {
 	php_curl	*ch;
 	CURL		*cp;
-	char		*src = NULL;
+	zstr		src = NULL_ZSTR;
 	int		src_len;
 	zend_uchar	src_type;
 
-        if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|t", &src, &src_len, &src_type) == FAILURE) {
-                RETURN_FALSE;
-        }
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|t", &src, &src_len, &src_type) == FAILURE) {
+		RETURN_FALSE;
+	}
 
-	if (src && src_type == IS_UNICODE) {
-		src = zend_unicode_to_ascii((UChar*)src, src_len TSRMLS_CC);
-		if (!src) {
+	if (src.v && src_type == IS_UNICODE) {
+		src.s = zend_unicode_to_ascii((UChar*)src.u, src_len TSRMLS_CC);
+		if (!src.s) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received"); 
 			RETURN_FALSE;
 		}
@@ -1139,10 +1139,10 @@ PHP_FUNCTION(curl_init)
 	curl_easy_setopt(ch->cp, CURLOPT_NOSIGNAL, 1);
 #endif
 
-	if (src) {
+	if (src.v) {
 		char *urlcopy;
 
-		urlcopy = estrndup(src, src_len);
+		urlcopy = estrndup(src.s, src_len);
 		curl_easy_setopt(ch->cp, CURLOPT_URL, urlcopy);
 		zend_llist_add_element(&ch->to_free.str, &urlcopy);
 	}
