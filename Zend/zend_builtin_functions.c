@@ -1220,7 +1220,7 @@ ZEND_FUNCTION(get_included_files)
    Generates a user-level error/warning/notice message */
 ZEND_FUNCTION(trigger_error)
 {
-	int error_type = E_USER_NOTICE;
+	long error_type = E_USER_NOTICE;
 	char *message;
 	int message_len;
 
@@ -1239,7 +1239,7 @@ ZEND_FUNCTION(trigger_error)
 			break;
 	}
 
-	zend_error(error_type, "%s", message);
+	zend_error((int)error_type, "%s", message);
 	RETURN_TRUE;
 }
 /* }}} */
