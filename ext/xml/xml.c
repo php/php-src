@@ -100,38 +100,170 @@ void _xml_endNamespaceDeclHandler(void *, const XML_Char *);
 
 /* {{{ extension definition structures */
 static
-	ZEND_BEGIN_ARG_INFO(third_and_fourth_args_force_ref, 0)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(1)
-		ZEND_ARG_PASS_INFO(1)
-	ZEND_END_ARG_INFO();
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_parser_create, 0, 0, 0)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_parser_create_ns, 0, 0, 0)
+	ZEND_ARG_INFO(0, encoding)
+	ZEND_ARG_INFO(0, sep)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_set_object, 0, 0, 2)
+	ZEND_ARG_INFO(0, parser)
+	ZEND_ARG_INFO(1, obj)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_set_element_handler, 0, 0, 3)
+	ZEND_ARG_INFO(0, parser)
+	ZEND_ARG_INFO(0, shdl)
+	ZEND_ARG_INFO(0, ehdl)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_set_character_data_handler, 0, 0, 2)
+	ZEND_ARG_INFO(0, parser)
+	ZEND_ARG_INFO(0, hdl)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_set_processing_instruction_handler, 0, 0, 2)
+	ZEND_ARG_INFO(0, parser)
+	ZEND_ARG_INFO(0, hdl)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_set_default_handler, 0, 0, 2)
+	ZEND_ARG_INFO(0, parser)
+	ZEND_ARG_INFO(0, hdl)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_set_unparsed_entity_decl_handler, 0, 0, 2)
+	ZEND_ARG_INFO(0, parser)
+	ZEND_ARG_INFO(0, hdl)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_set_notation_decl_handler, 0, 0, 2)
+	ZEND_ARG_INFO(0, parser)
+	ZEND_ARG_INFO(0, hdl)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_set_external_entity_ref_handler, 0, 0, 2)
+	ZEND_ARG_INFO(0, parser)
+	ZEND_ARG_INFO(0, hdl)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_set_start_namespace_decl_handler, 0, 0, 2)
+	ZEND_ARG_INFO(0, parser)
+	ZEND_ARG_INFO(0, hdl)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_set_end_namespace_decl_handler, 0, 0, 2)
+	ZEND_ARG_INFO(0, parser)
+	ZEND_ARG_INFO(0, hdl)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_parse, 0, 0, 2)
+	ZEND_ARG_INFO(0, parser)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, isfinal)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_parse_into_struct, 0, 0, 3)
+	ZEND_ARG_INFO(0, parser)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(1, values)
+	ZEND_ARG_INFO(1, index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_get_error_code, 0, 0, 1)
+	ZEND_ARG_INFO(0, parser)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_error_string, 0, 0, 1)
+	ZEND_ARG_INFO(0, code)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_get_current_line_number, 0, 0, 1)
+	ZEND_ARG_INFO(0, parser)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_get_current_column_number, 0, 0, 1)
+	ZEND_ARG_INFO(0, parser)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_get_current_byte_index, 0, 0, 1)
+	ZEND_ARG_INFO(0, parser)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_parser_free, 0, 0, 1)
+	ZEND_ARG_INFO(0, parser)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_parser_set_option, 0, 0, 3)
+	ZEND_ARG_INFO(0, parser)
+	ZEND_ARG_INFO(0, option)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_parser_get_option, 0, 0, 2)
+	ZEND_ARG_INFO(0, parser)
+	ZEND_ARG_INFO(0, option)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_utf8_encode, 0, 0, 1)
+	ZEND_ARG_INFO(0, data)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_utf8_decode, 0, 0, 1)
+	ZEND_ARG_INFO(0, data)
+ZEND_END_ARG_INFO()
 
 const zend_function_entry xml_functions[] = {
-	PHP_FE(xml_parser_create, NULL)
-	PHP_FE(xml_parser_create_ns, NULL)
-	PHP_FE(xml_set_object, second_arg_force_ref)
-	PHP_FE(xml_set_element_handler, NULL)
-	PHP_FE(xml_set_character_data_handler, NULL)
-	PHP_FE(xml_set_processing_instruction_handler, NULL)
-	PHP_FE(xml_set_default_handler, NULL)
-	PHP_FE(xml_set_unparsed_entity_decl_handler, NULL)
-	PHP_FE(xml_set_notation_decl_handler, NULL)
-	PHP_FE(xml_set_external_entity_ref_handler, NULL)
-	PHP_FE(xml_set_start_namespace_decl_handler, NULL)
-	PHP_FE(xml_set_end_namespace_decl_handler, NULL)
-	PHP_FE(xml_parse, NULL)
-	PHP_FE(xml_parse_into_struct, third_and_fourth_args_force_ref)
-	PHP_FE(xml_get_error_code, NULL)
-	PHP_FE(xml_error_string, NULL)
-	PHP_FE(xml_get_current_line_number, NULL)
-	PHP_FE(xml_get_current_column_number, NULL)
-	PHP_FE(xml_get_current_byte_index, NULL)
-	PHP_FE(xml_parser_free, NULL)
-	PHP_FE(xml_parser_set_option, NULL)
-	PHP_FE(xml_parser_get_option, NULL)
-	PHP_FE(utf8_encode, NULL)
-	PHP_FE(utf8_decode, NULL)
+	PHP_FE(xml_parser_create,					arginfo_xml_parser_create)
+	PHP_FE(xml_parser_create_ns,				arginfo_xml_parser_create_ns)
+	PHP_FE(xml_set_object, 						arginfo_xml_set_object)
+	PHP_FE(xml_set_element_handler,				arginfo_xml_set_element_handler)
+	PHP_FE(xml_set_character_data_handler,		arginfo_xml_set_character_data_handler)
+	PHP_FE(xml_set_processing_instruction_handler, 	arginfo_xml_set_processing_instruction_handler)
+	PHP_FE(xml_set_default_handler, 				arginfo_xml_set_default_handler)
+	PHP_FE(xml_set_unparsed_entity_decl_handler,arginfo_xml_set_unparsed_entity_decl_handler)
+	PHP_FE(xml_set_notation_decl_handler,		arginfo_xml_set_notation_decl_handler)
+	PHP_FE(xml_set_external_entity_ref_handler,	arginfo_xml_set_external_entity_ref_handler)
+	PHP_FE(xml_set_start_namespace_decl_handler,arginfo_xml_set_start_namespace_decl_handler)
+	PHP_FE(xml_set_end_namespace_decl_handler,	arginfo_xml_set_end_namespace_decl_handler)
+	PHP_FE(xml_parse,							arginfo_xml_parse)
+	PHP_FE(xml_parse_into_struct, 				arginfo_xml_parse_into_struct)
+	PHP_FE(xml_get_error_code,					arginfo_xml_get_error_code)
+	PHP_FE(xml_error_string,					arginfo_xml_error_string)
+	PHP_FE(xml_get_current_line_number,			arginfo_xml_get_current_line_number)
+	PHP_FE(xml_get_current_column_number,		arginfo_xml_get_current_column_number)
+	PHP_FE(xml_get_current_byte_index,			arginfo_xml_get_current_byte_index)
+	PHP_FE(xml_parser_free, 					arginfo_xml_parser_free)
+	PHP_FE(xml_parser_set_option, 				arginfo_xml_parser_set_option)
+	PHP_FE(xml_parser_get_option,				arginfo_xml_parser_get_option)
+	PHP_FE(utf8_encode, 						arginfo_utf8_encode)
+	PHP_FE(utf8_decode, 						arginfo_utf8_decode)
 	{NULL, NULL, NULL}
 };
 
