@@ -38,5 +38,5 @@ int(-1)
 
 Warning: ftok(): ftok() failed - No such file or directory in %s on line %d
 int(-1)
-int(1895944710)
+int(%d)
 Done
