@@ -183,7 +183,8 @@ PHP_FUNCTION(iptcembed)
 	int jpeg_file_len, iptcdata_len;
     FILE *fp;
 	unsigned int marker;
-	unsigned int spool = 0, done = 0, inx;	
+	unsigned int done = 0, inx;	
+	long spool = 0;
 	unsigned char *spoolbuf=0, *poi=0;
 	struct stat sb;
 	zend_bool written = 0;
