@@ -9,35 +9,38 @@ if (!CL) {
 	ERROR("MS C++ compiler is required");
 }
 // Which version of the compiler do we have ?
-function probe_msvc_compiler_version(CL)
+function probe_binary(EXE, what)
 {
 	// tricky escapes to get stderr redirection to work
-	var banner = execute('cmd /c ""' + CL + '" 2>&1"');
-	if (banner.match(/(\d+)\.(\d+)\.(\d+)(\.(\d+))?/)) {
-		return RegExp.$1;		
+	var command = 'cmd /c ""' + EXE;
+	if (what == "version") {
+		command = command + '" -v"';
+	}
+	var version = execute(command + '" 2>&1"');
+
+	if (what == "64") {
+		if (version.match(/x64/)) {
+			return 1;
+		}
+	} else {
+		if (version.match(/(\d+\.\d+(\.\d+)?(\.\d+)?)/)) {
+			return RegExp.$1;
+		}
 	}
 	return 0;
 }
 
-VCVERS = probe_msvc_compiler_version(CL);
+// Which version of the compiler do we have?
+VCVERS = probe_binary(CL).substr(0, 2);
 STDOUT.WriteLine("Detected MS compiler version " + VCVERS);
 
 // 12 is VC6
 // 13 is vs.net 2003
 // 14 is vs.net 2005
+// 15 is vs.net 2008
 
 // do we use x64 or 80x86 version of compiler?
-function probe_msvc_compiler_x64(CL)
-{
-	// tricky escapes to get stderr redirection to work
-	var banner = execute('cmd /c ""' + CL + '" 2>&1"');
-	if (banner.match(/x64/)) {
-		return 1;		
-	}
-	return 0;
-}
-
-X64 = probe_msvc_compiler_x64(CL);
+X64 = probe_binary(CL, 64);
 if (X64) {
 	STDOUT.WriteLine("Detected 64-bit compiler");
 } else {
@@ -47,7 +50,6 @@ if (X64) {
 // cygwin now ships with link.exe.  Avoid searching the cygwin path
 // for this, as we want the MS linker, not the fileutil
 PATH_PROG('link', WshShell.Environment("Process").Item("PATH"));
-
 PATH_PROG('nmake');
 
 // we don't want to define LIB, as that will override the default library path
@@ -152,7 +154,8 @@ if (VCVERS < 14) {
 
 if (VCVERS >= 14) {
 	// fun stuff: MS deprecated ANSI stdio and similar functions
-	// disable annoying warnings
+	// disable annoying warnings.  In addition, time_t defaults
+	// to 64-bit.  Ask for 32-bit.
 	if (X64) {
 		ADD_FLAG('CFLAGS', ' /wd4996 /Wp64 ');
 	} else {
@@ -176,17 +179,13 @@ DEFINE("DLL_LDFLAGS", "/dll ");
 DEFINE("PHP_LDFLAGS", "$(DLL_LDFLAGS)");
 
 // General libs
-// urlmon.lib ole32.lib oleaut32.lib uuid.lib gdi32.lib winspool.lib comdlg32.lib 
+// urlmon.lib ole32.lib oleaut32.lib uuid.lib gdi32.lib winspool.lib comdlg32.lib
 DEFINE("LIBS", "kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib");
-
 
 // Set some debug/release specific options
 if (PHP_DEBUG == "yes") {
-	if (X64) {
-		ADD_FLAG("CFLAGS", "/LDd /MDd /Gm /Zi /Od /D _DEBUG /D ZEND_DEBUG=1");
-	} else {
-		ADD_FLAG("CFLAGS", "/LDd /MDd /Gm /ZI /Od /D _DEBUG /D ZEND_DEBUG=1");
-	}
+	ADD_FLAG("CFLAGS", "/LDd /MDd /Gm /Od /D _DEBUG /D ZEND_DEBUG=1 " +
+		(X64?"/Zi":"/ZI"));
 	ADD_FLAG("LDFLAGS", "/debug");
 	// Avoid problems when linking to release libraries that use the release
 	// version of the libc
@@ -207,7 +206,7 @@ if (PHP_DEBUG == "yes") {
 if (PHP_ZTS == "yes") {
 	ADD_FLAG("CFLAGS", "/D ZTS=1");
 }
-	
+
 // we want msvcrt in the PHP DLL
 ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:libcmt");
 
@@ -278,7 +277,7 @@ function probe_basic_headers()
 		ADD_FLAG("LDFLAGS", '/libpath:"' + p + '" ');
 		php_usual_lib_suspects += ";" + p;
 	} else if (!p) {
-		ERROR("We really need that arpa\\nameser.h file - it is part of the win32build package");
+		ERROR("We really need that arpa\\nameser.h file - it is part of the bindlib package");
 	}
 }
 
