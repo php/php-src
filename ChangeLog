@@ -1,3 +1,127 @@
+2008-07-01  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/mcrypt/mcrypt.c
+      ext/snmp/snmp.c
+      ext/sysvshm/sysvshm.c
+      ext/xml/xml.c:
+      - MFB: Added arginfo
+
+    * (PHP_5_3)
+      ext/mcrypt/mcrypt.c
+      ext/snmp/snmp.c
+      ext/sysvshm/sysvshm.c
+      ext/xml/xml.c:
+      - Added arginfo
+
+    * ext/sqlite/sqlite.c:
+      - MFB: Added arginfo (functions)
+
+    * (PHP_5_3)
+      ext/sqlite/sqlite.c:
+      - Added arginfo (functions)
+
+    * ext/sybase_ct/config.m4
+      ext/sybase_ct/php_sybase_ct.c:
+      MFB:
+      - Added arginfo
+      - Fixed
+        - PHP_SYBASE check
+        - compile warning
+
+    * (PHP_5_3)
+      ext/sybase_ct/php_sybase_ct.c:
+      - Added arginfo
+      - Fixed compile warning
+
+    * (PHP_5_3)
+      ext/sybase_ct/config.m4:
+      - Fix check for PHP_SYBASE
+
+2008-07-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c:
+      Removed redundant code
+
+2008-07-01  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/string.c:
+      - Removed unused variables
+
+    * (PHP_5_3)
+      ext/wddx/wddx.c:
+      - Fixed types
+      - Fixed protos
+
+2008-07-01  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/gd/tests/gif.phpt:
+      cleanup on test failure
+
+2008-07-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/formatted_print.c
+      ext/standard/formatted_print.c
+      ext/standard/tests/strings/fprintf_error.phpt:
+      Use new parameter parsing API
+
+2008-07-01  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/sysvshm/tests/001.phpt:
+      fix test
+
+    * ZendEngine2/zend_builtin_functions.c:
+      fix crash in define()
+
+    * ext/unicode/property.c:
+      misc parse_parameters fixes
+
+    * ext/standard/iptc.c:
+      this should be long
+
+    * ext/ldap/ldap.c:
+      MF53
+
+    * ext/curl/interface.c:
+      fix curl_init()
+      "s" in HEAD accepts zstr
+
+    * (PHP_5_3)
+      sapi/apache/php_apache.c:
+      long -> int + minor sources reorganization
+
+    * (PHP_5_3)
+      ext/wddx/wddx.c
+      ext/zip/php_zip.c:
+      fix typo
+
+    * (PHP_5_3)
+      ext/mbstring/mbstring.c
+      ext/mbstring/php_mbregex.c:
+      string length -> int
+
+    * (PHP_5_3)
+      ext/ldap/ldap.c:
+      int->long, add missing "s"
+
+    * (PHP_5_3)
+      ext/hash/hash.c:
+      more int -> long fixes
+
+    * (PHP_5_3)
+      ext/exif/exif.c:
+      more long -> int fixes
+
+    * (PHP_5_3)
+      ext/bz2/bz2.c:
+      on the contrary, string length is int
+
+    * ZendEngine2/zend_builtin_functions.c
+      ext/standard/math.c:
+      int -> long
+
 2008-06-30  Stanislav Malyshev  <stas@zend.com>
 
     * ZendEngine2/zend_builtin_functions.c:
