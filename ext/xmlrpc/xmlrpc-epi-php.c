@@ -881,12 +881,13 @@ PHP_FUNCTION(xmlrpc_server_destroy)
 {
 	zval *arg1;
 	int bSuccess = FAILURE, type;
+	xmlrpc_server_data *server;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
 		return;
 	}
 
-	xmlrpc_server_data *server = zend_list_find(Z_LVAL_P(arg1), &type);
+	server = zend_list_find(Z_LVAL_P(arg1), &type);
 
 	if (server && type == le_xmlrpc_server) {
 		bSuccess = zend_list_delete(Z_LVAL_P (arg1));
