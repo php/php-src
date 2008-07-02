@@ -16,7 +16,7 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id: buildconf.js,v 1.17 2008-05-14 11:32:28 mattwil Exp $ */
+/* $Id: buildconf.js,v 1.18 2008-07-02 20:53:36 pajoye Exp $ */
 // This generates a configure script for win32 build
 
 WScript.StdOut.WriteLine("Rebuilding configure.js");
@@ -55,7 +55,7 @@ function find_config_w32(dirname)
 	var	fc = new Enumerator(f.SubFolders);
 	var c, i, ok, n;
 	var item = null;
-	var re_dep_line = new RegExp("ADD_EXTENSION_DEP\\([^,]*\\s*,\\s*['\"]([^'\"]+)['\"].*\\);", "gm");
+	var re_dep_line = new RegExp("ADD_EXTENSION_DEP\\([^,]*\\s*,\\s*['\"]([^'\"]+)['\"].*\\)", "gm");
 	
 	for (; !fc.atEnd(); fc.moveNext())
 	{
@@ -73,7 +73,6 @@ function find_config_w32(dirname)
 			continue;
 		}
 
-			
 		c = FSO.BuildPath(fc.item(), "config.w32");
 		if (FSO.FileExists(c)) {
 //			WScript.StdOut.WriteLine(c);
@@ -91,6 +90,7 @@ function find_config_w32(dirname)
 					if (calls[i].match(re_dep_line)) {
 //						WScript.StdOut.WriteLine("n depends on " + RegExp.$1);
 						deps[deps.length] = RegExp.$1;
+
 					}
 				}
 			}
