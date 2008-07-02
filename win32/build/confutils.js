@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.73 2008-05-14 03:32:27 auroraeosrose Exp $
+// $Id: confutils.js,v 1.74 2008-07-02 20:54:10 pajoye Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -26,6 +26,19 @@ var FSO = WScript.CreateObject("Scripting.FileSystemObject");
 var MFO = null;
 var SYSTEM_DRIVE = WshShell.Environment("Process").Item("SystemDrive");
 var PROGRAM_FILES = WshShell.Environment("Process").Item("ProgramFiles");
+
+var extensions_enabled = new Array();
+var sapi_enabled = new Array();
+
+// 12 is VC6
+// 13 is vs.net 2003
+// 14 is vs.net 2005
+// 15 is vs.net 2008
+var VC_VERSIONS = new Array();
+VC_VERSIONS[12] = 'VC6';
+VC_VERSIONS[13] = 'Visual C++ 2003';
+VC_VERSIONS[14] = 'Visual C++ 2005';
+VC_VERSIONS[15] = 'Visual C++ 2008';
 
 if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files";
@@ -416,7 +429,11 @@ can be built that way. \
 				}
 			}
 			if (force) {
-				argval = "no";
+				if (arg.defval == '') {
+					argval = '';
+				} else {
+					argval = "no";
+				}
 				shared = false;
 			}
 		}
@@ -1001,6 +1018,7 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 	}
 
 	MFO.WriteBlankLines(1);
+	sapi_enabled[sapi_enabled.length] = [sapiname];
 }
 
 function ADD_DIST_FILE(filename)
@@ -1045,7 +1063,7 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 	
 	if (optional) {
 		if (dep_present == "no")
-			return;
+			return false;
 	}
 
 	var ext_shared = eval("PHP_" + EXT + "_SHARED");
@@ -1053,7 +1071,7 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 	if (dep_shared) {
 		if (!ext_shared) {
 			if (optional) {
-				return;
+				return false;
 			}
 			ERROR("static " + extname + " cannot depend on shared " + dependson);
 		}
@@ -1064,11 +1082,14 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 		if (dep_present == "no") {
 			if (ext_shared) {
 				WARNING(extname + " has a missing dependency: " + dependson);
+				return false;
 			} else {
 				ERROR("Cannot build " + extname + "; " + dependson + " not enabled");
+				return false;
 			}
 		}
-	} // dependency is statically built-in to PHP 
+	} // dependency is statically built-in to PHP
+	return true;
 }
 
 function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
@@ -1160,6 +1181,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		DEFINE('CFLAGS_' + EXT + '_OBJ', '$(CFLAGS_PHP) $(CFLAGS_' + EXT + ')');
 	}
 	ADD_FLAG("CFLAGS_" + EXT, cflags);
+	extensions_enabled[extensions_enabled.length] = [extname, shared ? 'shared' : 'static'];
 }
 
 function ADD_SOURCES(dir, file_list, target, obj_dir)
@@ -1277,6 +1299,104 @@ function generate_internal_functions()
 	outfile.Close();
 }
 
+function output_as_table(header, ar_out)
+{
+	var l = header.length;
+	var cols = 80;
+	var fixedlenght = "";
+	var t = 0;
+	var i,j,k,m;
+	var out = "| ";
+	var min = new Array(l);
+	var max = new Array(l);
+
+	if (l != ar_out[0].length) {
+		STDOUT.WriteLine("Invalid header argument, can't output the table " + l + " " + ar_out[0].length  );
+		return;
+	}
+	for (j=0; j < l; j++) {
+		var tmax, tmin;
+
+		/*Figure out the max length per column */
+		tmin = 0;
+		tmax = 0;
+		for (k = 0; k < ar_out.length; k++) {
+			var t = ar_out[k][j].length;
+			if (t > tmax) tmax = t;
+			else if (t < tmin) tmin = t;
+		}
+		if (tmax > header[j].length) {
+			max[j] = tmax;
+		} else {
+			max[j] = header[j].length;
+		}
+		if (tmin < header[j].length) {
+			min[j] = header[j].length;
+		}
+	}
+
+	sep = "";
+	k = 0;
+	for (i = 0; i < l; i++) {
+		k += max[i] + 3;
+	}
+	k++;
+
+	for (j=0; j < k; j++) {
+		sep += "-";
+	}
+
+	STDOUT.WriteLine(sep);
+	out = "|";
+	for (j=0; j < l; j++) {
+		out += " " + header[j];
+		for (var i = 0; i < (max[j] - header[j].length); i++){
+			out += " ";
+		}
+		out += " |";
+	}
+	STDOUT.WriteLine(out);
+
+	STDOUT.WriteLine(sep);
+
+	out = "|";
+	for (i=0; i < ar_out.length; i++) {
+		line = ar_out[i];
+		for (j=0; j < l; j++) {
+			out += " " + line[j];
+			for (var k = 0; k < (max[j] - line[j].length); k++){
+				out += " ";
+			}
+			out += " |";
+		}
+		STDOUT.WriteLine(out);
+		out = "|";
+	}
+
+	STDOUT.WriteLine(sep);
+}
+
+function write_summary()
+{
+	var ar = new Array();
+
+	STDOUT.WriteBlankLines(2);
+
+	STDOUT.WriteLine("Enabled extensions:");
+	output_as_table(["Extension", "Mode"], extensions_enabled);
+	STDOUT.WriteBlankLines(2);
+
+	STDOUT.WriteLine("Enabled SAPI:");
+	output_as_table(["Sapi Name"], sapi_enabled);
+	STDOUT.WriteBlankLines(2);
+
+	ar[0] = ['Compiler', VC_VERSIONS[VCVERS]];
+	ar[1] = ['Architecture', X64 ? 'x64' : 'x86'];
+
+	output_as_table(["",""], ar);
+	STDOUT.WriteBlankLines(2);
+}
+
 function generate_files()
 {
 	var i, dir, bd, last;
@@ -1302,15 +1422,16 @@ function generate_files()
 			FSO.CreateFolder(bd);
 		}
 	}
-		
+	
 	STDOUT.WriteLine("Generating files...");
 	generate_makefile();
 	generate_internal_functions();
 	generate_config_h();
-
-
 	STDOUT.WriteLine("Done.");
 	STDOUT.WriteBlankLines(1);
+
+	write_summary();
+
 	if (PHP_SNAPSHOT_BUILD != "no") {
 		STDOUT.WriteLine("Type 'nmake snap' to build a PHP snapshot");
 	} else {
@@ -1465,6 +1586,11 @@ function AC_DEFINE(name, value, comment, quote)
 	} else {
 		configure_hdr.Add(name, item);
 	}
+}
+
+function MESSAGE(msg)
+{
+	STDOUT.WriteLine("" + msg);
 }
 
 function ERROR(msg)
