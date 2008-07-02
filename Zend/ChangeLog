@@ -1,3 +1,17 @@
+2008-07-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c
+      zend_execute.c:
+      Removed redundant code
+
+2008-07-01  Antony Dovgal  <tony@daylessday.org>
+
+    * zend_builtin_functions.c:
+      fix crash in define()
+
+    * zend_builtin_functions.c:
+      int -> long
+
 2008-06-30  Stanislav Malyshev  <stas@zend.com>
 
     * zend_builtin_functions.c:
