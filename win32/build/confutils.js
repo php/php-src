@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.17 2008-06-23 11:44:21 pajoye Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.18 2008-07-02 20:50:18 pajoye Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -29,6 +29,16 @@ var PROGRAM_FILES = WshShell.Environment("Process").Item("ProgramFiles");
 
 var extensions_enabled = new Array();
 var sapi_enabled = new Array();
+
+// 12 is VC6
+// 13 is vs.net 2003
+// 14 is vs.net 2005
+// 15 is vs.net 2008
+var VC_VERSIONS = new Array();
+VC_VERSIONS[12] = 'VC6';
+VC_VERSIONS[13] = 'Visual C++ 2003';
+VC_VERSIONS[14] = 'Visual C++ 2005';
+VC_VERSIONS[15] = 'Visual C++ 2008';
 
 if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files";
@@ -1304,7 +1314,6 @@ function output_as_table(header, ar_out)
 		STDOUT.WriteLine("Invalid header argument, can't output the table " + l + " " + ar_out[0].length  );
 		return;
 	}
-
 	for (j=0; j < l; j++) {
 		var tmax, tmin;
 
@@ -1316,8 +1325,14 @@ function output_as_table(header, ar_out)
 			if (t > tmax) tmax = t;
 			else if (t < tmin) tmin = t;
 		}
-		max[j] = tmax;
-		min[j] = tmin;
+		if (tmax > header[j].length) {
+			max[j] = tmax;
+		} else {
+			max[j] = header[j].length;
+		}
+		if (tmin < header[j].length) {
+			min[j] = header[j].length;
+		}
 	}
 
 	sep = "";
@@ -1361,6 +1376,27 @@ function output_as_table(header, ar_out)
 	STDOUT.WriteLine(sep);
 }
 
+function write_summary()
+{
+	var ar = new Array();
+
+	STDOUT.WriteBlankLines(2);
+
+	STDOUT.WriteLine("Enabled extensions:");
+	output_as_table(["Extension", "Mode"], extensions_enabled);
+	STDOUT.WriteBlankLines(2);
+
+	STDOUT.WriteLine("Enabled SAPI:");
+	output_as_table(["Sapi Name"], sapi_enabled);
+	STDOUT.WriteBlankLines(2);
+
+	ar[0] = ['Compiler', VC_VERSIONS[VCVERS]];
+	ar[1] = ['Architecture', X64 ? 'x64' : 'x86'];
+
+	output_as_table(["",""], ar);
+	STDOUT.WriteBlankLines(2);
+}
+
 function generate_files()
 {
 	var i, dir, bd, last;
@@ -1386,24 +1422,16 @@ function generate_files()
 			FSO.CreateFolder(bd);
 		}
 	}
-		
+	
 	STDOUT.WriteLine("Generating files...");
 	generate_makefile();
 	generate_internal_functions();
 	generate_config_h();
-
-	STDOUT.WriteBlankLines(2);
-
-	STDOUT.WriteLine("Enabled extensions:");
-	output_as_table(["Extension", "Mode"], extensions_enabled);
-	STDOUT.WriteBlankLines(2);
-
-	STDOUT.WriteLine("Enabled SAPI:");
-	output_as_table(["Sapi Name"], sapi_enabled);
-	STDOUT.WriteBlankLines(2);
-
 	STDOUT.WriteLine("Done.");
 	STDOUT.WriteBlankLines(1);
+
+	write_summary();
+
 	if (PHP_SNAPSHOT_BUILD != "no") {
 		STDOUT.WriteLine("Type 'nmake snap' to build a PHP snapshot");
 	} else {
