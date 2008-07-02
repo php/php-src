@@ -89,158 +89,693 @@
 ZEND_DECLARE_MODULE_GLOBALS(pgsql)
 static PHP_GINIT_FUNCTION(pgsql);
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_connect, 0, 0, 1)
+	ZEND_ARG_INFO(0, connection_string)
+	ZEND_ARG_INFO(0, connect_type)
+	ZEND_ARG_INFO(0, host)
+	ZEND_ARG_INFO(0, port)
+	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, tty)
+	ZEND_ARG_INFO(0, database)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_pconnect, 0, 0, 1)
+	ZEND_ARG_INFO(0, connection_string)
+	ZEND_ARG_INFO(0, host)
+	ZEND_ARG_INFO(0, port)
+	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, tty)
+	ZEND_ARG_INFO(0, database)
+ZEND_END_ARG_INFO()
+
+#if HAVE_PQPARAMETERSTATUS
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_parameter_status, 0, 0, 1)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, param_name)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_close, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_dbname, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_last_error, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_options, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_port, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_tty, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_host, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_version, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_ping, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_query, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, query)
+ZEND_END_ARG_INFO()
+
+#if HAVE_PQEXECPARAMS
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_query_params, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, params)
+ZEND_END_ARG_INFO()
+#endif
+
+#if HAVE_PQPREPARE
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_prepare, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, stmtname)
+	ZEND_ARG_INFO(0, query)
+ZEND_END_ARG_INFO()
+#endif
+
+#if HAVE_PQEXECPREPARED
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_execute, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, stmtname)
+	ZEND_ARG_INFO(0, params)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_num_rows, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_num_fields, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+#if HAVE_PQCMDTUPLES
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_affected_rows, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_last_notice, 0, 0, 1)
+	ZEND_ARG_INFO(0, connection)
+ZEND_END_ARG_INFO()
+
+#ifdef HAVE_PQFTABLE
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_field_table, 0, 0, 2)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, field_number)
+	ZEND_ARG_INFO(0, oid_only)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_field_name, 0, 0, 2)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, field_number)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_field_size, 0, 0, 2)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, field_number)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_field_type, 0, 0, 2)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, field_number)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_field_type_oid, 0, 0, 2)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, field_number)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_field_num, 0, 0, 2)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, field_name)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_result, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, row_number)
+	ZEND_ARG_INFO(0, field_name)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_row, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, row)
+	ZEND_ARG_INFO(0, result_type)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_assoc, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, row)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_array, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, row)
+	ZEND_ARG_INFO(0, result_type)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_object, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, row)
+	ZEND_ARG_INFO(0, class_name)
+	ZEND_ARG_INFO(0, l)
+	ZEND_ARG_INFO(0, ctor_params)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_all, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_all_columns, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, column_number)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_result_seek, 0, 0, 2)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, offset)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_field_prtlen, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, row)
+	ZEND_ARG_INFO(0, field_name_or_number)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_field_is_null, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, row)
+	ZEND_ARG_INFO(0, field_name_or_number)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_free_result, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_last_oid, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_trace, 0, 0, 1)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, connection)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_untrace, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_create, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_unlink, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, large_object_oid)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_open, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, large_object_oid)
+	ZEND_ARG_INFO(0, mode)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_close, 0, 0, 1)
+	ZEND_ARG_INFO(0, large_object)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_read, 0, 0, 1)
+	ZEND_ARG_INFO(0, large_object)
+	ZEND_ARG_INFO(0, len)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_write, 0, 0, 2)
+	ZEND_ARG_INFO(0, large_object)
+	ZEND_ARG_INFO(0, buf)
+	ZEND_ARG_INFO(0, len)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_read_all, 0, 0, 1)
+	ZEND_ARG_INFO(0, large_object)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_import, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_export, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, objoid)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_seek, 0, 0, 2)
+	ZEND_ARG_INFO(0, large_object)
+	ZEND_ARG_INFO(0, offset)
+	ZEND_ARG_INFO(0, whence)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_tell, 0, 0, 1)
+	ZEND_ARG_INFO(0, large_object)
+ZEND_END_ARG_INFO()
+
+#if HAVE_PQSETERRORVERBOSITY
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_set_error_verbosity, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, verbosity)
+ZEND_END_ARG_INFO()
+#endif
+
+#if HAVE_PQCLIENTENCODING
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_set_client_encoding, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_client_encoding, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_end_copy, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_put_line, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, query)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_copy_to, 0, 0, 2)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, table_name)
+	ZEND_ARG_INFO(0, delimiter)
+	ZEND_ARG_INFO(0, null_as)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_copy_from, 0, 0, 3)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, table_name)
+	ZEND_ARG_INFO(0, rows)
+	ZEND_ARG_INFO(0, delimiter)
+	ZEND_ARG_INFO(0, null_as)
+ZEND_END_ARG_INFO()
+
+#if HAVE_PQESCAPE
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_escape_string, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, data)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_escape_bytea, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, data)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_unescape_bytea, 0, 0, 1)
+	ZEND_ARG_INFO(0, data)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_result_error, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+#if HAVE_PQRESULTERRORFIELD
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_result_error_field, 0, 0, 2)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, fieldcode)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_connection_status, 0, 0, 1)
+	ZEND_ARG_INFO(0, connnection)
+ZEND_END_ARG_INFO()
+
+#if HAVE_PGTRANSACTIONSTATUS
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_transaction_status, 0, 0, 1)
+	ZEND_ARG_INFO(0, connnection)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_connection_reset, 0, 0, 1)
+	ZEND_ARG_INFO(0, connection)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_cancel_query, 0, 0, 1)
+	ZEND_ARG_INFO(0, connection)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_connection_busy, 0, 0, 1)
+	ZEND_ARG_INFO(0, connection)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_send_query, 0, 0, 2)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, query)
+ZEND_END_ARG_INFO()
+
+#if HAVE_PQSENDQUERYPARAMS
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_send_query_params, 0, 0, 3)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, params)
+ZEND_END_ARG_INFO()
+#endif
+
+#if HAVE_PQSENDPREPARE
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_send_prepare, 0, 0, 3)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, stmtname)
+	ZEND_ARG_INFO(0, query)
+ZEND_END_ARG_INFO()
+#endif
+
+#if HAVE_PQSENDQUERYPREPARED
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_send_execute, 0, 0, 3)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, stmtname)
+	ZEND_ARG_INFO(0, params)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_get_result, 0, 0, 1)
+	ZEND_ARG_INFO(0, connection)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_result_status, 0, 0, 1)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, result_type)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_get_notify, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, e)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_get_pid, 0, 0, 0)
+	ZEND_ARG_INFO(0, connection)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_meta_data, 0, 0, 2)
+	ZEND_ARG_INFO(0, db)
+	ZEND_ARG_INFO(0, table)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_convert, 0, 0, 3)
+	ZEND_ARG_INFO(0, db)
+	ZEND_ARG_INFO(0, table)
+	ZEND_ARG_INFO(0, values)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_insert, 0, 0, 3)
+	ZEND_ARG_INFO(0, db)
+	ZEND_ARG_INFO(0, table)
+	ZEND_ARG_INFO(0, values)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_update, 0, 0, 4)
+	ZEND_ARG_INFO(0, db)
+	ZEND_ARG_INFO(0, table)
+	ZEND_ARG_INFO(0, fields)
+	ZEND_ARG_INFO(0, ids)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_delete, 0, 0, 3)
+	ZEND_ARG_INFO(0, db)
+	ZEND_ARG_INFO(0, table)
+	ZEND_ARG_INFO(0, ids)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_select, 0, 0, 3)
+	ZEND_ARG_INFO(0, db)
+	ZEND_ARG_INFO(0, table)
+	ZEND_ARG_INFO(0, ids)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 /* {{{ pgsql_functions[]
  */
 const zend_function_entry pgsql_functions[] = {
 	/* connection functions */
-	PHP_FE(pg_connect,		NULL)
-	PHP_FE(pg_pconnect,		NULL)
-	PHP_FE(pg_close,		NULL)
-	PHP_FE(pg_connection_status,	NULL)
-	PHP_FE(pg_connection_busy,		NULL)
-	PHP_FE(pg_connection_reset,		NULL)
-	PHP_FE(pg_host,			NULL)
-	PHP_FE(pg_dbname,		NULL)
-	PHP_FE(pg_port,			NULL)
-	PHP_FE(pg_tty,			NULL)
-	PHP_FE(pg_options,		NULL)
-	PHP_FE(pg_version,		NULL)
-	PHP_FE(pg_ping,			NULL)
+	PHP_FE(pg_connect,		arginfo_pg_connect)
+	PHP_FE(pg_pconnect,		arginfo_pg_pconnect)
+	PHP_FE(pg_close,		arginfo_pg_close)
+	PHP_FE(pg_connection_status,	arginfo_pg_connection_status)
+	PHP_FE(pg_connection_busy,		arginfo_pg_connection_busy)
+	PHP_FE(pg_connection_reset,		arginfo_pg_connection_reset)
+	PHP_FE(pg_host,			arginfo_pg_host)
+	PHP_FE(pg_dbname,		arginfo_pg_dbname)
+	PHP_FE(pg_port,			arginfo_pg_port)
+	PHP_FE(pg_tty,			arginfo_pg_tty)
+	PHP_FE(pg_options,		arginfo_pg_options)
+	PHP_FE(pg_version,		arginfo_pg_version)
+	PHP_FE(pg_ping,			arginfo_pg_ping)
 #if HAVE_PQPARAMETERSTATUS
-	PHP_FE(pg_parameter_status, NULL)
+	PHP_FE(pg_parameter_status, arginfo_pg_parameter_status)
 #endif
 #if HAVE_PGTRANSACTIONSTATUS
-	PHP_FE(pg_transaction_status, NULL)
+	PHP_FE(pg_transaction_status, arginfo_pg_transaction_status)
 #endif
 	/* query functions */
-	PHP_FE(pg_query,		NULL)
+	PHP_FE(pg_query,		arginfo_pg_query)
 #if HAVE_PQEXECPARAMS
-	PHP_FE(pg_query_params,		NULL)
+	PHP_FE(pg_query_params,		arginfo_pg_query_params)
 #endif
 #if HAVE_PQPREPARE
-	PHP_FE(pg_prepare,		NULL)
+	PHP_FE(pg_prepare,		arginfo_pg_prepare)
 #endif
 #if HAVE_PQEXECPREPARED
-	PHP_FE(pg_execute,		NULL)
+	PHP_FE(pg_execute,		arginfo_pg_execute)
 #endif
-	PHP_FE(pg_send_query,	NULL)
+	PHP_FE(pg_send_query,	arginfo_pg_send_query)
 #if HAVE_PQSENDQUERYPARAMS
-	PHP_FE(pg_send_query_params,	NULL)
+	PHP_FE(pg_send_query_params,	arginfo_pg_send_query_params)
 #endif
 #if HAVE_PQSENDPREPARE
-	PHP_FE(pg_send_prepare,	NULL)
+	PHP_FE(pg_send_prepare,	arginfo_pg_send_prepare)
 #endif
 #if HAVE_PQSENDQUERYPREPARED
-	PHP_FE(pg_send_execute,	NULL)
+	PHP_FE(pg_send_execute,	arginfo_pg_send_execute)
 #endif
-	PHP_FE(pg_cancel_query, NULL)
+	PHP_FE(pg_cancel_query, arginfo_pg_cancel_query)
 	/* result functions */
-	PHP_FE(pg_fetch_result,	NULL)
-	PHP_FE(pg_fetch_row,	NULL)
-	PHP_FE(pg_fetch_assoc,	NULL)
-	PHP_FE(pg_fetch_array,	NULL)
-	PHP_FE(pg_fetch_object,	NULL)
-	PHP_FE(pg_fetch_all,	NULL)
-	PHP_FE(pg_fetch_all_columns,	NULL)
+	PHP_FE(pg_fetch_result,	arginfo_pg_fetch_result)
+	PHP_FE(pg_fetch_row,	arginfo_pg_fetch_row)
+	PHP_FE(pg_fetch_assoc,	arginfo_pg_fetch_assoc)
+	PHP_FE(pg_fetch_array,	arginfo_pg_fetch_array)
+	PHP_FE(pg_fetch_object,	arginfo_pg_fetch_object)
+	PHP_FE(pg_fetch_all,	arginfo_pg_fetch_all)
+	PHP_FE(pg_fetch_all_columns,	arginfo_pg_fetch_all_columns)
 #if HAVE_PQCMDTUPLES
-	PHP_FE(pg_affected_rows,NULL)
+	PHP_FE(pg_affected_rows,arginfo_pg_affected_rows)
 #endif
-	PHP_FE(pg_get_result,	NULL)
-	PHP_FE(pg_result_seek,	NULL)
-	PHP_FE(pg_result_status,NULL)
-	PHP_FE(pg_free_result,	NULL)
-	PHP_FE(pg_last_oid,	    NULL)
-	PHP_FE(pg_num_rows,		NULL)
-	PHP_FE(pg_num_fields,	NULL)
-	PHP_FE(pg_field_name,	NULL)
-	PHP_FE(pg_field_num,	NULL)
-	PHP_FE(pg_field_size,	NULL)
-	PHP_FE(pg_field_type,	NULL)
-	PHP_FE(pg_field_type_oid, NULL)
-	PHP_FE(pg_field_prtlen,	NULL)
-	PHP_FE(pg_field_is_null,NULL)
+	PHP_FE(pg_get_result,	arginfo_pg_get_result)
+	PHP_FE(pg_result_seek,	arginfo_pg_result_seek)
+	PHP_FE(pg_result_status,arginfo_pg_result_status)
+	PHP_FE(pg_free_result,	arginfo_pg_free_result)
+	PHP_FE(pg_last_oid,	    arginfo_pg_last_oid)
+	PHP_FE(pg_num_rows,		arginfo_pg_num_rows)
+	PHP_FE(pg_num_fields,	arginfo_pg_num_fields)
+	PHP_FE(pg_field_name,	arginfo_pg_field_name)
+	PHP_FE(pg_field_num,	arginfo_pg_field_num)
+	PHP_FE(pg_field_size,	arginfo_pg_field_size)
+	PHP_FE(pg_field_type,	arginfo_pg_field_type)
+	PHP_FE(pg_field_type_oid, arginfo_pg_field_type_oid)
+	PHP_FE(pg_field_prtlen,	arginfo_pg_field_prtlen)
+	PHP_FE(pg_field_is_null,arginfo_pg_field_is_null)
 #ifdef HAVE_PQFTABLE
-	PHP_FE(pg_field_table,  NULL)
+	PHP_FE(pg_field_table,  arginfo_pg_field_table)
 #endif
 	/* async message function */
-	PHP_FE(pg_get_notify,   NULL)
-	PHP_FE(pg_get_pid,      NULL)
+	PHP_FE(pg_get_notify,   arginfo_pg_get_notify)
+	PHP_FE(pg_get_pid,      arginfo_pg_get_pid)
 	/* error message functions */
-	PHP_FE(pg_result_error, NULL)
+	PHP_FE(pg_result_error, arginfo_pg_result_error)
 #if HAVE_PQRESULTERRORFIELD
-	PHP_FE(pg_result_error_field, NULL)
+	PHP_FE(pg_result_error_field, arginfo_pg_result_error_field)
 #endif
-	PHP_FE(pg_last_error,   NULL)
-	PHP_FE(pg_last_notice,  NULL)
+	PHP_FE(pg_last_error,   arginfo_pg_last_error)
+	PHP_FE(pg_last_notice,  arginfo_pg_last_notice)
 	/* copy functions */
-	PHP_FE(pg_put_line,		NULL)
-	PHP_FE(pg_end_copy,		NULL)
-	PHP_FE(pg_copy_to,      NULL)
-	PHP_FE(pg_copy_from,    NULL)
+	PHP_FE(pg_put_line,		arginfo_pg_put_line)
+	PHP_FE(pg_end_copy,		arginfo_pg_end_copy)
+	PHP_FE(pg_copy_to,      arginfo_pg_copy_to)
+	PHP_FE(pg_copy_from,    arginfo_pg_copy_from)
 	/* debug functions */
-	PHP_FE(pg_trace,		NULL)
-	PHP_FE(pg_untrace,		NULL)
+	PHP_FE(pg_trace,		arginfo_pg_trace)
+	PHP_FE(pg_untrace,		arginfo_pg_untrace)
 	/* large object functions */
-	PHP_FE(pg_lo_create,	NULL)
-	PHP_FE(pg_lo_unlink,	NULL)
-	PHP_FE(pg_lo_open,		NULL)
-	PHP_FE(pg_lo_close,		NULL)
-	PHP_FE(pg_lo_read,		NULL)
-	PHP_FE(pg_lo_write,		NULL)
-	PHP_FE(pg_lo_read_all,	NULL)
-	PHP_FE(pg_lo_import,	NULL)
-	PHP_FE(pg_lo_export,	NULL)
-	PHP_FE(pg_lo_seek,		NULL)
-	PHP_FE(pg_lo_tell,		NULL)
+	PHP_FE(pg_lo_create,	arginfo_pg_lo_create)
+	PHP_FE(pg_lo_unlink,	arginfo_pg_lo_unlink)
+	PHP_FE(pg_lo_open,		arginfo_pg_lo_open)
+	PHP_FE(pg_lo_close,		arginfo_pg_lo_close)
+	PHP_FE(pg_lo_read,		arginfo_pg_lo_read)
+	PHP_FE(pg_lo_write,		arginfo_pg_lo_write)
+	PHP_FE(pg_lo_read_all,	arginfo_pg_lo_read_all)
+	PHP_FE(pg_lo_import,	arginfo_pg_lo_import)
+	PHP_FE(pg_lo_export,	arginfo_pg_lo_export)
+	PHP_FE(pg_lo_seek,		arginfo_pg_lo_seek)
+	PHP_FE(pg_lo_tell,		arginfo_pg_lo_tell)
 	/* utility functions */
 #if HAVE_PQESCAPE
-	PHP_FE(pg_escape_string,NULL)
-	PHP_FE(pg_escape_bytea, NULL)
-	PHP_FE(pg_unescape_bytea, NULL)
+	PHP_FE(pg_escape_string,	arginfo_pg_escape_string)
+	PHP_FE(pg_escape_bytea, 	arginfo_pg_escape_bytea)
+	PHP_FE(pg_unescape_bytea, 	arginfo_pg_unescape_bytea)
 #endif
 #if HAVE_PQSETERRORVERBOSITY
-	PHP_FE(pg_set_error_verbosity,	NULL)
+	PHP_FE(pg_set_error_verbosity,	arginfo_pg_set_error_verbosity)
 #endif
 #if HAVE_PQCLIENTENCODING
-	PHP_FE(pg_client_encoding,		NULL)
-	PHP_FE(pg_set_client_encoding,	NULL)
+	PHP_FE(pg_client_encoding,		arginfo_pg_client_encoding)
+	PHP_FE(pg_set_client_encoding,	arginfo_pg_set_client_encoding)
 #endif
 	/* misc function */
-	PHP_FE(pg_meta_data,	NULL)
-	PHP_FE(pg_convert,      NULL)
-	PHP_FE(pg_insert,       NULL)
-	PHP_FE(pg_update,       NULL)
-	PHP_FE(pg_delete,       NULL)
-	PHP_FE(pg_select,       NULL)
+	PHP_FE(pg_meta_data,	arginfo_pg_meta_data)
+	PHP_FE(pg_convert,      arginfo_pg_convert)
+	PHP_FE(pg_insert,       arginfo_pg_insert)
+	PHP_FE(pg_update,       arginfo_pg_update)
+	PHP_FE(pg_delete,       arginfo_pg_delete)
+	PHP_FE(pg_select,       arginfo_pg_select)
 	/* aliases for downwards compatibility */
-	PHP_FALIAS(pg_exec,          pg_query,          NULL)
-	PHP_FALIAS(pg_getlastoid,    pg_last_oid,       NULL)
+	PHP_FALIAS(pg_exec,          pg_query,          arginfo_pg_query)
+	PHP_FALIAS(pg_getlastoid,    pg_last_oid,       arginfo_pg_last_oid)
 #if HAVE_PQCMDTUPLES
-	PHP_FALIAS(pg_cmdtuples,	 pg_affected_rows,  NULL)
+	PHP_FALIAS(pg_cmdtuples,	 pg_affected_rows,  arginfo_pg_affected_rows)
 #endif
-	PHP_FALIAS(pg_errormessage,	 pg_last_error,     NULL)
-	PHP_FALIAS(pg_numrows,		 pg_num_rows,       NULL)
-	PHP_FALIAS(pg_numfields,	 pg_num_fields,     NULL)
-	PHP_FALIAS(pg_fieldname,	 pg_field_name,     NULL)
-	PHP_FALIAS(pg_fieldsize,     pg_field_size,     NULL)
-	PHP_FALIAS(pg_fieldtype,	 pg_field_type,     NULL)
-	PHP_FALIAS(pg_fieldnum,	     pg_field_num,      NULL)
-	PHP_FALIAS(pg_fieldprtlen,	 pg_field_prtlen,   NULL)
-	PHP_FALIAS(pg_fieldisnull,	 pg_field_is_null,  NULL)
-	PHP_FALIAS(pg_freeresult,    pg_free_result,    NULL)
-	PHP_FALIAS(pg_result,	     pg_fetch_result,   NULL)
-	PHP_FALIAS(pg_loreadall,	 pg_lo_read_all,    NULL)
-	PHP_FALIAS(pg_locreate,	     pg_lo_create,      NULL)
-	PHP_FALIAS(pg_lounlink,	     pg_lo_unlink,      NULL)
-	PHP_FALIAS(pg_loopen,	     pg_lo_open,        NULL)
-	PHP_FALIAS(pg_loclose,	     pg_lo_close,       NULL)
-	PHP_FALIAS(pg_loread,	     pg_lo_read,        NULL)
-	PHP_FALIAS(pg_lowrite,	     pg_lo_write,       NULL)
-	PHP_FALIAS(pg_loimport,	     pg_lo_import,      NULL)
-	PHP_FALIAS(pg_loexport,	     pg_lo_export,      NULL)
+	PHP_FALIAS(pg_errormessage,	 pg_last_error,     arginfo_pg_last_error)
+	PHP_FALIAS(pg_numrows,		 pg_num_rows,       arginfo_pg_num_rows)
+	PHP_FALIAS(pg_numfields,	 pg_num_fields,     arginfo_pg_num_fields)
+	PHP_FALIAS(pg_fieldname,	 pg_field_name,     arginfo_pg_field_name)
+	PHP_FALIAS(pg_fieldsize,     pg_field_size,     arginfo_pg_field_size)
+	PHP_FALIAS(pg_fieldtype,	 pg_field_type,     arginfo_pg_field_type)
+	PHP_FALIAS(pg_fieldnum,	     pg_field_num,      arginfo_pg_field_num)
+	PHP_FALIAS(pg_fieldprtlen,	 pg_field_prtlen,   arginfo_pg_field_prtlen)
+	PHP_FALIAS(pg_fieldisnull,	 pg_field_is_null,  arginfo_pg_field_is_null)
+	PHP_FALIAS(pg_freeresult,    pg_free_result,    arginfo_pg_free_result)
+	PHP_FALIAS(pg_result,	     pg_fetch_result,   arginfo_pg_get_result)
+	PHP_FALIAS(pg_loreadall,	 pg_lo_read_all,    arginfo_pg_lo_read_all)
+	PHP_FALIAS(pg_locreate,	     pg_lo_create,      arginfo_pg_lo_create)
+	PHP_FALIAS(pg_lounlink,	     pg_lo_unlink,      arginfo_pg_lo_unlink)
+	PHP_FALIAS(pg_loopen,	     pg_lo_open,        arginfo_pg_lo_open)
+	PHP_FALIAS(pg_loclose,	     pg_lo_close,       arginfo_pg_lo_close)
+	PHP_FALIAS(pg_loread,	     pg_lo_read,        arginfo_pg_lo_read)
+	PHP_FALIAS(pg_lowrite,	     pg_lo_write,       arginfo_pg_lo_write)
+	PHP_FALIAS(pg_loimport,	     pg_lo_import,      arginfo_pg_lo_import)
+	PHP_FALIAS(pg_loexport,	     pg_lo_export,      arginfo_pg_lo_export)
 #if HAVE_PQCLIENTENCODING
-	PHP_FALIAS(pg_clientencoding,		pg_client_encoding,		NULL)
-	PHP_FALIAS(pg_setclientencoding,	pg_set_client_encoding,	NULL)
+	PHP_FALIAS(pg_clientencoding,		pg_client_encoding,		arginfo_pg_client_encoding)
+	PHP_FALIAS(pg_setclientencoding,	pg_set_client_encoding,	arginfo_pg_set_client_encoding)
 #endif
 	{NULL, NULL, NULL} 
 };
