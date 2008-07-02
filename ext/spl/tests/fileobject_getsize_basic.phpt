@@ -14,7 +14,9 @@ $s = new SplFileObject( $file );
 echo $s->getSize();
 ?>
 --CLEAN--
+<?php
 $file = __DIR__ ."/data.txt";
 unlink($file);
+?>
 --EXPECT--
 6
