@@ -8,7 +8,7 @@ CL = PATH_PROG('cl');
 if (!CL) {
 	ERROR("MS C++ compiler is required");
 }
-
+// Which version of the compiler do we have ?
 function probe_binary(EXE, what)
 {
 	// tricky escapes to get stderr redirection to work
@@ -33,9 +33,11 @@ function probe_binary(EXE, what)
 // Which version of the compiler do we have?
 VCVERS = probe_binary(CL).substr(0, 2);
 STDOUT.WriteLine("Detected MS compiler version " + VCVERS);
+
 // 12 is VC6
 // 13 is vs.net 2003
 // 14 is vs.net 2005
+// 15 is vs.net 2008
 
 // do we use x64 or 80x86 version of compiler?
 X64 = probe_binary(CL, 64);
@@ -60,12 +62,23 @@ if (!PATH_PROG('bison')) {
 // There's a minimum requirement for re2c..
 MINRE2C = "0.13.4";
 
+function probe_re2c_version(RE2C)
+{
+	var command = "cmd /c " + RE2C + " -v";
+	var version = execute(command + '" 2>&1"');
+
+	if (version.match(/((\d+)\.(\d+)\.(\d+))/)) {
+		return RegExp.$1;
+	}
+	return 0;
+}
+
 RE2C = PATH_PROG('re2c');
 if (RE2C) {
 	var intvers, intmin;
 	var pattern = /\./g;
 
-	RE2CVERS = probe_binary(RE2C, "version");
+	RE2CVERS = probe_re2c_version(RE2C);
 	intvers = RE2CVERS.replace(pattern, '') - 0;
 	intmin = MINRE2C.replace(pattern, '') - 0;
 
@@ -200,20 +213,20 @@ ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:libcmt");
 // set up the build dir and DLL name
 if (PHP_DEBUG == "yes" && PHP_ZTS == "yes") {
 	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Debug_TS");
-	DEFINE("PHPDLL", "php5ts_debug.dll");
-	DEFINE("PHPLIB", "php5ts_debug.lib");
+	DEFINE("PHPDLL", "php" + PHP_VERSION + "ts_debug.dll");
+	DEFINE("PHPLIB", "php" + PHP_VERSION + "ts_debug.lib");
 } else if (PHP_DEBUG == "yes" && PHP_ZTS == "no") {
 	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Debug");
-	DEFINE("PHPDLL", "php5_debug.dll");
-	DEFINE("PHPLIB", "php5_debug.lib");
+	DEFINE("PHPDLL", "php" + PHP_VERSION + "_debug.dll");
+	DEFINE("PHPLIB", "php" + PHP_VERSION + "_debug.lib");
 } else if (PHP_DEBUG == "no" && PHP_ZTS == "yes") {
 	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Release_TS");
-	DEFINE("PHPDLL", "php5ts.dll");
-	DEFINE("PHPLIB", "php5ts.lib");
+	DEFINE("PHPDLL", "php" + PHP_VERSION + "ts.dll");
+	DEFINE("PHPLIB", "php" + PHP_VERSION + "ts.lib");
 } else if (PHP_DEBUG == "no" && PHP_ZTS == "no") {
 	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Release");
-	DEFINE("PHPDLL", "php5.dll");
-	DEFINE("PHPLIB", "php5.lib");
+	DEFINE("PHPDLL", "php" + PHP_VERSION + ".dll");
+	DEFINE("PHPLIB", "php" + PHP_VERSION + ".lib");
 }
 
 // Find the php_build dir - it contains headers and libraries
