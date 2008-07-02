@@ -1870,7 +1870,12 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 #define FileFunctionCall(func_name, pass_num_args, arg2) /* {{{ */\
 { \
 	zend_function *func_ptr; \
-	zend_hash_find(EG(function_table), #func_name, sizeof(#func_name), (void **) &func_ptr); \
+	int ret; \
+	ret = zend_ascii_hash_find(EG(function_table), #func_name, sizeof(#func_name), (void **) &func_ptr); \
+	if (ret != SUCCESS) { \
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Internal error, function '%s' not found. Please report", #func_name); \
+		return; \
+	} \
 	spl_filesystem_file_call(intern, func_ptr, pass_num_args, return_value, arg2 TSRMLS_CC); \
 } /* }}} */
 
