@@ -31,6 +31,7 @@ Zend Extension => %d
 Debug Build => %s
 Thread Safety => %s
 Zend Memory Manager => %s
+Zend multibyte support => %s
 IPv6 Support => %s
 Registered PHP Streams => %s
 Registered Stream Socket Transports => %s
