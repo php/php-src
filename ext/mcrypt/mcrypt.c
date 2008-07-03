@@ -1218,7 +1218,7 @@ int php_mcrypt_iv(php_mcrypt_iv_source source, int size, char **iv_str, int *iv_
 
 			/* It could be done using LoadLibrary but as we rely on 2k+ for 5.3, cleaner to use a clear dependency (Advapi32) and a 
 				standard API call (no f=getAddr..; f();) */
-			if(!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, 0)) {
+			if(!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
 				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot open random device");
 				return FAILURE;
 			}
