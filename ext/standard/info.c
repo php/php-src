@@ -525,6 +525,12 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 		php_info_print_table_row(2, "Zend Memory Manager", is_zend_mm(TSRMLS_C) ? "enabled" : "disabled" );
 
+#ifdef ZEND_MULTIBYTE
+		php_info_print_table_row(2, "Zend multibyte support", "enabled");
+#else
+		php_info_print_table_row(2, "Zend multibyte support", "disabled");
+#endif
+
 #if HAVE_IPV6
 		php_info_print_table_row(2, "IPv6 Support", "enabled" );
 #else
