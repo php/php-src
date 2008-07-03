@@ -2646,7 +2646,7 @@ AC_DEFUN([PHP_CHECK_CONFIGURE_OPTIONS],[
       with-tsrm-pth | with-tsrm-st | with-tsrm-pthreads[)];;
 
       # Allow certain Zend options
-      with-zend-vm | enable-maintainer-zts | enable-inline-optimization[)];;
+      with-zend-vm | enable-maintainer-zts | enable-zend-multibyte | enable-inline-optimization[)];;
 
       # All the rest must be set using the PHP_ARG_* macros
       # PHP_ARG_* macros set php_enable_<arg_name> or php_with_<arg_name>
