@@ -188,17 +188,18 @@ error_exit:
 PHP_FUNCTION(recode_file)
 {
 	RECODE_REQUEST request = NULL;
-	zval **req;
-	zval **input, **output;
+	char *req;
+	int req_len;
+	zval *input, *output;
 	php_stream *instream, *outstream;
 	FILE  *in_fp,  *out_fp;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &req, &input, &output) == FAILURE) {
-	 	WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "srr", &req, &req_len, &input, &output) == FAILURE) {
+	 	return;
 	}
 
-	php_stream_from_zval(instream, input);
-	php_stream_from_zval(outstream, output);
+	php_stream_from_zval(instream, &input);
+	php_stream_from_zval(outstream, &output);
 
 	if (FAILURE == php_stream_cast(instream, PHP_STREAM_AS_STDIO, (void**)&in_fp, REPORT_ERRORS))	{
 		RETURN_FALSE;
@@ -207,8 +208,6 @@ PHP_FUNCTION(recode_file)
 	if (FAILURE == php_stream_cast(outstream, PHP_STREAM_AS_STDIO, (void**)&out_fp, REPORT_ERRORS))	{
 		RETURN_FALSE;
 	}
-	
-	convert_to_string_ex(req);
 
 	request = recode_new_request(ReSG(outer));
 	if (request == NULL) {
@@ -216,8 +215,8 @@ PHP_FUNCTION(recode_file)
 		RETURN_FALSE;
 	}
 
-	if (!recode_scan_request(request, Z_STRVAL_PP(req))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal recode request '%s'", Z_STRVAL_PP(req));
+	if (!recode_scan_request(request, req)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal recode request '%s'", req);
 		goto error_exit;
 	}
 	
