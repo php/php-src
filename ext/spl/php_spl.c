@@ -751,6 +751,7 @@ PHP_MINFO_FUNCTION(spl)
 }
 /* }}} */
 
+/* {{{ arginfo */
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_iterator_to_array, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, iterator, Traversable, 0)
@@ -769,19 +770,70 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_iterator_apply, 0, 0, 2)
 	ZEND_ARG_ARRAY_INFO(0, args, 1)
 ZEND_END_ARG_INFO();
 
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_parents, 0, 0, 1)
+	ZEND_ARG_INFO(0, instance)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_implements, 0, 0, 1)
+	ZEND_ARG_INFO(0, what)
+	ZEND_ARG_INFO(0, autoload)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_spl_classes, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_spl_autoload_functions, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_spl_autoload, 0, 0, 1)
+	ZEND_ARG_INFO(0, class_name)
+	ZEND_ARG_INFO(0, file_extensions)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_spl_autoload_extensions, 0, 0, 0)
+	ZEND_ARG_INFO(0, file_extensions)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_spl_autoload_call, 0, 0, 1)
+	ZEND_ARG_INFO(0, class_name)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_spl_autoload_register, 0, 0, 0)
+	ZEND_ARG_INFO(0, autoload_function)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_spl_autoload_unregister, 0, 0, 1)
+	ZEND_ARG_INFO(0, autoload_function)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_spl_object_hash, 0, 0, 1)
+	ZEND_ARG_INFO(0, obj)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 /* {{{ spl_functions
  */
 const zend_function_entry spl_functions[] = {
-	PHP_FE(spl_classes,             NULL)
-	PHP_FE(spl_autoload,            NULL)
-	PHP_FE(spl_autoload_extensions, NULL)
-	PHP_FE(spl_autoload_register,   NULL)
-	PHP_FE(spl_autoload_unregister, NULL)
-	PHP_FE(spl_autoload_functions,  NULL)
-	PHP_FE(spl_autoload_call,       NULL)
-	PHP_FE(class_parents,           NULL)
-	PHP_FE(class_implements,        NULL)
-	PHP_FE(spl_object_hash,         NULL)
+	PHP_FE(spl_classes,             arginfo_spl_classes)
+	PHP_FE(spl_autoload,            arginfo_spl_autoload)
+	PHP_FE(spl_autoload_extensions, arginfo_spl_autoload_extensions)
+	PHP_FE(spl_autoload_register,   arginfo_spl_autoload_register)
+	PHP_FE(spl_autoload_unregister, arginfo_spl_autoload_unregister)
+	PHP_FE(spl_autoload_functions,  arginfo_spl_autoload_functions)
+	PHP_FE(spl_autoload_call,       arginfo_spl_autoload_call)
+	PHP_FE(class_parents,           arginfo_class_parents)
+	PHP_FE(class_implements,        arginfo_class_implements)
+	PHP_FE(spl_object_hash,         arginfo_spl_object_hash)
 #ifdef SPL_ITERATORS_H
 	PHP_FE(iterator_to_array,       arginfo_iterator_to_array)
 	PHP_FE(iterator_count,          arginfo_iterator)

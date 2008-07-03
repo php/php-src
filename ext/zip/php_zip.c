@@ -272,18 +272,73 @@ static char * php_zipobj_get_zip_comment(struct zip *za, int *len TSRMLS_DC) /* 
 }
 /* }}} */
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_close, 0, 0, 1)
+	ZEND_ARG_INFO(0, zip)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_read, 0, 0, 1)
+	ZEND_ARG_INFO(0, zip)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_open, 0, 0, 2)
+	ZEND_ARG_INFO(0, zip_dp)
+	ZEND_ARG_INFO(0, zip_entry)
+	ZEND_ARG_INFO(0, mode)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_close, 0, 0, 1)
+	ZEND_ARG_INFO(0, zip_ent)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_read, 0, 0, 1)
+	ZEND_ARG_INFO(0, zip_entry)
+	ZEND_ARG_INFO(0, len)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_name, 0, 0, 1)
+	ZEND_ARG_INFO(0, zip_entry)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_compressedsize, 0, 0, 1)
+	ZEND_ARG_INFO(0, zip_entry)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_filesize, 0, 0, 1)
+	ZEND_ARG_INFO(0, zip_entry)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_compressionmethod, 0, 0, 1)
+	ZEND_ARG_INFO(0, zip_entry)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 /* {{{ zend_function_entry */
 static const zend_function_entry zip_functions[] = {
-	ZEND_RAW_FENTRY("zip_open", zif_zip_open, NULL, 0)
-	ZEND_RAW_FENTRY("zip_close", zif_zip_close, NULL, 0)
-	ZEND_RAW_FENTRY("zip_read", zif_zip_read, NULL, 0)
-	PHP_FE(zip_entry_open,		NULL)
-	PHP_FE(zip_entry_close,		NULL)
-	PHP_FE(zip_entry_read,		NULL)
-	PHP_FE(zip_entry_filesize,	NULL)
-	PHP_FE(zip_entry_name,		NULL)
-	PHP_FE(zip_entry_compressedsize,		NULL)
-	PHP_FE(zip_entry_compressionmethod,		NULL)
+	ZEND_RAW_FENTRY("zip_open", zif_zip_open, arginfo_zip_open, 0)
+	ZEND_RAW_FENTRY("zip_close", zif_zip_close, arginfo_zip_close, 0)
+	ZEND_RAW_FENTRY("zip_read", zif_zip_read, arginfo_zip_read, 0)
+	PHP_FE(zip_entry_open,		arginfo_zip_entry_open)
+	PHP_FE(zip_entry_close,		arginfo_zip_entry_close)
+	PHP_FE(zip_entry_read,		arginfo_zip_entry_read)
+	PHP_FE(zip_entry_filesize,	arginfo_zip_entry_filesize)
+	PHP_FE(zip_entry_name,		arginfo_zip_entry_name)
+	PHP_FE(zip_entry_compressedsize,		arginfo_zip_entry_compressedsize)
+	PHP_FE(zip_entry_compressionmethod,		arginfo_zip_entry_compressionmethod)
 
 	{NULL, NULL, NULL}
 };

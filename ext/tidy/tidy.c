@@ -286,33 +286,151 @@ STD_PHP_INI_ENTRY("tidy.default_config",	"",		PHP_INI_SYSTEM,		OnUpdateString,		
 STD_PHP_INI_ENTRY("tidy.clean_output",		"0",	PHP_INI_USER,		php_tidy_set_clean_output,	clean_output,		zend_tidy_globals,	tidy_globals)
 PHP_INI_END()
 
-static const zend_function_entry tidy_functions[] = {
-	PHP_FE(tidy_getopt,             NULL)
-	PHP_FE(tidy_parse_string,       NULL)
-	PHP_FE(tidy_parse_file,         NULL)
-	PHP_FE(tidy_get_output,         NULL)
-	PHP_FE(tidy_get_error_buffer,   NULL) 
-	PHP_FE(tidy_clean_repair,       NULL)
-	PHP_FE(tidy_repair_string,	NULL)
-	PHP_FE(tidy_repair_file,	NULL)
-	PHP_FE(tidy_diagnose,           NULL)
-	PHP_FE(tidy_get_release,	NULL)
-	PHP_FE(tidy_get_config,		NULL)
-	PHP_FE(tidy_get_status,		NULL)
-	PHP_FE(tidy_get_html_ver,	NULL)
-	PHP_FE(tidy_is_xhtml,		NULL)
-	PHP_FE(tidy_is_xml,		NULL)
-	PHP_FE(tidy_error_count,	NULL)
-	PHP_FE(tidy_warning_count,	NULL)
-	PHP_FE(tidy_access_count,	NULL)
-	PHP_FE(tidy_config_count,	NULL) 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_parse_string, 0, 0, 1)
+	ZEND_ARG_INFO(0, input)
+	ZEND_ARG_INFO(0, config_options)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_error_buffer, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_output, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_parse_file, 0, 0, 1)
+	ZEND_ARG_INFO(0, file)
+	ZEND_ARG_INFO(0, config_options)
+	ZEND_ARG_INFO(0, encoding)
+	ZEND_ARG_INFO(0, use_include_path)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_tidy_clean_repair, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_repair_string, 0, 0, 1)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, config_file)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_repair_file, 0, 0, 1)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, config_file)
+	ZEND_ARG_INFO(0, encoding)
+	ZEND_ARG_INFO(0, use_include_path)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_tidy_diagnose, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_release, 0)
+ZEND_END_ARG_INFO()
+
 #if HAVE_TIDYOPTGETDOC
-	PHP_FE(tidy_get_opt_doc,	NULL)
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_opt_doc, 0, 0, 2)
+	ZEND_ARG_INFO(0, resource)
+	ZEND_ARG_INFO(0, optname)
+ZEND_END_ARG_INFO()
 #endif
-	PHP_FE(tidy_get_root,		NULL)
-	PHP_FE(tidy_get_head,		NULL)
-	PHP_FE(tidy_get_html,		NULL)
-	PHP_FE(tidy_get_body,		NULL)
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_config, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_status, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_html_ver, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_tidy_is_xhtml, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_tidy_is_xml, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_tidy_error_count, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_tidy_warning_count, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_tidy_access_count, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_tidy_config_count, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_getopt, 0, 0, 1)
+	ZEND_ARG_INFO(0, option)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_root, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_html, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_head, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_body, 0, 0, 1)
+	ZEND_ARG_INFO(0, tidy)
+ZEND_END_ARG_INFO()
+/* }}} */
+
+static const zend_function_entry tidy_functions[] = {
+	PHP_FE(tidy_getopt,             arginfo_tidy_getopt)
+	PHP_FE(tidy_parse_string,       arginfo_tidy_parse_string)
+	PHP_FE(tidy_parse_file,         arginfo_tidy_parse_file)
+	PHP_FE(tidy_get_output,         arginfo_tidy_get_output)
+	PHP_FE(tidy_get_error_buffer,   arginfo_tidy_get_error_buffer) 
+	PHP_FE(tidy_clean_repair,       arginfo_tidy_clean_repair)
+	PHP_FE(tidy_repair_string,	arginfo_tidy_repair_string)
+	PHP_FE(tidy_repair_file,	arginfo_tidy_repair_file)
+	PHP_FE(tidy_diagnose,		arginfo_tidy_diagnose)
+	PHP_FE(tidy_get_release,	arginfo_tidy_get_release)
+	PHP_FE(tidy_get_config,		arginfo_tidy_get_config)
+	PHP_FE(tidy_get_status,		arginfo_tidy_get_status)
+	PHP_FE(tidy_get_html_ver,	arginfo_tidy_get_html_ver)
+	PHP_FE(tidy_is_xhtml,		arginfo_tidy_is_xhtml)
+	PHP_FE(tidy_is_xml,			arginfo_tidy_is_xml)
+	PHP_FE(tidy_error_count,	arginfo_tidy_error_count)
+	PHP_FE(tidy_warning_count,	arginfo_tidy_warning_count)
+	PHP_FE(tidy_access_count,	arginfo_tidy_access_count)
+	PHP_FE(tidy_config_count,	arginfo_tidy_config_count) 
+#if HAVE_TIDYOPTGETDOC
+	PHP_FE(tidy_get_opt_doc,	arginfo_tidy_get_opt_doc)
+#endif
+	PHP_FE(tidy_get_root,		arginfo_tidy_get_root)
+	PHP_FE(tidy_get_head,		arginfo_tidy_get_head)
+	PHP_FE(tidy_get_html,		arginfo_tidy_get_html)
+	PHP_FE(tidy_get_body,		arginfo_tidy_get_body)
 	{NULL, NULL, NULL}
 };
 
