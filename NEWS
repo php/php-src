@@ -110,6 +110,7 @@ PHP                                                                        NEWS
 - Added forward_static_call(_array) to complete LSB. (Mike Lively)
 - Added native support for asinh(), acosh(), atanh(), log1p() and expm1() (Kalle)
 - inet_pton() and inet_ntop() is now available on Windows platforms (Kalle)
+- mcrypt_create_iv is now working on Windows platforms (Pierre)
 
 - Improved PHP runtime speed and memory usage:
   . Removed direct executor recursion. (Dmitry)
