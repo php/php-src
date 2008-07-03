@@ -66,11 +66,26 @@ ZEND_END_MODULE_GLOBALS(recode)
 ZEND_DECLARE_MODULE_GLOBALS(recode);
 static PHP_GINIT_FUNCTION(recode);
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_recode_string, 0, 0, 2)
+	ZEND_ARG_INFO(0, request)
+	ZEND_ARG_INFO(0, str)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_recode_file, 0, 0, 3)
+	ZEND_ARG_INFO(0, request)
+	ZEND_ARG_INFO(0, input)
+	ZEND_ARG_INFO(0, output)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 /* {{{ module stuff */
 static const zend_function_entry php_recode_functions[] = {
-	PHP_FE(recode_string, NULL)
-	PHP_FE(recode_file, NULL)
-	PHP_FALIAS(recode, recode_string, NULL)
+	PHP_FE(recode_string, 	arginfo_recode_string)
+	PHP_FE(recode_file, 	arginfo_recode_file)
+	PHP_FALIAS(recode, recode_string, arginfo_recode_string)
 	{NULL, NULL, NULL}
 };
 
