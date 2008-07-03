@@ -59,12 +59,12 @@ echo "Done\n";
 *** Testing error conditions ***
 -- Testing fgets() with zero argument --
 
-Warning: Wrong parameter count for fgets() in %s on line %d
-NULL
+Warning: fgets() expects at least 1 parameter, 0 given in %s on line %d
+bool(false)
 -- Testing fgets() with more than expected number of arguments --
 
-Warning: Wrong parameter count for fgets() in %s on line %d
-NULL
+Warning: fgets() expects at most 2 parameters, 3 given in %s on line %d
+bool(false)
 -- Testing fgets() with invalid length arguments --
 
 Warning: fgets(): Length parameter must be greater than 0 in %s on line %d
@@ -76,32 +76,32 @@ bool(false)
 -- Testing fgets() with invalid arguments --
 -- Iteration 1 --
 
-Warning: fgets(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fgets() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
 -- Iteration 2 --
 
-Warning: fgets(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fgets() expects parameter 1 to be resource, integer given in %s on line %d
 bool(false)
 -- Iteration 3 --
 
-Warning: fgets(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fgets() expects parameter 1 to be resource, double given in %s on line %d
 bool(false)
 -- Iteration 4 --
 
-Warning: fgets(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fgets() expects parameter 1 to be resource, boolean given in %s on line %d
 bool(false)
 -- Iteration 5 --
 
-Warning: fgets(): supplied argument is not a valid stream resource in %s on line %s
+Warning: fgets() expects parameter 1 to be resource, array given in %s on line %d
 bool(false)
 -- Iteration 6 --
 
-Warning: fgets(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fgets() expects parameter 1 to be resource, object given in %s on line %d
 bool(false)
 -- Testing fgets() with closed/unset file handle --
 Warning: fgets(): 5 is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: fgets(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fgets() expects parameter 1 to be resource, null given in %s on line %d
 bool(false)
 Done

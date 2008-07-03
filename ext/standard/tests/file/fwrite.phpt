@@ -30,21 +30,23 @@ var_dump(file_get_contents($filename));
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Wrong parameter count for fwrite() in %s on line %d
-NULL
+Warning: fwrite() expects at least 2 parameters, 1 given in %s on line %d
+bool(false)
 
-Notice: Array to string conversion in %s on line %d
-int(5)
+Warning: fwrite() expects parameter 2 to be string, array given in %s on line %d
+bool(false)
 int(0)
 int(0)
 int(4)
 int(0)
-int(0)
 
-Warning: fwrite(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fwrite() expects parameter 1 to be resource, array given in %s on line %d
 bool(false)
 
-Warning: Wrong parameter count for fwrite() in %s on line %d
-NULL
+Warning: fwrite() expects parameter 1 to be resource, array given in %s on line %d
+bool(false)
+
+Warning: fwrite() expects at least 2 parameters, 1 given in %s on line %d
+bool(false)
 string(4) "data"
 Done

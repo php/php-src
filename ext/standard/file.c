@@ -895,14 +895,14 @@ PHP_NAMED_FUNCTION(php_if_fopen)
    Close an open file pointer */
 PHPAPI PHP_FUNCTION(fclose)
 {
-	zval **arg1;
+	zval *arg1;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+		RETURN_FALSE;
 	}
-
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 	if (!stream->is_persistent) {
 		zend_list_delete(stream->rsrc_id);
 	} else {
@@ -996,14 +996,14 @@ PHP_FUNCTION(popen)
    Close a file pointer opened by popen() */
 PHP_FUNCTION(pclose)
 {
-	zval **arg1;
+	zval *arg1;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
 	zend_list_delete(stream->rsrc_id);
 	RETURN_LONG(FG(pclose_ret));
@@ -1014,14 +1014,14 @@ PHP_FUNCTION(pclose)
    Test for end-of-file on a file pointer */
 PHPAPI PHP_FUNCTION(feof)
 {
-	zval **arg1;
+	zval *arg1;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
 	if (php_stream_eof(stream)) {
 		RETURN_TRUE;
@@ -1035,18 +1035,18 @@ PHPAPI PHP_FUNCTION(feof)
    Get a line from file pointer */
 PHPAPI PHP_FUNCTION(fgets)
 {
-	zval **arg1, **arg2;
-	int len = 1024;
+	zval *arg1;
+	long len = 1024;
 	char *buf = NULL;
 	int argc = ZEND_NUM_ARGS();
 	size_t line_len = 0;
 	php_stream *stream;
 
-	if (argc < 1 || argc > 2 || zend_get_parameters_ex(argc, &arg1, &arg2) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &arg1, &len) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
 	if (argc == 1) {
 		/* ask streams to give us a buffer of an appropriate size */
@@ -1055,9 +1055,6 @@ PHPAPI PHP_FUNCTION(fgets)
 			goto exit_failed;
 		}
 	} else if (argc > 1) {
-		convert_to_long_ex(arg2);
-		len = Z_LVAL_PP(arg2);
-
 		if (len <= 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
 			RETURN_FALSE;
@@ -1094,16 +1091,16 @@ exit_failed:
    Get a character from file pointer */
 PHPAPI PHP_FUNCTION(fgetc)
 {
-	zval **arg1;
+	zval *arg1;
 	char buf[2];
 	int result;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
 	result = php_stream_getc(stream);
 
@@ -1122,7 +1119,8 @@ PHPAPI PHP_FUNCTION(fgetc)
    Get a line from file pointer and strip HTML tags */
 PHPAPI PHP_FUNCTION(fgetss)
 {
-	zval **fd, **bytes = NULL, **allow=NULL;
+	zval *fd;
+	long bytes = 0;
 	size_t len = 0;
 	size_t actual_len, retval_len;
 	char *buf = NULL, *retval;
@@ -1130,44 +1128,19 @@ PHPAPI PHP_FUNCTION(fgetss)
 	char *allowed_tags=NULL;
 	int allowed_tags_len=0;
 
-	switch(ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1, &fd) == FAILURE) {
-				RETURN_FALSE;
-			}
-			break;
-
-		case 2:
-			if (zend_get_parameters_ex(2, &fd, &bytes) == FAILURE) {
-				RETURN_FALSE;
-			}
-			break;
-
-		case 3:
-			if (zend_get_parameters_ex(3, &fd, &bytes, &allow) == FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string_ex(allow);
-			allowed_tags = Z_STRVAL_PP(allow);
-			allowed_tags_len = Z_STRLEN_PP(allow);
-			break;
-
-		default:
-			WRONG_PARAM_COUNT;
-			/* NOTREACHED */
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ls", &fd, &bytes, &allowed_tags, &allowed_tags_len) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, fd);
+	PHP_STREAM_TO_ZVAL(stream, &fd);
 
-	if (bytes != NULL) {
-		convert_to_long_ex(bytes);
-		if (Z_LVAL_PP(bytes) <= 0) {
+	if (ZEND_NUM_ARGS() >= 2) {
+		if (bytes <= 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
 			RETURN_FALSE;
 		}
 
-		len = (size_t) Z_LVAL_PP(bytes);
+		len = (size_t) bytes;
 		buf = safe_emalloc(sizeof(char), (len + 1), 0);
 		/*needed because recv doesnt set null char at end*/
 		memset(buf, 0, len + 1);
@@ -1248,48 +1221,37 @@ PHP_FUNCTION(fscanf)
    Binary-safe file write */
 PHPAPI PHP_FUNCTION(fwrite)
 {
-	zval **arg1, **arg2, **arg3=NULL;
+	zval *arg1;
+	char *arg2;
+	int arg2len;
 	int ret;
 	int num_bytes;
+	long arg3;
 	char *buffer = NULL;
 	php_stream *stream;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 2:
-			if (zend_get_parameters_ex(2, &arg1, &arg2)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string_ex(arg2);
-			num_bytes = Z_STRLEN_PP(arg2);
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l", &arg1, &arg2, &arg2len, &arg3) == FAILURE) {
+		RETURN_FALSE;
+	}
 
-		case 3:
-			if (zend_get_parameters_ex(3, &arg1, &arg2, &arg3)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string_ex(arg2);
-			convert_to_long_ex(arg3);
-			num_bytes = MAX(0, MIN(Z_LVAL_PP(arg3), Z_STRLEN_PP(arg2)));
-			break;
-
-		default:
-			WRONG_PARAM_COUNT;
-			/* NOTREACHED */
-			break;
+	if (ZEND_NUM_ARGS() == 2) {
+		num_bytes = arg2len;
+	} else {
+		num_bytes = MAX(0, MIN((int)arg3, arg2len));
 	}
 
 	if (!num_bytes) {
 		RETURN_LONG(0);
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
 	if (PG(magic_quotes_runtime)) {
-		buffer = estrndup(Z_STRVAL_PP(arg2), num_bytes);
+		buffer = estrndup(arg2, num_bytes);
 		php_stripslashes(buffer, &num_bytes TSRMLS_CC);
 	}
 
-	ret = php_stream_write(stream, buffer ? buffer : Z_STRVAL_PP(arg2), num_bytes);
+	ret = php_stream_write(stream, buffer ? buffer : arg2, num_bytes);
 	if (buffer) {
 		efree(buffer);
 	}
@@ -1302,15 +1264,15 @@ PHPAPI PHP_FUNCTION(fwrite)
    Flushes output */
 PHPAPI PHP_FUNCTION(fflush)
 {
-	zval **arg1;
+	zval *arg1;
 	int ret;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
 	ret = php_stream_flush(stream);
 	if (ret) {
@@ -1324,14 +1286,14 @@ PHPAPI PHP_FUNCTION(fflush)
    Rewind the position of a file pointer */
 PHPAPI PHP_FUNCTION(rewind)
 {
-	zval **arg1;
+	zval *arg1;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
 	if (-1 == php_stream_rewind(stream)) {
 		RETURN_FALSE;
@@ -1344,15 +1306,15 @@ PHPAPI PHP_FUNCTION(rewind)
    Get file pointer's read/write position */
 PHPAPI PHP_FUNCTION(ftell)
 {
-	zval **arg1;
+	zval *arg1;
 	long ret;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
 	ret = php_stream_tell(stream);
 	if (ret == -1)	{
@@ -1366,23 +1328,17 @@ PHPAPI PHP_FUNCTION(ftell)
    Seek on a file pointer */
 PHPAPI PHP_FUNCTION(fseek)
 {
-	zval **arg1, **arg2, **arg3;
-	int argcount = ZEND_NUM_ARGS(), whence = SEEK_SET;
+	zval *arg1;
+	long arg2, whence = SEEK_SET;
 	php_stream *stream;
 
-	if (argcount < 2 || argcount > 3 || zend_get_parameters_ex(argcount, &arg1, &arg2, &arg3) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|l", &arg1, &arg2, &whence) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
-	convert_to_long_ex(arg2);
-	if (argcount > 2) {
-		convert_to_long_ex(arg3);
-		whence = Z_LVAL_PP(arg3);
-	}
-
-	RETURN_LONG(php_stream_seek(stream, Z_LVAL_PP(arg2), whence));
+	RETURN_LONG(php_stream_seek(stream, arg2, whence));
 }
 /* }}} */
 
@@ -1488,7 +1444,7 @@ PHP_FUNCTION(readfile)
    Return or change the umask */
 PHP_FUNCTION(umask)
 {
-	zval **arg1;
+	long arg1;
 	int oldumask;
 	int arg_count = ZEND_NUM_ARGS();
 
@@ -1501,11 +1457,10 @@ PHP_FUNCTION(umask)
 	if (arg_count == 0) {
 		umask(oldumask);
 	} else {
-		if (arg_count > 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-			WRONG_PARAM_COUNT;
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &arg1) == FAILURE) {
+			RETURN_FALSE;
 		}
-		convert_to_long_ex(arg1);
-		umask(Z_LVAL_PP(arg1));
+		umask(arg1);
 	}
 
 	RETURN_LONG(oldumask);
@@ -1516,15 +1471,15 @@ PHP_FUNCTION(umask)
    Output all remaining data from a file pointer */
 PHPAPI PHP_FUNCTION(fpassthru)
 {
-	zval **arg1;
+	zval *arg1;
 	int size;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
 	size = php_stream_passthru(stream);
 	RETURN_LONG(size);
@@ -1603,23 +1558,22 @@ PHP_FUNCTION(unlink)
    Truncate file to 'size' length */
 PHP_NAMED_FUNCTION(php_if_ftruncate)
 {
-	zval **fp , **size;
+	zval *fp;
+	long size;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fp, &size) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &fp, &size) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, fp);
-
-	convert_to_long_ex(size);
+	PHP_STREAM_TO_ZVAL(stream, &fp);
 
 	if (!php_stream_truncate_supported(stream)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't truncate this stream!");
 		RETURN_FALSE;
 	}
 
-	RETURN_BOOL(0 == php_stream_truncate_set_size(stream, Z_LVAL_PP(size)));
+	RETURN_BOOL(0 == php_stream_truncate_set_size(stream, size));
 }
 /* }}} */
 
@@ -1627,7 +1581,7 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
    Stat() on a filehandle */
 PHP_NAMED_FUNCTION(php_if_fstat)
 {
-	zval **fp;
+	zval *fp;
 	zval *stat_dev, *stat_ino, *stat_mode, *stat_nlink, *stat_uid, *stat_gid, *stat_rdev,
 		 *stat_size, *stat_atime, *stat_mtime, *stat_ctime, *stat_blksize, *stat_blocks;
 	php_stream *stream;
@@ -1637,11 +1591,11 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 		"size", "atime", "mtime", "ctime", "blksize", "blocks"
 	};
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &fp) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &fp) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, fp);
+	PHP_STREAM_TO_ZVAL(stream, &fp);
 
 	if (php_stream_stat(stream, &stat_ssb)) {
 		RETURN_FALSE;
@@ -1836,18 +1790,16 @@ safe_to_copy:
    Binary-safe file read */
 PHPAPI PHP_FUNCTION(fread)
 {
-	zval **arg1, **arg2;
-	int len;
+	zval *arg1;
+	long len;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &arg1, &len) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
-	convert_to_long_ex(arg2);
-	len = Z_LVAL_PP(arg2);
 	if (len <= 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
 		RETURN_FALSE;

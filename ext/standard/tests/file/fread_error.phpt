@@ -61,12 +61,12 @@ echo "Done\n";
 *** Testing error conditions ***
 -- Testing fread() with zero argument --
 
-Warning: Wrong parameter count for fread() in %s on line %d
-NULL
+Warning: fread() expects exactly 2 parameters, 0 given in %s on line %d
+bool(false)
 -- Testing fread() with more than expected number of arguments --
 
-Warning: Wrong parameter count for fread() in %s on line %d
-NULL
+Warning: fread() expects exactly 2 parameters, 3 given in %s on line %d
+bool(false)
 -- Testing fread() with invalid length arguments --
 
 Warning: fread(): Length parameter must be greater than 0 in %s on line %d
@@ -77,27 +77,27 @@ bool(false)
 -- Testing fread() with invalid arguments --
 -- Iteration 1 --
 
-Warning: fread(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fread() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
 -- Iteration 2 --
 
-Warning: fread(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fread() expects parameter 1 to be resource, integer given in %s on line %d
 bool(false)
 -- Iteration 3 --
 
-Warning: fread(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fread() expects parameter 1 to be resource, double given in %s on line %d
 bool(false)
 -- Iteration 4 --
 
-Warning: fread(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fread() expects parameter 1 to be resource, boolean given in %s on line %d
 bool(false)
 -- Iteration 5 --
 
-Warning: fread(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fread() expects parameter 1 to be resource, array given in %s on line %d
 bool(false)
 -- Iteration 6 --
 
-Warning: fread(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fread() expects parameter 1 to be resource, object given in %s on line %d
 bool(false)
 -- Testing fwrite() with closed/unset file handle --
 
@@ -106,9 +106,9 @@ Notice: Undefined variable: file_content_type in %s on line %d
 Warning: fread(): 5 is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: fread(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fread() expects parameter 1 to be resource, null given in %s on line %d
 bool(false)
 
-Warning: fclose(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fclose() expects parameter 1 to be resource, null given in %s on line %d
 bool(false)
 Done
