@@ -18,5 +18,5 @@ echo "END\n";
 ECB
 CFB
 
-Warning: mcrypt_encrypt(): Attempt to use an empty IV, which is NOT recommend in %sbug43143.php on line 9
+Warning: mcrypt_encrypt(): Attempt to use an empty IV, which is NOT recommended in %sbug43143.php on line 9
 END

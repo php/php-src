@@ -20,4 +20,4 @@ mcrypt_cbc($cipher, $key, $enc_data, MCRYPT_DECRYPT);
 --EXPECTF--
 PHP Testfest 2008
 
-Warning: mcrypt_cbc(): Attempt to use an empty IV, which is NOT recommend in %s on line %d
+Warning: mcrypt_cbc(): Attempt to use an empty IV, which is NOT recommended in %s on line %d

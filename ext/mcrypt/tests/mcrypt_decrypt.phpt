@@ -22,7 +22,7 @@ var_dump(strpos(mcrypt_decrypt(MCRYPT_BLOWFISH, "FooBar", $enc_data, MCRYPT_MODE
 --EXPECTF--
 PHP Testfest 2008
 
-Warning: mcrypt_decrypt(): Attempt to use an empty IV, which is NOT recommend in %s on line %d
+Warning: mcrypt_decrypt(): Attempt to use an empty IV, which is NOT recommended in %s on line %d
 
 Warning: mcrypt_decrypt(): The IV parameter must be as long as the blocksize in %s on line %d
 bool(false)
