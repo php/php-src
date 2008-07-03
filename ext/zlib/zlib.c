@@ -101,10 +101,72 @@ static PHP_FUNCTION(gzencode);
 static PHP_FUNCTION(ob_gzhandler);
 static PHP_FUNCTION(zlib_get_coding_type);
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gzfile, 0, 0, 1)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, use_include_path)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gzopen, 0, 0, 2)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, use_include_path)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_readgzfile, 0, 0, 1)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, use_include_path)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gzcompress, 0, 0, 1)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, level)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gzuncompress, 0, 0, 1)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, length)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gzdeflate, 0, 0, 1)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, level)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gzinflate, 0, 0, 1)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, length)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_zlib_get_coding_type, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gzencode, 0, 0, 1)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, level)
+	ZEND_ARG_INFO(0, encoding_mode)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ob_gzhandler, 0, 0, 2)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, mode)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 /* {{{ php_zlib_functions[]
  */
 static const zend_function_entry php_zlib_functions[] = {
-	PHP_FE(readgzfile,						NULL)
+	PHP_FE(readgzfile,						arginfo_readgzfile)
 	PHP_FALIAS(gzrewind,	rewind,			NULL)
 	PHP_FALIAS(gzclose,		fclose,			NULL)
 	PHP_FALIAS(gzeof,		feof,			NULL)
@@ -112,20 +174,20 @@ static const zend_function_entry php_zlib_functions[] = {
 	PHP_FALIAS(gzgets,		fgets,			NULL)
 	PHP_FALIAS(gzgetss,		fgetss,			NULL)
 	PHP_FALIAS(gzread,		fread,			NULL)
-	PHP_FE(gzopen,							NULL)
+	PHP_FE(gzopen,							arginfo_gzopen)
 	PHP_FALIAS(gzpassthru,	fpassthru,		NULL)
 	PHP_FALIAS(gzseek,		fseek,			NULL)
 	PHP_FALIAS(gztell,		ftell,			NULL)
 	PHP_FALIAS(gzwrite,		fwrite,			NULL)
 	PHP_FALIAS(gzputs,		fwrite,			NULL)
-	PHP_FE(gzfile,							NULL)
-	PHP_FE(gzcompress,            			NULL)
-	PHP_FE(gzuncompress,           			NULL)
-	PHP_FE(gzdeflate,             			NULL)
-	PHP_FE(gzinflate,              			NULL)
-	PHP_FE(gzencode,						NULL)
-	PHP_FE(ob_gzhandler,					NULL)
-	PHP_FE(zlib_get_coding_type,			NULL)
+	PHP_FE(gzfile,							arginfo_gzfile)
+	PHP_FE(gzcompress,            			arginfo_gzcompress)
+	PHP_FE(gzuncompress,           			arginfo_gzuncompress)
+	PHP_FE(gzdeflate,             			arginfo_gzdeflate)
+	PHP_FE(gzinflate,              			arginfo_gzinflate)
+	PHP_FE(gzencode,						arginfo_gzencode)
+	PHP_FE(ob_gzhandler,					arginfo_ob_gzhandler)
+	PHP_FE(zlib_get_coding_type,			arginfo_zlib_get_coding_type)
 	{NULL, NULL, NULL}
 };
 /* }}} */
