@@ -147,12 +147,6 @@ var_dump( is_long(TRUE, FALSE) );
  
 echo "Done\n";
 ?>
-
---CLEAN--
-// close the resources
-fclose($fp);
-closedir($dfp);
-
 --EXPECTF--
 *** Testing is_int(), is_integer() & is_long()  with valid integer values ***
 --Iteration 1--
@@ -448,21 +442,21 @@ bool(false)
 
 *** Testing error conditions ***
 
-Warning: is_int(): Only one argument expected in %s on line %d
+Warning: is_int() expects exactly 1 parameter, 0 given in %s on line %d
 bool(false)
 
-Warning: is_integer(): Only one argument expected in %s on line %d
+Warning: is_integer() expects exactly 1 parameter, 0 given in %s on line %d
 bool(false)
 
-Warning: is_long(): Only one argument expected in %s on line %d
+Warning: is_long() expects exactly 1 parameter, 0 given in %s on line %d
 bool(false)
 
-Warning: is_int(): Only one argument expected in %s on line %d
+Warning: is_int() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 
-Warning: is_integer(): Only one argument expected in %s on line %d
+Warning: is_integer() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 
-Warning: is_long(): Only one argument expected in %s on line %d
+Warning: is_long() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 Done
