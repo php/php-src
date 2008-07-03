@@ -9,5 +9,5 @@ echo mcrypt_generic($td,'aaaaaaaa');
 print "I'm alive!\n";
 ?>
 --EXPECTF--
-Warning: mcrypt_generic(): Operation disallowed prior to mcrypt_generic_init(). in %sbug41252.php on line 3
+Warning: mcrypt_generic(): Operation disallowed prior to mcrypt_generic_init() in %sbug41252.php on line 3
 I'm alive!
