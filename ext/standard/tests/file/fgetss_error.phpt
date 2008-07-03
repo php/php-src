@@ -58,12 +58,12 @@ echo "Done\n";
 *** Testing error conditions ***
 -- Testing fgetss() with zero argument --
 
-Warning: Wrong parameter count for fgetss() in %s on line %d
-NULL
+Warning: fgetss() expects at least 1 parameter, 0 given in %s on line %d
+bool(false)
 -- Testing fgetss() with more than expected number of arguments --
 
-Warning: Wrong parameter count for fgetss() in %s on line %d
-NULL
+Warning: fgetss() expects at most 3 parameters, 4 given in %s on line %d
+bool(false)
 -- Testing fgetss() with invalid length arguments --
 
 Warning: fgetss(): Length parameter must be greater than 0 in %s on line %d
@@ -75,32 +75,32 @@ bool(false)
 -- Testing fgetss() with invalid arguments --
 -- Iteration 1 --
 
-Warning: fgetss(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fgetss() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
 -- Iteration 2 --
 
-Warning: fgetss(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fgetss() expects parameter 1 to be resource, integer given in %s on line %d
 bool(false)
 -- Iteration 3 --
 
-Warning: fgetss(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fgetss() expects parameter 1 to be resource, double given in %s on line %d
 bool(false)
 -- Iteration 4 --
 
-Warning: fgetss(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fgetss() expects parameter 1 to be resource, boolean given in %s on line %d
 bool(false)
 -- Iteration 5 --
 
-Warning: fgetss(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fgetss() expects parameter 1 to be resource, array given in %s on line %d
 bool(false)
 -- Iteration 6 --
 
-Warning: fgetss(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fgetss() expects parameter 1 to be resource, object given in %s on line %d
 bool(false)
 -- Testing fgetss() with closed/unset file handle --
 Warning: fgetss(): 5 is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: fgetss(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fgetss() expects parameter 1 to be resource, null given in %s on line %d
 bool(false)
 Done

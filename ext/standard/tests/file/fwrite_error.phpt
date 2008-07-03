@@ -73,48 +73,48 @@ unlink( $filename );
 *** Testing fwrite() : error conditions ***
 -- Testing fwrite() with less than expected number of arguments --
 
-Warning: Wrong parameter count for fwrite() in %s on line %d
-NULL
+Warning: fwrite() expects at least 2 parameters, 0 given in %s on line %d
+bool(false)
 
-Warning: Wrong parameter count for fwrite() in %s on line %d
-NULL
+Warning: fwrite() expects at least 2 parameters, 1 given in %s on line %d
+bool(false)
 -- Testing fwrite() with more than expected number of arguments --
 
-Warning: Wrong parameter count for fwrite() in %s on line %d
-NULL
+Warning: fwrite() expects at most 3 parameters, 4 given in %s on line %d
+bool(false)
 -- Testing fwrite() with invalid length arguments --
 int(0)
 int(0)
 -- Testing fwrite() with invalid arguments --
 -- Iteration 1 --
 
-Warning: fwrite(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fwrite() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
 -- Iteration 2 --
 
-Warning: fwrite(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fwrite() expects parameter 1 to be resource, integer given in %s on line %d
 bool(false)
 -- Iteration 3 --
 
-Warning: fwrite(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fwrite() expects parameter 1 to be resource, double given in %s on line %d
 bool(false)
 -- Iteration 4 --
 
-Warning: fwrite(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fwrite() expects parameter 1 to be resource, boolean given in %s on line %d
 bool(false)
 -- Iteration 5 --
 
-Warning: fwrite(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fwrite() expects parameter 1 to be resource, array given in %s on line %d
 bool(false)
 -- Iteration 6 --
 
-Warning: fwrite(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fwrite() expects parameter 1 to be resource, object given in %s on line %d
 bool(false)
 -- Testing fwrite() with closed/unset file handle --
 
 Warning: fwrite(): 6 is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: fwrite(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fwrite() expects parameter 1 to be resource, null given in %s on line %d
 bool(false)
 Done

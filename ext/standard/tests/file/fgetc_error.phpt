@@ -39,35 +39,35 @@ echo "Done\n";
 *** Testing error conditions ***
 -- Testing fgetc() with zero argument --
 
-Warning: Wrong parameter count for fgetc() in %s on line %d
-NULL
+Warning: fgetc() expects exactly 1 parameter, 0 given in %s on line %d
+bool(false)
 -- Testing fgetc() with more than expected number of arguments --
 
-Warning: Wrong parameter count for fgetc() in %s on line %d
-NULL
+Warning: fgetc() expects exactly 1 parameter, 2 given in %s on line %d
+bool(false)
 -- Testing fgetc() with invalid arguments --
 -- Iteration 1 --
 
-Warning: fgetc(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fgetc() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
 -- Iteration 2 --
 
-Warning: fgetc(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fgetc() expects parameter 1 to be resource, integer given in %s on line %d
 bool(false)
 -- Iteration 3 --
 
-Warning: fgetc(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fgetc() expects parameter 1 to be resource, double given in %s on line %d
 bool(false)
 -- Iteration 4 --
 
-Warning: fgetc(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fgetc() expects parameter 1 to be resource, boolean given in %s on line %d
 bool(false)
 -- Iteration 5 --
 
-Warning: fgetc(): supplied argument is not a valid stream resource in %s on line %s
+Warning: fgetc() expects parameter 1 to be resource, array given in %s on line %d
 bool(false)
 -- Iteration 6 --
 
-Warning: fgetc(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fgetc() expects parameter 1 to be resource, object given in %s on line %d
 bool(false)
 Done
