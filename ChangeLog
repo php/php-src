@@ -1,3 +1,69 @@
+2008-07-02  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_3)
+      ext/xmlrpc/xmlrpc-epi-php.c:
+      fix win build
+
+2008-07-02  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * win32/build/config.w32:
+      - MFB: compiler version and architecture detections
+
+    * win32/build/confutils.js:
+      - MFB:  Add summary info
+
+    * win32/build/buildconf.js:
+      - MFB: improve ADD_EXTENSION_DEP detection
+
+    * ext/zlib/config.w32:
+      - MFB: does not enable zlib when a lib or header is missign
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      - add summary function and VC version info
+
+    * (PHP_5_3)
+      ext/imap/config.w32
+      ext/imap/php_imap.c:
+      - add version info for 2007a and b
+      - update config.w32
+
+2008-07-02  Olivier Hill  <olivier.hill@gmail.com>
+
+    * run-tests.php:
+      MFB: Fix parse error
+
+    * (PHP_5_3)
+      run-tests.php:
+      Fix parse error
+
+2008-07-02  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      run-tests.php:
+      - MFH: fix make test TESTS=... and dynamic extension usage on windows
+
+    * run-tests.php:
+      - fix make test TESTS=... and dynamic extension usage on windows
+
+2008-07-02  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/spl/tests/fileobject_getsize_basic.phpt:
+      fix test
+
+    * ext/spl/spl_directory.c:
+      use zend_ascii_hash_find() and check its return value to prevent crash when
+      function not found
+
+2008-07-02  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/pgsql/pgsql.c:
+      - MFB: Added arginfo
+
+    * (PHP_5_3)
+      ext/pgsql/pgsql.c:
+      - Added arginfo
+
 2008-07-01  Felipe Pena  <felipensp@gmail.com>
 
     * ext/mcrypt/mcrypt.c
