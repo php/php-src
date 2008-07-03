@@ -544,10 +544,12 @@ HELP;
 		}
 	}
 
-	if (substr(PHP_OS, 0, 3) != "WIN") {
-		$pass_options .= " -c " . escapeshellarg($conf_passed);
-	} else {
-		$pass_options .= " -c '$conf_passed'";
+	if (strlen($conf_passed)) {
+		if (substr(PHP_OS, 0, 3) != "WIN") {
+			$pass_options .= " -c " . escapeshellarg($conf_passed);
+		} else {
+			$pass_options .= " -c '$conf_passed'";
+		}
 	}
 
 	$test_files = array_unique($test_files);
