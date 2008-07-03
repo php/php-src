@@ -183,7 +183,8 @@ PHP_MSHUTDOWN_FUNCTION(localeconv)
 PHP_FUNCTION(bin2hex)
 {
 	char *result, *data;
-	size_t newlen, datalen;
+	size_t newlen;
+	int datalen;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &datalen) == FAILURE) {
 		return;
