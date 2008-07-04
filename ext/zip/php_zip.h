@@ -93,18 +93,6 @@ php_stream *php_stream_zip_open(char *filename, char *path, char *mode STREAMS_D
 extern php_stream_wrapper php_stream_zip_wrapper;
 #endif
 
-/* zip_open is a macro for renaming libzip zipopen, so we need to use PHP_NAMED_FUNCTION */
-PHP_NAMED_FUNCTION(zif_zip_open);
-PHP_NAMED_FUNCTION(zif_zip_read);
-PHP_NAMED_FUNCTION(zif_zip_close);
-PHP_NAMED_FUNCTION(zif_zip_entry_read);
-PHP_NAMED_FUNCTION(zif_zip_entry_filesize);
-PHP_NAMED_FUNCTION(zif_zip_entry_name);
-PHP_NAMED_FUNCTION(zif_zip_entry_compressedsize);
-PHP_NAMED_FUNCTION(zif_zip_entry_compressionmethod);
-PHP_NAMED_FUNCTION(zif_zip_entry_open);
-PHP_NAMED_FUNCTION(zif_zip_entry_close);
-
 #endif	/* PHP_ZIP_H */
 
 /*
