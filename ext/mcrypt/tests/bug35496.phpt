@@ -9,6 +9,6 @@ mcrypt_generic($td, "foobar");
 mdecrypt_generic($td, "baz");
 ?>
 --EXPECTF--
-Warning: mcrypt_generic(): Operation disallowed prior to mcrypt_generic_init() in %sbug35496.php on line 3
+Warning: mcrypt_generic(): Operation disallowed prior to mcrypt_generic_init(). in %sbug35496.php on line 3
 
-Warning: mdecrypt_generic(): Operation disallowed prior to mcrypt_generic_init() in %sbug35496.php on line 4
+Warning: mdecrypt_generic(): Operation disallowed prior to mcrypt_generic_init(). in %sbug35496.php on line 4
