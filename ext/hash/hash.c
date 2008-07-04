@@ -790,7 +790,7 @@ static void mhash_init(INIT_FUNC_ARGS)
 
 		len = slprintf(buf, 127, "MHASH_%s", algorithm.mhash_name, strlen(algorithm.mhash_name));
 		{
-			char name[len+1];
+			char name[128];
 			memcpy(name, buf, len+1);
 			REGISTER_LONG_CONSTANT(name, algorithm.value, CONST_CS | CONST_PERSISTENT);
 		}
