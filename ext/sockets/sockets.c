@@ -94,66 +94,218 @@ static char *php_strerror(int error TSRMLS_DC);
 static int le_socket;
 #define le_socket_name "Socket"
 
+/* {{{ arginfo */
 static
-	ZEND_BEGIN_ARG_INFO(first_through_third_args_force_ref, 0)
-		ZEND_ARG_PASS_INFO(1)
-		ZEND_ARG_PASS_INFO(1)
-		ZEND_ARG_PASS_INFO(1)
-	ZEND_END_ARG_INFO();
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_select, 0, 0, 4)
+	ZEND_ARG_INFO(1, read_fds)
+	ZEND_ARG_INFO(1, write_fds)
+	ZEND_ARG_INFO(1, except_fds)
+	ZEND_ARG_INFO(0, tv_sec)
+	ZEND_ARG_INFO(0, tv_usec)
+ZEND_END_ARG_INFO()
 
 static
-	ZEND_BEGIN_ARG_INFO(second_and_third_args_force_ref, 0)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(1)
-		ZEND_ARG_PASS_INFO(1)
-	ZEND_END_ARG_INFO();
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_create_listen, 0, 0, 1)
+	ZEND_ARG_INFO(0, port)
+	ZEND_ARG_INFO(0, backlog)
+ZEND_END_ARG_INFO()
 
 static
-	ZEND_BEGIN_ARG_INFO(second_fifth_and_sixth_args_force_ref, 0)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(1)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(1)
-		ZEND_ARG_PASS_INFO(1)
-	ZEND_END_ARG_INFO();
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_accept, 0, 0, 1)
+	ZEND_ARG_INFO(0, socket)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_set_nonblock, 0, 0, 1)
+	ZEND_ARG_INFO(0, socket)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_set_block, 0, 0, 1)
+	ZEND_ARG_INFO(0, socket)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_listen, 0, 0, 1)
+	ZEND_ARG_INFO(0, socket)
+	ZEND_ARG_INFO(0, backlog)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_close, 0, 0, 1)
+	ZEND_ARG_INFO(0, socket)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_write, 0, 0, 2)
+	ZEND_ARG_INFO(0, socket)
+	ZEND_ARG_INFO(0, buf)
+	ZEND_ARG_INFO(0, length)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_read, 0, 0, 2)
+	ZEND_ARG_INFO(0, socket)
+	ZEND_ARG_INFO(0, length)
+	ZEND_ARG_INFO(0, type)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_getsockname, 0, 0, 2)
+	ZEND_ARG_INFO(0, socket)
+	ZEND_ARG_INFO(1, addr)
+	ZEND_ARG_INFO(1, port)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_getpeername, 0, 0, 2)
+	ZEND_ARG_INFO(0, socket)
+	ZEND_ARG_INFO(1, addr)
+	ZEND_ARG_INFO(1, port)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_create, 0, 0, 3)
+	ZEND_ARG_INFO(0, domain)
+	ZEND_ARG_INFO(0, type)
+	ZEND_ARG_INFO(0, protocol)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_connect, 0, 0, 2)
+	ZEND_ARG_INFO(0, socket)
+	ZEND_ARG_INFO(0, addr)
+	ZEND_ARG_INFO(0, port)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_strerror, 0, 0, 1)
+	ZEND_ARG_INFO(0, errno)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_bind, 0, 0, 2)
+	ZEND_ARG_INFO(0, socket)
+	ZEND_ARG_INFO(0, addr)
+	ZEND_ARG_INFO(0, port)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_recv, 0, 0, 4)
+	ZEND_ARG_INFO(0, socket)
+	ZEND_ARG_INFO(1, buf)
+	ZEND_ARG_INFO(0, len)
+	ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_send, 0, 0, 4)
+	ZEND_ARG_INFO(0, socket)
+	ZEND_ARG_INFO(0, buf)
+	ZEND_ARG_INFO(0, len)
+	ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_recvfrom, 0, 0, 5)
+	ZEND_ARG_INFO(0, socket)
+	ZEND_ARG_INFO(1, buf)
+	ZEND_ARG_INFO(0, len)
+	ZEND_ARG_INFO(0, flags)
+	ZEND_ARG_INFO(1, name)
+	ZEND_ARG_INFO(1, port)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_sendto, 0, 0, 5)
+	ZEND_ARG_INFO(0, socket)
+	ZEND_ARG_INFO(0, buf)
+	ZEND_ARG_INFO(0, len)
+	ZEND_ARG_INFO(0, flags)
+	ZEND_ARG_INFO(0, addr)
+	ZEND_ARG_INFO(0, port)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_get_option, 0, 0, 3)
+	ZEND_ARG_INFO(0, socket)
+	ZEND_ARG_INFO(0, level)
+	ZEND_ARG_INFO(0, optname)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_set_option, 0, 0, 4)
+	ZEND_ARG_INFO(0, socket)
+	ZEND_ARG_INFO(0, level)
+	ZEND_ARG_INFO(0, optname)
+	ZEND_ARG_INFO(0, optval)
+ZEND_END_ARG_INFO()
+
+#ifdef HAVE_SOCKETPAIR
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_create_pair, 0, 0, 4)
+	ZEND_ARG_INFO(0, domain)
+	ZEND_ARG_INFO(0, type)
+	ZEND_ARG_INFO(0, protocol)
+	ZEND_ARG_INFO(1, fd)
+ZEND_END_ARG_INFO()
+#endif
+
+#ifdef HAVE_SHUTDOWN
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_shutdown, 0, 0, 1)
+	ZEND_ARG_INFO(0, socket)
+	ZEND_ARG_INFO(0, how)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_last_error, 0, 0, 0)
+	ZEND_ARG_INFO(0, socket)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_clear_error, 0, 0, 0)
+	ZEND_ARG_INFO(0, socket)
+ZEND_END_ARG_INFO()
+/* }}} */
 
 /* {{{ sockets_functions[]
  */
 const zend_function_entry sockets_functions[] = {
-	PHP_FE(socket_select,			first_through_third_args_force_ref)
-	PHP_FE(socket_create,			NULL)
-	PHP_FE(socket_create_listen,	NULL)
+	PHP_FE(socket_select,			arginfo_socket_select)
+	PHP_FE(socket_create,			arginfo_socket_create)
+	PHP_FE(socket_create_listen,	arginfo_socket_create_listen)
 #ifdef HAVE_SOCKETPAIR
-	PHP_FE(socket_create_pair,		fourth_arg_force_ref)
+	PHP_FE(socket_create_pair,		arginfo_socket_create_pair)
 #endif
-	PHP_FE(socket_accept,			NULL)
-	PHP_FE(socket_set_nonblock,		NULL)
-	PHP_FE(socket_set_block,		NULL)
-	PHP_FE(socket_listen,			NULL)
-	PHP_FE(socket_close,			NULL)
-	PHP_FE(socket_write,			NULL)
-	PHP_FE(socket_read,				NULL)
-	PHP_FE(socket_getsockname, 		second_and_third_args_force_ref)
-	PHP_FE(socket_getpeername, 		second_and_third_args_force_ref)
-	PHP_FE(socket_connect,			NULL)
-	PHP_FE(socket_strerror,			NULL)
-	PHP_FE(socket_bind,				NULL)
-	PHP_FE(socket_recv,				second_arg_force_ref)
-	PHP_FE(socket_send,				NULL)
-	PHP_FE(socket_recvfrom,			second_fifth_and_sixth_args_force_ref)
-	PHP_FE(socket_sendto,			NULL)
-	PHP_FE(socket_get_option,		NULL)
-	PHP_FE(socket_set_option,		NULL)
+	PHP_FE(socket_accept,			arginfo_socket_accept)
+	PHP_FE(socket_set_nonblock,		arginfo_socket_set_nonblock)
+	PHP_FE(socket_set_block,		arginfo_socket_set_block)
+	PHP_FE(socket_listen,			arginfo_socket_listen)
+	PHP_FE(socket_close,			arginfo_socket_close)
+	PHP_FE(socket_write,			arginfo_socket_write)
+	PHP_FE(socket_read,				arginfo_socket_read)
+	PHP_FE(socket_getsockname, 		arginfo_socket_getsockname)
+	PHP_FE(socket_getpeername, 		arginfo_socket_getpeername)
+	PHP_FE(socket_connect,			arginfo_socket_connect)
+	PHP_FE(socket_strerror,			arginfo_socket_strerror)
+	PHP_FE(socket_bind,				arginfo_socket_bind)
+	PHP_FE(socket_recv,				arginfo_socket_recv)
+	PHP_FE(socket_send,				arginfo_socket_send)
+	PHP_FE(socket_recvfrom,			arginfo_socket_recvfrom)
+	PHP_FE(socket_sendto,			arginfo_socket_sendto)
+	PHP_FE(socket_get_option,		arginfo_socket_get_option)
+	PHP_FE(socket_set_option,		arginfo_socket_set_option)
 #ifdef HAVE_SHUTDOWN
-	PHP_FE(socket_shutdown,			NULL)
+	PHP_FE(socket_shutdown,			arginfo_socket_shutdown)
 #endif
-	PHP_FE(socket_last_error,		NULL)
-	PHP_FE(socket_clear_error,		NULL)
+	PHP_FE(socket_last_error,		arginfo_socket_last_error)
+	PHP_FE(socket_clear_error,		arginfo_socket_clear_error)
 
 	/* for downwards compatability */
-	PHP_FALIAS(socket_getopt, socket_get_option, NULL)
-	PHP_FALIAS(socket_setopt, socket_set_option, NULL)
+	PHP_FALIAS(socket_getopt, socket_get_option, arginfo_socket_get_option)
+	PHP_FALIAS(socket_setopt, socket_set_option, arginfo_socket_set_option)
 
 	{NULL, NULL, NULL}
 };
@@ -179,9 +331,6 @@ zend_module_entry sockets_module_entry = {
 
 #ifdef COMPILE_DL_SOCKETS
 ZEND_GET_MODULE(sockets)
-# ifdef PHP_WIN32
-# include "zend_arg_defs.c"
-# endif
 #endif
 
 /* inet_ntop should be used instead of inet_ntoa */
