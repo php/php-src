@@ -32,6 +32,18 @@
 #include "lib/zip.h"
 #include "lib/zipint.h"
 
+/* zip_open is a macro for renaming libzip zipopen, so we need to use PHP_NAMED_FUNCTION */
+static PHP_NAMED_FUNCTION(zif_zip_open);
+static PHP_NAMED_FUNCTION(zif_zip_read);
+static PHP_NAMED_FUNCTION(zif_zip_close);
+static PHP_NAMED_FUNCTION(zif_zip_entry_read);
+static PHP_NAMED_FUNCTION(zif_zip_entry_filesize);
+static PHP_NAMED_FUNCTION(zif_zip_entry_name);
+static PHP_NAMED_FUNCTION(zif_zip_entry_compressedsize);
+static PHP_NAMED_FUNCTION(zif_zip_entry_compressionmethod);
+static PHP_NAMED_FUNCTION(zif_zip_entry_open);
+static PHP_NAMED_FUNCTION(zif_zip_entry_close);
+
 #ifdef HAVE_GLOB
 #ifndef PHP_WIN32
 #include <glob.h>
@@ -1080,7 +1092,7 @@ ZEND_GET_MODULE(zip)
 
 /* {{{ proto resource zip_open(string filename)
 Create new zip using source uri for output */
-PHP_NAMED_FUNCTION(zif_zip_open)
+static PHP_NAMED_FUNCTION(zif_zip_open)
 {
 	char     *filename;
 	int       filename_len;
@@ -1112,7 +1124,7 @@ PHP_NAMED_FUNCTION(zif_zip_open)
 
 /* {{{ proto void zip_close(resource zip)
    Close a Zip archive */
-PHP_NAMED_FUNCTION(zif_zip_close)
+static PHP_NAMED_FUNCTION(zif_zip_close)
 {
 	zval * zip;
 	zip_rsrc *z_rsrc = NULL;
@@ -1129,7 +1141,7 @@ PHP_NAMED_FUNCTION(zif_zip_close)
 
 /* {{{ proto resource zip_read(resource zip)
    Returns the next file in the archive */
-PHP_NAMED_FUNCTION(zif_zip_read)
+static PHP_NAMED_FUNCTION(zif_zip_read)
 {
 	zval *zip_dp;
 	zip_read_rsrc *zr_rsrc;
@@ -1172,7 +1184,7 @@ PHP_NAMED_FUNCTION(zif_zip_read)
 /* {{{ proto bool zip_entry_open(resource zip_dp, resource zip_entry [, string mode])
    Open a Zip File, pointed by the resource entry */
 /* Dummy function to follow the old API */
-PHP_NAMED_FUNCTION(zif_zip_entry_open)
+static PHP_NAMED_FUNCTION(zif_zip_entry_open)
 {
 	zval * zip;
 	zval * zip_entry;
@@ -1199,7 +1211,7 @@ PHP_NAMED_FUNCTION(zif_zip_entry_open)
 /* {{{ proto void zip_entry_close(resource zip_ent)
    Close a zip entry */
 /* another dummy function to fit in the old api*/
-PHP_NAMED_FUNCTION(zif_zip_entry_close)
+static PHP_NAMED_FUNCTION(zif_zip_entry_close)
 {
 	zval * zip_entry;
 	zip_read_rsrc * zr_rsrc;
@@ -1216,7 +1228,7 @@ PHP_NAMED_FUNCTION(zif_zip_entry_close)
 
 /* {{{ proto mixed zip_entry_read(resource zip_entry [, int len])
    Read from an open directory entry */
-PHP_NAMED_FUNCTION(zif_zip_entry_read)
+static PHP_NAMED_FUNCTION(zif_zip_entry_read)
 {
 	zval * zip_entry;
 	long len = 0;
@@ -1315,7 +1327,7 @@ static void php_zip_entry_get_info(INTERNAL_FUNCTION_PARAMETERS, int opt) /* {{{
 
 /* {{{ proto string zip_entry_name(resource zip_entry)
    Return the name given a ZZip entry */
-PHP_NAMED_FUNCTION(zif_zip_entry_name)
+static PHP_NAMED_FUNCTION(zif_zip_entry_name)
 {
 	php_zip_entry_get_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
@@ -1323,7 +1335,7 @@ PHP_NAMED_FUNCTION(zif_zip_entry_name)
 
 /* {{{ proto int zip_entry_compressedsize(resource zip_entry)
    Return the compressed size of a ZZip entry */
-PHP_NAMED_FUNCTION(zif_zip_entry_compressedsize)
+static PHP_NAMED_FUNCTION(zif_zip_entry_compressedsize)
 {
 	php_zip_entry_get_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
@@ -1331,7 +1343,7 @@ PHP_NAMED_FUNCTION(zif_zip_entry_compressedsize)
 
 /* {{{ proto int zip_entry_filesize(resource zip_entry)
    Return the actual filesize of a ZZip entry */
-PHP_NAMED_FUNCTION(zif_zip_entry_filesize)
+static PHP_NAMED_FUNCTION(zif_zip_entry_filesize)
 {
 	php_zip_entry_get_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, 2);
 }
@@ -1339,7 +1351,7 @@ PHP_NAMED_FUNCTION(zif_zip_entry_filesize)
 
 /* {{{ proto string zip_entry_compressionmethod(resource zip_entry)
    Return a string containing the compression method used on a particular entry */
-PHP_NAMED_FUNCTION(zif_zip_entry_compressionmethod)
+static PHP_NAMED_FUNCTION(zif_zip_entry_compressionmethod)
 {
 	php_zip_entry_get_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, 3);
 }
