@@ -30,20 +30,6 @@
 extern zend_module_entry mcrypt_module_entry;
 #define mcrypt_module_ptr &mcrypt_module_entry
 
-typedef enum {
-	PHP_MCRYPT_IV_SOURCE_RANDOM = 0,
-	PHP_MCRYPT_IV_SOURCE_URANDOM,
-	PHP_MCRYPT_IV_SOURCE_RAND
-} php_mcrypt_iv_source;
-
-typedef enum {
-	PHP_MCRYPT_ENCRYPT = 0,
-	PHP_MCRYPT_DECRYPT = 1,
-} php_mcrypt_op;
-
-int php_mcrypt_iv(php_mcrypt_iv_source source, int size, char **iv_str, int *iv_len TSRMLS_DC);
-int php_mcrypt_func(php_mcrypt_op op, char *cipher, char *mode, char *key_str, int key_len, char *iv_str, int iv_len, char *data_str, int data_len, char **data_copy, int *data_size TSRMLS_DC);
-
 /* Functions for both old and new API */
 PHP_FUNCTION(mcrypt_ecb);
 PHP_FUNCTION(mcrypt_cbc);
