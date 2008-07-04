@@ -1,3 +1,120 @@
+2008-07-03  Olivier Hill  <olivier.hill@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/file.c
+      ext/standard/tests/file/007_error.phpt
+      ext/standard/tests/file/fflush_error.phpt
+      ext/standard/tests/file/fgetc_error.phpt
+      ext/standard/tests/file/fgetc_variation2.phpt
+      ext/standard/tests/file/fgets_error.phpt
+      ext/standard/tests/file/fgets_variation2.phpt
+      ext/standard/tests/file/fgetss_error.phpt
+      ext/standard/tests/file/fpassthru_error.phpt
+      ext/standard/tests/file/fread_error.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_error1.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_error2.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_error3.phpt
+      ext/standard/tests/file/ftruncate_error.phpt
+      ext/standard/tests/file/fwrite.phpt
+      ext/standard/tests/file/fwrite_error.phpt
+      ext/standard/tests/file/popen_pclose_error.phpt
+      ext/standard/tests/file/umask_error.phpt:
+      New parameter parsing API
+
+2008-07-03  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_3)
+      ext/mcrypt/mcrypt.c:
+      fix key container access
+
+2008-07-03  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/imap/config.w32
+      ext/imap/php_imap.c:
+      - MFB: add 2007a/b info
+      - update config.w32 to detect static lib
+
+2008-07-03  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/standard/string.c:
+      size_t -> int
+
+2008-07-03  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      - mcrypt_create_iv entry
+
+    * (PHP_5_3)
+      ext/mcrypt/mcrypt.c
+      ext/mcrypt/php_mcrypt.h
+      ext/mcrypt/tests/bug35496.phpt
+      ext/mcrypt/tests/bug41252.phpt
+      ext/mcrypt/tests/bug43143.phpt
+      ext/mcrypt/tests/mcrypt_cbc.phpt
+      ext/mcrypt/tests/mcrypt_cbf.phpt
+      ext/mcrypt/tests/mcrypt_decrypt.phpt:
+      - fix mcrypt_iv on windows, use urandom equivalent
+      - MFH, code cleaning and reorganisation
+
+2008-07-03  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/zip/php_zip.c
+      ext/zip/php_zip.h:
+      - Fixed compile warnings
+
+    * ext/recode/recode.c:
+      - MFB: New parameter parsing API
+
+    * (PHP_5_3)
+      ext/recode/recode.c:
+      - New parameter parsing API
+
+    * ext/recode/recode.c
+      ext/shmop/shmop.c
+      ext/spl/php_spl.c
+      ext/tidy/tidy.c
+      ext/zip/php_zip.c
+      ext/zlib/zlib.c:
+      - MFB: Added arginfo (functions)
+
+2008-07-03  Antony Dovgal  <tony@daylessday.org>
+
+    * run-tests.php:
+      fix run-tests.php failure when no custom php.ini passed
+
+    * (PHP_5_3)
+      ext/standard/tests/general_functions/phpinfo.phpt
+      ext/standard/tests/strings/printf_64bit.phpt:
+      fix test
+
+    * (PHP_5_3)
+      ext/standard/info.c:
+      add a line to phpinfo() to indicate whether multibyte support is On or Off
+
+    * (PHP_5_3)
+      acinclude.m4:
+      make --enable-zend-multibyte known to configure
+
+    * (PHP_5_3)
+      ext/standard/tests/general_functions/is_float_64bit.phpt
+      ext/standard/tests/general_functions/is_int_64bit.phpt
+      ext/standard/tests/general_functions/var_dump_64bit.phpt:
+      fix tests
+
+2008-07-03  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/recode/recode.c
+      ext/shmop/shmop.c
+      ext/spl/php_spl.c
+      ext/tidy/tidy.c
+      ext/zip/php_zip.c
+      ext/zlib/zlib.c:
+      - Added arginfo (functions)
+
 2008-07-02  Rob Richards  <rrichards@ctindustries.net>
 
     * (PHP_5_3)
