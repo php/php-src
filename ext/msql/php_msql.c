@@ -81,8 +81,6 @@ const zend_function_entry msql_functions[] = {
 	PHP_FALIAS(msql_fieldtype,		msql_field_type,		NULL)
 	PHP_FALIAS(msql_fieldflags,		msql_field_flags,		NULL)
 	
-	PHP_FALIAS(msql_regcase,		sql_regcase,			NULL)
-	
 	PHP_FALIAS(msql_affected_rows,	msql_affected_rows,		NULL)
 	
 	/* for downwards compatability */
