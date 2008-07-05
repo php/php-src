@@ -28,6 +28,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <sys/types.h>
+#include <process.h>
+
 typedef int uid_t;
 typedef int gid_t;
 typedef char * caddr_t;
