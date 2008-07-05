@@ -74,7 +74,10 @@ typedef long pid_t;
 #endif
 
 /* General Windows stuff */
-#define WINDOWS 1
+#ifndef WINDOWS
+# define WINDOWS 1
+#endif
+
 
 /* Prevent use of VC5 OpenFile function */
 #define NOOPENFILE
