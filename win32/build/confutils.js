@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.74 2008-07-02 20:54:10 pajoye Exp $
+// $Id: confutils.js,v 1.75 2008-07-05 19:52:45 pajoye Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -30,15 +30,12 @@ var PROGRAM_FILES = WshShell.Environment("Process").Item("ProgramFiles");
 var extensions_enabled = new Array();
 var sapi_enabled = new Array();
 
-// 12 is VC6
-// 13 is vs.net 2003
-// 14 is vs.net 2005
-// 15 is vs.net 2008
 var VC_VERSIONS = new Array();
-VC_VERSIONS[12] = 'VC6';
-VC_VERSIONS[13] = 'Visual C++ 2003';
-VC_VERSIONS[14] = 'Visual C++ 2005';
-VC_VERSIONS[15] = 'Visual C++ 2008';
+VC_VERSIONS[1200] = 'VC6';
+VC_VERSIONS[1300] = 'Visual C++ 2002';
+VC_VERSIONS[1310] = 'Visual C++ 2003';
+VC_VERSIONS[1400] = 'Visual C++ 2005';
+VC_VERSIONS[1500] = 'Visual C++ 2008';
 
 if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files";

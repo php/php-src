@@ -31,13 +31,15 @@ function probe_binary(EXE, what)
 }
 
 // Which version of the compiler do we have?
-VCVERS = probe_binary(CL).substr(0, 2);
+VCVERS = probe_binary(CL);
+VCVERS = VCVERS.substr(0, 2) + VCVERS.substr(3, 2);
 STDOUT.WriteLine("Detected MS compiler version " + VCVERS);
 
-// 12 is VC6
-// 13 is vs.net 2003
-// 14 is vs.net 2005
-// 15 is vs.net 2008
+// 1200 is VC6
+// 1300 is vs.net 2002
+// 1310 is vs.net 2003
+// 1400 is vs.net 2005
+// 1500 is vs.net 2008
 
 // do we use x64 or 80x86 version of compiler?
 X64 = probe_binary(CL, 64);
