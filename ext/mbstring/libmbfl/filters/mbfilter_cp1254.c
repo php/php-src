@@ -18,7 +18,7 @@
  * if not, write to the Free Software Foundation, Inc., 59 Temple Place,
  * Suite 330, Boston, MA  02111-1307  USA
  *
- * The author of this part: aluk AKIN <halukakin@gmail.com>
+ * The author of this part: Haluk AKIN <halukakin@gmail.com>
  *
  */
 /*
@@ -55,21 +55,21 @@ const struct mbfl_identify_vtbl vtbl_identify_cp1254 = {
 	mbfl_filt_ident_cp1254
 };
 
-const struct mbfl_convert_vtbl vtbl_wchar_cp1254 = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_cp1254,
-	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
-	mbfl_filt_conv_wchar_cp1254,
-	mbfl_filt_conv_common_flush
-};
-
 const struct mbfl_convert_vtbl vtbl_cp1254_wchar = {
 	mbfl_no_encoding_cp1254,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_cp1254_wchar,
+	mbfl_filt_conv_common_flush
+};
+
+const struct mbfl_convert_vtbl vtbl_wchar_cp1254 = {
+	mbfl_no_encoding_wchar,
+	mbfl_no_encoding_cp1254,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_wchar_cp1254,
 	mbfl_filt_conv_common_flush
 };
 
@@ -139,6 +139,12 @@ mbfl_filt_conv_cp1254_wchar(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
+/* We only distinguish the MS extensions to ISO-8859-1.
+ * Actually, this is pretty much a NO-OP, since the identification
+ * system doesn't allow us to discriminate between a positive match,
+ * a possible match and a definite non-match.
+ * The problem here is that cp1254 looks like SJIS for certain chars.
+ * */
 static int mbfl_filt_ident_cp1254(int c, mbfl_identify_filter *filter)
 {
 	if (c >= 0x80 && c < 0xff)
