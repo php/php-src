@@ -239,6 +239,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_busy_timeout, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_method_busy_timeout, 0, 0, 1)
+	ZEND_ARG_INFO(0, ms)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_close, 0, 0, 1)
 	ZEND_ARG_INFO(0, db)
 ZEND_END_ARG_INFO()
@@ -252,9 +257,22 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_unbuffered_query, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_method_unbuffered_query, 0, 0, 1)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, result_type)
+	ZEND_ARG_INFO(1, error_message)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_fetch_column_types, 0, 0, 2)
 	ZEND_ARG_INFO(0, table_name)
 	ZEND_ARG_INFO(0, db)
+	ZEND_ARG_INFO(0, result_type)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_method_fetch_column_types, 0, 0, 1)
+	ZEND_ARG_INFO(0, table_name)
 	ZEND_ARG_INFO(0, result_type)
 ZEND_END_ARG_INFO()
 
@@ -267,6 +285,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_query, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_method_query, 0, 0, 1)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, result_type)
+	ZEND_ARG_INFO(1, error_message)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_exec, 0, 0, 2)
 	ZEND_ARG_INFO(0, query)
 	ZEND_ARG_INFO(0, db)
@@ -274,8 +299,20 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_exec, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_method_exec, 0, 0, 1)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(1, error_message)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_fetch_all, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, result_type)
+	ZEND_ARG_INFO(0, decode_binary)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_method_fetch_all, 0, 0, 0)
 	ZEND_ARG_INFO(0, result_type)
 	ZEND_ARG_INFO(0, decode_binary)
 ZEND_END_ARG_INFO()
@@ -288,10 +325,22 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_fetch_array, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_method_fetch_array, 0, 0, 0)
+	ZEND_ARG_INFO(0, result_type)
+	ZEND_ARG_INFO(0, decode_binary)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_fetch_object, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, class_name)
-	ZEND_ARG_INFO(0, l)
+	ZEND_ARG_INFO(0, ctor_params)
+	ZEND_ARG_INFO(0, decode_binary)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_method_fetch_object, 0, 0, 0)
+	ZEND_ARG_INFO(0, class_name)
 	ZEND_ARG_INFO(0, ctor_params)
 	ZEND_ARG_INFO(0, decode_binary)
 ZEND_END_ARG_INFO()
@@ -299,6 +348,13 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_array_query, 0, 0, 2)
 	ZEND_ARG_INFO(0, db)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, result_type)
+	ZEND_ARG_INFO(0, decode_binary)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_method_array_query, 0, 0, 1)
 	ZEND_ARG_INFO(0, query)
 	ZEND_ARG_INFO(0, result_type)
 	ZEND_ARG_INFO(0, decode_binary)
@@ -313,8 +369,20 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_single_query, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_method_single_query, 0, 0, 1)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, first_row_only)
+	ZEND_ARG_INFO(0, decode_binary)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_fetch_single, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, decode_binary)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_method_fetch_single, 0, 0, 0)
 	ZEND_ARG_INFO(0, decode_binary)
 ZEND_END_ARG_INFO()
 
@@ -326,8 +394,20 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_current, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_method_current, 0, 0, 0)
+	ZEND_ARG_INFO(0, result_type)
+	ZEND_ARG_INFO(0, decode_binary)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_column, 0, 0, 2)
 	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, index_or_name)
+	ZEND_ARG_INFO(0, decode_binary)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_method_column, 0, 0, 1)
 	ZEND_ARG_INFO(0, index_or_name)
 	ZEND_ARG_INFO(0, decode_binary)
 ZEND_END_ARG_INFO()
@@ -346,8 +426,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_changes, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO(arginfo_sqlite_method_changes, 0)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_last_insert_rowid, 0, 0, 1)
 	ZEND_ARG_INFO(0, db)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_sqlite_method_last_insert_rowid, 0)
 ZEND_END_ARG_INFO()
 
 static
@@ -356,8 +444,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_num_rows, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO(arginfo_sqlite_method_num_rows, 0)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_valid, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_sqlite_method_valid, 0)
 ZEND_END_ARG_INFO()
 
 static
@@ -366,13 +462,26 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_has_prev, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO(arginfo_sqlite_method_has_prev, 0)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_num_fields, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO(arginfo_sqlite_method_num_fields, 0)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_field_name, 0, 0, 2)
 	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_INFO(0, field_index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_method_field_name, 0, 0, 1)
 	ZEND_ARG_INFO(0, field_index)
 ZEND_END_ARG_INFO()
 
@@ -383,8 +492,17 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_seek, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_method_seek, 0, 0, 1)
+	ZEND_ARG_INFO(0, row)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_rewind, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_sqlite_method_rewind, 0)
 ZEND_END_ARG_INFO()
 
 static
@@ -393,13 +511,25 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_next, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO(arginfo_sqlite_method_next, 0)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_key, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO(arginfo_sqlite_method_key, 0)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_prev, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_sqlite_method_prev, 0)
 ZEND_END_ARG_INFO()
 
 static
@@ -410,6 +540,10 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_last_error, 0, 0, 1)
 	ZEND_ARG_INFO(0, db)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_sqlite_method_last_error, 0)
 ZEND_END_ARG_INFO()
 
 static
@@ -427,8 +561,23 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_create_aggregate, 0, 0, 4)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_method_create_aggregate, 0, 0, 3)
+	ZEND_ARG_INFO(0, funcname)
+	ZEND_ARG_INFO(0, step_func)
+	ZEND_ARG_INFO(0, finalize_func)
+	ZEND_ARG_INFO(0, num_args)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_create_function, 0, 0, 3)
 	ZEND_ARG_INFO(0, db)
+	ZEND_ARG_INFO(0, funcname)
+	ZEND_ARG_INFO(0, callback)
+	ZEND_ARG_INFO(0, num_args)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite_method_create_function, 0, 0, 2)
 	ZEND_ARG_INFO(0, funcname)
 	ZEND_ARG_INFO(0, callback)
 	ZEND_ARG_INFO(0, num_args)
@@ -489,61 +638,61 @@ const zend_function_entry sqlite_functions[] = {
 };
 
 const zend_function_entry sqlite_funcs_db[] = {
-	PHP_ME_MAPPING(__construct, sqlite_open, third_arg_force_ref, 0)
+	PHP_ME_MAPPING(__construct, sqlite_open, arginfo_sqlite_open, 0)
 /*	PHP_ME_MAPPING(close, sqlite_close, NULL, 0)*/
-	PHP_ME_MAPPING(query, sqlite_query, third_arg_force_ref, 0)
-	PHP_ME_MAPPING(queryExec, sqlite_exec, second_arg_force_ref, 0)
-	PHP_ME_MAPPING(arrayQuery, sqlite_array_query, NULL, 0)
-	PHP_ME_MAPPING(singleQuery, sqlite_single_query, NULL, 0)
-	PHP_ME_MAPPING(unbufferedQuery, sqlite_unbuffered_query, third_arg_force_ref, 0)
-	PHP_ME_MAPPING(lastInsertRowid, sqlite_last_insert_rowid, NULL, 0)
-	PHP_ME_MAPPING(changes, sqlite_changes, NULL, 0)
-	PHP_ME_MAPPING(createAggregate, sqlite_create_aggregate, NULL, 0)
-	PHP_ME_MAPPING(createFunction, sqlite_create_function, NULL, 0)
-	PHP_ME_MAPPING(busyTimeout, sqlite_busy_timeout, NULL, 0)
-	PHP_ME_MAPPING(lastError, sqlite_last_error, NULL, 0)
-	PHP_ME_MAPPING(fetchColumnTypes, sqlite_fetch_column_types, NULL, 0)
+	PHP_ME_MAPPING(query, sqlite_query, arginfo_sqlite_method_query, 0)
+	PHP_ME_MAPPING(queryExec, sqlite_exec, arginfo_sqlite_method_exec, 0)
+	PHP_ME_MAPPING(arrayQuery, sqlite_array_query, arginfo_sqlite_method_array_query, 0)
+	PHP_ME_MAPPING(singleQuery, sqlite_single_query, arginfo_sqlite_method_single_query, 0)
+	PHP_ME_MAPPING(unbufferedQuery, sqlite_unbuffered_query, arginfo_sqlite_method_unbuffered_query, 0)
+	PHP_ME_MAPPING(lastInsertRowid, sqlite_last_insert_rowid, arginfo_sqlite_method_last_insert_rowid, 0)
+	PHP_ME_MAPPING(changes, sqlite_changes, arginfo_sqlite_method_changes, 0)
+	PHP_ME_MAPPING(createAggregate, sqlite_create_aggregate, arginfo_sqlite_method_create_aggregate, 0)
+	PHP_ME_MAPPING(createFunction, sqlite_create_function, arginfo_sqlite_method_create_function, 0)
+	PHP_ME_MAPPING(busyTimeout, sqlite_busy_timeout, arginfo_sqlite_method_busy_timeout, 0)
+	PHP_ME_MAPPING(lastError, sqlite_last_error, arginfo_sqlite_method_last_error, 0)
+	PHP_ME_MAPPING(fetchColumnTypes, sqlite_fetch_column_types, arginfo_sqlite_method_fetch_column_types, 0)
 /*	PHP_ME_MAPPING(error_string, sqlite_error_string, NULL, 0) static */
 /*	PHP_ME_MAPPING(escape_string, sqlite_escape_string, NULL, 0) static */
 	{NULL, NULL, NULL}
 };
 
 const zend_function_entry sqlite_funcs_query[] = {
-	PHP_ME_MAPPING(fetch, sqlite_fetch_array, NULL, 0)
-	PHP_ME_MAPPING(fetchObject, sqlite_fetch_object, NULL, 0)
-	PHP_ME_MAPPING(fetchSingle, sqlite_fetch_single, NULL, 0)
-	PHP_ME_MAPPING(fetchAll, sqlite_fetch_all, NULL, 0)
-	PHP_ME_MAPPING(column, sqlite_column, NULL, 0)
-	PHP_ME_MAPPING(numFields, sqlite_num_fields, NULL, 0)
-	PHP_ME_MAPPING(fieldName, sqlite_field_name, NULL, 0)
+	PHP_ME_MAPPING(fetch, sqlite_fetch_array, arginfo_sqlite_method_fetch_array, 0)
+	PHP_ME_MAPPING(fetchObject, sqlite_fetch_object, arginfo_sqlite_method_fetch_object, 0)
+	PHP_ME_MAPPING(fetchSingle, sqlite_fetch_single, arginfo_sqlite_method_fetch_single, 0)
+	PHP_ME_MAPPING(fetchAll, sqlite_fetch_all, arginfo_sqlite_method_fetch_all, 0)
+	PHP_ME_MAPPING(column, sqlite_column, arginfo_sqlite_method_column, 0)
+	PHP_ME_MAPPING(numFields, sqlite_num_fields, arginfo_sqlite_method_num_fields, 0)
+	PHP_ME_MAPPING(fieldName, sqlite_field_name, arginfo_sqlite_method_field_name, 0)
 	/* iterator */
-	PHP_ME_MAPPING(current, sqlite_current, NULL, 0)
-	PHP_ME_MAPPING(key, sqlite_key, NULL, 0)
-	PHP_ME_MAPPING(next, sqlite_next, NULL, 0)
-	PHP_ME_MAPPING(valid, sqlite_valid, NULL, 0)
-	PHP_ME_MAPPING(rewind, sqlite_rewind, NULL, 0)
+	PHP_ME_MAPPING(current, sqlite_current, arginfo_sqlite_method_current, 0)
+	PHP_ME_MAPPING(key, sqlite_key, arginfo_sqlite_method_key, 0)
+	PHP_ME_MAPPING(next, sqlite_next, arginfo_sqlite_method_next, 0)
+	PHP_ME_MAPPING(valid, sqlite_valid, arginfo_sqlite_method_valid, 0)
+	PHP_ME_MAPPING(rewind, sqlite_rewind, arginfo_sqlite_method_rewind, 0)
 	/* countable */
-	PHP_ME_MAPPING(count, sqlite_num_rows, NULL, 0)
+	PHP_ME_MAPPING(count, sqlite_num_rows, arginfo_sqlite_method_num_rows, 0)
 	/* additional */
-	PHP_ME_MAPPING(prev, sqlite_prev, NULL, 0)
-	PHP_ME_MAPPING(hasPrev, sqlite_has_prev, NULL, 0)
-	PHP_ME_MAPPING(numRows, sqlite_num_rows, NULL, 0)
-	PHP_ME_MAPPING(seek, sqlite_seek, NULL, 0)
+	PHP_ME_MAPPING(prev, sqlite_prev, arginfo_sqlite_method_prev, 0)
+	PHP_ME_MAPPING(hasPrev, sqlite_has_prev, arginfo_sqlite_method_has_prev, 0)
+	PHP_ME_MAPPING(numRows, sqlite_num_rows, arginfo_sqlite_method_num_rows, 0)
+	PHP_ME_MAPPING(seek, sqlite_seek, arginfo_sqlite_method_seek, 0)
 	{NULL, NULL, NULL}
 };
 
 const zend_function_entry sqlite_funcs_ub_query[] = {
-	PHP_ME_MAPPING(fetch, sqlite_fetch_array, NULL, 0)
-	PHP_ME_MAPPING(fetchObject, sqlite_fetch_object, NULL, 0)
-	PHP_ME_MAPPING(fetchSingle, sqlite_fetch_single, NULL, 0)
-	PHP_ME_MAPPING(fetchAll, sqlite_fetch_all, NULL, 0)
-	PHP_ME_MAPPING(column, sqlite_column, NULL, 0)
-	PHP_ME_MAPPING(numFields, sqlite_num_fields, NULL, 0)
-	PHP_ME_MAPPING(fieldName, sqlite_field_name, NULL, 0)
+	PHP_ME_MAPPING(fetch, sqlite_fetch_array, arginfo_sqlite_method_fetch_array, 0)
+	PHP_ME_MAPPING(fetchObject, sqlite_fetch_object, arginfo_sqlite_method_fetch_object, 0)
+	PHP_ME_MAPPING(fetchSingle, sqlite_fetch_single, arginfo_sqlite_method_fetch_single, 0)
+	PHP_ME_MAPPING(fetchAll, sqlite_fetch_all, arginfo_sqlite_method_fetch_all, 0)
+	PHP_ME_MAPPING(column, sqlite_column, arginfo_sqlite_method_column, 0)
+	PHP_ME_MAPPING(numFields, sqlite_num_fields, arginfo_sqlite_method_num_fields, 0)
+	PHP_ME_MAPPING(fieldName, sqlite_field_name, arginfo_sqlite_method_field_name, 0)
 	/* iterator */
-	PHP_ME_MAPPING(current, sqlite_current, NULL, 0)
-	PHP_ME_MAPPING(next, sqlite_next, NULL, 0)
-	PHP_ME_MAPPING(valid, sqlite_valid, NULL, 0)
+	PHP_ME_MAPPING(current, sqlite_current, arginfo_sqlite_method_current, 0)
+	PHP_ME_MAPPING(next, sqlite_next, arginfo_sqlite_method_next, 0)
+	PHP_ME_MAPPING(valid, sqlite_valid, arginfo_sqlite_method_valid, 0)
 	{NULL, NULL, NULL}
 };
 
@@ -596,9 +745,6 @@ zend_module_entry sqlite_module_entry = {
 
 #ifdef COMPILE_DL_SQLITE
 ZEND_GET_MODULE(sqlite)
-# ifdef PHP_WIN32
-# include "zend_arg_defs.c"
-# endif
 #endif
 
 static int php_sqlite_callback_invalidator(struct php_sqlite_agg_functions *funcs TSRMLS_DC)
