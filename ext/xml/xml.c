@@ -62,9 +62,6 @@ ZEND_DECLARE_MODULE_GLOBALS(xml)
 /* {{{ dynamically loadable module stuff */
 #ifdef COMPILE_DL_XML
 ZEND_GET_MODULE(xml)
-# ifdef PHP_WIN32
-# include "zend_arg_defs.c"
-# endif
 #endif /* COMPILE_DL_XML */
 /* }}} */
 
