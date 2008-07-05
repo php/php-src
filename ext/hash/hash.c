@@ -789,11 +789,7 @@ static void mhash_init(INIT_FUNC_ARGS)
 		}
 
 		len = slprintf(buf, 127, "MHASH_%s", algorithm.mhash_name, strlen(algorithm.mhash_name));
-		{
-			char name[128];
-			memcpy(name, buf, len+1);
-			REGISTER_LONG_CONSTANT(name, algorithm.value, CONST_CS | CONST_PERSISTENT);
-		}
+		zend_register_long_constant(buf, len + 1, algorithm.value, CONST_CS | CONST_PERSISTENT, module_number TSRMLS_CC);
 	}
 }
 
@@ -801,20 +797,20 @@ static void mhash_init(INIT_FUNC_ARGS)
    Hash data with hash */
 PHP_FUNCTION(mhash)
 {
-	zval **z_algorithm;
+	zval *z_algorithm;
 	int algorithm;
 
-	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_ex(1, &z_algorithm) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(1 TSRMLS_CC, "z", &z_algorithm) == FAILURE) {
+		return;
 	}
 
-	algorithm = Z_LVAL_PP(z_algorithm);
+	algorithm = Z_LVAL_P(z_algorithm);
 
 	/* need to conver the first parameter from int to string */
 	if (algorithm >= 0 && algorithm < MHASH_NUM_ALGOS) {
 		struct mhash_bc_entry algorithm_lookup = mhash_to_hash[algorithm];
 		if (algorithm_lookup.hash_name) {
-			ZVAL_STRING(*z_algorithm, algorithm_lookup.hash_name, 1);
+			ZVAL_STRING(z_algorithm, algorithm_lookup.hash_name, 1);
 		}
 	}
 
@@ -937,8 +933,8 @@ PHP_FUNCTION(mhash_keygen_s2k)
 						ops->hash_update(context, &null, 1);
 					}
 					ops->hash_update(context, (unsigned char *)padded_salt, salt_len);
-					ops->hash_update(context, password, password_len);
-					ops->hash_final(digest, context);
+					ops->hash_update(context, (unsigned char *)password, password_len);
+					ops->hash_final((unsigned char *)digest, context);
 					memcpy( &key[i*block_size], digest, block_size);
 				}
 
