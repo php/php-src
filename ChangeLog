@@ -1,3 +1,69 @@
+2008-07-04  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/hash/hash.c:
+      - MFB: fix compile error with VC6
+
+    * (PHP_5_3)
+      ext/hash/hash.c:
+      - fix compile error with vc6 (snaps)
+
+2008-07-04  Alexey Zakhlestin  <indeyets@gmail.com>
+
+    * ext/posix/tests/posix_strerror_error.phpt
+      ext/posix/tests/posix_strerror_variation1.phpt:
+      MFB: fixed tests not to rely on actual strings of errors, as those are not
+      defined by any standard and are platform-dependent
+
+2008-07-04  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/zip/php_zip.h:
+      - Moved protos to .c (sync with HEAD)
+
+    * (PHP_5_3)
+      ext/zip/php_zip.c:
+      - Reverted previous commit
+      - Moved protos to .c (sync with HEAD)
+
+2008-07-04  Alexey Zakhlestin  <indeyets@gmail.com>
+
+    * (PHP_5_3)
+      ext/posix/tests/posix_strerror_error.phpt
+      ext/posix/tests/posix_strerror_variation1.phpt:
+      fixed tests not to rely on actual strings of errors, as those are not
+      defined by any standard and are platform-dependent
+
+2008-07-04  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/sockets/sockets.c:
+      MFB:
+      - Added arginfo
+      - Removed #include "zend_arg_defs.c" (it's unnecessary now)
+
+    * (PHP_5_3)
+      ext/sockets/sockets.c:
+      - Added arginfo
+      - Removed #include "zend_arg_defs.c" (it's unnecessary now)
+
+2008-07-04  Rob Richards  <rrichards@ctindustries.net>
+
+    * win32/build/Makefile:
+      - Removed ntest and utest
+      - Removed -U flag to `make test' just to test once each test
+
+2008-07-04  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/mcrypt/mcrypt.c
+      ext/mcrypt/php_mcrypt.h
+      ext/mcrypt/tests/bug35496.phpt
+      ext/mcrypt/tests/bug41252.phpt
+      ext/mcrypt/tests/bug43143.phpt
+      ext/mcrypt/tests/mcrypt_cbc.phpt
+      ext/mcrypt/tests/mcrypt_cbf.phpt
+      ext/mcrypt/tests/mcrypt_decrypt.phpt:
+      - Revert that crap.
+
 2008-07-03  Olivier Hill  <olivier.hill@gmail.com>
 
     * (PHP_5_3)
