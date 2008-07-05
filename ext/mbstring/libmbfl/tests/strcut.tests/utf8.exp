@@ -1,0 +1,91 @@
+#!/usr/bin/expect -f
+proc begin_strcut_test {_from _length} {
+    global spawn_id from length
+    set from $_from
+    set length $_length
+
+    spawn tests/strcut Japanese UTF-8 $_from $_length
+    set timeout 1
+
+    expect_after {
+        "\[^\r\n\]*\r\n" { fail $test }
+    }
+}
+
+begin_strcut_test -1 2
+
+set test "asciish characters ($from, $length)"
+send "testtest\r"
+expect {
+    -ex "***ERROR***\r\n" { pass $test }
+}
+
+set test "non-asciish characters ($from, $length)"
+send "テストテスト\r"
+expect {
+    -ex "***ERROR***\r\n" { pass $test }
+}
+
+close
+begin_strcut_test 2 -1
+
+set test "asciish characters ($from, $length)"
+send "testtest\r"
+expect {
+    -ex "***ERROR***\r\n" { pass $test }
+}
+
+set test "non-asciish characters ($from, $length)"
+send "テストテスト\r"
+expect {
+    -ex "***ERROR***\r\n" { pass $test }
+}
+
+close
+begin_strcut_test 3 2
+
+set test "asciish characters ($from, $length)"
+send "testtest\r"
+expect {
+    -ex "%74%74 (2)\r\n" { pass $test }
+}
+
+set test "non-asciish characters ($from, $length)"
+send "テストテスト\r"
+expect {
+    -ex "(0)\r\n" { pass $test }
+}
+
+close
+begin_strcut_test 5 8
+
+set test "asciish characters ($from, $length)"
+send "testtest\r"
+expect {
+    -ex "%65%73%74 (3)\r\n" { pass $test }
+}
+
+set test "non-asciish characters ($from, $length)"
+send "テストテスト\r"
+expect {
+    -ex "%e3%82%b9%e3%83%88 (6)\r\n" { pass $test }
+}
+
+close
+begin_strcut_test 1 15
+
+set test "asciish characters ($from, $length)"
+send "testestestestestes\r"
+expect {
+     "%65%73%74%65%73%74%65%73%74%65%73%74%65%73%74 (15)\r\n" { pass $test }
+}
+
+set test "non-asciish characters ($from, $length)"
+send "テストテスト\r"
+expect {
+    -ex "%e3%83%86%e3%82%b9%e3%83%88%e3%83%86%e3%82%b9 (15)\r\n" { pass $test }
+}
+close
+
+
+# vim: sts=4 sw=4 ts=4 et encoding=UTF-8

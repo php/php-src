@@ -99,6 +99,13 @@
 #include "mbfl_ident.h"
 
 /*
+ * version information
+ */
+#define MBFL_VERSION_MAJOR 1
+#define MBFL_VERSION_MINOR 0
+#define MBFL_VERSION_TEENY 2
+
+/*
  * convert filter
  */
 #define MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE 0

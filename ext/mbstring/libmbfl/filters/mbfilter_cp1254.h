@@ -18,24 +18,26 @@
  * if not, write to the Free Software Foundation, Inc., 59 Temple Place,
  * Suite 330, Boston, MA  02111-1307  USA
  *
- * The author of this file:
+ * The author of this part: Haluk AKIN <halukakin@gmail.com>
  *
  */
 /*
- * The source code included in this files was separated from mbfilter.c
+ * the source code included in this files was separated from mbfilter.c
  * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
- * 
+ *
  */
 
-#ifndef MBFL_MBFILTER_PASS_H
-#define MBFL_MBFILTER_PASS_H
+#ifndef MBFL_MBFILTER_CP1254_H
+#define MBFL_MBFILTER_CP1254_H
 
-#include "mbfl_defs.h"
 #include "mbfilter.h"
 
-extern const mbfl_encoding mbfl_encoding_pass; 
-extern const struct mbfl_convert_vtbl vtbl_pass;
+extern const mbfl_encoding mbfl_encoding_cp1254;
+extern const struct mbfl_identify_vtbl vtbl_identify_cp1254;
+extern const struct mbfl_convert_vtbl vtbl_cp1254_wchar;
+extern const struct mbfl_convert_vtbl vtbl_wchar_cp1254;
 
-MBFLAPI extern int mbfl_filt_conv_pass(int c, mbfl_convert_filter *filter);
+int mbfl_filt_conv_wchar_cp1254(int c, mbfl_convert_filter *filter);
+int mbfl_filt_conv_cp1254_wchar(int c, mbfl_convert_filter *filter);
 
-#endif /* MBFL_MBFILTER_PASS_H */
+#endif /* MBFL_MBFILTER_CP1254_H */

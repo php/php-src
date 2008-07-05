@@ -18,24 +18,30 @@
  * if not, write to the Free Software Foundation, Inc., 59 Temple Place,
  * Suite 330, Boston, MA  02111-1307  USA
  *
- * The author of this file:
+ * The author of this part: Maksym Veremeyenko <verem@m1.tv>
+ *
+ * Based on mbfilter_koi8r.h code
  *
  */
-/*
- * The source code included in this files was separated from mbfilter.c
- * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
- * 
- */
 
-#ifndef MBFL_MBFILTER_PASS_H
-#define MBFL_MBFILTER_PASS_H
+#ifndef MBFL_MBFILTER_KOI8U_H
+#define MBFL_MBFILTER_KOI8U_H
 
-#include "mbfl_defs.h"
 #include "mbfilter.h"
 
-extern const mbfl_encoding mbfl_encoding_pass; 
-extern const struct mbfl_convert_vtbl vtbl_pass;
+extern const mbfl_encoding mbfl_encoding_koi8u;
+extern const struct mbfl_identify_vtbl vtbl_identify_koi8u;
+extern const struct mbfl_convert_vtbl vtbl_wchar_koi8u;
+extern const struct mbfl_convert_vtbl vtbl_koi8u_wchar;
 
-MBFLAPI extern int mbfl_filt_conv_pass(int c, mbfl_convert_filter *filter);
+int mbfl_filt_conv_koi8u_wchar(int c, mbfl_convert_filter *filter);
+int mbfl_filt_conv_wchar_koi8u(int c, mbfl_convert_filter *filter);
 
-#endif /* MBFL_MBFILTER_PASS_H */
+#endif /* MBFL_MBFILTER_KOI8U_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ */
