@@ -52,7 +52,7 @@ typedef char * caddr_t;
 #define off_t		_off_t
 typedef unsigned int uint;
 typedef unsigned long ulong;
-#if !NSAPI
+#if !NSAPI && !defined(pid_t)
 typedef long pid_t;
 #endif
 
@@ -72,7 +72,9 @@ typedef long pid_t;
 #endif
 
 /* General Windows stuff */
-#define WINDOWS 1
+#ifndef WINDOWS
+# define WINDOWS 1
+#endif
 
 /* Prevent use of VC5 OpenFile function */
 #define NOOPENFILE
