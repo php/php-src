@@ -57,6 +57,7 @@
 #include "nls/nls_uni.h"
 #include "nls/nls_de.h"
 #include "nls/nls_ru.h"
+#include "nls/nls_ua.h"
 #include "nls/nls_en.h"
 #include "nls/nls_hy.h"
 #include "nls/nls_tr.h"
@@ -77,6 +78,7 @@ static const mbfl_language *mbfl_language_ptr_table[] = {
 	&mbfl_language_english,
 	&mbfl_language_german,
 	&mbfl_language_russian,
+	&mbfl_language_ukrainian,
 	&mbfl_language_armenian,
 	&mbfl_language_turkish,
 	&mbfl_language_neutral,

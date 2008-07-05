@@ -221,6 +221,8 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
      libmbfl/filters/mbfilter_utf7imap.c
      libmbfl/filters/mbfilter_utf8.c
      libmbfl/filters/mbfilter_uuencode.c
+     libmbfl/filters/mbfilter_koi8u.c
+     libmbfl/filters/mbfilter_cp1254.c
      libmbfl/mbfl/mbfilter.c
      libmbfl/mbfl/mbfilter_8bit.c
      libmbfl/mbfl/mbfilter_pass.c
@@ -243,6 +245,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
      libmbfl/nls/nls_zh.c
      libmbfl/nls/nls_hy.c
      libmbfl/nls/nls_tr.c
+     libmbfl/nls/nls_ua.c
     ])
     PHP_MBSTRING_ADD_CFLAG([-DHAVE_CONFIG_H])
   else

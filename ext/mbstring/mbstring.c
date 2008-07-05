@@ -139,7 +139,14 @@ static const enum mbfl_no_encoding php_mb_default_identify_list_hy[] = {
 static const enum mbfl_no_encoding php_mb_default_identify_list_tr[] = {
 	mbfl_no_encoding_ascii,
 	mbfl_no_encoding_utf8,
+	mbfl_no_encoding_cp1254,
 	mbfl_no_encoding_8859_9
+};
+
+static const enum mbfl_no_encoding php_mb_default_identify_list_ua[] = {
+	mbfl_no_encoding_ascii,
+	mbfl_no_encoding_utf8,
+	mbfl_no_encoding_koi8u
 };
 
 static const enum mbfl_no_encoding php_mb_default_identify_list_neut[] = {
@@ -156,6 +163,7 @@ static const php_mb_nls_ident_list php_mb_default_identify_list[] = {
 	{ mbfl_no_language_russian, php_mb_default_identify_list_ru, sizeof(php_mb_default_identify_list_ru) / sizeof(php_mb_default_identify_list_ru[0]) },
 	{ mbfl_no_language_armenian, php_mb_default_identify_list_hy, sizeof(php_mb_default_identify_list_hy) / sizeof(php_mb_default_identify_list_hy[0]) },
 	{ mbfl_no_language_turkish, php_mb_default_identify_list_tr, sizeof(php_mb_default_identify_list_tr) / sizeof(php_mb_default_identify_list_tr[0]) },
+	{ mbfl_no_language_ukrainian, php_mb_default_identify_list_ua, sizeof(php_mb_default_identify_list_ua) / sizeof(php_mb_default_identify_list_ua[0]) },
 	{ mbfl_no_language_neutral, php_mb_default_identify_list_neut, sizeof(php_mb_default_identify_list_neut) / sizeof(php_mb_default_identify_list_neut[0]) }
 };
 
