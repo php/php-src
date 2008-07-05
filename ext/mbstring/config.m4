@@ -180,6 +180,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
      libmbfl/filters/mbfilter_byte4.c
      libmbfl/filters/mbfilter_cp1251.c
      libmbfl/filters/mbfilter_cp1252.c
+     libmbfl/filters/mbfilter_cp1254.c
      libmbfl/filters/mbfilter_cp866.c
      libmbfl/filters/mbfilter_cp932.c
      libmbfl/filters/mbfilter_cp936.c
