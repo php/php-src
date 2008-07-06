@@ -1,3 +1,10 @@
+2008-07-05  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      zend_builtin_functions.c:
+      - Added arginfo
+      - Removed #include "zend_arg_defs.c"
+
 2008-07-01  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute.c

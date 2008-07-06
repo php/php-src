@@ -1,3 +1,162 @@
+2008-07-05  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_builtin_functions.c
+      ext/odbc/php_odbc.c:
+      - Added arginfo
+      - Removed #include "zend_arg_defs.c"
+
+    * ext/odbc/php_odbc.c:
+      MFB:
+      - Added arginfo
+      - Removed #include "zend_arg_defs.c"
+
+    * ext/xml/xml.c:
+      - MFB: Removed unnecessary #include "zend_arg_defs.c"
+
+    * (PHP_5_3)
+      ext/xml/xml.c:
+      - Removed unnecessary #include "zend_arg_defs.c"
+
+    * ext/sqlite/sqlite.c:
+      MFB:
+      - Added arginfo (methods)
+      - Removed #include "zend_arg_defs.c"
+
+    * (PHP_5_3)
+      ext/sqlite/sqlite.c:
+      - Added arginfo (methods)
+      - Removed #include "zend_arg_defs.c"
+
+    * ext/mssql/php_mssql.c:
+      - MFB: zend_arg_defs.c is unnecessary now
+
+    * (PHP_5_3)
+      ext/mssql/php_mssql.c:
+      - zend_arg_defs.c is unnecessary now
+
+2008-07-05  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      win32/build/config.w32
+      win32/build/confutils.js:
+      -MFH:  improve detection of VC version and summary (2k2 and 2k3 are 1300
+      and resp. 1310) (Thx Marcus)
+
+    * win32/build/config.w32
+      win32/build/confutils.js:
+      - improve detection of VC version and summary (2k2 and 2k3 are 1300 and
+      resp. 1310) (Thx Marcus)
+
+    * main/win95nt.h:
+      - don't redefine WINDOWS and pid_t
+
+    * main/win95nt.h:
+      - _getpid is in process.h
+
+    * ext/xmlrpc/libxmlrpc/xmlrpc_win32.h:
+      - silent redefinition warning
+
+    * (PHP_5_3)
+      ext/msql/php_msql.c:
+      -MFH:  fix build (function was never implemented), even if noone uses it
+      (or complains about broken build ;)
+
+    * ext/msql/php_msql.c:
+      - fix build (function was never implemented), even if noone uses it (or
+      complained about broken build ;)
+
+2008-07-05  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_3)
+      ext/mbstring/libmbfl/filters/mbfilter_cp1254.c:
+      cosmetic change.
+
+    * (PHP_5_3)
+      ext/mbstring/libmbfl/filters/mbfilter_cp1254.c
+      ext/mbstring/libmbfl/filters/unicode_table_cp1254.h:
+      removed wrong bytes.
+
+    * (PHP_5_3)
+      ext/mbstring/config.m4:
+      revert commit.
+
+    * (PHP_5_3)
+      ext/mbstring/config.m4:
+      added CP1254
+
+    * ext/mbstring/libmbfl/filters/mbfilter_cp1254.c
+      ext/mbstring/libmbfl/filters/mbfilter_cp1254.c
+      ext/mbstring/libmbfl/filters/mbfilter_cp1254.h
+      ext/mbstring/libmbfl/filters/mbfilter_cp1254.h
+      ext/mbstring/libmbfl/filters/mbfilter_koi8u.c
+      ext/mbstring/libmbfl/filters/mbfilter_koi8u.c
+      ext/mbstring/libmbfl/filters/mbfilter_koi8u.h
+      ext/mbstring/libmbfl/filters/mbfilter_koi8u.h
+      ext/mbstring/libmbfl/filters/unicode_table_cp1254.h
+      ext/mbstring/libmbfl/filters/unicode_table_cp1254.h
+      ext/mbstring/libmbfl/filters/unicode_table_koi8u.h
+      ext/mbstring/libmbfl/filters/unicode_table_koi8u.h
+      ext/mbstring/libmbfl/mbfl/Makefile.am
+      ext/mbstring/libmbfl/mbfl/Makefile.bcc32
+      ext/mbstring/libmbfl/mbfl/mbfilter.h
+      ext/mbstring/libmbfl/mbfl/mbfilter_8bit.h
+      ext/mbstring/libmbfl/mbfl/mbfilter_pass.h
+      ext/mbstring/libmbfl/mbfl/mbfilter_wchar.h
+      ext/mbstring/libmbfl/mbfl/mbfl_consts.h
+      ext/mbstring/libmbfl/mbfl/mbfl_convert.c
+      ext/mbstring/libmbfl/mbfl/mbfl_encoding.c
+      ext/mbstring/libmbfl/mbfl/mbfl_encoding.h
+      ext/mbstring/libmbfl/mbfl/mbfl_ident.c
+      ext/mbstring/libmbfl/mbfl/mbfl_language.c
+      ext/mbstring/libmbfl/mbfl/mbfl_language.h
+      ext/mbstring/libmbfl/nls/Makefile.am
+      ext/mbstring/libmbfl/nls/Makefile.bcc32
+      ext/mbstring/libmbfl/nls/nls_ru.c
+      ext/mbstring/libmbfl/nls/nls_ua.c
+      ext/mbstring/libmbfl/nls/nls_ua.c
+      ext/mbstring/libmbfl/nls/nls_ua.h
+      ext/mbstring/libmbfl/nls/nls_ua.h
+      ext/mbstring/libmbfl/tests/Makefile.am
+      ext/mbstring/libmbfl/tests/Makefile.am
+      ext/mbstring/libmbfl/tests/conv_encoding.c
+      ext/mbstring/libmbfl/tests/conv_encoding.c
+      ext/mbstring/libmbfl/tests/conv_kana.c
+      ext/mbstring/libmbfl/tests/conv_kana.c
+      ext/mbstring/libmbfl/tests/strcut.c
+      ext/mbstring/libmbfl/tests/strcut.c
+      ext/mbstring/libmbfl/tests/strwidth.c
+      ext/mbstring/libmbfl/tests/strwidth.c:
+      
+      file mbfilter_cp1254.c was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/mbstring/config.m4
+      ext/mbstring/config.w32
+      ext/mbstring/mbstring.c
+      ext/mbstring/libmbfl/AUTHORS
+      ext/mbstring/libmbfl/Makefile.am
+      ext/mbstring/libmbfl/configure.in
+      ext/mbstring/libmbfl/libmbfl.dsp
+      ext/mbstring/libmbfl/libmbfl.dsw
+      ext/mbstring/libmbfl/libmbfl.sln
+      ext/mbstring/libmbfl/libmbfl.vcproj
+      ext/mbstring/libmbfl/mbfl.rc
+      ext/mbstring/libmbfl/filters/Makefile.am
+      ext/mbstring/libmbfl/filters/Makefile.bcc32:
+      - added koi8-u (Ukrainian) and CP1254 (Turkish).
+
+2008-07-05  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/hash/hash.c:
+      MFB: Fix break caused by previous commit, warning and remove
+      zend_get_parameters()
+
+    * (PHP_5_3)
+      ext/hash/hash.c:
+      Fix break caused by previous commit, warning and remove
+      zend_get_parameters()
+
 2008-07-04  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * ext/hash/hash.c:
