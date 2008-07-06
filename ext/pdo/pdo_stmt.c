@@ -37,37 +37,61 @@
 #include "zend_interfaces.h"
 #include "php_memory_streams.h"
 
-#if COMPILE_DL_PDO
-/* {{{ content from zend_arg_defs.c:
- * since it is a .c file, it won't be installed for use by PECL extensions, so we include it here. */
-ZEND_BEGIN_ARG_INFO(first_arg_force_ref, 0)
-	ZEND_ARG_PASS_INFO(1)
+/* {{{ arginfo */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_execute, 0, 0, 0)
+	ZEND_ARG_INFO(0, bound_input_params) /* array */
 ZEND_END_ARG_INFO()
-
-
-ZEND_BEGIN_ARG_INFO(second_arg_force_ref, 0)
-	ZEND_ARG_PASS_INFO(0)
-	ZEND_ARG_PASS_INFO(1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_fetch, 0, 0, 0)
+	ZEND_ARG_INFO(0, how)
+	ZEND_ARG_INFO(0, orientation)
+	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(third_arg_force_ref, 0)
-	ZEND_ARG_PASS_INFO(0)
-	ZEND_ARG_PASS_INFO(0)
-	ZEND_ARG_PASS_INFO(1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_fetchobject, 0, 0, 1)
+	ZEND_ARG_INFO(0, class_name)
+	ZEND_ARG_INFO(0, ctor_args) /* array */
 ZEND_END_ARG_INFO()
-
-
-ZEND_BEGIN_ARG_INFO(fourth_arg_force_ref, 0)
-	ZEND_ARG_PASS_INFO(0)
-	ZEND_ARG_PASS_INFO(0)
-	ZEND_ARG_PASS_INFO(0)
-	ZEND_ARG_PASS_INFO(1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_fetchcolumn, 0, 0, 0)
+	ZEND_ARG_INFO(0, column_number)
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(all_args_by_ref, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_fetchall, 0, 0, 0)
+	ZEND_ARG_INFO(0, how)
+	ZEND_ARG_INFO(0, class_name)
+	ZEND_ARG_INFO(0, ctor_args) /* array */
+ZEND_END_ARG_INFO()
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_bindvalue, 0, 0, 2)
+	ZEND_ARG_INFO(0, paramno)
+	ZEND_ARG_INFO(0, param)
+	ZEND_ARG_INFO(0, type)
+ZEND_END_ARG_INFO()
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_bindparam, 0, 0, 2)
+	ZEND_ARG_INFO(0, paramno)
+	ZEND_ARG_INFO(1, param)
+	ZEND_ARG_INFO(0, type)
+	ZEND_ARG_INFO(0, maxlen)
+	ZEND_ARG_INFO(0, driverdata)
+ZEND_END_ARG_INFO()
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_bindcolumn, 0, 0, 2)
+	ZEND_ARG_INFO(0, column)
+	ZEND_ARG_INFO(1, param)
+	ZEND_ARG_INFO(0, type)
+	ZEND_ARG_INFO(0, maxlen)
+	ZEND_ARG_INFO(0, driverdata)
+ZEND_END_ARG_INFO()
+ZEND_BEGIN_ARG_INFO(arginfo_pdostatement_setattribute, 0)
+	ZEND_ARG_INFO(0, attribute)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+ZEND_BEGIN_ARG_INFO(arginfo_pdostatement_getattribute, 0)
+	ZEND_ARG_INFO(0, attribute)
+ZEND_END_ARG_INFO()
+ZEND_BEGIN_ARG_INFO(arginfo_pdostatement_getcolumnmeta, 0)
+	ZEND_ARG_INFO(0, column)
+ZEND_END_ARG_INFO()
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_setfetchmode, 0, 0, 1)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, params)
 ZEND_END_ARG_INFO()
 /* }}} */
-#endif
 
 #define PHP_STMT_GET_OBJ	\
   pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);	\
@@ -2151,22 +2175,22 @@ static PHP_METHOD(PDOStatement, __sleep)
 /* }}} */
 
 const zend_function_entry pdo_dbstmt_functions[] = {
-	PHP_ME(PDOStatement, execute,		NULL,					ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, fetch,			NULL,					ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, bindParam,		second_arg_force_ref,	ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, bindColumn,	second_arg_force_ref,	ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, bindValue,		NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, execute,		arginfo_pdostatement_execute,		ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, fetch,			arginfo_pdostatement_fetch,			ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, bindParam,		arginfo_pdostatement_bindparam,		ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, bindColumn,	arginfo_pdostatement_bindcolumn,	ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, bindValue,		arginfo_pdostatement_bindvalue,		ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, rowCount,		NULL,					ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, fetchColumn,	NULL,					ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, fetchAll,		NULL,					ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, fetchObject,	NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, fetchColumn,	arginfo_pdostatement_fetchcolumn,	ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, fetchAll,		arginfo_pdostatement_fetchall,		ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, fetchObject,	arginfo_pdostatement_fetchobject,	ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, errorCode,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, errorInfo,		NULL,					ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, setAttribute,	NULL,					ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, getAttribute,	NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, setAttribute,	arginfo_pdostatement_setattribute,	ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, getAttribute,	arginfo_pdostatement_getattribute,	ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, columnCount,	NULL,					ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, getColumnMeta,	NULL,					ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, setFetchMode,	NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, getColumnMeta,	arginfo_pdostatement_getcolumnmeta,	ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, setFetchMode,	arginfo_pdostatement_setfetchmode,	ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, nextRowset,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, closeCursor,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, debugDumpParams, NULL,					ZEND_ACC_PUBLIC)
