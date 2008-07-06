@@ -144,7 +144,7 @@ DEFINE('CFLAGS_PHP_OBJ', '$(CFLAGS_PHP) $(STATIC_EXT_CFLAGS)');
 DEFINE("CFLAGS", "/nologo /FD $(BASE_INCLUDES) /D _WINDOWS \
 /D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS");
 
-if (VCVERS < 14) {
+if (VCVERS < 1400) {
 	// Enable automatic precompiled headers
 	ADD_FLAG('CFLAGS', ' /YX ');
 
@@ -154,7 +154,7 @@ if (VCVERS < 14) {
 	}
 }
 
-if (VCVERS >= 14) {
+if (VCVERS >= 1400) {
 	// fun stuff: MS deprecated ANSI stdio and similar functions
 	// disable annoying warnings.  In addition, time_t defaults
 	// to 64-bit.  Ask for 32-bit.
@@ -301,7 +301,7 @@ function add_extra_dirs()
 		for (i = 0; i < path.length; i++) {
 			f = FSO.GetAbsolutePathName(path[i]);
 			if (FSO.FolderExists(f)) {
-				if (VCVERS <= 12 && f.indexOf(" ") >= 0) {
+				if (VCVERS <= 1200 && f.indexOf(" ") >= 0) {
 					ADD_FLAG("LDFLAGS", '/libpath:"\\"' + f + '\\"" ');
 				} else {
 					ADD_FLAG("LDFLAGS", '/libpath:"' + f + '" ');
