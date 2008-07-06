@@ -158,7 +158,7 @@ ZEND_END_ARG_INFO()
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_each, 0, 0, 1)
-	ZEND_ARG_INFO(0, arr)
+	ZEND_ARG_INFO(1, arr)
 ZEND_END_ARG_INFO()
 
 static
