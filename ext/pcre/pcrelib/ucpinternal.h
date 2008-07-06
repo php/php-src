@@ -17,7 +17,7 @@ typedef struct cnode {
 
 #define f0_scriptmask   0xff000000  /* Mask for script field */
 #define f0_scriptshift          24  /* Shift for script value */
-#define f0_rangeflag    0x00f00000  /* Flag for a range item */
+#define f0_rangeflag    0x00800000  /* Flag for a range item */
 #define f0_charmask     0x001fffff  /* Mask for code point value */
 
 /* Things for the f1 field */
