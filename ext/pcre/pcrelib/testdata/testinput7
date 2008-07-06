@@ -4364,5 +4364,32 @@
     a\r\r\r\r\rb 
     a\x85\85b\<bsr_anycrlf>
     a\x0b\0bb\<bsr_anycrlf>
+    
+/a(?!)|\wbc/
+    abc 
+
+/a[]b/<JS>
+    ** Failers
+    ab
+
+/a[]+b/<JS>
+    ** Failers
+    ab 
+
+/a[]*+b/<JS>
+    ** Failers
+    ab 
+
+/a[^]b/<JS>
+    aXb
+    a\nb 
+    ** Failers
+    ab  
+    
+/a[^]+b/<JS> 
+    aXb
+    a\nX\nXb 
+    ** Failers
+    ab  
 
 / End of testinput7 /

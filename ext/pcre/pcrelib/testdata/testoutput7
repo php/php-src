@@ -7211,5 +7211,47 @@ No match
 No match
     a\x0b\0bb\<bsr_anycrlf>
 No match
+    
+/a(?!)|\wbc/
+    abc 
+ 0: abc
+
+/a[]b/<JS>
+    ** Failers
+No match
+    ab
+No match
+
+/a[]+b/<JS>
+    ** Failers
+No match
+    ab 
+No match
+
+/a[]*+b/<JS>
+    ** Failers
+No match
+    ab 
+No match
+
+/a[^]b/<JS>
+    aXb
+ 0: aXb
+    a\nb 
+ 0: a\x0ab
+    ** Failers
+No match
+    ab  
+No match
+    
+/a[^]+b/<JS> 
+    aXb
+ 0: aXb
+    a\nX\nXb 
+ 0: a\x0aX\x0aXb
+    ** Failers
+No match
+    ab  
+No match
 
 / End of testinput7 /

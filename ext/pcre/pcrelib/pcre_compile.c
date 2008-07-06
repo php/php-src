@@ -156,7 +156,7 @@ static const char verbnames[] =
   "SKIP\0"
   "THEN";
 
-static verbitem verbs[] = {
+static const verbitem verbs[] = {
   { 6, OP_ACCEPT },
   { 6, OP_COMMIT },
   { 1, OP_FAIL },
@@ -166,7 +166,7 @@ static verbitem verbs[] = {
   { 4, OP_THEN  }
 };
 
-static int verbcount = sizeof(verbs)/sizeof(verbitem);
+static const int verbcount = sizeof(verbs)/sizeof(verbitem);
 
 
 /* Tables of names of POSIX character classes and their lengths. The names are
@@ -293,14 +293,15 @@ static const char error_texts[] =
   /* 55 */
   "repeating a DEFINE group is not allowed\0"
   "inconsistent NEWLINE options\0"
-  "\\g is not followed by a braced name or an optionally braced non-zero number\0"
-  "(?+ or (?- or (?(+ or (?(- must be followed by a non-zero number\0"
+  "\\g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number\0"
+  "a numbered reference must not be zero\0"
   "(*VERB) with an argument is not supported\0"
   /* 60 */
   "(*VERB) not recognized\0"
   "number is too big\0"
   "subpattern name expected\0"
-  "digit expected after (?+";
+  "digit expected after (?+\0"
+  "] is an invalid data character in JavaScript compatibility mode";
 
 
 /* Table to identify digits and hex digits. This is used when compiling
@@ -529,14 +530,31 @@ else
     *errorcodeptr = ERR37;
     break;
 
-    /* \g must be followed by a number, either plain or braced. If positive, it
-    is an absolute backreference. If negative, it is a relative backreference.
-    This is a Perl 5.10 feature. Perl 5.10 also supports \g{name} as a
-    reference to a named group. This is part of Perl's movement towards a
-    unified syntax for back references. As this is synonymous with \k{name}, we
-    fudge it up by pretending it really was \k. */
+    /* \g must be followed by one of a number of specific things:
+
+    (1) A number, either plain or braced. If positive, it is an absolute
+    backreference. If negative, it is a relative backreference. This is a Perl
+    5.10 feature.
+
+    (2) Perl 5.10 also supports \g{name} as a reference to a named group. This
+    is part of Perl's movement towards a unified syntax for back references. As
+    this is synonymous with \k{name}, we fudge it up by pretending it really
+    was \k.
+
+    (3) For Oniguruma compatibility we also support \g followed by a name or a
+    number either in angle brackets or in single quotes. However, these are
+    (possibly recursive) subroutine calls, _not_ backreferences. Just return
+    the -ESC_g code (cf \k). */
 
     case 'g':
+    if (ptr[1] == '<' || ptr[1] == '\'')
+      {
+      c = -ESC_g;
+      break;
+      }
+
+    /* Handle the Perl-compatible cases */
+
     if (ptr[1] == '{')
       {
       const uschar *p;
@@ -563,15 +581,21 @@ else
     while ((digitab[ptr[1]] & ctype_digit) != 0)
       c = c * 10 + *(++ptr) - '0';
 
-    if (c < 0)
+    if (c < 0)   /* Integer overflow */
       {
       *errorcodeptr = ERR61;
       break;
       }
 
-    if (c == 0 || (braced && *(++ptr) != '}'))
+    if (braced && *(++ptr) != '}')
       {
       *errorcodeptr = ERR57;
+      break;
+      }
+
+    if (c == 0)
+      {
+      *errorcodeptr = ERR58;
       break;
       }
 
@@ -609,7 +633,7 @@ else
       c -= '0';
       while ((digitab[ptr[1]] & ctype_digit) != 0)
         c = c * 10 + *(++ptr) - '0';
-      if (c < 0)
+      if (c < 0)    /* Integer overflow */
         {
         *errorcodeptr = ERR61;
         break;
@@ -950,7 +974,7 @@ be terminated by '>' because that is checked in the first pass.
 
 Arguments:
   ptr          current position in the pattern
-  count        current count of capturing parens so far encountered
+  cd           compile background data
   name         name to seek, or NULL if seeking a numbered subpattern
   lorn         name length, or subpattern number if name is NULL
   xmode        TRUE if we are in /x mode
@@ -959,10 +983,11 @@ Returns:       the number of the named subpattern, or -1 if not found
 */
 
 static int
-find_parens(const uschar *ptr, int count, const uschar *name, int lorn,
+find_parens(const uschar *ptr, compile_data *cd, const uschar *name, int lorn,
   BOOL xmode)
 {
 const uschar *thisname;
+int count = cd->bracount;
 
 for (; *ptr != 0; ptr++)
   {
@@ -982,10 +1007,34 @@ for (; *ptr != 0; ptr++)
     continue;
     }
 
-  /* Skip over character classes */
+  /* Skip over character classes; this logic must be similar to the way they
+  are handled for real. If the first character is '^', skip it. Also, if the
+  first few characters (either before or after ^) are \Q\E or \E we skip them
+  too. This makes for compatibility with Perl. */
 
   if (*ptr == '[')
     {
+    BOOL negate_class = FALSE;
+    for (;;)
+      {
+      int c = *(++ptr);
+      if (c == '\\')
+        {
+        if (ptr[1] == 'E') ptr++;
+          else if (strncmp((const char *)ptr+1, "Q\\E", 3) == 0) ptr += 3;
+            else break;
+        }
+      else if (!negate_class && c == '^')
+        negate_class = TRUE;
+      else break;
+      }
+
+    /* If the next character is ']', it is a data character that must be
+    skipped, except in JavaScript compatibility mode. */
+
+    if (ptr[1] == ']' && (cd->external_options & PCRE_JAVASCRIPT_COMPAT) == 0)
+      ptr++;
+
     while (*(++ptr) != ']')
       {
       if (*ptr == 0) return -1;
@@ -1250,6 +1299,7 @@ for (;;)
     case OP_NOT_WORDCHAR:
     case OP_WORDCHAR:
     case OP_ANY:
+    case OP_ALLANY:
     branchlength++;
     cc++;
     break;
@@ -1542,7 +1592,7 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
 
   /* Groups with zero repeats can of course be empty; skip them. */
 
-  if (c == OP_BRAZERO || c == OP_BRAMINZERO)
+  if (c == OP_BRAZERO || c == OP_BRAMINZERO || c == OP_SKIPZERO)
     {
     code += _pcre_OP_lengths[c];
     do code += GET(code, 1); while (*code == OP_ALT);
@@ -1628,6 +1678,7 @@ for (code = first_significant_code(code + _pcre_OP_lengths[*code], NULL, 0, TRUE
     case OP_NOT_WORDCHAR:
     case OP_WORDCHAR:
     case OP_ANY:
+    case OP_ALLANY:
     case OP_ANYBYTE:
     case OP_CHAR:
     case OP_CHARNC:
@@ -1822,11 +1873,12 @@ return -1;
 that is referenced. This means that groups can be replicated for fixed
 repetition simply by copying (because the recursion is allowed to refer to
 earlier groups that are outside the current group). However, when a group is
-optional (i.e. the minimum quantifier is zero), OP_BRAZERO is inserted before
-it, after it has been compiled. This means that any OP_RECURSE items within it
-that refer to the group itself or any contained groups have to have their
-offsets adjusted. That one of the jobs of this function. Before it is called,
-the partially compiled regex must be temporarily terminated with OP_END.
+optional (i.e. the minimum quantifier is zero), OP_BRAZERO or OP_SKIPZERO is
+inserted before it, after it has been compiled. This means that any OP_RECURSE
+items within it that refer to the group itself or any contained groups have to
+have their offsets adjusted. That one of the jobs of this function. Before it
+is called, the partially compiled regex must be temporarily terminated with
+OP_END.
 
 This function has been extended with the possibility of forward references for
 recursions and subroutine calls. It must also check the list of such references
@@ -2111,7 +2163,6 @@ if (next >= 0) switch(op_code)
   /* For OP_NOT, "item" must be a single-byte character. */
 
   case OP_NOT:
-  if (next < 0) return FALSE;  /* Not a character */
   if (item == next) return TRUE;
   if ((options & PCRE_CASELESS) == 0) return FALSE;
 #ifdef SUPPORT_UTF8
@@ -2614,7 +2665,7 @@ for (;; ptr++)
     zerofirstbyte = firstbyte;
     zeroreqbyte = reqbyte;
     previous = code;
-    *code++ = OP_ANY;
+    *code++ = ((options & PCRE_DOTALL) != 0)? OP_ALLANY: OP_ANY;
     break;
 
 
@@ -2629,7 +2680,17 @@ for (;; ptr++)
     opcode is compiled. It may optionally have a bit map for characters < 256,
     but those above are are explicitly listed afterwards. A flag byte tells
     whether the bitmap is present, and whether this is a negated class or not.
-    */
+
+    In JavaScript compatibility mode, an isolated ']' causes an error. In
+    default (Perl) mode, it is treated as a data character. */
+
+    case ']':
+    if ((cd->external_options & PCRE_JAVASCRIPT_COMPAT) != 0)
+      {
+      *errorcodeptr = ERR64;
+      goto FAILED;
+      }
+    goto NORMAL_CHAR;
 
     case '[':
     previous = code;
@@ -2661,6 +2722,19 @@ for (;; ptr++)
       else if (!negate_class && c == '^')
         negate_class = TRUE;
       else break;
+      }
+
+    /* Empty classes are allowed in JavaScript compatibility mode. Otherwise,
+    an initial ']' is taken as a data character -- the code below handles
+    that. In JS mode, [] must always fail, so generate OP_FAIL, whereas
+    [^] must match any character, so generate OP_ALLANY. */
+
+    if (c ==']' && (cd->external_options & PCRE_JAVASCRIPT_COMPAT) != 0)
+      {
+      *code++ = negate_class? OP_ALLANY : OP_FAIL;
+      if (firstbyte == REQ_UNSET) firstbyte = REQ_NONE;
+      zerofirstbyte = firstbyte;
+      break;
       }
 
     /* If a class contains a negative special such as \S, we need to flip the
@@ -3818,28 +3892,38 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
 
       if (repeat_min == 0)
         {
-        /* If the maximum is also zero, we just omit the group from the output
-        altogether. */
+        /* If the maximum is also zero, we used to just omit the group from the
+        output altogether, like this:
 
-        if (repeat_max == 0)
-          {
-          code = previous;
-          goto END_REPEAT;
-          }
+        ** if (repeat_max == 0)
+        **   {
+        **   code = previous;
+        **   goto END_REPEAT;
+        **   }
 
-        /* If the maximum is 1 or unlimited, we just have to stick in the
-        BRAZERO and do no more at this point. However, we do need to adjust
-        any OP_RECURSE calls inside the group that refer to the group itself or
-        any internal or forward referenced group, because the offset is from
-        the start of the whole regex. Temporarily terminate the pattern while
-        doing this. */
+        However, that fails when a group is referenced as a subroutine from
+        elsewhere in the pattern, so now we stick in OP_SKIPZERO in front of it
+        so that it is skipped on execution. As we don't have a list of which
+        groups are referenced, we cannot do this selectively.
 
-        if (repeat_max <= 1)
+        If the maximum is 1 or unlimited, we just have to stick in the BRAZERO
+        and do no more at this point. However, we do need to adjust any
+        OP_RECURSE calls inside the group that refer to the group itself or any
+        internal or forward referenced group, because the offset is from the
+        start of the whole regex. Temporarily terminate the pattern while doing
+        this. */
+
+        if (repeat_max <= 1)    /* Covers 0, 1, and unlimited */
           {
           *code = OP_END;
           adjust_recurse(previous, 1, utf8, cd, save_hwm);
           memmove(previous+1, previous, len);
           code++;
+          if (repeat_max == 0)
+            {
+            *previous++ = OP_SKIPZERO;
+            goto END_REPEAT;
+            }
           *previous++ = OP_BRAZERO + repeat_type;
           }
 
@@ -4033,6 +4117,13 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           }
         }
       }
+
+    /* If previous is OP_FAIL, it was generated by an empty class [] in
+    JavaScript mode. The other ways in which OP_FAIL can be generated, that is
+    by (*FAIL) or (?!) set previous to NULL, which gives a "nothing to repeat"
+    error above. We can just ignore the repeat in JS case. */
+
+    else if (*previous == OP_FAIL) goto END_REPEAT;
 
     /* Else there's some kind of shambles */
 
@@ -4320,7 +4411,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
 
         /* Search the pattern for a forward reference */
 
-        else if ((i = find_parens(ptr, cd->bracount, name, namelen,
+        else if ((i = find_parens(ptr, cd, name, namelen,
                         (options & PCRE_EXTENDED) != 0)) > 0)
           {
           PUT2(code, 2+LINK_SIZE, i);
@@ -4566,7 +4657,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
         references (?P=name) and recursion (?P>name), as well as falling
         through from the Perl recursion syntax (?&name). We also come here from
         the Perl \k<name> or \k'name' back reference syntax and the \k{name}
-        .NET syntax. */
+        .NET syntax, and the Oniguruma \g<...> and \g'...' subroutine syntax. */
 
         NAMED_REF_OR_RECURSE:
         name = ++ptr;
@@ -4617,7 +4708,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
             recno = GET2(slot, 0);
             }
           else if ((recno =                /* Forward back reference */
-                    find_parens(ptr, cd->bracount, name, namelen,
+                    find_parens(ptr, cd, name, namelen,
                       (options & PCRE_EXTENDED) != 0)) <= 0)
             {
             *errorcodeptr = ERR15;
@@ -4644,6 +4735,15 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
         case '5': case '6': case '7': case '8': case '9':   /* subroutine */
           {
           const uschar *called;
+          terminator = ')';
+
+          /* Come here from the \g<...> and \g'...' code (Oniguruma
+          compatibility). However, the syntax has been checked to ensure that
+          the ... are a (signed) number, so that neither ERR63 nor ERR29 will
+          be called on this path, nor with the jump to OTHER_CHAR_AFTER_QUERY
+          ever be taken. */
+
+          HANDLE_NUMERICAL_RECURSION:
 
           if ((refsign = *ptr) == '+')
             {
@@ -4665,7 +4765,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
           while((digitab[*ptr] & ctype_digit) != 0)
             recno = recno * 10 + *ptr++ - '0';
 
-          if (*ptr != ')')
+          if (*ptr != terminator)
             {
             *errorcodeptr = ERR29;
             goto FAILED;
@@ -4718,8 +4818,8 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
 
             if (called == NULL)
               {
-              if (find_parens(ptr, cd->bracount, NULL, recno,
-                   (options & PCRE_EXTENDED) != 0) < 0)
+              if (find_parens(ptr, cd, NULL, recno,
+                    (options & PCRE_EXTENDED) != 0) < 0)
                 {
                 *errorcodeptr = ERR15;
                 goto FAILED;
@@ -5088,6 +5188,64 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
 
       zerofirstbyte = firstbyte;
       zeroreqbyte = reqbyte;
+
+      /* \g<name> or \g'name' is a subroutine call by name and \g<n> or \g'n'
+      is a subroutine call by number (Oniguruma syntax). In fact, the value
+      -ESC_g is returned only for these cases. So we don't need to check for <
+      or ' if the value is -ESC_g. For the Perl syntax \g{n} the value is
+      -ESC_REF+n, and for the Perl syntax \g{name} the result is -ESC_k (as
+      that is a synonym for a named back reference). */
+
+      if (-c == ESC_g)
+        {
+        const uschar *p;
+        save_hwm = cd->hwm;   /* Normally this is set when '(' is read */
+        terminator = (*(++ptr) == '<')? '>' : '\'';
+
+        /* These two statements stop the compiler for warning about possibly
+        unset variables caused by the jump to HANDLE_NUMERICAL_RECURSION. In
+        fact, because we actually check for a number below, the paths that
+        would actually be in error are never taken. */
+
+        skipbytes = 0;
+        reset_bracount = FALSE;
+
+        /* Test for a name */
+
+        if (ptr[1] != '+' && ptr[1] != '-')
+          {
+          BOOL isnumber = TRUE;
+          for (p = ptr + 1; *p != 0 && *p != terminator; p++)
+            {
+            if ((cd->ctypes[*p] & ctype_digit) == 0) isnumber = FALSE;
+            if ((cd->ctypes[*p] & ctype_word) == 0) break;
+            }
+          if (*p != terminator)
+            {
+            *errorcodeptr = ERR57;
+            break;
+            }
+          if (isnumber)
+            {
+            ptr++;
+            goto HANDLE_NUMERICAL_RECURSION;
+            }
+          is_recurse = TRUE;
+          goto NAMED_REF_OR_RECURSE;
+          }
+
+        /* Test a signed number in angle brackets or quotes. */
+
+        p = ptr + 2;
+        while ((digitab[*p] & ctype_digit) != 0) p++;
+        if (*p != terminator)
+          {
+          *errorcodeptr = ERR57;
+          break;
+          }
+        ptr++;
+        goto HANDLE_NUMERICAL_RECURSION;
+        }
 
       /* \k<name> or \k'name' is a back reference by name (Perl syntax).
       We also support \k{name} (.NET syntax) */
@@ -5595,14 +5753,14 @@ do {
      if (!is_anchored(scode, options, bracket_map, backref_map)) return FALSE;
      }
 
-   /* .* is not anchored unless DOTALL is set and it isn't in brackets that
-   are or may be referenced. */
+   /* .* is not anchored unless DOTALL is set (which generates OP_ALLANY) and
+   it isn't in brackets that are or may be referenced. */
 
    else if ((op == OP_TYPESTAR || op == OP_TYPEMINSTAR ||
-             op == OP_TYPEPOSSTAR) &&
-            (*options & PCRE_DOTALL) != 0)
+             op == OP_TYPEPOSSTAR))
      {
-     if (scode[1] != OP_ANY || (bracket_map & backref_map) != 0) return FALSE;
+     if (scode[1] != OP_ALLANY || (bracket_map & backref_map) != 0)
+       return FALSE;
      }
 
    /* Check for explicit anchoring */

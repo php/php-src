@@ -276,6 +276,15 @@ library. You can read more about them in the pcrebuild man page.
   Note that libreadline is GPL-licenced, so if you distribute a binary of
   pcretest linked in this way, there may be licensing issues.
 
+  Setting this option causes the -lreadline option to be added to the pcretest
+  build. In many operating environments with a sytem-installed readline
+  library this is sufficient. However, in some environments (e.g. if an
+  unmodified distribution version of readline is in use), it may be necessary
+  to specify something like LIBS="-lncurses" as well. This is because, to quote
+  the readline INSTALL, "Readline uses the termcap functions, but does not link
+  with the termcap or curses library itself, allowing applications which link
+  with readline the to choose an appropriate library."
+
 The "configure" script builds the following files for the basic C library:
 
 . Makefile is the makefile that builds the library
@@ -740,4 +749,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 25 January 2008
+Last updated: 13 April 2008
