@@ -2159,11 +2159,14 @@ NOWDOC_CHARS		({NEWLINE}*(([^a-zA-Z_\x7f-\xff\n\r][^\n\r]*)|({LABEL}[^a-zA-Z0-9_
 		/* ignore first line when it's started with a # */
 		goto restart;
 	} else {
+		YYCURSOR = yytext+1;
 		goto inline_char_handler;
 	}
 }
 
 <INITIAL>{ANY_CHAR} {
+
+inline_char_handler:
 
 	while (1) {
 		YYCTYPE *ptr = memchr(YYCURSOR, '<', YYLIMIT - YYCURSOR);
@@ -2177,15 +2180,13 @@ NOWDOC_CHARS		({NEWLINE}*(([^a-zA-Z_\x7f-\xff\n\r][^\n\r]*)|({LABEL}[^a-zA-Z0-9_
 			YYCURSOR = ptr + 1;
 
 			/* if it can be an opening tag, stop */
-			if (ptr < YYLIMIT && (*YYCURSOR == '?' || *YYCURSOR == '%')) {
+			if (YYCURSOR < YYLIMIT && (*YYCURSOR == '?' || *YYCURSOR == '%')) {
 				--YYCURSOR;
 				yyleng = YYCURSOR - SCNG(yy_text);
 				break;
 			}
 		}
 	}
-
-inline_char_handler:
 
 	Z_STRVAL_P(zendlval) = (char *) estrndup(yytext, yyleng);
 	Z_STRLEN_P(zendlval) = yyleng;
