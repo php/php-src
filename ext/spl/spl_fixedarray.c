@@ -61,6 +61,7 @@ typedef struct _spl_fixedarray_object { /* {{{ */
 	zend_function         *fptr_it_current;
 	zend_function         *fptr_it_key;
 	zend_function         *fptr_it_valid;
+	zend_function         *fptr_count;
 	int                    current;
 	zend_class_entry      *ce_get_iterator;
 } spl_fixedarray_object;
@@ -292,6 +293,10 @@ static zend_object_value spl_fixedarray_object_new_ex(zend_class_entry *class_ty
 		if (intern->fptr_it_valid->common.scope == parent) {
 			intern->fptr_it_valid = NULL;
 		}
+		zend_hash_find(&class_type->function_table, "count",        sizeof("count"),        (void **) &intern->fptr_count);
+		if (intern->fptr_count->common.scope == parent) {
+			intern->fptr_count = NULL;
+		}
 	}
 
 	return retval;
@@ -512,12 +517,23 @@ static int spl_fixedarray_object_count_elements(zval *object, long *count TSRMLS
 	spl_fixedarray_object *intern;
 	
 	intern = (spl_fixedarray_object *)zend_object_store_get_object(object TSRMLS_CC);
-	if (intern->array) {
+	if (intern->fptr_count) {
+		zval *rv;
+		zend_call_method_with_0_params(&object, intern->std.ce, &intern->fptr_count, "count", &rv);
+		if (rv) {
+			zval_ptr_dtor(&intern->retval);
+			MAKE_STD_ZVAL(intern->retval);
+			ZVAL_ZVAL(intern->retval, rv, 1, 1);
+			convert_to_long(intern->retval);
+			*count = (long) Z_LVAL_P(intern->retval);
+			return SUCCESS;
+		}
+	} else if (intern->array) {
 		*count = intern->array->size;
-	} else {
-		*count = 0;
+		return SUCCESS;
 	}
 
+	*count = 0;
 	return SUCCESS;
 }
 /* }}} */
@@ -945,7 +961,6 @@ PHP_MINIT_FUNCTION(spl_fixedarray)
 	memcpy(&spl_handler_SplFixedArray, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 
 	spl_handler_SplFixedArray.clone_obj       = spl_fixedarray_object_clone;
-	spl_handler_SplFixedArray.count_elements  = spl_fixedarray_object_count_elements;
 	spl_handler_SplFixedArray.read_dimension  = spl_fixedarray_object_read_dimension;
 	spl_handler_SplFixedArray.write_dimension = spl_fixedarray_object_write_dimension;
 	spl_handler_SplFixedArray.unset_dimension = spl_fixedarray_object_unset_dimension;
