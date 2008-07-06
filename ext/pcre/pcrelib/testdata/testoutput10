@@ -21,7 +21,7 @@ Memory allocation (code space): 25
 ------------------------------------------------------------------
   0  21 Bra
   3   9 CBra 1
-  8     Any*
+  8     AllAny*
  10     X
  12   6 Alt
  15     ^
@@ -37,7 +37,7 @@ Memory allocation (code space): 29
   0  25 Bra
   3   9 Bra
   6  04 Opt
-  8     Any*
+  8     AllAny*
  10     X
  12   8 Alt
  15  04 Opt

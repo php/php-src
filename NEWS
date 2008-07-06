@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.0
+- Upgraded PCRE to version 7.7 (Nuno)
 - Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
 - Removed zend.ze1_compatibility_mode. (Dmitry)
 
