@@ -1620,6 +1620,7 @@ NOWDOC_CHARS		({NEWLINE}*(([^a-zA-Z_\x7f-\xff\n\r][^\n\r]*)|({LABEL}[^a-zA-Z0-9_
 		/* ignore first line when it's started with a # */
 		goto restart;
 	} else {
+		YYCURSOR = yytext+1;
 		goto inline_char_handler;
 	}
 }
@@ -1640,7 +1641,7 @@ inline_char_handler:
 			YYCURSOR = ptr + 1;
 
 			/* if it can be an opening tag, stop */
-			if (ptr < YYLIMIT && (*YYCURSOR == '?' || *YYCURSOR == '%')) {
+			if (YYCURSOR < YYLIMIT && (*YYCURSOR == '?' || *YYCURSOR == '%')) {
 				--YYCURSOR;
 				yyleng = YYCURSOR - SCNG(yy_text);
 				break;
