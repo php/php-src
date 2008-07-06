@@ -92,6 +92,7 @@ struct _spl_dllist_object {
 	zend_function         *fptr_offset_set;
 	zend_function         *fptr_offset_has;
 	zend_function         *fptr_offset_del;
+	zend_function         *fptr_count;
 	zend_class_entry      *ce_get_iterator;
 };
 
@@ -432,6 +433,10 @@ static zend_object_value spl_dllist_object_new_ex(zend_class_entry *class_type, 
 		if (intern->fptr_offset_del->common.scope == parent) {
 			intern->fptr_offset_del = NULL;
 		}
+		zend_hash_find(&class_type->function_table, "count",        sizeof("count"),        (void **) &intern->fptr_count);
+		if (intern->fptr_count->common.scope == parent) {
+			intern->fptr_count = NULL;
+		}
 	}
 
 	return retval;
@@ -467,8 +472,22 @@ static int spl_dllist_object_count_elements(zval *object, long *count TSRMLS_DC)
 {
 	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(object TSRMLS_CC);
 
-	*count = spl_ptr_llist_count(intern->llist);
+	if (intern->fptr_count) {
+		zval *rv;
+		zend_call_method_with_0_params(&object, intern->std.ce, &intern->fptr_count, "count", &rv);
+		if (rv) {
+			zval_ptr_dtor(&intern->retval);
+			MAKE_STD_ZVAL(intern->retval);
+			ZVAL_ZVAL(intern->retval, rv, 1, 1);
+			convert_to_long(intern->retval);
+			*count = (long) Z_LVAL_P(intern->retval);
+			return SUCCESS;
+		}
+		*count = 0;
+		return FAILURE;
+	}
 
+	*count = spl_ptr_llist_count(intern->llist);
 	return SUCCESS;
 } 
 /* }}} */
@@ -655,12 +674,13 @@ SPL_METHOD(SplDoublyLinkedList, bottom)
 SPL_METHOD(SplDoublyLinkedList, count)
 {
 	long count;
+	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	spl_dllist_object_count_elements(getThis(), &count TSRMLS_CC);
+	count = spl_ptr_llist_count(intern->llist);
 	RETURN_LONG(count);
 }
 /* }}} */
