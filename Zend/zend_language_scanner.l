@@ -1626,6 +1626,8 @@ NOWDOC_CHARS		({NEWLINE}*(([^a-zA-Z_\x7f-\xff\n\r][^\n\r]*)|({LABEL}[^a-zA-Z0-9_
 
 <INITIAL>{ANY_CHAR} {
 
+inline_char_handler:
+
 	while (1) {
 		YYCTYPE *ptr = memchr(YYCURSOR, '<', YYLIMIT - YYCURSOR);
 
@@ -1645,8 +1647,6 @@ NOWDOC_CHARS		({NEWLINE}*(([^a-zA-Z_\x7f-\xff\n\r][^\n\r]*)|({LABEL}[^a-zA-Z0-9_
 			}
 		}
 	}
-
-inline_char_handler:
 
 #ifdef ZEND_MULTIBYTE
 	if (SCNG(output_filter)) {
