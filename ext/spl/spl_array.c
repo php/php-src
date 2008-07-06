@@ -66,10 +66,11 @@ typedef struct _spl_array_object {
 	HashPosition      pos;
 	int               ar_flags;
 	int               is_self;
-	zend_function *   fptr_offset_get;
-	zend_function *   fptr_offset_set;
-	zend_function *   fptr_offset_has;
-	zend_function *   fptr_offset_del;
+	zend_function     *fptr_offset_get;
+	zend_function     *fptr_offset_set;
+	zend_function     *fptr_offset_has;
+	zend_function     *fptr_offset_del;
+	zend_function     *fptr_count;
 	zend_class_entry* ce_get_iterator;
 } spl_array_object;
 
@@ -201,6 +202,10 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 		zend_hash_find(&class_type->function_table, "offsetunset",  sizeof("offsetunset"),  (void **) &intern->fptr_offset_del);
 		if (intern->fptr_offset_del->common.scope == parent) {
 			intern->fptr_offset_del = NULL;
+		}
+		zend_hash_find(&class_type->function_table, "count",        sizeof("count"),        (void **) &intern->fptr_count);
+		if (intern->fptr_count->common.scope == parent) {
+			intern->fptr_count = NULL;
 		}
 	}
 	/* Cache iterator functions if ArrayIterator or derived. Check current's */
@@ -1164,9 +1169,8 @@ SPL_METHOD(Array, seek)
 	zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0 TSRMLS_CC, "Seek position %ld is out of range", opos);
 } /* }}} */
 
-int spl_array_object_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
+int inline spl_array_object_count_elements_helper(spl_array_object *intern, long *count TSRMLS_DC) /* {{{ */
 {
-	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 	HashTable *aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
 	HashPosition pos;
 
@@ -1193,14 +1197,36 @@ int spl_array_object_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ 
 	}
 } /* }}} */
 
+int spl_array_object_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
+{
+	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
+
+	if (intern->fptr_count) {
+		zval *rv;
+		zend_call_method_with_0_params(&object, intern->std.ce, &intern->fptr_count, "count", &rv);
+		if (rv) {
+			zval_ptr_dtor(&intern->retval);
+			MAKE_STD_ZVAL(intern->retval);
+			ZVAL_ZVAL(intern->retval, rv, 1, 1);
+			convert_to_long(intern->retval);
+			*count = (long) Z_LVAL_P(intern->retval);
+			return SUCCESS;
+		}
+		*count = 0;
+		return FAILURE;
+	}
+	return spl_array_object_count_elements_helper(intern, count TSRMLS_CC);
+} /* }}} */
+
 /* {{{ proto int ArrayObject::count() U
        proto int ArrayIterator::count() U
  Return the number of elements in the Iterator. */
 SPL_METHOD(Array, count)
 {
 	long count;
+	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	spl_array_object_count_elements(getThis(), &count TSRMLS_CC);
+	spl_array_object_count_elements_helper(intern, &count TSRMLS_CC);
 	RETURN_LONG(count);
 } /* }}} */
 
@@ -1220,9 +1246,11 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 			zend_throw_exception(spl_ce_BadMethodCallException, "Function expects exactly one argument", 0 TSRMLS_CC);
 			return;
 		}
-		zend_call_method(NULL, NULL, NULL, fname, fname_len, &return_value, 2, &tmp, arg TSRMLS_CC);
+		zval_ptr_dtor(return_value_ptr);
+		zend_call_method(NULL, NULL, NULL, fname, fname_len, return_value_ptr, 2, &tmp, arg TSRMLS_CC);
 	} else {
-		zend_call_method(NULL, NULL, NULL, fname, fname_len, &return_value, 1, &tmp, NULL TSRMLS_CC);
+		zval_ptr_dtor(return_value_ptr);
+		zend_call_method(NULL, NULL, NULL, fname, fname_len, return_value_ptr, 1, &tmp, NULL TSRMLS_CC);
 	}
 } /* }}} */
 

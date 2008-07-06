@@ -75,6 +75,7 @@ struct _spl_heap_object {
 	int                 flags;
 	zend_class_entry   *ce_get_iterator;
 	zend_function      *fptr_cmp;
+	zend_function      *fptr_count;
 };
 
 /* define an overloaded iterator structure */
@@ -441,9 +442,12 @@ static zend_object_value spl_heap_object_new_ex(zend_class_entry *class_type, sp
 
 	if (inherited) {
 		zend_hash_find(&class_type->function_table, "compare",    sizeof("compare"),    (void **) &intern->fptr_cmp);
-
 		if (intern->fptr_cmp->common.scope == parent) {
 			intern->fptr_cmp = NULL;
+		}
+		zend_hash_find(&class_type->function_table, "count",        sizeof("count"),        (void **) &intern->fptr_count);
+		if (intern->fptr_count->common.scope == parent) {
+			intern->fptr_count = NULL;
 		}
 	}
 
@@ -480,6 +484,21 @@ static int spl_heap_object_count_elements(zval *object, long *count TSRMLS_DC) /
 {
 	spl_heap_object *intern = (spl_heap_object*)zend_object_store_get_object(object TSRMLS_CC);
 
+	if (intern->fptr_count) {
+		zval *rv;
+		zend_call_method_with_0_params(&object, intern->std.ce, &intern->fptr_count, "count", &rv);
+		if (rv) {
+			zval_ptr_dtor(&intern->retval);
+			MAKE_STD_ZVAL(intern->retval);
+			ZVAL_ZVAL(intern->retval, rv, 1, 1);
+			convert_to_long(intern->retval);
+			*count = (long) Z_LVAL_P(intern->retval);
+			return SUCCESS;
+		}
+		*count = 0;
+		return FAILURE;
+	}
+	
 	*count = spl_ptr_heap_count(intern->heap);
 
 	return SUCCESS;
@@ -545,12 +564,13 @@ static HashTable* spl_pqueue_object_get_debug_info(zval *obj, int *is_temp TSRML
 SPL_METHOD(SplHeap, count)
 {
 	long count;
+	spl_heap_object *intern = (spl_heap_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
 		return;
 	}
 
-	spl_heap_object_count_elements(getThis(), &count TSRMLS_CC);
+	count = spl_ptr_heap_count(intern->heap);
 	RETURN_LONG(count);
 }
 /* }}} */
@@ -559,14 +579,13 @@ SPL_METHOD(SplHeap, count)
  Return true if the heap is empty. */
 SPL_METHOD(SplHeap, isEmpty)
 {
-	long count;
+	spl_heap_object *intern = (spl_heap_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
 		return;
 	}
 
-	spl_heap_object_count_elements(getThis(), &count TSRMLS_CC);
-	RETURN_BOOL(count==0);
+	RETURN_BOOL(spl_ptr_heap_count(intern->heap)==0);
 }
 /* }}} */
 

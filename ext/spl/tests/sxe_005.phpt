@@ -1,5 +1,5 @@
 --TEST--
-SPL: SimpleXMLIterator and getChildren()
+SPL: SimpleXMLIterator and overriden count()
 --SKIPIF--
 <?php 
 if (!extension_loaded('simplexml')) print 'skip';

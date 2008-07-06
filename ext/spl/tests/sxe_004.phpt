@@ -1,5 +1,5 @@
 --TEST--
-SPL: SimpleXMLIterator and getChildren()
+SPL: SimpleXMLIterator and overridden iterator methods()
 --SKIPIF--
 <?php 
 if (!extension_loaded('simplexml')) print 'skip';
