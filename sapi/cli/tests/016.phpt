@@ -11,6 +11,9 @@ if (!extension_loaded('readline') || readline_info('done') === NULL) {
 <?php
 $php = getenv('TEST_PHP_EXECUTABLE');
 
+// disallow console escape sequences that may break the output
+putenv('TERM=VT100');
+
 $codes = array();
 
 $codes[1] = <<<EOT
