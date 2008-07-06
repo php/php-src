@@ -125,7 +125,8 @@ Opcodes with no following data
 These items are all just one byte long
 
   OP_END                 end of pattern
-  OP_ANY                 match any character
+  OP_ANY                 match any one character other than newline
+  OP_ALLANY              match any one character, including newline
   OP_ANYBYTE             match any single byte, even in UTF-8 mode
   OP_SOD                 match start of data: \A
   OP_SOM,                start of match (subject + offset): \G
@@ -318,9 +319,12 @@ maximally respectively. All three are followed by LINK_SIZE bytes giving (as a
 positive number) the offset back to the matching bracket opcode.
 
 If a subpattern is quantified such that it is permitted to match zero times, it
-is preceded by one of OP_BRAZERO or OP_BRAMINZERO. These are single-byte
-opcodes which tell the matcher that skipping this subpattern entirely is a
-valid branch.
+is preceded by one of OP_BRAZERO, OP_BRAMINZERO, or OP_SKIPZERO. These are
+single-byte opcodes that tell the matcher that skipping the following
+subpattern entirely is a valid branch. In the case of the first two, not 
+skipping the pattern is also valid (greedy and non-greedy). The third is used 
+when a pattern has the quantifier {0,0}. It cannot be entirely discarded, 
+because it may be called as a subroutine from elsewhere in the regex.
 
 A subpattern with an indefinite maximum repetition is replicated in the
 compiled data its minimum number of times (or once with OP_BRAZERO if the
@@ -411,4 +415,4 @@ at compile time, and so does not cause anything to be put into the compiled
 data.
 
 Philip Hazel
-August 2007
+April 2008
