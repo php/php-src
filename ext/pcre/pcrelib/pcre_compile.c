@@ -4929,7 +4929,7 @@ we set the flag only if there is a literal "\r" or "\n" in the class. */
                (lengthptr == NULL || *lengthptr == 2 + 2*LINK_SIZE))
             {
             cd->external_options = newoptions;
-            options = newoptions;
+            options = *optionsptr = newoptions;
             }
          else
             {
