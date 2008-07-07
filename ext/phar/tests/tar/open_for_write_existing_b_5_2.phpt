@@ -1,10 +1,8 @@
 --TEST--
 Phar: fopen a .phar for writing (existing file) tar-based
 --SKIPIF--
-<?php
-if (!extension_loaded("phar")) die("skip");
-if (version_compare(PHP_VERSION, "5.3", "<")) die("skip requires 5.3 or later");
-?>
+<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (version_compare(PHP_VERSION, "5.3", ">")) die("skip requires 5.2 or earlier"); ?>
 --INI--
 phar.readonly=0
 phar.require_hash=0
@@ -30,6 +28,12 @@ foreach ($files as $n => $file) {
 $phar->stopBuffering();
 ini_set('phar.readonly', 1);
 
+function err_handler($errno, $errstr, $errfile, $errline) {
+	echo "Catchable fatal error: $errstr in $errfile on line $errline\n";
+}
+
+set_error_handler("err_handler", E_RECOVERABLE_ERROR);
+
 $fp = fopen($alias . '/b/c.php', 'wb');
 fwrite($fp, 'extra');
 fclose($fp);
@@ -43,11 +47,11 @@ include $alias . '/b/c.php';
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECTF--
 
-Warning: fopen(phar://%sopen_for_write_existing_c.phar.tar/b/c.php): failed to open stream: phar error: write operations disabled by INI setting in %sopen_for_write_existing_c.php on line %d
+Warning: fopen(phar://%sopen_for_write_existing_b.phar.tar/b/c.php): failed to open stream: phar error: write operations disabled by INI setting in %sopen_for_write_existing_b.php on line %d
 
-Warning: fwrite() expects parameter 1 to be resource, boolean given in %spen_for_write_existing_c.php on line %d
+Warning: fwrite(): supplied argument is not a valid stream resource in %sopen_for_write_existing_b.php on line %d
 
-Warning: fclose() expects parameter 1 to be resource, boolean given in %spen_for_write_existing_c.php on line %d
+Warning: fclose(): supplied argument is not a valid stream resource in %spen_for_write_existing_b.php on line %d
 This is b/c
 
 ===DONE===
