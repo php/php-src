@@ -3868,9 +3868,10 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 PHP_METHOD(Phar, extractTo)
 {
 	char *error = NULL;
+	php_stream *fp;
 	php_stream_statbuf ssb;
 	phar_entry_info *entry;
-	char *pathto, *filename;
+	char *pathto, *filename, *actual;
 	int pathto_len, filename_len;
 	int ret, i;
 	int nelems;
@@ -3881,6 +3882,15 @@ PHP_METHOD(Phar, extractTo)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z!b", &pathto, &pathto_len, &zval_files, &overwrite) == FAILURE) {
 		return;
 	}
+
+	fp = php_stream_open_wrapper(phar_obj->arc.archive->fname, "rb", IGNORE_URL|STREAM_MUST_SEEK, &actual);
+	efree(actual);
+	if (!fp) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
+			"Invalid argument, %s cannot be found", phar_obj->arc.archive->fname);
+		return;
+	}
+	php_stream_close(fp);
 
 	if (pathto_len < 1) {
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
