@@ -1,0 +1,3 @@
+- Update dateformat for PHP 6
+- Integrate default locale functionality
+- Integrate collator with standard sorting functions
