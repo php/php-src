@@ -8,38 +8,16 @@ CL = PATH_PROG('cl');
 if (!CL) {
 	ERROR("MS C++ compiler is required");
 }
-// Which version of the compiler do we have ?
-function probe_binary(EXE, what)
-{
-	// tricky escapes to get stderr redirection to work
-	var command = 'cmd /c ""' + EXE;
-	if (what == "version") {
-		command = command + '" -v"';
-	}
-	var version = execute(command + '" 2>&1"');
-
-	if (what == "64") {
-		if (version.match(/x64/)) {
-			return 1;
-		}
-	} else {
-		if (version.match(/(\d+\.\d+(\.\d+)?(\.\d+)?)/)) {
-			return RegExp.$1;
-		}
-	}
-	return 0;
-}
-
-// Which version of the compiler do we have?
-VCVERS = probe_binary(CL);
-VCVERS = VCVERS.substr(0, 2) + VCVERS.substr(3, 2);
-STDOUT.WriteLine("Detected MS compiler version " + VCVERS);
 
 // 1200 is VC6
 // 1300 is vs.net 2002
 // 1310 is vs.net 2003
 // 1400 is vs.net 2005
 // 1500 is vs.net 2008
+// Which version of the compiler do we have?
+VCVERS = probe_binary(CL).substr(0, 5).replace('.', '');
+STDOUT.WriteLine("  Detected compiler " + VC_VERSIONS[VCVERS]);
+AC_DEFINE('COMPILER', VC_VERSIONS[VCVERS], "Detected compiler version");
 
 // do we use x64 or 80x86 version of compiler?
 X64 = probe_binary(CL, 64);
@@ -402,3 +380,5 @@ if (PHP_SNAPSHOT_TEMPLATE == "no") {
 }
 
 DEFINE('SNAPSHOT_TEMPLATE', PHP_SNAPSHOT_TEMPLATE);
+
+ARG_ENABLE('summary', 'Enable configuration summary', 'yes');

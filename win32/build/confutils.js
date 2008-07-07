@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.75 2008-07-05 19:52:45 pajoye Exp $
+// $Id: confutils.js,v 1.76 2008-07-07 13:48:23 pajoye Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -31,11 +31,11 @@ var extensions_enabled = new Array();
 var sapi_enabled = new Array();
 
 var VC_VERSIONS = new Array();
-VC_VERSIONS[1200] = 'VC6';
-VC_VERSIONS[1300] = 'Visual C++ 2002';
-VC_VERSIONS[1310] = 'Visual C++ 2003';
-VC_VERSIONS[1400] = 'Visual C++ 2005';
-VC_VERSIONS[1500] = 'Visual C++ 2008';
+VC_VERSIONS[1200] = 'MSVC6 (Visual C++ 6.0)';
+VC_VERSIONS[1300] = 'MSVC7 (Visual C++ 2002)';
+VC_VERSIONS[1310] = 'MSVC7.1 (Visual C++ 2003)';
+VC_VERSIONS[1400] = 'MSVC8 (Visual C++ 2005)';
+VC_VERSIONS[1500] = 'MSVC9 (Visual C++ 2008)';
 
 if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files";
@@ -106,6 +106,27 @@ function execute(command_line)
 //STDOUT.WriteLine(ret);
 
 	return ret;
+}
+
+function probe_binary(EXE, what)
+{
+	// tricky escapes to get stderr redirection to work
+	var command = 'cmd /c ""' + EXE;
+	if (what == "version") {
+		command = command + '" -v"';
+	}
+	var version = execute(command + '" 2>&1"');
+
+	if (what == "64") {
+		if (version.match(/x64/)) {
+			return 1;
+		}
+	} else {
+		if (version.match(/(\d+\.\d+(\.\d+)?(\.\d+)?)/)) {
+			return RegExp.$1;
+		}
+	}
+	return 0;
 }
 
 function condense_path(path)
@@ -1376,6 +1397,9 @@ function output_as_table(header, ar_out)
 function write_summary()
 {
 	var ar = new Array();
+	if (PHP_SUMMARY == "no") {
+		return;
+	}
 
 	STDOUT.WriteBlankLines(2);
 
@@ -1426,7 +1450,6 @@ function generate_files()
 	generate_config_h();
 	STDOUT.WriteLine("Done.");
 	STDOUT.WriteBlankLines(1);
-
 	write_summary();
 
 	if (PHP_SNAPSHOT_BUILD != "no") {
@@ -1732,7 +1755,6 @@ function _inner_glob(base, p, parts)
 	return items;
 }
 
-
 // for snapshot builders, this option will attempt to enable everything
 // and you can then build everything, ignoring fatal errors within a module
 // by running "nmake snap"
@@ -1743,5 +1765,3 @@ ARG_ENABLE('snapshot-build', 'Build a snapshot; turns on everything it can and i
 // several objects at once, reducing overhead of starting new
 // compiler processes.
 ARG_ENABLE('one-shot', 'Optimize for fast build - best for release and snapshot builders, not so hot for edit-and-rebuild hacking', 'no');
-
-
