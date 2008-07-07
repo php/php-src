@@ -2604,7 +2604,6 @@ PHP_FUNCTION(mb_strwidth)
    Trim the string in terminal width */
 PHP_FUNCTION(mb_strimwidth)
 {
-	zval **arg1, **arg2, **arg3, **arg4, **arg5;
 	char *str, *trimmarker, *encoding;
 	long from, width;
 	int str_len, trimmarker_len, encoding_len;
