@@ -1,3 +1,53 @@
+2008-07-06  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * zend_language_scanner.c
+      zend_language_scanner.c
+      zend_language_scanner.c
+      zend_language_scanner_defs.h
+      zend_language_scanner_defs.h
+      zend_language_scanner_defs.h:
+      regenerate
+
+    * zend_language_scanner.l:
+      MFB
+
+    * (PHP_5_3)
+      zend_language_scanner.l:
+      fix last part of bug #44654
+
+    * (PHP_5_3)
+      zend_language_scanner.l:
+      fix first part of bug #44654: scan for opening tag <? after a # char
+
+2008-07-06  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_3)
+      tests/multibyte/multibyte_encoding_004.phpt
+      tests/multibyte/multibyte_encoding_005.phpt:
+      improved zend-multibyte detection.
+
+2008-07-06  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_builtin_functions.c:
+      MFB:
+      - Added arginfo
+      - Removed #include "zend_arg_defs.c"
+
+2008-07-06  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * tests/multibyte/multibyte_encoding_004.phpt
+      tests/multibyte/multibyte_encoding_004.phpt
+      tests/multibyte/multibyte_encoding_005.phpt
+      tests/multibyte/multibyte_encoding_005.phpt:
+      
+      file multibyte_encoding_004.phpt was initially added on branch PHP_5_3.
+
+2008-07-06  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      zend_builtin_functions.c:
+      - Fixed arginfo
+
 2008-07-05  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
