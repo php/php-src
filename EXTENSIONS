@@ -194,7 +194,7 @@ STATUS:              Working
 SINCE:               5.1
 -------------------------------------------------------------------------------
 EXTENSION:           pdo_mysql
-PRIMARY MAINTAINER:  Ilia Alshanetsky <iliaa@php.net>, Johannes Schlüter <johannes@php.net>, Andrey Hristov <andrey@php.net>,  Johannes Schlüter <johannes@php.net>, Ulf Wendel <uw@php.net>      
+PRIMARY MAINTAINER:  Ilia Alshanetsky <iliaa@php.net>, Johannes Schlüter <johannes@php.net>, Andrey Hristov <andrey@php.net>, Ulf Wendel <uw@php.net>
 MAINTENANCE:         Odd fixes
 STATUS:              Working
 SINCE:               5.1
