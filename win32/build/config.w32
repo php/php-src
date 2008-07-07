@@ -8,7 +8,7 @@ CL = PATH_PROG('cl');
 if (!CL) {
 	ERROR("MS C++ compiler is required");
 }
-// Which version of the compiler do we have ?
+
 function probe_binary(EXE, what)
 {
 	// tricky escapes to get stderr redirection to work
@@ -30,24 +30,26 @@ function probe_binary(EXE, what)
 	return 0;
 }
 
-// Which version of the compiler do we have?
-VCVERS = probe_binary(CL);
-VCVERS = VCVERS.substr(0, 2) + VCVERS.substr(3, 2);
-STDOUT.WriteLine("Detected MS compiler version " + VCVERS);
+var VC_VERSIONS = new Array();
+VC_VERSIONS[1200] = 'MSVC6 (Visual C++ 6.0)';
+VC_VERSIONS[1300] = 'MSVC7 (Visual C++ 2002)';
+VC_VERSIONS[1310] = 'MSVC7.1 (Visual C++ 2003)';
+VC_VERSIONS[1400] = 'MSVC8 (Visual C++ 2005)';
+VC_VERSIONS[1500] = 'MSVC9 (Visual C++ 2008)';
 
-// 1200 is VC6
-// 1300 is vs.net 2002
-// 1310 is vs.net 2003
-// 1400 is vs.net 2005
-// 1500 is vs.net 2008
+// Which version of the compiler do we have?
+VCVERS = probe_binary(CL).substr(0, 5).replace('.', '');
+STDOUT.WriteLine("  Detected compiler " + VC_VERSIONS[VCVERS]);
+AC_DEFINE('COMPILER', VC_VERSIONS[VCVERS], "Detected compiler version");
 
 // do we use x64 or 80x86 version of compiler?
 X64 = probe_binary(CL, 64);
 if (X64) {
-	STDOUT.WriteLine("Detected 64-bit compiler");
+	STDOUT.WriteLine("  Detected 64-bit compiler");
 } else {
-	STDOUT.WriteLine("Detected 32-bit compiler");
+	STDOUT.WriteLine("  Detected 32-bit compiler");
 }
+AC_DEFINE('ARCHITECTURE', X64 ? 'x64' : 'x86', "Detected compiler architecture");
 
 // cygwin now ships with link.exe.  Avoid searching the cygwin path
 // for this, as we want the MS linker, not the fileutil
@@ -64,28 +66,19 @@ if (!PATH_PROG('bison')) {
 // There's a minimum requirement for re2c..
 MINRE2C = "0.13.4";
 
-function probe_re2c_version(RE2C)
-{
-	var command = "cmd /c " + RE2C + " -v";
-	var version = execute(command + '" 2>&1"');
-
-	if (version.match(/((\d+)\.(\d+)\.(\d+))/)) {
-		return RegExp.$1;
-	}
-	return 0;
-}
-
 RE2C = PATH_PROG('re2c');
 if (RE2C) {
 	var intvers, intmin;
 	var pattern = /\./g;
 
-	RE2CVERS = probe_re2c_version(RE2C);
+	RE2CVERS = probe_binary(RE2C, "version");
+	STDOUT.WriteLine('  Detected re2c version ' + RE2CVERS);
+
 	intvers = RE2CVERS.replace(pattern, '') - 0;
 	intmin = MINRE2C.replace(pattern, '') - 0;
 
 	if (intvers < intmin) {
-		STDOUT.WriteLine('WARNING: The minimum RE2C version requirement is ' + MINRE2C + ', ' + RE2CVERS + ' detected');
+		STDOUT.WriteLine('WARNING: The minimum RE2C version requirement is ' + MINRE2C);
 		STDOUT.WriteLine('Parsers will not be generated. Upgrade your copy at http://sf.net/projects/re2c');
 		DEFINE('RE2C', '');
 	} else {
@@ -101,7 +94,9 @@ PATH_PROG('lemon');
 PATH_PROG('mc', WshShell.Environment("Process").Item("PATH"));
 
 // Try locating manifest tool
-PATH_PROG('mt', WshShell.Environment("Process").Item("PATH"));
+if (VCVERS > 1200) {
+	PATH_PROG('mt', WshShell.Environment("Process").Item("PATH"));
+}
 
 // stick objects somewhere outside of the source tree
 ARG_ENABLE('object-out-dir', 'Alternate location for binary objects during build', '');
@@ -389,3 +384,5 @@ if (PHP_SNAPSHOT_TEMPLATE == "no") {
 }
 
 DEFINE('SNAPSHOT_TEMPLATE', PHP_SNAPSHOT_TEMPLATE);
+
+ARG_WITH('summary', 'Skip configuration summary', 'yes');
