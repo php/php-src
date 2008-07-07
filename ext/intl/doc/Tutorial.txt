@@ -1,0 +1,239 @@
+1. Collator::getAvailableLocales().
+Return the locales available at the time of the call, including registered locales.
+If a sever error occurs (such as out of memory condition) this will return null.
+If there is no locale data, an empty enumeration will be returned. 
+Returned locales list is a strings in format of RFC4646 standart (see http://www.rfc-editor.org/rfc/rfc4646.txt).
+Examle of locales format: 'en_US', 'ru_UA', 'ua_UA' (see http://demo.icu-project.org/icu-bin/locexp).
+
+
+2. Collator::getDisplayName( $obj_locale, $disp_locale ).
+Get name of the object for the desired Locale, in the desired langauge. Both arguments 
+must be from getAvailableLocales method.
+
+     @param  string  $obj_locale   Locale to get display name for.
+     @param  string  $disp_locale  Specifies the desired locale for output
+
+Both parameters are case insensitive.
+For locale format see RFC4647 standart in ftp://ftp.rfc-editor.org/in-notes/rfc4647.txt
+
+3. Collator::getLocaleByType( $type ).
+Allow user to select whether she wants information on requested, valid or actual locale.
+Returned locale tag is a string formatted to a RFC4646 standart and normalize to normal form -
+value is a string from 
+For example, a collator for "en_US_CALIFORNIA" was requested. In the current state of ICU (2.0), 
+the requested locale is "en_US_CALIFORNIA", the valid locale is "en_US" (most specific locale 
+supported by ICU) and the actual locale is "root" (the collation data comes unmodified from the UCA) 
+The locale is considered supported by ICU if there is a core ICU bundle for that locale (although 
+it may be empty). 
+
+
+4. VariableTop
+The Variable_Top attribute is only meaningful if the Alternate attribute is not set to NonIgnorable.
+In such a case, it controls which characters count as ignorable. The string value specifies 
+the "highest" character (in UCA order) weight that is to be considered ignorable.
+Thus, for example, if a user wanted whitespace to be ignorable, but not any visible characters, 
+then s/he would use the value Variable_Top="\u0020" (space). The string should only be a 
+single character. All characters of the same primary weight are equivalent, so 
+Variable_Top="\u3000" (ideographic space) has the same effect as Variable_Top="\u0020".
+This setting (alone) has little impact on string comparison performance; setting it lower or higher
+will make sort keys slightly shorter or longer respectively.
+
+
+5. Strength
+The ICU Collation Service supports many levels of comparison (named "Levels", but also
+known as "Strengths"). Having these categories enables ICU to sort strings precisely
+according to local conventions. However, by allowing the levels to be selectively
+employed, searching for a string in text can be performed with various matching
+conditions.
+Performance optimizations have been made for ICU collation with the default level
+settings. Performance specific impacts are discussed in the Performance section below.
+Following is a list of the names for each level and an example usage:
+
+1. Primary Level: Typically, this is used to denote differences between base characters
+(for example, "a" < "b"). It is the strongest difference. For example, dictionaries are
+divided into different sections by base character. This is also called the level1
+strength.
+
+2. Secondary Level: Accents in the characters are considered secondary differences (for
+example, "as" < "as" < "at"). Other differences between letters can also be considered
+secondary differences, depending on the language. A secondary difference is ignored
+when there is a primary difference anywhere in the strings. This is also called the
+level2 strength.
+Note: In some languages (such as Danish), certain accented letters are considered to
+be separate base characters. In most languages, however, an accented letter only has a
+secondary difference from the unaccented version of that letter.
+
+3. Tertiary Level: Upper and lower case differences in characters are distinguished at the
+tertiary level (for example, "ao" < "Ao" < "ao"). In addition, a variant of a letter differs
+from the base form on the tertiary level (such as "A" and " "). Another ? example is the
+difference between large and small Kana. A tertiary difference is ignored when there is
+a primary or secondary difference anywhere in the strings. This is also called the level3
+strength.
+
+4. Quaternary Level: When punctuation is ignored (see Ignoring Punctuations ) at level
+13, an additional level can be used to distinguish words with and without punctuation
+(for example, "ab" < "a-b" < "aB"). This difference is ignored when there is a primary,
+secondary or tertiary difference. This is also known as the level4 strength. The
+quaternary level should only be used if ignoring punctuation is required or when
+processing Japanese text (see Hiragana processing).
+
+5. Identical Level: When all other levels are equal, the identical level is used as a
+tiebreaker. The Unicode code point values of the NFD form of each string are
+compared at this level, just in case there is no difference at levels 14
+. For example, Hebrew cantillation marks are only distinguished at this level. This level should be
+used sparingly, as only code point values differences between two strings is an
+extremely rare occurrence. Using this level substantially decreases the performance for
+both incremental comparison and sort key generation (as well as increasing the sort
+key length). It is also known as level 5 strength.
+
+For example, people may choose to ignore accents or ignore accents and case when searching
+for text. Almost all characters are distinguished by the first three levels, and in most
+locales the default value is thus Tertiary. However, if Alternate is set to be Shifted,
+then the Quaternary strength can be used to break ties among whitespace, punctuation, and
+symbols that would otherwise be ignored. If very fine distinctions among characters are required,
+then the Identical strength can be used (for example, Identical Strength distinguishes
+between the Mathematical Bold Small A and the Mathematical Italic Small A.). However, using
+levels higher than Tertiary the Identical strength result in significantly longer sort
+keys, and slower string comparison performance for equal strings.
+
+
+
+6. Collator::__construct( $locale ).
+The Locale attribute is typically the most important attribute for correct sorting and matching,
+according to the user expectations in different countries and regions. The default UCA
+ordering will only sort a few languages such as Dutch and Portuguese correctly ("correctly"
+meaning according to the normal expectations for users of the languages).
+Otherwise, you need to supply the locale to UCA in order to properly collate text for a
+given language. Thus a locale needs to be supplied so as to choose a collator that is correctly
+tailored for that locale. The choice of a locale will automatically preset the values for
+all of the attributes to something that is reasonable for that locale. Thus most of the time the
+other attributes do not need to be explicitly set. In some cases, the choice of locale will make a
+difference in string comparison performance and/or sort key length.
+In short attribute names, <language>_<script>_<region>_<keyword>.
+Not all the elements are required. Valid values for locale elements are general valid values
+for RFC4646 locale naming, and RFC 4647 lookup algorithm.
+Example:
+Locale="sv" (Swedish) "Kypper" < "Kopfe"
+Locale="de" (German) "Kopfe" < "Kypper"
+
+
+7. Collator::get/setAttribute.
+ICU uses UCA as a default starting point for ordering. Not all languages have sorting sequences
+that correspond with the UCA because UCA cannot simultaneously encompass the specifics of all
+the languages currently in use. Therefore, ICU provides a data-driven, flexible, and run-time
+customizable mechanism called "tailoring". Tailoring overrides the default order of code points
+and the values of the ICU Collation Service attributes.
+Collator have followed attributes:
+   - FRENCH_COLLATION, possible values are: 
+	ON
+	OFF (default)
+	DEFAULT
+
+   - CASE_FIRST, possible values are:
+	OFF (default)
+	LOWER_FIRST
+	UPPER_FIRST
+	DEFAULT
+
+   - CASE_LEVEL, possible values are:
+	OFF (default)
+	ON
+	DEFAULT
+
+   - NORMALIZATION_MODE, possible values are:
+	OFF (default)
+	ON
+	DEFAULT
+
+   - STRENGTH, possible values are:
+	PRIMARY
+	SECONDARY
+	TERTIARY (default)
+	QUATERNARY
+	IDENTICAL
+	DEFAULT
+
+   - ALTERNATE_HANDLING, possible values are:
+	NON_IGNORABLE (default)
+	SHIFTED
+	DEFAULT
+
+   - HIRAGANA_QUATERNARY_MODE, possible values are:
+	ON
+	OFF (default)
+	DEFAULT
+
+   - NUMERIC_COLLATION, possible values are:
+	ON
+	OFF (default)
+	DEFAULT
+
+Description of all of this attributes:
+
+FRENCH_COLLATION - Sort strings with different accents from the back of the string. This attribute
+is automatically set to On for the French locales and a few others. Users normally would
+not need to explicitly set this attribute. There is a string comparison performance cost when
+it is set On, but sort key length is unaffected.
+Example:
+F=X cote < cote < cote < cote
+F=O cote < cote < cote < cote
+
+CASE_FIRST - The Case_First attribute is used to control whether uppercase letters come before
+lowercase letters or vice versa, in the absence of other differences in the strings. The possible
+values are Uppercase_First (U) and Lowercase_First (L), plus the standard Default and Off.
+There is almost no difference between the Off and Lowercase_First options in terms of results,
+so typically users will not use Lowercase_First: only Off or Uppercase_First. (People interested
+in the detailed differences between X and L should consult the Collation Customization).
+Specifying either L or U won't affect string comparison performance, but will affect the sort key
+length.
+Example:
+C=X or C=L "china" < "China" < "denmark" <
+"Denmark"
+C=U "China" < "china" < "Denmark" < "denmark"
+
+CASE_LEVEL - The Case_Level attribute is used when ignoring accents but not case. In such a situation,
+set Strength to be Primary, and Case_Level to be On. In most locales, this setting is Off by default.
+There is a small string comparison performance and sort key impact if this attribute is set to be On.
+Example:
+S=1, E=X role = Role = role
+S=1, E=O role = role < Role
+
+NORMALIZATION_MODE - The Normalization setting determines whether text is thoroughly normalized
+or not in comparison. Even if the setting is off (which is the default for many locales), text as
+represented in common usage will compare correctly (for details, see UTN #5). Only if the accent
+marks are in noncanonical order will there be a problem. If the setting is On, then the best
+results are guaranteed for all possible text input. There is a medium string comparison performance
+cost if this attribute is On, depending on the frequency of sequences that require normalization.
+There is no significant effect on sort key length. If the input text is known to be in NFD or NFKD
+normalization forms, there is no need to enable this Normalization option.
+
+STRENGTH - see Collator::setStrength chapter.
+
+ALTERNATE_HANDLING - The Alternate attribute is used to control the handling of the socalled
+variable characters in the UCA: whitespace, punctuation and symbols. If Alternate is set to
+NonIgnorable (N), then differences among these characters are of the same importance as
+differences among letters. If Alternate is set to Shifted (S), then these characters are of only
+minor importance. The Shifted value is often used in combination with Strength set to Quaternary.
+In such a case, whitespace, punctuation, and symbols are considered when comparing strings,
+but only if all other aspects of the strings (base letters, accents, and case) are identical.
+If Alternate is not set to Shifted, then there is no difference between a Strength of 3 and
+a Strength of 4. For more information and examples, see
+Variable_Weighting in the UCA (http://www.unicode.org/reports/tr10/#Variable_Weighting).
+The reason the Alternate values are not simply On and Off is that additional Alternate values
+may be added in the future. The UCA option Blanked is expressed with Strength set to 3,
+and Alternate set to Shifted. The default for most locales is NonIgnorable. If Shifted is selected,
+it may be slower if there are many strings that are the same except for punctuation;
+sort key length will not be affected unless the strength level is also increased.
+Example:
+S=3, A=N di Silva < Di Silva < diSilva < U.S.A. < USA
+S=3, A=S di Silva = diSilva < Di Silva < U.S.A. = USA
+S=4, A=S di Silva < diSilva < Di Silva < U.S.A. < USA
+
+HIRAGANA_QUATERNARY_MODE - Compatibility with JIS x 4061 requires the introduction of an additional
+level to distinguish Hiragana and Katakana characters. If compatibility with that standard is required,
+then this attribute should be set On, and the strength set to Quaternary. This will affect sort key
+length and string comparison string comparison performance.
+
+NUMERIC_COLLATION - When turned on, this attribute generates a collation key for the
+numeric value of substrings of digits. This is a way to get '100' to sort AFTER '2'.
+
