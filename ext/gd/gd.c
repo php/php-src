@@ -1906,6 +1906,8 @@ PHP_FUNCTION(imagegrabwindow)
 	HDC memDC;
 	HBITMAP memBM;
 	HBITMAP hOld;
+	HINSTANCE handle;
+	long lwindow_handle;
 	typedef BOOL (WINAPI *tPrintWindow)(HWND, HDC,UINT);
 	tPrintWindow pPrintWindow = 0;
 	gdImagePtr im;
