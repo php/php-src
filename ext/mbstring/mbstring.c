@@ -163,32 +163,6 @@ static const php_mb_nls_ident_list php_mb_default_identify_list[] = {
 
 /* }}} */
 
-static
-	ZEND_BEGIN_ARG_INFO(third_and_rest_force_ref, 1)
-		ZEND_ARG_PASS_INFO(0)
-		ZEND_ARG_PASS_INFO(0)
-	ZEND_END_ARG_INFO()
-
-static
-	ZEND_BEGIN_ARG_INFO_EX(mb_parse_str_arginfo, 0, 0, 1)
-		ZEND_ARG_INFO(0, encoded_string)
-		ZEND_ARG_ARRAY_INFO(1, result, 1)
-	ZEND_END_ARG_INFO()
-
-static
-	ZEND_BEGIN_ARG_INFO_EX(mb_convert_variables_arginfo, 1, 0, 3)
-		ZEND_ARG_INFO(0, to_encoding)
-		ZEND_ARG_INFO(0, from_encoding)
-		ZEND_ARG_INFO(1, vars)
-	ZEND_END_ARG_INFO()
-
-static
-	ZEND_BEGIN_ARG_INFO_EX(mb_ereg_arginfo, 0, 0, 2)
-		ZEND_ARG_INFO(0, pattern)
-		ZEND_ARG_INFO(0, string)
-		ZEND_ARG_INFO(1, regs)
-	ZEND_END_ARG_INFO()
-
 /* {{{ mb_overload_def mb_ovld[] */
 static const struct mb_overload_def mb_ovld[] = {
 	{MB_OVERLOAD_MAIL, "mail", "mb_send_mail", "mb_orig_mail"},
@@ -215,48 +189,406 @@ static const struct mb_overload_def mb_ovld[] = {
 }; 
 /* }}} */
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_language, 0, 0, 0)
+	ZEND_ARG_INFO(0, language)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_internal_encoding, 0, 0, 0)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_http_input, 0, 0, 0)
+	ZEND_ARG_INFO(0, type)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_http_output, 0, 0, 0)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_detect_order, 0, 0, 0)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_substitute_character, 0, 0, 0)
+	ZEND_ARG_INFO(0, substchar)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_preferred_mime_name, 0, 0, 1)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_parse_str, 0, 0, 1)
+	ZEND_ARG_INFO(0, encoded_string)
+	ZEND_ARG_INFO(1, result)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_output_handler, 0, 0, 2)
+	ZEND_ARG_INFO(0, contents)
+	ZEND_ARG_INFO(0, status)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strlen, 0, 0, 1)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strpos, 0, 0, 2)
+	ZEND_ARG_INFO(0, haystack)
+	ZEND_ARG_INFO(0, needle)
+	ZEND_ARG_INFO(0, offset)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strrpos, 0, 0, 2)
+	ZEND_ARG_INFO(0, haystack)
+	ZEND_ARG_INFO(0, needle)
+	ZEND_ARG_INFO(0, offset)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_stripos, 0, 0, 2)
+	ZEND_ARG_INFO(0, haystack)
+	ZEND_ARG_INFO(0, needle)
+	ZEND_ARG_INFO(0, offset)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strripos, 0, 0, 2)
+	ZEND_ARG_INFO(0, haystack)
+	ZEND_ARG_INFO(0, needle)
+	ZEND_ARG_INFO(0, offset)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strstr, 0, 0, 2)
+	ZEND_ARG_INFO(0, haystack)
+	ZEND_ARG_INFO(0, needle)
+	ZEND_ARG_INFO(0, part)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strrchr, 0, 0, 2)
+	ZEND_ARG_INFO(0, haystack)
+	ZEND_ARG_INFO(0, needle)
+	ZEND_ARG_INFO(0, part)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_stristr, 0, 0, 2)
+	ZEND_ARG_INFO(0, haystack)
+	ZEND_ARG_INFO(0, needle)
+	ZEND_ARG_INFO(0, part)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strrichr, 0, 0, 2)
+	ZEND_ARG_INFO(0, haystack)
+	ZEND_ARG_INFO(0, needle)
+	ZEND_ARG_INFO(0, part)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_substr_count, 0, 0, 2)
+	ZEND_ARG_INFO(0, haystack)
+	ZEND_ARG_INFO(0, needle)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_substr, 0, 0, 2)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, start)
+	ZEND_ARG_INFO(0, length)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strcut, 0, 0, 2)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, start)
+	ZEND_ARG_INFO(0, length)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strwidth, 0, 0, 1)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strimwidth, 0, 0, 3)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, start)
+	ZEND_ARG_INFO(0, width)
+	ZEND_ARG_INFO(0, trimmarker)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_convert_encoding, 0, 0, 2)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, to)
+	ZEND_ARG_INFO(0, from)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_convert_case, 0, 0, 2)
+	ZEND_ARG_INFO(0, sourcestring)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strtoupper, 0, 0, 1)
+	ZEND_ARG_INFO(0, sourcestring)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strtolower, 0, 0, 1)
+	ZEND_ARG_INFO(0, sourcestring)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_detect_encoding, 0, 0, 1)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, encoding_list)
+	ZEND_ARG_INFO(0, strict)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_list_encodings, 0, 0, 0)
+	ZEND_ARG_INFO(0, alias_encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_list_encodings_alias_names, 0, 0, 0)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_list_mime_names, 0, 0, 0)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_encode_mimeheader, 0, 0, 1)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, charset)
+	ZEND_ARG_INFO(0, transfer)
+	ZEND_ARG_INFO(0, linefeed)
+	ZEND_ARG_INFO(0, indent)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_decode_mimeheader, 0, 0, 1)
+	ZEND_ARG_INFO(0, string)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_convert_kana, 0, 0, 1)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, option)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_convert_variables, 1, 0, 3)
+	ZEND_ARG_INFO(0, to)
+	ZEND_ARG_INFO(0, from)
+	ZEND_ARG_INFO(1, ...)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_encode_numericentity, 0, 0, 2)
+	ZEND_ARG_INFO(0, string)
+	ZEND_ARG_INFO(0, convmap)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_decode_numericentity, 0, 0, 2)
+	ZEND_ARG_INFO(0, string)
+	ZEND_ARG_INFO(0, convmap)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_send_mail, 0, 0, 3)
+	ZEND_ARG_INFO(0, to)
+	ZEND_ARG_INFO(0, subject)
+	ZEND_ARG_INFO(0, message)
+	ZEND_ARG_INFO(0, additional_headers)
+	ZEND_ARG_INFO(0, additional_parameters)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_get_info, 0, 0, 0)
+	ZEND_ARG_INFO(0, type)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_check_encoding, 0, 0, 0)
+	ZEND_ARG_INFO(0, var)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_regex_encoding, 0, 0, 0)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_ereg, 0, 0, 2)
+	ZEND_ARG_INFO(0, pattern)
+	ZEND_ARG_INFO(0, string)
+	ZEND_ARG_INFO(1, registers)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_eregi, 0, 0, 2)
+	ZEND_ARG_INFO(0, pattern)
+	ZEND_ARG_INFO(0, string)
+	ZEND_ARG_INFO(1, registers)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_ereg_replace, 0, 0, 3)
+	ZEND_ARG_INFO(0, pattern)
+	ZEND_ARG_INFO(0, replacement)
+	ZEND_ARG_INFO(0, string)
+	ZEND_ARG_INFO(0, option)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_eregi_replace, 0, 0, 3)
+	ZEND_ARG_INFO(0, pattern)
+	ZEND_ARG_INFO(0, replacement)
+	ZEND_ARG_INFO(0, string)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_split, 0, 0, 2)
+	ZEND_ARG_INFO(0, pattern)
+	ZEND_ARG_INFO(0, string)
+	ZEND_ARG_INFO(0, limit)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_ereg_match, 0, 0, 2)
+	ZEND_ARG_INFO(0, pattern)
+	ZEND_ARG_INFO(0, string)
+	ZEND_ARG_INFO(0, option)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_ereg_search, 0, 0, 0)
+	ZEND_ARG_INFO(0, pattern)
+	ZEND_ARG_INFO(0, option)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_ereg_search_pos, 0, 0, 0)
+	ZEND_ARG_INFO(0, pattern)
+	ZEND_ARG_INFO(0, option)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_ereg_search_regs, 0, 0, 0)
+	ZEND_ARG_INFO(0, pattern)
+	ZEND_ARG_INFO(0, option)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_ereg_search_init, 0, 0, 1)
+	ZEND_ARG_INFO(0, string)
+	ZEND_ARG_INFO(0, pattern)
+	ZEND_ARG_INFO(0, option)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_mb_ereg_search_getregs, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_mb_ereg_search_getpos, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_ereg_search_setpos, 0, 0, 1)
+	ZEND_ARG_INFO(0, position)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_regex_set_options, 0, 0, 0)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 /* {{{ zend_function_entry mbstring_functions[] */
 const zend_function_entry mbstring_functions[] = {
-	PHP_FE(mb_convert_case,			NULL)
-	PHP_FE(mb_strtoupper,			NULL)
-	PHP_FE(mb_strtolower,			NULL)
-	PHP_FE(mb_language,				NULL)
-	PHP_FE(mb_internal_encoding,	NULL)
-	PHP_FE(mb_http_input,			NULL)
-	PHP_FE(mb_http_output,			NULL)
-	PHP_FE(mb_detect_order,			NULL)
-	PHP_FE(mb_substitute_character,	NULL)
-	PHP_FE(mb_parse_str,			mb_parse_str_arginfo)
-	PHP_FE(mb_output_handler,		NULL)
-	PHP_FE(mb_preferred_mime_name,	NULL)
-	PHP_FE(mb_strlen,				NULL)
-	PHP_FE(mb_strpos,				NULL)
-	PHP_FE(mb_strrpos,				NULL)
-	PHP_FE(mb_stripos,				NULL)
-	PHP_FE(mb_strripos,				NULL)
-	PHP_FE(mb_strstr,				NULL)
-	PHP_FE(mb_strrchr,				NULL)
-	PHP_FE(mb_stristr,				NULL)
-	PHP_FE(mb_strrichr,				NULL)
-	PHP_FE(mb_substr_count,			NULL)
-	PHP_FE(mb_substr,				NULL)
-	PHP_FE(mb_strcut,				NULL)
-	PHP_FE(mb_strwidth,				NULL)
-	PHP_FE(mb_strimwidth,			NULL)
-	PHP_FE(mb_convert_encoding,		NULL)
-	PHP_FE(mb_detect_encoding,		NULL)
-	PHP_FE(mb_list_encodings,		NULL)
-	PHP_FE(mb_list_encodings_alias_names,		NULL)
-	PHP_FE(mb_list_mime_names,		NULL)
-	PHP_FE(mb_convert_kana,			NULL)
-	PHP_FE(mb_encode_mimeheader,	NULL)
-	PHP_FE(mb_decode_mimeheader,	NULL)
-	PHP_FE(mb_convert_variables,	mb_convert_variables_arginfo)
-	PHP_FE(mb_encode_numericentity,	NULL)
-	PHP_FE(mb_decode_numericentity,	NULL)
-	PHP_FE(mb_send_mail,			NULL)
-	PHP_FE(mb_get_info,				NULL)
-	PHP_FE(mb_check_encoding,		NULL)
+	PHP_FE(mb_convert_case,			arginfo_mb_convert_case)
+	PHP_FE(mb_strtoupper,			arginfo_mb_strtoupper)
+	PHP_FE(mb_strtolower,			arginfo_mb_strtolower)
+	PHP_FE(mb_language,				arginfo_mb_language)
+	PHP_FE(mb_internal_encoding,	arginfo_mb_internal_encoding)
+	PHP_FE(mb_http_input,			arginfo_mb_http_input)
+	PHP_FE(mb_http_output,			arginfo_mb_http_output)
+	PHP_FE(mb_detect_order,			arginfo_mb_detect_order)
+	PHP_FE(mb_substitute_character,	arginfo_mb_substitute_character)
+	PHP_FE(mb_parse_str,			arginfo_mb_parse_str)
+	PHP_FE(mb_output_handler,		arginfo_mb_output_handler)
+	PHP_FE(mb_preferred_mime_name,	arginfo_mb_preferred_mime_name)
+	PHP_FE(mb_strlen,				arginfo_mb_strlen)
+	PHP_FE(mb_strpos,				arginfo_mb_strpos)
+	PHP_FE(mb_strrpos,				arginfo_mb_strrpos)
+	PHP_FE(mb_stripos,				arginfo_mb_stripos)
+	PHP_FE(mb_strripos,				arginfo_mb_strripos)
+	PHP_FE(mb_strstr,				arginfo_mb_strstr)
+	PHP_FE(mb_strrchr,				arginfo_mb_strrchr)
+	PHP_FE(mb_stristr,				arginfo_mb_stristr)
+	PHP_FE(mb_strrichr,				arginfo_mb_strrichr)
+	PHP_FE(mb_substr_count,			arginfo_mb_substr_count)
+	PHP_FE(mb_substr,				arginfo_mb_substr)
+	PHP_FE(mb_strcut,				arginfo_mb_strcut)
+	PHP_FE(mb_strwidth,				arginfo_mb_strwidth)
+	PHP_FE(mb_strimwidth,			arginfo_mb_strimwidth)
+	PHP_FE(mb_convert_encoding,		arginfo_mb_convert_encoding)
+	PHP_FE(mb_detect_encoding,		arginfo_mb_detect_encoding)
+	PHP_FE(mb_list_encodings,		arginfo_mb_list_encodings)
+	PHP_FE(mb_list_encodings_alias_names,		arginfo_mb_list_encodings_alias_names)
+	PHP_FE(mb_list_mime_names,		arginfo_mb_list_mime_names)
+	PHP_FE(mb_convert_kana,			arginfo_mb_convert_kana)
+	PHP_FE(mb_encode_mimeheader,	arginfo_mb_encode_mimeheader)
+	PHP_FE(mb_decode_mimeheader,	arginfo_mb_decode_mimeheader)
+	PHP_FE(mb_convert_variables,	arginfo_mb_convert_variables)
+	PHP_FE(mb_encode_numericentity,	arginfo_mb_encode_numericentity)
+	PHP_FE(mb_decode_numericentity,	arginfo_mb_decode_numericentity)
+	PHP_FE(mb_send_mail,			arginfo_mb_send_mail)
+	PHP_FE(mb_get_info,				arginfo_mb_get_info)
+	PHP_FE(mb_check_encoding,		arginfo_mb_check_encoding)
 #if HAVE_MBREGEX
 	PHP_MBREGEX_FUNCTION_ENTRIES
 #endif
@@ -293,9 +625,6 @@ static sapi_post_entry php_post_entries[] = {
 
 #ifdef COMPILE_DL_MBSTRING
 ZEND_GET_MODULE(mbstring)
-# ifdef PHP_WIN32
-# include "zend_arg_defs.c"
-# endif
 #endif
 
 /* {{{ allocators */
