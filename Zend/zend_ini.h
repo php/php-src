@@ -104,6 +104,7 @@ ZEND_API void display_ini_entries(zend_module_entry *module);
 ZEND_API long zend_ini_long(char *name, uint name_length, int orig);
 ZEND_API double zend_ini_double(char *name, uint name_length, int orig);
 ZEND_API char *zend_ini_string(char *name, uint name_length, int orig);
+ZEND_API char *zend_ini_string_ex(char *name, uint name_length, int orig, zend_bool *exists);
 
 ZEND_API int zend_ini_register_displayer(char *name, uint name_length, void (*displayer)(zend_ini_entry *ini_entry, int type));
 
@@ -157,7 +158,7 @@ END_EXTERN_C()
 
 #define INI_INT(name) zend_ini_long((name), sizeof(name), 0)
 #define INI_FLT(name) zend_ini_double((name), sizeof(name), 0)
-#define INI_STR(name) zend_ini_string((name), sizeof(name), 0)
+#define INI_STR(name) zend_ini_string_ex((name), sizeof(name), 0, NULL)
 #define INI_BOOL(name) ((zend_bool) INI_INT(name))
 
 #define INI_ORIG_INT(name)	zend_ini_long((name), sizeof(name), 1)
