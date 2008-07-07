@@ -32,12 +32,6 @@
 #define ZEND_MODULE_INFO_FUNC_ARGS zend_module_entry *zend_module TSRMLS_DC
 #define ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU zend_module TSRMLS_CC
 
-extern const struct _zend_arg_info first_arg_force_ref[2];
-extern const struct _zend_arg_info second_arg_force_ref[3];
-extern const struct _zend_arg_info third_arg_force_ref[4];
-extern const struct _zend_arg_info fourth_arg_force_ref[5];
-extern const struct _zend_arg_info fifth_arg_force_ref[6];
-extern const struct _zend_arg_info all_args_by_ref[1];
 
 #define ZEND_MODULE_API_NO 20070729
 #ifdef ZTS
