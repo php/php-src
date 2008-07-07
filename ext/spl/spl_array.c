@@ -1190,9 +1190,9 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 			zend_throw_exception(spl_ce_BadMethodCallException, "Function expects exactly one argument", 0 TSRMLS_CC);
 			return;
 		}
-		zend_call_method(NULL, NULL, NULL, fname, fname_len, &return_value, 2, &tmp, arg TSRMLS_CC);
+		zend_call_method(NULL, NULL, NULL, fname, fname_len, return_value_ptr, 2, &tmp, arg TSRMLS_CC);
 	} else {
-		zend_call_method(NULL, NULL, NULL, fname, fname_len, &return_value, 1, &tmp, NULL TSRMLS_CC);
+		zend_call_method(NULL, NULL, NULL, fname, fname_len, return_value_ptr, 1, &tmp, NULL TSRMLS_CC);
 	}
 }
 
