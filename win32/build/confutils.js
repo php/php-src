@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.19 2008-07-05 19:53:04 pajoye Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.20 2008-07-07 01:23:56 sfox Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -29,13 +29,6 @@ var PROGRAM_FILES = WshShell.Environment("Process").Item("ProgramFiles");
 
 var extensions_enabled = new Array();
 var sapi_enabled = new Array();
-
-var VC_VERSIONS = new Array();
-VC_VERSIONS[1200] = 'VC6';
-VC_VERSIONS[1300] = 'Visual C++ 2002';
-VC_VERSIONS[1310] = 'Visual C++ 2003';
-VC_VERSIONS[1400] = 'Visual C++ 2005';
-VC_VERSIONS[1500] = 'Visual C++ 2008';
 
 if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files";
@@ -446,7 +439,7 @@ can be built that way. \
 	nicefile.WriteLine(nice +  " %*");
 	nicefile.Close();
 
-	AC_DEFINE('CONFIGURE_COMMAND', nice);
+	AC_DEFINE('CONFIGURE_COMMAND', nice, "Configure line");
 }
 
 function DEFINE(name, value)
@@ -1311,6 +1304,7 @@ function output_as_table(header, ar_out)
 		STDOUT.WriteLine("Invalid header argument, can't output the table " + l + " " + ar_out[0].length  );
 		return;
 	}
+
 	for (j=0; j < l; j++) {
 		var tmax, tmin;
 
@@ -1407,7 +1401,7 @@ function generate_files()
 	if (!FSO.FolderExists(dir)) {
 		FSO.CreateFolder(dir);
 	}
-	
+
 	for (i = 0; i < build_dirs.length; i++) {
 		bd = FSO.BuildPath(dir, build_dirs[i]);
 		if (bd == last) {
@@ -1419,7 +1413,7 @@ function generate_files()
 			FSO.CreateFolder(bd);
 		}
 	}
-	
+
 	STDOUT.WriteLine("Generating files...");
 	generate_makefile();
 	generate_internal_functions();
@@ -1427,7 +1421,9 @@ function generate_files()
 	STDOUT.WriteLine("Done.");
 	STDOUT.WriteBlankLines(1);
 
-	write_summary();
+	if (PHP_SUMMARY != "no") {
+		write_summary();
+	}
 
 	if (PHP_SNAPSHOT_BUILD != "no") {
 		STDOUT.WriteLine("Type 'nmake snap' to build a PHP snapshot");
