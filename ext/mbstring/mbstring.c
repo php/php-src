@@ -169,6 +169,26 @@ static
 		ZEND_ARG_PASS_INFO(0)
 	ZEND_END_ARG_INFO()
 
+static
+	ZEND_BEGIN_ARG_INFO_EX(mb_parse_str_arginfo, 0, 0, 1)
+		ZEND_ARG_INFO(0, encoded_string)
+		ZEND_ARG_ARRAY_INFO(1, result, 1)
+	ZEND_END_ARG_INFO()
+
+static
+	ZEND_BEGIN_ARG_INFO_EX(mb_convert_variables_arginfo, 1, 0, 3)
+		ZEND_ARG_INFO(0, to_encoding)
+		ZEND_ARG_INFO(0, from_encoding)
+		ZEND_ARG_INFO(1, vars)
+	ZEND_END_ARG_INFO()
+
+static
+	ZEND_BEGIN_ARG_INFO_EX(mb_ereg_arginfo, 0, 0, 2)
+		ZEND_ARG_INFO(0, pattern)
+		ZEND_ARG_INFO(0, string)
+		ZEND_ARG_INFO(1, regs)
+	ZEND_END_ARG_INFO()
+
 /* {{{ mb_overload_def mb_ovld[] */
 static const struct mb_overload_def mb_ovld[] = {
 	{MB_OVERLOAD_MAIL, "mail", "mb_send_mail", "mb_orig_mail"},
@@ -206,7 +226,7 @@ const zend_function_entry mbstring_functions[] = {
 	PHP_FE(mb_http_output,			NULL)
 	PHP_FE(mb_detect_order,			NULL)
 	PHP_FE(mb_substitute_character,	NULL)
-	PHP_FE(mb_parse_str,			second_arg_force_ref)
+	PHP_FE(mb_parse_str,			mb_parse_str_arginfo)
 	PHP_FE(mb_output_handler,		NULL)
 	PHP_FE(mb_preferred_mime_name,	NULL)
 	PHP_FE(mb_strlen,				NULL)
@@ -231,7 +251,7 @@ const zend_function_entry mbstring_functions[] = {
 	PHP_FE(mb_convert_kana,			NULL)
 	PHP_FE(mb_encode_mimeheader,	NULL)
 	PHP_FE(mb_decode_mimeheader,	NULL)
-	PHP_FE(mb_convert_variables,	third_and_rest_force_ref)
+	PHP_FE(mb_convert_variables,	mb_convert_variables_arginfo)
 	PHP_FE(mb_encode_numericentity,	NULL)
 	PHP_FE(mb_decode_numericentity,	NULL)
 	PHP_FE(mb_send_mail,			NULL)
