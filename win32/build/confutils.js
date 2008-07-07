@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.21 2008-07-07 13:32:55 pajoye Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.22 2008-07-07 13:51:35 pajoye Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -1402,6 +1402,9 @@ function output_as_table(header, ar_out)
 function write_summary()
 {
 	var ar = new Array();
+	if (PHP_SUMMARY == "no") {
+		return;
+	}
 
 	STDOUT.WriteBlankLines(2);
 
@@ -1452,10 +1455,7 @@ function generate_files()
 	generate_config_h();
 	STDOUT.WriteLine("Done.");
 	STDOUT.WriteBlankLines(1);
-
-	if (PHP_SUMMARY != "no") {
-		write_summary();
-	}
+	write_summary();
 
 	if (PHP_SNAPSHOT_BUILD != "no") {
 		STDOUT.WriteLine("Type 'nmake snap' to build a PHP snapshot");
