@@ -363,4 +363,4 @@ if (PHP_SNAPSHOT_TEMPLATE == "no") {
 
 DEFINE('SNAPSHOT_TEMPLATE', PHP_SNAPSHOT_TEMPLATE);
 
-ARG_WITH('summary', 'Enable configuration summary', 'yes');
+ARG_ENABLE('summary', 'Enable configuration summary', 'yes');
