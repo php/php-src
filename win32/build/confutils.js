@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.20 2008-07-07 01:23:56 sfox Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.21 2008-07-07 13:32:55 pajoye Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -27,8 +27,19 @@ var MFO = null;
 var SYSTEM_DRIVE = WshShell.Environment("Process").Item("SystemDrive");
 var PROGRAM_FILES = WshShell.Environment("Process").Item("ProgramFiles");
 
+/* Store the enabled extensions (summary + QA check) */
 var extensions_enabled = new Array();
+
+/* Store the SAPI enabled (summary + QA check) */
 var sapi_enabled = new Array();
+
+/* Mapping CL version > human readable name */
+var VC_VERSIONS = new Array();
+VC_VERSIONS[1200] = 'MSVC6 (Visual C++ 6.0)';
+VC_VERSIONS[1300] = 'MSVC7 (Visual C++ 2002)';
+VC_VERSIONS[1310] = 'MSVC7.1 (Visual C++ 2003)';
+VC_VERSIONS[1400] = 'MSVC8 (Visual C++ 2005)';
+VC_VERSIONS[1500] = 'MSVC9 (Visual C++ 2008)';
 
 if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files";
@@ -99,6 +110,27 @@ function execute(command_line)
 //STDOUT.WriteLine(ret);
 
 	return ret;
+}
+
+function probe_binary(EXE, what)
+{
+	// tricky escapes to get stderr redirection to work
+	var command = 'cmd /c ""' + EXE;
+	if (what == "version") {
+		command = command + '" -v"';
+	}
+	var version = execute(command + '" 2>&1"');
+
+	if (what == "64") {
+		if (version.match(/x64/)) {
+			return 1;
+		}
+	} else {
+		if (version.match(/(\d+\.\d+(\.\d+)?(\.\d+)?)/)) {
+			return RegExp.$1;
+		}
+	}
+	return 0;
 }
 
 function condense_path(path)
