@@ -382,12 +382,12 @@ ZEND_API char *zend_ini_string_ex(char *name, uint name_length, int orig, zend_b
 		} else {
 			return ini_entry->value;
 		}
-	} else if (exists) {
-		*exists = 0;
+	} else {
+		if (exists) {
+			*exists = 0;
+		}
 		return NULL;
 	}
-
-	return "";
 }
 /* }}} */
 
