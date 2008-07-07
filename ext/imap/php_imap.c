@@ -96,84 +96,498 @@ void *fs_get(size_t size);
 ZEND_DECLARE_MODULE_GLOBALS(imap)
 static PHP_GINIT_FUNCTION(imap);
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_open, 0, 0, 3)
+	ZEND_ARG_INFO(0, mailbox)
+	ZEND_ARG_INFO(0, user)
+	ZEND_ARG_INFO(0, password)
+	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, n_retries)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_reopen, 0, 0, 2)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, mailbox)
+	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, n_retries)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_append, 0, 0, 3)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, folder)
+	ZEND_ARG_INFO(0, message)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_num_msg, 0, 0, 1)
+	ZEND_ARG_INFO(0, stream_id)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_ping, 0, 0, 1)
+	ZEND_ARG_INFO(0, stream_id)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_num_recent, 0, 0, 1)
+	ZEND_ARG_INFO(0, stream_id)
+ZEND_END_ARG_INFO()
+
+#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_get_quota, 0, 0, 2)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, qroot)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_get_quotaroot, 0, 0, 2)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, mbox)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_set_quota, 0, 0, 3)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, qroot)
+	ZEND_ARG_INFO(0, mailbox_size)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_setacl, 0, 0, 4)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, mailbox)
+	ZEND_ARG_INFO(0, id)
+	ZEND_ARG_INFO(0, rights)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_getacl, 0, 0, 2)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, mailbox)
+ZEND_END_ARG_INFO()
+#endif
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_expunge, 0, 0, 1)
+	ZEND_ARG_INFO(0, stream_id)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_close, 0, 0, 1)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_headers, 0, 0, 1)
+	ZEND_ARG_INFO(0, stream_id)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_body, 0, 0, 2)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, msg_no)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mail_copy, 0, 0, 3)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, msglist)
+	ZEND_ARG_INFO(0, mailbox)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mail_move, 0, 0, 3)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, sequence)
+	ZEND_ARG_INFO(0, mailbox)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_createmailbox, 0, 0, 2)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, mailbox)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_renamemailbox, 0, 0, 3)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, old_name)
+	ZEND_ARG_INFO(0, new_name)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_deletemailbox, 0, 0, 2)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, mailbox)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_list, 0, 0, 3)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, ref)
+	ZEND_ARG_INFO(0, pattern)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_getmailboxes, 0, 0, 3)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, ref)
+	ZEND_ARG_INFO(0, pattern)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_listscan, 0, 0, 4)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, ref)
+	ZEND_ARG_INFO(0, pattern)
+	ZEND_ARG_INFO(0, content)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_check, 0, 0, 1)
+	ZEND_ARG_INFO(0, stream_id)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_delete, 0, 0, 2)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, msg_no)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_undelete, 0, 0, 2)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, msg_no)
+	ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_headerinfo, 0, 0, 2)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, msg_no)
+	ZEND_ARG_INFO(0, from_length)
+	ZEND_ARG_INFO(0, subject_length)
+	ZEND_ARG_INFO(0, default_host)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_rfc822_parse_headers, 0, 0, 1)
+	ZEND_ARG_INFO(0, headers)
+	ZEND_ARG_INFO(0, default_host)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_lsub, 0, 0, 3)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, ref)
+	ZEND_ARG_INFO(0, pattern)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_getsubscribed, 0, 0, 3)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, ref)
+	ZEND_ARG_INFO(0, pattern)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_subscribe, 0, 0, 2)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, mailbox)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_unsubscribe, 0, 0, 2)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, mailbox)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_fetchstructure, 0, 0, 2)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, msg_no)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_fetchbody, 0, 0, 3)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, msg_no)
+	ZEND_ARG_INFO(0, section)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_savebody, 0, 0, 3)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, file)
+	ZEND_ARG_INFO(0, msg_no)
+	ZEND_ARG_INFO(0, section)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_base64, 0, 0, 1)
+	ZEND_ARG_INFO(0, text)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_qprint, 0, 0, 1)
+	ZEND_ARG_INFO(0, text)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_8bit, 0, 0, 1)
+	ZEND_ARG_INFO(0, text)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_binary, 0, 0, 1)
+	ZEND_ARG_INFO(0, text)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mailboxmsginfo, 0, 0, 1)
+	ZEND_ARG_INFO(0, stream_id)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_rfc822_write_address, 0, 0, 3)
+	ZEND_ARG_INFO(0, mailbox)
+	ZEND_ARG_INFO(0, host)
+	ZEND_ARG_INFO(0, personal)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_rfc822_parse_adrlist, 0, 0, 2)
+	ZEND_ARG_INFO(0, address_string)
+	ZEND_ARG_INFO(0, default_host)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_utf8, 0, 0, 1)
+	ZEND_ARG_INFO(0, mime_encoded_text)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_utf7_decode, 0, 0, 1)
+	ZEND_ARG_INFO(0, buf)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_utf7_encode, 0, 0, 1)
+	ZEND_ARG_INFO(0, buf)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_setflag_full, 0, 0, 3)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, sequence)
+	ZEND_ARG_INFO(0, flag)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_clearflag_full, 0, 0, 3)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, sequence)
+	ZEND_ARG_INFO(0, flag)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_sort, 0, 0, 3)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, criteria)
+	ZEND_ARG_INFO(0, reverse)
+	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, search_criteria)
+	ZEND_ARG_INFO(0, charset)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_fetchheader, 0, 0, 2)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, msg_no)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_uid, 0, 0, 2)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, msg_no)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_msgno, 0, 0, 2)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, unique_msg_id)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_status, 0, 0, 3)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, mailbox)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_bodystruct, 0, 0, 3)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, msg_no)
+	ZEND_ARG_INFO(0, section)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_fetch_overview, 0, 0, 2)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, sequence)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mail_compose, 0, 0, 2)
+	ZEND_ARG_INFO(0, envelope)
+	ZEND_ARG_INFO(0, body)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mail, 0, 0, 3)
+	ZEND_ARG_INFO(0, to)
+	ZEND_ARG_INFO(0, subject)
+	ZEND_ARG_INFO(0, message)
+	ZEND_ARG_INFO(0, additional_headers)
+	ZEND_ARG_INFO(0, cc)
+	ZEND_ARG_INFO(0, bcc)
+	ZEND_ARG_INFO(0, rpath)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_search, 0, 0, 2)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, criteria)
+	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, charset)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imap_alerts, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imap_errors, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_imap_last_error, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mime_header_decode, 0, 0, 1)
+	ZEND_ARG_INFO(0, str)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_thread, 0, 0, 1)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_timeout, 0, 0, 1)
+	ZEND_ARG_INFO(0, timeout_type)
+	ZEND_ARG_INFO(0, timeout)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 /* {{{ imap_functions[]
  */
 const zend_function_entry imap_functions[] = {
-	PHP_FE(imap_open,								NULL)
-	PHP_FE(imap_reopen,								NULL)
-	PHP_FE(imap_close,								NULL)
-	PHP_FE(imap_num_msg,							NULL)
-	PHP_FE(imap_num_recent,							NULL)
-	PHP_FE(imap_headers,							NULL)
-	PHP_FE(imap_headerinfo,							NULL)
-	PHP_FE(imap_rfc822_parse_headers,				NULL)
-	PHP_FE(imap_rfc822_write_address,				NULL)
-	PHP_FE(imap_rfc822_parse_adrlist,				NULL)
-	PHP_FE(imap_body,								NULL)
-	PHP_FE(imap_bodystruct,							NULL)
-	PHP_FE(imap_fetchbody,							NULL)
-	PHP_FE(imap_savebody,							NULL)
-	PHP_FE(imap_fetchheader,						NULL)
-	PHP_FE(imap_fetchstructure,						NULL)
-	PHP_FE(imap_expunge,							NULL)
-	PHP_FE(imap_delete,								NULL)
-	PHP_FE(imap_undelete,							NULL)
-	PHP_FE(imap_check,								NULL)
-	PHP_FE(imap_mail_copy,							NULL)
-	PHP_FE(imap_mail_move,							NULL)
-	PHP_FE(imap_mail_compose,						NULL)
-	PHP_FE(imap_createmailbox,						NULL)
-	PHP_FE(imap_renamemailbox,						NULL)
-	PHP_FE(imap_deletemailbox,						NULL)
-	PHP_FE(imap_subscribe,							NULL)
-	PHP_FE(imap_unsubscribe,						NULL)
-	PHP_FE(imap_append,								NULL)
-	PHP_FE(imap_ping,								NULL)
-	PHP_FE(imap_base64,								NULL)
-	PHP_FE(imap_qprint,								NULL)
-	PHP_FE(imap_8bit,								NULL)
-	PHP_FE(imap_binary,								NULL)
-	PHP_FE(imap_utf8,								NULL)
-	PHP_FE(imap_status,								NULL)
-	PHP_FE(imap_mailboxmsginfo,						NULL)
-	PHP_FE(imap_setflag_full,						NULL)
-	PHP_FE(imap_clearflag_full,						NULL)
-	PHP_FE(imap_sort,								NULL)
-	PHP_FE(imap_uid,								NULL)
-	PHP_FE(imap_msgno,								NULL)
-	PHP_FE(imap_list,								NULL)
-	PHP_FE(imap_lsub,								NULL)
-	PHP_FE(imap_fetch_overview,						NULL)
-	PHP_FE(imap_alerts,								NULL)
-	PHP_FE(imap_errors,								NULL)
-	PHP_FE(imap_last_error,							NULL)
-	PHP_FE(imap_search,								NULL)
-	PHP_FE(imap_utf7_decode,						NULL)
-	PHP_FE(imap_utf7_encode,						NULL)
-	PHP_FE(imap_mime_header_decode,					NULL)
-	PHP_FE(imap_thread,								NULL)
-	PHP_FE(imap_timeout,								NULL)
+	PHP_FE(imap_open,								arginfo_imap_open)
+	PHP_FE(imap_reopen,								arginfo_imap_reopen)
+	PHP_FE(imap_close,								arginfo_imap_close)
+	PHP_FE(imap_num_msg,							arginfo_imap_num_msg)
+	PHP_FE(imap_num_recent,							arginfo_imap_num_recent)
+	PHP_FE(imap_headers,							arginfo_imap_headers)
+	PHP_FE(imap_headerinfo,							arginfo_imap_headerinfo)
+	PHP_FE(imap_rfc822_parse_headers,				arginfo_imap_rfc822_parse_headers)
+	PHP_FE(imap_rfc822_write_address,				arginfo_imap_rfc822_write_address)
+	PHP_FE(imap_rfc822_parse_adrlist,				arginfo_imap_rfc822_parse_adrlist)
+	PHP_FE(imap_body,								arginfo_imap_body)
+	PHP_FE(imap_bodystruct,							arginfo_imap_bodystruct)
+	PHP_FE(imap_fetchbody,							arginfo_imap_fetchbody)
+	PHP_FE(imap_savebody,							arginfo_imap_savebody)
+	PHP_FE(imap_fetchheader,						arginfo_imap_fetchheader)
+	PHP_FE(imap_fetchstructure,						arginfo_imap_fetchstructure)
+	PHP_FE(imap_expunge,							arginfo_imap_expunge)
+	PHP_FE(imap_delete,								arginfo_imap_delete)
+	PHP_FE(imap_undelete,							arginfo_imap_undelete)
+	PHP_FE(imap_check,								arginfo_imap_check)
+	PHP_FE(imap_mail_copy,							arginfo_imap_mail_copy)
+	PHP_FE(imap_mail_move,							arginfo_imap_mail_move)
+	PHP_FE(imap_mail_compose,						arginfo_imap_mail_compose)
+	PHP_FE(imap_createmailbox,						arginfo_imap_createmailbox)
+	PHP_FE(imap_renamemailbox,						arginfo_imap_renamemailbox)
+	PHP_FE(imap_deletemailbox,						arginfo_imap_deletemailbox)
+	PHP_FE(imap_subscribe,							arginfo_imap_subscribe)
+	PHP_FE(imap_unsubscribe,						arginfo_imap_unsubscribe)
+	PHP_FE(imap_append,								arginfo_imap_append)
+	PHP_FE(imap_ping,								arginfo_imap_ping)
+	PHP_FE(imap_base64,								arginfo_imap_base64)
+	PHP_FE(imap_qprint,								arginfo_imap_qprint)
+	PHP_FE(imap_8bit,								arginfo_imap_8bit)
+	PHP_FE(imap_binary,								arginfo_imap_binary)
+	PHP_FE(imap_utf8,								arginfo_imap_utf8)
+	PHP_FE(imap_status,								arginfo_imap_status)
+	PHP_FE(imap_mailboxmsginfo,						arginfo_imap_mailboxmsginfo)
+	PHP_FE(imap_setflag_full,						arginfo_imap_setflag_full)
+	PHP_FE(imap_clearflag_full,						arginfo_imap_clearflag_full)
+	PHP_FE(imap_sort,								arginfo_imap_sort)
+	PHP_FE(imap_uid,								arginfo_imap_uid)
+	PHP_FE(imap_msgno,								arginfo_imap_msgno)
+	PHP_FE(imap_list,								arginfo_imap_list)
+	PHP_FE(imap_lsub,								arginfo_imap_lsub)
+	PHP_FE(imap_fetch_overview,						arginfo_imap_fetch_overview)
+	PHP_FE(imap_alerts,								arginfo_imap_alerts)
+	PHP_FE(imap_errors,								arginfo_imap_errors)
+	PHP_FE(imap_last_error,							arginfo_imap_last_error)
+	PHP_FE(imap_search,								arginfo_imap_search)
+	PHP_FE(imap_utf7_decode,						arginfo_imap_utf7_decode)
+	PHP_FE(imap_utf7_encode,						arginfo_imap_utf7_encode)
+	PHP_FE(imap_mime_header_decode,					arginfo_imap_mime_header_decode)
+	PHP_FE(imap_thread,								arginfo_imap_thread)
+	PHP_FE(imap_timeout,								arginfo_imap_timeout)
 
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
-	PHP_FE(imap_get_quota,							NULL)
-	PHP_FE(imap_get_quotaroot,						NULL)
-	PHP_FE(imap_set_quota,							NULL)
-	PHP_FE(imap_setacl,								NULL)
-	PHP_FE(imap_getacl,								NULL)
+	PHP_FE(imap_get_quota,							arginfo_imap_get_quota)
+	PHP_FE(imap_get_quotaroot,						arginfo_imap_get_quotaroot)
+	PHP_FE(imap_set_quota,							arginfo_imap_set_quota)
+	PHP_FE(imap_setacl,								arginfo_imap_setacl)
+	PHP_FE(imap_getacl,								arginfo_imap_getacl)
 #endif
 
-	PHP_FE(imap_mail,								NULL)
+	PHP_FE(imap_mail,								arginfo_imap_mail)
 
-	PHP_FALIAS(imap_header,			imap_headerinfo,	NULL)
-	PHP_FALIAS(imap_listmailbox,	imap_list,			NULL)
-	PHP_FALIAS(imap_getmailboxes,	imap_list_full,		NULL)
-	PHP_FALIAS(imap_scanmailbox,	imap_listscan,		NULL)
-	PHP_FALIAS(imap_listsubscribed,	imap_lsub,			NULL)
-	PHP_FALIAS(imap_getsubscribed,	imap_lsub_full,		NULL)
-	PHP_FALIAS(imap_fetchtext,		imap_body,			NULL)
-	PHP_FALIAS(imap_scan,			imap_listscan,		NULL)
-	PHP_FALIAS(imap_create,			imap_createmailbox,	NULL)
-	PHP_FALIAS(imap_rename,			imap_renamemailbox,	NULL)
+	PHP_FALIAS(imap_header,			imap_headerinfo,	arginfo_imap_headerinfo)
+	PHP_FALIAS(imap_listmailbox,	imap_list,			arginfo_imap_list)
+	PHP_FALIAS(imap_getmailboxes,	imap_list_full,		arginfo_imap_getmailboxes)
+	PHP_FALIAS(imap_scanmailbox,	imap_listscan,		arginfo_imap_listscan)
+	PHP_FALIAS(imap_listsubscribed,	imap_lsub,			arginfo_imap_lsub)
+	PHP_FALIAS(imap_getsubscribed,	imap_lsub_full,		arginfo_imap_getsubscribed)
+	PHP_FALIAS(imap_fetchtext,		imap_body,			arginfo_imap_body)
+	PHP_FALIAS(imap_scan,			imap_listscan,		arginfo_imap_listscan)
+	PHP_FALIAS(imap_create,			imap_createmailbox,	arginfo_imap_createmailbox)
+	PHP_FALIAS(imap_rename,			imap_renamemailbox,	arginfo_imap_renamemailbox)
 	{NULL, NULL, NULL}
 };
 /* }}} */
