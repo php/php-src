@@ -1,10 +1,8 @@
 --TEST--
 Phar: fopen a .phar for writing (new file)
 --SKIPIF--
-<?php
-if (!extension_loaded("phar")) die("skip");
-if (version_compare(PHP_VERSION, "5.3", "<")) die("skip requires 5.3 or later");
-?>
+<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (version_compare(PHP_VERSION, "5.3", ">")) die("skip requires 5.2 or earlier"); ?>
 --INI--
 phar.readonly=1
 phar.require_hash=0
@@ -40,12 +38,12 @@ include $pname . '/b/new.php';
 
 Warning: fopen(phar://%sopen_for_write_newfile_b.phar.php/b/new.php): failed to open stream: phar error: write operations disabled by INI setting in %sopen_for_write_newfile_b.php on line %d
 
-Warning: fwrite() expects parameter 1 to be resource, boolean given in %sopen_for_write_newfile_b.php on line %d
+Warning: fwrite(): supplied argument is not a valid stream resource in %sopen_for_write_newfile_b.php on line %d
 
-Warning: fclose() expects parameter 1 to be resource, boolean given in %sopen_for_write_newfile_b.php on line %d
+Warning: fclose(): supplied argument is not a valid stream resource in %sopen_for_write_newfile_b.php on line %d
 This is b/c
 
-Warning: include(phar://%sopen_for_write_newfile_b.phar.php/b/new.php): failed to open stream: phar error: "b/new.php" is not a file in phar "%sopen_for_write_newfile_b.phar.php" in %sopen_for_write_newfile_b.php on line 22
+Warning: include(phar://%sopen_for_write_newfile_b.phar.php/b/new.php): failed to open stream: phar error: "b/new.php" is not a file in phar "%sopen_for_write_newfile_b.phar.php" in %sopen_for_write_newfile_b.php on line %d
 
 Warning: include(): Failed opening 'phar://%sopen_for_write_newfile_b.phar.php/b/new.php' for inclusion (include_path='%s') in %sopen_for_write_newfile_b.php on line %d
 
