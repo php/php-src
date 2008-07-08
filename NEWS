@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 
 - Changed PCRE extension to be enabled always. (Marcus)
 - Changed md5() to use improved implementation. (Solar Designer, Dmitry)
+- Changed mhash to be a wrapper layer around the hash extesion. (Scott)
 
 - Improved PHP syntax and semantics:
   . Added "jump label" operator (limited "goto"). (Dmitry, Sara)
@@ -159,6 +160,7 @@ PHP                                                                        NEWS
     a maximum number of occurences.
 
 - Added hash_copy() function. (Tony)
+- Added sha224 hash algorithm to the hash extension. (Scott)
 - Added ReflectionProperty::setAccessible() method that allows non-public
   property's values to be read through ::getValue(). (Derick)
 - Added msg_queue_exists() function. (Benjamin Schulz)
@@ -192,6 +194,8 @@ PHP                                                                        NEWS
   to different characters with cp1251 and cp866. (Scott)
 - Fixed an issue in date() where a : was printed for the O modifier after a P
   modifier was used. (Derick)
+- Fixed an issue where exec() on Windows would eat the first and last double quotes
+  (Scott)
 
 - Fixed PECL bug #12431 (OCI8 ping functionality is broken). (Oracle Corp.)
 
@@ -224,6 +228,7 @@ PHP                                                                        NEWS
   timezone). (Derick)
 - Fixed bug #43426 (crash on nested call_user_func() calls). (Dmitry)
 - Fixed bug #43323 (Wrong count abstract methods). (Felipe, Dmitry)
+- Fixed bug #43261 (Use ^ as the escape with escapeshellcmd() on Windows). (Scott)
 - Fixed bug #43075 (Support 2007-11-01T24:00:00+00:00). (Derick)
 - Fixed bug #43003 (Invalid timezone reported for DateTime objects constructed
   using a timestamp). (Derick)
