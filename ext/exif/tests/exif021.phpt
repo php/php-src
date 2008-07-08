@@ -14,7 +14,7 @@ array(34) {
   [u"FileName"]=>
   unicode(13) "image021.tiff"
   [u"FileDateTime"]=>
-  int(1215471677)
+  int(%d)
   [u"FileSize"]=>
   int(2068)
   [u"FileType"]=>

@@ -14,7 +14,7 @@ array(14) {
   [u"FileName"]=>
   unicode(12) "image024.jpg"
   [u"FileDateTime"]=>
-  int(1215471672)
+  int(%d)
   [u"FileSize"]=>
   int(417)
   [u"FileType"]=>
