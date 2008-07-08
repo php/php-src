@@ -1474,6 +1474,33 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 }
 /* }}} */
 
+void zend_do_begin_lambda_function_declaration(znode *result, znode *function_token, int return_reference, int is_static TSRMLS_DC) /* {{{ */
+{
+	znode          function_name;
+	zend_op_array *current_op_array = CG(active_op_array);
+	int            current_op_number = get_next_op_number(CG(active_op_array));
+	zend_op       *current_op;
+
+	function_name.op_type = IS_CONST;
+	ZVAL_ASCII_STRING(&function_name.u.constant, "lambda", ZSTR_DUPLICATE);
+
+	zend_do_begin_function_declaration(function_token, &function_name, 0, return_reference, NULL TSRMLS_CC);
+
+	result->op_type = IS_TMP_VAR;
+	result->u.var = get_temporary_variable(current_op_array);;
+
+	current_op = &current_op_array->opcodes[current_op_number];
+	current_op->opcode = ZEND_DECLARE_LAMBDA_FUNCTION;
+	zval_dtor(&current_op->op2.u.constant);
+	ZVAL_LONG(&current_op->op2.u.constant, zend_u_hash_func(Z_TYPE(current_op->op1.u.constant), Z_UNIVAL(current_op->op1.u.constant), Z_UNILEN(current_op->op1.u.constant)));
+	current_op->result = *result;
+	if (is_static) {
+	    CG(active_op_array)->fn_flags |= ZEND_ACC_STATIC;
+	}
+    CG(active_op_array)->fn_flags |= ZEND_ACC_CLOSURE;
+}
+/* }}} */
+
 void zend_do_handle_exception(TSRMLS_D) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -4374,13 +4401,13 @@ void zend_do_fetch_static_variable(znode *varname, znode *static_assignment, int
 	}
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-	opline->opcode = ZEND_FETCH_W;		/* the default mode must be Write, since fetch_simple_variable() is used to define function arguments */
+	opline->opcode = (fetch_type == ZEND_FETCH_LEXICAL) ? ZEND_FETCH_R : ZEND_FETCH_W;		/* the default mode must be Write, since fetch_simple_variable() is used to define function arguments */
 	opline->result.op_type = IS_VAR;
 	opline->result.u.EA.type = 0;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->op1 = *varname;
 	SET_UNUSED(opline->op2);
-	opline->op2.u.EA.type = fetch_type;
+	opline->op2.u.EA.type = ZEND_FETCH_STATIC;
 	result = opline->result;
 
 	if (varname->op_type == IS_CONST) {
@@ -4388,10 +4415,37 @@ void zend_do_fetch_static_variable(znode *varname, znode *static_assignment, int
 	}
 	fetch_simple_variable(&lval, varname, 0 TSRMLS_CC); /* Relies on the fact that the default fetch is BP_VAR_W */
 
-	zend_do_assign_ref(NULL, &lval, &result TSRMLS_CC);
-	CG(active_op_array)->opcodes[CG(active_op_array)->last-1].result.u.EA.type |= EXT_TYPE_UNUSED;
+	if (fetch_type == ZEND_FETCH_LEXICAL) {
+		znode dummy;
+
+		zend_do_begin_variable_parse(TSRMLS_C);
+		zend_do_assign(&dummy, &lval, &result TSRMLS_CC);
+		zend_do_free(&dummy TSRMLS_CC);
+	} else {
+		zend_do_assign_ref(NULL, &lval, &result TSRMLS_CC);
+	}	CG(active_op_array)->opcodes[CG(active_op_array)->last-1].result.u.EA.type |= EXT_TYPE_UNUSED;
 
 /*	zval_dtor(&varname->u.constant); */
+}
+/* }}} */
+
+void zend_do_fetch_lexical_variable(znode *varname, zend_bool is_ref TSRMLS_DC) /* {{{ */
+{
+	znode value;
+
+	if (Z_UNILEN(varname->u.constant) == sizeof("this") - 1 &&
+		ZEND_U_EQUAL(UG(unicode)?IS_UNICODE:IS_STRING, Z_UNIVAL(varname->u.constant), Z_UNILEN(varname->u.constant), "this", sizeof("this")-1)) {
+		zend_error(E_COMPILE_ERROR, "Cannot use $this as lexical variable");
+		return;
+	}
+
+	value.op_type = IS_CONST;
+	ZVAL_NULL(&value.u.constant);
+	Z_TYPE(value.u.constant) |= is_ref ? IS_LEXICAL_REF : IS_LEXICAL_VAR;
+	Z_SET_REFCOUNT_P(&value.u.constant, 1);
+	Z_UNSET_ISREF_P(&value.u.constant);
+	
+	zend_do_fetch_static_variable(varname, &value, is_ref ? ZEND_FETCH_STATIC : ZEND_FETCH_LEXICAL TSRMLS_CC);
 }
 /* }}} */
 

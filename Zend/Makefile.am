@@ -17,7 +17,7 @@ libZend_la_SOURCES=\
 	zend_objects_API.c zend_ts_hash.c zend_stream.c \
 	zend_default_classes.c \
 	zend_iterators.c zend_interfaces.c zend_exceptions.c \
-	zend_strtod.c zend_strtod.c zend_strtol.c
+	zend_strtod.c zend_strtod.c zend_strtol.c zend_closures.c
 
 libZend_la_LDFLAGS =
 libZend_la_LIBADD = @ZEND_EXTRA_LIBS@

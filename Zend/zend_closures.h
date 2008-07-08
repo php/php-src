@@ -5,36 +5,33 @@
    | Copyright (c) 1998-2008 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
+   | that is bundled with this package in the file LICENSE, and is        | 
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Sterling Hughes <sterling@php.net>                          |
-   |          Marcus Boerger <helly@php.net>                              |
+   | Authors: Christian Seiler <chris_se@gmx.net>                         |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
 /* $Id$ */
 
-#include "zend.h"
-#include "zend_API.h"
-#include "zend_builtin_functions.h"
-#include "zend_interfaces.h"
-#include "zend_exceptions.h"
-#include "zend_closures.h"
+#ifndef ZEND_CLOSURES_H
+#define ZEND_CLOSURES_H
 
-ZEND_API void zend_register_default_classes(TSRMLS_D) /* {{{ */
-{
-	zend_register_interfaces(TSRMLS_C);
-	zend_register_default_exception(TSRMLS_C);
-	zend_register_unicode_exceptions(TSRMLS_C);
-	zend_register_iterator_wrapper(TSRMLS_C);
-	zend_register_closure_ce(TSRMLS_C);
-}
-/* }}} */
+BEGIN_EXTERN_C()
+
+void zend_register_closure_ce(TSRMLS_D);
+
+ZEND_API void zend_create_closure(zval *res, zend_function *op_array, zend_class_entry *scope, zval *this_ptr TSRMLS_DC);
+ZEND_API int zend_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval **zobj_ptr, zval ***zobj_ptr_ptr TSRMLS_DC);
+
+END_EXTERN_C()
+
+#endif
 
 /*
  * Local variables:
