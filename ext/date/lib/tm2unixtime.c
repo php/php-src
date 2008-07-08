@@ -186,10 +186,10 @@ static timelib_sll do_years(timelib_sll year)
 	timelib_sll res = 0;
 	timelib_sll eras;
 
-	eras = (year - 1970) / 400;
+	eras = (year - 1970) / 40000;
 	if (eras != 0) {
-		year = year - (eras * 400);
-		res += (SECS_PER_ERA * eras);
+		year = year - (eras * 40000);
+		res += (SECS_PER_ERA * eras * 100);
 	}
 
 	if (year >= 1970) {
