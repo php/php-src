@@ -184,10 +184,10 @@ static void do_adjust_relative(timelib_time* time)
 		time->y += time->relative.y;
 	}
 	switch (time->relative.first_last_day_of) {
-		case 1: // first
+		case 1: /* first */
 			time->d = 1;
 			break;
-		case 2: // last
+		case 2: /* last */
 			time->d = 0;
 			time->m++;
 			break;
@@ -203,43 +203,43 @@ static void do_adjust_special_weekday(timelib_time* time)
 
 	current_dow = timelib_day_of_week(time->y, time->m, time->d);
 	if (count == 0) {
-		// skip over saturday and sunday
+		/* skip over saturday and sunday */
 		if (current_dow == 6) {
 			time->d += 2;
 		}
-		// skip over sunday
+		/* skip over sunday */
 		if (current_dow == 0) {
 			time->d += 1;
 		}
 	} else if (count > 0) {
-		// skip over saturday and sunday
+		/* skip over saturday and sunday */
 		if (current_dow == 5) {
 			time->d += 2;
 		}
-		// skip over sunday
+		/* skip over sunday */
 		if (current_dow == 6) {
 			time->d += 1;
 		}
-		// add increments of 5 weekdays as a week
+		/* add increments of 5 weekdays as a week */
 		time->d += (count / 5) * 7;
-		// if current DOW plus the remainder > 5, add two days
+		/* if current DOW plus the remainder > 5, add two days */
 		current_dow = timelib_day_of_week(time->y, time->m, time->d);
 		time->d += (count % 5);
 		if ((count % 5) + current_dow > 5) {
 			time->d += 2;
 		}
 	} else if (count < 0) {
-		// skip over sunday and saturday
+		/* skip over sunday and saturday */
 		if (current_dow == 1) {
 			time->d -= 2;
 		}
-		// skip over satruday
+		/* skip over satruday */
 		if (current_dow == 0 ) {
 			time->d -= 1;
 		}
-		// subtract increments of 5 weekdays as a week
+		/* subtract increments of 5 weekdays as a week */
 		time->d += (count / 5) * 7;
-		// if current DOW minus the remainder < 0, subtract two days
+		/* if current DOW minus the remainder < 0, subtract two days */
 		current_dow = timelib_day_of_week(time->y, time->m, time->d);
 		time->d += (count % 5);
 		if ((count % 5) + current_dow < 1) {
@@ -285,10 +285,10 @@ static timelib_sll do_years(timelib_sll year)
 	timelib_sll res = 0;
 	timelib_sll eras;
 
-	eras = (year - 1970) / 400;
+	eras = (year - 1970) / 40000;
 	if (eras != 0) {
-		year = year - (eras * 400);
-		res += (SECS_PER_ERA * eras);
+		year = year - (eras * 40000);
+		res += (SECS_PER_ERA * eras * 100);
 	}
 
 	if (year >= 1970) {
