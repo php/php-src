@@ -553,9 +553,9 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 					!EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].destructor_called) {
 
 					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].destructor_called = 1;
-					zend_try {
-						EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.dtor(EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.object, Z_OBJ_HANDLE(p->z) TSRMLS_CC);
-					} zend_end_try();
+					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.refcount++;
+					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.dtor(EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.object, Z_OBJ_HANDLE(p->z) TSRMLS_CC);
+					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.refcount--;
 				}
 			}
 			count++;
@@ -571,19 +571,15 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].valid &&
 					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.refcount <= 0) {
 					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.refcount = 1;
-					zend_try {
-						Z_TYPE(p->z) = IS_NULL;
-						zend_objects_store_del_ref_by_handle(Z_OBJ_HANDLE(p->z) TSRMLS_CC);
-					} zend_end_try();
+					Z_TYPE(p->z) = IS_NULL;
+					zend_objects_store_del_ref_by_handle(Z_OBJ_HANDLE(p->z) TSRMLS_CC);
 				}
 			} else if (Z_TYPE(p->z) == IS_ARRAY) {
 				Z_TYPE(p->z) = IS_NULL;
 				zend_hash_destroy(Z_ARRVAL(p->z));
 				FREE_HASHTABLE(Z_ARRVAL(p->z));
 			} else {
-				zend_try {
-					zval_dtor(&p->z);
-				} zend_end_try();
+				zval_dtor(&p->z);
 				Z_TYPE(p->z) = IS_NULL;
 			}
 			p = GC_G(next_to_free);

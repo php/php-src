@@ -1,5 +1,5 @@
 --TEST--
-GC 028: GC and destructors
+GC 029: GC and destructors
 --FILE--
 <?php
 class Foo {
