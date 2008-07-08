@@ -47,13 +47,13 @@ object(SplFileInfo)#%d (2) {
   [u"pathName":u"SplFileInfo":private]=>
   unicode(%d) "%s"
   [u"fileName":u"SplFileInfo":private]=>
-  unicode(%d) "%sfileobject_001a.txt"
+  unicode(%d) "fileobject_001a.txt"
 }
 object(SplFileInfo)#%d (2) {
   [u"pathName":u"SplFileInfo":private]=>
   unicode(%d) "%s"
   [u"fileName":u"SplFileInfo":private]=>
-  unicode(%d) "%sfileobject_001a.txt"
+  unicode(%d) "fileobject_001a.txt"
 }
 bool(false)
 bool(true)
@@ -63,7 +63,7 @@ unicode(%d) "%sfileobject_001a.txt"
 bool(true)
 unicode(19) "fileobject_001a.txt"
 bool(true)
-unicode(%d) "%stests"
+string(%d) "%stests"
 bool(true)
 unicode(%d) "%sfileobject_001a.txt"
 unicode(19) "fileobject_001a.txt"
@@ -73,13 +73,13 @@ object(SplFileInfo)#%d (2) {
   [u"pathName":u"SplFileInfo":private]=>
   unicode(%d) "%s"
   [u"fileName":u"SplFileInfo":private]=>
-  unicode(%d) "%s"
+  unicode(%d) ""
 }
 object(SplFileInfo)#%d (2) {
   [u"pathName":u"SplFileInfo":private]=>
   unicode(%d) "%s"
   [u"fileName":u"SplFileInfo":private]=>
-  unicode(%d) "%s"
+  unicode(%d) ""
 }
 bool(false)
 bool(true)
@@ -89,7 +89,7 @@ unicode(%d) "%stests"
 bool(true)
 unicode(5) "tests"
 bool(true)
-unicode(%d) "%sspl"
+string(%d) "%sspl"
 bool(true)
 unicode(%d) "%stests"
 unicode(%d) "%stests"
@@ -115,7 +115,7 @@ unicode(%d) "%stests"
 bool(true)
 unicode(%d) "tests"
 bool(true)
-unicode(%d) "%sspl"
+string(%d) "%sspl"
 bool(true)
 unicode(%d) "%stests"
 unicode(5) "tests"
