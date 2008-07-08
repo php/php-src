@@ -1,32 +1,125 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.0
-- Upgraded PCRE to version 7.7 (Nuno)
+- Upgraded bundled PCRE to version 7.7 (Nuno)
+- Upgraded bundled sqlite to version 3.5.6. (Scott)
+
+- Moved extensions to PECL (Pierre):
+  . ext/fdpf
+  . ext/ncurses
+  . ext/sybase (not maintained anymore, sybase_ct has to be used instead)
+
 - Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
 - Removed zend.ze1_compatibility_mode. (Dmitry)
 
-- Added pcre to list of standard extensions that cannot be disabled. (Marcus)
-- Added "jump label" operator (limited "goto"). (Dmitry, Sara)
-- Added hash_copy() function. (Tony)
-- Added ability to use stream wrappers in include_path (Gregory, Dmitry)
-- Added concept of "delayed early binding" that allows opcode caches to perform
-  class declaration (early and/or run-time binding) in exactly the same order
-  as vanila php. (Dmitry)
-- Added new error mode E_DEPRECATED which is used to inform about stuff to be
-  dropped in future PHP versions. (Lars Strojny, Felipe, Marcus)
-- Added and improved PHP syntax and semantics:
+- Changed PCRE extension to be enabled always. (Marcus)
+- Changed md5() to use improved implementation. (Solar Designer, Dmitry)
+
+- Improved PHP syntax and semantics:
+  . Added "jump label" operator (limited "goto"). (Dmitry, Sara)
   . Added NOWDOC syntax. (Gwynne Raskind, Stas, Dmitry)
   . Added HEREDOC syntax with double quotes. (Lars Strojny, Felipe)
   . Added "?:" operator. (Marcus)
   . Added support for namespaces. (Dmitry, Stas, Gregory)
   . Added support for Late Static Binding. (Dmitry, Etienne Kneuss)
   . Added support for __callstatic() magic method. (Sara)
+  . Added forward_static_call(_array) to complete LSB. (Mike Lively)
   . Added support for dynamic access of static members using $foo::myFunc().
     (Etienne Kneuss)
   . Improved checks for callbacks. (Marcus)
   . Added __DIR__ constant. (Lars Strojny)
   . Added PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION,
     PHP_EXTRA_VERSION, PHP_VERSION_ID, PHP_ZTS and PHP_DEBUG constants. (Pierre)
+  . Added new error mode E_DEPRECATED which is used to inform about stuff to be
+    dropped in future PHP versions. (Lars Strojny, Felipe, Marcus)
+
+- Improved SPL extension:
+  . Added SPL to list of standard extensions that cannot be disabled. (Marcus)
+  . Added ability to store associative information with objects in
+    SplObjectStorage. (Marcus)
+  . Added ArrayAccess support to SplObjectStorage. (Marcus)
+  . Added SplDoublyLinkedList, SplStack, SplQueue classes. (Etienne)
+  . Added FilesystemIterator. (Marcus)
+  . Added GlobIterator. (Marcus)
+  . Added SplHeap, SplMinHeap, SplMaxHeap, SplPriorityQueue classes. (Etienne)
+  . Added new parameter $prepend to spl_autoload_register(). (Etienne)
+  . Added FixedArray. (Etienne, Tony)
+
+- Improved Zend Engine:
+  . Added "compact" handler for Zend MM storage. (Dmitry)
+  . Added "+" and "*" specifiers to zend_parse_parameters(). (Andrei)
+  . Added concept of "delayed early binding" that allows opcode caches to perform
+    class declaration (early and/or run-time binding) in exactly the same order
+    as vanilla PHP. (Dmitry)
+
+- Improved PHP runtime speed and memory usage:
+  . Removed direct executor recursion. (Dmitry)
+  . Use fastcall calling convention in executor on x86. (Dmitry)
+  . Use IS_CV for direct access to $this variable. (Dmitry)
+  . Use ZEND_FREE() opcode instead of ZEND_SWITCH_FREE(IS_TMP_VAR). (Dmitry)
+  . Lazy EG(active_symbol_table) initialization. (Dmitry)
+  . Optimized ZEND_RETURN opcode to not allocate and copy return value if it is
+    not used. (Dmitry)
+  . Replaced all flex based scanners with re2c based scanners.
+    (Marcus, Nuno, Scott)
+  . Added garbage collector. (David Wang, Dmitry).
+  . Improved PHP binary size and startup speed with GCC4 visibility control.
+    (Nuno)
+  . Improved engine stack implementation for better performance and stability.
+    (Dmitry)
+  . Improved memory usage by moving constants to read only memory.
+    (Dmitry, Pierre)
+  . Changed exception handling. Now each op_array doesn't contain
+    ZEND_HANDLE_EXCEPTION opcode in the end. (Dmitry)
+  . Optimized require_once() and include_once() by eliminating fopen(3) on
+    second usage. (Dmitry)
+  . Optimized ZEND_FETCH_CLASS + ZEND_ADD_INTERFACE into single
+    ZEND_ADD_INTERFACE opcode (Dmitry)
+
+- Improved php.ini handling: (Jani)
+  . Added ".htaccess" style user-defined php.ini files support for CGI/FastCGI
+  . Added support for special [PATH=/opt/httpd/www.example.com/] and
+    [HOST=www.example.com] sections. Directives set in these sections can
+    not be overridden by user-defined ini-files or during runtime.
+  . Added better error reporting for php.ini syntax errors
+  . Allowed using full path to load modules using "extension" directive
+  . Allowed "ini-variables" to be used almost everywhere ini php.ini files
+  . Allowed using alphanumeric/variable indexes in "array" ini options
+  . Added 3rd optional parameter to parse_ini_file() to specify the scanning
+    mode of INI_SCANNER_NORMAL or INI_SCANNER_RAW. In raw mode option values
+    and section values are treated as-is
+  . Fixed get_cfg_var() to be able to return "array" ini options
+  . Added optional parameter to ini_get_all() to only retrieve the current
+    value. (Hannes)
+
+- Improved and cleaned CGI code:
+  . FastCGI is now always enabled and can not be disabled.
+    See sapi/cgi/CHANGES for more details. (Dmitry)
+  . Added CGI SAPI -T option which can be used to measure execution
+    time of script repeated several times. (Dmitry)
+
+- Improved streams:
+  . Fixed potentially confusing error message on failure when no errors are logged (Greg)
+  . Added stream_supports_lock() function. (Benjamin Schulz)
+  . Added "ignore_errors" option to http fopen wrapper. (David Zulke, Sara)
+  . Added context parameter for copy() function. (Sara)
+  . Added "glob" stream wrapper. (Marcus)
+  . Added "params" as optional parameter for stream_context_create(). (Sara)
+  . Added ability to use stream wrappers in include_path. (Gregory, Dmitry)
+
+- Improved SOAP extension:
+  . Added support for element names in context of XMLShema's <any>. (Dmitry)
+  . Added ability to use Traversable objects instead of plain arrays.
+   (Joshua Reese, Dmitry)
+  . Fixed possible crash bug caused by an uninitialized value. (Zdash Urf)
+
+- Improved OpenSSL extension: (Dmitry)
+  . Added support for OpenSSL digest and cipher functions.
+  . Added access to internal values of DSA, RSA and DH keys.
+
+- Added hash_copy() function. (Tony)
+- Added "request_order" INI variable to control specifically $_REQUEST behavior.
+  (Stas)
 - Added new date/time functionality: (Derick)
   . date_parse_from_format(): Parse date/time strings according to a format.
   . date_create_from_format()/DateTime::createFromFormat(): Create a date/time
@@ -66,26 +159,13 @@ PHP                                                                        NEWS
     applying a DateInterval on each iteration, up to an end date or limited by
     a maximum number of occurences.
 
-- Added functionality to SPL extension:
-  . Added SPL to list of standard extensions that cannot be disabled. (Marcus)
-  . Added ability to store associative information with objects in
-    SplObjectStorage. (Marcus)
-  . Added ArrayAccess support to SplObjectStorage. (Marcus)
-  . Added SplDoublyLinkedList, SplStack, SplQueue classes. (Etienne)
-  . Added FilesystemIterator. (Marcus)
-  . Added GlobIterator. (Marcus)
-  . Added SplHeap, SplMinHeap, SplMaxHeap, SplPriorityQueue classes. (Etienne)
-  . Added new parameter $prepend to spl_autoload_register(). (Etienne)
-  . Added FastArray. (Etienne, Tony)
 - Added ReflectionProperty::setAccessible() method that allows non-public
   property's values to be read through ::getValue(). (Derick)
-- Added ability to use Traversable objects instead of plain arrays in ext/soap.
-  (Joshua Reese, Dmitry)
 - Added msg_queue_exists() function. (Benjamin Schulz)
 - Added 3 Firebird specific attributes that can be set via PDO::setAttribute()
   to control formatting of date/timestamp columns: PDO::FB_ATTR_DATE_FORMAT,
   PDO::FB_ATTR_TIME_FORMAT and PDO::FB_ATTR_TIMESTAMP_FORMAT. (Lars W)
-- Added gmp_testbit() function from HEAD. (Stas)
+- Added gmp_testbit() function. (Stas)
 - Added icon format support to getimagesize(). (Scott)
 - Added LDAP_OPT_NETWORK_TIMEOUT option for ldap_set_option() to allow
   setting network timeout (FR #42837). (Jani)
@@ -98,90 +178,22 @@ PHP                                                                        NEWS
   win32 systems by adding a common getopt implementation into core.
   (David Soria Parra, Jani)
 - Added support for optional values, and = as separator, in getopt(). (Hannes)
-- Added "compact" handler for Zend MM storage. (Dmitry)
-- Added "+" and "*" specifiers to zend_parse_parameters(). (Andrei)
 - Added lcfirst() function. (David C)
 - Added OCI8 Database Resident Connection Pooling (DRCP) and Fast
   Application Notification (FAN) support (Oracle Corp.)
-- Added OCI8 SQLT_AFC (aka CHAR datatype) support to oci_bind_by_name
+- Added OCI8 SQLT_AFC (aka CHAR datatype) support to oci_bind_by_name.
   (Chris Jones)
 - Added PREG_BAD_UTF8_OFFSET_ERROR constant. (Nuno)
-- Added request_order INI variable to control specifically $_REQUEST 
-  behavior. (Stas)
-- Added forward_static_call(_array) to complete LSB. (Mike Lively)
-- Added native support for asinh(), acosh(), atanh(), log1p() and expm1() (Kalle)
-- inet_pton() and inet_ntop() is now available on Windows platforms (Kalle)
-- mcrypt_create_iv is now working on Windows platforms (Pierre)
-
-- Improved PHP runtime speed and memory usage:
-  . Removed direct executor recursion. (Dmitry)
-  . Use fastcall calling convention in executor on x86. (Dmitry)
-  . Use IS_CV for direct access to $this variable. (Dmitry)
-  . Use ZEND_FREE() opcode instead of ZEND_SWITCH_FREE(IS_TMP_VAR). (Dmitry)
-  . Lazy EG(active_symbol_table) initialization. (Dmitry)
-  . Optimized ZEND_RETURN opcode to not allocate and copy return value if it is
-    not used. (Dmitry)
-  . Replaced flex based scanner with re2c based scanner. (Marcus, Nuno, Scott)
-  . Added garbage collector. (David Wang, Dmitry).
-  . Improved PHP binary size and startup speed with GCC4 visibility control.
-    (Nuno)
-  . Improved engine stack implementation for better performance and stability.
-    (Dmitry)
-  . Improved memory usage by moving constants to read only memory.
-    (Dmitry, Pierre)
-  . Changed exception handling. Now each op_array doesn't contain
-    ZEND_HANDLE_EXCEPTION opcode in the end. (Dmitry)
-  . Optimized require_once() and include_once() by eliminating fopen(3) on
-    second usage. (Dmitry)
-  . Optimized ZEND_FETCH_CLASS + ZEND_ADD_INTERFACE into single
-    ZEND_ADD_INTERFACE opcode (Dmitry)
-- Improved php.ini handling: (Jani)
-  . Added ".htaccess" style user-defined php.ini files support for CGI/FastCGI
-  . Added support for special [PATH=/opt/httpd/www.example.com/] and
-    [HOST=www.example.com] sections. Directives set in these sections can
-    not be overridden by user-defined ini-files or during runtime.
-  . Added better error reporting for php.ini syntax errors
-  . Allowed using full path to load modules using "extension" directive
-  . Allowed "ini-variables" to be used almost everywhere ini php.ini files
-  . Allowed using alphanumeric/variable indexes in "array" ini options
-  . Added 3rd optional parameter to parse_ini_file() to specify the scanning
-    mode of INI_SCANNER_NORMAL or INI_SCANNER_RAW. In raw mode option values
-    and section values are treated as-is
-  . Fixed get_cfg_var() to be able to return "array" ini options
-  . Added optional parameter to ini_get_all() to only retrieve the current
-    value. (Hannes)
-- Improved and cleaned CGI code:
-  . FastCGI is now always enabled and can not be disabled.
-    See sapi/cgi/CHANGES for more details. (Dmitry)
-  . Added CGI SAPI -T option which can be used to measure execution
-    time of script repeated several times. (Dmitry)
-- Improved streams:
-  . Fixed potentially confusing error message on failure when no errors are logged (Greg)
-  . Added stream_supports_lock() function. (Benjamin Schulz)
-  . Added "ignore_errors" option to http fopen wrapper. (David Zulke, Sara)
-  . Added context parameter for copy() function. (Sara)
-  . Added "glob" stream wrapper. (Marcus)
-  . Added "params" as optional parameter for stream_context_create(). (Sara)
-- Improved ext/soap to support element names in context of XMLShema's <any>.
-  (Dmitry)
-- Improved ext/openssl: (Dmitry)
-  . Added support for OpenSSL digest functions
-  . Added support for OpenSSL cipher functions
-  . Added access to internal values of DSA, RSA and DH keys
-- Improved md5() implementation. (Solar Designer, Dmitry)
-
-- Upgraded bundled sqlite to version 3.5.6. (Scott)
-- Moved extensions to PECL (Pierre):
-  . ext/fdpf
-  . ext/ncurses
-  . ext/sybase (not maintained anymore, sybase_ct has to be used instead)
+- Added native support for asinh(), acosh(), atanh(), log1p() and expm1(). (Kalle)
+- Added inet_pton() and inet_ntop() also for Windows platforms. (Kalle)
+- Added mcrypt_create_iv() also for Windows platforms. (Pierre)
 
 - Fixed html_entity_decode() incorrectly converting numeric html entities
   to different characters with cp1251 and cp866. (Scott)
-- Fixed possible crash in ext/soap because of uninitialized value. (Zdash Urf)
-- Fixed PECL bug #12431 (OCI8 ping functionality is broken). (Oracle Corp.)
 - Fixed an issue in date() where a : was printed for the O modifier after a P
   modifier was used. (Derick)
+
+- Fixed PECL bug #12431 (OCI8 ping functionality is broken). (Oracle Corp.)
 
 - Fixed bug #45434 (circular reference causes segfault in gc_collect_cycles()).
   (Dmitry)
