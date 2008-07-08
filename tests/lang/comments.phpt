@@ -16,7 +16,7 @@ echo "e este, # hein?";
 echo "\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 #teste2
 #ola
 uhm # ah
