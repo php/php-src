@@ -29,6 +29,7 @@
 #include "zend_ptr_stack.h"
 #include "zend_constants.h"
 #include "zend_extensions.h"
+#include "zend_closures.h"
 #include "zend_exceptions.h"
 #include "zend_vm.h"
 #ifdef HAVE_SYS_TIME_H
@@ -889,7 +890,11 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			}
 		}
 
-		if (Z_TYPE_P(fci->function_name) != IS_STRING &&
+		if (Z_TYPE_P(fci->function_name) == IS_OBJECT) {
+			if (zend_get_closure(fci->function_name, &calling_scope, &EX(function_state).function, NULL, &fci->object_pp TSRMLS_CC) == SUCCESS) {
+				goto init_fci_cache;
+			}
+		} else if (Z_TYPE_P(fci->function_name) != IS_STRING &&
 			Z_TYPE_P(fci->function_name) != IS_UNICODE
 		) {
 			return FAILURE;
@@ -1035,6 +1040,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				return FAILURE;
 			}
 		}
+
+init_fci_cache:
 		if (fci_cache &&
 			(EX(function_state).function->type != ZEND_INTERNAL_FUNCTION ||
 			((zend_internal_function*)EX(function_state).function)->handler != zend_std_call_user_call)

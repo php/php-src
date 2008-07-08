@@ -148,6 +148,10 @@ SOURCE=.\zend_builtin_functions.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_closures.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_compile.c
 # End Source File
 # Begin Source File

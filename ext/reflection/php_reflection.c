@@ -38,6 +38,7 @@
 #include "zend_constants.h"
 #include "zend_ini.h"
 #include "zend_interfaces.h"
+#include "zend_closures.h"
 
 /* Class entry pointers */
 PHPAPI zend_class_entry *reflector_ptr;
@@ -1586,6 +1587,20 @@ ZEND_METHOD(reflection_function, getStaticVariables)
 }
 /* }}} */
 
+/* {{{ proto public mixed ReflectionFunction::getClosure()
+   Invokes the function */
+ZEND_METHOD(reflection_function, getClosure)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+	
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_ptr, 0);
+	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	zend_create_closure(return_value, fptr, NULL, NULL TSRMLS_CC);
+}
+/* }}} */
+
 /* {{{ proto public mixed ReflectionFunction::invoke(mixed* args) U
    Invokes the function */
 ZEND_METHOD(reflection_function, invoke)
@@ -2330,6 +2345,34 @@ ZEND_METHOD(reflection_method, __toString)
 	string_init(&str);
 	_function_string(&str, mptr, intern->ce, "" TSRMLS_CC);
 	RETURN_U_STRINGL(ZEND_U_CONVERTER(UG(output_encoding_conv)), str.string, str.len - 1, ZSTR_AUTOFREE);
+}
+/* }}} */
+
+/* {{{ proto public mixed ReflectionMethod::getClosure([mixed object])
+   Invokes the function */
+ZEND_METHOD(reflection_method, getClosure)
+{
+	reflection_object *intern;
+	zval *obj;
+	zend_function *mptr;
+	
+	METHOD_NOTSTATIC(reflection_method_ptr);
+	GET_REFLECTION_OBJECT_PTR(mptr);
+
+	if (mptr->common.fn_flags & ZEND_ACC_STATIC)  {
+		zend_create_closure(return_value, mptr, mptr->common.scope, NULL TSRMLS_CC);
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &obj) == FAILURE) {
+			return;
+		}
+
+		if (!instanceof_function(Z_OBJCE_P(obj), mptr->common.scope TSRMLS_CC)) {
+			_DO_THROW("Given object is not an instance of the class this method was declared in");
+			/* Returns from this function */
+		}
+
+		zend_create_closure(return_value, mptr, mptr->common.scope, obj TSRMLS_CC);
+	}
 }
 /* }}} */
 
@@ -4781,6 +4824,7 @@ static const zend_function_entry reflection_function_functions[] = {
 	ZEND_ME(reflection_function, __toString, NULL, 0)
 	ZEND_ME(reflection_function, export, arginfo_reflection_function_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_function, isDisabled, NULL, 0)
+	ZEND_ME(reflection_function, getClosure, NULL, 0)
 	ZEND_ME(reflection_function, invoke, arginfo_reflection_function_invoke, 0)
 	ZEND_ME(reflection_function, invokeArgs, arginfo_reflection_function_invokeArgs, 0)
 	{NULL, NULL, NULL}
@@ -4824,6 +4868,7 @@ static const zend_function_entry reflection_method_functions[] = {
 	ZEND_ME(reflection_method, isConstructor, NULL, 0)
 	ZEND_ME(reflection_method, isDestructor, NULL, 0)
 	ZEND_ME(reflection_method, getModifiers, NULL, 0)
+	ZEND_ME(reflection_method, getClosure, NULL, 0)
 	ZEND_ME(reflection_method, invoke, arginfo_reflection_method_invoke, 0)
 	ZEND_ME(reflection_method, invokeArgs, arginfo_reflection_method_invokeArgs, 0)
 	ZEND_ME(reflection_method, getDeclaringClass, NULL, 0)

@@ -1334,7 +1334,7 @@ PHP_ADD_SOURCES(Zend, \
     zend_list.c zend_indent.c zend_builtin_functions.c zend_sprintf.c \
     zend_ini.c zend_qsort.c zend_ts_hash.c zend_stream.c \
     zend_iterators.c zend_interfaces.c zend_exceptions.c zend_strtod.c \
-    zend_strtol.c zend_gc.c)
+    zend_strtol.c zend_gc.c zend_closures.c)
 
 if test -r "$abs_srcdir/Zend/zend_objects.c"; then
   PHP_ADD_SOURCES(Zend, zend_objects.c zend_object_handlers.c zend_objects_API.c \

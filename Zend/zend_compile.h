@@ -151,6 +151,7 @@ typedef struct _zend_try_catch_element {
 /* class implement interface(s) flag */
 #define ZEND_ACC_IMPLEMENT_INTERFACES 0x80000
 
+#define ZEND_ACC_CLOSURE              0x100000
 
 char *zend_visibility_string(zend_uint fn_flags);
 
@@ -438,6 +439,9 @@ void zend_do_end_function_call(znode *function_name, znode *result, znode *argum
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
 void zend_do_handle_exception(TSRMLS_D);
 
+void zend_do_begin_lambda_function_declaration(znode *result, znode *function_token, int return_reference, int is_static TSRMLS_DC);
+void zend_do_fetch_lexical_variable(znode *varname, zend_bool is_ref TSRMLS_DC);
+
 void zend_do_try(znode *try_token TSRMLS_DC);
 void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var, znode *first_catch TSRMLS_DC);
 void zend_do_end_catch(znode *try_token TSRMLS_DC);
@@ -640,7 +644,7 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_FETCH_STATIC_MEMBER	3
 #define ZEND_FETCH_GLOBAL_LOCK		4
 #define ZEND_FETCH_AUTO_GLOBAL		5
-
+#define ZEND_FETCH_LEXICAL			6
 
 /* class fetches */
 #define ZEND_FETCH_CLASS_DEFAULT	0
