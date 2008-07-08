@@ -18,16 +18,16 @@ var_dump($fi = $d->getFileInfo(), (string)$fi);
 --EXPECTF--
 object(SplFileInfo)#2 (2) {
   [u"pathName":u"SplFileInfo":private]=>
-  %s(%d) "%sext%espl%etests"
-  [u"fileName":u"SplFileInfo":private]=>
   %s(%d) "%sext%espl%etests%efileobject_getfileinfo_basic.php"
+  [u"fileName":u"SplFileInfo":private]=>
+  %s(%d) "fileobject_getfileinfo_basic.php"
 }
 %s(%d) "%sext%espl%etests%efileobject_getfileinfo_basic.php"
 
 object(SplFileInfo)#4 (2) {
   [u"pathName":u"SplFileInfo":private]=>
-  %s(%d) "%sext%espl"
+  %s(%d) "%sext%espl%stests"
   [u"fileName":u"SplFileInfo":private]=>
-  %s(%d) "%sext%espl%etests"
+  %s(%d) "tests"
 }
 %s(%d) "%sext%espl%etests"

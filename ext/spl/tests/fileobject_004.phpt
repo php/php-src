@@ -16,7 +16,7 @@ var_dump($fo->getRealPath());
 ?>
 ==DONE==
 --EXPECTF--
-unicode(%d) "%sspl%stests"
-unicode(19) "fileobject_004.phpt"
-unicode(%d) "%sspl%stests%sfileobject_004.phpt"
+%s(%d) "%sspl%stests"
+%s(19) "fileobject_004.phpt"
+%s(%d) "%sspl%stests%sfileobject_004.phpt"
 ==DONE==
