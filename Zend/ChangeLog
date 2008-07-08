@@ -1,3 +1,35 @@
+2008-07-07  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      zend_ini.c:
+      Tweak last commit, should always return NULL when an entry doesn't exist.
+
+    * zend_ini.c
+      zend_ini.c
+      zend_ini.h
+      zend_ini.h:
+      Add zend_ini_string_ex so that the you can differentiate between NULL as a
+      value and its absence, this is important for ini_get. Related to bug
+      #42657 and #43348
+
+2008-07-07  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_arg_defs.c
+      zend_modules.h:
+      MFB:
+      - Removed zend_arg_defs.c
+        The first_arg_force_ref, second_arg_force_ref, third_arg_force_ref,
+         fourth_arg_force_ref, fifth_arg_force_ref and all_args_by_ref are not
+      more used.
+
+    * (PHP_5_3)
+      zend_arg_defs.c
+      zend_modules.h:
+      - Removed zend_arg_defs.c
+        The first_arg_force_ref, second_arg_force_ref, third_arg_force_ref,
+         fourth_arg_force_ref, fifth_arg_force_ref and all_args_by_ref are not
+      more used.
+
 2008-07-06  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * zend_language_scanner.c
