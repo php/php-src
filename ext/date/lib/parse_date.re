@@ -635,7 +635,7 @@ static const timelib_relunit* timelib_lookup_relunit(char **ptr)
 	char *begin = *ptr, *end;
 	const timelib_relunit *tp, *value = NULL;
 
-	while (**ptr != '\0' && **ptr != ' ' && **ptr != '\t') {
+	while (**ptr != '\0' && **ptr != ' ' && **ptr != ',' && **ptr != '\t') {
 		++*ptr;
 	}
 	end = *ptr;
@@ -1818,6 +1818,15 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 	while (*fptr && *ptr) {
 		begin = ptr;
 		switch (*fptr) {
+			case 'D': /* three letter day */
+			case 'l': /* full day */
+				tmp = timelib_lookup_relunit((char **) &ptr);
+				if (!tmp) {
+					add_pbf_error(s, "A textual day could not be found", string, begin);
+				} else {
+					s->time->m = tmp;
+				}
+				break;
 			case 'd': /* two digit day, with leading zero */
 			case 'j': /* two digit day, without leading zero */
 				TIMELIB_CHECK_NUMBER;
@@ -1931,6 +1940,9 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 				break;
 
 			case 'e': /* timezone */
+			case 'P': /* timezone */
+			case 'T': /* timezone */
+			case 'O': /* timezone */
 				{
 					int tz_not_found;
 					s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb);
@@ -1983,6 +1995,15 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 
 			case '?': /* random char */
 				++ptr;
+				break;
+
+			case '\\': /* escaped char */
+				*fptr++;
+				if (*ptr == *fptr) {
+					++ptr;
+				} else {
+					add_pbf_error(s, "The escaped character could not be found", string, begin);
+				}
 				break;
 
 			case '*': /* random chars until a separator or number ([ \t.,:;/-0123456789]) */
