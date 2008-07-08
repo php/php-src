@@ -10,9 +10,11 @@ var_dump(is_string($d));
 ?>
 ===DONE===
 --EXPECTF--
-object(DirectoryIterator)#%d (3) {
+object(DirectoryIterator)#%d (4) {
   %s"pathName"%s"SplFileInfo":private]=>
-  %s(1) "."
+  %s(%d) "./%s"
+  %s"fileName"%s"SplFileInfo":private]=>
+  %s(%d) "%s"
   %s"glob"%s"DirectoryIterator":private]=>
   bool(false)
   %s"subPathName"%s"RecursiveDirectoryIterator":private]=>
