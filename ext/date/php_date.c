@@ -308,9 +308,9 @@ struct _php_timezone_obj {
 	int             initialized;
 	int             type;
 	union {
-		timelib_tzinfo *tz; // TIMELIB_ZONETYPE_ID;
-		timelib_sll     utc_offset; // TIMELIB_ZONETYPE_OFFSET
-		struct                      // TIMELIB_ZONETYPE_ABBR
+		timelib_tzinfo *tz; /* TIMELIB_ZONETYPE_ID; */
+		timelib_sll     utc_offset; /* TIMELIB_ZONETYPE_OFFSET */
+		struct                      /* TIMELIB_ZONETYPE_ABBR */
 		{
 			timelib_sll  utc_offset;
 			char        *abbr;
@@ -1874,12 +1874,12 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 		return props;
 	}
 
-	// first we add the date and time in ISO format
+	/* first we add the date and time in ISO format */
 	MAKE_STD_ZVAL(zv);
 	ZVAL_STRING(zv, date_format("Y-m-d H:i:s", 12, dateobj->time, 1), 0);
 	zend_hash_update(props, "date", 5, &zv, sizeof(zval), NULL);
 
-	// then we add the timezone name (or similar)
+	/* then we add the timezone name (or similar) */
 	if (dateobj->time->is_localtime) {
 		MAKE_STD_ZVAL(zv);
 		ZVAL_LONG(zv, dateobj->time->zone_type);
@@ -2132,7 +2132,7 @@ static int date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int 
 		dateobj->time = timelib_strtotime(time_str_len ? time_str : "now", time_str_len ? time_str_len : sizeof("now") -1, &err, DATE_TIMEZONEDB);
 	}
 
-	// update last errors and warnings
+	/* update last errors and warnings */
 	update_errors_warnings(err TSRMLS_CC);
 
 
