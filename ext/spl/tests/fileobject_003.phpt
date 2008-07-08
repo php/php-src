@@ -47,13 +47,13 @@ object(SplFileInfo)#%d (2) {
   ["pathName":"SplFileInfo":private]=>
   string(%d) "%s"
   ["fileName":"SplFileInfo":private]=>
-  string(%d) "%sfileobject_001a.txt"
+  string(%d) "fileobject_001a.txt"
 }
 object(SplFileInfo)#%d (2) {
   ["pathName":"SplFileInfo":private]=>
   string(%d) "%s"
   ["fileName":"SplFileInfo":private]=>
-  string(%d) "%sfileobject_001a.txt"
+  string(%d) "fileobject_001a.txt"
 }
 bool(false)
 bool(true)
@@ -92,8 +92,8 @@ bool(true)
 string(%d) "%sspl"
 bool(true)
 string(%d) "%stests"
-string(%d) "%stests"
-string(%d) "%stests"
+string(%d) "tests"
+string(%d) "%sspl"
 ===2===
 object(SplFileInfo)#%d (2) {
   ["pathName":"SplFileInfo":private]=>
