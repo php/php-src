@@ -195,8 +195,6 @@ PHP                                                                        NEWS
 
 - Fixed PECL bug #12431 (OCI8 ping functionality is broken). (Oracle Corp.)
 
-- Fixed bug #45434 (circular reference causes segfault in gc_collect_cycles()).
-  (Dmitry)
 - Fixed bug #44769 (declaring private magic methods should throw error). (Felipe)
 - Fixed bug #44913 (Segfault when using return in combination with nested loops
   and continue 2). (Dmitry)
@@ -242,7 +240,7 @@ PHP                                                                        NEWS
 - Fixed bug #42737 (preg_split('//u') triggers a E_NOTICE with newlines). (Nuno)
 - Fixed bug #42736 (xmlrpc_server_call_method() crashes). (Tony)
 - Fixed bug #42657 (ini_get() returns incorrect value when default is NULL).
-  (Jani)
+  (Jani, Scott)
 - Fixed bug #42637 (SoapFault : Only http and https are allowed). (Bill Moran)
 - Fixed bug #42548 (mysqli PROCEDURE calls can't return result sets). (hartmut)
 - Fixed bug #42509 (gmp leaks memory when gmp_init() not used). (Stas)
