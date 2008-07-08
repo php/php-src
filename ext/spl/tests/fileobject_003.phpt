@@ -71,15 +71,15 @@ unicode(%d) "%stests"
 ===1===
 object(SplFileInfo)#%d (2) {
   [u"pathName":u"SplFileInfo":private]=>
-  unicode(%d) "%s"
+  unicode(%d) "%s%etests"
   [u"fileName":u"SplFileInfo":private]=>
-  unicode(%d) ""
+  unicode(%d) "tests"
 }
 object(SplFileInfo)#%d (2) {
   [u"pathName":u"SplFileInfo":private]=>
   unicode(%d) "%s"
   [u"fileName":u"SplFileInfo":private]=>
-  unicode(%d) ""
+  unicode(%d) "tests"
 }
 bool(false)
 bool(true)
@@ -92,8 +92,8 @@ bool(true)
 string(%d) "%sspl"
 bool(true)
 unicode(%d) "%stests"
-unicode(%d) "%stests"
-unicode(%d) "%stests"
+unicode(%d) "tests"
+unicode(%d) "%s%espl"
 ===2===
 object(SplFileInfo)#%d (2) {
   [u"pathName":u"SplFileInfo":private]=>
@@ -103,7 +103,7 @@ object(SplFileInfo)#%d (2) {
 }
 object(SplFileInfo)#%d (2) {
   [u"pathName":u"SplFileInfo":private]=>
-  unicode(%d) "%s"
+  unicode(%d) "%s%etests"
   [u"fileName":u"SplFileInfo":private]=>
   unicode(%d) "%s"
 }

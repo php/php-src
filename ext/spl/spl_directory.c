@@ -394,7 +394,7 @@ void spl_filesystem_info_set_filename(spl_filesystem_object *intern, zend_uchar 
 			
 			if (type == IS_UNICODE) {
 				slash_pos.u = (p1.u > p2.u ? p1.u : p2.u);
-				if (IS_SLASH_AT(type, intern->file_name, intern->file_name_len)) {
+				if (IS_SLASH_AT(type, intern->file_name, intern->file_name_len-1)) {
 					intern->file_name_len = slash_pos.u - intern->file_name.u;
 					intern->file_name.u[intern->file_name_len] = 0;
 					continue;
@@ -402,7 +402,7 @@ void spl_filesystem_info_set_filename(spl_filesystem_object *intern, zend_uchar 
 				intern->_path_len = slash_pos.u - intern->file_name.u;
 			} else {
 				slash_pos.s = (p1.s > p2.s ? p1.s : p2.s);
-				if (IS_SLASH_AT(type, intern->file_name, intern->file_name_len)) {
+				if (IS_SLASH_AT(type, intern->file_name, intern->file_name_len-1)) {
 					intern->file_name_len = slash_pos.s - intern->file_name.s;
 					intern->file_name.s[intern->file_name_len] = 0;
 					continue;
