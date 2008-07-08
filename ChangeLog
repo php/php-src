@@ -1,3 +1,355 @@
+2008-07-07  David Soria Parra  <dsoria@gmx.net>
+
+    * (PHP_5_3)
+      ext/exif/tests/exif007.phpt
+      ext/exif/tests/exif008.phpt
+      ext/exif/tests/exif009.phpt
+      ext/exif/tests/exif010.phpt
+      ext/exif/tests/exif011.phpt
+      ext/exif/tests/exif012.phpt
+      ext/exif/tests/exif013.phpt
+      ext/exif/tests/exif014.phpt
+      ext/exif/tests/exif015.phpt
+      ext/exif/tests/exif016.phpt
+      ext/exif/tests/exif017.phpt
+      ext/exif/tests/exif018.phpt
+      ext/exif/tests/exif020.phpt
+      ext/exif/tests/exif021.phpt
+      ext/exif/tests/exif022.phpt
+      ext/exif/tests/exif023.phpt
+      ext/exif/tests/exif024.phpt
+      ext/exif/tests/exif025.phpt
+      ext/exif/tests/exif026.phpt
+      ext/exif/tests/exif027.phpt
+      ext/exif/tests/image007.jpg
+      ext/exif/tests/image008.jpg
+      ext/exif/tests/image009.jpg
+      ext/exif/tests/image010.jpg
+      ext/exif/tests/image011.jpg
+      ext/exif/tests/image012.jpg
+      ext/exif/tests/image013.jpg
+      ext/exif/tests/image014.jpg
+      ext/exif/tests/image015.jpg
+      ext/exif/tests/image016.tiff
+      ext/exif/tests/image017.tiff
+      ext/exif/tests/image018.tiff
+      ext/exif/tests/image020.tiff
+      ext/exif/tests/image021.tiff
+      ext/exif/tests/image022.tiff
+      ext/exif/tests/image023.tiff
+      ext/exif/tests/image024.jpg
+      ext/exif/tests/image025.jpg
+      ext/exif/tests/image026.tiff
+      ext/exif/tests/image027.tiff:
+      Exif tests from Eric Steward. Testfest task 82.
+
+    * ext/exif/tests/exif007.phpt
+      ext/exif/tests/exif007.phpt
+      ext/exif/tests/exif008.phpt
+      ext/exif/tests/exif008.phpt
+      ext/exif/tests/exif009.phpt
+      ext/exif/tests/exif009.phpt
+      ext/exif/tests/exif010.phpt
+      ext/exif/tests/exif010.phpt
+      ext/exif/tests/exif011.phpt
+      ext/exif/tests/exif011.phpt
+      ext/exif/tests/exif012.phpt
+      ext/exif/tests/exif012.phpt
+      ext/exif/tests/exif013.phpt
+      ext/exif/tests/exif013.phpt
+      ext/exif/tests/exif014.phpt
+      ext/exif/tests/exif014.phpt
+      ext/exif/tests/exif015.phpt
+      ext/exif/tests/exif015.phpt
+      ext/exif/tests/exif016.phpt
+      ext/exif/tests/exif016.phpt
+      ext/exif/tests/exif017.phpt
+      ext/exif/tests/exif017.phpt
+      ext/exif/tests/exif018.phpt
+      ext/exif/tests/exif018.phpt
+      ext/exif/tests/exif020.phpt
+      ext/exif/tests/exif020.phpt
+      ext/exif/tests/exif021.phpt
+      ext/exif/tests/exif021.phpt
+      ext/exif/tests/exif022.phpt
+      ext/exif/tests/exif022.phpt
+      ext/exif/tests/exif023.phpt
+      ext/exif/tests/exif023.phpt
+      ext/exif/tests/exif024.phpt
+      ext/exif/tests/exif024.phpt
+      ext/exif/tests/exif025.phpt
+      ext/exif/tests/exif025.phpt
+      ext/exif/tests/exif026.phpt
+      ext/exif/tests/exif026.phpt
+      ext/exif/tests/exif027.phpt
+      ext/exif/tests/exif027.phpt
+      ext/exif/tests/image007.jpg
+      ext/exif/tests/image007.jpg
+      ext/exif/tests/image008.jpg
+      ext/exif/tests/image008.jpg
+      ext/exif/tests/image009.jpg
+      ext/exif/tests/image009.jpg
+      ext/exif/tests/image010.jpg
+      ext/exif/tests/image010.jpg
+      ext/exif/tests/image011.jpg
+      ext/exif/tests/image011.jpg
+      ext/exif/tests/image012.jpg
+      ext/exif/tests/image012.jpg
+      ext/exif/tests/image013.jpg
+      ext/exif/tests/image013.jpg
+      ext/exif/tests/image014.jpg
+      ext/exif/tests/image014.jpg
+      ext/exif/tests/image015.jpg
+      ext/exif/tests/image015.jpg
+      ext/exif/tests/image016.tiff
+      ext/exif/tests/image016.tiff
+      ext/exif/tests/image017.tiff
+      ext/exif/tests/image017.tiff
+      ext/exif/tests/image018.tiff
+      ext/exif/tests/image018.tiff
+      ext/exif/tests/image020.tiff
+      ext/exif/tests/image020.tiff
+      ext/exif/tests/image021.tiff
+      ext/exif/tests/image021.tiff
+      ext/exif/tests/image022.tiff
+      ext/exif/tests/image022.tiff
+      ext/exif/tests/image023.tiff
+      ext/exif/tests/image023.tiff
+      ext/exif/tests/image024.jpg
+      ext/exif/tests/image024.jpg
+      ext/exif/tests/image025.jpg
+      ext/exif/tests/image025.jpg
+      ext/exif/tests/image026.tiff
+      ext/exif/tests/image026.tiff
+      ext/exif/tests/image027.tiff
+      ext/exif/tests/image027.tiff:
+      
+      Exif tests from Eric Steward. Testfest task 82.
+
+2008-07-07  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_ini.c:
+      Tweak last commit, should always return NULL when an entry doesn't exist.
+
+    * ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.h
+      ZendEngine2/zend_ini.h:
+      Add zend_ini_string_ex so that the you can differentiate between NULL as a
+      value and its absence, this is important for ini_get. Related to bug
+      #42657 and #43348
+
+2008-07-07  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * EXTENSIONS:
+      MFB: once is enough
+
+    * (PHP_5_3)
+      EXTENSIONS:
+      He doesn't actually maintain it that much... :)
+
+2008-07-07  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/interbase/interbase.c:
+      MFB: - Added arginfo
+
+    * ext/imap/php_imap.c:
+      - MFB: Added arginfo
+
+    * (PHP_5_3)
+      ext/imap/php_imap.c
+      ext/interbase/interbase.c:
+      - Added arginfo
+
+    * ZendEngine2/zend_arg_defs.c
+      ZendEngine2/zend_modules.h:
+      MFB:
+      - Removed zend_arg_defs.c
+        The first_arg_force_ref, second_arg_force_ref, third_arg_force_ref,
+         fourth_arg_force_ref, fifth_arg_force_ref and all_args_by_ref are not
+      more used.
+
+2008-07-07  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h:
+      - Updated to version 2008.4 (2008d)
+
+2008-07-07  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_arg_defs.c
+      ZendEngine2/zend_modules.h:
+      - Removed zend_arg_defs.c
+        The first_arg_force_ref, second_arg_force_ref, third_arg_force_ref,
+         fourth_arg_force_ref, fifth_arg_force_ref and all_args_by_ref are not
+      more used.
+
+    * ext/mbstring/mbstring.c:
+      - MFB: Removed unused variables
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/php_mbregex.h:
+      MFB:
+      - Added arginfo
+      - Removed unnecessary #include "zend_arg_defs.c"
+
+2008-07-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      win32/build/config.w32
+      win32/build/confutils.js:
+      - MFH:
+       - use ARG_ENABLE for the summary option
+       - move test if summary function
+
+    * win32/build/config.w32
+      win32/build/confutils.js:
+      - move common functions to confutil
+      - MFB: allow to disable the summary (and move test in the function)
+
+    * (PHP_5_3)
+      win32/build/config.w32
+      win32/build/confutils.js:
+      - move common functions to confutils
+      - rename the summary option to reflect its usage (Enable Sumamry, yes)
+
+2008-07-07  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/mbstring/mbstring.c:
+      - Removed unused variables
+
+    * (PHP_5_3)
+      ext/mbstring/mbstring.c
+      ext/mbstring/php_mbregex.h:
+      - Added arginfo
+      - Removed unnecessary #include "zend_arg_defs.c"
+
+2008-07-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/credits_ext.h
+      ext/standard/credits_ext.h:
+      - Update credits
+
+2008-07-07  Alexey Zakhlestin  <indeyets@gmail.com>
+
+    * ext/mbstring/mbstring.c:
+      MFB: string length -> int
+
+    * ext/mbstring/mbstring.c:
+      MFB: updated to the new parameter-parsing api
+
+    * ext/mbstring/mbstring.c:
+      MFB: added arginfo (fixes #45388)
+
+2008-07-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/gd/config.w32:
+      - test for ZLIB_SHARED (possible conflict)
+
+    * ext/gd/config.w32
+      ext/gd/gd.c:
+      - add support for old named zlib (no _a or dynamic)
+      - nuke the right unused vars
+
+    * ext/gd/config.w32
+      ext/gd/gd.c:
+      - restore wrongly removed vars
+      - test if zlib is shared or not (possible conflict)
+
+2008-07-07  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      ext/standard/info.c:
+      - Don't do stuff twice over
+
+    * (PHP_5_3)
+      win32/build/config.w32
+      win32/build/confutils.js:
+      - Fix up some bits and pieces.
+      - Always report re2c version.
+      - Head towards making it possible for all platforms to have compiler info
+      in phpinfo() output.
+      - Make it possible to switch off configure summary (--without-summary).
+
+    * (PHP_5_3)
+      main/.cvsignore
+      main/config.w32.h:
+      - This file is generated from win32/build/config.w32.h.in. It should never
+      have been in CVS in the first place...
+
+    * (PHP_5_3)
+      ext/phar/config.w32:
+      - Fixed config.w32 to keep Elizabeth happy
+      - NB This whole lot still might disappear, OpenSSL patch review pending
+
+    * (PHP_5_3)
+      ext/phar/phar_object.c:
+      - We forgot to check that the phar exists before trying to extract files
+      from it :)
+
+    * (PHP_5_3)
+      ext/phar/tests/open_for_write_existing_b.phpt
+      ext/phar/tests/open_for_write_existing_b_5_2.phpt
+      ext/phar/tests/open_for_write_existing_b_5_2.phpt
+      ext/phar/tests/open_for_write_existing_c.phpt
+      ext/phar/tests/open_for_write_existing_c_5_2.phpt
+      ext/phar/tests/open_for_write_existing_c_5_2.phpt
+      ext/phar/tests/open_for_write_newfile_b.phpt
+      ext/phar/tests/open_for_write_newfile_b_5_2.phpt
+      ext/phar/tests/open_for_write_newfile_b_5_2.phpt
+      ext/phar/tests/open_for_write_newfile_c.phpt
+      ext/phar/tests/open_for_write_newfile_c_5_2.phpt
+      ext/phar/tests/open_for_write_newfile_c_5_2.phpt
+      ext/phar/tests/phar_extract3.phpt
+      ext/phar/tests/phar_extract3.phpt
+      ext/phar/tests/files/notbogus.zip
+      ext/phar/tests/files/notbogus.zip
+      ext/phar/tests/tar/open_for_write_existing_b.phpt
+      ext/phar/tests/tar/open_for_write_existing_b_5_2.phpt
+      ext/phar/tests/tar/open_for_write_existing_b_5_2.phpt
+      ext/phar/tests/tar/open_for_write_existing_c.phpt
+      ext/phar/tests/tar/open_for_write_existing_c_5_2.phpt
+      ext/phar/tests/tar/open_for_write_existing_c_5_2.phpt
+      ext/phar/tests/tar/open_for_write_newfile_b.phpt
+      ext/phar/tests/tar/open_for_write_newfile_b_5_2.phpt
+      ext/phar/tests/tar/open_for_write_newfile_b_5_2.phpt
+      ext/phar/tests/tar/open_for_write_newfile_c.phpt
+      ext/phar/tests/tar/open_for_write_newfile_c_5_2.phpt
+      ext/phar/tests/tar/open_for_write_newfile_c_5_2.phpt
+      ext/phar/tests/zip/open_for_write_existing_b.phpt
+      ext/phar/tests/zip/open_for_write_existing_b_5_2.phpt
+      ext/phar/tests/zip/open_for_write_existing_b_5_2.phpt
+      ext/phar/tests/zip/open_for_write_existing_c.phpt
+      ext/phar/tests/zip/open_for_write_existing_c_5_2.phpt
+      ext/phar/tests/zip/open_for_write_existing_c_5_2.phpt
+      ext/phar/tests/zip/open_for_write_newfile_b.phpt
+      ext/phar/tests/zip/open_for_write_newfile_b_5_2.phpt
+      ext/phar/tests/zip/open_for_write_newfile_b_5_2.phpt
+      ext/phar/tests/zip/open_for_write_newfile_c.phpt
+      ext/phar/tests/zip/open_for_write_newfile_c_5_2.phpt
+      ext/phar/tests/zip/open_for_write_newfile_c_5_2.phpt:
+      Duplicate tests to accommodate parameter parsing fixes in 5_3 core
+      (NB the 5_2 tests will fail currently due to name changes, will fix
+      tomorrow)
+
+2008-07-07  Etienne Kneuss  <php@colder.ch>
+
+    * EXTENSIONS:
+      Fix my poor name
+
+    * ext/spl/tests/.htaccess
+      ext/spl/tests/.htaccess:
+      Remove .htaccess file(??)
+
+    * (PHP_5_2)
+      ext/spl/spl_array.c:
+      Avoid a leak on return_value
+
 2008-07-06  Etienne Kneuss  <php@colder.ch>
 
     * ext/spl/tests/fixedarray_016.phpt
