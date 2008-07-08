@@ -76,6 +76,8 @@ putenv('SSH_CONNECTION=deleted');
 $cwd = getcwd();
 set_time_limit(0);
 
+ini_set('pcre.backtrack_limit', PHP_INT_MAX);
+
 $valgrind_version = 0;
 $valgrind_header = '';
 
