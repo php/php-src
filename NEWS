@@ -2,7 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.0
 - Upgraded bundled PCRE to version 7.7 (Nuno)
-- Upgraded bundled sqlite to version 3.5.6. (Scott)
+- Upgraded bundled PDO sqlite to version 3.5.6. (Scott)
 
 - Moved extensions to PECL (Pierre):
   . ext/fdpf
@@ -12,9 +12,9 @@ PHP                                                                        NEWS
 - Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
 - Removed zend.ze1_compatibility_mode. (Dmitry)
 
-- Changed PCRE extension to be enabled always. (Marcus)
+- Changed PCRE, SPL and reflection extensions to always be enabled. (Marcus)
 - Changed md5() to use improved implementation. (Solar Designer, Dmitry)
-- Changed mhash to be a wrapper layer around the hash extesion. (Scott)
+- Changed mhash to be a wrapper layer around the hash extension. (Scott)
 
 - Improved PHP syntax and semantics:
   . Added "jump label" operator (limited "goto"). (Dmitry, Sara)
@@ -194,7 +194,7 @@ PHP                                                                        NEWS
   to different characters with cp1251 and cp866. (Scott)
 - Fixed an issue in date() where a : was printed for the O modifier after a P
   modifier was used. (Derick)
-- Fixed an issue where exec() on Windows would eat the first and last double quotes
+- Fixed an issue where exec() on Windows would eat the first and last double quotes.
   (Scott)
 
 - Fixed PECL bug #12431 (OCI8 ping functionality is broken). (Oracle Corp.)
