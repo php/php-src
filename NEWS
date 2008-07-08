@@ -6,8 +6,6 @@ PHP                                                                        NEWS
 - Fixed a crash inside PDO when trying instantiate PDORow manually (Felipe)
 - Fixed build failure of ext/mysqli with libmysql 6.0 - missing rpl
   functions. (Andrey)
-- Fixed a bug where exec() on Windows would eat the first and last double quotes
-  (Scott)
 - Fixed bug #45352 (Segmentation fault because of tick function on second
   request). (Dmitry)
 - Fixed bug #45312 (Segmentation fault on second request for array functions).
