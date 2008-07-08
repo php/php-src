@@ -832,6 +832,25 @@ yymore_restart:
 		return 0;
 	}
 
+	/* ignore first line when it's started with a # */
+	if (YYCURSOR == SCNG(yy_start) && *YYCURSOR == '#') {
+		while (++YYCURSOR < YYLIMIT) {
+			if (*YYCURSOR == '\n') {
+				++YYCURSOR;
+				goto restart;
+			}
+
+			if (*YYCURSOR == '\r') {
+				if (++YYCURSOR < YYLIMIT && *YYCURSOR == '\n') { /* match \r\n as single newline */
+					++YYCURSOR;
+				}
+				goto restart;
+			}
+		}
+
+		return 0; /* EOF */
+	}
+
 /*!re2c
 re2c:yyfill:check = 0;
 LNUM	[0-9]+
@@ -1549,10 +1568,7 @@ NOWDOC_CHARS		({NEWLINE}*(([^a-zA-Z_\x7f-\xff\n\r][^\n\r]*)|({LABEL}[^a-zA-Z0-9_
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG_WITH_ECHO;
 	} else {
-		zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
-		zendlval->value.str.len = yyleng;
-		zendlval->type = IS_STRING;
-		return T_INLINE_HTML;
+		goto inline_char_handler;
 	}
 }
 
@@ -1565,10 +1581,7 @@ NOWDOC_CHARS		({NEWLINE}*(([^a-zA-Z_\x7f-\xff\n\r][^\n\r]*)|({LABEL}[^a-zA-Z0-9_
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG_WITH_ECHO;
 	} else {
-		zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
-		zendlval->value.str.len = yyleng;
-		zendlval->type = IS_STRING;
-		return T_INLINE_HTML;
+		goto inline_char_handler;
 	}
 }
 
@@ -1581,10 +1594,7 @@ NOWDOC_CHARS		({NEWLINE}*(([^a-zA-Z_\x7f-\xff\n\r][^\n\r]*)|({LABEL}[^a-zA-Z0-9_
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG;
 	} else {
-		zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
-		zendlval->value.str.len = yyleng;
-		zendlval->type = IS_STRING;
-		return T_INLINE_HTML;
+		goto inline_char_handler;
 	}
 }
 
@@ -1600,7 +1610,6 @@ NOWDOC_CHARS		({NEWLINE}*(([^a-zA-Z_\x7f-\xff\n\r][^\n\r]*)|({LABEL}[^a-zA-Z0-9_
 
 
 <INITIAL>"<?" {
-	HANDLE_NEWLINES(yytext, yyleng);
 	if (CG(short_tags)) {
 		zendlval->value.str.val = yytext; /* no copying - intentional */
 		zendlval->value.str.len = yyleng;
@@ -1608,19 +1617,6 @@ NOWDOC_CHARS		({NEWLINE}*(([^a-zA-Z_\x7f-\xff\n\r][^\n\r]*)|({LABEL}[^a-zA-Z0-9_
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG;
 	} else {
-		zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
-		zendlval->value.str.len = yyleng;
-		zendlval->type = IS_STRING;
-		return T_INLINE_HTML;
-	}
-}
-
-<INITIAL>"#".+ {NEWLINE} {
-	if ((YYCTYPE*)yytext == SCNG(yy_start)) {
-		/* ignore first line when it's started with a # */
-		goto restart;
-	} else {
-		YYCURSOR = yytext+1;
 		goto inline_char_handler;
 	}
 }
@@ -1640,8 +1636,8 @@ inline_char_handler:
 		} else {
 			YYCURSOR = ptr + 1;
 
-			/* if it can be an opening tag, stop */
-			if (YYCURSOR < YYLIMIT && (*YYCURSOR == '?' || *YYCURSOR == '%')) {
+			/* stop if it may be an opening tag (<?, <%, <script>). this condition is not optimal though */
+			if (YYCURSOR < YYLIMIT && (*YYCURSOR == '?' || *YYCURSOR == '%' || *YYCURSOR == 's')) {
 				--YYCURSOR;
 				yyleng = YYCURSOR - SCNG(yy_text);
 				break;
