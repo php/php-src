@@ -32,25 +32,8 @@ PHP                                                                        NEWS
     PHP_EXTRA_VERSION, PHP_VERSION_ID, PHP_ZTS and PHP_DEBUG constants. (Pierre)
   . Added new error mode E_DEPRECATED which is used to inform about stuff to be
     dropped in future PHP versions. (Lars Strojny, Felipe, Marcus)
-
-- Improved SPL extension:
-  . Added SPL to list of standard extensions that cannot be disabled. (Marcus)
-  . Added ability to store associative information with objects in
-    SplObjectStorage. (Marcus)
-  . Added ArrayAccess support to SplObjectStorage. (Marcus)
-  . Added SplDoublyLinkedList, SplStack, SplQueue classes. (Etienne)
-  . Added FilesystemIterator. (Marcus)
-  . Added GlobIterator. (Marcus)
-  . Added SplHeap, SplMinHeap, SplMaxHeap, SplPriorityQueue classes. (Etienne)
-  . Added new parameter $prepend to spl_autoload_register(). (Etienne)
-  . Added FixedArray. (Etienne, Tony)
-
-- Improved Zend Engine:
-  . Added "compact" handler for Zend MM storage. (Dmitry)
-  . Added "+" and "*" specifiers to zend_parse_parameters(). (Andrei)
-  . Added concept of "delayed early binding" that allows opcode caches to perform
-    class declaration (early and/or run-time binding) in exactly the same order
-    as vanilla PHP. (Dmitry)
+  . Added "request_order" INI variable to control specifically $_REQUEST behavior.
+    (Stas)
 
 - Improved PHP runtime speed and memory usage:
   . Removed direct executor recursion. (Dmitry)
@@ -107,19 +90,35 @@ PHP                                                                        NEWS
   . Added "params" as optional parameter for stream_context_create(). (Sara)
   . Added ability to use stream wrappers in include_path. (Gregory, Dmitry)
 
+- Improved OpenSSL extension: (Dmitry)
+  . Added support for OpenSSL digest and cipher functions.
+  . Added access to internal values of DSA, RSA and DH keys.
+
 - Improved SOAP extension:
   . Added support for element names in context of XMLShema's <any>. (Dmitry)
   . Added ability to use Traversable objects instead of plain arrays.
    (Joshua Reese, Dmitry)
   . Fixed possible crash bug caused by an uninitialized value. (Zdash Urf)
 
-- Improved OpenSSL extension: (Dmitry)
-  . Added support for OpenSSL digest and cipher functions.
-  . Added access to internal values of DSA, RSA and DH keys.
+- Improved SPL extension:
+  . Added SPL to list of standard extensions that cannot be disabled. (Marcus)
+  . Added ability to store associative information with objects in
+    SplObjectStorage. (Marcus)
+  . Added ArrayAccess support to SplObjectStorage. (Marcus)
+  . Added SplDoublyLinkedList, SplStack, SplQueue classes. (Etienne)
+  . Added FilesystemIterator. (Marcus)
+  . Added GlobIterator. (Marcus)
+  . Added SplHeap, SplMinHeap, SplMaxHeap, SplPriorityQueue classes. (Etienne)
+  . Added new parameter $prepend to spl_autoload_register(). (Etienne)
+  . Added FixedArray. (Etienne, Tony)
 
-- Added hash_copy() function. (Tony)
-- Added "request_order" INI variable to control specifically $_REQUEST behavior.
-  (Stas)
+- Improved Zend Engine:
+  . Added "compact" handler for Zend MM storage. (Dmitry)
+  . Added "+" and "*" specifiers to zend_parse_parameters(). (Andrei)
+  . Added concept of "delayed early binding" that allows opcode caches to perform
+    class declaration (early and/or run-time binding) in exactly the same order
+    as vanilla PHP. (Dmitry)
+
 - Added new date/time functionality: (Derick)
   . date_parse_from_format(): Parse date/time strings according to a format.
   . date_create_from_format()/DateTime::createFromFormat(): Create a date/time
@@ -159,10 +158,11 @@ PHP                                                                        NEWS
     applying a DateInterval on each iteration, up to an end date or limited by
     a maximum number of occurences.
 
+- Added hash_copy() function. (Tony)
 - Added ReflectionProperty::setAccessible() method that allows non-public
   property's values to be read through ::getValue(). (Derick)
 - Added msg_queue_exists() function. (Benjamin Schulz)
-- Added 3 Firebird specific attributes that can be set via PDO::setAttribute()
+- Added Firebird specific attributes that can be set via PDO::setAttribute()
   to control formatting of date/timestamp columns: PDO::FB_ATTR_DATE_FORMAT,
   PDO::FB_ATTR_TIME_FORMAT and PDO::FB_ATTR_TIMESTAMP_FORMAT. (Lars W)
 - Added gmp_testbit() function. (Stas)
