@@ -4176,7 +4176,7 @@ static void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
    Load a new font from specified file */
 PHP_FUNCTION(imagepsloadfont)
 {
-	zval *file;
+	char *file;
 	int file_len, f_ind, *font;
 #ifdef PHP_WIN32
 	struct stat st;
