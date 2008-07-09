@@ -1868,14 +1868,12 @@ SXE_METHOD(__toString)
 }
 /* }}} */
 
-static int sxe_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
+static int php_sxe_count_elements_helper(php_sxe_object *sxe, long *count TSRMLS_DC) /* {{{ */
 {
-	php_sxe_object  *sxe;
 	xmlNodePtr       node;
 	zval            *data;
 
 	*count = 0;
-	sxe = php_sxe_fetch_object(object TSRMLS_CC);
 
 	data = sxe->iter.data;
 	sxe->iter.data = NULL;
@@ -1894,6 +1892,42 @@ static int sxe_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
 	sxe->iter.data = data;
 
 	return SUCCESS;
+}
+/* }}} */
+
+static int sxe_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
+{
+	php_sxe_object  *intern;
+	intern = php_sxe_fetch_object(object TSRMLS_CC);
+	if (intern->fptr_count) {
+		zval *rv;
+		zend_call_method_with_0_params(&object, intern->zo.ce, &intern->fptr_count, "count", &rv);
+		if (rv) {
+			if (intern->tmp) {
+				zval_ptr_dtor(&intern->tmp);
+			}
+			MAKE_STD_ZVAL(intern->tmp);
+			ZVAL_ZVAL(intern->tmp, rv, 1, 1);
+			convert_to_long(intern->tmp);
+			*count = (long) Z_LVAL_P(intern->tmp);
+			return SUCCESS;
+		}
+		return FAILURE;
+	}
+	return php_sxe_count_elements_helper(intern, count TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto int SimpleXMLIterator::count()
+ Get number of child elements */
+SXE_METHOD(count)
+{
+	long count = 0;
+	php_sxe_object *sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
+
+	php_sxe_count_elements_helper(sxe, &count TSRMLS_CC);
+	
+	RETURN_LONG(count);
 }
 /* }}} */
 
@@ -2035,14 +2069,33 @@ static void sxe_object_free_storage(void *object TSRMLS_DC)
 static php_sxe_object* php_sxe_object_new(zend_class_entry *ce TSRMLS_DC)
 {
 	php_sxe_object *intern;
+	zend_class_entry     *parent = ce;
+	int inherited = 0;
 
 	intern = ecalloc(1, sizeof(php_sxe_object));
 
 	intern->iter.type = SXE_ITER_NONE;
 	intern->iter.nsprefix = NULL;
 	intern->iter.name = NULL;
+	intern->fptr_count = NULL;
 
 	zend_object_std_init(&intern->zo, ce TSRMLS_CC);
+
+	while (parent) {
+		if (parent == sxe_class_entry) {
+			break;
+		}
+
+		parent = parent->parent;
+		inherited = 1;
+	}
+
+	if (inherited) {
+		zend_hash_find(&ce->function_table, "count", sizeof("count"),(void **) &intern->fptr_count);
+		if (intern->fptr_count->common.scope == parent) {
+			intern->fptr_count = NULL;
+		}
+	}
 
 	return intern;
 }
@@ -2538,6 +2591,7 @@ static const zend_function_entry sxe_functions[] = { /* {{{ */
 	SXE_ME(addChild,               NULL, ZEND_ACC_PUBLIC)
 	SXE_ME(addAttribute,           NULL, ZEND_ACC_PUBLIC)
 	SXE_ME(__toString,             NULL, ZEND_ACC_PUBLIC)
+	SXE_ME(count,                  NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 /* }}} */
