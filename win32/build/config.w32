@@ -311,7 +311,7 @@ if (PHP_STATIC_ICU == "yes") {
 	}
 	ADD_FLAG("LIBS", "icuuc.lib icuin.lib icuio.lib icule.lib iculx.lib");
 }
-	
+
 //DEFINE("PHP_BUILD", PHP_PHP_BUILD);
 
 STDOUT.WriteBlankLines(1);
@@ -328,7 +328,7 @@ ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
 	zend_sprintf.c zend_ini.c zend_qsort.c zend_ts_hash.c \
 	zend_stream.c zend_iterators.c zend_interfaces.c zend_objects.c \
 	zend_object_handlers.c zend_objects_API.c  zend_unicode.c zend_strtol.c  \
-	zend_default_classes.c zend_execute.c zend_strtod.c zend_gc.c");
+	zend_default_classes.c zend_execute.c zend_strtod.c zend_gc.c zend_closures.c");
 
 ADD_SOURCES("main", "main.c snprintf.c spprintf.c fopen_wrappers.c \
 	php_scandir.c php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
