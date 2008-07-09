@@ -1,14 +1,13 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_ENABLE("zip", "ZIP support", "no");
+ARG_ENABLE("zip", "ZIP support", "yes");
 
 if (PHP_ZIP != "no") {
-
-	if (CHECK_HEADER_ADD_INCLUDE("zlib.h", "CFLAGS_ZIP", "..\\zlib;" + php_usual_include_suspects + ";" + PHP_ZIP)) {
-		if (PHP_ZLIB_SHARED) {
-			CHECK_LIB("zlib.lib", "zip", PHP_ZIP);
-		}
+	if (CHECK_HEADER_ADD_INCLUDE("zlib.h", "CFLAGS_ZIP", "..\\zlib;" + PHP_ZIP) &&
+		(((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib", "zip", PHP_ZIP) ||  CHECK_LIB("zlib.lib", "zip", PHP_ZIP))) || 
+			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "zip", PHP_ZIP)) || (PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED)))
+		) {
 		EXTENSION('zip', 'php_zip.c zip_stream.c');
 		ADD_SOURCES(configure_module_dirname + "/lib", "zip_add.c zip_error.c zip_fclose.c \
                      zip_fread.c zip_open.c zip_source_filep.c  \
@@ -29,9 +28,7 @@ if (PHP_ZIP != "no") {
                      zip_unchange_archive.c zip_memdup.c zip_stat_init.c \
                      zip_add_dir.c zip_file_error_clear.c zip_error_clear.c", "zip");
 
-		AC_DEFINE('HAVE_ZLIB', 1);
 		AC_DEFINE('HAVE_ZIP', 1);
-		ADD_FLAG("CFLAGS_ZIP", "/D PHP_ZIP_EXPORTS ");
 	} else {
 		WARNING("zip not enabled; libraries and headers not found");
 	}
