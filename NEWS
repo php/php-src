@@ -199,6 +199,8 @@ PHP                                                                        NEWS
 
 - Fixed PECL bug #12431 (OCI8 ping functionality is broken). (Oracle Corp.)
 
+- Fixed bug #45345 (SPLFileInfo::getPathInfo() returning dir info instead of
+  file info). (Etienne)
 - Fixed bug #45038 (Crash when using DateTimeZone object returned by
   Date::getTimezone). (Joe Orton, Derick)
 - Fixed bug #44769 (declaring private magic methods should throw error). (Felipe)
