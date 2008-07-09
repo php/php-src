@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.22 2008-07-07 13:51:35 pajoye Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.23 2008-07-09 08:15:46 sfox Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -26,6 +26,7 @@ var FSO = WScript.CreateObject("Scripting.FileSystemObject");
 var MFO = null;
 var SYSTEM_DRIVE = WshShell.Environment("Process").Item("SystemDrive");
 var PROGRAM_FILES = WshShell.Environment("Process").Item("ProgramFiles");
+var DSP_FLAGS = new Array();
 
 /* Store the enabled extensions (summary + QA check) */
 var extensions_enabled = new Array();
@@ -1039,6 +1040,10 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		ADD_FLAG("SAPI_TARGETS", makefiletarget);
 	}
 
+	if (PHP_DSP != "no") {
+		generate_dsp_file(sapiname, configure_module_dirname, file_list, false);
+	}
+
 	MFO.WriteBlankLines(1);
 	sapi_enabled[sapi_enabled.length] = [sapiname];
 }
@@ -1203,6 +1208,11 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		DEFINE('CFLAGS_' + EXT + '_OBJ', '$(CFLAGS_PHP) $(CFLAGS_' + EXT + ')');
 	}
 	ADD_FLAG("CFLAGS_" + EXT, cflags);
+
+	if (PHP_DSP != "no") {
+		generate_dsp_file(extname, configure_module_dirname, file_list, shared);
+	}
+
 	extensions_enabled[extensions_enabled.length] = [extname, shared ? 'shared' : 'static'];
 }
 
@@ -1449,10 +1459,20 @@ function generate_files()
 		}
 	}
 
+	if (PHP_DSP != "no") {
+		generate_dsp_file("TSRM", "TSRM", null, false);
+		generate_dsp_file("Zend", "Zend", null, false);
+		generate_dsp_file("win32", "win32", null, false);
+		generate_dsp_file("main", "main", null, false);
+		generate_dsp_file("streams", "main\\streams", null, false);
+		generate_dsp_flags();
+	}
+
 	STDOUT.WriteLine("Generating files...");
 	generate_makefile();
 	generate_internal_functions();
 	generate_config_h();
+
 	STDOUT.WriteLine("Done.");
 	STDOUT.WriteBlankLines(1);
 	write_summary();
@@ -1577,6 +1597,12 @@ function ADD_FLAG(name, flags, target)
 		configure_subst.Remove(name);
 	}
 	configure_subst.Add(name, flags);
+
+	if (PHP_DSP != "no") {
+		if (flags && (name.substr(name.length-3) != "PHP") && (name.substr(0, 7) == "CFLAGS_")) {
+			DSP_FLAGS[DSP_FLAGS.length] = new Array(name, flags);
+		}
+	}
 }
 
 function get_define(name)
