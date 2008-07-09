@@ -325,9 +325,17 @@ PHP_FUNCTION(count)
 			break;
 		case IS_OBJECT: {
 #ifdef HAVE_SPL
-			/* it the object implements Countable we call its count() method */
 			zval *retval;
-
+#endif
+			/* first, we check if an handler is defined */
+			if (Z_OBJ_HT_P(array)->count_elements) {
+				RETVAL_LONG(1);
+				if (SUCCESS == Z_OBJ_HT(*array)->count_elements(array, &Z_LVAL_P(return_value) TSRMLS_CC)) {
+					return;
+				}
+			}
+#ifdef HAVE_SPL
+			/* if not and the object implements Countable we call its count() method */
 			if (Z_OBJ_HT_P(array)->get_class_entry && instanceof_function(Z_OBJCE_P(array), spl_ce_Countable TSRMLS_CC)) {
 				zend_call_method_with_0_params(&array, NULL, NULL, "count", &retval);
 				if (retval) {
@@ -338,13 +346,6 @@ PHP_FUNCTION(count)
 				return;
 			}
 #endif
-			/* if not we return the number of properties (not taking visibility into account) */
-			if (Z_OBJ_HT_P(array)->count_elements) {
-				RETVAL_LONG(1);
-				if (SUCCESS == Z_OBJ_HT(*array)->count_elements(array, &Z_LVAL_P(return_value) TSRMLS_CC)) {
-					return;
-				}
-			}
 		}
 		default:
 			RETURN_LONG(1);
