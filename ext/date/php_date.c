@@ -147,6 +147,270 @@ ZEND_BEGIN_ARG_INFO(arginfo_date_sun_info, 0)
 	ZEND_ARG_INFO(0, longitude)
 ZEND_END_ARG_INFO()
 
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_create, 0, 0, 0)
+	ZEND_ARG_INFO(0, time)
+	ZEND_ARG_INFO(0, object)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_create_from_format, 0, 0, 2)
+	ZEND_ARG_INFO(0, format)
+	ZEND_ARG_INFO(0, time)
+	ZEND_ARG_INFO(0, object)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_parse, 0, 0, 1)
+	ZEND_ARG_INFO(0, date)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_parse_from_format, 0, 0, 2)
+	ZEND_ARG_INFO(0, format)
+	ZEND_ARG_INFO(0, date)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_date_get_last_errors, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_format, 0, 0, 2)
+	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, format)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_format, 0, 0, 1)
+	ZEND_ARG_INFO(0, format)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_modify, 0, 0, 2)
+	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, modify)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_modify, 0, 0, 1)
+	ZEND_ARG_INFO(0, modify)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_add, 0, 0, 2)
+	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, interval)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_add, 0, 0, 1)
+	ZEND_ARG_INFO(0, interval)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_sub, 0, 0, 2)
+	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, interval)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_sub, 0, 0, 1)
+	ZEND_ARG_INFO(0, interval)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_timezone_get, 0, 0, 1)
+	ZEND_ARG_INFO(0, object)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_date_method_timezone_get, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_timezone_set, 0, 0, 2)
+	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, timezone)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_timezone_set, 0, 0, 1)
+	ZEND_ARG_INFO(0, timezone)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_offset_get, 0, 0, 1)
+	ZEND_ARG_INFO(0, object)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_date_method_offset_get, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_diff, 0, 0, 2)
+	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, object2)
+	ZEND_ARG_INFO(0, absolute)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_diff, 0, 0, 1)
+	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, absolute)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_time_set, 0, 0, 3)
+	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, hour)
+	ZEND_ARG_INFO(0, minute)
+	ZEND_ARG_INFO(0, second)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_time_set, 0, 0, 2)
+	ZEND_ARG_INFO(0, hour)
+	ZEND_ARG_INFO(0, minute)
+	ZEND_ARG_INFO(0, second)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_date_set, 0, 0, 4)
+	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, year)
+	ZEND_ARG_INFO(0, month)
+	ZEND_ARG_INFO(0, day)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_date_set, 0, 0, 3)
+	ZEND_ARG_INFO(0, year)
+	ZEND_ARG_INFO(0, month)
+	ZEND_ARG_INFO(0, day)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_isodate_set, 0, 0, 3)
+	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, year)
+	ZEND_ARG_INFO(0, week)
+	ZEND_ARG_INFO(0, day)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_isodate_set, 0, 0, 2)
+	ZEND_ARG_INFO(0, year)
+	ZEND_ARG_INFO(0, week)
+	ZEND_ARG_INFO(0, day)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_timestamp_set, 0, 0, 2)
+	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, unixtimestamp)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_timestamp_set, 0, 0, 1)
+	ZEND_ARG_INFO(0, unixtimestamp)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_timestamp_get, 0, 0, 1)
+	ZEND_ARG_INFO(0, object)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_date_method_timestamp_get, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_open, 0, 0, 1)
+	ZEND_ARG_INFO(0, timezone)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_name_get, 0, 0, 1)
+	ZEND_ARG_INFO(0, object)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_timezone_method_name_get, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_name_from_abbr, 0, 0, 1)
+	ZEND_ARG_INFO(0, abbr)
+	ZEND_ARG_INFO(0, gmtoffset)
+	ZEND_ARG_INFO(0, isdst)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_offset_get, 0, 0, 2)
+	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, datetime)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_method_offset_get, 0, 0, 1)
+	ZEND_ARG_INFO(0, datetime)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_transitions_get, 0, 0, 1)
+	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, timestamp_begin)
+	ZEND_ARG_INFO(0, timestamp_end)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_timezone_method_transitions_get, 0)
+	ZEND_ARG_INFO(0, timestamp_begin)
+	ZEND_ARG_INFO(0, timestamp_end)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_identifiers_list, 0, 0, 0)
+	ZEND_ARG_INFO(0, what)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_timezone_abbreviations_list, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_interval_create_from_date_string, 0, 0, 1)
+	ZEND_ARG_INFO(0, time)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_interval_format, 0, 0, 1)
+	ZEND_ARG_INFO(0, object)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_date_method_interval_format, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_period_construct, 0, 0, 3)
+	ZEND_ARG_INFO(0, start)
+	ZEND_ARG_INFO(0, interval)
+	ZEND_ARG_INFO(0, end)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_interval_construct, 0, 0, 0)
+	ZEND_ARG_INFO(0, interval_spec)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_format_locale, 0, 0, 2)
+	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, format)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ Function table */
@@ -169,37 +433,37 @@ const zend_function_entry date_functions[] = {
 	PHP_FE(getdate, arginfo_getdate)
 
 	/* Advanced Interface */
-	PHP_FE(date_create, NULL)
-	PHP_FE(date_create_from_format, NULL)
-	PHP_FE(date_parse, NULL)
-	PHP_FE(date_parse_from_format, NULL)
-	PHP_FE(date_get_last_errors, NULL)
-	PHP_FE(date_format, NULL)
-	PHP_FE(date_format_locale, NULL)
-	PHP_FE(date_modify, NULL)
-	PHP_FE(date_add, NULL)
-	PHP_FE(date_sub, NULL)
-	PHP_FE(date_timezone_get, NULL)
-	PHP_FE(date_timezone_set, NULL)
-	PHP_FE(date_offset_get, NULL)
-	PHP_FE(date_diff, NULL)
+	PHP_FE(date_create, arginfo_date_create)
+	PHP_FE(date_create_from_format, arginfo_date_create_from_format)
+	PHP_FE(date_parse, arginfo_date_parse)
+	PHP_FE(date_parse_from_format, arginfo_date_parse_from_format)
+	PHP_FE(date_get_last_errors, arginfo_date_get_last_errors)
+	PHP_FE(date_format, arginfo_date_format)
+	PHP_FE(date_format_locale, arginfo_date_format_locale)
+	PHP_FE(date_modify, arginfo_date_modify)
+	PHP_FE(date_add, arginfo_date_add)
+	PHP_FE(date_sub, arginfo_date_sub)
+	PHP_FE(date_timezone_get, arginfo_date_timezone_get)
+	PHP_FE(date_timezone_set, arginfo_date_timezone_set)
+	PHP_FE(date_offset_get, arginfo_date_offset_get)
+	PHP_FE(date_diff, arginfo_date_diff)
 
-	PHP_FE(date_time_set, NULL)
-	PHP_FE(date_date_set, NULL)
-	PHP_FE(date_isodate_set, NULL)
-	PHP_FE(date_timestamp_set, NULL)
-	PHP_FE(date_timestamp_get, NULL)
+	PHP_FE(date_time_set, arginfo_date_time_set)
+	PHP_FE(date_date_set, arginfo_date_date_set)
+	PHP_FE(date_isodate_set, arginfo_date_isodate_set)
+	PHP_FE(date_timestamp_set, arginfo_date_timestamp_set)
+	PHP_FE(date_timestamp_get, arginfo_date_timestamp_get)
 
-	PHP_FE(timezone_open, NULL)
-	PHP_FE(timezone_name_get, NULL)
-	PHP_FE(timezone_name_from_abbr, NULL)
-	PHP_FE(timezone_offset_get, NULL)
-	PHP_FE(timezone_transitions_get, NULL)
-	PHP_FE(timezone_identifiers_list, NULL)
-	PHP_FE(timezone_abbreviations_list, NULL)
+	PHP_FE(timezone_open, arginfo_timezone_open)
+	PHP_FE(timezone_name_get, arginfo_timezone_name_get)
+	PHP_FE(timezone_name_from_abbr, arginfo_timezone_name_from_abbr)
+	PHP_FE(timezone_offset_get, arginfo_timezone_offset_get)
+	PHP_FE(timezone_transitions_get, arginfo_timezone_transitions_get)
+	PHP_FE(timezone_identifiers_list, arginfo_timezone_identifiers_list)
+	PHP_FE(timezone_abbreviations_list, arginfo_timezone_abbreviations_list)
 
-	PHP_FE(date_interval_create_from_date_string, NULL)
-	PHP_FE(date_interval_format, NULL)
+	PHP_FE(date_interval_create_from_date_string, arginfo_date_interval_create_from_date_string)
+	PHP_FE(date_interval_format, arginfo_date_interval_format)
 
 	/* Options and Configuration */
 	PHP_FE(date_default_timezone_set, arginfo_date_default_timezone_set)
@@ -213,46 +477,46 @@ const zend_function_entry date_functions[] = {
 };
 
 const zend_function_entry date_funcs_date[] = {
-	PHP_ME(DateTime,            __construct,       NULL, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
-	PHP_ME(DateTime,            __wakeup,          NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(DateTime,            __set_state,       NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	PHP_ME_MAPPING(createFromFormat, date_create_from_format, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	PHP_ME_MAPPING(getLastErrors, date_get_last_errors,       NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	PHP_ME_MAPPING(format,      date_format,       NULL, 0)
-	PHP_ME_MAPPING(modify,      date_modify,       NULL, 0)
- 	PHP_ME_MAPPING(add,			date_add,			NULL, 0)
- 	PHP_ME_MAPPING(sub,			date_sub,			NULL, 0)
-	PHP_ME_MAPPING(getTimezone, date_timezone_get, NULL, 0)
-	PHP_ME_MAPPING(setTimezone, date_timezone_set, NULL, 0)
-	PHP_ME_MAPPING(getOffset,   date_offset_get,   NULL, 0)
-	PHP_ME_MAPPING(setTime,     date_time_set,     NULL, 0)
-	PHP_ME_MAPPING(setDate,     date_date_set,     NULL, 0)
-	PHP_ME_MAPPING(setISODate,  date_isodate_set,  NULL, 0)
-	PHP_ME_MAPPING(setTimestamp,date_timestamp_set, NULL, 0)
-	PHP_ME_MAPPING(getTimestamp,date_timestamp_get, NULL, 0)
- 	PHP_ME_MAPPING(diff,        date_diff, NULL, 0)
+	PHP_ME(DateTime,			__construct,		arginfo_date_create, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+	PHP_ME(DateTime,			__wakeup,			NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(DateTime,			__set_state,		NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(createFromFormat, date_create_from_format,	arginfo_date_create_from_format, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(getLastErrors, date_get_last_errors,	arginfo_date_get_last_errors, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(format,		date_format,		arginfo_date_method_format, 0)
+	PHP_ME_MAPPING(modify,		date_modify,		arginfo_date_method_modify, 0)
+	PHP_ME_MAPPING(add,			date_add,			arginfo_date_method_add, 0)
+	PHP_ME_MAPPING(sub,			date_sub,			arginfo_date_method_sub, 0)
+	PHP_ME_MAPPING(getTimezone, date_timezone_get,	arginfo_date_method_timezone_get, 0)
+	PHP_ME_MAPPING(setTimezone, date_timezone_set,	arginfo_date_method_timezone_set, 0)
+	PHP_ME_MAPPING(getOffset,	date_offset_get,	arginfo_date_method_offset_get, 0)
+	PHP_ME_MAPPING(setTime,		date_time_set,		arginfo_date_method_time_set, 0)
+	PHP_ME_MAPPING(setDate,		date_date_set,		arginfo_date_method_date_set, 0)
+	PHP_ME_MAPPING(setISODate,	date_isodate_set,	arginfo_date_isodate_set, 0)
+	PHP_ME_MAPPING(setTimestamp,	date_timestamp_set, arginfo_date_method_timestamp_set, 0)
+	PHP_ME_MAPPING(getTimestamp,	date_timestamp_get, arginfo_date_method_timestamp_get, 0)
+	PHP_ME_MAPPING(diff,			date_diff, arginfo_date_method_diff, 0)
 	{NULL, NULL, NULL}
 };
 
 const zend_function_entry date_funcs_timezone[] = {
-	PHP_ME(DateTimeZone,              __construct,                 NULL, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getName,           timezone_name_get,           NULL, 0)
-	PHP_ME_MAPPING(getOffset,         timezone_offset_get,         NULL, 0)
-	PHP_ME_MAPPING(getTransitions,    timezone_transitions_get,    NULL, 0)
-	PHP_ME_MAPPING(listAbbreviations, timezone_abbreviations_list, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	PHP_ME_MAPPING(listIdentifiers,   timezone_identifiers_list,   NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME(DateTimeZone,              __construct,                 arginfo_timezone_open, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getName,           timezone_name_get,           arginfo_timezone_method_name_get, 0)
+	PHP_ME_MAPPING(getOffset,         timezone_offset_get,         arginfo_timezone_method_offset_get, 0)
+	PHP_ME_MAPPING(getTransitions,    timezone_transitions_get,    arginfo_timezone_method_transitions_get, 0)
+	PHP_ME_MAPPING(listAbbreviations, timezone_abbreviations_list, arginfo_timezone_abbreviations_list, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(listIdentifiers,   timezone_identifiers_list,   arginfo_timezone_identifiers_list, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	{NULL, NULL, NULL}
 };
 
 const zend_function_entry date_funcs_interval[] = {
-	PHP_ME(DateInterval,              __construct,                 NULL, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(format,            date_interval_format,        NULL, 0)
-	PHP_ME_MAPPING(createFromDateString, date_interval_create_from_date_string,	NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME(DateInterval,              __construct,                 arginfo_date_interval_construct, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(format,            date_interval_format,        arginfo_date_method_interval_format, 0)
+	PHP_ME_MAPPING(createFromDateString, date_interval_create_from_date_string,	arginfo_date_interval_create_from_date_string, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	{NULL, NULL, NULL}
 };
 
 const zend_function_entry date_funcs_period[] = {
-	PHP_ME(DatePeriod,                __construct,                 NULL, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+	PHP_ME(DatePeriod,                __construct,                 arginfo_date_period_construct, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -2490,7 +2754,7 @@ void zval_from_error_container(zval *z, timelib_error_container *error)
 	add_ascii_assoc_zval(z, "errors", element);
 }
 
-/* {{{ proto array date_get_last_errorse() U
+/* {{{ proto array date_get_last_errors() U
    Returns the warnings and errors found while parsing a date/time string.
 */
 PHP_FUNCTION(date_get_last_errors)
