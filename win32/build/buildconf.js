@@ -16,13 +16,14 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id: buildconf.js,v 1.13.2.2.2.1.2.2 2008-06-23 07:55:03 pajoye Exp $ */
+/* $Id: buildconf.js,v 1.13.2.2.2.1.2.3 2008-07-09 08:15:46 sfox Exp $ */
 // This generates a configure script for win32 build
 
 WScript.StdOut.WriteLine("Rebuilding configure.js");
 var FSO = WScript.CreateObject("Scripting.FileSystemObject");
 var C = FSO.CreateTextFile("configure.js", true);
 var B = FSO.CreateTextFile("configure.bat", true);
+var DSP = false;
 
 var modules = "";
 var MODULES = WScript.CreateObject("Scripting.Dictionary");
@@ -203,6 +204,11 @@ function buildconf_process_args()
 			WScript.StdOut.WriteLine("Adding " + argval + " to the module search path");
 			module_dirs[module_dirs.length] = argval;
 		}
+
+		if (argname == '--add-project-files') {
+			WScript.StdOut.WriteLine("Adding dsp templates into the mix");
+			DSP = true;
+		}
 	}
 }
 
@@ -211,6 +217,16 @@ buildconf_process_args();
 // Write the head of the configure script
 C.WriteLine("/* This file automatically generated from win32/build/confutils.js */");
 C.Write(file_get_contents("win32/build/confutils.js"));
+
+// If project files were requested, pull in the code to generate them
+if (DSP == true) {
+	C.WriteLine('PHP_DSP="yes"');
+	C.WriteBlankLines(1);
+	C.Write(file_get_contents("win32/build/projectgen.js"));
+} else {
+	C.WriteLine('PHP_DSP="no"');
+	C.WriteBlankLines(1);
+}
 
 // Pull in code from sapi and extensions
 modules = file_get_contents("win32/build/config.w32");

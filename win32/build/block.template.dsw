@@ -1,0 +1,14 @@
+Project: "EXTNAME"=..\ADDRESS - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name main
+    End Project Dependency
+}}}
+
+###############################################################################
