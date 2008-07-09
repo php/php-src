@@ -68,6 +68,7 @@ typedef struct {
 		zval                  *data;
 	} iter;
 	zval *tmp;
+	zend_function *fptr_count;
 } php_sxe_object;
 
 #ifdef ZTS
