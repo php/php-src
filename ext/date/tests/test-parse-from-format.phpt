@@ -22,123 +22,123 @@ foreach( $formats as $format )
 }
 ?>
 --EXPECT--
-string(13) "Y-m-d\TH:i:sP"
-string(25) "2008-07-08T22:14:12+02:00"
+unicode(13) "Y-m-d\TH:i:sP"
+unicode(25) "2008-07-08T22:14:12+02:00"
 object(DateTime)#2 (3) {
-  ["date"]=>
-  string(19) "2008-07-08 22:14:12"
-  ["timezone_type"]=>
+  [u"date"]=>
+  unicode(19) "2008-07-08 22:14:12"
+  [u"timezone_type"]=>
   int(1)
-  ["timezone"]=>
-  string(6) "+02:00"
+  [u"timezone"]=>
+  unicode(6) "+02:00"
 }
 
-string(16) "l, d-M-y H:i:s T"
-string(36) "Tuesday, 08-Jul-08 22:14:12 GMT+0200"
+unicode(16) "l, d-M-y H:i:s T"
+unicode(36) "Tuesday, 08-Jul-08 22:14:12 GMT+0200"
 object(DateTime)#1 (3) {
-  ["date"]=>
-  string(19) "2008-07-08 22:14:12"
-  ["timezone_type"]=>
+  [u"date"]=>
+  unicode(19) "2008-07-08 22:14:12"
+  [u"timezone_type"]=>
   int(1)
-  ["timezone"]=>
-  string(6) "+02:00"
+  [u"timezone"]=>
+  unicode(6) "+02:00"
 }
 
-string(13) "Y-m-d\TH:i:sO"
-string(24) "2008-07-08T22:14:12+0200"
+unicode(13) "Y-m-d\TH:i:sO"
+unicode(24) "2008-07-08T22:14:12+0200"
 object(DateTime)#3 (3) {
-  ["date"]=>
-  string(19) "2008-07-08 22:14:12"
-  ["timezone_type"]=>
+  [u"date"]=>
+  unicode(19) "2008-07-08 22:14:12"
+  [u"timezone_type"]=>
   int(1)
-  ["timezone"]=>
-  string(6) "+02:00"
+  [u"timezone"]=>
+  unicode(6) "+02:00"
 }
 
-string(16) "D, d M y H:i:s O"
-string(29) "Tue, 08 Jul 08 22:14:12 +0200"
+unicode(16) "D, d M y H:i:s O"
+unicode(29) "Tue, 08 Jul 08 22:14:12 +0200"
 object(DateTime)#2 (3) {
-  ["date"]=>
-  string(19) "2008-07-08 22:14:12"
-  ["timezone_type"]=>
+  [u"date"]=>
+  unicode(19) "2008-07-08 22:14:12"
+  [u"timezone_type"]=>
   int(1)
-  ["timezone"]=>
-  string(6) "+02:00"
+  [u"timezone"]=>
+  unicode(6) "+02:00"
 }
 
-string(16) "l, d-M-y H:i:s T"
-string(36) "Tuesday, 08-Jul-08 22:14:12 GMT+0200"
+unicode(16) "l, d-M-y H:i:s T"
+unicode(36) "Tuesday, 08-Jul-08 22:14:12 GMT+0200"
 object(DateTime)#1 (3) {
-  ["date"]=>
-  string(19) "2008-07-08 22:14:12"
-  ["timezone_type"]=>
+  [u"date"]=>
+  unicode(19) "2008-07-08 22:14:12"
+  [u"timezone_type"]=>
   int(1)
-  ["timezone"]=>
-  string(6) "+02:00"
+  [u"timezone"]=>
+  unicode(6) "+02:00"
 }
 
-string(16) "D, d M y H:i:s O"
-string(29) "Tue, 08 Jul 08 22:14:12 +0200"
+unicode(16) "D, d M y H:i:s O"
+unicode(29) "Tue, 08 Jul 08 22:14:12 +0200"
 object(DateTime)#3 (3) {
-  ["date"]=>
-  string(19) "2008-07-08 22:14:12"
-  ["timezone_type"]=>
+  [u"date"]=>
+  unicode(19) "2008-07-08 22:14:12"
+  [u"timezone_type"]=>
   int(1)
-  ["timezone"]=>
-  string(6) "+02:00"
+  [u"timezone"]=>
+  unicode(6) "+02:00"
 }
 
-string(16) "D, d M Y H:i:s O"
-string(31) "Tue, 08 Jul 2008 22:14:12 +0200"
+unicode(16) "D, d M Y H:i:s O"
+unicode(31) "Tue, 08 Jul 2008 22:14:12 +0200"
 object(DateTime)#2 (3) {
-  ["date"]=>
-  string(19) "2008-07-08 22:14:12"
-  ["timezone_type"]=>
+  [u"date"]=>
+  unicode(19) "2008-07-08 22:14:12"
+  [u"timezone_type"]=>
   int(1)
-  ["timezone"]=>
-  string(6) "+02:00"
+  [u"timezone"]=>
+  unicode(6) "+02:00"
 }
 
-string(16) "D, d M Y H:i:s O"
-string(31) "Tue, 08 Jul 2008 22:14:12 +0200"
+unicode(16) "D, d M Y H:i:s O"
+unicode(31) "Tue, 08 Jul 2008 22:14:12 +0200"
 object(DateTime)#1 (3) {
-  ["date"]=>
-  string(19) "2008-07-08 22:14:12"
-  ["timezone_type"]=>
+  [u"date"]=>
+  unicode(19) "2008-07-08 22:14:12"
+  [u"timezone_type"]=>
   int(1)
-  ["timezone"]=>
-  string(6) "+02:00"
+  [u"timezone"]=>
+  unicode(6) "+02:00"
 }
 
-string(13) "Y-m-d\TH:i:sP"
-string(25) "2008-07-08T22:14:12+02:00"
+unicode(13) "Y-m-d\TH:i:sP"
+unicode(25) "2008-07-08T22:14:12+02:00"
 object(DateTime)#3 (3) {
-  ["date"]=>
-  string(19) "2008-07-08 22:14:12"
-  ["timezone_type"]=>
+  [u"date"]=>
+  unicode(19) "2008-07-08 22:14:12"
+  [u"timezone_type"]=>
   int(1)
-  ["timezone"]=>
-  string(6) "+02:00"
+  [u"timezone"]=>
+  unicode(6) "+02:00"
 }
 
-string(16) "D, d M Y H:i:s O"
-string(31) "Tue, 08 Jul 2008 22:14:12 +0200"
+unicode(16) "D, d M Y H:i:s O"
+unicode(31) "Tue, 08 Jul 2008 22:14:12 +0200"
 object(DateTime)#2 (3) {
-  ["date"]=>
-  string(19) "2008-07-08 22:14:12"
-  ["timezone_type"]=>
+  [u"date"]=>
+  unicode(19) "2008-07-08 22:14:12"
+  [u"timezone_type"]=>
   int(1)
-  ["timezone"]=>
-  string(6) "+02:00"
+  [u"timezone"]=>
+  unicode(6) "+02:00"
 }
 
-string(13) "Y-m-d\TH:i:sP"
-string(25) "2008-07-08T22:14:12+02:00"
+unicode(13) "Y-m-d\TH:i:sP"
+unicode(25) "2008-07-08T22:14:12+02:00"
 object(DateTime)#1 (3) {
-  ["date"]=>
-  string(19) "2008-07-08 22:14:12"
-  ["timezone_type"]=>
+  [u"date"]=>
+  unicode(19) "2008-07-08 22:14:12"
+  [u"timezone_type"]=>
   int(1)
-  ["timezone"]=>
-  string(6) "+02:00"
+  [u"timezone"]=>
+  unicode(6) "+02:00"
 }
