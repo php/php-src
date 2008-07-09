@@ -1,3 +1,75 @@
+2008-07-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_closures.c
+      tests/closure_013.phpt
+      tests/closure_014.phpt:
+      Closure::__invoke() is fixed to support references
+
+2008-07-08  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * zend_language_scanner.c
+      zend_language_scanner_defs.h:
+      let re2c do its magic
+
+    * zend_language_scanner.l:
+      MFB: fix remaining # comments issues
+
+    * (PHP_5_3)
+      zend_language_scanner.c
+      zend_language_scanner_defs.h:
+      regenerate
+
+    * (PHP_5_3)
+      zend_language_scanner.l:
+      now really fix once and for all the #-style comments.
+      also remove some duplicated code in <?, <%, <%= handlers. this also has
+      the side-effect of producing better bytecodes in some special cases
+
+2008-07-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_gc.c
+      zend_gc.c
+      tests/gc_029.phpt
+      tests/gc_029.phpt
+      tests/gc_030.phpt:
+      Fixed bug #45434 (circular reference causes segfault in
+      gc_collect_cycles())
+
+    * tests/gc_030.phpt
+      tests/gc_030.phpt:
+      
+      file gc_030.phpt was initially added on branch PHP_5_3.
+
+    * Makefile.am
+      Zend.dsp
+      ZendTS.dsp
+      zend.h
+      zend_API.c
+      zend_closures.c
+      zend_closures.h
+      zend_compile.c
+      zend_compile.h
+      zend_default_classes.c
+      zend_execute.c
+      zend_execute_API.c
+      zend_language_parser.y
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/closure_001.phpt
+      tests/closure_002.phpt
+      tests/closure_003.phpt
+      tests/closure_004.phpt
+      tests/closure_005.phpt
+      tests/closure_006.phpt
+      tests/closure_007.phpt
+      tests/closure_008.phpt
+      tests/closure_009.phpt
+      tests/closure_010.phpt
+      tests/closure_011.phpt
+      tests/closure_012.phpt:
+      Added closures support
+
 2008-07-07  Scott MacVicar  <scott@macvicar.net>
 
     * (PHP_5_3)

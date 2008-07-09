@@ -1,3 +1,292 @@
+2008-07-08  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/spl_directory.c
+      ext/spl/tests/fileobject_003.phpt:
+      Woopsy
+
+    * (PHP_5_3)
+      ext/spl/spl_directory.c
+      ext/spl/tests/dit_001.phpt
+      ext/spl/tests/fileobject_003.phpt
+      ext/spl/tests/fileobject_getfileinfo_basic.phpt:
+      MFH: - Fix filename in debug_info
+      - Fix #45345 (getPathInfo on the file instead of the dir)
+      - Remove trailing / on input
+
+    * ext/spl/spl_directory.c
+      ext/spl/tests/dit_001.phpt
+      ext/spl/tests/fileobject_003.phpt
+      ext/spl/tests/fileobject_004.phpt
+      ext/spl/tests/fileobject_getfileinfo_basic.phpt:
+      - Fix filename in debug_info
+      - Fix #45345 (getPathInfo on the file instead of the dir)
+      - Remove trailing / on input
+
+2008-07-08  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/tests/test-parse-from-format.phpt:
+      - MFH: Fixed bug #45459 (date_create_from_format() fails on DATE_RFC3339)
+      by
+        allowing a few more format specifiers in date_create_from_format() /
+        date_parse_from_format().
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/tests/test-parse-from-format.phpt
+      ext/date/tests/test-parse-from-format.phpt:
+      - Fixed bug #45459 (date_create_from_format() fails on DATE_RFC3339) by
+        allowing a few more format specifiers in date_create_from_format() /
+        date_parse_from_format().
+
+    * (PHP_5_3)
+      ext/date/php_date.c:
+      - MFH: Fixed a memleak (Original patch by Hannes Magnusson).
+
+    * ext/date/php_date.c:
+      - Fixed a memleak (Original patch by Hannes Magnusson).
+
+2008-07-08  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/gd/config.w32:
+      MFH:
+       - use _a for static lib
+       - fix logic for shared zlib
+
+    * ext/gd/config.w32:
+      - use _a for static lib
+      - fix logic for shared zlib
+
+2008-07-08  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/lib/parse_iso_intervals.c:
+      - MFH: Fixed some ambiguities in the date parser.
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/lib/parse_iso_intervals.c:
+      - Fixed some ambiguities in the date parser.
+
+2008-07-08  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * run-tests.php:
+      MFB: increase pcre.backtrack_limit
+
+    * (PHP_5_3)
+      run-tests.php:
+      increase pcre.backtrack_limit so that the phpinfo.phpt test passes on my
+      computer.
+      we should really consider increase the default of this limit.. (but not
+      the recursion one though)
+
+2008-07-08  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_2)
+      ext/date/php_date.c
+      ext/date/lib/parse_tz.c
+      ext/date/lib/tm2unixtime.c:
+      - MFH: Memory issues
+      - MFH: // style comments
+
+    * ext/date/php_date.c
+      ext/date/php_date.c
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/lib/parse_date.re
+      ext/date/lib/parse_iso_intervals.c
+      ext/date/lib/parse_iso_intervals.c
+      ext/date/lib/tm2unixtime.c
+      ext/date/lib/tm2unixtime.c:
+      - Replaced // by /* .. */ comments.
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/php_date.c
+      ext/date/tests/015.phpt
+      ext/date/tests/dateinterval_errors.phpt:
+      - MFH: Fixed memory leaks and segfaults, patch by Joe Orton.
+      - MFH: Fixed bug #45038 (Crash when using DateTimeZone object returned by
+        Date::getTimezone).
+
+    * ext/date/tests/015.phpt
+      ext/date/tests/015.phpt
+      ext/date/tests/dateinterval_errors.phpt
+      ext/date/tests/dateinterval_errors.phpt:
+      
+      - Fixed memory leaks and segfaults, patch by Joe Orton.
+      - Fixed bug #45038 (Crash when using DateTimeZone object returned by
+        Date::getTimezone).
+
+    * ext/date/php_date.c:
+      - Fixed memory leaks and segfaults, patch by Joe Orton.
+      - Fixed bug #45038 (Crash when using DateTimeZone object returned by
+        Date::getTimezone).
+
+2008-07-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_closures.c
+      ZendEngine2/tests/closure_013.phpt
+      ZendEngine2/tests/closure_014.phpt:
+      Closure::__invoke() is fixed to support references
+
+2008-07-08  Henrique do Nascimento Angelo  <h.n.angelo@gmail.com>
+
+    * ext/exif/tests/exif007.phpt
+      ext/exif/tests/exif008.phpt
+      ext/exif/tests/exif009.phpt
+      ext/exif/tests/exif010.phpt
+      ext/exif/tests/exif011.phpt
+      ext/exif/tests/exif012.phpt
+      ext/exif/tests/exif013.phpt
+      ext/exif/tests/exif014.phpt
+      ext/exif/tests/exif015.phpt
+      ext/exif/tests/exif016.phpt
+      ext/exif/tests/exif017.phpt
+      ext/exif/tests/exif018.phpt
+      ext/exif/tests/exif020.phpt
+      ext/exif/tests/exif021.phpt
+      ext/exif/tests/exif022.phpt
+      ext/exif/tests/exif023.phpt
+      ext/exif/tests/exif024.phpt
+      ext/exif/tests/exif025.phpt
+      ext/exif/tests/exif026.phpt
+      ext/exif/tests/exif027.phpt:
+      Fix the expected FileDateTime
+
+2008-07-08  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner_defs.h:
+      let re2c do its magic
+
+    * ZendEngine2/zend_language_scanner.l:
+      MFB: fix remaining # comments issues
+
+2008-07-08  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/gd/gd.c:
+      fix typo
+
+2008-07-08  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner_defs.h:
+      regenerate
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_scanner.l:
+      now really fix once and for all the #-style comments.
+      also remove some duplicated code in <?, <%, <%= handlers. this also has
+      the side-effect of producing better bytecodes in some special cases
+
+    * tests/lang/comments.phpt
+      tests/lang/comments2.phpt
+      tests/lang/script_tag.phpt:
+      add new tests
+
+    * (PHP_5_3)
+      tests/lang/comments.phpt
+      tests/lang/comments2.phpt
+      tests/lang/comments2.phpt
+      tests/lang/script_tag.phpt
+      tests/lang/script_tag.phpt:
+      add more tests for the parser. currently both fail
+
+2008-07-08  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      NEWS:
+      Typo, missing items and clarify what sqlite was updated.
+
+    * (PHP_5_2)
+      NEWS:
+      This change was backed out of 5.2 and is now in 5.3+
+
+    * (PHP_5_3)
+      NEWS:
+      Add missing NEWS items.
+
+2008-07-08  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      NEWS:
+      - We do not mention bugs that were not in any release. (DMITRY!..)
+
+    * (PHP_5_3)
+      NEWS:
+      - Some more reordering
+
+    * (PHP_5_3)
+      NEWS:
+      - Reorder, simplify, make it somewhat more readable and easier to read. :)
+
+2008-07-08  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/standard/info.c
+      ext/standard/tests/general_functions/phpinfo.phpt:
+      capitalize multibyte support
+
+2008-07-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/gc_030.phpt
+      ZendEngine2/tests/gc_030.phpt:
+      
+      file gc_030.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_gc.c
+      ZendEngine2/zend_gc.c
+      ZendEngine2/tests/gc_029.phpt
+      ZendEngine2/tests/gc_029.phpt
+      ZendEngine2/tests/gc_030.phpt:
+      Fixed bug #45434 (circular reference causes segfault in
+      gc_collect_cycles())
+
+    * NEWS
+      configure.in
+      ZendEngine2/Makefile.am
+      ZendEngine2/Zend.dsp
+      ZendEngine2/ZendTS.dsp
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_closures.c
+      ZendEngine2/zend_closures.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/closure_001.phpt
+      ZendEngine2/tests/closure_002.phpt
+      ZendEngine2/tests/closure_003.phpt
+      ZendEngine2/tests/closure_004.phpt
+      ZendEngine2/tests/closure_005.phpt
+      ZendEngine2/tests/closure_006.phpt
+      ZendEngine2/tests/closure_007.phpt
+      ZendEngine2/tests/closure_008.phpt
+      ZendEngine2/tests/closure_009.phpt
+      ZendEngine2/tests/closure_010.phpt
+      ZendEngine2/tests/closure_011.phpt
+      ZendEngine2/tests/closure_012.phpt
+      ext/pcre/php_pcre.c
+      ext/reflection/php_reflection.c:
+      Added closures support
+
 2008-07-07  David Soria Parra  <dsoria@gmx.net>
 
     * (PHP_5_3)
