@@ -10,10 +10,13 @@ var_dump($tzold->getName());
 $dto->setTimezone(new DateTimeZone('US/Eastern'));
 var_dump($tzold->getName());
 var_dump($dto->getTimezone()->getName());
+unset($dto);
+var_dump($tzold->getName());
 echo "Done\n";
 ?>
 --EXPECTF--
 unicode(3) "UTC"
 unicode(3) "UTC"
 unicode(10) "US/Eastern"
+unicode(3) "UTC"
 Done
