@@ -102,7 +102,7 @@ static void phar_split_cache_list(TSRMLS_D)
 {
 	char *tmp;
 	char *key, *lasts, *end;
-	char ds[1];
+	char ds[2];
 	phar_archive_data *phar;
 	uint i = 0;
 
@@ -111,6 +111,7 @@ static void phar_split_cache_list(TSRMLS_D)
 	}
 
 	ds[0] = DEFAULT_DIR_SEPARATOR;
+	ds[1] = '\0';
 	tmp = estrdup(PHAR_GLOBALS->cache_list);
 
 	/* fake request startup */
