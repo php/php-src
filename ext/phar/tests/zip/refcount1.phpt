@@ -51,9 +51,9 @@ include $alias . '/b/c.php';
 ===CLOSE===
 object(PharFileInfo)#%d (2) {
   [u"pathName":u"SplFileInfo":private]=>
-  string(%d) "phar://%srefcount1.phar.zip/b"
-  [u"fileName":u"SplFileInfo":private]=>
   string(%d) "phar://%srefcount1.phar.zip/b/c.php"
+  [u"fileName":u"SplFileInfo":private]=>
+  string(%d) "c.php"
 }
 string(5) "extra"
 ===UNLINK===
@@ -61,9 +61,9 @@ string(5) "extra"
 Warning: unlink(): phar error: "b/c.php" in phar "%srefcount1.phar.zip", has open file pointers, cannot unlink in %srefcount1.php on line %d
 object(PharFileInfo)#%d (2) {
   [u"pathName":u"SplFileInfo":private]=>
-  string(%d) "phar://%srefcount1.phar.zip/b"
+  string(%d) "phar://%srefcount1.phar.zip/b/c.php"
   [u"fileName":u"SplFileInfo":private]=>
-  string(%s) "phar://%srefcount1.phar.zip/b/c.php"
+  string(%s) "c.php"
 }
 string(5) "extra"
 extra
