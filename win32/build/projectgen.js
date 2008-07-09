@@ -155,13 +155,14 @@ function generate_dsp_filelist(ext, ext_dir, files)
 				}
 
 				DSP_HEADERS = DSP_HEADERS.concat(libheaders.split(" "));
-			}
 
-			sources = newarr[1].replace(/\\/g, "");
-			sources = sources.replace(ws, " ");
-			path = path ? " ./" + path + "/" : " ./";
-			sources = sources.replace(/ /g, path);
-			DSP_SOURCES = DSP_SOURCES.concat(sources.split(" "));
+				sources = newarr[1].replace(/\\/g, "");
+				sources = sources.replace(ws, " ");
+				path = path ? " ./" + path + "/" : " ./";
+				sources = sources.replace(/ /g, path);
+		
+				DSP_SOURCES = DSP_SOURCES.concat(sources.split(" "));
+			}
 		}
 	}
 
