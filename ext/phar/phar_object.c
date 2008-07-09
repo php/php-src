@@ -3884,12 +3884,12 @@ PHP_METHOD(Phar, extractTo)
 	}
 
 	fp = php_stream_open_wrapper(phar_obj->arc.archive->fname, "rb", IGNORE_URL|STREAM_MUST_SEEK, &actual);
-	efree(actual);
 	if (!fp) {
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
 			"Invalid argument, %s cannot be found", phar_obj->arc.archive->fname);
 		return;
 	}
+	efree(actual);
 	php_stream_close(fp);
 
 	if (pathto_len < 1) {
