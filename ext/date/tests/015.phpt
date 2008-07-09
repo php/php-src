@@ -15,8 +15,8 @@ var_dump($tzold->getName());
 echo "Done\n";
 ?>
 --EXPECTF--
-unicode(3) "UTC"
-unicode(3) "UTC"
-unicode(10) "US/Eastern"
-unicode(3) "UTC"
+string(3) "UTC"
+string(3) "UTC"
+string(10) "US/Eastern"
+string(3) "UTC"
 Done
