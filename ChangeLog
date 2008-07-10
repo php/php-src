@@ -1,3 +1,141 @@
+2008-07-09  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/standard/array.c:
+      MFH: Fix resolution rule of count vs. handler
+
+    * ext/standard/array.c:
+      Fix resolution rule of count vs. handler
+
+    * (PHP_5_3)
+      ext/simplexml/php_simplexml.h
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/036.phpt
+      ext/spl/spl_sxe.c:
+      MFH: Move SXI::count to SXE::count and make it user-friendly
+
+    * ext/simplexml/php_simplexml.h
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/036.phpt
+      ext/simplexml/tests/036.phpt:
+      Move SXI::count to SXE::count and make it user-friendly
+
+    * ext/spl/tests/fixedarray_019.phpt
+      ext/spl/tests/fixedarray_019.phpt:
+      
+      Test extended iterators methods
+
+2008-07-09  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/gd/config.w32
+      ext/zip/config.w32:
+      MFB: fix zlib detection and linking
+      - synch zip config.w32
+
+    * (PHP_5_3)
+      ext/gd/config.w32
+      ext/zip/config.w32:
+      fix zlib detection and linking
+
+2008-07-09  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/projectgen.js:
+      - It's amazing the havoc one little misplaced bracket can cause...
+
+    * (PHP_5_3)
+      win32/build/projectgen.js:
+      - Clean up ws/cs a bit and add some comments
+
+2008-07-09  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/phar/phar.c:
+      add zero-terminator to the delimiter (and make valgrind happy)
+
+2008-07-09  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/date/tests/015.phpt
+      ext/date/tests/test-parse-from-format.phpt:
+      - Fixed test
+
+    * ext/date/php_date.c:
+      - MFB: Added arginfo
+
+    * (PHP_5_3)
+      ext/date/php_date.c:
+      - Added arginfo
+
+2008-07-09  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/each_002.phpt:
+      remove UEXPECTF section
+
+2008-07-09  Scott MacVicar  <scott@macvicar.net>
+
+    * win32/build/config.w32:
+      Fix windows build
+
+2008-07-09  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      NEWS:
+      add SplFileInfo::getPathInfo fix to NEWS
+
+    * ext/phar/tests/phar_oo_005.phpt
+      ext/phar/tests/refcount1.phpt
+      ext/phar/tests/tar/refcount1.phpt
+      ext/phar/tests/zip/refcount1.phpt:
+      MFB: Fix filename/pathname/getpathinfo tests according to SPL fix
+
+2008-07-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ext/phar/phar_object.c:
+      Fixed efree(NULL)
+
+2008-07-09  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/phar/tests/phar_oo_005.phpt
+      ext/phar/tests/refcount1.phpt
+      ext/phar/tests/tar/refcount1.phpt
+      ext/phar/tests/zip/refcount1.phpt:
+      Fix filename/pathname/getpathinfo tests according to SPL fix
+
+2008-07-09  Joe Orton  <jorton@redhat.com>
+
+    * (PHP_5_3)
+      ext/date/tests/015.phpt:
+      - MFH: tweak test case to better trigger the (now-fixed) reference bugs
+
+    * ext/date/tests/015.phpt:
+      - tweak test case to better trigger the (now-fixed) reference bugs
+
+2008-07-09  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/.cvsignore:
+      - Add generated files to .cvsignore
+
+    * win32/build/DSP.README
+      win32/build/DSP.README
+      win32/build/block.template.dsw
+      win32/build/block.template.dsw
+      win32/build/buildconf.js
+      win32/build/config.w32
+      win32/build/confutils.js
+      win32/build/projectgen.js
+      win32/build/projectgen.js
+      win32/build/template.dsp
+      win32/build/template.dsp
+      win32/build/template.dsw
+      win32/build/template.dsw:
+      
+      file DSP.README was initially added on branch PHP_5_3.
+
 2008-07-08  Etienne Kneuss  <php@colder.ch>
 
     * ext/spl/spl_directory.c
