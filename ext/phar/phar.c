@@ -3299,13 +3299,18 @@ PHP_MINIT_FUNCTION(phar) /* {{{ */
 
 	phar_object_init(TSRMLS_C);
 
+	phar_intercept_functions_init(TSRMLS_C);
+
 	return php_register_url_stream_wrapper("phar", &php_stream_phar_wrapper TSRMLS_CC);
 }
 /* }}} */
 
 PHP_MSHUTDOWN_FUNCTION(phar) /* {{{ */
 {
-	return php_unregister_url_stream_wrapper("phar" TSRMLS_CC);
+	php_unregister_url_stream_wrapper("phar" TSRMLS_CC);
+
+	phar_intercept_functions_shutdown(TSRMLS_C);
+
 	if (zend_compile_file == phar_compile_file) {
 		zend_compile_file = phar_orig_compile_file;
 	}
@@ -3319,6 +3324,8 @@ PHP_MSHUTDOWN_FUNCTION(phar) /* {{{ */
 		zend_hash_destroy(&(cached_phars));
 		zend_hash_destroy(&(cached_alias));
 	}
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -3353,9 +3360,7 @@ void phar_request_initialize(TSRMLS_D) /* {{{ */
 		PHAR_G(cwd) = NULL;
 		PHAR_G(cwd_len) = 0;
 		PHAR_G(cwd_init) = 0;
-		if (!PHAR_G(orig_fopen)) {
-			phar_intercept_functions(TSRMLS_C);
-		}
+		phar_intercept_functions(TSRMLS_C);
 	}
 }
 /* }}} */
@@ -3451,6 +3456,7 @@ static zend_module_dep phar_deps[] = {
 	ZEND_MOD_OPTIONAL("bz2")
 	ZEND_MOD_OPTIONAL("openssl")
 	ZEND_MOD_OPTIONAL("zlib")
+	ZEND_MOD_OPTIONAL("standard")
 #if HAVE_SPL
 	ZEND_MOD_REQUIRED("spl")
 #endif

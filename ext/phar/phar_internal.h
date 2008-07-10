@@ -158,6 +158,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	int         has_bz2;
 	zend_bool   readonly_orig;
 	zend_bool   require_hash_orig;
+	zend_bool	intercepted;
 	int         request_init;
 	int         require_hash;
 	int         request_done;
