@@ -86,6 +86,10 @@ zend_object_value IntlDateFormatter_object_create(zend_class_entry *ce TSRMLS_DC
 /* {{{ IntlDateFormatter_class_functions
  * Every 'IntlDateFormatter' class method has an entry in this table
  */
+static ZEND_BEGIN_ARG_INFO_EX( datefmt_parse_args, 0, 0, 1 )
+		ZEND_ARG_INFO( 0, string )
+		ZEND_ARG_INFO( 1, position )
+ZEND_END_ARG_INFO()
 
 static function_entry IntlDateFormatter_class_functions[] = {
 	PHP_ME( IntlDateFormatter, __construct, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
@@ -102,8 +106,8 @@ static function_entry IntlDateFormatter_class_functions[] = {
 	PHP_NAMED_FE( setLenient, ZEND_FN( datefmt_set_lenient ), NULL )
 	PHP_NAMED_FE( isLenient, ZEND_FN( datefmt_is_lenient ), NULL )
 	PHP_NAMED_FE( format, ZEND_FN( datefmt_format ), NULL )
-	PHP_NAMED_FE( parse, ZEND_FN( datefmt_parse), NULL )
-	PHP_NAMED_FE( localtime, ZEND_FN( datefmt_localtime ), NULL )
+	PHP_NAMED_FE( parse, ZEND_FN( datefmt_parse), datefmt_parse_args )
+	PHP_NAMED_FE( localtime, ZEND_FN( datefmt_localtime ), datefmt_parse_args )
 	PHP_NAMED_FE( getErrorCode, ZEND_FN( datefmt_get_error_code ), NULL )
 	PHP_NAMED_FE( getErrorMessage, ZEND_FN( datefmt_get_error_message ), NULL )
 	{ NULL, NULL, NULL }

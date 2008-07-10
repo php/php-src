@@ -59,11 +59,11 @@ function ut_main()
                 $res_str .= "\nInput text is : $text_entry";
 		$cnt =0;
 
-		$parse_pos = 0;
 
                     foreach( $fmt_array as $fmt_entry ){
 			$res_str .= "\n------------";
 			$res_str .= "\nIntlDateFormatter : ".$fmt_desc_array[$cnt];
+		$parse_pos = 0;
 			$cnt++;		
 			$parsed_arr = ut_datefmt_localtime( $fmt_entry , $text_entry , $parse_pos );
 
