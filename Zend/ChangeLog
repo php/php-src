@@ -1,3 +1,9 @@
+2008-07-09  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      tests/each_002.phpt:
+      remove UEXPECTF section
+
 2008-07-08  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_closures.c
