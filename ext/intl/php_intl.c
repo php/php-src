@@ -210,6 +210,12 @@ ZEND_BEGIN_ARG_INFO_EX( grapheme_extract_args, 0, 0, 2 )
 		ZEND_ARG_INFO( 1, arg5 )  /* 1 = pass by reference */
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX( datefmt_parse_args, 0, 0, 2 )
+		ZEND_ARG_INFO( 0, formatter )
+		ZEND_ARG_INFO( 0, string )
+		ZEND_ARG_INFO( 1, position )
+ZEND_END_ARG_INFO()
+
 /* }}} */
 
 /* {{{ intl_functions
@@ -299,8 +305,8 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( datefmt_is_lenient, NULL )
 	PHP_FE( datefmt_set_lenient, NULL )
 	PHP_FE( datefmt_format, NULL )
-	PHP_FE( datefmt_parse, NULL )
-        PHP_FE( datefmt_localtime , NULL )
+	PHP_FE( datefmt_parse, datefmt_parse_args )
+    PHP_FE( datefmt_localtime , datefmt_parse_args )
 	PHP_FE( datefmt_get_error_code, NULL )
 	PHP_FE( datefmt_get_error_message, NULL )
 
