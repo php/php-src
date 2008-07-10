@@ -29,6 +29,10 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 	int filename_len;
 	zval *zcontext = NULL;
 
+	if (!PHAR_G(intercepted)) {
+		goto skip_phar;
+	}
+
 	if ((PHAR_GLOBALS->phar_fname_map.arBuckets && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
 		&& !cached_phars.arBuckets) {
 		goto skip_phar;
@@ -97,6 +101,10 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 	long offset = -1;
 	long maxlen = PHP_STREAM_COPY_ALL;
 	zval *zcontext = NULL;
+
+	if (!PHAR_G(intercepted)) {
+		goto skip_phar;
+	}
 
 	if ((PHAR_GLOBALS->phar_fname_map.arBuckets && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
 		&& !cached_phars.arBuckets) {
@@ -224,6 +232,10 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 	zval *zcontext = NULL;
 	php_stream *stream;
 
+	if (!PHAR_G(intercepted)) {
+		goto skip_phar;
+	}
+
 	if ((PHAR_GLOBALS->phar_fname_map.arBuckets && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
 		&& !cached_phars.arBuckets) {
 		goto skip_phar;
@@ -314,6 +326,10 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 	zend_bool use_include_path = 0;
 	zval *zcontext = NULL;
 	php_stream *stream;
+
+	if (!PHAR_G(intercepted)) {
+		goto skip_phar;
+	}
 
 	if ((PHAR_GLOBALS->phar_fname_map.arBuckets && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
 		&& !cached_phars.arBuckets) {
@@ -792,14 +808,18 @@ skip_phar:
 
 #define PharFileFunction(fname, funcnum, orig) \
 void fname(INTERNAL_FUNCTION_PARAMETERS) { \
-	char *filename; \
-	int filename_len; \
-	\
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) { \
-		return; \
+	if (!PHAR_G(intercepted)) { \
+		PHAR_G(orig)(INTERNAL_FUNCTION_PARAM_PASSTHRU); \
+	} else { \
+		char *filename; \
+		int filename_len; \
+		\
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) { \
+			return; \
+		} \
+		\
+		phar_file_stat(filename, (php_stat_len) filename_len, funcnum, PHAR_G(orig), INTERNAL_FUNCTION_PARAM_PASSTHRU); \
 	} \
-	\
-	phar_file_stat(filename, (php_stat_len) filename_len, funcnum, PHAR_G(orig), INTERNAL_FUNCTION_PARAM_PASSTHRU); \
 }
 /* }}} */
 
@@ -878,6 +898,10 @@ PHAR_FUNC(phar_is_file) /* {{{ */
 	char *filename;
 	int filename_len;
 
+	if (!PHAR_G(intercepted)) {
+		goto skip_phar;
+	}
+
 	if ((PHAR_GLOBALS->phar_fname_map.arBuckets && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
 		&& !cached_phars.arBuckets) {
 		goto skip_phar;
@@ -938,6 +962,10 @@ PHAR_FUNC(phar_is_link) /* {{{ */
 {
 	char *filename;
 	int filename_len;
+
+	if (!PHAR_G(intercepted)) {
+		goto skip_phar;
+	}
 
 	if ((PHAR_GLOBALS->phar_fname_map.arBuckets && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
 		&& !cached_phars.arBuckets) {
@@ -1006,13 +1034,6 @@ PharFileFunction(phar_stat, FS_STAT, orig_stat)
 /* }}} */
 
 /* {{{ void phar_intercept_functions(TSRMLS_D) */
-#define PHAR_INTERCEPT(func) \
-	PHAR_G(orig_##func) = NULL; \
-	if (SUCCESS == zend_hash_find(CG(function_table), #func, sizeof(#func), (void **)&orig)) { \
-		PHAR_G(orig_##func) = orig->internal_function.handler; \
-		orig->internal_function.handler = phar_##func; \
-	}
-
 void phar_intercept_functions(TSRMLS_D)
 {
 	zend_function *orig;
@@ -1020,10 +1041,30 @@ void phar_intercept_functions(TSRMLS_D)
 	if (!PHAR_G(request_init)) {
 		PHAR_G(cwd) = NULL;
 		PHAR_G(cwd_len) = 0;
-	} else if (PHAR_G(orig_fopen)) {
-		/* don't double-intercept */
-		return;
 	}
+	PHAR_G(intercepted) = 1;
+}
+/* }}} */
+
+/* {{{ void phar_release_functions(TSRMLS_D) */
+void phar_release_functions(TSRMLS_D)
+{
+	PHAR_G(intercepted) = 0;
+}
+/* }}} */
+
+/* {{{ void phar_intercept_functions_init(TSRMLS_D) */
+#define PHAR_INTERCEPT(func) \
+	PHAR_G(orig_##func) = NULL; \
+	if (SUCCESS == zend_hash_find(CG(function_table), #func, sizeof(#func), (void **)&orig)) { \
+		PHAR_G(orig_##func) = orig->internal_function.handler; \
+		orig->internal_function.handler = phar_##func; \
+	}
+
+void phar_intercept_functions_init(TSRMLS_D)
+{
+	zend_function *orig;
+
 	PHAR_INTERCEPT(fopen);
 	PHAR_INTERCEPT(file_get_contents);
 	PHAR_INTERCEPT(is_file);
@@ -1046,17 +1087,18 @@ void phar_intercept_functions(TSRMLS_D)
 	PHAR_INTERCEPT(lstat);
 	PHAR_INTERCEPT(stat);
 	PHAR_INTERCEPT(readfile);
+	PHAR_G(intercepted) = 0;
 }
 /* }}} */
 
-/* {{{ void phar_release_functions(TSRMLS_D) */
+/* {{{ void phar_intercept_functions_shutdown(TSRMLS_D) */
 #define PHAR_RELEASE(func) \
 	if (PHAR_G(orig_##func) && SUCCESS == zend_hash_find(CG(function_table), #func, sizeof(#func), (void **)&orig)) { \
 		orig->internal_function.handler = PHAR_G(orig_##func); \
 	} \
 	PHAR_G(orig_##func) = NULL;
 
-void phar_release_functions(TSRMLS_D)
+void phar_intercept_functions_shutdown(TSRMLS_D)
 {
 	zend_function *orig;
 
@@ -1081,6 +1123,7 @@ void phar_release_functions(TSRMLS_D)
 	PHAR_RELEASE(lstat);
 	PHAR_RELEASE(stat);
 	PHAR_RELEASE(readfile);
+	PHAR_G(intercepted) = 0;
 }
 /* }}} */
 
