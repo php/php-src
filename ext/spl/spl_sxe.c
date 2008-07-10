@@ -145,17 +145,6 @@ SPL_METHOD(SimpleXMLIterator, getChildren)
 	RETURN_ZVAL(sxe->iter.data, 1, 0);
 }
 
-/* {{{ proto int SimpleXMLIterator::count() U
- Get number of child elements */
-SPL_METHOD(SimpleXMLIterator, count)
-{
-	long count = 0;
-
-	Z_OBJ_HANDLER_P(getThis(), count_elements)(getThis(), &count TSRMLS_CC);
-	
-	RETURN_LONG(count);
-}
-
 static const zend_function_entry spl_funcs_SimpleXMLIterator[] = {
 	SPL_ME(SimpleXMLIterator, rewind,                 NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SimpleXMLIterator, valid,                  NULL, ZEND_ACC_PUBLIC)
@@ -164,7 +153,6 @@ static const zend_function_entry spl_funcs_SimpleXMLIterator[] = {
 	SPL_ME(SimpleXMLIterator, next,                   NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SimpleXMLIterator, hasChildren,            NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SimpleXMLIterator, getChildren,            NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(SimpleXMLIterator, count,                  NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 /* }}} */
