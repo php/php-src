@@ -1358,7 +1358,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 		return entry;
 	}
 	if (dir) {
-		if (SUCCESS == zend_hash_find(&phar->virtual_dirs, path, path_len, (void**)&entry)) {
+		if (zend_hash_exists(&phar->virtual_dirs, path, path_len)) {
 			/* a file or directory exists in a sub-directory of this path */
 			entry = (phar_entry_info *) ecalloc(1, sizeof(phar_entry_info));
 			/* this next line tells PharFileInfo->__destruct() to efree the filename */
@@ -1958,12 +1958,16 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
  */
 static int phar_add_empty(HashTable *ht, char *arKey, uint nKeyLength)  /* {{{ */
 {
-	char *dummy = (char*)1;
-	if (SUCCESS == zend_hash_find(ht, arKey, nKeyLength, (void **)&dummy)) {
-		dummy++;
-	}
+	char **dummy;
 
-	return zend_hash_update(ht, arKey, nKeyLength, (char *) &dummy, sizeof(void *), NULL);
+	if (SUCCESS == zend_hash_find(ht, arKey, nKeyLength, (void **)&dummy)) {
+		(*dummy)++;
+		return SUCCESS;
+	} else {
+		char *dummy = (char*)1;
+
+		return zend_hash_add(ht, arKey, nKeyLength, (char *) &dummy, sizeof(void *), NULL);
+	}
 }
 /* }}} */
 
@@ -1983,19 +1987,15 @@ void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, int filename
 void phar_delete_virtual_dirs(phar_archive_data *phar, char *filename, int filename_len TSRMLS_DC) /* {{{ */
 {
 	char *s = filename;
+	char **dummy;
 
 	/* we use filename_len - 1 to avoid adding a virtual dir for empty directory entries */
 	for (; s - filename < filename_len - 1; s++) {
 		if (*s == '/') {
-			char *dummy;
-			if (FAILURE == zend_hash_find(&phar->virtual_dirs, filename, s - filename, (void **)&dummy)) {
-				continue;
-			}
-
-			if (!--dummy) {
-				zend_hash_del(&phar->virtual_dirs, filename, s - filename);
-			} else {
-				zend_hash_update(&phar->virtual_dirs, filename, s - filename, &dummy, sizeof(void *), NULL);
+			if (SUCCESS == zend_hash_find(&phar->virtual_dirs, filename, s - filename, (void **)&dummy)) {
+				if (!--(*dummy)) {
+					zend_hash_del(&phar->virtual_dirs, filename, s - filename);
+				}
 			}
 		}
 	}
