@@ -658,7 +658,7 @@ splitted:
 				efree(entry);
 				goto stat_entry;
 			}
-			if (SUCCESS == zend_hash_find(&(phar->virtual_dirs), entry, entry_len, (void **) &data)) {
+			if (zend_hash_exists(&(phar->virtual_dirs), entry, entry_len)) {
 				efree(entry);
 				efree(arch);
 				if (IS_EXISTS_CHECK(type)) {
@@ -706,7 +706,7 @@ notfound:
 					}
 					goto stat_entry;
 				}
-				if (SUCCESS == zend_hash_find(&(phar->virtual_dirs), entry + 1, entry_len - 1, (void **) &data)) {
+				if (zend_hash_exists(&(phar->virtual_dirs), entry + 1, entry_len - 1)) {
 					PHAR_G(cwd) = save;
 					PHAR_G(cwd_len) = save_len;
 					efree(entry);

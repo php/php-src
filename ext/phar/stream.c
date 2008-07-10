@@ -608,7 +608,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 		php_url_free(resource);
 		return SUCCESS;
 	}
-	if (SUCCESS == zend_hash_find(&(phar->virtual_dirs), internal_file, internal_file_len, (void **) &entry)) {
+	if (zend_hash_exists(&(phar->virtual_dirs), internal_file, internal_file_len)) {
 		phar_dostat(phar, NULL, ssb, 1, phar->alias, phar->alias_len TSRMLS_CC);
 		php_url_free(resource);
 		return SUCCESS;
