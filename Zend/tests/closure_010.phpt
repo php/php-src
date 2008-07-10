@@ -1,9 +1,5 @@
 --TEST--
 Closure 010: Closure calls itself
---SKIPIF--
-<?php 
-	if (!class_exists('Closure')) die('skip Closure support is needed');
-?>
 --FILE--
 <?php
 $i = 3;

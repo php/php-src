@@ -1,9 +1,5 @@
 --TEST--
 Closure 013: __invoke() on temporary result
---SKIPIF--
-<?php 
-	if (!class_exists('Closure')) die('skip Closure support is needed');
-?>
 --FILE--
 <?php
 class Foo {

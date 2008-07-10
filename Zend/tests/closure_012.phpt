@@ -1,9 +1,5 @@
 --TEST--
 Closure 012: Undefined lexical variables
---SKIPIF--
-<?php 
-	if (!class_exists('Closure')) die('skip Closure support is needed');
-?>
 --FILE--
 <?php
 $lambda = function () use ($i) {

@@ -1,9 +1,5 @@
 --TEST--
 Closure 007: Nested lambdas in classes
---SKIPIF--
-<?php 
-	if (!class_exists('Closure')) die('skip Closure support is needed');
-?>
 --FILE--
 <?php
 

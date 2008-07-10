@@ -1,9 +1,5 @@
 --TEST--
 Closure 005: Lambda inside class, lifetime of $this
---SKIPIF--
-<?php 
-	if (!class_exists('Closure')) die('skip Closure support is needed');
-?>
 --FILE--
 <?php
 
