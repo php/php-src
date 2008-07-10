@@ -1,9 +1,5 @@
 --TEST--
 Closure 003: Lambda with lexical variables (local scope)
---SKIPIF--
-<?php 
-	if (!class_exists('Closure')) die('skip Closure support is needed');
-?>
 --FILE--
 <?php
 

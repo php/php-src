@@ -1,9 +1,5 @@
 --TEST--
 Closure 014: return by value/reference
---SKIPIF--
-<?php 
-	if (!class_exists('Closure')) die('skip Closure support is needed');
-?>
 --FILE--
 <?php
 class C1 {

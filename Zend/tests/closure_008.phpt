@@ -1,9 +1,5 @@
 --TEST--
 Closure 008: Use in preg_replace()
---SKIPIF--
-<?php 
-	if (!class_exists('Closure')) die('skip Closure support is needed');
-?>
 --FILE--
 <?php
 
