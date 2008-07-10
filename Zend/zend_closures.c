@@ -27,6 +27,7 @@
 #include "zend_globals.h"
 
 #define ZEND_INVOKE_FUNC_NAME "__invoke"
+#define ZEND_CLOSURE_PRINT_NAME "Closure object"
 
 typedef struct _zend_closure {
 	zend_object    std;
@@ -88,9 +89,12 @@ static int zend_closure_cast_object_tostring(zval *readobj, zval *writeobj, int 
 
 	switch (type) {
 		case IS_STRING:
+			INIT_PZVAL(writeobj);
+			ZVAL_STRINGL(writeobj, ZEND_CLOSURE_PRINT_NAME, sizeof(ZEND_CLOSURE_PRINT_NAME)-1, 1);
+			return SUCCESS;
 		case IS_UNICODE:
 			INIT_PZVAL(writeobj);
-			ZVAL_ASCII_STRINGL(writeobj, "Closure object", sizeof("Closure object")-1, ZSTR_DUPLICATE);
+			ZVAL_UNICODEL(writeobj, USTR_MAKE(ZEND_CLOSURE_PRINT_NAME), sizeof(ZEND_CLOSURE_PRINT_NAME)-1, 0);
 			return SUCCESS;
 		default:
 			ce = Z_OBJCE_P(readobj);
