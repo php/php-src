@@ -1,3 +1,25 @@
+2008-07-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/closure_001.phpt
+      tests/closure_002.phpt
+      tests/closure_003.phpt
+      tests/closure_004.phpt
+      tests/closure_005.phpt
+      tests/closure_006.phpt
+      tests/closure_007.phpt
+      tests/closure_008.phpt
+      tests/closure_009.phpt
+      tests/closure_010.phpt
+      tests/closure_011.phpt
+      tests/closure_012.phpt
+      tests/closure_013.phpt
+      tests/closure_014.phpt:
+      Removed SKIPIF sections
+
+    * zend_closures.c
+      tests/closure_015.phpt:
+      Fixed unicode support
+
 2008-07-09  Antony Dovgal  <tony@daylessday.org>
 
     * (PHP_5_3)

@@ -1,3 +1,100 @@
+2008-07-10  David Soria Parra  <dsoria@gmx.net>
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/strnatcasecmp_basic.phpt
+      ext/standard/tests/strings/strnatcasecmp_variation1.phpt:
+      PHP Testfest. Tests done by Felix De Vliegher
+
+    * ext/standard/tests/strings/strnatcasecmp_basic.phpt
+      ext/standard/tests/strings/strnatcasecmp_basic.phpt
+      ext/standard/tests/strings/strnatcasecmp_variation1.phpt
+      ext/standard/tests/strings/strnatcasecmp_variation1.phpt:
+      
+      PHP Testfest. Tests done by Felix De Vliegher
+
+2008-07-10  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      ext/intl/php_intl.c
+      ext/intl/dateformat/dateformat_class.c
+      ext/intl/dateformat/dateformat_parse.c
+      ext/intl/tests/dateformat_localtime.phpt
+      ext/intl/tests/dateformat_parse.phpt
+      ext/intl/tests/ut_common.inc:
+      fix date formatter positions (bug #14263)
+
+2008-07-10  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.c:
+      - MFB: Fixed bug #45460 (imap patch for fromlength fix in imap_headerinfo
+      doesn't accept lengths of 1024)
+
+    * (PHP_5_2)
+      ext/imap/php_imap.c:
+      - Fixed bug #45460 (imap patch for fromlength fix in imap_headerinfo
+      doesn't accept lengths of 1024)
+
+2008-07-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ext/phar/func_interceptors.c
+      ext/phar/stream.c
+      ext/phar/util.c:
+      Fixed wrong refcount updates
+
+    * ext/phar/tests/rename_dir.phpt
+      ext/phar/tests/rename_dir.phpt
+      ext/phar/tests/rmdir.phpt
+      ext/phar/tests/rmdir.phpt
+      ext/phar/tests/tar/rename_dir.phpt
+      ext/phar/tests/tar/rename_dir.phpt
+      ext/phar/tests/tar/rmdir.phpt
+      ext/phar/tests/tar/rmdir.phpt
+      ext/phar/tests/zip/rename_dir.phpt
+      ext/phar/tests/zip/rename_dir.phpt
+      ext/phar/tests/zip/rmdir.phpt
+      ext/phar/tests/zip/rmdir.phpt:
+      
+      file rename_dir.phpt was initially added on branch PHP_5_3.
+
+2008-07-10  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/spl_sxe.c:
+      Forgot to remove the count method here
+
+2008-07-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ext/phar/func_interceptors.c
+      ext/phar/func_interceptors.h
+      ext/phar/phar.c
+      ext/phar/phar_internal.h:
+      Extensions MUST NOT manipulate with internal functions from
+      EG(function_table) in run-time. It may cause problems with opcode caches
+      and in multi-threaded environment. Now the same functions are overriden at
+      MINIT and call original functions or PHAR ones dependent on flag setting.
+
+    * ZendEngine2/tests/closure_001.phpt
+      ZendEngine2/tests/closure_002.phpt
+      ZendEngine2/tests/closure_003.phpt
+      ZendEngine2/tests/closure_004.phpt
+      ZendEngine2/tests/closure_005.phpt
+      ZendEngine2/tests/closure_006.phpt
+      ZendEngine2/tests/closure_007.phpt
+      ZendEngine2/tests/closure_008.phpt
+      ZendEngine2/tests/closure_009.phpt
+      ZendEngine2/tests/closure_010.phpt
+      ZendEngine2/tests/closure_011.phpt
+      ZendEngine2/tests/closure_012.phpt
+      ZendEngine2/tests/closure_013.phpt
+      ZendEngine2/tests/closure_014.phpt:
+      Removed SKIPIF sections
+
+    * ZendEngine2/zend_closures.c
+      ZendEngine2/tests/closure_015.phpt:
+      Fixed unicode support
+
 2008-07-09  Etienne Kneuss  <php@colder.ch>
 
     * (PHP_5_3)
