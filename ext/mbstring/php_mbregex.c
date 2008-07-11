@@ -1160,7 +1160,6 @@ PHP_FUNCTION(mb_ereg_search_getpos)
 PHP_FUNCTION(mb_ereg_search_setpos)
 {
 	long position;
-	int n;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &position) == FAILURE) {
 		return;
