@@ -6623,12 +6623,13 @@ PHPAPI int php_u_strip_tags(UChar *rbuf, int len, int *stateptr, UChar *allow, i
 			/* fall-through */
 
 		case 'l':
+		case 'L':
 
 			/* swm: If we encounter '<?xml' then we shouldn't be in
 			 * state == 2 (PHP). Switch back to HTML.
 			 */
 
-			if (state == 2 && codepts > 2 && prev1 == 'm' && prev2 == 'x') {
+			if (state == 2 && codepts > 2 && (prev1 == 'm' || prev1 == 'M') && (prev2 == 'x' || prev2 == 'X')) {
 				state = 1;
 				break;
 			}
@@ -6859,12 +6860,13 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 				/* fall-through */
 
 			case 'l':
+			case 'L':
 
 				/* swm: If we encounter '<?xml' then we shouldn't be in
 				 * state == 2 (PHP). Switch back to HTML.
 				 */
 
-				if (state == 2 && p > buf+2 && *(p-1) == 'm' && *(p-2) == 'x') {
+				if (state == 2 && p > buf+2 && strncasecmp(p-2, "xm", 2) == 0) {
 					state = 1;
 					break;
 				}
