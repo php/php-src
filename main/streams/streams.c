@@ -2419,8 +2419,9 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 				opened_path, context STREAMS_REL_CC TSRMLS_CC);
 		}
 
-		if (context) {
-			zend_list_addref(context->rsrc_id);
+		/* increase context refcount only if the context is really used */
+		if (stream && stream->context) {
+			zend_list_addref(stream->context->rsrc_id);
 		}
 
 		/* if the caller asked for a persistent stream but the wrapper did not
