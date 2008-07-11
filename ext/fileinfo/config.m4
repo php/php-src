@@ -17,18 +17,17 @@ if test "$PHP_FILEINFO" != "no"; then
     done
   done
 
-  AC_CHECK_FUNCS([utimes])
-  
   AC_DEFINE_UNQUOTED(PHP_DEFAULT_MAGIC_FILE,"$PHP_DEFAULT_MAGIC_FILE",[magic file path])
 
+  libmagic_sources=" \
+    libmagic/apprentice.c libmagic/apptype.c libmagic/ascmagic.c \
+    libmagic/compress.c libmagic/file.c libmagic/fsmagic.c libmagic/funcs.c \
+    libmagic/getopt_long.c libmagic/is_tar.c libmagic/magic.c libmagic/print.c \
+    libmagic/readelf.c libmagic/softmagic.c"
+
+  PHP_NEW_EXTENSION(fileinfo, fileinfo.c $libmagic_sources, $ext_shared,,-I@ext_srcdir@/libmagic)
   PHP_SUBST(FILEINFO_SHARED_LIBADD)
+  PHP_ADD_BUILD_DIR($ext_builddir/libmagic)
 
-  PHP_NEW_EXTENSION(fileinfo, fileinfo.c lib/apprentice.c lib/apptype.c lib/ascmagic.c lib/compress.c lib/file.c lib/fsmagic.c lib/funcs.c lib/getopt_long.c lib/is_tar.c lib/magic.c lib/print.c lib/readelf.c lib/softmagic.c, $ext_shared)
-
-if test "$ext_shared" = "no" || test "$ext_srcdir" != "$abs_srcdir"; then
-  echo '#include <php_config.h>' > $ext_builddir/libsqlite/src/config.h
-else
-  echo "#include \"$abs_builddir/config.h\"" > $ext_builddir/libsqlite/src/config.h
-fi
-
+  AC_CHECK_FUNCS([utimes])
 fi
