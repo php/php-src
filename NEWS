@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Fixed a crash inside PDO when trying instantiate PDORow manually (Felipe)
 - Fixed build failure of ext/mysqli with libmysql 6.0 - missing rpl
   functions. (Andrey)
+- Fixed bug #45460 (imap patch for fromlength fix in imap_headerinfo doesn't 
+  accept lengths of 1024). (Felipe, andrew at lifescale dot com)
 - Fixed bug #45352 (Segmentation fault because of tick function on second
   request). (Dmitry)
 - Fixed bug #45312 (Segmentation fault on second request for array functions).
