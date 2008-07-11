@@ -167,7 +167,9 @@ static int php_network_getaddresses(const char *host, int socktype, struct socka
 	struct sockaddr **sap;
 	int n;
 #if HAVE_GETADDRINFO
+# if HAVE_IPV6
 	static int ipv6_borked = -1; /* the way this is used *is* thread safe */
+# endif
 	struct addrinfo hints, *res, *sai;
 #else
 	struct hostent *host_info;
