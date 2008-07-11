@@ -1575,7 +1575,7 @@ PHP_FUNCTION(imap_headerinfo)
 	pils *imap_le_struct;
 	MESSAGECACHE *cache;
 	ENVELOPE *en;
-	char dummy[2000], fulladdress[MAILTMPLEN];
+	char dummy[2000], fulladdress[MAILTMPLEN + 1];
 	int myargc = ZEND_NUM_ARGS();
 	
 	if (myargc < 2 || myargc > 5 || zend_get_parameters_ex(myargc, &streamind, &msgno, &fromlength, &subjectlength, &defaulthost) == FAILURE) {
