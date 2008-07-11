@@ -1968,7 +1968,7 @@ PHP_FUNCTION(imap_headerinfo)
 	pils *imap_le_struct;
 	MESSAGECACHE *cache;
 	ENVELOPE *en;
-	char dummy[2000], fulladdress[MAILTMPLEN];
+	char dummy[2000], fulladdress[MAILTMPLEN + 1];
 	
 	if (zend_parse_parameters(argc TSRMLS_CC, "rl|lls", &streamind, &msgno, &fromlength, &subjectlength, &defaulthost, &defaulthost_len) == FAILURE) {
 		return;
