@@ -100,6 +100,10 @@ PHP_FUNCTION(stream_socket_client)
 	
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
+	if (context) {
+		zend_list_addref(context->rsrc_id);
+	}
+
 	if (flags & PHP_STREAM_CLIENT_PERSISTENT) {
 		spprintf(&hashkey, 0, "stream_socket_client__%s", host);
 	}
@@ -155,10 +159,7 @@ PHP_FUNCTION(stream_socket_client)
 	}
 	
 	php_stream_to_zval(stream, return_value);
-
-	if (zcontext) {
-		zend_list_addref(Z_RESVAL_P(zcontext));
-	}
+	
 }
 /* }}} */
 
@@ -182,6 +183,10 @@ PHP_FUNCTION(stream_socket_server)
 	}
 	
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
+	
+	if (context) {
+		zend_list_addref(context->rsrc_id);
+	}
 
 	if (zerrno)	{
 		zval_dtor(zerrno);
@@ -220,10 +225,6 @@ PHP_FUNCTION(stream_socket_server)
 	}
 	
 	php_stream_to_zval(stream, return_value);
-
-	if (zcontext) {
-		zend_list_addref(Z_RESVAL_P(zcontext));
-	}
 }
 /* }}} */
 
@@ -1032,7 +1033,7 @@ PHP_FUNCTION(stream_context_get_default)
 		FG(default_context) = php_stream_context_alloc();
 	}
 	context = FG(default_context);
-	
+
 	if (params) {
 		parse_context_options(context, params TSRMLS_CC);
 	}
@@ -1062,7 +1063,7 @@ PHP_FUNCTION(stream_context_create)
 		parse_context_params(context, params TSRMLS_CC);
 	}
 	
-	php_stream_context_to_zval(context, return_value);
+	RETURN_RESOURCE(context->rsrc_id);
 }
 /* }}} */
 
