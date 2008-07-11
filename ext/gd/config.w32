@@ -11,6 +11,7 @@ if (PHP_GD != "no") {
 		CHECK_HEADER_ADD_INCLUDE("gd.h", "CFLAGS_GD", PHP_GD + ";ext\\gd\\libgd") &&
 		(CHECK_LIB("libiconv_a.lib", "gd", PHP_GD) || CHECK_LIB("libiconv.lib", "gd", PHP_GD) ||
 		 CHECK_LIB("iconv_a.lib", "gd", PHP_GD) || CHECK_LIB("iconv.lib", "gd", PHP_GD)) &&
+		 CHECK_HEADER_ADD_INCLUDE("iconv.h", "CFLAGS_GD", PHP_GD) && 
 		(((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib", "gd", PHP_GD) || CHECK_LIB("zlib.lib", "gd", PHP_GD))) || 
 			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "gd", PHP_GD)) || (PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED)))
 		) {
