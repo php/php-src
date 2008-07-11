@@ -6,6 +6,9 @@
  * $File: patchlevel.h,v 1.68 2008/03/22 21:39:43 christos Exp $
  *
  * $Log$
+ * Revision 1.1  2008/07/11 14:10:50  derick
+ * - Step one for bundling the libmagic library. Some config.m4 issues left.
+ *
  * Revision 1.68  2008/03/22 21:39:43  christos
  * file 4.24
  *
