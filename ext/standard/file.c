@@ -1000,10 +1000,6 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 	}
 
 	php_stream_to_zval(stream, return_value);
-
-	if (zcontext) {
-		zend_list_addref(Z_RESVAL_P(zcontext));
-	}
 }
 /* }}} */
 

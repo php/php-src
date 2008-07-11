@@ -716,8 +716,10 @@ static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t
 
 			xparam->outputs.client = php_stream_alloc_rel(stream->ops, clisockdata, NULL, "r+");
 			if (xparam->outputs.client) {
-				/* TODO: addref ? */
 				xparam->outputs.client->context = stream->context;
+				if (stream->context) {
+					zend_list_addref(stream->context->rsrc_id);
+				}
 			}
 		}
 	}

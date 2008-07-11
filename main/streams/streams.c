@@ -288,6 +288,7 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* 
 	int remove_rsrc = 1;
 	int preserve_handle = close_options & PHP_STREAM_FREE_PRESERVE_HANDLE ? 1 : 0;
 	int release_cast = 1;
+	php_stream_context *context = stream->context;
 
 	if (stream->flags & PHP_STREAM_FLAG_NO_CLOSE) {
 		preserve_handle = 1;
@@ -426,6 +427,10 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 
 		pefree(stream, stream->is_persistent);
 #endif
+	}
+
+	if (context) {
+		zend_list_delete(context->rsrc_id);
 	}
 
 	return ret;
@@ -2412,6 +2417,10 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 			stream = wrapper->wops->stream_opener(wrapper,
 				path_to_open, implicit_mode, options ^ REPORT_ERRORS,
 				opened_path, context STREAMS_REL_CC TSRMLS_CC);
+		}
+
+		if (context) {
+			zend_list_addref(context->rsrc_id);
 		}
 
 		/* if the caller asked for a persistent stream but the wrapper did not
