@@ -558,6 +558,7 @@ static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_exception___construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, message)
 	ZEND_ARG_INFO(0, code)
+	ZEND_ARG_INFO(0, previous)
 ZEND_END_ARG_INFO()
 
 const static zend_function_entry default_exception_functions[] = {
