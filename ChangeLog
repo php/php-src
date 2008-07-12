@@ -1,3 +1,150 @@
+2008-07-11  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/ftp_fopen_wrapper.c
+      ext/standard/ftp_fopen_wrapper.c:
+      - MFB: Fixed bug #45449 (filesize() regression using ftp wrapper) (patch by
+      crrodriguez at suse dot de)
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN: #45449, #45486
+
+    * (PHP_5_2)
+      ext/standard/ftp_fopen_wrapper.c:
+      - Fixed bug #45449 (filesize() regression using ftp wrapper) (patch by
+      crrodriguez at suse dot de)
+
+2008-07-11  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/gd/config.w32:
+      MFB: dont forget the header
+
+    * (PHP_5_3)
+      ext/gd/config.w32:
+      dont forget the header
+
+    * ext/gd/config.w32:
+      MFB: fix iconv linking
+
+    * (PHP_5_3)
+      ext/gd/config.w32:
+      fix iconv linking
+
+2008-07-11  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c:
+      MFB: - Fixed bug #45486 (mb_send_mail(); header 'Content-Type: text/plain;
+      charset=' parsing incorrect)
+
+2008-07-11  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      ext/mbstring/php_mbregex.c:
+      nuke unused variable
+
+2008-07-11  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/mbstring/mbstring.c:
+      - Fixed bug #45486 (mb_send_mail(); header 'Content-Type: text/plain;
+      charset=' parsing incorrect)
+
+2008-07-11  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * main/network.c:
+      - Silence "unused variable" warning when ip6 support is disabled
+
+2008-07-11  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/reflection/tests/reflectionExtension_getDependencies_basic.phpt:
+      make sure dom extension is present
+
+2008-07-11  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/string.c
+      ext/standard/string.c
+      ext/standard/tests/strings/bug45485.phpt
+      ext/standard/tests/strings/bug45485.phpt:
+      - MFB: Fixed bug #45485 (strip_tags and <?XML tag)
+
+2008-07-11  Antony Dovgal  <tony@daylessday.org>
+
+    * main/streams/streams.c:
+      not all stream wrappers use context, so no need to addref in all cases
+
+2008-07-11  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/strings/bug45485.phpt
+      ext/standard/tests/strings/bug45485.phpt
+      ext/standard/tests/strings/bug45485.phpt:
+        1.1.4;
+      file bug45485.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      - Fixed bug #45485 (strip_tags and <?XML tag)
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.c:
+      MFB: - Fixed the strings size in imap_headerinfo
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN: #45460
+
+    * (PHP_5_2)
+      ext/imap/php_imap.c:
+      - Fixed the string sizes in imap_headerinfo
+
+2008-07-11  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/openssl/xp_ssl.c
+      ext/standard/file.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/streamsfuncs.c
+      main/streams/streams.c
+      main/streams/userspace.c
+      main/streams/xp_socket.c:
+      MFH: manage references of stream context properly
+
+    * ext/openssl/xp_ssl.c
+      ext/standard/file.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/streamsfuncs.c
+      main/streams/streams.c
+      main/streams/userspace.c
+      main/streams/xp_socket.c:
+      manage references of stream context properly
+
+    * ext/standard/tests/file/lchown_basic.phpt
+      ext/standard/tests/file/lchown_error.phpt:
+      fix skip messages
+
+    * ext/standard/tests/file/lchown_basic.phpt
+      ext/standard/tests/file/lchown_error.phpt:
+      check for posix_getuid()
+
+    * (PHP_5_3)
+      ext/phar/func_interceptors.c:
+      drop unused var
+
+    * (PHP_5_3)
+      ext/phar/func_interceptors.c:
+      fix function protos and is_link() wrapper
+
+2008-07-11  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - MFH: Fixed a compiler warning - the code didn't make much sense.
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - Fixed a compiler warning - the code didn't make much sense.
+
 2008-07-10  David Soria Parra  <dsoria@gmx.net>
 
     * (PHP_5_3)
