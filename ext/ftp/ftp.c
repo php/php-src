@@ -1437,7 +1437,7 @@ ftp_getdata(ftpbuf_t *ftp TSRMLS_DC)
 
 	data->listener = fd;
 
-#if HAVE_IPV6
+#if HAVE_IPV6 && HAVE_INET_NTOP
 	if (sa->sa_family == AF_INET6) {
 		/* need to use EPRT */
 		char eprtarg[INET6_ADDRSTRLEN + sizeof("|x||xxxxx|")];
