@@ -117,7 +117,9 @@
 #if defined(_WIN32) && !defined(__GNUC__)
 #define xalloca     _alloca
 #ifdef NOT_RUBY
-#define vsnprintf   _vsnprintf
+#if _MSC_VER < 1500
+# define vsnprintf   _vsnprintf
+#endif
 #endif
 #else
 #define xalloca     alloca
