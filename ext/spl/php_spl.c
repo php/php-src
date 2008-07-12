@@ -371,13 +371,21 @@ PHP_FUNCTION(spl_autoload_call)
 	ZVAL_ZSTRL(zclass_name, ZEND_STR_TYPE, class_name, class_name_len, 1);
 	if (SPL_G(autoload_functions)) {
 		int l_autoload_running = SPL_G(autoload_running);
+		zval *exception = NULL;
 		SPL_G(autoload_running) = 1;
 		lc_name = zend_u_str_tolower_dup(ZEND_STR_TYPE, class_name, class_name_len);
 		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &function_pos);
-		while(zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS && !EG(exception)) {
+		while(zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS) {
 			func_name_type = zend_hash_get_current_key_ex(SPL_G(autoload_functions), &func_name, &func_name_len, &dummy, 0, &function_pos);
 			zend_hash_get_current_data_ex(SPL_G(autoload_functions), (void **) &alfi, &function_pos);
 			zend_u_call_method(alfi->obj ? &alfi->obj : NULL, alfi->ce, &alfi->func_ptr, func_name_type, func_name, func_name_len, &retval, 1, zclass_name, NULL TSRMLS_CC);
+			if (EG(exception)) {
+				if (exception) {
+					zend_update_property(zend_exception_get_default(TSRMLS_C), EG(exception), "previous", sizeof("previous")-1, exception TSRMLS_CC);
+				}
+				exception = EG(exception);
+				EG(exception) = NULL;
+			}
 			if (retval) {
 				zval_ptr_dtor(&retval);					
 			}
@@ -386,6 +394,7 @@ PHP_FUNCTION(spl_autoload_call)
 			}
 			zend_hash_move_forward_ex(SPL_G(autoload_functions), &function_pos);
 		}
+		EG(exception) = exception;
 		efree(lc_name.v);
 		SPL_G(autoload_running) = l_autoload_running;
 	} else {
