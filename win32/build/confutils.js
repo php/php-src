@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.23 2008-07-09 08:15:46 sfox Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.24 2008-07-12 15:04:39 sfox Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -1082,15 +1082,24 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 
 	try {
 		dep_present = eval("PHP_" + DEP);
-		dep_shared = eval("PHP_" + DEP + "_SHARED");
+
+		if (dep_present != "no") {
+			try {
+				dep_shared = eval("PHP_" + DEP + "_SHARED");
+			} catch (e) {
+				dep_shared = false;
+			}
+		}
+
 	} catch (e) {
 		dep_present = "no";
-		dep_shared = false;
 	}
-	
+
 	if (optional) {
-		if (dep_present == "no")
+		if (dep_present == "no") {
+			MESSAGE("\t" + dependson + " not found: " + dependson + " support in " + extname + " disabled");
 			return false;
+		}
 	}
 
 	var ext_shared = eval("PHP_" + EXT + "_SHARED");
@@ -1098,18 +1107,35 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 	if (dep_shared) {
 		if (!ext_shared) {
 			if (optional) {
+				MESSAGE("\tstatic " + extname + " cannot depend on shared " + dependson + ": " + dependson + "support disabled");
 				return false;
 			}
 			ERROR("static " + extname + " cannot depend on shared " + dependson);
 		}
+
 		ADD_FLAG("LDFLAGS_" + EXT, "/libpath:$(BUILD_DIR)");
 		ADD_FLAG("LIBS_" + EXT, "php_" + dependson + ".lib");
 		ADD_FLAG("DEPS_" + EXT, "$(BUILD_DIR)\\php_" + dependson + ".lib");
+
 	} else {
+
 		if (dep_present == "no") {
 			if (ext_shared) {
-				WARNING(extname + " has a missing dependency: " + dependson);
+				WARNING(extname + " cannot be built: missing dependency, " + dependson + " not found");
+
+				if (configure_hdr.Exists('HAVE_' + EXT)) {
+					configure_hdr.Remove('HAVE_' + EXT);
+				}
+
+				dllname = ' php_' + extname + '.dll';
+
+				if (!REMOVE_TARGET(dllname, 'EXT_TARGETS')) {
+					REMOVE_TARGET(dllname, 'PECL_TARGETS');
+				}
+
+				extensions_enabled.pop();
 				return false;
+
 			} else {
 				ERROR("Cannot build " + extname + "; " + dependson + " not enabled");
 				return false;
@@ -1303,6 +1329,20 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 	DEFINE(sym, tv);
 }
 
+function REMOVE_TARGET(dllname, flag)
+{
+	if (configure_subst.Exists(flag)) {
+		targets = configure_subst.Item(flag);
+		if (targets.match(dllname)) {
+			configure_subst.Remove(flag);
+			targets = targets.replace(dllname, "");
+			configure_subst.Add(flag, targets);
+			return true;
+		}
+	}
+	return false;
+}
+
 function generate_internal_functions()
 {
 	var infile, outfile;
@@ -1465,7 +1505,7 @@ function generate_files()
 		generate_dsp_file("win32", "win32", null, false);
 		generate_dsp_file("main", "main", null, false);
 		generate_dsp_file("streams", "main\\streams", null, false);
-		generate_dsp_flags();
+		copy_dsp_files();
 	}
 
 	STDOUT.WriteLine("Generating files...");
@@ -1633,7 +1673,7 @@ function AC_DEFINE(name, value, comment, quote)
 	var item = new Array(value, comment);
 	if (configure_hdr.Exists(name)) {
 		var orig_item = configure_hdr.Item(name);
-		STDOUT.WriteLine("AC_DEFINE[" + name + "]=" + value + ": is already defined to " + item[0]);
+		STDOUT.WriteLine("AC_DEFINE[" + name + "]=" + value + ": is already defined to " + orig_item[0]);
 	} else {
 		configure_hdr.Add(name, item);
 	}
