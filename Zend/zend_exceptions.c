@@ -484,7 +484,7 @@ ZEND_METHOD(exception, __toString)
 	zval fname;
 
 	exception = getThis();
-	ZVAL_STRINGL(&fname, "gettraceasstring", sizeof("gettraceasstring")-1, 0);
+	ZVAL_STRINGL(&fname, "gettraceasstring", sizeof("gettraceasstring")-1, 1);
 
 	while (exception && Z_TYPE_P(exception) == IS_OBJECT) {
 		prev_str = str;
@@ -530,6 +530,7 @@ ZEND_METHOD(exception, __toString)
 
 		exception = zend_read_property(default_exception_ce, exception, "previous", sizeof("previous")-1, 0 TSRMLS_CC);
 	}
+	zval_dtor(&fname);
 
 	/* We store the result in the private property string so we can access
 	 * the result in uncaught exception handlers without memleaks. */
