@@ -1,3 +1,16 @@
+2008-07-12  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      zend_exceptions.c:
+      - Missed one line in merge
+
+    * (PHP_5_3)
+      zend_exceptions.c:
+      - MFH Add support for linking exceptions (implements TODO)
+
+    * zend_exceptions.c:
+      - Add support for linking exceptions (implements TODO)
+
 2008-07-10  Dmitry Stogov  <dmitry@zend.com>
 
     * tests/closure_001.phpt

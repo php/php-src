@@ -1,3 +1,78 @@
+2008-07-12  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/mbstring/oniguruma/regint.h:
+      - fix build with VC9 PSDK6.x
+
+    * win32/build/config.w32:
+      - support for new naming
+
+    * (PHP_5_3)
+      ext/ftp/ftp.c:
+      - MFH: don't use inet_ntop when not present
+
+    * ext/ftp/ftp.c:
+      - don't use inet_ntop when not present
+
+2008-07-12  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/curl/interface.c
+      ext/curl/interface.c:
+      - MFB: Fixed bug #45220 (curl_read callback returns -1 when needs to return
+      size_t (unsigned))
+
+    * (PHP_5_2)
+      NEWS:
+      BFN: #45220
+
+    * (PHP_5_2)
+      ext/curl/interface.c:
+      - Fixed bug #45220 (curl_read callback returns -1 when needs to return
+      size_t (unsigned))
+
+2008-07-12  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      This looks more than it is due to ws/cs and minor fixes in it...
+      - Fixes logic in dependency check
+      - Fixes logic in AC_DEFINE error message
+      - Prevents shared extensions from building if a hard dependency is missing
+      altogether
+      - Cleans up errors/warnings/messages for all scenarios
+      - Changes a function call to the new project support
+
+2008-07-12  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_exceptions.c:
+      - Missed one line in merge
+
+    * (PHP_5_3)
+      ext/spl/php_spl.c
+      ext/spl/tests/spl_autoload_012.phpt:
+      - MFH Allow multiple exceptions in spl's autoload
+
+    * ext/spl/tests/spl_autoload_012.phpt
+      ext/spl/tests/spl_autoload_012.phpt:
+      
+      - Allow multiple exceptions in spl's autoload
+
+    * ext/spl/php_spl.c:
+      - Allow multiple exceptions in spl's autoload
+
+    * (PHP_5_3)
+      ZendEngine2/zend_exceptions.c:
+      - MFH Add support for linking exceptions (implements TODO)
+
+    * ZendEngine2/zend_exceptions.c:
+      - Add support for linking exceptions (implements TODO)
+
+2008-07-12  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN: #45485
+
 2008-07-11  Felipe Pena  <felipensp@gmail.com>
 
     * ext/standard/ftp_fopen_wrapper.c
