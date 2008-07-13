@@ -1,7 +1,7 @@
 --TEST--
 ctype on integers
 --SKIPIF--
-<?php if (!extension_loaded("ctype")) print "skip"; ?>
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php 
   setlocale(LC_ALL,"C"); 

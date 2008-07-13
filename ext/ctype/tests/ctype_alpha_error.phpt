@@ -1,5 +1,7 @@
 --TEST--
 Test ctype_alpha() function : error conditions - Incorrect number of arguments
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 /* Prototype  : bool ctype_alpha(mixed $c)
