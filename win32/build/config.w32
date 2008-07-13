@@ -295,7 +295,7 @@ add_extra_dirs();
 
 // We can't probe for libs before this line
 
-if (!(CHECK_LIB("resolv_a.lib") ) || CHECK_LIB("resolv.lib") ) {
+if (!(CHECK_LIB("resolv_a.lib") || CHECK_LIB("resolv.lib"))) {
 	ERROR("We really need that arpa\\nameser.h file - it is part of the bindlib package");
 }
 
