@@ -40,7 +40,7 @@ string(178) "Class [ <internal> class stdClass ] {
 }
 
 "
-string(1141) "Class [ <internal> class Exception ] {
+string(1300) "Class [ <internal> class Exception ] {
 
   - Constants [0] {
   }
@@ -51,24 +51,26 @@ string(1141) "Class [ <internal> class Exception ] {
   - Static methods [0] {
   }
 
-  - Properties [6] {
+  - Properties [7] {
     Property [ <default> protected $message ]
     Property [ <default> private $string ]
     Property [ <default> protected $code ]
     Property [ <default> protected $file ]
     Property [ <default> protected $line ]
     Property [ <default> private $trace ]
+    Property [ <default> private $previous ]
   }
 
-  - Methods [9] {
+  - Methods [10] {
     Method [ <internal> final private method __clone ] {
     }
 
     Method [ <internal, ctor> public method __construct ] {
 
-      - Parameters [2] {
+      - Parameters [3] {
         Parameter #0 [ <optional> $message ]
         Parameter #1 [ <optional> $code ]
+        Parameter #2 [ <optional> $previous ]
       }
     }
 
@@ -85,6 +87,9 @@ string(1141) "Class [ <internal> class Exception ] {
     }
 
     Method [ <internal> final public method getTrace ] {
+    }
+
+    Method [ <internal> final public method getPrevious ] {
     }
 
     Method [ <internal> final public method getTraceAsString ] {
