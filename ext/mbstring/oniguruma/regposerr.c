@@ -76,7 +76,7 @@ regerror(int posix_ecode, const regex_t* reg, char* buf, size_t size)
     s = "";
   }
   else {
-    sprintf(tbuf,  "undefined error code (%d)", posix_ecode);
+    sprintf(tbuf, "undefined error code (%d)", posix_ecode);
     s = tbuf;
   }
 

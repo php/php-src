@@ -2,7 +2,7 @@
   utf8.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2008  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2006  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -223,17 +223,6 @@ utf8_mbc_to_normalize(OnigAmbigType flag, const UChar** pp, const UChar* end, UC
   const UChar* p = *pp;
 
   if (ONIGENC_IS_MBC_ASCII(p)) {
-    if (end > p + 1 &&
-        (flag & ONIGENC_AMBIGUOUS_MATCH_COMPOUND) != 0 &&
-	((*p == 's' && *(p+1) == 's') ||
-	 ((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0 &&
-	  (*p == 'S' && *(p+1) == 'S')))) {
-      *lower++ = '\303';
-      *lower   = '\237';
-      (*pp) += 2;
-      return 2;
-    }
-
     if ((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0) {
       *lower = ONIGENC_ASCII_CODE_TO_LOWER_CASE(*p);
     }
@@ -258,15 +247,6 @@ utf8_mbc_to_normalize(OnigAmbigType flag, const UChar** pp, const UChar* end, UC
             return 2;
           }
         }
-#if 0
-        else if (c == (UChar )'\237' &&
-                 (flag & ONIGENC_AMBIGUOUS_MATCH_COMPOUND) != 0) {
-          *lower++ = '\303';
-          *lower   = '\237';
-          (*pp) += 2;
-          return 2;
-        }
-#endif
       }
     }
 
@@ -288,15 +268,6 @@ utf8_is_mbc_ambiguous(OnigAmbigType flag, const UChar** pp, const UChar* end)
   const UChar* p = *pp;
 
   if (ONIGENC_IS_MBC_ASCII(p)) {
-    if (end > p + 1 &&
-        (flag & ONIGENC_AMBIGUOUS_MATCH_COMPOUND) != 0 &&
-	((*p == 's' && *(p+1) == 's') ||
-	 ((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0 &&
-	  (*p == 'S' && *(p+1) == 'S')))) {
-      (*pp) += 2;
-      return TRUE;
-    }
-
     (*pp)++;
     if ((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0) {
       return ONIGENC_IS_ASCII_CODE_CASE_AMBIG(*p);
@@ -317,10 +288,6 @@ utf8_is_mbc_ambiguous(OnigAmbigType flag, const UChar** pp, const UChar* end)
             if (c == (UChar )'\267') return FALSE;
             return TRUE;
           }
-        }
-        else if (c == (UChar )'\237' &&
-                 (flag & ONIGENC_AMBIGUOUS_MATCH_COMPOUND) != 0) {
-	  return TRUE;
         }
       }
     }
@@ -3739,8 +3706,7 @@ OnigEncodingType OnigEncodingUTF8 = {
   6,           /* max byte length */
   1,           /* min byte length */
   (ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE | 
-   ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE | 
-   ONIGENC_AMBIGUOUS_MATCH_COMPOUND),
+   ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE ),
   {
       (OnigCodePoint )'\\'                       /* esc */
     , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anychar '.'  */

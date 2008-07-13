@@ -1,4 +1,4 @@
-FAQ    2006/05/15
+FAQ    2006/10/30
 
 1. 最長マッチ
 
@@ -19,6 +19,11 @@ FAQ    2006/05/15
        THREAD_ATOMIC_START
        THREAD_ATOMIC_END
        THREAD_PASS
+
+       何らかの初期化/終了処理が必要であれば、以下のマクロに定義する。
+       THREAD_SYSTEM_INIT
+       THREAD_SYSTEM_END
+
 
    (B) Application Layer
 
@@ -85,6 +90,8 @@ Rubyは自分自身で独自のスレッド機能を実装しています。
 なります。
 
 #define USE_MULTI_THREAD_SYSTEM
+#define THREAD_SYSTEM_INIT
+#define THREAD_SYSTEM_END
 #define THREAD_ATOMIC_START       DEFER_INTS
 #define THREAD_ATOMIC_END         ENABLE_INTS
 #define THREAD_PASS               rb_thread_schedule()

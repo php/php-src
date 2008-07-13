@@ -1,4 +1,4 @@
-鬼車インターフェース Version 4.1.0   2006/05/15
+鬼車インターフェース Version 4.7.1   2007/07/04
 
 #include <oniguruma.h>
 
@@ -64,7 +64,7 @@
   4 option:      正規表現コンパイル時オプション
 
       ONIG_OPTION_NONE               オプションなし
-      ONIG_OPTION_SINGLELINE         '^' -> '\A', '$' -> '\z', '\Z' -> '\z'
+      ONIG_OPTION_SINGLELINE         '^' -> '\A', '$' -> '\Z'
       ONIG_OPTION_MULTILINE          '.'が改行にマッチする
       ONIG_OPTION_IGNORECASE         曖昧マッチ オン
       ONIG_OPTION_EXTEND             パターン拡張形式
@@ -159,7 +159,6 @@
        ONIGENC_AMBIGUOUS_MATCH_NONE:          曖昧無し
        ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE:    ASCIIの大文字小文字
        ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE: ASCII以外の大文字小文字
-       ONIGENC_AMBIGUOUS_MATCH_COMPOUND:      合成文字
        ONIGENC_AMBIGUOUS_MATCH_FULL:          全ての曖昧フラグ有効
        ONIGENC_AMBIGUOUS_MATCH_DEFAULT:       (ASCII | NONASCII)
                                               onig_set_default_ambig_flag()

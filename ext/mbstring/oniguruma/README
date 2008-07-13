@@ -1,9 +1,8 @@
-README  2006/05/15
+README  2007/06/18
 
 Oniguruma  ----   (C) K.Kosako <sndgk393 AT ybb DOT ne DOT jp>
 
 http://www.geocities.jp/kosako3/oniguruma/
-http://www.ruby-lang.org/cgi-bin/cvsweb.cgi/oniguruma/
 http://www.freebsd.org/cgi/cvsweb.cgi/ports/devel/oniguruma/
 
 Oniguruma is a regular expressions library.
@@ -183,18 +182,8 @@ API differences with Japanized GNU regex(version 0.12) of Ruby 1.8/1.6
    + re_alloc_pattern() is added.
 
 
-ToDo
 
-  ? ignore case in full code point range of Unicode.
-  ? Unicode Property.
-  ? ambig-flag Katakana <-> Hiragana.
-  ? add ONIG_OPTION_NOTBOS/NOTEOS. (\A, \z, \Z)
- ?? \X (== \PM\pM*)
- ?? implement syntax behavior ONIG_SYN_CONTEXT_INDEP_ANCHORS.
- ?? variable line separator.
- ?? transmission stopper. (return ONIG_STOP from match_at())
-
-and I'm thankful to Akinori MUSHA.
+I'm thankful to Akinori MUSHA.
 
 
 Mail Address: K.Kosako <sndgk393 AT ybb DOT ne DOT jp>

@@ -2,7 +2,7 @@
   utf32_be.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2008  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2006  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,20 +85,6 @@ utf32be_mbc_to_normalize(OnigAmbigType flag, const UChar** pp, const UChar* end,
 
   if (*(p+2) == 0 && *(p+1) == 0 && *p == 0) {
     p += 3;
-    if (end > p + 4 &&
-        (flag & ONIGENC_AMBIGUOUS_MATCH_COMPOUND) != 0 &&
-	((*p == 's' && *(p+4) == 's') ||
-	((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0 &&
-	 (*p == 'S' && *(p+4) == 'S'))) &&
-        *(p+3) == 0 && *(p+2) == 0 && *(p+1) == 0) {
-      *lower++ = '\0';
-      *lower++ = '\0';
-      *lower++ = '\0';
-      *lower   = 0xdf;
-      (*pp) += 8;
-      return 4;
-    }
-
     *lower++ = '\0';
     *lower++ = '\0';
     *lower++ = '\0';
@@ -139,20 +125,6 @@ utf32be_is_mbc_ambiguous(OnigAmbigType flag, const UChar** pp, const UChar* end)
     int c, v;
 
     p += 3;
-    if ((flag & ONIGENC_AMBIGUOUS_MATCH_COMPOUND) != 0) {
-      if (end > p + 4 &&
-	  ((*p == 's' && *(p+4) == 's') ||
-	   ((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0 &&
-	    (*p == 'S' && *(p+4) == 'S'))) &&
-          *(p+3) == 0 && *(p+2) == 0 && *(p+1) == 0) {
-        (*pp) += 4;
-        return TRUE;
-      }
-      else if (*p == 0xdf) {
-        return TRUE;
-      }
-    }
-
     if (((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0 &&
 	 ONIGENC_IS_MBC_ASCII(p)) ||
 	((flag & ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE) != 0 &&
@@ -191,8 +163,7 @@ OnigEncodingType OnigEncodingUTF32_BE = {
   4,            /* max byte length */
   4,            /* min byte length */
   (ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE |
-   ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE |
-   ONIGENC_AMBIGUOUS_MATCH_COMPOUND),
+   ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE ),
   {
       (OnigCodePoint )'\\'                       /* esc */
     , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anychar '.'  */

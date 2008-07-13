@@ -1,5 +1,98 @@
 History
 
+2007/08/16: Version 4.7.1
+
+2007/08/16: [test] success in ruby 1.9.0 (2007-04-06) [i686-linux].
+2007/07/04: [spec] (thanks K.Takata)
+                   ONIG_OPTION_SINGLELINE: '$' -> '\Z'  (as Perl)
+2007/07/04: [dist] (thanks K.Takata)
+                   fix documents API and API.ja.
+
+2007/06/18: Version 4.7.0
+
+2007/06/18: [test] success in ruby 1.9.0 (2007-04-06) [i686-linux].
+2007/06/18: [bug]  (thanks KUBO Takehiro)
+                   WORD_ALIGNMENT_SIZE must be sizeof(OnigCodePoint).
+2007/06/05: [impl] add #ifndef vsnprintf in regint.h.
+2007/06/05: [bug]  should check USE_CRNL_AS_LINE_TERMINATOR case
+                   in onig_search().
+
+2007/04/12: Version 4.6.2
+
+2007/04/09: [impl] change STATE_CHECK_BUFF_MAX_SIZE value from 0x8000
+                   to 0x4000.
+2007/03/26: [impl] add 'void' to function declarations.
+
+2007/03/06: Version 4.6.1
+
+2007/03/06: [test] success in ruby 1.9.0 (2006-10-23) [i686-linux].
+2007/03/06: [bug]  add #include <malloc.h> for bcc32.
+                   (In bcc32, alloca() is declared in malloc.h.)
+2007/03/06: [impl] remove including version.h of Ruby.
+2007/03/02: [bug]  invalid optimization for semi-end-buf in onig_search().
+                   ex. /\n\Z/.match("aaaaaaaaaa\n")
+2007/03/02: [impl] move range > start check position in end_buf process.
+
+2007/02/08: Version 4.6.0
+
+2007/02/08: [test] success in ruby 1.9.0 (2006-10-23) [i686-linux].
+2007/01/09: [tune] select_opt_exact_info() didn't work for empty info.
+                   ex. /.a/ make MAP info instead of EXACT info.
+2006/12/29: [impl] add print_enc_string() for ONIG_DEBUG mode.
+2006/12/22: [spec] should check too short multibyte char in parse_exp().
+                   add USE_PAD_TO_SHORT_BYTE_CHAR.
+                   ex. /\x00/ in UTF16 should be error.
+
+2006/11/17: Version 4.5.1
+
+2006/11/17: [test] success in ruby 1.9.0 (2006-10-23) [i686-linux].
+2006/11/15: [impl] remove CHECK_INTERRUPT.
+2006/11/10: [bug]  0x24, 0x2b, 0x3c, 0x3d, 0x3e, 0x5e, 0x60, 0x7c, 0x7e
+                   should be [:punct:].
+2006/11/08: [impl] rename QUALIFIER -> QUANTIFIER.
+2006/11/07: [bug]  (thanks Byte)
+                   add 0xa3 <=> 0xb3 to CaseFoldMap[] for KOI8-R.
+
+2006/11/06: Version 4.5.0
+
+2006/11/06: [test] success in ruby 1.9.0 (2006-10-23) [i686-linux].
+2006/11/06: [API]  remove ONIGENC_AMBIGUOUS_MATCH_COMPOUND.
+2006/11/06: [spec] change ONIG_OPTION_FIND_LONGEST to search all of 
+                   the string range.
+                   add USE_FIND_LONGEST_SEARCH_ALL_OF_RANGE.
+
+2006/10/30: Version 4.4.6
+
+2006/10/30: [test] success in ruby 1.9.0 (2006-10-23) [i686-linux].
+2006/10/30: [impl] (thanks K.Takata)
+                   add THREAD_SYSTEM_INIT and THREAD_SYSTEM_END.
+2006/10/30: [bug]  (thanks Wolfgang Nadasi-Donner)
+                   invalid offset value was used in STATE_CHECK_BUFF_INIT().
+
+2006/10/24: Version 4.4.5
+
+2006/10/24: [test] success in ruby 1.9.0 (2006-10-23) [i686-linux].
+2006/10/24: [impl] escape -Wall warning.
+2006/10/24: [tune] (thanks Kornelius Kalnbach)
+                   String#scan for long string needs long time compare with
+                   old Ruby
+                   by initialization time for combination explosion check
+                   ex. ("test " * 100_000).scan(/\w*\s?/)
+                   change STATE_CHECK_BUFF_MAX_SIZE from 0x8000000 to 0x8000.
+                   reduce initialization area of state_check_buff.
+2006/10/16: [bug]  (thanks Akinori Musha)
+                   first argument of rb_warn() should be format string.
+2006/10/10: [impl] add msa.state_check_buff_size initialization
+                   in onig_search().
+2006/10/10: [bug]  should call onig_st_free_table() in
+                   onig_free_shared_cclass_table().
+2006/10/10: [impl] remove OP_WORD_SB and OP_WORD_MB.
+2006/09/29: [impl] initialize state_check_buff_size in STATE_CHECK_BUFF_INIT().
+                   make valgrind happy.
+2006/09/22: [impl] convert to ascii for parameter string in
+                   onig_error_code_to_str().
+                   add enc member into OnigErrorInfo.
+
 2006/09/19: Version 4.4.4
 
 2006/09/19: [test] success in ruby 1.9.0 (2006-08-22) [i686-linux].
@@ -1717,15 +1810,6 @@ History
 [test: test]
 [memo: memo]
 --
-<branch>
-svn mkdir http://localhost/repos/branches -m ""
-svn mkdir http://localhost/repos/branches/oniguruma -m ""
-svn copy http://localhost/repos/trunk/oniguruma http://localhost/repos/branches/oniguruma/2.X -m "branch for 8-bit encodings only"
-
-<create tag>
-svn copy http://localhost/repos/trunk/oniguruma http://localhost/repos/tags/oniguruma/X.X.X -m "onigdXXXXXXXX"
-
-
 <CVS: show all tags>
 cvs history -T
 
