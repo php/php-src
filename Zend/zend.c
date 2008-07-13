@@ -737,12 +737,16 @@ static void free_u_zend_constant(zend_constant *c) /* {{{ */
 static void function_to_unicode(zend_function *func TSRMLS_DC) /* {{{ */
 {
 	if (func->common.function_name.s) {
-		UChar *uname;
-		int len = strlen(func->common.function_name.s) + 1;
-
-		uname = malloc(UBYTES(len));
-		u_charsToUChars(func->common.function_name.s, uname, len);
-		func->common.function_name.u = uname;
+		if (UG(unicode)) {
+			func->common.function_name.u = zend_ustrdup(func->common.function_name.u);
+		} else {
+			UChar *uname;
+			int len = strlen(func->common.function_name.s) + 1;
+	
+			uname = malloc(UBYTES(len));
+			u_charsToUChars(func->common.function_name.s, uname, len);
+			func->common.function_name.u = uname;
+		}
 	}
 	if (func->common.arg_info) {
 		zend_arg_info *args;
