@@ -31,7 +31,7 @@ $test->bar();
 
 ?>
 --EXPECTF--
-object(Exception)#2 (6) {
+object(Exception)#%d (7) {
   ["message":protected]=>
   string(3) "foo"
   ["string":"Exception":private]=>
@@ -39,7 +39,7 @@ object(Exception)#2 (6) {
   ["code":protected]=>
   int(0)
   ["file":protected]=>
-  string(%d) "%s"
+  string(%d) "%s030.php"
   ["line":protected]=>
   int(%d)
   ["trace":"Exception":private]=>
@@ -47,7 +47,7 @@ object(Exception)#2 (6) {
     [0]=>
     array(6) {
       ["file"]=>
-      string(%d) "%s"
+      string(%d) "%s030.php"
       ["line"]=>
       int(%d)
       ["function"]=>
@@ -61,42 +61,8 @@ object(Exception)#2 (6) {
       }
     }
   }
-}
-'test' => '0'
-'test_2' => '1'
-'test_3' => '2'
-ok
---UEXPECTF--
-object(Exception)#2 (6) {
-  ["message":protected]=>
-  string(3) "foo"
-  ["string":"Exception":private]=>
-  string(0) ""
-  ["code":protected]=>
-  int(0)
-  ["file":protected]=>
-  string(32) "%s"
-  ["line":protected]=>
-  int(%d)
-  ["trace":"Exception":private]=>
-  array(1) {
-    [0]=>
-    array(6) {
-      ["file"]=>
-      string(32) "%s"
-      ["line"]=>
-      int(%d)
-      ["function"]=>
-      string(3) "bar"
-      ["class"]=>
-      string(3) "foo"
-      ["type"]=>
-      string(2) "->"
-      ["args"]=>
-      array(0) {
-      }
-    }
-  }
+  ["previous":"Exception":private]=>
+  NULL
 }
 'test' => '0'
 'test_2' => '1'
