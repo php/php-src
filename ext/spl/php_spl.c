@@ -388,10 +388,9 @@ PHP_FUNCTION(spl_autoload_call)
 			zend_hash_get_current_key_ex(SPL_G(autoload_functions), &func_name, &func_name_len, &dummy, 0, &function_pos);
 			zend_hash_get_current_data_ex(SPL_G(autoload_functions), (void **) &alfi, &function_pos);
 			zend_call_method(alfi->obj ? &alfi->obj : NULL, alfi->ce, &alfi->func_ptr, func_name, func_name_len, &retval, 1, class_name, NULL TSRMLS_CC);
+			zend_exception_set_previous(exception TSRMLS_CC);
 			if (EG(exception)) {
-				if (exception) {
-					zend_update_property(zend_exception_get_default(TSRMLS_C), EG(exception), "previous", sizeof("previous")-1, exception TSRMLS_CC);
-				}
+				zend_exception_set_previous(exception TSRMLS_CC);
 				exception = EG(exception);
 				EG(exception) = NULL;
 			}
