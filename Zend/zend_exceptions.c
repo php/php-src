@@ -33,13 +33,37 @@ zend_class_entry *error_exception_ce;
 static zend_object_handlers default_exception_handlers;
 ZEND_API void (*zend_throw_exception_hook)(zval *ex TSRMLS_DC);
 
+void zend_exception_set_previous(zval *add_previous TSRMLS_DC)
+{
+	zval *exception = EG(exception), *previous;
+
+	if (exception == add_previous || !add_previous) {
+		return;
+	}
+	if (Z_TYPE_P(add_previous) != IS_OBJECT && !instanceof_function(Z_OBJCE_P(add_previous), default_exception_ce TSRMLS_CC)) {
+		zend_error(E_ERROR, "Cannot set non exception as previous exception");
+		return;
+	}
+	if (!exception) {
+		EG(exception) = add_previous;
+		return;
+	}
+	while (exception && exception != add_previous && Z_OBJ_HANDLE_P(exception) != Z_OBJ_HANDLE_P(add_previous)) {
+		previous = zend_read_property(default_exception_ce, exception, "previous", sizeof("previous")-1, 1 TSRMLS_CC);
+		if (Z_TYPE_P(previous) == IS_NULL) {
+			zend_update_property(default_exception_ce, exception, "previous", sizeof("previous")-1, add_previous TSRMLS_CC);
+			return;
+		}
+		exception = previous;
+	}
+}
+
 void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 {
 	if (exception != NULL) {
-		if (EG(exception)) {
-			zend_update_property(default_exception_ce, exception, "previous", sizeof("previous")-1, EG(exception) TSRMLS_CC);
-		}
+		zval *previous = EG(exception);
 		EG(exception) = exception;
+		zend_exception_set_previous(previous TSRMLS_CC);
 	}
 	if (!EG(current_execute_data)) {
 		zend_error(E_ERROR, "Exception thrown without a stack frame");
@@ -129,8 +153,8 @@ ZEND_METHOD(exception, __construct)
 	zval  *object, *previous = NULL;
 	int    argc = ZEND_NUM_ARGS(), message_len;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC, "|slO", &message, &message_len, &code, &previous, default_exception_ce) == FAILURE) {
-		zend_error(E_ERROR, "Wrong parameters for Exception([string $exception [, long $code ]])");
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC, "|slO!", &message, &message_len, &code, &previous, default_exception_ce) == FAILURE) {
+		zend_error(E_ERROR, "Wrong parameters for Exception([string $exception [, long $code [, Exception $previous = NULL]]])");
 	}
 
 	object = getThis();
@@ -158,8 +182,8 @@ ZEND_METHOD(error_exception, __construct)
 	zval  *object, *previous = NULL;
 	int    argc = ZEND_NUM_ARGS(), message_len, filename_len;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC, "|sllslO", &message, &message_len, &code, &severity, &filename, &filename_len, &lineno, &previous, default_exception_ce) == FAILURE) {
-		zend_error(E_ERROR, "Wrong parameters for ErrorException([string $exception [, long $code, [ long $severity, [ string $filename, [ long $lineno ]]]]])");
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC, "|sllslO!", &message, &message_len, &code, &severity, &filename, &filename_len, &lineno, &previous, default_exception_ce) == FAILURE) {
+		zend_error(E_ERROR, "Wrong parameters for ErrorException([string $exception [, long $code, [ long $severity, [ string $filename, [ long $lineno  [, Exception $previous = NULL]]]]]])");
 	}
 
 	object = getThis();

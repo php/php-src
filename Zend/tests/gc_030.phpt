@@ -18,4 +18,14 @@ unset($f1, $f2);
 gc_collect_cycles();
 ?>
 --EXPECTF--
-Fatal error: Ignoring exception from foo::__destruct() while an exception is already active (Uncaught Exception in %sgc_030.php on line %d) in %sgc_030.php on line %d
+Fatal error: Uncaught exception 'Exception' with message 'foobar' in %sgc_030.php:%d
+Stack trace:
+#0 [internal function]: foo->__destruct()
+#1 %sgc_030.php(%d): gc_collect_cycles()
+#2 {main}
+
+Next exception 'Exception' with message 'foobar' in %sgc_030.php:%d
+Stack trace:
+#0 %sgc_030.php(%d): foo->__destruct()
+#1 {main}
+  thrown in %sgc_030.php on line %d
