@@ -3,6 +3,8 @@ Tests DOMNode::insertBefore()
 --CREDITS--
 Michael Stillwell <mjs@beebo.org>
 # TestFest 2008
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 
