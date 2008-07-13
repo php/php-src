@@ -2,7 +2,7 @@
   iso8859_15.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2005  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2007  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,18 +73,18 @@ static const unsigned short EncISO_8859_15_CtypeTable[256] = {
   0x2008, 0x220c, 0x2209, 0x2208, 0x2208, 0x2208, 0x2008, 0x2008,
   0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008,
   0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008, 0x2008,
-  0x2284, 0x21a0, 0x21a0, 0x21a0, 0x20a0, 0x21a0, 0x21a0, 0x21a0,
-  0x21a0, 0x21a0, 0x21a0, 0x20a0, 0x21a0, 0x21a0, 0x21a0, 0x21a0,
+  0x2284, 0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x21a0,
+  0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x21a0,
   0x38b0, 0x38b0, 0x38b0, 0x38b0, 0x38b0, 0x38b0, 0x38b0, 0x38b0,
-  0x38b0, 0x38b0, 0x21a0, 0x21a0, 0x20a0, 0x20a0, 0x20a0, 0x21a0,
+  0x38b0, 0x38b0, 0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x21a0,
   0x21a0, 0x3ca2, 0x3ca2, 0x3ca2, 0x3ca2, 0x3ca2, 0x3ca2, 0x34a2,
   0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2,
   0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2,
-  0x34a2, 0x34a2, 0x34a2, 0x21a0, 0x21a0, 0x21a0, 0x20a0, 0x31a0,
-  0x20a0, 0x38e2, 0x38e2, 0x38e2, 0x38e2, 0x38e2, 0x38e2, 0x30e2,
+  0x34a2, 0x34a2, 0x34a2, 0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x31a0,
+  0x21a0, 0x38e2, 0x38e2, 0x38e2, 0x38e2, 0x38e2, 0x38e2, 0x30e2,
   0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2,
   0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2,
-  0x30e2, 0x30e2, 0x30e2, 0x21a0, 0x20a0, 0x21a0, 0x20a0, 0x2008,
+  0x30e2, 0x30e2, 0x30e2, 0x21a0, 0x21a0, 0x21a0, 0x21a0, 0x2008,
   0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008,
   0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008,
   0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008,
@@ -104,20 +104,10 @@ static const unsigned short EncISO_8859_15_CtypeTable[256] = {
 };
 
 static int
-iso_8859_15_mbc_to_normalize(OnigAmbigType flag,
-			     const UChar** pp, const UChar* end, UChar* lower)
+mbc_to_normalize(OnigAmbigType flag,
+		 const UChar** pp, const UChar* end, UChar* lower)
 {
   const UChar* p = *pp;
-
-  if (end > p + 1 && (flag & ONIGENC_AMBIGUOUS_MATCH_COMPOUND) != 0) {
-    if ((*p == 's' && *(p+1) == 's') ||
-	((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0 &&
-	 (*p == 'S' && *(p+1) == 'S'))) {
-      *lower = 0xdf;
-      (*pp) += 2;
-      return 1;
-    }
-  }
 
   if (((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0 &&
        ONIGENC_IS_MBC_ASCII(p)) ||
@@ -133,26 +123,9 @@ iso_8859_15_mbc_to_normalize(OnigAmbigType flag,
 }
 
 static int
-iso_8859_15_is_mbc_ambiguous(OnigAmbigType flag,
-			     const UChar** pp, const UChar* end)
+is_mbc_ambiguous(OnigAmbigType flag, const UChar** pp, const UChar* end)
 {
   const UChar* p = *pp;
-
-  if ((flag & ONIGENC_AMBIGUOUS_MATCH_COMPOUND) != 0) {
-    if (end > p + 1) {
-      if ((*p == 's' && *(p+1) == 's') ||
-	  ((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0 &&
-	   (*p == 'S' && *(p+1) == 'S'))) {
-	(*pp) += 2;
-	return TRUE;
-      }
-    }
-
-    if (*p == 0xdf) {
-      (*pp)++;
-      return TRUE;
-    }
-  }
 
   (*pp)++;
   if (((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0 &&
@@ -176,7 +149,7 @@ iso_8859_15_is_mbc_ambiguous(OnigAmbigType flag,
 }
 
 static int
-iso_8859_15_is_code_ctype(OnigCodePoint code, unsigned int ctype)
+is_code_ctype(OnigCodePoint code, unsigned int ctype)
 {
   if (code < 256)
     return ENC_IS_ISO_8859_15_CTYPE(code, ctype);
@@ -185,8 +158,8 @@ iso_8859_15_is_code_ctype(OnigCodePoint code, unsigned int ctype)
 }
 
 static int
-iso_8859_15_get_all_pair_ambig_codes(OnigAmbigType flag,
-                                     const OnigPairAmbigCodes** ccs)
+get_all_pair_ambig_codes(OnigAmbigType flag,
+			 const OnigPairAmbigCodes** ccs)
 {
   static const OnigPairAmbigCodes cc[] = {
     { 0xa6, 0xa8 },
@@ -282,8 +255,7 @@ OnigEncodingType OnigEncodingISO_8859_15 = {
   1,             /* max enc length */
   1,             /* min enc length */
   (ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE |
-   ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE |
-   ONIGENC_AMBIGUOUS_MATCH_COMPOUND),
+   ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE ),
   {
       (OnigCodePoint )'\\'                       /* esc */
     , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anychar '.'  */
@@ -296,11 +268,11 @@ OnigEncodingType OnigEncodingISO_8859_15 = {
   onigenc_single_byte_mbc_to_code,
   onigenc_single_byte_code_to_mbclen,
   onigenc_single_byte_code_to_mbc,
-  iso_8859_15_mbc_to_normalize,
-  iso_8859_15_is_mbc_ambiguous,
-  iso_8859_15_get_all_pair_ambig_codes,
+  mbc_to_normalize,
+  is_mbc_ambiguous,
+  get_all_pair_ambig_codes,
   onigenc_ess_tsett_get_all_comp_ambig_codes,
-  iso_8859_15_is_code_ctype,
+  is_code_ctype,
   onigenc_not_support_get_ctype_code_range,
   onigenc_single_byte_left_adjust_char_head,
   onigenc_always_true_is_allowed_reverse_match

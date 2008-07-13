@@ -4,7 +4,7 @@
   regint.h -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2008  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2007  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,7 +71,7 @@
 /* internal config */
 #define USE_RECYCLE_NODE
 #define USE_OP_PUSH_OR_JUMP_EXACT
-#define USE_QUALIFIER_PEEK_NEXT
+#define USE_QUANTIFIER_PEEK_NEXT
 #define USE_ST_HASH_TABLE
 #define USE_SHARED_CCLASS_TABLE
 
@@ -86,34 +86,29 @@
 #define USE_VARIABLE_META_CHARS
 #define USE_WORD_BEGIN_END          /* "\<": word-begin, "\>": word-end */
 #define USE_POSIX_REGION_OPTION     /* needed for POSIX API support */
+#define USE_FIND_LONGEST_SEARCH_ALL_OF_RANGE
 /* #define USE_COMBINATION_EXPLOSION_CHECK */     /* (X*)* */
 /* #define USE_MULTI_THREAD_SYSTEM */
+#define THREAD_SYSTEM_INIT          /* depend on thread system */
+#define THREAD_SYSTEM_END           /* depend on thread system */
 #define THREAD_ATOMIC_START         /* depend on thread system */
 #define THREAD_ATOMIC_END           /* depend on thread system */
 #define THREAD_PASS                 /* depend on thread system */
-#define CHECK_INTERRUPT             /* depend on application */
 #define xmalloc     malloc
 #define xrealloc    realloc
 #define xcalloc     calloc
 #define xfree       free
 #else
 #include "ruby.h"
-#include "version.h"
 #include "rubysig.h"      /* for DEFER_INTS, ENABLE_INTS */
 
 #define USE_COMBINATION_EXPLOSION_CHECK        /* (X*)* */
 #define USE_MULTI_THREAD_SYSTEM
-
+#define THREAD_SYSTEM_INIT
+#define THREAD_SYSTEM_END
 #define THREAD_ATOMIC_START          DEFER_INTS
 #define THREAD_ATOMIC_END            ENABLE_INTS
 #define THREAD_PASS                  rb_thread_schedule()
-#define CHECK_INTERRUPT do {\
-  if (rb_trap_pending) {\
-    if (! rb_prohibit_interrupt) {\
-      rb_trap_exec();\
-    }\
-  }\
-} while (0)
 
 #define DEFAULT_WARN_FUNCTION        onig_rb_warn
 #define DEFAULT_VERB_WARN_FUNCTION   onig_rb_warning
@@ -121,7 +116,7 @@
 #endif /* else NOT_RUBY */
 
 #define STATE_CHECK_STRING_THRESHOLD_LEN             7
-#define STATE_CHECK_BUFF_MAX_SIZE           0x08000000
+#define STATE_CHECK_BUFF_MAX_SIZE               0x4000
 
 #define THREAD_PASS_LIMIT_COUNT     8
 #define xmemset     memset
@@ -129,15 +124,12 @@
 #define xmemmove    memmove
 #if defined(_WIN32) && !defined(__GNUC__)
 #define xalloca     _alloca
-#ifdef NOT_RUBY
-#if _MSC_VER < 1500
-# define vsnprintf   _vsnprintf
-#endif
+#ifndef vsnprintf
+#define vsnprintf   _vsnprintf
 #endif
 #else
 #define xalloca     alloca
 #endif
-
 
 #if defined(USE_RECOMPILE_API) && defined(USE_MULTI_THREAD_SYSTEM)
 #define ONIG_STATE_INC(reg) (reg)->state++
@@ -235,6 +227,10 @@
 #endif
 #endif
 
+#ifdef __BORLANDC__
+#include <malloc.h>
+#endif
+
 #ifdef ONIG_DEBUG
 # include <stdio.h>
 #endif
@@ -258,7 +254,8 @@
 #define NULL_UCHARP                   ((UChar* )0)
 
 #ifndef PLATFORM_UNALIGNED_WORD_ACCESS
-#define WORD_ALIGNMENT_SIZE       SIZEOF_INT
+/* sizeof(OnigCodePoint) */
+#define WORD_ALIGNMENT_SIZE     SIZEOF_LONG
 
 #define GET_ALIGNMENT_PAD_SIZE(addr,pad_size) do {\
   (pad_size) = WORD_ALIGNMENT_SIZE \
@@ -586,8 +583,6 @@ enum OpCode {
 
   OP_WORD,
   OP_NOT_WORD,
-  OP_WORD_SB,
-  OP_WORD_MB,
   OP_WORD_BOUND,
   OP_NOT_WORD_BOUND,
   OP_WORD_BEGIN,

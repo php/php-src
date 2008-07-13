@@ -4,7 +4,7 @@
   oniguruma.h - Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2008  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2007  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,8 +37,8 @@ extern "C" {
 
 #define ONIGURUMA
 #define ONIGURUMA_VERSION_MAJOR   4
-#define ONIGURUMA_VERSION_MINOR   4
-#define ONIGURUMA_VERSION_TEENY   4
+#define ONIGURUMA_VERSION_MINOR   7
+#define ONIGURUMA_VERSION_TEENY   1
 
 #ifdef __cplusplus
 # ifndef  HAVE_PROTOTYPES
@@ -106,17 +106,11 @@ ONIG_EXTERN OnigAmbigType OnigDefaultAmbigFlag;
 #define ONIGENC_AMBIGUOUS_MATCH_NONE                   0
 #define ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE            (1<<0)
 #define ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE         (1<<1)
-/* #define ONIGENC_AMBIGUOUS_MATCH_ACCENT             (1<<2) */
-/* #define ONIGENC_AMBIGUOUS_MATCH_HIRAGANA_KATAKANA  (1<<3) */
-/* #define ONIGENC_AMBIGUOUS_MATCH_KATAKANA_WIDTH     (1<<4) */
 
 #define ONIGENC_AMBIGUOUS_MATCH_LIMIT                 (1<<1)
-#define ONIGENC_AMBIGUOUS_MATCH_COMPOUND              (1<<30)
 
 #define ONIGENC_AMBIGUOUS_MATCH_FULL \
-  ( ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE | \
-    ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE | \
-    ONIGENC_AMBIGUOUS_MATCH_COMPOUND )
+ ( ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE | ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE )
 #define ONIGENC_AMBIGUOUS_MATCH_DEFAULT  OnigDefaultAmbigFlag
 
 
@@ -427,11 +421,11 @@ OnigUChar* onigenc_step_back P_((OnigEncoding enc, const OnigUChar* start, const
 
 /* encoding API */
 ONIG_EXTERN
-int onigenc_init P_(());
+int onigenc_init P_((void));
 ONIG_EXTERN
 int onigenc_set_default_encoding P_((OnigEncoding enc));
 ONIG_EXTERN
-OnigEncoding onigenc_get_default_encoding P_(());
+OnigEncoding onigenc_get_default_encoding P_((void));
 ONIG_EXTERN
 void  onigenc_set_default_caseconv_table P_((const OnigUChar* table));
 ONIG_EXTERN
@@ -717,6 +711,7 @@ struct re_registers {
 typedef struct re_registers   OnigRegion;
 
 typedef struct {
+  OnigEncoding enc;
   OnigUChar* par;
   OnigUChar* par_end;
 } OnigErrorInfo;
@@ -889,7 +884,7 @@ int onig_set_meta_char P_((OnigEncoding enc, unsigned int what, OnigCodePoint co
 ONIG_EXTERN
 void onig_copy_encoding P_((OnigEncoding to, OnigEncoding from));
 ONIG_EXTERN
-OnigAmbigType onig_get_default_ambig_flag P_(());
+OnigAmbigType onig_get_default_ambig_flag P_((void));
 ONIG_EXTERN
 int onig_set_default_ambig_flag P_((OnigAmbigType ambig_flag));
 ONIG_EXTERN

@@ -2,7 +2,7 @@
   regparse.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2008  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2007  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,13 +64,13 @@ extern void onig_null_warn(const char* s) { }
 extern void
 onig_rb_warn(const char* s)
 {
-  rb_warn(s);
+  rb_warn("%s", s);
 }
 
 extern void
 onig_rb_warning(const char* s)
 {
-  rb_warning(s);
+  rb_warning("%s", s);
 }
 #endif
 
@@ -1051,9 +1051,9 @@ onig_node_free(Node* node)
     }
     break;
 
-  case N_QUALIFIER:
-    if (NQUALIFIER(node).target)
-      onig_node_free(NQUALIFIER(node).target);
+  case N_QUANTIFIER:
+    if (NQUANTIFIER(node).target)
+      onig_node_free(NQUANTIFIER(node).target);
     break;
 
   case N_EFFECT:
@@ -1088,7 +1088,7 @@ onig_node_free(Node* node)
 
 #ifdef USE_RECYCLE_NODE
 extern int
-onig_free_node_list()
+onig_free_node_list(void)
 {
   FreeNode* n;
 
@@ -1104,7 +1104,7 @@ onig_free_node_list()
 #endif
 
 static Node*
-node_new()
+node_new(void)
 {
   Node* node;
 
@@ -1133,7 +1133,7 @@ initialize_cclass(CClassNode* cc)
 }
 
 static Node*
-node_new_cclass()
+node_new_cclass(void)
 {
   Node* node = node_new();
   CHECK_NULL_RETURN(node);
@@ -1202,7 +1202,7 @@ node_new_ctype(int type)
 }
 
 static Node*
-node_new_anychar()
+node_new_anychar(void)
 {
   Node* node = node_new();
   CHECK_NULL_RETURN(node);
@@ -1318,25 +1318,25 @@ node_new_call(UChar* name, UChar* name_end)
 #endif
 
 static Node*
-node_new_qualifier(int lower, int upper, int by_number)
+node_new_quantifier(int lower, int upper, int by_number)
 {
   Node* node = node_new();
   CHECK_NULL_RETURN(node);
-  node->type = N_QUALIFIER;
-  NQUALIFIER(node).state  = 0;
-  NQUALIFIER(node).target = NULL;
-  NQUALIFIER(node).lower  = lower;
-  NQUALIFIER(node).upper  = upper;
-  NQUALIFIER(node).greedy = 1;
-  NQUALIFIER(node).target_empty_info = NQ_TARGET_ISNOT_EMPTY;
-  NQUALIFIER(node).head_exact        = NULL_NODE;
-  NQUALIFIER(node).next_head_exact   = NULL_NODE;
-  NQUALIFIER(node).is_refered        = 0;
+  node->type = N_QUANTIFIER;
+  NQUANTIFIER(node).state  = 0;
+  NQUANTIFIER(node).target = NULL;
+  NQUANTIFIER(node).lower  = lower;
+  NQUANTIFIER(node).upper  = upper;
+  NQUANTIFIER(node).greedy = 1;
+  NQUANTIFIER(node).target_empty_info = NQ_TARGET_ISNOT_EMPTY;
+  NQUANTIFIER(node).head_exact        = NULL_NODE;
+  NQUANTIFIER(node).next_head_exact   = NULL_NODE;
+  NQUANTIFIER(node).is_refered        = 0;
   if (by_number != 0)
-    NQUALIFIER(node).state |= NST_BY_NUMBER;
+    NQUANTIFIER(node).state |= NST_BY_NUMBER;
 
 #ifdef USE_COMBINATION_EXPLOSION_CHECK
-  NQUALIFIER(node).comb_exp_check_num = 0;
+  NQUANTIFIER(node).comb_exp_check_num = 0;
 #endif
 
   return node;
@@ -1481,6 +1481,7 @@ onig_node_new_str(const UChar* s, const UChar* end)
   return node_new_str(s, end);
 }
 
+#ifdef NUMBERED_CHAR_IS_NOT_CASE_AMBIG
 static Node*
 node_new_str_raw(UChar* s, UChar* end)
 {
@@ -1488,20 +1489,21 @@ node_new_str_raw(UChar* s, UChar* end)
   NSTRING_SET_RAW(node);
   return node;
 }
+#endif
 
 static Node*
-node_new_empty()
+node_new_empty(void)
 {
   return node_new_str(NULL, NULL);
 }
 
 static Node*
-node_new_str_raw_char(UChar c)
+node_new_str_char(UChar c)
 {
   UChar p[1];
 
   p[0] = c;
-  return node_new_str_raw(p, p + 1);
+  return node_new_str(p, p + 1);
 }
 
 static Node*
@@ -1530,6 +1532,24 @@ str_node_can_be_split(StrNode* sn, OnigEncoding enc)
   }
   return 0;
 }
+
+#ifdef USE_PAD_TO_SHORT_BYTE_CHAR
+static int
+node_str_head_pad(StrNode* sn, int num, UChar val)
+{
+  UChar buf[NODE_STR_BUF_SIZE];
+  int i, len;
+
+  len = sn->end - sn->s;
+  onig_strcpy(buf, sn->s, sn->end);
+  onig_strcpy(&(sn->s[num]), buf, buf + len);
+  sn->end += num;
+
+  for (i = 0; i < num; i++) {
+    sn->s[i] = val;
+  }
+}
+#endif
 
 extern int
 onig_scan_unsigned_number(UChar** src, const UChar* end, OnigEncoding enc)
@@ -1925,29 +1945,6 @@ and_code_range_buf(BBuf* bbuf1, int not1, BBuf* bbuf2, int not2, BBuf** pbuf)
 }
 
 static int
-clear_not_flag_cclass(CClassNode* cc, OnigEncoding enc)
-{
-  BBuf *tbuf;
-  int r;
-
-  if (IS_CCLASS_NOT(cc)) {
-    bitset_invert(cc->bs);
-
-    if (! ONIGENC_IS_SINGLEBYTE(enc)) {
-      r = not_code_range_buf(enc, cc->mbuf, &tbuf);
-      if (r != 0) return r;
-
-      bbuf_free(cc->mbuf);
-      cc->mbuf = tbuf;
-    }
-
-    CCLASS_CLEAR_NOT(cc);
-  }
-
-  return 0;
-}
-
-static int
 and_cclass(CClassNode* dest, CClassNode* cc, OnigEncoding enc)
 {
   int r, not1, not2;
@@ -2089,7 +2086,7 @@ conv_backslash_value(int c, ScanEnv* env)
 }
 
 static int
-is_invalid_qualifier_target(Node* node)
+is_invalid_quantifier_target(Node* node)
 {
   switch (NTYPE(node)) {
   case N_ANCHOR:
@@ -2098,19 +2095,19 @@ is_invalid_qualifier_target(Node* node)
 
   case N_EFFECT:
     if (NEFFECT(node).type == EFFECT_OPTION)
-      return is_invalid_qualifier_target(NEFFECT(node).target);
+      return is_invalid_quantifier_target(NEFFECT(node).target);
     break;
 
   case N_LIST: /* ex. (?:\G\A)* */
     do {
-      if (! is_invalid_qualifier_target(NCONS(node).left)) return 0;
+      if (! is_invalid_quantifier_target(NCONS(node).left)) return 0;
     } while (IS_NOT_NULL(node = NCONS(node).right));
     return 0;
     break;
 
   case N_ALT:  /* ex. (?:abc|\A)* */
     do {
-      if (is_invalid_qualifier_target(NCONS(node).left)) return 1;
+      if (is_invalid_quantifier_target(NCONS(node).left)) return 1;
     } while (IS_NOT_NULL(node = NCONS(node).right));
     break;
 
@@ -2122,7 +2119,7 @@ is_invalid_qualifier_target(Node* node)
 
 /* ?:0, *:1, +:2, ??:3, *?:4, +?:5 */
 static int
-popular_qualifier_num(QualifierNode* qf)
+popular_quantifier_num(QuantifierNode* qf)
 {
   if (qf->greedy) {
     if (qf->lower == 0) {
@@ -2166,15 +2163,15 @@ static enum ReduceType ReduceTypeTable[6][6] = {
 };
 
 extern void
-onig_reduce_nested_qualifier(Node* pnode, Node* cnode)
+onig_reduce_nested_quantifier(Node* pnode, Node* cnode)
 {
   int pnum, cnum;
-  QualifierNode *p, *c;
+  QuantifierNode *p, *c;
 
-  p = &(NQUALIFIER(pnode));
-  c = &(NQUALIFIER(cnode));
-  pnum = popular_qualifier_num(p);
-  cnum = popular_qualifier_num(c);
+  p = &(NQUANTIFIER(pnode));
+  c = &(NQUANTIFIER(cnode));
+  pnum = popular_quantifier_num(p);
+  cnum = popular_quantifier_num(c);
 
   switch(ReduceTypeTable[cnum][pnum]) {
   case RQ_DEL:
@@ -2282,7 +2279,7 @@ typedef struct {
 
 
 static int
-fetch_range_qualifier(UChar** src, UChar* end, OnigToken* tok, ScanEnv* env)
+fetch_range_quantifier(UChar** src, UChar* end, OnigToken* tok, ScanEnv* env)
 {
   int low, up, syn_allow, non_low = 0;
   int r = 0;
@@ -3035,7 +3032,7 @@ fetch_token(OnigToken* tok, UChar** src, UChar* end, ScanEnv* env)
 
     case '{':
       if (! IS_SYNTAX_OP(syn, ONIG_SYN_OP_ESC_BRACE_INTERVAL)) break;
-      r = fetch_range_qualifier(&p, end, tok, env);
+      r = fetch_range_quantifier(&p, end, tok, env);
       if (r < 0) return r;  /* error */
       if (r == 0) goto greedy_check;
       else if (r == 2) { /* {n} */
@@ -3454,7 +3451,7 @@ fetch_token(OnigToken* tok, UChar** src, UChar* end, ScanEnv* env)
 
     case '{':
       if (! IS_SYNTAX_OP(syn, ONIG_SYN_OP_BRACE_INTERVAL)) break;
-      r = fetch_range_qualifier(&p, end, tok, env);
+      r = fetch_range_quantifier(&p, end, tok, env);
       if (r < 0) return r;  /* error */
       if (r == 0) goto greedy_check;
       else if (r == 2) { /* {n} */
@@ -3512,7 +3509,7 @@ fetch_token(OnigToken* tok, UChar** src, UChar* end, ScanEnv* env)
       if (! IS_SYNTAX_OP(syn, ONIG_SYN_OP_LINE_ANCHOR)) break;
       tok->type = TK_ANCHOR;
       tok->u.subtype = (IS_SINGLELINE(env->option)
-			? ANCHOR_END_BUF : ANCHOR_END_LINE);
+			? ANCHOR_SEMI_END_BUF : ANCHOR_END_LINE);
       break;
 
     case '[':
@@ -4619,11 +4616,11 @@ static const char* ReduceQStr[] = {
 };
 
 static int
-set_qualifier(Node* qnode, Node* target, int group, ScanEnv* env)
+set_quantifier(Node* qnode, Node* target, int group, ScanEnv* env)
 {
-  QualifierNode* qn;
+  QuantifierNode* qn;
 
-  qn = &(NQUALIFIER(qnode));
+  qn = &(NQUANTIFIER(qnode));
   if (qn->lower == 1 && qn->upper == 1) {
     return 1;
   }
@@ -4642,15 +4639,15 @@ set_qualifier(Node* qnode, Node* target, int group, ScanEnv* env)
     }
     break;
 
-  case N_QUALIFIER:
+  case N_QUANTIFIER:
     { /* check redundant double repeat. */
       /* verbose warn (?:.?)? etc... but not warn (.?)? etc... */
-      QualifierNode* qnt = &(NQUALIFIER(target));
-      int nestq_num   = popular_qualifier_num(qn);
-      int targetq_num = popular_qualifier_num(qnt);
+      QuantifierNode* qnt = &(NQUANTIFIER(target));
+      int nestq_num   = popular_quantifier_num(qn);
+      int targetq_num = popular_quantifier_num(qnt);
 
 #ifdef USE_WARNING_REDUNDANT_NESTED_REPEAT_OPERATOR
-      if (!IS_QUALIFIER_BY_NUMBER(qn) && !IS_QUALIFIER_BY_NUMBER(qnt) &&
+      if (!IS_QUANTIFIER_BY_NUMBER(qn) && !IS_QUANTIFIER_BY_NUMBER(qnt) &&
 	  IS_SYNTAX_BV(env->syntax, ONIG_SYN_WARN_REDUNDANT_NESTED_REPEAT)) {
         UChar buf[WARN_BUFSIZE];
 
@@ -4686,7 +4683,7 @@ set_qualifier(Node* qnode, Node* target, int group, ScanEnv* env)
 #endif
       if (targetq_num >= 0) {
 	if (nestq_num >= 0) {
-	  onig_reduce_nested_qualifier(qnode, target);
+	  onig_reduce_nested_quantifier(qnode, target);
 	  goto q_exit;
 	}
 	else if (targetq_num == 1 || targetq_num == 2) { /* * or + */
@@ -4707,61 +4704,6 @@ set_qualifier(Node* qnode, Node* target, int group, ScanEnv* env)
  q_exit:
   return 0;
 }
-
-static int
-make_compound_alt_node_from_cc(OnigAmbigType ambig_flag, OnigEncoding enc,
-                               CClassNode* cc, Node** root)
-{
-  int r, i, j, k, clen, len, ncode, n;
-  UChar buf[ONIGENC_CODE_TO_MBC_MAXLEN];
-  Node **ptail, *snode = NULL_NODE;
-  const OnigCompAmbigCodes* ccs;
-  const OnigCompAmbigCodeItem* ci;
-  OnigAmbigType amb;
-
-  n = 0;
-  *root = NULL_NODE;
-  ptail = root;
-
-
-  for (amb = 0x01; amb <= ONIGENC_AMBIGUOUS_MATCH_LIMIT; amb <<= 1) {
-    if ((amb & ambig_flag) == 0)  continue;
-
-    ncode = ONIGENC_GET_ALL_COMP_AMBIG_CODES(enc, amb, &ccs);
-    for (i = 0; i < ncode; i++) {
-      if (onig_is_code_in_cc(enc, ccs[i].code, cc)) {
-        for (j = 0; j < ccs[i].n; j++) {
-          ci = &(ccs[i].items[j]);
-          if (ci->len > 1) { /* compound only */
-            if (IS_CCLASS_NOT(cc)) clear_not_flag_cclass(cc, enc);
-
-            clen = ci->len;
-            for (k = 0; k < clen; k++) {
-              len = ONIGENC_CODE_TO_MBC(enc, ci->code[k], buf);
-
-              if (k == 0) {
-                snode = node_new_str_raw(buf, buf + len);
-                CHECK_NULL_RETURN_VAL(snode, ONIGERR_MEMORY);
-              }
-              else {
-                r = onig_node_str_cat(snode, buf, buf + len);
-                if (r < 0) return r;
-              }
-            }
-
-            *ptail = node_new_alt(snode, NULL_NODE);
-            CHECK_NULL_RETURN_VAL(*ptail, ONIGERR_MEMORY);
-            ptail = &(NCONS(*ptail).right);
-            n++;
-        }
-        }
-      }
-    }
-  }
-
-  return n;
-}
-
 
 #ifdef USE_SHARED_CCLASS_TABLE
 
@@ -4826,11 +4768,11 @@ i_free_shared_class(type_cclass_key* key, Node* node, void* arg)
 }
 
 extern int
-onig_free_shared_cclass_table()
+onig_free_shared_cclass_table(void)
 {
   if (IS_NOT_NULL(OnigTypeCClassTable)) {
     onig_st_foreach(OnigTypeCClassTable, i_free_shared_class, 0);
-    xfree(OnigTypeCClassTable);
+    onig_st_free_table(OnigTypeCClassTable);
     OnigTypeCClassTable = NULL;
   }
 
@@ -4911,23 +4853,36 @@ parse_exp(Node** np, OnigToken* tok, int term,
   case TK_RAW_BYTE:
   tk_raw_byte:
     {
-      *np = node_new_str_raw_char((UChar )tok->u.c);
+      *np = node_new_str_char((UChar )tok->u.c);
       CHECK_NULL_RETURN_VAL(*np, ONIGERR_MEMORY);
       len = 1;
       while (1) {
+	if (len >= ONIGENC_MBC_MINLEN(env->enc)) {
+	  if (len == enc_len(env->enc, NSTRING(*np).s)) {
+	    r = fetch_token(tok, src, end, env);
+	    goto string_end;
+	  }
+	}
+
 	r = fetch_token(tok, src, end, env);
 	if (r < 0) return r;
 	if (r != TK_RAW_BYTE) {
-#ifndef NUMBERED_CHAR_IS_NOT_CASE_AMBIG
-	  if (len >= enc_len(env->enc, NSTRING(*np).s)) {
-	    NSTRING_CLEAR_RAW(*np);
+#ifdef USE_PAD_TO_SHORT_BYTE_CHAR
+	  int rem;
+	  if (len < ONIGENC_MBC_MINLEN(env->enc)) {
+	    rem = ONIGENC_MBC_MINLEN(env->enc) - len;
+	    (void )node_str_head_pad(&NSTRING(*np), rem, (UChar )0);
+	    if (len + rem == enc_len(env->enc, NSTRING(*np).s)) {
+	      goto string_end;
+	    }
 	  }
 #endif
-          goto string_end;
+	  return ONIGERR_TOO_SHORT_MULTI_BYTE_STRING;
 	}
 
 	r = node_str_cat_char(*np, (UChar )tok->u.c);
 	if (r < 0) return r;
+
 	len++;
       }
     }
@@ -5098,24 +5053,6 @@ parse_exp(Node** np, OnigToken* tok, int term,
           }
         }
       }
-
-      if (IS_IGNORECASE(env->option) &&
-          (env->ambig_flag & ONIGENC_AMBIGUOUS_MATCH_COMPOUND) != 0) {
-        int res;
-        Node *alt_root, *work;
-
-        res = make_compound_alt_node_from_cc(env->ambig_flag, env->enc,
-                                             cc, &alt_root);
-        if (res < 0) return res;
-        if (res > 0) {
-          work = node_new_alt(*np, alt_root);
-          if (IS_NULL(work)) {
-            onig_node_free(alt_root);
-            return ONIGERR_MEMORY;
-          }
-          *np = work;
-        }
-      }
     }
     break;
 
@@ -5127,9 +5064,9 @@ parse_exp(Node** np, OnigToken* tok, int term,
   case TK_ANYCHAR_ANYTIME:
     *np = node_new_anychar();
     CHECK_NULL_RETURN_VAL(*np, ONIGERR_MEMORY);
-    qn = node_new_qualifier(0, REPEAT_INFINITE, 0);
+    qn = node_new_quantifier(0, REPEAT_INFINITE, 0);
     CHECK_NULL_RETURN_VAL(qn, ONIGERR_MEMORY);
-    NQUALIFIER(qn).target = *np;
+    NQUANTIFIER(qn).target = *np;
     *np = qn;
     break;
 
@@ -5185,14 +5122,14 @@ parse_exp(Node** np, OnigToken* tok, int term,
 
   repeat:
     if (r == TK_OP_REPEAT || r == TK_INTERVAL) {
-      if (is_invalid_qualifier_target(*targetp))
+      if (is_invalid_quantifier_target(*targetp))
 	return ONIGERR_TARGET_OF_REPEAT_OPERATOR_INVALID;
 
-      qn = node_new_qualifier(tok->u.repeat.lower, tok->u.repeat.upper,
+      qn = node_new_quantifier(tok->u.repeat.lower, tok->u.repeat.upper,
 			      (r == TK_INTERVAL ? 1 : 0));
       CHECK_NULL_RETURN_VAL(qn, ONIGERR_MEMORY);
-      NQUALIFIER(qn).greedy = tok->u.repeat.greedy;
-      r = set_qualifier(qn, *targetp, group, env);
+      NQUANTIFIER(qn).greedy = tok->u.repeat.greedy;
+      r = set_quantifier(qn, *targetp, group, env);
       if (r < 0) return r;
       
       if (tok->u.repeat.possessive != 0) {

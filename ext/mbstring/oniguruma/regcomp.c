@@ -2,7 +2,7 @@
   regcomp.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2008  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2007  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@ OnigAmbigType OnigDefaultAmbigFlag =
    ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE);
 
 extern OnigAmbigType
-onig_get_default_ambig_flag()
+onig_get_default_ambig_flag(void)
 {
   return OnigDefaultAmbigFlag;
 }
@@ -46,10 +46,6 @@ onig_set_default_ambig_flag(OnigAmbigType ambig_flag)
   return 0;
 }
 
-
-#ifndef PLATFORM_UNALIGNED_WORD_ACCESS
-static unsigned char PadBuf[WORD_ALIGNMENT_SIZE];
-#endif
 
 static UChar*
 k_strdup(UChar* s, UChar* end)
@@ -539,6 +535,8 @@ add_multi_byte_cclass(BBuf* mbuf, regex_t* reg)
   add_length(reg, mbuf->used);
   return add_bytes(reg, mbuf->p, mbuf->used);
 #else
+  static unsigned char PadBuf[WORD_ALIGNMENT_SIZE];
+
   int r, pad_size;
   UChar* p = BBUF_GET_ADD_ADDRESS(reg) + SIZE_LENGTH;
 
@@ -660,7 +658,7 @@ entry_repeat_range(regex_t* reg, int id, int lower, int upper)
 }
 
 static int
-compile_range_repeat_node(QualifierNode* qn, int target_len, int empty_info,
+compile_range_repeat_node(QuantifierNode* qn, int target_len, int empty_info,
                           regex_t* reg)
 {
   int r;
@@ -684,7 +682,7 @@ compile_range_repeat_node(QualifierNode* qn, int target_len, int empty_info,
 #ifdef USE_SUBEXP_CALL
       reg->num_call > 0 ||
 #endif
-      IS_QUALIFIER_IN_REPEAT(qn)) {
+      IS_QUANTIFIER_IN_REPEAT(qn)) {
     r = add_opcode(reg, qn->greedy ? OP_REPEAT_INC_SG : OP_REPEAT_INC_NG_SG);
   }
   else {
@@ -696,7 +694,7 @@ compile_range_repeat_node(QualifierNode* qn, int target_len, int empty_info,
 }
 
 static int
-is_anychar_star_qualifier(QualifierNode* qn)
+is_anychar_star_quantifier(QuantifierNode* qn)
 {
   if (qn->greedy && IS_REPEAT_INFINITE(qn->upper) &&
       NTYPE(qn->target) == N_ANYCHAR)
@@ -705,13 +703,13 @@ is_anychar_star_qualifier(QualifierNode* qn)
     return 0;
 }
 
-#define QUALIFIER_EXPAND_LIMIT_SIZE   50
+#define QUANTIFIER_EXPAND_LIMIT_SIZE   50
 #define CKN_ON   (ckn > 0)
 
 #ifdef USE_COMBINATION_EXPLOSION_CHECK
 
 static int
-compile_length_qualifier_node(QualifierNode* qn, regex_t* reg)
+compile_length_quantifier_node(QuantifierNode* qn, regex_t* reg)
 {
   int len, mod_tlen, cklen;
   int ckn;
@@ -791,7 +789,7 @@ compile_length_qualifier_node(QualifierNode* qn, regex_t* reg)
 }
 
 static int
-compile_qualifier_node(QualifierNode* qn, regex_t* reg)
+compile_quantifier_node(QuantifierNode* qn, regex_t* reg)
 {
   int r, mod_tlen;
   int ckn;
@@ -803,7 +801,7 @@ compile_qualifier_node(QualifierNode* qn, regex_t* reg)
 
   ckn = ((reg->num_comb_exp_check > 0) ? qn->comb_exp_check_num : 0);
 
-  if (is_anychar_star_qualifier(qn)) {
+  if (is_anychar_star_quantifier(qn)) {
     r = compile_tree_n_times(qn->target, qn->lower, reg);
     if (r) return r;
     if (IS_NOT_NULL(qn->next_head_exact) && !CKN_ON) {
@@ -945,7 +943,7 @@ compile_qualifier_node(QualifierNode* qn, regex_t* reg)
 #else /* USE_COMBINATION_EXPLOSION_CHECK */
 
 static int
-compile_length_qualifier_node(QualifierNode* qn, regex_t* reg)
+compile_length_quantifier_node(QuantifierNode* qn, regex_t* reg)
 {
   int len, mod_tlen;
   int infinite = IS_REPEAT_INFINITE(qn->upper);
@@ -970,8 +968,8 @@ compile_length_qualifier_node(QualifierNode* qn, regex_t* reg)
     mod_tlen = tlen;
 
   if (infinite &&
-      (qn->lower <= 1 || tlen * qn->lower <= QUALIFIER_EXPAND_LIMIT_SIZE)) {
-    if (qn->lower == 1 && tlen > QUALIFIER_EXPAND_LIMIT_SIZE) {
+      (qn->lower <= 1 || tlen * qn->lower <= QUANTIFIER_EXPAND_LIMIT_SIZE)) {
+    if (qn->lower == 1 && tlen > QUANTIFIER_EXPAND_LIMIT_SIZE) {
       len = SIZE_OP_JUMP;
     }
     else {
@@ -994,7 +992,7 @@ compile_length_qualifier_node(QualifierNode* qn, regex_t* reg)
   }
   else if (!infinite && qn->greedy &&
            (qn->upper == 1 || (tlen + SIZE_OP_PUSH) * qn->upper
-                                      <= QUALIFIER_EXPAND_LIMIT_SIZE)) {
+                                      <= QUANTIFIER_EXPAND_LIMIT_SIZE)) {
     len = tlen * qn->lower;
     len += (SIZE_OP_PUSH + tlen) * (qn->upper - qn->lower);
   }
@@ -1010,7 +1008,7 @@ compile_length_qualifier_node(QualifierNode* qn, regex_t* reg)
 }
 
 static int
-compile_qualifier_node(QualifierNode* qn, regex_t* reg)
+compile_quantifier_node(QuantifierNode* qn, regex_t* reg)
 {
   int i, r, mod_tlen;
   int infinite = IS_REPEAT_INFINITE(qn->upper);
@@ -1019,7 +1017,7 @@ compile_qualifier_node(QualifierNode* qn, regex_t* reg)
 
   if (tlen < 0) return tlen;
 
-  if (is_anychar_star_qualifier(qn)) {
+  if (is_anychar_star_quantifier(qn)) {
     r = compile_tree_n_times(qn->target, qn->lower, reg);
     if (r) return r;
     if (IS_NOT_NULL(qn->next_head_exact)) {
@@ -1044,8 +1042,8 @@ compile_qualifier_node(QualifierNode* qn, regex_t* reg)
     mod_tlen = tlen;
 
   if (infinite &&
-      (qn->lower <= 1 || tlen * qn->lower <= QUALIFIER_EXPAND_LIMIT_SIZE)) {
-    if (qn->lower == 1 && tlen > QUALIFIER_EXPAND_LIMIT_SIZE) {
+      (qn->lower <= 1 || tlen * qn->lower <= QUANTIFIER_EXPAND_LIMIT_SIZE)) {
+    if (qn->lower == 1 && tlen > QUANTIFIER_EXPAND_LIMIT_SIZE) {
       if (qn->greedy) {
 	if (IS_NOT_NULL(qn->head_exact))
 	  r = add_opcode_rel_addr(reg, OP_JUMP, SIZE_OP_PUSH_OR_JUMP_EXACT1);
@@ -1109,7 +1107,7 @@ compile_qualifier_node(QualifierNode* qn, regex_t* reg)
   }
   else if (!infinite && qn->greedy &&
            (qn->upper == 1 || (tlen + SIZE_OP_PUSH) * qn->upper
-                                  <= QUALIFIER_EXPAND_LIMIT_SIZE)) {
+                                  <= QUANTIFIER_EXPAND_LIMIT_SIZE)) {
     int n = qn->upper - qn->lower;
 
     r = compile_tree_n_times(qn->target, qn->lower, reg);
@@ -1227,7 +1225,7 @@ compile_length_effect_node(EffectNode* node, regex_t* reg)
 
   case EFFECT_STOP_BACKTRACK:
     if (IS_EFFECT_STOP_BT_SIMPLE_REPEAT(node)) {
-      QualifierNode* qn = &NQUALIFIER(node->target);
+      QuantifierNode* qn = &NQUANTIFIER(node->target);
       tlen = compile_length_tree(qn->target, reg);
       if (tlen < 0) return tlen;
 
@@ -1317,7 +1315,7 @@ compile_effect_node(EffectNode* node, regex_t* reg)
 
   case EFFECT_STOP_BACKTRACK:
     if (IS_EFFECT_STOP_BT_SIMPLE_REPEAT(node)) {
-      QualifierNode* qn = &NQUALIFIER(node->target);
+      QuantifierNode* qn = &NQUANTIFIER(node->target);
       r = compile_tree_n_times(qn->target, qn->lower, reg);
       if (r) return r;
 
@@ -1540,8 +1538,8 @@ compile_length_tree(Node* node, regex_t* reg)
     break;
 #endif
 
-  case N_QUALIFIER:
-    r = compile_length_qualifier_node(&(NQUALIFIER(node)), reg);
+  case N_QUANTIFIER:
+    r = compile_length_quantifier_node(&(NQUANTIFIER(node)), reg);
     break;
 
   case N_EFFECT:
@@ -1703,8 +1701,8 @@ compile_tree(Node* node, regex_t* reg)
     break;
 #endif
 
-  case N_QUALIFIER:
-    r = compile_qualifier_node(&(NQUALIFIER(node)), reg);
+  case N_QUANTIFIER:
+    r = compile_quantifier_node(&(NQUANTIFIER(node)), reg);
     break;
 
   case N_EFFECT:
@@ -1741,13 +1739,13 @@ noname_disable_map(Node** plink, GroupNumRemap* map, int* counter)
     } while (r == 0 && IS_NOT_NULL(node = NCONS(node).right));
     break;
 
-  case N_QUALIFIER:
+  case N_QUANTIFIER:
     {
-      Node** ptarget = &(NQUALIFIER(node).target);
+      Node** ptarget = &(NQUANTIFIER(node).target);
       Node*  old = *ptarget;
       r = noname_disable_map(ptarget, map, counter);
-      if (*ptarget != old && NTYPE(*ptarget) == N_QUALIFIER) {
-	onig_reduce_nested_qualifier(node, *ptarget);
+      if (*ptarget != old && NTYPE(*ptarget) == N_QUANTIFIER) {
+	onig_reduce_nested_quantifier(node, *ptarget);
       }
     }
     break;
@@ -1821,8 +1819,8 @@ renumber_by_map(Node* node, GroupNumRemap* map)
       r = renumber_by_map(NCONS(node).left, map);
     } while (r == 0 && IS_NOT_NULL(node = NCONS(node).right));
     break;
-  case N_QUALIFIER:
-    r = renumber_by_map(NQUALIFIER(node).target, map);
+  case N_QUANTIFIER:
+    r = renumber_by_map(NQUANTIFIER(node).target, map);
     break;
   case N_EFFECT:
     r = renumber_by_map(NEFFECT(node).target, map);
@@ -1851,8 +1849,8 @@ numbered_ref_check(Node* node)
       r = numbered_ref_check(NCONS(node).left);
     } while (r == 0 && IS_NOT_NULL(node = NCONS(node).right));
     break;
-  case N_QUALIFIER:
-    r = numbered_ref_check(NQUALIFIER(node).target);
+  case N_QUANTIFIER:
+    r = numbered_ref_check(NQUANTIFIER(node).target);
     break;
   case N_EFFECT:
     r = numbered_ref_check(NEFFECT(node).target);
@@ -1933,7 +1931,7 @@ unset_addr_list_fix(UnsetAddrList* uslist, regex_t* reg)
 
 #ifdef USE_INFINITE_REPEAT_MONOMANIAC_MEM_STATUS_CHECK
 static int
-qualifiers_memory_node_info(Node* node)
+quantifiers_memory_node_info(Node* node)
 {
   int r = 0;
 
@@ -1943,7 +1941,7 @@ qualifiers_memory_node_info(Node* node)
     {
       int v;
       do {
-	v = qualifiers_memory_node_info(NCONS(node).left);
+	v = quantifiers_memory_node_info(NCONS(node).left);
 	if (v > r) r = v;
       } while (v >= 0 && IS_NOT_NULL(node = NCONS(node).right));
     }
@@ -1955,15 +1953,15 @@ qualifiers_memory_node_info(Node* node)
       return NQ_TARGET_IS_EMPTY_REC; /* tiny version */
     }
     else
-      r = qualifiers_memory_node_info(NCALL(node).target);
+      r = quantifiers_memory_node_info(NCALL(node).target);
     break;
 #endif
 
-  case N_QUALIFIER:
+  case N_QUANTIFIER:
     {
-      QualifierNode* qn = &(NQUALIFIER(node));
+      QuantifierNode* qn = &(NQUANTIFIER(node));
       if (qn->upper != 0) {
-	r = qualifiers_memory_node_info(qn->target);
+	r = quantifiers_memory_node_info(qn->target);
       }
     }
     break;
@@ -1978,7 +1976,7 @@ qualifiers_memory_node_info(Node* node)
 
       case EFFECT_OPTION:
       case EFFECT_STOP_BACKTRACK:
-	r = qualifiers_memory_node_info(en->target);
+	r = quantifiers_memory_node_info(en->target);
 	break;
       default:
 	break;
@@ -2083,9 +2081,9 @@ get_min_match_length(Node* node, OnigDistance *min, ScanEnv* env)
     *min = 1;
     break;
 
-  case N_QUALIFIER:
+  case N_QUANTIFIER:
     {
-      QualifierNode* qn = &(NQUALIFIER(node));
+      QuantifierNode* qn = &(NQUANTIFIER(node));
 
       if (qn->lower > 0) {
 	r = get_min_match_length(qn->target, min, env);
@@ -2204,9 +2202,9 @@ get_max_match_length(Node* node, OnigDistance *max, ScanEnv* env)
     break;
 #endif
 
-  case N_QUALIFIER:
+  case N_QUANTIFIER:
     {
-      QualifierNode* qn = &(NQUALIFIER(node));
+      QuantifierNode* qn = &(NQUANTIFIER(node));
 
       if (qn->upper != 0) {
 	r = get_max_match_length(qn->target, max, env);
@@ -2311,9 +2309,9 @@ get_char_length_tree1(Node* node, regex_t* reg, int* len, int level)
     }
     break;
 
-  case N_QUALIFIER:
+  case N_QUANTIFIER:
     {
-      QualifierNode* qn = &(NQUALIFIER(node));
+      QuantifierNode* qn = &(NQUANTIFIER(node));
       if (qn->lower == qn->upper) {
 	r = get_char_length_tree1(qn->target, reg, &tlen, level);
 	if (r == 0)
@@ -2623,9 +2621,9 @@ get_head_value_node(Node* node, int exact, regex_t* reg)
     }
     break;
 
-  case N_QUALIFIER:
+  case N_QUANTIFIER:
     {
-      QualifierNode* qn = &(NQUALIFIER(node));
+      QuantifierNode* qn = &(NQUANTIFIER(node));
       if (qn->lower > 0) {
 	if (IS_NOT_NULL(qn->head_exact))
 	  n = qn->head_exact;
@@ -2686,8 +2684,8 @@ check_type_tree(Node* node, int type_mask, int effect_mask, int anchor_mask)
     } while (r == 0 && IS_NOT_NULL(node = NCONS(node).right));
     break;
 
-  case N_QUALIFIER:
-    r = check_type_tree(NQUALIFIER(node).target, type_mask, effect_mask,
+  case N_QUANTIFIER:
+    r = check_type_tree(NQUANTIFIER(node).target, type_mask, effect_mask,
 			anchor_mask);
     break;
 
@@ -2762,10 +2760,10 @@ subexp_inf_recursive_check(Node* node, ScanEnv* env, int head)
     }
     break;
 
-  case N_QUALIFIER:
-    r = subexp_inf_recursive_check(NQUALIFIER(node).target, env, head);
+  case N_QUANTIFIER:
+    r = subexp_inf_recursive_check(NQUANTIFIER(node).target, env, head);
     if (r == RECURSION_EXIST) {
-      if (NQUALIFIER(node).lower == 0) r = 0;
+      if (NQUANTIFIER(node).lower == 0) r = 0;
     }
     break;
 
@@ -2821,8 +2819,8 @@ subexp_inf_recursive_check_trav(Node* node, ScanEnv* env)
     } while (r == 0 && IS_NOT_NULL(node = NCONS(node).right));
     break;
 
-  case N_QUALIFIER:
-    r = subexp_inf_recursive_check_trav(NQUALIFIER(node).target, env);
+  case N_QUANTIFIER:
+    r = subexp_inf_recursive_check_trav(NQUANTIFIER(node).target, env);
     break;
 
   case N_ANCHOR:
@@ -2876,8 +2874,8 @@ subexp_recursive_check(Node* node)
     } while (IS_NOT_NULL(node = NCONS(node).right));
     break;
 
-  case N_QUALIFIER:
-    r = subexp_recursive_check(NQUALIFIER(node).target);
+  case N_QUANTIFIER:
+    r = subexp_recursive_check(NQUANTIFIER(node).target);
     break;
 
   case N_ANCHOR:
@@ -2941,11 +2939,11 @@ subexp_recursive_check_trav(Node* node, ScanEnv* env)
     }
     break;
 
-  case N_QUALIFIER:
-    r = subexp_recursive_check_trav(NQUALIFIER(node).target, env);
-    if (NQUALIFIER(node).upper == 0) {
+  case N_QUANTIFIER:
+    r = subexp_recursive_check_trav(NQUANTIFIER(node).target, env);
+    if (NQUANTIFIER(node).upper == 0) {
       if (r == FOUND_CALLED_NODE)
-	NQUALIFIER(node).is_refered = 1;
+	NQUANTIFIER(node).is_refered = 1;
     }
     break;
 
@@ -3008,8 +3006,8 @@ setup_subexp_call(Node* node, ScanEnv* env)
     } while (r == 0 && IS_NOT_NULL(node = NCONS(node).right));
     break;
 
-  case N_QUALIFIER:
-    r = setup_subexp_call(NQUALIFIER(node).target, env);
+  case N_QUANTIFIER:
+    r = setup_subexp_call(NQUANTIFIER(node).target, env);
     break;
   case N_EFFECT:
     r = setup_subexp_call(NEFFECT(node).target, env);
@@ -3158,10 +3156,10 @@ next_setup(Node* node, Node* next_node, regex_t* reg)
 
  retry:
   type = NTYPE(node);
-  if (type == N_QUALIFIER) {
-    QualifierNode* qn = &(NQUALIFIER(node));
+  if (type == N_QUANTIFIER) {
+    QuantifierNode* qn = &(NQUANTIFIER(node));
     if (qn->greedy && IS_REPEAT_INFINITE(qn->upper)) {
-#ifdef USE_QUALIFIER_PEEK_NEXT
+#ifdef USE_QUANTIFIER_PEEK_NEXT
       qn->next_head_exact = get_head_value_node(next_node, 1, reg);
 #endif
       /* automatic posseivation a*b ==> (?>a*)b */
@@ -3327,11 +3325,11 @@ setup_comb_exp_check(Node* node, int state, ScanEnv* env)
     }
     break;
 
-  case N_QUALIFIER:
+  case N_QUANTIFIER:
     {
       int child_state = state;
       int add_state = 0;
-      QualifierNode* qn = &(NQUALIFIER(node));
+      QuantifierNode* qn = &(NQUANTIFIER(node));
       Node* target = qn->target;
       int var_num;
 
@@ -3345,8 +3343,8 @@ setup_comb_exp_check(Node* node, int state, ScanEnv* env)
 	    if (NTYPE(qn->target) == N_EFFECT) {
 	      EffectNode* en = &(NEFFECT(qn->target));
 	      if (en->type == EFFECT_MEMORY) {
-		if (NTYPE(en->target) == N_QUALIFIER) {
-		  QualifierNode* q = &(NQUALIFIER(en->target));
+		if (NTYPE(en->target) == N_QUANTIFIER) {
+		  QuantifierNode* q = &(NQUANTIFIER(en->target));
 		  if (IS_REPEAT_INFINITE(q->upper)
 		      && q->greedy == qn->greedy) {
 		    qn->upper = (qn->lower == 0 ? 1 : qn->lower);
@@ -3509,10 +3507,10 @@ setup_tree(Node* node, regex_t* reg, int state, ScanEnv* env)
     }
     break;
 
-  case N_QUALIFIER:
+  case N_QUANTIFIER:
     {
       OnigDistance d;
-      QualifierNode* qn = &(NQUALIFIER(node));
+      QuantifierNode* qn = &(NQUANTIFIER(node));
       Node* target = qn->target;
 
       if ((state & IN_REPEAT) != 0) {
@@ -3525,7 +3523,7 @@ setup_tree(Node* node, regex_t* reg, int state, ScanEnv* env)
 	if (d == 0) {
 	  qn->target_empty_info = NQ_TARGET_IS_EMPTY;
 #ifdef USE_INFINITE_REPEAT_MONOMANIAC_MEM_STATUS_CHECK
-	  r = qualifiers_memory_node_info(target);
+	  r = quantifiers_memory_node_info(target);
 	  if (r < 0) break;
 	  if (r > 0) {
 	    qn->target_empty_info = r;
@@ -3567,15 +3565,15 @@ setup_tree(Node* node, regex_t* reg, int state, ScanEnv* env)
 	      if (r) break;
 	    }
 	    onig_node_free(target);
-	    break; /* break case N_QUALIFIER: */
+	    break; /* break case N_QUANTIFIER: */
 	  }
 	}
       }
 
 #ifdef USE_OP_PUSH_OR_JUMP_EXACT
       if (qn->greedy && (qn->target_empty_info != 0)) {
-	if (NTYPE(target) == N_QUALIFIER) {
-	  QualifierNode* tqn = &(NQUALIFIER(target));
+	if (NTYPE(target) == N_QUANTIFIER) {
+	  QuantifierNode* tqn = &(NQUANTIFIER(target));
 	  if (IS_NOT_NULL(tqn->head_exact)) {
 	    qn->head_exact  = tqn->head_exact;
 	    tqn->head_exact = NULL;
@@ -3615,8 +3613,8 @@ setup_tree(Node* node, regex_t* reg, int state, ScanEnv* env)
 	{
 	  Node* target = en->target;
 	  r = setup_tree(target, reg, state, env);
-	  if (NTYPE(target) == N_QUALIFIER) {
-	    QualifierNode* tqn = &(NQUALIFIER(target));
+	  if (NTYPE(target) == N_QUANTIFIER) {
+	    QuantifierNode* tqn = &(NQUANTIFIER(target));
 	    if (IS_REPEAT_INFINITE(tqn->upper) && tqn->lower <= 1 &&
 		tqn->greedy != 0) {  /* (?>a*), a*+ etc... */
 	      int qtype = NTYPE(tqn->target);
@@ -3645,7 +3643,7 @@ setup_tree(Node* node, regex_t* reg, int state, ScanEnv* env)
 /* allowed node types in look-behind */
 #define ALLOWED_TYPE_IN_LB  \
   ( N_LIST | N_ALT | N_STRING | N_CCLASS | N_CTYPE | \
-    N_ANYCHAR | N_ANCHOR | N_EFFECT | N_QUALIFIER | N_CALL )
+    N_ANYCHAR | N_ANCHOR | N_EFFECT | N_QUANTIFIER | N_CALL )
 
 #define ALLOWED_EFFECT_IN_LB       ( EFFECT_MEMORY )
 #define ALLOWED_EFFECT_IN_LB_NOT   0
@@ -4080,7 +4078,14 @@ select_opt_exact_info(OnigEncoding enc, OptExactInfo* now, OptExactInfo* alt)
   v1 = now->len;
   v2 = alt->len;
 
-  if (v1 <= 2 && v2 <= 2) {
+  if (v2 == 0) {
+    return ;
+  }
+  else if (v1 == 0) {
+    copy_opt_exact_info(now, alt);
+    return ;
+  }
+  else if (v1 <= 2 && v2 <= 2) {
     /* ByteValTable[x] is big value --> low price */
     v2 = map_position_value(enc, now->s[0]);
     v1 = map_position_value(enc, alt->s[0]);
@@ -4143,10 +4148,9 @@ static int
 add_char_amb_opt_map_info(OptMapInfo* map, UChar* p, UChar* end,
                           OnigEncoding enc, OnigAmbigType ambig_flag)
 {
-  int i, j, n, len;
+  int i, n, len;
   UChar buf[ONIGENC_MBC_NORMALIZE_MAXLEN];
-  OnigCodePoint code, ccode;
-  const OnigCompAmbigCodes* ccs;
+  OnigCodePoint code;
   const OnigPairAmbigCodes* pccs;
   OnigAmbigType amb;
 
@@ -4162,21 +4166,6 @@ add_char_amb_opt_map_info(OptMapInfo* map, UChar* p, UChar* end,
         len = ONIGENC_CODE_TO_MBC(enc, pccs[i].to, buf);
         if (len < 0) return len;
         add_char_opt_map_info(map, buf[0], enc);
-      }
-    }
-
-    if ((ambig_flag & ONIGENC_AMBIGUOUS_MATCH_COMPOUND) != 0) {
-      n = ONIGENC_GET_ALL_COMP_AMBIG_CODES(enc, amb, &ccs);
-      for (i = 0; i < n; i++) {
-        if (ccs[i].code == code) {
-          for (j = 0; j < ccs[i].n; j++) {
-            ccode = ccs[i].items[j].code[0];
-            len = ONIGENC_CODE_TO_MBC(enc, ccode, buf);
-            if (len < 0) return len;
-            add_char_opt_map_info(map, buf[0], enc);
-          }
-          break;
-        }
       }
     }
   }
@@ -4572,12 +4561,12 @@ optimize_node_left(Node* node, NodeOptInfo* opt, OptEnv* env)
     break;
 #endif
 
-  case N_QUALIFIER:
+  case N_QUANTIFIER:
     {
       int i;
       OnigDistance min, max;
       NodeOptInfo nopt;
-      QualifierNode* qn = &(NQUALIFIER(node));
+      QuantifierNode* qn = &(NQUANTIFIER(node));
 
       r = optimize_node_left(qn->target, &nopt, env);
       if (r) break;
@@ -4830,6 +4819,38 @@ clear_optimize_info(regex_t* reg)
 }
 
 #ifdef ONIG_DEBUG
+
+static void print_enc_string(FILE* fp, OnigEncoding enc,
+			     const UChar *s, const UChar *end)
+{
+  fprintf(fp, "\nPATTERN: /");
+
+  if (ONIGENC_MBC_MINLEN(enc) > 1) {
+    const UChar *p;
+    OnigCodePoint code;
+
+    p = s;
+    while (p < end) {
+      code = ONIGENC_MBC_TO_CODE(enc, p, end);
+      if (code >= 0x80) {
+	fprintf(fp, " 0x%04x ", (int )code);
+      }
+      else {
+	fputc((int )code, fp);
+      }
+
+      p += enc_len(enc, p);
+    }
+  }
+  else {
+    while (s < end) {
+      fputc((int )*s, fp);
+      s++;
+    }
+  }
+
+  fprintf(fp, "/\n");
+}
 
 static void
 print_distance_range(FILE* f, OnigDistance a, OnigDistance b)
@@ -5122,6 +5143,10 @@ onig_compile(regex_t* reg, const UChar* pattern, const UChar* pattern_end,
 
   reg->state = ONIG_STATE_COMPILING;
 
+#ifdef ONIG_DEBUG
+  print_enc_string(stderr, reg->enc, pattern, pattern_end);
+#endif
+
   if (reg->alloc == 0) {
     init_size = (pattern_end - pattern) * 2;
     if (init_size <= 0) init_size = COMPILE_INIT_SIZE;
@@ -5277,6 +5302,7 @@ onig_compile(regex_t* reg, const UChar* pattern, const UChar* pattern_end,
  err:
   if (IS_NOT_NULL(scan_env.error)) {
     if (IS_NOT_NULL(einfo)) {
+      einfo->enc     = scan_env.enc;
       einfo->par     = scan_env.error;
       einfo->par_end = scan_env.error_end;
     }
@@ -5379,13 +5405,14 @@ onig_new(regex_t** reg, const UChar* pattern, const UChar* pattern_end,
 }
 
 extern int
-onig_init()
+onig_init(void)
 {
   if (onig_inited != 0)
     return 0;
 
   onig_inited = 1;
 
+  THREAD_SYSTEM_INIT;
   THREAD_ATOMIC_START;
 
   onigenc_init();
@@ -5401,9 +5428,9 @@ onig_init()
 
 
 extern int
-onig_end()
+onig_end(void)
 {
-  extern int onig_free_shared_cclass_table();
+  extern int onig_free_shared_cclass_table(void);
 
   THREAD_ATOMIC_START;
 
@@ -5422,6 +5449,7 @@ onig_end()
   onig_inited = 0;
 
   THREAD_ATOMIC_END;
+  THREAD_SYSTEM_END;
   return 0;
 }
 
@@ -5470,8 +5498,6 @@ OnigOpInfoType OnigOpInfo[] = {
   { OP_ANYCHAR_ML_STAR_PEEK_NEXT, "anychar-ml*-peek-next", ARG_SPECIAL },
   { OP_WORD,                "word",            ARG_NON },
   { OP_NOT_WORD,            "not-word",        ARG_NON },
-  { OP_WORD_SB,             "word-sb",         ARG_NON },
-  { OP_WORD_MB,             "word-mb",         ARG_NON },
   { OP_WORD_BOUND,          "word-bound",      ARG_NON },
   { OP_NOT_WORD_BOUND,      "not-word-bound",  ARG_NON },
   { OP_WORD_BEGIN,          "word-begin",      ARG_NON },
@@ -5969,11 +5995,11 @@ print_indent_tree(FILE* f, Node* node, int indent)
     break;
 #endif
 
-  case N_QUALIFIER:
-    fprintf(f, "<qualifier:%x>{%d,%d}%s\n", (int )node,
-	    NQUALIFIER(node).lower, NQUALIFIER(node).upper,
-	    (NQUALIFIER(node).greedy ? "" : "?"));
-    print_indent_tree(f, NQUALIFIER(node).target, indent + add);
+  case N_QUANTIFIER:
+    fprintf(f, "<quantifier:%x>{%d,%d}%s\n", (int )node,
+	    NQUANTIFIER(node).lower, NQUANTIFIER(node).upper,
+	    (NQUANTIFIER(node).greedy ? "" : "?"));
+    print_indent_tree(f, NQUANTIFIER(node).target, indent + add);
     break;
 
   case N_EFFECT:
@@ -6002,7 +6028,7 @@ print_indent_tree(FILE* f, Node* node, int indent)
     break;
   }
 
-  if (type != N_LIST && type != N_ALT && type != N_QUALIFIER &&
+  if (type != N_LIST && type != N_ALT && type != N_QUANTIFIER &&
       type != N_EFFECT)
     fprintf(f, "\n");
   fflush(f);

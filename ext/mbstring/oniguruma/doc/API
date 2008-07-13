@@ -1,4 +1,4 @@
-Oniguruma API  Version 4.1.0  2006/05/15
+Oniguruma API  Version 4.7.1  2007/07/04
 
 #include <oniguruma.h>
 
@@ -63,7 +63,7 @@ Oniguruma API  Version 4.1.0  2006/05/15
   4 option:      compile time options.
 
       ONIG_OPTION_NONE               no option
-      ONIG_OPTION_SINGLELINE         '^' -> '\A', '$' -> '\z', '\Z' -> '\z'
+      ONIG_OPTION_SINGLELINE         '^' -> '\A', '$' -> '\Z'
       ONIG_OPTION_MULTILINE          '.' match with newline
       ONIG_OPTION_IGNORECASE         ambiguity match on
       ONIG_OPTION_EXTEND             extended pattern form
@@ -159,7 +159,6 @@ Oniguruma API  Version 4.1.0  2006/05/15
        ONIGENC_AMBIGUOUS_MATCH_NONE:          exact
        ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE:    ignore case for ASCII
        ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE: ignore case for non-ASCII
-       ONIGENC_AMBIGUOUS_MATCH_COMPOUND:      grapheme cluster as a char
        ONIGENC_AMBIGUOUS_MATCH_FULL:          all ambiguity on
        ONIGENC_AMBIGUOUS_MATCH_DEFAULT:       (ASCII | NONASCII)
                                               onig_set_default_ambig_flag()

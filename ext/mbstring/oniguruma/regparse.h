@@ -4,7 +4,7 @@
   regparse.h -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2008  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2007  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
 #define N_CTYPE        (1<< 2)
 #define N_ANYCHAR      (1<< 3)
 #define N_BACKREF      (1<< 4)
-#define N_QUALIFIER    (1<< 5)
+#define N_QUANTIFIER   (1<< 5)
 #define N_EFFECT       (1<< 6)
 #define N_ANCHOR       (1<< 7)
 #define N_LIST         (1<< 8)
@@ -52,7 +52,7 @@
 #define NSTRING(node)      ((node)->u.str)
 #define NCCLASS(node)      ((node)->u.cclass)
 #define NCTYPE(node)       ((node)->u.ctype)
-#define NQUALIFIER(node)   ((node)->u.qualifier)
+#define NQUANTIFIER(node)  ((node)->u.quantifier)
 #define NANCHOR(node)      ((node)->u.anchor)
 #define NBACKREF(node)     ((node)->u.backref)
 #define NEFFECT(node)      ((node)->u.effect)
@@ -131,7 +131,7 @@ typedef struct {
 #ifdef USE_COMBINATION_EXPLOSION_CHECK
   int comb_exp_check_num;  /* 1,2,3...: check,  0: no check  */
 #endif
-} QualifierNode;
+} QuantifierNode;
 
 /* status bits */
 #define NST_MIN_FIXED             (1<<0)
@@ -170,8 +170,8 @@ typedef struct {
 #define IS_CALL_NAME_REF(cn)           (((cn)->state & NST_NAME_REF)   != 0)
 #define IS_BACKREF_NAME_REF(bn)        (((bn)->state & NST_NAME_REF)   != 0)
 #define IS_BACKREF_NEST_LEVEL(bn)      (((bn)->state & NST_NEST_LEVEL) != 0)
-#define IS_QUALIFIER_IN_REPEAT(qn)     (((qn)->state & NST_IN_REPEAT)  != 0)
-#define IS_QUALIFIER_BY_NUMBER(qn)     (((qn)->state & NST_BY_NUMBER)  != 0)
+#define IS_QUANTIFIER_IN_REPEAT(qn)     (((qn)->state & NST_IN_REPEAT)  != 0)
+#define IS_QUANTIFIER_BY_NUMBER(qn)     (((qn)->state & NST_BY_NUMBER)  != 0)
 
 typedef struct {
   int state;
@@ -230,15 +230,15 @@ typedef struct {
 typedef struct _Node {
   int type;
   union {
-    StrNode       str;
-    CClassNode    cclass;
-    QualifierNode qualifier;
-    EffectNode    effect;
+    StrNode        str;
+    CClassNode     cclass;
+    QuantifierNode quantifier;
+    EffectNode     effect;
 #ifdef USE_SUBEXP_CALL
-    CallNode      call;
+    CallNode       call;
 #endif
-    BackrefNode   backref;
-    AnchorNode    anchor;
+    BackrefNode    backref;
+    AnchorNode     anchor;
     struct {
       struct _Node* left;
       struct _Node* right;
@@ -306,7 +306,7 @@ extern int    onig_renumber_name_table P_((regex_t* reg, GroupNumRemap* map));
 extern int    onig_strncmp P_((const UChar* s1, const UChar* s2, int n));
 extern void   onig_scan_env_set_error_string P_((ScanEnv* env, int ecode, UChar* arg, UChar* arg_end));
 extern int    onig_scan_unsigned_number P_((UChar** src, const UChar* end, OnigEncoding enc));
-extern void   onig_reduce_nested_qualifier P_((Node* pnode, Node* cnode));
+extern void   onig_reduce_nested_quantifier P_((Node* pnode, Node* cnode));
 extern void   onig_node_conv_to_str_node P_((Node* node, int raw));
 extern int    onig_node_str_cat P_((Node* node, const UChar* s, const UChar* end));
 extern void   onig_node_free P_((Node* node));
@@ -315,7 +315,7 @@ extern Node*  onig_node_new_anchor P_((int type));
 extern Node*  onig_node_new_str P_((const UChar* s, const UChar* end));
 extern Node*  onig_node_new_list P_((Node* left, Node* right));
 extern void   onig_node_str_clear P_((Node* node));
-extern int    onig_free_node_list();
+extern int    onig_free_node_list P_((void));
 extern int    onig_names_free P_((regex_t* reg));
 extern int    onig_parse_make_tree P_((Node** root, const UChar* pattern, const UChar* end, regex_t* reg, ScanEnv* env));
 
