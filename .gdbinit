@@ -95,8 +95,8 @@ define ____printzv_contents
 	set $zvalue = $arg0
 	set $type = $zvalue->type
 
-	printf "(refcount=%d", $zvalue->refcount
-	if $zvalue->is_ref
+	printf "(refcount=%d", $zvalue->refcount__gc
+	if $zvalue->is_ref__gc
 		printf ",is_ref"
 	end
 	printf ") "
@@ -181,7 +181,20 @@ define ____printzv_contents
 	if $type == 9
 	end
 	if $type == 10
-		printf "(%d): [%p]", $zvalue->value.str.len, $zvalue->value.str.val
+		printf "(%d): [%p]: \"", $zvalue->value.str.len, $zvalue->value.str.val
+		set $pos = 0
+		while $pos < 20 && $pos < $zvalue->value.str.len
+			if $zvalue->value.ustr.val[$pos] < 256
+				printf "%c", $zvalue->value.ustr.val[$pos]
+			else
+				printf "\\u%04X", $zvalue->value.ustr.val[$pos]
+			end
+			set $pos = $pos + 1
+		end
+		printf "\""
+		if $pos < $zvalue->value.str.len
+			printf "[...]"
+		end
 	end
 	if $type > 10
 	end
