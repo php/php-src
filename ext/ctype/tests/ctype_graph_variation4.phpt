@@ -1,5 +1,7 @@
 --TEST--
 Test ctype_graph() function : usage variations - octal and hexadecimal values
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 /* Prototype  : bool ctype_graph(mixed $c)

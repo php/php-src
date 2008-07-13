@@ -1,5 +1,7 @@
 --TEST--
 Test ctype_cntrl() function : error conditions - Incorrect number of args
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 /* Prototype  : bool ctype_cntrl(mixed $c)
