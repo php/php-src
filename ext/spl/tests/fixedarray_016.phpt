@@ -9,12 +9,9 @@ var_dump(empty($a[0]), empty($a[1]), $a);
 --EXPECTF--
 bool(false)
 bool(true)
-object(SplFixedArray)#1 (1) {
-  [u"array":u"SplFixedArray":private]=>
-  array(2) {
-    [0]=>
-    unicode(3) "foo"
-    [1]=>
-    NULL
-  }
+object(SplFixedArray)#%d (2) {
+  [0]=>
+  unicode(3) "foo"
+  [1]=>
+  NULL
 }
