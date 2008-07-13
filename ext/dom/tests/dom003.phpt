@@ -54,6 +54,8 @@ object(DOMException)#%d (6) {
   }
   ["code"]=>
   int(3)
+  ["previous":"Exception":private]=>
+  NULL
 }
 --- Don't catch exception with try/catch
 

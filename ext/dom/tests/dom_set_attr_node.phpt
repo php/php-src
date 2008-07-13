@@ -31,7 +31,7 @@ try {
 
 ?>
 --EXPECTF--
-object(DOMException)#%d (6) {
+object(DOMException)#%d (7) {
   ["message":protected]=>
   string(20) "Wrong Document Error"
   ["string":"Exception":private]=>
@@ -64,4 +64,6 @@ object(DOMException)#%d (6) {
   }
   ["code"]=>
   int(4)
+  ["previous":"Exception":private]=>
+  NULL
 }
