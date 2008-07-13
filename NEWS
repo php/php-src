@@ -35,6 +35,8 @@ PHP                                                                        NEWS
     dropped in future PHP versions. (Lars Strojny, Felipe, Marcus)
   . Added "request_order" INI variable to control specifically $_REQUEST behavior.
     (Stas)
+  . Added support for exception linking. (Marcus)
+  . Added ability to handle exceptions in destuctors. (Marcus)
 
 - Improved PHP runtime speed and memory usage:
   . Removed direct executor recursion. (Dmitry)
@@ -112,6 +114,7 @@ PHP                                                                        NEWS
   . Added SplHeap, SplMinHeap, SplMaxHeap, SplPriorityQueue classes. (Etienne)
   . Added new parameter $prepend to spl_autoload_register(). (Etienne)
   . Added FixedArray. (Etienne, Tony)
+  . Added delaying exceptions in SPL's autoload mechanism. (Marcus)
 
 - Improved Zend Engine:
   . Added "compact" handler for Zend MM storage. (Dmitry)
