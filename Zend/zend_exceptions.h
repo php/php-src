@@ -26,6 +26,8 @@
 
 BEGIN_EXTERN_C()
 
+ZEND_API void zend_exception_set_previous(zval *add_previous TSRMLS_DC);
+
 void zend_throw_exception_internal(zval *exception TSRMLS_DC);
 
 void zend_register_default_exception(TSRMLS_D);
