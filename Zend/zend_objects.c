@@ -100,20 +100,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 		old_exception = EG(exception);
 		EG(exception) = NULL;
 		zend_call_method_with_0_params(&obj, object->ce, &destructor, ZEND_DESTRUCTOR_FUNC_NAME, NULL);
-		if (old_exception) {
-			if (EG(exception)) {
-				zend_class_entry *default_exception_ce = zend_exception_get_default(TSRMLS_C);
-				zval *file = zend_read_property(default_exception_ce, old_exception, "file", sizeof("file")-1, 1 TSRMLS_CC);
-				zval *line = zend_read_property(default_exception_ce, old_exception, "line", sizeof("line")-1, 1 TSRMLS_CC);
-
-				zval_ptr_dtor(&obj);
-				zval_ptr_dtor(&EG(exception));
-				EG(exception) = old_exception;
-				zend_error(E_ERROR, "Ignoring exception from %v::__destruct() while an exception is already active (Uncaught %v in %R on line %ld)", 
-					object->ce->name, Z_OBJCE_P(old_exception)->name, Z_TYPE_P(file), Z_UNIVAL_P(file), Z_LVAL_P(line));
-			}
-			EG(exception) = old_exception;
-		}
+		zend_exception_set_previous(old_exception TSRMLS_CC);
 		zval_ptr_dtor(&obj);
 	}
 }
