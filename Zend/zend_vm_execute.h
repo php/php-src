@@ -747,6 +747,15 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 	} else {
 		function_name = &opline->op2.u.constant;
 
+		if (Z_TYPE_P(function_name) == IS_OBJECT &&
+			zend_get_closure(function_name, &EX(called_scope), &EX(fbc), &EX(object), NULL TSRMLS_CC) == SUCCESS) {
+			if (EX(object)) {
+				Z_ADDREF_P(EX(object));
+			}
+
+			ZEND_VM_NEXT_OPCODE();
+		}
+
 		if (Z_TYPE_P(function_name) != IS_STRING) {
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
 		}
@@ -935,6 +944,15 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 	} else {
 		function_name = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
+		if (Z_TYPE_P(function_name) == IS_OBJECT &&
+			zend_get_closure(function_name, &EX(called_scope), &EX(fbc), &EX(object), NULL TSRMLS_CC) == SUCCESS) {
+			if (EX(object)) {
+				Z_ADDREF_P(EX(object));
+			}
+			zval_dtor(free_op2.var);
+			ZEND_VM_NEXT_OPCODE();
+		}
+
 		if (Z_TYPE_P(function_name) != IS_STRING) {
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
 		}
@@ -1030,6 +1048,15 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 		}
 	} else {
 		function_name = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
+
+		if (Z_TYPE_P(function_name) == IS_OBJECT &&
+			zend_get_closure(function_name, &EX(called_scope), &EX(fbc), &EX(object), NULL TSRMLS_CC) == SUCCESS) {
+			if (EX(object)) {
+				Z_ADDREF_P(EX(object));
+			}
+			if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
+			ZEND_VM_NEXT_OPCODE();
+		}
 
 		if (Z_TYPE_P(function_name) != IS_STRING) {
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
@@ -1154,6 +1181,15 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 		}
 	} else {
 		function_name = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
+
+		if (Z_TYPE_P(function_name) == IS_OBJECT &&
+			zend_get_closure(function_name, &EX(called_scope), &EX(fbc), &EX(object), NULL TSRMLS_CC) == SUCCESS) {
+			if (EX(object)) {
+				Z_ADDREF_P(EX(object));
+			}
+
+			ZEND_VM_NEXT_OPCODE();
+		}
 
 		if (Z_TYPE_P(function_name) != IS_STRING) {
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
@@ -2871,6 +2907,21 @@ static int ZEND_FASTCALL  ZEND_DECLARE_CONST_SPEC_CONST_CONST_HANDLER(ZEND_OPCOD
 	if (zend_register_constant(&c TSRMLS_CC) == FAILURE) {
 	}
 
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	zend_op_array *op_array;
+
+	if (zend_hash_quick_find(EG(function_table), Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), Z_LVAL(opline->op2.u.constant), (void *) &op_array) == FAILURE ||
+	    op_array->type != ZEND_USER_FUNCTION) {
+		zend_error_noreturn(E_ERROR, "Base lambda function for closure not found");
+	}
+
+	zend_create_closure(&EX_T(opline->result.u.var).tmp_var, op_array, EG(scope), EG(This) TSRMLS_CC);
 
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -33508,6 +33559,31 @@ void zend_init_opcodes_handlers(void)
   	ZEND_JMP_SET_SPEC_CV_HANDLER,
   	ZEND_JMP_SET_SPEC_CV_HANDLER,
   	ZEND_JMP_SET_SPEC_CV_HANDLER,
+  	ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_CONST_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER
   };
   zend_opcode_handlers = (opcode_handler_t*)labels;

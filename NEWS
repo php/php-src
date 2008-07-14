@@ -17,6 +17,7 @@ PHP                                                                        NEWS
 - Changed mhash to be a wrapper layer around the hash extension. (Scott)
 
 - Improved PHP syntax and semantics:
+  . Added lambda functions and closures (Christian Seiler, Dmitry)
   . Added "jump label" operator (limited "goto"). (Dmitry, Sara)
   . Added NOWDOC syntax. (Gwynne Raskind, Stas, Dmitry)
   . Added HEREDOC syntax with double quotes. (Lars Strojny, Felipe)
