@@ -62,8 +62,8 @@ object(DOMException)#%d (7) {
       }
     }
   }
-  ["code"]=>
-  int(4)
   ["previous":"Exception":private]=>
   NULL
+  ["code"]=>
+  int(4)
 }
