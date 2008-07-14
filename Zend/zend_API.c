@@ -3097,7 +3097,21 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *c
 		case IS_OBJECT:
 			if (zend_get_closure(callable, ce_ptr, fptr_ptr, NULL, zobj_ptr_ptr TSRMLS_CC) == SUCCESS) {
 				if (callable_name) {
-					ZVAL_ZSTR(callable_name, UG(unicode) ? IS_UNICODE : IS_STRING, (*fptr_ptr)->common.function_name, 1);
+					zend_class_entry *ce = Z_OBJCE_P(callable); /* TBFixed: what if it's overloaded? */
+
+					if (UG(unicode)) {
+						Z_TYPE_P(callable_name) = IS_UNICODE;
+						Z_USTRLEN_P(callable_name) = ce->name_length + sizeof("::__invoke") - 1;
+						Z_USTRVAL_P(callable_name) = eumalloc(Z_USTRLEN_P(callable_name)+1);
+						u_memcpy(Z_USTRVAL_P(callable_name), ce->name.u, ce->name_length);
+						u_charsToUChars("::__invoke", Z_USTRVAL_P(callable_name) + ce->name_length, sizeof("::__invoke"));
+					} else {
+						Z_TYPE_P(callable_name) = IS_STRING;
+						Z_STRLEN_P(callable_name) = ce->name_length + sizeof("::__invoke") - 1;
+						Z_STRVAL_P(callable_name) = emalloc(Z_STRLEN_P(callable_name) + 1);
+						memcpy(Z_STRVAL_P(callable_name), ce->name.s, ce->name_length);
+						memcpy(Z_STRVAL_P(callable_name) + ce->name_length, "::__invoke", sizeof("::__invoke"));
+					}
 				}
 				return 1;
 			}

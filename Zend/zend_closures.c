@@ -70,6 +70,12 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 }
 /* }}} */
 
+const static zend_function_entry closure_functions[] = { /* {{{ */
+	ZEND_ME(Closure, __invoke, NULL, 0)
+	{NULL, NULL, NULL}
+};
+/* }}} */
+
 static zend_function *zend_closure_get_constructor(zval *object TSRMLS_DC) /* {{{ */
 {
 	zend_error(E_ERROR, "Instantiation of 'Closure' is not allowed");
@@ -193,7 +199,7 @@ void zend_register_closure_ce(TSRMLS_D) /* {{{ */
 {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(ce, "Closure", NULL);
+	INIT_CLASS_ENTRY(ce, "Closure", closure_functions);
 	zend_ce_closure = zend_register_internal_class(&ce TSRMLS_CC);
 	zend_ce_closure->ce_flags |= ZEND_ACC_FINAL_CLASS;
 	zend_ce_closure->create_object = zend_closure_new;
