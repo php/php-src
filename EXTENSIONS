@@ -378,6 +378,12 @@ PRIMARY MAINTAINER:  Moriyoshi Koizumi <moriyoshi@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
+EXTENSION:           intl
+PRIMARY MAINTAINER:  Stanislav Malyshev <stas@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
+SINCE:               5.3
+-------------------------------------------------------------------------------
 EXTENSION:           imap
 PRIMARY MAINTAINER:  Chuck Hagenbuch <chuck@horde.org>, Ilia Alshanetsky <iliaa@php.net>, Pierre-Alain Joye <pajoye@php.net>
 MAINTENANCE:         Maintained
