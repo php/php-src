@@ -39,40 +39,227 @@ zend_class_entry
    	*php_com_exception_class_entry,
 	*php_com_saproxy_class_entry;
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_set, 0, 0, 2)
+	ZEND_ARG_INFO(0, variant)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_add, 0, 0, 2)
+	ZEND_ARG_INFO(0, left)
+	ZEND_ARG_INFO(0, right)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_cat, 0, 0, 2)
+	ZEND_ARG_INFO(0, left)
+	ZEND_ARG_INFO(0, right)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_sub, 0, 0, 2)
+	ZEND_ARG_INFO(0, left)
+	ZEND_ARG_INFO(0, right)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_mul, 0, 0, 2)
+	ZEND_ARG_INFO(0, left)
+	ZEND_ARG_INFO(0, right)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_and, 0, 0, 2)
+	ZEND_ARG_INFO(0, left)
+	ZEND_ARG_INFO(0, right)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_div, 0, 0, 2)
+	ZEND_ARG_INFO(0, left)
+	ZEND_ARG_INFO(0, right)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_eqv, 0, 0, 2)
+	ZEND_ARG_INFO(0, left)
+	ZEND_ARG_INFO(0, right)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_idiv, 0, 0, 2)
+	ZEND_ARG_INFO(0, left)
+	ZEND_ARG_INFO(0, right)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_imp, 0, 0, 2)
+	ZEND_ARG_INFO(0, left)
+	ZEND_ARG_INFO(0, right)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_mod, 0, 0, 2)
+	ZEND_ARG_INFO(0, left)
+	ZEND_ARG_INFO(0, right)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_or, 0, 0, 2)
+	ZEND_ARG_INFO(0, left)
+	ZEND_ARG_INFO(0, right)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_pow, 0, 0, 2)
+	ZEND_ARG_INFO(0, left)
+	ZEND_ARG_INFO(0, right)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_xor, 0, 0, 2)
+	ZEND_ARG_INFO(0, left)
+	ZEND_ARG_INFO(0, right)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_abs, 0, 0, 1)
+	ZEND_ARG_INFO(0, left)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_fix, 0, 0, 1)
+	ZEND_ARG_INFO(0, left)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_int, 0, 0, 1)
+	ZEND_ARG_INFO(0, left)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_neg, 0, 0, 1)
+	ZEND_ARG_INFO(0, left)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_not, 0, 0, 1)
+	ZEND_ARG_INFO(0, left)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_round, 0, 0, 2)
+	ZEND_ARG_INFO(0, left)
+	ZEND_ARG_INFO(0, decimals)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_cmp, 0, 0, 2)
+	ZEND_ARG_INFO(0, left)
+	ZEND_ARG_INFO(0, right)
+	ZEND_ARG_INFO(0, lcid)
+	ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_date_to_timestamp, 0, 0, 1)
+	ZEND_ARG_INFO(0, variant)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_date_from_timestamp, 0, 0, 1)
+	ZEND_ARG_INFO(0, timestamp)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_get_type, 0, 0, 1)
+	ZEND_ARG_INFO(0, variant)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_set_type, 0, 0, 2)
+	ZEND_ARG_INFO(0, variant)
+	ZEND_ARG_INFO(0, type)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_cast, 0, 0, 2)
+	ZEND_ARG_INFO(0, variant)
+	ZEND_ARG_INFO(0, type)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_com_get_active_object, 0, 0, 1)
+	ZEND_ARG_INFO(0, progid)
+	ZEND_ARG_INFO(0, code_page)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_com_create_guid, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_com_event_sink, 0, 0, 2)
+	ZEND_ARG_INFO(0, comobject)
+	ZEND_ARG_INFO(0, sinkobject)
+	ZEND_ARG_INFO(0, sinkinterface)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_com_print_typeinfo, 0, 0, 1)
+	ZEND_ARG_INFO(0, comobject)
+	ZEND_ARG_INFO(0, dispinterface)
+	ZEND_ARG_INFO(0, wantsink)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_com_message_pump, 0, 0, 0)
+	ZEND_ARG_INFO(0, timeoutms)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_com_load_typelib, 0, 0, 1)
+	ZEND_ARG_INFO(0, typelib_name)
+	ZEND_ARG_INFO(0, case_insensitive)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 const zend_function_entry com_dotnet_functions[] = {
-	PHP_FE(variant_set, NULL)
-	PHP_FE(variant_add, NULL)
-	PHP_FE(variant_cat, NULL)
-	PHP_FE(variant_sub, NULL)
-	PHP_FE(variant_mul, NULL)
-	PHP_FE(variant_and, NULL)
-	PHP_FE(variant_div, NULL)
-	PHP_FE(variant_eqv, NULL)
-	PHP_FE(variant_idiv, NULL)
-	PHP_FE(variant_imp, NULL)
-	PHP_FE(variant_mod, NULL)
-	PHP_FE(variant_or, NULL)
-	PHP_FE(variant_pow, NULL)
-	PHP_FE(variant_xor, NULL)
-	PHP_FE(variant_abs, NULL)
-	PHP_FE(variant_fix, NULL)
-	PHP_FE(variant_int, NULL)
-	PHP_FE(variant_neg, NULL)
-	PHP_FE(variant_not, NULL)
-	PHP_FE(variant_round, NULL)
-	PHP_FE(variant_cmp, NULL)
-	PHP_FE(variant_date_to_timestamp, NULL)
-	PHP_FE(variant_date_from_timestamp, NULL)
-	PHP_FE(variant_get_type, NULL)
-	PHP_FE(variant_set_type, NULL)
-	PHP_FE(variant_cast, NULL)
+	PHP_FE(variant_set, arginfo_variant_set)
+	PHP_FE(variant_add, arginfo_variant_add)
+	PHP_FE(variant_cat, arginfo_variant_cat)
+	PHP_FE(variant_sub, arginfo_variant_sub)
+	PHP_FE(variant_mul, arginfo_variant_mul)
+	PHP_FE(variant_and, arginfo_variant_and)
+	PHP_FE(variant_div, arginfo_variant_div)
+	PHP_FE(variant_eqv, arginfo_variant_eqv)
+	PHP_FE(variant_idiv, arginfo_variant_idiv)
+	PHP_FE(variant_imp, arginfo_variant_imp)
+	PHP_FE(variant_mod, arginfo_variant_mod)
+	PHP_FE(variant_or, arginfo_variant_or)
+	PHP_FE(variant_pow, arginfo_variant_pow)
+	PHP_FE(variant_xor, arginfo_variant_xor)
+	PHP_FE(variant_abs, arginfo_variant_abs)
+	PHP_FE(variant_fix, arginfo_variant_fix)
+	PHP_FE(variant_int, arginfo_variant_int)
+	PHP_FE(variant_neg, arginfo_variant_neg)
+	PHP_FE(variant_not, arginfo_variant_not)
+	PHP_FE(variant_round, arginfo_variant_round)
+	PHP_FE(variant_cmp, arginfo_variant_cmp)
+	PHP_FE(variant_date_to_timestamp, arginfo_variant_date_to_timestamp)
+	PHP_FE(variant_date_from_timestamp, arginfo_variant_date_from_timestamp)
+	PHP_FE(variant_get_type, arginfo_variant_get_type)
+	PHP_FE(variant_set_type, arginfo_variant_set_type)
+	PHP_FE(variant_cast, arginfo_variant_cast)
 	/* com_com.c */
-	PHP_FE(com_create_guid, NULL)
-	PHP_FE(com_event_sink, NULL)
-	PHP_FE(com_print_typeinfo, NULL)
-	PHP_FE(com_message_pump, NULL)
-	PHP_FE(com_load_typelib, NULL)
-	PHP_FE(com_get_active_object, NULL)
+	PHP_FE(com_create_guid, arginfo_com_create_guid)
+	PHP_FE(com_event_sink, arginfo_com_event_sink)
+	PHP_FE(com_print_typeinfo, arginfo_com_print_typeinfo)
+	PHP_FE(com_message_pump, arginfo_com_message_pump)
+	PHP_FE(com_load_typelib, arginfo_com_load_typelib)
+	PHP_FE(com_get_active_object, arginfo_com_get_active_object)
 	{ NULL, NULL, NULL }
 };
 
