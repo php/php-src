@@ -3,11 +3,11 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(zip, for zip archive read/writesupport,
-[  --enable-zip            Include Zip read/write support.])
+[  --enable-zip            Include Zip read/write support])
 
 if test -z "$PHP_ZLIB_DIR"; then
   PHP_ARG_WITH(zlib-dir, for the location of libz,
-  [  --with-zlib-dir[=DIR]     ZIP: Set the path to libz install prefix.], no, no)
+  [  --with-zlib-dir[=DIR]     ZIP: Set the path to libz install prefix], no, no)
 fi
 
 PHP_ARG_WITH(pcre-dir, pcre install prefix,
