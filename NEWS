@@ -36,7 +36,7 @@ PHP                                                                        NEWS
   . Added "request_order" INI variable to control specifically $_REQUEST behavior.
     (Stas)
   . Added support for exception linking. (Marcus)
-  . Added ability to handle exceptions in destuctors. (Marcus)
+  . Added ability to handle exceptions in destructors. (Marcus)
 
 - Improved PHP runtime speed and memory usage:
   . Removed direct executor recursion. (Dmitry)
