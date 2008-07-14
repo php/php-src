@@ -1,3 +1,54 @@
+2008-07-13  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      zend_exceptions.c
+      zend_exceptions.h
+      zend_objects.c
+      tests/exception_007.phpt
+      tests/exception_008.phpt
+      tests/gc_030.phpt:
+      - MFH Exception handling
+      [DOC]
+      - Exceptions can be thrown while exceptions are pending, they are linked
+      - Exceptions can be handled in __destruct
+      - Add optional Exception $previous parameter to
+        . Exception::__construct
+        . ErrorException::__construct
+
+    * tests/exception_007.phpt
+      tests/exception_007.phpt
+      tests/exception_008.phpt
+      tests/exception_008.phpt
+      tests/gc_030.phpt:
+      
+      - Fix/add tests
+
+    * zend_objects.c:
+      - Fix old workaround, since we are not C++ we can deal with exceptions in
+        dtors (whether or not an exception is already pending).
+
+    * zend_exceptions.c
+      zend_exceptions.h:
+      - Fix setting previous exception and add new helper function
+
+    * zend.c:
+      - Fix function copying (in TSRM mode)
+
+2008-07-13  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      zend_exceptions.c:
+      apply correct fix
+
+    * (PHP_5_3)
+      zend_exceptions.c:
+      fix segfault in Exception::__toString()
+
+    * (PHP_5_3)
+      tests/030.phpt
+      tests/exception_handler_004.phpt:
+      fix test
+
 2008-07-12  Marcus Boerger  <php@marcus-boerger.de>
 
     * (PHP_5_3)
