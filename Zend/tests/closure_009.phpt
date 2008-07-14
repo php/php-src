@@ -1,5 +1,5 @@
 --TEST--
-Closure 009: Use in preg_replace()
+Closure 009: Using static vars inside lambda
 --FILE--
 <?php
 $a = 1;
