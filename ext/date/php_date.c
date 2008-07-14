@@ -1736,7 +1736,7 @@ PHP_FUNCTION(checkdate)
 		RETURN_FALSE;
 	}
 
- 	if (y < 1 || y > 32767 || timelib_valid_date(y, m, d)) {
+ 	if (y < 1 || y > 32767 || !timelib_valid_date(y, m, d)) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;	/* True : This month, day, year arguments are valid */
