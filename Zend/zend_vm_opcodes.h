@@ -152,3 +152,4 @@
 #define ZEND_HANDLE_EXCEPTION                149
 #define ZEND_USER_OPCODE                     150
 #define ZEND_JMP_SET                         152
+#define ZEND_DECLARE_LAMBDA_FUNCTION         153

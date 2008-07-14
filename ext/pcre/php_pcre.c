@@ -1312,7 +1312,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 	}
 
 	SEPARATE_ZVAL(replace);
-	if (Z_TYPE_PP(replace) != IS_ARRAY)
+	if (Z_TYPE_PP(replace) != IS_ARRAY && (Z_TYPE_PP(replace) != IS_OBJECT || !is_callable_replace))
 		convert_to_string_ex(replace);
 	if (is_callable_replace) {
 		if (!zend_is_callable(*replace, 0, &callback_name)) {

@@ -26,6 +26,7 @@
 #include "zend_modules.h"
 #include "zend_constants.h"
 #include "zend_exceptions.h"
+#include "zend_closures.h"
 
 #ifdef HAVE_STDARG_H
 #include <stdarg.h>
@@ -2614,6 +2615,16 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, char **
 				*ce_ptr = ce;
 			}
 			return 0;
+
+		case IS_OBJECT:
+			if (zend_get_closure(callable, ce_ptr, fptr_ptr, NULL, zobj_ptr_ptr TSRMLS_CC) == SUCCESS) {
+				if (callable_name) {
+					*callable_name_len = strlen((*fptr_ptr)->common.function_name);
+					*callable_name = estrndup((*fptr_ptr)->common.function_name, *callable_name_len);
+				}									
+				return 1;
+			}
+			/* break missing intentionally */
 
 		default:
 			if (callable_name) {
