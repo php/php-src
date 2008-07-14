@@ -1,3 +1,290 @@
+2008-07-13  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      NEWS:
+      - BFN
+
+2008-07-13  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/mysqli/tests/mysqli_autocommit.phpt
+      ext/mysqli/tests/mysqli_character_set.phpt
+      ext/mysqli/tests/mysqli_get_charset.phpt:
+      more fixed tests
+
+2008-07-13  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.h
+      ZendEngine2/zend_objects.c
+      ZendEngine2/tests/exception_007.phpt
+      ZendEngine2/tests/exception_008.phpt
+      ZendEngine2/tests/gc_030.phpt:
+      - MFH Exception handling
+      [DOC]
+      - Exceptions can be thrown while exceptions are pending, they are linked
+      - Exceptions can be handled in __destruct
+      - Add optional Exception $previous parameter to
+        . Exception::__construct
+        . ErrorException::__construct
+
+2008-07-13  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/filter/tests/053.phpt
+      ext/mysql/tests/skipif.inc:
+      fix skipif sections
+
+2008-07-13  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ext/spl/php_spl.c
+      ext/spl/php_spl.c:
+      - Use new helper
+
+    * ext/spl/tests/spl_autoload_003.phpt:
+      - Fix test
+
+    * ZendEngine2/tests/exception_007.phpt
+      ZendEngine2/tests/exception_007.phpt
+      ZendEngine2/tests/exception_008.phpt
+      ZendEngine2/tests/exception_008.phpt
+      ZendEngine2/tests/gc_030.phpt:
+      
+      - Fix/add tests
+
+    * ZendEngine2/zend_objects.c:
+      - Fix old workaround, since we are not C++ we can deal with exceptions in
+        dtors (whether or not an exception is already pending).
+
+    * ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.h:
+      - Fix setting previous exception and add new helper function
+
+2008-07-13  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/ctype/tests/skipif.inc
+      ext/ctype/tests/skipif.inc:
+      
+      file skipif.inc was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/ctype/tests/001.phpt
+      ext/ctype/tests/002.phpt
+      ext/ctype/tests/bug25745.phpt
+      ext/ctype/tests/bug34645.phpt
+      ext/ctype/tests/ctype_alnum_basic.phpt
+      ext/ctype/tests/ctype_alnum_error.phpt
+      ext/ctype/tests/ctype_alnum_variation1.phpt
+      ext/ctype/tests/ctype_alnum_variation2.phpt
+      ext/ctype/tests/ctype_alnum_variation3.phpt
+      ext/ctype/tests/ctype_alnum_variation4.phpt
+      ext/ctype/tests/ctype_alpha_basic.phpt
+      ext/ctype/tests/ctype_alpha_error.phpt
+      ext/ctype/tests/ctype_alpha_variation1.phpt
+      ext/ctype/tests/ctype_alpha_variation2.phpt
+      ext/ctype/tests/ctype_alpha_variation3.phpt
+      ext/ctype/tests/ctype_alpha_variation4.phpt
+      ext/ctype/tests/ctype_cntrl_basic.phpt
+      ext/ctype/tests/ctype_cntrl_error.phpt
+      ext/ctype/tests/ctype_cntrl_variation1.phpt
+      ext/ctype/tests/ctype_cntrl_variation2.phpt
+      ext/ctype/tests/ctype_cntrl_variation3.phpt
+      ext/ctype/tests/ctype_cntrl_variation4.phpt
+      ext/ctype/tests/ctype_digit_basic.phpt
+      ext/ctype/tests/ctype_digit_error.phpt
+      ext/ctype/tests/ctype_digit_variation1.phpt
+      ext/ctype/tests/ctype_digit_variation2.phpt
+      ext/ctype/tests/ctype_digit_variation3.phpt
+      ext/ctype/tests/ctype_digit_variation4.phpt
+      ext/ctype/tests/ctype_graph_basic.phpt
+      ext/ctype/tests/ctype_graph_error.phpt
+      ext/ctype/tests/ctype_graph_variation1.phpt
+      ext/ctype/tests/ctype_graph_variation2.phpt
+      ext/ctype/tests/ctype_graph_variation3.phpt
+      ext/ctype/tests/ctype_graph_variation4.phpt
+      ext/ctype/tests/ctype_lower_basic.phpt
+      ext/ctype/tests/ctype_lower_error.phpt
+      ext/ctype/tests/ctype_lower_variation1.phpt
+      ext/ctype/tests/ctype_lower_variation2.phpt
+      ext/ctype/tests/ctype_lower_variation3.phpt
+      ext/ctype/tests/ctype_lower_variation4.phpt
+      ext/ctype/tests/ctype_print_basic.phpt
+      ext/ctype/tests/ctype_print_error.phpt
+      ext/ctype/tests/ctype_print_variation1.phpt
+      ext/ctype/tests/ctype_print_variation2.phpt
+      ext/ctype/tests/ctype_print_variation3.phpt
+      ext/ctype/tests/ctype_print_variation4.phpt
+      ext/ctype/tests/ctype_punct_basic.phpt
+      ext/ctype/tests/ctype_punct_error.phpt
+      ext/ctype/tests/ctype_punct_variation1.phpt
+      ext/ctype/tests/ctype_punct_variation2.phpt
+      ext/ctype/tests/ctype_punct_variation3.phpt
+      ext/ctype/tests/ctype_punct_variation4.phpt
+      ext/ctype/tests/ctype_space_basic.phpt
+      ext/ctype/tests/ctype_space_error.phpt
+      ext/ctype/tests/ctype_space_variation1.phpt
+      ext/ctype/tests/ctype_space_variation2.phpt
+      ext/ctype/tests/ctype_space_variation3.phpt
+      ext/ctype/tests/ctype_space_variation4.phpt
+      ext/ctype/tests/ctype_upper_basic.phpt
+      ext/ctype/tests/ctype_upper_error.phpt
+      ext/ctype/tests/ctype_upper_variation1.phpt
+      ext/ctype/tests/ctype_upper_variation2.phpt
+      ext/ctype/tests/ctype_upper_variation3.phpt
+      ext/ctype/tests/ctype_upper_variation4.phpt
+      ext/ctype/tests/ctype_xdigit_basic.phpt
+      ext/ctype/tests/ctype_xdigit_error.phpt
+      ext/ctype/tests/ctype_xdigit_variation1.phpt
+      ext/ctype/tests/ctype_xdigit_variation2.phpt
+      ext/ctype/tests/ctype_xdigit_variation3.phpt
+      ext/ctype/tests/ctype_xdigit_variation4.phpt:
+      add missing SKIPIF sections
+
+2008-07-13  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ZendEngine2/zend.c:
+      - Fix function copying (in TSRM mode)
+
+    * .gdbinit:
+      - Improve/fix debugging experience
+
+2008-07-13  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/dom/tests/DOMCharacterData_appendData_basic.phpt
+      ext/dom/tests/DOMComment_appendData_basic_Sullivan.phpt
+      ext/dom/tests/DOMComment_replaceData_basic.phpt
+      ext/dom/tests/DOMDocumentFragment_appendXML_hasChildNodes_basic.phpt
+      ext/dom/tests/DOMDocument_createAttribute_basic.phpt
+      ext/dom/tests/DOMDocument_createAttribute_error.phpt
+      ext/dom/tests/DOMDocument_createAttribute_error1.phpt
+      ext/dom/tests/DOMDocument_createAttribute_variation.phpt
+      ext/dom/tests/DOMDocument_createProcessingInstruction_basic.phpt
+      ext/dom/tests/DOMDocument_createProcessingInstruction_error.phpt
+      ext/dom/tests/DOMElement_hasAttributes_basic.phpt
+      ext/dom/tests/DOMNode_hasChildNodes.phpt
+      ext/dom/tests/DOMNode_insertBefore.phpt
+      ext/dom/tests/DOMNode_issamenode_basic.phpt
+      ext/dom/tests/DOMText_appendData_basic.phpt
+      ext/dom/tests/bug42082.phpt
+      ext/dom/tests/bug43364.phpt:
+      add missing SKIPIF
+
+    * ext/spl/tests/fixedarray_010.phpt
+      ext/spl/tests/fixedarray_010.phpt
+      ext/spl/tests/fixedarray_021.phpt
+      ext/spl/tests/fixedarray_021.phpt
+      ext/spl/tests/fixedarray_021.phpt:
+      improve code coverage
+
+2008-07-13  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/spl/spl_fixedarray.c
+      ext/spl/tests/fixedarray_016.phpt
+      ext/spl/tests/fixedarray_017.phpt
+      ext/spl/tests/fixedarray_018.phpt
+      ext/spl/tests/fixedarray_019.phpt
+      ext/spl/tests/fixedarray_020.phpt:
+      MFH: Implement toArray,fromArray and get_properties (Thanks Tony for the
+      patches)
+
+    * ext/spl/spl_fixedarray.c
+      ext/spl/tests/fixedarray_016.phpt
+      ext/spl/tests/fixedarray_017.phpt
+      ext/spl/tests/fixedarray_018.phpt
+      ext/spl/tests/fixedarray_019.phpt
+      ext/spl/tests/fixedarray_020.phpt
+      ext/spl/tests/fixedarray_020.phpt:
+      Implement toArray,fromArray and get_properties (Thanks Tony for the
+      patches)
+
+2008-07-13  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/pdo_firebird/firebird_driver.c:
+      blind fix for a segfault in ext/pdo_firebird/tests/bug_38253.phpt
+
+2008-07-13  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * win32/build/config.w32:
+      - MFB: wrong bracket position while merging
+
+    * (PHP_5_3)
+      win32/build/config.w32:
+      - wrong bracket position while mergin
+
+2008-07-13  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_exceptions.c:
+      apply correct fix
+
+    * (PHP_5_3)
+      ZendEngine2/zend_exceptions.c:
+      fix segfault in Exception::__toString()
+
+    * (PHP_5_3)
+      ZendEngine2/tests/030.phpt
+      ZendEngine2/tests/exception_handler_004.phpt
+      sapi/cli/tests/005.phpt:
+      fix test
+
+2008-07-13  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_2)
+      ext/mbstring/mbstring.c:
+      MFPHP5_3
+
+    * (PHP_5_3)
+      ext/mbstring/mbstring.c:
+      fixed #43227 removed PHP_INI_PERDIR from mbstring.func_overload.
+
+    * (PHP_5_3)
+      ext/mbstring/oniguruma/HISTORY
+      ext/mbstring/oniguruma/README
+      ext/mbstring/oniguruma/README.ja
+      ext/mbstring/oniguruma/index.html
+      ext/mbstring/oniguruma/oniguruma.h
+      ext/mbstring/oniguruma/regcomp.c
+      ext/mbstring/oniguruma/regenc.c
+      ext/mbstring/oniguruma/regenc.h
+      ext/mbstring/oniguruma/regerror.c
+      ext/mbstring/oniguruma/regexec.c
+      ext/mbstring/oniguruma/regext.c
+      ext/mbstring/oniguruma/reggnu.c
+      ext/mbstring/oniguruma/regint.h
+      ext/mbstring/oniguruma/regparse.c
+      ext/mbstring/oniguruma/regparse.h
+      ext/mbstring/oniguruma/regposerr.c
+      ext/mbstring/oniguruma/regposix.c
+      ext/mbstring/oniguruma/regsyntax.c
+      ext/mbstring/oniguruma/regversion.c
+      ext/mbstring/oniguruma/enc/iso8859_1.c
+      ext/mbstring/oniguruma/enc/iso8859_10.c
+      ext/mbstring/oniguruma/enc/iso8859_11.c
+      ext/mbstring/oniguruma/enc/iso8859_13.c
+      ext/mbstring/oniguruma/enc/iso8859_14.c
+      ext/mbstring/oniguruma/enc/iso8859_15.c
+      ext/mbstring/oniguruma/enc/iso8859_16.c
+      ext/mbstring/oniguruma/enc/iso8859_2.c
+      ext/mbstring/oniguruma/enc/iso8859_3.c
+      ext/mbstring/oniguruma/enc/iso8859_4.c
+      ext/mbstring/oniguruma/enc/iso8859_5.c
+      ext/mbstring/oniguruma/enc/iso8859_6.c
+      ext/mbstring/oniguruma/enc/iso8859_7.c
+      ext/mbstring/oniguruma/enc/iso8859_8.c
+      ext/mbstring/oniguruma/enc/iso8859_9.c
+      ext/mbstring/oniguruma/enc/koi8.c
+      ext/mbstring/oniguruma/enc/koi8_r.c
+      ext/mbstring/oniguruma/enc/mktable.c
+      ext/mbstring/oniguruma/enc/utf16_be.c
+      ext/mbstring/oniguruma/enc/utf16_le.c
+      ext/mbstring/oniguruma/enc/utf32_be.c
+      ext/mbstring/oniguruma/enc/utf32_le.c
+      ext/mbstring/oniguruma/enc/utf8.c:
+      updated bundled oniguruma from 4.4.0 to 4.7.1
+
 2008-07-12  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * ext/mbstring/oniguruma/regint.h:
