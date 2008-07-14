@@ -1409,7 +1409,7 @@ void zend_do_begin_lambda_function_declaration(znode *result, znode *function_to
 	zend_op       *current_op;
 
 	function_name.op_type = IS_CONST;
-	ZVAL_STRINGL(&function_name.u.constant, "lambda", sizeof("lambda")-1, 1);
+	ZVAL_STRINGL(&function_name.u.constant, "", sizeof("")-1, 1);
 
 	zend_do_begin_function_declaration(function_token, &function_name, 0, return_reference, NULL TSRMLS_CC);
 

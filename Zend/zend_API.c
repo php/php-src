@@ -2619,8 +2619,12 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, char **
 		case IS_OBJECT:
 			if (zend_get_closure(callable, ce_ptr, fptr_ptr, NULL, zobj_ptr_ptr TSRMLS_CC) == SUCCESS) {
 				if (callable_name) {
-					*callable_name_len = strlen((*fptr_ptr)->common.function_name);
-					*callable_name = estrndup((*fptr_ptr)->common.function_name, *callable_name_len);
+					zend_class_entry *ce = Z_OBJCE_P(callable); /* TBFixed: what if it's overloaded? */
+
+					*callable_name_len = ce->name_length + sizeof("::__invoke") - 1;
+					*callable_name = emalloc(*callable_name_len + 1);
+					memcpy(*callable_name, ce->name, ce->name_length);
+					memcpy((*callable_name) + ce->name_length, "::__invoke", sizeof("::__invoke"));
 				}									
 				return 1;
 			}
