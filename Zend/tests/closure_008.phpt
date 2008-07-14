@@ -1,5 +1,5 @@
 --TEST--
-Closure 008: Use in preg_replace()
+Closure 008: Use in preg_replace_callback()
 --FILE--
 <?php
 
