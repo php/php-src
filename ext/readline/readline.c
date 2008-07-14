@@ -67,25 +67,92 @@ PHP_MINIT_FUNCTION(readline);
 PHP_RSHUTDOWN_FUNCTION(readline);
 
 /* }}} */
-/* {{{ module stuff */
 
-static const zend_function_entry php_readline_functions[] = {
-	PHP_FE(readline,	   		        NULL)
-	PHP_FE(readline_info,  	            NULL)
-	PHP_FE(readline_add_history, 		NULL)
-	PHP_FE(readline_clear_history, 		NULL)
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_readline, 0, 0, 0)
+	ZEND_ARG_INFO(0, prompt)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_info, 0, 0, 0)
+	ZEND_ARG_INFO(0, varname)
+	ZEND_ARG_INFO(0, newvalue)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_add_history, 0, 0, 1)
+	ZEND_ARG_INFO(0, prompt)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_readline_clear_history, 0)
+ZEND_END_ARG_INFO()
+
 #ifndef HAVE_LIBEDIT
-	PHP_FE(readline_list_history, 		NULL)
+static
+ZEND_BEGIN_ARG_INFO(arginfo_readline_list_history, 0)
+ZEND_END_ARG_INFO()
 #endif
-	PHP_FE(readline_read_history, 		NULL)
-	PHP_FE(readline_write_history, 		NULL)
-	PHP_FE(readline_completion_function,NULL)
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_read_history, 0, 0, 0)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_write_history, 0, 0, 0)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_completion_function, 0, 0, 1)
+	ZEND_ARG_INFO(0, funcname)
+ZEND_END_ARG_INFO()
+
 #if HAVE_RL_CALLBACK_READ_CHAR
-	PHP_FE(readline_callback_handler_install, NULL)
-	PHP_FE(readline_callback_read_char,			NULL)
-	PHP_FE(readline_callback_handler_remove,	NULL)
-	PHP_FE(readline_redisplay, NULL)
-	PHP_FE(readline_on_new_line, NULL)
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_callback_handler_install, 0, 0, 2)
+	ZEND_ARG_INFO(0, prompt)
+	ZEND_ARG_INFO(0, callback)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_readline_callback_read_char, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_readline_callback_handler_remove, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_readline_redisplay, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_readline_on_new_line, 0)
+ZEND_END_ARG_INFO()
+#endif
+/* }}} */
+
+/* {{{ module stuff */
+static const zend_function_entry php_readline_functions[] = {
+	PHP_FE(readline,	   		        arginfo_readline)
+	PHP_FE(readline_info,  	            arginfo_readline_info)
+	PHP_FE(readline_add_history, 		arginfo_readline_add_history)
+	PHP_FE(readline_clear_history, 		arginfo_readline_clear_history)
+#ifndef HAVE_LIBEDIT
+	PHP_FE(readline_list_history, 		arginfo_readline_list_history)
+#endif
+	PHP_FE(readline_read_history, 		arginfo_readline_read_history)
+	PHP_FE(readline_write_history, 		arginfo_readline_write_history)
+	PHP_FE(readline_completion_function,arginfo_readline_completion_function)
+#if HAVE_RL_CALLBACK_READ_CHAR
+	PHP_FE(readline_callback_handler_install, arginfo_readline_callback_handler_install)
+	PHP_FE(readline_callback_read_char,			arginfo_readline_callback_read_char)
+	PHP_FE(readline_callback_handler_remove,	arginfo_readline_callback_handler_remove)
+	PHP_FE(readline_redisplay, arginfo_readline_redisplay)
+	PHP_FE(readline_on_new_line, arginfo_readline_on_new_line)
 #endif
 	{NULL, NULL, NULL}
 };
