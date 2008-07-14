@@ -21,7 +21,7 @@ $rootNode->appendChild($rootNode);
 ?>
 --EXPECTF--
 --- Catch exception with try/catch
-object(DOMException)#%d (6) {
+object(DOMException)#%d (%d) {
   [u"message":protected]=>
   unicode(23) "Hierarchy Request Error"
   [u"string":u"Exception":private]=>
@@ -52,6 +52,8 @@ object(DOMException)#%d (6) {
       }
     }
   }
+  [u"previous":u"Exception":private]=>
+  NULL
   [u"code"]=>
   int(3)
 }
