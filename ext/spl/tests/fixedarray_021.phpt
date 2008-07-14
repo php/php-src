@@ -60,7 +60,7 @@ unicode(35) "array size cannot be less than zero"
 NULL
 int(0)
 int(0)
-object(SplFixedArray)#$d (0) {
+object(SplFixedArray)#%d (0) {
 }
 unicode(52) "An iterator cannot be used with foreach by reference"
 ==DONE==
