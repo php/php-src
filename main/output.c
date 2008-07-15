@@ -738,15 +738,14 @@ PHP_FUNCTION(ob_start)
 	zval *output_handler=NULL;
 	long chunk_size=0;
 	zend_bool erase=1;
-	int argc = ZEND_NUM_ARGS();
-	
-	if (zend_parse_parameters(argc TSRMLS_CC, "|zlb", &output_handler, &chunk_size, &erase) == FAILURE) {
-		RETURN_FALSE;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|zlb", &output_handler, &chunk_size, &erase) == FAILURE) {
+		return;
 	}
 
 	if (chunk_size < 0)
 		chunk_size = 0;
-	
+
 	if (php_start_ob_buffer(output_handler, chunk_size, erase TSRMLS_CC)==FAILURE) {
 		RETURN_FALSE;
 	}
@@ -965,12 +964,12 @@ static int php_ob_buffer_status(php_ob_buffer *ob_buffer, zval *result)
    Return the status of the active or all output buffers */
 PHP_FUNCTION(ob_get_status)
 {
-	int argc = ZEND_NUM_ARGS();
 	zend_bool full_status = 0;
-	
-	if (zend_parse_parameters(argc TSRMLS_CC, "|b", &full_status) == FAILURE )
-		RETURN_FALSE;
-	
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &full_status) == FAILURE ) {
+		return;
+	}
+
 	array_init(return_value);
 
 	if (full_status) {
@@ -1002,7 +1001,7 @@ PHP_FUNCTION(ob_implicit_flush)
 	long flag = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &flag) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (flag) {
@@ -1053,7 +1052,7 @@ PHP_FUNCTION(output_add_rewrite_var)
 	int name_len, value_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &name, &name_len, &value, &value_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (php_url_scanner_add_var(name, name_len, value, value_len, 1 TSRMLS_CC) == SUCCESS) {
