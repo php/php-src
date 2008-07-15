@@ -2040,6 +2040,12 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 		}
 	}
 
+	/* do funky checking whether the parsed time was valid time */
+	if (s->time->h != TIMELIB_UNSET && s->time->i != TIMELIB_UNSET &&
+		s->time->s != TIMELIB_UNSET && 
+		!timelib_valid_time( s->time->h, s->time->i, s->time->s)) {
+		add_pbf_warning(s, "The parsed time was invalid", string, ptr);
+	}
 	/* do funky checking whether the parsed date was valid date */
 	if (s->time->y != TIMELIB_UNSET && s->time->m != TIMELIB_UNSET &&
 		s->time->d != TIMELIB_UNSET && 
