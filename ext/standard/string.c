@@ -6696,6 +6696,9 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 			case '\0':
 				break;
 			case '<':
+				if (in_q) {
+					break;
+				}
 				if (isspace(*(p + 1)) && !allow_tag_spaces) {
 					goto reg_char;
 				}
