@@ -2,6 +2,7 @@
 Test open_basedir configuration
 --INI--
 open_basedir=.
+error_log=
 --FILE--
 <?php
 require_once "open_basedir.inc";
@@ -37,7 +38,7 @@ bool(false)
 
 Warning: ini_set(): open_basedir restriction in effect. File(%s/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 bool(false)
-bool(false)
+string(0) ""
 string(%d) "%s/test/ok/ok.txt"
 *** Finished testing open_basedir configuration [error_log] ***
 
