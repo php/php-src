@@ -514,6 +514,18 @@ PHP_RINIT_FUNCTION(mysql)
 }
 /* }}} */
 
+
+#ifdef MYSQL_USE_MYSQLND
+static int php_mysql_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC)
+{
+	if (le->type == le_plink) {
+		mysqlnd_end_psession(((php_mysql_conn *) le->ptr)->conn);
+	}
+	return ZEND_HASH_APPLY_KEEP;
+} /* }}} */
+#endif
+
+
 /* {{{ PHP_RSHUTDOWN_FUNCTION
  */
 PHP_RSHUTDOWN_FUNCTION(mysql)
@@ -531,7 +543,9 @@ PHP_RSHUTDOWN_FUNCTION(mysql)
 	if (MySG(connect_error)!=NULL) {
 		efree(MySG(connect_error));
 	}
+
 #ifdef MYSQL_USE_MYSQLND
+	zend_hash_apply(&EG(persistent_list), (apply_func_t) php_mysql_persistent_helper TSRMLS_CC);
 	mysqlnd_palloc_rshutdown(MySG(mysqlnd_thd_zval_cache));
 #endif
 
@@ -572,6 +586,7 @@ PHP_MINFO_FUNCTION(mysql)
 		}
 	}
 #endif
+
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
@@ -644,7 +659,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		passwd = MySG(default_password);
 	
 		/* mysql_pconnect does not support new_link parameter */
-		if (persistent) {	
+		if (persistent) {
 			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&s&s&l", &host_and_port, &host_len, UG(utf8_conv),
 									&user, &user_len, UG(utf8_conv), &passwd, &passwd_len, UG(utf8_conv),
 									&client_flags)==FAILURE) {
@@ -662,6 +677,8 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if (((PG(open_basedir) && PG(open_basedir)[0] != '\0')) && (client_flags & CLIENT_LOCAL_FILES)) {
 			client_flags ^= CLIENT_LOCAL_FILES;
 		}
+
+		client_flags &= ~CLIENT_MULTI_STATEMENTS;   /* don't allow multi_queries via connect parameter */
 
 		hashed_details_length = spprintf(&hashed_details, 0, "mysql_%s_%s_%s_%ld", SAFE_STRING(host_and_port), SAFE_STRING(user), SAFE_STRING(passwd), client_flags);
 	}
@@ -714,7 +731,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			/* create the link */
 			mysql = (php_mysql_conn *) malloc(sizeof(php_mysql_conn));
 			mysql->active_result_id = 0;
-			mysql->multi_query = 1;
+			mysql->multi_query = client_flags & CLIENT_MULTI_STATEMENTS? 1:0;
 #ifndef MYSQL_USE_MYSQLND
 			mysql->conn = mysql_init(NULL);
 #else
@@ -724,8 +741,9 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				mysql_options(mysql->conn, MYSQL_SET_CHARSET_NAME, "utf8");
 			}
 
-			if (connect_timeout != -1)
+			if (connect_timeout != -1) {
 				mysql_options(mysql->conn, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout);
+			}
 #ifndef MYSQL_USE_MYSQLND
 			if (mysql_real_connect(mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL)
 #else
@@ -778,6 +796,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 			mysql = (php_mysql_conn *) le->ptr;
 			mysql->active_result_id = 0;
+			mysql->multi_query = client_flags & CLIENT_MULTI_STATEMENTS? 1:0;
 			/* ensure that the link did not die */
 			if (mysql_ping(mysql->conn)) {
 				if (mysql_errno(mysql->conn) == 2006) {
