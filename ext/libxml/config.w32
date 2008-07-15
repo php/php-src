@@ -6,7 +6,8 @@ ARG_WITH("libxml", "LibXML support", "yes");
 if (PHP_LIBXML == "yes") {
 	if (CHECK_LIB("libxml2_a_dll.lib;libxml2_a.lib", "libxml") &&
 			CHECK_LIB("libiconv_a.lib;iconv_a.lib;libiconv.lib;iconv.lib", "libxml") &&
-			CHECK_HEADER_ADD_INCLUDE("libxml/parser.h", "CFLAGS")) {
+			CHECK_HEADER_ADD_INCLUDE("libxml/parser.h", "CFLAGS_LIBXML") &&
+			ADD_EXTENSION_DEP('libxml', 'iconv')) {
 
 		EXTENSION("libxml", "libxml.c", false /* never shared */);
 		AC_DEFINE("HAVE_LIBXML", 1, "LibXML support");
@@ -14,7 +15,9 @@ if (PHP_LIBXML == "yes") {
 		if (!PHP_LIBXML_SHARED) {
 			ADD_DEF_FILE("ext\\libxml\\php_libxml2.def");
 		}
-		ADD_EXTENSION_DEP('libxml', 'iconv');
+	} else {
+		WARNING("libxml support can't be enabled, iconv or libxml are missing")
+		PHP_LIBXML = "no"
 	}
 }
 
