@@ -72,19 +72,17 @@ int foo(int x, ...) {
 	return 0;
 }
 int main() { return foo(10, "", 3.14); }
-      ], [cv_php_mbstring_stdarg=yes], [cv_php_mbstring_stdarg=no], 
- [
-  dnl cross-compile needs something here
-case $host_alias in
-*netware*)
-cv_php_mbstring_stdarg=yes
-;;
-*)
-cv_php_mbstring_stdarg=no
-;;
-esac
-]
-)
+      ], [cv_php_mbstring_stdarg=yes], [cv_php_mbstring_stdarg=no], [
+        dnl cross-compile needs something here
+        case $host_alias in
+        *netware*)
+          cv_php_mbstring_stdarg=yes
+          ;;
+        *)
+          cv_php_mbstring_stdarg=no
+          ;;
+        esac
+      ])
     ])
 
     AC_CHECK_HEADERS([stdlib.h string.h strings.h unistd.h sys/time.h sys/times.h stdarg.h])
@@ -97,7 +95,6 @@ esac
     AC_FUNC_MEMCMP
 
     AC_DEFINE([HAVE_MBREGEX], 1, [whether to have multibyte regex support])
-
 
     if test "$PHP_MBREGEX_BACKTRACK" != "no"; then
       AC_DEFINE([USE_COMBINATION_EXPLOSION_CHECK],1,[whether to check multibyte regex backtrack])
