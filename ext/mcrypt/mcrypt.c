@@ -26,6 +26,11 @@
 
 #if HAVE_LIBMCRYPT
 
+#if PHP_WIN32
+# include <Wincrypt.h>
+# include <Ntsecapi.h>
+#endif
+
 #include "php_mcrypt.h"
 #include "fcntl.h"
 
@@ -1452,6 +1457,23 @@ PHP_FUNCTION(mcrypt_create_iv)
 	iv = ecalloc(size + 1, 1);
 	
 	if (source == RANDOM || source == URANDOM) {
+#if PHP_WIN32
+			/* random/urandom equivalent on Windows */
+			HCRYPTPROV     hCryptProv;
+			BYTE *iv_b = (BYTE *) iv;
+
+			/* It could be done using LoadLibrary but as we rely on 2k+ for 5.3, cleaner to use a clear dependency (Advapi32) and a 
+				standard API call (no f=getAddr..; f();) */
+			if(!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot open random device");
+				RETURN_FALSE;
+			}
+			if(!CryptGenRandom(hCryptProv, size,  iv_b)) {
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not gather sufficient random data");
+				RETURN_FALSE;
+			}
+			n = size;
+#else
 		int    fd;
 		size_t read_bytes = 0;
 
@@ -1475,6 +1497,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not gather sufficient random data");
 			RETURN_FALSE;
 		}
+#endif
 	} else {
 		n = size;
 		while (size) {
