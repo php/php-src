@@ -3475,6 +3475,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 	if (zheaders) {
 		zend_hash_internal_pointer_reset_ex(HASH_OF(zheaders), &hpos);
 		while(zend_hash_get_current_data_ex(HASH_OF(zheaders), (void**)&zcertval, &hpos) == SUCCESS) {
+			strindex = NULL;
 			zend_hash_get_current_key_ex(HASH_OF(zheaders), &strindex, &strindexlen, &intindex, 0, &hpos);
 
 			convert_to_string_ex(zcertval);
@@ -3584,6 +3585,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 	if (zheaders) {
 		zend_hash_internal_pointer_reset_ex(HASH_OF(zheaders), &hpos);
 		while(zend_hash_get_current_data_ex(HASH_OF(zheaders), (void**)&hval, &hpos) == SUCCESS) {
+			strindex = NULL;
 			zend_hash_get_current_key_ex(HASH_OF(zheaders), &strindex, &strindexlen, &intindex, 0, &hpos);
 
 			convert_to_string_ex(hval);
