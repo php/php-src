@@ -582,7 +582,7 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const stmt TSRMLS_DC)
 	SET_ERROR_AFF_ROWS(stmt);
 	SET_ERROR_AFF_ROWS(stmt->conn);
 	
-	if (stmt->state > MYSQLND_STMT_PREPARED && stmt->field_count) {
+	if (stmt->result && stmt->state > MYSQLND_STMT_PREPARED && stmt->field_count) {
 		/*
 		  We don need to copy the data from the buffers which we will clean.
 		  Because it has already been copied. See
