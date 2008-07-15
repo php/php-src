@@ -170,6 +170,20 @@ static void fcgi_signal_handler(int signo)
 	}
 }
 
+static void fcgi_setup_signals(void)
+{
+	struct sigaction new_sa, old_sa;
+
+	sigemptyset(&new_sa.sa_mask);
+	new_sa.sa_flags = 0;
+	new_sa.sa_handler = fcgi_signal_handler;
+	sigaction(SIGUSR1, &new_sa, NULL);
+	sigaction(SIGTERM, &new_sa, NULL);
+	sigaction(SIGPIPE, NULL, &old_sa);
+	if (old_sa.sa_handler == SIG_DFL) {
+		sigaction(SIGPIPE, &new_sa, NULL);
+	}
+}
 #endif
 
 int fcgi_in_shutdown(void)
@@ -229,18 +243,7 @@ int fcgi_init(void)
 		is_initialized = 1;
 		errno = 0;
 		if (getpeername(0, (struct sockaddr *)&sa, &len) != 0 && errno == ENOTCONN) {
-			struct sigaction new_sa, old_sa;
-
-			sigemptyset(&new_sa.sa_mask);
-			new_sa.sa_flags = 0;
-			new_sa.sa_handler = fcgi_signal_handler;
-			sigaction(SIGUSR1, &new_sa, NULL);
-			sigaction(SIGTERM, &new_sa, NULL);
-			sigaction(SIGPIPE, NULL, &old_sa);
-			if (old_sa.sa_handler == SIG_DFL) {
-				sigaction(SIGPIPE, &new_sa, NULL);
-			}
-
+			fcgi_setup_signals();
 			return is_fastcgi = 1;
 		} else {
 			return is_fastcgi = 0;
@@ -501,6 +504,8 @@ int fcgi_listen(const char *path, int backlog)
 	if (tcp) {
 		listen_socket = _open_osfhandle((long)listen_socket, 0);
 	}
+#else
+	fcgi_setup_signals();
 #endif
 	return listen_socket;
 }
