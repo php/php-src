@@ -172,7 +172,7 @@ MYSQLND_THD_ZVAL_PCACHE* _mysqlnd_palloc_get_thd_cache_reference(MYSQLND_THD_ZVA
 	if (cache) {
 		++cache->references;
 		DBG_INF_FMT("cache=%p new_refc=%d gc_list.canary1=%p gc_list.canary2=%p",
-					*cache, cache->references, cache->gc_list.canary1, cache->gc_list.canary2);
+					cache, cache->references, cache->gc_list.canary1, cache->gc_list.canary2);
 		mysqlnd_palloc_get_cache_reference(cache->parent);
 	}
 	DBG_RETURN(cache);

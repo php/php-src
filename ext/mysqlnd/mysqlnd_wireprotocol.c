@@ -690,8 +690,6 @@ size_t php_mysqlnd_auth_write(void *_packet, MYSQLND *conn TSRMLS_DC)
 		packet->client_flags ^= CLIENT_LOCAL_FILES;
 	}
 	
-	/* don't allow multi_queries via connect parameter */
-	packet->client_flags ^= CLIENT_MULTI_STATEMENTS;
 	int4store(p, packet->client_flags);
 	p+= 4;
 
