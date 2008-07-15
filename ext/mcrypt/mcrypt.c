@@ -26,6 +26,11 @@
 
 #if HAVE_LIBMCRYPT
 
+#if PHP_WIN32
+# include <Wincrypt.h>
+# include <Ntsecapi.h>
+#endif
+
 #include "php_mcrypt.h"
 #include "fcntl.h"
 
@@ -1199,9 +1204,6 @@ PHP_FUNCTION(mcrypt_create_iv)
 /* {{{ php_mcrypt_iv */
 int php_mcrypt_iv(php_mcrypt_iv_source source, int size, char **iv_str, int *iv_len TSRMLS_DC)
 {
-	int fd, n;
-	size_t read_bytes;
-	
 	if (size <= 0 || size >= INT_MAX) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can not create an IV with a size of less then 1 or greater then %d", INT_MAX);
 		return FAILURE;
@@ -1211,9 +1213,27 @@ int php_mcrypt_iv(php_mcrypt_iv_source source, int size, char **iv_str, int *iv_
 	
 	switch (source) {
 		case PHP_MCRYPT_IV_SOURCE_RANDOM:
-		case PHP_MCRYPT_IV_SOURCE_URANDOM:
-			read_bytes = 0;
-			
+		case PHP_MCRYPT_IV_SOURCE_URANDOM: {
+#if PHP_WIN32
+			/* random/urandom equivalent on Windows */
+			HCRYPTPROV     hCryptProv;
+			BYTE *iv = (BYTE *) *iv_str;
+
+			/* It could be done using LoadLibrary but as we rely on 2k+ for 5.3, cleaner to use a clear dependency (Advapi32) and a 
+				standard API call (no f=getAddr..; f();) */
+			if(!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot open random device");
+				return FAILURE;
+			}
+			if(!CryptGenRandom(hCryptProv, size,  iv)) {
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not gather sufficient random data");
+				return FAILURE;
+			}
+			*iv_len = size;
+#else
+			size_t read_bytes = 0;
+			int fd;
+
 			fd = open(source == PHP_MCRYPT_IV_SOURCE_RANDOM ? "/dev/random" : "/dev/urandom", O_RDONLY);
 			if (fd < 0) {
 				efree(*iv_str);
@@ -1236,7 +1256,9 @@ int php_mcrypt_iv(php_mcrypt_iv_source source, int size, char **iv_str, int *iv_
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not gather sufficient random data");
 				return FAILURE;
 			}
+#endif
 			break;
+		}
 		case PHP_MCRYPT_IV_SOURCE_RAND:
 				*iv_len = size;
 				while (size) {

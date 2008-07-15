@@ -6,7 +6,9 @@ ARG_WITH("mcrypt", "mcrypt support", "no");
 if (PHP_MCRYPT != "no") {
 
 	if (CHECK_HEADER_ADD_INCLUDE('mcrypt.h', 'CFLAGS_MCRYPT') &&
-			CHECK_LIB('libmcrypt.lib', 'mcrypt')) {
+			CHECK_LIB('libmcrypt.lib', 'mcrypt') &&
+			CHECK_LIB('Advapi32.lib', 'mcrypt')
+		) {
 		EXTENSION('mcrypt', 'mcrypt.c');
 		AC_DEFINE('HAVE_LIBMCRYPT', 1);
 		AC_DEFINE('HAVE_LIBMCRYPT24', 1);
