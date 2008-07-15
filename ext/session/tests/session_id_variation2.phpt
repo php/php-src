@@ -2,6 +2,8 @@
 Test session_id() function : variation
 --SKIPIF--
 <?php include('skipif.inc'); ?>
+--INI--
+session.hash_function=0
 --FILE--
 <?php
 
