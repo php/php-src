@@ -451,7 +451,11 @@ PHPAPI void _mysqlnd_restart_psession(MYSQLND *conn, MYSQLND_THD_ZVAL_PCACHE *ca
 		mnd_pefree(conn->last_message, conn->persistent);
 		conn->last_message = NULL;
 	}
-	conn->zval_cache = cache;
+	/*
+	  The thd zval cache is always freed on request shutdown, so this has happened already.
+	  Don't touch the old value! Get new reference
+	*/
+	conn->zval_cache = mysqlnd_palloc_get_thd_cache_reference(cache);
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -461,16 +465,8 @@ PHPAPI void _mysqlnd_restart_psession(MYSQLND *conn, MYSQLND_THD_ZVAL_PCACHE *ca
 PHPAPI void _mysqlnd_end_psession(MYSQLND *conn TSRMLS_DC)
 {
 	DBG_ENTER("_mysqlnd_end_psession");
-	/*
-	  BEWARE!!!! This will have a problem with a query cache.
-	  We need to move the data out of the zval cache before we end the psession.
-	  Or we will use nirvana pointers!!
-	*/
-	if (conn->zval_cache) {
-		DBG_INF("Freeing zval cache reference");
-		mysqlnd_palloc_free_thd_cache_reference(&conn->zval_cache);
-		conn->zval_cache = NULL;
-	}
+	/* The thd zval cache is always freed on request shutdown, so this has happened already */
+	mysqlnd_palloc_free_thd_cache_reference(&conn->zval_cache);
 	DBG_VOID_RETURN;
 }
 /* }}} */
