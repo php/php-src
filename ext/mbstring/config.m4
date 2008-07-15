@@ -72,7 +72,17 @@ int foo(int x, ...) {
 	return 0;
 }
 int main() { return foo(10, "", 3.14); }
-      ], [cv_php_mbstring_stdarg=yes], [cv_php_mbstring_stdarg=no], [cv_php_mbstring_stdarg=no])
+      ], [cv_php_mbstring_stdarg=yes], [cv_php_mbstring_stdarg=no], [
+        dnl cross-compile needs something here
+        case $host_alias in
+        *netware*)
+        cv_php_mbstring_stdarg=yes
+        ;;
+        *)
+        cv_php_mbstring_stdarg=no
+        ;;
+        esac
+      ])
     ])
 
     AC_CHECK_HEADERS([stdlib.h string.h strings.h unistd.h sys/time.h sys/times.h stdarg.h])
@@ -85,6 +95,10 @@ int main() { return foo(10, "", 3.14); }
     AC_FUNC_MEMCMP
 
     AC_DEFINE([HAVE_MBREGEX], 1, [whether to have multibyte regex support])
+
+    if test "$PHP_MBREGEX_BACKTRACK" != "no"; then
+      AC_DEFINE([USE_COMBINATION_EXPLOSION_CHECK],1,[whether to check multibyte regex backtrack])
+    fi
 
     PHP_MBSTRING_ADD_CFLAG([-DNOT_RUBY])
     PHP_MBSTRING_ADD_BUILD_DIR([oniguruma])
@@ -263,6 +277,10 @@ PHP_ARG_ENABLE(mbstring, whether to enable multibyte string support,
 PHP_ARG_ENABLE([mbregex], [whether to enable multibyte regex support],
 [  --disable-mbregex         MBSTRING: Disable multibyte regex support], yes, no)
 
+PHP_ARG_ENABLE([mbregex_backtrack], [whether to check multibyte regex backtrack],
+[  --disable-mbregex-backtrack
+                            MBSTRING: Disable multibyte regex backtrack check], yes, no)
+
 PHP_ARG_WITH(libmbfl, [for external libmbfl],
 [  --with-libmbfl[=DIR]      MBSTRING: Use external libmbfl. DIR is the libmbfl install prefix.
                             If DIR is not set, the bundled libmbfl will be used], no, no)
@@ -273,7 +291,6 @@ if test "$PHP_MBSTRING" != "no"; then
   PHP_MBSTRING_ADD_BASE_SOURCES([mbstring.c php_unicode.c mb_gpc.c])
 
   if test "$PHP_MBREGEX" != "no"; then
-    AC_MSG_ERROR([multibyte regex support must be disabled, use --disable-mbregex])
     PHP_MBSTRING_SETUP_MBREGEX
   fi
   
