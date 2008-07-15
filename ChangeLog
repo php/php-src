@@ -1,3 +1,232 @@
+2008-07-14  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      EXTENSIONS:
+      add intl to extensions
+
+2008-07-14  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/com_dotnet/com_extension.c
+      ext/readline/readline.c:
+      - MFB: Added arginfo
+
+    * (PHP_5_3)
+      ext/com_dotnet/com_extension.c
+      ext/readline/readline.c:
+      - Added arginfo
+
+2008-07-14  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/php_date.c:
+      - Fixed reversed logic.
+
+    * (PHP_5_3)
+      ext/date/php_date.c
+      ext/date/lib/dow.c
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/lib/timelib.h:
+      - MFH: Added a warning to the error struct in case a parsed-date was found
+      to
+        be invalid.
+
+    * ext/date/php_date.c
+      ext/date/lib/dow.c
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/lib/timelib.h:
+      - Added a warning to the error struct in case a parsed-date was found to be
+        invalid.
+
+2008-07-14  Josie Messa  <jdmessa@gmail.com>
+
+    * ext/standard/tests/strings/similar_text_basic.phpt
+      ext/standard/tests/strings/similar_text_error.phpt:
+      - Tests from TestFest
+      - Have slightly modified similar_text_error.phpt from original file
+
+    * ext/standard/tests/strings/similar_text_basic.phpt
+      ext/standard/tests/strings/similar_text_basic.phpt
+      ext/standard/tests/strings/similar_text_error.phpt
+      ext/standard/tests/strings/similar_text_error.phpt:
+      
+      file similar_text_basic.phpt was initially added on branch PHP_5_3.
+
+2008-07-14  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/tests/closure_017.phpt
+      ZendEngine2/tests/closure_018.phpt
+      ZendEngine2/tests/closure_019.phpt
+      ZendEngine2/tests/closure_020.phpt
+      ZendEngine2/tests/closure_021.phpt:
+      - New tests
+
+    * ZendEngine2/tests/closure_017.phpt
+      ZendEngine2/tests/closure_017.phpt
+      ZendEngine2/tests/closure_018.phpt
+      ZendEngine2/tests/closure_018.phpt
+      ZendEngine2/tests/closure_019.phpt
+      ZendEngine2/tests/closure_019.phpt
+      ZendEngine2/tests/closure_020.phpt
+      ZendEngine2/tests/closure_020.phpt
+      ZendEngine2/tests/closure_021.phpt
+      ZendEngine2/tests/closure_021.phpt:
+      
+      file closure_017.phpt was initially added on branch PHP_5_3.
+
+    * ZendEngine2/tests/closure_008.phpt
+      ZendEngine2/tests/closure_008.phpt
+      ZendEngine2/tests/closure_009.phpt
+      ZendEngine2/tests/closure_009.phpt:
+      - Fixed test titles
+
+    * ext/dom/tests/dom003.phpt
+      ext/dom/tests/dom003.phpt
+      ext/dom/tests/dom_set_attr_node.phpt
+      ext/dom/tests/dom_set_attr_node.phpt:
+      - Fixed tests
+
+2008-07-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_closures.c
+      ZendEngine2/zend_closures.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/closure_016.phpt
+      ZendEngine2/tests/closure_016.phpt
+      ZendEngine2/tests/closure_016.phpt:
+      Fixed is_callable() to support closures and return appropriate function
+      name
+
+2008-07-14  Antony Dovgal  <tony@daylessday.org>
+
+    * sapi/apache/php_apache.c:
+      use int for length
+
+    * ext/hash/hash.c:
+      use long for "l"
+
+    * ext/exif/exif.c:
+      use zend_bool for "b"
+
+2008-07-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/mysqlnd/config9.m4
+      ext/zip/config.m4:
+      MFB
+
+2008-07-14  Matt Wilmas  <php_lists@realplain.com>
+
+    * (PHP_5_3)
+      win32/build/config.w32:
+      MFH: Prevent build failure after closures
+
+2008-07-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS:
+      - Closures come in 5.3
+
+2008-07-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      configure.in
+      ZendEngine2/Makefile.am
+      ZendEngine2/Zend.dsp
+      ZendEngine2/ZendTS.dsp
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_closures.c
+      ZendEngine2/zend_closures.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/closure_001.phpt
+      ZendEngine2/tests/closure_002.phpt
+      ZendEngine2/tests/closure_003.phpt
+      ZendEngine2/tests/closure_004.phpt
+      ZendEngine2/tests/closure_005.phpt
+      ZendEngine2/tests/closure_006.phpt
+      ZendEngine2/tests/closure_007.phpt
+      ZendEngine2/tests/closure_008.phpt
+      ZendEngine2/tests/closure_009.phpt
+      ZendEngine2/tests/closure_010.phpt
+      ZendEngine2/tests/closure_011.phpt
+      ZendEngine2/tests/closure_012.phpt
+      ZendEngine2/tests/closure_013.phpt
+      ZendEngine2/tests/closure_014.phpt
+      ZendEngine2/tests/closure_015.phpt
+      ext/pcre/php_pcre.c
+      ext/reflection/php_reflection.c:
+      Added support for lambda functions and closures
+
+2008-07-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      ext/zip/config.m4:
+      No dots
+
+    * (PHP_5_3)
+      ext/intl/config.m4
+      ext/mysqlnd/config9.m4
+      ext/phar/config.m4
+      ext/zip/config.m4:
+      - Some config*.m4 file cleanups: NO tabs in these!
+
+    * (PHP_5_3)
+      ext/standard/credits_ext.h:
+      - Update credits: Whenever some extension is removed/added, remember to run
+      scripts/dev/credits and commit ext/standards/credits* !!
+
+2008-07-14  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/spl/spl_fixedarray.c:
+      MFH: minor speedup - convert offset to long only when needed
+
+    * ext/spl/spl_fixedarray.c:
+      minor speedup - convert offset to long only when needed
+
+    * ext/spl/tests/fixedarray_021.phpt:
+      fix test
+
+2008-07-14  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/intl/php_intl.c
+      ext/intl/php_intl.c:
+      add icu version to phpinfo
+
+2008-07-14  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      NEWS:
+      fix typo
+
+2008-07-14  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      ext/intl/tests/collator_create.phpt:
+      fix test
+
+    * (PHP_5_3)
+      ext/intl/intl_data.h:
+      - increase max locale to 80
+      - add some macros
+
+    * (PHP_5_3)
+      ext/intl/TODO:
+      todo
+
 2008-07-13  Marcus Boerger  <php@marcus-boerger.de>
 
     * (PHP_5_3)

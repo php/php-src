@@ -1,3 +1,81 @@
+2008-07-14  Felipe Pena  <felipensp@gmail.com>
+
+    * tests/closure_017.phpt
+      tests/closure_018.phpt
+      tests/closure_019.phpt
+      tests/closure_020.phpt
+      tests/closure_021.phpt:
+      - New tests
+
+    * tests/closure_017.phpt
+      tests/closure_017.phpt
+      tests/closure_018.phpt
+      tests/closure_018.phpt
+      tests/closure_019.phpt
+      tests/closure_019.phpt
+      tests/closure_020.phpt
+      tests/closure_020.phpt
+      tests/closure_021.phpt
+      tests/closure_021.phpt:
+      
+      file closure_017.phpt was initially added on branch PHP_5_3.
+
+    * tests/closure_008.phpt
+      tests/closure_008.phpt
+      tests/closure_009.phpt
+      tests/closure_009.phpt:
+      - Fixed test titles
+
+2008-07-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c
+      zend_API.c
+      zend_closures.c
+      zend_closures.c
+      zend_compile.c
+      zend_compile.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/closure_016.phpt
+      tests/closure_016.phpt
+      tests/closure_016.phpt:
+      Fixed is_callable() to support closures and return appropriate function
+      name
+
+    * (PHP_5_3)
+      Makefile.am
+      Zend.dsp
+      ZendTS.dsp
+      zend.h
+      zend_API.c
+      zend_closures.c
+      zend_closures.h
+      zend_compile.c
+      zend_compile.h
+      zend_default_classes.c
+      zend_execute.c
+      zend_execute_API.c
+      zend_language_parser.y
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/closure_001.phpt
+      tests/closure_002.phpt
+      tests/closure_003.phpt
+      tests/closure_004.phpt
+      tests/closure_005.phpt
+      tests/closure_006.phpt
+      tests/closure_007.phpt
+      tests/closure_008.phpt
+      tests/closure_009.phpt
+      tests/closure_010.phpt
+      tests/closure_011.phpt
+      tests/closure_012.phpt
+      tests/closure_013.phpt
+      tests/closure_014.phpt
+      tests/closure_015.phpt:
+      Added support for lambda functions and closures
+
 2008-07-13  Marcus Boerger  <php@marcus-boerger.de>
 
     * (PHP_5_3)
