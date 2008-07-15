@@ -2950,8 +2950,10 @@ PHP_FUNCTION(openssl_pkey_new)
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_PP(data), rsa, dmp1);
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_PP(data), rsa, dmq1);
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_PP(data), rsa, iqmp);
-					if (EVP_PKEY_assign_RSA(pkey, rsa)) {
-						RETURN_RESOURCE(zend_list_insert(pkey, le_key));
+					if (rsa->n && rsa->d) {
+						if (EVP_PKEY_assign_RSA(pkey, rsa)) {
+							RETURN_RESOURCE(zend_list_insert(pkey, le_key));
+						}
 					}
 					RSA_free(rsa);
 				}
@@ -2969,11 +2971,13 @@ PHP_FUNCTION(openssl_pkey_new)
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_PP(data), dsa, g);
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_PP(data), dsa, priv_key);
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_PP(data), dsa, pub_key);
-					if (!dsa->priv_key && !dsa->pub_key) {
-						DSA_generate_key(dsa);
-					}
-					if (EVP_PKEY_assign_DSA(pkey, dsa)) {
-						RETURN_RESOURCE(zend_list_insert(pkey, le_key));
+					if (dsa->p && dsa->q && dsa->g) {
+						if (!dsa->priv_key && !dsa->pub_key) {
+							DSA_generate_key(dsa);
+						}
+						if (EVP_PKEY_assign_DSA(pkey, dsa)) {
+							RETURN_RESOURCE(zend_list_insert(pkey, le_key));
+						}
 					}
 					DSA_free(dsa);
 				}
@@ -2990,11 +2994,13 @@ PHP_FUNCTION(openssl_pkey_new)
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_PP(data), dh, g);
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_PP(data), dh, priv_key);
 					OPENSSL_PKEY_SET_BN(Z_ARRVAL_PP(data), dh, pub_key);
-					if (!dh->pub_key) {
-						DH_generate_key(dh);
-					}
-					if (EVP_PKEY_assign_DH(pkey, dh)) {
-						RETURN_RESOURCE(zend_list_insert(pkey, le_key));
+					if (dh->p && dh->g) {
+						if (!dh->pub_key) {
+							DH_generate_key(dh);
+						}
+						if (EVP_PKEY_assign_DH(pkey, dh)) {
+							RETURN_RESOURCE(zend_list_insert(pkey, le_key));
+						}
 					}
 					DH_free(dh);
 				}
