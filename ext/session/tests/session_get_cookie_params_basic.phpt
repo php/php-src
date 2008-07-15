@@ -2,6 +2,12 @@
 Test session_get_cookie_params() function : basic functionality
 --SKIPIF--
 <?php include('skipif.inc'); ?>
+--INI--
+session.cookie_lifetime=0
+session.cookie_path="/"
+session.cookie_domain=""
+session.cookie_secure=0
+session.cookie_httponly=0
 --FILE--
 <?php
 
@@ -65,4 +71,3 @@ array(5) {
   bool(true)
 }
 Done
-
