@@ -999,24 +999,12 @@ PHP_FUNCTION(ob_get_status)
    Turn implicit flush on/off and is equivalent to calling flush() after every output call */
 PHP_FUNCTION(ob_implicit_flush)
 {
-	zval **zv_flag;
-	int flag;
+	long flag = 1;
 
-	switch(ZEND_NUM_ARGS()) {
-		case 0:
-			flag = 1;
-			break;
-		case 1:
-			if (zend_get_parameters_ex(1, &zv_flag)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(zv_flag);
-			flag = Z_LVAL_PP(zv_flag);
-			break;
-		default:
-			ZEND_WRONG_PARAM_COUNT();
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &flag) == FAILURE) {
+		RETURN_FALSE;
 	}
+
 	if (flag) {
 		php_start_implicit_flush(TSRMLS_C);
 	} else {
