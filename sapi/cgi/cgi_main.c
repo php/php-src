@@ -103,6 +103,12 @@ static int children = 0;
  */
 static int parent = 1;
 
+/* Did parent received exit signals SIG_TERM/SIG_INT/SIG_QUIT */
+static int exit_signal = 0;
+
+/* Is Parent waiting for children to exit */
+static int parent_waiting = 0;
+
 /**
  * Process group
  */
@@ -1135,7 +1141,7 @@ static void init_request_info(TSRMLS_D)
 }
 /* }}} */
 
-#if PHP_FASTCGI
+#if PHP_FASTCGI && !defined(PHP_WIN32)
 /**
  * Clean up child processes upon exit
  */
@@ -1145,15 +1151,16 @@ void fastcgi_cleanup(int signal)
 	fprintf(stderr, "FastCGI shutdown, pid %d\n", getpid());
 #endif
 
-#ifndef PHP_WIN32
 	sigaction(SIGTERM, &old_term, 0);
 
 	/* Kill all the processes in our process group */
 	kill(-pgroup, SIGTERM);
-#endif
 
-	/* We should exit at this point, but MacOSX doesn't seem to */
-	exit(0);
+	if (parent && parent_waiting) {
+		exit_signal = 1;
+	} else {
+		exit(0);
+	}
 }
 #endif
 
@@ -1520,7 +1527,7 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 
 		if (fcgi_in_shutdown()) {
-			exit(0);
+			goto parent_out;
 		}
 
 		while (parent) {
@@ -1557,9 +1564,25 @@ consult the installation file that came with this distribution, or visit \n\
 #ifdef DEBUG_FASTCGI
 				fprintf(stderr, "Wait for kids, pid %d\n", getpid());
 #endif
-				while (wait(&status) < 0) {
+				parent_waiting = 1;
+				while (1) {
+					if (wait(&status) >= 0) {
+						running--;
+						break;
+					} else if (exit_signal) {
+						break;
+					}						
 				}
-				running--;
+				if (exit_signal) {
+#if 0
+					while (running > 0) {
+						while (wait(&status) < 0) {
+						}
+						running--;
+					}
+#endif
+					goto parent_out;
+				}
 			}
 		}
 	} else {
@@ -2059,6 +2082,10 @@ out:
 		fprintf(stderr, "\nElapsed time: %d sec\n", sec);
 #endif
 	}
+#endif
+
+#ifndef PHP_WIN32
+parent_out:
 #endif
 
 	SG(server_context) = NULL;
