@@ -9,6 +9,7 @@ PHP                                                                        NEWS
 - Fixed a crash inside PDO when trying instantiate PDORow manually. (Felipe)
 - Fixed build failure of ext/mysqli with libmysql 6.0 - missing rpl
   functions. (Andrey)
+- Fixed a regression when using strip_tags() and < is within an attribute. (Scott)
 
 - Fixed bug #45486 (mb_send_mail(); header 'Content-Type: text/plain; charset=' 
   parsing incorrect). (Felipe)
