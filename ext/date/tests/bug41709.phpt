@@ -18,9 +18,10 @@ Array
     [minute] => 0
     [second] => 0
     [fraction] => 0
-    [warning_count] => 0
+    [warning_count] => 1
     [warnings] => Array
         (
+            [22] => The parsed date was invalid
         )
 
     [error_count] => 1

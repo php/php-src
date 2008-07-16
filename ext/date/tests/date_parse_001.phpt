@@ -89,9 +89,11 @@ array(15) {
   ["fraction"]=>
   bool(false)
   ["warning_count"]=>
-  int(0)
+  int(1)
   ["warnings"]=>
-  array(0) {
+  array(1) {
+    [12]=>
+    string(27) "The parsed date was invalid"
   }
   ["error_count"]=>
   int(1)
@@ -125,9 +127,11 @@ array(12) {
   ["fraction"]=>
   bool(false)
   ["warning_count"]=>
-  int(0)
+  int(1)
   ["warnings"]=>
-  array(0) {
+  array(1) {
+    [11]=>
+    string(27) "The parsed date was invalid"
   }
   ["error_count"]=>
   int(0)
@@ -181,9 +185,11 @@ array(12) {
   ["fraction"]=>
   bool(false)
   ["warning_count"]=>
-  int(0)
+  int(1)
   ["warnings"]=>
-  array(0) {
+  array(1) {
+    [8]=>
+    string(27) "The parsed date was invalid"
   }
   ["error_count"]=>
   int(0)
@@ -298,6 +304,6 @@ array(12) {
   bool(false)
 }
 
-Warning: date_parse() expects parameter 1 to be string, array given in %s on line %d
+Warning: date_parse() expects parameter 1 to be string, array given in /home/derick/dev/php/php-5.3dev/ext/date/tests/date_parse_001.php on line 11
 bool(false)
 Done
