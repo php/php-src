@@ -1,3 +1,218 @@
+2008-07-15  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/config.m4:
+      - indentation fix & reenable mbregex again.
+
+2008-07-15  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/date/lib/dow.c
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/lib/timelib.h:
+      - MFH: Also add the warnings for times. This does not make sense for the
+        english text parser, as invalid times are never allowed in there.
+
+    * ext/date/lib/dow.c
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/lib/timelib.h:
+      - Also add the warnings for times. This does not make sense for the english
+        text parser, as invalid times are never allowed in there.
+
+2008-07-15  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/mcrypt/config.w32
+      ext/mcrypt/mcrypt.c:
+      - MFH: Port mcrypt_create_iv to windows (aka fix it on windows)
+
+    * ext/mcrypt/config.w32
+      ext/mcrypt/mcrypt.c:
+      - Port mcrypt_create_iv to windows (aka fix it on windows)
+
+    * ext/dom/config.w32
+      ext/libxml/config.w32:
+      - MFB: do not enable libxml or dom when a dep/header/lib is missing
+
+2008-07-15  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      main/streams/streams.c:
+      MFH: Fixed potentially confusing error message on failure when no errors
+      are logged
+
+2008-07-15  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/string.c
+      ext/standard/string.c
+      ext/standard/tests/strings/strip_tags_variation11.phpt
+      ext/standard/tests/strings/strip_tags_variation11.phpt:
+      MFH: Fix bug when < is used within attribute.
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/strip_tags_variation11.phpt
+      ext/standard/tests/strings/strip_tags_variation11.phpt
+      ext/standard/tests/strings/strip_tags_variation11.phpt:
+      Fix bug when < is used within attribute.
+
+2008-07-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Fixed bug #45151 (Crash with URI/file..php (filename contains 2 dots))
+
+2008-07-15  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      Fix news
+
+2008-07-15  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli.c
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd_palloc.c
+      ext/mysqlnd/mysqlnd_palloc.c
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqlnd/mysqlnd_wireprotocol.c:
+      Sync with bzr
+
+2008-07-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c:
+      Fixed bug #45423 (fastcgi parent process doesn't invoke php_module_shutdown
+      before shutdown) (basant dot kukreja at sun dot com)
+
+2008-07-15  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/sockets/sockets.c:
+      - Reverted fix for #44197 (unsuitable for minor versions)
+
+2008-07-15  Felix De Vliegher  <felix.devliegher@gmail.com>
+
+    * ext/standard/tests/strings/strpbrk_basic.phpt
+      ext/standard/tests/strings/strpbrk_error.phpt:
+      MFB: Tests for strpbrk(), testfest.php.net task #91 and #92.
+
+    * ext/standard/tests/strings/strpbrk_basic.phpt
+      ext/standard/tests/strings/strpbrk_basic.phpt
+      ext/standard/tests/strings/strpbrk_error.phpt
+      ext/standard/tests/strings/strpbrk_error.phpt:
+      
+      file strpbrk_basic.phpt was initially added on branch PHP_5_3.
+
+2008-07-15  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/openssl/tests/002.phpt
+      ext/openssl/tests/002.phpt:
+      fix test
+
+2008-07-15  Lars Strojny  <lars@strojny.net>
+
+    * (PHP_5_3)
+      main/output.c:
+      Return null on when param parsing errors occur
+
+    * (PHP_5_3)
+      main/output.c:
+      New parameter parsing API
+
+    * tests/lang/033.phpt:
+      Merging from 5_3
+
+    * (PHP_5_3)
+      tests/lang/033.phpt:
+      Reenabling the test but removing the test cases for old_function as the
+      alternative syntaxes are still there
+
+2008-07-15  Henrique do Nascimento Angelo  <h.n.angelo@gmail.com>
+
+    * ext/openssl/openssl.c
+      ext/openssl/openssl.c
+      ext/openssl/tests/012.phpt
+      ext/openssl/tests/public.key:
+      Fix error message
+
+    * ext/openssl/tests/012.phpt
+      ext/openssl/tests/012.phpt
+      ext/openssl/tests/public.key
+      ext/openssl/tests/public.key:
+      
+      file 012.phpt was initially added on branch PHP_5_3.
+
+    * ext/openssl/openssl.c
+      ext/openssl/openssl.c
+      ext/openssl/tests/023.phpt
+      ext/openssl/tests/025.phpt
+      ext/openssl/tests/cert.crt
+      ext/openssl/tests/private.key:
+      Fix uninitilized variables in openssl_pkcs7_encrypt() and
+      openssl_pkcs7_sign()
+
+    * ext/openssl/tests/023.phpt
+      ext/openssl/tests/023.phpt
+      ext/openssl/tests/025.phpt
+      ext/openssl/tests/025.phpt
+      ext/openssl/tests/cert.crt
+      ext/openssl/tests/cert.crt
+      ext/openssl/tests/private.key
+      ext/openssl/tests/private.key:
+      
+      file 023.phpt was initially added on branch PHP_5_3.
+
+    * ext/openssl/openssl.c
+      ext/openssl/openssl.c
+      ext/openssl/tests/006.phpt:
+      Fix segfault caused by openssl_pkey_new() in ext/openssl/tests/006.phpt
+
+    * ext/openssl/tests/006.phpt
+      ext/openssl/tests/006.phpt:
+      
+      file 006.phpt was initially added on branch PHP_5_3.
+
+2008-07-15  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      ext/session/tests/session_get_cookie_params_basic.phpt
+      ext/session/tests/session_get_cookie_params_basic.phpt
+      ext/session/tests/session_get_cookie_params_variation1.phpt
+      ext/session/tests/session_get_cookie_params_variation1.phpt
+      ext/session/tests/session_id_error4.phpt
+      ext/session/tests/session_id_error4.phpt
+      ext/session/tests/session_id_variation1.phpt
+      ext/session/tests/session_id_variation1.phpt
+      ext/session/tests/session_id_variation2.phpt
+      ext/session/tests/session_id_variation2.phpt:
+      MFH:- Fix tests (do NOT assume things in php.ini always to be same...or
+      sane)
+
+    * ext/session/tests/session_get_cookie_params_basic.phpt
+      ext/session/tests/session_get_cookie_params_variation1.phpt
+      ext/session/tests/session_id_error4.phpt
+      ext/session/tests/session_id_variation1.phpt
+      ext/session/tests/session_id_variation2.phpt:
+      - Fix tests (do NOT assume things in php.ini always to be same...or sane)
+
 2008-07-14  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_3)
