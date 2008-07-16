@@ -2,6 +2,7 @@
 Basic XMLType test
 --SKIPIF--
 <?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+<?php if (!extension_loaded("simplexml")) die("skip no simplexml extension"; ?>
 --FILE--
 <?php
 
@@ -46,7 +47,7 @@ function do_query($c)
 	$s = oci_parse($c, 'select XMLType.getClobVal(xt_spec)
 				        from xtt where xt_id = 1');
 	oci_execute($s);
-	$row = oci_fetch_row($s);	
+	$row = oci_fetch_row($s);
 	$data = $row[0]->load();
 	var_dump($data);
 	return($data);
@@ -65,10 +66,10 @@ $sx->Nice = 'Y';
 $s = oci_parse($c, 'update xtt
 					set xt_spec = XMLType(:clob)
 					where xt_id = 1');
-$lob = oci_new_descriptor($c, OCI_D_LOB);	
+$lob = oci_new_descriptor($c, OCI_D_LOB);
 oci_bind_by_name($s, ':clob', $lob, -1, OCI_B_CLOB);
-$lob->writeTemporary($sx->asXml()); 
-oci_execute($s);	
+$lob->writeTemporary($sx->asXml());
+oci_execute($s);
 $lob->close();
 
 // Verify
