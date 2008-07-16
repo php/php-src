@@ -73,23 +73,33 @@ extern zend_class_entry *oci_coll_class_entry_ptr;
 
 #define PHP_OCI_MAX_NAME_LEN  64
 #define PHP_OCI_MAX_DATA_SIZE INT_MAX
-#define PHP_OCI_PIECE_SIZE	  (64*1024)-1
+#define PHP_OCI_PIECE_SIZE	  ((64*1024)-1)
 #define PHP_OCI_LOB_BUFFER_SIZE 1048576l  /* 1Mb seems to be the most reasonable buffer size for LOB reading */
 
-#define PHP_OCI_ASSOC				1<<0
-#define PHP_OCI_NUM					1<<1
+#define PHP_OCI_ASSOC				(1<<0)
+#define PHP_OCI_NUM					(1<<1)
 #define PHP_OCI_BOTH				(PHP_OCI_ASSOC|PHP_OCI_NUM)
 
-#define PHP_OCI_RETURN_NULLS		1<<2
-#define PHP_OCI_RETURN_LOBS			1<<3
+#define PHP_OCI_RETURN_NULLS		(1<<2)
+#define PHP_OCI_RETURN_LOBS			(1<<3)
 
-#define PHP_OCI_FETCHSTATEMENT_BY_COLUMN	1<<4
-#define PHP_OCI_FETCHSTATEMENT_BY_ROW		1<<5
+#define PHP_OCI_FETCHSTATEMENT_BY_COLUMN	(1<<4)
+#define PHP_OCI_FETCHSTATEMENT_BY_ROW		(1<<5)
 #define PHP_OCI_FETCHSTATEMENT_BY			(PHP_OCI_FETCHSTATEMENT_BY_COLUMN | PHP_OCI_FETCHSTATEMENT_BY_ROW)
 
 #define PHP_OCI_LOB_BUFFER_DISABLED 0
-#define PHP_OCI_LOB_BUFFER_ENABLED 1
-#define PHP_OCI_LOB_BUFFER_USED 2
+#define PHP_OCI_LOB_BUFFER_ENABLED  1
+#define PHP_OCI_LOB_BUFFER_USED     2
+
+/* The mode parameter for oci_connect() is overloaded and accepts both
+ * privilege and external authentication flags OR'd together.
+ * PHP_OCI_CRED_EXT must be distinct from the OCI_xxx privilege
+ * values.
+ */
+#define PHP_OCI_CRED_EXT                    (1<<31)
+#if ((PHP_OCI_CRED_EXT == OCI_DEFAULT) || (PHP_OCI_CRED_EXT & (OCI_SYSOPER | OCI_SYSDBA)))
+#error Invalid value for PHP_OCI_CRED_EXT
+#endif
 
 /* }}} */
 
