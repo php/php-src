@@ -29,11 +29,11 @@
  * SUCH DAMAGE.
  */
 
-#include "php_onig_compat.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "../php_onig_compat.h"
 
 #define ONIGURUMA
 #define ONIGURUMA_VERSION_MAJOR   3

@@ -80,8 +80,6 @@
 #if HAVE_MBSTRING
 /* }}} */
 
-#include "oniguruma/oniguruma.h"
-
 /* {{{ prototypes */
 ZEND_DECLARE_MODULE_GLOBALS(mbstring)
 static PHP_GINIT_FUNCTION(mbstring);
@@ -1407,20 +1405,15 @@ PHP_MINFO_FUNCTION(mbstring)
 	if (MBSTRG(encoding_translation)) {
 		php_info_print_table_row(2, "HTTP input encoding translation", "enabled");	
 	}
-#if defined(HAVE_MBREGEX)
-	{
-		char buf[32];
-		php_info_print_table_row(2, "Multibyte (japanese) regex support", "enabled");
-		snprintf(buf, sizeof(buf), "%d.%d.%d",
-			ONIGURUMA_VERSION_MAJOR,ONIGURUMA_VERSION_MINOR,ONIGURUMA_VERSION_TEENY);
-		php_info_print_table_row(2, "Multibyte regex (oniguruma) version", buf);
-	}
-#endif
 	php_info_print_table_end();
 
 	php_info_print_table_start();
 	php_info_print_table_header(1, "mbstring extension makes use of \"streamable kanji code filter and converter\", which is distributed under the GNU Lesser General Public License version 2.1.");
 	php_info_print_table_end();
+
+#if HAVE_MBREGEX
+	PHP_MINFO(mb_regex)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
+#endif
 
 	DISPLAY_INI_ENTRIES();
 }
