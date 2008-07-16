@@ -3095,6 +3095,7 @@ PHP_FUNCTION(date_timezone_set)
 	tzobj = (php_timezone_obj *) zend_object_store_get_object(timezone_object TSRMLS_CC);
 	if (tzobj->type != TIMELIB_ZONETYPE_ID) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can only do this for zones with ID for now");
+		return;
 	}
 	timelib_set_timezone(dateobj->time, tzobj->tzi.tz);
 	timelib_unixtime2local(dateobj->time, dateobj->time->sse);
