@@ -105,6 +105,28 @@ PHP_RSHUTDOWN_FUNCTION(mb_regex)
 }
 /* }}} */
 
+/* {{{ PHP_MINFO_FUNCTION(mb_regex) */
+PHP_MINFO_FUNCTION(mb_regex)
+{
+	char buf[32];
+	php_info_print_table_start();
+	php_info_print_table_row(2, "Multibyte (japanese) regex support", "enabled");
+	snprintf(buf, sizeof(buf), "%d.%d.%d",
+			ONIGURUMA_VERSION_MAJOR,
+			ONIGURUMA_VERSION_MINOR,
+			ONIGURUMA_VERSION_TEENY);
+#ifdef PHP_ONIG_BUNDLED
+#ifdef USE_COMBINATION_EXPLOSION_CHECK
+	php_info_print_table_row(2, "Multibyte regex (oniguruma) backtrack check", "On");
+#else	/* USE_COMBINATION_EXPLOSION_CHECK */
+	php_info_print_table_row(2, "Multibyte regex (oniguruma) backtrack check", "Off");
+#endif	/* USE_COMBINATION_EXPLOSION_CHECK */
+#endif /* PHP_BUNDLED_ONIG */
+	php_info_print_table_row(2, "Multibyte regex (oniguruma) version", buf);
+	php_info_print_table_end();
+}
+/* }}} */
+
 /*
  * encoding name resolver
  */
@@ -115,123 +137,181 @@ typedef struct _php_mb_regex_enc_name_map_t {
 	OnigEncoding code;
 } php_mb_regex_enc_name_map_t;
 
-php_mb_regex_enc_name_map_t enc_name_map[] ={
+php_mb_regex_enc_name_map_t enc_name_map[] = {
+#ifdef ONIG_ENCODING_EUC_JP
 	{
 		"EUC-JP\0EUCJP\0X-EUC-JP\0UJIS\0EUCJP\0EUCJP-WIN\0",
 		ONIG_ENCODING_EUC_JP
 	},
+#endif
+#ifdef ONIG_ENCODING_UTF8
 	{
 		"UTF-8\0UTF8\0",
 		ONIG_ENCODING_UTF8
 	},
+#endif
+#ifdef ONIG_ENCODING_UTF16_BE
 	{
 		"UTF-16\0UTF-16BE\0",
 		ONIG_ENCODING_UTF16_BE
 	},
+#endif
+#ifdef ONIG_ENCODING_UTF16_LE
 	{
 		"UTF-16LE\0",
 		ONIG_ENCODING_UTF16_LE
 	},
+#endif
+#ifdef ONIG_ENCODING_UTF32_BE
 	{
 		"UCS-4\0UTF-32\0UTF-32BE\0",
 		ONIG_ENCODING_UTF32_BE
 	},
+#endif
+#ifdef ONIG_ENCODING_UTF32_LE
 	{
 		"UCS-4LE\0UTF-32LE\0",
 		ONIG_ENCODING_UTF32_LE
 	},
+#endif
+#ifdef ONIG_ENCODING_SJIS
 	{
 		"SJIS\0CP932\0MS932\0SHIFT_JIS\0SJIS-WIN\0WINDOWS-31J\0",
 		ONIG_ENCODING_SJIS
 	},
+#endif
+#ifdef ONIG_ENCODING_BIG5
 	{
 		"BIG5\0BIG-5\0BIGFIVE\0CN-BIG5\0BIG-FIVE\0",
 		ONIG_ENCODING_BIG5
 	},
+#endif
+#ifdef ONIG_ENCODING_EUC_CN
 	{
 		"EUC-CN\0EUCCN\0EUC_CN\0GB-2312\0GB2312\0",
 		ONIG_ENCODING_EUC_CN
 	},
+#endif
+#ifdef ONIG_ENCODING_EUC_TW
 	{
 		"EUC-TW\0EUCTW\0EUC_TW\0",
 		ONIG_ENCODING_EUC_TW
 	},
+#endif
+#ifdef ONIG_ENCODING_EUC_KR
 	{
 		"EUC-KR\0EUCKR\0EUC_KR\0",
 		ONIG_ENCODING_EUC_KR
 	},
+#endif
+#if defined(ONIG_ENCODING_KOI8) && !PHP_ONIG_BAD_KOI8_ENTRY
 	{
 		"KOI8\0KOI-8\0",
 		ONIG_ENCODING_KOI8
 	},
+#endif
+#ifdef ONIG_ENCODING_KOI8_R
 	{
 		"KOI8R\0KOI8-R\0KOI-8R\0",
 		ONIG_ENCODING_KOI8_R
 	},
+#endif
+#ifdef ONIG_ENCODING_ISO_8859_1
 	{
 		"ISO-8859-1\0ISO8859-1\0ISO_8859_1\0ISO8859_1\0",
 		ONIG_ENCODING_ISO_8859_1
 	},
+#endif
+#ifdef ONIG_ENCODING_ISO_8859_2
 	{
 		"ISO-8859-2\0ISO8859-2\0ISO_8859_2\0ISO8859_2\0",
 		ONIG_ENCODING_ISO_8859_2
 	},
+#endif
+#ifdef ONIG_ENCODING_ISO_8859_3
 	{
 		"ISO-8859-3\0ISO8859-3\0ISO_8859_3\0ISO8859_3\0",
 		ONIG_ENCODING_ISO_8859_3
 	},
+#endif
+#ifdef ONIG_ENCODING_ISO_8859_4
 	{
 		"ISO-8859-4\0ISO8859-4\0ISO_8859_4\0ISO8859_4\0",
 		ONIG_ENCODING_ISO_8859_4
 	},
+#endif
+#ifdef ONIG_ENCODING_ISO_8859_5
 	{
 		"ISO-8859-5\0ISO8859-5\0ISO_8859_5\0ISO8859_5\0",
 		ONIG_ENCODING_ISO_8859_5
 	},
+#endif
+#ifdef ONIG_ENCODING_ISO_8859_6
 	{
 		"ISO-8859-6\0ISO8859-6\0ISO_8859_6\0ISO8859_6\0",
 		ONIG_ENCODING_ISO_8859_6
 	},
+#endif
+#ifdef ONIG_ENCODING_ISO_8859_7
 	{
 		"ISO-8859-7\0ISO8859-7\0ISO_8859_7\0ISO8859_7\0",
 		ONIG_ENCODING_ISO_8859_7
 	},
+#endif
+#ifdef ONIG_ENCODING_ISO_8859_8
 	{
 		"ISO-8859-8\0ISO8859-8\0ISO_8859_8\0ISO8859_8\0",
 		ONIG_ENCODING_ISO_8859_8
 	},
+#endif
+#ifdef ONIG_ENCODING_ISO_8859_9
 	{
 		"ISO-8859-9\0ISO8859-9\0ISO_8859_9\0ISO8859_9\0",
 		ONIG_ENCODING_ISO_8859_9
 	},
+#endif
+#ifdef ONIG_ENCODING_ISO_8859_10
 	{
 		"ISO-8859-10\0ISO8859-10\0ISO_8859_10\0ISO8859_10\0",
 		ONIG_ENCODING_ISO_8859_10
 	},
+#endif
+#ifdef ONIG_ENCODING_ISO_8859_11
 	{
 		"ISO-8859-11\0ISO8859-11\0ISO_8859_11\0ISO8859_11\0",
 		ONIG_ENCODING_ISO_8859_11
 	},
+#endif
+#ifdef ONIG_ENCODING_ISO_8859_13
 	{
 		"ISO-8859-13\0ISO8859-13\0ISO_8859_13\0ISO8859_13\0",
 		ONIG_ENCODING_ISO_8859_13
 	},
+#endif
+#ifdef ONIG_ENCODING_ISO_8859_14
 	{
 		"ISO-8859-14\0ISO8859-14\0ISO_8859_14\0ISO8859_14\0",
 		ONIG_ENCODING_ISO_8859_14
 	},
+#endif
+#ifdef ONIG_ENCODING_ISO_8859_15
 	{
 		"ISO-8859-15\0ISO8859-15\0ISO_8859_15\0ISO8859_15\0",
 		ONIG_ENCODING_ISO_8859_15
 	},
+#endif
+#ifdef ONIG_ENCODING_ISO_8859_16
 	{
 		"ISO-8859-16\0ISO8859-16\0ISO_8859_16\0ISO8859_16\0",
 		ONIG_ENCODING_ISO_8859_16
 	},
+#endif
+#ifdef ONIG_ENCODING_ASCII
 	{
 		"ASCII\0US-ASCII\0US_ASCII\0ISO646\0",
 		ONIG_ENCODING_ASCII
 	},
+#endif
 	{ NULL, ONIG_ENCODING_UNDEF }
 };
 /* }}} */
@@ -663,6 +743,10 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		}
 	}
 	if (Z_TYPE_PP(arg_pattern_zval) == IS_STRING) {
+		arg_pattern = Z_STRVAL_PP(arg_pattern_zval);
+		arg_pattern_len = Z_STRLEN_PP(arg_pattern_zval);
+	} else if (Z_TYPE_PP(arg_pattern_zval) == IS_UNICODE) {
+		convert_to_string_ex(arg_pattern_zval);
 		arg_pattern = Z_STRVAL_PP(arg_pattern_zval);
 		arg_pattern_len = Z_STRLEN_PP(arg_pattern_zval);
 	} else {

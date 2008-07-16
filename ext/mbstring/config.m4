@@ -26,6 +26,10 @@ AC_DEFUN([PHP_MBSTRING_ADD_CFLAG], [
   PHP_MBSTRING_CFLAGS="$PHP_MBSTRING_CFLAGS $1"
 ])
 
+AC_DEFUN([PHP_MBSTRING_ADD_INSTALL_HEADERS], [
+  PHP_MBSTRING_INSTALL_HEADERS="$PHP_MBSTRING_INSTALL_HEADERS $1"
+])
+
 AC_DEFUN([PHP_MBSTRING_EXTENSION], [
   PHP_NEW_EXTENSION(mbstring, $PHP_MBSTRING_SOURCES, $ext_shared,, $PHP_MBSTRING_CFLAGS)
   PHP_SUBST(MBSTRING_SHARED_LIBADD)
@@ -56,12 +60,22 @@ AC_DEFUN([PHP_MBSTRING_EXTENSION], [
 #include "$out"
 EOF
   done
+  PHP_MBSTRING_ADD_INSTALL_HEADERS([mbstring.h])
+  PHP_INSTALL_HEADERS([ext/mbstring], [$PHP_MBSTRING_INSTALL_HEADERS])
 ])
 
 AC_DEFUN([PHP_MBSTRING_SETUP_MBREGEX], [
   if test "$PHP_MBREGEX" = "yes"; then
-    AC_CACHE_CHECK(for variable length prototypes and stdarg.h, cv_php_mbstring_stdarg, [
-      AC_TRY_RUN([
+    if test "$PHP_ONIG" = "yes" || test "$PHP_ONIG" = "no"; then
+      dnl
+      dnl Bundled oniguruma
+      dnl
+      if test "$PHP_MBREGEX_BACKTRACK" != "no"; then
+        AC_DEFINE([USE_COMBINATION_EXPLOSION_CHECK],1,[whether to check multibyte regex backtrack])
+      fi
+
+      AC_CACHE_CHECK(for variable length prototypes and stdarg.h, cv_php_mbstring_stdarg, [
+        AC_TRY_RUN([
 #include <stdarg.h>
 int foo(int x, ...) {
 	va_list va;
@@ -72,83 +86,119 @@ int foo(int x, ...) {
 	return 0;
 }
 int main() { return foo(10, "", 3.14); }
-      ], [cv_php_mbstring_stdarg=yes], [cv_php_mbstring_stdarg=no], [
-        dnl cross-compile needs something here
-        case $host_alias in
-        *netware*)
-        cv_php_mbstring_stdarg=yes
-        ;;
-        *)
-        cv_php_mbstring_stdarg=no
-        ;;
-        esac
+        ], [cv_php_mbstring_stdarg=yes], [cv_php_mbstring_stdarg=no], [
+          dnl cross-compile needs something here
+          case $host_alias in
+          *netware*)
+          cv_php_mbstring_stdarg=yes
+          ;;
+          *)
+          cv_php_mbstring_stdarg=no
+          ;;
+          esac
+        ])
       ])
-    ])
 
-    AC_CHECK_HEADERS([stdlib.h string.h strings.h unistd.h sys/time.h sys/times.h stdarg.h])
-    AC_CHECK_SIZEOF(int, 4)
-    AC_CHECK_SIZEOF(short, 2)
-    AC_CHECK_SIZEOF(long, 4)
-    AC_C_CONST
-    AC_HEADER_TIME 
-    AC_FUNC_ALLOCA
-    AC_FUNC_MEMCMP
+      AC_CHECK_HEADERS([stdlib.h string.h strings.h unistd.h sys/time.h sys/times.h stdarg.h])
+      AC_CHECK_SIZEOF(int, 4)
+      AC_CHECK_SIZEOF(short, 2)
+      AC_CHECK_SIZEOF(long, 4)
+      AC_C_CONST
+      AC_HEADER_TIME 
+      AC_FUNC_ALLOCA
+      AC_FUNC_MEMCMP
+      AC_CHECK_HEADER([stdarg.h], [
+        AC_DEFINE([HAVE_STDARG_PROTOTYPES], [1], [Define to 1 if you have the <stdarg.h> header file.])
+      ], [])
+      AC_DEFINE([PHP_ONIG_BUNDLED], [1], [Define to 1 if the bundled oniguruma is used])
+      PHP_MBSTRING_ADD_CFLAG([-DNOT_RUBY])
+      PHP_MBSTRING_ADD_BUILD_DIR([oniguruma])
+      PHP_MBSTRING_ADD_BUILD_DIR([oniguruma/enc])
+      PHP_MBSTRING_ADD_INCLUDE([oniguruma])
+      PHP_MBSTRING_ADD_CONFIG_HEADER([oniguruma/config.h])
+      PHP_MBSTRING_ADD_SOURCES([
+        oniguruma/regcomp.c
+        oniguruma/regerror.c
+        oniguruma/regexec.c
+        oniguruma/reggnu.c
+        oniguruma/regparse.c
+        oniguruma/regenc.c
+        oniguruma/regext.c
+        oniguruma/regsyntax.c
+        oniguruma/regtrav.c
+        oniguruma/regversion.c
+        oniguruma/st.c
+        oniguruma/enc/unicode.c
+        oniguruma/enc/ascii.c
+        oniguruma/enc/utf8.c
+        oniguruma/enc/euc_jp.c
+        oniguruma/enc/euc_tw.c
+        oniguruma/enc/euc_kr.c
+        oniguruma/enc/sjis.c
+        oniguruma/enc/iso8859_1.c
+        oniguruma/enc/iso8859_2.c
+        oniguruma/enc/iso8859_3.c
+        oniguruma/enc/iso8859_4.c
+        oniguruma/enc/iso8859_5.c
+        oniguruma/enc/iso8859_6.c
+        oniguruma/enc/iso8859_7.c
+        oniguruma/enc/iso8859_8.c
+        oniguruma/enc/iso8859_9.c
+        oniguruma/enc/iso8859_10.c
+        oniguruma/enc/iso8859_11.c
+        oniguruma/enc/iso8859_13.c
+        oniguruma/enc/iso8859_14.c
+        oniguruma/enc/iso8859_15.c
+        oniguruma/enc/iso8859_16.c
+        oniguruma/enc/koi8.c
+        oniguruma/enc/koi8_r.c
+        oniguruma/enc/big5.c
+        oniguruma/enc/utf16_be.c
+        oniguruma/enc/utf16_le.c
+        oniguruma/enc/utf32_be.c
+        oniguruma/enc/utf32_le.c
+      ])
+      PHP_MBSTRING_ADD_INSTALL_HEADERS([oniguruma/oniguruma.h])
+    else
+      dnl
+      dnl External oniguruma
+      dnl
+      if test ! -f "$PHP_ONIG/include/oniguruma.h"; then
+        AC_MSG_ERROR([oniguruma.h not found in $PHP_ONIG/include])
+      fi
+      PHP_ADD_INCLUDE([$PHP_ONIG/include])
+
+      PHP_CHECK_LIBRARY(onig, onig_init, [
+        PHP_ADD_LIBRARY_WITH_PATH(onig, $PHP_ONIG/$PHP_LIBDIR, MBSTRING_SHARED_LIBADD)
+      ],[
+        AC_MSG_ERROR([Problem with oniguruma. Please check config.log for more information.])
+      ], [
+        -L$PHP_ONIG/$PHP_LIBDIR
+      ])
+
+      save_old_LDFLAGS=$LDFLAGS
+      PHP_EVAL_LIBLINE([$MBSTRING_SHARED_LIBADD], LDFLAGS)
+      AC_MSG_CHECKING([if oniguruma has an invalid entry for KOI8 encoding])
+      AC_TRY_LINK([
+  #include <oniguruma.h>
+      ], [
+  return (int)(ONIG_ENCODING_KOI8 + 1);
+      ], [
+        AC_MSG_RESULT([no])
+      ], [
+        AC_MSG_RESULT([yes])
+        AC_DEFINE([PHP_ONIG_BAD_KOI8_ENTRY], [1], [define to 1 if oniguruma has an invalid entry for KOI8 encoding])
+      ])
+      LDFLAGS=$save_old_LDFLAGS
+    fi
+
+    PHP_MBSTRING_ADD_CFLAG([-DONIG_ESCAPE_UCHAR_COLLISION=1])
+    PHP_MBSTRING_ADD_CFLAG([-DUChar=OnigUChar])
 
     AC_DEFINE([HAVE_MBREGEX], 1, [whether to have multibyte regex support])
 
-    if test "$PHP_MBREGEX_BACKTRACK" != "no"; then
-      AC_DEFINE([USE_COMBINATION_EXPLOSION_CHECK],1,[whether to check multibyte regex backtrack])
-    fi
-
-    PHP_MBSTRING_ADD_CFLAG([-DNOT_RUBY])
-    PHP_MBSTRING_ADD_BUILD_DIR([oniguruma])
-    PHP_MBSTRING_ADD_BUILD_DIR([oniguruma/enc])
-    PHP_MBSTRING_ADD_INCLUDE([oniguruma])
-    PHP_MBSTRING_ADD_CONFIG_HEADER([oniguruma/config.h])
-
     PHP_MBSTRING_ADD_BASE_SOURCES([php_mbregex.c])
-    PHP_MBSTRING_ADD_SOURCES([
-      oniguruma/regcomp.c
-      oniguruma/regerror.c
-      oniguruma/regexec.c
-      oniguruma/reggnu.c
-      oniguruma/regparse.c
-      oniguruma/regenc.c
-      oniguruma/regext.c
-      oniguruma/regsyntax.c
-      oniguruma/regtrav.c
-      oniguruma/regversion.c
-      oniguruma/st.c
-      oniguruma/enc/unicode.c
-      oniguruma/enc/ascii.c
-      oniguruma/enc/utf8.c
-      oniguruma/enc/euc_jp.c
-      oniguruma/enc/euc_tw.c
-      oniguruma/enc/euc_kr.c
-      oniguruma/enc/sjis.c
-      oniguruma/enc/iso8859_1.c
-      oniguruma/enc/iso8859_2.c
-      oniguruma/enc/iso8859_3.c
-      oniguruma/enc/iso8859_4.c
-      oniguruma/enc/iso8859_5.c
-      oniguruma/enc/iso8859_6.c
-      oniguruma/enc/iso8859_7.c
-      oniguruma/enc/iso8859_8.c
-      oniguruma/enc/iso8859_9.c
-      oniguruma/enc/iso8859_10.c
-      oniguruma/enc/iso8859_11.c
-      oniguruma/enc/iso8859_13.c
-      oniguruma/enc/iso8859_14.c
-      oniguruma/enc/iso8859_15.c
-      oniguruma/enc/iso8859_16.c
-      oniguruma/enc/koi8.c
-      oniguruma/enc/koi8_r.c
-      oniguruma/enc/big5.c
-      oniguruma/enc/utf16_be.c
-      oniguruma/enc/utf16_le.c
-      oniguruma/enc/utf32_be.c
-      oniguruma/enc/utf32_le.c
-    ])
+    PHP_MBSTRING_ADD_INSTALL_HEADERS([php_mbregex.h php_onig_compat.h])
   fi
 ])
 
@@ -240,6 +290,8 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
      libmbfl/nls/nls_tr.c
     ])
     PHP_MBSTRING_ADD_CFLAG([-DHAVE_CONFIG_H])
+
+    PHP_MBSTRING_ADD_INSTALL_HEADERS([libmbfl/config.h libmbfl/mbfl/eaw_table.h libmbfl/mbfl/mbfilter.h libmbfl/mbfl/mbfilter_8bit.h libmbfl/mbfl/mbfilter_pass.h libmbfl/mbfl/mbfilter_wchar.h libmbfl/mbfl/mbfl_allocators.h libmbfl/mbfl/mbfl_consts.h libmbfl/mbfl/mbfl_convert.h libmbfl/mbfl/mbfl_defs.h libmbfl/mbfl/mbfl_encoding.h libmbfl/mbfl/mbfl_filter_output.h libmbfl/mbfl/mbfl_ident.h libmbfl/mbfl/mbfl_language.h libmbfl/mbfl/mbfl_memory_device.h libmbfl/mbfl/mbfl_string.h])
   else
     dnl
     dnl External libmfl
@@ -285,6 +337,10 @@ PHP_ARG_WITH(libmbfl, [for external libmbfl],
 [  --with-libmbfl[=DIR]      MBSTRING: Use external libmbfl. DIR is the libmbfl install prefix.
                             If DIR is not set, the bundled libmbfl will be used], no, no)
 
+PHP_ARG_WITH(onig, [for external oniguruma],
+[  --with-onig[=DIR]         MBSTRING: Use external oniguruma. DIR is the oniguruma install prefix.
+                            If DIR is not set, the bundled oniguruma will be used], no, no)
+
 if test "$PHP_MBSTRING" != "no"; then  
   AC_DEFINE([HAVE_MBSTRING],1,[whether to have multibyte string support])
 
@@ -297,7 +353,6 @@ if test "$PHP_MBSTRING" != "no"; then
   dnl libmbfl is required
   PHP_MBSTRING_SETUP_LIBMBFL
   PHP_MBSTRING_EXTENSION
-  PHP_INSTALL_HEADERS([ext/mbstring], [mbstring.h php_mbregex.h libmbfl/config.h libmbfl/mbfl/eaw_table.h libmbfl/mbfl/mbfilter.h libmbfl/mbfl/mbfilter_8bit.h libmbfl/mbfl/mbfilter_pass.h libmbfl/mbfl/mbfilter_wchar.h libmbfl/mbfl/mbfl_allocators.h libmbfl/mbfl/mbfl_consts.h libmbfl/mbfl/mbfl_convert.h libmbfl/mbfl/mbfl_defs.h libmbfl/mbfl/mbfl_encoding.h libmbfl/mbfl/mbfl_filter_output.h libmbfl/mbfl/mbfl_ident.h libmbfl/mbfl/mbfl_language.h libmbfl/mbfl/mbfl_memory_device.h libmbfl/mbfl/mbfl_string.h oniguruma/oniguruma.h oniguruma/php_onig_compat.h])
 fi
 
 # vim600: sts=2 sw=2 et

@@ -25,7 +25,9 @@
 
 #include "php.h"
 #include "zend.h"
-#include "oniguruma/oniguruma.h"
+#include "php_onig_compat.h" /* must come prior to the oniguruma header */
+#include "oniguruma.h"
+#undef UChar
 
 /* {{{ PHP_MBREGEX_GLOBALS */
 #define PHP_MBREGEX_GLOBALS \
@@ -82,6 +84,7 @@ PHP_MINIT_FUNCTION(mb_regex);
 PHP_MSHUTDOWN_FUNCTION(mb_regex);
 PHP_RINIT_FUNCTION(mb_regex);
 PHP_RSHUTDOWN_FUNCTION(mb_regex);
+PHP_MINFO_FUNCTION(mb_regex);
 void _php_mb_regex_globals_ctor(zend_mbstring_globals_ptr pglobals TSRMLS_DC);
 void php_mb_regex_set_options(OnigOptionType options, OnigSyntaxType *syntax, OnigOptionType *prev_options, OnigSyntaxType **prev_syntax TSRMLS_DC);
 void _php_mb_regex_globals_dtor(zend_mbstring_globals_ptr pglobals TSRMLS_DC);
