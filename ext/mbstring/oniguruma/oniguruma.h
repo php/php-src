@@ -29,7 +29,7 @@
  * SUCH DAMAGE.
  */
 
-#include "php_onig_compat.h"
+#include "../php_onig_compat.h"
 
 #ifdef __cplusplus
 extern "C" {
