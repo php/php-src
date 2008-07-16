@@ -1,34 +1,36 @@
 --TEST--
-IPv6 Loopback test
+Unix domain socket Loopback test
 --SKIPIF--
 <?php
 	if (!extension_loaded('sockets')) {
 		die('skip sockets extension not available.');
 	}
-	if (!defined("AF_INET6")) {
-		die('skip no IPv6 support');
-	}
 ?>
 --FILE--
 <?php
+	$sock_path = sprintf("/tmp/%s.sock", uniqid());
+
+	if (file_exists($sock_path))
+		die('Temporary socket already exists.');
+
 	/* Setup socket server */
-	$server = socket_create(AF_INET6, SOCK_STREAM, getprotobyname('tcp'));
+	$server = socket_create(AF_UNIX, SOCK_STREAM, 0);
 	if (!$server) {
-		die('Unable to create AF_INET6 socket [server]');
+		die('Unable to create AF_UNIX socket [server]');
 	}
-	if (!socket_bind($server, '::1', 31337)) {
-		die('Unable to bind to [::1]:31337');
+	if (!socket_bind($server,  $sock_path)) {
+		die("Unable to bind to $sock_path");
 	}
 	if (!socket_listen($server, 2)) {
 		die('Unable to listen on socket');
 	}
 	
 	/* Connect to it */
-	$client = socket_create(AF_INET6, SOCK_STREAM, getprotobyname('tcp'));
+	$client = socket_create(AF_UNIX, SOCK_STREAM, 0);
 	if (!$client) {
-		die('Unable to create AF_INET6 socket [client]');
+		die('Unable to create AF_UNIX socket [client]');
 	}
-	if (!socket_connect($client, '::1', 31337)) {
+	if (!socket_connect($client, $sock_path)) {
 		die('Unable to connect to server socket');
 	}
 
@@ -46,6 +48,7 @@ IPv6 Loopback test
 	socket_close($client);
 	socket_close($socket);
 	socket_close($server);
+	@unlink($sock_path);
 ?>
 --EXPECT--
 string(10) "ABCdef123
