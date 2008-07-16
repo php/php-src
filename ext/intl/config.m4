@@ -51,7 +51,7 @@ if test "$PHP_INTL" != "no"; then
     msgformat/msgformat_helpers.cpp \
     msgformat/msgformat_parse.c \
     grapheme/grapheme_string.c \
-    grapheme/grapheme_util.c,$ext_shared)
+    grapheme/grapheme_util.c,$ext_shared,,$ICU_INCS)
 
   PHP_ADD_BUILD_DIR($ext_builddir/collator)
   PHP_ADD_BUILD_DIR($ext_builddir/common)
