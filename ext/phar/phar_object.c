@@ -161,7 +161,7 @@ static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char 
 }
 /* }}} */
 
-static int phar_file_action(phar_entry_data *idata, char *mime_type, int code, char *entry, int entry_len, char *arch, int arch_len, char *basename, int basename_len, char *ru, int ru_len TSRMLS_DC) /* {{{ */
+static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char *mime_type, int code, char *entry, int entry_len, char *arch, int arch_len, char *basename, int basename_len, char *ru, int ru_len TSRMLS_DC) /* {{{ */
 {
 	char *name = NULL, buf[8192], *cwd;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
@@ -171,6 +171,8 @@ static int phar_file_action(phar_entry_data *idata, char *mime_type, int code, c
 	zend_file_handle file_handle;
 	zend_op_array *new_op_array;
 	zval *result = NULL;
+	php_stream *fp;
+	off_t position;
 
 	switch (code) {
 		case PHAR_MIME_PHPS:
@@ -185,7 +187,6 @@ static int phar_file_action(phar_entry_data *idata, char *mime_type, int code, c
 
 			highlight_file(name, &syntax_highlighter_ini TSRMLS_CC);
 
-			phar_entry_delref(idata TSRMLS_CC);
 			efree(name);
 #ifdef PHP_WIN32
 			efree(arch);
@@ -197,60 +198,60 @@ static int phar_file_action(phar_entry_data *idata, char *mime_type, int code, c
 			ctr.line_len = spprintf(&(ctr.line), 0, "Content-type: %s", mime_type);
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 			efree(ctr.line);
-			ctr.line_len = spprintf(&(ctr.line), 0, "Content-length: %d", idata->internal_file->uncompressed_filesize);
+			ctr.line_len = spprintf(&(ctr.line), 0, "Content-length: %d", info->uncompressed_filesize);
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 			efree(ctr.line);
 			if (FAILURE == sapi_send_headers(TSRMLS_C)) {
-				phar_entry_delref(idata TSRMLS_CC);
 				zend_bailout();
 			}
 
 			/* prepare to output  */
-			if (!phar_get_efp(idata->internal_file, 1 TSRMLS_CC)) {
+			fp = phar_get_efp(info, 1 TSRMLS_CC);
+			if (!fp) {
 				char *error;
-				if (!phar_open_jit(idata->phar, idata->internal_file, phar_get_pharfp(idata->phar TSRMLS_CC), &error, 0 TSRMLS_CC)) {
+				if (!phar_open_jit(phar, info, phar_get_pharfp(phar TSRMLS_CC), &error, 0 TSRMLS_CC)) {
 					if (error) {
 						zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 						efree(error);
 					}
 					return -1;
 				}
-				idata->fp = phar_get_efp(idata->internal_file, 1 TSRMLS_CC);
-				idata->zero = phar_get_fp_offset(idata->internal_file TSRMLS_CC);
+				fp = phar_get_efp(info, 1 TSRMLS_CC);
 			}
-			phar_seek_efp(idata->internal_file, 0, SEEK_SET, 0, 1 TSRMLS_CC);
+			position = 0;
+			phar_seek_efp(info, 0, SEEK_SET, 0, 1 TSRMLS_CC);
 			do {
-				got = php_stream_read(idata->fp, buf, MIN(8192, idata->internal_file->uncompressed_filesize - idata->position));
-				PHPWRITE(buf, got);
-				idata->position = php_stream_tell(idata->fp) - idata->zero;
-				if (idata->position == (off_t) idata->internal_file->uncompressed_filesize) {
-					break;
+				got = php_stream_read(fp, buf, MIN(8192, info->uncompressed_filesize - position));
+				if (got > 0) {
+					PHPWRITE(buf, got);
+					position += got;
+					if (position == (off_t) info->uncompressed_filesize) {
+						break;
+					}
 				}
 			} while (1);
 
-			phar_entry_delref(idata TSRMLS_CC);
 			zend_bailout();
 		case PHAR_MIME_PHP:
 			if (basename) {
 				phar_mung_server_vars(arch, entry, entry_len, basename, basename_len, ru, ru_len TSRMLS_CC);
 				efree(basename);
 			}
-			phar_entry_delref(idata TSRMLS_CC);
 			if (entry[0] == '/') {
 				name_len = spprintf(&name, 4096, "phar://%s%s", arch, entry);
 			} else {
 				name_len = spprintf(&name, 4096, "phar://%s/%s", arch, entry);
 			}
 
-			ret = php_stream_open_for_zend_ex(name, &file_handle, ENFORCE_SAFE_MODE|USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
-			
-			if (ret != SUCCESS) {
-				efree(name);
-				return -1;
-			}
+			file_handle.type = ZEND_HANDLE_FILENAME;
+			file_handle.handle.fd = 0;
+			file_handle.filename = name;
+			file_handle.opened_path = NULL;
+			file_handle.free_filename = 0;
+
 			PHAR_G(cwd) = NULL;
 			PHAR_G(cwd_len) = 0;
-			if (zend_hash_add(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
+			if (!zend_hash_exists(&EG(included_files), name, name_len+1)) {
 				if ((cwd = strrchr(entry, '/'))) {
 					PHAR_G(cwd_init) = 1;
 					if (entry == cwd) {
@@ -266,14 +267,13 @@ static int phar_file_action(phar_entry_data *idata, char *mime_type, int code, c
 					}
 				}
 				new_op_array = zend_compile_file(&file_handle, ZEND_REQUIRE TSRMLS_CC);
+				if (new_op_array) {
+					zend_hash_add(&EG(included_files), name, name_len+1, (void *)&dummy, sizeof(int), NULL);
+				}
 				zend_destroy_file_handle(&file_handle TSRMLS_CC);
 			} else {
+				efree(name);
 				new_op_array = NULL;
-#if PHP_VERSION_ID >= 50300
-				zend_file_handle_dtor(&file_handle TSRMLS_CC);
-#else
-				zend_file_handle_dtor(&file_handle);
-#endif
 			}
 #ifdef PHP_WIN32
 			efree(arch);
@@ -321,31 +321,28 @@ static void phar_do_403(char *entry, int entry_len TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static void phar_do_404(char *fname, int fname_len, char *f404, int f404_len, char *entry, int entry_len TSRMLS_DC) /* {{{ */
+static void phar_do_404(phar_archive_data *phar, char *fname, int fname_len, char *f404, int f404_len, char *entry, int entry_len TSRMLS_DC) /* {{{ */
 {
-	int hi;
-	phar_entry_data *phar;
-	char *error;
-	if (f404_len) {
-		if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, f404, f404_len, "r", 0, &error, 1 TSRMLS_CC)) {
-			if (error) {
-				efree(error);
-			}
-			goto nofile;
+	sapi_header_line ctr = {0};
+	phar_entry_info	*info;
+
+	if (phar && f404_len) {
+		info = phar_get_entry_info(phar, f404, f404_len, NULL, 1 TSRMLS_CC);
+
+		if (info) {
+			phar_file_action(phar, info, "text/html", PHAR_MIME_PHP, f404, f404_len, fname, fname_len, NULL, 0, NULL, 0 TSRMLS_CC);
+			return;
 		}
-		hi = phar_file_action(phar, "text/html", PHAR_MIME_PHP, f404, f404_len, fname, fname_len, NULL, 0, NULL, 0 TSRMLS_CC);
-	} else {
-		sapi_header_line ctr = {0};
-nofile:
-		ctr.response_code = 404;
-		ctr.line_len = sizeof("HTTP/1.0 404 Not Found")+1;
-		ctr.line = "HTTP/1.0 404 Not Found";
-		sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
-		sapi_send_headers(TSRMLS_C);
-		PHPWRITE("<html>\n <head>\n  <title>File Not Found</title>\n </head>\n <body>\n  <h1>404 - File ", sizeof("<html>\n <head>\n  <title>File Not Found</title>\n </head>\n <body>\n  <h1>404 - File ") - 1);
-		PHPWRITE(entry, entry_len);
-		PHPWRITE(" Not Found</h1>\n </body>\n</html>",  sizeof(" Not Found</h1>\n </body>\n</html>") - 1);
 	}
+
+	ctr.response_code = 404;
+	ctr.line_len = sizeof("HTTP/1.0 404 Not Found")+1;
+	ctr.line = "HTTP/1.0 404 Not Found";
+	sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
+	sapi_send_headers(TSRMLS_C);
+	PHPWRITE("<html>\n <head>\n  <title>File Not Found</title>\n </head>\n <body>\n  <h1>404 - File ", sizeof("<html>\n <head>\n  <title>File Not Found</title>\n </head>\n <body>\n  <h1>404 - File ") - 1);
+	PHPWRITE(entry, entry_len);
+	PHPWRITE(" Not Found</h1>\n </body>\n</html>",  sizeof(" Not Found</h1>\n </body>\n</html>") - 1);
 }
 /* }}} */
 
@@ -534,7 +531,8 @@ PHP_METHOD(Phar, webPhar)
 	int alias_len = 0, ret, f404_len = 0, free_pathinfo = 0, ru_len = 0;
 	char *fname, *basename, *path_info, *mime_type, *entry, *pt;
 	int fname_len, entry_len, code, index_php_len = 0, not_cgi;
-	phar_entry_data *phar;
+	phar_archive_data *phar = NULL;
+	phar_entry_info *info;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!saz", &alias, &alias_len, &index_php, &index_php_len, &f404, &f404_len, &mimeoverride, &rewrite) == FAILURE) {
 		return;
@@ -697,8 +695,10 @@ PHP_METHOD(Phar, webPhar)
 			entry = estrndup("/index.php", sizeof("/index.php"));
 			entry_len = sizeof("/index.php")-1;
 		}
-		if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", 0, NULL, 1 TSRMLS_CC)) {
-			phar_do_404(fname, fname_len, f404, f404_len, entry, entry_len TSRMLS_CC);
+
+		if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, NULL TSRMLS_CC) ||
+			(info = phar_get_entry_info(phar, entry, entry_len, NULL, 0 TSRMLS_CC)) == NULL) {
+			phar_do_404(phar, fname, fname_len, f404, f404_len, entry, entry_len TSRMLS_CC);
 			if (free_pathinfo) {
 				efree(path_info);
 			}
@@ -730,14 +730,14 @@ PHP_METHOD(Phar, webPhar)
 			}
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 			sapi_send_headers(TSRMLS_C);
-			phar_entry_delref(phar TSRMLS_CC);
 			efree(ctr.line);
 			zend_bailout();
 		}
 	}
 
-	if (FAILURE == phar_get_entry_data(&phar, fname, fname_len, entry, entry_len, "r", 0, &error, 1 TSRMLS_CC)) {
-		phar_do_404(fname, fname_len, f404, f404_len, entry, entry_len TSRMLS_CC);
+	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, NULL TSRMLS_CC) ||
+		(info = phar_get_entry_info(phar, entry, entry_len, NULL, 0 TSRMLS_CC)) == NULL) {
+		phar_do_404(phar, fname, fname_len, f404, f404_len, entry, entry_len TSRMLS_CC);
 #ifdef PHP_WIN32
 		efree(fname);
 #endif
@@ -818,7 +818,6 @@ PHP_METHOD(Phar, webPhar)
 
 			if (HASH_KEY_IS_LONG == zend_hash_get_current_key_ex(Z_ARRVAL_P(mimeoverride), &key, &keylen, &intkey, 0, NULL)) {
 				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Key of MIME type overrides array must be a file extension, was \"%d\"", intkey);
-				phar_entry_delref(phar TSRMLS_CC);
 #ifdef PHP_WIN32
 				efree(fname);
 #endif
@@ -829,7 +828,6 @@ PHP_METHOD(Phar, webPhar)
 
 			if (FAILURE == zend_hash_get_current_data(Z_ARRVAL_P(mimeoverride), (void **) &val)) {
 				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Failed to retrieve Mime type for extension \"%s\"", str_key);
-				phar_entry_delref(phar TSRMLS_CC);
 #ifdef PHP_WIN32
 				efree(fname);
 #endif
@@ -841,7 +839,6 @@ PHP_METHOD(Phar, webPhar)
 						PHAR_SET_USER_MIME((char) Z_LVAL_PP(val))
 					} else {
 						zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unknown mime type specifier used, only Phar::PHP, Phar::PHPS and a mime type string are allowed");
-						phar_entry_delref(phar TSRMLS_CC);
 #ifdef PHP_WIN32
 						efree(fname);
 #endif
@@ -853,7 +850,6 @@ PHP_METHOD(Phar, webPhar)
 					break;
 				default :
 					zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unknown mime type specifier used (not a string or int), only Phar::PHP, Phar::PHPS and a mime type string are allowed");
-					phar_entry_delref(phar TSRMLS_CC);
 #ifdef PHP_WIN32
 					efree(fname);
 #endif
@@ -865,7 +861,7 @@ PHP_METHOD(Phar, webPhar)
 no_mimes:
 	code = phar_file_type(&mimetypes, entry, &mime_type TSRMLS_CC);
 	zend_hash_destroy(&mimetypes);
-	ret = phar_file_action(phar, mime_type, code, entry, entry_len, fname, fname_len, pt, strlen(pt), ru, ru_len TSRMLS_CC);
+	ret = phar_file_action(phar, info, mime_type, code, entry, entry_len, fname, fname_len, pt, strlen(pt), ru, ru_len TSRMLS_CC);
 }
 /* }}} */
 
