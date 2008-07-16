@@ -104,7 +104,7 @@ ZEND_GET_MODULE(oci8)
 #endif /* COMPILE_DL */
 /* }}} */
 
-/* {{{ arginfo */
+/* {{{ Function arginfo */
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_define_by_name, 0, 0, 3)
 	ZEND_ARG_INFO(0, statement_resource)
@@ -223,7 +223,7 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ocisetbufferinglob, 0, 0, 2)
 	ZEND_ARG_INFO(0, lob_descriptor)
-	ZEND_ARG_INFO(0, flag)
+	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
 static
@@ -467,7 +467,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_free_collection, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_append, 0, 0, )
+ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_append, 0, 0, 2)
 	ZEND_ARG_INFO(0, collection)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
@@ -504,7 +504,7 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_trim, 0, 0, 2)
 	ZEND_ARG_INFO(0, collection)
-	ZEND_ARG_INFO(0, num)
+	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
 
 static
@@ -512,6 +512,147 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_new_collection, 0, 0, 2)
 	ZEND_ARG_INFO(0, connection_resource)
 	ZEND_ARG_INFO(0, type_name)
 	ZEND_ARG_INFO(0, schema_name)
+ZEND_END_ARG_INFO()
+/* }}} */
+
+/* {{{ LOB Method arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_save_method, 0, 0, 1)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, offset)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_import_method, 0, 0, 1)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_oci_lob_load_method, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_read_method, 0, 0, 1)
+	ZEND_ARG_INFO(0, length)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_oci_lob_eof_method, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_oci_lob_tell_method, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_oci_lob_rewind_method, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_seek_method, 0, 0, 1)
+	ZEND_ARG_INFO(0, offset)
+	ZEND_ARG_INFO(0, whence)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_oci_lob_size_method, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_write_method, 0, 0, 1)
+	ZEND_ARG_INFO(0, string)
+	ZEND_ARG_INFO(0, length)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_append_method, 0, 0, 1)
+	ZEND_ARG_INFO(0, lob_descriptor_from)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_truncate_method, 0, 0, 0)
+	ZEND_ARG_INFO(0, length)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_erase_method, 0, 0, 0)
+	ZEND_ARG_INFO(0, offset)
+	ZEND_ARG_INFO(0, length)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_flush_method, 0, 0, 0)
+	ZEND_ARG_INFO(0, flag)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_setbuffering_method, 0, 0, 1)
+	ZEND_ARG_INFO(0, mode)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_oci_lob_getbuffering_method, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_export_method, 0, 0, 1)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, start)
+	ZEND_ARG_INFO(0, length)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_write_temporary_method, 0, 0, 1)
+	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, type)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_oci_lob_close_method, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_oci_free_descriptor_method, 0)
+ZEND_END_ARG_INFO()
+/* }}} */
+
+/* {{{ Collection Method arginfo */
+static
+ZEND_BEGIN_ARG_INFO(arginfo_oci_collection_free_method, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_append_method, 0, 0, 1)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_element_get_method, 0, 0, 1)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_assign_method, 0, 0, 1)
+	ZEND_ARG_INFO(0, collection_from)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_element_assign_method, 0, 0, 2)
+	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_oci_collection_size_method, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_oci_collection_max_method, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_trim_method, 0, 0, 1)
+	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
 /* }}} */
 
@@ -712,40 +853,40 @@ zend_function_entry php_oci_functions[] = {
 };
 
 static const zend_function_entry php_oci_lob_class_functions[] = {
-	PHP_FALIAS(load,		oci_lob_load,			NULL)
-	PHP_FALIAS(tell,		oci_lob_tell,			NULL)
-	PHP_FALIAS(truncate,	oci_lob_truncate,		NULL)
-	PHP_FALIAS(erase,		oci_lob_erase,			NULL)
-	PHP_FALIAS(flush,		oci_lob_flush,			NULL)
-	PHP_FALIAS(setbuffering,ocisetbufferinglob,		NULL)
-	PHP_FALIAS(getbuffering,ocigetbufferinglob,		NULL)
-	PHP_FALIAS(rewind,		oci_lob_rewind,			NULL)
-	PHP_FALIAS(read,		oci_lob_read,			NULL)
-	PHP_FALIAS(eof,			oci_lob_eof,			NULL)
-	PHP_FALIAS(seek,		oci_lob_seek,			NULL)
-	PHP_FALIAS(write,		oci_lob_write,			NULL)
-	PHP_FALIAS(append,		oci_lob_append,			NULL)
-	PHP_FALIAS(size,		oci_lob_size,			NULL)
-	PHP_FALIAS(writetofile, oci_lob_export,			NULL)
-	PHP_FALIAS(export,		oci_lob_export,			NULL)
-	PHP_FALIAS(import,		oci_lob_import,			NULL)
-	PHP_FALIAS(writetemporary,	oci_lob_write_temporary,	NULL)
-	PHP_FALIAS(close,			oci_lob_close,				NULL)
-	PHP_FALIAS(save,		oci_lob_save,			NULL)
-	PHP_FALIAS(savefile,	oci_lob_import,			NULL)
-	PHP_FALIAS(free,		oci_free_descriptor,	NULL)
+	PHP_FALIAS(load,		oci_lob_load,			arginfo_oci_lob_load_method)
+	PHP_FALIAS(tell,		oci_lob_tell,			arginfo_oci_lob_tell_method)
+	PHP_FALIAS(truncate,	oci_lob_truncate,		arginfo_oci_lob_truncate_method)
+	PHP_FALIAS(erase,		oci_lob_erase,			arginfo_oci_lob_erase_method)
+	PHP_FALIAS(flush,		oci_lob_flush,			arginfo_oci_lob_flush_method)
+	PHP_FALIAS(setbuffering,ocisetbufferinglob,		arginfo_oci_lob_setbuffering_method)
+	PHP_FALIAS(getbuffering,ocigetbufferinglob,		arginfo_oci_lob_getbuffering_method)
+	PHP_FALIAS(rewind,		oci_lob_rewind,			arginfo_oci_lob_rewind_method)
+	PHP_FALIAS(read,		oci_lob_read,			arginfo_oci_lob_read_method)
+	PHP_FALIAS(eof,			oci_lob_eof,			arginfo_oci_lob_eof_method)
+	PHP_FALIAS(seek,		oci_lob_seek,			arginfo_oci_lob_seek_method)
+	PHP_FALIAS(write,		oci_lob_write,			arginfo_oci_lob_write_method)
+	PHP_FALIAS(append,		oci_lob_append,			arginfo_oci_lob_append_method)
+	PHP_FALIAS(size,		oci_lob_size,			arginfo_oci_lob_size_method)
+	PHP_FALIAS(writetofile, oci_lob_export,			arginfo_oci_lob_export_method)
+	PHP_FALIAS(export,		oci_lob_export,			arginfo_oci_lob_export_method)
+	PHP_FALIAS(import,		oci_lob_import,			arginfo_oci_lob_import_method)
+	PHP_FALIAS(writetemporary,	oci_lob_write_temporary,	arginfo_oci_lob_write_temporary_method)
+	PHP_FALIAS(close,			oci_lob_close,				arginfo_oci_lob_close_method)
+	PHP_FALIAS(save,		oci_lob_save,			arginfo_oci_lob_save_method)
+	PHP_FALIAS(savefile,	oci_lob_import,			arginfo_oci_lob_import_method)
+	PHP_FALIAS(free,		oci_free_descriptor,	arginfo_oci_free_descriptor_method)
 	{NULL,NULL,NULL}
 };
 
 static const zend_function_entry php_oci_coll_class_functions[] = {
-	PHP_FALIAS(append,		  oci_collection_append,			NULL)
-	PHP_FALIAS(getelem,		  oci_collection_element_get,		NULL)
-	PHP_FALIAS(assignelem,	  oci_collection_element_assign,	NULL)
-	PHP_FALIAS(assign,		  oci_collection_assign,			NULL)
-	PHP_FALIAS(size,		  oci_collection_size,				NULL)
-	PHP_FALIAS(max,			  oci_collection_max,				NULL)
-	PHP_FALIAS(trim,		  oci_collection_trim,				NULL)
-	PHP_FALIAS(free,		  oci_free_collection,				NULL)
+	PHP_FALIAS(append,		  oci_collection_append,			arginfo_oci_collection_append_method)
+	PHP_FALIAS(getelem,		  oci_collection_element_get,		arginfo_oci_collection_element_get_method)
+	PHP_FALIAS(assignelem,	  oci_collection_element_assign,	arginfo_oci_collection_element_assign_method)
+	PHP_FALIAS(assign,		  oci_collection_assign,			arginfo_oci_collection_assign_method)
+	PHP_FALIAS(size,		  oci_collection_size,				arginfo_oci_collection_size_method)
+	PHP_FALIAS(max,			  oci_collection_max,				arginfo_oci_collection_max_method)
+	PHP_FALIAS(trim,		  oci_collection_trim,				arginfo_oci_collection_trim_method)
+	PHP_FALIAS(free,		  oci_free_collection,				arginfo_oci_collection_free_method)
 	{NULL,NULL,NULL}
 };
 
