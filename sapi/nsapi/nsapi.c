@@ -168,18 +168,34 @@ ZEND_DECLARE_MODULE_GLOBALS(nsapi)
 
 #define NSAPI_G(v) TSRMG(nsapi_globals_id, zend_nsapi_globals *, v)
 
+
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_nsapi_virtual, 0, 0, 1)
+	ZEND_ARG_INFO(0, uri)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_nsapi_request_headers, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_nsapi_response_headers, 0)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 /* {{{ nsapi_functions[]
  *
  * Every user visible function must have an entry in nsapi_functions[].
  */
 const zend_function_entry nsapi_functions[] = {
-	PHP_FE(nsapi_virtual,	NULL)										/* Make subrequest */
-	PHP_FALIAS(virtual, nsapi_virtual, NULL)							/* compatibility */
-	PHP_FE(nsapi_request_headers, NULL)									/* get request headers */
-	PHP_FALIAS(getallheaders, nsapi_request_headers, NULL)				/* compatibility */
-	PHP_FALIAS(apache_request_headers, nsapi_request_headers, NULL)		/* compatibility */
-	PHP_FE(nsapi_response_headers, NULL)								/* get response headers */
-	PHP_FALIAS(apache_response_headers, nsapi_response_headers, NULL)	/* compatibility */
+	PHP_FE(nsapi_virtual,	arginfo_nsapi_virtual)						/* Make subrequest */
+	PHP_FALIAS(virtual, nsapi_virtual, arginfo_nsapi_virtual)			/* compatibility */
+	PHP_FE(nsapi_request_headers, arginfo_nsapi_request_headers)		/* get request headers */
+	PHP_FALIAS(getallheaders, nsapi_request_headers, arginfo_nsapi_request_headers)	/* compatibility */
+	PHP_FALIAS(apache_request_headers, nsapi_request_headers, arginfo_nsapi_request_headers)	/* compatibility */
+	PHP_FE(nsapi_response_headers, arginfo_nsapi_response_headers)		/* get response headers */
+	PHP_FALIAS(apache_response_headers, nsapi_response_headers, arginfo_nsapi_response_headers)	/* compatibility */
 	{NULL, NULL, NULL}
 };
 /* }}} */
