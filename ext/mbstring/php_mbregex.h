@@ -26,7 +26,7 @@
 #include "php.h"
 #include "zend.h"
 #include "php_onig_compat.h" /* must come prior to the oniguruma header */
-#include "oniguruma/oniguruma.h"
+#include "oniguruma.h"
 #undef UChar
 
 /* {{{ PHP_MBREGEX_GLOBALS */
