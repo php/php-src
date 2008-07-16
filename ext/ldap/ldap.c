@@ -2434,7 +2434,7 @@ static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_set_option, 0, 0, 3)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, option)
-	ZEND_ARG_INFO(1, newval)
+	ZEND_ARG_INFO(0, newval)
 ZEND_END_ARG_INFO()
 
 static
