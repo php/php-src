@@ -487,7 +487,7 @@ Function [ <internal:oci8> function ocisetbufferinglob ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $lob_descriptor ]
-    Parameter #1 [ <required> $flag ]
+    Parameter #1 [ <required> $mode ]
   }
 }
 
@@ -608,8 +608,8 @@ Function [ <internal:oci8> function oci_free_collection ] {
 Function [ <internal:oci8> function oci_collection_append ] {
 
   - Parameters [2] {
-    Parameter #0 [ <optional> $collection ]
-    Parameter #1 [ <optional> $value ]
+    Parameter #0 [ <required> $collection ]
+    Parameter #1 [ <required> $value ]
   }
 }
 
@@ -656,7 +656,7 @@ Function [ <internal:oci8> function oci_collection_trim ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $collection ]
-    Parameter #1 [ <required> $num ]
+    Parameter #1 [ <required> $number ]
   }
 }
 
@@ -1005,8 +1005,8 @@ Function [ <internal:oci8> function ocinewcollection ] {
 Function [ <internal:oci8> function ocicollappend ] {
 
   - Parameters [2] {
-    Parameter #0 [ <optional> $collection ]
-    Parameter #1 [ <optional> $value ]
+    Parameter #0 [ <required> $collection ]
+    Parameter #1 [ <required> $value ]
   }
 }
 
@@ -1045,7 +1045,7 @@ Function [ <internal:oci8> function ocicolltrim ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $collection ]
-    Parameter #1 [ <required> $num ]
+    Parameter #1 [ <required> $number ]
   }
 }
 
