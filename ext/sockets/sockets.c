@@ -1318,8 +1318,8 @@ PHP_FUNCTION(socket_connect)
 			memset(&s_un, 0, sizeof(struct sockaddr_un));
 
 			s_un.sun_family = AF_UNIX;
-			snprintf(s_un.sun_path, 108, "%s", addr);
-			retval = connect(php_sock->bsd_socket, (struct sockaddr *) &s_un, SUN_LEN(&s_un));
+			memcpy(&s_un.sun_path, addr, addr_len);
+			retval = connect(php_sock->bsd_socket, (struct sockaddr *) &s_un, (socklen_t) XtOffsetOf(struct sockaddr_un, sun_path) + addr_len);
 			break;
 
 		default:
