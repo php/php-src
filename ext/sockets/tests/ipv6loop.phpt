@@ -3,7 +3,7 @@ IPv6 Loopback test
 --SKIPIF--
 <?php
 	if (!extension_loaded('sockets')) {
-		die('skip sockets extenion not available.');
+		die('skip sockets extension not available.');
 	}
 	if (!defined("AF_INET6")) {
 		die('skip no IPv6 support');
