@@ -25,33 +25,31 @@ CFG=extname - Win32 Status_TS
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 CPP=cl.exe
-MTL=midl.exe
 RSC=rc.exe
+RE2C=re2c.exe
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "Status_TS"
-# PROP BASE Intermediate_Dir "Status_TS"
+# PROP BASE Output_Dir "OUTPUTDIR"
+# PROP BASE Intermediate_Dir "OUTPUTDIR"
 # PROP BASE Ignore_Export_Lib 0
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Status_TS"
-# PROP Intermediate_Dir "Status_TS"
+# PROP Output_Dir "OUTPUTDIR"
+# PROP Intermediate_Dir "OUTPUTDIR"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP BASECPP
-# ADD CPP BASECPP
-# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
-# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
+# ADD CPP BASECPP LOCALCPP
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 BASELIBS BASELDFLAGS /libpath:"..\..\Status_TS" /libpath:"..\..\..\bindlib_w32\Status"
-# ADD LINK32 LOCALLIBS BASELIBS BASELDFLAGS /libpath:"..\..\Status_TS" /libpath:"..\..\..\bindlib_w32\Status"
+# ADD BASE LINK32 BASELIBS
+# ADD LINK32 BASELIBS LOCALLIBS BASELDFLAGS LOCALLDFLAGS OUTPATH
 
 # Begin Target
 # Name "extname - Win32 Status_TS"
@@ -59,17 +57,25 @@ LINK32=link.exe
 # Begin Group "Source Files"
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 
+CORESOURCES
 SOURCEFILES
 # End Group
 
 # Begin Group "Header Files"
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 
+COREHEADERS
 HEADERFILES
 # End Group
 
+DEFS
+
+TEXTFILES
+
 # Begin Group "Resource Files"
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
+
+RESOURCEFILES
 # End Group
 # End Target
 # End Project

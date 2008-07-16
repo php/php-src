@@ -30,7 +30,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "win32"=.\win32.dsp - Package Owner=<4>
+Project: "php5dllts"=..\win32\php5dllts.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -38,69 +38,16 @@ Package=<5>
 
 Package=<4>
 {{{
-}}}
-
-###############################################################################
-
-Project: "main"=..\main\main.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name Zend
-    End Project Dependency
     Begin Project Dependency
     Project_Dep_Name TSRM
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name win32
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "streams"=..\main\streams\streams.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
     Project_Dep_Name Zend
     End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name TSRM
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name win32
-    End Project Dependency
 }}}
 
 ###############################################################################
-
-Project: "standard"=..\ext\standard\standard.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name main
-    End Project Dependency
-}}}
-
-###############################################################################
-
 INSERT
-
 
 Global:
 
