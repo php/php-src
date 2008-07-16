@@ -9,7 +9,8 @@ PHP                                                                        NEWS
 - Fixed a crash inside PDO when trying instantiate PDORow manually. (Felipe)
 - Fixed build failure of ext/mysqli with libmysql 6.0 - missing rpl
   functions. (Andrey)
-- Fixed a regression when using strip_tags() and < is within an attribute. (Scott)
+- Fixed a regression when using strip_tags() and < is within an attribute.
+  (Scott)
 
 - Fixed bug #45486 (mb_send_mail(); header 'Content-Type: text/plain; charset=' 
   parsing incorrect). (Felipe)
@@ -42,6 +43,8 @@ PHP                                                                        NEWS
 - Fixed bug #44716 (Progress notifications incorrect). (Hannes)
 - Fixed bug #44712 (stream_context_set_params segfaults on invalid arguments).
   (Hannes)
+- Fixed bug #44127 (UNIX abstract namespace socket connect does not work).
+  (Jani)
 - Fixed bug #41348 (OCI8: allow compilation with Oracle 8.1). (Chris Jones)
 
 01 May 2008, PHP 5.2.6
