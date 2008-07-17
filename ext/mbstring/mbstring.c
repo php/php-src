@@ -73,6 +73,10 @@
 
 #include "mb_gpc.h"
 
+#if HAVE_MBREGEX
+#include "php_mbregex.h"
+#endif
+
 #ifdef ZEND_MULTIBYTE
 #include "zend_multibyte.h"
 #endif /* ZEND_MULTIBYTE */
@@ -89,7 +93,7 @@ static PHP_GSHUTDOWN_FUNCTION(mbstring);
 /* {{{ php_mb_default_identify_list */
 typedef struct _php_mb_nls_ident_list {
 	enum mbfl_no_language lang;
-	enum mbfl_no_encoding* list;
+	const enum mbfl_no_encoding* list;
 	int list_size;
 } php_mb_nls_ident_list;
 
@@ -911,7 +915,7 @@ static int php_mb_nls_get_default_detect_order_list(enum mbfl_no_language lang, 
 
 	for (i = 0; i < sizeof(php_mb_default_identify_list) / sizeof(php_mb_default_identify_list[0]); i++) {
 		if (php_mb_default_identify_list[i].lang == lang) {
-			*plist = php_mb_default_identify_list[i].list;
+			*plist = (enum mbfl_no_encoding *)php_mb_default_identify_list[i].list;
 			*plist_size = php_mb_default_identify_list[i].list_size;
 			return 1;
 		}
@@ -1008,12 +1012,13 @@ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 		MBSTRG(current_internal_encoding) = no_encoding;
 #if HAVE_MBREGEX
  		{
- 			OnigEncoding mbctype;
- 			mbctype = php_mb_regex_name2mbctype(new_value);
- 			if (mbctype == ONIG_ENCODING_UNDEF) {
- 				mbctype = ONIG_ENCODING_EUC_JP;
- 			}
- 			MBSTRG(current_mbctype) = MBSTRG(default_mbctype) = mbctype;
+			const char *enc_name = new_value;
+			if (FAILURE == php_mb_regex_set_default_mbctype(enc_name)) {
+				/* falls back to EUC-JP if an unknown encoding name is given */
+				enc_name = "EUC-JP";
+				php_mb_regex_set_default_mbctype(enc_name);
+			}
+			php_mb_regex_set_mbctype(new_value);
 		}
 #endif
 #ifdef ZEND_MULTIBYTE
@@ -1164,7 +1169,7 @@ static PHP_GINIT_FUNCTION(mbstring)
 	mbstring_globals->strict_detection = 0;
 	mbstring_globals->outconv = NULL;
 #if HAVE_MBREGEX
-	_php_mb_regex_globals_ctor(mbstring_globals TSRMLS_CC);
+	mbstring_globals->mb_regex_globals = php_mb_regex_globals_alloc(TSRMLS_C);
 #endif
 }
 /* }}} */
@@ -1173,7 +1178,7 @@ static PHP_GINIT_FUNCTION(mbstring)
 static PHP_GSHUTDOWN_FUNCTION(mbstring)
 {
 #if HAVE_MBREGEX
-	_php_mb_regex_globals_dtor(mbstring_globals TSRMLS_CC);
+	php_mb_regex_globals_free(mbstring_globals->mb_regex_globals TSRMLS_CC);
 #endif
 }
 /* }}} */
