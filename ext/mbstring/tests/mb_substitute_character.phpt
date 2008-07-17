@@ -5,7 +5,7 @@ mb_substitute_character()
 --FILE--
 <?php
 //$debug = true;
-ini_set('include_path','.');
+ini_set('include_path', dirname(__FILE__));
 include_once('common.inc');
 
 // Note: It does not return TRUE/FALSE for setting char

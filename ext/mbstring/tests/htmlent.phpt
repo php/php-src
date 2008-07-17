@@ -2,7 +2,7 @@
 HTML input/output
 --SKIPIF--
 <?php 
-	ini_set('include_path','.'); 
+	ini_set('include_path', dirname(__FILE__)); 
 	extension_loaded('mbstring') or die('skip mbstring not available'); 
 ?>
 --INI--

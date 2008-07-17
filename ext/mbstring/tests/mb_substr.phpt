@@ -8,7 +8,7 @@ mbstring.func_overload=0
 --FILE--
 <?php
 // TODO: Add more encodings
-ini_set('include_path','.');
+ini_set('include_path', dirname(__FILE__));
 include_once('common.inc');
 
 // EUC-JP
