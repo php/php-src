@@ -4592,6 +4592,8 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC)
 	if (!zend_binary_strcasecmp(var->u.constant.value.str.val, var->u.constant.value.str.len, "ticks", sizeof("ticks")-1)) {
 		convert_to_long(&val->u.constant);
 		CG(declarables).ticks = val->u.constant;
+		
+		zend_error(E_DEPRECATED, "Ticks is deprecated and will be removed in PHP 6");
 #ifdef ZEND_MULTIBYTE
 	} else if (!zend_binary_strcasecmp(var->u.constant.value.str.val, var->u.constant.value.str.len, "encoding", sizeof("encoding")-1)) {
 		zend_encoding *new_encoding, *old_encoding;

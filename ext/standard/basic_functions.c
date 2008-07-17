@@ -6031,6 +6031,8 @@ PHP_FUNCTION(register_tick_function)
 	if (tick_fe.arg_count < 1) {
 		WRONG_PARAM_COUNT;
 	}
+	
+	php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "Ticks is deprecated and will be removed in PHP 6");
 
 	tick_fe.arguments = (zval **) safe_emalloc(sizeof(zval *), tick_fe.arg_count, 0);
 
