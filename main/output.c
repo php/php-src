@@ -526,8 +526,17 @@ static int php_ob_init(uint initial_size, uint block_size, zval *output_handler,
 			}
 		}
 	} else if (output_handler && output_handler->type == IS_OBJECT) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "No method name given: use ob_start(array($object,'method')) to specify instance $object and the name of a method of class %s to use as output handler", Z_OBJCE_P(output_handler)->name);
-		result = FAILURE;
+		/* do we have callable object */
+		if (zend_is_callable(output_handler, 0, &handler_name)) {
+			SEPARATE_ZVAL(&output_handler);
+			Z_ADDREF_P(output_handler);
+			result = php_ob_init_named(initial_size, block_size, handler_name, output_handler, chunk_size, erase TSRMLS_CC);
+			efree(handler_name);
+		} else {
+			efree(handler_name);
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "No method name given: use ob_start(array($object,'method')) to specify instance $object and the name of a method of class %s to use as output handler", Z_OBJCE_P(output_handler)->name);
+			result = FAILURE;
+		}
 	} else {
 		result = php_ob_init_named(initial_size, block_size, OB_DEFAULT_HANDLER_NAME, NULL, chunk_size, erase TSRMLS_CC);
 	}
