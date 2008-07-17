@@ -17,6 +17,9 @@ echo "Done\n";
 
 ?>
 --EXPECTF--	
+Deprecated: Ticks is deprecated and will be removed in PHP 6 in %s on line %d
+
+Deprecated: register_tick_function(): Ticks is deprecated and will be removed in PHP 6 in %s on line %d
 Test
 %d
 %d
