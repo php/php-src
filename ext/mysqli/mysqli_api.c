@@ -1420,6 +1420,7 @@ PHP_FUNCTION(mysqli_set_local_infile_handler)
 		efree(callback_name);
 		RETURN_FALSE;
 	}
+	efree(callback_name);
 
 	/* save callback function */
 	if (!mysql->li_read) {
@@ -1427,7 +1428,7 @@ PHP_FUNCTION(mysqli_set_local_infile_handler)
 	} else {
 		zval_dtor(mysql->li_read);
 	}
-	ZVAL_STRING(mysql->li_read, callback_name, 0);
+	ZVAL_ZVAL(mysql->li_read, callback_func, 1, 0);
 
 	RETURN_TRUE;
 }
