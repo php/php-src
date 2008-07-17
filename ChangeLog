@@ -1,3 +1,322 @@
+2008-07-16  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_3)
+      ext/oci8/oci8.c
+      ext/oci8/tests/reflection1.phpt
+      ext/oci8/tests/reflection2.phpt:
+      MFH: [DOC] Add LOB & Collection class parameter reflection
+
+    * ext/oci8/oci8.c
+      ext/oci8/tests/reflection1.phpt
+      ext/oci8/tests/reflection2.phpt
+      ext/oci8/tests/reflection2.phpt:
+      Add LOB & Collection class parameter reflection
+
+2008-07-16  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_3)
+      ext/mbstring/php_mbregex.h:
+      revert my previous patch.
+
+2008-07-16  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/DSP.README:
+      Update README to reflect current state of play
+
+    * (PHP_5_3)
+      win32/build/block.template.dsw
+      win32/build/projectgen.js
+      win32/build/template.dsp
+      win32/build/template.dsw:
+      - A bit more finesse for .dsp generation
+      - Builds (on my box) for cgi or cli
+      - This is still VC6-only at present
+
+2008-07-16  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_3)
+      ext/oci8/oci8.c
+      ext/oci8/php_oci8_int.h
+      ext/oci8/tests/extauth_01.phpt
+      ext/oci8/tests/extauth_02.phpt
+      ext/oci8/tests/extauth_03.phpt
+      ext/oci8/tests/extauth_04.phpt
+      ext/oci8/tests/reflection1.phpt:
+      MFH
+      
+      1. Merged ARG_INFO patch (Felipe)
+      
+      2. Allow empty username & password so Oracle can do non-password based
+      authentication, i.e. "External Authentication".
+      http://news.php.net/php.internals/37545
+      
+      [DOC]
+      
+      A new OCI_CRED_EXT flag can be passed as the "session_mode" parameter
+      to oci_connect(), oci_new_connect() and oci_pconnect().
+      
+        $c1 = oci_connect("/", "", $db, null, OCI_CRED_EXT);
+      
+      This tells Oracle to do external or OS authentication, if configured
+      in the database.
+      
+      OCI_CRED_EXT can only be used with username of "/" and a empty
+      password.  Oci8.privileged_connection may be On or Off.  OCI_CRED_EXT
+      is not supported on Windows for security reasons.
+      
+      The new flag may be combined with the existing OCI_SYSOPER or
+      OCI_SYSDBA modes (note: oci8.privileged_connection needs to be On for
+      OCI_SYSDBA and OCI_SYSOPER), e.g.:
+      
+        $c1 = oci_connect("/", "", $db, null, OCI_CRED_EXT+OCI_SYSOPER);
+
+    * ext/oci8/tests/extauth_01.phpt
+      ext/oci8/tests/extauth_01.phpt
+      ext/oci8/tests/extauth_02.phpt
+      ext/oci8/tests/extauth_02.phpt
+      ext/oci8/tests/extauth_03.phpt
+      ext/oci8/tests/extauth_03.phpt
+      ext/oci8/tests/extauth_04.phpt
+      ext/oci8/tests/extauth_04.phpt
+      ext/oci8/tests/reflection1.phpt
+      ext/oci8/tests/reflection1.phpt:
+      
+      1. Merged ARG_INFO patch (Felipe)
+      
+      2. Allow an empty username/password to be passed so Oracle can do
+      non-password based authentication, i.e. "External Authentication".
+      http://news.php.net/php.internals/37545
+      
+      [DOC]
+      
+      A new OCI_CRED_EXT flag can be passed as the "session_mode" parameter
+      to oci_connect(), oci_new_connect() and oci_pconnect().
+      
+        $c1 = oci_connect("/", "", $db, null, OCI_CRED_EXT);
+      
+      This tells Oracle to do external or OS authentication, if configured
+      in the database.
+      
+      OCI_CRED_EXT can only be used with username of "/" and a empty
+      password.  Oci8.privileged_connection may be On or Off.
+      
+      The new flag may be combined with the existing OCI_SYSOPER or
+      OCI_SYSDBA modes (note: oci8.privileged_connection needs to be On for
+      OCI_SYSDBA and OCI_SYSOPER mode), e.g.:
+      
+        $c1 = oci_connect("/", "", $db, null, OCI_CRED_EXT+OCI_SYSOPER);
+
+    * ext/oci8/oci8.c
+      ext/oci8/php_oci8_int.h:
+      1. Merged ARG_INFO patch (Felipe)
+      
+      2. Allow an empty username/password to be passed so Oracle can do
+      non-password based authentication, i.e. "External Authentication".
+      http://news.php.net/php.internals/37545
+      
+      [DOC]
+      
+      A new OCI_CRED_EXT flag can be passed as the "session_mode" parameter
+      to oci_connect(), oci_new_connect() and oci_pconnect().
+      
+        $c1 = oci_connect("/", "", $db, null, OCI_CRED_EXT);
+      
+      This tells Oracle to do external or OS authentication, if configured
+      in the database.
+      
+      OCI_CRED_EXT can only be used with username of "/" and a empty
+      password.  Oci8.privileged_connection may be On or Off.
+      
+      The new flag may be combined with the existing OCI_SYSOPER or
+      OCI_SYSDBA modes (note: oci8.privileged_connection needs to be On for
+      OCI_SYSDBA and OCI_SYSOPER mode), e.g.:
+      
+        $c1 = oci_connect("/", "", $db, null, OCI_CRED_EXT+OCI_SYSOPER);
+
+    * ext/oci8/tests/xmltype_01.phpt:
+      improve skipif
+
+2008-07-16  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/pspell/pspell.c
+      sapi/aolserver/aolserver.c
+      sapi/apache2handler/php_functions.c
+      sapi/milter/php_milter.c
+      sapi/nsapi/nsapi.c:
+      - MFB: Added arginfo
+
+    * (PHP_5_3)
+      ext/pspell/pspell.c
+      sapi/aolserver/aolserver.c
+      sapi/apache2handler/php_functions.c
+      sapi/milter/php_milter.c
+      sapi/nsapi/nsapi.c:
+      - Added arginfo
+
+2008-07-16  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * configure.in
+      configure.in
+      configure.in:
+      -nuke weird char
+
+    * (PHP_5_2)
+      configure.in
+      configure.in:
+      MFH:- Prevent errors in CVS builds when bison is not there (for Sean :)
+
+    * configure.in:
+      - Prevent errors in CVS builds when bison is not there (for Sean :)
+
+2008-07-16  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/tests/bug45529.phpt:
+      - Added missing test-file.
+
+2008-07-16  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      run-tests.php:
+      - fix the fix
+
+2008-07-16  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/tests/bug45529.phpt
+      ext/date/tests/bug45529.phpt:
+      
+      file bug45529.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - MFH: Fixed bug #45529 (new DateTimeZone() and
+      date_create()->getTimezone() behave
+        different).
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - Fixed bug #45529 (new DateTimeZone() and date_create()->getTimezone()
+      behave
+        different).
+
+2008-07-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ext/phar/phar_object.c:
+      Improved support for opcode caches. Now some open() syscalls might be
+      eliminated by caches.
+
+2008-07-16  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      ext/standard/var_unserializer.c:
+      - Regenerated using more recent re2c
+
+    * ext/phar/config.m4:
+      - Revert (dunno why I had this like this..)
+
+    * (PHP_5_2)
+      NEWS
+      ext/sockets/sockets.c
+      ext/sockets/sockets.c
+      ext/sockets/tests/ipv4loop.phpt
+      ext/sockets/tests/ipv4loop.phpt
+      ext/sockets/tests/ipv6loop.phpt
+      ext/sockets/tests/ipv6loop.phpt
+      ext/standard/url_scanner_ex.c
+      main/streams/xp_socket.c:
+      MFH:- Fixed bug #44127 (UNIX abstract namespace socket connect does not
+      work)
+
+    * ext/sockets/tests/unixloop.phpt
+      ext/sockets/tests/unixloop.phpt
+      main/streams/xp_socket.c:
+      
+      file unixloop.phpt was initially added on branch PHP_5_3.
+
+    * ext/phar/config.m4
+      ext/sockets/sockets.c
+      ext/sockets/tests/ipv4loop.phpt
+      ext/sockets/tests/ipv6loop.phpt
+      main/streams/xp_socket.c:
+      - Fixed bug #44127 (UNIX abstract namespace socket connect does not work)
+
+2008-07-16  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/ldap/ldap.c:
+      - MFB: Fix typo
+
+    * (PHP_5_3)
+      ext/ldap/ldap.c:
+      - Fix typo (thanks Pierre)
+
+2008-07-16  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      ext/intl/config.m4:
+      - Fix build
+
+2008-07-16  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/php_date.c:
+      - MF53: Fixed segfault.
+
+    * (PHP_5_3)
+      ext/date/php_date.c:
+      - Fixed a segfault - simply a forgotten return;
+
+2008-07-16  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_3)
+      ext/mbstring/php_mbregex.h:
+      fixed compile error on Win32 environment.
+
+2008-07-16  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/mcrypt/mcrypt.c:
+      fix build
+
+2008-07-16  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/tests/bug41523-64bit.phpt
+      ext/date/tests/bug41709.phpt
+      ext/date/tests/date_parse_001.phpt:
+      - Fixed tests.
+
+2008-07-16  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/oniguruma/oniguruma.h:
+      - Oops.
+
+    * (PHP_5_3)
+      ext/mbstring/config.m4
+      ext/mbstring/mbstring.c
+      ext/mbstring/php_mbregex.c
+      ext/mbstring/php_mbregex.h
+      ext/mbstring/php_onig_compat.h
+      ext/mbstring/oniguruma/oniguruma.h
+      ext/mbstring/oniguruma/php_onig_compat.h:
+      - MFH: Added a new configure option --with-onig=[DIR] that allows the
+      extension
+        to link to the external oniguruma library.
+      - MFH: Prevent libmbfl files from being installed when --with-libmbfl is
+        specified.
+
+    * ext/mbstring/config.m4
+      ext/mbstring/mbstring.c
+      ext/mbstring/php_mbregex.c
+      ext/mbstring/php_mbregex.h
+      ext/mbstring/php_onig_compat.h
+      ext/mbstring/php_onig_compat.h
+      ext/mbstring/oniguruma/oniguruma.h
+      ext/mbstring/oniguruma/php_onig_compat.h:
+      - Added a new configure option --with-onig=[DIR] that allows the extension
+        to link to the external oniguruma library.
+      - Prevent libmbfl files from being installed when --with-libmbfl is
+      specified.
+      - Fixed mb_ereg_replace() to work with unicode strings.
+
 2008-07-15  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/mbstring/config.m4:
