@@ -1483,6 +1483,19 @@ PHP_FUNCTION(imageloadfont)
 		body_size = font->w * font->h * font->nchars;
 	}
 
+	if (overflow2(font->nchars, font->h)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error reading font, invalid font header");
+		efree(font);
+		php_stream_close(stream);
+		RETURN_FALSE;
+	}
+	if (overflow2(font->nchars * font->h, font->w )) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error reading font, invalid font header");
+		efree(font);
+		php_stream_close(stream);
+		RETURN_FALSE;
+	}
+
 	if (body_size != body_size_check) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error reading font");
 		efree(font);
