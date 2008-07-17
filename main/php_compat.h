@@ -56,6 +56,7 @@
 #define _pcre_xclass	 		php__pcre_xclass
 #define pcre_callout			php_pcre_callout
 #define _pcre_OP_lengths		php__pcre_OP_lengths
+#define _pcre_utt_names			php__pcre_utt_names
 #define _pcre_default_tables		php__pcre_default_tables
 #define pcre_get_stringtable_entries	php_pcre_get_stringtable_entries
 #define _pcre_is_newline		php__pcre_is_newline
