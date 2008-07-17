@@ -21,3 +21,6 @@ EXTENSION("standard", "array.c base64.c basic_functions.c browscap.c \
 	user_filters.c uuencode.c filters.c proc_open.c \
 	streamsfuncs.c http.c flock_compat.c", false /* never shared */);
 
+if (PHP_MBREGEX != "no") {
+   CHECK_HEADER_ADD_INCLUDE("oniguruma.h", "CFLAGS_STANDARD", PHP_MBREGEX + ";ext\\mbstring\\oniguruma")   
+}
