@@ -193,7 +193,7 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 				php_stream_close(fp);
 				return FAILURE;
 			}
-			mydata = pecalloc(sizeof(phar_archive_data), 1, PHAR_G(persist));
+			mydata = pecalloc(1, sizeof(phar_archive_data), PHAR_G(persist));
 			mydata->is_persistent = PHAR_G(persist);
 
 			/* read in archive comment, if any */
