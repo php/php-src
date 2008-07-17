@@ -1013,12 +1013,12 @@ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 #if HAVE_MBREGEX
  		{
 			const char *enc_name = new_value;
-			if (FAILURE == php_mb_regex_set_default_mbctype(enc_name)) {
+			if (FAILURE == php_mb_regex_set_default_mbctype(enc_name TSRMLS_CC)) {
 				/* falls back to EUC-JP if an unknown encoding name is given */
 				enc_name = "EUC-JP";
-				php_mb_regex_set_default_mbctype(enc_name);
+				php_mb_regex_set_default_mbctype(enc_name TSRMLS_CC);
 			}
-			php_mb_regex_set_mbctype(new_value);
+			php_mb_regex_set_mbctype(new_value TSRMLS_CC);
 		}
 #endif
 #ifdef ZEND_MULTIBYTE
