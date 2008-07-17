@@ -5390,6 +5390,10 @@ static int user_tick_function_compare(user_tick_function_entry * tick_fe1, user_
 		zval result;
 		zend_compare_arrays(&result, func1, func2 TSRMLS_CC);
 		ret = (Z_LVAL(result) == 0);
+	} else if (Z_TYPE_P(func1) == IS_OBJECT && Z_TYPE_P(func2) == IS_OBJECT) {
+		zval result;
+		zend_compare_objects(&result, func1, func2 TSRMLS_CC);
+		ret = (Z_LVAL(result) == 0);
 	} else {
 		ret = 0;
 	}
@@ -6109,7 +6113,7 @@ PHP_FUNCTION(register_tick_function)
 		RETURN_FALSE;
 	}
 
-	if (Z_TYPE_P(tick_fe.arguments[0]) != IS_ARRAY) {
+	if (Z_TYPE_P(tick_fe.arguments[0]) != IS_ARRAY && Z_TYPE_P(tick_fe.arguments[0]) != IS_OBJECT) {
 		convert_to_text_ex(&tick_fe.arguments[0]);
 	}
 
