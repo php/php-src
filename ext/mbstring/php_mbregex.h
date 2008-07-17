@@ -25,23 +25,6 @@
 
 #include "php.h"
 #include "zend.h"
-#include "php_onig_compat.h" /* must come prior to the oniguruma header */
-#include "oniguruma.h"
-#undef UChar
-
-/* {{{ PHP_MBREGEX_GLOBALS */
-#define PHP_MBREGEX_GLOBALS \
-	OnigEncoding default_mbctype; \
-	OnigEncoding current_mbctype; \
-	HashTable ht_rc; \
-	zval *search_str; \
-	zval *search_str_val; \
-	unsigned int search_pos; \
-	php_mb_regex_t *search_re; \
-	OnigRegion *search_regs; \
-	OnigOptionType regex_default_options; \
-	OnigSyntaxType *regex_default_syntax;
-/* }}} */
 
 /* {{{ PHP_MBREGEX_FUNCTION_ENTRIES */
 #define PHP_MBREGEX_FUNCTION_ENTRIES \
@@ -76,8 +59,6 @@
 	PHP_FALIAS(mbereg_search_setpos,	mb_ereg_search_setpos,	arginfo_mb_ereg_search_setpos)
 /* }}} */
 
-typedef struct _zend_mbstring_globals * zend_mbstring_globals_ptr;
-
 #define PHP_MBREGEX_MAXCACHE 50
 
 PHP_MINIT_FUNCTION(mb_regex);
@@ -85,11 +66,15 @@ PHP_MSHUTDOWN_FUNCTION(mb_regex);
 PHP_RINIT_FUNCTION(mb_regex);
 PHP_RSHUTDOWN_FUNCTION(mb_regex);
 PHP_MINFO_FUNCTION(mb_regex);
-void _php_mb_regex_globals_ctor(zend_mbstring_globals_ptr pglobals TSRMLS_DC);
-void php_mb_regex_set_options(OnigOptionType options, OnigSyntaxType *syntax, OnigOptionType *prev_options, OnigSyntaxType **prev_syntax TSRMLS_DC);
-void _php_mb_regex_globals_dtor(zend_mbstring_globals_ptr pglobals TSRMLS_DC);
-OnigEncoding php_mb_regex_name2mbctype(const char *pname);
-const char *php_mb_regex_mbctype2name(OnigEncoding mbctype);
+
+typedef struct _zend_mb_regex_globals zend_mb_regex_globals;
+
+zend_mb_regex_globals *php_mb_regex_globals_new(TSRMLS_D);
+void php_mb_regex_globals_free(zend_mb_regex_globals *pglobals TSRMLS_DC);
+int php_mb_regex_set_mbctype(const char *enc TSRMLS_DC);
+int php_mb_regex_set_default_mbctype(const char *encname TSRMLS_DC);
+const char *php_mb_regex_get_mbctype(TSRMLS_D);
+const char *php_mb_regex_get_default_mbctype(TSRMLS_D);
 
 PHP_FUNCTION(mb_regex_encoding);
 PHP_FUNCTION(mb_ereg);
