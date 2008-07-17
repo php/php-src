@@ -1261,7 +1261,7 @@ void _xml_endNamespaceDeclHandler(void *userData, const XML_Char *prefix)
 
 /************************* EXTENSION FUNCTIONS *************************/
 
-static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_support)
+static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_support) /* {{{ */
 {
 	xml_parser *parser;
 	int auto_detect = 0;
@@ -1317,6 +1317,7 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 	ZEND_REGISTER_RESOURCE(return_value, parser,le_xml_parser);
 	parser->index = Z_LVAL_P(return_value);
 }
+/* }}} */
 
 /* {{{ proto resource xml_parser_create([string encoding]) 
    Create an XML parser */
