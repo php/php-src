@@ -112,6 +112,8 @@ ZEND_GET_MODULE(oci8)
 #endif /* COMPILE_DL */
 /* }}} */
 
+#ifdef ZEND_ENGINE_2
+
 /* {{{ Function arginfo */
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_define_by_name, 0, 0, 3)
@@ -663,6 +665,108 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_trim_method, 0, 0, 1)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
 /* }}} */
+
+#else /* ZEND_ENGINE_2 */
+/* {{{ Keep the old arginfo behavior when building with PHP 4 */
+
+static unsigned char arginfo_ocifetchinto[]  = { 2, BYREF_NONE, BYREF_FORCE };
+static unsigned char arginfo_oci_fetch_all[] = { 2, BYREF_NONE, BYREF_FORCE };
+static unsigned char arginfo_oci_define_by_name[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
+static unsigned char arginfo_oci_bind_by_name[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
+static unsigned char arginfo_oci_bind_array_by_name[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
+
+#define arginfo_oci_free_descriptor						NULL
+#define arginfo_oci_lob_save							NULL
+#define arginfo_oci_lob_import							NULL
+#define arginfo_oci_lob_load							NULL
+#define arginfo_oci_lob_read							NULL
+#define arginfo_oci_lob_eof								NULL
+#define arginfo_oci_lob_tell							NULL
+#define arginfo_oci_lob_rewind							NULL
+#define arginfo_oci_lob_seek							NULL
+#define arginfo_oci_lob_size							NULL
+#define arginfo_oci_lob_write							NULL
+#define arginfo_oci_lob_append							NULL
+#define arginfo_oci_lob_truncate						NULL
+#define arginfo_oci_lob_erase							NULL
+#define arginfo_oci_lob_flush							NULL
+#define arginfo_ocisetbufferinglob						NULL
+#define arginfo_ocigetbufferinglob						NULL
+#define arginfo_oci_lob_copy							NULL
+#define arginfo_oci_lob_is_equal						NULL
+#define arginfo_oci_lob_export							NULL
+#define arginfo_oci_new_descriptor						NULL
+#define arginfo_oci_rollback							NULL
+#define arginfo_oci_commit								NULL
+#define arginfo_oci_field_name							NULL
+#define arginfo_oci_field_size							NULL
+#define arginfo_oci_field_scale							NULL
+#define arginfo_oci_field_precision						NULL
+#define arginfo_oci_field_type							NULL
+#define arginfo_oci_field_type_raw						NULL
+#define arginfo_oci_field_is_null						NULL
+#define arginfo_oci_internal_debug						NULL
+#define arginfo_oci_execute								NULL
+#define arginfo_oci_cancel								NULL
+#define arginfo_oci_fetch								NULL
+#define arginfo_oci_fetch_object						NULL
+#define arginfo_oci_fetch_row							NULL
+#define arginfo_oci_fetch_assoc							NULL
+#define arginfo_oci_fetch_array							NULL
+#define arginfo_oci_free_statement						NULL
+#define arginfo_oci_close								NULL
+#define arginfo_oci_new_connect							NULL
+#define arginfo_oci_connect								NULL
+#define arginfo_oci_pconnect							NULL
+#define arginfo_oci_error								NULL
+#define arginfo_oci_num_fields							NULL
+#define arginfo_oci_parse								NULL
+#define arginfo_oci_set_prefetch						NULL
+#define arginfo_oci_password_change						NULL
+#define arginfo_oci_new_cursor							NULL
+#define arginfo_oci_result								NULL
+#define arginfo_oci_server_version						NULL
+#define arginfo_oci_statement_type						NULL
+#define arginfo_oci_num_rows							NULL
+#define arginfo_oci_free_collection						NULL
+#define arginfo_oci_collection_append					NULL
+#define arginfo_oci_collection_element_get				NULL
+#define arginfo_oci_collection_assign					NULL
+#define arginfo_oci_collection_element_assign			NULL
+#define arginfo_oci_collection_size						NULL
+#define arginfo_oci_collection_max						NULL
+#define arginfo_oci_collection_trim						NULL
+#define arginfo_oci_new_collection						NULL
+#define arginfo_oci_lob_size_method						NULL
+#define arginfo_oci_lob_getbuffering_method				NULL
+#define arginfo_oci_lob_close_method					NULL
+#define arginfo_oci_lob_save_method						NULL
+#define arginfo_oci_lob_import_method					NULL
+#define arginfo_oci_lob_read_method						NULL
+#define arginfo_oci_lob_seek_method						NULL
+#define arginfo_oci_lob_write_method					NULL
+#define arginfo_oci_lob_append_method					NULL
+#define arginfo_oci_lob_truncate_method					NULL
+#define arginfo_oci_lob_erase_method					NULL
+#define arginfo_oci_lob_flush_method					NULL
+#define arginfo_oci_lob_setbuffering_method				NULL
+#define arginfo_oci_lob_export_method					NULL
+#define arginfo_oci_lob_write_temporary_method			NULL
+#define arginfo_oci_lob_load_method						NULL
+#define arginfo_oci_lob_tell_method						NULL
+#define arginfo_oci_lob_rewind_method					NULL
+#define arginfo_oci_lob_eof_method						NULL
+#define arginfo_oci_free_descriptor_method				NULL
+#define arginfo_oci_collection_append_method			NULL
+#define arginfo_oci_collection_element_get_method		NULL
+#define arginfo_oci_collection_assign_method			NULL
+#define arginfo_oci_collection_size_method				NULL
+#define arginfo_oci_collection_element_assign_method	NULL
+#define arginfo_oci_collection_max_method				NULL
+#define arginfo_oci_collection_trim_method				NULL
+#define arginfo_oci_collection_free_method				NULL
+/* }}} */
+#endif /* ZEND_ENGINE_2 */
 
 /* {{{ extension function prototypes
 */
