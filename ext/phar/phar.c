@@ -963,7 +963,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 		MAPPHAR_FAIL("internal corruption of phar \"%s\" (too many manifest entries for size of manifest)")
 	}
 
-	mydata = pecalloc(sizeof(phar_archive_data), 1, PHAR_G(persist));
+	mydata = pecalloc(1, sizeof(phar_archive_data), PHAR_G(persist));
 	mydata->is_persistent = PHAR_G(persist);
 
 	/* check whether we have meta data, zero check works regardless of byte order */
@@ -1281,7 +1281,7 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 	}
 
 	/* set up our manifest */
-	mydata = ecalloc(sizeof(phar_archive_data), 1);
+	mydata = ecalloc(1, sizeof(phar_archive_data));
 
 	mydata->fname = expand_filepath(fname, NULL TSRMLS_CC);
 	fname_len = strlen(mydata->fname);
