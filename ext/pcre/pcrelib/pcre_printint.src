@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2005 University of Cambridge
+           Copyright (c) 1997-2008 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -71,6 +71,12 @@ print_char(FILE *f, uschar *ptr, BOOL utf8)
 {
 int c = *ptr;
 
+#ifndef SUPPORT_UTF8
+utf8 = utf8;  /* Avoid compiler warning */
+if (PRINTABLE(c)) fprintf(f, "%c", c); else fprintf(f, "\\x%02x", c);
+return 0;
+
+#else
 if (!utf8 || (c & 0xc0) != 0xc0)
   {
   if (PRINTABLE(c)) fprintf(f, "%c", c); else fprintf(f, "\\x%02x", c);
@@ -102,6 +108,7 @@ else
   if (c < 128) fprintf(f, "\\x%02x", c); else fprintf(f, "\\x{%x}", c);
   return a;
   }
+#endif
 }
 
 
@@ -115,11 +122,11 @@ get_ucpname(int ptype, int pvalue)
 {
 #ifdef SUPPORT_UCP
 int i;
-for (i = _pcre_utt_size; i >= 0; i--)
+for (i = _pcre_utt_size - 1; i >= 0; i--)
   {
   if (ptype == _pcre_utt[i].type && pvalue == _pcre_utt[i].value) break;
   }
-return (i >= 0)? _pcre_utt[i].name : "??";
+return (i >= 0)? _pcre_utt_names + _pcre_utt[i].name_offset : "??";
 #else
 /* It gets harder and harder to shut off unwanted compiler warnings. */
 ptype = ptype * pvalue;
@@ -134,10 +141,13 @@ return (ptype == pvalue)? "??" : "??";
 *************************************************/
 
 /* Make this function work for a regex with integers either byte order.
-However, we assume that what we are passed is a compiled regex. */
+However, we assume that what we are passed is a compiled regex. The
+print_lengths flag controls whether offsets and lengths of items are printed.
+They can be turned off from pcretest so that automatic tests on bytecode can be
+written that do not depend on the value of LINK_SIZE. */
 
 static void
-pcre_printint(pcre *external_re, FILE *f)
+pcre_printint(pcre *external_re, FILE *f, BOOL print_lengths)
 {
 real_pcre *re = (real_pcre *)external_re;
 uschar *codestart, *code;
@@ -168,7 +178,10 @@ for(;;)
   int c;
   int extra = 0;
 
-  fprintf(f, "%3d ", (int)(code - codestart));
+  if (print_lengths)
+    fprintf(f, "%3d ", (int)(code - codestart));
+  else
+    fprintf(f, "    ");
 
   switch(*code)
     {
@@ -205,8 +218,9 @@ for(;;)
 
     case OP_CBRA:
     case OP_SCBRA:
-    fprintf(f, "%3d %s %d", GET(code, 1), OP_names[*code],
-      GET2(code, 1+LINK_SIZE));
+    if (print_lengths) fprintf(f, "%3d ", GET(code, 1));
+      else fprintf(f, "    ");
+    fprintf(f, "%s %d", OP_names[*code], GET2(code, 1+LINK_SIZE));
     break;
 
     case OP_BRA:
@@ -223,7 +237,9 @@ for(;;)
     case OP_COND:
     case OP_SCOND:
     case OP_REVERSE:
-    fprintf(f, "%3d %s", GET(code, 1), OP_names[*code]);
+    if (print_lengths) fprintf(f, "%3d ", GET(code, 1));
+      else fprintf(f, "    ");
+    fprintf(f, "%s", OP_names[*code]);
     break;
 
     case OP_CREF:
@@ -339,7 +355,9 @@ for(;;)
     break;
 
     case OP_RECURSE:
-    fprintf(f, "%3d %s", GET(code, 1), OP_names[*code]);
+    if (print_lengths) fprintf(f, "%3d ", GET(code, 1));
+      else fprintf(f, "    ");
+    fprintf(f, "%s", OP_names[*code]);
     break;
 
     case OP_REF:

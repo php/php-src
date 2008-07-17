@@ -1494,8 +1494,8 @@
 /(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)\12\123/
     abcdefghijk\12S
 
-/ab\hdef/
-    abhdef
+/ab\idef/
+    abidef
 
 /a{0}bc/
     bc
@@ -3421,11 +3421,6 @@
 /((?m)^b)/
     a\nb\nc\n
 
-/(?(1)a|b)/
-
-/(?(1)b|a)/
-    a
-
 /(x)?(?(1)a|b)/
     *** Failers
     a
@@ -4017,5 +4012,28 @@
 /\z(?<!\n)/
   abc
   abc\n  
+
+/(.*(.)?)*/
+    abcd
+
+/( (A | (?(1)0|) )*   )/x
+    abcd
+
+/( ( (?(1)0|) )*   )/x
+    abcd
+
+/(  (?(1)0|)*   )/x
+    abcd
+
+/[[:abcd:xyz]]/
+    a]
+    :] 
+    
+/[abc[:x\]pqr]/
+    a
+    [
+    :
+    ]
+    p    
 
 / End of testinput1 /

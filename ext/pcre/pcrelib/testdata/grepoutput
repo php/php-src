@@ -75,14 +75,7 @@ RC=1
 39:nineteen
 40:twenty
 41:
-42:Here follows some CR/LF/CRLF test data.
-43:
-44:abc
-def
-45:ghi
-46:jkl
-47:
-48:This is the last line of this file.
+42:This is the last line of this file.
 ---------------------------- Test 12 -----------------------------
 Pattern
 ---------------------------- Test 13 -----------------------------
@@ -164,8 +157,7 @@ eighteen
 nineteen
 twenty
 
-Here follows some CR/LF/CRLF test data.
-
+This is the last line of this file.
 ---------------------------- Test 25 -----------------------------
 15-
 16-complete pair
@@ -215,8 +207,7 @@ eighteen
 nineteen
 twenty
 
-Here follows some CR/LF/CRLF test data.
-
+This is the last line of this file.
 ---------------------------- Test 27 -----------------------------
 four
 five
@@ -236,10 +227,7 @@ eighteen
 nineteen
 twenty
 
-Here follows some CR/LF/CRLF test data.
-
-abc
-def
+This is the last line of this file.
 ---------------------------- Test 28 -----------------------------
 14-of lines all by themselves.
 15-
@@ -291,12 +279,7 @@ eighteen
 nineteen
 twenty
 
-Here follows some CR/LF/CRLF test data.
-
-abc
-def
-ghi
-jkl
+This is the last line of this file.
 ---------------------------- Test 30 -----------------------------
 ./testdata/grepinput-4-features should be added at the end, because some of the tests involve the
 ./testdata/grepinput-5-output of line numbers, and we don't want these to change.
@@ -345,8 +328,8 @@ RC=2
 ./testdata/grepinputx
 RC=0
 ---------------------------- Test 36 -----------------------------
-./testdata/grepinputx
 ./testdata/grepinput8
+./testdata/grepinputx
 RC=0
 ---------------------------- Test 37 -----------------------------
 aaaaa0
@@ -375,10 +358,13 @@ after the binary zero
 ./testdata/grepinput:597:after the binary zero
 ---------------------------- Test 42 ------------------------------
 595:before
+595:zero
 596:zero
 597:after
+597:zero
 ---------------------------- Test 43 ------------------------------
 595:before
+595:zero
 596:zero
 597:zero
 ---------------------------- Test 44 ------------------------------
@@ -400,30 +386,19 @@ AB.VE
 AB.VE the turtle
 PUT NEW DATA ABOVE THIS LINE.
 ---------------------------- Test 49 ------------------------------
-abc
-def
-ghi
-jkl
 ---------------------------- Test 50 ------------------------------
-def
+over the lazy dog.
 ---------------------------- Test 51 ------------------------------
-ghi
-jkl
-
-This is the last line of this file.
+fox [1;31mjumps[00m
 ---------------------------- Test 52 ------------------------------
-def
-ghi
-jkl
-
-This is the last line of this file.
+36972,6
+36990,4
+37024,4
+37066,5
+37083,4
 ---------------------------- Test 53 ------------------------------
-ghi
-jkl
-
-This is the last line of this file.
----------------------------- Test 54 ------------------------------
-44:abc
-45:def
-46:ghi
-47:jkl
+595:15,6
+595:33,4
+596:28,4
+597:15,5
+597:32,4

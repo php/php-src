@@ -271,7 +271,7 @@ No match
 No match
   
 /^\p{Cs}/8
-    \x{dfff}
+    \?\x{dfff}
  0: \x{dfff}
     ** Failers
 No match
@@ -285,7 +285,7 @@ No match
 No match
     Z
 No match
-    \x{dfff}  
+    \x{e000}  
 No match
   
 /^\p{Lm}/8
@@ -1623,5 +1623,21 @@ No match
 No match
      AXY      
 No match
+
+/^\x{023a}+?(\x{0130}+)/8i
+  \x{023a}\x{2c65}\x{0130}
+ 0: \x{23a}\x{2c65}\x{130}
+  
+/^\x{023a}+([^X])/8i
+  \x{023a}\x{2c65}X
+ 0: \x{23a}\x{2c65}
+ 
+/Check property support in non-UTF-8 mode/
+ 
+/\p{L}{4}/
+    123abcdefg
+ 0: abcd
+    123abc\xc4\xc5zz
+ 0: abc\xc4
 
 / End / 

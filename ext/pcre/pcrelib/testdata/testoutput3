@@ -146,14 +146,14 @@ No match
     >>>\xba<<< 
  0: º
     
-/[[:alpha:]][[:lower:]][[:upper:]]/DLfr_FR 
+/[[:alpha:]][[:lower:]][[:upper:]]/DZLfr_FR 
 ------------------------------------------------------------------
-  0 102 Bra 0
-  3     [A-Za-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\xff]
- 36     [a-z\xb5\xdf-\xf6\xf8-\xff]
- 69     [A-Z\xc0-\xd6\xd8-\xde]
-102 102 Ket
-105     End
+        Bra
+        [A-Za-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\xff]
+        [a-z\xb5\xdf-\xf6\xf8-\xff]
+        [A-Z\xc0-\xd6\xd8-\xde]
+        Ket
+        End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 No options

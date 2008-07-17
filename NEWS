@@ -1,5 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ?? 2008, Version 4.4.9
+- Updated PCRE to version 7.7. (Nuno)
+
 03 Jan 2008, Version 4.4.8
 - Improved fix for MOPB-02-2007. (Ilia)
 - Fixed an integer overflow inside chunk_split(). Identified by Gerhard Wagner.

@@ -1,6 +1,762 @@
 ChangeLog for PCRE
 ------------------
 
+Version 7.7 07-May-08
+---------------------
+
+1.  Applied Craig's patch to sort out a long long problem: "If we can't convert
+    a string to a long long, pretend we don't even have a long long." This is
+    done by checking for the strtoq, strtoll, and _strtoi64 functions.
+
+2.  Applied Craig's patch to pcrecpp.cc to restore ABI compatibility with
+    pre-7.6 versions, which defined a global no_arg variable instead of putting
+    it in the RE class. (See also #8 below.)
+
+3.  Remove a line of dead code, identified by coverity and reported by Nuno
+    Lopes.
+
+4.  Fixed two related pcregrep bugs involving -r with --include or --exclude:
+
+    (1) The include/exclude patterns were being applied to the whole pathnames
+        of files, instead of just to the final components.
+
+    (2) If there was more than one level of directory, the subdirectories were
+        skipped unless they satisfied the include/exclude conditions. This is
+        inconsistent with GNU grep (and could even be seen as contrary to the
+        pcregrep specification - which I improved to make it absolutely clear).
+        The action now is always to scan all levels of directory, and just
+        apply the include/exclude patterns to regular files.
+
+5.  Added the --include_dir and --exclude_dir patterns to pcregrep, and used
+    --exclude_dir in the tests to avoid scanning .svn directories.
+
+6.  Applied Craig's patch to the QuoteMeta function so that it escapes the
+    NUL character as backslash + 0 rather than backslash + NUL, because PCRE
+    doesn't support NULs in patterns.
+
+7.  Added some missing "const"s to declarations of static tables in
+    pcre_compile.c and pcre_dfa_exec.c.
+
+8.  Applied Craig's patch to pcrecpp.cc to fix a problem in OS X that was
+    caused by fix #2  above. (Subsequently also a second patch to fix the
+    first patch. And a third patch - this was a messy problem.)
+
+9.  Applied Craig's patch to remove the use of push_back().
+
+10. Applied Alan Lehotsky's patch to add REG_STARTEND support to the POSIX
+    matching function regexec().
+
+11. Added support for the Oniguruma syntax \g<name>, \g<n>, \g'name', \g'n',
+    which, however, unlike Perl's \g{...}, are subroutine calls, not back
+    references. PCRE supports relative numbers with this syntax (I don't think
+    Oniguruma does).
+
+12. Previously, a group with a zero repeat such as (...){0} was completely
+    omitted from the compiled regex. However, this means that if the group
+    was called as a subroutine from elsewhere in the pattern, things went wrong
+    (an internal error was given). Such groups are now left in the compiled
+    pattern, with a new opcode that causes them to be skipped at execution
+    time.
+
+13. Added the PCRE_JAVASCRIPT_COMPAT option. This makes the following changes
+    to the way PCRE behaves:
+
+    (a) A lone ] character is dis-allowed (Perl treats it as data).
+
+    (b) A back reference to an unmatched subpattern matches an empty string
+        (Perl fails the current match path).
+
+    (c) A data ] in a character class must be notated as \] because if the
+        first data character in a class is ], it defines an empty class. (In
+        Perl it is not possible to have an empty class.) The empty class []
+        never matches; it forces failure and is equivalent to (*FAIL) or (?!).
+        The negative empty class [^] matches any one character, independently
+        of the DOTALL setting.
+
+14. A pattern such as /(?2)[]a()b](abc)/ which had a forward reference to a
+    non-existent subpattern following a character class starting with ']' and
+    containing () gave an internal compiling error instead of "reference to
+    non-existent subpattern". Fortunately, when the pattern did exist, the
+    compiled code was correct. (When scanning forwards to check for the
+    existencd of the subpattern, it was treating the data ']' as terminating
+    the class, so got the count wrong. When actually compiling, the reference
+    was subsequently set up correctly.)
+
+15. The "always fail" assertion (?!) is optimzed to (*FAIL) by pcre_compile;
+    it was being rejected as not supported by pcre_dfa_exec(), even though
+    other assertions are supported. I have made pcre_dfa_exec() support
+    (*FAIL).
+
+16. The implementation of 13c above involved the invention of a new opcode,
+    OP_ALLANY, which is like OP_ANY but doesn't check the /s flag. Since /s
+    cannot be changed at match time, I realized I could make a small
+    improvement to matching performance by compiling OP_ALLANY instead of
+    OP_ANY for "." when DOTALL was set, and then removing the runtime tests
+    on the OP_ANY path.
+
+17. Compiling pcretest on Windows with readline support failed without the
+    following two fixes: (1) Make the unistd.h include conditional on
+    HAVE_UNISTD_H; (2) #define isatty and fileno as _isatty and _fileno.
+
+18. Changed CMakeLists.txt and cmake/FindReadline.cmake to arrange for the
+    ncurses library to be included for pcretest when ReadLine support is
+    requested, but also to allow for it to be overridden. This patch came from
+    Daniel Bergström.
+
+19. There was a typo in the file ucpinternal.h where f0_rangeflag was defined
+    as 0x00f00000 instead of 0x00800000. Luckily, this would not have caused
+    any errors with the current Unicode tables. Thanks to Peter Kankowski for
+    spotting this.
+
+
+Version 7.6 28-Jan-08
+---------------------
+
+1.  A character class containing a very large number of characters with
+    codepoints greater than 255 (in UTF-8 mode, of course) caused a buffer
+    overflow.
+
+2.  Patch to cut out the "long long" test in pcrecpp_unittest when
+    HAVE_LONG_LONG is not defined.
+
+3.  Applied Christian Ehrlicher's patch to update the CMake build files to
+    bring them up to date and include new features. This patch includes:
+
+    - Fixed PH's badly added libz and libbz2 support.
+    - Fixed a problem with static linking.
+    - Added pcredemo. [But later removed - see 7 below.]
+    - Fixed dftables problem and added an option.
+    - Added a number of HAVE_XXX tests, including HAVE_WINDOWS_H and
+        HAVE_LONG_LONG.
+    - Added readline support for pcretest.
+    - Added an listing of the option settings after cmake has run.
+
+4.  A user submitted a patch to Makefile that makes it easy to create
+    "pcre.dll" under mingw when using Configure/Make. I added stuff to
+    Makefile.am that cause it to include this special target, without
+    affecting anything else. Note that the same mingw target plus all
+    the other distribution libraries and programs are now supported
+    when configuring with CMake (see 6 below) instead of with
+    Configure/Make.
+
+5.  Applied Craig's patch that moves no_arg into the RE class in the C++ code.
+    This is an attempt to solve the reported problem "pcrecpp::no_arg is not
+    exported in the Windows port". It has not yet been confirmed that the patch
+    solves the problem, but it does no harm.
+
+6.  Applied Sheri's patch to CMakeLists.txt to add NON_STANDARD_LIB_PREFIX and
+    NON_STANDARD_LIB_SUFFIX for dll names built with mingw when configured
+    with CMake, and also correct the comment about stack recursion.
+
+7.  Remove the automatic building of pcredemo from the ./configure system and
+    from CMakeLists.txt. The whole idea of pcredemo.c is that it is an example
+    of a program that users should build themselves after PCRE is installed, so
+    building it automatically is not really right. What is more, it gave
+    trouble in some build environments.
+
+8.  Further tidies to CMakeLists.txt from Sheri and Christian.
+
+
+Version 7.5 10-Jan-08
+---------------------
+
+1.  Applied a patch from Craig: "This patch makes it possible to 'ignore'
+    values in parens when parsing an RE using the C++ wrapper."
+
+2.  Negative specials like \S did not work in character classes in UTF-8 mode.
+    Characters greater than 255 were excluded from the class instead of being
+    included.
+
+3.  The same bug as (2) above applied to negated POSIX classes such as
+    [:^space:].
+
+4.  PCRECPP_STATIC was referenced in pcrecpp_internal.h, but nowhere was it
+    defined or documented. It seems to have been a typo for PCRE_STATIC, so
+    I have changed it.
+
+5.  The construct (?&) was not diagnosed as a syntax error (it referenced the
+    first named subpattern) and a construct such as (?&a) would reference the
+    first named subpattern whose name started with "a" (in other words, the
+    length check was missing). Both these problems are fixed. "Subpattern name
+    expected" is now given for (?&) (a zero-length name), and this patch also
+    makes it give the same error for \k'' (previously it complained that that
+    was a reference to a non-existent subpattern).
+
+6.  The erroneous patterns (?+-a) and (?-+a) give different error messages;
+    this is right because (?- can be followed by option settings as well as by
+    digits. I have, however, made the messages clearer.
+
+7.  Patterns such as (?(1)a|b) (a pattern that contains fewer subpatterns
+    than the number used in the conditional) now cause a compile-time error.
+    This is actually not compatible with Perl, which accepts such patterns, but
+    treats the conditional as always being FALSE (as PCRE used to), but it
+    seems to me that giving a diagnostic is better.
+
+8.  Change "alphameric" to the more common word "alphanumeric" in comments
+    and messages.
+
+9.  Fix two occurrences of "backslash" in comments that should have been
+    "backspace".
+
+10. Remove two redundant lines of code that can never be obeyed (their function
+    was moved elsewhere).
+
+11. The program that makes PCRE's Unicode character property table had a bug
+    which caused it to generate incorrect table entries for sequences of
+    characters that have the same character type, but are in different scripts.
+    It amalgamated them into a single range, with the script of the first of
+    them. In other words, some characters were in the wrong script. There were
+    thirteen such cases, affecting characters in the following ranges:
+
+      U+002b0 - U+002c1
+      U+0060c - U+0060d
+      U+0061e - U+00612
+      U+0064b - U+0065e
+      U+0074d - U+0076d
+      U+01800 - U+01805
+      U+01d00 - U+01d77
+      U+01d9b - U+01dbf
+      U+0200b - U+0200f
+      U+030fc - U+030fe
+      U+03260 - U+0327f
+      U+0fb46 - U+0fbb1
+      U+10450 - U+1049d
+
+12. The -o option (show only the matching part of a line) for pcregrep was not
+    compatible with GNU grep in that, if there was more than one match in a
+    line, it showed only the first of them. It now behaves in the same way as
+    GNU grep.
+
+13. If the -o and -v options were combined for pcregrep, it printed a blank
+    line for every non-matching line. GNU grep prints nothing, and pcregrep now
+    does the same. The return code can be used to tell if there were any
+    non-matching lines.
+
+14. Added --file-offsets and --line-offsets to pcregrep.
+
+15. The pattern (?=something)(?R) was not being diagnosed as a potentially
+    infinitely looping recursion. The bug was that positive lookaheads were not
+    being skipped when checking for a possible empty match (negative lookaheads
+    and both kinds of lookbehind were skipped).
+
+16. Fixed two typos in the Windows-only code in pcregrep.c, and moved the
+    inclusion of <windows.h> to before rather than after the definition of
+    INVALID_FILE_ATTRIBUTES (patch from David Byron).
+
+17. Specifying a possessive quantifier with a specific limit for a Unicode
+    character property caused pcre_compile() to compile bad code, which led at
+    runtime to PCRE_ERROR_INTERNAL (-14). Examples of patterns that caused this
+    are: /\p{Zl}{2,3}+/8 and /\p{Cc}{2}+/8. It was the possessive "+" that
+    caused the error; without that there was no problem.
+
+18. Added --enable-pcregrep-libz and --enable-pcregrep-libbz2.
+
+19. Added --enable-pcretest-libreadline.
+
+20. In pcrecpp.cc, the variable 'count' was incremented twice in
+    RE::GlobalReplace(). As a result, the number of replacements returned was
+    double what it should be. I removed one of the increments, but Craig sent a
+    later patch that removed the other one (the right fix) and added unit tests
+    that check the return values (which was not done before).
+
+21. Several CMake things:
+
+    (1) Arranged that, when cmake is used on Unix, the libraries end up with
+        the names libpcre and libpcreposix, not just pcre and pcreposix.
+
+    (2) The above change means that pcretest and pcregrep are now correctly
+        linked with the newly-built libraries, not previously installed ones.
+
+    (3) Added PCRE_SUPPORT_LIBREADLINE, PCRE_SUPPORT_LIBZ, PCRE_SUPPORT_LIBBZ2.
+
+22. In UTF-8 mode, with newline set to "any", a pattern such as .*a.*=.b.*
+    crashed when matching a string such as a\x{2029}b (note that \x{2029} is a
+    UTF-8 newline character). The key issue is that the pattern starts .*;
+    this means that the match must be either at the beginning, or after a
+    newline. The bug was in the code for advancing after a failed match and
+    checking that the new position followed a newline. It was not taking
+    account of UTF-8 characters correctly.
+
+23. PCRE was behaving differently from Perl in the way it recognized POSIX
+    character classes. PCRE was not treating the sequence [:...:] as a
+    character class unless the ... were all letters. Perl, however, seems to
+    allow any characters between [: and :], though of course it rejects as
+    unknown any "names" that contain non-letters, because all the known class
+    names consist only of letters. Thus, Perl gives an error for [[:1234:]],
+    for example, whereas PCRE did not - it did not recognize a POSIX character
+    class. This seemed a bit dangerous, so the code has been changed to be
+    closer to Perl. The behaviour is not identical to Perl, because PCRE will
+    diagnose an unknown class for, for example, [[:l\ower:]] where Perl will
+    treat it as [[:lower:]]. However, PCRE does now give "unknown" errors where
+    Perl does, and where it didn't before.
+
+24. Rewrite so as to remove the single use of %n from pcregrep because in some
+    Windows environments %n is disabled by default.
+
+
+Version 7.4 21-Sep-07
+---------------------
+
+1.  Change 7.3/28 was implemented for classes by looking at the bitmap. This
+    means that a class such as [\s] counted as "explicit reference to CR or
+    LF". That isn't really right - the whole point of the change was to try to
+    help when there was an actual mention of one of the two characters. So now
+    the change happens only if \r or \n (or a literal CR or LF) character is
+    encountered.
+
+2.  The 32-bit options word was also used for 6 internal flags, but the numbers
+    of both had grown to the point where there were only 3 bits left.
+    Fortunately, there was spare space in the data structure, and so I have
+    moved the internal flags into a new 16-bit field to free up more option
+    bits.
+
+3.  The appearance of (?J) at the start of a pattern set the DUPNAMES option,
+    but did not set the internal JCHANGED flag - either of these is enough to
+    control the way the "get" function works - but the PCRE_INFO_JCHANGED
+    facility is supposed to tell if (?J) was ever used, so now (?J) at the
+    start sets both bits.
+
+4.  Added options (at build time, compile time, exec time) to change \R from
+    matching any Unicode line ending sequence to just matching CR, LF, or CRLF.
+
+5.  doc/pcresyntax.html was missing from the distribution.
+
+6.  Put back the definition of PCRE_ERROR_NULLWSLIMIT, for backward
+    compatibility, even though it is no longer used.
+
+7.  Added macro for snprintf to pcrecpp_unittest.cc and also for strtoll and
+    strtoull to pcrecpp.cc to select the available functions in WIN32 when the
+    windows.h file is present (where different names are used). [This was
+    reversed later after testing - see 16 below.]
+
+8.  Changed all #include <config.h> to #include "config.h". There were also
+    some further <pcre.h> cases that I changed to "pcre.h".
+
+9.  When pcregrep was used with the --colour option, it missed the line ending
+    sequence off the lines that it output.
+
+10. It was pointed out to me that arrays of string pointers cause lots of
+    relocations when a shared library is dynamically loaded. A technique of
+    using a single long string with a table of offsets can drastically reduce
+    these. I have refactored PCRE in four places to do this. The result is
+    dramatic:
+
+      Originally:                          290
+      After changing UCP table:            187
+      After changing error message table:   43
+      After changing table of "verbs"       36
+      After changing table of Posix names   22
+
+    Thanks to the folks working on Gregex for glib for this insight.
+
+11. --disable-stack-for-recursion caused compiling to fail unless -enable-
+    unicode-properties was also set.
+
+12. Updated the tests so that they work when \R is defaulted to ANYCRLF.
+
+13. Added checks for ANY and ANYCRLF to pcrecpp.cc where it previously
+    checked only for CRLF.
+
+14. Added casts to pcretest.c to avoid compiler warnings.
+
+15. Added Craig's patch to various pcrecpp modules to avoid compiler warnings.
+
+16. Added Craig's patch to remove the WINDOWS_H tests, that were not working,
+    and instead check for _strtoi64 explicitly, and avoid the use of snprintf()
+    entirely. This removes changes made in 7 above.
+
+17. The CMake files have been updated, and there is now more information about
+    building with CMake in the NON-UNIX-USE document.
+
+
+Version 7.3 28-Aug-07
+---------------------
+
+ 1. In the rejigging of the build system that eventually resulted in 7.1, the
+    line "#include <pcre.h>" was included in pcre_internal.h. The use of angle
+    brackets there is not right, since it causes compilers to look for an
+    installed pcre.h, not the version that is in the source that is being
+    compiled (which of course may be different). I have changed it back to:
+
+      #include "pcre.h"
+
+    I have a vague recollection that the change was concerned with compiling in
+    different directories, but in the new build system, that is taken care of
+    by the VPATH setting the Makefile.
+
+ 2. The pattern .*$ when run in not-DOTALL UTF-8 mode with newline=any failed
+    when the subject happened to end in the byte 0x85 (e.g. if the last
+    character was \x{1ec5}). *Character* 0x85 is one of the "any" newline
+    characters but of course it shouldn't be taken as a newline when it is part
+    of another character. The bug was that, for an unlimited repeat of . in
+    not-DOTALL UTF-8 mode, PCRE was advancing by bytes rather than by
+    characters when looking for a newline.
+
+ 3. A small performance improvement in the DOTALL UTF-8 mode .* case.
+
+ 4. Debugging: adjusted the names of opcodes for different kinds of parentheses
+    in debug output.
+
+ 5. Arrange to use "%I64d" instead of "%lld" and "%I64u" instead of "%llu" for
+    long printing in the pcrecpp unittest when running under MinGW.
+
+ 6. ESC_K was left out of the EBCDIC table.
+
+ 7. Change 7.0/38 introduced a new limit on the number of nested non-capturing
+    parentheses; I made it 1000, which seemed large enough. Unfortunately, the
+    limit also applies to "virtual nesting" when a pattern is recursive, and in
+    this case 1000 isn't so big. I have been able to remove this limit at the
+    expense of backing off one optimization in certain circumstances. Normally,
+    when pcre_exec() would call its internal match() function recursively and
+    immediately return the result unconditionally, it uses a "tail recursion"
+    feature to save stack. However, when a subpattern that can match an empty
+    string has an unlimited repetition quantifier, it no longer makes this
+    optimization. That gives it a stack frame in which to save the data for
+    checking that an empty string has been matched. Previously this was taken
+    from the 1000-entry workspace that had been reserved. So now there is no
+    explicit limit, but more stack is used.
+
+ 8. Applied Daniel's patches to solve problems with the import/export magic
+    syntax that is required for Windows, and which was going wrong for the
+    pcreposix and pcrecpp parts of the library. These were overlooked when this
+    problem was solved for the main library.
+
+ 9. There were some crude static tests to avoid integer overflow when computing
+    the size of patterns that contain repeated groups with explicit upper
+    limits. As the maximum quantifier is 65535, the maximum group length was
+    set at 30,000 so that the product of these two numbers did not overflow a
+    32-bit integer. However, it turns out that people want to use groups that
+    are longer than 30,000 bytes (though not repeat them that many times).
+    Change 7.0/17 (the refactoring of the way the pattern size is computed) has
+    made it possible to implement the integer overflow checks in a much more
+    dynamic way, which I have now done. The artificial limitation on group
+    length has been removed - we now have only the limit on the total length of
+    the compiled pattern, which depends on the LINK_SIZE setting.
+
+10. Fixed a bug in the documentation for get/copy named substring when
+    duplicate names are permitted. If none of the named substrings are set, the
+    functions return PCRE_ERROR_NOSUBSTRING (7); the doc said they returned an
+    empty string.
+
+11. Because Perl interprets \Q...\E at a high level, and ignores orphan \E
+    instances, patterns such as [\Q\E] or [\E] or even [^\E] cause an error,
+    because the ] is interpreted as the first data character and the
+    terminating ] is not found. PCRE has been made compatible with Perl in this
+    regard. Previously, it interpreted [\Q\E] as an empty class, and [\E] could
+    cause memory overwriting.
+
+10. Like Perl, PCRE automatically breaks an unlimited repeat after an empty
+    string has been matched (to stop an infinite loop). It was not recognizing
+    a conditional subpattern that could match an empty string if that
+    subpattern was within another subpattern. For example, it looped when
+    trying to match  (((?(1)X|))*)  but it was OK with  ((?(1)X|)*)  where the
+    condition was not nested. This bug has been fixed.
+
+12. A pattern like \X?\d or \P{L}?\d in non-UTF-8 mode could cause a backtrack
+    past the start of the subject in the presence of bytes with the top bit
+    set, for example "\x8aBCD".
+
+13. Added Perl 5.10 experimental backtracking controls (*FAIL), (*F), (*PRUNE),
+    (*SKIP), (*THEN), (*COMMIT), and (*ACCEPT).
+
+14. Optimized (?!) to (*FAIL).
+
+15. Updated the test for a valid UTF-8 string to conform to the later RFC 3629.
+    This restricts code points to be within the range 0 to 0x10FFFF, excluding
+    the "low surrogate" sequence 0xD800 to 0xDFFF. Previously, PCRE allowed the
+    full range 0 to 0x7FFFFFFF, as defined by RFC 2279. Internally, it still
+    does: it's just the validity check that is more restrictive.
+
+16. Inserted checks for integer overflows during escape sequence (backslash)
+    processing, and also fixed erroneous offset values for syntax errors during
+    backslash processing.
+
+17. Fixed another case of looking too far back in non-UTF-8 mode (cf 12 above)
+    for patterns like [\PPP\x8a]{1,}\x80 with the subject "A\x80".
+
+18. An unterminated class in a pattern like (?1)\c[ with a "forward reference"
+    caused an overrun.
+
+19. A pattern like (?:[\PPa*]*){8,} which had an "extended class" (one with
+    something other than just ASCII characters) inside a group that had an
+    unlimited repeat caused a loop at compile time (while checking to see
+    whether the group could match an empty string).
+
+20. Debugging a pattern containing \p or \P could cause a crash. For example,
+    [\P{Any}] did so. (Error in the code for printing property names.)
+
+21. An orphan \E inside a character class could cause a crash.
+
+22. A repeated capturing bracket such as (A)? could cause a wild memory
+    reference during compilation.
+
+23. There are several functions in pcre_compile() that scan along a compiled
+    expression for various reasons (e.g. to see if it's fixed length for look
+    behind). There were bugs in these functions when a repeated \p or \P was
+    present in the pattern. These operators have additional parameters compared
+    with \d, etc, and these were not being taken into account when moving along
+    the compiled data. Specifically:
+
+    (a) A item such as \p{Yi}{3} in a lookbehind was not treated as fixed
+        length.
+
+    (b) An item such as \pL+ within a repeated group could cause crashes or
+        loops.
+
+    (c) A pattern such as \p{Yi}+(\P{Yi}+)(?1) could give an incorrect
+        "reference to non-existent subpattern" error.
+
+    (d) A pattern like (\P{Yi}{2}\277)? could loop at compile time.
+
+24. A repeated \S or \W in UTF-8 mode could give wrong answers when multibyte
+    characters were involved (for example /\S{2}/8g with "A\x{a3}BC").
+
+25. Using pcregrep in multiline, inverted mode (-Mv) caused it to loop.
+
+26. Patterns such as [\P{Yi}A] which include \p or \P and just one other
+    character were causing crashes (broken optimization).
+
+27. Patterns such as (\P{Yi}*\277)* (group with possible zero repeat containing
+    \p or \P) caused a compile-time loop.
+
+28. More problems have arisen in unanchored patterns when CRLF is a valid line
+    break. For example, the unstudied pattern [\r\n]A does not match the string
+    "\r\nA" because change 7.0/46 below moves the current point on by two
+    characters after failing to match at the start. However, the pattern \nA
+    *does* match, because it doesn't start till \n, and if [\r\n]A is studied,
+    the same is true. There doesn't seem any very clean way out of this, but
+    what I have chosen to do makes the common cases work: PCRE now takes note
+    of whether there can be an explicit match for \r or \n anywhere in the
+    pattern, and if so, 7.0/46 no longer applies. As part of this change,
+    there's a new PCRE_INFO_HASCRORLF option for finding out whether a compiled
+    pattern has explicit CR or LF references.
+
+29. Added (*CR) etc for changing newline setting at start of pattern.
+
+
+Version 7.2 19-Jun-07
+---------------------
+
+ 1. If the fr_FR locale cannot be found for test 3, try the "french" locale,
+    which is apparently normally available under Windows.
+
+ 2. Re-jig the pcregrep tests with different newline settings in an attempt
+    to make them independent of the local environment's newline setting.
+
+ 3. Add code to configure.ac to remove -g from the CFLAGS default settings.
+
+ 4. Some of the "internals" tests were previously cut out when the link size
+    was not 2, because the output contained actual offsets. The recent new
+    "Z" feature of pcretest means that these can be cut out, making the tests
+    usable with all link sizes.
+
+ 5. Implemented Stan Switzer's goto replacement for longjmp() when not using
+    stack recursion. This gives a massive performance boost under BSD, but just
+    a small improvement under Linux. However, it saves one field in the frame
+    in all cases.
+
+ 6. Added more features from the forthcoming Perl 5.10:
+
+    (a) (?-n) (where n is a string of digits) is a relative subroutine or
+        recursion call. It refers to the nth most recently opened parentheses.
+
+    (b) (?+n) is also a relative subroutine call; it refers to the nth next
+        to be opened parentheses.
+
+    (c) Conditions that refer to capturing parentheses can be specified
+        relatively, for example, (?(-2)... or (?(+3)...
+
+    (d) \K resets the start of the current match so that everything before
+        is not part of it.
+
+    (e) \k{name} is synonymous with \k<name> and \k'name' (.NET compatible).
+
+    (f) \g{name} is another synonym - part of Perl 5.10's unification of
+        reference syntax.
+
+    (g) (?| introduces a group in which the numbering of parentheses in each
+        alternative starts with the same number.
+
+    (h) \h, \H, \v, and \V match horizontal and vertical whitespace.
+
+ 7. Added two new calls to pcre_fullinfo(): PCRE_INFO_OKPARTIAL and
+    PCRE_INFO_JCHANGED.
+
+ 8. A pattern such as  (.*(.)?)*  caused pcre_exec() to fail by either not
+    terminating or by crashing. Diagnosed by Viktor Griph; it was in the code
+    for detecting groups that can match an empty string.
+
+ 9. A pattern with a very large number of alternatives (more than several
+    hundred) was running out of internal workspace during the pre-compile
+    phase, where pcre_compile() figures out how much memory will be needed. A
+    bit of new cunning has reduced the workspace needed for groups with
+    alternatives. The 1000-alternative test pattern now uses 12 bytes of
+    workspace instead of running out of the 4096 that are available.
+
+10. Inserted some missing (unsigned int) casts to get rid of compiler warnings.
+
+11. Applied patch from Google to remove an optimization that didn't quite work.
+    The report of the bug said:
+
+      pcrecpp::RE("a*").FullMatch("aaa") matches, while
+      pcrecpp::RE("a*?").FullMatch("aaa") does not, and
+      pcrecpp::RE("a*?\\z").FullMatch("aaa") does again.
+
+12. If \p or \P was used in non-UTF-8 mode on a character greater than 127
+    it matched the wrong number of bytes.
+
+
+Version 7.1 24-Apr-07
+---------------------
+
+ 1. Applied Bob Rossi and Daniel G's patches to convert the build system to one
+    that is more "standard", making use of automake and other Autotools. There
+    is some re-arrangement of the files and adjustment of comments consequent
+    on this.
+
+ 2. Part of the patch fixed a problem with the pcregrep tests. The test of -r
+    for recursive directory scanning broke on some systems because the files
+    are not scanned in any specific order and on different systems the order
+    was different. A call to "sort" has been inserted into RunGrepTest for the
+    approprate test as a short-term fix. In the longer term there may be an
+    alternative.
+
+ 3. I had an email from Eric Raymond about problems translating some of PCRE's
+    man pages to HTML (despite the fact that I distribute HTML pages, some
+    people do their own conversions for various reasons). The problems
+    concerned the use of low-level troff macros .br and .in. I have therefore
+    removed all such uses from the man pages (some were redundant, some could
+    be replaced by .nf/.fi pairs). The 132html script that I use to generate
+    HTML has been updated to handle .nf/.fi and to complain if it encounters
+    .br or .in.
+
+ 4. Updated comments in configure.ac that get placed in config.h.in and also
+    arranged for config.h to be included in the distribution, with the name
+    config.h.generic, for the benefit of those who have to compile without
+    Autotools (compare pcre.h, which is now distributed as pcre.h.generic).
+
+ 5. Updated the support (such as it is) for Virtual Pascal, thanks to Stefan
+    Weber: (1) pcre_internal.h was missing some function renames; (2) updated
+    makevp.bat for the current PCRE, using the additional files
+    makevp_c.txt, makevp_l.txt, and pcregexp.pas.
+
+ 6. A Windows user reported a minor discrepancy with test 2, which turned out
+    to be caused by a trailing space on an input line that had got lost in his
+    copy. The trailing space was an accident, so I've just removed it.
+
+ 7. Add -Wl,-R... flags in pcre-config.in for *BSD* systems, as I'm told
+    that is needed.
+
+ 8. Mark ucp_table (in ucptable.h) and ucp_gentype (in pcre_ucp_searchfuncs.c)
+    as "const" (a) because they are and (b) because it helps the PHP
+    maintainers who have recently made a script to detect big data structures
+    in the php code that should be moved to the .rodata section. I remembered
+    to update Builducptable as well, so it won't revert if ucptable.h is ever
+    re-created.
+
+ 9. Added some extra #ifdef SUPPORT_UTF8 conditionals into pcretest.c,
+    pcre_printint.src, pcre_compile.c, pcre_study.c, and pcre_tables.c, in
+    order to be able to cut out the UTF-8 tables in the latter when UTF-8
+    support is not required. This saves 1.5-2K of code, which is important in
+    some applications.
+
+    Later: more #ifdefs are needed in pcre_ord2utf8.c and pcre_valid_utf8.c
+    so as not to refer to the tables, even though these functions will never be
+    called when UTF-8 support is disabled. Otherwise there are problems with a
+    shared library.
+
+10. Fixed two bugs in the emulated memmove() function in pcre_internal.h:
+
+    (a) It was defining its arguments as char * instead of void *.
+
+    (b) It was assuming that all moves were upwards in memory; this was true
+        a long time ago when I wrote it, but is no longer the case.
+
+    The emulated memove() is provided for those environments that have neither
+    memmove() nor bcopy(). I didn't think anyone used it these days, but that
+    is clearly not the case, as these two bugs were recently reported.
+
+11. The script PrepareRelease is now distributed: it calls 132html, CleanTxt,
+    and Detrail to create the HTML documentation, the .txt form of the man
+    pages, and it removes trailing spaces from listed files. It also creates
+    pcre.h.generic and config.h.generic from pcre.h and config.h. In the latter
+    case, it wraps all the #defines with #ifndefs. This script should be run
+    before "make dist".
+
+12. Fixed two fairly obscure bugs concerned with quantified caseless matching
+    with Unicode property support.
+
+    (a) For a maximizing quantifier, if the two different cases of the
+        character were of different lengths in their UTF-8 codings (there are
+        some cases like this - I found 11), and the matching function had to
+        back up over a mixture of the two cases, it incorrectly assumed they
+        were both the same length.
+
+    (b) When PCRE was configured to use the heap rather than the stack for
+        recursion during matching, it was not correctly preserving the data for
+        the other case of a UTF-8 character when checking ahead for a match
+        while processing a minimizing repeat. If the check also involved
+        matching a wide character, but failed, corruption could cause an
+        erroneous result when trying to check for a repeat of the original
+        character.
+
+13. Some tidying changes to the testing mechanism:
+
+    (a) The RunTest script now detects the internal link size and whether there
+        is UTF-8 and UCP support by running ./pcretest -C instead of relying on
+        values substituted by "configure". (The RunGrepTest script already did
+        this for UTF-8.) The configure.ac script no longer substitutes the
+        relevant variables.
+
+    (b) The debugging options /B and /D in pcretest show the compiled bytecode
+        with length and offset values. This means that the output is different
+        for different internal link sizes. Test 2 is skipped for link sizes
+        other than 2 because of this, bypassing the problem. Unfortunately,
+        there was also a test in test 3 (the locale tests) that used /B and
+        failed for link sizes other than 2. Rather than cut the whole test out,
+        I have added a new /Z option to pcretest that replaces the length and
+        offset values with spaces. This is now used to make test 3 independent
+        of link size. (Test 2 will be tidied up later.)
+
+14. If erroroffset was passed as NULL to pcre_compile, it provoked a
+    segmentation fault instead of returning the appropriate error message.
+
+15. In multiline mode when the newline sequence was set to "any", the pattern
+    ^$ would give a match between the \r and \n of a subject such as "A\r\nB".
+    This doesn't seem right; it now treats the CRLF combination as the line
+    ending, and so does not match in that case. It's only a pattern such as ^$
+    that would hit this one: something like ^ABC$ would have failed after \r
+    and then tried again after \r\n.
+
+16. Changed the comparison command for RunGrepTest from "diff -u" to "diff -ub"
+    in an attempt to make files that differ only in their line terminators
+    compare equal. This works on Linux.
+
+17. Under certain error circumstances pcregrep might try to free random memory
+    as it exited. This is now fixed, thanks to valgrind.
+
+19. In pcretest, if the pattern /(?m)^$/g<any> was matched against the string
+    "abc\r\n\r\n", it found an unwanted second match after the second \r. This
+    was because its rules for how to advance for /g after matching an empty
+    string at the end of a line did not allow for this case. They now check for
+    it specially.
+
+20. pcretest is supposed to handle patterns and data of any length, by
+    extending its buffers when necessary. It was getting this wrong when the
+    buffer for a data line had to be extended.
+
+21. Added PCRE_NEWLINE_ANYCRLF which is like ANY, but matches only CR, LF, or
+    CRLF as a newline sequence.
+
+22. Code for handling Unicode properties in pcre_dfa_exec() wasn't being cut
+    out by #ifdef SUPPORT_UCP. This did no harm, as it could never be used, but
+    I have nevertheless tidied it up.
+
+23. Added some casts to kill warnings from HP-UX ia64 compiler.
+
+24. Added a man page for pcre-config.
+
+
 Version 7.0 19-Dec-06
 ---------------------
 

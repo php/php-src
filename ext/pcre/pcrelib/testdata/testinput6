@@ -61,7 +61,7 @@
     \x{09f} 
   
 /^\p{Cs}/8
-    \x{dfff}
+    \?\x{dfff}
     ** Failers
     \x{09f} 
   
@@ -69,7 +69,7 @@
     a
     ** Failers 
     Z
-    \x{dfff}  
+    \x{e000}  
   
 /^\p{Lm}/8
     \x{2b0}
@@ -323,20 +323,20 @@
     ** Failers
     WXYZ 
 
-/[\p{L}]/D
+/[\p{L}]/DZ
 
-/[\p{^L}]/D
+/[\p{^L}]/DZ
 
-/[\P{L}]/D
+/[\P{L}]/DZ
 
-/[\P{^L}]/D
+/[\P{^L}]/DZ
 
-/[abc\p{L}\x{0660}]/8D
+/[abc\p{L}\x{0660}]/8DZ
 
-/[\p{Nd}]/8DM
+/[\p{Nd}]/8DZ
     1234
 
-/[\p{Nd}+-]+/8DM
+/[\p{Nd}+-]+/8DZ
     1234
     12-34
     12+\x{661}-34  
@@ -425,13 +425,13 @@
     A\x{391}\x{10427}\x{ff5a}\x{1fb0}
     A\x{391}\x{10427}\x{ff3a}\x{1fb8}
 
-/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8iD
+/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8iDZ
 
-/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8D
+/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8DZ
 
-/AB\x{1fb0}/8D
+/AB\x{1fb0}/8DZ
 
-/AB\x{1fb0}/8Di
+/AB\x{1fb0}/8DZi
 
 /\x{391}+/8i
     \x{391}\x{3b1}\x{3b1}\x{3b1}\x{391}
@@ -452,7 +452,7 @@
     \x{c0}
     \x{e0} 
 
-/[\x{105}-\x{109}]/8iD
+/[\x{105}-\x{109}]/8iDZ
     \x{104}
     \x{105}
     \x{109}  
@@ -460,7 +460,7 @@
     \x{100}
     \x{10a} 
     
-/[z-\x{100}]/8iD 
+/[z-\x{100}]/8iDZ 
     Z
     z
     \x{39c}
@@ -475,7 +475,7 @@
     Y
     y           
 
-/[z-\x{100}]/8Di
+/[z-\x{100}]/8DZi
 
 /^\X/8
     A
@@ -761,5 +761,150 @@ of case for anything other than the ASCII letters. /
     
 /^\p{Balinese}\p{Cuneiform}\p{Nko}\p{Phags_Pa}\p{Phoenician}/8
     \x{1b00}\x{12000}\x{7c0}\x{a840}\x{10900}
+
+/The next two are special cases where the lengths of the different cases of the 
+same character differ. The first went wrong with heap fram storage; the 2nd
+was broken in all cases./
+
+/^\x{023a}+?(\x{0130}+)/8i
+  \x{023a}\x{2c65}\x{0130}
+  
+/^\x{023a}+([^X])/8i
+  \x{023a}\x{2c65}X
+
+/Check property support in non-UTF-8 mode/
+ 
+/\p{L}{4}/
+    123abcdefg
+    123abc\xc4\xc5zz
+
+/\X{1,3}\d/
+  \x8aBCD
+  
+/\X?\d/
+  \x8aBCD 
+
+/\P{L}?\d/
+  \x8aBCD 
+
+/[\PPP\x8a]{1,}\x80/
+    A\x80
+
+/(?:[\PPa*]*){8,}/
+
+/[\P{Any}]/BZ
+
+/[\P{Any}\E]/BZ
+
+/(\P{Yi}+\277)/
+
+/(\P{Yi}+\277)?/
+
+/(?<=\P{Yi}{3}A)X/
+
+/\p{Yi}+(\P{Yi}+)(?1)/
+
+/(\P{Yi}{2}\277)?/
+
+/[\P{Yi}A]/
+
+/[\P{Yi}\P{Yi}\P{Yi}A]/
+
+/[^\P{Yi}A]/
+
+/[^\P{Yi}\P{Yi}\P{Yi}A]/
+
+/(\P{Yi}*\277)*/
+
+/(\P{Yi}*?\277)*/
+
+/(\p{Yi}*+\277)*/
+
+/(\P{Yi}?\277)*/
+
+/(\P{Yi}??\277)*/
+
+/(\p{Yi}?+\277)*/
+
+/(\P{Yi}{0,3}\277)*/
+
+/(\P{Yi}{0,3}?\277)*/
+
+/(\p{Yi}{0,3}+\277)*/
+
+/^[\p{Arabic}]/8
+    \x{60e} 
+    \x{656} 
+    \x{657} 
+    \x{658} 
+    \x{659} 
+    \x{65a} 
+    \x{65b} 
+    \x{65c} 
+    \x{65d} 
+    \x{65e} 
+    \x{66a} 
+    \x{6e9} 
+    \x{6ef}
+    \x{6fa}  
+    ** Failers
+    \x{600}
+    \x{650}
+    \x{651}  
+    \x{652}  
+    \x{653}  
+    \x{654} 
+    \x{655} 
+    \x{65f}  
+    
+/^\p{Cyrillic}/8
+    \x{1d2b} 
+    
+/^\p{Common}/8
+    \x{589}
+    \x{60c}
+    \x{61f}  
+    \x{964}
+    \x{965}  
+    \x{970}  
+
+/^\p{Inherited}/8
+    \x{64b}
+    \x{654}
+    \x{655}
+    \x{200c} 
+    ** Failers
+    \x{64a}
+    \x{656}     
+
+/^\p{Shavian}/8
+    \x{10450}
+    \x{1047f}
+    
+/^\p{Deseret}/8
+    \x{10400}
+    \x{1044f}
+    
+/^\p{Osmanya}/8
+    \x{10480}
+    \x{1049d}
+    \x{104a0}
+    \x{104a9}
+    ** Failers
+    \x{1049e}
+    \x{1049f}
+    \x{104aa}           
+
+/\p{Zl}{2,3}+/8BZ
+    \xe2\x80\xa8\xe2\x80\xa8
+    \x{2028}\x{2028}\x{2028}
+    
+/\p{Zl}/8BZ
+
+/\p{Lu}{3}+/8BZ
+
+/\pL{2}+/8BZ
+
+/\p{Cc}{2}+/8BZ
 
 / End of testinput6 /

@@ -1,128 +1,156 @@
 Compiling PCRE on non-Unix systems
 ----------------------------------
 
-See below for comments on Cygwin or MinGW and OpenVMS usage. I (Philip Hazel)
-have no knowledge of Windows or VMS sytems and how their libraries work. The
-items in the PCRE Makefile that relate to anything other than Unix-like systems
-have been contributed by PCRE users. There are some other comments and files in
-the Contrib directory on the ftp site that you may find useful. See
+This document contains the following sections:
+
+  General
+  Generic instructions for the PCRE C library
+  The C++ wrapper functions
+  Building for virtual Pascal
+  Stack size in Windows environments
+  Linking programs in Windows environments
+  Comments about Win32 builds
+  Building PCRE on Windows with CMake
+  Use of relative paths with CMake on Windows
+  Testing with runtest.bat
+  Building under Windows with BCC5.5
+  Building PCRE on OpenVMS
+
+
+GENERAL
+
+I (Philip Hazel) have no experience of Windows or VMS sytems and how their
+libraries work. The items in the PCRE distribution and Makefile that relate to
+anything other than Unix-like systems are untested by me.
+
+There are some other comments and files in the Contrib directory on the ftp
+site that you may find useful. See
 
   ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/Contrib
 
-If you want to compile PCRE for a non-Unix system (or perhaps, more strictly,
-for a system that does not support "configure" and "make" files), note that
-the basic PCRE library consists entirely of code written in Standard C, and so
-should compile successfully on any system that has a Standard C compiler and
-library. The C++ wrapper functions are a separate issue (see below).
+If you want to compile PCRE for a non-Unix system (especially for a system that
+does not support "configure" and "make" files), note that the basic PCRE
+library consists entirely of code written in Standard C, and so should compile
+successfully on any system that has a Standard C compiler and library. The C++
+wrapper functions are a separate issue (see below).
+
+The PCRE distribution includes a "configure" file for use by the Configure/Make
+build system, as found in many Unix-like environments. There is also support
+support for CMake, which some users prefer, in particular in Windows
+environments. There are some instructions for CMake under Windows in the
+section entitled "Building PCRE with CMake" below. CMake can also be used to
+build PCRE in Unix-like systems.
 
 
-GENERIC INSTRUCTIONS FOR THE C LIBRARY
+GENERIC INSTRUCTIONS FOR THE PCRE C LIBRARY
 
-The following are generic comments about building PCRE. The interspersed
-indented commands are suggestions from Mark Tetrode as to which commands you
-might use on a Windows system to build a static library.
+The following are generic comments about building the PCRE C library "by hand".
 
-(1) Copy or rename the file config.h.in as config.h, and change the macros that
-define HAVE_STRERROR and HAVE_MEMMOVE to define them as 1 rather than 0.
-Unfortunately, because of the way Unix autoconf works, the default setting has
-to be 0. You may also want to make changes to other macros in config.h. In
-particular, if you want to force a specific value for newline, you can define
-the NEWLINE macro. The default is to use '\n', thereby using whatever value
-your compiler gives to '\n'.
+ (1) Copy or rename the file config.h.generic as config.h, and edit the macro
+     settings that it contains to whatever is appropriate for your environment.
+     In particular, if you want to force a specific value for newline, you can
+     define the NEWLINE macro. When you compile any of the PCRE modules, you
+     must specify -DHAVE_CONFIG_H to your compiler so that config.h is included
+     in the sources.
 
-  rem Mark Tetrode's commands
-  copy config.h.in config.h
-  rem Use write, because notepad cannot handle UNIX files. Change values.
-  write config.h
+     An alternative approach is not to edit config.h, but to use -D on the
+     compiler command line to make any changes that you need to the
+     configuration options. In this case -DHAVE_CONFIG_H must not be set.
 
-(2) Compile dftables.c as a stand-alone program, and then run it with
-the single argument "pcre_chartables.c". This generates a set of standard
-character tables and writes them to that file.
+     NOTE: There have been occasions when the way in which certain parameters
+     in config.h are used has changed between releases. (In the configure/make
+     world, this is handled automatically.) When upgrading to a new release,
+     you are strongly advised to review config.h.generic before re-using what
+     you had previously.
 
-  rem Mark Tetrode's commands
-  rem Compile & run
-  cl -DSUPPORT_UTF8 -DSUPPORT_UCP dftables.c
-  dftables.exe pcre_chartables.c
+ (2) Copy or rename the file pcre.h.generic as pcre.h.
 
-(3) Compile the following source files:
+ (3) EITHER:
+       Copy or rename file pcre_chartables.c.dist as pcre_chartables.c.
 
-  pcre_chartables.c
-  pcre_compile.c
-  pcre_config.c
-  pcre_dfa_exec.c
-  pcre_exec.c
-  pcre_fullinfo.c
-  pcre_get.c
-  pcre_globals.c
-  pcre_info.c
-  pcre_maketables.c
-  pcre_newline.c
-  pcre_ord2utf8.c
-  pcre_refcount.c
-  pcre_study.c
-  pcre_tables.c
-  pcre_try_flipped.c
-  pcre_ucp_searchfuncs.c
-  pcre_valid_utf8.c
-  pcre_version.c
-  pcre_xclass.c
+     OR:
+       Compile dftables.c as a stand-alone program (using -DHAVE_CONFIG_H if
+       you have set up config.h), and then run it with the single argument
+       "pcre_chartables.c". This generates a set of standard character tables
+       and writes them to that file. The tables are generated using the default
+       C locale for your system. If you want to use a locale that is specified
+       by LC_xxx environment variables, add the -L option to the dftables
+       command. You must use this method if you are building on a system that
+       uses EBCDIC code.
 
-and link them all together into an object library in whichever form your system
-keeps such libraries. This is the pcre C library. If your system has static and
-shared libraries, you may have to do this once for each type.
+     The tables in pcre_chartables.c are defaults. The caller of PCRE can
+     specify alternative tables at run time.
 
-  rem These comments are out-of-date, referring to a previous release which
-  rem had fewer source files. Replace with the file names from above.
-  rem Mark Tetrode's commands, for a static library
-  rem Compile & lib
-  cl -DSUPPORT_UTF8 -DSUPPORT_UCP -DPOSIX_MALLOC_THRESHOLD=10 /c maketables.c get.c study.c pcre.c
-  lib /OUT:pcre.lib maketables.obj get.obj study.obj pcre.obj
+ (4) Ensure that you have the following header files:
 
-(4) Similarly, compile pcreposix.c and link it (on its own) as the pcreposix
-library.
+       pcre_internal.h
+       ucp.h
+       ucpinternal.h
+       ucptable.h
 
-  rem Mark Tetrode's commands, for a static library
-  rem Compile & lib
-  cl -DSUPPORT_UTF8 -DSUPPORT_UCP -DPOSIX_MALLOC_THRESHOLD=10 /c pcreposix.c
-  lib /OUT:pcreposix.lib pcreposix.obj
+ (5) Also ensure that you have the following file, which is #included as source
+     when building a debugging version of PCRE, and is also used by pcretest.
 
-(5) Compile the test program pcretest.c. This needs the functions in the
-pcre and pcreposix libraries when linking.
+       pcre_printint.src
 
-  rem Mark Tetrode's commands
-  rem compile & link
-  cl /F0x400000 pcretest.c pcre.lib pcreposix.lib
+ (6) Compile the following source files, setting -DHAVE_CONFIG_H as a compiler
+     option if you have set up config.h with your configuration, or else use
+     other -D settings to change the configuration as required.
 
-(6) Run pcretest on the testinput files in the testdata directory, and check
-that the output matches the corresponding testoutput files. Note that the
-supplied files are in Unix format, with just LF characters as line terminators.
-You may need to edit them to change this if your system uses a different
-convention.
+       pcre_chartables.c
+       pcre_compile.c
+       pcre_config.c
+       pcre_dfa_exec.c
+       pcre_exec.c
+       pcre_fullinfo.c
+       pcre_get.c
+       pcre_globals.c
+       pcre_info.c
+       pcre_maketables.c
+       pcre_newline.c
+       pcre_ord2utf8.c
+       pcre_refcount.c
+       pcre_study.c
+       pcre_tables.c
+       pcre_try_flipped.c
+       pcre_ucp_searchfuncs.c
+       pcre_valid_utf8.c
+       pcre_version.c
+       pcre_xclass.c
 
-  rem Mark Tetrode's commands
-  pcretest testdata\testinput1 testdata\myoutput1
-  windiff testdata\testoutput1 testdata\myoutput1
-  pcretest -i testdata\testinput2 testdata\myoutput2
-  windiff testdata\testoutput2 testdata\myoutput2
-  pcretest testdata\testinput3 testdata\myoutput3
-  windiff testdata\testoutput3 testdata\myoutput3
-  pcretest testdata\testinput4 testdata\myoutput4
-  windiff testdata\testoutput4 testdata\myoutput4
-  pcretest testdata\testinput5 testdata\myoutput5
-  windiff testdata\testoutput5 testdata\myoutput5
-  pcretest testdata\testinput6 testdata\myoutput6
-  windiff testdata\testoutput6 testdata\myoutput6
+     Make sure that you include -I. in the compiler command (or equivalent for
+     an unusual compiler) so that all included PCRE header files are first
+     sought in the current directory. Otherwise you run the risk of picking up
+     a previously-installed file from somewhere else.
 
-Note that there are now three more tests (7, 8, 9) that did not exist when Mark
-wrote those comments. The test the new pcre_dfa_exec() function.
+ (7) Now link all the compiled code into an object library in whichever form
+     your system keeps such libraries. This is the basic PCRE C library. If
+     your system has static and shared libraries, you may have to do this once
+     for each type.
 
-(7) If you want to use the pcregrep command, compile and link pcregrep.c; it
-uses only the basic PCRE library.
+ (8) Similarly, compile pcreposix.c (remembering -DHAVE_CONFIG_H if necessary)
+     and link the result (on its own) as the pcreposix library.
+
+ (9) Compile the test program pcretest.c (again, don't forget -DHAVE_CONFIG_H).
+     This needs the functions in the pcre and pcreposix libraries when linking.
+     It also needs the pcre_printint.src source file, which it #includes.
+
+(10) Run pcretest on the testinput files in the testdata directory, and check
+     that the output matches the corresponding testoutput files. Note that the
+     supplied files are in Unix format, with just LF characters as line
+     terminators. You may need to edit them to change this if your system uses
+     a different convention. If you are using Windows, you probably should use
+     the wintestinput3 file instead of testinput3 (and the corresponding output
+     file). This is a locale test; wintestinput3 sets the locale to "french"
+     rather than "fr_FR", and there some minor output differences.
+
+(11) If you want to use the pcregrep command, compile and link pcregrep.c; it
+     uses only the basic PCRE library (it does not need the pcreposix library).
 
 
 THE C++ WRAPPER FUNCTIONS
 
-The PCRE distribution now contains some C++ wrapper functions and tests,
+The PCRE distribution also contains some C++ wrapper functions and tests,
 contributed by Google Inc. On a system that can use "configure" and "make",
 the functions are automatically built into a library called pcrecpp. It should
 be straightforward to compile the .cc files manually on other systems. The
@@ -130,11 +158,199 @@ files called xxx_unittest.cc are test programs for each of the corresponding
 xxx.cc files.
 
 
-FURTHER REMARKS
+BUILDING FOR VIRTUAL PASCAL
 
-If you have a system without "configure" but where you can use a Makefile, edit
-Makefile.in to create Makefile, substituting suitable values for the variables
-at the head of the file.
+A script for building PCRE using Borland's C++ compiler for use with VPASCAL
+was contributed by Alexander Tokarev. Stefan Weber updated the script and added
+additional files. The following files in the distribution are for building PCRE
+for use with VP/Borland: makevp_c.txt, makevp_l.txt, makevp.bat, pcregexp.pas.
+
+
+STACK SIZE IN WINDOWS ENVIRONMENTS
+
+The default processor stack size of 1Mb in some Windows environments is too
+small for matching patterns that need much recursion. In particular, test 2 may
+fail because of this. Normally, running out of stack causes a crash, but there
+have been cases where the test program has just died silently. See your linker
+documentation for how to increase stack size if you experience problems. The
+Linux default of 8Mb is a reasonable choice for the stack, though even that can
+be too small for some pattern/subject combinations.
+
+PCRE has a compile configuration option to disable the use of stack for
+recursion so that heap is used instead. However, pattern matching is
+significantly slower when this is done. There is more about stack usage in the
+"pcrestack" documentation.
+
+
+LINKING PROGRAMS IN WINDOWS ENVIRONMENTS
+
+If you want to statically link a program against a PCRE library in the form of
+a non-dll .a file, you must define PCRE_STATIC before including pcre.h,
+otherwise the pcre_malloc() and pcre_free() exported functions will be declared
+__declspec(dllimport), with unwanted results.
+
+
+COMMENTS ABOUT WIN32 BUILDS (see also "BUILDING PCRE WITH CMAKE" below)
+
+There are two ways of building PCRE using the "configure, make, make install"
+paradigm on Windows systems: using MinGW or using Cygwin. These are not at all
+the same thing; they are completely different from each other. There is also
+support for building using CMake, which some users find a more straightforward
+way of building PCRE under Windows. However, the tests are not run
+automatically when CMake is used.
+
+The MinGW home page (http://www.mingw.org/) says this:
+
+  MinGW: A collection of freely available and freely distributable Windows
+  specific header files and import libraries combined with GNU toolsets that
+  allow one to produce native Windows programs that do not rely on any
+  3rd-party C runtime DLLs.
+
+The Cygwin home page (http://www.cygwin.com/) says this:
+
+  Cygwin is a Linux-like environment for Windows. It consists of two parts:
+
+  . A DLL (cygwin1.dll) which acts as a Linux API emulation layer providing
+    substantial Linux API functionality
+
+  . A collection of tools which provide Linux look and feel.
+
+  The Cygwin DLL currently works with all recent, commercially released x86 32
+  bit and 64 bit versions of Windows, with the exception of Windows CE.
+
+On both MinGW and Cygwin, PCRE should build correctly using:
+
+  ./configure && make && make install
+
+This should create two libraries called libpcre and libpcreposix, and, if you
+have enabled building the C++ wrapper, a third one called libpcrecpp. These are
+independent libraries: when you like with libpcreposix or libpcrecpp you must
+also link with libpcre, which contains the basic functions. (Some earlier
+releases of PCRE included the basic libpcre functions in libpcreposix. This no
+longer happens.)
+
+A user submitted a special-purpose patch that makes it easy to create
+"pcre.dll" under mingw32 using the "msys" environment. It provides "pcre.dll"
+as a special target. If you use this target, no other files are built, and in
+particular, the pcretest and pcregrep programs are not built. An example of how
+this might be used is:
+
+  ./configure --enable-utf --disable-cpp CFLAGS="-03 -s"; make pcre.dll
+
+Using Cygwin's compiler generates libraries and executables that depend on
+cygwin1.dll. If a library that is generated this way is distributed,
+cygwin1.dll has to be distributed as well. Since cygwin1.dll is under the GPL
+licence, this forces not only PCRE to be under the GPL, but also the entire
+application. A distributor who wants to keep their own code proprietary must
+purchase an appropriate Cygwin licence.
+
+MinGW has no such restrictions. The MinGW compiler generates a library or
+executable that can run standalone on Windows without any third party dll or
+licensing issues.
+
+But there is more complication:
+
+If a Cygwin user uses the -mno-cygwin Cygwin gcc flag, what that really does is
+to tell Cygwin's gcc to use the MinGW gcc. Cygwin's gcc is only acting as a
+front end to MinGW's gcc (if you install Cygwin's gcc, you get both Cygwin's
+gcc and MinGW's gcc). So, a user can:
+
+. Build native binaries by using MinGW or by getting Cygwin and using
+  -mno-cygwin.
+
+. Build binaries that depend on cygwin1.dll by using Cygwin with the normal
+  compiler flags.
+
+The test files that are supplied with PCRE are in Unix format, with LF
+characters as line terminators. It may be necessary to change the line
+terminators in order to get some of the tests to work. We hope to improve
+things in this area in future.
+
+
+BUILDING PCRE ON WINDOWS WITH CMAKE
+
+CMake is an alternative build facility that can be used instead of the
+traditional Unix "configure". CMake version 2.4.7 supports Borland makefiles,
+MinGW makefiles, MSYS makefiles, NMake makefiles, UNIX makefiles, Visual Studio
+6, Visual Studio 7, Visual Studio 8, and Watcom W8. The following instructions
+were contributed by a PCRE user.
+
+1.  Download CMake 2.4.7 or above from http://www.cmake.org/, install and ensure
+    that cmake\bin is on your path.
+
+2.  Unzip (retaining folder structure) the PCRE source tree into a source
+    directory such as C:\pcre.
+
+3.  Create a new, empty build directory: C:\pcre\build\
+
+4.  Run CMakeSetup from the Shell envirornment of your build tool, e.g., Msys
+    for Msys/MinGW or Visual Studio Command Prompt for VC/VC++
+
+5.  Enter C:\pcre\pcre-xx and C:\pcre\build for the source and build
+    directories, respectively
+
+6.  Hit the "Configure" button.
+
+7.  Select the particular IDE / build tool that you are using (Visual Studio,
+    MSYS makefiles, MinGW makefiles, etc.)
+
+8.  The GUI will then list several configuration options. This is where you can
+    enable UTF-8 support, etc.
+
+9.  Hit "Configure" again. The adjacent "OK" button should now be active.
+
+10. Hit "OK".
+
+11. The build directory should now contain a usable build system, be it a
+    solution file for Visual Studio, makefiles for MinGW, etc.
+
+
+USE OF RELATIVE PATHS WITH CMAKE ON WINDOWS
+
+A PCRE user comments as follows:
+
+I thought that others may want to know the current state of
+CMAKE_USE_RELATIVE_PATHS support on Windows.
+
+Here it is:
+-- AdditionalIncludeDirectories is only partially modified (only the
+first path - see below)
+-- Only some of the contained file paths are modified - shown below for
+pcre.vcproj
+-- It properly modifies
+
+I am sure CMake people can fix that if they want to. Until then one will
+need to replace existing absolute paths in project files with relative
+paths manually (e.g. from VS) - relative to project file location. I did
+just that before being told to try CMAKE_USE_RELATIVE_PATHS. Not a big
+deal.
+
+AdditionalIncludeDirectories="E:\builds\pcre\build;E:\builds\pcre\pcre-7.5;"
+AdditionalIncludeDirectories=".;E:\builds\pcre\pcre-7.5;"
+
+RelativePath="pcre.h">
+RelativePath="pcre_chartables.c">
+RelativePath="pcre_chartables.c.rule">
+
+
+TESTING WITH RUNTEST.BAT
+
+1. Copy RunTest.bat into the directory where pcretest.exe has been created.
+
+2. Edit RunTest.bat and insert a line that indentifies the relative location of
+   the pcre source, e.g.:
+
+   set srcdir=..\pcre-7.4-RC3
+
+3. Run RunTest.bat from a command shell environment. Test outputs will
+   automatically be compared to expected results, and discrepancies will
+   identified in the console output.
+
+4. To test pcrecpp, run pcrecpp_unittest.exe, pcre_stringpiece_unittest.exe and
+   pcre_scanner_unittest.exe.
+
+
+BUILDING UNDER WINDOWS WITH BCC5.5
 
 Michael Roy sent these comments about building PCRE under Windows with BCC5.5:
 
@@ -146,72 +362,6 @@ Michael Roy sent these comments about building PCRE under Windows with BCC5.5:
   When linking a project with BCC5.5, pcre.lib must be included before any of
   the libraries cw32.lib, cw32i.lib, cw32mt.lib, and cw32mti.lib on the command
   line.
-
-Some help in building a Win32 DLL of PCRE in GnuWin32 environments was
-contributed by Paul Sokolovsky. These environments are Mingw32
-(http://www.xraylith.wisc.edu/~khan/software/gnu-win32/) and CygWin
-(http://sourceware.cygnus.com/cygwin/). Paul comments:
-
-  For CygWin, set CFLAGS=-mno-cygwin, and do 'make dll'. You'll get
-  pcre.dll (containing pcreposix also), libpcre.dll.a, and dynamically
-  linked pgrep and pcretest. If you have /bin/sh, run RunTest (three
-  main test go ok, locale not supported).
-
-Changes to do MinGW with autoconf 2.50 were supplied by Fred Cox
-<sailorFred@yahoo.com>, who comments as follows:
-
-  If you are using the PCRE DLL, the normal Unix style configure && make &&
-  make check && make install should just work[*]. If you want to statically
-  link against the .a file, you must define PCRE_STATIC before including
-  pcre.h, otherwise the pcre_malloc and pcre_free exported functions will be
-  declared __declspec(dllimport), with hilarious results.  See the configure.in
-  and pcretest.c for how it is done for the static test.
-
-  Also, there will only be a libpcre.la, not a libpcreposix.la, as you
-  would expect from the Unix version. The single DLL includes the pcreposix
-  interface.
-
-[*] But note that the supplied test files are in Unix format, with just LF
-characters as line terminators. You will have to edit them to change to CR LF
-terminators.
-
-A script for building PCRE using Borland's C++ compiler for use with VPASCAL
-was contributed by Alexander Tokarev. It is called makevp.bat.
-
-These are some further comments about Win32 builds from Mark Evans. They
-were contributed before Fred Cox's changes were made, so it is possible that
-they may no longer be relevant.
-
-"The documentation for Win32 builds is a bit shy.  Under MSVC6 I
-followed their instructions to the letter, but there were still
-some things missing.
-
-(1) Must #define STATIC for entire project if linking statically.
-    (I see no reason to use DLLs for code this compact.)  This of
-    course is a project setting in MSVC under Preprocessor.
-
-(2) Missing some #ifdefs relating to the function pointers
-    pcre_malloc and pcre_free.  See my solution below.  (The stubs
-    may not be mandatory but they made me feel better.)"
-
-=========================
-#ifdef _WIN32
-#include <malloc.h>
-
-void* malloc_stub(size_t N)
-{ return malloc(N); }
-void free_stub(void* p)
-{ free(p); }
-void *(*pcre_malloc)(size_t) = &malloc_stub;
-void  (*pcre_free)(void *) = &free_stub;
-
-#else
-
-void *(*pcre_malloc)(size_t) = malloc;
-void  (*pcre_free)(void *) = free;
-
-#endif
-=========================
 
 
 BUILDING PCRE ON OPENVMS
@@ -278,4 +428,5 @@ $!   Locale could not be set to fr
 $!
 =========================
 
+Last Updated: 25 January 2008
 ****

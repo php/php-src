@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2006 University of Cambridge
+           Copyright (c) 1997-2008 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -41,16 +41,18 @@ POSSIBILITY OF SUCH DAMAGE.
 /* This module contains code for searching the table of Unicode character
 properties. */
 
+#include "config.h"
+
 #include "pcre_internal.h"
 
 #include "ucp.h"               /* Category definitions */
 #include "ucpinternal.h"       /* Internal table details */
-#include "ucptable.c"          /* The table itself */
+#include "ucptable.h"          /* The table itself */
 
 
 /* Table to translate from particular type value to the general value. */
 
-static int ucp_gentype[] = {
+static const int ucp_gentype[] = {
   ucp_C, ucp_C, ucp_C, ucp_C, ucp_C,  /* Cc, Cf, Cn, Co, Cs */
   ucp_L, ucp_L, ucp_L, ucp_L, ucp_L,  /* Ll, Lu, Lm, Lo, Lt */
   ucp_M, ucp_M, ucp_M,                /* Mc, Me, Mn */

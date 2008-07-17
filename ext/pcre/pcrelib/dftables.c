@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2006 University of Cambridge
+           Copyright (c) 1997-2008 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -38,14 +38,17 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-/* This is a freestanding support program to generate a file containing default
-character tables for PCRE. The tables are built according to the default C
+/* This is a freestanding support program to generate a file containing
+character tables for PCRE. The tables are built according to the current
 locale. Now that pcre_maketables is a function visible to the outside world, we
 make use of its code from here in order to be consistent. */
+
+#include "config.h"
 
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
+#include <locale.h>
 
 #include "pcre_internal.h"
 
@@ -55,45 +58,58 @@ make use of its code from here in order to be consistent. */
 
 int main(int argc, char **argv)
 {
-int i;
 FILE *f;
-const unsigned char *tables = pcre_maketables();
-const unsigned char *base_of_tables = tables;
+int i = 1;
+const unsigned char *tables;
+const unsigned char *base_of_tables;
 
-if (argc != 2)
+/* By default, the default C locale is used rather than what the building user
+happens to have set. However, if the -L option is given, set the locale from
+the LC_xxx environment variables. */
+
+if (argc > 1 && strcmp(argv[1], "-L") == 0)
+  {
+  setlocale(LC_ALL, "");        /* Set from environment variables */
+  i++;
+  }
+
+if (argc < i + 1)
   {
   fprintf(stderr, "dftables: one filename argument is required\n");
   return 1;
   }
 
-f = fopen(argv[1], "wb");
+tables = pcre_maketables();
+base_of_tables = tables;
+
+f = fopen(argv[i], "wb");
 if (f == NULL)
   {
   fprintf(stderr, "dftables: failed to open %s for writing\n", argv[1]);
   return 1;
   }
 
-/* There are two fprintf() calls here, because gcc in pedantic mode complains
-about the very long string otherwise. */
+/* There are several fprintf() calls here, because gcc in pedantic mode
+complains about the very long string otherwise. */
 
 fprintf(f,
   "/*************************************************\n"
   "*      Perl-Compatible Regular Expressions       *\n"
   "*************************************************/\n\n"
-  "/* This file is automatically written by the dftables auxiliary \n"
-  "program. If you edit it by hand, you might like to edit the Makefile to \n"
-  "prevent its ever being regenerated.\n\n");
+  "/* This file was automatically written by the dftables auxiliary\n"
+  "program. It contains character tables that are used when no external\n"
+  "tables are passed to PCRE by the application that calls it. The tables\n"
+  "are used only for characters whose code values are less than 256.\n\n");
 fprintf(f,
-  "This file contains the default tables for characters with codes less than\n"
-  "128 (ASCII characters). These tables are used when no external tables are\n"
-  "passed to PCRE.\n\n");
-fprintf(f,
-  "The following #include is present because without it gcc 4.x may remove\n"
+  "The following #includes are present because without them gcc 4.x may remove\n"
   "the array definition from the final binary if PCRE is built into a static\n"
   "library and dead code stripping is activated. This leads to link errors.\n"
   "Pulling in the header ensures that the array gets flagged as \"someone\n"
   "outside this compilation unit might reference this\" and so it will always\n"
   "be supplied to the linker. */\n\n"
+  "#ifdef HAVE_CONFIG_H\n"
+  "#include \"config.h\"\n"
+  "#endif\n\n"
   "#include \"pcre_internal.h\"\n\n");
 fprintf(f,
   "const unsigned char _pcre_default_tables[] = {\n\n"
@@ -171,7 +187,7 @@ if (isprint(i-8)) fprintf(f, " %c -", i-8);
   else fprintf(f, "%3d-", i-8);
 if (isprint(i-1)) fprintf(f, " %c ", i-1);
   else fprintf(f, "%3d", i-1);
-fprintf(f, " */\n\n/* End of chartables.c */\n");
+fprintf(f, " */\n\n/* End of pcre_chartables.c */\n");
 
 fclose(f);
 free((void *)base_of_tables);

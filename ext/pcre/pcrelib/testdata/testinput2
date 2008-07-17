@@ -28,9 +28,9 @@
     *** Failers
     def\nabc
 
-/ab\hdef/X
+/ab\idef/X
 
-/(?X)ab\hdef/X
+/(?X)ab\idef/X
 
 /x{5,4}/
 
@@ -82,7 +82,7 @@
     \O3abcb
     \O6abcb
     \O9abcb
-    \O12abcb 
+    \O12abcb
 
 /(a)bc|(a)(b)\2/I
     abc
@@ -126,7 +126,7 @@
 /abc/IP
     abc
     *** Failers
-    
+
 /^abc|def/IP
     abcdef
     abcdef\B
@@ -134,23 +134,23 @@
 /.*((abc)$|(def))/IP
     defabc
     \Zdefabc
-  
+
 /the quick brown fox/IP
     the quick brown fox
-    *** Failers 
-    The Quick Brown Fox 
+    *** Failers
+    The Quick Brown Fox
 
 /the quick brown fox/IPi
     the quick brown fox
-    The Quick Brown Fox 
+    The Quick Brown Fox
 
 /abc.def/IP
     *** Failers
     abc\ndef
-    
+
 /abc$/IP
     abc
-    abc\n 
+    abc\n
 
 /(abc)\2/IP
 
@@ -162,8 +162,8 @@
 /a[]b/
 
 /[^aeiou ]{3,}/I
-    co-processors, and for 
-    
+    co-processors, and for
+
 /<.*>/I
     abc<def>ghi<klm>nop
 
@@ -172,25 +172,25 @@
 
 /<.*>/IU
     abc<def>ghi<klm>nop
-    
+
 /(?U)<.*>/I
     abc<def>ghi<klm>nop
 
 /<.*?>/IU
     abc<def>ghi<klm>nop
-    
+
 /={3,}/IU
     abc========def
-    
+
 /(?U)={3,}?/I
     abc========def
-    
+
 /(?<!bar|cattle)foo/I
     foo
-    catfoo 
+    catfoo
     *** Failers
     the barfoo
-    and cattlefoo   
+    and cattlefoo
 
 /(?<=a+)b/
 
@@ -236,27 +236,27 @@
 
 /((?i)blah)\s+\1/I
 
-/((?i)b)/IDS
+/((?i)b)/IDZS
 
 /(a*b|(?i:c*(?-i)d))/IS
 
 /a$/I
     a
     a\n
-    *** Failers 
+    *** Failers
     \Za
-    \Za\n   
+    \Za\n
 
 /a$/Im
     a
     a\n
-    \Za\n   
-    *** Failers 
+    \Za\n
+    *** Failers
     \Za
-    
+
 /\Aabc/Im
 
-/^abc/Im 
+/^abc/Im
 
 /^((a+)(?U)([ab]+)(?-U)([bc]+)(\w*))/I
   aaaaabbbbbcccccdef
@@ -268,24 +268,24 @@
 /(?!alphabet)[ab]/IS
 
 /(?<=foo\n)^bar/Im
-    foo\nbarbar 
+    foo\nbarbar
     ***Failers
-    rhubarb 
+    rhubarb
     barbell
-    abc\nbarton 
+    abc\nbarton
 
 /^(?<=foo\n)bar/Im
-    foo\nbarbar 
+    foo\nbarbar
     ***Failers
-    rhubarb 
+    rhubarb
     barbell
-    abc\nbarton 
+    abc\nbarton
 
 /(?>^abc)/Im
     abc
     def\nabc
     *** Failers
-    defabc   
+    defabc
 
 /(?<=ab(c+)d)ef/
 
@@ -300,8 +300,8 @@
     a donkey-cart race
     *** Failers
     cart
-    horse-and-cart    
-      
+    horse-and-cart
+
 /(?<=ab(?i)x|y|z)/I
 
 /(?>.*)(?<=(abcd)|(xyz))/I
@@ -314,30 +314,30 @@
     ZZZ
     zZZ
     bZZ
-    BZZ     
+    BZZ
     *** Failers
-    ZZ 
-    abXYZZ 
+    ZZ
+    abXYZZ
     zzz
-    bzz  
+    bzz
 
 /(?<!(foo)a)bar/I
     bar
-    foobbar 
+    foobbar
     *** Failers
-    fooabar  
+    fooabar
 
 /This one is here because Perl 5.005_02 doesn't fail it/I
 
 /^(a)?(?(1)a|b)+$/I
     *** Failers
-    a 
+    a
 
 /This one is here because I think Perl 5.005_02 gets the setting of $1 wrong/I
 
 /^(a\1?){4}$/I
     aaaaaa
-    
+
 /These are syntax tests from Perl 5.005/I
 
 /a[b-a]/
@@ -398,8 +398,6 @@
 
 /(?(1?)a|b)/
 
-/(?(1)a|b|c)/
-
 /[a[:xyz:/
 
 /(?<=x+)y/
@@ -416,12 +414,12 @@
     abcd
     abcd\C2
     abcd\C5
-     
+
 /(.{20})/I
     abcdefghijklmnopqrstuvwxyz
     abcdefghijklmnopqrstuvwxyz\C1
     abcdefghijklmnopqrstuvwxyz\G1
-     
+
 /(.{15})/I
     abcdefghijklmnopqrstuvwxyz
     abcdefghijklmnopqrstuvwxyz\C1\G1
@@ -429,30 +427,30 @@
 /(.{16})/I
     abcdefghijklmnopqrstuvwxyz
     abcdefghijklmnopqrstuvwxyz\C1\G1\L
-    
+
 /^(a|(bc))de(f)/I
-    adef\G1\G2\G3\G4\L 
-    bcdef\G1\G2\G3\G4\L 
-    adefghijk\C0 
-    
+    adef\G1\G2\G3\G4\L
+    bcdef\G1\G2\G3\G4\L
+    adefghijk\C0
+
 /^abc\00def/I
-    abc\00def\L\C0 
-    
-/word ((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ 
-)((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ 
-)?)?)?)?)?)?)?)?)?otherword/IM
+    abc\00def\L\C0
 
-/.*X/ID
+/word ((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+
+)((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+
+)?)?)?)?)?)?)?)?)?otherword/I
 
-/.*X/IDs
+/.*X/IDZ
 
-/(.*X|^B)/ID
+/.*X/IDZs
 
-/(.*X|^B)/IDs
-    
-/(?s)(.*X|^B)/ID
+/(.*X|^B)/IDZ
 
-/(?s:.*X|^B)/ID
+/(.*X|^B)/IDZs
+
+/(?s)(.*X|^B)/IDZ
+
+/(?s:.*X|^B)/IDZ
 
 /\Biss\B/I+
     Mississippi
@@ -479,15 +477,15 @@
 
 /^iss/Ig+
     ississippi
-    
+
 /.*iss/Ig+
-    abciss\nxyzisspqr 
+    abciss\nxyzisspqr
 
 /.i./I+g
     Mississippi
     Mississippi\A
     Missouri river
-    Missouri river\A  
+    Missouri river\A
 
 /^.is/I+g
     Mississippi
@@ -568,15 +566,15 @@
 
 /ab\d+/I
 
-/a(?(1)b)/I
+/a(?(1)b)(.)/I
 
-/a(?(1)bag|big)/I
+/a(?(1)bag|big)(.)/I
 
-/a(?(1)bag|big)*/I
+/a(?(1)bag|big)*(.)/I
 
-/a(?(1)bag|big)+/I
+/a(?(1)bag|big)+(.)/I
 
-/a(?(1)b..|b..)/I
+/a(?(1)b..|b..)(.)/I
 
 /ab\d{0}e/I
 
@@ -586,14 +584,14 @@
     ab
     \
     *** Failers
-    \N     
-    
+    \N
+
 /|-/I
     abcd
     -abc
     \Nab-c
     *** Failers
-    \Nabc     
+    \Nabc
 
 /a*(b+)(z)(z)/IP
     aaaabbbbzzzz
@@ -603,8 +601,8 @@
     aaaabbbbzzzz\O3
     aaaabbbbzzzz\O4
     aaaabbbbzzzz\O5
-    
-/^.?abcd/IS 
+
+/^.?abcd/IS
 
 /\(             # ( at start
   (?:           # Non-capturing bracket
@@ -617,26 +615,26 @@
     (abcd)
     (abcd)xyz
     xyz(abcd)
-    (ab(xy)cd)pqr 
-    (ab(xycd)pqr 
-    () abc () 
+    (ab(xy)cd)pqr
+    (ab(xycd)pqr
+    () abc ()
     12(abcde(fsh)xyz(foo(bar))lmno)89
     *** Failers
-    abcd 
+    abcd
     abcd)
-    (abcd  
+    (abcd
 
 /\(  ( (?>[^()]+) | (?R) )* \) /Ixg
-    (ab(xy)cd)pqr 
+    (ab(xy)cd)pqr
     1(abcd)(x(y)z)pqr
 
 /\(  (?: (?>[^()]+) | (?R) ) \) /Ix
     (abcd)
     (ab(xy)cd)
-    (a(b(c)d)e) 
-    ((ab)) 
+    (a(b(c)d)e)
+    ((ab))
     *** Failers
-    ()   
+    ()
 
 /\(  (?: (?>[^()]+) | (?R) )? \) /Ix
     ()
@@ -666,53 +664,53 @@
     (ab(cd)ef)
     (ab(cd(ef)gh)ij)
 
-/^[[:alnum:]]/D
+/^[[:alnum:]]/DZ
 
-/^[[:^alnum:]]/D
+/^[[:^alnum:]]/DZ
 
-/^[[:alpha:]]/D
+/^[[:alpha:]]/DZ
 
-/^[[:^alpha:]]/D
-             
+/^[[:^alpha:]]/DZ
+
 /[_[:alpha:]]/IS
 
-/^[[:ascii:]]/D
+/^[[:ascii:]]/DZ
 
-/^[[:^ascii:]]/D
+/^[[:^ascii:]]/DZ
 
-/^[[:blank:]]/D
+/^[[:blank:]]/DZ
 
-/^[[:^blank:]]/D
+/^[[:^blank:]]/DZ
 
 /[\n\x0b\x0c\x0d[:blank:]]/IS
 
-/^[[:cntrl:]]/D
+/^[[:cntrl:]]/DZ
 
-/^[[:digit:]]/D
+/^[[:digit:]]/DZ
 
-/^[[:graph:]]/D
+/^[[:graph:]]/DZ
 
-/^[[:lower:]]/D
+/^[[:lower:]]/DZ
 
-/^[[:print:]]/D
+/^[[:print:]]/DZ
 
-/^[[:punct:]]/D
+/^[[:punct:]]/DZ
 
-/^[[:space:]]/D
+/^[[:space:]]/DZ
 
-/^[[:upper:]]/D
+/^[[:upper:]]/DZ
 
-/^[[:xdigit:]]/D
+/^[[:xdigit:]]/DZ
 
-/^[[:word:]]/D
+/^[[:word:]]/DZ
 
-/^[[:^cntrl:]]/D
+/^[[:^cntrl:]]/DZ
 
-/^[12[:^digit:]]/D
+/^[12[:^digit:]]/DZ
 
-/^[[:^blank:]]/D
+/^[[:^blank:]]/DZ
 
-/[01[:alpha:]%]/D
+/[01[:alpha:]%]/DZ
 
 /[[.ch.]]/I
 
@@ -722,18 +720,18 @@
 
 /[[:upper:]]/Ii
     A
-    a 
-    
+    a
+
 /[[:lower:]]/Ii
     A
-    a 
+    a
 
 /((?-i)[[:lower:]])[[:lower:]]/Ii
     ab
     aB
     *** Failers
     Ab
-    AB        
+    AB
 
 /[\200-\110]/I
 
@@ -749,120 +747,120 @@
 /(main(O)?)+/I
     mainmain
     mainOmain
-    
+
 /These are all cases where Perl does it differently (nested captures)/I
 
 /^(a(b)?)+$/I
     aba
-   
+
 /^(aa(bb)?)+$/I
-    aabbaa    
-    
+    aabbaa
+
 /^(aa|aa(bb))+$/I
-    aabbaa 
-    
+    aabbaa
+
 /^(aa(bb)??)+$/I
-    aabbaa    
-    
+    aabbaa
+
 /^(?:aa(bb)?)+$/I
-    aabbaa    
-    
+    aabbaa
+
 /^(aa(b(b))?)+$/I
-    aabbaa    
+    aabbaa
 
 /^(?:aa(b(b))?)+$/I
-    aabbaa    
+    aabbaa
 
 /^(?:aa(b(?:b))?)+$/I
-    aabbaa    
+    aabbaa
 
 /^(?:aa(bb(?:b))?)+$/I
-    aabbbaa    
-    
+    aabbbaa
+
 /^(?:aa(b(?:bb))?)+$/I
-    aabbbaa    
+    aabbbaa
 
 /^(?:aa(?:b(b))?)+$/I
-    aabbaa    
+    aabbaa
 
 /^(?:aa(?:b(bb))?)+$/I
-    aabbbaa    
+    aabbbaa
 
 /^(aa(b(bb))?)+$/I
-    aabbbaa    
+    aabbbaa
 
 /^(aa(bb(bb))?)+$/I
-    aabbbbaa    
+    aabbbbaa
 
-/--------------------------------------------------------------------/I 
-    
-/#/IxMD
+/--------------------------------------------------------------------/I
 
-/a#/IxMD
+/#/IxDZ
 
-/[\s]/D
+/a#/IxDZ
 
-/[\S]/D
+/[\s]/DZ
 
-/a(?i)b/D
+/[\S]/DZ
+
+/a(?i)b/DZ
     ab
     aB
-    *** Failers 
-    AB  
+    *** Failers
+    AB
 
-/(a(?i)b)/D
+/(a(?i)b)/DZ
     ab
     aB
-    *** Failers 
-    AB  
-    
-/   (?i)abc/IxD
+    *** Failers
+    AB
+
+/   (?i)abc/IxDZ
 
 /#this is a comment
-  (?i)abc/IxD
+  (?i)abc/IxDZ
 
-/123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890/D
+/123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890/DZ
 
-/\Q123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890/D
+/\Q123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890/DZ
 
-/\Q\E/D
+/\Q\E/DZ
     \
 
-/\Q\Ex/D
+/\Q\Ex/DZ
 
-/ \Q\E/D
+/ \Q\E/DZ
 
-/a\Q\E/D
+/a\Q\E/DZ
   abc
   bca
-  bac  
+  bac
 
-/a\Q\Eb/D
+/a\Q\Eb/DZ
   abc
 
-/\Q\Eabc/D
+/\Q\Eabc/DZ
 
-/x*+\w/D
+/x*+\w/DZ
     *** Failers
     xxxxx
-    
-/x?+/D
 
-/x++/D
+/x?+/DZ
 
-/x{1,3}+/D 
+/x++/DZ
 
-/(x)*+/D
+/x{1,3}+/DZ
+
+/(x)*+/DZ
 
 /^(\w++|\s++)*$/I
     now is the time for all good men to come to the aid of the party
     *** Failers
     this is not a line with only words and spaces!
-    
+
 /(\d++)(\w)/I
     12345a
     *** Failers
-    12345+ 
+    12345+
 
 /a++b/I
     aaab
@@ -875,14 +873,14 @@
 
 /([^()]++|\([^()]*\))+/I
     ((abc(ade)ufh()()x
-    
-/\(([^()]++|\([^()]+\))+\)/I 
+
+/\(([^()]++|\([^()]+\))+\)/I
     (abc)
     (abc(def)xyz)
     *** Failers
-    ((()aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa   
+    ((()aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
-/(abc){1,3}+/D
+/(abc){1,3}+/DZ
 
 /a+?+/I
 
@@ -892,17 +890,17 @@
 
 /a{2,3}?+b/IU
 
-/x(?U)a++b/D
+/x(?U)a++b/DZ
     xaaaab
 
-/(?U)xa++b/D
+/(?U)xa++b/DZ
     xaaaab
 
-/^((a+)(?U)([ab]+)(?-U)([bc]+)(\w*))/D
+/^((a+)(?U)([ab]+)(?-U)([bc]+)(\w*))/DZ
 
-/^x(?U)a+b/D
+/^x(?U)a+b/DZ
 
-/^x(?U)(a+)b/D
+/^x(?U)(a+)b/DZ
 
 /[.x.]/I
 
@@ -926,30 +924,30 @@
 
 /[[:space:]/I
 
-/[\s]/IDM
+/[\s]/IDZ
 
-/[[:space:]]/IDM
+/[[:space:]]/IDZ
 
-/[[:space:]abcde]/IDM
+/[[:space:]abcde]/IDZ
 
 /< (?: (?(R) \d++  | [^<>]*+) | (?R)) * >/Ix
     <>
     <abcd>
     <abc <123> hij>
     <abc <def> hij>
-    <abc<>def> 
-    <abc<>      
+    <abc<>def>
+    <abc<>
     *** Failers
     <abc
 
-|8J\$WE\<\.rX\+ix\[d1b\!H\#\?vV0vrK\:ZH1\=2M\>iV\;\?aPhFB\<\*vW\@QW\@sO9\}cfZA\-i\'w\%hKd6gt1UJP\,15_\#QY\$M\^Mss_U\/\]\&LK9\[5vQub\^w\[KDD\<EjmhUZ\?\.akp2dF\>qmj\;2\}YWFdYx\.Ap\]hjCPTP\(n28k\+3\;o\&WXqs\/gOXdr\$\:r\'do0\;b4c\(f_Gr\=\"\\4\)\[01T7ajQJvL\$W\~mL_sS\/4h\:x\*\[ZN\=KLs\&L5zX\/\/\>it\,o\:aU\(\;Z\>pW\&T7oP\'2K\^E\:x9\'c\[\%z\-\,64JQ5AeH_G\#KijUKghQw\^\\vea3a\?kka_G\$8\#\`\*kynsxzBLru\'\]k_\[7FrVx\}\^\=\$blx\>s\-N\%j\;D\*aZDnsw\:YKZ\%Q\.Kne9\#hP\?\+b3\(SOvL\,\^\;\&u5\@\?5C5Bhb\=m\-vEh_L15Jl\]U\)0RP6\{q\%L\^_z5E\'Dw6X\b|IDM
+|8J\$WE\<\.rX\+ix\[d1b\!H\#\?vV0vrK\:ZH1\=2M\>iV\;\?aPhFB\<\*vW\@QW\@sO9\}cfZA\-i\'w\%hKd6gt1UJP\,15_\#QY\$M\^Mss_U\/\]\&LK9\[5vQub\^w\[KDD\<EjmhUZ\?\.akp2dF\>qmj\;2\}YWFdYx\.Ap\]hjCPTP\(n28k\+3\;o\&WXqs\/gOXdr\$\:r\'do0\;b4c\(f_Gr\=\"\\4\)\[01T7ajQJvL\$W\~mL_sS\/4h\:x\*\[ZN\=KLs\&L5zX\/\/\>it\,o\:aU\(\;Z\>pW\&T7oP\'2K\^E\:x9\'c\[\%z\-\,64JQ5AeH_G\#KijUKghQw\^\\vea3a\?kka_G\$8\#\`\*kynsxzBLru\'\]k_\[7FrVx\}\^\=\$blx\>s\-N\%j\;D\*aZDnsw\:YKZ\%Q\.Kne9\#hP\?\+b3\(SOvL\,\^\;\&u5\@\?5C5Bhb\=m\-vEh_L15Jl\]U\)0RP6\{q\%L\^_z5E\'Dw6X\b|IDZ
 
-|\$\<\.X\+ix\[d1b\!H\#\?vV0vrK\:ZH1\=2M\>iV\;\?aPhFB\<\*vW\@QW\@sO9\}cfZA\-i\'w\%hKd6gt1UJP\,15_\#QY\$M\^Mss_U\/\]\&LK9\[5vQub\^w\[KDD\<EjmhUZ\?\.akp2dF\>qmj\;2\}YWFdYx\.Ap\]hjCPTP\(n28k\+3\;o\&WXqs\/gOXdr\$\:r\'do0\;b4c\(f_Gr\=\"\\4\)\[01T7ajQJvL\$W\~mL_sS\/4h\:x\*\[ZN\=KLs\&L5zX\/\/\>it\,o\:aU\(\;Z\>pW\&T7oP\'2K\^E\:x9\'c\[\%z\-\,64JQ5AeH_G\#KijUKghQw\^\\vea3a\?kka_G\$8\#\`\*kynsxzBLru\'\]k_\[7FrVx\}\^\=\$blx\>s\-N\%j\;D\*aZDnsw\:YKZ\%Q\.Kne9\#hP\?\+b3\(SOvL\,\^\;\&u5\@\?5C5Bhb\=m\-vEh_L15Jl\]U\)0RP6\{q\%L\^_z5E\'Dw6X\b|IDM
+|\$\<\.X\+ix\[d1b\!H\#\?vV0vrK\:ZH1\=2M\>iV\;\?aPhFB\<\*vW\@QW\@sO9\}cfZA\-i\'w\%hKd6gt1UJP\,15_\#QY\$M\^Mss_U\/\]\&LK9\[5vQub\^w\[KDD\<EjmhUZ\?\.akp2dF\>qmj\;2\}YWFdYx\.Ap\]hjCPTP\(n28k\+3\;o\&WXqs\/gOXdr\$\:r\'do0\;b4c\(f_Gr\=\"\\4\)\[01T7ajQJvL\$W\~mL_sS\/4h\:x\*\[ZN\=KLs\&L5zX\/\/\>it\,o\:aU\(\;Z\>pW\&T7oP\'2K\^E\:x9\'c\[\%z\-\,64JQ5AeH_G\#KijUKghQw\^\\vea3a\?kka_G\$8\#\`\*kynsxzBLru\'\]k_\[7FrVx\}\^\=\$blx\>s\-N\%j\;D\*aZDnsw\:YKZ\%Q\.Kne9\#hP\?\+b3\(SOvL\,\^\;\&u5\@\?5C5Bhb\=m\-vEh_L15Jl\]U\)0RP6\{q\%L\^_z5E\'Dw6X\b|IDZ
 
 /(.*)\d+\1/I
 
 /(.*)\d+/I
-    
+
 /(.*)\d+\1/Is
 
 /(.*)\d+/Is
@@ -958,7 +956,7 @@
 
 /((.*))\d+\1/I
     abc123bc
-    
+
 /a[b]/I
 
 /(?=a).*/I
@@ -977,13 +975,13 @@
 
 /()a/I
 
-/(?(1)ab|ac)/I
+/(?(1)ab|ac)(.)/I
 
-/(?(1)abz|acz)/I
+/(?(1)abz|acz)(.)/I
 
-/(?(1)abz)/I
+/(?(1)abz)(.)/I
 
-/(?(1)abz)123/I
+/(?(1)abz)(1)23/I
 
 /(a)+/I
 
@@ -1007,9 +1005,9 @@
 
 /^a/Im
   abcde
-  xy\nabc 
-  *** Failers 
-  xyabc 
+  xy\nabc
+  *** Failers
+  xyabc
 
 /c|abc/I
 
@@ -1019,24 +1017,24 @@
 
 /abc(?C)def/I
     abcdef
-    1234abcdef 
+    1234abcdef
     *** Failers
     abcxyz
-    abcxyzf   
+    abcxyzf
 
 /abc(?C)de(?C1)f/I
     123abcdef
-    
-/(?C1)\dabc(?C2)def/I 
+
+/(?C1)\dabc(?C2)def/I
     1234abcdef
     *** Failers
-    abcdef 
-    
+    abcdef
+
 /(?C255)ab/I
 
 /(?C256)ab/I
 
-/(?Cab)xx/I 
+/(?Cab)xx/I
 
 /(?C12vr)x/I
 
@@ -1046,21 +1044,21 @@
 
 /(abc)(?C)de(?C1)f/I
     123abcdef
-    123abcdef\C+ 
-    123abcdef\C- 
+    123abcdef\C+
+    123abcdef\C-
     *** Failers
-    123abcdef\C!1 
-    
+    123abcdef\C!1
+
 /(?C0)(abc(?C1))*/I
     abcabcabc
-    abcabc\C!1!3   
+    abcabc\C!1!3
     *** Failers
-    abcabcabc\C!1!3   
+    abcabcabc\C!1!3
 
 /(\d{3}(?C))*/I
     123\C+
     123456\C+
-    123456789\C+  
+    123456789\C+
 
 /((xyz)(?C)p|(?C1)xyzabc)/I
     xyzabc\C+
@@ -1070,20 +1068,20 @@
 
 /(?=(abc))(?C)abcdef/I
     abcdef\C+
-    
+
 /(?!(abc)(?C1)d)(?C2)abcxyz/I
-    abcxyz\C+ 
+    abcxyz\C+
 
 /(?<=(abc)(?C))xyz/I
    abcxyz\C+
-   
+
 /a(b+)(c*)(?C1)/I
     abbbbbccc\C*1
 
 /a(b+?)(c*?)(?C1)/I
     abbbbbccc\C*1
-   
-/(?C)abc/I 
+
+/(?C)abc/I
 
 /(?C)^abc/I
 
@@ -1102,7 +1100,7 @@
     xxab
     xxxab
     *** Failers
-    xyab   
+    xyab
 
 /(ab|(bc|(de|(?1))))/I
 
@@ -1111,48 +1109,48 @@
 /^([^()]|\((?1)*\))*$/I
     abc
     a(b)c
-    a(b(c))d  
+    a(b(c))d
     *** Failers)
-    a(b(c)d  
+    a(b(c)d
 
 /^>abc>([^()]|\((?1)*\))*<xyz<$/I
    >abc>123<xyz<
    >abc>1(2)3<xyz<
    >abc>(1(2)3)<xyz<
 
-/(a(?1)b)/D
+/(a(?1)b)/DZ
 
-/(a(?1)+b)/D
+/(a(?1)+b)/DZ
 
 /^\W*(?:((.)\W*(?1)\W*\2|)|((.)\W*(?3)\W*\4|\W*.\W*))\W*$/Ii
     1221
     Satan, oscillate my metallic sonatas!
     A man, a plan, a canal: Panama!
-    Able was I ere I saw Elba. 
+    Able was I ere I saw Elba.
     *** Failers
-    The quick brown fox  
-    
+    The quick brown fox
+
 /^(\d+|\((?1)([+*-])(?1)\)|-(?1))$/I
     12
     (((2+2)*-3)-7)
     -12
     *** Failers
     ((2+2)*-3)-7)
-         
+
 /^(x(y|(?1){2})z)/I
     xyz
-    xxyzxyzz 
+    xxyzxyzz
     *** Failers
     xxyzz
-    xxyzxyzxyzz   
+    xxyzxyzxyzz
 
 /((< (?: (?(R) \d++  | [^<>]*+) | (?2)) * >))/Ix
     <>
     <abcd>
     <abc <123> hij>
     <abc <def> hij>
-    <abc<>def> 
-    <abc<>      
+    <abc<>def>
+    <abc<>
     *** Failers
     <abc
 
@@ -1166,32 +1164,32 @@
 /^(a|b|c)=(?1)+/I
     a=a
     a=b
-    a=bc  
+    a=bc
 
 /^(a|b|c)=((?1))+/I
     a=a
     a=b
-    a=bc  
+    a=bc
 
-/a(?P<name1>b|c)d(?P<longername2>e)/D
+/a(?P<name1>b|c)d(?P<longername2>e)/DZ
     abde
-    acde 
+    acde
 
-/(?:a(?P<c>c(?P<d>d)))(?P<a>a)/D
+/(?:a(?P<c>c(?P<d>d)))(?P<a>a)/DZ
 
-/(?P<a>a)...(?P=a)bbb(?P>a)d/D
+/(?P<a>a)...(?P=a)bbb(?P>a)d/DZ
 
 /^\W*(?:(?P<one>(?P<two>.)\W*(?P>one)\W*(?P=two)|)|(?P<three>(?P<four>.)\W*(?P>three)\W*(?P=four)|\W*.\W*))\W*$/Ii
     1221
     Satan, oscillate my metallic sonatas!
     A man, a plan, a canal: Panama!
-    Able was I ere I saw Elba. 
+    Able was I ere I saw Elba.
     *** Failers
-    The quick brown fox  
-    
+    The quick brown fox
+
 /((?(R)a|b))\1(?1)?/I
   bb
-  bbaa 
+  bbaa
 
 /(.*)a/Is
 
@@ -1215,13 +1213,13 @@
 
 /(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)a\32/Is
 
-/(a)(bc)/IND
+/(a)(bc)/INDZ
   abc
 
-/(?P<one>a)(bc)/IND
+/(?P<one>a)(bc)/INDZ
   abc
 
-/(a)(?P<named>bc)/IND
+/(a)(?P<named>bc)/INDZ
 
 /(a+)*zz/I
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazzbbbbbb\M
@@ -1237,11 +1235,11 @@
     abcdefgh
     abcdefgh\C1\Gtwo
     abcdefgh\Cone\Ctwo
-    abcdefgh\Cthree  
+    abcdefgh\Cthree
 
-/(?P<Tes>)(?P<Test>)/D
+/(?P<Tes>)(?P<Test>)/DZ
 
-/(?P<Test>)(?P<Tes>)/D
+/(?P<Test>)(?P<Tes>)/DZ
 
 /(?P<Z>zz)(?P<A>aa)/I
     zzaa\CZ
@@ -1254,47 +1252,47 @@
 "\[((?P<elem>\d+)(,(?P>elem))*)\]"I
     [10,20,30,5,5,4,4,2,43,23,4234]
     *** Failers
-    []  
+    []
 
 "\[((?P<elem>\d+)(,(?P>elem))*)?\]"I
     [10,20,30,5,5,4,4,2,43,23,4234]
-    [] 
+    []
 
-/(a(b(?2)c))?/D
+/(a(b(?2)c))?/DZ
 
-/(a(b(?2)c))*/D
+/(a(b(?2)c))*/DZ
 
-/(a(b(?2)c)){0,2}/D
+/(a(b(?2)c)){0,2}/DZ
 
-/[ab]{1}+/D
+/[ab]{1}+/DZ
 
 /((w\/|-|with)*(free|immediate)*.*?shipping\s*[!.-]*)/Ii
      Baby Bjorn Active Carrier - With free SHIPPING!!
 
 /((w\/|-|with)*(free|immediate)*.*?shipping\s*[!.-]*)/IiS
      Baby Bjorn Active Carrier - With free SHIPPING!!
-     
-/a*.*b/ISD
 
-/(a|b)*.?c/ISD 
+/a*.*b/ISDZ
 
-/abc(?C255)de(?C)f/D
+/(a|b)*.?c/ISDZ
 
-/abcde/ICD
+/abc(?C255)de(?C)f/DZ
+
+/abcde/ICDZ
   abcde
-  abcdfe 
-  
-/a*b/ICD
+  abcdfe
+
+/a*b/ICDZ
   ab
   aaaab
-  aaaacb   
+  aaaacb
 
-/a+b/ICD
+/a+b/ICDZ
   ab
   aaaab
-  aaaacb   
+  aaaacb
 
-/(abc|def)x/ICD
+/(abc|def)x/ICDZ
   abcx
   defx
   abcdefzx
@@ -1302,43 +1300,43 @@
 /(ab|cd){3,4}/IC
   ababab
   abcdabcd
-  abcdcdcdcdcd  
+  abcdcdcdcdcd
 
-/([ab]{,4}c|xy)/ICD
+/([ab]{,4}c|xy)/ICDZ
     Note: that { does NOT introduce a quantifier
 
-/([ab]{1,4}c|xy){4,5}?123/ICD
+/([ab]{1,4}c|xy){4,5}?123/ICDZ
     aacaacaacaacaac123
 
 /\b.*/I
   ab cd\>1
-  
-/\b.*/Is 
+
+/\b.*/Is
   ab cd\>1
-  
+
 /(?!.bcd).*/I
-  Xbcd12345 
+  Xbcd12345
 
 /abcde/I
     ab\P
     abc\P
     abcd\P
-    abcde\P   
+    abcde\P
     the quick brown abc\P
     ** Failers\P
     the quick brown abxyz fox\P
-    
+
 "^(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|1[012])/(20)?\d\d$"I
     13/05/04\P
     13/5/2004\P
-    02/05/09\P 
+    02/05/09\P
     1\P
     1/2\P
     1/2/0\P
-    1/2/04\P    
+    1/2/04\P
     0\P
     02/\P
-    02/0\P   
+    02/0\P
     02/1\P
     ** Failers\P
     \P
@@ -1346,14 +1344,14 @@
     33/4/04\P
     3/13/04\P
     0/1/2003\P
-    0/\P 
-    02/0/\P 
-    02/13\P  
+    0/\P
+    02/0/\P
+    02/13\P
 
 /0{0,2}ABC/I
-    
+
 /\d{3,}ABC/I
-    
+
 /\d*ABC/I
 
 /[abc]+DE/I
@@ -1364,7 +1362,7 @@
     b\P
     c\P
     c12\P
-    c123\P      
+    c123\P
 
 /^(?:\d){3,5}X/I
     1\P
@@ -1373,17 +1371,17 @@
     1234\P
     1234X
     12345\P
-    12345X      
-    *** Failers 
-    1X 
-    123456\P 
+    12345X
+    *** Failers
+    1X
+    123456\P
 
 /abc/I>testsavedregex
 <testsavedregex
     abc
     ** Failers
     bca
-    
+
 /abc/IF>testsavedregex
 <testsavedregex
     abc
@@ -1394,14 +1392,14 @@
 <testsavedregex
     abc
     ** Failers
-    def  
-    
+    def
+
 /(a|b)/ISF>testsavedregex
 <testsavedregex
     abc
     ** Failers
-    def  
-    
+    def
+
 ~<(\w+)/?>(.)*</(\1)>~smgI
     <!DOCTYPE seite SYSTEM "http://www.lco.lineas.de/xmlCms.dtd">\n<seite>\n<dokumenteninformation>\n<seitentitel>Partner der LCO</seitentitel>\n<sprache>de</sprache>\n<seitenbeschreibung>Partner der LINEAS Consulting\nGmbH</seitenbeschreibung>\n<schluesselworte>LINEAS Consulting GmbH Hamburg\nPartnerfirmen</schluesselworte>\n<revisit>30 days</revisit>\n<robots>index,follow</robots>\n<menueinformation>\n<aktiv>ja</aktiv>\n<menueposition>3</menueposition>\n<menuetext>Partner</menuetext>\n</menueinformation>\n<lastedited>\n<autor>LCO</autor>\n<firma>LINEAS Consulting</firma>\n<datum>15.10.2003</datum>\n</lastedited>\n</dokumenteninformation>\n<inhalt>\n\n<absatzueberschrift>Die Partnerfirmen der LINEAS Consulting\nGmbH</absatzueberschrift>\n\n<absatz><link ziel="http://www.ca.com/" zielfenster="_blank">\n<bild name="logo_ca.gif" rahmen="no"/></link> <link\nziel="http://www.ey.com/" zielfenster="_blank"><bild\nname="logo_euy.gif" rahmen="no"/></link>\n</absatz>\n\n<absatz><link ziel="http://www.cisco.de/" zielfenster="_blank">\n<bild name="logo_cisco.gif" rahmen="ja"/></link></absatz>\n\n<absatz><link ziel="http://www.atelion.de/"\nzielfenster="_blank"><bild\nname="logo_atelion.gif" rahmen="no"/></link>\n</absatz>\n\n<absatz><link ziel="http://www.line-information.de/"\nzielfenster="_blank">\n<bild name="logo_line_information.gif" rahmen="no"/></link>\n</absatz>\n\n<absatz><bild name="logo_aw.gif" rahmen="no"/></absatz>\n\n<absatz><link ziel="http://www.incognis.de/"\nzielfenster="_blank"><bild\nname="logo_incognis.gif" rahmen="no"/></link></absatz>\n\n<absatz><link ziel="http://www.addcraft.com/"\nzielfenster="_blank"><bild\nname="logo_addcraft.gif" rahmen="no"/></link></absatz>\n\n<absatz><link ziel="http://www.comendo.com/"\nzielfenster="_blank"><bild\nname="logo_comendo.gif" rahmen="no"/></link></absatz>\n\n</inhalt>\n</seite>
 
@@ -1409,34 +1407,34 @@
 
 /line\nbreak/I
     this is a line\nbreak
-    line one\nthis is a line\nbreak in the second line 
+    line one\nthis is a line\nbreak in the second line
 
 /line\nbreak/If
     this is a line\nbreak
-    ** Failers 
-    line one\nthis is a line\nbreak in the second line 
+    ** Failers
+    line one\nthis is a line\nbreak in the second line
 
 /line\nbreak/Imf
     this is a line\nbreak
-    ** Failers 
-    line one\nthis is a line\nbreak in the second line 
+    ** Failers
+    line one\nthis is a line\nbreak in the second line
 
 /ab.cd/IP
     ab-cd
-    ab=cd 
+    ab=cd
     ** Failers
     ab\ncd
 
 /ab.cd/IPs
     ab-cd
-    ab=cd 
+    ab=cd
     ab\ncd
 
 /(?i)(?-i)AbCd/I
     AbCd
     ** Failers
-    abcd  
-    
+    abcd
+
 /a{11111111111111111111}/I
 
 /(){64294967295}/I
@@ -1460,35 +1458,35 @@
 
 /[^()]*(?:\((?R)\)[^()]*)*/I
     (this(and)that
-    (this(and)that) 
+    (this(and)that)
     (this(and)that)stuff
 
 /[^()]*(?:\((?>(?R))\)[^()]*)*/I
     (this(and)that
-    (this(and)that) 
-    
+    (this(and)that)
+
 /[^()]*(?:\((?R)\))*[^()]*/I
     (this(and)that
-    (this(and)that) 
+    (this(and)that)
 
 /(?:\((?R)\))*[^()]*/I
     (this(and)that
-    (this(and)that) 
-    ((this)) 
+    (this(and)that)
+    ((this))
 
 /(?:\((?R)\))|[^()]*/I
     (this(and)that
-    (this(and)that) 
+    (this(and)that)
     (this)
-    ((this)) 
-    
+    ((this))
+
 /a(b)c/IPN
     abc
-    
+
 /a(?P<name>b)c/IPN
-    abc  
-    
-/\x{100}/I 
+    abc
+
+/\x{100}/I
 
 /\x{0000ff}/I
 
@@ -1496,44 +1494,44 @@
 
 /^((?P<A>a1)|(?P<A>a2)b)/IJ
     a1b\CA
-    a2b\CA 
+    a2b\CA
     ** Failers
-    a1b\CZ\CA 
-    
+    a1b\CZ\CA
+
 /^(?P<A>a)(?P<A>b)/IJ
     ab\CA
-    
+
 /^(?P<A>a)(?P<A>b)|cd/IJ
     ab\CA
-    cd\CA 
-  
+    cd\CA
+
 /^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/IJ
-    cdefgh\CA 
-  
+    cdefgh\CA
+
 /^((?P<A>a1)|(?P<A>a2)b)/IJ
     a1b\GA
-    a2b\GA 
+    a2b\GA
     ** Failers
-    a1b\GZ\GA 
-    
+    a1b\GZ\GA
+
 /^(?P<A>a)(?P<A>b)/IJ
     ab\GA
-    
+
 /^(?P<A>a)(?P<A>b)|cd/IJ
     ab\GA
-    cd\GA 
-  
+    cd\GA
+
 /^(?P<A>a)(?P<A>b)|cd(?P<A>ef)(?P<A>gh)/IJ
-    cdefgh\GA 
-  
+    cdefgh\GA
+
 /(?J)^((?P<A>a1)|(?P<A>a2)b)/I
     a1b\CA
-    a2b\CA 
-    
+    a2b\CA
+
 /^(?P<A>a) (?J:(?P<B>b)(?P<B>c)) (?P<A>d)/I
 
 / In this next test, J is not set at the outer level; consequently it isn't
-set in the pattern's options; consequently pcre_get_named_substring() produces 
+set in the pattern's options; consequently pcre_get_named_substring() produces
 a random value. /Ix
 
 /^(?P<A>a) (?J:(?P<B>b)(?P<B>c)) (?P<C>d)/I
@@ -1543,7 +1541,7 @@ a random value. /Ix
     aabc
     bc
     ** Failers
-    abc   
+    abc
 
 /(?:(?(ZZ)a|b)(?P<ZZ>X))+/I
     bXaX
@@ -1562,7 +1560,7 @@ a random value. /Ix
 
 /(?:(?(A)(?P=A)a|b)(?P<A>X|Y))+/I
     bXXaYYaY
-    bXYaXXaX  
+    bXYaXXaX
 
 /()()()()()()()()()(?:(?(A)(?P=A)a|b)(?P<A>X|Y))+/I
     bXXaYYaY
@@ -1571,7 +1569,7 @@ a random value. /Ix
 
 /\s*,\s*/IS
     \x0b,\x0b
-    \x0c,\x0d 
+    \x0c,\x0d
 
 /^abc/Im
     xyz\nabc
@@ -1579,51 +1577,51 @@ a random value. /Ix
     xyz\r\nabc\<lf>
     xyz\rabc\<cr>
     xyz\r\nabc\<crlf>
-    ** Failers 
+    ** Failers
     xyz\nabc\<cr>
     xyz\r\nabc\<cr>
     xyz\nabc\<crlf>
     xyz\rabc\<crlf>
     xyz\rabc\<lf>
-    
+
 /abc$/Im<lf>
     xyzabc
-    xyzabc\n 
-    xyzabc\npqr 
-    xyzabc\r\<cr> 
-    xyzabc\rpqr\<cr> 
-    xyzabc\r\n\<crlf> 
-    xyzabc\r\npqr\<crlf> 
+    xyzabc\n
+    xyzabc\npqr
+    xyzabc\r\<cr>
+    xyzabc\rpqr\<cr>
+    xyzabc\r\n\<crlf>
+    xyzabc\r\npqr\<crlf>
     ** Failers
-    xyzabc\r 
-    xyzabc\rpqr 
-    xyzabc\r\n 
-    xyzabc\r\npqr 
-    
+    xyzabc\r
+    xyzabc\rpqr
+    xyzabc\r\n
+    xyzabc\r\npqr
+
 /^abc/Im<cr>
     xyz\rabcdef
     xyz\nabcdef\<lf>
-    ** Failers  
+    ** Failers
     xyz\nabcdef
-       
+
 /^abc/Im<lf>
     xyz\nabcdef
     xyz\rabcdef\<cr>
-    ** Failers  
+    ** Failers
     xyz\rabcdef
-       
+
 /^abc/Im<crlf>
     xyz\r\nabcdef
     xyz\rabcdef\<cr>
-    ** Failers  
+    ** Failers
     xyz\rabcdef
-    
+
 /^abc/Im<bad>
 
 /abc/I
     xyz\rabc\<bad>
-    abc  
-       
+    abc
+
 /.*/I<lf>
     abc\ndef
     abc\rdef
@@ -1651,7 +1649,7 @@ a random value. /Ix
  ()()()()()()()()()()()()()()()()()()()()
  ()()()()()()()()()()()()()()()()()()()()
  (.(.))/Ix
-    XY\O400  
+    XY\O400
 
 /(a*b|(?i:c*(?-i)d))/IS
 
@@ -1667,18 +1665,18 @@ a random value. /Ix
 
 /(d?|c)[ab]xyz/IS
 
-/^a*b\d/D
+/^a*b\d/DZ
 
-/^a*+b\d/D
+/^a*+b\d/DZ
 
-/^a*?b\d/D
+/^a*?b\d/DZ
 
-/^a+A\d/D
+/^a+A\d/DZ
     aaaA5
     ** Failers
-    aaaa5 
+    aaaa5
 
-/^a*A\d/IiD
+/^a*A\d/IiDZ
     aaaA5
     aaaa5
 
@@ -1696,141 +1694,141 @@ a random value. /Ix
  a
  ))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
  ))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
- ))) 
-/Ix  
+ )))
+/Ix
   large nest
 
-/a*\d/B
+/a*\d/BZ
 
-/a*\D/B
+/a*\D/BZ
 
-/0*\d/B
+/0*\d/BZ
 
-/0*\D/B
+/0*\D/BZ
 
-/a*\s/B
+/a*\s/BZ
 
-/a*\S/B
+/a*\S/BZ
 
-/ *\s/B
+/ *\s/BZ
 
-/ *\S/B
+/ *\S/BZ
 
-/a*\w/B
+/a*\w/BZ
 
-/a*\W/B
+/a*\W/BZ
 
-/=*\w/B
+/=*\w/BZ
 
-/=*\W/B
+/=*\W/BZ
 
-/\d*a/B
+/\d*a/BZ
 
-/\d*2/B
+/\d*2/BZ
 
-/\d*\d/B
+/\d*\d/BZ
 
-/\d*\D/B
+/\d*\D/BZ
 
-/\d*\s/B
+/\d*\s/BZ
 
-/\d*\S/B
+/\d*\S/BZ
 
-/\d*\w/B
+/\d*\w/BZ
 
-/\d*\W/B
+/\d*\W/BZ
 
-/\D*a/B
+/\D*a/BZ
 
-/\D*2/B
+/\D*2/BZ
 
-/\D*\d/B
+/\D*\d/BZ
 
-/\D*\D/B
+/\D*\D/BZ
 
-/\D*\s/B
+/\D*\s/BZ
 
-/\D*\S/B
+/\D*\S/BZ
 
-/\D*\w/B
+/\D*\w/BZ
 
-/\D*\W/B
+/\D*\W/BZ
 
-/\s*a/B
+/\s*a/BZ
 
-/\s*2/B
+/\s*2/BZ
 
-/\s*\d/B
+/\s*\d/BZ
 
-/\s*\D/B
+/\s*\D/BZ
 
-/\s*\s/B
+/\s*\s/BZ
 
-/\s*\S/B
+/\s*\S/BZ
 
-/\s*\w/B
+/\s*\w/BZ
 
-/\s*\W/B
+/\s*\W/BZ
 
-/\S*a/B
+/\S*a/BZ
 
-/\S*2/B
+/\S*2/BZ
 
-/\S*\d/B
+/\S*\d/BZ
 
-/\S*\D/B
+/\S*\D/BZ
 
-/\S*\s/B
+/\S*\s/BZ
 
-/\S*\S/B
+/\S*\S/BZ
 
-/\S*\w/B
+/\S*\w/BZ
 
-/\S*\W/B
+/\S*\W/BZ
 
-/\w*a/B
+/\w*a/BZ
 
-/\w*2/B
+/\w*2/BZ
 
-/\w*\d/B
+/\w*\d/BZ
 
-/\w*\D/B
+/\w*\D/BZ
 
-/\w*\s/B
+/\w*\s/BZ
 
-/\w*\S/B
+/\w*\S/BZ
 
-/\w*\w/B
+/\w*\w/BZ
 
-/\w*\W/B
+/\w*\W/BZ
 
-/\W*a/B
+/\W*a/BZ
 
-/\W*2/B
+/\W*2/BZ
 
-/\W*\d/B
+/\W*\d/BZ
 
-/\W*\D/B
+/\W*\D/BZ
 
-/\W*\s/B
+/\W*\s/BZ
 
-/\W*\S/B
+/\W*\S/BZ
 
-/\W*\w/B
+/\W*\w/BZ
 
-/\W*\W/B
+/\W*\W/BZ
 
-/[^a]+a/B
+/[^a]+a/BZ
 
-/[^a]+a/Bi
+/[^a]+a/BZi
 
-/[^a]+A/Bi
+/[^a]+A/BZi
 
-/[^a]+b/B
+/[^a]+b/BZ
 
-/[^a]+\d/B
+/[^a]+\d/BZ
 
-/a*[^a]/B
+/a*[^a]/BZ
 
 /(?P<abc>x)(?P<xyz>y)/I
     xy\Cabc\Cxyz
@@ -1848,8 +1846,8 @@ a random value. /Ix
     bXaX
     bXbX
     ** Failers
-    aXaX   
-    aXbX 
+    aXaX
+    aXbX
 
 /^(?P>abc)(?<abcd>xxx)/
 
@@ -1857,60 +1855,60 @@ a random value. /Ix
     xx
     xy
     yy
-    yx   
+    yx
 
 /^(?P>abc)(?P<abc>x|y)/
     xx
     xy
     yy
-    yx   
+    yx
 
 /^((?(abc)a|b)(?<abc>x|y))+/
     bxay
-    bxby 
+    bxby
     ** Failers
-    axby  
+    axby
 
 /^(((?P=abc)|X)(?<abc>x|y))+/
     XxXxxx
     XxXyyx
     XxXyxx
     ** Failers
-    x  
+    x
 
 /^(?1)(abc)/
     abcabc
 
 /^(?:(?:\1|X)(a|b))+/
     Xaaa
-    Xaba 
+    Xaba
 
-/^[\E\Qa\E-\Qz\E]+/B
-    
-/^[a\Q]bc\E]/B
-    
-/^[a-\Q\E]/B
+/^[\E\Qa\E-\Qz\E]+/BZ
 
-/^(?P>abc)[()](?<abc>)/B
+/^[a\Q]bc\E]/BZ
 
-/^((?(abc)y)[()](?P<abc>x))+/B
+/^[a-\Q\E]/BZ
+
+/^(?P>abc)[()](?<abc>)/BZ
+
+/^((?(abc)y)[()](?P<abc>x))+/BZ
     (xy)x
-    
-/^(?P>abc)\Q()\E(?<abc>)/B 
 
-/^(?P>abc)[a\Q(]\E(](?<abc>)/B 
+/^(?P>abc)\Q()\E(?<abc>)/BZ
+
+/^(?P>abc)[a\Q(]\E(](?<abc>)/BZ
 
 /^(?P>abc) # this is (a comment)
-  (?<abc>)/Bx 
+  (?<abc>)/BZx
 
 /^\W*(?:(?<one>(?<two>.)\W*(?&one)\W*\k<two>|)|(?<three>(?<four>.)\W*(?&three)\W*\k'four'|\W*.\W*))\W*$/Ii
     1221
     Satan, oscillate my metallic sonatas!
     A man, a plan, a canal: Panama!
-    Able was I ere I saw Elba. 
+    Able was I ere I saw Elba.
     *** Failers
-    The quick brown fox  
-    
+    The quick brown fox
+
 /(?=(\w+))\1:/I
     abcd:
 
@@ -1921,28 +1919,28 @@ a random value. /Ix
     a:aaxyz
     ab:ababxyz
     ** Failers
-    a:axyz   
-    ab:abxyz 
+    a:axyz
+    ab:abxyz
 
 /(?'abc'a|b)(?<abc>d|e)\k<abc>{2}/J
     adaa
     ** Failers
     addd
-    adbb   
+    adbb
 
 /(?'abc'a|b)(?<abc>d|e)(?&abc){2}/J
     bdaa
     bdab
     ** Failers
-    bddd   
+    bddd
 
 /^(?<ab>a)? (?(<ab>)b|c) (?('ab')d|e)/x
     abd
-    ce 
-    
+    ce
+
 /(?(<bc))/
 
-/(?(''))/ 
+/(?(''))/
 
 /(?('R')stuff)/
 
@@ -1959,16 +1957,16 @@ a random value. /Ix
 
 /^(?(DEFINE) (?<A> a) (?<B> b) )  (?&A) (?&B) /x
     abcd
-    
+
 /(?<NAME>(?&NAME_PAT))\s+(?<ADDR>(?&ADDRESS_PAT))
   (?(DEFINE)
   (?<NAME_PAT>[a-z]+)
   (?<ADDRESS_PAT>\d+)
   )/x
     metcalfe 33
- 
+
 /^(?(DEFINE) abc | xyz ) /x
-    
+
 /(?(DEFINE) abc) xyz/xI
 
 /(?(DEFINE) abc){3} xyz/x
@@ -1979,12 +1977,15 @@ a random value. /Ix
 
 /^a.b/<lf>
     a\rb
-    a\nb\<cr> 
+    a\nb\<cr>
+    a\x85b\<anycrlf> 
     ** Failers
     a\nb
     a\nb\<any>
-    a\rb\<cr>   
-    a\rb\<any>   
+    a\rb\<cr>
+    a\rb\<any>
+    a\x85b\<any> 
+    a\rb\<anycrlf>
 
 /^abc./mgx<any>
     abc1 \x0aabc2 \x0babc3xx \x0cabc4 \x0dabc5xx \x0d\x0aabc6 \x85abc7 \x{2028}abc8 \x{2029}abc9 JUNK
@@ -1996,55 +1997,55 @@ a random value. /Ix
 
 /a/<any><crlf>
 
-/^a\Rb/
+/^a\Rb/<bsr_unicode>
     a\nb
     a\rb
     a\r\nb
     a\x0bb
     a\x0cb
-    a\x85b   
+    a\x85b
     ** Failers
-    a\n\rb    
+    a\n\rb
 
-/^a\R*b/
+/^a\R*b/<bsr_unicode>
     ab
     a\nb
     a\rb
     a\r\nb
     a\x0bb
     a\x0cb
-    a\x85b   
-    a\n\rb    
-    a\n\r\x85\x0cb 
+    a\x85b
+    a\n\rb
+    a\n\r\x85\x0cb
 
-/^a\R+b/
+/^a\R+b/<bsr_unicode>
     a\nb
     a\rb
     a\r\nb
     a\x0bb
     a\x0cb
-    a\x85b   
-    a\n\rb    
-    a\n\r\x85\x0cb 
+    a\x85b
+    a\n\rb
+    a\n\r\x85\x0cb
     ** Failers
-    ab  
-    
-/^a\R{1,3}b/
+    ab
+
+/^a\R{1,3}b/<bsr_unicode>
     a\nb
     a\n\rb
     a\n\r\x85b
-    a\r\n\r\nb 
-    a\r\n\r\n\r\nb 
+    a\r\n\r\nb
+    a\r\n\r\n\r\nb
     a\n\r\n\rb
-    a\n\n\r\nb 
+    a\n\n\r\nb
     ** Failers
     a\n\n\n\rb
     a\r
 
-/^a[\R]b/
+/^a[\R]b/<bsr_unicode>
     aRb
     ** Failers
-    a\nb  
+    a\nb
 
 /(?&abc)X(?<abc>P)/I
     abcPXP123
@@ -2058,7 +2059,7 @@ a random value. /Ix
     10.0.0.0
     ** Failers
     10.6
-    455.3.4.5   
+    455.3.4.5
 
 /\b(?&byte)(\.(?&byte)){3}(?(DEFINE)(?<byte>2[0-4]\d|25[0-5]|1\d\d|[1-9]?\d))/
     1.2.3.4
@@ -2066,12 +2067,12 @@ a random value. /Ix
     10.0.0.0
     ** Failers
     10.6
-    455.3.4.5   
-    
+    455.3.4.5
+
 /(?:a(?&abc)b)*(?<abc>x)/
     123axbaxbaxbx456
     123axbaxbaxb456
-      
+
 /(?:a(?&abc)b){1,5}(?<abc>x)/
     123axbaxbaxbx456
 
@@ -2109,25 +2110,618 @@ a random value. /Ix
 
 /.+foo/
     afoo
-    ** Failers 
-    \r\nfoo 
-    \nfoo 
+    ** Failers
+    \r\nfoo
+    \nfoo
 
 /.+foo/<crlf>
     afoo
-    \nfoo 
-    ** Failers 
-    \r\nfoo 
+    \nfoo
+    ** Failers
+    \r\nfoo
 
 /.+foo/<any>
     afoo
-    ** Failers 
-    \nfoo 
-    \r\nfoo 
+    ** Failers
+    \nfoo
+    \r\nfoo
 
 /.+foo/s
     afoo
-    \r\nfoo 
-    \nfoo 
+    \r\nfoo
+    \nfoo
+    
+/^$/mg<any>
+    abc\r\rxyz
+    abc\n\rxyz  
+    ** Failers 
+    abc\r\nxyz
+
+/(?m)^$/<any>g+
+    abc\r\n\r\n
+
+/(?m)^$|^\r\n/<any>g+ 
+    abc\r\n\r\n
+    
+/(?m)$/<any>g+ 
+    abc\r\n\r\n
+
+/abc.$/mgx<anycrlf>
+    abc1\x0a abc2\x0b abc3\x0c abc4\x0d abc5\x0d\x0a abc6\x85 abc7\x{2028} abc8\x{2029} abc9
+
+/^X/m
+    XABC
+    ** Failers 
+    XABC\B
+
+/(ab|c)(?-1)/BZ
+    abc
+
+/xy(?+1)(abc)/BZ
+    xyabcabc
+    ** Failers
+    xyabc  
+    
+/x(?-0)y/
+
+/x(?-1)y/
+
+/x(?+0)y/ 
+
+/x(?+1)y/
+
+/^(abc)?(?(-1)X|Y)/BZ
+    abcX
+    Y
+    ** Failers
+    abcY   
+    
+/^((?(+1)X|Y)(abc))+/BZ 
+    YabcXabc
+    YabcXabcXabc
+    ** Failers
+    XabcXabc  
+
+/(?(-1)a)/BZ
+
+/((?(-1)a))/BZ
+
+/((?(-2)a))/BZ
+
+/^(?(+1)X|Y)(.)/BZ
+    Y!
+
+/(foo)\Kbar/
+    foobar
+   
+/(foo)(\Kbar|baz)/
+    foobar
+    foobaz 
+
+/(foo\Kbar)baz/
+    foobarbaz
+
+/(?<A>tom|bon)-\k{A}/
+    tom-tom
+    bon-bon 
+    ** Failers
+    tom-bon  
+
+/(?<A>tom|bon)-\g{A}/
+    tom-tom
+    bon-bon 
+    
+/\g{A/ 
+
+/(?|(abc)|(xyz))/BZ
+   >abc<
+   >xyz< 
+
+/(x)(?|(abc)|(xyz))(x)/BZ
+    xabcx
+    xxyzx 
+
+/(x)(?|(abc)(pqr)|(xyz))(x)/BZ
+    xabcpqrx
+    xxyzx 
+
+/(?|(abc)|(xyz))\1/
+    abcabc
+    xyzxyz 
+    ** Failers
+    abcxyz
+    xyzabc   
+    
+/(?|(abc)|(xyz))(?1)/
+    abcabc
+    xyzabc 
+    ** Failers 
+    xyzxyz 
+ 
+/\H\h\V\v/
+    X X\x0a
+    X\x09X\x0b
+    ** Failers
+    \xa0 X\x0a   
+    
+/\H*\h+\V?\v{3,4}/ 
+    \x09\x20\xa0X\x0a\x0b\x0c\x0d\x0a
+    \x09\x20\xa0\x0a\x0b\x0c\x0d\x0a
+    \x09\x20\xa0\x0a\x0b\x0c
+    ** Failers 
+    \x09\x20\xa0\x0a\x0b
+     
+/\H{3,4}/
+    XY  ABCDE
+    XY  PQR ST 
+    
+/.\h{3,4}./
+    XY  AB    PQRS
+
+/\h*X\h?\H+Y\H?Z/
+    >XNNNYZ
+    >  X NYQZ
+    ** Failers
+    >XYZ   
+    >  X NY Z
+
+/\v*X\v?Y\v+Z\V*\x0a\V+\x0b\V{2,3}\x0c/
+    >XY\x0aZ\x0aA\x0bNN\x0c
+    >\x0a\x0dX\x0aY\x0a\x0bZZZ\x0aAAA\x0bNNN\x0c
+
+/[\h]/BZ
+    >\x09<
+
+/[\h]+/BZ
+    >\x09\x20\xa0<
+
+/[\v]/BZ
+
+/[\H]/BZ
+
+/[^\h]/BZ
+
+/[\V]/BZ
+
+/[\x0a\V]/BZ
+
+/\H++X/BZ
+    ** Failers
+    XXXX
+    
+/\H+\hY/BZ
+    XXXX Y 
+
+/\H+ Y/BZ
+
+/\h+A/BZ
+
+/\v*B/BZ
+
+/\V+\x0a/BZ
+
+/A+\h/BZ
+
+/ *\H/BZ
+
+/A*\v/BZ
+
+/\x0b*\V/BZ
+
+/\d+\h/BZ
+
+/\d*\v/BZ
+
+/S+\h\S+\v/BZ
+
+/\w{3,}\h\w+\v/BZ
+
+/\h+\d\h+\w\h+\S\h+\H/BZ
+
+/\v+\d\v+\w\v+\S\v+\V/BZ
+
+/\H+\h\H+\d/BZ
+
+/\V+\v\V+\w/BZ
+
+/\( (?: [^()]* | (?R) )* \)/x
+(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(0(00)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)0)
+
+/[\E]AAA/
+
+/[\Q\E]AAA/
+
+/[^\E]AAA/
+
+/[^\Q\E]AAA/
+
+/[\E^]AAA/
+
+/[\Q\E^]AAA/
+
+/A(*PRUNE)B(*SKIP)C(*THEN)D(*COMMIT)E(*F)F(*FAIL)G(?!)H(*ACCEPT)I/BZ
+
+/^a+(*FAIL)/
+    aaaaaa
+    
+/a+b?c+(*FAIL)/
+    aaabccc
+
+/a+b?(*PRUNE)c+(*FAIL)/
+    aaabccc
+
+/a+b?(*COMMIT)c+(*FAIL)/
+    aaabccc
+    
+/a+b?(*SKIP)c+(*FAIL)/
+    aaabcccaaabccc
+
+/^(?:aaa(*THEN)\w{6}|bbb(*THEN)\w{5}|ccc(*THEN)\w{4}|\w{3})/
+    aaaxxxxxx
+    aaa++++++ 
+    bbbxxxxx
+    bbb+++++ 
+    cccxxxx
+    ccc++++ 
+    dddddddd   
+
+/^(aaa(*THEN)\w{6}|bbb(*THEN)\w{5}|ccc(*THEN)\w{4}|\w{3})/
+    aaaxxxxxx
+    aaa++++++ 
+    bbbxxxxx
+    bbb+++++ 
+    cccxxxx
+    ccc++++ 
+    dddddddd   
+
+/a+b?(*THEN)c+(*FAIL)/
+    aaabccc
+
+/(A (A|B(*ACCEPT)|C) D)(E)/x
+    ABX
+    AADE
+    ACDE
+    ** Failers
+    AD 
+        
+/^a+(*FAIL)/C
+    aaaaaa
+    
+/a+b?c+(*FAIL)/C
+    aaabccc
+
+/a+b?(*PRUNE)c+(*FAIL)/C
+    aaabccc
+
+/a+b?(*COMMIT)c+(*FAIL)/C
+    aaabccc
+    
+/a+b?(*SKIP)c+(*FAIL)/C
+    aaabcccaaabccc
+
+/a+b?(*THEN)c+(*FAIL)/C
+    aaabccc
+    
+/a(*PRUNE:XXX)b/
+
+/a(*MARK)b/ 
+
+/(?i:A{1,}\6666666666)/
+
+/\g6666666666/
+
+/[\g6666666666]/
+
+/(?1)\c[/
+
+/.+A/<crlf>
+    \r\nA
+    
+/\nA/<crlf>
+    \r\nA 
+
+/[\r\n]A/<crlf>
+    \r\nA 
+
+/(\r|\n)A/<crlf>
+    \r\nA 
+
+/a(*CR)b/
+
+/(*CR)a.b/
+    a\nb
+    ** Failers
+    a\rb  
+
+/(*CR)a.b/<lf>
+    a\nb
+    ** Failers
+    a\rb  
+
+/(*LF)a.b/<CRLF>
+    a\rb
+    ** Failers
+    a\nb  
+
+/(*CRLF)a.b/
+    a\rb
+    a\nb  
+    ** Failers
+    a\r\nb  
+
+/(*ANYCRLF)a.b/<CR>
+    ** Failers
+    a\rb
+    a\nb  
+    a\r\nb  
+
+/(*ANY)a.b/<cr>
+    ** Failers
+    a\rb
+    a\nb  
+    a\r\nb  
+    a\x85b 
+
+/a\Rb/I<bsr_anycrlf>
+    a\rb
+    a\nb
+    a\r\nb
+    ** Failers
+    a\x85b
+    a\x0bb     
+
+/a\Rb/I<bsr_unicode>
+    a\rb
+    a\nb
+    a\r\nb
+    a\x85b
+    a\x0bb     
+    ** Failers 
+    a\x85b\<bsr_anycrlf>
+    a\x0bb\<bsr_anycrlf>
+    
+/a\R?b/I<bsr_anycrlf>
+    a\rb
+    a\nb
+    a\r\nb
+    ** Failers
+    a\x85b
+    a\x0bb     
+
+/a\R?b/I<bsr_unicode>
+    a\rb
+    a\nb
+    a\r\nb
+    a\x85b
+    a\x0bb     
+    ** Failers 
+    a\x85b\<bsr_anycrlf>
+    a\x0bb\<bsr_anycrlf>
+    
+/a\R{2,4}b/I<bsr_anycrlf>
+    a\r\n\nb
+    a\n\r\rb
+    a\r\n\r\n\r\n\r\nb
+    ** Failers
+    a\x85\85b
+    a\x0b\0bb     
+
+/a\R{2,4}b/I<bsr_unicode>
+    a\r\rb
+    a\n\n\nb
+    a\r\n\n\r\rb
+    a\x85\85b
+    a\x0b\0bb     
+    ** Failers 
+    a\r\r\r\r\rb 
+    a\x85\85b\<bsr_anycrlf>
+    a\x0b\0bb\<bsr_anycrlf>
+ 
+/(*BSR_ANYCRLF)a\Rb/I
+    a\nb
+    a\rb 
+
+/(*BSR_UNICODE)a\Rb/I
+    a\x85b
+
+/(*BSR_ANYCRLF)(*CRLF)a\Rb/I
+    a\nb
+    a\rb 
+
+/(*CRLF)(*BSR_UNICODE)a\Rb/I
+    a\x85b
+
+/(*CRLF)(*BSR_ANYCRLF)(*CR)ab/I
+
+/(?<a>)(?&)/
+
+/(?<abc>)(?&a)/
+
+/(?<a>)(?&aaaaaaaaaaaaaaaaaaaaaaa)/
+
+/(?+-a)/
+
+/(?-+a)/
+
+/(?(-1))/
+
+/(?(+10))/
+
+/(?(10))/
+
+/(?(+2))()()/
+
+/(?(2))()()/
+
+/\k''/
+
+/\k<>/
+
+/\k{}/
+
+/(?P=)/
+
+/(?P>)/
+
+/(?!\w)(?R)/
+
+/(?=\w)(?R)/
+
+/(?<!\w)(?R)/
+
+/(?<=\w)(?R)/
+
+/[[:foo:]]/
+
+/[[:1234:]]/
+
+/[[:f\oo:]]/
+
+/[[: :]]/
+
+/[[:...:]]/
+
+/[[:l\ower:]]/
+
+/[[:abc\:]]/
+
+/[abc[:x\]pqr:]]/
+
+/[[:a\dz:]]/
+
+/^(?<name>a|b\g<name>c)/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/^(?<name>a|b\g'name'c)/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/^(a|b\g<1>c)/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/^(a|b\g'1'c)/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/^(a|b\g'-1'c)/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/(^(a|b\g<-1>c))/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/(^(a|b\g<-1'c))/
+
+/(^(a|b\g{-1}))/
+    bacxxx
+
+/(?-i:\g<name>)(?i:(?<name>a))/
+    XaaX
+    XAAX 
+
+/(?i:\g<name>)(?-i:(?<name>a))/
+    XaaX
+    ** Failers 
+    XAAX 
+
+/(?-i:\g<+1>)(?i:(a))/
+    XaaX
+    XAAX 
+
+/(?=(?<regex>(?#simplesyntax)\$(?<name>[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*)(?:\[(?<index>[a-zA-Z0-9_\x{7f}-\x{ff}]+|\$\g<name>)\]|->\g<name>(\(.*?\))?)?|(?#simple syntax withbraces)\$\{(?:\g<name>(?<indices>\[(?:\g<index>|'(?:\\.|[^'\\])*'|"(?:\g<regex>|\\.|[^"\\])*")\])?|\g<complex>|\$\{\g<complex>\})\}|(?#complexsyntax)\{(?<complex>\$(?<segment>\g<name>(\g<indices>*|\(.*?\))?)(?:->\g<segment>)*|\$\g<complex>|\$\{\g<complex>\})\}))\{/
+
+/(?<n>a|b|c)\g<n>*/
+   abc
+   accccbbb 
+
+/^(?+1)(?<a>x|y){0}z/
+    xzxx
+    yzyy 
+    ** Failers
+    xxz  
+
+/(\3)(\1)(a)/
+    cat
+
+/(\3)(\1)(a)/<JS>
+    cat
+    
+/TA]/
+    The ACTA] comes 
+
+/TA]/<JS>
+    The ACTA] comes 
+
+/(?2)[]a()b](abc)/
+    abcbabc
+
+/(?2)[^]a()b](abc)/
+    abcbabc
+
+/(?1)[]a()b](abc)/
+    abcbabc
+    ** Failers 
+    abcXabc
+
+/(?1)[^]a()b](abc)/
+    abcXabc
+    ** Failers 
+    abcbabc
+
+/(?2)[]a()b](abc)(xyz)/
+    xyzbabcxyz
+
+/(?&N)[]a(?<N>)](?<M>abc)/
+   abc<abc
+
+/(?&N)[]a(?<N>)](abc)/
+   abc<abc
+
+/a[]b/
+
+/a[^]b/
+
+/a[]b/<JS>
+    ** Failers
+    ab
+
+/a[]+b/<JS>
+    ** Failers
+    ab 
+
+/a[]*+b/<JS>
+    ** Failers
+    ab 
+
+/a[^]b/<JS>
+    aXb
+    a\nb 
+    ** Failers
+    ab  
+    
+/a[^]+b/<JS> 
+    aXb
+    a\nX\nXb 
+    ** Failers
+    ab  
+
+/a(?!)+b/
+
+/a(*FAIL)+b/
 
 / End of testinput2 /

@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2006 University of Cambridge
+           Copyright (c) 1997-2008 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -42,11 +42,12 @@ POSSIBILITY OF SUCH DAMAGE.
 one kind of newline is to be recognized. When a newline is found, its length is
 returned. In principle, we could implement several newline "types", each
 referring to a different set of newline characters. At present, PCRE supports
-only NLTYPE_FIXED, which gets handled without these functions, and NLTYPE_ALL,
-so for now the type isn't passed into the functions. It can easily be added
-later if required. The full list of Unicode newline characters is taken from
+only NLTYPE_FIXED, which gets handled without these functions, NLTYPE_ANYCRLF,
+and NLTYPE_ANY. The full list of Unicode newline characters is taken from
 http://unicode.org/unicode/reports/tr18/. */
 
+
+#include "config.h"
 
 #include "pcre_internal.h"
 
@@ -61,6 +62,7 @@ string that is being processed.
 
 Arguments:
   ptr          pointer to possible newline
+  type         the newline type
   endptr       pointer to the end of the string
   lenptr       where to return the length
   utf8         TRUE if in utf8 mode
@@ -69,12 +71,23 @@ Returns:       TRUE or FALSE
 */
 
 BOOL
-_pcre_is_newline(const uschar *ptr, const uschar *endptr, int *lenptr,
-  BOOL utf8)
+_pcre_is_newline(const uschar *ptr, int type, const uschar *endptr,
+  int *lenptr, BOOL utf8)
 {
 int c;
 if (utf8) { GETCHAR(c, ptr); } else c = *ptr;
-switch(c)
+
+if (type == NLTYPE_ANYCRLF) switch(c)
+  {
+  case 0x000a: *lenptr = 1; return TRUE;             /* LF */
+  case 0x000d: *lenptr = (ptr < endptr - 1 && ptr[1] == 0x0a)? 2 : 1;
+               return TRUE;                          /* CR */
+  default: return FALSE;
+  }
+
+/* NLTYPE_ANY */
+
+else switch(c)
   {
   case 0x000a:                                       /* LF */
   case 0x000b:                                       /* VT */
@@ -99,6 +112,7 @@ the string that is being processed.
 
 Arguments:
   ptr          pointer to possible newline
+  type         the newline type
   startptr     pointer to the start of the string
   lenptr       where to return the length
   utf8         TRUE if in utf8 mode
@@ -107,18 +121,31 @@ Returns:       TRUE or FALSE
 */
 
 BOOL
-_pcre_was_newline(const uschar *ptr, const uschar *startptr, int *lenptr,
-  BOOL utf8)
+_pcre_was_newline(const uschar *ptr, int type, const uschar *startptr,
+  int *lenptr, BOOL utf8)
 {
 int c;
 ptr--;
+#ifdef SUPPORT_UTF8
 if (utf8)
   {
   BACKCHAR(ptr);
   GETCHAR(c, ptr);
   }
 else c = *ptr;
-switch(c)
+#else   /* no UTF-8 support */
+c = *ptr;
+#endif  /* SUPPORT_UTF8 */
+
+if (type == NLTYPE_ANYCRLF) switch(c)
+  {
+  case 0x000a: *lenptr = (ptr > startptr && ptr[-1] == 0x0d)? 2 : 1;
+               return TRUE;                         /* LF */
+  case 0x000d: *lenptr = 1; return TRUE;            /* CR */
+  default: return FALSE;
+  }
+
+else switch(c)
   {
   case 0x000a: *lenptr = (ptr > startptr && ptr[-1] == 0x0d)? 2 : 1;
                return TRUE;                         /* LF */

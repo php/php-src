@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2006 University of Cambridge
+           Copyright (c) 1997-2008 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,8 @@ POSSIBILITY OF SUCH DAMAGE.
 see if it was compiled with the opposite endianness. If so, it uses an
 auxiliary local function to flip the appropriate bytes. */
 
+
+#include "config.h"
 
 #include "pcre_internal.h"
 
@@ -104,6 +106,7 @@ if (byteflip(re->magic_number, sizeof(re->magic_number)) != MAGIC_NUMBER)
 *internal_re = *re;           /* To copy other fields */
 internal_re->size = byteflip(re->size, sizeof(re->size));
 internal_re->options = byteflip(re->options, sizeof(re->options));
+internal_re->flags = (pcre_uint16)byteflip(re->flags, sizeof(re->flags));
 internal_re->top_bracket =
   (pcre_uint16)byteflip(re->top_bracket, sizeof(re->top_bracket));
 internal_re->top_backref =

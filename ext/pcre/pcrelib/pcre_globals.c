@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2006 University of Cambridge
+           Copyright (c) 1997-2008 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -46,37 +46,16 @@ indirection. These values can be changed by the caller, but are shared between
 all threads. However, when compiling for Virtual Pascal, things are done
 differently, and global variables are not used (see pcre.in). */
 
+#include "config.h"
 
 #include "pcre_internal.h"
 
-
 #ifndef VPCOMPAT
-
-/**************************************************************************
-This code used to be here for use when compiling as a C++ library. However,
-according to Dair Grant it is not needed: "
-
- Including 'extern "C"' in the declaration generates an "initialized and
- declared `extern'" warning from gcc 4.0.1. Since we include pcre_internal.h,
- which includes pcre.h, which declares these prototypes within an extern "C" {}
- block, we shouldn't need the prefix here.
-
-So, from Release 7.0 I have cut this out.
-
-#ifdef __cplusplus
-extern "C" void *(*pcre_malloc)(size_t) = malloc;
-extern "C" void  (*pcre_free)(void *) = free;
-extern "C" void *(*pcre_stack_malloc)(size_t) = malloc;
-extern "C" void  (*pcre_stack_free)(void *) = free;
-extern "C" int   (*pcre_callout)(pcre_callout_block *) = NULL;
-#else
-**************************************************************************/
-
-void *(*pcre_malloc)(size_t) = malloc;
-void  (*pcre_free)(void *) = free;
-void *(*pcre_stack_malloc)(size_t) = malloc;
-void  (*pcre_stack_free)(void *) = free;
-int   (*pcre_callout)(pcre_callout_block *) = NULL;
+PCRE_EXP_DATA_DEFN void *(*pcre_malloc)(size_t) = malloc;
+PCRE_EXP_DATA_DEFN void  (*pcre_free)(void *) = free;
+PCRE_EXP_DATA_DEFN void *(*pcre_stack_malloc)(size_t) = malloc;
+PCRE_EXP_DATA_DEFN void  (*pcre_stack_free)(void *) = free;
+PCRE_EXP_DATA_DEFN int   (*pcre_callout)(pcre_callout_block *) = NULL;
 #endif
 
 /* End of pcre_globals.c */

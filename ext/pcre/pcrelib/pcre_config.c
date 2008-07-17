@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2006 University of Cambridge
+           Copyright (c) 1997-2008 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,8 @@ POSSIBILITY OF SUCH DAMAGE.
 /* This module contains the external function pcre_config(). */
 
 
+#include "config.h"
+
 #include "pcre_internal.h"
 
 
@@ -58,7 +60,7 @@ Arguments:
 Returns:           0 if data returned, negative on error
 */
 
-PCRE_DATA_SCOPE int
+PCRE_EXP_DEFN int
 pcre_config(int what, void *where)
 {
 switch (what)
@@ -81,6 +83,14 @@ switch (what)
 
   case PCRE_CONFIG_NEWLINE:
   *((int *)where) = NEWLINE;
+  break;
+
+  case PCRE_CONFIG_BSR:
+#ifdef BSR_ANYCRLF
+  *((int *)where) = 1;
+#else
+  *((int *)where) = 0;
+#endif
   break;
 
   case PCRE_CONFIG_LINK_SIZE:

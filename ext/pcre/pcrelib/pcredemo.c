@@ -4,17 +4,27 @@
 
 /* This is a demonstration program to illustrate the most straightforward ways
 of calling the PCRE regular expression library from a C program. See the
-pcresample documentation for a short discussion.
+pcresample documentation for a short discussion ("man pcresample" if you have
+the PCRE man pages installed).
 
-Compile thuswise:
+In Unix-like environments, compile this program thuswise:
+
   gcc -Wall pcredemo.c -I/usr/local/include -L/usr/local/lib \
     -R/usr/local/lib -lpcre
 
 Replace "/usr/local/include" and "/usr/local/lib" with wherever the include and
-library files for PCRE are installed on your system. Only some operating
+library files for PCRE are installed on your system. You don't need -I and -L
+if PCRE is installed in the standard system libraries. Only some operating
 systems (e.g. Solaris) use the -R option.
-*/
 
+Building under Windows:
+
+If you want to statically link this program against a non-dll .a file, you must
+define PCRE_STATIC before including pcre.h, otherwise the pcre_malloc() and
+pcre_free() exported functions will be declared __declspec(dllimport), with
+unwanted results. So in this environment, uncomment the following line. */
+
+/* #define PCRE_STATIC */
 
 #include <stdio.h>
 #include <string.h>
@@ -128,8 +138,8 @@ printf("\nMatch succeeded at offset %d\n", ovector[0]);
 
 /*************************************************************************
 * We have found the first match within the subject string. If the output *
-* vector wasn't big enough, set its size to the maximum. Then output any *
-* substrings that were captured.                                         *
+* vector wasn't big enough, say so. Then output any substrings that were *
+* captured.                                                              *
 *************************************************************************/
 
 /* The output vector wasn't big enough */
@@ -154,7 +164,7 @@ for (i = 0; i < rc; i++)
 /**************************************************************************
 * That concludes the basic part of this demonstration program. We have    *
 * compiled a pattern, and performed a single match. The code that follows *
-* first shows how to access named substrings, and then how to code for    *
+* shows first how to access named substrings, and then how to code for    *
 * repeated matches on the same subject.                                   *
 **************************************************************************/
 

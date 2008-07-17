@@ -109,15 +109,15 @@ variable length. The first byte in an item is an opcode, and the length of the
 item is either implicit in the opcode or contained in the data bytes that
 follow it. 
 
-In many cases below "two-byte" data values are specified. This is in fact just
-a default when the number is an offset within the compiled pattern. PCRE can be
+In many cases below LINK_SIZE data values are specified for offsets within the 
+compiled pattern. The default value for LINK_SIZE is 2, but PCRE can be
 compiled to use 3-byte or 4-byte values for these offsets (impairing the
 performance). This is necessary only when patterns whose compiled length is
 greater than 64K are going to be processed. In this description, we assume the
-"normal" compilation options. "Two-byte" data values that are counts (e.g. for 
-quantifiers) are always just two bytes.
+"normal" compilation options. Data values that are counts (e.g. for
+quantifiers) are always just two bytes long.
 
-A list of all the opcodes follows:
+A list of the opcodes follows:
 
 Opcodes with no following data
 ------------------------------
@@ -125,17 +125,23 @@ Opcodes with no following data
 These items are all just one byte long
 
   OP_END                 end of pattern
-  OP_ANY                 match any character
+  OP_ANY                 match any one character other than newline
+  OP_ALLANY              match any one character, including newline
   OP_ANYBYTE             match any single byte, even in UTF-8 mode
   OP_SOD                 match start of data: \A
   OP_SOM,                start of match (subject + offset): \G
+  OP_SET_SOM,            set start of match (\K) 
   OP_CIRC                ^ (start of data, or after \n in multiline)
   OP_NOT_WORD_BOUNDARY   \W
   OP_WORD_BOUNDARY       \w
   OP_NOT_DIGIT           \D
   OP_DIGIT               \d
+  OP_NOT_HSPACE          \H
+  OP_HSPACE              \h  
   OP_NOT_WHITESPACE      \S
   OP_WHITESPACE          \s
+  OP_NOT_VSPACE          \V
+  OP_VSPACE              \v  
   OP_NOT_WORDCHAR        \W
   OP_WORDCHAR            \w
   OP_EODN                match end of data or \n at end: \Z
@@ -143,6 +149,13 @@ These items are all just one byte long
   OP_DOLL                $ (end of data, or before \n in multiline)
   OP_EXTUNI              match an extended Unicode character 
   OP_ANYNL               match any Unicode newline sequence 
+  
+  OP_ACCEPT              )
+  OP_COMMIT              ) 
+  OP_FAIL                ) These are Perl 5.10's "backtracking     
+  OP_PRUNE               ) control verbs".                         
+  OP_SKIP                )
+  OP_THEN                )
   
 
 Repeating single characters
@@ -306,9 +319,12 @@ maximally respectively. All three are followed by LINK_SIZE bytes giving (as a
 positive number) the offset back to the matching bracket opcode.
 
 If a subpattern is quantified such that it is permitted to match zero times, it
-is preceded by one of OP_BRAZERO or OP_BRAMINZERO. These are single-byte
-opcodes which tell the matcher that skipping this subpattern entirely is a
-valid branch.
+is preceded by one of OP_BRAZERO, OP_BRAMINZERO, or OP_SKIPZERO. These are
+single-byte opcodes that tell the matcher that skipping the following
+subpattern entirely is a valid branch. In the case of the first two, not 
+skipping the pattern is also valid (greedy and non-greedy). The third is used 
+when a pattern has the quantifier {0,0}. It cannot be entirely discarded, 
+because it may be called as a subroutine from elsewhere in the regex.
 
 A subpattern with an indefinite maximum repetition is replicated in the
 compiled data its minimum number of times (or once with OP_BRAZERO if the
@@ -399,4 +415,4 @@ at compile time, and so does not cause anything to be put into the compiled
 data.
 
 Philip Hazel
-November 2006
+April 2008

@@ -148,7 +148,7 @@
     \x{09f} 
   
 /^\p{Cs}/8
-    \x{dfff}
+    \?\x{dfff}
     ** Failers
     \x{09f} 
   
@@ -156,7 +156,7 @@
     a
     ** Failers 
     Z
-    \x{dfff}  
+    \x{e000}  
   
 /^\p{Lm}/8
     \x{2b0}
@@ -812,5 +812,17 @@
      ** Failers
      \x{1c5}XY
      AXY      
+
+/^\x{023a}+?(\x{0130}+)/8i
+  \x{023a}\x{2c65}\x{0130}
+  
+/^\x{023a}+([^X])/8i
+  \x{023a}\x{2c65}X
+ 
+/Check property support in non-UTF-8 mode/
+ 
+/\p{L}{4}/
+    123abcdefg
+    123abc\xc4\xc5zz
 
 / End / 

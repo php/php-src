@@ -1,7 +1,127 @@
 News about PCRE releases
 ------------------------
 
-Release 7.0 23-Nov-06
+
+Release 7.7 07-May-08
+---------------------
+
+This is once again mainly a bug-fix release, but there are a couple of new
+features.
+
+
+Release 7.6 28-Jan-08
+---------------------
+
+The main reason for having this release so soon after 7.5 is because it fixes a
+potential buffer overflow problem in pcre_compile() when run in UTF-8 mode. In
+addition, the CMake configuration files have been brought up to date.
+
+
+Release 7.5 10-Jan-08
+---------------------
+
+This is mainly a bug-fix release. However the ability to link pcregrep with
+libz or libbz2 and the ability to link pcretest with libreadline have been
+added. Also the --line-offsets and --file-offsets options were added to
+pcregrep.
+
+
+Release 7.4 21-Sep-07
+---------------------
+
+The only change of specification is the addition of options to control whether
+\R matches any Unicode line ending (the default) or just CR, LF, and CRLF.
+Otherwise, the changes are bug fixes and a refactoring to reduce the number of
+relocations needed in a shared library. There have also been some documentation
+updates, in particular, some more information about using CMake to build PCRE
+has been added to the NON-UNIX-USE file.
+
+
+Release 7.3 28-Aug-07
+---------------------
+
+Most changes are bug fixes. Some that are not:
+
+1. There is some support for Perl 5.10's experimental "backtracking control
+   verbs" such as (*PRUNE).
+
+2. UTF-8 checking is now as per RFC 3629 instead of RFC 2279; this is more
+   restrictive in the strings it accepts.
+
+3. Checking for potential integer overflow has been made more dynamic, and as a
+   consequence there is no longer a hard limit on the size of a subpattern that
+   has a limited repeat count.
+
+4. When CRLF is a valid line-ending sequence, pcre_exec() and pcre_dfa_exec()
+   no longer advance by two characters instead of one when an unanchored match
+   fails at CRLF if there are explicit CR or LF matches within the pattern.
+   This gets rid of some anomalous effects that previously occurred.
+
+5. Some PCRE-specific settings for varying the newline options at the start of
+   a pattern have been added.
+
+
+Release 7.2 19-Jun-07
+---------------------
+
+WARNING: saved patterns that were compiled by earlier versions of PCRE must be
+recompiled for use with 7.2 (necessitated by the addition of \K, \h, \H, \v,
+and \V).
+
+Correction to the notes for 7.1: the note about shared libraries for Windows is
+wrong. Previously, three libraries were built, but each could function
+independently. For example, the pcreposix library also included all the
+functions from the basic pcre library. The change is that the three libraries
+are no longer independent. They are like the Unix libraries. To use the
+pcreposix functions, for example, you need to link with both the pcreposix and
+the basic pcre library.
+
+Some more features from Perl 5.10 have been added:
+
+  (?-n) and (?+n) relative references for recursion and subroutines.
+
+  (?(-n) and (?(+n) relative references as conditions.
+
+  \k{name} and \g{name} are synonyms for \k<name>.
+
+  \K to reset the start of the matched string; for example, (foo)\Kbar
+  matches bar preceded by foo, but only sets bar as the matched string.
+
+  (?| introduces a group where the capturing parentheses in each alternative
+  start from the same number; for example, (?|(abc)|(xyz)) sets capturing
+  parentheses number 1 in both cases.
+
+  \h, \H, \v, \V match horizontal and vertical whitespace, respectively.
+
+
+Release 7.1 24-Apr-07
+---------------------
+
+There is only one new feature in this release: a linebreak setting of
+PCRE_NEWLINE_ANYCRLF. It is a cut-down version of PCRE_NEWLINE_ANY, which
+recognizes only CRLF, CR, and LF as linebreaks.
+
+A few bugs are fixed (see ChangeLog for details), but the major change is a
+complete re-implementation of the build system. This now has full Autotools
+support and so is now "standard" in some sense. It should help with compiling
+PCRE in a wide variety of environments.
+
+NOTE: when building shared libraries for Windows, three dlls are now built,
+called libpcre, libpcreposix, and libpcrecpp. Previously, everything was
+included in a single dll.
+
+Another important change is that the dftables auxiliary program is no longer
+compiled and run at "make" time by default. Instead, a default set of character
+tables (assuming ASCII coding) is used. If you want to use dftables to generate
+the character tables as previously, add --enable-rebuild-chartables to the
+"configure" command. You must do this if you are compiling PCRE to run on a
+system that uses EBCDIC code.
+
+There is a discussion about character tables in the README file. The default is
+not to use dftables so that that there is no problem when cross-compiling.
+
+
+Release 7.0 19-Dec-06
 ---------------------
 
 This release has a new major number because there have been some internal

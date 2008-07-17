@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2006 University of Cambridge
+           Copyright (c) 1997-2008 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,8 @@ POSSIBILITY OF SUCH DAMAGE.
 from the subject string after a regex match has succeeded. The original idea
 for these functions came from Scott Wimer. */
 
+
+#include "config.h"
 
 #include "pcre_internal.h"
 
@@ -185,7 +187,7 @@ const real_pcre *re = (const real_pcre *)code;
 int entrysize;
 char *first, *last;
 uschar *entry;
-if ((re->options & (PCRE_DUPNAMES | PCRE_JCHANGED)) == 0)
+if ((re->options & PCRE_DUPNAMES) == 0 && (re->flags & PCRE_JCHANGED) == 0)
   return pcre_get_stringnumber(code, stringname);
 entrysize = pcre_get_stringtable_entries(code, stringname, &first, &last);
 if (entrysize <= 0) return entrysize;
