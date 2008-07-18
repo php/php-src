@@ -135,8 +135,11 @@ PHP                                                                        NEWS
     . date_parse_from_format()
   . support for abbreviation and offset based timezone specifiers for
     DateTime::getOffset() and DateTime::getName().
-  . support for selectively listing timezone identifiers through
-    timezone_identifiers_list() / DateTimezone::listIdentifiers().
+  . support for selectively listing timezone identifiers by continent or
+    country code through timezone_identifiers_list() /
+    DateTimezone::listIdentifiers().
+  . timezone_location_get() / DateTimezone::getLocation() for retrieving
+    location information from timezones.
   . date_timestamp_set() / DateTime::setTimestamp() to set a Unix timestamp
     without invoking the date parser. (Scott)
   . date_timestamp_get() / DateTime::getTimestamp() to retrieve the Unix
