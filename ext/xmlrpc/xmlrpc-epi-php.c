@@ -879,6 +879,7 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data)
 {
 	zval *retval_ptr, **php_function;
 	zval* callback_params[1];
+	char *php_function_name;
 	xmlrpc_callback_data* pData = (xmlrpc_callback_data*)data;
 	TSRMLS_FETCH();
 
@@ -893,35 +894,39 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data)
 	while(1) {
 		if(zend_hash_get_current_data(Z_ARRVAL_P(pData->server->introspection_map), (void**)&php_function) == SUCCESS) {
 
-			/* php func prototype: function string user_func($user_params) */
-			if(call_user_function(CG(function_table), NULL, *php_function, retval_ptr, 1, callback_params TSRMLS_CC) == SUCCESS) {
-				XMLRPC_VALUE xData;
-				STRUCT_XMLRPC_ERROR err = {0};
+			if (zend_is_callable(*php_function, 0, &php_function_name)) {
+				/* php func prototype: function string user_func($user_params) */
+				if (call_user_function(CG(function_table), NULL, *php_function, retval_ptr, 1, callback_params TSRMLS_CC) == SUCCESS) {
+					XMLRPC_VALUE xData;
+					STRUCT_XMLRPC_ERROR err = {0};
 
-				/* return value should be a string */
-				convert_to_string(retval_ptr);
+					/* return value should be a string */
+					convert_to_string(retval_ptr);
 
-				xData = XMLRPC_IntrospectionCreateDescription(Z_STRVAL_P(retval_ptr), &err);
+					xData = XMLRPC_IntrospectionCreateDescription(Z_STRVAL_P(retval_ptr), &err);
 
-				if(xData) {
-					if(!XMLRPC_ServerAddIntrospectionData(server, xData)) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to add introspection data returned from %s(), improper element structure", Z_STRVAL_PP(php_function));
-					}
-					XMLRPC_CleanupValue(xData);
-				} else {
-					/* could not create description */
-					if(err.xml_elem_error.parser_code) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "xml parse error: [line %ld, column %ld, message: %s] Unable to add introspection data returned from %s()", 
-						err.xml_elem_error.column, err.xml_elem_error.line, err.xml_elem_error.parser_error, Z_STRVAL_PP(php_function));
+					if(xData) {
+						if(!XMLRPC_ServerAddIntrospectionData(server, xData)) {
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to add introspection data returned from %s(), improper element structure", php_function_name);
+						}
+						XMLRPC_CleanupValue(xData);
 					} else {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to add introspection data returned from %s()", 
-						Z_STRVAL_PP(php_function));
+						/* could not create description */
+						if(err.xml_elem_error.parser_code) {
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "xml parse error: [line %ld, column %ld, message: %s] Unable to add introspection data returned from %s()", 
+							err.xml_elem_error.column, err.xml_elem_error.line, err.xml_elem_error.parser_error, php_function_name);
+						} else {
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to add introspection data returned from %s()", php_function_name);
+						}
 					}
+				} else {
+					/* user func failed */
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error calling user introspection callback: %s()", php_function_name);
 				}
 			} else {
-				/* user func failed */
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error calling user introspection callback: %s()", Z_STRVAL_PP(php_function));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid callback '%s' passed", php_function_name);
 			}
+			efree(php_function_name);
 		} else {
 			break;
 		}
