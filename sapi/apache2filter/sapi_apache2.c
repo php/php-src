@@ -210,7 +210,7 @@ php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 	php_struct *ctx = SG(server_context);
 	const apr_array_header_t *arr = apr_table_elts(ctx->r->subprocess_env);
 	char *key, *val;
-	int new_val_len;
+	unsigned int new_val_len;
 	
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
 		if (!val) {
@@ -468,7 +468,6 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 	} else {
 		pbb = f->ctx = apr_palloc(f->r->pool, sizeof(*pbb));
 		pbb->bb = apr_brigade_create(f->r->pool, f->c->bucket_alloc);
-		pbb->total_len = 0;
 	}
 
 	if(ap_save_brigade(NULL, &pbb->bb, &bb, f->r->pool) != APR_SUCCESS) {
@@ -522,9 +521,9 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 	
 	zfd.handle.stream.handle = pbb;
 	zfd.handle.stream.reader = php_apache_read_stream;
-	zfd.handle.stream.closer = php_apache_close_stream;
-	zfd.handle.stream.fteller = php_apache_fteller_stream;
-	zfd.handle.stream.interactive = 0;
+	zfd.handle.stream.closer = NULL;
+	zfd.handle.stream.fsizer = php_apache_fsizer_stream;
+	zfd.handle.stream.isatty = 0;
 	
 	zfd.filename = f->r->filename;
 	zfd.opened_path = NULL;
@@ -710,20 +709,20 @@ static size_t php_apache_read_stream(void *handle, char *buf, size_t wantlen TSR
 	readlen = wantlen;
 	apr_brigade_flatten(rbb, buf, &readlen);
 	apr_brigade_cleanup(rbb);
-	pbb->total_len += readlen;
 	
 	return readlen;
 }
 
-static void php_apache_close_stream(void *handle TSRMLS_DC)
-{
-	return;	
-}
-
-static long php_apache_fteller_stream(void *handle TSRMLS_DC)
+static size_t php_apache_fsizer_stream(void *handle TSRMLS_DC)
 {
 	php_apr_bucket_brigade *pbb = (php_apr_bucket_brigade *)handle;
-	return pbb->total_len;
+	apr_off_t actual = 0;
+
+	if (apr_brigade_length(pbb->bb, 1, &actual) == APR_SUCCESS) {
+		return actual;
+	}
+
+	return 0;
 }
 
 AP_MODULE_DECLARE_DATA module php5_module = {
