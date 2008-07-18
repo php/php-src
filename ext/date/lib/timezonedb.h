@@ -18214,4 +18214,4 @@ const unsigned char timelib_timezone_db_data_builtin[259662] = {
 0x00, 0x00, 0x55, 0x54, 0x43, 0x00, 0x00, 0x00, 0x00, 0x89, 0x54, 0x40, 0x01, 0x12, 0xA8, 0x80, 
 0x00, 0x00, 0x00, 0x00, };
 
-const timelib_tzdb timezonedb_builtin = { "2008.4", 558, timezonedb_idx_builtin, timelib_timezone_db_data_builtin };
+const timelib_tzdb timezonedb_builtin = { "2008.4.1", 558, timezonedb_idx_builtin, timelib_timezone_db_data_builtin };
