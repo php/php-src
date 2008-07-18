@@ -80,12 +80,7 @@ static void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 # ifdef HAVE_LIBFREETYPE
 #  include <ft2build.h>
 #  include FT_FREETYPE_H
-# else
-#  ifdef HAVE_LIBTTF
-#   include <freetype.h>
-#  endif
 # endif
-# include "gdttf.h"
 #endif
 
 #ifndef M_PI
@@ -1390,13 +1385,6 @@ PHP_MINFO_FUNCTION(gd)
 #endif
 		php_info_print_table_row(2, "FreeType Version", tmp);
 	}
-#elif HAVE_LIBTTF
-	php_info_print_table_row(2, "FreeType Linkage", "with TTF library");
-	{
-		char tmp[256];
-		snprintf(tmp, sizeof(tmp), "%d.%d", TT_FREETYPE_MAJOR, TT_FREETYPE_MINOR);
-		php_info_print_table_row(2, "FreeType Version", tmp);
-	}
 #else
 	php_info_print_table_row(2, "FreeType Linkage", "with unknown library");
 #endif
@@ -1452,8 +1440,6 @@ PHP_FUNCTION(gd_info)
 	add_assoc_bool(return_value, "FreeType Support", 1);
 #if HAVE_LIBFREETYPE
 	add_assoc_string(return_value, "FreeType Linkage", "with freetype", 1);
-#elif HAVE_LIBTTF
-	add_assoc_string(return_value, "FreeType Linkage", "with TTF library", 1);
 #else
 	add_assoc_string(return_value, "FreeType Linkage", "with unknown library", 1);
 #endif
@@ -4143,8 +4129,6 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	error = gdImageStringTTF(im, brect, col, fontname, ptsize, angle, x, y, str);
 # endif
 
-#else /* !USE_GD_IMGSTRTTF */
-	error = gdttf(im, brect, col, fontname, ptsize, angle, x, y, str);
 #endif
 
 	if (error) {

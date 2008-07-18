@@ -28,7 +28,7 @@ if (PHP_GD != "no") {
 		CHECK_LIB("User32.lib", "gd", PHP_GD);
 		CHECK_LIB("Gdi32.lib", "gd", PHP_GD);
 
-		EXTENSION("gd", "gd.c gdttf.c", null, "-Iext/gd/libgd", "php_gd2.dll");
+		EXTENSION("gd", "gd.c", null, "-Iext/gd/libgd", "php_gd2.dll");
 		ADD_SOURCES("ext/gd/libgd", "gd2copypal.c gd_arc_f_buggy.c gd.c \
 			gdcache.c gdfontg.c gdfontl.c gdfontmb.c gdfonts.c gdfontt.c \
 			gdft.c gd_gd2.c gd_gd.c gd_gif_in.c gd_gif_out.c gdhelpers.c gd_io.c gd_io_dp.c \
