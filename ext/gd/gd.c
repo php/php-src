@@ -181,7 +181,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagesetstyle, 0)
 	ZEND_ARG_INFO(0, styles) /* ARRAY_INFO(0, styles, 0) */
 ZEND_END_ARG_INFO()
 
-#if HAVE_LIBGD20
 static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecreatetruecolor, 0)
 	ZEND_ARG_INFO(0, x_size)
@@ -199,7 +198,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagetruecolortopalette, 0)
 	ZEND_ARG_INFO(0, ditherFlag)
 	ZEND_ARG_INFO(0, colorsWanted)
 ZEND_END_ARG_INFO()
-#endif
 
 #if HAVE_GD_BUNDLED
 static
@@ -209,7 +207,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecolormatch, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_LIBGD20
 static
 ZEND_BEGIN_ARG_INFO(arginfo_imagesetthickness, 0)
 	ZEND_ARG_INFO(0, im)
@@ -250,7 +247,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagesavealpha, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, save)
 ZEND_END_ARG_INFO()
-#endif
 
 #if HAVE_GD_BUNDLED
 static
@@ -260,7 +256,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagelayereffect, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_LIBGD20
 static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecolorallocatealpha, 0)
 	ZEND_ARG_INFO(0, im)
@@ -310,7 +305,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecopyresampled, 0)
 	ZEND_ARG_INFO(0, src_w)
 	ZEND_ARG_INFO(0, src_h)
 ZEND_END_ARG_INFO()
-#endif
 
 #ifdef PHP_WIN32
 static
@@ -814,7 +808,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagesy, 0)
 ZEND_END_ARG_INFO()
 
 #ifdef ENABLE_GD_TTF
-#if HAVE_LIBGD20 && HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
+#if HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imageftbbox, 0, 0, 4)
 	ZEND_ARG_INFO(0, size)
@@ -1014,7 +1008,6 @@ const zend_function_entry gd_functions[] = {
 #endif
 	PHP_FE(imagecopyresized,						arginfo_imagecopyresized)
 	PHP_FE(imagecreate,								arginfo_imagecreate)
-#if HAVE_LIBGD20
 	PHP_FE(imagecreatetruecolor,					arginfo_imagecreatetruecolor)
 	PHP_FE(imageistruecolor,						arginfo_imageistruecolor)
 	PHP_FE(imagetruecolortopalette,					arginfo_imagetruecolortopalette)
@@ -1028,7 +1021,6 @@ const zend_function_entry gd_functions[] = {
 	PHP_FE(imagecolorclosestalpha,					arginfo_imagecolorclosestalpha)
 	PHP_FE(imagecolorexactalpha,					arginfo_imagecolorexactalpha)
 	PHP_FE(imagecopyresampled,						arginfo_imagecopyresampled)
-#endif
 
 #ifdef PHP_WIN32
 	PHP_FE(imagegrabwindow,							arginfo_imagegrabwindow)
@@ -1113,7 +1105,7 @@ const zend_function_entry gd_functions[] = {
 #ifdef ENABLE_GD_TTF
 	PHP_FE(imagettfbbox,							arginfo_imagettfbbox)
 	PHP_FE(imagettftext,							arginfo_imagettftext)
-#if HAVE_LIBGD20 && HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
+#if HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
 	PHP_FE(imageftbbox,								arginfo_imageftbbox)
 	PHP_FE(imagefttext,								arginfo_imagefttext)
 #endif
@@ -1168,7 +1160,7 @@ zend_module_entry gd_module_entry = {
 	NULL,
 #endif
 	NULL,
-#if HAVE_LIBGD20 && HAVE_GD_STRINGFT && (HAVE_LIBFREETYPE && (HAVE_GD_FONTCACHESHUTDOWN || HAVE_GD_FREEFONTCACHE))
+#if HAVE_GD_STRINGFT && (HAVE_LIBFREETYPE && (HAVE_GD_FONTCACHESHUTDOWN || HAVE_GD_FREEFONTCACHE))
 	PHP_RSHUTDOWN(gd),
 #else
 	NULL,
@@ -1262,14 +1254,12 @@ PHP_MINIT_FUNCTION(gd)
 	REGISTER_LONG_CONSTANT("IMG_COLOR_STYLEDBRUSHED", gdStyledBrushed, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_COLOR_TRANSPARENT", gdTransparent, CONST_CS | CONST_PERSISTENT);
 #endif
-#if HAVE_LIBGD20
 	/* for imagefilledarc */
 	REGISTER_LONG_CONSTANT("IMG_ARC_ROUNDED", gdArc, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_ARC_PIE", gdPie, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_ARC_CHORD", gdChord, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_ARC_NOFILL", gdNoFill, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_ARC_EDGED", gdEdged, CONST_CS | CONST_PERSISTENT);
-#endif
 /* GD2 image format types */
 #ifdef GD2_FMT_RAW
 	REGISTER_LONG_CONSTANT("IMG_GD2_RAW", GD2_FMT_RAW, CONST_CS | CONST_PERSISTENT);
@@ -1334,7 +1324,7 @@ PHP_MINIT_FUNCTION(gd)
 
 /* {{{ PHP_RSHUTDOWN_FUNCTION
  */
-#if HAVE_LIBGD20 && HAVE_GD_STRINGFT && (HAVE_LIBFREETYPE && (HAVE_GD_FONTCACHESHUTDOWN || HAVE_GD_FREEFONTCACHE))
+#if HAVE_GD_STRINGFT && (HAVE_LIBFREETYPE && (HAVE_GD_FONTCACHESHUTDOWN || HAVE_GD_FREEFONTCACHE))
 PHP_RSHUTDOWN_FUNCTION(gd)
 {
 #if HAVE_GD_FONTCACHESHUTDOWN
@@ -1349,14 +1339,8 @@ PHP_RSHUTDOWN_FUNCTION(gd)
 
 #if HAVE_GD_BUNDLED
 #define PHP_GD_VERSION_STRING "bundled (2.0.34 compatible)"
-#elif HAVE_LIBGD20
-#define PHP_GD_VERSION_STRING "2.0 or higher"
-#elif HAVE_GDIMAGECOLORRESOLVE
-#define PHP_GD_VERSION_STRING "1.6.2 or higher"
-#elif HAVE_LIBGD13
-#define PHP_GD_VERSION_STRING "between 1.3 and 1.6.1"
 #else
-#define PHP_GD_VERSION_STRING "1.2"
+#define PHP_GD_VERSION_STRING "2.0"
 #endif
 
 /* {{{ PHP_MINFO_FUNCTION
@@ -1710,7 +1694,6 @@ PHP_FUNCTION(imagesetstyle)
 }
 /* }}} */
 
-#if HAVE_LIBGD20
 /* {{{ proto resource imagecreatetruecolor(int x_size, int y_size)
    Create a new true color image */
 PHP_FUNCTION(imagecreatetruecolor)
@@ -1911,7 +1894,6 @@ PHP_FUNCTION(imagealphablending)
 }
 /* }}} */
 
-#if HAVE_LIBGD20
 /* {{{ proto bool imagesavealpha(resource im, bool on)
    Include alpha channel to a saved image */
 PHP_FUNCTION(imagesavealpha)
@@ -1931,7 +1913,6 @@ PHP_FUNCTION(imagesavealpha)
 	RETURN_TRUE;
 }
 /* }}} */
-#endif
 
 #if HAVE_GD_BUNDLED
 /* {{{ proto bool imagelayereffect(resource im, int effect)
@@ -2063,7 +2044,6 @@ PHP_FUNCTION(imagecopyresampled)
 	RETURN_TRUE;
 }
 /* }}} */
-#endif
 
 #ifdef PHP_WIN32
 /* {{{ proto resource imagegrabwindow(int window_handle [, int client_area])
@@ -2794,14 +2774,12 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				}
 				(*func_p)(im, i, fp);
 				break;
-#if HAVE_LIBGD20
 			case PHP_GDIMG_TYPE_GD:
 				if (im->trueColor){
 					gdImageTrueColorToPalette(im,1,256);
 				}
 				(*func_p)(im, fp);
 				break;
-#endif
 #ifdef HAVE_GD_GD2
 			case PHP_GDIMG_TYPE_GD2:
 				if (q == -1) {
@@ -2854,14 +2832,12 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				}
 				(*func_p)(im, q, tmp);
 				break;
-#if HAVE_LIBGD20
 			case PHP_GDIMG_TYPE_GD:
 				if (im->trueColor) {
 					gdImageTrueColorToPalette(im,1,256);
 				}
 				(*func_p)(im, tmp);
 				break;
-#endif
 #ifdef HAVE_GD_GD2
 			case PHP_GDIMG_TYPE_GD2:
 				if (q == -1) {
@@ -3056,7 +3032,6 @@ PHP_FUNCTION(imagecolorat)
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-#if HAVE_LIBGD20
 	if (gdImageTrueColor(im)) {
 		if (im->tpixels && gdImageBoundsSafe(im, x, y)) {
 			RETURN_LONG(gdImageTrueColorPixel(im, x, y));
@@ -3065,20 +3040,13 @@ PHP_FUNCTION(imagecolorat)
 			RETURN_FALSE;
 		}
 	} else {
-#endif
 		if (im->pixels && gdImageBoundsSafe(im, x, y)) {
-#if HAVE_LIBGD13
-			RETURN_LONG(im->pixels[y][x]);
-#else
 			RETURN_LONG(im->pixels[x][y]);
-#endif
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%ld,%ld is out of bounds", x, y);
 			RETURN_FALSE;
 		}
-#if HAVE_LIBGD20
 	}
-#endif
 }
 /* }}} */
 
@@ -3135,12 +3103,10 @@ PHP_FUNCTION(imagecolordeallocate)
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-#if HAVE_LIBGD20
 	/* We can return right away for a truecolor image as deallocating colours is meaningless here */
 	if (gdImageTrueColor(im)) {
 		RETURN_TRUE;
 	}
-#endif
 
 	col = index;
 
@@ -3234,7 +3200,6 @@ PHP_FUNCTION(imagecolorsforindex)
 
 	col = index;
 
-#if HAVE_LIBGD20
 	if ((col >= 0 && gdImageTrueColor(im)) || (!gdImageTrueColor(im) && col >= 0 && col < gdImageColorsTotal(im))) {
 		array_init(return_value);
 
@@ -3242,17 +3207,7 @@ PHP_FUNCTION(imagecolorsforindex)
 		add_assoc_long(return_value,"green", gdImageGreen(im,col));
 		add_assoc_long(return_value,"blue", gdImageBlue(im,col));
 		add_assoc_long(return_value,"alpha", gdImageAlpha(im,col));
-	}
-#else
-	if (col >= 0 && col < gdImageColorsTotal(im)) {
-		array_init(return_value);
-
-		add_assoc_long(return_value,"red",  im->red[col]);
-		add_assoc_long(return_value,"green", im->green[col]);
-		add_assoc_long(return_value,"blue", im->blue[col]);
-	}
-#endif
-	else {
+	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Color index %d out of range", col);
 		RETURN_FALSE;
 	}
@@ -3274,7 +3229,6 @@ PHP_FUNCTION(imagegammacorrect)
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-#if HAVE_LIBGD20
 	if (gdImageTrueColor(im))	{
 		int x, y, c;
 
@@ -3292,7 +3246,7 @@ PHP_FUNCTION(imagegammacorrect)
 		}
 		RETURN_TRUE;
 	}
-#endif
+
 	for (i = 0; i < gdImageColorsTotal(im); i++) {
 		im->red[i]   = (int)((pow((pow((im->red[i]   / 255.0), input)), 1.0 / output) * 255) + .5);
 		im->green[i] = (int)((pow((pow((im->green[i] / 255.0), input)), 1.0 / output) * 255) + .5);
@@ -3998,7 +3952,7 @@ PHP_FUNCTION(imagesy)
 
 #ifdef ENABLE_GD_TTF
 
-#if HAVE_LIBGD20 && HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
+#if  HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
 /* {{{ proto array imageftbbox(float size, float angle, string font_file, string text [, array extrainfo])
    Give the bounding box of a text using fonts via freetype2 */
 PHP_FUNCTION(imageftbbox)
@@ -4374,9 +4328,7 @@ PHP_FUNCTION(imagepstext)
 	int *f_ind;
 	int h_lines, v_lines, c_ind;
 	int rd, gr, bl, fg_rd, fg_gr, fg_bl, bg_rd, bg_gr, bg_bl;
-#if HAVE_LIBGD20
 	int fg_al, bg_al, al;
-#endif
 	int aa[16];
 	int amount_kern, add_width;
 	double angle = 0.0, extend;
@@ -4396,20 +4348,12 @@ PHP_FUNCTION(imagepstext)
 	ZEND_FETCH_RESOURCE(f_ind, int *, &fnt, -1, "Type 1 font", le_ps_font);
 
 	/* Ensure that the provided colors are valid */
-#if HAVE_LIBGD20
 	if (_fg < 0 || (!gdImageTrueColor(bg_img) && _fg > gdImageColorsTotal(bg_img))) {
-#else
-	if (_fg < 0 || _fg > gdImageColorsTotal(bg_img)) {
-#endif
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Foreground color index %ld out of range", _fg);
 		RETURN_FALSE;
 	}
 
-#if HAVE_LIBGD20
 	if (_bg < 0 || (!gdImageTrueColor(bg_img) && _fg > gdImageColorsTotal(bg_img))) {
-#else
-	if (_bg < 0 || _bg > gdImageColorsTotal(bg_img)) {
-#endif
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Background color index %ld out of range", _bg);
 		RETURN_FALSE;
 	}
@@ -4417,27 +4361,19 @@ PHP_FUNCTION(imagepstext)
 	fg_rd = gdImageRed  (bg_img, _fg);
 	fg_gr = gdImageGreen(bg_img, _fg);
 	fg_bl = gdImageBlue (bg_img, _fg);
-#if HAVE_LIBGD20
 	fg_al = gdImageAlpha(bg_img, _fg);
-#endif
 
 	bg_rd = gdImageRed  (bg_img, _bg);
 	bg_gr = gdImageGreen(bg_img, _bg);
 	bg_bl = gdImageBlue (bg_img, _bg);
-#if HAVE_LIBGD20
 	bg_al = gdImageAlpha(bg_img, _bg);
-#endif
 
 	for (i = 0; i < aa_steps; i++) {
 		rd = bg_rd + (double) (fg_rd - bg_rd) / aa_steps * (i + 1);
 		gr = bg_gr + (double) (fg_gr - bg_gr) / aa_steps * (i + 1);
 		bl = bg_bl + (double) (fg_bl - bg_bl) / aa_steps * (i + 1);
-#if HAVE_LIBGD20
 		al = bg_al + (double) (fg_al - bg_al) / aa_steps * (i + 1);
 		aa[i] = gdImageColorResolveAlpha(bg_img, rd, gr, bl, al);
-#else
-		aa[i] = gdImageColorResolve(bg_img, rd, gr, bl);
-#endif
 	}
 
 	T1_AASetBitsPerPixel(8);
@@ -4677,11 +4613,9 @@ static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold
 		return;
 	}
 
-#if HAVE_LIBGD20
 	if (im_org->trueColor) {
 		gdImageTrueColorToPalette(im_org, 1, 256);
 	}
-#endif
 
 	for (y = 0; y < dest_height; y++) {
 		for (x = 0; x < dest_width; x++) {
