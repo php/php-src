@@ -344,8 +344,9 @@ function copy_dsp_files()
 				newext = (ext.match(/apache2handler/) ? "php5apache2" : "php5" + ext);
 				address = address.replace(ext + ".dsp", newext + ".dsp");
 				srcpath = ".\\";
-				oldext = new RegExp(ext, "g");
+				oldext = new RegExp(('[^=\\\\]'+ext), "g");
 				contents = contents.replace(oldext, newext);
+				contents = contents.replace(ext + ".dll", newext + ".dll");
 			}
 
 			contents = contents.replace("CFG=" + ext, "CFG=" + newext);
