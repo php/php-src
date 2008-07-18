@@ -12,6 +12,9 @@ PHP                                                                        NEWS
 - Fixed a regression when using strip_tags() and < is within an attribute.
   (Scott)
 
+- Fixed bug #45556 (Return value from callback isn't freed). (Felipe)
+- Fixed bug #45555 (Segfault with invalid non-string as 
+  register_introspection_callback). (Christian Seiler)
 - Fixed bug #45486 (mb_send_mail(); header 'Content-Type: text/plain; charset=' 
   parsing incorrect). (Felipe)
 - Fixed bug #45485 (strip_tags and <?XML tag). (Felipe)
