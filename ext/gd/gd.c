@@ -3041,7 +3041,7 @@ PHP_FUNCTION(imagecolorat)
 		}
 	} else {
 		if (im->pixels && gdImageBoundsSafe(im, x, y)) {
-			RETURN_LONG(im->pixels[x][y]);
+			RETURN_LONG(im->pixels[y][x]);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%ld,%ld is out of bounds", x, y);
 			RETURN_FALSE;
