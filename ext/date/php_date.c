@@ -372,6 +372,15 @@ ZEND_BEGIN_ARG_INFO(arginfo_timezone_method_transitions_get, 0)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_location_get, 0, 0, 1)
+	ZEND_ARG_INFO(0, object)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_timezone_method_location_get, 0)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_identifiers_list, 0, 0, 0)
 	ZEND_ARG_INFO(0, what)
 ZEND_END_ARG_INFO()
@@ -459,6 +468,7 @@ const zend_function_entry date_functions[] = {
 	PHP_FE(timezone_name_from_abbr, arginfo_timezone_name_from_abbr)
 	PHP_FE(timezone_offset_get, arginfo_timezone_offset_get)
 	PHP_FE(timezone_transitions_get, arginfo_timezone_transitions_get)
+	PHP_FE(timezone_location_get, arginfo_timezone_location_get)
 	PHP_FE(timezone_identifiers_list, arginfo_timezone_identifiers_list)
 	PHP_FE(timezone_abbreviations_list, arginfo_timezone_abbreviations_list)
 
@@ -503,6 +513,7 @@ const zend_function_entry date_funcs_timezone[] = {
 	PHP_ME_MAPPING(getName,           timezone_name_get,           arginfo_timezone_method_name_get, 0)
 	PHP_ME_MAPPING(getOffset,         timezone_offset_get,         arginfo_timezone_method_offset_get, 0)
 	PHP_ME_MAPPING(getTransitions,    timezone_transitions_get,    arginfo_timezone_method_transitions_get, 0)
+	PHP_ME_MAPPING(getLocation,       timezone_location_get,       arginfo_timezone_method_location_get, 0)
 	PHP_ME_MAPPING(listAbbreviations, timezone_abbreviations_list, arginfo_timezone_abbreviations_list, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(listIdentifiers,   timezone_identifiers_list,   arginfo_timezone_identifiers_list, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	{NULL, NULL, NULL}
@@ -1955,6 +1966,7 @@ PHP_FUNCTION(getdate)
 #define PHP_DATE_TIMEZONE_GROUP_UTC        0x0400
 #define PHP_DATE_TIMEZONE_GROUP_ALL        0x07FF
 #define PHP_DATE_TIMEZONE_GROUP_ALL_W_BC   0x0FFF
+#define PHP_DATE_TIMEZONE_PER_COUNTRY      0x1000
 
 #define PHP_DATE_PERIOD_EXCLUDE_START_DATE 0x0001
 
@@ -2157,6 +2169,7 @@ static void date_register_classes(TSRMLS_D)
 	REGISTER_TIMEZONE_CLASS_CONST_STRING("UTC",         PHP_DATE_TIMEZONE_GROUP_UTC);
 	REGISTER_TIMEZONE_CLASS_CONST_STRING("ALL",         PHP_DATE_TIMEZONE_GROUP_ALL);
 	REGISTER_TIMEZONE_CLASS_CONST_STRING("ALL_WITH_BC", PHP_DATE_TIMEZONE_GROUP_ALL_W_BC);
+	REGISTER_TIMEZONE_CLASS_CONST_STRING("PER_COUNTRY", PHP_DATE_TIMEZONE_PER_COUNTRY);
 
 	INIT_CLASS_ENTRY(ce_interval, "DateInterval", date_funcs_interval);
 	ce_interval.create_object = date_object_new_interval;
@@ -3531,6 +3544,31 @@ PHP_FUNCTION(timezone_transitions_get)
 }
 /* }}} */
 
+/* {{{ proto array timezone_location_get()
+   Returns location information for a timezone, including country code, latitude/longitude and comments
+*/
+PHP_FUNCTION(timezone_location_get)
+{
+	zval                *object;
+	php_timezone_obj    *tzobj;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &object, date_ce_timezone) == FAILURE) {
+		RETURN_FALSE;
+	}
+	tzobj = (php_timezone_obj *) zend_object_store_get_object(object TSRMLS_CC);
+	DATE_CHECK_INITIALIZED(tzobj->initialized, DateTimeZone);
+	if (tzobj->type != TIMELIB_ZONETYPE_ID) {
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+	add_assoc_string(return_value, "country_code", tzobj->tzi.tz->location.country_code, 1);
+	add_assoc_double(return_value, "latitude", tzobj->tzi.tz->location.latitude);
+	add_assoc_double(return_value, "longitude", tzobj->tzi.tz->location.longitude);
+	add_assoc_string(return_value, "comments", tzobj->tzi.tz->location.comments, 1);
+}
+/* }}} */
+
 static int date_interval_initialize(timelib_rel_time **rt, /*const*/ char *format, int format_length TSRMLS_DC)
 {
 	timelib_time     *b = NULL, *e = NULL;
@@ -3909,8 +3947,16 @@ PHP_FUNCTION(timezone_identifiers_list)
 	const timelib_tzdb_index_entry *table;
 	int                             i, item_count;
 	long                            what = PHP_DATE_TIMEZONE_GROUP_ALL;
+	char                           *option;
+	int                             option_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &what) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ls", &what, &option, &option_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	/* Extra validation */
+	if (what == PHP_DATE_TIMEZONE_PER_COUNTRY && option_len != 2) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "A two-letter ISO 639-2 compatible country code is expected");
 		RETURN_FALSE;
 	}
 
@@ -3921,7 +3967,11 @@ PHP_FUNCTION(timezone_identifiers_list)
 	array_init(return_value);
 
 	for (i = 0; i < item_count; ++i) {
-		if (what == PHP_DATE_TIMEZONE_GROUP_ALL_W_BC || check_id_allowed(table[i].id, what)) {
+		if (what == PHP_DATE_TIMEZONE_PER_COUNTRY) {
+			if (tzdb->data[table[i].pos + 5] == option[0] && tzdb->data[table[i].pos + 6] == option[1]) {
+				add_next_index_ascii_string(return_value, table[i].id, 1);
+			}
+		} else if (what == PHP_DATE_TIMEZONE_GROUP_ALL_W_BC || (check_id_allowed(table[i].id, what) && (tzdb->data[table[i].pos + 4] == '\1'))) {
 			add_next_index_ascii_string(return_value, table[i].id, 1);
 		}
 	};
