@@ -347,10 +347,11 @@ phar_stub:
 static int phar_stream_close(php_stream *stream, int close_handle TSRMLS_DC) /* {{{ */
 {
 	phar_entry_info *entry = ((phar_entry_data *)stream->abstract)->internal_file;
+	int is_temp_dir = entry->is_temp_dir;
 
 	phar_entry_delref((phar_entry_data *)stream->abstract TSRMLS_CC);
 
-	if (entry->is_temp_dir) {
+	if (is_temp_dir) {
 		/* phar archive stub, free it */
 		efree(entry);
 	}
