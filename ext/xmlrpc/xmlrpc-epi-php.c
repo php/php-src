@@ -877,14 +877,11 @@ static XMLRPC_VALUE php_xmlrpc_callback(XMLRPC_SERVER server, XMLRPC_REQUEST xRe
  */
 static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data)
 {
-	zval *retval_ptr, **php_function;
+	zval retval, **php_function;
 	zval* callback_params[1];
 	char *php_function_name;
 	xmlrpc_callback_data* pData = (xmlrpc_callback_data*)data;
 	TSRMLS_FETCH();
-
-	MAKE_STD_ZVAL(retval_ptr);
-	Z_TYPE_P(retval_ptr) = IS_NULL;
 
 	/* setup data hoojum */
 	callback_params[0] = pData->caller_params;
@@ -896,14 +893,14 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data)
 
 			if (zend_is_callable(*php_function, 0, &php_function_name)) {
 				/* php func prototype: function string user_func($user_params) */
-				if (call_user_function(CG(function_table), NULL, *php_function, retval_ptr, 1, callback_params TSRMLS_CC) == SUCCESS) {
+				if (call_user_function(CG(function_table), NULL, *php_function, &retval, 1, callback_params TSRMLS_CC) == SUCCESS) {
 					XMLRPC_VALUE xData;
 					STRUCT_XMLRPC_ERROR err = {0};
 
 					/* return value should be a string */
-					convert_to_string(retval_ptr);
+					convert_to_string(&retval);
 
-					xData = XMLRPC_IntrospectionCreateDescription(Z_STRVAL_P(retval_ptr), &err);
+					xData = XMLRPC_IntrospectionCreateDescription(Z_STRVAL(retval), &err);
 
 					if(xData) {
 						if(!XMLRPC_ServerAddIntrospectionData(server, xData)) {
@@ -919,6 +916,7 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data)
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to add introspection data returned from %s()", php_function_name);
 						}
 					}
+					zval_dtor(&retval);
 				} else {
 					/* user func failed */
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error calling user introspection callback: %s()", php_function_name);
