@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 
 - Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
 - Removed zend.ze1_compatibility_mode. (Dmitry)
+- Deprecated ticks support. (Felipe)
 
 - Changed PCRE, SPL and reflection extensions to always be enabled. (Marcus)
 - Changed md5() to use improved implementation. (Solar Designer, Dmitry)
