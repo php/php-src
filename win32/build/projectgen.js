@@ -290,15 +290,22 @@ function copy_dsp_files()
 		ext = address.slice(address.lastIndexOf("\\")+1, address.length-4);
 		EXT = ext.toUpperCase();
 
+		if (path.match(/(sapi|ext)/)) {
+			rel = "..\\..\\";
+		} else {
+			rel = "..\\";
+		}
+
 		/* pick up local flags and libs */
 		cflags = (get_define("CFLAGS_" + EXT) ? get_define("CFLAGS_" + EXT) : "");
 		cflags += (ext.match(/(TSRM|Zend)/) ? "/D TSRM_EXPORTS " : "");
 		cflags += (ext.match(/Zend/) ? "/D LIBZEND_EXPORTS " : "");
 		libs = get_define("LIBS_" + EXT);
 		ldflags = get_define("LDFLAGS_" + EXT);
-		contents = contents.replace(/LOCALCPP/, cflags + "/c");
+		ldflags = (ldflags ? ldflags.replace(/(\.\.\\)/g, rel + "$1") : "");
+		contents = contents.replace(/LOCALCPP/, cflags + " /c");
 		contents = contents.replace(/LOCALLIBS\s/, (libs ? libs + " " : ""));
-		contents = contents.replace(/LOCALLDFLAGS\s/, (ldflags ? ldflags + " " : ""));
+		contents = contents.replace(/LOCALLDFLAGS\s/, ldflags);
 
 		if (ext.match("Zend")) {
 			arr = new Array("ini", "language");
@@ -331,18 +338,14 @@ function copy_dsp_files()
 				contents = contents.replace(/\"cgi/g, '"' + newext);
 				contents = contents.replace(/cgi\.exe/g, "php-cgi.exe");
 
-			} else if (ext == "embed") {
-
-				/* leave embed alone for now */
-				continue;
-
 			} else {
 
-				/* change of address: server modules get a prefix */
-				/* DOESN'T WORK YET */
-				continue;
-				newext = "php5" + ext;
+				/* there's always one... most sapis just get a 'php5' prefix */
+				newext = (ext.match(/apache2handler/) ? "php5apache2" : "php5" + ext);
 				address = address.replace(ext + ".dsp", newext + ".dsp");
+				srcpath = ".\\";
+				oldext = new RegExp(ext, "g");
+				contents = contents.replace(oldext, newext);
 			}
 
 			contents = contents.replace("CFG=" + ext, "CFG=" + newext);
