@@ -1,3 +1,286 @@
+2008-07-17  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/gd.c
+      ext/gd/gd.c
+      ext/gd/tests/imageloadfont_invalid.phpt
+      ext/gd/tests/imageloadfont_invalid.phpt:
+      - MFB: fix crash when some crafted font are given
+
+    * (PHP_5_3)
+      ext/gd/gd.c
+      ext/gd/tests/imageloadfont_invalid.phpt:
+       - MFB: fix crash when some crafted font are given
+
+    * (PHP_4_4)
+      NEWS:
+      - a dot :)
+
+2008-07-17  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/php_mbregex.h:
+      - Fix ZTS build
+
+2008-07-17  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug43027.phpt
+      ZendEngine2/tests/jump12.phpt
+      ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/bug41037.phpt
+      ext/standard/tests/general_functions/closures_002.phpt:
+      - Deprecate ticks
+
+2008-07-17  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_4_4)
+      NEWS
+      ext/gd/gd.c
+      ext/gd/tests/imageloadfont_invalid.phpt
+      ext/gd/tests/imageloadfont_invalid.phpt
+      ext/gd/tests/imageloadfont_invalid.phpt
+      ext/gd/tests/imageloadfont_invalid.phpt:
+      - fix crash when some crafted font are given
+
+2008-07-17  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_config.w32.h
+      ZendEngine2/zend_config.w32.h:
+      vc9 build fix
+
+2008-07-17  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * win32/crypt_win32.c:
+      - CS/WS
+
+2008-07-17  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/pdo_sqlite/sqlite/src/limits.h:
+      MFB: This file isn't needed any more
+
+    * (PHP_5_3)
+      ext/pdo_sqlite/sqlite/src/limits.h:
+      This file isn't needed any more
+
+2008-07-17  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_3)
+      ext/mbstring/tests/bug20087.phpt
+      ext/mbstring/tests/htmlent.phpt
+      ext/mbstring/tests/mb_convert_encoding.phpt
+      ext/mbstring/tests/mb_convert_variables.phpt
+      ext/mbstring/tests/mb_detect_encoding.phpt
+      ext/mbstring/tests/mb_detect_order.phpt
+      ext/mbstring/tests/mb_http_input.phpt
+      ext/mbstring/tests/mb_http_output.phpt
+      ext/mbstring/tests/mb_internal_encoding.phpt
+      ext/mbstring/tests/mb_preferred_mime_name.phpt
+      ext/mbstring/tests/mb_strcut.phpt
+      ext/mbstring/tests/mb_strimwidth.phpt
+      ext/mbstring/tests/mb_strlen.phpt
+      ext/mbstring/tests/mb_strpos.phpt
+      ext/mbstring/tests/mb_strwidth.phpt
+      ext/mbstring/tests/mb_substitute_character.phpt
+      ext/mbstring/tests/mb_substr.phpt:
+      - Fix include_path.
+
+    * (PHP_5_3)
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      ext/mbstring/php_mbregex.c
+      ext/mbstring/php_mbregex.h:
+      - MFH: Removed dependencies from php_mbregex to oniguruma types
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      ext/mbstring/php_mbregex.c
+      ext/mbstring/php_mbregex.h:
+      - Removed dependencies from php_mbregex to oniguruma types
+
+2008-07-17  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_4_4)
+      win32/php4dllts.dsp:
+      update for PCRE upgrade
+
+    * main/php_compat.h
+      main/php_compat.h
+      main/php_compat.h:
+      update PCRE symbols
+
+    * (PHP_4_4)
+      NEWS
+      ext/pcre/config0.m4
+      ext/pcre/upgrade-pcre.php
+      ext/pcre/pcrelib/AUTHORS
+      ext/pcre/pcrelib/COPYING
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/HACKING
+      ext/pcre/pcrelib/LICENCE
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/config.h
+      ext/pcre/pcrelib/dftables.c
+      ext/pcre/pcrelib/libpcre.def
+      ext/pcre/pcrelib/libpcreposix.def
+      ext/pcre/pcrelib/pcre.def
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre_chartables.c
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_config.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_fullinfo.c
+      ext/pcre/pcrelib/pcre_get.c
+      ext/pcre/pcrelib/pcre_globals.c
+      ext/pcre/pcrelib/pcre_info.c
+      ext/pcre/pcrelib/pcre_internal.h
+      ext/pcre/pcrelib/pcre_maketables.c
+      ext/pcre/pcrelib/pcre_newline.c
+      ext/pcre/pcrelib/pcre_ord2utf8.c
+      ext/pcre/pcrelib/pcre_printint.src
+      ext/pcre/pcrelib/pcre_refcount.c
+      ext/pcre/pcrelib/pcre_scanner.cc
+      ext/pcre/pcrelib/pcre_scanner.h
+      ext/pcre/pcrelib/pcre_scanner_unittest.cc
+      ext/pcre/pcrelib/pcre_stringpiece.cc
+      ext/pcre/pcrelib/pcre_stringpiece.h
+      ext/pcre/pcrelib/pcre_stringpiece_unittest.cc
+      ext/pcre/pcrelib/pcre_study.c
+      ext/pcre/pcrelib/pcre_tables.c
+      ext/pcre/pcrelib/pcre_try_flipped.c
+      ext/pcre/pcrelib/pcre_ucp_searchfuncs.c
+      ext/pcre/pcrelib/pcre_valid_utf8.c
+      ext/pcre/pcrelib/pcre_version.c
+      ext/pcre/pcrelib/pcre_xclass.c
+      ext/pcre/pcrelib/pcrecpp.cc
+      ext/pcre/pcrelib/pcrecpp.h
+      ext/pcre/pcrelib/pcrecpp_unittest.cc
+      ext/pcre/pcrelib/pcrecpparg.h
+      ext/pcre/pcrelib/pcredemo.c
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/pcreposix.h
+      ext/pcre/pcrelib/pcretest.c
+      ext/pcre/pcrelib/ucpinternal.h
+      ext/pcre/pcrelib/ucptable.c
+      ext/pcre/pcrelib/ucptable.h
+      ext/pcre/pcrelib/doc/Tech.Notes
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/testdata/.cvsignore
+      ext/pcre/pcrelib/testdata/grepinputx
+      ext/pcre/pcrelib/testdata/grepoutput
+      ext/pcre/pcrelib/testdata/grepoutputN
+      ext/pcre/pcrelib/testdata/testinput1
+      ext/pcre/pcrelib/testdata/testinput10
+      ext/pcre/pcrelib/testdata/testinput2
+      ext/pcre/pcrelib/testdata/testinput3
+      ext/pcre/pcrelib/testdata/testinput4
+      ext/pcre/pcrelib/testdata/testinput5
+      ext/pcre/pcrelib/testdata/testinput6
+      ext/pcre/pcrelib/testdata/testinput7
+      ext/pcre/pcrelib/testdata/testinput8
+      ext/pcre/pcrelib/testdata/testinput9
+      ext/pcre/pcrelib/testdata/testoutput1
+      ext/pcre/pcrelib/testdata/testoutput10
+      ext/pcre/pcrelib/testdata/testoutput2
+      ext/pcre/pcrelib/testdata/testoutput3
+      ext/pcre/pcrelib/testdata/testoutput4
+      ext/pcre/pcrelib/testdata/testoutput5
+      ext/pcre/pcrelib/testdata/testoutput6
+      ext/pcre/pcrelib/testdata/testoutput7
+      ext/pcre/pcrelib/testdata/testoutput8
+      ext/pcre/pcrelib/testdata/testoutput9:
+      upgrade PCRE to 7.7 + one additional patch to fix a security bug
+
+2008-07-17  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_5_3)
+      ext/standard/config.w32:
+      fixed win32 build when ext/mbstring is enabled.
+
+2008-07-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ext/phar/phar.c:
+      Fixed search on uninitialized data
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/zip.c:
+      Fixed wrong arguments order
+
+2008-07-17  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/xml/xml.c
+      ext/xml/xml.c:
+      fix folding
+
+2008-07-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ext/curl/tests/curl_006.phpt
+      ext/filter/tests/callback_closure.phpt
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/tests/mysqli_set_local_infile_handler_closures.phpt
+      ext/pcntl/tests/signal_closure_handler.phpt
+      ext/session/tests/save_handler_closures.inc
+      ext/session/tests/session_set_save_handler_closures.phpt
+      ext/sqlite/tests/sqlite_closures_001.phpt
+      ext/sqlite/tests/sqlite_closures_002.phpt
+      ext/standard/basic_functions.c
+      ext/standard/tests/assert/assert_closures.phpt
+      ext/standard/tests/general_functions/closures_001.phpt
+      ext/standard/tests/general_functions/closures_002.phpt
+      ext/standard/tests/general_functions/ob_start_closures.phpt
+      ext/xml/xml.c
+      ext/xml/tests/xml_closures_001.phpt
+      main/output.c:
+      Support for closures
+
+    * (PHP_5_3)
+      ext/filter/tests/callback_closure.phpt
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/tests/mysqli_set_local_infile_handler_closures.phpt
+      ext/mysqli/tests/mysqli_set_local_infile_handler_closures.phpt
+      ext/pcntl/tests/signal_closure_handler.phpt
+      ext/pcntl/tests/signal_closure_handler.phpt
+      ext/session/tests/save_handler_closures.inc
+      ext/session/tests/save_handler_closures.inc
+      ext/session/tests/session_set_save_handler_closures.phpt
+      ext/session/tests/session_set_save_handler_closures.phpt
+      ext/sqlite/tests/sqlite_closures_001.phpt
+      ext/sqlite/tests/sqlite_closures_001.phpt
+      ext/sqlite/tests/sqlite_closures_002.phpt
+      ext/sqlite/tests/sqlite_closures_002.phpt
+      ext/standard/basic_functions.c
+      ext/standard/tests/assert/assert_closures.phpt
+      ext/standard/tests/assert/assert_closures.phpt
+      ext/standard/tests/general_functions/closures_001.phpt
+      ext/standard/tests/general_functions/closures_001.phpt
+      ext/standard/tests/general_functions/closures_002.phpt
+      ext/standard/tests/general_functions/closures_002.phpt
+      ext/standard/tests/general_functions/ob_start_closures.phpt
+      ext/standard/tests/general_functions/ob_start_closures.phpt
+      ext/xml/xml.c
+      ext/xml/tests/xml_closures_001.phpt
+      ext/xml/tests/xml_closures_001.phpt:
+      file callback_closure.phpt was added on branch PHP_5_3 on 2008-07-17
+      09:53:41 +0000
+
+    * ext/curl/tests/curl_006.phpt
+      ext/curl/tests/curl_006.phpt
+      ext/filter/tests/callback_closure.phpt:
+      
+      support for closures
+
+2008-07-17  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_3)
+      ext/oci8/oci8.c:
+      Allow PECL builds with PHP 4.  No MTH needed
+
 2008-07-16  Christopher Jones  <christopher.jones@oracle.com>
 
     * (PHP_5_3)
