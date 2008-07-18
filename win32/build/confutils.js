@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.24 2008-07-12 15:04:39 sfox Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.25 2008-07-18 15:45:03 sfox Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -1331,11 +1331,21 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 
 function REMOVE_TARGET(dllname, flag)
 {
+	dllname = dllname.replace(/\s/g, "");
+	EXT = dllname.replace(/php_(\S+)\.dll/, "$1").toUpperCase();
+
+	php_flags = configure_subst.Item("CFLAGS_PHP");
+	configure_subst.Remove("CFLAGS_PHP");
+	php_flags = php_flags.replace(" /D COMPILE_DL_" + EXT, "");
+	configure_subst.Add("CFLAGS_PHP", php_flags);
+
 	if (configure_subst.Exists(flag)) {
 		targets = configure_subst.Item(flag);
 		if (targets.match(dllname)) {
 			configure_subst.Remove(flag);
 			targets = targets.replace(dllname, "");
+			targets = targets.replace(/\s+/, " ");
+			targets = targets.replace(/\s$/, "");
 			configure_subst.Add(flag, targets);
 			return true;
 		}
