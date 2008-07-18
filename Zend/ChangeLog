@@ -1,3 +1,17 @@
+2008-07-17  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      zend_compile.c
+      tests/bug43027.phpt
+      tests/jump12.phpt:
+      - Deprecate ticks
+
+2008-07-17  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_config.w32.h
+      zend_config.w32.h:
+      vc9 build fix
+
 2008-07-14  Felipe Pena  <felipensp@gmail.com>
 
     * tests/closure_017.phpt
