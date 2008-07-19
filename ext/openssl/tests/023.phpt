@@ -4,12 +4,12 @@ openssl_pkcs7_encrypt() tests
 <?php if (!extension_loaded("openssl")) print "skip"; ?>
 --FILE--
 <?php
-$infile = (binary) (dirname(__FILE__) . "/cert.crt");
-$outfile = (binary) tempnam(b"/tmp", b"ssl");
+$infile = dirname(__FILE__) . "/cert.crt";
+$outfile = tempnam(b"/tmp", b"ssl");
 if ($outfile === false)
 	die("failed to get a temporary filename!");
 
-$single_cert = (binary) ("file://" . dirname(__FILE__) . "/cert.crt");
+$single_cert = "file://" . dirname(__FILE__) . "/cert.crt";
 $multi_certs = array($single_cert, $single_cert);
 $assoc_headers = array("To" => "test@test", "Subject" => "testing openssl_pkcs7_encrypt()");
 $assoc_headers_bin = array(b"To" => b"test@test", b"Subject" => b"testing openssl_pkcs7_encrypt()");
@@ -48,6 +48,10 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+
+Warning: openssl_pkcs7_encrypt(): Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received. Skipping it. in %s on line %d
+
+Warning: openssl_pkcs7_encrypt(): Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received. Skipping it. in %s on line %d
 bool(true)
 
 Warning: openssl_pkcs7_encrypt() expects parameter 4 to be array, Unicode string given in %s on line %d
@@ -55,6 +59,8 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+
+Warning: openssl_pkcs7_encrypt(): Binary string expected, Unicode string received in %s on line %d
 bool(false)
 bool(false)
 bool(false)
