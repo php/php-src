@@ -776,6 +776,44 @@ SPL_METHOD(DirectoryIterator, next)
 }
 /* }}} */
 
+/* {{{ proto void DirectoryIterator::seek(int position)
+   Seek to the given position */
+SPL_METHOD(DirectoryIterator, seek)
+{
+	spl_filesystem_object *intern    = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	zval                  *retval    = NULL;
+	long                   pos;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &pos) == FAILURE) {
+		return;
+	}
+
+	if (intern->u.dir.index > pos) {
+		/* we first rewind */
+		zend_call_method_with_0_params(&this_ptr, Z_OBJCE_P(getThis()), &intern->u.dir.func_rewind, "rewind", &retval);
+		if (retval) {
+			zval_ptr_dtor(&retval);
+		}
+	}
+
+	while (intern->u.dir.index < pos) {
+		int valid = 0;
+		zend_call_method_with_0_params(&this_ptr, Z_OBJCE_P(getThis()), &intern->u.dir.func_valid, "valid", &retval);
+		if (retval) {
+			valid = zend_is_true(retval);
+			zval_ptr_dtor(&retval);
+		}
+		if (!valid) {
+			break;
+		}
+		zend_call_method_with_0_params(&this_ptr, Z_OBJCE_P(getThis()), &intern->u.dir.func_next, "next", &retval);
+		if (retval) {
+			zval_ptr_dtor(&retval);
+		}
+	}
+} /* }}} */
+
+
 /* {{{ proto string DirectoryIterator::valid() U
    Check whether dir contains more entries */
 SPL_METHOD(DirectoryIterator, valid)
@@ -1768,6 +1806,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_dir___construct, 0)
 	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
 
+static
+ZEND_BEGIN_ARG_INFO(arginfo_dir_it_seek, 0) 
+	ZEND_ARG_INFO(0, position)
+ZEND_END_ARG_INFO();
+
+
 /* the method table */
 /* each method can have its own parameters and visibility */
 static const zend_function_entry spl_DirectoryIterator_functions[] = {
@@ -1780,6 +1824,7 @@ static const zend_function_entry spl_DirectoryIterator_functions[] = {
 	SPL_ME(DirectoryIterator, key,           NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(DirectoryIterator, current,       NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(DirectoryIterator, next,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, seek,          arginfo_dir_it_seek, ZEND_ACC_PUBLIC)
 	SPL_MA(DirectoryIterator, __toString, DirectoryIterator, getFilename, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
@@ -2704,12 +2749,13 @@ PHP_MINIT_FUNCTION(spl_directory)
 
 	REGISTER_SPL_STD_CLASS_EX(SplFileInfo, spl_filesystem_object_new, spl_SplFileInfo_functions);
 	memcpy(&spl_filesystem_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	spl_filesystem_object_handlers.clone_obj = spl_filesystem_object_clone;
-	spl_filesystem_object_handlers.cast_object = spl_filesystem_object_cast;
+	spl_filesystem_object_handlers.clone_obj      = spl_filesystem_object_clone;
+	spl_filesystem_object_handlers.cast_object    = spl_filesystem_object_cast;
 	spl_filesystem_object_handlers.get_debug_info = spl_filesystem_object_get_debug_info;
 
 	REGISTER_SPL_SUB_CLASS_EX(DirectoryIterator, SplFileInfo, spl_filesystem_object_new, spl_DirectoryIterator_functions);
 	zend_class_implements(spl_ce_DirectoryIterator TSRMLS_CC, 1, zend_ce_iterator);
+	REGISTER_SPL_IMPLEMENTS(DirectoryIterator, SeekableIterator);
 
 	spl_ce_DirectoryIterator->get_iterator = spl_filesystem_dir_get_iterator;
 

@@ -82,6 +82,9 @@ struct _spl_filesystem_object {
 			int                sub_path_len;
 			int                index;
 			int                is_recursive;
+			zend_function      *func_rewind;
+			zend_function      *func_next;
+			zend_function      *func_valid;
 		} dir;
 		struct {
 			php_stream         *stream;
