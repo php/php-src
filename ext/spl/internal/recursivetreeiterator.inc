@@ -10,11 +10,11 @@
  */
 
 
-/** @ingroup Examples
+/** @ingroup SPL
  * @brief   RecursiveIteratorIterator to generate ASCII graphic trees for the
  *          entries in a RecursiveIterator
  * @author  Marcus Boerger, Johannes Schlueter
- * @version 1.0
+ * @version 1.1
  */
 class RecursiveTreeIterator extends RecursiveIteratorIterator
 {
@@ -35,16 +35,34 @@ class RecursiveTreeIterator extends RecursiveIteratorIterator
 		$this->rit_flags = $rit_flags;
 	}
 
-	/**  Prefix strings used in getPrefix()
-	 *
-	 * 0: prefix used to start elements
-	 * 1: prefix used if $level < depth and hasNext($level) == true
-	 * 2: prefix used if $level < depth and hasNext($level) == false
-	 * 3: prefix used if $level == depth and hasNext($level) == true
-	 * 4: prefix used if $level == depth and hasNext($level) == false
-	 * 5: prefix used right in front of the current element
+	private $prefix = array(0=>'', 1=>'| ', 2=>'  ', 3=>'|-', 4=>'\-', 5=>'');
+
+	/** Prefix used to start elements. */
+	const PREFIX_LEFT         = 0;
+	/** Prefix used if $level < depth and hasNext($level) == true. */
+	const PREFIX_MID_HAS_NEXT = 1;
+	/** Prefix used if $level < depth and hasNext($level) == false. */
+	const PREFIX_MID_LAST     = 2;
+	/** Prefix used if $level == depth and hasNext($level) == true. */
+	const PREFIX_END_HAS_NEXT = 3;
+	/** Prefix used if $level == depth and hasNext($level) == false. */
+	const PREFIX_END_LAST     = 4;
+	/** Prefix used right in front of the current element. */
+	const PREFIX_RIGHT        = 5;
+
+	/**
+	 * Set prefix part as used in getPrefix() and stored in $prefix.
+	 * @param $part   any PREFIX_* const.
+	 * @param $value  new prefix string for specified part.
+	 * @throws OutOfRangeException if 0 > $part or $part > 5.
 	 */
-	public $prefix = array(0=>'', 1=>'| ', 2=>'  ', 3=>'|-', 4=>'\-', 5=>'');
+	function setPrefixPart($part, $value)
+	{
+		if (0 > $part || $part > 5) {
+			throw new OutOfRangeException();
+		}
+		$this->prefix[$part] = (string)$value;
+	}
 
 	/** @return string to place in front of current element
 	 */

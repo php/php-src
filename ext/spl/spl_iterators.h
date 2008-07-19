@@ -77,6 +77,13 @@ typedef enum {
 	DIT_Unknown = ~0
 } dual_it_type;
 
+typedef enum {
+	RIT_Default = 0,
+	RIT_RecursiveIteratorIterator = RIT_Default,
+	RIT_RecursiveTreeIterator,
+	RIT_Unknow = ~0
+} recursive_it_it_type;
+
 enum {
 	/* public */
 	CIT_CALL_TOSTRING        = 0x00000001,

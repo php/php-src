@@ -35,6 +35,7 @@
  * - interface RecursiveIterator extends Iterator
  * - interface OuterIterator extends Iterator
  * - class RecursiveIteratorIterator implements OuterIterator
+ * - class RecursiveTreeIterator extends RecursiveIteratorIterator
  * - abstract class FilterIterator implements OuterIterator
  * - class ParentIterator extends FilterIterator implements RecursiveIterator
  * - interface SeekableIterator extends Iterator
