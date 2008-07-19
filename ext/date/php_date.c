@@ -3956,7 +3956,7 @@ PHP_FUNCTION(timezone_identifiers_list)
 
 	/* Extra validation */
 	if (what == PHP_DATE_TIMEZONE_PER_COUNTRY && option_len != 2) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "A two-letter ISO 639-2 compatible country code is expected");
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "A two-letter ISO 3166-1 compatible country code is expected");
 		RETURN_FALSE;
 	}
 
