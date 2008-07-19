@@ -15,6 +15,7 @@
  *          entries in a RecursiveIterator
  * @author  Marcus Boerger, Johannes Schlueter
  * @version 1.1
+ * @since   PHP 5.3
  */
 class RecursiveTreeIterator extends RecursiveIteratorIterator
 {
