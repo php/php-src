@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.26 2008-07-19 16:57:58 sfox Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.27 2008-07-19 19:02:59 sfox Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -1652,7 +1652,10 @@ function ADD_FLAG(name, flags, target)
 
 function get_define(name)
 {
-	return configure_subst.Item(name);
+	if (configure_subst.Exists(name)) {
+		return configure_subst.Item(name);
+	}
+	return "";
 }
 
 // Add a .def to the core to export symbols
