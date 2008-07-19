@@ -4,13 +4,13 @@ openssl_pkcs7_sign() tests
 <?php if (!extension_loaded("openssl")) print "skip"; ?>
 --FILE--
 <?php
-$infile = (binary) (dirname(__FILE__) . "/cert.crt");
-$outfile = (binary) tempnam(b"/tmp", b"ssl");
+$infile = dirname(__FILE__) . "/cert.crt";
+$outfile = tempnam(b"/tmp", b"ssl");
 if ($outfile === false)
 	die("failed to get a temporary filename!");
 
-$privkey = (binary) ("file://" . dirname(__FILE__) . "/private.key");
-$single_cert = (binary) ("file://" . dirname(__FILE__) . "/cert.crt");
+$privkey = "file://" . dirname(__FILE__) . "/private.key";
+$single_cert = "file://" . dirname(__FILE__) . "/cert.crt";
 $assoc_headers = array("To" => "test@test", "Subject" => "testing openssl_pkcs7_sign()");
 $assoc_headers_bin = array(b"To" => b"test@test", b"Subject" => b"testing openssl_pkcs7_sign()");
 $headers = array("test@test", "testing openssl_pkcs7_sign()");
@@ -49,6 +49,10 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+
+Warning: openssl_pkcs7_sign(): Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received. Skipping it. in %s on line %d
+
+Warning: openssl_pkcs7_sign(): Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received. Skipping it. in %s on line %d
 bool(true)
 
 Warning: openssl_pkcs7_sign() expects parameter 5 to be array, Unicode string given in %s on line %d
@@ -63,6 +67,8 @@ bool(false)
 Warning: openssl_pkcs7_sign(): error opening output file %s in %s on line %d
 bool(false)
 
+Warning: openssl_pkcs7_sign(): Binary string expected, Unicode string received in %s on line %d
+
 Warning: openssl_pkcs7_sign(): error getting cert in %s on line %d
 bool(false)
 
@@ -74,6 +80,8 @@ bool(false)
 
 Warning: openssl_pkcs7_sign() expects parameter 5 to be array, binary string given in %s on line %d
 NULL
+
+Warning: openssl_pkcs7_sign(): Binary string expected, Unicode string received in %s on line %d
 
 Warning: openssl_pkcs7_sign(): error getting private key in %s on line %d
 bool(false)

@@ -18,7 +18,7 @@ $priv_key_id = openssl_get_privatekey($priv_key);
 
 $pub_key = file_get_contents($file_pub);
 $pub_key_id = openssl_get_publickey($pub_key);
-$data = "some custom data";
+$data = b"some custom data";
 if (!openssl_sign($data, $signature, $priv_key_id, OPENSSL_ALGO_MD5)) {
 	echo "openssl_sign failed.";
 }

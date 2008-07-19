@@ -14,7 +14,7 @@ class test {
 }
 $t = new test;
 
-var_dump(openssl_x509_parse("foo"));
+var_dump(openssl_x509_parse(b"foo"));
 var_dump(openssl_x509_parse($t));
 var_dump(openssl_x509_parse(array()));
 var_dump(openssl_x509_parse());
