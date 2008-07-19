@@ -1242,21 +1242,23 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	HashTable *aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
-	zval tmp, *arg;
+	zval *tmp, *arg;
 	
-	INIT_PZVAL(&tmp);
-	Z_TYPE(tmp) = IS_ARRAY;
-	Z_ARRVAL(tmp) = aht;
+	MAKE_STD_ZVAL(tmp);
+	Z_TYPE_P(tmp) = IS_ARRAY;
+	Z_ARRVAL_P(tmp) = aht;
 	
 	if (use_arg) {
 		if (ZEND_NUM_ARGS() != 1 || zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 			zend_throw_exception(spl_ce_BadMethodCallException, "Function expects exactly one argument", 0 TSRMLS_CC);
 			return;
 		}
-		zend_call_method(NULL, NULL, NULL, fname, fname_len, return_value_ptr, 2, &tmp, arg TSRMLS_CC);
+		zend_call_method(NULL, NULL, NULL, fname, fname_len, return_value_ptr, 2, tmp, arg TSRMLS_CC);
 	} else {
-		zend_call_method(NULL, NULL, NULL, fname, fname_len, return_value_ptr, 1, &tmp, NULL TSRMLS_CC);
+		zend_call_method(NULL, NULL, NULL, fname, fname_len, return_value_ptr, 1, tmp, NULL TSRMLS_CC);
 	}
+	Z_TYPE_P(tmp) = IS_NULL; /* we want to destroy the zval, not the hashtable */
+	zval_ptr_dtor(&tmp);
 } /* }}} */
 
 #define SPL_ARRAY_METHOD(cname, fname, use_arg) \
