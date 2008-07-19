@@ -35,6 +35,7 @@
  * - interface RecursiveIterator extends Iterator
  * - interface OuterIterator extends Iterator
  * - class RecursiveIteratorIterator implements OuterIterator
+ * - class RecursiveTreeIterator extends RecursiveIteratorIterator
  * - abstract class FilterIterator implements OuterIterator
  * - class ParentIterator extends FilterIterator implements RecursiveIterator
  * - interface SeekableIterator extends Iterator
@@ -55,7 +56,7 @@
  *
  * - class SplFileInfo
  * - class DirectoryIterator extends SplFileInfo implements Iterator
- * - class filesystemIterator extends DirectoryIterator
+ * - class FilesystemIterator extends DirectoryIterator
  * - class RecursiveDirectoryIterator extends FilesystemIterator implements RecursiveIterator
  * - class GlobIterator extends FilesystemIterator implements Countable
  * - class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIterator
@@ -1132,7 +1133,7 @@ interface SplObserver
 {
 	/** Called from the subject (i.e. when it's value has changed).
 	 * @param $subject the callee
-	 :*/
+	 */
 	function update(SplSubject $subject);
 }
 
