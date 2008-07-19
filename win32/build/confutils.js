@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.25 2008-07-18 15:45:03 sfox Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.26 2008-07-19 16:57:58 sfox Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -1123,23 +1123,18 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 			if (ext_shared) {
 				WARNING(extname + " cannot be built: missing dependency, " + dependson + " not found");
 
-				if (configure_hdr.Exists('HAVE_' + EXT)) {
-					configure_hdr.Remove('HAVE_' + EXT);
-				}
-
-				dllname = ' php_' + extname + '.dll';
+				var dllname = ' php_' + extname + '.dll';
 
 				if (!REMOVE_TARGET(dllname, 'EXT_TARGETS')) {
 					REMOVE_TARGET(dllname, 'PECL_TARGETS');
 				}
 
-				extensions_enabled.pop();
 				return false;
 
-			} else {
-				ERROR("Cannot build " + extname + "; " + dependson + " not enabled");
-				return false;
 			}
+
+			ERROR("Cannot build " + extname + "; " + dependson + " not enabled");
+			return false;
 		}
 	} // dependency is statically built-in to PHP
 	return true;
@@ -1331,22 +1326,22 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 
 function REMOVE_TARGET(dllname, flag)
 {
-	dllname = dllname.replace(/\s/g, "");
-	EXT = dllname.replace(/php_(\S+)\.dll/, "$1").toUpperCase();
-
-	php_flags = configure_subst.Item("CFLAGS_PHP");
-	configure_subst.Remove("CFLAGS_PHP");
-	php_flags = php_flags.replace(" /D COMPILE_DL_" + EXT, "");
-	configure_subst.Add("CFLAGS_PHP", php_flags);
+	var dllname = dllname.replace(/\s/g, "");
+	var EXT = dllname.replace(/php_(\S+)\.dll/, "$1").toUpperCase();
+	var php_flags = configure_subst.Item("CFLAGS_PHP");
 
 	if (configure_subst.Exists(flag)) {
-		targets = configure_subst.Item(flag);
+		var targets = configure_subst.Item(flag);
+
 		if (targets.match(dllname)) {
 			configure_subst.Remove(flag);
 			targets = targets.replace(dllname, "");
 			targets = targets.replace(/\s+/, " ");
 			targets = targets.replace(/\s$/, "");
 			configure_subst.Add(flag, targets);
+			configure_hdr.Add("HAVE_" + EXT, new Array(0, ""));
+			configure_subst.Item("CFLAGS_PHP") = php_flags.replace(" /D COMPILE_DL_" + EXT, "");
+			extensions_enabled.pop();
 			return true;
 		}
 	}
@@ -1469,7 +1464,7 @@ function write_summary()
 	STDOUT.WriteBlankLines(2);
 
 	STDOUT.WriteLine("Enabled extensions:");
-	output_as_table(["Extension", "Mode"], extensions_enabled);
+	output_as_table(["Extension", "Mode"], extensions_enabled.sort());
 	STDOUT.WriteBlankLines(2);
 
 	STDOUT.WriteLine("Enabled SAPI:");
