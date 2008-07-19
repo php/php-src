@@ -416,7 +416,7 @@ zend_object_iterator_funcs spl_recursive_it_iterator_funcs = {
 	spl_recursive_it_rewind
 };
 
-static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_base, zend_class_entry *ce_inner, recursive_it_it_type rit_type TSRMLS_DC)
+static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_base, zend_class_entry *ce_inner, recursive_it_it_type rit_type)
 {
 	zval                      *object = getThis();
 	spl_recursive_it_object   *intern;
@@ -447,7 +447,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 				} else {
 					ZVAL_LONG(caching_it_flags, CIT_CATCH_GET_CHILD);
 				}
-				spl_instantiate_arg_ex2(spl_ce_RecursiveCachingIterator, &caching_it, 1, iterator, caching_it_flags);
+				spl_instantiate_arg_ex2(spl_ce_RecursiveCachingIterator, &caching_it, 1, iterator, caching_it_flags TSRMLS_CC);
 				zval_ptr_dtor(&caching_it_flags);
 				if (inc_refcount == 0 && iterator) {
 					zval_ptr_dtor(&iterator);
