@@ -117,6 +117,7 @@ PHP                                                                        NEWS
   . Added new parameter $prepend to spl_autoload_register(). (Etienne)
   . Added FixedArray. (Etienne, Tony)
   . Added delaying exceptions in SPL's autoload mechanism. (Marcus)
+  . Added RecursiveTreeIterator. (Arnaud, Marcus)
 
 - Improved Zend Engine:
   . Added "compact" handler for Zend MM storage. (Dmitry)
