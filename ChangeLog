@@ -1,3 +1,195 @@
+2008-07-18  Henrique do Nascimento Angelo  <h.n.angelo@gmail.com>
+
+    * ext/openssl/openssl.c:
+      Add unicode suport to ext/openssl
+
+    * ext/openssl/tests/007.phpt
+      ext/openssl/tests/007.phpt
+      ext/openssl/tests/008.phpt
+      ext/openssl/tests/008.phpt
+      ext/openssl/tests/009.phpt
+      ext/openssl/tests/009.phpt
+      ext/openssl/tests/011.phpt
+      ext/openssl/tests/011.phpt
+      ext/openssl/tests/013.phpt
+      ext/openssl/tests/013.phpt
+      ext/openssl/tests/014.phpt
+      ext/openssl/tests/014.phpt
+      ext/openssl/tests/015.phpt
+      ext/openssl/tests/015.phpt
+      ext/openssl/tests/016.phpt
+      ext/openssl/tests/016.phpt
+      ext/openssl/tests/017.phpt
+      ext/openssl/tests/017.phpt
+      ext/openssl/tests/018.phpt
+      ext/openssl/tests/018.phpt
+      ext/openssl/tests/019.phpt
+      ext/openssl/tests/019.phpt
+      ext/openssl/tests/021.phpt
+      ext/openssl/tests/021.phpt
+      ext/openssl/tests/022.phpt
+      ext/openssl/tests/022.phpt
+      ext/openssl/tests/024.phpt
+      ext/openssl/tests/024.phpt
+      ext/openssl/tests/openssl_decrypt_error.phpt
+      ext/openssl/tests/openssl_decrypt_error.phpt
+      ext/openssl/tests/openssl_digest_basic.phpt
+      ext/openssl/tests/openssl_digest_basic.phpt
+      ext/openssl/tests/openssl_encrypt_error.phpt
+      ext/openssl/tests/openssl_encrypt_error.phpt
+      ext/openssl/tests/openssl_x509_parse_basic.phpt
+      ext/openssl/tests/openssl_x509_parse_basic.phpt:
+      
+      file 007.phpt was initially added on branch PHP_5_3.
+
+2008-07-18  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/xmlrpc/tests/bug45555.phpt
+      ext/xmlrpc/tests/bug45556.phpt:
+      - New tests
+
+    * (PHP_5_3)
+      ext/xmlrpc/xmlrpc-epi-php.c:
+      MFB:
+      - Fixed bug #45556 (Return value from callback isn't freed).
+      - Fixed bug #45555 (Segfault with invalid non-string as
+      register_introspection_callback).
+      - Fixed wrong arginfo for xmlrpc_encode_request()
+
+    * (PHP_5_3)
+      NEWS:
+      - Added: Deprecated ticks support.
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN: #45556, #45555
+
+2008-07-18  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/projectgen.js:
+      - Make SAPI include paths work (on my box at least)
+
+2008-07-18  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/xmlrpc/tests/bug45556.phpt
+      ext/xmlrpc/tests/bug45556.phpt
+      ext/xmlrpc/tests/bug45556.phpt:
+        1.1.4;
+      file bug45556.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/xmlrpc/xmlrpc-epi-php.c:
+      - Fixed bug #45556 (Return value from callback isn't freed)
+
+    * (PHP_5_2)
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/tests/bug45555.phpt
+      ext/xmlrpc/tests/bug45555.phpt
+      ext/xmlrpc/tests/bug45555.phpt:
+      - Fixed bug #45555 (Segfault with invalid non-string as
+      register_introspection_callback)
+        (patch by chris_se at gmx dot ne)
+
+2008-07-18  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      - Make REMOVE_TARGET work in all cases
+
+2008-07-18  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/xmlrpc/xmlrpc-epi-php.c:
+      - MFB: Fix ws
+
+2008-07-18  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/php_date.c
+      ext/date/php_date.h
+      ext/date/lib/parse_tz.c
+      ext/date/lib/timelib_structs.h:
+      - MFH: Added support for selectively listing timezone identifiers by
+      country
+        code through timezone_identifiers_list() /
+      DateTimezone::listIdentifiers().
+      - MFH: Added timezone_location_get() / DateTimezone::getLocation() for
+        retrieving location information from timezones.
+
+    * ext/date/php_date.c
+      ext/date/php_date.h
+      ext/date/lib/parse_tz.c
+      ext/date/lib/timelib_structs.h:
+      - Added support for selectively listing timezone identifiers by country
+      code
+        through timezone_identifiers_list() / DateTimezone::listIdentifiers().
+      - Added timezone_location_get() / DateTimezone::getLocation() for
+      retrieving
+        location information from timezones.
+
+    * ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h:
+      - Updated to version 2008.4.1 (2008d)
+
+    * ext/date/lib/timezonedb.h:
+      - Updated to version 2008.4 (2008d)
+
+2008-07-18  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      sapi/apache2filter/php_apache.h
+      sapi/apache2filter/sapi_apache2.c:
+      Fix compile error due to the removal of fteller on streams.
+
+2008-07-18  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/pcntl/tests/signal_closure_handler.phpt:
+      - Fixed test
+
+2008-07-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ext/phar/stream.c:
+      Fixed access to freed memory
+
+2008-07-18  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/gd/gd.c:
+      fix segfault
+
+2008-07-18  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/projectgen.js:
+      - SAPIs are go.
+      Caveat: aolserver, isapi, nsapi, pi3web and (obviously) Linux-specific
+      modules not tested.
+
+2008-07-18  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/gd/gd.c
+      ext/gd/php_gd.h:
+      Remove GD 1.0 support, still need to adjust the configure scripts to
+      correctly check for a newer version
+
+    * (PHP_5_3)
+      ext/gd/config.m4
+      ext/gd/config.w32
+      ext/gd/gd.c
+      ext/gd/gdcache.c
+      ext/gd/gdttf.c
+      ext/gd/gdttf.h
+      ext/gd/php_gd.h
+      ext/gd/libgd/gdcache.c:
+      Remove freetype1 support
+
 2008-07-17  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * ext/gd/gd.c
