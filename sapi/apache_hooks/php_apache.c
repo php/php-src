@@ -59,18 +59,64 @@ PHP_FUNCTION(apache_get_modules);
 
 PHP_MINFO_FUNCTION(apache);
 
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_apachehooks_virtual, 0, 0, 1)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_apachehooks_request_headers, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_apachehooks_response_headers, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_apachehooks_setenv, 0, 0, 2)
+	ZEND_ARG_INFO(0, variable)
+	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_INFO(0, walk_to_top)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_apachehooks_lookup_uri, 0, 0, 1)
+	ZEND_ARG_INFO(0, uri)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_apachehooks_get_version, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_apachehooks_get_modules, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_apachehooks_request_run, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_apachehooks_child_terminate, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_apachehooks_note, 0, 0, 1)
+	ZEND_ARG_INFO(0, note_name)
+	ZEND_ARG_INFO(0, note_value)
+ZEND_END_ARG_INFO()
 
 const zend_function_entry apache_functions[] = {
-	PHP_FE(virtual,									NULL)
-	PHP_FE(apache_request_headers,					NULL)
-	PHP_FE(apache_note,								NULL)
-	PHP_FE(apache_lookup_uri,						NULL)
-	PHP_FE(apache_child_terminate,					NULL)
-	PHP_FE(apache_setenv,							NULL)
-	PHP_FE(apache_response_headers,					NULL)
-	PHP_FE(apache_get_version,					NULL)
-	PHP_FE(apache_get_modules,					NULL)
-	PHP_FALIAS(getallheaders, apache_request_headers, NULL)
+	PHP_FE(virtual,									arginfo_apachehooks_virtual)
+	PHP_FE(apache_request_headers,					arginfo_apachehooks_request_headers)
+	PHP_FE(apache_note,								arginfo_apachehooks_note)
+	PHP_FE(apache_lookup_uri,						arginfo_apachehooks_lookup_uri)
+	PHP_FE(apache_child_terminate,					arginfo_apachehooks_child_terminate)
+	PHP_FE(apache_setenv,							arginfo_apachehooks_setenv)
+	PHP_FE(apache_response_headers,					arginfo_apachehooks_response_headers)
+	PHP_FE(apache_get_version,						arginfo_apachehooks_get_version)
+	PHP_FE(apache_get_modules,						arginfo_apachehooks_get_modules)
+	PHP_FALIAS(getallheaders, apache_request_headers, arginfo_apachehooks_request_headers)
 	{NULL, NULL, NULL}
 };
 
