@@ -3730,6 +3730,7 @@ PHP_FUNCTION(date_interval_create_from_date_string)
 	time = timelib_strtotime(time_str, time_str_len, &err, DATE_TIMEZONEDB);
 	diobj = (php_interval_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
 	diobj->diff = timelib_rel_time_clone(&time->relative);
+	diobj->initialized = 1;
 	timelib_time_dtor(time);
 	timelib_error_container_dtor(err);
 }
@@ -3846,7 +3847,7 @@ PHP_METHOD(DatePeriod, __construct)
 	zval *start, *end = NULL, *interval;
 	long  recurrences = 0, options = 0;
 	char *isostr = NULL;
-	int   isostr_len;
+	int   isostr_len = 0;
 	timelib_time *clone;
 	
 	php_set_error_handling(EH_THROW, NULL TSRMLS_CC);
@@ -3873,7 +3874,9 @@ PHP_METHOD(DatePeriod, __construct)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The ISO interval '%s' did not contain an end date or a recurrence count.", isostr);
 		}
 
-		timelib_update_ts(dpobj->start, NULL);
+		if (dpobj->start) {
+			timelib_update_ts(dpobj->start, NULL);
+		}
 		if (dpobj->end) {
 			timelib_update_ts(dpobj->end, NULL);
 		}
