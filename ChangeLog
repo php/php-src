@@ -1,3 +1,123 @@
+2008-07-19  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/spl_iterators.c:
+      Complete the ZTS build fix
+
+2008-07-19  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/spl/spl_iterators.c:
+      - Fixed ZTS build.
+
+2008-07-19  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      - Fix logic in get_define()
+
+2008-07-19  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/php_date.c:
+      - Country codes are ISO 3166.
+
+2008-07-19  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      - Rejig REMOVE_TARGET
+      - Tidy ADD_EXTENSION_DEP
+      - Put summary output in alphabetical order
+
+2008-07-19  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ext/spl/examples/multipleiterator.inc:
+      - MFH Add MultipleIterator
+      (http://blog.somabo.de/2008/01/multipleiterator-for-php.html)
+
+    * ext/spl/examples/multipleiterator.inc
+      ext/spl/examples/multipleiterator.inc:
+      
+      - Add MultipleIterator
+      (http://blog.somabo.de/2008/01/multipleiterator-for-php.html)
+
+    * ext/spl/internal/recursivetreeiterator.inc
+      ext/spl/internal/recursivetreeiterator.inc:
+      
+      - added missing @since tag
+
+    * ext/spl/spl.php
+      ext/spl/spl_iterators.c
+      ext/spl/spl_iterators.h
+      ext/spl/examples/recursivetreeiterator.inc
+      ext/spl/internal/recursivetreeiterator.inc
+      ext/spl/tests/recursive_tree_iterator_001.phpt
+      ext/spl/tests/recursive_tree_iterator_001.phpt
+      ext/spl/tests/recursive_tree_iterator_002.phpt
+      ext/spl/tests/recursive_tree_iterator_002.phpt
+      ext/spl/tests/recursive_tree_iterator_003.phpt
+      ext/spl/tests/recursive_tree_iterator_003.phpt
+      ext/spl/tests/recursive_tree_iterator_004.phpt
+      ext/spl/tests/recursive_tree_iterator_004.phpt
+      ext/spl/tests/recursive_tree_iterator_005.phpt
+      ext/spl/tests/recursive_tree_iterator_005.phpt
+      ext/spl/tests/recursive_tree_iterator_006.phpt
+      ext/spl/tests/recursive_tree_iterator_006.phpt
+      ext/spl/tests/recursive_tree_iterator_007.phpt
+      ext/spl/tests/recursive_tree_iterator_007.phpt
+      ext/spl/tests/recursive_tree_iterator_008.phpt
+      ext/spl/tests/recursive_tree_iterator_008.phpt:
+      - Move RecursiveTreeIterator from PHP to C code (Arnaud, Marcus)
+      [DOC] Added RecursiveTreeIterator
+            Documentation in ext/spl/internal/recursivetreeiterator.inc
+
+2008-07-19  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/spl/spl_array.c:
+      MFH: Fix valgrind errors in array_method, and possibly #45349 (Thanks tony
+      for the patch)
+
+    * ext/spl/spl_array.c:
+      Fix valgrind errors in array_method, and possibly #45349 (Thanks tony for
+      the patch)
+
+    * ext/spl/spl_directory.c
+      ext/spl/spl_directory.h
+      ext/spl/tests/dit_006.phpt
+      ext/spl/tests/dit_006.phpt:
+      Implement DirectoryIterator::seek
+
+2008-07-19  Henrique do Nascimento Angelo  <h.n.angelo@gmail.com>
+
+    * ext/openssl/tests/003.phpt
+      ext/openssl/tests/012.phpt
+      ext/openssl/tests/023.phpt
+      ext/openssl/tests/025.phpt
+      ext/openssl/tests/bug37820.phpt
+      ext/openssl/tests/bug38255.phpt
+      ext/openssl/tests/bug38261.phpt:
+      Fix tests
+
+    * ext/openssl/tests/007.phpt
+      ext/openssl/tests/008.phpt
+      ext/openssl/tests/009.phpt
+      ext/openssl/tests/011.phpt
+      ext/openssl/tests/013.phpt
+      ext/openssl/tests/014.phpt
+      ext/openssl/tests/015.phpt
+      ext/openssl/tests/016.phpt
+      ext/openssl/tests/017.phpt
+      ext/openssl/tests/018.phpt
+      ext/openssl/tests/019.phpt
+      ext/openssl/tests/021.phpt
+      ext/openssl/tests/022.phpt
+      ext/openssl/tests/024.phpt
+      ext/openssl/tests/openssl_decrypt_error.phpt
+      ext/openssl/tests/openssl_digest_basic.phpt
+      ext/openssl/tests/openssl_encrypt_error.phpt
+      ext/openssl/tests/openssl_x509_parse_basic.phpt:
+      New tests
+
 2008-07-18  Henrique do Nascimento Angelo  <h.n.angelo@gmail.com>
 
     * ext/openssl/openssl.c:
