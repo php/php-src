@@ -6,7 +6,7 @@
 int readlink(char *file_Name, char *buf_Mem, int buf_Size)
 {
 	/* See if the file exists */
-	if (access(file_Name, X_OK) == -1) {
+	if (access(file_Name, WFILE_EXISTS) == -1) {
 		errno = ENOENT;
 	} else {
 		errno = EINVAL;
