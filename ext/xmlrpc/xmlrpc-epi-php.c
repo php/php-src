@@ -97,7 +97,7 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_encode_request, 0, 0, 2)
 	ZEND_ARG_INFO(0, method)
-	ZEND_ARG_INFO(1, params)
+	ZEND_ARG_INFO(0, params)
 	ZEND_ARG_INFO(0, output_options)
 ZEND_END_ARG_INFO()
 
@@ -951,13 +951,11 @@ static XMLRPC_VALUE php_xmlrpc_callback(XMLRPC_SERVER server, XMLRPC_REQUEST xRe
  */
 static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) /* {{{ */
 {
-	zval *retval_ptr, **php_function;
+	zval retval, **php_function;
 	zval* callback_params[1];
+	zval php_function_name;
 	xmlrpc_callback_data* pData = (xmlrpc_callback_data*)data;
 	TSRMLS_FETCH();
-
-	MAKE_STD_ZVAL(retval_ptr);
-	Z_TYPE_P(retval_ptr) = IS_NULL;
 
 	/* setup data hoojum */
 	callback_params[0] = pData->caller_params;
@@ -965,44 +963,42 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
 	/* loop through and call all registered callbacks */
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(pData->server->introspection_map));
 	while(1) {
-		if(zend_hash_get_current_data(Z_ARRVAL_P(pData->server->introspection_map), 
-					(void**)&php_function) == SUCCESS) {
+		if(zend_hash_get_current_data(Z_ARRVAL_P(pData->server->introspection_map), (void**)&php_function) == SUCCESS) {
+			if (zend_is_callable(*php_function, 0, &php_function_name)) {
+				/* php func prototype: function string user_func($user_params) */
+				if (call_user_function(CG(function_table), NULL, *php_function, &retval, 1, callback_params TSRMLS_CC) == SUCCESS) {
+					XMLRPC_VALUE xData;
+					STRUCT_XMLRPC_ERROR err = {0};
 
-			/* php func prototype: function string user_func($user_params) */
-			if(call_user_function(CG(function_table), NULL, *php_function, 
-						retval_ptr, 1, callback_params TSRMLS_CC) == SUCCESS) {
-				XMLRPC_VALUE xData;
-				STRUCT_XMLRPC_ERROR err = {0};
+					/* return value should be a string */
+					convert_to_string(&retval);
 
-				/* return value should be a string */
-				convert_to_string(retval_ptr);
+					xData = XMLRPC_IntrospectionCreateDescription(Z_STRVAL(retval), &err);
 
-				xData = XMLRPC_IntrospectionCreateDescription(Z_STRVAL_P(retval_ptr), &err);
-
-				if(xData) {
-					if(!XMLRPC_ServerAddIntrospectionData(server, xData)) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to add introspection data returned from %s(), improper element structure", Z_STRVAL_PP(php_function));
+					if(xData) {
+						if(!XMLRPC_ServerAddIntrospectionData(server, xData)) {
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to add introspection data returned from %v(), improper element structure", Z_UNIVAL(php_function_name));
+						}
+						XMLRPC_CleanupValue(xData);
+					} else {
+						/* could not create description */
+						if(err.xml_elem_error.parser_code) {
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "xml parse error: [line %ld, column %ld, message: %s] Unable to add introspection data returned from %v()", 
+									err.xml_elem_error.column, err.xml_elem_error.line, err.xml_elem_error.parser_error, Z_UNIVAL(php_function_name));
+						} else {
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to add introspection data returned from %v()", Z_UNIVAL(php_function_name));
+						}
 					}
-					XMLRPC_CleanupValue(xData);
+					zval_dtor(&retval);
+				} else {
+					/* user func failed */
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error calling user introspection callback: %v()", Z_UNIVAL(php_function_name));
 				}
-				else {
-					/* could not create description */
-					if(err.xml_elem_error.parser_code) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "xml parse error: [line %ld, column %ld, message: %s] Unable to add introspection data returned from %s()", 
-								err.xml_elem_error.column, err.xml_elem_error.line, err.xml_elem_error.parser_error, Z_STRVAL_PP(php_function));
-					}
-					else {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to add introspection data returned from %s()", 
-								Z_STRVAL_PP(php_function));
-					}
-				}
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid callback '%v' passed", Z_UNIVAL(php_function_name));
 			}
-			else {
-				/* user func failed */
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error calling user introspection callback: %s()", Z_STRVAL_PP(php_function));
-			}
-		}
-		else {
+			zval_dtor(&php_function_name);
+		} else {
 			break;
 		}
 
