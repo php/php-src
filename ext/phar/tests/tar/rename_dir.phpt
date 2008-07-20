@@ -39,4 +39,4 @@ echo file_get_contents($alias . '/a/x') . "\n";
 a
 a
 
-Warning: file_get_contents(phar://%srename.phar.tar/a/x): failed to open stream: phar error: "a" is not a file in phar "%srename.phar.tar" in %srename.php on line %d
+Warning: file_get_contents(phar://%srename_dir.phar.tar/a/x): failed to open stream: phar error: "a/x" is not a file in phar "%srename_dir.phar.tar" in %srename_dir.php on line %d

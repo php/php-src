@@ -620,14 +620,16 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 		char *str_key;
 		ulong unused;
 		uint keylen;
+		HashPosition pos;
 
-		zend_hash_internal_pointer_reset(&phar->mounted_dirs);
-		while (FAILURE != zend_hash_has_more_elements(&phar->mounted_dirs)) {
-			if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(&phar->mounted_dirs, &key, &keylen, &unused, 0, NULL)) {
+		zend_hash_internal_pointer_reset_ex(&phar->mounted_dirs, &pos);
+		while (FAILURE != zend_hash_has_more_elements_ex(&phar->mounted_dirs, &pos)) {
+			if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(&phar->mounted_dirs, &key, &keylen, &unused, 0, &pos)) {
 				break;
 			}
 			PHAR_STR(key, str_key);
 			if ((int)keylen >= internal_file_len || strncmp(str_key, internal_file, keylen)) {
+			    zend_hash_move_forward_ex(&phar->mounted_dirs, &pos);
 				continue;
 			} else {
 				char *test;
@@ -644,6 +646,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 				test_len = spprintf(&test, MAXPATHLEN, "%s%s", entry->tmp, internal_file + keylen);
 				if (SUCCESS != php_stream_stat_path(test, &ssbi)) {
 					efree(test);
+				    zend_hash_move_forward_ex(&phar->mounted_dirs, &pos);
 					continue;
 				}
 				/* mount the file/directory just in time */
@@ -752,6 +755,8 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 	phar_archive_data *phar, *pfrom, *pto;
 	phar_entry_info *entry;
 	uint host_len;
+	int is_dir = 0;
+	int is_modified = 0;
 
 	error = NULL;
 
@@ -872,21 +877,96 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 			zend_hash_del(&(phar->manifest), entry->filename, strlen(entry->filename));
 			return 0;
 		}
+		is_modified = 1;
 		entry->is_modified = 1;
 		entry->filename_len = strlen(entry->filename);
+		is_dir = entry->is_dir;
+	} else {
+		is_dir = zend_hash_exists(&(phar->virtual_dirs), resource_from->path+1, strlen(resource_from->path)-1);
+	}
+
+	/* Rename directory. Update all nested paths */
+	if (is_dir) {
+		int key_type;
+		char *key, *new_key;
+		uint key_len, new_key_len;
+		ulong unused;
+		uint from_len = strlen(resource_from->path+1);
+		uint to_len = strlen(resource_to->path+1);
+
+		for (zend_hash_internal_pointer_reset(&phar->manifest);
+		    HASH_KEY_NON_EXISTANT != (key_type = zend_hash_get_current_key_ex(&phar->manifest, &key, &key_len, &unused, 0, NULL)) &&
+		    SUCCESS == zend_hash_get_current_data(&phar->manifest, (void **) &entry);
+		    zend_hash_move_forward(&phar->manifest)) {
+
+			if (!entry->is_deleted &&
+			    key_len > from_len &&
+			    memcmp(key, resource_from->path+1, from_len) == 0 &&
+			    IS_SLASH(key[from_len])) {
+
+				new_key_len = key_len + to_len - from_len;
+				new_key = emalloc(new_key_len+1);
+				memcpy(new_key, resource_to->path + 1, to_len);
+				memcpy(new_key + to_len, key + from_len, key_len - from_len);
+				new_key[new_key_len] = 0;
+				is_modified = 1;
+				entry->is_modified = 1;
+				efree(entry->filename);
+				entry->filename = new_key;
+				entry->filename_len = new_key_len;
+				zend_hash_update_current_key_ex(&phar->manifest, key_type, new_key, new_key_len, 0, NULL);
+			}
+		}		
+
+		for (zend_hash_internal_pointer_reset(&phar->virtual_dirs);
+		    HASH_KEY_NON_EXISTANT != (key_type = zend_hash_get_current_key_ex(&phar->virtual_dirs, &key, &key_len, &unused, 0, NULL));
+		    zend_hash_move_forward(&phar->virtual_dirs)) {
+
+			if (key_len >= from_len &&
+			    memcmp(key, resource_from->path+1, from_len) == 0 &&
+			    (key_len == from_len || IS_SLASH(key[from_len]))) {
+
+				new_key_len = key_len + to_len - from_len;
+				new_key = emalloc(new_key_len+1);
+				memcpy(new_key, resource_to->path + 1, to_len);
+				memcpy(new_key + to_len, key + from_len, key_len - from_len);
+				new_key[new_key_len] = 0;
+				zend_hash_update_current_key_ex(&phar->virtual_dirs, key_type, new_key, new_key_len, 0, NULL);
+				efree(new_key);
+			}
+		}
+
+		for (zend_hash_internal_pointer_reset(&phar->mounted_dirs);
+		    HASH_KEY_NON_EXISTANT != (key_type = zend_hash_get_current_key_ex(&phar->mounted_dirs, &key, &key_len, &unused, 0, NULL)) &&
+		    SUCCESS == zend_hash_get_current_data(&phar->mounted_dirs, (void **) &entry);
+		    zend_hash_move_forward(&phar->mounted_dirs)) {
+
+			if (key_len >= from_len &&
+			    memcmp(key, resource_from->path+1, from_len) == 0 &&
+			    (key_len == from_len || IS_SLASH(key[from_len]))) {
+
+				new_key_len = key_len + to_len - from_len;
+				new_key = emalloc(new_key_len+1);
+				memcpy(new_key, resource_to->path + 1, to_len);
+				memcpy(new_key + to_len, key + from_len, key_len - from_len);
+				new_key[new_key_len] = 0;
+				zend_hash_update_current_key_ex(&phar->mounted_dirs, key_type, new_key, new_key_len, 0, NULL);
+				efree(new_key);
+			}
+		}
+	}
+
+	if (is_modified) {
 		phar_flush(phar, 0, 0, 0, &error TSRMLS_CC);
 		if (error) {
 			php_url_free(resource_from);
 			php_url_free(resource_to);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": %s", url_from, url_to, error);
 			efree(error);
-			zend_hash_del(&(phar->manifest), entry->filename, strlen(entry->filename));
 			return 0;
 		}
-
-		phar_add_virtual_dirs(phar, resource_to->path+1, strlen(resource_to->path)-1 TSRMLS_CC);
-		phar_delete_virtual_dirs(phar, resource_from->path+1, strlen(resource_from->path)-1 TSRMLS_CC);
 	}
+
 	php_url_free(resource_from);
 	php_url_free(resource_to);
 	return 1;

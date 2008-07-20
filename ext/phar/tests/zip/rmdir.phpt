@@ -21,12 +21,17 @@ $phar->stopBuffering();
 include $fname;
 
 echo file_get_contents($alias . '/a/x') . "\n";
-rmdir($alias . '/a');
+var_dump(rmdir($alias . '/a'));
 echo file_get_contents($alias . '/a/x') . "\n";
+unlink($alias . '/a/x');
+var_dump(rmdir($alias . '/a'));
 ?>
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>
 --EXPECTF--
 a
 
-Warning: file_get_contents(phar://%srename.phar.zip/a/x): failed to open stream: phar error: "a" is not a file in phar "%srename.phar.zip" in %srename.php on line %d
+Warning: rmdir(): phar error: Directory not empty in %srmdir.php on line 16
+bool(false)
+a
+bool(true)
