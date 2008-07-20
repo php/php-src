@@ -218,6 +218,7 @@ PHP                                                                        NEWS
 - Fixed bug #44913 (Segfault when using return in combination with nested loops
   and continue 2). (Dmitry)
 - Fixed bug #44899 (__isset usage changes behavior of empty()) (Etienne)
+- Fixed bug #44849 (imagecolorclosesthwb() is not available on Windows) (Kalle)
 - Fixed bug #44805 (rename() function is not portable to Windows). (Pierre)
 - Fixed bug #44742 (timezone_offset_get() causes segmentation faults). (Derick)
 - Fixed bug #44648 (Attribute names not checked for wellformedness). (Rob)
