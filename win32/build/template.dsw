@@ -30,7 +30,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "php5dllts"=..\win32\php5dllts.dsp - Package Owner=<4>
+Project: "php5ts"=..\win32\php5ts.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
