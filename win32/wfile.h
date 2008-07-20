@@ -4,7 +4,7 @@
 #include  <errno.h>
 
 #define access _access
-#define X_OK	0
+#define WFILE_EXISTS	0
 #ifndef ENOENT
 #define ENOENT	136
 #endif
