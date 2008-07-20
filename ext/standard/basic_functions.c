@@ -3392,8 +3392,8 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(set_time_limit,													arginfo_set_time_limit)
 	PHP_FE(get_cfg_var,														arginfo_get_cfg_var)
 
-	PHP_FE(get_magic_quotes_gpc,											NULL)
-	PHP_FE(get_magic_quotes_runtime,										NULL)
+	PHP_FE(get_magic_quotes_gpc,											arginfo_get_magic_quotes_gpc)
+	PHP_FE(get_magic_quotes_runtime,										arginfo_get_magic_quotes_runtime)
 
 	PHP_FE(import_request_variables,										arginfo_import_request_variables)
 	PHP_FE(error_log,														arginfo_error_log)

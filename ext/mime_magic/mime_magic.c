@@ -217,9 +217,16 @@ static PHP_GINIT_FUNCTION(mime_magic);
 /* True global resources - no need for thread safety here */
 static magic_server_config_rec mime_global;
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mime_content_type, 0, 0, 1)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 /* {{{ mime_magic_functions[] */
 const zend_function_entry mime_magic_functions[] = {
-	PHP_FE(mime_content_type,	NULL)	   
+	PHP_FE(mime_content_type,	arginfo_mime_content_type)	   
 	{NULL, NULL, NULL}	
 };
 /* }}} */

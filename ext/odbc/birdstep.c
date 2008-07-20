@@ -49,37 +49,104 @@
 #include "ext/standard/info.h"
 #include "php_ini.h"
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_connect, 0, 0, 3)
+	ZEND_ARG_INFO(0, server)
+	ZEND_ARG_INFO(0, user)
+	ZEND_ARG_INFO(0, pass)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_close, 0, 0, 1)
+	ZEND_ARG_INFO(0, id)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_exec, 0, 0, 2)
+	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_INFO(0, exec_str)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_fetch, 0, 0, 1)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_result, 0, 0, 2)
+	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_INFO(0, col)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_freeresult, 0, 0, 1)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_autocommit, 0, 0, 1)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_off_autocommit, 0, 0, 1)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_commit, 0, 0, 1)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_rollback, 0, 0, 1)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_fieldname, 0, 0, 2)
+	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_INFO(0, col)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_fieldnum, 0, 0, 1)
+	ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 const zend_function_entry birdstep_functions[] = {
-	PHP_FE(birdstep_connect,        NULL)
-	PHP_FE(birdstep_close,          NULL)
-	PHP_FE(birdstep_exec,           NULL)
-	PHP_FE(birdstep_fetch,          NULL)
-	PHP_FE(birdstep_result,         NULL)
-	PHP_FE(birdstep_freeresult,     NULL)
-	PHP_FE(birdstep_autocommit,     NULL)
-	PHP_FE(birdstep_off_autocommit, NULL)
-	PHP_FE(birdstep_commit,         NULL)
-	PHP_FE(birdstep_rollback,       NULL)
-	PHP_FE(birdstep_fieldnum,       NULL)
-	PHP_FE(birdstep_fieldname,      NULL)
+	PHP_FE(birdstep_connect,        arginfo_birdstep_connect)
+	PHP_FE(birdstep_close,          arginfo_birdstep_close)
+	PHP_FE(birdstep_exec,           arginfo_birdstep_exec)
+	PHP_FE(birdstep_fetch,          arginfo_birdstep_fetch)
+	PHP_FE(birdstep_result,         arginfo_birdstep_result)
+	PHP_FE(birdstep_freeresult,     arginfo_birdstep_freeresult)
+	PHP_FE(birdstep_autocommit,     arginfo_birdstep_autocommit)
+	PHP_FE(birdstep_off_autocommit, arginfo_birdstep_off_autocommit)
+	PHP_FE(birdstep_commit,         arginfo_birdstep_commit)
+	PHP_FE(birdstep_rollback,       arginfo_birdstep_rollback)
+	PHP_FE(birdstep_fieldnum,       arginfo_birdstep_fieldnum)
+	PHP_FE(birdstep_fieldname,      arginfo_birdstep_fieldname)
 /*
  * Temporary Function aliases until the next major upgrade to PHP.  
  * These should allow users to continue to use their current scripts, 
  * but should in reality warn the user that this functionality is 
  * deprecated.
  */
-	PHP_FALIAS(velocis_connect,        birdstep_connect,        NULL)
-	PHP_FALIAS(velocis_close,          birdstep_close,          NULL)
-	PHP_FALIAS(velocis_exec,           birdstep_exec,           NULL)
-	PHP_FALIAS(velocis_fetch,          birdstep_fetch,          NULL)
-	PHP_FALIAS(velocis_result,         birdstep_result,         NULL)
-	PHP_FALIAS(velocis_freeresult,     birdstep_freeresult,     NULL)
-	PHP_FALIAS(velocis_autocommit,     birdstep_autocommit,     NULL)
-	PHP_FALIAS(velocis_off_autocommit, birdstep_off_autocommit, NULL)
-	PHP_FALIAS(velocis_commit,         birdstep_commit,         NULL)
-	PHP_FALIAS(velocis_rollback,       birdstep_rollback,       NULL)
-	PHP_FALIAS(velocis_fieldnum,       birdstep_fieldnum,       NULL)
-	PHP_FALIAS(velocis_fieldname,      birdstep_fieldname,      NULL)
+	PHP_FALIAS(velocis_connect,        birdstep_connect,        arginfo_birdstep_connect)
+	PHP_FALIAS(velocis_close,          birdstep_close,          arginfo_birdstep_close)
+	PHP_FALIAS(velocis_exec,           birdstep_exec,           arginfo_birdstep_exec)
+	PHP_FALIAS(velocis_fetch,          birdstep_fetch,          arginfo_birdstep_fetch)
+	PHP_FALIAS(velocis_result,         birdstep_result,         arginfo_birdstep_result)
+	PHP_FALIAS(velocis_freeresult,     birdstep_freeresult,     arginfo_birdstep_freeresult)
+	PHP_FALIAS(velocis_autocommit,     birdstep_autocommit,     arginfo_birdstep_autocommit)
+	PHP_FALIAS(velocis_off_autocommit, birdstep_off_autocommit, arginfo_birdstep_off_autocommit)
+	PHP_FALIAS(velocis_commit,         birdstep_commit,         arginfo_birdstep_commit)
+	PHP_FALIAS(velocis_rollback,       birdstep_rollback,       arginfo_birdstep_rollback)
+	PHP_FALIAS(velocis_fieldnum,       birdstep_fieldnum,       arginfo_birdstep_fieldnum)
+	PHP_FALIAS(velocis_fieldname,      birdstep_fieldname,      arginfo_birdstep_fieldname)
 /* End temporary aliases */
 	{NULL, NULL, NULL}
 };

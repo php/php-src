@@ -44,58 +44,224 @@ static php_msql_globals msql_globals;
 #define MSQL_NUM		1<<1
 #define MSQL_BOTH		(MSQL_ASSOC|MSQL_NUM)
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_connect, 0, 0, 0)
+	ZEND_ARG_INFO(0, hostname)
+	ZEND_ARG_INFO(0, username)
+	ZEND_ARG_INFO(0, password)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_pconnect, 0, 0, 0)
+	ZEND_ARG_INFO(0, hostname)
+	ZEND_ARG_INFO(0, username)
+	ZEND_ARG_INFO(0, password)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_close, 0, 0, 0)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_select_db, 0, 0, 1)
+	ZEND_ARG_INFO(0, database_name)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_create_db, 0, 0, 1)
+	ZEND_ARG_INFO(0, database_name)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_drop_db, 0, 0, 1)
+	ZEND_ARG_INFO(0, database_name)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_query, 0, 0, 1)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_db_query, 0, 0, 2)
+	ZEND_ARG_INFO(0, database_name)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_list_dbs, 0, 0, 0)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_list_tables, 0, 0, 1)
+	ZEND_ARG_INFO(0, database_name)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_list_fields, 0, 0, 2)
+	ZEND_ARG_INFO(0, database_name)
+	ZEND_ARG_INFO(0, table_name)
+	ZEND_ARG_INFO(0, link_identifier)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_msql_error, 0)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_result, 0, 0, 2)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, row)
+	ZEND_ARG_INFO(0, field)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_num_rows, 0, 0, 1)
+	ZEND_ARG_INFO(0, query)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_num_fields, 0, 0, 1)
+	ZEND_ARG_INFO(0, query)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_fetch_row, 0, 0, 1)
+	ZEND_ARG_INFO(0, query)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_fetch_object, 0, 0, 1)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, result_type)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_fetch_array, 0, 0, 1)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, result_type)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_data_seek, 0, 0, 2)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, row_number)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_fetch_field, 0, 0, 1)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, field_offset)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_field_seek, 0, 0, 2)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, field_offset)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_field_name, 0, 0, 2)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, field_index)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_field_table, 0, 0, 2)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, field_offset)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_field_len, 0, 0, 2)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, field_offet)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_field_type, 0, 0, 2)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, field_offset)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_field_flags, 0, 0, 2)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, field_offset)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_free_result, 0, 0, 1)
+	ZEND_ARG_INFO(0, query)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msql_affected_rows, 0, 0, 1)
+	ZEND_ARG_INFO(0, query)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 /* {{{ msql_functions[]
  */
 const zend_function_entry msql_functions[] = {
-	PHP_FE(msql_connect,							NULL)
-	PHP_FE(msql_pconnect,							NULL)
-	PHP_FE(msql_close,								NULL)
-	PHP_FE(msql_select_db,							NULL)
-	PHP_FE(msql_create_db,							NULL)
-	PHP_FE(msql_drop_db,							NULL)
-	PHP_FE(msql_query,								NULL)
-	PHP_FE(msql_db_query,							NULL)
-	PHP_FE(msql_list_dbs,							NULL)
-	PHP_FE(msql_list_tables,						NULL)
-	PHP_FE(msql_list_fields,						NULL)
-	PHP_FE(msql_error,								NULL)
-	PHP_FE(msql_result,								NULL)
-	PHP_FE(msql_num_rows,							NULL)
-	PHP_FE(msql_num_fields,							NULL)
-	PHP_FE(msql_fetch_row,							NULL)
-	PHP_FE(msql_fetch_array,						NULL)
-	PHP_FE(msql_fetch_object,						NULL)
-	PHP_FE(msql_data_seek,							NULL)
-	PHP_FE(msql_fetch_field,						NULL)
-	PHP_FE(msql_field_seek,							NULL)
-	PHP_FE(msql_free_result,						NULL)
-	PHP_FE(msql_field_name,							NULL)
-	PHP_FE(msql_field_table,						NULL)
-	PHP_FE(msql_field_len,							NULL)
-	PHP_FE(msql_field_type,							NULL)
-	PHP_FE(msql_field_flags,						NULL)
+	PHP_FE(msql_connect,							arginfo_msql_connect)
+	PHP_FE(msql_pconnect,							arginfo_msql_pconnect)
+	PHP_FE(msql_close,								arginfo_msql_close)
+	PHP_FE(msql_select_db,							arginfo_msql_select_db)
+	PHP_FE(msql_create_db,							arginfo_msql_create_db)
+	PHP_FE(msql_drop_db,							arginfo_msql_drop_db)
+	PHP_FE(msql_query,								arginfo_msql_query)
+	PHP_FE(msql_db_query,							arginfo_msql_db_query)
+	PHP_FE(msql_list_dbs,							arginfo_msql_list_dbs)
+	PHP_FE(msql_list_tables,						arginfo_msql_list_tables)
+	PHP_FE(msql_list_fields,						arginfo_msql_list_fields)
+	PHP_FE(msql_error,								arginfo_msql_error)
+	PHP_FE(msql_result,								arginfo_msql_result)
+	PHP_FE(msql_num_rows,							arginfo_msql_num_rows)
+	PHP_FE(msql_num_fields,							arginfo_msql_num_fields)
+	PHP_FE(msql_fetch_row,							arginfo_msql_fetch_row)
+	PHP_FE(msql_fetch_array,						arginfo_msql_fetch_array)
+	PHP_FE(msql_fetch_object,						arginfo_msql_fetch_object)
+	PHP_FE(msql_data_seek,							arginfo_msql_data_seek)
+	PHP_FE(msql_fetch_field,						arginfo_msql_fetch_field)
+	PHP_FE(msql_field_seek,							arginfo_msql_field_seek)
+	PHP_FE(msql_free_result,						arginfo_msql_free_result)
+	PHP_FE(msql_field_name,							arginfo_msql_field_name)
+	PHP_FE(msql_field_table,						arginfo_msql_field_table)
+	PHP_FE(msql_field_len,							arginfo_msql_field_len)
+	PHP_FE(msql_field_type,							arginfo_msql_field_type)
+	PHP_FE(msql_field_flags,						arginfo_msql_field_flags)
 	
-	PHP_FALIAS(msql_fieldname,		msql_field_name,		NULL)
-	PHP_FALIAS(msql_fieldtable,		msql_field_table,		NULL)
-	PHP_FALIAS(msql_fieldlen,		msql_field_len,			NULL)
-	PHP_FALIAS(msql_fieldtype,		msql_field_type,		NULL)
-	PHP_FALIAS(msql_fieldflags,		msql_field_flags,		NULL)
-
-	PHP_FALIAS(msql_affected_rows,	msql_affected_rows,		NULL)
+	PHP_FALIAS(msql_fieldname,		msql_field_name,		arginfo_msql_field_name)
+	PHP_FALIAS(msql_fieldtable,		msql_field_table,		arginfo_msql_field_table)
+	PHP_FALIAS(msql_fieldlen,		msql_field_len,			arginfo_msql_field_len)
+	PHP_FALIAS(msql_fieldtype,		msql_field_type,		arginfo_msql_field_type)
+	PHP_FALIAS(msql_fieldflags,		msql_field_flags,		arginfo_msql_field_flags)
+	
+	PHP_FALIAS(msql_affected_rows,	msql_affected_rows,		arginfo_msql_affected_rows)
 	
 	/* for downwards compatability */
-	PHP_FALIAS(msql,				msql_db_query,			NULL)
-	PHP_FALIAS(msql_selectdb,		msql_select_db,			NULL)
-	PHP_FALIAS(msql_createdb,		msql_create_db,			NULL)
-	PHP_FALIAS(msql_dropdb,			msql_drop_db,			NULL)
-	PHP_FALIAS(msql_freeresult,		msql_free_result,		NULL)
-	PHP_FALIAS(msql_numfields,		msql_num_fields,		NULL)
-	PHP_FALIAS(msql_numrows,		msql_num_rows,			NULL)
-	PHP_FALIAS(msql_listdbs,		msql_list_dbs,			NULL)
-	PHP_FALIAS(msql_listtables,		msql_list_tables,		NULL)
-	PHP_FALIAS(msql_listfields,		msql_list_fields,		NULL)
-	PHP_FALIAS(msql_dbname,			msql_result,			NULL)
-	PHP_FALIAS(msql_tablename,		msql_result,			NULL)
+	PHP_FALIAS(msql,				msql_db_query,			arginfo_msql_db_query)
+	PHP_FALIAS(msql_selectdb,		msql_select_db,			arginfo_msql_select_db)
+	PHP_FALIAS(msql_createdb,		msql_create_db,			arginfo_msql_create_db)
+	PHP_FALIAS(msql_dropdb,			msql_drop_db,			arginfo_msql_drop_db)
+	PHP_FALIAS(msql_freeresult,		msql_free_result,		arginfo_msql_free_result)
+	PHP_FALIAS(msql_numfields,		msql_num_fields,		arginfo_msql_num_fields)
+	PHP_FALIAS(msql_numrows,		msql_num_rows,			arginfo_msql_num_rows)
+	PHP_FALIAS(msql_listdbs,		msql_list_dbs,			arginfo_msql_list_dbs)
+	PHP_FALIAS(msql_listtables,		msql_list_tables,		arginfo_msql_list_tables)
+	PHP_FALIAS(msql_listfields,		msql_list_fields,		arginfo_msql_list_fields)
+	PHP_FALIAS(msql_dbname,			msql_result,			arginfo_msql_result)
+	PHP_FALIAS(msql_tablename,		msql_result,			arginfo_msql_result)
 	{NULL, NULL, NULL}
 };
 /* }}} */
