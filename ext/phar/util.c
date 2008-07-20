@@ -1950,53 +1950,14 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 }
 /* }}} */
 
-/**
- * add an empty element with a char * key to a hash table, avoiding duplicates
- *
- * This is used to get a unique listing of virtual directories within a phar,
- * for iterating over opendir()ed phar directories.
- */
-static int phar_add_empty(HashTable *ht, char *arKey, uint nKeyLength)  /* {{{ */
-{
-	char **dummy;
-
-	if (SUCCESS == zend_hash_find(ht, arKey, nKeyLength, (void **)&dummy)) {
-		(*dummy)++;
-		return SUCCESS;
-	} else {
-		char *dummy = (char*)1;
-
-		return zend_hash_add(ht, arKey, nKeyLength, (char *) &dummy, sizeof(void *), NULL);
-	}
-}
-/* }}} */
-
 void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, int filename_len TSRMLS_DC) /* {{{ */
 {
-	char *s = filename;
+	char *s;
 
-	/* we use filename_len - 1 to avoid adding a virtual dir for empty directory entries */
-	for (; s - filename < filename_len - 1; s++) {
-		if (*s == '/') {
-			phar_add_empty(&phar->virtual_dirs, filename, s - filename);
-		}
-	}
-}
-/* }}} */
-
-void phar_delete_virtual_dirs(phar_archive_data *phar, char *filename, int filename_len TSRMLS_DC) /* {{{ */
-{
-	char *s = filename;
-	char **dummy;
-
-	/* we use filename_len - 1 to avoid adding a virtual dir for empty directory entries */
-	for (; s - filename < filename_len - 1; s++) {
-		if (*s == '/') {
-			if (SUCCESS == zend_hash_find(&phar->virtual_dirs, filename, s - filename, (void **)&dummy)) {
-				if (!--(*dummy)) {
-					zend_hash_del(&phar->virtual_dirs, filename, s - filename);
-				}
-			}
+	while ((s = zend_memrchr(filename, '/', filename_len))) {
+		filename_len = s - filename;
+		if (FAILURE == zend_hash_add_empty_element(&phar->virtual_dirs, filename, filename_len)) {
+			break;
 		}
 	}
 }
