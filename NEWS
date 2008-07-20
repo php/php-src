@@ -208,6 +208,8 @@ PHP                                                                        NEWS
 
 - Fixed PECL bug #12431 (OCI8 ping functionality is broken). (Oracle Corp.)
 
+- Fixed bug #45571 (ReflectionClass::export() shows superclasses' private static 
+  methods). (robin_fernandes at uk dot ibm dot com)
 - Fixed bug #45345 (SPLFileInfo::getPathInfo() returning dir info instead of
   file info). (Etienne)
 - Fixed bug #45038 (Crash when using DateTimeZone object returned by
