@@ -5,7 +5,7 @@ PHP_ARG_ENABLE(hash, whether to enable hash support,
 [  --disable-hash          Disable hash support], yes)
 
 if test "$PHP_MHASH" != "no"; then
-  if test "$PHP_HASH" == "no"; then
+  if test "$PHP_HASH" = "no"; then
     PHP_HASH="yes"
   fi
 
