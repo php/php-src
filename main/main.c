@@ -944,6 +944,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 				break;
 			case E_STRICT:
 			case E_DEPRECATED:
+			case E_USER_DEPRECATED:
 				/* for the sake of BC to old damaged code */
 				break;
 			case E_NOTICE:
@@ -994,6 +995,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 				error_type_str = "Strict Standards";
 				break;
 			case E_DEPRECATED:
+			case E_USER_DEPRECATED:
 				error_type_str = "Deprecated";
 				break;
 			default:
