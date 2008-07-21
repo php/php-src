@@ -3,7 +3,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2007 The PHP Group                                |
+  | Copyright (c) 1997-2008 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.76 2008-07-07 13:48:23 pajoye Exp $
+// $Id: confutils.js,v 1.77 2008-07-21 09:56:37 sfox Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -26,10 +26,15 @@ var FSO = WScript.CreateObject("Scripting.FileSystemObject");
 var MFO = null;
 var SYSTEM_DRIVE = WshShell.Environment("Process").Item("SystemDrive");
 var PROGRAM_FILES = WshShell.Environment("Process").Item("ProgramFiles");
+var DSP_FLAGS = new Array();
 
+/* Store the enabled extensions (summary + QA check) */
 var extensions_enabled = new Array();
+
+/* Store the SAPI enabled (summary + QA check) */
 var sapi_enabled = new Array();
 
+/* Mapping CL version > human readable name */
 var VC_VERSIONS = new Array();
 VC_VERSIONS[1200] = 'MSVC6 (Visual C++ 6.0)';
 VC_VERSIONS[1300] = 'MSVC7 (Visual C++ 2002)';
@@ -378,7 +383,7 @@ can be built that way. \
 
 	var snapshot_build_exclusions = new Array(
 		'debug', 'crt-debug', 'lzf-better-compression',
-		 'php-build', 'snapshot-template',
+		 'php-build', 'snapshot-template', 'ereg',
 		 'pcre-regex', 'fastcgi', 'force-cgi-redirect',
 		 'path-info-check', 'zts', 'ipv6', 'memory-limit',
 		 'zend-multibyte', 'fd-setsize', 'memory-manager', 't1lib'
@@ -467,7 +472,7 @@ can be built that way. \
 	nicefile.WriteLine(nice +  " %*");
 	nicefile.Close();
 
-	AC_DEFINE('CONFIGURE_COMMAND', nice);
+	AC_DEFINE('CONFIGURE_COMMAND', nice, "Configure line");
 }
 
 function DEFINE(name, value)
@@ -1035,6 +1040,10 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		ADD_FLAG("SAPI_TARGETS", makefiletarget);
 	}
 
+	if (PHP_DSP != "no") {
+		generate_dsp_file(sapiname, configure_module_dirname, file_list, false);
+	}
+
 	MFO.WriteBlankLines(1);
 	sapi_enabled[sapi_enabled.length] = [sapiname];
 }
@@ -1073,15 +1082,24 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 
 	try {
 		dep_present = eval("PHP_" + DEP);
-		dep_shared = eval("PHP_" + DEP + "_SHARED");
+
+		if (dep_present != "no") {
+			try {
+				dep_shared = eval("PHP_" + DEP + "_SHARED");
+			} catch (e) {
+				dep_shared = false;
+			}
+		}
+
 	} catch (e) {
 		dep_present = "no";
-		dep_shared = false;
 	}
-	
+
 	if (optional) {
-		if (dep_present == "no")
+		if (dep_present == "no") {
+			MESSAGE("\t" + dependson + " not found: " + dependson + " support in " + extname + " disabled");
 			return false;
+		}
 	}
 
 	var ext_shared = eval("PHP_" + EXT + "_SHARED");
@@ -1089,22 +1107,33 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 	if (dep_shared) {
 		if (!ext_shared) {
 			if (optional) {
+				MESSAGE("\tstatic " + extname + " cannot depend on shared " + dependson + ": " + dependson + "support disabled");
 				return false;
 			}
 			ERROR("static " + extname + " cannot depend on shared " + dependson);
 		}
+
 		ADD_FLAG("LDFLAGS_" + EXT, "/libpath:$(BUILD_DIR)");
 		ADD_FLAG("LIBS_" + EXT, "php_" + dependson + ".lib");
 		ADD_FLAG("DEPS_" + EXT, "$(BUILD_DIR)\\php_" + dependson + ".lib");
+
 	} else {
+
 		if (dep_present == "no") {
 			if (ext_shared) {
-				WARNING(extname + " has a missing dependency: " + dependson);
-				return false;
-			} else {
-				ERROR("Cannot build " + extname + "; " + dependson + " not enabled");
+				WARNING(extname + " cannot be built: missing dependency, " + dependson + " not found");
+
+				var dllname = ' php_' + extname + '.dll';
+
+				if (!REMOVE_TARGET(dllname, 'EXT_TARGETS')) {
+					REMOVE_TARGET(dllname, 'PECL_TARGETS');
+				}
+
 				return false;
 			}
+
+			ERROR("Cannot build " + extname + "; " + dependson + " not enabled");
+			return false;
 		}
 	} // dependency is statically built-in to PHP
 	return true;
@@ -1199,6 +1228,11 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		DEFINE('CFLAGS_' + EXT + '_OBJ', '$(CFLAGS_PHP) $(CFLAGS_' + EXT + ')');
 	}
 	ADD_FLAG("CFLAGS_" + EXT, cflags);
+
+	if (PHP_DSP != "no") {
+		generate_dsp_file(extname, configure_module_dirname, file_list, shared);
+	}
+
 	extensions_enabled[extensions_enabled.length] = [extname, shared ? 'shared' : 'static'];
 }
 
@@ -1289,6 +1323,30 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 	DEFINE(sym, tv);
 }
 
+function REMOVE_TARGET(dllname, flag)
+{
+	var dllname = dllname.replace(/\s/g, "");
+	var EXT = dllname.replace(/php_(\S+)\.dll/, "$1").toUpperCase();
+	var php_flags = configure_subst.Item("CFLAGS_PHP");
+
+	if (configure_subst.Exists(flag)) {
+		var targets = configure_subst.Item(flag);
+
+		if (targets.match(dllname)) {
+			configure_subst.Remove(flag);
+			targets = targets.replace(dllname, "");
+			targets = targets.replace(/\s+/, " ");
+			targets = targets.replace(/\s$/, "");
+			configure_subst.Add(flag, targets);
+			configure_hdr.Add("HAVE_" + EXT, new Array(0, ""));
+			configure_subst.Item("CFLAGS_PHP") = php_flags.replace(" /D COMPILE_DL_" + EXT, "");
+			extensions_enabled.pop();
+			return true;
+		}
+	}
+	return false;
+}
+
 function generate_internal_functions()
 {
 	var infile, outfile;
@@ -1332,6 +1390,7 @@ function output_as_table(header, ar_out)
 		STDOUT.WriteLine("Invalid header argument, can't output the table " + l + " " + ar_out[0].length  );
 		return;
 	}
+
 	for (j=0; j < l; j++) {
 		var tmax, tmin;
 
@@ -1404,7 +1463,7 @@ function write_summary()
 	STDOUT.WriteBlankLines(2);
 
 	STDOUT.WriteLine("Enabled extensions:");
-	output_as_table(["Extension", "Mode"], extensions_enabled);
+	output_as_table(["Extension", "Mode"], extensions_enabled.sort());
 	STDOUT.WriteBlankLines(2);
 
 	STDOUT.WriteLine("Enabled SAPI:");
@@ -1431,7 +1490,7 @@ function generate_files()
 	if (!FSO.FolderExists(dir)) {
 		FSO.CreateFolder(dir);
 	}
-	
+
 	for (i = 0; i < build_dirs.length; i++) {
 		bd = FSO.BuildPath(dir, build_dirs[i]);
 		if (bd == last) {
@@ -1443,11 +1502,21 @@ function generate_files()
 			FSO.CreateFolder(bd);
 		}
 	}
-	
+
+	if (PHP_DSP != "no") {
+		generate_dsp_file("TSRM", "TSRM", null, false);
+		generate_dsp_file("Zend", "Zend", null, false);
+		generate_dsp_file("win32", "win32", null, false);
+		generate_dsp_file("main", "main", null, false);
+		generate_dsp_file("streams", "main\\streams", null, false);
+		copy_dsp_files();
+	}
+
 	STDOUT.WriteLine("Generating files...");
 	generate_makefile();
 	generate_internal_functions();
 	generate_config_h();
+
 	STDOUT.WriteLine("Done.");
 	STDOUT.WriteBlankLines(1);
 	write_summary();
@@ -1572,11 +1641,20 @@ function ADD_FLAG(name, flags, target)
 		configure_subst.Remove(name);
 	}
 	configure_subst.Add(name, flags);
+
+	if (PHP_DSP != "no") {
+		if (flags && (name.substr(name.length-3) != "PHP") && (name.substr(0, 7) == "CFLAGS_")) {
+			DSP_FLAGS[DSP_FLAGS.length] = new Array(name, flags);
+		}
+	}
 }
 
 function get_define(name)
 {
-	return configure_subst.Item(name);
+	if (configure_subst.Exists(name)) {
+		return configure_subst.Item(name);
+	}
+	return "";
 }
 
 // Add a .def to the core to export symbols
@@ -1602,7 +1680,7 @@ function AC_DEFINE(name, value, comment, quote)
 	var item = new Array(value, comment);
 	if (configure_hdr.Exists(name)) {
 		var orig_item = configure_hdr.Item(name);
-		STDOUT.WriteLine("AC_DEFINE[" + name + "]=" + value + ": is already defined to " + item[0]);
+		STDOUT.WriteLine("AC_DEFINE[" + name + "]=" + value + ": is already defined to " + orig_item[0]);
 	} else {
 		configure_hdr.Add(name, item);
 	}
@@ -1765,3 +1843,4 @@ ARG_ENABLE('snapshot-build', 'Build a snapshot; turns on everything it can and i
 // several objects at once, reducing overhead of starting new
 // compiler processes.
 ARG_ENABLE('one-shot', 'Optimize for fast build - best for release and snapshot builders, not so hot for edit-and-rebuild hacking', 'no');
+
