@@ -15,17 +15,17 @@ array(3) {
   ["error_reporting values"]=>
   array(6) {
     ["foo"]=>
-    string(7) "14335 8"
+    string(7) "30719 8"
     ["error_reporting"]=>
-    string(5) "14335"
+    string(5) "30719"
     ["error_reporting1"]=>
     string(4) "4177"
     ["error_reporting2"]=>
-    string(5) "14327"
+    string(5) "30711"
     ["error_reporting3"]=>
-    string(5) "14327"
+    string(5) "30711"
     ["error_reporting4"]=>
-    string(5) "16375"
+    string(5) "32759"
   }
   ["true or false"]=>
   array(8) {
