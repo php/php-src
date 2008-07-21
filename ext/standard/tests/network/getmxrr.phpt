@@ -1,9 +1,9 @@
 --TEST--
-dns_check_record() segfault with empty host
+getmxrr() test
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip No windows support');
+    die('skip: no Windows support');
 }
 ?>
 --FILE--
