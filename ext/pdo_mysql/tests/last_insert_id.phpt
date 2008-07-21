@@ -4,7 +4,7 @@ PDO MySQL auto_increment / last insert id
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
 require dirname(__FILE__) . '/config.inc';
-require  dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>
 --FILE--
