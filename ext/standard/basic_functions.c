@@ -5064,6 +5064,22 @@ PHPAPI char *php_get_current_user(void) /* {{{ */
 #else
 		struct passwd *pwd;
 
+#if defined(ZTS) && defined(HAVE_GETPWUID_R) && defined(_SC_GETPW_R_SIZE_MAX)
+		struct passwd _pw;
+		struct passwd *retpwptr = NULL;
+		int pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+		char *pwbuf;
+
+		if (pwbuflen < 1) {
+			return "";
+		}
+		pwbuf = emalloc(pwbuflen);
+		if (getpwuid_r(pstat->st_uid, &_pw, pwbuf, pwbuflen, &retpwptr) != 0) {
+				efree(pwbuf);
+				return "";
+		}
+		pwd = &_pw;
+#else
 		if ((pwd=getpwuid(pstat->st_uid))==NULL) {
 			return "";
 		}
@@ -5475,7 +5491,7 @@ ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highl
 {
 	syntax_highlighter_ini->highlight_comment = INI_STR("highlight.comment");
 	syntax_highlighter_ini->highlight_default = INI_STR("highlight.default");
-	syntax_highlighter_ini->highlight_html    = INI_STR("highlight.html");
+	syntax_highlighter_ini->highlight_html	  = INI_STR("highlight.html");
 	syntax_highlighter_ini->highlight_keyword = INI_STR("highlight.keyword");
 	syntax_highlighter_ini->highlight_string  = INI_STR("highlight.string");
 }

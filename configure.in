@@ -71,10 +71,10 @@ echo "#define PHP_VERSION \"$PHP_VERSION\"" >> php_version.h.new
 echo "#define PHP_VERSION_ID $PHP_VERSION_ID" >> php_version.h.new
 cmp php_version.h.new $srcdir/main/php_version.h >/dev/null 2>&1
 if test $? -ne 0 ; then
-    rm -f $srcdir/main/php_version.h && mv php_version.h.new $srcdir/main/php_version.h && \
-    echo 'Updated main/php_version.h'
+  rm -f $srcdir/main/php_version.h && mv php_version.h.new $srcdir/main/php_version.h && \
+  echo 'Updated main/php_version.h'
 else
-    rm -f php_version.h.new
+  rm -f php_version.h.new
 fi
 
 
@@ -161,7 +161,6 @@ dnl check for -R, etc. switch
 PHP_RUNPATH_SWITCH
 
 dnl Checks for some support/generator progs
-
 PHP_PROG_AWK
 PHP_PROG_BISON
 PHP_PROG_RE2C
@@ -183,16 +182,16 @@ if test "$PHP_RE2C_CGOTO" = "no"; then
 else
   AC_MSG_CHECKING([whether re2c -g works])
   AC_TRY_COMPILE([],[
-		int main(int argc, const char **argv)
-		{
-			argc = argc;
-			argv = argv;
+int main(int argc, const char **argv)
+{
+  argc = argc;
+  argv = argv;
 label1:
 label2:
-			static void *adr[] = { &&label1, &&label2};
-			goto *adr[0];
-			return 0;
-		}
+  static void *adr[] = { &&label1, &&label2};
+  goto *adr[0];
+  return 0;
+}
   ],[
     RE2C_FLAGS=""
     AC_MSG_RESULT([no])
@@ -208,7 +207,7 @@ dnl -------------------------------------------------------------------------
 
 dnl See bug #28605
 case $host_cpu in
-alpha*)
+  alpha*)
     if test "$GCC" = "yes"; then
       CFLAGS="$CFLAGS -mieee"
     else
@@ -233,15 +232,16 @@ if test "$GCC" = "yes"; then
 fi
 
 case $host_alias in
-*solaris*)
+  *solaris*)
     CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
     if test "${enable_libgcc+set}" != "set" && test "$GCC" = "yes"; then
       enable_libgcc=yes
     fi
     ;;
-*dgux*)
-    CPPFLAGS="$CPPFLAGS -D_BSD_TIMEOFDAY_FLAVOR";;
-*darwin*|*rhapsody*)
+  *dgux*)
+    CPPFLAGS="$CPPFLAGS -D_BSD_TIMEOFDAY_FLAVOR"
+    ;;
+  *darwin*|*rhapsody*)
     if test -n "$GCC"; then
       PHP_CHECK_GCC_ARG(-no-cpp-precomp, gcc_no_cpp_precomp=yes)
       if test "$gcc_no_cpp_precomp" = "yes"; then
@@ -249,18 +249,21 @@ case $host_alias in
       fi
     fi
     AC_DEFINE(BIND_8_COMPAT, 1, [Enabling BIND8 compatibility for Panther])
-    php_multiple_shlib_versions_ok=yes;;
-*beos*)
+    php_multiple_shlib_versions_ok=yes
+    ;;
+  *beos*)
     beos_threads=1
-    LIBS="$LIBS -lbe -lroot";;
-*mips*)
-    CPPFLAGS="$CPPFLAGS -D_XPG_IV";;
-*hpux*)
+    LIBS="$LIBS -lbe -lroot"
+    ;;
+  *mips*)
+    CPPFLAGS="$CPPFLAGS -D_XPG_IV"
+    ;;
+  *hpux*)
     if test "$GCC" = "yes"; then
       CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
     fi
     ;;
-*netware*)
+  *netware*)
     PHP_BUILD_PROGRAM
     PHP_ADD_SOURCES(/main, internal_functions.c,,PHP_GLOBAL_OBJS)
     PHP_ADD_SOURCES(win32, sendmail.c, -I$CFLAGS, PHP_GLOBAL_OBJS)
@@ -275,7 +278,7 @@ esac
 # to avoid the performance hit from the lost register
 AC_MSG_CHECKING([whether to force non-PIC code in shared modules])
 case $host_alias in
-i?86-*-linux*|i?86-*-freebsd*)
+  i?86-*-linux*|i?86-*-freebsd*)
     if test "${with_pic+set}" != "set" || test "$with_pic" = "no"; then
       with_pic=no
       AC_MSG_RESULT(yes)
@@ -283,7 +286,9 @@ i?86-*-linux*|i?86-*-freebsd*)
       AC_MSG_RESULT(no)
     fi
     ;;
-*) AC_MSG_RESULT(no) ;;
+  *)
+    AC_MSG_RESULT(no)
+    ;;
 esac
 
 
@@ -361,8 +366,8 @@ PHP_TEST_WRITE_STDOUT
 dnl Check for /usr/pkg/{lib,include} which is where NetBSD puts binary
 dnl and source packages.  This should be harmless on other OSs.
 if test -d /usr/pkg/include -a -d /usr/pkg/lib ; then
-       CPPFLAGS="$CPPFLAGS -I/usr/pkg/include"
-       LDFLAGS="$LDFLAGS -L/usr/pkg/lib"
+   CPPFLAGS="$CPPFLAGS -I/usr/pkg/include"
+   LDFLAGS="$LDFLAGS -L/usr/pkg/lib"
 fi
 test -d /usr/ucblib && PHP_ADD_LIBPATH(/usr/ucblib)
 
@@ -482,12 +487,10 @@ assert.h
 dnl Don't use mach-o/dyld.h on Darwin 8+, dl* is recommended by Apple from there on
 dnl See http://developer.apple.com/documentation/DeveloperTools/Conceptual/MachOTopics/Articles/loading_code.html
 case $host_alias in
-*darwin[[89]]*)
+  *darwin[[89]]*)
     ;;
-*)
-    AC_CHECK_HEADERS([  \
-mach-o/dyld.h
-],[],[][])
+  *)
+    AC_CHECK_HEADERS([mach-o/dyld.h],[],[],[])
     ;;
 esac
 
@@ -572,6 +575,7 @@ gettimeofday \
 gmtime_r \
 getpwnam_r \
 getgrnam_r \
+getpwuid_r \
 grantpt \
 inet_ntoa \
 inet_ntop \
@@ -938,20 +942,24 @@ enable_shared=yes
 enable_static=yes
 
 case $php_build_target in
-program|static)
+  program|static)
     standard_libtool_flag='-prefer-non-pic -static'
     if test -z "$PHP_MODULES" && test -z "$PHP_ZEND_EX"; then
         enable_shared=no
     fi
-;;
-shared)
+    ;;
+  shared)
     enable_static=no
     case $with_pic in
-      yes) standard_libtool_flag='-prefer-pic';;
-      no)  standard_libtool_flag='-prefer-non-pic';;
+      yes)
+        standard_libtool_flag='-prefer-pic'
+        ;;
+      no)
+        standard_libtool_flag='-prefer-non-pic'
+        ;;
     esac
     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -avoid-version -module"
-;;
+    ;;
 esac
 
 EXTRA_LIBS="$EXTRA_LIBS $DLIBS $LIBS"
@@ -1018,7 +1026,6 @@ case $datadir in
   '${prefix}/share')
     datadir=$datadir/php
     ;;
-  *) ;;
 esac
 
 phplibdir=`pwd`/modules
@@ -1319,18 +1326,18 @@ PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c php_sprintf.c \
 
 PHP_ADD_SOURCES(main/streams, streams.c cast.c memory.c filter.c \
        plain_wrapper.c userspace.c transports.c xp_socket.c mmap.c \
-       unicode_filter.c  glob_wrapper.c)
+       unicode_filter.c glob_wrapper.c)
 
 PHP_ADD_SOURCES(/main, internal_functions.c,, sapi)
 
 case $host_alias in
-*netware*)
-  PHP_ADD_BUILD_DIR(win32)
-  PHP_ADD_BUILD_DIR(netware)
-  ;;
-*)
-  PHP_ADD_SOURCES(/main, internal_functions_cli.c,, cli)
-  ;;
+  *netware*)
+    PHP_ADD_BUILD_DIR(win32)
+    PHP_ADD_BUILD_DIR(netware)
+    ;;
+  *)
+    PHP_ADD_SOURCES(/main, internal_functions_cli.c,, cli)
+    ;;
 esac
 
 PHP_ADD_SOURCES(Zend, \
@@ -1346,8 +1353,7 @@ PHP_ADD_SOURCES(Zend, \
     zend_strtol.c zend_gc.c zend_closures.c)
 
 if test -r "$abs_srcdir/Zend/zend_objects.c"; then
-  PHP_ADD_SOURCES(Zend, zend_objects.c zend_object_handlers.c zend_objects_API.c \
-    zend_default_classes.c)
+  PHP_ADD_SOURCES(Zend, zend_objects.c zend_object_handlers.c zend_objects_API.c zend_default_classes.c)
 fi
 
 dnl Selectively disable optimization due to high RAM usage during
@@ -1424,13 +1430,6 @@ dnl mv -f main/internal_functions.c main/internal_functions.c.old 2>/dev/null
   echo "creating main/internal_functions_cli.c"
   cli_extensions="$EXT_CLI_STATIC"
   sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in $srcdir "$EXTRA_MODULE_PTRS" $AWK \$cli_extensions > main/internal_functions_cli.c
-
-dnl  if cmp main/internal_functions.c.old main/internal_functions.c > /dev/null 2>&1; then
-dnl      echo "main/internal_functions.c is unchanged"
-dnl      mv main/internal_functions.c.old main/internal_functions.c
-dnl  else
-dnl      rm -f main/internal_functions.c.old
-dnl  fi
 
   if test "$UNAME" = "FreeBSD" && test "$PHP_SAPI" = "apache2filter" && test "$TSRM_PTH" != "pth-config" ; then
     echo "+--------------------------------------------------------------------+"
