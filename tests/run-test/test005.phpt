@@ -24,7 +24,7 @@ var_dump($php_errormsg);
 ?>
 --EXPECTF--
 unicode(1) "1"
-unicode(5) "16383"
+unicode(5) "30719"
 unicode(1) "0"
 unicode(1) "1"
 unicode(1) "0"

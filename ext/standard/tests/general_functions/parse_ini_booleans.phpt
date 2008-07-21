@@ -15,17 +15,17 @@ array(3) {
   [u"error_reporting values"]=>
   array(6) {
     [u"foo"]=>
-    unicode(7) "16383 8"
+    unicode(7) "32767 8"
     [u"error_reporting"]=>
-    unicode(5) "16383"
+    unicode(5) "32767"
     [u"error_reporting1"]=>
     unicode(4) "4177"
     [u"error_reporting2"]=>
-    unicode(5) "16375"
+    unicode(5) "32759"
     [u"error_reporting3"]=>
-    unicode(5) "16375"
+    unicode(5) "32759"
     [u"error_reporting4"]=>
-    unicode(5) "16375"
+    unicode(5) "32759"
   }
   [u"true or false"]=>
   array(8) {
