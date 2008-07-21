@@ -116,11 +116,11 @@ if (getenv('TEST_PHP_EXECUTABLE')) {
 	$php = getenv('TEST_PHP_EXECUTABLE');
 
 	if ($php=='auto') {
-		$php = $cwd.'/sapi/cli/php';
+		$php = $cwd . '/sapi/cli/php';
 		putenv("TEST_PHP_EXECUTABLE=$php");
 
 		if (!getenv('TEST_PHP_CGI_EXECUTABLE')) {
-			$php_cgi = $cwd.'/sapi/cgi/php-cgi';
+			$php_cgi = $cwd . '/sapi/cgi/php-cgi';
 
 			if (file_exists($php_cgi)) {
 				putenv("TEST_PHP_CGI_EXECUTABLE=$php_cgi");
@@ -136,7 +136,7 @@ if (getenv('TEST_PHP_CGI_EXECUTABLE')) {
 	$php_cgi = getenv('TEST_PHP_CGI_EXECUTABLE');
 
 	if ($php_cgi=='auto') {
-		$php_cgi = $cwd.'/sapi/cgi/php-cgi';
+		$php_cgi = $cwd . '/sapi/cgi/php-cgi';
 		putenv("TEST_PHP_CGI_EXECUTABLE=$php_cgi");
 	}
 
@@ -171,7 +171,7 @@ if (getenv('TEST_PHP_DETAILED')) {
 
 // Check whether user test dirs are requested.
 if (getenv('TEST_PHP_USER')) {
-	$user_tests = explode (', ', getenv('TEST_PHP_USER'));
+	$user_tests = explode (',', getenv('TEST_PHP_USER'));
 } else {
 	$user_tests = array();
 }
@@ -209,12 +209,12 @@ function write_information($show_html)
 	$info_file = __DIR__ . '/run-test-info.php';
 	@unlink($info_file);
 	$php_info = '<?php echo "
-PHP_SAPI    : " . PHP_SAPI . "
-PHP_VERSION : " . phpversion() . "
-ZEND_VERSION: " . zend_version() . "
-PHP_OS      : " . PHP_OS . " - " . php_uname() . "
-INI actual  : " . realpath(get_cfg_var("cfg_file_path")) . "
-More .INIs  : " . (function_exists(\'php_ini_scanned_files\') ? str_replace("\n","", php_ini_scanned_files()) : "** not determined **"); ?>';
+PHP_SAPI    : " , PHP_SAPI , "
+PHP_VERSION : " , phpversion() , "
+ZEND_VERSION: " , zend_version() , "
+PHP_OS      : " , PHP_OS , " - " , php_uname() , "
+INI actual  : " , realpath(get_cfg_var("cfg_file_path")) , "
+More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n","", php_ini_scanned_files()) : "** not determined **"); ?>';
 	save_text($info_file, $php_info);
 	$info_params = array();
 	settings2array($ini_overwrites, $info_params);
@@ -229,10 +229,11 @@ More .INIs  : " . (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 	} else {
 		$php_cgi_info = '';
 	}
+
 	@unlink($info_file);
 
 	// load list of enabled extensions
-	save_text($info_file, '<?php echo join(",",get_loaded_extensions()); ?>');
+	save_text($info_file, '<?php echo join(",", get_loaded_extensions()); ?>');
 	$exts_to_test = explode(',',`$php $pass_options $info_params "$info_file"`);
 	// check for extensions that need special handling and regenerate
 	$info_params_ex = array(
@@ -336,7 +337,7 @@ if (isset($argc) && $argc > 1) {
 				foreach($cfgtypes as $type) {
 					if (strpos($switch, '--' . $type) === 0) {
 						foreach($cfgfiles as $file) {
-							if ($switch == '--' . $type.'-' . $file) {
+							if ($switch == '--' . $type . '-' . $file) {
 								$cfg[$type][$file] = true;
 								$is_switch = false;
 								break;
@@ -454,10 +455,10 @@ if (isset($argc) && $argc > 1) {
 				case '--verbose':
 					$DETAILED = true;
 					break;
-				//case 'w'
 				case 'x':
 					$environment['SKIP_SLOW_TESTS'] = 1;
 					break;
+				//case 'w'
 				case '-':
 					// repeat check with full switch
 					$switch = $argv[$i];
@@ -516,6 +517,8 @@ Options:
 
     -s <file>   Write output to <file>.
 
+   -x           FIXME: STEPH WRITES THE HELP TEXT HERE!!
+
     --verbose
     -v          Verbose mode.
 
@@ -535,6 +538,9 @@ Options:
     --keep-[all|php|skip|clean]
                 Do not delete 'all' files, 'php' test file, 'skip' or 'clean'
                 file.
+                
+	--set-timeout
+				FIXME: STEPH WRITES THE HELP TEXT HERE!!
 
     --show-[all|php|skip|clean|exp|diff|out]
                 Show 'all' files, 'php' test file, 'skip' or 'clean' file. You
@@ -1182,7 +1188,7 @@ TEST $file
 	}
 	fclose($fp);
 
-	$shortname = str_replace($cwd.'/', '', $file);
+	$shortname = str_replace($cwd . '/', '', $file);
 	$tested_file = $shortname;
 
 	if ($borked) {
