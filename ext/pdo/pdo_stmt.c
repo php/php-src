@@ -538,6 +538,20 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 	stmt->methods->get_col(stmt, colno, &value, &value_len, &caller_frees TSRMLS_CC);
 
 	switch (type) {
+		case PDO_PARAM_ZVAL:
+			if (value && value_len == sizeof(zval)) {
+				int need_copy = (new_type != PDO_PARAM_ZVAL || stmt->dbh->stringify) ? 1 : 0;
+				zval *zv = *(zval**)value;
+				ZVAL_ZVAL(dest, zv, need_copy, 1);
+			} else {
+				ZVAL_NULL(dest);
+			}
+			
+			if (Z_TYPE_P(dest) == IS_NULL) {
+				type = new_type;
+			}
+			break;
+			
 		case PDO_PARAM_INT:
 			if (value && value_len == sizeof(long)) {
 				ZVAL_LONG(dest, *(long*)value);
@@ -1879,7 +1893,10 @@ static PHP_METHOD(PDOStatement, getColumnMeta)
 	add_assoc_string(return_value, "name", col->name, 1);
 	add_assoc_long(return_value, "len", col->maxlen); /* FIXME: unsigned ? */
 	add_assoc_long(return_value, "precision", col->precision);
-	add_assoc_long(return_value, "pdo_type", col->param_type);
+	if (col->param_type != PDO_PARAM_ZVAL) {
+		/* if param_type is PDO_PARAM_ZVAL the driver has to provide correct data */
+		add_assoc_long(return_value, "pdo_type", col->param_type);
+	}
 }
 /* }}} */
 

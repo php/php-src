@@ -3,16 +3,15 @@ PDO MySQL Bug #33689 (query() execute() and fetch() return false on valid select
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
-require 'ext/pdo_mysql/tests/config.inc';
-require 'ext/pdo/tests/pdo_test.inc';
+require dirname(__FILE__) . '/config.inc';
+require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>
---INI--
-precision=14
 --FILE--
 <?php
-require 'ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory('ext/pdo_mysql/tests/common.phpt');
+require dirname(__FILE__) . '/config.inc';
+require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
 
 $db->exec('CREATE TABLE test (bar INT NOT NULL)');
 $db->exec('INSERT INTO test VALUES(1)');
@@ -25,12 +24,20 @@ foreach ($db->query('SELECT * from test') as $row) {
 $stmt = $db->prepare('SELECT * from test');
 print_r($stmt->getColumnMeta(0));
 $stmt->execute();
-print_r($stmt->getColumnMeta(0));
+$tmp = $stmt->getColumnMeta(0);
+
+// libmysql and mysqlnd will show the pdo_type entry at a different position in the hash
+if (!isset($tmp['pdo_type']) || (isset($tmp['pdo_type']) && $tmp['pdo_type'] != 2))
+	printf("Expecting pdo_type = 2 got %s\n", $tmp['pdo_type']);
+else
+	unset($tmp['pdo_type']);
+
+print_r($tmp);
 ?>
 --EXPECTF--
 object(PDOStatement)#%d (1) {
-  [u"queryString"]=>
-  unicode(18) "SELECT * from test"
+  ["queryString"]=>
+  string(18) "SELECT * from test"
 }
 Array
 (
@@ -49,5 +56,4 @@ Array
     [name] => bar
     [len] => 11
     [precision] => 0
-    [pdo_type] => 2
 )
