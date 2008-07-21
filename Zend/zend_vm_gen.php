@@ -304,7 +304,7 @@ function helper_name($name, $spec, $op1, $op2) {
 }
 
 // Generates code for opcode handler or helper
-function gen_code($f, $spec, $kind, $export, $code, $op1, $op2) {
+function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 	global $op1_type, $op2_type, $op1_get_zval_ptr, $op2_get_zval_ptr,
 		$op1_get_zval_ptr_ptr, $op2_get_zval_ptr_ptr,
 		$op1_get_obj_zval_ptr, $op2_get_obj_zval_ptr,
@@ -381,6 +381,9 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2) {
 		),
 		$code);
 
+	if (0 && strpos($code, '{') === 0) {
+		$code = "{\n\tfprintf(stderr, \"$name\\n\");\n" . substr($code, 1);
+	}
 	// Updating code according to selected threading model
 	switch($kind) {
 		case ZEND_VM_KIND_CALL:
@@ -485,7 +488,7 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno) 
 	// Generate opcode handler's entry point according to selected threading model
 	switch($kind) {
 		case ZEND_VM_KIND_CALL:
-			out($f,"static int ZEND_FASTCALL ".$name.($spec?"_SPEC":"").$prefix[$op1].$prefix[$op2]."_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
+			out($f,"static int ZEND_FASTCALL  ".$name.($spec?"_SPEC":"").$prefix[$op1].$prefix[$op2]."_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
 			break;
 		case ZEND_VM_KIND_SWITCH:
 			if ($spec) {
@@ -506,7 +509,7 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno) 
 	}
 
 	// Generate opcode handler's code
-	gen_code($f, $spec, $kind, 0, $code, $op1, $op2);
+	gen_code($f, $spec, $kind, 0, $code, $op1, $op2, $name);
 }
 
 // Generates helper
@@ -537,7 +540,7 @@ function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno)
 	}
 
 	// Generate helper's code
-	gen_code($f, $spec, $kind, 0, $code, $op1, $op2);
+	gen_code($f, $spec, $kind, 0, $code, $op1, $op2, $name);
 }
 
 // Generates array of opcode handlers (specialized or unspecialized)
@@ -1254,7 +1257,7 @@ function gen_vm($def, $skel) {
 			}
 		}
 		if (!$done) {
-			gen_code($f, 0, ZEND_VM_KIND_CALL, 1, $code, 'ANY', 'ANY');
+			gen_code($f, 0, ZEND_VM_KIND_CALL, 1, $code, 'ANY', 'ANY', $name);
 		}
 	}
 
