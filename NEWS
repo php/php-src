@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2008, PHP 5.2.7
+- Fixed securities issue detailed in CVE-2008-2665 and CVE-2008-2666.
+  (Christian Hoffmann)
+
 - Reverted fix for bug #44197 due to change in behaviour in minor version.
   (Felipe)
 
