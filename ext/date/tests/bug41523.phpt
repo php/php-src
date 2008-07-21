@@ -29,9 +29,11 @@ array(12) {
   ["fraction"]=>
   float(0)
   ["warning_count"]=>
-  int(0)
+  int(1)
   ["warnings"]=>
-  array(0) {
+  array(1) {
+    [20]=>
+    string(27) "The parsed date was invalid"
   }
   ["error_count"]=>
   int(0)
