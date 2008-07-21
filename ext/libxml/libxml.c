@@ -700,7 +700,7 @@ static PHP_FUNCTION(libxml_set_streams_context)
 }
 /* }}} */
 
-/* {{{ proto void libxml_use_internal_errors([boolean use_errors]) 
+/* {{{ proto bool libxml_use_internal_errors([boolean use_errors]) 
    Disable libxml errors and allow user to fetch error information as needed */
 static PHP_FUNCTION(libxml_use_internal_errors)
 {
