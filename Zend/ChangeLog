@@ -1,3 +1,13 @@
+2008-07-20  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_3)
+      zend_variables.h:
+      - Fix the header (thanks Johannes)
+
+    * (PHP_5_3)
+      zend_variables.h:
+      - WS fix
+
 2008-07-17  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)

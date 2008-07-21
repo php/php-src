@@ -1,3 +1,158 @@
+2008-07-20  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/tests/bug44562.phpt:
+      - Added test case to HEAD too.
+
+    * (PHP_5_3)
+      ext/date/php_date.c
+      ext/date/tests/bug44562.phpt
+      ext/date/tests/bug44562.phpt:
+      - MFH: Fixed bug #45562 (Creating instance of DatePeriod crashes).
+
+    * ext/date/php_date.c:
+      - Fixed bug #45562 (Creating instance of DatePeriod crashes).
+
+2008-07-20  Kalle Sommer Nielsen  <kalle@zesix.com>
+
+    * win32/wfile.c
+      win32/wfile.h:
+      MFB
+
+    * (PHP_5_3)
+      win32/wfile.c
+      win32/wfile.h:
+      Fix macro redef
+
+    * ext/gd/config.w32:
+      Fixed #44849 (imagecolorclosesthwb() is not available on Windows)
+
+2008-07-20  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/libmbfl/mbfl/mbfl_defs.h:
+      - Bug #45572
+
+2008-07-20  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/spl/spl_fixedarray.c:
+      MFH: Iterator methods overwriting optimisations
+
+    * ext/spl/spl_fixedarray.c:
+      Iterator methods overwriting optimisations
+
+2008-07-20  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/reflection/php_reflection.c:
+      - MFB: Fixed bug #45571 (ReflectionClass::export() shows superclasses'
+      private static methods.)
+
+    * (PHP_5_3)
+      NEWS:
+      - BFN: #45571
+
+    * (PHP_5_3)
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/bug45571.phpt
+      ext/reflection/tests/bug45571.phpt:
+      - Fixed bug #45571 (ReflectionClass::export() shows superclasses' private
+      static methods.)
+        patch by Robin Fernandes
+
+2008-07-20  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/spl_array.c:
+      Fix build for solaris
+
+2008-07-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ext/date/tests/date_parse_001.phpt
+      ext/standard/tests/dir/rewinddir_basic.phpt:
+      Fixed test
+
+2008-07-20  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/tests/bug45555.phpt
+      ext/xmlrpc/tests/bug45556.phpt:
+      MFB:
+      - Fixed bug #45556 (Return value from callback isn't freed).
+      - Fixed bug #45555 (Segfault with invalid non-string as
+      register_introspection_callback).
+      - Fixed wrong arginfo for xmlrpc_encode_request()
+
+2008-07-20  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_variables.h:
+      - Fix the header (thanks Johannes)
+
+2008-07-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ext/phar/dirstream.c
+      ext/phar/phar.c
+      ext/phar/phar_internal.h
+      ext/phar/stream.c
+      ext/phar/util.c
+      ext/phar/tests/rename_dir.phpt
+      ext/phar/tests/rename_dir_and_mount.phpt
+      ext/phar/tests/rename_dir_and_mount.phpt
+      ext/phar/tests/rmdir.phpt
+      ext/phar/tests/tar/rename_dir.phpt
+      ext/phar/tests/tar/rmdir.phpt
+      ext/phar/tests/zip/rename_dir.phpt
+      ext/phar/tests/zip/rmdir.phpt:
+      Fixed directory reanming/deletion
+
+2008-07-20  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/mime_magic/mime_magic.c
+      ext/msql/php_msql.c
+      ext/odbc/birdstep.c
+      ext/standard/basic_functions.c
+      sapi/apache/php_apache.c
+      sapi/apache2filter/php_functions.c
+      sapi/apache_hooks/php_apache.c:
+      - MFB: Added arginfo
+
+    * (PHP_5_3)
+      ext/mime_magic/mime_magic.c
+      ext/msql/php_msql.c
+      ext/odbc/birdstep.c
+      ext/standard/basic_functions.c
+      sapi/apache/php_apache.c
+      sapi/apache2filter/php_functions.c
+      sapi/apache_hooks/php_apache.c:
+      - Added arginfo
+
+2008-07-20  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_variables.h:
+      - WS fix
+
+2008-07-20  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      win32/build/Makefile
+      win32/build/buildconf.js
+      win32/build/confutils.js
+      win32/build/cvsclean.js:
+      - Happy New Year!
+      (better late than never, eh?)
+
+    * (PHP_5_3)
+      win32/build/block.template.dsw
+      win32/build/projectgen.js
+      win32/build/template.dsw:
+      - Update get_define() calls to reflect earlier change in return value on
+      failure
+      - Rename output files (to avoid that build option for "php5ts.exe")
+      - Add libpath to intermediate dir path (avoids a naming collision that
+      wasn't there last week)
+      - Don't make assumptions about trailing whitespace in incoming data
+
 2008-07-19  Etienne Kneuss  <php@colder.ch>
 
     * ext/spl/spl_iterators.c:
