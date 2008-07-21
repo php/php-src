@@ -472,14 +472,14 @@ PHP_FUNCTION(stream_copy_to_stream)
     Retrieves header/meta data from streams/file pointers */
 PHP_FUNCTION(stream_get_meta_data)
 {
-	zval **arg1;
+	zval *arg1;
 	php_stream *stream;
 	zval *newval;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+		return;
 	}
-	php_stream_from_zval(stream, arg1);
+	php_stream_from_zval(stream, &arg1);
 
 	array_init(return_value);
 	
@@ -1375,52 +1375,52 @@ PHP_FUNCTION(stream_get_line)
    Set blocking/non-blocking mode on a socket or stream */
 PHP_FUNCTION(stream_set_blocking)
 {
-	zval **arg1, **arg2;
+	zval *arg1;
+	long arg2;
 	int block;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &arg1, &arg2) == FAILURE) {
+		return;
 	}
 
-	php_stream_from_zval(stream, arg1);
+	php_stream_from_zval(stream, &arg1);
 
-	convert_to_long_ex(arg2);
-	block = Z_LVAL_PP(arg2);
+	block = arg2;
 
-	if (php_stream_set_option(stream, PHP_STREAM_OPTION_BLOCKING, block == 0 ? 0 : 1, NULL) == -1)
+	if (php_stream_set_option(stream, PHP_STREAM_OPTION_BLOCKING, block == 0 ? 0 : 1, NULL) == -1) {
 		RETURN_FALSE;
+	}
 	RETURN_TRUE;
 }
 
 /* }}} */
 
-/* {{{ proto bool stream_set_timeout(resource stream, int seconds, int microseconds) U
+/* {{{ proto bool stream_set_timeout(resource stream, int seconds [, int microseconds]) U
    Set timeout on stream read to seconds + microseonds */
 #if HAVE_SYS_TIME_H || defined(PHP_WIN32)
 PHP_FUNCTION(stream_set_timeout)
 {
-	zval **socket, **seconds, **microseconds;
+	zval *socket;
+	long seconds, microseconds;
 	struct timeval t;
 	php_stream *stream;
+	int argc = ZEND_NUM_ARGS();
 
-	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 3 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &socket, &seconds, &microseconds)==FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(argc TSRMLS_CC, "rl|l", &socket, &seconds, &microseconds) == FAILURE) {
+		return;
 	}
 
-	php_stream_from_zval(stream, socket);
+	php_stream_from_zval(stream, &socket);
 
-	convert_to_long_ex(seconds);
-	t.tv_sec = Z_LVAL_PP(seconds);
+	t.tv_sec = seconds;
 
-	if (ZEND_NUM_ARGS() == 3) {
-		convert_to_long_ex(microseconds);
-		t.tv_usec = Z_LVAL_PP(microseconds) % 1000000;
-		t.tv_sec += Z_LVAL_PP(microseconds) / 1000000;
-	}
-	else
+	if (argc == 3) {
+		t.tv_usec = microseconds % 1000000;
+		t.tv_sec += microseconds / 1000000;
+	} else {
 		t.tv_usec = 0;
+	}
 
 	if (PHP_STREAM_OPTION_RETURN_OK == php_stream_set_option(stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &t)) {
 		RETURN_TRUE;
@@ -1435,27 +1435,19 @@ PHP_FUNCTION(stream_set_timeout)
    Set file write buffer */
 PHP_FUNCTION(stream_set_write_buffer)
 {
-	zval **arg1, **arg2;
+	zval *arg1;
+	long arg2;
 	int ret;
 	size_t buff;
 	php_stream *stream;
 
-	switch (ZEND_NUM_ARGS()) {
-	case 2:
-		if (zend_get_parameters_ex(2, &arg1, &arg2)==FAILURE) {
-			RETURN_FALSE;
-		}
-		break;
-	default:
-		WRONG_PARAM_COUNT;
-		/* NOTREACHED */
-		break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &arg1, &arg2) == FAILURE) {
+		return;
 	}
 	
-	php_stream_from_zval(stream, arg1);
+	php_stream_from_zval(stream, &arg1);
 	
-	convert_to_long_ex(arg2);
-	buff = Z_LVAL_PP(arg2);
+	buff = arg2;
 
 	/* if buff is 0 then set to non-buffered */
 	if (buff == 0) {
