@@ -2168,7 +2168,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 
 		PG(during_request_startup) = 0;
 
-		if ((primary_file->type == ZEND_HANDLE_FILENAME || primary_file->type == ZEND_HANDLE_STREAM) && primary_file->filename) {
+		if (primary_file->filename && !(SG(options) & SAPI_OPTION_NO_CHDIR)) {
 #if HAVE_BROKEN_GETCWD
 			/* this looks nasty to me */
 			old_cwd_fd = open(".", 0);
@@ -2257,7 +2257,7 @@ PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval **ret 
 
 		PG(during_request_startup) = 0;
 
-		if (primary_file->type == ZEND_HANDLE_FILENAME && primary_file->filename) {
+		if (primary_file->filename && !(SG(options) & SAPI_OPTION_NO_CHDIR)) {
 			VCWD_GETCWD(old_cwd, OLD_CWD_SIZE-1);
 			VCWD_CHDIR_FILE(primary_file->filename);
 		}
