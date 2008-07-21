@@ -233,7 +233,9 @@ PHP_FUNCTION(stream_socket_server)
 PHP_FUNCTION(stream_socket_accept)
 {
 	double timeout = FG(default_socket_timeout);
-	zval *peername = NULL;
+	zval *zpeername = NULL;
+	char *peername = NULL;
+	int peername_len;
 	php_timeout_ull conv;
 	struct timeval tv;
 	php_stream *stream = NULL, *clistream = NULL;
@@ -241,7 +243,7 @@ PHP_FUNCTION(stream_socket_accept)
 
 	char *errstr = NULL;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|dz", &zstream, &timeout, &peername) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|dz", &zstream, &timeout, &zpeername) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
@@ -252,20 +254,20 @@ PHP_FUNCTION(stream_socket_accept)
 	tv.tv_sec = conv / 1000000;
 	tv.tv_usec = conv % 1000000;
 
-	if (peername) {
-		zval_dtor(peername);
-		ZVAL_NULL(peername);
+	if (zpeername) {
+		zval_dtor(zpeername);
+		ZVAL_NULL(zpeername);
 	}
 
 	if (0 == php_stream_xport_accept(stream, &clistream,
-				peername ? &Z_STRVAL_P(peername) : NULL,
-				peername ? &Z_STRLEN_P(peername) : NULL,
+				zpeername ? &peername : NULL,
+				zpeername ? &peername_len : NULL,
 				NULL, NULL,
 				&tv, &errstr
 				TSRMLS_CC) && clistream) {
 
 		if (peername) {
-			Z_TYPE_P(peername) = IS_STRING;
+			ZVAL_STRINGL(zpeername, peername, peername_len, 0);
 		}
 		php_stream_to_zval(clistream, return_value);
 	} else {
@@ -286,6 +288,8 @@ PHP_FUNCTION(stream_socket_get_name)
 	php_stream *stream;
 	zval *zstream;
 	zend_bool want_peer;
+	char *name = NULL;
+	int name_len;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb", &zstream, &want_peer) == FAILURE) {
 		RETURN_FALSE;
@@ -293,15 +297,15 @@ PHP_FUNCTION(stream_socket_get_name)
 	
 	php_stream_from_zval(stream, &zstream);
 
-	Z_TYPE_P(return_value) = IS_STRING;
-	
 	if (0 != php_stream_xport_get_name(stream, want_peer,
-				&Z_STRVAL_P(return_value),
-				&Z_STRLEN_P(return_value),
+				&name,
+				&name_len,
 				NULL, NULL
 				TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
+
+	RETURN_STRINGL(name, name_len, 0);
 }
 /* }}} */
 
@@ -340,6 +344,8 @@ PHP_FUNCTION(stream_socket_recvfrom)
 {
 	php_stream *stream;
 	zval *zstream, *zremote = NULL;
+	char *remote_addr = NULL;
+	int remote_addr_len;
 	long to_read = 0;
 	char *read_buf;
 	long flags = 0;
@@ -354,7 +360,6 @@ PHP_FUNCTION(stream_socket_recvfrom)
 	if (zremote) {
 		zval_dtor(zremote);
 		ZVAL_NULL(zremote);
-		Z_STRLEN_P(zremote) = 0;
 	}
 
 	if (to_read <= 0) {
@@ -365,20 +370,19 @@ PHP_FUNCTION(stream_socket_recvfrom)
 	read_buf = safe_emalloc(1, to_read, 1);
 	
 	recvd = php_stream_xport_recvfrom(stream, read_buf, to_read, flags, NULL, NULL,
-			zremote ? &Z_STRVAL_P(zremote) : NULL,
-			zremote ? &Z_STRLEN_P(zremote) : NULL
+			zremote ? &remote_addr : NULL,
+			zremote ? &remote_addr_len : NULL
 			TSRMLS_CC);
 
 	if (recvd >= 0) {
-		if (zremote && Z_STRLEN_P(zremote)) {
-			Z_TYPE_P(zremote) = IS_STRING;
+		if (zremote) {
+			ZVAL_STRINGL(zremote, remote_addr, remote_addr_len, 0);
 		}
 		read_buf[recvd] = '\0';
 
 		if (PG(magic_quotes_runtime)) {
 			Z_TYPE_P(return_value) = IS_STRING;
-			Z_STRVAL_P(return_value) = php_addslashes(Z_STRVAL_P(return_value),
-					Z_STRLEN_P(return_value), &Z_STRLEN_P(return_value), 1 TSRMLS_CC);
+			Z_STRVAL_P(return_value) = php_addslashes(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value), &Z_STRLEN_P(return_value), 1 TSRMLS_CC);
 			return;
 		} else {
 			RETURN_STRINGL(read_buf, recvd, 0);
