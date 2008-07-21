@@ -639,15 +639,6 @@ static void php_caudium_module_main(php_caudium_request *ureq)
   THREADS_ALLOW();
 #endif
 
-#ifdef VIRTUAL_DIR
-  /* Change virtual directory, if the feature is enabled, which is
-   * (almost) a requirement for PHP in Caudium. Might want to fail if it
-   * isn't. Not a problem though, since it's on by default when using ZTS
-   * which we require.
-   */
-  VCWD_CHDIR_FILE(THIS->filename->str);
-#endif
-  
   file_handle.type = ZEND_HANDLE_FILENAME;
   file_handle.filename = THIS->filename->str;
   file_handle.opened_path = NULL;
