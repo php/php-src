@@ -45,6 +45,13 @@
 #include "mysqli_libmysql.h"
 #endif
 
+#ifdef PHP_MYSQL_UNIX_SOCK_ADDR
+#ifdef MYSQL_UNIX_ADDR
+#undef MYSQL_UNIX_ADDR
+#endif
+#define MYSQL_UNIX_ADDR PHP_MYSQL_UNIX_SOCK_ADDR
+#endif
+
 #include "php_mysqli.h"
 
 /* character set support */

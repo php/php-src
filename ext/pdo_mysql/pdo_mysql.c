@@ -102,6 +102,7 @@ PHP_MINFO_FUNCTION(pdo_mysql)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "PDO Driver for MySQL, client library version", mysql_get_client_info());
+	php_info_print_table_row(2, "MYSQL_SOCKET", PDO_MYSQL_UNIX_ADDR);
 	php_info_print_table_end();
 }
 /* }}} */
