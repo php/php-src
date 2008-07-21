@@ -206,7 +206,9 @@ PHP                                                                        NEWS
 - Fixed an issue where exec() on Windows would eat the first and last double quotes.
   (Scott)
 
+- Fixed PECL bug #12794 (PDOStatement->nextRowset() doesn¿t work). (Johannes)
 - Fixed PECL bug #12431 (OCI8 ping functionality is broken). (Oracle Corp.)
+- Fixed PECL bug #12401 (Add support for ATTR_FETCH_TABLE_NAMES). (Johannes)
 
 - Fixed bug #45571 (ReflectionClass::export() shows superclasses' private static 
   methods). (robin_fernandes at uk dot ibm dot com)
@@ -266,6 +268,8 @@ PHP                                                                        NEWS
 - Fixed bug #42637 (SoapFault : Only http and https are allowed). (Bill Moran)
 - Fixed bug #42548 (mysqli PROCEDURE calls can't return result sets). (hartmut)
 - Fixed bug #42509 (gmp leaks memory when gmp_init() not used). (Stas)
+- Fixed bug #42499 (PDO_MYSQL: multi-statement execution via PDO::exec() makes
+  connection unusable). (Johannes)
 - Fixed bug #42443 (PDO SQLite driver binds integers and booleans as strings).
   (Scott)
 - Fixed bug #42284 (duplicate of #39700). (Lars W)
@@ -274,6 +278,8 @@ PHP                                                                        NEWS
   DateTimeZone). (Derick)
 - Fixed bug #42069 (parse_ini_file() allows using some non-alpha numeric
   characters). (Jani)
+- Fixed bug #41997 (pdo_mysql: stored procedure call returning single rowset
+  blocks future queries). (Johannes)
 - Fixed bug #41599 (setTime() fails after modify() is used). (Derick)
 - Fixed bug #41522 (PDO firebird driver returns null if it fails to connect).
   (Lars W)

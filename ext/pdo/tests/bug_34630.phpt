@@ -45,6 +45,8 @@ $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 var_dump($db->query("SELECT * from test")->fetchAll(PDO::FETCH_ASSOC));
 
 ?>
+--XFAIL--
+This bug might be still open on aix5.2-ppc64 and hpux11.23-ia64
 --EXPECT--
 array(1) {
   [0]=>

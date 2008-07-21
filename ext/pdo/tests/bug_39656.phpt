@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: Bug #39656 (Crash when calling fetch() on a PDO statment object after closeCursor())
 --SKIPIF--
-<?php  
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
@@ -15,13 +15,13 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE_
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-@$db->exec("DROP TABLE testtable");
+@$db->exec("DROP TABLE test");
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-$db->exec("CREATE TABLE testtable (id INTEGER NOT NULL PRIMARY KEY, usr VARCHAR( 256 ) NOT NULL)");
-$db->exec("INSERT INTO testtable (id, usr) VALUES (1, 'user')");
+$db->exec("CREATE TABLE test (id INTEGER NOT NULL PRIMARY KEY, usr VARCHAR( 256 ) NOT NULL)");
+$db->exec("INSERT INTO test (id, usr) VALUES (1, 'user')");
 
-$stmt = $db->prepare("SELECT * FROM testtable WHERE id = ?");
+$stmt = $db->prepare("SELECT * FROM test WHERE id = ?");
 $stmt->bindValue(1, 1, PDO::PARAM_INT );
 $stmt->execute();
 $row = $stmt->fetch();
@@ -32,9 +32,10 @@ $stmt->closeCursor();
 $row = $stmt->fetch(); // this line will crash CLI
 var_dump( $row );
 
+@$db->exec("DROP TABLE test");
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 array(4) {
   ["id"]=>
   string(1) "1"
