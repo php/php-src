@@ -1153,6 +1153,9 @@ ZEND_API zend_mm_heap *zend_mm_startup(void) /* {{{ */
 		if (zend_mm_low_bit(seg_size) != zend_mm_high_bit(seg_size)) {
 			fprintf(stderr, "ZEND_MM_SEG_SIZE must be a power of two\n");
 			exit(255);
+		} else if (seg_size < ZEND_MM_ALIGNED_SEGMENT_SIZE + ZEND_MM_ALIGNED_HEADER_SIZE) {
+			fprintf(stderr, "ZEND_MM_SEG_SIZE is too small\n");
+			exit(255);
 		}
 	} else {
 		seg_size = ZEND_MM_SEG_SIZE;
