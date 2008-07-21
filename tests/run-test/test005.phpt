@@ -24,7 +24,7 @@ var_dump($php_errormsg);
 ?>
 --EXPECTF--
 string(1) "1"
-string(5) "16383"
+string(5) "32767"
 string(1) "0"
 string(1) "1"
 string(1) "0"
