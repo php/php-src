@@ -10,6 +10,8 @@ extern "C" {
 /* === regex2.h === */
 #ifdef WIN32
 #define API_EXPORT(type)    __declspec(dllexport) type __stdcall
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#define API_EXPORT(type)    __attribute__ ((visibility("default"))) type
 #else
 #define API_EXPORT(type)    type
 #endif
