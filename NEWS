@@ -33,8 +33,8 @@ PHP                                                                        NEWS
   . Added __DIR__ constant. (Lars Strojny)
   . Added PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION,
     PHP_EXTRA_VERSION, PHP_VERSION_ID, PHP_ZTS and PHP_DEBUG constants. (Pierre)
-  . Added new error mode E_DEPRECATED which is used to inform about stuff to be
-    dropped in future PHP versions. (Lars Strojny, Felipe, Marcus)
+  . Added new error modes E_USER_DEPRECATED and E_DEPRECATED which is used to inform
+    about stuff to be dropped in future PHP versions. (Lars Strojny, Felipe, Marcus)
   . Added "request_order" INI variable to control specifically $_REQUEST behavior.
     (Stas)
   . Added support for exception linking. (Marcus)
