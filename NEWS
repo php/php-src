@@ -280,6 +280,7 @@ PHP                                                                        NEWS
   characters). (Jani)
 - Fixed bug #41997 (pdo_mysql: stored procedure call returning single rowset
   blocks future queries). (Johannes)
+- Fixed bug #41996 (Problem accessing Oracle ROWID). (Martin Jansen)
 - Fixed bug #41599 (setTime() fails after modify() is used). (Derick)
 - Fixed bug #41522 (PDO firebird driver returns null if it fails to connect).
   (Lars W)
