@@ -31,7 +31,7 @@ AC_DEFUN([PHP_MYSQL_SOCKET_SEARCH], [
   done
 
   if test -n "$MYSQL_SOCK"; then
-    AC_DEFINE_UNQUOTED(MYSQL_UNIX_ADDR, "$MYSQL_SOCK", [ ])
+    AC_DEFINE_UNQUOTED(PHP_MYSQL_UNIX_SOCK_ADDR, "$MYSQL_SOCK", [ ])
     AC_MSG_RESULT([$MYSQL_SOCK])
   else
     AC_MSG_RESULT([no])
@@ -45,7 +45,7 @@ PHP_ARG_WITH(mysql, for MySQL support,
                           the MySQL native driver will be used [/usr/local]])
 
 PHP_ARG_WITH(mysql-sock, for specified location of the MySQL UNIX socket,
-[  --with-mysql-sock[=DIR]   MySQL: Location of the MySQL unix socket pointer.
+[  --with-mysql-sock[=DIR]   MySQL/MySQLi/PDO_MYSQL: Location of the MySQL unix socket pointer.
                             If unspecified, the default locations are searched], no, no)
 
 if test -z "$PHP_ZLIB_DIR"; then
@@ -62,7 +62,7 @@ elif test "$PHP_MYSQL" != "no"; then
   AC_MSG_CHECKING([for MySQL UNIX socket location])
   if test "$PHP_MYSQL_SOCK" != "no" && test "$PHP_MYSQL_SOCK" != "yes"; then
     MYSQL_SOCK=$PHP_MYSQL_SOCK
-    AC_DEFINE_UNQUOTED(MYSQL_UNIX_ADDR, "$MYSQL_SOCK", [ ])
+    AC_DEFINE_UNQUOTED(PHP_MYSQL_UNIX_SOCK_ADDR, "$MYSQL_SOCK", [ ])
     AC_MSG_RESULT([$MYSQL_SOCK])
   elif test "$PHP_MYSQL" = "yes" || test "$PHP_MYSQL_SOCK" = "yes"; then
     PHP_MYSQL_SOCKET_SEARCH

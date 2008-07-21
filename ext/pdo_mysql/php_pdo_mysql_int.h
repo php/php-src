@@ -87,4 +87,13 @@ enum {
 	PDO_MYSQL_ATTR_MAX_BUFFER_SIZE,
 	PDO_MYSQL_ATTR_DIRECT_QUERY,
 };
+
+#ifndef PDO_MYSQL_UNIX_ADDR
+# ifdef PHP_WIN32
+#  define PDO_MYSQL_UNIX_ADDR	"MySQL"
+# else
+#  define PDO_MYSQL_UNIX_ADDR	"/tmp/mysql.sock"
+# endif
+#endif
+
 #endif
