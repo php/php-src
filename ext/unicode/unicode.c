@@ -125,14 +125,6 @@ static PHP_FUNCTION(unicode_encode)
 }
 /* }}} */
 
-/* {{{ proto bool unicode_semantics() U
-   Check whether unicode semantics are enabled */
-static PHP_FUNCTION(unicode_semantics)
-{
-	RETURN_BOOL(UG(unicode));
-}
-/* }}} */
-
 /* {{{ proto bool unicode_set_error_mode(int direction, int mode) U
    Sets global conversion error mode for the specified conversion direction */
 PHP_FUNCTION(unicode_set_error_mode)
@@ -303,7 +295,6 @@ const zend_function_entry unicode_functions[] = {
 	PHP_FE(locale_get_default, NULL)
 	PHP_FE(locale_set_default, NULL)
 	PHP_FE(unicode_decode, NULL)
-	PHP_FE(unicode_semantics, NULL)
 	PHP_FE(unicode_encode, NULL)
 	PHP_FE(unicode_set_error_handler, NULL)
 	PHP_FE(unicode_restore_error_handler, NULL)
