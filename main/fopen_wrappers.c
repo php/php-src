@@ -433,9 +433,6 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 
 	file_handle->opened_path = expand_filepath(filename, NULL TSRMLS_CC);
 
-	if (!(SG(options) & SAPI_OPTION_NO_CHDIR)) {
-		VCWD_CHDIR_FILE(filename);
-	}
 	SG(request_info).path_translated = filename;
 
 	file_handle->filename = SG(request_info).path_translated;
