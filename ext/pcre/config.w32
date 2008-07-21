@@ -9,3 +9,4 @@ ADD_DEF_FILE("ext\\pcre\\php_pcre.def");
 
 AC_DEFINE('HAVE_BUNDLED_PCRE', 1, 'Using bundled PCRE library');
 AC_DEFINE('HAVE_PCRE', 1, 'Have PCRE library');
+PHP_PCRE="yes";
