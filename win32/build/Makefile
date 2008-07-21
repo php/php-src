@@ -1,7 +1,7 @@
 #  +----------------------------------------------------------------------+
 #  | PHP Version 5                                                        |
 #  +----------------------------------------------------------------------+
-#  | Copyright (c) 1997-2007 The PHP Group                                |
+#  | Copyright (c) 1997-2008 The PHP Group                                |
 #  +----------------------------------------------------------------------+
 #  | This source file is subject to version 3.01 of the PHP license,      |
 #  | that is bundled with this package in the file LICENSE, and is        |
@@ -76,14 +76,14 @@ $(PHPDLL_RES): win32\build\template.rc
 	$(RC) /fo $(PHPDLL_RES) /d FILE_DESCRIPTION="\"PHP Script Interpreter\"" \
 		/d FILE_NAME="\"$(PHPDLL)\"" /d PRODUCT_NAME="\"PHP Script Interpreter\"" \
 		/I$(BUILD_DIR) /d MC_INCLUDE="\"$(MCFILE)\"" \
-		win32\build\template.rc 
+		win32\build\template.rc
 
 $(BUILD_DIR)\$(PHPDLL): generated_files $(PHPDEF) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(PHPDLL_RES) $(MCFILE)
 	@$(CC) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /link /out:$(BUILD_DIR)\$(PHPDLL) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
 	-@$(_VC_MANIFEST_EMBED_DLL)
-	
+
 $(BUILD_DIR)\$(PHPLIB): $(BUILD_DIR)\$(PHPDLL)
-	
+
 $(BUILD_DIR) $(BUILD_DIRS_SUB):
 	@echo Recreating build dirs
 	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
@@ -97,14 +97,19 @@ clean-sapi:
 	-@del /F /Q $(BUILD_DIR)\$(PHPDLL)
 
 clean: clean-sapi
-	@echo Cleaning build dirs
+	@echo Cleaning distribution build dirs
 	@for %D in (_x $(BUILD_DIRS_SUB)) do @if exist %D @del /F /Q %D\*.* > NUL
 	-@del /F /Q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\php-$(PHP_VERSION_STRING)-Win32.zip $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)-Win32.zip > NUL
-	-rmdir /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING) 
+	-rd /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
 
 clean-pecl:
 	@echo Cleaning PECL targets only
-	-rmdir /s /q $(BUILD_DIR)\pecl
+	-rd /s /q $(BUILD_DIR)\pecl
+
+clean-all:
+	@echo Cleaning standard build dirs
+	@for %D in (_x $(BUILD_DIRS_SUB)) do @if exist %D @rd /s /q %D
+	-@del /f /q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\*.rc $(BUILD_DIR)\*.dbg $(BUILD_DIR)\*.bin $(BUILD_DIR)\php*.dll $(BUILD_DIR)\php*.exe > NUL
 
 test:
 	<<test_suite_uses_lame_env_vars.bat
@@ -119,8 +124,8 @@ build-snap: generated_files
 	-for %T in ($(PECL_TARGETS)) do $(MAKE) /I /nologo "%T"
 
 build-dist: $(BUILD_DIR)\deplister.exe
-	-rmdir /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
-	-rmdir /s /q $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)
+	-rd /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
+	-rd /s /q $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)
 	-del /f /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)-Win32.zip
 	-del /f /q $(BUILD_DIR)\php-debug-pack-$(PHP_VERSION_STRING)-Win32.zip
 	-del /f /q $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)-Win32.zip

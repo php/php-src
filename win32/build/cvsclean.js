@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2007 The PHP Group                                |
+  | Copyright (c) 1997-2008 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +16,7 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id: cvsclean.js,v 1.7 2007-01-29 04:40:46 iliaa Exp $ */
+/* $Id: cvsclean.js,v 1.8 2008-07-21 09:56:37 sfox Exp $ */
 // Cleans up files that do not belong in CVS
 
 var FSO = WScript.CreateObject("Scripting.FileSystemObject");
