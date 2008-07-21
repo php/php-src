@@ -1,5 +1,7 @@
 --TEST--
 Bug #45529 (UTC not properly recognised as timezone identifier while parsing)
+--INI--
+date.default_timezone=Europe/Oslo
 --FILE--
 <?php
 $tz1 = new DateTimeZone('UTC');
