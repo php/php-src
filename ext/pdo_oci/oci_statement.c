@@ -415,7 +415,7 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ */
 		case SQLT_BIN:
 		default:
 			dyn = FALSE;
-			if (dtype == SQLT_DAT || dtype == SQLT_NUM
+			if (dtype == SQLT_DAT || dtype == SQLT_NUM || dtype == SQLT_RDD
 #ifdef SQLT_TIMESTAMP
 					|| dtype == SQLT_TIMESTAMP
 #endif
