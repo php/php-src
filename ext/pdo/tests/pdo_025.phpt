@@ -110,4 +110,4 @@ object(Test)#%d (3) {
 }
 ===FAIL===
 
-Fatal error: Cannot access protected property Fail::$id in %spdo_025.php on line %d
+Fatal error: Cannot access protected property Fail::$id in %spdo_025.php on line %d%a

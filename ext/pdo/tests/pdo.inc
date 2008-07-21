@@ -7,5 +7,4 @@ function set_sql($name,  $query)
 		$GLOBALS['SQL'][$name] = $query;
 	}
 }
-
 ?>
