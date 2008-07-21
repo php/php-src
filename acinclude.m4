@@ -931,8 +931,9 @@ dnl "shared" can be set to "shared" or "yes" to build the extension as
 dnl a dynamically loadable library. Optional parameter "sapi_class" can
 dnl be set to "cli" to mark extension build only with CLI or CGI sapi's.
 dnl "extra-cflags" are passed to the compiler, with 
-dnl "cxx" can be used to indicate that a C++ shared module is desired.
 dnl @ext_srcdir@ and @ext_builddir@ being substituted.
+dnl "cxx" can be used to indicate that a C++ shared module is desired.
+dnl "zend_ext" indicates a zend extension.
 AC_DEFUN([PHP_NEW_EXTENSION],[
   ext_builddir=[]PHP_EXT_BUILDDIR($1)
   ext_srcdir=[]PHP_EXT_SRCDIR($1)
@@ -2154,11 +2155,11 @@ AC_DEFUN([PHP_PROG_RE2C],[
   AC_CHECK_PROG(RE2C, re2c, re2c)
   if test -n "$RE2C"; then
     AC_CACHE_CHECK([for re2c version], php_cv_re2c_version, [
-      re2c_vernum=`re2c --vernum 2>/dev/null`
+      re2c_vernum=`$RE2C --vernum 2>/dev/null`
       if test -z "$re2c_vernum" || test "$re2c_vernum" -lt "1304"; then
         php_cv_re2c_version=invalid
       else
-        php_cv_re2c_version="`re2c --version | cut -d ' ' -f 2  2>/dev/null` (ok)"
+        php_cv_re2c_version="`$RE2C --version | cut -d ' ' -f 2  2>/dev/null` (ok)"
       fi 
     ])
   fi
@@ -2716,6 +2717,7 @@ AC_DEFUN([PHP_CHECK_CONFIGURE_OPTIONS],[
             enable-zend-multibyte[)] continue;;
           esac 
         fi
+
         is_arg_set=php_[]`echo [$]arg_name | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ-' 'abcdefghijklmnopqrstuvwxyz_'`
         if eval test "x\$$is_arg_set" = "x"; then
           PHP_UNKNOWN_CONFIGURE_OPTIONS="$PHP_UNKNOWN_CONFIGURE_OPTIONS
