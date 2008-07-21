@@ -56,23 +56,23 @@ echo "Done";
 
 -- Testing stream_set_timeout() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for stream_set_timeout() in %s on line %i
+Warning: stream_set_timeout() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 
 -- Testing stream_set_timeout() function with less than expected no. of arguments --
 
-Warning: Wrong parameter count for stream_set_timeout() in %s on line %i
+Warning: stream_set_timeout() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
 -- Testing stream_set_timeout() function with a closed socket --
 
-Warning: stream_set_timeout(): %i is not a valid stream resource in %s on line %i
+Warning: stream_set_timeout(): 6 is not a valid stream resource in %s on line %d
 bool(false)
 
 -- Testing stream_set_timeout() function with an invalid stream --
 
-Warning: stream_set_timeout(): supplied argument is not a valid stream resource in %s on line %i
-bool(false)
+Warning: stream_set_timeout() expects parameter 1 to be resource, integer given in %s on line %d
+NULL
 
 -- Testing stream_set_timeout() function with a stream that does not support timeouts --
 bool(false)
