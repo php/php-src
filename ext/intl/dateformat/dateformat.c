@@ -98,6 +98,7 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_NULL();
     }
 
+	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 	// Convert pattern (if specified) to UTF-16.
 	if( pattern_str && pattern_str_len>0 ){

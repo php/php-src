@@ -48,7 +48,7 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_NULL();
 	}
 
-	INTL_CHECK_LOCALE_LEN(locale_len);
+	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
 	MSG_FORMAT_METHOD_FETCH_OBJECT;
 
 	// Convert pattern (if specified) to UTF-16.
