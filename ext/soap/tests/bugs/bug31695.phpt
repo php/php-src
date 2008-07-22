@@ -17,7 +17,7 @@ class LocalSoapClient extends SoapClient {
 		$this->server->addFunction("Test"); 
   }
 
-  function __doRequest($request, $location, $action, $version) {
+  function __doRequest($request, $location, $action, $version, $one_way = 0) {
   	echo "$location\n";
     ob_start();
     $this->server->handle($request);
