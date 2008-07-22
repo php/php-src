@@ -118,6 +118,7 @@ PHP                                                                        NEWS
   . Added FixedArray. (Etienne, Tony)
   . Added delaying exceptions in SPL's autoload mechanism. (Marcus)
   . Added RecursiveTreeIterator. (Arnaud, Marcus)
+  . Added MultipleIterator. (Arnaud, Marcus, Johannes)
 
 - Improved Zend Engine:
   . Added "compact" handler for Zend MM storage. (Dmitry)

@@ -27,6 +27,7 @@
 extern PHPAPI zend_class_entry *spl_ce_SplObserver;
 extern PHPAPI zend_class_entry *spl_ce_SplSubject;
 extern PHPAPI zend_class_entry *spl_ce_SplObjectStorage;
+extern PHPAPI zend_class_entry *spl_ce_MultipleIterator;
 
 PHP_MINIT_FUNCTION(spl_observer);
 

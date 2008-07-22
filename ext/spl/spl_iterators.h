@@ -35,6 +35,7 @@
 
 extern PHPAPI zend_class_entry *spl_ce_RecursiveIterator;
 extern PHPAPI zend_class_entry *spl_ce_RecursiveIteratorIterator;
+extern PHPAPI zend_class_entry *spl_ce_RecursiveTreeIterator;
 extern PHPAPI zend_class_entry *spl_ce_FilterIterator;
 extern PHPAPI zend_class_entry *spl_ce_RecursiveFilterIterator;
 extern PHPAPI zend_class_entry *spl_ce_ParentIterator;
