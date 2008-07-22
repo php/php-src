@@ -1,7 +1,7 @@
 <?php
 
 /** @file recursivetreeiterator.inc
- * @ingroup Examples
+ * @ingroup SPL
  * @brief   class RecursiveTreeIterator
  * @author  Marcus Boerger, Johannes Schlueter
  * @date    2005

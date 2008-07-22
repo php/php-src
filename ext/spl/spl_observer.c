@@ -73,6 +73,8 @@ static const zend_function_entry spl_funcs_SplSubject[] = {
 PHPAPI zend_class_entry     *spl_ce_SplObserver;
 PHPAPI zend_class_entry     *spl_ce_SplSubject;
 PHPAPI zend_class_entry     *spl_ce_SplObjectStorage;
+PHPAPI zend_class_entry     *spl_ce_MultipleIterator;
+
 PHPAPI zend_object_handlers spl_handler_SplObjectStorage;
 
 typedef struct _spl_SplObjectStorage { /* {{{ */
@@ -80,6 +82,7 @@ typedef struct _spl_SplObjectStorage { /* {{{ */
 	HashTable         storage;
 	long              index;
 	HashPosition      pos;
+	long              flags;
 } spl_SplObjectStorage; /* }}} */
 
 /* {{{ storage is an assoc aray of [zend_object_value]=>[zval *obj, zval *inf] */
@@ -595,6 +598,298 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_offsetSet, 0, 0, 2)
 	ZEND_ARG_INFO(0, info)
 ZEND_END_ARG_INFO()
 
+typedef enum {
+	MIT_NEED_ANY     = 0,
+	MIT_NEED_ALL     = 1,
+	MIT_KEYS_NUMERIC = 0,
+	MIT_KEYS_ASSOC   = 2
+} MultipleIteratorFlags;
+
+#define SPL_MULTIPLE_ITERATOR_GET_ALL_CURRENT   1
+#define SPL_MULTIPLE_ITERATOR_GET_ALL_KEY       2
+
+/* {{{ proto void MultipleIterator::__construct([int flags = MIT_NEED_ALL|MIT_KEYS_NUMERIC]) U
+   Iterator that iterates over several iterators one after the other */
+SPL_METHOD(MultipleIterator, __construct)
+{
+	spl_SplObjectStorage   *intern;
+	long                    flags = MIT_NEED_ALL|MIT_KEYS_NUMERIC;
+
+	php_set_error_handling(EH_THROW, spl_ce_InvalidArgumentException TSRMLS_CC);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &flags) == FAILURE) {
+		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+		return;
+	}
+
+	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+
+	intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern->flags = flags;
+}
+/* }}} */
+
+/* {{{ proto int MultipleIterator::getFlags() U
+   Return current flags */
+SPL_METHOD(MultipleIterator, getFlags)
+{
+	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	RETURN_LONG(intern->flags);
+}
+/* }}} */
+
+/* {{{ proto int MultipleIterator::setFlags(int flags) U
+   Set flags */
+SPL_METHOD(MultipleIterator, setFlags)
+{
+	spl_SplObjectStorage *intern;
+	intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &intern->flags) == FAILURE) {
+		return;
+	}
+}
+/* }}} */
+
+/* {{{ proto void attachIterator(Iterator iterator[, mixed info]) throws InvalidArgumentException U
+   Attach a new iterator */
+SPL_METHOD(MultipleIterator, attachIterator)
+{
+	spl_SplObjectStorage        *intern;
+	zval                        *iterator = NULL, *info = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|z!", &iterator, zend_ce_iterator, &info) == FAILURE) {
+		return;
+	}
+
+	intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (info != NULL) {
+		spl_SplObjectStorageElement *element;
+		zval                         compare_result;
+
+		if (Z_TYPE_P(info) != IS_LONG && Z_TYPE_P(info) != IS_STRING && Z_TYPE_P(info) != IS_UNICODE) {
+			zend_throw_exception(spl_ce_InvalidArgumentException, "Info must be NULL, integer or string", 0 TSRMLS_CC);
+			return;
+		}
+
+		zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
+		while (zend_hash_get_current_data_ex(&intern->storage, (void**)&element, &intern->pos) == SUCCESS) {
+			is_identical_function(&compare_result, info, element->inf TSRMLS_CC);
+			if (Z_LVAL(compare_result)) {
+				zend_throw_exception(spl_ce_InvalidArgumentException, "Key duplication error", 0 TSRMLS_CC);
+				return;
+			}
+			zend_hash_move_forward_ex(&intern->storage, &intern->pos);
+		}
+	}
+
+	spl_object_storage_attach(intern, iterator, info TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto void MultipleIterator::rewind() U
+   Rewind all attached iterator instances */
+SPL_METHOD(MultipleIterator, rewind)
+{
+	spl_SplObjectStorage        *intern;
+	spl_SplObjectStorageElement *element;
+	zval                        *it;
+
+	intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
+	while (zend_hash_get_current_data_ex(&intern->storage, (void**)&element, &intern->pos) == SUCCESS && !EG(exception)) {
+		it = element->obj;
+		zend_call_method_with_0_params(&it, Z_OBJCE_P(it), &Z_OBJCE_P(it)->iterator_funcs.zf_rewind, "rewind", NULL);
+		zend_hash_move_forward_ex(&intern->storage, &intern->pos);
+	}
+}
+/* }}} */
+
+/* {{{ proto void MultipleIterator::next() U
+   Move all attached iterator instances forward */
+SPL_METHOD(MultipleIterator, next)
+{
+	spl_SplObjectStorage        *intern;
+	spl_SplObjectStorageElement *element;
+	zval                        *it;
+
+	intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
+	while (zend_hash_get_current_data_ex(&intern->storage, (void**)&element, &intern->pos) == SUCCESS && !EG(exception)) {
+		it = element->obj;
+		zend_call_method_with_0_params(&it, Z_OBJCE_P(it), &Z_OBJCE_P(it)->iterator_funcs.zf_next, "next", NULL);
+		zend_hash_move_forward_ex(&intern->storage, &intern->pos);
+	}
+}
+/* }}} */
+
+/* {{{ proto bool MultipleIterator::valid() U
+   Return whether all or one sub iterator is valid depending on flags */
+SPL_METHOD(MultipleIterator, valid)
+{
+	spl_SplObjectStorage        *intern;
+	spl_SplObjectStorageElement *element;
+	zval                        *it, *retval = NULL;
+	long                         expect, valid;
+
+	intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (!zend_hash_num_elements(&intern->storage)) {
+		RETURN_FALSE;
+	}
+
+	expect = (intern->flags & MIT_NEED_ALL) ? 1 : 0;
+
+	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
+	while (zend_hash_get_current_data_ex(&intern->storage, (void**)&element, &intern->pos) == SUCCESS && !EG(exception)) {
+		it = element->obj;
+		zend_call_method_with_0_params(&it, Z_OBJCE_P(it), &Z_OBJCE_P(it)->iterator_funcs.zf_valid, "valid", &retval);
+
+		if (retval) {
+			valid = Z_LVAL_P(retval);
+			zval_ptr_dtor(&retval);
+		} else {
+			valid = 0;
+		}
+
+		if (expect != valid) {
+			RETURN_BOOL(!expect);
+		}
+
+		zend_hash_move_forward_ex(&intern->storage, &intern->pos);
+	}
+
+	RETURN_BOOL(expect);
+}
+/* }}} */
+
+static void spl_multiple_iterator_get_all(spl_SplObjectStorage *intern, int get_type, zval *return_value TSRMLS_DC) /* {{{ */
+{
+	spl_SplObjectStorageElement *element;
+	zval                        *it, *retval = NULL;
+	int                          valid = 1, num_elements;
+
+	num_elements = zend_hash_num_elements(&intern->storage);
+	if (num_elements < 1) {
+		RETURN_FALSE;
+	}
+
+	array_init_size(return_value, num_elements);
+	
+	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
+	while (zend_hash_get_current_data_ex(&intern->storage, (void**)&element, &intern->pos) == SUCCESS && !EG(exception)) {
+		it = element->obj;
+		zend_call_method_with_0_params(&it, Z_OBJCE_P(it), &Z_OBJCE_P(it)->iterator_funcs.zf_valid, "valid", &retval);
+
+		if (retval) {
+			valid = Z_LVAL_P(retval);
+			zval_ptr_dtor(&retval);
+		} else {
+			valid = 0;
+		}
+
+		if (valid) {
+			if (SPL_MULTIPLE_ITERATOR_GET_ALL_CURRENT == get_type) {
+				zend_call_method_with_0_params(&it, Z_OBJCE_P(it), &Z_OBJCE_P(it)->iterator_funcs.zf_current, "current", &retval);
+			} else {
+				zend_call_method_with_0_params(&it, Z_OBJCE_P(it), &Z_OBJCE_P(it)->iterator_funcs.zf_key,     "key",     &retval);
+			}
+			if (!retval) {
+				zend_throw_exception(spl_ce_RuntimeException, "Failed to call sub iterator method", 0 TSRMLS_CC);
+				return;
+			}
+		} else if (intern->flags & MIT_NEED_ALL) {
+			if (SPL_MULTIPLE_ITERATOR_GET_ALL_CURRENT == get_type) {
+				zend_throw_exception(spl_ce_RuntimeException, "Called current() with non valid sub iterator", 0 TSRMLS_CC);
+			} else {
+				zend_throw_exception(spl_ce_RuntimeException, "Called key() with non valid sub iterator", 0 TSRMLS_CC);
+			}
+			return;
+		} else {
+			ALLOC_INIT_ZVAL(retval);
+		}
+
+		if (intern->flags & MIT_KEYS_ASSOC) {
+			switch (Z_TYPE_P(element->inf)) {
+				case IS_LONG:
+					add_index_zval(return_value, Z_LVAL_P(element->inf), retval);
+					break;
+				case IS_STRING:
+				case IS_UNICODE:
+					add_u_assoc_zval_ex(return_value, Z_TYPE_P(element->inf), Z_UNIVAL_P(element->inf), Z_UNILEN_P(element->inf)+1U, retval);
+					break;
+				default:
+					zval_ptr_dtor(&retval);
+					zend_throw_exception(spl_ce_InvalidArgumentException, "Sub-Iterator is associated with NULL", 0 TSRMLS_CC);
+					return;
+			}
+		} else {
+			add_next_index_zval(return_value, retval);
+		}
+
+		zend_hash_move_forward_ex(&intern->storage, &intern->pos);
+	}
+}
+/* }}} */
+
+/* {{{ proto array current() throws RuntimeException throws InvalidArgumentException U
+   Return an array of all registered Iterator instances current() result */
+SPL_METHOD(MultipleIterator, current)
+{
+	spl_SplObjectStorage        *intern;
+	intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	spl_multiple_iterator_get_all(intern, SPL_MULTIPLE_ITERATOR_GET_ALL_CURRENT, return_value TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto array MultipleIterator::key() U
+   Return an array of all registered Iterator instances key() result */
+SPL_METHOD(MultipleIterator, key)
+{
+	spl_SplObjectStorage        *intern;
+	intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	spl_multiple_iterator_get_all(intern, SPL_MULTIPLE_ITERATOR_GET_ALL_KEY, return_value TSRMLS_CC);
+}
+/* }}} */
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_MultipleIterator_attachIterator, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
+	ZEND_ARG_INFO(0, infos)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_MultipleIterator_detachIterator, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_MultipleIterator_containsIterator, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
+ZEND_END_ARG_INFO();
+
+static const zend_function_entry spl_funcs_MultipleIterator[] = {
+	SPL_ME(MultipleIterator,  __construct,            NULL,                                       0)
+	SPL_ME(MultipleIterator,  getFlags,               NULL,                                       0)
+	SPL_ME(MultipleIterator,  setFlags,               NULL,                                       0)
+	SPL_ME(MultipleIterator,  attachIterator,         arginfo_MultipleIterator_attachIterator,    0)
+	SPL_MA(MultipleIterator,  detachIterator,         SplObjectStorage, detach,   arginfo_MultipleIterator_detachIterator,   0)
+	SPL_MA(MultipleIterator,  containsIterator,       SplObjectStorage, contains, arginfo_MultipleIterator_containsIterator, 0)
+	SPL_MA(MultipleIterator,  countIterators,         SplObjectStorage, count,    NULL,                                      0)
+	/* Iterator */
+	SPL_ME(MultipleIterator,  rewind,                 NULL,                                       0)
+	SPL_ME(MultipleIterator,  valid,                  NULL,                                       0)
+	SPL_ME(MultipleIterator,  key,                    NULL,                                       0)
+	SPL_ME(MultipleIterator,  current,                NULL,                                       0)
+	SPL_ME(MultipleIterator,  next,                   NULL,                                       0)
+	{NULL, NULL, NULL}
+};
+
 static const zend_function_entry spl_funcs_SplObjectStorage[] = {
 	SPL_ME(SplObjectStorage,  attach,      arginfo_attach,        0)
 	SPL_ME(SplObjectStorage,  detach,      arginfo_Object,        0)
@@ -634,6 +929,14 @@ PHP_MINIT_FUNCTION(spl_observer)
 	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, Iterator);
 	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, Serializable);
 	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, ArrayAccess);
+
+	REGISTER_SPL_STD_CLASS_EX(MultipleIterator, spl_SplObjectStorage_new, spl_funcs_MultipleIterator);
+	REGISTER_SPL_ITERATOR(MultipleIterator);
+
+	REGISTER_SPL_CLASS_CONST_LONG(MultipleIterator, "MIT_NEED_ANY",     MIT_NEED_ANY);
+	REGISTER_SPL_CLASS_CONST_LONG(MultipleIterator, "MIT_NEED_ALL",     MIT_NEED_ALL);
+	REGISTER_SPL_CLASS_CONST_LONG(MultipleIterator, "MIT_KEYS_NUMERIC", MIT_KEYS_NUMERIC);
+	REGISTER_SPL_CLASS_CONST_LONG(MultipleIterator, "MIT_KEYS_ASSOC",   MIT_KEYS_ASSOC);
 
 	return SUCCESS;
 }
