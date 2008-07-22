@@ -32,10 +32,6 @@
 #include "ext/standard/info.h"
 #include "php_mbregex.h"
 #include "mbstring.h"
-
-#include "php_onig_compat.h" /* must come prior to the oniguruma header */
-#include <oniguruma.h>
-#undef UChar
  
 #include "php_onig_compat.h" /* must come prior to the oniguruma header */
 #include <oniguruma.h>
