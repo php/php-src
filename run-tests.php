@@ -189,7 +189,7 @@ $ini_overwrites = array(
 		'safe_mode=0',
 		'disable_functions=',
 		'output_buffering=Off',
-		'error_reporting=' . ((PHP_MAJOR_VERSION == 5) ? '32767' : '30719'),
+		'error_reporting=' . (E_ALL | E_STRICT),
 		'display_errors=1',
 		'display_startup_errors=1',
 		'log_errors=0',
