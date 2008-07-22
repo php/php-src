@@ -4,6 +4,9 @@ PHP 4                                                                      NEWS
 - Updated PCRE to version 7.7. (Nuno)
 - Fixed crash in imageloadfont when an invalid font is given.
   (discovered by CzechSec, fixed by Pierre)
+- Fixed open_basedir handling issue in the curl extension. (Stas)
+- Fixed bug #37421 (mbstring.func_overload set in .htaccess becomes global).
+  (Rui)
 
 03 Jan 2008, Version 4.4.8
 - Improved fix for MOPB-02-2007. (Ilia)
