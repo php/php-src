@@ -1,5 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Aug 2008, Version 4.4.9
+	
 22 Jul 2008, Version 4.4.9RC1
 - Updated PCRE to version 7.7. (Nuno)
 - Fixed crash in imageloadfont when an invalid font is given.
