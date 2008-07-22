@@ -45,7 +45,7 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_NULL();
 	}
 
-	INTL_CHECK_LOCALE_LEN(locale_len);
+	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
 	object = return_value;
 	FORMATTER_METHOD_FETCH_OBJECT;
 
