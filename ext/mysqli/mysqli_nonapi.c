@@ -162,8 +162,12 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 							mysql->mysql = zend_ptr_stack_pop(&plist->free_links);
 
 							MyG(num_inactive_persistent)--;
+#if defined(MYSQLI_USE_MYSQLND)
+							mysqlnd_end_psession(mysql->mysql);
+#endif	
 							/* reset variables */
 							/* todo: option for ping or change_user */
+
 #if G0
 							if (!mysql_change_user(mysql->mysql, username, passwd, dbname)) {
 #else
@@ -175,9 +179,6 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 								MyG(num_active_persistent)++;
 								goto end;
 							} else {
-#if defined(MYSQLI_USE_MYSQLND)
-								mysqlnd_end_psession(mysql->mysql);
-#endif	
 								mysqli_close(mysql->mysql, MYSQLI_CLOSE_IMPLICIT);
 								mysql->mysql = NULL;
 							}
