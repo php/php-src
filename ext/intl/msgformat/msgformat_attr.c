@@ -85,7 +85,7 @@ PHP_FUNCTION( msgfmt_set_pattern )
 	intl_convert_utf8_to_utf16(&spattern, &spattern_len, value, value_len, &INTL_DATA_ERROR_CODE(mfo));
 	INTL_METHOD_CHECK_STATUS(mfo, "Error converting pattern to UTF-16" );
 
-	if(msfgotmat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo)) != SUCCESS) {
+	if(msgformat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo)) != SUCCESS) {
 		intl_error_set( NULL, U_INVALID_FORMAT_ERROR,
 			"msgfmt_set_pattern: error converting pattern to quote-friendly format", 0 TSRMLS_CC );
 		RETURN_FALSE;
