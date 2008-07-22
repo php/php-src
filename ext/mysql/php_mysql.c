@@ -802,6 +802,9 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			mysql->active_result_id = 0;
 			mysql->multi_query = client_flags & CLIENT_MULTI_STATEMENTS? 1:0;
 			/* ensure that the link did not die */
+#if defined(MYSQL_USE_MYSQLND)
+			mysqlnd_end_psession(mysql->conn);
+#endif	
 			if (mysql_ping(mysql->conn)) {
 				if (mysql_errno(mysql->conn) == 2006) {
 					if (UG(unicode)) {
@@ -1004,15 +1007,6 @@ PHP_FUNCTION(mysql_close)
 	}
 	
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
-
-#ifdef MYSQL_USE_MYSQLND
-	{
-		int tmp;
-		if ((mysql = zend_list_find(Z_RESVAL_PP(mysql_link), &tmp)) && tmp == le_plink) {
-			mysqlnd_end_psession(mysql->conn);
-		}
-	}
-#endif
 
 	if (id==-1) { /* explicit resource number */
 		PHPMY_UNBUFFERED_QUERY_CHECK();
