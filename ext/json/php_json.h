@@ -30,11 +30,6 @@ extern zend_module_entry json_module_entry;
 #include "TSRM.h"
 #endif
 
-PHP_MINFO_FUNCTION(json);
-
-PHP_FUNCTION(json_encode);
-PHP_FUNCTION(json_decode);
-
 #endif  /* PHP_JSON_H */
 
 /*
