@@ -135,7 +135,7 @@ PHP_FUNCTION( msgfmt_format_message )
 		slocale = UG(default_locale);
 	}
 
-	if(msfgotmat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo), &free_pattern) != SUCCESS) {
+	if(msgformat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo), &free_pattern) != SUCCESS) {
 		intl_error_set( NULL, U_INVALID_FORMAT_ERROR,
 			"msgfmt_format_message: error converting pattern to quote-friendly format", 0 TSRMLS_CC );
 		RETURN_FALSE;

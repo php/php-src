@@ -52,28 +52,28 @@ foreach($args as $arg) {
 ?>
 --EXPECTF--
 Warning: NumberFormatter::__construct() expects at least 2 parameters, 0 given in %s on line %d
-'__construct: unable to parse input params: U_ILLEGAL_ARGUMENT_ERROR'
+'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: numfmt_create() expects at least 2 parameters, 0 given in %s on line %d
 'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: NumberFormatter::create() expects at least 2 parameters, 0 given in %s on line %d
 'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
-'__construct: number formatter creation failed: U_UNSUPPORTED_ERROR'
+'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
 
 Warning: NumberFormatter::__construct() expects parameter 1 to be binary string, array given in %s on line %d
-'__construct: unable to parse input params: U_ILLEGAL_ARGUMENT_ERROR'
+'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: NumberFormatter::create() expects parameter 1 to be binary string, array given in %s on line %d
 'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: numfmt_create() expects parameter 1 to be binary string, array given in %s on line %d
 'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
-'__construct: number formatter creation failed: U_UNSUPPORTED_ERROR'
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
-'__construct: number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'
+'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
+'numfmt_create: number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'
 'numfmt_create: number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'
 'numfmt_create: number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'

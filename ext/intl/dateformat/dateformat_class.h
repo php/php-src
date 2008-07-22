@@ -37,8 +37,8 @@ extern zend_class_entry *IntlDateFormatter_ce_ptr;
 
 /* Auxiliary macros */
 
-#define DATE_FORMAT_METHOD_INIT_VARS	INTL_METHOD_INIT_VARS(IntlDateFormatter, mfo)
-#define DATE_FORMAT_METHOD_FETCH_OBJECT	INTL_METHOD_FETCH_OBJECT(IntlDateFormatter, mfo)
-#define DATE_FORMAT_OBJECT(mfo)		(mfo)->datef_data.udatf
+#define DATE_FORMAT_METHOD_INIT_VARS	INTL_METHOD_INIT_VARS(IntlDateFormatter, dfo)
+#define DATE_FORMAT_METHOD_FETCH_OBJECT	INTL_METHOD_FETCH_OBJECT(IntlDateFormatter, dfo)
+#define DATE_FORMAT_OBJECT(dfo)		(dfo)->datef_data.udatf
 
 #endif // #ifndef DATE_FORMAT_CLASS_H

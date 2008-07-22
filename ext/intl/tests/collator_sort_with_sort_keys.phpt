@@ -36,10 +36,7 @@ function sort_arrays( $locale, $arrays )
         
         
         // Preppend test signature to output string
-        if( unicode_semantics() )
              $md5 = md5( unicode_encode( $res_dump, 'utf-8' ) );
-        else
-             $md5 = md5( $res_dump );
 
         global $test_num;
 
