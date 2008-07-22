@@ -63,7 +63,7 @@ foreach($unsigned_formats as $unsigned_format) {
 
 // closing the resources
 fclose($fp);
-fclose($dfp);
+closedir($dfp);
 
 echo "\n*** Done ***";
 ?>

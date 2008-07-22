@@ -63,7 +63,7 @@ foreach($scientific_formats as $scientific_format) {
 
 // closing the resources
 fclose($fp);
-fclose($dfp);
+closedir($dfp);
 
 echo "\n*** Done ***";
 ?>

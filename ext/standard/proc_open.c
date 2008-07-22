@@ -969,7 +969,7 @@ PHP_FUNCTION(proc_open)
 					zval *retfp;
 
 					/* nasty hack; don't copy it */
-					stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
+					stream->flags |= PHP_STREAM_FLAG_NO_SEEK | PHP_STREAM_FLAG_FCLOSE;
 					
 					MAKE_STD_ZVAL(retfp);
 					php_stream_to_zval(stream, retfp);
