@@ -861,6 +861,8 @@ PHP_NAMED_FUNCTION(php_if_tmpfile)
 	stream = php_stream_fopen_tmpfile();
 
 	if (stream) {
+		stream->flags |= PHP_STREAM_FLAG_FCLOSE;
+
 		php_stream_to_zval(stream, return_value);
 	} else {
 		RETURN_FALSE;
@@ -891,6 +893,8 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 	if (stream == NULL) {
 		RETURN_FALSE;
 	}
+	
+	stream->flags |= PHP_STREAM_FLAG_FCLOSE;
 
 	php_stream_to_zval(stream, return_value);
 
@@ -912,6 +916,12 @@ PHPAPI PHP_FUNCTION(fclose)
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, arg1);
+	
+	if (!(stream->flags & PHP_STREAM_FLAG_FCLOSE)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a valid stream resource", stream->rsrc_id);
+		RETURN_FALSE;
+	}
+	
 	if (!stream->is_persistent) {
 		zend_list_delete(stream->rsrc_id);
 	} else {

@@ -68,7 +68,7 @@ foreach($octal_formats as $octal_format) {
 
 // closing the resources
 fclose($fp);
-fclose($dfp);
+closedir($dfp);
 
 echo "\n*** Done ***";
 ?>

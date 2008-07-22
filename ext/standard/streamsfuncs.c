@@ -122,6 +122,7 @@ PHP_FUNCTION(stream_socket_client)
 			STREAM_XPORT_CLIENT | (flags & PHP_STREAM_CLIENT_CONNECT ? STREAM_XPORT_CONNECT : 0) |
 			(flags & PHP_STREAM_CLIENT_ASYNC_CONNECT ? STREAM_XPORT_CONNECT_ASYNC : 0),
 			hashkey, &tv, context, &errstr, &err);
+		
 
 	if (stream == NULL) {
 		/* host might contain binary characters */
@@ -149,6 +150,8 @@ PHP_FUNCTION(stream_socket_client)
 		}
 		RETURN_FALSE;
 	}
+	
+	stream->flags |= PHP_STREAM_FLAG_FCLOSE;
 	
 	if (errstr) {
 		efree(errstr);
@@ -195,6 +198,8 @@ PHP_FUNCTION(stream_socket_server)
 	stream = php_stream_xport_create(host, host_len, ENFORCE_SAFE_MODE | REPORT_ERRORS,
 			STREAM_XPORT_SERVER | flags,
 			NULL, NULL, context, &errstr, &err);
+			
+	stream->flags |= PHP_STREAM_FLAG_FCLOSE;
 
 	if (stream == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s (%s)", host, errstr == NULL ? "Unknown error" : errstr);
@@ -262,7 +267,9 @@ PHP_FUNCTION(stream_socket_accept)
 				NULL, NULL,
 				&tv, &errstr
 				TSRMLS_CC) && clistream) {
-
+		
+		clistream->flags |= PHP_STREAM_FLAG_FCLOSE;
+		
 		if (peername) {
 			Z_TYPE_P(peername) = IS_STRING;
 		}

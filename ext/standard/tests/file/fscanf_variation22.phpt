@@ -67,7 +67,7 @@ foreach($char_formats as $char_format) {
 
 // closing the resources
 fclose($fp);
-fclose($dfp);
+closedir($dfp);
 
 echo "\n*** Done ***";
 ?>
