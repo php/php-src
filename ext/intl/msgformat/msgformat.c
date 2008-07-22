@@ -26,7 +26,7 @@
 #include "intl_convert.h"
 
 /* {{{ */
-static msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS) 
+static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS) 
 {
 	char*       locale;
 	char*       pattern;
