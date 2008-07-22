@@ -29,6 +29,9 @@
 #define ZEND_INVOKE_FUNC_NAME "__invoke"
 #define ZEND_CLOSURE_PRINT_NAME "Closure object"
 
+#define ZEND_CLOSURE_PROPERTY_ERROR() \
+	zend_error(E_ERROR, "Closure object cannot have properties")
+
 typedef struct _zend_closure {
 	zend_object    std;
 	zend_function  func;
@@ -146,6 +149,39 @@ static zend_function *zend_closure_get_method(zval **object_ptr, zstr method_nam
 }
 /* }}} */
 
+static zval *zend_closure_read_property(zval *object, zval *member, int type TSRMLS_DC) /* {{{ */
+{
+    ZEND_CLOSURE_PROPERTY_ERROR();
+	return NULL;
+}
+/* }}} */
+
+static void zend_closure_write_property(zval *object, zval *member, zval *value TSRMLS_DC) /* {{{ */
+{
+    ZEND_CLOSURE_PROPERTY_ERROR();
+}
+/* }}} */
+
+static zval **zend_closure_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC) /* {{{ */
+{
+    ZEND_CLOSURE_PROPERTY_ERROR();
+	return NULL;
+}
+/* }}} */
+
+static int zend_closure_has_property(zval *object, zval *member, int has_set_exists TSRMLS_DC) /* {{{ */
+{
+    ZEND_CLOSURE_PROPERTY_ERROR();
+	return 0;
+}
+/* }}} */
+
+static void zend_closure_unset_property(zval *object, zval *member TSRMLS_DC) /* {{{ */
+{
+    ZEND_CLOSURE_PROPERTY_ERROR();
+}
+/* }}} */
+
 static void zend_closure_free_storage(void *object TSRMLS_DC) /* {{{ */
 {
 	zend_closure *closure = (zend_closure *)object;
@@ -207,6 +243,11 @@ void zend_register_closure_ce(TSRMLS_D) /* {{{ */
 	memcpy(&closure_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	closure_handlers.get_constructor = zend_closure_get_constructor;
 	closure_handlers.get_method = zend_closure_get_method;
+	closure_handlers.write_property = zend_closure_write_property;
+	closure_handlers.read_property = zend_closure_read_property;
+	closure_handlers.get_property_ptr_ptr = zend_closure_get_property_ptr_ptr;
+	closure_handlers.has_property = zend_closure_has_property;
+	closure_handlers.unset_property = zend_closure_unset_property;
 	closure_handlers.compare_objects = zend_closure_compare_objects;
 	closure_handlers.cast_object = zend_closure_cast_object_tostring;
 	closure_handlers.clone_obj = NULL;
