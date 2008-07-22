@@ -86,7 +86,7 @@ static int oci_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 	}
 	
 	if (S->einfo.errmsg) {
-		efree(S->einfo.errmsg);
+		pefree(S->einfo.errmsg, stmt->dbh->is_persistent);
 		S->einfo.errmsg = NULL;
 	}
 	
