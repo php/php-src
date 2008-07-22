@@ -28,12 +28,11 @@
 typedef struct {
 	zend_object     zo;
 
-	// ICU collator
-	UCollator*      ucoll;
-
 	// error handling
 	intl_error  err;
 
+	// ICU collator
+	UCollator*      ucoll;
 } Collator_object;
 
 #define COLLATOR_ERROR(co) (co)->err

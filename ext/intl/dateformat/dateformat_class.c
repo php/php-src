@@ -39,17 +39,17 @@ static void IntlDateFormatter_object_dtor(void *object, zend_object_handle handl
 /* {{{ IntlDateFormatter_objects_free */
 void IntlDateFormatter_object_free( zend_object *object TSRMLS_DC )
 {
-	IntlDateFormatter_object* mfo = (IntlDateFormatter_object*)object;
+	IntlDateFormatter_object* dfo = (IntlDateFormatter_object*)object;
 
-	zend_object_std_dtor( &mfo->zo TSRMLS_CC );
+	zend_object_std_dtor( &dfo->zo TSRMLS_CC );
 
-	dateformat_data_free( &mfo->datef_data TSRMLS_CC );
+	dateformat_data_free( &dfo->datef_data TSRMLS_CC );
 	
-	if( mfo->timezone_id ){
-		efree(mfo->timezone_id);
+	if( dfo->timezone_id ){
+		efree(dfo->timezone_id);
 	}
 
-	efree( mfo );
+	efree( dfo );
 }
 /* }}} */
 

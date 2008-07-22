@@ -59,7 +59,7 @@ foreach($args as $arg) {
 ?>
 --EXPECTF--
 Warning: MessageFormatter::__construct() expects exactly 2 parameters, 0 given in %s on line %d
-'__construct: unable to parse input params: U_ILLEGAL_ARGUMENT_ERROR'
+'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: msgfmt_create() expects exactly 2 parameters, 0 given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
@@ -68,34 +68,34 @@ Warning: MessageFormatter::create() expects exactly 2 parameters, 0 given in %s 
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: MessageFormatter::__construct() expects exactly 2 parameters, 1 given in %s on line %d
-'__construct: unable to parse input params: U_ILLEGAL_ARGUMENT_ERROR'
+'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: msgfmt_create() expects exactly 2 parameters, 1 given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: MessageFormatter::create() expects exactly 2 parameters, 1 given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
-'__construct: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
-'__construct: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: MessageFormatter::__construct() expects parameter 1 to be string, array given in %s on line %d
-'__construct: unable to parse input params: U_ILLEGAL_ARGUMENT_ERROR'
+'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: MessageFormatter::create() expects parameter 1 to be string, array given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: msgfmt_create() expects parameter 1 to be string, array given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
-'__construct: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
-'__construct: message formatter creation failed: U_UNMATCHED_BRACES'
+'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
 'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
-'__construct: Error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'
+'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
+'msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'
 'msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'
 'msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'

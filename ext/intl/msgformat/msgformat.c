@@ -25,12 +25,8 @@
 #include "msgformat_class.h"
 #include "intl_convert.h"
 
-/* {{{ proto MessageFormatter MesssageFormatter::create( string $locale, string $pattern )
- * Create formatter. }}} */
-/* {{{ proto MessageFormatter msgfmt_create( string $locale, string $pattern )
- * Create formatter.
- */
-PHP_FUNCTION( msgfmt_create )
+/* {{{ */
+static msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS) 
 {
 	char*       locale;
 	char*       pattern;
@@ -39,39 +35,26 @@ PHP_FUNCTION( msgfmt_create )
 	int         spattern_len = 0;
 	zval*       object;
 	MessageFormatter_object* mfo;
-
 	intl_error_reset( NULL TSRMLS_CC );
 
+	object = return_value;
 	// Parse parameters.
 	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "ss",
 		&locale, &locale_len, &pattern, &pattern_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"msgfmt_create: unable to parse input parameters", 0 TSRMLS_CC );
-
+		zval_dtor(return_value);
 		RETURN_NULL();
 	}
 
 	INTL_CHECK_LOCALE_LEN(locale_len);
-	// Create a MessageFormatter object and save the ICU formatter into it.
-	if( ( object = getThis() ) == NULL )
-		object = return_value;
-
-	if( Z_TYPE_P( object ) != IS_OBJECT )
-		object_init_ex( object, MessageFormatter_ce_ptr );
-
 	MSG_FORMAT_METHOD_FETCH_OBJECT;
 
 	// Convert pattern (if specified) to UTF-16.
 	if(pattern && pattern_len) {
 		intl_convert_utf8_to_utf16(&spattern, &spattern_len, pattern, pattern_len, &INTL_DATA_ERROR_CODE(mfo));
-		if( U_FAILURE( INTL_DATA_ERROR_CODE((mfo)) ) )
-		{
-			intl_error_set( NULL, INTL_DATA_ERROR_CODE( mfo ),
-				"msgfmt_create: error converting pattern to UTF-16", 0 TSRMLS_CC );
-			zval_dtor(return_value);
-			RETURN_NULL();
-		}
+		INTL_CTOR_CHECK_STATUS(mfo, "msgfmt_create: error converting pattern to UTF-16");
 	} else {
 		spattern_len = 0;
 		spattern = NULL;
@@ -81,11 +64,8 @@ PHP_FUNCTION( msgfmt_create )
 		locale = INTL_G(default_locale);
 	}
 
-	if(msfgotmat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo)) != SUCCESS) {
-		intl_error_set( NULL, U_INVALID_FORMAT_ERROR,
-			"msgfmt_create: error converting pattern to quote-friendly format", 0 TSRMLS_CC );
-		zval_dtor(return_value);
-		RETURN_NULL();
+	if(msgformat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo)) != SUCCESS) {
+		INTL_CTOR_CHECK_STATUS(mfo, "msgfmt_create: error converting pattern to quote-friendly format");
 	}
 
 	(mfo)->mf_data.orig_format = estrndup(pattern, pattern_len);
@@ -98,13 +78,19 @@ PHP_FUNCTION( msgfmt_create )
 		efree(spattern);
 	}
 
-	if( U_FAILURE( INTL_DATA_ERROR_CODE((mfo)) ) )
-	{
-		intl_error_set( NULL, INTL_DATA_ERROR_CODE( mfo ),
-			"msgfmt_create: message formatter creation failed", 0 TSRMLS_CC );
-		zval_dtor(return_value);
-		RETURN_NULL();
-	}
+	INTL_CTOR_CHECK_STATUS(mfo, "msgfmt_create: message formatter creation failed");
+}
+/* }}} */
+
+/* {{{ proto MessageFormatter MesssageFormatter::create( string $locale, string $pattern )
+ * Create formatter. }}} */
+/* {{{ proto MessageFormatter msgfmt_create( string $locale, string $pattern )
+ * Create formatter.
+ */
+PHP_FUNCTION( msgfmt_create )
+{
+	object_init_ex( return_value, MessageFormatter_ce_ptr );
+	msgfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
@@ -113,80 +99,8 @@ PHP_FUNCTION( msgfmt_create )
  */
 PHP_METHOD( MessageFormatter, __construct )
 {
-	char*       locale;
-	char*       pattern;
-	int         locale_len, pattern_len = 0;
-	UChar*      spattern     = NULL;
-	int         spattern_len = 0;
-	zval*       object;
-	MessageFormatter_object* mfo;
-
-	intl_error_reset( NULL TSRMLS_CC );
-
-	object = getThis();
-
-	// Parse parameters.
-	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "ss",
-		&locale, &locale_len, &pattern, &pattern_len ) == FAILURE )
-	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"__construct: unable to parse input params", 0 TSRMLS_CC );
-		zval_dtor(object);
-		ZVAL_NULL(object);
-		RETURN_NULL();
-	}
-
-	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, object);
-	mfo = (MessageFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
-
-	intl_error_reset( &mfo->mf_data.error TSRMLS_CC );
-
-	// Convert pattern to UTF-16.
-	if(pattern && pattern_len) {
-		intl_convert_utf8_to_utf16(&spattern, &spattern_len, pattern, pattern_len, &INTL_DATA_ERROR_CODE(mfo));
-		if( U_FAILURE( INTL_DATA_ERROR_CODE((mfo)) ) )
-		{
-			intl_error_set( NULL, INTL_DATA_ERROR_CODE( mfo ),
-				"__construct: Error converting pattern to UTF-16", 0 TSRMLS_CC );
-			zval_dtor(object);
-			ZVAL_NULL(object);
-			RETURN_NULL();
-		}
-	} else {
-		spattern_len = 0;
-		spattern = NULL;
-	}
-
-	if(locale_len == 0) {
-		locale = INTL_G(default_locale);
-	}
-
-	if(msfgotmat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo)) != SUCCESS) {
-		intl_error_set( NULL, U_INVALID_FORMAT_ERROR,
-			"__construct: error converting pattern to quote-friendly format", 0 TSRMLS_CC );
-		zval_dtor(object);
-		ZVAL_NULL(object);
-		RETURN_NULL();
-	}
-
-	(mfo)->mf_data.orig_format = estrndup(pattern, pattern_len);
-	(mfo)->mf_data.orig_format_len = pattern_len;
-	
-	// Create an ICU message formatter.
-	MSG_FORMAT_OBJECT(mfo) = umsg_open(spattern, spattern_len, locale, NULL, &INTL_DATA_ERROR_CODE(mfo));
-
-	if(spattern && spattern_len) {
-		efree(spattern);
-	}
-
-	if( U_FAILURE( INTL_DATA_ERROR_CODE((mfo)) ) )
-	{
-		intl_error_set( NULL, INTL_DATA_ERROR_CODE(mfo),
-			"__construct: message formatter creation failed", 0 TSRMLS_CC );
-		zval_dtor(object);
-		ZVAL_NULL(object);
-		RETURN_NULL();
-	}
+	return_value = getThis();
+	msgfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
