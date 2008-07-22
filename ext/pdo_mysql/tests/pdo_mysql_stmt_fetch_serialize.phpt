@@ -125,27 +125,27 @@ myclass::serialize()
 Unserializing the previously serialized object...
 myclass::unserialize('Data from serialize')
 object(myclass)#4 (1) {
-  ["myprotected":protected]=>
-  string(19) "a protected propery"
+  [u"myprotected":protected]=>
+  unicode(19) "a protected propery"
 }
 
 Using PDO::FETCH_CLASS|PDO::FETCH_SERIALIZE to fetch the object from DB and unserialize it...
 myclass::__set(myobj, 'C:7:"myclass":19:{Data from serialize}')
 myclass::__construct(PDO shall not call __construct())
 object(myclass)#%d (2) {
-  ["myprotected":protected]=>
-  string(19) "a protected propery"
-  ["myobj"]=>
-  string(38) "C:7:"myclass":19:{Data from serialize}"
+  [u"myprotected":protected]=>
+  unicode(19) "a protected propery"
+  [u"myobj"]=>
+  unicode(38) "C:7:"myclass":19:{Data from serialize}"
 }
 
 Using PDO::FETCH_CLASS to fetch the object from DB and unserialize it...
 myclass::__set(myobj, 'C:7:"myclass":19:{Data from serialize}')
 myclass::__construct(PDO shall call __construct())
 object(myclass)#%d (2) {
-  ["myprotected":protected]=>
-  string(19) "a protected propery"
-  ["myobj"]=>
-  string(38) "C:7:"myclass":19:{Data from serialize}"
+  [u"myprotected":protected]=>
+  unicode(19) "a protected propery"
+  [u"myobj"]=>
+  unicode(38) "C:7:"myclass":19:{Data from serialize}"
 }
 done!

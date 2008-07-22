@@ -75,11 +75,11 @@ array(1) {
   [0]=>
   array(3) {
     ["?"]=>
-    string(2) "id"
+    unicode(2) "id"
     ["id"]=>
     int(1)
     ["label"]=>
-    string(4) "row1"
+    unicode(4) "row1"
   }
 }
 done!

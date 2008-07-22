@@ -83,13 +83,13 @@ myclass::__set(null, -NULL-) 3
 myclass::__set(, -''-) 4
 myclass::__construct(2, 3): 12 / 4
 object(myclass)#%d (4) {
-  ["set_calls":"myclass":private]=>
+  [u"set_calls":u"myclass":private]=>
   int(4)
-  ["grp":protected]=>
+  [u"grp":protected]=>
   NULL
-  ["id"]=>
+  [u"id"]=>
   string(1) "3"
-  ["null"]=>
+  [u"null"]=>
   NULL
 }
 done!

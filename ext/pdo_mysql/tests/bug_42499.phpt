@@ -72,7 +72,7 @@ array(1) {
   [0]=>
   array(1) {
     ["_id"]=>
-    string(1) "a"
+    unicode(1) "a"
   }
 }
 
