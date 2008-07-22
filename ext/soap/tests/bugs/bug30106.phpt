@@ -19,7 +19,7 @@ class LocalSoapClient extends SoapClient {
 		$this->server->addFunction("getContinentList"); 
   }
 
-  function __doRequest($request, $location, $action, $version) {
+  function __doRequest($request, $location, $action, $version, $one_way = 0) {
   	echo $request;
     ob_start();
     $this->server->handle($request);
