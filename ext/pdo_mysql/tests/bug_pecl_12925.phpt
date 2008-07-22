@@ -56,7 +56,7 @@ array(1) {
   [0]=>
   array(1) {
     ["id"]=>
-    string(1) "c"
+    unicode(1) "c"
   }
 }
 done!

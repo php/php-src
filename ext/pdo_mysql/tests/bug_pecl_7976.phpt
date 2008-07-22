@@ -74,14 +74,14 @@ array(1) {
   [0]=>
   array(1) {
     ["_one"]=>
-    string(1) "1"
+    unicode(1) "1"
   }
 }
 array(1) {
   [0]=>
   array(1) {
     ["_one"]=>
-    string(1) "1"
+    unicode(1) "1"
   }
 }
 done!

@@ -85,7 +85,7 @@ $db = MySQLPDOTest::factory();
 	$db->exec(sprintf('DROP TABLE IF EXISTS test'));
 	print "done!";
 --EXPECTF--
-string(15) "PDO::CASE_LOWER"
+unicode(15) "PDO::CASE_LOWER"
 array(2) {
   [0]=>
   array(6) {
