@@ -31,16 +31,15 @@
 #include "php_json.h"
 
 static PHP_MINFO_FUNCTION(json);
-
 static PHP_FUNCTION(json_encode);
 static PHP_FUNCTION(json_decode);
 
 static const char digits[] = "0123456789abcdef";
 
-#define PHP_JSON_HEX_TAG       (1<<0)
-#define PHP_JSON_HEX_AMP       (1<<1)
-#define PHP_JSON_HEX_APOS      (1<<2)
-#define PHP_JSON_HEX_QUOT      (1<<3)
+#define PHP_JSON_HEX_TAG	(1<<0)
+#define PHP_JSON_HEX_AMP	(1<<1)
+#define PHP_JSON_HEX_APOS	(1<<2)
+#define PHP_JSON_HEX_QUOT	(1<<3)
 
 /* {{{ arginfo */
 static
@@ -60,9 +59,9 @@ ZEND_END_ARG_INFO()
  * Every user visible function must have an entry in json_functions[].
  */
 static const function_entry json_functions[] = {
-    PHP_FE(json_encode, arginfo_json_encode)
-    PHP_FE(json_decode, arginfo_json_decode)
-    {NULL, NULL, NULL}  /* Must be the last line in json_functions[] */
+	PHP_FE(json_encode, arginfo_json_encode)
+	PHP_FE(json_decode, arginfo_json_decode)
+	{NULL, NULL, NULL}
 };
 /* }}} */
 
@@ -83,19 +82,19 @@ static PHP_MINIT_FUNCTION(json)
  */
 zend_module_entry json_module_entry = {
 #if ZEND_MODULE_API_NO >= 20010901
-    STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER,
 #endif
-    "json",
-    json_functions,
-    PHP_MINIT(json),
-    NULL,
-    NULL,
-    NULL,
-    PHP_MINFO(json),
+	"json",
+	json_functions,
+	PHP_MINIT(json),
+	NULL,
+	NULL,
+	NULL,
+	PHP_MINFO(json),
 #if ZEND_MODULE_API_NO >= 20010901
-    PHP_JSON_VERSION,
+	PHP_JSON_VERSION,
 #endif
-    STANDARD_MODULE_PROPERTIES
+	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 
@@ -107,155 +106,152 @@ ZEND_GET_MODULE(json)
  */
 static PHP_MINFO_FUNCTION(json)
 {
-    php_info_print_table_start();
-    php_info_print_table_row(2, "json support", "enabled");
-    php_info_print_table_row(2, "json version", PHP_JSON_VERSION);
-    php_info_print_table_end();
+	php_info_print_table_start();
+	php_info_print_table_row(2, "json support", "enabled");
+	php_info_print_table_row(2, "json version", PHP_JSON_VERSION);
+	php_info_print_table_end();
 }
 /* }}} */
 
 static void json_encode_r(smart_str *buf, zval *val, int options TSRMLS_DC);
 static void json_escape_string(smart_str *buf, char *s, int len, int options TSRMLS_DC);
 
-static int json_determine_array_type(zval **val TSRMLS_DC)  /* {{{ */
+static int json_determine_array_type(zval **val TSRMLS_DC) /* {{{ */
 {
-    int i;
-    HashTable *myht = HASH_OF(*val);
+	int i;
+	HashTable *myht = HASH_OF(*val);
 
-    i = myht ? zend_hash_num_elements(myht) : 0;
-    if (i > 0) {
-        char *key;
-        ulong index, idx;
-        uint key_len;
-        HashPosition pos;
+	i = myht ? zend_hash_num_elements(myht) : 0;
+	if (i > 0) {
+		char *key;
+		ulong index, idx;
+		uint key_len;
+		HashPosition pos;
 
-        zend_hash_internal_pointer_reset_ex(myht, &pos);
-        idx = 0;
-        for (;; zend_hash_move_forward_ex(myht, &pos)) {
-            i = zend_hash_get_current_key_ex(myht, &key, &key_len, &index, 0, &pos);
-            if (i == HASH_KEY_NON_EXISTANT)
-                break;
+		zend_hash_internal_pointer_reset_ex(myht, &pos);
+		idx = 0;
+		for (;; zend_hash_move_forward_ex(myht, &pos)) {
+			i = zend_hash_get_current_key_ex(myht, &key, &key_len, &index, 0, &pos);
+			if (i == HASH_KEY_NON_EXISTANT)
+				break;
 
-            if (i == HASH_KEY_IS_STRING) {
-                return 1;
-            } else {
-                if (index != idx) {
-                    return 1;
-                }
-            }
-            idx++;
-        }
-    }
+			if (i == HASH_KEY_IS_STRING) {
+				return 1;
+			} else {
+				if (index != idx) {
+					return 1;
+				}
+			}
+			idx++;
+		}
+	}
 
-    return 0;
+	return 0;
 }
 /* }}} */
 
-static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC) { /* {{{ */
-    int i, r;
-    HashTable *myht;
+static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC) /* {{{ */
+{
+	int i, r;
+	HashTable *myht;
 
-    if (Z_TYPE_PP(val) == IS_ARRAY) {
-        myht = HASH_OF(*val);
-        r = json_determine_array_type(val TSRMLS_CC);
-    } else {
-        myht = Z_OBJPROP_PP(val);
-        r = 1;
-    }
+	if (Z_TYPE_PP(val) == IS_ARRAY) {
+		myht = HASH_OF(*val);
+		r = json_determine_array_type(val TSRMLS_CC);
+	} else {
+		myht = Z_OBJPROP_PP(val);
+		r = 1;
+	}
 
-    if (myht && myht->nApplyCount > 1) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
-        smart_str_appendl(buf, "null", 4);
-        return;
-    }
+	if (myht && myht->nApplyCount > 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
+		smart_str_appendl(buf, "null", 4);
+		return;
+	}
 
-    if (r == 0)
-    {
-        smart_str_appendc(buf, '[');
-    }
-    else
-    {
-        smart_str_appendc(buf, '{');
-    }
+	if (r == 0) {
+		smart_str_appendc(buf, '[');
+	} else {
+		smart_str_appendc(buf, '{');
+	}
 
-    i = myht ? zend_hash_num_elements(myht) : 0;
-    if (i > 0) {
-        char *key;
-        zval **data;
-        ulong index;
-        uint key_len;
-        HashPosition pos;
-        HashTable *tmp_ht;
-        int need_comma = 0;
+	i = myht ? zend_hash_num_elements(myht) : 0;
 
-        zend_hash_internal_pointer_reset_ex(myht, &pos);
-        for (;; zend_hash_move_forward_ex(myht, &pos)) {
-            i = zend_hash_get_current_key_ex(myht, &key, &key_len, &index, 0, &pos);
-            if (i == HASH_KEY_NON_EXISTANT)
-                break;
+	if (i > 0)
+	{
+		char *key;
+		zval **data;
+		ulong index;
+		uint key_len;
+		HashPosition pos;
+		HashTable *tmp_ht;
+		int need_comma = 0;
 
-            if (zend_hash_get_current_data_ex(myht, (void **) &data, &pos) == SUCCESS) {
-                tmp_ht = HASH_OF(*data);
-                if (tmp_ht) {
-                    tmp_ht->nApplyCount++;
-                }
+		zend_hash_internal_pointer_reset_ex(myht, &pos);
+		for (;; zend_hash_move_forward_ex(myht, &pos)) {
+			i = zend_hash_get_current_key_ex(myht, &key, &key_len, &index, 0, &pos);
+			if (i == HASH_KEY_NON_EXISTANT)
+				break;
 
-                if (r == 0) {
-                    if (need_comma) {
-                        smart_str_appendc(buf, ',');
-                    } else {
-                        need_comma = 1;
-                    }
+			if (zend_hash_get_current_data_ex(myht, (void **) &data, &pos) == SUCCESS) {
+				tmp_ht = HASH_OF(*data);
+				if (tmp_ht) {
+					tmp_ht->nApplyCount++;
+				}
+
+				if (r == 0) {
+					if (need_comma) {
+						smart_str_appendc(buf, ',');
+					} else {
+						need_comma = 1;
+					}
  
-                    json_encode_r(buf, *data, options TSRMLS_CC);
-                } else if (r == 1) {
-                    if (i == HASH_KEY_IS_STRING) {
-                        if (key[0] == '\0' && Z_TYPE_PP(val) == IS_OBJECT) {
-                            /* Skip protected and private members. */
-                            continue;
-                        }
+					json_encode_r(buf, *data, options TSRMLS_CC);
+				} else if (r == 1) {
+					if (i == HASH_KEY_IS_STRING) {
+						if (key[0] == '\0' && Z_TYPE_PP(val) == IS_OBJECT) {
+							/* Skip protected and private members. */
+							continue;
+						}
 
-                        if (need_comma) {
-                            smart_str_appendc(buf, ',');
-                        } else {
-                            need_comma = 1;
-                        }
+						if (need_comma) {
+							smart_str_appendc(buf, ',');
+						} else {
+							need_comma = 1;
+						}
 
-                        json_escape_string(buf, key, key_len - 1, options TSRMLS_CC);
-                        smart_str_appendc(buf, ':');
+						json_escape_string(buf, key, key_len - 1, options TSRMLS_CC);
+						smart_str_appendc(buf, ':');
 
-                        json_encode_r(buf, *data, options TSRMLS_CC);
-                    } else {
-                        if (need_comma) {
-                            smart_str_appendc(buf, ',');
-                        } else {
-                            need_comma = 1;
-                        }
-                        
-                        smart_str_appendc(buf, '"');
-                        smart_str_append_long(buf, (long) index);
-                        smart_str_appendc(buf, '"');
-                        smart_str_appendc(buf, ':');
+						json_encode_r(buf, *data, options TSRMLS_CC);
+					} else {
+						if (need_comma) {
+							smart_str_appendc(buf, ',');
+						} else {
+							need_comma = 1;
+						}
 
-                        json_encode_r(buf, *data, options TSRMLS_CC);
-                    }
-                }
+						smart_str_appendc(buf, '"');
+						smart_str_append_long(buf, (long) index);
+						smart_str_appendc(buf, '"');
+						smart_str_appendc(buf, ':');
 
-                if (tmp_ht) {
-                    tmp_ht->nApplyCount--;
-                }
-            }
-        }
-    }
+						json_encode_r(buf, *data, options TSRMLS_CC);
+					}
+				}
 
-    if (r == 0)
-    {
-        smart_str_appendc(buf, ']');
-    }
-    else
-    {
-        smart_str_appendc(buf, '}');
-    }
+				if (tmp_ht) {
+					tmp_ht->nApplyCount--;
+				}
+			}
+		}
+	}
+
+	if (r == 0) {
+		smart_str_appendc(buf, ']');
+	} else {
+		smart_str_appendc(buf, '}');
+	}
 }
 /* }}} */
 
@@ -263,202 +259,186 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 
 static void json_escape_string(smart_str *buf, char *s, int len, int options TSRMLS_DC) /* {{{ */
 {
-    int pos = 0;
-    unsigned short us;
-    unsigned short *utf16;
+	int pos = 0;
+	unsigned short us;
+	unsigned short *utf16;
 
-    if (len == 0)
-    {
-        smart_str_appendl(buf, "\"\"", 2);
-        return;
-    }
+	if (len == 0) {
+		smart_str_appendl(buf, "\"\"", 2);
+		return;
+	}
 
-    utf16 = (unsigned short *) safe_emalloc(len, sizeof(unsigned short), 0);
+	utf16 = (unsigned short *) safe_emalloc(len, sizeof(unsigned short), 0);
 
-    len = utf8_to_utf16(utf16, s, len);
-    if (len <= 0)
-    {
-        if (utf16)
-        {
-            efree(utf16);
-        }
-		if(len < 0) {
-			if(!PG(display_errors)) {
+	len = utf8_to_utf16(utf16, s, len);
+	if (len <= 0) {
+		if (utf16) {
+			efree(utf16);
+		}
+		if (len < 0) {
+			if (!PG(display_errors)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid UTF-8 sequence in argument");
 			}
-	        smart_str_appendl(buf, "null", 4);
+			smart_str_appendl(buf, "null", 4);
 		} else {
-	        smart_str_appendl(buf, "\"\"", 2);
+			smart_str_appendl(buf, "\"\"", 2);
 		}
-        return;
-    }
+		return;
+	}
 
-    smart_str_appendc(buf, '"');
+	smart_str_appendc(buf, '"');
 
-    while(pos < len)
-    {
-        us = utf16[pos++];
+	while (pos < len)
+	{
+		us = utf16[pos++];
 
-        switch (us)
-        {
-            case '"':
-                {
-                    if (options & PHP_JSON_HEX_QUOT) {
-                        smart_str_appendl(buf, "\\u0022", 6);
-                    } else {
-                        smart_str_appendl(buf, "\\\"", 2);
-                    }
-                }
-                break;
-            case '\\':
-                {
-                    smart_str_appendl(buf, "\\\\", 2);
-                }
-                break;
-            case '/':
-                {
-                    smart_str_appendl(buf, "\\/", 2);
-                }
-                break;
-            case '\b':
-                {
-                    smart_str_appendl(buf, "\\b", 2);
-                }
-                break;
-            case '\f':
-                {
-                    smart_str_appendl(buf, "\\f", 2);
-                }
-                break;
-            case '\n':
-                {
-                    smart_str_appendl(buf, "\\n", 2);
-                }
-                break;
-            case '\r':
-                {
-                    smart_str_appendl(buf, "\\r", 2);
-                }
-                break;
-            case '\t':
-                {
-                    smart_str_appendl(buf, "\\t", 2);
-                }
-                break;
-            case '<':
-                {
-                    if (options & PHP_JSON_HEX_TAG) {
-                        smart_str_appendl(buf, "\\u003C", 6);
-                    } else {
-                        smart_str_appendc(buf, '<');
-                    }
-                }
-                break;
-            case '>':
-                {
-                    if (options & PHP_JSON_HEX_TAG) {
-                        smart_str_appendl(buf, "\\u003E", 6);
-                    } else {
-                        smart_str_appendc(buf, '>');
-                    }
-                }
-                break;
-            case '&':
-                {
-                    if (options & PHP_JSON_HEX_AMP) {
-                        smart_str_appendl(buf, "\\u0026", 6);
-                    } else {
-                        smart_str_appendc(buf, '&');
-                    }
-                }
-                break;
-            case '\'':
-                {
-                    if (options & PHP_JSON_HEX_APOS) {
-                        smart_str_appendl(buf, "\\u0027", 6);
-                    } else {
-                        smart_str_appendc(buf, '\'');
-                    }
-                }
-                break;
-            default:
-                {
-                    if (us >= ' ' && (us & 127) == us)
-                    {
-                        smart_str_appendc(buf, (unsigned char) us);
-                    }
-                    else
-                    {
-                        smart_str_appendl(buf, "\\u", 2);
-                        us = REVERSE16(us);
+		switch (us)
+		{
+			case '"':
+				if (options & PHP_JSON_HEX_QUOT) {
+					smart_str_appendl(buf, "\\u0022", 6);
+				} else {
+					smart_str_appendl(buf, "\\\"", 2);
+				}
+				break;
 
-                        smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
-                        us >>= 4;
-                        smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
-                        us >>= 4;
-                        smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
-                        us >>= 4;
-                        smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
-                    }
-                }
-                break;
-        }
-    }
+			case '\\':
+				smart_str_appendl(buf, "\\\\", 2);
+				break;
 
-    smart_str_appendc(buf, '"');
-    efree(utf16);
+			case '/':
+				smart_str_appendl(buf, "\\/", 2);
+				break;
+
+			case '\b':
+				smart_str_appendl(buf, "\\b", 2);
+				break;
+
+			case '\f':
+				smart_str_appendl(buf, "\\f", 2);
+				break;
+
+			case '\n':
+				smart_str_appendl(buf, "\\n", 2);
+				break;
+
+			case '\r':
+				smart_str_appendl(buf, "\\r", 2);
+				break;
+
+			case '\t':
+				smart_str_appendl(buf, "\\t", 2);
+				break;
+
+			case '<':
+				if (options & PHP_JSON_HEX_TAG) {
+					smart_str_appendl(buf, "\\u003C", 6);
+				} else {
+					smart_str_appendc(buf, '<');
+				}
+				break;
+
+			case '>':
+				if (options & PHP_JSON_HEX_TAG) {
+					smart_str_appendl(buf, "\\u003E", 6);
+				} else {
+					smart_str_appendc(buf, '>');
+				}
+				break;
+
+			case '&':
+				if (options & PHP_JSON_HEX_AMP) {
+					smart_str_appendl(buf, "\\u0026", 6);
+				} else {
+					smart_str_appendc(buf, '&');
+				}
+				break;
+
+			case '\'':
+				if (options & PHP_JSON_HEX_APOS) {
+					smart_str_appendl(buf, "\\u0027", 6);
+				} else {
+					smart_str_appendc(buf, '\'');
+				}
+				break;
+
+			default:
+				if (us >= ' ' && (us & 127) == us) {
+					smart_str_appendc(buf, (unsigned char) us);
+				} else {
+					smart_str_appendl(buf, "\\u", 2);
+					us = REVERSE16(us);
+
+					smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
+					us >>= 4;
+					smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
+					us >>= 4;
+					smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
+					us >>= 4;
+					smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
+				}
+				break;
+		}
+	}
+
+	smart_str_appendc(buf, '"');
+	efree(utf16);
 }
 /* }}} */
 
 static void json_encode_r(smart_str *buf, zval *val, int options TSRMLS_DC) /* {{{ */
 {
-    switch (Z_TYPE_P(val)) {
-        case IS_NULL:
-            smart_str_appendl(buf, "null", 4);
-            break;
-        case IS_BOOL:
-            if (Z_BVAL_P(val))
-            {
-                smart_str_appendl(buf, "true", 4);
-            }
-            else
-            {
-                smart_str_appendl(buf, "false", 5);
-            }
-            break;
-        case IS_LONG:
-	    smart_str_append_long(buf, Z_LVAL_P(val));
-            break;
-        case IS_DOUBLE:
-            {
-                char *d = NULL;
-                int len;
-                double dbl = Z_DVAL_P(val);
+	switch (Z_TYPE_P(val))
+	{
+		case IS_NULL:
+			smart_str_appendl(buf, "null", 4);
+			break;
 
-                if (!zend_isinf(dbl) && !zend_isnan(dbl)) {
-			len = spprintf(&d, 0, "%.*k", (int) EG(precision), dbl);
-			smart_str_appendl(buf, d, len);
-			efree(d);
-                } else {
-                    zend_error(E_WARNING, "[json] (json_encode_r) double %.9g does not conform to the JSON spec, encoded as 0.", dbl);
-                    smart_str_appendc(buf, '0');
-                }
-            }
-            break;
-        case IS_STRING:
-            json_escape_string(buf, Z_STRVAL_P(val), Z_STRLEN_P(val), options TSRMLS_CC);
-            break;
-        case IS_ARRAY:
-        case IS_OBJECT:
-            json_encode_array(buf, &val, options TSRMLS_CC);
-            break;
-        default:
-            zend_error(E_WARNING, "[json] (json_encode_r) type is unsupported, encoded as null.");
-            smart_str_appendl(buf, "null", 4);
-            break;
-    }
+		case IS_BOOL:
+			if (Z_BVAL_P(val)) {
+				smart_str_appendl(buf, "true", 4);
+			} else {
+				smart_str_appendl(buf, "false", 5);
+			}
+			break;
 
-    return;
+		case IS_LONG:
+			smart_str_append_long(buf, Z_LVAL_P(val));
+			break;
+
+		case IS_DOUBLE:
+			{
+				char *d = NULL;
+				int len;
+				double dbl = Z_DVAL_P(val);
+
+				if (!zend_isinf(dbl) && !zend_isnan(dbl)) {
+					len = spprintf(&d, 0, "%.*k", (int) EG(precision), dbl);
+					smart_str_appendl(buf, d, len);
+					efree(d);
+				} else {
+					zend_error(E_WARNING, "[json] (json_encode_r) double %.9g does not conform to the JSON spec, encoded as 0.", dbl);
+					smart_str_appendc(buf, '0');
+				}
+			}
+			break;
+
+		case IS_STRING:
+			json_escape_string(buf, Z_STRVAL_P(val), Z_STRLEN_P(val), options TSRMLS_CC);
+			break;
+
+		case IS_ARRAY:
+		case IS_OBJECT:
+			json_encode_array(buf, &val, options TSRMLS_CC);
+			break;
+
+		default:
+			zend_error(E_WARNING, "[json] (json_encode_r) type is unsupported, encoded as null.");
+			smart_str_appendl(buf, "null", 4);
+			break;
+	}
+
+	return;
 }
 /* }}} */
 
@@ -466,19 +446,19 @@ static void json_encode_r(smart_str *buf, zval *val, int options TSRMLS_DC) /* {
    Returns the JSON representation of a value */
 static PHP_FUNCTION(json_encode)
 {
-    zval *parameter;
-    smart_str buf = {0};
-    long options = 0;
+	zval *parameter;
+	smart_str buf = {0};
+	long options = 0;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &parameter, &options) == FAILURE) {
-        return;
-    }
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &parameter, &options) == FAILURE) {
+		return;
+	}
 
-    json_encode_r(&buf, parameter, options TSRMLS_CC);
+	json_encode_r(&buf, parameter, options TSRMLS_CC);
 
-    ZVAL_STRINGL(return_value, buf.c, buf.len, 1);
+	ZVAL_STRINGL(return_value, buf.c, buf.len, 1);
 
-    smart_str_free(&buf);
+	smart_str_free(&buf);
 }
 /* }}} */
 
@@ -486,76 +466,70 @@ static PHP_FUNCTION(json_encode)
    Decodes the JSON representation into a PHP value */
 static PHP_FUNCTION(json_decode)
 {
-    char *parameter;
-    int parameter_len, utf16_len;
-    zend_bool assoc = 0; /* return JS objects as PHP objects by default */
-    zval *z;
-    unsigned short *utf16;
+	char *str;
+	int str_len, utf16_len;
+	zend_bool assoc = 0; /* return JS objects as PHP objects by default */
+	zval *z;
+	unsigned short *utf16;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &parameter, &parameter_len, &assoc) == FAILURE) {
-        return;
-    }
-
-    if (!parameter_len)
-    {
-        RETURN_NULL();
-    }
-
-    utf16 = (unsigned short *) safe_emalloc((parameter_len+1), sizeof(unsigned short), 1);
-
-    utf16_len = utf8_to_utf16(utf16, parameter, parameter_len);
-    if (utf16_len <= 0)
-    {
-        if (utf16)
-        {
-            efree(utf16);
-        }
-
-        RETURN_NULL();
-    }
-
-    ALLOC_INIT_ZVAL(z);
-    if (JSON_parser(z, utf16, utf16_len, assoc TSRMLS_CC))
-    {
-        *return_value = *z;
-
-        FREE_ZVAL(z);
-        efree(utf16);
-    }
-    else
-    {
-	double d;
-	int type;
-	long p;
-
-        zval_dtor(z);
-        FREE_ZVAL(z);
-        efree(utf16);
-
-	if (parameter_len == 4) {
-		if (!strcasecmp(parameter, "null")) {
-			RETURN_NULL();
-		} else if (!strcasecmp(parameter, "true")) {
-			RETURN_BOOL(1);
-		}
-	} else if (parameter_len == 5 && !strcasecmp(parameter, "false")) {
-		RETURN_BOOL(0);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &str, &str_len, &assoc) == FAILURE) {
+		return;
 	}
-	if ((type = is_numeric_string(parameter, parameter_len, &p, &d, 0)) != 0) {
-		if (type == IS_LONG) {
-			RETURN_LONG(p);
-		} else if (type == IS_DOUBLE) {
-			RETURN_DOUBLE(d);
-		}
-	}
-	if (parameter_len > 1 && *parameter == '"' && parameter[parameter_len-1] == '"') {
-	        RETURN_STRINGL(parameter+1, parameter_len-2, 1);
-	} else if (*parameter == '{' || *parameter == '[') { /* invalid JSON string */
+
+	if (!str_len) {
 		RETURN_NULL();
-	} else {
-	        RETURN_STRINGL(parameter, parameter_len, 1);
 	}
-    }
+
+	utf16 = (unsigned short *) safe_emalloc((str_len+1), sizeof(unsigned short), 1);
+
+	utf16_len = utf8_to_utf16(utf16, str, str_len);
+	if (utf16_len <= 0) {
+		if (utf16) {
+			efree(utf16);
+		}
+		RETURN_NULL();
+	}
+
+	ALLOC_INIT_ZVAL(z);
+	if (JSON_parser(z, utf16, utf16_len, assoc TSRMLS_CC)) {
+		*return_value = *z;
+		FREE_ZVAL(z);
+		efree(utf16);
+	}
+	else
+	{
+		double d;
+		int type;
+		long p;
+
+		zval_dtor(z);
+		FREE_ZVAL(z);
+		efree(utf16);
+
+		if (str_len == 4) {
+			if (!strcasecmp(str, "null")) {
+				RETURN_NULL();
+			} else if (!strcasecmp(str, "true")) {
+				RETURN_BOOL(1);
+			}
+		} else if (str_len == 5 && !strcasecmp(str, "false")) {
+			RETURN_BOOL(0);
+		}
+		if ((type = is_numeric_string(str, str_len, &p, &d, 0)) != 0) {
+			if (type == IS_LONG) {
+				RETURN_LONG(p);
+			} else if (type == IS_DOUBLE) {
+				RETURN_DOUBLE(d);
+			}
+		}
+		if (str_len > 1 && *str == '"' && str[str_len-1] == '"') {
+			RETURN_STRINGL(str+1, str_len-2, 1);
+		} else if (*str == '{' || *str == '[') { /* invalid JSON string */
+			RETURN_NULL();
+		} else {
+			RETURN_STRINGL(str, str_len, 1);
+		}
+	}
 }
 /* }}} */
 
