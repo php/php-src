@@ -555,10 +555,6 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		php_info_print_table_row(2, "Configure Command", CONFIGURE_COMMAND );
 #endif
 
-#ifdef PHP_WIN32
-		php_info_print_table_row(2, "Windows Compiler and Version", PHP_WINAPI_COMPILER );
-#endif
-
 		if (sapi_module.pretty_name) {
 			php_info_print_table_row(2, "Server API", sapi_module.pretty_name );
 		}
