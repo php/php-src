@@ -516,6 +516,10 @@ static void cli_register_file_handles(TSRMLS_D) /* {{{ */
 		if (s_err) php_stream_close(s_err);
 		return;
 	}
+	
+	s_in->flags  |= PHP_STREAM_FLAG_FCLOSE;
+	s_out->flags |= PHP_STREAM_FLAG_FCLOSE;
+	s_err->flags |= PHP_STREAM_FLAG_FCLOSE;
 
 #if PHP_DEBUG
 	/* do not close stdout and stderr */
