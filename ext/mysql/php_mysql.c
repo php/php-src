@@ -1005,6 +1005,15 @@ PHP_FUNCTION(mysql_close)
 	
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 
+#ifdef MYSQL_USE_MYSQLND
+	{
+		int tmp;
+		if ((mysql = zend_list_find(Z_RESVAL_PP(mysql_link), &tmp)) && tmp == le_plink) {
+			mysqlnd_end_psession(mysql->conn);
+		}
+	}
+#endif
+
 	if (id==-1) { /* explicit resource number */
 		PHPMY_UNBUFFERED_QUERY_CHECK();
 		zend_list_delete(Z_RESVAL_PP(mysql_link));
