@@ -1842,7 +1842,7 @@ PHP_FUNCTION(strrpos)
 		p = haystack + offset;
 		e = haystack + haystack_len - needle_len;
 	} else {
-		if (-offset > haystack_len) {
+		if (-offset > haystack_len || offset < -INT_MAX) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
