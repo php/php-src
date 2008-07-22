@@ -1,3 +1,629 @@
+2008-07-21  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/tests/error_reporting01.phpt
+      ZendEngine2/tests/error_reporting02.phpt
+      ZendEngine2/tests/error_reporting03.phpt
+      ZendEngine2/tests/error_reporting04.phpt
+      ZendEngine2/tests/error_reporting05.phpt
+      ZendEngine2/tests/error_reporting06.phpt
+      ZendEngine2/tests/error_reporting07.phpt
+      ZendEngine2/tests/error_reporting08.phpt
+      ZendEngine2/tests/error_reporting09.phpt
+      ZendEngine2/tests/error_reporting10.phpt:
+      - Fixed tests (patch by Lars Strojny)
+
+    * (PHP_5_3)
+      Makefile.global:
+      MFH:
+      - Removed ntest and utest
+      - Removed -U flag to `make test' just to test once each test
+
+2008-07-21  Lars Strojny  <lars@strojny.net>
+
+    * ext/standard/tests/general_functions/parse_ini_booleans.phpt
+      tests/run-test/test005.phpt
+      tests/run-test/test008a.phpt:
+      Fixing tests broken by the introduction E_USER_DEPRECATED
+
+2008-07-21  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      Tidy language and order
+
+2008-07-21  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      main/safe_mode.c:
+      - MFB: Fixed securities issue detailed in CVE-2008-2665 and CVE-2008-2666.
+        (patch by Christian Hoffmann)
+
+    * (PHP_5_3)
+      main/safe_mode.c:
+      - Fixed securities issue detailed in CVE-2008-2665 and CVE-2008-2666.
+        (patch by Christian Hoffmann)
+
+2008-07-21  Scott MacVicar  <scott@macvicar.net>
+
+    * ZendEngine2/zend_operators.h
+      ZendEngine2/zend_operators.h:
+      Optimisation for zend_memnstr when the needle is only a single character.
+      (Patch by Michal Dziemianko - GSoC08)
+
+2008-07-21  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/pdo_oci/oci_statement.c
+      ext/pdo_oci/tests/bug41996.phpt:
+      - SAB: #41996, Problem accessing Oracle ROWID (Martin Jansen)
+
+    * ext/pdo_oci/oci_statement.c
+      ext/pdo_oci/tests/bug41996.phpt
+      ext/pdo_oci/tests/bug41996.phpt:
+      - #41996, Problem accessing Oracle ROWID (Martin Jansen)
+
+2008-07-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      Added check for small ZEMD_MM_SEG_SIZE
+
+2008-07-21  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * win32/build/confutils.js:
+      - MFB: sync changes with 5.3...
+
+2008-07-21  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/ereg/regex/regex.h:
+      - Visibility (bug #45564)
+
+2008-07-21  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/pcre/config.w32
+      ext/reflection/config.w32
+      ext/spl/config.w32:
+      Sync with 5_3 changes
+
+2008-07-21  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * run-tests.php:
+      Sync with PHP 5.3 (might not work 100% yet due to huge inconsistencies AND
+      bugs in PHP
+
+2008-07-21  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/streams/stream_get_meta_data_file_error.phpt
+      ext/standard/tests/streams/stream_set_timeout_error.phpt:
+      - Fixed tests
+
+    * ext/standard/streamsfuncs.c:
+      - MFB: New parameter parsing API
+
+2008-07-21  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      NEWS
+      ext/pdo/pdo_stmt.c
+      ext/pdo/php_pdo_driver.h
+      ext/pdo/tests/bug_34630.phpt
+      ext/pdo/tests/bug_39656.phpt
+      ext/pdo/tests/bug_43130.phpt
+      ext/pdo/tests/bug_43663.phpt
+      ext/pdo/tests/bug_44159.phpt
+      ext/pdo/tests/pdo.inc
+      ext/pdo/tests/pdo_017.phpt
+      ext/pdo/tests/pdo_025.phpt
+      ext/pdo/tests/pdo_test.inc
+      ext/pdo_mysql/CREDITS
+      ext/pdo_mysql/config.m4
+      ext/pdo_mysql/config.w32
+      ext/pdo_mysql/mysql_driver.c
+      ext/pdo_mysql/mysql_statement.c
+      ext/pdo_mysql/pdo_mysql.c
+      ext/pdo_mysql/php_pdo_mysql.h
+      ext/pdo_mysql/php_pdo_mysql_int.h
+      ext/pdo_mysql/tests/README
+      ext/pdo_mysql/tests/bug_33689.phpt
+      ext/pdo_mysql/tests/bug_39858.phpt
+      ext/pdo_mysql/tests/bug_41125.phpt
+      ext/pdo_mysql/tests/bug_41997.phpt
+      ext/pdo_mysql/tests/bug_42499.phpt
+      ext/pdo_mysql/tests/bug_43371.phpt
+      ext/pdo_mysql/tests/bug_44454.phpt
+      ext/pdo_mysql/tests/bug_44707.phpt
+      ext/pdo_mysql/tests/bug_45120.phpt
+      ext/pdo_mysql/tests/bug_pecl_12925.phpt
+      ext/pdo_mysql/tests/bug_pecl_7976.phpt
+      ext/pdo_mysql/tests/config.inc
+      ext/pdo_mysql/tests/mysql_pdo_test.inc
+      ext/pdo_mysql/tests/pdo_mysql___construct.phpt
+      ext/pdo_mysql/tests/pdo_mysql___construct_ini.phpt
+      ext/pdo_mysql/tests/pdo_mysql___construct_options.phpt
+      ext/pdo_mysql/tests/pdo_mysql___construct_options_libmysql.phpt
+      ext/pdo_mysql/tests/pdo_mysql___construct_uri.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_autocommit.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_case.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_client_version.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_connection_status.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_driver_name.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_errmode.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_fetch_table_names.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_init_command.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_max_buffer_size.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_oracle_nulls.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_prefetch.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_server_info.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_server_version.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_statement_class.phpt
+      ext/pdo_mysql/tests/pdo_mysql_begintransaction.phpt
+      ext/pdo_mysql/tests/pdo_mysql_bit.phpt
+      ext/pdo_mysql/tests/pdo_mysql_class_constants.phpt
+      ext/pdo_mysql/tests/pdo_mysql_commit.phpt
+      ext/pdo_mysql/tests/pdo_mysql_errorcode.phpt
+      ext/pdo_mysql/tests/pdo_mysql_errorinfo.phpt
+      ext/pdo_mysql/tests/pdo_mysql_exec.phpt
+      ext/pdo_mysql/tests/pdo_mysql_exec_ddl.phpt
+      ext/pdo_mysql/tests/pdo_mysql_exec_load_data.phpt
+      ext/pdo_mysql/tests/pdo_mysql_exec_select.phpt
+      ext/pdo_mysql/tests/pdo_mysql_fetch_both.phpt
+      ext/pdo_mysql/tests/pdo_mysql_get_attribute.phpt
+      ext/pdo_mysql/tests/pdo_mysql_interface.phpt
+      ext/pdo_mysql/tests/pdo_mysql_last_insert_id.phpt
+      ext/pdo_mysql/tests/pdo_mysql_pconnect.phpt
+      ext/pdo_mysql/tests/pdo_mysql_phpinfo.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_emulated.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_emulated_anonymous.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_emulated_placeholder_everywhere.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_match_against.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native_clear_error.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native_column.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native_dup_named_placeholder.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native_mixed_style.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native_named_placeholder.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native_placeholder_everywhere.phpt
+      ext/pdo_mysql/tests/pdo_mysql_rollback.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_bindcolumn.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_bindparam.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_bindparam_types.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_bindvalue.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_blobfromsteam.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_blobs.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_closecursor.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_closecursor_empty.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_columncount.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_errorcode.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_errorinfo.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_fetch_non_select.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_fetch_serialize.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_fetch_serialize_simple.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_fetchobject.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_getcolumnmeta.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_multiquery.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_nextrowset.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_rowcount.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_unbuffered_2050.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_variable_columncount.phpt
+      ext/pdo_mysql/tests/pdo_mysql_subclass.phpt
+      ext/pdo_mysql/tests/pdo_mysql_types.phpt
+      ext/pdo_mysql/tests/pdo_mysql_types_zerofill.phpt
+      ext/pdo_mysql/tests/skipif.inc
+      ext/pdo_mysql/tests/table.inc:
+      MFH: Add mysqlnd support for PDO_mysql, fixes at least bug#41997,#42499,
+           pecl#12794, pecl#12401
+      
+
+    * ext/pdo/pdo_stmt.c
+      ext/pdo/php_pdo_driver.h
+      ext/pdo_mysql/CREDITS
+      ext/pdo_mysql/config.m4
+      ext/pdo_mysql/config.w32
+      ext/pdo_mysql/mysql_driver.c
+      ext/pdo_mysql/mysql_statement.c
+      ext/pdo_mysql/pdo_mysql.c
+      ext/pdo_mysql/php_pdo_mysql.h
+      ext/pdo_mysql/php_pdo_mysql_int.h
+      ext/pdo_mysql/tests/README
+      ext/pdo_mysql/tests/README
+      ext/pdo_mysql/tests/bug_33689.phpt
+      ext/pdo_mysql/tests/bug_37445.phpt
+      ext/pdo_mysql/tests/bug_39483.phpt
+      ext/pdo_mysql/tests/bug_39858.phpt
+      ext/pdo_mysql/tests/bug_39858.phpt
+      ext/pdo_mysql/tests/bug_41125.phpt
+      ext/pdo_mysql/tests/bug_41125.phpt
+      ext/pdo_mysql/tests/bug_41698.phpt
+      ext/pdo_mysql/tests/bug_41997.phpt
+      ext/pdo_mysql/tests/bug_41997.phpt
+      ext/pdo_mysql/tests/bug_42499.phpt
+      ext/pdo_mysql/tests/bug_42499.phpt
+      ext/pdo_mysql/tests/bug_43371.phpt
+      ext/pdo_mysql/tests/bug_43371.phpt
+      ext/pdo_mysql/tests/bug_44454.phpt
+      ext/pdo_mysql/tests/bug_44454.phpt
+      ext/pdo_mysql/tests/bug_44707.phpt
+      ext/pdo_mysql/tests/bug_44707.phpt
+      ext/pdo_mysql/tests/bug_45120.phpt
+      ext/pdo_mysql/tests/bug_45120.phpt
+      ext/pdo_mysql/tests/bug_pecl_12925.phpt
+      ext/pdo_mysql/tests/bug_pecl_12925.phpt
+      ext/pdo_mysql/tests/bug_pecl_7976.phpt
+      ext/pdo_mysql/tests/bug_pecl_7976.phpt
+      ext/pdo_mysql/tests/config.inc
+      ext/pdo_mysql/tests/last_insert_id.phpt
+      ext/pdo_mysql/tests/mysql_pdo_test.inc
+      ext/pdo_mysql/tests/mysql_pdo_test.inc
+      ext/pdo_mysql/tests/pdo_mysql___construct.phpt
+      ext/pdo_mysql/tests/pdo_mysql___construct.phpt
+      ext/pdo_mysql/tests/pdo_mysql___construct_ini.phpt
+      ext/pdo_mysql/tests/pdo_mysql___construct_ini.phpt
+      ext/pdo_mysql/tests/pdo_mysql___construct_options.phpt
+      ext/pdo_mysql/tests/pdo_mysql___construct_options.phpt
+      ext/pdo_mysql/tests/pdo_mysql___construct_options_libmysql.phpt
+      ext/pdo_mysql/tests/pdo_mysql___construct_options_libmysql.phpt
+      ext/pdo_mysql/tests/pdo_mysql___construct_uri.phpt
+      ext/pdo_mysql/tests/pdo_mysql___construct_uri.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_autocommit.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_autocommit.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_case.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_case.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_client_version.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_client_version.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_connection_status.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_connection_status.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_driver_name.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_driver_name.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_errmode.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_errmode.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_fetch_table_names.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_fetch_table_names.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_init_command.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_init_command.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_max_buffer_size.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_max_buffer_size.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_oracle_nulls.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_oracle_nulls.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_prefetch.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_prefetch.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_server_info.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_server_info.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_server_version.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_server_version.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_statement_class.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_statement_class.phpt
+      ext/pdo_mysql/tests/pdo_mysql_begintransaction.phpt
+      ext/pdo_mysql/tests/pdo_mysql_begintransaction.phpt
+      ext/pdo_mysql/tests/pdo_mysql_bit.phpt
+      ext/pdo_mysql/tests/pdo_mysql_bit.phpt
+      ext/pdo_mysql/tests/pdo_mysql_class_constants.phpt
+      ext/pdo_mysql/tests/pdo_mysql_class_constants.phpt
+      ext/pdo_mysql/tests/pdo_mysql_commit.phpt
+      ext/pdo_mysql/tests/pdo_mysql_commit.phpt
+      ext/pdo_mysql/tests/pdo_mysql_errorcode.phpt
+      ext/pdo_mysql/tests/pdo_mysql_errorcode.phpt
+      ext/pdo_mysql/tests/pdo_mysql_errorinfo.phpt
+      ext/pdo_mysql/tests/pdo_mysql_errorinfo.phpt
+      ext/pdo_mysql/tests/pdo_mysql_exec.phpt
+      ext/pdo_mysql/tests/pdo_mysql_exec.phpt
+      ext/pdo_mysql/tests/pdo_mysql_exec_ddl.phpt
+      ext/pdo_mysql/tests/pdo_mysql_exec_ddl.phpt
+      ext/pdo_mysql/tests/pdo_mysql_exec_load_data.phpt
+      ext/pdo_mysql/tests/pdo_mysql_exec_load_data.phpt
+      ext/pdo_mysql/tests/pdo_mysql_exec_select.phpt
+      ext/pdo_mysql/tests/pdo_mysql_exec_select.phpt
+      ext/pdo_mysql/tests/pdo_mysql_fetch_both.phpt
+      ext/pdo_mysql/tests/pdo_mysql_fetch_both.phpt
+      ext/pdo_mysql/tests/pdo_mysql_get_attribute.phpt
+      ext/pdo_mysql/tests/pdo_mysql_get_attribute.phpt
+      ext/pdo_mysql/tests/pdo_mysql_interface.phpt
+      ext/pdo_mysql/tests/pdo_mysql_interface.phpt
+      ext/pdo_mysql/tests/pdo_mysql_last_insert_id.phpt
+      ext/pdo_mysql/tests/pdo_mysql_last_insert_id.phpt
+      ext/pdo_mysql/tests/pdo_mysql_pconnect.phpt
+      ext/pdo_mysql/tests/pdo_mysql_pconnect.phpt
+      ext/pdo_mysql/tests/pdo_mysql_phpinfo.phpt
+      ext/pdo_mysql/tests/pdo_mysql_phpinfo.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_emulated.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_emulated.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_emulated_anonymous.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_emulated_anonymous.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_emulated_placeholder_everywhere.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_emulated_placeholder_everywhere.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_match_against.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_match_against.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native_clear_error.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native_clear_error.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native_column.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native_column.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native_dup_named_placeholder.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native_dup_named_placeholder.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native_mixed_style.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native_mixed_style.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native_named_placeholder.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native_named_placeholder.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native_placeholder_everywhere.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native_placeholder_everywhere.phpt
+      ext/pdo_mysql/tests/pdo_mysql_rollback.phpt
+      ext/pdo_mysql/tests/pdo_mysql_rollback.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_bindcolumn.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_bindcolumn.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_bindparam.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_bindparam.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_bindparam_types.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_bindparam_types.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_bindvalue.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_bindvalue.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_blobfromsteam.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_blobfromsteam.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_blobs.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_blobs.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_closecursor.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_closecursor.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_closecursor_empty.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_closecursor_empty.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_columncount.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_columncount.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_errorcode.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_errorcode.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_errorinfo.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_errorinfo.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_fetch_non_select.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_fetch_non_select.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_fetch_serialize.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_fetch_serialize.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_fetch_serialize_simple.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_fetch_serialize_simple.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_fetchobject.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_fetchobject.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_getcolumnmeta.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_getcolumnmeta.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_multiquery.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_multiquery.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_nextrowset.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_nextrowset.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_rowcount.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_rowcount.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_unbuffered_2050.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_unbuffered_2050.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_variable_columncount.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_variable_columncount.phpt
+      ext/pdo_mysql/tests/pdo_mysql_subclass.phpt
+      ext/pdo_mysql/tests/pdo_mysql_subclass.phpt
+      ext/pdo_mysql/tests/pdo_mysql_types.phpt
+      ext/pdo_mysql/tests/pdo_mysql_types.phpt
+      ext/pdo_mysql/tests/pdo_mysql_types_zerofill.phpt
+      ext/pdo_mysql/tests/pdo_mysql_types_zerofill.phpt
+      ext/pdo_mysql/tests/pecl_bug_5200.phpt
+      ext/pdo_mysql/tests/pecl_bug_5780.phpt
+      ext/pdo_mysql/tests/pecl_bug_5802.phpt
+      ext/pdo_mysql/tests/show_tables.phpt
+      ext/pdo_mysql/tests/skipif.inc
+      ext/pdo_mysql/tests/skipif.inc
+      ext/pdo_mysql/tests/table.inc
+      ext/pdo_mysql/tests/table.inc:
+      - Add mysqlnd support for PDO_mysql, fixes at least bug#41997,#42499,
+        pecl#12794, pecl#12401
+      
+
+2008-07-21  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      NEWS:
+      Pure, old-fashion CVS grown, bug fix.
+
+    * ext/mysql/config.m4
+      ext/mysql/php_mysql.c
+      ext/mysql/php_mysql_structs.h
+      ext/mysqli/mysqli.c
+      ext/mysqli/php_mysqli_structs.h
+      ext/pdo_mysql/config.m4
+      ext/pdo_mysql/mysql_driver.c
+      ext/pdo_mysql/pdo_mysql.c
+      ext/pdo_mysql/php_pdo_mysql_int.h:
+      MFB :
+      
+      Fix for bug#45179 --with-mysql-sock fails to compile & work
+      Now --with-mysql-sock controls all mysql extensions. If provided it will
+      be
+      the default value as it was set in php.ini . php.ini will override it for
+      ext/mysql and ext/mysqli but not for pdo_mysql
+
+2008-07-21  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/sockets/tests/unixloop.phpt:
+      - forgot to commit to HEAD
+
+2008-07-21  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysql/config.m4
+      ext/mysql/php_mysql.c
+      ext/mysql/php_mysql_structs.h
+      ext/mysqli/mysqli.c
+      ext/mysqli/php_mysqli_structs.h
+      ext/pdo_mysql/config.m4
+      ext/pdo_mysql/mysql_driver.c
+      ext/pdo_mysql/pdo_mysql.c
+      ext/pdo_mysql/php_pdo_mysql_int.h:
+      Fix for bug#45179 --with-mysql-sock fails to compile & work
+      Now --with-mysql-sock controls all mysql extensions. If provided it will
+      be
+      the default value as it was set in php.ini . php.ini will override it for
+      ext/mysql and ext/mysqli but not for pdo_mysql
+
+2008-07-21  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/bug33771.phpt
+      ZendEngine2/tests/error_reporting01.phpt
+      ZendEngine2/tests/error_reporting02.phpt
+      ZendEngine2/tests/error_reporting03.phpt
+      ZendEngine2/tests/error_reporting04.phpt
+      ZendEngine2/tests/error_reporting05.phpt
+      ZendEngine2/tests/error_reporting06.phpt
+      ZendEngine2/tests/error_reporting07.phpt
+      ZendEngine2/tests/error_reporting08.phpt
+      ZendEngine2/tests/error_reporting09.phpt
+      ZendEngine2/tests/error_reporting10.phpt
+      ext/standard/tests/general_functions/parse_ini_basic.phpt
+      ext/standard/tests/general_functions/parse_ini_booleans.phpt
+      tests/run-test/test005.phpt
+      tests/run-test/test008a.phpt:
+      Fix tests (patch by Lars)
+
+2008-07-21  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      ext/standard/file.c:
+      - Forward compatibility.
+
+2008-07-21  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/unicode/unicode.c:
+      - Removed unicode_semantics()
+
+2008-07-21  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/basic_functions.c:
+      MFB: The rest of the fix too for previous commit
+
+2008-07-21  Kalle Sommer Nielsen  <kalle@zesix.com>
+
+    * ext/standard/tests/network/getmxrr.phpt:
+      Forgot to fix title
+
+2008-07-21  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      run-tests.php:
+      - More stupid WS etc fixes. Plus the missing help text place holders for
+      Steph to fill up..
+
+    * run-tests.php:
+      - This is still available in HEAD, so keep the override here!
+
+    * (PHP_5_3)
+      acinclude.m4:
+      MFH: sync acinclude.m4 (leave the PHP_PROG_LEX for BC!)
+
+    * acinclude.m4:
+      - Sync to PHP_5_3
+
+    * (PHP_5_3)
+      configure.in:
+      MFH: sync configure.in with HEAD (where applicable)
+
+    * configure.in
+      ext/standard/basic_functions.c:
+      MFB:- Fixed bug #40079 (php_get_current_user() not thread safe).
+
+    * ext/standard/basic_functions.c:
+      ws
+
+2008-07-21  Steph Fox  <steph.fox@virgin.net>
+
+    * main/.cvsignore
+      main/config.w32.h:
+      MFB Removed generated file (no longer used for .dsp builds)
+
+2008-07-21  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_3)
+      run-tests.php:
+      Run the tests with E_STRICT again
+
+2008-07-21  Steph Fox  <steph.fox@virgin.net>
+
+    * ext/standard/info.c:
+      MFB Make compiler/architecture info potentially cross-platform
+
+    * win32/build/DSP.README
+      win32/build/Makefile
+      win32/build/block.template.dsw
+      win32/build/buildconf.js
+      win32/build/config.w32
+      win32/build/confutils.js
+      win32/build/cvsclean.js
+      win32/build/projectgen.js
+      win32/build/template.dsp
+      win32/build/template.dsw:
+      MFH project file generation + a few small fixes made along the way
+
+2008-07-21  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_3)
+      NEWS
+      php.ini-dist
+      php.ini-recommended
+      run-tests.php
+      ZendEngine2/zend.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_errors.h
+      ZendEngine2/tests/015.phpt
+      main/main.c:
+      MFH: Add E_USER_DEPRECATED (patch by Lars Strojny)
+
+    * ext/libxml/libxml.c:
+      Fix proto
+
+    * php.ini-dist
+      php.ini-recommended
+      run-tests.php
+      ZendEngine2/zend.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_errors.h
+      ZendEngine2/tests/015.phpt
+      main/main.c:
+      Add E_USER_DEPRECATED (patch by Lars Strojny)
+
+2008-07-21  Kalle Sommer Nielsen  <kalle@zesix.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/network/getmxrr.phpt:
+      Fix test on Windows
+
+2008-07-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * main/fopen_wrappers.c
+      main/fopen_wrappers.c
+      main/main.c
+      main/main.c
+      sapi/caudium/caudium.c
+      sapi/caudium/caudium.c:
+      Fixed chdir() into requested file directory inconsistencies
+
+2008-07-21  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/intl/config.m4:
+      ws + style fix
+
+2008-07-21  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_vm_gen.php:
+      - MFH Little debug hack to allow printing vm function
+
+    * ZendEngine2/zend_vm_gen.php:
+      - Little debug hack to allow printing vm function
+
+2008-07-21  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/tests/bug45529.phpt:
+      - Fixed test.
+
+2008-07-21  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/hash/config.m4:
+      this should be "=", not "=="
+
 2008-07-20  Derick Rethans  <php@derickrethans.nl>
 
     * ext/date/tests/bug44562.phpt:

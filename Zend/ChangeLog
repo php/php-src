@@ -1,3 +1,71 @@
+2008-07-21  Felipe Pena  <felipensp@gmail.com>
+
+    * tests/error_reporting01.phpt
+      tests/error_reporting02.phpt
+      tests/error_reporting03.phpt
+      tests/error_reporting04.phpt
+      tests/error_reporting05.phpt
+      tests/error_reporting06.phpt
+      tests/error_reporting07.phpt
+      tests/error_reporting08.phpt
+      tests/error_reporting09.phpt
+      tests/error_reporting10.phpt:
+      - Fixed tests (patch by Lars Strojny)
+
+2008-07-21  Scott MacVicar  <scott@macvicar.net>
+
+    * zend_operators.h
+      zend_operators.h:
+      Optimisation for zend_memnstr when the needle is only a single character.
+      (Patch by Michal Dziemianko - GSoC08)
+
+2008-07-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_alloc.c
+      zend_alloc.c
+      zend_alloc.c:
+      Added check for small ZEMD_MM_SEG_SIZE
+
+2008-07-21  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_3)
+      tests/bug33771.phpt
+      tests/error_reporting01.phpt
+      tests/error_reporting02.phpt
+      tests/error_reporting03.phpt
+      tests/error_reporting04.phpt
+      tests/error_reporting05.phpt
+      tests/error_reporting06.phpt
+      tests/error_reporting07.phpt
+      tests/error_reporting08.phpt
+      tests/error_reporting09.phpt
+      tests/error_reporting10.phpt:
+      Fix tests (patch by Lars)
+
+    * (PHP_5_3)
+      zend.c
+      zend_builtin_functions.c
+      zend_constants.c
+      zend_errors.h
+      tests/015.phpt:
+      MFH: Add E_USER_DEPRECATED (patch by Lars Strojny)
+
+    * zend.c
+      zend_builtin_functions.c
+      zend_constants.c
+      zend_errors.h
+      tests/015.phpt:
+      Add E_USER_DEPRECATED (patch by Lars Strojny)
+
+2008-07-21  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      zend_vm_gen.php:
+      - MFH Little debug hack to allow printing vm function
+
+    * zend_vm_gen.php:
+      - Little debug hack to allow printing vm function
+
 2008-07-20  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * (PHP_5_3)
