@@ -232,6 +232,8 @@ PHP                                                                        NEWS
   (Andrey)
 - Fixed bug #44336 (Improve pcre UTF-8 string matching performance).
   (frode at coretrek dot com, Nuno)
+- Fixed bug #44301 (Segfault when an exception is thrown on persistent connections).
+  (Martin Jansen)
 - Fixed bug #44257 (timelib_tz_lookup_table must use float for gmtoffset). 
   (Derick, iuri dot fiedoruk at hp dot com).
 - Fixed bug #44214 (Crash using preg_replace_callback() and global variable).
