@@ -5,7 +5,7 @@ Bug #32941 (Sending structured exception kills a php)
 --FILE--
 <?php
 class TestSoapClient extends SoapClient {
-  function __doRequest($request, $location, $action, $version) {
+  function __doRequest($request, $location, $action, $version, $one_way = 0) {
   	return <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <soapenv:Envelope
