@@ -69,7 +69,7 @@ msgformat_data* msgformat_data_create( TSRMLS_D )
 }
 /* }}} */
 
-int msfgotmat_fix_quotes(UChar **spattern, uint32_t *spattern_len, UErrorCode *ec, int *free_pattern) 
+int msgformat_fix_quotes(UChar **spattern, uint32_t *spattern_len, UErrorCode *ec, int *free_pattern) 
 {
 	*free_pattern = 0;
 	if(*spattern && *spattern_len && u_strchr(*spattern, (UChar)'\'')) {

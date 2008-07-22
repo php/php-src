@@ -1,5 +1,7 @@
 --TEST--
 normalize()
+--INI--
+unicode.runtime_encoding="utf-8"
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 --FILE--

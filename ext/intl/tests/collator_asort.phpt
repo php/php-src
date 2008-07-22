@@ -34,10 +34,7 @@ function sort_arrays( $locale, $test_arrays, $sort_flag = Collator::SORT_REGULAR
                     "\n Result: " . dump_str( $res_val );
 
 		// Preppend test signature to output string
-        if( unicode_semantics() )
              $md5 = md5( unicode_encode( $res_dump, 'utf-8' ) );
-        else
-             $md5 = md5( $res_dump );
 
         global $test_num;
         

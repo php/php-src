@@ -1,5 +1,7 @@
 --TEST--
 grapheme()
+--INI--
+unicode.runtime_encoding="utf-8"
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 --FILE--
@@ -9,35 +11,37 @@ grapheme()
  * Test grapheme functions (procedural only)
  */
 
+function b_urlencode($s) { return urlencode((binary)$s); }
+
 function ut_main()
 {
 	$res_str = '';
 
-	$char_a_diaeresis = "\xC3\xA4";	// 'LATIN SMALL LETTER A WITH DIAERESIS' (U+00E4)
-	$char_a_ring = "\xC3\xA5";		// 'LATIN SMALL LETTER A WITH RING ABOVE' (U+00E5)
-	$char_o_diaeresis = "\xC3\xB6";    // 'LATIN SMALL LETTER O WITH DIAERESIS' (U+00F6)
-	$char_O_diaeresis = "\xC3\x96";    // 'LATIN CAPITAL LETTER O WITH DIAERESIS' (U+00D6)
+	$char_a_diaeresis = b"\xC3\xA4";	// 'LATIN SMALL LETTER A WITH DIAERESIS' (U+00E4)
+	$char_a_ring = b"\xC3\xA5";		// 'LATIN SMALL LETTER A WITH RING ABOVE' (U+00E5)
+	$char_o_diaeresis = b"\xC3\xB6";    // 'LATIN SMALL LETTER O WITH DIAERESIS' (U+00F6)
+	$char_O_diaeresis = b"\xC3\x96";    // 'LATIN CAPITAL LETTER O WITH DIAERESIS' (U+00D6)
 
-	$char_angstrom_sign = "\xE2\x84\xAB"; // 'ANGSTROM SIGN' (U+212B)
-	$char_A_ring = "\xC3\x85";	// 'LATIN CAPITAL LETTER A WITH RING ABOVE' (U+00C5)
+	$char_angstrom_sign = b"\xE2\x84\xAB"; // 'ANGSTROM SIGN' (U+212B)
+	$char_A_ring = b"\xC3\x85";	// 'LATIN CAPITAL LETTER A WITH RING ABOVE' (U+00C5)
 
-	$char_ohm_sign = "\xE2\x84\xA6";	// 'OHM SIGN' (U+2126)
-	$char_omega = "\xCE\xA9";  // 'GREEK CAPITAL LETTER OMEGA' (U+03A9)
+	$char_ohm_sign = b"\xE2\x84\xA6";	// 'OHM SIGN' (U+2126)
+	$char_omega = b"\xCE\xA9";  // 'GREEK CAPITAL LETTER OMEGA' (U+03A9)
 
-	$char_combining_ring_above = "\xCC\x8A";  // 'COMBINING RING ABOVE' (U+030A)
+	$char_combining_ring_above = b"\xCC\x8A";  // 'COMBINING RING ABOVE' (U+030A)
 
-	$char_fi_ligature = "\xEF\xAC\x81";  // 'LATIN SMALL LIGATURE FI' (U+FB01)
+	$char_fi_ligature = b"\xEF\xAC\x81";  // 'LATIN SMALL LIGATURE FI' (U+FB01)
 
-	$char_long_s_dot = "\xE1\xBA\x9B";	// 'LATIN SMALL LETTER LONG S WITH DOT ABOVE' (U+1E9B)
+	$char_long_s_dot = b"\xE1\xBA\x9B";	// 'LATIN SMALL LETTER LONG S WITH DOT ABOVE' (U+1E9B)
 	
 	// the word 'hindi' using Devanagari characters:
-	$hindi = "\xe0\xa4\xb9\xe0\xa4\xbf\xe0\xa4\xa8\xe0\xa5\x8d\xe0\xa4\xa6\xe0\xa5\x80";
+	$hindi = b"\xe0\xa4\xb9\xe0\xa4\xbf\xe0\xa4\xa8\xe0\xa5\x8d\xe0\xa4\xa6\xe0\xa5\x80";
 
-	$char_a_ring_nfd = "a\xCC\x8A";
-	$char_A_ring_nfd = "A\xCC\x8A";
-	$char_o_diaeresis_nfd = "o\xCC\x88";
-	$char_O_diaeresis_nfd = "O\xCC\x88";
-	$char_diaeresis = "\xCC\x88";
+	$char_a_ring_nfd = b"a\xCC\x8A";
+	$char_A_ring_nfd = b"A\xCC\x8A";
+	$char_o_diaeresis_nfd = b"o\xCC\x88";
+	$char_O_diaeresis_nfd = b"O\xCC\x88";
+	$char_diaeresis = b"\xCC\x88";
 
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_strlen($string) {}' . "\n\n";
@@ -95,8 +99,8 @@ function ut_main()
 	);
 
 	foreach( $tests as $test ) {
-	    $arg1 = urlencode($test[1]);
-	    $arg0 = urlencode($test[0]);
+	    $arg1 = b_urlencode($test[1]);
+	    $arg0 = b_urlencode($test[0]);
 		$res_str .= "find \"$arg1\" in \"$arg0\" - grapheme_strpos";
 		if ( 3 == count( $test ) ) {
 			$result = grapheme_strpos($test[0], $test[1]);
@@ -159,8 +163,8 @@ function ut_main()
 	);
 
 	foreach( $tests as $test ) {
-	    $arg1 = urlencode($test[1]);
-	    $arg0 = urlencode($test[0]);
+	    $arg1 = b_urlencode($test[1]);
+	    $arg0 = b_urlencode($test[0]);
 		$res_str .= "find \"$arg1\" in \"$arg0\" - grapheme_stripos";
 		if ( 3 == count( $test ) ) {
 			$result = grapheme_stripos($test[0], $test[1]);
@@ -225,8 +229,8 @@ function ut_main()
 	);
 
 	foreach( $tests as $test ) {
-	    $arg1 = urlencode($test[1]);
-	    $arg0 = urlencode($test[0]);
+	    $arg1 = b_urlencode($test[1]);
+	    $arg0 = b_urlencode($test[0]);
 		$res_str .= "find \"$arg1\" in \"$arg0\" - grapheme_strrpos";
 		if ( 3 == count( $test ) ) {
 			$result = grapheme_strrpos($test[0], $test[1]);
@@ -290,8 +294,8 @@ function ut_main()
 	);
 
 	foreach( $tests as $test ) {
-	    $arg1 = urlencode($test[1]);
-	    $arg0 = urlencode($test[0]);
+	    $arg1 = b_urlencode($test[1]);
+	    $arg0 = b_urlencode($test[0]);
 		$res_str .= "find \"$arg1\" in \"$arg0\" - grapheme_strripos";
 		if ( 3 == count( $test ) ) {
 			$result = grapheme_strripos($test[0], $test[1]);
@@ -386,7 +390,7 @@ function ut_main()
 	);
 
 	foreach( $tests as $test ) {
-	    $arg0 = urlencode($test[0]);
+	    $arg0 = b_urlencode($test[0]);
 		$res_str .= "substring of \"$arg0\" from \"$test[1]\" - grapheme_substr";
 		if ( 3 == count( $test ) ) {
 			$result = grapheme_substr($test[0], $test[1]);
@@ -400,9 +404,9 @@ function ut_main()
 			$res_str .= 'false';
 		}
 		else {
-			$res_str .= urlencode($result);
+			$res_str .= b_urlencode($result);
 		}
-		$res_str .= " == " . urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
+		$res_str .= " == " . b_urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
 	}
 	
 
@@ -450,8 +454,8 @@ function ut_main()
 	);
 
 	foreach( $tests as $test ) {
-	    $arg1 = urlencode($test[1]);
-	    $arg0 = urlencode($test[0]);
+	    $arg1 = b_urlencode($test[1]);
+	    $arg0 = b_urlencode($test[0]);
 		$res_str .= "find \"$arg1\" in \"$arg0\" - grapheme_strstr";
 		if ( 3 == count( $test ) ) {
 			$result = grapheme_strstr($test[0], $test[1]);
@@ -465,9 +469,9 @@ function ut_main()
 			$res_str .= 'false';
 		}
 		else {
-			$res_str .= urlencode($result);
+			$res_str .= b_urlencode($result);
 		}
-		$res_str .= " == " . urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
+		$res_str .= " == " . b_urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
 	}
 	
 
@@ -515,8 +519,8 @@ function ut_main()
 	);
 
 	foreach( $tests as $test ) {
-	    $arg1 = urlencode($test[1]);
-	    $arg0 = urlencode($test[0]);
+	    $arg1 = b_urlencode($test[1]);
+	    $arg0 = b_urlencode($test[0]);
 		$res_str .= "find \"$arg1\" in \"$arg0\" - grapheme_stristr";
 		if ( 3 == count( $test ) ) {
 			$result = grapheme_stristr($test[0], $test[1]);
@@ -530,9 +534,9 @@ function ut_main()
 			$res_str .= 'false';
 		}
 		else {
-			$res_str .= urlencode($result);
+			$res_str .= b_urlencode($result);
 		}
-		$res_str .= " == " . urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
+		$res_str .= " == " . b_urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
 	}
 	
 
@@ -592,7 +596,7 @@ function ut_main()
 
 	$next = -1;
 	foreach( $tests as $test ) {
-	    $arg0 = urlencode($test[0]);
+	    $arg0 = b_urlencode($test[0]);
 		$res_str .= "extract from \"$arg0\" \"$test[1]\" graphemes - grapheme_extract";
 		if ( 3 == count( $test ) ) {
 			$result = grapheme_extract($test[0], $test[1]);
@@ -610,9 +614,9 @@ function ut_main()
 			$res_str .= 'false';
 		}
 		else {
-			$res_str .= urlencode($result);
+			$res_str .= b_urlencode($result);
 		}
-		$res_str .= " == " . urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]);
+		$res_str .= " == " . b_urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]);
 		if ( 5 == count ( $test ) ) {
 			$res_str .= " \$next=$next == $test[3] ";
 			if ( $next != $test[3] ) {
@@ -661,7 +665,7 @@ function ut_main()
 	);
 
 	foreach( $tests as $test ) {
-	    $arg0 = urlencode($test[0]);
+	    $arg0 = b_urlencode($test[0]);
 		$res_str .= "extract from \"$arg0\" \"$test[1]\" graphemes - grapheme_extract GRAPHEME_EXTR_MAXBYTES";
 		if ( 3 == count( $test ) ) {
 			$result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_MAXBYTES);
@@ -675,9 +679,9 @@ function ut_main()
 			$res_str .= 'false';
 		}
 		else {
-			$res_str .= urlencode($result);
+			$res_str .= b_urlencode($result);
 		}
-		$res_str .= " == " . urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
+		$res_str .= " == " . b_urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
 	}
 	
 
@@ -725,7 +729,7 @@ function ut_main()
 	);
 
 	foreach( $tests as $test ) {
-	    $arg0 = urlencode($test[0]);
+	    $arg0 = b_urlencode($test[0]);
 		$res_str .= "extract from \"$arg0\" \"$test[1]\" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS";
 		if ( 3 == count( $test ) ) {
 			$result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_MAXCHARS);
@@ -739,9 +743,9 @@ function ut_main()
 			$res_str .= 'false';
 		}
 		else {
-			$res_str .= urlencode($result);
+			$res_str .= b_urlencode($result);
 		}
-		$res_str .= " == " . urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
+		$res_str .= " == " . b_urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
 	}
 	
 	

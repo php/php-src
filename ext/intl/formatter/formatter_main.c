@@ -23,12 +23,8 @@
 #include "php_intl.h"
 #include "formatter_class.h"
 
-/* {{{ proto NumberFormatter NumberFormatter::create( string $locale, int style[, string $pattern ] )
- * Create formatter. }}} */
-/* {{{ proto NumberFormatter numfmt_create( string $locale, int style[, string $pattern ] )
- * Create formatter.
- */
-PHP_FUNCTION( numfmt_create )
+/* {{{ */
+static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	char*       locale;
 	UChar*      pattern = NULL;
@@ -42,18 +38,12 @@ PHP_FUNCTION( numfmt_create )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"numfmt_create: unable to parse input parameters", 0 TSRMLS_CC );
-
+		zval_dtor(return_value);
 		RETURN_NULL();
 	}
 
-	INTL_CHECK_LOCALE_LEN(locale_len);
-	// Create a NumberFormatter object and save the ICU formatter into it.
-	if( ( object = getThis() ) == NULL )
-		object = return_value;
-
-	if( Z_TYPE_P( object ) != IS_OBJECT )
-		object_init_ex( object, NumberFormatter_ce_ptr );
-
+	object = return_value;
+	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
 	FORMATTER_METHOD_FETCH_OBJECT;
 
 	if(locale_len == 0) {
@@ -62,13 +52,19 @@ PHP_FUNCTION( numfmt_create )
 
 	FORMATTER_OBJECT(nfo) = unum_open(style, pattern, pattern_len, locale, NULL, &INTL_DATA_ERROR_CODE(nfo));
 
-	if( U_FAILURE( INTL_DATA_ERROR_CODE((nfo)) ) )
-	{
-		intl_error_set( NULL, INTL_DATA_ERROR_CODE( nfo ),
-			"numfmt_create: number formatter creation failed", 0 TSRMLS_CC );
-		zval_dtor(return_value);
-		RETURN_NULL();
-	}
+	INTL_CTOR_CHECK_STATUS(nfo, "numfmt_create: number formatter creation failed");
+}
+/* }}} */
+
+/* {{{ proto NumberFormatter NumberFormatter::create( string $locale, int style[, string $pattern ] )
+ * Create number formatter. }}} */
+/* {{{ proto NumberFormatter numfmt_create( string $locale, int style[, string $pattern ] )
+ * Create number formatter.
+ */
+PHP_FUNCTION( numfmt_create )
+{
+	object_init_ex( return_value, NumberFormatter_ce_ptr );
+	numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
@@ -77,43 +73,8 @@ PHP_FUNCTION( numfmt_create )
  */
 PHP_METHOD( NumberFormatter, __construct )
 {
-	char*       locale;
-	UChar*      pattern = NULL;
-	int         locale_len = 0, pattern_len = 0;
-	long        style;
-	FORMATTER_METHOD_INIT_VARS;
-
-	object = getThis();
-
-	// Parse parameters.
-	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "sl|u",
-		&locale, &locale_len, &style, &pattern, &pattern_len ) == FAILURE )
-	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"__construct: unable to parse input params", 0 TSRMLS_CC );
-		zval_dtor(object);
-		ZVAL_NULL(object);
-		RETURN_NULL();
-	}
-
-	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, object);
-	FORMATTER_METHOD_FETCH_OBJECT;
-
-	if(locale_len == 0) {
-		locale = UG(default_locale);
-	}
-
-	// Create an ICU number formatter.
-	FORMATTER_OBJECT(nfo) = unum_open(style, pattern, pattern_len, locale, NULL, &INTL_DATA_ERROR_CODE(nfo));
-
-	if( U_FAILURE( INTL_DATA_ERROR_CODE((nfo)) ) )
-	{
-		intl_error_set( NULL, INTL_DATA_ERROR_CODE( nfo ),
-			"__construct: number formatter creation failed", 0 TSRMLS_CC );
-		zval_dtor(object);
-		ZVAL_NULL(object);
-		RETURN_NULL();
-	}
+	return_value = getThis();
+	numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 

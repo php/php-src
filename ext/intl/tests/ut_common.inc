@@ -84,8 +84,6 @@ function dump_str( $val, $use_quotes = true )
     $q = '';
     if( $use_quotes )
 	$q = "'";
-    if( is_unicode( $val ) && !unicode_semantics() )
-        return $q . unicode_encode( $val, 'utf-8' ) . $q;
 
     if( is_string( $val ) )
         return $q . "$val" . $q;
@@ -107,9 +105,7 @@ function dump_array( $a )
         else
             $b .= "  '$key' => ";
 
-        if( is_unicode( $val ) && !unicode_semantics() )
-    	    $b .= "'" . unicode_encode( $val, 'utf-8' ) . "'";
-        elseif( is_null( $val ) )
+        if( is_null( $val ) )
             $b .= "NULL";
         elseif( is_string( $val ) )
             $b .= "'" . "$val" . "'";
