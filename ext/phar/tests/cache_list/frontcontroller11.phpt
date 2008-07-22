@@ -5,6 +5,7 @@ default_charset=
 phar.cache_list={PWD}/frontcontroller11.php
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php die("skip"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller11.php
 REQUEST_URI=/frontcontroller11.php/a.php

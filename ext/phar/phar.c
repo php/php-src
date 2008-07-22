@@ -3283,6 +3283,8 @@ typedef zend_compile_t* (compile_hook)(zend_compile_t *ptr);
 
 PHP_MINIT_FUNCTION(phar) /* {{{ */
 {
+	phar_mime_type mime;
+
 	ZEND_INIT_MODULE_GLOBALS(phar, php_phar_init_globals_module, NULL);
 	REGISTER_INI_ENTRIES();
 
@@ -3301,6 +3303,55 @@ PHP_MINIT_FUNCTION(phar) /* {{{ */
 
 	phar_intercept_functions_init(TSRMLS_C);
 
+	zend_hash_init(&PHAR_G(mime_types), 0, NULL, NULL, 1);
+
+#define PHAR_SET_MIME(mimetype, ret, fileext) \
+		mime.mime = mimetype; \
+		mime.len = sizeof((mimetype))+1; \
+		mime.type = ret; \
+		zend_hash_add(&PHAR_G(mime_types), fileext, sizeof(fileext)-1, (void *)&mime, sizeof(phar_mime_type), NULL); \
+
+	PHAR_SET_MIME("text/html", PHAR_MIME_PHPS, "phps")
+	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "c")
+	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "cc")
+	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "cpp")
+	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "c++")
+	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "dtd")
+	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "h")
+	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "log")
+	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "rng")
+	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "txt")
+	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "xsd")
+	PHAR_SET_MIME("", PHAR_MIME_PHP, "php")
+	PHAR_SET_MIME("", PHAR_MIME_PHP, "inc")
+	PHAR_SET_MIME("video/avi", PHAR_MIME_OTHER, "avi")
+	PHAR_SET_MIME("image/bmp", PHAR_MIME_OTHER, "bmp")
+	PHAR_SET_MIME("text/css", PHAR_MIME_OTHER, "css")
+	PHAR_SET_MIME("image/gif", PHAR_MIME_OTHER, "gif")
+	PHAR_SET_MIME("text/html", PHAR_MIME_OTHER, "htm")
+	PHAR_SET_MIME("text/html", PHAR_MIME_OTHER, "html")
+	PHAR_SET_MIME("text/html", PHAR_MIME_OTHER, "htmls")
+	PHAR_SET_MIME("image/x-ico", PHAR_MIME_OTHER, "ico")
+	PHAR_SET_MIME("image/jpeg", PHAR_MIME_OTHER, "jpe")
+	PHAR_SET_MIME("image/jpeg", PHAR_MIME_OTHER, "jpg")
+	PHAR_SET_MIME("image/jpeg", PHAR_MIME_OTHER, "jpeg")
+	PHAR_SET_MIME("application/x-javascript", PHAR_MIME_OTHER, "js")
+	PHAR_SET_MIME("audio/midi", PHAR_MIME_OTHER, "midi")
+	PHAR_SET_MIME("audio/midi", PHAR_MIME_OTHER, "mid")
+	PHAR_SET_MIME("audio/mod", PHAR_MIME_OTHER, "mod")
+	PHAR_SET_MIME("movie/quicktime", PHAR_MIME_OTHER, "mov")
+	PHAR_SET_MIME("audio/mp3", PHAR_MIME_OTHER, "mp3")
+	PHAR_SET_MIME("video/mpeg", PHAR_MIME_OTHER, "mpg")
+	PHAR_SET_MIME("video/mpeg", PHAR_MIME_OTHER, "mpeg")
+	PHAR_SET_MIME("application/pdf", PHAR_MIME_OTHER, "pdf")
+	PHAR_SET_MIME("image/png", PHAR_MIME_OTHER, "png")
+	PHAR_SET_MIME("application/shockwave-flash", PHAR_MIME_OTHER, "swf")
+	PHAR_SET_MIME("image/tiff", PHAR_MIME_OTHER, "tif")
+	PHAR_SET_MIME("image/tiff", PHAR_MIME_OTHER, "tiff")
+	PHAR_SET_MIME("audio/wav", PHAR_MIME_OTHER, "wav")
+	PHAR_SET_MIME("image/xbm", PHAR_MIME_OTHER, "xbm")
+	PHAR_SET_MIME("text/xml", PHAR_MIME_OTHER, "xml")
+
 	return php_register_url_stream_wrapper("phar", &php_stream_phar_wrapper TSRMLS_CC);
 }
 /* }}} */
@@ -3308,6 +3359,8 @@ PHP_MINIT_FUNCTION(phar) /* {{{ */
 PHP_MSHUTDOWN_FUNCTION(phar) /* {{{ */
 {
 	php_unregister_url_stream_wrapper("phar" TSRMLS_CC);
+
+	zend_hash_destroy(&PHAR_G(mime_types));
 
 	phar_intercept_functions_shutdown(TSRMLS_C);
 
@@ -3347,16 +3400,13 @@ void phar_request_initialize(TSRMLS_D) /* {{{ */
 			phar_entry_fp *stuff = (phar_entry_fp *) ecalloc(zend_hash_num_elements(&cached_phars), sizeof(phar_entry_fp));
 
 			for (zend_hash_internal_pointer_reset(&cached_phars);
-			zend_hash_has_more_elements(&cached_phars) == SUCCESS;
+			zend_hash_get_current_data(&cached_phars, (void **)&pphar) == SUCCESS;
 			zend_hash_move_forward(&cached_phars)) {
-				if (zend_hash_get_current_data(&cached_phars, (void **)&pphar) == FAILURE) {
-					continue;
-				}
 				stuff[pphar[0]->phar_pos].manifest = (phar_entry_fp_info *) ecalloc( zend_hash_num_elements(&(pphar[0]->manifest)), sizeof(phar_entry_fp_info));
 			}
 			PHAR_GLOBALS->cached_fp = stuff;
 		}
-		zend_hash_init(&(PHAR_GLOBALS->phar_SERVER_mung_list), 5, zend_get_hash_value, NULL, 0);
+		PHAR_GLOBALS->phar_SERVER_mung_list = 0;
 		PHAR_G(cwd) = NULL;
 		PHAR_G(cwd_len) = 0;
 		PHAR_G(cwd_init) = 0;
@@ -3377,7 +3427,7 @@ PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 		PHAR_GLOBALS->phar_alias_map.arBuckets = NULL;
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_fname_map));
 		PHAR_GLOBALS->phar_fname_map.arBuckets = NULL;
-		zend_hash_destroy(&(PHAR_GLOBALS->phar_SERVER_mung_list));
+		PHAR_GLOBALS->phar_SERVER_mung_list = 0;
 		if (PHAR_GLOBALS->cached_fp) {
 			for (i = 0; i < zend_hash_num_elements(&cached_phars); ++i) {
 				if (PHAR_GLOBALS->cached_fp[i].fp) {
@@ -3391,7 +3441,6 @@ PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 			efree(PHAR_GLOBALS->cached_fp);
 			PHAR_GLOBALS->cached_fp = 0;
 		}
-		PHAR_GLOBALS->phar_SERVER_mung_list.arBuckets = NULL;
 		PHAR_GLOBALS->request_init = 0;
 		if (PHAR_G(cwd)) {
 			efree(PHAR_G(cwd));
