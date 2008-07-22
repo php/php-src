@@ -30,6 +30,10 @@
 #include "JSON_parser.h"
 #include "php_json.h"
 
+static PHP_MINFO_FUNCTION(json);
+static PHP_FUNCTION(json_encode);
+static PHP_FUNCTION(json_decode);
+
 static const char digits[] = "0123456789abcdef";
 
 #define PHP_JSON_HEX_TAG	(1<<0)
@@ -54,10 +58,10 @@ ZEND_END_ARG_INFO()
  *
  * Every user visible function must have an entry in json_functions[].
  */
-const function_entry json_functions[] = {
-    PHP_FE(json_encode, arginfo_json_encode)
-    PHP_FE(json_decode, arginfo_json_decode)
-	{NULL, NULL, NULL}  /* Must be the last line in json_functions[] */
+static const function_entry json_functions[] = {
+	PHP_FE(json_encode, arginfo_json_encode)
+	PHP_FE(json_decode, arginfo_json_decode)
+	{NULL, NULL, NULL}
 };
 /* }}} */
 
@@ -100,7 +104,7 @@ ZEND_GET_MODULE(json)
 
 /* {{{ PHP_MINFO_FUNCTION
  */
-PHP_MINFO_FUNCTION(json)
+static PHP_MINFO_FUNCTION(json)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "json support", "enabled");
@@ -165,17 +169,16 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 		return;
 	}
 
-	if (r == 0)
-	{
+	if (r == 0) {
 		smart_str_appendc(buf, '[');
-	}
-	else
-	{
+	} else {
 		smart_str_appendc(buf, '{');
 	}
 
 	i = myht ? zend_hash_num_elements(myht) : 0;
-	if (i > 0) {
+
+	if (i > 0)
+	{
 		zstr key;
 		zval **data;
 		ulong index;
@@ -205,8 +208,7 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
  
 					json_encode_r(buf, *data, options TSRMLS_CC);
 				} else if (r == 1) {
-					if (i == HASH_KEY_IS_STRING ||
-						i == HASH_KEY_IS_UNICODE) {
+					if (i == HASH_KEY_IS_STRING || i == HASH_KEY_IS_UNICODE) {
 						if (key.s[0] == '\0' && Z_TYPE_PP(val) == IS_OBJECT) {
 							/* Skip protected and private members. */
 							continue;
@@ -218,7 +220,7 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 							need_comma = 1;
 						}
 
-						json_escape_string(buf, key, key_len - 1, (i==HASH_KEY_IS_UNICODE)?IS_UNICODE:IS_STRING, options TSRMLS_CC);
+						json_escape_string(buf, key, key_len - 1, (i == HASH_KEY_IS_UNICODE) ? IS_UNICODE : IS_STRING, options TSRMLS_CC);
 						smart_str_appendc(buf, ':');
 
 						json_encode_r(buf, *data, options TSRMLS_CC);
@@ -228,7 +230,7 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 						} else {
 							need_comma = 1;
 						}
-						
+
 						smart_str_appendc(buf, '"');
 						smart_str_append_long(buf, (long) index);
 						smart_str_appendc(buf, '"');
@@ -245,12 +247,9 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 		}
 	}
 
-	if (r == 0)
-	{
+	if (r == 0) {
 		smart_str_appendc(buf, ']');
-	}
-	else
-	{
+	} else {
 		smart_str_appendc(buf, '}');
 	}
 }
@@ -264,25 +263,23 @@ static void json_escape_string(smart_str *buf, zstr s, int len, zend_uchar type,
 	unsigned short us;
 	unsigned short *utf16;
 
-	if (len == 0)
-	{
+	if (len == 0) {
 		smart_str_appendl(buf, "\"\"", 2);
 		return;
 	}
 
 	if (type == IS_UNICODE) {
 		utf16 = (unsigned short *) s.u;
-	} else {	
+	} else {
 		utf16 = (unsigned short *) safe_emalloc(len, sizeof(unsigned short), 0);
 
 		len = utf8_to_utf16(utf16, s.s, len);
-		if (len <= 0)
-		{
+		if (len <= 0) {
 			if (utf16) {
 				efree(utf16);
 			}
-			if(len < 0) {
-				if(!PG(display_errors)) {
+			if (len < 0) {
+				if (!PG(display_errors)) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid UTF-8 sequence in argument");
 				}
 				smart_str_appendl(buf, "null", 4);
@@ -295,111 +292,94 @@ static void json_escape_string(smart_str *buf, zstr s, int len, zend_uchar type,
 
 	smart_str_appendc(buf, '"');
 
-	while(pos < len)
+	while (pos < len)
 	{
 		us = utf16[pos++];
 
 		switch (us)
 		{
 			case '"':
-				{
-					if (options & PHP_JSON_HEX_QUOT) {
-						smart_str_appendl(buf, "\\u0022", 6);
-					} else {
-						smart_str_appendl(buf, "\\\"", 2);
-					}
+				if (options & PHP_JSON_HEX_QUOT) {
+					smart_str_appendl(buf, "\\u0022", 6);
+				} else {
+					smart_str_appendl(buf, "\\\"", 2);
 				}
 				break;
-			case '\\':
-				{
-					smart_str_appendl(buf, "\\\\", 2);
-				}
-				break;
-			case '/':
-				{
-					smart_str_appendl(buf, "\\/", 2);
-				}
-				break;
-			case '\b':
-				{
-					smart_str_appendl(buf, "\\b", 2);
-				}
-				break;
-			case '\f':
-				{
-					smart_str_appendl(buf, "\\f", 2);
-				}
-				break;
-			case '\n':
-				{
-					smart_str_appendl(buf, "\\n", 2);
-				}
-				break;
-			case '\r':
-				{
-					smart_str_appendl(buf, "\\r", 2);
-				}
-				break;
-			case '\t':
-				{
-					smart_str_appendl(buf, "\\t", 2);
-				}
-				break;
-			case '<':
-				{
-					if (options & PHP_JSON_HEX_TAG) {
-						smart_str_appendl(buf, "\\u003C", 6);
-					} else {
-						smart_str_appendc(buf, '<');
-					}
-				}
-				break;
-			case '>':
-				{
-					if (options & PHP_JSON_HEX_TAG) {
-						smart_str_appendl(buf, "\\u003E", 6);
-					} else {
-						smart_str_appendc(buf, '>');
-					}
-				}
-				break;
-			case '&':
-				{
-					if (options & PHP_JSON_HEX_AMP) {
-						smart_str_appendl(buf, "\\u0026", 6);
-					} else {
-						smart_str_appendc(buf, '&');
-					}
-				}
-				break;
-			case '\'':
-				{
-					if (options & PHP_JSON_HEX_APOS) {
-						smart_str_appendl(buf, "\\u0027", 6);
-					} else {
-						smart_str_appendc(buf, '\'');
-					}
-				}
-				break;
-			default:
-				{
-					if (us >= ' ' && (us & 127) == us)
-					{
-						smart_str_appendc(buf, (unsigned char) us);
-					}
-					else
-					{
-						smart_str_appendl(buf, "\\u", 2);
-						us = REVERSE16(us);
 
-						smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
-						us >>= 4;
-						smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
-						us >>= 4;
-						smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
-						us >>= 4;
-						smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
-					}
+			case '\\':
+				smart_str_appendl(buf, "\\\\", 2);
+				break;
+
+			case '/':
+				smart_str_appendl(buf, "\\/", 2);
+				break;
+
+			case '\b':
+				smart_str_appendl(buf, "\\b", 2);
+				break;
+
+			case '\f':
+				smart_str_appendl(buf, "\\f", 2);
+				break;
+
+			case '\n':
+				smart_str_appendl(buf, "\\n", 2);
+				break;
+
+			case '\r':
+				smart_str_appendl(buf, "\\r", 2);
+				break;
+
+			case '\t':
+				smart_str_appendl(buf, "\\t", 2);
+				break;
+
+			case '<':
+				if (options & PHP_JSON_HEX_TAG) {
+					smart_str_appendl(buf, "\\u003C", 6);
+				} else {
+					smart_str_appendc(buf, '<');
+				}
+				break;
+
+			case '>':
+				if (options & PHP_JSON_HEX_TAG) {
+					smart_str_appendl(buf, "\\u003E", 6);
+				} else {
+					smart_str_appendc(buf, '>');
+				}
+				break;
+
+			case '&':
+				if (options & PHP_JSON_HEX_AMP) {
+					smart_str_appendl(buf, "\\u0026", 6);
+				} else {
+					smart_str_appendc(buf, '&');
+				}
+				break;
+
+			case '\'':
+				if (options & PHP_JSON_HEX_APOS) {
+					smart_str_appendl(buf, "\\u0027", 6);
+				} else {
+					smart_str_appendc(buf, '\'');
+				}
+				break;
+
+			default:
+				if (us >= ' ' && (us & 127) == us) {
+					smart_str_appendc(buf, (unsigned char) us);
+				} else {
+					smart_str_appendl(buf, "\\u", 2);
+					us = REVERSE16(us);
+
+					smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
+					us >>= 4;
+					smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
+					us >>= 4;
+					smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
+					us >>= 4;
+					smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
 				}
 				break;
 		}
@@ -415,23 +395,24 @@ static void json_escape_string(smart_str *buf, zstr s, int len, zend_uchar type,
 
 static void json_encode_r(smart_str *buf, zval *val, int options TSRMLS_DC) /* {{{ */
 {
-	switch (Z_TYPE_P(val)) {
+	switch (Z_TYPE_P(val))
+	{
 		case IS_NULL:
 			smart_str_appendl(buf, "null", 4);
 			break;
+
 		case IS_BOOL:
-			if (Z_BVAL_P(val))
-			{
+			if (Z_BVAL_P(val)) {
 				smart_str_appendl(buf, "true", 4);
-			}
-			else
-			{
+			} else {
 				smart_str_appendl(buf, "false", 5);
 			}
 			break;
+
 		case IS_LONG:
 			smart_str_append_long(buf, Z_LVAL_P(val));
 			break;
+
 		case IS_DOUBLE:
 			{
 				char *d = NULL;
@@ -448,14 +429,17 @@ static void json_encode_r(smart_str *buf, zval *val, int options TSRMLS_DC) /* {
 				}
 			}
 			break;
+
 		case IS_STRING:
 		case IS_UNICODE:
 			json_escape_string(buf, Z_UNIVAL_P(val), Z_UNILEN_P(val), Z_TYPE_P(val), options TSRMLS_CC);
 			break;
+
 		case IS_ARRAY:
 		case IS_OBJECT:
 			json_encode_array(buf, &val, options TSRMLS_CC);
 			break;
+
 		default:
 			zend_error(E_WARNING, "[json] (json_encode_r) type is unsupported, encoded as null.");
 			smart_str_appendl(buf, "null", 4);
@@ -468,7 +452,7 @@ static void json_encode_r(smart_str *buf, zval *val, int options TSRMLS_DC) /* {
 
 /* {{{ proto string json_encode(mixed data) U
    Returns the JSON representation of a value */
-PHP_FUNCTION(json_encode)
+static PHP_FUNCTION(json_encode)
 {
 	zval *parameter;
 	smart_str buf = {0};
@@ -492,7 +476,7 @@ PHP_FUNCTION(json_encode)
 
 /* {{{ proto mixed json_decode(string json [, bool assoc]) U
    Decodes the JSON representation into a PHP value */
-PHP_FUNCTION(json_decode)
+static PHP_FUNCTION(json_decode)
 {
 	zstr str;
 	int str_len, utf16_len;
@@ -505,8 +489,7 @@ PHP_FUNCTION(json_decode)
 		return;
 	}
 
-	if (!str_len)
-	{
+	if (!str_len) {
 		RETURN_NULL();
 	}
 
@@ -517,27 +500,25 @@ PHP_FUNCTION(json_decode)
 		utf16 = (unsigned short *) safe_emalloc((str_len+1), sizeof(unsigned short), 0);
 
 		utf16_len = utf8_to_utf16(utf16, str.s, str_len);
-		if (utf16_len <= 0)
-		{
-			if (utf16)
-			{
+		if (utf16_len <= 0) {
+			if (utf16) {
 				efree(utf16);
 			}
-
 			RETURN_NULL();
 		}
 	}
 
 	ALLOC_INIT_ZVAL(z);
-	if (JSON_parser(z, utf16, utf16_len, assoc TSRMLS_CC))
-	{
+	if (JSON_parser(z, utf16, utf16_len, assoc TSRMLS_CC)) {
 		*return_value = *z;
-
 		FREE_ZVAL(z);
+
 		if (str_type == IS_STRING) {
 			efree(utf16);
 		}
-	} else if (str_type == IS_STRING) {
+	}
+	else if (str_type == IS_STRING)
+	{
 		double d;
 		int type;
 		long p;
@@ -567,7 +548,9 @@ PHP_FUNCTION(json_decode)
 		} else {
 			RETURN_STRINGL(str.s, str_len, 1);
 		}
-	} else {
+	}
+	else
+	{
 		double d;
 		int type;
 		long p;
