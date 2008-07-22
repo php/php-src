@@ -30,14 +30,7 @@ extern zend_module_entry json_module_entry;
 #include "TSRM.h"
 #endif
 
-#ifdef ZTS
-#define JSON_G(v) TSRMG(json_globals_id, zend_json_globals *, v)
-#else
-#define JSON_G(v) (json_globals.v)
-#endif
-
 #endif  /* PHP_JSON_H */
-
 
 /*
  * Local variables:
