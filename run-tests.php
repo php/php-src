@@ -517,7 +517,7 @@ Options:
 
     -s <file>   Write output to <file>.
 
-    -x          FIXME: STEPH WRITES THE HELP TEXT HERE!!
+    -x          Sets 'SKIP_SLOW_TESTS' environmental variable.
 
     --verbose
     -v          Verbose mode.
@@ -539,8 +539,10 @@ Options:
                 Do not delete 'all' files, 'php' test file, 'skip' or 'clean'
                 file.
 
-    --set-timeout
-                FIXME: STEPH WRITES THE HELP TEXT HERE!!
+    --set-timeout [n]
+                Set timeout for individual tests, where [n] is the number of
+                seconds. The default value is 60 seconds, or 300 seconds when
+                testing for memory leaks.
 
     --show-[all|php|skip|clean|exp|diff|out]
                 Show 'all' files, 'php' test file, 'skip' or 'clean' file. You
