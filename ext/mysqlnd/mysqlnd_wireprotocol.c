@@ -462,10 +462,9 @@ mysqlnd_read_header(MYSQLND *conn, mysqlnd_packet_header *header TSRMLS_DC)
 		DBG_RETURN(PASS);
 	}
 
-#if !MYSQLND_SILENT
 	DBG_ERR_FMT("Packets out of order. Expected %d received %d. Packet size=%d",
 				net->packet_no, header->packet_no, header->size);
-#endif
+
 	php_error(E_WARNING, "Packets out of order. Expected %d received %d. Packet size=%d. PID=%d",
 			  net->packet_no, header->packet_no, header->size, getpid());
 	DBG_RETURN(FAIL);
@@ -1216,10 +1215,10 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 		*(root_ptr +=len) = '\0';
 		root_ptr++;
 	}
-/*
+
 	DBG_INF_FMT("FIELD=[%s.%s.%s]", meta->db? meta->db:"*NA*", meta->table? meta->table:"*NA*",
 				meta->name? meta->name:"*NA*");
-*/
+
 	DBG_RETURN(PASS);
 
 faulty_or_fake:
@@ -1346,6 +1345,7 @@ void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffe
 
 	for (i = 0; current_field < end_field; current_field++, i++) {
 #if 1
+		DBG_INF("Trying to use the zval cache");
 		obj = mysqlnd_palloc_get_zval(conn->zval_cache, &allocated TSRMLS_CC);
 		if (allocated) {
 			*current_field = (zval *) obj;
@@ -1355,9 +1355,16 @@ void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffe
 			((mysqlnd_zval *) obj)->point_type = MYSQLND_POINTS_EXT_BUFFER;
 		}
 #else
+		DBG_INF("Directly creating zval");
 		MAKE_STD_ZVAL(*current_field);
 #endif
+
+		DBG_INF_FMT("Into zval=%p decoding column %d [%s.%s.%s] type=%d field->flags&unsigned=%d flags=%u is_bit=%d as_unicode=%d",
+			*current_field, i,
+			fields_metadata[i].db, fields_metadata[i].table, fields_metadata[i].name, fields_metadata[i].type,
+			fields_metadata[i].flags & UNSIGNED_FLAG, fields_metadata[i].flags, fields_metadata[i].type == MYSQL_TYPE_BIT, as_unicode);
 		if (*null_ptr & bit) {
+			DBG_INF("It's null");
 			ZVAL_NULL(*current_field);
 		} else {
 			enum_mysqlnd_field_types type = fields_metadata[i].type;
