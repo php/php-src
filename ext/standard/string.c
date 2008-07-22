@@ -2795,7 +2795,7 @@ PHP_FUNCTION(strrpos)
 			u_e = haystack.u + haystack_len - needle_len;
 		} else {
 			u_p = haystack.u;
-			if (-offset > haystack_len) {
+			if (-offset > haystack_len || offset < -INT_MAX) {
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			} else {
@@ -2832,7 +2832,7 @@ PHP_FUNCTION(strrpos)
 			p = haystack.s + offset;
 			e = haystack.s + haystack_len - needle_len;
 		} else {
-			if (-offset > haystack_len) {
+			if (-offset > haystack_len || offset < -INT_MAX) {
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
