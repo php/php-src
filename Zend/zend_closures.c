@@ -125,7 +125,8 @@ static zend_function *zend_closure_get_method(zval **object_ptr, zstr method_nam
 	/* Create a zend_copy_str_tolower(dest, src, src_length); */
 	lc_name = zend_u_str_case_fold(type, method_name, method_len, 1, &lc_name_len);
 	if ((lc_name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1) &&
-	    (ZEND_U_EQUAL(type, lc_name, lc_name_len, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1))) {
+		(ZEND_U_EQUAL(type, lc_name, lc_name_len, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1))
+	) {
 		zend_closure *closure = (zend_closure *)zend_object_store_get_object(*object_ptr TSRMLS_CC);
 
 		if (!closure->invoke) {
@@ -151,34 +152,34 @@ static zend_function *zend_closure_get_method(zval **object_ptr, zstr method_nam
 
 static zval *zend_closure_read_property(zval *object, zval *member, int type TSRMLS_DC) /* {{{ */
 {
-    ZEND_CLOSURE_PROPERTY_ERROR();
+	ZEND_CLOSURE_PROPERTY_ERROR();
 	return NULL;
 }
 /* }}} */
 
 static void zend_closure_write_property(zval *object, zval *member, zval *value TSRMLS_DC) /* {{{ */
 {
-    ZEND_CLOSURE_PROPERTY_ERROR();
+	ZEND_CLOSURE_PROPERTY_ERROR();
 }
 /* }}} */
 
 static zval **zend_closure_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC) /* {{{ */
 {
-    ZEND_CLOSURE_PROPERTY_ERROR();
+	ZEND_CLOSURE_PROPERTY_ERROR();
 	return NULL;
 }
 /* }}} */
 
 static int zend_closure_has_property(zval *object, zval *member, int has_set_exists TSRMLS_DC) /* {{{ */
 {
-    ZEND_CLOSURE_PROPERTY_ERROR();
+	ZEND_CLOSURE_PROPERTY_ERROR();
 	return 0;
 }
 /* }}} */
 
 static void zend_closure_unset_property(zval *object, zval *member TSRMLS_DC) /* {{{ */
 {
-    ZEND_CLOSURE_PROPERTY_ERROR();
+	ZEND_CLOSURE_PROPERTY_ERROR();
 }
 /* }}} */
 
@@ -223,10 +224,10 @@ static zend_object_value zend_closure_new(zend_class_entry *class_type TSRMLS_DC
 	memset(closure, 0, sizeof(zend_closure));
 
 	zend_object_std_init(&closure->std, class_type TSRMLS_CC);
-	
+
 	object.handle = zend_objects_store_put(closure, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) zend_closure_free_storage, NULL TSRMLS_CC);
 	object.handlers = &closure_handlers;
-	
+
 	return object;
 }
 /* }}} */
@@ -259,7 +260,7 @@ static int zval_copy_static_var(zval **p, int num_args, va_list args, zend_hash_
 	HashTable *target = va_arg(args, HashTable*);
 	zend_bool is_ref;
 	TSRMLS_FETCH();
-	
+
 	if (Z_TYPE_PP(p) & (IS_LEXICAL_VAR|IS_LEXICAL_REF)) {
 		is_ref = Z_TYPE_PP(p) & IS_LEXICAL_REF;
 
@@ -305,7 +306,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 	if (closure->func.type == ZEND_USER_FUNCTION) {
 		if (closure->func.op_array.static_variables) {
 			HashTable *static_variables = closure->func.op_array.static_variables;
-	
+
 			ALLOC_HASHTABLE(closure->func.op_array.static_variables);
 			zend_u_hash_init(closure->func.op_array.static_variables, zend_hash_num_elements(static_variables), NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
 			zend_hash_apply_with_arguments(static_variables, (apply_func_args_t)zval_copy_static_var, 1, closure->func.op_array.static_variables);
