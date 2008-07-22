@@ -141,6 +141,11 @@
 #define TAR_DIR     '5'
 #define TAR_NEW     '8'
 
+#define PHAR_MUNG_PHP_SELF			(1<<0)
+#define PHAR_MUNG_REQUEST_URI		(1<<1)
+#define PHAR_MUNG_SCRIPT_NAME		(1<<2)
+#define PHAR_MUNG_SCRIPT_FILENAME	(1<<3)
+
 typedef struct _phar_entry_fp phar_entry_fp;
 typedef struct _phar_archive_data phar_archive_data;
 
@@ -149,7 +154,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	/* for cached phars, this is a per-process store of fp/ufp */
 	phar_entry_fp *cached_fp;
 	HashTable   phar_alias_map;
-	HashTable   phar_SERVER_mung_list;
+	int         phar_SERVER_mung_list;
 	int         readonly;
 	char*       cache_list;
 	int         manifest_cached;
@@ -197,6 +202,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	char*       last_alias;
 	int         last_alias_len;
 	phar_archive_data* last_phar;
+	HashTable mime_types;
 ZEND_END_MODULE_GLOBALS(phar)
 
 ZEND_EXTERN_MODULE_GLOBALS(phar)

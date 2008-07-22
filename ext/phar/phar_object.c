@@ -50,21 +50,24 @@ static int phar_file_type(HashTable *mimes, char *file, char **mime_type TSRMLS_
 }
 /* }}} */
 
-static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char *basename, int basename_len, char *request_uri, int request_uri_len TSRMLS_DC) /* {{{ */
+static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char *basename, char *request_uri, int request_uri_len TSRMLS_DC) /* {{{ */
 {
-	zval **_SERVER, **stuff;
+	HashTable *_SERVER;
+	zval **stuff;
 	char *path_info;
+	int basename_len = strlen(basename);
 
 	/* "tweak" $_SERVER variables requested in earlier call to Phar::mungServer() */
-	if (SUCCESS != zend_hash_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER"), (void **) &_SERVER)) {
+	if (!PG(http_globals)[TRACK_VARS_SERVER]) {
 		return;
 	}
 
+	_SERVER = Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]);
+
 	/* PATH_INFO and PATH_TRANSLATED should always be munged */
-	if (SUCCESS == zend_hash_find(Z_ARRVAL_PP(_SERVER), "PATH_INFO", sizeof("PATH_INFO"), (void **) &stuff)) { 
+	if (SUCCESS == zend_hash_find(_SERVER, "PATH_INFO", sizeof("PATH_INFO"), (void **) &stuff)) { 
 		int code; 
 		zval *temp; 
-		char newname[] = "PHAR_PATH_INFO";
 
 		path_info = Z_STRVAL_PP(stuff);
 		code = Z_STRLEN_PP(stuff);
@@ -73,13 +76,12 @@ static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char 
 
 			MAKE_STD_ZVAL(temp); 
 			ZVAL_STRINGL(temp, path_info, code, 0);
-			zend_hash_update(Z_ARRVAL_PP(_SERVER), newname, sizeof(newname), (void *) &temp, sizeof(zval **), NULL);
+			zend_hash_update(_SERVER, "PHAR_PATH_INFO", sizeof("PHAR_PATH_INFO"), (void *) &temp, sizeof(zval **), NULL);
 		}
 	}
-	if (SUCCESS == zend_hash_find(Z_ARRVAL_PP(_SERVER), "PATH_TRANSLATED", sizeof("PATH_TRANSLATED"), (void **) &stuff)) { 
+	if (SUCCESS == zend_hash_find(_SERVER, "PATH_TRANSLATED", sizeof("PATH_TRANSLATED"), (void **) &stuff)) { 
 		int code; 
 		zval *temp; 
-		char newname[] = "PHAR_PATH_TRANSLATED";
 
 		path_info = Z_STRVAL_PP(stuff); 
 		code = Z_STRLEN_PP(stuff); 
@@ -87,16 +89,15 @@ static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char 
 
 		MAKE_STD_ZVAL(temp);
 		ZVAL_STRINGL(temp, path_info, code, 0);
-		zend_hash_update(Z_ARRVAL_PP(_SERVER), newname, sizeof(newname), (void *) &temp, sizeof(zval **), NULL); 
+		zend_hash_update(_SERVER, "PHAR_PATH_TRANSLATED", sizeof("PHAR_PATH_TRANSLATED"), (void *) &temp, sizeof(zval **), NULL); 
 	}
-	if (!PHAR_GLOBALS->phar_SERVER_mung_list.arBuckets || !zend_hash_num_elements(&(PHAR_GLOBALS->phar_SERVER_mung_list))) {
+	if (!PHAR_GLOBALS->phar_SERVER_mung_list) {
 		return;
 	}
-	if (zend_hash_exists(&(PHAR_GLOBALS->phar_SERVER_mung_list), "REQUEST_URI", sizeof("REQUEST_URI")-1)) {
-		if (SUCCESS == zend_hash_find(Z_ARRVAL_PP(_SERVER), "REQUEST_URI", sizeof("REQUEST_URI"), (void **) &stuff)) { 
+	if (PHAR_GLOBALS->phar_SERVER_mung_list & PHAR_MUNG_REQUEST_URI) {
+		if (SUCCESS == zend_hash_find(_SERVER, "REQUEST_URI", sizeof("REQUEST_URI"), (void **) &stuff)) { 
 			int code;
 			zval *temp;
-			char newname[] = "PHAR_REQUEST_URI";
 
 			path_info = Z_STRVAL_PP(stuff);
 			code = Z_STRLEN_PP(stuff);
@@ -105,15 +106,14 @@ static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char 
 
 				MAKE_STD_ZVAL(temp);
 				ZVAL_STRINGL(temp, path_info, code, 0);
-				zend_hash_update(Z_ARRVAL_PP(_SERVER), newname, sizeof(newname), (void *) &temp, sizeof(zval **), NULL);
+				zend_hash_update(_SERVER, "PHAR_REQUEST_URI", sizeof("PHAR_REQUEST_URI"), (void *) &temp, sizeof(zval **), NULL);
 			}
 		}
 	}
-	if (zend_hash_exists(&(PHAR_GLOBALS->phar_SERVER_mung_list), "PHP_SELF", sizeof("PHP_SELF")-1)) {
-		if (SUCCESS == zend_hash_find(Z_ARRVAL_PP(_SERVER), "PHP_SELF", sizeof("PHP_SELF"), (void **) &stuff)) { 
+	if (PHAR_GLOBALS->phar_SERVER_mung_list & PHAR_MUNG_PHP_SELF) {
+		if (SUCCESS == zend_hash_find(_SERVER, "PHP_SELF", sizeof("PHP_SELF"), (void **) &stuff)) { 
 			int code;
 			zval *temp;
-			char newname[] = "PHAR_PHP_SELF";
 
 			path_info = Z_STRVAL_PP(stuff);
 			code = Z_STRLEN_PP(stuff);
@@ -122,16 +122,15 @@ static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char 
 
 				MAKE_STD_ZVAL(temp);
 				ZVAL_STRINGL(temp, path_info, code, 0);
-				zend_hash_update(Z_ARRVAL_PP(_SERVER), newname, sizeof(newname), (void *) &temp, sizeof(zval **), NULL);
+				zend_hash_update(_SERVER, "PHAR_PHP_SELF", sizeof("PHAR_PHP_SELF"), (void *) &temp, sizeof(zval **), NULL);
 			}
 		}
 	}
 
-	if (zend_hash_exists(&(PHAR_GLOBALS->phar_SERVER_mung_list), "SCRIPT_NAME", sizeof("SCRIPT_NAME")-1)) {
-		if (SUCCESS == zend_hash_find(Z_ARRVAL_PP(_SERVER), "SCRIPT_NAME", sizeof("SCRIPT_NAME"), (void **) &stuff)) { 
+	if (PHAR_GLOBALS->phar_SERVER_mung_list & PHAR_MUNG_SCRIPT_NAME) {
+		if (SUCCESS == zend_hash_find(_SERVER, "SCRIPT_NAME", sizeof("SCRIPT_NAME"), (void **) &stuff)) { 
 			int code; 
 			zval *temp; 
-			char newname[] = "PHAR_SCRIPT_NAME";
 							
 			path_info = Z_STRVAL_PP(stuff); 
 			code = Z_STRLEN_PP(stuff); 
@@ -139,15 +138,14 @@ static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char 
 						
 			MAKE_STD_ZVAL(temp);
 			ZVAL_STRINGL(temp, path_info, code, 0);
-			zend_hash_update(Z_ARRVAL_PP(_SERVER), newname, sizeof(newname), (void *) &temp, sizeof(zval **), NULL); 
+			zend_hash_update(_SERVER, "PHAR_SCRIPT_NAME", sizeof("PHAR_SCRIPT_NAME"), (void *) &temp, sizeof(zval **), NULL); 
 		} 
 	}
 
-	if (zend_hash_exists(&(PHAR_GLOBALS->phar_SERVER_mung_list), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME")-1)) {
-		if (SUCCESS == zend_hash_find(Z_ARRVAL_PP(_SERVER), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME"), (void **) &stuff)) {
+	if (PHAR_GLOBALS->phar_SERVER_mung_list & PHAR_MUNG_SCRIPT_FILENAME) {
+		if (SUCCESS == zend_hash_find(_SERVER, "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME"), (void **) &stuff)) {
 			int code; 
 			zval *temp; 
-			char newname[] = "PHAR_SCRIPT_FILENAME";
 
 			path_info = Z_STRVAL_PP(stuff); 
 			code = Z_STRLEN_PP(stuff); 
@@ -155,19 +153,19 @@ static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char 
 
 			MAKE_STD_ZVAL(temp);
 			ZVAL_STRINGL(temp, path_info, code, 0);
-			zend_hash_update(Z_ARRVAL_PP(_SERVER), newname, sizeof(newname), (void *) &temp, sizeof(zval **), NULL); 
+			zend_hash_update(_SERVER, "PHAR_SCRIPT_FILENAME", sizeof("PHAR_SCRIPT_FILENAME"), (void *) &temp, sizeof(zval **), NULL); 
 		}
 	}
 }
 /* }}} */
 
-static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char *mime_type, int code, char *entry, int entry_len, char *arch, int arch_len, char *basename, int basename_len, char *ru, int ru_len TSRMLS_DC) /* {{{ */
+static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char *mime_type, int code, char *entry, int entry_len, char *arch, int arch_len, char *basename, char *ru, int ru_len TSRMLS_DC) /* {{{ */
 {
 	char *name = NULL, buf[8192], *cwd;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 	sapi_header_line ctr = {0};
 	size_t got;
-	int dummy = 1, name_len, ret;
+	int dummy = 1, name_len;
 	zend_file_handle file_handle;
 	zend_op_array *new_op_array;
 	zval *result = NULL;
@@ -234,7 +232,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 			zend_bailout();
 		case PHAR_MIME_PHP:
 			if (basename) {
-				phar_mung_server_vars(arch, entry, entry_len, basename, basename_len, ru, ru_len TSRMLS_CC);
+				phar_mung_server_vars(arch, entry, entry_len, basename, ru, ru_len TSRMLS_CC);
 				efree(basename);
 			}
 			if (entry[0] == '/') {
@@ -251,8 +249,8 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 
 			PHAR_G(cwd) = NULL;
 			PHAR_G(cwd_len) = 0;
-			if (!zend_hash_exists(&EG(included_files), name, name_len+1)) {
-				if ((cwd = strrchr(entry, '/'))) {
+			if (zend_hash_add(&EG(included_files), name, name_len+1, (void *)&dummy, sizeof(int), NULL) == SUCCESS) {
+				if ((cwd = zend_memrchr(entry, '/', entry_len))) {
 					PHAR_G(cwd_init) = 1;
 					if (entry == cwd) {
 						/* root directory */
@@ -267,8 +265,8 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 					}
 				}
 				new_op_array = zend_compile_file(&file_handle, ZEND_REQUIRE TSRMLS_CC);
-				if (new_op_array) {
-					zend_hash_add(&EG(included_files), name, name_len+1, (void *)&dummy, sizeof(int), NULL);
+				if (!new_op_array) {
+					zend_hash_del(&EG(included_files), name, name_len+1);
 				}
 				zend_destroy_file_handle(&file_handle TSRMLS_CC);
 			} else {
@@ -330,7 +328,7 @@ static void phar_do_404(phar_archive_data *phar, char *fname, int fname_len, cha
 		info = phar_get_entry_info(phar, f404, f404_len, NULL, 1 TSRMLS_CC);
 
 		if (info) {
-			phar_file_action(phar, info, "text/html", PHAR_MIME_PHP, f404, f404_len, fname, fname_len, NULL, 0, NULL, 0 TSRMLS_CC);
+			phar_file_action(phar, info, "text/html", PHAR_MIME_PHP, f404, f404_len, fname, fname_len, NULL, NULL, 0 TSRMLS_CC);
 			return;
 		}
 	}
@@ -524,12 +522,10 @@ carry_on:
  */
 PHP_METHOD(Phar, webPhar)
 {
-	HashTable mimetypes;
-	phar_mime_type mime;
 	zval *mimeoverride = NULL, *rewrite = NULL;
 	char *alias = NULL, *error, *index_php = NULL, *f404 = NULL, *ru = NULL;
 	int alias_len = 0, ret, f404_len = 0, free_pathinfo = 0, ru_len = 0;
-	char *fname, *basename, *path_info, *mime_type, *entry, *pt;
+	char *fname, *basename, *path_info, *mime_type = NULL, *entry, *pt;
 	int fname_len, entry_len, code, index_php_len = 0, not_cgi;
 	phar_archive_data *phar = NULL;
 	phar_entry_info *info;
@@ -557,7 +553,7 @@ PHP_METHOD(Phar, webPhar)
 	fname = estrndup(fname, fname_len);
 	phar_unixify_path_separators(fname, fname_len);
 #endif
-	basename = strrchr(fname, '/');
+	basename = zend_memrchr(fname, '/', fname_len);
 	if (!basename) {
 		basename = fname;
 	} else {
@@ -566,26 +562,52 @@ PHP_METHOD(Phar, webPhar)
 
 	if ((strlen(sapi_module.name) == sizeof("cgi-fcgi")-1 && !strncmp(sapi_module.name, "cgi-fcgi", sizeof("cgi-fcgi")-1))
 		|| (strlen(sapi_module.name) == sizeof("cgi")-1 && !strncmp(sapi_module.name, "cgi", sizeof("cgi")-1))) {
-		char *testit;
 
-		testit = sapi_getenv("SCRIPT_NAME", sizeof("SCRIPT_NAME")-1 TSRMLS_CC);
-		if (!(pt = strstr(testit, basename))) {
-			efree(testit);
-			return;
-		}
-		path_info = sapi_getenv("PATH_INFO", sizeof("PATH_INFO")-1 TSRMLS_CC);
-		if (path_info) {
-			entry = path_info;
-			entry_len = strlen(entry);
-			spprintf(&path_info, 0, "%s%s", testit, path_info);
-			free_pathinfo = 1;
+		if (PG(http_globals)[TRACK_VARS_SERVER]) {
+			HashTable *ht = Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]);
+			zval **z_script_name, **z_path_info;
+
+			if (SUCCESS != zend_hash_find(ht, "SCRIPT_NAME", sizeof("SCRIPT_NAME"), (void**)&z_script_name) ||
+			    IS_STRING != Z_TYPE_PP(z_script_name) ||
+			    !strstr(Z_STRVAL_PP(z_script_name), basename)) {
+				return;
+			}
+			if (SUCCESS == zend_hash_find(ht, "PATH_INFO", sizeof("PATH_INFO"), (void**)&z_path_info) &&
+			    IS_STRING == Z_TYPE_PP(z_path_info)) {
+				entry_len = Z_STRLEN_PP(z_path_info);
+				entry = estrndup(Z_STRVAL_PP(z_path_info), entry_len);
+				path_info = emalloc(Z_STRLEN_PP(z_script_name) + entry_len + 1);
+				memcpy(path_info, Z_STRVAL_PP(z_script_name), Z_STRLEN_PP(z_script_name));
+				memcpy(path_info + Z_STRLEN_PP(z_script_name), entry, entry_len + 1);
+				free_pathinfo = 1;
+			} else {
+				entry_len = 0;
+				entry = estrndup("", 0);
+				path_info = Z_STRVAL_PP(z_script_name);
+			}
+			pt = estrndup(Z_STRVAL_PP(z_script_name), Z_STRLEN_PP(z_script_name));
 		} else {
-			path_info = testit;
-			free_pathinfo = 1;
-			entry = estrndup("", 0);
-			entry_len = 0;
+			char *testit;
+
+			testit = sapi_getenv("SCRIPT_NAME", sizeof("SCRIPT_NAME")-1 TSRMLS_CC);
+			if (!(pt = strstr(testit, basename))) {
+				efree(testit);
+				return;
+			}
+			path_info = sapi_getenv("PATH_INFO", sizeof("PATH_INFO")-1 TSRMLS_CC);
+			if (path_info) {
+				entry = path_info;
+				entry_len = strlen(entry);
+				spprintf(&path_info, 0, "%s%s", testit, path_info);
+				free_pathinfo = 1;
+			} else {
+				path_info = testit;
+				free_pathinfo = 1;
+				entry = estrndup("", 0);
+				entry_len = 0;
+			}
+			pt = estrndup(testit, (pt - testit) + (fname_len - (basename - fname)));
 		}
-		pt = estrndup(testit, (pt - testit) + (fname_len - (basename - fname)));
 		not_cgi = 0;
 	} else {
 		path_info = SG(request_info).request_uri;
@@ -744,124 +766,46 @@ PHP_METHOD(Phar, webPhar)
 		zend_bailout();
 	}
 
-	/* set up mime types */
-	zend_hash_init(&mimetypes, sizeof(phar_mime_type *), zend_get_hash_value, NULL, 0);
-#define PHAR_SET_MIME(mimetype, ret, fileext) \
-		mime.mime = mimetype; \
-		mime.len = sizeof((mimetype))+1; \
-		mime.type = ret; \
-		zend_hash_add(&mimetypes, fileext, sizeof(fileext)-1, (void *)&mime, sizeof(phar_mime_type), NULL); \
+	if (mimeoverride && zend_hash_num_elements(Z_ARRVAL_P(mimeoverride))) {
+		char *ext = zend_memrchr(entry, '.', entry_len);
+		zval **val;
 
-	PHAR_SET_MIME("text/html", PHAR_MIME_PHPS, "phps")
-	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "c")
-	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "cc")
-	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "cpp")
-	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "c++")
-	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "dtd")
-	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "h")
-	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "log")
-	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "rng")
-	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "txt")
-	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "xsd")
-	PHAR_SET_MIME("", PHAR_MIME_PHP, "php")
-	PHAR_SET_MIME("", PHAR_MIME_PHP, "inc")
-	PHAR_SET_MIME("video/avi", PHAR_MIME_OTHER, "avi")
-	PHAR_SET_MIME("image/bmp", PHAR_MIME_OTHER, "bmp")
-	PHAR_SET_MIME("text/css", PHAR_MIME_OTHER, "css")
-	PHAR_SET_MIME("image/gif", PHAR_MIME_OTHER, "gif")
-	PHAR_SET_MIME("text/html", PHAR_MIME_OTHER, "htm")
-	PHAR_SET_MIME("text/html", PHAR_MIME_OTHER, "html")
-	PHAR_SET_MIME("text/html", PHAR_MIME_OTHER, "htmls")
-	PHAR_SET_MIME("image/x-ico", PHAR_MIME_OTHER, "ico")
-	PHAR_SET_MIME("image/jpeg", PHAR_MIME_OTHER, "jpe")
-	PHAR_SET_MIME("image/jpeg", PHAR_MIME_OTHER, "jpg")
-	PHAR_SET_MIME("image/jpeg", PHAR_MIME_OTHER, "jpeg")
-	PHAR_SET_MIME("application/x-javascript", PHAR_MIME_OTHER, "js")
-	PHAR_SET_MIME("audio/midi", PHAR_MIME_OTHER, "midi")
-	PHAR_SET_MIME("audio/midi", PHAR_MIME_OTHER, "mid")
-	PHAR_SET_MIME("audio/mod", PHAR_MIME_OTHER, "mod")
-	PHAR_SET_MIME("movie/quicktime", PHAR_MIME_OTHER, "mov")
-	PHAR_SET_MIME("audio/mp3", PHAR_MIME_OTHER, "mp3")
-	PHAR_SET_MIME("video/mpeg", PHAR_MIME_OTHER, "mpg")
-	PHAR_SET_MIME("video/mpeg", PHAR_MIME_OTHER, "mpeg")
-	PHAR_SET_MIME("application/pdf", PHAR_MIME_OTHER, "pdf")
-	PHAR_SET_MIME("image/png", PHAR_MIME_OTHER, "png")
-	PHAR_SET_MIME("application/shockwave-flash", PHAR_MIME_OTHER, "swf")
-	PHAR_SET_MIME("image/tiff", PHAR_MIME_OTHER, "tif")
-	PHAR_SET_MIME("image/tiff", PHAR_MIME_OTHER, "tiff")
-	PHAR_SET_MIME("audio/wav", PHAR_MIME_OTHER, "wav")
-	PHAR_SET_MIME("image/xbm", PHAR_MIME_OTHER, "xbm")
-	PHAR_SET_MIME("text/xml", PHAR_MIME_OTHER, "xml")
+		if (ext) {
+			++ext;
 
-	/* set up user overrides */
-#define PHAR_SET_USER_MIME(ret) \
-		if (Z_TYPE_PP(val) == IS_LONG) { \
-			mime.mime = ""; \
-			mime.len = 0; \
-		} else { \
-			mime.mime = Z_STRVAL_PP(val); \
-			mime.len = Z_STRLEN_PP(val); \
-		} \
-		mime.type = ret; \
-		zend_hash_update(&mimetypes, str_key, keylen-1, (void *)&mime, sizeof(phar_mime_type), NULL);
-
-	if (mimeoverride) {
-		if (!zend_hash_num_elements(Z_ARRVAL_P(mimeoverride))) {
-			goto no_mimes;
-		}
-		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(mimeoverride)); SUCCESS == zend_hash_has_more_elements(Z_ARRVAL_P(mimeoverride)); zend_hash_move_forward(Z_ARRVAL_P(mimeoverride))) {
-			zval **val;
-			phar_zstr key;
-			char *str_key;
-			uint keylen;
-			ulong intkey;
-
-			if (HASH_KEY_IS_LONG == zend_hash_get_current_key_ex(Z_ARRVAL_P(mimeoverride), &key, &keylen, &intkey, 0, NULL)) {
-				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Key of MIME type overrides array must be a file extension, was \"%d\"", intkey);
+			if (SUCCESS == zend_hash_find(Z_ARRVAL_P(mimeoverride), ext, strlen(ext)+1, (void **) &val)) {
+				switch (Z_TYPE_PP(val)) {
+					case IS_LONG :
+						if (Z_LVAL_PP(val) == PHAR_MIME_PHP || Z_LVAL_PP(val) == PHAR_MIME_PHPS) {
+							mime_type = "";
+							code = Z_LVAL_PP(val);
+						} else {
+							zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unknown mime type specifier used, only Phar::PHP, Phar::PHPS and a mime type string are allowed");
 #ifdef PHP_WIN32
-				efree(fname);
+							efree(fname);
 #endif
-				RETURN_FALSE;
-			}
-
-			PHAR_STR(key, str_key);
-
-			if (FAILURE == zend_hash_get_current_data(Z_ARRVAL_P(mimeoverride), (void **) &val)) {
-				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Failed to retrieve Mime type for extension \"%s\"", str_key);
-#ifdef PHP_WIN32
-				efree(fname);
-#endif
-				RETURN_FALSE;
-			}
-			switch (Z_TYPE_PP(val)) {
-				case IS_LONG :
-					if (Z_LVAL_PP(val) == PHAR_MIME_PHP || Z_LVAL_PP(val) == PHAR_MIME_PHPS) {
-						PHAR_SET_USER_MIME((char) Z_LVAL_PP(val))
-					} else {
-						zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unknown mime type specifier used, only Phar::PHP, Phar::PHPS and a mime type string are allowed");
+							RETURN_FALSE;
+						}
+						break;
+					case IS_STRING :
+						mime_type = Z_STRVAL_PP(val);
+						code = PHAR_MIME_OTHER;
+						break;
+					default :
+						zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unknown mime type specifier used (not a string or int), only Phar::PHP, Phar::PHPS and a mime type string are allowed");
 #ifdef PHP_WIN32
 						efree(fname);
 #endif
 						RETURN_FALSE;
-					}
-					break;
-				case IS_STRING :
-					PHAR_SET_USER_MIME(PHAR_MIME_OTHER)
-					break;
-				default :
-					zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unknown mime type specifier used (not a string or int), only Phar::PHP, Phar::PHPS and a mime type string are allowed");
-#ifdef PHP_WIN32
-					efree(fname);
-#endif
-					RETURN_FALSE;
+				}
 			}
 		}
 	}
 
-no_mimes:
-	code = phar_file_type(&mimetypes, entry, &mime_type TSRMLS_CC);
-	zend_hash_destroy(&mimetypes);
-	ret = phar_file_action(phar, info, mime_type, code, entry, entry_len, fname, fname_len, pt, strlen(pt), ru, ru_len TSRMLS_CC);
+	if (!mime_type) {
+		code = phar_file_type(&PHAR_G(mime_types), entry, &mime_type TSRMLS_CC);
+	}
+	ret = phar_file_action(phar, info, mime_type, code, entry, entry_len, fname, fname_len, pt, ru, ru_len TSRMLS_CC);
 }
 /* }}} */
 
@@ -874,7 +818,6 @@ no_mimes:
 PHP_METHOD(Phar, mungServer)
 {
 	zval *mungvalues;
-	int php_self = 0, request_uri = 0, script_name = 0, script_filename = 0;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &mungvalues) == FAILURE) {
 		return;
 	}
@@ -901,35 +844,19 @@ PHP_METHOD(Phar, mungServer)
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Non-string value passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
 			return;
 		}
-		if (!php_self && Z_STRLEN_PP(data) == sizeof("PHP_SELF")-1 && !strncmp(Z_STRVAL_PP(data), "PHP_SELF", sizeof("PHP_SELF")-1)) {
-			if (SUCCESS != zend_hash_add_empty_element(&(PHAR_GLOBALS->phar_SERVER_mung_list), "PHP_SELF", sizeof("PHP_SELF")-1)) {
-				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unable to add PHP_SELF to Phar::mungServer() list of values to mung");
-				return;
-			}
-			php_self = 1;
+		if (Z_STRLEN_PP(data) == sizeof("PHP_SELF")-1 && !strncmp(Z_STRVAL_PP(data), "PHP_SELF", sizeof("PHP_SELF")-1)) {
+			PHAR_GLOBALS->phar_SERVER_mung_list |= PHAR_MUNG_PHP_SELF;
 		}
 		if (Z_STRLEN_PP(data) == sizeof("REQUEST_URI")-1) {
-			if (!request_uri && !strncmp(Z_STRVAL_PP(data), "REQUEST_URI", sizeof("REQUEST_URI")-1)) {
-				if (SUCCESS != zend_hash_add_empty_element(&(PHAR_GLOBALS->phar_SERVER_mung_list), "REQUEST_URI", sizeof("REQUEST_URI")-1)) {
-					zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unable to add REQUEST_URI to Phar::mungServer() list of values to mung");
-					return;
-				}
-				request_uri = 1;
+			if (!strncmp(Z_STRVAL_PP(data), "REQUEST_URI", sizeof("REQUEST_URI")-1)) {
+				PHAR_GLOBALS->phar_SERVER_mung_list |= PHAR_MUNG_REQUEST_URI;
 			}
-			if (!script_name && !strncmp(Z_STRVAL_PP(data), "SCRIPT_NAME", sizeof("SCRIPT_NAME")-1)) {
-				if (SUCCESS != zend_hash_add_empty_element(&(PHAR_GLOBALS->phar_SERVER_mung_list), "SCRIPT_NAME", sizeof("SCRIPT_NAME")-1)) {
-					zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unable to add SCRIPT_NAME to Phar::mungServer() list of values to mung");
-					return;
-				}
-				script_name = 1;
+			if (!strncmp(Z_STRVAL_PP(data), "SCRIPT_NAME", sizeof("SCRIPT_NAME")-1)) {
+				PHAR_GLOBALS->phar_SERVER_mung_list |= PHAR_MUNG_SCRIPT_NAME;
 			}
 		}
-		if (!script_filename && Z_STRLEN_PP(data) == sizeof("SCRIPT_FILENAME")-1 && !strncmp(Z_STRVAL_PP(data), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME")-1)) {
-			if (SUCCESS != zend_hash_add_empty_element(&(PHAR_GLOBALS->phar_SERVER_mung_list), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME")-1)) {
-				zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unable to add SCRIPT_FILENAME to Phar::mungServer() list of values to mung");
-				return;
-			}
-			script_filename = 1;
+		if (Z_STRLEN_PP(data) == sizeof("SCRIPT_FILENAME")-1 && !strncmp(Z_STRVAL_PP(data), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME")-1)) {
+			PHAR_GLOBALS->phar_SERVER_mung_list |= PHAR_MUNG_SCRIPT_FILENAME;
 		}
 	}
 }
@@ -1948,7 +1875,7 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 	}
 
 	oldpath = estrndup(phar->fname, phar->fname_len);
-	oldname = strrchr(phar->fname, '/');
+	oldname = zend_memrchr(phar->fname, '/', phar->fname_len);
 	++oldname;
 
 	basename = estrndup(oldname, strlen(oldname));
@@ -3777,7 +3704,7 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 		return FAILURE;
 	}
 	/* perform dirname */
-	slash = strrchr(entry->filename, '/');
+	slash = zend_memrchr(entry->filename, '/', entry->filename_len);
 	if (slash) {
 		fullpath[dest_len + (slash - entry->filename) + 1] = '\0';
 	} else {
