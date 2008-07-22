@@ -35,6 +35,7 @@
 #include "spl_directory.h"
 #include "spl_array.h"
 #include "spl_exceptions.h"
+#include "spl_observer.h"
 #include "ext/standard/php_smart_str.h"
 
 #ifdef accept

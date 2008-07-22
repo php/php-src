@@ -1,6 +1,6 @@
 <?php
 /** @file multipleiterator.inc
- * @ingroup Examples
+ * @ingroup SPL
  * @brief class MultipleIterator
  * @author  Johannes Schlueter
  * @author  Marcus Boerger
@@ -9,7 +9,7 @@
  * SPL - Standard PHP Library
  */
 
-/** @ingroup Examples
+/** @ingroup SPL
  * @brief   Iterator that iterates over several iterators one after the other
  * @author  Johannes Schlueter
  * @author  Marcus Boerger
