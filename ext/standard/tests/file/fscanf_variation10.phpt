@@ -68,7 +68,7 @@ foreach($float_formats as $float_format) {
 
 // closing the resources
 fclose($fp);
-fclose($dfp);
+closedir($dfp);
 
 echo "\n*** Done ***";
 ?>

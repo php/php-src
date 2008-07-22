@@ -191,6 +191,8 @@ struct _php_stream_wrapper	{
 	
 #define PHP_STREAM_FLAG_IS_DIR						64
 
+#define PHP_STREAM_FLAG_FCLOSE						128
+
 struct _php_stream  {
 	php_stream_ops *ops;
 	void *abstract;  		/* convenience pointer for abstraction */

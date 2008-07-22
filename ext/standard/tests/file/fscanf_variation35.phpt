@@ -63,7 +63,7 @@ foreach($hexa_formats as $hexa_format) {
 
 // closing the resources
 fclose($fp);
-fclose($dfp);
+closedir($dfp);
 
 echo "\n*** Done ***";
 ?>
