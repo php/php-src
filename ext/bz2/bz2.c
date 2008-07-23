@@ -247,7 +247,6 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 			if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void **) &fd, REPORT_ERRORS)) {
 				bz_file = BZ2_bzdopen(fd, mode);
 			}
-			stream->flags |= PHP_STREAM_FLAG_FCLOSE;
 		}
 
 		/* remove the file created by php_stream_open_wrapper(), it is not needed since BZ2 functions
@@ -261,7 +260,6 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 	if (bz_file) {
 		retstream = _php_stream_bz2open_from_BZFILE(bz_file, mode, stream STREAMS_REL_CC TSRMLS_CC);
 		if (retstream) {
-			retstream->flags |= PHP_STREAM_FLAG_FCLOSE;
 			return retstream;
 		}
 
