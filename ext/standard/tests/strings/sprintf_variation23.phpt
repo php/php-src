@@ -75,4 +75,6 @@ string(1) ""
 string(1) ""
 string(11) "a-bA-B@#$&]"
 string(1) "c"
+
+Warning: fclose(): %d is not a valid stream resource in %s on line %d
 Done
