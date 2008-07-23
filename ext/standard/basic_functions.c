@@ -4928,65 +4928,17 @@ error options:
    Send an error message somewhere */
 PHP_FUNCTION(error_log)
 {
-	zval **string, **erropt = NULL, **option = NULL, **emailhead = NULL;
-	int opt_err = 0;
 	char *message, *opt = NULL, *headers = NULL;
+	int message_len, opt_len, headers_len;
+	int opt_err = 0, argc = ZEND_NUM_ARGS();
+	long erropt;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1, &string) == FAILURE) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument 1 invalid");
-				RETURN_FALSE;
-			}
-			break;
-
-		case 2:
-			if (zend_get_parameters_ex(2, &string, &erropt) == FAILURE) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid arguments");
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(erropt);
-			opt_err = Z_LVAL_PP(erropt);
-			break;
-
-		case 3:
-			if (zend_get_parameters_ex(3, &string, &erropt, &option) == FAILURE) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid arguments");
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(erropt);
-			opt_err = Z_LVAL_PP(erropt);
-			convert_to_string_ex(option);
-			opt = Z_STRVAL_PP(option);
-			break;
-
-		case 4:
-			if (zend_get_parameters_ex (4, &string, &erropt, &option, &emailhead) == FAILURE) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid arguments");
-				RETURN_FALSE;
-			}
-			break;
-
-		default:
-			WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(argc TSRMLS_CC, "s|lss", &message, &message_len, &erropt, &opt, &opt_len, &headers, &headers_len) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(string);
-	message = Z_STRVAL_PP(string);
-
-	if (erropt != NULL) {
-		convert_to_long_ex(erropt);
-		opt_err = Z_LVAL_PP(erropt);
-	}
-
-	if (option != NULL) {
-		convert_to_string_ex(option);
-		opt = Z_STRVAL_PP(option);
-	}
-
-	if (emailhead != NULL) {
-		convert_to_string_ex(emailhead);
-		headers = Z_STRVAL_PP(emailhead);
+	if (argc > 1) {
+		opt_err = erropt;
 	}
 
 	if (_php_error_log(opt_err, message, opt, headers TSRMLS_CC) == FAILURE) {

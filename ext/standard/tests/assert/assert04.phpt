@@ -30,11 +30,11 @@ echo "not reached\n";
  
 ?>
 --EXPECTF--
-Warning: Wrong parameter count for assert() in %s on line %d
+Warning: assert() expects exactly 1 parameter, 2 given in %s on line %d
 
-Warning: Wrong parameter count for assert_options() in %s on line %d
+Warning: assert_options() expects at most 2 parameters, 3 given in %s on line %d
 
-Warning: assert_options(): Unknown value 0 in %s on line %d
+Warning: assert_options() expects parameter 1 to be long, Unicode string given in %s on line %d
 
 Warning: assert(): Assertion failed in %s on line %d
 
