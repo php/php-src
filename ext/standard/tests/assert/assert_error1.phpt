@@ -34,11 +34,11 @@ var_dump($r2=assert($sa,1));
 //Catch recoverable error with handler
 var_dump($rc=assert('aa=sd+as+safsafasfaçsafçsafç'));
 --EXPECTF--
-Warning: Wrong parameter count for assert_options() in %s on line 14
+Warning: assert_options() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: assert_options(): Unknown value 0 in %s on line 18
-bool(false)
+Warning: assert_options() expects parameter 1 to be long, Unicode string given in %s on line %d
+NULL
 
-Warning: Wrong parameter count for assert() in %s on line 22
+Warning: assert() expects exactly 1 parameter, 2 given in %s on line %d
 NULL

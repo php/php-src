@@ -149,8 +149,8 @@ PHP_FUNCTION(assert)
 		RETURN_TRUE;
 	}
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &assertion) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &assertion) == FAILURE) {
+		return;
 	}
 
 	if (Z_TYPE_PP(assertion) == IS_STRING || Z_TYPE_PP(assertion) == IS_UNICODE) {
@@ -262,17 +262,16 @@ PHP_FUNCTION(assert)
    Set/get the various assert flags */
 PHP_FUNCTION(assert_options)
 {
-	zval **what, **value;
+	zval **value;
+	long what;
 	int oldint;
 	int ac = ZEND_NUM_ARGS();
 
-	if (ac < 1 || ac > 2 || zend_get_parameters_ex(ac, &what, &value) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ac TSRMLS_CC, "l|Z", &what, &value) == FAILURE) {
+		return;
 	}
 
-	convert_to_long_ex(what);
-
-	switch (Z_LVAL_PP(what)) {
+	switch (what) {
 	case ASSERT_ACTIVE:
 		oldint = ASSERTG(active);
 		if (ac == 2) {
@@ -328,7 +327,7 @@ PHP_FUNCTION(assert_options)
 		break;
 
 	default:
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown value %ld", Z_LVAL_PP(what));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown value %ld", what);
 		break;
 	}
 
