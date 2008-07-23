@@ -58,6 +58,11 @@ NO_PROC_OPEN_ERROR;
 exit;
 }
 
+// If timezone is not set, use UTC.
+if (ini_get('date.timezone') == '') {
+	date_default_timezone_set('UTC');
+}
+
 // store current directory
 $CUR_DIR = getcwd();
 
@@ -75,6 +80,8 @@ putenv('SSH_CONNECTION=deleted');
 
 $cwd = getcwd();
 set_time_limit(0);
+
+ini_set('pcre.backtrack_limit', PHP_INT_MAX);
 
 $valgrind_version = 0;
 
