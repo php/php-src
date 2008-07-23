@@ -1,5 +1,5 @@
 --TEST--
-Bug #39858 (http://bugs.php.net/bug.php?id=39858)
+Bug #39858 (Lost connection to MySQL server during query by a repeated call stored proced)
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
