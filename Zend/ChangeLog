@@ -1,3 +1,25 @@
+2008-07-22  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * zend_closures.c
+      zend_closures.c:
+      ws
+
+2008-07-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_closures.c
+      zend_closures.c
+      tests/closure_022.phpt
+      tests/closure_022.phpt
+      tests/closure_022.phpt:
+      Closure object cannot have properties
+
+2008-07-22  Derick Rethans  <php@derickrethans.nl>
+
+    * tests/bug20242.phpt
+      tests/bug20242.phpt
+      tests/bug20242.phpt:
+      - This test works fine (patch by Lars Strojny)
+
 2008-07-21  Felipe Pena  <felipensp@gmail.com>
 
     * tests/error_reporting01.phpt
