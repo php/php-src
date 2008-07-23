@@ -1,3 +1,403 @@
+2008-07-22  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli_nonapi.c:
+      MFH: Two less failing tests, one of which was definitely a leak in mysqli
+      with mysqlnd
+           and pconn. ext/mysql is being fixed with a better fix for similar
+      leak.
+
+    * ext/mysql/php_mysql.c
+      ext/mysqli/mysqli_nonapi.c:
+      Two less failing tests, one of which was definitely a leak in mysqli with
+      mysqlnd
+      and pconn. ext/mysql is being fixed with a better fix for similar leak.
+
+2008-07-22  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      NEWS
+      ext/spl/php_spl.c
+      ext/spl/spl_iterators.h
+      ext/spl/spl_observer.c
+      ext/spl/spl_observer.h
+      ext/spl/examples/multipleiterator.inc
+      ext/spl/internal/multipleiterator.inc
+      ext/spl/internal/recursivetreeiterator.inc
+      ext/spl/tests/multiple_iterator_001.phpt:
+      - MFH Add MultipleIterator (Arnaud, Marcus)
+
+    * ext/spl/internal/multipleiterator.inc
+      ext/spl/internal/multipleiterator.inc
+      ext/spl/internal/recursivetreeiterator.inc
+      ext/spl/tests/multiple_iterator_001.phpt
+      ext/spl/tests/multiple_iterator_001.phpt:
+      
+      - Add MultipleIterator (Arnaud, Marcus)
+
+    * ext/spl/php_spl.c
+      ext/spl/spl_iterators.c
+      ext/spl/spl_iterators.h
+      ext/spl/spl_observer.c
+      ext/spl/spl_observer.h
+      ext/spl/examples/multipleiterator.inc:
+      - Add MultipleIterator (Arnaud, Marcus)
+
+2008-07-22  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/intl/intl_data.h
+      ext/intl/collator/collator_class.h
+      ext/intl/collator/collator_create.c
+      ext/intl/dateformat/dateformat.c
+      ext/intl/dateformat/dateformat_attr.c
+      ext/intl/dateformat/dateformat_class.c
+      ext/intl/dateformat/dateformat_class.h
+      ext/intl/dateformat/dateformat_format.c
+      ext/intl/dateformat/dateformat_parse.c
+      ext/intl/formatter/formatter_main.c
+      ext/intl/msgformat/msgformat.c
+      ext/intl/msgformat/msgformat_attr.c
+      ext/intl/msgformat/msgformat_data.c
+      ext/intl/msgformat/msgformat_data.h
+      ext/intl/msgformat/msgformat_format.c
+      ext/intl/msgformat/msgformat_parse.c
+      ext/intl/tests/collator_asort.phpt
+      ext/intl/tests/collator_sort.phpt
+      ext/intl/tests/collator_sort_with_sort_keys.phpt
+      ext/intl/tests/formatter_fail.phpt
+      ext/intl/tests/grapheme.phpt
+      ext/intl/tests/msgfmt_fail.phpt
+      ext/intl/tests/normalizer_normalize.phpt
+      ext/intl/tests/ut_common.inc:
+      MFB: constructors fixes and cleanup
+
+2008-07-22  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/standard/exec.c:
+      MFB: Fix windows build error.
+
+    * (PHP_5_3)
+      ext/standard/exec.c:
+      Fix windows build error.
+
+2008-07-22  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      ext/intl/collator/collator_create.c
+      ext/intl/dateformat/dateformat.c
+      ext/intl/formatter/formatter_main.c
+      ext/intl/msgformat/msgformat.c:
+      use correct locale check
+
+    * (PHP_5_3)
+      ext/intl/msgformat/msgformat.c
+      ext/intl/msgformat/msgformat_data.h:
+      typofixes
+
+    * (PHP_5_3)
+      ext/intl/intl_data.h
+      ext/intl/collator/collator_class.h
+      ext/intl/collator/collator_create.c
+      ext/intl/dateformat/dateformat.c
+      ext/intl/dateformat/dateformat_attr.c
+      ext/intl/dateformat/dateformat_class.c
+      ext/intl/dateformat/dateformat_class.h
+      ext/intl/dateformat/dateformat_format.c
+      ext/intl/dateformat/dateformat_parse.c
+      ext/intl/formatter/formatter_main.c
+      ext/intl/msgformat/msgformat.c
+      ext/intl/msgformat/msgformat_attr.c
+      ext/intl/msgformat/msgformat_data.c
+      ext/intl/msgformat/msgformat_format.c
+      ext/intl/msgformat/msgformat_parse.c
+      ext/intl/tests/formatter_fail.phpt
+      ext/intl/tests/msgfmt_fail.phpt:
+      refactor ctors, cleanup code
+
+2008-07-22  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      run-tests.php:
+      - MFH: The error level must be E_ALL | E_STRICT.
+
+    * run-tests.php:
+      - The error level must be E_ALL | E_STRICT.
+
+2008-07-22  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/pdo_mysql/tests/bug_42499.phpt
+      ext/pdo_mysql/tests/bug_pecl_12925.phpt
+      ext/pdo_mysql/tests/bug_pecl_7976.phpt
+      ext/pdo_mysql/tests/pdo_mysql___construct_uri.phpt
+      ext/pdo_mysql/tests/pdo_mysql_attr_case.phpt
+      ext/pdo_mysql/tests/pdo_mysql_fetch_both.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native_placeholder_everywhere.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_fetch_serialize.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_fetchobject.phpt:
+      Fixing some tests to expect unicode instead of (binary) strings.
+
+2008-07-22  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysql/php_mysql.c:
+      Fix a leak with pconn and mysqlnd
+
+2008-07-22  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/json/json.c:
+      MFB:- Fixed bug #38680 (Added missing handling of basic types in
+      json_decode)
+
+2008-07-22  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/standard/exec.c
+      ext/standard/tests/general_functions/escapeshellcmd-win32.phpt:
+      MFH: Add test for escapeshellcmd and restore previous behaviour with
+      stripping % on Windows.
+
+    * ext/standard/exec.c
+      ext/standard/tests/general_functions/escapeshellcmd-win32.phpt
+      ext/standard/tests/general_functions/escapeshellcmd-win32.phpt:
+      Add test for escapeshellcmd and restore previous behaviour with stripping %
+      on Windows.
+
+2008-07-22  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysqlnd/mysqlnd_ps_codec.c
+      ext/mysqlnd/mysqlnd_wireprotocol.c:
+      More debugging info for the trace log
+
+    * ext/mysqlnd/mysqlnd_ps_codec.c
+      ext/mysqlnd/mysqlnd_wireprotocol.c:
+      More debugging info
+
+2008-07-22  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/json/php_json.h:
+      MFB: sync
+
+    * ext/json/json.c:
+      ws + cs + sync with PHP_5_3
+
+    * (PHP_5_3)
+      ext/json/json.c:
+      ws + cs
+
+    * ext/json/tests/bug41504.phpt
+      ext/json/tests/bug41567.phpt:
+      - Add missing tests (thanks for being so fucking lazy Ilia!)
+
+2008-07-22  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN: #44246
+
+    * (PHP_5_2)
+      ext/standard/file.c
+      ext/standard/file.c
+      ext/standard/fsock.c
+      ext/standard/fsock.c
+      ext/standard/proc_open.c
+      ext/standard/proc_open.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.c
+      ext/standard/tests/file/fscanf_variation10.phpt
+      ext/standard/tests/file/fscanf_variation10.phpt
+      ext/standard/tests/file/fscanf_variation16.phpt
+      ext/standard/tests/file/fscanf_variation16.phpt
+      ext/standard/tests/file/fscanf_variation22.phpt
+      ext/standard/tests/file/fscanf_variation22.phpt
+      ext/standard/tests/file/fscanf_variation29.phpt
+      ext/standard/tests/file/fscanf_variation29.phpt
+      ext/standard/tests/file/fscanf_variation35.phpt
+      ext/standard/tests/file/fscanf_variation35.phpt
+      ext/standard/tests/file/fscanf_variation4.phpt
+      ext/standard/tests/file/fscanf_variation4.phpt
+      ext/standard/tests/file/fscanf_variation41.phpt
+      ext/standard/tests/file/fscanf_variation41.phpt
+      ext/standard/tests/file/fscanf_variation47.phpt
+      ext/standard/tests/file/fscanf_variation47.phpt
+      main/php_streams.h
+      main/php_streams.h
+      sapi/cli/php_cli.c
+      sapi/cli/php_cli.c:
+      - MFH: Fixed bug #44246 (closedir() accepts a file resource opened by
+      fopen())
+
+    * ext/standard/file.c
+      ext/standard/fsock.c
+      ext/standard/proc_open.c
+      ext/standard/streamsfuncs.c
+      ext/standard/tests/file/fscanf_variation10.phpt
+      ext/standard/tests/file/fscanf_variation16.phpt
+      ext/standard/tests/file/fscanf_variation22.phpt
+      ext/standard/tests/file/fscanf_variation29.phpt
+      ext/standard/tests/file/fscanf_variation35.phpt
+      ext/standard/tests/file/fscanf_variation4.phpt
+      ext/standard/tests/file/fscanf_variation41.phpt
+      ext/standard/tests/file/fscanf_variation47.phpt
+      ext/standard/tests/strings/sprintf_variation23.phpt
+      main/php_streams.h
+      sapi/cli/php_cli.c:
+      - Fixed bug #44246 (closedir() accepts a file resource opened by fopen())
+
+2008-07-22  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/libxml/libxml.c
+      ext/libxml/php_libxml.h:
+      - Visibility (bug #45557)
+
+2008-07-22  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/standard/info.c:
+      - fix build
+
+2008-07-22  Steph Fox  <steph.fox@virgin.net>
+
+    * run-tests.php:
+      - Add missing help text
+
+2008-07-22  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_3)
+      ext/mbstring/php_mbregex.c:
+      - Remove duplicated lines.
+
+2008-07-22  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ZendEngine2/zend_closures.c
+      ZendEngine2/zend_closures.c:
+      ws
+
+2008-07-22  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Back to dev.
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - RC1.
+
+    * (PHP_4_4)
+      NEWS:
+      - Added missing NEWS items.
+
+2008-07-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_closures.c
+      ZendEngine2/zend_closures.c
+      ZendEngine2/tests/closure_022.phpt
+      ZendEngine2/tests/closure_022.phpt
+      ZendEngine2/tests/closure_022.phpt:
+      Closure object cannot have properties
+
+2008-07-22  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/tests/bug20242.phpt
+      ZendEngine2/tests/bug20242.phpt
+      ZendEngine2/tests/bug20242.phpt:
+      - This test works fine (patch by Lars Strojny)
+
+2008-07-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/tests/bugs/bug39815.phpt
+      ext/soap/tests/bugs/bug39815.phpt:
+      Fixed test
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/tests/frontcontroller11.phpt
+      ext/phar/tests/files/frontcontroller5.phar
+      ext/phar/tests/files/frontcontroller6.phar
+      ext/phar/tests/files/frontcontroller6.phar.inc
+      ext/phar/tests/files/frontcontroller7.phar
+      ext/phar/tests/files/frontcontroller7.phar.inc
+      ext/phar/tests/tar/frontcontroller11.phar.phpt
+      ext/phar/tests/tar/files/frontcontroller6.phar.inc
+      ext/phar/tests/tar/files/frontcontroller6.phar.tar
+      ext/phar/tests/tar/files/frontcontroller7.phar.inc
+      ext/phar/tests/tar/files/frontcontroller7.phar.tar
+      ext/phar/tests/zip/frontcontroller11.phar.phpt
+      ext/phar/tests/zip/files/frontcontroller6.phar.inc
+      ext/phar/tests/zip/files/frontcontroller6.phar.zip
+      ext/phar/tests/zip/files/frontcontroller7.phar.inc
+      ext/phar/tests/zip/files/frontcontroller7.phar.zip:
+      Improved webPhar speed (frontcontroller11.phar.phpt is disabled, should be
+      removed)
+
+2008-07-22  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/pdo_oci/oci_statement.c
+      ext/pdo_oci/tests/bug44301.phpt:
+      - MFH: Segfault when an exception is thrown on persistent connections
+
+    * ext/pdo_oci/oci_statement.c
+      ext/pdo_oci/tests/bug44301.phpt
+      ext/pdo_oci/tests/bug44301.phpt:
+      - Segfault when an exception is thrown on persistent connections
+
+2008-07-22  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/soap/soap.c
+      ext/soap/tests/any.phpt
+      ext/soap/tests/classmap002.phpt
+      ext/soap/tests/classmap003.phpt
+      ext/soap/tests/classmap004.phpt
+      ext/soap/tests/transport001.phpt
+      ext/soap/tests/typemap003.phpt
+      ext/soap/tests/typemap004.phpt
+      ext/soap/tests/typemap007.phpt
+      ext/soap/tests/typemap008.phpt
+      ext/soap/tests/typemap011.phpt
+      ext/soap/tests/typemap012.phpt
+      ext/soap/tests/bugs/bug28969.phpt
+      ext/soap/tests/bugs/bug29795.phpt
+      ext/soap/tests/bugs/bug29839.phpt
+      ext/soap/tests/bugs/bug29844.phpt
+      ext/soap/tests/bugs/bug30045.phpt
+      ext/soap/tests/bugs/bug30106.phpt
+      ext/soap/tests/bugs/bug30175.phpt
+      ext/soap/tests/bugs/bug30928.phpt
+      ext/soap/tests/bugs/bug31695.phpt
+      ext/soap/tests/bugs/bug32776.phpt
+      ext/soap/tests/bugs/bug32941.phpt
+      ext/soap/tests/bugs/bug34449.phpt
+      ext/soap/tests/bugs/bug34453.phpt
+      ext/soap/tests/bugs/bug34643.phpt
+      ext/soap/tests/bugs/bug35142.phpt
+      ext/soap/tests/bugs/bug35273.phpt
+      ext/soap/tests/bugs/bug36226-2.phpt
+      ext/soap/tests/bugs/bug36226.phpt
+      ext/soap/tests/bugs/bug36999.phpt
+      ext/soap/tests/bugs/bug37083.phpt
+      ext/soap/tests/bugs/bug38004.phpt
+      ext/soap/tests/bugs/bug38005.phpt
+      ext/soap/tests/bugs/bug38055.phpt
+      ext/soap/tests/bugs/bug38067.phpt
+      ext/soap/tests/bugs/bug38536.phpt
+      ext/soap/tests/bugs/bug39121.phpt
+      ext/soap/tests/bugs/bug42692.phpt:
+      - Added arginfo
+
+2008-07-22  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/strrpos_offset.phpt
+      ext/standard/tests/strings/strrpos_offset.phpt:
+      Fix integer oveflow in strrpos()
+
 2008-07-21  Felipe Pena  <felipensp@gmail.com>
 
     * ZendEngine2/tests/error_reporting01.phpt
