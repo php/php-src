@@ -140,7 +140,6 @@ php_stream *php_stream_zip_open(char *filename, char *path, char *mode STREAMS_D
 	if (!stream) {
 		return NULL;
 	} else {
-		stream->flags |= PHP_STREAM_FLAG_FCLOSE;
 		return stream;
 	}
 
