@@ -21,7 +21,7 @@ $extra_arg = 10;
 var_dump( gethostbynamel($hostname, $extra_arg) );
 
 echo "\n-- Testing gethostbynamel() with an unknown host --\n";
-$hostname = 'unknownhost_zzz_xxx_yyy';
+$hostname = 'unknownhost_zzz_xxx_yyy.';
 var_dump( gethostbynamel($hostname) );
 
 echo "Done";
