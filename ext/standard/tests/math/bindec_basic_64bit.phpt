@@ -4,6 +4,8 @@ Test bindec() - basic function test bindec()
 <?php
 if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
+--INI--
+precision=14
 --FILE--
 <?php
 $values = array(111000111,
