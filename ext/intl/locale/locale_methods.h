@@ -43,5 +43,6 @@ PHP_FUNCTION( locale_parse);
 PHP_FUNCTION( locale_filter_matches);
 PHP_FUNCTION( locale_lookup);
 PHP_FUNCTION( locale_canonicalize);
+PHP_FUNCTION( locale_accept_from_http);
 
 #endif // LOCALE_METHODS_H
