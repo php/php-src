@@ -49,6 +49,7 @@
  * - class AppendIterator implements OuterIterator
  * - class RegexIterator extends FilterIterator
  * - class RecursiveRegexIterator extends RegexIterator implements RecursiveIterator
+ * - class MultipleIterator extends Iterator
  *
  * 2) Directories and Files
  *
@@ -75,6 +76,7 @@
  * - class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
  * - class ArrayIterator implements Iterator, ArrayAccess, Countable, SeekableIterator
  * - class RecursiveArrayIterator extends ArrayIterator implements RecursiveIterator
+ * - class SplFixedArray implements Iterator, ArrayAccess, Countable
  *
  * As the above suggest an ArrayObject creates an ArrayIterator when it comes to
  * iteration (e.g. ArrayObject instance used inside foreach).
