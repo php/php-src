@@ -971,7 +971,7 @@ PHP_FUNCTION(proc_open)
 					zval *retfp;
 
 					/* nasty hack; don't copy it */
-					stream->flags |= PHP_STREAM_FLAG_NO_SEEK | PHP_STREAM_FLAG_FCLOSE;
+					stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
 
 					if (UG(unicode) && !binary_pipes) {
 						if (write_stream) {
