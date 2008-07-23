@@ -249,6 +249,9 @@ PHP                                                                        NEWS
 - Fixed bug #43808 (date_create never fails (even when it should)). (Derick)
 - Fixed bug #43527 (DateTime created from a timestamp reports environment
   timezone). (Derick)
+- Fixed bug #43452 (strings containing a weekday, or a number plus weekday
+  behaved incorrect of the current day-of-week was the same as the one in the
+  phrase). (Derick)
 - Fixed bug #43426 (crash on nested call_user_func() calls). (Dmitry)
 - Fixed bug #43323 (Wrong count abstract methods). (Felipe, Dmitry)
 - Fixed bug #43261 (Use ^ as the escape with escapeshellcmd() on Windows). (Scott)
