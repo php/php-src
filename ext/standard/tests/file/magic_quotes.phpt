@@ -69,7 +69,9 @@ Deprecated: Function set_magic_quotes_runtime() is deprecated in %s on line %d
 bool(true)
 
 Deprecated: Function set_magic_quotes_runtime() is deprecated in %s on line %d
-bool(false)
+
+Warning: set_magic_quotes_runtime() expects exactly 1 parameter, 0 given in %s on line %d
+NULL
 int(0)
 string(27) "some'content'here"and}there"
 Done
