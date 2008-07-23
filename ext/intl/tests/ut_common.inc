@@ -352,8 +352,8 @@ function ut_loc_locale_lookup( $lang_tag_arr,$loc_range,$isCanonical,$default_lo
     return $GLOBALS['oo-mode'] ? Locale::lookup( $lang_tag_arr,$loc_range,$isCanonical,$default_loc ) : locale_lookup( $lang_tag_arr,$loc_range,$isCanonical,$default_loc );
 }
 function ut_loc_accept_http($http) {
-       return $GLOBALS['oo-mode'] ? Locale::acceptFromHttp($http):locale_accept_from_http($http);^
-
+       return $GLOBALS['oo-mode'] ? Locale::acceptFromHttp($http):locale_accept_from_http($http);
+}
 /* MessageFormatter functions */
 function ut_msgfmt_create( $locale, $pattern)
 {
