@@ -1,5 +1,5 @@
 --TEST--
-Bug #43371 (http://bugs.php.net/bug.php?id=43371)
+Bug #43371 (Memory errors in PDO constructor)
 --SKIPIF--
 <?php
 <?php

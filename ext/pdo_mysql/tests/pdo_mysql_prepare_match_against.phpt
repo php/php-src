@@ -1,5 +1,5 @@
 --TEST--
-MySQL PDO->prepare(MATCH ... AGAINST (:placeholder)) - similar: http://bugs.php.net/bug.php?id=41876
+Bug #41876 (bindParam() and bindValue() do not work with MySQL MATCH () AGAINST ())
 --SKIPIF--
 <?php
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');

@@ -1,5 +1,5 @@
 --TEST--
-Bug #44454 (http://bugs.php.net/bug.php?id=44454)
+Bug #44454 (Unexpected exception thrown in foreach() statement)
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
