@@ -1848,7 +1848,7 @@ ZEND_END_ARG_INFO()
 static const zend_function_entry spl_FilesystemIterator_functions[] = {
 	SPL_ME(FilesystemIterator, __construct,   arginfo_r_dir___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(FilesystemIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(DirectoryIterator, next,           NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator,  next,          NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(FilesystemIterator, key,           NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(FilesystemIterator, current,       NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(FilesystemIterator, getFlags,      NULL, ZEND_ACC_PUBLIC)
@@ -2769,6 +2769,7 @@ PHP_MINIT_FUNCTION(spl_directory)
 	REGISTER_SPL_CLASS_CONST_LONG(FilesystemIterator, "KEY_AS_PATHNAME",     SPL_FILE_DIR_KEY_AS_PATHNAME);
 	REGISTER_SPL_CLASS_CONST_LONG(FilesystemIterator, "KEY_AS_FILENAME",     SPL_FILE_DIR_KEY_AS_FILENAME);
 	REGISTER_SPL_CLASS_CONST_LONG(FilesystemIterator, "NEW_CURRENT_AND_KEY", SPL_FILE_DIR_KEY_AS_FILENAME|SPL_FILE_DIR_CURRENT_AS_FILEINFO);
+	REGISTER_SPL_CLASS_CONST_LONG(FilesystemIterator, "SKIP_DOTS",           SPL_FILE_DIR_SKIPDOTS);
 
 	spl_ce_FilesystemIterator->get_iterator = spl_filesystem_tree_get_iterator;
 
