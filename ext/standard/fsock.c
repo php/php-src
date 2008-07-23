@@ -79,8 +79,6 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	stream = php_stream_xport_create(hostname, hostname_len, REPORT_ERRORS,
 			STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, hashkey, &tv, NULL, &errstr, &err);
 
-	stream->flags |= PHP_STREAM_FLAG_FCLOSE;
-
 	if (port > 0) {
 		efree(hostname);
 	}
