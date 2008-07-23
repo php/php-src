@@ -278,6 +278,7 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( locale_filter_matches, locale_3_args )
 	PHP_FE( locale_canonicalize, locale_1_arg )
 	PHP_FE( locale_lookup, locale_4_args )
+	PHP_FE( locale_accept_from_http, locale_1_arg )
 
 	// MessageFormatter functions
 	PHP_FE( msgfmt_create, NULL )

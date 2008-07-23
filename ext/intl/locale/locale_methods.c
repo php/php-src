@@ -21,12 +21,14 @@
 #include <unicode/ustring.h>
 #include <unicode/udata.h>
 #include <unicode/putil.h>
+#include <unicode/ures.h>
 
 #include "php_intl.h"
 #include "locale.h"
 #include "locale_class.h"
 #include "locale_methods.h"
 #include "intl_convert.h"
+#include "intl_data.h"
 
 #include <zend_API.h>
 #include <zend.h>
@@ -424,12 +426,10 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-/* {{{
- * proto public static string Locale::getScript($locale) 
+/* {{{ proto static string Locale::getScript($locale) 
  * gets the script for the $locale 
  }}} */
-/* {{{
- * proto public static string locale_get_script($locale) 
+/* {{{ proto static string locale_get_script($locale) 
  * gets the script for the $locale 
  */
 PHP_FUNCTION( locale_get_script ) 
@@ -438,12 +438,10 @@ PHP_FUNCTION( locale_get_script )
 }
 /* }}} */
 
-/* {{{
- * proto public static string Locale::getRegion($locale) 
+/* {{{ proto static string Locale::getRegion($locale) 
  * gets the region for the $locale 
  }}} */
-/* {{{
- * proto public static string locale_get_region($locale) 
+/* {{{ proto static string locale_get_region($locale) 
  * gets the region for the $locale 
  */
 PHP_FUNCTION( locale_get_region ) 
@@ -452,12 +450,10 @@ PHP_FUNCTION( locale_get_region )
 }
 /* }}} */
 
-/* {{{
- * proto public static string Locale::getPrimaryLanguage($locale) 
+/* {{{ proto static string Locale::getPrimaryLanguage($locale) 
  * gets the primary language for the $locale 
  }}} */
-/* {{{
- * proto public static string locale_get_primary_language($locale) 
+/* {{{ proto static string locale_get_primary_language($locale) 
  * gets the primary language for the $locale 
  */
 PHP_FUNCTION(locale_get_primary_language ) 
@@ -607,12 +603,10 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 }
 /* }}} */
 
-/* {{{
-* public static string Locale::getDisplayName($locale, $in_locale = null)
+/* {{{ proto static string Locale::getDisplayName($locale[, $in_locale = null])
 * gets the name for the $locale in $in_locale or default_locale
  }}} */
-/* {{{
-* public static string get_display_name($locale, $in_locale = null)
+/* {{{ proto static string get_display_name($locale[, $in_locale = null])
 * gets the name for the $locale in $in_locale or default_locale
 */
 PHP_FUNCTION(locale_get_display_name) 
@@ -621,12 +615,10 @@ PHP_FUNCTION(locale_get_display_name)
 }
 /* }}} */
 
-/* {{{
-* public static string Locale::getDisplayLanguage($locale, $in_locale = null)
+/* {{{ proto static string Locale::getDisplayLanguage($locale[, $in_locale = null])
 * gets the language for the $locale in $in_locale or default_locale
  }}} */
-/* {{{
-* public static string get_display_language($locale, $in_locale = null)
+/* {{{ proto static string get_display_language($locale[, $in_locale = null])
 * gets the language for the $locale in $in_locale or default_locale
 */
 PHP_FUNCTION(locale_get_display_language) 
@@ -635,12 +627,10 @@ PHP_FUNCTION(locale_get_display_language)
 }
 /* }}} */
 
-/* {{{
-* public static string Locale::getDisplayScript($locale, $in_locale = null)
+/* {{{ proto static string Locale::getDisplayScript($locale, $in_locale = null)
 * gets the script for the $locale in $in_locale or default_locale
  }}} */
-/* {{{
-* public static string get_display_script($locale, $in_locale = null)
+/* {{{ proto static string get_display_script($locale, $in_locale = null)
 * gets the script for the $locale in $in_locale or default_locale
 */
 PHP_FUNCTION(locale_get_display_script) 
@@ -649,12 +639,10 @@ PHP_FUNCTION(locale_get_display_script)
 }
 /* }}} */
 
-/* {{{
-* public static string Locale::getDisplayRegion($locale, $in_locale = null)
+/* {{{ proto static string Locale::getDisplayRegion($locale, $in_locale = null)
 * gets the region for the $locale in $in_locale or default_locale
  }}} */
-/* {{{
-* public static string get_display_region($locale, $in_locale = null)
+/* {{{ proto static string get_display_region($locale, $in_locale = null)
 * gets the region for the $locale in $in_locale or default_locale
 */
 PHP_FUNCTION(locale_get_display_region) 
@@ -664,11 +652,11 @@ PHP_FUNCTION(locale_get_display_region)
 /* }}} */
 
 /* {{{
-* public static string Locale::getDisplayVariant($locale, $in_locale = null)
+* proto static string Locale::getDisplayVariant($locale, $in_locale = null)
 * gets the variant for the $locale in $in_locale or default_locale
  }}} */
 /* {{{
-* public static string get_display_variant($locale, $in_locale = null)
+* proto static string get_display_variant($locale, $in_locale = null)
 * gets the variant for the $locale in $in_locale or default_locale
 */
 PHP_FUNCTION(locale_get_display_variant) 
@@ -677,17 +665,14 @@ PHP_FUNCTION(locale_get_display_variant)
 }
 /* }}} */
 
-     /* {{{
-     * proto static string[] getKeywords(string $locale) {
-     * return an associative array containing keyword-value
-     * pairs for this locale. The keys are keys to the array (doh!)
-     * }}}*/
-     /* {{{
-     * proto static string[] locale_get_keywords(string $locale) {
-     * return an associative array containing keyword-value
-     * pairs for this locale. The keys are keys to the array (doh!)
-     */ 
-
+ /* {{{ proto static array getKeywords(string $locale) {
+ * return an associative array containing keyword-value
+ * pairs for this locale. The keys are keys to the array (doh!)
+ * }}}*/
+ /* {{{ proto static array locale_get_keywords(string $locale) {
+ * return an associative array containing keyword-value
+ * pairs for this locale. The keys are keys to the array (doh!)
+ */ 
 PHP_FUNCTION( locale_get_keywords )
 {
     UEnumeration*   e        = NULL;
@@ -761,12 +746,10 @@ PHP_FUNCTION( locale_get_keywords )
 }
 /* }}} */
 
- /* {{{
- * proto static string Locale::canonicalize($locale) 
+ /* {{{ proto static string Locale::canonicalize($locale) 
  * @return string the canonicalized locale 
  * }}} */
- /* {{{
- * proto static string locale_canonicalize(Locale $loc, string $locale) 
+ /* {{{ proto static string locale_canonicalize(Locale $loc, string $locale) 
  * @param string $locale	The locale string to canonicalize
  */
 PHP_FUNCTION(locale_canonicalize)
@@ -970,12 +953,10 @@ static int handleAppendResult( int result,char* loc_name TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{
-* proto static string Locale::composeLocale($array) 
+/* {{{ proto static string Locale::composeLocale($array) 
 * Creates a locale by combining the parts of locale-ID passed	
 * }}} */
-/* {{{
-* proto static string compose_locale($array) 
+/* {{{ proto static string compose_locale($array) 
 * Creates a locale by combining the parts of locale-ID passed	
 * }}} */
 PHP_FUNCTION(locale_compose)
@@ -1174,13 +1155,12 @@ static int add_array_entry(char* loc_name, zval* hash_arr, char* key_name TSRMLS
 	}
 	return cur_result;
 }
+/* }}} */
 
-/* {{{
-* proto static array Locale::parseLocale($locale) 
+/* {{{ proto static array Locale::parseLocale($locale) 
 * parses a locale-id into an array the different parts of it
  }}} */
-/* {{{
-* proto static array parse_locale($locale) 
+/* {{{ proto static array parse_locale($locale) 
 * parses a locale-id into an array the different parts of it
 */
 PHP_FUNCTION(locale_parse)
@@ -1317,8 +1297,12 @@ static int strToMatch(char* str ,char *retstr)
 }
 /* }}} */
 
-/*{{{
-* code used by locale_filter_maatches
+/* {{{ proto static boolean Locale::filterMatches(string $langtag, string $locale)
+* Checks if a $langtag filter matches with $locale according to RFC 4647's basic filtering algorithm 
+*/
+/* }}} */
+/* {{{ proto boolean locale_filter_matches(string $langtag, string $locale)
+* Checks if a $langtag filter matches with $locale according to RFC 4647's basic filtering algorithm 
 */
 PHP_FUNCTION(locale_filter_matches)
 {
@@ -1483,6 +1467,7 @@ PHP_FUNCTION(locale_filter_matches)
 
 	}
 }
+/* }}} */
 
 static void array_cleanup( char* arr[] , int arr_size)
 {
@@ -1656,13 +1641,12 @@ static char* lookup_loc_range(char* loc_range, HashTable* hash_arr , int isCanon
 }
 /* }}} */
 
-/* {{{
-* public static function lookup(array $langtag, $locale, $default = null) 
+/* {{{ proto string Locale::lookup(array $langtag, $locale[, $default = null]) 
 * Searchs the items in $langtag for the best match to the language
 * range 
 */
-/* {{{
-* public static function lookup(array $langtag, $locale, $default = null) 
+/* }}} */
+/* {{{ proto string locale_lookup(array $langtag, $locale[, $default = null])
 * Searchs the items in $langtag for the best match to the language
 * range 
 */
@@ -1718,8 +1702,44 @@ PHP_FUNCTION(locale_lookup)
 
 	RETVAL_STRINGL( result, strlen(result), 0);
 }
+/* }}} */
 
+/* {{{ proto string Locale::acceptFromHttp(string $http_accept)
+* Tries to find out best available locale based on HTTP “Accept-Language” header
+*/
+/* }}} */
+/* {{{ proto string locale_accept_from_http(string $http_accept)
+* Tries to find out best available locale based on HTTP “Accept-Language” header
+*/
+PHP_FUNCTION(locale_accept_from_http)
+{
+	UEnumeration *available;
+	char *http_accept = NULL;
+	int http_accept_len;
+	UErrorCode status = 0;
+	int len;
+	char resultLocale[INTL_MAX_LOCALE_LEN+1];
+	UAcceptResult outResult;
 
+	if(zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "s", &http_accept, &http_accept_len) == FAILURE)
+	{
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
+		"locale_accept_from_http: unable to parse input parameters", 0 TSRMLS_CC );
+		RETURN_NULL();
+	}
+	
+	available = ures_openAvailableLocales(NULL, &status);
+	INTL_CHECK_STATUS(status, "locale_accept_from_http: failed to retrieve locale list");
+	len = uloc_acceptLanguageFromHTTP(resultLocale, INTL_MAX_LOCALE_LEN, 
+						&outResult, http_accept, available, &status);
+	uenum_close(available);
+	INTL_CHECK_STATUS(status, "locale_accept_from_http: failed to find acceptable locale");
+	if(outResult == ULOC_ACCEPT_FAILED) {
+		RETURN_FALSE;
+	}
+	RETURN_STRINGL(resultLocale, len, 1);
+}
+/* }}} */
 
 /*
  * Local variables:
