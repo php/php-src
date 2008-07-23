@@ -207,8 +207,6 @@ MySQLPDOTest::skip();
 					try {
 						$db = @new PDO($dsn, $user, $pass);
 						/* NOTE: MySQL does a fallback to the charset suggested during the handshake - no error - no bug! */
-						assert(false);
-						printf("%s\n", $dsn);
 					} catch (PDOException $e) {
 						$tmp = $e->getMessage();
 						/* TODO: add proper codes */
@@ -297,7 +295,4 @@ MySQLPDOTest::skip();
 [009] SQLSTATE[28000] [1045] Access denied for user 'dont%s'@'%s' (using password: YES), [n/a] n/a
 [010] SQLSTATE[28000] [1045] Access denied for user 'dont%s'@'%s' (using password: YES), [n/a] n/a
 [017] DSN=%s, SQLSTATE[%s] [%d] %s
-
-Warning: assert(): Assertion failed in %s on line %d
-mysql:%s
 [033] DSN = mysql:%s, character sets has not been set, @@character_set_connection reports 'latin1', expecting 'latin2'done!
