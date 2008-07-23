@@ -66,7 +66,7 @@ if test "$PHP_PGSQL" != "no"; then
   AC_DEFINE(HAVE_PGSQL,1,[Whether to build PostgreSQL support or not])
   old_LIBS=$LIBS
   old_LDFLAGS=$LDFLAGS
-  LDFLAGS="$LDFLAGS -L$PGSQL_LIBDIR"
+  LDFLAGS="-L$PGSQL_LIBDIR $LDFLAGS"
   AC_CHECK_LIB(pq, PQescapeString,AC_DEFINE(HAVE_PQESCAPE,1,[PostgreSQL 7.2.0 or later]))
   AC_CHECK_LIB(pq, PQunescapeBytea,AC_DEFINE(HAVE_PQUNESCAPEBYTEA,1,[PostgreSQL 7.3.0 or later]))
   AC_CHECK_LIB(pq, PQsetnonblocking,AC_DEFINE(HAVE_PQSETNONBLOCKING,1,[PostgreSQL 7.0.x or later]))
