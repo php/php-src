@@ -34,6 +34,7 @@
 #include <zend.h>
 #include <php.h>
 #include "main/php_ini.h"
+#include "ext/standard/php_smart_str.h"
 
 ZEND_EXTERN_MODULE_GLOBALS( intl )
 
@@ -49,6 +50,8 @@ ZEND_EXTERN_MODULE_GLOBALS( intl )
 #define MAX_NO_EXTLANG  3
 #define MAX_NO_PRIVATE  15
 #define MAX_NO_LOOKUP_LANG_TAG  100
+
+#define LOC_NOT_FOUND 1
 
 //Sizes required for the strings "variant15" , "extlang3", "private12" etc.
 #define VARIANT_KEYNAME_LEN  11
@@ -758,66 +761,42 @@ PHP_FUNCTION(locale_canonicalize)
 }
 /* }}} */
 
-
 /* {{{ append_key_value 
 * Internal function which is called from locale_compose
 * gets the value for the key_name and appends to the loc_name
 * returns 1 if successful , -1 if not found , 
 * 0 if array element is not a string , -2 if buffer-overflow
 */
-static int append_key_value(char* loc_name, int loc_name_capacity , HashTable* hash_arr, char* key_name TSRMLS_DC)
+static int append_key_value(smart_str* loc_name, HashTable* hash_arr, char* key_name)
 {
-	int	needed_size 	= -1;
 	zval**	ele_value	= NULL;
 
-	intl_error_reset( NULL TSRMLS_CC );
-
-	if( zend_hash_find( hash_arr , key_name , strlen(key_name) + 1 ,(void **)&ele_value ) == SUCCESS ){
-		if( Z_TYPE_PP(ele_value)!= IS_STRING ){
+	if(zend_hash_find(hash_arr , key_name , strlen(key_name) + 1 ,(void **)&ele_value ) == SUCCESS ) {
+		if(Z_TYPE_PP(ele_value)!= IS_STRING ){
 			//element value is not a string 
-			return 0;
+			return FAILURE;
 		}
-		if( strcmp(key_name , LOC_LANG_TAG) != 0 && 
-		    strcmp(key_name , LOC_GRANDFATHERED_LANG_TAG)!=0 ){
-
-			needed_size = Z_STRLEN_PP(ele_value)+1 ; 	 	
-			if( needed_size > loc_name_capacity ){
-				//Will cause Buffer_overflow
-				return -2;
-				
-			} else {
-				strcat( loc_name , SEPARATOR);
-				strncat( loc_name , 
-					 Z_STRVAL_PP(ele_value) , 
-					 Z_STRLEN_PP(ele_value) );	
-			}
-		} else {
-			//lang or grandfathered  tag   
-			needed_size = Z_STRLEN_PP(ele_value) ; 	 	
-			if( needed_size > loc_name_capacity ){
-				//Will cause Buffer_overflow
-				return -2;
-				
-			} else {
-				strncat( loc_name , Z_STRVAL_PP(ele_value) , Z_STRLEN_PP(ele_value) );	
-			}
+		if(strcmp(key_name, LOC_LANG_TAG) != 0 && 
+		   strcmp(key_name, LOC_GRANDFATHERED_LANG_TAG)!=0 ) {
+			// not lang or grandfathered  tag   
+			smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
 		}
-	
-		return 1;
+		smart_str_appendl(loc_name, Z_STRVAL_PP(ele_value) , Z_STRLEN_PP(ele_value));
+		return SUCCESS;
 	}
 
-	return -1;
+	return LOC_NOT_FOUND;
 }
 /* }}} */
 
 /* {{{ append_prefix , appends the prefix needed
 * e.g. private adds 'x'
 */
-static void add_prefix(char* loc_name , char* key_name)
+static void add_prefix(smart_str* loc_name, char* key_name)
 {
 	if( strncmp(key_name , LOC_PRIVATE_TAG , 7) == 0 ){
-		strcat( loc_name , SEPARATOR);
-		strcat( loc_name , PRIVATE_PREFIX);
+		smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
+		smart_str_appendl(loc_name, PRIVATE_PREFIX , sizeof(PRIVATE_PREFIX)-1);
 	}
 }
 /* }}} */
@@ -829,44 +808,45 @@ static void add_prefix(char* loc_name , char* key_name)
 * returns 1 if successful , -1 if not found , 
 * 0 if array element is not a string , -2 if buffer-overflow
 */
-static int append_multiple_key_values(char* loc_name, int loc_name_capacity  , HashTable* hash_arr, char* key_name TSRMLS_DC)
+static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, char* key_name)
 {
-	int	result 		= -1;
 	zval**	ele_value    	= NULL;
-	char*   cur_key_name 	= NULL;
-
 	int 	i 		= 0;
 	int 	isFirstSubtag 	= 0;
 	int 	max_value 	= 0;
-	int 	needed_size 	= 0;
 
 	//Variant/ Extlang/Private etc.
-	if( zend_hash_find( hash_arr , key_name , strlen(key_name) + 1 ,(void **)&ele_value ) == SUCCESS ){
-		if( Z_TYPE_PP(ele_value)!= IS_STRING ){
-			//key_name is not a string 
-			return 0;
-		}
+	if( zend_hash_find( hash_arr , key_name , strlen(key_name) + 1 ,(void **)&ele_value ) == SUCCESS ) {
+		if( Z_TYPE_PP(ele_value) == IS_STRING ){
+			add_prefix( loc_name , key_name);
 
-		//Determine the needed_size and check it against available
-		if( strcmp(key_name , LOC_PRIVATE_TAG) ==0 ){
-			//for the string "-x-" and the size of array element
-			needed_size = Z_STRLEN_PP(ele_value) + 3; 
+			smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
+			smart_str_appendl(loc_name, Z_STRVAL_PP(ele_value) , Z_STRLEN_PP(ele_value));
+			return SUCCESS;
+		} else if(Z_TYPE_PP(ele_value) == IS_ARRAY ) {
+			HashPosition pos;
+			HashTable *arr = HASH_OF(*ele_value);
+			zval **data = NULL;
+
+			zend_hash_internal_pointer_reset_ex(arr, &pos);
+			while(zend_hash_get_current_data_ex(arr, (void **)&data, &pos) != FAILURE) {
+				if(Z_TYPE_PP(data) != IS_STRING) {
+					return FAILURE;
+				}
+				if (isFirstSubtag++ == 0){
+					add_prefix(loc_name , key_name);
+				}
+				smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
+				smart_str_appendl(loc_name, Z_STRVAL_PP(data) , Z_STRLEN_PP(data));
+				zend_hash_move_forward_ex(arr, &pos);
+			}
+			return SUCCESS;
 		} else {
-			//for the SEPARATOR and the size of array element
-			needed_size = Z_STRLEN_PP(ele_value) + 1; 
+			return FAILURE;
 		}
-		if( needed_size > loc_name_capacity){
-			//Will cause buffer_overflow
-			return -2;
-		}
-
-		add_prefix( loc_name , key_name);
-
-		strcat( loc_name , SEPARATOR);
-		strncat( loc_name , Z_STRVAL_PP(ele_value) , Z_STRLEN_PP(ele_value) );	
-		return 1;
 	} else {
-		//Decide the max_value : the max. no. of elements allowed
+		char cur_key_name[31];
+		//Decide the max_value: the max. no. of elements allowed
 		if( strcmp(key_name , LOC_VARIANT_TAG) ==0 ){
 			max_value  = MAX_NO_VARIANT;
 		}
@@ -878,48 +858,25 @@ static int append_multiple_key_values(char* loc_name, int loc_name_capacity  , H
 		}
 
 		//Multiple variant values as variant0, variant1 ,variant2
-		cur_key_name = (char*)ecalloc( 25,  25);
 		isFirstSubtag = 0;
 		for( i=0 ; i< max_value; i++ ){  
-			sprintf( cur_key_name , "%s%d", key_name , i);	
+			snprintf( cur_key_name , 30, "%s%d", key_name , i);	
 			if( zend_hash_find( hash_arr , cur_key_name , strlen(cur_key_name) + 1,(void **)&ele_value ) == SUCCESS ){
 				if( Z_TYPE_PP(ele_value)!= IS_STRING ){
 					//variant is not a string 
-					if( cur_key_name){
-						efree(cur_key_name);
-					}
-					return 0;
+					return FAILURE;
 				}
-
-				//Determine the needed_size and check it against available
-				if( strcmp(key_name , LOC_PRIVATE_TAG) ==0 && isFirstSubtag ==0 ){
-					//for the string "-x-" and the size of array element
-					needed_size = Z_STRLEN_PP(ele_value) + 3; 
-				} else {
-					//for the SEPARATOR and the size of array element
-					needed_size = Z_STRLEN_PP(ele_value) + 1; 
-				}
-				if( needed_size > loc_name_capacity){
-					//Will cause buffer_overflow
-					if( cur_key_name){
-						efree(cur_key_name);
-					}
-					return -2;
-				}
-			
 				//Add the contents
 				if (isFirstSubtag++ == 0){
-					add_prefix( loc_name , cur_key_name);
+					add_prefix(loc_name , cur_key_name);
 				}
-				strcat( loc_name , SEPARATOR);
-				strncat( loc_name , Z_STRVAL_PP(ele_value) , Z_STRLEN_PP(ele_value) );	
+				smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
+				smart_str_appendl(loc_name, Z_STRVAL_PP(ele_value) , Z_STRLEN_PP(ele_value));
 			}
-			result = 1;
 		}//end of for 
-		efree(cur_key_name);
 	}//end of else
 
-	return result;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -928,31 +885,20 @@ static int append_multiple_key_values(char* loc_name, int loc_name_capacity  , H
 * returns 0  if locale_compose needs to be aborted 
 * otherwise returns 1
 */
-static int handleAppendResult( int result,char* loc_name TSRMLS_DC)
+static int handleAppendResult( int result, smart_str* loc_name TSRMLS_DC)
 {
 	intl_error_reset( NULL TSRMLS_CC );
-	if( result == 0 ){
+	if( result == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "Aborting locale_compose: parameter array element is not a string ", 0 TSRMLS_CC );
-	
-		if( loc_name){
-			efree(loc_name);
-		}
-		return 0;
-	}
-	if( result == -2 ){
-		intl_error_set( NULL, U_BUFFER_OVERFLOW_ERROR,
-		 "Aborting locale_compose: array element will cause the buffer overflow. Maximum size allowed for locale_compose parameters is 512 bytes including separator character and prefixes. ", 0 TSRMLS_CC );
-
-		if( loc_name){
-			efree(loc_name);
-		}
+			 "locale_compose: parameter array element is not a string", 0 TSRMLS_CC );
+		smart_str_free(loc_name);
 		return 0;
 	}
 	return 1;
 }
 /* }}} */
 
+#define RETURN_SMART_STR(s) smart_str_0((s)); RETURN_STRINGL((s)->c, (s)->len, 0)
 /* {{{ proto static string Locale::composeLocale($array) 
 * Creates a locale by combining the parts of locale-ID passed	
 * }}} */
@@ -961,26 +907,20 @@ static int handleAppendResult( int result,char* loc_name TSRMLS_DC)
 * }}} */
 PHP_FUNCTION(locale_compose)
 {
-	char*       	loc_name        = NULL;
-	int         	loc_name_len    = 0;
-
-	int32_t     	buflen          = 512;
-
-	zval*		arr		= NULL;
-	HashTable*	hash_arr	= NULL;
-
-	int 		result		= 0;
+	smart_str      	loc_name_s = {0};
+	smart_str *loc_name = &loc_name_s;
+	zval*			arr	= NULL;
+	HashTable*		hash_arr = NULL;
+	int 			result = 0;
 
 	intl_error_reset( NULL TSRMLS_CC );
-
 	// Parse parameters.
 	if(zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "a",
 		&arr) == FAILURE)
 	{
-	intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-	     "locale_compose: unable to parse input params", 0 TSRMLS_CC );
-
-	RETURN_FALSE;
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			 "locale_compose: unable to parse input params", 0 TSRMLS_CC );
+		RETURN_FALSE;
 	}
 
 	hash_arr = HASH_OF( arr );
@@ -988,27 +928,21 @@ PHP_FUNCTION(locale_compose)
 	if( !hash_arr || zend_hash_num_elements( hash_arr ) == 0 )
 		RETURN_FALSE;
 
-	//Allocate memory
-	loc_name = (char*)ecalloc( 512,  sizeof(char));
-	loc_name_len = buflen;
-
 	//Check for grandfathered first
-	result = append_key_value( loc_name , loc_name_len , hash_arr ,  LOC_GRANDFATHERED_LANG_TAG TSRMLS_CC );	
-	if( result == 1 ){
-		RETURN_STRING( loc_name ,FALSE);
+	result = append_key_value(loc_name, hash_arr,  LOC_GRANDFATHERED_LANG_TAG);	
+	if( result == SUCCESS){
+		RETURN_SMART_STR(loc_name);
 	}
 	if( !handleAppendResult( result, loc_name TSRMLS_CC)){
 		RETURN_FALSE;
 	}
 
 	//Not grandfathered
-	result = append_key_value( loc_name , loc_name_len , hash_arr , LOC_LANG_TAG TSRMLS_CC );	
-	if( result == -1 ){
+	result = append_key_value(loc_name, hash_arr , LOC_LANG_TAG);	
+	if( result == LOC_NOT_FOUND ){
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 		"locale_compose: parameter array does not contain 'language' tag.", 0 TSRMLS_CC );
-		if( loc_name){
-			efree(loc_name);
-		}
+		smart_str_free(loc_name);
 		RETURN_FALSE;
 	}
 	if( !handleAppendResult( result, loc_name TSRMLS_CC)){
@@ -1016,36 +950,36 @@ PHP_FUNCTION(locale_compose)
 	}
 
 	//Extlang
-	result = append_multiple_key_values( loc_name , loc_name_len , hash_arr , LOC_EXTLANG_TAG TSRMLS_CC );
+	result = append_multiple_key_values(loc_name, hash_arr , LOC_EXTLANG_TAG);
 	if( !handleAppendResult( result, loc_name TSRMLS_CC)){
 		RETURN_FALSE;
 	}
 
 	//Script
-	result = append_key_value( loc_name , loc_name_len , hash_arr , LOC_SCRIPT_TAG TSRMLS_CC ); 
+	result = append_key_value(loc_name, hash_arr , LOC_SCRIPT_TAG); 
 	if( !handleAppendResult( result, loc_name TSRMLS_CC)){
 		RETURN_FALSE;
 	}
 	
 	//Region
-	result = append_key_value( loc_name , loc_name_len , hash_arr , LOC_REGION_TAG TSRMLS_CC );
+	result = append_key_value( loc_name, hash_arr , LOC_REGION_TAG);
 	if( !handleAppendResult( result, loc_name TSRMLS_CC)){
 		RETURN_FALSE;
 	}
 
 	//Variant
-	result = append_multiple_key_values( loc_name , loc_name_len , hash_arr , LOC_VARIANT_TAG TSRMLS_CC ); 
+	result = append_multiple_key_values( loc_name, hash_arr , LOC_VARIANT_TAG); 
 	if( !handleAppendResult( result, loc_name TSRMLS_CC)){
 		RETURN_FALSE;
 	}
 
 	//Private
-	result = append_multiple_key_values( loc_name , loc_name_len , hash_arr , LOC_PRIVATE_TAG TSRMLS_CC );
+	result = append_multiple_key_values( loc_name, hash_arr , LOC_PRIVATE_TAG);
 	if( !handleAppendResult( result, loc_name TSRMLS_CC)){
 		RETURN_FALSE;
 	}
 
-	RETURN_STRING( loc_name , FALSE);
+	RETURN_SMART_STR(loc_name);
 }
 /* }}} */
 
