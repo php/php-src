@@ -1,5 +1,5 @@
 --TEST--
-Bug #44707 (http://bugs.php.net/bug.php?id=44707) = ! driver bug
+Bug #44707 (The MySQL PDO driver resets variable content after bindParam on tinyint field)
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
