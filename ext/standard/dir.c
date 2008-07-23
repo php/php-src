@@ -220,6 +220,8 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 	if (dirp == NULL) {
 		RETURN_FALSE;
 	}
+
+	dirp->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 		
 	php_set_default_dir(dirp->rsrc_id TSRMLS_CC);
 
