@@ -12,12 +12,10 @@ locale_compose_locale()
 
 function ut_main()
 {
-	$longstr = str_repeat("blah", 500);
 	$loc_parts_arr1 = array( 
 		Locale::LANG_TAG =>'sl' ,
 		Locale::SCRIPT_TAG =>'Latn' ,
-		Locale::REGION_TAG =>'IT' ,
-		Locale::VARIANT_TAG => $longstr
+		Locale::REGION_TAG =>'IT' 
 	);
 	$loc_parts_arr2 = array( 
 		Locale::LANG_TAG =>'de' ,
@@ -66,25 +64,27 @@ function ut_main()
 	$loc_parts_arr9 = array( 
 		Locale::REGION_TAG =>'DE'
 	);
-	$loc_parts_arr10 = array(
-		Locale::LANG_TAG => $longstr
-	);	
-	$loc_parts_arr11 = array(
-		Locale::LANG_TAG =>'en' ,
-		'private0' => $longstr
-	);
-	$loc_parts_arr12 = array( 
+	$loc_parts_arr10 = array( 
 		Locale::LANG_TAG => 45,
 		Locale::REGION_TAG => false,
 		Locale::SCRIPT_TAG => 15
 	);
-	$loc_parts_arr13 = array(
+	$loc_parts_arr11 = array(
 		Locale::LANG_TAG =>'de'  , 
 		Locale::REGION_TAG =>'DE', 
 		'private0' => 13,
 		'variant1' => array(),
 		'extlang2' => false
 	);	
+        $loc_parts_arr12 = array(
+                Locale::LANG_TAG =>'en' ,
+                Locale::SCRIPT_TAG =>'Hans' ,
+                Locale::REGION_TAG =>'CN',
+                Locale::VARIANT_TAG => array('nedis', 'rozaj'),
+		Locale::PRIVATE_TAG => array('prv1', 'prv2'),
+		Locale::EXTLANG_TAG => array('lng', 'ing')
+        );
+
 
 	$loc_parts_arr = array(
 		'loc1' => $loc_parts_arr1	,
@@ -98,8 +98,7 @@ function ut_main()
 		'loc9' => $loc_parts_arr9	,
 		'loc10' => $loc_parts_arr10	,
 		'loc11' => $loc_parts_arr11	,
-		'loc12' => $loc_parts_arr12	,
-		'loc13' => $loc_parts_arr13
+		'loc12' => $loc_parts_arr12
 	);
 
     error_reporting( E_ERROR );
@@ -139,8 +138,7 @@ ut_run();
 ------------
 Input Array name is : loc1
 
-Composed Locale: No values found from Locale compose due to the following error:
-Aborting locale_compose: array element will cause the buffer overflow. Maximum size allowed for locale_compose parameters is 512 bytes including separator character and prefixes. : U_BUFFER_OVERFLOW_ERROR
+Composed Locale: sl_Latn_IT
 ------------
 Input Array name is : loc2
 
@@ -178,20 +176,15 @@ locale_compose: parameter array does not contain 'language' tag.: U_ILLEGAL_ARGU
 Input Array name is : loc10
 
 Composed Locale: No values found from Locale compose due to the following error:
-Aborting locale_compose: array element will cause the buffer overflow. Maximum size allowed for locale_compose parameters is 512 bytes including separator character and prefixes. : U_BUFFER_OVERFLOW_ERROR
+locale_compose: parameter array element is not a string: U_ILLEGAL_ARGUMENT_ERROR
 ------------
 Input Array name is : loc11
 
 Composed Locale: No values found from Locale compose due to the following error:
-Aborting locale_compose: array element will cause the buffer overflow. Maximum size allowed for locale_compose parameters is 512 bytes including separator character and prefixes. : U_BUFFER_OVERFLOW_ERROR
+locale_compose: parameter array element is not a string: U_ILLEGAL_ARGUMENT_ERROR
 ------------
 Input Array name is : loc12
 
-Composed Locale: No values found from Locale compose due to the following error:
-Aborting locale_compose: parameter array element is not a string : U_ILLEGAL_ARGUMENT_ERROR
+Composed Locale: en_lng_ing_Hans_CN_nedis_rozaj_x_prv1_prv2
 ------------
-Input Array name is : loc13
 
-Composed Locale: No values found from Locale compose due to the following error:
-Aborting locale_compose: parameter array element is not a string : U_ILLEGAL_ARGUMENT_ERROR
-------------

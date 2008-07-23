@@ -35,9 +35,9 @@ ut_run();
 
 ?>
 --EXPECTF--
-Warning: Locale::acceptFromHttp() expects parameter 1 to be string, array given in %s on line %d
+Warning: Locale::acceptFromHttp() expects parameter 1 to be binary string, array given in %s on line %d
 
-Warning: locale_accept_from_http() expects parameter 1 to be string, array given in %s on line %d
+Warning: locale_accept_from_http() expects parameter 1 to be binary string, array given in %s on line %d
 Accepting en-us,en;q=0.5: en_US
 Accepting da, en-gb;q=0.8, en;q=0.7: da
 Accepting zh, en-us;q=0.8, en;q=0.7: zh
