@@ -350,6 +350,7 @@ ZEND_END_ARG_INFO()
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_create, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_INFO(0, large_object_id)
 ZEND_END_ARG_INFO()
 
 static
@@ -392,6 +393,7 @@ static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_import, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, large_object_oid)
 ZEND_END_ARG_INFO()
 
 static
@@ -2978,42 +2980,86 @@ PHP_FUNCTION(pg_untrace)
 }
 /* }}} */
 
-/* {{{ proto int pg_lo_create([resource connection])
+/* {{{ proto mixed pg_lo_create([resource connection],[mixed large_object_oid])
    Create a large object */
 PHP_FUNCTION(pg_lo_create)
 {
-  	zval *pgsql_link = NULL;
-	PGconn *pgsql;
-	Oid pgsql_oid;
-	int id = -1, argc = ZEND_NUM_ARGS();
+  	zval *pgsql_link = NULL, *oid = NULL;
+  	PGconn *pgsql;
+  	Oid pgsql_oid, wanted_oid = InvalidOid;
+  	int id = -1, argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "|r", &pgsql_link) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "|zz", &pgsql_link, &oid) == FAILURE) {
 		return;
 	}
+
+	if ((argc == 1) && (Z_TYPE_P(pgsql_link) != IS_RESOURCE)) {
+		oid = pgsql_link;
+		pgsql_link = NULL;
+	}
 	
-	if (argc == 0) {
+	if (pgsql_link == NULL) {
 		id = PGG(default_link);
 		CHECK_DEFAULT_LINK(id);
+		if (id == -1) {
+			RETURN_FALSE;
+		}
 	}
-
-	if (pgsql_link == NULL && id == -1) {
-		RETURN_FALSE;
-	}	
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 	
-	/* NOTE: Archive modes not supported until I get some more data. Don't think anybody's
-	   using it anyway. I believe it's also somehow related to the 'time travel' feature of
-	   PostgreSQL, that's on the list of features to be removed... Create modes not supported.
-	   What's the use of an object that can be only written to, but not read from, and vice
-	   versa? Beats me... And the access type (r/w) must be specified again when opening
-	   the object, probably (?) overrides this. (Jouni) 
-	*/
+	if (oid) {
+#ifndef HAVE_PG_LO_CREATE	
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OID value passing not supported");
+#else
+		switch (Z_TYPE_P(oid)) {
+		case IS_STRING:
+			{	
+				char *end_ptr;
+				wanted_oid = (Oid)strtoul(Z_STRVAL_P(oid), &end_ptr, 10);
+				if ((Z_STRVAL_P(oid)+Z_STRLEN_P(oid)) != end_ptr) {
+					/* wrong integer format */
+					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "invalid OID value passed");
+					RETURN_FALSE;
+				}
+			}
+			break;
+		case IS_UNICODE:
+			{	
+				UChar *end_ptr;
+				wanted_oid = (Oid)zend_u_strtoul(Z_USTRVAL_P(oid), &end_ptr, 10);
+				if ((Z_USTRVAL_P(oid)+Z_USTRLEN_P(oid)) != end_ptr) {
+					/* wrong integer format */
+					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "invalid OID value passed");
+					RETURN_FALSE;
+				}
+			}
+			break;
+		case IS_LONG:
+			if (Z_LVAL_P(oid) < (long)InvalidOid) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "invalid OID value passed");
+				RETURN_FALSE;
+			}
+			wanted_oid = (Oid)Z_LVAL_P(oid);
+			break;
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "invalid OID value passed");
+			RETURN_FALSE;
+        }
+		if ((pgsql_oid = lo_create(pgsql, wanted_oid)) == InvalidOid) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create PostgreSQL large object");
+			RETURN_FALSE;
+		}
+
+		PGSQL_RETURN_OID(pgsql_oid);	
+#endif
+	}
 
 	if ((pgsql_oid = lo_creat(pgsql, INV_READ|INV_WRITE)) == InvalidOid) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create PostgreSQL large object");
 		RETURN_FALSE;
 	}
+
 	PGSQL_RETURN_OID(pgsql_oid);	
 }
 /* }}} */
@@ -3332,26 +3378,27 @@ PHP_FUNCTION(pg_lo_read_all)
 }
 /* }}} */
 
-/* {{{ proto int pg_lo_import([resource connection, ] string filename)
+/* {{{ proto int pg_lo_import([resource connection, ] string filename [, mixed oid])
    Import large object direct from filesystem */
 PHP_FUNCTION(pg_lo_import)
 {
-	zval *pgsql_link = NULL;
+	zval *pgsql_link = NULL, *oid = NULL;
 	char *file_in;
 	int id = -1, name_len;
 	int argc = ZEND_NUM_ARGS();
 	PGconn *pgsql;
-	Oid oid;
+	Oid wanted_oid, returned_oid;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
-								 "rs", &pgsql_link, &file_in, &name_len) == SUCCESS) {
+								 "rs|z", &pgsql_link, &file_in, &name_len, &oid) == SUCCESS) {
 		;
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
-									  "s", &file_in, &name_len) == SUCCESS) {
+									  "s|z", &file_in, &name_len, &oid) == SUCCESS) {
 		id = PGG(default_link);
 		CHECK_DEFAULT_LINK(id);
 	}
+	// old calling convention, deprecated since PHP 4.2
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
 									  "sr", &file_in, &name_len, &pgsql_link ) == SUCCESS) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Old API is used");
@@ -3370,12 +3417,61 @@ PHP_FUNCTION(pg_lo_import)
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
-	oid = lo_import(pgsql, file_in);
+	if (oid) {
+#ifndef HAVE_PG_LO_IMPORT_WITH_OID
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OID value passing not supported");
+#else
+		switch (Z_TYPE_P(oid)) {
+		case IS_STRING:
+			{	
+				char *end_ptr;
+				wanted_oid = (Oid)strtoul(Z_STRVAL_P(oid), &end_ptr, 10);
+				if ((Z_STRVAL_P(oid)+Z_STRLEN_P(oid)) != end_ptr) {
+					/* wrong integer format, trailing non-numeric characters */
+					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "invalid OID value passed");
+					RETURN_FALSE;
+				}
+			}
+			break;
+		case IS_UNICODE:
+			{	
+				UChar *end_ptr;
+				wanted_oid = (Oid)zend_u_strtoul(Z_USTRVAL_P(oid), &end_ptr, 10);
+				if ((Z_USTRVAL_P(oid)+Z_USTRLEN_P(oid)) != end_ptr) {
+					/* wrong integer format, trailing non-numeric characters */
+					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "invalid OID value passed");
+					RETURN_FALSE;
+				}
+			}
+			break;
+		case IS_LONG:
+			if (Z_LVAL_P(oid) < (long)InvalidOid) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "invalid OID value passed");
+				RETURN_FALSE;
+			}
+			wanted_oid = (Oid)Z_LVAL_P(oid);
+			break;
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "invalid OID value passed");
+			RETURN_FALSE;
+        }
 
-	if (oid == InvalidOid) {
+       returned_oid = lo_import_with_oid(pgsql, file_in, wanted_oid);
+
+	   if (returned_oid == InvalidOid) {
+		   RETURN_FALSE;
+	   }
+
+	   PGSQL_RETURN_OID(returned_oid);
+#endif
+	}
+
+	returned_oid = lo_import(pgsql, file_in);
+
+	if (returned_oid == InvalidOid) {
 		RETURN_FALSE;
 	}
-	PGSQL_RETURN_OID(oid);
+	PGSQL_RETURN_OID(returned_oid);
 }
 /* }}} */
 
