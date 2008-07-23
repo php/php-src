@@ -1,5 +1,5 @@
 --TEST--
-Bug #45120 (http://bugs.php.net/bug.php?id=45120)
+Bug #45120 (PDOStatement->execute() returns true then false for same statement)
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');

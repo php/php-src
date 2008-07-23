@@ -1,5 +1,5 @@
 --TEST--
-PDO MySQL Bug #42499 (http://bugs.php.net/bug.php?id=42499)
+Bug #42499 (Multi-statement execution via PDO::exec() makes connection unusable)
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');

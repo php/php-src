@@ -1,5 +1,5 @@
 --TEST--
-Bug #41125 (http://bugs.php.net/bug.php?id=41125)
+Bug #41125 (PDO mysql + quote() + prepare() can result in segfault)
 --SKIPIF--
 <?php
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
