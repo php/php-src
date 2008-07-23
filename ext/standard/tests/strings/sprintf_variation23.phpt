@@ -39,11 +39,11 @@ foreach($resource_values as $resource_value) {
 
 // closing the resources
 fclose($fp);
-closedir($dfp);
+fclose($dfp);
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing sprintf() : char formats with resource values ***
 
 -- Iteration 1 --
@@ -75,4 +75,6 @@ unicode(1) ""
 unicode(1) ""
 unicode(11) "a-bA-B@#$&]"
 unicode(1) "c"
+
+Warning: fclose(): %d is not a valid stream resource in %s on line %d
 Done
