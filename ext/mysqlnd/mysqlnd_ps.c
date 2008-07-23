@@ -1985,7 +1985,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, net_close)(MYSQLND_STMT * const stmt, zend_
 	zend_uchar cmd_buf[STMT_ID_LENGTH /* statement id */];
 	enum_mysqlnd_collected_stats stat = STAT_LAST;
 
-	DBG_ENTER("mysqlnd_stmt::close");
+	DBG_ENTER("mysqlnd_stmt::net_close");
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
 
 	SET_EMPTY_ERROR(stmt->error_info);
@@ -1996,17 +1996,20 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, net_close)(MYSQLND_STMT * const stmt, zend_
 	  We have to call the appropriate use_result() or store_result() and
 	  clean.
 	*/
-	if (stmt->state == MYSQLND_STMT_WAITING_USE_OR_STORE) {
-		DBG_INF("fetching result set header");
-		stmt->default_rset_handler(stmt TSRMLS_CC);
-		stmt->state = MYSQLND_STMT_USER_FETCHING;
-	}
+	do {
+		DBG_INF_FMT("stmt->state=%d", stmt->state);
+		if (stmt->state == MYSQLND_STMT_WAITING_USE_OR_STORE) {
+			DBG_INF("fetching result set header");
+			stmt->default_rset_handler(stmt TSRMLS_CC);
+			stmt->state = MYSQLND_STMT_USER_FETCHING;
+		}
 
-	/* unbuffered set not fetched to the end ? Clean the line */
-	if (stmt->result) {
-		DBG_INF("skipping result");
-		stmt->result->m.skip_result(stmt->result TSRMLS_CC);
-	}
+		/* unbuffered set not fetched to the end ? Clean the line */
+		if (stmt->result) {
+			DBG_INF("skipping result");
+			stmt->result->m.skip_result(stmt->result TSRMLS_CC);
+		}
+	} while (mysqlnd_stmt_more_results(stmt) && mysqlnd_stmt_next_result(stmt));
 	/*
 	  After this point we are allowed to free the result set,
 	  as we have cleaned the line
