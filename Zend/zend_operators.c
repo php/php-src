@@ -1882,7 +1882,7 @@ ZEND_API void zend_str_tolower(char *str, unsigned int length)
 	}
 }
 
-ZEND_API int zend_binary_strcmp(char *s1, uint len1, char *s2, uint len2)
+ZEND_API int zend_binary_strcmp(const char *s1, uint len1, const char *s2, uint len2)
 {
 	int retval;
 
@@ -1894,7 +1894,7 @@ ZEND_API int zend_binary_strcmp(char *s1, uint len1, char *s2, uint len2)
 	}
 }
 
-ZEND_API int zend_binary_strncmp(char *s1, uint len1, char *s2, uint len2, uint length)
+ZEND_API int zend_binary_strncmp(const char *s1, uint len1, const char *s2, uint len2, uint length)
 {
 	int retval;
 
@@ -1907,7 +1907,7 @@ ZEND_API int zend_binary_strncmp(char *s1, uint len1, char *s2, uint len2, uint 
 }
 
 
-ZEND_API int zend_binary_strcasecmp(char *s1, uint len1, char *s2, uint len2)
+ZEND_API int zend_binary_strcasecmp(const char *s1, uint len1, const char *s2, uint len2)
 {
 	int len;
 	int c1, c2;
@@ -1926,7 +1926,7 @@ ZEND_API int zend_binary_strcasecmp(char *s1, uint len1, char *s2, uint len2)
 }
 
 
-ZEND_API int zend_binary_strncasecmp(char *s1, uint len1, char *s2, uint len2, uint length)
+ZEND_API int zend_binary_strncasecmp(const char *s1, uint len1, const char *s2, uint len2, uint length)
 {
 	int len;
 	int c1, c2;

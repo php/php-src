@@ -305,10 +305,10 @@ ZEND_API int zend_binary_zval_strcmp(zval *s1, zval *s2);
 ZEND_API int zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3);
 ZEND_API int zend_binary_zval_strcasecmp(zval *s1, zval *s2);
 ZEND_API int zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval *s3);
-ZEND_API int zend_binary_strcmp(char *s1, uint len1, char *s2, uint len2);
-ZEND_API int zend_binary_strncmp(char *s1, uint len1, char *s2, uint len2, uint length);
-ZEND_API int zend_binary_strcasecmp(char *s1, uint len1, char *s2, uint len2);
-ZEND_API int zend_binary_strncasecmp(char *s1, uint len1, char *s2, uint len2, uint length);
+ZEND_API int zend_binary_strcmp(const char *s1, uint len1, const char *s2, uint len2);
+ZEND_API int zend_binary_strncmp(const char *s1, uint len1, const char *s2, uint len2, uint length);
+ZEND_API int zend_binary_strcasecmp(const char *s1, uint len1, const char *s2, uint len2);
+ZEND_API int zend_binary_strncasecmp(const char *s1, uint len1, const char *s2, uint len2, uint length);
 
 ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 ZEND_API void zend_compare_symbol_tables(zval *result, HashTable *ht1, HashTable *ht2 TSRMLS_DC);
