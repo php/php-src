@@ -31,6 +31,19 @@
 	else (lval) = __tmpvar;											\
 } while (0)
 
+#elif SIZEOF_LONG == 4 && defined(HAVE_ZEND_LONG64)
+
+#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
+	zend_long64 __result = (zend_long64) (a) * (zend_long64) (b);	\
+	if (__result > LONG_MAX || __result < LONG_MIN) {				\
+		(dval) = (double) __result;									\
+		(usedval) = 1;												\
+	} else {														\
+		(lval) = (long) __result;									\
+		(usedval) = 0;												\
+	}																\
+} while (0)
+
 #else
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {		\

@@ -2402,6 +2402,19 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
         return res;
 }
 
+#elif SIZEOF_SIZE_T == 4 && defined(HAVE_ZEND_LONG64)
+
+static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
+{
+	zend_ulong64 res = (zend_ulong64)nmemb * (zend_ulong64)size + (zend_ulong64)offset;
+
+	if (UNEXPECTED(res > (zend_ulong64)0xFFFFFFFFL)) {
+		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
+		return 0;
+	}
+	return (size_t) res;
+}
+
 #else
 
 static inline size_t safe_address(size_t nmemb, size_t size, size_t offset) /* {{{ */
