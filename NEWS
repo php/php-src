@@ -229,6 +229,7 @@ PHP                                                                        NEWS
 - Fixed bug #44849 (imagecolorclosesthwb() is not available on Windows).
   (Kalle)
 - Fixed bug #44805 (rename() function is not portable to Windows). (Pierre)
+- Fixed bug #44779 (filter returns NULL in CLI when it shouldn't). (Arnaud)
 - Fixed bug #44742 (timezone_offset_get() causes segmentation faults). (Derick)
 - Fixed bug #44648 (Attribute names not checked for wellformedness). (Rob)
 - Fixed bug #44414 (Incomplete reporting about abstract methods). (Dmitry)
