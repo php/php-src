@@ -620,6 +620,20 @@ static PHP_FUNCTION(gzinflate)
 	}
 	plength = limit;
 
+	stream.zalloc = (alloc_func) Z_NULL;
+	stream.zfree = (free_func) Z_NULL;
+	stream.opaque = Z_NULL;
+	stream.avail_in = data_len + 1; /* there is room for \0 */
+	stream.next_in = (Bytef *) data;
+	stream.total_out = 0;
+
+	/* init with -MAX_WBITS disables the zlib internal headers */
+	status = inflateInit2(&stream, -MAX_WBITS);
+	if (status != Z_OK) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", zError(status));
+		RETURN_FALSE;
+	}
+
 	/*
 	  stream.avail_out wants to know the output data length
 	  if none was given as a parameter
@@ -627,43 +641,32 @@ static PHP_FUNCTION(gzinflate)
 	  doubling it whenever it wasn't big enough
 	  that should be enaugh for all real life cases	
 	*/
-
-	stream.zalloc = (alloc_func) Z_NULL;
-	stream.zfree = (free_func) Z_NULL;
-
 	do {
 		length = plength ? plength : (unsigned long)data_len * (1 << factor++);
 		s2 = (char *) erealloc(s1, length);
 
-		if (!s2 && s1) {
-			efree(s1);
+		if (!s2) {
+			if (s1) {
+				efree(s1);
+			}
+			inflateEnd(&stream);
 			RETURN_FALSE;
 		}
-
-		stream.next_in = (Bytef *) data;
-		stream.avail_in = (uInt) data_len + 1; /* there is room for \0 */
-
-		stream.next_out = s2;
-		stream.avail_out = (uInt) length;
-
-		/* init with -MAX_WBITS disables the zlib internal headers */
-		status = inflateInit2(&stream, -MAX_WBITS);
-		if (status == Z_OK) {
-			status = inflate(&stream, Z_FINISH);
-			if (status != Z_STREAM_END) {
-				inflateEnd(&stream);
-				if (status == Z_OK) {
-					status = Z_BUF_ERROR;
-				}
-			} else {
-				status = inflateEnd(&stream);
-			}
-		}
 		s1 = s2;
-		
-	} while ((status == Z_BUF_ERROR) && (!plength) && (factor < maxfactor));
 
-	if (status == Z_OK) {
+		stream.next_out = (Bytef *) &s2[stream.total_out];
+		stream.avail_out = length - stream.total_out;
+		status = inflate(&stream, Z_NO_FLUSH);
+
+	} while ((Z_BUF_ERROR == status || (Z_OK == status && stream.avail_in)) && !plength && factor < maxfactor);
+
+	inflateEnd(&stream);
+
+	if ((plength && Z_OK == status) || factor >= maxfactor) {
+		status = Z_MEM_ERROR;
+	}
+
+	if (Z_STREAM_END == status || Z_OK == status) {
 		s2 = erealloc(s2, stream.total_out + 1); /* room for \0 */
 		s2[ stream.total_out ] = '\0';
 		RETURN_STRINGL(s2, stream.total_out, 0);

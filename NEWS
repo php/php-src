@@ -283,6 +283,8 @@ PHP                                                                        NEWS
 - Fixed bug #42737 (preg_split('//u') triggers a E_NOTICE with newlines).
   (Nuno)
 - Fixed bug #42736 (xmlrpc_server_call_method() crashes). (Tony)
+- Fixed bug #42663 (gzinflate() try to allocate all memory with truncated 
+  data). (Arnaud)
 - Fixed bug #42657 (ini_get() returns incorrect value when default is NULL).
   (Jani, Scott)
 - Fixed bug #42637 (SoapFault : Only http and https are allowed). (Bill Moran)
