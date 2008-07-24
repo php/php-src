@@ -1665,6 +1665,8 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 		}
 		zend_error(E_STRICT, "Only variables should be assigned by reference");
 		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_ASSIGN);
+	} else if (OP2_TYPE == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+		PZVAL_LOCK(*value_ptr_ptr);
 	}
 	if (OP1_TYPE == IS_VAR && EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr) {
 		zend_error(E_ERROR, "Cannot assign by reference to overloaded object");
@@ -1676,6 +1678,10 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 		zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
 	}
 	zend_assign_to_variable_reference(variable_ptr_ptr, value_ptr_ptr TSRMLS_CC);
+
+	if (OP2_TYPE == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+		Z_DELREF_PP(variable_ptr_ptr);
+	}
 
 	if (!RETURN_VALUE_UNUSED(&opline->result)) {
 		AI_SET_PTR(EX_T(opline->result.u.var).var, *variable_ptr_ptr);

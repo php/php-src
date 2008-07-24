@@ -737,6 +737,8 @@ void zend_do_assign_ref(znode *result, znode *lvar, znode *rvar TSRMLS_DC) /* {{
 	opline->opcode = ZEND_ASSIGN_REF;
 	if (zend_is_function_or_method_call(rvar)) {
 		opline->extended_value = ZEND_RETURNS_FUNCTION;
+	} else if (rvar->u.EA.type & ZEND_PARSED_NEW) {
+		opline->extended_value = ZEND_RETURNS_NEW;
 	} else {
 		opline->extended_value = 0;
 	}
