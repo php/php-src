@@ -21,7 +21,7 @@ if test "$PHP_FILEINFO" != "no"; then
 
   libmagic_sources=" \
     libmagic/apprentice.c libmagic/apptype.c libmagic/ascmagic.c \
-    libmagic/compress.c libmagic/file.c libmagic/fsmagic.c libmagic/funcs.c \
+    libmagic/compress.c libmagic/fsmagic.c libmagic/funcs.c \
     libmagic/getopt_long.c libmagic/is_tar.c libmagic/magic.c libmagic/print.c \
     libmagic/readelf.c libmagic/softmagic.c"
 
