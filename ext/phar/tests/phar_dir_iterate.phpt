@@ -26,7 +26,7 @@ unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php')
 __halt_compiler();
 ?>
 --EXPECTF--
-string(%d) "phar://%sphar_dir_iterate.phar.php%canother.file.txt"
-string(%d) "phar://%sphar_dir_iterate.phar.php%csub%ctop.txt"
-string(%d) "phar://%sphar_dir_iterate.phar.php%ctop.txt"
+string(%d) "phar://%sphar_dir_iterate.phar.php/another.file.txt"
+string(%d) "phar://%sphar_dir_iterate.phar.php/sub/top.txt"
+string(%d) "phar://%sphar_dir_iterate.phar.php/top.txt"
 ===DONE===

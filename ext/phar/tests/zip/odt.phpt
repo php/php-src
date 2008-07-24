@@ -23,13 +23,13 @@ try {
 ?>
 ===DONE===
 --EXPECTF--
-phar://%sodt.odt%cConfigurations2%caccelerator%ccurrent.xml
-phar://%sodt.odt%cMETA-INF%cmanifest.xml
-phar://%sodt.odt%cThumbnails%cthumbnail.png
-phar://%sodt.odt%ccontent.xml
-phar://%sodt.odt%cmeta.xml
-phar://%sodt.odt%cmimetype
-phar://%sodt.odt%csettings.xml
-phar://%sodt.odt%cstyles.xml
+phar://%sodt.odt/Configurations2/accelerator/current.xml
+phar://%sodt.odt/META-INF/manifest.xml
+phar://%sodt.odt/Thumbnails/thumbnail.png
+phar://%sodt.odt/content.xml
+phar://%sodt.odt/meta.xml
+phar://%sodt.odt/mimetype
+phar://%sodt.odt/settings.xml
+phar://%sodt.odt/styles.xml
 Cannot create phar '%sodt.odt', file extension (or combination) not recognised
 ===DONE===
