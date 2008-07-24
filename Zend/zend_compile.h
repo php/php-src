@@ -645,6 +645,7 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_PARSED_FUNCTION_CALL		(1<<3)
 #define ZEND_PARSED_VARIABLE			(1<<4)
 #define ZEND_PARSED_REFERENCE_VARIABLE	(1<<5)
+#define ZEND_PARSED_NEW					(1<<6)
 
 
 /* unset types */
@@ -725,6 +726,7 @@ int zendlex(znode *zendlval TSRMLS_DC);
 
 
 #define ZEND_RETURNS_FUNCTION 1<<0
+#define ZEND_RETURNS_NEW      1<<1
 
 END_EXTERN_C()
 
