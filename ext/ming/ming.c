@@ -43,7 +43,7 @@
 void destroySWFBlock(SWFBlock block);
 #endif
 
-static const zend_function_entry ming_functions[] = {
+static zend_function_entry ming_functions[] = {
 	PHP_FALIAS(ming_setcubicthreshold,  ming_setCubicThreshold,  NULL)
 	PHP_FALIAS(ming_setscale,           ming_setScale,           NULL)
 	PHP_FALIAS(ming_useswfversion,      ming_useSWFVersion,      NULL)
@@ -2595,7 +2595,7 @@ PHP_METHOD(swfblur, __construct)
 	SWFBlur blur;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ddd", &blurX, &blurY, &passes) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ddl", &blurX, &blurY, &passes) == FAILURE) {
 		return;
 	}
 
@@ -3452,6 +3452,8 @@ PHP_METHOD(swfvideostream, __construct)
 	case 0:
 		stream = newSWFVideoStream();
 		break;
+	default: // warn
+		return;
 	}
 	
 	if(stream) {
@@ -3910,7 +3912,6 @@ static void phpStreamOutputMethod(byte b, void * data)
 PHP_METHOD(swfmovie, saveToFile)
 {
 	zval *x;
-	long zlimit = 0;
 	int limit = -1;
 #if !defined(HAVE_NEW_MING)
 	int oldval = INT_MIN;
@@ -3949,7 +3950,7 @@ PHP_METHOD(swfmovie, saveToFile)
   Saves the movie. 'where' can be stream and the movie will be saved there otherwise it is treated as string and written in file with that name */
 PHP_METHOD(swfmovie, save)
 {
-	zval *x, *zlimit = NULL;
+	zval *x;
 	int limit = -1;
 #if !defined(HAVE_NEW_MING)
 	int oldval = INT_MIN;
@@ -5182,7 +5183,7 @@ PHP_METHOD(swfsprite, setSoundStream)
 	SWFInput input = NULL;
 	SWFMovieClip mc = getSprite(getThis() TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zdd", &zfile, &rate, &skip) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zd|d", &zfile, &rate, &skip) == FAILURE) {
 		return;
 	}
 
