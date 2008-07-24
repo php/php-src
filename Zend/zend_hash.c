@@ -709,7 +709,7 @@ ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t appl
 }
 
 
-ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, apply_func_args_t apply_func, int num_args, ...)
+ZEND_API void zend_hash_apply_with_arguments(HashTable *ht TSRMLS_DC, apply_func_args_t apply_func, int num_args, ...)
 {
 	Bucket *p;
 	va_list args;
@@ -726,7 +726,7 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, apply_func_args_t ap
 		hash_key.arKey = p->arKey;
 		hash_key.nKeyLength = p->nKeyLength;
 		hash_key.h = p->h;
-		result = apply_func(p->pData, num_args, args, &hash_key);
+		result = apply_func(p->pData TSRMLS_CC, num_args, args, &hash_key);
 
 		if (result & ZEND_HASH_APPLY_REMOVE) {
 			p = zend_hash_apply_deleter(ht, p);

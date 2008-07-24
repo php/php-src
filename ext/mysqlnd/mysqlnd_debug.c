@@ -1002,7 +1002,7 @@ void _mysqlnd_free(void *ptr MYSQLND_MEM_D)
 /* }}} */
 
 /* {{{ mysqlnd_build_trace_args */
-static int mysqlnd_build_trace_args(zval **arg, int num_args, va_list args, zend_hash_key *hash_key)
+static int mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	char **str;
 	int *len;
@@ -1042,7 +1042,6 @@ static int mysqlnd_build_trace_args(zval **arg, int num_args, va_list args, zend
 		}
 		case IS_UNICODE: {
 			int l_added;
-			TSRMLS_FETCH();
 
 			/*
 			 * We do not want to apply current error mode here, since
@@ -1095,7 +1094,6 @@ static int mysqlnd_build_trace_args(zval **arg, int num_args, va_list args, zend
 			double dval = Z_DVAL_PP(arg);
 			char *s_tmp;
 			int l_tmp;
-			TSRMLS_FETCH();
 
 			s_tmp = emalloc(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
 			l_tmp = zend_sprintf(s_tmp, "%.*G", (int) EG(precision), dval);  /* SAFE */
@@ -1112,7 +1110,6 @@ static int mysqlnd_build_trace_args(zval **arg, int num_args, va_list args, zend
 			zstr class_name;
 			zend_uint class_name_len;
 			int dup;
-			TSRMLS_FETCH();
 
 			TRACE_APPEND_STR("Object(");
 
@@ -1143,7 +1140,7 @@ static int mysqlnd_build_trace_args(zval **arg, int num_args, va_list args, zend
 /* }}} */
 
 
-static int mysqlnd_build_trace_string(zval **frame, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int mysqlnd_build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	char *s_tmp, **str;
 	int *len, *num;
@@ -1179,7 +1176,7 @@ static int mysqlnd_build_trace_string(zval **frame, int num_args, va_list args, 
 	TRACE_APPEND_CHR('(');
 	if (zend_ascii_hash_find(ht, "args", sizeof("args"), (void**)&tmp) == SUCCESS) {
 		int last_len = *len;
-		zend_hash_apply_with_arguments(Z_ARRVAL_PP(tmp), (apply_func_args_t)mysqlnd_build_trace_args, 2, str, len);
+		zend_hash_apply_with_arguments(Z_ARRVAL_PP(tmp) TSRMLS_CC, (apply_func_args_t)mysqlnd_build_trace_args, 2, str, len);
 		if (last_len != *len) {
 			*len -= 2; /* remove last ', ' */
 		}
@@ -1217,7 +1214,7 @@ static int mysqlnd_build_trace_string(zval **frame, int num_args, va_list args, 
 /* }}} */
 
 
-static int mysqlnd_build_trace_args(zval **arg, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	char **str;
 	int *len;
@@ -1277,7 +1274,6 @@ static int mysqlnd_build_trace_args(zval **arg, int num_args, va_list args, zend
 			double dval = Z_DVAL_PP(arg);
 			char *s_tmp;
 			int l_tmp;
-			TSRMLS_FETCH();
 
 			s_tmp = emalloc(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
 			l_tmp = zend_sprintf(s_tmp, "%.*G", (int) EG(precision), dval);  /* SAFE */
@@ -1294,7 +1290,6 @@ static int mysqlnd_build_trace_args(zval **arg, int num_args, va_list args, zend
 			char *class_name;
 			zend_uint class_name_len;
 			int dup;
-			TSRMLS_FETCH();
 
 			TRACE_APPEND_STR("Object(");
 
@@ -1315,7 +1310,7 @@ static int mysqlnd_build_trace_args(zval **arg, int num_args, va_list args, zend
 }
 /* }}} */
 
-static int mysqlnd_build_trace_string(zval **frame, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int mysqlnd_build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	char *s_tmp, **str;
 	int *len, *num;
@@ -1350,7 +1345,7 @@ static int mysqlnd_build_trace_string(zval **frame, int num_args, va_list args, 
 	TRACE_APPEND_CHR('(');
 	if (zend_hash_find(ht, "args", sizeof("args"), (void**)&tmp) == SUCCESS) {
 		int last_len = *len;
-		zend_hash_apply_with_arguments(Z_ARRVAL_PP(tmp), (apply_func_args_t)mysqlnd_build_trace_args, 2, str, len);
+		zend_hash_apply_with_arguments(Z_ARRVAL_PP(tmp) TSRMLS_CC, (apply_func_args_t)mysqlnd_build_trace_args, 2, str, len);
 		if (last_len != *len) {
 			*len -= 2; /* remove last ', ' */
 		}
@@ -1371,7 +1366,7 @@ char * mysqlnd_get_backtrace(TSRMLS_D)
 	MAKE_STD_ZVAL(trace);
 	zend_fetch_debug_backtrace(trace, 0, 0 TSRMLS_CC);
 
-	zend_hash_apply_with_arguments(Z_ARRVAL_P(trace), (apply_func_args_t)mysqlnd_build_trace_string, 3, str, len, &num);
+	zend_hash_apply_with_arguments(Z_ARRVAL_P(trace) TSRMLS_CC, (apply_func_args_t)mysqlnd_build_trace_string, 3, str, len, &num);
 	zval_ptr_dtor(&trace);
 
 	s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 7 + 1);

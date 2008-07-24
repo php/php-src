@@ -212,7 +212,7 @@ PHP_MSHUTDOWN_FUNCTION(browscap) /* {{{ */
 }
 /* }}} */
 
-static int browser_reg_compare(zval **browser, int num_args, va_list args, zend_hash_key *key) /* {{{ */
+static int browser_reg_compare(zval **browser TSRMLS_DC, int num_args, va_list args, zend_hash_key *key) /* {{{ */
 {
 	zval **browser_regex, **previous_match;
 	regex_t r;
@@ -329,7 +329,7 @@ PHP_FUNCTION(get_browser)
 
 	if (zend_hash_find(&browser_hash, lookup_browser_name, agent_name_len + 1, (void **) &agent) == FAILURE) {
 		found_browser_entry = NULL;
-		zend_hash_apply_with_arguments(&browser_hash, (apply_func_args_t) browser_reg_compare, 2, lookup_browser_name, &found_browser_entry);
+		zend_hash_apply_with_arguments(&browser_hash TSRMLS_CC, (apply_func_args_t) browser_reg_compare, 2, lookup_browser_name, &found_browser_entry);
 
 		if (found_browser_entry) {
 			agent = &found_browser_entry;

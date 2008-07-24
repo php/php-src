@@ -4887,7 +4887,7 @@ PHP_FUNCTION(get_current_user)
 
 /* {{{ add_config_entry_cb
  */
-static int add_config_entry_cb(zval *entry, int num_args, va_list args, zend_hash_key *hash_key TSRMLS_DC)
+static int add_config_entry_cb(zval *entry TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	zval *retval = (zval *) va_arg(args, int);
 	zval *tmp;
@@ -4901,7 +4901,7 @@ static int add_config_entry_cb(zval *entry, int num_args, va_list args, zend_has
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
 		MAKE_STD_ZVAL(tmp);
 		array_init(tmp);
-		zend_hash_apply_with_arguments(Z_ARRVAL_P(entry), (apply_func_args_t) add_config_entry_cb, 1, tmp TSRMLS_CC);
+		zend_hash_apply_with_arguments(Z_ARRVAL_P(entry) TSRMLS_CC, (apply_func_args_t) add_config_entry_cb, 1, tmp);
 		add_assoc_zval_ex(retval, hash_key->arKey, hash_key->nKeyLength, tmp);
 	}
 	return 0;
@@ -4925,7 +4925,7 @@ PHP_FUNCTION(get_cfg_var)
 	if (retval) {
 		if (Z_TYPE_P(retval) == IS_ARRAY) {
 			array_init(return_value);
-			zend_hash_apply_with_arguments(Z_ARRVAL_P(retval), (apply_func_args_t) add_config_entry_cb, 1, return_value TSRMLS_CC);
+			zend_hash_apply_with_arguments(Z_ARRVAL_P(retval) TSRMLS_CC, (apply_func_args_t) add_config_entry_cb, 1, return_value);
 			return;
 		} else {
 			RETURN_STRING(Z_STRVAL_P(retval), 1);
@@ -5604,7 +5604,7 @@ PHP_FUNCTION(ini_get)
 }
 /* }}} */
 
-static int php_ini_get_option(zend_ini_entry *ini_entry, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int php_ini_get_option(zend_ini_entry *ini_entry TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	zval *ini_array = va_arg(args, zval *);
 	int module_number = va_arg(args, int);
@@ -5675,7 +5675,7 @@ PHP_FUNCTION(ini_get_all)
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(ini_directives), (apply_func_args_t) php_ini_get_option, 2, return_value, extnumber, details TSRMLS_CC);
+	zend_hash_apply_with_arguments(EG(ini_directives) TSRMLS_CC, (apply_func_args_t) php_ini_get_option, 2, return_value, extnumber, details);
 }
 /* }}} */
 
@@ -6290,17 +6290,16 @@ PHP_FUNCTION(config_get_hash) /* {{{ */
 	HashTable *hash = php_ini_get_configuration_hash();
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(hash, (apply_func_args_t) add_config_entry_cb, 1, return_value TSRMLS_CC);
+	zend_hash_apply_with_arguments(hash TSRMLS_CC, (apply_func_args_t) add_config_entry_cb, 1, return_value);
 }
 /* }}} */
 #endif
 
-static int copy_request_variable(void *pDest, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int copy_request_variable(void *pDest TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	zval *prefix, new_key;
 	int prefix_len;
 	zval **var = (zval **) pDest;
-	TSRMLS_FETCH();
 
 	if (num_args != 1) {
 		return 0;
@@ -6367,18 +6366,18 @@ PHP_FUNCTION(import_request_variables)
 
 			case 'g':
 			case 'G':
-				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]), (apply_func_args_t) copy_request_variable, 1, prefix);
+				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]) TSRMLS_CC, (apply_func_args_t) copy_request_variable, 1, prefix);
 				break;
 
 			case 'p':
 			case 'P':
-				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_POST]), (apply_func_args_t) copy_request_variable, 1, prefix);
-				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_FILES]), (apply_func_args_t) copy_request_variable, 1, prefix);
+				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_POST]) TSRMLS_CC, (apply_func_args_t) copy_request_variable, 1, prefix);
+				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_FILES]) TSRMLS_CC, (apply_func_args_t) copy_request_variable, 1, prefix);
 				break;
 
 			case 'c':
 			case 'C':
-				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]), (apply_func_args_t) copy_request_variable, 1, prefix);
+				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]) TSRMLS_CC, (apply_func_args_t) copy_request_variable, 1, prefix);
 				break;
 		}
 	}
