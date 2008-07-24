@@ -219,6 +219,8 @@ PHP                                                                        NEWS
 - Fixed PECL bug #12431 (OCI8 ping functionality is broken). (Oracle Corp.)
 - Fixed PECL bug #12401 (Add support for ATTR_FETCH_TABLE_NAMES). (Johannes)
 
+- Fixed bug #45614 (ArrayIterator::current(), ::key() can show 1st private 
+  prop of wrapped object). (robin_fernandes at uk dot ibm dot com, Arnaud)
 - Fixed bug #45571 (ReflectionClass::export() shows superclasses' private
   static methods). (robin_fernandes at uk dot ibm dot com)
 - Fixed bug #45345 (SPLFileInfo::getPathInfo() returning dir info instead of
