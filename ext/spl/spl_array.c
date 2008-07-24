@@ -87,6 +87,8 @@ static inline HashTable *spl_array_get_hash_table(spl_array_object* intern, int 
 	}
 } /* }}} */
 
+static void spl_array_rewind(spl_array_object *intern TSRMLS_DC);
+
 SPL_API int spl_hash_verify_pos(spl_array_object * intern TSRMLS_DC) /* {{{ */
 {
 	HashTable *ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
@@ -103,7 +105,7 @@ SPL_API int spl_hash_verify_pos(spl_array_object * intern TSRMLS_DC) /* {{{ */
 		p = p->pListNext;
 	}
 /*	HASH_UNPROTECT_RECURSION(ht); */
-	zend_hash_internal_pointer_reset_ex(spl_array_get_hash_table(intern, 0 TSRMLS_CC), &intern->pos);
+	spl_array_rewind(intern TSRMLS_CC);
 	return FAILURE;
 }
 /* }}} */
@@ -227,7 +229,7 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 		}
 	}
 
-	zend_hash_internal_pointer_reset_ex(spl_array_get_hash_table(intern, 0 TSRMLS_CC), &intern->pos);
+	spl_array_rewind(intern TSRMLS_CC);
 	return retval;
 }
 /* }}} */
@@ -707,8 +709,6 @@ static int spl_array_has_property(zval *object, zval *member, int has_set_exists
 	return std_object_handlers.has_property(object, member, has_set_exists TSRMLS_CC);
 } /* }}} */
 
-static void spl_array_rewind(spl_array_object *intern TSRMLS_DC);
-
 static void spl_array_unset_property(zval *object, zval *member TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
@@ -1157,7 +1157,7 @@ SPL_METHOD(Array, seek)
 	opos = position;
 
 	if (position >= 0) { /* negative values are not supported */
-		zend_hash_internal_pointer_reset_ex(aht, &intern->pos);
+		spl_array_rewind(intern TSRMLS_CC);
 		result = SUCCESS;
 		
 		while (position-- > 0 && (result = spl_array_next(intern TSRMLS_CC)) == SUCCESS);
@@ -1185,7 +1185,7 @@ int static spl_array_object_count_elements_helper(spl_array_object *intern, long
 		 * we're going to call and which do not support 'pos' as parameter. */
 		pos = intern->pos;
 		*count = 0;
-		zend_hash_internal_pointer_reset_ex(aht, &intern->pos);
+		spl_array_rewind(intern TSRMLS_CC);
 		while(intern->pos && spl_array_next(intern TSRMLS_CC) == SUCCESS) {
 			(*count)++;
 		}
