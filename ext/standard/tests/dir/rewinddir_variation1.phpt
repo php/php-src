@@ -26,7 +26,7 @@ class classA
   }
 }
 
-// heredoc string
+// heredoc Unicode string
 $heredoc = <<<EOT
 hello world
 EOT;
@@ -62,9 +62,9 @@ $inputs = array(
        '',
        array(),
 
-       // string data
-/*19*/ "string",
-       'string',
+       // Unicode string data
+/*19*/ "Unicode string",
+       'Unicode string',
        $heredoc,
        
        // object data
@@ -91,121 +91,121 @@ foreach($inputs as $input) {
 
 -- Iteration 1 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, integer given in %s on line %d
+NULL
 
 -- Iteration 2 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, integer given in %s on line %d
+NULL
 
 -- Iteration 3 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, integer given in %s on line %d
+NULL
 
 -- Iteration 4 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, integer given in %s on line %d
+NULL
 
 -- Iteration 5 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, double given in %s on line %d
+NULL
 
 -- Iteration 6 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, double given in %s on line %d
+NULL
 
 -- Iteration 7 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, double given in %s on line %d
+NULL
 
 -- Iteration 8 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, double given in %s on line %d
+NULL
 
 -- Iteration 9 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, double given in %s on line %d
+NULL
 
 -- Iteration 10 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, null given in %s on line %d
+NULL
 
 -- Iteration 11 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, null given in %s on line %d
+NULL
 
 -- Iteration 12 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, boolean given in %s on line %d
+NULL
 
 -- Iteration 13 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, boolean given in %s on line %d
+NULL
 
 -- Iteration 14 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, boolean given in %s on line %d
+NULL
 
 -- Iteration 15 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, boolean given in %s on line %d
+NULL
 
 -- Iteration 16 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+NULL
 
 -- Iteration 17 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+NULL
 
 -- Iteration 18 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, array given in %s on line %d
+NULL
 
 -- Iteration 19 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+NULL
 
 -- Iteration 20 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+NULL
 
 -- Iteration 21 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+NULL
 
 -- Iteration 22 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, object given in %s on line %d
+NULL
 
 -- Iteration 23 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, null given in %s on line %d
+NULL
 
 -- Iteration 24 --
 
-Warning: rewinddir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: rewinddir() expects parameter 1 to be resource, null given in %s on line %d
+NULL
 ===DONE===
