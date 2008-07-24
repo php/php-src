@@ -10,7 +10,7 @@ MySQLPDOTest::skip();
 <?php
 	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 
-	function test_type(&$db, $offset, $sql_type, $value, $ret_value = NULL, $pattern = NULL) {
+	function test_type(&$db, $offset, $sql_type, $value, $ret_value = NULL, $pattern = NULL, $alternative_type = NULL) {
 
 		$db->exec('DROP TABLE IF EXISTS test');
 		$sql = sprintf('CREATE TABLE test(id INT, label %s) ENGINE=%s', $sql_type, MySQLPDOTest::getTableEngine());
@@ -57,10 +57,11 @@ MySQLPDOTest::skip();
 				// typically the difference is only the type
 				$exp = $ret_value;
 			}
-			if ($row['label'] !== $exp) {
-				printf("[%03d + 4] %s - input = %s/%s, output = %s/%s\n", $offset,
+			if ($row['label'] !== $exp && !is_null($alternative_type) && gettype($row['label']) != $alternative_type) {
+				printf("[%03d + 4] %s - input = %s/%s, output = %s/%s (alternative type: %s)\n", $offset,
 					$sql_type, var_export($exp, true), gettype($exp),
-					var_export($row['label'], true), gettype($row['label']));
+					var_export($row['label'], true), gettype($row['label']),
+					$alternative_type);
 				return false;
 			}
 
@@ -102,8 +103,11 @@ MySQLPDOTest::skip();
 	test_type($db, 80, 'MEDIUMINT', -8388608, ($is_mysqlnd) ? -8388608 : '-8388608');
 	test_type($db, 90, 'MEDIUMINT UNSIGNED', 16777215, ($is_mysqlnd) ? 16777215 : '16777215');
 
-	test_type($db, 100, 'INT', -2147483648, ($is_mysqlnd) ? -2147483648 : '-2147483648');
-	test_type($db, 110, 'INT UNSIGNED', 4294967295, ($is_mysqlnd) ? 4294967295 : '4294967295');
+	test_type($db, 100, 'INT', -2147483648, 
+		($is_mysqlnd) ? ((PHP_INT_SIZE > 4) ? (int)-2147483648 : (double)-2147483648) : '-2147483648', 
+		NULL, ($is_mysqlnd) ? 'integer' : NULL);
+
+	test_type($db, 110, 'INT UNSIGNED', 4294967295, ($is_mysqlnd) ? ((PHP_INT_SIZE > 4) ? 4294967295 : '4294967295') : '4294967295');
 
 	// no chance to return int with the current PDO version - we are forced to return strings
 	test_type($db, 120, 'BIGINT', 1, ($is_mysqlnd) ? 1 : '1');
