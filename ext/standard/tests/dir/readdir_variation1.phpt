@@ -90,121 +90,121 @@ foreach($inputs as $input) {
 
 -- Iteration 1 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, integer given in %s on line %d
+NULL
 
 -- Iteration 2 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, integer given in %s on line %d
+NULL
 
 -- Iteration 3 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, integer given in %s on line %d
+NULL
 
 -- Iteration 4 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, integer given in %s on line %d
+NULL
 
 -- Iteration 5 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, double given in %s on line %d
+NULL
 
 -- Iteration 6 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, double given in %s on line %d
+NULL
 
 -- Iteration 7 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, double given in %s on line %d
+NULL
 
 -- Iteration 8 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, double given in %s on line %d
+NULL
 
 -- Iteration 9 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, double given in %s on line %d
+NULL
 
 -- Iteration 10 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, null given in %s on line %d
+NULL
 
 -- Iteration 11 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, null given in %s on line %d
+NULL
 
 -- Iteration 12 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, boolean given in %s on line %d
+NULL
 
 -- Iteration 13 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, boolean given in %s on line %d
+NULL
 
 -- Iteration 14 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, boolean given in %s on line %d
+NULL
 
 -- Iteration 15 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, boolean given in %s on line %d
+NULL
 
 -- Iteration 16 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+NULL
 
 -- Iteration 17 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+NULL
 
 -- Iteration 18 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, array given in %s on line %d
+NULL
 
 -- Iteration 19 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+NULL
 
 -- Iteration 20 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+NULL
 
 -- Iteration 21 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+NULL
 
 -- Iteration 22 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, object given in %s on line %d
+NULL
 
 -- Iteration 23 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, null given in %s on line %d
+NULL
 
 -- Iteration 24 --
 
-Warning: readdir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: readdir() expects parameter 1 to be resource, null given in %s on line %d
+NULL
 ===DONE===

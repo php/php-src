@@ -92,121 +92,121 @@ foreach($inputs as $input) {
 
 -- Iteration 1 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, integer given in %s on line %d
+NULL
 
 -- Iteration 2 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, integer given in %s on line %d
+NULL
 
 -- Iteration 3 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, integer given in %s on line %d
+NULL
 
 -- Iteration 4 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, integer given in %s on line %d
+NULL
 
 -- Iteration 5 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, double given in %s on line %d
+NULL
 
 -- Iteration 6 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, double given in %s on line %d
+NULL
 
 -- Iteration 7 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, double given in %s on line %d
+NULL
 
 -- Iteration 8 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, double given in %s on line %d
+NULL
 
 -- Iteration 9 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, double given in %s on line %d
+NULL
 
 -- Iteration 10 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, null given in %s on line %d
+NULL
 
 -- Iteration 11 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, null given in %s on line %d
+NULL
 
 -- Iteration 12 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, boolean given in %s on line %d
+NULL
 
 -- Iteration 13 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, boolean given in %s on line %d
+NULL
 
 -- Iteration 14 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, boolean given in %s on line %d
+NULL
 
 -- Iteration 15 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, boolean given in %s on line %d
+NULL
 
 -- Iteration 16 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+NULL
 
 -- Iteration 17 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+NULL
 
 -- Iteration 18 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, array given in %s on line %d
+NULL
 
 -- Iteration 19 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+NULL
 
 -- Iteration 20 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+NULL
 
 -- Iteration 21 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+NULL
 
 -- Iteration 22 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, object given in %s on line %d
+NULL
 
 -- Iteration 23 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, null given in %s on line %d
+NULL
 
 -- Iteration 24 --
 
-Warning: closedir(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Warning: closedir() expects parameter 1 to be resource, null given in %s on line %d
+NULL
 ===DONE===
