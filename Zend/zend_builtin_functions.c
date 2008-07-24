@@ -1625,14 +1625,13 @@ ZEND_FUNCTION(restore_exception_handler)
 }
 /* }}} */
 
-static int copy_class_or_interface_name(zend_class_entry **pce, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int copy_class_or_interface_name(zend_class_entry **pce TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	zval *array = va_arg(args, zval *);
 	zend_uint mask = va_arg(args, zend_uint);
 	zend_uint comply = va_arg(args, zend_uint);
 	zend_uint comply_mask = (comply)? mask:0;
 	zend_class_entry *ce  = *pce;
-	TSRMLS_FETCH();
 
 	if ((hash_key->nKeyLength==0 ||
 	     (hash_key->type == IS_UNICODE && hash_key->arKey.u[0] != 0) ||
@@ -1656,7 +1655,7 @@ ZEND_FUNCTION(get_declared_classes)
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) copy_class_or_interface_name, 3, return_value, mask, comply);
+	zend_hash_apply_with_arguments(EG(class_table) TSRMLS_CC, (apply_func_args_t) copy_class_or_interface_name, 3, return_value, mask, comply);
 }
 /* }}} */
 
@@ -1672,11 +1671,11 @@ ZEND_FUNCTION(get_declared_interfaces)
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) copy_class_or_interface_name, 3, return_value, mask, comply);
+	zend_hash_apply_with_arguments(EG(class_table) TSRMLS_CC, (apply_func_args_t) copy_class_or_interface_name, 3, return_value, mask, comply);
 }
 /* }}} */
 
-static int copy_function_name(zend_function *func, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int copy_function_name(zend_function *func TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	zval *internal_ar = va_arg(args, zval *),
 	     *user_ar     = va_arg(args, zval *);
@@ -1723,7 +1722,7 @@ ZEND_FUNCTION(get_defined_functions)
 	array_init(user);
 	array_init(return_value);
 
-	zend_hash_apply_with_arguments(EG(function_table), (apply_func_args_t) copy_function_name, 2, internal, user);
+	zend_hash_apply_with_arguments(EG(function_table) TSRMLS_CC, (apply_func_args_t) copy_function_name, 2, internal, user);
 
 	if (zend_ascii_hash_add(Z_ARRVAL_P(return_value), "internal", sizeof("internal"), (void **)&internal, sizeof(zval *), NULL) == FAILURE) {
 		zval_ptr_dtor(&internal);
