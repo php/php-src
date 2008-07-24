@@ -608,8 +608,8 @@ ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter
 
 	/* convert and set */
 	if (!SCNG(input_filter)) {
-		length = SCNG(script_org_size) - offset - 1;
-		p = SCNG(script_org) + offset + 1;
+		length = SCNG(script_org_size) - offset;
+		p = SCNG(script_org) + offset;
 		free_flag = 0;
 	} else {
 		SCNG(input_filter)(&p, &length, SCNG(script_org) + offset, SCNG(script_org_size) - offset TSRMLS_CC);
