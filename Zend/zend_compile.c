@@ -4611,18 +4611,20 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC)
 		 * parseable according to the .ini script_encoding setting. We still
 		 * want to tell them to put declare() at the top.
 		 */
-		if (CG(active_op_array)->last > 0) {
-			/* ignore ZEND_EXT_STMT and ZEND_TICKS */
+		{
 			int num = CG(active_op_array)->last;
+			/* ignore ZEND_EXT_STMT and ZEND_TICKS */
 			while (num > 0 &&
 			       (CG(active_op_array)->opcodes[num-1].opcode == ZEND_EXT_STMT ||
 			        CG(active_op_array)->opcodes[num-1].opcode == ZEND_TICKS)) {
 				--num;
 			}
-			if (num > 0) {
-				zend_error(E_COMPILE_ERROR, "Encoding declaration pragma has to be the very first statement in the script");
+
+			if (num > 0 || CG(encoding_declared)) {
+				zend_error(E_COMPILE_ERROR, "Encoding declaration pragma must be the very first statement in the script");
 			}
-		}		
+		}
+		CG(encoding_declared) = 1;
 
 		convert_to_string(&val->u.constant);
 		new_encoding = zend_multibyte_fetch_encoding(val->u.constant.value.str.val);

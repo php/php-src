@@ -1,5 +1,5 @@
 --TEST--
-zend multibyte
+zend multibyte (1)
 --SKIPIF--
 <?php
 ini_set("mbstring.script_encoding","SJIS");

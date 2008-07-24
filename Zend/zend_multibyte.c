@@ -25,14 +25,15 @@
 #include "zend_multibyte.h"
 
 #ifdef ZEND_MULTIBYTE
-static int zend_multibyte_encoding_filter(char **to, int *to_length, const char *to_encoding, const char *from, int from_length, const char *from_encoding TSRMLS_DC);
-int sjis_input_filter(char **buf, int *length, const char *sjis, int sjis_length TSRMLS_DC);
-int sjis_output_filter(char **buf, int *length, const char *sjis, int sjis_length TSRMLS_DC);
-static char* zend_multibyte_assemble_encoding_list(zend_encoding **encoding_list, int encoding_list_size);
-static int zend_multibyte_parse_encoding_list(const char *encoding_list, int encoding_list_size, zend_encoding ***result, int *result_size);
-static zend_encoding* zend_multibyte_find_script_encoding(zend_encoding *onetime_encoding TSRMLS_DC);
-static zend_encoding* zend_multibyte_detect_unicode(TSRMLS_D);
-static zend_encoding* zend_multibyte_detect_utf_encoding(char *script, int script_size TSRMLS_DC);
+static size_t zend_multibyte_encoding_filter(unsigned char **to, size_t *to_length, const char *to_encoding, const unsigned char *from, size_t from_length, const char *from_encoding TSRMLS_DC);
+size_t sjis_input_filter(unsigned char **buf, size_t *length, const unsigned char *sjis, size_t sjis_length TSRMLS_DC);
+size_t sjis_output_filter(unsigned char **buf, size_t *length, const unsigned char *sjis, size_t sjis_length TSRMLS_DC);
+static char* zend_multibyte_assemble_encoding_list(zend_encoding **encoding_list, size_t encoding_list_size);
+static int zend_multibyte_parse_encoding_list(const char *encoding_list,
+size_t encoding_list_size, zend_encoding ***result, size_t *result_size);
+static zend_encoding *zend_multibyte_find_script_encoding(zend_encoding *onetime_encoding TSRMLS_DC);
+static zend_encoding *zend_multibyte_detect_unicode(TSRMLS_D);
+static zend_encoding *zend_multibyte_detect_utf_encoding(const unsigned char *script, size_t script_size TSRMLS_DC);
 
 /*
  * encodings
@@ -475,7 +476,8 @@ zend_encoding *zend_encoding_table[] = {
 
 
 
-ZEND_API int zend_multibyte_set_script_encoding(char *encoding_list, int encoding_list_size TSRMLS_DC)
+ZEND_API int zend_multibyte_set_script_encoding(const char *encoding_list,
+size_t encoding_list_size TSRMLS_DC)
 {
 	if (CG(script_encoding_list)) {
 		efree(CG(script_encoding_list));
@@ -493,7 +495,7 @@ ZEND_API int zend_multibyte_set_script_encoding(char *encoding_list, int encodin
 }
 
 
-ZEND_API int zend_multibyte_set_internal_encoding(char *encoding_name, int encoding_name_size TSRMLS_DC)
+ZEND_API int zend_multibyte_set_internal_encoding(const char *encoding_name TSRMLS_DC)
 {
 	CG(internal_encoding) = zend_multibyte_fetch_encoding(encoding_name);
 	return 0;
@@ -558,7 +560,7 @@ ZEND_API int zend_multibyte_set_filter(zend_encoding *onetime_encoding TSRMLS_DC
 }
 
 
-ZEND_API zend_encoding* zend_multibyte_fetch_encoding(char *encoding_name)
+ZEND_API zend_encoding* zend_multibyte_fetch_encoding(const char *encoding_name)
 {
 	int i, j;
 	zend_encoding *encoding;
@@ -568,7 +570,7 @@ ZEND_API zend_encoding* zend_multibyte_fetch_encoding(char *encoding_name)
 	}
 
 	for (i = 0; (encoding = zend_encoding_table[i]) != NULL; i++) {
-		if (zend_binary_strcasecmp((char*)encoding->name, strlen(encoding->name), encoding_name, strlen(encoding_name)) == 0) {
+		if (zend_binary_strcasecmp(encoding->name, strlen(encoding->name), encoding_name, strlen(encoding_name)) == 0) {
 			return encoding;
 		}
 	}
@@ -576,7 +578,7 @@ ZEND_API zend_encoding* zend_multibyte_fetch_encoding(char *encoding_name)
 	for (i = 0; (encoding = zend_encoding_table[i]) != NULL; i++) {
 		if (encoding->aliases != NULL) {
 			for (j = 0; (*encoding->aliases)[j] != NULL; j++) {
-				if (zend_binary_strcasecmp((char*)(*encoding->aliases)[j], strlen((*encoding->aliases)[j]), encoding_name, strlen(encoding_name)) == 0) {
+				if (zend_binary_strcasecmp((*encoding->aliases)[j], strlen((*encoding->aliases)[j]), encoding_name, strlen(encoding_name)) == 0) {
 					return encoding;
 				}
 			}
@@ -587,7 +589,8 @@ ZEND_API zend_encoding* zend_multibyte_fetch_encoding(char *encoding_name)
 }
 
 
-ZEND_API int zend_multibyte_script_encoding_filter(char **to, int *to_length, const char *from, int from_length TSRMLS_DC)
+ZEND_API size_t zend_multibyte_script_encoding_filter(unsigned char **to, size_t
+*to_length, const unsigned char *from, size_t from_length TSRMLS_DC)
 {
 	const char *name;
 
@@ -600,7 +603,7 @@ ZEND_API int zend_multibyte_script_encoding_filter(char **to, int *to_length, co
 	return zend_multibyte_encoding_filter(to, to_length, name, from, from_length, LANG_SCNG(script_encoding)->name TSRMLS_CC);
 }
 
-ZEND_API int zend_multibyte_internal_encoding_filter(char **to, int *to_length, const char *from, int from_length TSRMLS_DC)
+ZEND_API size_t zend_multibyte_internal_encoding_filter(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length TSRMLS_DC)
 {
 	const char *name;
 
@@ -613,9 +616,9 @@ ZEND_API int zend_multibyte_internal_encoding_filter(char **to, int *to_length, 
 	return zend_multibyte_encoding_filter(to, to_length, LANG_SCNG(internal_encoding)->name, from, from_length, name TSRMLS_CC);
 }
 
-static int zend_multibyte_encoding_filter(char **to, int *to_length, const char *to_encoding, const char *from, int from_length, const char *from_encoding TSRMLS_DC)
+static size_t zend_multibyte_encoding_filter(unsigned char **to, size_t *to_length, const char *to_encoding, const unsigned char *from, size_t from_length, const char *from_encoding TSRMLS_DC)
 {
-	int oddlen;
+	size_t oddlen;
 
 	if (!CG(encoding_converter)) {
 		return 0;
@@ -658,21 +661,22 @@ static const unsigned char table_sjis[] = { /* 0x80-0x9f,0xE0-0xEF */
   3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 0, 0, 0
 };
 
-int sjis_input_filter(char **buf, int *length, const char *sjis, int sjis_length TSRMLS_DC)
+size_t sjis_input_filter(unsigned char **buf, size_t *length, const unsigned char *sjis, size_t sjis_length TSRMLS_DC)
 {
-	unsigned char *p, *q;
+	const unsigned char *p;
+	unsigned char *q;
 	unsigned char  c1, c2;
 
-	*buf = (char*)emalloc(sjis_length*3/2+1);
+	*buf = (unsigned char*)emalloc(sjis_length * 3 / 2 + 1);
 	if (!*buf)
 		return 0;
 	*length = 0;
 
-	p = (unsigned char*)sjis;
-	q = (unsigned char*)*buf;
+	p = sjis;
+	q = *buf;
 
 	/* convert [SJIS -> EUC-JP] (for lex scan) -- some other better ways? */
-	while (*p && (p-(unsigned char*)sjis) < sjis_length) {
+	while (*p && (p - sjis) < sjis_length) {
 		if (!(*p & 0x80)) {
 			*q++ = *p++;
 			continue;
@@ -694,7 +698,7 @@ int sjis_input_filter(char **buf, int *length, const char *sjis, int sjis_length
 		if (table_sjis[*p] == 2) {
 			/* 2 byte kanji code */
 			c1 = *p++;
-			if (!*p || (p-(unsigned char*)sjis) >= sjis_length) {
+			if (!*p || (p - sjis) >= sjis_length) {
 				break;
 			}
 			c2 = *p++;
@@ -725,11 +729,11 @@ int sjis_input_filter(char **buf, int *length, const char *sjis, int sjis_length
 			 * so, these code are for perfect RESTORING in sjis_output_filter()
 			 */
 			c1 = *p++;
-			if (!*p || (p-(unsigned char*)sjis) >= sjis_length) {
+			if (!*p || (p - sjis) >= sjis_length) {
 				break;
 			}
 			c2 = *p++;
-			*q++ = (char)0x8f;
+			*q++ = 0x8f;
 			/*
 			 * MAP TO (EUC-JP):
 			 * type A: 0xeba1 - 0xf4fe
@@ -754,8 +758,8 @@ int sjis_input_filter(char **buf, int *length, const char *sjis, int sjis_length
 			*q++ = c2;
 		}
 	}
-	*q = (char)NULL;
-	*length = (char*)q - *buf;
+	*q = '\0';
+	*length = q - *buf;
 
 	return *length;
 }
@@ -779,18 +783,18 @@ static const unsigned char table_eucjp[] = { /* 0xA1-0xFE */
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1
 };
 
-int sjis_output_filter(char **sjis, int *sjis_length, const char *buf, int length TSRMLS_DC)
+size_t sjis_output_filter(unsigned char **sjis, size_t *sjis_length, const unsigned char *buf, size_t length TSRMLS_DC)
 {
 	unsigned char c1, c2;
-	char *p;
-	const char *q;
+	unsigned char *p;
+	const unsigned char *q;
 
 	if (!sjis || !sjis_length) {
 		return 0;
 	}
 
 	/* always Shift_JIS <= EUC-JP */
-	*sjis = (char*)emalloc(length+1);
+	*sjis = (unsigned char*)emalloc(length+1);
 	if (!sjis) {
 		return 0;
 	}
@@ -798,14 +802,14 @@ int sjis_output_filter(char **sjis, int *sjis_length, const char *buf, int lengt
 	q = buf;
 
 	/* restore converted strings [EUC-JP -> Shift_JIS] */
-	while (*q) {
+	while (*q && (q - buf) < length) {
 		if (!(*q & 0x80)) {
 			*p++ = *q++;
 			continue;
 		}
 
 		/* hankaku kana */
-		if (*q == (char)0x8e) {
+		if (*q == 0x8e) {
 			q++;
 			if (*q) {
 				*p++ = *q++;
@@ -814,7 +818,7 @@ int sjis_output_filter(char **sjis, int *sjis_length, const char *buf, int lengt
 		}
 
 		/* 2 byte kanji code */
-		if (table_eucjp[(unsigned char)*q] == 2) {
+		if (table_eucjp[*q] == 2) {
 			c1 = (*q++ & ~0x80) & 0xff;
 			if (*q) {
 				c2 = (*q++ & ~0x80) & 0xff;
@@ -837,7 +841,7 @@ int sjis_output_filter(char **sjis, int *sjis_length, const char *buf, int lengt
 			continue;
 		}
 
-		if (*q == (char)0x8f) {
+		if (*q == 0x8f) {
 			q++;
 			if (*q) {
 				c1 = (*q++ & ~0x80) & 0xff;
@@ -882,7 +886,7 @@ int sjis_output_filter(char **sjis, int *sjis_length, const char *buf, int lengt
 }
 
 
-static char* zend_multibyte_assemble_encoding_list(zend_encoding **encoding_list, int encoding_list_size)
+static char *zend_multibyte_assemble_encoding_list(zend_encoding **encoding_list, size_t encoding_list_size)
 {
 	int i, list_size = 0;
 	const char *name;
@@ -901,7 +905,7 @@ static char* zend_multibyte_assemble_encoding_list(zend_encoding **encoding_list
 				if (!list) {
 					return NULL;
 				}
-				*list = (char)NULL;
+				*list = '\0';
 			} else {
 				list = (char*)erealloc(list, list_size);
 				if (!list) {
@@ -916,7 +920,8 @@ static char* zend_multibyte_assemble_encoding_list(zend_encoding **encoding_list
 }
 
 
-static int zend_multibyte_parse_encoding_list(const char *encoding_list, int encoding_list_size, zend_encoding ***result, int *result_size)
+static int zend_multibyte_parse_encoding_list(const char *encoding_list,
+size_t encoding_list_size, zend_encoding ***result, size_t *result_size)
 {
 	int n, size;
 	char *p, *p1, *p2, *endp, *tmpstr;
@@ -1034,7 +1039,7 @@ static zend_encoding* zend_multibyte_detect_unicode(TSRMLS_D)
 {
 	zend_encoding *script_encoding = NULL;
 	int bom_size;
-	char *script;
+	unsigned char *script;
 
 	if (LANG_SCNG(script_org_size) < sizeof(BOM_UTF32_LE)-1) {
 		return NULL;
@@ -1060,7 +1065,7 @@ static zend_encoding* zend_multibyte_detect_unicode(TSRMLS_D)
 
 	if (script_encoding) {
 		/* remove BOM */
-		script = (char*)emalloc(LANG_SCNG(script_org_size)+1-bom_size);
+		script = (unsigned char*)emalloc(LANG_SCNG(script_org_size)+1-bom_size);
 		memcpy(script, LANG_SCNG(script_org)+bom_size, LANG_SCNG(script_org_size)+1-bom_size);
 		efree(LANG_SCNG(script_org));
 		LANG_SCNG(script_org) = script;
@@ -1078,9 +1083,9 @@ static zend_encoding* zend_multibyte_detect_unicode(TSRMLS_D)
 	return NULL;
 }
 
-static zend_encoding* zend_multibyte_detect_utf_encoding(char *script, int script_size TSRMLS_DC)
+static zend_encoding *zend_multibyte_detect_utf_encoding(const unsigned char *script, size_t script_size TSRMLS_DC)
 {
-	char *p;
+	const unsigned char *p;
 	int wchar_size = 2;
 	int le = 0;
 
@@ -1091,7 +1096,7 @@ static zend_encoding* zend_multibyte_detect_utf_encoding(char *script, int scrip
 		if (!p) {
 			break;
 		}
-		if (*(p+1) == (char)NULL && *(p+2) == (char)NULL) {
+		if (*(p+1) == '\0' && *(p+2) == '\0') {
 			wchar_size = 4;
 			break;
 		}
@@ -1103,11 +1108,11 @@ static zend_encoding* zend_multibyte_detect_utf_encoding(char *script, int scrip
 	/* BE or LE? */
 	p = script;
 	while ((p-script) < script_size) {
-		if (*p == (char)NULL && *(p+wchar_size-1) != (char)NULL) {
+		if (*p == '\0' && *(p+wchar_size-1) != '\0') {
 			/* BE */
 			le = 0;
 			break;
-		} else if (*p != (char)NULL && *(p+wchar_size-1) == (char)NULL) {
+		} else if (*p != '\0' && *(p+wchar_size-1) == '\0') {
 			/* LE* */
 			le = 1;
 			break;

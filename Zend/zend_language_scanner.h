@@ -38,12 +38,12 @@ typedef struct _zend_lex_state {
 
 #ifdef ZEND_MULTIBYTE
 	/* original (unfiltered) script */
-	char *script_org;
-	int script_org_size;
+	unsigned char *script_org;
+	size_t script_org_size;
 
 	/* filtered script */
-	char *script_filtered;
-	int script_filtered_size;
+	unsigned char *script_filtered;
+	size_t script_filtered_size;
 
 	/* input/ouput filters */
 	zend_encoding_filter input_filter;
