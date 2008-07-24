@@ -13825,6 +13825,8 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 		}
 		zend_error(E_STRICT, "Only variables should be assigned by reference");
 		return ZEND_ASSIGN_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+		PZVAL_LOCK(*value_ptr_ptr);
 	}
 	if (IS_VAR == IS_VAR && EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr) {
 		zend_error(E_ERROR, "Cannot assign by reference to overloaded object");
@@ -13836,6 +13838,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 		zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
 	}
 	zend_assign_to_variable_reference(variable_ptr_ptr, value_ptr_ptr TSRMLS_CC);
+
+	if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+		Z_DELREF_PP(variable_ptr_ptr);
+	}
 
 	if (!RETURN_VALUE_UNUSED(&opline->result)) {
 		AI_SET_PTR(EX_T(opline->result.u.var).var, *variable_ptr_ptr);
@@ -16245,6 +16251,8 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 		}
 		zend_error(E_STRICT, "Only variables should be assigned by reference");
 		return ZEND_ASSIGN_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+		PZVAL_LOCK(*value_ptr_ptr);
 	}
 	if (IS_VAR == IS_VAR && EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr) {
 		zend_error(E_ERROR, "Cannot assign by reference to overloaded object");
@@ -16256,6 +16264,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 		zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
 	}
 	zend_assign_to_variable_reference(variable_ptr_ptr, value_ptr_ptr TSRMLS_CC);
+
+	if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+		Z_DELREF_PP(variable_ptr_ptr);
+	}
 
 	if (!RETURN_VALUE_UNUSED(&opline->result)) {
 		AI_SET_PTR(EX_T(opline->result.u.var).var, *variable_ptr_ptr);
@@ -27120,6 +27132,8 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		}
 		zend_error(E_STRICT, "Only variables should be assigned by reference");
 		return ZEND_ASSIGN_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+		PZVAL_LOCK(*value_ptr_ptr);
 	}
 	if (IS_CV == IS_VAR && EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr) {
 		zend_error(E_ERROR, "Cannot assign by reference to overloaded object");
@@ -27131,6 +27145,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
 	}
 	zend_assign_to_variable_reference(variable_ptr_ptr, value_ptr_ptr TSRMLS_CC);
+
+	if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+		Z_DELREF_PP(variable_ptr_ptr);
+	}
 
 	if (!RETURN_VALUE_UNUSED(&opline->result)) {
 		AI_SET_PTR(EX_T(opline->result.u.var).var, *variable_ptr_ptr);
@@ -29317,6 +29335,8 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 		}
 		zend_error(E_STRICT, "Only variables should be assigned by reference");
 		return ZEND_ASSIGN_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+		PZVAL_LOCK(*value_ptr_ptr);
 	}
 	if (IS_CV == IS_VAR && EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr) {
 		zend_error(E_ERROR, "Cannot assign by reference to overloaded object");
@@ -29328,6 +29348,10 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 		zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
 	}
 	zend_assign_to_variable_reference(variable_ptr_ptr, value_ptr_ptr TSRMLS_CC);
+
+	if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+		Z_DELREF_PP(variable_ptr_ptr);
+	}
 
 	if (!RETURN_VALUE_UNUSED(&opline->result)) {
 		AI_SET_PTR(EX_T(opline->result.u.var).var, *variable_ptr_ptr);
