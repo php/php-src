@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2008 The PHP Group                                |
+  | Copyright (c) 1997-2006 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -23,6 +23,30 @@
 #ifndef _PHP_MING_H
 #define _PHP_MING_H
 
+#if !defined(PHP_METHOD)
+/* Must be building for PHP4 */
+#define ZEND_METHOD(classname, name)    ZEND_NAMED_FUNCTION(ZEND_FN(classname##_##name))
+#define PHP_METHOD              ZEND_METHOD
+
+#define ZEND_ME(classname, name, arg_info, flags)       ZEND_FALIAS(name, classname##_##name, arg_info)
+#define PHP_ME                  ZEND_ME
+
+
+#undef INIT_CLASS_ENTRY
+#define INIT_CLASS_ENTRY(class_container, class_name, functions)	\
+	{								\
+		char *p;						\
+		php4_fix_funcnames(class_name,functions);		\
+		class_container.name = strdup(class_name);		\
+		p = class_container.name;while(*p) {*p = tolower(*p);p++;}  \
+		class_container.name_length = sizeof(class_name) - 1;	\
+		class_container.builtin_functions = functions;		\
+		class_container.handle_function_call = NULL;		\
+		class_container.handle_property_get = NULL;		\
+		class_container.handle_property_set = NULL;		\
+	}
+#endif
+
 #if HAVE_MING
 
 extern zend_module_entry ming_module_entry;
@@ -42,12 +66,35 @@ PHP_METHOD(swfvideostream, getnumframes);
 
 PHP_METHOD(swfprebuiltclip, init);
 
+PHP_METHOD(swfbinarydata, init);
+
+PHP_METHOD(swfshadow, init);
+
+PHP_METHOD(swfblur, init);
+
+PHP_METHOD(swffiltermatrix, init);
+
+PHP_METHOD(swffilter, init);
+
+PHP_METHOD(swfbrowserfont, init);
+
+PHP_METHOD(swfinput, init);
+
+PHP_METHOD(swfcxform, init);
+PHP_METHOD(swfcxform, setColorAdd);
+PHP_METHOD(swfcxform, setColorMult);
+
 PHP_METHOD(swffill, init);
 PHP_METHOD(swffill, moveTo);
+PHP_METHOD(swffill, move);
 PHP_METHOD(swffill, scaleTo);
+PHP_METHOD(swffill, scale);
 PHP_METHOD(swffill, rotateTo);
+PHP_METHOD(swffill, rotate);
 PHP_METHOD(swffill, skewXTo);
+PHP_METHOD(swffill, skewX);
 PHP_METHOD(swffill, skewYTo);
+PHP_METHOD(swffill, skewY);
 
 PHP_METHOD(swfgradient, init);
 PHP_METHOD(swfgradient, addEntry);
@@ -68,6 +115,16 @@ PHP_METHOD(swfshape, drawarc);
 PHP_METHOD(swfshape, drawcircle);
 PHP_METHOD(swfshape, drawcubic);
 PHP_METHOD(swfshape, drawcubicto);
+PHP_METHOD(swfshape, end);
+PHP_METHOD(swfshape, useVersion);
+PHP_METHOD(swfshape, getVersion);
+PHP_METHOD(swfshape, setRenderHintingFlags);
+PHP_METHOD(swfshape, getPenX);
+PHP_METHOD(swfshape, getPenY);
+PHP_METHOD(swfshape, hideLine);
+PHP_METHOD(swfshape, drawCharacterBounds);
+PHP_METHOD(swfshape, setLine2);
+PHP_METHOD(swfshape, setLine2Filled);
 
 /* SWFMovie */
 
@@ -79,9 +136,7 @@ PHP_METHOD(swfmovie, add);
 PHP_METHOD(swfmovie, remove);
 PHP_METHOD(swfmovie, nextFrame);
 PHP_METHOD(swfmovie, labelFrame);
-#ifdef HAVE_SWFMOVIE_NAMEDANCHOR
 PHP_METHOD(swfmovie, namedAnchor);
-#endif
 PHP_METHOD(swfmovie, setBackground);
 PHP_METHOD(swfmovie, setRate);
 PHP_METHOD(swfmovie, setDimension);
@@ -97,6 +152,8 @@ PHP_METHOD(swfmovie, stopSound);
 PHP_METHOD(swfmovie, importChar);
 PHP_METHOD(swfmovie, importFont);
 PHP_METHOD(swfmovie, addFont);
+PHP_METHOD(swfmovie, replace);
+PHP_METHOD(swfmovie, getRate);
 # endif
 
 /* SWFSprint */
@@ -117,22 +174,21 @@ PHP_METHOD(swfsprite, stopSound);
 
 PHP_METHOD(swffont, init);
 PHP_METHOD(swffont, getWidth);
-
-#ifdef HAVE_NEW_MING
-PHP_METHOD(swffont, getUTF8Width);
-/*PHP_METHOD(swffont, getWideWidth);*/
-#endif
-
 PHP_METHOD(swffont, getAscent);
 PHP_METHOD(swffont, getDescent);
 PHP_METHOD(swffont, getLeading);
-
 #ifdef HAVE_NEW_MING
-/*PHP_METHOD(swffont, addChars);*/
-PHP_METHOD(swffont, getShape);
+PHP_METHOD(swffont, getUTF8Width);
+PHP_METHOD(swffont, getGlyphCount);
+PHP_METHOD(swffont, getName);
 #endif
 
-PHP_METHOD(swffont, getLeading);
+/* SWFFontCollection */
+
+PHP_METHOD(swffontcollection, init);
+PHP_METHOD(swffontcollection, getFont);
+PHP_METHOD(swffontcollection, getFontCount);
+
 
 /* SWFText */
 
@@ -175,8 +231,11 @@ PHP_METHOD(swftextfield, setLineSpacing);
 PHP_METHOD(swftextfield, setColor);
 PHP_METHOD(swftextfield, setName);
 PHP_METHOD(swftextfield, addString);
+PHP_METHOD(swftextfield, addUTF8String);
 PHP_METHOD(swftextfield, setPadding);
 PHP_METHOD(swftextfield, addChars);
+PHP_METHOD(swftextfield, setLength);
+PHP_METHOD(swftextfield, setFieldHeight);
 
 /* SWFFontChar */
 
@@ -204,6 +263,8 @@ PHP_METHOD(swfdisplayitem, setName);
 PHP_METHOD(swfdisplayitem, addAction);
 
 #ifdef HAVE_NEW_MING
+PHP_METHOD(swfdisplayitem, addFilter);
+PHP_METHOD(swfdisplayitem, flush);
 PHP_METHOD(swfdisplayitem, remove);
 PHP_METHOD(swfdisplayitem, setMaskLevel);
 PHP_METHOD(swfdisplayitem, endMask);
@@ -214,6 +275,7 @@ PHP_METHOD(swfdisplayitem, getYScale);
 PHP_METHOD(swfdisplayitem, getXSkew);
 PHP_METHOD(swfdisplayitem, getYSkew);
 PHP_METHOD(swfdisplayitem, getRot);
+PHP_METHOD(swfdisplayitem, getDepth);
 #endif
 
 /* SWFButton */
@@ -234,11 +296,33 @@ PHP_METHOD(swfbutton, addAction);
 
 #ifdef HAVE_NEW_MING
 PHP_METHOD(swfbutton, addSound);
+PHP_METHOD(swfbutton, addCharacter);
 #endif
+
+/* SWFButtonRecord */
+
+PHP_METHOD(swfbuttonrecord, setDepth);
+PHP_METHOD(swfbuttonrecord, setBlendMode);
+PHP_METHOD(swfbuttonrecord, move);
+PHP_METHOD(swfbuttonrecord, moveTo);
+PHP_METHOD(swfbuttonrecord, rotate);
+PHP_METHOD(swfbuttonrecord, rotateTo);
+PHP_METHOD(swfbuttonrecord, scale);
+PHP_METHOD(swfbuttonrecord, scaleTo);
+PHP_METHOD(swfbuttonrecord, skewX);
+PHP_METHOD(swfbuttonrecord, skewXTo);
+PHP_METHOD(swfbuttonrecord, skewY);
+PHP_METHOD(swfbuttonrecord, skewYTo);
+PHP_METHOD(swfbuttonrecord, addFilter);
 
 /* SWFAction */
 
 PHP_METHOD(swfaction, init);
+PHP_METHOD(swfaction, compile);
+
+/* SWFInitAction */
+
+PHP_METHOD(swfinitaction, init);
 
 /* SWFMorph */
 
@@ -268,8 +352,6 @@ PHP_FUNCTION(ming_useSWFVersion);
 
 #ifdef HAVE_NEW_MING
 PHP_FUNCTION(ming_useConstants);
-#endif
-#ifdef HAVE_MING_SETSWFCOMPRESSION
 PHP_FUNCTION(ming_setSWFCompression);
 #endif
 
