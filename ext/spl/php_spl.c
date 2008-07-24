@@ -433,6 +433,7 @@ PHP_FUNCTION(spl_autoload_register)
 	zend_function *spl_func_ptr;
 	autoload_func_info alfi;
 	zval **obj_ptr;
+	zend_fcall_info_cache fcc;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "|zbb", &zcallable, &do_throw, &prepend) == FAILURE) {
 		return;
@@ -450,7 +451,10 @@ PHP_FUNCTION(spl_autoload_register)
 			}
 		}
 	
-		if (!zend_is_callable_ex(zcallable, IS_CALLABLE_STRICT, &func_name, &func_name_len, &alfi.ce, &alfi.func_ptr, &obj_ptr, &error TSRMLS_CC)) {
+		if (!zend_is_callable_ex(zcallable, IS_CALLABLE_STRICT, &func_name, &func_name_len, &fcc, &error TSRMLS_CC)) {
+			alfi.ce = fcc.calling_scope;
+			alfi.func_ptr = fcc.function_handler;
+			obj_ptr = fcc.object_pp;
 			if (Z_TYPE_P(zcallable) == IS_ARRAY) {
 				if (!obj_ptr && alfi.func_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 					if (do_throw) {
@@ -490,6 +494,9 @@ PHP_FUNCTION(spl_autoload_register)
 				RETURN_FALSE;
 			}
 		}
+		alfi.ce = fcc.calling_scope;
+		alfi.func_ptr = fcc.function_handler;
+		obj_ptr = fcc.object_pp;
 		if (error) {
 			efree(error);
 		}
@@ -560,12 +567,13 @@ PHP_FUNCTION(spl_autoload_unregister)
 	int success = FAILURE;
 	zend_function *spl_func_ptr;
 	zval **obj_ptr;
+	zend_fcall_info_cache fcc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zcallable) == FAILURE) {
 		return;
 	}
 
-	if (!zend_is_callable_ex(zcallable, IS_CALLABLE_CHECK_SYNTAX_ONLY, &func_name, &func_name_len, NULL, NULL, &obj_ptr, &error TSRMLS_CC)) {
+	if (!zend_is_callable_ex(zcallable, IS_CALLABLE_CHECK_SYNTAX_ONLY, &func_name, &func_name_len, &fcc, &error TSRMLS_CC)) {
 		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Unable to unregister invalid function (%s)", error);
 		if (error) {
 			efree(error);
@@ -575,6 +583,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 		}
 		RETURN_FALSE;
 	}
+	obj_ptr = fcc.object_pp;
 	if (error) {
 		efree(error);
 	}
