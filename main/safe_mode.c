@@ -52,7 +52,6 @@ PHPAPI int php_checkuid_ex(const char *filename, const char *fopen_mode, int mod
 	long uid=0L, gid=0L, duid=0L, dgid=0L;
 	char path[MAXPATHLEN];
 	char *s, filenamecopy[MAXPATHLEN];
-	php_stream_wrapper *wrapper = NULL;
 	TSRMLS_FETCH();
 
 	path[0] = '\0';
