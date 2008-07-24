@@ -32,13 +32,13 @@
 #define HOWMANY 65536
 #endif
 
-
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h" /* needed for context stuff */
 #include "php_fileinfo.h"
 #include "fopen_wrappers.h" /* needed for is_url */
 
+/* {{{ macros and type definitions */
 struct php_fileinfo {
 	long options;
 	struct magic_set *magic;
@@ -49,7 +49,7 @@ struct php_fileinfo {
 #endif
 
 #ifdef ZEND_ENGINE_2
-
+/* {{{ */
 static zend_object_handlers finfo_object_handlers;
 zend_class_entry *finfo_class_entry;
 
@@ -136,15 +136,17 @@ function_entry finfo_class_functions[] = {
 };
 /* }}} */
 
+/* }}} */
 #else 
-
+/* {{{ */
 #define FILEINFO_REGISTER_OBJECT(_object, _ptr) {}
 #define FILEINFO_FROM_OBJECT(socket_id, object) {}
 
 #define FILEINFO_DECLARE_INIT_OBJECT(object)
 #define object 0
 
-#endif
+/* }}} */
+#endif /* ZEND_ENGINE_2 */
 
 #define FINFO_SET_OPTION(magic, options) \
 	if (magic_setflags(magic, options) == -1) { \
@@ -155,8 +157,9 @@ function_entry finfo_class_functions[] = {
 
 /* True global resources - no need for thread safety here */
 static int le_fileinfo;
+/* }}} */
 
-void finfo_resource_destructor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+void finfo_resource_destructor(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
 {
 	if (rsrc->ptr) {
 		struct php_fileinfo *finfo = (struct php_fileinfo *) rsrc->ptr;
@@ -165,6 +168,7 @@ void finfo_resource_destructor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		rsrc->ptr = NULL;
 	}
 }
+/* }}} */
 
 /* {{{ fileinfo_functions[]
  */
@@ -344,7 +348,7 @@ PHP_FUNCTION(finfo_set_flags)
 }
 /* }}} */
 
-static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode)
+static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {
 	long options = 0;
 	char *buffer, *tmp, *ret_val;
@@ -422,6 +426,7 @@ common:
 		RETURN_STRING(ret_val, 1);
 	}
 }
+/* }}} */
 
 /* {{{ proto string finfo_file(resource finfo, char *file_name [, int options [, resource context]])
    Return information about a file. */
