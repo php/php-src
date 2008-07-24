@@ -157,6 +157,10 @@ main(int argc, char *argv[])
 }
 #endif /* COMPILE_ONLY */
 
+#ifdef PHP_BUNDLE
+#include "../data_file.c"
+#endif
+
 static const struct type_tbl_s {
 	const char name[16];
 	const size_t len;
@@ -310,6 +314,11 @@ file_delmagic(struct magic *p, int type, size_t entries)
 	if (p == NULL)
 		return;
 	switch (type) {
+#ifdef PHP_BUNDLE
+	case 3:
+		/* Do nothing, it's part of the code segment */
+		break;
+#endif
 #ifdef QUICK
 	case 2:
 		p--;
@@ -339,8 +348,20 @@ file_apprentice(struct magic_set *ms, const char *fn, int action)
 
 	if (fn == NULL)
 		fn = getenv("MAGIC");
-	if (fn == NULL)
+	if (fn == NULL) {
+#ifdef PHP_BUNDLE
+		if ((mlist = malloc(sizeof(*mlist))) == NULL) {
+			free(mfn);
+			file_oomem(ms, sizeof(*mlist));
+			return NULL;
+		}
+		mlist->next = mlist->prev = mlist;
+		apprentice_1(ms, fn, action, mlist);
+		return mlist;
+#else
 		fn = MAGIC;
+#endif
+	}
 
 	if ((mfn = strdup(fn)) == NULL) {
 		file_oomem(ms, strlen(fn));
@@ -1886,6 +1907,15 @@ apprentice_map(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 	int needsbyteswap;
 	char *dbname = NULL;
 	void *mm = NULL;
+	int   ret = 0;
+
+#ifdef PHP_BUNDLE
+	if (fn == NULL) {
+		mm = &php_magic_database;
+		ret = 3;
+		goto internal_loaded;
+	}
+#endif
 
 	mkdbname(fn, &dbname, 0);
 	if (dbname == NULL)
@@ -1909,7 +1939,7 @@ apprentice_map(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 		file_error(ms, errno, "cannot map `%s'", dbname);
 		goto error1;
 	}
-#define RET	2
+	ret = 2;
 #else
 	if ((mm = malloc((size_t)st.st_size)) == NULL) {
 		file_oomem(ms, (size_t)st.st_size);
@@ -1919,11 +1949,14 @@ apprentice_map(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 		file_badread(ms);
 		goto error1;
 	}
-#define RET	1
+	ret = 1;
 #endif
-	*magicp = mm;
 	(void)close(fd);
 	fd = -1;
+#ifdef PHP_BUNDLE
+internal_loaded:
+#endif
+	*magicp = mm;
 	ptr = (uint32_t *)(void *)*magicp;
 	if (*ptr != MAGICNO) {
 		if (swap4(*ptr) != MAGICNO) {
@@ -1950,7 +1983,7 @@ apprentice_map(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 	if (needsbyteswap)
 		byteswap(*magicp, *nmagicp);
 	free(dbname);
-	return RET;
+	return ret;
 
 error1:
 	if (fd != -1)

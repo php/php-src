@@ -251,7 +251,7 @@ PHP_MINFO_FUNCTION(fileinfo)
 PHP_FUNCTION(finfo_open)
 {
 	long options = MAGIC_NONE;
-	char *file = PHP_DEFAULT_MAGIC_FILE;
+	char *file = NULL;
 	int file_len = 0;
 	struct php_fileinfo *finfo;
 	FILEINFO_DECLARE_INIT_OBJECT(object)
