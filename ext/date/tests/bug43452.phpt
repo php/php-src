@@ -1,7 +1,7 @@
 --TEST--
 Bug #43452 ("weekday" is not equivalent to "1 weekday" of the current weekday is "weekday")
 --INI--
-date.default_timezone=Europe/Oslo
+date.timezone=Europe/Oslo
 --FILE--
 <?php
 // <day> is equivalent to 1 <day> and will *not* forward if the current day
