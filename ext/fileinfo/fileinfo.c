@@ -309,7 +309,7 @@ PHP_FUNCTION(finfo_close)
 	struct php_fileinfo *finfo;
 	zval *zfinfo;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zfinfo) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zfinfo) == FAILURE) {
 		RETURN_FALSE;
 	}
 	ZEND_FETCH_RESOURCE(finfo, struct php_fileinfo *, &zfinfo, -1, "file_info", le_fileinfo);
@@ -335,7 +335,7 @@ PHP_FUNCTION(finfo_set_flags)
 		}
 		FILEINFO_FROM_OBJECT(finfo, object);
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &zfinfo, &options) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &zfinfo, &options) == FAILURE) {
 			RETURN_FALSE;
 		}
 		ZEND_FETCH_RESOURCE(finfo, struct php_fileinfo *, &zfinfo, -1, "file_info", le_fileinfo);
@@ -358,12 +358,12 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ *
 	FILEINFO_DECLARE_INIT_OBJECT(object)
 
 	if (object) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lbz", &buffer, &buffer_len, &options, &zcontext) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lbr", &buffer, &buffer_len, &options, &zcontext) == FAILURE) {
 			RETURN_FALSE;
 		}
 		FILEINFO_FROM_OBJECT(finfo, object);
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs|lbz", &zfinfo, &buffer, &buffer_len, &options, &zcontext) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|lbr", &zfinfo, &buffer, &buffer_len, &options, &zcontext) == FAILURE) {
 			RETURN_FALSE;
 		}
 		ZEND_FETCH_RESOURCE(finfo, struct php_fileinfo *, &zfinfo, -1, "file_info", le_fileinfo);
