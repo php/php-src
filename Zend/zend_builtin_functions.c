@@ -1808,7 +1808,7 @@ ZEND_FUNCTION(zend_test_func)
 #ifdef ZTS
 ZEND_FUNCTION(zend_thread_id)
 {
-	RETURN_LONG(tsrm_thread_id());
+	RETURN_LONG((long)tsrm_thread_id());
 }
 #endif
 #endif
