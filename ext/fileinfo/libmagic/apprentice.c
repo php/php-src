@@ -664,7 +664,7 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 	if (stat(fn, &st) == 0 && S_ISDIR(st.st_mode)) {
 		dir = opendir(fn);
 		if (dir) {
-			while (d = readdir(dir)) {
+			while ((d = readdir(dir))) {
 				snprintf(subfn, sizeof(subfn), "%s/%s",
 				    fn, d->d_name);
 				if (stat(subfn, &st) == 0 && S_ISREG(st.st_mode)) {
