@@ -37,6 +37,6 @@ rmdir($dir_path);
 
 -- Testing rewinddir() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for rewinddir() in %s on line %d
+Warning: rewinddir() expects at most 1 parameter, 2 given in %s on line %d
 NULL
 ===DONE===

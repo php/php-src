@@ -38,6 +38,6 @@ rmdir($path);
 
 -- Testing readdir() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for readdir() in %s on line %d
+Warning: readdir() expects at most 1 parameter, 2 given in %s on line %d
 NULL
 ===DONE===

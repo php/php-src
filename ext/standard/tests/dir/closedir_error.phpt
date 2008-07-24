@@ -40,6 +40,6 @@ rmdir($dir_path);
 
 -- Testing closedir() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for closedir() in %s on line %d
+Warning: closedir() expects at most 1 parameter, 2 given in %s on line %d
 NULL
 ===DONE===
