@@ -4,7 +4,7 @@ mb_output_handler() patterns
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --INI--
 mbstring.internal_encoding=UTF-8
-mbstring.http_output_content_type_regex=html
+mbstring.http_output_conv_mimetypes=html
 --FILE--
 <?php
 mb_http_output("EUC-JP");
