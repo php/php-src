@@ -175,6 +175,8 @@ PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, int *
 
 static inline void spl_filesystem_object_get_file_name(spl_filesystem_object *intern TSRMLS_DC) /* {{{ */
 {
+	char slash = intern->flags & SPL_FILE_DIR_UNIXPATHS ? '/' : DEFAULT_SLASH;
+
 	if (!intern->file_name) {
 		switch (intern->type) {
 		case SPL_FS_INFO:
@@ -184,7 +186,7 @@ static inline void spl_filesystem_object_get_file_name(spl_filesystem_object *in
 		case SPL_FS_DIR:
 			intern->file_name_len = spprintf(&intern->file_name, 0, "%s%c%s",
 			                                 spl_filesystem_object_get_path(intern, NULL TSRMLS_CC),
-			                                 DEFAULT_SLASH, intern->u.dir.entry.d_name);
+			                                 slash, intern->u.dir.entry.d_name);
 			break;
 		}
 	}
@@ -614,6 +616,9 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, int ctor_flag
 	}
 	if (ctor_flags & SPL_FILE_DIR_SKIPDOTS) {
 		flags |= SPL_FILE_DIR_SKIPDOTS;
+	}
+	if (ctor_flags & SPL_FILE_DIR_UNIXPATHS) {
+		flags |= SPL_FILE_DIR_UNIXPATHS;
 	}
 	if (parsed == FAILURE) {
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
@@ -1244,6 +1249,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 	zval zpath, zflags;
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	spl_filesystem_object *subdir;
+	char slash = intern->flags & SPL_FILE_DIR_UNIXPATHS ? '/' : DEFAULT_SLASH;
 	
 	spl_filesystem_object_get_file_name(intern TSRMLS_CC);
 
@@ -1257,7 +1263,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 	subdir = (spl_filesystem_object*)zend_object_store_get_object(return_value TSRMLS_CC);
 	if (subdir) {
 		if (intern->u.dir.sub_path && intern->u.dir.sub_path[0]) {
-			subdir->u.dir.sub_path_len = spprintf(&subdir->u.dir.sub_path, 0, "%s%c%s", intern->u.dir.sub_path, DEFAULT_SLASH, intern->u.dir.entry.d_name);
+			subdir->u.dir.sub_path_len = spprintf(&subdir->u.dir.sub_path, 0, "%s%c%s", intern->u.dir.sub_path, slash, intern->u.dir.entry.d_name);
 		} else {
 			subdir->u.dir.sub_path_len = strlen(intern->u.dir.entry.d_name);
 			subdir->u.dir.sub_path = estrndup(intern->u.dir.entry.d_name, subdir->u.dir.sub_path_len);
@@ -1290,9 +1296,10 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPathname)
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	char *sub_name;
 	int len;
+	char slash = intern->flags & SPL_FILE_DIR_UNIXPATHS ? '/' : DEFAULT_SLASH;
 
 	if (intern->u.dir.sub_path) {
-		len = spprintf(&sub_name, 0, "%s%c%s", intern->u.dir.sub_path, DEFAULT_SLASH, intern->u.dir.entry.d_name);
+		len = spprintf(&sub_name, 0, "%s%c%s", intern->u.dir.sub_path, slash, intern->u.dir.entry.d_name);
 		RETURN_STRINGL(sub_name, len, 0);
 	} else {
 		RETURN_STRING(intern->u.dir.entry.d_name, 1);
@@ -2624,6 +2631,7 @@ PHP_MINIT_FUNCTION(spl_directory)
 	REGISTER_SPL_CLASS_CONST_LONG(FilesystemIterator, "KEY_AS_FILENAME",     SPL_FILE_DIR_KEY_AS_FILENAME);
 	REGISTER_SPL_CLASS_CONST_LONG(FilesystemIterator, "NEW_CURRENT_AND_KEY", SPL_FILE_DIR_KEY_AS_FILENAME|SPL_FILE_DIR_CURRENT_AS_FILEINFO);
 	REGISTER_SPL_CLASS_CONST_LONG(FilesystemIterator, "SKIP_DOTS",           SPL_FILE_DIR_SKIPDOTS);
+	REGISTER_SPL_CLASS_CONST_LONG(FilesystemIterator, "UNIX_PATHS",          SPL_FILE_DIR_UNIXPATHS);
 
 	spl_ce_FilesystemIterator->get_iterator = spl_filesystem_tree_get_iterator;
 
