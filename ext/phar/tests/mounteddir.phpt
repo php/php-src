@@ -105,9 +105,9 @@ Mounting of .phar/stub.php to %sextfile.php within phar %stests/tempmanifest1.ph
 directory
 extfile.php
 extfile2.php
-phar://%stempmanifest1.phar.php/testit%cdirectory
-phar://%stempmanifest1.phar.php/testit%cextfile.php
-phar://%stempmanifest1.phar.php/testit%cextfile2.php
+phar://%stempmanifest1.phar.php/testit/directory
+phar://%stempmanifest1.phar.php/testit/extfile.php
+phar://%stempmanifest1.phar.php/testit/extfile2.php
 Mounting of /testit to another\..\mistake within phar %stempmanifest1.phar.php failed
 Mounting of /notfound to %stests/this/does/not/exist within phar %stempmanifest1.phar.php failed
 Mounting of /testit to %stests within phar %stests/tempmanifest1.phar.php failed

@@ -26,10 +26,10 @@ string(1) "b"
 string(1) "d"
 string(9) "index.php"
 string(7) "web.php"
-string(%d) "phar://%snophar.phar%cb%cc.php"
-string(%d) "phar://%snophar.phar%cd"
-string(%d) "phar://%snophar.phar%cindex.php"
-string(%d) "phar://%snophar.phar%cweb.php"
+string(%d) "phar://%snophar.phar/b/c.php"
+string(%d) "phar://%snophar.phar/d"
+string(%d) "phar://%snophar.phar/index.php"
+string(%d) "phar://%snophar.phar/web.php"
 bool(true)
 bool(false)
 bool(false)

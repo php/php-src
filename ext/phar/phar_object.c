@@ -1057,7 +1057,7 @@ PHP_METHOD(Phar, __construct)
 #else
 	char *fname, *alias = NULL, *error, *arch = NULL, *entry = NULL, *save_fname;
 	int fname_len, alias_len = 0, arch_len, entry_len, is_data;
-	long flags = SPL_FILE_DIR_SKIPDOTS, format = 0;
+	long flags = SPL_FILE_DIR_SKIPDOTS|SPL_FILE_DIR_UNIXPATHS, format = 0;
 	phar_archive_object *phar_obj;
 	phar_archive_data   *phar_data;
 	zval *zobj = getThis(), arg1, arg2;
@@ -1601,7 +1601,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 	INIT_PZVAL(&arg);
 	ZVAL_STRINGL(&arg, dir, dir_len, 0);
 	INIT_PZVAL(&arg2);
-	ZVAL_LONG(&arg2, SPL_FILE_DIR_SKIPDOTS);
+	ZVAL_LONG(&arg2, SPL_FILE_DIR_SKIPDOTS|SPL_FILE_DIR_UNIXPATHS);
 
 	zend_call_method_with_2_params(&iter, spl_ce_RecursiveDirectoryIterator, 
 			&spl_ce_RecursiveDirectoryIterator->constructor, "__construct", NULL, &arg, &arg2);
