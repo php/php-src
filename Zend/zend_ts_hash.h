@@ -72,7 +72,7 @@ ZEND_API int zend_ts_hash_add_empty_element(TsHashTable *ht, char *arKey, uint n
 ZEND_API void zend_ts_hash_graceful_destroy(TsHashTable *ht);
 ZEND_API void zend_ts_hash_apply(TsHashTable *ht, apply_func_t apply_func TSRMLS_DC);
 ZEND_API void zend_ts_hash_apply_with_argument(TsHashTable *ht, apply_func_arg_t apply_func, void * TSRMLS_DC);
-ZEND_API void zend_ts_hash_apply_with_arguments(TsHashTable *ht, apply_func_args_t apply_func, int, ...);
+ZEND_API void zend_ts_hash_apply_with_arguments(TsHashTable *ht TSRMLS_DC, apply_func_args_t apply_func, int, ...);
 
 ZEND_API void zend_ts_hash_reverse_apply(TsHashTable *ht, apply_func_t apply_func TSRMLS_DC);
 
