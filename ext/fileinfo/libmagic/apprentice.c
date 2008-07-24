@@ -1976,9 +1976,11 @@ internal_loaded:
 		    VERSIONNO, dbname, version);
 		goto error1;
 	}
-	*nmagicp = (uint32_t)(st.st_size / sizeof(struct magic));
+#ifndef PHP_BUNDLE
+	*nmagicp = (st.st_size / sizeof(struct magic));
 	if (*nmagicp > 0)
 		(*nmagicp)--;
+#endif
 	(*magicp)++;
 	if (needsbyteswap)
 		byteswap(*magicp, *nmagicp);
