@@ -12386,6 +12386,8 @@ static int ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 		zend_error(E_STRICT, "Only variables should be assigned by reference");
 		return ZEND_ASSIGN_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+		PZVAL_LOCK(*value_ptr_ptr);
 	}
 	if (IS_VAR == IS_VAR && EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr) {
 		zend_error(E_ERROR, "Cannot assign by reference to overloaded object");
@@ -12393,6 +12395,10 @@ static int ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	variable_ptr_ptr = _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 	zend_assign_to_variable_reference(variable_ptr_ptr, value_ptr_ptr TSRMLS_CC);
+
+	if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+		(*variable_ptr_ptr)->refcount--;
+	}
 
 	if (!RETURN_VALUE_UNUSED(&opline->result)) {
 		EX_T(opline->result.u.var).var.ptr_ptr = variable_ptr_ptr;
@@ -14388,6 +14394,8 @@ static int ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 		zend_error(E_STRICT, "Only variables should be assigned by reference");
 		return ZEND_ASSIGN_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+		PZVAL_LOCK(*value_ptr_ptr);
 	}
 	if (IS_VAR == IS_VAR && EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr) {
 		zend_error(E_ERROR, "Cannot assign by reference to overloaded object");
@@ -14395,6 +14403,10 @@ static int ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	variable_ptr_ptr = _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 	zend_assign_to_variable_reference(variable_ptr_ptr, value_ptr_ptr TSRMLS_CC);
+
+	if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+		(*variable_ptr_ptr)->refcount--;
+	}
 
 	if (!RETURN_VALUE_UNUSED(&opline->result)) {
 		EX_T(opline->result.u.var).var.ptr_ptr = variable_ptr_ptr;
@@ -24495,6 +24507,8 @@ static int ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 		zend_error(E_STRICT, "Only variables should be assigned by reference");
 		return ZEND_ASSIGN_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+		PZVAL_LOCK(*value_ptr_ptr);
 	}
 	if (IS_CV == IS_VAR && EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr) {
 		zend_error(E_ERROR, "Cannot assign by reference to overloaded object");
@@ -24502,6 +24516,10 @@ static int ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	variable_ptr_ptr = _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_W TSRMLS_CC);
 	zend_assign_to_variable_reference(variable_ptr_ptr, value_ptr_ptr TSRMLS_CC);
+
+	if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+		(*variable_ptr_ptr)->refcount--;
+	}
 
 	if (!RETURN_VALUE_UNUSED(&opline->result)) {
 		EX_T(opline->result.u.var).var.ptr_ptr = variable_ptr_ptr;
@@ -26487,6 +26505,8 @@ static int ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 		zend_error(E_STRICT, "Only variables should be assigned by reference");
 		return ZEND_ASSIGN_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+		PZVAL_LOCK(*value_ptr_ptr);
 	}
 	if (IS_CV == IS_VAR && EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr) {
 		zend_error(E_ERROR, "Cannot assign by reference to overloaded object");
@@ -26494,6 +26514,10 @@ static int ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	variable_ptr_ptr = _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_W TSRMLS_CC);
 	zend_assign_to_variable_reference(variable_ptr_ptr, value_ptr_ptr TSRMLS_CC);
+
+	if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
+		(*variable_ptr_ptr)->refcount--;
+	}
 
 	if (!RETURN_VALUE_UNUSED(&opline->result)) {
 		EX_T(opline->result.u.var).var.ptr_ptr = variable_ptr_ptr;
