@@ -32,22 +32,24 @@ echo "\n-- Read and rewind first directory (argument supplied) --\n";
 while(FALSE !== $file1 = readdir($dh1)) {
 	$data[] = $file1;
 }
+$first = $data[0];
 sort($data);
 var_dump($data);
 
 var_dump(rewinddir($dh1));
-var_dump(readdir($dh1));
+var_dump(readdir($dh1) == $first);
 
 $data = array();
 echo "\n-- Read and rewind second directory (no argument supplied) --\n";
 while(FALSE !== $file2 = readdir()) {
 	$data[] = $file2;
 }
+$first = $data[0];
 sort($data);
 var_dump($data);
 
 var_dump(rewinddir());
-var_dump(readdir());
+var_dump(readdir() == $first);
 
 closedir($dh1);
 closedir($dh2);
@@ -78,7 +80,7 @@ array(3) {
   string(9) "file1.tmp"
 }
 NULL
-string(1) "."
+bool(true)
 
 -- Read and rewind second directory (no argument supplied) --
 array(3) {
@@ -90,5 +92,5 @@ array(3) {
   string(9) "file2.tmp"
 }
 NULL
-string(1) "."
+bool(true)
 ===DONE===
