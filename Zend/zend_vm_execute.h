@@ -2606,8 +2606,15 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 		if (!ce) {
 			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
 		}
+		EX(called_scope) = ce;
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
+
+		if (opline->op1.u.EA.type == ZEND_FETCH_CLASS_PARENT || opline->op1.u.EA.type == ZEND_FETCH_CLASS_SELF) {
+			EX(called_scope) = EG(called_scope);
+		} else {
+			EX(called_scope) = ce;
+		}
 	}
 	if(IS_CONST != IS_UNUSED) {
 		char *function_name_strval;
@@ -2648,8 +2655,6 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 		}
 		EX(fbc) = ce->constructor;
 	}
-
-	EX(called_scope) = ce;
 
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
@@ -3194,8 +3199,15 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
 		if (!ce) {
 			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
 		}
+		EX(called_scope) = ce;
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
+
+		if (opline->op1.u.EA.type == ZEND_FETCH_CLASS_PARENT || opline->op1.u.EA.type == ZEND_FETCH_CLASS_SELF) {
+			EX(called_scope) = EG(called_scope);
+		} else {
+			EX(called_scope) = ce;
+		}
 	}
 	if(IS_TMP_VAR != IS_UNUSED) {
 		char *function_name_strval;
@@ -3236,8 +3248,6 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
 		}
 		EX(fbc) = ce->constructor;
 	}
-
-	EX(called_scope) = ce;
 
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
@@ -3662,8 +3672,15 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
 		if (!ce) {
 			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
 		}
+		EX(called_scope) = ce;
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
+
+		if (opline->op1.u.EA.type == ZEND_FETCH_CLASS_PARENT || opline->op1.u.EA.type == ZEND_FETCH_CLASS_SELF) {
+			EX(called_scope) = EG(called_scope);
+		} else {
+			EX(called_scope) = ce;
+		}
 	}
 	if(IS_VAR != IS_UNUSED) {
 		char *function_name_strval;
@@ -3704,8 +3721,6 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
 		}
 		EX(fbc) = ce->constructor;
 	}
-
-	EX(called_scope) = ce;
 
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
@@ -3886,8 +3901,15 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 		if (!ce) {
 			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
 		}
+		EX(called_scope) = ce;
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
+
+		if (opline->op1.u.EA.type == ZEND_FETCH_CLASS_PARENT || opline->op1.u.EA.type == ZEND_FETCH_CLASS_SELF) {
+			EX(called_scope) = EG(called_scope);
+		} else {
+			EX(called_scope) = ce;
+		}
 	}
 	if(IS_UNUSED != IS_UNUSED) {
 		char *function_name_strval;
@@ -3928,8 +3950,6 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 		}
 		EX(fbc) = ce->constructor;
 	}
-
-	EX(called_scope) = ce;
 
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
@@ -4322,8 +4342,15 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 		if (!ce) {
 			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
 		}
+		EX(called_scope) = ce;
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
+
+		if (opline->op1.u.EA.type == ZEND_FETCH_CLASS_PARENT || opline->op1.u.EA.type == ZEND_FETCH_CLASS_SELF) {
+			EX(called_scope) = EG(called_scope);
+		} else {
+			EX(called_scope) = ce;
+		}
 	}
 	if(IS_CV != IS_UNUSED) {
 		char *function_name_strval;
@@ -4364,8 +4391,6 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 		}
 		EX(fbc) = ce->constructor;
 	}
-
-	EX(called_scope) = ce;
 
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
@@ -10260,8 +10285,15 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 		if (!ce) {
 			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
 		}
+		EX(called_scope) = ce;
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
+
+		if (opline->op1.u.EA.type == ZEND_FETCH_CLASS_PARENT || opline->op1.u.EA.type == ZEND_FETCH_CLASS_SELF) {
+			EX(called_scope) = EG(called_scope);
+		} else {
+			EX(called_scope) = ce;
+		}
 	}
 	if(IS_CONST != IS_UNUSED) {
 		char *function_name_strval;
@@ -10302,8 +10334,6 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 		}
 		EX(fbc) = ce->constructor;
 	}
-
-	EX(called_scope) = ce;
 
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
@@ -12092,8 +12122,15 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND
 		if (!ce) {
 			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
 		}
+		EX(called_scope) = ce;
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
+
+		if (opline->op1.u.EA.type == ZEND_FETCH_CLASS_PARENT || opline->op1.u.EA.type == ZEND_FETCH_CLASS_SELF) {
+			EX(called_scope) = EG(called_scope);
+		} else {
+			EX(called_scope) = ce;
+		}
 	}
 	if(IS_TMP_VAR != IS_UNUSED) {
 		char *function_name_strval;
@@ -12134,8 +12171,6 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND
 		}
 		EX(fbc) = ce->constructor;
 	}
-
-	EX(called_scope) = ce;
 
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
@@ -13894,8 +13929,15 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND
 		if (!ce) {
 			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
 		}
+		EX(called_scope) = ce;
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
+
+		if (opline->op1.u.EA.type == ZEND_FETCH_CLASS_PARENT || opline->op1.u.EA.type == ZEND_FETCH_CLASS_SELF) {
+			EX(called_scope) = EG(called_scope);
+		} else {
+			EX(called_scope) = ce;
+		}
 	}
 	if(IS_VAR != IS_UNUSED) {
 		char *function_name_strval;
@@ -13936,8 +13978,6 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND
 		}
 		EX(fbc) = ce->constructor;
 	}
-
-	EX(called_scope) = ce;
 
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
@@ -14799,8 +14839,15 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 		if (!ce) {
 			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
 		}
+		EX(called_scope) = ce;
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
+
+		if (opline->op1.u.EA.type == ZEND_FETCH_CLASS_PARENT || opline->op1.u.EA.type == ZEND_FETCH_CLASS_SELF) {
+			EX(called_scope) = EG(called_scope);
+		} else {
+			EX(called_scope) = ce;
+		}
 	}
 	if(IS_UNUSED != IS_UNUSED) {
 		char *function_name_strval;
@@ -14841,8 +14888,6 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 		}
 		EX(fbc) = ce->constructor;
 	}
-
-	EX(called_scope) = ce;
 
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
@@ -16302,8 +16347,15 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 		if (!ce) {
 			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
 		}
+		EX(called_scope) = ce;
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
+
+		if (opline->op1.u.EA.type == ZEND_FETCH_CLASS_PARENT || opline->op1.u.EA.type == ZEND_FETCH_CLASS_SELF) {
+			EX(called_scope) = EG(called_scope);
+		} else {
+			EX(called_scope) = ce;
+		}
 	}
 	if(IS_CV != IS_UNUSED) {
 		char *function_name_strval;
@@ -16344,8 +16396,6 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 		}
 		EX(fbc) = ce->constructor;
 	}
-
-	EX(called_scope) = ce;
 
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
