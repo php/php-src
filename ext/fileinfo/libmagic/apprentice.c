@@ -351,7 +351,6 @@ file_apprentice(struct magic_set *ms, const char *fn, int action)
 	if (fn == NULL) {
 #ifdef PHP_BUNDLE
 		if ((mlist = malloc(sizeof(*mlist))) == NULL) {
-			free(mfn);
 			file_oomem(ms, sizeof(*mlist));
 			return NULL;
 		}
@@ -583,6 +582,7 @@ set_test_type(struct magic *mstart, struct magic *m)
 		/* invalid search type, but no need to complain here */
 		break;
 	}
+	return 1;
 }
 
 /*
