@@ -137,9 +137,9 @@ MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c,
                                  size_t nbytes TSRMLS_DC);
 MBSTRING_API char *php_mb_strrchr(const char *s, char c TSRMLS_DC);
 
-MBSTRING_API char * php_mb_convert_encoding(char *input, size_t length,
-                                      char *_to_encoding,
-                                      char *_from_encodings,
+MBSTRING_API char * php_mb_convert_encoding(const char *input, size_t length,
+                                      const char *_to_encoding,
+                                      const char *_from_encodings,
                                       size_t *output_len TSRMLS_DC);
 
 MBSTRING_API int php_mb_check_encoding_list(const char *encoding_list TSRMLS_DC);
@@ -158,7 +158,7 @@ MBSTRING_API int php_mb_gpc_encoding_converter(char **str, int *len, int num, co
 
 MBSTRING_API int php_mb_gpc_encoding_detector(char **arg_string, int *arg_length, int num, char *arg_list TSRMLS_DC);
 
-MBSTRING_API int php_mb_stripos(int mode, char *old_haystack, int old_haystack_len, char *old_needle, int old_needle_len, long offset, char *from_encoding TSRMLS_DC);
+MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int old_haystack_len, const char *old_needle, unsigned int old_needle_len, unsigned int offset, const char *from_encoding TSRMLS_DC);
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	enum mbfl_no_language language;
