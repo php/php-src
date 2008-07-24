@@ -1,3 +1,389 @@
+2008-07-23  Hartmut Holzgraefe  <hartmut@mysql.com>
+
+    * (PHP_5_3)
+      ext/pgsql/config.m4:
+      MFH: corrected library search path order in tests
+
+    * ext/pgsql/config.m4:
+      corrected library search path order in tests
+
+2008-07-23  Lars Strojny  <lars@strojny.net>
+
+    * ext/standard/tests/array_intersect_ukey_error.phpt
+      ext/standard/tests/array_intersect_ukey_variation1.phpt
+      ext/standard/tests/array_intersect_ukey_variation2.phpt
+      ext/standard/tests/array_intersect_ukey_variation3.phpt
+      ext/standard/tests/array_intersect_ukey_variation4.phpt
+      ext/standard/tests/array_intersect_ukey_variation5.phpt
+      ext/standard/tests/array_intersect_ukey_variation6.phpt
+      ext/standard/tests/array_intersect_ukey_variation7.phpt
+      ext/standard/tests/array_intersect_ukey_variation8.phpt
+      ext/standard/tests/array_intersect_ukey_variation9.phpt:
+      array_intersect_ukey tests by Sanjay Mantoor
+
+    * ext/standard/tests/array_intersect_ukey_error.phpt
+      ext/standard/tests/array_intersect_ukey_error.phpt
+      ext/standard/tests/array_intersect_ukey_variation1.phpt
+      ext/standard/tests/array_intersect_ukey_variation1.phpt
+      ext/standard/tests/array_intersect_ukey_variation2.phpt
+      ext/standard/tests/array_intersect_ukey_variation2.phpt
+      ext/standard/tests/array_intersect_ukey_variation3.phpt
+      ext/standard/tests/array_intersect_ukey_variation3.phpt
+      ext/standard/tests/array_intersect_ukey_variation4.phpt
+      ext/standard/tests/array_intersect_ukey_variation4.phpt
+      ext/standard/tests/array_intersect_ukey_variation5.phpt
+      ext/standard/tests/array_intersect_ukey_variation5.phpt
+      ext/standard/tests/array_intersect_ukey_variation6.phpt
+      ext/standard/tests/array_intersect_ukey_variation6.phpt
+      ext/standard/tests/array_intersect_ukey_variation7.phpt
+      ext/standard/tests/array_intersect_ukey_variation7.phpt
+      ext/standard/tests/array_intersect_ukey_variation8.phpt
+      ext/standard/tests/array_intersect_ukey_variation8.phpt
+      ext/standard/tests/array_intersect_ukey_variation9.phpt
+      ext/standard/tests/array_intersect_ukey_variation9.phpt:
+      
+      file array_intersect_ukey_error.phpt was initially added on branch
+      PHP_5_3.
+
+2008-07-23  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/intl/locale/locale_methods.c
+      ext/intl/tests/locale_accept.phpt
+      ext/intl/tests/locale_compose_locale.phpt:
+      implement bug #14266
+
+    * ext/intl/tests/ut_common.inc:
+      typoes
+
+2008-07-23  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - MFH: Fixed an issue with "first <weekday> of" in case the first <weekday>
+      was
+        the same day-of-week as the first day of the month.
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - Fixed an issue with "first <weekday> of" in case the first <weekday> was
+      the
+        same day-of-week as the first day of the month.
+
+2008-07-23  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      NEWS:
+      80 chars per line..
+
+2008-07-23  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/class_object/get_class_error_001.phpt
+      ext/standard/tests/class_object/get_class_methods_error_001.phpt
+      ext/standard/tests/class_object/get_object_vars_error_001.phpt
+      ext/standard/tests/class_object/get_parent_class_error_001.phpt
+      ext/standard/tests/class_object/is_a_error_001.phpt
+      ext/standard/tests/class_object/is_subclass_of_error_001.phpt
+      ext/standard/tests/class_object/method_exists_error_001.phpt:
+      - Fixed tests
+
+2008-07-23  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      ext/intl/locale/locale_methods.c
+      ext/intl/tests/locale_compose_locale.phpt:
+      add compose syntax as per request #14266
+
+2008-07-23  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/assert.c
+      ext/standard/basic_functions.c
+      ext/standard/tests/assert/assert04.phpt
+      ext/standard/tests/assert/assert_error1.phpt:
+      - New parameter parsing API
+
+2008-07-23  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/tests/bug43452.phpt:
+      - MFH: Fixed bug #43452 (strings containing a weekday, or a number plus
+      weekday
+        behaved incorrect of the current day-of-week was the same as the one in
+      the
+        phrase).
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/tests/bug43452.phpt
+      ext/date/tests/bug43452.phpt:
+      - Fixed bug #43452 (strings containing a weekday, or a number plus weekday
+        behaved incorrect of the current day-of-week was the same as the one in
+      the
+        phrase). (Derick)
+
+2008-07-23  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/intl/tests/locale_accept.phpt:
+      add test
+
+    * ext/intl/intl_data.h
+      ext/intl/php_intl.c
+      ext/intl/locale/locale_class.c
+      ext/intl/locale/locale_methods.c
+      ext/intl/locale/locale_methods.h
+      ext/intl/tests/ut_common.inc:
+      add locale_accept_from_http
+
+2008-07-23  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/array.c:
+      - MFH: Fixed bug #45605 (array_uintersect_assoc gives incorrect error
+      message)
+
+    * ext/standard/array.c:
+      - Fixed bug #45605 (array_uintersect_assoc gives incorrect error message)
+        (patch by ilewis at uk dot ibm dot com)
+
+2008-07-23  Lars Strojny  <lars@strojny.net>
+
+    * (PHP_5_3)
+      run-tests.php:
+      Allowing "%unicode|string%" as a placeholder (backport from HEAD)
+
+    * run-tests.php:
+      Allowing "%unicode|string%" as a placeholder. In 6, this placeholder is
+      resolved
+      to "unicode", in <6 to "string". This allows to easily write portable
+      tests.
+      Patch by uw
+
+2008-07-23  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/tests/math/bindec_basic.phpt
+      ext/standard/tests/math/bindec_basic_64bit.phpt:
+      Fix test (bug #44985)
+
+2008-07-23  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      NEWS:
+      NEWS!:
+
+    * (PHP_5_3)
+      ext/mysqli/tests/bug44897.phpt
+      ext/mysqlnd/mysqlnd_ps.c:
+      MFH: Fixed bug#44897 - failed to prepare statement
+           After a PS "CALL()" we have at least one result set. If the SP does
+      also some, then
+           we need to clean the wire more fool-proof.
+
+    * ext/mysqli/tests/bug44897.phpt
+      ext/mysqli/tests/bug44897.phpt
+      ext/mysqlnd/mysqlnd_ps.c:
+      
+      Fixed bug#44897 - failed to prepare statement
+      After a PS "CALL()" we have at least one result set. If the SP does also
+      some, then
+      we need to clean the wire more fool-proof.
+
+2008-07-23  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      run-tests.php:
+      MFH: some fixes to allow certain tests to pass regardless of system php.ini
+      settins
+
+2008-07-23  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/pdo_mysql/tests/pdo_mysql___construct.phpt:
+      This little detail seems MySQL version/setup dependent
+
+2008-07-23  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - Change credits for #44246
+
+2008-07-23  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/bz2/bz2.c
+      ext/bz2/bz2.c
+      ext/standard/dir.c
+      ext/standard/dir.c
+      ext/standard/file.c
+      ext/standard/file.c
+      ext/standard/fsock.c
+      ext/standard/fsock.c
+      ext/standard/proc_open.c
+      ext/standard/proc_open.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.c
+      ext/zip/zip_stream.c
+      ext/zip/zip_stream.c
+      main/php_streams.h
+      main/php_streams.h
+      sapi/cli/php_cli.c
+      sapi/cli/php_cli.c:
+      MFH: invert the logics - FLAG_FCLOSE -> FLAG_NO_FCLOSE
+
+    * ext/bz2/bz2.c
+      ext/standard/dir.c
+      ext/standard/file.c
+      ext/standard/fsock.c
+      ext/standard/proc_open.c
+      ext/standard/streamsfuncs.c
+      ext/zip/zip_stream.c
+      main/php_streams.h
+      sapi/cli/php_cli.c:
+      invert the logics - FLAG_FCLOSE -> FLAG_NO_FCLOSE
+
+    * (PHP_5_3)
+      ext/pdo_mysql/tests/bug_39858.phpt
+      ext/pdo_mysql/tests/bug_41125.phpt
+      ext/pdo_mysql/tests/bug_42499.phpt
+      ext/pdo_mysql/tests/bug_43371.phpt
+      ext/pdo_mysql/tests/bug_44454.phpt
+      ext/pdo_mysql/tests/bug_44707.phpt
+      ext/pdo_mysql/tests/bug_45120.phpt
+      ext/pdo_mysql/tests/bug_pecl_7976.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_match_against.phpt:
+      fix test names
+
+    * ext/pdo_mysql/tests/bug_39858.phpt
+      ext/pdo_mysql/tests/bug_41125.phpt
+      ext/pdo_mysql/tests/bug_42499.phpt
+      ext/pdo_mysql/tests/bug_43371.phpt
+      ext/pdo_mysql/tests/bug_44454.phpt
+      ext/pdo_mysql/tests/bug_44707.phpt
+      ext/pdo_mysql/tests/bug_45120.phpt
+      ext/pdo_mysql/tests/bug_pecl_7976.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_match_against.phpt:
+      fix tests names
+
+    * ext/date/tests/bug45529.phpt
+      ext/date/tests/bug45529.phpt
+      ext/standard/tests/general_functions/bug44394_2.phpt
+      ext/standard/tests/general_functions/bug44394_2.phpt
+      ext/standard/tests/general_functions/bug44394_2.phpt
+      ext/standard/tests/strings/sprintf_variation23.phpt
+      ext/standard/tests/strings/sprintf_variation23.phpt:
+      fix test
+
+    * ext/standard/tests/strings/sprintf_variation23.phpt:
+      sync test with other branches
+
+2008-07-23  Hartmut Holzgraefe  <hartmut@mysql.com>
+
+    * ext/pgsql/config.m4
+      ext/pgsql/pgsql.c
+      ext/pgsql/tests/27large_object_oid.phpt
+      ext/pgsql/tests/28large_object_import_oid.phpt:
+      MFB + Unicode:
+      added support for object ids in pg_lo_create() and pg_lo_import()
+      where available (based on code provided by Tatsuo Ishii)
+
+2008-07-23  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * ext/soap/tests/typemap001.phpt
+      ext/soap/tests/typemap003.phpt
+      ext/soap/tests/typemap005.phpt
+      ext/soap/tests/typemap007.phpt:
+      Fix tests: need simplexml
+
+2008-07-23  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/zip/zip_stream.c
+      ext/zip/zip_stream.c:
+      MFH: add PHP_STREAM_FLAG_FCLOSE to zip streams
+
+    * ext/zip/zip_stream.c:
+      add PHP_STREAM_FLAG_FCLOSE to zip streams
+
+2008-07-23  Hartmut Holzgraefe  <hartmut@mysql.com>
+
+    * (PHP_5_3)
+      ext/pgsql/tests/27large_object_oid.phpt
+      ext/pgsql/tests/28large_object_import_oid.phpt
+      ext/pgsql/tests/28large_object_import_oid.phpt:
+      splitted test cases for lo_create and lo_import, added version aware
+      SKIP tests
+
+2008-07-23  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/bz2/bz2.c
+      ext/bz2/bz2.c:
+      MFH: add PHP_STREAM_FLAG_FCLOSE, bz2 streams can be closed with fclose()
+
+2008-07-23  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      ext/soap/tests/schema/skipif.inc:
+      MFH: Fix tests: soap tests in schema/ needs the xml extension
+
+2008-07-23  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/bz2/bz2.c:
+      add PHP_STREAM_FLAG_FCLOSE, bz2 streams can be closed with fclose()
+
+2008-07-23  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * ext/soap/tests/schema/skipif.inc:
+      Fix tests: soap tests in schema/ needs the xml extension
+
+    * (PHP_5_3)
+      ext/standard/tests/network/gethostbynamel_error.phpt:
+      MFH: Fix test: use canonical name to avoid problems with domain search path
+
+    * ext/standard/tests/network/gethostbynamel_error.phpt:
+      Fix test: use canonical name to avoid problems with domain search path
+
+2008-07-23  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ext/spl/spl_directory.c:
+      - MFH [DOC] Add FilesystemIterator::SKIP_DOTS (flag to skip '.' and '..' in
+      iteration)
+
+    * (PHP_5_3)
+      ext/spl/spl_directory.c:
+      - [DOC] Add FilesystemIterator::SKIP_DOTS (flag to skip '.' and '..' in
+      iteration)
+
+    * ext/spl/spl.php:
+      - Add new classes
+
+2008-07-23  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/intl/tests/locale_accept.phpt
+      ext/intl/tests/locale_accept.phpt:
+      
+      file locale_accept.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/intl/php_intl.c
+      ext/intl/locale/locale_class.c
+      ext/intl/locale/locale_methods.c
+      ext/intl/locale/locale_methods.h
+      ext/intl/tests/ut_common.inc:
+      add acceptFromHttp
+
+2008-07-23  Hartmut Holzgraefe  <hartmut@mysql.com>
+
+    * (PHP_5_3)
+      ext/pgsql/config.m4
+      ext/pgsql/pgsql.c
+      ext/pgsql/tests/27large_object_oid.phpt
+      ext/pgsql/tests/27large_object_oid.phpt:
+      added support for object ids in pg_lo_create() and pg_lo_import() where
+      available
+      (based on code provided by Tatsuo Ishii)
+
 2008-07-22  Andrey Hristov  <php@hristov.com>
 
     * (PHP_5_3)
