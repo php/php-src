@@ -268,8 +268,8 @@ MBSTRING_API unsigned long php_unicode_totitle(unsigned long code, enum mbfl_no_
 	((unsigned char*)(ptr))[3] = (v    ) & 0xff;\
 }
 
-MBSTRING_API char *php_unicode_convert_case(int case_mode, char *srcstr, size_t srclen, size_t *ret_len,
-		char *src_encoding TSRMLS_DC)
+MBSTRING_API char *php_unicode_convert_case(int case_mode, const char *srcstr, size_t srclen, size_t *ret_len,
+		const char *src_encoding TSRMLS_DC)
 {
 	char *unicode, *newstr;
 	size_t unicode_len;
