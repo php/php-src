@@ -40,6 +40,26 @@ typedef struct _zend_function_entry {
 	zend_uint flags;
 } zend_function_entry;
 
+typedef struct _zend_fcall_info {
+	size_t size;
+	HashTable *function_table;
+	zval *function_name;
+	HashTable *symbol_table;
+	zval **retval_ptr_ptr;
+	zend_uint param_count;
+	zval ***params;
+	zval **object_pp;
+	zend_bool no_separation;
+} zend_fcall_info;
+
+typedef struct _zend_fcall_info_cache {
+	zend_bool initialized;
+	zend_function *function_handler;
+	zend_class_entry *calling_scope;
+	zend_class_entry *called_scope;
+	zval **object_pp;
+} zend_fcall_info_cache;
+
 #define ZEND_NS_NAME(ns, name)			ns"::"name
 
 #define ZEND_FN(name) zif_##name
@@ -263,7 +283,7 @@ ZEND_API void zend_wrong_param_count(TSRMLS_D);
 
 #define IS_CALLABLE_STRICT  (IS_CALLABLE_CHECK_IS_STATIC)
 
-ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *callable_name, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval ***zobj_ptr_ptr, char **error TSRMLS_DC);
+ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *callable_name, zend_fcall_info_cache *fcc, char **error TSRMLS_DC);
 ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, zval *callable_name);
 ZEND_API zend_bool zend_make_callable(zval *callable, zval *callable_name TSRMLS_DC);
 ZEND_API const char *zend_get_module_version(const char *module_name);
@@ -1532,28 +1552,7 @@ ZEND_API int add_property_zstrl_ex(zval *arg, char *key, uint key_len, zend_ucha
 
 ZEND_API int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, zend_uint param_count, zval *params[] TSRMLS_DC);
 ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, zend_uint param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC);
-END_EXTERN_C()
 
-typedef struct _zend_fcall_info {
-	size_t size;
-	HashTable *function_table;
-	zval *function_name;
-	HashTable *symbol_table;
-	zval **retval_ptr_ptr;
-	zend_uint param_count;
-	zval ***params;
-	zval **object_pp;
-	zend_bool no_separation;
-} zend_fcall_info;
-
-typedef struct _zend_fcall_info_cache {
-	zend_bool initialized;
-	zend_function *function_handler;
-	zend_class_entry *calling_scope;
-	zval **object_pp;
-} zend_fcall_info_cache;
-
-BEGIN_EXTERN_C()
 ZEND_API extern zend_fcall_info empty_fcall_info;
 ZEND_API extern zend_fcall_info_cache empty_fcall_info_cache;
 

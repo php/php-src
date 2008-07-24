@@ -47,4 +47,4 @@ ok
 
 Warning: call_user_func() expects parameter 1 to be a valid callback, class 'bar' does not have a method 'www' in %s on line %d
 
-Fatal error: Cannot access self:: when no class scope is active in %s on line %d
+Warning: call_user_func() expects parameter 1 to be a valid callback, cannot access self:: when no class scope is active in %sbug45186_2.php on line 27

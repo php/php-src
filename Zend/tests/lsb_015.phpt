@@ -86,7 +86,7 @@ A
 B
 B
 B
-A
-A
+B
+B
 B
 ==DONE==
