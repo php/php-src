@@ -4,11 +4,10 @@ dnl vim:et:sw=2:ts=2:
 
 if test "$PHP_PDO" != "no"; then
 
-PHP_ARG_WITH(pdo-sqlite, for sqlite 3 driver for PDO,
+PHP_ARG_WITH(pdo-sqlite, for sqlite 3 support for PDO,
 [  --without-pdo-sqlite[=DIR]
                             PDO: sqlite 3 support.  DIR is the sqlite base
                             install directory [BUNDLED]], yes)
-
 
 if test "$PHP_PDO_SQLITE" != "no"; then
 
@@ -74,18 +73,21 @@ if test "$PHP_PDO_SQLITE" != "no"; then
     # use bundled libs
     pdo_sqlite_sources="libsqlite/sqlite3.c"
 
-    if test "$enable_maintainer_zts" = "yes"; then
-      threadsafe_flag="-DTHREADSAFE=1"
-    else
-      threadsafe_flag="-DTHREADSAFE=0"
-    fi
+      if test "$enable_maintainer_zts" = "yes"; then
+        threadsafe_flag="-DSQLITE_THREADSAFE=1"
+      else
+        threadsafe_flag="-DSQLITE_THREADSAFE=0"
+      fi
 
       PHP_NEW_EXTENSION(pdo_sqlite,
         $php_pdo_sqlite_sources_core $pdo_sqlite_sources,
-        $ext_shared,,-I@ext_builddir@/libsqlite -DPDO_SQLITE_BUNDLED=1 -DSQLITE_OMIT_CURSOR $threadsafe_flag -I$pdo_inc_path)
+        $ext_shared,,-I$ext_srcdir/libsqlite -DPDO_SQLITE_BUNDLED=1 $threadsafe_flag -I$pdo_inc_path)
 
       PHP_SUBST(PDO_SQLITE_SHARED_LIBADD)
       PHP_ADD_BUILD_DIR($ext_builddir/libsqlite, 1)
+ 
+      AC_CHECK_FUNCS(usleep nanosleep)
+      AC_CHECK_HEADERS(time.h)
   fi
 
   dnl Solaris fix
