@@ -1870,7 +1870,7 @@ ZEND_FUNCTION(zend_test_func)
 Returns a unique identifier for the current thread */
 ZEND_FUNCTION(zend_thread_id)
 {
-	RETURN_LONG(tsrm_thread_id());
+	RETURN_LONG((long)tsrm_thread_id());
 }
 /* }}} */
 #endif
