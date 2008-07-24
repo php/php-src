@@ -85,6 +85,7 @@ ZEND_API zval* zend_u_call_method(zval **object_pp, zend_class_entry *obj_ce, ze
 			fcic.function_handler = *fn_proxy;
 		}
 		fcic.calling_scope = obj_ce;
+		fcic.called_scope = object_pp ? obj_ce : EG(called_scope);
 		fcic.object_pp = object_pp;
 		result = zend_call_function(&fci, &fcic TSRMLS_CC);
 	}

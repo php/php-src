@@ -30,7 +30,7 @@ object(foo)#%d (0) {
 Strict Standards: Non-static method foo::test() should not be called statically in %s on line %d
 
 Strict Standards: Non-static method bar::show() should not be called statically in %s on line %d
-object(bar)#%d (0) {
+object(foo)#%d (0) {
 }
 object(foo)#%d (0) {
 }
@@ -40,5 +40,5 @@ Strict Standards: call_user_func() expects parameter 1 to be a valid callback, n
 Strict Standards: Non-static method foo::test() should not be called statically in %s on line %d
 
 Strict Standards: Non-static method bar::show() should not be called statically in %s on line %d
-object(bar)#%d (0) {
+object(foo)#%d (0) {
 }

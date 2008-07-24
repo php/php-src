@@ -5213,7 +5213,7 @@ PHP_FUNCTION(forward_static_call)
 
 	if (EG(called_scope) &&
 		instanceof_function(EG(called_scope), fci_cache.calling_scope TSRMLS_CC)) {
-			fci_cache.calling_scope = EG(called_scope);
+			fci_cache.called_scope = EG(called_scope);
 	}
 	
 	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && fci.retval_ptr_ptr && *fci.retval_ptr_ptr) {
@@ -5243,7 +5243,7 @@ PHP_FUNCTION(forward_static_call_array)
 
 	if (EG(called_scope) &&
 		instanceof_function(EG(called_scope), fci_cache.calling_scope TSRMLS_CC)) {
-			fci_cache.calling_scope = EG(called_scope);
+			fci_cache.called_scope = EG(called_scope);
 	}
 
 	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && fci.retval_ptr_ptr && *fci.retval_ptr_ptr) {

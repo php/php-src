@@ -37,7 +37,7 @@ echo "Done";
 *** Testing array_map() :  with non-existent class and method ***
 -- with non-existent class --
 
-Warning: array_map() expects parameter 1 to be a valid callback, first array member is not a valid class name in %s on line %d
+Warning: array_map() expects parameter 1 to be a valid callback, class 'non-existent' not found in %s on line %d
 NULL
 -- with existent class and non-existent method --
 

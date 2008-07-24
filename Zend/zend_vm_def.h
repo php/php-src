@@ -1991,8 +1991,15 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 		if (!ce) {
 			zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 		}
+		EX(called_scope) = ce;
 	} else {
 		ce = EX_T(opline->op1.u.var).class_entry;
+		
+		if (opline->op1.u.EA.type == ZEND_FETCH_CLASS_PARENT || opline->op1.u.EA.type == ZEND_FETCH_CLASS_SELF) {
+			EX(called_scope) = EG(called_scope);
+		} else {
+			EX(called_scope) = ce;
+		}
 	}
 	if(OP2_TYPE != IS_UNUSED) {
 		zstr function_name_strval;
@@ -2036,8 +2043,6 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 		}
 		EX(fbc) = ce->constructor;
 	}
-
-	EX(called_scope) = ce;
 
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
