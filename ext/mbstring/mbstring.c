@@ -81,8 +81,16 @@
 #include "zend_multibyte.h"
 #endif /* ZEND_MULTIBYTE */
 
-#if HAVE_MBSTRING
+#if HAVE_ONIG
+#include "php_onig_compat.h"
+#include <oniguruma.h>
+#undef UChar
+#elif HAVE_PCRE || HAVE_BUNDLED_PCRE
+#include <pcre.h>
+#endif
 /* }}} */
+
+#if HAVE_MBSTRING
 
 /* {{{ prototypes */
 ZEND_DECLARE_MODULE_GLOBALS(mbstring)
@@ -905,6 +913,79 @@ php_mb_parse_encoding_array(zval *array, enum mbfl_no_encoding **return_list, in
 }
 /* }}} */
 
+static void *_php_mb_compile_regex(const char *pattern TSRMLS_DC);
+static int _php_mb_match_regex(void *opaque, const char *str, size_t str_len);
+static void _php_mb_free_regex(void *opaque);
+
+#if HAVE_ONIG
+/* {{{ _php_mb_compile_regex */
+void *_php_mb_compile_regex(const char *pattern TSRMLS_DC)
+{
+	php_mb_regex_t *retval;
+	OnigErrorInfo err_info;
+	int err_code;
+
+	if ((err_code = onig_new(&retval,
+			(const OnigUChar *)pattern,
+			(const OnigUChar *)pattern + strlen(pattern),
+			ONIG_OPTION_IGNORECASE | ONIG_OPTION_DONT_CAPTURE_GROUP,
+			ONIG_ENCODING_ASCII, &OnigSyntaxPerl, &err_info))) {
+		OnigUChar err_str[ONIG_MAX_ERROR_MESSAGE_LEN];
+		onig_error_code_to_str(err_str, err_code, err_info);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s: %s", pattern, err_str);
+		retval = NULL;
+	}
+	return retval;
+}
+/* }}} */
+
+/* {{{ _php_mb_match_regex */
+int _php_mb_match_regex(void *opaque, const char *str, size_t str_len)
+{
+	return onig_search((php_mb_regex_t *)opaque, (const OnigUChar *)str,
+			(const OnigUChar*)str + str_len, (const OnigUChar *)str,
+			(const OnigUChar*)str + str_len, NULL, ONIG_OPTION_NONE) >= 0;
+}
+/* }}} */
+
+/* {{{ _php_mb_free_regex */
+void _php_mb_free_regex(void *opaque)
+{
+	onig_free((php_mb_regex_t *)opaque);
+}
+/* }}} */
+#elif HAVE_PCRE || HAVE_BUNDLED_PCRE
+/* {{{ _php_mb_compile_regex */
+void *_php_mb_compile_regex(const char *pattern TSRMLS_DC)
+{
+	pcre *retval;
+	const char *err_str;
+	int err_offset;
+
+	if (!(retval = pcre_compile(pattern,
+			PCRE_CASELESS, &err_str, &err_offset, NULL))) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s (offset=%d): %s", pattern, err_offset, err_str);
+	}
+	return retval;
+}
+/* }}} */
+
+/* {{{ _php_mb_match_regex */
+int _php_mb_match_regex(void *opaque, const char *str, size_t str_len)
+{
+	return pcre_exec((pcre *)opaque, NULL, str, (int)str_len, 0,
+			0, NULL, 0) >= 0;
+}
+/* }}} */
+
+/* {{{ _php_mb_free_regex */
+void _php_mb_free_regex(void *opaque)
+{
+	pcre_free(opaque);
+}
+/* }}} */
+#endif
+
 /* {{{ php_mb_nls_get_default_detect_order_list */
 static int php_mb_nls_get_default_detect_order_list(enum mbfl_no_language lang, enum mbfl_no_encoding **plist, int* plist_size)
 {
@@ -925,6 +1006,7 @@ static int php_mb_nls_get_default_detect_order_list(enum mbfl_no_language lang, 
 /* }}} */
 
 /* {{{ php.ini directive handler */
+/* {{{ static PHP_INI_MH(OnUpdate_mbstring_language) */
 static PHP_INI_MH(OnUpdate_mbstring_language)
 {
 	enum mbfl_no_language no_language;
@@ -1110,26 +1192,69 @@ static PHP_INI_MH(OnUpdate_mbstring_encoding_translation)
 }
 /* }}} */
 
+/* {{{ static PHP_INI_MH(OnUpdate_mbstring_http_output_conv_mimetypes */
+static PHP_INI_MH(OnUpdate_mbstring_http_output_conv_mimetypes)
+{
+	zval tmp;
+	void *re = NULL;
+
+	if (!new_value) {
+		return SUCCESS;
+	}
+	php_trim(new_value, new_value_length, NULL, 0, &tmp, 3 TSRMLS_CC);
+
+	if (Z_STRLEN(tmp) > 0) {
+		if (!(re = _php_mb_compile_regex(Z_STRVAL(tmp) TSRMLS_CC))) {
+			zval_dtor(&tmp);
+			return FAILURE;
+		}
+	}
+
+	if (MBSTRG(http_output_conv_mimetypes)) {
+		_php_mb_free_regex(MBSTRG(http_output_conv_mimetypes));
+	}
+
+	MBSTRG(http_output_conv_mimetypes) = re;
+
+	zval_dtor(&tmp);
+	return SUCCESS;
+}
+/* }}} */
+/* }}} */
+
 /* {{{ php.ini directive registration */
 PHP_INI_BEGIN()
-	 PHP_INI_ENTRY("mbstring.language", "neutral", PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdate_mbstring_language)
-	 PHP_INI_ENTRY("mbstring.detect_order", NULL, PHP_INI_ALL, OnUpdate_mbstring_detect_order)
-	 PHP_INI_ENTRY("mbstring.http_input", "pass", PHP_INI_ALL, OnUpdate_mbstring_http_input)
-	 PHP_INI_ENTRY("mbstring.http_output", "pass", PHP_INI_ALL, OnUpdate_mbstring_http_output)
-	 PHP_INI_ENTRY("mbstring.internal_encoding", NULL, PHP_INI_ALL, OnUpdate_mbstring_internal_encoding)
+	PHP_INI_ENTRY("mbstring.language", "neutral", PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdate_mbstring_language)
+	PHP_INI_ENTRY("mbstring.detect_order", NULL, PHP_INI_ALL, OnUpdate_mbstring_detect_order)
+	PHP_INI_ENTRY("mbstring.http_input", "pass", PHP_INI_ALL, OnUpdate_mbstring_http_input)
+	PHP_INI_ENTRY("mbstring.http_output", "pass", PHP_INI_ALL, OnUpdate_mbstring_http_output)
+	PHP_INI_ENTRY("mbstring.internal_encoding", NULL, PHP_INI_ALL, OnUpdate_mbstring_internal_encoding)
 #ifdef ZEND_MULTIBYTE
-	 PHP_INI_ENTRY("mbstring.script_encoding", NULL, PHP_INI_ALL, OnUpdate_mbstring_script_encoding)
+	PHP_INI_ENTRY("mbstring.script_encoding", NULL, PHP_INI_ALL, OnUpdate_mbstring_script_encoding)
 #endif /* ZEND_MULTIBYTE */
-	 PHP_INI_ENTRY("mbstring.substitute_character", NULL, PHP_INI_ALL, OnUpdate_mbstring_substitute_character)
-	 STD_PHP_INI_ENTRY("mbstring.func_overload", "0", PHP_INI_SYSTEM |
-	 PHP_INI_PERDIR, OnUpdateLong, func_overload, zend_mbstring_globals, mbstring_globals)
+	PHP_INI_ENTRY("mbstring.substitute_character", NULL, PHP_INI_ALL, OnUpdate_mbstring_substitute_character)
+	STD_PHP_INI_ENTRY("mbstring.func_overload", "0",
+		PHP_INI_SYSTEM | PHP_INI_PERDIR,
+		OnUpdateLong,
+		func_overload,
+		zend_mbstring_globals, mbstring_globals)
 	 	 								  
-	 STD_PHP_INI_BOOLEAN("mbstring.encoding_translation", "0",
-	 PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdate_mbstring_encoding_translation, 
-	 encoding_translation, zend_mbstring_globals, mbstring_globals)					 
+	STD_PHP_INI_BOOLEAN("mbstring.encoding_translation", "0",
+		PHP_INI_SYSTEM | PHP_INI_PERDIR,
+		OnUpdate_mbstring_encoding_translation, 
+		encoding_translation,
+		zend_mbstring_globals, mbstring_globals)
 
-	 STD_PHP_INI_BOOLEAN("mbstring.strict_detection", "0",
-	 PHP_INI_ALL, OnUpdateLong, strict_detection, zend_mbstring_globals, mbstring_globals)
+	PHP_INI_ENTRY("mbstring.http_output_conv_mimetypes",
+ 		"^(text/|application/xhtml\\+xml)",
+ 		PHP_INI_ALL,
+ 		OnUpdate_mbstring_http_output_conv_mimetypes)
+
+	STD_PHP_INI_BOOLEAN("mbstring.strict_detection", "0",
+		PHP_INI_ALL,
+		OnUpdateLong,
+		strict_detection,
+		zend_mbstring_globals, mbstring_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -1168,6 +1293,7 @@ static PHP_GINIT_FUNCTION(mbstring)
 	mbstring_globals->encoding_translation = 0;
 	mbstring_globals->strict_detection = 0;
 	mbstring_globals->outconv = NULL;
+	mbstring_globals->http_output_conv_mimetypes = NULL;
 #if HAVE_MBREGEX
 	mbstring_globals->mb_regex_globals = php_mb_regex_globals_alloc(TSRMLS_C);
 #endif
@@ -1177,6 +1303,22 @@ static PHP_GINIT_FUNCTION(mbstring)
 /* {{{ PHP_GSHUTDOWN_FUNCTION */
 static PHP_GSHUTDOWN_FUNCTION(mbstring)
 {
+	if (mbstring_globals->http_input_list) {
+		free(mbstring_globals->http_input_list);
+	}
+#ifdef ZEND_MULTIBYTE
+	if (mbstring_globals->script_encoding_list) {
+		free(mbstring_globals->script_encoding_list);
+	}
+#endif /* ZEND_MULTIBYTE */
+	if (mbstring_globals->detect_order_list) {
+		free(mbstring_globals->detect_order_list);
+	}
+
+	if (mbstring_globals->http_output_conv_mimetypes) {
+		_php_mb_free_regex(mbstring_globals->http_output_conv_mimetypes);
+	}
+
 #if HAVE_MBREGEX
 	php_mb_regex_globals_free(mbstring_globals->mb_regex_globals TSRMLS_CC);
 #endif
@@ -1215,18 +1357,6 @@ PHP_MSHUTDOWN_FUNCTION(mbstring)
 {
 	UNREGISTER_INI_ENTRIES();
 	
-	if (MBSTRG(http_input_list)) {
-		free(MBSTRG(http_input_list));
-	}
-#ifdef ZEND_MULTIBYTE
-	if (MBSTRG(script_encoding_list)) {
-		free(MBSTRG(script_encoding_list));
-	}
-#endif /* ZEND_MULTIBYTE */
-	if (MBSTRG(detect_order_list)) {
-		free(MBSTRG(detect_order_list));
-	}
-
 #if HAVE_MBREGEX
 	PHP_MSHUTDOWN(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
 #endif
@@ -1407,9 +1537,7 @@ PHP_MINFO_FUNCTION(mbstring)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Multibyte Support", "enabled");
 	php_info_print_table_row(2, "Multibyte string engine", "libmbfl");
-	if (MBSTRG(encoding_translation)) {
-		php_info_print_table_row(2, "HTTP input encoding translation", "enabled");	
-	}
+	php_info_print_table_row(2, "HTTP input encoding translation", MBSTRG(encoding_translation) ? "enabled": "disabled");	
 	php_info_print_table_end();
 
 	php_info_print_table_start();
@@ -1843,8 +1971,11 @@ PHP_FUNCTION(mb_output_handler)
 		}
 
 		/* analyze mime type */
-		if (SG(sapi_headers).mimetype && 
-			strncmp(SG(sapi_headers).mimetype, "text/", 5) == 0) {
+		if (SG(sapi_headers).mimetype &&
+			_php_mb_match_regex(
+				MBSTRG(http_output_conv_mimetypes),
+				SG(sapi_headers).mimetype,
+				strlen(SG(sapi_headers).mimetype))) {
 			if ((s = strchr(SG(sapi_headers).mimetype,';')) == NULL){
 				mimetype = estrdup(SG(sapi_headers).mimetype);
 			} else {
