@@ -2750,7 +2750,7 @@ ZEND_API zstr zend_u_str_case_fold(zend_uchar type, zstr source, unsigned int le
 }
 /* }}} */
 
-ZEND_API int zend_binary_strcmp(char *s1, uint len1, char *s2, uint len2) /* {{{ */
+ZEND_API int zend_binary_strcmp(const char *s1, uint len1, const char *s2, uint len2) /* {{{ */
 {
 	int retval;
 
@@ -2770,7 +2770,7 @@ ZEND_API int zend_u_binary_strcmp(UChar *s1, int len1, UChar *s2, int len2) /* {
 }
 /* }}} */
 
-ZEND_API int zend_binary_strncmp(char *s1, uint len1, char *s2, uint len2, uint length) /* {{{ */
+ZEND_API int zend_binary_strncmp(const char *s1, uint len1, const char *s2, uint len2, uint length) /* {{{ */
 {
 	int retval;
 
@@ -2806,7 +2806,7 @@ ZEND_API int zend_u_binary_strncmp(UChar *s1, int len1, UChar *s2, int len2, uin
 }
 /* }}} */
 
-ZEND_API int zend_binary_strcasecmp(char *s1, uint len1, char *s2, uint len2) /* {{{ */
+ZEND_API int zend_binary_strcasecmp(const char *s1, uint len1, const char *s2, uint len2) /* {{{ */
 {
 	int len;
 	int c1, c2;
@@ -2833,7 +2833,7 @@ ZEND_API int zend_u_binary_strcasecmp(UChar *s1, int len1, UChar *s2, int len2) 
 }
 /* }}} */
 
-ZEND_API int zend_binary_strncasecmp(char *s1, uint len1, char *s2, uint len2, uint length) /* {{{ */
+ZEND_API int zend_binary_strncasecmp(const char *s1, uint len1, const char *s2, uint len2, uint length) /* {{{ */
 {
 	int len;
 	int c1, c2;
