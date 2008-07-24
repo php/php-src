@@ -101,6 +101,11 @@ PHP                                                                        NEWS
   . Added support for OpenSSL digest and cipher functions.
   . Added access to internal values of DSA, RSA and DH keys.
 
+- Improved mbstring extension:
+  . Added "mbstring.http_output_conv_mimetypes" INI directive that allows
+    common non-text types such as "application/xhtml+xml" to be converted
+    by mb_output_handler(). (Moriyoshi)
+
 - Improved SOAP extension:
   . Added support for element names in context of XMLShema's <any>. (Dmitry)
   . Added ability to use Traversable objects instead of plain arrays.
