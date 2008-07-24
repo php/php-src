@@ -52,6 +52,7 @@ if (PHP_MBSTRING == "yes") {
 	if (PHP_MBREGEX != "no") {
 		AC_DEFINE('HAVE_STDARG_PROTOTYPES', 1, 'have stdarg.h');
 		AC_DEFINE('HAVE_MBREGEX', 1);
+		AC_DEFINE('HAVE_ONIG', 1);
 		ADD_SOURCES("ext/mbstring/oniguruma", "regcomp.c regerror.c \
 			regenc.c regexec.c reggnu.c regparse.c regposerr.c \
 			regext.c regsyntax.c regtrav.c regversion.c st.c", "mbstring");
