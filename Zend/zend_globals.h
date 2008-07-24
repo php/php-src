@@ -140,8 +140,9 @@ struct _zend_compiler_globals {
 
 #ifdef ZEND_MULTIBYTE
 	zend_encoding **script_encoding_list;
-	int script_encoding_list_size;
+	size_t script_encoding_list_size;
 	zend_bool detect_unicode;
+	zend_bool encoding_declared;
 
 	zend_encoding *internal_encoding;
 
@@ -258,14 +259,14 @@ struct _zend_ini_scanner_globals {
 	zend_file_handle *yy_in;
 	zend_file_handle *yy_out;
 
-        unsigned int yy_leng;
-        unsigned char *yy_start;
-        unsigned char *yy_text;
-        unsigned char *yy_cursor;
-        unsigned char *yy_marker;
-        unsigned char *yy_limit;
-        int yy_state;
-        zend_stack state_stack;
+	unsigned int yy_leng;
+	unsigned char *yy_start;
+	unsigned char *yy_text;
+	unsigned char *yy_cursor;
+	unsigned char *yy_marker;
+	unsigned char *yy_limit;
+	int yy_state;
+	zend_stack state_stack;
 
 	char *filename;
 	int lineno;
@@ -291,12 +292,12 @@ struct _zend_php_scanner_globals {
 
 #ifdef ZEND_MULTIBYTE
 	/* original (unfiltered) script */
-	char *script_org;
-	int script_org_size;
+	unsigned char *script_org;
+	size_t script_org_size;
 
 	/* filtered script */
-	char *script_filtered;
-	int script_filtered_size;
+	unsigned char *script_filtered;
+	size_t script_filtered_size;
 
 	/* input/ouput filters */
 	zend_encoding_filter input_filter;
