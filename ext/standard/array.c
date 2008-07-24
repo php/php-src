@@ -3057,27 +3057,34 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 	int (*intersect_data_compare_func)(zval **, zval ** TSRMLS_DC) = NULL;
 	zend_bool ok;
 	zval **data;
+	int req_args;
+	char *param_spec;
 
 	/* Get the argument count */
 	argc = ZEND_NUM_ARGS();
 	if (data_compare_type == INTERSECT_COMP_DATA_USER) {
-		if (argc < 3) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "at least 3 parameters are required, %d given", ZEND_NUM_ARGS());
-			return;
-		}
-		
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+f", &args, &argc, &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
-			return;
-		}
+		/* INTERSECT_COMP_DATA_USER - array_uintersect_assoc() */
+		req_args = 3;
+		param_spec = "+f";
 		intersect_data_compare_func = zval_user_compare;
 	} else {
-		if (argc < 2 || zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &argc) == FAILURE) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "at least 2 parameters are required, %d given", ZEND_NUM_ARGS());
-			return;
-		}
+		/* 	INTERSECT_COMP_DATA_NONE - array_intersect_key()
+			INTERSECT_COMP_DATA_INTERNAL - array_intersect_assoc() */
+		req_args = 2;
+		param_spec = "+";
+				
 		if (data_compare_type == INTERSECT_COMP_DATA_INTERNAL) {
 			intersect_data_compare_func = zval_compare;
 		}
+	}
+	
+	if (argc < req_args) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "at least %d parameters are required, %d given", req_args, argc);
+		return;
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, param_spec, &args, &argc, &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
+		return;
 	}
 
 	for (i = 0; i < argc; i++) {
