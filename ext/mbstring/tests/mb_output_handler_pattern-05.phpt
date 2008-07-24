@@ -1,5 +1,5 @@
 --TEST--
-mb_output_handler() and mbstring.http_output_content_type_regex (5)
+mb_output_handler() and mbstring.http_output_conv_mimetypes (5)
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --INI--
