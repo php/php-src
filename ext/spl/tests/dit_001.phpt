@@ -12,7 +12,7 @@ var_dump(is_string($d));
 --EXPECTF--
 object(DirectoryIterator)#%d (4) {
   %s"pathName"%s"SplFileInfo":private]=>
-  %s(%d) "./%s"
+  %s(%d) ".%c%s"
   %s"fileName"%s"SplFileInfo":private]=>
   %s(%d) "%s"
   %s"glob"%s"DirectoryIterator":private]=>
