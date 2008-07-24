@@ -296,19 +296,35 @@ static char *script_filename = "";
 
 static void sapi_cli_register_variables(zval *track_vars_array TSRMLS_DC) /* {{{ */
 {
+	size_t len;
+	char   *docroot = "";
+
 	/* In CGI mode, we consider the environment to be a part of the server
 	 * variables
 	 */
 	php_import_environment_variables(track_vars_array TSRMLS_CC);
 
 	/* Build the special-case PHP_SELF variable for the CLI version */
-	php_register_variable("PHP_SELF", php_self, track_vars_array TSRMLS_CC);
-	php_register_variable("SCRIPT_NAME", php_self, track_vars_array TSRMLS_CC);
+	len = strlen(php_self);
+	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &php_self, len, &len TSRMLS_CC)) {
+		php_register_variable("PHP_SELF", php_self, track_vars_array TSRMLS_CC);
+	}
+	if (sapi_module.input_filter(PARSE_SERVER, "SCRIPT_NAME", &php_self, len, &len TSRMLS_CC)) {
+		php_register_variable("SCRIPT_NAME", php_self, track_vars_array TSRMLS_CC);
+	}
 	/* filenames are empty for stdin */
-	php_register_variable("SCRIPT_FILENAME", script_filename, track_vars_array TSRMLS_CC);
-	php_register_variable("PATH_TRANSLATED", script_filename, track_vars_array TSRMLS_CC);
+	len = strlen(script_filename);
+	if (sapi_module.input_filter(PARSE_SERVER, "SCRIPT_FILENAME", &script_filename, len, &len TSRMLS_CC)) {
+		php_register_variable("SCRIPT_FILENAME", script_filename, track_vars_array TSRMLS_CC);
+	}
+	if (sapi_module.input_filter(PARSE_SERVER, "PATH_TRANSLATED", &script_filename, len, &len TSRMLS_CC)) {
+		php_register_variable("PATH_TRANSLATED", script_filename, track_vars_array TSRMLS_CC);
+	}
 	/* just make it available */
-	php_register_variable("DOCUMENT_ROOT", "", track_vars_array TSRMLS_CC);
+	len = 0U;
+	if (sapi_module.input_filter(PARSE_SERVER, "DOCUMENT_ROOT", &docroot, len, &len TSRMLS_CC)) {
+		php_register_variable("DOCUMENT_ROOT", docroot, track_vars_array TSRMLS_CC);
+	}
 }
 /* }}} */
 
