@@ -189,7 +189,11 @@ $ini_overwrites = array(
 		'safe_mode=0',
 		'disable_functions=',
 		'output_buffering=Off',
+<<<<<<< run-tests.php
+		'error_reporting=32767', /* E_ALL | E_STRICT */
+=======
 		'error_reporting=' . (E_ALL | E_STRICT),
+>>>>>>> 1.367
 		'display_errors=1',
 		'display_startup_errors=1',
 		'log_errors=0',

@@ -93,11 +93,10 @@ static void php_var_dump_unicode(UChar *ustr, int length, int verbose, char *quo
 }
 /* }}} */
 
-static int php_array_element_dump(zval **zv, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int php_array_element_dump(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	int level;
 	int verbose;
-	TSRMLS_FETCH();
 
 	level = va_arg(args, int);
 	verbose = va_arg(args, int);
@@ -121,12 +120,11 @@ static int php_array_element_dump(zval **zv, int num_args, va_list args, zend_ha
 }
 /* }}} */
 
-static int php_object_property_dump(zval **zv, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int php_object_property_dump(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	int level;
 	zstr prop_name, class_name;
 	int verbose;
-	TSRMLS_FETCH();
 
 	level = va_arg(args, int);
 	verbose = va_arg(args, int);
@@ -167,7 +165,7 @@ PHPAPI void php_var_dump(zval **struc, int level, int verbose TSRMLS_DC) /* {{{ 
 	HashTable *myht;
 	zstr class_name;
 	zend_uint class_name_len;
-	int (*php_element_dump_func)(zval**, int, va_list, zend_hash_key*);
+	int (*php_element_dump_func)(zval** TSRMLS_DC, int, va_list, zend_hash_key*);
 	int is_temp;
 
 	if (level > 1) {
@@ -220,7 +218,7 @@ PHPAPI void php_var_dump(zval **struc, int level, int verbose TSRMLS_DC) /* {{{ 
 		php_element_dump_func = php_object_property_dump;
 head_done:
 		if (myht) {
-			zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_element_dump_func, 2, level, verbose);
+			zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_element_dump_func, 2, level, verbose);
 			if (is_temp) {
 				zend_hash_destroy(myht);
 				efree(myht);
@@ -291,10 +289,9 @@ PHP_FUNCTION(var_inspect)
 }
 /* }}} */
 
-static int zval_array_element_dump(zval **zv, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int zval_array_element_dump(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	int level;
-	TSRMLS_FETCH();
 
 	level = va_arg(args, int);
 
@@ -326,12 +323,11 @@ static int zval_array_element_dump(zval **zv, int num_args, va_list args, zend_h
 }
 /* }}} */
 
-static int zval_object_property_dump(zval **zv, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int zval_object_property_dump(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	int level;
 	zstr prop_name, class_name;
 	int verbose;
-	TSRMLS_FETCH();
 
 	level = va_arg(args, int);
 	verbose = va_arg(args, int);
@@ -366,7 +362,7 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level, int verbose TSRMLS_DC) 
 	zstr class_name;
 	zend_uint class_name_len;
 	zend_class_entry *ce;
-	int (*zval_element_dump_func)(zval**, int, va_list, zend_hash_key*);
+	int (*zval_element_dump_func)(zval** TSRMLS_DC, int, va_list, zend_hash_key*);
 	int is_temp = 0;
 
 	if (level > 1) {
@@ -418,7 +414,7 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level, int verbose TSRMLS_DC) 
 		zval_element_dump_func = zval_object_property_dump;
 head_done:
 		if (myht) {
-			zend_hash_apply_with_arguments(myht, (apply_func_args_t) zval_element_dump_func, 1, level, (Z_TYPE_PP(struc) == IS_ARRAY ? 0 : 1));
+			zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) zval_element_dump_func, 1, level, (Z_TYPE_PP(struc) == IS_ARRAY ? 0 : 1));
 			if (is_temp) {
 				zend_hash_destroy(myht);
 				efree(myht);
@@ -466,10 +462,9 @@ PHP_FUNCTION(debug_zval_dump)
 }
 /* }}} */
 
-static int php_array_element_export(zval **zv, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int php_array_element_export(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	int level;
-	TSRMLS_FETCH();
 
 	level = va_arg(args, int);
 
@@ -496,11 +491,10 @@ static int php_array_element_export(zval **zv, int num_args, va_list args, zend_
 }
 /* }}} */
 
-static int php_object_element_export(zval **zv, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int php_object_element_export(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	int level;
 	zstr prop_name, class_name;
-	TSRMLS_FETCH();
 
 	level = va_arg(args, int);
 
@@ -622,7 +616,7 @@ PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC) /* {{{ */
 			php_printf("\n%*c", level - 1, ' ');
 		}
 		PUTS ("array (\n");
-		zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_array_element_export, 1, level, (Z_TYPE_PP(struc) == IS_ARRAY ? 0 : 1));
+		zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_array_element_export, 1, level, (Z_TYPE_PP(struc) == IS_ARRAY ? 0 : 1));
 		if (level > 1) {
 			php_printf("%*c", level - 1, ' ');
 		}
@@ -637,7 +631,7 @@ PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC) /* {{{ */
 		php_printf ("%v::__set_state(array(\n", class_name);
 		efree(class_name.v);
 		if (myht) {
-			zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_object_element_export, 1, level);
+			zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_object_element_export, 1, level);
 		}
 		if (level > 1) {
 			php_printf("%*c", level - 1, ' ');

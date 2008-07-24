@@ -347,7 +347,7 @@ ZEND_METHOD(error_exception, getSeverity)
 	}
 /* }}} */
 
-static int _build_trace_args(zval **arg, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int _build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	char **str;
 	int *len;
@@ -440,7 +440,6 @@ static int _build_trace_args(zval **arg, int num_args, va_list args, zend_hash_k
 			double dval = Z_DVAL_PP(arg);
 			char *s_tmp;
 			int l_tmp;
-			TSRMLS_FETCH();
 
 			s_tmp = emalloc(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
 			l_tmp = zend_sprintf(s_tmp, "%.*G", (int) EG(precision), dval);  /* SAFE */
@@ -457,7 +456,6 @@ static int _build_trace_args(zval **arg, int num_args, va_list args, zend_hash_k
 			zstr class_name;
 			zend_uint class_name_len;
 			int dup;
-			TSRMLS_FETCH();
 
 			TRACE_APPEND_STR("Object(");
 
@@ -487,7 +485,7 @@ static int _build_trace_args(zval **arg, int num_args, va_list args, zend_hash_k
 }
 /* }}} */
 
-static int _build_trace_string(zval **frame, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int _build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	char *s_tmp, **str;
 	int *len, *num;
@@ -523,7 +521,7 @@ static int _build_trace_string(zval **frame, int num_args, va_list args, zend_ha
 	TRACE_APPEND_CHR('(');
 	if (zend_ascii_hash_find(ht, "args", sizeof("args"), (void**)&tmp) == SUCCESS) {
 		int last_len = *len;
-		zend_hash_apply_with_arguments(Z_ARRVAL_PP(tmp), (apply_func_args_t)_build_trace_args, 2, str, len);
+		zend_hash_apply_with_arguments(Z_ARRVAL_PP(tmp) TSRMLS_CC, (apply_func_args_t)_build_trace_args, 2, str, len);
 		if (last_len != *len) {
 			*len -= 2; /* remove last ', ' */
 		}
@@ -542,7 +540,7 @@ ZEND_METHOD(exception, getTraceAsString)
 	int res_len = 0, *len = &res_len, num = 0;
 
 	trace = zend_read_property(default_exception_ce, getThis(), "trace", sizeof("trace")-1, 1 TSRMLS_CC);
-	zend_hash_apply_with_arguments(Z_ARRVAL_P(trace), (apply_func_args_t)_build_trace_string, 3, str, len, &num);
+	zend_hash_apply_with_arguments(Z_ARRVAL_P(trace) TSRMLS_CC, (apply_func_args_t)_build_trace_string, 3, str, len, &num);
 
 	s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 7 + 1);
 	sprintf(s_tmp, "#%d {main}", num);

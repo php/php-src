@@ -903,7 +903,7 @@ static int _extension_class_string(zend_class_entry **pce, int num_args, va_list
 }
 /* }}} */
 
-static int _extension_const_string(zend_constant *constant, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int _extension_const_string(zend_constant *constant TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	string *str = va_arg(args, string *);
 	char *indent = va_arg(args, char *);
@@ -911,7 +911,6 @@ static int _extension_const_string(zend_constant *constant, int num_args, va_lis
 	int *num_classes = va_arg(args, int*);
 
 	if (constant->module_number  == module->module_number) {
-		TSRMLS_FETCH();
 		_const_string(str, constant->name, &constant->value, indent TSRMLS_CC);
 		(*num_classes)++;
 	}
@@ -971,7 +970,7 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 	{
 		string str_ini;
 		string_init(&str_ini);
-		zend_hash_apply_with_arguments(EG(ini_directives), (apply_func_args_t) _extension_ini_string, 3, &str_ini, indent, module->module_number);
+		zend_hash_apply_with_arguments(EG(ini_directives) TSRMLS_CC, (apply_func_args_t) _extension_ini_string, 3, &str_ini, indent, module->module_number);
 		if (str_ini.len > 1) {
 			string_printf(str, "\n  - INI {\n");
 			string_append(str, &str_ini);
@@ -985,7 +984,7 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 		int num_constants = 0;
 		
 		string_init(&str_constants);
-		zend_hash_apply_with_arguments(EG(zend_constants), (apply_func_args_t) _extension_const_string, 4, &str_constants, indent, module, &num_constants TSRMLS_CC);
+		zend_hash_apply_with_arguments(EG(zend_constants) TSRMLS_CC, (apply_func_args_t) _extension_const_string, 4, &str_constants, indent, module, &num_constants TSRMLS_CC);
 		if (num_constants) {
 			string_printf(str, "\n  - Constants [%d] {\n", num_constants);
 			string_append(str, &str_constants);
@@ -1022,7 +1021,7 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 		string_init(&sub_indent);
 		string_printf(&sub_indent, "%s    ", indent);
 		string_init(&str_classes);
-		zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) _extension_class_string, 4, &str_classes, sub_indent.string, module, &num_classes TSRMLS_CC);
+		zend_hash_apply_with_arguments(EG(class_table) TSRMLS_CC, (apply_func_args_t) _extension_class_string, 4, &str_classes, sub_indent.string, module, &num_classes TSRMLS_CC);
 		if (num_classes) {
 			string_printf(str, "\n  - Classes [%d] {", num_classes);
 			string_append(str, &str_classes);
@@ -3219,7 +3218,7 @@ ZEND_METHOD(reflection_class, getMethod)
 /* }}} */
 
 /* {{{ _addmethod */
-static int _addmethod(zend_function *mptr, int num_args, va_list args, zend_hash_key *hash_key)
+static int _addmethod(zend_function *mptr TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	zval *method;
 	zend_class_entry *ce = *va_arg(args, zend_class_entry**);
@@ -3227,7 +3226,6 @@ static int _addmethod(zend_function *mptr, int num_args, va_list args, zend_hash
 	long filter = va_arg(args, long);
 
 	if (mptr->common.fn_flags & filter) {
-		TSRMLS_FETCH();
 		ALLOC_ZVAL(method);
 		reflection_method_factory(ce, mptr, method TSRMLS_CC);
 		add_next_index_zval(retval, method);
@@ -3258,7 +3256,7 @@ ZEND_METHOD(reflection_class, getMethods)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(&ce->function_table, (apply_func_args_t) _addmethod, 3, &ce, return_value, filter);
+	zend_hash_apply_with_arguments(&ce->function_table TSRMLS_CC, (apply_func_args_t) _addmethod, 3, &ce, return_value, filter);
 }
 /* }}} */
 
@@ -3368,7 +3366,7 @@ ZEND_METHOD(reflection_class, getProperty)
 /* }}} */
 
 /* {{{ _addproperty */
-static int _addproperty(zend_property_info *pptr, int num_args, va_list args, zend_hash_key *hash_key)
+static int _addproperty(zend_property_info *pptr TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	zval *property;
 	zend_class_entry *ce = *va_arg(args, zend_class_entry**);
@@ -3380,7 +3378,6 @@ static int _addproperty(zend_property_info *pptr, int num_args, va_list args, ze
 	}
 	
 	if (pptr->flags	& filter) {
-		TSRMLS_FETCH();
 		ALLOC_ZVAL(property);
 		reflection_property_factory(ce, pptr, property TSRMLS_CC);
 		add_next_index_zval(retval, property);
@@ -3390,12 +3387,11 @@ static int _addproperty(zend_property_info *pptr, int num_args, va_list args, ze
 /* }}} */
 
 /* {{{ _adddynproperty */
-static int _adddynproperty(zval **pptr, int num_args, va_list args, zend_hash_key *hash_key)
+static int _adddynproperty(zval **pptr TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	zval *property;
 	zend_class_entry *ce = *va_arg(args, zend_class_entry**);
 	zval *retval = va_arg(args, zval*), member;
-	TSRMLS_FETCH();
 
 	if (hash_key->type == IS_UNICODE) {
 		if (hash_key->arKey.u[0] == 0) {
@@ -3439,11 +3435,11 @@ ZEND_METHOD(reflection_class, getProperties)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(&ce->properties_info, (apply_func_args_t) _addproperty, 3, &ce, return_value, filter);
+	zend_hash_apply_with_arguments(&ce->properties_info TSRMLS_CC, (apply_func_args_t) _addproperty, 3, &ce, return_value, filter);
 
 	if (intern->obj && (filter & ZEND_ACC_PUBLIC) != 0 && Z_OBJ_HT_P(intern->obj)->get_properties) {
 		HashTable *properties = Z_OBJ_HT_P(intern->obj)->get_properties(intern->obj TSRMLS_CC);
-		zend_hash_apply_with_arguments(properties, (apply_func_args_t) _adddynproperty, 2, &ce, return_value);
+		zend_hash_apply_with_arguments(properties TSRMLS_CC, (apply_func_args_t) _adddynproperty, 2, &ce, return_value);
 	}
 }
 /* }}} */
@@ -4592,12 +4588,12 @@ ZEND_METHOD(reflection_extension, getConstants)
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(zend_constants), (apply_func_args_t) _addconstant, 2, return_value, module->module_number);
+	zend_hash_apply_with_arguments(EG(zend_constants) TSRMLS_CC, (apply_func_args_t) _addconstant, 2, return_value, module->module_number);
 }
 /* }}} */
 
 /* {{{ _addinientry */
-static int _addinientry(zend_ini_entry *ini_entry, int num_args, va_list args, zend_hash_key *hash_key)
+static int _addinientry(zend_ini_entry *ini_entry TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	zval *retval = va_arg(args, zval*);
 	int number = va_arg(args, int);
@@ -4626,19 +4622,18 @@ ZEND_METHOD(reflection_extension, getINIEntries)
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(ini_directives), (apply_func_args_t) _addinientry, 2, return_value, module->module_number);
+	zend_hash_apply_with_arguments(EG(ini_directives) TSRMLS_CC, (apply_func_args_t) _addinientry, 2, return_value, module->module_number);
 }
 /* }}} */
 
 /* {{{ add_extension_class */
-static int add_extension_class(zend_class_entry **pce, int num_args, va_list args, zend_hash_key *hash_key)
+static int add_extension_class(zend_class_entry **pce TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	zval *class_array = va_arg(args, zval*), *zclass;
 	struct _zend_module_entry *module = va_arg(args, struct _zend_module_entry*);
 	int add_reflection_class = va_arg(args, int);
 
 	if ((*pce)->module && !strcasecmp((*pce)->module->name, module->name)) {
-		TSRMLS_FETCH();
 		if (add_reflection_class) {
 			ALLOC_ZVAL(zclass);
 			zend_reflection_class_factory(*pce, zclass TSRMLS_CC);
@@ -4662,7 +4657,7 @@ ZEND_METHOD(reflection_extension, getClasses)
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) add_extension_class, 3, return_value, module, 1 TSRMLS_CC);
+	zend_hash_apply_with_arguments(EG(class_table) TSRMLS_CC, (apply_func_args_t) add_extension_class, 3, return_value, module, 1 TSRMLS_CC);
 }
 /* }}} */
 
@@ -4677,7 +4672,7 @@ ZEND_METHOD(reflection_extension, getClassNames)
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) add_extension_class, 3, return_value, module, 0 TSRMLS_CC);
+	zend_hash_apply_with_arguments(EG(class_table) TSRMLS_CC, (apply_func_args_t) add_extension_class, 3, return_value, module, 0 TSRMLS_CC);
 }
 /* }}} */
 

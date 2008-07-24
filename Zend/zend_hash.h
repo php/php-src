@@ -170,13 +170,13 @@ ZEND_API int zend_u_hash_add_empty_element(HashTable *ht, zend_uchar type, zstr 
 
 typedef int (*apply_func_t)(void *pDest TSRMLS_DC);
 typedef int (*apply_func_arg_t)(void *pDest, void *argument TSRMLS_DC);
-typedef int (*apply_func_args_t)(void *pDest, int num_args, va_list args, zend_hash_key *hash_key);
+typedef int (*apply_func_args_t)(void *pDest TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key);
 
 ZEND_API void zend_hash_graceful_destroy(HashTable *ht);
 ZEND_API void zend_hash_graceful_reverse_destroy(HashTable *ht);
 ZEND_API void zend_hash_apply(HashTable *ht, apply_func_t apply_func TSRMLS_DC);
 ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t apply_func, void * TSRMLS_DC);
-ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, apply_func_args_t apply_func, int, ...);
+ZEND_API void zend_hash_apply_with_arguments(HashTable *ht TSRMLS_DC, apply_func_args_t apply_func, int, ...);
 
 /* This function should be used with special care (in other words,
  * it should usually not be used).  When used with the ZEND_HASH_APPLY_STOP

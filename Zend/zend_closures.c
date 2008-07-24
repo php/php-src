@@ -255,11 +255,10 @@ void zend_register_closure_ce(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-static int zval_copy_static_var(zval **p, int num_args, va_list args, zend_hash_key *key) /* {{{ */
+static int zval_copy_static_var(zval **p TSRMLS_DC, int num_args, va_list args, zend_hash_key *key) /* {{{ */
 {
 	HashTable *target = va_arg(args, HashTable*);
 	zend_bool is_ref;
-	TSRMLS_FETCH();
 
 	if (Z_TYPE_PP(p) & (IS_LEXICAL_VAR|IS_LEXICAL_REF)) {
 		is_ref = Z_TYPE_PP(p) & IS_LEXICAL_REF;
@@ -309,7 +308,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 
 			ALLOC_HASHTABLE(closure->func.op_array.static_variables);
 			zend_u_hash_init(closure->func.op_array.static_variables, zend_hash_num_elements(static_variables), NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
-			zend_hash_apply_with_arguments(static_variables, (apply_func_args_t)zval_copy_static_var, 1, closure->func.op_array.static_variables);
+			zend_hash_apply_with_arguments(static_variables TSRMLS_CC, (apply_func_args_t)zval_copy_static_var, 1, closure->func.op_array.static_variables);
 		}
 		(*closure->func.op_array.refcount)++;
 	}
