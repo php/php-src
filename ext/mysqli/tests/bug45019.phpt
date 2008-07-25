@@ -57,7 +57,7 @@ require_once('skipifconnectfailure.inc');
 		printf("[006] [%d] %s\n", $link->errno, $link->error);
 
 	$column1 = null;
-	if (!$stmt->bind_result($column1) || !$stmt->execute())
+	if (!$stmt->execute() || !$stmt->bind_result($column1))
 		printf("[007] [%d] %s\n", $stmt->errno, $stmt->error);
 
 	$index = 0;
@@ -153,6 +153,6 @@ string(5) "three"
 string(3) "two"
 Testing bind_param(), strings only, with CAST AS CHAR...
 string(3) "one"
-string(5) "three beers are more than enough"
+string(32) "three beers are more than enough"
 string(3) "two"
 done!
