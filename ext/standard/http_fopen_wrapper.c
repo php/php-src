@@ -572,25 +572,25 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 				(context && php_stream_context_get_option(context, "http", "ignore_errors",  &tmpzval) == SUCCESS && zend_is_true(*tmpzval)) ) {
 				reqok = 1;
 			}
-			switch(response_code) {
-				case 200:
-				case 206: /* partial content */
-				case 302:
-				case 303:
-				case 301:
-					reqok = 1;
-					break;
-				case 403:
-					php_stream_notify_error(context, PHP_STREAM_NOTIFY_AUTH_RESULT,
-							tmp_line, response_code);
-					break;
-				default:
-					/* safety net in the event tmp_line == NULL */
-					if (!tmp_line_len) {
-						tmp_line[0] = '\0';
-					}
-					php_stream_notify_error(context, PHP_STREAM_NOTIFY_FAILURE,
-							tmp_line, response_code);
+			/* all status codes in the 2xx range are defined by the specification as successful;
+			 * all status codes in the 3xx range are for redirection, and so also should never
+			 * fail */
+			if (response_code >= 200 && response_code < 400) {
+				reqok = 1;
+			} else {
+				switch(response_code) {
+					case 403:
+						php_stream_notify_error(context, PHP_STREAM_NOTIFY_AUTH_RESULT,
+								tmp_line, response_code);
+						break;
+					default:
+						/* safety net in the event tmp_line == NULL */
+						if (!tmp_line_len) {
+							tmp_line[0] = '\0';
+						}
+						php_stream_notify_error(context, PHP_STREAM_NOTIFY_FAILURE,
+								tmp_line, response_code);
+				}
 			}
 			if (tmp_line[tmp_line_len - 1] == '\n') {
 				--tmp_line_len;
