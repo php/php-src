@@ -267,7 +267,7 @@ PHP_FUNCTION(finfo_open)
 		}
 		file = resolved_path;
 
-		if ((PG(safe_mode) && (!php_checkuid(file, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(file TSRMLS_CC)) {
+		if (php_check_open_basedir(file TSRMLS_CC)) {
 			RETURN_FALSE;
 		}
 	}
