@@ -1120,18 +1120,22 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
    Sets the maximum time a script can run */
 PHP_FUNCTION(set_time_limit)
 {
-	zval **new_timeout;
+	long new_timeout;
+	char *new_timeout_str;
+	int new_timeout_strlen;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &new_timeout) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &new_timeout) == FAILURE) {
 		return;
 	}
+	
+	new_timeout_strlen = zend_spprintf(&new_timeout_str, 0, "%ld", new_timeout);
 
-	convert_to_string_ex(new_timeout);
-	if (zend_alter_ini_entry_ex("max_execution_time", sizeof("max_execution_time"), Z_STRVAL_PP(new_timeout), Z_STRLEN_PP(new_timeout), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC) == SUCCESS) {
-		RETURN_TRUE;
+	if (zend_alter_ini_entry_ex("max_execution_time", sizeof("max_execution_time"), new_timeout_str, new_timeout_strlen, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC) == SUCCESS) {
+		RETVAL_TRUE;
 	} else {
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
+	efree(new_timeout_str);
 }
 /* }}} */
 
