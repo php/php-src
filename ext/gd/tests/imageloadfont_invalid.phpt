@@ -17,6 +17,7 @@ $image = imagecreatetruecolor(50, 20);
 $font = imageloadfont($filename);
 $black = imagecolorallocate($image, 0, 0, 0);
 imagestring($image, $font, 0, 0, "Hello", $black);
+unlink($filename);
 ?>
 --EXPECTF--
 Warning: imageloadfont(): gd warning: product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
