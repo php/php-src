@@ -582,7 +582,6 @@ set_test_type(struct magic *mstart, struct magic *m)
 		/* invalid search type, but no need to complain here */
 		break;
 	}
-	return 1;
 }
 
 /*
@@ -664,7 +663,7 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 	if (stat(fn, &st) == 0 && S_ISDIR(st.st_mode)) {
 		dir = opendir(fn);
 		if (dir) {
-			while ((d = readdir(dir))) {
+			while (d = readdir(dir)) {
 				snprintf(subfn, sizeof(subfn), "%s/%s",
 				    fn, d->d_name);
 				if (stat(subfn, &st) == 0 && S_ISREG(st.st_mode)) {
@@ -1976,11 +1975,14 @@ internal_loaded:
 		    VERSIONNO, dbname, version);
 		goto error1;
 	}
-#ifndef PHP_BUNDLE
-	*nmagicp = (st.st_size / sizeof(struct magic));
+#ifdef PHP_BUNDLE
+	if (fn == NULL)
+		*nmagicp = (sizeof(php_magic_database) / sizeof(struct magic));
+	else // the statement after the #endif is used
+#endif
+	*nmagicp = (uint32_t)(st.st_size / sizeof(struct magic));
 	if (*nmagicp > 0)
 		(*nmagicp)--;
-#endif
 	(*magicp)++;
 	if (needsbyteswap)
 		byteswap(*magicp, *nmagicp);

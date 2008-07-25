@@ -48,6 +48,7 @@ protected int
 file_printf(struct magic_set *ms, const char *fmt, ...)
 {
 	va_list ap;
+	size_t size;
 	int len;
 	char *buf, *newstr;
 
