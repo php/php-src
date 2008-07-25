@@ -928,7 +928,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				zval_dtor(&v);
 			}
 			n = regs->end[0];
-			if ((size_t)(pos - (OnigUChar *)string) < n) {
+			if ((pos - (OnigUChar *)string) < n) {
 				pos = (OnigUChar *)string + n;
 			} else {
 				if (pos < string_lim) {
@@ -1021,7 +1021,7 @@ PHP_FUNCTION(mb_split)
 		}
 
 		/* add it to the array */
-		if (regs->beg[0] < string_len && regs->beg[0] >= (size_t)(pos - (OnigUChar *)string)) {
+		if (regs->beg[0] < string_len && regs->beg[0] >= (pos - (OnigUChar *)string)) {
 			add_next_index_stringl(return_value, (char *)pos, ((OnigUChar *)(string + regs->beg[0]) - pos), 1);
 		} else {
 			err = -2;
@@ -1246,7 +1246,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 	char *arg_pattern, *arg_options;
 	int arg_pattern_len, arg_options_len;
 	OnigSyntaxType *syntax = NULL;
-	int option;
+	OnigOptionType option;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "z|ss", &arg_str, &arg_pattern, &arg_pattern_len, &arg_options, &arg_options_len) == FAILURE) {
 		return;
