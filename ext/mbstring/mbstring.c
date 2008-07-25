@@ -2269,7 +2269,7 @@ PHP_FUNCTION(mb_strripos)
 		RETURN_FALSE;
 	}
 
-	if (offset > haystack.len) {
+	if ((unsigned int)offset > haystack.len) {
 		RETURN_FALSE;
 	}
 
@@ -2677,11 +2677,11 @@ PHP_FUNCTION(mb_strcut)
 		}
 	}
 
-	if (from > string.len) {
+	if ((unsigned int)from > string.len) {
 		RETURN_FALSE;
 	}
 
-	if (((unsigned) from + (unsigned) len) > string.len) {
+	if (((unsigned int)from + (unsigned int)len) > string.len) {
 		len = string.len - from;
 	}
 
@@ -3063,7 +3063,7 @@ PHP_FUNCTION(mb_detect_encoding)
 	}
 
 	if (ZEND_NUM_ARGS() < 3) {
-		strict = MBSTRG(strict_detection);
+		strict = (zend_bool)MBSTRG(strict_detection);
 	}
 
 	if (size > 0 && list != NULL) {
