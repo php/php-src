@@ -44,10 +44,6 @@ struct php_fileinfo {
 	struct magic_set *magic;
 };
 
-#ifndef PHP_DEFAULT_MAGIC_FILE
-#define PHP_DEFAULT_MAGIC_FILE NULL
-#endif
-
 #ifdef ZEND_ENGINE_2
 /* {{{ */
 static zend_object_handlers finfo_object_handlers;
