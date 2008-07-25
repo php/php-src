@@ -16,6 +16,8 @@ PHP                                                                        NEWS
 - Changed PCRE, SPL and reflection extensions to always be enabled. (Marcus)
 - Changed md5() to use improved implementation. (Solar Designer, Dmitry)
 - Changed mhash to be a wrapper layer around the hash extension. (Scott)
+- Changed HTTP stream wrapper to accept any code between and including
+  200 to 399 as successful. (Mike, Noah Fontes)
 
 - Improved PHP syntax and semantics:
   . Added lambda functions and closures (Christian Seiler, Dmitry)
