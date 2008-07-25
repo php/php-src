@@ -426,7 +426,7 @@ if ($compression) {
 	$output_file = 'compress.zlib://' . $output_file . '.gz';
 }
 
-$jnust_save_results = false;
+$just_save_results = false;
 $leak_check = false;
 $html_output = false;
 $html_file = null;
