@@ -1,3 +1,124 @@
+2008-07-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_3)
+      zend_language_scanner.c
+      zend_language_scanner.l:
+      - No need to advance the cursor
+
+    * (PHP_5_3)
+      zend_compile.c
+      zend_globals.h
+      zend_language_scanner.c
+      zend_language_scanner.h
+      zend_language_scanner.l
+      zend_language_scanner_defs.h
+      zend_multibyte.c
+      zend_multibyte.h:
+      - Revived zend multibyte
+
+    * zend_builtin_functions.c:
+      - Suppress signedness warnings.
+
+    * zend_operators.c
+      zend_operators.h:
+      - Constify read-only arguments.
+
+2008-07-24  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      zend_API.c
+      zend_builtin_functions.c
+      zend_closures.c
+      zend_compile.c
+      zend_exceptions.c
+      zend_hash.c
+      zend_hash.h
+      zend_ts_hash.c
+      zend_ts_hash.h:
+      - MFH: Added TSRMLS_DC to apply_func_args_t and
+      zend_hash_apply_with_arguments.
+
+    * zend_API.c
+      zend_builtin_functions.c
+      zend_closures.c
+      zend_compile.c
+      zend_exceptions.c
+      zend_hash.c
+      zend_hash.h
+      zend_ts_hash.c
+      zend_ts_hash.h:
+      - Added TSRMLS_DC to apply_func_args_t and zend_hash_apply_with_arguments.
+
+2008-07-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_alloc.c
+      zend_alloc.c
+      zend_multiply.h
+      zend_multiply.h
+      zend_types.h
+      zend_types.h:
+      Optimized ZEND_SIGNED_MULTIPLY_LONG() (Matt)
+
+    * zend_compile.c
+      zend_compile.c
+      zend_compile.c
+      zend_compile.h
+      zend_compile.h
+      zend_language_parser.y
+      zend_language_parser.y
+      zend_language_parser.y
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug45178.phpt
+      tests/bug45178.phpt:
+      Fixed bug #45178 (memory corruption on assignment result of "new" by
+      reference)
+
+    * tests/bug45178.phpt
+      tests/bug45178.phpt
+      tests/bug45178.phpt:
+        1.1.4;
+      file bug45178.phpt was initially added on branch PHP_5_2.
+
+    * zend_API.c
+      zend_API.c
+      zend_API.h
+      zend_API.h
+      zend_execute_API.c
+      zend_execute_API.c
+      zend_interfaces.c
+      zend_interfaces.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug45186.phpt
+      tests/bug45186.phpt
+      tests/bug45186_2.phpt
+      tests/bug45186_2.phpt
+      tests/lsb_015.phpt
+      tests/lsb_015.phpt
+      tests/lsb_019.phpt
+      tests/lsb_019.phpt
+      tests/lsb_020.phpt
+      tests/lsb_020.phpt
+      tests/lsb_021.phpt
+      tests/lsb_022.phpt
+      tests/objects_027.phpt:
+      LSB parent/self forwarding
+
+    * tests/lsb_021.phpt
+      tests/lsb_021.phpt
+      tests/lsb_022.phpt
+      tests/lsb_022.phpt
+      tests/objects_027.phpt:
+      
+      file lsb_021.phpt was initially added on branch PHP_5_3.
+
 2008-07-22  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * zend_closures.c
