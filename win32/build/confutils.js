@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.28 2008-07-20 02:20:31 sfox Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.29 2008-07-25 12:40:45 pajoye Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -1145,10 +1145,13 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 	var objs = null;
 	var EXT = extname.toUpperCase();
 	var extname_for_printing;
-	
+
 	if (shared == null) {
 		eval("shared = PHP_" + EXT + "_SHARED;");
+	} else {
+		eval("PHP_" + EXT + "_SHARED = shared;");
 	}
+
 	if (cflags == null) {
 		cflags = "";
 	}
