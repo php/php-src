@@ -1380,6 +1380,7 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 	fcall_cache.initialized = EG(autoload_func) ? 1 : 0;
 	fcall_cache.function_handler = EG(autoload_func);
 	fcall_cache.calling_scope = NULL;
+	fcall_cache.called_scope = NULL;
 	fcall_cache.object_pp = NULL;
 
 	exception = EG(exception);

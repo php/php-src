@@ -483,6 +483,7 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 		fcc.initialized = 1;
 		fcc.function_handler = dbstmt_ce->constructor;
 		fcc.calling_scope = EG(scope);
+		fcc.called_scope = Z_OBJCE_P(object);
 		fcc.object_pp = &object;
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {

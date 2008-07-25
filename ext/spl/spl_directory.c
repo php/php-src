@@ -1958,6 +1958,7 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 	fcic.initialized = 1;
 	fcic.function_handler = func_ptr;
 	fcic.calling_scope = NULL;
+	fcic.called_scope = NULL;
 	fcic.object_pp = NULL;
 
 	result = zend_call_function(&fci, &fcic TSRMLS_CC);
