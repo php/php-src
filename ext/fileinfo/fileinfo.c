@@ -114,19 +114,73 @@ PHP_FILEINFO_API zend_object_value finfo_objects_new(zend_class_entry *class_typ
 }
 /* }}} */
 
+/* {{{ arginfo */
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_open, 0, 0, 0)
+	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, arg)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_close, 0, 0, 1)
+	ZEND_ARG_INFO(0, finfo)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_set_flags, 0, 0, 2)
+	ZEND_ARG_INFO(0, finfo)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_method_set_flags, 0, 0, 1)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_file, 0, 0, 2)
+	ZEND_ARG_INFO(0, finfo)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, context)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_method_file, 0, 0, 1)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, context)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_buffer, 0, 0, 2)
+	ZEND_ARG_INFO(0, finfo)
+	ZEND_ARG_INFO(0, string)
+	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, context)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_method_buffer, 0, 0, 1)
+	ZEND_ARG_INFO(0, string)
+	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, context)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 /* {{{ finfo_class_functions
  */
 function_entry finfo_class_functions[] = {
 #if PHP_VERSION_ID >= 50200
-	ZEND_ME_MAPPING(finfo,          finfo_open,     NULL, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,NULL, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(file,           finfo_file,     NULL, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(buffer,         finfo_buffer,   NULL, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(finfo,          finfo_open,     arginfo_finfo_open, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,arginfo_finfo_method_set_flags, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(file,           finfo_file,     arginfo_finfo_method_file, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(buffer,         finfo_buffer,   arginfo_finfo_method_buffer, ZEND_ACC_PUBLIC)
 #else
-	ZEND_ME_MAPPING(finfo,          finfo_open,     NULL)
-	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,NULL)
-	ZEND_ME_MAPPING(file,           finfo_file,     NULL)
-	ZEND_ME_MAPPING(buffer,         finfo_buffer,   NULL)
+	ZEND_ME_MAPPING(finfo,          finfo_open,     arginfo_finfo_open)
+	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,arginfo_finfo_method_set_flags)
+	ZEND_ME_MAPPING(file,           finfo_file,     arginfo_finfo_method_file)
+	ZEND_ME_MAPPING(buffer,         finfo_buffer,   arginfo_finfo_method_buffer)
 #endif
 	{NULL, NULL, NULL}
 };
@@ -166,14 +220,15 @@ void finfo_resource_destructor(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+
 /* {{{ fileinfo_functions[]
  */
 function_entry fileinfo_functions[] = {
-	PHP_FE(finfo_open,	NULL)
-	PHP_FE(finfo_close,	NULL)
-	PHP_FE(finfo_set_flags,	NULL)
-	PHP_FE(finfo_file,	NULL)
-	PHP_FE(finfo_buffer,	NULL)
+	PHP_FE(finfo_open,		arginfo_finfo_open)
+	PHP_FE(finfo_close,		arginfo_finfo_close)
+	PHP_FE(finfo_set_flags,	arginfo_finfo_set_flags)
+	PHP_FE(finfo_file,		arginfo_finfo_file)
+	PHP_FE(finfo_buffer,	arginfo_finfo_buffer)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -354,12 +409,12 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ *
 	FILEINFO_DECLARE_INIT_OBJECT(object)
 
 	if (object) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lbr", &buffer, &buffer_len, &options, &zcontext) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lr", &buffer, &buffer_len, &options, &zcontext) == FAILURE) {
 			RETURN_FALSE;
 		}
 		FILEINFO_FROM_OBJECT(finfo, object);
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|lbr", &zfinfo, &buffer, &buffer_len, &options, &zcontext) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|lr", &zfinfo, &buffer, &buffer_len, &options, &zcontext) == FAILURE) {
 			RETURN_FALSE;
 		}
 		ZEND_FETCH_RESOURCE(finfo, struct php_fileinfo *, &zfinfo, -1, "file_info", le_fileinfo);
@@ -432,7 +487,7 @@ PHP_FUNCTION(finfo_file)
 }
 /* }}} */
 
-/* {{{ proto string finfo_buffer(resource finfo, char *string [, int options])
+/* {{{ proto string finfo_buffer(resource finfo, char *string [, int options [, resource context]])
    Return infromation about a string buffer. */
 PHP_FUNCTION(finfo_buffer)
 {
