@@ -142,12 +142,12 @@ static void tokenize(zval *return_value TSRMLS_DC)
 				add_next_index_stringl(keyword, Z_STRVAL(token), Z_STRLEN(token), 1);
 				efree(Z_STRVAL(token));
 			} else {
-				add_next_index_stringl(keyword, zendtext, zendleng, 1);
+				add_next_index_stringl(keyword, (char *)zendtext, zendleng, 1);
 			}
 			add_next_index_long(keyword, token_line);
 			add_next_index_zval(return_value, keyword);
 		} else {
-			add_next_index_stringl(return_value, zendtext, zendleng, 1);
+			add_next_index_stringl(return_value, (char *)zendtext, zendleng, 1);
 		}
 		if (destroy && Z_TYPE(token) != IS_NULL) {
 			zval_dtor(&token);
