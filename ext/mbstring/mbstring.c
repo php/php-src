@@ -4862,7 +4862,7 @@ MBSTRING_API int php_mb_set_zend_encoding(TSRMLS_D)
 			list_size += strlen(name) + 1;
 			if (!list) {
 				list = (char*)emalloc(list_size);
-				*list = (char)NULL;
+				*list = '\0';
 			} else {
 				list = (char*)erealloc(list, list_size);
 				strcat(list, ",");
