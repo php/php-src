@@ -1,3 +1,562 @@
+2008-07-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l:
+      - No need to advance the cursor
+
+    * ext/mbstring/tests/zend_multibyte-01.phpt
+      ext/mbstring/tests/zend_multibyte-01.phpt
+      ext/mbstring/tests/zend_multibyte-02.phpt
+      ext/mbstring/tests/zend_multibyte-02.phpt
+      ext/mbstring/tests/zend_multibyte-03.phpt
+      ext/mbstring/tests/zend_multibyte-03.phpt
+      ext/mbstring/tests/zend_multibyte-04.phpt
+      ext/mbstring/tests/zend_multibyte-04.phpt
+      ext/mbstring/tests/zend_multibyte-05.phpt
+      ext/mbstring/tests/zend_multibyte-05.phpt
+      ext/mbstring/tests/zend_multibyte-06.phpt
+      ext/mbstring/tests/zend_multibyte-06.phpt
+      ext/mbstring/tests/zend_multibyte-07.phpt
+      ext/mbstring/tests/zend_multibyte-07.phpt
+      ext/mbstring/tests/zend_multibyte-08.phpt
+      ext/mbstring/tests/zend_multibyte-08.phpt
+      ext/mbstring/tests/zend_multibyte-09.phpt
+      ext/mbstring/tests/zend_multibyte-09.phpt
+      ext/mbstring/tests/zend_multibyte-10.phpt
+      ext/mbstring/tests/zend_multibyte-10.phpt
+      ext/mbstring/tests/zend_multibyte-11.phpt
+      ext/mbstring/tests/zend_multibyte-11.phpt
+      ext/mbstring/tests/zend_multibyte-12.phpt
+      ext/mbstring/tests/zend_multibyte-12.phpt:
+      
+      file zend_multibyte-01.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.h
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner_defs.h
+      ZendEngine2/zend_multibyte.c
+      ZendEngine2/zend_multibyte.h
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      ext/mbstring/tests/zend-multibyte.phpt:
+      - Revived zend multibyte
+
+2008-07-24  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * run-tests.php:
+      - Revert accidental commit.
+
+2008-07-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Suppress signedness warnings.
+
+    * ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h:
+      - Constify read-only arguments.
+
+2008-07-24  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_closures.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.h
+      ZendEngine2/zend_ts_hash.c
+      ZendEngine2/zend_ts_hash.h
+      ext/mysqlnd/mysqlnd_debug.c
+      ext/reflection/php_reflection.c
+      ext/standard/basic_functions.c
+      ext/standard/browscap.c
+      ext/standard/var.c:
+      - MFH: Added TSRMLS_DC to apply_func_args_t and
+      zend_hash_apply_with_arguments.
+
+    * run-tests.php
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_closures.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.h
+      ZendEngine2/zend_ts_hash.c
+      ZendEngine2/zend_ts_hash.h
+      ext/mysqlnd/mysqlnd_debug.c
+      ext/reflection/php_reflection.c
+      ext/standard/basic_functions.c
+      ext/standard/browscap.c
+      ext/standard/var.c:
+      - Added TSRMLS_DC to apply_func_args_t and zend_hash_apply_with_arguments.
+
+2008-07-24  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_5_3)
+      ext/ming/ming.c:
+      Fix parameter types for a couple of methods
+
+2008-07-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/config.w32:
+      - Fix win32 build
+
+2008-07-24  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/pdo/config.w32:
+      - MFH:  force static for now, broken now
+
+    * ext/pdo/config.w32:
+      - force static for now, broken now
+
+2008-07-24  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      main/safe_mode.c:
+      - MFB: Removed unused variable.
+
+    * (PHP_5_3)
+      main/safe_mode.c:
+      - Removed unused variable.
+
+2008-07-24  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/spl/spl_array.c
+      ext/spl/tests/bug45614.phpt:
+      MFH: Fixed bug #45614 (ArrayIterator::current(), ::key() can show 1st
+      private prop of wrapped object)
+
+    * ext/spl/spl_array.c
+      ext/spl/tests/bug45614.phpt
+      ext/spl/tests/bug45614.phpt:
+      Fixed bug #45614 (ArrayIterator::current(), ::key() can show 1st private
+      prop of wrapped object)
+
+2008-07-24  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_3)
+      ext/oci8/oci8.c
+      ext/oci8/php_oci8.h:
+      MFH
+      
+      1. Fix macro version test for constants
+      
+      2. [DOC] Increase oci8.default_prefetch to 100.  Better out of box
+      experience.  Consistent woth PDO_OCI
+
+    * ext/oci8/oci8.c
+      ext/oci8/php_oci8.h:
+      1. Fix macro version test for constants
+      
+      2. [DOC] Increase oci8.default_prefetch to 100.  Better out of box
+      experience.  Consistent woth PDO_OCI
+
+2008-07-24  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/fileinfo/fileinfo.c:
+      use "r" instead of "z" when accepting resources
+
+2008-07-24  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/pdo_mysql/tests/pdo_mysql_prepare_load_data.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_load_data.phpt:
+      
+      Test for PS fallback logic in prepare()
+
+2008-07-24  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/fileinfo/libmagic/apprentice.c:
+      we don't do fstat, hence st struct is uninitalized
+
+    * ext/fileinfo/libmagic/apprentice.c:
+      silence compile warning
+
+    * ext/fileinfo/fileinfo.c:
+      fix folding
+
+2008-07-24  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * ext/zlib/tests/gzinflate-bug42663.phpt
+      ext/zlib/tests/gzinflate_length.phpt:
+      MFB: Added tests for #42663
+
+    * (PHP_5_3)
+      NEWS
+      ext/zlib/zlib.c
+      ext/zlib/tests/gzinflate-bug42663.phpt
+      ext/zlib/tests/gzinflate-bug42663.phpt
+      ext/zlib/tests/gzinflate_length.phpt
+      ext/zlib/tests/gzinflate_length.phpt:
+      Fixed #42663 (gzinflate() try to allocate all memory with truncated data),
+      not present in HEAD.
+
+2008-07-24  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/fileinfo/.cvsignore:
+      don't ignore .patch if it's in CVS
+
+    * ext/fileinfo/libmagic/apprentice.c
+      ext/fileinfo/libmagic/funcs.c:
+      drop freeing of uninitialized variable
+      add missing return
+      nuke unused variable
+
+2008-07-24  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/pdo_sqlite/config.m4
+      ext/pdo_sqlite/config.w32:
+      MFH: Remove non existent defines and change THREADSAFE to SQLITE_THREADSAFE
+
+2008-07-24  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/fileinfo/config.m4:
+      do not include libmagic/file.c into the build
+
+2008-07-24  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/pdo_sqlite/config.m4
+      ext/pdo_sqlite/config.w32:
+      Remove non existent defines, change THREADSAFE to SQLITE_THREADSAFE and
+      sync with 5.3
+
+2008-07-24  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      acinclude.m4:
+      MFH: set GCC to "no" if ICC was detected
+
+2008-07-24  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/tests/bug45019.phpt
+      ext/mysqli/tests/bug45019.phpt:
+      
+      Added test file
+
+2008-07-24  Antony Dovgal  <tony@daylessday.org>
+
+    * acinclude.m4:
+      set GCC to "no" if ICC was detected
+
+2008-07-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/tests/mb_output_handler_pattern-07.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-08.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-09.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-10.phpt
+      ext/mbstring/tests/mb_output_handler_runtime_ini_alteration-01.phpt
+      ext/mbstring/tests/mb_output_handler_runtime_ini_alteration-02.phpt:
+      - Fix tests.
+
+    * ext/mbstring/tests/mb_strstr.phpt:
+      
+      file mb_strstr.phpt was initially added on branch PHP_5_3.
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      ext/mbstring/php_unicode.c
+      ext/mbstring/php_unicode.h:
+      - Fixed warnings.
+
+2008-07-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_multiply.h
+      ZendEngine2/zend_multiply.h
+      ZendEngine2/zend_types.h
+      ZendEngine2/zend_types.h:
+      Optimized ZEND_SIGNED_MULTIPLY_LONG() (Matt)
+
+2008-07-24  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/fileinfo/create_data_file.php
+      ext/fileinfo/data_file.c
+      ext/fileinfo/fileinfo.c
+      ext/fileinfo/libmagic.patch
+      ext/fileinfo/libmagic/apprentice.c
+      ext/fileinfo/libmagic/config.h:
+      - Bundle the data file - you can still use the external file if you
+        specify that in the call to finfo_open().
+
+2008-07-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/mbstring/config.m4
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      ext/mbstring/tests/mb_output_handler_pattern-01.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-02.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-03.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-04.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-05.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-06.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-07.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-08.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-09.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-10.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-11.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-12.phpt
+      ext/mbstring/tests/mb_output_handler_runtime_ini_alteration-01.phpt
+      ext/mbstring/tests/mb_output_handler_runtime_ini_alteration-02.phpt:
+      - MFH: Added "mbstring.http_output_conv_mimetypes" INI directive.
+
+    * ext/mbstring/config.m4
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      ext/mbstring/tests/mb_output_handler_pattern-01.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-01.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-02.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-02.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-03.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-03.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-04.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-04.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-05.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-05.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-06.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-06.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-07.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-07.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-08.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-08.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-09.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-09.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-10.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-10.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-11.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-11.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-12.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-12.phpt
+      ext/mbstring/tests/mb_output_handler_runtime_ini_alteration-01.phpt
+      ext/mbstring/tests/mb_output_handler_runtime_ini_alteration-01.phpt
+      ext/mbstring/tests/mb_output_handler_runtime_ini_alteration-02.phpt
+      ext/mbstring/tests/mb_output_handler_runtime_ini_alteration-02.phpt:
+      - Add mbstring.http_output_conv_mimetypes that allows common non-text
+        types such as "application/xhtml+xml" to be converted by
+        mb_output_handler().
+
+2008-07-24  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * ext/pdo_mysql/tests/pdo_mysql_types.phpt:
+      Make the test pass on 32bit and not bail out because of int vs. double
+
+2008-07-24  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/dir.c
+      ext/standard/tests/dir/closedir_error.phpt
+      ext/standard/tests/dir/closedir_variation1.phpt
+      ext/standard/tests/dir/readdir_error.phpt
+      ext/standard/tests/dir/readdir_variation1.phpt
+      ext/standard/tests/dir/rewinddir_error.phpt
+      ext/standard/tests/dir/rewinddir_variation1.phpt:
+      - New parameter parsing API
+
+2008-07-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug45178.phpt
+      ZendEngine2/tests/bug45178.phpt
+      ZendEngine2/tests/bug45178.phpt:
+        1.1.4;
+      file bug45178.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug45178.phpt
+      ZendEngine2/tests/bug45178.phpt:
+      Fixed bug #45178 (memory corruption on assignment result of "new" by
+      reference)
+
+2008-07-24  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/pdo_sqlite/config.w32
+      ext/pdo_sqlite/libsqlite/.cvsignore:
+      MFH: Add .cvsignore, update config.w32 and remove the other bundled sqlite
+      library
+
+    * ext/pdo_sqlite/config.w32
+      ext/pdo_sqlite/libsqlite/.cvsignore
+      ext/pdo_sqlite/libsqlite/.cvsignore:
+      Add .cvsignore, update config.w32 and remove the other bundled sqlite
+      library
+
+2008-07-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/dir/rewinddir_basic.phpt:
+      Fixed test
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug45186.phpt
+      ZendEngine2/tests/bug45186.phpt
+      ZendEngine2/tests/bug45186_2.phpt
+      ZendEngine2/tests/bug45186_2.phpt
+      ZendEngine2/tests/lsb_015.phpt
+      ZendEngine2/tests/lsb_015.phpt
+      ZendEngine2/tests/lsb_019.phpt
+      ZendEngine2/tests/lsb_019.phpt
+      ZendEngine2/tests/lsb_020.phpt
+      ZendEngine2/tests/lsb_020.phpt
+      ZendEngine2/tests/lsb_021.phpt
+      ZendEngine2/tests/lsb_022.phpt
+      ZendEngine2/tests/objects_027.phpt
+      ext/spl/php_spl.c
+      ext/standard/basic_functions.c
+      ext/standard/tests/array/array_map_object2.phpt:
+      LSB parent/self forwarding
+
+    * ZendEngine2/tests/lsb_021.phpt
+      ZendEngine2/tests/lsb_021.phpt
+      ZendEngine2/tests/lsb_022.phpt
+      ZendEngine2/tests/lsb_022.phpt
+      ZendEngine2/tests/objects_027.phpt
+      ext/spl/php_spl.c
+      ext/standard/basic_functions.c
+      ext/standard/tests/array/array_map_object2.phpt:
+      
+      file lsb_021.phpt was initially added on branch PHP_5_3.
+
+2008-07-24  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      ext/phar/phar_object.c
+      ext/phar/tests/cached_manifest_1.phpt
+      ext/phar/tests/mounteddir.phpt
+      ext/phar/tests/phar_dir_iterate.phpt
+      ext/phar/tests/phar_extract.phpt
+      ext/phar/tests/phar_extract2.phpt
+      ext/phar/tests/phar_extract3.phpt
+      ext/phar/tests/phar_oo_002.phpt
+      ext/phar/tests/zip/odt.phpt
+      ext/phar/tests/zip/unixzip.phpt:
+      - Utilize new UNIX_PATHS flag in SPL
+      - Fix tests
+      
+
+2008-07-24  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/filter/tests/bug44779.phpt
+      sapi/cli/php_cli.c:
+      MFH: Allow filters to work on INPUT_SERVER in CLI (bug #44779)
+
+    * ext/filter/tests/bug44779.phpt
+      ext/filter/tests/bug44779.phpt
+      sapi/cli/php_cli.c:
+      
+      Allow filters to work on INPUT_SERVER in CLI (bug #44779)
+
+2008-07-24  Steph Fox  <steph.fox@virgin.net>
+
+    * ext/spl/tests/dit_001.phpt:
+      - Make test x-platform
+
+    * ext/spl/spl_directory.c
+      ext/spl/spl_directory.h:
+      - Introduce SPL_FILE_DIR_UNIXPATHS.
+
+2008-07-24  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_5_3)
+      ext/ming/ming.c:
+      Add a couple of methods to SWFVideoStream
+
+2008-07-24  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/ming/ming.c
+      ext/ming/php_ming.h:
+      bump copyright year
+
+2008-07-24  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_5_3)
+      ext/ming/ming.c
+      ext/ming/php_ming.h:
+      Syncronize the ming extension with libming 0.4
+      [DOC] PHP 5.3 requires libming 0.4
+
+2008-07-24  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/date/tests/bug43452.phpt
+      ext/date/tests/bug43452.phpt:
+      fix test
+
+2008-07-24  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/array/each.phpt
+      ext/standard/tests/array/each_error.phpt:
+      - Fixed tests
+
+    * ext/standard/array.c:
+      - Improved parameter handling
+
+2008-07-24  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/pdo_sqlite/config.m4
+      ext/pdo_sqlite/pdo_sqlite.c
+      ext/pdo_sqlite/post-bundle.sh
+      ext/pdo_sqlite/libsqlite/sqlite3.c
+      ext/pdo_sqlite/libsqlite/sqlite3.h
+      ext/pdo_sqlite/libsqlite/sqlite3ext.h:
+      MFB: Update pdo_sqlite to use the amalgamation, much easier to upgrade /
+      maintain. Also kill useless PECL version tag in MINFO.
+
+    * (PHP_5_3)
+      ext/pdo_sqlite/config.m4
+      ext/pdo_sqlite/pdo_sqlite.c
+      ext/pdo_sqlite/post-bundle.sh
+      ext/pdo_sqlite/libsqlite/sqlite3.c
+      ext/pdo_sqlite/libsqlite/sqlite3.c
+      ext/pdo_sqlite/libsqlite/sqlite3.h
+      ext/pdo_sqlite/libsqlite/sqlite3.h
+      ext/pdo_sqlite/libsqlite/sqlite3ext.h
+      ext/pdo_sqlite/libsqlite/sqlite3ext.h:
+      Update pdo_sqlite to use the amalgamation, much easier to upgrade /
+      maintain. Also kill useless PECL version tag in MINFO.
+      
+      Will probably be chastised by Jani for doing branch first...
+
 2008-07-23  Hartmut Holzgraefe  <hartmut@mysql.com>
 
     * (PHP_5_3)
