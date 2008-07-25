@@ -2434,7 +2434,7 @@ ZEND_METHOD(reflection_method, invoke)
 	 */
 	if (mptr->common.fn_flags & ZEND_ACC_STATIC) {
 		object_pp = NULL;
-		obj_ce = NULL;
+		obj_ce = mptr->common.scope;
 	} else {
 		if ((Z_TYPE_PP(params[0]) != IS_OBJECT)) {
 			efree(params);
@@ -2465,7 +2465,7 @@ ZEND_METHOD(reflection_method, invoke)
 	fcc.initialized = 1;
 	fcc.function_handler = mptr;
 	fcc.calling_scope = obj_ce;
-	fcc.called_scope = Z_OBJCE_PP(object_pp);
+	fcc.called_scope = obj_ce;
 	fcc.object_pp = object_pp;
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
@@ -2538,7 +2538,7 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	 */
 	if (mptr->common.fn_flags & ZEND_ACC_STATIC) {
 		object = NULL;
-		obj_ce = NULL;
+		obj_ce = mptr->common.scope;
 	} else {
 		if (!object) {
 			efree(params);
@@ -2570,8 +2570,8 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	fcc.initialized = 1;
 	fcc.function_handler = mptr;
 	fcc.calling_scope = obj_ce;
-	fcc.called_scope = Z_OBJCE_P(object);
-	fcc.object_pp = &object;
+	fcc.called_scope = obj_ce;
+	fcc.object_pp = object ? &object : NULL;
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 	

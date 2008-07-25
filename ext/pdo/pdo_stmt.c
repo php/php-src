@@ -850,7 +850,7 @@ static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * 
 	fcc->initialized = 1;
 	fcc->function_handler = function_handler;
 	fcc->calling_scope = EG(scope);
-	fcc->called_scope = Z_OBJCE_PP(object);
+	fcc->called_scope = object ? Z_OBJCE_PP(object) : NULL;
 	fcc->object_pp = object;
 	
 	return 1;
