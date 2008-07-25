@@ -2,8 +2,6 @@ dnl $Id$
 dnl config.m4 for extension pdo_odbc
 dnl vim:et:sw=2:ts=2:
 
-if test "$PHP_PDO" != "no"; then
-
 define([PDO_ODBC_HELP_TEXT],[[
                             include and lib dirs are looked for under 'dir'.
                             
@@ -38,6 +36,10 @@ AC_DEFUN([PDO_ODBC_CHECK_HEADER],[
 ])
                                   
 if test "$PHP_PDO_ODBC" != "no"; then
+
+  if test "$PHP_PDO" = "no" && test "$ext_shared" = "no"; then
+    AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
+  fi
 
   ifdef([PHP_CHECK_PDO_INCLUDES],
   [
@@ -163,6 +165,4 @@ functions required for PDO support.
   [
     PHP_ADD_EXTENSION_DEP(pdo_odbc, pdo)
   ])
-fi
-
 fi
