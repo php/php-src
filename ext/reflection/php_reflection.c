@@ -1256,6 +1256,7 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	fcc.initialized = 1;
 	fcc.function_handler = ce_ptr->constructor;
 	fcc.calling_scope = ce_ptr;
+	fcc.called_scope = Z_OBJCE_P(reflector_ptr);
 	fcc.object_pp = &reflector_ptr;
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
@@ -1637,6 +1638,7 @@ ZEND_METHOD(reflection_function, invoke)
 	fcc.initialized = 1;
 	fcc.function_handler = fptr;
 	fcc.calling_scope = EG(scope);
+	fcc.called_scope = NULL;
 	fcc.object_pp = NULL;
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
@@ -1701,6 +1703,7 @@ ZEND_METHOD(reflection_function, invokeArgs)
 	fcc.initialized = 1;
 	fcc.function_handler = fptr;
 	fcc.calling_scope = EG(scope);
+	fcc.called_scope = NULL;
 	fcc.object_pp = NULL;
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
@@ -2462,6 +2465,7 @@ ZEND_METHOD(reflection_method, invoke)
 	fcc.initialized = 1;
 	fcc.function_handler = mptr;
 	fcc.calling_scope = obj_ce;
+	fcc.called_scope = Z_OBJCE_PP(object_pp);
 	fcc.object_pp = object_pp;
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
@@ -2566,6 +2570,7 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	fcc.initialized = 1;
 	fcc.function_handler = mptr;
 	fcc.calling_scope = obj_ce;
+	fcc.called_scope = Z_OBJCE_P(object);
 	fcc.object_pp = &object;
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
@@ -3645,6 +3650,7 @@ ZEND_METHOD(reflection_class, newInstance)
 		fcc.initialized = 1;
 		fcc.function_handler = ce->constructor;
 		fcc.calling_scope = EG(scope);
+		fcc.called_scope = Z_OBJCE_P(return_value);
 		fcc.object_pp = &return_value;
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
@@ -3720,6 +3726,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		fcc.initialized = 1;
 		fcc.function_handler = ce->constructor;
 		fcc.calling_scope = EG(scope);
+		fcc.called_scope = Z_OBJCE_P(return_value);
 		fcc.object_pp = &return_value;
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
