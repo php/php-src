@@ -32,6 +32,9 @@ PHP_ARG_ENABLE(pdo, whether to enable PDO support,
 
 if test "$PHP_PDO" != "no"; then
 
+  dnl Make sure $PHP_PDO is 'yes' when it's not 'no' :)
+  PHP_PDO=yes
+
   PHP_PDO_PEAR_CHECK
 
   if test "$ext_shared" = "yes" ; then

@@ -1,14 +1,17 @@
-dnl
 dnl $Id$
-dnl
-
-if test "$PHP_PDO" != "no"; then
+dnl config.m4 for extension pdo_pgsql
+dnl vim:et:sw=2:ts=2:
 
 PHP_ARG_WITH(pdo-pgsql,for PostgreSQL support for PDO,
 [  --with-pdo-pgsql[=DIR]    PDO: PostgreSQL support.  DIR is the PostgreSQL base
                             install directory or the path to pg_config])
 
 if test "$PHP_PDO_PGSQL" != "no"; then
+
+  if test "$PHP_PDO" = "no" && test "$ext_shared" = "no"; then
+    AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
+  fi
+
   PHP_EXPAND_PATH($PGSQL_INCLUDE, PGSQL_INCLUDE)
 
   AC_MSG_CHECKING(for pg_config)
@@ -127,6 +130,4 @@ if test "$PHP_PDO_PGSQL" != "no"; then
   [
     PHP_ADD_EXTENSION_DEP(pdo_pgsql, pdo) 
   ])
-fi
-
 fi

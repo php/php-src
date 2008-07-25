@@ -1,6 +1,6 @@
 dnl $Id$
-
-if test "$PHP_PDO" != "no"; then
+dnl config.m4 for extension pdo_oci
+dnl vim:et:sw=2:ts=2:
 
 AC_DEFUN([AC_PDO_OCI_VERSION],[
   AC_MSG_CHECKING([Oracle version])
@@ -61,6 +61,11 @@ PHP_ARG_WITH(pdo-oci, Oracle OCI support for PDO,
                             --with-pdo-oci=instantclient,/usr,10.2.0.3])
 
 if test "$PHP_PDO_OCI" != "no"; then
+
+  if test "$PHP_PDO" = "no" && test "$ext_shared" = "no"; then
+    AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
+  fi
+
   AC_MSG_CHECKING([Oracle Install-Dir])
   if test "$PHP_PDO_OCI" = "yes" || test -z "$PHP_PDO_OCI"; then
     PDO_OCI_DIR=$ORACLE_HOME
@@ -253,6 +258,4 @@ You need to tell me where to find your Oracle Instant Client SDK, or set ORACLE_
   ])
 
   AC_DEFINE_UNQUOTED(PHP_PDO_OCI_CLIENT_VERSION, "$PDO_OCI_VERSION", [ ])
-fi
-
 fi
