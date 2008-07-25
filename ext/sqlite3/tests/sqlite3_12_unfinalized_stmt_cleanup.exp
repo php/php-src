@@ -1,0 +1,17 @@
+Creating Table
+bool(true)
+INSERT into table
+bool(true)
+bool(true)
+SELECTING results
+array(2) {
+  [0]=>
+  int(%d)
+  [1]=>
+  unicode(1) "a"
+}
+Closing database
+bool(true)
+Check result was freed
+NULL
+Done
