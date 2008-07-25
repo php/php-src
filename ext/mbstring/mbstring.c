@@ -2236,10 +2236,13 @@ PHP_FUNCTION(mb_stripos)
 	n = -1;
 	offset = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ls", (char **)&haystack.val, (int *)&haystack.len, (char **)needle.val, (int *)&needle.len, &offset, &from_encoding, &from_encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ls", (char **)&haystack.val, (int *)&haystack.len, (char **)&needle.val, (int *)&needle.len, &offset, &from_encoding, &from_encoding_len) == FAILURE) {
 		RETURN_FALSE;
 	}
-
+	if (needle.len == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter.");
+		RETURN_FALSE;
+	}
 	n = php_mb_stripos(0, (char *)haystack.val, haystack.len, (char *)needle.val, needle.len, offset, from_encoding TSRMLS_CC);
 
 	if (n >= 0) {
