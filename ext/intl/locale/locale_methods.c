@@ -815,7 +815,7 @@ static void add_prefix(smart_str* loc_name, char* key_name)
 * returns 1 if successful , -1 if not found , 
 * 0 if array element is not a string , -2 if buffer-overflow
 */
-static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, char* key_name)
+static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, char* key_name TSRMLS_DC)
 {
 	zval**	ele_value    	= NULL;
 	int 	i 		= 0;
@@ -977,7 +977,7 @@ PHP_FUNCTION(locale_compose)
 	}
 
 	//Extlang
-	result = append_multiple_key_values(loc_name, hash_arr , LOC_EXTLANG_TAG);
+	result = append_multiple_key_values(loc_name, hash_arr , LOC_EXTLANG_TAG TSRMLS_CC);
 	if( !handleAppendResult( result, loc_name TSRMLS_CC)){
 		RETURN_FALSE;
 	}
@@ -995,13 +995,13 @@ PHP_FUNCTION(locale_compose)
 	}
 
 	//Variant
-	result = append_multiple_key_values( loc_name, hash_arr , LOC_VARIANT_TAG); 
+	result = append_multiple_key_values( loc_name, hash_arr , LOC_VARIANT_TAG TSRMLS_CC); 
 	if( !handleAppendResult( result, loc_name TSRMLS_CC)){
 		RETURN_FALSE;
 	}
 
 	//Private
-	result = append_multiple_key_values( loc_name, hash_arr , LOC_PRIVATE_TAG);
+	result = append_multiple_key_values( loc_name, hash_arr , LOC_PRIVATE_TAG TSRMLS_CC);
 	if( !handleAppendResult( result, loc_name TSRMLS_CC)){
 		RETURN_FALSE;
 	}
