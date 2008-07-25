@@ -2,9 +2,10 @@ Index: libmagic/apprentice.c
 ===================================================================
 RCS file: /repository/pecl/fileinfo/libmagic/apprentice.c,v
 retrieving revision 1.1
-diff -u -r1.1 apprentice.c
+retrieving revision 1.6
+diff -u -r1.1 -r1.6
 --- libmagic/apprentice.c	11 Jul 2008 14:13:50 -0000	1.1
-+++ libmagic/apprentice.c	24 Jul 2008 13:34:23 -0000
++++ libmagic/apprentice.c	25 Jul 2008 08:16:03 -0000	1.6
 @@ -157,6 +157,10 @@
  }
  #endif /* COMPILE_ONLY */
@@ -28,7 +29,7 @@ diff -u -r1.1 apprentice.c
  #ifdef QUICK
  	case 2:
  		p--;
-@@ -339,8 +348,20 @@
+@@ -339,8 +348,19 @@
  
  	if (fn == NULL)
  		fn = getenv("MAGIC");
@@ -36,7 +37,6 @@ diff -u -r1.1 apprentice.c
 +	if (fn == NULL) {
 +#ifdef PHP_BUNDLE
 +		if ((mlist = malloc(sizeof(*mlist))) == NULL) {
-+			free(mfn);
 +			file_oomem(ms, sizeof(*mlist));
 +			return NULL;
 +		}
@@ -50,7 +50,7 @@ diff -u -r1.1 apprentice.c
  
  	if ((mfn = strdup(fn)) == NULL) {
  		file_oomem(ms, strlen(fn));
-@@ -1886,6 +1907,15 @@
+@@ -1886,6 +1906,15 @@
  	int needsbyteswap;
  	char *dbname = NULL;
  	void *mm = NULL;
@@ -66,7 +66,7 @@ diff -u -r1.1 apprentice.c
  
  	mkdbname(fn, &dbname, 0);
  	if (dbname == NULL)
-@@ -1909,7 +1939,7 @@
+@@ -1909,7 +1938,7 @@
  		file_error(ms, errno, "cannot map `%s'", dbname);
  		goto error1;
  	}
@@ -75,7 +75,7 @@ diff -u -r1.1 apprentice.c
  #else
  	if ((mm = malloc((size_t)st.st_size)) == NULL) {
  		file_oomem(ms, (size_t)st.st_size);
-@@ -1919,11 +1949,14 @@
+@@ -1919,11 +1948,14 @@
  		file_badread(ms);
  		goto error1;
  	}
@@ -92,7 +92,19 @@ diff -u -r1.1 apprentice.c
  	ptr = (uint32_t *)(void *)*magicp;
  	if (*ptr != MAGICNO) {
  		if (swap4(*ptr) != MAGICNO) {
-@@ -1950,7 +1983,7 @@
+@@ -1943,6 +1975,11 @@
+ 		    VERSIONNO, dbname, version);
+ 		goto error1;
+ 	}
++#ifdef PHP_BUNDLE
++	if (fn == NULL)
++		*nmagicp = (sizeof(php_magic_database) / sizeof(struct magic));
++	else // the statement after the #endif is used
++#endif
+ 	*nmagicp = (uint32_t)(st.st_size / sizeof(struct magic));
+ 	if (*nmagicp > 0)
+ 		(*nmagicp)--;
+@@ -1950,7 +1987,7 @@
  	if (needsbyteswap)
  		byteswap(*magicp, *nmagicp);
  	free(dbname);
@@ -105,9 +117,10 @@ Index: libmagic/config.h
 ===================================================================
 RCS file: /repository/pecl/fileinfo/libmagic/config.h,v
 retrieving revision 1.2
-diff -u -r1.2 config.h
+retrieving revision 1.3
+diff -u -r1.2 -r1.3
 --- libmagic/config.h	11 Jul 2008 14:49:45 -0000	1.2
-+++ libmagic/config.h	24 Jul 2008 13:34:23 -0000
++++ libmagic/config.h	24 Jul 2008 13:40:21 -0000	1.3
 @@ -2,3 +2,4 @@
  #ifdef HAVE_CONFIG_H
  #include "../config.h"
