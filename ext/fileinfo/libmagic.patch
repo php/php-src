@@ -2,10 +2,9 @@ Index: libmagic/apprentice.c
 ===================================================================
 RCS file: /repository/pecl/fileinfo/libmagic/apprentice.c,v
 retrieving revision 1.1
-retrieving revision 1.6
-diff -u -r1.1 -r1.6
+diff -u -r1.1 apprentice.c
 --- libmagic/apprentice.c	11 Jul 2008 14:13:50 -0000	1.1
-+++ libmagic/apprentice.c	25 Jul 2008 08:16:03 -0000	1.6
++++ libmagic/apprentice.c	25 Jul 2008 08:18:07 -0000
 @@ -157,6 +157,10 @@
  }
  #endif /* COMPILE_ONLY */
@@ -99,7 +98,7 @@ diff -u -r1.1 -r1.6
 +#ifdef PHP_BUNDLE
 +	if (fn == NULL)
 +		*nmagicp = (sizeof(php_magic_database) / sizeof(struct magic));
-+	else // the statement after the #endif is used
++	else /* the statement after the #endif is used */
 +#endif
  	*nmagicp = (uint32_t)(st.st_size / sizeof(struct magic));
  	if (*nmagicp > 0)

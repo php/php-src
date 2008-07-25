@@ -1978,7 +1978,7 @@ internal_loaded:
 #ifdef PHP_BUNDLE
 	if (fn == NULL)
 		*nmagicp = (sizeof(php_magic_database) / sizeof(struct magic));
-	else // the statement after the #endif is used
+	else /* the statement after the #endif is used */
 #endif
 	*nmagicp = (uint32_t)(st.st_size / sizeof(struct magic));
 	if (*nmagicp > 0)
