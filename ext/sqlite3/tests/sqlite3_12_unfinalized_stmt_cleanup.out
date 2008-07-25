@@ -1,0 +1,18 @@
+Creating Table
+bool(true)
+INSERT into table
+bool(true)
+bool(true)
+SELECTING results
+array(2) {
+  [0]=>
+  int(1217021333)
+  [1]=>
+  unicode(1) "a"
+}
+Closing database
+bool(true)
+Check result was freed
+object(SQLite3_result)#3 (0) {
+}
+Done

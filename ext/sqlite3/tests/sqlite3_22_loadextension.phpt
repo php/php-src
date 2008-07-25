@@ -1,0 +1,27 @@
+--TEST--
+SQLite3 load extension
+--SKIPIF--
+<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+--INI--
+open_basedir=.
+sqlite3.extension_dir=.
+--FILE--
+<?php
+
+require_once(dirname(__FILE__) . '/new_db.inc');
+
+$directory = dirname(__FILE__);
+
+touch($directory . '/myext.txt');
+
+var_dump($db->loadExtension('myext.txt'));
+var_dump($db->close());
+unlink($directory . '/myext.txt');
+
+echo "Done\n";
+?>
+--EXPECTF--
+Warning: SQLite3::loadExtension(): Unable to load extension at './myext.txt' in %s on line %d
+bool(false)
+bool(true)
+Done

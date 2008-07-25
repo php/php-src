@@ -1,0 +1,76 @@
+009+ array(2) {
+010+   [u"total"]=>
+011+   int(0)
+012+   [u"values"]=>
+009- 
+010- Closing database
+011- bool(true)
+012- Done
+013+   array(0) {
+014+   }
+015+ }
+016+ array(2) {
+017+   [u"total"]=>
+018+   int(0)
+019+   [u"values"]=>
+020+   array(0) {
+021+   }
+022+ }
+023+ bool(true)
+024+ 
+025+ Warning: Cannot use a scalar value as an array in /Users/scott/dev/php6/ext/sqlite3/tests/sqlite3_25_create_aggregate.php on line 11
+026+ 
+027+ Warning: Cannot use a scalar value as an array in /Users/scott/dev/php6/ext/sqlite3/tests/sqlite3_25_create_aggregate.php on line 12
+028+ bool(true)
+029+ 
+030+ Warning: Cannot use a scalar value as an array in /Users/scott/dev/php6/ext/sqlite3/tests/sqlite3_25_create_aggregate.php on line 11
+031+ 
+032+ Warning: Cannot use a scalar value as an array in /Users/scott/dev/php6/ext/sqlite3/tests/sqlite3_25_create_aggregate.php on line 12
+033+ bool(true)
+034+ 
+035+ Warning: Cannot use a scalar value as an array in /Users/scott/dev/php6/ext/sqlite3/tests/sqlite3_25_create_aggregate.php on line 11
+036+ 
+037+ Warning: Cannot use a scalar value as an array in /Users/scott/dev/php6/ext/sqlite3/tests/sqlite3_25_create_aggregate.php on line 12
+038+ bool(true)
+039+ 
+040+ Warning: Cannot use a scalar value as an array in /Users/scott/dev/php6/ext/sqlite3/tests/sqlite3_25_create_aggregate.php on line 11
+041+ 
+042+ Warning: Cannot use a scalar value as an array in /Users/scott/dev/php6/ext/sqlite3/tests/sqlite3_25_create_aggregate.php on line 12
+043+ bool(true)
+044+ 
+045+ Warning: Cannot use a scalar value as an array in /Users/scott/dev/php6/ext/sqlite3/tests/sqlite3_25_create_aggregate.php on line 11
+046+ 
+047+ Warning: Cannot use a scalar value as an array in /Users/scott/dev/php6/ext/sqlite3/tests/sqlite3_25_create_aggregate.php on line 12
+048+ bool(true)
+049+ 
+050+ Warning: Cannot use a scalar value as an array in /Users/scott/dev/php6/ext/sqlite3/tests/sqlite3_25_create_aggregate.php on line 11
+051+ 
+052+ Warning: Cannot use a scalar value as an array in /Users/scott/dev/php6/ext/sqlite3/tests/sqlite3_25_create_aggregate.php on line 12
+053+ bool(true)
+054+ 
+055+ Warning: Cannot use a scalar value as an array in /Users/scott/dev/php6/ext/sqlite3/tests/sqlite3_25_create_aggregate.php on line 11
+056+ 
+057+ Warning: Cannot use a scalar value as an array in /Users/scott/dev/php6/ext/sqlite3/tests/sqlite3_25_create_aggregate.php on line 12
+058+ bool(true)
+059+ 
+060+ Warning: Cannot use a scalar value as an array in /Users/scott/dev/php6/ext/sqlite3/tests/sqlite3_25_create_aggregate.php on line 11
+061+ 
+062+ Warning: Cannot use a scalar value as an array in /Users/scott/dev/php6/ext/sqlite3/tests/sqlite3_25_create_aggregate.php on line 12
+063+ bool(true)
+064+ 
+065+ Warning: implode(): Invalid arguments passed in /Users/scott/dev/php6/ext/sqlite3/tests/sqlite3_25_create_aggregate.php on line 18
+066+ bool(true)
+067+ 
+068+ Warning: implode(): Invalid arguments passed in /Users/scott/dev/php6/ext/sqlite3/tests/sqlite3_25_create_aggregate.php on line 18
+069+ Array
+070+ (
+071+     [S(a)] => 
+072+     [S(b)] => 
+073+ )
+074+ Closing database
+075+ bool(true)
+076+ Done
+077+ [Fri Jul 25 22:28:54 2008]  Script:  '/Users/scott/dev/php6/ext/sqlite3/tests/sqlite3_25_create_aggregate.php'
+078+ /Users/scott/dev/php6/Zend/zend_vm_execute.h(305) :  Freeing 0x00757394 (20 bytes), script=/Users/scott/dev/php6/ext/sqlite3/tests/sqlite3_25_create_aggregate.php
+079+ Last leak repeated 7 times
+080+ === Total 8 memory leaks detected ===
