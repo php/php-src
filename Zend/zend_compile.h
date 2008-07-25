@@ -789,6 +789,9 @@ END_EXTERN_C()
 /* generate ZEND_DECLARE_INHERITED_CLASS_DELAYED opcode to delay early binding */
 #define ZEND_COMPILE_DELAYED_BINDING			(1<<4)
 
+/* disable constant substitution at compile-time */
+#define ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION	(1<<5)
+
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY
 

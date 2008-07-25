@@ -4009,6 +4009,13 @@ static zend_constant* zend_get_ct_const(zval *const_name TSRMLS_DC) /* {{{ */
 	if (c->flags & CONST_CT_SUBST) {
 		return c;
 	}
+	if ((c->flags & CONST_PERSISTENT) &&
+	    !CG(current_namespace) &&
+	    !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION) &&
+	    Z_TYPE(c->value) != IS_CONSTANT &&
+	    Z_TYPE(c->value) != IS_CONSTANT_ARRAY) {
+		return c;
+	}
 	return NULL;
 }
 /* }}} */
@@ -5546,12 +5553,14 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 void zend_do_declare_constant(znode *name, znode *value TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
+	zend_constant *c;
 
 	if(Z_TYPE(value->u.constant) == IS_CONSTANT_ARRAY) {
 		zend_error(E_COMPILE_ERROR, "Arrays are not allowed as constants");
 	}
 
-	if (zend_get_ct_const(&name->u.constant TSRMLS_CC)) {
+	c = zend_get_ct_const(&name->u.constant TSRMLS_CC);
+	if (c && (c->flags & CONST_CT_SUBST)) {
 		zend_error(E_COMPILE_ERROR, "Cannot redeclare constant '%R'", Z_TYPE(name->u.constant), Z_UNIVAL(name->u.constant));
 	}
 
