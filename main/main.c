@@ -1122,8 +1122,8 @@ PHP_FUNCTION(set_time_limit)
 {
 	zval **new_timeout;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &new_timeout) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &new_timeout) == FAILURE) {
+		return;
 	}
 
 	convert_to_string_ex(new_timeout);
