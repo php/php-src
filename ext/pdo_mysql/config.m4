@@ -1,6 +1,6 @@
-dnl
 dnl $Id$
-dnl
+dnl config.m4 for extension pdo_mysql
+dnl vim: se ts=2 sw=2 et:
 
 dnl TODO Rename when moving to pdo_mysql
 PHP_ARG_WITH(pdo-mysql, for MySQL support for PDO,
@@ -14,6 +14,11 @@ if test -z "$PHP_ZLIB_DIR"; then
 fi
 
 if test "$PHP_PDO_MYSQL" != "no"; then
+
+  if test "$PHP_PDO" = "no" && test "$ext_shared" = "no"; then
+    AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
+  fi
+
   PHP_MYSQLND_ENABLED=yes
 
   AC_DEFUN([PDO_MYSQL_LIB_CHK], [
@@ -171,5 +176,3 @@ if test "$PHP_PDO_MYSQL" != "no"; then
 
   PHP_SUBST_OLD(PDO_MYSQL_MODULE_TYPE)
 fi
-
-dnl vim: se ts=2 sw=2 et:
