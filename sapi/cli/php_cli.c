@@ -296,7 +296,7 @@ static char *script_filename = "";
 
 static void sapi_cli_register_variables(zval *track_vars_array TSRMLS_DC) /* {{{ */
 {
-	size_t len;
+	unsigned int len;
 	char   *docroot = "";
 
 	/* In CGI mode, we consider the environment to be a part of the server
