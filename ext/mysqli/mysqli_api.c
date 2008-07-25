@@ -389,8 +389,13 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 				if (stmt->stmt->fields[ofs].max_length == 0 &&
 					!mysql_stmt_attr_get(stmt->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &tmp) && !tmp)
 				{
-					stmt->result.buf[ofs].buflen =
-						(stmt->stmt->fields) ? (stmt->stmt->fields[ofs].length) ? stmt->stmt->fields[ofs].length + 1: 256: 256;
+					/*
+					  Allocate directly 256 because it's easier to allocate a bit more
+					  than update max length even for text columns. Try SELECT UNION SELECT UNION with
+					  different lengths and you will see that we get different lengths in stmt->stmt->fields[ofs].length
+					  The just take 256 and saves us from realloc-ing.
+					*/
+					stmt->result.buf[ofs].buflen = 256;
 				} else {
 					/*
 						the user has called store_result(). if he does not there is no way to determine the
