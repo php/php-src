@@ -27,6 +27,7 @@
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
 #include "php_sqlite3.h"
+#include "php_sqlite3_structs.h"
 
 #include <sqlite3.h>
 
