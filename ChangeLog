@@ -1,3 +1,353 @@
+2008-07-25  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/fileinfo/fileinfo.c:
+      MFH:
+      - Added arginfo
+      - Fixed:
+        . proto: finfo_buffer
+        . parameter type in _php_finfo_get_type()
+
+    * ext/fileinfo/fileinfo.c:
+      - Added arginfo
+      - Fixed:
+        . proto: finfo_buffer
+        . parameter type in _php_finfo_get_type()
+
+2008-07-25  Antony Dovgal  <tony@daylessday.org>
+
+    * sapi/cli/php_cli.c
+      sapi/cli/php_cli.c:
+      fix warnings
+
+2008-07-25  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/php_mbregex.c:
+      - Fix warnings
+
+    * ext/mbstring/mbstring.c:
+      - Fix wrong cast
+
+2008-07-25  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      main/main.c:
+      - MFB: Fixed the parameter type expected. set_time_limit() should accept
+      only integer.
+
+2008-07-25  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      ext/pdo/config.m4
+      ext/pdo_dblib/config.m4
+      ext/pdo_firebird/config.m4
+      ext/pdo_mysql/config.m4
+      ext/pdo_oci/config.m4
+      ext/pdo_odbc/config.m4
+      ext/pdo_pgsql/config.m4
+      ext/pdo_sqlite/config.m4:
+      MFH: Fix PDO configure dependancy: If --disable-pdo is used, disable all
+      MFH: enabled-by-default drivers. Also error out if you try to configure
+      MFH: a driver as static but pdo is disabled.
+
+2008-07-25  Felipe Pena  <felipensp@gmail.com>
+
+    * main/main.c:
+      - Fixed the parameter type expected. set_time_limit() should accept only
+      integer.
+
+2008-07-25  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/pdo/config.m4
+      ext/pdo_dblib/config.m4
+      ext/pdo_firebird/config.m4
+      ext/pdo_mysql/config.m4
+      ext/pdo_oci/config.m4
+      ext/pdo_odbc/config.m4
+      ext/pdo_pgsql/config.m4
+      ext/pdo_sqlite/config.m4:
+      - Fix PDO configure dependancy: If --disable-pdo is used, disable all
+      enabled-by-default drivers. Also error out if you try to configure a
+      driver as static but pdo is disabled.
+
+2008-07-25  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_3)
+      ext/mbstring/mbstring.c
+      ext/mbstring/tests/mb_stripos.phpt
+      ext/mbstring/tests/mb_stripos_basic.phpt
+      ext/mbstring/tests/mb_stripos_error1.phpt
+      ext/mbstring/tests/mb_stripos_error2.phpt
+      ext/mbstring/tests/mb_stripos_variation1.phpt
+      ext/mbstring/tests/mb_stripos_variation2.phpt
+      ext/mbstring/tests/mb_stripos_variation3.phpt
+      ext/mbstring/tests/mb_stripos_variation4.phpt:
+      - MFH: Fix a typo in mb_stripos() that caused segfaults (noticed by
+      bs@php.net, thanks).
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/tests/mb_stripos.phpt
+      ext/mbstring/tests/mb_stripos.phpt
+      ext/mbstring/tests/mb_stripos_basic.phpt
+      ext/mbstring/tests/mb_stripos_basic.phpt
+      ext/mbstring/tests/mb_stripos_error1.phpt
+      ext/mbstring/tests/mb_stripos_error1.phpt
+      ext/mbstring/tests/mb_stripos_error2.phpt
+      ext/mbstring/tests/mb_stripos_error2.phpt
+      ext/mbstring/tests/mb_stripos_variation1.phpt
+      ext/mbstring/tests/mb_stripos_variation1.phpt
+      ext/mbstring/tests/mb_stripos_variation2.phpt
+      ext/mbstring/tests/mb_stripos_variation2.phpt
+      ext/mbstring/tests/mb_stripos_variation3.phpt
+      ext/mbstring/tests/mb_stripos_variation3.phpt
+      ext/mbstring/tests/mb_stripos_variation4.phpt
+      ext/mbstring/tests/mb_stripos_variation4.phpt:
+      - fix a typo in mb_stripos() that caused segfault.
+        (noticed by bs@php.net, thanks).
+
+2008-07-25  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/tests/bug45019.phpt:
+      MFH: Fixed bug#45019 Segmentation fault with SELECT ? and UNION
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/tests/bug45019.phpt:
+      Fix bug#45019 Segmentation fault with SELECT ? and UNION
+
+2008-07-25  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      - MFH: fix EXT_FOO_SHARED usage as dep mgt broke it (one more hack but we
+      can clean them after alpha)
+
+2008-07-25  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/intl/locale/locale_methods.c:
+      fix zts build
+
+2008-07-25  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * win32/build/confutils.js:
+      - fix EXT_FOO_SHARED usage as dep mgt broke it (one more hack but we can
+      clean them after alpha)
+
+2008-07-25  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      configure.in
+      configure.in
+      scripts/phpize.m4
+      scripts/phpize.m4:
+      MFH: Fixed a minor problem in not enabling c++/g++ when not needed.
+
+    * configure.in
+      scripts/phpize.m4:
+      - Fixed a minor problem in not enabling c++/g++ when not needed.
+
+2008-07-25  Felipe Pena  <felipensp@gmail.com>
+
+    * main/main.c:
+      - MFB: New parameter parsing API (set_time_limit)
+
+    * ext/fileinfo/fileinfo.c:
+      - Fix build
+
+2008-07-25  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_3)
+      ext/mbstring/tests/mb_convert_encoding_basic.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_basic.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation1.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation2.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation3.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation4.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation5.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation6.phpt
+      ext/mbstring/tests/mb_ereg_basic.phpt
+      ext/mbstring/tests/mb_ereg_variation1.phpt
+      ext/mbstring/tests/mb_ereg_variation3.phpt
+      ext/mbstring/tests/mb_ereg_variation4.phpt
+      ext/mbstring/tests/mb_ereg_variation5.phpt
+      ext/mbstring/tests/mb_ereg_variation6.phpt
+      ext/mbstring/tests/mb_ereg_variation7.phpt
+      ext/mbstring/tests/mb_internal_encoding_variation1.phpt
+      ext/mbstring/tests/mb_internal_encoding_variation2.phpt
+      ext/mbstring/tests/mb_regex_encoding_variation1.phpt
+      ext/mbstring/tests/mb_strlen_variation1.phpt
+      ext/mbstring/tests/mb_strlen_variation2.phpt
+      ext/mbstring/tests/mb_strlen_variation3.phpt
+      ext/mbstring/tests/mb_strpos_basic.phpt
+      ext/mbstring/tests/mb_strpos_variation1.phpt
+      ext/mbstring/tests/mb_strpos_variation2.phpt
+      ext/mbstring/tests/mb_strpos_variation3.phpt
+      ext/mbstring/tests/mb_strpos_variation4.phpt
+      ext/mbstring/tests/mb_strrpos_error1.phpt
+      ext/mbstring/tests/mb_strrpos_error2.phpt
+      ext/mbstring/tests/mb_strrpos_variation1.phpt
+      ext/mbstring/tests/mb_strrpos_variation2.phpt
+      ext/mbstring/tests/mb_strrpos_variation4.phpt
+      ext/mbstring/tests/mb_strrpos_variation5.phpt
+      ext/mbstring/tests/mb_strtolower_basic.phpt
+      ext/mbstring/tests/mb_strtolower_error1.phpt
+      ext/mbstring/tests/mb_strtolower_variation1.phpt
+      ext/mbstring/tests/mb_strtolower_variation3.phpt
+      ext/mbstring/tests/mb_strtolower_variation4.phpt
+      ext/mbstring/tests/mb_strtoupper_basic.phpt
+      ext/mbstring/tests/mb_strtoupper_error1.phpt
+      ext/mbstring/tests/mb_strtoupper_error2.phpt
+      ext/mbstring/tests/mb_strtoupper_variation1.phpt
+      ext/mbstring/tests/mb_strtoupper_variation3.phpt
+      ext/mbstring/tests/mb_strtoupper_variation4.phpt
+      ext/mbstring/tests/mb_substr_basic.phpt
+      ext/mbstring/tests/mb_substr_count_basic.phpt
+      ext/mbstring/tests/mb_substr_count_error1.phpt
+      ext/mbstring/tests/mb_substr_count_error2.phpt
+      ext/mbstring/tests/mb_substr_count_variation2.phpt
+      ext/mbstring/tests/mb_substr_count_variation3.phpt
+      ext/mbstring/tests/mb_substr_variation1.phpt
+      ext/mbstring/tests/mb_substr_variation2.phpt
+      ext/mbstring/tests/mb_substr_variation3.phpt
+      ext/mbstring/tests/mb_substr_variation4.phpt
+      ext/mbstring/tests/mb_substr_variation5.phpt
+      ext/mbstring/tests/zend_multibyte-02.phpt
+      ext/mbstring/tests/zend_multibyte-03.phpt
+      ext/mbstring/tests/zend_multibyte-04.phpt
+      ext/mbstring/tests/zend_multibyte-05.phpt
+      ext/mbstring/tests/zend_multibyte-06.phpt
+      ext/mbstring/tests/zend_multibyte-07.phpt
+      ext/mbstring/tests/zend_multibyte-08.phpt
+      ext/mbstring/tests/zend_multibyte-09.phpt
+      ext/mbstring/tests/zend_multibyte-10.phpt
+      ext/mbstring/tests/zend_multibyte-11.phpt
+      ext/mbstring/tests/zend_multibyte-12.phpt:
+      - Fix tests.
+
+2008-07-25  Antony Dovgal  <tony@daylessday.org>
+
+    * run-tests.php
+      run-tests.php:
+      fix typo
+
+2008-07-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/pdo/pdo_stmt.c
+      ext/pdo/pdo_stmt.c
+      ext/reflection/php_reflection.c
+      ext/reflection/php_reflection.c:
+      Fixed support for static methods
+
+2008-07-25  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_3)
+      run-tests.php:
+      - MFH: Allow the results of a partial run to be saved when -s option is
+        explicitly specified.
+
+    * run-tests.php:
+      - Allow the results of a partial run to be saved when -s option is
+      explicitly
+        specified.
+
+2008-07-25  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/url_scanner_ex.c:
+      MFB: generated with a bit newer re2c
+
+    * ext/fileinfo/Makefile.frag
+      ext/fileinfo/Makefile.frag
+      ext/fileinfo/config.m4
+      ext/fileinfo/fileinfo.c:
+      
+      - Enable fileinfo by default
+
+    * (PHP_5_3)
+      ext/standard/credits_ext.h:
+      Update credits
+
+    * ext/gd/tests/imageloadfont_invalid.phpt:
+      - Cleanup after test
+
+2008-07-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute_API.c
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c
+      ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_stmt.c
+      ext/pgsql/pgsql.c
+      ext/reflection/php_reflection.c
+      ext/reflection/php_reflection.c
+      ext/spl/spl_directory.c
+      ext/sqlite/sqlite.c
+      main/streams/userspace.c:
+      Fixed uninitialized data
+
+2008-07-25  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/pdo/pdo_stmt.c
+      ext/reflection/php_reflection.c:
+      fix typos
+
+2008-07-25  Michael Wallner  <mike@iworks.at>
+
+    * (PHP_5_3)
+      NEWS
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c:
+      - Changed HTTP stream wrapper to accept any code between and including
+        200 to 399 as successful. (patch by Noah Fontes)
+
+2008-07-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_execute_API.c
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c
+      ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_stmt.c
+      ext/pgsql/pgsql.c
+      ext/reflection/php_reflection.c
+      ext/spl/spl_directory.c
+      ext/sqlite/sqlite.c
+      main/streams/userspace.c:
+      Fixed uninitialised data
+
+2008-07-25  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/fileinfo/libmagic.patch
+      ext/fileinfo/libmagic/apprentice.c:
+      - No C++ comments.
+
+    * ext/fileinfo/CREDITS
+      ext/fileinfo/libmagic.patch:
+      - Updating the libmagic patch.
+      - Adding myself to credits.
+
+    * ext/fileinfo/libmagic/apprentice.c
+      ext/fileinfo/libmagic/funcs.c:
+      - Fixed size calculation.
+      - Reverted cosmetic fixes that makes upgrading harder.
+
+2008-07-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h:
+      Substitute persistent constants by their values at compile time. (Matt)
+
+2008-07-25  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/tokenizer/tokenizer.c:
+      - Suppress signedness warnings.
+
 2008-07-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * (PHP_5_3)
