@@ -10688,7 +10688,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_OBJ_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 			if (0) {
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
-			Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			if (Z_OBJ_HT_P(*container)->unset_property) {
+				Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			} else {
+				zend_error(E_NOTICE, "Trying to unset property of non-object");
+			}
 			if (0) {
 				zval_ptr_dtor(&offset);
 			} else {
@@ -10777,9 +10781,19 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CONST(
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
 			if (prop_dim) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_property) {
+					result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check property of non-object");
+					result = 0;
+				}
 			} else {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_dimension) {
+					result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check element of non-array");
+					result = 0;
+				}
 			}
 			if (0) {
 				zval_ptr_dtor(&offset);
@@ -12457,7 +12471,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_OBJ_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLE
 			if (1) {
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
-			Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			if (Z_OBJ_HT_P(*container)->unset_property) {
+				Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			} else {
+				zend_error(E_NOTICE, "Trying to unset property of non-object");
+			}
 			if (1) {
 				zval_ptr_dtor(&offset);
 			} else {
@@ -12546,9 +12564,19 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_TMP(in
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
 			if (prop_dim) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_property) {
+					result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check property of non-object");
+					result = 0;
+				}
 			} else {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_dimension) {
+					result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check element of non-array");
+					result = 0;
+				}
 			}
 			if (1) {
 				zval_ptr_dtor(&offset);
@@ -14273,7 +14301,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_OBJ_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 			if (0) {
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
-			Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			if (Z_OBJ_HT_P(*container)->unset_property) {
+				Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			} else {
+				zend_error(E_NOTICE, "Trying to unset property of non-object");
+			}
 			if (0) {
 				zval_ptr_dtor(&offset);
 			} else {
@@ -14362,9 +14394,19 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_VAR(in
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
 			if (prop_dim) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_property) {
+					result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check property of non-object");
+					result = 0;
+				}
 			} else {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_dimension) {
+					result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check element of non-array");
+					result = 0;
+				}
 			}
 			if (0) {
 				zval_ptr_dtor(&offset);
@@ -16702,7 +16744,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_OBJ_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER
 			if (0) {
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
-			Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			if (Z_OBJ_HT_P(*container)->unset_property) {
+				Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			} else {
+				zend_error(E_NOTICE, "Trying to unset property of non-object");
+			}
 			if (0) {
 				zval_ptr_dtor(&offset);
 			} else {
@@ -16791,9 +16837,19 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CV(int
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
 			if (prop_dim) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_property) {
+					result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check property of non-object");
+					result = 0;
+				}
 			} else {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_dimension) {
+					result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check element of non-array");
+					result = 0;
+				}
 			}
 			if (0) {
 				zval_ptr_dtor(&offset);
@@ -17875,7 +17931,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_OBJ_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_H
 			if (0) {
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
-			Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			if (Z_OBJ_HT_P(*container)->unset_property) {
+				Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			} else {
+				zend_error(E_NOTICE, "Trying to unset property of non-object");
+			}
 			if (0) {
 				zval_ptr_dtor(&offset);
 			} else {
@@ -17963,9 +18023,19 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CON
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
 			if (prop_dim) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_property) {
+					result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check property of non-object");
+					result = 0;
+				}
 			} else {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_dimension) {
+					result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check element of non-array");
+					result = 0;
+				}
 			}
 			if (0) {
 				zval_ptr_dtor(&offset);
@@ -18894,7 +18964,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_OBJ_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HAN
 			if (1) {
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
-			Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			if (Z_OBJ_HT_P(*container)->unset_property) {
+				Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			} else {
+				zend_error(E_NOTICE, "Trying to unset property of non-object");
+			}
 			if (1) {
 				zval_ptr_dtor(&offset);
 			} else {
@@ -18982,9 +19056,19 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_TMP
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
 			if (prop_dim) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_property) {
+					result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check property of non-object");
+					result = 0;
+				}
 			} else {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_dimension) {
+					result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check element of non-array");
+					result = 0;
+				}
 			}
 			if (1) {
 				zval_ptr_dtor(&offset);
@@ -19913,7 +19997,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_OBJ_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HAN
 			if (0) {
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
-			Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			if (Z_OBJ_HT_P(*container)->unset_property) {
+				Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			} else {
+				zend_error(E_NOTICE, "Trying to unset property of non-object");
+			}
 			if (0) {
 				zval_ptr_dtor(&offset);
 			} else {
@@ -20001,9 +20089,19 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_VAR
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
 			if (prop_dim) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_property) {
+					result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check property of non-object");
+					result = 0;
+				}
 			} else {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_dimension) {
+					result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check element of non-array");
+					result = 0;
+				}
 			}
 			if (0) {
 				zval_ptr_dtor(&offset);
@@ -21202,7 +21300,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_OBJ_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAND
 			if (0) {
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
-			Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			if (Z_OBJ_HT_P(*container)->unset_property) {
+				Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			} else {
+				zend_error(E_NOTICE, "Trying to unset property of non-object");
+			}
 			if (0) {
 				zval_ptr_dtor(&offset);
 			} else {
@@ -21290,9 +21392,19 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CV(
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
 			if (prop_dim) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_property) {
+					result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check property of non-object");
+					result = 0;
+				}
 			} else {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_dimension) {
+					result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check element of non-array");
+					result = 0;
+				}
 			}
 			if (0) {
 				zval_ptr_dtor(&offset);
@@ -24133,7 +24245,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_OBJ_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 			if (0) {
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
-			Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			if (Z_OBJ_HT_P(*container)->unset_property) {
+				Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			} else {
+				zend_error(E_NOTICE, "Trying to unset property of non-object");
+			}
 			if (0) {
 				zval_ptr_dtor(&offset);
 			} else {
@@ -24221,9 +24337,19 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CONST(i
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
 			if (prop_dim) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_property) {
+					result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check property of non-object");
+					result = 0;
+				}
 			} else {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_dimension) {
+					result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check element of non-array");
+					result = 0;
+				}
 			}
 			if (0) {
 				zval_ptr_dtor(&offset);
@@ -25783,7 +25909,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_OBJ_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER
 			if (1) {
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
-			Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			if (Z_OBJ_HT_P(*container)->unset_property) {
+				Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			} else {
+				zend_error(E_NOTICE, "Trying to unset property of non-object");
+			}
 			if (1) {
 				zval_ptr_dtor(&offset);
 			} else {
@@ -25871,9 +26001,19 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_TMP(int
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
 			if (prop_dim) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_property) {
+					result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check property of non-object");
+					result = 0;
+				}
 			} else {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_dimension) {
+					result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check element of non-array");
+					result = 0;
+				}
 			}
 			if (1) {
 				zval_ptr_dtor(&offset);
@@ -27479,7 +27619,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_OBJ_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 			if (0) {
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
-			Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			if (Z_OBJ_HT_P(*container)->unset_property) {
+				Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			} else {
+				zend_error(E_NOTICE, "Trying to unset property of non-object");
+			}
 			if (0) {
 				zval_ptr_dtor(&offset);
 			} else {
@@ -27567,9 +27711,19 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_VAR(int
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
 			if (prop_dim) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_property) {
+					result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check property of non-object");
+					result = 0;
+				}
 			} else {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_dimension) {
+					result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check element of non-array");
+					result = 0;
+				}
 			}
 			if (0) {
 				zval_ptr_dtor(&offset);
@@ -29679,7 +29833,11 @@ static int ZEND_FASTCALL  ZEND_UNSET_OBJ_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_
 			if (0) {
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
-			Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			if (Z_OBJ_HT_P(*container)->unset_property) {
+				Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			} else {
+				zend_error(E_NOTICE, "Trying to unset property of non-object");
+			}
 			if (0) {
 				zval_ptr_dtor(&offset);
 			} else {
@@ -29767,9 +29925,19 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CV(int 
 				MAKE_REAL_ZVAL_PTR(offset);
 			}
 			if (prop_dim) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_property) {
+					result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check property of non-object");
+					result = 0;
+				}
 			} else {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				if (Z_OBJ_HT_P(*container)->has_dimension) {
+					result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+				} else {
+					zend_error(E_NOTICE, "Trying to check element of non-array");
+					result = 0;
+				}
 			}
 			if (0) {
 				zval_ptr_dtor(&offset);
