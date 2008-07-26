@@ -1,3 +1,18 @@
+2008-07-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c:
+      Fixed uninitialized data
+
+    * (PHP_5_3)
+      zend_execute_API.c:
+      Fixed uninitialised data
+
+    * zend_compile.c
+      zend_compile.c
+      zend_compile.h
+      zend_compile.h:
+      Substitute persistent constants by their values at compile time. (Matt)
+
 2008-07-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * (PHP_5_3)
