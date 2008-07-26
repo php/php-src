@@ -23,7 +23,7 @@
 /*
  * LALR shift/reduce conflicts and how they are resolved:
  *
- * - 2 shift/reduce conflicts due to the dangeling elseif/else ambiguity.  Solved by shift.
+ * - 2 shift/reduce conflicts due to the dangling elseif/else ambiguity. Solved by shift.
  *
  */
 
@@ -147,8 +147,6 @@
 %token T_NAMESPACE
 %token T_NS_C
 %token T_DIR
-%token T_START_NOWDOC
-%token T_END_NOWDOC
 
 %% /* Rules */
 
@@ -641,7 +639,7 @@ expr_without_variable:
 	|	'@' { zend_do_begin_silence(&$1 TSRMLS_CC); } expr { zend_do_end_silence(&$1 TSRMLS_CC); $$ = $3; }
 	|	scalar				{ $$ = $1; }
 	|	T_ARRAY '(' array_pair_list ')' { $$ = $3; }
-	|	'`' encaps_list '`' { zend_do_shell_exec(&$$, &$2 TSRMLS_CC); }
+	|	'`' backticks_expr '`' { zend_do_shell_exec(&$$, &$2 TSRMLS_CC); }
 	|	T_PRINT expr  { zend_do_print(&$$, &$2 TSRMLS_CC); }
 	|	function is_reference '(' { zend_do_begin_lambda_function_declaration(&$$, &$1, $2.op_type, 0 TSRMLS_CC); }
 			parameter_list ')' lexical_vars '{' inner_statement_list '}' {  zend_do_end_function_declaration(&$1 TSRMLS_CC); $$ = $4; }
@@ -736,6 +734,12 @@ exit_expr:
 	|	'(' expr ')'	{ $$ = $2; }
 ;
 
+backticks_expr:
+		/* empty */	{ ZVAL_EMPTY_STRING(&$$.u.constant); INIT_PZVAL(&$$.u.constant); $$.op_type = IS_CONST; }
+	|	T_ENCAPSED_AND_WHITESPACE	{ $$ = $1; }
+	|	encaps_list	{ $$ = $1; }
+;
+
 
 ctor_arguments:
 		/* empty */	{ Z_LVAL($$.u.constant)=0; }
@@ -754,7 +758,8 @@ common_scalar:
 	|	T_METHOD_C					{ $$ = $1; }
 	|	T_FUNC_C					{ $$ = $1; }
 	|	T_NS_C						{ $$ = $1; }
-	|	T_START_NOWDOC T_ENCAPSED_AND_WHITESPACE T_END_NOWDOC	{ $$ = $2; }
+	|	T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC { $$ = $2; }
+	|	T_START_HEREDOC T_END_HEREDOC { ZVAL_EMPTY_STRING(&$$.u.constant); INIT_PZVAL(&$$.u.constant); $$.op_type = IS_CONST; }
 ;
 
 
@@ -944,8 +949,8 @@ non_empty_array_pair_list:
 encaps_list:
 		encaps_list encaps_var { zend_do_end_variable_parse(&$2, BP_VAR_R, 0 TSRMLS_CC);  zend_do_add_variable(&$$, &$1, &$2 TSRMLS_CC); }
 	|	encaps_list T_ENCAPSED_AND_WHITESPACE	{ zend_do_add_string(&$$, &$1, &$2 TSRMLS_CC); }
-	|	/* empty */			{ zend_do_init_string(&$$ TSRMLS_CC); }
-
+	|	encaps_var { zend_do_end_variable_parse(&$1, BP_VAR_R, 0 TSRMLS_CC); zend_do_add_variable(&$$, NULL, &$1 TSRMLS_CC); }
+	|	T_ENCAPSED_AND_WHITESPACE encaps_var	{ zend_do_add_string(&$$, NULL, &$1 TSRMLS_CC); zend_do_end_variable_parse(&$2, BP_VAR_R, 0 TSRMLS_CC); zend_do_add_variable(&$$, &$$, &$2 TSRMLS_CC); }
 ;
 
 
