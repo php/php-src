@@ -734,7 +734,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				zend_error(E_WARNING, "Invalid callback %s, %s", callable_name, error);
 				efree(error);
 			}
-			efree(callable_name);
+			if (callable_name) {
+				efree(callable_name);
+			}
 			return FAILURE;
 		} else if (error) {
 			/* Capitalize the first latter of the error message */
@@ -744,9 +746,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			zend_error(E_STRICT, "%s", error);
 			efree(error);
 		}
-		if (callable_name) {
-			efree(callable_name);
-		}
+		efree(callable_name);
 	}
 
 	EX(function_state).function = fci_cache->function_handler;
