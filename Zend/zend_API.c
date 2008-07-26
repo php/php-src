@@ -2573,6 +2573,15 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval **object_pp, uint ch
 	fcc->calling_scope = NULL;
 	fcc->object_pp = NULL;
 
+	if (object_pp && (!*object_pp ||  Z_TYPE_PP(object_pp) != IS_OBJECT)) {
+		object_pp = NULL;
+	}
+	if (object_pp &&
+	    (!EG(objects_store).object_buckets || 
+	     !EG(objects_store).object_buckets[Z_OBJ_HANDLE_PP(object_pp)].valid)) {
+		return 0;
+	}
+
 	switch (Z_TYPE_P(callable)) {
 		case IS_STRING:
 			if (object_pp && *object_pp) {
@@ -2648,6 +2657,11 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval **object_pp, uint ch
 						}
 
 					} else {
+						if (!EG(objects_store).object_buckets || 
+						    !EG(objects_store).object_buckets[Z_OBJ_HANDLE_PP(obj)].valid) {
+							return 0;
+						}
+
 						fcc->calling_scope = Z_OBJCE_PP(obj); /* TBFixed: what if it's overloaded? */
 
 						fcc->object_pp = obj;
