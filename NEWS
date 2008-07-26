@@ -24,6 +24,10 @@ PHP                                                                        NEWS
   . Added "jump label" operator (limited "goto"). (Dmitry, Sara)
   . Added NOWDOC syntax. (Gwynne Raskind, Stas, Dmitry)
   . Added HEREDOC syntax with double quotes. (Lars Strojny, Felipe)
+  . Added support for using static HEREDOCs to initialize static variables and
+    class members or constants. (Matt)
+  . Improved syntax highlighting and consistency for variables in double-quoted
+    strings and literal text in HEREDOCs and backticks. (Matt)
   . Added "?:" operator. (Marcus)
   . Added support for namespaces. (Dmitry, Stas, Gregory)
   . Added support for Late Static Binding. (Dmitry, Etienne Kneuss)
@@ -69,6 +73,7 @@ PHP                                                                        NEWS
     second usage. (Dmitry)
   . Optimized ZEND_FETCH_CLASS + ZEND_ADD_INTERFACE into single
     ZEND_ADD_INTERFACE opcode (Dmitry)
+  . Optimized interpolated strings to use one less opcode. (Matt)
 
 - Improved php.ini handling: (Jani)
   . Added ".htaccess" style user-defined php.ini files support for CGI/FastCGI

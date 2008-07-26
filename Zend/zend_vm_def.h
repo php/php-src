@@ -1776,37 +1776,63 @@ ZEND_VM_HANDLER(53, ZEND_INIT_STRING, ANY, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(54, ZEND_ADD_CHAR, TMP, CONST)
+ZEND_VM_HANDLER(54, ZEND_ADD_CHAR, TMP|UNUSED, CONST)
 {
 	zend_op *opline = EX(opline);
-	zend_free_op free_op1;
+	zval *str = &EX_T(opline->result.u.var).tmp_var;
 
-	add_char_to_string(&EX_T(opline->result.u.var).tmp_var,
-		GET_OP1_ZVAL_PTR(BP_VAR_NA),
-		&opline->op2.u.constant);
+	if (OP1_TYPE == IS_UNUSED) {
+		/* Initialize for erealloc in add_char_to_string */
+		Z_STRVAL_P(str) = NULL;
+		Z_STRLEN_P(str) = 0;
+		Z_TYPE_P(str) = IS_STRING;
+
+		INIT_PZVAL(str);
+	}
+
+	add_char_to_string(str, str, &opline->op2.u.constant);
+
 	/* FREE_OP is missing intentionally here - we're always working on the same temporary variable */
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(55, ZEND_ADD_STRING, TMP, CONST)
+ZEND_VM_HANDLER(55, ZEND_ADD_STRING, TMP|UNUSED, CONST)
 {
 	zend_op *opline = EX(opline);
-	zend_free_op free_op1;
+	zval *str = &EX_T(opline->result.u.var).tmp_var;
 
-	add_string_to_string(&EX_T(opline->result.u.var).tmp_var,
-		GET_OP1_ZVAL_PTR(BP_VAR_NA),
-		&opline->op2.u.constant);
+	if (OP1_TYPE == IS_UNUSED) {
+		/* Initialize for erealloc in add_string_to_string */
+		Z_STRVAL_P(str) = NULL;
+		Z_STRLEN_P(str) = 0;
+		Z_TYPE_P(str) = IS_STRING;
+
+		INIT_PZVAL(str);
+	}
+
+	add_string_to_string(str, str, &opline->op2.u.constant);
+
 	/* FREE_OP is missing intentionally here - we're always working on the same temporary variable */
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(56, ZEND_ADD_VAR, TMP, TMP|VAR|CV)
+ZEND_VM_HANDLER(56, ZEND_ADD_VAR, TMP|UNUSED, TMP|VAR|CV)
 {
 	zend_op *opline = EX(opline);
-	zend_free_op free_op1, free_op2;
+	zend_free_op free_op2;
+	zval *str = &EX_T(opline->result.u.var).tmp_var;
 	zval *var = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	zval var_copy;
 	int use_copy = 0;
+
+	if (OP1_TYPE == IS_UNUSED) {
+		/* Initialize for erealloc in add_string_to_string */
+		Z_STRVAL_P(str) = NULL;
+		Z_STRLEN_P(str) = 0;
+		Z_TYPE_P(str) = IS_STRING;
+
+		INIT_PZVAL(str);
+	}
 
 	if (Z_TYPE_P(var) != IS_STRING) {
 		zend_make_printable_zval(var, &var_copy, &use_copy);
@@ -1815,9 +1841,8 @@ ZEND_VM_HANDLER(56, ZEND_ADD_VAR, TMP, TMP|VAR|CV)
 			var = &var_copy;
 		}
 	}
-	add_string_to_string(	&EX_T(opline->result.u.var).tmp_var,
-							GET_OP1_ZVAL_PTR(BP_VAR_NA),
-							var);
+	add_string_to_string(str, str, var);
+
 	if (use_copy) {
 		zval_dtor(var);
 	}
