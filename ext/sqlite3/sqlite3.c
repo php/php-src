@@ -742,8 +742,6 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 	if (retval) {
 		zval_ptr_dtor(&retval);
 	}
-/* }}} */
-
 	return ret;
 }
 /* }}}*/
