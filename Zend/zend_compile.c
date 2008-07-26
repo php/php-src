@@ -1078,20 +1078,6 @@ void zend_do_end_variable_parse(znode *variable, int type, int arg_offset TSRMLS
 }
 /* }}} */
 
-void zend_do_init_string(znode *result TSRMLS_DC) /* {{{ */
-{
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-	opline->opcode = ZEND_INIT_STRING;
-	opline->result.op_type = IS_TMP_VAR;
-	opline->result.u.var = get_temporary_variable(CG(active_op_array));
-	opline->extended_value = CG(literal_type);
-	*result = opline->result;
-	SET_UNUSED(opline->op1);
-	SET_UNUSED(opline->op2);
-}
-/* }}} */
-
 void zend_do_add_string(znode *result, znode *op1, znode *op2 TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
@@ -1111,45 +1097,35 @@ void zend_do_add_string(znode *result, znode *op1, znode *op2 TSRMLS_DC) /* {{{ 
 		efree(Z_UNIVAL(op2->u.constant).v);
 		return;
 	}
-	opline->op1 = *op1;
+
+	if (op1) {
+		opline->op1 = *op1;
+		opline->result = *op1;
+	} else {
+		SET_UNUSED(opline->op1);
+		opline->result.op_type = IS_TMP_VAR;
+		opline->result.u.var = get_temporary_variable(CG(active_op_array));
+	}
 	opline->op2 = *op2;
-	opline->op2.op_type = IS_CONST;
-	opline->result = opline->op1;
+	opline->extended_value = CG(literal_type);
 	*result = opline->result;
 }
 /* }}} */
 
 void zend_do_add_variable(znode *result, znode *op1, znode *op2 TSRMLS_DC) /* {{{ */
 {
-	zend_op *opline;
+	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	if (op1->op_type == IS_CONST) {
-		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-		opline->opcode = ZEND_INIT_STRING;
+	opline->opcode = ZEND_ADD_VAR;
+
+	if (op1) {
+		opline->op1 = *op1;
+		opline->result = *op1;
+	} else {
+		SET_UNUSED(opline->op1);
 		opline->result.op_type = IS_TMP_VAR;
 		opline->result.u.var = get_temporary_variable(CG(active_op_array));
-		*result = opline->result;
-		SET_UNUSED(opline->op1);
-		SET_UNUSED(opline->op2);
-
-		if (Z_STRLEN(op1->u.constant)>0) {
-			opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-			opline->opcode = ZEND_ADD_STRING;
-			opline->result = *result;
-			opline->op1 = *result;
-			opline->op2 = *op1;
-			opline->result = opline->op1;
-		} else {
-			zval_dtor(&op1->u.constant);
-		}
-	} else {
-		*result = *op1;
 	}
-
-	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-	opline->opcode = ZEND_ADD_VAR;
-	opline->result = *result;
-	opline->op1 = *result;
 	opline->op2 = *op2;
 	opline->extended_value = CG(literal_type);
 	*result = opline->result;
@@ -4168,6 +4144,7 @@ void zend_do_shell_exec(znode *result, znode *cmd TSRMLS_DC) /* {{{ */
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 	switch (cmd->op_type) {
+		case IS_CONST:
 		case IS_TMP_VAR:
 			opline->opcode = ZEND_SEND_VAL;
 			break;
@@ -5153,7 +5130,6 @@ again:
 			retval = T_ECHO;
 			break;
 		case T_END_HEREDOC:
-		case T_END_NOWDOC:
 			efree(Z_STRVAL(zendlval->u.constant));
 			break;
 	}

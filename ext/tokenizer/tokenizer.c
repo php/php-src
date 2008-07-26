@@ -134,7 +134,7 @@ static void tokenize(zval *return_value TSRMLS_DC)
 			MAKE_STD_ZVAL(keyword);
 			array_init(keyword);
 			add_next_index_long(keyword, token_type);
-			if (token_type == T_END_HEREDOC || token_type == T_END_NOWDOC) {
+			if (token_type == T_END_HEREDOC) {
 				if (CG(increment_lineno)) {
 					token_line = ++CG(zend_lineno);
 					CG(increment_lineno) = 0;

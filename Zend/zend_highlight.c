@@ -77,7 +77,6 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 	int token_type;
 	char *last_color = syntax_highlighter_ini->highlight_html;
 	char *next_color;
-	int in_string=0;
 
 	CG(literal_type) = IS_STRING;
 	zend_printf("<code>");
@@ -100,12 +99,10 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 			case T_CLOSE_TAG:
 				next_color = syntax_highlighter_ini->highlight_default;
 				break;
+			case '"':
+			case T_ENCAPSED_AND_WHITESPACE:
 			case T_CONSTANT_ENCAPSED_STRING:
 				next_color = syntax_highlighter_ini->highlight_string;
-				break;
-			case '"':
-				next_color = syntax_highlighter_ini->highlight_string;
-				in_string = !in_string;
 				break;
 			case T_WHITESPACE:
 				zend_html_puts(LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);  /* no color needed */
@@ -113,9 +110,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				continue;
 				break;
 			default:
-				if (in_string) {
-					next_color = syntax_highlighter_ini->highlight_string;
-				} else if (Z_TYPE(token) == 0) {
+				if (Z_TYPE(token) == 0) {
 					next_color = syntax_highlighter_ini->highlight_keyword;
 				} else {
 					next_color = syntax_highlighter_ini->highlight_default;
@@ -134,7 +129,6 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 		}
 		switch (token_type) {
 			case T_END_HEREDOC:
-			case T_END_NOWDOC:
 				zend_html_puts(Z_STRVAL(token), Z_STRLEN(token) TSRMLS_CC);
 				break;
 			default:
@@ -156,7 +150,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 					efree(Z_UNIVAL(token).v);
 					break;
 			}
-		} else if (token_type == T_END_HEREDOC || token_type == T_END_NOWDOC) {
+		} else if (token_type == T_END_HEREDOC) {
 			efree(Z_UNIVAL(token).v);
 		}
 		Z_TYPE(token) = 0;
@@ -204,11 +198,7 @@ ZEND_API void zend_strip(TSRMLS_D) /* {{{ */
 				Z_TYPE(token) = 0;
 				continue;
 
-			case EOF:
-				return;
-
 			case T_END_HEREDOC:
-			case T_END_NOWDOC:
 				zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				efree(Z_STRVAL(token));
 				/* read the following character, either newline or ; */
