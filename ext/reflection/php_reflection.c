@@ -1279,7 +1279,7 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	params[0] = &reflector_ptr;
 	params[1] = &output_ptr;
 
-	ZVAL_ASCII_STRINGL(&fname, "export", sizeof("export") - 1, 1);
+	ZVAL_ASCII_STRINGL(&fname, "reflection::export", sizeof("reflection::export") - 1, 1);
 	fci.function_table = &reflection_ptr->function_table;
 	fci.function_name = &fname;
 	fci.object_pp = NULL;

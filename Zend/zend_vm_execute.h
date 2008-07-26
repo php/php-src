@@ -2721,6 +2721,9 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 			} else {
 				EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 			}
+			if (!EX(fbc)) {
+				zend_error(E_ERROR, "Call to undefined method %v::%R()", ce->name, function_name_type, function_name_strval);
+			}
 		}
 
 		if (IS_CONST != IS_CONST) {
@@ -3322,6 +3325,9 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
 			} else {
 				EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 			}
+			if (!EX(fbc)) {
+				zend_error(E_ERROR, "Call to undefined method %v::%R()", ce->name, function_name_type, function_name_strval);
+			}
 		}
 
 		if (IS_TMP_VAR != IS_CONST) {
@@ -3799,6 +3805,9 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
 			} else {
 				EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 			}
+			if (!EX(fbc)) {
+				zend_error(E_ERROR, "Call to undefined method %v::%R()", ce->name, function_name_type, function_name_strval);
+			}
 		}
 
 		if (IS_VAR != IS_CONST) {
@@ -4031,6 +4040,9 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 				EX(fbc) = ce->get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 			} else {
 				EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
+			}
+			if (!EX(fbc)) {
+				zend_error(E_ERROR, "Call to undefined method %v::%R()", ce->name, function_name_type, function_name_strval);
 			}
 		}
 
@@ -4476,6 +4488,9 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 				EX(fbc) = ce->get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 			} else {
 				EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
+			}
+			if (!EX(fbc)) {
+				zend_error(E_ERROR, "Call to undefined method %v::%R()", ce->name, function_name_type, function_name_strval);
 			}
 		}
 
@@ -10720,6 +10735,9 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 			} else {
 				EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 			}
+			if (!EX(fbc)) {
+				zend_error(E_ERROR, "Call to undefined method %v::%R()", ce->name, function_name_type, function_name_strval);
+			}
 		}
 
 		if (IS_CONST != IS_CONST) {
@@ -12616,6 +12634,9 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND
 			} else {
 				EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 			}
+			if (!EX(fbc)) {
+				zend_error(E_ERROR, "Call to undefined method %v::%R()", ce->name, function_name_type, function_name_strval);
+			}
 		}
 
 		if (IS_TMP_VAR != IS_CONST) {
@@ -14488,6 +14509,9 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND
 			} else {
 				EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 			}
+			if (!EX(fbc)) {
+				zend_error(E_ERROR, "Call to undefined method %v::%R()", ce->name, function_name_type, function_name_strval);
+			}
 		}
 
 		if (IS_VAR != IS_CONST) {
@@ -15451,6 +15475,9 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 				EX(fbc) = ce->get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 			} else {
 				EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
+			}
+			if (!EX(fbc)) {
+				zend_error(E_ERROR, "Call to undefined method %v::%R()", ce->name, function_name_type, function_name_strval);
 			}
 		}
 
@@ -16973,6 +17000,9 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 				EX(fbc) = ce->get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 			} else {
 				EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
+			}
+			if (!EX(fbc)) {
+				zend_error(E_ERROR, "Call to undefined method %v::%R()", ce->name, function_name_type, function_name_strval);
 			}
 		}
 

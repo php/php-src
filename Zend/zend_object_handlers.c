@@ -803,7 +803,7 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, zstr method_
 			call_user_call->arg_info = NULL;
 			call_user_call->num_args = 0;
 			call_user_call->scope = zobj->ce;
-			call_user_call->fn_flags = 0;
+			call_user_call->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
 			if (UG(unicode)) {
 				call_user_call->function_name.u = eustrndup(method_name.u, method_len);
 			} else {
@@ -939,7 +939,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_uc
 			call_user_call->arg_info = NULL;
 			call_user_call->num_args = 0;
 			call_user_call->scope = ce;
-			call_user_call->fn_flags = 0;
+			call_user_call->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
 			if (UG(unicode)) {
 				call_user_call->function_name.u = eustrndup(function_name_strval.u, function_name_strlen);
 			} else {
@@ -957,7 +957,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_uc
 			callstatic_user_call->arg_info = NULL;
 			callstatic_user_call->num_args = 0;
 			callstatic_user_call->scope    = ce;
-			callstatic_user_call->fn_flags = ZEND_ACC_STATIC | ZEND_ACC_PUBLIC;
+			callstatic_user_call->fn_flags = ZEND_ACC_STATIC | ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER;
 
 			if (UG(unicode)) {
 				callstatic_user_call->function_name.u = eustrndup(function_name_strval.u, function_name_strlen);
@@ -970,12 +970,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_uc
 
 			return (zend_function *)callstatic_user_call;
 		} else {
-			zstr class_name = ce->name;
-
-			if (!class_name.v) {
-				class_name.u = EMPTY_STR;
-			}
-			zend_error(E_ERROR, "Call to undefined method %R::%R()", type, class_name, type, function_name_strval);
+			return NULL;
 		}
 	}
 	efree(lc_function_name.v);
