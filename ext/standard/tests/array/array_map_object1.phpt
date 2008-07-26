@@ -70,7 +70,7 @@ class ChildClass extends AbstractClass
 {
   private $var3;
   public function emptyFunction() {
-    echo "defined in child";
+    echo "defined in child\n";
   }
 }
 test(array('ChildClass', 'emptyFunction'), array(1, 2));
@@ -80,7 +80,7 @@ class FinalClass
 {
   private $var4;
   final function finalMethod() {
-    echo "This function can't be overloaded";
+    echo "This function can't be overloaded\n";
   }
 }
 test(array('FinalClass', 'finalMethod'), array(1, 2));
@@ -128,10 +128,6 @@ test(array('InterClass', 'square'), array(1, 2));
 SimpleClass::square
 
 Strict Standards: array_map() expects parameter 1 to be a valid callback, non-static method SimpleClass::square() should not be called statically in %sarray_map_object1.php on line %d
-
-Strict Standards: Non-static method SimpleClass::square() should not be called statically in %sarray_map_object1.php on line %d
-
-Strict Standards: Non-static method SimpleClass::square() should not be called statically in %sarray_map_object1.php on line %d
 array(2) {
   [0]=>
   int(1)
@@ -161,11 +157,9 @@ NULL
 ChildClass::emptyFunction
 
 Strict Standards: array_map() expects parameter 1 to be a valid callback, non-static method ChildClass::emptyFunction() should not be called statically in %sarray_map_object1.php on line %d
-
-Strict Standards: Non-static method ChildClass::emptyFunction() should not be called statically in %sarray_map_object1.php on line %d
 defined in child
-Strict Standards: Non-static method ChildClass::emptyFunction() should not be called statically in %sarray_map_object1.php on line %d
-defined in childarray(2) {
+defined in child
+array(2) {
   [0]=>
   NULL
   [1]=>
@@ -176,11 +170,9 @@ defined in childarray(2) {
 FinalClass::finalMethod
 
 Strict Standards: array_map() expects parameter 1 to be a valid callback, non-static method FinalClass::finalMethod() should not be called statically in %sarray_map_object1.php on line %d
-
-Strict Standards: Non-static method FinalClass::finalMethod() should not be called statically in %sarray_map_object1.php on line %d
 This function can't be overloaded
-Strict Standards: Non-static method FinalClass::finalMethod() should not be called statically in %sarray_map_object1.php on line %d
-This function can't be overloadedarray(2) {
+This function can't be overloaded
+array(2) {
   [0]=>
   NULL
   [1]=>

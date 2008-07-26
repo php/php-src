@@ -793,7 +793,7 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 			call_user_call->arg_info = NULL;
 			call_user_call->num_args = 0;
 			call_user_call->scope = zobj->ce;
-			call_user_call->fn_flags = 0;
+			call_user_call->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
 			call_user_call->function_name = estrndup(method_name, method_len);
 			call_user_call->pass_rest_by_reference = 0;
 			call_user_call->return_reference = ZEND_RETURN_VALUE;
@@ -919,7 +919,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, char *f
 			call_user_call->arg_info = NULL;
 			call_user_call->num_args = 0;
 			call_user_call->scope = ce;
-			call_user_call->fn_flags = 0;
+			call_user_call->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
 			call_user_call->function_name = estrndup(function_name_strval, function_name_strlen);
 			call_user_call->pass_rest_by_reference = 0;
 			call_user_call->return_reference = ZEND_RETURN_VALUE;
@@ -934,14 +934,14 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, char *f
 			callstatic_user_call->arg_info = NULL;
 			callstatic_user_call->num_args = 0;
 			callstatic_user_call->scope    = ce;
-			callstatic_user_call->fn_flags = ZEND_ACC_STATIC | ZEND_ACC_PUBLIC;
+			callstatic_user_call->fn_flags = ZEND_ACC_STATIC | ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER;
 			callstatic_user_call->function_name = estrndup(function_name_strval, function_name_strlen);
 			callstatic_user_call->pass_rest_by_reference = 0;
 			callstatic_user_call->return_reference       = ZEND_RETURN_VALUE;
 
 			return (zend_function *)callstatic_user_call;
 		} else {
-			zend_error(E_ERROR, "Call to undefined method %s::%s()", ce->name ? ce->name : "", function_name_strval);
+	   		return NULL;
 		}
 	}
 	efree(lc_function_name);

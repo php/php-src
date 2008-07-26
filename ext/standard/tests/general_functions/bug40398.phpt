@@ -77,16 +77,8 @@ new Derived_6('6');
 --EXPECTF--
 Base::__construct(1)
 Base::__construct(2)
-
-Strict Standards: call_user_func_array() expects parameter 1 to be a valid callback, non-static method Base::__construct() cannot be called statically, assuming $this from compatible context Derived_%d in %s on line %d
 Base::__construct(3)
-
-Strict Standards: call_user_func_array() expects parameter 1 to be a valid callback, non-static method Base::__construct() cannot be called statically, assuming $this from compatible context Derived_%d in %s on line %d
 Base::__construct(4)
-
-Strict Standards: call_user_func_array() expects parameter 1 to be a valid callback, non-static method Base::__construct() cannot be called statically, assuming $this from compatible context Derived_%d in %s on line %d
 Base::__construct(5)
-
-Strict Standards: call_user_func_array() expects parameter 1 to be a valid callback, non-static method Base::__construct() cannot be called statically, assuming $this from compatible context Derived_%d in %s on line %d
 Base::__construct(6)
 ===DONE===
