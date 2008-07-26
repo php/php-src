@@ -36,7 +36,6 @@ typedef struct _zend_closure {
 	zend_object    std;
 	zend_function  func;
 	zval          *this_ptr;
-	zend_function *invoke;
 } zend_closure;
 
 static zend_class_entry *zend_ce_closure;
@@ -44,6 +43,7 @@ static zend_object_handlers closure_handlers;
 
 ZEND_METHOD(Closure, __invoke) /* {{{ */
 {
+	zend_function *func = EG(current_execute_data)->function_state.function;
 	zval ***arguments;
 	zval *closure_result_ptr = NULL;
 
@@ -51,16 +51,10 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), arguments) == FAILURE) {
 		efree(arguments);
 		zend_error(E_ERROR, "Cannot get arguments for calling closure");
-		RETURN_FALSE;
-	}
-
-	if (call_user_function_ex(CG(function_table), NULL, this_ptr, &closure_result_ptr, ZEND_NUM_ARGS(), arguments, 1, NULL TSRMLS_CC) == FAILURE) {
-		efree(arguments);
-		RETURN_FALSE;
-	}
-
-	efree(arguments);
-	if (closure_result_ptr) {
+		RETVAL_FALSE;
+	} else if (call_user_function_ex(CG(function_table), NULL, this_ptr, &closure_result_ptr, ZEND_NUM_ARGS(), arguments, 1, NULL TSRMLS_CC) == FAILURE) {
+		RETVAL_FALSE;
+	} else if (closure_result_ptr) {
 		if (Z_ISREF_P(closure_result_ptr) && return_value_ptr) {
 			if (return_value) {
 				zval_ptr_dtor(&return_value);
@@ -70,13 +64,12 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 			RETVAL_ZVAL(closure_result_ptr, 1, 1);
 		}
 	}
-}
-/* }}} */
+	efree(arguments);
 
-const static zend_function_entry closure_functions[] = { /* {{{ */
-	ZEND_ME(Closure, __invoke, NULL, 0)
-	{NULL, NULL, NULL}
-};
+	/* destruct the function also, then - we have allocated it in get_method */
+	efree(func->internal_function.function_name.v);
+	efree(func);
+}
 /* }}} */
 
 static zend_function *zend_closure_get_constructor(zval *object TSRMLS_DC) /* {{{ */
@@ -128,22 +121,21 @@ static zend_function *zend_closure_get_method(zval **object_ptr, zstr method_nam
 		(ZEND_U_EQUAL(type, lc_name, lc_name_len, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1))
 	) {
 		zend_closure *closure = (zend_closure *)zend_object_store_get_object(*object_ptr TSRMLS_CC);
+		zend_function *invoke = (zend_function*)emalloc(sizeof(zend_function));
 
-		if (!closure->invoke) {
-			closure->invoke = (zend_function*)emalloc(sizeof(zend_function));
-			closure->invoke->common = closure->func.common;
-			closure->invoke->type = ZEND_INTERNAL_FUNCTION;
-			closure->invoke->internal_function.handler = ZEND_MN(Closure___invoke);
-			closure->invoke->internal_function.module = 0;
-			closure->invoke->internal_function.scope = zend_ce_closure;
-			if (UG(unicode)) {
-				closure->invoke->internal_function.function_name.u = USTR_MAKE(ZEND_INVOKE_FUNC_NAME);
-			} else {
-				closure->invoke->internal_function.function_name.s = ZEND_INVOKE_FUNC_NAME;
-			}
+		invoke->common = closure->func.common;
+		invoke->type = ZEND_INTERNAL_FUNCTION;
+		invoke->internal_function.fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
+		invoke->internal_function.handler = ZEND_MN(Closure___invoke);
+		invoke->internal_function.module = 0;
+		invoke->internal_function.scope = zend_ce_closure;
+		if (UG(unicode)) {
+			invoke->internal_function.function_name.u = USTR_MAKE(ZEND_INVOKE_FUNC_NAME);
+		} else {
+			invoke->internal_function.function_name.s = estrndup(ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1);
 		}
 		efree(lc_name.v);
-		return (zend_function *)closure->invoke;
+		return invoke;
 	}
 	efree(lc_name.v);
 	return NULL;
@@ -204,13 +196,6 @@ static void zend_closure_free_storage(void *object TSRMLS_DC) /* {{{ */
 		zval_ptr_dtor(&closure->this_ptr);
 	}
 
-	if (closure->invoke) {
-		if (UG(unicode)) {
-			efree(closure->invoke->internal_function.function_name.u);
-		}
-		efree(closure->invoke);
-	}
-
 	efree(closure);
 }
 /* }}} */
@@ -236,7 +221,7 @@ void zend_register_closure_ce(TSRMLS_D) /* {{{ */
 {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(ce, "Closure", closure_functions);
+	INIT_CLASS_ENTRY(ce, "Closure", NULL);
 	zend_ce_closure = zend_register_internal_class(&ce TSRMLS_CC);
 	zend_ce_closure->ce_flags |= ZEND_ACC_FINAL_CLASS;
 	zend_ce_closure->create_object = zend_closure_new;

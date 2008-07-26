@@ -57,7 +57,7 @@ foreach($funcs as $idx => $func)
 <?php exit(0); ?>
 --EXPECTF--
 unicode(22) "MyAutoLoader::notExist"
-Function 'MyAutoLoader::notExist' not found (class 'MyAutoLoader' does not have a method 'notexist')
+Function 'MyAutoLoader::notExist' not found (class 'MyAutoLoader' does not have a method 'notExist')
 
 unicode(22) "MyAutoLoader::noAccess"
 Function 'MyAutoLoader::noAccess' not callable (cannot access protected method MyAutoLoader::noAccess())
@@ -74,7 +74,7 @@ array(2) {
   [1]=>
   unicode(8) "notExist"
 }
-Passed array does not specify an existing static method (class 'MyAutoLoader' does not have a method 'notexist')
+Passed array does not specify an existing static method (class 'MyAutoLoader' does not have a method 'notExist')
 
 array(2) {
   [0]=>
@@ -107,7 +107,7 @@ array(2) {
   [1]=>
   unicode(8) "notExist"
 }
-Passed array does not specify an existing method (class 'MyAutoLoader' does not have a method 'notexist')
+Passed array does not specify an existing method (class 'MyAutoLoader' does not have a method 'notExist')
 
 array(2) {
   [0]=>

@@ -97,12 +97,8 @@ B|who2
 A
 ===FOREIGN===
 parent|who
-
-Strict Standards: call_user_func() expects parameter 1 to be a valid callback, non-static method O::who() should not be called statically, assuming $this from compatible context P in %s on line %d
 O
 P|parent::who
-
-Strict Standards: call_user_func() expects parameter 1 to be a valid callback, non-static method O::who() should not be called statically, assuming $this from compatible context P in %s on line %d
 O
 $this|O::who
 O

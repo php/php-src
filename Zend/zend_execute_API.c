@@ -740,16 +740,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	zend_class_entry *current_called_scope;
 	zend_class_entry *calling_scope = NULL;
 	zend_class_entry *called_scope = NULL;
-	zend_class_entry *check_scope_or_static = NULL;
 	zval *current_this;
 	zend_execute_data execute_data;
-	zval *method_name;
-	zval *params_array;
-	int call_via_handler = 0;
 	char *old_func_name = NULL;
-	unsigned int clen, lcname_len;
-	int fname_len;
-	zstr colon, fname, cname, lcname;
 
 	*fci->retval_ptr_ptr = NULL;
 
@@ -784,304 +777,40 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	}
 
 	if (!fci_cache || !fci_cache->initialized) {
-		if (Z_TYPE_P(fci->function_name) == IS_ARRAY) { /* assume array($obj, $name) couple */
-			zval **tmp_object_ptr, **tmp_real_function_name;
+		zend_fcall_info_cache fci_cache_local;
+		zval callable_name;
+		char *error = NULL;
 
-			if (zend_hash_index_find(Z_ARRVAL_P(fci->function_name), 0, (void **) &tmp_object_ptr) == FAILURE) {
-				return FAILURE;
-			}
-			if (zend_hash_index_find(Z_ARRVAL_P(fci->function_name), 1, (void **) &tmp_real_function_name) == FAILURE) {
-				return FAILURE;
-			}
-			fci->function_name = *tmp_real_function_name;
-			SEPARATE_ZVAL_IF_NOT_REF(tmp_object_ptr);
-			fci->object_pp = tmp_object_ptr;
-			Z_SET_ISREF_PP(fci->object_pp);
-		}
+		if (!fci_cache) {
+			fci_cache = &fci_cache_local;
+ 		}
 
-		if (fci->object_pp && !*fci->object_pp) {
-			fci->object_pp = NULL;
-		}
+		if (!zend_is_callable_ex(fci->function_name, fci->object_pp, IS_CALLABLE_CHECK_SILENT, &callable_name, fci_cache, &error TSRMLS_CC)) {
+			if (error) {
+				zend_error(E_WARNING, "Invalid callback %Z, %s", callable_name, error);
+				efree(error);
+ 			}
+			zval_dtor(&callable_name);
+ 			return FAILURE;
+		} else if (error) {
+			/* Capitalize the first latter of the error message */
+			if (error[0] >= 'a' && error[0] <= 'z') {
+				error[0] += ('A' - 'a');
+ 			}
+			zend_error(E_STRICT, "%s", error);
+			efree(error);
+ 		}
+		zval_dtor(&callable_name);
+	}
 
-		if (fci->object_pp) {
-			if (Z_TYPE_PP(fci->object_pp) == IS_OBJECT
-				&& (!EG(objects_store).object_buckets || !EG(objects_store).object_buckets[Z_OBJ_HANDLE_PP(fci->object_pp)].valid)) {
-				return FAILURE;
-			}
-			/* TBI!! new object handlers */
-			if (Z_TYPE_PP(fci->object_pp) == IS_OBJECT) {
-				if (!IS_ZEND_STD_OBJECT(**fci->object_pp)) {
-					zend_error(E_WARNING, "Cannot use call_user_function on objects without a class entry");
-					return FAILURE;
-				}
-
-				calling_scope = called_scope = Z_OBJCE_PP(fci->object_pp);
-				fci->function_table = &calling_scope->function_table;
-				EX(object) = *fci->object_pp;
-			} else if (Z_TYPE_PP(fci->object_pp) == IS_STRING ||
-				Z_TYPE_PP(fci->object_pp) == IS_UNICODE
-			) {
-				zend_class_entry **ce;
-				int found = FAILURE;
-
-				if (Z_UNILEN_PP(fci->object_pp) == sizeof("self") - 1 &&
-					ZEND_U_EQUAL(Z_TYPE_PP(fci->object_pp), Z_UNIVAL_PP(fci->object_pp), Z_UNILEN_PP(fci->object_pp), "self", sizeof("self") - 1)
-				) {
-					if (!EG(active_op_array) || !EG(active_op_array)->scope) {
-						zend_error(E_ERROR, "Cannot access self:: when no class scope is active");
-					}
-					ce = &(EG(active_op_array)->scope);
-					found = (*ce != NULL?SUCCESS:FAILURE);
-					fci->object_pp = EG(This)?&EG(This):NULL;
-					EX(object) = EG(This);
-					calling_scope = *ce;
-					called_scope = EG(called_scope) ? EG(called_scope) : calling_scope;
-				} else if (EG(active_op_array) &&
-					Z_UNILEN_PP(fci->object_pp) == sizeof("parent") - 1 &&
-					ZEND_U_EQUAL(Z_TYPE_PP(fci->object_pp), Z_UNIVAL_PP(fci->object_pp), Z_UNILEN_PP(fci->object_pp), "parent", sizeof("parent") - 1)
-				) {
-					if (!EG(active_op_array) || !EG(active_op_array)->scope) {
-						zend_error(E_ERROR, "Cannot access parent:: when no class scope is active");
-					}
-					if (!EG(active_op_array)->scope->parent) {
-						zend_error(E_ERROR, "Cannot access parent:: when current class scope has no parent");
-					}
-					ce = &(EG(active_op_array)->scope->parent);
-					found = (*ce != NULL?SUCCESS:FAILURE);
-					fci->object_pp = EG(This)?&EG(This):NULL;
-					EX(object) = EG(This);
-					calling_scope = *ce;
-					called_scope = EG(called_scope) ? EG(called_scope) : calling_scope;
-				} else if (Z_UNILEN_PP(fci->object_pp) == sizeof("static") - 1 &&
-					ZEND_U_EQUAL(Z_TYPE_PP(fci->object_pp), Z_UNIVAL_PP(fci->object_pp), Z_UNILEN_PP(fci->object_pp), "static", sizeof("static") - 1)
-				) {
-					if (!EG(called_scope)) {
-						zend_error(E_ERROR, "Cannot access static:: when no class scope is active");
-					}
-					ce = &(EG(called_scope));
-					found = (EG(called_scope) != NULL?SUCCESS:FAILURE);
-					fci->object_pp = EG(This)?&EG(This):NULL;
-					EX(object) = EG(This);
-					calling_scope = called_scope = EG(called_scope);
-				} else {
-					zend_class_entry *scope;
-					scope = EG(active_op_array) ? EG(active_op_array)->scope : NULL;
-
-					found = zend_u_lookup_class(Z_TYPE_PP(fci->object_pp), Z_UNIVAL_PP(fci->object_pp), Z_UNILEN_PP(fci->object_pp), &ce TSRMLS_CC);
-					if (found == FAILURE) {
-						zend_error(E_ERROR, "Class '%R' not found", Z_TYPE_PP(fci->object_pp), Z_UNIVAL_PP(fci->object_pp));
-					}
-					if (scope && EG(This) &&
-						instanceof_function(Z_OBJCE_P(EG(This)), scope TSRMLS_CC) &&
-						instanceof_function(scope, *ce TSRMLS_CC)) {
-						fci->object_pp = &EG(This);
-						EX(object) = EG(This);
-					} else {
-						fci->object_pp = NULL;
-					}
-					calling_scope = called_scope = *ce;
-				}
-				if (found == FAILURE)
-					return FAILURE;
-
-				fci->function_table = &(*ce)->function_table;
-			} else {
-				zend_error(E_NOTICE, "Non-callable array passed to zend_call_function()");
-				return FAILURE;
-			}
-
-			if (fci->function_table == NULL) {
-				return FAILURE;
-			}
-		}
-
-		if (Z_TYPE_P(fci->function_name) == IS_OBJECT) {
-			if (zend_get_closure(fci->function_name, &calling_scope, &EX(function_state).function, NULL, &fci->object_pp TSRMLS_CC) == SUCCESS) {
-				called_scope = calling_scope;
-				goto init_fci_cache;
-			}
-		} else if (Z_TYPE_P(fci->function_name) != IS_STRING &&
-			Z_TYPE_P(fci->function_name) != IS_UNICODE
-		) {
-			return FAILURE;
-		}
-
-		if (UG(unicode) && Z_TYPE_P(fci->function_name) == IS_STRING) {
-			old_func_name = Z_STRVAL_P(fci->function_name);
-
-			Z_STRVAL_P(fci->function_name) = estrndup(Z_STRVAL_P(fci->function_name), Z_STRLEN_P(fci->function_name));
-			convert_to_unicode(fci->function_name);
-		}
-
-		fname = Z_UNIVAL_P(fci->function_name);
-		fname_len = Z_UNILEN_P(fci->function_name);
-		if (Z_TYPE_P(fci->function_name) == IS_UNICODE) {
-			if (fname.u[0] == ':' && fname.u[0] == ':') {
-				fname.u += 2;
-				fname_len -= 2;
-			}
-		} else {
-			if (fname.s[0] == ':' && fname.s[0] == ':') {
-				fname.s += 2;
-				fname_len -= 2;
-			}
-		}
-		EX(function_state).function = NULL;
-		lcname = zend_u_str_case_fold(Z_TYPE_P(fci->function_name), fname, fname_len, 1, &lcname_len);
-
-		if (!fci->object_pp &&
-			zend_u_hash_find(fci->function_table, Z_TYPE_P(fci->function_name), lcname, lcname_len + 1, (void **) &EX(function_state).function) == SUCCESS
-		) {
-			efree(lcname.v);
-		} else {
-			efree(lcname.v);
-
-			cname = fname;
-
-			if (Z_TYPE_P(fci->function_name) == IS_UNICODE) {
-				if ((colon.u = u_memrchr(fname.u, ':', fname_len)) != NULL &&
-					colon.u > fname.u &&
-					*(colon.u - 1) == ':'
-				) {
-					clen = colon.u - fname.u - 1;
-					fname_len -= (clen + 2);
-					fname.u = colon.u + 1;
-				} else {
-					colon.u = NULL;
-				}
-			} else {
-				if ((colon.s = zend_memrchr(fname.s, ':', fname_len)) != NULL &&
-					colon.s > fname.s &&
-					*(colon.s - 1) == ':'
-				) {
-					clen = colon.s - fname.s - 1;
-					fname_len -= (clen + 2);
-					fname.s = colon.s + 1;
-				} else {
-					colon.s = NULL;
-				}
-			}
-			if (colon.v != NULL) {
-				zend_class_entry **pce, *ce_child = NULL;
-
-				lcname = zend_u_str_case_fold(Z_TYPE_P(fci->function_name), cname, clen, 1, &clen);
-				/* caution: lcname is not '\0' terminated */
-				if (clen == sizeof("self") - 1 &&
-					ZEND_U_EQUAL(Z_TYPE_P(fci->function_name), lcname, clen, "self", sizeof("self") - 1)
-				) {
-					if (!EG(active_op_array) || !EG(active_op_array)->scope) {
-						zend_error(E_ERROR, "Cannot access self:: when no class scope is active");
-					}
-					ce_child = EG(active_op_array) ? EG(active_op_array)->scope : NULL;
-					called_scope = EG(called_scope) ? EG(called_scope) : ce_child;
-				} else if (clen == sizeof("parent") - 1 &&
-					ZEND_U_EQUAL(Z_TYPE_P(fci->function_name), lcname, clen, "parent", sizeof("parent") - 1)
-				) {
-					if (!EG(active_op_array) || !EG(active_op_array)->scope) {
-						zend_error(E_ERROR, "Cannot access parent:: when no class scope is active");
-					}
-					if (!EG(active_op_array)->scope->parent) {
-						zend_error(E_ERROR, "Cannot access parent:: when current class scope has no parent");
-					}
-					ce_child = EG(active_op_array) && EG(active_op_array)->scope ? EG(active_op_array)->scope->parent : NULL;
-					called_scope = EG(called_scope) ? EG(called_scope) : ce_child;
-				} else if (clen == sizeof("static") - 1 &&
-					ZEND_U_EQUAL(Z_TYPE_P(fci->function_name), lcname, clen, "static", sizeof("static") - 1)
-				) {
-					if (!EG(called_scope)) {
-						zend_error(E_ERROR, "Cannot access static:: when no class scope is active");
-					}
-					called_scope = ce_child = EG(called_scope);
-				} else if (zend_u_lookup_class_ex(Z_TYPE_P(fci->function_name), lcname, clen, cname, 0, &pce TSRMLS_CC) == SUCCESS) {
-					called_scope = ce_child = *pce;
-				}
-				efree(lcname.v);
-
-				if (!ce_child) {
-					zend_error(E_ERROR, "Cannot call method %R() or method does not exist", Z_TYPE_P(fci->function_name), Z_UNIVAL_P(fci->function_name));
-					return FAILURE;
-				}
-				check_scope_or_static = calling_scope;
-				fci->function_table = &ce_child->function_table;
-				calling_scope = ce_child;
-			}
-
-			if (fci->object_pp) {
-				if (Z_OBJ_HT_PP(fci->object_pp)->get_method == NULL) {
-					zend_error(E_ERROR, "Object does not support method calls");
-				}
-				EX(function_state).function =
-					Z_OBJ_HT_PP(fci->object_pp)->get_method(fci->object_pp, fname, fname_len TSRMLS_CC);
-				if (EX(function_state).function && calling_scope != EX(function_state).function->common.scope) {
-					zstr function_name_lc = zend_u_str_tolower_dup(Z_TYPE_P(fci->function_name), fname, fname_len);
-					if (zend_u_hash_find(&calling_scope->function_table, Z_TYPE_P(fci->function_name), function_name_lc, fname_len + 1, (void **) &EX(function_state).function) == FAILURE) {
-						efree(function_name_lc.v);
-						zend_error(E_ERROR, "Cannot call method %v::%R() or method does not exist", calling_scope->name, Z_TYPE_P(fci->function_name), fname);
-					}
-					efree(function_name_lc.v);
-				}
-			} else if (calling_scope) {
-				if (calling_scope->get_static_method) {
-					EX(function_state).function = calling_scope->get_static_method(calling_scope, Z_TYPE_P(fci->function_name), fname, fname_len TSRMLS_CC);
-				} else {
-					EX(function_state).function = zend_std_get_static_method(calling_scope, Z_TYPE_P(fci->function_name), fname, fname_len TSRMLS_CC);
-				}
-				
-				if (((zend_internal_function*)EX(function_state).function)->handler == zend_std_call_user_call)  {
-					fci->object_pp = &EG(This);
-				}
-
-				if (check_scope_or_static && EX(function_state).function
-				&& !(EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)
-				&& !instanceof_function(check_scope_or_static, calling_scope TSRMLS_CC)) {
-					zend_error(E_ERROR, "Cannot call method %R() of class %v which is not a derived from %v", Z_TYPE_P(fci->function_name), Z_UNIVAL_P(fci->function_name), calling_scope->name, check_scope_or_static->name);
-					return FAILURE;
-				}
-			}
-		}
-
-		if (EX(function_state).function == NULL) {
-			/* try calling __call */
-			if (calling_scope && calling_scope->__call) {
-				EX(function_state).function = calling_scope->__call;
-				/* prepare params */
-				ALLOC_INIT_ZVAL(method_name);
-				ZVAL_STRINGL(method_name, fname.s, fname_len, 0);
-
-				ALLOC_INIT_ZVAL(params_array);
-				array_init(params_array);
-				call_via_handler = 1;
-			} else {
-				if (old_func_name) {
-					efree(Z_STRVAL_P(fci->function_name));
-					Z_TYPE_P(fci->function_name) = IS_STRING;
-					Z_STRVAL_P(fci->function_name) = old_func_name;
-				}
-				return FAILURE;
-			}
-		}
-
-init_fci_cache:
-		if (fci_cache &&
-			(EX(function_state).function->type != ZEND_INTERNAL_FUNCTION ||
-			((zend_internal_function*)EX(function_state).function)->handler != zend_std_call_user_call)
-		) {
-			fci_cache->function_handler = EX(function_state).function;
-			fci_cache->object_pp = fci->object_pp;
-			fci_cache->calling_scope = calling_scope;
-			fci_cache->called_scope = called_scope;
-			fci_cache->initialized = 1;
-		}
-	} else {
-		EX(function_state).function = fci_cache->function_handler;
-		calling_scope = fci_cache->calling_scope;
-		called_scope = fci_cache->called_scope;
-		fci->object_pp = fci_cache->object_pp;
-		EX(object) = fci->object_pp ? *fci->object_pp : NULL;
-		if (fci->object_pp && *fci->object_pp && Z_TYPE_PP(fci->object_pp) == IS_OBJECT
-			&& (!EG(objects_store).object_buckets || !EG(objects_store).object_buckets[Z_OBJ_HANDLE_PP(fci->object_pp)].valid)) {
-			return FAILURE;
-		}
+	EX(function_state).function = fci_cache->function_handler;
+	calling_scope = fci_cache->calling_scope;
+	called_scope = fci_cache->called_scope;
+	fci->object_pp = fci_cache->object_pp;
+	EX(object) = fci->object_pp ? *fci->object_pp : NULL;
+	if (fci->object_pp && *fci->object_pp && Z_TYPE_PP(fci->object_pp) == IS_OBJECT
+		&& (!EG(objects_store).object_buckets || !EG(objects_store).object_buckets[Z_OBJ_HANDLE_PP(fci->object_pp)].valid)) {
+		return FAILURE;
 	}
 
 	if (EX(function_state).function->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) {
@@ -1096,11 +825,7 @@ init_fci_cache:
 		}
 	}
 
-	if (call_via_handler) {
-		ZEND_VM_STACK_GROW_IF_NEEDED(2 + 1);
-	} else {
-		ZEND_VM_STACK_GROW_IF_NEEDED(fci->param_count + 1);
-	}
+	ZEND_VM_STACK_GROW_IF_NEEDED(fci->param_count + 1);
 
 	for (i=0; i<fci->param_count; i++) {
 		zval *param;
@@ -1122,10 +847,6 @@ init_fci_cache:
 						Z_STRVAL_P(fci->function_name) = old_func_name;
 					}
 
-					if (call_via_handler) {
-						zval_ptr_dtor(&method_name);
-						zval_ptr_dtor(&params_array);
-					}
 					zend_error(E_WARNING, "Parameter %d to %v%s%v() expected to be a reference, value given",
 						i+1,
 						EX(function_state).function->common.scope ? EX(function_state).function->common.scope->name : EMPTY_ZSTR,
@@ -1151,17 +872,7 @@ init_fci_cache:
 			*param = **(fci->params[i]);
 			INIT_PZVAL(param);
 		}
-		if (call_via_handler) {
-			add_next_index_zval(params_array, param);
-		} else {
-			zend_vm_stack_push_nocheck(param TSRMLS_CC);
-		}
-	}
-
-	if (call_via_handler) {
-		zend_vm_stack_push_nocheck(method_name TSRMLS_CC);
-		zend_vm_stack_push_nocheck(params_array TSRMLS_CC);
-		fci->param_count = 2;
+		zend_vm_stack_push_nocheck(param TSRMLS_CC);
 	}
 
 	EX(function_state).arguments = zend_vm_stack_top(TSRMLS_C);
@@ -1199,19 +910,6 @@ init_fci_cache:
 		}
 	} else {
 		EG(This) = NULL;
-		if (calling_scope && !(EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)) {
-			int severity;
-			char *verb;
-			if (EX(function_state).function->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				severity = E_STRICT;
-				verb = "should not";
-			} else {
-				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				severity = E_ERROR;
-				verb = "cannot";
-			}
-			zend_error(severity, "Non-static method %v::%v() %s be called statically", calling_scope->name, EX(function_state).function->common.function_name, verb);
-		}
 	}
 
 	EX(prev_execute_data) = EG(current_execute_data);
@@ -1248,6 +946,8 @@ init_fci_cache:
 		EG(return_value_ptr_ptr)=original_return_value;
 		EG(opline_ptr) = original_opline_ptr;
 	} else {
+		int call_via_handler = (EX(function_state).function->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0;
+
 		ALLOC_INIT_ZVAL(*fci->retval_ptr_ptr);
 		if (EX(function_state).function->common.scope) {
 			EG(scope) = EX(function_state).function->common.scope;
@@ -1263,12 +963,13 @@ init_fci_cache:
 			zval_ptr_dtor(fci->retval_ptr_ptr);
 			*fci->retval_ptr_ptr = NULL;
 		}
+
+		if (call_via_handler) {
+			/* We must re-initialize function again */
+			fci_cache->initialized = 0;
+		}
 	}
 	zend_vm_stack_clear_multiple(TSRMLS_C);
-	if (call_via_handler) {
-		zval_ptr_dtor(&method_name);
-		zval_ptr_dtor(&params_array);
-	}
 
 	if (EG(This)) {
 		zval_ptr_dtor(&EG(This));

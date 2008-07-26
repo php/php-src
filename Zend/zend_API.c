@@ -2704,6 +2704,9 @@ static int zend_is_callable_check_class(zend_uchar utype, zstr name, int name_le
 		} else {
 			fcc->called_scope = EG(called_scope);
 			fcc->calling_scope = EG(scope);
+			if (!fcc->object_pp) {
+				fcc->object_pp = EG(This) ? &EG(This) : NULL;
+			}
 			ret = 1;
 		}
 	} else if (lcname_len == sizeof("parent") - 1 && 
@@ -2715,6 +2718,9 @@ static int zend_is_callable_check_class(zend_uchar utype, zstr name, int name_le
 		} else {
 			fcc->called_scope = EG(called_scope);
 			fcc->calling_scope = EG(scope)->parent;
+			if (!fcc->object_pp) {
+				fcc->object_pp = EG(This) ? &EG(This) : NULL;
+			}
 			ret = 1;
 		}
 	} else if (lcname_len == sizeof("static") - 1 &&
@@ -2724,10 +2730,23 @@ static int zend_is_callable_check_class(zend_uchar utype, zstr name, int name_le
 		} else {
 			fcc->called_scope = EG(called_scope);
 			fcc->calling_scope = EG(called_scope);
+			if (!fcc->object_pp) {
+				fcc->object_pp = EG(This) ? &EG(This) : NULL;
+			}
 			ret = 1;
 		}
 	} else if (zend_u_lookup_class(utype, name, name_len, &pce TSRMLS_CC) == SUCCESS) {
-		fcc->called_scope = fcc->calling_scope = *pce;
+		zend_class_entry *scope = EG(active_op_array) ? EG(active_op_array)->scope : NULL;
+
+		fcc->calling_scope = *pce;
+		if (scope && !fcc->object_pp && EG(This) &&
+		    instanceof_function(Z_OBJCE_P(EG(This)), scope TSRMLS_CC) &&
+		    instanceof_function(scope, fcc->calling_scope TSRMLS_CC)) {
+			fcc->object_pp = &EG(This);
+			fcc->called_scope = Z_OBJCE_PP(fcc->object_pp);
+		} else {
+			fcc->called_scope = fcc->object_pp ? Z_OBJCE_PP(fcc->object_pp) : fcc->calling_scope;
+		}
 		ret = 1;
 	} else {
 		if (error) {
@@ -2749,9 +2768,9 @@ static int zend_is_callable_check_class(zend_uchar utype, zstr name, int name_le
 static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fcall_info_cache *fcc, char **error TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce_org = fcc->calling_scope;
-	int retval;
+	int retval = 0;
 	zstr lmname, mname, colon = NULL_ZSTR;
-	unsigned int clen = 0, mlen;
+	unsigned int clen = 0, lmlen, mlen;
 	zend_class_entry *last_scope;
 	HashTable *ftable;
 	int call_via_handler = 0;
@@ -2769,24 +2788,24 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 			Z_USTRVAL_P(callable)[0] == ':' &&
 			Z_USTRVAL_P(callable)[1] == ':'
 		) {
-			zstr tmp;
-
-			tmp.u = Z_USTRVAL_P(callable) + 2;
-			lmname = zend_u_str_case_fold(IS_UNICODE, tmp, Z_USTRLEN_P(callable)-2, 1, &mlen);
+ 			mlen = Z_USTRLEN_P(callable) - 2;
+			mname.u = Z_USTRVAL_P(callable) + 2;
+			lmname = zend_u_str_case_fold(IS_UNICODE, mname, mlen, 1, &lmlen);
 		} else if (Z_TYPE_P(callable) == IS_STRING &&
 			Z_STRVAL_P(callable)[0] == ':' &&
 			Z_STRVAL_P(callable)[1] == ':'
 		) {
-			zstr tmp;
-
-			tmp.s = Z_STRVAL_P(callable) + 2;
-			lmname = zend_u_str_case_fold(IS_STRING, tmp, Z_STRLEN_P(callable)-2, 1, &mlen);
+ 			mlen = Z_USTRLEN_P(callable) - 2;
+			mname.u = Z_USTRVAL_P(callable) + 2;
+			lmname = zend_u_str_case_fold(IS_STRING, mname, mlen, 1, &lmlen);
 		} else {
-			lmname = zend_u_str_case_fold(Z_TYPE_P(callable), Z_UNIVAL_P(callable), Z_UNILEN_P(callable), 1, &mlen);
+			mlen = Z_UNILEN_P(callable);
+			mname = Z_UNIVAL_P(callable);
+			lmname = zend_u_str_case_fold(Z_TYPE_P(callable), Z_UNIVAL_P(callable), Z_UNILEN_P(callable), 1, &lmlen);
 		}
 		/* Check if function with given name exists.
 		 * This may be a compound name that includes namespace name */
-		if (zend_u_hash_find(EG(function_table), Z_TYPE_P(callable), lmname, mlen+1, (void**)&fcc->function_handler) == SUCCESS) {
+		if (zend_u_hash_find(EG(function_table), Z_TYPE_P(callable), lmname, lmlen+1, (void**)&fcc->function_handler) == SUCCESS) {
 			efree(lmname.v);
 			return 1;
 		}
@@ -2840,53 +2859,52 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 			if (error) zend_spprintf(error, 0, "class '%v' is not a subclass of '%v'", ce_org->name, fcc->calling_scope->name);
 			return 0;
 		}
-		lmname = zend_u_str_case_fold(Z_TYPE_P(callable), mname, mlen, 1, &mlen);
 	} else if (ce_org) {
 		/* Try to fetch find static method of given class. */
-		lmname = zend_u_str_case_fold(Z_TYPE_P(callable), Z_UNIVAL_P(callable), Z_UNILEN_P(callable), 1, &mlen);
+		mlen = Z_UNILEN_P(callable);
+		mname = Z_UNIVAL_P(callable);
 		ftable = &ce_org->function_table;
 		fcc->calling_scope = ce_org;
 	} else {
 		/* We already checked for plain function before. */
-		if (error) zend_spprintf(error, 0, "function '%Z' not found or invalid function name", callable);
+		if (error && !(check_flags & IS_CALLABLE_CHECK_SILENT)) {
+			zend_spprintf(error, 0, "function '%Z' not found or invalid function name", callable);
+		}
 		return 0;
 	}
 
-	retval = zend_u_hash_find(ftable, Z_TYPE_P(callable), lmname, mlen+1, (void**)&fcc->function_handler) == SUCCESS ? 1 : 0;
+	lmname = zend_u_str_case_fold(Z_TYPE_P(callable), mname, mlen, 1, &lmlen);
+	if (zend_u_hash_find(ftable, Z_TYPE_P(callable), lmname, lmlen+1, (void**)&fcc->function_handler) == SUCCESS) {
+		retval = 1;
+	} else if (fcc->object_pp && Z_OBJ_HT_PP(fcc->object_pp)->get_method) {
+		zstr method = mname;
+		int method_len = mlen;
 
-	if (!retval) {
-		if (fcc->object_pp && fcc->calling_scope && fcc->calling_scope->__call != 0) {
-			retval = 1;
-			call_via_handler = 1;
-			fcc->function_handler = fcc->calling_scope->__call;
-		} else {
-			if (!fcc->object_pp && fcc->calling_scope && (fcc->calling_scope->__callstatic || fcc->calling_scope->__call)) {
-				if (fcc->calling_scope->__call &&
-					EG(This) &&
-		    		Z_OBJ_HT_P(EG(This))->get_class_entry &&
-		    		instanceof_function(Z_OBJCE_P(EG(This)), fcc->calling_scope TSRMLS_CC)) {
-					retval = 1;
-					call_via_handler = 1;
-					fcc->function_handler = fcc->calling_scope->__call;
-					fcc->object_pp = &EG(This);
-				} else if (fcc->calling_scope->__callstatic) {
-					retval = 1;
-					call_via_handler = 1;
-					fcc->function_handler = fcc->calling_scope->__callstatic;
-				}
-			}
-
-			if (retval == 0) {
-				if (fcc->calling_scope) {
-					if (error) zend_spprintf(error, 0, "class '%v' does not have a method '%v'", fcc->calling_scope->name, lmname);
-				} else {
-					if (error) zend_spprintf(error, 0, "function '%v' does not exist", lmname);
-				}
-			}
+		if (UG(unicode) && Z_TYPE_P(callable) == IS_STRING) {
+			zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &method.u, &method_len, mname.s, mlen TSRMLS_CC);
+		} else if (!UG(unicode) && Z_TYPE_P(callable) == IS_UNICODE) {
+			zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &method.s, &method_len, mname.u, mlen TSRMLS_CC);
+		}	
+		fcc->function_handler = Z_OBJ_HT_PP(fcc->object_pp)->get_method(fcc->object_pp, method, method_len TSRMLS_CC);
+		if (method.v != mname.v) {
+			efree(method.v);
 		}
-	} else {
-		if (fcc->calling_scope) {
-			if (!fcc->object_pp && !(fcc->function_handler->common.fn_flags & ZEND_ACC_STATIC)) {
+		retval = fcc->function_handler ? 1 : 0;
+		call_via_handler = 1;
+	} else if (fcc->calling_scope) {
+		if (fcc->calling_scope->get_static_method) {
+			fcc->function_handler = fcc->calling_scope->get_static_method(fcc->calling_scope, Z_TYPE_P(callable), mname, mlen TSRMLS_CC);
+		} else {
+			fcc->function_handler = zend_std_get_static_method(fcc->calling_scope, Z_TYPE_P(callable), mname, mlen TSRMLS_CC);
+		}
+		retval = fcc->function_handler ? 1 : 0;
+		call_via_handler = 1;
+	}
+	efree(lmname.v);
+
+	if (retval) {
+		if (fcc->calling_scope && !call_via_handler) {
+ 			if (!fcc->object_pp && !(fcc->function_handler->common.fn_flags & ZEND_ACC_STATIC)) {
 				int severity;
 				char *verb;
 				if (fcc->function_handler->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
@@ -2917,7 +2935,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 			}
 			if (retval && (check_flags & IS_CALLABLE_CHECK_NO_ACCESS) == 0) {
 				if (fcc->function_handler->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-					if (!zend_check_private(fcc->function_handler, fcc->object_pp ? Z_OBJCE_PP(fcc->object_pp) : EG(scope), lmname, mlen TSRMLS_CC)) {
+					if (!zend_check_private(fcc->function_handler, fcc->object_pp ? Z_OBJCE_PP(fcc->object_pp) : EG(scope), mname, mlen TSRMLS_CC)) {
 						if (error) {
 							if (*error) {
 								efree(*error);
@@ -2939,20 +2957,26 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 				}
 			}
 		}
+	} else if (error && !(check_flags & IS_CALLABLE_CHECK_SILENT)) {
+		if (fcc->calling_scope) {
+			if (error) zend_spprintf(error, 0, "class '%v' does not have a method '%R'", fcc->calling_scope->name, Z_TYPE_P(callable), mname);
+		} else {
+			if (error) zend_spprintf(error, 0, "function '%R' does not exist", Z_TYPE_P(callable), mname);
+		}
 	}
 	if (fcc->object_pp) {
 		fcc->called_scope = Z_OBJCE_PP(fcc->object_pp);
 	}
-	efree(lmname.v);
-	if (retval && !call_via_handler) {
+	if (retval) {
 		fcc->initialized = 1;
 	}
 	return retval;
 }
 /* }}} */
 
-ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *callable_name, zend_fcall_info_cache *fcc, char **error TSRMLS_DC) /* {{{ */
+ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval **object_pp, uint check_flags, zval *callable_name, zend_fcall_info_cache *fcc, char **error TSRMLS_DC) /* {{{ */
 {
+	zend_bool ret;
 	zend_fcall_info_cache fcc_local;
 
 	if (callable_name) {
@@ -2975,16 +2999,71 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *c
 	switch (Z_TYPE_P(callable)) {
 		case IS_STRING:
 		case IS_UNICODE:
-			if (callable_name) {
+			if (object_pp && *object_pp) {
+				fcc->object_pp = object_pp;
+				fcc->calling_scope = Z_OBJCE_PP(object_pp);
+				if (callable_name) {
+					if (UG(unicode)) {
+						Z_TYPE_P(callable_name) = IS_UNICODE;
+						Z_USTRLEN_P(callable_name) = fcc->calling_scope->name_length + Z_UNILEN_P(callable) + 2;
+						Z_USTRVAL_P(callable_name) = eumalloc(Z_USTRLEN_P(callable_name)+1);
+						memcpy(Z_USTRVAL_P(callable_name), fcc->calling_scope->name.u, UBYTES(fcc->calling_scope->name_length));
+						Z_USTRVAL_P(callable_name)[fcc->calling_scope->name_length] = ':';
+						Z_USTRVAL_P(callable_name)[fcc->calling_scope->name_length+1] = ':';
+						if (Z_TYPE_P(callable) == IS_UNICODE) {
+							u_memcpy(Z_USTRVAL_P(callable_name)+fcc->calling_scope->name_length+2, Z_USTRVAL_P(callable), Z_USTRLEN_P(callable)+1);
+						} else {
+							zval *method = callable;
+							zval copy;
+							int use_copy;
+
+							zend_make_unicode_zval(method, &copy, &use_copy);
+							u_memcpy(Z_USTRVAL_P(callable_name)+fcc->calling_scope->name_length+2, Z_USTRVAL(copy), Z_USTRLEN(copy)+1);
+							zval_dtor(&copy);
+						}
+					} else {
+						Z_TYPE_P(callable_name) = IS_STRING;
+						Z_STRLEN_P(callable_name) = fcc->calling_scope->name_length + Z_UNILEN_P(callable) + 2;
+						Z_STRVAL_P(callable_name) = emalloc(Z_STRLEN_P(callable_name)+1);
+						memcpy(Z_STRVAL_P(callable_name), fcc->calling_scope->name.s, fcc->calling_scope->name_length);
+						Z_STRVAL_P(callable_name)[fcc->calling_scope->name_length] = ':';
+						Z_STRVAL_P(callable_name)[fcc->calling_scope->name_length+1] = ':';
+						if (Z_TYPE_P(callable) == IS_STRING) {
+							memcpy(Z_STRVAL_P(callable_name)+fcc->calling_scope->name_length+2, Z_STRVAL_P(callable), Z_STRLEN_P(callable)+1);
+						} else {
+							zval *method = callable;
+							zval copy;
+							int use_copy;
+
+							zend_make_string_zval(method, &copy, &use_copy);
+							memcpy(Z_STRVAL_P(callable_name)+fcc->calling_scope->name_length+2, Z_STRVAL(copy), Z_STRLEN(copy)+1);
+							zval_dtor(&copy);
+						}
+					}
+				}
+			} else if (callable_name) {
 				*callable_name = *callable;
 				zval_copy_ctor(callable_name);
 				convert_to_text(callable_name);
 			}
 			if (check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY) {
+				fcc->called_scope = fcc->calling_scope;
 				return 1;
 			}
 
-			return zend_is_callable_check_func(check_flags, callable, fcc, error TSRMLS_CC);
+			ret = zend_is_callable_check_func(check_flags, callable, fcc, error TSRMLS_CC);
+			if (fcc == &fcc_local &&
+			    fcc->function_handler &&
+				((fcc->function_handler->type == ZEND_INTERNAL_FUNCTION &&
+			      (fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER)) ||
+			     fcc->function_handler->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY ||
+			     fcc->function_handler->type == ZEND_OVERLOADED_FUNCTION)) {
+				if (fcc->function_handler->type != ZEND_OVERLOADED_FUNCTION) {
+					efree(fcc->function_handler->common.function_name.v);
+				}
+				efree(fcc->function_handler);
+			}
+			return ret;
 
 		case IS_ARRAY:
 			{
@@ -3113,7 +3192,20 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *c
 						}
 					}
 
-					return zend_is_callable_check_func(check_flags, *method, fcc, error TSRMLS_CC);
+					ret = zend_is_callable_check_func(check_flags, *method, fcc, error TSRMLS_CC);
+					if (fcc == &fcc_local &&
+					    fcc->function_handler &&
+						((fcc->function_handler->type == ZEND_INTERNAL_FUNCTION &&
+					      (fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER)) ||
+					     fcc->function_handler->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY ||
+					     fcc->function_handler->type == ZEND_OVERLOADED_FUNCTION)) {
+						if (fcc->function_handler->type != ZEND_OVERLOADED_FUNCTION) {
+							efree(fcc->function_handler->common.function_name.v);
+						}
+						efree(fcc->function_handler);
+					}
+					return ret;
+
 				} else {
 					if (zend_hash_num_elements(Z_ARRVAL_P(callable)) == 2) {
 						if (!obj || (Z_TYPE_PP(obj) != IS_OBJECT && Z_TYPE_PP(obj) != IS_STRING && Z_TYPE_PP(obj) != IS_UNICODE)) {
@@ -3171,7 +3263,7 @@ ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, zval *call
 {
 	TSRMLS_FETCH();
 
-	return zend_is_callable_ex(callable, check_flags, callable_name, NULL, NULL TSRMLS_CC);
+	return zend_is_callable_ex(callable, NULL, check_flags, callable_name, NULL, NULL TSRMLS_CC);
 }
 /* }}} */
 
@@ -3179,7 +3271,7 @@ ZEND_API zend_bool zend_make_callable(zval *callable, zval *callable_name TSRMLS
 {
 	zend_fcall_info_cache fcc;
 
-	if (zend_is_callable_ex(callable, IS_CALLABLE_STRICT, callable_name, &fcc, NULL TSRMLS_CC)) {
+	if (zend_is_callable_ex(callable, NULL, IS_CALLABLE_STRICT, callable_name, &fcc, NULL TSRMLS_CC)) {
 		if ((Z_TYPE_P(callable) == IS_STRING ||
 		     Z_TYPE_P(callable) == IS_UNICODE) &&
 		    fcc.calling_scope) {
@@ -3189,6 +3281,16 @@ ZEND_API zend_bool zend_make_callable(zval *callable, zval *callable_name TSRMLS
 			add_next_index_text(callable, fcc.calling_scope->name, 1);
 			add_next_index_text(callable, fcc.function_handler->common.function_name, 1);
 		}
+		if (fcc.function_handler &&
+			((fcc.function_handler->type == ZEND_INTERNAL_FUNCTION &&
+		      (fcc.function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER)) ||
+		     fcc.function_handler->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY ||
+		     fcc.function_handler->type == ZEND_OVERLOADED_FUNCTION)) {
+			if (fcc.function_handler->type != ZEND_OVERLOADED_FUNCTION) {
+				efree(fcc.function_handler->common.function_name.v);
+			}
+			efree(fcc.function_handler);
+		}
 		return 1;
 	}
 	return 0;
@@ -3197,7 +3299,7 @@ ZEND_API zend_bool zend_make_callable(zval *callable, zval *callable_name TSRMLS
 
 ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval *callable_name, char **error TSRMLS_DC) /* {{{ */
 {
-	if (!zend_is_callable_ex(callable, check_flags, callable_name, fcc, error TSRMLS_CC)) {
+	if (!zend_is_callable_ex(callable, NULL, check_flags, callable_name, fcc, error TSRMLS_CC)) {
 		return FAILURE;
 	}
 

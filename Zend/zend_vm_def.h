@@ -2035,6 +2035,9 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 			} else {
 				EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 			}
+			if (!EX(fbc)) {
+				zend_error(E_ERROR, "Call to undefined method %v::%R()", ce->name, function_name_type, function_name_strval);
+			}
 		}
 
 		if (OP2_TYPE != IS_CONST) {
