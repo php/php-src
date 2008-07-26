@@ -600,6 +600,11 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, zval 
 				*retval = EG(uninitialized_zval_ptr);
 				PZVAL_LOCK(*retval);
 			}
+			if (value_op->op_type == IS_TMP_VAR) {
+				FREE_ZVAL(value);
+			} else if (value_op->op_type == IS_CONST) {
+				zval_ptr_dtor(&value);
+			}
 			FREE_OP(free_value);
 			return;
 		}
