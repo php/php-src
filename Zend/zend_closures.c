@@ -305,6 +305,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 			closure->this_ptr = this_ptr;
 			Z_ADDREF_P(this_ptr);
 		} else {
+			closure->func.common.fn_flags |= ZEND_ACC_STATIC;
 			closure->this_ptr = NULL;
 		}
 	} else {
