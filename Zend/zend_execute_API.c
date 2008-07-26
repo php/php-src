@@ -945,7 +945,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		EG(active_op_array) = original_op_array;
 		EG(return_value_ptr_ptr)=original_return_value;
 		EG(opline_ptr) = original_opline_ptr;
-	} else {
+	} else if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {
 		int call_via_handler = (EX(function_state).function->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0;
 
 		ALLOC_INIT_ZVAL(*fci->retval_ptr_ptr);
@@ -967,6 +967,26 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		if (call_via_handler) {
 			/* We must re-initialize function again */
 			fci_cache->initialized = 0;
+		}
+	} else { /* ZEND_OVERLOADED_FUNCTION */
+
+		ALLOC_INIT_ZVAL(*fci->retval_ptr_ptr);
+
+			/* Not sure what should be done here if it's a static method */
+		if (fci->object_pp) {
+			Z_OBJ_HT_PP(fci->object_pp)->call_method(EX(function_state).function->common.function_name, fci->param_count, *fci->retval_ptr_ptr, fci->retval_ptr_ptr, *fci->object_pp, 1 TSRMLS_CC);
+		} else {
+			zend_error_noreturn(E_ERROR, "Cannot call overloaded function for non-object");
+		}
+
+		if (EX(function_state).function->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
+			efree(EX(function_state).function->common.function_name.v);
+		}
+		efree(EX(function_state).function);
+
+		if (EG(exception) && fci->retval_ptr_ptr) {
+			zval_ptr_dtor(fci->retval_ptr_ptr);
+			*fci->retval_ptr_ptr = NULL;
 		}
 	}
 	zend_vm_stack_clear_multiple(TSRMLS_C);
