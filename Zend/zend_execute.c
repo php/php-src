@@ -1175,6 +1175,7 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 			}
 			object_init(container);
 		} else {
+			zend_error(E_WARNING, "Attempt to modify property of non-object");
 			result->var.ptr_ptr = &EG(error_zval_ptr);
 			PZVAL_LOCK(EG(error_zval_ptr));
 			return;
