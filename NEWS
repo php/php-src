@@ -106,6 +106,24 @@ PHP                                                                        NEWS
   . Added "params" as optional parameter for stream_context_create(). (Sara)
   . Added ability to use stream wrappers in include_path. (Gregory, Dmitry)
 
+- Improved OCI8 extension:
+  . Added Database Resident Connection Pooling (DRCP) and Fast
+    Application Notification (FAN) support. (Oracle Corp.)
+  . Added support for Oracle External Authentication (not supported
+    on Windows). (Oracle Corp.)
+  . Improve persistent connection handling of restarted DBs.
+  . Added SQLT_AFC (aka CHAR datatype) support to oci_bind_by_name.
+    (Chris Jones)
+  . Fixed bug #41069 (Seg fault with query over DB link). (Chris Jones)
+  . Fixed define of SQLT_BDOUBLE and SQLT_BFLOAT constants with Oracle
+    10g ORACLE_HOME builds. (Chris Jones)
+  . Changed default value of oci8.default_prefetch from 10 to 100.
+    (Chris Jones)
+  . Fixed PECL bug #12431 (OCI8 ping functionality is broken). (Oracle
+    Corp.)
+  . Allow building (e.g from PECL) the PHP 5.3-based OCI8 code with
+    PHP 4.3.9 onwards. (Chris Jones)
+
 - Improved OpenSSL extension: (Dmitry)
   . Added support for OpenSSL digest and cipher functions.
   . Added access to internal values of DSA, RSA and DH keys.
@@ -207,10 +225,6 @@ PHP                                                                        NEWS
   (David Soria Parra, Jani)
 - Added support for optional values, and = as separator, in getopt(). (Hannes)
 - Added lcfirst() function. (David C)
-- Added OCI8 Database Resident Connection Pooling (DRCP) and Fast
-  Application Notification (FAN) support (Oracle Corp.)
-- Added OCI8 SQLT_AFC (aka CHAR datatype) support to oci_bind_by_name.
-  (Chris Jones)
 - Added PREG_BAD_UTF8_OFFSET_ERROR constant. (Nuno)
 - Added native support for asinh(), acosh(), atanh(), log1p() and expm1().
   (Kalle)
@@ -221,15 +235,14 @@ PHP                                                                        NEWS
   to different characters with cp1251 and cp866. (Scott)
 - Fixed an issue in date() where a : was printed for the O modifier after a P
   modifier was used. (Derick)
-- Fixed exec() on Windows to not eat the first and last double quotes. (Scott) 
+- Fixed exec() on Windows to not eat the first and last double quotes. (Scott)
 
 - Fixed PECL bug #12794 (PDOStatement->nextRowset() doesn¿t work). (Johannes)
-- Fixed PECL bug #12431 (OCI8 ping functionality is broken). (Oracle Corp.)
 - Fixed PECL bug #12401 (Add support for ATTR_FETCH_TABLE_NAMES). (Johannes)
 
 - Fixed bug #45622 (isset($arrayObject->p) misbehaves with ArrayObject::
   ARRAY_AS_PROPS set). (robin_fernandes at uk dot ibm dot com, Arnaud)
-- Fixed bug #45614 (ArrayIterator::current(), ::key() can show 1st private 
+- Fixed bug #45614 (ArrayIterator::current(), ::key() can show 1st private
   prop of wrapped object). (robin_fernandes at uk dot ibm dot com, Arnaud)
 - Fixed bug #45571 (ReflectionClass::export() shows superclasses' private
   static methods). (robin_fernandes at uk dot ibm dot com)
@@ -261,7 +274,7 @@ PHP                                                                        NEWS
   (frode at coretrek dot com, Nuno)
 - Fixed bug #44301 (Segfault when an exception is thrown on persistent
   connections). (Martin Jansen)
-- Fixed bug #44257 (timelib_tz_lookup_table must use float for gmtoffset). 
+- Fixed bug #44257 (timelib_tz_lookup_table must use float for gmtoffset).
   (Derick, iuri dot fiedoruk at hp dot com).
 - Fixed bug #44214 (Crash using preg_replace_callback() and global variable).
   (Nuno, Scott)
@@ -297,7 +310,7 @@ PHP                                                                        NEWS
 - Fixed bug #42737 (preg_split('//u') triggers a E_NOTICE with newlines).
   (Nuno)
 - Fixed bug #42736 (xmlrpc_server_call_method() crashes). (Tony)
-- Fixed bug #42663 (gzinflate() try to allocate all memory with truncated 
+- Fixed bug #42663 (gzinflate() try to allocate all memory with truncated
   data). (Arnaud)
 - Fixed bug #42657 (ini_get() returns incorrect value when default is NULL).
   (Jani, Scott)
@@ -322,7 +335,6 @@ PHP                                                                        NEWS
   (Lars W)
 - Fixed bug #41135 (PDO SQLite driver binds blobs as strings,
   use sqlite3_bind_blob() to stop errors with null bytes). (Scott)
-- Fixed bug #41069 (OCI8: Seg fault with query over DB link) (Chris Jones)
 - Fixed bug #39822 (new PDO() doesn't work with firebird). (Lars W)
 - Fixed bug #39700 (NUMERIC error when result precision are 7,8 or 12-14 ).
   (Lars W)
@@ -333,7 +345,7 @@ PHP                                                                        NEWS
 - Fixed bug #39127 (Old-style constructor fallbacks produce strange results).
   (Tony)
 - Fixed bug #39056 (Interbase NUMERIC data type error). (Lars W)
-- Fixed bug #39018 (Error control operator '@' fails to suppress "Uninitialized 
+- Fixed bug #39018 (Error control operator '@' fails to suppress "Uninitialized
   string offset"). (Felipe)
 - Fixed bug #38468 (Unexpected creation of cycle). (Dmitry)
 - Fixed bug #37964 (Reflection shows private methods of parent class).
@@ -1943,7 +1955,7 @@ PHP                                                                        NEWS
   (Pierre)
 - Fixed bug #36689 (Removed arbitrary limit on the length of syslog messages).
   (Ilia)
-- Fixed bug #36656 (http_build_query generates invalid URIs due to use of 
+- Fixed bug #36656 (http_build_query generates invalid URIs due to use of
   square brackets). (Mike)
 - Fixed bug #36638 (strtotime() returns false when 2nd argument < 1). (Derick)
 - Fixed bug #36629 (SoapServer::handle() exits on SOAP faults). (Dmitry)
