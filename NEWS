@@ -178,7 +178,7 @@ PHP                                                                        NEWS
   . timezone_location_get() / DateTimezone::getLocation() for retrieving
     location information from timezones.
   . date_timestamp_set() / DateTime::setTimestamp() to set a Unix timestamp
-    without invoking the date parser. (Scott)
+    without invoking the date parser. (Scott, Derick)
   . date_timestamp_get() / DateTime::getTimestamp() to retrieve the Unix
     timestamp belonging to a date object.
   . two optional parameters to timezone_transitions_get() /
