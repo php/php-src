@@ -1,3 +1,205 @@
+2008-07-26  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/sqlite3/php_sqlite3.h
+      ext/sqlite3/php_sqlite3_structs.h
+      ext/sqlite3/php_sqlite3_structs.h
+      ext/sqlite3/sqlite3.c:
+      - Fix build
+
+    * ext/sqlite3/config.m4:
+      - Fixed build with bundled library
+
+    * ext/sqlite3/tests/sqlite3_12_unfinalized_stmt_cleanup.diff
+      ext/sqlite3/tests/sqlite3_12_unfinalized_stmt_cleanup.exp
+      ext/sqlite3/tests/sqlite3_12_unfinalized_stmt_cleanup.log
+      ext/sqlite3/tests/sqlite3_12_unfinalized_stmt_cleanup.php
+      ext/sqlite3/tests/sqlite3_25_create_aggregate.diff
+      ext/sqlite3/tests/sqlite3_25_create_aggregate.exp
+      ext/sqlite3/tests/sqlite3_25_create_aggregate.log
+      ext/sqlite3/tests/sqlite3_25_create_aggregate.php:
+      jfc..*SIGH*
+
+    * (PHP_5_3)
+      ext/pdo_mysql/config.m4:
+      - Removed merge typos
+
+    * ext/sqlite3/config.m4:
+      NO Winblows EOLs here!!!
+
+    * ext/sqlite3/sqlite3.c:
+      fix folding tag
+
+    * ext/standard/credits_ext.h
+      ext/standard/credits_ext.h:
+      update credits
+
+    * ext/sqlite3/php_sqlite3.h
+      ext/sqlite3/sqlite3.c:
+      - Fix ws/cs (please do not invent your own CS...) and weird EOLs
+
+    * header:
+      correct year and version
+
+    * ext/sqlite3/CREDITS:
+      - Fix EOLs
+
+    * ext/intl/CREDITS:
+      tune
+
+    * ext/sqlite3/config.m4
+      ext/sqlite3/config.m4:
+      - No tabs.
+
+2008-07-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_execute_API.c:
+      -** empty log message ***
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_execute_API.c:
+      Added checks for destroied objects
+
+    * ZendEngine2/tests/bug44660.phpt
+      ZendEngine2/tests/bug44660.phpt:
+      
+      file bug44660.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug36303.phpt
+      ZendEngine2/tests/bug36303.phpt
+      ZendEngine2/tests/bug44660.phpt:
+      Fixed bug #44660 (Indexed and reference assignment to propery of non-object
+      don't trigger warning)
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c:
+      Added support for overloaded functions (e.g. COM) in call_user_func().
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_highlight.c
+      ZendEngine2/zend_highlight.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner_defs.h
+      ZendEngine2/zend_language_scanner_defs.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug35655.phpt
+      ZendEngine2/tests/bug35655.phpt
+      ZendEngine2/tests/heredoc_011.phpt
+      ZendEngine2/tests/heredoc_011.phpt
+      ZendEngine2/tests/nowdoc_013.phpt
+      ZendEngine2/tests/nowdoc_013.phpt
+      ZendEngine2/tests/nowdoc_014.phpt
+      ZendEngine2/tests/nowdoc_014.phpt
+      ext/tokenizer/tokenizer.c
+      ext/tokenizer/tokenizer.c
+      ext/tokenizer/tokenizer_data.c
+      tests/strings/bug26703.phpt
+      tests/strings/bug26703.phpt:
+      . Added support for using static HEREDOCs to initialize static variables
+      and class members or constants. (Matt)
+      . Improved syntax highlighting and consistency for variables in
+      double-quoted strings and literal text in HEREDOCs and backticks. (Matt)
+      . Optimized interpolated strings to use one less opcode. (Matt)
+
+    * ZendEngine2/zend_closures.c
+      ZendEngine2/zend_closures.c
+      ZendEngine2/tests/closure_023.phpt:
+      Fixed bug #45608 (closures don't work in static methods)
+
+    * ZendEngine2/tests/closure_023.phpt
+      ZendEngine2/tests/closure_023.phpt:
+      
+      file closure_023.phpt was initially added on branch PHP_5_3.
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h:
+      Fixed crashes and memory leak for objects with NULL
+      write_property/has_property/unset_property handlers
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_closures.c
+      ZendEngine2/zend_closures.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug32290.phpt
+      ZendEngine2/tests/bug32290.phpt
+      ZendEngine2/tests/objects_027.phpt
+      ZendEngine2/tests/objects_027.phpt
+      ext/reflection/php_reflection.c
+      ext/reflection/php_reflection.c
+      ext/spl/php_spl.c
+      ext/spl/php_spl.c
+      ext/spl/tests/spl_autoload_007.phpt
+      ext/spl/tests/spl_autoload_007.phpt
+      ext/standard/tests/array/array_map_object1.phpt
+      ext/standard/tests/array/array_map_object1.phpt
+      ext/standard/tests/array/array_map_object3.phpt
+      ext/standard/tests/array/array_map_object3.phpt
+      ext/standard/tests/general_functions/bug40398.phpt
+      ext/standard/tests/general_functions/bug40398.phpt
+      ext/standard/tests/general_functions/callbacks_001.phpt
+      ext/standard/tests/general_functions/callbacks_001.phpt:
+      Fixed is_callable/call_user_func mess that had done different things for
+      very similar arguments e.g. array("A","B") and "A::B"
+
+2008-07-26  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/spl/spl_array.c
+      ext/spl/tests/bug45622.phpt:
+      MFH: Fix bug #45622 (isset($arrayObject->p) misbehaves with
+      ArrayObject::ARRAY_AS_PROPS set)
+
+    * ext/spl/spl_array.c
+      ext/spl/tests/bug45622.phpt
+      ext/spl/tests/bug45622.phpt:
+      Fix bug #45622 (isset($arrayObject->p) misbehaves with
+      ArrayObject::ARRAY_AS_PROPS set)
+
+2008-07-26  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/sqlite3/CREDITS
+      ext/sqlite3/config.m4
+      ext/sqlite3/config.w32
+      ext/sqlite3/php_sqlite3.h
+      ext/sqlite3/sqlite3.c:
+      Forgot to add these earlier
+      SQLite3 extension, still has 2 failing tests that will be sorted shortly.
+
 2008-07-25  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
