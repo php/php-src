@@ -11,8 +11,8 @@ dnl ## Diversion 2 is the initial checking of OS features, programs,
 dnl ## libraries and so on.
 
 dnl ## In diversion 3 we check for compile-time options to the PHP
-dnl ## core and how to deal with different system dependencies.  This
-dnl ## includes what regex library is used and whether debugging or short
+dnl ## core and how to deal with different system dependencies.
+dnl ## This includes what regex library is used and whether debugging or short
 dnl ## tags are enabled, and the default behaviour of php.ini options.
 dnl ## This is also where an SAPI interface is selected (choosing between
 dnl ## Apache module, CGI etc.)
@@ -71,10 +71,10 @@ echo "#define PHP_VERSION \"$PHP_VERSION\"" >> php_version.h.new
 echo "#define PHP_VERSION_ID $PHP_VERSION_ID" >> php_version.h.new
 cmp php_version.h.new $srcdir/main/php_version.h >/dev/null 2>&1
 if test $? -ne 0 ; then
-    rm -f $srcdir/main/php_version.h && mv php_version.h.new $srcdir/main/php_version.h && \
-    echo 'Updated main/php_version.h'
+  rm -f $srcdir/main/php_version.h && mv php_version.h.new $srcdir/main/php_version.h && \
+  echo 'Updated main/php_version.h'
 else
-    rm -f php_version.h.new
+  rm -f php_version.h.new
 fi
 
 
@@ -122,6 +122,21 @@ dnl or the contents of libs.
 $php_shtool mkdir -p libs
 rm -f libs/*
 
+dnl Darwin 9 hack
+dnl Because the default debugging format used by Apple's GCC on Mac OS 10.5
+dnl causes errors in all current and past versions of Autoconf, we do a little
+dnl messing with the CFLAGS here to trick it.
+php_did_darwin9_cheat=0
+case $host_alias in
+*darwin9*)
+  hasg=`echo $CFLAGS | grep -E '(^-g)|([[:space:]]-g)'`
+  if test x"$hasg" = "x"; then
+    php_did_darwin9_cheat=1
+    CFLAGS="$CFLAGS -gstabs"
+  fi
+  ;;
+esac
+
 dnl Checks for programs.
 dnl -------------------------------------------------------------------------
 
@@ -146,10 +161,10 @@ dnl check for -R, etc. switch
 PHP_RUNPATH_SWITCH
 
 dnl Checks for some support/generator progs
-PHP_PROG_RE2C
 PHP_PROG_AWK
 PHP_PROG_BISON
 PHP_PROG_LEX
+PHP_PROG_RE2C
 
 dnl Check if bison generated files exist when bison does not..
 case $php_cv_bison_version in
@@ -165,7 +180,7 @@ dnl -------------------------------------------------------------------------
 
 dnl See bug #28605
 case $host_cpu in
-alpha*)
+  alpha*)
     if test "$GCC" = "yes"; then
       CFLAGS="$CFLAGS -mieee"
     else
@@ -174,16 +189,32 @@ alpha*)
     ;;
 esac
 
+dnl activate some gcc specific optimizations for gcc >= 4
+if test "$GCC" = "yes"; then
+  case $host_alias in
+  *darwin*)
+    GCC_MAJOR_VERSION=`$CC -dumpversion | /usr/bin/sed -nE '1s/([[0-9]]+)\.[[0-9]]+\..*/\1/;1p'`
+    ;;
+  *)
+    GCC_MAJOR_VERSION=`$CC --version | $SED -n '1s/[[^0-9]]*//;1s/\..*//;1p'`
+    ;;
+  esac
+  if test $GCC_MAJOR_VERSION -ge 4; then
+    CFLAGS="$CFLAGS -fvisibility=hidden"
+  fi
+fi
+
 case $host_alias in
-*solaris*)
+  *solaris*)
     CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
     if test "${enable_libgcc+set}" != "set" && test "$GCC" = "yes"; then
       enable_libgcc=yes
     fi
     ;;
-*dgux*)
-    CPPFLAGS="$CPPFLAGS -D_BSD_TIMEOFDAY_FLAVOR";;
-*darwin*|*rhapsody*)
+  *dgux*)
+    CPPFLAGS="$CPPFLAGS -D_BSD_TIMEOFDAY_FLAVOR"
+    ;;
+  *darwin*|*rhapsody*)
     if test -n "$GCC"; then
       PHP_CHECK_GCC_ARG(-no-cpp-precomp, gcc_no_cpp_precomp=yes)
       if test "$gcc_no_cpp_precomp" = "yes"; then
@@ -191,18 +222,21 @@ case $host_alias in
       fi
     fi
     AC_DEFINE(BIND_8_COMPAT, 1, [Enabling BIND8 compatibility for Panther])
-    php_multiple_shlib_versions_ok=yes;;
-*beos*)
+    php_multiple_shlib_versions_ok=yes
+    ;;
+  *beos*)
     beos_threads=1
-    LIBS="$LIBS -lbe -lroot";;
-*mips*)
-    CPPFLAGS="$CPPFLAGS -D_XPG_IV";;
-*hpux*)
+    LIBS="$LIBS -lbe -lroot"
+    ;;
+  *mips*)
+    CPPFLAGS="$CPPFLAGS -D_XPG_IV"
+    ;;
+  *hpux*)
     if test "$GCC" = "yes"; then
       CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
     fi
     ;;
-*netware*)
+  *netware*)
     PHP_BUILD_PROGRAM
     PHP_ADD_SOURCES(/main, internal_functions.c,,PHP_GLOBAL_OBJS)
     PHP_ADD_SOURCES(win32, sendmail.c, -I$CFLAGS, PHP_GLOBAL_OBJS)
@@ -217,7 +251,7 @@ esac
 # to avoid the performance hit from the lost register
 AC_MSG_CHECKING([whether to force non-PIC code in shared modules])
 case $host_alias in
-i?86-*-linux*|i?86-*-freebsd*)
+  i?86-*-linux*|i?86-*-freebsd*)
     if test "${with_pic+set}" != "set" || test "$with_pic" = "no"; then
       with_pic=no
       AC_MSG_RESULT(yes)
@@ -225,7 +259,9 @@ i?86-*-linux*|i?86-*-freebsd*)
       AC_MSG_RESULT(no)
     fi
     ;;
-*) AC_MSG_RESULT(no) ;;
+  *)
+    AC_MSG_RESULT(no)
+    ;;
 esac
 
 
@@ -279,10 +315,9 @@ fi
 divert(3)
 
 dnl ## In diversion 3 we check for compile-time options to the PHP
-dnl ## core and how to deal with different system dependencies.  This
-dnl ## includes what regex library is used and whether debugging or short
+dnl ## core and how to deal with different system dependencies.
+dnl ## This includes what regex library is used and whether debugging or short
 dnl ## tags are enabled, and the default behaviour of php.ini options.
-
 
 dnl Starting system checks.
 dnl -------------------------------------------------------------------------
@@ -304,8 +339,8 @@ PHP_TEST_WRITE_STDOUT
 dnl Check for /usr/pkg/{lib,include} which is where NetBSD puts binary
 dnl and source packages.  This should be harmless on other OSs.
 if test -d /usr/pkg/include -a -d /usr/pkg/lib ; then
-       CPPFLAGS="$CPPFLAGS -I/usr/pkg/include"
-       LDFLAGS="$LDFLAGS -L/usr/pkg/lib"
+   CPPFLAGS="$CPPFLAGS -I/usr/pkg/include"
+   LDFLAGS="$LDFLAGS -L/usr/pkg/lib"
 fi
 test -d /usr/ucblib && PHP_ADD_LIBPATH(/usr/ucblib)
 
@@ -371,7 +406,6 @@ langinfo.h \
 limits.h \
 locale.h \
 monetary.h \
-mach-o/dyld.h \
 netdb.h \
 pwd.h \
 resolv.h \
@@ -422,6 +456,16 @@ assert.h
 #include <arpa/nameser.h>
 #endif
 ])
+
+dnl Don't use mach-o/dyld.h on Darwin 8+, dl* is recommended by Apple from there on
+dnl See http://developer.apple.com/documentation/DeveloperTools/Conceptual/MachOTopics/Articles/loading_code.html
+case $host_alias in
+  *darwin[[89]]*)
+    ;;
+  *)
+    AC_CHECK_HEADERS([mach-o/dyld.h],[],[],[])
+    ;;
+esac
 
 PHP_FOPENCOOKIE
 PHP_BROKEN_GETCWD
@@ -900,20 +944,24 @@ enable_shared=yes
 enable_static=yes
 
 case $php_build_target in
-program|static)
+  program|static)
     standard_libtool_flag='-prefer-non-pic -static'
     if test -z "$PHP_MODULES"; then
         enable_shared=no
     fi
-;;
-shared)
+    ;;
+  shared)
     enable_static=no
     case $with_pic in
-      yes) standard_libtool_flag='-prefer-pic';;
-      no)  standard_libtool_flag='-prefer-non-pic';;
+      yes)
+        standard_libtool_flag='-prefer-pic'
+        ;;
+      no)
+        standard_libtool_flag='-prefer-non-pic'
+        ;;
     esac
     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -avoid-version -module"
-;;
+    ;;
 esac
 
 EXTRA_LIBS="$EXTRA_LIBS $DLIBS $LIBS"
@@ -1039,7 +1087,6 @@ case $datadir in
   '${prefix}/share')
     datadir=$datadir/php
     ;;
-  *) ;;
 esac
 
 phplibdir=`pwd`/modules
@@ -1282,6 +1329,15 @@ SHARED_LIBTOOL='$(LIBTOOL)'
 
 CC=$old_CC
 
+dnl Finish the Darwin hack
+if test "$php_did_darwin9_cheat" -eq 1; then
+  if test "$PHP_DEBUG" = "yes"; then
+    CFLAGS=`echo "$CFLAGS" | $SED -e 's/-gstabs/-g/g'`
+  else
+    CFLAGS=`echo "-O2 $CFLAGS" | $SED -e 's/-gstabs//g'`
+  fi
+fi
+
 PHP_CONFIGURE_PART(Generating files)
 
 CXXFLAGS_CLEAN=$CXXFLAGS
@@ -1322,13 +1378,13 @@ PHP_ADD_SOURCES(main/streams, streams.c cast.c memory.c filter.c \
 PHP_ADD_SOURCES(/main, internal_functions.c,, sapi)
 
 case $host_alias in
-*netware*)
-  PHP_ADD_BUILD_DIR(win32)
-  PHP_ADD_BUILD_DIR(netware)
-  ;;
-*)
-  PHP_ADD_SOURCES(/main, internal_functions_cli.c,, cli)
-  ;;
+  *netware*)
+    PHP_ADD_BUILD_DIR(win32)
+    PHP_ADD_BUILD_DIR(netware)
+    ;;
+  *)
+    PHP_ADD_SOURCES(/main, internal_functions_cli.c,, cli)
+    ;;
 esac
 
 PHP_ADD_SOURCES(Zend, \
@@ -1343,8 +1399,7 @@ PHP_ADD_SOURCES(Zend, \
     zend_iterators.c zend_interfaces.c zend_exceptions.c zend_strtod.c)
 
 if test -r "$abs_srcdir/Zend/zend_objects.c"; then
-  PHP_ADD_SOURCES(Zend, zend_objects.c zend_object_handlers.c zend_objects_API.c \
-    zend_default_classes.c)
+  PHP_ADD_SOURCES(Zend, zend_objects.c zend_object_handlers.c zend_objects_API.c zend_default_classes.c)
 fi
 
 dnl Selectively disable optimization due to high RAM usage during
@@ -1423,13 +1478,6 @@ dnl mv -f main/internal_functions.c main/internal_functions.c.old 2>/dev/null
   echo "creating main/internal_functions_cli.c"
   cli_extensions="$EXT_CLI_STATIC"
   sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in $srcdir "$EXTRA_MODULE_PTRS" $AWK \$cli_extensions > main/internal_functions_cli.c
-
-dnl  if cmp main/internal_functions.c.old main/internal_functions.c > /dev/null 2>&1; then
-dnl      echo "main/internal_functions.c is unchanged"
-dnl      mv main/internal_functions.c.old main/internal_functions.c
-dnl  else
-dnl      rm -f main/internal_functions.c.old
-dnl  fi
 
   if test "$UNAME" = "FreeBSD" && test "$PHP_SAPI" = "apache2filter" && test "$TSRM_PTH" != "pth-config" ; then
     echo "+--------------------------------------------------------------------+"
