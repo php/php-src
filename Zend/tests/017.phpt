@@ -45,17 +45,17 @@ var_dump(count(get_extension_funcs("zend")));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: Wrong parameter count for get_resource_type() in %s on line %d
+Warning: get_resource_type() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Supplied argument is not a valid resource handle in %s on line %d
-bool(false)
+Warning: get_resource_type() expects parameter 1 to be resource, Unicode string given in %s on line %d
+NULL
 unicode(6) "stream"
 unicode(7) "Unknown"
 unicode(5) "array"
 int(%d)
 unicode(5) "array"
-int(%d)
+int(0)
 
 Warning: get_loaded_extensions() expects at most 1 parameter, 2 given in %s on line %d
 NULL

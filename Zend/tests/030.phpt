@@ -31,7 +31,7 @@ $test->bar();
 
 ?>
 --EXPECTF--
-object(Exception)#2 (6) {
+object(Exception)#2 (%d) {
   [u"message":protected]=>
   unicode(3) "foo"
   [u"string":u"Exception":private]=>
@@ -61,6 +61,8 @@ object(Exception)#2 (6) {
       }
     }
   }
+  [u"previous":u"Exception":private]=>
+  NULL
 }
 'test' => '0'
 'test_2' => '1'
