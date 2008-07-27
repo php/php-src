@@ -34,7 +34,7 @@ var_dump(error_reporting());
 echo "Done\n";
 ?>
 --EXPECT--
-int(16383)
-int(16383)
-int(14335)
+int(32767)
+int(32767)
+int(30719)
 Done

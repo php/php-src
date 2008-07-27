@@ -40,7 +40,9 @@ unicode(3) "foo"
 
 Warning: get_class() called without object from outside a class in %s on line %d
 bool(false)
-bool(false)
+
+Warning: get_class() expects parameter 1 to be object, Unicode string given in %s on line %d
+NULL
 unicode(3) "foo"
 unicode(4) "foo2"
 Done

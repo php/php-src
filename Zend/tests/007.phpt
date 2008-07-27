@@ -22,7 +22,7 @@ var_dump(each($a));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: Wrong parameter count for each() in %s on line %d
+Warning: each() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
 Warning: Variable passed to each() is not an array or object in %s on line %d
