@@ -3230,7 +3230,7 @@ PHP_FUNCTION(date_timestamp_set)
 	}
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
-	timelib_unixtime2gmt(dateobj->time, (timelib_sll)timestamp);
+	timelib_unixtime2local(dateobj->time, (timelib_sll)timestamp);
 	timelib_update_ts(dateobj->time, NULL);
 }
 /* }}} */
