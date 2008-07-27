@@ -788,10 +788,11 @@ msql.max_links = -1
 
 ; Connection: Set this to a user chosen connection class to be used
 ; for all pooled server requests with Oracle 11g Database Resident
-; Connection Pooling (DRCP).  The default name is system generated.
-; To use DRCP, the database pool must be configured, and the
-; connection string must also specify to use a pooled server.
-;oci8.connection_class = MYPHPAPP
+; Connection Pooling (DRCP).  To use DRCP, this value should be set to
+; the same string for all web servers running the same application,
+; the database pool must be configured, and the connection string must
+; specify to use a pooled server.
+;oci8.connection_class =
 
 ; High Availability: Using 1 lets PHP receive Fast Application
 ; Notification (FAN) events generated when a database node fails. The
@@ -804,7 +805,7 @@ msql.max_links = -1
 
 ; Tuning: Enables statement prefetching and sets the default number of
 ; rows that will be fetched automatically after statement execution.
-;oci8.default_prefetch = 10
+;oci8.default_prefetch = 100
 
 ; Compatibility. Using 1 means oci_close() will not close
 ; oci_connect() and oci_new_connect() connections.
