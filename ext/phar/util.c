@@ -1665,7 +1665,8 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 					read_size = (int)read_len;
 				}
 			}
-			if (!EVP_VerifyFinal (&md_ctx, (unsigned char *)sig, sig_len, key)) {
+			if (EVP_VerifyFinal(&md_ctx, (unsigned char *)sig, sig_len, key) != 1) {
+				/* 1: signature verified, 0: signature does not match, -1: failed signature operation */
 				EVP_MD_CTX_cleanup(&md_ctx);
 				if (error) {
 					spprintf(error, 0, "broken openssl signature");
