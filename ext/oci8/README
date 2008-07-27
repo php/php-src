@@ -2,19 +2,21 @@ Installing OCI8
 ---------------
 
 0. Overview
-1. Common requirements.
-2. Installing as shared extension.
-3. Installing as statically compiled extension.
-4. Installing from PECL.
+1. Common requirements
+2. Installing as a shared extension
+3. Installing as a statically compiled extension
+4. Installing from PECL to an existing PHP
 5. Testing OCI8
-6. DRCP and FAN Support
+6. Oracle DRCP and FAN Support
+
 
 0. Overview
 -----------
 
 The OCI8 extension allows you to access Oracle databases.  It can be
 built using Oracle 9.2, 10.2 or 11.1 client libraries, and allows
-Oracle's standard cross-version connectivity.
+Oracle's standard cross-version connectivity.  This release can be
+used with PHP 6.
 
 The OCI8 extension is not related to or used by PDO_OCI, the PHP Data
 Objects (PDO) extension for Oracle.
@@ -22,22 +24,41 @@ Objects (PDO) extension for Oracle.
 1. Common requirements
 ----------------------
 
-This version of PHP OCI8 will build with Oracle 9.2 (or more recent)
-client libraries.
+This version of PHP OCI8:
 
-If you use a common Oracle Client installation that comes with the
-Oracle server installation, you MUST set at least the ORACLE_HOME
-environment variable and make it visible for your web-server BEFORE it
-starts.
+  - Will build with Oracle 9.2 (or more recent) client libraries.  The
+    same (or more recent) version of Oracle libraries used when
+    building OCI8 must also be used at runtime.
 
-If you use Oracle Instant Client, you don't have to set ORACLE_HOME
-and many of the other environment variables to build PHP with OCI8
-support.  The only variables you may have to set are:
+  - Can be used with PHP versions 4.3.9 to 5.x.
 
-  LD_LIBRARY_PATH - it must include the Instant Client library directory
+If you build PHP with the "ORACLE_HOME" Oracle database or full Oracle
+client libraries:
 
-  NLS_LANG - if you want to change the default encoding used during
-  interaction with Oracle servers
+  - you MUST set at least the ORACLE_HOME environment variable and
+    make it visible for your web server BEFORE it starts.
+
+  - the Oracle software must be readable by the web server.  With
+    Oracle 10.2, see the $ORACLE_HOME/install/changePerm.sh script
+    included in patch releases.
+
+If you build PHP with Oracle Instant Client libraries from
+http://www.oracle.com/technology/tech/oci/instantclient/index.html
+
+  - either the "basic" or "basic-lite" package is required.
+
+  - the "devel" package is required.
+
+  - you don't have to set ORACLE_HOME and many of the other
+    environment variables to build PHP with OCI8 support.
+
+For both ORACLE_HOME and Instant Client installs you may have to set:
+
+  - LD_LIBRARY_PATH: it must include the $ORACLE_HOME/lib or Instant
+    Client library directory
+
+  - NLS_LANG: if you want to change the default encoding used during
+    interaction with Oracle servers
 
 The most appropriate places to add the environment variables are:
 
@@ -45,55 +66,100 @@ The most appropriate places to add the environment variables are:
   /etc/profile.local
   /etc/profile.d
 
-2. Installing as shared extension
----------------------------------
 
-To install OCI8 as a shared extension (i.e. the one you should put
-into your php.ini) use the following configure lines to configure PHP:
+2. Installing as a shared extension
+-----------------------------------
 
-a) if you use a common Oracle or Oracle Client installation:
+Configure OCI8 using one of the the following configure options:
 
-  ./configure --with-oci8=shared,$ORACLE_HOME
+  a) if you use an Oracle server or Oracle Client installation:
 
-b) with Oracle Instant Client:
+      ./configure --with-oci8=shared,$ORACLE_HOME
 
-  ./configure --with-oci8=shared,instantclient,/path/to/instant/client/lib
+  b) with Oracle Instant Client:
 
-If you use an RPM-based installation of Oracle Instant Client, your configure
-line will look like this:
+      ./configure --with-oci8=shared,instantclient,/path/to/instant/client/lib
 
-  ./configure --with-oci8=shared,instantclient,/usr/lib/oracle/<OIC version>/client/lib
+    If you use an RPM-based installation of Oracle Instant Client,
+    your configure line will look like this:
 
-Follow the usual building procedure after that and you'll get an OCI8
-shared extension (i.e. oci8.so). Add it into the php.ini file like
-this:
+      ./configure --with-oci8=shared,instantclient,/usr/lib/oracle/<version>/client/lib
+
+Follow the usual building procedure, e.g. "make install".  The OCI8
+shared extension oci8.so will be created.  It may need to be manually
+moved to the PHP extension directory, specified by the extension_dir
+option in your php.ini file.
+
+Edit php.ini file and add the line:
 
   extension=oci8.so
 
-and don't forget to specify the right extension_dir for PHP to be able
-to find shared extensions correctly.
 
-3. Installing as statically compiled extension
-----------------------------------------------
+3. Installing as a statically compiled extension
+------------------------------------------------
 
-To install OCI8 as statically compiled module use the following
-configure lines:
+Configure OCI8 using one of the the following configure options:
 
-a) with a common Oracle or Oracle Client installation
+  a) with a common Oracle server or full Oracle client installation
 
-  ./configure --with-oci8=$ORACLE_HOME
+      ./configure --with-oci8=$ORACLE_HOME
 
-b) with Oracle Instant Client
+  b) with Oracle Instant Client
 
-  ./configure --with-oci8=instantclient,/path/to/instant/client/lib
+      ./configure --with-oci8=instantclient,/path/to/instant/client/lib
 
-After successful compile, you don't have to add oci8.so to the
-php.ini.  The module will be usable without any additional actions.
+Run "make install".
 
-4. Installing from PECL
------------------------
+After successful compile, you do not need to add oci8.so to php.ini.
+The module will be usable without any additional actions.
 
-TBD
+
+4. Installing from PECL to an existing PHP
+------------------------------------------
+
+The OCI8 extension is also available as a PECL module on
+http://pecl.php.net/package/oci8.
+
+Install using either (a) or (b) below.
+
+  a) Do an automated download and install:
+
+    Set PEARs proxy, if necessary:
+
+      pear config-set http_proxy http://my-proxy.example.com:80/
+
+    Run
+
+      pecl install oci8
+
+    When prompted, enter either the value of $ORACLE_HOME, or
+    "instantclient,/path/to/instant/client/lib" (without quotes).
+
+  b) Alternatively, manually download the PECL package, e.g. oci8-1.3.3.tgz
+
+     Extract and prepare the package:
+
+       tar -zxf oci8-1.3.3.tgz
+       cd oci8-1.3.3
+       phpize
+
+     Configure the package, either using $ORACLE_HOME or Instant Client
+
+       ./configure -with-oci8=shared,$ORACLE_HOME
+
+       or
+
+       ./configure -with-oci8=shared,instantclient,/path/to/instant/client/lib
+
+    Install the package:
+
+       make install
+
+After either install, edit your php.ini file, e.g. /etc/php.ini, and
+add the line:
+
+  extension=oci8.so
+
 
 5. Testing OCI8
 ---------------
@@ -177,8 +243,8 @@ directory will contain logs of any failures.
 5.2.5. Rerun the tests
 
 
-6. DRCP and FAN Support
------------------------
+6. Oracle DRCP and FAN Support
+------------------------------
 
 The PHP OCI8 extension has support for the Oracle Database Resident
 Connection Pool (DRCP) and Fast Application Notification (FAN).
@@ -329,7 +395,7 @@ To enable FAN support in PHP, after building PHP with Oracle 10gR2 or
 6.3.4. Run your application, connecting to a 10gR2 or 11g database.
 
 
-6.4. Recommendations and Known Limitations 
+6.4. Recommendations and Known Limitations
 
 6.4.1 Changing Password for DRCP connections
 
@@ -339,11 +405,11 @@ restriction of Oracle Database 11g.
 
 6.4.2 Closing Connections
 
-With the PHP 6 OCI8 extension, persistent connections can now be
-closed by the user, allowing greater control over connection resource
-usage.  Persistent connections will now also be closed automatically
-when there is no PHP variable referencing them, such as at the end of
-scope of a PHP user function.  This will rollback any uncommitted
+With the PHP OCI8 extension, persistent connections can now be closed
+by the user, allowing greater control over connection resource usage.
+Persistent connections will now also be closed automatically when
+there is no PHP variable referencing them, such as at the end of scope
+of a PHP user function.  This will rollback any uncommitted
 transaction.  These changes to persistent connections make them behave
 similarly to non-persistent connections, simplifying the interface,
 allowing for greater application consistency and predictability.  Use
