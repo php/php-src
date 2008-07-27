@@ -40,9 +40,12 @@ if test "$PHP_MING" != "no"; then
   PHP_ADD_INCLUDE($MING_INC_DIR)
   PHP_ADD_LIBRARY_WITH_PATH(ming, $MING_DIR/$PHP_LIBDIR, MING_SHARED_LIBADD)
 
-  PHP_CHECK_LIBRARY(ming, SWFPrebuiltClip, [ AC_DEFINE(HAVE_SWFPREBUILTCLIP, 1, [ ]) ], [], []) 
-  PHP_CHECK_LIBRARY(ming, SWFMovie_namedAnchor, [ AC_DEFINE(HAVE_SWFMOVIE_NAMEDANCHOR, 1, [ ]) ], [], []) 
-  PHP_CHECK_LIBRARY(ming, Ming_setSWFCompression, [ AC_DEFINE(HAVE_MING_SETSWFCOMPRESSION, 1, [ ]) ], [], []) 
+  PHP_CHECK_LIBRARY(ming, SWFPrebuiltClip,             [ AC_DEFINE(HAVE_SWFPREBUILTCLIP,             1, [ ]) ], [], []) 
+  PHP_CHECK_LIBRARY(ming, SWFMovie_namedAnchor,        [ AC_DEFINE(HAVE_SWFMOVIE_NAMEDANCHOR,        1, [ ]) ], [], []) 
+  PHP_CHECK_LIBRARY(ming, Ming_setSWFCompression,      [ AC_DEFINE(HAVE_MING_SETSWFCOMPRESSION,      1, [ ]) ], [], []) 
+  PHP_CHECK_LIBRARY(ming, SWFVideoStream_seek,         [ AC_DEFINE(HAVE_SWFVIDEOSTREAM_SEEK,         1, [ ]) ], [], []) 
+  PHP_CHECK_LIBRARY(ming, SWFVideoStream_setFrameMode, [ AC_DEFINE(HAVE_SWFVIDEOSTREAM_SETFRAMEMODE, 1, [ ]) ], [], []) 
+  PHP_CHECK_LIBRARY(ming, SWFVideoStream_nextFrame,    [ AC_DEFINE(HAVE_SWFVIDEOSTREAM_NEXTFRAME,    1, [ ]) ], [], []) 
 
   old_CPPFLAGS=$CPPFLAGS
   CPPFLAGS=-I$MING_INC_DIR

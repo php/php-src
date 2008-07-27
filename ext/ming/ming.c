@@ -3521,6 +3521,7 @@ PHP_METHOD(swfvideostream, hasaudio)
 }
 /* }}} */
 
+#if HAVE_SWFVIDEOSTREAM_NEXTFRAME
 /* {{{ proto swfvideostream::nextFrame */
 PHP_METHOD(swfvideostream, nextFrame) 
 {
@@ -3531,7 +3532,9 @@ PHP_METHOD(swfvideostream, nextFrame)
 	RETURN_LONG(SWFVideoStream_nextFrame(getVideoStream(getThis() TSRMLS_CC)));
 }
 /* }}} */
-	
+#endif
+
+#if HAVE_SWFVIDEOSTREAM_SETFRAMEMODE
 /* {{{ proto swfvideostream::setFrameMode */	
 PHP_METHOD(swfvideostream, setFrameMode)
 {
@@ -3547,7 +3550,9 @@ PHP_METHOD(swfvideostream, setFrameMode)
 	RETURN_LONG(SWFVideoStream_setFrameMode(stream, mode));
 }
 /* }}} */
+#endif
 
+#if HAVE_SWFVIDEOSTREAM_SEEK
 /* {{{ proto swfvideostream::seek(frame, whence) */	
 PHP_METHOD(swfvideostream, seek)
 {
@@ -3563,16 +3568,22 @@ PHP_METHOD(swfvideostream, seek)
 	RETURN_LONG(SWFVideoStream_seek(stream, frame, whence));
 }
 /* }}} */
-		
-		
+#endif
+
 static zend_function_entry swfvideostream_functions[] = {
 	PHP_ME(swfvideostream, 	__construct,	NULL, 0)
 	PHP_ME(swfvideostream, setdimension, NULL, 0)
 	PHP_ME(swfvideostream, getnumframes, NULL, 0)
 	PHP_ME(swfvideostream, hasaudio, NULL, 0)
+#if HAVE_SWFVIDEOSTREAM_SETFRAMEMODE
 	PHP_ME(swfvideostream, setFrameMode, NULL, 0)
+#endif
+#if HAVE_SWFVIDEOSTREAM_NEXTFRAME
 	PHP_ME(swfvideostream, nextFrame, NULL, 0)
+#endif
+#if HAVE_SWFVIDEOSTREAM_SEEK
 	PHP_ME(swfvideostream, seek, NULL, 0)
+#endif
 	{ NULL, NULL, NULL }
 };
 
