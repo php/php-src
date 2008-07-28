@@ -19,4 +19,4 @@ test
 string(10) "test
 test
 "
-areinf(12) "e4ebfce1e9fa"
+string(12) "e4ebfce1e9fa"
