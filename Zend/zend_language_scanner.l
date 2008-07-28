@@ -448,20 +448,21 @@ ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D)
 {
 	size_t offset = SCNG(yy_cursor) - SCNG(yy_start);
 #ifdef ZEND_MULTIBYTE
-	size_t original_offset = offset, length = 0;
-	do {
-		unsigned char *p = NULL;
-		SCNG(input_filter)(&p, &length, SCNG(script_org), offset TSRMLS_CC);
-		if (!p) {
-			break;
-		}
-		efree(p);
-		if (length > original_offset) {
-			offset--;
-		} else if (length < original_offset) {
-			offset++;
-		}
-	} while (original_offset != length);
+	if (SCNG(input_filter)) {
+		size_t original_offset = offset, length = 0; do {
+			unsigned char *p = NULL;
+			SCNG(input_filter)(&p, &length, SCNG(script_org), offset TSRMLS_CC);
+			if (!p) {
+				break;
+			}
+			efree(p);
+			if (length > original_offset) {
+				offset--;
+			} else if (length < original_offset) {
+				offset++;
+			}
+		} while (original_offset != length);
+	}
 #endif
 	return offset;
 }
@@ -607,7 +608,7 @@ ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter
 		zend_encoding *new_encoding = SCNG(script_encoding);
 		zend_encoding_filter new_filter = SCNG(input_filter);
 		SCNG(script_encoding) = old_encoding;
-		SCNG(input_filter) = new_filter;
+		SCNG(input_filter) = old_input_filter;
 		offset = zend_get_scanned_file_offset(TSRMLS_C);
 		SCNG(script_encoding) = new_encoding;
 		SCNG(input_filter) = new_filter;
