@@ -1013,7 +1013,7 @@ PHP_METHOD(sqlite3_stmt, bindParam)
 }
 /* }}} */
 
-/* {{{ proto bool SQLite3_stmt::bindValue(inte parameter_number, mixed parameter [, int type])
+/* {{{ proto bool SQLite3_stmt::bindValue(int parameter_number, mixed parameter [, int type])
    Bind Value of a parameter to a stmt variable. */
 PHP_METHOD(sqlite3_stmt, bindValue)
 {
@@ -1252,9 +1252,11 @@ PHP_METHOD(sqlite3_result, fetchArray)
 					add_assoc_zval(return_value, (char*)sqlite3_column_name(result_obj->stmt_obj->stmt, i), data);
 				}
 			}
-		break;
+			break;
+
 		case SQLITE_DONE:
 			RETURN_FALSE;
+			break;
 
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to execute statement: %s", sqlite3_errmsg(sqlite3_db_handle(result_obj->stmt_obj->stmt)));
