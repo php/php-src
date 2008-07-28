@@ -253,6 +253,7 @@ PHP                                                                        NEWS
   prop of wrapped object). (robin_fernandes at uk dot ibm dot com, Arnaud)
 - Fixed bug #45571 (ReflectionClass::export() shows superclasses' private
   static methods). (robin_fernandes at uk dot ibm dot com)
+- Fixed bug #45540 (stream_context_create creates bad http request). (Arnaud)
 - Fixed bug #45430 (windows implementation of crypt is not thread safe).
   (Pierre)
 - Fixed bug #45345 (SPLFileInfo::getPathInfo() returning dir info instead of
