@@ -3972,15 +3972,13 @@ static zend_constant* zend_get_ct_const(zval *const_name TSRMLS_DC) /* {{{ */
 		zstr lookup_name = zend_u_str_case_fold(Z_TYPE_P(const_name), Z_UNIVAL_P(const_name), Z_UNILEN_P(const_name), 1, &lookup_name_len);
 
 		if (zend_u_hash_find(EG(zend_constants), Z_TYPE_P(const_name), lookup_name, lookup_name_len+1, (void **) &c)==SUCCESS) {
-			if ((c->flags & CONST_CS) && memcmp(c->name.v, Z_UNIVAL_P(const_name).v, UG(unicode)?UBYTES(Z_USTRLEN_P(const_name)):Z_STRLEN_P(const_name))!=0) {
+			if ((c->flags & CONST_CT_SUBST) && !(c->flags & CONST_CS)) {
 				efree(lookup_name.v);
-				return NULL;
+				return c;
 			}
-		} else {
-			efree(lookup_name.v);
-			return NULL;
 		}
 		efree(lookup_name.v);
+		return NULL;
 	}
 	if (c->flags & CONST_CT_SUBST) {
 		return c;
