@@ -29,11 +29,16 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_CRYPT_H
-#if defined(CRYPT_R_GNU_SOURCE) && !defined(_GNU_SOURCE)
-#define _GNU_SOURCE
-#endif
-#include <crypt.h>
+#ifdef PHP_USE_PHP_CRYPT_R
+# include "php_crypt_r.h"
+# include "crypt_freesec.h"
+#else
+# if HAVE_CRYPT_H
+#  if defined(CRYPT_R_GNU_SOURCE) && !defined(_GNU_SOURCE)
+#   define _GNU_SOURCE
+#  endif
+#  include <crypt.h>
+# endif
 #endif
 #if TM_IN_SYS_TIME
 #include <sys/time.h>
@@ -48,7 +53,6 @@
 
 #ifdef PHP_WIN32
 #include <process.h>
-extern char *crypt(char *__key, char *__salt);
 #endif
 
 #include "php_lcg.h"
@@ -98,8 +102,21 @@ PHP_MINIT_FUNCTION(crypt) /* {{{ */
 	REGISTER_LONG_CONSTANT("CRYPT_MD5", PHP_MD5_CRYPT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CRYPT_BLOWFISH", PHP_BLOWFISH_CRYPT, CONST_CS | CONST_PERSISTENT);
 
+#ifdef PHP_USE_PHP_CRYPT_R
+	php_init_crypt_r();
+#endif
+
 	return SUCCESS;
 }
+
+#ifdef PHP_USE_PHP_CRYPT_R
+PHP_MSHUTDOWN_FUNCTION(crypt)
+{
+	php_shutdown_crypt_r();
+
+	return SUCCESS;
+}
+#endif
 /* }}} */
 
 static unsigned char itoa64[] = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -135,7 +152,7 @@ PHP_FUNCTION(crypt)
 		memcpy(salt, salt_in, MIN(PHP_MAX_SALT_LEN, salt_in_len));
 	}
 
-	/* The automatic salt generation only covers standard DES and md5-crypt */
+	/* The automatic salt generation covers standard DES, md5-crypt and Blowfish (simple) */
 	if (!*salt) {
 #if PHP_MD5_CRYPT
 		strcpy(salt, "$1$");
@@ -147,21 +164,54 @@ PHP_FUNCTION(crypt)
 		salt[2] = '\0';
 #endif
 	}
-#if defined(HAVE_CRYPT_R) && (defined(_REENTRANT) || defined(_THREAD_SAFE))
+
+/* Windows (win32/crypt) has a stripped down version of libxcrypt and 
+	a CryptoApi md5_crypt implementation */
+#if PHP_USE_PHP_CRYPT_R
 	{
-#if defined(CRYPT_R_STRUCT_CRYPT_DATA)
+		struct php_crypt_extended_data buffer;
+
+		if (salt[0]=='$' && salt[1]=='1' && salt[2]=='$') {
+			char output[MD5_HASH_MAX_LEN];
+
+			RETURN_STRING(php_md5_crypt_r(str, salt, output), 1);
+		} else  if (
+				salt[0] == '$' &&
+				salt[1] == '2' &&
+				salt[2] == 'a' &&
+				salt[3] == '$' &&
+				salt[4] >= '0' && salt[4] <= '3' &&
+				salt[5] >= '0' && salt[5] <= '9' &&
+				salt[6] == '$') {
+			char output[PHP_MAX_SALT_LEN + 1];
+
+			memset(output, 0, PHP_MAX_SALT_LEN + 1);
+			php_crypt_blowfish_rn(str, salt, output, sizeof(output));
+
+			RETVAL_STRING(output, 1);
+			memset(output, 0, PHP_MAX_SALT_LEN + 1);
+		} else {
+			memset(&buffer, 0, sizeof(buffer));
+			_crypt_extended_init_r();
+			RETURN_STRING(_crypt_extended_r(str, salt, &buffer), 1);
+		}
+	}
+#else
+
+# if defined(HAVE_CRYPT_R) && (defined(_REENTRANT) || defined(_THREAD_SAFE))
+	{
+#  if defined(CRYPT_R_STRUCT_CRYPT_DATA)
 		struct crypt_data buffer;
 		memset(&buffer, 0, sizeof(buffer));
-#elif defined(CRYPT_R_CRYPTD)
+#  elif defined(CRYPT_R_CRYPTD)
 		CRYPTD buffer;
-#else
-#error Data struct used by crypt_r() is unknown. Please report.
-#endif
+#  else
+#    error Data struct used by crypt_r() is unknown. Please report.
+#  endif
 
 		RETURN_STRING(crypt_r(str, salt, &buffer), 1);
 	}
-#else
-	RETURN_STRING(crypt(str, salt), 1);
+# endif
 #endif
 }
 /* }}} */
