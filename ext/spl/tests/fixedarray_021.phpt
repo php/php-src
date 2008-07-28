@@ -50,6 +50,17 @@ try {
 	var_dump($e->getMessage());
 }
 
+
+//non-long indexes
+$a = new SplFixedArray(4);
+$a["2"] = "foo";
+$a["1"] = "foo";
+$a["3"] = "0";
+
+var_dump(isset($a["0"], $a[-1]), $a["1"]);
+var_dump(empty($a["3"]));
+
+
 ?>
 ==DONE==
 --EXPECTF--
@@ -63,4 +74,7 @@ int(0)
 object(SplFixedArray)#%d (0) {
 }
 unicode(52) "An iterator cannot be used with foreach by reference"
+bool(false)
+unicode(3) "foo"
+bool(true)
 ==DONE==
