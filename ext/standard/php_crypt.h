@@ -26,6 +26,9 @@
 PHP_FUNCTION(crypt);
 #if HAVE_CRYPT
 PHP_MINIT_FUNCTION(crypt);
+#if PHP_WIN32
+PHP_MSHUTDOWN_FUNCTION(crypt);
+#endif
 PHP_RINIT_FUNCTION(crypt);
 #endif
 

@@ -3,6 +3,10 @@
 	$Id$
 */
 
+/* Define the minimum supported version */
+#define _WIN32_WINNT 0x500
+#define NTDDI_VERSION  _WIN32_WIN2K
+
 /* Default PHP / PEAR directories */
 #define PHP_CONFIG_FILE_PATH (getenv("SystemRoot"))?getenv("SystemRoot"):""
 #define CONFIGURATION_FILE_PATH "php.ini"
@@ -19,9 +23,9 @@
 /* Enable / Disable crypt() function (default: enabled) */
 #define HAVE_CRYPT 1
 #define PHP_STD_DES_CRYPT 1
-#define PHP_EXT_DES_CRYPT 0
+#define PHP_EXT_DES_CRYPT 1
 #define PHP_MD5_CRYPT 1
-#define PHP_BLOWFISH_CRYPT 0
+#define PHP_BLOWFISH_CRYPT 1
 
 /* PHP Runtime Configuration */
 #define PHP_URL_FOPEN 1
