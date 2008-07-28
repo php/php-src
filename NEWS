@@ -161,6 +161,13 @@ PHP                                                                        NEWS
     perform class declaration (early and/or run-time binding) in exactly
     the same order as vanilla PHP. (Dmitry)
 
+- Improved crypt() function (Pierre)
+  . add Blowfish (using implementation from Solar Designer <solar at openwal dot com>) and extended DES support
+  . Make crypt features portable:
+    . if no crypt_r, php's implemetation is used (all algo and TS), php can't be used with unsafe crypt anymore
+    . if one algo is missing, php's implemetation is used
+    . Windows always use php's implementation
+
 - Added new date/time functionality: (Derick)
   . date_parse_from_format(): Parse date/time strings according to a format.
   . date_create_from_format()/DateTime::createFromFormat(): Create a date/time
@@ -202,7 +209,7 @@ PHP                                                                        NEWS
   . DatePeriod class which supports iterating over a DateTime object applying
     DateInterval on each iteration, up to an end date or limited by maximum
     number of occurences.
-
+- Added Extended DES, Blowfish to all
 - Added hash_copy() function. (Tony)
 - Added sha224 hash algorithm to the hash extension. (Scott)
 - Added ReflectionProperty::setAccessible() method that allows non-public
@@ -246,6 +253,8 @@ PHP                                                                        NEWS
   prop of wrapped object). (robin_fernandes at uk dot ibm dot com, Arnaud)
 - Fixed bug #45571 (ReflectionClass::export() shows superclasses' private
   static methods). (robin_fernandes at uk dot ibm dot com)
+- Fixed bug #45430 (windows implementation of crypt is not thread safe).
+  (Pierre)
 - Fixed bug #45345 (SPLFileInfo::getPathInfo() returning dir info instead of
   file info). (Etienne)
 - Fixed bug #45179 (--with-mysql-sock fails to compile & work). (Andrey)

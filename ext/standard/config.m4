@@ -84,12 +84,6 @@ main() {
 ],[
   ac_cv_crypt_des=yes
 ])])
-if test "$ac_cv_crypt_des" = "yes"; then
-  ac_result=1
-else
-  ac_result=0
-fi
-AC_DEFINE_UNQUOTED(PHP_STD_DES_CRYPT, $ac_result, [Whether the system supports standard DES salt])
 
 AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
   AC_TRY_RUN([
@@ -114,12 +108,6 @@ main() {
 ],[
   ac_cv_crypt_ext_des=no
 ])])
-if test "$ac_cv_crypt_ext_des" = "yes"; then
-  ac_result=1
-else
-  ac_result=0
-fi
-AC_DEFINE_UNQUOTED(PHP_EXT_DES_CRYPT, $ac_result, [Whether the system supports extended DES salt])
 
 AC_CACHE_CHECK(for MD5 crypt, ac_cv_crypt_md5,[
 AC_TRY_RUN([
@@ -153,15 +141,6 @@ main() {
 ],[
   ac_cv_crypt_md5=no
 ])])
-if test "$ac_cv_crypt_md5" = "yes"; then
-  ac_result=1
-else
-  if test "$ac_cv_crypt_des" != "yes"; then
-    PHP_DEBUG_MACRO(debug.log)
-  fi
-  ac_result=0
-fi
-AC_DEFINE_UNQUOTED(PHP_MD5_CRYPT, $ac_result, [Whether the system supports MD5 salt])
 
 AC_CACHE_CHECK(for Blowfish crypt, ac_cv_crypt_blowfish,[
 AC_TRY_RUN([
@@ -192,12 +171,48 @@ main() {
 ],[
   ac_cv_crypt_blowfish=no
 ])])
-if test "$ac_cv_crypt_blowfish" = "yes"; then
-  ac_result=1
+
+dnl
+dnl If one of them is missing, use our own implementation, portable code is then possible
+dnl
+if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "x$php_crypt_r" = "x0"; then
+  AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 1, [Whether PHP has to use its own crypt_r for blowfish, des, ext des and md5])
+  AC_DEFINE_UNQUOTED(PHP_STD_DES_CRYPT, 1, [Whether the system supports standard DES salt])
+  AC_DEFINE_UNQUOTED(PHP_BLOWFISH_CRYPT, 1, [Whether the system supports BlowFish salt])
+  AC_DEFINE_UNQUOTED(PHP_EXT_DES_CRYPT, 1, [Whether the system supports extended DES salt])
+  AC_DEFINE_UNQUOTED(PHP_MD5_CRYPT, 1, [Whether the system supports extended DES salt])
+
+  PHP_ADD_SOURCES(PHP_EXT_DIR(standard), crypt_freesec.c crypt_blowfish.c php_crypt_r.c)
 else
-  ac_result=0
+  if test "$ac_cv_crypt_des" = "yes"; then
+    ac_result=1
+    ac_crypt_des=1
+  else
+    ac_result=0
+    ac_crypt_des=0
+  fi
+  AC_DEFINE_UNQUOTED(PHP_STD_DES_CRYPT, $ac_result, [Whether the system supports standard DES salt])
+
+  if test "$ac_cv_crypt_blowfish" = "yes"; then
+    ac_result=1
+    ac_crypt_blowfish=1
+  else
+    ac_result=0
+    ac_crypt_blowfish=0
+  fi
+  AC_DEFINE_UNQUOTED(PHP_BLOWFISH_CRYPT, $ac_result, [Whether the system supports BlowFish salt])
+
+  if test "$ac_cv_crypt_ext_des" = "yes"; then
+    ac_result=1
+    ac_crypt_edes=1
+  else
+    ac_result=0
+    ac_crypt_edes=0
+  fi
+  AC_DEFINE_UNQUOTED(PHP_EXT_DES_CRYPT, $ac_result, [Whether the system supports extended DES salt])
+
+  AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 0, [Whether PHP has to use its own crypt_r for blowfish, des and ext des])
 fi
-AC_DEFINE_UNQUOTED(PHP_BLOWFISH_CRYPT, $ac_result, [Whether the system supports BlowFish salt])
 
 dnl
 dnl Check for available functions

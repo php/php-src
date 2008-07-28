@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
@@ -12,7 +13,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author:                                                              |
+   | Authors: Pierre Alain Joye  <pajoye@php.net                          |
    +----------------------------------------------------------------------+
  */
 
@@ -23,8 +24,29 @@
 extern "C"
 {
 #endif
+#include "crypt_freesec.h"
 
-PHPAPI char* crypt(const char *key, const char *salt);
+#ifndef __const
+#ifdef __GNUC__
+#define __CONST __const
+#else
+#define __CONST
+#endif
+#endif
+
+void php_init_crypt_r();
+void php_shutdown_crypt_r();
+
+extern void _crypt_extended_init_r(void);
+
+/*PHPAPI char* crypt(const char *key, const char *salt);*/
+PHPAPI char *php_crypt_r (const char *__key, const char *__salt, struct php_crypt_extended_data * __data);
+
+#define MD5_HASH_MAX_LEN 120
+
+extern char * php_md5_crypt_r(const char *pw, const char *salt, char *out);
+extern char * php_crypt_blowfish_rn(__CONST char *key, __CONST char *setting,
+	char *output, int size);
 
 #ifdef __cplusplus
 }
