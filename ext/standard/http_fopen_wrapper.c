@@ -294,10 +294,17 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 
 	if (context && php_stream_context_get_option(context, "http", "method", &tmpzval) == SUCCESS) {
 		if (Z_TYPE_PP(tmpzval) == IS_STRING && Z_STRLEN_PP(tmpzval) > 0) {
-			scratch_len = strlen(path) + 29 + Z_STRLEN_PP(tmpzval);
-			scratch = emalloc(scratch_len);
-			strlcpy(scratch, Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval) + 1);
-			strcat(scratch, " ");
+			/* As per the RFC, automatically redirected requests MUST NOT use other methods than
+			 * GET and HEAD unless it can be confirmed by the user */
+			if (redirect_max == PHP_URL_REDIRECT_MAX
+				|| (Z_STRLEN_PP(tmpzval) == 3 && memcmp("GET", Z_STRVAL_PP(tmpzval), 3) == 0)
+				|| (Z_STRLEN_PP(tmpzval) == 4 && memcmp("HEAD",Z_STRVAL_PP(tmpzval), 4) == 0)
+			) {
+				scratch_len = strlen(path) + 29 + Z_STRLEN_PP(tmpzval);
+				scratch = emalloc(scratch_len);
+				strlcpy(scratch, Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval) + 1);
+				strcat(scratch, " ");
+			}
 		}
 	}
  
