@@ -2453,7 +2453,7 @@ inline_char_handler:
 
 	/* Check for ending label on the next line */
 	if (CG(heredoc_len) < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, s, CG(heredoc_len))) {
-		char *end = YYCURSOR + CG(heredoc_len);
+		unsigned char *end = YYCURSOR + CG(heredoc_len);
 
 		if (*end == ';') {
 			end++;
