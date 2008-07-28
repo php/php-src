@@ -1,3 +1,22 @@
+2008-07-27  Felipe Pena  <felipensp@gmail.com>
+
+    * tests/007.phpt
+      tests/008.phpt
+      tests/009.phpt
+      tests/011.phpt
+      tests/017.phpt
+      tests/020.phpt
+      tests/030.phpt
+      tests/bug33771.phpt:
+      - Fixed tests
+
+2008-07-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_strtod.c
+      zend_strtod.c
+      zend_strtod.c:
+      Fix for bug #43487 (Wrong conversion of float to string)
+
 2008-07-26  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_3)

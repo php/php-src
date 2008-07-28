@@ -1,3 +1,135 @@
+2008-07-27  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ext/ming/config.m4
+      ext/ming/ming.c:
+      - Allow building with ming-0.4rc1 (the latest available ming)
+
+2008-07-27  David Soria Parra  <dsoria@gmx.net>
+
+    * scripts/phpize.m4
+      scripts/phpize.m4:
+      MFB: - Fixed the fix for not requiring C++ always
+
+    * (PHP_5_2)
+      scripts/phpize.m4:
+      - Fixed the fix for not requiring C++ always
+
+2008-07-27  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/php_date.c
+      ext/date/tests/date-set-timestamp.phpt:
+      - MFH: Fixed DateTime::setTimestamp() and added a test for it.
+
+    * ext/date/tests/date-set-timestamp.phpt
+      ext/date/tests/date-set-timestamp.phpt:
+      
+      - Fixed DateTime::setTimestamp() and added a test for it.
+
+    * ext/date/php_date.c:
+      - Fixed DateTime::setTimestamp() and added a test for it.
+
+2008-07-27  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_3)
+      ext/oci8/README
+      ext/oci8/package2.xml
+      ext/oci8/php_oci8.h:
+      MFH Update README.  Bump ver ready for PECL release
+
+    * ext/oci8/README
+      ext/oci8/php_oci8.h:
+      Update README.  Bump ver ready for PECL release
+
+2008-07-27  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/tests/007.phpt
+      ZendEngine2/tests/008.phpt
+      ZendEngine2/tests/009.phpt
+      ZendEngine2/tests/011.phpt
+      ZendEngine2/tests/017.phpt
+      ZendEngine2/tests/020.phpt
+      ZendEngine2/tests/030.phpt
+      ZendEngine2/tests/bug33771.phpt:
+      - Fixed tests
+
+2008-07-27  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_3)
+      php.ini-dist
+      php.ini-recommended:
+      MFH: Sync oci8.default_prefetch example value with recent change
+
+    * php.ini-dist
+      php.ini-recommended:
+      Sync oci8.default_prefetch example value with recent change
+
+    * (PHP_5_3)
+      NEWS:
+      Add OCI8 changes
+
+2008-07-27  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      configure.in
+      configure.in:
+      MFH:- Fixed the fix for not requiring C++ always
+
+    * configure.in:
+      - Fixed the fix for not requiring C++ always
+
+2008-07-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtod.c:
+      Fix for bug #43487 (Wrong conversion of float to string)
+
+2008-07-27  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ext/phar/util.c:
+      - Fix openssl check
+
+2008-07-27  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/sqlite3/tests/sqlite3_12_unfinalized_stmt_cleanup.out
+      ext/sqlite3/tests/sqlite3_25_create_aggregate.out:
+      -sigh*
+
+    * (PHP_5_3)
+      ext/sqlite3/tests/sqlite3_01_open.phpt
+      ext/sqlite3/tests/sqlite3_02_create.phpt
+      ext/sqlite3/tests/sqlite3_03_insert.phpt
+      ext/sqlite3/tests/sqlite3_04_update.phpt
+      ext/sqlite3/tests/sqlite3_05_delete.phpt
+      ext/sqlite3/tests/sqlite3_06_prepared_stmt.phpt
+      ext/sqlite3/tests/sqlite3_07_prepared_stmt.phpt
+      ext/sqlite3/tests/sqlite3_08_udf.phpt
+      ext/sqlite3/tests/sqlite3_09_blob_bound_param.phpt
+      ext/sqlite3/tests/sqlite3_10_bound_value_name.phpt
+      ext/sqlite3/tests/sqlite3_11_numrows.phpt
+      ext/sqlite3/tests/sqlite3_12_unfinalized_stmt_cleanup.phpt
+      ext/sqlite3/tests/sqlite3_13_skip_all_cleanup.phpt
+      ext/sqlite3/tests/sqlite3_14_querysingle.phpt
+      ext/sqlite3/tests/sqlite3_15_open_error.phpt
+      ext/sqlite3/tests/sqlite3_16_select_no_results.phpt
+      ext/sqlite3/tests/sqlite3_17_version.phpt
+      ext/sqlite3/tests/sqlite3_18_changes.phpt
+      ext/sqlite3/tests/sqlite3_19_columninfo.phpt
+      ext/sqlite3/tests/sqlite3_20_error.phpt
+      ext/sqlite3/tests/sqlite3_21_security.phpt
+      ext/sqlite3/tests/sqlite3_22_loadextension.phpt
+      ext/sqlite3/tests/sqlite3_23_escape_string.phpt
+      ext/sqlite3/tests/sqlite3_24_last_insert_rowid.phpt
+      ext/sqlite3/tests/sqlite3_25_create_aggregate.phpt
+      ext/sqlite3/tests/sqlite3_26_reset_prepared_stmt.phpt
+      ext/sqlite3/tests/sqlite3_27_reset_prepared_stmt_result.phpt
+      ext/sqlite3/tests/sqlite3_28_clear_bindings.phpt:
+      nuke \r\n
+
 2008-07-26  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/sqlite3/php_sqlite3.h
