@@ -858,7 +858,7 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 }
 
 
-ZEND_API int zend_get_scanned_file_offset(TSRMLS_D)
+ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D)
 {
 	return SCNG(yy_cursor) - SCNG(yy_start);
 }
