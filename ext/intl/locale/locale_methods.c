@@ -743,10 +743,10 @@ PHP_FUNCTION(locale_canonicalize)
 
 /* {{{ append_convert_to_string
 */
-static int append_convert_to_string(zval **val, char **strval, int *str_len)
+static int append_convert_to_string(zval **val, char **strval, int *str_len TSRMLS_DC)
 {
 	if(Z_TYPE_PP(val) == IS_UNICODE) {
-		*strval = zend_unicode_to_ascii(Z_USTRVAL_PP(val), Z_USTRLEN_PP(val));
+		*strval = zend_unicode_to_ascii(Z_USTRVAL_PP(val), Z_USTRLEN_PP(val) TSRMLS_CC);
 		*str_len = strlen(*strval);
 		return 1;
 	} else if(Z_TYPE_PP(val) == IS_STRING) {
@@ -765,7 +765,7 @@ static int append_convert_to_string(zval **val, char **strval, int *str_len)
 * returns 1 if successful , -1 if not found , 
 * 0 if array element is not a string , -2 if buffer-overflow
 */
-static int append_key_value(smart_str* loc_name, HashTable* hash_arr, char* key_name)
+static int append_key_value(smart_str* loc_name, HashTable* hash_arr, char* key_name TSRMLS_DC)
 {
 	zval**	ele_value	= NULL;
 
@@ -775,7 +775,7 @@ static int append_key_value(smart_str* loc_name, HashTable* hash_arr, char* key_
 		char *val = NULL;
 		int len = 0;
 
-		free_val = append_convert_to_string(ele_value, &val, &len);
+		free_val = append_convert_to_string(ele_value, &val, &len TSRMLS_CC);
 		if(val == NULL) {
 			//element value is not a string 
 			return FAILURE;
@@ -835,7 +835,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 
 			zend_hash_internal_pointer_reset_ex(arr, &pos);
 			while(zend_hash_get_current_data_ex(arr, (void **)&data, &pos) != FAILURE) {
-				free_val = append_convert_to_string(data, &val, &len);
+				free_val = append_convert_to_string(data, &val, &len TSRMLS_CC);
 				if(val == NULL) {
 					//element value is not a string 
 					return FAILURE;
@@ -852,7 +852,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 			}
 			return SUCCESS;
 		} else {
-			free_val = append_convert_to_string(ele_value, &val, &len);
+			free_val = append_convert_to_string(ele_value, &val, &len TSRMLS_CC);
 			if(val == NULL) {
 				//element value is not a string 
 				return FAILURE;
@@ -885,7 +885,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 			snprintf( cur_key_name , 30, "%s%d", key_name , i);	
 			if(zend_hash_find(hash_arr, cur_key_name, strlen(cur_key_name)+1, (void **)&ele_value) == SUCCESS ||
 				zend_ascii_hash_find(hash_arr, cur_key_name, strlen(cur_key_name)+1, (void **)&ele_value) == SUCCESS) {
-				free_val = append_convert_to_string(ele_value, &val, &len);
+				free_val = append_convert_to_string(ele_value, &val, &len TSRMLS_CC);
 				if(val == NULL) {
 					//element value is not a string 
 					return FAILURE;
@@ -956,7 +956,7 @@ PHP_FUNCTION(locale_compose)
 		RETURN_FALSE;
 
 	//Check for grandfathered first
-	result = append_key_value(loc_name, hash_arr,  LOC_GRANDFATHERED_LANG_TAG);	
+	result = append_key_value(loc_name, hash_arr,  LOC_GRANDFATHERED_LANG_TAG TSRMLS_CC);	
 	if( result == SUCCESS){
 		RETURN_SMART_STR(loc_name);
 	}
@@ -965,7 +965,7 @@ PHP_FUNCTION(locale_compose)
 	}
 
 	//Not grandfathered
-	result = append_key_value(loc_name, hash_arr , LOC_LANG_TAG);	
+	result = append_key_value(loc_name, hash_arr , LOC_LANG_TAG TSRMLS_CC);	
 	if( result == LOC_NOT_FOUND ){
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 		"locale_compose: parameter array does not contain 'language' tag.", 0 TSRMLS_CC );
@@ -983,13 +983,13 @@ PHP_FUNCTION(locale_compose)
 	}
 
 	//Script
-	result = append_key_value(loc_name, hash_arr , LOC_SCRIPT_TAG); 
+	result = append_key_value(loc_name, hash_arr , LOC_SCRIPT_TAG TSRMLS_CC); 
 	if( !handleAppendResult( result, loc_name TSRMLS_CC)){
 		RETURN_FALSE;
 	}
 	
 	//Region
-	result = append_key_value( loc_name, hash_arr , LOC_REGION_TAG);
+	result = append_key_value( loc_name, hash_arr , LOC_REGION_TAG TSRMLS_CC);
 	if( !handleAppendResult( result, loc_name TSRMLS_CC)){
 		RETURN_FALSE;
 	}
@@ -1475,7 +1475,7 @@ static char* lookup_loc_range(char* loc_range, HashTable* hash_arr , int isCanon
 			efree( lang_tag );
 		}
 		if( Z_TYPE_PP(ele_value)== IS_UNICODE ) {
-			lang_tag = zend_unicode_to_ascii(Z_USTRVAL_PP(ele_value), Z_USTRLEN_PP(ele_value));
+			lang_tag = zend_unicode_to_ascii(Z_USTRVAL_PP(ele_value), Z_USTRLEN_PP(ele_value) TSRMLS_CC);
 		} else if( Z_TYPE_PP(ele_value)== IS_STRING ) {
 			lang_tag = estrdup(Z_STRVAL_PP(ele_value));
 		} else {
