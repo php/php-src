@@ -3767,15 +3767,13 @@ static zend_constant* zend_get_ct_const(zval *const_name TSRMLS_DC) /* {{{ */
 		char *lookup_name = zend_str_tolower_dup(Z_STRVAL_P(const_name), Z_STRLEN_P(const_name));
 		 
 		if (zend_hash_find(EG(zend_constants), lookup_name, Z_STRLEN_P(const_name)+1, (void **) &c)==SUCCESS) {
-			if ((c->flags & CONST_CS) && memcmp(c->name, Z_STRVAL_P(const_name), Z_STRLEN_P(const_name))!=0) {
+			if ((c->flags & CONST_CT_SUBST) && !(c->flags & CONST_CS)) {
 				efree(lookup_name);
-				return NULL;
+				return c;
 			}
-		} else {
-			efree(lookup_name);
-			return NULL;
 		}
 		efree(lookup_name);
+		return NULL;
 	}
 	if (c->flags & CONST_CT_SUBST) {
 		return c;

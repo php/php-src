@@ -231,7 +231,7 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 		lookup_name = zend_str_tolower_dup(name, name_len);
 
 		if (zend_hash_find(EG(zend_constants), lookup_name, name_len+1, (void **) &c)==SUCCESS) {
-			if ((c->flags & CONST_CS) && memcmp(c->name, name, name_len) != 0) {
+			if (c->flags & CONST_CS) {
 				retval=0;
 			}
 		} else {
