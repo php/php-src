@@ -209,7 +209,7 @@ PHP                                                                        NEWS
   . DatePeriod class which supports iterating over a DateTime object applying
     DateInterval on each iteration, up to an end date or limited by maximum
     number of occurences.
-- Added Extended DES, Blowfish to all
+
 - Added hash_copy() function. (Tony)
 - Added sha224 hash algorithm to the hash extension. (Scott)
 - Added ReflectionProperty::setAccessible() method that allows non-public
