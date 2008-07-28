@@ -336,7 +336,7 @@ ADD_SOURCES("main", "main.c snprintf.c spprintf.c fopen_wrappers.c \
 ADD_SOURCES("main/streams", "streams.c cast.c memory.c filter.c plain_wrapper.c \
 	userspace.c transports.c xp_socket.c mmap.c unicode_filter.c glob_wrapper.c");
 
-ADD_SOURCES("win32", "crypt_win32.c glob.c md5crypt.c readdir.c \
+ADD_SOURCES("win32", "glob.c readdir.c \
 	registry.c select.c sendmail.c time.c wfile.c winutil.c wsyslog.c globals.c");
 
 STDOUT.WriteBlankLines(1);
