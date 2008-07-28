@@ -444,9 +444,26 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 }
 
 
-ZEND_API int zend_get_scanned_file_offset(TSRMLS_D)
+ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D)
 {
-	return SCNG(yy_cursor) - SCNG(yy_start);
+	size_t offset = SCNG(yy_cursor) - SCNG(yy_start);
+#ifdef ZEND_MULTIBYTE
+    size_t original_offset = offset, length = 0;
+    do {
+        unsigned char *p = NULL;
+        SCNG(input_filter)(&p, &length, SCNG(script_org), offset TSRMLS_CC);
+        if (!p) {
+            break;
+        }
+        efree(p);
+        if (length > original_offset) {
+            offset--;
+        } else if (length < original_offset) {
+            offset++;
+        }
+    } while (original_offset != length);
+#endif
+    return offset;
 }
 
 
@@ -581,29 +598,19 @@ END_EXTERN_C()
 BEGIN_EXTERN_C()
 ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter, zend_encoding *old_encoding TSRMLS_DC)
 {
-	size_t offset, original_offset, length, free_flag, new_len;
+	size_t original_offset, offset, free_flag, new_len, length;
 	unsigned char *p;
-	zend_encoding *new_encoding;
 
 	/* calculate current position */
 	offset = original_offset = YYCURSOR - SCNG(yy_start);
-	if (old_input_filter && original_offset > 0) {
-		new_encoding = SCNG(script_encoding);
+	if (old_input_filter && offset > 0) {
+		zend_encoding *new_encoding = SCNG(script_encoding);
+        zend_encoding_filter new_filter = SCNG(input_filter);
 		SCNG(script_encoding) = old_encoding;
-		do {
-			(old_input_filter)(&p, &length, SCNG(script_org), offset TSRMLS_CC);
-			if (!p) {
-				SCNG(script_encoding) = new_encoding;
-				return;
-			}
-			efree(p);
-			if (length > original_offset) {
-				offset--;
-			} else if (length < original_offset) {
-				offset++;
-			}
-		} while (original_offset != length);
+        SCNG(input_filter) = new_filter;
+        offset = zend_get_scanned_file_offset(TSRMLS_C);
 		SCNG(script_encoding) = new_encoding;
+		SCNG(input_filter) = new_filter;
 	}
 
 	/* convert and set */
@@ -1926,7 +1933,7 @@ inline_char_handler:
 
 	/* Check for ending label on the next line */
 	if (CG(heredoc_len) < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, s, CG(heredoc_len))) {
-		char *end = YYCURSOR + CG(heredoc_len);
+		unsigned char *end = YYCURSOR + CG(heredoc_len);
 
 		if (*end == ';') {
 			end++;

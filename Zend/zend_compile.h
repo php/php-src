@@ -357,7 +357,7 @@ ZEND_API char *zend_set_compiled_filename(char *new_compiled_filename TSRMLS_DC)
 ZEND_API void zend_restore_compiled_filename(char *original_compiled_filename TSRMLS_DC);
 ZEND_API char *zend_get_compiled_filename(TSRMLS_D);
 ZEND_API int zend_get_compiled_lineno(TSRMLS_D);
-ZEND_API int zend_get_scanned_file_offset(TSRMLS_D);
+ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D);
 
 void zend_resolve_class_name(znode *class_name, ulong *fetch_type, int check_ns_name TSRMLS_DC);
 ZEND_API char* zend_get_compiled_variable_name(zend_op_array *op_array, zend_uint var, int* name_len);
