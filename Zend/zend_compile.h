@@ -359,7 +359,7 @@ ZEND_API char *zend_set_compiled_filename(char *new_compiled_filename TSRMLS_DC)
 ZEND_API void zend_restore_compiled_filename(char *original_compiled_filename TSRMLS_DC);
 ZEND_API char *zend_get_compiled_filename(TSRMLS_D);
 ZEND_API int zend_get_compiled_lineno(TSRMLS_D);
-ZEND_API int zend_get_scanned_file_offset(TSRMLS_D);
+ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D);
 ZEND_API char *zend_set_compiled_script_encoding(char *new_script_enc TSRMLS_DC);
 ZEND_API void zend_restore_compiled_script_encoding(char *original_script_enc TSRMLS_DC);
 ZEND_API char *zend_get_compiled_script_encoding(TSRMLS_D);
