@@ -7,10 +7,14 @@ AC_DEFINE("PHP_CONFIG_FILE_SCAN_DIR", PHP_CONFIG_FILE_SCAN_DIR);
 AC_DEFINE("HAVE_INET_PTON", 1);
 AC_DEFINE("HAVE_INET_NTOP", 1);
 
+AC_DEFINE("PHP_USE_PHP_CRYPT_R", 1);
+
 CHECK_HEADER_ADD_INCLUDE("timelib_config.h", "CFLAGS_STANDARD", "ext/date/lib");
 
 EXTENSION("standard", "array.c base64.c basic_functions.c browscap.c \
-	crc32.c crypt.c cyr_convert.c datetime.c dir.c dl.c dns.c exec.c \
+	crc32.c crypt.c \
+	crypt_freesec.c crypt_blowfish.c php_crypt_r.c \
+	cyr_convert.c datetime.c dir.c dl.c dns.c exec.c \
 	file.c filestat.c formatted_print.c fsock.c head.c html.c image.c \
 	info.c iptc.c lcg.c link.c mail.c math.c md5.c metaphone.c microtime.c \
 	pack.c pageinfo.c quot_print.c rand.c soundex.c \
