@@ -114,7 +114,6 @@ struct _php_sqlite3_stmt_object  {
 
 #endif
 
-
 /*
  * Local variables:
  * tab-width: 4
