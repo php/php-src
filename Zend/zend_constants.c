@@ -278,7 +278,7 @@ ZEND_API int zend_u_get_constant(zend_uchar type, zstr name, uint name_len, zval
 		lookup_name = zend_u_str_case_fold(type, name, name_len, 1, &lookup_name_len);
 
 		if (zend_u_hash_find(EG(zend_constants), type, lookup_name, lookup_name_len+1, (void **) &c)==SUCCESS) {
-			if ((c->flags & CONST_CS) && memcmp(c->name.v, name.v, UG(unicode)?UBYTES(name_len):name_len)!=0) {
+			if (c->flags & CONST_CS) {
 				retval=0;
 			}
 		} else {
