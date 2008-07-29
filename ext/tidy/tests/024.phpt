@@ -28,7 +28,7 @@ var_dump($tidy->value);
 
 ?>
 --EXPECTF--
-string(11%d) "<html>
+unicode(%d) "<html>
 <head>
 <title></title>
 </head>

@@ -13,15 +13,15 @@ var_dump(call_user_func("strlen", $a));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: Parameter 1 to sort() expected to be a reference, value given in %sbug41970.php on line 5
+Warning: Parameter 1 to sort() expected to be a reference, value given in %s on line %d
 NULL
 
-Notice: Array to string conversion in %sbug41970.php on line 6
-int(5)
-
-Warning: Parameter 1 to sort() expected to be a reference, value given in %sbug41970.php on line 7
+Warning: strlen() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
 NULL
 
-Notice: Array to string conversion in %sbug41970.php on line 8
-int(5)
+Warning: Parameter 1 to sort() expected to be a reference, value given in %s on line %d
+NULL
+
+Warning: strlen() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 Done

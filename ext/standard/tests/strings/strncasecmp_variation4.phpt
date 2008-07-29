@@ -130,31 +130,31 @@ int(0)
 int(0)
 -- Iteration 15 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: strlen() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
 
 Warning: strncasecmp() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
 NULL
 -- Iteration 16 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: strlen() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
 
 Warning: strncasecmp() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
 NULL
 -- Iteration 17 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: strlen() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
 
 Warning: strncasecmp() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
 NULL
 -- Iteration 18 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: strlen() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
 
 Warning: strncasecmp() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
 NULL
 -- Iteration 19 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: strlen() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
 
 Warning: strncasecmp() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
 NULL
@@ -179,6 +179,8 @@ int(0)
 -- Iteration 29 --
 int(0)
 -- Iteration 30 --
+
+Warning: strlen() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
 
 Warning: strncasecmp() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
 NULL
