@@ -98,7 +98,7 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 HashTable cached_phars;
 HashTable cached_alias;
 
-static void phar_split_cache_list(TSRMLS_D)
+static void phar_split_cache_list(TSRMLS_D) /* {{{ */
 {
 	char *tmp;
 	char *key, *lasts, *end;
@@ -1221,6 +1221,7 @@ check_file:
 	return phar_create_or_parse_filename(fname, fname_len, alias, alias_len, is_data, options, pphar, error TSRMLS_CC);
 
 }
+/* }}} */
 
 int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
@@ -1420,7 +1421,7 @@ int phar_open_from_filename(char *fname, int fname_len, char *alias, int alias_l
 }
 /* }}}*/
 
-static inline char *phar_strnstr(const char *buf, int buf_len, const char *search, int search_len)
+static inline char *phar_strnstr(const char *buf, int buf_len, const char *search, int search_len) /* {{{ */
 {
 	const char *c;
 	int so_far = 0;
@@ -1442,6 +1443,7 @@ static inline char *phar_strnstr(const char *buf, int buf_len, const char *searc
 		}
 	} while (1);
 }
+/* }}} */
 
 /**
  * Scan an open fp for the required __HALT_COMPILER(); ?> token and verify
@@ -1601,7 +1603,7 @@ static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *a
  * if not, check to see if its dirname() exists (i.e. "/path/to") and is a directory
  * succeed if we are creating the file, otherwise fail.
  */
-static int phar_analyze_path(const char *fname, const char *ext, int ext_len, int for_create TSRMLS_DC)
+static int phar_analyze_path(const char *fname, const char *ext, int ext_len, int for_create TSRMLS_DC) /* {{{ */
 {
 	php_stream_statbuf ssb;
 	char *realpath, old, *a = (char *)(ext + ext_len);
@@ -1685,9 +1687,10 @@ static int phar_analyze_path(const char *fname, const char *ext, int ext_len, in
 		return FAILURE;
 	}
 }
+/* }}} */
 
 /* check for ".phar" in extension */
-static int phar_check_str(const char *fname, const char *ext_str, int ext_len, int executable, int for_create TSRMLS_DC)
+static int phar_check_str(const char *fname, const char *ext_str, int ext_len, int executable, int for_create TSRMLS_DC) /* {{{ */
 {
 	char test[51];
 	const char *pos;
@@ -1723,6 +1726,7 @@ static int phar_check_str(const char *fname, const char *ext_str, int ext_len, i
 	}
 	return FAILURE;
 }
+/* }}} */
 
 /*
  * if executable is 1, only returns SUCCESS if the extension is one of the tar/zip .phar extensions
@@ -1885,7 +1889,7 @@ next_extension:
 }
 /* }}} */
 
-static int php_check_dots(const char *element, int n) 
+static int php_check_dots(const char *element, int n)  /* {{{ */
 {
 	for(n--; n >= 0; --n) {
 		if (element[n] != '.') {
@@ -1894,6 +1898,7 @@ static int php_check_dots(const char *element, int n)
 	}
 	return 0;
 }
+/* }}} */
 
 #define IS_DIRECTORY_UP(element, len) \
 	(len >= 2 && !php_check_dots(element, len))
@@ -1905,7 +1910,7 @@ static int php_check_dots(const char *element, int n)
 
 #ifdef COMPILE_DL_PHAR
 /* stupid-ass non-extern declaration in tsrm_strtok.h breaks dumbass MS compiler */
-static inline int in_character_class(char ch, const char *delim)
+static inline int in_character_class(char ch, const char *delim) /* {{{ */
 {
 	while (*delim) {
 		if (*delim == ch) {
@@ -1915,8 +1920,9 @@ static inline int in_character_class(char ch, const char *delim)
 	}
 	return 0;
 }
+/* }}} */
 
-char *tsrm_strtok_r(char *s, const char *delim, char **last)
+char *tsrm_strtok_r(char *s, const char *delim, char **last) /* {{{ */
 {
 	char *token;
 
@@ -1944,6 +1950,7 @@ char *tsrm_strtok_r(char *s, const char *delim, char **last)
 	}
 	return token;
 }
+/* }}} */
 #endif
 
 /**
@@ -2260,7 +2267,7 @@ static int phar_flush_clean_deleted_apply(void *data TSRMLS_DC) /* {{{ */
 
 #include "stub.h"
 
-char *phar_create_default_stub(const char *index_php, const char *web_index, size_t *len, char **error TSRMLS_DC)
+char *phar_create_default_stub(const char *index_php, const char *web_index, size_t *len, char **error TSRMLS_DC) /* {{{ */
 {
 	char *stub = NULL;
 	int index_len, web_len;
@@ -2304,9 +2311,10 @@ char *phar_create_default_stub(const char *index_php, const char *web_index, siz
 	phar_get_stub(index_php, web_index, len, &stub, index_len+1, web_len+1 TSRMLS_CC);
 	return stub;
 }
+/* }}} */
 
 #ifndef PHAR_HAVE_OPENSSL
-static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, char *key, int key_len, char **signature, int *signature_len TSRMLS_DC)
+static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, char *key, int key_len, char **signature, int *signature_len TSRMLS_DC) /* {{{ */
 {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
@@ -2415,6 +2423,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 			return FAILURE;
 	}
 }
+/* }}} */
 #endif /* #ifndef PHAR_HAVE_OPENSSL */
 
 /**
