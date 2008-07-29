@@ -1174,6 +1174,7 @@ PHP_METHOD(Phar, __construct)
 #endif /* HAVE_SPL */
 }
 /* }}} */
+/* }}} */
 
 /* {{{ proto array Phar::getSupportedSignatures()
  * Return array of supported signature types
@@ -1675,6 +1676,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 		php_stream_close(pass.fp);
 	}
 }
+/* }}} */
 
 /* {{{ proto array Phar::buildFromIterator(Iterator iter[, string base_directory])
  * Construct a phar archive from an iterator.  The iterator must return a series of strings
@@ -1807,7 +1809,7 @@ static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp TSRMLS
 }
 /* }}} */
 
-static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool compress TSRMLS_DC)
+static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool compress TSRMLS_DC) /* {{{ */
 {
 	char *oldname = NULL, *oldpath = NULL;
 	char *basename = NULL, *basepath = NULL;
@@ -1979,6 +1981,7 @@ its_ok:
 	
 	return ret;
 }
+/* }}} */
 
 static zval *phar_convert_to_other(phar_archive_data *source, int convert, char *ext, php_uint32 flags TSRMLS_DC) /* {{{ */
 {
@@ -3655,7 +3658,7 @@ PHP_METHOD(Phar, delMetadata)
 	php_check_open_basedir(filename TSRMLS_CC)
 #endif
 
-static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *dest, int dest_len, char **error TSRMLS_DC)
+static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *dest, int dest_len, char **error TSRMLS_DC) /* {{{ */
 {
 	php_stream_statbuf ssb;
 	int len;
@@ -3784,6 +3787,7 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 	efree(fullpath);
 	return SUCCESS;
 }
+/* }}} */
 
 /* {{{ proto bool Phar::extractTo(string pathto[[, mixed files], bool overwrite])
  * Extract one or more file from a phar archive, optionally overwriting existing files

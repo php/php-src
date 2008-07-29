@@ -34,7 +34,7 @@
 # define PHAR_SET_16(buffer) (buffer)
 #endif
 
-static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, php_uint16 len TSRMLS_DC)
+static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, php_uint16 len TSRMLS_DC) /* {{{ */
 {
 	union {
 		phar_zip_extra_field_header header;
@@ -72,6 +72,7 @@ static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, php_ui
 	} while (len);
 	return SUCCESS;
 }
+/* }}} */
 
 /*
   extracted from libzip
@@ -106,7 +107,7 @@ static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, php_ui
   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-static time_t phar_zip_d2u_time(int dtime, int ddate)
+static time_t phar_zip_d2u_time(int dtime, int ddate) /* {{{ */
 {
     struct tm *tm, tmbuf;
     time_t now;
@@ -124,8 +125,9 @@ static time_t phar_zip_d2u_time(int dtime, int ddate)
 
     return mktime(tm);
 }
+/* }}} */
 
-static void phar_zip_u2d_time(time_t time, php_uint16 *dtime, php_uint16 *ddate)
+static void phar_zip_u2d_time(time_t time, php_uint16 *dtime, php_uint16 *ddate) /* {{{ */
 {
     struct tm *tm, tmbuf;
 
@@ -133,6 +135,7 @@ static void phar_zip_u2d_time(time_t time, php_uint16 *dtime, php_uint16 *ddate)
     *ddate = ((tm->tm_year+1900-1980)<<9) + ((tm->tm_mon+1)<<5) + tm->tm_mday;
     *dtime = ((tm->tm_hour)<<11) + ((tm->tm_min)<<5) + ((tm->tm_sec)>>1);
 }
+/* }}} */
 
 /**
  * Does not check for a previously opened phar in the cache.
@@ -1142,3 +1145,12 @@ nostub:
 	return EOF;
 }
 /* }}} */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */

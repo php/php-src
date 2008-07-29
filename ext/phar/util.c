@@ -43,7 +43,7 @@ extern php_stream_wrapper php_stream_phar_wrapper;
 #endif
 
 /* for links to relative location, prepend cwd of the entry */
-static char *phar_get_link_location(phar_entry_info *entry TSRMLS_DC)
+static char *phar_get_link_location(phar_entry_info *entry TSRMLS_DC) /* {{{ */
 {
 	char *p, *ret = NULL;
 	if (!entry->link) {
@@ -60,8 +60,9 @@ static char *phar_get_link_location(phar_entry_info *entry TSRMLS_DC)
 	}
 	return entry->link;
 }
+/* }}} */
 
-phar_entry_info *phar_get_link_source(phar_entry_info *entry TSRMLS_DC)
+phar_entry_info *phar_get_link_source(phar_entry_info *entry TSRMLS_DC) /* {{{ */
 {
 	phar_entry_info *link_entry;
 	char *link = phar_get_link_location(entry TSRMLS_CC);
@@ -83,9 +84,10 @@ phar_entry_info *phar_get_link_source(phar_entry_info *entry TSRMLS_DC)
 		return NULL;
 	}
 }
+/* }}} */
 
 /* retrieve a phar_entry_info's current file pointer for reading contents */
-php_stream *phar_get_efp(phar_entry_info *entry, int follow_links TSRMLS_DC)
+php_stream *phar_get_efp(phar_entry_info *entry, int follow_links TSRMLS_DC) /* {{{ */
 {
 	if (follow_links && entry->link) {
 		phar_entry_info *link_entry = phar_get_link_source(entry TSRMLS_CC);
@@ -112,8 +114,9 @@ php_stream *phar_get_efp(phar_entry_info *entry, int follow_links TSRMLS_DC)
 		return entry->fp;
 	}
 }
+/* }}} */
 
-int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t position, int follow_links TSRMLS_DC)
+int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t position, int follow_links TSRMLS_DC) /* {{{ */
 {
 	php_stream *fp = phar_get_efp(entry, follow_links TSRMLS_CC);
 	off_t temp, eoffset;
@@ -151,9 +154,10 @@ int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t positi
 	}
 	return php_stream_seek(fp, temp, SEEK_SET);
 }
+/* }}} */
 
 /* mount an absolute path or uri to a path internal to the phar archive */
-int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, char *path, int path_len TSRMLS_DC)
+int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, char *path, int path_len TSRMLS_DC) /* {{{ */
 {
 	phar_entry_info entry = {0};
 	php_stream_statbuf ssb;
@@ -230,6 +234,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 	efree(entry.filename);
 	return FAILURE;
 }
+/* }}} */
 
 char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_data **pphar TSRMLS_DC) /* {{{ */
 {
@@ -775,7 +780,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 /* }}} */
 
 /* initialize a phar_archive_data's read-only fp for existing phar data */
-int phar_open_archive_fp(phar_archive_data *phar TSRMLS_DC) 
+int phar_open_archive_fp(phar_archive_data *phar TSRMLS_DC)  /* {{{ */
 {
 	if (phar_get_pharfp(phar TSRMLS_CC)) {
 		return SUCCESS;
@@ -798,9 +803,10 @@ int phar_open_archive_fp(phar_archive_data *phar TSRMLS_DC)
 	}
 	return SUCCESS;
 }
+/* }}} */
 
 /* copy file data from an existing to a new phar_entry_info that is not in the manifest */
-int phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **error TSRMLS_DC)
+int phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_entry_info *link;
 
@@ -832,10 +838,11 @@ int phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **er
 	}
 	return SUCCESS;
 }
+/* }}} */
 
 /* open and decompress a compressed phar entry
  */
-int phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_links TSRMLS_DC) 
+int phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_links TSRMLS_DC)  /* {{{ */
 {
 	php_stream_filter *filter;
 	phar_archive_data *phar = entry->phar;
@@ -912,6 +919,7 @@ int phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_links TS
 
 	return SUCCESS;
 }
+/* }}} */
 
 #if defined(PHP_VERSION_ID) && PHP_VERSION_ID < 50202
 typedef struct {
@@ -996,7 +1004,7 @@ int phar_create_writeable_entry(phar_archive_data *phar, phar_entry_info *entry,
 }
 /* }}} */
 
-int phar_separate_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC)
+int phar_separate_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC) /* {{{ */
 {
 	php_stream *fp;
 	phar_entry_info *link;
@@ -1034,12 +1042,12 @@ int phar_separate_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC)
 	entry->is_modified = 1;
 	return SUCCESS;
 }
+/* }}} */
 
 /**
  * helper function to open an internal file's fp just-in-time
  */
-phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, php_stream *fp,
-				      char **error, int for_write TSRMLS_DC)
+phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, php_stream *fp, char **error, int for_write TSRMLS_DC) /* {{{ */
 {
 	if (error) {
 		*error = NULL;
@@ -1054,6 +1062,7 @@ phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry,
 	}
 	return entry;
 }
+/* }}} */
 
 int phar_free_alias(phar_archive_data *phar, char *alias, int alias_len TSRMLS_DC) /* {{{ */
 {
@@ -1448,7 +1457,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 
 static const char hexChars[] = "0123456789ABCDEF";
 
-static int phar_hex_str(const char *digest, size_t digest_len, char **signature TSRMLS_DC)
+static int phar_hex_str(const char *digest, size_t digest_len, char **signature TSRMLS_DC) /* {{{ */
 {
 	int pos = -1;
 	size_t len = 0;
@@ -1462,8 +1471,10 @@ static int phar_hex_str(const char *digest, size_t digest_len, char **signature 
 	(*signature)[++pos] = '\0';
 	return pos;
 }
+/* }}} */
+
 #ifndef PHAR_HAVE_OPENSSL
-static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, char *key, int key_len, char **signature, int *signature_len TSRMLS_DC)
+static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, char *key, int key_len, char **signature, int *signature_len TSRMLS_DC) /* {{{ */
 {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
@@ -1572,6 +1583,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 			return FAILURE;
 	}
 }
+/* }}} */
 #endif /* #ifndef PHAR_HAVE_OPENSSL */
 
 int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_type, char *sig, int sig_len, char *fname, char **signature, int *signature_len, char **error TSRMLS_DC) /* {{{ */
@@ -2001,6 +2013,7 @@ static void phar_update_cached_entry(void *data, void *argument) /* {{{ */
 		}
 	}
 }
+/* }}} */
 
 static void phar_copy_cached_phar(phar_archive_data **pphar TSRMLS_DC) /* {{{ */
 {
@@ -2073,3 +2086,12 @@ int phar_copy_on_write(phar_archive_data **pphar TSRMLS_DC) /* {{{ */
 	return SUCCESS;
 }
 /* }}} */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */

@@ -97,7 +97,7 @@ static php_uint32 phar_tar_checksum(char *buf, int len) /* {{{ */
 }
 /* }}} */
 
-int phar_is_tar(char *buf, char *fname)
+int phar_is_tar(char *buf, char *fname) /* {{{ */
 {
 	tar_header *header = (tar_header *) buf;
 	php_uint32 checksum = phar_tar_number(header->checksum, sizeof(header->checksum));
@@ -119,6 +119,7 @@ int phar_is_tar(char *buf, char *fname)
 	}
 	return ret;
 }
+/* }}} */
 
 int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
@@ -152,8 +153,9 @@ int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_l
 	}
 	return FAILURE;
 }
+/* }}} */
 
-int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp TSRMLS_DC)
+int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp TSRMLS_DC) /* {{{ */
 {
 	char *metadata;
 	size_t save = php_stream_tell(fp), read;
@@ -186,6 +188,7 @@ int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp TSRMLS_DC)
 	php_stream_seek(fp, save, SEEK_SET);
 	return SUCCESS;
 }
+/* }}} */
 
 int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, php_uint32 compression, char **error TSRMLS_DC) /* {{{ */
 {
@@ -555,7 +558,7 @@ struct _phar_pass_tar_info {
 	char **error;
 };
 
-int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC)
+int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC) /* {{{ */
 {
 	tar_header header;
 	size_t pos;
@@ -674,8 +677,9 @@ int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC)
 	entry->offset = entry->offset_abs = pos;
 	return ZEND_HASH_APPLY_KEEP;
 }
+/* }}} */
 
-int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error, php_stream *fp TSRMLS_DC)
+int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error, php_stream *fp TSRMLS_DC) /* {{{ */
 {
 	php_serialize_data_t metadata_hash;
 
@@ -702,8 +706,9 @@ int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error, p
 	}
 	return ZEND_HASH_APPLY_KEEP;
 }
+/* }}} */
 
-int phar_tar_setupmetadata(void *pDest, void *argument TSRMLS_DC)
+int phar_tar_setupmetadata(void *pDest, void *argument TSRMLS_DC) /* {{{ */
 {
 	int lookfor_len;
 	struct _phar_pass_tar_info *i = (struct _phar_pass_tar_info *)argument;
@@ -755,6 +760,7 @@ int phar_tar_setupmetadata(void *pDest, void *argument TSRMLS_DC)
 
 	return phar_tar_setmetadata(entry->metadata, metadata, error, fp TSRMLS_CC);
 }
+/* }}} */
 
 int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defaultstub, char **error TSRMLS_DC) /* {{{ */
 {
@@ -1124,3 +1130,12 @@ nostub:
 	return EOF;
 }
 /* }}} */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */
