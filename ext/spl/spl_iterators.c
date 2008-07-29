@@ -931,7 +931,10 @@ static void spl_recursive_tree_iterator_get_entry(spl_recursive_it_object * obje
 
 	php_set_error_handling(EH_THROW, spl_ce_UnexpectedValueException TSRMLS_CC);
 	RETVAL_ZVAL(*data, 1, 0);
-	if (Z_TYPE_PP(data) != IS_UNICODE && Z_TYPE_PP(data) != IS_STRING) {
+	if (Z_TYPE_P(return_value) == IS_ARRAY) {
+		zval_dtor(return_value);
+		ZVAL_STRINGL(return_value, "Array", sizeof("Array")-1, 1);
+	} else if (Z_TYPE_PP(data) != IS_UNICODE && Z_TYPE_PP(data) != IS_STRING) {
 		convert_to_text(return_value);
 	}
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
