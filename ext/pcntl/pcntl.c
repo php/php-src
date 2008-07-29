@@ -134,6 +134,7 @@ const zend_function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_waitpid,		arginfo_pcntl_waitpid)
 	PHP_FE(pcntl_wait,			arginfo_pcntl_wait)
 	PHP_FE(pcntl_signal,		arginfo_pcntl_signal)
+	PHP_FE(pcntl_signal_dispatch,	arginfo_pcntl_void)
 	PHP_FE(pcntl_wifexited,		arginfo_pcntl_wifexited)
 	PHP_FE(pcntl_wifstopped,	arginfo_pcntl_wifstopped)
 	PHP_FE(pcntl_wifsignaled,	arginfo_pcntl_wifsignaled)
@@ -173,7 +174,7 @@ ZEND_GET_MODULE(pcntl)
 #endif
 
 static void pcntl_signal_handler(int);
-static void pcntl_tick_handler();
+static void pcntl_signal_dispatch();
   
 void php_register_signal_constants(INIT_FUNC_ARGS)
 {
@@ -262,7 +263,7 @@ PHP_RINIT_FUNCTION(pcntl)
 PHP_MINIT_FUNCTION(pcntl)
 {
 	php_register_signal_constants(INIT_FUNC_ARGS_PASSTHRU);
-	php_add_tick_function(pcntl_tick_handler);
+	php_add_tick_function(pcntl_signal_dispatch);
 
 	return SUCCESS;
 }
@@ -644,6 +645,15 @@ PHP_FUNCTION(pcntl_signal)
 }
 /* }}} */
 
+/* {{{ proto bool pcntl_signal_dispatch()
+   Dispatch signals to signal handlers */
+PHP_FUNCTION(pcntl_signal_dispatch)
+{
+	pcntl_signal_dispatch();
+	RETURN_TRUE;
+}
+/* }}} */
+
 #ifdef HAVE_GETPRIORITY
 /* {{{ proto int pcntl_getpriority([int pid [, int process_identifier]]) U
    Get the priority of any process */
@@ -747,7 +757,7 @@ static void pcntl_signal_handler(int signo)
 	PCNTL_G(tail) = psig;
 }
 
-void pcntl_tick_handler()
+void pcntl_signal_dispatch()
 {
 	zval *param, **handle, *retval;
 	struct php_pcntl_pending_signal *queue, *next;
