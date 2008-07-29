@@ -4267,7 +4267,7 @@ ZEND_METHOD(reflection_property, getValue)
 	reflection_object *intern;
 	property_reference *ref;
 	zval *object, name;
-	zval **member= NULL;
+	zval **member= NULL, *member_p;
 	zend_uchar utype = UG(unicode)?IS_UNICODE:IS_STRING;
 
 	METHOD_NOTSTATIC(reflection_property_ptr);
@@ -4287,19 +4287,27 @@ ZEND_METHOD(reflection_property, getValue)
 			zend_error(E_ERROR, "Internal error: Could not find the property %v::%v", intern->ce->name, ref->prop.name);
 			/* Bails out */
 		}
+		*return_value= **member;
+		zval_copy_ctor(return_value);
+		INIT_PZVAL(return_value);
 	} else {
+		zstr class_name, prop_name;
+		int prop_name_len;
+
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &object) == FAILURE) {
 			return;
 		}
-		if (zend_u_hash_quick_find(Z_OBJPROP_P(object), utype, ref->prop.name, ref->prop.name_length + 1, ref->prop.h, (void **) &member) == FAILURE) {
-			zend_error(E_ERROR, "Internal error: Could not find the property %v::%v", intern->ce->name, ref->prop.name);
-			/* Bails out */
+		zend_u_unmangle_property_name(UG(unicode)?IS_UNICODE:IS_STRING, ref->prop.name, ref->prop.name_length, &class_name, &prop_name);
+		prop_name_len = UG(unicode) ? u_strlen(prop_name.u) : strlen(prop_name.s);
+		member_p = zend_u_read_property(Z_OBJCE_P(object), object, UG(unicode)?IS_UNICODE:IS_STRING, prop_name, prop_name_len, 1 TSRMLS_CC);
+		*return_value= *member_p;
+		zval_copy_ctor(return_value);
+		INIT_PZVAL(return_value);
+		if (member_p != EG(uninitialized_zval_ptr)) {
+			zval_add_ref(&member_p);
+			zval_ptr_dtor(&member_p);
 		}
 	}
-
-	*return_value= **member;
-	zval_copy_ctor(return_value);
-	INIT_PZVAL(return_value);
 }
 /* }}} */
 
@@ -4336,38 +4344,38 @@ ZEND_METHOD(reflection_property, setValue)
 		}
 		zend_update_class_constants(intern->ce TSRMLS_CC);
 		prop_table = CE_STATIC_MEMBERS(intern->ce);
+
+		if (zend_u_hash_quick_find(prop_table, utype, ref->prop.name, ref->prop.name_length + 1, ref->prop.h, (void **) &variable_ptr) == FAILURE) {
+			zend_error(E_ERROR, "Internal error: Could not find the property %v::%v", intern->ce->name, ref->prop.name);
+			/* Bails out */
+		}
+		if (*variable_ptr == value) {
+			setter_done = 1;
+		} else {
+			if (PZVAL_IS_REF(*variable_ptr)) {
+				zval_dtor(*variable_ptr);
+				(*variable_ptr)->type = value->type;
+				(*variable_ptr)->value = value->value;
+				if (Z_REFCOUNT_P(value) > 0) {
+					zval_copy_ctor(*variable_ptr);
+				}
+				setter_done = 1;
+			}
+		}
+		if (!setter_done) {
+			zval **foo;
+
+			Z_ADDREF_P(value);
+			if (PZVAL_IS_REF(value)) {
+				SEPARATE_ZVAL(&value);
+			}
+			zend_u_hash_quick_update(prop_table, utype, ref->prop.name, ref->prop.name_length+1, ref->prop.h, &value, sizeof(zval *), (void **) &foo);
+		}
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oz", &object, &value) == FAILURE) {
 			return;
 		}
-		prop_table = Z_OBJPROP_P(object);
-	}
-
-	if (zend_u_hash_quick_find(prop_table, utype, ref->prop.name, ref->prop.name_length + 1, ref->prop.h, (void **) &variable_ptr) == FAILURE) {
-		zend_error(E_ERROR, "Internal error: Could not find the property %v::%v", intern->ce->name, ref->prop.name);
-		/* Bails out */
-	}
-	if (*variable_ptr == value) {
-		setter_done = 1;
-	} else {
-		if (PZVAL_IS_REF(*variable_ptr)) {
-			zval_dtor(*variable_ptr);
-			(*variable_ptr)->type = value->type;
-			(*variable_ptr)->value = value->value;
-			if (Z_REFCOUNT_P(value) > 0) {
-				zval_copy_ctor(*variable_ptr);
-			}
-			setter_done = 1;
-		}
-	}
-	if (!setter_done) {
-		zval **foo;
-
-		Z_ADDREF_P(value);
-		if (PZVAL_IS_REF(value)) {
-			SEPARATE_ZVAL(&value);
-		}
-		zend_u_hash_quick_update(prop_table, utype, ref->prop.name, ref->prop.name_length+1, ref->prop.h, &value, sizeof(zval *), (void **) &foo);
+		zend_u_update_property(Z_OBJCE_P(object), object, UG(unicode)?IS_UNICODE:IS_STRING, ref->prop.name, ref->prop.name_length, value TSRMLS_CC);
 	}
 }
 /* }}} */
