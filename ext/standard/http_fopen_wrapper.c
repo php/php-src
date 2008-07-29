@@ -81,6 +81,9 @@
 #define HTTP_HEADER_CONTENT_LENGTH	16
 #define HTTP_HEADER_TYPE			32
 
+#define HTTP_WRAPPER_HEADER_INIT    1
+#define HTTP_WRAPPER_REDIRECTED     2
+
 static inline char *php_http_detect_charset(char *http_header_line) /* {{{ */
 {
 	char *s;
@@ -123,7 +126,7 @@ static inline char *php_http_detect_charset(char *http_header_line) /* {{{ */
 }
 /* }}} */
 
-php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context, int redirect_max, int header_init STREAMS_DC TSRMLS_DC) /* {{{ */
+php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context, int redirect_max, int flags STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	php_stream *stream = NULL;
 	php_url *resource = NULL;
@@ -149,6 +152,8 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	char *charset = NULL;
 	struct timeval timeout;
 	char *user_headers = NULL;
+	int header_init = ((flags & HTTP_WRAPPER_HEADER_INIT) != 0);
+	int redirected = ((flags & HTTP_WRAPPER_REDIRECTED) != 0);
 
 	tmp_line[0] = '\0';
 
@@ -296,7 +301,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		if (Z_TYPE_PP(tmpzval) == IS_STRING && Z_STRLEN_PP(tmpzval) > 0) {
 			/* As per the RFC, automatically redirected requests MUST NOT use other methods than
 			 * GET and HEAD unless it can be confirmed by the user */
-			if (redirect_max == PHP_URL_REDIRECT_MAX
+			if (!redirected
 				|| (Z_STRLEN_PP(tmpzval) == 3 && memcmp("GET", Z_STRVAL_PP(tmpzval), 3) == 0)
 				|| (Z_STRLEN_PP(tmpzval) == 4 && memcmp("HEAD",Z_STRVAL_PP(tmpzval), 4) == 0)
 			) {
@@ -749,7 +754,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 				CHECK_FOR_CNTRL_CHARS(resource->pass)
 				CHECK_FOR_CNTRL_CHARS(resource->path)
 			}
-			stream = php_stream_url_wrap_http_ex(wrapper, new_path, mode, options, opened_path, context, --redirect_max, 0 STREAMS_CC TSRMLS_CC);
+			stream = php_stream_url_wrap_http_ex(wrapper, new_path, mode, options, opened_path, context, --redirect_max, HTTP_WRAPPER_REDIRECTED STREAMS_CC TSRMLS_CC);
 		} else {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "HTTP request failed! %s", tmp_line);
 		}
@@ -803,7 +808,7 @@ out:
 
 php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
 {
-	return php_stream_url_wrap_http_ex(wrapper, path, mode, options, opened_path, context, PHP_URL_REDIRECT_MAX, 1 STREAMS_CC TSRMLS_CC);
+	return php_stream_url_wrap_http_ex(wrapper, path, mode, options, opened_path, context, PHP_URL_REDIRECT_MAX, HTTP_WRAPPER_HEADER_INIT STREAMS_CC TSRMLS_CC);
 }
 /* }}} */
 
