@@ -3836,6 +3836,34 @@ ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, char *
 }
 /* }}} */
 
+ZEND_API void zend_u_update_property(zend_class_entry *scope, zval *object, zend_uchar type, zstr name, int name_length, zval *value TSRMLS_DC) /* {{{ */
+{
+	zval *property;
+	zend_class_entry *old_scope = EG(scope);
+
+	EG(scope) = scope;
+
+	if (!Z_OBJ_HT_P(object)->write_property) {
+		zstr class_name;
+		zend_uint class_name_len;
+
+		zend_get_object_classname(object, &class_name, &class_name_len TSRMLS_CC);
+
+		zend_error(E_CORE_ERROR, "Property %v of class %v cannot be updated", name.v, class_name.v);
+	}
+	MAKE_STD_ZVAL(property);
+	if (type == IS_UNICODE) {
+		ZVAL_UNICODEL(property, name.u, name_length, 1);
+	} else {
+		ZVAL_ASCII_STRINGL(property, name.s, name_length, 1);
+	}
+	Z_OBJ_HT_P(object)->write_property(object, property, value TSRMLS_CC);
+	zval_ptr_dtor(&property);
+
+	EG(scope) = old_scope;
+}
+/* }}} */
+
 ZEND_API void zend_update_property_null(zend_class_entry *scope, zval *object, char *name, int name_length TSRMLS_DC) /* {{{ */
 {
 	zval *tmp;
@@ -4176,6 +4204,35 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, char *n
 
 	MAKE_STD_ZVAL(property);
 	ZVAL_ASCII_STRINGL(property, name, name_length, 1);
+	value = Z_OBJ_HT_P(object)->read_property(object, property, silent?BP_VAR_IS:BP_VAR_R TSRMLS_CC);
+	zval_ptr_dtor(&property);
+
+	EG(scope) = old_scope;
+	return value;
+}
+/* }}} */
+
+ZEND_API zval *zend_u_read_property(zend_class_entry *scope, zval *object, zend_uchar type, zstr name, int name_length, zend_bool silent TSRMLS_DC) /* {{{ */
+{
+	zval *property, *value;
+	zend_class_entry *old_scope = EG(scope);
+
+	EG(scope) = scope;
+
+	if (!Z_OBJ_HT_P(object)->read_property) {
+		zstr class_name;
+		zend_uint class_name_len;
+
+		zend_get_object_classname(object, &class_name, &class_name_len TSRMLS_CC);
+		zend_error(E_CORE_ERROR, "Property %v of class %v cannot be read", name.v, class_name.v);
+	}
+
+	MAKE_STD_ZVAL(property);
+	if (type == IS_UNICODE) {
+		ZVAL_UNICODEL(property, name.u, name_length, 1);
+	} else {
+		ZVAL_ASCII_STRINGL(property, name.s, name_length, 1);
+	}
 	value = Z_OBJ_HT_P(object)->read_property(object, property, silent?BP_VAR_IS:BP_VAR_R TSRMLS_CC);
 	zval_ptr_dtor(&property);
 
