@@ -70,6 +70,26 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_signal, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_sigprocmask, 0, 0, 2)
+	ZEND_ARG_INFO(0, how)
+	ZEND_ARG_INFO(0, set)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_sigwaitinfo, 0, 0, 1)
+	ZEND_ARG_INFO(0, set)
+	ZEND_ARG_INFO(1, info)
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_sigtimedwait, 0, 0, 1)
+	ZEND_ARG_INFO(0, set)
+	ZEND_ARG_INFO(1, info)
+	ZEND_ARG_INFO(0, seconds)
+	ZEND_ARG_INFO(0, nanoseconds)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifexited, 0, 0, 1)
 	ZEND_ARG_INFO(0, status)
 ZEND_END_ARG_INFO()
@@ -148,6 +168,13 @@ const zend_function_entry pcntl_functions[] = {
 #endif
 #ifdef HAVE_SETPRIORITY
 	PHP_FE(pcntl_setpriority,	arginfo_pcntl_setpriority)
+#endif
+#ifdef HAVE_SIGPROCMASK
+	PHP_FE(pcntl_sigprocmask,	arginfo_pcntl_sigprocmask)
+#endif
+#if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
+	PHP_FE(pcntl_sigwaitinfo,	arginfo_pcntl_sigwaitinfo)
+	PHP_FE(pcntl_sigtimedwait,	arginfo_pcntl_sigtimedwait)
 #endif
 	{NULL, NULL, NULL}	
 };
@@ -246,6 +273,81 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("PRIO_USER", PRIO_USER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PRIO_PROCESS", PRIO_PROCESS, CONST_CS | CONST_PERSISTENT);
 #endif
+
+	/* {{{ "how" argument for sigprocmask */
+#ifdef HAVE_SIGPROCMASK
+	REGISTER_LONG_CONSTANT("SIG_BLOCK",   SIG_BLOCK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIG_UNBLOCK", SIG_BLOCK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIG_SETMASK", SIG_BLOCK, CONST_CS | CONST_PERSISTENT);
+#endif
+	/* }}} */
+
+	/* {{{ si_code */
+#if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
+	REGISTER_LONG_CONSTANT("SI_USER",    SI_USER,    CONST_CS | CONST_PERSISTENT);
+#ifdef SI_NOINFO
+	REGISTER_LONG_CONSTANT("SI_NOINFO",  SI_NOINFO,  CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SI_KERNEL
+	REGISTER_LONG_CONSTANT("SI_KERNEL",  SI_KERNEL,  CONST_CS | CONST_PERSISTENT);
+#endif
+	REGISTER_LONG_CONSTANT("SI_QUEUE",   SI_QUEUE,   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SI_TIMER",   SI_TIMER,   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SI_MESGQ",   SI_MESGQ,   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SI_ASYNCIO", SI_ASYNCIO, CONST_CS | CONST_PERSISTENT);
+#ifdef SI_SIGIO
+	REGISTER_LONG_CONSTANT("SI_SIGIO",   SI_SIGIO,   CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SI_TKILL
+	REGISTER_LONG_CONSTANT("SI_TKILL",   SI_TKILL,   CONST_CS | CONST_PERSISTENT);
+#endif
+
+	/* si_code for SIGCHILD */
+	REGISTER_LONG_CONSTANT("CLD_EXITED",    CLD_EXITED,    CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CLD_KILLED",    CLD_KILLED,    CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CLD_DUMPED",    CLD_DUMPED,    CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CLD_TRAPPED",   CLD_TRAPPED,   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CLD_STOPPED",   CLD_STOPPED,   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CLD_CONTINUED", CLD_CONTINUED, CONST_CS | CONST_PERSISTENT);
+
+	/* si_code for SIGTRAP */
+	REGISTER_LONG_CONSTANT("TRAP_BRKPT", TRAP_BRKPT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("TRAP_TRACE", TRAP_TRACE, CONST_CS | CONST_PERSISTENT);
+
+	/* si_code for SIGPOLL */
+	REGISTER_LONG_CONSTANT("POLL_IN",  POLL_IN,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("POLL_OUT", POLL_OUT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("POLL_MSG", POLL_MSG, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("POLL_ERR", POLL_ERR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("POLL_PRI", POLL_PRI, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("POLL_HUP", POLL_HUP, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("ILL_ILLOPC", ILL_ILLOPC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ILL_ILLOPN", ILL_ILLOPN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ILL_ILLADR", ILL_ILLADR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ILL_ILLTRP", ILL_ILLTRP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ILL_PRVOPC", ILL_PRVOPC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ILL_PRVREG", ILL_PRVREG, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ILL_COPROC", ILL_COPROC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ILL_BADSTK", ILL_BADSTK, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("FPE_INTDIV", FPE_INTDIV, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FPE_INTOVF", FPE_INTOVF, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FPE_FLTDIV", FPE_FLTDIV, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FPE_FLTOVF", FPE_FLTOVF, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FPE_FLTUND", FPE_FLTINV, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FPE_FLTRES", FPE_FLTRES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FPE_FLTINV", FPE_FLTINV, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FPE_FLTSUB", FPE_FLTSUB, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("SEGV_MAPERR", SEGV_MAPERR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SEGV_ACCERR", SEGV_ACCERR, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("BUS_ADRALN", BUS_ADRALN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("BUS_ADRERR", BUS_ADRERR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("BUS_OBJERR", BUS_OBJERR, CONST_CS | CONST_PERSISTENT);
+#endif
+	/* }}} */
 }
 
 static PHP_GINIT_FUNCTION(pcntl)
@@ -653,6 +755,161 @@ PHP_FUNCTION(pcntl_signal_dispatch)
 	RETURN_TRUE;
 }
 /* }}} */
+
+#ifdef HAVE_SIGPROCMASK
+/* {{{ proto bool pcntl_sigprocmask(int how, array set)
+   Examine and change blocked signals */
+PHP_FUNCTION(pcntl_sigprocmask)
+{
+	long          how, signo;
+	zval         *user_set, **user_signo;
+	sigset_t      set;
+	HashPosition  pos;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "la", &how, &user_set) == FAILURE) {
+		return;
+	}
+
+	if (sigemptyset(&set) != 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		RETURN_FALSE;
+	}
+
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(user_set), &pos);
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(user_set), (void **)&user_signo, &pos) == SUCCESS)
+	{
+		if (Z_TYPE_PP(user_signo) != IS_LONG) {
+			SEPARATE_ZVAL(user_signo);
+			convert_to_long_ex(user_signo);
+		}
+		signo = Z_LVAL_PP(user_signo);
+		if (sigaddset(&set, signo) != 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+			RETURN_FALSE;
+		}
+		zend_hash_move_forward_ex(Z_ARRVAL_P(user_set), &pos);
+	}
+
+	if (sigprocmask(how, &set, NULL) != 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+/* }}} */
+#endif
+
+#if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
+static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{{ */
+{
+	zval            *user_set, **user_signo, *user_siginfo = NULL;
+	long             tv_sec = 0, tv_nsec = 0;
+	sigset_t         set;
+	HashPosition     pos;
+	int              signo;
+	siginfo_t        siginfo;
+	struct timespec  timeout;
+
+	if (timedwait) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|zll", &user_set, &user_siginfo, &tv_sec, &tv_nsec) == FAILURE) {
+			return;
+		}
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|z", &user_set, &user_siginfo) == FAILURE) {
+			return;
+		}
+	}
+
+	if (sigemptyset(&set) != 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		RETURN_FALSE;
+	}
+
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(user_set), &pos);
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(user_set), (void **)&user_signo, &pos) == SUCCESS)
+	{
+		if (Z_TYPE_PP(user_signo) != IS_LONG) {
+			SEPARATE_ZVAL(user_signo);
+			convert_to_long_ex(user_signo);
+		}
+		signo = Z_LVAL_PP(user_signo);
+		if (sigaddset(&set, signo) != 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+			RETURN_FALSE;
+		}
+		zend_hash_move_forward_ex(Z_ARRVAL_P(user_set), &pos);
+	}
+
+	if (timedwait) {
+		timeout.tv_sec  = (time_t) tv_sec;
+		timeout.tv_nsec = tv_nsec;
+		signo = sigtimedwait(&set, &siginfo, &timeout);
+	} else {
+		signo = sigwaitinfo(&set, &siginfo);
+	}
+	if (signo == -1 && errno != EAGAIN) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+	}
+
+	if (signo > 0 && user_siginfo) {
+		if (Z_TYPE_P(user_siginfo) != IS_ARRAY) {
+			zval_dtor(user_siginfo);
+			array_init(user_siginfo);
+		}
+		add_ascii_assoc_long_ex(user_siginfo, "signo", sizeof("signo"), siginfo.si_signo);
+		add_ascii_assoc_long_ex(user_siginfo, "errno", sizeof("errno"), siginfo.si_errno);
+		add_ascii_assoc_long_ex(user_siginfo, "code",  sizeof("code"),  siginfo.si_code);
+		switch(signo) {
+#ifdef SIGCHLD
+			case SIGCHLD:
+				add_ascii_assoc_long_ex(user_siginfo,   "status", sizeof("status"), siginfo.si_status);
+#ifdef si_utime
+				add_ascii_assoc_double_ex(user_siginfo, "utime",  sizeof("utime"),  siginfo.si_utime);
+#endif
+#ifdef si_stime
+				add_ascii_assoc_double_ex(user_siginfo, "stime",  sizeof("stime"),  siginfo.si_stime);
+#endif
+				add_ascii_assoc_long_ex(user_siginfo,   "pid",    sizeof("pid"),    siginfo.si_pid);
+				add_ascii_assoc_long_ex(user_siginfo,   "uid",    sizeof("uid"),    siginfo.si_uid);
+				break;
+#endif
+			case SIGILL:
+			case SIGFPE:
+			case SIGSEGV:
+			case SIGBUS:
+				add_ascii_assoc_double_ex(user_siginfo, "addr", sizeof("addr"), (long)siginfo.si_addr);
+				break;
+#ifdef SIGPOLL
+			case SIGPOLL:
+				add_ascii_assoc_long_ex(user_siginfo, "band", sizeof("band"), siginfo.si_band);
+				add_ascii_assoc_long_ex(user_siginfo, "fd",   sizeof("fd"),   siginfo.si_fd);
+				break;
+#endif
+			EMPTY_SWITCH_DEFAULT_CASE();
+		}
+	}
+	
+	RETURN_LONG(signo);
+}
+/* }}} */
+
+/* {{{ proto int sigwaitinfo(array set[, array &siginfo])
+   Synchronously wait for queued signals */
+PHP_FUNCTION(pcntl_sigwaitinfo)
+{
+	pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto int sigtimedwait(array set[, array &siginfo[, int seconds[, int nanoseconds]]])
+   Wait for queued signals */
+PHP_FUNCTION(pcntl_sigtimedwait)
+{
+	pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+#endif
 
 #ifdef HAVE_GETPRIORITY
 /* {{{ proto int pcntl_getpriority([int pid [, int process_identifier]]) U
