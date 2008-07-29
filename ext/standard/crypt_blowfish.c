@@ -47,6 +47,8 @@
 #else
 #define __CONST
 #endif
+#else
+#define __CONST __const
 #endif
 
 #ifdef __i386__
