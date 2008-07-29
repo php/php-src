@@ -850,7 +850,7 @@ static void _property_string(string *str, zend_property_info *prop, zstr sz_prop
 }
 /* }}} */
 
-static int _extension_ini_string(zend_ini_entry *ini_entry, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int _extension_ini_string(zend_ini_entry *ini_entry TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	string *str = va_arg(args, string *);
 	char *indent = va_arg(args, char *);
@@ -886,7 +886,7 @@ static int _extension_ini_string(zend_ini_entry *ini_entry, int num_args, va_lis
 }
 /* }}} */
 
-static int _extension_class_string(zend_class_entry **pce, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int _extension_class_string(zend_class_entry **pce TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	string *str = va_arg(args, string *);
 	char *indent = va_arg(args, char *);
