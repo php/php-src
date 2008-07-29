@@ -1,3 +1,85 @@
+2008-07-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      zend_constants.c
+      zend_constants.c
+      tests/constants_005.phpt:
+      Fixed constant substitution (Matt)
+
+    * tests/constants_005.phpt
+      tests/constants_005.phpt:
+      
+      file constants_005.phpt was initially added on branch PHP_5_3.
+
+2008-07-28  Felipe Pena  <felipensp@gmail.com>
+
+    * tests/036.phpt
+      tests/036.phpt
+      tests/037.phpt
+      tests/037.phpt
+      tests/038.phpt
+      tests/038.phpt
+      tests/closure_024.phpt
+      tests/closure_024.phpt
+      tests/closure_025.phpt
+      tests/closure_025.phpt
+      tests/closure_026.phpt
+      tests/closure_026.phpt
+      tests/closure_027.phpt
+      tests/closure_027.phpt
+      tests/closure_028.phpt
+      tests/closure_028.phpt
+      tests/closure_029.phpt
+      tests/closure_029.phpt
+      tests/closure_030.phpt
+      tests/closure_030.phpt
+      tests/list_007.phpt
+      tests/list_007.phpt
+      tests/objects_031.phpt
+      tests/objects_031.phpt:
+      
+      - New tests
+
+2008-07-28  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_3)
+      zend_language_scanner.l:
+      - SCNG(input_filter) can be null if the script encoding is idential to
+        the internal encoding.
+
+    * zend_language_scanner.c
+      zend_language_scanner.c
+      zend_language_scanner_defs.h
+      zend_language_scanner_defs.h:
+      - Touch.
+
+    * zend_language_scanner.l:
+      - Another portion to merge.
+
+    * zend_compile.h
+      zend_language_scanner.l:
+      - Sync function signature with the 5.3 branch
+
+    * (PHP_5_3)
+      zend_language_scanner.c
+      zend_language_scanner_defs.h:
+      - Touch
+
+    * (PHP_5_3)
+      zend_language_scanner.l:
+      - WS
+
+    * (PHP_5_3)
+      zend_language_scanner.c
+      zend_language_scanner_defs.h:
+      - touch
+
+    * (PHP_5_3)
+      zend_compile.h
+      zend_language_scanner.l:
+      - Fix __halt_compiler() weirdness with zend-mulibyte enabled
+
 2008-07-27  Felipe Pena  <felipensp@gmail.com>
 
     * tests/007.phpt
