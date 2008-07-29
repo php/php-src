@@ -304,6 +304,6 @@ array(12) {
   bool(false)
 }
 
-Warning: date_parse() expects parameter 1 to be binary string, array given in /home/derick/dev/php/php-6.0dev/ext/date/tests/date_parse_001.php on line 11
+Warning: date_parse() expects parameter 1 to be binary string, array given in %sdate_parse_001.php on line 11
 bool(false)
 Done
