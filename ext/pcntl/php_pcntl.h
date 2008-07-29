@@ -45,6 +45,13 @@ PHP_FUNCTION(pcntl_wtermsig);
 PHP_FUNCTION(pcntl_wstopsig);
 PHP_FUNCTION(pcntl_signal);
 PHP_FUNCTION(pcntl_signal_dispatch);
+#ifdef HAVE_SIGPROCMASK
+PHP_FUNCTION(pcntl_sigprocmask);
+#endif
+#if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
+PHP_FUNCTION(pcntl_sigwaitinfo);
+PHP_FUNCTION(pcntl_sigtimedwait);
+#endif
 PHP_FUNCTION(pcntl_exec);
 #ifdef HAVE_GETPRIORITY
 PHP_FUNCTION(pcntl_getpriority);
