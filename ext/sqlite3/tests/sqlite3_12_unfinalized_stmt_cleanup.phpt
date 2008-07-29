@@ -26,8 +26,8 @@ while ($result = $results->fetchArray(SQLITE3_NUM))
 
 echo "Closing database\n";
 var_dump($db->close());
-echo "Check result was freed\n";
-var_dump($results);
+echo "Check db was closed\n";
+var_dump($results->numColumns());
 echo "Done\n";
 ?>
 --EXPECTF--
@@ -45,6 +45,8 @@ array(2) {
 }
 Closing database
 bool(true)
-Check result was freed
-NULL
+Check db was closed
+
+Warning: SQLite3_result::numColumns(): The SQLite3_result object has not been correctly initialised in %s on line %d
+bool(false)
 Done
