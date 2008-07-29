@@ -4565,15 +4565,13 @@ ZEND_METHOD(reflection_extension, getFunctions)
 }
 /* }}} */
 
-static int _addconstant(zend_constant *constant, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int _addconstant(zend_constant *constant TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	zval *const_val;
 	zval *retval = va_arg(args, zval*);
 	int number = va_arg(args, int);
 
 	if (number == constant->module_number) {
-		TSRMLS_FETCH();
-
 		ALLOC_ZVAL(const_val);
 		*const_val = constant->value;
 		zval_copy_ctor(const_val);
