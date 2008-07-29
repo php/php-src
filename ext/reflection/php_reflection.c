@@ -892,7 +892,6 @@ static int _extension_class_string(zend_class_entry **pce TSRMLS_DC, int num_arg
 	char *indent = va_arg(args, char *);
 	struct _zend_module_entry *module = va_arg(args, struct _zend_module_entry*);
 	int *num_classes = va_arg(args, int*);
-	TSRMLS_FETCH();
 
 	if ((*pce)->module && !strcasecmp((*pce)->module->name, module->name)) {
 		string_printf(str, "\n");
@@ -4604,8 +4603,6 @@ static int _addinientry(zend_ini_entry *ini_entry TSRMLS_DC, int num_args, va_li
 	int number = va_arg(args, int);
 
 	if (number == ini_entry->module_number) {
-		TSRMLS_FETCH();
-
 		if (ini_entry->value) {
 			add_ascii_assoc_rt_stringl(retval, ini_entry->name, ini_entry->value, ini_entry->value_length, 1);
 		} else {
