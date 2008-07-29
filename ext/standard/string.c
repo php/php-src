@@ -7842,7 +7842,7 @@ PHP_FUNCTION(money_format)
 	}
 	str[str_len] = 0;
 
-	RETURN_RT_STRINGL(erealloc(str, str_len + 1), str_len, 0);
+	RETURN_RT_STRINGL(erealloc(str, str_len + 1), str_len, ZSTR_AUTOFREE);
 }
 /* }}} */
 #endif
