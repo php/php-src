@@ -234,6 +234,7 @@ PHP_NAMED_FUNCTION(zif_bindtextdomain)
 	
 	if (!domain_len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "the first parameter must not be empty");
+		RETURN_FALSE;
 	}
 	if (!dir_len || (dir_len == 1 && *dir_str == '0')) {
 		if (!VCWD_GETCWD(dir_tmp, sizeof(dir_tmp))) {
