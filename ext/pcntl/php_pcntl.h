@@ -44,6 +44,7 @@ PHP_FUNCTION(pcntl_wexitstatus);
 PHP_FUNCTION(pcntl_wtermsig);
 PHP_FUNCTION(pcntl_wstopsig);
 PHP_FUNCTION(pcntl_signal);
+PHP_FUNCTION(pcntl_signal_dispatch);
 PHP_FUNCTION(pcntl_exec);
 #ifdef HAVE_GETPRIORITY
 PHP_FUNCTION(pcntl_getpriority);
