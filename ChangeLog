@@ -1,3 +1,245 @@
+2008-07-28  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/sqlite3/sqlite3.c:
+      MFB: Fix error when fetchArray reaches the last row
+
+    * (PHP_5_3)
+      ext/sqlite3/sqlite3.c:
+      Fix error when fetchArray reaches the last row, and prototyp error
+
+2008-07-28  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h:
+      - Updated to version 2008.5 (2008e)
+
+2008-07-28  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/standard/http_fopen_wrapper.c:
+      MFH: When automatically redirecting an HTTP request, use the GET method
+      when the
+      original method was not HEAD or GET (fixes #45540)
+
+    * ext/standard/http_fopen_wrapper.c:
+      When automatically redirecting an HTTP request, use the GET method when the
+      original method was not HEAD or GET (fixes #45540)
+
+2008-07-28  Elizabeth Marie Smith  <emsmith@elizabethmariesmith.com>
+
+    * ext/standard/php_crypt_r.c
+      ext/standard/php_crypt_r.c:
+      Secure versions of string functions don't exist for VC6
+
+2008-07-28  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/crypt_freesec.c:
+      - MFH: vc6 is picky about brackets when used with a defined type...
+
+    * ext/standard/crypt_freesec.c:
+      - vc6 is picky about brackets when used with a defined type...
+
+2008-07-28  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/tests/fixedarray_021.phpt:
+      Increase coverage a bit
+
+2008-07-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/tests/constants_005.phpt:
+      Fixed constant substitution (Matt)
+
+    * ZendEngine2/tests/constants_005.phpt
+      ZendEngine2/tests/constants_005.phpt:
+      
+      file constants_005.phpt was initially added on branch PHP_5_3.
+
+2008-07-28  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/tests/036.phpt
+      ZendEngine2/tests/036.phpt
+      ZendEngine2/tests/037.phpt
+      ZendEngine2/tests/037.phpt
+      ZendEngine2/tests/038.phpt
+      ZendEngine2/tests/038.phpt
+      ZendEngine2/tests/closure_024.phpt
+      ZendEngine2/tests/closure_024.phpt
+      ZendEngine2/tests/closure_025.phpt
+      ZendEngine2/tests/closure_025.phpt
+      ZendEngine2/tests/closure_026.phpt
+      ZendEngine2/tests/closure_026.phpt
+      ZendEngine2/tests/closure_027.phpt
+      ZendEngine2/tests/closure_027.phpt
+      ZendEngine2/tests/closure_028.phpt
+      ZendEngine2/tests/closure_028.phpt
+      ZendEngine2/tests/closure_029.phpt
+      ZendEngine2/tests/closure_029.phpt
+      ZendEngine2/tests/closure_030.phpt
+      ZendEngine2/tests/closure_030.phpt
+      ZendEngine2/tests/list_007.phpt
+      ZendEngine2/tests/list_007.phpt
+      ZendEngine2/tests/objects_031.phpt
+      ZendEngine2/tests/objects_031.phpt:
+      
+      - New tests
+
+2008-07-28  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      ext/sqlite3/php_sqlite3.h
+      ext/sqlite3/php_sqlite3_structs.h
+      ext/sqlite3/libsqlite/sqlite3ext.h
+      ext/sqlite3/tests/skipif.inc
+      ext/sqlite3/tests/skipif.inc
+      ext/sqlite3/tests/stream_test.inc
+      ext/sqlite3/tests/stream_test.inc:
+      - Fix EOLs
+
+    * ext/sqlite3/php_sqlite3.h:
+      - Fix EOLs. (Pierre: yea, mac2unix..try not touch files with your braindead
+      Winblows editors!)
+
+2008-07-28  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      - nothing to do here
+
+    * win32/build/config.w32:
+      - not here anymore (old crypt implementation)
+
+    * (PHP_5_3)
+      NEWS
+      ext/standard/config.m4
+      ext/standard/config.w32
+      ext/standard/crypt.c
+      ext/standard/crypt_blowfish.c
+      ext/standard/crypt_freesec.c
+      ext/standard/crypt_freesec.h
+      ext/standard/php_crypt.h
+      ext/standard/php_crypt_r.c
+      ext/standard/php_crypt_r.h
+      win32/crypt_win32.c
+      win32/crypt_win32.h
+      win32/md5crypt.c
+      win32/md5crypt.h
+      win32/php_stdint.h
+      win32/build/config.w32
+      win32/build/config.w32.h.in:
+      -MFH:
+       - #45430, windows implementation of crypt is not TS
+       - add Blowfish (using implementation from Solar Designer <solar at
+      openwal dot com>) and extended DES support
+       - Make crypt features portable:
+         - if no crypt_r, php's implemetation is used (all algo and TS), php
+      can't be used with unsafe crypt anymore
+         - if one algo is missing, php's implemetation is used
+         - Windows always use php's implementation
+       - removed old code in windows/
+
+    * main/win95nt.h:
+      - silent warning with vc8 + dbg mode
+
+    * ext/standard/config.m4
+      ext/standard/config.w32
+      ext/standard/crypt.c
+      ext/standard/crypt_blowfish.c
+      ext/standard/crypt_blowfish.c
+      ext/standard/crypt_freesec.c
+      ext/standard/crypt_freesec.c
+      ext/standard/crypt_freesec.h
+      ext/standard/crypt_freesec.h
+      ext/standard/php_crypt_r.c
+      ext/standard/php_crypt_r.c
+      ext/standard/php_crypt_r.h
+      ext/standard/php_crypt_r.h
+      win32/crypt_win32.c
+      win32/crypt_win32.h
+      win32/md5crypt.c
+      win32/md5crypt.h
+      win32/php_stdint.h
+      win32/php_stdint.h
+      win32/build/config.w32.h.in:
+      - #45430, windows implementation of crypt is not TS
+      - add Blowfish (using implementation from Solar Designer <solar at openwal
+      dot com>) and extended DES support
+      - Make crypt features portable:
+        - if no crypt_r, php's implemetation is used (all algo and TS), php
+      can't be used with unsafe crypt anymore
+        - if one algo is missing, php's implemetation is used
+        - Windows always use php's implementation
+      - removed old code in windows/
+
+    * ext/pdo_odbc/odbc_stmt.c
+      ext/pdo_odbc/php_pdo_odbc_int.h
+      ext/sqlite3/php_sqlite3_structs.h
+      ext/sqlite3/libsqlite/sqlite3.c
+      ext/sqlite3/libsqlite/sqlite3.h:
+      - mac to unix
+
+    * ext/sqlite3/php_sqlite3.h:
+      - mac to unix format
+
+    * ext/intl/locale/locale_methods.c:
+      - Fix ZTS build
+
+2008-07-28  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_scanner.l
+      ext/mbstring/tests/zend_multibyte-14.phpt
+      ext/mbstring/tests/zend_multibyte-14.phpt:
+      - SCNG(input_filter) can be null if the script encoding is idential to
+        the internal encoding.
+
+    * (PHP_5_3)
+      ext/mbstring/tests/zend_multibyte-13.phpt:
+      - ???
+
+    * ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner_defs.h
+      ZendEngine2/zend_language_scanner_defs.h:
+      - Touch.
+
+    * ZendEngine2/zend_language_scanner.l:
+      - Another portion to merge.
+
+    * ZendEngine2/zend_compile.h
+      ZendEngine2/zend_language_scanner.l:
+      - Sync function signature with the 5.3 branch
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner_defs.h:
+      - Touch
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_scanner.l:
+      - WS
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner_defs.h:
+      - touch
+
+    * ext/mbstring/tests/zend_multibyte-13.phpt
+      ext/mbstring/tests/zend_multibyte-13.phpt:
+      
+      file zend_multibyte-13.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_language_scanner.l:
+      - Fix __halt_compiler() weirdness with zend-mulibyte enabled
+
 2008-07-27  Marcus Boerger  <php@marcus-boerger.de>
 
     * (PHP_5_3)
