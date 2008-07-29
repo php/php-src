@@ -420,7 +420,9 @@ PHP_FUNCTION(parse_url)
 	resource = php_url_parse_ex(str.s, str_len);
 	if (resource == NULL) {
 		php_error_docref1(NULL TSRMLS_CC, str.s, E_WARNING, "Unable to parse URL");
-		efree(str.s);
+		if (type == IS_UNICODE) {
+			efree(str.s);
+		}
 		RETURN_FALSE;
 	}
 
