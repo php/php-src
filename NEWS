@@ -210,6 +210,12 @@ PHP                                                                        NEWS
     DateInterval on each iteration, up to an end date or limited by maximum
     number of occurences.
 
+- Improved pcntl extension: (Arnaud)
+  . Added pcntl_signal_dispatch()
+  . Added pcntl_sigprocmask()
+  . Added pcntl_sigwaitinfo()
+  . Added pcntl_sigtimedwait()
+
 - Added hash_copy() function. (Tony)
 - Added sha224 hash algorithm to the hash extension. (Scott)
 - Added ReflectionProperty::setAccessible() method that allows non-public
