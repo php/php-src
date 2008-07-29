@@ -68,23 +68,18 @@ typedef struct _php_sqlite3_db_object  {
 	int initialised;
 	sqlite3 *db;
 	php_sqlite3_func *funcs;
-} php_sqlite3_db_object;
 
-/*typedef struct _php_sqlite3_stmt {
-	sqlite3_stmt *stmt;
-	int initialised;
-} php_sqlite3_stmt;*/
+	zend_llist free_list;
+} php_sqlite3_db_object;
 
 typedef struct _php_sqlite3_stmt_object php_sqlite3_stmt;
 typedef struct _php_sqlite3_result_object php_sqlite3_result;
 
 /* sqlite3 objects to be destroyed */
-typedef struct _php_sqlite3_stmt_free_list {
-	sqlite3_stmt *stmt;
-
-	zval *statement_object;
-	zval *result_object;
-} php_sqlite3_stmt_free_list;
+typedef struct _php_sqlite3_free_list {
+	zval *stmt_obj_zval;
+	php_sqlite3_stmt *stmt_obj;
+} php_sqlite3_free_list;
 
 /* Structure for SQLite Result object. */
 struct _php_sqlite3_result_object  {
@@ -92,8 +87,6 @@ struct _php_sqlite3_result_object  {
 	php_sqlite3_db_object *db_obj;
 	php_sqlite3_stmt *stmt_obj;
 	zval *stmt_obj_zval;
-
-	int initialised;
 	
 	int is_prepared_statement;
 	int complete;
