@@ -1,6 +1,8 @@
 #ifndef TSRM_CONFIG_W32_H
 #define TSRM_CONFIG_W32_H
 
+#include <../main/config.w32.h>
+
 #define HAVE_UTIME 1
 #define HAVE_ALLOCA 1
 #define HAVE_REALPATH 1
