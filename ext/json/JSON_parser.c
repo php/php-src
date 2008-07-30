@@ -201,7 +201,7 @@ static const int state_transition_table[30][31] = {
 /*29*/ {29,29,-1,-1,-1,-1,-1,-1, 3,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}
 };
 
-#define JSON_PARSER_MAX_DEPTH 128
+#define JSON_PARSER_MAX_DEPTH 512
 
 
 /*
