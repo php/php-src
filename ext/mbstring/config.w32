@@ -12,7 +12,7 @@ if (PHP_MBSTRING == "yes") {
 	FSO.CopyFile("ext\\mbstring\\oniguruma\\win32\\config.h",
 		"ext\\mbstring\\oniguruma\\config.h", true);
 	
-	EXTENSION("mbstring", "mbstring.c php_unicode.c mb_gpc.c", null,
+	EXTENSION("mbstring", "mbstring.c php_unicode.c mb_gpc.c", true,
 		"-Iext/mbstring/libmbfl -Iext/mbstring/libmbfl/mbfl \
 		-Iext/mbstring/oniguruma /D NOT_RUBY=1 /D LIBMBFL_EXPORTS=1 \
 		/D HAVE_STDARG_PROTOTYPES=1 /D HAVE_CONFIG_H /D HAVE_STDLIB_H \
