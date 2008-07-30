@@ -1319,7 +1319,7 @@ PHP_FUNCTION(locale_filter_matches)
 		}
 
 		//Convert to lower case for case-insensitive comparison
-		cur_lang_tag = ecalloc( 1, strlen(lang_tag ) + 1);
+		cur_lang_tag = ecalloc( 1, strlen(can_lang_tag) + 1);
 
 		//Convert to lower case for case-insensitive comparison
 		result = strToMatch( can_lang_tag , cur_lang_tag);
@@ -1329,7 +1329,7 @@ PHP_FUNCTION(locale_filter_matches)
 			RETURN_FALSE;
 		}
 
-		cur_loc_range = ecalloc( 1, strlen(loc_range ) + 1);
+		cur_loc_range = ecalloc( 1, strlen(can_loc_range) + 1);
 		result = strToMatch( can_loc_range , cur_loc_range );
 		if( result == 0) {
 			efree( cur_lang_tag );
