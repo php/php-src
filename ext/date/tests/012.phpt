@@ -20,15 +20,36 @@ var_dump($dto->format("Y/m/d H:i:s"));
 echo "Done\n";
 ?>
 --EXPECTF--
-NULL
+object(DateTime)#1 (3) {
+  [u"date"]=>
+  unicode(19) "2006-01-23 00:00:00"
+  [u"timezone_type"]=>
+  int(3)
+  [u"timezone"]=>
+  unicode(3) "UTC"
+}
 unicode(19) "2006/01/23 00:00:00"
 
 Warning: date_isodate_set() expects at least 3 parameters, 2 given in %s on line %d
 bool(false)
 unicode(19) "2006/01/23 00:00:00"
-NULL
+object(DateTime)#1 (3) {
+  [u"date"]=>
+  unicode(19) "2006-01-30 00:00:00"
+  [u"timezone_type"]=>
+  int(3)
+  [u"timezone"]=>
+  unicode(3) "UTC"
+}
 unicode(19) "2006/01/30 00:00:00"
-NULL
+object(DateTime)#1 (3) {
+  [u"date"]=>
+  unicode(19) "2007-12-10 00:00:00"
+  [u"timezone_type"]=>
+  int(3)
+  [u"timezone"]=>
+  unicode(3) "UTC"
+}
 unicode(19) "2007/12/10 00:00:00"
 
 Warning: date_isodate_set() expects at most 4 parameters, 5 given in %s on line %d

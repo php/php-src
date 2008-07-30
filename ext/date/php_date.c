@@ -2962,20 +2962,15 @@ PHP_FUNCTION(date_modify)
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 
 	tmp_time = timelib_strtotime(modify, modify_len, NULL, DATE_TIMEZONEDB);
-	dateobj->time->relative.y = tmp_time->relative.y;
-	dateobj->time->relative.m = tmp_time->relative.m;
-	dateobj->time->relative.d = tmp_time->relative.d;
-	dateobj->time->relative.h = tmp_time->relative.h;
-	dateobj->time->relative.i = tmp_time->relative.i;
-	dateobj->time->relative.s = tmp_time->relative.s;
-	dateobj->time->relative.weekday = tmp_time->relative.weekday;
+	memcpy(&dateobj->time->relative, &tmp_time->relative, sizeof(struct timelib_rel_time));
 	dateobj->time->have_relative = tmp_time->have_relative;
-	dateobj->time->relative.have_weekday_relative = tmp_time->relative.have_weekday_relative;
 	dateobj->time->sse_uptodate = 0;
 	timelib_time_dtor(tmp_time);
 
 	timelib_update_ts(dateobj->time, NULL);
 	timelib_update_from_sse(dateobj->time);
+
+	RETURN_ZVAL(object, 1, 0);
 }
 /* }}} */
 
@@ -3115,6 +3110,8 @@ PHP_FUNCTION(date_timezone_set)
 	}
 	timelib_set_timezone(dateobj->time, tzobj->tzi.tz);
 	timelib_unixtime2local(dateobj->time, dateobj->time->sse);
+
+	RETURN_ZVAL(object, 1, 0);
 }
 /* }}} */
 
@@ -3171,6 +3168,8 @@ PHP_FUNCTION(date_time_set)
 	dateobj->time->i = i;
 	dateobj->time->s = s;
 	timelib_update_ts(dateobj->time, NULL);
+
+	RETURN_ZVAL(object, 1, 0);
 }
 /* }}} */
 
@@ -3192,6 +3191,8 @@ PHP_FUNCTION(date_date_set)
 	dateobj->time->m = m;
 	dateobj->time->d = d;
 	timelib_update_ts(dateobj->time, NULL);
+
+	RETURN_ZVAL(object, 1, 0);
 }
 /* }}} */
 
@@ -3216,6 +3217,8 @@ PHP_FUNCTION(date_isodate_set)
 	dateobj->time->have_relative = 1;
 	
 	timelib_update_ts(dateobj->time, NULL);
+
+	RETURN_ZVAL(object, 1, 0);
 }
 /* }}} */
 
@@ -3235,6 +3238,8 @@ PHP_FUNCTION(date_timestamp_set)
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 	timelib_unixtime2local(dateobj->time, (timelib_sll)timestamp);
 	timelib_update_ts(dateobj->time, NULL);
+
+	RETURN_ZVAL(object, 1, 0);
 }
 /* }}} */
 
