@@ -1235,13 +1235,13 @@ if test "$PHP_THREAD_SAFETY" = "yes" && test "$PHP_MYSQL" = "yes"; then
 fi
 
 if test "$PHP_DEBUG" = "yes" && test "$PHP_THREAD_SAFETY" = "yes; then
-ZEND_EXT_TYPE="zend_extension_debug_ts"
+  ZEND_EXT_TYPE="zend_extension_debug_ts"
 elif test "$PHP_DEBUG" = "yes"; then
-ZEND_EXT_TYPE="zend_extension_debug"
+  ZEND_EXT_TYPE="zend_extension_debug"
 elif test "$PHP_THREAD_SAFETY" = "yes; then
-ZEND_EXT_TYPE="zend_extension_ts"
+  ZEND_EXT_TYPE="zend_extension_ts"
 else
-ZEND_EXT_TYPE="zend_extension"
+  ZEND_EXT_TYPE="zend_extension"
 fi
 PHP_SUBST(ZEND_EXT_TYPE)
 
