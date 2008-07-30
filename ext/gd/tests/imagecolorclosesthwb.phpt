@@ -7,21 +7,24 @@ imagecolorclosesthwb() test
 ?>
 --FILE--
 <?php
-	$im = imagecreatefrompng('test.png');
+	$im = imagecreatefrompng(dirname(__FILE__).'/test.png');
 
-	echo imagecolorclosesthwb($im, 255, 50, 0);
+	var_dump(imagecolorclosesthwb($im, 255, 50, 0));
 
-	imagecolorclosesthwb(NULL);
-	imagecolorclosesthwb(NULL, NULL, NULL, NULL);
-	imagecolorclosesthwb($im, "hello", "from", "gd");
+	var_dump(imagecolorclosesthwb(NULL));
+	var_dump(imagecolorclosesthwb(NULL, NULL, NULL, NULL));
+	var_dump(imagecolorclosesthwb($im, "hello", "from", "gd"));
 
 	imagedestroy($im);
 ?>
 --EXPECTF--
-16724480
+int(16724480)
 
-Warning: imagecolorclosesthwb\(\) expects exactly 4 parameters, 1 given in .* code on line \d+
+Warning: imagecolorclosesthwb() expects exactly 4 parameters, 1 given in %s on line %d
+NULL
 
-Warning: imagecolorclosesthwb\(\) expects parameter 1 to be resource, null given in .* code on line \d+
+Warning: imagecolorclosesthwb() expects parameter 1 to be resource, null given in %s on line %d
+NULL
 
-Warning: imagecolorclosesthwb\(\) expects parameter 2 to be long, string given in .* code on line \d+
+Warning: imagecolorclosesthwb() expects parameter 2 to be long, string given in %s on line %d
+NULL
