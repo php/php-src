@@ -64,7 +64,7 @@ PHP_BUILD_SHARED
 dnl Required programs
 PHP_PROG_RE2C
 PHP_PROG_AWK
-    
+
 sinclude(config.m4)
 
 enable_static=no
