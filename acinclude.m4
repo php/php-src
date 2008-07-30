@@ -837,7 +837,7 @@ AC_DEFUN([PHP_BUILD_PROGRAM],[
 ])
 
 dnl
-dnl PHP_SHARED_MODULE(module-name, object-var, build-dir, cxx)
+dnl PHP_SHARED_MODULE(module-name, object-var, build-dir, cxx, zend_ext)
 dnl
 dnl Basically sets up the link-stage for building module-name
 dnl from object_var in build-dir.
@@ -860,7 +860,11 @@ AC_DEFUN([PHP_SHARED_MODULE],[
       ;;
   esac
 
-  PHP_MODULES="$PHP_MODULES \$(phplibdir)/$1.$suffix"
+  if test "x$5" = "xyes"; then
+    PHP_ZEND_EX="$PHP_ZEND_EX \$(phplibdir)/$1.$suffix"
+  else
+    PHP_MODULES="$PHP_MODULES \$(phplibdir)/$1.$suffix"
+  fi
   PHP_SUBST($2)
   cat >>Makefile.objects<<EOF
 \$(phplibdir)/$1.$suffix: $3/$1.$suffix
@@ -916,7 +920,7 @@ AC_DEFUN([PHP_GEN_BUILD_DIRS],[
 ])
 
 dnl
-dnl PHP_NEW_EXTENSION(extname, sources [, shared [,sapi_class[, extra-cflags[, cxx]]]])
+dnl PHP_NEW_EXTENSION(extname, sources [, shared [,sapi_class[, extra-cflags[, cxx[, zend_ext]]]]])
 dnl
 dnl Includes an extension in the build.
 dnl
@@ -928,6 +932,8 @@ dnl a dynamically loadable library. Optional parameter "sapi_class" can
 dnl be set to "cli" to mark extension build only with CLI or CGI sapi's.
 dnl "extra-cflags" are passed to the compiler, with 
 dnl @ext_srcdir@ and @ext_builddir@ being substituted.
+dnl "cxx" can be used to indicate that a C++ shared module is desired.
+dnl "zend_ext" indicates a zend extension.
 AC_DEFUN([PHP_NEW_EXTENSION],[
   ext_builddir=[]PHP_EXT_BUILDDIR($1)
   ext_srcdir=[]PHP_EXT_SRCDIR($1)
@@ -949,10 +955,10 @@ dnl ---------------------------------------------- Shared module
       PHP_ADD_SOURCES_X(PHP_EXT_DIR($1),$2,$ac_extra,shared_objects_$1,yes)
       case $host_alias in
         *netware*[)]
-          PHP_SHARED_MODULE(php$1,shared_objects_$1, $ext_builddir, $6)
+          PHP_SHARED_MODULE(php$1,shared_objects_$1, $ext_builddir, $6, $7)
           ;;
         *[)]
-          PHP_SHARED_MODULE($1,shared_objects_$1, $ext_builddir, $6)
+          PHP_SHARED_MODULE($1,shared_objects_$1, $ext_builddir, $6, $7)
           ;;
       esac
       AC_DEFINE_UNQUOTED([COMPILE_DL_]translit($1,a-z_-,A-Z__), 1, Whether to build $1 as dynamic module)
@@ -2149,17 +2155,17 @@ AC_DEFUN([PHP_PROG_RE2C],[
   AC_CHECK_PROG(RE2C, re2c, re2c)
   if test -n "$RE2C"; then
     AC_CACHE_CHECK([for re2c version], php_cv_re2c_version, [
-      re2c_vernum=`re2c --vernum 2>/dev/null`
-      if test -z "$re2c_vernum" || test "$re2c_vernum" -lt "1200"; then
+      re2c_vernum=`$RE2C --vernum 2>/dev/null`
+      if test -z "$re2c_vernum" || test "$re2c_vernum" -lt "1304"; then
         php_cv_re2c_version=invalid
       else
-        php_cv_re2c_version="`re2c --version | cut -d ' ' -f 2  2>/dev/null` (ok)"
+        php_cv_re2c_version="`$RE2C --version | cut -d ' ' -f 2  2>/dev/null` (ok)"
       fi 
     ])
   fi
   case $php_cv_re2c_version in
     ""|invalid[)]
-      AC_MSG_WARN([You will need re2c 0.12.0 or later if you want to regenerate PHP parsers.])
+      AC_MSG_WARN([You will need re2c 0.13.4 or later if you want to regenerate PHP parsers.])
       RE2C="exit 0;"
       ;;
   esac
@@ -2711,6 +2717,7 @@ AC_DEFUN([PHP_CHECK_CONFIGURE_OPTIONS],[
             enable-zend-multibyte[)] continue;;
           esac 
         fi
+
         is_arg_set=php_[]`echo [$]arg_name | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ-' 'abcdefghijklmnopqrstuvwxyz_'`
         if eval test "x\$$is_arg_set" = "x"; then
           PHP_UNKNOWN_CONFIGURE_OPTIONS="$PHP_UNKNOWN_CONFIGURE_OPTIONS
@@ -2744,7 +2751,7 @@ ifelse([$2],[],[AC_MSG_ERROR([Cannot find php_pdo_driver.h.])],[$2])
 
 dnl
 dnl PHP_DETECT_ICC
-dnl
+dnl Detect Intel C++ Compiler and unset $GCC if ICC found
 AC_DEFUN([PHP_DETECT_ICC],
 [
   ICC="no"
@@ -2753,6 +2760,7 @@ AC_DEFUN([PHP_DETECT_ICC],
     ICC="no"
     AC_MSG_RESULT([no]),
     ICC="yes"
+    GCC="no"
     AC_MSG_RESULT([yes])
   )
 ])
