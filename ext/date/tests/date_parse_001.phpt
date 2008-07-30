@@ -79,7 +79,7 @@ array(15) {
   ["month"]=>
   int(12)
   ["day"]=>
-  bool(false)
+  int(1)
   ["hour"]=>
   bool(false)
   ["minute"]=>
@@ -89,11 +89,9 @@ array(15) {
   ["fraction"]=>
   bool(false)
   ["warning_count"]=>
-  int(1)
+  int(0)
   ["warnings"]=>
-  array(1) {
-    [12]=>
-    string(27) "The parsed date was invalid"
+  array(0) {
   }
   ["error_count"]=>
   int(1)
@@ -175,7 +173,7 @@ array(12) {
   ["month"]=>
   int(3)
   ["day"]=>
-  bool(false)
+  int(1)
   ["hour"]=>
   bool(false)
   ["minute"]=>
@@ -185,11 +183,9 @@ array(12) {
   ["fraction"]=>
   bool(false)
   ["warning_count"]=>
-  int(1)
+  int(0)
   ["warnings"]=>
-  array(1) {
-    [8]=>
-    string(27) "The parsed date was invalid"
+  array(0) {
   }
   ["error_count"]=>
   int(0)
