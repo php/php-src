@@ -124,8 +124,10 @@
 #define xmemmove    memmove
 #if defined(_WIN32) && !defined(__GNUC__)
 #define xalloca     _alloca
+#if _MSC_VER < 1500
 #ifndef vsnprintf
 #define vsnprintf   _vsnprintf
+#endif
 #endif
 #else
 #define xalloca     alloca
