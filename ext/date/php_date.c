@@ -660,8 +660,8 @@ void date_interval_write_property(zval *object, zval *member, zval *value TSRMLS
 
 /* This is need to ensure that session extension request shutdown occurs 1st, because it uses the date extension */ 
 static const zend_module_dep date_deps[] = {
-        ZEND_MOD_OPTIONAL("session")
-        {NULL, NULL, NULL}
+	ZEND_MOD_OPTIONAL("session")
+	{NULL, NULL, NULL}
 };
 
 /* {{{ Module struct */
@@ -2105,21 +2105,21 @@ zend_object_iterator_funcs date_period_it_funcs = {
 
 zend_object_iterator *date_object_period_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
-    date_period_it  *iterator = emalloc(sizeof(date_period_it));
-    php_period_obj  *dpobj    = (php_period_obj *)zend_object_store_get_object(object TSRMLS_CC);
+	date_period_it  *iterator = emalloc(sizeof(date_period_it));
+	php_period_obj  *dpobj    = (php_period_obj *)zend_object_store_get_object(object TSRMLS_CC);
 
-    if (by_ref) {
-        zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
-    }
+	if (by_ref) {
+		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+	}
 
-    Z_ADDREF_P(object);
-    iterator->intern.data = (void*) dpobj;
-    iterator->intern.funcs = &date_period_it_funcs;
+	Z_ADDREF_P(object);
+	iterator->intern.data = (void*) dpobj;
+	iterator->intern.funcs = &date_period_it_funcs;
 	iterator->date_period_zval = object;
-    iterator->object = dpobj;
-    iterator->current = NULL;
+	iterator->object = dpobj;
+	iterator->current = NULL;
 
-    return (zend_object_iterator*)iterator;
+	return (zend_object_iterator*)iterator;
 }
 
 static void date_register_classes(TSRMLS_D)
