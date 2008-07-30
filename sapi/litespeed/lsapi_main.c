@@ -431,7 +431,11 @@ static void cli_usage( TSRMLS_D )
 	php_output_startup();
 	php_output_activate(TSRMLS_C);
 	php_printf( usage );
-	php_end_ob_buffers(1 TSRMLS_CC);
+#ifdef PHP_OUTPUT_NEWAPI
+    php_output_end_all(TSRMLS_C);
+#else
+    php_end_ob_buffers(1 TSRMLS_CC);
+#endif
 }
 
 static int parse_opt( int argc, char * argv[], int *climode,
@@ -529,7 +533,11 @@ static int cli_main( int argc, char * argv[] )
 			case 'i':
 				if (php_request_startup(TSRMLS_C) != FAILURE) {
 					php_print_info(0xFFFFFFFF TSRMLS_CC);
-					php_end_ob_buffers(1 TSRMLS_CC);
+#ifdef PHP_OUTPUT_NEWAPI
+                    php_output_end_all(TSRMLS_C);
+#else
+                    php_end_ob_buffers(1 TSRMLS_CC);
+#endif
 					php_request_shutdown( NULL );
 				}
 				ret = 1;
@@ -541,7 +549,11 @@ static int cli_main( int argc, char * argv[] )
 #else
 					php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2004 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #endif
-					php_end_ob_buffers(1 TSRMLS_CC);
+#ifdef PHP_OUTPUT_NEWAPI
+                    php_output_end_all(TSRMLS_C);
+#else
+                    php_end_ob_buffers(1 TSRMLS_CC);
+#endif
 					php_request_shutdown( NULL );
 				}
 				ret = 1;
