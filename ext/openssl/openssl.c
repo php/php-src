@@ -395,6 +395,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_openssl_dh_compute_key, 0)
     ZEND_ARG_INFO(0, dh_key)
 ZEND_END_ARG_INFO()
 /* }}} */
+
 /* {{{ openssl_functions[]
  */
 const zend_function_entry openssl_functions[] = {
@@ -530,7 +531,7 @@ inline static int php_openssl_safe_mode_chk(char *filename TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ openssl -> PHP "bridging" */
+/* openssl -> PHP "bridging" */
 /* true global; readonly after module startup */
 static char default_ssl_conf_filename[MAXPATHLEN];
 
@@ -560,7 +561,6 @@ static X509_STORE     * setup_verify(zval * calist TSRMLS_DC);
 static STACK_OF(X509) * load_all_certs_from_file(char *certfile);
 static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long * resourceval TSRMLS_DC);
 static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req TSRMLS_DC);
-
 
 static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname TSRMLS_DC) /* {{{ */
 {
@@ -712,12 +712,7 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static inline int php_openssl_config_check_syntax(
-		const char * section_label,
-		const char * config_filename,
-		const char * section,
-		LHASH * config TSRMLS_DC
-		) /* {{{ */
+static inline int php_openssl_config_check_syntax(const char * section_label, const char * config_filename,	const char * section, LHASH * config TSRMLS_DC) /* {{{ */
 {
 	X509V3_CTX ctx;
 	
@@ -780,13 +775,7 @@ static int add_oid_section(struct php_x509_request * req TSRMLS_DC) /* {{{ */
 	else \
 		varname = defval
 
-
-
-static int php_openssl_parse_config(
-		struct php_x509_request * req,
-		zval * optional_args
-		TSRMLS_DC
-		) /* {{{ */
+static int php_openssl_parse_config(struct php_x509_request * req, zval * optional_args TSRMLS_DC) /* {{{ */
 {
 	char * str;
 	zval ** item;
@@ -1686,9 +1675,8 @@ PHP_FUNCTION(openssl_x509_free)
 
 /* }}} */
 
-
 /* Pop all X509 from Stack and free them, free the stack afterwards */
-static void php_sk_X509_free(STACK_OF(X509) * sk)
+static void php_sk_X509_free(STACK_OF(X509) * sk) /* {{{ */
 {
 	for (;;) {
 		X509* x = sk_X509_pop(sk);
@@ -1697,8 +1685,9 @@ static void php_sk_X509_free(STACK_OF(X509) * sk)
 	}
 	sk_X509_free(sk);
 }
+/* }}} */
 
-static STACK_OF(X509) * php_array_to_X509_sk(zval ** zcerts TSRMLS_DC)
+static STACK_OF(X509) * php_array_to_X509_sk(zval ** zcerts TSRMLS_DC) /* {{{ */
 {
 	HashPosition hpos;
 	zval ** zcertval;
@@ -1750,6 +1739,7 @@ static STACK_OF(X509) * php_array_to_X509_sk(zval ** zcerts TSRMLS_DC)
   clean_exit:
     return sk;
 }
+/* }}} */
 
 /* {{{ proto bool openssl_pkcs12_export_to_file(mixed x509, string filename, mixed priv_key, string pass[, array args])
    Creates and exports a PKCS to file */
@@ -4714,7 +4704,6 @@ PHP_FUNCTION(openssl_decrypt)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto string openssl_dh_compute_key(string pub_key, resource dh_key)
    Computes shared sicret for public value of remote DH key and local DH key */
