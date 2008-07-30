@@ -21,6 +21,7 @@ abs_srcdir=`(cd $srcdir && pwd)`
 abs_builddir=`pwd`
 
 AC_PROG_CC
+PHP_DETECT_ICC
 AC_PROG_CC_C_O
 
 dnl Support systems with system libraries in e.g. /usr/lib64
@@ -57,6 +58,40 @@ AC_MSG_CHECKING([for PHP extension directory])
 AC_MSG_RESULT([$EXTENSION_DIR])
 AC_MSG_CHECKING([for PHP installed headers prefix])
 AC_MSG_RESULT([$phpincludedir])
+
+dnl Check for PHP_DEBUG / ZEND_DEBUG
+AC_MSG_CHECKING([if debug is enabled])
+old_CPPFLAGS=$CPPFLAGS
+CPPFLAGS="-I$phpincludedir"
+AC_EGREP_CPP(php_debug_is_enabled,[
+#include <main/php_config.h>
+#if ZEND_DEBUG
+php_debug_is_enabled
+#endif
+],[
+  PHP_DEBUG=yes
+],[
+  PHP_DEBUG=no
+])
+CPPFLAGS=$old_CPPFLAGS
+AC_MSG_RESULT([$PHP_DEBUG])
+
+if test "$PHP_DEBUG" = "yes"; then
+  PHP_DEBUG=1
+  ZEND_DEBUG=yes
+  changequote({,})
+  CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O[0-9s]*//g'`
+  CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-O[0-9s]*//g'`
+  changequote([,])
+  dnl add -O0 only if GCC or ICC is used
+  if test "$GCC" = "yes" || test "$ICC" = "yes"; then
+    CFLAGS="$CFLAGS -O0"
+    CXXFLAGS="$CXXFLAGS -O0"
+  fi
+else
+  PHP_DEBUG=0
+  ZEND_DEBUG=no
+fi
 
 dnl Always shared
 PHP_BUILD_SHARED
