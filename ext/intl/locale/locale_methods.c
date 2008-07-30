@@ -1692,7 +1692,7 @@ PHP_FUNCTION(locale_accept_from_http)
 						&outResult, http_accept, available, &status);
 	uenum_close(available);
 	INTL_CHECK_STATUS(status, "locale_accept_from_http: failed to find acceptable locale");
-	if(outResult == ULOC_ACCEPT_FAILED) {
+	if(len < 0 || outResult == ULOC_ACCEPT_FAILED) {
 		RETURN_FALSE;
 	}
 	RETURN_STRINGL(resultLocale, len, 1);
