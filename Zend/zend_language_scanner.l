@@ -1958,7 +1958,7 @@ NOWDOC_CHARS        ([^\n\r]|{NEWLINE}+([^a-zA-Z_\x7f-\xff\n\r]|({LABEL}([^a-zA-
 	return T_DNUMBER;
 }
 
-<ST_IN_SCRIPTING>'__CLASS__' {
+<ST_IN_SCRIPTING>"__CLASS__" {
 	zstr class_name = NULL_ZSTR;
 
 	if (CG(active_class_entry)) {
@@ -1973,7 +1973,7 @@ NOWDOC_CHARS        ([^\n\r]|{NEWLINE}+([^a-zA-Z_\x7f-\xff\n\r]|({LABEL}([^a-zA-
 	return T_CLASS_C;
 }
 
-<ST_IN_SCRIPTING>'__FUNCTION__' {
+<ST_IN_SCRIPTING>"__FUNCTION__" {
 	zstr func_name = NULL_ZSTR;
 
 	if (CG(active_op_array)) {
@@ -1988,7 +1988,7 @@ NOWDOC_CHARS        ([^\n\r]|{NEWLINE}+([^a-zA-Z_\x7f-\xff\n\r]|({LABEL}([^a-zA-
 	return T_FUNC_C;
 }
 
-<ST_IN_SCRIPTING>'__METHOD__' {
+<ST_IN_SCRIPTING>"__METHOD__" {
 	zstr class_name = CG(active_class_entry) ? CG(active_class_entry)->name : NULL_ZSTR;
 	zstr func_name = CG(active_op_array)? CG(active_op_array)->function_name : NULL_ZSTR;
 	size_t len = 0;
@@ -2037,13 +2037,13 @@ NOWDOC_CHARS        ([^\n\r]|{NEWLINE}+([^a-zA-Z_\x7f-\xff\n\r]|({LABEL}([^a-zA-
 	return T_METHOD_C;
 }
 
-<ST_IN_SCRIPTING>'__LINE__' {
+<ST_IN_SCRIPTING>"__LINE__" {
 	Z_LVAL_P(zendlval) = CG(zend_lineno);
 	Z_TYPE_P(zendlval) = IS_LONG;
 	return T_LINE;
 }
 
-<ST_IN_SCRIPTING>'__FILE__' {
+<ST_IN_SCRIPTING>"__FILE__" {
 	char *filename = zend_get_compiled_filename(TSRMLS_C);
 
 	if (!filename) {
@@ -2053,7 +2053,7 @@ NOWDOC_CHARS        ([^\n\r]|{NEWLINE}+([^a-zA-Z_\x7f-\xff\n\r]|({LABEL}([^a-zA-
 	return T_FILE;
 }
 
-<ST_IN_SCRIPTING>'__DIR__' {
+<ST_IN_SCRIPTING>"__DIR__" {
 	char *filename = zend_get_compiled_filename(TSRMLS_C);
 	const size_t filename_len = strlen(filename);
 	char *dirname;
@@ -2080,7 +2080,7 @@ NOWDOC_CHARS        ([^\n\r]|{NEWLINE}+([^a-zA-Z_\x7f-\xff\n\r]|({LABEL}([^a-zA-
 	return T_DIR;
 }
 
-<ST_IN_SCRIPTING>'__NAMESPACE__' {
+<ST_IN_SCRIPTING>"__NAMESPACE__" {
 	if (CG(current_namespace)) {
 		*zendlval = *CG(current_namespace);
 		zval_copy_ctor(zendlval);
