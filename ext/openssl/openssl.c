@@ -392,6 +392,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_openssl_dh_compute_key, 0)
     ZEND_ARG_INFO(0, dh_key)
 ZEND_END_ARG_INFO()
 /* }}} */
+
 /* {{{ openssl_functions[]
  */
 const zend_function_entry openssl_functions[] = {
@@ -513,11 +514,11 @@ static void php_csr_free(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ openssl -> PHP "bridging" */
+/* openssl -> PHP "bridging" */
 /* true global; readonly after module startup */
 static char default_ssl_conf_filename[MAXPATHLEN];
 
-struct php_x509_request {
+struct php_x509_request { /* {{{ */
 	LHASH * global_config;	/* Global SSL config */
 	LHASH * req_config;		/* SSL config for this request */
 	const EVP_MD * md_alg;
@@ -534,7 +535,7 @@ struct php_x509_request {
 
 	EVP_PKEY * priv_key;
 };
-
+/* }}} */
 
 static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * resourceval TSRMLS_DC);
 static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * passphrase, int makeresource, long * resourceval TSRMLS_DC);
@@ -543,7 +544,6 @@ static X509_STORE     * setup_verify(zval * calist TSRMLS_DC);
 static STACK_OF(X509) * load_all_certs_from_file(char *certfile);
 static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long * resourceval TSRMLS_DC);
 static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req TSRMLS_DC);
-
 
 static void add_ascii_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname TSRMLS_DC) /* {{{ */
 {
@@ -707,12 +707,7 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static inline int php_openssl_config_check_syntax(
-		const char * section_label,
-		const char * config_filename,
-		const char * section,
-		LHASH * config TSRMLS_DC
-		) /* {{{ */
+static inline int php_openssl_config_check_syntax(const char * section_label, const char * config_filename, const char * section, LHASH * config TSRMLS_DC) /* {{{ */
 {
 	X509V3_CTX ctx;
 	
@@ -779,13 +774,7 @@ static int add_oid_section(struct php_x509_request * req TSRMLS_DC) /* {{{ */
 	else \
 		varname = defval
 
-
-
-static int php_openssl_parse_config(
-		struct php_x509_request * req,
-		zval * optional_args
-		TSRMLS_DC
-		) /* {{{ */
+static int php_openssl_parse_config(struct php_x509_request * req, zval * optional_args	TSRMLS_DC) /* {{{ */
 {
 	char * str;
 	zval ** item;
@@ -4979,7 +4968,6 @@ PHP_FUNCTION(openssl_decrypt)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto string openssl_dh_compute_key(string pub_key, resource dh_key) U
    Computes shared sicret for public value of remote DH key and local DH key */
