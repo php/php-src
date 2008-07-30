@@ -206,7 +206,7 @@ static const int state_transition_table[30][31] = {
 
 /* }}} */
 
-#define JSON_PARSER_MAX_DEPTH 128
+#define JSON_PARSER_MAX_DEPTH 512
 
 /*
    A stack maintains the states of nested structures.
