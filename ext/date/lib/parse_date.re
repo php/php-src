@@ -1258,6 +1258,7 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		TIMELIB_HAVE_DATE();
 		s->time->y = timelib_get_nr((char **) &ptr, 4);
 		s->time->m = timelib_get_nr((char **) &ptr, 2);
+		s->time->d = 1;
 		TIMELIB_PROCESS_YEAR(s->time->y);
 		TIMELIB_DEINIT;
 		return TIMELIB_ISO_DATE;
