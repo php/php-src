@@ -1,3 +1,15 @@
+2008-07-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_exceptions.c
+      zend_exceptions.c:
+      Fixed memory leak
+
+2008-07-29  Antony Dovgal  <tony@daylessday.org>
+
+    * zend_API.c
+      zend_API.h:
+      add zend_u_read_property() and zend_u_update_property()
+
 2008-07-28  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c

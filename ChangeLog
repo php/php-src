@@ -1,3 +1,206 @@
+2008-07-29  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c:
+      - MFH: missing in the previous crypt commit (shutdown frees the locking
+      mechanism)
+
+    * ext/standard/basic_functions.c:
+      - missing in the previous crypt commit (shutdown frees the locking
+      mechanism)
+
+2008-07-29  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/pcntl/config.m4
+      ext/pcntl/pcntl.c
+      ext/pcntl/php_pcntl.h
+      ext/pcntl/tests/002.phpt:
+      MFH: Added pcntl_sigwaitinfo(), pcntl_sigtimedwait() and
+      pcntl_sigprocmask()
+      [DOC] pcntl_sigprocmask() allows to block signals. pcntl_sigwaitinfo()
+      allows to fetch blocked signals or signals delivered while
+      pcntl_sigwaitinfo()
+      is running. pcntl_sigtimedwait() is pcntl_sigwaitinfo() with a timeout.
+
+    * ext/pcntl/config.m4
+      ext/pcntl/pcntl.c
+      ext/pcntl/php_pcntl.h
+      ext/pcntl/tests/002.phpt
+      ext/pcntl/tests/002.phpt:
+      Added pcntl_sigwaitinfo(), pcntl_sigtimedwait() and pcntl_sigprocmask()
+      [DOC] pcntl_sigprocmask() allows to block signals. pcntl_sigwaitinfo()
+      allows to fetch blocked signals or signals delivered while
+      pcntl_sigwaitinfo()
+      is running. pcntl_sigtimedwait() is pcntl_sigwaitinfo() with a timeout.
+
+2008-07-29  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/string.c:
+      - Fix memory leak
+
+2008-07-29  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      ext/pcntl/pcntl.c
+      ext/pcntl/php_pcntl.h
+      ext/pcntl/tests/pcntl_signal_dispatch.phpt:
+      MFH: Added pcntl_signal_dispatch()
+      [DOC] pcntl_signal_dispatch() allows to dispatch pending signals to
+      registered
+      signal handler functions on-demand. This allows to use pcntl_signal()
+      without
+      ticks.
+
+    * ext/pcntl/pcntl.c
+      ext/pcntl/php_pcntl.h
+      ext/pcntl/tests/pcntl_signal_dispatch.phpt
+      ext/pcntl/tests/pcntl_signal_dispatch.phpt:
+      Added pcntl_signal_dispatch()
+      [DOC] pcntl_signal_dispatch() allows to dispatch pending signals to
+      registered
+      signal handler functions on-demand. This allows to use pcntl_signal()
+      without
+      ticks.
+
+2008-07-29  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/gettext/gettext.c:
+      - Fix crash when NULL is passed to bindtextdomain() (sync with 5_3)
+
+2008-07-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.c
+      ext/date/php_date.c
+      ext/date/php_date.c
+      ext/spl/tests/iterator_041b.phpt
+      ext/spl/tests/iterator_041b.phpt:
+      Fixed memory leak
+
+2008-07-29  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * ext/standard/http_fopen_wrapper.c:
+      Fixed previous fix
+
+2008-07-29  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/url.c:
+      - Fix the fix
+
+    * ext/standard/url.c:
+      - Fix mem. leak
+
+    * ext/standard/tests/general_functions/bug41970.phpt
+      ext/standard/tests/strings/strncasecmp_variation10.phpt
+      ext/standard/tests/strings/strncasecmp_variation11.phpt
+      ext/standard/tests/strings/strncasecmp_variation4.phpt
+      ext/standard/tests/strings/strncmp_variation4.phpt
+      ext/tidy/tests/024.phpt:
+      - Fixed tests
+
+2008-07-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ext/date/tests/date-set-timestamp.phpt
+      ext/date/tests/date_parse_001.phpt:
+      Fixed test
+
+    * ext/spl/spl_iterators.c
+      ext/spl/spl_iterators.c:
+      Removed warning
+
+2008-07-29  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/phar/util.c:
+      don't segfault if given invalid/empty private key
+
+    * (PHP_5_3)
+      ext/phar/util.c:
+      don't free function name before calling the function
+
+    * (PHP_5_3)
+      ext/phar/dirstream.c
+      ext/phar/phar.c
+      ext/phar/phar.phar
+      ext/phar/phar_object.c
+      ext/phar/stream.c
+      ext/phar/tar.c
+      ext/phar/util.c
+      ext/phar/zip.c:
+      fix folding
+
+    * (PHP_5_2)
+      ext/curl/interface.c
+      ext/curl/interface.c:
+      MFH: fix copy/paste error (patch by Mikko)
+
+    * ext/curl/interface.c:
+      fix 5 years old copy/paste error (patch by Mikko)
+
+    * ext/reflection/tests/reflectionClass_getExtension_basic.phpt:
+      fix test
+
+    * ext/reflection/php_reflection.c:
+      make ReflectionProperty::getValue() and ReflectionProperty::setValue()
+      consistent with their implementations in 5_3
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      add zend_u_read_property() and zend_u_update_property()
+
+    * (PHP_5_2)
+      configure.in:
+      this shouldn't have been backported
+
+2008-07-29  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      Makefile.gcov:
+      - MFH Exclude bundled libs from gcov processing
+
+    * Makefile.gcov:
+      - Exclude bundled libs from gcov processing
+
+2008-07-29  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/reflection/php_reflection.c:
+      no need for FETCH anymore..
+
+    * ext/reflection/php_reflection.c:
+      more similar fixes
+
+    * ext/reflection/php_reflection.c:
+      add TSRMLS_DC and fix crash in ZTS mode
+
+2008-07-29  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/standard/crypt_blowfish.c
+      ext/standard/php_crypt_r.h:
+      Fix build where __const is already defined like OS X.
+
+    * (PHP_5_3)
+      ext/sqlite3/php_sqlite3_structs.h
+      ext/sqlite3/sqlite3.c
+      ext/sqlite3/tests/sqlite3_12_unfinalized_stmt_cleanup.phpt:
+      MFH: Add freelist for tracking sqlite statements to free on implicit
+      SQLite3::close()
+
+    * ext/sqlite3/php_sqlite3_structs.h
+      ext/sqlite3/sqlite3.c
+      ext/sqlite3/tests/sqlite3_12_unfinalized_stmt_cleanup.phpt:
+      Add freelist for tracking sqlite statements to free on implicit
+      SQLite3::close()
+
+2008-07-29  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_3)
+      ext/mbstring/tests/zend_multibyte-14.phpt:
+      - Typo.
+
 2008-07-28  Scott MacVicar  <scott@macvicar.net>
 
     * ext/sqlite3/sqlite3.c:
