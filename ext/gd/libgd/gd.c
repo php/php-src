@@ -2620,6 +2620,7 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 				green /= spixels;
 				blue /= spixels;
 				alpha /= spixels;
+				alpha += 0.5;
 			}
 			if ( alpha_sum != 0.0f) {
 				if( contrib_sum != 0.0f) {
