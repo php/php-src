@@ -15,7 +15,6 @@ PHP                                                                        NEWS
 
 - Changed PCRE, SPL and reflection extensions to always be enabled. (Marcus)
 - Changed md5() to use improved implementation. (Solar Designer, Dmitry)
-- Changed mhash to be a wrapper layer around the hash extension. (Scott)
 - Changed HTTP stream wrapper to accept any code between and including
   200 to 399 as successful. (Mike, Noah Fontes)
 
@@ -73,7 +72,8 @@ PHP                                                                        NEWS
     second usage. (Dmitry)
   . Optimized ZEND_FETCH_CLASS + ZEND_ADD_INTERFACE into single
     ZEND_ADD_INTERFACE opcode (Dmitry)
-  . Optimized string searching for a single character. (Michal Dziemianko, Scott)
+  . Optimized string searching for a single character.
+    (Michal Dziemianko, Scott)
   . Optimized interpolated strings to use one less opcode. (Matt)
 
 - Improved php.ini handling: (Jani)
@@ -107,6 +107,16 @@ PHP                                                                        NEWS
   . Added "params" as optional parameter for stream_context_create(). (Sara)
   . Added ability to use stream wrappers in include_path. (Gregory, Dmitry)
 
+- Improved hash extension:
+  . Changed mhash to be a wrapper layer around the hash extension. (Scott)
+  . Added hash_copy() function. (Tony)
+  . Added sha224 hash algorithm to the hash extension. (Scott)
+
+- Improved mbstring extension:
+  . Added "mbstring.http_output_conv_mimetypes" INI directive that allows
+    common non-text types such as "application/xhtml+xml" to be converted
+    by mb_output_handler(). (Moriyoshi)
+
 - Improved OCI8 extension:
   . Added Database Resident Connection Pooling (DRCP) and Fast
     Application Notification (FAN) support. (Oracle Corp.)
@@ -128,11 +138,6 @@ PHP                                                                        NEWS
 - Improved OpenSSL extension: (Dmitry)
   . Added support for OpenSSL digest and cipher functions.
   . Added access to internal values of DSA, RSA and DH keys.
-
-- Improved mbstring extension:
-  . Added "mbstring.http_output_conv_mimetypes" INI directive that allows
-    common non-text types such as "application/xhtml+xml" to be converted
-    by mb_output_handler(). (Moriyoshi)
 
 - Improved pcntl extension: (Arnaud)
   . Added pcntl_signal_dispatch()
@@ -168,18 +173,16 @@ PHP                                                                        NEWS
     perform class declaration (early and/or run-time binding) in exactly
     the same order as vanilla PHP. (Dmitry)
 
-- Improved crypt() function (Pierre)
-  . add Blowfish (using implementation from Solar Designer <solar at openwall
-    dot com>) and extended DES support
-  . Make crypt features portable:
-    . if no crypt_r, php's implemetation is used (all algo and TS), php can't
-      be used with unsafe crypt anymore
-    . if one algo is missing, php's implemetation is used
-    . Windows always use php's implementation
+- Improved crypt() function: (Pierre)
+  . Added Blowfish and extended DES support. (Using Blowfish implementation
+    from Solar Designer).
+  . Made crypt features portable by providing our own implementations 
+    for crypt_r and the algorithms which are used when OS does not provide 
+    them. PHP implementations are always used for Windows builds.
 
 - Added new extensions:
-  . Added fileinfo extension. (Derick)
-  . Added intl extension for Internationalization. (Ed B., Vladimir I.
+  . Added fileinfo extension as replacement for mime_magic extension. (Derick)
+  . Added intl extension for Internationalization. (Ed B., Vladimir I.,
     Dmitry L., Stanislav M., Vadim S., Kirti V.)
   . Added mysqlnd extension as replacement for libmysql for ext/mysql, mysqli
     and PDO_mysql. (Andrey, Johannes, Ulf)
@@ -229,11 +232,9 @@ PHP                                                                        NEWS
     number of occurences.
 
 - Added array_replace() and array_replace_recursive() functions. (Matt)
-- Added hash_copy() function. (Tony)
-- Added sha224 hash algorithm to the hash extension. (Scott)
 - Added ReflectionProperty::setAccessible() method that allows non-public
   property's values to be read through ::getValue(). (Derick)
-- Added msg_queue_exists() function. (Benjamin Schulz)
+- Added msg_queue_exists() function to sysvmsg extension. (Benjamin Schulz)
 - Added Firebird specific attributes that can be set via PDO::setAttribute()
   to control formatting of date/timestamp columns: PDO::FB_ATTR_DATE_FORMAT,
   PDO::FB_ATTR_TIME_FORMAT and PDO::FB_ATTR_TIMESTAMP_FORMAT. (Lars W)
