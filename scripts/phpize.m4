@@ -59,7 +59,7 @@ AC_MSG_RESULT([$EXTENSION_DIR])
 AC_MSG_CHECKING([for PHP installed headers prefix])
 AC_MSG_RESULT([$phpincludedir])
 
-dnl Check for PHP_DEBUG / ZEND_DEBUG
+dnl Checks for PHP_DEBUG / ZEND_DEBUG / ZTS
 AC_MSG_CHECKING([if debug is enabled])
 old_CPPFLAGS=$CPPFLAGS
 CPPFLAGS="-I$phpincludedir"
@@ -73,9 +73,37 @@ php_debug_is_enabled
 ],[
   PHP_DEBUG=no
 ])
+AC_MSG_RESULT([$PHP_DEBUG])
+
+AC_MSG_CHECKING([if zts is enabled])
+old_CPPFLAGS=$CPPFLAGS
+CPPFLAGS="-I$phpincludedir"
+AC_EGREP_CPP(php_zts_is_enabled,[
+#include <main/php_config.h>
+#if ZTS
+php_zts_is_enabled
+#endif
+],[
+  PHP_THREAD_SAFETY=yes
+],[
+  PHP_THREAD_SAFETY=no
+])
 CPPFLAGS=$old_CPPFLAGS
 AC_MSG_RESULT([$PHP_DEBUG])
 
+dnl Support for building and testing Zend extensions
+if test "$PHP_DEBUG" = "yes" && test "$PHP_THREAD_SAFETY" = "yes; then
+  ZEND_EXT_TYPE="zend_extension_debug_ts"
+elif test "$PHP_DEBUG" = "yes"; then
+  ZEND_EXT_TYPE="zend_extension_debug"
+elif test "$PHP_THREAD_SAFETY" = "yes; then
+  ZEND_EXT_TYPE="zend_extension_ts"
+else
+  ZEND_EXT_TYPE="zend_extension"
+fi
+PHP_SUBST(ZEND_EXT_TYPE)
+
+dnl Discard optimization flags when debugging is enabled
 if test "$PHP_DEBUG" = "yes"; then
   PHP_DEBUG=1
   ZEND_DEBUG=yes
@@ -115,7 +143,7 @@ AC_PROVIDE_IFELSE([PHP_REQUIRE_CXX], [], [
 ])
 AC_PROG_LIBTOOL
 
-all_targets='$(PHP_MODULES)'
+all_targets='$(PHP_MODULES) $(PHP_ZEND_EX)'
 install_targets="install-modules install-headers"
 phplibdir="`pwd`/modules"
 CPPFLAGS="$CPPFLAGS -DHAVE_CONFIG_H"
@@ -126,6 +154,8 @@ test "$prefix" = "NONE" && prefix="/usr/local"
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
 
 PHP_SUBST(PHP_MODULES)
+PHP_SUBST(PHP_ZEND_EX)
+
 PHP_SUBST(all_targets)
 PHP_SUBST(install_targets)
 
