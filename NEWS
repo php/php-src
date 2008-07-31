@@ -134,6 +134,12 @@ PHP                                                                        NEWS
     common non-text types such as "application/xhtml+xml" to be converted
     by mb_output_handler(). (Moriyoshi)
 
+- Improved pcntl extension: (Arnaud)
+  . Added pcntl_signal_dispatch()
+  . Added pcntl_sigprocmask()
+  . Added pcntl_sigwaitinfo()
+  . Added pcntl_sigtimedwait()
+
 - Improved SOAP extension:
   . Added support for element names in context of XMLShema's <any>. (Dmitry)
   . Added ability to use Traversable objects instead of plain arrays.
@@ -163,9 +169,11 @@ PHP                                                                        NEWS
     the same order as vanilla PHP. (Dmitry)
 
 - Improved crypt() function (Pierre)
-  . add Blowfish (using implementation from Solar Designer <solar at openwal dot com>) and extended DES support
+  . add Blowfish (using implementation from Solar Designer <solar at openwal
+    dot com>) and extended DES support
   . Make crypt features portable:
-    . if no crypt_r, php's implemetation is used (all algo and TS), php can't be used with unsafe crypt anymore
+    . if no crypt_r, php's implemetation is used (all algo and TS), php can't
+      be used with unsafe crypt anymore
     . if one algo is missing, php's implemetation is used
     . Windows always use php's implementation
 
@@ -210,12 +218,6 @@ PHP                                                                        NEWS
   . DatePeriod class which supports iterating over a DateTime object applying
     DateInterval on each iteration, up to an end date or limited by maximum
     number of occurences.
-
-- Improved pcntl extension: (Arnaud)
-  . Added pcntl_signal_dispatch()
-  . Added pcntl_sigprocmask()
-  . Added pcntl_sigwaitinfo()
-  . Added pcntl_sigtimedwait()
 
 - Added array_replace() and array_replace_recursive() functions. (Matt)
 - Added hash_copy() function. (Tony)
