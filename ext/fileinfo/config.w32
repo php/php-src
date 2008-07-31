@@ -3,11 +3,8 @@
 
 ARG_WITH("fileinfo", "fileinfo support", "no");
 
-if (PHP_FILEINFO != 'no' && 
-		CHECK_HEADER_ADD_INCLUDE('magic.h', 'CFLAGS_FILEINFO') &&
-		CHECK_LIB(PHP_DEBUG != 'no'?'libmagic-staticd.lib':'libmagic-static.lib', 
-			'fileinfo', PHP_FILEINFO)) {
-	EXTENSION('fileinfo', 'fileinfo.c');
-	AC_DEFINE('USE_MAGIC_STATIC', '', '');
+if (PHP_FILEINFO != 'no') {
+	EXTENSION('fileinfo', 'fileinfo.c', null, "/I" + configure_module_dirname + "/libmagic /I" + configure_module_dirname);
+	ADD_SOURCES(configure_module_dirname + "/libmagick", "apprentice.c apptype.c ascmagic.c \
+	compress.c fsmagic.c funcs.c getopt_long.c is_tar.c magic.c print.c readelf.c softmagic.c", "fileinfo");
 }
-
