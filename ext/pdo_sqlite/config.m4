@@ -73,9 +73,17 @@ if test "$PHP_PDO_SQLITE" != "no"; then
     PHP_NEW_EXTENSION(pdo_sqlite, $php_pdo_sqlite_sources_core, $ext_shared,,-I$pdo_inc_path)
   else
       # use bundled libs
+      if test "$enable_maintainer_zts" = "yes"; then
+        threadsafe_flags="-DSQLITE_THREADSAFE=1"
+      else
+        threadsafe_flags="-DSQLITE_THREADSAFE=0"
+      fi
+
+      other_flags="-DSQLITE_ENABLE_FTS3=1 -DSQLITE_CORE=1"
+
       PHP_NEW_EXTENSION(pdo_sqlite,
         $php_pdo_sqlite_sources_core,
-        $ext_shared,,-DPDO_SQLITE_BUNDLED=1 -I$pdo_inc_path)
+        $ext_shared,,-DPDO_SQLITE_BUNDLED=1 $other_flags $threadsafe_flags -I$pdo_inc_path)
 
       PHP_SUBST(PDO_SQLITE_SHARED_LIBADD)
       PHP_ADD_EXTENSION_DEP(pdo_sqlite, sqlite3)
