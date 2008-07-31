@@ -231,8 +231,8 @@ if (PHP_PHP_BUILD == 'no') {
 ARG_WITH('extra-includes', 'Extra include path to use when building everything', '');
 ARG_WITH('extra-libs', 'Extra library path to use when linking everything', '');
 
-var php_usual_include_suspects = PHP_PHP_BUILD+"\\include;..\\bindlib_w32";
-var php_usual_lib_suspects = PHP_PHP_BUILD+"\\lib;..\\bindlib_w32";
+var php_usual_include_suspects = PHP_PHP_BUILD+"\\include;..\\deps\\include;..\\bindlib_w32;";
+var php_usual_lib_suspects = PHP_PHP_BUILD+"\\lib;..\\deps\\lib;..\\bindlib_w32";
 
 // Poke around for some headers
 function probe_basic_headers()
