@@ -52,6 +52,8 @@ PHP                                                                        NEWS
 - Fixed bug #44716 (Progress notifications incorrect). (Hannes)
 - Fixed bug #44712 (stream_context_set_params segfaults on invalid arguments).
   (Hannes)
+- Fixed bug #44617 (wrong HTML entity output when substitute_character=entity).
+  (Moriyoshi)
 - Fixed bug #44246 (closedir() accepts a file resource opened by fopen()).
   (Dmitry, Tony)
 - Fixed bug #44127 (UNIX abstract namespace socket connect does not work).
