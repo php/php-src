@@ -1,3 +1,165 @@
+2008-07-30  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      scripts/phpize.m4:
+      MFH:- Detect whether debugging was enabled in PHP and drop optimizing flags
+      if so (merge from configure.in)
+
+    * scripts/phpize.m4:
+      - Detect whether debugging was enabled in PHP and drop optimizing flags if
+      so (merge from configure.in)
+
+    * configure.in:
+      CS
+
+2008-07-30  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/intl/locale/locale_methods.c:
+      - MFH: Fixed memory leak.
+
+    * ext/intl/locale/locale_methods.c:
+      - Fixed memory leak.
+
+2008-07-30  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/date/php_date.c
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/tests/012.phpt
+      ext/date/tests/013.phpt
+      ext/date/tests/date_parse_001.phpt:
+      - MFH: Fixed a bug with the YYYY-MM format not resetting the day correctly.
+      - MFH: Fixed a bug in the DateTime->modify() methods, it would not use the
+        advanced relative time strings.
+      - MFH: Fixed return values of all the modifying methods, they now properly
+        return the object itself.
+
+2008-07-30  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/intl/locale/locale_methods.c:
+      - MFB: Fixed crash when NULL is passed to locale_accept_from_http()
+
+2008-07-30  Stanislav Malyshev  <stas@zend.com>
+
+    * TSRM/readdir.h
+      TSRM/readdir.h
+      TSRM/tsrm_config.w32.h
+      TSRM/tsrm_config.w32.h:
+      fix warnings
+
+2008-07-30  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/php_date.c
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/tests/012.phpt
+      ext/date/tests/013.phpt
+      ext/date/tests/date_parse_001.phpt:
+      - Fixed a bug with the YYYY-MM format not resetting the day correctly.
+      - Fixed a bug in the DateTime->modify() methods, it would not use the
+      advanced
+        relative time strings.
+      - Fixed return values of all the modifying methods, they now properly
+      return
+        the object itself.
+
+2008-07-30  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/intl/locale/locale_methods.c:
+      - Fixed crash when NULL is passed to locale_accept_from_http()
+
+2008-07-30  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/json/JSON_parser.c
+      ext/json/JSON_parser.c
+      ext/json/JSON_parser.c:
+      We can afford a larger stack here and other json parsers out there
+      go deeper than 128.
+
+2008-07-30  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/tests/constants_006.phpt:
+      - New test
+
+    * ZendEngine2/tests/constants_006.phpt
+      ZendEngine2/tests/constants_006.phpt:
+      
+      file constants_006.phpt was initially added on branch PHP_5_3.
+
+2008-07-30  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/openssl/openssl.c
+      ext/openssl/openssl.c:
+      fix folding
+
+    * (PHP_5_3)
+      ext/gd/tests/bug44849.phpt:
+      enable this test on all platforms, no reason to limit it windows only
+
+    * ext/gd/tests/bug44849.phpt
+      ext/gd/tests/imagecolorclosesthwb.phpt:
+      fix tests
+
+    * (PHP_5_3)
+      ext/gd/tests/imagecolorclosesthwb.phpt:
+      fix test
+
+2008-07-30  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/mbstring/config.w32:
+      - mbstring is built shared on windows
+        it looks like the idea was to have it static (but does not work)
+
+    * (PHP_5_3)
+      ext/mbstring/oniguruma/regint.h:
+      - fix VC9 build (5.3+)
+        Please do not revert this fix again and to merge 5.3's changes to HEAD
+
+2008-07-30  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/date/php_date.c
+      scripts/phpize.m4:
+      ws
+
+2008-07-30  Kalle Sommer Nielsen  <kalle@zesix.com>
+
+    * (PHP_5_3)
+      ext/gd/tests/imagecolorclosesthwb.phpt:
+      MFH: Add test for imagecolorclosesthwb()
+
+    * ext/gd/tests/imagecolorclosesthwb.phpt
+      ext/gd/tests/imagecolorclosesthwb.phpt:
+      
+      Add test for imagecolorclosesthwb()
+
+    * ext/gd/tests/bug44849.phpt:
+      MFB: Add test case for #44849
+
+    * ext/gd/tests/bug44849.phpt
+      ext/gd/tests/bug44849.phpt:
+      
+      file bug44849.phpt was initially added on branch PHP_5_3.
+
+2008-07-30  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l:
+      - MFH: Fixed BC break: The magic constants must be case-insensitive.
+
+    * ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l:
+      - Fixed BC break: The magic constants must be case-insensitive.
+
+2008-07-30  George Wang  <gwang@litespeedtech.com>
+
+    * sapi/litespeed/lsapi_main.c:
+      make it compatible with PHP 6.0 using new php output API
+
 2008-07-29  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * (PHP_5_3)
