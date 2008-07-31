@@ -3963,7 +3963,7 @@ void zend_do_end_new_object(znode *result, znode *new_token, znode *argument_lis
 }
 /* }}} */
 
-static zend_constant* zend_get_ct_const(zval *const_name TSRMLS_DC) /* {{{ */
+static zend_constant* zend_get_ct_const(zval *const_name, int mode TSRMLS_DC) /* {{{ */
 {
 	zend_constant *c = NULL;
 
@@ -3983,7 +3983,8 @@ static zend_constant* zend_get_ct_const(zval *const_name TSRMLS_DC) /* {{{ */
 	if (c->flags & CONST_CT_SUBST) {
 		return c;
 	}
-	if ((c->flags & CONST_PERSISTENT) &&
+	if (mode == ZEND_RT &&
+	    (c->flags & CONST_PERSISTENT) &&
 	    !CG(current_namespace) &&
 	    !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION) &&
 	    Z_TYPE(c->value) != IS_CONSTANT &&
@@ -3994,9 +3995,9 @@ static zend_constant* zend_get_ct_const(zval *const_name TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int zend_constant_ct_subst(znode *result, zval *const_name TSRMLS_DC) /* {{{ */
+static int zend_constant_ct_subst(znode *result, zval *const_name, int mode TSRMLS_DC) /* {{{ */
 {
-	zend_constant *c = zend_get_ct_const(const_name TSRMLS_CC);
+	zend_constant *c = zend_get_ct_const(const_name, mode TSRMLS_CC);
 
 	if (c) {
 		zval_dtor(const_name);
@@ -4039,7 +4040,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 				zend_do_build_full_name(NULL, constant_container, constant_name TSRMLS_CC);
 				*result = *constant_container;
 				result->u.constant.type = IS_CONSTANT | fetch_type;
-			} else if (fetch_type || !zend_constant_ct_subst(result, &constant_name->u.constant TSRMLS_CC)) {
+			} else if (fetch_type || !zend_constant_ct_subst(result, &constant_name->u.constant, ZEND_CT TSRMLS_CC)) {
 				if (check_namespace && CG(current_namespace)) {
 					/* We assume we use constant from the current namespace
 					   if it is not prefixed. */
@@ -4056,7 +4057,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 			break;
 		case ZEND_RT:
 			if (constant_container ||
-			    !zend_constant_ct_subst(result, &constant_name->u.constant TSRMLS_CC)) {
+			    !zend_constant_ct_subst(result, &constant_name->u.constant, ZEND_RT TSRMLS_CC)) {
 				zend_op *opline;
 
 				if (constant_container) {
@@ -5527,14 +5528,12 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 void zend_do_declare_constant(znode *name, znode *value TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
-	zend_constant *c;
 
 	if(Z_TYPE(value->u.constant) == IS_CONSTANT_ARRAY) {
 		zend_error(E_COMPILE_ERROR, "Arrays are not allowed as constants");
 	}
 
-	c = zend_get_ct_const(&name->u.constant TSRMLS_CC);
-	if (c && (c->flags & CONST_CT_SUBST)) {
+	if (zend_get_ct_const(&name->u.constant, ZEND_CT TSRMLS_CC)) {
 		zend_error(E_COMPILE_ERROR, "Cannot redeclare constant '%R'", Z_TYPE(name->u.constant), Z_UNIVAL(name->u.constant));
 	}
 
