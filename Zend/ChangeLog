@@ -1,3 +1,22 @@
+2008-07-30  Felipe Pena  <felipensp@gmail.com>
+
+    * tests/constants_006.phpt:
+      - New test
+
+    * tests/constants_006.phpt
+      tests/constants_006.phpt:
+      
+      file constants_006.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      zend_language_scanner.c
+      zend_language_scanner.l:
+      - MFH: Fixed BC break: The magic constants must be case-insensitive.
+
+    * zend_language_scanner.c
+      zend_language_scanner.l:
+      - Fixed BC break: The magic constants must be case-insensitive.
+
 2008-07-29  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_exceptions.c
