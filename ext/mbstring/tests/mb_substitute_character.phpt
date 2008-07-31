@@ -10,40 +10,36 @@ include_once('common.inc');
 
 // Note: It does not return TRUE/FALSE for setting char
 
-// Use Unicode val
-$r = mb_substitute_character(0x3013);
-//$r = mb_substitute_character('U+3013');
-($r === TRUE) ?    print "OK_UTF\n" :  print("NG_UTF: ".gettype($r)." $r\n");
-print mb_substitute_character() . "\n";
+var_dump(mb_substitute_character(0x3044));
+var_dump(mb_substitute_character());
+var_dump(bin2hex(mb_convert_encoding("\xe2\x99\xa0\xe3\x81\x82", "CP932", "UTF-8")));
 
+var_dump(mb_substitute_character('long'));
+var_dump(mb_substitute_character());
+var_dump(bin2hex(mb_convert_encoding("\xe2\x99\xa0\xe3\x81\x82", "CP932", "UTF-8")));
 
-// Use "long"
-$r = mb_substitute_character('long');
-($r === TRUE) ? print "OK_LONG\n" : print("NG_LONG: ".gettype($r)." $r\n");
-print mb_substitute_character() . "\n";
+var_dump(mb_substitute_character('none'));
+var_dump(mb_substitute_character());
+var_dump(bin2hex(mb_convert_encoding("\xe2\x99\xa0\xe3\x81\x82", "CP932", "UTF-8")));
 
+var_dump(mb_substitute_character('entity'));
+var_dump(mb_substitute_character());
+var_dump(bin2hex(mb_convert_encoding("\xe2\x99\xa0\xe3\x81\x82", "CP932", "UTF-8")));
 
-// Use "none"
-$r = mb_substitute_character('none');
-($r === TRUE) ? print "OK_NONE\n" : print("NG_NONE: ".gettype($r)." $r\n");
-print mb_substitute_character() . "\n";
-
-
-// Set invalid string. Should fail.
-print "== INVALID PARAMETER ==\n";
-$r = mb_substitute_character('BAD_NAME');
-($r === FALSE) ? print "OK_BAD_NAME\n" : print("NG_BAD_NAME: ".gettype($r)." $r\n");
-
+var_dump(mb_substitute_character('BAD_NAME'));
 ?>
-
 --EXPECT--
-OK_UTF
-12307
-OK_LONG
-long
-OK_NONE
-none
-== INVALID PARAMETER ==
+bool(true)
+int(12356)
+string(8) "82a282a0"
+bool(true)
+string(4) "long"
+string(16) "552b3236363082a0"
+bool(true)
+string(4) "none"
+string(4) "82a0"
+bool(true)
+string(6) "entity"
+string(20) "262378323636303b82a0"
 ERR: Warning
-OK_BAD_NAME
-
+bool(false)
