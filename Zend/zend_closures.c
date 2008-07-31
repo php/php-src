@@ -85,30 +85,6 @@ static int zend_closure_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int zend_closure_cast_object_tostring(zval *readobj, zval *writeobj, int type, void *extra TSRMLS_DC) /* {{{ */
-{
-	zend_class_entry *ce;
-
-	switch (type) {
-		case IS_STRING:
-			INIT_PZVAL(writeobj);
-			ZVAL_STRINGL(writeobj, ZEND_CLOSURE_PRINT_NAME, sizeof(ZEND_CLOSURE_PRINT_NAME)-1, 1);
-			return SUCCESS;
-		case IS_UNICODE:
-			INIT_PZVAL(writeobj);
-			ZVAL_UNICODEL(writeobj, USTR_MAKE(ZEND_CLOSURE_PRINT_NAME), sizeof(ZEND_CLOSURE_PRINT_NAME)-1, 0);
-			return SUCCESS;
-		default:
-			ce = Z_OBJCE_P(readobj);
-			zend_error(E_NOTICE, "Object of class %v could not be converted to %s", ce->name, zend_get_type_by_const(type));
-			INIT_PZVAL(writeobj);
-			Z_TYPE_P(writeobj) = IS_NULL;
-			break;
-	}
-	return FAILURE;
-}
-/* }}} */
-
 static zend_function *zend_closure_get_method(zval **object_ptr, zstr method_name, int method_len TSRMLS_DC) /* {{{ */
 {
 	unsigned int lc_name_len;
@@ -235,7 +211,6 @@ void zend_register_closure_ce(TSRMLS_D) /* {{{ */
 	closure_handlers.has_property = zend_closure_has_property;
 	closure_handlers.unset_property = zend_closure_unset_property;
 	closure_handlers.compare_objects = zend_closure_compare_objects;
-	closure_handlers.cast_object = zend_closure_cast_object_tostring;
 	closure_handlers.clone_obj = NULL;
 }
 /* }}} */
