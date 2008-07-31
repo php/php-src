@@ -7,19 +7,17 @@ SQLite3::createAggregate() test
 
 require_once(dirname(__FILE__) . '/new_db.inc');
 
-function sum_list_step(&$context, $string) {
+function sum_list_step($context, $num_args, $string) {
 	if (empty($context))
 	{
 		$context = array('total' => 0, 'values' => array());
 	}
-	var_dump($context);
 	$context['total'] += intval($string);
 	$context['values'][] = $context['total'];
-	return true;
+	return $context;
 }
 
-function sum_list_finalize(&$context) {
-	var_dump($context);
+function sum_list_finalize($context) {
 	return implode(',', $context['values']);
 }
 
@@ -50,7 +48,11 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-
+Array
+(
+    [S(a)] => 1,3,6,10,14
+    [S(b)] => -1,-3,-6,-10,-14
+)
 Closing database
 bool(true)
 Done
