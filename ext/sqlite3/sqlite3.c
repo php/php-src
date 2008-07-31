@@ -163,7 +163,6 @@ PHP_METHOD(sqlite3, close)
 		zend_llist_clean(&(db_obj->free_list));
 		errcode = sqlite3_close(db_obj->db);
 		if (errcode != SQLITE_OK) {
-			RETURN_TRUE;
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to close database: %d, %s", errcode, sqlite3_errmsg(db_obj->db));
 			RETURN_FALSE;
 		}
