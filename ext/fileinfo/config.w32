@@ -1,10 +1,22 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_WITH("fileinfo", "fileinfo support", "no");
+ARG_ENABLE("fileinfo", "fileinfo support", "no");
 
 if (PHP_FILEINFO != 'no') {
-	EXTENSION('fileinfo', 'fileinfo.c', null, "/I" + configure_module_dirname + "/libmagic /I" + configure_module_dirname);
-	ADD_SOURCES(configure_module_dirname + "/libmagick", "apprentice.c apptype.c ascmagic.c \
-	compress.c fsmagic.c funcs.c getopt_long.c is_tar.c magic.c print.c readelf.c softmagic.c", "fileinfo");
+
+		if (CHECK_HEADER_ADD_INCLUDE("dirent.h", "CFLAGS_FILEINFO") && 
+		CHECK_LIB("dirent_a.lib", "fileinfo", PHP_FILEINFO)) {
+
+		LIBMAGIC_SOURCES=" apprentice.c apptype.c ascmagic.c \
+			compress.c fsmagic.c funcs.c is_tar.c \
+			magic.c print.c \
+			readelf.c softmagic.c";
+
+		EXTENSION('fileinfo', 'fileinfo.c', true, "/I" + configure_module_dirname + "/libmagic /I" + configure_module_dirname);
+		ADD_SOURCES(configure_module_dirname + '\\libmagic', LIBMAGIC_SOURCES, "fileinfo");
+	} else {
+		WARNING("fileinfo not enabled; libraries and headers not found");
+		PHP_FILEINFO = "no";
+	}
 }
