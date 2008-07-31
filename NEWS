@@ -177,6 +177,15 @@ PHP                                                                        NEWS
     . if one algo is missing, php's implemetation is used
     . Windows always use php's implementation
 
+- Added new extensions:
+  . Added fileinfo extension. (Derick)
+  . Added intl extension for Internationalization. (Ed B., Vladimir I.
+    Dmitry L., Stanislav M., Vadim S., Kirti V.)
+  . Added mysqlnd extension as replacement for libmysql for ext/mysql, mysqli
+    and PDO_mysql. (Andrey, Johannes, Ulf)
+  . Added phar extension for handling PHP Archives. (Greg, Marcus)
+  . Added SQLite3 extension. (Scott)
+
 - Added new date/time functionality: (Derick)
   . date_parse_from_format(): Parse date/time strings according to a format.
   . date_create_from_format()/DateTime::createFromFormat(): Create a date/time
