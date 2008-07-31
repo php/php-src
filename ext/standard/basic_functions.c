@@ -459,6 +459,20 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_array_merge_recursive, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_replace, 0, 0, 2)
+	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg, 0) */
+	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg, 0) */
+	ZEND_ARG_INFO(0, ...)  /* ARRAY_INFO(0, ..., 0) */
+ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_replace_recursive, 0, 0, 2)
+	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg, 0) */
+	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg, 0) */
+	ZEND_ARG_INFO(0, ...)  /* ARRAY_INFO(0, arg, 0) */
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_keys, 0, 0, 1)
 	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
 	ZEND_ARG_INFO(0, search_value)
@@ -3731,6 +3745,8 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(array_slice,														arginfo_array_slice)
 	PHP_FE(array_merge,														arginfo_array_merge)
 	PHP_FE(array_merge_recursive,											arginfo_array_merge_recursive)
+	PHP_FE(array_replace,													arginfo_array_replace)
+	PHP_FE(array_replace_recursive,											arginfo_array_replace_recursive)
 	PHP_FE(array_keys,														arginfo_array_keys)
 	PHP_FE(array_values,													arginfo_array_values)
 	PHP_FE(array_count_values,												arginfo_array_count_values)

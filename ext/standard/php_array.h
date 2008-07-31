@@ -66,6 +66,8 @@ PHP_FUNCTION(array_splice);
 PHP_FUNCTION(array_slice);
 PHP_FUNCTION(array_merge);
 PHP_FUNCTION(array_merge_recursive);
+PHP_FUNCTION(array_replace);
+PHP_FUNCTION(array_replace_recursive);
 PHP_FUNCTION(array_keys);
 PHP_FUNCTION(array_values);
 PHP_FUNCTION(array_count_values);
@@ -102,6 +104,7 @@ PHP_FUNCTION(array_combine);
 
 PHPAPI HashTable* php_splice(HashTable *, int, int, zval ***, int, HashTable **);
 PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS_DC);
+PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src TSRMLS_DC);
 PHPAPI int php_multisort_compare(const void *a, const void *b TSRMLS_DC);
 PHPAPI int php_array_data_compare(const void *a, const void *b TSRMLS_DC);
 PHPAPI void php_set_compare_func(int sort_type TSRMLS_DC);

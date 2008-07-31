@@ -2500,10 +2500,75 @@ ukey:
 }
 /* }}} */
 
-static void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive) /* {{{ */
+PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src TSRMLS_DC) /* {{{ */
+{
+	zval **src_entry, **dest_entry;
+	zstr string_key;
+	uint string_key_len;
+	ulong num_key;
+	HashPosition pos;
+
+	for (zend_hash_internal_pointer_reset_ex(src, &pos);
+	     zend_hash_get_current_data_ex(src, (void **)&src_entry, &pos) == SUCCESS;
+	     zend_hash_move_forward_ex(src, &pos)) {
+		zend_uchar utype;
+
+		switch (zend_hash_get_current_key_ex(src, &string_key, &string_key_len, &num_key, 0, &pos)) {
+			case HASH_KEY_IS_STRING:
+				utype = IS_STRING;
+				goto ukey;
+			case HASH_KEY_IS_UNICODE:
+				utype = IS_UNICODE;
+ukey:
+				if (Z_TYPE_PP(src_entry) != IS_ARRAY ||
+					zend_u_hash_find(dest, utype, string_key, string_key_len, (void **)&dest_entry) == FAILURE ||
+					Z_TYPE_PP(dest_entry) != IS_ARRAY) {
+
+					Z_ADDREF_PP(src_entry);
+					zend_u_hash_update(dest, utype, string_key, string_key_len, src_entry, sizeof(zval *), NULL);
+
+					continue;
+				}
+				break;
+
+			case HASH_KEY_IS_LONG:
+				if (Z_TYPE_PP(src_entry) != IS_ARRAY ||
+					zend_hash_index_find(dest, num_key, (void **)&dest_entry) == FAILURE ||
+					Z_TYPE_PP(dest_entry) != IS_ARRAY) {
+
+					Z_ADDREF_PP(src_entry);
+					zend_hash_index_update(dest, num_key, src_entry, sizeof(zval *), NULL);
+
+					continue;
+				}
+				break;
+		}
+
+		if (Z_ARRVAL_PP(src_entry)->nApplyCount > 1 || Z_ARRVAL_PP(dest_entry)->nApplyCount > 1 || (*src_entry == *dest_entry && Z_ISREF_PP(dest_entry) && (Z_REFCOUNT_PP(dest_entry) % 2))) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
+			return 0;
+		}
+		SEPARATE_ZVAL(dest_entry);
+		Z_ARRVAL_PP(dest_entry)->nApplyCount++;
+		Z_ARRVAL_PP(src_entry)->nApplyCount++;
+
+		if (!php_array_replace_recursive(Z_ARRVAL_PP(dest_entry), Z_ARRVAL_PP(src_entry) TSRMLS_CC)) {
+			Z_ARRVAL_PP(dest_entry)->nApplyCount--;
+			Z_ARRVAL_PP(src_entry)->nApplyCount--;
+			return 0;
+		}
+		Z_ARRVAL_PP(dest_entry)->nApplyCount--;
+		Z_ARRVAL_PP(src_entry)->nApplyCount--;
+	}
+
+	return 1;
+}
+/* }}} */
+
+static void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive, int replace) /* {{{ */
 {
 	zval ***args = NULL;
-	int argc, i, params_ok = 1;
+	int argc, i, params_ok = 1, init_size = 0;
 
 	/* Get the argument count and check it */
 	argc = ZEND_NUM_ARGS();
@@ -2522,6 +2587,12 @@ static void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive)
 		if (Z_TYPE_PP(args[i]) != IS_ARRAY) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d is not an array", i + 1);
 			params_ok = 0;
+		} else {
+			int num = zend_hash_num_elements(Z_ARRVAL_PP(args[i]));
+
+			if (num > init_size) {
+				init_size = num;
+			}
 		}
 	}
 	if (params_ok == 0) {
@@ -2529,12 +2600,16 @@ static void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive)
 		return;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, init_size);
 
-	for (i=0; i<argc; i++) {
-		SEPARATE_ZVAL(args[i]);
-		convert_to_array_ex(args[i]);
-		php_array_merge(Z_ARRVAL_P(return_value), Z_ARRVAL_PP(args[i]), recursive TSRMLS_CC);
+	for (i = 0; i < argc; i++) {
+		if (!replace) {
+			php_array_merge(Z_ARRVAL_P(return_value), Z_ARRVAL_PP(args[i]), recursive TSRMLS_CC);
+		} else if (recursive && i > 0) { /* First array will be copied directly instead */
+			php_array_replace_recursive(Z_ARRVAL_P(return_value), Z_ARRVAL_PP(args[i]) TSRMLS_CC);
+		} else {
+			zend_hash_merge(Z_ARRVAL_P(return_value), Z_ARRVAL_PP(args[i]), (copy_ctor_func_t) zval_add_ref, NULL, sizeof(zval *), 1);
+		}
 	}
 
 	efree(args);
@@ -2545,7 +2620,7 @@ static void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive)
    Merges elements from passed arrays into one array */
 PHP_FUNCTION(array_merge)
 {
-	php_array_merge_wrapper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 0);
 }
 /* }}} */
 
@@ -2553,7 +2628,23 @@ PHP_FUNCTION(array_merge)
    Recursively merges elements from passed arrays into one array */
 PHP_FUNCTION(array_merge_recursive)
 {
-	php_array_merge_wrapper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1, 0);
+}
+/* }}} */
+
+/* {{{ proto array array_replace(array arr1, array arr2 [, array ...]) U
+   Replaces elements from passed arrays into one array */
+PHP_FUNCTION(array_replace)
+{
+	php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 1);
+}
+/* }}} */
+
+/* {{{ proto array array_replace_recursive(array arr1, array arr2 [, array ...]) U
+   Recursively replaces elements from passed arrays into one array */
+PHP_FUNCTION(array_replace_recursive)
+{
+	php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1, 1);
 }
 /* }}} */
 
