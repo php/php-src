@@ -17,8 +17,8 @@
 */
 /* $Id$ */
 
-#ifndef PHP_SQLITE_H
-#define PHP_SQLITE_H
+#ifndef PHP_SQLITE3_H
+#define PHP_SQLITE3_H
 
 #define PHP_SQLITE3_VERSION	 "0.7-dev"
 
