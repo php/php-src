@@ -14,6 +14,8 @@ PHP                                                                        NEWS
 - Fixed a regression when using strip_tags() and < is within an attribute.
   (Scott)
 
+- Fixed bug #45568 (ISAPI doesn't property clear auth_digest in header).
+  (Patch by: navara at emclient dot com)
 - Fixed bug #45556 (Return value from callback isn't freed). (Felipe)
 - Fixed bug #45555 (Segfault with invalid non-string as 
   register_introspection_callback). (Christian Seiler)
