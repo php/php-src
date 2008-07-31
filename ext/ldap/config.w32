@@ -5,11 +5,13 @@ ARG_WITH("ldap", "LDAP support", "no");
 
 if (PHP_LDAP != "no") {
 
-	if (CHECK_HEADER_ADD_INCLUDE("ldap.h", "CFLAGS_LDAP", PHP_PHP_BUILD + "\\openldap\\include;" + PHP_LDAP) &&
+	if (CHECK_HEADER_ADD_INCLUDE("ldap.h", "CFLAGS_LDAP", PHP_PHP_BUILD + "\\include\\openldap;" + PHP_PHP_BUILD + "\\openldap\\include;" + PHP_LDAP) &&
+			CHECK_HEADER_ADD_INCLUDE("lber.h", "CFLAGS_LDAP", PHP_PHP_BUILD + "\\include\\openldap;" + PHP_PHP_BUILD + "\\openldap\\include;" + PHP_LDAP)
+			&&
 			CHECK_LIB("ssleay32.lib", "ldap", PHP_LDAP) &&
 			CHECK_LIB("libeay32.lib", "ldap", PHP_LDAP) &&
-			CHECK_LIB("oldap32.lib", "ldap", PHP_LDAP) &&
-			CHECK_LIB("olber32.lib", "ldap", PHP_LDAP)) {
+			CHECK_LIB("oldap32_a.lib", "ldap", PHP_LDAP) &&
+			CHECK_LIB("olber32_a.lib", "ldap", PHP_LDAP)) {
 		EXTENSION('ldap', 'ldap.c');
 
 		AC_DEFINE('HAVE_LDAP_PARSE_RESULT', 1);
