@@ -2,7 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.0
 - Upgraded bundled PCRE to version 7.7 (Nuno)
-- Upgraded bundled PDO sqlite to version 3.5.6. (Scott)
+- Upgraded bundled PDO sqlite to version 3.5.9. (Scott)
 
 - Moved extensions to PECL (Pierre):
   . ext/fdpf
@@ -73,6 +73,7 @@ PHP                                                                        NEWS
     second usage. (Dmitry)
   . Optimized ZEND_FETCH_CLASS + ZEND_ADD_INTERFACE into single
     ZEND_ADD_INTERFACE opcode (Dmitry)
+  . Optimized string searching for a single character. (Michal Dziemianko, Scott)
   . Optimized interpolated strings to use one less opcode. (Matt)
 
 - Improved php.ini handling: (Jani)
