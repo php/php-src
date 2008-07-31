@@ -216,6 +216,7 @@ PHP                                                                        NEWS
   . Added pcntl_sigwaitinfo()
   . Added pcntl_sigtimedwait()
 
+- Added array_replace() and array_replace_recursive() functions. (Matt)
 - Added hash_copy() function. (Tony)
 - Added sha224 hash algorithm to the hash extension. (Scott)
 - Added ReflectionProperty::setAccessible() method that allows non-public
