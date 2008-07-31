@@ -4104,10 +4104,6 @@ PHP_FUNCTION(parse_str)
 		return;
 	}
 
-	if (!arglen) {
-		return;
-	}
-
 	res = estrndup(arg, arglen);
 
 	if (arrayArg == NULL) {
