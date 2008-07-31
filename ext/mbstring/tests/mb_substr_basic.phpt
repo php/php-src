@@ -5,6 +5,8 @@ Test mb_substr() function : basic functionality
 extension_loaded('mbstring') or die('skip');
 function_exists('mb_substr') or die("skip mb_substr() is not available in this build");
 ?>
+--INI--
+mbstring.internal_encoding=ISO-8859-1
 --FILE--
 <?php
 /* Prototype  : string mb_substr(string $str, int $start [, int $length [, string $encoding]])
