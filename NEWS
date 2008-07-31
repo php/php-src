@@ -169,7 +169,7 @@ PHP                                                                        NEWS
     the same order as vanilla PHP. (Dmitry)
 
 - Improved crypt() function (Pierre)
-  . add Blowfish (using implementation from Solar Designer <solar at openwal
+  . add Blowfish (using implementation from Solar Designer <solar at openwall
     dot com>) and extended DES support
   . Make crypt features portable:
     . if no crypt_r, php's implemetation is used (all algo and TS), php can't
