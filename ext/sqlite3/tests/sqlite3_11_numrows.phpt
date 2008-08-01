@@ -4,7 +4,7 @@ SQLite3::prepare number of rows
 <?php require_once(dirname(__FILE__) . '/skipif.inc');
 // Create an instance of the ReflectionMethod class
 try {
-	$method = new ReflectionMethod('sqlite3_result', 'numRows');
+	$method = new ReflectionMethod('sqlite3result', 'numRows');
 } catch (ReflectionException $e) {
 	die("skip");
 }
