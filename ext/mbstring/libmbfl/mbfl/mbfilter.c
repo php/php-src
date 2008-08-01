@@ -1013,6 +1013,7 @@ mbfl_substr_count(
 			if (pc.matched_pos >= 0) {
 				++result;
 				pc.matched_pos = -1;
+				pc.needle_pos = 0;
 			}
 			n--;
 		}
