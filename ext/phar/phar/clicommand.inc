@@ -4,7 +4,7 @@
  * @ingroup Phar
  * @brief class CLICommand
  * @author  Marcus Boerger
- * @date    2007 - 2007
+ * @date    2007 - 2008
  *
  * Phar Command
  */
@@ -57,6 +57,7 @@ abstract class CLICommand
 					break;
 				}
 			}
+
 			if (isset($this->args[''])) {
 				if ($i >= $argc) {
 					if (isset($this->args['']['require']) && $this->args['']['require']) {
@@ -71,14 +72,14 @@ abstract class CLICommand
 			} else if ($i < $argc) {
 				self::error("Unexpected default arguments to command $command, check ${argv[0]} help\n");
 			}
-			
+
 			foreach($this->args as $arg => $inf) {
 				if (strlen($arg) && !isset($inf['val']) && isset($inf['required']) && $inf['required']) {
 					$missing .=  "Missing parameter '-$arg' to command $command, check ${argv[0]} help\n";
 				}
 			}
-			if (strlen($missing))
-			{
+
+			if (strlen($missing)) {
 				self::error($missing);
 			}
 		}
@@ -91,7 +92,7 @@ abstract class CLICommand
 		fprintf(STDERR, $msg);
 	}
 
-	static function error ($msg, $exit_code = 1) 
+	static function error ($msg, $exit_code = 1)
 	{
 		self::notice($msg);
 		exit($exit_code);
@@ -114,19 +115,14 @@ abstract class CLICommand
 		$r = new ReflectionClass($cmdclass);
 		$l = strlen($prefix);
 
-		foreach($r->getMethods() as $m)
-		{
-			if (substr($m->name, 0, $l) == $prefix)
-			{
-				foreach($subs as $sub)
-				{
+		foreach($r->getMethods() as $m) {
+			if (substr($m->name, 0, $l) == $prefix) {
+				foreach($subs as $sub) {
 					$what = substr($m->name, $l+strlen($sub)+1);
 					$func = $prefix . $sub . '_' . $what;
 					$what = str_replace('_', '-', $what);
-					if ($r->hasMethod($func))
-					{
-						if (!isset($a[$what]))
-						{
+					if ($r->hasMethod($func)) {
+						if (!isset($a[$what])) {
 							$a[$what] = array();
 						}
 						$a[$what][$sub] = /*$m->class . '::' .*/ $func;
@@ -152,8 +148,7 @@ abstract class CLICommand
 		return (bool)$arg;
 	}
 
-	
-	static function cli_arg_typ_int($arg, $cfg, $key) 
+	static function cli_arg_typ_int($arg, $cfg, $key)
 	{
 		if ((int)$arg != $arg) {
 			self::error("Argument to -$key must be an integer.\n");
@@ -161,22 +156,16 @@ abstract class CLICommand
 
 		return (int)$arg;
 	}
-	
+
 	static function cli_arg_typ_regex($arg, $cfg, $key)
 	{
-		if (strlen($arg))
-		{
-			if (strlen($arg) > 1 && $arg[0] == $arg[strlen($arg)-1] && strpos('/,', $arg) !== false)
-			{
+		if (strlen($arg)) {
+			if (strlen($arg) > 1 && $arg[0] == $arg[strlen($arg)-1] && strpos('/,', $arg) !== false) {
 				return $arg;
-			}
-			else
-			{
+			} else {
 				return '/' . $arg . '/';
 			}
-		}
-		else
-		{
+		} else {
 			return NULL;
 		}
 	}
@@ -203,8 +192,7 @@ abstract class CLICommand
 	{
 		$f = new SplFileInfo($arg);
 		$f = $f->getRealPath();
-		if ($f===false || !file_exists($f))
-		{
+		if ($f===false || !file_exists($f)) {
 			echo "Requested file '$arg' does not exist.\n";
 			exit(1);
 		}
@@ -215,7 +203,7 @@ abstract class CLICommand
 	{
 		$d = dirname($arg);
 		$f = realpath($d);
-		
+
 		if ($f === false) {
 			self::error("Path for file '$arg' does not exist.\n");
 		}
@@ -254,46 +242,37 @@ abstract class CLICommand
 	private function cli_help_get_args($func, $l, $sp, $required)
 	{
 		$inf = "";
-		foreach(call_user_func($func, $l, $sp) as $arg => $conf)
-		{
-			if ((isset($conf['required']) && $conf['required']) != $required)
-			{
+		foreach(call_user_func($func, $l, $sp) as $arg => $conf) {
+			if ((isset($conf['required']) && $conf['required']) != $required) {
 				continue;
 			}
-			if (strlen($arg))
-			{
+
+			if (strlen($arg)) {
 				$arg = "-$arg  ";
-			}
-			else
-			{
+			} else {
 				$arg = "... ";
 			}
+
 			$sp2 = $this->cli_get_SP2($l, $inf);
 			$l2  = strlen($sp2);
 			$inf .= $this->cli_wordwrap($sp . $arg . $conf['inf'], $l2, $sp2) . "\n";
-			if (isset($conf['select']) && count($conf['select']))
-			{
+
+			if (isset($conf['select']) && count($conf['select'])) {
 				$ls = 0;
-				foreach($conf['select'] as $opt => $what)
-				{
+				foreach($conf['select'] as $opt => $what) {
 					$ls = max($ls, strlen($opt));
 				}
 				$sp3 = $this->cli_get_SP3($l, $ls, $inf);
 				$l3  = strlen($sp3);
-				foreach($conf['select'] as $opt => $what)
-				{
+				foreach($conf['select'] as $opt => $what) {
 					$inf .= $this->cli_wordwrap($sp2 . "  " . sprintf("%-${ls}s  ", $opt) . $what, $l3, $sp3) . "\n";
 				}
 			}
 		}
-		if (strlen($inf))
-		{
-			if ($required)
-			{
+		if (strlen($inf)) {
+			if ($required) {
 				return $sp . "Required arguments:\n\n" . $inf;
-			}
-			else
-			{
+			} else {
 				return $sp . "Optional arguments:\n\n". $inf;
 			}
 		}
@@ -308,12 +287,11 @@ abstract class CLICommand
 	{
 		$argv  = $this->argv;
 		$which = $this->args['']['val'];
-		if (isset($which))
-		{
+		if (isset($which)) {
 			if (count($which) != 1) {
 				self::error("More than one command given.\n");
 			}
-			
+
 			$which = $which[0];
 			if (!array_key_exists($which, $this->cmds)) {
 				if (strtolower($which) == 'commands') {
@@ -335,22 +313,18 @@ abstract class CLICommand
 			$inf = "Commands:";
 			$lst = "";
 			$ind = strlen($inf) + 1;
-			foreach($this->cmds as $name => $funcs)
-			{
+			foreach($this->cmds as $name => $funcs) {
 				$lst .= ' ' . $name;
 			}
 			echo $this->cli_wordwrap($inf.$lst, $ind, str_repeat(' ', $ind)) . "\n\n";
 			$cmds = $this->cmds;
 		}
 		$sp = str_repeat(' ', $l + 2);
-		foreach($cmds as $name => $funcs)
-		{
+		foreach($cmds as $name => $funcs) {
 			$inf = $name . substr($sp, strlen($name));
-			if (isset($funcs['inf']))
-			{
+			if (isset($funcs['inf'])) {
 				$inf .= $this->cli_wordwrap(call_user_func(array($this, $funcs['inf'])), $l, $sp) . "\n";
-				if (isset($funcs['arg']))
-				{
+				if (isset($funcs['arg'])) {
 					$inf .= "\n";
 					$inf .= $this->cli_help_get_args(array($this, $funcs['arg']), $l, $sp, true);
 					$inf .= "\n";
