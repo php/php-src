@@ -209,20 +209,24 @@ if (PHP_DEBUG == "yes" && PHP_ZTS == "yes") {
 ARG_WITH('php-build', 'Path to where you extracted http://www.php.net/extra/win32build.zip. Assumes that it is a sibling of this source dir (..\\php_build) if not specified', 'no');
 
 if (PHP_PHP_BUILD == 'no') {
-	if (FSO.FolderExists("..\\php_build")) {
-		PHP_PHP_BUILD = "..\\php_build";
+	if (FSO.FolderExists("..\\deps")) {
+		PHP_PHP_BUILD = "..\\deps";
 	} else {
-		if (X64) {
-			if (FSO.FolderExists("..\\win64build")) {
-				PHP_PHP_BUILD = "..\\win64build";
-			} else if (FSO.FolderExists("..\\php-win64-dev\\php_build")) {
-				PHP_PHP_BUILD = "..\\php-win64-dev\\php_build";
-			}
+		if (FSO.FolderExists("..\\php_build")) {
+			PHP_PHP_BUILD = "..\\php_build";
 		} else {
-			if (FSO.FolderExists("..\\win32build")) {
-				PHP_PHP_BUILD = "..\\win32build";
-			} else if (FSO.FolderExists("..\\php-win32-dev\\php_build")) {
-				PHP_PHP_BUILD = "..\\php-win32-dev\\php_build";
+			if (X64) {
+				if (FSO.FolderExists("..\\win64build")) {
+					PHP_PHP_BUILD = "..\\win64build";
+				} else if (FSO.FolderExists("..\\php-win64-dev\\php_build")) {
+					PHP_PHP_BUILD = "..\\php-win64-dev\\php_build";
+				}
+			} else {
+				if (FSO.FolderExists("..\\win32build")) {
+					PHP_PHP_BUILD = "..\\win32build";
+				} else if (FSO.FolderExists("..\\php-win32-dev\\php_build")) {
+					PHP_PHP_BUILD = "..\\php-win32-dev\\php_build";
+				}
 			}
 		}
 	}
