@@ -72,7 +72,8 @@ PHP_METHOD(sqlite3, open)
 	zval *object = getThis();
 	char *filename, *encryption_key, *fullpath;
 	zend_uchar filename_type;
-	int filename_len, encryption_key_len, flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+	int filename_len, encryption_key_len;
+	long flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
 	db_obj = (php_sqlite3_db_object *)zend_object_store_get_object(object TSRMLS_CC);
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|lS", &filename, &filename_len, &filename_type, &flags, &encryption_key, &encryption_key_len)) {
@@ -536,7 +537,8 @@ PHP_METHOD(sqlite3, querySingle)
 	php_sqlite3_db_object *db_obj;
 	zval *object = getThis();
 	char *sql, *errtext = NULL;
-	int sql_len, return_code, entire_row = 0;
+	int sql_len, return_code;
+	zend_bool entire_row = 0;
 	sqlite3_stmt *stmt;
 	db_obj = (php_sqlite3_db_object *)zend_object_store_get_object(object TSRMLS_CC);
 
@@ -1145,7 +1147,7 @@ PHP_METHOD(sqlite3_stmt, execute)
 					break;
 
 				default:
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown parameter type: %d for parameter %ld", param->type, param->param_number);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown parameter type: %ld for parameter %ld", param->type, param->param_number);
 					RETURN_FALSE;
 			}
 			zend_hash_move_forward(stmt_obj->bound_params);
@@ -1216,7 +1218,7 @@ PHP_METHOD(sqlite3_result, columnName)
 {
 	php_sqlite3_result *result_obj;
 	zval *object = getThis();
-	int column = 0;
+	long column = 0;
 	result_obj = (php_sqlite3_result *)zend_object_store_get_object(object TSRMLS_CC);
 
 	SQLITE3_CHECK_INITIALIZED(result_obj->stmt_obj->initialised, SQLite3_result)
@@ -1235,7 +1237,7 @@ PHP_METHOD(sqlite3_result, columnType)
 {
 	php_sqlite3_result *result_obj;
 	zval *object = getThis();
-	int column = 0;
+	long column = 0;
 	result_obj = (php_sqlite3_result *)zend_object_store_get_object(object TSRMLS_CC);
 
 	SQLITE3_CHECK_INITIALIZED(result_obj->stmt_obj->initialised, SQLite3_result)
@@ -1254,7 +1256,8 @@ PHP_METHOD(sqlite3_result, fetchArray)
 {
 	php_sqlite3_result *result_obj;
 	zval *object = getThis();
-	int i, ret, mode = PHP_SQLITE3_BOTH;
+	int i, ret;
+	long mode = PHP_SQLITE3_BOTH;
 	result_obj = (php_sqlite3_result *)zend_object_store_get_object(object TSRMLS_CC);
 
 	SQLITE3_CHECK_INITIALIZED(result_obj->stmt_obj->initialised, SQLite3_result)
