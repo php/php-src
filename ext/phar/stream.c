@@ -911,7 +911,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 				efree(entry->filename);
 				entry->filename = new_key;
 				entry->filename_len = new_key_len;
-				zend_hash_update_current_key_ex(&phar->manifest, key_type, new_key, new_key_len, 0, NULL);
+				zend_hash_update_current_key_ex(&phar->manifest, key_type, new_key, new_key_len, 0, HASH_UPDATE_KEY_ANYWAY, NULL);
 			}
 		}
 
@@ -928,7 +928,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 				memcpy(new_key, resource_to->path + 1, to_len);
 				memcpy(new_key + to_len, key + from_len, key_len - from_len);
 				new_key[new_key_len] = 0;
-				zend_hash_update_current_key_ex(&phar->virtual_dirs, key_type, new_key, new_key_len, 0, NULL);
+				zend_hash_update_current_key_ex(&phar->virtual_dirs, key_type, new_key, new_key_len, 0, HASH_UPDATE_KEY_ANYWAY, NULL);
 				efree(new_key);
 			}
 		}
@@ -947,7 +947,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 				memcpy(new_key, resource_to->path + 1, to_len);
 				memcpy(new_key + to_len, key + from_len, key_len - from_len);
 				new_key[new_key_len] = 0;
-				zend_hash_update_current_key_ex(&phar->mounted_dirs, key_type, new_key, new_key_len, 0, NULL);
+				zend_hash_update_current_key_ex(&phar->mounted_dirs, key_type, new_key, new_key_len, 0, HASH_UPDATE_KEY_ANYWAY, NULL);
 				efree(new_key);
 			}
 		}
