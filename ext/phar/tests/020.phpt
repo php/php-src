@@ -8,7 +8,7 @@ phar.require_hash=0
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$file = (binary)"<?php
+$file = b"<?php
 Phar::mapPhar('hio');
 __HALT_COMPILER(); ?>";
 
@@ -53,31 +53,31 @@ array(26) {
   int(-1)
   [12]=>
   int(-1)
-  [u"dev"]=>
+  [%sdev"]=>
   int(12)
-  [u"ino"]=>
+  [%sino"]=>
   int(%d)
-  [u"mode"]=>
+  [%smode"]=>
   int(33060)
-  [u"nlink"]=>
+  [%snlink"]=>
   int(1)
-  [u"uid"]=>
+  [%suid"]=>
   int(0)
-  [u"gid"]=>
+  [%sgid"]=>
   int(0)
-  [u"rdev"]=>
+  [%srdev"]=>
   int(-1)
-  [u"size"]=>
+  [%ssize"]=>
   int(1)
-  [u"atime"]=>
+  [%satime"]=>
   int(%d)
-  [u"mtime"]=>
+  [%smtime"]=>
   int(%d)
-  [u"ctime"]=>
+  [%sctime"]=>
   int(%d)
-  [u"blksize"]=>
+  [%sblksize"]=>
   int(-1)
-  [u"blocks"]=>
+  [%sblocks"]=>
   int(-1)
 }
 array(26) {
@@ -107,30 +107,30 @@ array(26) {
   int(-1)
   [12]=>
   int(-1)
-  [u"dev"]=>
+  [%sdev"]=>
   int(12)
-  [u"ino"]=>
+  [%sino"]=>
   int(%d)
-  [u"mode"]=>
+  [%smode"]=>
   int(16749)
-  [u"nlink"]=>
+  [%snlink"]=>
   int(1)
-  [u"uid"]=>
+  [%suid"]=>
   int(0)
-  [u"gid"]=>
+  [%sgid"]=>
   int(0)
-  [u"rdev"]=>
+  [%srdev"]=>
   int(-1)
-  [u"size"]=>
+  [%ssize"]=>
   int(0)
-  [u"atime"]=>
+  [%satime"]=>
   int(%d)
-  [u"mtime"]=>
+  [%smtime"]=>
   int(%d)
-  [u"ctime"]=>
+  [%sctime"]=>
   int(%d)
-  [u"blksize"]=>
+  [%sblksize"]=>
   int(-1)
-  [u"blocks"]=>
+  [%sblocks"]=>
   int(-1)
 }

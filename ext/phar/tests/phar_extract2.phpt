@@ -23,7 +23,7 @@ $phar->extractTo(dirname(__FILE__) . '/extract', 'mount');
 $phar->extractTo(dirname(__FILE__) . '/extract');
 $out = array();
 
-foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(dirname(__FILE__) . '/extract'), RecursiveIteratorIterator::CHILD_FIRST) as $path => $file) {
+foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(dirname(__FILE__) . '/extract', 0x00003000), RecursiveIteratorIterator::CHILD_FIRST) as $path => $file) {
 	$extracted[] = $path;
 }
 

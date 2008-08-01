@@ -23,9 +23,9 @@ try {
 ?>
 ===DONE===
 --EXPECTF--
-phar://%sodt.odt%cConfigurations2%caccelerator%ccurrent.xml
-phar://%sodt.odt%cMETA-INF%cmanifest.xml
-phar://%sodt.odt%cThumbnails%cthumbnail.png
+phar://%sodt.odt/Configurations2/accelerator%ccurrent.xml
+phar://%sodt.odt/META-INF%cmanifest.xml
+phar://%sodt.odt/Thumbnails%cthumbnail.png
 phar://%sodt.odt%ccontent.xml
 phar://%sodt.odt%cmeta.xml
 phar://%sodt.odt%cmimetype

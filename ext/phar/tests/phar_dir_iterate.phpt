@@ -27,6 +27,6 @@ __halt_compiler();
 ?>
 --EXPECTF--
 string(%d) "phar://%sphar_dir_iterate.phar.php%canother.file.txt"
-string(%d) "phar://%sphar_dir_iterate.phar.php%csub%ctop.txt"
+string(%d) "phar://%sphar_dir_iterate.phar.php/sub%ctop.txt"
 string(%d) "phar://%sphar_dir_iterate.phar.php%ctop.txt"
 ===DONE===

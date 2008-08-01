@@ -54,6 +54,6 @@ __HALT_COMPILER();
 rewind
 valid
 current
-unicode(24) "UnexpectedValueException"
+%s(24) "UnexpectedValueException"
 Iterator myIterator returned an invalid value (must return a string)
 ===DONE===

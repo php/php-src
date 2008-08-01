@@ -21,7 +21,7 @@ try {
 unlink(dirname(__FILE__) . '/buildfromdirectory.phar');
 __HALT_COMPILER();
 ?>
---EXPECT--
-unicode(24) "UnexpectedValueException"
+--EXPECTF--
+%s(24) "UnexpectedValueException"
 RecursiveDirectoryIterator::__construct(1): failed to open dir: No such file or directory
 ===DONE===

@@ -1,7 +1,10 @@
 --TEST--
 Phar::startBuffering()/setStub()/stopBuffering() zip-based
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php
+if (!extension_loaded("phar")) die("skip");
+if (version_compare(PHP_VERSION, "6.0", ">")) die("skip pre-unicode version of PHP required");
+?>
 --INI--
 phar.readonly=0
 --FILE--
@@ -49,16 +52,16 @@ unlink(dirname(__FILE__) . '/myfakestub.php');
 bool(true)
 bool(true)
 bool(false)
-unicode(5) "Hello"
+string(5) "Hello"
 string(84) "<?php var_dump("First"); Phar::mapPhar("brandnewphar.phar"); __HALT_COMPILER(); ?>
 "
-unicode(5) "World"
+string(5) "World"
 string(85) "<?php var_dump("Second"); Phar::mapPhar("brandnewphar.phar"); __HALT_COMPILER(); ?>
 "
 ===COMMIT===
 bool(true)
-unicode(5) "Hello"
-unicode(5) "World"
+string(5) "Hello"
+string(5) "World"
 string(85) "<?php var_dump("Second"); Phar::mapPhar("brandnewphar.phar"); __HALT_COMPILER(); ?>
 "
 string(93) "<?php var_dump("First resource"); Phar::mapPhar("brandnewphar.phar"); __HALT_COMPILER(); ?>

@@ -1,8 +1,11 @@
 --TEST--
 Phar object: basics
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
+<?php
+if (!extension_loaded("phar")) die("skip");
+if (version_compare(PHP_VERSION, "6.0", ">")) die("skip pre-unicode version of PHP required");
+if (!extension_loaded("spl")) die("skip SPL not available");
+?>
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -49,6 +52,6 @@ __halt_compiler();
 --EXPECT--
 string(5) "1.0.0"
 int(5)
-unicode(50) "Cannot call method on an uninitialized Phar object"
-unicode(29) "Cannot call constructor twice"
+string(50) "Cannot call method on an uninitialized Phar object"
+string(29) "Cannot call constructor twice"
 ===DONE===

@@ -11,7 +11,7 @@ phar.require_hash=0
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$file = (binary)"<?php __HALT_COMPILER(); ?>";
+$file = b"<?php __HALT_COMPILER(); ?>";
 
 $files = array();
 $files['a.php'] = '<?php echo "This is a\n"; ?>';
@@ -20,7 +20,7 @@ $files['b/c.php'] = '<?php echo "This is b/c\n"; ?>';
 include 'files/phar_test.inc';
 
 $fp = fopen($pname . '/b/c.php', 'wb');
-fwrite($fp, (binary)"extra");
+fwrite($fp, b"extra");
 fclose($fp);
 echo "===CLOSE===\n";
 $p = new Phar($fname);
@@ -42,9 +42,9 @@ include $pname . '/b/c.php';
 --EXPECTF--
 ===CLOSE===
 object(PharFileInfo)#%d (2) {
-  [u"pathName":u"SplFileInfo":private]=>
+  [%spathName":%sSplFileInfo":private]=>
   string(%d) "phar://%srefcount1.phar.php/b/c.php"
-  [u"fileName":u"SplFileInfo":private]=>
+  [%sfileName":%sSplFileInfo":private]=>
   string(%d) "c.php"
 }
 string(5) "extra"
@@ -52,9 +52,9 @@ string(5) "extra"
 
 Warning: unlink(): phar error: "b/c.php" in phar "%srefcount1.phar.php", has open file pointers, cannot unlink in %srefcount1.php on line %d
 object(PharFileInfo)#%d (2) {
-  [u"pathName":u"SplFileInfo":private]=>
+  [%spathName":%sSplFileInfo":private]=>
   string(%d) "phar://%srefcount1.phar.php/b/c.php"
-  [u"fileName":u"SplFileInfo":private]=>
+  [%sfileName":%sSplFileInfo":private]=>
   string(%s) "c.php"
 }
 string(5) "extra"

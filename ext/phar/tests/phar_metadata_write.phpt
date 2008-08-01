@@ -1,7 +1,10 @@
 --TEST--
 Phar with metadata (write)
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip");?>
+<?php
+if (!extension_loaded("phar")) die("skip");
+if (version_compare(PHP_VERSION, "6.0", ">")) die("skip pre-unicode version of PHP required");
+?>
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -9,7 +12,7 @@ phar.readonly=0
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$file = (binary)"<?php __HALT_COMPILER(); ?>";
+$file = "<?php __HALT_COMPILER(); ?>";
 
 $files = array();
 $files['a'] = array('cont' => 'a');
@@ -52,16 +55,16 @@ string(1) "c"
 string(1) "d"
 NULL
 array(1) {
-  [u"my"]=>
-  unicode(6) "friend"
+  ["my"]=>
+  string(6) "friend"
 }
 int(42)
 NULL
 array(2) {
   [0]=>
   int(25)
-  [u"foo"]=>
-  unicode(3) "bar"
+  ["foo"]=>
+  string(3) "bar"
 }
 bool(true)
 string(1) "a"

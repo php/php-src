@@ -1,11 +1,15 @@
 --TEST--
 Phar: tar-based phar, bzipped tar
 --SKIPIF--
-<?php if (!extension_loaded('phar')) die('skip'); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
-<?php if (!extension_loaded("bz2")) die("skip bz2 not available"); ?>
+<?php
+if (!extension_loaded("phar")) die("skip");
+if (version_compare(PHP_VERSION, "6.0", ">")) die("skip pre-unicode version of PHP required");
+if (!extension_loaded("spl")) die("skip SPL not available");
+if (!extension_loaded("bz2")) die("skip bz2 not available");
+?>
 --INI--
 phar.readonly=0
+phar.require_hash=0
 --FILE--
 <?php
 include dirname(__FILE__) . '/files/tarmaker.php.inc';
@@ -22,13 +26,16 @@ $tar->addFile('internal/file/here', "hi there!\n");
 $tar->mkDir('internal/dir');
 $tar->mkDir('dir');
 $tar->addFile('.phar/stub.php', '<?php
+var_dump(__FILE__);
+var_dump(substr(__FILE__, 0, 4) != "phar");
 Phar::mapPhar();
 var_dump("it worked");
 include "phar://" . __FILE__ . "/tar_004.php";
+__HALT_COMPILER();
 ');
 $tar->close();
 
-include $fname;
+include $alias;
 
 $phar = new Phar($fname);
 $phar['test'] = 'hi';
@@ -47,8 +54,10 @@ var_dump($phar2->isCompressed() == Phar::BZ2);
 @unlink(dirname(__FILE__) . '/tar_bz2.phar.tar');
 ?>
 --EXPECTF--
-unicode(9) "it worked"
-unicode(%d) "phar://%star_bz2.phar/tar_004.php"
+string(%d) "%star_bz2.phar"
+bool(true)
+string(9) "it worked"
+string(%d) "phar://%star_bz2.phar/tar_004.php"
 bool(true)
 bool(true)
 ===DONE===

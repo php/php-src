@@ -9,7 +9,7 @@ phar.readonly=0
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar';
 $pname = 'phar://' . $fname;
-$file = (binary)"<?php
+$file = "<?php
 Phar::mapPhar('hio');
 __HALT_COMPILER(); ?>";
 

@@ -9,7 +9,7 @@ phar.require_hash=0
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$file = (binary)"<?php __HALT_COMPILER(); ?>";
+$file = "<?php __HALT_COMPILER(); ?>";
 
 $files = array();
 $files['a'] = array('cont'=>'a','comp'=>chr(75) . chr(4) . chr(0) /* 'a' gzdeflated */, 'flags'=>0x00001000);

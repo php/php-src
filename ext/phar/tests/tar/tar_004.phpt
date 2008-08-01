@@ -1,10 +1,14 @@
 --TEST--
 Phar: tar-based phar, tar phar with stub, mapPhar()
 --SKIPIF--
-<?php if (!extension_loaded('phar')) die('skip'); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
+<?php
+if (!extension_loaded("phar")) die("skip");
+if (version_compare(PHP_VERSION, "6.0", ">")) die("skip pre-unicode version of PHP required");
+if (!extension_loaded("spl")) die("skip SPL not available");
+?>
 --INI--
 phar.readonly=0
+phar.require_hash=0
 --FILE--
 <?php
 include dirname(__FILE__) . '/files/tarmaker.php.inc';
@@ -33,6 +37,6 @@ include $fname;
 @unlink(dirname(__FILE__) . '/tar_004.phar.tar');
 ?>
 --EXPECTF--
-unicode(9) "it worked"
-unicode(%d) "phar://%star_004.phar.tar/tar_004.php"
+string(9) "it worked"
+string(%d) "phar://%star_004.phar.tar/tar_004.php"
 ===DONE===

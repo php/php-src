@@ -9,7 +9,7 @@ phar.require_hash=0
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$file = (binary)"<?php __HALT_COMPILER(); ?>";
+$file = "<?php __HALT_COMPILER(); ?>";
 // file length is too short
 
 $files = array();

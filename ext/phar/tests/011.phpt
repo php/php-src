@@ -8,11 +8,11 @@ phar.require_hash=0
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$file = (binary)"<?php
+$file = "<?php
 Phar::mapPhar('hio');
 __HALT_COMPILER(); ?>";
 
-// compressed file length does not match incompressed length for an uncompressed file
+// compressed file length does not match incompressed lentgh for an uncompressed file
 
 $files = array();
 $files['a'] = array('cont'=>'a','ulen'=>1,'clen'=>2);;

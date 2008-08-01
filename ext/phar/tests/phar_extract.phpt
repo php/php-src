@@ -6,6 +6,7 @@ Phar: Phar::extractTo()
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = dirname(__FILE__) . '/tempmanifest1.phar.php';
 $pname = 'phar://' . $fname;
 
@@ -18,65 +19,83 @@ $a->addEmptyDir('one/level');
 
 $a->extractTo(dirname(__FILE__) . '/extract', 'mount');
 $a->extractTo(dirname(__FILE__) . '/extract');
+
 $out = array();
-foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(dirname(__FILE__) . '/extract'), RecursiveIteratorIterator::CHILD_FIRST) as $p => $b) {
+
+foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(dirname(__FILE__) . '/extract', 0x00003000), RecursiveIteratorIterator::CHILD_FIRST) as $p => $b) {
 	$out[] = $p;
 }
+
 sort($out);
+
 foreach ($out as $b) {
-echo "$b\n";
+	echo "$b\n";
 }
 
 $a->extractTo(dirname(__FILE__) . '/extract1', 'file1.txt');
 var_dump(file_get_contents(dirname(__FILE__) . '/extract1/file1.txt'));
+
 $a->extractTo(dirname(__FILE__) . '/extract1', 'subdir/ectory/file.txt');
 var_dump(file_get_contents(dirname(__FILE__) . '/extract1/subdir/ectory/file.txt'));
 
 $a->extractTo(dirname(__FILE__) . '/extract2', array('file2.txt', 'one/level'));
 var_dump(file_get_contents(dirname(__FILE__) . '/extract2/file2.txt'));
 var_dump(is_dir(dirname(__FILE__) . '/extract2/one/level'));
+
 try {
-$a->extractTo(dirname(__FILE__) . '/whatever', 134);
+	$a->extractTo(dirname(__FILE__) . '/whatever', 134);
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+	echo $e->getMessage(), "\n";
 }
+
 $a->extractTo(array());
+
 try {
-$a->extractTo('');
+	$a->extractTo('');
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+	echo $e->getMessage(), "\n";
 }
+
 file_put_contents(dirname(__FILE__) . '/oops', 'I is file');
+
 try {
-$a->extractTo(dirname(__FILE__) . '/oops', 'file1.txt');
+	$a->extractTo(dirname(__FILE__) . '/oops', 'file1.txt');
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+	echo $e->getMessage(), "\n";
 }
+
 try {
-$a->extractTo(dirname(__FILE__) . '/oops1', array(array(), 'file1.txt'));
+	$a->extractTo(dirname(__FILE__) . '/oops1', array(array(), 'file1.txt'));
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+	echo $e->getMessage(), "\n";
 }
+
 try {
-$a->extractTo(dirname(__FILE__) . '/extract', 'file1.txt');
+	$a->extractTo(dirname(__FILE__) . '/extract', 'file1.txt');
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+	echo $e->getMessage(), "\n";
 }
+
 file_put_contents(dirname(__FILE__) . '/extract/file1.txt', 'first');
 var_dump(file_get_contents(dirname(__FILE__) . '/extract/file1.txt'));
+
 $a->extractTo(dirname(__FILE__) . '/extract', 'file1.txt', true);
 var_dump(file_get_contents(dirname(__FILE__) . '/extract/file1.txt'));
+
 try {
-$a->extractTo(str_repeat('a', 20000), 'file1.txt');
+	$a->extractTo(str_repeat('a', 20000), 'file1.txt');
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+	echo $e->getMessage(), "\n";
 }
+
 $a[str_repeat('a', 20000)] = 'long';
+
 try {
-$a->extractTo(dirname(__FILE__) . '/extract', str_repeat('a', 20000));
+	$a->extractTo(dirname(__FILE__) . '/extract', str_repeat('a', 20000));
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+	echo $e->getMessage(), "\n";
 }
+
 ?>
 ===DONE===
 --CLEAN--
@@ -119,7 +138,7 @@ string(3) "hi2"
 bool(false)
 Invalid argument, expected a filename (string) or array of filenames
 
-Warning: Phar::extractTo() expects parameter 1 to be binary string, array given in %sphar_extract.php on line %d
+Warning: Phar::extractTo() expects parameter 1 to be %string, array given in %sphar_extract.php on line %d
 Invalid argument, extraction path must be non-zero length
 Unable to use path "%soops" for extraction, it is a file, must be a directory
 Invalid argument, array of filenames to extract contains non-string value

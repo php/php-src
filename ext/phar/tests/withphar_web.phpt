@@ -1,7 +1,7 @@
 --TEST--
 Phar: default web stub, with phar extension
 --INI--
-default_charset=
+default_charset=UTF-8
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip");?>
 --ENV--

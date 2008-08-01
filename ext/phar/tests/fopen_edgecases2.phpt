@@ -1,7 +1,7 @@
 --TEST--
 Phar: test edge cases of fopen() function interception #2
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip");?>
+<?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
 phar.readonly=0
 --FILE--
@@ -35,9 +35,7 @@ include $pname . '/foo/hi';
 <?php rmdir(dirname(__FILE__) . '/poo'); ?>
 <?php unlink(dirname(__FILE__) . '/foob'); ?>
 --EXPECTF--
-Notice: Array to string conversion in %sfopen_edgecases2.php on line %d
-
-Warning: fopen(Array): failed to open stream: No such file or directory in %sfopen_edgecases2.php on line %d
+Warning: fopen() expects parameter 1 to be string, array given in %sfopen_edgecases2.php on line %d
 blah
 test
 

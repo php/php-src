@@ -9,7 +9,7 @@ phar.require_hash=0
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$file = (binary)"<?php __HALT_COMPILER(); ?>";
+$file = "<?php __HALT_COMPILER(); ?>";
 
 $files = array();
 $files['a.php'] = '<?php echo "This is a\n"; ?>';
@@ -18,7 +18,7 @@ $files['b/c.php'] = '<?php echo "This is b/c\n"; ?>';
 include 'files/phar_test.inc';
 
 $fp = fopen($pname . '/b/c.php', 'wb');
-fwrite($fp, (binary)'extra');
+fwrite($fp, b'extra');
 fclose($fp);
 include $pname . '/b/c.php';
 ?>
