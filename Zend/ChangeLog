@@ -1,3 +1,15 @@
+2008-07-31  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c:
+      Fixed constant substitution in constant expression context
+
+    * zend_closures.c
+      zend_closures.c
+      tests/closure_015.phpt
+      tests/closure_015.phpt:
+      Removed Closure::__toString()
+
 2008-07-30  Felipe Pena  <felipensp@gmail.com>
 
     * tests/constants_006.phpt:

@@ -1,3 +1,260 @@
+2008-07-31  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/pdo_sqlite/config.m4:
+      Still need defines so that sqlite3.h will match the lib that sqlite3 uses
+
+2008-07-31  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      ext/pdo_sqlite/libsqlite/.cvsignore:
+      remove that file, too
+
+2008-07-31  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/pdo_sqlite/libsqlite/sqlite3.c
+      ext/pdo_sqlite/libsqlite/sqlite3.h
+      ext/pdo_sqlite/libsqlite/sqlite3ext.h:
+      Bundled pdo_sqlite files are no longer required
+
+    * (PHP_5_3)
+      ext/pdo_sqlite/config.m4
+      ext/sqlite3/tests/sqlite3_12_unfinalized_stmt_cleanup.phpt:
+      Make pdo_sqlite use the bundled extension with sqlite3 (pdo_sqlite gets
+      fts!)
+      Fix test after class rename
+
+2008-07-31  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * win32/build/config.w32:
+      - new usual suspects
+
+2008-07-31  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/sqlite3/config.m4:
+      MFB5.3: "without" and "do not include"
+
+2008-07-31  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/sqlite3/sqlite3.c:
+      Class rename to match Coding Standards
+
+2008-07-31  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_3)
+      ext/sqlite3/config.m4:
+      Which means do not include.., thanks Jani :)
+
+    * (PHP_5_3)
+      ext/sqlite3/config.m4:
+      Say without, since its enabled by default
+
+2008-07-31  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/sqlite3/config.m4
+      ext/sqlite3/php_sqlite3.h:
+      MFB: Enable by default and fix compile error
+
+    * (PHP_5_3)
+      ext/sqlite3/config.m4
+      ext/sqlite3/php_sqlite3.h:
+      Enable by default and fix compile error
+
+2008-07-31  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      NEWS:
+      - Fix news
+
+2008-07-31  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      NEWS:
+      - Added a few exts
+
+2008-07-31  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      Typo
+
+2008-07-31  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      NEWS:
+      move 'Improved' stuff together and max 80 char width
+
+2008-07-31  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      NEWS:
+      Fix some NEWS entries
+
+2008-07-31  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      NEWS:
+      Update NEWS
+
+    * (PHP_5_3)
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h
+      ext/standard/tests/array_replace.phpt:
+      MFH (DOC] Add array_replace/array_replace_recursive (Mett Wilmas)
+
+    * ext/standard/tests/array_replace.phpt
+      ext/standard/tests/array_replace.phpt:
+      
+      - Add array_replace/array_replace_recursive (Mett Wilmas)
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h:
+      - Add array_replace/array_replace_recursive (Mett Wilmas)
+
+2008-07-31  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/ldap/config.w32:
+      - add detection for newer libs
+
+2008-07-31  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/mbstring/libmbfl/mbfl/mbfl_convert.c
+      ext/mbstring/tests/mb_substitute_character.phpt:
+      - MFH: Fixed bug #44617 (wrong HTML entity output when
+      substitute_character=entity).
+
+    * (PHP_5_3)
+      ext/mbstring/libmbfl/mbfl/mbfl_convert.c
+      ext/mbstring/tests/mb_substitute_character.phpt:
+      - MFH: Fixed bug #44617 (wrong HTML entity output when
+      substitute_character=entity)
+
+    * ext/mbstring/libmbfl/mbfl/mbfl_convert.c
+      ext/mbstring/tests/mb_substitute_character.phpt:
+      - Fixed bug #44617 (wrong HTML entity output when
+      substitute_character=entity)
+
+2008-07-31  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/sqlite3/tests/sqlite3_25_create_aggregate.phpt:
+      Fix test
+
+    * ext/sqlite3/sqlite3.c:
+      MFB: Stray RETURN_TRUE value
+
+    * (PHP_5_3)
+      ext/sqlite3/sqlite3.c:
+      Stray RETURN_TRUE value
+
+2008-07-31  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c:
+      Fixed constant substitution in constant expression context
+
+2008-07-31  Olivier Hill  <olivier.hill@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/string.c:
+      Fix regression issue
+
+2008-07-31  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/fileinfo/config.w32:
+       - MFB: update config to match config.m4
+         (still does not build but will be fixed for alpha2)
+
+    * (PHP_5_3)
+      ext/fileinfo/config.w32:
+      - update config to match config.m4
+        (still does not build but will be fixed for alpha2)
+
+2008-07-31  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/mbstring/tests/mb_substr_basic.phpt:
+      - fix test
+
+2008-07-31  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/json/tests/fail001.phpt
+      ext/json/tests/fail001.phpt
+      ext/json/tests/fail001.phpt:
+      Fix test to test higher nesting level
+
+    * ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.c
+      ext/gd/libgd/gd_png.c
+      ext/gd/libgd/gd_png.c
+      ext/gd/libgd/gd_png.c:
+      Fix for bug #45030
+
+2008-07-31  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_closures.c
+      ZendEngine2/zend_closures.c
+      ZendEngine2/tests/closure_015.phpt
+      ZendEngine2/tests/closure_015.phpt:
+      Removed Closure::__toString()
+
+2008-07-31  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      typo
+
+    * (PHP_5_2)
+      NEWS
+      sapi/isapi/php5isapi.c
+      sapi/isapi/php5isapi.c:
+      MFH:- Fixed bug #45568 (ISAPI does not property clear auth_digest in
+      header).
+
+    * sapi/isapi/php5isapi.c:
+      - Fixed bug #45568 (ISAPI does not property clear auth_digest in header).
+
+2008-07-31  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/sqlite3/libsqlite/sqlite3.c
+      ext/sqlite3/libsqlite/sqlite3.h
+      ext/sqlite3/libsqlite/sqlite3ext.h:
+      MFH: Resync libsqlite files from amalgamation. Save the kittens, no EOL
+      mess.
+
+    * ext/sqlite3/libsqlite/sqlite3.c
+      ext/sqlite3/libsqlite/sqlite3.h
+      ext/sqlite3/libsqlite/sqlite3ext.h:
+      Resync libsqlite files from amalgamation. Save the kittens, no EOL mess.
+
+2008-07-31  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      scripts/phpize.m4
+      scripts/phpize.m4:
+      MFH:- Applied the missing parts to phpize.m4 for zend extension builds
+
+    * scripts/phpize.m4:
+      - Applied the missing parts to phpize.m4 for zend extension builds
+
+2008-07-31  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/fileinfo/config.w32
+      ext/fileinfo/libmagic/config.h:
+      MFH: get fileinfo building again on Windows
+
+    * ext/fileinfo/config.w32
+      ext/fileinfo/libmagic/config.h:
+      get fileinfo building again on Windows
+
 2008-07-30  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_5_3)
