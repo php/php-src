@@ -41,7 +41,7 @@ struct php_sqlite3_bound_param  {
 	long param_number;
 	char *name;
 	int name_len;
-	int type;
+	long type;
 
 	zval *parameter;
 };
