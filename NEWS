@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.3.0 Alpha 2
+- Fixed bug #44100 (Inconsistent handling of static array declarations with
+  duplicate keys). (Dmitry)
 
 01 Aug 2008, PHP 5.3.0 Alpha 1
 - Upgraded bundled PCRE to version 7.7 (Nuno)
