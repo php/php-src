@@ -58,6 +58,8 @@ PHP                                                                        NEWS
   (Dmitry, Tony)
 - Fixed bug #44127 (UNIX abstract namespace socket connect does not work).
   (Jani)
+- Fixed bug #43993 (mb_substr_count() behaves differently to substr_count() with
+  overlapping needles). (Moriyoshi)
 - Fixed bug #41348 (OCI8: allow compilation with Oracle 8.1). (Chris Jones)
 
 01 May 2008, PHP 5.2.6
