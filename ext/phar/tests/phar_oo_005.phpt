@@ -1,8 +1,11 @@
 --TEST--
 Phar and RecursiveDirectoryIterator
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
+<?php
+if (!extension_loaded("phar")) die("skip");
+if (!extension_loaded("spl")) die("skip SPL not available");
+if (!version_compare(PHP_VERSION, "5.3", "==")) die("skip requires 5.3");
+?>
 --INI--
 phar.require_hash=0
 --FILE--

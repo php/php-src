@@ -1,7 +1,7 @@
 --TEST--
 Phar front controller with no extension
 --INI--
-default_charset=
+default_charset=UTF-8
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
@@ -11,6 +11,6 @@ PATH_INFO=/noext
 --FILE_EXTERNAL--
 files/frontcontroller8.phar
 --EXPECTHEADERS--
-Content-type: text/plain
+Content-type: text/plain;charset=UTF-8
 --EXPECTF--
 hi

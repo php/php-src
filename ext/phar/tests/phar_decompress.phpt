@@ -63,7 +63,7 @@ int(4096)
 %sphar_decompress.phar
 %sphar_decompress.hooba.phar
 
-Warning: Phar::decompress() expects parameter 1 to be string, array given in %sphar_decompress.php on line %d
+Warning: Phar::decompress() expects parameter 1 to be %string, array given in %sphar_decompress.php on line %d
 Cannot decompress phar archive, phar is read-only
 Cannot decompress zip-based archives with whole-archive compression
 ===DONE===

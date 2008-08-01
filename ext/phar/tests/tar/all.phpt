@@ -1,10 +1,13 @@
 --TEST--
 Phar: test that creation of tar-based phar generates valid tar with all bells/whistles
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
-<?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
-<?php if (!extension_loaded("bz2")) die("skip bz2 not available"); ?>
+<?php
+if (!extension_loaded("phar")) die("skip");
+if (version_compare(PHP_VERSION, "6.0", ">")) die("skip pre-unicode version of PHP required");
+if (!extension_loaded("spl")) die("skip SPL not available");
+if (!extension_loaded("zlib")) die("skip zlib not available");
+if (!extension_loaded("bz2")) die("skip bz2 not available");
+?>
 --INI--
 phar.readonly=0
 --FILE--

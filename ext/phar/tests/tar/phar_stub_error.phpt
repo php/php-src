@@ -11,12 +11,12 @@ phar.readonly=0
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
 
 $phar = new Phar($fname);
-$phar->setStub($stub = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>' ."\r\n");
+$stub = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>' ."\r\n";
+$phar->setStub($stub);
 $phar->setAlias('hio');
 $phar['a'] = 'a';
 $phar->stopBuffering();
 
-var_dump($stub);
 var_dump($phar->getStub());
 var_dump($phar->getStub() == $stub);
 
@@ -42,8 +42,6 @@ unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar')
 __HALT_COMPILER();
 ?>
 --EXPECTF--
-string(50) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>
-"
 string(50) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>
 "
 bool(true)

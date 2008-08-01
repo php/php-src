@@ -1,7 +1,7 @@
 --TEST--
 Phar front controller with generic action router test
 --INI--
-default_charset=
+default_charset=UTF-8
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
@@ -11,7 +11,7 @@ PATH_INFO=/hi/there
 --FILE_EXTERNAL--
 files/frontcontroller14.phar
 --EXPECTHEADERS--
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 --EXPECTF--
 string(9) "/hi/there"
 string(%d) "phar://%sfrontcontroller23.php/html/index.php"

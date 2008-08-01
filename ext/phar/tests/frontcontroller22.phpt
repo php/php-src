@@ -1,7 +1,7 @@
 --TEST--
 Phar front controller include from cwd test 1
 --INI--
-default_charset=
+default_charset=UTF-8
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
@@ -11,7 +11,7 @@ PATH_INFO=/index.php
 --FILE_EXTERNAL--
 files/frontcontroller13.phar
 --EXPECTHEADERS--
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 --EXPECTF--
 string(4) "test"
 string(12) "oof/test.php"

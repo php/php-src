@@ -51,10 +51,10 @@ $dir = dirname(__FILE__) . '/extract1/';
 @rmdir($dir);
 ?>
 --EXPECTF--
-%sextract/file1.txt
-%sextract/file2.txt
-%sextract/one
-%sextract/subdir
-%sextract/subdir/ectory
-%sextract/subdir/ectory/file.txt
+%sextract%cfile1.txt
+%sextract%cfile2.txt
+%sextract%cone
+%sextract%csubdir
+%sextract%csubdir%cectory
+%sextract%csubdir%cectory%cfile.txt
 ===DONE===

@@ -6,7 +6,7 @@ Phar::mapPhar too many manifest entries
 phar.require_hash=0
 --FILE--
 <?php
-$file = "<?php
+$file = b"<?php
 Phar::mapPhar('hio');
 __HALT_COMPILER(); ?>";
 $file .= pack('VVnVVV', 500, 500, 0x1000, 0x00000000, 0, 0) . str_repeat('A', 500);

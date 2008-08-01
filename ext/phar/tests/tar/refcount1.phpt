@@ -31,7 +31,7 @@ foreach ($files as $n => $file) {
 $tar->close();
 
 $fp = fopen($alias . '/b/c.php', 'wb');
-fwrite($fp, "extra");
+fwrite($fp, b"extra");
 fclose($fp);
 echo "===CLOSE===\n";
 $phar = new Phar($fname);
@@ -54,9 +54,9 @@ include $alias . '/b/c.php';
 --EXPECTF--
 ===CLOSE===
 object(PharFileInfo)#%d (2) {
-  ["pathName":"SplFileInfo":private]=>
+  [%spathName":%sSplFileInfo":private]=>
   string(%d) "phar://%srefcount1.phar.tar/b/c.php"
-  ["fileName":"SplFileInfo":private]=>
+  [%sfileName":%sSplFileInfo":private]=>
   string(%d) "c.php"
 }
 string(5) "extra"
@@ -64,9 +64,9 @@ string(5) "extra"
 
 Warning: unlink(): phar error: "b/c.php" in phar "%srefcount1.phar.tar", has open file pointers, cannot unlink in %srefcount1.php on line %d
 object(PharFileInfo)#%d (2) {
-  ["pathName":"SplFileInfo":private]=>
+  [%spathName":%sSplFileInfo":private]=>
   string(%d) "phar://%srefcount1.phar.tar/b/c.php"
-  ["fileName":"SplFileInfo":private]=>
+  [%sfileName":%sSplFileInfo":private]=>
   string(%s) "c.php"
 }
 string(5) "extra"

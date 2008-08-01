@@ -1,7 +1,7 @@
 --TEST--
 Phar front controller $_SERVER munging success
 --INI--
-default_charset=
+default_charset=UTF-8
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
@@ -12,7 +12,7 @@ QUERY_STRING=test=hi
 --FILE_EXTERNAL--
 files/frontcontroller12.phar
 --EXPECTHEADERS--
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 --EXPECTF--
 string(10) "/index.php"
 string(10) "/index.php"

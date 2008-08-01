@@ -39,7 +39,7 @@ phpinfo(INFO_MODULES);
 </table><br />
 <table border="0" cellpadding="3" width="600">
 <tr class="v"><td>
-Phar based on pear/PHP_Archive, original concept by Davey Shafik.<br />Phar fully realized by Gregory Beaver and Marcus Boerger.<br />Portions of tar implementation Copyright (c) 2003-2007 Tim Kientzle.</td></tr>
+Phar based on pear/PHP_Archive, original concept by Davey Shafik.<br />Phar fully realized by Gregory Beaver and Marcus Boerger.<br />Portions of tar implementation Copyright (c) 2003-2008 Tim Kientzle.</td></tr>
 </table><br />
 <table border="0" cellpadding="3" width="600">
 <tr class="h"><th>Directive</th><th>Local Value</th><th>Master Value</th></tr>
@@ -63,7 +63,7 @@ Phar based on pear/PHP_Archive, original concept by Davey Shafik.<br />Phar full
 </table><br />
 <table border="0" cellpadding="3" width="600">
 <tr class="v"><td>
-Phar based on pear/PHP_Archive, original concept by Davey Shafik.<br />Phar fully realized by Gregory Beaver and Marcus Boerger.<br />Portions of tar implementation Copyright (c) 2003-2007 Tim Kientzle.</td></tr>
+Phar based on pear/PHP_Archive, original concept by Davey Shafik.<br />Phar fully realized by Gregory Beaver and Marcus Boerger.<br />Portions of tar implementation Copyright (c) 2003-2008 Tim Kientzle.</td></tr>
 </table><br />
 <table border="0" cellpadding="3" width="600">
 <tr class="h"><th>Directive</th><th>Local Value</th><th>Master Value</th></tr>

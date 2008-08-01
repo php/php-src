@@ -1,12 +1,17 @@
 --TEST--
 Phar: test edge cases of file_get_contents() function interception
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip");?>
+<?php
+if (!extension_loaded("phar")) die("skip");
+if (version_compare(PHP_VERSION, "6.0", ">")) die("skip pre-unicode version of PHP required");
+?>
 --INI--
 phar.readonly=0
 --FILE--
 <?php
+
 Phar::interceptFileFuncs();
+
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 
@@ -17,6 +22,7 @@ file_put_contents("foob", "test\n");
 echo file_get_contents($fname);
 unlink($fname);
 mkdir($pname . '/oops');
+
 file_put_contents($pname . '/foo/hi', '<?php
 echo file_get_contents("foo/" . basename(__FILE__));
 $context = stream_context_create();
@@ -32,7 +38,9 @@ echo file_get_contents("./hi");
 echo file_get_contents("./hi", 0, $context, 0, 0);
 ?>
 ');
+
 include $pname . '/foo/hi';
+
 ?>
 ===DONE===
 --CLEAN--

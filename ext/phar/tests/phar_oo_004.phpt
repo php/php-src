@@ -1,8 +1,11 @@
 --TEST--
 Phar and DirectoryIterator
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
+<?php
+if (!extension_loaded("phar")) die("skip");
+if (!extension_loaded("spl")) die("skip SPL not available");
+if (version_compare(PHP_VERSION, "6.0", ">")) die("skip pre-unicode version of PHP required");
+?>
 --INI--
 phar.require_hash=0
 --FILE--
@@ -35,31 +38,31 @@ class MyDirectoryIterator extends DirectoryIterator
 	function rewind()
 	{
 		echo __METHOD__ . "\n";
-		parent::rewind();		
+		parent::rewind();
 	}
 
 	function valid()
 	{
 		echo __METHOD__ . "\n";
-		return parent::valid();		
+		return parent::valid();
 	}
 
 	function key()
 	{
 		echo __METHOD__ . "\n";
-		return parent::key();		
+		return parent::key();
 	}
 
 	function current()
 	{
 		echo __METHOD__ . "\n";
-		return parent::current();		
+		return parent::current();
 	}
 
 	function next()
 	{
 		echo __METHOD__ . "\n";
-		parent::next();		
+		parent::next();
 	}
 }
 

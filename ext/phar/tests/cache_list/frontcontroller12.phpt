@@ -1,7 +1,7 @@
 --TEST--
 Phar front controller mime type unknown int [cache_list]
 --INI--
-default_charset=
+default_charset=UTF-8
 phar.cache_list={PWD}/frontcontroller12.php
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
@@ -12,7 +12,7 @@ PATH_INFO=/a.php
 --FILE_EXTERNAL--
 files/frontcontroller6.phar
 --EXPECTHEADERS--
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 --EXPECTF--
 Fatal error: Uncaught exception 'PharException' with message 'Unknown mime type specifier used, only Phar::PHP, Phar::PHPS and a mime type string are allowed' in %sfrontcontroller12.php:2
 Stack trace:

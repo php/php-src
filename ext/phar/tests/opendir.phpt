@@ -11,8 +11,10 @@ $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $a = new Phar($fname);
 $a['index.php'] = '<?php
 $a = opendir("dir");
-while (false !== ($e = readdir($a))) {
-    echo $e;
+if ($a) {
+	while (false !== ($e = readdir($a))) {
+		echo $e;
+	}
 }
 ?>';
 $a['dir/file1.txt'] = 'hi';

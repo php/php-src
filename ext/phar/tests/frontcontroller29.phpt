@@ -1,7 +1,7 @@
 --TEST--
 Phar front controller with fatal error in php file
 --INI--
-default_charset=
+default_charset=UTF-8
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
@@ -11,6 +11,6 @@ PATH_INFO=/fatalerror.phps
 --FILE_EXTERNAL--
 files/frontcontroller8.phar
 --EXPECTHEADERS--
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 --EXPECTF--
 Fatal error: Call to undefined function oopsie_daisy() in phar://%sfatalerror.phps on line 1
