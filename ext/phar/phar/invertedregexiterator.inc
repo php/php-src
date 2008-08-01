@@ -4,7 +4,7 @@
  * @ingroup Phar
  * @brief class InvertedRegexIterator
  * @author  Marcus Boerger
- * @date    2007 - 2007
+ * @date    2007 - 2008
  *
  * Inverted RegexIterator
  */
@@ -17,7 +17,7 @@
 class InvertedRegexIterator extends RegexIterator
 {
 	/** @return !RegexIterator::accept()
-	 */	
+	 */
 	function accept()
 	{
 		return !RegexIterator::accept();
