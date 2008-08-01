@@ -4,7 +4,7 @@
  * @ingroup Examples
  * @brief class DirectoryGraphIterator
  * @author  Marcus Boerger
- * @date    2003 - 2005
+ * @date    2003 - 2008
  *
  * SPL - Standard PHP Library
  */
@@ -23,9 +23,9 @@ class DirectoryGraphIterator extends DirectoryTreeIterator
 				new ParentIterator(
 					new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::KEY_AS_FILENAME
 					)
-				), 
+				),
 				CachingIterator::CALL_TOSTRING|CachingIterator::CATCH_GET_CHILD
-			), 
+			),
 			parent::SELF_FIRST
 		);
 	}

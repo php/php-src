@@ -5,7 +5,7 @@
  * @ingroup Phar
  * @brief class CLICommand
  * @author  Marcus Boerger
- * @date    2007 - 2007
+ * @date    2007 - 2008
  *
  * Phar Command
  */
@@ -36,7 +36,7 @@ class PharCommand extends CLICommand
 	 *
 	 * @param string $l1      Eleven
 	 * @param string $l2      Twelve
-	 * @param string $arg_inf 
+	 * @param string $arg_inf
 	 * @return string  The repeated string.
 	 */
 	function cli_get_SP3($l1, $l2, $arg_inf)
@@ -157,8 +157,8 @@ class PharCommand extends CLICommand
 		$hash_optional = array('SHA-256' => 'SHA256',
 							   'SHA-512' => 'SHA512',
 							   'OpenSSL' => 'OpenSSL');
-		foreach($hash_optional as $key => $name)
-		{
+
+		foreach($hash_optional as $key => $name) {
 			if (in_array($key, $hash_avail)) {
 				$phar_args['h']['select'][strtolower($name)] = $name;
 			}
@@ -183,11 +183,11 @@ class PharCommand extends CLICommand
 	/**
 	 * String Ends With
 	 * 
-	 * Wether a string end with another needle.
+	 * Whether a string ends with another needle.
 	 *
 	 * @param string $haystack  The haystack
 	 * @param string $needle    The needle.
-	 * @return mixed false if doesn't end with anything, the string 
+	 * @return mixed false if doesn't end with anything, the string
 	 *               substr'ed if the string ends with the needle.
 	 */
 	static function strEndsWith($haystack, $needle)
@@ -199,10 +199,10 @@ class PharCommand extends CLICommand
 	/**
 	 * Argument type loader
 	 *
-	 * @param string $arg   Either 'auto', 'optional' or an filename that 
+	 * @param string $arg   Either 'auto', 'optional' or an filename that
 	 *                      contains class PHP_Archive
 	 * @param  string $cfg  Configuration to pass to a new file
-	 * @param  string $key  The key 
+	 * @param  string $key  The key
 	 * @return string $arg  The argument.
 	 */
 	static function cli_arg_typ_loader($arg, $cfg, $key)
@@ -255,7 +255,7 @@ class PharCommand extends CLICommand
 	 *
 	 * @param  string $arg  The new phar component.
 	 * @param  string $cfg  Configuration to pass to a new file
-	 * @param  string $key  The key 
+	 * @param  string $key  The key
 	 * @return string $arg  The new argument file.
 	 */
 	static function cli_arg_typ_pharnew($arg, $cfg, $key)
@@ -271,7 +271,7 @@ class PharCommand extends CLICommand
 	/**
 	 * Argument type existing Phar file
 	 * 
-	 * Return filenam eof an existing Phar.
+	 * Return filename of an existing Phar.
 	 *
 	 * @param  string $arg      The file in the phar to open.
 	 * @param  string $cfg      The configuration information
@@ -298,7 +298,7 @@ class PharCommand extends CLICommand
 	/**
 	 * Argument type Phar url-like
 	 * 
-	 * Check the argument as cli_arg_Typ_phar and return its name prefixed 
+	 * Check the argument as cli_arg_Typ_phar and return its name prefixed
 	 * with phar://
 	 * 
 	 * Ex:
@@ -356,7 +356,7 @@ class PharCommand extends CLICommand
 	static function cli_arg_typ_compalg($arg, $cfg, $key)
 	{
 		$arg = self::cli_arg_typ_select($arg, $cfg, $key);
-		
+
 		switch($arg) {
 			case 'auto':
 				if (extension_loaded('zlib')) {
@@ -383,7 +383,7 @@ class PharCommand extends CLICommand
 	static function cli_arg_typ_privkey($arg, $cfg, $key)
 	{
 		$arg = self::cli_arg_typ_string($arg, $cfg, $key);
-		
+
 		$hash_avail = Phar::getSupportedSignatures();
 		if ($arg && !in_array('OpenSSL', $hash_avail))
 		{
@@ -400,8 +400,7 @@ class PharCommand extends CLICommand
 	 */
 	function phar_check_hash($hash, $privkey)
 	{
-		switch($hash)
-		{
+		switch($hash) {
 			case 'md5':
 				return Phar::MD5;
 			case 'sha1':
@@ -411,8 +410,7 @@ class PharCommand extends CLICommand
 			case 'sha512':
 				return Phar::SHA512;
 			case 'openssl':
-				if (!$privkey)
-				{
+				if (!$privkey) {
 					self::error("Cannot use OpenSSL signing without key.\n");
 				}
 				return Phar::OPENSSL;
@@ -427,10 +425,10 @@ class PharCommand extends CLICommand
 	 */
 	static function cli_cmd_inf_pack()
 	{
-		return "Pack files into a PHAR archive.\n" .  
+		return "Pack files into a PHAR archive.\n" .
 			   "When using -s <stub>, then the stub file is being " .
 			   "excluded from the list of input files/dirs." .
-			   "To create an archive that contains PEAR class PHP_Archiave " .
+			   "To create an archive that contains PEAR class PHP_Archive " .
 			   "then point -p argument to PHP/Archive.php.\n";
 	}
 	// }}}
@@ -443,15 +441,14 @@ class PharCommand extends CLICommand
 	static function cli_cmd_arg_pack()
 	{
 		$args = self::phar_args('abcFhilpsxy', 'pharnew');
-		
+
 		$args[''] = array(
-			'typ'     => 'any',     
-			'val'      => NULL,      
-			'required' => 1, 
+			'typ'     => 'any',
+			'val'      => NULL,
+			'required' => 1,
 			'inf'      => '         Any number of input files and directories. If -i is in use then ONLY files and matching thegiven regular expression are being packed. If -x is given then files matching that regular expression are NOT being packed.',
-			
 		);
-		
+
 		return $args;
 	}
 	// }}}
@@ -540,7 +537,7 @@ class PharCommand extends CLICommand
 		if (ini_get('phar.readonly')) {
 			self::error("Creating phar files is disabled by ini setting 'phar.readonly'.\n");
 		}
-		
+
 		if (!Phar::canWrite()) {
 			self::error("Creating phar files is disabled, Phar::canWrite() returned false.\n");
 		}
@@ -585,12 +582,11 @@ class PharCommand extends CLICommand
 				$phar->compressFiles(Phar::BZ2);
 				break;
 			default:
-				$phar->decompressFiles();;
+				$phar->decompressFiles();
 				break;
 		}
 
-		if ($hash)
-		{
+		if ($hash) {
 			$phar->setSignatureAlgorithm($hash, $privkey);
 		}
 
@@ -607,9 +603,9 @@ class PharCommand extends CLICommand
 	 * 
 	 * @param Phar        $phar      The phar object.
 	 * @param string      $input     The input directory
-	 * @param string      $regex     The regex use in RegexIterator.
+	 * @param string      $regex     The regex used in RegexIterator.
 	 * @param string      $invregex  The InvertedRegexIterator expression.
-	 * @param SplFileInfo $stub Stub file object    
+	 * @param SplFileInfo $stub Stub file object
 	 * @param mixed       $compress  Compression algorithm or NULL
 	 * @param boolean     $noloader  Whether to prevent adding the loader
 	 */
@@ -688,7 +684,7 @@ class PharCommand extends CLICommand
 	/**
 	 * Echo directory
 	 *
-	 * @param string $pn      
+	 * @param string $pn
 	 * @param unknown_type $f
 	 */
 	public function phar_dir_echo($pn, $f)
@@ -758,7 +754,7 @@ class PharCommand extends CLICommand
 	{
 		$this->phar_dir_operation(
 			new DirectoryTreeIterator(
-				$this->args['f']['val']), 
+				$this->args['f']['val']),
 				array($this, 'phar_dir_echo')
 			);
 	}
@@ -799,7 +795,7 @@ class PharCommand extends CLICommand
 	{
 		$a = $this->phar_dir_operation(
 			new DirectoryGraphIterator(
-				$this->args['f']['val']), 
+				$this->args['f']['val']),
 				array($this, 'phar_dir_echo')
 			);
 		if (!$a) {
@@ -829,13 +825,13 @@ class PharCommand extends CLICommand
 	static function cli_cmd_arg_extract()
 	{
 		$args = self::phar_args('Fix', 'phar');
-		
+
 		$args[''] = array(
-			'type' => 'dir',  
-			'val' => '.',                 
+			'type' => 'dir',
+			'val' => '.',
 			'inf' => '         Directory to extract to (defaults to \'.\').',
 		);
-		
+
 		return $args;
 	}
 	// }}}
@@ -850,7 +846,7 @@ class PharCommand extends CLICommand
 	public function cli_cmd_run_extract()
 	{
 		$dir = $this->args['']['val'];
-		
+
 		if (is_array($dir)) {
 			if (count($dir) != 1) {
 				self::error("Only one target directory allowed.\n");
@@ -858,7 +854,7 @@ class PharCommand extends CLICommand
 				$dir = $dir[0];
 			}
 		}
-		
+
 		$phar = $this->args['f']['val'];
 		$base = $phar->getPathname();
 		$bend = strpos($base, '.phar');
@@ -867,8 +863,8 @@ class PharCommand extends CLICommand
 		$blen = strlen($base);
 
 		$this->phar_dir_operation(
-			new RecursiveIteratorIterator($phar), 
-			array($this, 'phar_dir_extract'), 
+			new RecursiveIteratorIterator($phar),
+			array($this, 'phar_dir_extract'),
 			array($blen, $dir)
 		);
 	}
@@ -891,17 +887,17 @@ class PharCommand extends CLICommand
 		$dir    = $args[1];
 		$sub    = substr($pn, $blen);
 		$target = $dir . '/' . $sub;
-		
+
 		if (!file_exists(dirname($target))) {
 			if (!is_writable(dirname($target))) {
 				self::error("Operation could not be completed\n");
 			}
-			
+
 			mkdir(dirname($target));
 		}
-		
+
 		echo "$sub";
-		
+
 		if (!@copy($f, $target)) {
 			echo " ...error\n";
 		} else {
@@ -942,9 +938,9 @@ class PharCommand extends CLICommand
 		$phar  = $this->args['f']['val'];
 		$entry = $this->args['e']['val'];
 
-	   $phar->startBuffering();
-	   unset($phar[$entry]);
-	   $phar->stopBuffering();
+		$phar->startBuffering();
+		unset($phar[$entry]);
+		$phar->stopBuffering();
 	}
 	// }}}
 	// {{{ static function cli_cmd_inf_add
@@ -966,9 +962,9 @@ class PharCommand extends CLICommand
 	{
 		$args = self::phar_args('acFilx', 'phar');
 		$args[''] = array(
-			'type'     => 'any',     
-			'val'      => NULL,      
-			'required' => 1, 
+			'type'     => 'any',
+			'val'      => NULL,
+			'required' => 1,
 			'inf'      => '         Any number of input files and directories. If -i is in use then ONLY files and matching thegiven regular expression are being packed. If -x is given then files matching that regular expression are NOT being packed.',
 		);
 		return $args;
@@ -1011,7 +1007,7 @@ class PharCommand extends CLICommand
 	 */
 	public function cli_cmd_inf_stub_set()
 	{
-		return "Set the stub of a PHAR file. " . 
+		return "Set the stub of a PHAR file. " .
 			   "If no input file is specified as stub then stdin is being used.";
 	}
 	// }}}
@@ -1019,7 +1015,7 @@ class PharCommand extends CLICommand
 	/**
 	 * Set the argument stub
 	 *
-	 * @return string arguments for a stub 
+	 * @return string arguments for a stub
 	 */
 	public function cli_cmd_arg_stub_set()
 	{
@@ -1053,7 +1049,7 @@ class PharCommand extends CLICommand
 	 */
 	public function cli_cmd_inf_stub_get()
 	{
-		return "Get the stub of a PHAR file. " .  
+		return "Get the stub of a PHAR file. " .
 			   "If no output file is specified as stub then stdout is being used.";
 	}
 	// }}}
@@ -1192,12 +1188,12 @@ class PharCommand extends CLICommand
 	/**
 	 * Cli Command Inf Meta Set
 	 *
-	 * @return string A description 
+	 * @return string A description
 	 */
 	public function cli_cmd_inf_meta_set()
 	{
-		return "Set meta data of a PHAR entry or a PHAR package using serialized input. " . 
-			   "If no input file is specified for meta data then stdin is being used." . 
+		return "Set meta data of a PHAR entry or a PHAR package using serialized input. " .
+			   "If no input file is specified for meta data then stdin is being used." .
 			   "You can also specify a particular index using -k. In that case the metadata is " .
 			   "expected to be an array and the value of the given index is being set. If " .
 			   "the metadata is not present or empty a new array will be created. If the " .
@@ -1257,7 +1253,7 @@ class PharCommand extends CLICommand
 		} else {
 			$meta = unserialize($meta);
 		}
-		
+
 		if (isset($entry)) {
 			$phar[$entry]->setMetadata($meta);
 		} else {
@@ -1275,7 +1271,7 @@ class PharCommand extends CLICommand
 	public function cli_cmd_inf_meta_get()
 	{
 		return "Get meta information of a PHAR entry or a PHAR package in serialized from. " .
-			   "If no output file is specified for meta data then stdout is being used.\n" . 
+			   "If no output file is specified for meta data then stdout is being used.\n" .
 			   "You can also specify a particular index using -k. In that case the metadata is " .
 			   "expected to be an array and the value of the given index is returned using echo " .
 			   "rather than using serialize. If that index does not exist or no meta data is " .
@@ -1344,8 +1340,8 @@ class PharCommand extends CLICommand
 	 */
 	public function cli_cmd_inf_meta_del()
 	{
-		return "Delete meta information of a PHAR entry or a PHAR package.\n" . 
-			   "If -k is given then the metadata is expected to be an array " . 
+		return "Delete meta information of a PHAR entry or a PHAR package.\n" .
+			   "If -k is given then the metadata is expected to be an array " .
 			   "and the given index is being deleted.\n" .
 			   "If something was deleted the return value is 0 otherwise it is 1.";
 	}
@@ -1420,7 +1416,7 @@ class PharCommand extends CLICommand
 	 */
 	public function cli_cmd_inf_info()
 	{
-		return "Get information about a PHAR package.\n" . 
+		return "Get information about a PHAR package.\n" .
 			   "By using -k it is possible to return a single value.";
 	}
 	// }}}
@@ -1482,9 +1478,9 @@ class PharCommand extends CLICommand
 				$ucount++;
 				$csize += $ent->getSize();
 			}
-			
+
 			$usize += $ent->getSize();
-			
+
 			if ($ent->hasMetadata()) {
 				$mcount++;
 			}
@@ -1510,12 +1506,12 @@ class PharCommand extends CLICommand
 			echo $infos[$index];
 			exit(0);
 		}
-		
+
 		$l = 0;
 		foreach($infos as $which => $val) {
 			$l = max(strlen($which), $l);
 		}
-		
+
 		foreach($infos as $which => $val) {
 			echo $which . ':' . str_repeat(' ', $l + 1 - strlen($which)) . $val . "\n";
 		}

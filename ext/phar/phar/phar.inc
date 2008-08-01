@@ -5,7 +5,7 @@
  * @ingroup Phar
  * @brief class Phar
  * @author  Marcus Boerger
- * @date    2007 - 2007
+ * @date    2007 - 2008
  *
  * Phar Command
  */
