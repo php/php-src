@@ -33,7 +33,6 @@
 #endif
 
 #ifdef ZEND_WIN32
-# define _WIN32_WINNT 0x0400
 # include <wincrypt.h>
 # include <process.h>
 #endif
