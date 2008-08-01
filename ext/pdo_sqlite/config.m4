@@ -72,21 +72,22 @@ if test "$PHP_PDO_SQLITE" != "no"; then
     PHP_SUBST(PDO_SQLITE_SHARED_LIBADD)
     PHP_NEW_EXTENSION(pdo_sqlite, $php_pdo_sqlite_sources_core, $ext_shared,,-I$pdo_inc_path)
   else
-    # use bundled libs
-    pdo_sqlite_sources="libsqlite/sqlite3.c"
-
+      # use bundled libs
       if test "$enable_maintainer_zts" = "yes"; then
-        threadsafe_flag="-DSQLITE_THREADSAFE=1"
+        threadsafe_flags="-DSQLITE_THREADSAFE=1"
       else
-        threadsafe_flag="-DSQLITE_THREADSAFE=0"
+        threadsafe_flags="-DSQLITE_THREADSAFE=0"
       fi
 
+      other_flags="-DSQLITE_ENABLE_FTS3=1 -DSQLITE_CORE=1"
+
       PHP_NEW_EXTENSION(pdo_sqlite,
-        $php_pdo_sqlite_sources_core $pdo_sqlite_sources,
-        $ext_shared,,-I$ext_srcdir/libsqlite -DPDO_SQLITE_BUNDLED=1 $threadsafe_flag -I$pdo_inc_path)
+        $php_pdo_sqlite_sources_core,
+        $ext_shared,,-DPDO_SQLITE_BUNDLED=1 $other_flags $threadsafe_flags -I$pdo_inc_path)
 
       PHP_SUBST(PDO_SQLITE_SHARED_LIBADD)
-      PHP_ADD_BUILD_DIR($ext_builddir/libsqlite, 1)
+      PHP_ADD_EXTENSION_DEP(pdo_sqlite, sqlite3)
+      PHP_ADD_INCLUDE($abs_srcdir/ext/sqlite3/libsqlite)
  
       AC_CHECK_FUNCS(usleep nanosleep)
       AC_CHECK_HEADERS(time.h)
