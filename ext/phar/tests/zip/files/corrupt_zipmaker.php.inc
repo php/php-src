@@ -246,7 +246,7 @@ class corrupt_zipmaker
 		$mtime = $this->getMTime($mtime ? $mtime : null);
 
 		$uncomplength = strlen($data);
-		$crc32 = crc32((binary)$data) & 0xFFFFFFFF;
+		$crc32 = crc32($data) & 0xFFFFFFFF;
 		$compmethod = 0;
 		switch ($compress) {
 			case 'gz' :

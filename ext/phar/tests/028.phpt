@@ -8,7 +8,7 @@ phar.require_hash=0
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://hio';
-$file = (binary)'<?php include "' . $pname . '/a.php"; __HALT_COMPILER(); ?>';
+$file = '<?php include "' . $pname . '/a.php"; __HALT_COMPILER(); ?>';
 $alias = '';
 
 $files = array();

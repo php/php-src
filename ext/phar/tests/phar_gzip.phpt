@@ -1,10 +1,13 @@
 --TEST--
 Phar: gzipped phar
 --SKIPIF--
-<?php if (!extension_loaded('phar')) die('skip'); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
-<?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
-<?php if (version_compare(phpversion(), '5.2.6', '<')) die("skip zlib is buggy in PHP < 5.2.6"); ?>
+<?php
+if (!extension_loaded("phar")) die("skip");
+if (version_compare(PHP_VERSION, "6.0", ">")) die("skip pre-unicode version of PHP required");
+if (!extension_loaded("spl")) die("skip SPL not available");
+if (!extension_loaded("zlib")) die("skip zlib not available");
+if (version_compare(phpversion(), '5.2.6', '<')) die("skip zlib is buggy in PHP < 5.2.6");
+?>
 --INI--
 phar.readonly=0
 phar.require_hash=0
@@ -15,7 +18,7 @@ $pname = 'phar://' . $fname;
 $fname2 = dirname(__FILE__) . '/phar_gzip.2.phar';
 $pname2 = 'phar://' . $fname2;
 
-$file = (binary)'<?php
+$file = '<?php
 Phar::mapPhar();
 var_dump("it worked");
 include "phar://" . __FILE__ . "/tar_004.php";
@@ -47,8 +50,8 @@ var_dump($b->isCompressed() == Phar::GZ);
 @unlink(dirname(__FILE__) . '/phar_gzip.2.phar');
 ?>
 --EXPECTF--
-unicode(9) "it worked"
-unicode(%d) "phar://%sphar_gzip.phar/tar_004.php"
+string(9) "it worked"
+string(%d) "phar://%sphar_gzip.phar/tar_004.php"
 bool(true)
 bool(true)
 ===DONE===

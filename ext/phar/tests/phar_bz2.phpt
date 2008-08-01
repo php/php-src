@@ -1,9 +1,12 @@
 --TEST--
 Phar: bzipped phar
 --SKIPIF--
-<?php if (!extension_loaded('phar')) die('skip'); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
-<?php if (!extension_loaded("bz2")) die("skip bz2 not available"); ?>
+<?php
+if (!extension_loaded("phar")) die("skip");
+if (version_compare(PHP_VERSION, "6.0", ">")) die("skip pre-unicode version of PHP required");
+if (!extension_loaded("spl")) die("skip SPL not available");
+if (!extension_loaded("bz2")) die("skip bz2 not available");
+?>
 --INI--
 phar.readonly=0
 phar.require_hash=0
@@ -14,7 +17,7 @@ $pname = 'phar://' . $fname;
 $fname2 = dirname(__FILE__) . '/phar_bz2.2.phar';
 $pname2 = 'phar://' . $fname2;
 
-$file = (binary)'<?php
+$file = '<?php
 Phar::mapPhar();
 var_dump("it worked");
 include "phar://" . __FILE__ . "/tar_004.php";
@@ -53,8 +56,8 @@ echo $e->getMessage(),"\n";
 @unlink(dirname(__FILE__) . '/phar_bz2.2.phar');
 ?>
 --EXPECTF--
-unicode(9) "it worked"
-unicode(%d) "phar://%sphar_bz2.phar/tar_004.php"
+string(9) "it worked"
+string(%d) "phar://%sphar_bz2.phar/tar_004.php"
 bool(true)
 bool(true)
 

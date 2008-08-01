@@ -5,6 +5,7 @@ Phar: test broken app
 <?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
 --INI--
 phar.readonly=0
+phar.require_hash=0
 --FILE--
 <?php
 

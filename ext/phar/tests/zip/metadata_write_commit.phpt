@@ -1,7 +1,10 @@
 --TEST--
 Phar with meta-data (write) zip-based
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip");?>
+<?php
+if (!extension_loaded("phar")) die("skip");
+if (version_compare(PHP_VERSION, "6.0", ">")) die("skip pre-unicode version of PHP required");
+?>
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -64,8 +67,8 @@ NULL
 array(2) {
   [0]=>
   int(25)
-  [u"foo"]=>
-  unicode(3) "bar"
+  ["foo"]=>
+  string(3) "bar"
 }
 bool(true)
 string(1) "a"
@@ -77,9 +80,9 @@ NULL
 array(2) {
   [0]=>
   int(25)
-  [u"foo"]=>
-  unicode(3) "bar"
+  ["foo"]=>
+  string(3) "bar"
 }
 bool(true)
-unicode(2) "hi"
+string(2) "hi"
 ===DONE===

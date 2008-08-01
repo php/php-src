@@ -1,7 +1,10 @@
 --TEST--
 Phar: fopen a .phar for writing (existing file) zip-based
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php
+if (!extension_loaded("phar")) die("skip");
+if (version_compare(PHP_VERSION, "5.3", "<")) die("skip requires 5.3 or later");
+?>
 --INI--
 phar.readonly=0
 phar.require_hash=0
@@ -28,7 +31,7 @@ $phar->stopBuffering();
 ini_set('phar.readonly', 1);
 
 $fp = fopen($alias . '/b/c.php', 'wb');
-fwrite($fp, (binary)'extra');
+fwrite($fp, b'extra');
 fclose($fp);
 include $alias . '/b/c.php';
 ?>
@@ -36,10 +39,11 @@ include $alias . '/b/c.php';
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>
 --EXPECTF--
+
 Warning: fopen(phar://%sopen_for_write_existing_c.phar.zip/b/c.php): failed to open stream: phar error: write operations disabled by INI setting in %sopen_for_write_existing_c.php on line %d
 
-Warning: fwrite() expects parameter 1 to be resource, boolean given in %sopen_for_write_existing_c.php on line %d
+Warning: fwrite() expects parameter 1 to be resource, boolean given in %spen_for_write_existing_c.php on line %d
 
-Warning: fclose(): supplied argument is not a valid stream resource in %sopen_for_write_existing_c.php on line %d
+Warning: fclose() expects parameter 1 to be resource, boolean given in %spen_for_write_existing_c.php on line %d
 This is b/c
 ===DONE===

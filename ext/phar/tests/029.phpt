@@ -11,7 +11,7 @@ $fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.php';
 $fname = $fname1;
 $alias = '';
 $pname = 'phar://hio';
-$file = (binary)'<?php include "' . $pname . '/a.php"; __HALT_COMPILER(); ?>';
+$file = '<?php include "' . $pname . '/a.php"; __HALT_COMPILER(); ?>';
 
 $files = array();
 $files['a.php']   = '<?php echo "This is a\n"; include "'.$pname.'/b.php"; ?>';      

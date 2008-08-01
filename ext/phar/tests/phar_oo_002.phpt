@@ -1,8 +1,11 @@
 --TEST--
 Phar object: iterator & entries
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
+<?php
+if (!extension_loaded("phar")) die("skip");
+if (version_compare(PHP_VERSION, "6.0", ">")) die("skip pre-unicode version of PHP required");
+if (!extension_loaded("spl")) die("skip SPL not available");
+?>
 --INI--
 phar.readonly=1
 phar.require_hash=0
@@ -110,13 +113,13 @@ int(32)
 bool(false)
 NULL
 int(0)
-string(44) "phar://*/files/phar_oo_test.phar.php%cb%cc.php"
+string(44) "phar://*/files/phar_oo_test.phar.php/b%cc.php"
 string(5) "c.php"
 int(34)
 bool(false)
 NULL
 int(0)
-string(44) "phar://*/files/phar_oo_test.phar.php%cb%cd.php"
+string(44) "phar://*/files/phar_oo_test.phar.php/b%cd.php"
 string(5) "d.php"
 int(34)
 bool(false)

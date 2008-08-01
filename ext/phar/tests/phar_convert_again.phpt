@@ -13,7 +13,8 @@ phar.readonly=0
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar';
 $fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '2.tbz';
 $pname = 'phar://' . $fname;
-$file = (binary)'<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
+$stub = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
+$file = $stub;
 
 $files = array();
 $files['a'] = 'a';
@@ -139,12 +140,6 @@ $data->setDefaultStub();
 echo $e->getMessage() . "\n";
 }
 try {
-$data->setSignatureAlgorithm(Phar::MD5);
-} catch (Exception $e) {
-echo $e->getMessage() . "\n";
-}
-
-try {
 $tgz->convertToData(Phar::TAR, Phar::GZ, '.phar.tgz.oops');
 } catch (Exception $e) {
 echo $e->getMessage() . "\n";
@@ -210,7 +205,6 @@ Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2
 A Phar stub cannot be set in a plain tar archive
 A Phar alias cannot be set in a plain tar archive
 A Phar stub cannot be set in a plain tar archive
-Cannot set signature algorithm, not possible with tar-based phar archives
 data phar "%sphar_convert_again2.phar.tgz.oops" has invalid extension phar.tgz.oops
 phar "%sphar_convert_again2.tgz.oops" has invalid extension tgz.oops
 data phar "%sphar_convert_again2.phar/.tgz.oops" has invalid extension phar/.tgz.oops

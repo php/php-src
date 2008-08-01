@@ -23,5 +23,5 @@ unlink(dirname(__FILE__) . '/buildfromiterator.phar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--
-Warning: Phar::buildFromDirectory() expects parameter 2 to be binary string, object given in %sphar_buildfromdirectory3.php on line %d
+Warning: Phar::buildFromDirectory() expects parameter 2 to be %string, object given in %sphar_buildfromdirectory3.php on line %d
 ===DONE===

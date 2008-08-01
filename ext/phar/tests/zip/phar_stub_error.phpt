@@ -16,7 +16,6 @@ $phar->setAlias('hio');
 $phar['a'] = 'a';
 $phar->stopBuffering();
 
-var_dump($stub);
 var_dump($phar->getStub());
 var_dump($phar->getStub() == $stub);
 
@@ -43,8 +42,6 @@ unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip')
 __HALT_COMPILER();
 ?>
 --EXPECTF--
-unicode(50) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>
-"
 string(50) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>
 "
 bool(true)

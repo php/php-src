@@ -30,12 +30,12 @@ foreach($phar as $name => $ent)
 unlink(dirname(__FILE__) . '/files/phar_oo_test.phar.php');
 __halt_compiler();
 ?>
---EXPECT--
+--EXPECTF--
 string(5) "a.php"
 string(32) "<?php echo "This is a.php\n"; ?>"
 This is a.php
 string(1) "b"
-string(3) "DIR"
+%s(3) "DIR"
 string(5) "b.php"
 string(32) "<?php echo "This is b.php\n"; ?>"
 This is b.php

@@ -9,7 +9,7 @@ phar.readonly=0
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$file = (binary)'<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
+$file = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
 
 $files = array();
 $files['a'] = 'a';
@@ -18,13 +18,13 @@ $files['c'] = 'c';
 
 include 'files/phar_test.inc';
 
-$file = (binary)'<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
+$file = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
 $fp = fopen($fname, 'rb');
 //// 1
 echo fread($fp, strlen($file)) . "\n";
 fclose($fp);
 $phar = new Phar($fname);
-$file = (binary)'<?php echo "second stub\n"; __HALT_COMPILER(); ?>';
+$file = '<?php echo "second stub\n"; __HALT_COMPILER(); ?>';
 
 //// 2
 $phar->setStub($file);
@@ -33,9 +33,9 @@ echo fread($fp, strlen($file)) . "\n";
 fclose($fp);
 
 $fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phartmp.php';
-$file = (binary)'<?php echo "third stub\n"; __HALT_COMPILER(); ?>';
+$file = b'<?php echo "third stub\n"; __HALT_COMPILER(); ?>';
 $fp = fopen($fname2, 'wb');
-fwrite($fp, (binary)$file);
+fwrite($fp, $file);
 fclose($fp);
 $fp = fopen($fname2, 'rb');
 
@@ -48,7 +48,7 @@ echo fread($fp, strlen($file)) . "\n";
 fclose($fp);
 
 $fp = fopen($fname2, 'ab');
-fwrite($fp, (binary)'booya');
+fwrite($fp, b'booya');
 fclose($fp);
 echo file_get_contents($fname2) . "\n";
 
@@ -69,7 +69,7 @@ $phar['testing'] = 'hi';
 // ensure stub is not overwritten
 $fp = fopen($fname, 'rb');
 echo fread($fp, strlen($file)) . "\n";
-if (fread($fp, strlen('booya')) == (binary)'booya') {
+if (fread($fp, strlen('booya')) == 'booya') {
 	echo 'failed - copied booya';
 }
 fclose($fp);

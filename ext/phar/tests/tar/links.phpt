@@ -2,6 +2,8 @@
 Phar: tar with hard link and symbolic link
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
+--INI--
+phar.require_hash=0
 --FILE--
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.tar';

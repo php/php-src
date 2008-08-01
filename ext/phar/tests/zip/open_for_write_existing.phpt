@@ -26,7 +26,7 @@ foreach ($files as $n => $file) {
 $phar->stopBuffering();
 
 $fp = fopen($alias . '/b/c.php', 'wb');
-fwrite($fp, (binary)'extra');
+fwrite($fp, b'extra');
 fclose($fp);
 include $alias . '/b/c.php';
 ?>

@@ -9,7 +9,7 @@ phar.readonly=0
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$stub = (binary)'<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
+$stub = b'<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
 $file = $stub;
 
 $files = array();
@@ -22,7 +22,7 @@ var_dump($stub);
 var_dump($phar->getStub());
 var_dump($phar->getStub() == $stub);
 
-$newstub = (binary)'<?php echo "second stub\n"; _x_HALT_COMPILER(); ?>';
+$newstub = '<?php echo "second stub\n"; _x_HALT_COMPILER(); ?>';
 try
 {
 	$phar->setStub($newstub);

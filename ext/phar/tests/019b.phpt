@@ -1,15 +1,17 @@
 --TEST--
 Phar: opendir test, recurse into
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!version_compare(phpversion(), 6, '<')) die("skip: permanent loop FIXME"); ?>
+<?php
+if (!extension_loaded("phar")) die("skip");
+if (version_compare(PHP_VERSION, "6.0", ">")) die("skip pre-unicode version of PHP required");
+?>
 --INI--
 phar.require_hash=0
 --FILE--
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$file = (binary)"<?php
+$file = "<?php
 Phar::mapPhar('hio');
 __HALT_COMPILER(); ?>";
 

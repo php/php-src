@@ -163,7 +163,7 @@ class tarmaker
      */
     function close()
     {
-        fwrite($this->tmp, (binary)pack('a1024', ''));
+        fwrite($this->tmp, pack('a1024', ''));
         fclose($this->tmp);
     }
 }

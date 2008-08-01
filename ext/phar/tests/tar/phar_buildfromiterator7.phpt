@@ -50,11 +50,11 @@ try {
 unlink(dirname(__FILE__) . '/buildfromiterator.phar.tar');
 __HALT_COMPILER();
 ?>
---EXPECT--
+--EXPECTF--
 rewind
 valid
 current
 key
-unicode(24) "UnexpectedValueException"
+%s(24) "UnexpectedValueException"
 Iterator myIterator returned a file that could not be opened "phar_buildfromiterator7./oopsie/there.phpt"
 ===DONE===

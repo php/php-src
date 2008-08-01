@@ -55,6 +55,6 @@ rewind
 valid
 current
 key
-unicode(24) "UnexpectedValueException"
+%s(24) "UnexpectedValueException"
 Iterator myIterator returned an invalid key (must return a string)
 ===DONE===

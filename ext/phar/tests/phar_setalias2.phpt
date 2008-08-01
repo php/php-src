@@ -9,7 +9,7 @@ phar.readonly=0
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$file = (binary)'<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
+$file = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
 
 $files = array();
 $files['a'] = 'a';

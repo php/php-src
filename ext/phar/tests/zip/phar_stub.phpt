@@ -22,16 +22,16 @@ copy($fname2, $fname);
 $phar = new Phar($fname);
 echo $phar->getStub();
 
-$file = '<?php echo "second stub\n"; __HALT_COMPILER(); ?>';
+$file = b'<?php echo "second stub\n"; __HALT_COMPILER(); ?>';
 
 //// 2
 $phar->setStub($file);
 echo $phar->getStub();
 
 $fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phartmp.php';
-$file = '<?php echo "third stub\n"; __HALT_COMPILER(); ?>';
+$file = b'<?php echo "third stub\n"; __HALT_COMPILER(); ?>';
 $fp = fopen($fname3, 'wb');
-fwrite($fp, (binary)$file);
+fwrite($fp, $file);
 fclose($fp);
 $fp = fopen($fname3, 'rb');
 
@@ -42,7 +42,7 @@ fclose($fp);
 echo $phar->getStub();
 
 $fp = fopen($fname3, 'ab');
-fwrite($fp, (binary)'booya');
+fwrite($fp, b'booya');
 fclose($fp);
 echo file_get_contents($fname3) . "\n";
 
