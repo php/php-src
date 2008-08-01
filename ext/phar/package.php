@@ -53,29 +53,29 @@ require_once 'PEAR/PackageFileManager2.php';
 PEAR::setErrorHandling(PEAR_ERROR_DIE);
 
 $options = array(
-    'filelistgenerator' => 'CVS',
-    'changelogoldtonew' => false,
-    'simpleoutput'      => true,
-    'baseinstalldir'    => '/',
-    'packagedirectory'  => dirname(__FILE__),
-    'packagefile'       => 'package.xml',
-    'clearcontents'     => true,
-    'ignore'            => array('package*.php', 'package*.xml'),
-    'dir_roles'         => array(
-         'docs'         => 'doc',
-         'examples'     => 'doc',
-         'tests'        => 'test',
-         'phar'         => 'src',
-    ),
-    'exceptions'        => array(
-         'CREDITS'            => 'doc',
-         'EXPERIMENTAL'       => 'doc',
-         'LICENSE'            => 'doc',
-         'Makefile.frag'      => 'src',
-         'phar_path_check.re' => 'src',
-         'TODO'               => 'doc',
-         'phar.phar'          => 'script',
-    ),
+	'filelistgenerator' => 'CVS',
+	'changelogoldtonew' => false,
+	'simpleoutput'      => true,
+	'baseinstalldir'    => '/',
+	'packagedirectory'  => dirname(__FILE__),
+	'packagefile'       => 'package.xml',
+	'clearcontents'     => true,
+	'ignore'            => array('package*.php', 'package*.xml'),
+	'dir_roles'         => array(
+		 'docs'         => 'doc',
+		 'examples'     => 'doc',
+		 'tests'        => 'test',
+		 'phar'         => 'src',
+	),
+	'exceptions'        => array(
+		 'CREDITS'            => 'doc',
+		 'EXPERIMENTAL'       => 'doc',
+		 'LICENSE'            => 'doc',
+		 'Makefile.frag'      => 'src',
+		 'phar_path_check.re' => 'src',
+		 'TODO'               => 'doc',
+		 'phar.phar'          => 'script',
+	),
 );
 
 $package = PEAR_PackageFileManager2::importOptions(dirname(__FILE__) . '/package.xml', $options);
@@ -100,9 +100,9 @@ $package->setNotes("\n$notes\n");
 $package->generateContents();
 
 if (isset($_GET['make']) || (isset($_SERVER['argv']) && @$_SERVER['argv'][1] == 'make')) {
-    $package->writePackageFile();
+	$package->writePackageFile();
 } else {
-    $package->debugPackageFile();
+	$package->debugPackageFile();
 }
 
 ?>
