@@ -552,11 +552,13 @@ default_socket_timeout = 60
 ;extension=php_dba.dll
 ;extension=php_dbase.dll
 ;extension=php_exif.dll
+;extension=php_fileinfo.dll
 ;extension=php_fdf.dll
 ;extension=php_gd2.dll
 ;extension=php_gettext.dll
 ;extension=php_gmp.dll
 ;extension=php_ifx.dll
+;extension=php_intl.dll
 ;extension=php_imap.dll
 ;extension=php_interbase.dll
 ;extension=php_ldap.dll
@@ -581,12 +583,14 @@ default_socket_timeout = 60
 ;extension=php_pdo_pgsql.dll
 ;extension=php_pdo_sqlite.dll
 ;extension=php_pgsql.dll
+;extension=php_phar.dll
 ;extension=php_pspell.dll
 ;extension=php_shmop.dll
 ;extension=php_snmp.dll
 ;extension=php_soap.dll
 ;extension=php_sockets.dll
 ;extension=php_sqlite.dll
+;extension=php_sqlite3.dll
 ;extension=php_sybase_ct.dll
 ;extension=php_tidy.dll
 ;extension=php_xmlrpc.dll
@@ -616,8 +620,14 @@ default_socket_timeout = 60
 ;iconv.internal_encoding = ISO-8859-1
 ;iconv.output_encoding = ISO-8859-1
 
+[intl]
+;intl.default_locale = 
+
 [sqlite]
 ;sqlite.assoc_case = 0
+
+[sqlite3]
+;sqlite3.extension_dir =
 
 [xmlrpc]
 ;xmlrpc_error_number = 0
@@ -632,6 +642,11 @@ default_socket_timeout = 60
 ;the available process stack and eventually crash PHP (due to reaching the 
 ;stack size limit imposed by the Operating System).
 ;pcre.recursion_limit=100000
+
+[Phar]
+;phar.readonly = On
+;phar.require_hash = On
+;phar.cache_list =
 
 [Syslog]
 ; Whether or not to define the various syslog variables (e.g. $LOG_PID,
