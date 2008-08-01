@@ -654,17 +654,17 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 			switch (Z_TYPE(const_value)) {
 				case IS_STRING:
 				case IS_UNICODE:
-					zend_u_symtable_update_current_key(Z_ARRVAL_P(p), Z_TYPE(const_value), Z_UNIVAL(const_value), Z_UNILEN(const_value) + 1);
+					zend_u_symtable_update_current_key(Z_ARRVAL_P(p), Z_TYPE(const_value), Z_UNIVAL(const_value), Z_UNILEN(const_value) + 1, HASH_UPDATE_KEY_IF_BEFORE);
 					break;
 				case IS_BOOL:
 				case IS_LONG:
-					zend_hash_update_current_key(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL_ZSTR, 0, Z_LVAL(const_value));
+					zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL_ZSTR, 0, Z_LVAL(const_value), HASH_UPDATE_KEY_IF_BEFORE, NULL);
 					break;
 				case IS_DOUBLE:
-					zend_hash_update_current_key(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL_ZSTR, 0, (long)Z_DVAL(const_value));
+					zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL_ZSTR, 0, (long)Z_DVAL(const_value), HASH_UPDATE_KEY_IF_BEFORE, NULL);
 					break;
 				case IS_NULL:
-					zend_hash_update_current_key(Z_ARRVAL_P(p), HASH_KEY_IS_STRING, EMPTY_ZSTR, 1, 0);
+					zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_STRING, EMPTY_ZSTR, 1, 0, HASH_UPDATE_KEY_IF_BEFORE, NULL);
 					break;
 			}
 			zend_hash_move_forward(Z_ARRVAL_P(p));
