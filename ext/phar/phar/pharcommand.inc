@@ -209,19 +209,34 @@ class PharCommand extends CLICommand
     {
         if (($arg == '0' || $arg == '1') && !file_exists($arg)) {
             $found = NULL;
-        	$apiver = `pear -q info PHP_Archive 2>/dev/null|grep 'API Version'`;
-        	$apiver = trim(substr($apiver, strlen('API Version')));
-        	if ($apiver) {
-        		self::notice("Pear package PHP_Archive found: API Version: $apiver.\n");
-	            foreach(split("\n", `pear list-files PHP_Archive`) as $ent) {
-	                $matches = NULL;
-	                if (preg_match(",^php[ \t]+([^ \t].*pear[\\\\/]PHP[\\\\/]Archive.php)$,", $ent, $matches)) {
-	                    $found = $matches[1];
-	                    break;
-	                }
-	            }
-	        }
-            if (!isset($found)) {
+            $apiver = `pear -q info PHP_Archive 2>/dev/null|grep 'API Version'`;
+            $apiver = trim(substr($apiver, strlen('API Version')));
+            if ($apiver) {
+                self::notice("Pear package PHP_Archive: API Version: $apiver.\n");
+                $files  = split("\n", `pear list-files PHP_Archive`);
+                $phpdir = `pear config-get php_dir 2>/dev/null`;
+                $phpdir = trim($phpdir);
+                self::notice("Pear package PHP_Archive: $phpdir.\n");
+                if (is_dir($phpdir)) {
+                    foreach($files as $ent) {
+                        $matches = NULL;
+                        if (preg_match(",^php[ \t]+([^ \t].*[\\\\/]PHP[\\\\/]Archive\.php)$,", $ent, $matches)) {
+                            $sub = $matches[1];
+                            if (strpos($sub, $phpdir) !== 0) {
+                                $found = NULL;
+                                break;
+                            }
+                            $found = $sub;
+                            break;
+                        }
+                    }
+                } else {
+                    self::notice("Pear package PHP_Archive: corrupt or inaccessible base dir: $php_dir.\n");
+                }
+            }
+            if (isset($found)) {
+                self::notice("Pear package PHP_Archive: $found.\n");
+            } else {
                 $msg = "Pear package PHP_Archive or Archive.php class file not found.\n";
                 if ($arg == '0') {
                     self::notice($msg);
