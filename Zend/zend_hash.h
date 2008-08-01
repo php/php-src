@@ -37,6 +37,11 @@
 #define HASH_DEL_INDEX 1
 #define HASH_DEL_KEY_QUICK 2
 
+#define HASH_UPDATE_KEY_IF_NONE    0
+#define HASH_UPDATE_KEY_IF_BEFORE  1
+#define HASH_UPDATE_KEY_IF_AFTER   2
+#define HASH_UPDATE_KEY_ANYWAY     3
+
 typedef ulong (*hash_func_t)(const char *arKey, uint nKeyLength);
 typedef int  (*compare_func_t)(const void *, const void * TSRMLS_DC);
 typedef void (*sort_func_t)(void *, size_t, register size_t, compare_func_t TSRMLS_DC);
@@ -124,7 +129,6 @@ ZEND_API int zend_hash_add_empty_element(HashTable *ht, const char *arKey, uint 
 #define ZEND_HASH_APPLY_REMOVE				1<<0
 #define ZEND_HASH_APPLY_STOP				1<<1
 
-
 typedef int (*apply_func_t)(void *pDest TSRMLS_DC);
 typedef int (*apply_func_arg_t)(void *pDest, void *argument TSRMLS_DC);
 typedef int (*apply_func_args_t)(void *pDest TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key);
@@ -177,7 +181,7 @@ ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos)
 ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosition *pos);
 ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *pos);
 ZEND_API void zend_hash_internal_pointer_end_ex(HashTable *ht, HashPosition *pos);
-ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const char *str_index, uint str_length, ulong num_index, HashPosition *pos);
+ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const char *str_index, uint str_length, ulong num_index, int mode, HashPosition *pos);
 
 typedef struct _HashPointer {
 	HashPosition pos;
@@ -204,7 +208,7 @@ ZEND_API int zend_hash_set_pointer(HashTable *ht, const HashPointer *ptr);
 #define zend_hash_internal_pointer_end(ht) \
 	zend_hash_internal_pointer_end_ex(ht, NULL)
 #define zend_hash_update_current_key(ht, key_type, str_index, str_length, num_index) \
-	zend_hash_update_current_key_ex(ht, key_type, str_index, str_length, num_index, NULL)
+	zend_hash_update_current_key_ex(ht, key_type, str_index, str_length, num_index, HASH_UPDATE_KEY_ANYWAY, NULL)
 
 /* Copying, merging and sorting */
 ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size);
@@ -364,10 +368,10 @@ static inline int zend_symtable_exists(HashTable *ht, const char *arKey, uint nK
 	return zend_hash_exists(ht, arKey, nKeyLength);
 }
 
-static inline int zend_symtable_update_current_key(HashTable *ht, const char *arKey, uint nKeyLength)
+static inline int zend_symtable_update_current_key(HashTable *ht, const char *arKey, uint nKeyLength, int mode)
 {
-	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL, 0, idx));
-	return zend_hash_update_current_key(ht, HASH_KEY_IS_STRING, arKey, nKeyLength, 0);
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key_ex(ht, HASH_KEY_IS_LONG, NULL, 0, idx, mode, NULL));
+	return zend_hash_update_current_key_ex(ht, HASH_KEY_IS_STRING, arKey, nKeyLength, 0, mode, NULL);
 }
 
 #endif							/* ZEND_HASH_H */

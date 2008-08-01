@@ -1170,7 +1170,7 @@ ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosi
 /* This function changes key of currevt element without changing elements'
  * order. If element with target key already exists, it will be deleted first.
  */
-ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const char *str_index, uint str_length, ulong num_index, HashPosition *pos)
+ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const char *str_index, uint str_length, ulong num_index, int mode, HashPosition *pos)
 {
 	Bucket *p;
 
@@ -1184,12 +1184,72 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const 
 			if (!p->nKeyLength && p->h == num_index) {
 				return SUCCESS;
 			}
+
+			if (mode != HASH_UPDATE_KEY_ANYWAY) {
+				Bucket *q = ht->arBuckets[num_index & ht->nTableMask];
+				int found = 0;
+
+				while (q != NULL) {
+					if (q == p) {
+						found = 1;
+					} else if (!q->nKeyLength && q->h == num_index) {
+					    if (found) {
+					    	if (mode & HASH_UPDATE_KEY_IF_BEFORE) {
+					    		break;
+					    	} else {
+								zend_hash_index_del(ht, p->h);
+					    		return FAILURE;
+					    	}
+					    } else {
+					    	if (mode & HASH_UPDATE_KEY_IF_AFTER) {
+					    		break;
+					    	} else {
+								zend_hash_index_del(ht, p->h);
+					    		return FAILURE;
+					    	}
+						}
+					}
+					q = q->pNext;
+				}
+			}
+
 			zend_hash_index_del(ht, num_index);
 		} else if (key_type == HASH_KEY_IS_STRING) {
 			if (p->nKeyLength == str_length &&
 			    memcmp(p->arKey, str_index, str_length) == 0) {
 				return SUCCESS;
 			}
+
+			if (mode != HASH_UPDATE_KEY_ANYWAY) {
+				ulong h = zend_inline_hash_func(str_index, str_length);
+				Bucket *q = ht->arBuckets[h & ht->nTableMask];
+				int found = 0;
+
+				while (q != NULL) {
+					if (q == p) {
+						found = 1;
+					} else if (q->h == h && q->nKeyLength == str_length && 
+					           memcmp(q->arKey, str_index, str_length) == 0) {
+					    if (found) {
+					    	if (mode & HASH_UPDATE_KEY_IF_BEFORE) {
+					    		break;
+					    	} else {
+								zend_hash_del(ht, p->arKey, p->nKeyLength);
+					    		return FAILURE;
+					    	}
+					    } else {
+					    	if (mode & HASH_UPDATE_KEY_IF_AFTER) {
+					    		break;
+					    	} else {
+								zend_hash_del(ht, p->arKey, p->nKeyLength);
+					    		return FAILURE;
+					    	}
+						}
+					}
+					q = q->pNext;
+				}
+			}
+
 			zend_hash_del(ht, str_index, str_length);
 		} else {
 			return FAILURE;
