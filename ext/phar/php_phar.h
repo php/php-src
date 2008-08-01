@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005 The PHP Group                                     |
+  | Copyright (c) 2005-2008 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,7 @@
 #ifndef PHP_PHAR_H
 #define PHP_PHAR_H
 
-#define PHP_PHAR_VERSION      "2.0.0b2-dev"
+#define PHP_PHAR_VERSION "2.0.0b2-dev"
 
 #include "ext/standard/basic_functions.h"
 extern zend_module_entry phar_module_entry;
@@ -34,7 +34,7 @@ extern zend_module_entry phar_module_entry;
 #define PHP_PHAR_API
 #endif
 
-#endif	/* PHP_PHAR_H */
+#endif /* PHP_PHAR_H */
 
 
 /*

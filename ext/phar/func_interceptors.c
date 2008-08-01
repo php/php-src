@@ -37,6 +37,7 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 		&& !cached_phars.arBuckets) {
 		goto skip_phar;
 	}
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &filename, &filename_len, &zcontext) == FAILURE) {
 		return;
 	}
@@ -110,10 +111,12 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 		&& !cached_phars.arBuckets) {
 		goto skip_phar;
 	}
+
 	/* Parse arguments */
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s|br!ll", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen) == FAILURE) {
 		goto skip_phar;
 	}
+
 	if (use_include_path || (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://"))) {
 		char *arch, *entry, *fname;
 		int arch_len, entry_len, fname_len;
@@ -783,7 +786,7 @@ statme_baby:
 			if (!phar->is_writeable) {
 				sb.st_mode = (sb.st_mode & 0555) | (sb.st_mode & ~0777);
 			}
-		
+
 			sb.st_nlink = 1;
 			sb.st_rdev = -1;
 			/* this is only for APC, so use /dev/null device - no chance of conflict there! */

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2007 The PHP Group                                |
+  | Copyright (c) 2006-2008 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -163,7 +163,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	int         has_bz2;
 	zend_bool   readonly_orig;
 	zend_bool   require_hash_orig;
-	zend_bool	intercepted;
+	zend_bool   intercepted;
 	int         request_init;
 	int         require_hash;
 	int         request_done;
@@ -493,8 +493,8 @@ union _phar_archive_object {
 	zend_object              std;
 	spl_filesystem_object    spl;
 	struct {
-	    zend_object          std;
-	    phar_archive_data    *archive;
+		zend_object          std;
+		phar_archive_data    *archive;
 	} arc;
 };
 #endif
@@ -505,8 +505,8 @@ union _phar_entry_object {
 	zend_object              std;
 	spl_filesystem_object    spl;
 	struct {
-	    zend_object          std;
-	    phar_entry_info      *entry;
+		zend_object          std;
+		phar_entry_info      *entry;
 	} ent;
 };
 #endif
@@ -520,10 +520,14 @@ extern char *(*phar_save_resolve_path)(const char *filename, int filename_len TS
 #if PHP_VERSION_ID >= 60000
 typedef zstr phar_zstr;
 #define PHAR_STR(a, b)	\
-	spprintf(&b, 0, "%r", a.s);
+	spprintf(&b, 0, "%s", a.s);
+#define PHAR_ZSTR(a, b)	\
+	b = ZSTR(a);
 #else
 typedef char *phar_zstr;
 #define PHAR_STR(a, b)	\
+	b = a;
+#define PHAR_ZSTR(a, b)	\
 	b = a;
 #endif
 
