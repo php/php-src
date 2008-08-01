@@ -1646,7 +1646,7 @@ ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosi
 /* This function changes key of currevt element without changing elements'
  * order. If element with target key already exists, it will be deleted first.
  */
-ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, zstr str_index, uint str_length, ulong num_index, HashPosition *pos) /* {{{ */
+ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, zstr str_index, uint str_length, ulong num_index, int mode, HashPosition *pos) /* {{{ */
 {
 	Bucket *p;
 	uint real_length;
@@ -1661,23 +1661,77 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, zstr s
 			if (!p->nKeyLength && p->h == num_index) {
 				return SUCCESS;
 			}
+
+			if (mode != HASH_UPDATE_KEY_ANYWAY) {
+				Bucket *q = ht->arBuckets[num_index & ht->nTableMask];
+				int found = 0;
+
+				while (q != NULL) {
+					if (q == p) {
+						found = 1;
+					} else if (!q->nKeyLength && q->h == num_index) {
+					    if (found) {
+					    	if (mode & HASH_UPDATE_KEY_IF_BEFORE) {
+					    		break;
+					    	} else {
+								zend_hash_index_del(ht, p->h);
+					    		return FAILURE;
+					    	}
+					    } else {
+					    	if (mode & HASH_UPDATE_KEY_IF_AFTER) {
+					    		break;
+					    	} else {
+								zend_hash_index_del(ht, p->h);
+					    		return FAILURE;
+					    	}
+						}
+					}
+					q = q->pNext;
+				}
+			}
+
 			zend_hash_index_del(ht, num_index);
-		} else if (key_type == HASH_KEY_IS_STRING) {
-			real_length = str_length;
+		} else if (key_type == HASH_KEY_IS_STRING ||
+		           key_type == HASH_KEY_IS_UNICODE) {
+			real_length = key_type == HASH_KEY_IS_STRING ? str_length : str_length * sizeof(UChar);
 			if (p->nKeyLength == str_length &&
-			    p->key.type == IS_STRING &&
-			    memcmp(p->key.arKey.s, str_index.s, str_length) == 0) {
+			    p->key.type == key_type &&
+			    memcmp(p->key.arKey.s, str_index.v, real_length) == 0) {
 				return SUCCESS;
 			}
-			zend_u_hash_del(ht, IS_STRING, str_index, str_length);
-		} else if (key_type == HASH_KEY_IS_UNICODE) {
-			real_length = str_length * sizeof(UChar);
-			if (p->nKeyLength == str_length &&
-			    p->key.type == IS_UNICODE &&
-			    memcmp(p->key.arKey.u, str_index.u, real_length) == 0) {
-				return SUCCESS;
+
+			if (mode != HASH_UPDATE_KEY_ANYWAY) {
+				ulong h = zend_u_inline_hash_func(key_type, str_index, str_length);
+				Bucket *q = ht->arBuckets[h & ht->nTableMask];
+				int found = 0;
+
+				while (q != NULL) {
+					if (q == p) {
+						found = 1;
+					} else if (q->h == h && q->nKeyLength == str_length && 
+					           q->key.type == key_type &&
+					           memcmp(q->key.arKey.s, str_index.v, real_length) == 0) {
+					    if (found) {
+					    	if (mode & HASH_UPDATE_KEY_IF_BEFORE) {
+					    		break;
+					    	} else {
+								zend_u_hash_del(ht, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength);
+					    		return FAILURE;
+					    	}
+					    } else {
+					    	if (mode & HASH_UPDATE_KEY_IF_AFTER) {
+					    		break;
+					    	} else {
+								zend_u_hash_del(ht, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength);
+					    		return FAILURE;
+					    	}
+						}
+					}
+					q = q->pNext;
+				}
 			}
-			zend_u_hash_del(ht, IS_UNICODE, str_index, str_length);
+
+			zend_u_hash_del(ht, key_type, str_index, str_length);
 		} else {
 			return FAILURE;
 		}
@@ -1977,18 +2031,18 @@ ZEND_API int zend_u_symtable_exists(HashTable *ht, zend_uchar type, zstr arKey, 
 }
 /* }}} */
 
-ZEND_API int zend_u_symtable_update_current_key(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength) /* {{{ */
+ZEND_API int zend_u_symtable_update_current_key(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, int mode) /* {{{ */
 {
 	zend_uchar key_type;
 
 	if (type == IS_STRING) {
 		key_type = HASH_KEY_IS_STRING;
-		ZEND_HANDLE_NUMERIC(arKey.s, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx));
+		ZEND_HANDLE_NUMERIC(arKey.s, nKeyLength, zend_hash_update_current_key_ex(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx, mode, NULL));
 	} else {
 		key_type = HASH_KEY_IS_UNICODE;
-		ZEND_HANDLE_U_NUMERIC(arKey.u, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx));
+		ZEND_HANDLE_U_NUMERIC(arKey.u, nKeyLength, zend_hash_update_current_key_ex(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx, mode, NULL));
 	}
-	return zend_hash_update_current_key(ht, key_type, arKey, nKeyLength, 0);
+	return zend_hash_update_current_key_ex(ht, key_type, arKey, nKeyLength, 0, mode, NULL);
 }
 /* }}} */
 
@@ -2020,10 +2074,10 @@ ZEND_API int zend_symtable_exists(HashTable *ht, const char *arKey, uint nKeyLen
 }
 /* }}} */
 
-ZEND_API int zend_symtable_update_current_key(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
+ZEND_API int zend_symtable_update_current_key(HashTable *ht, const char *arKey, uint nKeyLength, int mode) /* {{{ */
 {
-	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx));
-	return zend_hash_update_current_key(ht, HASH_KEY_IS_STRING, ZSTR(arKey), nKeyLength, 0);
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key_ex(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx, mode, NULL));
+	return zend_hash_update_current_key_ex(ht, HASH_KEY_IS_STRING, ZSTR(arKey), nKeyLength, 0, mode, NULL);
 }
 /* }}} */
 
