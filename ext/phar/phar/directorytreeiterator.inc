@@ -40,7 +40,7 @@ class DirectoryTreeIterator extends RecursiveIteratorIterator
 			$tree .= $this->getSubIterator($l)->hasNext() ? '| ' : '  ';
 		}
 		return $tree . ($this->getSubIterator($l)->hasNext() ? '|-' : '\-') 
-		       . $this->getSubIterator($l)->__toString();
+			   . $this->getSubIterator($l)->__toString();
 	}
 
 	/** Aggregates the inner iterator
