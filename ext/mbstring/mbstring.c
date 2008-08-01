@@ -821,6 +821,18 @@ static PHP_GINIT_FUNCTION(mbstring)
 /* {{{ PHP_GSHUTDOWN_FUNCTION */
 static PHP_GSHUTDOWN_FUNCTION(mbstring)
 {
+	if (mbstring_globals->http_input_list) {
+		free(mbstring_globals->http_input_list);
+	}
+#ifdef ZEND_MULTIBYTE
+	if (mbstring_globals->script_encoding_list) {
+		free(mbstring_globals->script_encoding_list);
+	}
+#endif /* ZEND_MULTIBYTE */
+	if (mbstring_globals->detect_order_list) {
+		free(mbstring_globals->detect_order_list);
+	}
+
 #if HAVE_MBREGEX
 	_php_mb_regex_globals_dtor(mbstring_globals TSRMLS_CC);
 #endif
@@ -859,18 +871,6 @@ PHP_MSHUTDOWN_FUNCTION(mbstring)
 {
 	UNREGISTER_INI_ENTRIES();
 	
-	if (MBSTRG(http_input_list)) {
-		free(MBSTRG(http_input_list));
-	}
-#ifdef ZEND_MULTIBYTE
-	if (MBSTRG(script_encoding_list)) {
-		free(MBSTRG(script_encoding_list));
-	}
-#endif /* ZEND_MULTIBYTE */
-	if (MBSTRG(detect_order_list)) {
-		free(MBSTRG(detect_order_list));
-	}
-
 #if HAVE_MBREGEX
 	PHP_MSHUTDOWN(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
 #endif
