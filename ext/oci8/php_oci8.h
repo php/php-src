@@ -50,6 +50,7 @@
 
 extern zend_module_entry oci8_module_entry;
 #define phpext_oci8_ptr &oci8_module_entry
+#define phpext_oci8_11g_ptr &oci8_module_entry
 
 
 PHP_MINIT_FUNCTION(oci);
