@@ -31,7 +31,7 @@ $phar->stopBuffering();
 ini_set('phar.readonly', 1);
 
 $fp = fopen($alias . '/b/c.php', 'wb');
-fwrite($fp, 'extra');
+fwrite($fp, b'extra');
 fclose($fp);
 include $alias . '/b/c.php';
 ?>

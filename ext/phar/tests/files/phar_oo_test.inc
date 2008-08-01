@@ -4,7 +4,7 @@ ini_set('date.timezone', 'GMT');
 
 $fname = dirname(__FILE__) . '/phar_oo_test.phar.php';
 $pname = 'phar://' . $fname;
-$file = '<?php include "' . $pname . '/a.php"; __HALT_COMPILER(); ?>';
+$file = (binary)'<?php include "' . $pname . '/a.php"; __HALT_COMPILER(); ?>';
 
 $files = array();
 

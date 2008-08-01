@@ -1,7 +1,7 @@
 --TEST--
 Phar front controller PHP test zip-based
 --INI--
-default_charset=
+default_charset=UTF-8
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
@@ -12,6 +12,6 @@ PATH_INFO=/a.php
 --FILE_EXTERNAL--
 files/frontcontroller.phar.zip
 --EXPECTHEADERS--
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 --EXPECT--
 hio

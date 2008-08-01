@@ -18,7 +18,7 @@ $files['b/c.php'] = '<?php echo "This is b/c\n"; ?>';
 include 'files/phar_test.inc';
 
 $fp = fopen($pname . '/b/new.php', 'wb');
-fwrite($fp, 'extra');
+fwrite($fp, b'extra');
 fclose($fp);
 include $pname . '/b/c.php';
 include $pname . '/b/new.php';

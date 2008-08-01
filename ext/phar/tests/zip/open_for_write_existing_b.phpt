@@ -37,7 +37,7 @@ function err_handler($errno, $errstr, $errfile, $errline) {
 set_error_handler("err_handler", E_RECOVERABLE_ERROR);
 
 $fp = fopen($alias . '/b/c.php', 'wb');
-fwrite($fp, 'extra');
+fwrite($fp, b'extra');
 fclose($fp);
 include $alias . '/b/c.php';
 ?>

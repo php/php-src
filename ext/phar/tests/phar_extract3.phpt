@@ -41,6 +41,6 @@ $dir = dirname(__FILE__) . '/test/';
 ?>
 --EXPECTF--
 Invalid argument, %sfiles/bogus.zip cannot be found
-phar://%sfiles/notbogus.zip/nonsense.txt
-phar://%sfiles/notbogus.zip/stuff.txt
+phar://%sfiles/notbogus.zip%cnonsense.txt
+phar://%sfiles/notbogus.zip%cstuff.txt
 ===DONE===

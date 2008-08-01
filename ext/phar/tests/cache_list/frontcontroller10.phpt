@@ -1,7 +1,7 @@
 --TEST--
 Phar front controller rewrite access denied [cache_list]
 --INI--
-default_charset=
+default_charset=UTF-8
 phar.cache_list={PWD}/frontcontroller10.php
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
@@ -12,7 +12,7 @@ PATH_INFO=/hi
 --FILE_EXTERNAL--
 files/frontcontroller4.phar
 --EXPECTHEADERS--
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 Status: 403 Access Denied
 --EXPECT--
 <html>

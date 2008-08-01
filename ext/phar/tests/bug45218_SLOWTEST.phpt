@@ -1,8 +1,11 @@
 --TEST--
 Phar::buildFromIterator() iterator, too many files for open file handles (Bug #45218)
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (getenv('SKIP_SLOW_TESTS')) die('skip'); ?>
+<?php
+if (!extension_loaded("phar")) die("skip");
+if (version_compare(PHP_VERSION, "6.0", ">")) die("skip pre-unicode version of PHP required");
+if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
+?>
 --INI--
 phar.require_hash=0
 phar.readonly=0

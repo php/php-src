@@ -5,7 +5,7 @@ if (function_exists('date_default_timezone_set')) {
 }
 
 $manifest = (binary)'';
-$glags = 0;
+$gflags = 0;
 
 foreach($files as $name => $cont)
 {

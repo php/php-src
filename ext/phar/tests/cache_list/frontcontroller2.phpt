@@ -1,7 +1,7 @@
 --TEST--
 Phar front controller PHP test [cache_list]
 --INI--
-default_charset=
+default_charset=UTF-8
 phar.cache_list=frontcontroller2.php
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
@@ -12,6 +12,6 @@ PATH_INFO=/a.php
 --FILE_EXTERNAL--
 files/frontcontroller.phar
 --EXPECTHEADERS--
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 --EXPECT--
 hio

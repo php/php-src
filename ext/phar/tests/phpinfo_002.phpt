@@ -35,7 +35,7 @@ OpenSSL support => disabled (install ext/openssl)
 
 Phar based on pear/PHP_Archive, original concept by Davey Shafik.
 Phar fully realized by Gregory Beaver and Marcus Boerger.
-Portions of tar implementation Copyright (c) 2003-2007 Tim Kientzle.
+Portions of tar implementation Copyright (c) 2003-2008 Tim Kientzle.
 Directive => Local Value => Master Value
 phar.cache_list => no value => no value
 phar.readonly => On => On
