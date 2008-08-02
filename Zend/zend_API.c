@@ -940,7 +940,6 @@ static int zend_merge_property(zval **value TSRMLS_DC, int num_args, va_list arg
 		zval *obj = va_arg(args, zval *);
 		zend_object_handlers *obj_ht = va_arg(args, zend_object_handlers *);
 		zval *member;
-		TSRMLS_FETCH();
 
 		MAKE_STD_ZVAL(member);
 		ZVAL_STRINGL(member, hash_key->arKey, hash_key->nKeyLength-1, 1);
