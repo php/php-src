@@ -163,7 +163,6 @@ MBSTRING_API int php_mb_stripos(int mode, char *old_haystack, int old_haystack_l
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	enum mbfl_no_language language;
-	enum mbfl_no_language current_language;
 	enum mbfl_no_encoding internal_encoding;
 	enum mbfl_no_encoding current_internal_encoding;
 #ifdef ZEND_MULTIBYTE
