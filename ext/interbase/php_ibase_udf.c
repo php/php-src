@@ -192,10 +192,14 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 		INIT_ZVAL(callback);
 		ZVAL_STRING(&callback,name,0);
 
+		LOCK();
+		
 		/* check if the requested function exists */
-		if (!zend_is_callable(&callback, 0, NULL)) {
+		if (!zend_is_callable(&callback, 0, NULL TSRMLS_CC)) {
 			break;
 		}
+		
+		UNLOCK();
 	
 		/* create the argument array */
 		for (i = 0; i < argc; ++i) {
