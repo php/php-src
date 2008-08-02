@@ -285,7 +285,7 @@ ZEND_API void zend_wrong_param_count(TSRMLS_D);
 #define IS_CALLABLE_STRICT  (IS_CALLABLE_CHECK_IS_STATIC)
 
 ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval **object_pp, uint check_flags, zval *callable_name, zend_fcall_info_cache *fcc, char **error TSRMLS_DC);
-ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, zval *callable_name);
+ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, zval *callable_name TSRMLS_DC);
 ZEND_API zend_bool zend_make_callable(zval *callable, zval *callable_name TSRMLS_DC);
 ZEND_API const char *zend_get_module_version(const char *module_name);
 ZEND_API int zend_get_module_started(char *module_name);

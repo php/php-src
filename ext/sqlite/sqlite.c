@@ -3556,14 +3556,14 @@ PHP_FUNCTION(sqlite_create_aggregate)
 		DB_FROM_ZVAL(db, &zdb);
 	}
 
-	if (!zend_is_callable(zstep, 0, &callable)) {
+	if (!zend_is_callable(zstep, 0, &callable TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "step function `%R' is not callable", Z_TYPE(callable), Z_UNIVAL(callable));
 		zval_dtor(&callable);
 		return;
 	}
 	zval_dtor(&callable);
 
-	if (!zend_is_callable(zfinal, 0, &callable)) {
+	if (!zend_is_callable(zfinal, 0, &callable TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "finalize function `%R' is not callable", Z_TYPE(callable), Z_UNIVAL(callable));
 		zval_dtor(&callable);
 		return;
@@ -3607,7 +3607,7 @@ PHP_FUNCTION(sqlite_create_function)
 		DB_FROM_ZVAL(db, &zdb);
 	}
 
-	if (!zend_is_callable(zcall, 0, &callable)) {
+	if (!zend_is_callable(zcall, 0, &callable TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function `%R' is not callable", Z_TYPE(callable), Z_UNIVAL(callable));
 		zval_dtor(&callable);
 		return;

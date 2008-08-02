@@ -728,7 +728,7 @@ PHP_FUNCTION(pcntl_signal)
 		RETURN_TRUE;
 	}
 	
-	if (!zend_is_callable(handle, 0, &func_name)) {
+	if (!zend_is_callable(handle, 0, &func_name TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%R is not a callable function name error", Z_TYPE(func_name), Z_UNIVAL(func_name));
 		zval_dtor(&func_name);
 		RETURN_FALSE;

@@ -2140,7 +2140,7 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 	}
 
 	/* callable? */
-	if (!zend_is_callable(callback, 0, &callback_name)) {
+	if (!zend_is_callable(callback, 0, &callback_name TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Two arguments expected for '%R' to be a valid callback", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
 		zval_dtor(&callback_name);
 		RETURN_FALSE;

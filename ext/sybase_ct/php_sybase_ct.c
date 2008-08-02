@@ -2363,7 +2363,7 @@ PHP_FUNCTION(sybase_set_message_handler)
 		case IS_ARRAY:
 		case IS_STRING:
 			/* Either "function", array("class", "function") or array($object, "function") */
-			if (!zend_is_callable(*param, 0, &name)) {
+			if (!zend_is_callable(*param, 0, &name TSRMLS_CC)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argumented is expected to be a valid callback, '%R' was given", Z_TYPE(name), Z_UNIVAL(name));
 				zval_dtor(&name);
 				RETURN_FALSE;
