@@ -284,7 +284,7 @@ define('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
 function save_or_mail_results()
 {
 	global $sum_results, $just_save_results, $failed_test_summary,
-	       $PHP_FAILED_TESTS, $CUR_DIR, $php, $output_file;
+	       $PHP_FAILED_TESTS, $CUR_DIR, $php, $output_file, $compression;
 
 	/* We got failed Tests, offer the user to send an e-mail to QA team, unless NO_INTERACTION is set */
 	if (!getenv('NO_INTERACTION')) {
