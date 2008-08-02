@@ -628,7 +628,7 @@ static int php_array_user_compare(const void *a, const void *b TSRMLS_DC) /* {{{
 
 /* check if comparison function is valid */
 #define PHP_ARRAY_CMP_FUNC_CHECK(func_name)	\
-	if (!zend_is_callable(*func_name, 0, NULL)) {	\
+	if (!zend_is_callable(*func_name, 0, NULL TSRMLS_CC)) {	\
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid comparison function");	\
 		BG(user_compare_fci) = old_user_compare_fci; \
 		BG(user_compare_fci_cache) = old_user_compare_fci_cache; \

@@ -802,7 +802,7 @@ static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * 
 		method = &callable;
 	}
 	
-	if (!method || !zend_is_callable(callable, 0, NULL)) {
+	if (!method || !zend_is_callable(callable, 0, NULL TSRMLS_CC)) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied function must be a valid callback" TSRMLS_CC);
 		return 0;
 	}

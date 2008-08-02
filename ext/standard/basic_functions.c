@@ -5298,7 +5298,7 @@ static int user_shutdown_function_call(php_shutdown_function_entry *shutdown_fun
 	zval retval;
 	zval function_name;
 
-	if (!zend_is_callable(shutdown_function_entry->arguments[0], 0, &function_name)) {
+	if (!zend_is_callable(shutdown_function_entry->arguments[0], 0, &function_name TSRMLS_CC)) {
 		php_error(E_WARNING, "(Registered shutdown functions) Unable to call %R() - function does not exist", Z_TYPE(function_name), Z_UNIVAL(function_name));
 		zval_dtor(&function_name);
 		return 0;
@@ -5441,7 +5441,7 @@ PHP_FUNCTION(register_shutdown_function)
 	}
 
 	/* Prevent entering of anything but valid callback (syntax check only!) */
-	if (!zend_is_callable(shutdown_function_entry.arguments[0], 0, &function_name)) {
+	if (!zend_is_callable(shutdown_function_entry.arguments[0], 0, &function_name TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid shutdown callback '%R' passed", Z_TYPE(function_name), Z_UNIVAL(function_name));
 		efree(shutdown_function_entry.arguments);
 		RETVAL_FALSE;

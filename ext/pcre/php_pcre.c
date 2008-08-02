@@ -1463,7 +1463,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 		if (Z_TYPE_P(replace) != IS_ARRAY && Z_TYPE_P(replace) != IS_OBJECT) {
 			convert_to_text(replace);
 		}
-		if (!zend_is_callable(replace, 0, &callback_name)) {
+		if (!zend_is_callable(replace, 0, &callback_name TSRMLS_CC)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Requires argument 2, '%R', to be a valid callback", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
 			zval_dtor(&callback_name);
 			*return_value = *subject;

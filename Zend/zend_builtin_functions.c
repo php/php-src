@@ -1506,7 +1506,7 @@ ZEND_FUNCTION(set_error_handler)
 		return;
 	}
 
-	if (!zend_is_callable(error_handler, 0, &error_handler_name)) {
+	if (!zend_is_callable(error_handler, 0, &error_handler_name TSRMLS_CC)) {
 		zend_error(E_WARNING, "%v() expects the argument (%R) to be a valid callback",
 				   get_active_function_name(TSRMLS_C), Z_TYPE(error_handler_name), Z_UNIVAL(error_handler_name));
 		zval_dtor(&error_handler_name);
@@ -1576,7 +1576,7 @@ ZEND_FUNCTION(set_exception_handler)
 	}
 
 	if (Z_TYPE_P(exception_handler) != IS_NULL) { /* NULL == unset */
-		if (!zend_is_callable(exception_handler, 0, &exception_handler_name)) {
+		if (!zend_is_callable(exception_handler, 0, &exception_handler_name TSRMLS_CC)) {
 			zend_error(E_WARNING, "%v() expects the argument (%R) to be a valid callback",
 					   get_active_function_name(TSRMLS_C), Z_TYPE(exception_handler_name), Z_UNIVAL(exception_handler_name));
 			zval_dtor(&exception_handler_name);

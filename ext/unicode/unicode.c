@@ -237,7 +237,7 @@ PHP_FUNCTION(unicode_set_error_handler)
 	}
 
 	if (Z_TYPE_P(error_handler) != IS_NULL) { /* NULL == unset */
-		if (!zend_is_callable(error_handler, 0, &error_handler_name)) {
+		if (!zend_is_callable(error_handler, 0, &error_handler_name TSRMLS_CC)) {
 			zend_error(E_WARNING, "%v() expects the argument (%R) to be a valid callback",
 					   get_active_function_name(TSRMLS_C), Z_TYPE(error_handler_name), Z_UNIVAL(error_handler_name));
 			zval_dtor(&error_handler_name);

@@ -964,7 +964,7 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(pData->server->introspection_map));
 	while(1) {
 		if(zend_hash_get_current_data(Z_ARRVAL_P(pData->server->introspection_map), (void**)&php_function) == SUCCESS) {
-			if (zend_is_callable(*php_function, 0, &php_function_name)) {
+			if (zend_is_callable(*php_function, 0, &php_function_name TSRMLS_CC)) {
 				/* php func prototype: function string user_func($user_params) */
 				if (call_user_function(CG(function_table), NULL, *php_function, &retval, 1, callback_params TSRMLS_CC) == SUCCESS) {
 					XMLRPC_VALUE xData;

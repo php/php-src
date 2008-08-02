@@ -1477,7 +1477,7 @@ PHP_FUNCTION(mysqli_set_local_infile_handler)
 	}
 
 	/* check callback function */
-	if (!zend_is_callable(callback_func, 0, &callback_name)) {
+	if (!zend_is_callable(callback_func, 0, &callback_name TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback function %R", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
 		zval_dtor(&callback_name);
 		RETURN_FALSE;
