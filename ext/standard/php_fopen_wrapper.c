@@ -142,6 +142,7 @@ static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, i
 
 	p = php_strtok_r(filterlist, "|", &token);
 	while (p) {
+		php_url_decode(p, strlen(p));
 		if (read_chain) {
 			if ((temp_filter = php_stream_filter_create(p, NULL, php_stream_is_persistent(stream) TSRMLS_CC))) {
 				php_stream_filter_append(&stream->readfilters, temp_filter);
