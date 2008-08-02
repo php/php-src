@@ -1,3 +1,831 @@
+2008-08-01  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/mbstring/libmbfl/mbfl/mbfilter.c
+      ext/mbstring/libmbfl/mbfl/mbfilter.c
+      ext/mbstring/tests/bug43993.phpt
+      ext/mbstring/tests/bug43993.phpt:
+      - MFH: Fixed bug #43993 (mb_substr_count() behaves differently to
+      substr_count() with overlapping needles)
+
+    * ext/mbstring/tests/bug43993.phpt
+      ext/mbstring/tests/bug43993.phpt
+      ext/mbstring/tests/bug43993.phpt:
+        1.1.4;
+      - Add a test for bug #43993.
+
+    * ext/mbstring/libmbfl/mbfl/mbfilter.c:
+      - Fixed bug #43993 (mb_substr_count() behaves differently to substr_count()
+      with overlapping needles)
+
+    * (PHP_5_2)
+      ext/mbstring/mbstring.c:
+      - Move finalization code to the proper place
+
+2008-08-01  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      remove unneeded define
+
+2008-08-01  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gettext/config.w32:
+      - use static lib first if found
+
+    * (PHP_5_3)
+      ext/pdo_oci/config.w32:
+      - MFH: fix EOL broken by previous commit
+
+    * ext/pdo_oci/config.w32:
+      - fix EOL broken by previous commit
+
+    * (PHP_5_3)
+      ext/pdo_oci/config.w32:
+      drop 8.x support
+
+2008-08-01  Steph Fox  <steph.fox@virgin.net>
+
+    * ext/phar/tests/cache_list/.cvsignore
+      ext/phar/tests/cache_list/frontcontroller1.phpt
+      ext/phar/tests/cache_list/frontcontroller10.phpt
+      ext/phar/tests/cache_list/frontcontroller11.phpt
+      ext/phar/tests/cache_list/frontcontroller12.phpt
+      ext/phar/tests/cache_list/frontcontroller13.phpt
+      ext/phar/tests/cache_list/frontcontroller14.phpt
+      ext/phar/tests/cache_list/frontcontroller15.phpt
+      ext/phar/tests/cache_list/frontcontroller16.phpt
+      ext/phar/tests/cache_list/frontcontroller17.phpt
+      ext/phar/tests/cache_list/frontcontroller18.phpt
+      ext/phar/tests/cache_list/frontcontroller19.phpt
+      ext/phar/tests/cache_list/frontcontroller2.phpt
+      ext/phar/tests/cache_list/frontcontroller20.phpt
+      ext/phar/tests/cache_list/frontcontroller21.phpt
+      ext/phar/tests/cache_list/frontcontroller22.phpt
+      ext/phar/tests/cache_list/frontcontroller23.phpt
+      ext/phar/tests/cache_list/frontcontroller24.phpt
+      ext/phar/tests/cache_list/frontcontroller25.phpt
+      ext/phar/tests/cache_list/frontcontroller26.phpt
+      ext/phar/tests/cache_list/frontcontroller27.phpt
+      ext/phar/tests/cache_list/frontcontroller28.phpt
+      ext/phar/tests/cache_list/frontcontroller29.phpt
+      ext/phar/tests/cache_list/frontcontroller3.phpt
+      ext/phar/tests/cache_list/frontcontroller30.phpt
+      ext/phar/tests/cache_list/frontcontroller31.phpt
+      ext/phar/tests/cache_list/frontcontroller32.phpt
+      ext/phar/tests/cache_list/frontcontroller33.phpt
+      ext/phar/tests/cache_list/frontcontroller34.phpt
+      ext/phar/tests/cache_list/frontcontroller4.phpt
+      ext/phar/tests/cache_list/frontcontroller5.phpt
+      ext/phar/tests/cache_list/frontcontroller6.phpt
+      ext/phar/tests/cache_list/frontcontroller7.phpt
+      ext/phar/tests/cache_list/frontcontroller8.phpt
+      ext/phar/tests/cache_list/frontcontroller9.phpt
+      ext/phar/tests/cache_list/files/frontcontroller.phar
+      ext/phar/tests/cache_list/files/frontcontroller10.phar
+      ext/phar/tests/cache_list/files/frontcontroller11.phar
+      ext/phar/tests/cache_list/files/frontcontroller12.phar
+      ext/phar/tests/cache_list/files/frontcontroller13.phar
+      ext/phar/tests/cache_list/files/frontcontroller14.phar
+      ext/phar/tests/cache_list/files/frontcontroller16.phar
+      ext/phar/tests/cache_list/files/frontcontroller17.phar
+      ext/phar/tests/cache_list/files/frontcontroller18.phar
+      ext/phar/tests/cache_list/files/frontcontroller19.phar
+      ext/phar/tests/cache_list/files/frontcontroller2.phar
+      ext/phar/tests/cache_list/files/frontcontroller3.phar
+      ext/phar/tests/cache_list/files/frontcontroller4.phar
+      ext/phar/tests/cache_list/files/frontcontroller5.phar
+      ext/phar/tests/cache_list/files/frontcontroller6.phar
+      ext/phar/tests/cache_list/files/frontcontroller7.phar
+      ext/phar/tests/cache_list/files/frontcontroller8.phar
+      ext/phar/tests/cache_list/files/frontcontroller9.phar:
+      - Somehow 'cvs add' managed to ignore these completely(?)
+
+    * ext/phar/stream.c:
+      - Merge Dmitry's changes from PHP_5_3 branch
+
+2008-08-01  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/oci8/config.w32
+      ext/oci8/php_oci8.h:
+      - MFH: support for Oracle 11g (either 8 or 11g can be built but not both
+
+    * ext/oci8/config.w32
+      ext/oci8/php_oci8.h:
+      - support for Oracle 11g (either 8 or 11g can be built but not both
+
+2008-08-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ext/phar/stream.c:
+      Fixed bug #44100 (Inconsistent handling of static array declarations with
+      duplicate keys)
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.h
+      ZendEngine2/zend_hash.h
+      ZendEngine2/tests/bug28072.phpt
+      ZendEngine2/tests/bug28072.phpt:
+      Fixed bug #44100 (Inconsistent handling of static array declarations with
+      duplicate keys).
+
+2008-08-01  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      ext/phar/build_precommand.php
+      ext/phar/dirstream.c
+      ext/phar/dirstream.h
+      ext/phar/func_interceptors.c
+      ext/phar/func_interceptors.h
+      ext/phar/makestub.php
+      ext/phar/phar.c
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/phar_path_check.c
+      ext/phar/phar_path_check.re
+      ext/phar/php_phar.h
+      ext/phar/shortarc.php
+      ext/phar/stream.c
+      ext/phar/stream.h
+      ext/phar/tar.c
+      ext/phar/util.c
+      ext/phar/zip.c:
+      - ws/cs, macros, code that only affects other branches
+      - some unsynced changes need valgrind testing before they can go into this
+      branch, see PECL/HEAD
+
+    * ext/phar/Makefile.frag
+      ext/phar/build_precommand.php
+      ext/phar/cgidebug
+      ext/phar/config.m4
+      ext/phar/config.w32
+      ext/phar/dirstream.c
+      ext/phar/dirstream.h
+      ext/phar/func_interceptors.c
+      ext/phar/func_interceptors.h
+      ext/phar/makestub.php
+      ext/phar/package.php
+      ext/phar/phar.c
+      ext/phar/phar.phar
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/phar_path_check.c
+      ext/phar/phar_path_check.re
+      ext/phar/php_phar.h
+      ext/phar/stream.c
+      ext/phar/stream.h
+      ext/phar/tar.c
+      ext/phar/util.c
+      ext/phar/zip.c:
+      - This is as good as it gets in HEAD at present (~30% tests fail here)
+
+    * (PHP_5_3)
+      ext/phar/phar/clicommand.inc
+      ext/phar/phar/directorygraphiterator.inc
+      ext/phar/phar/directorytreeiterator.inc
+      ext/phar/phar/invertedregexiterator.inc
+      ext/phar/phar/phar.inc
+      ext/phar/phar/phar.php
+      ext/phar/phar/pharcommand.inc:
+      - Merge ws/cs fixes to bring all branches into sync
+
+    * ext/phar/phar/clicommand.inc
+      ext/phar/phar/directorygraphiterator.inc
+      ext/phar/phar/directorytreeiterator.inc
+      ext/phar/phar/invertedregexiterator.inc
+      ext/phar/phar/phar.inc
+      ext/phar/phar/phar.php
+      ext/phar/phar/pharcommand.inc:
+      - Bring phar command into sync with 5_3 and PECL
+
+    * (PHP_5_3)
+      ext/phar/tests/009.phpt
+      ext/phar/tests/010.phpt
+      ext/phar/tests/014.phpt
+      ext/phar/tests/017.phpt
+      ext/phar/tests/017U.phpt
+      ext/phar/tests/018.phpt
+      ext/phar/tests/018U.phpt
+      ext/phar/tests/019.phpt
+      ext/phar/tests/019b.phpt
+      ext/phar/tests/019bU.phpt
+      ext/phar/tests/019c.phpt
+      ext/phar/tests/019cU.phpt
+      ext/phar/tests/020.phpt
+      ext/phar/tests/021.phpt
+      ext/phar/tests/027.phpt
+      ext/phar/tests/027U.phpt
+      ext/phar/tests/033a.phpt
+      ext/phar/tests/badparameters.phpt
+      ext/phar/tests/bug45218_SLOWTEST.phpt
+      ext/phar/tests/bug45218_SLOWTESTU.phpt
+      ext/phar/tests/cached_manifest_1.phpt
+      ext/phar/tests/cached_manifest_1U.phpt
+      ext/phar/tests/fgc_edgecases.phpt
+      ext/phar/tests/fopen_edgecases2.phpt
+      ext/phar/tests/front.phar.phpt
+      ext/phar/tests/frontcontroller10.phpt
+      ext/phar/tests/frontcontroller12.phpt
+      ext/phar/tests/frontcontroller13.phpt
+      ext/phar/tests/frontcontroller15.phpt
+      ext/phar/tests/frontcontroller16.phpt
+      ext/phar/tests/frontcontroller2.phpt
+      ext/phar/tests/frontcontroller21.phpt
+      ext/phar/tests/frontcontroller22.phpt
+      ext/phar/tests/frontcontroller23.phpt
+      ext/phar/tests/frontcontroller24.phpt
+      ext/phar/tests/frontcontroller25.phpt
+      ext/phar/tests/frontcontroller27.phpt
+      ext/phar/tests/frontcontroller28.phpt
+      ext/phar/tests/frontcontroller29.phpt
+      ext/phar/tests/frontcontroller3.phpt
+      ext/phar/tests/frontcontroller31.phpt
+      ext/phar/tests/frontcontroller32.phpt
+      ext/phar/tests/frontcontroller33.phpt
+      ext/phar/tests/frontcontroller34.phpt
+      ext/phar/tests/frontcontroller9.phpt
+      ext/phar/tests/ini_set.phpt
+      ext/phar/tests/ini_setU.phpt
+      ext/phar/tests/ini_set_off.phpt
+      ext/phar/tests/ini_set_offU.phpt
+      ext/phar/tests/metadata_read.phpt
+      ext/phar/tests/metadata_readU.phpt
+      ext/phar/tests/metadata_write.phpt
+      ext/phar/tests/metadata_writeU.phpt
+      ext/phar/tests/metadata_write_commit.phpt
+      ext/phar/tests/metadata_write_commitU.phpt
+      ext/phar/tests/mounteddir.phpt
+      ext/phar/tests/mounteddirU.phpt
+      ext/phar/tests/open_for_write_existing.phpt
+      ext/phar/tests/open_for_write_existing_b_5_2.phpt
+      ext/phar/tests/open_for_write_existing_c_5_2.phpt
+      ext/phar/tests/open_for_write_newfile.phpt
+      ext/phar/tests/open_for_write_newfile_b_5_2.phpt
+      ext/phar/tests/open_for_write_newfile_c_5_2.phpt
+      ext/phar/tests/opendir.phpt
+      ext/phar/tests/opendir_edgecases.phpt
+      ext/phar/tests/phar_begin_setstub_commit.phpt
+      ext/phar/tests/phar_begin_setstub_commitU.phpt
+      ext/phar/tests/phar_buildfromdirectory1.phpt
+      ext/phar/tests/phar_buildfromdirectory2.phpt
+      ext/phar/tests/phar_buildfromdirectory3.phpt
+      ext/phar/tests/phar_buildfromiterator1.phpt
+      ext/phar/tests/phar_buildfromiterator10.phpt
+      ext/phar/tests/phar_buildfromiterator10U.phpt
+      ext/phar/tests/phar_buildfromiterator3.phpt
+      ext/phar/tests/phar_buildfromiterator5.phpt
+      ext/phar/tests/phar_buildfromiterator6.phpt
+      ext/phar/tests/phar_buildfromiterator7.phpt
+      ext/phar/tests/phar_bz2.phpt
+      ext/phar/tests/phar_bz2U.phpt
+      ext/phar/tests/phar_ctx_001.phpt
+      ext/phar/tests/phar_decompress.phpt
+      ext/phar/tests/phar_dir_iterate.phpt
+      ext/phar/tests/phar_extract.phpt
+      ext/phar/tests/phar_extract2.phpt
+      ext/phar/tests/phar_extract3.phpt
+      ext/phar/tests/phar_gzip.phpt
+      ext/phar/tests/phar_gzipU.phpt
+      ext/phar/tests/phar_isvalidpharfilename.phpt
+      ext/phar/tests/phar_metadata_read.phpt
+      ext/phar/tests/phar_metadata_readU.phpt
+      ext/phar/tests/phar_metadata_write.phpt
+      ext/phar/tests/phar_metadata_writeU.phpt
+      ext/phar/tests/phar_oo_001.phpt
+      ext/phar/tests/phar_oo_001U.phpt
+      ext/phar/tests/phar_oo_002.phpt
+      ext/phar/tests/phar_oo_002U.phpt
+      ext/phar/tests/phar_oo_003.phpt
+      ext/phar/tests/phar_oo_004.phpt
+      ext/phar/tests/phar_oo_004U.phpt
+      ext/phar/tests/phar_oo_005.phpt
+      ext/phar/tests/phar_oo_005U.phpt
+      ext/phar/tests/phar_oo_005_5.2.phpt
+      ext/phar/tests/phar_oo_compressed_002.phpt
+      ext/phar/tests/phar_oo_compressed_002b.phpt
+      ext/phar/tests/phar_stub.phpt
+      ext/phar/tests/phar_stub_error.phpt
+      ext/phar/tests/phar_stub_write.phpt
+      ext/phar/tests/phar_stub_write_file.phpt
+      ext/phar/tests/phar_unlinkarchive.phpt
+      ext/phar/tests/pharfileinfo_construct.phpt
+      ext/phar/tests/phpinfo_001.phpt
+      ext/phar/tests/phpinfo_002.phpt
+      ext/phar/tests/phpinfo_003.phpt
+      ext/phar/tests/phpinfo_004.phpt
+      ext/phar/tests/refcount1.phpt
+      ext/phar/tests/rename_dir.phpt
+      ext/phar/tests/rmdir.phpt
+      ext/phar/tests/withphar_web.phpt
+      ext/phar/tests/cache_list/frontcontroller10.phpt
+      ext/phar/tests/cache_list/frontcontroller11.phpt
+      ext/phar/tests/cache_list/frontcontroller12.phpt
+      ext/phar/tests/cache_list/frontcontroller13.phpt
+      ext/phar/tests/cache_list/frontcontroller15.phpt
+      ext/phar/tests/cache_list/frontcontroller16.phpt
+      ext/phar/tests/cache_list/frontcontroller2.phpt
+      ext/phar/tests/cache_list/frontcontroller21.phpt
+      ext/phar/tests/cache_list/frontcontroller22.phpt
+      ext/phar/tests/cache_list/frontcontroller23.phpt
+      ext/phar/tests/cache_list/frontcontroller24.phpt
+      ext/phar/tests/cache_list/frontcontroller25.phpt
+      ext/phar/tests/cache_list/frontcontroller27.phpt
+      ext/phar/tests/cache_list/frontcontroller28.phpt
+      ext/phar/tests/cache_list/frontcontroller29.phpt
+      ext/phar/tests/cache_list/frontcontroller3.phpt
+      ext/phar/tests/cache_list/frontcontroller31.phpt
+      ext/phar/tests/cache_list/frontcontroller32.phpt
+      ext/phar/tests/cache_list/frontcontroller33.phpt
+      ext/phar/tests/cache_list/frontcontroller34.phpt
+      ext/phar/tests/cache_list/frontcontroller9.phpt
+      ext/phar/tests/files/phar_oo_test.inc
+      ext/phar/tests/files/phar_test.inc
+      ext/phar/tests/tar/all.phpt
+      ext/phar/tests/tar/allU.phpt
+      ext/phar/tests/tar/frontcontroller10.phar.phpt
+      ext/phar/tests/tar/frontcontroller12.phar.phpt
+      ext/phar/tests/tar/frontcontroller13.phar.phpt
+      ext/phar/tests/tar/frontcontroller15.phar.phpt
+      ext/phar/tests/tar/frontcontroller16.phar.phpt
+      ext/phar/tests/tar/frontcontroller2.phar.phpt
+      ext/phar/tests/tar/frontcontroller21.phar.phpt
+      ext/phar/tests/tar/frontcontroller3.phar.phpt
+      ext/phar/tests/tar/frontcontroller9.phar.phpt
+      ext/phar/tests/tar/open_for_write_existing.phpt
+      ext/phar/tests/tar/open_for_write_existing_b.phpt
+      ext/phar/tests/tar/open_for_write_existing_b_5_2.phpt
+      ext/phar/tests/tar/open_for_write_existing_c_5_2.phpt
+      ext/phar/tests/tar/open_for_write_newfile.phpt
+      ext/phar/tests/tar/open_for_write_newfile_b_5_2.phpt
+      ext/phar/tests/tar/open_for_write_newfile_c_5_2.phpt
+      ext/phar/tests/tar/phar_begin_setstub_commit.phpt
+      ext/phar/tests/tar/phar_begin_setstub_commitU.phpt
+      ext/phar/tests/tar/phar_buildfromiterator5.phpt
+      ext/phar/tests/tar/phar_buildfromiterator6.phpt
+      ext/phar/tests/tar/phar_buildfromiterator7.phpt
+      ext/phar/tests/tar/phar_stub.phpt
+      ext/phar/tests/tar/phar_stub_error.phpt
+      ext/phar/tests/tar/refcount1.phpt
+      ext/phar/tests/tar/tar_004.phpt
+      ext/phar/tests/tar/tar_004U.phpt
+      ext/phar/tests/tar/tar_bz2.phpt
+      ext/phar/tests/tar/tar_bz2U.phpt
+      ext/phar/tests/tar/tar_gzip.phpt
+      ext/phar/tests/tar/tar_gzipU.phpt
+      ext/phar/tests/zip/all.phpt
+      ext/phar/tests/zip/allU.phpt
+      ext/phar/tests/zip/frontcontroller10.phar.phpt
+      ext/phar/tests/zip/frontcontroller12.phar.phpt
+      ext/phar/tests/zip/frontcontroller13.phar.phpt
+      ext/phar/tests/zip/frontcontroller15.phar.phpt
+      ext/phar/tests/zip/frontcontroller16.phar.phpt
+      ext/phar/tests/zip/frontcontroller2.phar.phpt
+      ext/phar/tests/zip/frontcontroller21.phar.phpt
+      ext/phar/tests/zip/frontcontroller3.phar.phpt
+      ext/phar/tests/zip/frontcontroller9.phar.phpt
+      ext/phar/tests/zip/metadata_write_commit.phpt
+      ext/phar/tests/zip/metadata_write_commitU.phpt
+      ext/phar/tests/zip/notphar.phpt
+      ext/phar/tests/zip/odt.phpt
+      ext/phar/tests/zip/open_for_write_existing.phpt
+      ext/phar/tests/zip/open_for_write_existing_b.phpt
+      ext/phar/tests/zip/open_for_write_existing_b_5_2.phpt
+      ext/phar/tests/zip/open_for_write_existing_c.phpt
+      ext/phar/tests/zip/open_for_write_existing_c_5_2.phpt
+      ext/phar/tests/zip/open_for_write_newfile.phpt
+      ext/phar/tests/zip/open_for_write_newfile_b.phpt
+      ext/phar/tests/zip/open_for_write_newfile_b_5_2.phpt
+      ext/phar/tests/zip/open_for_write_newfile_c.phpt
+      ext/phar/tests/zip/open_for_write_newfile_c_5_2.phpt
+      ext/phar/tests/zip/phar_begin_setstub_commit.phpt
+      ext/phar/tests/zip/phar_begin_setstub_commitU.phpt
+      ext/phar/tests/zip/phar_buildfromiterator5.phpt
+      ext/phar/tests/zip/phar_buildfromiterator6.phpt
+      ext/phar/tests/zip/phar_buildfromiterator7.phpt
+      ext/phar/tests/zip/phar_magic.phpt
+      ext/phar/tests/zip/phar_magicU.phpt
+      ext/phar/tests/zip/phar_stub.phpt
+      ext/phar/tests/zip/phar_stub_error.phpt
+      ext/phar/tests/zip/refcount1.phpt
+      ext/phar/tests/zip/unixzip.phpt:
+      - MFH Bring phar tests into line across all branches
+
+    * ext/phar/tests/tar/allU.phpt
+      ext/phar/tests/tar/allU.phpt
+      ext/phar/tests/tar/bignames.phpt
+      ext/phar/tests/tar/frontcontroller11.phar.phpt
+      ext/phar/tests/tar/frontcontroller9.phar.phpt
+      ext/phar/tests/tar/links.phpt
+      ext/phar/tests/tar/links3.phpt
+      ext/phar/tests/tar/links4.phpt
+      ext/phar/tests/tar/links5.phpt
+      ext/phar/tests/tar/open_for_write_existing.phpt
+      ext/phar/tests/tar/open_for_write_existing_b.phpt
+      ext/phar/tests/tar/open_for_write_existing_b_5_2.phpt
+      ext/phar/tests/tar/open_for_write_existing_c.phpt
+      ext/phar/tests/tar/open_for_write_existing_c_5_2.phpt
+      ext/phar/tests/tar/open_for_write_newfile.phpt
+      ext/phar/tests/tar/open_for_write_newfile_b.phpt
+      ext/phar/tests/tar/open_for_write_newfile_b_5_2.phpt
+      ext/phar/tests/tar/open_for_write_newfile_c.phpt
+      ext/phar/tests/tar/open_for_write_newfile_c_5_2.phpt
+      ext/phar/tests/tar/phar_begin_setstub_commit.phpt
+      ext/phar/tests/tar/phar_begin_setstub_commitU.phpt
+      ext/phar/tests/tar/phar_begin_setstub_commitU.phpt
+      ext/phar/tests/tar/phar_buildfromiterator5.phpt
+      ext/phar/tests/tar/phar_buildfromiterator6.phpt
+      ext/phar/tests/tar/phar_buildfromiterator7.phpt
+      ext/phar/tests/tar/phar_setsignaturealgo2.phpt
+      ext/phar/tests/tar/phar_stub.phpt
+      ext/phar/tests/tar/phar_stub_error.phpt
+      ext/phar/tests/tar/refcount1.phpt
+      ext/phar/tests/tar/rename_dir.phpt
+      ext/phar/tests/tar/require_hash.phpt
+      ext/phar/tests/tar/rmdir.phpt
+      ext/phar/tests/tar/tar_003.phpt
+      ext/phar/tests/tar/tar_004.phpt
+      ext/phar/tests/tar/tar_004U.phpt
+      ext/phar/tests/tar/tar_004U.phpt
+      ext/phar/tests/tar/tar_bz2.phpt
+      ext/phar/tests/tar/tar_bz2U.phpt
+      ext/phar/tests/tar/tar_bz2U.phpt
+      ext/phar/tests/tar/tar_gzip.phpt
+      ext/phar/tests/tar/tar_gzipU.phpt
+      ext/phar/tests/tar/tar_gzipU.phpt
+      ext/phar/tests/tar/tar_nostub.phpt
+      ext/phar/tests/tar/files/frontcontroller.phar.tar
+      ext/phar/tests/tar/files/frontcontroller10.phar.tar
+      ext/phar/tests/tar/files/frontcontroller11.phar.tar
+      ext/phar/tests/tar/files/frontcontroller12.phar.tar
+      ext/phar/tests/tar/files/frontcontroller2.phar.tar
+      ext/phar/tests/tar/files/frontcontroller3.phar.tar
+      ext/phar/tests/tar/files/frontcontroller4.phar.tar
+      ext/phar/tests/tar/files/frontcontroller5.phar.tar
+      ext/phar/tests/tar/files/frontcontroller6.phar.inc
+      ext/phar/tests/tar/files/frontcontroller6.phar.tar
+      ext/phar/tests/tar/files/frontcontroller7.phar.inc
+      ext/phar/tests/tar/files/frontcontroller7.phar.tar
+      ext/phar/tests/tar/files/frontcontroller8.phar.tar
+      ext/phar/tests/tar/files/frontcontroller9.phar.tar
+      ext/phar/tests/tar/files/tarmaker.php.inc
+      ext/phar/tests/zip/all.phpt
+      ext/phar/tests/zip/allU.phpt
+      ext/phar/tests/zip/allU.phpt
+      ext/phar/tests/zip/frontcontroller11.phar.phpt
+      ext/phar/tests/zip/metadata_write_commit.phpt
+      ext/phar/tests/zip/metadata_write_commitU.phpt
+      ext/phar/tests/zip/metadata_write_commitU.phpt
+      ext/phar/tests/zip/notphar.phpt
+      ext/phar/tests/zip/odt.phpt
+      ext/phar/tests/zip/open_for_write_existing.phpt
+      ext/phar/tests/zip/open_for_write_existing_b.phpt
+      ext/phar/tests/zip/open_for_write_existing_b_5_2.phpt
+      ext/phar/tests/zip/open_for_write_existing_c.phpt
+      ext/phar/tests/zip/open_for_write_existing_c_5_2.phpt
+      ext/phar/tests/zip/open_for_write_newfile.phpt
+      ext/phar/tests/zip/open_for_write_newfile_b.phpt
+      ext/phar/tests/zip/open_for_write_newfile_b_5_2.phpt
+      ext/phar/tests/zip/open_for_write_newfile_c.phpt
+      ext/phar/tests/zip/open_for_write_newfile_c_5_2.phpt
+      ext/phar/tests/zip/phar_begin_setstub_commit.phpt
+      ext/phar/tests/zip/phar_begin_setstub_commitU.phpt
+      ext/phar/tests/zip/phar_begin_setstub_commitU.phpt
+      ext/phar/tests/zip/phar_buildfromiterator5.phpt
+      ext/phar/tests/zip/phar_buildfromiterator6.phpt
+      ext/phar/tests/zip/phar_buildfromiterator7.phpt
+      ext/phar/tests/zip/phar_magic.phpt
+      ext/phar/tests/zip/phar_magicU.phpt
+      ext/phar/tests/zip/phar_magicU.phpt
+      ext/phar/tests/zip/phar_stub.phpt
+      ext/phar/tests/zip/phar_stub_error.phpt
+      ext/phar/tests/zip/refcount1.phpt
+      ext/phar/tests/zip/rename_dir.phpt
+      ext/phar/tests/zip/rmdir.phpt
+      ext/phar/tests/zip/unixzip.phpt
+      ext/phar/tests/zip/files/corrupt_zipmaker.php.inc
+      ext/phar/tests/zip/files/frontcontroller.phar.zip
+      ext/phar/tests/zip/files/frontcontroller10.phar.zip
+      ext/phar/tests/zip/files/frontcontroller11.phar.zip
+      ext/phar/tests/zip/files/frontcontroller12.phar.zip
+      ext/phar/tests/zip/files/frontcontroller2.phar.zip
+      ext/phar/tests/zip/files/frontcontroller3.phar.zip
+      ext/phar/tests/zip/files/frontcontroller4.phar.zip
+      ext/phar/tests/zip/files/frontcontroller5.phar.zip
+      ext/phar/tests/zip/files/frontcontroller6.phar.inc
+      ext/phar/tests/zip/files/frontcontroller6.phar.zip
+      ext/phar/tests/zip/files/frontcontroller7.phar.inc
+      ext/phar/tests/zip/files/frontcontroller7.phar.zip
+      ext/phar/tests/zip/files/frontcontroller8.phar.zip
+      ext/phar/tests/zip/files/frontcontroller9.phar.zip:
+      
+      - Bring phar tests into line across all branches
+
+    * ext/phar/tests/008.phpt
+      ext/phar/tests/009.phpt
+      ext/phar/tests/010.phpt
+      ext/phar/tests/011.phpt
+      ext/phar/tests/012.phpt
+      ext/phar/tests/013.phpt
+      ext/phar/tests/014.phpt
+      ext/phar/tests/015.phpt
+      ext/phar/tests/015b.phpt
+      ext/phar/tests/016.phpt
+      ext/phar/tests/016b.phpt
+      ext/phar/tests/017.phpt
+      ext/phar/tests/017U.phpt
+      ext/phar/tests/017U.phpt
+      ext/phar/tests/018.phpt
+      ext/phar/tests/018U.phpt
+      ext/phar/tests/018U.phpt
+      ext/phar/tests/019.phpt
+      ext/phar/tests/019b.phpt
+      ext/phar/tests/019bU.phpt
+      ext/phar/tests/019bU.phpt
+      ext/phar/tests/019c.phpt
+      ext/phar/tests/019cU.phpt
+      ext/phar/tests/019cU.phpt
+      ext/phar/tests/020.phpt
+      ext/phar/tests/021.phpt
+      ext/phar/tests/022.phpt
+      ext/phar/tests/023.phpt
+      ext/phar/tests/024.phpt
+      ext/phar/tests/025.phpt
+      ext/phar/tests/026.phpt
+      ext/phar/tests/027.phpt
+      ext/phar/tests/027U.phpt
+      ext/phar/tests/027U.phpt
+      ext/phar/tests/028.phpt
+      ext/phar/tests/029.phpt
+      ext/phar/tests/030.phpt
+      ext/phar/tests/033.phpt
+      ext/phar/tests/033a.phpt
+      ext/phar/tests/badparameters.phpt
+      ext/phar/tests/bug13727.phpt
+      ext/phar/tests/bug45218_SLOWTEST.phpt
+      ext/phar/tests/bug45218_SLOWTESTU.phpt
+      ext/phar/tests/bug45218_SLOWTESTU.phpt
+      ext/phar/tests/cached_manifest_1.phpt
+      ext/phar/tests/cached_manifest_1U.phpt
+      ext/phar/tests/cached_manifest_1U.phpt
+      ext/phar/tests/config.xml
+      ext/phar/tests/delete.phpt
+      ext/phar/tests/delete_in_phar.phpt
+      ext/phar/tests/delete_in_phar_b.phpt
+      ext/phar/tests/delete_in_phar_confirm.phpt
+      ext/phar/tests/dir.phpt
+      ext/phar/tests/fgc_edgecases.phpt
+      ext/phar/tests/fopen_edgecases2.phpt
+      ext/phar/tests/front.phar.phpt
+      ext/phar/tests/frontcontroller11.phpt
+      ext/phar/tests/frontcontroller21.phpt
+      ext/phar/tests/frontcontroller22.phpt
+      ext/phar/tests/frontcontroller23.phpt
+      ext/phar/tests/frontcontroller24.phpt
+      ext/phar/tests/frontcontroller25.phpt
+      ext/phar/tests/frontcontroller26.phpt
+      ext/phar/tests/frontcontroller27.phpt
+      ext/phar/tests/frontcontroller29.phpt
+      ext/phar/tests/frontcontroller30.phpt
+      ext/phar/tests/frontcontroller31.phpt
+      ext/phar/tests/frontcontroller32.phpt
+      ext/phar/tests/frontcontroller33.phpt
+      ext/phar/tests/frontcontroller6.phpt
+      ext/phar/tests/frontcontroller8.phpt
+      ext/phar/tests/frontcontroller9.phpt
+      ext/phar/tests/include_path.phpt
+      ext/phar/tests/ini_set.phpt
+      ext/phar/tests/ini_setU.phpt
+      ext/phar/tests/ini_setU.phpt
+      ext/phar/tests/ini_set_off.phpt
+      ext/phar/tests/ini_set_offU.phpt
+      ext/phar/tests/ini_set_offU.phpt
+      ext/phar/tests/invalid_alias.phpt
+      ext/phar/tests/invalid_setstubalias.phpt
+      ext/phar/tests/metadata_read.phpt
+      ext/phar/tests/metadata_readU.phpt
+      ext/phar/tests/metadata_readU.phpt
+      ext/phar/tests/metadata_write.phpt
+      ext/phar/tests/metadata_writeU.phpt
+      ext/phar/tests/metadata_writeU.phpt
+      ext/phar/tests/metadata_write_commit.phpt
+      ext/phar/tests/metadata_write_commitU.phpt
+      ext/phar/tests/metadata_write_commitU.phpt
+      ext/phar/tests/mkdir.phpt
+      ext/phar/tests/mounteddir.phpt
+      ext/phar/tests/mounteddirU.phpt
+      ext/phar/tests/mounteddirU.phpt
+      ext/phar/tests/open_for_write_existing.phpt
+      ext/phar/tests/open_for_write_existing_b.phpt
+      ext/phar/tests/open_for_write_existing_b_5_2.phpt
+      ext/phar/tests/open_for_write_existing_c.phpt
+      ext/phar/tests/open_for_write_existing_c_5_2.phpt
+      ext/phar/tests/open_for_write_newfile.phpt
+      ext/phar/tests/open_for_write_newfile_b.phpt
+      ext/phar/tests/open_for_write_newfile_b_5_2.phpt
+      ext/phar/tests/open_for_write_newfile_c.phpt
+      ext/phar/tests/open_for_write_newfile_c_5_2.phpt
+      ext/phar/tests/opendir.phpt
+      ext/phar/tests/opendir_edgecases.phpt
+      ext/phar/tests/phar_begin_setstub_commit.phpt
+      ext/phar/tests/phar_begin_setstub_commitU.phpt
+      ext/phar/tests/phar_begin_setstub_commitU.phpt
+      ext/phar/tests/phar_buildfromdirectory1.phpt
+      ext/phar/tests/phar_buildfromdirectory2.phpt
+      ext/phar/tests/phar_buildfromdirectory3.phpt
+      ext/phar/tests/phar_buildfromdirectory4.phpt
+      ext/phar/tests/phar_buildfromiterator1.phpt
+      ext/phar/tests/phar_buildfromiterator10.phpt
+      ext/phar/tests/phar_buildfromiterator10U.phpt
+      ext/phar/tests/phar_buildfromiterator10U.phpt
+      ext/phar/tests/phar_buildfromiterator3.phpt
+      ext/phar/tests/phar_buildfromiterator5.phpt
+      ext/phar/tests/phar_buildfromiterator6.phpt
+      ext/phar/tests/phar_buildfromiterator7.phpt
+      ext/phar/tests/phar_buildfromiterator8.phpt
+      ext/phar/tests/phar_bz2.phpt
+      ext/phar/tests/phar_bz2U.phpt
+      ext/phar/tests/phar_bz2U.phpt
+      ext/phar/tests/phar_convert_again.phpt
+      ext/phar/tests/phar_convert_repeated.phpt
+      ext/phar/tests/phar_convert_tar.phpt
+      ext/phar/tests/phar_convert_tar2.phpt
+      ext/phar/tests/phar_convert_tar3.phpt
+      ext/phar/tests/phar_convert_zip.phpt
+      ext/phar/tests/phar_ctx_001.phpt
+      ext/phar/tests/phar_decompress.phpt
+      ext/phar/tests/phar_dir_iterate.phpt
+      ext/phar/tests/phar_dotted_path.phpt
+      ext/phar/tests/phar_extract.phpt
+      ext/phar/tests/phar_extract2.phpt
+      ext/phar/tests/phar_extract3.phpt
+      ext/phar/tests/phar_get_supported_signatures_001.phpt
+      ext/phar/tests/phar_get_supported_signatures_001a.phpt
+      ext/phar/tests/phar_get_supported_signatures_002.phpt
+      ext/phar/tests/phar_get_supported_signatures_002a.phpt
+      ext/phar/tests/phar_gzip.phpt
+      ext/phar/tests/phar_gzipU.phpt
+      ext/phar/tests/phar_gzipU.phpt
+      ext/phar/tests/phar_isvalidpharfilename.phpt
+      ext/phar/tests/phar_metadata_read.phpt
+      ext/phar/tests/phar_metadata_readU.phpt
+      ext/phar/tests/phar_metadata_readU.phpt
+      ext/phar/tests/phar_metadata_write.phpt
+      ext/phar/tests/phar_metadata_writeU.phpt
+      ext/phar/tests/phar_metadata_writeU.phpt
+      ext/phar/tests/phar_oo_001.phpt
+      ext/phar/tests/phar_oo_001U.phpt
+      ext/phar/tests/phar_oo_001U.phpt
+      ext/phar/tests/phar_oo_002.phpt
+      ext/phar/tests/phar_oo_002U.phpt
+      ext/phar/tests/phar_oo_002U.phpt
+      ext/phar/tests/phar_oo_003.phpt
+      ext/phar/tests/phar_oo_004.phpt
+      ext/phar/tests/phar_oo_004U.phpt
+      ext/phar/tests/phar_oo_004U.phpt
+      ext/phar/tests/phar_oo_005.phpt
+      ext/phar/tests/phar_oo_005U.phpt
+      ext/phar/tests/phar_oo_005U.phpt
+      ext/phar/tests/phar_oo_005_5.2.phpt
+      ext/phar/tests/phar_oo_005_5.2.phpt
+      ext/phar/tests/phar_oo_compressallbz2.phpt
+      ext/phar/tests/phar_oo_compressallgz.phpt
+      ext/phar/tests/phar_oo_compressed_001.phpt
+      ext/phar/tests/phar_oo_compressed_001b.phpt
+      ext/phar/tests/phar_oo_compressed_002.phpt
+      ext/phar/tests/phar_oo_compressed_002b.phpt
+      ext/phar/tests/phar_oo_getmodified.phpt
+      ext/phar/tests/phar_oo_iswriteable.phpt
+      ext/phar/tests/phar_oo_uncompressall.phpt
+      ext/phar/tests/phar_setalias.phpt
+      ext/phar/tests/phar_setalias2.phpt
+      ext/phar/tests/phar_setsignaturealgo2.phpt
+      ext/phar/tests/phar_stub.phpt
+      ext/phar/tests/phar_stub_error.phpt
+      ext/phar/tests/phar_stub_write.phpt
+      ext/phar/tests/phar_stub_write_file.phpt
+      ext/phar/tests/phar_unlinkarchive.phpt
+      ext/phar/tests/pharfileinfo_construct.phpt
+      ext/phar/tests/pharfileinfo_getcrc32.phpt
+      ext/phar/tests/phpinfo_001.phpt
+      ext/phar/tests/phpinfo_002.phpt
+      ext/phar/tests/phpinfo_003.phpt
+      ext/phar/tests/phpinfo_004.phpt
+      ext/phar/tests/readfile_edgecases.phpt
+      ext/phar/tests/refcount1.phpt
+      ext/phar/tests/rename.phpt
+      ext/phar/tests/rename_dir.phpt
+      ext/phar/tests/rename_dir_and_mount.phpt
+      ext/phar/tests/rmdir.phpt
+      ext/phar/tests/stat2.phpt
+      ext/phar/tests/stat2_5.3.phpt
+      ext/phar/tests/test_signaturealgos.phpt
+      ext/phar/tests/withphar_web.phpt
+      ext/phar/tests/zf_test.phpt
+      ext/phar/tests/files/blog.phar
+      ext/phar/tests/files/blog.phar.inc
+      ext/phar/tests/files/config.xml
+      ext/phar/tests/files/frontcontroller5.phar
+      ext/phar/tests/files/frontcontroller6.phar
+      ext/phar/tests/files/frontcontroller6.phar.inc
+      ext/phar/tests/files/frontcontroller7.phar
+      ext/phar/tests/files/frontcontroller7.phar.inc
+      ext/phar/tests/files/notbogus.zip
+      ext/phar/tests/files/openssl.phar
+      ext/phar/tests/files/openssl.phar.pubkey
+      ext/phar/tests/files/phar_test.inc
+      ext/phar/tests/files/private.pem
+      ext/phar/tests/tar/all.phpt:
+      - Bring phar tests into line across all branches
+
+2008-08-01  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/pdo_sqlite/config.m4:
+      MFB: Make pdo_sqlite use the bundled extension with sqlite3
+
+2008-08-01  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      win32/build/config.w32:
+      - MFH: add new default dir (old still works)
+
+    * win32/build/config.w32:
+      - add new default dir (old still works)
+
+    * (PHP_5_3)
+      ext/tidy/config.w32:
+      - MFH: first static lib then dyn or old one
+
+    * ext/tidy/config.w32:
+      - first static lib then dyn or old one
+
+2008-08-01  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * php.ini-dist
+      php.ini-recommended:
+      MFB5.3: INI options for new extions
+
+    * (PHP_5_3)
+      php.ini-dist
+      php.ini-recommended:
+      Add ini options for the new exts
+
+2008-08-01  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/sqlite3/php_sqlite3_structs.h
+      ext/sqlite3/sqlite3.c:
+      MFH: fix int<->long mess causing lots of segfaults on x86_64
+
+    * ext/sqlite3/php_sqlite3_structs.h
+      ext/sqlite3/sqlite3.c:
+      fix int<->long mess causing lots of segfaults on x86_64
+
+2008-08-01  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/sqlite3/tests/sqlite3_11_numrows.phpt:
+      fix skipif
+
+    * (PHP_5_3)
+      ext/sqlite3/tests/sqlite3_11_numrows.phpt:
+      Fix skipif (altough I can't find any such method in the source..?)
+
+2008-08-01  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ext/phar/makestub.php
+      ext/phar/package.php
+      ext/phar/shortarc.php
+      ext/phar/phar/clicommand.inc
+      ext/phar/phar/directorytreeiterator.inc
+      ext/phar/phar/phar.php
+      ext/phar/phar/pharcommand.inc:
+      - Consistency rocks: Make all lines start with tabs for indentation
+
+    * (PHP_5_3)
+      ext/phar/phar/pharcommand.inc:
+       - Fix pear PHP_Archive class file location
+
+2008-08-01  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      NEWS
+      configure.in
+      main/php_version.h:
+      back to dev
+
+    * (PHP_5_3)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.3.0alpha1
+
 2008-07-31  Scott MacVicar  <scott@macvicar.net>
 
     * (PHP_5_3)

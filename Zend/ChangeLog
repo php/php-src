@@ -1,3 +1,22 @@
+2008-08-01  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_alloc.c
+      zend_alloc.c:
+      remove unneeded define
+
+2008-08-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c
+      zend_execute_API.c
+      zend_hash.c
+      zend_hash.c
+      zend_hash.h
+      zend_hash.h
+      tests/bug28072.phpt
+      tests/bug28072.phpt:
+      Fixed bug #44100 (Inconsistent handling of static array declarations with
+      duplicate keys).
+
 2008-07-31  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c
