@@ -156,6 +156,19 @@ zend_module_entry php_zlib_module_entry = {
 ZEND_GET_MODULE(php_zlib)
 #endif
 
+/* {{{ Memory management wrappers */
+
+static voidpf php_zlib_alloc(voidpf opaque, uInt items, uInt size)
+{
+	return (voidpf)safe_emalloc(items, size, 0);
+}
+
+static void php_zlib_free(voidpf opaque, voidpf address)
+{
+	efree((void*)address);
+}
+/* }}} */
+
 /* {{{ OnUpdate_zlib_output_compression */
 static PHP_INI_MH(OnUpdate_zlib_output_compression)
 {
@@ -491,8 +504,8 @@ static PHP_FUNCTION(gzdeflate)
 	}
 
 	stream.data_type = Z_ASCII;
-	stream.zalloc = (alloc_func) Z_NULL;
-	stream.zfree  = (free_func) Z_NULL;
+	stream.zalloc = php_zlib_alloc;
+	stream.zfree  = php_zlib_free;
 	stream.opaque = (voidpf) Z_NULL;
 
 	stream.next_in = (Bytef *) data;
@@ -566,8 +579,8 @@ static PHP_FUNCTION(gzinflate)
 	  that should be enaugh for all real life cases	
 	*/
 
-	stream.zalloc = (alloc_func) Z_NULL;
-	stream.zfree = (free_func) Z_NULL;
+	stream.zalloc = php_zlib_alloc;
+	stream.zfree = php_zlib_free;
 
 	do {
 		length = plength ? plength : (unsigned long)data_len * (1 << factor++);
@@ -681,8 +694,8 @@ static int php_deflate_string(const char *str, uint str_length, char **newstr, u
 	int err;
 
 	if (do_start) {
-		ZLIBG(stream).zalloc = Z_NULL;
-		ZLIBG(stream).zfree = Z_NULL;
+		ZLIBG(stream).zalloc = php_zlib_alloc;
+		ZLIBG(stream).zfree = php_zlib_free;
 		ZLIBG(stream).opaque = Z_NULL;
 
 		switch (ZLIBG(compression_coding)) {
@@ -771,8 +784,8 @@ static PHP_FUNCTION(gzencode)
 		RETURN_FALSE;
 	}
 
-	stream.zalloc = Z_NULL;
-	stream.zfree = Z_NULL;
+	stream.zalloc = php_zlib_alloc;
+	stream.zfree = php_zlib_free;
 	stream.opaque = Z_NULL;
 
 	stream.next_in = (Bytef *) data;
