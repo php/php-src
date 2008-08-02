@@ -36,6 +36,19 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(zlib);
 
+/* {{{ Memory management wrappers */
+
+static voidpf php_zlib_alloc(voidpf opaque, uInt items, uInt size)
+{
+	return (voidpf)safe_emalloc(items, size, 0);
+}
+
+static void php_zlib_free(voidpf opaque, voidpf address)
+{
+	efree((void*)address);
+}
+/* }}} */
+
 /* {{{ php_zlib_output_conflict_check() */
 int php_zlib_output_conflict_check(zval *handler_name TSRMLS_DC)
 {
@@ -104,12 +117,16 @@ void php_zlib_output_compression_start(TSRMLS_D)
 php_output_handler *php_zlib_output_handler_init(zval *handler_name, size_t chunk_size, int flags TSRMLS_DC)
 {
 	php_output_handler *h = NULL;
+	php_zlib_context   *ctx;
 	
 	if (!ZLIBG(output_compression)) {
 		ZLIBG(output_compression) = chunk_size ? chunk_size : PHP_OUTPUT_HANDLER_DEFAULT_SIZE;
 	}
 	if ((h = php_output_handler_create_internal(handler_name, php_zlib_output_handler, chunk_size, flags TSRMLS_CC))) {
-		php_output_handler_set_context(h, ecalloc(1, sizeof(php_zlib_context)), php_zlib_output_handler_dtor TSRMLS_CC);
+		ctx = (php_zlib_context *) ecalloc(1, sizeof(php_zlib_context));
+		ctx->Z.zalloc = php_zlib_alloc;
+		ctx->Z.zfree = php_zlib_free;
+		php_output_handler_set_context(h, ctx, php_zlib_output_handler_dtor TSRMLS_CC);
 	}
 	
 	return h;
@@ -264,6 +281,8 @@ int php_zlib_encode(const char *in_buf, size_t in_len, char **out_buf, size_t *o
 	z_stream Z;
 	
 	memset(&Z, 0, sizeof(z_stream));
+	Z.zalloc = php_zlib_alloc;
+	Z.zfree = php_zlib_free;
 	
 	if (Z_OK == (status = deflateInit2(&Z, level, Z_DEFLATED, encoding, MAX_MEM_LEVEL, Z_DEFAULT_STRATEGY))) {
 		*out_len = PHP_ZLIB_BUFFER_SIZE_GUESS(in_len);
@@ -347,6 +366,9 @@ int php_zlib_decode(const char *in_buf, size_t in_len, char **out_buf, size_t *o
 	z_stream Z;
 	
 	memset(&Z, 0, sizeof(z_stream));
+	Z.zalloc = php_zlib_alloc;
+	Z.zfree = php_zlib_free;
+
 	if (in_len) {
 retry_raw_inflate:
 		status = inflateInit2(&Z, encoding);
