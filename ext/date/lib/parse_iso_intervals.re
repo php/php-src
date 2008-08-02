@@ -285,7 +285,9 @@ number = [0-9]+;
 hour24lz = [01][0-9] | "2"[0-4];
 minutelz = [0-5][0-9];
 monthlz = "0" [1-9] | "1" [0-2];
+monthlzz = "0" [0-9] | "1" [0-2];
 daylz   = "0" [1-9] | [1-2][0-9] | "3" [01];
+daylzz  = "0" [0-9] | [1-2][0-9] | "3" [01];
 secondlz = minutelz;
 year4 = [0-9]{4};
 weekofyear = "0"[1-9] | [1-4][0-9] | "5"[0-3];
@@ -294,6 +296,7 @@ space = [ \t]+;
 datetimebasic  = year4 monthlz daylz "T" hour24lz minutelz secondlz "Z";
 datetimeextended  = year4 "-" monthlz "-" daylz "T" hour24lz ':' minutelz ':' secondlz "Z";
 period   = "P" (number "Y")? (number "M")? (number "W")? (number "D")? ("T" (number "H")? (number "M")? (number "S")?)?;
+combinedrep = "P" year4 "-" monthlzz "-" daylzz "T" hour24lz ':' minutelz ':' secondlz;
 
 recurrences = "R" number;
 
@@ -356,7 +359,7 @@ isoweek          = year4 "-"? "W" weekofyear;
 				break;
 			}
 
-			nr = timelib_get_unsigned_nr((char **) &ptr, 4);
+			nr = timelib_get_unsigned_nr((char **) &ptr, 9);
 			switch (*ptr) {
 				case 'Y': s->period->y = nr; break;
 				case 'W': s->period->d = nr * 7; break;
@@ -376,6 +379,26 @@ isoweek          = year4 "-"? "W" weekofyear;
 			}
 			ptr++;
 		} while (*ptr);
+		s->have_period = 1;
+		TIMELIB_DEINIT;
+		return TIMELIB_PERIOD;
+	}
+
+	combinedrep
+	{
+		DEBUG_OUTPUT("combinedrep");
+		TIMELIB_INIT;
+		s->period->y = timelib_get_unsigned_nr((char **) &ptr, 4);
+		ptr++;
+		s->period->m = timelib_get_unsigned_nr((char **) &ptr, 2);
+		ptr++;
+		s->period->d = timelib_get_unsigned_nr((char **) &ptr, 2);
+		ptr++;
+		s->period->h = timelib_get_unsigned_nr((char **) &ptr, 2);
+		ptr++;
+		s->period->i = timelib_get_unsigned_nr((char **) &ptr, 2);
+		ptr++;
+		s->period->s = timelib_get_unsigned_nr((char **) &ptr, 2);
 		s->have_period = 1;
 		TIMELIB_DEINIT;
 		return TIMELIB_PERIOD;
