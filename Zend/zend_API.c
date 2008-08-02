@@ -2746,10 +2746,8 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval **object_pp, uint ch
 }
 /* }}} */
 
-ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, char **callable_name) /* {{{ */
+ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, char **callable_name TSRMLS_DC) /* {{{ */
 {
-	TSRMLS_FETCH();
-
 	return zend_is_callable_ex(callable, NULL, check_flags, callable_name, NULL, NULL, NULL TSRMLS_CC);
 }
 /* }}} */

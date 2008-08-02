@@ -304,7 +304,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 	}
 
 	/* get the callback */
-	if (!zend_is_callable(*cb_arg, 0, NULL)) {
+	if (!zend_is_callable(*cb_arg, 0, NULL TSRMLS_CC)) {
 		_php_ibase_module_error("Callback argument %s is not a callable function"
 			TSRMLS_CC, Z_STRVAL_PP(cb_arg));
 		RETURN_FALSE;

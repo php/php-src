@@ -5289,7 +5289,7 @@ static int user_shutdown_function_call(php_shutdown_function_entry *shutdown_fun
 	zval retval;
 	char *function_name;
 
-	if (!zend_is_callable(shutdown_function_entry->arguments[0], 0, &function_name)) {
+	if (!zend_is_callable(shutdown_function_entry->arguments[0], 0, &function_name TSRMLS_CC)) {
 		php_error(E_WARNING, "(Registered shutdown functions) Unable to call %s() - function does not exist", function_name);
 		if (function_name) {
 			efree(function_name);
@@ -5434,7 +5434,7 @@ PHP_FUNCTION(register_shutdown_function)
 	}
 
 	/* Prevent entering of anything but valid callback (syntax check only!) */
-	if (!zend_is_callable(shutdown_function_entry.arguments[0], 0, &function_name)) {
+	if (!zend_is_callable(shutdown_function_entry.arguments[0], 0, &function_name TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid shutdown callback '%s' passed", function_name);
 		efree(shutdown_function_entry.arguments);
 		RETVAL_FALSE;
@@ -6021,7 +6021,7 @@ PHP_FUNCTION(register_tick_function)
 		RETURN_FALSE;
 	}
 
-	if (!zend_is_callable(tick_fe.arguments[0], 0, &function_name)) {
+	if (!zend_is_callable(tick_fe.arguments[0], 0, &function_name TSRMLS_CC)) {
 		efree(tick_fe.arguments);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid tick callback '%s' passed", function_name);
 		efree(function_name);

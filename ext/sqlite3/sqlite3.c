@@ -776,7 +776,7 @@ PHP_METHOD(sqlite3, createFunction)
 		RETURN_FALSE;
 	}
 
-	if (!zend_is_callable(callback_func, 0, &callback_name)) {
+	if (!zend_is_callable(callback_func, 0, &callback_name TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback function %s", callback_name);
 		efree(callback_name);
 		RETURN_FALSE;
@@ -827,14 +827,14 @@ PHP_METHOD(sqlite3, createAggregate)
 		RETURN_FALSE;
 	}
 
-	if (!zend_is_callable(step_callback, 0, &callback_name)) {
+	if (!zend_is_callable(step_callback, 0, &callback_name TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback function %s", callback_name);
 		efree(callback_name);
 		RETURN_FALSE;
 	}
 	efree(callback_name);
 
-	if (!zend_is_callable(fini_callback, 0, &callback_name)) {
+	if (!zend_is_callable(fini_callback, 0, &callback_name TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback function %s", callback_name);
 		efree(callback_name);
 		RETURN_FALSE;

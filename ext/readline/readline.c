@@ -499,7 +499,7 @@ PHP_FUNCTION(readline_completion_function)
 		RETURN_FALSE;
 	}
 
-	if (!zend_is_callable(arg, 0, &name)) {
+	if (!zend_is_callable(arg, 0, &name TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not callable", name);
 		efree(name);
 		RETURN_FALSE;
@@ -551,7 +551,7 @@ PHP_FUNCTION(readline_callback_handler_install)
 		return;
 	}
 
-	if (!zend_is_callable(callback, 0, &name)) {
+	if (!zend_is_callable(callback, 0, &name TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not callable", name);
 		RETURN_FALSE;
 	}
