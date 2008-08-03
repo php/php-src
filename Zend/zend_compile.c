@@ -5263,7 +5263,7 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 		if (len_adjust == 0) {
 			path[0] = '.';
 			path[1] = '\0';
-			return 1; //only one character
+			return 1; /* only one character */
 		} else {
 			path[0] = '\0';
 			return len_adjust;
