@@ -569,7 +569,7 @@ static void php_unicode_export(UChar *ustr, int ustr_len TSRMLS_DC) /* {{{ */
 				break;
 		}
 	}
-	if (state == 1) { // if we are in double quotes, go back to single */
+	if (state == 1) { /* if we are in double quotes, go back to single */
 		PHPWRITE("\" . '", 5);
 	}
 }
