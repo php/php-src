@@ -10,9 +10,11 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Kirti Velankar <kirtig@yahoo-inc.com>                  	  |
+   | Author: Kirti Velankar <kirtig@yahoo-inc.com>                        |
    +----------------------------------------------------------------------+
- */
+*/
+
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -54,7 +56,7 @@ void locale_register_constants( INIT_FUNC_ARGS )
 	LOCALE_EXPOSE_CUSTOM_CLASS_CONST_STR( "GRANDFATHERED_LANG_TAG",LOC_GRANDFATHERED_LANG_TAG);
 	LOCALE_EXPOSE_CUSTOM_CLASS_CONST_STR( "PRIVATE_TAG",LOC_PRIVATE_TAG);
 
-	#undef LOCALE_EXPOSE_CUSTOM_CLASS_CONS_STR
+	#undef LOCALE_EXPOSE_CUSTOM_CLASS_CONST_STR
 	#undef LOCALE_EXPOSE_CLASS_CONST
 	#undef LOCALE_EXPOSE_CONST
 }

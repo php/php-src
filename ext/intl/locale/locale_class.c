@@ -10,14 +10,14 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Kirti Velankar <kirtig@yahoo-inc.com>                  	  |
+   | Authors: Kirti Velankar <kirtig@yahoo-inc.com>                       |
    +----------------------------------------------------------------------+
- */
+*/
+
+/* $Id $ */
 
 #include <unicode/uloc.h>
-
 #include "php_intl.h"
-
 #include "intl_error.h"
 #include "locale_class.h"
 #include "locale_methods.h"
@@ -25,15 +25,15 @@
 
 zend_class_entry *Locale_ce_ptr = NULL;
 
-
-/////////////////////////////////////////////////////////////////////////////
-// 'Locale' class registration structures & functions
-/////////////////////////////////////////////////////////////////////////////
+/*
+ * 'Locale' class registration structures & functions
+ */
 
 /* {{{ Locale methods arguments info */
-// NOTE: modifying 'locale_XX_args' do not forget to
-//       modify approptiate 'locale_XX_args' for
-//       the procedural API.
+/*
+ *  NOTE: when modifying 'locale_XX_args' do not forget to modify
+ *        approptiate 'locale_XX_args' for the procedural API!
+ */
 
 static
 ZEND_BEGIN_ARG_INFO_EX( locale_0_args, 0, 0, 0 )
@@ -101,12 +101,12 @@ void locale_register_Locale_class( TSRMLS_D )
 {
 	zend_class_entry ce;
 
-	// Create and register 'Locale' class.
+	/* Create and register 'Locale' class. */
 	INIT_CLASS_ENTRY( ce, "Locale", Locale_class_functions );
 	ce.create_object = NULL;
 	Locale_ce_ptr = zend_register_internal_class( &ce TSRMLS_CC );
 
-	// Declare 'Locale' class properties.
+	/* Declare 'Locale' class properties. */
 	if( !Locale_ce_ptr )
 	{
 		zend_error( E_ERROR,
@@ -115,7 +115,6 @@ void locale_register_Locale_class( TSRMLS_D )
 	}
 }
 /* }}} */
-
 
 /*
  * Local variables:
