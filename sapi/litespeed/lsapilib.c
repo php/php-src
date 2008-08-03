@@ -1,4 +1,3 @@
-
 /*
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
@@ -17,6 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 /*
 Copyright (c) 2007, Lite Speed Technologies Inc.
@@ -49,8 +49,6 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 */
-
-
 
 #include <lsapilib.h>
 
@@ -138,7 +136,7 @@ static const char *HTTP_HEADERS[H_TRANSFER_ENCODING+1] = {
 };
 
 static int HTTP_HEADER_LEN[H_TRANSFER_ENCODING+1] = {
-    6, 14, 15, 15, 13, 10, 12, 14, 6, 7, 4, 6, 7, 10, //user-agent
+    6, 14, 15, 15, 13, 10, 12, 14, 6, 7, 4, 6, 7, 10, /* user-agent */
     13,17, 8, 13, 8, 19, 10, 5, 15, 3, 17
 };
      

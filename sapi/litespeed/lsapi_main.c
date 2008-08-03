@@ -16,6 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id */
 
 #include "php.h"
 #include "SAPI.h"
@@ -804,14 +805,14 @@ zend_function_entry litespeed_functions[] = {
 
 static PHP_MINIT_FUNCTION(litespeed)
 {
-	//REGISTER_INI_ENTRIES();
+	/* REGISTER_INI_ENTRIES(); */
 	return SUCCESS;
 }
 
 
 static PHP_MSHUTDOWN_FUNCTION(litespeed)
 {
-	//UNREGISTER_INI_ENTRIES();
+	/* UNREGISTER_INI_ENTRIES(); */
 	return SUCCESS;
 }
 
@@ -840,7 +841,7 @@ static int add_associate_array( const char * pKey, int keyLen, const char * pVal
    Fetch all HTTP request headers */
 PHP_FUNCTION(litespeed_request_headers)
 {
-	//TODO:
+	/* TODO: */
 	if (ZEND_NUM_ARGS() > 0) {
 		WRONG_PARAM_COUNT;
 	}
