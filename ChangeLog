@@ -1,3 +1,151 @@
+2008-08-02  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      ext/mbstring/mbstring.h:
+      - MFH: Fixed bug #45691 (Some per-dir or runtime settings may leak into
+      other requests).
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      - Fixed bug #45691 (Some per-dir or runtime settings may leak into other
+      requests).
+
+2008-08-02  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/date/config.w32
+      ext/date/lib/parse_iso_intervals.re:
+      - MFH: improve previous fix for scan, disable optimizer only for scan()
+      using #pragma optimize
+
+    * ext/date/config.w32
+      ext/date/lib/parse_iso_intervals.re:
+      - improve previous fix for scan, disable optimizer only for scan() using
+      #pragma optimize
+
+    * (PHP_5_3)
+      ext/date/config.w32:
+      - MFH: parser's scan function is too large for VC6-7.x, disable the
+      optimizer (size optimization instead) fixes it
+
+    * ext/date/config.w32:
+      - parser's scan function is too large for VC6-7.x, disable the optimizer
+      (size optimization instead) fixes it
+
+2008-08-02  Steph Fox  <steph.fox@virgin.net>
+
+    * ext/phar/config.m4:
+      - Remove obsolete check
+
+2008-08-02  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/lib/parse_iso_intervals.c
+      ext/date/lib/parse_iso_intervals.re:
+      - MFH: Fixed bug #45545 (DateInterval has a limitation of 4 chars for ISO
+        durations).
+
+    * ext/date/lib/parse_iso_intervals.c
+      ext/date/lib/parse_iso_intervals.re:
+      - Fixed bug #45545 (DateInterval has a limitation of 4 chars for ISO
+        durations).
+
+2008-08-02  Felipe Pena  <felipensp@gmail.com>
+
+    * run-tests.php:
+      - Fixed undefined variable
+
+2008-08-02  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * ext/standard/php_fopen_wrapper.c
+      ext/standard/tests/file/bug43008.phpt:
+      MFB: Allow urlencode()d filer names in php://filter (fixes #43008)
+
+    * (PHP_5_3)
+      NEWS:
+      news
+
+    * (PHP_5_3)
+      ext/standard/php_fopen_wrapper.c
+      ext/standard/tests/file/bug43008.phpt
+      ext/standard/tests/file/bug43008.phpt:
+      Allow urlencode()d filer names in php://filter
+
+2008-08-02  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ext/filter/callback_filter.c
+      ext/interbase/ibase_events.c
+      ext/interbase/php_ibase_udf.c
+      ext/ldap/ldap.c
+      ext/mysqli/mysqli_api.c
+      ext/pcntl/pcntl.c
+      ext/pcre/php_pcre.c
+      ext/pdo/pdo_stmt.c
+      ext/pdo_sqlite/sqlite_driver.c
+      ext/readline/readline.c
+      ext/session/session.c
+      ext/spl/spl_iterators.c
+      ext/sqlite/sqlite.c
+      ext/sqlite3/sqlite3.c
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/type.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      main/output.c:
+      - MFH: Added parameter TSRMLS_DC in zend_is_callable()
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ext/filter/callback_filter.c
+      ext/interbase/ibase_events.c
+      ext/interbase/php_ibase_udf.c
+      ext/ldap/ldap.c
+      ext/mysqli/mysqli_api.c
+      ext/pcntl/pcntl.c
+      ext/pcre/php_pcre.c
+      ext/pdo/pdo_stmt.c
+      ext/pdo_sqlite/sqlite_driver.c
+      ext/readline/readline.c
+      ext/session/session.c
+      ext/spl/spl_iterators.c
+      ext/sqlite/sqlite.c
+      ext/sqlite3/sqlite3.c
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/type.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/unicode/property.c
+      ext/unicode/unicode.c
+      ext/xmlrpc/xmlrpc-epi-php.c:
+      - Added parameter TSRMLS_DC in zend_is_callable()
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.c:
+      - MFH:  Removed unnecessary TSRMLS_FETCH()
+
+    * ZendEngine2/zend_API.c:
+      - Removed unnecessary TSRMLS_FETCH()
+
+2008-08-02  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      ext/zlib/zlib.c
+      ext/zlib/zlib.c:
+      MFH: Avoid leaks when zlib streams can not be closed properly.
+
+    * ext/zlib/zlib.c:
+      Avoid leaks when zlib streams can not be closed properly.
+
 2008-08-01  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * (PHP_5_2)
