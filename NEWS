@@ -13,7 +13,7 @@ PHP                                                                        NEWS
 - Upgraded bundled PDO sqlite to version 3.5.9. (Scott)
 
 - Moved extensions to PECL (Pierre):
-  . ext/fdpf
+  . ext/fdf
   . ext/ncurses
   . ext/sybase (not maintained anymore, sybase_ct has to be used instead)
 
@@ -21,7 +21,7 @@ PHP                                                                        NEWS
 - Removed zend.ze1_compatibility_mode. (Dmitry)
 - Deprecated ticks support. (Felipe)
 
-- Changed PCRE, Reflection and SPL extensions to always be enabled. (Marcus)
+- Changed PCRE, Reflection and SPL extensions to be always enabled. (Marcus)
 - Changed md5() to use improved implementation. (Solar Designer, Dmitry)
 - Changed HTTP stream wrapper to accept any code between and including
   200 to 399 as successful. (Mike, Noah Fontes)
