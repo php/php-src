@@ -2508,7 +2508,7 @@ PHP_METHOD(swffiltermatrix, __construct)
 	}
 	
 	matrix = newSWFFilterMatrix(cols, rows, values);
-	free(values); // array is copied by libming
+	free(values); /* array is copied by libming */
 	ret = zend_list_insert(matrix, le_swffiltermatrixp);
 	object_init_ex(getThis(), filtermatrix_class_entry_ptr);
 	add_property_resource(getThis(), "filtermatrix", ret);
@@ -3452,7 +3452,7 @@ PHP_METHOD(swfvideostream, __construct)
 	case 0:
 		stream = newSWFVideoStream();
 		break;
-	default: // warn
+	default: /* warn */
 		return;
 	}
 	

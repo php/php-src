@@ -67,7 +67,7 @@ static int pdo_odbc_utf82ucs2(pdo_stmt_t *stmt, int is_unicode, const char *buf,
 
 		ret = MultiByteToWideChar(CP_UTF8, 0, buf, buflen, NULL, 0);
 		if (ret == 0) {
-			//printf("%s:%d %d [%d] %.*s\n", __FILE__, __LINE__, GetLastError(), buflen, buflen, buf);
+			/*printf("%s:%d %d [%d] %.*s\n", __FILE__, __LINE__, GetLastError(), buflen, buflen, buf);*/
 			return PDO_ODBC_CONV_FAIL;
 		}
 
@@ -80,7 +80,7 @@ static int pdo_odbc_utf82ucs2(pdo_stmt_t *stmt, int is_unicode, const char *buf,
 		
 		ret = MultiByteToWideChar(CP_UTF8, 0, buf, buflen, (LPWSTR)S->convbuf, S->convbufsize / sizeof(WCHAR));
 		if (ret == 0) {
-			//printf("%s:%d %d [%d] %.*s\n", __FILE__, __LINE__, GetLastError(), buflen, buflen, buf);
+			/*printf("%s:%d %d [%d] %.*s\n", __FILE__, __LINE__, GetLastError(), buflen, buflen, buf);*/
 			return PDO_ODBC_CONV_FAIL;
 		}
 
