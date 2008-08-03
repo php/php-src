@@ -1092,8 +1092,8 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output)
 }
 /* }}} */
 
-/* {{{ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding) */
-static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
+/* {{{ static _php_mb_ini_mbstring_internal_encoding_set */
+static int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_value_length TSRMLS_DC)
 {
 	enum mbfl_no_encoding no_encoding;
  	const char *enc_name = NULL;
@@ -1166,6 +1166,23 @@ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 	zend_multibyte_set_internal_encoding(new_value, new_value_length TSRMLS_CC);
 #endif /* ZEND_MULTIBYTE */
 	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding) */
+static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
+{
+	if (stage == PHP_INI_STAGE_STARTUP || stage == PHP_INI_STAGE_SHUTDOWN) {
+		return _php_mb_ini_mbstring_internal_encoding_set(new_value, new_value_length TSRMLS_CC);
+	} else {
+		// the corresponding mbstring globals needs to be set according to the
+		// ini value in the later stage because it never falls back to the
+		// default value if 1. no value for mbstring.internal_encoding is given,
+		// 2. mbstring.language directive is processed in per-dir or runtime
+		// context and 3. call to the handler for mbstring.language is done
+		// after mbstring.internal_encoding is handled.
+		return SUCCESS;
+	}
 }
 /* }}} */
 
@@ -1430,8 +1447,10 @@ PHP_RINIT_FUNCTION(mbstring)
 	zend_function *func, *orig;
 	const struct mb_overload_def *p;
 
-	php_mb_nls_get_default_detect_order_list(MBSTRG(language), 
-        &MBSTRG(default_detect_order_list), &MBSTRG(default_detect_order_list_size));
+	{
+		char *value = zend_ini_string("mbstring.internal_encoding", sizeof("mbstring.internal_encoding"), 0);
+		_php_mb_ini_mbstring_internal_encoding_set(value, value ? strlen(value): 0 TSRMLS_CC);
+	}
 
 	MBSTRG(current_internal_encoding) = MBSTRG(internal_encoding);
 	MBSTRG(current_http_output_encoding) = MBSTRG(http_output_encoding);
