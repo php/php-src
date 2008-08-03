@@ -9,7 +9,7 @@ PHP                                                                        NEWS
   handle slashes). (Arnaud)
 
 01 Aug 2008, PHP 5.3.0 Alpha 1
-- Upgraded bundled PCRE to version 7.7 (Nuno)
+- Upgraded bundled PCRE to version 7.7. (Nuno)
 - Upgraded bundled PDO sqlite to version 3.5.9. (Scott)
 
 - Moved extensions to PECL (Pierre):
@@ -21,13 +21,13 @@ PHP                                                                        NEWS
 - Removed zend.ze1_compatibility_mode. (Dmitry)
 - Deprecated ticks support. (Felipe)
 
-- Changed PCRE, SPL and reflection extensions to always be enabled. (Marcus)
+- Changed PCRE, Reflection and SPL extensions to always be enabled. (Marcus)
 - Changed md5() to use improved implementation. (Solar Designer, Dmitry)
 - Changed HTTP stream wrapper to accept any code between and including
   200 to 399 as successful. (Mike, Noah Fontes)
 
 - Improved PHP syntax and semantics:
-  . Added lambda functions and closures (Christian Seiler, Dmitry)
+  . Added lambda functions and closures. (Christian Seiler, Dmitry)
   . Added "jump label" operator (limited "goto"). (Dmitry, Sara)
   . Added NOWDOC syntax. (Gwynne Raskind, Stas, Dmitry)
   . Added HEREDOC syntax with double quotes. (Lars Strojny, Felipe)
@@ -38,7 +38,7 @@ PHP                                                                        NEWS
   . Added "?:" operator. (Marcus)
   . Added support for namespaces. (Dmitry, Stas, Gregory)
   . Added support for Late Static Binding. (Dmitry, Etienne Kneuss)
-  . Added support for __callstatic() magic method. (Sara)
+  . Added support for __callStatic() magic method. (Sara)
   . Added forward_static_call(_array) to complete LSB. (Mike Lively)
   . Added support for dynamic access of static members using $foo::myFunc().
     (Etienne Kneuss)
@@ -57,7 +57,7 @@ PHP                                                                        NEWS
 
 - Improved PHP runtime speed and memory usage:
   . Substitute persistent constants by their values at compile time. (Matt)
-  . Optimized ZEND_SIGNED_MULTIPLY_LONG() (Matt)
+  . Optimized ZEND_SIGNED_MULTIPLY_LONG(). (Matt)
   . Removed direct executor recursion. (Dmitry)
   . Use fastcall calling convention in executor on x86. (Dmitry)
   . Use IS_CV for direct access to $this variable. (Dmitry)
@@ -79,24 +79,24 @@ PHP                                                                        NEWS
   . Optimized require_once() and include_once() by eliminating fopen(3) on
     second usage. (Dmitry)
   . Optimized ZEND_FETCH_CLASS + ZEND_ADD_INTERFACE into single
-    ZEND_ADD_INTERFACE opcode (Dmitry)
+    ZEND_ADD_INTERFACE opcode. (Dmitry)
   . Optimized string searching for a single character.
     (Michal Dziemianko, Scott)
   . Optimized interpolated strings to use one less opcode. (Matt)
 
 - Improved php.ini handling: (Jani)
-  . Added ".htaccess" style user-defined php.ini files support for CGI/FastCGI
+  . Added ".htaccess" style user-defined php.ini files support for CGI/FastCGI.
   . Added support for special [PATH=/opt/httpd/www.example.com/] and
     [HOST=www.example.com] sections. Directives set in these sections can
     not be overridden by user-defined ini-files or during runtime.
-  . Added better error reporting for php.ini syntax errors
-  . Allowed using full path to load modules using "extension" directive
-  . Allowed "ini-variables" to be used almost everywhere ini php.ini files
-  . Allowed using alphanumeric/variable indexes in "array" ini options
+  . Added better error reporting for php.ini syntax errors.
+  . Allowed using full path to load modules using "extension" directive.
+  . Allowed "ini-variables" to be used almost everywhere ini php.ini files.
+  . Allowed using alphanumeric/variable indexes in "array" ini options.
   . Added 3rd optional parameter to parse_ini_file() to specify the scanning
     mode of INI_SCANNER_NORMAL or INI_SCANNER_RAW. In raw mode option values
-    and section values are treated as-is
-  . Fixed get_cfg_var() to be able to return "array" ini options
+    and section values are treated as-is.
+  . Fixed get_cfg_var() to be able to return "array" ini options.
   . Added optional parameter to ini_get_all() to only retrieve the current
     value. (Hannes)
 
@@ -111,7 +111,7 @@ PHP                                                                        NEWS
   . Added stream_supports_lock() function. (Benjamin Schulz)
   . Added "ignore_errors" option to http fopen wrapper. (David Zulke, Sara)
   . Added context parameter for copy() function. (Sara)
-  . Added "glob" stream wrapper. (Marcus)
+  . Added "glob://" stream wrapper. (Marcus)
   . Added "params" as optional parameter for stream_context_create(). (Sara)
   . Added ability to use stream wrappers in include_path. (Gregory, Dmitry)
 
@@ -125,38 +125,35 @@ PHP                                                                        NEWS
     common non-text types such as "application/xhtml+xml" to be converted
     by mb_output_handler(). (Moriyoshi)
 
-- Improved OCI8 extension:
+- Improved OCI8 extension (Chris Jones/Oracle Corp.):
   . Added Database Resident Connection Pooling (DRCP) and Fast
-    Application Notification (FAN) support. (Oracle Corp.)
+    Application Notification (FAN) support.
   . Added support for Oracle External Authentication (not supported
-    on Windows). (Oracle Corp.)
+    on Windows).
   . Improve persistent connection handling of restarted DBs.
   . Added SQLT_AFC (aka CHAR datatype) support to oci_bind_by_name.
-    (Chris Jones)
-  . Fixed bug #41069 (Seg fault with query over DB link). (Chris Jones)
+  . Fixed bug #41069 (Seg fault with query over DB link).
   . Fixed define of SQLT_BDOUBLE and SQLT_BFLOAT constants with Oracle
-    10g ORACLE_HOME builds. (Chris Jones)
+    10g ORACLE_HOME builds.
   . Changed default value of oci8.default_prefetch from 10 to 100.
-    (Chris Jones)
-  . Fixed PECL bug #12431 (OCI8 ping functionality is broken). (Oracle
-    Corp.)
+  . Fixed PECL bug #12431 (OCI8 ping functionality is broken).
   . Allow building (e.g from PECL) the PHP 5.3-based OCI8 code with
-    PHP 4.3.9 onwards. (Chris Jones)
+    PHP 4.3.9 onwards.
 
 - Improved OpenSSL extension: (Dmitry)
   . Added support for OpenSSL digest and cipher functions.
   . Added access to internal values of DSA, RSA and DH keys.
 
 - Improved pcntl extension: (Arnaud)
-  . Added pcntl_signal_dispatch()
-  . Added pcntl_sigprocmask()
-  . Added pcntl_sigwaitinfo()
-  . Added pcntl_sigtimedwait()
+  . Added pcntl_signal_dispatch().
+  . Added pcntl_sigprocmask().
+  . Added pcntl_sigwaitinfo().
+  . Added pcntl_sigtimedwait().
 
 - Improved SOAP extension:
   . Added support for element names in context of XMLShema's <any>. (Dmitry)
   . Added ability to use Traversable objects instead of plain arrays.
-   (Joshua Reese, Dmitry)
+    (Joshua Reese, Dmitry)
   . Fixed possible crash bug caused by an uninitialized value. (Zdash Urf)
 
 - Improved SPL extension:
@@ -194,7 +191,7 @@ PHP                                                                        NEWS
     Dmitry L., Stanislav M., Vadim S., Kirti V.)
   . Added mysqlnd extension as replacement for libmysql for ext/mysql, mysqli
     and PDO_mysql. (Andrey, Johannes, Ulf)
-  . Added phar extension for handling PHP Archives. (Greg, Marcus)
+  . Added phar extension for handling PHP Archives. (Greg, Marcus, Steph)
   . Added SQLite3 extension. (Scott)
 
 - Added new date/time functionality: (Derick)
@@ -205,7 +202,7 @@ PHP                                                                        NEWS
     and errors that were found while parsing a date/time string through:
     . strtotime() / new DateTime
     . date_create_from_format() / DateTime::createFromFormat()
-    . date_parse_from_format()
+    . date_parse_from_format().
   . support for abbreviation and offset based timezone specifiers for
     DateTime::getOffset() and DateTime::getName().
   . support for selectively listing timezone identifiers by continent or
