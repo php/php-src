@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.3.0 Alpha 2
+- Fixed bug #45696 (Not all DateTime methods allow method chaining). (Derick)
 - Fixed bug #45545 (DateInterval has a limitation of 4 chars for ISO
   durations). (Derick)
 - Fixed bug #44100 (Inconsistent handling of static array declarations with
