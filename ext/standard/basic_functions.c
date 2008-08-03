@@ -2998,7 +2998,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_uniqid, 0, 0, 0)
 	ZEND_ARG_INFO(0, more_entropy)
 ZEND_END_ARG_INFO()
 #endif
-/* }}} *//* {{{ url.c */
+/* }}} */
+/* {{{ url.c */
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_parse_url, 0, 0, 1)
 	ZEND_ARG_INFO(0, url)
