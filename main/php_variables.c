@@ -366,12 +366,12 @@ plain_var:
 			zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 		} else {
 			/* UTODO fix for php_addslashes case */
-			//char *escaped_index = php_addslashes(index, index_len, &index_len, 0 TSRMLS_CC);
+			/* char *escaped_index = php_addslashes(index, index_len, &index_len, 0 TSRMLS_CC); */
 			zstr escaped_index;
 
 			escaped_index.u = index;
 			zend_u_symtable_update(symtable1, IS_UNICODE, escaped_index, index_len+1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
-			//efree(escaped_index);
+			/* efree(escaped_index); */
 		}
 	}
 }

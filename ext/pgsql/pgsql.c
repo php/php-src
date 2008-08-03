@@ -3399,7 +3399,7 @@ PHP_FUNCTION(pg_lo_import)
 		id = PGG(default_link);
 		CHECK_DEFAULT_LINK(id);
 	}
-	// old calling convention, deprecated since PHP 4.2
+	/* old calling convention, deprecated since PHP 4.2 */
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
 									  "sr", &file_in, &name_len, &pgsql_link ) == SUCCESS) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Old API is used");
