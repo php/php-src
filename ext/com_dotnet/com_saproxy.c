@@ -386,8 +386,8 @@ zend_object_handlers php_com_saproxy_handlers = {
 	saproxy_read_dimension,
 	saproxy_write_dimension,
 	NULL,
-	NULL, //saproxy_object_get,
-	NULL, //saproxy_object_set,
+	NULL, /* saproxy_object_get, */
+	NULL, /* saproxy_object_set, */
 	saproxy_property_exists,
 	saproxy_property_delete,
 	saproxy_dimension_exists,

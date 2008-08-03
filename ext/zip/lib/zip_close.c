@@ -147,7 +147,7 @@ zip_close(struct zip *za)
 		de.crc = za->cdir->entry[i].crc;
 		de.comp_size = za->cdir->entry[i].comp_size;
 		de.uncomp_size = za->cdir->entry[i].uncomp_size;
-		//de.bitflags &= ~ZIP_GPBF_DATA_DESCRIPTOR;
+		/* de.bitflags &= ~ZIP_GPBF_DATA_DESCRIPTOR; */
 	    }
 	    memcpy(cd->entry+j, za->cdir->entry+i, sizeof(cd->entry[j]));
 	}
