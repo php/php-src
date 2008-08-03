@@ -16563,7 +16563,7 @@ SQLITE_PRIVATE int sqlite3GetVarint(const unsigned char *p, u64 *v){
   u32 a,b,s;
 
   a = *p;
-  // a: p0 (unmasked)
+  /* a: p0 (unmasked) */
   if (!(a&0x80))
   {
     *v = a;
@@ -16572,7 +16572,7 @@ SQLITE_PRIVATE int sqlite3GetVarint(const unsigned char *p, u64 *v){
 
   p++;
   b = *p;
-  // b: p1 (unmasked)
+  /* b: p1 (unmasked) */
   if (!(b&0x80))
   {
     a &= 0x7f;
@@ -16585,7 +16585,7 @@ SQLITE_PRIVATE int sqlite3GetVarint(const unsigned char *p, u64 *v){
   p++;
   a = a<<14;
   a |= *p;
-  // a: p0<<14 | p2 (unmasked)
+  /* a: p0<<14 | p2 (unmasked) */
   if (!(a&0x80))
   {
     a &= (0x7f<<14)|(0x7f);
@@ -16596,41 +16596,41 @@ SQLITE_PRIVATE int sqlite3GetVarint(const unsigned char *p, u64 *v){
     return 3;
   }
 
-  // CSE1 from below
+  /* CSE1 from below */
   a &= (0x7f<<14)|(0x7f);
   p++;
   b = b<<14;
   b |= *p;
-  // b: p1<<14 | p3 (unmasked)
+  /* b: p1<<14 | p3 (unmasked) */
   if (!(b&0x80))
   {
     b &= (0x7f<<14)|(0x7f);
-    // moved CSE1 up
-    // a &= (0x7f<<14)|(0x7f);
+    /* moved CSE1 up */
+    /* a &= (0x7f<<14)|(0x7f); */
     a = a<<7;
     a |= b;
     *v = a;
     return 4;
   }
 
-  // a: p0<<14 | p2 (masked)
-  // b: p1<<14 | p3 (unmasked)
-  // 1:save off p0<<21 | p1<<14 | p2<<7 | p3 (masked)
-  // moved CSE1 up
-  // a &= (0x7f<<14)|(0x7f);
+  /* a: p0<<14 | p2 (masked) */
+  /* b: p1<<14 | p3 (unmasked) */
+  /* 1:save off p0<<21 | p1<<14 | p2<<7 | p3 (masked) */
+  /* moved CSE1 up */
+  /* a &= (0x7f<<14)|(0x7f); */
   b &= (0x7f<<14)|(0x7f);
   s = a;
-  // s: p0<<14 | p2 (masked)
+  /* s: p0<<14 | p2 (masked) */
 
   p++;
   a = a<<14;
   a |= *p;
-  // a: p0<<28 | p2<<14 | p4 (unmasked)
+  /* a: p0<<28 | p2<<14 | p4 (unmasked) */
   if (!(a&0x80))
   {
-    // we can skip these cause they were (effectively) done above in calc'ing s
-    // a &= (0x7f<<28)|(0x7f<<14)|(0x7f);
-    // b &= (0x7f<<14)|(0x7f);
+    /* we can skip these cause they were (effectively) done above in calc'ing s */
+    /* a &= (0x7f<<28)|(0x7f<<14)|(0x7f); */
+    /* b &= (0x7f<<14)|(0x7f); */
     b = b<<7;
     a |= b;
     s = s>>18;
@@ -16638,19 +16638,19 @@ SQLITE_PRIVATE int sqlite3GetVarint(const unsigned char *p, u64 *v){
     return 5;
   }
 
-  // 2:save off p0<<21 | p1<<14 | p2<<7 | p3 (masked)
+  /* 2:save off p0<<21 | p1<<14 | p2<<7 | p3 (masked) */
   s = s<<7;
   s |= b;
-  // s: p0<<21 | p1<<14 | p2<<7 | p3 (masked)
+  /* s: p0<<21 | p1<<14 | p2<<7 | p3 (masked) */
 
   p++;
   b = b<<14;
   b |= *p;
-  // b: p1<<28 | p3<<14 | p5 (unmasked)
+  /* b: p1<<28 | p3<<14 | p5 (unmasked) */
   if (!(b&0x80))
   {
-    // we can skip this cause it was (effectively) done above in calc'ing s
-    // b &= (0x7f<<28)|(0x7f<<14)|(0x7f);
+    /* we can skip this cause it was (effectively) done above in calc'ing s */
+    /* b &= (0x7f<<28)|(0x7f<<14)|(0x7f); */
     a &= (0x7f<<14)|(0x7f);
     a = a<<7;
     a |= b;
@@ -16662,7 +16662,7 @@ SQLITE_PRIVATE int sqlite3GetVarint(const unsigned char *p, u64 *v){
   p++;
   a = a<<14;
   a |= *p;
-  // a: p2<<28 | p4<<14 | p6 (unmasked)
+  /* a: p2<<28 | p4<<14 | p6 (unmasked) */
   if (!(a&0x80))
   {
     a &= (0x7f<<28)|(0x7f<<14)|(0x7f);
@@ -16674,17 +16674,17 @@ SQLITE_PRIVATE int sqlite3GetVarint(const unsigned char *p, u64 *v){
     return 7;
   }
 
-  // CSE2 from below
+  /* CSE2 from below */
   a &= (0x7f<<14)|(0x7f);
   p++;
   b = b<<14;
   b |= *p;
-  // b: p3<<28 | p5<<14 | p7 (unmasked)
+  /* b: p3<<28 | p5<<14 | p7 (unmasked) */
   if (!(b&0x80))
   {
     b &= (0x7f<<28)|(0x7f<<14)|(0x7f);
-    // moved CSE2 up
-    // a &= (0x7f<<14)|(0x7f);
+    /* moved CSE2 up */
+    /* a &= (0x7f<<14)|(0x7f); */
     a = a<<7;
     a |= b;
     s = s>>4;
@@ -16695,10 +16695,10 @@ SQLITE_PRIVATE int sqlite3GetVarint(const unsigned char *p, u64 *v){
   p++;
   a = a<<15;
   a |= *p;
-  // a: p4<<29 | p6<<15 | p8 (unmasked)
+  /* a: p4<<29 | p6<<15 | p8 (unmasked) */
 
-  // moved CSE2 up
-  // a &= (0x7f<<29)|(0x7f<<15)|(0xff);
+  /* moved CSE2 up */
+  /* a &= (0x7f<<29)|(0x7f<<15)|(0xff); */
   b &= (0x7f<<14)|(0x7f);
   b = b<<8;
   a |= b;
@@ -16725,7 +16725,7 @@ SQLITE_PRIVATE int sqlite3GetVarint32(const unsigned char *p, u32 *v){
   u32 a,b;
 
   a = *p;
-  // a: p0 (unmasked)
+  /* a: p0 (unmasked) */
 #ifndef getVarint32
   if (!(a&0x80))
   {
@@ -16736,7 +16736,7 @@ SQLITE_PRIVATE int sqlite3GetVarint32(const unsigned char *p, u32 *v){
 
   p++;
   b = *p;
-  // b: p1 (unmasked)
+  /* b: p1 (unmasked) */
   if (!(b&0x80))
   {
     a &= 0x7f;
@@ -16748,7 +16748,7 @@ SQLITE_PRIVATE int sqlite3GetVarint32(const unsigned char *p, u32 *v){
   p++;
   a = a<<14;
   a |= *p;
-  // a: p0<<14 | p2 (unmasked)
+  /* a: p0<<14 | p2 (unmasked) */
   if (!(a&0x80))
   {
     a &= (0x7f<<14)|(0x7f);
@@ -16761,7 +16761,7 @@ SQLITE_PRIVATE int sqlite3GetVarint32(const unsigned char *p, u32 *v){
   p++;
   b = b<<14;
   b |= *p;
-  // b: p1<<14 | p3 (unmasked)
+  /* b: p1<<14 | p3 (unmasked) */
   if (!(b&0x80))
   {
     b &= (0x7f<<14)|(0x7f);
@@ -16774,7 +16774,7 @@ SQLITE_PRIVATE int sqlite3GetVarint32(const unsigned char *p, u32 *v){
   p++;
   a = a<<14;
   a |= *p;
-  // a: p0<<28 | p2<<14 | p4 (unmasked)
+  /* a: p0<<28 | p2<<14 | p4 (unmasked) */
   if (!(a&0x80))
   {
     a &= (0x7f<<28)|(0x7f<<14)|(0x7f);
@@ -18329,7 +18329,7 @@ static int os2Open(
 
   OSTRACE2( "OPEN want %d\n", flags );
 
-  //ulOpenMode = flags & SQLITE_OPEN_READWRITE ? OPEN_ACCESS_READWRITE : OPEN_ACCESS_READONLY;
+  /* ulOpenMode = flags & SQLITE_OPEN_READWRITE ? OPEN_ACCESS_READWRITE : OPEN_ACCESS_READONLY; */
   if( flags & SQLITE_OPEN_READWRITE ){
     ulOpenMode |= OPEN_ACCESS_READWRITE;
     OSTRACE1( "OPEN read/write\n" );
@@ -18338,7 +18338,7 @@ static int os2Open(
     OSTRACE1( "OPEN read only\n" );
   }
 
-  //ulOpenFlags = flags & SQLITE_OPEN_CREATE ? OPEN_ACTION_CREATE_IF_NEW : OPEN_ACTION_FAIL_IF_NEW;
+  /* ulOpenFlags = flags & SQLITE_OPEN_CREATE ? OPEN_ACTION_CREATE_IF_NEW : OPEN_ACTION_FAIL_IF_NEW; */
   if( flags & SQLITE_OPEN_CREATE ){
     ulOpenFlags |= OPEN_ACTION_OPEN_IF_EXISTS | OPEN_ACTION_CREATE_IF_NEW;
     OSTRACE1( "OPEN open new/create\n" );
@@ -18347,7 +18347,7 @@ static int os2Open(
     OSTRACE1( "OPEN open existing\n" );
   }
 
-  //ulOpenMode |= flags & SQLITE_OPEN_MAIN_DB ? OPEN_SHARE_DENYNONE : OPEN_SHARE_DENYWRITE;
+  /* ulOpenMode |= flags & SQLITE_OPEN_MAIN_DB ? OPEN_SHARE_DENYNONE : OPEN_SHARE_DENYWRITE; */
   if( flags & SQLITE_OPEN_MAIN_DB ){
     ulOpenMode |= OPEN_SHARE_DENYNONE;
     OSTRACE1( "OPEN share read/write\n" );
@@ -18359,7 +18359,7 @@ static int os2Open(
   if( flags & (SQLITE_OPEN_TEMP_DB | SQLITE_OPEN_TEMP_JOURNAL
                | SQLITE_OPEN_SUBJOURNAL) ){
     char pathUtf8[CCHMAXPATH];
-    //ulFileAttribute = FILE_HIDDEN;  //for debugging, we want to make sure it is deleted
+    /* ulFileAttribute = FILE_HIDDEN;  //for debugging, we want to make sure it is deleted */
     ulFileAttribute = FILE_NORMAL;
     sqlite3OsFullPathname( pVfs, zName, CCHMAXPATH, pathUtf8 );
     pFile->pathToDel = convertUtf8PathToCp( pathUtf8 );
