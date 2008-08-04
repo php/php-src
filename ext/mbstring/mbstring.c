@@ -1239,6 +1239,11 @@ static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
 				}
 			}
 		}
+	} else {
+		MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
+		MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
+		MBSTRG(filter_illegal_substchar) = 0x3f;	/* '?' */
+		MBSTRG(current_filter_illegal_substchar) = 0x3f;	/* '?' */
 	}
 
 	return SUCCESS;
@@ -1274,7 +1279,8 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output_conv_mimetypes)
 	void *re = NULL;
 
 	if (!new_value) {
-		return SUCCESS;
+		new_value = entry->orig_value;
+		new_value_length = entry->orig_value_length;
 	}
 	php_trim(new_value, new_value_length, NULL, 0, &tmp, 3 TSRMLS_CC);
 
@@ -1457,9 +1463,7 @@ PHP_RINIT_FUNCTION(mbstring)
 	MBSTRG(current_filter_illegal_mode) = MBSTRG(filter_illegal_mode);
 	MBSTRG(current_filter_illegal_substchar) = MBSTRG(filter_illegal_substchar);
 
-	if (!MBSTRG(encoding_translation)) {
-		MBSTRG(illegalchars) = 0;
-	}
+	MBSTRG(illegalchars) = 0;
 
 	n = 0;
 	if (MBSTRG(detect_order_list)) {
