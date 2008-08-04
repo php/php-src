@@ -802,6 +802,11 @@ static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
 				}
 			}
 		}
+	} else {
+		MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
+		MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
+		MBSTRG(filter_illegal_substchar) = 0x3f;	/* '?' */
+		MBSTRG(current_filter_illegal_substchar) = 0x3f;	/* '?' */
 	}
 
 	return SUCCESS;
@@ -972,9 +977,7 @@ PHP_RINIT_FUNCTION(mbstring)
 	MBSTRG(current_filter_illegal_mode) = MBSTRG(filter_illegal_mode);
 	MBSTRG(current_filter_illegal_substchar) = MBSTRG(filter_illegal_substchar);
 
-	if (!MBSTRG(encoding_translation)) {
-		MBSTRG(illegalchars) = 0;
-	}
+	MBSTRG(illegalchars) = 0;
 
 	n = 0;
 	if (MBSTRG(detect_order_list)) {
