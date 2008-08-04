@@ -14,6 +14,8 @@ PHP                                                                        NEWS
 - Fixed a regression when using strip_tags() and < is within an attribute.
   (Scott)
 
+- Fixed bug #45705 (rfc822_parse_adrlist() modifies passed address parameter).
+  (Jani)
 - Fixed bug #45691 (Some per-dir or runtime settings may leak into other
   requests). (Moriyoshi)
 - Fixed bug #45568 (ISAPI doesn't properly clear auth_digest in header).

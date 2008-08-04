@@ -2157,7 +2157,8 @@ PHP_FUNCTION(imap_rfc822_parse_adrlist)
 	zval **str, **defaulthost, *tovals;
 	ADDRESS *addresstmp;
 	ENVELOPE *env;
-	
+	char *str_copy;
+
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &str, &defaulthost) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
@@ -2168,7 +2169,10 @@ PHP_FUNCTION(imap_rfc822_parse_adrlist)
 
 	env = mail_newenvelope();
 
-	rfc822_parse_adrlist(&env->to, Z_STRVAL_PP(str), Z_STRVAL_PP(defaulthost));
+	/* rfc822_parse_adrlist() modifies passed string. Copy it. */
+	str_copy = estrndup(Z_STRVAL_PP(str), Z_STRLEN_PP(str));
+	rfc822_parse_adrlist(&env->to, str_copy, defaulthost);
+	efree(str_copy);
 
 	array_init(return_value);
 
@@ -2964,7 +2968,7 @@ PHP_FUNCTION(imap_mail_compose)
 	BODY *bod=NULL, *topbod=NULL;
 	PART *mypart=NULL, *part;
 	PARAMETER *param, *disp_param = NULL, *custom_headers_param = NULL, *tmp_param = NULL;
-	char *tmp=NULL, *mystring=NULL, *t=NULL, *tempstring=NULL;
+	char *tmp=NULL, *mystring=NULL, *t=NULL, *tempstring=NULL, *str_copy = NULL;
 	int toppart = 0;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &envelope, &body) == FAILURE) {
@@ -2981,50 +2985,55 @@ PHP_FUNCTION(imap_mail_compose)
 		RETURN_FALSE;
  	}
 
+#define PHP_RFC822_PARSE_ADRLIST(target, value) \
+	str_copy = estrndup(Z_STRVAL_PP(value), Z_STRLEN_PP(value)); \
+	rfc822_parse_adrlist(target, str_copy, "NO HOST"); \
+	efree(str_copy);
+
 	env = mail_newenvelope();
 	if (zend_hash_find(Z_ARRVAL_PP(envelope), "remail", sizeof("remail"), (void **) &pvalue)== SUCCESS) {
 		convert_to_string_ex(pvalue);
-		env->remail=cpystr(Z_STRVAL_PP(pvalue));
+		env->remail = cpystr(Z_STRVAL_PP(pvalue));
 	}
 	if (zend_hash_find(Z_ARRVAL_PP(envelope), "return_path", sizeof("return_path"), (void **) &pvalue)== SUCCESS) {
 		convert_to_string_ex(pvalue)
-		rfc822_parse_adrlist(&env->return_path, Z_STRVAL_PP(pvalue), "NO HOST");
+		PHP_RFC822_PARSE_ADRLIST(&env->return_path, pvalue);
 	}
 	if (zend_hash_find(Z_ARRVAL_PP(envelope), "date", sizeof("date"), (void **) &pvalue)== SUCCESS) {
 		convert_to_string_ex(pvalue);
-		env->date=cpystr(Z_STRVAL_PP(pvalue));
+		env->date = cpystr(Z_STRVAL_PP(pvalue));
 	}
 	if (zend_hash_find(Z_ARRVAL_PP(envelope), "from", sizeof("from"), (void **) &pvalue)== SUCCESS) {
 		convert_to_string_ex(pvalue);
-		rfc822_parse_adrlist (&env->from, Z_STRVAL_PP(pvalue), "NO HOST");
+		PHP_RFC822_PARSE_ADRLIST(&env->from, pvalue);
 	}
 	if (zend_hash_find(Z_ARRVAL_PP(envelope), "reply_to", sizeof("reply_to"), (void **) &pvalue)== SUCCESS) {
 		convert_to_string_ex(pvalue);
-		rfc822_parse_adrlist (&env->reply_to, Z_STRVAL_PP(pvalue), "NO HOST");
+		PHP_RFC822_PARSE_ADRLIST(&env->reply_to, pvalue);
 	}
 	if (zend_hash_find(Z_ARRVAL_PP(envelope), "in_reply_to", sizeof("in_reply_to"), (void **) &pvalue)== SUCCESS) {
 		convert_to_string_ex(pvalue);
-		env->in_reply_to=cpystr(Z_STRVAL_PP(pvalue));
+		env->in_reply_to = cpystr(Z_STRVAL_PP(pvalue));
 	}
 	if (zend_hash_find(Z_ARRVAL_PP(envelope), "subject", sizeof("subject"), (void **) &pvalue)== SUCCESS) {
 		convert_to_string_ex(pvalue);
-		env->subject=cpystr(Z_STRVAL_PP(pvalue));
+		env->subject = cpystr(Z_STRVAL_PP(pvalue));
 	}
 	if (zend_hash_find(Z_ARRVAL_PP(envelope), "to", sizeof("to"), (void **) &pvalue)== SUCCESS) {
 		convert_to_string_ex(pvalue);
-		rfc822_parse_adrlist (&env->to, Z_STRVAL_PP(pvalue), "NO HOST");
+		PHP_RFC822_PARSE_ADRLIST(&env->to, pvalue);
 	}
 	if (zend_hash_find(Z_ARRVAL_PP(envelope), "cc", sizeof("cc"), (void **) &pvalue)== SUCCESS) {
 		convert_to_string_ex(pvalue);
-		rfc822_parse_adrlist (&env->cc, Z_STRVAL_PP(pvalue), "NO HOST");
+		PHP_RFC822_PARSE_ADRLIST(&env->cc, pvalue);
 	}
 	if (zend_hash_find(Z_ARRVAL_PP(envelope), "bcc", sizeof("bcc"), (void **) &pvalue)== SUCCESS) {
 		convert_to_string_ex(pvalue);
-		rfc822_parse_adrlist (&env->bcc, Z_STRVAL_PP(pvalue), "NO HOST");
+		PHP_RFC822_PARSE_ADRLIST(&env->bcc, pvalue);
 	}
 	if (zend_hash_find(Z_ARRVAL_PP(envelope), "message_id", sizeof("message_id"), (void **) &pvalue)== SUCCESS) {
 		convert_to_string_ex(pvalue);
-		env->message_id=cpystr(Z_STRVAL_PP(pvalue));
+		env->message_id = cpystr(Z_STRVAL_PP(pvalue));
 	}
 
 	if (zend_hash_find(Z_ARRVAL_PP(envelope), "custom_headers", sizeof("custom_headers"), (void **) &pvalue)== SUCCESS) {
