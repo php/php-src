@@ -4528,12 +4528,12 @@ convert_done:
 #ifdef HAVE_GD_BUNDLED
 
 #define PHP_GD_SINGLE_RES	\
-	zval **SIM;	\
+	zval *SIM;	\
 	gdImagePtr im_src;	\
-	if (zend_get_parameters_ex(1, &SIM) == FAILURE) {	\
+	if (zend_parse_parameters(1 TSRMLS_CC, "r", &SIM) == FAILURE) {	\
 		RETURN_FALSE;	\
 	}	\
-	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);	\
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, &SIM, -1, "Image", le_gd);	\
 	if (im_src == NULL) {	\
 		RETURN_FALSE;	\
 	}
