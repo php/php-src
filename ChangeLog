@@ -1,3 +1,125 @@
+2008-08-03  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/tests/heap_011.phpt
+      ext/spl/tests/heap_011.phpt:
+      
+      Fix clone + add tests
+
+    * ext/spl/spl_heap.c
+      ext/spl/tests/heap_001.phpt:
+      Fix clone + add tests
+
+2008-08-03  Marcus Boerger  <php@marcus-boerger.de>
+
+    * Makefile.gcov:
+      - Drop libsqlite even here
+
+2008-08-03  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/spl_heap.c:
+      Remove cast and fix mem errors
+
+2008-08-03  Felipe Pena  <felipensp@gmail.com>
+
+    * php.ini-dist
+      php.ini-recommended:
+      - Fixed error levels
+
+2008-08-03  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/php_date.c:
+      - MFH: Fixed bug #45696 (Not all DateTime methods allow method chaining).
+
+    * ext/date/php_date.c:
+      - Fixed bug #45696 (Not all DateTime methods allow method chaining).
+
+2008-08-03  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      NEWS:
+      typo, grammar
+
+    * ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_saproxy.c
+      ext/dom/xpath.c
+      ext/fbsql/php_fbsql.c
+      ext/pdo_mysql/mysql_driver.c
+      ext/pgsql/pgsql.c
+      ext/sqlite3/libsqlite/sqlite3.c
+      ext/xmlrpc/libxmlrpc/xml_to_soap.c
+      ext/xsl/xsltprocessor.c
+      main/php_variables.c:
+      - Nuketh C++ comments from C files.
+
+2008-08-03  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      NEWS:
+      - Nitpicking
+
+2008-08-03  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/exif/exif.c:
+      - fix comment style
+
+    * ext/standard/basic_functions.c:
+      missing eol
+
+    * ext/standard/var.c:
+      - Fix comment
+
+    * ext/intl/locale/locale_class.c
+      ext/intl/locale/locale_class.c
+      sapi/litespeed/lsapi_main.c:
+      oops
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ext/mbstring/mbstring.c:
+      - No C++ comments in C files!
+
+    * sapi/litespeed/lsapi_main.c
+      sapi/litespeed/lsapilib.c:
+      - Added missing $Id$ tags and nuked c++ comments
+
+    * (PHP_5_3)
+      ext/intl/locale/locale.c
+      ext/intl/locale/locale.h
+      ext/intl/locale/locale_class.c
+      ext/intl/locale/locale_class.h
+      ext/intl/locale/locale_methods.c
+      ext/intl/locale/locale_methods.h:
+      - What a mess..
+
+    * ext/intl/locale/locale.c
+      ext/intl/locale/locale.h
+      ext/intl/locale/locale_class.c
+      ext/intl/locale/locale_class.h
+      ext/intl/locale/locale_methods.c
+      ext/intl/locale/locale_methods.h:
+      - These files do not conform to any kind of coding standard. Sync from 5.3
+      too
+
+2008-08-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_2)
+      ext/mbstring/mbstring.c:
+      - MFH:Forgot to take account of the case when mbstring.language is
+      processed
+        afterwards.
+
+    * (PHP_5_3)
+      ext/mbstring/mbstring.c:
+      - MFH: Forgot to take account of the case when mbstring.language is
+      processed
+        afterwards.
+
+    * ext/mbstring/mbstring.c:
+      - Forgot to take account of the case when mbstring.language is processed
+        afterwards.
+
 2008-08-02  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * (PHP_5_2)

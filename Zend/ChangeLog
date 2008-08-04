@@ -1,3 +1,9 @@
+2008-08-03  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * zend_compile.c
+      zend_compile.c:
+      - No C++ comments in C files!
+
 2008-08-02  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
