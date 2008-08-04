@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Fixed bug #45696 (Not all DateTime methods allow method chaining). (Derick)
 - Fixed bug #45545 (DateInterval has a limitation of 4 chars for ISO
   durations). (Derick)
+- Fixed bug #45406 (session.serialize_handler declared by shared extension 
+  fails). (Kalle, oleg dot grenrus at dynamoid dot com)
 - Fixed bug #44100 (Inconsistent handling of static array declarations with
   duplicate keys). (Dmitry)
 - Fixed bug #43008 (php://filter uris ignore url encoded filternames and can't 
