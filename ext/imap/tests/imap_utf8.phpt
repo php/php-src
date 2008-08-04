@@ -16,7 +16,7 @@ echo "Done\n";
 string(0) ""
 string(1) "1"
 
-Notice: Array to string conversion in %s on line %d
-string(5) "%s"
-string(4) "%s"
+Warning: imap_utf8() expects parameter 1 to be binary string, array given in %s line %d
+NULL
+string(4) "test"
 Done
