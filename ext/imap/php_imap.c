@@ -1137,12 +1137,26 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 }
 /* }}} */
 
+#if !defined(CCLIENTVERSION)
+#if HAVE_IMAP2004
+#define CCLIENTVERSION "2004"
+#elif HAVE_IMAP2001
+#define CCLIENTVERSION "2001"
+#elif HAVE_IMAP2000
+#define CCLIENTVERSION "2000"
+#elif defined(IMAP41)
+#define CCLIENTVERSION "4.1"
+#else
+#define CCLIENTVERSION "4.0"
+#endif
+#endif
 
 /* {{{ PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(imap)
 {
 	php_info_print_table_start();
+	php_info_print_table_row(2, "IMAP c-Client Version", CCLIENTVERSION);
 #if HAVE_IMAP2007b
 	php_info_print_table_row(2, "IMAP c-Client Version", "2007b");
 #elif HAVE_IMAP2007a
