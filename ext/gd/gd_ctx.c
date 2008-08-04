@@ -49,9 +49,11 @@ static void _php_image_output_ctxfree(struct gdIOCtx *ctx)
 /* {{{ _php_image_output_ctx */
 static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)())
 {
-	zval **imgind, **file, **quality, **basefilter;
+	zval *imgind;
+	char *file = NULL;
+	int file_len = 0;
+	long quality, basefilter;
 	gdImagePtr im;
-	char *fn = NULL;
 	FILE *fp = NULL;
 	int argc = ZEND_NUM_ARGS();
 	int q = -1, i;
@@ -63,39 +65,37 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	 * from imagey<type>().
 	 */
 
-	if (argc < 2 && image_type == PHP_GDIMG_TYPE_XBM) {
-		WRONG_PARAM_COUNT;
+	if (image_type == PHP_GDIMG_TYPE_XBM) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs!|ll", &imgind, &file, &file_len, &quality, &basefilter) == FAILURE) {
+			return;
+		}
+	} else {
+		/* PHP_GDIMG_TYPE_GIF
+		 * PHP_GDIMG_TYPE_PNG 
+		 * PHP_GDIMG_TYPE_JPG 
+		 * PHP_GDIMG_TYPE_WBM */
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|s!ll", &imgind, &file, &file_len, &quality, &basefilter) == FAILURE) {
+			return;
+		}		
 	}
 
-	if (argc < 1 || argc > 4 || zend_get_parameters_ex(argc, &imgind, &file, &quality, &basefilter) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
-	}
-
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", phpi_get_le_gd());
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &imgind, -1, "Image", phpi_get_le_gd());
 
 	if (argc > 1) {
-		if (argc >= 2 && Z_TYPE_PP(file) != IS_NULL) {
-			convert_to_string_ex(file);
-		}
-		fn = Z_STRVAL_PP(file);
 		if (argc >= 3) {
-			convert_to_long_ex(quality);
-			q = Z_LVAL_PP(quality);/* or colorindex for foreground of BW images (defaults to black) */
+			q = quality; /* or colorindex for foreground of BW images (defaults to black) */
 			if (argc == 4) {
-				convert_to_long_ex(basefilter);
-				f = Z_LVAL_PP(basefilter);
+				f = basefilter;
 			}
 		}
 	}
 
-	if (argc > 1 && (Z_TYPE_PP(file) != IS_NULL && ((argc == 2) || (argc > 2 && Z_STRLEN_PP(file))))) {
+	if (argc > 1 && file_len) {
+		PHP_GD_CHECK_OPEN_BASEDIR(file, "Invalid filename");
 
-		PHP_GD_CHECK_OPEN_BASEDIR(fn, "Invalid filename");
-
-		fp = VCWD_FOPEN(fn, "wb");
+		fp = VCWD_FOPEN(file, "wb");
 		if (!fp) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open '%s' for writing: %s", fn, strerror(errno));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open '%s' for writing: %s", file, strerror(errno));
 			RETURN_FALSE;
 		}
 
@@ -137,7 +137,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 				q = i;
 			}
 			if (image_type == PHP_GDIMG_TYPE_XBM) {
-				(*func_p)(im, fn, q, ctx);
+				(*func_p)(im, file, q, ctx);
 			} else {
 				(*func_p)(im, q, ctx);
 			}
