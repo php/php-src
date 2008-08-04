@@ -111,7 +111,7 @@ PHP_FUNCTION(ming_setScale)
 {
 	double num;
 
-        if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
 		return;
 	}
 	Ming_setScale((float)num);
@@ -380,13 +380,12 @@ static SWFInput getInput(zval *id TSRMLS_DC)
 }
 /* }}} */
 
-
 /* {{{ proto void swfinput::__construct(string data) */
 PHP_METHOD(swfinput, __construct)
 {
 	SWFInput input;
 	char *data;
-	long data_len;
+	int data_len;
 	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &data_len) == FAILURE) {
@@ -424,7 +423,7 @@ static SWFFontCollection getFontCollection(zval *id TSRMLS_DC)
 PHP_METHOD(swffontcollection, __construct)
 {
 	char *filename;
-	long filename_len;
+	int filename_len;
 	int ret;
 	SWFFontCollection fc;
 
@@ -485,7 +484,6 @@ static zend_function_entry swffontcollection_functions[] = {
 };
 /* }}} */
 
-
 /* {{{ SWFBrowserFont */
 static SWFBrowserFont getBrowserFont(zval *id TSRMLS_DC)
 {
@@ -503,7 +501,7 @@ static SWFBrowserFont getBrowserFont(zval *id TSRMLS_DC)
 PHP_METHOD(swfbrowserfont, __construct)
 {
 	char *name;
-	long name_len;
+	int name_len;
 	int ret;
 	SWFBrowserFont font;
 
@@ -531,13 +529,14 @@ static zend_function_entry swfbrowserfont_functions[] = {
 	{ NULL, NULL, NULL }
 };
 /* }}} */
+
 /* {{{ SWFCXform
 */
 /* {{{ proto void swfcxform::__construct([rAdd, gAdd, bAdd, aAdd, rMult, gMult, bMult, aMult]) */
 PHP_METHOD(swfcxform, __construct)
 {
 	SWFCXform cx;
-	int rAdd, gAdd, bAdd, aAdd;
+	long rAdd, gAdd, bAdd, aAdd;
 	double rMult, gMult, bMult, aMult;
 	int ret;
 
@@ -568,7 +567,7 @@ PHP_METHOD(swfcxform, __construct)
 /* {{{ proto void setColorAdd(r, g, b, a) */
 PHP_METHOD(swfcxform, setColorAdd)
 {
-	int rAdd, gAdd, bAdd, aAdd;
+	long rAdd, gAdd, bAdd, aAdd;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "llll", &rAdd, &gAdd, &bAdd, &aAdd) == FAILURE) {
 		return;
@@ -615,9 +614,6 @@ static zend_function_entry swfcxform_functions[] = {
 	{ NULL, NULL, NULL }
 };
 /* }}} */
-
-
-
 
 /* {{{ SWFMatrix */
 
@@ -747,7 +743,6 @@ static zend_function_entry swfinitaction_functions[] = {
 };
 /* }}} */
 
-
 /* {{{ SWFAction
 */
 /* {{{ proto void swfaction::__construct(string)
@@ -781,7 +776,7 @@ PHP_METHOD(swfaction, __construct)
 /* {{{ proto long swfaction::compile(version) */
 PHP_METHOD(swfaction, compile)
 {
-	int version;
+	long version;
 	int len, ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &version) == FAILURE) {
@@ -963,7 +958,7 @@ SWFButtonRecord getButtonRecord(zval *id TSRMLS_DC)
    sets a button characters depth */
 PHP_METHOD(swfbuttonrecord, setDepth)
 {
-	int depth;
+	long depth;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &depth) == FAILURE) {
 		return;
@@ -976,7 +971,7 @@ PHP_METHOD(swfbuttonrecord, setDepth)
    assigns a blend mode to a button's character */
 PHP_METHOD(swfbuttonrecord, setBlendMode)
 {
-	int mode;
+	long mode;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &mode) == FAILURE) {
 		return;
@@ -1062,7 +1057,6 @@ PHP_METHOD(swfbuttonrecord, scaleTo)
 	SWFButtonRecord_scaleTo(getButtonRecord(getThis() TSRMLS_CC), x, y);
 }
 /* }}} */
-
 
 /* {{{ proto void swfbuttoncharacter::skewX(double x) */
 PHP_METHOD(swfbuttonrecord, skewX)
@@ -2263,7 +2257,7 @@ SWFFontCharacter getFontCharacter(zval *id TSRMLS_DC)
 PHP_METHOD(swffontchar, addChars)
 {
 	char *string;
-	long string_len;
+	int string_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &string, &string_len) == FAILURE) {
 		return;
@@ -2279,7 +2273,7 @@ PHP_METHOD(swffontchar, addChars)
 PHP_METHOD(swffontchar, addUTF8Chars)
 {
 	char *string;
-	long string_len;
+	int string_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &string, &string_len) == FAILURE) {
 		return;
@@ -2312,8 +2306,6 @@ static zend_function_entry swffontchar_functions[] = {
 #endif
 /* }}} */
 
-/* {{{ SWFFont
-*/
 /* {{{ internal function SWFText getFont(zval *id)
    Returns the Font object in zval *id */
 static SWFFont getFont(zval *id TSRMLS_DC)
@@ -2332,7 +2324,7 @@ static SWFFont getFont(zval *id TSRMLS_DC)
 PHP_METHOD(swffont, __construct)
 {
 	char *file;
-	long file_len;
+	int file_len;
 	SWFFont font;
 	int ret;
 
@@ -2371,7 +2363,7 @@ static void destroy_SWFFont_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 PHP_METHOD(swffont, getWidth)
 {
 	char *string;
-	long string_len;
+	int string_len;
 	float width;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &string, &string_len) == FAILURE) {
@@ -2390,7 +2382,7 @@ PHP_METHOD(swffont, getWidth)
 PHP_METHOD(swffont, getUTF8Width)
 {
 	char *string;
-	long string_len;
+	int string_len;
 	float width;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &string, &string_len) == FAILURE) {
@@ -2467,7 +2459,6 @@ static zend_function_entry swffont_functions[] = {
 };
 
 /* }}} */
-
 
 /* {{{ SWFFilterMatrix
 */
@@ -2629,7 +2620,6 @@ static zend_function_entry swfblur_functions[] = {
 	{ NULL, NULL, NULL }
 };
 /* }}} */
-
 
 /* {{{ SWFGradient
 */
@@ -3081,8 +3071,6 @@ static zend_function_entry swffilter_functions[] = {
 };
 /* }}} */
 
-
-
 /* {{{ SWFMorph 
 */
 /* {{{ proto void swfmorph::__construct()
@@ -3238,8 +3226,6 @@ static zend_function_entry swfsoundstream_functions[] = {
 };
 /* }}} */
 
-
-
 /* {{{ SWFSound */
 /* {{{ internal function SWFSound getSound(zval *id)
    Returns the Sound object in zval *id */
@@ -3325,7 +3311,6 @@ static zend_function_entry swfsound_functions[] = {
 
 /* }}} */
 
-/* {{{ SWFSoundInstance */
 #ifdef HAVE_NEW_MING
 /* should handle envelope functions */
 /* {{{ internal function SWFSoundInstance getSoundInstance(zval *id)
@@ -3371,6 +3356,7 @@ PHP_METHOD(swfsoundinstance, loopInPoint)
 }
 
 /* }}} */
+
 /* {{{ swfsoundinstance_loopoutpoint(point) */
 
 PHP_METHOD(swfsoundinstance, loopOutPoint)
@@ -3597,7 +3583,7 @@ static zend_function_entry swfvideostream_functions[] = {
 PHP_METHOD(swfbinarydata, __construct)
 {
 	char *data;
-	long data_len;
+	int data_len;
 	SWFBinaryData bd = NULL;
 	int ret;
 
@@ -3768,7 +3754,7 @@ PHP_METHOD(swfmovie, nextFrame)
 PHP_METHOD(swfmovie, labelFrame)
 {
 	char *label;
-	long label_len;
+	int label_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &label, &label_len) == FAILURE) {
 		return;
@@ -3783,7 +3769,7 @@ PHP_METHOD(swfmovie, labelFrame)
 PHP_METHOD(swfmovie, namedAnchor)
 {
 	char *label;
-	long label_len;
+	int label_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &label, &label_len) == FAILURE) {
 		return;
@@ -3798,7 +3784,7 @@ PHP_METHOD(swfmovie, namedAnchor)
 PHP_METHOD(swfmovie, protect)
 {
 	char *passwd = NULL;
-	long passwd_len;
+	int passwd_len;
 	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &passwd, &passwd_len) == FAILURE) {
@@ -3873,7 +3859,7 @@ PHP_METHOD(swfmovie, output)
 {
 	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
 #if !defined(HAVE_NEW_MING)
-	int limit = -1;
+	long limit = -1;
 	int oldval = INT_MIN;
 	long out; 
 
@@ -3886,7 +3872,7 @@ PHP_METHOD(swfmovie, output)
 		
 	RETURN_LONG(out);
 #elif defined(HAVE_NEW_MING) && defined(HAVE_MING_MOVIE_LEVEL)
-	int limit = -1;
+	long limit = -1;
 	int argc = ZEND_NUM_ARGS();
 
 	if(argc) {
@@ -3923,7 +3909,7 @@ static void phpStreamOutputMethod(byte b, void * data)
 PHP_METHOD(swfmovie, saveToFile)
 {
 	zval *x;
-	int limit = -1;
+	long limit = -1;
 #if !defined(HAVE_NEW_MING)
 	int oldval = INT_MIN;
 #endif
@@ -3962,7 +3948,7 @@ PHP_METHOD(swfmovie, saveToFile)
 PHP_METHOD(swfmovie, save)
 {
 	zval *x;
-	int limit = -1;
+	long limit = -1;
 #if !defined(HAVE_NEW_MING)
 	int oldval = INT_MIN;
 #endif
@@ -4077,7 +4063,7 @@ PHP_METHOD(swfmovie, setFrames)
 PHP_METHOD(swfmovie, addMetadata)
 { 
 	char *xml;
-	long xml_len;
+	int xml_len;
 	
 	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
   
@@ -4125,7 +4111,7 @@ PHP_METHOD(swfmovie, assignSymbol)
 {
 	zval *zchar;
 	char *name;
-	long name_len;
+	int name_len;
 	SWFCharacter character;
 	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
 
@@ -4144,7 +4130,7 @@ PHP_METHOD(swfmovie, defineScene)
 {
 	long offset;
 	char *name;
-	long name_len;
+	int name_len;
 	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &offset, &name, &name_len) == FAILURE) {
@@ -4237,7 +4223,7 @@ PHP_METHOD(swfmovie, addExport)
 {
 	zval *zchar;
 	char *name;
-	long name_len;
+	int name_len;
 	SWFBlock block;
 	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
 
@@ -4340,7 +4326,7 @@ PHP_METHOD(swfmovie, importFont)
 	SWFFontCharacter res;
 	int ret;
 	char *libswf, *name;
-	long libswf_len, name_len;
+	int libswf_len, name_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &libswf, &libswf_len, &name, &name_len) == FAILURE) {
 		return;
@@ -4516,7 +4502,7 @@ PHP_METHOD(swfshape, addFill)
 	if (ZEND_NUM_ARGS() == 1 || ZEND_NUM_ARGS() == 2) {
 		/* it's a gradient or bitmap */
 		zval *arg1;
-		unsigned char flags = 0;
+		long flags = 0;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|l", &arg1, &flags) == FAILURE) {
 			return;
@@ -4725,8 +4711,8 @@ PHP_METHOD(swfshape, drawGlyph)
 {
 	zval *font;
 	char *c;
-	long c_len;
-	int size = (int)(1024.0f/Ming_getScale());
+	int c_len;
+	long size = (long)(1024.0f/Ming_getScale());
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "os|l", &font, &c, &c_len, &size) == FAILURE) {
 		return;
@@ -5114,7 +5100,7 @@ PHP_METHOD(swfsprite, nextFrame)
 PHP_METHOD(swfsprite, labelFrame)
 {
 	char *label;
-	long label_len;
+	int label_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &label, &label_len) == FAILURE) {
 		return;
@@ -5131,7 +5117,7 @@ PHP_METHOD(swfsprite, setFrames)
 	long frames;
 	SWFMovieClip sprite = getSprite(getThis() TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &frames) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &frames) == FAILURE) {
 		return;
 	}
 
@@ -5433,7 +5419,7 @@ PHP_METHOD(swftext, moveTo)
 PHP_METHOD(swftext, addString)
 {
 	char *s;
-	long s_len;
+	int s_len;
 	SWFText text = getText(getThis() TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &s, &s_len) == FAILURE) {
@@ -5452,7 +5438,7 @@ PHP_METHOD(swftext, addString)
 PHP_METHOD(swftext, addUTF8String)
 {
 	char *s;
-	long s_len;
+	int s_len;
 	SWFText text = getText(getThis() TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &s, &s_len) == FAILURE) {
@@ -5470,7 +5456,7 @@ PHP_METHOD(swftext, addUTF8String)
 PHP_METHOD(swftext, addWideString)
 {
 	char *s;
-	long s_len;
+	int s_len;
 	SWFText text = getText(getThis() TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &s, &s_len) == FAILURE) {
@@ -5488,7 +5474,7 @@ PHP_METHOD(swftext, addWideString)
 PHP_METHOD(swftext, getWidth)
 {
 	char *string;
-	long string_len;
+	int string_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &string, &string_len) == FAILURE) {
 		return;
@@ -5505,7 +5491,7 @@ PHP_METHOD(swftext, getWidth)
 PHP_METHOD(swftext, getUTF8Width)
 {
 	char *string;
-	long string_len;
+	int string_len;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &string, &string_len) == FAILURE) {
 		return;
@@ -5521,7 +5507,7 @@ PHP_METHOD(swftext, getUTF8Width)
 PHP_METHOD(swftext, getWideWidth)
 {
 	char *string;
-	long string_len;
+	int string_len;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &string, &string_len) == FAILURE) {
 		return;
@@ -5802,7 +5788,7 @@ PHP_METHOD(swftextfield, setColor)
 PHP_METHOD(swftextfield, setName)
 {
 	char *name;
-	long name_len;
+	int name_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
 		return;
@@ -5817,7 +5803,7 @@ PHP_METHOD(swftextfield, setName)
 PHP_METHOD(swftextfield, addString)
 {
 	char *str;
-	long str_len;
+	int str_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
@@ -5832,7 +5818,7 @@ PHP_METHOD(swftextfield, addString)
 PHP_METHOD(swftextfield, addUTF8String)
 {
 	char *str;
-	long str_len;
+	int str_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
@@ -5863,7 +5849,7 @@ PHP_METHOD(swftextfield, setPadding)
 PHP_METHOD(swftextfield, addChars)
 {
 	char *str;
-	long str_len;
+	int str_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
@@ -5957,7 +5943,7 @@ PHP_MINFO_FUNCTION(ming)
 /* }}} */
 
 #if PHP_API_VERSION == 20020918
-static php4_fix_funcnames(char *class_name, zend_function_entry *funcs)
+static php4_fix_funcnames(char *class_name, zend_function_entry *funcs) /* {{{ */
 {
 	zend_function_entry *pf = funcs;
 	char *pname;
@@ -5973,10 +5959,11 @@ static php4_fix_funcnames(char *class_name, zend_function_entry *funcs)
 		funcs++;
 	}
 }
+/* }}} */
 #endif
 
 /* custom error handler propagates ming errors up to php */
-static void php_ming_error(const char *msg, ...)
+static void php_ming_error(const char *msg, ...) /* {{{ */
 {
 	va_list args;
 	char *buffer;
@@ -5990,8 +5977,9 @@ static void php_ming_error(const char *msg, ...)
 	php_error_docref(NULL TSRMLS_CC, E_ERROR, "%s", buffer);
 	efree(buffer);
 }
+/* }}} */
 
-PHP_RINIT_FUNCTION(ming)
+PHP_RINIT_FUNCTION(ming) /* {{{ */
 {
 	/* XXX - this didn't work so well last I tried.. */
 
@@ -6001,6 +5989,7 @@ PHP_RINIT_FUNCTION(ming)
 	}
 	return SUCCESS;
 }
+/* }}} */
 
 /* {{{ todo PHP_MINIT_FUNCTION(ming)
 */
