@@ -12,11 +12,11 @@ var_dump(imap_utf8("test"));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 string(0) ""
 string(1) "1"
 
-Warning: imap_utf8() expects parameter 1 to be binary string, array given in %s line %d
+Warning: imap_utf8() expects parameter 1 to be binary string, array given in %s on line %d
 NULL
 string(4) "test"
 Done
