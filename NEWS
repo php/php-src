@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.3.0 Alpha 2
+- Removed shebang line check from CGI sapi (it is checked by scanner) (Dmitry)
+
 - Fixed bug #45696 (Not all DateTime methods allow method chaining). (Derick)
 - Fixed bug #45545 (DateInterval has a limitation of 4 chars for ISO
   durations). (Derick)
