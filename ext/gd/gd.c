@@ -2583,7 +2583,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 				break;
 #if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
 			case PHP_GDIMG_TYPE_XPM:
-				im = gdImageCreateFromXpm(fn);
+				im = gdImageCreateFromXpm(file);
 				break;
 #endif
 
