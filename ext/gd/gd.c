@@ -2497,35 +2497,30 @@ PHP_FUNCTION(imagecreatefromstring)
  */
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)())
 {
-	zval **file, **srcx, **srcy, **width, **height;
+	char *file;
+	int file_len;
+	long srcx, srcy, width, height;
 	gdImagePtr im = NULL;
-	char *fn=NULL;
 	php_stream *stream;
 	FILE * fp = NULL;
-	int argc=ZEND_NUM_ARGS();
 #ifdef HAVE_GD_JPG
 	long ignore_warning;
 #endif
-
-	if ((image_type == PHP_GDIMG_TYPE_GD2PART && argc != 5) ||
-		(image_type != PHP_GDIMG_TYPE_GD2PART && argc != 1) ||
-		zend_get_parameters_ex(argc, &file, &srcx, &srcy, &width, &height) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
-	}
-
-	convert_to_string_ex(file);
-
-	if (argc == 5 && image_type == PHP_GDIMG_TYPE_GD2PART) {
-		multi_convert_to_long_ex(4, srcx, srcy, width, height);
-		if (Z_LVAL_PP(width) < 1 || Z_LVAL_PP(height) < 1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Zero width or height not allowed");
+	if (image_type == PHP_GDIMG_TYPE_GD2PART) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sllll", &file, &file_len, &srcx, &srcy, &width, &height) == FAILURE) {
+			return;
+		}
+		if (width < 1 || height < 1) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Zero width or height not allowed");
 			RETURN_FALSE;
+		}
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file, &file_len) == FAILURE) {
+			return;
 		}
 	}
 
-	fn = Z_STRVAL_PP(file);
-
-	stream = php_stream_open_wrapper(fn, "rb", ENFORCE_SAFE_MODE|REPORT_ERRORS|IGNORE_PATH|IGNORE_URL_WIN, NULL);
+	stream = php_stream_open_wrapper(file, "rb", ENFORCE_SAFE_MODE|REPORT_ERRORS|IGNORE_PATH|IGNORE_URL_WIN, NULL);
 	if (stream == NULL)	{
 		RETURN_FALSE;
 	}
@@ -2562,7 +2557,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		}
 
 		if (image_type == PHP_GDIMG_TYPE_GD2PART) {
-			im = (*ioctx_func_p)(io_ctx, Z_LVAL_PP(srcx), Z_LVAL_PP(srcy), Z_LVAL_PP(width), Z_LVAL_PP(height));
+			im = (*ioctx_func_p)(io_ctx, srcx, srcy, width, height);
 		} else {
 			im = (*ioctx_func_p)(io_ctx);
 		}
@@ -2584,7 +2579,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 	if (!im && fp) {
 		switch (image_type) {
 			case PHP_GDIMG_TYPE_GD2PART:
-				im = (*func_p)(fp, Z_LVAL_PP(srcx), Z_LVAL_PP(srcy), Z_LVAL_PP(width), Z_LVAL_PP(height));
+				im = (*func_p)(fp, srcx, srcy, width, height);
 				break;
 #if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
 			case PHP_GDIMG_TYPE_XPM:
@@ -2617,7 +2612,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		return;
 	}
 
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%s' is not a valid %s file", fn, tn);
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%s' is not a valid %s file", file, tn);
 out_err:
 	php_stream_close(stream);
 	RETURN_FALSE;
@@ -4832,12 +4827,12 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 #ifdef HAVE_GD_BUNDLED
 
 #define PHP_GD_SINGLE_RES	\
-	zval **SIM;	\
+	zval *SIM;	\
 	gdImagePtr im_src;	\
-	if (zend_get_parameters_ex(1, &SIM) == FAILURE) {	\
+	if (zend_parse_parameters(1 TSRMLS_CC, "r", &SIM) == FAILURE) {	\
 		RETURN_FALSE;	\
 	}	\
-	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);	\
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, &SIM, -1, "Image", le_gd);	\
 	if (im_src == NULL) {	\
 		RETURN_FALSE;	\
 	}
