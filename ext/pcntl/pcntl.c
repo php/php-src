@@ -35,8 +35,11 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_pcntl.h"
+#include "php_signal.h"
+#include "php_ticks.h"
 
 #if HAVE_GETPRIORITY || HAVE_SETPRIORITY || HAVE_WAIT3
+#include <sys/wait.h>
 #include <sys/time.h>
 #include <sys/resource.h>
 #endif
@@ -864,12 +867,12 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 #ifdef SIGCHLD
 			case SIGCHLD:
 				add_ascii_assoc_long_ex(user_siginfo,   "status", sizeof("status"), siginfo.si_status);
-#ifdef si_utime
+# ifdef si_utime
 				add_ascii_assoc_double_ex(user_siginfo, "utime",  sizeof("utime"),  siginfo.si_utime);
-#endif
-#ifdef si_stime
+# endif
+# ifdef si_stime
 				add_ascii_assoc_double_ex(user_siginfo, "stime",  sizeof("stime"),  siginfo.si_stime);
-#endif
+# endif
 				add_ascii_assoc_long_ex(user_siginfo,   "pid",    sizeof("pid"),    siginfo.si_pid);
 				add_ascii_assoc_long_ex(user_siginfo,   "uid",    sizeof("uid"),    siginfo.si_uid);
 				break;
@@ -883,7 +886,9 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 #ifdef SIGPOLL
 			case SIGPOLL:
 				add_ascii_assoc_long_ex(user_siginfo, "band", sizeof("band"), siginfo.si_band);
+#ifdef si_fd
 				add_ascii_assoc_long_ex(user_siginfo, "fd",   sizeof("fd"),   siginfo.si_fd);
+#endif
 				break;
 #endif
 			EMPTY_SWITCH_DEFAULT_CASE();
@@ -894,7 +899,7 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 }
 /* }}} */
 
-/* {{{ proto int sigwaitinfo(array set[, array &siginfo])
+/* {{{ proto int pcnlt_sigwaitinfo(array set[, array &siginfo])
    Synchronously wait for queued signals */
 PHP_FUNCTION(pcntl_sigwaitinfo)
 {
@@ -902,7 +907,7 @@ PHP_FUNCTION(pcntl_sigwaitinfo)
 }
 /* }}} */
 
-/* {{{ proto int sigtimedwait(array set[, array &siginfo[, int seconds[, int nanoseconds]]])
+/* {{{ proto int pcntl_sigtimedwait(array set[, array &siginfo[, int seconds[, int nanoseconds]]])
    Wait for queued signals */
 PHP_FUNCTION(pcntl_sigtimedwait)
 {
