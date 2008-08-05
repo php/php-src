@@ -3718,7 +3718,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 	char * outfilename;	int outfilename_len;
 	char * extracertsfilename; int extracertsfilename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZZZa!|ls", &ppinfilename, 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZZZa!|lZ", &ppinfilename, 
 				&ppoutfilename, &zcert, &zprivkey, &zheaders, &flags, &ppextracertsfilename) == FAILURE) {
 		return;
 	}
