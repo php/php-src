@@ -10,8 +10,4 @@ if (PHP_SQLITE3 != "no") {
 	ADD_SOURCES(configure_module_dirname + "/libsqlite", "sqlite3.c", "sqlite3");
 
 	AC_DEFINE("HAVE_SQLITE3", 1, "SQLite support");
-
-	if (!PHP_SQLITE3_SHARED) {
-		ADD_DEF_FILE(configure_module_dirname + "\\php_sqlite3.def");
-	}
 }
