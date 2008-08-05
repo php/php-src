@@ -107,7 +107,7 @@ static sword php_oci_ping_init(php_oci_connection *connection, OCIError *errh TS
 /* }}} */
 
 /* {{{ dynamically loadable module stuff */
-#ifdef COMPILE_DL_OCI8
+#if defined(COMPILE_DL_OCI8) || defined(COMPILE_DL_OCI8_11G)
 ZEND_GET_MODULE(oci8)
 #endif /* COMPILE_DL */
 /* }}} */
@@ -1018,7 +1018,7 @@ zend_function_entry php_oci_coll_class_functions[] = {
 
 zend_module_entry oci8_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"oci8",				  /* extension name */
+	"oci8_11g",				  /* extension name */
 	php_oci_functions,	  /* extension function list */
 	PHP_MINIT(oci),		  /* extension-wide startup function */
 	PHP_MSHUTDOWN(oci),	  /* extension-wide shutdown function */
