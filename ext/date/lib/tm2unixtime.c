@@ -277,6 +277,7 @@ static void do_adjust_special_early(timelib_time* time)
 				break;
 		}
 	}
+	do_normalize(time);
 }
 
 static timelib_sll do_years(timelib_sll year)
