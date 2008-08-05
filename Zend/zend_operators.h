@@ -224,6 +224,10 @@ zend_memnstr(char *haystack, char *needle, int needle_len, char *end)
 		return (char *)memchr(p, *needle, (end-p));
 	}
 
+	if(needle_len > end-haystack) {
+		return NULL;
+	}
+
 	end -= needle_len;
 
 	while (p <= end) {
