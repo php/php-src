@@ -99,7 +99,7 @@ static sword php_oci_ping_init(php_oci_connection *connection, OCIError *errh TS
 /* }}} */
 
 /* {{{ dynamically loadable module stuff */
-#ifdef COMPILE_DL_OCI8
+#if defined(COMPILE_DL_OCI8) || defined(COMPILE_DL_OCI8_11G)
 ZEND_GET_MODULE(oci8)
 #endif /* COMPILE_DL */
 /* }}} */
