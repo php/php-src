@@ -21,9 +21,6 @@
 #ifndef PHP_PCNTL_H
 #define PHP_PCNTL_H
 
-#include <sys/wait.h>
-#include "php_signal.h"
-#include "php_ticks.h"
 extern zend_module_entry pcntl_module_entry;
 #define phpext_pcntl_ptr &pcntl_module_entry
 
