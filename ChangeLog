@@ -1,3 +1,127 @@
+2008-08-04  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/gd/gd.c:
+      - Fix build (thanks Sebastian)
+
+2008-08-04  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/mcrypt/config.w32:
+      - detect _a or normal lib
+
+2008-08-04  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      NEWS
+      ext/imap/php_imap.c
+      ext/imap/php_imap.c
+      ext/imap/tests/bug45705_1.phpt
+      ext/imap/tests/bug45705_1.phpt
+      ext/imap/tests/bug45705_2.phpt
+      ext/imap/tests/bug45705_2.phpt:
+      MFH:- Fixed bug #45705 (rfc822_parse_adrlist() modifies passed address
+      parameter)
+
+    * ext/imap/tests/bug45705_1.phpt
+      ext/imap/tests/bug45705_1.phpt
+      ext/imap/tests/bug45705_1.phpt
+      ext/imap/tests/bug45705_2.phpt
+      ext/imap/tests/bug45705_2.phpt
+      ext/imap/tests/bug45705_2.phpt:
+        1.1.4;
+      - Fixed bug #45705 (rfc822_parse_adrlist() modifies passed address
+      parameter)
+
+    * ext/imap/php_imap.c
+      ext/imap/tests/bug45705.phpt:
+      - Fixed bug #45705 (rfc822_parse_adrlist() modifies passed address
+      parameter)
+
+    * ext/imap/tests/imap_utf8.phpt:
+      - Fix test
+
+2008-08-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/oniguruma/.cvsignore
+      ext/mbstring/oniguruma/enc/.cvsignore:
+      - Added .libs to .cvsignore
+
+    * ext/mbstring/mbstring.c:
+      - More fixes for bug #45691
+
+2008-08-04  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      ext/imap/php_imap.c:
+      MFH: Add proper version check (new c-clients have this)
+
+2008-08-04  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/gd/tests/imagecolorclosesthwb.phpt:
+      - Fixed test
+
+    * (PHP_5_3)
+      ext/gd/gd.c
+      ext/gd/gd_ctx.c:
+      - MFH: Added new parameter parsing API (part II)
+
+    * ext/gd/gd.c
+      ext/gd/gd_ctx.c:
+      - Added new parameter parsing API (part II)
+
+2008-08-04  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/imap/php_imap.c
+      ext/imap/tests/imap_utf8.phpt:
+      - Merged the missing parameter parsing API change (Bunny thanks you Felipe)
+      - Added proper C-client library version check
+
+    * ext/imap/tests/bug45705.phpt:
+      - Add test for bug #45705
+
+2008-08-04  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/ming/ming.c:
+      numerous int<->long fixes (this code just couldn't work on 64bit OSes)
+      here is why we need to put ming to PECL
+
+2008-08-04  Robin Fernandes  <robin@soal.org>
+
+    * ext/spl/spl_array.c
+      ext/spl/spl_array.c
+      ext/spl/tests/arrayObject_exchangeArray_basic1.phpt
+      ext/spl/tests/arrayObject_exchangeArray_basic1.phpt
+      ext/spl/tests/arrayObject_exchangeArray_basic1.phpt
+      ext/spl/tests/arrayObject_exchangeArray_basic2.phpt
+      ext/spl/tests/arrayObject_exchangeArray_basic2.phpt
+      ext/spl/tests/arrayObject_exchangeArray_basic2.phpt:
+      Improve ArrayObject::exchangeArray() behaviour with objects and CoW
+      references (see http://turl.ca/exarr ).
+
+2008-08-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      main/fopen_wrappers.c
+      main/fopen_wrappers.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Removed shebang line check from CGI sapi (it is checked by scanner)
+
+    * ext/standard/tests/dir/rewinddir_basic.phpt:
+      Fixed test
+
+2008-08-04  Kalle Sommer Nielsen  <kalle@zesix.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/session/session.c:
+      MFH: Fixes #45406 - Patch by oleg dot grenrus at dynamoid dot com
+
+    * ext/session/session.c:
+      Fixes #45406 - Patch by oleg dot grenrus at dynamoid dot com
+
 2008-08-03  Etienne Kneuss  <php@colder.ch>
 
     * ext/spl/tests/heap_011.phpt
