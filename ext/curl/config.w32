@@ -8,7 +8,8 @@ if (PHP_CURL != "no") {
 			CHECK_HEADER_ADD_INCLUDE("curl/easy.h", "CFLAGS_CURL") &&
 			CHECK_LIB("ssleay32.lib", "curl", PHP_CURL) &&
 			CHECK_LIB("libeay32.lib", "curl", PHP_CURL) &&
-			CHECK_LIB("zlib.lib", "curl", PHP_CURL) &&
+		(((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib", "gd", PHP_GD) || CHECK_LIB("zlib.lib", "gd", PHP_GD))) || 
+			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "gd", PHP_GD)) || (PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED))) &&
 			CHECK_LIB("winmm.lib", "curl", PHP_CURL)) {
 		EXTENSION("curl", "interface.c multi.c streams.c");
 		AC_DEFINE('HAVE_CURL', 1, 'Have cURL library');
