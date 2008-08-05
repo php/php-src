@@ -2,8 +2,8 @@
 pcntl: pcntl_sigprocmask(), pcntl_sigwaitinfo(), pcntl_sigtimedwait()
 --SKIPIF--
 <?php
-if (!extension_loaded('pcntl')) die('skip pcntl extension not available');
-if (!extension_loaded('posix')) die('skip posix extension not available');
+	if (!extension_loaded('pcntl')) die('skip pcntl extension not available');
+	elseif (!extension_loaded('posix')) die('skip posix extension not available');
 ?>
 --FILE--
 <?php
