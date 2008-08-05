@@ -30,7 +30,7 @@ function get_depends($module)
 {
 	static $no_dist = array(
 		/* windows system dlls that should not be bundled */
-		'advapi32.dll', 'comdlg32.dll', 'gdi32.dll', 'kernel32.dll', 'ntdll.dll',
+		'advapi32.dll', 'comdlg32.dll', 'crypt32.dll', 'gdi32.dll', 'kernel32.dll', 'ntdll.dll',
 		'odbc32.dll', 'ole32.dll', 'oleaut32.dll', 'rpcrt4.dll',
 		'shell32.dll', 'shlwapi.dll', 'user32.dll', 'ws2_32.dll', 'ws2help.dll',
 		'comctl32.dll', 'winmm.dll', 'wsock32.dll', 'winspool.drv', 'msasn1.dll',
@@ -40,7 +40,7 @@ function get_depends($module)
 		'apachecore.dll',
 
 		/* apache 2 */
-		'libhttpd.dll', 'libapr.dll', 'libaprutil.dll',
+		'libhttpd.dll', 'libapr.dll', 'libaprutil.dll','libapr-1.dll', 'libaprutil-1.dll',
 
 		/* pi3web */
 		'piapi.dll', 'pi3api.dll',
@@ -284,8 +284,11 @@ foreach ($extra_dll_deps as $dll) {
 		/* try template dir */
 		$tdll = $snapshot_template . "/dlls/" . basename($dll);
 		if (!file_exists($tdll)) {
-			echo "WARNING: distro depends on $dll, but could not find it on your system\n";
-			continue;
+			$tdll = '../deps/bin/' . basename($dll);
+			if (!file_exists($tdll)) {
+				echo "WARNING: distro depends on $dll, but could not find it on your system\n";
+				continue;
+			}
 		}
 		$dll = $tdll;
 	}
