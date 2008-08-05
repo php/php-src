@@ -13,6 +13,7 @@ PHP                                                                        NEWS
   functions. (Andrey)
 - Fixed a regression when using strip_tags() and < is within an attribute.
   (Scott)
+- Fixed memnstr bug by Laurent Gaffie (Stas)
 
 - Fixed bug #45705 (rfc822_parse_adrlist() modifies passed address parameter).
   (Jani)
