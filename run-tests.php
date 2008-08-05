@@ -231,7 +231,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 	settings2array($ini_overwrites, $info_params);
 	settings2params($info_params);
 	$php_info = `$php $pass_options $info_params "$info_file"`;
-	define('TESTED_PHP_VERSION', `$php -r "echo PHP_VERSION;"`);
+	define('TESTED_PHP_VERSION', `$php -n -r "echo PHP_VERSION;"`);
 
 	if ($php_cgi && $php != $php_cgi) {
 		$php_info_cgi = `$php_cgi $pass_options $info_params -q "$info_file"`;
