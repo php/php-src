@@ -2414,14 +2414,22 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 			php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC,
 					"wrapper does not support stream open");
 		} else {
+			/* refcount++ to make sure the context doesn't get destroyed 
+			 * if open() fails and stream is closed */
+			if (context) {
+				zend_list_addref(context->rsrc_id);
+			}
+
 			stream = wrapper->wops->stream_opener(wrapper,
 				path_to_open, implicit_mode, options ^ REPORT_ERRORS,
 				opened_path, context STREAMS_REL_CC TSRMLS_CC);
-		}
 
-		/* increase context refcount only if the context is really used */
-		if (stream && stream->context) {
-			zend_list_addref(stream->context->rsrc_id);
+			/* if open() succeeded and context was not used, do refcount--
+			 * XXX if a wrapper didn't actually use context (no way to know that)
+			 * and open() failed, refcount will stay increased */
+			if (context && stream && !stream->context) {
+				zend_list_delete(context->rsrc_id);
+			}
 		}
 
 		/* if the caller asked for a persistent stream but the wrapper did not
