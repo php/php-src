@@ -1,3 +1,161 @@
+2008-08-05  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      ext/session/php_session.h:
+      - nuketh period from error message
+
+    * ext/session/session.c:
+      - Nuke ending period
+
+    * (PHP_5_3)
+      ext/session/session.c:
+      - Nuke ending periods from error messages
+
+2008-08-05  George Wang  <gwang@litespeedtech.com>
+
+    * (PHP_5_3)
+      sapi/litespeed/CREDITS
+      sapi/litespeed/Makefile.frag
+      sapi/litespeed/README
+      sapi/litespeed/config.m4
+      sapi/litespeed/lsapi_main.c
+      sapi/litespeed/lsapidef.h
+      sapi/litespeed/lsapilib.c
+      sapi/litespeed/lsapilib.h:
+      added litespeed SAPI
+
+    * sapi/litespeed/CREDITS
+      sapi/litespeed/CREDITS:
+      
+      add CREDITS
+
+2008-08-05  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/tests/strings/explode_bug.phpt:
+      fix test
+
+2008-08-05  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      useless entry
+
+2008-08-05  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      ok, clarify :)
+
+    * (PHP_5_2)
+      NEWS:
+      add bugfix
+
+    * ZendEngine2/zend_operators.h
+      ext/standard/tests/strings/explode_bug.phpt:
+      fix memnstr bug by Laurent Gaffie
+
+2008-08-05  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/oci8/oci8.c:
+      - MFH: fix oci8_11g when build shared (invalid extension)
+
+    * ext/oci8/oci8.c:
+      - fix oci8_11g when build shared (invalid extension)
+
+2008-08-05  Elizabeth Marie Smith  <emsmith@elizabethmariesmith.com>
+
+    * ext/pdo_sqlite/config.w32
+      ext/pdo_sqlite/config.w32
+      ext/sqlite3/config.w32
+      ext/sqlite3/config.w32:
+      Some fancy detection for sqlite3 and pdo_sqlite3 - so the two extensions
+      don't depend on each other if shared, and don't try to put two versions of
+      the sqlite3 lib if static
+
+2008-08-05  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_operators.h
+      ext/standard/tests/strings/explode_bug.phpt
+      ext/standard/tests/strings/explode_bug.phpt
+      ext/standard/tests/strings/explode_bug.phpt
+      ext/standard/tests/strings/explode_bug.phpt:
+      fix memnstr bug, by Laurent Gaffie
+
+2008-08-05  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/curl/config.w32:
+      - MFH: fix zlib detection (shared/static) and add zlib_a support
+
+    * ext/curl/config.w32:
+      - fix zlib detection (shared/static) and add zlib_a support
+
+2008-08-05  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/lib/tm2unixtime.c
+      ext/date/tests/date_period.phpt:
+      - MFH: Fixed a bug that caused miscalculations with the "last <weekday> of
+      <n>
+        month" relative time string.
+
+    * ext/date/lib/tm2unixtime.c
+      ext/date/tests/date_period.phpt
+      ext/date/tests/date_period.phpt:
+      - Fixed a bug that caused miscalculations with the "last <weekday> of <n>
+        month" relative time string.
+
+2008-08-05  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/mcrypt/config.w32:
+       - not shared
+
+2008-08-05  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * run-tests.php:
+      - No need to load any php.ini here
+
+    * ext/pcntl/config.m4
+      ext/pcntl/pcntl.c
+      ext/pcntl/php_pcntl.h
+      ext/pcntl/php_signal.c
+      ext/pcntl/tests/001.phpt
+      ext/pcntl/tests/002.phpt
+      ext/pcntl/tests/pcntl_signal_dispatch.phpt
+      ext/pcntl/tests/signal_closure_handler.phpt:
+      - Portability fix. (si_fd seems to be linux only thing)
+
+2008-08-05  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/openssl/openssl.c:
+      fix typo
+
+2008-08-05  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/tests/math/bug45712.phpt
+      ext/standard/tests/math/bug45712.phpt
+      ext/standard/tests/math/bug45712.phpt:
+        1.1.4;
+      - Add test for bug #45712
+
+2008-08-05  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      win32/build/mkdist.php:
+      - MFH: add dll path to mkdist default path
+
+    * win32/build/mkdist.php:
+      - add dll path to mkdist default path
+
+2008-08-05  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * ext/standard/tests/file/bug43008.phpt:
+      Fixed test
+
 2008-08-04  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)

@@ -1,3 +1,13 @@
+2008-08-05  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_operators.h:
+      fix memnstr bug by Laurent Gaffie
+
+    * (PHP_5_2)
+      zend_operators.h
+      zend_operators.h:
+      fix memnstr bug, by Laurent Gaffie
+
 2008-08-03  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * zend_compile.c
