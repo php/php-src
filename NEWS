@@ -32,6 +32,8 @@ PHP                                                                        NEWS
   (crrodriguez at suse dot de)
 - Fixed bug #45423 (fastcgi parent process doesn't invoke php_module_shutdown
   before shutdown) (basant dot kukreja at sun dot com)
+- Fixed bug #45406 (session.serialize_handler declared by shared extension 
+  fails). (Kalle, oleg dot grenrus at dynamoid dot com)
 - Fixed bug #45352 (Segmentation fault because of tick function on second
   request). (Dmitry)
 - Fixed bug #45312 (Segmentation fault on second request for array functions).
