@@ -21,6 +21,7 @@ CREDIT_LINE("CLI", "Edin Kadribasic, Marcus Boerger, Johannes Schlueter");
 CREDIT_LINE("Continuity", "Alex Leigh (based on nsapi code)");
 CREDIT_LINE("Embed", "Edin Kadribasic");
 CREDIT_LINE("ISAPI", "Andi Gutmans, Zeev Suraski");
+CREDIT_LINE("litespeed", "George Wang");
 CREDIT_LINE("NSAPI", "Jayakumar Muthukumarasamy, Uwe Schindler");
 CREDIT_LINE("phttpd", "Thies C. Arntzen");
 CREDIT_LINE("pi3web", "Holger Zimmermann");
