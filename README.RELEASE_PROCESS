@@ -2,7 +2,7 @@
   PHP Release Process
 =======================
 
-General notes and tipps
+General notes and tips
 ---------------------------
 
 1. Do not release on Fridays, Saturdays or Sundays
@@ -195,7 +195,7 @@ announcement file should list in detail:
 
  a. security fixes,
 
- b. changes in behaviour (whether due to a bug fix or not)
+ b. changes in behavior (whether due to a bug fix or not)
 
 7. Add a short notice to phpweb stating that there is a new release, and
 highlight the major important things (security fixes) and when it is important
