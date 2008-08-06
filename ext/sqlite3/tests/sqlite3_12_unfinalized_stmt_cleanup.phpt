@@ -47,6 +47,6 @@ Closing database
 bool(true)
 Check db was closed
 
-Warning: SQLite3_result::numColumns(): The SQLite3_result object has not been correctly initialised in %s on line %d
+Warning: SQLite3Result::numColumns(): The SQLite3_result object has not been correctly initialised in %s on line %d
 bool(false)
 Done
