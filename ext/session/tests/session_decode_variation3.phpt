@@ -23,8 +23,8 @@ $_SESSION["foo"] = 1234567890;
 $_SESSION["bar"] = "Blah!";
 $_SESSION["guff"] = 123.456;
 var_dump($_SESSION);
-$encoded = "A2Zvb2k6MTIzNDU2Nzg5MDs=";
-var_dump(session_decode(base64_decode($encoded)));
+$encoded = "foo|i:1234567890;";
+var_dump(session_decode($encoded));
 var_dump($_SESSION);
 var_dump(session_destroy());
 
@@ -34,10 +34,11 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_decode() : variation ***
 
-Warning: session_start(): Unknown session.serialize_handler. Failed to decode session object in %s on line %d
-bool(true)
-array(0) {
-}
+Warning: session_start(): Cannot find serialization handler 'blah' - session startup failed in %s on line %d
+bool(false)
+
+Notice: Undefined variable: _SESSION in %s on line %d
+NULL
 array(3) {
   [u"foo"]=>
   int(1234567890)
@@ -49,14 +50,8 @@ array(3) {
 
 Warning: session_decode(): Unknown session.serialize_handler. Failed to decode session object in %s on line %d
 bool(true)
-array(3) {
-  [u"foo"]=>
-  int(1234567890)
-  [u"bar"]=>
-  unicode(5) "Blah!"
-  [u"guff"]=>
-  float(123.456)
-}
-bool(true)
-Done
+unicode(17) "foo|i:1234567890;"
 
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
+bool(false)
+Done
