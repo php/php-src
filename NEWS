@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.3.0 Alpha 2
 - Removed shebang line check from CGI sapi (it is checked by scanner) (Dmitry)
+
+- Added litespeed SAPI module. (George Wang)
+
 - Fixed a bug that caused miscalculations with the "last <weekday> of <n>
   month" relative time string. (Derick)
 
