@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Fixed a bug that caused miscalculations with the "last <weekday> of <n>
   month" relative time string. (Derick)
 
+- Fixed bug #45717 (Fileinfo/libmagic build fails, missing err.h and getopt.h).
+  (Derick)
 - Fixed bug #45696 (Not all DateTime methods allow method chaining). (Derick)
 - Fixed bug #45545 (DateInterval has a limitation of 4 chars for ISO
   durations). (Derick)
