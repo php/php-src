@@ -29,11 +29,12 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_encode() : variation ***
 
-Warning: session_start(): Unknown session.serialize_handler. Failed to decode session object in %s on line %d
-bool(true)
+Warning: session_start(): Cannot find serialization handler 'blah' - session startup failed in %s on line 13
+bool(false)
 
-Warning: session_encode(): Unknown session.serialize_handler. Failed to encode session object in %s on line %d
+Warning: session_encode(): Cannot encode non-existent session in %s on line 15
 string(0) ""
-bool(true)
-Done
 
+Warning: session_destroy(): Trying to destroy uninitialized session in %s on line 17
+bool(false)
+Done

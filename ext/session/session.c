@@ -508,24 +508,13 @@ static PHP_INI_MH(OnUpdateSaveHandler) /* {{{ */
 			err_type = E_ERROR;
 		}
 
-		php_error_docref(NULL TSRMLS_CC, err_type, "Cannot find save handler %s", new_value);
+		/* Do not output error when restoring ini options. */
+		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
+			php_error_docref(NULL TSRMLS_CC, err_type, "Cannot find save handler '%s'", new_value);
+		}
 		return FAILURE;
 	}
 	PS(mod) = tmp;
-
-	return SUCCESS;
-}
-/* }}} */
-
-static PHP_INI_MH(OnUpdateTransSid) /* {{{ */
-{
-	SESSION_CHECK_ACTIVE_STATE;
-
-	if (!strncasecmp(new_value, "on", sizeof("on"))) {
-		PS(use_trans_sid) = (zend_bool) 1;
-	} else {
-		PS(use_trans_sid) = (zend_bool) atoi(new_value);
-	}
 
 	return SUCCESS;
 }
@@ -547,10 +536,27 @@ static PHP_INI_MH(OnUpdateSerializer) /* {{{ */
 			err_type = E_ERROR;
 		}
 
-		php_error_docref(NULL TSRMLS_CC, err_type, "Cannot find serialization handler '%s'", new_value);
+		/* Do not output error when restoring ini options. */
+		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
+			php_error_docref(NULL TSRMLS_CC, err_type, "Cannot find serialization handler '%s'", new_value);
+		}
 		return FAILURE;
 	}
 	PS(serializer) = tmp;
+
+	return SUCCESS;
+}
+/* }}} */
+
+static PHP_INI_MH(OnUpdateTransSid) /* {{{ */
+{
+	SESSION_CHECK_ACTIVE_STATE;
+
+	if (!strncasecmp(new_value, "on", sizeof("on"))) {
+		PS(use_trans_sid) = (zend_bool) 1;
+	} else {
+		PS(use_trans_sid) = (zend_bool) atoi(new_value);
+	}
 
 	return SUCCESS;
 }
@@ -1236,30 +1242,42 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 {
 	zval **ppid;
 	zval **data;
-	char *p;
+	char *p, *value;
 	int nrand;
 	int lensess;
 
 	PS(apply_trans_sid) = PS(use_trans_sid);
 
-	if (PS(session_status) != php_session_none) {
-		if (PS(session_status) == php_session_disabled) {
-			char *value;
-
-			value = zend_ini_string("session.save_handler", sizeof("session.save_handler"), 0);
-
-			if (value) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot find save handler %s", value);
-			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot find unknown save handler");
-			}
+	switch (PS(session_status)) {
+		case php_session_active:
+			php_error(E_NOTICE, "A session had already been started - ignoring session_start()");
 			return;
-		}
-		php_error(E_NOTICE, "A session had already been started - ignoring session_start()");
-		return;
-	} else {
-		PS(define_sid) = 1;
-		PS(send_cookie) = 1;
+			break;
+
+		case php_session_disabled:
+			value = zend_ini_string("session.save_handler", sizeof("session.save_handler"), 0);
+			if (!PS(mod) && value) {
+				PS(mod) = _php_find_ps_module(value TSRMLS_CC);
+				if (!PS(mod)) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot find save handler '%s' - session startup failed", value);
+					return;
+				}
+			}
+			value = zend_ini_string("session.serialize_handler", sizeof("session.serialize_handler"), 0);
+			if (!PS(serializer) && value) {
+				PS(serializer) = _php_find_ps_serializer(value TSRMLS_CC);
+				if (!PS(serializer)) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot find serialization handler '%s' - session startup failed", value);
+					return;
+				}
+			}
+			PS(session_status) = php_session_none;
+			/* fallthrough */
+
+		default:
+		case php_session_none:
+			PS(define_sid) = 1;
+			PS(send_cookie) = 1;
 	}
 
 	lensess = strlen(PS(session_name));
@@ -1560,7 +1578,6 @@ static PHP_FUNCTION(session_save_path)
 	if (name) {
 		if (memchr(name, '\0', name_len) != NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The save_path cannot contain NULL characters");
-
 			zval_dtor(return_value);
 			RETURN_FALSE;
 		}
@@ -1762,6 +1779,10 @@ static PHP_FUNCTION(session_start)
 {
 	/* skipping check for non-zero args for performance reasons here ?*/
 	php_session_start(TSRMLS_C);
+
+	if (PS(session_status) != php_session_active) {
+		RETURN_FALSE;
+	}
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1777,7 +1798,6 @@ static PHP_FUNCTION(session_destroy)
 	RETURN_BOOL(php_session_destroy(TSRMLS_C) == SUCCESS);
 }
 /* }}} */
-
 
 /* {{{ proto void session_unset(void) U
    Unset all registered variables */
@@ -1968,7 +1988,7 @@ static PHP_GINIT_FUNCTION(ps) /* {{{ */
 	}
 	ps_globals->http_session_vars = NULL;
 }
-/* }}}*/
+/* }}} */
 
 static PHP_MINIT_FUNCTION(session) /* {{{ */
 {
@@ -2048,7 +2068,7 @@ static PHP_MINFO_FUNCTION(session) /* {{{ */
 
 	DISPLAY_INI_ENTRIES();
 }
-/* }}} */ 
+/* }}} */
 
 zend_module_entry session_module_entry = {
 	STANDARD_MODULE_HEADER,
