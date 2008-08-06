@@ -1018,7 +1018,7 @@ zend_function_entry php_oci_coll_class_functions[] = {
 
 zend_module_entry oci8_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"oci8_11g",				  /* extension name */
+	"oci8",				  /* extension name */
 	php_oci_functions,	  /* extension function list */
 	PHP_MINIT(oci),		  /* extension-wide startup function */
 	PHP_MSHUTDOWN(oci),	  /* extension-wide shutdown function */
