@@ -15,7 +15,7 @@ if test "$PHP_FILEINFO" != "no"; then
   PHP_NEW_EXTENSION(fileinfo, fileinfo.c $libmagic_sources, $ext_shared,,-I@ext_srcdir@/libmagic)
   PHP_ADD_BUILD_DIR($ext_builddir/libmagic)
 
-  AC_CHECK_FUNCS([utimes])
+  AC_CHECK_FUNCS([utimes strndup])
 
   PHP_ADD_MAKEFILE_FRAGMENT
 fi

@@ -12,6 +12,7 @@ PHP                                                                        NEWS
 - Fixed bug #45717 (Fileinfo/libmagic build fails, missing err.h and getopt.h).
   (Derick)
 - Fixed bug #45696 (Not all DateTime methods allow method chaining). (Derick)
+- Fixed bug #45636 (fileinfo ext duplicate strndup). (Derick)
 - Fixed bug #45545 (DateInterval has a limitation of 4 chars for ISO
   durations). (Derick)
 - Fixed bug #45406 (session.serialize_handler declared by shared extension 
