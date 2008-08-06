@@ -21,7 +21,7 @@ unlink($directory . '/myext.txt');
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: SQLite3::loadExtension(): Unable to load extension at './myext.txt' in %s on line %d
+Warning: SQLite3::loadExtension(): Unable to load extension at '.%emyext.txt' in %s on line %d
 bool(false)
 bool(true)
 Done
