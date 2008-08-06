@@ -49,7 +49,7 @@
 #define MYSQL_UNIX_ADDR PHP_MYSQL_UNIX_SOCK_ADDR
 #endif
 
-#if (MYSQL_VERSION_ID >= 40113 && MYSQL_VERSION_ID < 50000) || MYSQL_VERSION_ID >= 50007 || MYSQL_USE_MYSQLND
+#if (MYSQL_VERSION_ID >= 40113 && MYSQL_VERSION_ID < 50000) || MYSQL_VERSION_ID >= 50007 || defined(MYSQL_USE_MYSQLND)
 #define MYSQL_HAS_SET_CHARSET
 #endif
 
@@ -106,6 +106,9 @@ PHP_FUNCTION(mysql_stat);
 PHP_FUNCTION(mysql_thread_id);
 PHP_FUNCTION(mysql_client_encoding);
 PHP_FUNCTION(mysql_ping);
+#ifdef MYSQL_HAS_SET_CHARSET
+PHP_FUNCTION(mysql_set_charset);
+#endif
 
 ZEND_BEGIN_MODULE_GLOBALS(mysql)
 	long default_link;

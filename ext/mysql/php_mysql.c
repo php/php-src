@@ -192,7 +192,9 @@ static const zend_function_entry mysql_functions[] = {
 #endif
 
 	PHP_FE(mysql_info,									NULL)
-	 
+#ifdef MYSQL_HAS_SET_CHARSET
+	PHP_FE(mysql_set_charset,							NULL)
+#endif	 
 	/* for downwards compatability */
 	PHP_FALIAS(mysql,				mysql_db_query,		NULL)
 	PHP_FALIAS(mysql_fieldname,		mysql_field_name,	NULL)
@@ -1238,6 +1240,36 @@ PHP_FUNCTION(mysql_client_encoding)
 
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 	RETURN_STRING((char *)mysql_character_set_name(mysql->conn), 1);
+}
+/* }}} */
+#endif
+
+#ifdef MYSQL_HAS_SET_CHARSET
+/* {{{ proto bool mysql_set_charset(string csname [, int link_identifier])
+   sets client character set */
+PHP_FUNCTION(mysql_set_charset)
+{
+	zval *mysql_link = NULL;
+	char *csname;
+	int id = -1, csname_len;
+	php_mysql_conn *mysql;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &csname, &csname_len, &mysql_link) == FAILURE) {
+		return;
+	}
+
+	if (ZEND_NUM_ARGS() == 1) {
+		id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		CHECK_LINK(id);
+	}
+
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
+
+	if (!mysql_set_character_set(mysql->conn, csname)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 #endif
