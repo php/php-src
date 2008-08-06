@@ -30,6 +30,7 @@ ob_end_flush();
 *** Testing session_id() : error functionality ***
 string(1) "0"
 string(0) ""
-
-Fatal error: session_start(): Invalid session hash function in %s on line %d
-
+bool(true)
+string(40) "%s"
+bool(true)
+Done
