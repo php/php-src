@@ -37,7 +37,7 @@ PHP_FUNCTION( msgfmt_get_pattern )
 	// Parse parameters.
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( INTL_DATA_ERROR_P(mfo), U_ILLEGAL_ARGUMENT_ERROR,	
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,	
 			"msgfmt_get_pattern: unable to parse input params", 0 TSRMLS_CC );
 		RETURN_FALSE;
 	}
