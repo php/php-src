@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 - Removed shebang line check from CGI sapi (it is checked by scanner) (Dmitry)
 
 - Added litespeed SAPI module. (George Wang)
+- Added ext/hash support to ext/session's ID generator. (Sara)
 
 - Fixed a bug that caused miscalculations with the "last <weekday> of <n>
   month" relative time string. (Derick)
