@@ -1503,21 +1503,25 @@ static PHP_FUNCTION(session_module_name)
    Sets user-level functions */
 static PHP_FUNCTION(session_set_save_handler)
 {
-	zval **args[6];
-	int i;
+	zval ***args = NULL;
+	int i, num_args, argc = ZEND_NUM_ARGS();
 	zval name;
 
 	if (PS(session_status) != php_session_none) {
 		RETURN_FALSE;
 	}
 
-	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_array_ex(6, args) == FAILURE) {
+	if (argc != 6) {
 		WRONG_PARAM_COUNT;
 	}
 
+	if (zend_parse_parameters(argc TSRMLS_CC, "+", &args, &num_args) == FAILURE) {
+		return;
+	}
 
 	for (i = 0; i < 6; i++) {
 		if (!zend_is_callable(*args[i], 0, &name TSRMLS_CC)) {
+			efree(args);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument %d is not a valid callback", i+1);
 			zval_dtor(&name);
 			RETURN_FALSE;
@@ -1531,10 +1535,11 @@ static PHP_FUNCTION(session_set_save_handler)
 		if (PS(mod_user_names).names[i] != NULL) {
 			zval_ptr_dtor(&PS(mod_user_names).names[i]);
 		}
-		Z_ADDREF_P(*args[i]);
+		Z_ADDREF_PP(args[i]);
 		PS(mod_user_names).names[i] = *args[i];
 	}
 
+	efree(args);
 	RETURN_TRUE;
 }
 /* }}} */
