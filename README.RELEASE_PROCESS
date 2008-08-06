@@ -2,18 +2,35 @@
   PHP Release Process
 =======================
 
-Rolling a release candidate
+General notes and tipps
+---------------------------
+
+1. Do not release on Fridays, Saturdays or Sundays
+because the sysadmins can not upgrade stuff then.
+
+2. Package the day before a release. So if the release is to be on Thursday,
+package on Wednesday.
+
+3. Ensure that Windows builds will work before packaging
+
+4. Follow all steps to the letter. When unclear ask previous RM's (Derick/Ilia)
+before proceeding. Ideally make sure that for the first releases one of the
+previous RM's is around to answer questions. For the steps related to the
+php/QA/bug websites try to have someone from the webmaster team (Bjori) on hand.
+
+Rolling a non stable release (alpha/beta/RC)
 ---------------------------
 
 1. Check windows snapshot builder logs (http://snaps.php.net/win32/snapshot-STABLE.log f.e.)
 
 2. Bump the version numbers in ``main/php_version.h``, ``configure.in`` and possibly ``NEWS``.
+Do not use abbreviations for alpha and beta.
 
 3. Commit those changes
 
-4. tag the repository with "``cvs tag php_4_4_1RC1``" (of course, you need to
-change that to the version you're rolling an RC for). When making 5.X release,
-you need to tag the Zend directory separately!!
+4. tag the repository with the version f.e. "``cvs tag php_4_4_1RC1``"
+(of course, you need to change that to the version you're rolling an RC for).
+When making 5.X release, you need to tag the Zend directory separately!!
 
 5. Bump up the version numbers in ``main/php_version.h``, ``configure.in``
 and possibly ``NEWS`` again, to the **next** version. F.e. if the release
@@ -26,7 +43,7 @@ correctly work.
 7. Log in onto the snaps box and go into the correct tree (f.e. the PHP_4_4
 branch if you're rolling 4.4.x releases).
 
-8. You do not have to update the tree, but ofcourse you can with "``cvs up -dP``".
+8. You do not have to update the tree, but of course you can with "``cvs up -dP``".
 
 9. run: ``./makedist php 4.4.1RC1``, this will export the tree, create configure
 and build two tarballs (one gz and one bz2).
@@ -38,11 +55,11 @@ MD5 sums. If you do not have this directory, talk to Derick.
 11. Now the RC can be found on http://downloads.php.net/yourname,
 f.e. http://downloads.php.net/derick/
 
-12. Once the release has been tagged, contact Edin Kadribasic (edink @ usual
-php e-mail) so that Windows binaries can be created. Once those are made, they
-should be placed into the same directory as the source snapshots.
+12. Once the release has been tagged, contact the PHP Windows development team
+(internals-win@lists.php.net) so that Windows binaries can be created. Once
+those are made, they should be placed into the same directory as the source snapshots.
 
-Getting the Release Candidate out there
+Getting the non stable release announced
 ---------------------------------------
 
 1. Send an email (see example here: http://news.php.net/php.internals/19486)
@@ -75,7 +92,7 @@ commit this.
 1. Update in ``php-bugs-web/include/functions.inc`` the ``show_version_option``
 function to include the new RC and commit.
 
-2. Run the bumpRelease script for phpweb
+2. Run the bumpRelease script for phpweb in your local checkout
 
  a. ``php bin/bumpRelease 5`` (or ``php bin/bumpRelease 4`` for PHP4)
 
@@ -89,7 +106,7 @@ function to include the new RC and commit.
 
  a. ``cvs commit include/version.inc include/releases.inc``
 
-Rolling a release
+Rolling a stable release
 -----------------
 
 1. Check windows snapshot builder logs (http://snaps.php.net/win32/snapshot-STABLE.log f.e.)
@@ -100,9 +117,9 @@ Rolling a release
 
 4. Commit those changes
 
-5. tag the repository with "``cvs tag php_4_4_1``" (of course, you need to
-change that to the version you're rolling an RC for). When making 5.X release,
-you need to tag the Zend directory separately!!
+5. tag the repository with the version f.e. "``cvs tag php_4_4_1``"
+(of course, you need to change that to the version you're rolling an RC for).
+When making 5.X release, you need to tag the Zend directory separately!!
 
 6. Bump up the version numbers in ``main/php_version.h``, ``configure.in`` and
 possibly ``NEWS`` again, to the **next** version. F.e. if the release candidate
@@ -114,26 +131,26 @@ a new RC or not. This is to make sure ``version_compare()`` can correctly work.
 8. Log in onto the snaps box and go into the correct tree (f.e. the PHP_4_4
 branch if you're rolling 4.4.x releases).
 
-9. You do not have to update the tree, but ofcourse you can with "``cvs up -dP``".
+9. You do not have to update the tree, but of course you can with "``cvs up -dP``".
 
 10. run: ``./makedist php 4.4.1``, this will export the tree, create configure
 and build two tarballs (one gz and one bz2).
 
 11. Commit those two tarballs to CVS (phpweb/distributions)
 
-12. Once the release has been tagged, contact Edin Kadribasic (edink @ usual
-php e-mail) so that Windows binaries can be created. Once those are made, they
-should be committed to CVS too.
+12. Once the release has been tagged, contact the PHP Windows development team
+(internals-win@lists.php.net) so that Windows binaries can be created. Once
+those are made, they should be committed to CVS too.
 
 13. Check if the pear files are updated (phar for 5.1+ or run pear/make-pear-bundle.php with 4.4)
 
-14. When making a final release, also remind Edin to ask John to prepare the
-installer packages for Win32.
+14. When making a final release, also remind the PHP Windows development team
+(internals-win@lists.php.net) to prepare the installer packages for Win32.
 
-Getting the Release out there
+Getting the stable release announced
 -----------------------------
 
-1. Run the bumpRelease script for phpweb
+1. Run the bumpRelease script for phpweb on your local checkout
 
  a. ``php bin/bumpRelease 5`` (or ``php bin/bumpRelease 4`` for PHP4)
 
@@ -152,7 +169,8 @@ Getting the Release out there
 
  f. if the windows builds aren't ready yet prefix the "windows" key with a dot (".windows")
 
-3. Update the ChangeLog file ``ChangeLog-4.php`` from the NEWS file
+3. Update the ChangeLog file for the given major version
+f.e. ``ChangeLog-4.php`` from the NEWS file
 
  a. go over the list and put every element on one line
 
@@ -183,10 +201,11 @@ announcement file should list in detail:
 highlight the major important things (security fixes) and when it is important
 to upgrade.
 
- a. php bin/createNewsEntry
+ a. Call php bin/createNewsEntry in your local phpweb checkout
 
-8. Commit all the changes, do not release on Fridays, Saturdays or Sundays
-because the sysadmins can not upgrade stuff then.
+ b. Add the content for the news entry
+
+8. Commit all the changes.
 
 9. Wait an hour or two, then send a mail to php-announce@lists.php.net,
 php-general@lists.php.net and internals@lists.php.net with a text similar to
