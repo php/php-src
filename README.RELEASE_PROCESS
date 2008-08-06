@@ -3,7 +3,7 @@
 =======================
 
 General notes and tips
----------------------------
+----------------------
 
 1. Do not release on Fridays, Saturdays or Sundays
 because the sysadmins can not upgrade stuff then.
@@ -18,8 +18,10 @@ before proceeding. Ideally make sure that for the first releases one of the
 previous RM's is around to answer questions. For the steps related to the
 php/QA/bug websites try to have someone from the webmaster team (Bjori) on hand.
 
+5. Verify the tags to be extra sure everything was tagged properly.
+
 Rolling a non stable release (alpha/beta/RC)
----------------------------
+--------------------------------------------
 
 1. Check windows snapshot builder logs (http://snaps.php.net/win32/snapshot-STABLE.log f.e.)
 
@@ -30,7 +32,6 @@ Do not use abbreviations for alpha and beta.
 
 4. tag the repository with the version f.e. "``cvs tag php_4_4_1RC1``"
 (of course, you need to change that to the version you're rolling an RC for).
-When making 5.X release, you need to tag the Zend directory separately!!
 
 5. Bump up the version numbers in ``main/php_version.h``, ``configure.in``
 and possibly ``NEWS`` again, to the **next** version. F.e. if the release
@@ -60,7 +61,7 @@ f.e. http://downloads.php.net/derick/
 those are made, they should be placed into the same directory as the source snapshots.
 
 Getting the non stable release announced
----------------------------------------
+----------------------------------------
 
 1. Send an email (see example here: http://news.php.net/php.internals/19486)
 **To** ``internals@lists.php.net`` and ``php-general@lists.php.net`` lists
@@ -107,7 +108,7 @@ function to include the new RC and commit.
  a. ``cvs commit include/version.inc include/releases.inc``
 
 Rolling a stable release
------------------
+------------------------
 
 1. Check windows snapshot builder logs (http://snaps.php.net/win32/snapshot-STABLE.log f.e.)
 
@@ -148,7 +149,7 @@ those are made, they should be committed to CVS too.
 (internals-win@lists.php.net) to prepare the installer packages for Win32.
 
 Getting the stable release announced
------------------------------
+------------------------------------
 
 1. Run the bumpRelease script for phpweb on your local checkout
 
