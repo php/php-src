@@ -1,10 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Aug 2008, Version 4.4.9
-- Fixed overflow in memnstr(). (Reported by Laurent Gaffie, Derick)
-	
-22 Jul 2008, Version 4.4.9RC1
+07 Aug 2008, Version 4.4.9
 - Updated PCRE to version 7.7. (Nuno)
+- Fixed overflow in memnstr(). (Reported by Laurent Gaffie, Derick)
 - Fixed crash in imageloadfont when an invalid font is given.
   (discovered by CzechSec, fixed by Pierre)
 - Fixed open_basedir handling issue in the curl extension. (Stas)
