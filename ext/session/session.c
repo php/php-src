@@ -200,7 +200,6 @@ static char *php_session_encode(int *newlen TSRMLS_DC) /* {{{ */
 	} else {
 		 php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot encode non-existent session");
 	}
-
 	return ret;
 }
 /* }}} */
@@ -541,6 +540,7 @@ static PHP_INI_MH(OnUpdateSerializer) /* {{{ */
 
 	if (PG(modules_activated) && !tmp) {
 		int err_type;
+
 		if (stage == ZEND_INI_STAGE_RUNTIME) {
 			err_type = E_WARNING;
 		} else {
@@ -560,7 +560,7 @@ static PHP_INI_MH(OnUpdateSaveDir) /* {{{ */
 {
 	/* Only do the safemode/open_basedir check at runtime */
 	if (stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) {
- 		char *p;
+		char *p;
 
 		if (memchr(new_value, '\0', new_value_length) != NULL) {
 			return FAILURE;
@@ -637,11 +637,11 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.name",               "PHPSESSID", PHP_INI_ALL, OnUpdateString, session_name,       php_ps_globals,    ps_globals)
 	PHP_INI_ENTRY("session.save_handler",           "files",     PHP_INI_ALL, OnUpdateSaveHandler)
 	STD_PHP_INI_BOOLEAN("session.auto_start",       "0",         PHP_INI_ALL, OnUpdateBool,   auto_start,         php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.gc_probability",     "1",         PHP_INI_ALL, OnUpdateLong,    gc_probability,     php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.gc_divisor",         "100",       PHP_INI_ALL, OnUpdateLong,    gc_divisor,        php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.gc_maxlifetime",     "1440",      PHP_INI_ALL, OnUpdateLong,    gc_maxlifetime,     php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.gc_probability",     "1",         PHP_INI_ALL, OnUpdateLong,   gc_probability,     php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.gc_divisor",         "100",       PHP_INI_ALL, OnUpdateLong,   gc_divisor,         php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.gc_maxlifetime",     "1440",      PHP_INI_ALL, OnUpdateLong,   gc_maxlifetime,     php_ps_globals,    ps_globals)
 	PHP_INI_ENTRY("session.serialize_handler",      "php",       PHP_INI_ALL, OnUpdateSerializer)
-	STD_PHP_INI_ENTRY("session.cookie_lifetime",    "0",         PHP_INI_ALL, OnUpdateLong,    cookie_lifetime,    php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.cookie_lifetime",    "0",         PHP_INI_ALL, OnUpdateLong,   cookie_lifetime,    php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.cookie_path",        "/",         PHP_INI_ALL, OnUpdateString, cookie_path,        php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.cookie_domain",      "",          PHP_INI_ALL, OnUpdateString, cookie_domain,      php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.cookie_secure",    "",          PHP_INI_ALL, OnUpdateBool,   cookie_secure,      php_ps_globals,    ps_globals)
@@ -650,12 +650,12 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("session.use_only_cookies", "1",         PHP_INI_ALL, OnUpdateBool,   use_only_cookies,   php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.referer_check",      "",          PHP_INI_ALL, OnUpdateString, extern_referer_chk, php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.entropy_file",       "",          PHP_INI_ALL, OnUpdateString, entropy_file,       php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.entropy_length",     "0",         PHP_INI_ALL, OnUpdateLong,    entropy_length,     php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.entropy_length",     "0",         PHP_INI_ALL, OnUpdateLong,   entropy_length,     php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.cache_limiter",      "nocache",   PHP_INI_ALL, OnUpdateString, cache_limiter,      php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.cache_expire",       "180",       PHP_INI_ALL, OnUpdateLong,    cache_expire,       php_ps_globals,    ps_globals)
-	PHP_INI_ENTRY("session.use_trans_sid",    	"0",         PHP_INI_ALL, OnUpdateTransSid)
-	PHP_INI_ENTRY("session.hash_function",		"0",         PHP_INI_ALL, OnUpdateHashFunc)
-	STD_PHP_INI_ENTRY("session.hash_bits_per_character",      "4",         PHP_INI_ALL, OnUpdateLong,    hash_bits_per_character,          php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.cache_expire",       "180",       PHP_INI_ALL, OnUpdateLong,   cache_expire,       php_ps_globals,    ps_globals)
+	PHP_INI_ENTRY("session.use_trans_sid",          "0",         PHP_INI_ALL, OnUpdateTransSid)
+	PHP_INI_ENTRY("session.hash_function",          "0",         PHP_INI_ALL, OnUpdateHashFunc)
+	STD_PHP_INI_ENTRY("session.hash_bits_per_character", "4",    PHP_INI_ALL, OnUpdateLong,   hash_bits_per_character, php_ps_globals, ps_globals)
 
 	/* Commented out until future discussion */
 	/* PHP_INI_ENTRY("session.encode_sources", "globals,track", PHP_INI_ALL, NULL) */
@@ -679,15 +679,15 @@ PS_SERIALIZER_ENCODE_FUNC(php_binary) /* {{{ */
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
 	PS_UENCODE_LOOP(
-			if (key_length > PS_BIN_MAX || key_type != HASH_KEY_IS_STRING) continue;
-			if (struc) {
-				smart_str_appendc(&buf, (unsigned char)key_length );
-				smart_str_appendl(&buf, key.s, key_length);
-				php_var_serialize(&buf, struc, &var_hash TSRMLS_CC);
-			} else {
-				smart_str_appendc(&buf, (unsigned char)key_length | PS_BIN_UNDEF);
-				smart_str_appendl(&buf, key.s, key_length);
-			}
+		if (key_length > PS_BIN_MAX || key_type != HASH_KEY_IS_STRING) continue;
+		if (struc) {
+			smart_str_appendc(&buf, (unsigned char)key_length );
+			smart_str_appendl(&buf, key.s, key_length);
+			php_var_serialize(&buf, struc, &var_hash TSRMLS_CC);
+		} else {
+			smart_str_appendc(&buf, (unsigned char)key_length | PS_BIN_UNDEF);
+			smart_str_appendl(&buf, key.s, key_length);
+		}
 	);
 
 	if (newlen) {
@@ -717,7 +717,7 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 		zval **tmp;
 		namelen = ((unsigned char)(*p)) & (~PS_BIN_UNDEF);
 
-		if (namelen > PS_BIN_MAX || (p + namelen) >= endptr) {
+		if (namelen < 0 || namelen > PS_BIN_MAX || (p + namelen) >= endptr) {
 			return FAILURE;
 		}
 
@@ -731,8 +731,8 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 			if ((Z_TYPE_PP(tmp) == IS_ARRAY && Z_ARRVAL_PP(tmp) == &EG(symbol_table)) || *tmp == PS(http_session_vars)) {
 				efree(name);
 				continue;
-  			}
-  		}
+			}
+		}
 
 		if (has_value) {
 			ALLOC_INIT_ZVAL(current);
@@ -742,7 +742,6 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 				zval_ptr_dtor(&current);
 			}
 		}
-
 		PS_ADD_VARL(name, namelen);
 		efree(name);
 	}
@@ -799,8 +798,9 @@ PS_SERIALIZER_ENCODE_FUNC(php) /* {{{ */
 		}
 	);
 
-	if (newlen) *newlen = buf.len;
-
+	if (newlen) {
+		*newlen = buf.len;
+	}
 	smart_str_0(&buf);
 	*newstr = buf.c;
 
@@ -845,8 +845,8 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 		if (zend_hash_find(&EG(symbol_table), name, namelen + 1, (void **) &tmp) == SUCCESS) {
 			if ((Z_TYPE_PP(tmp) == IS_ARRAY && Z_ARRVAL_PP(tmp) == &EG(symbol_table)) || *tmp == PS(http_session_vars)) {
 				goto skip;
-  			}
-  		}
+			}
+		}
 
 		if (has_value) {
 			ALLOC_INIT_ZVAL(current);
@@ -896,10 +896,10 @@ PHPAPI int php_session_register_serializer(
 			break;
 		}
 	}
-
 	return ret;
 }
 /* }}} */
+
 /* *******************
    * Storage Modules *
    ******************* */
@@ -965,7 +965,7 @@ static inline void strcpy_gmt(char *ubuf, time_t *when) /* {{{ */
 		return;
 	}
 
-	n = snprintf(buf, sizeof(buf), "%s, %02d %s %d %02d:%02d:%02d GMT", /* SAFE */
+	n = slprintf(buf, sizeof(buf), "%s, %02d %s %d %02d:%02d:%02d GMT", /* SAFE */
 				week_days[tm.tm_wday], tm.tm_mday, 
 				month_names[tm.tm_mon], tm.tm_year + 1900, 
 				tm.tm_hour, tm.tm_min, 
@@ -1178,7 +1178,6 @@ PHPAPI ps_module *_php_find_ps_module(char *name TSRMLS_DC) /* {{{ */
 			break;
 		}
 	}
-
 	return ret;
 }
 /* }}} */
@@ -1194,7 +1193,6 @@ PHPAPI const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC) /* {{{
 			break;
 		}
 	}
-
 	return ret;
 }
 /* }}} */
@@ -1250,14 +1248,13 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 
 			value = zend_ini_string("session.save_handler", sizeof("session.save_handler"), 0);
 
-			if (value) { 
+			if (value) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot find save handler %s", value);
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot find unknown save handler");
 			}
 			return;
 		}
-
 		php_error(E_NOTICE, "A session had already been started - ignoring session_start()");
 		return;
 	} else {
@@ -1266,7 +1263,6 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 	}
 
 	lensess = strlen(PS(session_name));
-
 
 	/*
 	 * Cookies are preferred, because initially
@@ -1400,7 +1396,7 @@ PHPAPI void session_adapt_url(const char *url, size_t urllen, char **new, size_t
 
 /* {{{ proto void session_set_cookie_params(int lifetime [, string path [, string domain [, bool secure[, bool httponly]]]]) U
    Set session cookie parameters */
-static PHP_FUNCTION(session_set_cookie_params) /* {{{ */
+static PHP_FUNCTION(session_set_cookie_params)
 {
 	/* lifetime is really a numeric, but the alter_ini_entry method wants a string */
 	char *lifetime, *path = NULL, *domain = NULL;
@@ -1433,7 +1429,7 @@ static PHP_FUNCTION(session_set_cookie_params) /* {{{ */
 
 /* {{{ proto array session_get_cookie_params(void) U
    Return the session cookie parameters */ 
-static PHP_FUNCTION(session_get_cookie_params) /* {{{ */
+static PHP_FUNCTION(session_get_cookie_params)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1451,7 +1447,7 @@ static PHP_FUNCTION(session_get_cookie_params) /* {{{ */
 
 /* {{{ proto string session_name([string newname]) U
    Return the current session name. If newname is given, the session name is replaced with newname */
-static PHP_FUNCTION(session_name) /* {{{ */
+static PHP_FUNCTION(session_name)
 {
 	char *name = NULL;
 	int name_len;
@@ -1470,7 +1466,7 @@ static PHP_FUNCTION(session_name) /* {{{ */
 
 /* {{{ proto string session_module_name([string newname]) U
    Return the current module name used for accessing session data. If newname is given, the module name is replaced with newname */
-static PHP_FUNCTION(session_module_name) /* {{{ */
+static PHP_FUNCTION(session_module_name)
 {
 	char *name = NULL;
 	int name_len;
@@ -1505,7 +1501,7 @@ static PHP_FUNCTION(session_module_name) /* {{{ */
 
 /* {{{ proto void session_set_save_handler(string open, string close, string read, string write, string destroy, string gc) U
    Sets user-level functions */
-static PHP_FUNCTION(session_set_save_handler) /* {{{ */
+static PHP_FUNCTION(session_set_save_handler)
 {
 	zval **args[6];
 	int i;
@@ -1545,7 +1541,7 @@ static PHP_FUNCTION(session_set_save_handler) /* {{{ */
 
 /* {{{ proto string session_save_path([string newname]) U
    Return the current save path passed to module_name. If newname is given, the save path is replaced with newname */
-static PHP_FUNCTION(session_save_path) /* {{{ */
+static PHP_FUNCTION(session_save_path)
 {
 	char *name = NULL;
 	int name_len;
