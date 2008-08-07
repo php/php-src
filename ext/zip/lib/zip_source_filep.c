@@ -1,11 +1,9 @@
 /*
-  $NiH: zip_source_filep.c,v 1.6 2005/06/09 19:57:10 dillo Exp $
-
   zip_source_filep.c -- create data source from FILE *
   Copyright (C) 1999-2008 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
-  The authors can be contacted at <nih@giga.or.at>
+  The authors can be contacted at <libzip@nih.at>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -41,10 +39,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zip.h"
 #include "zipint.h"
 
 struct read_file {
+    char *fname;	/* name of file to copy from */
     FILE *f;		/* file to copy from */
     off_t off;		/* start offset of */
     off_t len;		/* lengt of data to copy */
@@ -57,16 +55,30 @@ static ssize_t read_file(void *state, void *data, size_t len,
 
 
 
-PHPZIPAPI struct zip_source *
+ZIP_EXTERN(struct zip_source *)
 zip_source_filep(struct zip *za, FILE *file, off_t start, off_t len)
 {
-    struct read_file *f;
-    struct zip_source *zs;
-
     if (za == NULL)
 	return NULL;
 
     if (file == NULL || start < 0 || len < -1) {
+	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
+	return NULL;
+    }
+
+    return _zip_source_file_or_p(za, NULL, file, start, len);
+}
+
+
+
+struct zip_source *
+_zip_source_file_or_p(struct zip *za, const char *fname, FILE *file,
+		      off_t start, off_t len)
+{
+    struct read_file *f;
+    struct zip_source *zs;
+
+    if (file == NULL && fname == NULL) {
 	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
 	return NULL;
     }
@@ -76,6 +88,14 @@ zip_source_filep(struct zip *za, FILE *file, off_t start, off_t len)
 	return NULL;
     }
 
+    f->fname = NULL;
+    if (fname) {
+	if ((f->fname=strdup(fname)) == NULL) {
+	    _zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
+	    free(f);
+	    return NULL;
+	}
+    }
     f->f = file;
     f->off = start;
     f->len = (len ? len : -1);
@@ -102,6 +122,14 @@ read_file(void *state, void *data, size_t len, enum zip_source_cmd cmd)
 
     switch (cmd) {
     case ZIP_SOURCE_OPEN:
+	if (z->fname) {
+	    if ((z->f=fopen(z->fname, "rb")) == NULL) {
+		z->e[0] = ZIP_ER_OPEN;
+		z->e[1] = errno;
+		return -1;
+	    }
+	}
+
 	if (fseeko(z->f, z->off, SEEK_SET) < 0) {
 	    z->e[0] = ZIP_ER_SEEK;
 	    z->e[1] = errno;
@@ -128,17 +156,27 @@ read_file(void *state, void *data, size_t len, enum zip_source_cmd cmd)
 	return i;
 	
     case ZIP_SOURCE_CLOSE:
+	if (z->fname) {
+	    fclose(z->f);
+	    z->f = NULL;
+	}
 	return 0;
 
     case ZIP_SOURCE_STAT:
         {
 	    struct zip_stat *st;
 	    struct stat fst;
+	    int err;
 	    
 	    if (len < sizeof(*st))
 		return -1;
 
-	    if (fstat(fileno(z->f), &fst) != 0) {
+	    if (z->f)
+		err = fstat(fileno(z->f), &fst);
+	    else
+		err = stat(z->fname, &fst);
+
+	    if (err != 0) {
 		z->e[0] = ZIP_ER_READ; /* best match */
 		z->e[1] = errno;
 		return -1;
@@ -164,6 +202,8 @@ read_file(void *state, void *data, size_t len, enum zip_source_cmd cmd)
 	return sizeof(int)*2;
 
     case ZIP_SOURCE_FREE:
+	free(z->fname);
+	if (z->f)
 	fclose(z->f);
 	free(z);
 	return 0;

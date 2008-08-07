@@ -2,13 +2,11 @@
 #define _HAD_ZIPINT_H
 
 /*
-  $NiH: zipint.h,v 1.48 2007/04/24 14:04:19 dillo Exp $
-
   zipint.h -- internal declarations.
-  Copyright (C) 1999, 2003, 2004, 2005, 2007 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2008 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
-  The authors can be contacted at <nih@giga.or.at>
+  The authors can be contacted at <libzip@nih.at>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -22,7 +20,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -39,18 +37,38 @@
 #include <zlib.h>
 
 #include "zip.h"
-/* #defines that rename all zip_ functions and structs */
-#include "zipint_alias.h"
 
-BEGIN_EXTERN_C()
+#ifdef PHP_WIN32
+#include <windows.h>
+#include <wchar.h>
+#define _zip_rename(s, t)						\
+	(!MoveFileExA((s), (t),						\
+		     MOVEFILE_COPY_ALLOWED|MOVEFILE_REPLACE_EXISTING))
+#else
+#define _zip_rename	rename
+#endif
+
+#ifndef strcasecmp
+# define strcmpi strcasecmp 
+#endif
+
 #ifndef HAVE_FSEEKO
 #define fseeko(s, o, w)	(fseek((s), (long int)(o), (w)))
 #endif
+#ifndef HAVE_FTELLO
+#define ftello(s)	((long)ftell((s)))
+#endif
+
+
 
 #define CENTRAL_MAGIC "PK\1\2"
 #define LOCAL_MAGIC   "PK\3\4"
 #define EOCD_MAGIC    "PK\5\6"
 #define DATADES_MAGIC "PK\7\8"
+#define TORRENT_SIG	"TORRENTZIPPED-"
+#define TORRENT_SIG_LEN	14
+#define TORRENT_CRC_LEN 8
+#define TORRENT_MEM_LEVEL	8
 #define CDENTRYSIZE         46u
 #define LENTRYSIZE          30
 #define MAXCOMLEN        65536
@@ -74,8 +92,8 @@ enum zip_state { ZIP_ST_UNCHANGED, ZIP_ST_DELETED, ZIP_ST_REPLACED,
 /* directory entry: general purpose bit flags */
 
 #define ZIP_GPBF_ENCRYPTED		0x0001	/* is encrypted */
+#define ZIP_GPBF_DATA_DESCRIPTOR	0x0008	/* crc/size after file data */
 #define ZIP_GPBF_STRONG_ENCRYPTION	0x0040  /* uses strong encryption */
-#define ZIP_GPBF_USE_DATA_DESCRIPTOR    0x0008  /* uses crc and size from data header */
 
 /* error information */
 
@@ -91,6 +109,9 @@ struct zip {
     char *zn;			/* file name */
     FILE *zp;			/* file */
     struct zip_error error;	/* error information */
+
+    unsigned int flags;		/* archive global flags */
+    unsigned int ch_flags;	/* changed archive global flags */
 
     struct zip_cdir *cdir;	/* central directory */
     char *ch_comment;		/* changed archive comment */
@@ -112,13 +133,13 @@ struct zip_file {
     int flags;			/* -1: eof, >0: error */
 
     int method;			/* compression method */
-    long fpos;			/* position within zip file (fread/fwrite) */
+    off_t fpos;			/* position within zip file (fread/fwrite) */
     unsigned long bytes_left;	/* number of bytes left to read */
     unsigned long cbytes_left;  /* number of bytes of compressed data left */
-    
+
     unsigned long crc;		/* CRC so far */
     unsigned long crc_orig;	/* CRC recorded in archive */
-    
+
     char *buffer;
     z_stream *zstr;
 };
@@ -189,43 +210,49 @@ extern const int _zip_err_type[];
 
 
 
-PHPZIPAPI void _zip_cdir_free(struct zip_cdir *);
-PHPZIPAPI struct zip_cdir *_zip_cdir_new(int, struct zip_error *);
-PHPZIPAPI int _zip_cdir_write(struct zip_cdir *, FILE *, struct zip_error *);
+int _zip_cdir_compute_crc(struct zip *, uLong *);
+void _zip_cdir_free(struct zip_cdir *);
+struct zip_cdir *_zip_cdir_new(int, struct zip_error *);
+int _zip_cdir_write(struct zip_cdir *, FILE *, struct zip_error *);
 
-PHPZIPAPI void _zip_dirent_finalize(struct zip_dirent *);
-PHPZIPAPI void _zip_dirent_init(struct zip_dirent *);
-PHPZIPAPI int _zip_dirent_read(struct zip_dirent *, FILE *,
+void _zip_dirent_finalize(struct zip_dirent *);
+void _zip_dirent_init(struct zip_dirent *);
+int _zip_dirent_read(struct zip_dirent *, FILE *,
 		     unsigned char **, unsigned int, int, struct zip_error *);
-PHPZIPAPI int _zip_dirent_write(struct zip_dirent *, FILE *, int, struct zip_error *);
+void _zip_dirent_torrent_normalize(struct zip_dirent *);
+int _zip_dirent_write(struct zip_dirent *, FILE *, int, struct zip_error *);
 
-PHPZIPAPI void _zip_entry_free(struct zip_entry *);
-PHPZIPAPI void _zip_entry_init(struct zip *, int);
-PHPZIPAPI struct zip_entry *_zip_entry_new(struct zip *);
+void _zip_entry_free(struct zip_entry *);
+void _zip_entry_init(struct zip *, int);
+struct zip_entry *_zip_entry_new(struct zip *);
 
-PHPZIPAPI void _zip_error_clear(struct zip_error *);
-PHPZIPAPI void _zip_error_copy(struct zip_error *, struct zip_error *);
-PHPZIPAPI void _zip_error_fini(struct zip_error *);
-PHPZIPAPI void _zip_error_get(struct zip_error *, int *, int *);
-PHPZIPAPI void _zip_error_init(struct zip_error *);
-PHPZIPAPI void _zip_error_set(struct zip_error *, int, int);
-PHPZIPAPI const char *_zip_error_strerror(struct zip_error *);
+void _zip_error_clear(struct zip_error *);
+void _zip_error_copy(struct zip_error *, struct zip_error *);
+void _zip_error_fini(struct zip_error *);
+void _zip_error_get(struct zip_error *, int *, int *);
+void _zip_error_init(struct zip_error *);
+void _zip_error_set(struct zip_error *, int, int);
+const char *_zip_error_strerror(struct zip_error *);
 
-PHPZIPAPI int _zip_file_fillbuf(void *, size_t, struct zip_file *);
-PHPZIPAPI unsigned int _zip_file_get_offset(struct zip *, int);
+int _zip_file_fillbuf(void *, size_t, struct zip_file *);
+unsigned int _zip_file_get_offset(struct zip *, int);
 
-PHPZIPAPI void _zip_free(struct zip *);
-PHPZIPAPI const char *_zip_get_name(struct zip *, int, int, struct zip_error *);
-PHPZIPAPI int _zip_local_header_read(struct zip *, int);
-PHPZIPAPI void *_zip_memdup(const void *, size_t, struct zip_error *);
-PHPZIPAPI int _zip_name_locate(struct zip *, const char *, int, struct zip_error *);
-PHPZIPAPI struct zip *_zip_new(struct zip_error *);
-PHPZIPAPI unsigned short _zip_read2(unsigned char **);
-PHPZIPAPI unsigned int _zip_read4(unsigned char **);
-PHPZIPAPI int _zip_replace(struct zip *, int, const char *, struct zip_source *);
-PHPZIPAPI int _zip_set_name(struct zip *, int, const char *);
-PHPZIPAPI int _zip_unchange(struct zip *, int, int);
-PHPZIPAPI void _zip_unchange_data(struct zip_entry *);
+int _zip_filerange_crc(FILE *, off_t, off_t, uLong *, struct zip_error *);
 
-END_EXTERN_C();
+struct zip_source *_zip_source_file_or_p(struct zip *, const char *, FILE *,
+					 off_t, off_t);
+
+void _zip_free(struct zip *);
+const char *_zip_get_name(struct zip *, int, int, struct zip_error *);
+int _zip_local_header_read(struct zip *, int);
+void *_zip_memdup(const void *, size_t, struct zip_error *);
+int _zip_name_locate(struct zip *, const char *, int, struct zip_error *);
+struct zip *_zip_new(struct zip_error *);
+unsigned short _zip_read2(unsigned char **);
+unsigned int _zip_read4(unsigned char **);
+int _zip_replace(struct zip *, int, const char *, struct zip_source *);
+int _zip_set_name(struct zip *, int, const char *);
+int _zip_unchange(struct zip *, int, int);
+void _zip_unchange_data(struct zip_entry *);
+
 #endif /* zipint.h */
