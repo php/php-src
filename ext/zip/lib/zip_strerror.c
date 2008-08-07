@@ -1,11 +1,9 @@
 /*
-  $NiH: zip_strerror.c,v 1.1 2003/10/05 16:05:22 dillo Exp $
-
   zip_sterror.c -- get string representation of zip error
-  Copyright (C) 1999, 2003 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2007 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
-  The authors can be contacted at <nih@giga.or.at>
+  The authors can be contacted at <libzip@nih.at>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -35,12 +33,10 @@
 
 
 
-#include "zip.h"
 #include "zipint.h"
 
 
-
-PHPZIPAPI const char *
+ZIP_EXTERN(const char *)
 zip_strerror(struct zip *za)
 {
     return _zip_error_strerror(&za->error);
