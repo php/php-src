@@ -446,7 +446,8 @@ STATUS:              Working
 SINCE:               4.0.4
 -------------------------------------------------------------------------------
 EXTENSION:           pcntl
-MAINTENANCE:         Unknown
+PRIMARY MAINTAINER:  Arnaud Le Blanc <lbarnaud@php.net>
+MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           pcre
