@@ -77,6 +77,11 @@ EXTENSION:           isapi
 MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
+EXTENSION:           litespeed
+MAINTENANCE:         George Wang <gwang@php.net>
+STATUS:              Working
+SINCE:               5.3
+-------------------------------------------------------------------------------
 EXTENSION:           milter
 MAINTENANCE:         Unknown
 STATUS:              Unknown
@@ -234,11 +239,18 @@ PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>, Wez Furlong <wez@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.0 (Since 4.3.2 in PECL)
-COMMENT:             Integrates SQLite embeddable SQL database engine.
+COMMENT:             Integrates SQLite 2 embeddable SQL database engine.
+-------------------------------------------------------------------------------
+EXTENSION:           sqlite3
+PRIMARY MAINTAINER:  Scott MacVicar <scottmac@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
+SINCE:               5.3
+COMMENT:             Integrates SQLite 3 embeddable SQL database engine.
 -------------------------------------------------------------------------------
 EXTENSION:           sybase_ct
-PRIMARY MAINTAINER:   Timm Friebe <thekid@thekid.de>
-MAINTENANCE:        Maintained
+PRIMARY MAINTAINER:  Timm Friebe <thekid@thekid.de>
+MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 
@@ -347,6 +359,12 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               4.2
 -------------------------------------------------------------------------------
+EXTENSION:           fileinfo
+PRIMARY MAINTAINER:  Derick Rethans <derick@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
+SINCE:               5.3
+-------------------------------------------------------------------------------
 EXTENSION:           filter
 PRIMARY MAINTAINER:  Derick Rethans <derick@php.net>, Pierre-Alain Joye <pajoye@php.net>, Ilia Alshanetsky <iliaa@php.net>
 MAINTENANCE:         Maintained
@@ -413,7 +431,7 @@ EXTENSION:           mime_magic
 PRIMARY MAINTAINER:  Unknown
 MAINTENANCE:         Deprecated
 STATUS:              Experimental
-COMMENT:             Use PECL's fileinfo extension instead
+COMMENT:             Use the fileinfo extension instead
 -------------------------------------------------------------------------------
 EXTENSION:           ming
 PRIMARY MAINTAINER:  Frank M. Kromann
@@ -439,6 +457,7 @@ EXTENSION:           phar
 PRIMARY MAINTAINER:  Greg Beaver <cellog@php.net>, Marcus Börger <helly@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
+SINCE:               5.3
 -------------------------------------------------------------------------------
 EXTENSION:           posix
 PRIMARY MAINTAINER:  Kristian Köhntopp <kris@koehntopp.de>
