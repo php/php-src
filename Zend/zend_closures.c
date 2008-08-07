@@ -79,6 +79,20 @@ static zend_function *zend_closure_get_constructor(zval *object TSRMLS_DC) /* {{
 }
 /* }}} */
 
+static int zend_closure_serialize(zval *object, int *type, zstr *buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC) /* {{{ */
+{
+	zend_error(E_ERROR, "Serialization of 'Closure' is not allowed");
+	return FAILURE;
+}
+/* }}} */
+
+static int zend_closure_unserialize(zval **object, zend_class_entry *ce, int type, const zstr buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC) /* {{{ */
+{
+	zend_error(E_ERROR, "Unserialization of 'Closure' is not allowed");
+	return FAILURE;
+}
+/* }}} */
+
 static int zend_closure_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 {
 	return (Z_OBJ_HANDLE_P(o1) != Z_OBJ_HANDLE_P(o2));
@@ -201,6 +215,8 @@ void zend_register_closure_ce(TSRMLS_D) /* {{{ */
 	zend_ce_closure = zend_register_internal_class(&ce TSRMLS_CC);
 	zend_ce_closure->ce_flags |= ZEND_ACC_FINAL_CLASS;
 	zend_ce_closure->create_object = zend_closure_new;
+	zend_ce_closure->serialize = zend_closure_serialize;
+	zend_ce_closure->unserialize = zend_closure_unserialize;
 
 	memcpy(&closure_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	closure_handlers.get_constructor = zend_closure_get_constructor;
