@@ -2472,7 +2472,6 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		retval = fcc->function_handler ? 1 : 0;
 		call_via_handler = 1;
 	}
-	efree(lmname);
 
 	if (retval) {
 		if (fcc->calling_scope && !call_via_handler) {
@@ -2507,7 +2506,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 			}
 			if (retval && (check_flags & IS_CALLABLE_CHECK_NO_ACCESS) == 0) {
 				if (fcc->function_handler->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-					if (!zend_check_private(fcc->function_handler, fcc->object_pp ? Z_OBJCE_PP(fcc->object_pp) : EG(scope), mname, mlen TSRMLS_CC)) {
+					if (!zend_check_private(fcc->function_handler, fcc->object_pp ? Z_OBJCE_PP(fcc->object_pp) : EG(scope), lmname, mlen TSRMLS_CC)) {
 						if (error) {
 							if (*error) {
 								efree(*error);
@@ -2536,6 +2535,8 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 			if (error) zend_spprintf(error, 0, "function '%s' does not exist", mname);
 		}
 	}
+	efree(lmname);
+
 	if (fcc->object_pp) {
 		fcc->called_scope = Z_OBJCE_PP(fcc->object_pp);
 	}
