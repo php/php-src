@@ -1,6 +1,6 @@
 /*
-   This file was generated automatically by make_zip_err_str.sh
-   from zip.h; make changes there.
+   This file was generated automatically by ./make_zip_err_str.sh
+   from ./zip.h; make changes there.
  */
 
 #include "zipint.h"

@@ -57,6 +57,8 @@ zip_source_zip(struct zip *za, struct zip *srcza, int srcidx, int flags,
     struct zip_source *zs;
     struct read_zip *p;
 
+    /* XXX: ZIP_FL_RECOMPRESS */
+
     if (za == NULL)
 	return NULL;
 
@@ -74,7 +76,7 @@ zip_source_zip(struct zip *za, struct zip *srcza, int srcidx, int flags,
     if (len == 0)
 	len = -1;
 
-    if (start == 0 && len == -1)
+    if (start == 0 && len == -1 && (flags & ZIP_FL_RECOMPRESS) == 0)
 	flags |= ZIP_FL_COMPRESSED;
     else
 	flags &= ~ZIP_FL_COMPRESSED;

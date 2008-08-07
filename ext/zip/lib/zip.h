@@ -70,6 +70,7 @@ BEGIN_EXTERN_C()
 #define ZIP_FL_NODIR		2 /* ignore directory component */
 #define ZIP_FL_COMPRESSED	4 /* read compressed data */
 #define ZIP_FL_UNCHANGED	8 /* use original data, ignoring changes */
+#define ZIP_FL_RECOMPRESS      16 /* force recompression of data */
 
 /* archive global flags flags */
 
@@ -160,8 +161,6 @@ enum zip_source_cmd {
     ZIP_SOURCE_ERROR,	/* get error information */
     ZIP_SOURCE_FREE	/* cleanup and free resources */
 };
-
-
 
 typedef ssize_t (*zip_source_callback)(void *state, void *data,
 				       size_t len, enum zip_source_cmd cmd);
