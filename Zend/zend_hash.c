@@ -1670,28 +1670,28 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, zstr s
 					if (q == p) {
 						found = 1;
 					} else if (!q->nKeyLength && q->h == num_index) {
-					    if (found) {
-					    	if (mode & HASH_UPDATE_KEY_IF_BEFORE) {
-					    		break;
-					    	} else {
-					    		if (p->nKeyLength) {
+						if (found) {
+							if (mode & HASH_UPDATE_KEY_IF_BEFORE) {
+								break;
+							} else {
+								if (p->nKeyLength) {
 									zend_u_hash_del(ht, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength);
 								} else {
 									zend_hash_index_del(ht, p->h);
 								}
-					    		return FAILURE;
-					    	}
-					    } else {
-					    	if (mode & HASH_UPDATE_KEY_IF_AFTER) {
-					    		break;
-					    	} else {
-					    		if (p->nKeyLength) {
+								return FAILURE;
+							}
+						} else {
+							if (mode & HASH_UPDATE_KEY_IF_AFTER) {
+								break;
+							} else {
+								if (p->nKeyLength) {
 									zend_u_hash_del(ht, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength);
 								} else {
 									zend_hash_index_del(ht, p->h);
 								}
-					    		return FAILURE;
-					    	}
+								return FAILURE;
+							}
 						}
 					}
 					q = q->pNext;
@@ -1718,29 +1718,29 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, zstr s
 						found = 1;
 					} else if (q->h == h && q->nKeyLength == str_length && 
 					           q->key.type == key_type &&
-					           memcmp(q->key.arKey.s, str_index.v, real_length) == 0) {
-					    if (found) {
-					    	if (mode & HASH_UPDATE_KEY_IF_BEFORE) {
-					    		break;
-					    	} else {
-					    		if (p->nKeyLength) {
+							   memcmp(q->key.arKey.s, str_index.v, real_length) == 0) {
+						if (found) {
+							if (mode & HASH_UPDATE_KEY_IF_BEFORE) {
+								break;
+							} else {
+								if (p->nKeyLength) {
 									zend_u_hash_del(ht, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength);
 								} else {
 									zend_hash_index_del(ht, p->h);
 								}
-					    		return FAILURE;
-					    	}
-					    } else {
-					    	if (mode & HASH_UPDATE_KEY_IF_AFTER) {
-					    		break;
-					    	} else {
-					    		if (p->nKeyLength) {
+								return FAILURE;
+							}
+						} else {
+							if (mode & HASH_UPDATE_KEY_IF_AFTER) {
+								break;
+							} else {
+								if (p->nKeyLength) {
 									zend_u_hash_del(ht, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength);
 								} else {
 									zend_hash_index_del(ht, p->h);
 								}
-					    		return FAILURE;
-					    	}
+								return FAILURE;
+							}
 						}
 					}
 					q = q->pNext;
