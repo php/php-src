@@ -780,8 +780,11 @@ PHP_FUNCTION(touch)
 
 /* {{{ php_clear_stat_cache()
 */
-PHPAPI void php_clear_stat_cache(TSRMLS_D)
+PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, int filename_len TSRMLS_DC)
 {
+	/* always clear CurrentStatFile and CurrentLStatFile even if filename is not NULL
+	 * as it may contains outdated data (e.g. "nlink" for a directory when deleting a file
+	 * in this directory, as shown by lstat_stat_variation9.phpt) */
 	if (BG(CurrentStatFile)) {
 		efree(BG(CurrentStatFile));
 		BG(CurrentStatFile) = NULL;
@@ -790,18 +793,40 @@ PHPAPI void php_clear_stat_cache(TSRMLS_D)
 		efree(BG(CurrentLStatFile));
 		BG(CurrentLStatFile) = NULL;
 	}
-	realpath_cache_clean(TSRMLS_C);
+	if (clear_realpath_cache) {
+		if (filename != NULL) {
+			realpath_cache_del(filename, filename_len TSRMLS_CC);
+		} else {
+			realpath_cache_clean(TSRMLS_C);
+		}
+	}
 }
 /* }}} */
 
-/* {{{ proto void clearstatcache(void)
+/* {{{ proto void clearstatcache([bool clear_realpath_cache[, string filename]])
    Clear file stat cache */
 PHP_FUNCTION(clearstatcache)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
+	zend_bool   clear_realpath_cache = 0;
+	char       *filename             = NULL;
+	zend_uchar  filename_type;
+	int         filename_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|bt", &clear_realpath_cache, &filename, &filename_len, &filename_type) == FAILURE) {
 		return;
 	}
-	php_clear_stat_cache(TSRMLS_C);
+
+	if (filename && filename_type == IS_UNICODE) {
+		if (FAILURE == php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, FG(default_context))) {
+			RETURN_FALSE;
+		}
+	}
+
+	php_clear_stat_cache(clear_realpath_cache, filename, filename_len TSRMLS_CC);
+
+	if (filename && filename_type == IS_UNICODE) {
+		efree(filename);
+	}
 }
 /* }}} */
 
