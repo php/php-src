@@ -1,6 +1,6 @@
 /*
-  zip_source_file.c -- create data source from file
-  Copyright (C) 1999-2008 Dieter Baron and Thomas Klausner
+  zip_get_archive_flag.c -- get archive global flag
+  Copyright (C) 2008 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -33,23 +33,16 @@
 
 
 
-#include <errno.h>
-#include <stdio.h>
-
 #include "zipint.h"
 
 
 
-ZIP_EXTERN(struct zip_source *)
-zip_source_file(struct zip *za, const char *fname, off_t start, off_t len)
+ZIP_EXTERN(int)
+zip_get_archive_flag(struct zip *za, int flag, int flags)
 {
-    if (za == NULL)
-	return NULL;
+    int fl;
 
-    if (fname == NULL || start < 0 || len < -1) {
-	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
-	return NULL;
-    }
+    fl = (flags & ZIP_FL_UNCHANGED) ? za->flags : za->ch_flags;
 
-    return _zip_source_file_or_p(za, fname, NULL, start, len);
+    return (fl & flag) ? 1 : 0;
 }

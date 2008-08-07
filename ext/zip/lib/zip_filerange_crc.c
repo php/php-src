@@ -1,6 +1,6 @@
 /*
-  zip_source_file.c -- create data source from file
-  Copyright (C) 1999-2008 Dieter Baron and Thomas Klausner
+  zip_filerange_crc.c -- compute CRC32 for a range of a file
+  Copyright (C) 2008 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -33,23 +33,39 @@
 
 
 
-#include <errno.h>
 #include <stdio.h>
+#include <errno.h>
 
 #include "zipint.h"
 
+
 
 
-ZIP_EXTERN(struct zip_source *)
-zip_source_file(struct zip *za, const char *fname, off_t start, off_t len)
+int
+_zip_filerange_crc(FILE *fp, off_t start, off_t len, uLong *crcp,
+		   struct zip_error *errp)
 {
-    if (za == NULL)
-	return NULL;
+    Bytef buf[BUFSIZE];
+    size_t n;
 
-    if (fname == NULL || start < 0 || len < -1) {
-	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
-	return NULL;
+    *crcp = crc32(0L, Z_NULL, 0);
+
+    if (fseeko(fp, start, SEEK_SET) != 0) {
+	_zip_error_set(errp, ZIP_ER_SEEK, errno);
+	return -1;
+    }
+    
+    while (len > 0) {
+	n = len > BUFSIZE ? BUFSIZE : len;
+	if ((n=fread(buf, 1, n, fp)) <= 0) {
+	    _zip_error_set(errp, ZIP_ER_READ, errno);
+	    return -1;
+	}
+
+	*crcp = crc32(*crcp, buf, n);
+
+	len-= n;
     }
 
-    return _zip_source_file_or_p(za, fname, NULL, start, len);
+    return 0;
 }
