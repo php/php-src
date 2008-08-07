@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.3.0 Alpha 2
 - Removed shebang line check from CGI sapi (it is checked by scanner) (Dmitry)
+- Added clear_realpath_cache and filename parameters to clearstatcache() (Jani,
+  Arnaud)
 
 - Added litespeed SAPI module. (George Wang)
 - Added ext/hash support to ext/session's ID generator. (Sara)
