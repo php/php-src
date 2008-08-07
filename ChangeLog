@@ -1,3 +1,178 @@
+2008-08-06  Lukas Smith  <smith@pooteeweet.org>
+
+    * README.RELEASE_PROCESS:
+      separate tagging of the zend dir should not be necessary, fix reST
+      formatting of titles
+
+2008-08-06  Kalle Sommer Nielsen  <kalle@zesix.com>
+
+    * (PHP_5_2)
+      NEWS:
+      Backport #45406 (session.serialize_handler declared by shared extension
+      fails) to PHP_5_2
+
+    * (PHP_5_3)
+      NEWS:
+      Backport fix for #45406 to PHP_5_2
+
+    * (PHP_5_2)
+      ext/session/session.c:
+      Backport fix for #45406 - Patch by oleg dot grenrus at dynamoid dot com
+
+2008-08-06  Lukas Smith  <smith@pooteeweet.org>
+
+    * README.RELEASE_PROCESS:
+      lets me all american :)
+
+    * README.RELEASE_PROCESS:
+      updated in regards to windows, added some clarifications and addition tipps
+
+2008-08-06  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysql/php_mysql.c
+      ext/mysql/php_mysql_structs.h:
+      Re-add mysql_set_charset. Missed during introduction of mysqlnd. Exists in
+      HEAD, thus no merge
+
+2008-08-06  Elizabeth Marie Smith  <emsmith@elizabethmariesmith.com>
+
+    * ext/pdo_sqlite/config.w32
+      ext/pdo_sqlite/config.w32:
+      Stupid typo
+
+    * ext/pdo_sqlite/config.w32
+      ext/pdo_sqlite/config.w32:
+      Fix include path
+
+2008-08-06  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/intl/msgformat/msgformat_attr.c:
+      - Fixed crash msgfmt_get_pattern
+
+2008-08-06  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      NEWS
+      ext/fileinfo/config.m4:
+      - MFH: Fixed bug #45636 (fileinfo ext duplicate strndup).
+
+    * ext/fileinfo/config.m4:
+      - Fixed bug #45636 (fileinfo ext duplicate strndup).
+
+    * (PHP_5_3)
+      NEWS
+      ext/fileinfo/config.m4:
+      - MFH: Fixed bug #45717 (Fileinfo/libmagic build fails, missing err.h and
+        getopt.h).
+
+    * ext/fileinfo/config.m4:
+      - Fixed bug #45717 (Fileinfo/libmagic build fails, missing err.h and
+      getopt.h).
+
+2008-08-06  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/sqlite3/libsqlite/sqlite3.c
+      ext/sqlite3/libsqlite/sqlite3.h
+      ext/sqlite3/libsqlite/sqlite3ext.h:
+      Sync libsqlite to 3.6.1
+
+    * ext/sqlite3/tests/sqlite3_22_loadextension.phpt:
+      Fix test on Windows
+
+    * ext/sqlite3/sqlite3.c
+      ext/sqlite3/tests/sqlite3_12_unfinalized_stmt_cleanup.phpt
+      ext/sqlite3/tests/sqlite3_25_create_aggregate.phpt:
+      MFB: Update coding standards and fix a test, this was already in 5.3 alpha
+      1
+
+2008-08-06  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      main/streams/streams.c:
+      MFH: increase context refcount before open() to avoid crash when open()
+      fails and destroys the context
+
+    * main/streams/streams.c:
+      increase context refcount before open() to avoid crash when open() fails
+      and destroys the context
+
+2008-08-06  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - 4.4.9, rock and roll.
+
+    * (PHP_4_4)
+      NEWS
+      Zend/zend_multibyte.c
+      ext/standard/php_string.h
+      ext/standard/tests/strings/explode_bug.phpt:
+      - MFH (manually): Fixed overflow in memnstr().
+
+2008-08-06  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/oci8/oci8.c:
+      fix 11g crap
+
+2008-08-06  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      NEWS
+      ext/session/php_session.h
+      ext/session/session.c
+      ext/session/tests/008-php4.2.3.phpt
+      ext/session/tests/014.phpt
+      ext/session/tests/session_decode_variation3.phpt
+      ext/session/tests/session_encode_error2.phpt
+      ext/session/tests/session_encode_variation1.phpt
+      ext/session/tests/session_encode_variation2.phpt
+      ext/session/tests/session_encode_variation3.phpt
+      ext/session/tests/session_encode_variation4.phpt
+      ext/session/tests/session_encode_variation5.phpt
+      ext/session/tests/session_encode_variation6.phpt
+      ext/session/tests/session_encode_variation7.phpt
+      ext/session/tests/session_encode_variation8.phpt
+      ext/session/tests/session_id_error4.phpt:
+      MFH: General sync. WS / CS / etc. crap some people didn't bother to merge
+      MFH: before this commit..bunnies thank you all..
+      [DOC] - Added ext/hash support to ext/session's ID generator. (Sara)
+      [DOC] Ask Sara for explanation..
+
+    * NEWS:
+      - Old news
+
+    * ext/session/session.c
+      ext/session/tests/session_decode_variation3.phpt
+      ext/session/tests/session_encode_variation3.phpt
+      ext/session/tests/session_encode_variation4.phpt
+      ext/session/tests/session_encode_variation5.phpt
+      ext/session/tests/session_encode_variation7.phpt
+      ext/session/tests/session_encode_variation8.phpt:
+      - Fixed some inconsistencies with the behaviour of sessions. Changed
+      session_start() to return false when session start fails.
+
+    * ext/session/session.c:
+      - MFB: sync parameter parsing API changes in session_set_save_handler()
+
+    * ext/session/session.c:
+      - MFB: snprintf -> slprintf, nuketh extra folding tags, ws fixes
+
+2008-08-06  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      NEWS
+      ext/standard/credits_sapi.h:
+      - litespeed was merged from HEAD
+
+2008-08-06  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/session/session.c:
+      ws + folding tags
+
 2008-08-05  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_5_3)
