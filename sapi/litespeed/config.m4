@@ -4,7 +4,7 @@ dnl
 
 AC_MSG_CHECKING(for LiteSpeed support)
 
-AC_ARG_WITH(litespeed,
+PHP_ARG_WITH(litespeed,
 [  --with-litespeed        Build PHP as litespeed module],
 [
   PHP_SAPI_LITESPEED=$withval
