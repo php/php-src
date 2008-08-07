@@ -1975,15 +1975,18 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_DOUBLE, IS_LONG):
-				ZVAL_LONG(result, Z_DVAL_P(op1)>((double)Z_LVAL_P(op2))?1:(Z_DVAL_P(op1)<((double)Z_LVAL_P(op2))?-1:0));
+				Z_DVAL_P(result) = Z_DVAL_P(op1) - (double)Z_LVAL_P(op2);
+				ZVAL_LONG(result, ZEND_NORMALIZE_BOOL(Z_DVAL_P(result)));
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_LONG, IS_DOUBLE):
-				ZVAL_LONG(result, ((double)Z_LVAL_P(op1))>Z_DVAL_P(op2)?1:(((double)Z_LVAL_P(op1))<Z_DVAL_P(op2)?-1:0));
+				Z_DVAL_P(result) = (double)Z_LVAL_P(op1) - Z_DVAL_P(op2);
+				ZVAL_LONG(result, ZEND_NORMALIZE_BOOL(Z_DVAL_P(result)));
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_DOUBLE, IS_DOUBLE):
-				ZVAL_LONG(result, Z_DVAL_P(op1)>Z_DVAL_P(op2)?1:(Z_DVAL_P(op1)<Z_DVAL_P(op2)?-1:0));
+				Z_DVAL_P(result) = Z_DVAL_P(op1) - Z_DVAL_P(op2);
+				ZVAL_LONG(result, ZEND_NORMALIZE_BOOL(Z_DVAL_P(result)));
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_ARRAY, IS_ARRAY):
