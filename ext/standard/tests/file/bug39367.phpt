@@ -19,7 +19,7 @@ function test() {
   echo file_get_contents('/tmp/1link')."\n";
 
   unlink('/tmp/1link');
-  clearstatcache();
+  clearstatcache(true);
 
   echo file_get_contents('/tmp/1link')."\n";
 

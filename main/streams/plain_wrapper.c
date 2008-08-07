@@ -1025,8 +1025,8 @@ static int php_plain_files_unlink(php_stream_wrapper *wrapper, char *url, int op
 		return 0;
 	}
 
-	/* Clear stat cache */
-	php_clear_stat_cache(TSRMLS_C);
+	/* Clear stat cache (and realpath cache) */
+	php_clear_stat_cache(1, NULL, 0 TSRMLS_CC);
 
 	return 1;
 }
@@ -1092,8 +1092,8 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, char *url_from, c
         return 0;
 	}
 
-	/* Clear stat cache */
-	php_clear_stat_cache(TSRMLS_C);
+	/* Clear stat cache (and realpath cache) */
+	php_clear_stat_cache(1, NULL, 0 TSRMLS_CC);
 
 	return 1;
 }
@@ -1202,8 +1202,8 @@ static int php_plain_files_rmdir(php_stream_wrapper *wrapper, char *url, int opt
 		return 0;
 	}
 
-	/* Clear stat cache */
-	php_clear_stat_cache(TSRMLS_C);
+	/* Clear stat cache (and realpath cache) */
+	php_clear_stat_cache(1, NULL, 0 TSRMLS_CC);
 
 	return 1;
 }

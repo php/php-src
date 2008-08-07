@@ -1494,7 +1494,9 @@ ZEND_END_ARG_INFO()
 #endif
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_clearstatcache, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_clearstatcache, 0, 0, 0)
+	ZEND_ARG_INFO(0, clear_realpath_cache)
+	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
 static
