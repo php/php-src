@@ -1674,14 +1674,22 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, zstr s
 					    	if (mode & HASH_UPDATE_KEY_IF_BEFORE) {
 					    		break;
 					    	} else {
-								zend_hash_index_del(ht, p->h);
+					    		if (p->nKeyLength) {
+									zend_u_hash_del(ht, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength);
+								} else {
+									zend_hash_index_del(ht, p->h);
+								}
 					    		return FAILURE;
 					    	}
 					    } else {
 					    	if (mode & HASH_UPDATE_KEY_IF_AFTER) {
 					    		break;
 					    	} else {
-								zend_hash_index_del(ht, p->h);
+					    		if (p->nKeyLength) {
+									zend_u_hash_del(ht, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength);
+								} else {
+									zend_hash_index_del(ht, p->h);
+								}
 					    		return FAILURE;
 					    	}
 						}
@@ -1715,14 +1723,22 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, zstr s
 					    	if (mode & HASH_UPDATE_KEY_IF_BEFORE) {
 					    		break;
 					    	} else {
-								zend_u_hash_del(ht, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength);
+					    		if (p->nKeyLength) {
+									zend_u_hash_del(ht, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength);
+								} else {
+									zend_hash_index_del(ht, p->h);
+								}
 					    		return FAILURE;
 					    	}
 					    } else {
 					    	if (mode & HASH_UPDATE_KEY_IF_AFTER) {
 					    		break;
 					    	} else {
-								zend_u_hash_del(ht, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength);
+					    		if (p->nKeyLength) {
+									zend_u_hash_del(ht, p->key.type, ZSTR(p->key.arKey.s), p->nKeyLength);
+								} else {
+									zend_hash_index_del(ht, p->h);
+								}
 					    		return FAILURE;
 					    	}
 						}
