@@ -406,7 +406,6 @@ DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 	if (yytext[0] == '"' && yytext[yyleng - 1] == '"') {
 		SCNG(yy_text)++;
 		yyleng = yyleng - 2;
-		yytext[yyleng] = 0;
 	}
 	RETURN_TOKEN(TC_RAW, yytext, yyleng);
 }
