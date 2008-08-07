@@ -1,25 +1,27 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.3.0 Alpha 2
-- Removed shebang line check from CGI sapi (it is checked by scanner) (Dmitry)
-- Added clear_realpath_cache and filename parameters to clearstatcache() (Jani,
-  Arnaud)
+- Removed shebang line check from CGI sapi (it is checked by scanner). (Dmitry)
 
+- Changed session_start() to return false when session startup fails. (Jani)
+
+- Added optional clear_realpath_cache and filename parameters to
+  clearstatcache(). (Jani, Arnaud)
 - Added litespeed SAPI module. (George Wang)
 - Added ext/hash support to ext/session's ID generator. (Sara)
 
-- Fixed a bug that caused miscalculations with the "last <weekday> of <n>
-  month" relative time string. (Derick)
+- Fixed a bug causing miscalculations with the "last <weekday> of <n> month"
+  relative time string. (Derick)
 
 - Fixed bug #45717 (Fileinfo/libmagic build fails, missing err.h and getopt.h).
   (Derick)
 - Fixed bug #45696 (Not all DateTime methods allow method chaining). (Derick)
 - Fixed bug #45636 (fileinfo ext duplicate strndup). (Derick)
-- Fixed bug #45545 (DateInterval has a limitation of 4 chars for ISO
-  durations). (Derick)
+- Fixed bug #45545 (DateInterval has 4 char limitation for ISO durations).
+  (Derick)
 - Fixed bug #44100 (Inconsistent handling of static array declarations with
   duplicate keys). (Dmitry)
-- Fixed bug #43008 (php://filter uris ignore url encoded filternames and can't 
+- Fixed bug #43008 (php://filter uris ignore url encoded filternames and can't
   handle slashes). (Arnaud)
 
 01 Aug 2008, PHP 5.3.0 Alpha 1
