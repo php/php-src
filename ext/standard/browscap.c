@@ -22,7 +22,7 @@
 #include "php_browscap.h"
 #include "php_ini.h"
 #include "php_string.h"
-#include "ext/ereg/php_regex.h"
+#include "ext/pcre/php_pcre.h"
 
 #include "zend_ini_scanner.h"
 #include "zend_globals.h"
@@ -51,16 +51,17 @@ static void browscap_entry_dtor(zval **zvalue) /* {{{ */
 
 static void convert_browscap_pattern(zval *pattern) /* {{{ */
 {
-	register int i, j;
+	int i, j=0;
 	char *t;
 
 	php_strtolower(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern));
 
-	t = (char *) safe_pemalloc(Z_STRLEN_P(pattern), 2, 3, 1);
+	t = (char *) safe_pemalloc(Z_STRLEN_P(pattern), 2, 5, 1);
 
-	t[0] = '^';
+	t[j++] = '§';
+	t[j++] = '^';
 
-	for (i=0, j=1; i<Z_STRLEN_P(pattern); i++, j++) {
+	for (i=0; i<Z_STRLEN_P(pattern); i++, j++) {
 		switch (Z_STRVAL_P(pattern)[i]) {
 			case '?':
 				t[j] = '.';
@@ -73,6 +74,22 @@ static void convert_browscap_pattern(zval *pattern) /* {{{ */
 				t[j++] = '\\';
 				t[j] = '.';
 				break;
+			case '\\':
+				t[j++] = '\\';
+				t[j] = '\\';
+				break;
+			case '(':
+				t[j++] = '\\';
+				t[j] = '(';
+				break;
+			case ')':
+				t[j++] = '\\';
+				t[j] = ')';
+				break;
+			case '§':
+				t[j++] = '\\';
+				t[j] = '§';
+				break;
 			default:
 				t[j] = Z_STRVAL_P(pattern)[i];
 				break;
@@ -80,6 +97,7 @@ static void convert_browscap_pattern(zval *pattern) /* {{{ */
 	}
 
 	t[j++] = '$';
+	t[j++] = '§';
 
 	t[j]=0;
 	Z_STRVAL_P(pattern) = t;
@@ -215,8 +233,11 @@ PHP_MSHUTDOWN_FUNCTION(browscap) /* {{{ */
 static int browser_reg_compare(zval **browser TSRMLS_DC, int num_args, va_list args, zend_hash_key *key) /* {{{ */
 {
 	zval **browser_regex, **previous_match;
-	regex_t r;
+	pcre *re;
+	int re_options;
+	pcre_extra *re_extra;
 	char *lookup_browser_name = va_arg(args, char *);
+	int lookup_browser_length = va_arg(args, int);
 	zval **found_browser_entry = va_arg(args, zval **);
 
 	/* See if we have an exact match, if so, we're done... */
@@ -233,10 +254,12 @@ static int browser_reg_compare(zval **browser TSRMLS_DC, int num_args, va_list a
 		return 0;
 	}
 
-	if (regcomp(&r, Z_STRVAL_PP(browser_regex), REG_NOSUB) != 0) {
+	re = pcre_get_compiled_regex(Z_STRVAL_PP(browser_regex), &re_extra, &re_options TSRMLS_CC);
+	if (re == NULL) {
 		return 0;
 	}
-	if (regexec(&r, lookup_browser_name, 0, NULL, 0) == 0) {
+
+	if (pcre_exec(re, re_extra, lookup_browser_name, lookup_browser_length, 0, re_options, NULL, 0) == 0) {
 		/* If we've found a possible browser, we need to do a comparison of the
 		   number of characters changed in the user agent being checked versus
 		   the previous match found and the current match. */
@@ -245,11 +268,10 @@ static int browser_reg_compare(zval **browser TSRMLS_DC, int num_args, va_list a
 			zval **current_match;
 
 			if (zend_hash_find(Z_ARRVAL_PP(browser), "browser_name_pattern", sizeof("browser_name_pattern"), (void**) &current_match) == FAILURE) {
-				regfree(&r);
 				return 0;
 			}
 
-			ua_len = strlen(lookup_browser_name);
+			ua_len = lookup_browser_length;
 
 			for (i = 0; i < Z_STRLEN_PP(previous_match); i++) {
 				switch (Z_STRVAL_PP(previous_match)[i]) {
@@ -284,10 +306,6 @@ static int browser_reg_compare(zval **browser TSRMLS_DC, int num_args, va_list a
 		else {
 			*found_browser_entry = *browser;
 		}
-	}
-
-	if (&r) {
-		regfree(&r);
 	}
 
 	return 0;
@@ -329,7 +347,7 @@ PHP_FUNCTION(get_browser)
 
 	if (zend_hash_find(&browser_hash, lookup_browser_name, agent_name_len + 1, (void **) &agent) == FAILURE) {
 		found_browser_entry = NULL;
-		zend_hash_apply_with_arguments(&browser_hash TSRMLS_CC, (apply_func_args_t) browser_reg_compare, 2, lookup_browser_name, &found_browser_entry);
+		zend_hash_apply_with_arguments(&browser_hash TSRMLS_CC, (apply_func_args_t) browser_reg_compare, 3, lookup_browser_name, agent_name_len, &found_browser_entry);
 
 		if (found_browser_entry) {
 			agent = &found_browser_entry;
