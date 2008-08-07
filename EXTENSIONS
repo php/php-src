@@ -78,7 +78,8 @@ MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           litespeed
-MAINTENANCE:         George Wang <gwang@php.net>
+PRIMARY MAINTAINER:  George Wang <gwang@php.net>
+MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
 -------------------------------------------------------------------------------
