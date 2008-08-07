@@ -1193,28 +1193,28 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const 
 					if (q == p) {
 						found = 1;
 					} else if (!q->nKeyLength && q->h == num_index) {
-					    if (found) {
-					    	if (mode & HASH_UPDATE_KEY_IF_BEFORE) {
-					    		break;
-					    	} else {
-					    		if (p->nKeyLength) {
+						if (found) {
+							if (mode & HASH_UPDATE_KEY_IF_BEFORE) {
+								break;
+							} else {
+								if (p->nKeyLength) {
 									zend_hash_del(ht, p->arKey, p->nKeyLength);
 								} else {
 									zend_hash_index_del(ht, p->h);
 								}
-					    		return FAILURE;
-					    	}
-					    } else {
-					    	if (mode & HASH_UPDATE_KEY_IF_AFTER) {
-					    		break;
-					    	} else {
-					    		if (p->nKeyLength) {
+								return FAILURE;
+							}
+						} else {
+							if (mode & HASH_UPDATE_KEY_IF_AFTER) {
+								break;
+							} else {
+								if (p->nKeyLength) {
 									zend_hash_del(ht, p->arKey, p->nKeyLength);
 								} else {
 									zend_hash_index_del(ht, p->h);
 								}
-					    		return FAILURE;
-					    	}
+								return FAILURE;
+							}
 						}
 					}
 					q = q->pNext;
@@ -1239,27 +1239,27 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const 
 					} else if (q->h == h && q->nKeyLength == str_length && 
 					           memcmp(q->arKey, str_index, str_length) == 0) {
 					    if (found) {
-					    	if (mode & HASH_UPDATE_KEY_IF_BEFORE) {
-					    		break;
-					    	} else {
-					    		if (p->nKeyLength) {
+							if (mode & HASH_UPDATE_KEY_IF_BEFORE) {
+								break;
+							} else {
+								if (p->nKeyLength) {
 									zend_hash_del(ht, p->arKey, p->nKeyLength);
 								} else {
 									zend_hash_index_del(ht, p->h);
 								}
-					    		return FAILURE;
-					    	}
-					    } else {
-					    	if (mode & HASH_UPDATE_KEY_IF_AFTER) {
-					    		break;
-					    	} else {
-					    		if (p->nKeyLength) {
+								return FAILURE;
+							}
+						} else {
+							if (mode & HASH_UPDATE_KEY_IF_AFTER) {
+								break;
+							} else {
+								if (p->nKeyLength) {
 									zend_hash_del(ht, p->arKey, p->nKeyLength);
 								} else {
 									zend_hash_index_del(ht, p->h);
 								}
-					    		return FAILURE;
-					    	}
+								return FAILURE;
+							}
 						}
 					}
 					q = q->pNext;
