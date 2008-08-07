@@ -29,6 +29,7 @@ PHP                                                                        NEWS
 - Upgraded bundled PDO sqlite to version 3.5.9. (Scott)
 
 - Moved extensions to PECL (Pierre):
+  . ext/dbase
   . ext/fdf
   . ext/ncurses
   . ext/sybase (not maintained anymore, sybase_ct has to be used instead)
