@@ -4,15 +4,10 @@ dnl
 
 AC_MSG_CHECKING(for LiteSpeed support)
 
-PHP_ARG_WITH(litespeed,
-[  --with-litespeed        Build PHP as litespeed module],
-[
-  PHP_SAPI_LITESPEED=$withval
-],[
-  PHP_SAPI_LITESPEED=no
-])
+PHP_ARG_WITH(litespeed,,
+[  --with-litespeed        Build PHP as litespeed module], no)
 
-if test "$PHP_SAPI_LITESPEED" != "no"; then
+if test "$PHP_LITESPEED" != "no"; then
   PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/litespeed/Makefile.frag,$abs_srcdir/sapi/litespeed,sapi/litespeed)
   SAPI_LITESPEED_PATH=sapi/litespeed/php
   PHP_SUBST(SAPI_LITESPEED_PATH)
@@ -33,4 +28,4 @@ if test "$PHP_SAPI_LITESPEED" != "no"; then
   PHP_SUBST(BUILD_LITESPEED)
 fi
 
-AC_MSG_RESULT($PHP_SAPI_LITESPEED)
+AC_MSG_RESULT($PHP_LITESPEED)
