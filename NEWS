@@ -30,6 +30,7 @@ PHP                                                                        NEWS
 
 - Moved extensions to PECL (Pierre):
   . ext/dbase
+  . ext/fbsql
   . ext/fdf
   . ext/ncurses
   . ext/sybase (not maintained anymore, sybase_ct has to be used instead)
