@@ -1,3 +1,59 @@
+2008-08-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_closures.c
+      zend_closures.c:
+      Disable closures serialization/unserialization
+
+2008-08-07  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * zend_ini_scanner.c
+      zend_ini_scanner.c
+      zend_ini_scanner_defs.h
+      zend_ini_scanner_defs.h:
+      regenerate
+
+    * zend_ini_scanner.l:
+      MFB: fix crash
+
+    * (PHP_5_3)
+      zend_ini_scanner.l:
+      fix crash: yytext can't be modified because it is mmaped(). strndup() will
+      take care of last zero char
+
+2008-08-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c
+      zend_API.c
+      tests/bug45744.phpt
+      tests/bug45744.phpt
+      tests/bug45744.phpt:
+      Fixed bug #45744 (Case sensitive callback behaviour)
+
+2008-08-07  Antony Dovgal  <tony@daylessday.org>
+
+    * zend_hash.c
+      zend_hash.c:
+      fix WS
+
+2008-08-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_hash.c
+      zend_hash.c
+      tests/bug45742.phpt
+      tests/bug45742.phpt
+      tests/bug45742.phpt:
+      Fixed bug #45742 (Wrong class array inpretetion using constant indexes)
+
+2008-08-07  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      zend_operators.c:
+      MFH: fix bug #45712 ($something == NaN returns true with 5.3, false with
+      5.2.*)
+
+    * zend_operators.c:
+      fix bug #45712 ($something == NaN returns true with 5.3, false with 5.2.*)
+
 2008-08-05  Stanislav Malyshev  <stas@zend.com>
 
     * zend_operators.h:

@@ -1,3 +1,289 @@
+2008-08-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      - dbase moved to pecl
+
+    * ext/dbase/.cvsignore
+      ext/dbase/CREDITS
+      ext/dbase/config.m4
+      ext/dbase/config.w32
+      ext/dbase/dbase.c
+      ext/dbase/dbase.dsp
+      ext/dbase/dbf.h
+      ext/dbase/dbf_head.c
+      ext/dbase/dbf_head.h
+      ext/dbase/dbf_misc.c
+      ext/dbase/dbf_misc.h
+      ext/dbase/dbf_ndx.c
+      ext/dbase/dbf_ndx.h
+      ext/dbase/dbf_rec.c
+      ext/dbase/dbf_rec.h
+      ext/dbase/package.xml
+      ext/dbase/php_dbase.h
+      ext/dbase/tests/.cvsignore
+      ext/dbase/tests/001.phpt
+      ext/dbase/tests/002.phpt
+      ext/dbase/tests/bug31754.phpt:
+      - moved to pecl
+
+    * (PHP_5_3)
+      ext/zip/config.w32
+      ext/zip/lib/.cvsignore
+      ext/zip/lib/zip.h
+      ext/zip/lib/zip_close.c
+      ext/zip/lib/zip_dirent.c
+      ext/zip/lib/zip_err_str.c
+      ext/zip/lib/zip_filerange_crc.c
+      ext/zip/lib/zip_get_archive_flag.c
+      ext/zip/lib/zip_open.c
+      ext/zip/lib/zip_rename.c
+      ext/zip/lib/zip_set_archive_flag.c
+      ext/zip/lib/zip_source_file.c
+      ext/zip/lib/zip_source_filep.c
+      ext/zip/lib/zip_source_zip.c
+      ext/zip/lib/zip_unchange_archive.c
+      ext/zip/lib/zipint.h:
+      - MFH: update to 0.9 (torrentzip support, files open only when necessary),
+      windows fixes
+
+    * ext/zip/lib/zip_filerange_crc.c
+      ext/zip/lib/zip_filerange_crc.c
+      ext/zip/lib/zip_fopen.c
+      ext/zip/lib/zip_fopen_index.c
+      ext/zip/lib/zip_fread.c
+      ext/zip/lib/zip_free.c
+      ext/zip/lib/zip_get_archive_comment.c
+      ext/zip/lib/zip_get_archive_flag.c
+      ext/zip/lib/zip_get_archive_flag.c
+      ext/zip/lib/zip_get_file_comment.c
+      ext/zip/lib/zip_get_name.c
+      ext/zip/lib/zip_get_num_files.c
+      ext/zip/lib/zip_memdup.c
+      ext/zip/lib/zip_name_locate.c
+      ext/zip/lib/zip_new.c
+      ext/zip/lib/zip_open.c
+      ext/zip/lib/zip_rename.c
+      ext/zip/lib/zip_replace.c
+      ext/zip/lib/zip_set_archive_comment.c
+      ext/zip/lib/zip_set_archive_flag.c
+      ext/zip/lib/zip_set_archive_flag.c
+      ext/zip/lib/zip_set_file_comment.c
+      ext/zip/lib/zip_set_name.c
+      ext/zip/lib/zip_source_buffer.c
+      ext/zip/lib/zip_source_file.c
+      ext/zip/lib/zip_source_filep.c
+      ext/zip/lib/zip_source_free.c
+      ext/zip/lib/zip_source_function.c
+      ext/zip/lib/zip_source_zip.c
+      ext/zip/lib/zip_stat.c
+      ext/zip/lib/zip_stat_index.c
+      ext/zip/lib/zip_stat_init.c
+      ext/zip/lib/zip_strerror.c
+      ext/zip/lib/zip_unchange.c
+      ext/zip/lib/zip_unchange_all.c
+      ext/zip/lib/zip_unchange_archive.c
+      ext/zip/lib/zip_unchange_data.c
+      ext/zip/lib/zip_win32.h
+      ext/zip/lib/zipint.h:
+      
+      -  update to 0.9 (torrentzip support, files open only when necessary),
+      windows fixes
+
+    * ext/zip/config.w32
+      ext/zip/lib/zip.h
+      ext/zip/lib/zip_add.c
+      ext/zip/lib/zip_add_dir.c
+      ext/zip/lib/zip_close.c
+      ext/zip/lib/zip_delete.c
+      ext/zip/lib/zip_dirent.c
+      ext/zip/lib/zip_entry_free.c
+      ext/zip/lib/zip_entry_new.c
+      ext/zip/lib/zip_err_str.c
+      ext/zip/lib/zip_error.c
+      ext/zip/lib/zip_error_clear.c
+      ext/zip/lib/zip_error_get.c
+      ext/zip/lib/zip_error_get_sys_type.c
+      ext/zip/lib/zip_error_strerror.c
+      ext/zip/lib/zip_error_to_str.c
+      ext/zip/lib/zip_fclose.c
+      ext/zip/lib/zip_file_error_clear.c
+      ext/zip/lib/zip_file_error_get.c
+      ext/zip/lib/zip_file_get_offset.c
+      ext/zip/lib/zip_file_strerror.c:
+      -  update to 0.9 (torrentzip support, files open only when necessary),
+      windows fixes
+
+2008-08-07  Felix De Vliegher  <felix.devliegher@gmail.com>
+
+    * ext/standard/tests/filters/stream_filter_remove_basic.phpt
+      ext/standard/tests/filters/stream_filter_remove_error.phpt:
+      MFB: Basic and error tests for stream_filter_remove().
+
+    * ext/standard/tests/filters/stream_filter_remove_basic.phpt
+      ext/standard/tests/filters/stream_filter_remove_basic.phpt
+      ext/standard/tests/filters/stream_filter_remove_error.phpt
+      ext/standard/tests/filters/stream_filter_remove_error.phpt:
+      
+      file stream_filter_remove_basic.phpt was initially added on branch
+      PHP_5_3.
+
+2008-08-07  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * sapi/litespeed/config.m4:
+      MFB: fix build
+
+    * (PHP_5_3)
+      sapi/litespeed/config.m4:
+      fix this, so that I can build php without litespeed..
+
+2008-08-07  George Wang  <gwang@litespeedtech.com>
+
+    * sapi/litespeed/config.m4
+      sapi/litespeed/config.m4:
+      use PHP_ARG_WITH instead of AC_ARG_WITH
+
+2008-08-07  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * EXTENSIONS:
+      New maintainer :)
+
+2008-08-07  Johannes Schlüter  <johannes@schlueters.de>
+
+    * EXTENSIONS:
+      fix (thx Christian Hoffmann)
+
+    * EXTENSIONS:
+      Update EXTENSIONS file
+
+2008-08-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_closures.c
+      ZendEngine2/zend_closures.c:
+      Disable closures serialization/unserialization
+
+2008-08-07  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/pcntl/config.m4
+      ext/pcntl/config.m4
+      ext/pcntl/config.m4:
+      not experimental anymore
+
+    * ext/pcntl/EXPERIMENTAL
+      ext/pcntl/EXPERIMENTAL
+      ext/pcntl/EXPERIMENTAL:
+      remove EXPERIMENTAL flag
+
+2008-08-07  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/standard/browscap.c:
+      MFB: upgrade to PCRE
+
+    * (PHP_5_3)
+      ext/standard/browscap.c:
+      upgrade to PCRE (i.e. get ride of ereg usage)
+
+    * ZendEngine2/zend_ini_scanner.c
+      ZendEngine2/zend_ini_scanner.c
+      ZendEngine2/zend_ini_scanner_defs.h
+      ZendEngine2/zend_ini_scanner_defs.h:
+      regenerate
+
+    * ZendEngine2/zend_ini_scanner.l:
+      MFB: fix crash
+
+    * (PHP_5_3)
+      ZendEngine2/zend_ini_scanner.l:
+      fix crash: yytext can't be modified because it is mmaped(). strndup() will
+      take care of last zero char
+
+2008-08-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/tests/bug45744.phpt
+      ZendEngine2/tests/bug45744.phpt
+      ZendEngine2/tests/bug45744.phpt:
+      Fixed bug #45744 (Case sensitive callback behaviour)
+
+2008-08-07  Antony Dovgal  <tony@daylessday.org>
+
+    * ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.c:
+      fix WS
+
+2008-08-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.c
+      ZendEngine2/tests/bug45742.phpt
+      ZendEngine2/tests/bug45742.phpt
+      ZendEngine2/tests/bug45742.phpt:
+      Fixed bug #45742 (Wrong class array inpretetion using constant indexes)
+
+2008-08-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      NEWS:
+      Tune news, added missing entry
+
+2008-08-07  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/filestat.c
+      ext/standard/php_filestat.h
+      ext/standard/tests/file/bug39367.phpt
+      ext/standard/tests/file/clearstatcache_001.phpt
+      ext/standard/tests/file/clearstatcache_error.phpt
+      main/streams/plain_wrapper.c:
+      MFH:
+      Added clear_realpath_cache and filename parameters to clearstatcache()
+      (Jani,
+      Arnaud)
+      [DOC] clearstatcache() now defaults to not affect the realpath cache.
+      clearstatcache() now takes two optionnal parameters, clear_realpath_cache
+      to
+      clear the realpath cache (defaults to false), and filename to clear only
+      the
+      given filename from the cache.
+
+    * ext/standard/basic_functions.c
+      ext/standard/filestat.c
+      ext/standard/php_filestat.h
+      ext/standard/tests/file/bug39367.phpt
+      ext/standard/tests/file/clearstatcache_001.phpt
+      ext/standard/tests/file/clearstatcache_001.phpt
+      ext/standard/tests/file/clearstatcache_error.phpt
+      main/streams/plain_wrapper.c:
+      Added clear_realpath_cache and filename parameters to clearstatcache()
+      (Jani,
+      Arnaud)
+      [DOC] clearstatcache() now defaults to not affect the realpath cache.
+      clearstatcache() now takes two optionnal parameters, clear_realpath_cache
+      to
+      clear the realpath cache (defaults to false), and filename to clear only
+      the
+      given filename from the cache.
+
+2008-08-07  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/standard/tests/math/bug45712.phpt:
+      fix test
+      NaN != NaN
+
+    * (PHP_5_3)
+      ZendEngine2/zend_operators.c
+      ext/standard/tests/math/bug45712.phpt:
+      MFH: fix bug #45712 ($something == NaN returns true with 5.3, false with
+      5.2.*)
+
+    * ZendEngine2/zend_operators.c
+      ext/standard/tests/math/bug45712.phpt:
+      fix bug #45712 ($something == NaN returns true with 5.3, false with 5.2.*)
+
 2008-08-06  Lukas Smith  <smith@pooteeweet.org>
 
     * README.RELEASE_PROCESS:
