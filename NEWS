@@ -306,6 +306,8 @@ PHP                                                                        NEWS
 - Fixed bug #45179 (--with-mysql-sock fails to compile & work). (Andrey)
 - Fixed bug #45038 (Crash when using DateTimeZone object returned by
   Date::getTimezone). (Joe Orton, Derick)
+- Fixed bug #45030 (Destination image alpha channel noise when using 
+  imagecopyresampled). (Pierre)
 - Fixed bug #44769 (declaring private magic methods should throw error).
   (Felipe)
 - Fixed bug #44913 (Segfault when using return in combination with nested loops
