@@ -10,6 +10,9 @@ if test -z "$PHP_ZLIB_DIR"; then
   [  --with-zlib-dir[=DIR]     ZIP: Set the path to libz install prefix], no, no)
 fi
 
+PHP_ARG_WITH(pcre-dir, pcre install prefix,
+[  --with-pcre-dir           ZIP: pcre install prefix], no, no)
+
 if test "$PHP_ZIP" != "no"; then
 
   if test "$PHP_ZLIB_DIR" != "no" && test "$PHP_ZLIB_DIR" != "yes"; then
@@ -44,6 +47,30 @@ if test "$PHP_ZIP" != "no"; then
     PHP_ADD_INCLUDE($PHP_ZLIB_INCDIR)
   fi
 
+  dnl This is PECL build, check if bundled PCRE library is used
+  old_CPPFLAGS=$CPPFLAGS
+  CPPFLAGS=$INCLUDES
+  AC_EGREP_CPP(yes,[
+#include <main/php_config.h>
+#if defined(HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
+yes
+#endif
+  ],[
+    PHP_PCRE_REGEX=yes
+  ],[
+    AC_EGREP_CPP(yes,[
+#include <main/php_config.h>
+#if defined(HAVE_PCRE) && !defined(COMPILE_DL_PCRE)
+yes
+#endif
+    ],[
+      PHP_PCRE_REGEX=pecl
+    ],[
+      PHP_PCRE_REGEX=no
+    ])
+  ])
+  CPPFLAGS=$old_CPPFLAGS
+
   PHP_ZIP_SOURCES="$PHP_ZIP_SOURCES lib/zip_add.c lib/zip_error.c lib/zip_fclose.c \
                          lib/zip_fread.c lib/zip_open.c lib/zip_source_filep.c  \
                          lib/zip_strerror.c lib/zip_close.c lib/zip_error_get.c \
@@ -66,4 +93,7 @@ if test "$PHP_ZIP" != "no"; then
   PHP_NEW_EXTENSION(zip, php_zip.c zip_stream.c $PHP_ZIP_SOURCES, $ext_shared)
   PHP_ADD_BUILD_DIR($ext_builddir/lib, 1)
   PHP_SUBST(ZIP_SHARED_LIBADD)
+
+  dnl so we always include the known-good working hack.
+  PHP_ADD_MAKEFILE_FRAGMENT
 fi
