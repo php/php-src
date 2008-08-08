@@ -802,6 +802,15 @@ typedef enum {
 	EH_THROW
 } zend_error_handling_t;
 
+typedef struct {
+	zend_error_handling_t  handling;
+	zend_class_entry       *exception;
+} zend_error_handling;
+
+ZEND_API void zend_save_error_handling(zend_error_handling *current TSRMLS_DC);
+ZEND_API void zend_replace_error_handling(zend_error_handling_t error_handling, zend_class_entry *exception_class, zend_error_handling *current TSRMLS_DC);
+ZEND_API void zend_restore_error_handling(const zend_error_handling *saved TSRMLS_DC);
+
 #define ZEND_U_EQUAL(type, ustr, ulen, str, slen) \
 	((type == IS_STRING)? \
 	  (!memcmp((ustr).s,(str),(slen))): \

@@ -877,21 +877,6 @@ PHPAPI void php_html_puts(const char *str, uint size TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ php_suppress_errors */
-PHPAPI void php_set_error_handling(error_handling_t error_handling, zend_class_entry *exception_class TSRMLS_DC)
-{
-	EG(error_handling) = error_handling;
-	EG(exception_class) = exception_class;
-
-	if (error_handling == EH_NORMAL) {
-		EG(user_error_handler)     = EG(user_error_handler_old);
-	} else {
-		EG(user_error_handler_old) = EG(user_error_handler);
-		EG(user_error_handler)     = NULL;
-	}
-}
-/* }}} */
-
 /* {{{ php_error_cb
  extended error handling function */
 static void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
