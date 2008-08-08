@@ -1589,7 +1589,7 @@ ZEND_METHOD(reflection_function, getStaticVariables)
 /* }}} */
 
 /* {{{ proto public mixed ReflectionFunction::getClosure()
-   Invokes the function */
+   Returns a dynamically created closure for the function */
 ZEND_METHOD(reflection_function, getClosure)
 {
 	reflection_object *intern;
