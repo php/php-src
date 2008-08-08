@@ -4,7 +4,7 @@
 
 #if PHP_WIN32
 # include "win32/php_stdint.h"
-#else
+#elif HAVE_STDINT_H
 # include <stdint.h>
 #endif
 
