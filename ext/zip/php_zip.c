@@ -515,9 +515,9 @@ int php_zip_glob(char *pattern, int pattern_len, long flags, zval *return_value 
 
 int php_zip_pcre(char *regexp, int regexp_len, char *path, int path_len, zval *return_value TSRMLS_DC) /* {{{ */
 {
+#ifdef ZTS
 	char cwd[MAXPATHLEN];
 	int cwd_skip = 0;
-#ifdef ZTS
 	char work_path[MAXPATHLEN];
 	char *result;
 #endif
