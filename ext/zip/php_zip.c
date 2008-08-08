@@ -88,8 +88,12 @@ static int le_zip_entry;
 		RETURN_FALSE; \
 	} \
 	RETURN_TRUE;
-
 /* }}} */
+
+#if (PHP_MAJOR_VERSION < 6)
+# define add_ascii_assoc_string add_assoc_string
+# define add_ascii_assoc_long add_assoc_long
+#endif
 
 #ifdef ZEND_ENGINE_2_1
 /* {{{ php_zip_extract_file */
@@ -345,13 +349,13 @@ static int php_zip_parse_options(zval *options, long *remove_all_path,
 #define RETURN_SB(sb) \
 	{ \
 		array_init(return_value); \
-		add_assoc_string(return_value, "name", (char *)(sb)->name, 1); \
-		add_assoc_long(return_value, "index", (long) (sb)->index); \
-		add_assoc_long(return_value, "crc", (long) (sb)->crc); \
-		add_assoc_long(return_value, "size", (long) (sb)->size); \
-		add_assoc_long(return_value, "mtime", (long) (sb)->mtime); \
-		add_assoc_long(return_value, "comp_size", (long) (sb)->comp_size); \
-		add_assoc_long(return_value, "comp_method", (long) (sb)->comp_method); \
+		add_ascii_assoc_string(return_value, "name", (char *)(sb)->name, 1); \
+		add_ascii_assoc_long(return_value, "index", (long) (sb)->index); \
+		add_ascii_assoc_long(return_value, "crc", (long) (sb)->crc); \
+		add_ascii_assoc_long(return_value, "size", (long) (sb)->size); \
+		add_ascii_assoc_long(return_value, "mtime", (long) (sb)->mtime); \
+		add_ascii_assoc_long(return_value, "comp_size", (long) (sb)->comp_size); \
+		add_ascii_assoc_long(return_value, "comp_method", (long) (sb)->comp_method); \
 	}
 /* }}} */
 
@@ -1071,7 +1075,7 @@ zend_module_entry zip_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(zip),
-	"@PACKAGE_VERSION@",
+	PHP_ZIP_VERSION_STRING,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -2612,7 +2616,7 @@ static PHP_MINFO_FUNCTION(zip)
 
 	php_info_print_table_row(2, "Zip", "enabled");
 	php_info_print_table_row(2, "Extension Version","$Id$");
-	php_info_print_table_row(2, "Zip version", "@PACKAGE_VERSION@");
+	php_info_print_table_row(2, "Zip version", PHP_ZIP_VERSION_STRING);
 	php_info_print_table_row(2, "Libzip version", "0.7.1");
 
 	php_info_print_table_end();
