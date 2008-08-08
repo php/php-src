@@ -287,7 +287,7 @@ END_EXTERN_C()
 
 BEGIN_EXTERN_C()
 PHPAPI void php_set_error_handling(error_handling_t error_handling, zend_class_entry *exception_class TSRMLS_DC);
-#define php_std_error_handling() php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC)
+static ZEND_ATTRIBUTE_DEPRECATED void php_std_error_handling() {}
 
 PHPAPI void php_verror(const char *docref, const char *params, int type, const char *format, va_list args TSRMLS_DC);
 
