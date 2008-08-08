@@ -59,15 +59,6 @@ static int le_zip_entry;
 #define le_zip_entry_name "Zip Entry"
 /* }}} */
 
-/* {{{ SAFEMODE_CHECKFILE(filename) */
-#if (PHP_MAJOR_VERSION < 6)
-#define SAFEMODE_CHECKFILE(filename) \
-	(PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename TSRMLS_CC)
-#else 
-#define SAFEMODE_CHECKFILE(filename) (0)
-#endif
-/* }}} */
-
 /* {{{ PHP_ZIP_STAT_INDEX(za, index, flags, sb) */
 #define PHP_ZIP_STAT_INDEX(za, index, flags, sb) \
 	if (zip_stat_index(za, index, flags, &sb) != 0) { \
@@ -142,7 +133,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 
 		php_basename(file, file_len, NULL, 0, &file_basename, (unsigned int *)&file_basename_len TSRMLS_CC);
 
-		if (SAFEMODE_CHECKFILE(file_dirname_fullpath)) {
+		if (OPENBASEDIR_CHECKPATH(file_dirname_fullpath)) {
 			efree(file_dirname_fullpath);
 			efree(file_basename);
 			return 0;
@@ -191,7 +182,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 	 * is required, does a file can have a different
 	 * safemode status as its parent folder?
 	 */
-	if (SAFEMODE_CHECKFILE(fullpath)) {
+	if (OPENBASEDIR_CHECKPATH(fullpath)) {
 		efree(file_dirname_fullpath);
 		efree(file_basename);
 		return 0;
@@ -236,7 +227,7 @@ static int php_zip_add_file(struct zip *za, const char *filename, int filename_l
 	char resolved_path[MAXPATHLEN];
 
 
-	if (SAFEMODE_CHECKFILE(filename)) {
+	if (OPENBASEDIR_CHECKPATH(filename)) {
 		return -1;
 	}
 
@@ -1103,7 +1094,7 @@ static PHP_NAMED_FUNCTION(zif_zip_open)
 		return;
 	}
 
-	if (SAFEMODE_CHECKFILE(filename)) {
+	if (OPENBASEDIR_CHECKPATH(filename)) {
 		RETURN_FALSE;
 	}
 
