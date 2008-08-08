@@ -1155,7 +1155,7 @@ static PHP_NAMED_FUNCTION(zif_zip_read)
 
 		if (ret != 0) {
 			efree(zr_rsrc);
-			RETURN_LONG((long)ret);
+			RETURN_FALSE;
 		}
 
 		zr_rsrc->zf = zip_fopen_index(rsrc_int->za, rsrc_int->index_current, 0);
@@ -1163,6 +1163,7 @@ static PHP_NAMED_FUNCTION(zif_zip_read)
 			rsrc_int->index_current++;
 			ZEND_REGISTER_RESOURCE(return_value, zr_rsrc, le_zip_entry);
 		} else {
+			efree(zr_rsrc);
 			RETURN_FALSE;
 		}
 
@@ -1244,6 +1245,7 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_read)
 			buffer[n] = 0;
 			RETURN_STRINGL(buffer, n, 0);
 		} else {
+			efree(buffer);
 			RETURN_EMPTY_STRING()
 		}
 	} else {
