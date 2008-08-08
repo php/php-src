@@ -2226,22 +2226,22 @@ PHP_FUNCTION(simplexml_load_string)
    SimpleXMLElement constructor */
 SXE_METHOD(__construct)
 {
-	php_sxe_object *sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
-	zstr            data;
-	char           *ns = NULL;
-	int             data_len, ns_len = 0;
-	xmlDocPtr       docp;
-	long            options = 0;
-	zend_bool       is_url = 0, isprefix = 0;
-	zend_uchar      data_type;
+	php_sxe_object      *sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
+	zstr                 data;
+	char                *ns = NULL;
+	int                  data_len, ns_len = 0;
+	xmlDocPtr            docp;
+	long                 options = 0;
+	zend_bool            is_url = 0, isprefix = 0;
+	zend_uchar           data_type;
+	zend_error_handling  error_handling;
 
-	php_set_error_handling(EH_THROW, zend_exception_get_default(TSRMLS_C) TSRMLS_CC);
+	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|lbs&b", &data, &data_len, &data_type, &options, &is_url, &ns, &ns_len, UG(utf8_conv), &isprefix) == FAILURE) {
-		php_std_error_handling();
 		return;
 	}
 
-	php_std_error_handling();
+	zend_restore_error_handling(&error_handling TSRMLS_CC);
 
 	if (data_type == IS_UNICODE) {
 		if (is_url) {
