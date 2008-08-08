@@ -916,7 +916,6 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval **a
 		intern->array = *array;
 	} else {
 		if (Z_TYPE_PP(array) != IS_OBJECT && Z_TYPE_PP(array) != IS_ARRAY) {
-			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 			zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object, using empty array instead", 0 TSRMLS_CC);
 			return;
 		}
@@ -935,7 +934,6 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval **a
 		zend_object_get_properties_t handler = Z_OBJ_HANDLER_PP(array, get_properties);
 		if ((handler != std_object_handlers.get_properties && handler != spl_array_get_properties)
 		|| !spl_array_get_hash_table(intern, 0 TSRMLS_CC)) {
-			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "Overloaded object of type %v is not compatible with %v", Z_OBJCE_PP(array)->name, intern->std.ce->name);
 		}
 	}
@@ -990,12 +988,12 @@ SPL_METHOD(Array, __construct)
 	if (ZEND_NUM_ARGS() == 0) {
 		return; /* nothing to do */
 	}
-	php_set_error_handling(EH_THROW, spl_ce_InvalidArgumentException TSRMLS_CC);
+
+	zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, NULL TSRMLS_CC);
 
 	intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|lC", &array, &ar_flags, &ce_get_iterator) == FAILURE) {
-		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 		return;
 	}
 
@@ -1006,8 +1004,6 @@ SPL_METHOD(Array, __construct)
 	ar_flags &= ~SPL_ARRAY_INT_MASK;
 
 	spl_array_set_array(object, intern, array, ar_flags, ZEND_NUM_ARGS() == 1 TSRMLS_CC);
-
-	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 }
 /* }}} */
 
@@ -1020,7 +1016,6 @@ SPL_METHOD(Array, setIteratorClass)
 	zend_class_entry *ce_get_iterator = zend_ce_iterator;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "C", &ce_get_iterator) == FAILURE) {
-		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 		return;
 	}
 

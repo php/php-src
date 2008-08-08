@@ -65,13 +65,13 @@ PHP_METHOD(domattr, __construct)
 	dom_object *intern;
 	char *name, *value = NULL;
 	int name_len, value_len, name_valid;
+	zend_error_handling error_handling;
 
-	php_set_error_handling(EH_THROW, dom_domexception_class_entry TSRMLS_CC);
+	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling TSRMLS_CC);
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&|s&", &id, dom_attr_class_entry, &name, &name_len, UG(utf8_conv), &value, &value_len, UG(utf8_conv)) == FAILURE) {
-		php_std_error_handling();
 		return;
 	}
-	php_std_error_handling();
+	zend_restore_error_handling(&error_handling TSRMLS_CC);
 
 	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
 

@@ -56,13 +56,13 @@ PHP_METHOD(domcomment, __construct)
 	dom_object *intern;
 	char *value = NULL;
 	int value_len;
+	zend_error_handling error_handling;
 
-	php_set_error_handling(EH_THROW, dom_domexception_class_entry TSRMLS_CC);
+	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling TSRMLS_CC);
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|s&", &id, dom_comment_class_entry, &value, &value_len, UG(utf8_conv)) == FAILURE) {
-		php_std_error_handling();
 		return;
 	}
-	php_std_error_handling();
+	zend_restore_error_handling(&error_handling TSRMLS_CC);
 
 	nodep = xmlNewComment((xmlChar *) value);
 

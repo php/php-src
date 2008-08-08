@@ -615,14 +615,11 @@ SPL_METHOD(MultipleIterator, __construct)
 	spl_SplObjectStorage   *intern;
 	long                    flags = MIT_NEED_ALL|MIT_KEYS_NUMERIC;
 
-	php_set_error_handling(EH_THROW, spl_ce_InvalidArgumentException TSRMLS_CC);
+	zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, NULL TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &flags) == FAILURE) {
-		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 		return;
 	}
-
-	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 
 	intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	intern->flags = flags;

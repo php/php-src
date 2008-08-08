@@ -426,7 +426,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 	long                       mode, flags;
 	int                        inc_refcount = 1;
 
-	php_set_error_handling(EH_THROW, spl_ce_InvalidArgumentException TSRMLS_CC);
+	zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, NULL TSRMLS_CC);
 
 	switch(rit_type) {
 		case RIT_RecursiveTreeIterator: {
@@ -481,7 +481,6 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 		if (iterator && !inc_refcount) {
 			zval_ptr_dtor(&iterator);
 		}
-		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 		zend_throw_exception(spl_ce_InvalidArgumentException, "An instance of RecursiveIterator or IteratorAggregate creating it is required", 0 TSRMLS_CC);
 		return;
 	}
@@ -532,7 +531,6 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 	intern->iterators[0].ce = ce_iterator;
 	intern->iterators[0].state = RS_START;
 
-	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 }
 
 /* {{{ proto void RecursiveIteratorIterator::__construct(RecursiveIterator|IteratorAggregate it [, int mode = RIT_LEAVES_ONLY [, int flags = 0]]) throws InvalidArgumentException U
@@ -925,11 +923,13 @@ static void spl_recursive_tree_iterator_get_prefix(spl_recursive_it_object *obje
 static void spl_recursive_tree_iterator_get_entry(spl_recursive_it_object * object, zval * return_value TSRMLS_DC)
 {
 	zend_object_iterator      *iterator = object->iterators[object->level].iterator;
-	zval                      **data;
+	zval                     **data;
+	zend_error_handling        error_handling;
 
 	iterator->funcs->get_current_data(iterator, &data TSRMLS_CC);
 
-	php_set_error_handling(EH_THROW, spl_ce_UnexpectedValueException TSRMLS_CC);
+	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling TSRMLS_CC);
+
 	RETVAL_ZVAL(*data, 1, 0);
 	if (Z_TYPE_P(return_value) == IS_ARRAY) {
 		zval_dtor(return_value);
@@ -937,7 +937,7 @@ static void spl_recursive_tree_iterator_get_entry(spl_recursive_it_object * obje
 	} else if (Z_TYPE_PP(data) != IS_UNICODE && Z_TYPE_PP(data) != IS_STRING) {
 		convert_to_text(return_value);
 	}
-	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+	zend_restore_error_handling(&error_handling TSRMLS_CC);
 }
 
 static void spl_recursive_tree_iterator_get_postfix(spl_recursive_it_object * object, zval * return_value, zend_uchar return_type TSRMLS_DC)
@@ -1302,7 +1302,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 		return NULL;
 	}
 
-	php_set_error_handling(EH_THROW, spl_ce_InvalidArgumentException TSRMLS_CC);
+	zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, NULL TSRMLS_CC);
 
 	intern->dit_type = dit_type;
 	switch (dit_type) {
@@ -1310,16 +1310,13 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			intern->u.limit.offset = 0; /* start at beginning */
 			intern->u.limit.count = -1; /* get all */
 			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|ll", &zobject, ce_inner, &intern->u.limit.offset, &intern->u.limit.count) == FAILURE) {
-				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 				return NULL;
 			}
 			if (intern->u.limit.offset < 0) {
-				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 				zend_throw_exception(spl_ce_OutOfRangeException, "Parameter offset must be > 0", 0 TSRMLS_CC);
 				return NULL;
 			}
 			if (intern->u.limit.count < 0 && intern->u.limit.count != -1) {
-				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 				zend_throw_exception(spl_ce_OutOfRangeException, "Parameter count must either be -1 or a value greater than or equal 0", 0 TSRMLS_CC);
 				return NULL;
 			}
@@ -1329,11 +1326,9 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 		case DIT_RecursiveCachingIterator: {
 			long flags = CIT_CALL_TOSTRING;
 			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|l", &zobject, ce_inner, &flags) == FAILURE) {
-				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 				return NULL;
 			}
 			if (spl_cit_check_flags(flags) != SUCCESS) {
-				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 				zend_throw_exception(spl_ce_InvalidArgumentException, "Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_CURRENT", 0 TSRMLS_CC);
 				return NULL;
 			}
@@ -1349,7 +1344,6 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 
 			/* UTODO: class_name must be zstr */
 			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|s", &zobject, ce_inner, &class_name, &class_name_len) == FAILURE) {
-				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 				return NULL;
 			}
 			ce = Z_OBJCE_P(zobject);
@@ -1360,7 +1354,6 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 					|| !(*pce_cast)->get_iterator
 					) {
 						zend_throw_exception(spl_ce_LogicException, "Class to downcast to not found or not base class or does not implement Traversable", 0 TSRMLS_CC);
-						php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 						return NULL;
 					}
 					ce = *pce_cast;
@@ -1371,12 +1364,10 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 						if (retval) {
 							zval_ptr_dtor(&retval);
 						}
-						php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 						return NULL;
 					}
 					if (!retval || Z_TYPE_P(retval) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(retval), zend_ce_traversable TSRMLS_CC)) {
 						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "%v::getIterator() must return an object that implememnts Traversable", ce->name);
-						php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 						return NULL;
 					}
 					zobject = retval;
@@ -1390,7 +1381,6 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			spl_instantiate(spl_ce_ArrayIterator, &intern->u.append.zarrayit, 1 TSRMLS_CC);
 			zend_call_method_with_0_params(&intern->u.append.zarrayit, spl_ce_ArrayIterator, &spl_ce_ArrayIterator->constructor, "__construct", NULL);
 			intern->u.append.iterator = spl_ce_ArrayIterator->get_iterator(spl_ce_ArrayIterator, intern->u.append.zarrayit, 0 TSRMLS_CC);
-			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 			return intern;
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 		case DIT_RegexIterator:
@@ -1404,12 +1394,10 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			intern->u.regex.preg_flags = 0;
 			/* UTODO: do we need tocare if regex unicode? */
 			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Os|lll", &zobject, ce_inner, &regex, &regex_len, &mode, &intern->u.regex.flags, &intern->u.regex.preg_flags) == FAILURE) {
-				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 				return NULL;
 			}
 			if (mode < 0 || mode >= REGIT_MODE_MAX) {
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "Illegal mode %ld", mode);
-				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 				return NULL;
 			}
 			intern->u.regex.mode = mode;
@@ -1417,7 +1405,6 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			intern->u.regex.pce = pcre_get_compiled_regex_cache(ZEND_STR_TYPE, regex, regex_len TSRMLS_CC);
 			if (intern->u.regex.pce == NULL) {
 				/* pcre_get_compiled_regex_cache has already sent error */
-				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 				return NULL;
 			}
 			intern->u.regex.pce->refcount++;
@@ -1426,13 +1413,12 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 #endif
 		default:
 			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &zobject, ce_inner) == FAILURE) {
-				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 				return NULL;
 			}
 			break;
 	}
 
-	php_set_error_handling(EH_THROW, zend_exception_get_default(TSRMLS_C) TSRMLS_CC);
+	zend_replace_error_handling(EH_THROW, NULL, NULL TSRMLS_CC);
 
 	if (inc_refcount) {
 		Z_ADDREF_P(zobject);
@@ -1442,7 +1428,6 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 	intern->inner.object = zend_object_store_get_object(zobject TSRMLS_CC);
 	intern->inner.iterator = intern->inner.ce->get_iterator(intern->inner.ce, zobject, 0 TSRMLS_CC);
 
-	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 	return intern;
 }
 
