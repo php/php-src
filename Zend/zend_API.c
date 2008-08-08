@@ -4285,6 +4285,37 @@ ZEND_API zend_uchar zend_get_unified_string_type(int num_args TSRMLS_DC, ...) /*
 }
 /* }}} */
 
+ZEND_API void zend_save_error_handling(zend_error_handling *current TSRMLS_DC) /* {{{ */
+{
+	current->handling = EG(error_handling);
+	current->exception = EG(exception_class);
+}
+/* }}} */
+
+ZEND_API void zend_replace_error_handling(zend_error_handling_t error_handling, zend_class_entry *exception_class, zend_error_handling *current TSRMLS_DC) /* {{{ */
+{
+	if (current) {
+		zend_save_error_handling(current TSRMLS_CC);
+	}
+	EG(error_handling) = error_handling;
+	EG(exception_class) = error_handling == EH_THROW ? exception_class : NULL;
+
+	if (error_handling == EH_NORMAL) {
+		EG(user_error_handler)     = EG(user_error_handler_old);
+	} else {
+		EG(user_error_handler_old) = EG(user_error_handler);
+		EG(user_error_handler)     = NULL;
+	}
+}
+/* }}} */
+
+ZEND_API void zend_restore_error_handling(const zend_error_handling *saved TSRMLS_DC) /* {{{ */
+{
+	EG(error_handling) = saved->handling;
+	EG(exception_class) = saved->handling == EH_THROW ? saved->exception : NULL;
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

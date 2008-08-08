@@ -302,6 +302,7 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 	EX(function_state).arguments = zend_vm_stack_push_args(opline->extended_value TSRMLS_CC);
 
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {
+		zend_error_handling error_handling;
 		ALLOC_INIT_ZVAL(EX_T(opline->result.u.var).var.ptr);
 		EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
 		EX_T(opline->result.u.var).var.fcall_returned_reference = EX(function_state).function->common.return_reference;
@@ -316,12 +317,14 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 				arg_count--;
 			}
 		}
+		zend_save_error_handling(&error_handling TSRMLS_CC);
 		if (!zend_execute_internal) {
 			/* saves one function call if zend_execute_internal is not used */
 			((zend_internal_function *) EX(function_state).function)->handler(opline->extended_value, EX_T(opline->result.u.var).var.ptr, &EX_T(opline->result.u.var).var.ptr, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
 		} else {
 			zend_execute_internal(execute_data, RETURN_VALUE_USED(opline) TSRMLS_CC);
 		}
+		zend_restore_error_handling(&error_handling TSRMLS_CC);
 
 		if (!RETURN_VALUE_USED(opline)) {
 			zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
@@ -369,7 +372,10 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 
 			/* Not sure what should be done here if it's a static method */
 		if (EX(object)) {
+			zend_error_handling error_handling;
+			zend_save_error_handling(&error_handling TSRMLS_CC);
 			Z_OBJ_HT_P(EX(object))->call_method(EX(function_state).function->common.function_name, opline->extended_value, EX_T(opline->result.u.var).var.ptr, &EX_T(opline->result.u.var).var.ptr, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
+			zend_restore_error_handling(&error_handling TSRMLS_CC);
 		} else {
 			zend_error_noreturn(E_ERROR, "Cannot call overloaded function for non-object");
 		}
