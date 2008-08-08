@@ -947,12 +947,16 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		EG(opline_ptr) = original_opline_ptr;
 	} else if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {
 		int call_via_handler = (EX(function_state).function->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0;
+		zend_error_handling_t  error_handling  = EG(error_handling);
+		zend_class_entry      *exception_class = EG(exception_class);
 
 		ALLOC_INIT_ZVAL(*fci->retval_ptr_ptr);
 		if (EX(function_state).function->common.scope) {
 			EG(scope) = EX(function_state).function->common.scope;
 		}
 		((zend_internal_function *) EX(function_state).function)->handler(fci->param_count, *fci->retval_ptr_ptr, fci->retval_ptr_ptr, (fci->object_pp?*fci->object_pp:NULL), 1 TSRMLS_CC);
+		EG(error_handling)  = error_handling;
+		EG(exception_class) = exception_class;
 		/*	We shouldn't fix bad extensions here,
 		    because it can break proper ones (Bug #34045)
 		if (!EX(function_state).function->common.return_reference)
@@ -969,12 +973,15 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			fci_cache->initialized = 0;
 		}
 	} else { /* ZEND_OVERLOADED_FUNCTION */
-
 		ALLOC_INIT_ZVAL(*fci->retval_ptr_ptr);
 
 			/* Not sure what should be done here if it's a static method */
 		if (fci->object_pp) {
+			zend_error_handling_t  error_handling  = EG(error_handling);
+			zend_class_entry      *exception_class = EG(exception_class);
 			Z_OBJ_HT_PP(fci->object_pp)->call_method(EX(function_state).function->common.function_name, fci->param_count, *fci->retval_ptr_ptr, fci->retval_ptr_ptr, *fci->object_pp, 1 TSRMLS_CC);
+			EG(error_handling)  = error_handling;
+			EG(exception_class) = exception_class;
 		} else {
 			zend_error_noreturn(E_ERROR, "Cannot call overloaded function for non-object");
 		}
