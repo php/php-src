@@ -2176,14 +2176,14 @@ SXE_METHOD(__construct)
 	xmlDocPtr       docp;
 	long            options = 0;
 	zend_bool       is_url = 0, isprefix = 0;
+	zend_error_handling error_handling;
 
-	php_set_error_handling(EH_THROW, zend_exception_get_default(TSRMLS_C) TSRMLS_CC);
+	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lbsb", &data, &data_len, &options, &is_url, &ns, &ns_len, &isprefix) == FAILURE) {
-		php_std_error_handling();
 		return;
 	}
 
-	php_std_error_handling();
+	zend_restore_error_handling(&error_handling TSRMLS_CC);
 
 	docp = is_url ? xmlReadFile(data, NULL, options) : xmlReadMemory(data, data_len, NULL, NULL, options);
 
