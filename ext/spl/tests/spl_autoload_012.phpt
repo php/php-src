@@ -18,11 +18,22 @@ function autoload_second($name)
 spl_autoload_register('autoload_first');
 spl_autoload_register('autoload_second');
 
-class_exists('ThisClassDoesNotExist');
+try {
+    class_exists('ThisClassDoesNotExist');
+} catch(Exception $e) {
+    do {
+        echo $e->getMessage()."\n";
+    } while($e = $e->getPrevious());
+}
 
+class_exists('ThisClassDoesNotExist');
 ?>
 ===DONE===
 --EXPECTF--
+autoload_first
+autoload_second
+second
+first
 autoload_first
 autoload_second
 
