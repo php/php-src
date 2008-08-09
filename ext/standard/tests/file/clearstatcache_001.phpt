@@ -1,5 +1,5 @@
 --TEST--
-clearstatcache() optionnal parameters
+clearstatcache() optional parameters
 --SKIPIF--
 <?php
 if (strncmp(PHP_OS, "WIN", 3) === 0) {
