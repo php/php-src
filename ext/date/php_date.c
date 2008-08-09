@@ -2311,7 +2311,7 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 					abs(utc_offset / 60),
 					abs((utc_offset % 60)));
 
-				ZVAL_ASCII_STRING(zv, tmpstr, 0);
+				ZVAL_ASCII_STRING(zv, tmpstr, ZSTR_AUTOFREE);
 				}
 				break;
 			case TIMELIB_ZONETYPE_ABBR:
