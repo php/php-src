@@ -1,3 +1,42 @@
+2008-08-08  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      zend.h
+      zend_API.c
+      zend_execute_API.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - MFH error handling, now with save, replace, restore
+
+    * zend.h
+      zend_API.c
+      zend_execute_API.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - Turns out the easy solution for correct error_handling doesn't work. So
+        we need to provide save/replace/restore functions right away. It also
+        to save/restore in the vm.
+
+    * (PHP_5_3)
+      zend_execute_API.c:
+      - MFH store error handling mode on stack when executing internal
+        or overloaded functions and methods. [...]
+
+    * zend_execute_API.c:
+      - PHP 5.3 todo, store error handling mode on stack when executing internal
+        or overloaded functions and methods. The issue is that a function might
+        set and rely on a certain mode and then calls another internal function
+        which changes it again, probably changing it back to the normal mode.
+        With this change we need to drop all calls that change the mode back to
+        normal using php_std_error_handling(). However there might be places
+        where someone wants to restore the last mode. If there is such a case we
+        need to add two functions one to save and one to restore. I briefly on
+        this and not all cases are clear, especially one in sqlite but that
+      seems
+        to be a rather misleading comment. Eitherway I chose to not drop and
+      mark
+        as deprecated for now.
+
 2008-08-07  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_closures.c
