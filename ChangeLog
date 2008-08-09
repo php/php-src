@@ -1,3 +1,224 @@
+2008-08-08  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/date/php_date.c
+      ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/element.c
+      ext/dom/entityreference.c
+      ext/dom/processinginstruction.c
+      ext/dom/text.c
+      ext/dom/xpath.c
+      ext/mysqli/mysqli_driver.c
+      ext/simplexml/simplexml.c
+      ext/spl/spl_array.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_iterators.c
+      ext/spl/spl_observer.c
+      ext/sqlite/sqlite.c:
+      MFH: Fix error_handling usage in various extensions
+
+    * ext/date/php_date.c
+      ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/element.c
+      ext/dom/entityreference.c
+      ext/dom/processinginstruction.c
+      ext/dom/text.c
+      ext/dom/xpath.c
+      ext/mysqli/mysqli_driver.c
+      ext/simplexml/simplexml.c
+      ext/spl/spl_array.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_iterators.c
+      ext/spl/spl_observer.c
+      ext/sqlite/sqlite.c:
+      Fix error_handling usage in various extensions
+
+2008-08-08  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      - missing entry
+
+    * ext/zip/config.m4:
+      - MFB: add new files
+
+    * ext/zip/config.m4
+      ext/zip/config.w32
+      ext/zip/php_zip.c
+      ext/zip/php_zip.h:
+      - sync with 5.3
+
+2008-08-08  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      main/main.c
+      main/php.h:
+      - MFH error handling, now with save, replace, restore
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      main/main.c
+      main/php.h:
+      - Turns out the easy solution for correct error_handling doesn't work. So
+        we need to provide save/replace/restore functions right away. It also
+        to save/restore in the vm.
+
+2008-08-08  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/zip/php_zip.c:
+      - MFH: constify zend_function_entry and update phpinfo
+
+    * (PHP_5_3)
+      ext/zip/php_zip.c
+      ext/zip/php_zip.h:
+      - MFH: use PHP_ZIP_VERSION_STRING and add add_ascii_assoc_string macro
+      (easy sync)
+
+    * (PHP_5_3)
+      ext/zip/php_zip.c:
+      - MFH: fix leak in zif_zip_entry_read and ::ExtractTo on Error
+
+    * (PHP_5_3)
+      ext/zip/php_zip.c:
+      - use OPENBASEDIR_CHECKPATH instead of SAFEMODE_CHECKFILE, easier to keep
+      code synced with HEAD
+
+2008-08-08  Marcus Boerger  <php@marcus-boerger.de>
+
+    * main/php.h:
+      - Sorry for the compiler warning
+
+2008-08-08  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ext/spl/tests/spl_autoload_012.phpt:
+      MFH: Test the catching of chains of exceptions
+
+    * ext/spl/tests/spl_autoload_012.phpt:
+      Test the catching of chains of exceptions
+
+2008-08-08  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_execute_API.c
+      main/php.h:
+      - MFH store error handling mode on stack when executing internal
+        or overloaded functions and methods. [...]
+
+    * ZendEngine2/zend_execute_API.c
+      main/php.h:
+      - PHP 5.3 todo, store error handling mode on stack when executing internal
+        or overloaded functions and methods. The issue is that a function might
+        set and rely on a certain mode and then calls another internal function
+        which changes it again, probably changing it back to the normal mode.
+        With this change we need to drop all calls that change the mode back to
+        normal using php_std_error_handling(). However there might be places
+        where someone wants to restore the last mode. If there is such a case we
+        need to add two functions one to save and one to restore. I briefly on
+        this and not all cases are clear, especially one in sqlite but that
+      seems
+        to be a rather misleading comment. Eitherway I chose to not drop and
+      mark
+        as deprecated for now.
+
+2008-08-08  Felix De Vliegher  <felix.devliegher@gmail.com>
+
+    * ext/reflection/tests/ReflectionFunction_getClosure_basic.phpt
+      ext/reflection/tests/ReflectionFunction_getClosure_error.phpt
+      ext/reflection/tests/ReflectionMethod_getClosure_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getClosure_error.phpt:
+      MFB: Tests for ReflectionMethod::getClosure() and
+      ReflectionFunction::getClosure()
+
+    * ext/reflection/tests/ReflectionFunction_getClosure_basic.phpt
+      ext/reflection/tests/ReflectionFunction_getClosure_basic.phpt
+      ext/reflection/tests/ReflectionFunction_getClosure_error.phpt
+      ext/reflection/tests/ReflectionFunction_getClosure_error.phpt
+      ext/reflection/tests/ReflectionMethod_getClosure_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getClosure_basic.phpt
+      ext/reflection/tests/ReflectionMethod_getClosure_error.phpt
+      ext/reflection/tests/ReflectionMethod_getClosure_error.phpt:
+      
+      file ReflectionFunction_getClosure_basic.phpt was initially added on
+      branch PHP_5_3.
+
+2008-08-08  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      Apparently this is broken in alpha1 too
+
+2008-08-08  Felix De Vliegher  <felix.devliegher@gmail.com>
+
+    * ext/reflection/php_reflection.c:
+      MFB: Documentation fix for getClosure()
+
+    * (PHP_5_3)
+      ext/reflection/php_reflection.c:
+      Documentation fix for getClosure()
+
+2008-08-08  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/zip/php_zip.c:
+      move unused vars into their ifdef
+
+2008-08-08  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/zip/config.m4:
+      - add missing files for 0.9
+
+2008-08-08  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      ext/pcre/php_pcre.c
+      ext/pcre/tests/bug37911.phpt:
+      -** empty log message ***
+
+2008-08-08  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/crypt_freesec.h:
+      MFH: Fix build on FreeBSD4.11 (bug#45757)
+
+    * ext/standard/crypt_freesec.h:
+      Fix build on FreeBSD4.11 (bug#45757)
+
+2008-08-08  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      - fbsql to pecl
+
+    * (PHP_5_3)
+      ext/fbsql/.cvsignore
+      ext/fbsql/CREDITS
+      ext/fbsql/Readme_w32.txt
+      ext/fbsql/config.m4
+      ext/fbsql/config.w32
+      ext/fbsql/fbsql.dsp
+      ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.h:
+      - moved to PECL
+
 2008-08-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * (PHP_5_3)
