@@ -11078,7 +11078,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 								offset_len = norm_len;
 								free_offset = 1;
 							}
-						} else if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+						}
+
+						if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 							Z_ADDREF_P(offset);
 						}
 
@@ -12920,7 +12922,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLE
 								offset_len = norm_len;
 								free_offset = 1;
 							}
-						} else if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+						}
+
+						if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 							Z_ADDREF_P(offset);
 						}
 
@@ -14809,7 +14813,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 								offset_len = norm_len;
 								free_offset = 1;
 							}
-						} else if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+						}
+
+						if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 							Z_ADDREF_P(offset);
 						}
 
@@ -17314,7 +17320,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER
 								offset_len = norm_len;
 								free_offset = 1;
 							}
-						} else if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+						}
+
+						if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 							Z_ADDREF_P(offset);
 						}
 
@@ -18594,7 +18602,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_H
 								offset_len = norm_len;
 								free_offset = 1;
 							}
-						} else if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+						}
+
+						if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 							Z_ADDREF_P(offset);
 						}
 
@@ -19724,7 +19734,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HAN
 								offset_len = norm_len;
 								free_offset = 1;
 							}
-						} else if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+						}
+
+						if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 							Z_ADDREF_P(offset);
 						}
 
@@ -20854,7 +20866,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HAN
 								offset_len = norm_len;
 								free_offset = 1;
 							}
-						} else if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+						}
+
+						if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 							Z_ADDREF_P(offset);
 						}
 
@@ -22252,7 +22266,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAND
 								offset_len = norm_len;
 								free_offset = 1;
 							}
-						} else if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+						}
+
+						if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 							Z_ADDREF_P(offset);
 						}
 
@@ -25394,7 +25410,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 								offset_len = norm_len;
 								free_offset = 1;
 							}
-						} else if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+						}
+
+						if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 							Z_ADDREF_P(offset);
 						}
 
@@ -27114,7 +27132,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER
 								offset_len = norm_len;
 								free_offset = 1;
 							}
-						} else if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+						}
+
+						if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 							Z_ADDREF_P(offset);
 						}
 
@@ -28880,7 +28900,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 								offset_len = norm_len;
 								free_offset = 1;
 							}
-						} else if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+						}
+
+						if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 							Z_ADDREF_P(offset);
 						}
 
@@ -31150,7 +31172,9 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_
 								offset_len = norm_len;
 								free_offset = 1;
 							}
-						} else if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+						}
+
+						if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 							Z_ADDREF_P(offset);
 						}
 
