@@ -10,11 +10,11 @@ fclose($h);
 
 var_dump($data);
 ?>
---EXPECT--
+--EXPECTF--
 array(2) {
   [0]=>
-  string(88) "this element contains the delimiter, and ends with an odd number of
+  string(%d) "this element contains the delimiter, and ends with an odd number of
 backslashes (ex: 1)\"
   [1]=>
-  string(30) "and it isn't the last element$"
+  string(%d) "and it isn't the last element$"
 }
