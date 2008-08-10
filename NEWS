@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   (Jani)
 - Fixed bug #45691 (Some per-dir or runtime settings may leak into other
   requests). (Moriyoshi)
+- Fixed bug #45581 (htmlspecialchars() double encoding &#x hex items). (Arnaud)
 - Fixed bug #45568 (ISAPI doesn't properly clear auth_digest in header).
   (Patch by: navara at emclient dot com)
 - Fixed bug #45556 (Return value from callback isn't freed). (Felipe)
