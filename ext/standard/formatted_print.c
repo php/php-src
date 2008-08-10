@@ -980,16 +980,13 @@ static zstr php_u_formatted_print(int ht, int *len, int use_array, int format_of
 	int always_sign;
 	zstr result_str;
 
-	argc = ZEND_NUM_ARGS();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &argc) == FAILURE) {
+		return NULL_ZSTR;
+	}
 
 	/* verify the number of args */
 	if ((use_array && argc != (2 + format_offset)) 
 			|| (!use_array && argc < (1 + format_offset))) {
-		WRONG_PARAM_COUNT_WITH_RETVAL(NULL_ZSTR);
-	}
-	args = (zval ***)safe_emalloc(argc, sizeof(zval *), 0);
-
-	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT_WITH_RETVAL(NULL_ZSTR);
 	}
@@ -1364,19 +1361,19 @@ PHP_FUNCTION(vprintf)
 PHP_FUNCTION(fprintf)
 {
 	php_stream *stream;
-	zval **arg1, **arg2;
+	zval *arg1, **arg2;
 	zstr result;
 	int len, ret;
 	
 	if (ZEND_NUM_ARGS() < 2) {
 		WRONG_PARAM_COUNT;
 	}
-	
-	if (zend_get_parameters_ex(2, &arg1, &arg2)==FAILURE) {
+
+	if (zend_parse_parameters(2 TSRMLS_CC, "rZ", &arg1, &arg2) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
-	php_stream_from_zval(stream, arg1);
+	php_stream_from_zval(stream, &arg1);
 
 	if (Z_TYPE_PP(arg2) != IS_STRING && Z_TYPE_PP(arg2) != IS_UNICODE) {
 		convert_to_text_ex(arg2);
@@ -1406,7 +1403,7 @@ PHP_FUNCTION(fprintf)
 PHP_FUNCTION(vfprintf)
 {
 	php_stream *stream;
-	zval **arg1, **arg2;
+	zval *arg1, **arg2;
 	zstr result;
 	int len, ret;
 	
@@ -1414,11 +1411,11 @@ PHP_FUNCTION(vfprintf)
 		WRONG_PARAM_COUNT;
 	}
 	
-	if (zend_get_parameters_ex(2, &arg1, &arg2)==FAILURE) {
+	if (zend_parse_parameters(2 TSRMLS_CC, "rZ", &arg1, &arg2) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
-	php_stream_from_zval(stream, arg1);
+	php_stream_from_zval(stream, &arg1);
 
 	if (Z_TYPE_PP(arg2) != IS_STRING && Z_TYPE_PP(arg2) != IS_UNICODE) {
 		convert_to_text_ex(arg2);
