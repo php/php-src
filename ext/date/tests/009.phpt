@@ -2,6 +2,11 @@
 strftime() and gmstrftime() tests
 --INI--
 date.timezone=Asia/Jerusalem
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) == 'WIN') die('skip posix only test.');
+if (!function_exists('strftime')) die("skip, strftime not available");
+?>
 --FILE--
 <?php
 
@@ -25,22 +30,22 @@ var_dump(gmstrftime("blah", $t));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: strftime() expects at least 1 parameter, 0 given in %s on line %d
 bool(false)
 bool(false)
-unicode(%d) "Tue Tuesday Jun June Tue Jun 27 00:00:00 2006 %s
+string(%d) "Tue Tuesday Jun June Tue Jun 27 00:00:00 2006 %s
 %s %"
-unicode(5) "%q %a"
-unicode(%d) "%s"
-unicode(4) "blah"
+string(5) "%q %a"
+string(%d) "%s"
+string(4) "blah"
 
 Warning: gmstrftime() expects at least 1 parameter, 0 given in %s on line %d
 bool(false)
 bool(false)
-unicode(%d) "Mon Monday Jun June Mon Jun 26 21:00:00 2006 %s
+string(%d) "Mon Monday Jun June Mon Jun 26 21:00:00 2006 %s
 %s %"
-unicode(5) "%q %a"
-unicode(%d) "%s"
-unicode(4) "blah"
+string(5) "%q %a"
+string(%d) "%s"
+string(4) "blah"
 Done
