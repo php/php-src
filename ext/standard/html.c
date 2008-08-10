@@ -1197,9 +1197,20 @@ encode_amp:
 					} else {
 						if (*s == '#') { /* numeric entities */
 							s++;
-							while (s < e) {
-								if (!isdigit(*s++)) {
-									goto encode_amp;
+							/* Hex (&#x5A;) */
+							if (*s == 'x' || *s == 'X') {
+								s++;
+								while (s < e) {
+									if (!isxdigit(*s++)) {
+										goto encode_amp;
+									}
+								}
+							/* Dec (&#90;)*/
+							} else {
+								while (s < e) {
+									if (!isdigit(*s++)) {
+										goto encode_amp;
+									}
 								}
 							}
 						} else { /* text entities */
