@@ -3554,7 +3554,9 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 								offset_len = norm_len;
 								free_offset = 1;
 							}
-						} else if (OP2_TYPE == IS_CV || OP2_TYPE == IS_VAR) {
+						}
+						
+						if (OP2_TYPE == IS_CV || OP2_TYPE == IS_VAR) {
 							Z_ADDREF_P(offset);
 						}
 
