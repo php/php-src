@@ -35,7 +35,7 @@ unlink( $file );
 --EXPECTF--
 -- Testing vfprintf() function with other strangeties  --
 
-Warning: vfprintf(): supplied argument is not a valid stream resource in %s on line %d
+Warning: vfprintf() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
 
 Warning: vfprintf(): Argument number must be greater than zero in %s on line %d
