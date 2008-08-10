@@ -154,11 +154,11 @@ PHP_FUNCTION(symlink)
 		RETURN_FALSE;
 	}
 
-#ifndef ZTS
-	ret = symlink(topath, frompath);
-#else 
-	ret = symlink(dest_p, source_p);
-#endif	
+	/* For the source, an expanded path must be used (in ZTS an other thread could have changed the CWD).
+	 * For the target the exact string given by the user must be used, relative or not, existing or not. 
+	 * The target is relative to the link itself, not to the CWD. */
+	ret = symlink(topath, source_p);
+
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
