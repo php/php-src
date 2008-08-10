@@ -572,7 +572,7 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 /* default engine string type */
 #define ZEND_STR_TYPE (UG(unicode) ? IS_UNICODE : IS_STRING)
 
-int zend_startup(zend_utility_functions *utility_functions, char **extensions, int start_builtin_functions);
+int zend_startup(zend_utility_functions *utility_functions, char **extensions);
 void zend_shutdown(TSRMLS_D);
 void zend_register_standard_ini_entries(TSRMLS_D);
 void zend_post_startup(TSRMLS_D);
