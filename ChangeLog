@@ -1,3 +1,29 @@
+2008-08-09  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/standard/tests/file/copy_variation4.phpt
+      ext/standard/tests/file/copy_variation4.phpt:
+      disable the test on AIX
+
+    * ext/standard/tests/file/copy_variation4.phpt:
+      disable the test on AIX - unlink() deletes directories there (omg..)
+
+    * (PHP_5_2)
+      ext/date/lib/parse_tz.c
+      ext/date/lib/parse_tz.c:
+      MFH: do not fail & segfault if malloc(0) returns NULL, that's expected
+
+    * ext/date/lib/parse_tz.c:
+      do not fail & segfault if malloc(0) returns NULL, that's expected
+      (reproducible on AIX with simple date() and UTC timezone)
+
+    * ext/date/php_date.c:
+      fix leak
+
+    * ext/standard/tests/file/clearstatcache_001.phpt
+      ext/standard/tests/file/clearstatcache_001.phpt:
+      fix typo
+
 2008-08-08  Etienne Kneuss  <php@colder.ch>
 
     * (PHP_5_3)
