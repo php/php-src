@@ -9,4 +9,4 @@ MYLABEL;
 echo $var;
 ?>
 --EXPECTF--
-Parse error: parse error in %sheredoc_014.php on line 3
+Parse error: %s in %sheredoc_014.php on line %d

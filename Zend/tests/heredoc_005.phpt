@@ -19,4 +19,4 @@ print "{$x}";
 
 ?>
 --EXPECTF--
-Parse error: parse error, expecting `T_STRING' or `T_VARIABLE' or `T_NUM_STRING' in %sheredoc_005.php on line %d
+Parse error: %s in %sheredoc_005.php on line 6
