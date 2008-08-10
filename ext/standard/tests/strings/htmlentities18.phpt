@@ -6,7 +6,8 @@ $tests = array(
 	"abc",
 	"abc&amp;sfdsa",
 	"test&#043;s &amp; some more &#68;",
-	"&; &amp &#a; &9;",
+	"test&#x2b;s &amp; some more &#X44;",
+	"&; &amp &#a; &9; &#xyz;",
 	"&kffjadfdhsjfhjasdhffasdfas;",
 	"&#8787978789",
 	"&",
@@ -26,8 +27,10 @@ string(13) "abc&amp;sfdsa"
 string(13) "abc&amp;sfdsa"
 string(33) "test&#043;s &amp; some more &#68;"
 string(33) "test&#043;s &amp; some more &#68;"
-string(24) "&; &amp;amp &amp;#a; &9;"
-string(24) "&; &amp;amp &amp;#a; &9;"
+string(34) "test&#x2b;s &amp; some more &#X44;"
+string(34) "test&#x2b;s &amp; some more &#X44;"
+string(35) "&; &amp;amp &amp;#a; &9; &amp;#xyz;"
+string(35) "&; &amp;amp &amp;#a; &9; &amp;#xyz;"
 string(32) "&amp;kffjadfdhsjfhjasdhffasdfas;"
 string(32) "&amp;kffjadfdhsjfhjasdhffasdfas;"
 string(16) "&amp;#8787978789"
