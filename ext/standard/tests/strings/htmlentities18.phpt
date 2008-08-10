@@ -6,7 +6,8 @@ $tests = array(
 	"abc",
 	"abc&amp;sfdsa",
 	"test&#043;s &amp; some more &#68;",
-	"&; &amp &#a; &9;",
+	"test&#x2b;s &amp; some more &#X44;",
+	"&; &amp &#a; &9; &#xyz;",
 	"&kffjadfdhsjfhjasdhffasdfas;",
 	"&#8787978789",
 	"&",
@@ -26,8 +27,10 @@ unicode(13) "abc&amp;sfdsa"
 unicode(13) "abc&amp;sfdsa"
 unicode(33) "test&#043;s &amp; some more &#68;"
 unicode(33) "test&#043;s &amp; some more &#68;"
-unicode(24) "&; &amp;amp &amp;#a; &9;"
-unicode(24) "&; &amp;amp &amp;#a; &9;"
+unicode(34) "test&#x2b;s &amp; some more &#X44;"
+unicode(34) "test&#x2b;s &amp; some more &#X44;"
+unicode(35) "&; &amp;amp &amp;#a; &9; &amp;#xyz;"
+unicode(35) "&; &amp;amp &amp;#a; &9; &amp;#xyz;"
 unicode(32) "&amp;kffjadfdhsjfhjasdhffasdfas;"
 unicode(32) "&amp;kffjadfdhsjfhjasdhffasdfas;"
 unicode(16) "&amp;#8787978789"
