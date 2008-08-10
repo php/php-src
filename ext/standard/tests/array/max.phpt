@@ -20,16 +20,16 @@ var_dump(max(0, true, false, true));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: max(): At least one value should be passed in %s on line %d
+Warning: max() expects at least 1 parameter, 0 given in %s on line 3
 NULL
 
-Warning: Wrong parameter count for max() in %s on line %d
+Warning: max(): When only one parameter is given, it must be an array in %s on line 4
 NULL
 
-Warning: max(): Array must contain at least one element in %s on line %d
+Warning: max(): Array must contain at least one element in %s on line 5
 bool(false)
 
-Warning: Wrong parameter count for max() in %s on line %d
+Warning: max(): When only one parameter is given, it must be an array in %s on line 6
 NULL
 int(2)
 float(2.11)

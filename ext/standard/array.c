@@ -946,47 +946,48 @@ PHP_FUNCTION(key)
    Return the lowest value in an array or a series of arguments */
 PHP_FUNCTION(min)
 {
-	int argc=ZEND_NUM_ARGS();
-	zval **result;
+	int argc;
+	zval ***args = NULL;
 
-	if (argc<=0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "At least one value should be passed");
-		RETURN_NULL();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &argc) == FAILURE) {
+		return;
 	}
+	
 	php_set_compare_func(PHP_SORT_REGULAR TSRMLS_CC);
+	
+	/* mixed min ( array $values ) */
 	if (argc == 1) {
-		zval **arr;
-
-		if (zend_get_parameters_ex(1, &arr) == FAILURE || Z_TYPE_PP(arr) != IS_ARRAY) {
-			WRONG_PARAM_COUNT;
-		}
-		if (zend_hash_minmax(Z_ARRVAL_PP(arr), php_array_data_compare, 0, (void **) &result TSRMLS_CC) == SUCCESS) {
-			RETVAL_ZVAL(*result, 1, 0);
+		zval **result;
+		
+		if (Z_TYPE_PP(args[0]) != IS_ARRAY) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "When only one parameter is given, it must be an array");
+			RETVAL_NULL();
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array must contain at least one element");
-			RETURN_FALSE;
+			if (zend_hash_minmax(Z_ARRVAL_PP(args[0]), php_array_data_compare, 0, (void **) &result TSRMLS_CC) == SUCCESS) {
+				RETVAL_ZVAL(*result, 1, 0);
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array must contain at least one element");
+				RETVAL_FALSE;
+			}
 		}
 	} else {
-		zval ***args = (zval ***) safe_emalloc(sizeof(zval **), ZEND_NUM_ARGS(), 0);
+		/* mixed min ( mixed $value1 , mixed $value2 [, mixed $value3... ] ) */
 		zval **min, result;
 		int i;
 
-		if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args)==FAILURE) {
-			efree(args);
-			WRONG_PARAM_COUNT;
-		}
-
 		min = args[0];
 
-		for (i=1; i<ZEND_NUM_ARGS(); i++) {
+		for (i = 1; i < argc; i++) {
 			is_smaller_function(&result, *args[i], *min TSRMLS_CC);
 			if (Z_LVAL(result) == 1) {
 				min = args[i];
 			}
 		}
 
-		RETVAL_ZVAL(*min, 1, 0);
+		RETVAL_ZVAL(*min, 1, 0);	
+	}
 
+	if (args) {
 		efree(args);
 	}
 }
@@ -996,39 +997,38 @@ PHP_FUNCTION(min)
    Return the highest value in an array or a series of arguments */
 PHP_FUNCTION(max)
 {
-	int argc=ZEND_NUM_ARGS();
-	zval **result;
-
-	if (argc<=0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "At least one value should be passed");
-		RETURN_NULL();
+	zval ***args = NULL;
+	int argc;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &argc) == FAILURE) {
+		return;
 	}
-	php_set_compare_func(PHP_SORT_REGULAR TSRMLS_CC);
-	if (argc == 1) {
-		zval **arr;
 
-		if (zend_get_parameters_ex(1, &arr) == FAILURE || Z_TYPE_PP(arr) != IS_ARRAY) {
-			WRONG_PARAM_COUNT;
-		}
-		if (zend_hash_minmax(Z_ARRVAL_PP(arr), php_array_data_compare, 1, (void **) &result TSRMLS_CC) == SUCCESS) {
-			RETVAL_ZVAL(*result, 1, 0);
+	php_set_compare_func(PHP_SORT_REGULAR TSRMLS_CC);
+	
+	/* mixed max ( array $values ) */
+	if (argc == 1) {
+		zval **result;
+
+		if (Z_TYPE_PP(args[0]) != IS_ARRAY) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "When only one parameter is given, it must be an array");
+			RETVAL_NULL();
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array must contain at least one element");
-			RETURN_FALSE;
+			if (zend_hash_minmax(Z_ARRVAL_PP(args[0]), php_array_data_compare, 1, (void **) &result TSRMLS_CC) == SUCCESS) {
+				RETVAL_ZVAL(*result, 1, 0);
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array must contain at least one element");
+				RETVAL_FALSE;
+			}
 		}
 	} else {
-		zval ***args = (zval ***) safe_emalloc(sizeof(zval **), ZEND_NUM_ARGS(), 0);
+		/* mixed max ( mixed $value1 , mixed $value2 [, mixed $value3... ] ) */
 		zval **max, result;
 		int i;
 
-		if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
-			efree(args);
-			WRONG_PARAM_COUNT;
-		}
-
 		max = args[0];
 
-		for (i=1; i<ZEND_NUM_ARGS(); i++) {
+		for (i = 1; i < argc; i++) {
 			is_smaller_or_equal_function(&result, *args[i], *max TSRMLS_CC);
 			if (Z_LVAL(result) == 0) {
 				max = args[i];
@@ -1036,6 +1036,9 @@ PHP_FUNCTION(max)
 		}
 
 		RETVAL_ZVAL(*max, 1, 0);
+	}
+	
+	if (args) {
 		efree(args);
 	}
 }
