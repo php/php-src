@@ -10,4 +10,4 @@ final final class test {
 echo "Done\n";
 ?>
 --EXPECTF--
-Parse error: parse error, expecting `T_CLASS' in %saccess_modifiers_003.php on line %d
+Parse error: %s error,%sexpecting %s in %s on line %d
