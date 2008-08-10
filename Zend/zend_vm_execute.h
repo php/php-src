@@ -3020,7 +3020,7 @@ static int ZEND_FASTCALL  ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_CONST_HANDLER(
 		zend_error_noreturn(E_ERROR, "Base lambda function for closure not found");
 	}
 
-	zend_create_closure(&EX_T(opline->result.u.var).tmp_var, op_array, EG(scope), EG(This) TSRMLS_CC);
+	zend_create_closure(&EX_T(opline->result.u.var).tmp_var, (zend_function*)op_array, EG(scope), EG(This) TSRMLS_CC);
 
 	ZEND_VM_NEXT_OPCODE();
 }
