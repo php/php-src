@@ -416,6 +416,12 @@ int zend_startup_builtin_functions(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
+void zend_shutdown_builtin_functions(TSRMLS_D) /* {{{ */
+{
+	zend_unregister_functions(builtin_functions, -1, NULL TSRMLS_CC);
+}
+/* }}} */
+
 /* {{{ proto string zend_version(void) U
    Get the version of the Zend Engine */
 ZEND_FUNCTION(zend_version)

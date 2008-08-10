@@ -1045,7 +1045,7 @@ static void unicode_globals_dtor(zend_unicode_globals *unicode_globals TSRMLS_DC
 
 void zend_init_opcodes_handlers(void);
 
-int zend_startup(zend_utility_functions *utility_functions, char **extensions, int start_builtin_functions) /* {{{ */
+int zend_startup(zend_utility_functions *utility_functions, char **extensions) /* {{{ */
 {
 #ifdef ZTS
 	zend_compiler_globals *compiler_globals;
@@ -1170,10 +1170,6 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_init_exception_op(TSRMLS_C);
 #endif
 
-	if (start_builtin_functions) {
-		zend_startup_builtin_functions(TSRMLS_C);
-	}
-
 	zend_ini_startup(TSRMLS_C);
 
 #ifdef ZTS
@@ -1209,6 +1205,7 @@ void zend_register_standard_ini_entries(TSRMLS_D) /* {{{ */
 		ucnv_close(UG(runtime_encoding_conv));
 		UG(runtime_encoding_conv) = old_runtime_encoding_conv;
 	}
+	zend_startup_builtin_functions(TSRMLS_C);
 }
 /* }}} */
 
@@ -1248,6 +1245,7 @@ void zend_shutdown(TSRMLS_D) /* {{{ */
 #endif
 	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 	zend_hash_graceful_reverse_destroy(&module_registry);
+	zend_shutdown_builtin_functions(TSRMLS_C);
 
 	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
 	zend_hash_destroy(GLOBAL_CLASS_TABLE);
