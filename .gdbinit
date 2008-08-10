@@ -91,6 +91,58 @@ document printzv
 	prints zval contents
 end
 
+define printu
+	set $str = (UChar*)$arg0
+	if $arg1 > 0
+		set $max = $arg1
+	else
+		set $max = 1024
+	end
+	set $pos = 0
+	while $pos < $max && *(char*)(($str+$pos))
+		if $str[$pos] < 256
+			printf "%c", $str[$pos]
+		else
+			printf "\\u%04X", $str[$pos]
+		end
+		set $pos = $pos + 1
+	end
+	if $pos < $max && *((char*)($str+$pos))
+		printf "[...]"
+	end
+end
+
+document printu
+	prints a unicode string, optionally with given length
+	usage: printu str [len]
+	The function stops at the first zero byte (not char) or when len is reached.
+	If len is less than or equal to one then a maximum of 1024 characters are 
+	printed.
+end
+
+define printt
+	if $arg0
+		printu $arg1 $arg2
+	else
+		set $len = strlen($arg1)
+		if $arg2 > 0 && $len > $arg2
+			set $copy = strdup($arg1)
+			printf "%p: %s\n", $copy, $copy
+			set ((char*)$copy)[$arg2] = 0
+			printf "%s[...]", $copy
+			call free($copy)
+		else
+			printf "%s", $arg1
+		end
+	end
+end
+
+document printt
+	prints a binary or unicode string, optionally with given length
+	usage: printt unicode str [len]
+	If unicode is 1 the function calls printu, else it uses printf.
+end
+
 define ____printzv_contents
 	set $zvalue = $arg0
 	set $type = $zvalue->type
@@ -182,19 +234,7 @@ define ____printzv_contents
 	end
 	if $type == 10
 		printf "(%d): [%p]: \"", $zvalue->value.str.len, $zvalue->value.str.val
-		set $pos = 0
-		while $pos < 20 && $pos < $zvalue->value.str.len
-			if $zvalue->value.ustr.val[$pos] < 256
-				printf "%c", $zvalue->value.ustr.val[$pos]
-			else
-				printf "\\u%04X", $zvalue->value.ustr.val[$pos]
-			end
-			set $pos = $pos + 1
-		end
-		printf "\""
-		if $pos < $zvalue->value.str.len
-			printf "[...]"
-		end
+		printu $zvalue->value.ustr.val $zvalue->value.str.len
 	end
 	if $type > 10
 	end
@@ -254,6 +294,7 @@ define ____print_ht
 	set $ht = $arg0
 	set $obj = $arg1
 	set $p = $ht->pListHead
+	set $unicode = $ht->unicode
 
 	while $p != 0
 		set $i = $ind
@@ -274,7 +315,9 @@ define ____print_ht
 					printf "\"private %s::%s\" => ", $p->key.arKey.s+1, $p->key.arKey.s+$n+1
 				end
 			else
-				printf "\"%s\" => ", $p->key.arKey.s
+				printf "\""
+				printt $unicode $p->key.arKey.v $p->nKeyLength
+				printf "\" => "
 			end
 		else
 			printf "%d => ", $p->h
@@ -297,7 +340,7 @@ end
 
 define print_ht
 	set $ind = 1
-	printf "[0x%08x] {\n", $arg0
+	printf "[0x%08x] (%d) {\n", $arg0, $arg0->nNumOfElements
 	____print_ht $arg0 0 1
 	printf "}\n"
 end
@@ -308,7 +351,7 @@ end
 
 define print_htptr
 	set $ind = 1
-	printf "[0x%08x] {\n", $arg0
+	printf "[0x%08x] (%d) {\n", $arg0, $arg0->nNumOfElements
 	____print_ht $arg0 0 0
 	printf "}\n"
 end
@@ -319,7 +362,7 @@ end
 
 define print_htstr
 	set $ind = 1
-	printf "[0x%08x] {\n", $arg0
+	printf "[0x%08x] (%d) {\n", $arg0, $arg0->nNumOfElements
 	____print_ht $arg0 0 2
 	printf "}\n"
 end
@@ -331,6 +374,7 @@ end
 define ____print_ft
 	set $ht = $arg0
 	set $p = $ht->pListHead
+	set $unicode = $ht->unicode
 
 	while $p != 0
 		set $func = (zend_function*)$p->pData
@@ -342,19 +386,40 @@ define ____print_ft
 		end
 
 		if $p->nKeyLength > 0 
-			printf "\"%s\" => ", $p->key.arKey.s
+			printf "\""
+			printt $unicode $p->key.arKey.u $p->nKeyLength
+			printf "\" => "
 		else
 			printf "%d => ", $p->h
 		end
-
-		printf "\"%s\"\n", $func->common.function_name
+		printf "[%p]: ", $func
+		if $func->common.fn_flags & 0x01
+			printf "static "
+		end
+		if $func->common.fn_flags & 0x02
+			printf "abstract "
+		end
+		if $func->common.fn_flags & 0x04
+			printf "final "
+		end
+		set $visibility = zend_visibility_string($func->common.fn_flags)
+		printf "%s", $visibility
+		if *$visibility
+			printf " "
+		end
+		if $func->common.return_reference
+			printf "& "
+		end
+		printt $unicode $func->common.function_name.s 0
+		
+		printf "()\n"
 		set $p = $p->pListNext
 	end
 end
 
 define print_ft
 	set $ind = 1
-	printf "[0x%08x] {\n", $arg0
+	printf "[0x%08x] (%d) {\n", $arg0, $arg0->nNumOfElements
 	____print_ft $arg0
 	printf "}\n"
 end
