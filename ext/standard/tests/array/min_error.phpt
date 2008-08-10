@@ -17,17 +17,16 @@ var_dump(min(new stdclass));
 
 ?>
 --EXPECTF--
-
 *** Testing Error Conditions ***
 
-Warning: min(): At least one %s on line %d
+Warning: min() expects at least 1 parameter, 0 given in %s on line 10
 NULL
 
-Warning: Wrong parameter count for min() in %s on line %d
+Warning: min(): When only one parameter is given, it must be an array in %s on line 11
 NULL
 
-Warning: min(): Array must contain at least one element in %s on line %d
+Warning: min(): Array must contain at least one element in %s on line 12
 bool(false)
 
-Warning: Wrong parameter count for min() in %s on line %d
+Warning: min(): When only one parameter is given, it must be an array in %s on line 13
 NULL
