@@ -31,7 +31,7 @@ echo "Done";
 
 -- Testing vsprintf() function with Zero arguments --
 
-Warning: Wrong parameter count for vsprintf() in %s on line %d
+Warning: vsprintf() expects at least %d parameter, %d given in %s on line %d
 bool(false)
 
 -- Testing vsprintf() function with less than expected no. of arguments --

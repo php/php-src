@@ -39,7 +39,7 @@ echo "Done";
 
 -- Testing sprintf() function with Zero arguments --
 
-Warning: Wrong parameter count for sprintf() in %s on line %d
+Warning: sprintf() expects at least %d parameter, %d given in %s on line %d
 bool(false)
 
 -- Testing sprintf() function with less than expected no. of arguments --
