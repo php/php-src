@@ -37,6 +37,10 @@
 #include <wctype.h>
 #endif
 
+#ifndef SIZE_MAX 
+# define SIZE_MAX ((size_t) -1) 
+#endif
+
 #ifndef	lint
 FILE_RCSID("@(#)$File: funcs.c,v 1.39 2008/03/01 22:21:49 rrt Exp $")
 #endif	/* lint */
