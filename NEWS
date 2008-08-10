@@ -19,7 +19,6 @@ PHP                                                                        NEWS
   (Derick)
 - Fixed bug #45696 (Not all DateTime methods allow method chaining). (Derick)
 - Fixed bug #45636 (fileinfo ext duplicate strndup). (Derick)
-- Fixed bug #45581 (htmlspecialchars() double encoding &#x hex items). (Arnaud)
 - Fixed bug #45545 (DateInterval has 4 char limitation for ISO durations).
   (Derick)
 - Fixed bug #44100 (Inconsistent handling of static array declarations with
