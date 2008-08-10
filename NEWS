@@ -160,9 +160,14 @@ PHP                                                                        NEWS
   . Allow building (e.g from PECL) the PHP 5.3-based OCI8 code with
     PHP 4.3.9 onwards.
 
-- Improved OpenSSL extension: (Dmitry)
-  . Added support for OpenSSL digest and cipher functions.
-  . Added access to internal values of DSA, RSA and DH keys.
+- Improved OpenSSL extension:
+  . Added support for OpenSSL digest and cipher functions. (Dmitry)
+  . Added access to internal values of DSA, RSA and DH keys. (Dmitry)
+  . Fixed a memory leak on openssl_decrypt(). (Henrique)
+  . Fixed segfault caused by openssl_pkey_new(). (Henrique)
+  . Fixed bug caused by uninitilized variables in openssl_pkcs7_encrypt() and 
+    openssl_pkcs7_sign(). (Henrique)
+  . Fixed error message in openssl_seal(). (Henrique)
 
 - Improved pcntl extension: (Arnaud)
   . Added pcntl_signal_dispatch().
