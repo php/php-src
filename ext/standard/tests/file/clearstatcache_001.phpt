@@ -27,6 +27,7 @@ var_dump(realpath(__FILE__ . "_link2"));
 clearstatcache(true, "/foo/bar");
 var_dump(realpath(__FILE__ . "_link2"));
 clearstatcache(true, __FILE__ . "_link2");
+clearstatcache(true, __FILE__ . "_link1");
 var_dump(realpath(__FILE__ . "_link2"));
 
 ?>
