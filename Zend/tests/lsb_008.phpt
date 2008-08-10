@@ -5,4 +5,4 @@ ZE2 Late Static Binding class name "static"
 class static {
 }
 --EXPECTF--
-Parse error: parse error, expecting `T_STRING' in %slsb_008.php on line %d
+Parse error: %s error,%sexpecting %s in %s on line %d
