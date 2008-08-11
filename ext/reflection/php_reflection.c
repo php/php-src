@@ -644,7 +644,7 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 			*zv = precv->op2.u.constant;
 			zval_copy_ctor(zv);
 			INIT_PZVAL(zv);
-			zval_update_constant(&zv, (void*)1 TSRMLS_CC);
+			zval_update_constant_ex(&zv, (void*)1, fptr->common.scope TSRMLS_CC);
 			if (Z_TYPE_P(zv) == IS_BOOL) {
 				if (Z_LVAL_P(zv)) {
 					string_write(str, "true", sizeof("true")-1);
