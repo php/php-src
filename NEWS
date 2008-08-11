@@ -44,6 +44,8 @@ PHP                                                                        NEWS
 - Fixed bug #45251 (double free or corruption with setAttributeNode()). (Rob)
 - Fixed bug #45220 (curl_read callback returns -1 when needs to return 
   size_t (unsigned)). (Felipe)
+- Fixed bug #45181 (chdir() should clear relative entries in stat cache). 
+  (Arnaud)
 - Fixed bug #45178 (memory corruption on assignment result of "new" by
   reference). (Dmitry)
 - Fixed bug #45151 (Crash with URI/file..php (filename contains 2 dots)).
