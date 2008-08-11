@@ -51,31 +51,33 @@ void intl_convert_utf8_to_utf16(
 	UChar*      dst_buf = NULL;
 	int32_t     dst_len = 0;
 
-	// If *target is NULL determine required destination buffer size (pre-flighting).
-	// Otherwise, attempt to convert source string; if *target buffer is not large enough
-	// it will be resized appropriately.
+	/* If *target is NULL determine required destination buffer size (pre-flighting).
+	 * Otherwise, attempt to convert source string; if *target buffer is not large enough
+	 * it will be resized appropriately.
+	 */
 	*status = U_ZERO_ERROR;
 
 	u_strFromUTF8( *target, *target_len, &dst_len, src, src_len, status );
 
 	if( *status == U_ZERO_ERROR )
 	{
-		// String is converted successfuly
+		/* String is converted successfuly */
 		(*target)[dst_len] = 0;
 		*target_len = dst_len;
 		return;
 	}
 
-	// Bail out if an unexpected error occured.
-	// (U_BUFFER_OVERFLOW_ERROR means that *target buffer is not large enough).
-	// (U_STRING_NOT_TERMINATED_WARNING usually means that the input string is empty).
+	/* Bail out if an unexpected error occured.
+	 * (U_BUFFER_OVERFLOW_ERROR means that *target buffer is not large enough).
+	 * (U_STRING_NOT_TERMINATED_WARNING usually means that the input string is empty).
+	 */
 	if( *status != U_BUFFER_OVERFLOW_ERROR && *status != U_STRING_NOT_TERMINATED_WARNING )
 		return;
 
-	// Allocate memory for the destination buffer (it will be zero-terminated).
+	/* Allocate memory for the destination buffer (it will be zero-terminated). */
 	dst_buf = eumalloc( dst_len + 1 );
 
-	// Convert source string from UTF-8 to UTF-16.
+	/* Convert source string from UTF-8 to UTF-16. */
 	*status = U_ZERO_ERROR;
 	u_strFromUTF8( dst_buf, dst_len+1, NULL, src, src_len, status );
 	if( U_FAILURE( *status ) )
@@ -113,20 +115,21 @@ void intl_convert_utf16_to_utf8(
 	char*       dst_buf = NULL;
 	int32_t     dst_len;
 
-	// Determine required destination buffer size (pre-flighting).
+	/* Determine required destination buffer size (pre-flighting). */
 	*status = U_ZERO_ERROR;
 	u_strToUTF8( NULL, 0, &dst_len, src, src_len, status );
 
-	// Bail out if an unexpected error occured.
-	// (U_BUFFER_OVERFLOW_ERROR means that *target buffer is not large enough).
-	// (U_STRING_NOT_TERMINATED_WARNING usually means that the input string is empty).
+	/* Bail out if an unexpected error occured.
+	 * (U_BUFFER_OVERFLOW_ERROR means that *target buffer is not large enough).
+	 * (U_STRING_NOT_TERMINATED_WARNING usually means that the input string is empty).
+	 */
 	if( *status != U_BUFFER_OVERFLOW_ERROR && *status != U_STRING_NOT_TERMINATED_WARNING )
 		return;
 
-	// Allocate memory for the destination buffer (it will be zero-terminated).
+	/* Allocate memory for the destination buffer (it will be zero-terminated). */
 	dst_buf = emalloc( dst_len+1 );
 
-	// Convert source string from UTF-8 to UTF-16.
+	/* Convert source string from UTF-8 to UTF-16. */
 	*status = U_ZERO_ERROR;
 	u_strToUTF8( dst_buf, dst_len, NULL, src, src_len, status );
 	if( U_FAILURE( *status ) )
@@ -135,7 +138,7 @@ void intl_convert_utf16_to_utf8(
 		return;
 	}
 
-	// U_STRING_NOT_TERMINATED_WARNING is OK for us => reset 'status'.
+	/* U_STRING_NOT_TERMINATED_WARNING is OK for us => reset 'status'. */
 	*status = U_ZERO_ERROR;
 
 	dst_buf[dst_len] = 0;

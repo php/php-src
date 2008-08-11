@@ -787,7 +787,7 @@ PHP_FUNCTION(grapheme_extract)
 	unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
 	UBreakIterator* bi = NULL;
 	int ret_pos;
-	zval *next = NULL; // return offset of next part of the string
+	zval *next = NULL; /* return offset of next part of the string */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|llz", (char **)&str, &str_len, &size, &extract_type, &lstart, &next) == FAILURE) {
 	

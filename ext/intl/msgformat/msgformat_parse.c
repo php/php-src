@@ -63,7 +63,7 @@ PHP_FUNCTION( msgfmt_parse )
 	MSG_FORMAT_METHOD_INIT_VARS;
 
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os",
 		&object, MessageFormatter_ce_ptr,  &source, &source_len ) == FAILURE )
 	{
@@ -73,7 +73,7 @@ PHP_FUNCTION( msgfmt_parse )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	MSG_FORMAT_METHOD_FETCH_OBJECT;
 
 	msgfmt_do_parse(mfo, source, source_len, return_value TSRMLS_CC);
@@ -98,7 +98,7 @@ PHP_FUNCTION( msgfmt_parse_message )
 	MessageFormatter_object mf = {0};
 	MessageFormatter_object *mfo = &mf;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "sss",
 		  &slocale, &slocale_len, &pattern, &pattern_len, &source, &src_len ) == FAILURE )
 	{
@@ -133,7 +133,7 @@ PHP_FUNCTION( msgfmt_parse_message )
 		RETURN_FALSE;
 	}
 
-	// Create an ICU message formatter.
+	/* Create an ICU message formatter. */
 	MSG_FORMAT_OBJECT(mfo) = umsg_open(spattern, spattern_len, slocale, NULL, &INTL_DATA_ERROR_CODE(mfo));
 	if(spattern && spattern_len) {
 		efree(spattern);
@@ -142,7 +142,7 @@ PHP_FUNCTION( msgfmt_parse_message )
 
 	msgfmt_do_parse(mfo, source, src_len, return_value TSRMLS_CC);
 
-	// drop the temporary formatter
+	/* drop the temporary formatter */
 	msgformat_data_free(&mfo->mf_data TSRMLS_CC);
 }
 /* }}} */

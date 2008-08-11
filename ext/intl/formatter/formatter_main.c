@@ -35,7 +35,7 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	int         spattern_len = 0;
 	FORMATTER_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "sl|s",
 		&locale, &locale_len, &style, &pattern, &pattern_len ) == FAILURE )
 	{
@@ -49,7 +49,7 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	object = return_value;
 	FORMATTER_METHOD_FETCH_OBJECT;
 
-	// Convert pattern (if specified) to UTF-16.
+	/* Convert pattern (if specified) to UTF-16. */
 	if(pattern && pattern_len) {
 		intl_convert_utf8_to_utf16(&spattern, &spattern_len, pattern, pattern_len, &INTL_DATA_ERROR_CODE(nfo));
 		INTL_CTOR_CHECK_STATUS(nfo, "numfmt_create: error converting pattern to UTF-16");
@@ -59,7 +59,7 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		locale = INTL_G(default_locale);
 	}
 
-	// Create an ICU number formatter.
+	/* Create an ICU number formatter. */
 	FORMATTER_OBJECT(nfo) = unum_open(style, spattern, spattern_len, locale, NULL, &INTL_DATA_ERROR_CODE(nfo));
 
 	if(spattern) {
@@ -101,7 +101,7 @@ PHP_FUNCTION( numfmt_get_error_code )
 {
 	FORMATTER_METHOD_INIT_VARS
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
 		&object, NumberFormatter_ce_ptr ) == FAILURE )
 	{
@@ -113,7 +113,7 @@ PHP_FUNCTION( numfmt_get_error_code )
 
 	nfo = (NumberFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
 
-	// Return formatter's last error code.
+	/* Return formatter's last error code. */
 	RETURN_LONG( INTL_DATA_ERROR_CODE(nfo) );
 }
 /* }}} */
@@ -128,7 +128,7 @@ PHP_FUNCTION( numfmt_get_error_message )
 	char*                    message = NULL;
 	FORMATTER_METHOD_INIT_VARS
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
 		&object, NumberFormatter_ce_ptr ) == FAILURE )
 	{
@@ -140,7 +140,7 @@ PHP_FUNCTION( numfmt_get_error_message )
 
 	nfo = (NumberFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
 
-	// Return last error message.
+	/* Return last error message. */
 	message = intl_error_get_message( &INTL_DATA_ERROR(nfo) TSRMLS_CC );
 	RETURN_STRING( message, 0);
 }

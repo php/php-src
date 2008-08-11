@@ -38,7 +38,7 @@ PHP_FUNCTION( msgfmt_get_pattern )
 	UChar* value  = value_buf;
 	MSG_FORMAT_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,	
@@ -46,7 +46,7 @@ PHP_FUNCTION( msgfmt_get_pattern )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	MSG_FORMAT_METHOD_FETCH_OBJECT;
 
 	if(mfo->mf_data.orig_format) {
@@ -70,7 +70,7 @@ PHP_FUNCTION( msgfmt_set_pattern )
 	UChar*	    spattern  = NULL;
 	MSG_FORMAT_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os",
 		&object, MessageFormatter_ce_ptr, &value, &value_len ) == FAILURE )
 	{
@@ -81,7 +81,7 @@ PHP_FUNCTION( msgfmt_set_pattern )
 
 	MSG_FORMAT_METHOD_FETCH_OBJECT;
 
-	// Convert given pattern to UTF-16.
+	/* Convert given pattern to UTF-16. */
 	intl_convert_utf8_to_utf16(&spattern, &spattern_len, value, value_len, &INTL_DATA_ERROR_CODE(mfo));
 	INTL_METHOD_CHECK_STATUS(mfo, "Error converting pattern to UTF-16" );
 
@@ -91,7 +91,7 @@ PHP_FUNCTION( msgfmt_set_pattern )
 		RETURN_FALSE;
 	}
 
-	// TODO: add parse error information
+	/* TODO: add parse error information */
 	umsg_applyPattern(MSG_FORMAT_OBJECT(mfo), spattern, spattern_len, NULL, &INTL_DATA_ERROR_CODE(mfo));
 	efree(spattern);
 	INTL_METHOD_CHECK_STATUS(mfo, "Error setting symbol value");
@@ -116,7 +116,7 @@ PHP_FUNCTION( msgfmt_get_locale )
 	char *loc;
 	MSG_FORMAT_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
@@ -126,7 +126,7 @@ PHP_FUNCTION( msgfmt_get_locale )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	MSG_FORMAT_METHOD_FETCH_OBJECT;
 
 	loc = (char *)umsg_getLocale(MSG_FORMAT_OBJECT(mfo));
