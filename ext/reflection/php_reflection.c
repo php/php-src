@@ -3369,7 +3369,7 @@ ZEND_METHOD(reflection_class, getMethods)
 
 	array_init(return_value);
 	zend_hash_apply_with_arguments(&ce->function_table TSRMLS_CC, (apply_func_args_t) _addmethod_va, 4, &ce, return_value, filter, intern->obj);
-	if (intern->obj && instanceof_function(ce, zend_ce_closure)) {
+	if (intern->obj && instanceof_function(ce, zend_ce_closure TSRMLS_CC)) {
 		zend_function *closure = zend_get_closure_invoke_method(intern->obj TSRMLS_CC);
 		if (closure) {
 			_addmethod(closure, ce, return_value, filter, intern->obj TSRMLS_CC);
