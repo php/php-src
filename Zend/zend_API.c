@@ -4289,6 +4289,10 @@ ZEND_API void zend_save_error_handling(zend_error_handling *current TSRMLS_DC) /
 {
 	current->handling = EG(error_handling);
 	current->exception = EG(exception_class);
+	current->user_handler = EG(user_error_handler);
+	if (current->user_handler) {
+		Z_ADDREF_P(current->user_handler);
+	}
 }
 /* }}} */
 
@@ -4296,23 +4300,29 @@ ZEND_API void zend_replace_error_handling(zend_error_handling_t error_handling, 
 {
 	if (current) {
 		zend_save_error_handling(current TSRMLS_CC);
+		if (error_handling != EH_NORMAL && EG(user_error_handler)) {
+			zval_ptr_dtor(&EG(user_error_handler));
+			EG(user_error_handler) = NULL;
+		}
 	}
 	EG(error_handling) = error_handling;
 	EG(exception_class) = error_handling == EH_THROW ? exception_class : NULL;
-
-	if (error_handling == EH_NORMAL) {
-		EG(user_error_handler)     = EG(user_error_handler_old);
-	} else {
-		EG(user_error_handler_old) = EG(user_error_handler);
-		EG(user_error_handler)     = NULL;
-	}
 }
 /* }}} */
 
-ZEND_API void zend_restore_error_handling(const zend_error_handling *saved TSRMLS_DC) /* {{{ */
+ZEND_API void zend_restore_error_handling(zend_error_handling *saved TSRMLS_DC) /* {{{ */
 {
 	EG(error_handling) = saved->handling;
 	EG(exception_class) = saved->handling == EH_THROW ? saved->exception : NULL;
+	if (saved->user_handler	&& saved->user_handler != EG(user_error_handler)) {
+		if (EG(user_error_handler)) {
+			zval_ptr_dtor(&EG(user_error_handler));
+		}
+		EG(user_error_handler) = saved->user_handler;
+	} else if (saved->user_handler) {
+		zval_ptr_dtor(&saved->user_handler);
+	}
+	saved->user_handler = NULL;
 }
 /* }}} */
 

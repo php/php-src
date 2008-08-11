@@ -210,7 +210,6 @@ struct _zend_executor_globals {
 
 	int user_error_handler_error_reporting;
 	zval *user_error_handler;
-	zval *user_error_handler_old;
 	zval *user_exception_handler;
 	zend_stack user_error_handlers_error_reporting;
 	zend_ptr_stack user_error_handlers;
