@@ -49,7 +49,7 @@ var_dump(iterator_apply($it, 'non_existing_functon', NULL, 2));
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 int(0)
 int(1)
 int(2)
