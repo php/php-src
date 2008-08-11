@@ -106,13 +106,13 @@ void intl_error_set_custom_msg( intl_error* err, char* msg, int copyMsg TSRMLS_D
 	if( !err && !( err = intl_g_error_get( TSRMLS_C ) ) )
 		return;
 
-	// Free previous message if any
+	/* Free previous message if any */
 	intl_free_custom_error_msg( err TSRMLS_CC );
 
-	// Mark message copied if any
+	/* Mark message copied if any */
 	err->free_custom_error_message = copyMsg;
 
-	// Set user's error text message
+	/* Set user's error text message */
 	err->custom_error_message = copyMsg ? estrdup( msg ) : msg;
 }
 /* }}} */
@@ -130,7 +130,7 @@ char* intl_error_get_message( intl_error* err TSRMLS_DC )
 
 	uErrorName = u_errorName( err->code );
 
-	// Format output string
+	/* Format output string */
 	if( err->custom_error_message )
 	{
 		spprintf( &errMessage, 0, "%s: %s", err->custom_error_message, uErrorName );

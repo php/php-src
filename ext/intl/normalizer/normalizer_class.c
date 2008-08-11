@@ -23,9 +23,9 @@
 
 zend_class_entry *Normalizer_ce_ptr = NULL;
 
-/////////////////////////////////////////////////////////////////////////////
-// 'Normalizer' class registration structures & functions
-/////////////////////////////////////////////////////////////////////////////
+/*
+ * 'Normalizer' class registration structures & functions
+ */
 
 /* {{{ Normalizer methods arguments info */
 
@@ -56,12 +56,12 @@ void normalizer_register_Normalizer_class( TSRMLS_D )
 {
 	zend_class_entry ce;
 
-	// Create and register 'Normalizer' class.
+	/* Create and register 'Normalizer' class. */
 	INIT_CLASS_ENTRY( ce, "Normalizer", Normalizer_class_functions );
 	ce.create_object = NULL;
 	Normalizer_ce_ptr = zend_register_internal_class( &ce TSRMLS_CC );
 
-	// Declare 'Normalizer' class properties.
+	/* Declare 'Normalizer' class properties. */
 	if( !Normalizer_ce_ptr )
 	{
 		zend_error( E_ERROR,

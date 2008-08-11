@@ -32,7 +32,7 @@
  */
 PHP_FUNCTION( normalizer_normalize )
 {
-	// form is optional, defaults to FORM_C
+	/* form is optional, defaults to FORM_C */
 	long			form = NORMALIZER_DEFAULT;
 		
 	UChar*			uinput = NULL;
@@ -49,7 +49,7 @@ PHP_FUNCTION( normalizer_normalize )
 
 	intl_error_reset( NULL TSRMLS_CC );
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "u|l",
 				&uinput, &uinput_len, &form ) == FAILURE )
 	{
@@ -83,43 +83,45 @@ PHP_FUNCTION( normalizer_normalize )
 	 * Normalize string
 	 */
 
-	// Allocate memory for the destination buffer for normalization
+	/* Allocate memory for the destination buffer for normalization */
 	uret_len = uinput_len * expansion_factor;
 	uret_buf = eumalloc( uret_len + 1 );
 
-	// normalize
+	/* normalize */
 	size_needed = unorm_normalize( uinput, uinput_len, form, (int32_t) 0 /* options */, uret_buf, uret_len, &status);
 	
-	// Bail out if an unexpected error occured.
-	// (U_BUFFER_OVERFLOW_ERROR means that *target buffer is not large enough).
-	// (U_STRING_NOT_TERMINATED_WARNING usually means that the input string is empty).
+	/* Bail out if an unexpected error occured.
+	 * (U_BUFFER_OVERFLOW_ERROR means that *target buffer is not large enough).
+	 * (U_STRING_NOT_TERMINATED_WARNING usually means that the input string is empty).
+	 */
 	if( U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR && status != U_STRING_NOT_TERMINATED_WARNING ) {
 		efree( uret_buf );
 		RETURN_NULL();
 	}
 
 	if ( size_needed > uret_len ) {
-		// realloc does not seem to work properly - memory is corrupted
-		// uret_buf =  eurealloc(uret_buf, size_needed + 1);
+		/* realloc does not seem to work properly - memory is corrupted
+		 * uret_buf =  eurealloc(uret_buf, size_needed + 1);
+		 */
 		efree( uret_buf );
 		uret_buf = eumalloc( size_needed + 1 );
 		uret_len = size_needed;
 
 		status = U_ZERO_ERROR;
 
-		// try normalize again
+		/* try normalize again */
 		size_needed = unorm_normalize( uinput, uinput_len, form, (int32_t) 0 /* options */, uret_buf, uret_len, &status);
 
-		// Bail out if an unexpected error occured.
+		/* Bail out if an unexpected error occured. */
 		if( U_FAILURE(status)  ) {
-			// Set error messages.
+			/* Set error messages. */
 			intl_error_set_custom_msg( NULL,"Error normalizing string", 1 TSRMLS_CC );
 			efree( uret_buf );
 			RETURN_NULL();
 		}
 	}
 
-	// the buffer we actually used
+	/* the buffer we actually used */
 	uret_len = size_needed;
 	uret_buf[uret_len] = 0;
 	RETURN_UNICODEL(uret_buf, uret_len, 0);
@@ -133,7 +135,7 @@ PHP_FUNCTION( normalizer_normalize )
  */
 PHP_FUNCTION( normalizer_is_normalized )
 {
-	// form is optional, defaults to FORM_C
+	/* form is optional, defaults to FORM_C */
 	long		form = NORMALIZER_DEFAULT;
 
 	UChar*	 	uinput = NULL;
@@ -146,7 +148,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 
 	intl_error_reset( NULL TSRMLS_CC );
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "u|l",
 				&uinput, &uinput_len, &form) == FAILURE )
 	{
@@ -157,7 +159,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 	}
 
 	switch(form) {
-		// case NORMALIZER_NONE: not allowed - doesn't make sense
+		/* case NORMALIZER_NONE: not allowed - doesn't make sense */
 
 		case NORMALIZER_FORM_D:
 		case NORMALIZER_FORM_KD:
@@ -175,12 +177,12 @@ PHP_FUNCTION( normalizer_is_normalized )
 	 * Test normalization of string 
 	 */
 
-	// test string
+	/* test string */
 	uret = unorm_isNormalizedWithOptions( uinput, uinput_len, form, (int32_t) 0 /* options */, &status);
 	
-	// Bail out if an unexpected error occured.
+	/* Bail out if an unexpected error occured. */
 	if( U_FAILURE(status)  ) {
-		// Set error messages.
+		/* Set error messages. */
 		intl_error_set_custom_msg( NULL,"Error testing if string is the given normalization form.", 1 TSRMLS_CC );
 		RETURN_FALSE;
 	}

@@ -42,7 +42,7 @@ PHP_FUNCTION( numfmt_parse )
 	zval *zposition = NULL;
 	FORMATTER_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ou|lz!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &type, &zposition ) == FAILURE )
 	{
@@ -52,7 +52,7 @@ PHP_FUNCTION( numfmt_parse )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
 	if(zposition) {
@@ -109,7 +109,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 	zval *zcurrency = NULL, *zposition = NULL;
 	FORMATTER_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ouz|z!",
 		&object, NumberFormatter_ce_ptr, &str, &str_len, &zcurrency, &zposition ) == FAILURE )
 	{
@@ -119,7 +119,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
 	if(zposition) {

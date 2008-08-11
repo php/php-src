@@ -43,7 +43,7 @@ void dateformat_register_constants( INIT_FUNC_ARGS )
 
 	#define DATEFORMATTER_EXPOSE_UCAL_CLASS_CONST(x) zend_declare_class_constant_long( IntlDateFormatter_ce_ptr, ZEND_STRS( #x ) - 1, UCAL_##x TSRMLS_CC );
 
-	// UDateFormatStyle constants
+	/* UDateFormatStyle constants */
 	DATEFORMATTER_EXPOSE_CLASS_CONST( FULL );
 	DATEFORMATTER_EXPOSE_CLASS_CONST( LONG );
 	DATEFORMATTER_EXPOSE_CLASS_CONST( MEDIUM );
@@ -78,14 +78,14 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
     long        calendar = 1;
     UChar*      pattern_str = NULL;
     int         pattern_str_len = 0;
-    UChar*      timezone_utf16 = NULL;		//UTF-16 timezone_str
+    UChar*      timezone_utf16 = NULL;		/* UTF-16 timezone_str */
     int         timezone_utf16_len = 0;
 	UCalendar   ucal_obj = NULL;
 	IntlDateFormatter_object* dfo;
 	
 	intl_error_reset( NULL TSRMLS_CC );
 	object = return_value;
-	// Parse parameters.
+	/* Parse parameters. */
     if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "sll|ulu",
 		&locale, &locale_len, &date_type, & time_type , &timezone_utf16, &timezone_utf16_len , &calendar ,&pattern_str , &pattern_str_len ) == FAILURE )
     {
@@ -105,7 +105,7 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		DATE_FORMAT_OBJECT(dfo) = udat_open(time_type,date_type, locale, timezone_utf16, timezone_utf16_len ,pattern_str ,pattern_str_len , &INTL_DATA_ERROR_CODE(dfo));
 	}
 
-    //Set the calendar if passed
+    /* Set the calendar if passed */
     if(!U_FAILURE(INTL_DATA_ERROR_CODE(dfo)) && calendar) {
 		ucal_obj = ucal_open( timezone_utf16 , timezone_utf16_len , locale , calendar , &INTL_DATA_ERROR_CODE(dfo) );
 		if(!U_FAILURE(INTL_DATA_ERROR_CODE(dfo))) {
@@ -115,7 +115,7 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	INTL_CTOR_CHECK_STATUS(dfo, "datefmt_create: date formatter creation failed");
 
-	//Set the class variables 
+	/* Set the class variables */
 	dfo->date_type = date_type;
 	dfo->time_type = time_type;
 	dfo->calendar  = calendar;
@@ -158,7 +158,7 @@ PHP_FUNCTION( datefmt_get_error_code )
 	zval*                    object  = NULL;
 	IntlDateFormatter_object*  dfo     = NULL;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
 		&object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
@@ -169,7 +169,7 @@ PHP_FUNCTION( datefmt_get_error_code )
 
 	dfo = (IntlDateFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
 
-	// Return formatter's last error code.
+	/* Return formatter's last error code. */
 	RETURN_LONG( INTL_DATA_ERROR_CODE(dfo) );
 }
 /* }}} */
@@ -185,7 +185,7 @@ PHP_FUNCTION( datefmt_get_error_message )
 	zval*                    object  = NULL;
 	IntlDateFormatter_object*  dfo     = NULL;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
 		&object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
@@ -197,7 +197,7 @@ PHP_FUNCTION( datefmt_get_error_message )
 
 	dfo = (IntlDateFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
 
-	// Return last error message.
+	/* Return last error message. */
 	message = intl_error_get_message( &dfo->datef_data.error TSRMLS_CC );
 	RETURN_STRING( message, 0);
 }

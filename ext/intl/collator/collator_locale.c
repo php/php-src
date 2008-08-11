@@ -38,7 +38,7 @@ PHP_FUNCTION( collator_get_locale )
 
 	COLLATOR_METHOD_INIT_VARS
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol",
 		&object, Collator_ce_ptr, &type ) == FAILURE )
 	{
@@ -48,15 +48,15 @@ PHP_FUNCTION( collator_get_locale )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
-	// Get locale by specified type.
+	/* Get locale by specified type. */
 	locale_name = (char*) ucol_getLocaleByType(
 		co->ucoll, type, COLLATOR_ERROR_CODE_P( co ) );
 	COLLATOR_CHECK_STATUS( co, "Error getting locale by type" );
 
-	// Return it.
+	/* Return it. */
 	RETURN_ASCII_STRINGL( locale_name, strlen(locale_name), TRUE );
 }
 /* }}} */

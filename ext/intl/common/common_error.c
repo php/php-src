@@ -51,7 +51,7 @@ PHP_FUNCTION( intl_is_failure )
 {
 	long err_code;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "l",
 		&err_code ) == FAILURE )
 	{
@@ -72,7 +72,7 @@ PHP_FUNCTION( intl_error_name )
 {
 	long err_code;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "l",
 		&err_code ) == FAILURE )
 	{
@@ -93,7 +93,7 @@ void intl_expose_icu_error_codes( INIT_FUNC_ARGS )
 {
 	#define INTL_EXPOSE_CONST(x) REGISTER_LONG_CONSTANT(#x, x, CONST_CS)
 
-	// Warnings
+	/* Warnings */
 	INTL_EXPOSE_CONST( U_USING_FALLBACK_WARNING );
 	INTL_EXPOSE_CONST( U_ERROR_WARNING_START );
 	INTL_EXPOSE_CONST( U_USING_DEFAULT_WARNING );
@@ -105,7 +105,7 @@ void intl_expose_icu_error_codes( INIT_FUNC_ARGS )
 	INTL_EXPOSE_CONST( U_DIFFERENT_UCA_VERSION );
 	INTL_EXPOSE_CONST( U_ERROR_WARNING_LIMIT );
 
-	// Standard errors
+	/* Standard errors */
 	INTL_EXPOSE_CONST( U_ZERO_ERROR );
 	INTL_EXPOSE_CONST( U_ILLEGAL_ARGUMENT_ERROR );
 	INTL_EXPOSE_CONST( U_MISSING_RESOURCE_ERROR );
@@ -139,7 +139,7 @@ void intl_expose_icu_error_codes( INIT_FUNC_ARGS )
 	INTL_EXPOSE_CONST( U_NO_WRITE_PERMISSION );
 	INTL_EXPOSE_CONST( U_STANDARD_ERROR_LIMIT );
 
-	// The error code range 0x10000 0x10100 are reserved for Transliterator
+	/* The error code range 0x10000 0x10100 are reserved for Transliterator */
 	INTL_EXPOSE_CONST( U_BAD_VARIABLE_DEFINITION );
 	INTL_EXPOSE_CONST( U_PARSE_ERROR_START );
 	INTL_EXPOSE_CONST( U_MALFORMED_RULE );
@@ -178,11 +178,11 @@ void intl_expose_icu_error_codes( INIT_FUNC_ARGS )
 	INTL_EXPOSE_CONST( U_INVALID_FUNCTION );
 	INTL_EXPOSE_CONST( U_PARSE_ERROR_LIMIT );
 
-	// The error code range 0x10100 0x10200 are reserved for formatting API parsing error
+	/* The error code range 0x10100 0x10200 are reserved for formatting API parsing error */
 	INTL_EXPOSE_CONST( U_UNEXPECTED_TOKEN );
 	INTL_EXPOSE_CONST( U_FMT_PARSE_ERROR_START );
 	INTL_EXPOSE_CONST( U_MULTIPLE_DECIMAL_SEPARATORS );
-	INTL_EXPOSE_CONST( U_MULTIPLE_DECIMAL_SEPERATORS );    // Typo: kept for backward compatibility. Use U_MULTIPLE_DECIMAL_SEPARATORS
+	INTL_EXPOSE_CONST( U_MULTIPLE_DECIMAL_SEPERATORS );    /* Typo: kept for backward compatibility. Use U_MULTIPLE_DECIMAL_SEPARATORS */
 	INTL_EXPOSE_CONST( U_MULTIPLE_EXPONENTIAL_SYMBOLS );
 	INTL_EXPOSE_CONST( U_MALFORMED_EXPONENTIAL_PATTERN );
 	INTL_EXPOSE_CONST( U_MULTIPLE_PERCENT_SYMBOLS );
@@ -195,7 +195,7 @@ void intl_expose_icu_error_codes( INIT_FUNC_ARGS )
 	INTL_EXPOSE_CONST( U_UNSUPPORTED_ATTRIBUTE );
 	INTL_EXPOSE_CONST( U_FMT_PARSE_ERROR_LIMIT );
 
-	// The error code range 0x10200 0x102ff are reserved for Break Iterator related error
+	/* The error code range 0x10200 0x102ff are reserved for Break Iterator related error */
 	INTL_EXPOSE_CONST( U_BRK_INTERNAL_ERROR );
 	INTL_EXPOSE_CONST( U_BRK_ERROR_START );
 	INTL_EXPOSE_CONST( U_BRK_HEX_DIGITS_EXPECTED );
@@ -213,7 +213,7 @@ void intl_expose_icu_error_codes( INIT_FUNC_ARGS )
 	INTL_EXPOSE_CONST( U_BRK_MALFORMED_RULE_TAG );
 	INTL_EXPOSE_CONST( U_BRK_ERROR_LIMIT );
 
-	// The error codes in the range 0x10300-0x103ff are reserved for regular expression related errrs
+	/* The error codes in the range 0x10300-0x103ff are reserved for regular expression related errrs */
 	INTL_EXPOSE_CONST( U_REGEX_INTERNAL_ERROR );
 	INTL_EXPOSE_CONST( U_REGEX_ERROR_START );
 	INTL_EXPOSE_CONST( U_REGEX_RULE_SYNTAX );
@@ -231,7 +231,7 @@ void intl_expose_icu_error_codes( INIT_FUNC_ARGS )
 	INTL_EXPOSE_CONST( U_REGEX_SET_CONTAINS_STRING );
 	INTL_EXPOSE_CONST( U_REGEX_ERROR_LIMIT );
 
-	// The error code in the range 0x10400-0x104ff are reserved for IDNA related error codes
+	/* The error code in the range 0x10400-0x104ff are reserved for IDNA related error codes */
 #if defined(U_IDNA_PROHIBITED_ERROR)
 	INTL_EXPOSE_CONST( U_IDNA_PROHIBITED_ERROR );
 	INTL_EXPOSE_CONST( U_IDNA_ERROR_START );
@@ -245,7 +245,7 @@ void intl_expose_icu_error_codes( INIT_FUNC_ARGS )
 	INTL_EXPOSE_CONST( U_IDNA_ERROR_LIMIT );
 #endif
 
-	// Aliases for StringPrep
+	/* Aliases for StringPrep */
 	INTL_EXPOSE_CONST( U_STRINGPREP_PROHIBITED_ERROR );
 	INTL_EXPOSE_CONST( U_STRINGPREP_UNASSIGNED_ERROR );
 	INTL_EXPOSE_CONST( U_STRINGPREP_CHECK_BIDI_ERROR );

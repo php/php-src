@@ -34,7 +34,7 @@ PHP_FUNCTION( numfmt_get_attribute )
 	long attribute, value;
 	FORMATTER_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol",
 		&object, NumberFormatter_ce_ptr, &attribute ) == FAILURE )
 	{
@@ -44,7 +44,7 @@ PHP_FUNCTION( numfmt_get_attribute )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
 	switch(attribute) {
@@ -107,7 +107,7 @@ PHP_FUNCTION( numfmt_get_text_attribute )
 	int    length = 0;
 	FORMATTER_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol",
 		&object, NumberFormatter_ce_ptr, &attribute ) == FAILURE )
 	{
@@ -117,12 +117,12 @@ PHP_FUNCTION( numfmt_get_text_attribute )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
 	length = unum_getTextAttribute( FORMATTER_OBJECT(nfo), attribute, value, value_buf_size, &INTL_DATA_ERROR_CODE(nfo) );
 	if(INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR && length >= value_buf_size) {
-		++length; // to avoid U_STRING_NOT_TERMINATED_WARNING
+		++length; /* to avoid U_STRING_NOT_TERMINATED_WARNING */
 		INTL_DATA_ERROR_CODE(nfo) = U_ZERO_ERROR;
 		value = eumalloc(length);
 		length = unum_getTextAttribute( FORMATTER_OBJECT(nfo), attribute, value, length, &INTL_DATA_ERROR_CODE(nfo) );
@@ -148,7 +148,7 @@ PHP_FUNCTION( numfmt_set_attribute )
 	zval **value;
 	FORMATTER_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OlZ",
 		&object, NumberFormatter_ce_ptr, &attribute, &value ) == FAILURE)
 	{
@@ -158,7 +158,7 @@ PHP_FUNCTION( numfmt_set_attribute )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
 	switch(attribute) {
@@ -211,7 +211,7 @@ PHP_FUNCTION( numfmt_set_text_attribute )
 	int len;
 	FORMATTER_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olu",
 		&object, NumberFormatter_ce_ptr, &attribute, &value, &len ) == FAILURE)
 	{
@@ -221,10 +221,10 @@ PHP_FUNCTION( numfmt_set_text_attribute )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
-	// Actually set new attribute value.
+	/* Actually set new attribute value. */
 	unum_setTextAttribute(FORMATTER_OBJECT(nfo), attribute, value, len, &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Error setting text attribute" );
 
@@ -245,7 +245,7 @@ PHP_FUNCTION( numfmt_get_symbol )
 	int length = USIZE(value);
 	FORMATTER_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol",
 		&object, NumberFormatter_ce_ptr, &symbol ) == FAILURE )
 	{
@@ -255,12 +255,12 @@ PHP_FUNCTION( numfmt_get_symbol )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
 	length = unum_getSymbol(FORMATTER_OBJECT(nfo), symbol, value_buf, length, &INTL_DATA_ERROR_CODE(nfo));
 	if(INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR && length >= USIZE( value )) {
-		++length; // to avoid U_STRING_NOT_TERMINATED_WARNING
+		++length; /* to avoid U_STRING_NOT_TERMINATED_WARNING */
 		INTL_DATA_ERROR_CODE(nfo) = U_ZERO_ERROR;
 		value = eumalloc(length);
 		length = unum_getSymbol(FORMATTER_OBJECT(nfo), symbol, value, length, &INTL_DATA_ERROR_CODE(nfo));
@@ -287,7 +287,7 @@ PHP_FUNCTION( numfmt_set_symbol )
 	int        value_len = 0;
 	FORMATTER_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olu",
 		&object, NumberFormatter_ce_ptr, &symbol, &value, &value_len ) == FAILURE )
 	{
@@ -297,10 +297,10 @@ PHP_FUNCTION( numfmt_set_symbol )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
-	// Actually set the symbol.
+	/* Actually set the symbol. */
 	unum_setSymbol(FORMATTER_OBJECT(nfo), symbol, value, value_len, &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Error setting symbol value" );
 
@@ -320,7 +320,7 @@ PHP_FUNCTION( numfmt_get_pattern )
 	UChar* value  = value_buf;
 	FORMATTER_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
 		&object, NumberFormatter_ce_ptr ) == FAILURE )
 	{
@@ -330,12 +330,12 @@ PHP_FUNCTION( numfmt_get_pattern )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
 	length = unum_toPattern(FORMATTER_OBJECT(nfo), 0, value, length, &INTL_DATA_ERROR_CODE(nfo));
 	if(INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR && length >= USIZE( value_buf )) {
-		++length; // to avoid U_STRING_NOT_TERMINATED_WARNING
+		++length; /* to avoid U_STRING_NOT_TERMINATED_WARNING */
 		INTL_DATA_ERROR_CODE(nfo) = U_ZERO_ERROR;
 		value = eumalloc(length);
 		length = unum_toPattern( FORMATTER_OBJECT(nfo), 0, value, length, &INTL_DATA_ERROR_CODE(nfo) );
@@ -361,7 +361,7 @@ PHP_FUNCTION( numfmt_set_pattern )
 	int         value_len = 0;
 	FORMATTER_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ou",
 		&object, NumberFormatter_ce_ptr, &value, &value_len ) == FAILURE )
 	{
@@ -371,7 +371,7 @@ PHP_FUNCTION( numfmt_set_pattern )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
 	unum_applyPattern(FORMATTER_OBJECT(nfo), 0, value, value_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
@@ -392,7 +392,7 @@ PHP_FUNCTION( numfmt_get_locale )
 	char* loc;
 	FORMATTER_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|l",
 		&object, NumberFormatter_ce_ptr, &type ) == FAILURE )
 	{
@@ -402,7 +402,7 @@ PHP_FUNCTION( numfmt_get_locale )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
 	loc = (char *)unum_getLocaleByType(FORMATTER_OBJECT(nfo), type, &INTL_DATA_ERROR_CODE(nfo));

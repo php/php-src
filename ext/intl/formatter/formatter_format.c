@@ -38,7 +38,7 @@ PHP_FUNCTION( numfmt_format )
 	int formatted_len = USIZE(format_buf);
 	FORMATTER_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OZ|l",
 		&object, NumberFormatter_ce_ptr,  &number, &type ) == FAILURE )
 	{
@@ -48,7 +48,7 @@ PHP_FUNCTION( numfmt_format )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
 	if(type == FORMAT_TYPE_DEFAULT) {
@@ -61,7 +61,7 @@ PHP_FUNCTION( numfmt_format )
 		}
 
 		if(Z_TYPE_PP(number) == IS_LONG) {
-			// take INT32 on 32-bit, int64 on 64-bit
+			/* take INT32 on 32-bit, int64 on 64-bit */
 			type = (sizeof(long) == 8)?FORMAT_TYPE_INT64:FORMAT_TYPE_INT32;
 		} else if(Z_TYPE_PP(number) == IS_DOUBLE) {
 			type = FORMAT_TYPE_DOUBLE;
@@ -148,7 +148,7 @@ PHP_FUNCTION( numfmt_format_currency )
 	int        currency_len;
 	FORMATTER_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Odu",
 		&object, NumberFormatter_ce_ptr,  &number, &currency, &currency_len ) == FAILURE )
 	{
@@ -158,15 +158,16 @@ PHP_FUNCTION( numfmt_format_currency )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
-	// Format the number using a fixed-length buffer.
+	/* Format the number using a fixed-length buffer. */
 	formatted_len = unum_formatDoubleCurrency(nfo->nf_data.unum, number, currency, formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
 
-	// If the buffer turned out to be too small
-	// then allocate another buffer dynamically
-	// and use it to format the number.
+	/* If the buffer turned out to be too small
+	 * then allocate another buffer dynamically
+	 * and use it to format the number.
+	 */
  	if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
  		intl_error_reset(INTL_DATA_ERROR_P(nfo) TSRMLS_CC); 
 		formatted = eumalloc(formatted_len+1);

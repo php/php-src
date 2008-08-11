@@ -69,7 +69,7 @@ static double internal_get_arr_ele(IntlDateFormatter_object *dfo  , HashTable* h
 			result =  Z_LVAL_PP(ele_value);
 		}
 	}
-	//printf("\n Inside internal_get_arr_ele key_name= %s , result = %g \n" , key_name, result);
+	/* printf("\n Inside internal_get_arr_ele key_name= %s , result = %g \n" , key_name, result); */
 	return result;
 }
 /* }}} */
@@ -88,9 +88,9 @@ static void internal_create_ucal(IntlDateFormatter_object *dfo, HashTable* hash_
 	long mday =0;
 	UBool isInDST = FALSE;
 
-	//Fetch  values from the incoming array
-	year = internal_get_arr_ele( dfo , hash_arr , CALENDAR_YEAR TSRMLS_CC) + 1900; //tm_year is years since 1900
-	//Month in ICU and PHP starts from January =0
+	/* Fetch  values from the incoming array */
+	year = internal_get_arr_ele( dfo , hash_arr , CALENDAR_YEAR TSRMLS_CC) + 1900; /* tm_year is years since 1900 */
+	/* Month in ICU and PHP starts from January =0 */
 	month = internal_get_arr_ele( dfo , hash_arr , CALENDAR_MON TSRMLS_CC);
 	hour = internal_get_arr_ele( dfo , hash_arr , CALENDAR_HOUR TSRMLS_CC);
 	minute = internal_get_arr_ele( dfo , hash_arr , CALENDAR_MIN TSRMLS_CC);
@@ -98,20 +98,21 @@ static void internal_create_ucal(IntlDateFormatter_object *dfo, HashTable* hash_
 	wday = internal_get_arr_ele( dfo , hash_arr , CALENDAR_WDAY TSRMLS_CC);
 	yday = internal_get_arr_ele( dfo , hash_arr , CALENDAR_YDAY TSRMLS_CC);
 	isInDST = internal_get_arr_ele( dfo , hash_arr , CALENDAR_ISDST TSRMLS_CC);
-	//For the ucal_setDateTime() function , this is the 'date'  value
+	/* For the ucal_setDateTime() function , this is the 'date'  value */
 	mday = internal_get_arr_ele( dfo , hash_arr , CALENDAR_MDAY TSRMLS_CC);
 
-	//set the incoming values for the calendar 	
+	/* set the incoming values for the calendar */
 	ucal_setDateTime( pcal, year, month  , mday , hour , minute , second , &INTL_DATA_ERROR_CODE(dfo));
 	if( INTL_DATA_ERROR_CODE(dfo) != U_ZERO_ERROR){
 		return;
 	}
-	//ICU UCAL_DAY_OF_WEEK starts from SUNDAY=1  thru SATURDAY=7 
-	//whereas PHP localtime has tm_wday SUNDAY=0 thru SATURDAY=6
+	/* ICU UCAL_DAY_OF_WEEK starts from SUNDAY=1  thru SATURDAY=7 
+	 * whereas PHP localtime has tm_wday SUNDAY=0 thru SATURDAY=6
+	 */
 	ucal_set( pcal, UCAL_DAY_OF_WEEK , (wday+1));
 	ucal_set( pcal, UCAL_DAY_OF_YEAR , yday);
 	
-	//TO DO :How to set the isInDST field?Is it required to set
+	/* TO DO: How to set the isInDST field?Is it required to set */
 }
 
 
@@ -129,18 +130,15 @@ PHP_FUNCTION(datefmt_format)
 
 	DATE_FORMAT_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oz", &object, IntlDateFormatter_ce_ptr ,&zarg ) == FAILURE )
-        {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "datefmt_format: unable to parse input params", 0 TSRMLS_CC );
-                RETURN_FALSE;
-        }
+	{
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_format: unable to parse input params", 0 TSRMLS_CC );
+		RETURN_FALSE;
+	}
 
-
-	// Fetch the object.
+	/* Fetch the object. */
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
-
 
 	switch(Z_TYPE_P(zarg) ){
 		case IS_LONG:
@@ -148,7 +146,7 @@ PHP_FUNCTION(datefmt_format)
 			timestamp = p_timestamp * 1000;
 			break;
 		case IS_DOUBLE:
-			//timestamp*1000 since ICU expects it in milliseconds
+			/* timestamp*1000 since ICU expects it in milliseconds */
 			p_timestamp = Z_DVAL_P(zarg) ;
 			timestamp = p_timestamp * 1000;
 			break;
@@ -156,13 +154,13 @@ PHP_FUNCTION(datefmt_format)
 			hash_arr = Z_ARRVAL_P(zarg);
 			if( !hash_arr || zend_hash_num_elements( hash_arr ) == 0 )
 				RETURN_FALSE;
-			//Create a UCalendar object from the array and then format it
+			/* Create a UCalendar object from the array and then format it */
 			temp_cal = ucal_open(NULL, -1, NULL, UCAL_GREGORIAN, &INTL_DATA_ERROR_CODE(dfo));
 			ucal_clear(temp_cal);
 			INTL_METHOD_CHECK_STATUS( dfo, "datefmt_format: Date formatting failed while creating calendar from the  array" )
 			internal_create_ucal( dfo ,  hash_arr , temp_cal TSRMLS_CC);
 			INTL_METHOD_CHECK_STATUS( dfo, "datefmt_format: Date formatting failed while creating calendar from the  array" )
-			//Fetch the timestamp from the  created UCalendar
+			/* Fetch the timestamp from the  created UCalendar */
 			timestamp  = ucal_getMillis(temp_cal  , &INTL_DATA_ERROR_CODE(dfo) );
 			INTL_METHOD_CHECK_STATUS( dfo, "datefmt_format: Date formatting failed" )
 			break;

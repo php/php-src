@@ -26,7 +26,7 @@
 #include "intl_data.h"
 
 /* {{{ */
-static msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS) 
+static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS) 
 {
 	char*       locale;
 	int         locale_len = 0;
@@ -38,7 +38,7 @@ static msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	intl_error_reset( NULL TSRMLS_CC );
 	object = return_value;
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "su",
 		&locale, &locale_len, &spattern, &spattern_len ) == FAILURE )
 	{
@@ -51,7 +51,7 @@ static msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
 	MSG_FORMAT_METHOD_FETCH_OBJECT;
 
-	// Convert pattern (if specified) to UTF-16.
+	/* Convert pattern (if specified) to UTF-16. */
 	if(locale_len == 0) {
 		locale = UG(default_locale);
 	}
@@ -63,7 +63,7 @@ static msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		INTL_CTOR_CHECK_STATUS(mfo, "msgfmt_create: error converting pattern to quote-friendly format");
 	}
 
-	// Create an ICU message formatter.
+	/* Create an ICU message formatter. */
 	MSG_FORMAT_OBJECT(mfo) = umsg_open(spattern, spattern_len, locale, NULL, &INTL_DATA_ERROR_CODE(mfo));
 	if(free_pattern) {
 		efree(spattern);
@@ -105,7 +105,7 @@ PHP_FUNCTION( msgfmt_get_error_code )
 	zval*                    object  = NULL;
 	MessageFormatter_object*  mfo     = NULL;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
@@ -117,7 +117,7 @@ PHP_FUNCTION( msgfmt_get_error_code )
 
 	mfo = (MessageFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
 
-	// Return formatter's last error code.
+	/* Return formatter's last error code. */
 	RETURN_LONG( INTL_DATA_ERROR_CODE(mfo) );
 }
 /* }}} */
@@ -133,7 +133,7 @@ PHP_FUNCTION( msgfmt_get_error_message )
 	zval*                    object  = NULL;
 	MessageFormatter_object*  mfo     = NULL;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
@@ -145,7 +145,7 @@ PHP_FUNCTION( msgfmt_get_error_message )
 
 	mfo = (MessageFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
 
-	// Return last error message.
+	/* Return last error message. */
 	message = intl_error_get_message( &mfo->mf_data.error TSRMLS_CC );
 	RETURN_STRING( message, 0);
 }
