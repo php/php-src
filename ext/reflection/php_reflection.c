@@ -509,9 +509,8 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			ulong index;
 
 			if ((prop_type = zend_hash_get_current_key_ex(properties, &prop_name, &prop_name_size, &index, 0, &pos)) == (UG(unicode)?HASH_KEY_IS_UNICODE:HASH_KEY_IS_STRING)) {
-				if (prop_name_size && (UG(unicode)?prop_name.u[0]:prop_name.s[0])) {
-					/* skip all private and protected properties */
-					if (zend_u_hash_exists(&ce->properties_info, prop_type, prop_name, prop_name_size)) {
+				if (prop_name_size && (UG(unicode)?prop_name.u[0]:prop_name.s[0])) { /* skip all private and protected properties */
+					if (!zend_u_hash_exists(&ce->properties_info, prop_type, prop_name, prop_name_size)) {
 						count++;
 						_property_string(&dyn, NULL, prop_name, sub_indent.string TSRMLS_CC);	
 					}

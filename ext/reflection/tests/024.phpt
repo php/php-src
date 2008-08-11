@@ -9,7 +9,12 @@ class C1 {
 	protected $p2 = 2;
 	public    $p3 = 3;
 }
-$obj = new ReflectionObject(new C1());
+
+$x = new C1();
+$x->z = 4;
+$x->p3 = 5;
+
+$obj = new ReflectionObject($x);
 echo $obj;
 ?>
 --EXPECTF--	
@@ -32,7 +37,7 @@ Object of class [ <user> class C1 ] {
   }
 
   - Dynamic properties [1] {
-    Property [ <dynamic> public $p3 ]
+    Property [ <dynamic> public $z ]
   }
 
   - Methods [0] {
