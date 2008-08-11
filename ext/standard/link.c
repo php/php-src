@@ -49,6 +49,7 @@
 
 #include "php_link.h"
 #include "ext/standard/file.h"
+#include "php_string.h"
 
 /* {{{ proto string readlink(string filename) U
    Return the target of a symbolic link */
@@ -126,6 +127,8 @@ PHP_FUNCTION(symlink)
 	int ret;
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];
+	char dirname[MAXPATHLEN];
+	size_t len;
 
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ", &pp_topath, &pp_frompath) == FAILURE ||
@@ -134,7 +137,15 @@ PHP_FUNCTION(symlink)
 		return;
 	}
 
-	if (!expand_filepath(frompath, source_p TSRMLS_CC) || !expand_filepath(topath, dest_p TSRMLS_CC)) {
+	if (!expand_filepath(frompath, source_p TSRMLS_CC)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such file or directory");
+		RETURN_FALSE;
+	}
+
+	memcpy(dirname, source_p, sizeof(source_p));
+	len = php_dirname(dirname, strlen(dirname));
+
+	if (!expand_filepath_ex(topath, dest_p, dirname, len TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such file or directory");
 		RETURN_FALSE;
 	}
