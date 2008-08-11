@@ -288,6 +288,12 @@ class corrupt_zipmaker
 					$this->offset, strlen($this->start),
 					strlen($this->comment)) . $this->comment;
 				break;
+			case 'disknumber' :
+				$write .= "PK\x05\x06\x01\x00\x01\x00" .
+					pack("vvVVv", $this->count, $this->count,
+					$this->offset, strlen($this->start),
+					strlen($this->comment)) . $this->comment;
+				break;
 			case 'count1' :
 				$write .= "PK\x05\x06\x00\x00\x00\x00" .
 					pack("vvVVv", $this->count + 1, $this->count,
