@@ -26,11 +26,10 @@
 #include "zend_objects_API.h"
 #include "zend_globals.h"
 
-#define ZEND_INVOKE_FUNC_NAME "__invoke"
 #define ZEND_CLOSURE_PRINT_NAME "Closure object"
 
 #define ZEND_CLOSURE_PROPERTY_ERROR() \
-	zend_error(E_ERROR, "Closure object cannot have properties")
+	zend_error(E_RECOVERABLE_ERROR, "Closure object cannot have properties")
 
 typedef struct _zend_closure {
 	zend_object    std;
@@ -38,7 +37,8 @@ typedef struct _zend_closure {
 	zval          *this_ptr;
 } zend_closure;
 
-static zend_class_entry *zend_ce_closure;
+/* non-static since it needs to be referenced */
+ZEND_API zend_class_entry *zend_ce_closure;
 static zend_object_handlers closure_handlers;
 
 ZEND_METHOD(Closure, __invoke) /* {{{ */
@@ -50,7 +50,7 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 	arguments = emalloc(sizeof(zval**) * ZEND_NUM_ARGS());
 	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), arguments) == FAILURE) {
 		efree(arguments);
-		zend_error(E_ERROR, "Cannot get arguments for calling closure");
+		zend_error(E_RECOVERABLE_ERROR, "Cannot get arguments for calling closure");
 		RETVAL_FALSE;
 	} else if (call_user_function_ex(CG(function_table), NULL, this_ptr, &closure_result_ptr, ZEND_NUM_ARGS(), arguments, 1, NULL TSRMLS_CC) == FAILURE) {
 		RETVAL_FALSE;
@@ -74,21 +74,21 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 
 static zend_function *zend_closure_get_constructor(zval *object TSRMLS_DC) /* {{{ */
 {
-	zend_error(E_ERROR, "Instantiation of 'Closure' is not allowed");
+	zend_error(E_RECOVERABLE_ERROR, "Instantiation of 'Closure' is not allowed");
 	return NULL;
 }
 /* }}} */
 
 static int zend_closure_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC) /* {{{ */
 {
-	zend_error(E_ERROR, "Serialization of 'Closure' is not allowed");
+	zend_error(E_RECOVERABLE_ERROR, "Serialization of 'Closure' is not allowed");
 	return FAILURE;
 }
 /* }}} */
 
 static int zend_closure_unserialize(zval **object, zend_class_entry *ce, const unsigned char *buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC) /* {{{ */
 {
-	zend_error(E_ERROR, "Unserialization of 'Closure' is not allowed");
+	zend_error(E_RECOVERABLE_ERROR, "Unserialization of 'Closure' is not allowed");
 	return FAILURE;
 }
 /* }}} */
@@ -96,6 +96,23 @@ static int zend_closure_unserialize(zval **object, zend_class_entry *ce, const u
 static int zend_closure_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 {
 	return (Z_OBJ_HANDLE_P(o1) != Z_OBJ_HANDLE_P(o2));
+}
+/* }}} */
+
+ZEND_API zend_function *zend_get_closure_invoke_method(zval *obj TSRMLS_DC) /* {{{ */
+{
+	zend_closure *closure = (zend_closure *)zend_object_store_get_object(obj TSRMLS_CC);	
+	zend_function *invoke = (zend_function*)emalloc(sizeof(zend_function));
+
+	invoke->common = closure->func.common;
+	invoke->type = ZEND_INTERNAL_FUNCTION;
+	invoke->internal_function.fn_flags = ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER;
+	invoke->internal_function.handler = ZEND_MN(Closure___invoke);
+	invoke->internal_function.module = 0;
+	invoke->internal_function.scope = zend_ce_closure;
+	invoke->internal_function.function_name = estrndup(ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1);
+	return invoke;
+	
 }
 /* }}} */
 
@@ -109,18 +126,8 @@ static zend_function *zend_closure_get_method(zval **object_ptr, char *method_na
 	if ((method_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1) &&
 		memcmp(lc_name, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
 	) {
-		zend_closure *closure = (zend_closure *)zend_object_store_get_object(*object_ptr TSRMLS_CC);
-		zend_function *invoke = (zend_function*)emalloc(sizeof(zend_function));
-
-		invoke->common = closure->func.common;
-		invoke->type = ZEND_INTERNAL_FUNCTION;
-		invoke->internal_function.fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
-		invoke->internal_function.handler = ZEND_MN(Closure___invoke);
-		invoke->internal_function.module = 0;
-		invoke->internal_function.scope = zend_ce_closure;
-		invoke->internal_function.function_name = estrndup(ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1);
 		free_alloca(lc_name, use_heap);
-		return invoke;
+		return zend_get_closure_invoke_method(*object_ptr TSRMLS_CC);
 	}
 	free_alloca(lc_name, use_heap);
 	return NULL;
