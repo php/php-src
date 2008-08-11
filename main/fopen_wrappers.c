@@ -695,6 +695,14 @@ PHPAPI char *php_strip_url_passwd(char *url)
  */
 PHPAPI char *expand_filepath(const char *filepath, char *real_path TSRMLS_DC)
 {
+	return expand_filepath_ex(filepath, real_path, NULL, 0 TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ expand_filepath_ex
+ */
+PHPAPI char *expand_filepath_ex(const char *filepath, char *real_path, const char *relative_to, size_t relative_to_len TSRMLS_DC)
+{
 	cwd_state new_state;
 	char cwd[MAXPATHLEN];
 	int copy_len;
@@ -705,7 +713,16 @@ PHPAPI char *expand_filepath(const char *filepath, char *real_path TSRMLS_DC)
 		cwd[0] = '\0';
 	} else {
 		const char *iam = SG(request_info).path_translated;
-		char *result = VCWD_GETCWD(cwd, MAXPATHLEN);
+		const char *result;
+		if (relative_to) {
+			if (relative_to_len > MAXPATHLEN-1U) {
+				return NULL;
+			}
+			result = relative_to;
+			memcpy(cwd, relative_to, relative_to_len+1U);
+		} else {
+			result = VCWD_GETCWD(cwd, MAXPATHLEN);
+		}
 
 		if (!result && (iam != filepath)) {
 			int fdtest = -1;
