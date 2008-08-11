@@ -112,7 +112,6 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zval *obj TSRMLS_DC) /* {
 	invoke->internal_function.scope = zend_ce_closure;
 	invoke->internal_function.function_name = estrndup(ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1);
 	return invoke;
-	
 }
 /* }}} */
 
