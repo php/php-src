@@ -26,6 +26,7 @@
 #include "php_dir.h"
 #include "php_string.h"
 #include "php_scandir.h"
+#include "basic_functions.h"
 
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
@@ -352,6 +353,15 @@ PHP_FUNCTION(chdir)
 	if (ret != 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s (errno %d)", strerror(errno), errno);
 		RETURN_FALSE;
+	}
+
+	if (BG(CurrentStatFile) && !IS_ABSOLUTE_PATH(BG(CurrentStatFile), strlen(BG(CurrentStatFile)))) {
+		efree(BG(CurrentStatFile));
+		BG(CurrentStatFile) = NULL;
+	}
+	if (BG(CurrentLStatFile) && !IS_ABSOLUTE_PATH(BG(CurrentLStatFile), strlen(BG(CurrentLStatFile)))) {
+		efree(BG(CurrentLStatFile));
+		BG(CurrentLStatFile) = NULL;
 	}
 
 	RETURN_TRUE;
