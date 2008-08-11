@@ -278,11 +278,7 @@ end:
 
 	MyG(num_links)++;
 
-#if !defined(MYSQLI_USE_MYSQLND)
 	mysql->multi_query = 0;
-#else
-	mysql->multi_query = 1;
-#endif
 
 	if (!object || !instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry TSRMLS_CC)) {
 		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);	
