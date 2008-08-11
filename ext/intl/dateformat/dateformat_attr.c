@@ -27,40 +27,36 @@
 #include <unicode/ucal.h>
 
 static void internal_set_calendar(IntlDateFormatter_object *dfo, char* timezone_id , int timezone_id_len , int calendar  ,zval* return_value TSRMLS_DC){
+	int         timezone_utf16_len = 0;
+	UChar*      timezone_utf16  = NULL;  /* timezone_id in UTF-16 */
+	char*       locale = NULL;
+	int         locale_type =ULOC_ACTUAL_LOCALE;
 
-        int         timezone_utf16_len = 0;
-        UChar*      timezone_utf16  = NULL;             //timezone_id in UTF-16
+	UCalendar*   ucal_obj = NULL;
 
-        char*       locale = NULL;
-        int         locale_type =ULOC_ACTUAL_LOCALE;
+	/* check for the validity  of value of calendar passed */
+	intl_error_reset( NULL TSRMLS_CC );
+	if( calendar > 1){
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"datefmt_set_calendar: calendar value specified is out of valid range", 0 TSRMLS_CC);
+		RETURN_FALSE;
+	}
 
-        UCalendar*   ucal_obj = NULL;
+	/* Convert timezone to UTF-16. */
+	intl_convert_utf8_to_utf16(&timezone_utf16, &timezone_utf16_len, timezone_id, timezone_id_len  , &INTL_DATA_ERROR_CODE(dfo));
+	INTL_METHOD_CHECK_STATUS(dfo, "Error converting timezone to UTF-16" );
 
-        //check for the validity  of value of calendar passed
-        intl_error_reset( NULL TSRMLS_CC );
-        if( calendar > 1){
-                intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-                        "datefmt_set_calendar: calendar value specified is out of valid range", 0 TSRMLS_CC);
-                RETURN_FALSE;
-        }
+	/* Get the lcoale for the dateformatter */
+	locale = (char *)udat_getLocaleByType(DATE_FORMAT_OBJECT(dfo), locale_type ,&INTL_DATA_ERROR_CODE(dfo));
 
-        // Convert timezone to UTF-16.
-        intl_convert_utf8_to_utf16(&timezone_utf16, &timezone_utf16_len, timezone_id, timezone_id_len  , &INTL_DATA_ERROR_CODE(dfo));
-        INTL_METHOD_CHECK_STATUS(dfo, "Error converting timezone to UTF-16" );
+	/* Set the calendar if passed */
+	ucal_obj = ucal_open( timezone_utf16 , timezone_utf16_len , locale , calendar , &INTL_DATA_ERROR_CODE(dfo) );
+	udat_setCalendar( DATE_FORMAT_OBJECT(dfo), ucal_obj );
+	INTL_METHOD_CHECK_STATUS(dfo, "Error setting the calendar.");
 
-
-        //Get the lcoale for the dateformatter
-        locale = (char *)udat_getLocaleByType(DATE_FORMAT_OBJECT(dfo), locale_type ,&INTL_DATA_ERROR_CODE(dfo));
-
-        //Set the calendar if passed
-        ucal_obj = ucal_open( timezone_utf16 , timezone_utf16_len , locale , calendar , &INTL_DATA_ERROR_CODE(dfo) );
-        udat_setCalendar( DATE_FORMAT_OBJECT(dfo), ucal_obj );
-        INTL_METHOD_CHECK_STATUS(dfo, "Error setting the calendar.");
-
-        if( timezone_utf16){
-                efree(timezone_utf16);
-        }
-
+	if( timezone_utf16){
+		efree(timezone_utf16);
+	}
 }
 
 /* {{{ proto unicode IntlDateFormatter::getDateType( )
@@ -72,7 +68,7 @@ PHP_FUNCTION( datefmt_get_datetype )
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
 		intl_error_set( NULL , U_ILLEGAL_ARGUMENT_ERROR,	
@@ -80,7 +76,7 @@ PHP_FUNCTION( datefmt_get_datetype )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	INTL_METHOD_CHECK_STATUS(dfo, "Error getting formatter datetype." );
@@ -98,7 +94,7 @@ PHP_FUNCTION( datefmt_get_timetype )
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
 		intl_error_set( NULL , U_ILLEGAL_ARGUMENT_ERROR,	
@@ -106,7 +102,7 @@ PHP_FUNCTION( datefmt_get_timetype )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	INTL_METHOD_CHECK_STATUS(dfo, "Error getting formatter timetype." );
@@ -125,7 +121,7 @@ PHP_FUNCTION( datefmt_get_calendar )
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
 		intl_error_set( NULL , U_ILLEGAL_ARGUMENT_ERROR,	
@@ -133,7 +129,7 @@ PHP_FUNCTION( datefmt_get_calendar )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	INTL_METHOD_CHECK_STATUS(dfo, "Error getting formatter calendar." );
@@ -151,7 +147,7 @@ PHP_FUNCTION( datefmt_get_timezone_id )
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
 		intl_error_set( NULL , U_ILLEGAL_ARGUMENT_ERROR,	
@@ -159,7 +155,7 @@ PHP_FUNCTION( datefmt_get_timezone_id )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	INTL_METHOD_CHECK_STATUS(dfo, "Error getting formatter timezone_id." );
@@ -181,24 +177,24 @@ PHP_FUNCTION( datefmt_set_timezone_id )
 	char* 		timezone_id 		= NULL;
 	int 		timezone_id_len 	= 0;
 
-        DATE_FORMAT_METHOD_INIT_VARS;
+	DATE_FORMAT_METHOD_INIT_VARS;
 
-        // Parse parameters.
-        if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &object, IntlDateFormatter_ce_ptr ,&timezone_id , &timezone_id_len) == FAILURE )
-        {
-                intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-                        "datefmt_set_timezone_id: unable to parse input params", 0 TSRMLS_CC );
-                RETURN_FALSE;
-        }
+	/* Parse parameters. */
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &object, IntlDateFormatter_ce_ptr ,&timezone_id , &timezone_id_len) == FAILURE )
+	{
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"datefmt_set_timezone_id: unable to parse input params", 0 TSRMLS_CC );
+		RETURN_FALSE;
+	}
 
-        // Fetch the object.
-        DATE_FORMAT_METHOD_FETCH_OBJECT;
+	/* Fetch the object. */
+	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
-	//set the timezone for the calendar
+	/* set the timezone for the calendar */
 	internal_set_calendar( dfo , timezone_id , timezone_id_len , dfo->calendar ,return_value TSRMLS_CC );
 
-	//Set the IntlDateFormatter variable
-        if( dfo->timezone_id ){
+	/* Set the IntlDateFormatter variable */
+	if( dfo->timezone_id ){
 		efree(dfo->timezone_id);
 	}
 	dfo->timezone_id = estrndup(timezone_id , timezone_id_len);
@@ -220,7 +216,7 @@ PHP_FUNCTION( datefmt_get_pattern )
 
 	DATE_FORMAT_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	
@@ -228,12 +224,12 @@ PHP_FUNCTION( datefmt_get_pattern )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	length = udat_toPattern(DATE_FORMAT_OBJECT(dfo), is_pattern_localized, value, length, &INTL_DATA_ERROR_CODE(dfo));
 	if(INTL_DATA_ERROR_CODE(dfo) == U_BUFFER_OVERFLOW_ERROR && length >= USIZE( value_buf )) {
-		++length; // to avoid U_STRING_NOT_TERMINATED_WARNING
+		++length; /* to avoid U_STRING_NOT_TERMINATED_WARNING */
 		INTL_DATA_ERROR_CODE(dfo) = U_ZERO_ERROR;
 		value = eumalloc(length);
 		length = udat_toPattern(DATE_FORMAT_OBJECT(dfo), is_pattern_localized , value, length, &INTL_DATA_ERROR_CODE(dfo) );
@@ -264,7 +260,7 @@ PHP_FUNCTION( datefmt_set_pattern )
 
 	DATE_FORMAT_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os",
 		&object, IntlDateFormatter_ce_ptr,  &value, &value_len ) == FAILURE )
 	{
@@ -275,7 +271,7 @@ PHP_FUNCTION( datefmt_set_pattern )
 
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
-	// Convert given pattern to UTF-16.
+	/* Convert given pattern to UTF-16. */
 	intl_convert_utf8_to_utf16(&svalue, &slength, value, value_len, &INTL_DATA_ERROR_CODE(dfo));
 	INTL_METHOD_CHECK_STATUS(dfo, "Error converting pattern to UTF-16" );
 
@@ -300,7 +296,7 @@ PHP_FUNCTION( datefmt_get_locale )
 
 	DATE_FORMAT_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|l",
 		&object, IntlDateFormatter_ce_ptr ,&loc_type) == FAILURE )
 	{
@@ -310,7 +306,7 @@ PHP_FUNCTION( datefmt_get_locale )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	loc = (char *)udat_getLocaleByType(DATE_FORMAT_OBJECT(dfo), loc_type ,&INTL_DATA_ERROR_CODE(dfo));
@@ -328,7 +324,7 @@ PHP_FUNCTION( datefmt_is_lenient )
 	
 	DATE_FORMAT_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
 		&object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
@@ -338,7 +334,7 @@ PHP_FUNCTION( datefmt_is_lenient )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	RETVAL_BOOL(udat_isLenient(DATE_FORMAT_OBJECT(dfo)));
@@ -352,25 +348,24 @@ PHP_FUNCTION( datefmt_is_lenient )
  */
 PHP_FUNCTION( datefmt_set_lenient )
 {
+	zend_bool isLenient  = FALSE;
 
-        zend_bool isLenient  = FALSE;
+	DATE_FORMAT_METHOD_INIT_VARS;
 
-        DATE_FORMAT_METHOD_INIT_VARS;
+	/* Parse parameters. */
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ob",
+	&object, IntlDateFormatter_ce_ptr ,&isLenient ) == FAILURE )
+	{
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"datefmt_set_lenient: unable to parse input params", 0 TSRMLS_CC );
 
-        // Parse parameters.
-        if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ob",
-                &object, IntlDateFormatter_ce_ptr ,&isLenient ) == FAILURE )
-        {
-                intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-                        "datefmt_set_lenient: unable to parse input params", 0 TSRMLS_CC );
+		RETURN_FALSE;
+	}
 
-                RETURN_FALSE;
-        }
+	/* Fetch the object. */
+	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
-        // Fetch the object.
-        DATE_FORMAT_METHOD_FETCH_OBJECT;
-
-        udat_setLenient(DATE_FORMAT_OBJECT(dfo) , (UBool)isLenient );
+	udat_setLenient(DATE_FORMAT_OBJECT(dfo) , (UBool)isLenient );
 }
 /* }}} */
 
@@ -383,33 +378,33 @@ PHP_FUNCTION( datefmt_set_calendar )
 {
 	long	calendar = 0;
 
-        DATE_FORMAT_METHOD_INIT_VARS;
+	DATE_FORMAT_METHOD_INIT_VARS;
 
-        // Parse parameters.
-        if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol",
-                &object, IntlDateFormatter_ce_ptr, &calendar ) == FAILURE )
-        {
-                intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-                        "datefmt_set_calendar: unable to parse input params", 0 TSRMLS_CC);
-                RETURN_FALSE;
-        }
-
-	//check for the validity  of value of calendar passed
-	intl_error_reset( NULL TSRMLS_CC );
-	if( calendar > 1){
-                intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-                        "datefmt_set_calendar: calendar value specified is out of valid range", 0 TSRMLS_CC);
-                RETURN_FALSE;
+	/* Parse parameters. */
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol",
+	&object, IntlDateFormatter_ce_ptr, &calendar ) == FAILURE )
+	{
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"datefmt_set_calendar: unable to parse input params", 0 TSRMLS_CC);
+		RETURN_FALSE;
 	}
 
-        DATE_FORMAT_METHOD_FETCH_OBJECT;
+	/* check for the validity  of value of calendar passed */
+	intl_error_reset( NULL TSRMLS_CC );
+	if( calendar > 1){
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"datefmt_set_calendar: calendar value specified is out of valid range", 0 TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
+	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	internal_set_calendar( dfo , dfo->timezone_id , strlen(dfo->timezone_id) , calendar ,return_value TSRMLS_CC );
 
-	//Set the calendar  value in the IntlDateFormatter object
-        dfo->calendar = calendar ;
+	/* Set the calendar  value in the IntlDateFormatter object */
+	dfo->calendar = calendar ;
 
-        RETURN_TRUE;
+	RETURN_TRUE;
 }
 /* }}} */
 

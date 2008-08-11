@@ -41,13 +41,13 @@ zval* collator_convert_object_to_string( zval* obj TSRMLS_DC )
 {
 	zval* zstr        = NULL;
 
-	// Bail out if it's not an object.
+	/* Bail out if it's not an object. */
 	if( Z_TYPE_P( obj ) != IS_OBJECT )
 	{
 		COLLATOR_CONVERT_RETURN_FAILED( obj );
 	}
 
-	// Try object's handlers.
+	/* Try object's handlers. */
 	if( Z_OBJ_HT_P(obj)->get )
 	{
 		zstr = Z_OBJ_HT_P(obj)->get( obj TSRMLS_CC );
@@ -56,7 +56,7 @@ zval* collator_convert_object_to_string( zval* obj TSRMLS_DC )
 		{
 			case IS_OBJECT:
 				{
-					// Bail out.
+					/* Bail out. */
 					zval_ptr_dtor( &zstr );
 					COLLATOR_CONVERT_RETURN_FAILED( obj );
 				} break;
@@ -76,13 +76,13 @@ zval* collator_convert_object_to_string( zval* obj TSRMLS_DC )
 
 		if( Z_OBJ_HT_P(obj)->cast_object( obj, zstr, IS_UNICODE, 0 TSRMLS_CC ) == FAILURE )
 		{
-			// cast_object failed => bail out.
+			/* cast_object failed => bail out. */
 			zval_ptr_dtor( &zstr );
 			COLLATOR_CONVERT_RETURN_FAILED( obj );
 		}
 	}
 
-	// Object wasn't successfuly converted => bail out.
+	/* Object wasn't successfuly converted => bail out. */
 	if( zstr == NULL )
 	{
 		COLLATOR_CONVERT_RETURN_FAILED( obj );
@@ -105,7 +105,7 @@ zval* collator_convert_string_to_number( zval* str )
 	zval* num = collator_convert_string_to_number_if_possible( str );
 	if( num == str )
 	{
-		// String wasn't converted => return zero.
+		/* String wasn't converted => return zero. */
 		zval_ptr_dtor( &num );
 
 		ALLOC_INIT_ZVAL( num );
@@ -197,11 +197,11 @@ zval* collator_make_printable_zval( zval* arg )
 
 		if( use_copy )
 		{
-			// Don't copy arg_copy data to str.
+			/* Don't copy arg_copy data to str. */
 			ALLOC_ZVAL( str );
 			*str = arg_copy;
 
-			// Reset refcounter.
+			/* Reset refcounter. */
 			INIT_PZVAL( str );
 		}
 		else
@@ -234,17 +234,18 @@ zval* collator_normalize_sort_argument( zval* arg )
 
 	if( Z_TYPE_P( arg ) != IS_UNICODE )
 	{
-		// If its not a string then nothing to do.
-		// Return original arg.
+		/* If its not a string then nothing to do.
+		 * Return original arg.
+		 */
 		COLLATOR_CONVERT_RETURN_FAILED( arg );
 	}
 
-	// Try convert to number.
+	/* Try convert to number. */
 	n_arg = collator_convert_string_to_number_if_possible( arg );
 
 	if( n_arg == arg )
 	{
-		// Conversion to number failed.
+		/* Conversion to number failed. */
 		zval_ptr_dtor( &n_arg );
 
 		zval_add_ref( &arg );

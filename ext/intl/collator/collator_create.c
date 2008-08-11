@@ -34,7 +34,7 @@ static void collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	intl_error_reset( NULL TSRMLS_CC );
 	object = return_value;
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "s",
 		&locale, &locale_len ) == FAILURE )
 	{
@@ -53,7 +53,7 @@ static void collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		locale = UG(default_locale);
 	}
 
-	// Open ICU collator.
+	/* Open ICU collator. */
 	co->ucoll = ucol_open( locale, COLLATOR_ERROR_CODE_P( co ) );
 	INTL_CTOR_CHECK_STATUS(co, "collator_create: unable to open ICU collator");
 }

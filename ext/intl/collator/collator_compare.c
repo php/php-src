@@ -40,7 +40,7 @@ PHP_FUNCTION( collator_compare )
 
 	COLLATOR_METHOD_INIT_VARS
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ouu",
 		&object, Collator_ce_ptr, &str1, &str1_len, &str2, &str2_len ) == FAILURE )
 	{
@@ -50,7 +50,7 @@ PHP_FUNCTION( collator_compare )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
 
@@ -58,13 +58,13 @@ PHP_FUNCTION( collator_compare )
 	 * Compare given strings (converting them to UTF-16 first).
 	 */
 
-	// Compare given strings.
+	/* Compare given strings. */
 	result = ucol_strcoll(
 		co->ucoll,
 		str1, str1_len,
 		str2, str2_len );
 
-	// Return result of the comparison.
+	/* Return result of the comparison. */
 	RETURN_LONG( result );
 }
 /* }}} */

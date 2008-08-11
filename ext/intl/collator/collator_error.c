@@ -32,7 +32,7 @@ PHP_FUNCTION( collator_get_error_code )
 {
 	COLLATOR_METHOD_INIT_VARS
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
 		&object, Collator_ce_ptr ) == FAILURE )
 	{
@@ -42,12 +42,12 @@ PHP_FUNCTION( collator_get_error_code )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object (without resetting its last error code).
+	/* Fetch the object (without resetting its last error code). */
 	co = (Collator_object *) zend_object_store_get_object(object TSRMLS_CC);
 	if( co == NULL )
 		RETURN_FALSE;
 
-	// Return collator's last error code.
+	/* Return collator's last error code. */
 	RETURN_LONG( COLLATOR_ERROR_CODE( co ) );
 }
 /* }}} */
@@ -63,7 +63,7 @@ PHP_FUNCTION( collator_get_error_message )
 
 	COLLATOR_METHOD_INIT_VARS
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
 		&object, Collator_ce_ptr ) == FAILURE )
 	{
@@ -73,12 +73,12 @@ PHP_FUNCTION( collator_get_error_message )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object (without resetting its last error code).
+	/* Fetch the object (without resetting its last error code). */
 	co = (Collator_object *) zend_object_store_get_object( object TSRMLS_CC );
 	if( co == NULL )
 		RETURN_FALSE;
 
-	// Return last error message.
+	/* Return last error message. */
 	message = intl_error_get_message( COLLATOR_ERROR_P( co ) TSRMLS_CC );
 	RETURN_STRING( (char*)message, FALSE );
 }

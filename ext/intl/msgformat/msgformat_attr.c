@@ -34,7 +34,7 @@ PHP_FUNCTION( msgfmt_get_pattern )
 {
 	MSG_FORMAT_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,	
@@ -42,7 +42,7 @@ PHP_FUNCTION( msgfmt_get_pattern )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	MSG_FORMAT_METHOD_FETCH_OBJECT;
 
  	if(mfo->mf_data.orig_format) {
@@ -65,7 +65,7 @@ PHP_FUNCTION( msgfmt_set_pattern )
 	int free_pattern = 0;
 	MSG_FORMAT_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ou",
 		&object, MessageFormatter_ce_ptr, &svalue, &slength ) == FAILURE )
 	{
@@ -88,7 +88,7 @@ PHP_FUNCTION( msgfmt_set_pattern )
  		RETURN_FALSE;
  	}
 
-	// TODO: add parse error information
+	/* TODO: add parse error information */
 	umsg_applyPattern(MSG_FORMAT_OBJECT(mfo), svalue, slength, NULL, &INTL_DATA_ERROR_CODE(mfo));
 	if(free_pattern) {
 		efree(svalue);
@@ -110,7 +110,7 @@ PHP_FUNCTION( msgfmt_get_locale )
 	char *loc;
 	MSG_FORMAT_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
@@ -120,7 +120,7 @@ PHP_FUNCTION( msgfmt_get_locale )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	MSG_FORMAT_METHOD_FETCH_OBJECT;
 
 	loc = (char *)umsg_getLocale(MSG_FORMAT_OBJECT(mfo));

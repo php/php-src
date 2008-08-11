@@ -30,9 +30,9 @@
 
 zend_class_entry *Collator_ce_ptr = NULL;
 
-/////////////////////////////////////////////////////////////////////////////
-// Auxiliary functions needed by objects of 'Collator' class
-/////////////////////////////////////////////////////////////////////////////
+/*
+ * Auxiliary functions needed by objects of 'Collator' class
+ */
 
 /* {{{ Collator_objects_dtor */
 static void Collator_objects_dtor(
@@ -79,14 +79,15 @@ zend_object_value Collator_object_create(
 }
 /* }}} */
 
-/////////////////////////////////////////////////////////////////////////////
-// 'Collator' class registration structures & functions
-/////////////////////////////////////////////////////////////////////////////
+/*
+ * 'Collator' class registration structures & functions
+ */
 
 /* {{{ Collator methods arguments info */
-// NOTE: modifying 'collator_XX_args' do not forget to
-//       modify approptiate 'collator_XX_args' for
-//       the procedural API.
+/* NOTE: modifying 'collator_XX_args' do not forget to
+       modify approptiate 'collator_XX_args' for
+       the procedural API.
+*/
 
 static
 ZEND_BEGIN_ARG_INFO_EX( collator_0_args, 0, 0, 0 )
@@ -140,12 +141,12 @@ void collator_register_Collator_class( TSRMLS_D )
 {
 	zend_class_entry ce;
 
-	// Create and register 'Collator' class.
+	/* Create and register 'Collator' class. */
 	INIT_CLASS_ENTRY( ce, "Collator", Collator_class_functions );
 	ce.create_object = Collator_object_create;
 	Collator_ce_ptr = zend_register_internal_class( &ce TSRMLS_CC );
 
-	// Declare 'Collator' class properties.
+	/* Declare 'Collator' class properties. */
 	if( !Collator_ce_ptr )
 	{
 		zend_error( E_ERROR,

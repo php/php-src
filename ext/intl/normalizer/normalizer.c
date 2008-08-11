@@ -41,7 +41,7 @@ void normalizer_register_constants( INIT_FUNC_ARGS )
 	#define NORMALIZER_EXPOSE_CLASS_CONST(x) zend_declare_class_constant_long( Normalizer_ce_ptr, ZEND_STRS( #x ) - 1, NORMALIZER_##x TSRMLS_CC );
 	#define NORMALIZER_EXPOSE_CUSTOM_CLASS_CONST(name, value) zend_declare_class_constant_long( Normalizer_ce_ptr, ZEND_STRS( name ) - 1, value TSRMLS_CC );
 
-	// Normalization form constants
+	/* Normalization form constants */
 	NORMALIZER_EXPOSE_CLASS_CONST( NONE );
 	NORMALIZER_EXPOSE_CLASS_CONST( FORM_D );
 	NORMALIZER_EXPOSE_CLASS_CONST( NFD );

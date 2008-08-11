@@ -32,7 +32,7 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	long        style;
 	FORMATTER_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "sl|u",
 		&locale, &locale_len, &style, &pattern, &pattern_len ) == FAILURE )
 	{
@@ -87,7 +87,7 @@ PHP_FUNCTION( numfmt_get_error_code )
 {
 	FORMATTER_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
 		&object, NumberFormatter_ce_ptr ) == FAILURE )
 	{
@@ -99,7 +99,7 @@ PHP_FUNCTION( numfmt_get_error_code )
 
 	nfo = (NumberFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
 
-	// Return formatter's last error code.
+	/* Return formatter's last error code. */
 	RETURN_LONG( INTL_DATA_ERROR_CODE(nfo) );
 }
 /* }}} */
@@ -114,7 +114,7 @@ PHP_FUNCTION( numfmt_get_error_message )
 	char*                    message = NULL;
 	FORMATTER_METHOD_INIT_VARS
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
 		&object, NumberFormatter_ce_ptr ) == FAILURE )
 	{
@@ -124,10 +124,10 @@ PHP_FUNCTION( numfmt_get_error_message )
 		RETURN_FALSE;
 	}
 
-	// Create an ICU number formatter.
+	/* Create an ICU number formatter. */
 	nfo = (NumberFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
 
-	// Return last error message.
+	/* Return last error message. */
 	message = intl_error_get_message( &INTL_DATA_ERROR(nfo) TSRMLS_CC );
 	RETURN_STRING( message, 0);
 }
