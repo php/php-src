@@ -86,7 +86,7 @@
 #include <oniguruma.h>
 #undef UChar
 #elif HAVE_PCRE || HAVE_BUNDLED_PCRE
-#include <pcre.h>
+#include "ext/pcre/php_pcre.h"
 #endif
 /* }}} */
 
