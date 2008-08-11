@@ -295,7 +295,7 @@ PHP_FUNCTION(chroot)
 		RETURN_FALSE;
 	}
 
-	realpath_cache_clean(TSRMLS_C);
+	php_clear_stat_cache(TSRMLS_C);
 	
 	ret = chdir("/");
 	
