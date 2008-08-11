@@ -1,3 +1,65 @@
+2008-08-10  Marcus Boerger  <php@marcus-boerger.de>
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      - Fix warning
+
+    * zend_builtin_functions.h:
+      - Oops
+
+    * zend.c
+      zend.h
+      zend_builtin_functions.c
+      zend_builtin_functions.h:
+      - Fix memleak, Zend's built-in functions get copied before we copy all
+        functions, thus ending up in the name and param definitions copied twice
+        because zend_register_funciton already copies them.
+      - Also Be able to deallocate Zend's built-in functions and do so when
+        appropriate.
+      - After unregistering Zend's built-in functions only dl() is left and that
+        seems to be fine.
+
+2008-08-10  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      tests/foreach_unset_globals.phpt:
+      new test
+
+    * tests/foreach_unset_globals.phpt
+      tests/foreach_unset_globals.phpt:
+      
+      fix bug reported by Henrique
+      add test
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      fix bug reported by Henrique
+      add test
+
+    * tests/access_modifiers_003.phpt
+      tests/lsb_007.phpt
+      tests/lsb_008.phpt
+      tests/lsb_009.phpt:
+      fix tests
+
+2008-08-10  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      tests/unset.inc:
+      - Fixed test (LF)
+
+    * (PHP_5_3)
+      tests/heredoc_005.phpt
+      tests/heredoc_013.phpt
+      tests/heredoc_014.phpt
+      tests/unset.inc:
+      - Fixed tests (Pierre)
+
+    * tests/heredoc_005.phpt
+      tests/heredoc_013.phpt
+      tests/heredoc_014.phpt:
+      - Fixed tests
+
 2008-08-08  Marcus Boerger  <php@marcus-boerger.de>
 
     * (PHP_5_3)
