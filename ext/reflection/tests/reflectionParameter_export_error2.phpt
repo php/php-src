@@ -9,15 +9,23 @@ function ReflectionParameterTest($test, $test2 = null) {
 }
 $reflect = new ReflectionFunction('ReflectionParameterTest');
 $params = $reflect->getParameters();
-foreach($params as $key => $value) {
-	ReflectionParameter::export($reflect, $key);
+try {
+	foreach($params as $key => $value) {
+		ReflectionParameter::export($reflect, $key);
+	}
+}
+catch (ReflectionException $e) {
+	echo $e->getMessage() . "\n";
+}
+try {
+	foreach($params as $key => $value) {
+		ReflectionParameter::export(42, $key);
+	}
+}
+catch (ReflectionException $e) {
+	echo $e->getMessage() . "\n";
 }
 ?>
 --EXPECTF--
-
-Fatal error: Uncaught exception 'ReflectionException' with message 'The parameter class is expected to be either a string or an array(class, method)' in %s.php:%d
-Stack trace:
-#0 [internal function]: ReflectionParameter->__construct(Object(ReflectionFunction), 0)
-#1 %s.php(%d): ReflectionParameter::export(Object(ReflectionFunction), 0)
-#2 {main}
-  thrown in %s.php on line %d
+Method ReflectionFunction::__invoke() does not exist
+The parameter class is expected to be either a string, an array(class, method) or a callable object
