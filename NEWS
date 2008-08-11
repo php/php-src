@@ -14,6 +14,8 @@ PHP                                                                        NEWS
 - Fixed a regression when using strip_tags() and < is within an attribute.
   (Scott)
 
+- Fixed bug #45765 (ReflectionObject with default parameters of self::xxx cause
+  an error). (Felipe)
 - Fixed bug #45705 (rfc822_parse_adrlist() modifies passed address parameter).
   (Jani)
 - Fixed bug #45691 (Some per-dir or runtime settings may leak into other
