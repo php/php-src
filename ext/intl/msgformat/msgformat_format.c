@@ -44,7 +44,7 @@ static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *ret
 	count = zend_hash_num_elements(Z_ARRVAL_P(args));
 
 	if(count < umsg_format_arg_count(MSG_FORMAT_OBJECT(mfo))) {
-		// Not enough aguments for format!
+		/* Not enough aguments for format! */
 		intl_error_set( INTL_DATA_ERROR_P(mfo), U_ILLEGAL_ARGUMENT_ERROR,
 			"msgfmt_format: not enough parameters", 0 TSRMLS_CC );
 		RETVAL_FALSE;
@@ -91,7 +91,7 @@ PHP_FUNCTION( msgfmt_format )
 	MSG_FORMAT_METHOD_INIT_VARS;
 
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oa",
 		&object, MessageFormatter_ce_ptr,  &args ) == FAILURE )
 	{
@@ -101,7 +101,7 @@ PHP_FUNCTION( msgfmt_format )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	MSG_FORMAT_METHOD_FETCH_OBJECT;
 
 	msgfmt_do_format(mfo, args, return_value TSRMLS_CC);
@@ -125,7 +125,7 @@ PHP_FUNCTION( msgfmt_format_message )
 	MessageFormatter_object mf = {0};
 	MessageFormatter_object *mfo = &mf;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "ssa",
 		  &slocale, &slocale_len, &pattern, &pattern_len, &args ) == FAILURE )
 	{
@@ -160,7 +160,7 @@ PHP_FUNCTION( msgfmt_format_message )
 		RETURN_FALSE;
 	}
 
-	// Create an ICU message formatter.
+	/* Create an ICU message formatter. */
 	MSG_FORMAT_OBJECT(mfo) = umsg_open(spattern, spattern_len, slocale, NULL, &INTL_DATA_ERROR_CODE(mfo));
 	if(spattern && spattern_len) {
 		efree(spattern);
@@ -169,7 +169,7 @@ PHP_FUNCTION( msgfmt_format_message )
 
 	msgfmt_do_format(mfo, args, return_value TSRMLS_CC);
 
-	// drop the temporary formatter
+	/* drop the temporary formatter */
 	msgformat_data_free(&mfo->mf_data TSRMLS_CC);
 }
 /* }}} */

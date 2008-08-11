@@ -45,7 +45,7 @@ PHP_FUNCTION( numfmt_parse )
 	zval *zposition = NULL;
 	FORMATTER_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|lz!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &type, &zposition ) == FAILURE )
 	{
@@ -55,10 +55,10 @@ PHP_FUNCTION( numfmt_parse )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
-	// Convert given string to UTF-16.
+	/* Convert given string to UTF-16. */
 	intl_convert_utf8_to_utf16(&sstr, &sstr_len, str, str_len, &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "String conversion to UTF-16 failed" );
 
@@ -122,7 +122,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 	zval *zcurrency, *zposition = NULL;
 	FORMATTER_METHOD_INIT_VARS;
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Osz|z!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &zcurrency, &zposition ) == FAILURE )
 	{
@@ -132,10 +132,10 @@ PHP_FUNCTION( numfmt_parse_currency )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
-	// Convert given string to UTF-16.
+	/* Convert given string to UTF-16. */
 	intl_convert_utf8_to_utf16(&sstr, &sstr_len, str, str_len, &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "String conversion to UTF-16 failed" );
 
@@ -153,7 +153,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 	efree(sstr);
 	INTL_METHOD_CHECK_STATUS( nfo, "Number parsing failed" );
 
-	// Convert parsed currency to UTF-8 and pass it back to caller.
+	/* Convert parsed currency to UTF-8 and pass it back to caller. */
 	intl_convert_utf16_to_utf8(&currency_str, &currency_len, currency, u_strlen(currency), &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Currency conversion to UTF-8 failed" );
 	zval_dtor( zcurrency );

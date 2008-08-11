@@ -37,7 +37,7 @@ PHP_FUNCTION( collator_get_attribute )
 
 	COLLATOR_METHOD_INIT_VARS
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol",
 		&object, Collator_ce_ptr, &attribute ) == FAILURE )
 	{
@@ -47,7 +47,7 @@ PHP_FUNCTION( collator_get_attribute )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
 	value = ucol_getAttribute( co->ucoll, attribute, COLLATOR_ERROR_CODE_P( co ) );
@@ -68,7 +68,7 @@ PHP_FUNCTION( collator_set_attribute )
 	COLLATOR_METHOD_INIT_VARS
 
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oll",
 		&object, Collator_ce_ptr, &attribute, &value ) == FAILURE)
 	{
@@ -78,10 +78,10 @@ PHP_FUNCTION( collator_set_attribute )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
-	// Set new value for the given attribute.
+	/* Set new value for the given attribute. */
 	ucol_setAttribute( co->ucoll, attribute, value, COLLATOR_ERROR_CODE_P( co ) );
 	COLLATOR_CHECK_STATUS( co, "Error setting attribute value" );
 
@@ -98,7 +98,7 @@ PHP_FUNCTION( collator_get_strength )
 {
 	COLLATOR_METHOD_INIT_VARS
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
 		&object, Collator_ce_ptr ) == FAILURE )
 	{
@@ -108,10 +108,10 @@ PHP_FUNCTION( collator_get_strength )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
-	// Get current strength and return it.
+	/* Get current strength and return it. */
 	RETURN_LONG( ucol_getStrength( co->ucoll ) );
 }
 /* }}} */
@@ -127,7 +127,7 @@ PHP_FUNCTION( collator_set_strength )
 
 	COLLATOR_METHOD_INIT_VARS
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol",
 		&object, Collator_ce_ptr, &strength ) == FAILURE )
 	{
@@ -137,10 +137,10 @@ PHP_FUNCTION( collator_set_strength )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
-	// Set given strength.
+	/* Set given strength. */
 	ucol_setStrength( co->ucoll, strength );
 
 	RETURN_TRUE;

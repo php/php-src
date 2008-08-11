@@ -45,7 +45,7 @@ PHP_FUNCTION( collator_compare )
 
 	COLLATOR_METHOD_INIT_VARS
 
-	// Parse parameters.
+	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oss",
 		&object, Collator_ce_ptr, &str1, &str1_len, &str2, &str2_len ) == FAILURE )
 	{
@@ -55,7 +55,7 @@ PHP_FUNCTION( collator_compare )
 		RETURN_FALSE;
 	}
 
-	// Fetch the object.
+	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
 
@@ -63,15 +63,15 @@ PHP_FUNCTION( collator_compare )
 	 * Compare given strings (converting them to UTF-16 first).
 	 */
 
-	// First convert the strings to UTF-16.
+	/* First convert the strings to UTF-16. */
 	intl_convert_utf8_to_utf16(
 		&ustr1, &ustr1_len, str1, str1_len, COLLATOR_ERROR_CODE_P( co ) );
 	if( U_FAILURE( COLLATOR_ERROR_CODE( co ) ) )
 	{
-		// Set global error code.
+		/* Set global error code. */
 		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) TSRMLS_CC );
 
-		// Set error messages.
+		/* Set error messages. */
 		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
 			"Error converting first argument to UTF-16", 0 TSRMLS_CC );
 		efree( ustr1 );
@@ -82,10 +82,10 @@ PHP_FUNCTION( collator_compare )
 		&ustr2, &ustr2_len, str2, str2_len, COLLATOR_ERROR_CODE_P( co ) );
 	if( U_FAILURE( COLLATOR_ERROR_CODE( co ) ) )
 	{
-		// Set global error code.
+		/* Set global error code. */
 		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) TSRMLS_CC );
 
-		// Set error messages.
+		/* Set error messages. */
 		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
 			"Error converting second argument to UTF-16", 0 TSRMLS_CC );
 		efree( ustr1 );
@@ -93,7 +93,7 @@ PHP_FUNCTION( collator_compare )
 		RETURN_FALSE;
 	}
 
-	// Then compare them.
+	/* Then compare them. */
 	result = ucol_strcoll(
 		co->ucoll,
 		ustr1, ustr1_len,
@@ -104,7 +104,7 @@ PHP_FUNCTION( collator_compare )
 	if( ustr2 )
 		efree( ustr2 );
 
-	// Return result of the comparison.
+	/* Return result of the comparison. */
 	RETURN_LONG( result );
 }
 /* }}} */
