@@ -1871,7 +1871,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 				if (zend_hash_find(&ce->function_table, lcname, lcname_len + 1, (void **) &fptr) == FAILURE) {
 					efree(lcname);
 					zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
-						"Method %s::%s() does not exist", Z_STRVAL_PP(classref), Z_TYPE_PP(method), Z_STRVAL_PP(method));
+						"Method %s::%s() does not exist", ce->name, Z_STRVAL_PP(method));
 					return;
 				}
 				efree(lcname);
