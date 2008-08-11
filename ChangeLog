@@ -1,3 +1,190 @@
+2008-08-10  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - Fix warning
+
+    * ZendEngine2/zend_builtin_functions.h:
+      - Oops
+
+    * .gdbinit:
+      - Improve gdb support
+
+2008-08-10  Henrique do Nascimento Angelo  <h.n.angelo@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      missing entries
+
+2008-08-10  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.h
+      main/main.c:
+      - Fix memleak, Zend's built-in functions get copied before we copy all
+        functions, thus ending up in the name and param definitions copied twice
+        because zend_register_funciton already copies them.
+      - Also Be able to deallocate Zend's built-in functions and do so when
+        appropriate.
+      - After unregistering Zend's built-in functions only dl() is left and that
+        seems to be fine.
+
+2008-08-10  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/formatted_print.c
+      ext/standard/tests/strings/vfprintf_error4.phpt:
+      - MFH: New parameter parsing API (for *printf())
+
+    * ext/standard/formatted_print.c
+      ext/standard/tests/strings/printf.phpt
+      ext/standard/tests/strings/sprintf_error.phpt
+      ext/standard/tests/strings/vfprintf_error4.phpt
+      ext/standard/tests/strings/vsprintf_error.phpt:
+      - New parameter parsing API (for *printf())
+
+2008-08-10  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/php_crypt_r.c:
+      - debugbreak may not be desired (harmless in release mode :)
+
+    * (PHP_5_3)
+      ext/standard/php_crypt_r.c:
+      - MFH: fix the VC6 fix or strncpy_s (md5 crypt failed with VC9 as it used
+      strncpy wrongly)
+
+    * ext/standard/php_crypt_r.c:
+      - fix the VC6 fix or strncpy_s (md5 crypt failed with VC9 as it used
+      strncpy wrongly)
+
+2008-08-10  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/foreach_unset_globals.phpt:
+      new test
+
+    * ZendEngine2/tests/foreach_unset_globals.phpt
+      ZendEngine2/tests/foreach_unset_globals.phpt:
+      
+      fix bug reported by Henrique
+      add test
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      fix bug reported by Henrique
+      add test
+
+    * ZendEngine2/tests/access_modifiers_003.phpt
+      ZendEngine2/tests/lsb_007.phpt
+      ZendEngine2/tests/lsb_008.phpt
+      ZendEngine2/tests/lsb_009.phpt:
+      fix tests
+
+    * ext/fileinfo/libmagic/funcs.c:
+      fix compilation on AIX
+
+2008-08-10  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/array.c
+      ext/standard/tests/array/max.phpt
+      ext/standard/tests/array/max_error.phpt
+      ext/standard/tests/array/min.phpt
+      ext/standard/tests/array/min_error.phpt:
+      - MFH: New parameter parsing API (for min() and max())
+
+    * ext/standard/array.c
+      ext/standard/tests/array/max.phpt
+      ext/standard/tests/array/max_error.phpt
+      ext/standard/tests/array/min.phpt
+      ext/standard/tests/array/min_error.phpt:
+      - New parameter parsing API (for min() and max())
+
+2008-08-10  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      NEWS:
+      - Already in 5.2 NEWS
+
+2008-08-10  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/standard/tests/file/bug40501.phpt:
+      - fix string len
+
+2008-08-10  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      NEWS
+      ext/standard/html.c
+      ext/standard/html.c
+      ext/standard/tests/strings/htmlentities18.phpt
+      ext/standard/tests/strings/htmlentities18.phpt:
+      MFH: Fixed bug #45581 (htmlspecialchars() double encoding &#x hex items)
+
+    * ext/standard/html.c
+      ext/standard/tests/strings/htmlentities18.phpt:
+      Fixed bug #45581 (htmlspecialchars() double encoding &#x hex items)
+
+    * ext/standard/tests/file/clearstatcache_001.phpt:
+      Fixed test
+
+    * (PHP_5_2)
+      ext/standard/link.c
+      ext/standard/link.c
+      ext/standard/tests/file/symlink_to_symlink.phpt
+      ext/standard/tests/file/symlink_to_symlink.phpt:
+      MFH:
+      Do not expand $target in symlink(). This made it impossible to symlink to
+      a
+      symlink. This also caused the target to be wrongly expanded relatively to
+      the CWD when target was not an absolute path.
+
+    * ext/standard/link.c
+      ext/standard/tests/file/symlink_to_symlink.phpt
+      ext/standard/tests/file/symlink_to_symlink.phpt
+      ext/standard/tests/file/symlink_to_symlink.phpt:
+      Do not expand $target in symlink(). This made it impossible to symlink to a
+      symlink. This also caused the target to be wrongly expanded relatively to
+      the CWD when target was not an absolute path.
+
+2008-08-10  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/date/tests/009.phpt
+      ext/date/tests/009.phpt
+      ext/date/tests/009_win32.phpt
+      ext/date/tests/009_win32.phpt
+      ext/date/tests/009_win32.phpt:
+      - [DOC] win's strftime does not support all posix formatting code and have
+      some win specific rules see
+      http://msdn.microsoft.com/en-us/library/fe06s4ak(VS.80).aspx for a
+      complete list: split test for  win32 and posix
+
+2008-08-10  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/mcrypt/mcrypt.c:
+      - New parameter parsing API
+
+    * (PHP_5_2)
+      ZendEngine2/tests/unset.inc:
+      - Fixed test (LF)
+
+    * (PHP_5_3)
+      ZendEngine2/tests/heredoc_005.phpt
+      ZendEngine2/tests/heredoc_013.phpt
+      ZendEngine2/tests/heredoc_014.phpt
+      ZendEngine2/tests/unset.inc:
+      - Fixed tests (Pierre)
+
+    * ZendEngine2/tests/heredoc_005.phpt
+      ZendEngine2/tests/heredoc_013.phpt
+      ZendEngine2/tests/heredoc_014.phpt:
+      - Fixed tests
+
 2008-08-09  Antony Dovgal  <tony@daylessday.org>
 
     * (PHP_5_2)
