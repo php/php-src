@@ -13,6 +13,7 @@ PHP                                                                        NEWS
 - Fixed a bug causing miscalculations with the "last <weekday> of <n> month"
   relative time string. (Derick)
 
+- Fixed bug #45763 (mysqli::multi_query does not work with mysqlnd). (Johannes)
 - Fixed bug #45757 (FreeBSD4.11 build failure: failed include; stdint.h).
   (Hannes)
 - Fixed bug #45717 (Fileinfo/libmagic build fails, missing err.h and getopt.h).
