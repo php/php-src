@@ -237,6 +237,15 @@ class corrupt_zipmaker
 						$filename . $comment;
 				$offset = strlen($central);
 				break;
+			case 'extralen1' :
+				$extra = 'nu' . 0xffff; // way huge size
+				$central = "PK\x01\x02\x00\x00\x14\x00\x00\x00" . pack('v', $compmethod) .
+						$mtime .
+						pack("VVVvvvvvVV", $crc32, $complength, $uncomplength, strlen($filename), strlen($extra),strlen($comment),0x00,0x00,
+							0x0000, $this->offset).
+						$filename . $extra . $comment;
+				$offset = strlen($central);
+				break;
 		}
 		return $central;
 	}
