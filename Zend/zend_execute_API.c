@@ -311,6 +311,8 @@ void shutdown_executor(TSRMLS_D) /* {{{ */
 
 		zend_vm_stack_destroy(TSRMLS_C);
 
+		zend_objects_store_free_object_storage(&EG(objects_store) TSRMLS_CC);
+
 		/* Destroy all op arrays */
 		if (EG(full_tables_cleanup)) {
 			zend_hash_apply(EG(function_table), (apply_func_t) clean_non_persistent_function_full TSRMLS_CC);
@@ -325,7 +327,6 @@ void shutdown_executor(TSRMLS_D) /* {{{ */
 			FREE_HASHTABLE(*EG(symtable_cache_ptr));
 			EG(symtable_cache_ptr)--;
 		}
-		zend_objects_store_free_object_storage(&EG(objects_store) TSRMLS_CC);
 	} zend_end_try();
 
 	zend_try {
