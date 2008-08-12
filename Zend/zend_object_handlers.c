@@ -1161,7 +1161,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists 
 }
 /* }}} */
 
-zend_class_entry *zend_std_object_get_class(zval *object TSRMLS_DC) /* {{{ */
+zend_class_entry *zend_std_object_get_class(const zval *object TSRMLS_DC) /* {{{ */
 {
 	zend_object *zobj;
 	zobj = Z_OBJ_P(object);
@@ -1170,7 +1170,7 @@ zend_class_entry *zend_std_object_get_class(zval *object TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-int zend_std_object_get_class_name(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC) /* {{{ */
+int zend_std_object_get_class_name(const zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC) /* {{{ */
 {
 	zend_object *zobj;
 	zend_class_entry *ce;

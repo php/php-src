@@ -473,7 +473,7 @@ typedef struct _zend_utility_functions {
 	void (*message_handler)(long message, void *data);
 	void (*block_interruptions)(void);
 	void (*unblock_interruptions)(void);
-	int (*get_configuration_directive)(char *name, uint name_length, zval *contents);
+	int (*get_configuration_directive)(const char *name, uint name_length, zval *contents);
 	void (*ticks_function)(int ticks);
 	void (*on_timeout)(int seconds TSRMLS_DC);
 	int (*stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
@@ -572,7 +572,7 @@ ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int in
 ZEND_API void zend_print_zval_r(zval *expr, int indent TSRMLS_DC);
 ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC);
 ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int indent TSRMLS_DC);
-ZEND_API void zend_output_debug_string(zend_bool trigger_break, char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+ZEND_API void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 END_EXTERN_C()
 
 void zend_activate(TSRMLS_D);
@@ -623,7 +623,7 @@ extern ZEND_API char *(*zend_resolve_path)(const char *filename, int filename_le
 
 ZEND_API void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
-void zenderror(char *error);
+void zenderror(const char *error);
 
 /* The following #define is used for code duality in PHP for Engine 1 & 2 */
 #define ZEND_STANDARD_CLASS_DEF_PTR zend_standard_class_def
@@ -641,7 +641,7 @@ END_EXTERN_C()
 BEGIN_EXTERN_C()
 ZEND_API void zend_message_dispatcher(long message, void *data);
 
-ZEND_API int zend_get_configuration_directive(char *name, uint name_length, zval *contents);
+ZEND_API int zend_get_configuration_directive(const char *name, uint name_length, zval *contents);
 END_EXTERN_C()
 
 /* Messages for applications of Zend */
