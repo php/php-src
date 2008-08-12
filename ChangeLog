@@ -1,3 +1,344 @@
+2008-08-11  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * ext/standard/dir.c
+      ext/standard/tests/file/chroot_001.phpt
+      ext/standard/tests/file/chroot_001.phpt
+      ext/standard/tests/file/chroot_001.phpt:
+      clear stat cache in chroot()
+
+2008-08-11  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/tests/zip/corrupt_010.phpt
+      ext/phar/tests/zip/corrupt_010.phpt
+      ext/phar/tests/zip/files/corrupt3.php.inc
+      ext/phar/tests/zip/files/corrupt_zipmaker.php.inc
+      ext/phar/tests/zip/files/disknumber.zip
+      ext/phar/tests/zip/files/disknumber.zip
+      ext/phar/tests/zip/files/extralen_toolong.zip:
+      
+      file corrupt_010.phpt was initially added on branch PHP_5_3.
+
+2008-08-11  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      news
+
+    * (PHP_5_2)
+      ext/standard/dir.c
+      ext/standard/dir.c
+      ext/standard/tests/file/bug45181.phpt
+      ext/standard/tests/file/bug45181.phpt:
+      MFH: Fixed #45181 (chdir() should clear relative entries in stat cache)
+
+    * ext/standard/dir.c
+      ext/standard/tests/file/bug45181.phpt
+      ext/standard/tests/file/bug45181.phpt
+      ext/standard/tests/file/bug45181.phpt:
+      Fixed #45181 (chdir() should clear relative entries in stat cache)
+
+2008-08-11  Christian Seiler  <chris_se@gmx.net>
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/tests/closures_003.phpt
+      ext/reflection/tests/closures_003.phpt
+      ext/reflection/tests/closures_004.phpt
+      ext/reflection/tests/closures_004.phpt
+      ext/reflection/tests/reflectionParameter_invalidMethodInConstructor.phpt
+      ext/reflection/tests/reflectionParameter_invalidMethodInConstructor.phpt:
+       - Fixed sefaults (tests added)
+
+    * (PHP_5_2)
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/reflectionParameter_invalidMethodInConstructor.phpt
+      ext/reflection/tests/reflectionParameter_invalidMethodInConstructor.phpt:
+       - Fixed segmentation fault (test added)
+
+2008-08-11  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/intl/intl_convert.c
+      ext/intl/intl_error.c
+      ext/intl/php_intl.c
+      ext/intl/collator/collator.c
+      ext/intl/collator/collator_attr.c
+      ext/intl/collator/collator_class.c
+      ext/intl/collator/collator_compare.c
+      ext/intl/collator/collator_convert.c
+      ext/intl/collator/collator_create.c
+      ext/intl/collator/collator_error.c
+      ext/intl/collator/collator_locale.c
+      ext/intl/collator/collator_sort.c
+      ext/intl/common/common_error.c
+      ext/intl/dateformat/dateformat.c
+      ext/intl/dateformat/dateformat_attr.c
+      ext/intl/dateformat/dateformat_class.c
+      ext/intl/dateformat/dateformat_format.c
+      ext/intl/dateformat/dateformat_parse.c
+      ext/intl/formatter/formatter.c
+      ext/intl/formatter/formatter_attr.c
+      ext/intl/formatter/formatter_class.c
+      ext/intl/formatter/formatter_format.c
+      ext/intl/formatter/formatter_main.c
+      ext/intl/formatter/formatter_parse.c
+      ext/intl/grapheme/grapheme_string.c
+      ext/intl/msgformat/msgformat.c
+      ext/intl/msgformat/msgformat_attr.c
+      ext/intl/msgformat/msgformat_class.c
+      ext/intl/msgformat/msgformat_format.c
+      ext/intl/msgformat/msgformat_parse.c
+      ext/intl/normalizer/normalizer.c
+      ext/intl/normalizer/normalizer_class.c
+      ext/intl/normalizer/normalizer_normalize.c:
+      MFH:
+      - Added arginfo
+      - Fixed WS
+      - Changed C++ comments to C comments
+
+    * ext/intl/intl_convert.c
+      ext/intl/intl_error.c
+      ext/intl/php_intl.c
+      ext/intl/collator/collator.c
+      ext/intl/collator/collator_attr.c
+      ext/intl/collator/collator_class.c
+      ext/intl/collator/collator_compare.c
+      ext/intl/collator/collator_convert.c
+      ext/intl/collator/collator_create.c
+      ext/intl/collator/collator_error.c
+      ext/intl/collator/collator_locale.c
+      ext/intl/collator/collator_sort.c
+      ext/intl/common/common_error.c
+      ext/intl/dateformat/dateformat.c
+      ext/intl/dateformat/dateformat_attr.c
+      ext/intl/dateformat/dateformat_class.c
+      ext/intl/dateformat/dateformat_format.c
+      ext/intl/dateformat/dateformat_parse.c
+      ext/intl/formatter/formatter.c
+      ext/intl/formatter/formatter_attr.c
+      ext/intl/formatter/formatter_class.c
+      ext/intl/formatter/formatter_format.c
+      ext/intl/formatter/formatter_main.c
+      ext/intl/formatter/formatter_parse.c
+      ext/intl/grapheme/grapheme_string.c
+      ext/intl/msgformat/msgformat.c
+      ext/intl/msgformat/msgformat_attr.c
+      ext/intl/msgformat/msgformat_class.c
+      ext/intl/msgformat/msgformat_format.c
+      ext/intl/msgformat/msgformat_parse.c
+      ext/intl/normalizer/normalizer.c
+      ext/intl/normalizer/normalizer_class.c
+      ext/intl/normalizer/normalizer_normalize.c:
+      - Added arginfo
+      - Fixed WS
+      - Changed C++ comments to C comments
+
+2008-08-11  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/php_reflection.c:
+      - Cleanup
+
+    * ZendEngine2/zend_execute_API.c:
+      - Fix shutdown order
+
+    * ext/spl/tests/spl_004.phpt:
+      - EXPECT rather than EXPECTF
+
+    * (PHP_5_3)
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_globals.h:
+      - MFH Fix memleak with new error handling stack'ing
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_globals.h:
+      - Fix memleak with new error handling stack'ing
+
+2008-08-11  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/mbstring/mbstring.c:
+      fix build when host machine doest has pcre installed
+
+2008-08-11  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      main/fopen_wrappers.c
+      main/fopen_wrappers.c
+      main/fopen_wrappers.h
+      main/fopen_wrappers.h:
+      MFH: Missing files in previous commit (Check the relevant path for
+      open_basedir
+      in symlink())
+
+    * main/fopen_wrappers.c
+      main/fopen_wrappers.h:
+      Missing files in previous commit (Check the relevant path for open_basedir
+      in symlink())
+
+    * (PHP_5_2)
+      ext/standard/link.c
+      ext/standard/link.c
+      ext/standard/tests/file/symlink_to_symlink.phpt
+      ext/standard/tests/file/symlink_to_symlink.phpt
+      tests/security/open_basedir_symlink.phpt
+      tests/security/open_basedir_symlink.phpt:
+      MFH: Check the relevant path for open_basedir in symlink()
+
+    * ext/standard/link.c
+      ext/standard/tests/file/symlink_to_symlink.phpt
+      tests/security/open_basedir_symlink.phpt:
+      Check the relevant path for open_basedir in symlink()
+
+2008-08-11  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_3)
+      ext/curl/tests/.cvsignore:
+      add
+
+    * ext/curl/tests/.cvsignore
+      ext/curl/tests/.cvsignore:
+      
+      add
+
+2008-08-11  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/reflection/tests/024.phpt
+      ext/reflection/tests/024.phpt:
+      
+      - Fixed wrong check for dynamic properties
+
+    * ext/reflection/php_reflection.c:
+      - Fixed wrong check for dynamic properties
+
+2008-08-11  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/file/chgrp.phpt:
+      - MFH: skip on windows, chgrp not supported
+
+    * ext/standard/tests/file/chgrp.phpt:
+      - skip on wndows, chgrp not supported
+
+    * ext/standard/file.c:
+      - removed commented code
+
+    * (PHP_5_3)
+      ext/standard/file.c
+      ext/standard/tests/file/copy_variation4-win32.phpt
+      ext/standard/tests/file/copy_variation4.phpt:
+      - [DOC] MFH: detect if dest is a dir (if the given stream layer supports
+      stat)
+        and fails
+       . remove win32 specific test. The errors are not the same
+
+    * ext/standard/file.c
+      ext/standard/tests/file/copy_variation4-win32.phpt
+      ext/standard/tests/file/copy_variation4.phpt:
+      - [DOC] detect if dest is a dir (if the given stream layer supports stat)
+        and fails
+       . remove win32 specific test. The errors are not the same
+
+2008-08-11  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/php_reflection.c:
+      - Fix build (ZTS)
+
+2008-08-11  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/closures_001.phpt
+      ext/reflection/tests/closures_002.phpt
+      ext/reflection/tests/reflectionParameter_export_error2.phpt:
+      - MFH Closure/Reflection integration (original idea by Christian Seiler)
+
+    * ext/reflection/tests/closures_001.phpt
+      ext/reflection/tests/closures_001.phpt
+      ext/reflection/tests/closures_002.phpt
+      ext/reflection/tests/closures_002.phpt
+      ext/reflection/tests/reflectionParameter_export_error2.phpt:
+      
+      - Closure/Reflection integration (original idea by Christian Seiler)
+
+    * ext/reflection/php_reflection.c:
+      - Closure/Reflection integration (original idea by Christian Seiler)
+
+2008-08-11  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      NEWS
+      ext/mysqli/mysqli_nonapi.c:
+      MFH: Fix #45763 (mysqli::multi_query does not work with mysqlnd)
+
+    * ext/mysqli/mysqli_nonapi.c:
+      - Fix #45763 (mysqli::multi_query does not work with mysqlnd)
+
+2008-08-11  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/file/copy_variation4.phpt:
+      - remove and add again as text not binary 2/2
+
+    * (PHP_5_3)
+      ext/standard/tests/file/copy_variation4.phpt:
+      - remove and add again as text not binary 1/2
+
+    * (PHP_5_3)
+      ext/standard/tests/file/copy_variation13.phpt:
+      - MFH: make it platform independent (/ vs \)
+
+2008-08-11  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_closures.c:
+      - WS (actually my falut)
+
+2008-08-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_closures.c
+      ZendEngine2/zend_closures.c
+      ZendEngine2/zend_closures.h
+      ZendEngine2/zend_closures.h
+      ZendEngine2/tests/closure_022.phpt
+      ZendEngine2/tests/closure_022.phpt:
+      - Made closures implementation reflection friendly (Christian)
+      - Changed E_ERROR(s) into E_RECOVERABLE_ERROR(s) (Marcus)
+
+2008-08-11  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/tests/zip/corrupt_009.phpt
+      ext/phar/tests/zip/corrupt_009.phpt
+      ext/phar/tests/zip/files/corrupt3.php.inc
+      ext/phar/tests/zip/files/corrupt3.php.inc
+      ext/phar/tests/zip/files/corrupt_zipmaker.php.inc
+      ext/phar/tests/zip/files/extralen_toolong.zip
+      ext/phar/tests/zip/files/extralen_toolong.zip:
+      
+      file corrupt_009.phpt was initially added on branch PHP_5_3.
+
+2008-08-11  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN: #45765
+
+    * (PHP_5_2)
+      ext/reflection/php_reflection.c
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/bug45765.phpt
+      ext/reflection/tests/bug45765.phpt:
+      - MFH: Fixed bug #45765 (ReflectionObject with default parameters of
+      self::xxx cause an error)
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/tests/bug45765.phpt
+      ext/reflection/tests/bug45765.phpt
+      ext/reflection/tests/bug45765.phpt:
+      - Fixed bug #45765 (ReflectionObject with default parameters of self::xxx
+      cause an error)
+
 2008-08-10  Marcus Boerger  <php@marcus-boerger.de>
 
     * ZendEngine2/zend_vm_def.h
