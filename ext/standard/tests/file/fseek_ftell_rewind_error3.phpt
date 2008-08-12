@@ -87,7 +87,7 @@ NULL
 Warning: rewind() expects parameter 1 to be resource, object given in %s on line %d
 NULL
 -- Testing rewind() with closed/unset file handle --
-Warning: rewind(): 5 is not a valid stream resource in %s on line %d
+Warning: rewind(): %d is not a valid stream resource in %s on line %d
 bool(false)
 
 Warning: rewind() expects parameter 1 to be resource, null given in %s on line %d
