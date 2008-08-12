@@ -243,7 +243,7 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array TS
 #define ZEND_PARSE_PARAMS_QUIET 1<<1
 ZEND_API int zend_parse_parameters(int num_args TSRMLS_DC, char *type_spec, ...);
 ZEND_API int zend_parse_parameters_ex(int flags, int num_args TSRMLS_DC, char *type_spec, ...);
-ZEND_API char *zend_zval_type_name(zval *arg);
+ZEND_API char *zend_zval_type_name(const zval *arg);
 
 ZEND_API int zend_parse_method_parameters(int num_args TSRMLS_DC, zval *this_ptr, char *type_spec, ...);
 ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args TSRMLS_DC, zval *this_ptr, char *type_spec, ...);
@@ -257,14 +257,14 @@ ZEND_API zend_module_entry* zend_register_internal_module(zend_module_entry *mod
 ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module TSRMLS_DC);
 ZEND_API int zend_startup_module_ex(zend_module_entry *module TSRMLS_DC);
 ZEND_API int zend_startup_modules(TSRMLS_D);
-ZEND_API void zend_check_magic_method_implementation(zend_class_entry *ce, zend_function *fptr, int error_type TSRMLS_DC);
+ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce, const zend_function *fptr, int error_type TSRMLS_DC);
 
 ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_entry TSRMLS_DC);
 ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce, char *parent_name TSRMLS_DC);
 ZEND_API zend_class_entry *zend_register_internal_interface(zend_class_entry *orig_class_entry TSRMLS_DC);
 ZEND_API void zend_class_implements(zend_class_entry *class_entry TSRMLS_DC, int num_interfaces, ...);
 
-ZEND_API int zend_register_class_alias_ex(char *name, int name_len, zend_class_entry *ce TSRMLS_DC);
+ZEND_API int zend_register_class_alias_ex(const char *name, int name_len, zend_class_entry *ce TSRMLS_DC);
 ZEND_API int zend_u_register_class_alias_ex(zend_uchar utype, zstr name, int name_len, zend_class_entry *ce TSRMLS_DC);
 
 #define zend_register_class_alias(name, ce) \
@@ -288,9 +288,9 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval **object_pp, uint ch
 ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, zval *callable_name TSRMLS_DC);
 ZEND_API zend_bool zend_make_callable(zval *callable, zval *callable_name TSRMLS_DC);
 ZEND_API const char *zend_get_module_version(const char *module_name);
-ZEND_API int zend_get_module_started(char *module_name);
+ZEND_API int zend_get_module_started(const char *module_name);
 ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type TSRMLS_DC);
-ZEND_API int zend_declare_property_ex(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type, zstr doc_comment, int doc_comment_len TSRMLS_DC);
+ZEND_API int zend_declare_property_ex(zend_class_entry *ce, const char *name, int name_length, zval *property, int access_type, zstr doc_comment, int doc_comment_len TSRMLS_DC);
 ZEND_API int zend_declare_property_null(zend_class_entry *ce, char *name, int name_length, int access_type TSRMLS_DC);
 ZEND_API int zend_declare_property_bool(zend_class_entry *ce, char *name, int name_length, long value, int access_type TSRMLS_DC);
 ZEND_API int zend_declare_property_long(zend_class_entry *ce, char *name, int name_length, long value, int access_type TSRMLS_DC);
@@ -301,13 +301,13 @@ ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, char *name, int
 ZEND_API int zend_u_declare_property(zend_class_entry *ce, zend_uchar type, zstr name, int name_length, zval *property, int access_type TSRMLS_DC);
 ZEND_API int zend_u_declare_property_ex(zend_class_entry *ce, zend_uchar type, zstr name, int name_length, zval *property, int access_type, zstr doc_comment, int doc_comment_len TSRMLS_DC);
 
-ZEND_API int zend_declare_class_constant(zend_class_entry *ce, char *name, size_t name_length, zval *value TSRMLS_DC);
-ZEND_API int zend_declare_class_constant_null(zend_class_entry *ce, char *name, size_t name_length TSRMLS_DC);
-ZEND_API int zend_declare_class_constant_long(zend_class_entry *ce, char *name, size_t name_length, long value TSRMLS_DC);
-ZEND_API int zend_declare_class_constant_bool(zend_class_entry *ce, char *name, size_t name_length, zend_bool value TSRMLS_DC);
-ZEND_API int zend_declare_class_constant_double(zend_class_entry *ce, char *name, size_t name_length, double value TSRMLS_DC);
-ZEND_API int zend_declare_class_constant_stringl(zend_class_entry *ce, char *name, size_t name_length, char *value, size_t value_length TSRMLS_DC);
-ZEND_API int zend_declare_class_constant_string(zend_class_entry *ce, char *name, size_t name_length, char *value TSRMLS_DC);
+ZEND_API int zend_declare_class_constant(zend_class_entry *ce, const char *name, size_t name_length, zval *value TSRMLS_DC);
+ZEND_API int zend_declare_class_constant_null(zend_class_entry *ce, const char *name, size_t name_length TSRMLS_DC);
+ZEND_API int zend_declare_class_constant_long(zend_class_entry *ce, const char *name, size_t name_length, long value TSRMLS_DC);
+ZEND_API int zend_declare_class_constant_bool(zend_class_entry *ce, const char *name, size_t name_length, zend_bool value TSRMLS_DC);
+ZEND_API int zend_declare_class_constant_double(zend_class_entry *ce, const char *name, size_t name_length, double value TSRMLS_DC);
+ZEND_API int zend_declare_class_constant_stringl(zend_class_entry *ce, const char *name, size_t name_length, const char *value, size_t value_length TSRMLS_DC);
+ZEND_API int zend_declare_class_constant_string(zend_class_entry *ce, const char *name, size_t name_length, const char *value TSRMLS_DC);
 
 ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC);
 ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, char *name, int name_length, zval *value TSRMLS_DC);
@@ -316,12 +316,12 @@ ZEND_API void zend_update_property_null(zend_class_entry *scope, zval *object, c
 ZEND_API void zend_update_property_bool(zend_class_entry *scope, zval *object, char *name, int name_length, long value TSRMLS_DC);
 ZEND_API void zend_update_property_long(zend_class_entry *scope, zval *object, char *name, int name_length, long value TSRMLS_DC);
 ZEND_API void zend_update_property_double(zend_class_entry *scope, zval *object, char *name, int name_length, double value TSRMLS_DC);
-ZEND_API void zend_update_property_string(zend_class_entry *scope, zval *object, char *name, int name_length, char *value TSRMLS_DC);
-ZEND_API void zend_update_property_stringl(zend_class_entry *scope, zval *object, char *name, int name_length, char *value, int value_length TSRMLS_DC);
-ZEND_API void zend_update_property_ascii_string(zend_class_entry *scope, zval *object, char *name, int name_length, char *value TSRMLS_DC);
-ZEND_API void zend_update_property_ascii_stringl(zend_class_entry *scope, zval *object, char *name, int name_length, char *value, int value_length TSRMLS_DC);
-ZEND_API void zend_update_property_rt_string(zend_class_entry *scope, zval *object, char *name, int name_length, char *value TSRMLS_DC);
-ZEND_API void zend_update_property_rt_stringl(zend_class_entry *scope, zval *object, char *name, int name_length, char *value, int value_length TSRMLS_DC);
+ZEND_API void zend_update_property_string(zend_class_entry *scope, zval *object, char *name, int name_length, const char *value TSRMLS_DC);
+ZEND_API void zend_update_property_stringl(zend_class_entry *scope, zval *object, char *name, int name_length, const char *value, int value_length TSRMLS_DC);
+ZEND_API void zend_update_property_ascii_string(zend_class_entry *scope, zval *object, char *name, int name_length, const char *value TSRMLS_DC);
+ZEND_API void zend_update_property_ascii_stringl(zend_class_entry *scope, zval *object, char *name, int name_length, const char *value, int value_length TSRMLS_DC);
+ZEND_API void zend_update_property_rt_string(zend_class_entry *scope, zval *object, char *name, int name_length, const char *value TSRMLS_DC);
+ZEND_API void zend_update_property_rt_stringl(zend_class_entry *scope, zval *object, char *name, int name_length, const char *value, int value_length TSRMLS_DC);
 ZEND_API void zend_update_property_unicode(zend_class_entry *scope, zval *object, char *name, int name_length, UChar *value TSRMLS_DC);
 ZEND_API void zend_update_property_unicodel(zend_class_entry *scope, zval *object, char *name, int name_length, UChar *value, int value_length TSRMLS_DC);
 
@@ -345,12 +345,12 @@ ZEND_API int zend_update_static_property_null(zend_class_entry *scope, char *nam
 ZEND_API int zend_update_static_property_bool(zend_class_entry *scope, char *name, int name_length, long value TSRMLS_DC);
 ZEND_API int zend_update_static_property_long(zend_class_entry *scope, char *name, int name_length, long value TSRMLS_DC);
 ZEND_API int zend_update_static_property_double(zend_class_entry *scope, char *name, int name_length, double value TSRMLS_DC);
-ZEND_API int zend_update_static_property_string(zend_class_entry *scope, char *name, int name_length, char *value TSRMLS_DC);
-ZEND_API int zend_update_static_property_stringl(zend_class_entry *scope, char *name, int name_length, char *value, int value_length TSRMLS_DC);
-ZEND_API int zend_update_static_property_ascii_string(zend_class_entry *scope, char *name, int name_length, char *value TSRMLS_DC);
-ZEND_API int zend_update_static_property_ascii_stringl(zend_class_entry *scope, char *name, int name_length, char *value, int value_length TSRMLS_DC);
-ZEND_API int zend_update_static_property_rt_string(zend_class_entry *scope, char *name, int name_length, char *value TSRMLS_DC);
-ZEND_API int zend_update_static_property_rt_stringl(zend_class_entry *scope, char *name, int name_length, char *value, int value_length TSRMLS_DC);
+ZEND_API int zend_update_static_property_string(zend_class_entry *scope, char *name, int name_length, const char *value TSRMLS_DC);
+ZEND_API int zend_update_static_property_stringl(zend_class_entry *scope, char *name, int name_length, const char *value, int value_length TSRMLS_DC);
+ZEND_API int zend_update_static_property_ascii_string(zend_class_entry *scope, char *name, int name_length, const char *value TSRMLS_DC);
+ZEND_API int zend_update_static_property_ascii_stringl(zend_class_entry *scope, char *name, int name_length, const char *value, int value_length TSRMLS_DC);
+ZEND_API int zend_update_static_property_rt_string(zend_class_entry *scope, char *name, int name_length, const char *value TSRMLS_DC);
+ZEND_API int zend_update_static_property_rt_stringl(zend_class_entry *scope, char *name, int name_length, const char *value, int value_length TSRMLS_DC);
 ZEND_API int zend_update_static_property_unicode(zend_class_entry *scope, char *name, int name_length, UChar *value TSRMLS_DC);
 ZEND_API int zend_update_static_property_unicodel(zend_class_entry *scope, char *name, int name_length, UChar *value, int value_length TSRMLS_DC);
 
@@ -359,8 +359,8 @@ ZEND_API zval *zend_u_read_property(zend_class_entry *scope, zval *object, zend_
 
 ZEND_API zval *zend_read_static_property(zend_class_entry *scope, char *name, int name_length, zend_bool silent TSRMLS_DC);
 
-ZEND_API zend_class_entry *zend_get_class_entry(zval *zobject TSRMLS_DC);
-ZEND_API int zend_get_object_classname(zval *object, zstr *class_name, zend_uint *class_name_len TSRMLS_DC);
+ZEND_API zend_class_entry *zend_get_class_entry(const zval *zobject TSRMLS_DC);
+ZEND_API int zend_get_object_classname(const zval *object, zstr *class_name, zend_uint *class_name_len TSRMLS_DC);
 ZEND_API zend_uchar zend_get_unified_string_type(int num_args TSRMLS_DC, ...);
 ZEND_API char *zend_get_type_by_const(int type);
 
@@ -1515,22 +1515,22 @@ ZEND_API int add_get_index_stringl(zval *arg, ulong idx, const char *str, uint l
 ZEND_API int add_get_index_unicode(zval *arg, ulong idx, UChar *str, void **dest, int duplicate);
 ZEND_API int add_get_index_unicodel(zval *arg, ulong idx, UChar *str, uint length, void **dest, int duplicate);
 
-ZEND_API int add_property_long_ex(zval *arg, char *key, uint key_len, long l TSRMLS_DC);
-ZEND_API int add_property_null_ex(zval *arg, char *key, uint key_len TSRMLS_DC);
-ZEND_API int add_property_bool_ex(zval *arg, char *key, uint key_len, int b TSRMLS_DC);
-ZEND_API int add_property_resource_ex(zval *arg, char *key, uint key_len, long r TSRMLS_DC);
-ZEND_API int add_property_double_ex(zval *arg, char *key, uint key_len, double d TSRMLS_DC);
-ZEND_API int add_property_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate TSRMLS_DC);
-ZEND_API int add_property_stringl_ex(zval *arg, char *key, uint key_len,  char *str, uint length, int duplicate TSRMLS_DC);
-ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *value TSRMLS_DC);
-ZEND_API int add_property_ascii_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate TSRMLS_DC);
-ZEND_API int add_property_ascii_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate TSRMLS_DC);
-ZEND_API int add_property_rt_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate TSRMLS_DC);
-ZEND_API int add_property_rt_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate TSRMLS_DC);
-ZEND_API int add_property_unicode_ex(zval *arg, char *key, uint key_len, UChar *str, int duplicate TSRMLS_DC);
-ZEND_API int add_property_unicodel_ex(zval *arg, char *key, uint key_len,  UChar *str, uint length, int duplicate TSRMLS_DC);
-ZEND_API int add_property_utf8_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate TSRMLS_DC);
-ZEND_API int add_property_utf8_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate TSRMLS_DC);
+ZEND_API int add_property_long_ex(zval *arg, const char *key, uint key_len, long l TSRMLS_DC);
+ZEND_API int add_property_null_ex(zval *arg, const char *key, uint key_len TSRMLS_DC);
+ZEND_API int add_property_bool_ex(zval *arg, const char *key, uint key_len, int b TSRMLS_DC);
+ZEND_API int add_property_resource_ex(zval *arg, const char *key, uint key_len, long r TSRMLS_DC);
+ZEND_API int add_property_double_ex(zval *arg, const char *key, uint key_len, double d TSRMLS_DC);
+ZEND_API int add_property_string_ex(zval *arg, const char *key, uint key_len, char *str, int duplicate TSRMLS_DC);
+ZEND_API int add_property_stringl_ex(zval *arg, const char *key, uint key_len,  char *str, uint length, int duplicate TSRMLS_DC);
+ZEND_API int add_property_zval_ex(zval *arg, const char *key, uint key_len, zval *value TSRMLS_DC);
+ZEND_API int add_property_ascii_string_ex(zval *arg, const char *key, uint key_len, char *str, int duplicate TSRMLS_DC);
+ZEND_API int add_property_ascii_stringl_ex(zval *arg, const char *key, uint key_len, char *str, uint length, int duplicate TSRMLS_DC);
+ZEND_API int add_property_rt_string_ex(zval *arg, const char *key, uint key_len, char *str, int duplicate TSRMLS_DC);
+ZEND_API int add_property_rt_stringl_ex(zval *arg, const char *key, uint key_len, char *str, uint length, int duplicate TSRMLS_DC);
+ZEND_API int add_property_unicode_ex(zval *arg, const char *key, uint key_len, UChar *str, int duplicate TSRMLS_DC);
+ZEND_API int add_property_unicodel_ex(zval *arg, const char *key, uint key_len,  UChar *str, uint length, int duplicate TSRMLS_DC);
+ZEND_API int add_property_utf8_string_ex(zval *arg, const char *key, uint key_len, char *str, int duplicate TSRMLS_DC);
+ZEND_API int add_property_utf8_stringl_ex(zval *arg, const char *key, uint key_len, char *str, uint length, int duplicate TSRMLS_DC);
 ZEND_API int add_property_zstr_ex(zval *arg, char *key, uint key_len, zend_uchar type, zstr str, int duplicate TSRMLS_DC);
 ZEND_API int add_property_zstrl_ex(zval *arg, char *key, uint key_len, zend_uchar type, zstr str, uint length, int duplicate TSRMLS_DC);
 
@@ -1615,7 +1615,7 @@ ZEND_API int zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *f
 
 ZEND_API int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TSRMLS_DC);
 
-ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length, zend_bool is_ref, int num_symbol_tables, ...);
+ZEND_API int zend_set_hash_symbol(zval *symbol, const char *name, int name_length, zend_bool is_ref, int num_symbol_tables, ...);
 
 ZEND_API int zend_delete_global_variable(char *name, int name_len TSRMLS_DC);
 ZEND_API int zend_u_delete_global_variable(zend_uchar type, zstr name, int name_len TSRMLS_DC);

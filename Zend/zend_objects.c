@@ -131,7 +131,7 @@ ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_ent
 }
 /* }}} */
 
-ZEND_API zend_object *zend_objects_get_address(zval *zobject TSRMLS_DC) /* {{{ */
+ZEND_API zend_object *zend_objects_get_address(const zval *zobject TSRMLS_DC) /* {{{ */
 {
 	return (zend_object *)zend_object_store_get_object(zobject TSRMLS_CC);
 }

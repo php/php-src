@@ -1356,12 +1356,12 @@ static zend_object_value sqlite_object_new_exception(zend_class_entry *class_typ
 		obj->u._type = _ptr; \
 	}
 
-static zend_class_entry *sqlite_get_ce_query(zval *object TSRMLS_DC)
+static zend_class_entry *sqlite_get_ce_query(const zval *object TSRMLS_DC)
 {
 	return sqlite_ce_query;
 }
 
-static zend_class_entry *sqlite_get_ce_ub_query(zval *object TSRMLS_DC)
+static zend_class_entry *sqlite_get_ce_ub_query(const zval *object TSRMLS_DC)
 {
 	return sqlite_ce_ub_query;
 }

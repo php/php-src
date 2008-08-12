@@ -72,7 +72,7 @@
 #define HT_DESTROYED		2
 #define HT_CLEANING			3
 
-static void _zend_is_inconsistent(HashTable *ht, char *file, int line) /* {{{ */
+static void _zend_is_inconsistent(const HashTable *ht, const char *file, int line) /* {{{ */
 {
 	if (ht->inconsistent==HT_OK) {
 		return;
@@ -1125,7 +1125,7 @@ ZEND_API ulong zend_get_hash_value(const char *arKey, uint nKeyLength) /* {{{ */
  * data is returned in pData. The reason is that there's no reason
  * someone using the hash table might not want to have NULL data
  */
-ZEND_API int zend_u_hash_find(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, void **pData) /* {{{ */
+ZEND_API int zend_u_hash_find(const HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, void **pData) /* {{{ */
 {
 	ulong h;
 	uint nIndex;
@@ -1158,13 +1158,13 @@ ZEND_API int zend_u_hash_find(HashTable *ht, zend_uchar type, zstr arKey, uint n
 }
 /* }}} */
 
-ZEND_API int zend_hash_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
+ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
 {
 	return zend_u_hash_find(ht, IS_STRING, ZSTR(arKey), nKeyLength, pData);
 }
 /* }}} */
 
-ZEND_API int zend_ascii_hash_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
+ZEND_API int zend_ascii_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -1182,7 +1182,7 @@ ZEND_API int zend_ascii_hash_find(HashTable *ht, const char *arKey, uint nKeyLen
 }
 /* }}} */
 
-ZEND_API int zend_rt_hash_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
+ZEND_API int zend_rt_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -1207,7 +1207,7 @@ string_key:
 }
 /* }}} */
 
-ZEND_API int zend_utf8_hash_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
+ZEND_API int zend_utf8_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -1232,7 +1232,7 @@ string_key:
 }
 /* }}} */
 
-ZEND_API int zend_u_hash_quick_find(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, ulong h, void **pData) /* {{{ */
+ZEND_API int zend_u_hash_quick_find(const HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, ulong h, void **pData) /* {{{ */
 {
 	uint nIndex;
 	Bucket *p;
@@ -1270,13 +1270,13 @@ ZEND_API int zend_u_hash_quick_find(HashTable *ht, zend_uchar type, zstr arKey, 
 }
 /* }}} */
 
-ZEND_API int zend_hash_quick_find(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, void **pData) /* {{{ */
+ZEND_API int zend_hash_quick_find(const HashTable *ht, char *arKey, uint nKeyLength, ulong h, void **pData) /* {{{ */
 {
 	return zend_u_hash_quick_find(ht, IS_STRING, ZSTR(arKey), nKeyLength, h, pData);
 }
 /* }}} */
 
-ZEND_API int zend_u_hash_exists(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength) /* {{{ */
+ZEND_API int zend_u_hash_exists(const HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength) /* {{{ */
 {
 	ulong h;
 	uint nIndex;
@@ -1308,7 +1308,7 @@ ZEND_API int zend_u_hash_exists(HashTable *ht, zend_uchar type, zstr arKey, uint
 }
 /* }}} */
 
-ZEND_API int zend_hash_exists(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
+ZEND_API int zend_hash_exists(const HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
 	return zend_u_hash_exists(ht, IS_STRING, ZSTR(arKey), nKeyLength);
 }
@@ -1382,7 +1382,7 @@ string_key:
 }
 /* }}} */
 
-ZEND_API int zend_u_hash_quick_exists(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, ulong h) /* {{{ */
+ZEND_API int zend_u_hash_quick_exists(const HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, ulong h) /* {{{ */
 {
 	uint nIndex;
 	Bucket *p;
@@ -1419,13 +1419,13 @@ ZEND_API int zend_u_hash_quick_exists(HashTable *ht, zend_uchar type, zstr arKey
 }
 /* }}} */
 
-ZEND_API int zend_hash_quick_exists(HashTable *ht, const char *arKey, uint nKeyLength, ulong h) /* {{{ */
+ZEND_API int zend_hash_quick_exists(const HashTable *ht, const char *arKey, uint nKeyLength, ulong h) /* {{{ */
 {
 	return zend_u_hash_quick_exists(ht, IS_STRING, ZSTR(arKey), nKeyLength, h);
 }
 /* }}} */
 
-ZEND_API int zend_hash_index_find(HashTable *ht, ulong h, void **pData) /* {{{ */
+ZEND_API int zend_hash_index_find(const HashTable *ht, ulong h, void **pData) /* {{{ */
 {
 	uint nIndex;
 	Bucket *p;
@@ -1446,7 +1446,7 @@ ZEND_API int zend_hash_index_find(HashTable *ht, ulong h, void **pData) /* {{{ *
 }
 /* }}} */
 
-ZEND_API int zend_hash_index_exists(HashTable *ht, ulong h) /* {{{ */
+ZEND_API int zend_hash_index_exists(const HashTable *ht, ulong h) /* {{{ */
 {
 	uint nIndex;
 	Bucket *p;
@@ -1466,7 +1466,7 @@ ZEND_API int zend_hash_index_exists(HashTable *ht, ulong h) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_hash_num_elements(HashTable *ht) /* {{{ */
+ZEND_API int zend_hash_num_elements(const HashTable *ht) /* {{{ */
 {
 	IS_CONSISTENT(ht);
 
@@ -1474,7 +1474,7 @@ ZEND_API int zend_hash_num_elements(HashTable *ht) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_hash_get_pointer(HashTable *ht, HashPointer *ptr) /* {{{ */
+ZEND_API int zend_hash_get_pointer(const HashTable *ht, HashPointer *ptr) /* {{{ */
 {
 	ptr->pos = ht->pInternalPointer;
 	if (ht->pInternalPointer) {
@@ -1563,7 +1563,7 @@ ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos) /* {{
 /* }}} */
 
 /* This function should be made binary safe  */
-ZEND_API int zend_hash_get_current_key_ex(HashTable *ht, zstr *str_index, uint *str_length, ulong *num_index, zend_bool duplicate, HashPosition *pos) /* {{{ */
+ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, zstr *str_index, uint *str_length, ulong *num_index, zend_bool duplicate, HashPosition *pos) /* {{{ */
 {
 	Bucket *p;
 
@@ -1966,7 +1966,7 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 }
 /* }}} */
 
-ZEND_API int zend_hash_minmax(HashTable *ht, compare_func_t compar, int flag, void **pData TSRMLS_DC) /* {{{ */
+ZEND_API int zend_hash_minmax(const HashTable *ht, compare_func_t compar, int flag, void **pData TSRMLS_DC) /* {{{ */
 {
 	Bucket *p, *res;
 
@@ -1994,7 +1994,7 @@ ZEND_API int zend_hash_minmax(HashTable *ht, compare_func_t compar, int flag, vo
 }
 /* }}} */
 
-ZEND_API ulong zend_hash_next_free_element(HashTable *ht) /* {{{ */
+ZEND_API ulong zend_hash_next_free_element(const HashTable *ht) /* {{{ */
 {
 	IS_CONSISTENT(ht);
 
@@ -2236,7 +2236,7 @@ ZEND_API void zend_hash_to_unicode(HashTable *ht, apply_func_t apply_func TSRMLS
 /* }}} */
 
 #if ZEND_DEBUG
-void zend_hash_display_pListTail(HashTable *ht) /* {{{ */
+void zend_hash_display_pListTail(const HashTable *ht) /* {{{ */
 {
 	Bucket *p;
 
@@ -2252,7 +2252,7 @@ void zend_hash_display_pListTail(HashTable *ht) /* {{{ */
 }
 /* }}} */
 
-void zend_hash_display(HashTable *ht) /* {{{ */
+void zend_hash_display(const HashTable *ht) /* {{{ */
 {
 	Bucket *p;
 	uint i;

@@ -1222,7 +1222,7 @@ static char *php_resolve_path_for_zend(const char *filename, int filename_len TS
 
 /* {{{ php_get_configuration_directive_for_zend
  */
-static int php_get_configuration_directive_for_zend(char *name, uint name_length, zval *contents)
+static int php_get_configuration_directive_for_zend(const char *name, uint name_length, zval *contents)
 {
 	zval *retval = cfg_get_entry(name, name_length);
 
