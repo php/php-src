@@ -225,6 +225,7 @@ typedef struct _realpath_cache_bucket {
 	int                            path_len;
 	char                          *realpath;
 	int                            realpath_len;
+	int                            is_dir;
 	time_t                         expires;
 	struct _realpath_cache_bucket *next;	
 } realpath_cache_bucket;
