@@ -54,36 +54,36 @@ unlink("$file_path/fflush_error.tmp");
 *** Testing error conditions ***
 -- Testing fflush(): with zero argument --
 
-Warning: Wrong parameter count for fflush() in %s on line %d
+Warning: fflush() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 -- Testing fflush(): with more than expected number of arguments --
 
-Warning: Wrong parameter count for fflush() in %s on line %d
+Warning: fflush() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 -- Testing fflush(): with invalid arguments --
 -- Iteration 1 --
 
-Warning: fflush(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: fflush() expects parameter 1 to be resource, Unicode string given in %s on line %d
+NULL
 -- Iteration 2 --
 
-Warning: fflush(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: fflush() expects parameter 1 to be resource, integer given in %s on line %d
+NULL
 -- Iteration 3 --
 
-Warning: fflush(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: fflush() expects parameter 1 to be resource, double given in %s on line %d
+NULL
 -- Iteration 4 --
 
-Warning: fflush(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: fflush() expects parameter 1 to be resource, boolean given in %s on line %d
+NULL
 -- Iteration 5 --
 
-Warning: fflush(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: fflush() expects parameter 1 to be resource, array given in %s on line %d
+NULL
 -- Iteration 6 --
 
-Warning: fflush(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: fflush() expects parameter 1 to be resource, object given in %s on line %d
+NULL
 
 *** Done ***

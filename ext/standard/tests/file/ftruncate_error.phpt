@@ -76,49 +76,49 @@ unlink( $filename );
  Initial file size = 36
 -- Testing ftruncate() with less than expected number of arguments --
 
-Warning: Wrong parameter count for ftruncate() in %s on line %d
+Warning: ftruncate() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ftruncate() in %s on line %d
+Warning: ftruncate() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 int(36)
 -- Testing ftruncate() with more than expected number of arguments --
 
-Warning: Wrong parameter count for ftruncate() in %s on line %d
+Warning: ftruncate() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 int(36)
 -- Testing ftruncate() with invalid file pointer --
 -- Iteration 1 --
 
-Warning: ftruncate(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: ftruncate() expects parameter 1 to be resource, Unicode string given in %s on line %d
+NULL
 -- Iteration 2 --
 
-Warning: ftruncate(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: ftruncate() expects parameter 1 to be resource, integer given in %s on line %d
+NULL
 -- Iteration 3 --
 
-Warning: ftruncate(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: ftruncate() expects parameter 1 to be resource, double given in %s on line %d
+NULL
 -- Iteration 4 --
 
-Warning: ftruncate(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: ftruncate() expects parameter 1 to be resource, boolean given in %s on line %d
+NULL
 -- Iteration 5 --
 
-Warning: ftruncate(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: ftruncate() expects parameter 1 to be resource, array given in %s on line %d
+NULL
 -- Iteration 6 --
 
-Warning: ftruncate(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: ftruncate() expects parameter 1 to be resource, object given in %s on line %d
+NULL
 -- Testing ftruncate() with closed/unset file handle --
 
 Warning: ftruncate(): 5 is not a valid stream resource in %s on line %d
 bool(false)
 int(36)
 
-Warning: ftruncate(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: ftruncate() expects parameter 1 to be resource, null given in %s on line %d
+NULL
 int(36)
 Done

@@ -56,44 +56,44 @@ echo "Done\n";
 *** Testing fseek() : error conditions ***
 -- Testing fseek() with zero argument --
 
-Warning: Wrong parameter count for fseek() in %s on line %d
+Warning: fseek() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 -- Testing fseek() with unexpected number of arguments --
 
-Warning: Wrong parameter count for fseek() in %s on line %d
+Warning: fseek() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for fseek() in %s on line %d
+Warning: fseek() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 -- Testing fseek() with invalid arguments --
 -- Iteration 1 --
 
-Warning: fseek(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: fseek() expects parameter 1 to be resource, Unicode string given in %s on line %d
+NULL
 -- Iteration 2 --
 
-Warning: fseek(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: fseek() expects parameter 1 to be resource, integer given in %s on line %d
+NULL
 -- Iteration 3 --
 
-Warning: fseek(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: fseek() expects parameter 1 to be resource, double given in %s on line %d
+NULL
 -- Iteration 4 --
 
-Warning: fseek(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: fseek() expects parameter 1 to be resource, boolean given in %s on line %d
+NULL
 -- Iteration 5 --
 
-Warning: fseek(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: fseek() expects parameter 1 to be resource, array given in %s on line %d
+NULL
 -- Iteration 6 --
 
-Warning: fseek(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: fseek() expects parameter 1 to be resource, object given in %s on line %d
+NULL
 -- Testing fseek() with closed/unset file handle --
 Warning: fseek(): 5 is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: fseek(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: fseek() expects parameter 1 to be resource, null given in %s on line %d
+NULL
 Done

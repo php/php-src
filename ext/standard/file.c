@@ -1007,14 +1007,14 @@ PHP_NAMED_FUNCTION(php_if_fopen)
    Close an open file pointer */
 PHPAPI PHP_FUNCTION(fclose)
 {
-	zval **arg1;
+	zval *arg1;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+		return;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 	
 	if ((stream->flags & PHP_STREAM_FLAG_NO_FCLOSE) != 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a valid stream resource", stream->rsrc_id);
@@ -1081,14 +1081,14 @@ PHP_FUNCTION(popen)
    Close a file pointer opened by popen() */
 PHP_FUNCTION(pclose)
 {
-	zval **arg1;
+	zval *arg1;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+		return;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
 	zend_list_delete(stream->rsrc_id);
 	RETURN_LONG(FG(pclose_ret));
@@ -1099,14 +1099,14 @@ PHP_FUNCTION(pclose)
    Test for end-of-file on a file pointer */
 PHPAPI PHP_FUNCTION(feof)
 {
-	zval **arg1;
+	zval *arg1;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+		return;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
 	if (php_stream_eof(stream)) {
 		RETURN_TRUE;
@@ -1171,14 +1171,14 @@ PHPAPI PHP_FUNCTION(fgets)
    Get a character from file pointer */
 PHPAPI PHP_FUNCTION(fgetc)
 {
-	zval **arg1;
+	zval *arg1;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+		return;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
 	if (stream->readbuf_type == IS_UNICODE) {
 		int buflen = 1;
@@ -1285,30 +1285,19 @@ PHPAPI PHP_FUNCTION(fgetss)
    Implements a mostly ANSI compatible fscanf() */
 PHP_FUNCTION(fscanf)
 {
-	int result;
-	zval **file_handle, **format_string;
-	int type;
+	int type, result, argc = 0;
+	zval ***args = NULL;
+	zval **format;
+	zval *file_handle;	
 	char *buf;
 	UChar *u_buf;
 	void *what;
 
-	zval ***args;
-	int argCount;
-
-	argCount = ZEND_NUM_ARGS();
-	if (argCount < 2) {
-		WRONG_PARAM_COUNT;
-	}
-	args = (zval ***)safe_emalloc(argCount, sizeof(zval **), 0);
-	if (zend_get_parameters_array_ex(argCount, args) == FAILURE) {
-		efree( args );
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rZ*", &file_handle, &format, &args, &argc) == FAILURE) {
+		return;
 	}
 
-	file_handle = args[0];
-	format_string = args[1];
-
-	what = zend_fetch_resource(file_handle TSRMLS_CC, -1, "File-Handle", &type, 2, php_file_le_stream(), php_file_le_pstream());
+	what = zend_fetch_resource(&file_handle TSRMLS_CC, -1, "File-Handle", &type, 2, php_file_le_stream(), php_file_le_pstream());
 
 	/*
 	 * we can't do a ZEND_VERIFY_RESOURCE(what), otherwise we end up
@@ -1316,38 +1305,45 @@ PHP_FUNCTION(fscanf)
 	 * if the code behind ZEND_VERIFY_RESOURCE changed. - cc
 	 */
 	if (!what) {
-		efree(args);
+		if (args) {
+			efree(args);
+		}
 		RETURN_FALSE;
 	}
 
 	if (((php_stream *)what)->readbuf_type == IS_UNICODE) {
 		u_buf = php_stream_u_get_line((php_stream *) what, NULL_ZSTR, 0, 0, NULL);
 		if (u_buf == NULL) {
-			efree(args);
+			if (args) {
+				efree(args);
+			}
 			RETURN_FALSE;
 		}
 
-		convert_to_unicode_ex(format_string);
-		result = php_u_sscanf_internal(u_buf, Z_USTRVAL_PP(format_string), argCount, args, 2, &return_value TSRMLS_CC);
+		convert_to_unicode_ex(format);
+		result = php_u_sscanf_internal(u_buf, Z_USTRVAL_PP(format), argc, args, 0, &return_value TSRMLS_CC);
 		efree(u_buf);
 	} else {
 		buf = php_stream_get_line((php_stream *) what, NULL_ZSTR, 0, NULL);
 		if (buf == NULL) {
-			efree(args);
+			if (args) {
+				efree(args);
+			}
 			RETURN_FALSE;
 		}
 
-		convert_to_string_ex(format_string);
-		result = php_sscanf_internal(buf, Z_STRVAL_PP(format_string), argCount, args, 2, &return_value TSRMLS_CC);
+		convert_to_string_ex(format);
+		result = php_sscanf_internal(buf, Z_STRVAL_PP(format), argc, args, 0, &return_value TSRMLS_CC);
 		efree(buf);
 	}
 
-	efree(args);
+	if (args) {
+		efree(args);
+	}
 
 	if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {
 		WRONG_PARAM_COUNT;
 	}
-
 }
 /* }}} */
 
@@ -1404,15 +1400,15 @@ PHPAPI PHP_FUNCTION(fwrite)
    Flushes output */
 PHPAPI PHP_FUNCTION(fflush)
 {
-	zval **arg1;
+	zval *arg1;
 	int ret;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+		return;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
 	ret = php_stream_flush(stream);
 	if (ret) {
@@ -1426,14 +1422,14 @@ PHPAPI PHP_FUNCTION(fflush)
    Rewind the position of a file pointer */
 PHPAPI PHP_FUNCTION(rewind)
 {
-	zval **arg1;
+	zval *arg1;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+		return;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
 	if (-1 == php_stream_rewind(stream)) {
 		RETURN_FALSE;
@@ -1446,15 +1442,15 @@ PHPAPI PHP_FUNCTION(rewind)
    Get file pointer's read/write position */
 PHPAPI PHP_FUNCTION(ftell)
 {
-	zval **arg1;
+	zval *arg1;
 	long ret;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+		return;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
 	ret = php_stream_tell(stream);
 	if (ret == -1)	{
@@ -1468,23 +1464,22 @@ PHPAPI PHP_FUNCTION(ftell)
    Seek on a file pointer */
 PHPAPI PHP_FUNCTION(fseek)
 {
-	zval **arg1, **arg2, **arg3;
-	int argcount = ZEND_NUM_ARGS(), whence = SEEK_SET;
+	zval *arg1;
+	long arg2, arg3;
+	int whence = SEEK_SET, argcount = ZEND_NUM_ARGS();
 	php_stream *stream;
 
-	if (argcount < 2 || argcount > 3 || zend_get_parameters_ex(argcount, &arg1, &arg2, &arg3) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(argcount TSRMLS_CC, "rl|l", &arg1, &arg2, &arg3) == FAILURE) {
+		return;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
-	convert_to_long_ex(arg2);
 	if (argcount > 2) {
-		convert_to_long_ex(arg3);
-		whence = Z_LVAL_PP(arg3);
+		whence = arg3;
 	}
 
-	RETURN_LONG(php_stream_seek(stream, Z_LVAL_PP(arg2), whence));
+	RETURN_LONG(php_stream_seek(stream, arg2, whence));
 }
 /* }}} */
 
@@ -1603,7 +1598,7 @@ PHP_FUNCTION(readfile)
    Return or change the umask */
 PHP_FUNCTION(umask)
 {
-	zval **arg1;
+	long arg1;
 	int oldumask;
 	int arg_count = ZEND_NUM_ARGS();
 
@@ -1612,15 +1607,15 @@ PHP_FUNCTION(umask)
 	if (BG(umask) == -1) {
 		BG(umask) = oldumask;
 	}
+	
+	if (zend_parse_parameters(arg_count TSRMLS_CC, "|l", &arg1) == FAILURE) {
+		return;
+	}
 
 	if (arg_count == 0) {
 		umask(oldumask);
 	} else {
-		if (arg_count > 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_long_ex(arg1);
-		umask(Z_LVAL_PP(arg1));
+		umask(arg1);
 	}
 
 	RETURN_LONG(oldumask);
@@ -1631,15 +1626,15 @@ PHP_FUNCTION(umask)
    Output all remaining data from a file pointer */
 PHPAPI PHP_FUNCTION(fpassthru)
 {
-	zval **arg1;
+	zval *arg1;
 	int size;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+		return;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
 	size = php_stream_passthru(stream);
 	RETURN_LONG(size);
@@ -1728,23 +1723,22 @@ PHP_FUNCTION(unlink)
    Truncate file to 'size' length */
 PHP_NAMED_FUNCTION(php_if_ftruncate)
 {
-	zval **fp , **size;
+	zval *fp;
+	long size;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fp, &size) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &fp, &size) == FAILURE) {
+		return;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, fp);
-
-	convert_to_long_ex(size);
+	PHP_STREAM_TO_ZVAL(stream, &fp);
 
 	if (!php_stream_truncate_supported(stream)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't truncate this stream!");
 		RETURN_FALSE;
 	}
 
-	RETURN_BOOL(0 == php_stream_truncate_set_size(stream, Z_LVAL_PP(size)));
+	RETURN_BOOL(0 == php_stream_truncate_set_size(stream, size));
 }
 /* }}} */
 
@@ -1752,7 +1746,7 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
    Stat() on a filehandle */
 PHP_NAMED_FUNCTION(php_if_fstat)
 {
-	zval **fp;
+	zval *fp;
 	zval *stat_dev, *stat_ino, *stat_mode, *stat_nlink, *stat_uid, *stat_gid, *stat_rdev,
 		 *stat_size, *stat_atime, *stat_mtime, *stat_ctime, *stat_blksize, *stat_blocks;
 	php_stream *stream;
@@ -1762,11 +1756,11 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 		"size", "atime", "mtime", "ctime", "blksize", "blocks"
 	};
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &fp) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &fp) == FAILURE) {
+		return;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, fp);
+	PHP_STREAM_TO_ZVAL(stream, &fp);
 
 	if (php_stream_stat(stream, &stat_ssb)) {
 		RETURN_FALSE;

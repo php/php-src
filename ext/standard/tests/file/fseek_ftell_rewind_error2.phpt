@@ -55,41 +55,41 @@ echo "Done\n";
 *** Testing ftell() : error conditions ***
 -- Testing ftell() with zero argument --
 
-Warning: Wrong parameter count for ftell() in %s on line %d
+Warning: ftell() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 -- Testing ftell() with more than expected number of arguments --
 
-Warning: Wrong parameter count for ftell() in %s on line %d
+Warning: ftell() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 -- Testing ftell() with invalid arguments --
 -- Iteration 1 --
 
-Warning: ftell(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: ftell() expects parameter 1 to be resource, Unicode string given in %s on line %d
+NULL
 -- Iteration 2 --
 
-Warning: ftell(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: ftell() expects parameter 1 to be resource, integer given in %s on line %d
+NULL
 -- Iteration 3 --
 
-Warning: ftell(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: ftell() expects parameter 1 to be resource, double given in %s on line %d
+NULL
 -- Iteration 4 --
 
-Warning: ftell(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: ftell() expects parameter 1 to be resource, boolean given in %s on line %d
+NULL
 -- Iteration 5 --
 
-Warning: ftell(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: ftell() expects parameter 1 to be resource, array given in %s on line %d
+NULL
 -- Iteration 6 --
 
-Warning: ftell(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: ftell() expects parameter 1 to be resource, object given in %s on line %d
+NULL
 -- Testing ftell with closed/unset file handle --
 Warning: ftell(): 5 is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: ftell(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: ftell() expects parameter 1 to be resource, null given in %s on line %d
+NULL
 Done
