@@ -1,3 +1,34 @@
+2008-08-11  Marcus Boerger  <php@marcus-boerger.de>
+
+    * zend_execute_API.c:
+      - Fix shutdown order
+
+    * (PHP_5_3)
+      zend.h
+      zend_API.c
+      zend_globals.h:
+      - MFH Fix memleak with new error handling stack'ing
+
+    * zend.h
+      zend_API.c
+      zend_globals.h:
+      - Fix memleak with new error handling stack'ing
+
+    * (PHP_5_3)
+      zend_closures.c:
+      - WS (actually my falut)
+
+2008-08-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_closures.c
+      zend_closures.c
+      zend_closures.h
+      zend_closures.h
+      tests/closure_022.phpt
+      tests/closure_022.phpt:
+      - Made closures implementation reflection friendly (Christian)
+      - Changed E_ERROR(s) into E_RECOVERABLE_ERROR(s) (Marcus)
+
 2008-08-10  Marcus Boerger  <php@marcus-boerger.de>
 
     * zend_vm_def.h
