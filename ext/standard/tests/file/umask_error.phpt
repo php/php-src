@@ -21,6 +21,6 @@ echo "Done\n";
 --EXPECTF--
 *** Testing umask() : error conditions ***
 
-Warning: Wrong parameter count for umask() in %s on line %d
+Warning: umask() expects at most 1 parameter, 2 given in %s on line %d
 NULL
 Done
