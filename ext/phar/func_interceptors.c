@@ -950,7 +950,9 @@ found_it:
 					}
 				}
 			}
-			efree(entry);
+			if (entry != filename) {
+				efree(entry);
+			}
 			efree(arch);
 			RETURN_FALSE;
 		}
