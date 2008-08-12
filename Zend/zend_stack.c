@@ -35,7 +35,7 @@ ZEND_API int zend_stack_init(zend_stack *stack) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_stack_push(zend_stack *stack, void *element, int size) /* {{{ */
+ZEND_API int zend_stack_push(zend_stack *stack, const void *element, int size) /* {{{ */
 {
 	if (stack->top >= stack->max) {		/* we need to allocate more memory */
 		stack->elements = (void **) erealloc(stack->elements,
@@ -50,7 +50,7 @@ ZEND_API int zend_stack_push(zend_stack *stack, void *element, int size) /* {{{ 
 }
 /* }}} */
 
-ZEND_API int zend_stack_top(zend_stack *stack, void **element) /* {{{ */
+ZEND_API int zend_stack_top(const zend_stack *stack, void **element) /* {{{ */
 {
 	if (stack->top > 0) {
 		*element = stack->elements[stack->top - 1];
@@ -71,7 +71,7 @@ ZEND_API int zend_stack_del_top(zend_stack *stack) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_stack_int_top(zend_stack *stack) /* {{{ */
+ZEND_API int zend_stack_int_top(const zend_stack *stack) /* {{{ */
 {
 	int *e;
 
@@ -83,7 +83,7 @@ ZEND_API int zend_stack_int_top(zend_stack *stack) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_stack_is_empty(zend_stack *stack) /* {{{ */
+ZEND_API int zend_stack_is_empty(const zend_stack *stack) /* {{{ */
 {
 	if (stack->top == 0) {
 		return 1;
@@ -109,13 +109,13 @@ ZEND_API int zend_stack_destroy(zend_stack *stack) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void **zend_stack_base(zend_stack *stack) /* {{{ */
+ZEND_API void **zend_stack_base(const zend_stack *stack) /* {{{ */
 {
 	return stack->elements;
 }
 /* }}} */
 
-ZEND_API int zend_stack_count(zend_stack *stack) /* {{{ */
+ZEND_API int zend_stack_count(const zend_stack *stack) /* {{{ */
 {
 	return stack->top;
 }

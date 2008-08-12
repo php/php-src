@@ -71,7 +71,7 @@ ZEND_API char *(*zend_resolve_path)(const char *filename, int filename_len TSRML
 void (*zend_on_timeout)(int seconds TSRMLS_DC);
 
 static void (*zend_message_dispatcher_p)(long message, void *data);
-static int (*zend_get_configuration_directive_p)(char *name, uint name_length, zval *contents);
+static int (*zend_get_configuration_directive_p)(const char *name, uint name_length, zval *contents);
 
 static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
 {
@@ -1286,7 +1286,7 @@ void zend_set_utility_values(zend_utility_values *utility_values) /* {{{ */
 /* }}} */
 
 /* this should be compatible with the standard zenderror */
-void zenderror(char *error) /* {{{ */
+void zenderror(const char *error) /* {{{ */
 {
 	zend_error(E_PARSE, "%s", error);
 }
@@ -1309,7 +1309,7 @@ ZEND_API void _zend_bailout(char *filename, uint lineno) /* {{{ */
 /* }}} */
 END_EXTERN_C()
 
-void zend_append_version_info(zend_extension *extension) /* {{{ */
+void zend_append_version_info(const zend_extension *extension) /* {{{ */
 {
 	char *new_info;
 	uint new_info_length;
@@ -1477,7 +1477,7 @@ ZEND_API void zend_message_dispatcher(long message, void *data) /* {{{ */
 /* }}} */
 END_EXTERN_C()
 
-ZEND_API int zend_get_configuration_directive(char *name, uint name_length, zval *contents) /* {{{ */
+ZEND_API int zend_get_configuration_directive(const char *name, uint name_length, zval *contents) /* {{{ */
 {
 	if (zend_get_configuration_directive_p) {
 		return zend_get_configuration_directive_p(name, name_length, contents);
@@ -1674,7 +1674,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((alias("zend_error"),noreturn));
 #endif
 
-ZEND_API void zend_output_debug_string(zend_bool trigger_break, char *format, ...) /* {{{ */
+ZEND_API void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) /* {{{ */
 {
 #if ZEND_DEBUG
 	va_list args;
@@ -1772,7 +1772,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 
 #define COMPILED_STRING_DESCRIPTION_FORMAT "%s(%d) : %s"
 
-ZEND_API char *zend_make_compiled_string_description(char *name TSRMLS_DC) /* {{{ */
+ZEND_API char *zend_make_compiled_string_description(const char *name TSRMLS_DC) /* {{{ */
 {
 	char *cur_filename;
 	int cur_lineno;

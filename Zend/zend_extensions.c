@@ -24,7 +24,7 @@
 ZEND_API zend_llist zend_extensions;
 static int last_resource_number;
 
-int zend_load_extension(char *path) /* {{{ */
+int zend_load_extension(const char *path) /* {{{ */
 {
 #if ZEND_EXTENSIONS_SUPPORT
 	DL_HANDLE handle;
@@ -179,7 +179,7 @@ void zend_extension_dtor(zend_extension *extension) /* {{{ */
 }
 /* }}} */
 
-static void zend_extension_message_dispatcher(zend_extension *extension, int num_args, va_list args TSRMLS_DC) /* {{{ */
+static void zend_extension_message_dispatcher(const zend_extension *extension, int num_args, va_list args TSRMLS_DC) /* {{{ */
 {
 	int message;
 	void *arg;
@@ -212,7 +212,7 @@ ZEND_API int zend_get_resource_handle(zend_extension *extension) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_extension *zend_get_extension(char *extension_name) /* {{{ */
+ZEND_API zend_extension *zend_get_extension(const char *extension_name) /* {{{ */
 {
 	zend_llist_element *element;
 

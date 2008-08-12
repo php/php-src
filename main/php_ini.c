@@ -688,7 +688,7 @@ void php_ini_register_extensions(TSRMLS_D)
 
 /* {{{ php_parse_user_ini_file
  */
-PHPAPI int php_parse_user_ini_file(char *dirname, char *ini_filename, HashTable *target_hash TSRMLS_DC)
+PHPAPI int php_parse_user_ini_file(const char *dirname, char *ini_filename, HashTable *target_hash TSRMLS_DC)
 {
 	struct stat sb;
 	char ini_file[MAXPATHLEN];
@@ -779,7 +779,7 @@ PHPAPI int php_ini_has_per_host_config(void)
 
 /* {{{ php_ini_activate_per_host_config
  */
-PHPAPI void php_ini_activate_per_host_config(char *host, uint host_len TSRMLS_DC)
+PHPAPI void php_ini_activate_per_host_config(const char *host, uint host_len TSRMLS_DC)
 {
 	zval *tmp;
 
@@ -794,7 +794,7 @@ PHPAPI void php_ini_activate_per_host_config(char *host, uint host_len TSRMLS_DC
 
 /* {{{ cfg_get_entry
  */
-PHPAPI zval *cfg_get_entry(char *name, uint name_length)
+PHPAPI zval *cfg_get_entry(const char *name, uint name_length)
 {
 	zval *tmp;
 
@@ -808,7 +808,7 @@ PHPAPI zval *cfg_get_entry(char *name, uint name_length)
 
 /* {{{ cfg_get_long
  */
-PHPAPI int cfg_get_long(char *varname, long *result)
+PHPAPI int cfg_get_long(const char *varname, long *result)
 {
 	zval *tmp, var;
 
@@ -826,7 +826,7 @@ PHPAPI int cfg_get_long(char *varname, long *result)
 
 /* {{{ cfg_get_double
  */
-PHPAPI int cfg_get_double(char *varname, double *result)
+PHPAPI int cfg_get_double(const char *varname, double *result)
 {
 	zval *tmp, var;
 
@@ -844,7 +844,7 @@ PHPAPI int cfg_get_double(char *varname, double *result)
 
 /* {{{ cfg_get_string
  */
-PHPAPI int cfg_get_string(char *varname, char **result)
+PHPAPI int cfg_get_string(const char *varname, char **result)
 {
 	zval *tmp;
 

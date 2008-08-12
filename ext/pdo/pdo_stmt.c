@@ -2710,12 +2710,12 @@ static union _zend_function *row_get_ctor(zval *object TSRMLS_DC)
 	return (union _zend_function*)&ctor;
 }
 
-static zend_class_entry *row_get_ce(zval *object TSRMLS_DC)
+static zend_class_entry *row_get_ce(const zval *object TSRMLS_DC)
 {
 	return pdo_dbstmt_ce;
 }
 
-static int row_get_classname(zval *object,  zstr *class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
+static int row_get_classname(const zval *object,  zstr *class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
 {
 	if (parent) {
 		return FAILURE;

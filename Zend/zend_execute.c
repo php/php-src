@@ -55,9 +55,9 @@ typedef int (*incdec_t)(zval *);
 #define get_obj_zval_ptr_ptr(node, Ts, should_free, type) _get_obj_zval_ptr_ptr(node, Ts, should_free, type TSRMLS_CC)
 
 /* Prototypes */
-static void zend_extension_statement_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC);
-static void zend_extension_fcall_begin_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC);
-static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC);
+static void zend_extension_statement_handler(const zend_extension *extension, zend_op_array *op_array TSRMLS_DC);
+static void zend_extension_fcall_begin_handler(const zend_extension *extension, zend_op_array *op_array TSRMLS_DC);
+static void zend_extension_fcall_end_handler(const zend_extension *extension, zend_op_array *op_array TSRMLS_DC);
 
 #define RETURN_VALUE_USED(opline) (!((opline)->result.u.EA.type & EXT_TYPE_UNUSED))
 
@@ -172,19 +172,19 @@ static inline void zend_pzval_unlock_free_func(zval *z) /* {{{ */
 #define DECODE_CTOR(ce) \
 	((zend_class_entry*)(((zend_uintptr_t)(ce)) & ~(CTOR_CALL_BIT|CTOR_USED_BIT)))
 
-ZEND_API zval** zend_get_compiled_variable_value(zend_execute_data *execute_data_ptr, zend_uint var) /* {{{ */
+ZEND_API zval** zend_get_compiled_variable_value(const zend_execute_data *execute_data_ptr, zend_uint var) /* {{{ */
 {
 	return execute_data_ptr->CVs[var];
 }
 /* }}} */
 
-static inline zval *_get_zval_ptr_tmp(znode *node, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC) /* {{{ */
+static inline zval *_get_zval_ptr_tmp(const znode *node, const temp_variable *Ts, zend_free_op *should_free TSRMLS_DC) /* {{{ */
 {
 	return should_free->var = &T(node->u.var).tmp_var;
 }
 /* }}} */
 
-static inline zval *_get_zval_ptr_var(znode *node, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC) /* {{{ */
+static inline zval *_get_zval_ptr_var(const znode *node, const temp_variable *Ts, zend_free_op *should_free TSRMLS_DC) /* {{{ */
 {
 	if (T(node->u.var).var.ptr) {
 		PZVAL_UNLOCK(T(node->u.var).var.ptr, should_free);
@@ -234,7 +234,7 @@ static inline zval *_get_zval_ptr_var(znode *node, temp_variable *Ts, zend_free_
 }
 /* }}} */
 
-static inline zval *_get_zval_ptr_cv(znode *node, temp_variable *Ts, int type TSRMLS_DC) /* {{{ */
+static inline zval *_get_zval_ptr_cv(const znode *node, const temp_variable *Ts, int type TSRMLS_DC) /* {{{ */
 {
 	zval ***ptr = &CV_OF(node->u.var);
 
@@ -271,7 +271,7 @@ static inline zval *_get_zval_ptr_cv(znode *node, temp_variable *Ts, int type TS
 }
 /* }}} */
 
-static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC) /* {{{ */
+static inline zval *_get_zval_ptr(znode *node, const temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC) /* {{{ */
 {
 /*	should_free->is_var = 0; */
 	switch (node->op_type) {
@@ -300,7 +300,7 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, zend_free_op *
 }
 /* }}} */
 
-static inline zval **_get_zval_ptr_ptr_var(znode *node, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC) /* {{{ */
+static inline zval **_get_zval_ptr_ptr_var(const znode *node, const temp_variable *Ts, zend_free_op *should_free TSRMLS_DC) /* {{{ */
 {
 	zval** ptr_ptr = T(node->u.var).var.ptr_ptr;
 
@@ -314,7 +314,7 @@ static inline zval **_get_zval_ptr_ptr_var(znode *node, temp_variable *Ts, zend_
 }
 /* }}} */
 
-static inline zval **_get_zval_ptr_ptr_cv(znode *node, temp_variable *Ts, int type TSRMLS_DC) /* {{{ */
+static inline zval **_get_zval_ptr_ptr_cv(const znode *node, const temp_variable *Ts, int type TSRMLS_DC) /* {{{ */
 {
 	zval ***ptr = &CV_OF(node->u.var);
 
@@ -351,7 +351,7 @@ static inline zval **_get_zval_ptr_ptr_cv(znode *node, temp_variable *Ts, int ty
 }
 /* }}} */
 
-static inline zval **_get_zval_ptr_ptr(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC) /* {{{ */
+static inline zval **_get_zval_ptr_ptr(const znode *node, const temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC) /* {{{ */
 {
 	if (node->op_type == IS_CV) {
 		should_free->var = 0;
@@ -376,7 +376,7 @@ static inline zval *_get_obj_zval_ptr_unused(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-static inline zval **_get_obj_zval_ptr_ptr(znode *op, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC) /* {{{ */
+static inline zval **_get_obj_zval_ptr_ptr(const znode *op, const temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC) /* {{{ */
 {
 	if (op->op_type == IS_UNUSED) {
 		if (EXPECTED(EG(This) != NULL)) {
@@ -403,7 +403,7 @@ static inline zval **_get_obj_zval_ptr_ptr_unused(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-static inline zval *_get_obj_zval_ptr(znode *op, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC) /* {{{ */
+static inline zval *_get_obj_zval_ptr(znode *op, const temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC) /* {{{ */
 {
 	if (op->op_type == IS_UNUSED) {
 		if (EXPECTED(EG(This) != NULL)) {
@@ -506,7 +506,7 @@ static inline char * zend_verify_arg_class_kind(zend_arg_info *cur_arg_info, ulo
 }
 /* }}} */
 
-static inline int zend_verify_arg_error(zend_function *zf, zend_uint arg_num, zend_arg_info *cur_arg_info, char *need_msg, zstr need_kind, char *given_msg, zstr given_kind TSRMLS_DC) /* {{{ */
+static inline int zend_verify_arg_error(const zend_function *zf, zend_uint arg_num, const zend_arg_info *cur_arg_info, char *need_msg, zstr need_kind, const char *given_msg, zstr given_kind TSRMLS_DC) /* {{{ */
 {
 	zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
 	zstr fname = zf->common.function_name;
@@ -570,7 +570,7 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 }
 /* }}} */
 
-static inline void zend_assign_to_object(znode *result, zval **object_ptr, zval *property_name, znode *value_op, temp_variable *Ts, int opcode TSRMLS_DC) /* {{{ */
+static inline void zend_assign_to_object(znode *result, zval **object_ptr, zval *property_name, znode *value_op, const temp_variable *Ts, int opcode TSRMLS_DC) /* {{{ */
 {
 	zval *object;
 	zend_free_op free_value;
@@ -661,7 +661,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, zval 
 }
 /* }}} */
 
-static inline int zend_assign_to_string_offset(temp_variable *T, zval *value, int value_type TSRMLS_DC) /* {{{ */
+static inline int zend_assign_to_string_offset(const temp_variable *T, const zval *value, int value_type TSRMLS_DC) /* {{{ */
 {
 	if (UG(unicode) && Z_TYPE_P(T->str_offset.str) == IS_STRING && Z_TYPE_P(value) != IS_STRING) {
 		convert_to_unicode(T->str_offset.str);
@@ -828,7 +828,7 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 /* }}} */
 
 /* Utility Functions for Extensions */
-static void zend_extension_statement_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC) /* {{{ */
+static void zend_extension_statement_handler(const zend_extension *extension, zend_op_array *op_array TSRMLS_DC) /* {{{ */
 {
 	if (extension->statement_handler) {
 		extension->statement_handler(op_array);
@@ -836,7 +836,7 @@ static void zend_extension_statement_handler(zend_extension *extension, zend_op_
 }
 /* }}} */
 
-static void zend_extension_fcall_begin_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC) /* {{{ */
+static void zend_extension_fcall_begin_handler(const zend_extension *extension, zend_op_array *op_array TSRMLS_DC) /* {{{ */
 {
 	if (extension->fcall_begin_handler) {
 		extension->fcall_begin_handler(op_array);
@@ -844,7 +844,7 @@ static void zend_extension_fcall_begin_handler(zend_extension *extension, zend_o
 }
 /* }}} */
 
-static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC) /* {{{ */
+static void zend_extension_fcall_end_handler(const zend_extension *extension, zend_op_array *op_array TSRMLS_DC) /* {{{ */
 {
 	if (extension->fcall_end_handler) {
 		extension->fcall_end_handler(op_array);
@@ -852,7 +852,7 @@ static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_
 }
 /* }}} */
 
-static inline HashTable *zend_get_target_symbol_table(zend_op *opline, temp_variable *Ts, int type, zval *variable TSRMLS_DC) /* {{{ */
+static inline HashTable *zend_get_target_symbol_table(const zend_op *opline, const temp_variable *Ts, int type, const zval *variable TSRMLS_DC) /* {{{ */
 {
 	switch (opline->op2.u.EA.type) {
 		case ZEND_FETCH_LOCAL:
@@ -879,7 +879,7 @@ static inline HashTable *zend_get_target_symbol_table(zend_op *opline, temp_vari
 }
 /* }}} */
 
-static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, zval *dim, int type TSRMLS_DC) /* {{{ */
+static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, const zval *dim, int type TSRMLS_DC) /* {{{ */
 {
 	zval **retval;
 	zstr offset_key;
@@ -1325,7 +1325,7 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 }
 /* }}} */
 
-static inline zend_brk_cont_element* zend_brk_cont(int nest_levels, int array_offset, zend_op_array *op_array, temp_variable *Ts TSRMLS_DC) /* {{{ */
+static inline zend_brk_cont_element* zend_brk_cont(int nest_levels, int array_offset, const zend_op_array *op_array, const temp_variable *Ts TSRMLS_DC) /* {{{ */
 {
 	int original_nest_levels;
 	zend_brk_cont_element *jmp_to;
@@ -1433,12 +1433,12 @@ ZEND_API user_opcode_handler_t zend_get_user_opcode_handler(zend_uchar opcode) /
 }
 /* }}} */
 
-ZEND_API zval *zend_get_zval_ptr(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC) { /* {{{ */
+ZEND_API zval *zend_get_zval_ptr(znode *node, const temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC) { /* {{{ */
 	return get_zval_ptr(node, Ts, should_free, type);
 }
 /* }}} */
 
-ZEND_API zval **zend_get_zval_ptr_ptr(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC) { /* {{{ */
+ZEND_API zval **zend_get_zval_ptr_ptr(const znode *node, const temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC) { /* {{{ */
 	return get_zval_ptr_ptr(node, Ts, should_free, type);
 }
 /* }}} */

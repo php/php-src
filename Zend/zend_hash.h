@@ -212,25 +212,25 @@ ZEND_API ulong zend_get_hash_value(const char *arKey, uint nKeyLength);
 ZEND_API ulong zend_u_get_hash_value(zend_uchar type, zstr arKey, uint nKeyLength);
 
 /* Data retreival */
-ZEND_API int zend_hash_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
-ZEND_API int zend_ascii_hash_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
-ZEND_API int zend_rt_hash_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
-ZEND_API int zend_utf8_hash_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
-ZEND_API int zend_u_hash_find(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, void **pData);
-ZEND_API int zend_hash_quick_find(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, void **pData);
-ZEND_API int zend_u_hash_quick_find(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, ulong h, void **pData);
-ZEND_API int zend_hash_index_find(HashTable *ht, ulong h, void **pData);
+ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
+ZEND_API int zend_ascii_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
+ZEND_API int zend_rt_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
+ZEND_API int zend_utf8_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
+ZEND_API int zend_u_hash_find(const HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, void **pData);
+ZEND_API int zend_hash_quick_find(const HashTable *ht, char *arKey, uint nKeyLength, ulong h, void **pData);
+ZEND_API int zend_u_hash_quick_find(const HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, ulong h, void **pData);
+ZEND_API int zend_hash_index_find(const HashTable *ht, ulong h, void **pData);
 
 /* Misc */
-ZEND_API int zend_hash_exists(HashTable *ht, const char *arKey, uint nKeyLength);
+ZEND_API int zend_hash_exists(const HashTable *ht, const char *arKey, uint nKeyLength);
 ZEND_API int zend_ascii_hash_exists(HashTable *ht, const char *arKey, uint nKeyLength);
 ZEND_API int zend_rt_hash_exists(HashTable *ht, const char *arKey, uint nKeyLength);
 ZEND_API int zend_utf8_hash_exists(HashTable *ht, const char *arKey, uint nKeyLength);
-ZEND_API int zend_u_hash_exists(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength);
-ZEND_API int zend_hash_quick_exists(HashTable *ht, const char *arKey, uint nKeyLength, ulong h);
-ZEND_API int zend_u_hash_quick_exists(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, ulong h);
-ZEND_API int zend_hash_index_exists(HashTable *ht, ulong h);
-ZEND_API ulong zend_hash_next_free_element(HashTable *ht);
+ZEND_API int zend_u_hash_exists(const HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength);
+ZEND_API int zend_hash_quick_exists(const HashTable *ht, const char *arKey, uint nKeyLength, ulong h);
+ZEND_API int zend_u_hash_quick_exists(const HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, ulong h);
+ZEND_API int zend_hash_index_exists(const HashTable *ht, ulong h);
+ZEND_API ulong zend_hash_next_free_element(const HashTable *ht);
 
 
 /* traversing */
@@ -238,7 +238,7 @@ ZEND_API ulong zend_hash_next_free_element(HashTable *ht);
 	(zend_hash_get_current_key_type_ex(ht, pos) == HASH_KEY_NON_EXISTANT ? FAILURE : SUCCESS)
 ZEND_API int zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos);
-ZEND_API int zend_hash_get_current_key_ex(HashTable *ht, zstr *str_index, uint *str_length, ulong *num_index, zend_bool duplicate, HashPosition *pos);
+ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, zstr *str_index, uint *str_length, ulong *num_index, zend_bool duplicate, HashPosition *pos);
 ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosition *pos);
 ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *pos);
@@ -250,7 +250,7 @@ typedef struct _HashPointer {
 	ulong h;
 } HashPointer;
 
-ZEND_API int zend_hash_get_pointer(HashTable *ht, HashPointer *ptr);
+ZEND_API int zend_hash_get_pointer(const HashTable *ht, HashPointer *ptr);
 ZEND_API int zend_hash_set_pointer(HashTable *ht, const HashPointer *ptr);
 
 #define zend_hash_has_more_elements(ht) \
@@ -278,12 +278,12 @@ ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_f
 ZEND_API void zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, uint size, merge_checker_func_t pMergeSource, void *pParam);
 ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func, compare_func_t compare_func, int renumber TSRMLS_DC);
 ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, zend_bool ordered TSRMLS_DC);
-ZEND_API int zend_hash_minmax(HashTable *ht, compare_func_t compar, int flag, void **pData TSRMLS_DC);
+ZEND_API int zend_hash_minmax(const HashTable *ht, compare_func_t compar, int flag, void **pData TSRMLS_DC);
 
 #define zend_hash_merge(target, source, pCopyConstructor, tmp, size, overwrite)					\
 	_zend_hash_merge(target, source, pCopyConstructor, tmp, size, overwrite ZEND_FILE_LINE_CC)
 
-ZEND_API int zend_hash_num_elements(HashTable *ht);
+ZEND_API int zend_hash_num_elements(const HashTable *ht);
 
 ZEND_API int zend_hash_rehash(HashTable *ht);
 
@@ -357,8 +357,8 @@ ZEND_API ulong zend_u_hash_func(zend_uchar type, zstr arKey, uint nKeyLength);
 
 #if ZEND_DEBUG
 /* debug */
-void zend_hash_display_pListTail(HashTable *ht);
-void zend_hash_display(HashTable *ht);
+void zend_hash_display_pListTail(const HashTable *ht);
+void zend_hash_display(const HashTable *ht);
 #endif
 
 END_EXTERN_C()

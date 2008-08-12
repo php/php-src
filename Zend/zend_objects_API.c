@@ -273,7 +273,7 @@ ZEND_API zend_object_value zend_objects_store_clone_obj(zval *zobject TSRMLS_DC)
 }
 /* }}} */
 
-ZEND_API void *zend_object_store_get_object(zval *zobject TSRMLS_DC) /* {{{ */
+ZEND_API void *zend_object_store_get_object(const zval *zobject TSRMLS_DC) /* {{{ */
 {
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 
