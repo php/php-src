@@ -1202,7 +1202,7 @@ ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 
 
 /* must support result==op1 */
-ZEND_API int add_char_to_string(zval *result, zval *op1, zval *op2)
+ZEND_API int add_char_to_string(zval *result, const zval *op1, const zval *op2)
 {
 	Z_STRLEN_P(result) = Z_STRLEN_P(op1) + 1;
 	Z_STRVAL_P(result) = (char *) erealloc(Z_STRVAL_P(op1), Z_STRLEN_P(result)+1);
@@ -1214,7 +1214,7 @@ ZEND_API int add_char_to_string(zval *result, zval *op1, zval *op2)
 
 
 /* must support result==op1 */
-ZEND_API int add_string_to_string(zval *result, zval *op1, zval *op2)
+ZEND_API int add_string_to_string(zval *result, const zval *op1, const zval *op2)
 {
 	int length = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
 
@@ -1640,7 +1640,7 @@ ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2 TSR
 }
 
 
-ZEND_API zend_bool instanceof_function_ex(zend_class_entry *instance_ce, zend_class_entry *ce, zend_bool interfaces_only TSRMLS_DC)
+ZEND_API zend_bool instanceof_function_ex(const zend_class_entry *instance_ce, const zend_class_entry *ce, zend_bool interfaces_only TSRMLS_DC)
 {
 	zend_uint i;
 
@@ -1661,7 +1661,7 @@ ZEND_API zend_bool instanceof_function_ex(zend_class_entry *instance_ce, zend_cl
 	return 0;
 }
 
-ZEND_API zend_bool instanceof_function(zend_class_entry *instance_ce, zend_class_entry *ce TSRMLS_DC)
+ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, const zend_class_entry *ce TSRMLS_DC)
 {
 	return instanceof_function_ex(instance_ce, ce, 0 TSRMLS_CC);
 }

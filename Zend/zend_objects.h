@@ -29,7 +29,7 @@ ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce TSR
 ZEND_API void zend_object_std_dtor(zend_object *object TSRMLS_DC);
 ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class_type TSRMLS_DC);
 ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handle handle TSRMLS_DC);
-ZEND_API zend_object *zend_objects_get_address(zval *object TSRMLS_DC);
+ZEND_API zend_object *zend_objects_get_address(const zval *object TSRMLS_DC);
 ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_value new_obj_val, zend_object *old_object, zend_object_handle handle TSRMLS_DC);
 ZEND_API zend_object_value zend_objects_clone_obj(zval *object TSRMLS_DC);
 ZEND_API void zend_objects_free_object_storage(zend_object *object TSRMLS_DC);
