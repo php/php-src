@@ -70,13 +70,13 @@ rmdir("$name_prefix/");
 string(%d) "%s\realpath_basic\home\realpath_basic.tmp"
 
 -- Iteration 2 --
-string(%d) "%s\realpath_basic\realpath_basic.tmp"
+bool(false)
 
 -- Iteration 3 --
 string(%d) "%s\realpath_basic\home\test\realpath_basic.tmp"
 
 -- Iteration 4 --
-string(%d) "%s\realpath_basic\realpath_basic.tmp"
+bool(false)
 
 -- Iteration 5 --
 string(%d) "%s\realpath_basic\home\realpath_basic.tmp"
