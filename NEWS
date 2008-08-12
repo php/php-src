@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 
 - Changed session_start() to return false when session startup fails. (Jani)
 
+- Added system independent realpath() implementation which caches intermediate
+  directories in realpath-cache (Dmitry)
 - Added optional clear_realpath_cache and filename parameters to
   clearstatcache(). (Jani, Arnaud)
 - Added litespeed SAPI module. (George Wang)
@@ -22,8 +24,11 @@ PHP                                                                        NEWS
 - Fixed bug #45636 (fileinfo ext duplicate strndup). (Derick)
 - Fixed bug #45545 (DateInterval has 4 char limitation for ISO durations).
   (Derick)
+- Fixed bug #45044 (relative paths not resolved correctly). (Dmitry)
 - Fixed bug #44100 (Inconsistent handling of static array declarations with
   duplicate keys). (Dmitry)
+- Fixed bug #43817 (opendir() fails on Windows directories with parent
+  directory unaccessible). (Dmitry)
 - Fixed bug #43008 (php://filter uris ignore url encoded filternames and can't
   handle slashes). (Arnaud)
 
