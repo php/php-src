@@ -1168,30 +1168,18 @@ PHPAPI PHP_FUNCTION(fgetss)
    Implements a mostly ANSI compatible fscanf() */
 PHP_FUNCTION(fscanf)
 {
-	int result;
-	zval **file_handle, **format_string;
+	int result, format_len, type, argc = 0;
+	zval ***args = NULL;
+	zval *file_handle;
+	char *buf, *format;
 	size_t len;
-	int type;
-	char *buf;
 	void *what;
-
-	zval ***args;
-	int argCount;
-
-	argCount = ZEND_NUM_ARGS();
-	if (argCount < 2) {
-		WRONG_PARAM_COUNT;
-	}
-	args = (zval ***)safe_emalloc(argCount, sizeof(zval **), 0);
-	if (zend_get_parameters_array_ex(argCount, args) == FAILURE) {
-		efree( args );
-		WRONG_PARAM_COUNT;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs*", &file_handle, &format, &format_len, &args, &argc) == FAILURE) {
+		return;
 	}
 
-	file_handle = args[0];
-	format_string = args[1];
-
-	what = zend_fetch_resource(file_handle TSRMLS_CC, -1, "File-Handle", &type, 2, php_file_le_stream(), php_file_le_pstream());
+	what = zend_fetch_resource(&file_handle TSRMLS_CC, -1, "File-Handle", &type, 2, php_file_le_stream(), php_file_le_pstream());
 
 	/*
 	 * we can't do a ZEND_VERIFY_RESOURCE(what), otherwise we end up
@@ -1199,26 +1187,30 @@ PHP_FUNCTION(fscanf)
 	 * if the code behind ZEND_VERIFY_RESOURCE changed. - cc
 	 */
 	if (!what) {
-		efree(args);
+		if (args) {
+			efree(args);
+		}
 		RETURN_FALSE;
 	}
 
 	buf = php_stream_get_line((php_stream *) what, NULL, 0, &len);
 	if (buf == NULL) {
-		efree(args);
+		if (args) {
+			efree(args);
+		}
 		RETURN_FALSE;
 	}
 
-	convert_to_string_ex(format_string);
-	result = php_sscanf_internal(buf, Z_STRVAL_PP(format_string), argCount, args, 2, &return_value TSRMLS_CC);
+	result = php_sscanf_internal(buf, format, argc, args, 0, &return_value TSRMLS_CC);
 
-	efree(args);
+	if (args) {
+		efree(args);
+	}
 	efree(buf);
 
 	if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {
 		WRONG_PARAM_COUNT;
 	}
-
 }
 /* }}} */
 
