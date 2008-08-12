@@ -593,7 +593,6 @@ ZEND_API int zend_convert_scanner_output(UConverter *conv, UChar **target, int *
 int zend_unicode_yyinput(zend_file_handle *file_handle, char *buf, size_t len TSRMLS_DC)
 {
 	size_t n;
-	int c = '*';
 	const char *src = buf;
 
 #ifdef scottmac_0
