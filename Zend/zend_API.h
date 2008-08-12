@@ -1556,8 +1556,8 @@ ZEND_API int add_property_zstrl_ex(zval *arg, char *key, uint key_len, zend_ucha
 ZEND_API int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, zend_uint param_count, zval *params[] TSRMLS_DC);
 ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, zend_uint param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC);
 
-ZEND_API extern zend_fcall_info empty_fcall_info;
-ZEND_API extern zend_fcall_info_cache empty_fcall_info_cache;
+ZEND_API extern const zend_fcall_info empty_fcall_info;
+ZEND_API extern const zend_fcall_info_cache empty_fcall_info_cache;
 
 /** Build zend_call_info/cache from a zval*
  *
