@@ -350,6 +350,7 @@ PHP                                                                        NEWS
   when lines end in \r\n). (Ilia)
 - Fixed bug #43960 (strtotime() returns timestamp in the future when given a
   bogus string). (Derick)
+- Fixed bug #43941 (json_encode silently cuts non-UTF8 strings). (Stas)
 - Fixed bug #43832 (mysqli_get_charset() doesn't expose charset comment).
   (Andrey)
 - Fixed bug #43808 (date_create never fails (even when it should)). (Derick)
