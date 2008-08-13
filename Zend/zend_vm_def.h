@@ -1664,6 +1664,10 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 			PZVAL_LOCK(*value_ptr_ptr); /* undo the effect of get_zval_ptr_ptr() */
 		}
 		zend_error(E_STRICT, "Only variables should be assigned by reference");
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			FREE_OP2_VAR_PTR();
+			ZEND_VM_NEXT_OPCODE();
+		}
 		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_ASSIGN);
 	} else if (OP2_TYPE == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
 		PZVAL_LOCK(*value_ptr_ptr);
