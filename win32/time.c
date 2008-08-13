@@ -22,10 +22,6 @@
 
 /* Include stuff ************************************************************ */
 
-/* this allows the use of the WaitableTimer functions.
- * For win98 and later */
-#define _WIN32_WINNT 0x400
-
 #include "time.h"
 #include "unistd.h"
 #include "signal.h"
