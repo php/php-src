@@ -374,7 +374,7 @@ static PHP_FUNCTION(pspell_new)
 
 	if(pspell_error_number(ret) != 0){
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL couldn't open the dictionary. reason: %s", pspell_error_message(ret));
-		delete_pspell_manager(ret);
+		delete_pspell_can_have_error(ret);
 		RETURN_FALSE;
 	}
 	
@@ -492,7 +492,7 @@ static PHP_FUNCTION(pspell_new_personal)
 
 	if(pspell_error_number(ret) != 0){
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL couldn't open the dictionary. reason: %s", pspell_error_message(ret));
-		delete_pspell_manager(ret);
+		delete_pspell_can_have_error(ret);
 		RETURN_FALSE;
 	}
 	
@@ -526,7 +526,7 @@ static PHP_FUNCTION(pspell_new_config)
 
 	if(pspell_error_number(ret) != 0){
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL couldn't open the dictionary. reason: %s", pspell_error_message(ret));
-		delete_pspell_manager(ret);
+		delete_pspell_can_have_error(ret);
 		RETURN_FALSE;
 	}
 	
