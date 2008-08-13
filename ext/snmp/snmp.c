@@ -785,60 +785,63 @@ retry:
 */
 static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version) 
 {
-	zval **a1, **a2, **a3, **a4, **a5, **a6, **a7;
+	char *a1, **a2, **a3;
+	int a1_len, a2_len, a3_len;
+	zval **a4 = NULL, **a5 = NULL;
+	long a6 = 0, a7 = 0;
 	struct snmp_session session;
-	long timeout=SNMP_DEFAULT_TIMEOUT;
-	long retries=SNMP_DEFAULT_RETRIES;
-	int myargc = ZEND_NUM_ARGS();
+	long timeout = SNMP_DEFAULT_TIMEOUT;
+	long retries = SNMP_DEFAULT_RETRIES;
 	char type = (char) 0;
 	char *value = (char *) 0;
 	char hostname[MAX_NAME_LEN];
 	int remote_port = 161;
 	char *pptr;
+	int argc = ZEND_NUM_ARGS();
 
-	if (myargc < 3 || myargc > 7 ||
-		zend_get_parameters_ex(myargc, &a1, &a2, &a3, &a4, &a5, &a6, &a7) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (st == SNMP_CMD_SET) {
+		if (zend_parse_parameters(argc TSRMLS_CC, "sssZZ|ll", &a1, &a1_len, &a2, &a2_len, &a3, &a3_len, &a4, &a5, &a6, &a7) == FAILURE) {
+			return;
+		}
+	} else {
+		/* SNMP_CMD_GET
+		 * SNMP_CMD_GETNEXT
+		 * SNMP_CMD_WALK
+		 * SNMP_CMD_REALWALK
+		 */
+		if (zend_parse_parameters(argc TSRMLS_CC, "sss|ZZ", &a1, &a1_len, &a2, &a2_len, &a3, &a3_len, &a4, &a5) == FAILURE) {
+			return;
+		}
 	}
-
-	convert_to_string_ex(a1);
-	convert_to_string_ex(a2);
-	convert_to_string_ex(a3);
 	
 	if (st == SNMP_CMD_SET) {
-		if (myargc < 5) {
-			WRONG_PARAM_COUNT;
-		}
-
 		convert_to_string_ex(a4);
 		convert_to_string_ex(a5);
 
-		if(myargc > 5) {
-			convert_to_long_ex(a6);
-			timeout = Z_LVAL_PP(a6);
+		if (argc > 5) {
+			timeout = a6;
 		}
 
-		if(myargc > 6) {
-			convert_to_long_ex(a7);
-			retries = Z_LVAL_PP(a7);
+		if (argc > 6) {
+			retries = a7;
 		}
 
 		type = Z_STRVAL_PP(a4)[0];
 		value = Z_STRVAL_PP(a5);
 	} else {
-		if(myargc > 3) {
+		if (argc > 3) {
 			convert_to_long_ex(a4);
 			timeout = Z_LVAL_PP(a4);
 		}
 
-		if(myargc > 4) {
+		if (argc > 4) {
 			convert_to_long_ex(a5);
 			retries = Z_LVAL_PP(a5);
 		}
 	}
 
 	snmp_sess_init(&session);
-	strlcpy(hostname, Z_STRVAL_PP(a1), sizeof(hostname));
+	strlcpy(hostname, a1, sizeof(hostname));
 	if ((pptr = strchr (hostname, ':'))) {
 		remote_port = strtol (pptr + 1, NULL, 0);
 	}
@@ -853,17 +856,17 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	* memory it did not allocate
 	*/
 #ifdef UCD_SNMP_HACK
-	session.community = (u_char *)strdup(Z_STRVAL_PP(a2)); /* memory freed by SNMP library, strdup NOT estrdup */
+	session.community = (u_char *)strdup(a2); /* memory freed by SNMP library, strdup NOT estrdup */
 #else
-	session.community = (u_char *)Z_STRVAL_PP(a2);
+	session.community = (u_char *)a2;
 #endif
-	session.community_len = Z_STRLEN_PP(a2);
+	session.community_len = a2_len;
 	session.retries = retries;
 	session.timeout = timeout;
 	
 	session.authenticator = NULL;
 
-	php_snmp_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, st, &session, Z_STRVAL_PP(a3), type, value);
+	php_snmp_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, st, &session, a3, type, value);
 }
 /* }}} */
 
@@ -919,10 +922,9 @@ PHP_FUNCTION(snmp_get_quick_print)
    Return all objects including their respective object id withing the specified one */
 PHP_FUNCTION(snmp_set_quick_print)
 {
-	int argc = ZEND_NUM_ARGS();
 	long a1;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "l", &a1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &a1) == FAILURE) {
 		return;
 	}
 
@@ -939,10 +941,9 @@ PHP_FUNCTION(snmp_set_quick_print)
    Return all values that are enums with their enum value instead of the raw integer */
 PHP_FUNCTION(snmp_set_enum_print)
 {
-	int argc = ZEND_NUM_ARGS();
 	long a1;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "l", &a1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &a1) == FAILURE) {
 		return;
 	}
 
@@ -954,10 +955,9 @@ PHP_FUNCTION(snmp_set_enum_print)
    Set the OID output format. */
 PHP_FUNCTION(snmp_set_oid_output_format)
 {
-	int argc = ZEND_NUM_ARGS();
 	long a1;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "l", &a1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &a1) == FAILURE) {
 		return;
 	}
 
@@ -1211,20 +1211,35 @@ PHP_FUNCTION(snmp2_set)
 */
 static void php_snmpv3(INTERNAL_FUNCTION_PARAMETERS, int st)
 {
-	zval **a1, **a2, **a3, **a4, **a5, **a6, **a7, **a8, **a9, **a10, **a11, **a12;
+	zval **a9 = NULL, **a10 = NULL;
+	char *a1, *a2, *a3, *a4, *a5, *a6, *a7, *a8;
+	int a1_len, a2_len, a3_len, a4_len, a5_len, a6_len, a7_len, a8_len;
+	long a11 = 0, a12 = 0;
 	struct snmp_session session;
-	long timeout=SNMP_DEFAULT_TIMEOUT;
-	long retries=SNMP_DEFAULT_RETRIES;
-	int myargc = ZEND_NUM_ARGS();
+	long timeout = SNMP_DEFAULT_TIMEOUT;
+	long retries = SNMP_DEFAULT_RETRIES;
 	char type = (char) 0;
 	char *value = (char *) 0;
 	char hostname[MAX_NAME_LEN];
 	int remote_port = 161;
 	char *pptr;
-
-	if (myargc < 8 || myargc > 12 ||
-		zend_get_parameters_ex(myargc, &a1, &a2, &a3, &a4, &a5, &a6, &a7, &a8, &a9, &a10, &a11, &a12) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	int argc = ZEND_NUM_ARGS();
+	
+	if (st == SNMP_CMD_SET) {	
+		if (zend_parse_parameters(argc TSRMLS_CC, "ssssssssZZ|ll", &a1, &a1_len, &a2, &a2_len, &a3, &a3_len,
+			&a4, &a4_len, &a5, &a5_len, &a6, &a6_len, &a7, &a7_len, &a8, &a8_len, &a9, &a10, &a11, &a12) == FAILURE) {
+			return;
+		}
+	} else {
+		/* SNMP_CMD_GET
+		 * SNMP_CMD_GETNEXT
+		 * SNMP_CMD_WALK
+		 * SNMP_CMD_REALWALK
+		 */
+		if (zend_parse_parameters(argc TSRMLS_CC, "ssssssss|ZZ", &a1, &a1_len, &a2, &a2_len, &a3, &a3_len,
+			&a4, &a4_len, &a5, &a5_len, &a6, &a6_len, &a7, &a7_len, &a8, &a8_len, &a9, &a10) == FAILURE) {
+			return;
+		}
 	}
 
 	snmp_sess_init(&session);
@@ -1232,80 +1247,66 @@ static void php_snmpv3(INTERNAL_FUNCTION_PARAMETERS, int st)
 	session.version = SNMP_VERSION_3;
 
 	/* Reading the hostname and its optional non-default port number */
-	convert_to_string_ex(a1);
-	strlcpy(hostname, Z_STRVAL_PP(a1), sizeof(hostname));
-	if ((pptr = strchr (hostname, ':'))) {
-		remote_port = strtol (pptr + 1, NULL, 0);
+	strlcpy(hostname, a1, sizeof(hostname));
+	if ((pptr = strchr(hostname, ':'))) {
+		remote_port = strtol(pptr + 1, NULL, 0);
 	}
 	session.peername = hostname;
 	session.remote_port = remote_port;
 
 	/* Setting the security name. */
-	convert_to_string_ex(a2);
-	if (netsnmp_session_set_sec_name(&session, Z_STRVAL_PP(a2))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could net set security name: %s", Z_STRVAL_PP(a2));
+	if (netsnmp_session_set_sec_name(&session, a2)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could net set security name: %s", a2);
 		RETURN_FALSE;
 	}
 
 	/* Setting the security level. */
-	convert_to_string_ex(a3);
-	if (netsnmp_session_set_sec_level(&session, Z_STRVAL_PP(a3) TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid security level: %s", Z_STRVAL_PP(a3));
+	if (netsnmp_session_set_sec_level(&session, a3 TSRMLS_CC)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid security level: %s", a3);
 		RETURN_FALSE;
 	}
 
 	/* Setting the authentication protocol. */
-	convert_to_string_ex(a4);
-	if (netsnmp_session_set_auth_protocol(&session, Z_STRVAL_PP(a4) TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid authentication protocol: %s", Z_STRVAL_PP(a4));
+	if (netsnmp_session_set_auth_protocol(&session, a4 TSRMLS_CC)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid authentication protocol: %s", a4);
 		RETURN_FALSE;
 	}
 
 	/* Setting the authentication passphrase. */
-	convert_to_string_ex(a5);
-	if (netsnmp_session_gen_auth_key(&session, Z_STRVAL_PP(a5) TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not generate key for authentication pass phrase: %s", Z_STRVAL_PP(a4));
+	if (netsnmp_session_gen_auth_key(&session, a5 TSRMLS_CC)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not generate key for authentication pass phrase: %s", a5);
 		RETURN_FALSE;
 	}
 
 	/* Setting the security protocol. */
-	convert_to_string_ex(a6);
-	if (netsnmp_session_set_sec_protocol(&session, Z_STRVAL_PP(a6) TSRMLS_CC) &&
-			(0 != strlen(Z_STRVAL_PP(a6)))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid security protocol: %s", Z_STRVAL_PP(a6));
+	if (netsnmp_session_set_sec_protocol(&session, a6 TSRMLS_CC) && a6_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid security protocol: %s", a6);
 		RETURN_FALSE;
 	}
 
 	/* Setting the security protocol passphrase. */
-	convert_to_string_ex(a7);
-	if (netsnmp_session_gen_sec_key(&session, Z_STRVAL_PP(a7) TSRMLS_CC) &&
-							(0 != strlen(Z_STRVAL_PP(a7)))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not generate key for security pass phrase: %s", Z_STRVAL_PP(a7));
+	if (netsnmp_session_gen_sec_key(&session, a7 TSRMLS_CC) && a7_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not generate key for security pass phrase: %s", a7);
 		RETURN_FALSE;
 	}
 
 	if (st == SNMP_CMD_SET) {
-		if (myargc < 10) {
-			WRONG_PARAM_COUNT;
+		if (argc > 10) {
+			timeout = a11;
 		}
-		if (myargc > 10) {
-			convert_to_long_ex(a11);
-			timeout = Z_LVAL_PP(a11);
-		}
-		if (myargc > 11) {
-			convert_to_long_ex(a12);
-			retries = Z_LVAL_PP(a12);
+		if (argc > 11) {
+			retries = a12;
 		}
 		convert_to_string_ex(a9);
 		convert_to_string_ex(a10);
 		type = Z_STRVAL_PP(a9)[0];
 		value = Z_STRVAL_PP(a10);
 	} else {
-		if (myargc > 8) {
+		if (argc > 8) {
 			convert_to_long_ex(a9);
 			timeout = Z_LVAL_PP(a9);
 		}
-		if (myargc > 9) {
+		if (argc > 9) {
 			convert_to_long_ex(a10);
 			retries = Z_LVAL_PP(a10);
 		}
@@ -1314,7 +1315,7 @@ static void php_snmpv3(INTERNAL_FUNCTION_PARAMETERS, int st)
 	session.retries = retries;
 	session.timeout = timeout;
 
-	php_snmp_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, st, &session, Z_STRVAL_PP(a8), type, value);
+	php_snmp_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, st, &session, a8, type, value);
 }
 /* }}} */
 
@@ -1358,23 +1359,18 @@ PHP_FUNCTION(snmp3_set)
 }
 /* }}} */
 
-/* {{{ proto int snmp_set_valueretrieval(int method)
+/* {{{ proto void snmp_set_valueretrieval(int method)
    Specify the method how the SNMP values will be returned */
 PHP_FUNCTION(snmp_set_valueretrieval)
 {
-	zval **method;
+	long method;
 
-	if (ZEND_NUM_ARGS() != 1 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &method) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &method) == FAILURE) {
+		return;
 	}
 
-	convert_to_long_ex(method);
-
-	if ((Z_LVAL_PP(method) == SNMP_VALUE_LIBRARY) ||
-	    (Z_LVAL_PP(method) == SNMP_VALUE_PLAIN) ||
-	    (Z_LVAL_PP(method) == SNMP_VALUE_OBJECT)) {
-		SNMP_G(valueretrieval) = Z_LVAL_PP(method);
+	if ((method == SNMP_VALUE_LIBRARY) || (method == SNMP_VALUE_PLAIN) || (method == SNMP_VALUE_OBJECT)) {
+		SNMP_G(valueretrieval) = method;
 	}
 }
 /* }}} */
@@ -1391,21 +1387,19 @@ PHP_FUNCTION(snmp_get_valueretrieval)
    Reads and parses a MIB file into the active MIB tree. */
 PHP_FUNCTION(snmp_read_mib)
 {
-	zval **filename;
+	char *filename;
+	int filename_len;
 
-	if (ZEND_NUM_ARGS() != 1 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &filename) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+		return;
 	}
-
-	convert_to_string_ex(filename);
 
 	/* Prevent read_mib() from printing any errors. */
 	snmp_disable_stderrlog();
 	
-	if (!read_mib(Z_STRVAL_PP(filename))) {
+	if (!read_mib(filename)) {
 		char *error = strerror(errno);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error while reading MIB file '%s': %s", Z_STRVAL_PP(filename), error);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error while reading MIB file '%s': %s", filename, error);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
