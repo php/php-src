@@ -18,6 +18,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 #include "php.h"
 #include "php_globals.h"
@@ -1057,13 +1058,6 @@ int main(int argc, char *argv[])
 
 		zend_uv.html_errors = 0; /* tell the engine we're in non-html mode */
 
-		if (milter_sapi_module.php_ini_path_override && milter_sapi_module.php_ini_ignore) {
-			SG(headers_sent) = 1;
-			SG(request_info).no_headers = 1;
-			PUTS("You cannot use both -n and -c switch. Use -h for help.\n");
-			exit(1);
-		}
-	
 		while ((c = ap_php_getopt(argc, argv, OPTSTRING)) != -1) {
 			switch (c) {
 

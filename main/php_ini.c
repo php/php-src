@@ -54,6 +54,7 @@ static int has_per_dir_config = 0;
 static int has_per_host_config = 0;
 PHPAPI char *php_ini_opened_path=NULL;
 static php_extension_lists extension_lists;
+PHPAPI char *php_ini_scanned_path=NULL;
 PHPAPI char *php_ini_scanned_files=NULL;
 
 /* {{{ php_ini_displayer_cb
@@ -517,9 +518,18 @@ int php_init_config(TSRMLS_D)
 
 	PG(open_basedir) = NULL;
 
+	/*
+	 * Find and open actual ini file
+	 */
+
 	memset(&fh, 0, sizeof(fh));
-	/* Check if php_ini_path_override is a file */
-	if (!sapi_module.php_ini_ignore) {
+
+	/* If SAPI does not want to ignore all ini files OR an overriding file/path is given.
+	 * This allows disabling scanning for ini files in the PHP_CONFIG_FILE_SCAN_DIR but still
+	 * load an optional ini file. */
+	if (!sapi_module.php_ini_ignore || sapi_module.php_ini_path_override) {
+
+		/* Check if php_ini_file_name is a file and can be opened */
 		if (php_ini_file_name && php_ini_file_name[0]) {
 			struct stat statbuf;
 
@@ -532,7 +542,8 @@ int php_init_config(TSRMLS_D)
 				}
 			}
 		}
-		/* Search php-%sapi-module-name%.ini file in search path */
+
+		/* Otherwise search for php-%sapi-module-name%.ini file in search path */
 		if (!fh.handle.fp) {
 			const char *fmt = "php-%s.ini";
 			char *ini_fname;
@@ -543,7 +554,8 @@ int php_init_config(TSRMLS_D)
 				fh.filename = php_ini_opened_path;
 			}
 		}
-		/* Search php.ini file in search path */
+
+		/* If still no ini file found, search for php.ini file in search path */
 		if (!fh.handle.fp) {
 			fh.handle.fp = php_fopen_with_path("php.ini", "r", php_ini_search_path, &php_ini_opened_path TSRMLS_CC);
 			if (fh.handle.fp) {
@@ -580,9 +592,16 @@ int php_init_config(TSRMLS_D)
 		}
 	}
 
-	/* If the config_file_scan_dir is set at compile-time, go and scan this directory and
-	 * parse any .ini files found in this directory. */
-	if (!sapi_module.php_ini_ignore && strlen(PHP_CONFIG_FILE_SCAN_DIR)) {
+	/* Check for PHP_INI_SCAN_DIR environment variable to override/set config file scan directory */
+	php_ini_scanned_path = getenv("PHP_INI_SCAN_DIR");
+	if (!php_ini_scanned_path) {
+		/* Or fall back using possible --with-config-file-scan-dir setting (defaults to empty string!) */
+		php_ini_scanned_path = PHP_CONFIG_FILE_SCAN_DIR;
+	}
+	int php_ini_scanned_path_len = strlen(php_ini_scanned_path);
+
+	/* Scan and parse any .ini files found in scan path if path not empty. */
+	if (!sapi_module.php_ini_ignore && php_ini_scanned_path_len) {
 		struct dirent **namelist;
 		int ndir, i;
 		struct stat sb;
@@ -596,7 +615,7 @@ int php_init_config(TSRMLS_D)
 		/* Reset active ini section */
 		RESET_ACTIVE_INI_HASH();
 
-		if ((ndir = php_scandir(PHP_CONFIG_FILE_SCAN_DIR, &namelist, 0, php_alphasort)) > 0) {
+		if ((ndir = php_scandir(php_ini_scanned_path, &namelist, 0, php_alphasort)) > 0) {
 			zend_llist_init(&scanned_ini_list, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
 			memset(&fh, 0, sizeof(fh));
 
@@ -607,7 +626,11 @@ int php_init_config(TSRMLS_D)
 					free(namelist[i]);
 					continue;
 				}
-				snprintf(ini_file, MAXPATHLEN, "%s%c%s", PHP_CONFIG_FILE_SCAN_DIR, DEFAULT_SLASH, namelist[i]->d_name);
+				if (IS_SLASH(php_ini_scanned_path[php_ini_scanned_path_len - 1])) {
+					snprintf(ini_file, MAXPATHLEN, "%s%s", php_ini_scanned_path, namelist[i]->d_name);
+				} else {
+					snprintf(ini_file, MAXPATHLEN, "%s%c%s", php_ini_scanned_path, DEFAULT_SLASH, namelist[i]->d_name);
+				}
 				if (VCWD_STAT(ini_file, &sb) == 0) {
 					if (S_ISREG(sb.st_mode)) {
 						if ((fh.handle.fp = VCWD_FOPEN(ini_file, "r"))) {
@@ -645,6 +668,9 @@ int php_init_config(TSRMLS_D)
 			}
 			zend_llist_destroy(&scanned_ini_list);
 		}
+	} else {
+		/* Make sure an empty php_ini_scanned_path ends up as NULL */
+		php_ini_scanned_path = NULL;
 	}
 
 	if (sapi_module.ini_entries) {

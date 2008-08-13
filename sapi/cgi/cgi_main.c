@@ -1734,15 +1734,6 @@ consult the installation file that came with this distribution, or visit \n\
 			CG(interactive) = 0;
 
 			if (!cgi && !fastcgi) {
-				if (cgi_sapi_module.php_ini_path_override && cgi_sapi_module.php_ini_ignore) {
-					no_headers = 1;
-					SG(headers_sent) = 1;
-					php_printf("You cannot use both -n and -c switch. Use -h for help.\n");
-					php_output_end_all(TSRMLS_C);
-					exit_status = 1;
-					goto out;
-				}
-
 				while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
 					switch (c) {
 
