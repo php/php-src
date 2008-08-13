@@ -291,7 +291,7 @@ static int parse_arg_object_to_string(zval **arg, char **p, int *pl, int type TS
 }
 /* }}} */
 
-static char *zend_parse_arg_impl(int arg_num, zval **arg, const va_list *va, char **spec, char **error, int *severity TSRMLS_DC) /* {{{ */
+static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **spec, char **error, int *severity TSRMLS_DC) /* {{{ */
 {
 	char *spec_walk = *spec;
 	char c = *spec_walk++;
@@ -617,7 +617,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, const va_list *va, cha
 }
 /* }}} */
 
-static int zend_parse_arg(int arg_num, zval **arg, const va_list *va, char **spec, int quiet TSRMLS_DC) /* {{{ */
+static int zend_parse_arg(int arg_num, zval **arg, va_list *va, char **spec, int quiet TSRMLS_DC) /* {{{ */
 {
 	char *expected_type = NULL, *error = NULL;
 	int severity = E_WARNING;
@@ -647,7 +647,7 @@ static int zend_parse_arg(int arg_num, zval **arg, const va_list *va, char **spe
 }
 /* }}} */
 
-static int zend_parse_va_args(int num_args, char *type_spec, const va_list *va, int flags TSRMLS_DC) /* {{{ */
+static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int flags TSRMLS_DC) /* {{{ */
 {
 	char *spec_walk;
 	int c, i;
