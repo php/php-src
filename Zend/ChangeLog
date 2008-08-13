@@ -1,3 +1,103 @@
+2008-08-12  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * zend_API.h
+      zend_execute_API.c:
+      MFB: move empty_fcall_info* to const table
+
+    * (PHP_5_3)
+      zend_API.h
+      zend_execute_API.c:
+      mark empty_fcall_info and empty_fcall_info_cache as constant. a few less
+      bytes in the dirty page :P
+
+2008-08-12  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      zend.c
+      zend.h
+      zend_API.c
+      zend_API.h
+      zend_compile.c
+      zend_compile.h
+      zend_constants.c
+      zend_constants.h
+      zend_execute.c
+      zend_execute.h
+      zend_extensions.c
+      zend_extensions.h
+      zend_hash.c
+      zend_hash.h
+      zend_modules.h
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_objects.c
+      zend_objects.h
+      zend_objects_API.c
+      zend_objects_API.h
+      zend_operators.c
+      zend_operators.h
+      zend_stack.c
+      zend_stack.h:
+      - MFH: Constness (Added const qualifier to several function parameters)
+
+    * zend.c
+      zend.h
+      zend_API.c
+      zend_API.h
+      zend_compile.c
+      zend_compile.h
+      zend_constants.c
+      zend_constants.h
+      zend_execute.c
+      zend_execute.h
+      zend_extensions.c
+      zend_extensions.h
+      zend_hash.c
+      zend_hash.h
+      zend_modules.h
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_objects.c
+      zend_objects.h
+      zend_objects_API.c
+      zend_objects_API.h
+      zend_operators.c
+      zend_operators.h
+      zend_stack.c
+      zend_stack.h:
+      - Constness (Added const qualifier to several function parameters)
+
+2008-08-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner_defs.h:
+      Fixed bug #45779 (regression with shebang lines processing)
+
+2008-08-12  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      tests/ns_069.inc
+      tests/ns_069.phpt
+      tests/ns_069.phpt:
+      file ns_069.inc was added on branch PHP_5_3 on 2008-08-12 11:52:16 +0000
+
+    * tests/ns_068.phpt
+      tests/ns_068.phpt
+      tests/ns_069.inc:
+      
+      - Add new test
+
+    * zend_language_parser.y:
+      - Add missing ';'s
+
+    * zend_language_scanner.c:
+      - Update .c after .l change
+
+    * zend_language_scanner.l:
+      - Fix warning
+
 2008-08-11  Marcus Boerger  <php@marcus-boerger.de>
 
     * zend_execute_API.c:

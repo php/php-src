@@ -1,3 +1,224 @@
+2008-08-12  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ZendEngine2/zend_API.h
+      ZendEngine2/zend_execute_API.c:
+      MFB: move empty_fcall_info* to const table
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_execute_API.c:
+      mark empty_fcall_info and empty_fcall_info_cache as constant. a few less
+      bytes in the dirty page :P
+
+2008-08-12  Christian Seiler  <chris_se@gmx.net>
+
+    * (PHP_5_2)
+      NEWS:
+      - News: http://news.php.net/php.cvs/52239
+
+2008-08-12  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/file/007_error.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_error1.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_error2.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_error3.phpt
+      ext/standard/tests/file/ftruncate_error.phpt:
+      - Fixed tests
+
+    * (PHP_5_3)
+      ext/standard/file.c
+      ext/standard/tests/file/fscanf.phpt
+      ext/standard/tests/file/fscanf_error.phpt:
+      - New parameter parsing API (for fscanf)
+
+    * ext/standard/file.c
+      ext/standard/tests/file/007_error.phpt
+      ext/standard/tests/file/fflush_error.phpt
+      ext/standard/tests/file/fgetc_error.phpt
+      ext/standard/tests/file/fgetss_error.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_error1.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_error2.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_error3.phpt
+      ext/standard/tests/file/ftruncate_error.phpt
+      ext/standard/tests/file/popen_pclose_error.phpt
+      ext/standard/tests/file/umask_error.phpt:
+      - New parameter parsing API
+
+    * (PHP_5_3)
+      ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_extensions.c
+      ZendEngine2/zend_extensions.h
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.h
+      ZendEngine2/zend_modules.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects.h
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.h
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_stack.c
+      ZendEngine2/zend_stack.h
+      ext/pdo/pdo_stmt.c
+      ext/phar/phar.phar
+      main/php_ini.c
+      main/php_ini.h:
+      - MFH: Constness (Added const qualifier to several function parameters)
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_extensions.c
+      ZendEngine2/zend_extensions.h
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.h
+      ZendEngine2/zend_modules.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects.h
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.h
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_stack.c
+      ZendEngine2/zend_stack.h
+      ext/pdo/pdo_stmt.c
+      ext/sqlite/sqlite.c
+      main/main.c
+      main/php_ini.c
+      main/php_ini.h:
+      - Constness (Added const qualifier to several function parameters)
+
+2008-08-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner_defs.h
+      sapi/cli/php_cli.c:
+      Fixed bug #45779 (regression with shebang lines processing)
+
+2008-08-12  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ext/phar/func_interceptors.c:
+      - MFB
+
+    * (PHP_5_3)
+      ext/phar/func_interceptors.c:
+      - Fix http://bugs.php.net/bug.php?id=45613
+
+2008-08-12  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/sqlite3/tests/sqlite3_12_unfinalized_stmt_cleanup.phpt
+      ext/standard/tests/file/fscanf_error.phpt:
+      - Fixed test
+
+    * (PHP_5_3)
+      ext/sqlite3/sqlite3.c
+      ext/sqlite3/tests/bug45798.phpt:
+      - MFH: Fixed bug #45798 (sqlite3 doesn't notice if variable was bound)
+
+    * ext/sqlite3/sqlite3.c
+      ext/sqlite3/tests/bug45798.phpt
+      ext/sqlite3/tests/bug45798.phpt:
+      - Fixed bug #45798 (sqlite3 doesn't notice if variable was bound)
+
+2008-08-12  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/file/realpath_basic-win32.phpt:
+      - MFH:  update test after php's portable realpath change (filename/ is not
+      valid anymore)
+
+    * ext/standard/tests/file/realpath_basic-win32.phpt:
+      - update test after php's portable realpath change (filename/ is not valid
+      anymore)
+
+    * ext/standard/tests/file/chown.phpt:
+      - not supported on windows
+
+2008-08-12  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/ns_069.inc
+      ZendEngine2/tests/ns_069.phpt
+      ZendEngine2/tests/ns_069.phpt:
+      file ns_069.inc was added on branch PHP_5_3 on 2008-08-12 11:52:16 +0000
+
+    * ZendEngine2/tests/ns_068.phpt
+      ZendEngine2/tests/ns_068.phpt
+      ZendEngine2/tests/ns_069.inc:
+      
+      - Add new test
+
+2008-08-12  Josie Messa  <jdmessa@gmail.com>
+
+    * ext/standard/tests/array/array_diff_key_error.phpt
+      ext/standard/tests/array/array_diff_key_error.phpt
+      ext/standard/tests/array/array_diff_key_variation1.phpt
+      ext/standard/tests/array/array_diff_key_variation2.phpt
+      ext/standard/tests/array/array_diff_key_variation2.phpt
+      ext/standard/tests/array/array_diff_key_variation3.phpt
+      ext/standard/tests/array/array_diff_key_variation3.phpt
+      ext/standard/tests/array/array_diff_key_variation4.phpt
+      ext/standard/tests/array/array_diff_key_variation4.phpt
+      ext/standard/tests/array/array_diff_key_variation5.phpt
+      ext/standard/tests/array/array_diff_key_variation5.phpt
+      ext/standard/tests/array/array_diff_key_variation6.phpt
+      ext/standard/tests/array/array_diff_key_variation6.phpt
+      ext/standard/tests/array/array_diff_key_variation7.phpt
+      ext/standard/tests/array/array_diff_key_variation7.phpt
+      ext/standard/tests/array/array_diff_key_variation8.phpt
+      ext/standard/tests/array/array_diff_key_variation8.phpt:
+      
+      file array_diff_key_error.phpt was initially added on branch PHP_5_3.
+
+2008-08-12  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ZendEngine2/zend_language_parser.y:
+      - Add missing ';'s
+
+    * ZendEngine2/zend_language_scanner.c:
+      - Update .c after .l change
+
+    * ZendEngine2/zend_language_scanner.l:
+      - Fix warning
+
+2008-08-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.h
+      TSRM/tsrm_virtual_cwd.h:
+      - Added system independent realpath() implementation which caches
+      intermediate directories in realpath-cache
+      - Fixed bug #45044 (relative paths not resolved correctly)
+      - Fixed bug #43817 (opendir() fails on Windows directories with parent
+      directory unaccessible).
+      [DOC] The semantic of realpath() on BSD and Windows is changed. Now it
+      should work exactly in the same way as on Linux (POSIX.1-2001)
+
 2008-08-11  Arnaud Le Blanc  <arnaud.lb@gmail.com>
 
     * ext/standard/dir.c
