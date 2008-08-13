@@ -2731,7 +2731,7 @@ static zend_function_entry swfgradient_functions[] = {
 */
 
 /* helper functions */
-static SWFColor hashToColor(zval **colorHash)
+static SWFColor hashToColor(zval **colorHash TSRMLS_DC)
 {
 	zval **data;
 	HashPosition pointer;
@@ -2779,7 +2779,7 @@ static SWFColor hashToColor(zval **colorHash)
 	return c;
 }
 
-static SWFFilter createDropShadowFilter(int argc, zval **argv[])
+static SWFFilter createDropShadowFilter(int argc, zval **argv[] TSRMLS_DC)
 {
 	zval **colorHash, **blur, **shadow, **flags;
 	SWFColor c;
@@ -2789,7 +2789,7 @@ static SWFFilter createDropShadowFilter(int argc, zval **argv[])
 
 	colorHash = argv[1];
 	convert_to_array_ex(colorHash);
-	c = hashToColor(colorHash); 
+	c = hashToColor(colorHash TSRMLS_CC);
 		
 	blur = argv[2];
 	convert_to_object_ex(blur);
@@ -2804,7 +2804,7 @@ static SWFFilter createDropShadowFilter(int argc, zval **argv[])
 		getShadow(*shadow TSRMLS_CC), Z_LVAL_PP(flags));
 }
 
-static SWFFilter createBlurFilter(int argc, zval **argv[])
+static SWFFilter createBlurFilter(int argc, zval **argv[] TSRMLS_DC)
 {
 	zval **blur;
 	
@@ -2817,7 +2817,7 @@ static SWFFilter createBlurFilter(int argc, zval **argv[])
 	return newBlurFilter(getBlur(*blur TSRMLS_CC));
 }
 
-static SWFFilter createGlowFilter(int argc, zval **argv[])
+static SWFFilter createGlowFilter(int argc, zval **argv[] TSRMLS_DC)
 {
 	zval **color, **blur, **strength, **flags;
 	SWFColor c;
@@ -2827,7 +2827,7 @@ static SWFFilter createGlowFilter(int argc, zval **argv[])
 	
 	color = argv[1];
 	convert_to_array_ex(color);
-	c = hashToColor(color);
+	c = hashToColor(color TSRMLS_CC);
 
 	blur = argv[2];
 	convert_to_object_ex(blur);
@@ -2842,7 +2842,7 @@ static SWFFilter createGlowFilter(int argc, zval **argv[])
 		Z_DVAL_PP(strength), Z_LVAL_PP(flags));
 }
 
-static SWFFilter createBevelFilter(int argc, zval **argv[])
+static SWFFilter createBevelFilter(int argc, zval **argv[] TSRMLS_DC)
 {
 	zval **sColor, **hColor, **blur, **shadow, **flags;
 	SWFColor hc, sc;
@@ -2852,11 +2852,11 @@ static SWFFilter createBevelFilter(int argc, zval **argv[])
 
 	sColor = argv[1];
 	convert_to_array_ex(sColor);
-	sc = hashToColor(sColor);
+	sc = hashToColor(sColor TSRMLS_CC);
 
 	hColor = argv[2];
 	convert_to_array_ex(hColor);
-	hc = hashToColor(hColor);
+	hc = hashToColor(hColor TSRMLS_CC);
 
 	blur = argv[3];
 	convert_to_object_ex(blur);
@@ -2871,7 +2871,7 @@ static SWFFilter createBevelFilter(int argc, zval **argv[])
 		getShadow(*shadow TSRMLS_CC), Z_LVAL_PP(flags));
 }
 
-static SWFFilter createGradientGlowFilter(int argc, zval **argv[])
+static SWFFilter createGradientGlowFilter(int argc, zval **argv[] TSRMLS_DC)
 {
 	zval **gradient, **blur, **shadow, **flags;
 
@@ -2895,7 +2895,7 @@ static SWFFilter createGradientGlowFilter(int argc, zval **argv[])
 		Z_LVAL_PP(flags));
 }
 
-static SWFFilter createConvolutionFilter(int argc, zval **argv[])
+static SWFFilter createConvolutionFilter(int argc, zval **argv[] TSRMLS_DC)
 {
 	zval **matrix, **div, **bias, **color, **flags;
 	SWFColor c;
@@ -2914,7 +2914,7 @@ static SWFFilter createConvolutionFilter(int argc, zval **argv[])
 
 	color = argv[4];
 	convert_to_array_ex(color);
-	c = hashToColor(color);
+	c = hashToColor(color TSRMLS_CC);
 
 	flags = argv[5];
 	convert_to_long_ex(flags);
@@ -2923,7 +2923,7 @@ static SWFFilter createConvolutionFilter(int argc, zval **argv[])
 		Z_DVAL_PP(bias), c, Z_LVAL_PP(flags));	
 }
 
-static SWFFilter createColorMatrixFilter(int argc, zval **argv[])
+static SWFFilter createColorMatrixFilter(int argc, zval **argv[] TSRMLS_DC)
 {
 	zval **matrix;
 
@@ -2936,7 +2936,7 @@ static SWFFilter createColorMatrixFilter(int argc, zval **argv[])
 	return newColorMatrixFilter(getFilterMatrix(*matrix TSRMLS_CC));
 }
 
-static SWFFilter createGradientBevelFilter(int argc, zval **argv[])
+static SWFFilter createGradientBevelFilter(int argc, zval **argv[] TSRMLS_DC)
 {
 	zval **gradient, **blur, **shadow, **flags;
 
@@ -3009,28 +3009,28 @@ PHP_METHOD(swffilter, __construct)
 	switch(type)
 	{
 	case SWFFILTER_TYPE_DROPSHADOW:
-		filter = createDropShadowFilter(argc, argv);
+		filter = createDropShadowFilter(argc, argv TSRMLS_CC);
 		break;
 	case SWFFILTER_TYPE_BLUR:
-		filter = createBlurFilter(argc, argv);
+		filter = createBlurFilter(argc, argv TSRMLS_CC);
 		break;
 	case SWFFILTER_TYPE_GLOW:
-		filter = createGlowFilter(argc, argv);
+		filter = createGlowFilter(argc, argv TSRMLS_CC);
 		break;
 	case SWFFILTER_TYPE_BEVEL:
-		filter = createBevelFilter(argc, argv);
+		filter = createBevelFilter(argc, argv TSRMLS_CC);
 		break;
 	case SWFFILTER_TYPE_GRADIENTGLOW:
-		filter = createGradientGlowFilter(argc, argv);
+		filter = createGradientGlowFilter(argc, argv TSRMLS_CC);
 		break;
 	case SWFFILTER_TYPE_CONVOLUTION:
-		filter = createConvolutionFilter(argc, argv);
+		filter = createConvolutionFilter(argc, argv TSRMLS_CC);
 		break;
 	case SWFFILTER_TYPE_COLORMATRIX:
-		filter  = createColorMatrixFilter(argc, argv);
+		filter  = createColorMatrixFilter(argc, argv TSRMLS_CC);
 		break;
 	case SWFFILTER_TYPE_GRADIENTBEVEL:
-		filter = createGradientBevelFilter(argc, argv);
+		filter = createGradientBevelFilter(argc, argv TSRMLS_CC);
 		break;
 	default:
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "new SWFFilter: unknown type");	
