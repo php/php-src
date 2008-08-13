@@ -1340,6 +1340,7 @@ yymore_restart:
 		while (++YYCURSOR < YYLIMIT) {
 			if (*YYCURSOR == '\n') {
 				++YYCURSOR;
+				CG(zend_lineno)++;
 				goto restart;
 			}
 
@@ -1347,6 +1348,7 @@ yymore_restart:
 				if (++YYCURSOR < YYLIMIT && *YYCURSOR == '\n') { /* match \r\n as single newline */
 					++YYCURSOR;
 				}
+				CG(zend_lineno)++;
 				goto restart;
 			}
 		}
