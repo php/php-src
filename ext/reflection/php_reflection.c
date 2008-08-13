@@ -3357,9 +3357,9 @@ static void _addmethod(zend_function *mptr, zend_class_entry *ce, zval *retval, 
 	zend_function *closure;
 
 	if (mptr->common.fn_flags & filter) {
-		ALLOC_ZVAL(method);
 		unsigned int lc_name_len;
 		zstr lc_name = zend_u_str_case_fold(ZEND_STR_TYPE, mptr->common.function_name, len, 1, &lc_name_len);
+		ALLOC_ZVAL(method);
 		if (ce == zend_ce_closure && obj && (lc_name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
 			&& ZEND_U_EQUAL(ZEND_STR_TYPE, lc_name, lc_name_len, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1)
 			&& (closure = zend_get_closure_invoke_method(obj TSRMLS_CC)) != NULL)
