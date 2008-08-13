@@ -19,6 +19,7 @@ PHP                                                                        NEWS
 - Fixed a crash on invalid method in ReflectionParameter constructor.
   (Christian Seiler)
 
+- Fixed bug #45805 (Crach on throwing exception from error handler). (Dmitry)
 - Fixed bug #45765 (ReflectionObject with default parameters of self::xxx cause
   an error). (Felipe)
 - Fixed bug #45705 (rfc822_parse_adrlist() modifies passed address parameter).
