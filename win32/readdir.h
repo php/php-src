@@ -7,7 +7,7 @@
  * on Windows 95/NT.
  */
 
-#define _WIN32_WINNT 0x0400
+#include <config.w32.h>
 
 #include <windows.h>
 
