@@ -14,9 +14,9 @@ class my_file
 class my_exception extends exception
 {
          public  function __construct()
-         {/*
+         {
                  $this->message = new stdclass ;
-                 $this->file = new my_file ;*/
+                 $this->file = new my_file ;
                  $this->line = "12" ;
          }
 }
@@ -25,4 +25,4 @@ throw new my_exception;
 
 ?>
 --EXPECT--
-Catchable fatal error: Object of class stdClass could not be converted to Unicode string in Unknown on line 0
+Catchable fatal error: Object of class stdClass could not be converted to string in Unknown on line 0
