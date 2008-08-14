@@ -389,7 +389,7 @@ function save_or_mail_results()
 			}
 
 			$failed_tests_data .= $sep . "PHPINFO" . $sep;
-			$failed_tests_data .= shell_exec($php . ' -dhtml_errors=0 -i');
+			$failed_tests_data .= shell_exec($php . ' -ddisplay_errors=stderr -dhtml_errors=0 -i 2> /dev/null');
 
 			if ($just_save_results || !mail_qa_team($failed_tests_data, $compression, $status)) {
 				file_put_contents($output_file, $failed_tests_data);
@@ -1560,7 +1560,7 @@ TEST $file
 		}
 
 		save_text($tmp_post, $request);
-		$cmd = "$php$pass_options$ini_settings -f \"$test_file\" 2>&1 < $tmp_post";
+		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < $tmp_post";
 
 	} else if (array_key_exists('POST', $section_text) && !empty($section_text['POST'])) {
 
@@ -1581,7 +1581,7 @@ TEST $file
 		$env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
 		$env['CONTENT_LENGTH'] = $content_length;
 
-		$cmd = "$php$pass_options$ini_settings -f \"$test_file\" 2>&1 < $tmp_post";
+		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < $tmp_post";
 
 	} else {
 
@@ -1589,7 +1589,7 @@ TEST $file
 		$env['CONTENT_TYPE']   = '';
 		$env['CONTENT_LENGTH'] = '';
 
-		$cmd = "$php$pass_options$ini_settings -f \"$test_file\" $args 2>&1";
+		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" $args 2>&1";
 	}
 
 	if ($leak_check) {
