@@ -99,7 +99,6 @@ int dom_nodelist_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
-
 /* {{{ proto DOMNode dom_nodelist_item(int index) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-844377136
 Since: 
@@ -173,4 +172,14 @@ PHP_FUNCTION(dom_nodelist_item)
 	RETVAL_NULL();
 }
 /* }}} end dom_nodelist_item */
+
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */

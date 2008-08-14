@@ -27,7 +27,6 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
-
 /* {{{ arginfo */
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_namednodemap_get_named_item, 0, 0, 1)
@@ -74,7 +73,7 @@ ZEND_END_ARG_INFO();
 * Since: 
 */
 
-const zend_function_entry php_dom_namednodemap_class_functions[] = {
+const zend_function_entry php_dom_namednodemap_class_functions[] = { /* {{{ */
 	PHP_FALIAS(getNamedItem, dom_namednodemap_get_named_item, arginfo_dom_namednodemap_get_named_item)
 	PHP_FALIAS(setNamedItem, dom_namednodemap_set_named_item, arginfo_dom_namednodemap_set_named_item)
 	PHP_FALIAS(removeNamedItem, dom_namednodemap_remove_named_item, arginfo_dom_namednodemap_remove_named_item)
@@ -84,6 +83,7 @@ const zend_function_entry php_dom_namednodemap_class_functions[] = {
 	PHP_FALIAS(removeNamedItemNS, dom_namednodemap_remove_named_item_ns, arginfo_dom_namednodemap_remove_named_item_ns)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
 /* {{{ length	int	
 readonly=yes 
@@ -126,9 +126,6 @@ int dom_namednodemap_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 }
 
 /* }}} */
-
-
-
 
 /* {{{ proto DOMNode dom_namednodemap_get_named_item(string name) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1074577549
@@ -184,7 +181,6 @@ PHP_FUNCTION(dom_namednodemap_get_named_item)
 }
 /* }}} end dom_namednodemap_get_named_item */
 
-
 /* {{{ proto DOMNode dom_namednodemap_set_named_item(DOMNode arg) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1025163788
 Since: 
@@ -195,7 +191,6 @@ PHP_FUNCTION(dom_namednodemap_set_named_item)
 }
 /* }}} end dom_namednodemap_set_named_item */
 
-
 /* {{{ proto DOMNode dom_namednodemap_remove_named_item(string name) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D58B193
 Since: 
@@ -205,7 +200,6 @@ PHP_FUNCTION(dom_namednodemap_remove_named_item)
  DOM_NOT_IMPLEMENTED();
 }
 /* }}} end dom_namednodemap_remove_named_item */
-
 
 /* {{{ proto DOMNode dom_namednodemap_item(int index) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-349467F9
@@ -265,7 +259,6 @@ PHP_FUNCTION(dom_namednodemap_item)
 }
 /* }}} end dom_namednodemap_item */
 
-
 /* {{{ proto DOMNode dom_namednodemap_get_named_item_ns(string namespaceURI, string localName) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getNamedItemNS
 Since: DOM Level 2
@@ -320,7 +313,6 @@ PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 }
 /* }}} end dom_namednodemap_get_named_item_ns */
 
-
 /* {{{ proto DOMNode dom_namednodemap_set_named_item_ns(DOMNode arg) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-setNamedItemNS
 Since: DOM Level 2
@@ -331,7 +323,6 @@ PHP_FUNCTION(dom_namednodemap_set_named_item_ns)
 }
 /* }}} end dom_namednodemap_set_named_item_ns */
 
-
 /* {{{ proto DOMNode dom_namednodemap_remove_named_item_ns(string namespaceURI, string localName) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-removeNamedItemNS
 Since: DOM Level 2
@@ -341,4 +332,14 @@ PHP_FUNCTION(dom_namednodemap_remove_named_item_ns)
  DOM_NOT_IMPLEMENTED();
 }
 /* }}} end dom_namednodemap_remove_named_item_ns */
+
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */
