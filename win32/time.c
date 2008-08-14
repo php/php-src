@@ -22,6 +22,8 @@
 
 /* Include stuff ************************************************************ */
 
+#include <config.w32.h>
+
 #include "time.h"
 #include "unistd.h"
 #include "signal.h"
