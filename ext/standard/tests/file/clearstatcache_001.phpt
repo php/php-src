@@ -30,9 +30,6 @@ clearstatcache(true, __FILE__ . "_link2");
 clearstatcache(true, __FILE__ . "_link1");
 var_dump(realpath(__FILE__ . "_link2"));
 
-?>
---CLEAN--
-<?php
 @rmdir(__FILE__ . "_dir1");
 @rmdir(__FILE__ . "_dir2");
 @unlink(__FILE__ . "_link1");
