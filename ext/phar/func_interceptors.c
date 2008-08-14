@@ -1130,6 +1130,85 @@ void phar_intercept_functions_shutdown(TSRMLS_D)
 }
 /* }}} */
 
+static struct _phar_orig_functions {
+	void        (*orig_fopen)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_file_get_contents)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_is_file)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_is_link)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_is_dir)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_opendir)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_file_exists)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_fileperms)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_fileinode)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_filesize)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_fileowner)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_filegroup)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_fileatime)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_filemtime)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_filectime)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_filetype)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_is_writable)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_is_readable)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_is_executable)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_lstat)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_readfile)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_stat)(INTERNAL_FUNCTION_PARAMETERS);
+} phar_orig_functions = {NULL};
+
+void phar_save_orig_functions(TSRMLS_D) /* {{{ */
+{
+	phar_orig_functions.orig_fopen             = PHAR_G(orig_fopen);
+	phar_orig_functions.orig_file_get_contents = PHAR_G(orig_file_get_contents);
+	phar_orig_functions.orig_is_file           = PHAR_G(orig_is_file);
+	phar_orig_functions.orig_is_link           = PHAR_G(orig_is_link);
+	phar_orig_functions.orig_is_dir            = PHAR_G(orig_is_dir);
+	phar_orig_functions.orig_opendir           = PHAR_G(orig_opendir);
+	phar_orig_functions.orig_file_exists       = PHAR_G(orig_file_exists);
+	phar_orig_functions.orig_fileperms         = PHAR_G(orig_fileperms);
+	phar_orig_functions.orig_fileinode         = PHAR_G(orig_fileinode);
+	phar_orig_functions.orig_filesize          = PHAR_G(orig_filesize);
+	phar_orig_functions.orig_fileowner         = PHAR_G(orig_fileowner);
+	phar_orig_functions.orig_filegroup         = PHAR_G(orig_filegroup);
+	phar_orig_functions.orig_fileatime         = PHAR_G(orig_fileatime);
+	phar_orig_functions.orig_filemtime         = PHAR_G(orig_filemtime);
+	phar_orig_functions.orig_filectime         = PHAR_G(orig_filectime);
+	phar_orig_functions.orig_filetype          = PHAR_G(orig_filetype);
+	phar_orig_functions.orig_is_writable       = PHAR_G(orig_is_writable);
+	phar_orig_functions.orig_is_readable       = PHAR_G(orig_is_readable);
+	phar_orig_functions.orig_is_executable     = PHAR_G(orig_is_executable);
+	phar_orig_functions.orig_lstat             = PHAR_G(orig_lstat);
+	phar_orig_functions.orig_readfile          = PHAR_G(orig_readfile);
+	phar_orig_functions.orig_stat              = PHAR_G(orig_stat);
+}
+/* }}} */
+
+void phar_restore_orig_functions(TSRMLS_D) /* {{{ */
+{
+	PHAR_G(orig_fopen)             = phar_orig_functions.orig_fopen;
+	PHAR_G(orig_file_get_contents) = phar_orig_functions.orig_file_get_contents;
+	PHAR_G(orig_is_file)           = phar_orig_functions.orig_is_file;
+	PHAR_G(orig_is_link)           = phar_orig_functions.orig_is_link;
+	PHAR_G(orig_is_dir)            = phar_orig_functions.orig_is_dir;
+	PHAR_G(orig_opendir)           = phar_orig_functions.orig_opendir;
+	PHAR_G(orig_file_exists)       = phar_orig_functions.orig_file_exists;
+	PHAR_G(orig_fileperms)         = phar_orig_functions.orig_fileperms;
+	PHAR_G(orig_fileinode)         = phar_orig_functions.orig_fileinode;
+	PHAR_G(orig_filesize)          = phar_orig_functions.orig_filesize;
+	PHAR_G(orig_fileowner)         = phar_orig_functions.orig_fileowner;
+	PHAR_G(orig_filegroup)         = phar_orig_functions.orig_filegroup;
+	PHAR_G(orig_fileatime)         = phar_orig_functions.orig_fileatime;
+	PHAR_G(orig_filemtime)         = phar_orig_functions.orig_filemtime;
+	PHAR_G(orig_filectime)         = phar_orig_functions.orig_filectime;
+	PHAR_G(orig_filetype)          = phar_orig_functions.orig_filetype;
+	PHAR_G(orig_is_writable)       = phar_orig_functions.orig_is_writable;
+	PHAR_G(orig_is_readable)       = phar_orig_functions.orig_is_readable;
+	PHAR_G(orig_is_executable)     = phar_orig_functions.orig_is_executable;
+	PHAR_G(orig_lstat)             = phar_orig_functions.orig_lstat;
+	PHAR_G(orig_readfile)          = phar_orig_functions.orig_readfile;
+	PHAR_G(orig_stat)              = phar_orig_functions.orig_stat;
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
@@ -1138,3 +1217,4 @@ void phar_intercept_functions_shutdown(TSRMLS_D)
  * vim600: noet sw=4 ts=4 fdm=marker
  * vim<600: noet sw=4 ts=4
  */
+
