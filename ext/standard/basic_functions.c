@@ -2195,6 +2195,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_quoted_printable_decode, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 /* }}} */
+/* {{{ quot_print.c */
+static
+ZEND_BEGIN_ARG_INFO(arginfo_quoted_printable_encode, 0)
+	ZEND_ARG_INFO(0, str)
+ZEND_END_ARG_INFO()
+/* }}} */
 /* {{{ rand.c */
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_srand, 0, 0, 0)
@@ -3405,6 +3411,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 #endif
 
 	PHP_FE(quoted_printable_decode,											arginfo_quoted_printable_decode)
+	PHP_FE(quoted_printable_encode,											arginfo_quoted_printable_encode)
 	PHP_FE(convert_cyr_string,												arginfo_convert_cyr_string)
 	PHP_FE(get_current_user,												arginfo_get_current_user)
 	PHP_FE(set_time_limit,													arginfo_set_time_limit)
