@@ -6,15 +6,14 @@ PHP                                                                        NEWS
 - Changed session_start() to return false when session startup fails. (Jani)
 
 - Added system independent realpath() implementation which caches intermediate
-  directories in realpath-cache (Dmitry)
+  directories in realpath-cache. (Dmitry)
 - Added optional clear_realpath_cache and filename parameters to
   clearstatcache(). (Jani, Arnaud)
 - Added litespeed SAPI module. (George Wang)
 - Added ext/hash support to ext/session's ID generator. (Sara)
 - Added quoted_printable_encode() function. (Tony)
-
-- Implemented feature request #34381 (nl2br() should have an option for 
-  XHTML/HTML compatible BR element) (Kalle)
+- Added optional "is_xhtml" parameter to nl2br() which makes the function
+  output <br> when false and <br /> when true (FR #34381). (Kalle)
 
 - Fixed a bug causing miscalculations with the "last <weekday> of <n> month"
   relative time string. (Derick)
