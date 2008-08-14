@@ -33,19 +33,15 @@ zend_class_entry *error_exception_ce;
 static zend_object_handlers default_exception_handlers;
 ZEND_API void (*zend_throw_exception_hook)(zval *ex TSRMLS_DC);
 
-void zend_exception_set_previous(zval *add_previous TSRMLS_DC)
+void zend_exception_set_previous(zval *exception, zval *add_previous TSRMLS_DC)
 {
-	zval *exception = EG(exception), *previous;
+	zval *previous;
 
-	if (exception == add_previous || !add_previous) {
+	if (exception == add_previous || !add_previous || !exception) {
 		return;
 	}	
 	if (Z_TYPE_P(add_previous) != IS_OBJECT && !instanceof_function(Z_OBJCE_P(add_previous), default_exception_ce TSRMLS_CC)) {
 		zend_error(E_ERROR, "Cannot set non exception as previous exception");
-		return;
-	}
-	if (!exception) {
-		EG(exception) = add_previous;
 		return;
 	}
 	while (exception && exception != add_previous && Z_OBJ_HANDLE_P(exception) != Z_OBJ_HANDLE_P(add_previous)) {
@@ -59,12 +55,40 @@ void zend_exception_set_previous(zval *add_previous TSRMLS_DC)
 	}
 }
 
+void zend_exception_save(TSRMLS_D) /* {{{ */
+{
+	if (EG(prev_exception)) {
+		zend_exception_set_previous(EG(exception), EG(prev_exception) TSRMLS_CC);
+	}
+	if (EG(exception)) {
+		EG(prev_exception) = EG(exception);
+	}
+	EG(exception) = NULL;
+}
+/* }}} */
+
+void zend_exception_restore(TSRMLS_D) /* {{{ */
+{
+	if (EG(prev_exception)) {
+		if (EG(exception)) {
+			zend_exception_set_previous(EG(exception), EG(prev_exception) TSRMLS_CC);
+		} else {
+			EG(exception) = EG(prev_exception);
+		}
+		EG(prev_exception) = NULL;
+	}
+}
+/* }}} */
+
 void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 {
 	if (exception != NULL) {
 		zval *previous = EG(exception);
+		zend_exception_set_previous(exception, EG(exception) TSRMLS_CC);
 		EG(exception) = exception;
-		zend_exception_set_previous(previous TSRMLS_CC);
+		if (previous) {
+			return;
+		}
 	}
 	if (!EG(current_execute_data)) {
 		zend_error(E_ERROR, "Exception thrown without a stack frame");
@@ -86,6 +110,10 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 
 ZEND_API void zend_clear_exception(TSRMLS_D) /* {{{ */
 {
+	if (EG(prev_exception)) {
+		zval_ptr_dtor(&EG(prev_exception));
+		EG(prev_exception) = NULL;
+	}
 	if (!EG(exception)) {
 		return;
 	}

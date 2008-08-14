@@ -2581,6 +2581,7 @@ ZEND_VM_HANDLER(108, ZEND_THROW, CONST|TMP|VAR|CV, ANY)
 	if (Z_TYPE_P(value) != IS_OBJECT) {
 		zend_error_noreturn(E_ERROR, "Can only throw objects");
 	}
+	zend_exception_save(TSRMLS_C);
 	/* Not sure if a complete copy is what we want here */
 	ALLOC_ZVAL(exception);
 	INIT_PZVAL_COPY(exception, value);
@@ -2589,6 +2590,7 @@ ZEND_VM_HANDLER(108, ZEND_THROW, CONST|TMP|VAR|CV, ANY)
 	}
 
 	zend_throw_exception_object(exception TSRMLS_CC);
+	zend_exception_restore(TSRMLS_C);
 	FREE_OP1_IF_VAR();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -2599,6 +2601,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, ANY, CV)
 	zend_class_entry *ce;
 
 	/* Check whether an exception has been thrown, if not, jump over code */
+	zend_exception_restore(TSRMLS_C);
 	if (EG(exception) == NULL) {
 		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->extended_value]);
 		ZEND_VM_CONTINUE(); /* CHECK_ME */

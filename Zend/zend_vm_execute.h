@@ -1209,6 +1209,7 @@ static int ZEND_FASTCALL  ZEND_CATCH_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_class_entry *ce;
 
 	/* Check whether an exception has been thrown, if not, jump over code */
+	zend_exception_restore(TSRMLS_C);
 	if (EG(exception) == NULL) {
 		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->extended_value]);
 		ZEND_VM_CONTINUE(); /* CHECK_ME */
@@ -1649,6 +1650,7 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	if (Z_TYPE_P(value) != IS_OBJECT) {
 		zend_error_noreturn(E_ERROR, "Can only throw objects");
 	}
+	zend_exception_save(TSRMLS_C);
 	/* Not sure if a complete copy is what we want here */
 	ALLOC_ZVAL(exception);
 	INIT_PZVAL_COPY(exception, value);
@@ -1657,6 +1659,7 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	}
 
 	zend_throw_exception_object(exception TSRMLS_CC);
+	zend_exception_restore(TSRMLS_C);
 
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -5073,6 +5076,7 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (Z_TYPE_P(value) != IS_OBJECT) {
 		zend_error_noreturn(E_ERROR, "Can only throw objects");
 	}
+	zend_exception_save(TSRMLS_C);
 	/* Not sure if a complete copy is what we want here */
 	ALLOC_ZVAL(exception);
 	INIT_PZVAL_COPY(exception, value);
@@ -5081,6 +5085,7 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	zend_throw_exception_object(exception TSRMLS_CC);
+	zend_exception_restore(TSRMLS_C);
 
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -8402,6 +8407,7 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (Z_TYPE_P(value) != IS_OBJECT) {
 		zend_error_noreturn(E_ERROR, "Can only throw objects");
 	}
+	zend_exception_save(TSRMLS_C);
 	/* Not sure if a complete copy is what we want here */
 	ALLOC_ZVAL(exception);
 	INIT_PZVAL_COPY(exception, value);
@@ -8410,6 +8416,7 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	zend_throw_exception_object(exception TSRMLS_CC);
+	zend_exception_restore(TSRMLS_C);
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -23099,6 +23106,7 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (Z_TYPE_P(value) != IS_OBJECT) {
 		zend_error_noreturn(E_ERROR, "Can only throw objects");
 	}
+	zend_exception_save(TSRMLS_C);
 	/* Not sure if a complete copy is what we want here */
 	ALLOC_ZVAL(exception);
 	INIT_PZVAL_COPY(exception, value);
@@ -23107,6 +23115,7 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	zend_throw_exception_object(exception TSRMLS_CC);
+	zend_exception_restore(TSRMLS_C);
 
 	ZEND_VM_NEXT_OPCODE();
 }

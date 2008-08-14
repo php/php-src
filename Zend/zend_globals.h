@@ -227,7 +227,7 @@ struct _zend_executor_globals {
 	HashTable *modified_ini_directives;
 
 	zend_objects_store objects_store;
-	zval *exception;
+	zval *exception, *prev_exception;
 	zend_op *opline_before_exception;
 	zend_op exception_op[3];
 
