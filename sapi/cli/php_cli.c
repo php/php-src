@@ -578,8 +578,6 @@ static const char *param_mode_conflict = "Either execute direct code, process st
  */
 static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file, int *lineno TSRMLS_DC)
 {
-	int c;
-
 	*lineno = 1;
 
 	file_handle->type = ZEND_HANDLE_FP;
