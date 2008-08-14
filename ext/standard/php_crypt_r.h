@@ -32,6 +32,8 @@ extern "C"
 #else
 #define __CONST
 #endif
+#else
+#define __CONST __const
 #endif
 
 void php_init_crypt_r();
