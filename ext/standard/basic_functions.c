@@ -2740,7 +2740,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_hebrevc, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_nl2br, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_nl2br, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, is_xhtml)
 ZEND_END_ARG_INFO()
