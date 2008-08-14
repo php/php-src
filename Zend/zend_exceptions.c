@@ -621,7 +621,9 @@ ZEND_METHOD(exception, __toString)
 		_default_exception_get_entry(exception, "file", sizeof("file")-1, &file TSRMLS_CC);
 		_default_exception_get_entry(exception, "line", sizeof("line")-1, &line TSRMLS_CC);
 
-		convert_to_long(&line);
+		convert_to_unicode(&message);
+		convert_to_unicode(&file);
+		convert_to_long(&line);		
 
 		fci.size = sizeof(fci);
 		fci.function_table = &Z_OBJCE_P(getThis())->function_table;
