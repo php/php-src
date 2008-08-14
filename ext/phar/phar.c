@@ -3367,15 +3367,6 @@ function_entry phar_functions[] = {
 };
 /* }}}*/
 
-/* {{{ php_phar_init_globals
- */
-static void php_phar_init_globals_module(zend_phar_globals *phar_globals)
-{
-	memset(phar_globals, 0, sizeof(zend_phar_globals));
-	phar_globals->readonly = 1;
-}
-/* }}} */
-
 static size_t phar_zend_stream_reader(void *handle, char *buf, size_t len TSRMLS_DC) /* {{{ */
 {
 	return php_stream_read(phar_get_pharfp((phar_archive_data*)handle TSRMLS_CC), buf, len);
@@ -3540,35 +3531,20 @@ skip_phar:
 typedef zend_op_array* (zend_compile_t)(zend_file_handle*, int TSRMLS_DC);
 typedef zend_compile_t* (compile_hook)(zend_compile_t *ptr);
 
-PHP_MINIT_FUNCTION(phar) /* {{{ */
+PHP_GINIT_FUNCTION(phar) /* {{{ */
 {
 	phar_mime_type mime;
 
-	ZEND_INIT_MODULE_GLOBALS(phar, php_phar_init_globals_module, NULL);
-	REGISTER_INI_ENTRIES();
+	memset(phar_globals, 0, sizeof(zend_phar_globals));
+	phar_globals->readonly = 1;
 
-	phar_orig_compile_file = zend_compile_file;
-	zend_compile_file = phar_compile_file;
-
-#if PHP_VERSION_ID >= 50300
-	phar_save_resolve_path = zend_resolve_path;
-	zend_resolve_path = phar_resolve_path;
-#else
-	phar_orig_zend_open = zend_stream_open_function;
-	zend_stream_open_function = phar_zend_open;
-#endif
-
-	phar_object_init(TSRMLS_C);
-
-	phar_intercept_functions_init(TSRMLS_C);
-
-	zend_hash_init(&PHAR_G(mime_types), 0, NULL, NULL, 1);
+	zend_hash_init(&phar_globals->mime_types, 0, NULL, NULL, 1);
 
 #define PHAR_SET_MIME(mimetype, ret, fileext) \
 		mime.mime = mimetype; \
 		mime.len = sizeof((mimetype))+1; \
 		mime.type = ret; \
-		zend_hash_add(&PHAR_G(mime_types), fileext, sizeof(fileext)-1, (void *)&mime, sizeof(phar_mime_type), NULL); \
+		zend_hash_add(&phar_globals->mime_types, fileext, sizeof(fileext)-1, (void *)&mime, sizeof(phar_mime_type), NULL); \
 
 	PHAR_SET_MIME("text/html", PHAR_MIME_PHPS, "phps")
 	PHAR_SET_MIME("text/plain", PHAR_MIME_OTHER, "c")
@@ -3611,6 +3587,36 @@ PHP_MINIT_FUNCTION(phar) /* {{{ */
 	PHAR_SET_MIME("image/xbm", PHAR_MIME_OTHER, "xbm")
 	PHAR_SET_MIME("text/xml", PHAR_MIME_OTHER, "xml")
 
+	phar_restore_orig_functions(TSRMLS_C);
+}
+/* }}} */
+
+PHP_GSHUTDOWN_FUNCTION(phar) /* {{{ */
+{
+	zend_hash_destroy(&phar_globals->mime_types);
+}
+/* }}} */
+
+PHP_MINIT_FUNCTION(phar) /* {{{ */
+{
+	REGISTER_INI_ENTRIES();
+
+	phar_orig_compile_file = zend_compile_file;
+	zend_compile_file = phar_compile_file;
+
+#if PHP_VERSION_ID >= 50300
+	phar_save_resolve_path = zend_resolve_path;
+	zend_resolve_path = phar_resolve_path;
+#else
+	phar_orig_zend_open = zend_stream_open_function;
+	zend_stream_open_function = phar_zend_open;
+#endif
+
+	phar_object_init(TSRMLS_C);
+
+	phar_intercept_functions_init(TSRMLS_C);
+	phar_save_orig_functions(TSRMLS_C);
+
 	return php_register_url_stream_wrapper("phar", &php_stream_phar_wrapper TSRMLS_CC);
 }
 /* }}} */
@@ -3618,8 +3624,6 @@ PHP_MINIT_FUNCTION(phar) /* {{{ */
 PHP_MSHUTDOWN_FUNCTION(phar) /* {{{ */
 {
 	php_unregister_url_stream_wrapper("phar" TSRMLS_CC);
-
-	zend_hash_destroy(&PHAR_G(mime_types));
 
 	phar_intercept_functions_shutdown(TSRMLS_C);
 
@@ -3793,7 +3797,11 @@ zend_module_entry phar_module_entry = {
 	PHP_RSHUTDOWN(phar),
 	PHP_MINFO(phar),
 	PHP_PHAR_VERSION,
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(phar),   /* globals descriptor */
+	PHP_GINIT(phar),            /* globals ctor */
+	PHP_GSHUTDOWN(phar),        /* globals dtor */
+	NULL,                       /* post deactivate */
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
