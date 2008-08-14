@@ -754,7 +754,8 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 		function_name = &opline->op2.u.constant;
 
 		if (Z_TYPE_P(function_name) == IS_OBJECT &&
-			zend_get_closure(function_name, &EX(called_scope), &EX(fbc), &EX(object), NULL TSRMLS_CC) == SUCCESS) {
+			Z_OBJ_HANDLER_P(function_name, get_closure) &&
+			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &EX(called_scope), &EX(fbc), &EX(object), NULL TSRMLS_CC) == SUCCESS) {
 			if (EX(object)) {
 				Z_ADDREF_P(EX(object));
 			}
@@ -951,7 +952,8 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 		function_name = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
 		if (Z_TYPE_P(function_name) == IS_OBJECT &&
-			zend_get_closure(function_name, &EX(called_scope), &EX(fbc), &EX(object), NULL TSRMLS_CC) == SUCCESS) {
+			Z_OBJ_HANDLER_P(function_name, get_closure) &&
+			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &EX(called_scope), &EX(fbc), &EX(object), NULL TSRMLS_CC) == SUCCESS) {
 			if (EX(object)) {
 				Z_ADDREF_P(EX(object));
 			}
@@ -1056,7 +1058,8 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 		function_name = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
 		if (Z_TYPE_P(function_name) == IS_OBJECT &&
-			zend_get_closure(function_name, &EX(called_scope), &EX(fbc), &EX(object), NULL TSRMLS_CC) == SUCCESS) {
+			Z_OBJ_HANDLER_P(function_name, get_closure) &&
+			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &EX(called_scope), &EX(fbc), &EX(object), NULL TSRMLS_CC) == SUCCESS) {
 			if (EX(object)) {
 				Z_ADDREF_P(EX(object));
 			}
@@ -1189,7 +1192,8 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 		function_name = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 
 		if (Z_TYPE_P(function_name) == IS_OBJECT &&
-			zend_get_closure(function_name, &EX(called_scope), &EX(fbc), &EX(object), NULL TSRMLS_CC) == SUCCESS) {
+			Z_OBJ_HANDLER_P(function_name, get_closure) &&
+			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &EX(called_scope), &EX(fbc), &EX(object), NULL TSRMLS_CC) == SUCCESS) {
 			if (EX(object)) {
 				Z_ADDREF_P(EX(object));
 			}

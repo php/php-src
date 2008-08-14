@@ -27,6 +27,7 @@
 #include "zend_objects_API.h"
 #include "zend_object_handlers.h"
 #include "zend_interfaces.h"
+#include "zend_closures.h"
 
 #define DEBUG_OBJECT_HANDLERS 0
 
@@ -1261,6 +1262,39 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 }
 /* }}} */
 
+int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval **zobj_ptr, zval ***zobj_ptr_ptr TSRMLS_DC) /* {{{ */
+{
+	zend_class_entry *ce;
+	if (Z_TYPE_P(obj) != IS_OBJECT) {
+		return FAILURE;
+	}
+
+	ce = Z_OBJCE_P(obj);
+
+	if (zend_hash_find(&ce->function_table, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME), (void**)fptr_ptr) == FAILURE) {
+		return FAILURE;
+	}
+
+	*ce_ptr = ce;
+	if ((*fptr_ptr)->common.fn_flags & ZEND_ACC_STATIC) {
+		if (zobj_ptr) {
+			*zobj_ptr = NULL;
+		}
+		if (zobj_ptr_ptr) {
+			*zobj_ptr_ptr = NULL;
+		}
+	} else {
+		if (zobj_ptr) {
+			*zobj_ptr = obj;
+		}
+		if (zobj_ptr_ptr) {
+			*zobj_ptr_ptr = NULL;
+		}
+	}
+	return SUCCESS;
+}
+/* }}} */
+
 ZEND_API zend_object_handlers std_object_handlers = {
 	zend_objects_store_add_ref,				/* add_ref */
 	zend_objects_store_del_ref,				/* del_ref */
@@ -1286,7 +1320,8 @@ ZEND_API zend_object_handlers std_object_handlers = {
 	zend_std_compare_objects,				/* compare_objects */
 	zend_std_cast_object_tostring,			/* cast_object */
 	NULL,									/* count_elements */
-	NULL,                                   /* get_debug_info */
+	NULL,									/* get_debug_info */
+	zend_std_get_closure,					/* get_closure */
 };
 
 /*
