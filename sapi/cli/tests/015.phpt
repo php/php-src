@@ -13,10 +13,10 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 $php = getenv('TEST_PHP_EXECUTABLE');
 
 
-echo `"$php" --version | grep built:`;
-echo `echo "<?php print_r(\\\$argv);" | "$php" -- foo bar baz`, "\n";
-echo `"$php" --version foo bar baz | grep built:`;
-echo `"$php" --notexisting foo bar baz | grep Usage:`;
+echo `"$php" -n --version | grep built:`;
+echo `echo "<?php print_r(\\\$argv);" | "$php" -n -- foo bar baz`, "\n";
+echo `"$php" -n --version foo bar baz | grep built:`;
+echo `"$php" -n --notexisting foo bar baz | grep Usage:`;
 
 echo "Done\n";
 ?>
