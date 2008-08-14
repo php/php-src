@@ -14,7 +14,7 @@ $php = getenv('TEST_PHP_EXECUTABLE');
 
 $filename = __DIR__.'/021.tmp.php';
 
-$script = "#!$php\n".
+$script = "#!$php -n\n".
           "ola\n".
           "<?php echo 1+1,'\n';\n".
           "?>\n".
