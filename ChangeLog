@@ -1,3 +1,156 @@
+2008-08-13  Kalle Sommer Nielsen  <kalle@zesix.com>
+
+    * (PHP_5_3)
+      main/php.h
+      win32/time.c:
+      MFH:
+      * Remove NTDDI_VERSION declaring and use the one in config.w32.h
+      * Remove another _WIN32_WINNT macro redef in win32/time.c
+
+    * main/php.h
+      win32/time.c:
+      - Remove NTDDI_VERSION declaring and use the one in config.w32.h
+      * Remove another _WIN32_WINNT macro redef in win32/time.c
+
+2008-08-13  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/reflection/php_reflection.c
+      main/php_ini.c:
+      - move declaration on top and fix build error
+
+    * main/php_ini.c:
+      - MFB: move declaration on top and fix build error
+
+2008-08-13  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      typoh
+
+2008-08-13  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/ming/ming.c:
+      - Fixed build (ZTS)
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c:
+      - Fix build
+
+    * ext/snmp/snmp.c:
+      - New parameter parsing API
+
+    * ext/gmp/gmp.c:
+      - New parameter parsing API (for gmp_testbit)
+
+2008-08-13  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/ming/ming.c:
+      fix long/int issues and a typo
+
+2008-08-13  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      - BFN #45798
+
+2008-08-13  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/pspell/pspell.c
+      ext/pspell/pspell.c:
+      MFH: fix compile warnings (patch by Phil Oleson)
+
+    * ext/pspell/pspell.c:
+      fix compile warnings (patch by Phil Oleson)
+
+2008-08-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner_defs.h:
+      Regenerate scanner
+
+    * ZendEngine2/tests/bug45805.phpt
+      ZendEngine2/tests/bug45805.phpt
+      ZendEngine2/tests/bug45805.phpt:
+        1.1.4;
+      file bug45805.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug45805.phpt
+      ZendEngine2/tests/bug45805.phpt:
+      Fixed bug #45805 (Crach on throwing exception from error handler)
+
+    * ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner_defs.h
+      sapi/cli/php_cli.c:
+      Fixed bug #45779 (regression with shebang lines processing)
+
+2008-08-13  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      Makefile.global
+      NEWS
+      ext/standard/info.c
+      main/php_ini.c
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c
+      sapi/milter/php_milter.c:
+      MFH: [DOC]- Added methods to change/disable
+      --with-config-file-scan-dir=PATH at
+      MFH: [DOC]  startup:
+      MFH: [DOC]
+      MFH: [DOC]  To disable: Override default php.ini by using both -c and -n
+      with
+      MFH: [DOC]              CGI/CLI or set "PHP_INI_SCAN_DIR" environment
+      variable
+      MFH: [DOC]              to an empty string.
+      MFH: [DOC]
+      MFH: [DOC]  To change: Simply set "PHP_INI_SCAN_DIR" environment variable
+      to point
+      MFH: [DOC]             to another path.
+      MFH: - Fixed bug #42604 ("make test" fails with 
+      --with-config-file-scan-dir=/some/path)
+      MFH: - Implemented FR #45114 (Option to change
+      --with-config-file-scan-dir)
+
+2008-08-13  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      NEWS:
+      report old bugfix
+
+2008-08-13  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * Makefile.global
+      ext/standard/info.c
+      main/php_ini.c
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c
+      sapi/milter/php_milter.c:
+      [DOC]- Added methods to change/disable --with-config-file-scan-dir=PATH at
+      [DOC]  startup:
+      [DOC]
+      [DOC]  To disable: Override default php.ini by using both -c and -n with
+      [DOC]              CGI/CLI or set "PHP_INI_SCAN_DIR" environment variable
+      [DOC]              to an empty string.
+      [DOC]
+      [DOC]  To change: Simply set "PHP_INI_SCAN_DIR" environment variable to
+      point
+      [DOC]             to another path.
+      
+      - Fixed bug #42604 ("make test" fails with
+      --with-config-file-scan-dir=/some/path)
+      - Implemented FR #45114 (Option to change --with-config-file-scan-dir)
+
 2008-08-12  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * ZendEngine2/zend_API.h

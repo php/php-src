@@ -1,3 +1,35 @@
+2008-08-13  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_API.c
+      zend_API.c:
+      - Fix build
+
+2008-08-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_language_scanner.c
+      zend_language_scanner_defs.h:
+      Regenerate scanner
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug45805.phpt
+      tests/bug45805.phpt:
+      Fixed bug #45805 (Crach on throwing exception from error handler)
+
+    * tests/bug45805.phpt
+      tests/bug45805.phpt
+      tests/bug45805.phpt:
+        1.1.4;
+      file bug45805.phpt was initially added on branch PHP_5_2.
+
+    * zend_language_scanner.l
+      zend_language_scanner_defs.h:
+      Fixed bug #45779 (regression with shebang lines processing)
+
 2008-08-12  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * zend_API.h
