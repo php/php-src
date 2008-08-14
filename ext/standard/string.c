@@ -656,6 +656,7 @@ PHP_FUNCTION(nl_langinfo)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Item '%ld' is not valid", item);
 			RETURN_FALSE;
 	}
+	/* }}} */
 
 	value = nl_langinfo(item);
 	if (value == NULL) {
