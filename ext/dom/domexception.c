@@ -27,7 +27,6 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
-
 /*
 * class DOMException 
 *
@@ -41,8 +40,7 @@ const zend_function_entry php_dom_domexception_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ php_dom_throw_error_with_message */
-void php_dom_throw_error_with_message(int error_code, char *error_message, int strict_error TSRMLS_DC)
+void php_dom_throw_error_with_message(int error_code, char *error_message, int strict_error TSRMLS_DC) /* {{{ */
 {
 	if (strict_error == 1) {
 		zend_throw_exception(dom_domexception_class_entry, error_message, error_code TSRMLS_CC);
@@ -50,6 +48,7 @@ void php_dom_throw_error_with_message(int error_code, char *error_message, int s
 		php_libxml_issue_error(E_WARNING, error_message TSRMLS_CC);
 	}
 }
+/* }}} */
 
 /* {{{ php_dom_throw_error */
 void php_dom_throw_error(int error_code, int strict_error TSRMLS_DC)
@@ -115,3 +114,12 @@ void php_dom_throw_error(int error_code, int strict_error TSRMLS_DC)
 /* }}} end php_dom_throw_error */
 
 #endif /* HAVE_LIBXML && HAVE_DOM */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */
