@@ -24,6 +24,8 @@ void phar_intercept_functions(TSRMLS_D);
 void phar_release_functions(TSRMLS_D);
 void phar_intercept_functions_init(TSRMLS_D);
 void phar_intercept_functions_shutdown(TSRMLS_D);
+void phar_save_orig_functions(TSRMLS_D);
+void phar_restore_orig_functions(TSRMLS_D);
 END_EXTERN_C()
 
 /*
