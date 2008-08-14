@@ -1,5 +1,7 @@
 --TEST--
 SPL: DirectoryIterator defaults
+--SKIPIF--
+<?php if (!extension_loaded("spl") || !extension_loaded('reflection')) print "skip"; ?>
 --FILE--
 <?php
 
@@ -29,7 +31,7 @@ foreach ($classes as $class => $flags) {
 			var_dump($obj->getFlags());
 			if ($isstring) {
 				$val = $obj->current();
-				if (is_string($val)) {
+				if (is_string($val) || is_unicode($val)) {
 					var_dump(true);
 				} else {
 					var_dump($val);

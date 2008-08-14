@@ -8,7 +8,7 @@ session.name=PHPSESSID
 <?php
 
 ini_set('session.use_trans_sid', 1);
-
+session_save_path(dirname(__FILE__));
 session_start();
 
 ob_start();
@@ -22,6 +22,8 @@ echo $string;
 ob_flush();
 
 ob_end_clean();
+
+unlink(dirname(__FILE__).'/sess_'.session_id());
 
 ?>
 --EXPECTF--
