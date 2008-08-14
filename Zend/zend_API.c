@@ -3238,7 +3238,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval **object_pp, uint ch
 			return 0;
 
 		case IS_OBJECT:
-			if (zend_get_closure(callable, &fcc->calling_scope, &fcc->function_handler, NULL, &fcc->object_pp TSRMLS_CC) == SUCCESS) {
+			if (Z_OBJ_HANDLER_P(callable, get_closure) && Z_OBJ_HANDLER_P(callable, get_closure)(callable, &fcc->calling_scope, &fcc->function_handler, NULL, &fcc->object_pp TSRMLS_CC) == SUCCESS) {
 				fcc->called_scope = fcc->calling_scope;
 				if (callable_name) {
 					zend_class_entry *ce = Z_OBJCE_P(callable); /* TBFixed: what if it's overloaded? */

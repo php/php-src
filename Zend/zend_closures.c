@@ -212,6 +212,38 @@ static zend_object_value zend_closure_new(zend_class_entry *class_type TSRMLS_DC
 }
 /* }}} */
 
+int zend_closure_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval **zobj_ptr, zval ***zobj_ptr_ptr TSRMLS_DC) /* {{{ */
+{
+	zend_closure *closure;
+
+	if (Z_TYPE_P(obj) != IS_OBJECT) {
+		return FAILURE;
+	}
+
+	closure = (zend_closure *)zend_object_store_get_object(obj TSRMLS_CC);
+	*fptr_ptr = &closure->func;
+
+	if (closure->this_ptr) {
+		if (zobj_ptr) {
+			*zobj_ptr = closure->this_ptr;
+		}
+		if (zobj_ptr_ptr) {
+			*zobj_ptr_ptr = &closure->this_ptr;
+		}
+		*ce_ptr = Z_OBJCE_P(closure->this_ptr);
+	} else {
+		if (zobj_ptr) {
+			*zobj_ptr = NULL;
+		}
+		if (zobj_ptr_ptr) {
+			*zobj_ptr_ptr = NULL;
+		}
+		*ce_ptr = closure->func.common.scope;
+	}
+	return SUCCESS;
+}
+/* }}} */
+
 void zend_register_closure_ce(TSRMLS_D) /* {{{ */
 {
 	zend_class_entry ce;
@@ -233,6 +265,7 @@ void zend_register_closure_ce(TSRMLS_D) /* {{{ */
 	closure_handlers.unset_property = zend_closure_unset_property;
 	closure_handlers.compare_objects = zend_closure_compare_objects;
 	closure_handlers.clone_obj = NULL;
+	closure_handlers.get_closure = zend_closure_get_closure;
 }
 /* }}} */
 
@@ -310,74 +343,6 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 }
 /* }}} */
 
-ZEND_API int zend_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval **zobj_ptr, zval ***zobj_ptr_ptr TSRMLS_DC) /* {{{ */
-{
-	zstr key;
-	zend_uchar utype = UG(unicode)?IS_UNICODE:IS_STRING;
-
-	if (utype == IS_UNICODE) {
-		key.u = USTR_MAKE(ZEND_INVOKE_FUNC_NAME);
-	} else {
-		key.s = ZEND_INVOKE_FUNC_NAME;
-	}
-
-	if (Z_TYPE_P(obj) == IS_OBJECT) {
-		zend_class_entry *ce = Z_OBJCE_P(obj);
-
-		if (ce == zend_ce_closure) {
-			zend_closure *closure = (zend_closure *)zend_object_store_get_object(obj TSRMLS_CC);
-
-			*fptr_ptr = &closure->func;
-			if (closure->this_ptr) {
-				if (zobj_ptr) {
-					*zobj_ptr = closure->this_ptr;
-				}
-				if (zobj_ptr_ptr) {
-					*zobj_ptr_ptr = &closure->this_ptr;
-				}
-				*ce_ptr = Z_OBJCE_P(closure->this_ptr);
-			} else {
-				if (zobj_ptr) {
-					*zobj_ptr = NULL;
-				}
-				if (zobj_ptr_ptr) {
-					*zobj_ptr_ptr = NULL;
-				}
-				*ce_ptr = closure->func.common.scope;
-			}
-			if (utype == IS_UNICODE) {
-				efree(key.u);
-			}
-			return SUCCESS;
-		} else if (zend_u_hash_find(&ce->function_table, utype, key, sizeof(ZEND_INVOKE_FUNC_NAME), (void**)fptr_ptr) == SUCCESS) {
-			*ce_ptr = ce;
-			if ((*fptr_ptr)->common.fn_flags & ZEND_ACC_STATIC) {
-				if (zobj_ptr) {
-					*zobj_ptr = NULL;
-				}
-				if (zobj_ptr_ptr) {
-					*zobj_ptr_ptr = NULL;
-				}
-			} else {
-				if (zobj_ptr) {
-					*zobj_ptr = obj;
-				}
-				if (zobj_ptr_ptr) {
-					*zobj_ptr_ptr = NULL;
-				}
-			}
-			if (utype == IS_UNICODE) {
-				efree(key.u);
-			}
-			return SUCCESS;
-		}
-	}
-	if (utype == IS_UNICODE) {
-		efree(key.u);
-	}
-	return FAILURE;
-}
-/* }}} */
 
 /*
  * Local variables:
