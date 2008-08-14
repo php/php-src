@@ -27,7 +27,6 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
-
 /* {{{ arginfo */
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_entityreference_construct, 0, 0, 1)
@@ -86,6 +85,15 @@ PHP_METHOD(domentityreference, __construct)
 		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, node, (void *)intern TSRMLS_CC);
 	}
 }
-
 /* }}} end DOMEntityReference::__construct */
+
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */

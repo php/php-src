@@ -55,8 +55,6 @@ int dom_domerror_severity_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
-
-
 /* {{{ message	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ERROR-DOMError-message
@@ -70,8 +68,6 @@ int dom_domerror_message_read(dom_object *obj, zval **retval TSRMLS_DC)
 }
 
 /* }}} */
-
-
 
 /* {{{ type	string	
 readonly=yes 
@@ -87,8 +83,6 @@ int dom_domerror_type_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
-
-
 /* {{{ relatedException	object	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ERROR-DOMError-relatedException
@@ -102,8 +96,6 @@ int dom_domerror_related_exception_read(dom_object *obj, zval **retval TSRMLS_DC
 }
 
 /* }}} */
-
-
 
 /* {{{ relatedData	domobject	
 readonly=yes 
@@ -119,8 +111,6 @@ int dom_domerror_related_data_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
-
-
 /* {{{ location	domlocator	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ERROR-DOMError-location
@@ -135,4 +125,15 @@ int dom_domerror_location_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
+/* }}} */
+
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */

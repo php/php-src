@@ -27,7 +27,6 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
-
 /* {{{ arginfo */
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_namelist_get_name, 0, 0, 1)
@@ -67,9 +66,6 @@ int dom_namelist_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
-
-
-
 /* {{{ proto string dom_namelist_get_name(int index) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#NameList-getName
 Since: 
@@ -80,7 +76,6 @@ PHP_FUNCTION(dom_namelist_get_name)
 }
 /* }}} end dom_namelist_get_name */
 
-
 /* {{{ proto string dom_namelist_get_namespace_uri(int index) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#NameList-getNamespaceURI
 Since: 
@@ -90,4 +85,14 @@ PHP_FUNCTION(dom_namelist_get_namespace_uri)
  DOM_NOT_IMPLEMENTED();
 }
 /* }}} end dom_namelist_get_namespace_uri */
+
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */

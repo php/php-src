@@ -27,7 +27,6 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
-
 /* {{{ arginfo */
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_configuration_set_parameter, 0, 0, 2)
@@ -95,4 +94,16 @@ PHP_FUNCTION(dom_domconfiguration_can_set_parameter)
  DOM_NOT_IMPLEMENTED();
 }
 /* }}} end dom_domconfiguration_can_set_parameter */
+
+/* }}} */
+
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */

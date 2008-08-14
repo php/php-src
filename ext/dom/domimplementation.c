@@ -89,7 +89,6 @@ PHP_METHOD(domimplementation, hasFeature)
 }
 /* }}} end dom_domimplementation_has_feature */
 
-
 /* {{{ proto DOMDocumentType dom_domimplementation_create_document_type(string qualifiedName, string publicId, string systemId) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Level-2-Core-DOM-createDocType
 Since: DOM Level 2
@@ -149,7 +148,6 @@ PHP_METHOD(domimplementation, createDocumentType)
 	DOM_RET_OBJ(rv, (xmlNodePtr) doctype, &ret, NULL);
 }
 /* }}} end dom_domimplementation_create_document_type */
-
 
 /* {{{ proto DOMDocument dom_domimplementation_create_document(string namespaceURI, string qualifiedName, DOMDocumentType doctype) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Level-2-Core-DOM-createDocument
@@ -253,7 +251,6 @@ PHP_METHOD(domimplementation, createDocument)
 }
 /* }}} end dom_domimplementation_create_document */
 
-
 /* {{{ proto DOMNode dom_domimplementation_get_feature(string feature, string version) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMImplementation3-getFeature
 Since: DOM Level 3
@@ -263,4 +260,14 @@ PHP_METHOD(domimplementation, getFeature)
  DOM_NOT_IMPLEMENTED();
 }
 /* }}} end dom_domimplementation_get_feature */
+
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */

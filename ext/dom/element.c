@@ -27,7 +27,6 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
-
 /* {{{ arginfo */
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_get_attribute, 0, 0, 1)
@@ -146,7 +145,7 @@ ZEND_END_ARG_INFO();
 * Since: 
 */
 
-const zend_function_entry php_dom_element_class_functions[] = {
+const zend_function_entry php_dom_element_class_functions[] = { /* {{{ */
 	PHP_FALIAS(getAttribute, dom_element_get_attribute, arginfo_dom_element_get_attribute)
 	PHP_FALIAS(setAttribute, dom_element_set_attribute, arginfo_dom_element_set_attribute)
 	PHP_FALIAS(removeAttribute, dom_element_remove_attribute, arginfo_dom_element_remove_attribute)
@@ -168,6 +167,7 @@ const zend_function_entry php_dom_element_class_functions[] = {
 	PHP_ME(domelement, __construct, arginfo_dom_element_construct, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
 /* {{{ proto void DOMElement::__construct(string name, [string value], [string uri]) U */
 PHP_METHOD(domelement, __construct)
@@ -283,8 +283,6 @@ int dom_element_tag_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
-
-
 /* {{{ schemaTypeInfo	typeinfo	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Element-schemaTypeInfo
@@ -299,7 +297,8 @@ int dom_element_schema_type_info_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
-static xmlNodePtr dom_get_dom1_attribute(xmlNodePtr elem, xmlChar *name) {
+static xmlNodePtr dom_get_dom1_attribute(xmlNodePtr elem, xmlChar *name) /* {{{ */
+{
     int len;
     const xmlChar *nqname;
 
@@ -339,6 +338,7 @@ static xmlNodePtr dom_get_dom1_attribute(xmlNodePtr elem, xmlChar *name) {
 	}
 	return (xmlNodePtr)xmlHasNsProp(elem, name, NULL);
 }
+/* }}} */
 
 /* {{{ proto string dom_element_get_attribute(string name) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-666EE0F9
@@ -382,7 +382,6 @@ PHP_FUNCTION(dom_element_get_attribute)
 	}
 }
 /* }}} end dom_element_get_attribute */
-
 
 /* {{{ proto void dom_element_set_attribute(string name, string value) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68F082
@@ -450,7 +449,6 @@ PHP_FUNCTION(dom_element_set_attribute)
 }
 /* }}} end dom_element_set_attribute */
 
-
 /* {{{ proto void dom_element_remove_attribute(string name) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6D6AC0F9
 Since:
@@ -499,7 +497,6 @@ PHP_FUNCTION(dom_element_remove_attribute)
 }
 /* }}} end dom_element_remove_attribute */
 
-
 /* {{{ proto DOMAttr dom_element_get_attribute_node(string name) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-217A91B8
 Since: 
@@ -545,7 +542,6 @@ PHP_FUNCTION(dom_element_get_attribute_node)
 	DOM_RET_OBJ(rv, (xmlNodePtr) attrp, &ret, intern);
 }
 /* }}} end dom_element_get_attribute_node */
-
 
 /* {{{ proto DOMAttr dom_element_set_attribute_node(DOMAttr newAttr) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-887236154
@@ -613,7 +609,6 @@ PHP_FUNCTION(dom_element_set_attribute_node)
 }
 /* }}} end dom_element_set_attribute_node */
 
-
 /* {{{ proto DOMAttr dom_element_remove_attribute_node(DOMAttr oldAttr) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D589198
 Since: 
@@ -651,7 +646,6 @@ PHP_FUNCTION(dom_element_remove_attribute_node)
 }
 /* }}} end dom_element_remove_attribute_node */
 
-
 /* {{{ proto DOMNodeList dom_element_get_elements_by_tag_name(string name) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1938918D
 Since: 
@@ -677,7 +671,6 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name)
 	dom_namednode_iter(intern, 0, namednode, NULL, local, NULL TSRMLS_CC);
 }
 /* }}} end dom_element_get_elements_by_tag_name */
-
 
 /* {{{ proto string dom_element_get_attribute_ns(string namespaceURI, string localName) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElGetAttrNS
@@ -720,7 +713,8 @@ PHP_FUNCTION(dom_element_get_attribute_ns)
 }
 /* }}} end dom_element_get_attribute_ns */
 
-static xmlNsPtr _dom_new_reconNs(xmlDocPtr doc, xmlNodePtr tree, xmlNsPtr ns) {
+static xmlNsPtr _dom_new_reconNs(xmlDocPtr doc, xmlNodePtr tree, xmlNsPtr ns) /* {{{ */
+{
     xmlNsPtr def;
     xmlChar prefix[50];
     int counter = 1;
@@ -756,6 +750,7 @@ static xmlNsPtr _dom_new_reconNs(xmlDocPtr doc, xmlNodePtr tree, xmlNsPtr ns) {
 	def = xmlNewNs(tree, ns->href, prefix);
 	return(def);
 }
+/* }}} */
 
 /* {{{ proto void dom_element_set_attribute_ns(string namespaceURI, string qualifiedName, string value) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetAttrNS
@@ -874,7 +869,6 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 }
 /* }}} end dom_element_set_attribute_ns */
 
-
 /* {{{ proto void dom_element_remove_attribute_ns(string namespaceURI, string localName) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElRemAtNS
 Since: DOM Level 2
@@ -932,7 +926,6 @@ PHP_FUNCTION(dom_element_remove_attribute_ns)
 }
 /* }}} end dom_element_remove_attribute_ns */
 
-
 /* {{{ proto DOMAttr dom_element_get_attribute_node_ns(string namespaceURI, string localName) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElGetAtNodeNS
 Since: DOM Level 2
@@ -962,7 +955,6 @@ PHP_FUNCTION(dom_element_get_attribute_node_ns)
 
 }
 /* }}} end dom_element_get_attribute_node_ns */
-
 
 /* {{{ proto DOMAttr dom_element_set_attribute_node_ns(DOMAttr newAttr) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetAtNodeNS
@@ -1037,8 +1029,6 @@ PHP_FUNCTION(dom_element_set_attribute_node_ns)
 }
 /* }}} end dom_element_set_attribute_node_ns */
 
-
-
 /* {{{ proto DOMNodeList dom_element_get_elements_by_tag_name_ns(string namespaceURI, string localName) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-A6C90942
 Since: DOM Level 2
@@ -1067,7 +1057,6 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name_ns)
 }
 /* }}} end dom_element_get_elements_by_tag_name_ns */
 
-
 /* {{{ proto boolean dom_element_has_attribute(string name) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElHasAttr
 Since: DOM Level 2
@@ -1095,7 +1084,6 @@ PHP_FUNCTION(dom_element_has_attribute)
 	}
 }
 /* }}} end dom_element_has_attribute */
-
 
 /* {{{ proto boolean dom_element_has_attribute_ns(string namespaceURI, string localName) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElHasAttrNS
@@ -1135,8 +1123,7 @@ PHP_FUNCTION(dom_element_has_attribute_ns)
 }
 /* }}} end dom_element_has_attribute_ns */
 
-
-static void php_set_attribute_id(xmlAttrPtr attrp, zend_bool is_id)
+static void php_set_attribute_id(xmlAttrPtr attrp, zend_bool is_id) /* {{{ */
 {
 	if (is_id == 1 && attrp->atype != XML_ATTRIBUTE_ID) {
 		xmlChar *id_val;
@@ -1153,6 +1140,7 @@ static void php_set_attribute_id(xmlAttrPtr attrp, zend_bool is_id)
 		}
 	}
 }
+/* }}} */
 
 /* {{{ proto void dom_element_set_id_attribute(string name, boolean isId) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetIdAttr
@@ -1190,7 +1178,6 @@ PHP_FUNCTION(dom_element_set_id_attribute)
 }
 /* }}} end dom_element_set_id_attribute */
 
-
 /* {{{ proto void dom_element_set_id_attribute_ns(string namespaceURI, string localName, boolean isId) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetIdAttrNS
 Since: DOM Level 3
@@ -1226,7 +1213,6 @@ PHP_FUNCTION(dom_element_set_id_attribute_ns)
 	RETURN_NULL();
 }
 /* }}} end dom_element_set_id_attribute_ns */
-
 
 /* {{{ proto void dom_element_set_id_attribute_node(attr idAttr, boolean isId) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetIdAttrNode
@@ -1264,3 +1250,12 @@ PHP_FUNCTION(dom_element_set_id_attribute_node)
 /* }}} end dom_element_set_id_attribute_node */
 
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */

@@ -27,7 +27,6 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
-
 /* {{{ arginfo */
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_processinginstruction_construct, 0, 0, 1)
@@ -113,8 +112,6 @@ int dom_processinginstruction_target_read(dom_object *obj, zval **retval TSRMLS_
 
 /* }}} */
 
-
-
 /* {{{ data	string	
 readonly=no 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-837822393
@@ -178,3 +175,12 @@ int dom_processinginstruction_data_write(dom_object *obj, zval *newval TSRMLS_DC
 /* }}} */
 
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */

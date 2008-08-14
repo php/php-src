@@ -75,7 +75,7 @@ const zend_function_entry php_dom_xpath_class_functions[] = {
 };
 
 
-static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int type)
+static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int type) /* {{{ */
 {
 	zval **args;
 	zval *retval;
@@ -256,16 +256,19 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 		efree(fci.params);
 	}
 }
+/* }}} */
 
-static void dom_xpath_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs)
+static void dom_xpath_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs) /* {{{ */
 {
 	dom_xpath_ext_function_php(ctxt, nargs, 1);
 }
+/* }}} */
 
-static void dom_xpath_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs)
+static void dom_xpath_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs) /* {{{ */
 {
 	dom_xpath_ext_function_php(ctxt, nargs, 2);
 }
+/* }}} */
 
 /* {{{ proto void DOMXPath::__construct(DOMDocument doc) U */
 PHP_METHOD(domxpath, __construct)
@@ -334,6 +337,7 @@ int dom_xpath_document_read(dom_object *obj, zval **retval TSRMLS_DC)
 	}
 	return SUCCESS;
 }
+/* }}} */
 
 /* {{{ proto boolean dom_xpath_register_ns(string prefix, string uri) U */
 PHP_FUNCTION(dom_xpath_register_ns)
@@ -361,8 +365,9 @@ PHP_FUNCTION(dom_xpath_register_ns)
 	}
 	RETURN_TRUE;
 }
+/* }}} */
 
-static void dom_xpath_iter(zval *baseobj, dom_object *intern)
+static void dom_xpath_iter(zval *baseobj, dom_object *intern) /* {{{ */
 {
 	dom_nnodemap_object *mapptr;
 
@@ -371,8 +376,10 @@ static void dom_xpath_iter(zval *baseobj, dom_object *intern)
 	mapptr->nodetype = DOM_NODESET;
 
 }
+/* }}} */
 
-static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) {
+static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
+{
 	zval *id, *retval, *context = NULL;
 	xmlXPathContextPtr ctxp;
 	xmlNodePtr nodep = NULL;
@@ -513,6 +520,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) {
 
 	xmlXPathFreeObject(xpathobjp);
 }
+/* }}} */
 
 /* {{{ proto DOMNodeList dom_xpath_query(string expr [,DOMNode context]) U */
 PHP_FUNCTION(dom_xpath_query)
@@ -572,5 +580,13 @@ PHP_FUNCTION(dom_xpath_register_php_functions)
 
 #endif /* LIBXML_XPATH_ENABLED */
 
-/* }}} */
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */

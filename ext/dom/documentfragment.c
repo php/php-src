@@ -27,7 +27,6 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
-
 /* {{{ arginfo */
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_documentfragement_construct, 0, 0, 0)
@@ -88,7 +87,8 @@ PHP_METHOD(domdocumentfragment, __construct)
 
 /* php_dom_xmlSetTreeDoc is a custom implementation of xmlSetTreeDoc
  needed for hack in appendXML due to libxml bug - no need to share this function */
-static void php_dom_xmlSetTreeDoc(xmlNodePtr tree, xmlDocPtr doc) {
+static void php_dom_xmlSetTreeDoc(xmlNodePtr tree, xmlDocPtr doc) /* {{{ */
+{
     xmlAttrPtr prop;
 	xmlNodePtr cur;
 
@@ -117,6 +117,7 @@ static void php_dom_xmlSetTreeDoc(xmlNodePtr tree, xmlDocPtr doc) {
 		tree->doc = doc;
     }
 }
+/* }}} */
 
 /* {{{ proto void DOMDocumentFragment::appendXML(string data) U */
 PHP_METHOD(domdocumentfragment, appendXML) {
@@ -154,5 +155,15 @@ PHP_METHOD(domdocumentfragment, appendXML) {
 
 	RETURN_TRUE;
 }
+/* }}} */
 
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */

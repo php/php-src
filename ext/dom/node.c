@@ -150,7 +150,7 @@ ZEND_END_ARG_INFO();
 * Since: 
 */
 
-const zend_function_entry php_dom_node_class_functions[] = {
+const zend_function_entry php_dom_node_class_functions[] = { /* {{{ */
 	PHP_FALIAS(insertBefore, dom_node_insert_before, arginfo_dom_node_insert_before)
 	PHP_FALIAS(replaceChild, dom_node_replace_child, arginfo_dom_node_replace_child)
 	PHP_FALIAS(removeChild, dom_node_remove_child, arginfo_dom_node_remove_child)
@@ -174,8 +174,10 @@ const zend_function_entry php_dom_node_class_functions[] = {
 	PHP_ME(domnode, C14NFile, arginfo_dom_node_C14NFile, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
-static void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) {
+static void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) /* {{{ */
+{
 	xmlNsPtr nsptr;
 
 	if (nodep->type == XML_ELEMENT_NODE) {
@@ -190,6 +192,7 @@ static void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) {
 		xmlReconciliateNs(doc, nodep);
 	}
 }
+/* }}} */
 
 /* {{{ nodeName	string	
 readonly=yes 
@@ -280,8 +283,6 @@ int dom_node_node_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 }
 
 /* }}} */
-
-
 
 /* {{{ nodeValue	string	
 readonly=no 
@@ -377,8 +378,6 @@ int dom_node_node_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 /* }}} */
 
-
-
 /* {{{ nodeType	int
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-111237558
@@ -408,8 +407,6 @@ int dom_node_node_type_read(dom_object *obj, zval **retval TSRMLS_DC)
 }
 
 /* }}} */
-
-
 
 /* {{{ parentNode	DomNode	
 readonly=yes 
@@ -444,8 +441,6 @@ int dom_node_parent_node_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
-
-
 /* {{{ childNodes	DomNodeList	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1451460987
@@ -477,8 +472,6 @@ int dom_node_child_nodes_read(dom_object *obj, zval **retval TSRMLS_DC)
 }
 
 /* }}} */
-
-
 
 /* {{{ firstChild DomNode	
 readonly=yes 
@@ -516,8 +509,6 @@ int dom_node_first_child_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
-
-
 /* {{{ lastChild	DomNode	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-61AD09FB
@@ -554,8 +545,6 @@ int dom_node_last_child_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
-
-
 /* {{{ previousSibling	DomNode	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-640FB3C8
@@ -588,8 +577,6 @@ int dom_node_previous_sibling_read(dom_object *obj, zval **retval TSRMLS_DC)
 }
 
 /* }}} */
-
-
 
 /* {{{ nextSibling	DomNode
 readonly=yes 
@@ -624,8 +611,6 @@ int dom_node_next_sibling_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
-
-
 /* {{{ attributes	DomNamedNodeMap	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-84CF096
@@ -657,8 +642,6 @@ int dom_node_attributes_read(dom_object *obj, zval **retval TSRMLS_DC)
 }
 
 /* }}} */
-
-
 
 /* {{{ ownerDocument	DomDocument	
 readonly=yes 
@@ -699,8 +682,6 @@ int dom_node_owner_document_read(dom_object *obj, zval **retval TSRMLS_DC)
 }
 
 /* }}} */
-
-
 
 /* {{{ namespaceUri	string	
 readonly=yes 
@@ -744,8 +725,6 @@ int dom_node_namespace_uri_read(dom_object *obj, zval **retval TSRMLS_DC)
 }
 
 /* }}} */
-
-
 
 /* {{{ prefix	string	
 readonly=no 
@@ -869,8 +848,6 @@ int dom_node_prefix_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 /* }}} */
 
-
-
 /* {{{ localName	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeNSLocalN
@@ -899,8 +876,6 @@ int dom_node_local_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 }
 
 /* }}} */
-
-
 
 /* {{{ baseURI	string
 readonly=yes
@@ -933,8 +908,6 @@ int dom_node_base_uri_read(dom_object *obj, zval **retval TSRMLS_DC)
 }
 
 /* }}} */
-
-
 
 /* {{{ textContent	string	
 readonly=no 
@@ -974,10 +947,7 @@ int dom_node_text_content_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 /* }}} */
 
-
-static xmlNodePtr _php_dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib,
-					xmlNodePtr nextsib, xmlNodePtr fragment, 
-					dom_object *intern, dom_object *childobj TSRMLS_DC)
+static xmlNodePtr _php_dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib, xmlNodePtr nextsib, xmlNodePtr fragment, dom_object *intern, dom_object *childobj TSRMLS_DC) /* {{{ */
 {
 	xmlNodePtr newchild, node;
 
@@ -1020,6 +990,7 @@ static xmlNodePtr _php_dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib,
 
 	return newchild;
 }
+/* }}} */
 
 /* {{{ proto domnode dom_node_insert_before(DomNode newChild, DomNode refChild) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-952280727
@@ -1182,7 +1153,6 @@ PHP_FUNCTION(dom_node_insert_before)
 }
 /* }}} end dom_node_insert_before */
 
-
 /* {{{ proto DomNode dom_node_replace_child(DomNode newChild, DomNode oldChild) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-785887307
 Since: 
@@ -1274,7 +1244,6 @@ PHP_FUNCTION(dom_node_replace_child)
 }
 /* }}} end dom_node_replace_child */
 
-
 /* {{{ proto DomNode dom_node_remove_child(DomNode oldChild) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1734834066
 Since: 
@@ -1326,7 +1295,6 @@ PHP_FUNCTION(dom_node_remove_child)
 	RETURN_FALSE
 }
 /* }}} end dom_node_remove_child */
-
 
 /* {{{ proto DomNode dom_node_append_child(DomNode newChild) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-184E7107
@@ -1429,7 +1397,6 @@ PHP_FUNCTION(dom_node_append_child)
 }
 /* }}} end dom_node_append_child */
 
-
 /* {{{ proto boolean dom_node_has_child_nodes() U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-810594187
 Since: 
@@ -1457,7 +1424,6 @@ PHP_FUNCTION(dom_node_has_child_nodes)
 	}
 }
 /* }}} end dom_node_has_child_nodes */
-
 
 /* {{{ proto DomNode dom_node_clone_node(boolean deep) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3A0ED0A4
@@ -1521,8 +1487,6 @@ PHP_FUNCTION(dom_node_clone_node)
 }
 /* }}} end dom_node_clone_node */
 
-
-
 /* {{{ proto void dom_node_normalize() U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-normalize
 Since: 
@@ -1543,7 +1507,6 @@ PHP_FUNCTION(dom_node_normalize)
 
 }
 /* }}} end dom_node_normalize */
-
 
 /* {{{ proto boolean dom_node_is_supported(string feature, string version);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Level-2-Core-Node-supports
@@ -1566,7 +1529,6 @@ PHP_FUNCTION(dom_node_is_supported)
 	}
 }
 /* }}} end dom_node_is_supported */
-
 
 /* {{{ proto boolean dom_node_has_attributes() U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeHasAttrs
@@ -1605,7 +1567,6 @@ PHP_FUNCTION(dom_node_compare_document_position)
 }
 /* }}} end dom_node_compare_document_position */
 
-
 /* {{{ proto boolean dom_node_is_same_node(DomNode other) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-isSameNode
 Since: DOM Level 3
@@ -1631,7 +1592,6 @@ PHP_FUNCTION(dom_node_is_same_node)
 	}
 }
 /* }}} end dom_node_is_same_node */
-
 
 /* {{{ proto string dom_node_lookup_prefix(string namespaceURI) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-lookupNamespacePrefix
@@ -1684,7 +1644,6 @@ PHP_FUNCTION(dom_node_lookup_prefix)
 }
 /* }}} end dom_node_lookup_prefix */
 
-
 /* {{{ proto boolean dom_node_is_default_namespace(string namespaceURI) U
 URL: http://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-isDefaultNamespace
 Since: DOM Level 3
@@ -1717,7 +1676,6 @@ PHP_FUNCTION(dom_node_is_default_namespace)
 	RETURN_FALSE;
 }
 /* }}} end dom_node_is_default_namespace */
-
 
 /* {{{ proto string dom_node_lookup_namespace_uri(string prefix) U
 URL: http://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-lookupNamespaceURI
@@ -1754,7 +1712,6 @@ PHP_FUNCTION(dom_node_lookup_namespace_uri)
 }
 /* }}} end dom_node_lookup_namespace_uri */
 
-
 /* {{{ proto boolean dom_node_is_equal_node(DomNode arg) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-isEqualNode
 Since: DOM Level 3
@@ -1764,7 +1721,6 @@ PHP_FUNCTION(dom_node_is_equal_node)
  DOM_NOT_IMPLEMENTED();
 }
 /* }}} end dom_node_is_equal_node */
-
 
 /* {{{ proto DomNode dom_node_get_feature(string feature, string version) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-getFeature
@@ -1776,7 +1732,6 @@ PHP_FUNCTION(dom_node_get_feature)
 }
 /* }}} end dom_node_get_feature */
 
-
 /* {{{ proto DomUserData dom_node_set_user_data(string key, DomUserData data, userdatahandler handler) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-setUserData
 Since: DOM Level 3
@@ -1786,7 +1741,6 @@ PHP_FUNCTION(dom_node_set_user_data)
  DOM_NOT_IMPLEMENTED();
 }
 /* }}} end dom_node_set_user_data */
-
 
 /* {{{ proto DomUserData dom_node_get_user_data(string key) U
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-getUserData
@@ -1798,8 +1752,7 @@ PHP_FUNCTION(dom_node_get_user_data)
 }
 /* }}} end dom_node_get_user_data */
 
-
-static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode)
+static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {
 	zval *id;
 	zval *xpath_array=NULL, *ns_prefixes=NULL;
@@ -2043,6 +1996,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		}
 	}
 }
+/* }}} */
 
 /* {{{ proto string DOMNode::C14N([bool exclusive [, bool with_comments [, array xpath [, array ns_prefixes]]]]) U
    Canonicalize nodes to a string */
@@ -2050,6 +2004,7 @@ PHP_METHOD(domnode, C14N)
 {
 	dom_canonicalization(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
+/* }}} */
 
 /* {{{ proto int DOMNode::C14NFile(string uri [, bool exclusive [, bool with_comments [, array xpath [, array ns_prefixes]]]]) U
    Canonicalize nodes to a file */
@@ -2057,8 +2012,7 @@ PHP_METHOD(domnode, C14NFile)
 {
 	dom_canonicalization(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-
-#endif
+/* }}} */
 
 /* {{{ proto int DOMNode::getNodePath() U
    Gets an xpath for a node */
@@ -2070,8 +2024,6 @@ PHP_METHOD(domnode, getNodePath)
 	dom_object *intern;
 	char *value;
 	
-
-	
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
 	value = (char *)xmlGetNodePath(nodep);
@@ -2081,7 +2033,16 @@ PHP_METHOD(domnode, getNodePath)
 		RETVAL_XML_STRING(value, ZSTR_DUPLICATE);
 		xmlFree(value);
 	}
-
-	
 }
+/* }}} */
 
+#endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */
