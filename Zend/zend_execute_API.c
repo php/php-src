@@ -186,6 +186,7 @@ void init_executor(TSRMLS_D) /* {{{ */
 #endif
 
 	EG(exception) = NULL;
+	EG(prev_exception) = NULL;
 
 	EG(scope) = NULL;
 	EG(called_scope) = NULL;
@@ -1029,7 +1030,7 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 	fcall_cache.object_pp = NULL;
 
 	exception = EG(exception);
-	EG(exception) = NULL;
+	zend_exception_save(TSRMLS_C);
 	retval = zend_call_function(&fcall_info, &fcall_cache TSRMLS_CC);
 	EG(autoload_func) = fcall_cache.function_handler;
 
@@ -1038,19 +1039,18 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 	zend_hash_del(EG(in_autoload), lc_name, name_length + 1);
 
 	if (retval == FAILURE) {
-		EG(exception) = exception;
+		zend_exception_restore(TSRMLS_C);
 		free_alloca(lc_free, use_heap);
 		return FAILURE;
 	}
 
 	if (EG(exception) && exception) {
+		zend_exception_restore(TSRMLS_C);
 		free_alloca(lc_free, use_heap);
 		zend_error(E_ERROR, "Function %s(%s) threw an exception of type '%s'", ZEND_AUTOLOAD_FUNC_NAME, name, Z_OBJCE_P(EG(exception))->name);
 		return FAILURE;
 	}
-	if (!EG(exception)) {
-		EG(exception) = exception;
-	}
+	zend_exception_restore(TSRMLS_C);
 	if (retval_ptr) {
 		zval_ptr_dtor(&retval_ptr);
 	}
