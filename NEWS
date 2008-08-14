@@ -11,6 +11,7 @@ PHP                                                                        NEWS
   clearstatcache(). (Jani, Arnaud)
 - Added litespeed SAPI module. (George Wang)
 - Added ext/hash support to ext/session's ID generator. (Sara)
+- Added quoted_printable_encode() function. (Tony)
 
 - Implemented feature request #34381 (nl2br() should have an option for 
   XHTML/HTML compatible BR element) (Kalle)
