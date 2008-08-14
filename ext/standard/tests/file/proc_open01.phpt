@@ -9,7 +9,7 @@ if ($php === false) {
 	die("no php executable defined");
 } 
 $proc = proc_open(
-	$php,
+	"$php -n",
 	array(0 => array('pipe', 'r'), 1 => array('pipe', 'w')),
 	$pipes
 );
