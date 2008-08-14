@@ -2131,7 +2131,8 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 		function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 		if (Z_TYPE_P(function_name) == IS_OBJECT &&
-			zend_get_closure(function_name, &EX(called_scope), &EX(fbc), &EX(object), NULL TSRMLS_CC) == SUCCESS) {
+			Z_OBJ_HANDLER_P(function_name, get_closure) &&
+			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &EX(called_scope), &EX(fbc), &EX(object), NULL TSRMLS_CC) == SUCCESS) {
 			if (EX(object)) {
 				Z_ADDREF_P(EX(object));
 			}
