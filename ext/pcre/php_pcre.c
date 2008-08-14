@@ -1976,9 +1976,8 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	/* Go through the input array */
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(input));
 	while(zend_hash_get_current_data(Z_ARRVAL_P(input), (void **)&entry) == SUCCESS) {
-		zval subject;
+		zval subject = **entry;
 
-		subject = **entry;
 		if (Z_TYPE_PP(entry) != IS_STRING) {
 			zval_copy_ctor(&subject);
 			convert_to_string_with_converter(&subject, UG(utf8_conv));
@@ -2001,8 +2000,8 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 		}
 
 		/* If the entry fits our requirements */
-		if ((count > 0 && !invert) ||
-			(count == PCRE_ERROR_NOMATCH && invert)) {
+		if ((count > 0 && !invert) || (count == PCRE_ERROR_NOMATCH && invert)) {
+
 			Z_ADDREF_PP(entry);
 
 			/* Add to return array */
