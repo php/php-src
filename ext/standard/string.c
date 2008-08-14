@@ -5978,19 +5978,20 @@ PHP_FUNCTION(hebrevc)
 }
 /* }}} */
 
-/* {{{ proto string nl2br(string str) U
+/* {{{ proto string nl2br(string str [, bool is_xhtml]) U
    Converts newlines to HTML line breaks */
 PHP_FUNCTION(nl2br)
 {
-	/* in brief this inserts <br /> before matched regexp \n\r?|\r\n? */
-	zstr	str;
-	int 	str_len;
-	zend_uchar str_type;
-	zstr	p, end, tmp, target;
+	/* in brief this inserts <br /> or <br> before matched regexp \n\r?|\r\n? */
+	zstr		str;
+	int 		str_len;
+	zend_uchar	str_type;
+	zstr		p, end, tmp, target;
 	int		new_length;
 	int		repl_cnt = 0;
+	zend_bool	is_xhtml = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|b", &str, &str_len, &str_type, &is_xhtml) == FAILURE) {
 		return;
 	}
 
@@ -6038,7 +6039,11 @@ PHP_FUNCTION(nl2br)
 		RETURN_ZSTRL(str_type, str, str_len, 1);
 	}
 
-	new_length = str_len + repl_cnt * (sizeof("<br />") - 1);
+	if (is_xhtml) {
+		new_length = str_len + repl_cnt * (sizeof("<br />") - 1);
+	} else {
+		new_length = str_len + repl_cnt * (sizeof("<br>") - 1);
+	}
 
 	if (str_type == IS_UNICODE) {
 		tmp.u = target.u = eumalloc(new_length + 1);
@@ -6051,8 +6056,12 @@ PHP_FUNCTION(nl2br)
 					*target.u++ = (UChar) 0x3c /*'<'*/;
 					*target.u++ = (UChar) 0x62 /*'b'*/;
 					*target.u++ = (UChar) 0x72 /*'r'*/;
-					*target.u++ = (UChar) 0x20 /*' '*/;
-					*target.u++ = (UChar) 0x2f /*'/'*/;
+
+					if (is_xhtml) {
+						*target.u++ = (UChar) 0x20 /*' '*/;
+						*target.u++ = (UChar) 0x2f /*'/'*/;
+					}
+
 					*target.u++ = (UChar) 0x3e /*'>'*/;
 
 					if ((*p.u == (UChar) 0x0d /*'\r'*/ && *(p.u+1) == (UChar) 0x0a /*'\n'*/)
@@ -6079,8 +6088,12 @@ PHP_FUNCTION(nl2br)
 					*target.s++ = '<';
 					*target.s++ = 'b';
 					*target.s++ = 'r';
-					*target.s++ = ' ';
-					*target.s++ = '/';
+
+					if (is_xhtml) {
+						*target.s++ = ' ';
+						*target.s++ = '/';
+					}
+
 					*target.s++ = '>';
 
 					if ((*p.s == '\r' && *(p.s+1) == '\n') || (*p.s == '\n' && *(p.s+1) == '\r')) {
