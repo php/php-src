@@ -42,7 +42,7 @@ class test
 
 file_put_contents($filename, $code);
 
-var_dump(`"$php" -l "$filename" 2>/dev/null`);
+var_dump(`"$php" -n -l "$filename" 2>/dev/null`);
 
 @unlink($filename);
 
