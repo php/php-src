@@ -42,7 +42,6 @@ const zend_function_entry php_dom_userdatahandler_class_functions[] = {
 
 /* {{{ attribute protos, not implemented yet */
 
-
 /* {{{ proto dom_void dom_userdatahandler_handle(short operation, string key, domobject data, node src, node dst);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-handleUserDataEvent
 Since: 
@@ -52,4 +51,16 @@ PHP_FUNCTION(dom_userdatahandler_handle)
  DOM_NOT_IMPLEMENTED();
 }
 /* }}} end dom_userdatahandler_handle */
+
+/* }}} */
+
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */

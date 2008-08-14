@@ -27,7 +27,6 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
-
 /* {{{ arginfo */
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_configuration_set_parameter, 0, 0, 2)
@@ -63,7 +62,6 @@ const zend_function_entry php_dom_domconfiguration_class_functions[] = {
 
 /* {{{ attribute protos, not implemented yet */
 
-
 /* {{{ proto dom_void dom_domconfiguration_set_parameter(string name, domuserdata value);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMConfiguration-property
 Since: 
@@ -73,7 +71,6 @@ PHP_FUNCTION(dom_domconfiguration_set_parameter)
  DOM_NOT_IMPLEMENTED();
 }
 /* }}} end dom_domconfiguration_set_parameter */
-
 
 /* {{{ proto domdomuserdata dom_domconfiguration_get_parameter(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMConfiguration-getParameter
@@ -85,7 +82,6 @@ PHP_FUNCTION(dom_domconfiguration_get_parameter)
 }
 /* }}} end dom_domconfiguration_get_parameter */
 
-
 /* {{{ proto boolean dom_domconfiguration_can_set_parameter(string name, domuserdata value);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMConfiguration-canSetParameter
 Since: 
@@ -95,4 +91,16 @@ PHP_FUNCTION(dom_domconfiguration_can_set_parameter)
  DOM_NOT_IMPLEMENTED();
 }
 /* }}} end dom_domconfiguration_can_set_parameter */
+
+/* }}} */
+
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */

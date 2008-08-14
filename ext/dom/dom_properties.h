@@ -160,3 +160,12 @@ int dom_xpath_document_read(dom_object *obj, zval **retval TSRMLS_DC);
 #endif
 
 #endif /* DOM_PROPERTIERS_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */
