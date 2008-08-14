@@ -1,5 +1,7 @@
 --TEST--
-Bug #45805 (Crach on throwing exception from error handler)
+Bug #45805 (Crash on throwing exception from error handler)
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 class PHPUnit_Util_ErrorHandler
