@@ -1744,29 +1744,16 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	/* Go through the input array */
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(input));
 	while (zend_hash_get_current_data(Z_ARRVAL_P(input), (void **)&entry) == SUCCESS) {
-		zend_bool is_copy;
-		zval *str;
+		zval subject = **entry;
 
-		switch (Z_TYPE_PP(entry)) {
-			case IS_STRING:
-				is_copy = 0;
-				str = *entry;
-				break;
-
-			default:
-				is_copy = 1;
-
-				ALLOC_ZVAL(str);
-				Z_ADDREF_PP(entry); /* the function below decreases the ref counting */
-				COPY_PZVAL_TO_ZVAL(*str, *entry);
-
-				convert_to_string(str);
-				break;
+		if (Z_TYPE_PP(entry) != IS_STRING) {
+			zval_copy_ctor(&subject);
+			convert_to_string(&subject);
 		}
 
 		/* Perform the match */
-		count = pcre_exec(pce->re, extra, Z_STRVAL_P(str),
-						  Z_STRLEN_P(str), 0,
+		count = pcre_exec(pce->re, extra, Z_STRVAL(subject),
+						  Z_STRLEN(subject), 0,
 						  0, offsets, size_offsets);
 
 		/* Check for too many substrings condition. */
@@ -1781,26 +1768,25 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 		/* If the entry fits our requirements */
 		if ((count > 0 && !invert) || (count == PCRE_ERROR_NOMATCH && invert)) {
 
-			if (!is_copy) {
-				SEPARATE_ARG_IF_REF(str);
-			}
+			Z_ADDREF_PP(entry);
 
 			/* Add to return array */
 			switch (zend_hash_get_current_key(Z_ARRVAL_P(input), &string_key, &num_key, 0))
 			{
 				case HASH_KEY_IS_STRING:
 					zend_hash_update(Z_ARRVAL_P(return_value), string_key,
-									 strlen(string_key)+1, &str, sizeof(zval *), NULL);
+									 strlen(string_key)+1, entry, sizeof(zval *), NULL);
 					break;
 
 				case HASH_KEY_IS_LONG:
-					zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, &str,
+					zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry,
 										   sizeof(zval *), NULL);
 					break;
 			}
-		} else if (is_copy) {
-			zval_dtor(str);
-			FREE_ZVAL(str);
+		}
+
+		if (Z_TYPE_PP(entry) != IS_STRING) {
+			zval_dtor(&subject);
 		}
 
 		zend_hash_move_forward(Z_ARRVAL_P(input));
