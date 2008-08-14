@@ -224,7 +224,7 @@ More .INIs  : " . (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 		$php_cgi_info = '';
 	}
 	@unlink($info_file);
-	define('TESTED_PHP_VERSION', `$php -r "echo PHP_VERSION;"`);
+	define('TESTED_PHP_VERSION', `$php -n -r "echo PHP_VERSION;"`);
 
 	// load list of enabled extensions
 	save_text($info_file, '<?php echo join(",",get_loaded_extensions()); ?>');
@@ -786,7 +786,7 @@ if ($just_save_results || !getenv('NO_INTERACTION')) {
 		}	
 		
 		$failed_tests_data .= $sep . "PHPINFO" . $sep;
-		$failed_tests_data .= shell_exec($php.' -dhtml_errors=0 -i');
+		$failed_tests_data .= shell_exec($php . ' -ddisplay_errors=stderr -dhtml_errors=0 -i 2> /dev/null');
 		
 		if ($just_save_results || !mail_qa_team($failed_tests_data, $compression, $status)) {
 			file_put_contents($output_file, $failed_tests_data);
@@ -1387,7 +1387,7 @@ TEST $file
 			return 'BORKED';
 		}
 		save_text($tmp_post, $request);
-		$cmd = "$php$pass_options$ini_settings -f \"$test_file\" 2>&1 < $tmp_post";
+		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < $tmp_post";
 	} elseif (array_key_exists('POST', $section_text) && !empty($section_text['POST'])) {
 
 		$post = trim($section_text['POST']);
@@ -1407,7 +1407,7 @@ TEST $file
 		$env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
 		$env['CONTENT_LENGTH'] = $content_length;
 
-		$cmd = "$php$pass_options$ini_settings -f \"$test_file\" 2>&1 < $tmp_post";
+		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < $tmp_post";
 
 	} else {
 
@@ -1415,7 +1415,7 @@ TEST $file
 		$env['CONTENT_TYPE']   = '';
 		$env['CONTENT_LENGTH'] = '';
 
-		$cmd = "$php$pass_options$ini_settings -f \"$test_file\" $args 2>&1";
+		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" $args 2>&1";
 	}
 
 	if ($leak_check) {
