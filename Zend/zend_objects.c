@@ -55,7 +55,6 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 
 	if (destructor) {
 		zval *obj;
-		zval *old_exception;
 
 		if (destructor->op_array.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
 			if (destructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
@@ -97,10 +96,12 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 		 * For example, if an exception was thrown in a function and when the function's
 		 * local variable destruction results in a destructor being called.
 		 */
-		old_exception = EG(exception);
-		EG(exception) = NULL;
+		if (EG(exception) && Z_OBJ_HANDLE_P(EG(exception)) == handle) {
+			zend_error(E_ERROR, "Attempt to destruct pending exception");
+		}
+		zend_exception_save(TSRMLS_C);
 		zend_call_method_with_0_params(&obj, object->ce, &destructor, ZEND_DESTRUCTOR_FUNC_NAME, NULL);
-		zend_exception_set_previous(old_exception TSRMLS_CC);
+		zend_exception_restore(TSRMLS_C);
 		zval_ptr_dtor(&obj);
 	}
 }

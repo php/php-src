@@ -1723,31 +1723,28 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 		if (EG(active_op_array)) {
 			EG(return_value_ptr_ptr) = retval ? retval : NULL;
 			zend_execute(EG(active_op_array) TSRMLS_CC);
+			zend_exception_restore(TSRMLS_C);
 			if (EG(exception)) {
 				EG(opline_ptr) = NULL;
 				if (EG(user_exception_handler)) {
 					zval *orig_user_exception_handler;
-					zval ***params, *retval2, *old_exception;
-					params = (zval ***)emalloc(sizeof(zval **));
+					zval **params[1], *retval2, *old_exception;
 					old_exception = EG(exception);
-					EG(exception) = NULL;
+					zend_exception_save(TSRMLS_C);
 					params[0] = &old_exception;
 					orig_user_exception_handler = EG(user_exception_handler);
 					if (call_user_function_ex(CG(function_table), NULL, orig_user_exception_handler, &retval2, 1, params, 1, NULL TSRMLS_CC) == SUCCESS) {
 						if (retval2 != NULL) {
 							zval_ptr_dtor(&retval2);
 						}
+						zend_exception_restore(TSRMLS_C);
+						if (EG(exception)) {
+							zval_ptr_dtor(&EG(exception));
+							EG(exception) = NULL;
+ 						}
 					} else {
-						if (!EG(exception)) {
-							EG(exception) = old_exception;
-						}
+						zend_exception_restore(TSRMLS_C);
 						zend_exception_error(EG(exception) TSRMLS_CC);
-					}
-					efree(params);
-					zval_ptr_dtor(&old_exception);
-					if (EG(exception)) {
-						zval_ptr_dtor(&EG(exception));
-						EG(exception) = NULL;
 					}
 				} else {
 					zend_exception_error(EG(exception) TSRMLS_CC);
