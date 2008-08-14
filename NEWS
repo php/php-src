@@ -12,6 +12,9 @@ PHP                                                                        NEWS
 - Added litespeed SAPI module. (George Wang)
 - Added ext/hash support to ext/session's ID generator. (Sara)
 
+- Implemented feature request #34381 (nl2br() should have an option for 
+  XHTML/HTML compatible BR element) (Kalle)
+
 - Fixed a bug causing miscalculations with the "last <weekday> of <n> month"
   relative time string. (Derick)
 
