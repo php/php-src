@@ -1216,7 +1216,7 @@ static long zend_mm_find_leaks(zend_mm_segment *segment, zend_mm_block *b) /* {{
 }
 /* }}} */
 
-static void zend_mm_check_leaks(zend_mm_heap *heap) /* {{{ */
+static void zend_mm_check_leaks(zend_mm_heap *heap TSRMLS_DC) /* {{{ */
 {
 	zend_mm_segment *segment = heap->segments_list;
 	zend_mm_block *p, *q;
@@ -1247,12 +1247,12 @@ static void zend_mm_check_leaks(zend_mm_heap *heap) /* {{{ */
 				leak.orig_filename = p->debug.orig_filename;
 				leak.orig_lineno = p->debug.orig_lineno;
 
-				zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL);
-				zend_message_dispatcher(ZMSG_MEMORY_LEAK_DETECTED, &leak);
+				zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL TSRMLS_CC);
+				zend_message_dispatcher(ZMSG_MEMORY_LEAK_DETECTED, &leak TSRMLS_CC);
 				repeated = zend_mm_find_leaks(segment, p);
 				total += 1 + repeated;
 				if (repeated) {
-					zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(zend_uintptr_t)repeated);
+					zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(zend_uintptr_t)repeated TSRMLS_CC);
 				}
 #if ZEND_MM_CACHE
 			} else if (p->magic == MEM_BLOCK_CACHED) {
@@ -1272,7 +1272,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap) /* {{{ */
 		p = q;
 	}
 	if (total) {
-		zend_message_dispatcher(ZMSG_MEMORY_LEAKS_GRAND_TOTAL, &total);
+		zend_message_dispatcher(ZMSG_MEMORY_LEAKS_GRAND_TOTAL, &total TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -1292,7 +1292,9 @@ static int zend_mm_check_ptr(zend_mm_heap *heap, void *ptr, int silent ZEND_FILE
 		no_cache_notice = 1;
 	}
 	if (!silent) {
-		zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL);
+		TSRMLS_FETCH();
+
+		zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL TSRMLS_CC);
 		zend_debug_alloc_output("---------------------------------------\n");
 		zend_debug_alloc_output("%s(%d) : Block "PTR_FMT" status:\n" ZEND_FILE_LINE_RELAY_CC, ptr);
 		if (__zend_orig_filename) {
@@ -1543,7 +1545,7 @@ static int zend_mm_check_heap(zend_mm_heap *heap, int silent ZEND_FILE_LINE_DC Z
 /* }}} */
 #endif
 
-ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent) /* {{{ */
+ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent TSRMLS_DC) /* {{{ */
 {
 	zend_mm_storage *storage;
 	zend_mm_segment *segment;
@@ -1607,7 +1609,7 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent
 
 #if ZEND_DEBUG
 	if (!silent) {
-		zend_mm_check_leaks(heap);
+		zend_mm_check_leaks(heap TSRMLS_CC);
 	}
 #endif
 
@@ -2628,7 +2630,7 @@ ZEND_API size_t zend_memory_peak_usage(int real_usage TSRMLS_DC) /* {{{ */
 
 ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC) /* {{{ */
 {
-	zend_mm_shutdown(AG(mm_heap), full_shutdown, silent);
+	zend_mm_shutdown(AG(mm_heap), full_shutdown, silent TSRMLS_CC);
 }
 /* }}} */
 

@@ -750,10 +750,10 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 
 	if (open_file_for_scanning(file_handle TSRMLS_CC)==FAILURE) {
 		if (type==ZEND_REQUIRE) {
-			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
+			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename TSRMLS_CC);
 			zend_bailout();
 		} else {
-			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename TSRMLS_CC);
 		}
 		compilation_successful=0;
 	} else {
@@ -933,7 +933,7 @@ int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlight
 	file_handle.opened_path = NULL;
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
 	if (open_file_for_scanning(&file_handle TSRMLS_CC)==FAILURE) {
-		zend_message_dispatcher(ZMSG_FAILED_HIGHLIGHT_FOPEN, filename);
+		zend_message_dispatcher(ZMSG_FAILED_HIGHLIGHT_FOPEN, filename TSRMLS_CC);
 		return FAILURE;
 	}
 	zend_highlight(syntax_highlighter_ini TSRMLS_CC);

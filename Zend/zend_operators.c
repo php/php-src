@@ -1949,7 +1949,7 @@ ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_
 }
 /* }}} */
 
-static inline void zend_free_obj_get_result(zval *op) /* {{{ */
+static inline void zend_free_obj_get_result(zval *op TSRMLS_DC) /* {{{ */
 {
 	if (Z_REFCOUNT_P(op) == 0) {
 		GC_REMOVE_ZVAL_FROM_BUFFER(op);
@@ -2075,18 +2075,18 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 					if (Z_OBJ_HT_P(op1)->get) {
 						op_free = Z_OBJ_HT_P(op1)->get(op1 TSRMLS_CC);
 						ret = compare_function(result, op_free, op2 TSRMLS_CC);
-						zend_free_obj_get_result(op_free);
+						zend_free_obj_get_result(op_free TSRMLS_CC);
 						return ret;
 					} else if (Z_TYPE_P(op2) != IS_OBJECT &&
 					           Z_OBJ_HT_P(op1)->cast_object) {
 						ALLOC_INIT_ZVAL(op_free);
 						if (Z_OBJ_HT_P(op1)->cast_object(op1, op_free, Z_TYPE_P(op2), NULL TSRMLS_CC) == FAILURE) {
 							ZVAL_LONG(result, 1);
-							zend_free_obj_get_result(op_free);
+							zend_free_obj_get_result(op_free TSRMLS_CC);
 							return SUCCESS;
 						}
 						ret = compare_function(result, op_free, op2 TSRMLS_CC);
-						zend_free_obj_get_result(op_free);
+						zend_free_obj_get_result(op_free TSRMLS_CC);
 						return ret;
 					}
 				}
@@ -2094,18 +2094,18 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 					if (Z_OBJ_HT_P(op2)->get) {
 						op_free = Z_OBJ_HT_P(op2)->get(op2 TSRMLS_CC);
 						ret = compare_function(result, op1, op_free TSRMLS_CC);
-						zend_free_obj_get_result(op_free);
+						zend_free_obj_get_result(op_free TSRMLS_CC);
 						return ret;
 					} else if (Z_TYPE_P(op1) != IS_OBJECT &&
 					           Z_OBJ_HT_P(op2)->cast_object) {
 						ALLOC_INIT_ZVAL(op_free);
 						if (Z_OBJ_HT_P(op2)->cast_object(op2, op_free, Z_TYPE_P(op1), NULL TSRMLS_CC) == FAILURE) {
 							ZVAL_LONG(result, -1);
-							zend_free_obj_get_result(op_free);
+							zend_free_obj_get_result(op_free TSRMLS_CC);
 							return SUCCESS;
 						}
 						ret = compare_function(result, op1, op_free TSRMLS_CC);
-						zend_free_obj_get_result(op_free);
+						zend_free_obj_get_result(op_free TSRMLS_CC);
 						return ret;
 					}
 				}

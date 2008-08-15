@@ -183,7 +183,7 @@ END_EXTERN_C()
 typedef struct _zend_mm_heap zend_mm_heap;
 
 ZEND_API zend_mm_heap *zend_mm_startup(void);
-ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent);
+ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent TSRMLS_DC);
 ZEND_API void *_zend_mm_alloc(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
 ZEND_API void _zend_mm_free(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 ZEND_API void *_zend_mm_realloc(zend_mm_heap *heap, void *p, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
