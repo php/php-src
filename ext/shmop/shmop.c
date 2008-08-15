@@ -267,7 +267,6 @@ PHP_FUNCTION(shmop_read)
 	int type;
 	char *startaddr;
 	int bytes;
-	char *return_string;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll", &shmid, &start, &count) == FAILURE) {
 		return;

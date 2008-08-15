@@ -51,10 +51,6 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 
 #if HAVE_PQPREPARE
 	if (S->stmt_name) {
-		pdo_pgsql_db_handle *H = S->H;
-		char *q = NULL;
-		PGresult *res;
-
 		efree(S->stmt_name);
 		S->stmt_name = NULL;
 	}
