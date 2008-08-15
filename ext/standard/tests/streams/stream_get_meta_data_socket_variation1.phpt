@@ -5,12 +5,21 @@ Testing stream_get_meta_data() "unread_bytes" field on a udp socket
 
 /* Setup socket server */
 $server = stream_socket_server('tcp://127.0.0.1:31337');
+if ($server === false) {
+	die("stream_socket_server() failed\n");
+}
 
 /* Connect to it */
 $client = fsockopen('tcp://127.0.0.1:31337');
+if ($client === false) {
+	die("fsockopen() failed\n");
+}
 
 /* Accept that connection */
 $socket = stream_socket_accept($server);
+if ($socket === false) {
+	die("stream_socket_accept() failed\n");
+}
 
 echo "Write some data:\n";
 fwrite($socket, "abcdefg\n1234567\nxyzxyz\n");
