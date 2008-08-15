@@ -1,3 +1,283 @@
+2008-08-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/spl/examples/tests/dualiterator_001.phpt:
+      fix skipif
+
+    * ext/standard/tests/file/bug26615.phpt
+      ext/standard/tests/file/bug26938.phpt
+      ext/standard/tests/file/proc_open01.phpt
+      sapi/cgi/tests/005.phpt
+      sapi/cgi/tests/006.phpt
+      sapi/cgi/tests/007.phpt
+      sapi/cgi/tests/include.inc
+      sapi/cli/tests/009.phpt
+      sapi/cli/tests/015.phpt:
+      - Fix tests
+
+    * run-tests.php:
+      - No unnecessary errors please
+
+2008-08-14  Kalle Sommer Nielsen  <kalle@zesix.com>
+
+    * (PHP_5_3)
+      win32/readdir.h
+      win32/time.c:
+      MFH:
+      * Last _WIN32_WINNT macro redef
+      * Include <config.w32.h> where _WIN32_WINNT was
+
+2008-08-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/spl/tests/dit_002.phpt:
+      - Skipif: as long as it is an extension, it can be disabled..
+
+    * ext/standard/tests/file/clearstatcache_001.phpt
+      ext/standard/tests/file/clearstatcache_001.phpt:
+      - Fix test: Do not leave your crap behind!
+
+2008-08-14  Kalle Sommer Nielsen  <kalle@zesix.com>
+
+    * win32/readdir.h
+      win32/time.c:
+      - Last _WIN32_WINNT macro redef
+      * Include <config.w32.h> where _WIN32_WINNT was
+
+2008-08-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ZendEngine2/tests/bug45805.phpt:
+      add skipif (yes, reflection CAN be disabled still..)
+
+    * tests/basic/bug20539.phpt:
+      - Fix test to use same path as test is as session.save_path to prevent
+        permission errors.
+
+2008-08-14  Etienne Kneuss  <php@colder.ch>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_closures.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Handlerify get_closure
+
+2008-08-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      ext/gd/tests/imageloadfont_invalid.phpt:
+      do not leave crap behind
+
+    * (PHP_5_3)
+      run-tests.php:
+      Silencio for some unnecessary errors
+
+    * (PHP_5_2)
+      run-tests.php:
+      - Nuke annoying errors already silenced elsewhere too
+
+    * (PHP_5_3)
+      ZendEngine2/tests/bug40236.phpt
+      ext/standard/tests/general_functions/bug44394_2.phpt
+      ext/standard/tests/strings/nl2br_error.phpt:
+      fix test
+
+    * (PHP_5_3)
+      sapi/cgi/tests/005.phpt
+      sapi/cgi/tests/006.phpt
+      sapi/cgi/tests/007.phpt
+      sapi/cgi/tests/include.inc
+      sapi/cli/tests/009.phpt
+      sapi/cli/tests/015.phpt
+      sapi/cli/tests/021.phpt:
+      fix tests
+
+    * sapi/cgi/tests/006.phpt:
+      - Fix test
+
+    * sapi/cli/tests/021.phpt
+      sapi/cli/tests/021.phpt:
+      
+      - Fix tests
+
+    * (PHP_5_3)
+      ext/standard/credits_ext.h:
+      - Something moved out -> update credits!
+
+2008-08-14  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/exception_009.phpt:
+      - Fixed test
+
+    * (PHP_5_2)
+      ZendEngine2/tests/exception_009.phpt
+      ZendEngine2/tests/exception_009.phpt:
+      - New test
+
+    * ZendEngine2/zend_exceptions.c
+      ZendEngine2/tests/exception_009.phpt
+      ZendEngine2/tests/exception_009.phpt
+      ZendEngine2/tests/exception_009.phpt:
+      - Fixed crash (reported by Lupus Michaelis)
+
+2008-08-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      NEWS:
+      keep the style
+
+2008-08-14  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      main/php_ini.c:
+      - MFH: move declaration on top and fix build error
+
+2008-08-14  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * (PHP_5_3)
+      ext/pcre/php_pcre.c
+      ext/pcre/tests/bug44925.phpt:
+      after rereading the documentation about preg_grep(), lets match the
+      behavior in HEAD (return the original array elements instead of the new
+      string).
+      tune the test accordingly
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/tests/bug44925.phpt:
+      sync with 5.3 branch. add test for bug #44925
+
+    * (PHP_5_3)
+      NEWS
+      ext/pcre/php_pcre.c
+      ext/pcre/tests/bug44925.phpt
+      ext/pcre/tests/bug44925.phpt:
+      Fixed bug #44925 (preg_grep() modifies input array)
+
+2008-08-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/phar/func_interceptors.c
+      ext/phar/func_interceptors.c
+      ext/phar/func_interceptors.h
+      ext/phar/func_interceptors.h
+      ext/phar/phar.c
+      ext/phar/phar.c:
+      Fixed bug #45613 Segfault when using is_file() on Apache-2.2.8
+
+2008-08-14  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      NEWS:
+      new function
+
+    * ext/standard/basic_functions.c
+      ext/standard/quot_print.c
+      ext/standard/quot_print.h
+      ext/standard/tests/strings/quoted_printable_encode_001.phpt
+      ext/standard/tests/strings/quoted_printable_encode_001.phpt
+      ext/standard/tests/strings/quoted_printable_encode_002.phpt
+      ext/standard/tests/strings/quoted_printable_encode_002.phpt:
+      [DOC] add quoted_printable_encode()
+
+2008-08-14  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ext/spl/php_spl.c:
+      - Improved exception linking
+
+2008-08-14  Antony Dovgal  <tony@daylessday.org>
+
+    * sapi/cli/php_cli.c:
+      nuke unused var
+
+    * ext/standard/basic_functions.c:
+      fix build
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c:
+      fix build
+      compile before commit?
+
+    * (PHP_5_3)
+      ext/standard/quot_print.c
+      ext/standard/string.c:
+      fix folding
+
+2008-08-14  Kalle Sommer Nielsen  <kalle@zesix.com>
+
+    * ext/standard/basic_functions.c:
+      Fix arginfo for nl2br
+
+2008-08-14  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/characterdata.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/documenttype.c
+      ext/dom/dom_ce.h
+      ext/dom/dom_fe.h
+      ext/dom/dom_iterators.c
+      ext/dom/dom_properties.h
+      ext/dom/domconfiguration.c
+      ext/dom/domerror.c
+      ext/dom/domerrorhandler.c
+      ext/dom/domexception.c
+      ext/dom/domimplementation.c
+      ext/dom/domimplementationlist.c
+      ext/dom/domimplementationsource.c
+      ext/dom/domlocator.c
+      ext/dom/domstringlist.c
+      ext/dom/element.c
+      ext/dom/entity.c
+      ext/dom/entityreference.c
+      ext/dom/namednodemap.c
+      ext/dom/namelist.c
+      ext/dom/node.c
+      ext/dom/nodelist.c
+      ext/dom/notation.c
+      ext/dom/php_dom.c
+      ext/dom/php_dom.h
+      ext/dom/processinginstruction.c
+      ext/dom/string_extend.c
+      ext/dom/text.c
+      ext/dom/typeinfo.c
+      ext/dom/userdatahandler.c
+      ext/dom/xml_common.h
+      ext/dom/xpath.c:
+      fix ws, cs and folding
+
+2008-08-14  Kalle Sommer Nielsen  <kalle@zesix.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/string.c:
+      MFH: Implemented feature request #34381 (nl2br() should have an option for
+      XHTML/HTML compatible BR element)
+
+    * ext/standard/basic_functions.c
+      ext/standard/string.c:
+      Implemented feature request #34381 (nl2br() should have an option for
+      XHTML/HTML compatible BR element)
+
+2008-08-14  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/ming/ming.c:
+      - MFB: New parameter parsing API
+
+    * ext/standard/crypt_blowfish.c
+      ext/standard/php_crypt_r.h:
+      - Fix build on BSD (5_3 and 5_2 are OK)
+
 2008-08-13  Kalle Sommer Nielsen  <kalle@zesix.com>
 
     * (PHP_5_3)
