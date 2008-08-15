@@ -1734,8 +1734,6 @@ static ZIPARCHIVE_METHOD(statName)
 	long flags = 0;
 	struct zip_stat sb;
 
-	int res = 0;
-
 	if (!this) {
 		RETURN_FALSE;
 	}
