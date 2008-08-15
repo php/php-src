@@ -1,3 +1,53 @@
+2008-08-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * tests/bug45805.phpt:
+      add skipif (yes, reflection CAN be disabled still..)
+
+2008-08-14  Etienne Kneuss  <php@colder.ch>
+
+    * zend_API.c
+      zend_closures.c
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Handlerify get_closure
+
+2008-08-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      tests/bug40236.phpt:
+      fix test
+
+2008-08-14  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      tests/exception_009.phpt:
+      - Fixed test
+
+    * (PHP_5_2)
+      tests/exception_009.phpt
+      tests/exception_009.phpt:
+      - New test
+
+    * zend_exceptions.c
+      tests/exception_009.phpt
+      tests/exception_009.phpt
+      tests/exception_009.phpt:
+      - Fixed crash (reported by Lupus Michaelis)
+
+2008-08-14  Marcus Boerger  <php@marcus-boerger.de>
+
+    * zend.c
+      zend_exceptions.c
+      zend_exceptions.h
+      zend_execute_API.c
+      zend_globals.h
+      zend_objects.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - Improved exception linking
+
 2008-08-13  Felipe Pena  <felipensp@gmail.com>
 
     * zend_API.c
