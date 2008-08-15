@@ -476,7 +476,7 @@ static inline realpath_cache_bucket* realpath_cache_find(const char *path, int p
 
 #define LINK_MAX 32
 
-static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, int use_realpath, int is_dir TSRMLS_DC) /* {{{ */
+static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, int use_realpath, int is_dir, int *link_is_dir TSRMLS_DC) /* {{{ */
 {
 	int i, j, save;
 	int directory = 0;
@@ -511,7 +511,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			if (i - 1 <= start) {
 				return start ? start : len;
 			}
-			j = tsrm_realpath_r(path, start, i-1, ll, t, use_realpath, 1 TSRMLS_CC);
+			j = tsrm_realpath_r(path, start, i-1, ll, t, use_realpath, 1, NULL TSRMLS_CC);
 			if (j > start) {
 				j--;
 				while (j > start && !IS_SLASH(path[j])) {
@@ -608,7 +608,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			}
 			path[j] = 0;
 			if (IS_ABSOLUTE_PATH(path, j)) {
-				j = tsrm_realpath_r(path, 1, j, ll, t, use_realpath, is_dir TSRMLS_CC);
+				j = tsrm_realpath_r(path, 1, j, ll, t, use_realpath, is_dir, &directory TSRMLS_CC);
 				if (j < 0) {
 					tsrm_free_alloca(tmp, use_heap);
 					return -1;
@@ -621,7 +621,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				memmove(path+i, path, j+1);
 				memcpy(path, tmp, i-1);
 				path[i-1] = DEFAULT_SLASH;
-				j = tsrm_realpath_r(path, start, i + j, ll, t, use_realpath, is_dir TSRMLS_CC);
+				j = tsrm_realpath_r(path, start, i + j, ll, t, use_realpath, is_dir, &directory TSRMLS_CC);
 				if (j < 0) {
 					tsrm_free_alloca(tmp, use_heap);
 					return -1;
@@ -630,6 +630,9 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 		} else {
 			if (save) {
 				directory = S_ISDIR(st.st_mode);
+				if (link_is_dir) {
+					*link_is_dir = directory;
+				}
 				if (is_dir && !directory) {
 					/* not a directory */
 					return -1;
@@ -640,7 +643,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				j = start;
 			} else {
 				/* some leading directories may be unaccessable */
-				j = tsrm_realpath_r(path, start, i-1, ll, t, save ? CWD_FILEPATH : use_realpath, 1 TSRMLS_CC);
+				j = tsrm_realpath_r(path, start, i-1, ll, t, save ? CWD_FILEPATH : use_realpath, 1, NULL TSRMLS_CC);
 				if (j > start) {
 					path[j++] = DEFAULT_SLASH;
 				}
@@ -780,7 +783,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 
 	add_slash = (use_realpath != CWD_REALPATH) && path_length > 0 && IS_SLASH(resolved_path[path_length-1]);	
 	t = CWDG(realpath_cache_ttl) ? 0 : -1;
-	path_length = tsrm_realpath_r(resolved_path, start, path_length, &ll, &t, use_realpath, 0 TSRMLS_CC);
+	path_length = tsrm_realpath_r(resolved_path, start, path_length, &ll, &t, use_realpath, 0, NULL TSRMLS_CC);
 	
 	if (path_length < 0) {
 		return 1;
