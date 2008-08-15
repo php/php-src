@@ -31,7 +31,7 @@ foreach ($classes as $class => $flags) {
 			var_dump($obj->getFlags());
 			if ($isstring) {
 				$val = $obj->current();
-				if (is_string($val) || is_unicode($val)) {
+				if (is_string($val)) {
 					var_dump(true);
 				} else {
 					var_dump($val);
