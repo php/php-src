@@ -3,10 +3,9 @@ Test popen() and pclose function: error conditions
 
 --SKIPIF--
 <?php
-ob_start();phpinfo(INFO_GENERAL);$inf=ob_get_contents(); ob_end_clean();
-if (strpos('MSVC9', $inf) || strpos('MSVC8', $inf)) die("skip Not Valid for build done with VC < 8");
-if(substr(PHP_OS, 0, 3) != 'WIN' ) die("skip Not Valid for Linux");
-if(PHP_DEBUG) die("skip Not Valid for debug builds");
+if(substr(PHP_OS, 0, 3) != 'WIN' && PHP_DEBUG)) die("skip Not Valid for Linux");
+if(!PHP_DEBUG) die("skip Not Valid for release builds");
+if (!(strpos('MSVC9', $inf) || strpos('MSVC8', $inf))) die("skip Not Valid for build done with VC < 8");
 ?>
 
 --FILE--
@@ -43,17 +42,20 @@ NULL
 
 Warning: popen() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
-resource(%d) of type (stream)
-'abc.txt' is not recognized as an internal or external command,
-operable program or batch file.
 
-Warning: Wrong parameter count for pclose() in %s on line %d
-NULL
+Warning: Invalid parameter detected in CRT function '_fdopen' (%s:%d) in %s on line %d
 
-Warning: Wrong parameter count for pclose() in %s on line %d
-NULL
-
-Warning: pclose(): supplied argument is not a valid stream resource in %s on line %d
+Warning: popen(abc.txt,rw): Invalid argument in %s on line %d
 bool(false)
 
---- Done ---
+Warning: pclose() expects exactly 1 parameter, 0 given in %s on line %d
+bool(false)
+
+Warning: pclose() expects exactly 1 parameter, 2 given in %s on line %d
+bool(false)
+
+Warning: pclose() expects parameter 1 to be resource, integer given in %s on line %d
+bool(false)
+
+--- Done ---'abc.txt' is not recognized as an internal or external command,
+operable program or batch file.
