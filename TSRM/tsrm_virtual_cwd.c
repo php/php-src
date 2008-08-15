@@ -136,6 +136,33 @@ static int php_check_dots(const char *element, int n)
 	free((s)->cwd);
 	
 #ifdef TSRM_WIN32
+
+#define SECS_BETWEEN_EPOCHS (__int64)11644473600
+#define SECS_TO_100NS (__int64)10000000
+static inline time_t FileTimeToUnixTime(const FILETIME FileTime)
+{
+	__int64 UnixTime;
+	long *nsec = NULL;
+	SYSTEMTIME SystemTime;
+	FileTimeToSystemTime(&FileTime, &SystemTime);
+
+	UnixTime = ((__int64)FileTime.dwHighDateTime << 32) +
+	FileTime.dwLowDateTime;
+
+	UnixTime -= (SECS_BETWEEN_EPOCHS * SECS_TO_100NS);
+
+	if (nsec) {
+		*nsec = (UnixTime % SECS_TO_100NS) * (__int64)100;
+	}
+
+	UnixTime /= SECS_TO_100NS; /* now convert to seconds */
+
+	if ((time_t)UnixTime != UnixTime) {
+		UnixTime = 0;
+	}
+	return (time_t)UnixTime;
+}
+
 CWD_API int php_sys_stat(const char *path, struct stat *buf) /* {{{ */
 {
 	WIN32_FILE_ATTRIBUTE_DATA data;
@@ -195,24 +222,19 @@ CWD_API int php_sys_stat(const char *path, struct stat *buf) /* {{{ */
 				buf->st_mode  |= (S_IEXEC|(S_IEXEC>>3)|(S_IEXEC>>6));
 			}
 		}
-	}			
-    buf->st_nlink = 1;
+	}
+
+	buf->st_nlink = 1;
 	t = data.nFileSizeHigh;
 	t = t << 32;
 	t |= data.nFileSizeLow;
 	buf->st_size = t;
-	t = data.ftLastAccessTime.dwHighDateTime;
-	t = t << 32;
-	t |= data.ftLastAccessTime.dwLowDateTime;
-	buf->st_atime = (unsigned long)((t / 10000000) - 11644473600);
-	t = data.ftCreationTime.dwHighDateTime;
-	t = t << 32;
-	t |= data.ftCreationTime.dwLowDateTime;
-	buf->st_ctime = (unsigned long)((t / 10000000) - 11644473600);
-	t = data.ftLastWriteTime.dwHighDateTime;
-	t = t << 32;
-	t |= data.ftLastWriteTime.dwLowDateTime;
-	buf->st_mtime = (unsigned long)((t / 10000000) - 11644473600);
+	buf->st_atime = FileTimeToUnixTime(data.ftLastAccessTime);
+	buf->st_ctime = FileTimeToUnixTime(data.ftCreationTime);
+	buf->st_mtime = FileTimeToUnixTime(data.ftLastWriteTime);
+	if (buf->st_mtime != buf->st_atime) {
+		buf->st_atime = buf->st_mtime;
+	}
 	return 0;
 }
 /* }}} */
@@ -279,8 +301,14 @@ CWD_API void virtual_cwd_startup(void) /* {{{ */
 	if (!result) {
 		cwd[0] = '\0';
 	}
-	main_cwd_state.cwd = strdup(cwd);
+
 	main_cwd_state.cwd_length = strlen(cwd);
+#ifdef TSRM_WIN32
+	if (main_cwd_state.cwd_length >= 2 && cwd[1] == ':') {
+		cwd[0] = toupper(cwd[0]);
+	}
+#endif
+	main_cwd_state.cwd = strdup(cwd);
 
 #ifdef ZTS
 	ts_allocate_id(&cwd_globals_id, sizeof(virtual_cwd_globals), (ts_allocate_ctor) cwd_globals_ctor, (ts_allocate_dtor) cwd_globals_dtor);
@@ -331,6 +359,7 @@ CWD_API char *virtual_getcwd_ex(size_t *length TSRMLS_DC) /* {{{ */
 		*length = state->cwd_length+1;
 		retval = (char *) malloc(*length+1);
 		memcpy(retval, state->cwd, *length);
+		retval[0] = toupper(retval[0]);
 		retval[*length-1] = DEFAULT_SLASH;
 		retval[*length] = '\0';
 		return retval;
@@ -977,6 +1006,50 @@ CWD_API int virtual_access(const char *pathname, int mode TSRMLS_DC) /* {{{ */
 /* }}} */
 
 #if HAVE_UTIME
+#ifdef TSRM_WIN32
+static void UnixTimeToFileTime(time_t t, LPFILETIME pft) /* {{{ */
+{
+	// Note that LONGLONG is a 64-bit value
+	LONGLONG ll;
+
+	ll = Int32x32To64(t, 10000000) + 116444736000000000;
+	pft->dwLowDateTime = (DWORD)ll;
+	pft->dwHighDateTime = ll >> 32;
+}
+/* }}} */
+
+static int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
+{
+	FILETIME mtime, atime;
+	BOOL f;
+	HANDLE hFile; 
+
+	hFile = CreateFile(filename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL,
+				 OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+
+	if ( hFile == INVALID_HANDLE_VALUE ) {
+		return -1;
+	}
+
+	if (!buf) {
+		SYSTEMTIME st;
+		GetSystemTime(&st);
+		SystemTimeToFileTime(&st, &mtime);
+		atime = mtime;
+	} else {
+		UnixTimeToFileTime(buf->modtime, &mtime);
+		UnixTimeToFileTime(buf->actime, &atime);
+	}
+	if (!SetFileTime(hFile, NULL,  &mtime, &atime)) {
+		CloseHandle(hFile);
+		return -1;
+	}
+	CloseHandle(hFile);
+	return 1;
+}
+/* }}} */
+#endif
+
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf TSRMLS_DC) /* {{{ */
 {
 	cwd_state new_state;
@@ -988,7 +1061,11 @@ CWD_API int virtual_utime(const char *filename, struct utimbuf *buf TSRMLS_DC) /
 		return -1;
 	}
 
+#ifdef TSRM_WIN32
+	ret = win32_utime(new_state.cwd, buf);
+#else
 	ret = utime(new_state.cwd, buf);
+#endif
 
 	CWD_STATE_FREE(&new_state);
 	return ret;
