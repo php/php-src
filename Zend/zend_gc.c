@@ -252,10 +252,9 @@ ZEND_API void gc_zobj_possible_root(zval *zv TSRMLS_DC)
 	}
 }
 
-ZEND_API void gc_remove_zval_from_buffer(zval *zv)
+ZEND_API void gc_remove_zval_from_buffer(zval *zv TSRMLS_DC)
 {
 	gc_root_buffer* root_buffer = GC_ADDRESS(((zval_gc_info*)zv)->u.buffered);
-	TSRMLS_FETCH();
 
 	if (UNEXPECTED(GC_G(free_list) != NULL &&
 		           GC_ZVAL_GET_COLOR(zv) == GC_BLACK) &&

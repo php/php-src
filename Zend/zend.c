@@ -50,7 +50,7 @@ BOOL WINAPI IsDebuggerPresent(VOID);
 ZEND_API zend_class_entry *zend_standard_class_def = NULL;
 ZEND_API int (*zend_printf)(const char *format, ...);
 ZEND_API zend_write_func_t zend_write;
-ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
+ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path TSRMLS_DC);
 ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
 ZEND_API void (*zend_block_interruptions)(void);
 ZEND_API void (*zend_unblock_interruptions)(void);
@@ -62,7 +62,7 @@ ZEND_API char *(*zend_resolve_path)(const char *filename, int filename_len TSRML
 
 void (*zend_on_timeout)(int seconds TSRMLS_DC);
 
-static void (*zend_message_dispatcher_p)(long message, void *data);
+static void (*zend_message_dispatcher_p)(long message, void *data TSRMLS_DC);
 static int (*zend_get_configuration_directive_p)(const char *name, uint name_length, zval *contents);
 
 static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
@@ -423,7 +423,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 }
 /* }}} */
 
-static FILE *zend_fopen_wrapper(const char *filename, char **opened_path) /* {{{ */
+static FILE *zend_fopen_wrapper(const char *filename, char **opened_path TSRMLS_DC) /* {{{ */
 {
 	if (opened_path) {
 		*opened_path = estrdup(filename);
@@ -601,7 +601,7 @@ static void php_scanner_globals_ctor(zend_php_scanner_globals *scanner_globals_p
 
 void zend_init_opcodes_handlers(void);
 
-int zend_startup(zend_utility_functions *utility_functions, char **extensions, int start_builtin_functions) /* {{{ */
+int zend_startup(zend_utility_functions *utility_functions, char **extensions, int start_builtin_functions TSRMLS_DC) /* {{{ */
 {
 #ifdef ZTS
 	zend_compiler_globals *compiler_globals;
@@ -612,7 +612,6 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	extern zend_ini_scanner_globals ini_scanner_globals;
 	extern zend_php_scanner_globals language_scanner_globals;
 #endif
-	TSRMLS_FETCH();
 
 	start_memory_manager(TSRMLS_C);
 
@@ -680,7 +679,6 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	ts_allocate_id(&ini_scanner_globals_id, sizeof(zend_ini_scanner_globals), (ts_allocate_ctor) ini_scanner_globals_ctor, NULL);
 	compiler_globals = ts_resource(compiler_globals_id);
 	executor_globals = ts_resource(executor_globals_id);
-	tsrm_ls = ts_resource_ex(0, NULL);
 
 	compiler_globals_dtor(compiler_globals TSRMLS_CC);
 	compiler_globals->in_compilation = 0;
@@ -949,10 +947,10 @@ void zend_post_deactivate_modules(TSRMLS_D) /* {{{ */
 /* }}} */
 
 BEGIN_EXTERN_C()
-ZEND_API void zend_message_dispatcher(long message, void *data) /* {{{ */
+ZEND_API void zend_message_dispatcher(long message, void *data TSRMLS_DC) /* {{{ */
 {
 	if (zend_message_dispatcher_p) {
-		zend_message_dispatcher_p(message, data);
+		zend_message_dispatcher_p(message, data TSRMLS_CC);
 	}
 }
 /* }}} */

@@ -1039,10 +1039,8 @@ PHP_FUNCTION(set_time_limit)
 
 /* {{{ php_fopen_wrapper_for_zend
  */
-static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path)
+static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	return php_stream_open_wrapper_as_file((char *)filename, "rb", ENFORCE_SAFE_MODE|USE_PATH|IGNORE_URL_WIN|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, opened_path);
 }
 /* }}} */
@@ -1134,10 +1132,8 @@ static int php_get_configuration_directive_for_zend(char *name, uint name_length
 
 /* {{{ php_message_handler_for_zend
  */
-static void php_message_handler_for_zend(long message, void *data)
+static void php_message_handler_for_zend(long message, void *data TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	switch (message) {
 		case ZMSG_FAILED_INCLUDE_FOPEN:
 			php_error_docref("function.include" TSRMLS_CC, E_WARNING, "Failed opening '%s' for inclusion (include_path='%s')", php_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
@@ -1723,7 +1719,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zuf.vspprintf_function = vspprintf;
 	zuf.getenv_function = sapi_getenv;
 	zuf.resolve_path_function = php_resolve_path_for_zend;
-	zend_startup(&zuf, NULL, 1);
+	zend_startup(&zuf, NULL, 1 TSRMLS_CC);
 
 #ifdef ZTS
 	executor_globals = ts_resource(executor_globals_id);

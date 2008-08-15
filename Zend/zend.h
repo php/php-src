@@ -469,8 +469,8 @@ typedef struct _zend_utility_functions {
 	void (*error_function)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
 	int (*printf_function)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
 	int (*write_function)(const char *str, uint str_length);
-	FILE *(*fopen_function)(const char *filename, char **opened_path);
-	void (*message_handler)(long message, void *data);
+	FILE *(*fopen_function)(const char *filename, char **opened_path TSRMLS_DC);
+	void (*message_handler)(long message, void *data TSRMLS_DC);
 	void (*block_interruptions)(void);
 	void (*unblock_interruptions)(void);
 	int (*get_configuration_directive)(const char *name, uint name_length, zval *contents);
@@ -526,7 +526,7 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define OE_IS_OBJECT	(1<<1)
 #define OE_IS_METHOD	(1<<2)
 
-int zend_startup(zend_utility_functions *utility_functions, char **extensions, int start_builtin_functions);
+int zend_startup(zend_utility_functions *utility_functions, char **extensions, int start_builtin_functions TSRMLS_DC);
 void zend_shutdown(TSRMLS_D);
 void zend_register_standard_ini_entries(TSRMLS_D);
 void zend_post_startup(TSRMLS_D);
@@ -610,7 +610,7 @@ END_EXTERN_C()
 BEGIN_EXTERN_C()
 extern ZEND_API int (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
 extern ZEND_API zend_write_func_t zend_write;
-extern ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
+extern ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path TSRMLS_DC);
 extern ZEND_API void (*zend_block_interruptions)(void);
 extern ZEND_API void (*zend_unblock_interruptions)(void);
 extern ZEND_API void (*zend_ticks_function)(int ticks);
@@ -639,7 +639,7 @@ END_EXTERN_C()
 #define HANDLE_UNBLOCK_INTERRUPTIONS()		if (zend_unblock_interruptions) { zend_unblock_interruptions(); }
 
 BEGIN_EXTERN_C()
-ZEND_API void zend_message_dispatcher(long message, void *data);
+ZEND_API void zend_message_dispatcher(long message, void *data TSRMLS_DC);
 
 ZEND_API int zend_get_configuration_directive(const char *name, uint name_length, zval *contents);
 END_EXTERN_C()
