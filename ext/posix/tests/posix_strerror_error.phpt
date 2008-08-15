@@ -24,7 +24,7 @@ var_dump( posix_strerror($errno, $extra_arg) );
 
 echo "\n-- Testing posix_strerror() function with invalid error number --\n";
 $errno = -999;
-var_dump( posix_strerror($errno) );
+echo gettype(posix_strerror($errno))."\n";
 
 echo "Done";
 ?>
@@ -42,5 +42,5 @@ Warning: posix_strerror() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 
 -- Testing posix_strerror() function with invalid error number --
-string(%d) "Unknown error %d"
+string
 Done

@@ -73,7 +73,7 @@ $values = array(
 
 foreach($values as $value) {
       echo "\nArg value $value \n";
-      var_dump( posix_strerror($value) );
+      echo gettype(posix_strerror($value))."\n";
 };
 
 echo "Done";
@@ -86,87 +86,87 @@ Notice: Undefined variable: undefined_var in %s on line %d
 Notice: Undefined variable: unset_var in %s on line %d
 
 Arg value 10.5 
-string(18) "No child processes"
+string
 
 Arg value -10.5 
-string(%d) "Unknown error %d"
+string
 
 Arg value 101234567000 
-string(%d) "Unknown error %d"
+string
 
 Arg value 1.07654321E-9 
-string(7) "Success"
+string
 
 Arg value 0.5 
-string(7) "Success"
+string
 
 Arg value Array 
 
 Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
-bool(false)
+boolean
 
 Arg value Array 
 
 Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
-bool(false)
+boolean
 
 Arg value Array 
 
 Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
-bool(false)
+boolean
 
 Arg value Array 
 
 Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
-bool(false)
+boolean
 
 Arg value Array 
 
 Warning: posix_strerror() expects parameter 1 to be long, array given in %s on line %d
-bool(false)
+boolean
 
 Arg value  
-string(7) "Success"
+string
 
 Arg value  
-string(7) "Success"
+string
 
 Arg value 1 
-string(23) "Operation not permitted"
+string
 
 Arg value  
-string(7) "Success"
+string
 
 Arg value 1 
-string(23) "Operation not permitted"
+string
 
 Arg value  
-string(7) "Success"
+string
 
 Arg value  
 
 Warning: posix_strerror() expects parameter 1 to be long, string given in %s on line %d
-bool(false)
+boolean
 
 Arg value  
 
 Warning: posix_strerror() expects parameter 1 to be long, string given in %s on line %d
-bool(false)
+boolean
 
 Arg value string 
 
 Warning: posix_strerror() expects parameter 1 to be long, string given in %s on line %d
-bool(false)
+boolean
 
 Arg value string 
 
 Warning: posix_strerror() expects parameter 1 to be long, string given in %s on line %d
-bool(false)
+boolean
 
 Arg value  
-string(7) "Success"
+string
 
 Arg value  
-string(7) "Success"
+string
 
 Catchable fatal error: Object of class stdClass could not be converted to string in %s on line %d
