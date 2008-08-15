@@ -275,7 +275,7 @@ int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE type);
 * startup / shutdown *
 *********************/
 
-static void destroy_server_data(xmlrpc_server_data *server) /* {{{ */
+static void destroy_server_data(xmlrpc_server_data *server TSRMLS_DC) /* {{{ */
 {
 	if (server) {
 		XMLRPC_ServerDestroy(server->server_ptr);
@@ -296,7 +296,7 @@ static void destroy_server_data(xmlrpc_server_data *server) /* {{{ */
 static void xmlrpc_server_destructor(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
 {
 	if (rsrc && rsrc->ptr) {
-		destroy_server_data((xmlrpc_server_data*) rsrc->ptr);
+		destroy_server_data((xmlrpc_server_data*) rsrc->ptr TSRMLS_CC);
 	}
 }
 /* }}} */
