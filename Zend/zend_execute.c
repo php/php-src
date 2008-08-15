@@ -83,11 +83,9 @@ static inline void zend_pzval_unlock_func(zval *z, zend_free_op *should_free, in
 }
 /* }}} */
 
-static inline void zend_pzval_unlock_free_func(zval *z) /* {{{ */
+static inline void zend_pzval_unlock_free_func(zval *z TSRMLS_DC) /* {{{ */
 {
 	if (!Z_DELREF_P(z)) {
-		TSRMLS_FETCH();
-
 		if (z != &EG(uninitialized_zval)) {
 			GC_REMOVE_ZVAL_FROM_BUFFER(z);
 			zval_dtor(z);
@@ -99,7 +97,7 @@ static inline void zend_pzval_unlock_free_func(zval *z) /* {{{ */
 
 #define PZVAL_UNLOCK(z, f) zend_pzval_unlock_func(z, f, 1 TSRMLS_CC)
 #define PZVAL_UNLOCK_EX(z, f, u) zend_pzval_unlock_func(z, f, u TSRMLS_CC)
-#define PZVAL_UNLOCK_FREE(z) zend_pzval_unlock_free_func(z)
+#define PZVAL_UNLOCK_FREE(z) zend_pzval_unlock_free_func(z TSRMLS_CC)
 #define PZVAL_LOCK(z) Z_ADDREF_P((z))
 #define RETURN_VALUE_UNUSED(pzn)	(((pzn)->u.EA.type & EXT_TYPE_UNUSED))
 #define SELECTIVE_PZVAL_LOCK(pzv, pzn)	if (!RETURN_VALUE_UNUSED(pzn)) { PZVAL_LOCK(pzv); }

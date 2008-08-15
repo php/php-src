@@ -109,7 +109,7 @@ ZEND_API int zend_stream_open(const char *filename, zend_file_handle *handle TSR
 	}
 	handle->type = ZEND_HANDLE_FP;
 	handle->opened_path = NULL;
-	handle->handle.fp = zend_fopen(filename, &handle->opened_path);
+	handle->handle.fp = zend_fopen(filename, &handle->opened_path TSRMLS_CC);
 	handle->filename = (char *)filename;
 	handle->free_filename = 0;
 	memset(&handle->handle.stream.mmap, 0, sizeof(zend_mmap));

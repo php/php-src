@@ -509,8 +509,8 @@ typedef struct _zend_utility_functions {
 	int (*write_function)(const char *str, uint str_length);
 	int (*path_encode_function)(char **encpath, int *encpath_len, const UChar *path, int path_len TSRMLS_DC);
 	int (*path_decode_function)(UChar **decpath, int *decpath_len, const char *path, int path_len TSRMLS_DC);
-	FILE *(*fopen_function)(const char *filename, char **opened_path);
-	void (*message_handler)(long message, void *data);
+	FILE *(*fopen_function)(const char *filename, char **opened_path TSRMLS_DC);
+	void (*message_handler)(long message, void *data TSRMLS_DC);
 	void (*block_interruptions)(void);
 	void (*unblock_interruptions)(void);
 	int (*get_configuration_directive)(const char *name, uint name_length, zval *contents);
@@ -572,7 +572,7 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 /* default engine string type */
 #define ZEND_STR_TYPE (UG(unicode) ? IS_UNICODE : IS_STRING)
 
-int zend_startup(zend_utility_functions *utility_functions, char **extensions);
+int zend_startup(zend_utility_functions *utility_functions, char **extensions TSRMLS_DC);
 void zend_shutdown(TSRMLS_D);
 void zend_register_standard_ini_entries(TSRMLS_D);
 void zend_post_startup(TSRMLS_D);
@@ -660,7 +660,7 @@ extern ZEND_API int (*zend_printf)(const char *format, ...);
 extern ZEND_API zend_write_func_t zend_write;
 extern ZEND_API int (*zend_path_encode)(char **encpath, int *encpath_len, const UChar *path, int path_len TSRMLS_DC);
 extern ZEND_API int (*zend_path_decode)(UChar **decpath, int *decpath_len, const char *path, int path_len TSRMLS_DC);
-extern ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
+extern ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path TSRMLS_DC);
 extern ZEND_API void (*zend_block_interruptions)(void);
 extern ZEND_API void (*zend_unblock_interruptions)(void);
 extern ZEND_API void (*zend_ticks_function)(int ticks);
@@ -689,7 +689,7 @@ END_EXTERN_C()
 #define HANDLE_UNBLOCK_INTERRUPTIONS()		if (zend_unblock_interruptions) { zend_unblock_interruptions(); }
 
 BEGIN_EXTERN_C()
-ZEND_API void zend_message_dispatcher(long message, void *data);
+ZEND_API void zend_message_dispatcher(long message, void *data TSRMLS_DC);
 
 ZEND_API int zend_get_configuration_directive(const char *name, uint name_length, zval *contents);
 ZEND_API void zend_reset_locale_deps(TSRMLS_D);
