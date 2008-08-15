@@ -202,7 +202,7 @@ PHP                                                                        NEWS
   . Added GlobIterator. (Marcus)
   . Added SplHeap, SplMinHeap, SplMaxHeap, SplPriorityQueue classes. (Etienne)
   . Added new parameter $prepend to spl_autoload_register(). (Etienne)
-  . Added FixedArray. (Etienne, Tony)
+  . Added SplFixedArray. (Etienne, Tony)
   . Added delaying exceptions in SPL's autoload mechanism. (Marcus)
   . Added RecursiveTreeIterator. (Arnaud, Marcus)
   . Added MultipleIterator. (Arnaud, Marcus, Johannes)
