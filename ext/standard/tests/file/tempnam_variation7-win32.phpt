@@ -79,9 +79,10 @@ File name is => %s
 File permissions are => 100666
 -- Iteration 7 --
 
-Notice: Array to string conversion in %s on line %d
-File name is => %s
-File permissions are => 100666
+Warning: tempnam() expects parameter 1 to be string, array given in %s on line %d
+-- File is not created --
+
+Warning: unlink(): No such file or directory in %s on line %d
 -- Iteration 8 --
 File name is => %s
 File permissions are => 100666
