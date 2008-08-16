@@ -3,7 +3,7 @@ Test popen() and pclose function: error conditions
 
 --SKIPIF--
 <?php
-if(substr(PHP_OS, 0, 3) != 'WIN') die("skip Not Valid for Linux");
+if(substr(PHP_OS, 0, 3) != 'WIN') die("skip Valid only on Windows");
 if(PHP_DEBUG) die("skip Not Valid for debug builds");
 ?>
 
