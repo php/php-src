@@ -12,6 +12,7 @@ PHP                                                                        NEWS
 - Added litespeed SAPI module. (George Wang)
 - Added ext/hash support to ext/session's ID generator. (Sara)
 - Added quoted_printable_encode() function. (Tony)
+- Added stream_context_set_default() function. (Davey Shafik)
 - Added optional "is_xhtml" parameter to nl2br() which makes the function
   output <br> when false and <br /> when true (FR #34381). (Kalle)
 
