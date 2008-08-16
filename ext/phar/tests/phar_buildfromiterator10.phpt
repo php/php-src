@@ -30,7 +30,7 @@ unlink(dirname(__FILE__) . '/buildfromiterator.phar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--
-array(33) {
+array(35) {
   ["phar_ctx_001.phpt"]=>
   string(%d) "%sphar_ctx_001.phpt"
   ["phar_get_supported_signatures_001.phpt"]=>
@@ -97,5 +97,9 @@ array(33) {
   string(%d) "%szip%ccorrupt_007.phpt"
   ["zip/corrupt_008.phpt"]=>
   string(%d) "%szip%ccorrupt_008.phpt"
+  ["zip/corrupt_009.phpt"]=>
+  string(%d) "%szip%ccorrupt_009.phpt"
+  ["zip/corrupt_010.phpt"]=>
+  string(%d) "%szip%ccorrupt_010.phpt"
 }
 ===DONE===
