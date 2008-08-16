@@ -125,24 +125,24 @@ unicode(7) "1.06E-9"
 unicode(3) "0.5"
 -- Iteration 10 --
 
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Array"
+Warning: addslashes() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 11 --
 
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Array"
+Warning: addslashes() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 12 --
 
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Array"
+Warning: addslashes() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 13 --
 
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Array"
+Warning: addslashes() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 14 --
 
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Array"
+Warning: addslashes() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 15 --
 unicode(1) "1"
 -- Iteration 16 --
@@ -162,7 +162,9 @@ unicode(0) ""
 -- Iteration 23 --
 unicode(7) "obj\'ct"
 -- Iteration 24 --
-unicode(%d) "Resource id #%d"
+
+Warning: addslashes() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+NULL
 -- Iteration 25 --
 unicode(0) ""
 -- Iteration 26 --

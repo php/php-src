@@ -111,18 +111,18 @@ unicode(6) "000105"
 
 -- Iteration 7 --
 
-Notice: Array to string conversion in %s on line %d
-unicode(6) "ay2Arr"
+Warning: strtr() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
+NULL
 
 -- Iteration 8 --
 
-Notice: Array to string conversion in %s on line %d
-unicode(6) "ay2Arr"
+Warning: strtr() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
+NULL
 
 -- Iteration 9 --
 
-Notice: Array to string conversion in %s on line %d
-unicode(6) "ay2Arr"
+Warning: strtr() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
+NULL
 
 -- Iteration 10 --
 unicode(6) "0121tm"
@@ -146,7 +146,9 @@ unicode(6) "012atm"
 unicode(6) "plesam"
 
 -- Iteration 17 --
-unicode(6) "ourRes"
+
+Warning: strtr() expects parameter 3 to be string (Unicode or binary), resource given in %s on line %d
+NULL
 
 -- Iteration 18 --
 unicode(6) "012atm"
