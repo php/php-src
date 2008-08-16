@@ -127,24 +127,24 @@ string(37) "this testcase test strtok() function "
 string(37) "this testcase test strtok() function "
 -- Iteration 10 --
 
-Notice: Array to string conversion in %s on line %d
-string(10) "this testc"
+Warning: strtok() expects parameter 2 to be string, array given in %s on line %d
+NULL
 -- Iteration 11 --
 
-Notice: Array to string conversion in %s on line %d
-string(10) "this testc"
+Warning: strtok() expects parameter 2 to be string, array given in %s on line %d
+NULL
 -- Iteration 12 --
 
-Notice: Array to string conversion in %s on line %d
-string(10) "this testc"
+Warning: strtok() expects parameter 2 to be string, array given in %s on line %d
+NULL
 -- Iteration 13 --
 
-Notice: Array to string conversion in %s on line %d
-string(10) "this testc"
+Warning: strtok() expects parameter 2 to be string, array given in %s on line %d
+NULL
 -- Iteration 14 --
 
-Notice: Array to string conversion in %s on line %d
-string(10) "this testc"
+Warning: strtok() expects parameter 2 to be string, array given in %s on line %d
+NULL
 -- Iteration 15 --
 string(37) "this testcase test strtok() function "
 -- Iteration 16 --
@@ -168,5 +168,7 @@ string(37) "this testcase test strtok() function "
 -- Iteration 25 --
 string(37) "this testcase test strtok() function "
 -- Iteration 26 --
-string(2) "th"
+
+Warning: strtok() expects parameter 2 to be string, resource given in %s on line %d
+NULL
 Done

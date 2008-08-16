@@ -40,12 +40,12 @@ echo "Done\n";
 
 -- Testing strtok() function with Zero arguments --
 
-Warning: Wrong parameter count for strtok() in %s on line %d
+Warning: strtok() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
 -- Testing strtok() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for strtok() in %s on line %d
+Warning: strtok() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 string(13) "sample string"
 
