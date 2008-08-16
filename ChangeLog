@@ -1,3 +1,146 @@
+2008-08-15  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/xmlrpc/xmlrpc-epi-php.c:
+      - Fix build
+
+2008-08-15  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/sqlite3/libsqlite/sqlite3.c:
+      - MFB: fix unexpected EOF on line 391
+
+2008-08-15  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/pdo_pgsql/pgsql_statement.c
+      ext/shmop/shmop.c
+      ext/zip/php_zip.c:
+      - Removed unused variables
+
+2008-08-15  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/sqlite3/libsqlite/sqlite3.c:
+      - attempt to fix unexpected EOF on line 391/6
+
+2008-08-15  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_gc.c
+      ZendEngine2/zend_gc.h
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_stream.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      main/main.c:
+      - Removed some TSRMLS_FETCH()s
+
+2008-08-15  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/file/bug38086.phpt:
+       - MFH: make it portable without loosing pertinent data
+
+    * ext/standard/tests/file/bug38086.phpt
+      ext/standard/tests/file/stream_copy_to_stream.phpt:
+      - make it portable without loosing pertinent data
+
+2008-08-15  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      Fix typo
+
+2008-08-15  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/file/stream_copy_to_stream.phpt:
+      - MFH: make it portable without loosing pertinent data
+
+    * (PHP_5_3)
+      ext/standard/tests/file/popen_pclose_error-win32-debug.phpt
+      ext/standard/tests/file/popen_pclose_error-win32.phpt:
+      -MFH:
+       - fix test
+       - add debug build mode (crt outputs callback for invalid parameters)
+
+    * ext/standard/tests/file/popen_pclose_error-win32-debug.phpt
+      ext/standard/tests/file/popen_pclose_error-win32-debug.phpt
+      ext/standard/tests/file/popen_pclose_error-win32.phpt:
+      
+      - fix test
+      - add debug build mode (crt outputs callback for invalid parameters)
+
+    * (PHP_5_3)
+      ext/standard/tests/file/rename_variation-win32.phpt:
+      - fix test
+
+    * (PHP_5_3)
+      ext/standard/tests/file/tempnam_variation7-win32.phpt:
+      - MFH: New parameter parsing API >  new warning
+
+    * ext/standard/tests/file/tempnam_variation7-win32.phpt:
+      - New parameter parsing API >  new warning
+
+2008-08-15  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/bcmath/libbcmath/src/bcmath.h:
+      - Revert bad fix
+
+    * (PHP_5_3)
+      ext/bcmath/libbcmath/src/bcmath.h:
+      - Revert wrong fix
+
+2008-08-15  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/bcmath/libbcmath/src/bcmath.h:
+      - no config.h in ext/
+
+2008-08-15  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      ext/spl/tests/dit_002.phpt:
+      - Remove crap
+
+2008-08-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c:
+      - [DOC] make stat, touch, filemtime, filemsize and related functions more
+      portable (almost 100% equivalent to linux now)
+      - [DOC] add support for touch($dir)
+      - fix windows server 2008/vista support (#45447) (Pierre)
+
+    * TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c:
+      Fixed realpath cache bug
+
+    * ext/standard/tests/streams/stream_get_meta_data_socket_variation1.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation1.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation2.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation2.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation3.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation3.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation4.phpt
+      ext/standard/tests/streams/stream_get_meta_data_socket_variation4.phpt:
+      Fixed possible infinity loop in tests
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Fixed double call to MSHUTDOWN in case of `php-cgi -m`
+
+2008-08-15  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/posix/tests/posix_strerror_error.phpt
+      ext/posix/tests/posix_strerror_variation1.phpt:
+      - Fixed tests (synced with 5_3 and HEAD)
+
 2008-08-14  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/spl/examples/tests/dualiterator_001.phpt:
