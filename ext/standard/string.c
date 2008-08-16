@@ -1177,38 +1177,34 @@ PHP_FUNCTION(implode)
 /* {{{ proto string strtok([string str,] string token)
    Tokenize a string */
 PHP_FUNCTION(strtok)
-{
-	zval **args[2];
-	zval **tok, **str;
+{		
+	char *str, *tok = NULL;
+	int str_len, tok_len = 0;
+	zval *zv;
+	
 	char *token;
 	char *token_end;
 	char *p;
 	char *pe;
 	int skipped = 0;
 	
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 || zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &str, &str_len, &tok, &tok_len) == FAILURE) {
+		return;
 	}
-		
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			tok = args[0];
-			break;
 
-		default:
-		case 2:
-			str = args[0];
-			tok = args[1];
-			convert_to_string_ex(str);
+	if (ZEND_NUM_ARGS() == 1) {
+		tok = str;
+		tok_len = str_len;
+	} else {
+		if (BG(strtok_zval)) {
+			zval_ptr_dtor(&BG(strtok_zval));
+		}
+		MAKE_STD_ZVAL(zv);
+		ZVAL_STRINGL(zv, str, str_len, 1);
 
-			zval_add_ref(str);
-			if (BG(strtok_zval)) {
-				zval_ptr_dtor(&BG(strtok_zval));
-			}
-			BG(strtok_zval) = *str;
-			BG(strtok_last) = BG(strtok_string) = Z_STRVAL_PP(str);
-			BG(strtok_len) = Z_STRLEN_PP(str);
-			break;
+		BG(strtok_zval) = zv;
+		BG(strtok_last) = BG(strtok_string) = Z_STRVAL_P(zv);
+		BG(strtok_len) = str_len;
 	}
 	
 	p = BG(strtok_last); /* Where we start to search */
@@ -1217,11 +1213,9 @@ PHP_FUNCTION(strtok)
 	if (!p || p >= pe) {
 		RETURN_FALSE;
 	}
-
-	convert_to_string_ex(tok);
 	
-	token = Z_STRVAL_PP(tok);
-	token_end = token + Z_STRLEN_PP(tok);
+	token = tok;
+	token_end = token + tok_len;
 
 	while (token < token_end) {
 		STRTOK_TABLE(token++) = 1;
@@ -1256,7 +1250,7 @@ return_token:
 
 	/* Restore table -- usually faster then memset'ing the table on every invocation */
 restore:
-	token = Z_STRVAL_PP(tok);
+	token = tok;
 	
 	while (token < token_end) {
 		STRTOK_TABLE(token++) = 0;
@@ -4001,61 +3995,64 @@ PHP_FUNCTION(strip_tags)
    Set locale information */
 PHP_FUNCTION(setlocale)
 {
-	zval ***args = (zval ***) safe_emalloc(sizeof(zval **), ZEND_NUM_ARGS(), 0);
+	zval ***args = NULL;
 	zval **pcategory, **plocale;
-	int i, cat, n_args=ZEND_NUM_ARGS();
+	int num_args, cat, i = 0;
 	char *loc, *retval;
 
-	if (zend_get_parameters_array_ex(n_args, args) == FAILURE || n_args < 2) {
-		efree(args);
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z+", &pcategory, &args, &num_args) == FAILURE) {
+		return;
 	}
+
 #ifdef HAVE_SETLOCALE
-	pcategory = args[0];
 	if (Z_TYPE_PP(pcategory) == IS_LONG) {
 		convert_to_long_ex(pcategory);	
 		cat = Z_LVAL_PP(pcategory);
-	} else { /* FIXME: The following behaviour should be removed. */
+	} else {
+		/* FIXME: The following behaviour should be removed. */
 		char *category;
+		
 		php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "Passing locale category name as string is deprecated. Use the LC_* -constants instead");
+		
 		convert_to_string_ex(pcategory);
-		category = Z_STRVAL_P(*pcategory);
+		category = Z_STRVAL_PP(pcategory);
 
-		if (!strcasecmp ("LC_ALL", category))
+		if (!strcasecmp("LC_ALL", category)) {
 			cat = LC_ALL;
-		else if (!strcasecmp ("LC_COLLATE", category))
+		} else if (!strcasecmp("LC_COLLATE", category)) {
 			cat = LC_COLLATE;
-		else if (!strcasecmp ("LC_CTYPE", category))
+		} else if (!strcasecmp("LC_CTYPE", category)) {
 			cat = LC_CTYPE;
 #ifdef LC_MESSAGES
-		else if (!strcasecmp ("LC_MESSAGES", category))
+		} else if (!strcasecmp("LC_MESSAGES", category)) {
 			cat = LC_MESSAGES;
 #endif
-		else if (!strcasecmp ("LC_MONETARY", category))
+		} else if (!strcasecmp("LC_MONETARY", category)) {
 			cat = LC_MONETARY;
-		else if (!strcasecmp ("LC_NUMERIC", category))
+		} else if (!strcasecmp("LC_NUMERIC", category)) {
 			cat = LC_NUMERIC;
-		else if (!strcasecmp ("LC_TIME", category))
+		} else if (!strcasecmp("LC_TIME", category)) {
 			cat = LC_TIME;
-		else {
+		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid locale category name %s, must be one of LC_ALL, LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC, or LC_TIME", category);
-			efree(args);
+			
+			if (args) {
+				efree(args);
+			}			
 			RETURN_FALSE;
 		}
 	}
 
-	if (Z_TYPE_PP(args[1]) == IS_ARRAY) {
-		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(args[1]));
-		i=0; /* not needed in this case: only kill a compiler warning */
-	} else {
-		i=1;
+	if (Z_TYPE_PP(args[0]) == IS_ARRAY) {
+		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(args[0]));
 	}
+	
 	while (1) {
-		if (Z_TYPE_PP(args[1]) == IS_ARRAY) {
-			if (!zend_hash_num_elements(Z_ARRVAL_PP(args[1]))) {
+		if (Z_TYPE_PP(args[0]) == IS_ARRAY) {
+			if (!zend_hash_num_elements(Z_ARRVAL_PP(args[0]))) {
 				break;
 			}
-			zend_hash_get_current_data(Z_ARRVAL_PP(args[1]),(void **)&plocale);
+			zend_hash_get_current_data(Z_ARRVAL_PP(args[0]), (void **)&plocale);
 		} else {
 			plocale = args[i];
 		}
@@ -4072,7 +4069,7 @@ PHP_FUNCTION(setlocale)
 			}
 		}
 
-		retval = setlocale (cat, loc);
+		retval = setlocale(cat, loc);
 		zend_update_current_locale();
 		if (retval) {
 			/* Remember if locale was changed */
@@ -4080,23 +4077,24 @@ PHP_FUNCTION(setlocale)
 				STR_FREE(BG(locale_string));
 				BG(locale_string) = estrdup(retval);
 			}
-			
-			efree(args);
-			RETVAL_STRING(retval, 1);
-			
-			return;
+
+			if (args) {
+				efree(args);
+			}
+			RETURN_STRING(retval, 1);
 		}
 		
-		if (Z_TYPE_PP(args[1]) == IS_ARRAY) {
-			if (zend_hash_move_forward(Z_ARRVAL_PP(args[1])) == FAILURE) break;
+		if (Z_TYPE_PP(args[0]) == IS_ARRAY) {
+			if (zend_hash_move_forward(Z_ARRVAL_PP(args[0])) == FAILURE) break;
 		} else {
-			if (++i >= n_args) break;
+			if (++i >= num_args) break;
 		}
 	}
 
 #endif
-	efree(args);
-
+	if (args) {
+		efree(args);
+	}
 	RETURN_FALSE;
 }
 /* }}} */
@@ -4847,28 +4845,20 @@ PHP_FUNCTION(str_pad)
    Implements an ANSI C compatible sscanf */
 PHP_FUNCTION(sscanf)
 {
-	zval ***args;
-	int     result;
-	int	    argc = ZEND_NUM_ARGS();	
+	zval ***args = NULL;
+	char *str, *format;
+	int str_len, format_len, result, num_args = 0;
 
-	if (argc < 2) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss*", &str, &str_len, &format, &format_len, 
+		&args, &num_args) == FAILURE) {
+		return;
 	}
-
-	args = (zval ***) safe_emalloc(argc, sizeof(zval **), 0);
-	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
-	}
-
-	convert_to_string_ex(args[0]);
-	convert_to_string_ex(args[1]);
 	
-	result = php_sscanf_internal(Z_STRVAL_PP(args[0]),
-	                             Z_STRVAL_PP(args[1]),
-	                             argc, args,
-	                             2, &return_value TSRMLS_CC);
-	efree(args);
+	result = php_sscanf_internal(str, format, num_args, args, 0, &return_value TSRMLS_CC);
+	
+	if (args) {
+		efree(args);
+	}
 
 	if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {
 		WRONG_PARAM_COUNT;

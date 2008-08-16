@@ -127,24 +127,24 @@ string(11) "1.07654321E"
 string(3) "0.5"
 -- Iteration 10 --
 
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
+Warning: strtok() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 11 --
 
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
+Warning: strtok() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 12 --
 
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
+Warning: strtok() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 13 --
 
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
+Warning: strtok() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 14 --
 
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
+Warning: strtok() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 15 --
 string(1) "1"
 -- Iteration 16 --
@@ -168,5 +168,7 @@ bool(false)
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --
-string(%d) "Resource id #%d"
+
+Warning: strtok() expects parameter 1 to be string, resource given in %s on line %d
+NULL
 Done
