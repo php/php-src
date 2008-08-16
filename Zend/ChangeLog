@@ -1,3 +1,20 @@
+2008-08-15  Felipe Pena  <felipensp@gmail.com>
+
+    * zend.c
+      zend.h
+      zend_alloc.c
+      zend_alloc.h
+      zend_execute.c
+      zend_gc.c
+      zend_gc.h
+      zend_language_scanner.c
+      zend_language_scanner.l
+      zend_operators.c
+      zend_stream.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - Removed some TSRMLS_FETCH()s
+
 2008-08-14  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * tests/bug45805.phpt:
