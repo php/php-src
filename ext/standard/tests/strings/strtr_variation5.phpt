@@ -104,16 +104,16 @@ unicode(5) "-ma.5"
 unicode(12) "ta5aaaaaaaaa"
 -- Iteration 7 --
 
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Arr0y"
+Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 8 --
 
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Arr0y"
+Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 9 --
 
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Arr0y"
+Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 10 --
 unicode(1) "t"
 -- Iteration 11 --
@@ -129,7 +129,9 @@ unicode(0) ""
 -- Iteration 16 --
 unicode(13) "s02ple objec1"
 -- Iteration 17 --
-unicode(%d) "Resource id #%d"
+
+Warning: strtr() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+NULL
 -- Iteration 18 --
 unicode(0) ""
 -- Iteration 19 --

@@ -123,63 +123,43 @@ bool(false)
 
 -- Iteration 7 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Array"
+Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 
 -- Iteration 8 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Array"
+Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 
 -- Iteration 9 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Array"
+Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 
 -- Iteration 10 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Array"
+Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 
 -- Iteration 11 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Array"
-
-Notice: Array to string conversion in %s on line %d
-unicode(5) "Array"
+Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 
 -- Iteration 12 --
 unicode(1) "1"
@@ -224,10 +204,12 @@ Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
 
 -- Iteration 19 --
-unicode(%d) "Resource id #%d"
 
-Warning: strtr(): The second argument is not an array in %s on line %d
-bool(false)
+Warning: strtr() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+NULL
+
+Warning: strtr() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+NULL
 
 -- Iteration 20 --
 unicode(0) ""
