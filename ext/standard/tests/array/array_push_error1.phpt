@@ -25,6 +25,6 @@ echo "Done";
 
 -- Testing array_push() function with less than expected no. of arguments --
 
-Warning: Wrong parameter count for array_push() in %s on line %d
+Warning: array_push() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 Done

@@ -119,220 +119,220 @@ echo "Done";
 *** Testing array_unshift() : unexpected values for $array argument ***
 
 -- Iteration 1 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, integer given in %s on line %d
+NULL
 int(0)
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, integer given in %s on line %d
+NULL
 int(0)
 
 -- Iteration 2 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, integer given in %s on line %d
+NULL
 int(1)
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, integer given in %s on line %d
+NULL
 int(1)
 
 -- Iteration 3 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, integer given in %s on line %d
+NULL
 int(12345)
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, integer given in %s on line %d
+NULL
 int(12345)
 
 -- Iteration 4 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, integer given in %s on line %d
+NULL
 int(-2345)
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, integer given in %s on line %d
+NULL
 int(-2345)
 
 -- Iteration 5 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, double given in %s on line %d
+NULL
 float(10.5)
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, double given in %s on line %d
+NULL
 float(10.5)
 
 -- Iteration 6 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, double given in %s on line %d
+NULL
 float(-10.5)
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, double given in %s on line %d
+NULL
 float(-10.5)
 
 -- Iteration 7 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, double given in %s on line %d
+NULL
 float(123456789000)
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, double given in %s on line %d
+NULL
 float(123456789000)
 
 -- Iteration 8 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, double given in %s on line %d
+NULL
 float(1.23456789E-9)
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, double given in %s on line %d
+NULL
 float(1.23456789E-9)
 
 -- Iteration 9 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, double given in %s on line %d
+NULL
 float(0.5)
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, double given in %s on line %d
+NULL
 float(0.5)
 
 -- Iteration 10 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, null given in %s on line %d
+NULL
 NULL
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, null given in %s on line %d
+NULL
 NULL
 
 -- Iteration 11 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, null given in %s on line %d
+NULL
 NULL
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, null given in %s on line %d
+NULL
 NULL
 
 -- Iteration 12 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, boolean given in %s on line %d
+NULL
 bool(true)
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, boolean given in %s on line %d
+NULL
 bool(true)
 
 -- Iteration 13 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, boolean given in %s on line %d
+NULL
 bool(false)
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, boolean given in %s on line %d
+NULL
 bool(false)
 
 -- Iteration 14 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, boolean given in %s on line %d
+NULL
 bool(true)
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, boolean given in %s on line %d
+NULL
 bool(true)
 
 -- Iteration 15 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, boolean given in %s on line %d
+NULL
 bool(false)
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, boolean given in %s on line %d
+NULL
 bool(false)
 
 -- Iteration 16 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, Unicode string given in %s on line %d
+NULL
 unicode(0) ""
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, Unicode string given in %s on line %d
+NULL
 unicode(0) ""
 
 -- Iteration 17 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, Unicode string given in %s on line %d
+NULL
 unicode(0) ""
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, Unicode string given in %s on line %d
+NULL
 unicode(0) ""
 
 -- Iteration 18 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, Unicode string given in %s on line %d
+NULL
 unicode(6) "string"
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, Unicode string given in %s on line %d
+NULL
 unicode(6) "string"
 
 -- Iteration 19 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, Unicode string given in %s on line %d
+NULL
 unicode(6) "string"
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, Unicode string given in %s on line %d
+NULL
 unicode(6) "string"
 
 -- Iteration 20 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, Unicode string given in %s on line %d
+NULL
 unicode(11) "hello world"
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, Unicode string given in %s on line %d
+NULL
 unicode(11) "hello world"
 
 -- Iteration 21 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
-object(classA)#%d (0) {
+Warning: array_unshift() expects parameter 1 to be array, object given in %s on line %d
+NULL
+object(classA)#1 (0) {
 }
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
-object(classA)#%d (0) {
+Warning: array_unshift() expects parameter 1 to be array, object given in %s on line %d
+NULL
+object(classA)#1 (0) {
 }
 
 -- Iteration 22 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, null given in %s on line %d
+NULL
 NULL
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, null given in %s on line %d
+NULL
 NULL
 
 -- Iteration 23 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, null given in %s on line %d
+NULL
 NULL
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, null given in %s on line %d
+NULL
 NULL
 
 -- Iteration 24 --
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
-resource(%d) of type (stream)
+Warning: array_unshift() expects parameter 1 to be array, resource given in %s on line %d
+NULL
+resource(5) of type (stream)
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
-resource(%d) of type (stream)
+Warning: array_unshift() expects parameter 1 to be array, resource given in %s on line %d
+NULL
+resource(5) of type (stream)
 Done

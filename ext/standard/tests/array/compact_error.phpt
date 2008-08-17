@@ -26,6 +26,6 @@ echo "Done";
 
 -- Testing compact() function with Zero arguments --
 
-Warning: Wrong parameter count for compact() in %s on line %d
+Warning: compact() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 Done
