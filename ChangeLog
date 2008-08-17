@@ -1,3 +1,68 @@
+2008-08-16  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/string.c
+      ext/standard/tests/strings/setlocale_error.phpt
+      ext/standard/tests/strings/strtok_error.phpt
+      ext/standard/tests/strings/strtok_variation1.phpt
+      ext/standard/tests/strings/strtok_variation2.phpt:
+      - New parameter parsing API (zend_get_parameters_array_ex--)
+      - Fixed tests
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/addslashes_error.phpt
+      ext/standard/tests/strings/addslashes_variation1.phpt
+      ext/standard/tests/strings/strtr_error.phpt
+      ext/standard/tests/strings/strtr_variation5.phpt
+      ext/standard/tests/strings/strtr_variation7.phpt
+      ext/standard/tests/strings/strtr_variation9.phpt:
+      - New parameter parsing API
+      - Fixed tests
+
+2008-08-16  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/file/popen_pclose_error-win32-debug.phpt
+      ext/standard/tests/file/popen_pclose_error-win32.phpt:
+      - MFH: remove confusion for non windows/linux users
+
+    * ext/standard/tests/file/popen_pclose_error-win32-debug.phpt
+      ext/standard/tests/file/popen_pclose_error-win32.phpt:
+      - remove confusion for non windows/linux users
+
+2008-08-16  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c:
+      Fix arginfo
+
+    * (PHP_5_3)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.h:
+      MFH: [DOC] Added stream_context_set_default() function. (Davey Shafik)
+
+    * ext/standard/basic_functions.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.h:
+      Added stream_context_set_default() function. (Davey Shafik)
+
+2008-08-16  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/standard/tests/file/popen_pclose_error-win32-debug.phpt:
+      - MFB: wrong file commited (and fix test, thx Tony for the head up)
+
+    * (PHP_5_3)
+      ext/standard/tests/file/popen_pclose_error-win32-debug.phpt:
+      - wrong file commited (and fix test, thx Tony for the head up)
+
+2008-08-16  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/phar/tests/phar_buildfromiterator10.phpt:
+      fix test
+
 2008-08-15  Felipe Pena  <felipensp@gmail.com>
 
     * ext/xmlrpc/xmlrpc-epi-php.c:
