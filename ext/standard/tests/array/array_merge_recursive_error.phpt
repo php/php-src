@@ -20,6 +20,6 @@ echo "Done";
 
 -- Testing array_merge_recursive() function with Zero arguments --
 
-Warning: Wrong parameter count for array_merge_recursive() in %s on line %d
+Warning: array_merge_recursive() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 Done

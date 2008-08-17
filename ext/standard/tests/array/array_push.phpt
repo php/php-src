@@ -72,14 +72,14 @@ echo"\nDone";
 --EXPECTF--
 *** Testing Error Conditions ***
 
-Warning: Wrong parameter count for array_push() in %s on line %d
+Warning: array_push() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: array_push(): First argument should be an array in %s on line %d
-bool(false)
+Warning: array_push() expects parameter 1 to be array, integer given in %s on line %d
+NULL
 
-Warning: array_push(): First argument should be an array in %s on line %d
-bool(false)
+Warning: array_push() expects parameter 1 to be array, Unicode string given in %s on line %d
+NULL
 int(11)
 int(1)
 

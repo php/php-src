@@ -746,7 +746,7 @@ array(7) {
 }
 
 *** Testing error conditions ***
-Warning: Wrong parameter count for array_merge() in %s on line %d
+Warning: array_merge() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
 Warning: array_merge(): Argument #1 is not an array in %s on line %d
