@@ -4389,7 +4389,7 @@ PHP_METHOD(swfmovie, replace)
 
 	item = getDisplayItem(zitem TSRMLS_CC);
 
-	block = (SWFBlock) getCharacter(*zblock TSRMLS_CC);
+	block = (SWFBlock) getCharacter(zblock TSRMLS_CC);
 	movie =  getMovie(getThis() TSRMLS_CC);
 	ublock.block = block;
 
