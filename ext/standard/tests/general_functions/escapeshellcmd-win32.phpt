@@ -16,7 +16,8 @@ $data = array(
 	'()[]{}$',
 	'%^',
 	'#&;`|*?',
-	'~<>\\'
+	'~<>\\',
+	'%NOENV%'
 );
 
 $count = 1;
@@ -38,9 +39,11 @@ string(6) "^?^<^>"
 -- Test 4 --
 string(14) "^(^)^[^]^{^}^$"
 -- Test 5 --
-string(2) "^^"
+string(4) "^%^^"
 -- Test 6 --
 string(14) "^#^&^;^`^|^*^?"
 -- Test 7 --
 string(8) "^~^<^>^\"
+-- Test 8 --
+string(9) "^%NOENV^%"
 Done
