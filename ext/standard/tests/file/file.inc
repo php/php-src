@@ -638,6 +638,8 @@ function compare_stats($stat1, $stat2, $fields, $op = "==", $flag = false ) {
   // if the result is false(i.e values are not as expected), 
   // dump the stat array so that easy to figure out the error
   if ( $result == false ) {
+    echo "\n Dumping diff between stat array 1 and 2...\n";
+    var_dump(array_diff($stat1, $stat2));
     echo "\n Dumping stat array 1...\n";
     var_dump($stat1);
     echo "\n Dumping stat array 2...\n";
