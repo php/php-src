@@ -37,7 +37,9 @@
 #include "zend_ini_scanner_defs.h"
 
 #define YYCTYPE   unsigned char
-#define YYFILL(n) { if (YYCURSOR >= YYLIMIT) return 0; }
+/* allow the scanner to read one null byte after the end of the string (from ZEND_MMAP_AHEAD)
+ * so that if will be able to terminate to match the current token (e.g. non-enclosed string) */
+#define YYFILL(n) { if (YYCURSOR > YYLIMIT) return 0; }
 #define YYCURSOR  SCNG(yy_cursor)
 #define YYLIMIT   SCNG(yy_limit)
 #define YYMARKER  SCNG(yy_marker)
@@ -58,8 +60,8 @@
 /* perform sanity check. If this message is triggered you should
    increase the ZEND_MMAP_AHEAD value in the zend_streams.h file */
 /*!max:re2c */
-#if ZEND_MMAP_AHEAD < YYMAXFILL
-# error ZEND_MMAP_AHEAD should be greater than or equal to YYMAXFILL
+#if ZEND_MMAP_AHEAD < (YYMAXFILL + 1)
+# error ZEND_MMAP_AHEAD should be greater than YYMAXFILL
 #endif
 
 
