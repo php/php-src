@@ -21,8 +21,8 @@ array(1) {
   string(0) ""
 }
 
-Warning: array_unshift(): The first argument should be an array in %s on line %d
-bool(false)
+Warning: array_unshift() expects parameter 1 to be array, string given in %s on line %d
+NULL
 array(1) {
   [0]=>
   string(0) ""

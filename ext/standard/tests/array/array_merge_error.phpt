@@ -25,6 +25,6 @@ echo "Done";
 
 -- Testing array_merge() function with less than expected no. of arguments --
 
-Warning: Wrong parameter count for array_merge() in %s on line %d
+Warning: array_merge() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 Done
