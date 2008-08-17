@@ -34,6 +34,8 @@ PHP                                                                        NEWS
   (Derick)
 - Fixed bug #45447 (Filesystem time functions on Vista and server 2008).
   (Pierre)
+- Fixed bug #45384 (parse_ini_file will result in parse error with no trailing 
+  newline). (Arnaud)
 - Fixed bug #45044 (relative paths not resolved correctly). (Dmitry)
 - Fixed bug #44925 (preg_grep() modifies input array). (Nuno)
 - Fixed bug #44100 (Inconsistent handling of static array declarations with
