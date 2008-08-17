@@ -19,7 +19,7 @@ phpinfo()
 PHP Version => %s
 
 System => %s
-Build Date => %s
+Build Date => %s%a
 Configure Command => %s
 Server API => Command Line Interface
 Virtual Directory Support => %s
