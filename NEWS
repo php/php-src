@@ -38,6 +38,8 @@ PHP                                                                        NEWS
   newline). (Arnaud)
 - Fixed bug #45044 (relative paths not resolved correctly). (Dmitry)
 - Fixed bug #44925 (preg_grep() modifies input array). (Nuno)
+- Fixed bug #44842 (parse_ini_file keys that start/end with underscore). 
+  (Arnaud)
 - Fixed bug #44100 (Inconsistent handling of static array declarations with
   duplicate keys). (Dmitry)
 - Fixed bug #43817 (opendir() fails on Windows directories with parent

@@ -312,7 +312,7 @@ NEWLINE	("\r"|"\n"|"\r\n")
 TABS_AND_SPACES [ \t]
 WHITESPACE [ \t]+
 CONSTANT [a-zA-Z][a-zA-Z0-9_]*
-LABEL [a-zA-Z0-9][a-zA-Z0-9._-]*
+LABEL [a-zA-Z0-9_][a-zA-Z0-9._-]*
 TOKENS [:,.\[\]"'()|^&+-/*=%$!~<>?@{}]
 OPERATORS [&|~()!]
 DOLLAR_CURLY "${"

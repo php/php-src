@@ -94,6 +94,15 @@ $ini = "[section1]\nname = value";
 file_put_contents($filename, $ini);
 var_dump(parse_ini_file($filename, true));
 
+/* #44842, labels starting with underscore */
+$ini = <<<'INI'
+foo=bar1
+_foo=bar2
+foo_=bar3
+INI;
+file_put_contents($filename, $ini);
+var_dump(parse_ini_file($filename, true));
+
 @unlink($filename);
 echo "Done\n";
 ?>
@@ -181,5 +190,13 @@ array(1) {
     ["name"]=>
     string(5) "value"
   }
+}
+array(3) {
+  ["foo"]=>
+  string(4) "bar1"
+  ["_foo"]=>
+  string(4) "bar2"
+  ["foo_"]=>
+  string(4) "bar3"
 }
 Done
