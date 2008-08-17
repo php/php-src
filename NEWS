@@ -15,7 +15,8 @@ PHP                                                                        NEWS
 - Added stream_context_set_default() function. (Davey Shafik)
 - Added optional "is_xhtml" parameter to nl2br() which makes the function
   output <br> when false and <br /> when true (FR #34381). (Kalle)
-
+- Improved Windows support(incl. 2008/Vista) and portability for stat, touch
+  filemtime, filesize and related functions. (Pierre)
 - Fixed a bug causing miscalculations with the "last <weekday> of <n> month"
   relative time string. (Derick)
 
@@ -29,6 +30,8 @@ PHP                                                                        NEWS
 - Fixed bug #45636 (fileinfo ext duplicate strndup). (Derick)
 - Fixed bug #45545 (DateInterval has 4 char limitation for ISO durations).
   (Derick)
+- Fixed bug #45447 (Filesystem time functions on Vista and server 2008).
+  (Pierre)
 - Fixed bug #45044 (relative paths not resolved correctly). (Dmitry)
 - Fixed bug #44925 (preg_grep() modifies input array). (Nuno)
 - Fixed bug #44100 (Inconsistent handling of static array declarations with
@@ -37,6 +40,7 @@ PHP                                                                        NEWS
   directory unaccessible). (Dmitry)
 - Fixed bug #43008 (php://filter uris ignore url encoded filternames and can't
   handle slashes). (Arnaud)
+- Fixed bug #35980 (touch() works on files but not on directories). (Pierre)
 
 01 Aug 2008, PHP 5.3.0 Alpha 1
 - Upgraded bundled PCRE to version 7.7. (Nuno)
