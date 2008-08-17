@@ -15,8 +15,10 @@ PHP                                                                        NEWS
 - Added stream_context_set_default() function. (Davey Shafik)
 - Added optional "is_xhtml" parameter to nl2br() which makes the function
   output <br> when false and <br /> when true (FR #34381). (Kalle)
-- Improved Windows support(incl. 2008/Vista) and portability for stat, touch
-  filemtime, filesize and related functions. (Pierre)
+
+- Improved Windows support and portability for stat(), touch(), filemtime(),
+  filesize() and related functions. (Pierre)
+
 - Fixed a bug causing miscalculations with the "last <weekday> of <n> month"
   relative time string. (Derick)
 
