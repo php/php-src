@@ -7,7 +7,7 @@
        delete_links() : delete links 
        fill_files()   : fill file with specified contents 
        change_file_perms() : Change permission of files 
-       fill_buffer()  : fills buffer with specified contents
+       fill_buffer()    : fill buffer with specified contents
        compare_self_stat() : compares the first 13 elements of the 
                             stat with the corresponding named key values of
                             the same stat.
@@ -80,7 +80,7 @@ function fill_buffer(&$buffer, $fill_type, $fill_size) {
 }
 
 /*
- Function : bool fill_file(resource $file_handle, string $fill_type, string $file_size);
+ Function : bool fill_file(resource $file_handle, string $fill_type, int $file_size);
  Description: Fills the file with data as specified with requested size.
    $file_handle = file handle, opened with write options,
    $fill_type: 
