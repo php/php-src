@@ -1488,17 +1488,11 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
    Creates a hash containing variables and their values */
 PHP_FUNCTION(compact)
 {
-	zval ***args;			/* function arguments array */
-	int i;
+	zval ***args = NULL;	/* function arguments array */
+	int num_args, i;
 
-	if (ZEND_NUM_ARGS() < 1) {
-		WRONG_PARAM_COUNT;
-	}
-	args = (zval ***)safe_emalloc(ZEND_NUM_ARGS(), sizeof(zval **), 0);
-
-	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &num_args) == FAILURE) {
+		return;
 	}
 
 	if (!EG(active_symbol_table)) {
@@ -1518,7 +1512,9 @@ PHP_FUNCTION(compact)
 		php_compact_var(EG(active_symbol_table), return_value, *args[i] TSRMLS_CC);
 	}
 
-	efree(args);
+	if (args) {
+		efree(args);
+	}
 }
 /* }}} */
 
@@ -1910,29 +1906,13 @@ PHP_FUNCTION(array_push)
 	int i,				/* Loop counter */
 		argc;			/* Number of function arguments */
 
-	/* Get the argument count and check it */
-	argc = ZEND_NUM_ARGS();
-	if (argc < 2) {
-		WRONG_PARAM_COUNT;
-	}
 
-	/* Allocate arguments array and get the arguments, checking for errors. */
-	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
-	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
-	}
-
-	/* Get first argument and check that it's an array */
-	stack = *args[0];
-	if (Z_TYPE_P(stack) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argument should be an array");
-		efree(args);
-		RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a+", &stack, &args, &argc) == FAILURE) {
+		return;
 	}
 
 	/* For each subsequent argument, make it a reference, increase refcount, and add it to the end of the array */
-	for (i=1; i<argc; i++) {
+	for (i = 0; i < argc; i++) {
 		new_var = *args[i];
 		Z_ADDREF_P(new_var);
 
@@ -2036,31 +2016,14 @@ PHP_FUNCTION(array_unshift)
 		   *stack;			/* Input stack */
 	HashTable *new_hash;	/* New hashtable for the stack */
 	int argc;				/* Number of function arguments */
-
-	/* Get the argument count and check it */
-	argc = ZEND_NUM_ARGS();
-	if (argc < 2) {
-		WRONG_PARAM_COUNT;
-	}
-
-	/* Allocate arguments array and get the arguments, checking for errors. */
-	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
-	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
-	}
-
-	/* Get first argument and check that it's an array */
-	stack = *args[0];
-	if (Z_TYPE_P(stack) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The first argument should be an array");
-		efree(args);
-		RETURN_FALSE;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a+", &stack, &args, &argc) == FAILURE) {
+		return;
 	}
 
 	/* Use splice to insert the elements at the beginning. Destroy old
 	 * hashtable and replace it with new one */
-	new_hash = php_splice(Z_ARRVAL_P(stack), 0, 0, &args[1], argc - 1, NULL);
+	new_hash = php_splice(Z_ARRVAL_P(stack), 0, 0, &args[0], argc, NULL);
 	zend_hash_destroy(Z_ARRVAL_P(stack));
 	if (Z_ARRVAL_P(stack) == &EG(symbol_table)) {
 		zend_reset_all_cv(&EG(symbol_table) TSRMLS_CC);
@@ -2367,17 +2330,8 @@ static void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETERS, int
 	zval ***args = NULL;
 	int argc, i, params_ok = 1, init_size = 0;
 
-	/* Get the argument count and check it */
-	argc = ZEND_NUM_ARGS();
-	if (argc < 1) {
-		WRONG_PARAM_COUNT;
-	}
-
-	/* Allocate arguments array and get the arguments, checking for errors. */
-	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
-	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &argc) == FAILURE) {
+		return;
 	}
 
 	for (i = 0; i < argc; i++) {
@@ -3802,17 +3756,8 @@ PHP_FUNCTION(array_multisort)
 	int				sort_type  = PHP_SORT_REGULAR;
 	int				i, k;
 
-	/* Get the argument count and check it */
-	argc = ZEND_NUM_ARGS();
-	if (argc < 1) {
-		WRONG_PARAM_COUNT;
-	}
-
-	/* Allocate arguments array and get the arguments, checking for errors. */
-	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
-	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &argc) == FAILURE) {
+		return;
 	}
 
 	/* Allocate space for storing pointers to input arrays and sort flags. */
