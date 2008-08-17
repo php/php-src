@@ -34,7 +34,7 @@ echo "\n*** Testing stat(): on file by truncating it to given size ***\n";
 $file_handle = fopen($filename, "w");
 fclose($file_handle);
 
-clearstatcache();
+clearstatcache(true, $filename);
 $old_stat = stat($filename);
 // clear the cache
 sleep(2);
@@ -44,7 +44,7 @@ $file_handle = fopen($filename, "r+");
 var_dump( ftruncate($file_handle, 512) );  // truncate it
 fclose($file_handle);
 
-clearstatcache();
+clearstatcache(true, $filename);
 $new_stat = stat($filename);
 
 // compare self stats
@@ -56,7 +56,7 @@ $affected_members = array(7, 8, 9, 'size', 'atime', 'mtime');
 var_dump( compare_stats($old_stat, $new_stat, $affected_members, '!=') );
 
 // clear the stat
-clearstatcache();  // clear previous size value in cache
+clearstatcache(true, $filename);  // clear previous size value in cache
 
 echo "\n*** Done ***";
 ?>
