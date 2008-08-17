@@ -80,15 +80,15 @@ array(26) {
   [0]=>
   int(%d)
   [1]=>
-  int(%d)
+  int(0)
   [2]=>
   int(%d)
   [3]=>
   int(%d)
   [4]=>
-  int(%d)
+  int(0)
   [5]=>
-  int(%d)
+  int(0)
   [6]=>
   int(%d)
   [7]=>
@@ -106,15 +106,15 @@ array(26) {
   [u"dev"]=>
   int(%d)
   [u"ino"]=>
-  int(%d)
+  int(0)
   [u"mode"]=>
   int(%d)
   [u"nlink"]=>
   int(%d)
   [u"uid"]=>
-  int(%d)
+  int(0)
   [u"gid"]=>
-  int(%d)
+  int(0)
   [u"rdev"]=>
   int(%d)
   [u"size"]=>

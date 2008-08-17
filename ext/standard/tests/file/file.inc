@@ -279,7 +279,7 @@ function create_files( $file_path,
   if ( $content_type == "empty" ) {
     $return_value['filled'] = $count;
   } else {
-    //fill the file with specifiec type of data and size
+    // fill the file with specifiec type of data and size
     $tmp_name_suffix = $name_suffix;
     for($loop_counter = 1; $loop_counter <= $count; $loop_counter ++) {
       $filename = $file_path."/".$name_prefix.$tmp_name_suffix.$file_extension;
@@ -577,7 +577,7 @@ Description:
   $stat2 = second stat array
   $op = type of the comparision to be perform between elements of stat1 and stat2
     "!=" compare for not equal
-    "==" comprae for equality
+    "==" compare for equality
     ">"  if each element of stat1 is > than stat2
     "<"  if each element of stat1 is < than stat2
   $fields = contains the key of the elements that needs to be compared. 
@@ -585,7 +585,10 @@ Description:
   $flag = specify true to dump the stat1 and stat2 
 */
 
-$all_stat_keys = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, "dev", "ino", "mode", "nlink", "uid", "gid", "rdev", "size", "atime", "mtime", "ctime", "blksize", "blocks");
+$all_stat_keys = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 
+                       "dev", "ino", "mode", "nlink", "uid", "gid",
+                       "rdev", "size", "atime", "mtime", "ctime",
+                       "blksize", "blocks");
 
 function compare_stats($stat1, $stat2, $fields, $op = "==", $flag = false ) {
   // dump the stat if requested
@@ -635,6 +638,8 @@ function compare_stats($stat1, $stat2, $fields, $op = "==", $flag = false ) {
   // if the result is false(i.e values are not as expected),
   // dump the stat array so that easy to figure out the error
   if ( $result == false ) {
+    echo "\n Dumping diff between stat array 1 and 2...\n";
+    var_dump(array_diff($stat1, $stat2));
     echo "\n Dumping stat array 1...\n";
     var_dump($stat1);
     echo "\n Dumping stat array 2...\n";
