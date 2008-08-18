@@ -1,3 +1,110 @@
+2008-08-17  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/array.c
+      ext/standard/tests/array/array_merge.phpt
+      ext/standard/tests/array/array_merge_error.phpt
+      ext/standard/tests/array/array_merge_recursive_error.phpt
+      ext/standard/tests/array/array_push.phpt
+      ext/standard/tests/array/array_push_error1.phpt
+      ext/standard/tests/array/array_push_variation1.phpt
+      ext/standard/tests/array/array_unshift.phpt
+      ext/standard/tests/array/array_unshift_error.phpt
+      ext/standard/tests/array/array_unshift_variation1.phpt
+      ext/standard/tests/array/compact_error.phpt:
+      - New parameter parsing API
+
+2008-08-17  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_ini_scanner.l
+      ext/standard/tests/general_functions/parse_ini_file.phpt:
+      MFH: Allow underscore at start of labels as underscore has no meaning here
+      (fixes #44842)
+
+    * ZendEngine2/zend_ini_scanner.c
+      ZendEngine2/zend_ini_scanner.c
+      ZendEngine2/zend_ini_scanner_defs.h
+      ZendEngine2/zend_ini_scanner_defs.h:
+      generated zend_ini_scanner.c
+
+    * ZendEngine2/zend_ini_scanner.l
+      ext/standard/tests/general_functions/parse_ini_file.phpt:
+      Allow underscore at start of labels as underscore has no meaning here
+      (fixes #44842)
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_ini_scanner.c
+      ZendEngine2/zend_ini_scanner.l
+      ZendEngine2/zend_ini_scanner_defs.h:
+      MFH: Fixed #45384 (parse_ini_file will result in parse error with no
+      trailing
+       newline)
+
+    * ZendEngine2/zend_ini_scanner.c
+      ZendEngine2/zend_ini_scanner.l
+      ZendEngine2/zend_ini_scanner_defs.h:
+      Fixed #45384 (parse_ini_file will result in parse error with no trailing
+       newline)
+
+2008-08-17  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      NEWS:
+      fix news
+
+2008-08-17  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/ming/ming.c:
+      - Fix build
+
+2008-08-17  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/standard/tests/general_functions/phpinfo.phpt:
+      - add %a for Compiler/architecture
+
+    * (PHP_5_3)
+      ext/standard/exec.c
+      ext/standard/tests/general_functions/escapeshellcmd-win32.phpt:
+      - [DOC] MFH: improve fix for #43261 for % and "
+
+    * ext/standard/exec.c
+      ext/standard/tests/general_functions/escapeshellcmd-win32.phpt:
+      - [DOC] improve fix for #43261 for % and "
+
+    * (PHP_5_3)
+      ext/standard/tests/general_functions/bug41518.phpt:
+      - MFH: fix test (portable), use . as basedir and create the tmp dir in the
+      test directory
+
+    * ext/standard/tests/general_functions/bug41518.phpt:
+      - fix test (portable), use . as basedir and create the tmp dir in the test
+      directory
+
+    * ext/standard/tests/file/file.inc
+      ext/standard/tests/file/stat_basic-win32.phpt
+      ext/standard/tests/file/stat_variation8-win32.phpt
+      ext/standard/tests/file/tempnam_variation3-win32.phpt
+      ext/standard/tests/file/touch.phpt:
+      - MFB:
+       - fix or improve tests
+       - add dump of the array_diff for compare_stats
+
+    * (PHP_5_3)
+      ext/standard/tests/file/file.inc
+      ext/standard/tests/file/stat_basic-win32.phpt
+      ext/standard/tests/file/stat_variation8-win32.phpt
+      ext/standard/tests/file/tempnam_variation3-win32.phpt
+      ext/standard/tests/file/touch.phpt:
+      - fix or improve tests
+      - add dump of the array_diff for compare_stats
+
+    * (PHP_5_3)
+      NEWS:
+      - fixes, portability and improvements for stat/file*/touch windows entry
+
 2008-08-16  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)

@@ -1,3 +1,34 @@
+2008-08-17  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      zend_ini_scanner.l:
+      MFH: Allow underscore at start of labels as underscore has no meaning here
+      (fixes #44842)
+
+    * zend_ini_scanner.c
+      zend_ini_scanner.c
+      zend_ini_scanner_defs.h
+      zend_ini_scanner_defs.h:
+      generated zend_ini_scanner.c
+
+    * zend_ini_scanner.l:
+      Allow underscore at start of labels as underscore has no meaning here
+      (fixes #44842)
+
+    * (PHP_5_3)
+      zend_ini_scanner.c
+      zend_ini_scanner.l
+      zend_ini_scanner_defs.h:
+      MFH: Fixed #45384 (parse_ini_file will result in parse error with no
+      trailing
+       newline)
+
+    * zend_ini_scanner.c
+      zend_ini_scanner.l
+      zend_ini_scanner_defs.h:
+      Fixed #45384 (parse_ini_file will result in parse error with no trailing
+       newline)
+
 2008-08-15  Felipe Pena  <felipensp@gmail.com>
 
     * zend.c
