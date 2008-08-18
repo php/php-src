@@ -78,6 +78,32 @@ Type specifiers
 	^ - returns original string type before conversion (only for 's' and 'u'
 	    specifiers)
 
+
+Note on 64bit compatibility
+---------------------------
+Please do not forget that int and long are two different things on 64bit 
+OSes (int is 4bit and long is 8bit), so make sure you pass longs to "l" 
+and ints to strings length (i.e. for "s" you need to pass char * and int), 
+not the other way round!
+Remember: "l" is the only case when you need to pass long (and that's why 
+it's "l", not "i" btw).
+
+Both mistakes cause memory corruptions and segfaults on 64bit OSes:
+1)
+  char *str;
+  long str_len; /* XXX THIS IS WRONG!! Use int instead. */
+  zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len)
+
+2)
+  int num; /* XXX THIS IS WRONG!! Use long instead. */
+  zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &num)
+
+If you're in doubt, use check_parameters.php script to the parameters 
+and their types (it can be found in ./scripts/dev/ directory of PHP sources):
+
+# php ./scripts/dev/check_parameters.php /path/to/your/sources/
+
+
 Examples
 --------
 /* Gets a long, a string and its length, and a zval */
