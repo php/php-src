@@ -31,6 +31,6 @@ echo "Done";
 
 -- Testing mb_regex_encoding() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for mb_regex_encoding() in %s on line %d
+Warning: mb_regex_encoding() expects at most 1 parameter, 2 given in %s on line %d
 NULL
 Done

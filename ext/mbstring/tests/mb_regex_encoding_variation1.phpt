@@ -210,6 +210,6 @@ bool(false)
 
 -- Iteration 24 --
 
-Warning: mb_regex_encoding(): Unknown encoding "Resource id #%d" in %s on line %d
-bool(false)
+Warning: mb_regex_encoding() expects parameter 1 to be binary string, resource given in %s on line %d
+NULL
 Done

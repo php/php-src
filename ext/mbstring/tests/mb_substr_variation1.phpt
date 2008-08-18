@@ -175,5 +175,7 @@ string(0) ""
 string(0) ""
 
 -- Iteration 24 --
-string(5) "Resou"
+
+Warning: mb_substr() expects parameter 1 to be binary string, resource given in %s on line %d
+NULL
 Done
