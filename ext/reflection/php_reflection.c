@@ -1659,9 +1659,8 @@ ZEND_METHOD(reflection_function, getClosure)
 ZEND_METHOD(reflection_function, invoke)
 {
 	zval *retval_ptr;
-	zval ***params;
-	int result;
-	int argc = ZEND_NUM_ARGS();
+	zval ***params = NULL;
+	int result, num_args = 0;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 	reflection_object *intern;
@@ -1670,10 +1669,8 @@ ZEND_METHOD(reflection_function, invoke)
 	METHOD_NOTSTATIC(reflection_function_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	params = safe_emalloc(sizeof(zval **), argc, 0);
-	if (zend_get_parameters_array_ex(argc, params) == FAILURE) {
-		efree(params);
-		RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &params, &num_args) == FAILURE) {
+		return;
 	}
 
 	fci.size = sizeof(fci);
@@ -1682,7 +1679,7 @@ ZEND_METHOD(reflection_function, invoke)
 	fci.symbol_table = NULL;
 	fci.object_pp = NULL;
 	fci.retval_ptr_ptr = &retval_ptr;
-	fci.param_count = argc;
+	fci.param_count = num_args;
 	fci.params = params;
 	fci.no_separation = 1;
 
@@ -2497,22 +2494,16 @@ ZEND_METHOD(reflection_method, getClosure)
 ZEND_METHOD(reflection_method, invoke)
 {
 	zval *retval_ptr;
-	zval ***params;
+	zval ***params = NULL;
 	zval **object_pp;
 	reflection_object *intern;
 	zend_function *mptr;
-	int argc = ZEND_NUM_ARGS();
-	int result;
+	int result, num_args = 0;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 	zend_class_entry *obj_ce;
 	
 	METHOD_NOTSTATIC(reflection_method_ptr);
-
-	if (argc < 1) {
-		zend_error(E_WARNING, "Invoke() expects at least one parameter, none given");
-		RETURN_FALSE;
-	}
 	
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
@@ -2533,10 +2524,8 @@ ZEND_METHOD(reflection_method, invoke)
 		return;
 	}
 
-	params = safe_emalloc(sizeof(zval **), argc, 0);
-	if (zend_get_parameters_array_ex(argc, params) == FAILURE) {
-		efree(params);
-		RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &params, &num_args) == FAILURE) {
+		return;
 	}
 	
 	/* In case this is a static method, we should'nt pass an object_pp
@@ -2571,7 +2560,7 @@ ZEND_METHOD(reflection_method, invoke)
 	fci.symbol_table = NULL;
 	fci.object_pp = object_pp;
 	fci.retval_ptr_ptr = &retval_ptr;
-	fci.param_count = argc-1;
+	fci.param_count = num_args-1;
 	fci.params = params+1;
 	fci.no_separation = 1;
 
@@ -3767,14 +3756,14 @@ ZEND_METHOD(reflection_class, newInstance)
 	zval *retval_ptr = NULL;
 	reflection_object *intern;
 	zend_class_entry *ce;
-	int argc = ZEND_NUM_ARGS();
 	
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	/* Run the constructor if there is one */
 	if (ce->constructor) {
-		zval ***params;
+		zval ***params = NULL;
+		int num_args = 0;
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcc;
 
@@ -3783,9 +3772,10 @@ ZEND_METHOD(reflection_class, newInstance)
 			return;
 		}
 
-		params = safe_emalloc(sizeof(zval **), argc, 0);
-		if (zend_get_parameters_array_ex(argc, params) == FAILURE) {
-			efree(params);
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "*", &params, &num_args) == FAILURE) {
+			if (params) {
+				efree(params);
+			}
 			RETURN_FALSE;
 		}
 
@@ -3797,7 +3787,7 @@ ZEND_METHOD(reflection_class, newInstance)
 		fci.symbol_table = NULL;
 		fci.object_pp = &return_value;
 		fci.retval_ptr_ptr = &retval_ptr;
-		fci.param_count = argc;
+		fci.param_count = num_args;
 		fci.params = params;
 		fci.no_separation = 1;
 
@@ -3818,7 +3808,10 @@ ZEND_METHOD(reflection_class, newInstance)
 		if (retval_ptr) {
 			zval_ptr_dtor(&retval_ptr);
 		}
-		efree(params);
+		
+		if (params) {
+			efree(params);
+		}
 	} else if (!ZEND_NUM_ARGS()) {
 		object_init_ex(return_value, ce);
 	} else {
