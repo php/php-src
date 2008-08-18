@@ -1215,8 +1215,8 @@ ZEND_FUNCTION(property_exists)
 	int property_len;
 	zend_class_entry *ce, **pce;
 	zend_property_info *property_info;
-	char *prop_name, *class_name;
 	zval property_z;
+	ulong h;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &object, &property, &property_len) == FAILURE) {
 		return;
@@ -1226,52 +1226,34 @@ ZEND_FUNCTION(property_exists)
 		RETURN_FALSE;
 	}
 
-	ZVAL_STRINGL(&property_z, property, property_len, 0);
-
-	switch(Z_TYPE_P(object)) {
-	case IS_STRING:
-		if (!Z_STRLEN_P(object)) {
+	if (Z_TYPE_P(object) == IS_STRING) {
+		if (zend_lookup_class(Z_STRVAL_P(object), Z_STRLEN_P(object), &pce TSRMLS_CC) == FAILURE) {
 			RETURN_FALSE;
 		}
-		if (zend_lookup_class(Z_STRVAL_P(object), Z_STRLEN_P(object), &pce TSRMLS_CC) == SUCCESS) {
-			ce = *pce;
-		} else {
-			RETURN_FALSE;
-		}
-		if (!ce) {
-			RETURN_NULL();
-		}
-		if (!(property_info = zend_get_property_info(ce, &property_z, 1 TSRMLS_CC)) || property_info == &EG(std_property_info)) {
-			RETURN_FALSE;
-		}
-		if (property_info->flags & ZEND_ACC_PUBLIC) {
-			RETURN_TRUE;
-		}
-		zend_unmangle_property_name(property_info->name, property_info->name_length, &class_name, &prop_name);
-		if (!strncmp(class_name, "*", 1)) {
-			if (instanceof_function(EG(scope), ce TSRMLS_CC) ||
-				(EG(This) && instanceof_function(Z_OBJCE_P(EG(This)), ce TSRMLS_CC))) {
-				RETURN_TRUE;
-			}
-			RETURN_FALSE;
-		}
-		if (zend_lookup_class(Z_STRVAL_P(object), Z_STRLEN_P(object), &pce TSRMLS_CC) == SUCCESS) {
-			ce = *pce;
-		} else {
-			RETURN_FALSE; /* shouldn't happen */
-		}
-		RETURN_BOOL(EG(scope) == ce);
-
-	case IS_OBJECT:
-		if (Z_OBJ_HANDLER_P(object, has_property) && Z_OBJ_HANDLER_P(object, has_property)(object, &property_z, 2 TSRMLS_CC)) {
-			RETURN_TRUE;
-		}
-		RETURN_FALSE;
-
-	default:
+		ce = *pce;
+	} else if (Z_TYPE_P(object) == IS_OBJECT) {
+		ce = Z_OBJCE_P(object);
+	} else {
 		zend_error(E_WARNING, "First parameter must either be an object or the name of an existing class");
 		RETURN_NULL();
 	}
+
+	h = zend_get_hash_value(property, property_len+1);
+	if (zend_hash_quick_find(&ce->properties_info, property, property_len+1, h, (void **) &property_info) == SUCCESS) {
+		if (property_info->flags & ZEND_ACC_SHADOW) {
+			RETURN_FALSE;
+		}
+		RETURN_TRUE;
+	}
+
+	ZVAL_STRINGL(&property_z, property, property_len, 0);
+
+	if (Z_TYPE_P(object) ==  IS_OBJECT &&
+		Z_OBJ_HANDLER_P(object, has_property) && 
+		Z_OBJ_HANDLER_P(object, has_property)(object, &property_z, 2 TSRMLS_CC)) {
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
 }
 /* }}} */
 
