@@ -1276,7 +1276,7 @@ static inline int php_output_stack_pop(int flags TSRMLS_DC)
 		/* pass output along */
 		if (context.out.data && context.out.used && !(flags & PHP_OUTPUT_POP_DISCARD)) {
 			/* in case of unclean_shutdown, do not output the buffer if it is not
-			* meant to be until end of script or ob_end_*() call */
+			 * meant to be until end of script or ob_end_*() call */
 			if (!CG(unclean_shutdown) || orphan->size) {
 				php_output_write(context.out.data, context.out.used TSRMLS_CC);
 			}
