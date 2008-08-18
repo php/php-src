@@ -82,7 +82,7 @@ Type specifiers
 Note on 64bit compatibility
 ---------------------------
 Please do not forget that int and long are two different things on 64bit 
-OSes (int is 4bit and long is 8bit), so make sure you pass longs to "l" 
+OSes (int is 4 bytes and long is 8 bytes), so make sure you pass longs to "l" 
 and ints to strings length (i.e. for "s" you need to pass char * and int), 
 not the other way round!
 Remember: "l" is the only case when you need to pass long (and that's why 
