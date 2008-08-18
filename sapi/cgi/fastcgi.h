@@ -108,7 +108,7 @@ typedef struct _fcgi_request {
 	unsigned char  out_buf[1024*8];
 	unsigned char  reserved[sizeof(fcgi_end_request_rec)];
 
-	HashTable      env;
+	HashTable     *env;
 } fcgi_request;
 
 int fcgi_init(void);
