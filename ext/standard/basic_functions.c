@@ -63,7 +63,11 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #include <netinet/in.h>
 #endif
 
-#include<netdb.h>
+#ifndef PHP_WIN32
+# include<netdb.h>
+#else
+# include "win32/inet.h"
+#endif
 
 #if HAVE_ARPA_INET_H
 # include <arpa/inet.h>
@@ -3874,10 +3878,6 @@ static void php_putenv_destructor(putenv_entry *pe) /* {{{ */
 # if HAVE_UNSETENV
 		unsetenv(pe->key);
 # elif defined(PHP_WIN32)
-		char *del_string = emalloc(pe->key_len+2);
-		snprintf(del_string, pe->key_len+2, "%s=", pe->key);
-		putenv(del_string);
-		efree(del_string);
 		SetEnvironmentVariable(pe->key, NULL);
 # else
 		char **env;
@@ -4402,13 +4402,37 @@ PHP_FUNCTION(getenv)
 	if (ptr) {
 		RETURN_STRING(ptr, 0);
 	}
+#ifdef PHP_WIN32
+	{
+		char dummybuf;
+		int size;
 
+		SetLastError(0);
+		/*If the given bugger is not large enough to hold the data, the return value is 
+		the buffer size,  in characters, required to hold the string and its terminating 
+		null character. We use this return value to alloc the final buffer. */
+		size = GetEnvironmentVariableA(str, &dummybuf, 0);
+		if (GetLastError() == ERROR_ENVVAR_NOT_FOUND) {
+				/* The environment variable doesn't exist. */
+				RETURN_FALSE;
+		}
+
+		if (size == 0) {
+				/* env exists, but it is empty */
+				RETURN_EMPTY_STRING();
+		}
+
+		ptr = emalloc(size);
+		size = GetEnvironmentVariableA(str, ptr, size);
+		RETURN_STRING(ptr, 0);
+	}
+#else
 	/* system method returns a const */
 	ptr = getenv(str);
 	if (ptr) {
 		RETURN_STRING(ptr, 1);
 	}
-
+#endif
 	RETURN_FALSE;
 }
 /* }}} */
@@ -4428,13 +4452,31 @@ PHP_FUNCTION(putenv)
 	if (setting_len) {
 		char *p, **env;
 		putenv_entry pe;
+#ifdef PHP_WIN32
+		char *value = NULL;
+		int equals = 0;
+#endif
 
 		pe.putenv_string = estrndup(setting, setting_len);
 		pe.key = estrndup(setting, setting_len);
 		if ((p = strchr(pe.key, '='))) {	/* nullify the '=' if there is one */
 			*p = '\0';
+#ifdef PHP_WIN32
+			equals = 1;
+#endif
 		}
+
 		pe.key_len = strlen(pe.key);
+#ifdef PHP_WIN32
+		if (equals) {
+			if (pe.key_len < setting_len - 2) {
+				value = p + 1;
+			} else {
+				/* empty string*/
+				value = p;
+			}
+		}
+#endif
 
 		if (PG(safe_mode)) {
 			/* Check the protected list */
@@ -4485,21 +4527,17 @@ PHP_FUNCTION(putenv)
 			}
 		}
 
-#if _MSC_VER >= 1300
-		/* VS.Net has a bug in putenv() when setting a variable that
-		 * is already set; if the SetEnvironmentVariable() API call
-		 * fails, the Crt will double free() a string.
-		 * We try to avoid this by setting our own value first */
-		SetEnvironmentVariable(pe.key, "bugbug");
-#endif
-
 #if HAVE_UNSETENV
 		if (!p) { /* no '=' means we want to unset it */
 			unsetenv(pe.putenv_string);
 		}
 		if (!p || putenv(pe.putenv_string) == 0) { /* success */
 #else
+# ifndef PHP_WIN32
 		if (putenv(pe.putenv_string) == 0) { /* success */
+# else
+		if (SetEnvironmentVariableA(pe.key, value) != 0) { /* success */
+# endif
 #endif
 			zend_hash_add(&BG(putenv_ht), pe.key, pe.key_len + 1, (void **) &pe, sizeof(putenv_entry), NULL);
 #ifdef HAVE_TZSET
