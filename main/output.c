@@ -336,7 +336,13 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 PHPAPI void php_end_ob_buffers(zend_bool send_buffer TSRMLS_DC)
 {
 	while (OG(ob_nesting_level)!=0) {
-		php_end_ob_buffer(send_buffer, 0 TSRMLS_CC);
+		/* in case of unclean_shutdown, do not output the buffer if it is not 
+		 * meant to be until end of script or ob_end_*() call */
+		if (CG(unclean_shutdown) && !OG(active_ob_buffer).chunk_size) {
+			php_end_ob_buffer(0, 0 TSRMLS_CC);
+		} else {
+			php_end_ob_buffer(send_buffer, 0 TSRMLS_CC);
+		}
 	}
 }
 /* }}} */
