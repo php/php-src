@@ -587,6 +587,9 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					/* not a directory */
 					return -1;
 		    	} else {
+		    		if (link_is_dir) {
+		    			*link_is_dir = bucket->is_dir;
+		    		}
 					memcpy(path, bucket->realpath, bucket->realpath_len + 1);
 				    return bucket->realpath_len;
 				}
@@ -655,6 +658,9 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					tsrm_free_alloca(tmp, use_heap);
 					return -1;
 				}
+			}
+			if (link_is_dir) {
+				*link_is_dir = directory;
 			}
 		} else {
 			if (save) {
