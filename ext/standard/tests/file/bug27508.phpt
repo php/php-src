@@ -42,9 +42,16 @@ class FileStream {
 stream_wrapper_register("myFile", "FileStream")
     or die("Failed to register protocol");
 
-$tn = tempnam('/tmp', 'foo');
+$tmp_dir = __DIR__;
+$tn = tempnam($tmp_dir, 'foo');
+if (!$tn) {
+  die("tempnam failed");
+}
 
 $fp = fopen("myFile://" . urlencode($tn), "w+");
+if (!$fp) {
+  die("fopen failed");
+}
 
 fwrite($fp, "line1\n");
 fwrite($fp, "line2\n");
