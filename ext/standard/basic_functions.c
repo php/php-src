@@ -61,7 +61,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #include <netinet/in.h>
 #endif
 
-#include<netdb.h>
+#include <netdb.h>
 
 #if HAVE_ARPA_INET_H
 # include <arpa/inet.h>
