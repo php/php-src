@@ -586,10 +586,10 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 
 		/* turn off magic_quotes while importing environment variables */
 		PG(magic_quotes_gpc) = 0;
-		for (zend_hash_internal_pointer_reset_ex(&request->env, &pos);
-			 zend_hash_get_current_key_ex(&request->env, &var, &var_len, &idx, 0, &pos) == HASH_KEY_IS_STRING &&
-			 zend_hash_get_current_data_ex(&request->env, (void **) &val, &pos) == SUCCESS;
-			 zend_hash_move_forward_ex(&request->env, &pos)
+		for (zend_hash_internal_pointer_reset_ex(request->env, &pos);
+			 zend_hash_get_current_key_ex(request->env, &var, &var_len, &idx, 0, &pos) == HASH_KEY_IS_STRING &&
+			 zend_hash_get_current_data_ex(request->env, (void **) &val, &pos) == SUCCESS;
+			 zend_hash_move_forward_ex(request->env, &pos)
 		) {
 			unsigned int new_val_len;
 
