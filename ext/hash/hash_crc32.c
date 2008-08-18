@@ -56,6 +56,16 @@ PHP_HASH_API void PHP_CRC32Final(unsigned char digest[4], PHP_CRC32_CTX *context
 	context->state = 0;
 }
 
+PHP_HASH_API void PHP_CRC32BFinal(unsigned char digest[4], PHP_CRC32_CTX *context)
+{
+	context->state=~context->state;
+	digest[0] = (unsigned char) ((context->state >> 24) & 0xff);
+	digest[1] = (unsigned char) ((context->state >> 16) & 0xff);
+	digest[2] = (unsigned char) ((context->state >> 8) & 0xff);
+	digest[3] = (unsigned char) (context->state & 0xff);
+	context->state = 0;
+}
+
 const php_hash_ops php_hash_crc32_ops = {
 	(php_hash_init_func_t) PHP_CRC32Init,
 	(php_hash_update_func_t) PHP_CRC32Update,
@@ -68,7 +78,7 @@ const php_hash_ops php_hash_crc32_ops = {
 const php_hash_ops php_hash_crc32b_ops = {
 	(php_hash_init_func_t) PHP_CRC32Init,
 	(php_hash_update_func_t) PHP_CRC32BUpdate,
-	(php_hash_final_func_t) PHP_CRC32Final,
+	(php_hash_final_func_t) PHP_CRC32BFinal,
 	4, /* what to say here? */
 	4,
 	sizeof(PHP_CRC32_CTX)

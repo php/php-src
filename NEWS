@@ -59,6 +59,8 @@ PHP                                                                        NEWS
   (Dmitry)
 - Fixed bug #45139 (ReflectionProperty returns incorrect declaring class).
   (Felipe)
+- Fixed bug #45028 (CRC32 output endianness is different between crc32() 
+  and hash()). (Tony)
 - Fixed bug #45004 (pg_insert() does not accept 4 digit timezone format).
   (Ilia)
 - Fixed bug #44891 Memory leak using registerPHPFunctions and XSLT Variable 
