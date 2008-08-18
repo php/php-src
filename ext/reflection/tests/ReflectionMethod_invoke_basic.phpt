@@ -91,8 +91,8 @@ NULL
 
 Static method:
 
-Warning: Invoke() expects at least one parameter, none given in %sReflectionMethod_invoke_basic.php on line %d
-bool(false)
+Warning: ReflectionMethod::invoke() expects at least 1 parameter, 0 given in %sReflectionMethod_invoke_basic.php on line %d
+NULL
 Called staticMethod()
 
 Notice: Undefined variable: this in %sReflectionMethod_invoke_basic.php on line %d
