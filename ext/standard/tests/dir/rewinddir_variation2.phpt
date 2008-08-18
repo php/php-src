@@ -36,7 +36,7 @@ rmdir($dir_path);
 
 -- Create the directory handle, read and close the directory --
 resource(%d) of type (stream)
-string(1) "."
+string(%d) "%s"
 
 -- Call to rewinddir() --
 
