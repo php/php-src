@@ -215,6 +215,6 @@ bool(false)
 
 -- Iteration 24 --
 
-Warning: mb_substr(): Unknown encoding "Resource id #%d" in %s on line %d
-bool(false)
+Warning: mb_substr() expects parameter 4 to be binary string, resource given in %s on line %d
+NULL
 Done

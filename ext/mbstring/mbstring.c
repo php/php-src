@@ -3466,37 +3466,30 @@ PHP_FUNCTION(mb_convert_kana)
 
 #define PHP_MBSTR_STACK_BLOCK_SIZE 32
 
-/* {{{ proto string mb_convert_variables(string to-encoding, mixed from-encoding [, mixed ...])
+/* {{{ proto string mb_convert_variables(string to-encoding, mixed from-encoding, mixed vars [, ...])
    Converts the string resource in variables to desired encoding */
 PHP_FUNCTION(mb_convert_variables)
 {
-	zval ***args, ***stack, **var, **hash_entry;
+	zval ***args, ***stack, **var, **hash_entry, **zfrom_enc;
 	HashTable *target_hash;
 	mbfl_string string, result, *ret;
 	enum mbfl_no_encoding from_encoding, to_encoding;
 	mbfl_encoding_detector *identd;
 	mbfl_buffer_converter *convd;
-	int n, argc, stack_level, stack_max, elistsz;
+	int n, to_enc_len, argc, stack_level, stack_max, elistsz;
 	enum mbfl_no_encoding *elist;
-	char *name;
+	char *name, *to_enc;
 	void *ptmp;
 
-	argc = ZEND_NUM_ARGS();
-	if (argc < 3) {
-		WRONG_PARAM_COUNT;
-	}
-	args = (zval ***)ecalloc(argc, sizeof(zval **));
-	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree((void *)args);
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sZ+", &to_enc, &to_enc_len, &zfrom_enc, &args, &argc) == FAILURE) {
+		return;
 	}
 
 	/* new encoding */
-	convert_to_string_ex(args[0]);
-	to_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(args[0]));
+	to_encoding = mbfl_name2no_encoding(to_enc);
 	if (to_encoding == mbfl_no_encoding_invalid) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(args[0]));
-		efree((void *)args);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", to_enc);
+		efree(args);
 		RETURN_FALSE;
 	}
 
@@ -3510,13 +3503,13 @@ PHP_FUNCTION(mb_convert_variables)
 	/* pre-conversion encoding */
 	elist = NULL;
 	elistsz = 0;
-	switch (Z_TYPE_PP(args[1])) {
+	switch (Z_TYPE_PP(zfrom_enc)) {
 	case IS_ARRAY:
-		php_mb_parse_encoding_array(*args[1], &elist, &elistsz, 0 TSRMLS_CC);
+		php_mb_parse_encoding_array(*zfrom_enc, &elist, &elistsz, 0 TSRMLS_CC);
 		break;
 	default:
-		convert_to_string_ex(args[1]);
-		php_mb_parse_encoding_list(Z_STRVAL_PP(args[1]), Z_STRLEN_PP(args[1]), &elist, &elistsz, 0 TSRMLS_CC);
+		convert_to_string_ex(zfrom_enc);
+		php_mb_parse_encoding_list(Z_STRVAL_PP(zfrom_enc), Z_STRLEN_PP(zfrom_enc), &elist, &elistsz, 0 TSRMLS_CC);
 		break;
 	}
 	if (elistsz <= 0) {
@@ -3531,7 +3524,7 @@ PHP_FUNCTION(mb_convert_variables)
 		stack_level = 0;
 		identd = mbfl_encoding_detector_new(elist, elistsz, MBSTRG(strict_detection));
 		if (identd != NULL) {
-			n = 2;
+			n = 0;
 			while (n < argc || stack_level > 0) {
 				if (stack_level <= 0) {
 					var = args[n++];
@@ -3612,7 +3605,7 @@ detect_end:
 		stack_max = PHP_MBSTR_STACK_BLOCK_SIZE;
 		stack = (zval ***)safe_emalloc(stack_max, sizeof(zval **), 0);
 		stack_level = 0;
-		n = 2;
+		n = 0;
 		while (n < argc || stack_level > 0) {
 			if (stack_level <= 0) {
 				var = args[n++];
@@ -3678,7 +3671,7 @@ detect_end:
 		mbfl_buffer_converter_delete(convd);
 	}
 
-	efree((void *)args);
+	efree(args);
 
 	name = (char *)mbfl_no_encoding2name(from_encoding);
 	if (name != NULL) {

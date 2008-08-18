@@ -28,27 +28,27 @@ foreach ($queries as $query) {
 ?>
 --EXPECT--
 array(2) {
-  ["foo"]=>
+  [u"foo"]=>
   string(3) "abc"
-  ["bar"]=>
+  [u"bar"]=>
   string(3) "def"
 }
-string(0) ""
-string(0) ""
-string(3) "abc"
-string(3) "def"
+unicode(0) ""
+unicode(0) ""
+unicode(3) "abc"
+unicode(3) "def"
 array(2) {
-  ["+foo"]=>
+  [u"+foo"]=>
   string(3) "def"
-  ["-bar"]=>
+  [u"-bar"]=>
   string(3) "jkl"
 }
-string(0) ""
-string(0) ""
-string(0) ""
-string(0) ""
+unicode(0) ""
+unicode(0) ""
+unicode(0) ""
+unicode(0) ""
 array(2) {
-  ["foo"]=>
+  [u"foo"]=>
   array(3) {
     [0]=>
     string(3) "abc"
@@ -57,14 +57,14 @@ array(2) {
     [2]=>
     string(3) "ghi"
   }
-  ["bar"]=>
+  [u"bar"]=>
   array(1) {
     [0]=>
     string(3) "jkl"
   }
 }
-string(0) ""
-string(0) ""
+unicode(0) ""
+unicode(0) ""
 array(3) {
   [0]=>
   string(3) "abc"

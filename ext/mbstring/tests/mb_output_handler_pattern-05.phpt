@@ -14,4 +14,4 @@ ob_end_flush();
 var_dump(bin2hex(ob_get_clean()));
 ?>
 --EXPECT--
-string(12) "a5c6a5b9a5c8"
+unicode(12) "a5c6a5b9a5c8"
