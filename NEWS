@@ -26,6 +26,8 @@ PHP                                                                        NEWS
 - Fixed bug #45763 (mysqli::multi_query does not work with mysqlnd). (Johannes)
 - Fixed bug #45757 (FreeBSD4.11 build failure: failed include; stdint.h).
   (Hannes)
+- Fixed bug #45743 (property_exists fails to find static protected member in 
+  child class). (Felipe)
 - Fixed bug #45717 (Fileinfo/libmagic build fails, missing err.h and getopt.h).
   (Derick)
 - Fixed bug #45696 (Not all DateTime methods allow method chaining). (Derick)
