@@ -1201,21 +1201,21 @@ encode_amp:
 							if (*s == 'x' || *s == 'X') {
 								s++;
 								while (s < e) {
-									if (!isxdigit(*s++)) {
+									if (!isxdigit((int)*(unsigned char *)s++)) {
 										goto encode_amp;
 									}
 								}
 							/* Dec (&#90;)*/
 							} else {
 								while (s < e) {
-									if (!isdigit(*s++)) {
+									if (!isdigit((int)*(unsigned char *)s++)) {
 										goto encode_amp;
 									}
 								}
 							}
 						} else { /* text entities */
 							while (s < e) {
-								if (!isalnum(*s++)) {
+								if (!isalnum((int)*(unsigned char *)s++)) {
 									goto encode_amp;
 								}
 							}
