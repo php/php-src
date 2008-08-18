@@ -37,6 +37,8 @@ PHP                                                                        NEWS
 - Fixed bug #45384 (parse_ini_file will result in parse error with no trailing 
   newline). (Arnaud)
 - Fixed bug #45044 (relative paths not resolved correctly). (Dmitry)
+- Fixed bug #45028 (CRC32 output endianness is different between crc32() 
+  and hash()). (Tony)
 - Fixed bug #44925 (preg_grep() modifies input array). (Nuno)
 - Fixed bug #44842 (parse_ini_file keys that start/end with underscore). 
   (Arnaud)
