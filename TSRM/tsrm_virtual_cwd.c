@@ -1040,7 +1040,7 @@ static int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 		UnixTimeToFileTime(buf->modtime, &mtime);
 		UnixTimeToFileTime(buf->actime, &atime);
 	}
-	if (!SetFileTime(hFile, NULL,  &mtime, &atime)) {
+	if (!SetFileTime(hFile, NULL, &atime, &mtime)) {
 		CloseHandle(hFile);
 		return -1;
 	}
