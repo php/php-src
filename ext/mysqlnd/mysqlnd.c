@@ -58,7 +58,7 @@ extern MYSQLND_CHARSET *mysqlnd_charsets;
 
 
 
-
+const char * mysqlnd_old_passwd  = "mysqlnd cannot connect to MySQL 4.1+ using old authentication";
 const char * mysqlnd_server_gone = "MySQL server has gone away";
 const char * mysqlnd_out_of_sync = "Commands out of sync; you can't run this command now";
 
@@ -692,8 +692,8 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 	if (FAIL == PACKET_READ_ALLOCA(ok_packet, conn) || ok_packet.field_count >= 0xFE) {
 		if (ok_packet.field_count == 0xFE) {
 			/* old authentication with new server  !*/
-			DBG_ERR("mysqlnd cannot connect to MySQL 4.1+ using old authentication");
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "mysqlnd cannot connect to MySQL 4.1+ using old authentication");
+			DBG_ERR(mysqlnd_old_passwd);
+			SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, mysqlnd_old_passwd);
 		} else if (ok_packet.field_count == 0xFF) {
 			if (ok_packet.sqlstate[0]) {
 				if (!self_alloced) {
