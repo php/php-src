@@ -108,15 +108,16 @@ PHP_MINIT_FUNCTION(crypt) /* {{{ */
 
 	return SUCCESS;
 }
+/* }}} */
 
-#ifdef PHP_USE_PHP_CRYPT_R
-PHP_MSHUTDOWN_FUNCTION(crypt)
+PHP_MSHUTDOWN_FUNCTION(crypt) /* {{{ */
 {
+#ifdef PHP_USE_PHP_CRYPT_R
 	php_shutdown_crypt_r();
+#endif
 
 	return SUCCESS;
 }
-#endif
 /* }}} */
 
 static unsigned char itoa64[] = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
