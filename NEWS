@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Removed shebang line check from CGI sapi (it is checked by scanner). (Dmitry)
 
 - Changed session_start() to return false when session startup fails. (Jani)
+- Changed property_exists() to check the existence of a property independent of
+  accessibility (like method_exists()).
 
 - Added system independent realpath() implementation which caches intermediate
   directories in realpath-cache. (Dmitry)
