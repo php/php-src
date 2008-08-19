@@ -1,3 +1,37 @@
+2008-08-18  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      tests/method_exists_002.phpt:
+      - New test
+
+    * (PHP_5_3)
+      tests/method_exists_002.phpt
+      tests/property_exists.phpt:
+      - New tests
+
+    * tests/method_exists_002.phpt
+      tests/method_exists_002.phpt
+      tests/method_exists_002.phpt
+      tests/property_exists.phpt
+      tests/property_exists.phpt:
+        1.1.4;
+      - New tests
+
+    * (PHP_5_3)
+      zend_builtin_functions.c
+      tests/011.phpt
+      tests/bug42211.phpt:
+      - MFH: Fixed bug #45743 (property_exists fails to find static protected
+      member in child class)
+
+    * zend_builtin_functions.c
+      tests/011.phpt
+      tests/bug42211.phpt:
+      - Fixed bug #45743 (property_exists fails to find static protected member
+      in child class)
+      In general, now property_exists() behave like method_exists() (ie.
+      independs of context/visibibility)
+
 2008-08-17  Arnaud Le Blanc  <arnaud.lb@gmail.com>
 
     * (PHP_5_3)

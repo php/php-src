@@ -1,3 +1,250 @@
+2008-08-18  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/standard/tests/file/bug27508.phpt:
+       - MFB: don't use /tmp as tmpdir and avoid endless loop when fopen or
+      tmpnam failed
+
+    * (PHP_5_3)
+      ext/standard/tests/file/bug27508.phpt:
+      - don't use /tmp as tmpdir and avoid endless loop when fopen or tmpnam
+      failed
+
+2008-08-18  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/reflection/tests/property_exists.phpt:
+      - Fixed test
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/tests/ReflectionMethod_invoke_basic.phpt
+      ext/reflection/tests/property_exists.phpt:
+      - MFB: New parameter parsing API
+      - Fixed tests
+
+2008-08-18  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/standard/tests/file/popen_pclose_error-win32.phpt:
+      - new parameter API error
+
+2008-08-18  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      - BFN: #45743
+
+    * (PHP_5_2)
+      ZendEngine2/tests/method_exists_002.phpt:
+      - New test
+
+    * (PHP_5_3)
+      ZendEngine2/tests/method_exists_002.phpt
+      ZendEngine2/tests/property_exists.phpt:
+      - New tests
+
+    * ZendEngine2/tests/method_exists_002.phpt
+      ZendEngine2/tests/method_exists_002.phpt
+      ZendEngine2/tests/method_exists_002.phpt
+      ZendEngine2/tests/property_exists.phpt
+      ZendEngine2/tests/property_exists.phpt:
+        1.1.4;
+      - New tests
+
+    * (PHP_5_3)
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/tests/011.phpt
+      ZendEngine2/tests/bug42211.phpt:
+      - MFH: Fixed bug #45743 (property_exists fails to find static protected
+      member in child class)
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/tests/011.phpt
+      ZendEngine2/tests/bug42211.phpt:
+      - Fixed bug #45743 (property_exists fails to find static protected member
+      in child class)
+      In general, now property_exists() behave like method_exists() (ie.
+      independs of context/visibibility)
+
+2008-08-18  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/config.w32:
+      fix windows build when building phar shared with native-ssl disabled (you
+      can't use the symbols directly if openssl is built shared or is not built
+      at all)
+
+2008-08-18  Antony Dovgal  <tony@daylessday.org>
+
+    * README.PARAMETER_PARSING_API:
+      these are not bits, but bytes..
+
+    * (PHP_5_2)
+      NEWS
+      NEWS
+      ext/hash/hash_crc32.c
+      ext/hash/hash_crc32.c
+      ext/hash/tests/crc32.phpt
+      ext/hash/tests/crc32.phpt
+      ext/hash/tests/hash_copy_001.phpt:
+      MFH: fix bug #45028 (CRC32 output endianness is different between crc32()
+      and hash())
+
+    * ext/hash/hash_crc32.c
+      ext/hash/tests/crc32.phpt
+      ext/hash/tests/hash_copy_001.phpt:
+      fix bug #45028 (CRC32 output endianness is different between crc32() and
+      hash())
+
+    * (PHP_5_3)
+      README.PARAMETER_PARSING_API:
+      MFH: add note on 64bit compatibility and mention check_parameters.php
+
+    * README.PARAMETER_PARSING_API:
+      add note on 64bit compatibility and mention check_parameters.php
+
+2008-08-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.h
+      sapi/cgi/fastcgi.h:
+      Fix for bug #45786 (FastCGI process exited unexpectedly)
+
+2008-08-18  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/basic_functions.c:
+      - Fix include
+
+2008-08-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c
+      ext/standard/tests/file/realpath_basic4.phpt:
+      Fixed bug #45835 (include and symlinks)
+
+    * ext/standard/tests/file/realpath_basic4.phpt
+      ext/standard/tests/file/realpath_basic4.phpt:
+      
+      Fixed bug #45835 (include and symlinks)
+
+    * TSRM/tsrm_virtual_cwd.c:
+      Fixed argumets order
+
+    * (PHP_5_3)
+      TSRM/tsrm_virtual_cwd.c:
+      Fixed arguments order
+
+    * ext/standard/tests/file/touch.phpt
+      ext/standard/tests/file/touch.phpt:
+      Reverted wrong "fix"
+
+2008-08-18  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c:
+      - MFH: this change was not part of the env patch
+
+    * ext/standard/basic_functions.c:
+      - this change was not part of the env patch
+
+2008-08-18  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      main/output.c
+      main/output.c:
+      reverted because of test failures
+
+    * main/output.c:
+      reverted because it causes lots of test failures in ext/soap
+
+2008-08-18  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/standard/tests/file/touch.phpt:
+      - MFB: unix is too young (<1970), make the test portable
+
+    * (PHP_5_3)
+      ext/standard/tests/file/touch.phpt:
+      - unix is too young (<1970), make the test portable
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c:
+      - [DOC] MFH: make putenv behaves like unix putenv on Windows:
+       .  FOO=1234 => set FOO to 1234
+       .  FOO= => set FOO to an empty string
+       .  FOO= => unset FOO
+       . Use Set/GetEnvironmnent variable only
+
+    * ext/standard/basic_functions.c:
+      - [DOC] make putenv behaves like unix putenv on Windows:
+       .  FOO=1234 => set FOO to 1234
+       .  FOO= => set FOO to an empty string
+       .  FOO= => unset FOO
+       . Use Set/GetEnvironmnent variable only
+
+2008-08-18  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * ext/standard/tests/dir/readdir_variation2.phpt
+      ext/standard/tests/dir/rewinddir_variation2.phpt:
+      Fix tests (closes #45841)
+
+    * main/output.c:
+      ws
+
+    * (PHP_5_2)
+      NEWS
+      main/output.c
+      main/output.c
+      tests/lang/bug45392.phpt
+      tests/lang/bug45392.phpt:
+      MFH: Fixed bug #45392 (ob_start()/ob_end_clean() and memory_limit).
+
+    * main/output.c
+      tests/lang/bug45392.phpt
+      tests/lang/bug45392.phpt
+      tests/lang/bug45392.phpt:
+      Fixed bug #45392 (ob_start()/ob_end_clean() and memory_limit).
+
+    * main/output.c:
+      update buffer size after having effectively realloc()ed it when appending
+      data to an output buffer
+
+2008-08-18  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/html.c:
+      - Beware of signedness
+
+2008-08-18  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/mbstring/mbstring.c:
+      - New parameter parsing API (for mb_convert_variables())
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/php_mbregex.c
+      ext/mbstring/tests/ini_language.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-01.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-02.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-03.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-04.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-05.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-06.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-07.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-08.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-09.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-10.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-11.phpt
+      ext/mbstring/tests/mb_output_handler_pattern-12.phpt
+      ext/mbstring/tests/mb_parse_str.phpt
+      ext/mbstring/tests/mb_regex_encoding_error1.phpt
+      ext/mbstring/tests/mb_regex_encoding_variation1.phpt
+      ext/mbstring/tests/mb_strtolower_basic.phpt
+      ext/mbstring/tests/mb_substr_error1.phpt
+      ext/mbstring/tests/mb_substr_variation1.phpt
+      ext/mbstring/tests/mb_substr_variation2.phpt:
+      - New parameter parsing API
+      - Fixed tests
+
 2008-08-17  Felipe Pena  <felipensp@gmail.com>
 
     * ext/standard/array.c
