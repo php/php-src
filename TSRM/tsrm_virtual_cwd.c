@@ -690,13 +690,15 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				return -1;
 			}
 			if (save) {
-				memcpy(path+j, data.cFileName, len-i+1);
+				i = strlen(data.cFileName);
+				memcpy(path+j, data.cFileName, i+1);
+				j += i;
 				FindClose(hFind);
 			} else {
 				/* use the original file or directory name as it wasn't found */
 				memcpy(path+j, tmp+i, len-i+1);
+				j += (len-i);
 			}
-			j += (len-i);
 #else
 			if (j < 0 || j + len - i >= MAXPATHLEN-1) {
 				tsrm_free_alloca(tmp, use_heap);
@@ -816,7 +818,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	}
 #endif
 
-	add_slash = (use_realpath != CWD_REALPATH) && path_length > 0 && IS_SLASH(resolved_path[path_length-1]);	
+	add_slash = (use_realpath != CWD_REALPATH) && path_length > 0 && IS_SLASH(resolved_path[path_length-1]);
 	t = CWDG(realpath_cache_ttl) ? 0 : -1;
 	path_length = tsrm_realpath_r(resolved_path, start, path_length, &ll, &t, use_realpath, 0, NULL TSRMLS_CC);
 	
