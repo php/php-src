@@ -84,8 +84,8 @@ echo "Done";
 ?>
 --EXPECTF--
 *** Testing method_exists() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s(67)
-Error: 8 - Undefined variable: unset_var, %s(70)
+Error: 8 - Undefined variable: undefined_var, %s(%d)
+Error: 8 - Undefined variable: unset_var, %s(%d)
 
 Arg value 0 
 bool(false)
@@ -113,31 +113,31 @@ bool(false)
 
 Arg value 0.5 
 bool(false)
-Error: 8 - Array to string conversion, %s(76)
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(77)
-bool(false)
-Error: 8 - Array to string conversion, %s(76)
+Error: 2 - method_exists() expects parameter 2 to be string (Unicode or binary), array given, %s(%d)
+NULL
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(77)
-bool(false)
-Error: 8 - Array to string conversion, %s(76)
+Error: 2 - method_exists() expects parameter 2 to be string (Unicode or binary), array given, %s(%d)
+NULL
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(77)
-bool(false)
-Error: 8 - Array to string conversion, %s(76)
+Error: 2 - method_exists() expects parameter 2 to be string (Unicode or binary), array given, %s(%d)
+NULL
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(77)
-bool(false)
-Error: 8 - Array to string conversion, %s(76)
+Error: 2 - method_exists() expects parameter 2 to be string (Unicode or binary), array given, %s(%d)
+NULL
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(77)
-bool(false)
+Error: 2 - method_exists() expects parameter 2 to be string (Unicode or binary), array given, %s(%d)
+NULL
 
 Arg value  
 bool(false)
@@ -162,12 +162,11 @@ bool(false)
 
 Arg value  
 bool(false)
-Error: 4096 - Object of class stdClass could not be converted to string, %s(76)
+Error: 4096 - Object of class stdClass could not be converted to string, %s(%d)
 
 Arg value  
-Error: 4096 - Object of class stdClass could not be converted to Unicode string, %s(77)
-Error: 8 - Object of class stdClass to string conversion, %s(77)
-bool(false)
+Error: 2 - method_exists() expects parameter 2 to be string (Unicode or binary), object given, %s(%d)
+NULL
 
 Arg value  
 bool(false)

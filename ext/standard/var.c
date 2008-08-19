@@ -247,16 +247,12 @@ head_done:
    Dumps a string representation of variable to output */
 PHP_FUNCTION(var_dump)
 {
-	zval ***args;
+	zval ***args = NULL;
 	int argc;
 	int	i;
 
-	argc = ZEND_NUM_ARGS();
-
-	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
-	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &argc) == FAILURE) {
+		return;
 	}
 
 	for (i = 0; i < argc; i++) {
@@ -270,16 +266,12 @@ PHP_FUNCTION(var_dump)
    Dumps a string representation of variable to output (verbose form) */
 PHP_FUNCTION(var_inspect)
 {
-	zval ***args;
+	zval ***args = NULL;
 	int argc;
 	int	i;
-
-	argc = ZEND_NUM_ARGS();
-
-	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
-	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &argc) == FAILURE) {
+		return;
 	}
 
 	for (i = 0; i < argc; i++) {
@@ -443,16 +435,12 @@ head_done:
    Dumps a string representation of an internal zend value to output. */
 PHP_FUNCTION(debug_zval_dump)
 {
-	zval ***args;
+	zval ***args = NULL;
 	int argc;
 	int	i;
 
-	argc = ZEND_NUM_ARGS();
-
-	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
-	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &argc) == FAILURE) {
+		return;
 	}
 
 	for (i = 0; i < argc; i++) {
@@ -1139,8 +1127,8 @@ PHP_FUNCTION(serialize)
 	php_serialize_data_t var_hash;
 	smart_str buf = {0};
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &struc) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &struc) == FAILURE) {
+		return;
 	}
 
 	Z_TYPE_P(return_value) = IS_STRING;

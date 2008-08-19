@@ -19,5 +19,5 @@ echo "Done\n";
 --EXPECTF--
 *** Testing error conditions ***
 
-Warning: Wrong parameter count for debug_zval_dump() in %s on line %d
+Warning: debug_zval_dump() expects at least 1 parameter, 0 given in %s on line %d
 Done

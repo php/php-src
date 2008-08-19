@@ -61,14 +61,14 @@ var_dump(fscanf($fp, "%s%d", $v));
 --CLEAN--
 <?php unlink(dirname(__FILE__)."/fscanf.dat"); ?>
 --EXPECTF--
-Warning: Wrong parameter count for fscanf() in %s on line %d
+Warning: fscanf() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for fscanf() in %s on line %d
+Warning: fscanf() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: fscanf(): supplied argument is not a valid File-Handle resource in %s on line %d
-bool(false)
+Warning: fscanf() expects parameter 1 to be resource, array given in %s on line %d
+NULL
 int(0)
 NULL
 int(1)

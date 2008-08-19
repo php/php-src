@@ -109,6 +109,6 @@ bool(false)
 Warning: fread() expects parameter 1 to be resource, null given in %s on line %d
 NULL
 
-Warning: fclose(): supplied argument is not a valid stream resource in %s on line %d
-bool(false)
+Warning: fclose() expects parameter 1 to be resource, null given in %s on line %d
+NULL
 Done

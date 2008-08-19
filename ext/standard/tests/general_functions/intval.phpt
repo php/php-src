@@ -297,10 +297,10 @@ int(0)
 
 *** Testing error conditions ***
 
-Warning: Wrong parameter count for intval() in %s on line %d
+Warning: intval() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for intval() in %s on line %d
+Warning: intval() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 
 --- Done ---
