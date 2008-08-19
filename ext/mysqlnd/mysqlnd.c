@@ -58,9 +58,9 @@ extern MYSQLND_CHARSET *mysqlnd_charsets;
 
 
 
-const char * mysqlnd_old_passwd  = "mysqlnd cannot connect to MySQL 4.1+ using old authentication";
-const char * mysqlnd_server_gone = "MySQL server has gone away";
-const char * mysqlnd_out_of_sync = "Commands out of sync; you can't run this command now";
+const char * const mysqlnd_old_passwd  = "mysqlnd cannot connect to MySQL 4.1+ using old authentication";
+const char * const mysqlnd_server_gone = "MySQL server has gone away";
+const char * const mysqlnd_out_of_sync = "Commands out of sync; you can't run this command now";
 
 MYSQLND_STATS *mysqlnd_global_stats = NULL;
 static zend_bool mysqlnd_library_initted = FALSE;
