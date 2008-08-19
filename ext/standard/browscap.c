@@ -118,7 +118,8 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 				char *new_key;
 
 				/* parent entry can not be same as current section -> causes infinite loop! */
-				if (!strcasecmp(Z_STRVAL_P(arg1), "parent") &&
+				if (!strcasecmp(Z_STRVAL_P(arg1), "parent") && 
+					current_section_name != NULL &&
 					!strcasecmp(current_section_name, Z_STRVAL_P(arg2))
 				) {
 					zend_error(E_CORE_ERROR, "Invalid browscap ini file: 'Parent' value can not be same as the section name: %s (in file %s)", current_section_name, INI_STR("browscap"));
@@ -171,6 +172,9 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 				zend_hash_init(section_properties, 0, NULL, (dtor_func_t) browscap_entry_dtor, 1);
 				Z_ARRVAL_P(current_section) = section_properties;
 				Z_TYPE_P(current_section) = IS_ARRAY;
+				if (current_section_name) {
+					free(current_section_name);
+				}
 				current_section_name = zend_strndup(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
 
 				zend_hash_update(&browser_hash, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1) + 1, (void *) &current_section, sizeof(zval *), NULL);
@@ -213,7 +217,12 @@ PHP_MINIT_FUNCTION(browscap) /* {{{ */
 		}
 		fh.filename = browscap;
 		Z_TYPE(fh) = ZEND_HANDLE_FP;
+		current_section_name = NULL;
 		zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_RAW, (zend_ini_parser_cb_t) php_browscap_parser_cb, &browser_hash TSRMLS_CC);
+		if (current_section_name) {
+			free(current_section_name);
+			current_section_name = NULL;
+		}
 	}
 
 	return SUCCESS;
