@@ -35,12 +35,12 @@ echo "Done\n";
 
 -- Testing join() function with Zero arguments --
 
-Warning: Wrong parameter count for join() in %s on line %d
+Warning: join() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
 -- Testing join() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for join() in %s on line %d
+Warning: join() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 
 -- Testing join() with less than expected no. of arguments --

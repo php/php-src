@@ -27,8 +27,8 @@ PHP_FUNCTION(gettype)
 {
 	zval **arg;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
+		return;
 	}
 
 	switch (Z_TYPE_PP(arg)) {
@@ -94,15 +94,13 @@ PHP_FUNCTION(gettype)
    Set the type of the variable */
 PHP_FUNCTION(settype)
 {
-	zval **var, **type;
+	zval **var;
 	char *new_type;
+	int new_type_len;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &var, &type) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zs", &var, &new_type, &new_type_len) == FAILURE) {
+		return;
 	}
-
-	convert_to_string_ex(type);
-	new_type = Z_STRVAL_PP(type);
 
 	if (!strcasecmp(new_type, "integer")) {
 		convert_to_long(*var);
@@ -147,27 +145,16 @@ PHP_FUNCTION(settype)
    Get the integer value of a variable using the optional base for the conversion */
 PHP_FUNCTION(intval)
 {
-	zval **num, **arg_base;
-	int base;
+	zval **num;
+	long arg_base = 0;
+	int base = 10;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1, &num) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			base = 10;
-			break;
-
-		case 2:
-			if (zend_get_parameters_ex(2, &num, &arg_base) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			convert_to_long_ex(arg_base);
-			base = Z_LVAL_PP(arg_base);
-			break;
-
-		default:
-			WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|l", &num, &arg_base) == FAILURE) {
+		return;
+	}
+	
+	if (ZEND_NUM_ARGS() == 2) {
+		base = arg_base;
 	}
 
 	RETVAL_ZVAL(*num, 1, 0);
@@ -181,8 +168,8 @@ PHP_FUNCTION(floatval)
 {
 	zval **num;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &num) == FAILURE) {
+		return;
 	}
 
 	RETVAL_ZVAL(*num, 1, 0);
@@ -198,8 +185,8 @@ PHP_FUNCTION(strval)
 	zval expr_copy;
 	int use_copy;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &num) == FAILURE) {
+		return;
 	}
 
 	if (UG(unicode)) {
@@ -329,14 +316,13 @@ PHP_FUNCTION(is_binary)
    Returns true if variable is a Unicode or binary string */
 PHP_FUNCTION(is_string)
 {
-	zval **arg;
+	zval *arg;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only one argument expected");
-		RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
+		return;
 	}
 
-	if (Z_TYPE_PP(arg) == IS_UNICODE || Z_TYPE_PP(arg) == IS_STRING) {
+	if (Z_TYPE_P(arg) == IS_UNICODE || Z_TYPE_P(arg) == IS_STRING) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -356,14 +342,13 @@ PHP_FUNCTION(is_unicode)
    Returns true if variable is a native, unicode or binary string */
 PHP_FUNCTION(is_buffer)
 {
-	zval **arg;
+	zval *arg;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only one argument expected");
-		RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
+		return;
 	}
 
-	if (Z_TYPE_PP(arg) == IS_STRING || Z_TYPE_PP(arg) == IS_UNICODE) {
+	if (Z_TYPE_P(arg) == IS_STRING || Z_TYPE_P(arg) == IS_UNICODE) {
 		RETURN_TRUE;
 	}
 	RETURN_FALSE;
@@ -393,8 +378,8 @@ PHP_FUNCTION(is_numeric)
 	zval **arg;
 	int result;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
+		return;
 	}
 
 	switch (Z_TYPE_PP(arg)) {
@@ -433,9 +418,9 @@ PHP_FUNCTION(is_numeric)
 PHP_FUNCTION(is_scalar)
 {
 	zval **arg;
-
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
+		return;
 	}
 
 	switch (Z_TYPE_PP(arg)) {
