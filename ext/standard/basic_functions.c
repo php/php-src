@@ -4105,7 +4105,6 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 	basic_globals_dtor(&basic_globals TSRMLS_CC);
 #ifdef PHP_WIN32
 	php_win32_core_globals_dtor(&the_php_win32_core_globals TSRMLS_CC);
-	PHP_MSHUTDOWN(crypt);
 #endif
 #endif
 
@@ -4126,6 +4125,7 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 #if defined(HAVE_LOCALECONV) && defined(ZTS)
 	PHP_MSHUTDOWN(localeconv)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 #endif
+	PHP_MSHUTDOWN(crypt)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 
 	return SUCCESS;
 }
