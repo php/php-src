@@ -6,6 +6,7 @@ PHP                                                                        NEWS
 - Changed session_start() to return false when session startup fails. (Jani)
 - Changed property_exists() to check the existence of a property independent of
   accessibility (like method_exists()). (Felipe)
+- Changed array_reduce() to allow mixed $initial (Christian Seiler)
 
 - Added system independent realpath() implementation which caches intermediate
   directories in realpath-cache. (Dmitry)
