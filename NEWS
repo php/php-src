@@ -5,7 +5,7 @@ PHP                                                                        NEWS
   (Felipe)
 
 - Added "PHP_INI_SCAN_DIR" environment variable which can be used to either
-  disable or change the compile time ini scan directory (FR 45114). (Jani)
+  disable or change the compile time ini scan directory (FR #45114). (Jani)
 
 - Fixed security issues detailed in CVE-2008-2665 and CVE-2008-2666.
   (Christian Hoffmann)
@@ -80,6 +80,8 @@ PHP                                                                        NEWS
   (Jani)
 - Fixed bug #43993 (mb_substr_count() behaves differently to substr_count() with
   overlapping needles). (Moriyoshi)
+- Fixed bug #42737 (preg_split('//u') triggers a E_NOTICE with newlines).
+  (Nuno)
 - Fixed bug #42604 ("make test" fails with --with-config-file-scan-dir=path).
   (Jani)
 - Fixed bug #41348 (OCI8: allow compilation with Oracle 8.1). (Chris Jones)
