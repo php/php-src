@@ -1,3 +1,76 @@
+2008-08-19  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/standard/browscap.c:
+      MFH: fix memleak in browscap code (noticed by Gopal)
+
+    * ext/standard/browscap.c:
+      fix memleak in browscap code (noticed by Gopal)
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c
+      ext/standard/crypt.c
+      ext/standard/php_crypt.h:
+      MFH: shutdown crypt correctly and fix memleak in ZTS mode
+
+    * ext/standard/basic_functions.c
+      ext/standard/crypt.c
+      ext/standard/php_crypt.h:
+      shudown crypt correctly and fix memleak in ZTS mode
+
+2008-08-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.c:
+      Fixed support for short windows file names
+
+2008-08-19  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      - Opss, I forgot add my name...
+
+    * (PHP_5_3)
+      NEWS:
+      - Note about property_exists()
+
+2008-08-19  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd_priv.h:
+      constify strings
+
+    * (PHP_5_3)
+      ext/mysqlnd/mysqlnd.c:
+      MFH: Fix empty error message when connecting to a bad server
+
+    * ext/mysqlnd/mysqlnd.c:
+      Fix empty error message when connecting to a bad server
+
+2008-08-19  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/type.c
+      ext/standard/var.c
+      ext/standard/tests/class_object/get_class_variation_001.phpt
+      ext/standard/tests/class_object/get_object_vars_variation_003.phpt
+      ext/standard/tests/class_object/is_a_variation_002.phpt
+      ext/standard/tests/class_object/is_subclass_of_variation_002.phpt
+      ext/standard/tests/class_object/method_exists_variation_002.phpt
+      ext/standard/tests/file/fread_error.phpt
+      ext/standard/tests/file/fscanf.phpt
+      ext/standard/tests/general_functions/debug_zval_dump_e.phpt
+      ext/standard/tests/general_functions/floatval.phpt
+      ext/standard/tests/general_functions/gettype_settype_error.phpt
+      ext/standard/tests/general_functions/intval.phpt
+      ext/standard/tests/general_functions/is_numeric.phpt
+      ext/standard/tests/general_functions/is_scalar.phpt
+      ext/standard/tests/general_functions/is_string.phpt
+      ext/standard/tests/general_functions/strval.phpt
+      ext/standard/tests/general_functions/var_dump.phpt
+      ext/standard/tests/strings/join_error.phpt:
+      - MFB: New parameter parsing API
+      - Fixed tests
+
 2008-08-18  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * ext/standard/tests/file/bug27508.phpt:
