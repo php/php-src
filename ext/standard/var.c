@@ -422,7 +422,7 @@ PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC) /* {{{ */
 			php_printf("\n%*c", level - 1, ' ');
 		}
 		Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
-		php_printf ("%s::__setState(array(\n", class_name);
+		php_printf ("%s::__set_state(array(\n", class_name);
 		efree(class_name);
 		if (myht) {
 			zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_object_element_export, 1, level);
