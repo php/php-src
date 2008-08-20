@@ -65,21 +65,23 @@ PHPAPI char *php_replace_controlchars_ex(char *str, int len)
 {
 	unsigned char *s = (unsigned char *)str;
 	unsigned char *e = (unsigned char *)str + len;
-	
+	unsigned char *r[len + 1];
+	unsigned int c = 0;
+
 	if (!str) {
-		return (NULL);
+		return NULL;
 	}
-	
+
 	while (s < e) {
-	    
-		if (iscntrl(*s)) {
-			*s='_';
-		}	
+		if (0 == iscntrl(*s)) {
+			r[c] = *s;
+			c++;
+		}
 		s++;
 	}
-	
-	return (str);
-} 
+
+	return (unsigned char *)r;
+}
 /* }}} */
 
 PHPAPI char *php_replace_controlchars(char *str)
