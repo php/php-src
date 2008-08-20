@@ -63,6 +63,7 @@ PHP                                                                        NEWS
   and hash()). (Tony)
 - Fixed bug #45004 (pg_insert() does not accept 4 digit timezone format).
   (Ilia)
+- Fixed bug #44925 (preg_grep() modifies input array). (Nuno)
 - Fixed bug #44891 Memory leak using registerPHPFunctions and XSLT Variable 
   as function parameter. (Rob)
 - Fixed bug #44830 (Very minor issue with backslash in heredoc). (Matt)

@@ -1731,13 +1731,17 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 	/* Go through the input array */
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(input));
-	while(zend_hash_get_current_data(Z_ARRVAL_P(input), (void **)&entry) == SUCCESS) {
+	while (zend_hash_get_current_data(Z_ARRVAL_P(input), (void **)&entry) == SUCCESS) {
+		zval subject = **entry;
 
-		convert_to_string_ex(entry);
+		if (Z_TYPE_PP(entry) != IS_STRING) {
+			zval_copy_ctor(&subject);
+			convert_to_string(&subject);
+		}
 
 		/* Perform the match */
-		count = pcre_exec(pce->re, extra, Z_STRVAL_PP(entry),
-						  Z_STRLEN_PP(entry), 0,
+		count = pcre_exec(pce->re, extra, Z_STRVAL(subject),
+						  Z_STRLEN(subject), 0,
 						  0, offsets, size_offsets);
 
 		/* Check for too many substrings condition. */
@@ -1750,9 +1754,8 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 		}
 
 		/* If the entry fits our requirements */
-		if ((count > 0 && !invert) ||
-			(count == PCRE_ERROR_NOMATCH && invert)) {
-			(*entry)->refcount++;
+		if ((count > 0 && !invert) || (count == PCRE_ERROR_NOMATCH && invert)) {
+			ZVAL_ADDREF(*entry);
 
 			/* Add to return array */
 			switch (zend_hash_get_current_key(Z_ARRVAL_P(input), &string_key, &num_key, 0))
@@ -1768,7 +1771,11 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 					break;
 			}
 		}
-		
+
+		if (Z_TYPE_PP(entry) != IS_STRING) {
+			zval_dtor(&subject);
+		}
+
 		zend_hash_move_forward(Z_ARRVAL_P(input));
 	}
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(input));
