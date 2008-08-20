@@ -4451,6 +4451,7 @@ PHP_FUNCTION(putenv)
 #ifdef PHP_WIN32
 		char *value = NULL;
 		int equals = 0;
+		int error_code;
 #endif
 
 		pe.putenv_string = estrndup(setting, setting_len);
@@ -4532,7 +4533,14 @@ PHP_FUNCTION(putenv)
 # ifndef PHP_WIN32
 		if (putenv(pe.putenv_string) == 0) { /* success */
 # else
-		if (SetEnvironmentVariableA(pe.key, value) != 0) { /* success */
+		error_code = SetEnvironmentVariable(pe.key, value);
+#  if _MSC_VER < 1500
+		/* Yet another VC6 bug, unset may return env not found */
+		if (error_code != 0 || 
+			(error_code == 0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND)) {
+#  else
+		if (error_code != 0) { /* success */
+#  endif
 # endif
 #endif
 			zend_hash_add(&BG(putenv_ht), pe.key, pe.key_len + 1, (void **) &pe, sizeof(putenv_entry), NULL);
@@ -4543,6 +4551,8 @@ PHP_FUNCTION(putenv)
 #endif
 			RETURN_TRUE;
 		} else {
+			int error = GetLastError();
+			printf("error: %i\n", error);
 			efree(pe.putenv_string);
 			efree(pe.key);
 			RETURN_FALSE;
