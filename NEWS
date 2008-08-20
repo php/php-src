@@ -41,8 +41,6 @@ PHP                                                                        NEWS
 - Fixed bug #45384 (parse_ini_file will result in parse error with no trailing 
   newline). (Arnaud)
 - Fixed bug #45044 (relative paths not resolved correctly). (Dmitry)
-- Fixed bug #45028 (CRC32 output endianness is different between crc32() 
-  and hash()). (Tony)
 - Fixed bug #44925 (preg_grep() modifies input array). (Nuno)
 - Fixed bug #44842 (parse_ini_file keys that start/end with underscore). 
   (Arnaud)
@@ -398,8 +396,6 @@ PHP                                                                        NEWS
   (Zoe Slattery)
 - Fixed bug #42848 (Status: header incorrect under FastCGI). (Dmitry)
 - Fixed bug #42773 (WSDL error causes HTTP 500 Response). (Dmitry)
-- Fixed bug #42737 (preg_split('//u') triggers a E_NOTICE with newlines).
-  (Nuno)
 - Fixed bug #42736 (xmlrpc_server_call_method() crashes). (Tony)
 - Fixed bug #42663 (gzinflate() try to allocate all memory with truncated
   data). (Arnaud)
