@@ -247,17 +247,6 @@ function probe_basic_headers()
 		php_usual_include_suspects += ";" + PHP_PHP_BUILD + "\\include";
 		php_usual_lib_suspects += ";" + PHP_PHP_BUILD + "\\lib";
 	}
-
-	p = CHECK_HEADER_ADD_INCLUDE("arpa\\nameser.h", "CFLAGS", php_usual_include_suspects);
-
-	// hack to catch common location of libs
-	if (typeof(p) == "string") {
-		p = p.replace(new RegExp("include$"), "lib");
-		ADD_FLAG("LDFLAGS", '/libpath:"' + p + '" ');
-		php_usual_lib_suspects += ";" + p;
-	} else if (!p) {
-		ERROR("We really need that arpa\\nameser.h file - it is part of the bindlib package");
-	}
 }
 
 function add_extra_dirs()
@@ -291,12 +280,6 @@ function add_extra_dirs()
 
 probe_basic_headers();
 add_extra_dirs();
-
-// We can't probe for libs before this line
-
-if (!(CHECK_LIB("resolv_a.lib") || CHECK_LIB("resolv.lib"))) {
-	ERROR("We really need that arpa\\nameser.h file - it is part of the bindlib package");
-}
 
 // Do we want static ICU lib
 ARG_WITH('static-icu', 'Link against the static version of the ICU library', 'no');
