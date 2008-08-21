@@ -22,6 +22,8 @@ PHP                                                                        NEWS
 - Fixed bug #45805 (Crash on throwing exception from error handler). (Dmitry)
 - Fixed bug #45765 (ReflectionObject with default parameters of self::xxx cause
   an error). (Felipe)
+- Fixed bug #45751 (Using auto_prepend_file crashes (out of scope stack address
+  use)). (basant dot kukreja at sun dot com) 
 - Fixed bug #45705 (rfc822_parse_adrlist() modifies passed address parameter).
   (Jani)
 - Fixed bug #45691 (Some per-dir or runtime settings may leak into other
