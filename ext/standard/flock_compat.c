@@ -30,6 +30,7 @@
 
 #ifdef PHP_WIN32
 #include <io.h>
+#include "config.w32.h"
 #endif
 
 #ifdef NETWARE

@@ -37,6 +37,7 @@
 #include <string.h>
 #include <time.h>
 #ifdef PHP_WIN32
+#include "win32/inet.h"
 #include <winsock2.h>
 #elif defined(NETWARE)
 #ifdef USE_WINSOCK    /* Modified to use Winsock (NOVSOCK2.H), atleast for now */
