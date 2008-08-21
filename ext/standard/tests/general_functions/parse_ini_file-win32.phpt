@@ -1,7 +1,7 @@
 --TEST--
 parse_ini_file() multiple calls
 --SKIPIF--
-<?php if( substr(PHP_OS, 0, 3) == 'WIN' ) die("skip Windows has different error message");?>
+<?php if( substr(PHP_OS, 0, 3) != 'WIN' ) die("skip non Windows systems have different error message");?>
 --FILE--
 <?php
 
@@ -108,97 +108,97 @@ var_dump(parse_ini_file($filename, true));
 @unlink($filename);
 echo "Done\n";
 ?>
---EXPECTF--
-Warning: parse_ini_file() expects at least 1 parameter, 0 given in %sparse_ini_file.php on line 6
+--EXPECTF--	
+Warning: parse_ini_file() expects at least 1 parameter, 0 given in %s on line 6
 bool(false)
 
-Warning: parse_ini_file() expects at most 3 parameters, 4 given in %sparse_ini_file.php on line 7
+Warning: parse_ini_file() expects at most 3 parameters, 4 given in %s on line 7
 bool(false)
 
-Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %sparse_ini_file.php on line 8
+Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %s.php on line 8
 array(0) {
 }
 
-Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %sparse_ini_file.php on line 9
+Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %s.php on line 9
 array(0) {
 }
 array(1) {
-  [u"test"]=>
-  unicode(0) ""
+  ["test"]=>
+  string(0) ""
 }
 
-Warning: %s error%sin %sparse_ini_file.dat on line 2
- in %sparse_ini_file.php on line 20
+Warning: parse error in %s on line %d
+ in %s on line 20
 array(1) {
-  [u"test"]=>
-  unicode(0) ""
+  ["test"]=>
+  string(0) ""
 }
 
-Warning: %serror%sin %sparse_ini_file.dat on line 2
- in %sparse_ini_file.php on line 26
+Warning: parse error in %s on line %d
+ in %s on line 26
 array(1) {
-  [u"test"]=>
-  unicode(4) "test"
+  ["test"]=>
+  string(4) "test"
 }
 array(1) {
-  [u"test"]=>
-  unicode(8) "new
+  ["test"]=>
+  string(8) "new
 line"
 }
 array(1) {
-  [u"test"]=>
-  unicode(16) "test const value"
+  ["test"]=>
+  string(16) "test const value"
 }
 array(1) {
-  [u"section"]=>
+  ["section"]=>
   array(1) {
-    [u"test"]=>
-    unicode(5) "hello"
+    ["test"]=>
+    string(5) "hello"
   }
 }
 array(1) {
-  [u"test"]=>
-  unicode(5) "hello"
+  ["test"]=>
+  string(5) "hello"
 }
 array(1) {
-  [u"section.test"]=>
-  unicode(5) "hello"
+  ["section.test"]=>
+  string(5) "hello"
 }
 array(1) {
-  [u"section"]=>
+  ["section"]=>
   array(1) {
-    [u"section.test"]=>
-    unicode(5) "hello"
+    ["section.test"]=>
+    string(5) "hello"
   }
 }
 array(1) {
-  [u"section"]=>
+  ["section"]=>
   array(1) {
     [1]=>
-    unicode(1) "2"
+    string(1) "2"
   }
 }
 array(1) {
   [1]=>
-  unicode(1) "2"
+  string(1) "2"
 }
 array(1) {
-  [u"test"]=>
-  unicode(5) "test4"
+  ["test"]=>
+  string(5) "test4"
 }
 array(1) {
-  [u"section1"]=>
+  ["section1"]=>
   array(1) {
-    [u"name"]=>
-    unicode(5) "value"
+    ["name"]=>
+    string(5) "value"
   }
 }
 array(3) {
-  [u"foo"]=>
-  unicode(4) "bar1"
-  [u"_foo"]=>
-  unicode(4) "bar2"
-  [u"foo_"]=>
-  unicode(4) "bar3"
+  ["foo"]=>
+  string(4) "bar1"
+  ["_foo"]=>
+  string(4) "bar2"
+  ["foo_"]=>
+  string(4) "bar3"
 }
 Done
