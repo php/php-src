@@ -8,10 +8,10 @@ if (!function_exists("inet_pton")) die("skip no inet_pton()");
 --FILE--
 <?php
 
-$packed = chr(127) . chr(0) . chr(0) . chr(1);
+$packed = pack("CCCC", 127, 0, 0, 1);
 var_dump(inet_ntop((binary)$packed));
 
-$packed = chr(255) . chr(255) . chr(255) . chr(0);
+$packed = pack("CCCC", 255, 255, 255, 0);
 var_dump(inet_ntop((binary)$packed));
 
 var_dump(inet_ntop());
