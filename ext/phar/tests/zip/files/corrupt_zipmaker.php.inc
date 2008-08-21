@@ -237,6 +237,15 @@ class corrupt_zipmaker
 						$filename . $comment;
 				$offset = strlen($central);
 				break;
+			case 'extralen1' :
+				$extra = 'nu' . 0xffff; // way huge size
+				$central = "PK\x01\x02\x00\x00\x14\x00\x00\x00" . pack('v', $compmethod) .
+						$mtime .
+						pack("VVVvvvvvVV", $crc32, $complength, $uncomplength, strlen($filename), strlen($extra),strlen($comment),0x00,0x00,
+							0x0000, $this->offset).
+						$filename . $extra . $comment;
+				$offset = strlen($central);
+				break;
 		}
 		return $central;
 	}
@@ -275,6 +284,12 @@ class corrupt_zipmaker
 		switch ($corrupt) {
 			case null :
 				$write .= "PK\x05\x06\x00\x00\x00\x00" .
+					pack("vvVVv", $this->count, $this->count,
+					$this->offset, strlen($this->start),
+					strlen($this->comment)) . $this->comment;
+				break;
+			case 'disknumber' :
+				$write .= "PK\x05\x06\x01\x00\x01\x00" .
 					pack("vvVVv", $this->count, $this->count,
 					$this->offset, strlen($this->start),
 					strlen($this->comment)) . $this->comment;
