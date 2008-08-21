@@ -576,6 +576,7 @@ void phar_object_init(TSRMLS_D);
 void phar_destroy_phar_data(phar_archive_data *phar TSRMLS_DC);
 
 int phar_open_entry_file(phar_archive_data *phar, phar_entry_info *entry, char **error TSRMLS_DC);
+int phar_postprocess_file(phar_entry_data *idata, php_uint32 crc32, char **error, int process_zip TSRMLS_DC);
 int phar_open_from_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
 int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
 int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC);

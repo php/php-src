@@ -307,8 +307,9 @@ idata_error:
 #endif
 
 	/* check length, crc32 */
-	if (!idata->internal_file->is_crc_checked && phar_postprocess_file(wrapper, options, idata, idata->internal_file->crc32, &error TSRMLS_CC) != SUCCESS) {
-		/* already issued the error */
+	if (!idata->internal_file->is_crc_checked && phar_postprocess_file(idata, idata->internal_file->crc32, &error, 2 TSRMLS_CC) != SUCCESS) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+		efree(error);
 		phar_entry_delref(idata TSRMLS_CC);
 		efree(internal_file);
 		return NULL;
