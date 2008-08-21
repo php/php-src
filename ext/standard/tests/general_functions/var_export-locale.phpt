@@ -4,13 +4,13 @@ Test var_export() function with locale
 precision=14
 --SKIPIF--
 <?php
-if (!setlocale(LC_ALL, "de","de_DE","de_DE.ISO8859-1","de_DE.ISO_8859-1","de_DE.UTF-8")) {
+if (!setlocale(LC_ALL, "german", "de","de_DE","de_DE.ISO8859-1","de_DE.ISO_8859-1","de_DE.UTF-8")) {
         die("skip locale needed for this test is not supported on this platform");
 }
 ?>
 --FILE--
 <?php
-setlocale(LC_ALL, "de","de_DE","de_DE.ISO8859-1","de_DE.ISO_8859-1","de_DE.UTF-8");
+setlocale(LC_ALL, "german", "de","de_DE","de_DE.ISO8859-1","de_DE.ISO_8859-1","de_DE.UTF-8");
 /* Prototype: mixed var_export( mixed expression [, bool return]);
  * Description: Returns the variable representation when the return parameter is used and evaluates to TRUE. Otherwise, this function will return NULL.
 
