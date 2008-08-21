@@ -7,7 +7,7 @@ output_handler=
 <?php
 
 	$php = getenv('TEST_PHP_EXECUTABLE');
-	$tmpfile = tempnam('/tmp', 'phpt');
+	$tmpfile = tempnam(__DIR__, 'phpt');
 	$args = ' -n -dsafe_mode=off ';
 	
 	/* Regular Data Test */
