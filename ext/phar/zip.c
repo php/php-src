@@ -655,6 +655,7 @@ static int phar_zip_changed_apply(void *data, void *arg TSRMLS_DC) /* {{{ */
 	struct _phar_zip_pass *p;
 	php_uint32 newcrc32;
 	off_t offset;
+	int not_really_modified = 0;
 
 	entry = (phar_entry_info *)data;
 	p = (struct _phar_zip_pass*) arg;
@@ -721,6 +722,12 @@ static int phar_zip_changed_apply(void *data, void *arg TSRMLS_DC) /* {{{ */
 		if (FAILURE == phar_open_entry_fp(entry, p->error, 0 TSRMLS_CC)) {
 			spprintf(p->error, 0, "unable to open file contents of file \"%s\" in zip-based phar \"%s\"", entry->filename, entry->phar->fname);
 			return ZEND_HASH_APPLY_STOP;
+		}
+
+		/* we can be modified and already be compressed, such as when chmod() is executed */
+		if (entry->flags & PHAR_ENT_COMPRESSION_MASK && (entry->old_flags == entry->flags || !entry->old_flags)) {
+			not_really_modified = 1;
+			goto is_compressed;
 		}
 
 		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 0 TSRMLS_CC)) {
@@ -791,6 +798,7 @@ static int phar_zip_changed_apply(void *data, void *arg TSRMLS_DC) /* {{{ */
 		entry->old_flags = entry->flags;
 		entry->is_modified = 1;
 	} else {
+is_compressed:
 		central.uncompsize = local.uncompsize = PHAR_SET_32(entry->uncompressed_filesize);
 		central.compsize = local.compsize = PHAR_SET_32(entry->compressed_filesize);
 
@@ -872,7 +880,7 @@ continue_dir:
 		return ZEND_HASH_APPLY_STOP;
 	}
 
-	if (entry->is_modified) {
+	if (!not_really_modified && entry->is_modified) {
 		if (entry->cfp) {
 			if (entry->compressed_filesize != php_stream_copy_to_stream(entry->cfp, p->filefp, entry->compressed_filesize)) {
 				spprintf(p->error, 0, "unable to write compressed contents of file \"%s\" in zip-based phar \"%s\"", entry->filename, entry->phar->fname);
@@ -900,6 +908,7 @@ continue_dir:
 
 		entry->is_modified = 0;
 	} else {
+		entry->is_modified = 0;
 		if (entry->fp_refcount) {
 			/* open file pointers refer to this fp, do not free the stream */
 			switch (entry->fp_type) {
