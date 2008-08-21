@@ -8,7 +8,7 @@ session.name=PHPSESSID
 <?php
 
 ini_set('session.use_trans_sid', 1);
-session_save_path(dirname(__FILE__));
+session_save_path(__DIR__);
 session_start();
 
 ob_start();
@@ -23,8 +23,13 @@ ob_flush();
 
 ob_end_clean();
 
-unlink(dirname(__FILE__).'/sess_'.session_id());
-
+?>
+--CLEAN--
+<?php
+unlink(__DIR__ . '/sess_'.session_id());
+foreach (glob(__DIR__ . '/sess_*') as $filename) {
+  unlink($filename);
+}
 ?>
 --EXPECTF--
 <a href='a?q=1&PHPSESSID=%s&a=b'>asd</a>
