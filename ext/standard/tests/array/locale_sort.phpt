@@ -3,7 +3,7 @@ Sort with SORT_LOCALE_STRING
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-  die("Unix locale name only, not available on windows (and crashes with VC6)\n");
+  die("skip Unix locale name only, not available on windows (and crashes with VC6)\n");
 }
 if (false == setlocale(LC_CTYPE, "fr_FR", "fr_FR.ISO8859-1")) {
   die("skip setlocale() failed\n");
