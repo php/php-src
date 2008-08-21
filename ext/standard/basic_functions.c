@@ -4551,8 +4551,6 @@ PHP_FUNCTION(putenv)
 #endif
 			RETURN_TRUE;
 		} else {
-			int error = GetLastError();
-			printf("error: %i\n", error);
 			efree(pe.putenv_string);
 			efree(pe.key);
 			RETURN_FALSE;
