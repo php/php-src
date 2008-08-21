@@ -4,10 +4,9 @@ Bug #22414 (passthru() does not read data correctly)
 output_handler=
 --FILE--
 <?php
-
 	$php = getenv('TEST_PHP_EXECUTABLE');
-	$tmpfile = tempnam('/tmp', 'phpt');
-	
+	$tmpfile = tempnam(__DIR__, 'phpt');
+
 	/* Regular Data Test */
 	passthru($php . ' -n -r " echo \"HELLO\"; "');
 
