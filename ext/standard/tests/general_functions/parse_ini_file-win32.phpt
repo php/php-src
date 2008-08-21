@@ -1,7 +1,7 @@
 --TEST--
 parse_ini_file() multiple calls
 --SKIPIF--
-<?php if( substr(PHP_OS, 0, 3) == 'WIN' ) die("skip Windows has different error message");?>
+<?php if( substr(PHP_OS, 0, 3) != 'WIN' ) die("skip non Windows systems have different error message");?>
 --FILE--
 <?php
 
@@ -109,17 +109,17 @@ var_dump(parse_ini_file($filename, true));
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: parse_ini_file() expects at least 1 parameter, 0 given in %sparse_ini_file.php on line 6
+Warning: parse_ini_file() expects at least 1 parameter, 0 given in %s on line 6
 bool(false)
 
-Warning: parse_ini_file() expects at most 3 parameters, 4 given in %sparse_ini_file.php on line 7
+Warning: parse_ini_file() expects at most 3 parameters, 4 given in %s on line 7
 bool(false)
 
-Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %sparse_ini_file.php on line 8
+Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %s.php on line 8
 array(0) {
 }
 
-Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %sparse_ini_file.php on line 9
+Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %s.php on line 9
 array(0) {
 }
 array(1) {
@@ -127,15 +127,15 @@ array(1) {
   string(0) ""
 }
 
-Warning: syntax error, unexpected '=' in %sparse_ini_file.dat on line 2
- in %sparse_ini_file.php on line 20
+Warning: parse error in %s on line %d
+ in %s on line 20
 array(1) {
   ["test"]=>
   string(0) ""
 }
 
-Warning: syntax error, unexpected '=' in %sparse_ini_file.dat on line 2
- in %sparse_ini_file.php on line 26
+Warning: parse error in %s on line %d
+ in %s on line 26
 array(1) {
   ["test"]=>
   string(4) "test"
