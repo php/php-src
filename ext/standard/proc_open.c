@@ -769,6 +769,8 @@ PHP_FUNCTION(proc_open)
 	}
 	
 	if (FALSE == newprocok) {
+		DWORD dw = GetLastError();
+
 		/* clean up all the descriptors */
 		for (i = 0; i < ndesc; i++) {
 			CloseHandle(descriptors[i].childend);
@@ -776,7 +778,7 @@ PHP_FUNCTION(proc_open)
 				CloseHandle(descriptors[i].parentend);
 			}
 		}
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "CreateProcess failed");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "CreateProcess failed, error code - %u", dw);
 		goto exit_fail;
 	}
 
