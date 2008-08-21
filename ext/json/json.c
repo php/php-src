@@ -251,8 +251,14 @@ static void json_escape_string(smart_str *buf, char *s, int len) /* {{{ */
         {
             efree(utf16);
         }
-
-        smart_str_appendl(buf, "\"\"", 2);
+	if(len < 0) {
+		if(!PG(display_errors)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid UTF-8 sequence in argument");
+		}
+	        smart_str_appendl(buf, "null", 4);
+	} else {
+	        smart_str_appendl(buf, "\"\"", 2);
+	}
         return;
     }
 
