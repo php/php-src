@@ -255,7 +255,10 @@ static int clean_module_resource(zend_rsrc_list_entry *le, int *resource_id TSRM
 static int zend_clean_module_rsrc_dtors_cb(zend_rsrc_list_dtors_entry *ld, int *module_number TSRMLS_DC) /* {{{ */
 {
 	if (ld->module_number == *module_number) {
+#if 0
+		/* EG(resource_list) is already destroied in this point */
 		zend_hash_apply_with_argument(&EG(regular_list), (apply_func_arg_t) clean_module_resource, (void *) &(ld->resource_id) TSRMLS_CC);
+#endif
 		zend_hash_apply_with_argument(&EG(persistent_list), (apply_func_arg_t) clean_module_resource, (void *) &(ld->resource_id) TSRMLS_CC);
 		return 1;
 	} else {
