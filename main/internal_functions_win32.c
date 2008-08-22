@@ -157,7 +157,7 @@ static zend_module_entry *php_builtin_extensions[] = {
 
 #define EXTCOUNT (sizeof(php_builtin_extensions)/sizeof(zend_module_entry *))
 	
-int php_register_internal_extensions(TSRMLS_D)
+PHPAPI int php_register_internal_extensions(TSRMLS_D)
 {
 	return php_register_extensions(php_builtin_extensions, EXTCOUNT TSRMLS_CC);
 }

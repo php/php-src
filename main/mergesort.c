@@ -102,7 +102,7 @@ static void insertionsort(u_char *a, size_t n, size_t size, int (*cmp)(const voi
 /* {{{ php_mergesort
  * Arguments are as for qsort.
  */
-int php_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *, const void * TSRMLS_DC) TSRMLS_DC)
+PHPAPI int php_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *, const void * TSRMLS_DC) TSRMLS_DC)
 {
 	register unsigned int i;
 	register int sense;
