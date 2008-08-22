@@ -2286,9 +2286,13 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			efree(lc_class_name.v);
 		}
 		while (ptr->fname) {
-			if (zend_hash_exists(target_function_table, ptr->fname, strlen(ptr->fname)+1)) {
+			fname_len = strlen(ptr->fname);
+			lowercase_name = zend_str_tolower_dup(ptr->fname, fname_len);
+			if (zend_hash_exists(target_function_table, lowercase_name, fname_len+1)) {
+				efree(lowercase_name);
 				zend_error(error_type, "Function registration failed - duplicate name - %v%s%s", scope ? scope->name : EMPTY_ZSTR, scope ? "::" : "", ptr->fname);
 			}
+			efree(lowercase_name);
 			ptr++;
 		}
 		zend_unregister_functions(functions, count, target_function_table TSRMLS_CC);
