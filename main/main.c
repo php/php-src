@@ -91,6 +91,8 @@
 #include "rfc1867.h"
 /* }}} */
 
+PHPAPI int (*php_register_internal_extensions_func)(TSRMLS_D) = php_register_internal_extensions;
+
 #ifndef ZTS
 php_core_globals core_globals;
 #else
@@ -1995,7 +1997,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zend_register_default_classes(TSRMLS_C);
 
 	/* startup extensions staticly compiled in */
-	if (php_register_internal_extensions(TSRMLS_C) == FAILURE) {
+	if (php_register_internal_extensions_func(TSRMLS_C) == FAILURE) {
 		php_printf("Unable to start builtin modules\n");
 		return FAILURE;
 	}
