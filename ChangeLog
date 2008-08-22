@@ -1,3 +1,191 @@
+2008-08-21  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/ftp/ftp.c
+      ext/sockets/php_sockets_win.c
+      ext/sockets/sockets.c
+      ext/standard/basic_functions.c
+      ext/standard/dns.c
+      ext/standard/flock_compat.c
+      main/network.c
+      main/php_network.h
+      win32/inet.c
+      win32/inet.h
+      win32/build/config.w32:
+      - drop bindlib usage on windows
+      - inet_pton, inet_ntop and inet_aton are always available (VC9 uses the
+      CRT implementation, VC6 our own)
+
+    * ext/standard/tests/network/inet.phpt:
+      - [DOC] fix test, chr uses codepoint as input
+
+2008-08-21  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/tests/zip/corrupt_009.phpt
+      ext/phar/tests/zip/corrupt_010.phpt
+      ext/phar/tests/zip/files/corrupt3.php.inc
+      ext/phar/tests/zip/files/corrupt_zipmaker.php.inc
+      ext/phar/tests/zip/files/disknumber.zip
+      ext/phar/tests/zip/files/extralen_toolong.zip:
+      MFB increase code coverage
+
+2008-08-21  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/standard/tests/general_functions/sunfuncts.phpt:
+      - use date.timezone ini setting
+
+    * (PHP_5_3)
+      ext/standard/tests/time/idate.phpt:
+      - MFH: use date.timezone ini setting instead of ENV
+
+    * ext/standard/tests/time/idate.phpt:
+      - use date.timezone ini setting instead of ENV
+
+    * ext/standard/tests/strings/006-win32.phpt
+      ext/standard/tests/strings/006-win32.phpt:
+      
+      - fix test on windows
+
+    * ext/standard/tests/strings/006.phpt:
+      - fix test on windows
+
+2008-08-21  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      report merged fix
+
+    * (PHP_5_2)
+      ext/json/json.c
+      ext/json/utf8_to_utf16.c
+      ext/json/tests/bug43941.phpt:
+      merge fix for #43941
+
+2008-08-21  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ext/standard/basic_functions.c:
+      - Fix 64bit issue
+
+2008-08-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_list.c
+      ZendEngine2/zend_list.c:
+      Fixed destruction of dl() loaded extensions
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_execute.c:
+      Fixed bug #45751 (Using auto_prepend_file crashes (out of scope stack
+      address use)). (basant dot kukreja at sun dot com)
+
+2008-08-21  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/general_functions/parse_ini_file-win32.phpt
+      ext/standard/tests/general_functions/parse_ini_file.phpt:
+      - MFH: different parser message on windows
+
+    * ext/standard/tests/general_functions/parse_ini_file-win32.phpt
+      ext/standard/tests/general_functions/parse_ini_file-win32.phpt
+      ext/standard/tests/general_functions/parse_ini_file.phpt:
+      
+      - different parser message on windows
+
+    * ext/standard/tests/general_functions/var_export-locale.phpt:
+      - "fix" crash on windows
+
+    * ext/standard/tests/strings/strtoupper1.phpt:
+      - use 'C' (and enable it on windows)
+
+    * ext/standard/tests/strings/strtolower.phpt:
+      - don't skip if windows matches
+
+    * ext/standard/tests/strings/strtolower.phpt:
+      - MFB: use "C" instead of "" (and enable it on windows)
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/strtolower-win32.phpt
+      ext/standard/tests/strings/strtolower.phpt:
+      - new params parsing API
+      - use "C" instead of ""
+
+2008-08-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/proc_open.c
+      ext/standard/proc_open.c
+      ext/standard/proc_open.c:
+      Adder error code into error message
+
+2008-08-21  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/007-win32.phpt
+      ext/standard/tests/strings/007.phpt:
+      - MFH: skip 007 on non windows platform and add a win specific version
+      (file not found instead of filename too long)
+
+    * ext/standard/tests/strings/007-win32.phpt
+      ext/standard/tests/strings/007-win32.phpt
+      ext/standard/tests/strings/007.phpt:
+      
+      - skip 007 on non windows platform and add a win specific version (file
+      not found instead of filename too long)
+
+    * (PHP_5_3)
+      ext/standard/tests/general_functions/bug44394_2.phpt:
+      - MFH: make it portable and clean on in the clean section, session file may
+      still be open (can't be deleted)
+
+    * ext/standard/tests/general_functions/bug44394_2.phpt:
+      - make it portable and clean on in the clean section, session file may
+      still be open (can't be deleted)
+
+    * ext/standard/tests/file/bug22414.phpt:
+      - make it portable
+
+2008-08-21  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.c:
+      revert for now
+
+2008-08-21  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/standard/tests/array/locale_sort.phpt
+      ext/standard/tests/array/locale_sort.phpt:
+      - +skip
+
+    * ext/standard/tests/array/locale_sort.phpt:
+      - MFB:  skip on windows (setlocale can even crash on win+VC6...)
+
+    * (PHP_5_3)
+      ext/standard/tests/array/locale_sort.phpt:
+      - skip on windows (setlocale can even crash on win+VC6...)
+
+2008-08-21  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c:
+      fix build
+
+2008-08-21  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/tests/zip/bzip2.phpt
+      ext/phar/tests/zip/bzip2.phpt
+      ext/phar/tests/zip/files/bzip2.zip
+      ext/phar/tests/zip/files/bzip2.zip:
+      
+      file bzip2.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/phar.phar
+      ext/phar/phar_internal.h
+      ext/phar/stream.c
+      ext/phar/stream.h
+      ext/phar/util.c
+      ext/phar/zip.c:
+      fix bug #45792: bz2 compressed files in zip failure
+
 2008-08-20  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * ext/standard/basic_functions.c:

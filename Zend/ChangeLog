@@ -1,3 +1,14 @@
+2008-08-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_list.c
+      zend_list.c:
+      Fixed destruction of dl() loaded extensions
+
+    * (PHP_5_2)
+      zend_execute.c:
+      Fixed bug #45751 (Using auto_prepend_file crashes (out of scope stack
+      address use)). (basant dot kukreja at sun dot com)
+
 2008-08-20  Antony Dovgal  <tony@daylessday.org>
 
     * zend_language_scanner.l:
