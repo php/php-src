@@ -972,8 +972,6 @@ ZEND_FUNCTION(is_a)
 /* {{{ add_class_vars */
 static void add_class_vars(zend_class_entry *ce, HashTable *properties, zval *return_value TSRMLS_DC)
 {
-	int instanceof = EG(scope) && instanceof_function(EG(scope), ce TSRMLS_CC);
-
 	if (zend_hash_num_elements(properties) > 0) {
 		HashPosition pos;
 		zval **prop;
@@ -982,21 +980,29 @@ static void add_class_vars(zend_class_entry *ce, HashTable *properties, zval *re
 		while (zend_hash_get_current_data_ex(properties, (void **) &prop, &pos) == SUCCESS) {
 			zstr key, class_name, prop_name;
 			uint key_len;
-			ulong num_index;
+			ulong num_index, h;
+			int prop_name_len = 0;
 			zval *prop_copy;
 			zend_uchar key_type;
+			zend_property_info *property_info;
 
 			key_type = zend_hash_get_current_key_ex(properties, &key, &key_len, &num_index, 0, &pos);
 			zend_hash_move_forward_ex(properties, &pos);
+
 			zend_u_unmangle_property_name(key_type, key, key_len-1, &class_name, &prop_name);
-			if (class_name.v) {
-				if (class_name.s[0] != '*' && strcmp(class_name.s, ce->name.s)) {
-					/* filter privates from base classes */
-					continue;
-				} else if (!instanceof) {
-					/* filter protected if not inside class */
-					continue;
-				}
+			prop_name_len = ZSTR_LEN(key_type, prop_name);
+			
+			h = zend_u_get_hash_value(key_type, prop_name, prop_name_len+1);
+			if (zend_u_hash_quick_find(&ce->properties_info, key_type, prop_name, prop_name_len+1, h, (void **) &property_info) == FAILURE) {
+				continue;
+			}
+			
+			if (property_info->flags & ZEND_ACC_SHADOW) {
+				continue;
+			} else if ((property_info->flags & ZEND_ACC_PRIVATE) && EG(scope) != ce) {
+				continue;
+			} else if ((property_info->flags & ZEND_ACC_PROTECTED) && zend_check_protected(ce, EG(scope)) == 0) {
+				continue;
 			}
 
 			/* copy: enforce read only access */
