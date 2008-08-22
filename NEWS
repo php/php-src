@@ -19,6 +19,8 @@ PHP                                                                        NEWS
 - Fixed a crash on invalid method in ReflectionParameter constructor.
   (Christian Seiler)
 
+- Fixed bug #45862 (get_class_vars is inconsistent with 'protected' and 
+  'private' variables). (ilewis at uk dot ibm dot com, Felipe)
 - Fixed bug #45805 (Crash on throwing exception from error handler). (Dmitry)
 - Fixed bug #45765 (ReflectionObject with default parameters of self::xxx cause
   an error). (Felipe)
