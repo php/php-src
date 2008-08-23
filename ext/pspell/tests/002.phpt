@@ -29,16 +29,14 @@ if ($res) {
 }
 ?>
 --EXPECTF--
-Warning: Wrong parameter count for pspell_check() in %s002.php on line 5
+Warning: pspell_check() expects exactly 2 parameters, 1 given in %s002.php on line %d
 NULL
 bool(false)
 bool(false)
 bool(true)
 bool(true)
 
-Notice: Object of class stdClass could not be converted to int in %s002.php on line 12
-
-Warning: pspell_clear_session(): 1 is not a PSPELL result index in %s002.php on line 12
-bool(false)
+Warning: pspell_clear_session() expects parameter 1 to be long, object given in %s002.php on line %d
+NULL
 bool(true)
 bool(false)
