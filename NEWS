@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 - Added stream_context_set_default() function. (Davey Shafik)
 - Added optional "is_xhtml" parameter to nl2br() which makes the function
   output <br> when false and <br /> when true (FR #34381). (Kalle)
+- Added PHP_MAXPATHLEN constant (maximum length of a path). (Pierre)
 
 - Improved Windows support and portability for stat(), touch(), filemtime(),
   filesize() and related functions. (Pierre)
