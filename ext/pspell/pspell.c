@@ -307,12 +307,12 @@ static PHP_FUNCTION(pspell_new)
 	/* If aspell was installed using installer, we should have a key
 	 * pointing to the location of the dictionaries
 	 */
-	if(0 == RegOpenKey(HKEY_LOCAL_MACHINE, "Software\\Aspell", &hkey)) {
+	if (0 == RegOpenKey(HKEY_LOCAL_MACHINE, "Software\\Aspell", &hkey)) {
 		LONG result;
 		dwLen = sizeof(aspell_dir) - 1;
 		result = RegQueryValueEx(hkey, "", NULL, &dwType, (LPBYTE)&aspell_dir, &dwLen);
 		RegCloseKey(hkey);
-		if(result == ERROR_SUCCESS) {
+		if (result == ERROR_SUCCESS) {
 			strlcpy(data_dir, aspell_dir, sizeof(data_dir));
 			strlcat(data_dir, "\\data", sizeof(data_dir));
 			strlcpy(dict_dir, aspell_dir, sizeof(dict_dir));
@@ -342,16 +342,16 @@ static PHP_FUNCTION(pspell_new)
 		speed = mode & PSPELL_SPEED_MASK_INTERNAL;
 
 		/* First check what mode we want (how many suggestions) */
-		if(speed == PSPELL_FAST){
+		if (speed == PSPELL_FAST) {
 			pspell_config_replace(config, "sug-mode", "fast");
-		}else if(speed == PSPELL_NORMAL){
+		} else if (speed == PSPELL_NORMAL) {
 			pspell_config_replace(config, "sug-mode", "normal");
-		}else if(speed == PSPELL_BAD_SPELLERS){
+		} else if (speed == PSPELL_BAD_SPELLERS) {
 			pspell_config_replace(config, "sug-mode", "bad-spellers");
 		}
 		
 		/* Then we see if run-together words should be treated as valid components */
-		if(mode & PSPELL_RUN_TOGETHER){
+		if (mode & PSPELL_RUN_TOGETHER) {
 			pspell_config_replace(config, "run-together", "true");
 		}
 	}
@@ -359,8 +359,8 @@ static PHP_FUNCTION(pspell_new)
 	ret = new_pspell_manager(config);
 	delete_pspell_config(config);
 
-	if(pspell_error_number(ret) != 0){
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL couldn't open the dictionary. reason: %s ", pspell_error_message(ret));
+	if (pspell_error_number(ret) != 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL couldn't open the dictionary. reason: %s", pspell_error_message(ret));
 		delete_pspell_can_have_error(ret);
 		RETURN_FALSE;
 	}
@@ -404,12 +404,12 @@ static PHP_FUNCTION(pspell_new_personal)
 	/* If aspell was installed using installer, we should have a key
 	 * pointing to the location of the dictionaries
 	 */
-	if(0 == RegOpenKey(HKEY_LOCAL_MACHINE, "Software\\Aspell", &hkey)) {
+	if (0 == RegOpenKey(HKEY_LOCAL_MACHINE, "Software\\Aspell", &hkey)) {
 		LONG result;
 		dwLen = sizeof(aspell_dir) - 1;
 		result = RegQueryValueEx(hkey, "", NULL, &dwType, (LPBYTE)&aspell_dir, &dwLen);
 		RegCloseKey(hkey);
-		if(result == ERROR_SUCCESS) {
+		if (result == ERROR_SUCCESS) {
 			strlcpy(data_dir, aspell_dir, sizeof(data_dir));
 			strlcat(data_dir, "\\data", sizeof(data_dir));
 			strlcpy(dict_dir, aspell_dir, sizeof(dict_dir));
@@ -452,16 +452,16 @@ static PHP_FUNCTION(pspell_new_personal)
 		speed = mode & PSPELL_SPEED_MASK_INTERNAL;
 
 		/* First check what mode we want (how many suggestions) */
-		if(speed == PSPELL_FAST){
+		if (speed == PSPELL_FAST) {
 			pspell_config_replace(config, "sug-mode", "fast");
-		}else if(speed == PSPELL_NORMAL){
+		} else if (speed == PSPELL_NORMAL) {
 			pspell_config_replace(config, "sug-mode", "normal");
-		}else if(speed == PSPELL_BAD_SPELLERS){
+		} else if (speed == PSPELL_BAD_SPELLERS) {
 			pspell_config_replace(config, "sug-mode", "bad-spellers");
 		}
 		
 		/* Then we see if run-together words should be treated as valid components */
-		if(mode & PSPELL_RUN_TOGETHER){
+		if (mode & PSPELL_RUN_TOGETHER) {
 			pspell_config_replace(config, "run-together", "true");
 		}
 	}
@@ -469,8 +469,8 @@ static PHP_FUNCTION(pspell_new_personal)
 	ret = new_pspell_manager(config);
 	delete_pspell_config(config);
 
-	if(pspell_error_number(ret) != 0){
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL couldn't open the dictionary. reason: %s ", pspell_error_message(ret));
+	if (pspell_error_number(ret) != 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL couldn't open the dictionary. reason: %s", pspell_error_message(ret));
 		delete_pspell_can_have_error(ret);
 		RETURN_FALSE;
 	}
@@ -486,8 +486,7 @@ static PHP_FUNCTION(pspell_new_personal)
 static PHP_FUNCTION(pspell_new_config)
 {
 	int type, ind;
-	long conf;
-	
+	long conf;	
 	PspellCanHaveError *ret;
 	PspellManager *manager;
 	PspellConfig *config;
@@ -500,8 +499,8 @@ static PHP_FUNCTION(pspell_new_config)
 
 	ret = new_pspell_manager(config);
 
-	if(pspell_error_number(ret) != 0){
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL couldn't open the dictionary. reason: %s ", pspell_error_message(ret));
+	if (pspell_error_number(ret) != 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL couldn't open the dictionary. reason: %s", pspell_error_message(ret));
 		delete_pspell_can_have_error(ret);
 		RETURN_FALSE;
 	}
@@ -556,14 +555,14 @@ static PHP_FUNCTION(pspell_suggest)
 	array_init(return_value);
 
 	wl = pspell_manager_suggest(manager, word);
-	if(wl){
+	if (wl) {
 		PspellStringEmulation *els = pspell_word_list_elements(wl);
-		while((sug = pspell_string_emulation_next(els)) != 0){
+		while ((sug = pspell_string_emulation_next(els)) != 0) {
 			add_next_index_string(return_value,(char *)sug,1);
 		}
 		delete_pspell_string_emulation(els);
-	}else{
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL had a problem. details: %s ", pspell_manager_error_message(manager));
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PSPELL had a problem. details: %s", pspell_manager_error_message(manager));
 		RETURN_FALSE;
 	}
 }
@@ -585,9 +584,9 @@ static PHP_FUNCTION(pspell_store_replacement)
 	PSPELL_FETCH_MANAGER;
 
 	pspell_manager_store_replacement(manager, miss, corr);
-	if(pspell_manager_error_number(manager) == 0){
+	if (pspell_manager_error_number(manager) == 0) {
 		RETURN_TRUE;
-	}else{
+	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "pspell_store_replacement() gave error: %s", pspell_manager_error_message(manager));
 		RETURN_FALSE;
 	}
@@ -610,14 +609,14 @@ static PHP_FUNCTION(pspell_add_to_personal)
 	PSPELL_FETCH_MANAGER;
 
 	/*If the word is empty, we have to return; otherwise we'll segfault! ouch!*/
-	if (word_len == 0){
+	if (word_len == 0) {
 		RETURN_FALSE;
 	}
 	
 	pspell_manager_add_to_personal(manager, word);
-	if(pspell_manager_error_number(manager) == 0){
+	if (pspell_manager_error_number(manager) == 0) {
 		RETURN_TRUE;
-	}else{
+	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "pspell_add_to_personal() gave error: %s", pspell_manager_error_message(manager));
 		RETURN_FALSE;
 	}
@@ -640,14 +639,14 @@ static PHP_FUNCTION(pspell_add_to_session)
 	PSPELL_FETCH_MANAGER;
 
 	/*If the word is empty, we have to return; otherwise we'll segfault! ouch!*/
-	if (word_len == 0){
+	if (word_len == 0) {
 		RETURN_FALSE;
 	}
 
 	pspell_manager_add_to_session(manager, word);
-	if(pspell_manager_error_number(manager) == 0){
+	if (pspell_manager_error_number(manager) == 0) {
 		RETURN_TRUE;
-	}else{
+	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "pspell_add_to_session() gave error: %s", pspell_manager_error_message(manager));
 		RETURN_FALSE;
 	}
@@ -669,9 +668,9 @@ static PHP_FUNCTION(pspell_clear_session)
 	PSPELL_FETCH_MANAGER;	
 
 	pspell_manager_clear_session(manager);
-	if(pspell_manager_error_number(manager) == 0){
+	if (pspell_manager_error_number(manager) == 0) {
 		RETURN_TRUE;
-	}else{
+	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "pspell_clear_session() gave error: %s", pspell_manager_error_message(manager));
 		RETURN_FALSE;
 	}
@@ -694,9 +693,9 @@ static PHP_FUNCTION(pspell_save_wordlist)
 
 	pspell_manager_save_all_word_lists(manager);
 
-	if(pspell_manager_error_number(manager) == 0){
+	if (pspell_manager_error_number(manager) == 0) {
 		RETURN_TRUE;
-	}else{
+	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "pspell_save_wordlist() gave error: %s", pspell_manager_error_message(manager));
 		RETURN_FALSE;
 	}
@@ -711,7 +710,6 @@ static PHP_FUNCTION(pspell_config_create)
 	char *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
 	int language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
 	int ind;
-
 	PspellConfig *config;
 
 #ifdef PHP_WIN32
@@ -733,12 +731,12 @@ static PHP_FUNCTION(pspell_config_create)
     /* If aspell was installed using installer, we should have a key
      * pointing to the location of the dictionaries
      */
-	if(0 == RegOpenKey(HKEY_LOCAL_MACHINE, "Software\\Aspell", &hkey)) {
+	if (0 == RegOpenKey(HKEY_LOCAL_MACHINE, "Software\\Aspell", &hkey)) {
 		LONG result;
 		dwLen = sizeof(aspell_dir) - 1;
 		result = RegQueryValueEx(hkey, "", NULL, &dwType, (LPBYTE)&aspell_dir, &dwLen);
 		RegCloseKey(hkey);
-		if(result == ERROR_SUCCESS) {
+		if (result == ERROR_SUCCESS) {
 			strlcpy(data_dir, aspell_dir, sizeof(data_dir));
 			strlcat(data_dir, "\\data", sizeof(data_dir));
 			strlcpy(dict_dir, aspell_dir, sizeof(dict_dir));
@@ -756,7 +754,7 @@ static PHP_FUNCTION(pspell_config_create)
 		pspell_config_replace(config, "spelling", spelling);
 	}
 
-	if (jargon_len){
+	if (jargon_len) {
 		pspell_config_replace(config, "jargon", jargon);
 	}
 
@@ -780,11 +778,8 @@ static PHP_FUNCTION(pspell_config_runtogether)
 	int type;
 	long conf;
 	zend_bool runtogether;
-	int argc;
-
 	PspellConfig *config;
 	
-	argc = ZEND_NUM_ARGS();
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lb", &conf, &runtogether) == FAILURE) {
 		return;
 	}
@@ -803,7 +798,6 @@ static PHP_FUNCTION(pspell_config_mode)
 {
 	int type;
 	long conf, mode;
-
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &conf, &mode) == FAILURE) {
@@ -813,11 +807,11 @@ static PHP_FUNCTION(pspell_config_mode)
 	PSPELL_FETCH_CONFIG;
 
 	/* First check what mode we want (how many suggestions) */
-	if (mode == PSPELL_FAST){
+	if (mode == PSPELL_FAST) {
 		pspell_config_replace(config, "sug-mode", "fast");
-	}else if (mode == PSPELL_NORMAL){
+	} else if (mode == PSPELL_NORMAL) {
 		pspell_config_replace(config, "sug-mode", "normal");
-	}else if (mode == PSPELL_BAD_SPELLERS){
+	} else if (mode == PSPELL_BAD_SPELLERS) {
 		pspell_config_replace(config, "sug-mode", "bad-spellers");
 	}
 
@@ -830,22 +824,15 @@ static PHP_FUNCTION(pspell_config_mode)
 static PHP_FUNCTION(pspell_config_ignore)
 {
 	int type;
-	long conf, pignore;
-	int argc;
-
 	char ignore_str[MAX_LENGTH_OF_LONG + 1];	
-	long ignore = 0L;
-
+	long conf, ignore = 0L;
 	PspellConfig *config;
 	
-	argc = ZEND_NUM_ARGS();
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &conf, &pignore) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &conf, &ignore) == FAILURE) {
 		return;
 	}
 
 	PSPELL_FETCH_CONFIG;
-
-	ignore = pignore;
 
 	snprintf(ignore_str, sizeof(ignore_str), "%ld", ignore);
 
@@ -913,7 +900,6 @@ static PHP_FUNCTION(pspell_config_repl)
 	long conf;
 	char *repl;
 	int repl_len;
-
 	PspellConfig *config;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &conf, &repl, &repl_len) == FAILURE) {
@@ -945,7 +931,6 @@ static PHP_FUNCTION(pspell_config_save_repl)
 	int type;
 	long conf;
 	zend_bool save;
-
 	PspellConfig *config;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lb", &conf, &save) == FAILURE) {
