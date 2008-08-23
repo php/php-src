@@ -1,3 +1,141 @@
+2008-08-22  Felipe Pena  <felipensp@gmail.com>
+
+    * ZendEngine2/zend_compile.c
+      ext/reflection/php_reflection.c
+      ext/standard/basic_functions.c:
+      - Removed unused arguments
+
+2008-08-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_list.c:
+      Fixed destruction of dl() loaded extensions
+
+    * ZendEngine2/zend_list.c
+      ZendEngine2/zend_list.c:
+      Removed redundant code
+
+2008-08-22  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c:
+      MFH: fix zend_register_functions() not displaying duplicate functions
+      (reported by Gopal)
+
+    * ZendEngine2/zend_API.c:
+      fix zend_register_functions() not displaying duplicate functions (reported
+      by Gopal)
+
+2008-08-22  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/get_class_methods_001.phpt
+      ZendEngine2/tests/get_class_methods_001.phpt
+      ZendEngine2/tests/get_class_methods_002.phpt
+      ZendEngine2/tests/get_class_methods_002.phpt
+      ZendEngine2/tests/get_class_methods_003.phpt
+      ZendEngine2/tests/get_class_methods_003.phpt:
+      - New tests
+
+    * ZendEngine2/tests/get_class_methods_001.phpt
+      ZendEngine2/tests/get_class_methods_001.phpt
+      ZendEngine2/tests/get_class_methods_001.phpt
+      ZendEngine2/tests/get_class_methods_002.phpt
+      ZendEngine2/tests/get_class_methods_002.phpt
+      ZendEngine2/tests/get_class_methods_002.phpt
+      ZendEngine2/tests/get_class_methods_003.phpt
+      ZendEngine2/tests/get_class_methods_003.phpt
+      ZendEngine2/tests/get_class_methods_003.phpt:
+        1.1.4;
+      - New tests
+
+2008-08-22  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      main/internal_functions.c.in
+      main/internal_functions_nw.c
+      main/internal_functions_win32.c
+      main/main.c
+      main/mergesort.c
+      main/php.h:
+      - MFH Cleanup exports and allow to overwrite ext registration
+
+    * main/internal_functions.c.in
+      main/internal_functions_nw.c
+      main/internal_functions_win32.c
+      main/main.c
+      main/mergesort.c
+      main/php.h:
+      - Cleanup exports and allow to overwrite ext registration
+
+2008-08-22  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * win32/glob.h:
+      - drop sys/ctype.h and use BEGIN/END_DECL_C  instead
+
+2008-08-22  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_2)
+      ext/json/json.c:
+      Fix ZTS build.
+
+2008-08-22  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/tests/bug45862.phpt
+      ZendEngine2/tests/bug45862.phpt
+      ZendEngine2/tests/get_class_vars_001.phpt
+      ZendEngine2/tests/get_class_vars_001.phpt
+      ZendEngine2/tests/get_class_vars_002.phpt
+      ZendEngine2/tests/get_class_vars_002.phpt
+      ZendEngine2/tests/get_class_vars_003.phpt
+      ZendEngine2/tests/get_class_vars_003.phpt
+      ZendEngine2/tests/get_class_vars_004.phpt
+      ZendEngine2/tests/get_class_vars_004.phpt
+      ZendEngine2/tests/get_class_vars_005.phpt
+      ZendEngine2/tests/get_class_vars_005.phpt
+      ZendEngine2/tests/get_class_vars_006.phpt
+      ZendEngine2/tests/get_class_vars_006.phpt
+      ZendEngine2/tests/get_class_vars_007.phpt
+      ZendEngine2/tests/get_class_vars_007.phpt:
+      MFH:
+      - Fixed bug #45862 (get_class_vars is inconsistent with 'protected' and
+      'private' variables)
+      - Added some tests
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/tests/bug45862.phpt
+      ZendEngine2/tests/bug45862.phpt
+      ZendEngine2/tests/bug45862.phpt
+      ZendEngine2/tests/get_class_vars_001.phpt
+      ZendEngine2/tests/get_class_vars_001.phpt
+      ZendEngine2/tests/get_class_vars_001.phpt
+      ZendEngine2/tests/get_class_vars_002.phpt
+      ZendEngine2/tests/get_class_vars_002.phpt
+      ZendEngine2/tests/get_class_vars_002.phpt
+      ZendEngine2/tests/get_class_vars_003.phpt
+      ZendEngine2/tests/get_class_vars_003.phpt
+      ZendEngine2/tests/get_class_vars_003.phpt
+      ZendEngine2/tests/get_class_vars_004.phpt
+      ZendEngine2/tests/get_class_vars_004.phpt
+      ZendEngine2/tests/get_class_vars_004.phpt
+      ZendEngine2/tests/get_class_vars_005.phpt
+      ZendEngine2/tests/get_class_vars_005.phpt
+      ZendEngine2/tests/get_class_vars_005.phpt
+      ZendEngine2/tests/get_class_vars_006.phpt
+      ZendEngine2/tests/get_class_vars_006.phpt
+      ZendEngine2/tests/get_class_vars_006.phpt
+      ZendEngine2/tests/get_class_vars_007.phpt
+      ZendEngine2/tests/get_class_vars_007.phpt
+      ZendEngine2/tests/get_class_vars_007.phpt:
+      - Fixed bug #45862 (get_class_vars is inconsistent with 'protected' and
+      'private' variables)
+      - Added some tests
+
 2008-08-21  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * ext/ftp/ftp.c
