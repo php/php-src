@@ -464,6 +464,27 @@ if test "$ac_cv_type_mbstate_t" = "yes"; then
 fi
 
 dnl
+dnl Check for u_int32_t
+dnl
+AC_CACHE_CHECK([for u_int32_t], [ac_cv_type_u_int32_t],[
+AC_TRY_COMPILE([
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+],[
+int __tmp__() { u_int32_t a; }
+],[
+  ac_cv_type_u_int32_t=yes
+],[
+  ac_cv_type_u_int32_t=no
+])])
+if test "$ac_cv_type_u_int32_t" = "yes"; then
+  AC_DEFINE([HAVE_U_INT32_T], 1, [Define if your system has u_int32_t in sys/types.h])
+fi
+
+AC_C_INLINE
+
+dnl
 dnl Setup extension sources
 dnl
 PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \

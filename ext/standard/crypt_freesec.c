@@ -184,7 +184,7 @@ static u_int32_t fp_maskl[8][256], fp_maskr[8][256];
 static u_int32_t key_perm_maskl[8][128], key_perm_maskr[8][128];
 static u_int32_t comp_maskl[8][128], comp_maskr[8][128];
 
-__inline int
+static inline int
 ascii_to_bin(char ch)
 {
 	if (ch > 'z')
