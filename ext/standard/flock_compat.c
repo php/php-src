@@ -163,6 +163,7 @@ PHPAPI int php_flock(int fd, int operation)
 }
 #endif
 
+#ifndef PHP_WIN32
 #if !(HAVE_INET_ATON)
 /* {{{ inet_aton
  * Check whether "cp" is a valid ascii representation
@@ -226,7 +227,7 @@ int inet_aton(const char *cp, struct in_addr *ap)
 }
 /* }}} */
 #endif /* !HAVE_INET_ATON */
-
+#endif /* !PHP_WIN32 */
 /*
  * Local variables:
  * tab-width: 4

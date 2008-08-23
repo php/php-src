@@ -49,7 +49,9 @@ PHPAPI int flock(int fd, int operation);
 #include <arpa/inet.h>
 #endif
 
+#ifndef PHP_WIN32
 extern int inet_aton(const char *, struct in_addr *);
+#endif
 #endif
 
 #endif	/* FLOCK_COMPAT_H */
