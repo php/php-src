@@ -246,6 +246,25 @@ function probe_basic_headers()
 	if (PHP_PHP_BUILD != "no") {
 		php_usual_include_suspects += ";" + PHP_PHP_BUILD + "\\include";
 		php_usual_lib_suspects += ";" + PHP_PHP_BUILD + "\\lib";
+
+		path = php_usual_include_suspects.split(';');
+		for (i = 0; i < path.length; i++) {
+			f = FSO.GetAbsolutePathName(path[i]);
+			if (FSO.FolderExists(f)) {
+				ADD_FLAG("CFLAGS", '/I "' + f + '" ');
+			}
+		}
+		path = php_usual_lib_suspects.split(';');
+		for (i = 0; i < path.length; i++) {
+			f = FSO.GetAbsolutePathName(path[i]);
+			if (FSO.FolderExists(f)) {
+				if (VCVERS <= 1200 && f.indexOf(" ") >= 0) {
+					ADD_FLAG("LDFLAGS", '/libpath:"\\"' + f + '\\"" ');
+				} else {
+					ADD_FLAG("LDFLAGS", '/libpath:"' + f + '" ');
+				}
+			}
+		}
 	}
 }
 
