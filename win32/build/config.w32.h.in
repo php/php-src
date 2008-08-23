@@ -3,6 +3,10 @@
 	$Id$
 */
 
+/* Define the minimum supported version */
+#define _WIN32_WINNT 0x500
+#define NTDDI_VERSION  _WIN32_WIN2K
+
 /* Default PHP / PEAR directories */
 #define PHP_CONFIG_FILE_PATH (getenv("SystemRoot"))?getenv("SystemRoot"):""
 #define CONFIGURATION_FILE_PATH "php.ini"
