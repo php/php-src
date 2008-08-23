@@ -29,23 +29,10 @@
 #endif
 
 #ifdef PHP_WIN32
-#if HAVE_LIBBIND
-#ifndef WINNT
-#define WINNT 1
-#endif
-/* located in www.php.net/extra/bindlib.zip */
-#if HAVE_ARPA_INET_H
-#include "arpa/inet.h"
-#endif
-#include "netdb.h"
-#if HAVE_ARPA_NAMESERV_H
-#include "arpa/nameser.h"
-#endif
-#if HAVE_RESOLV_H
-#include "resolv.h"
-#endif
-#endif /* HAVE_LIBBIND */
-#include <winsock2.h>
+# include "win32/inet.h"
+# include <winsock2.h>
+# include <windows.h>
+# include <Ws2tcpip.h>
 #else	/* This holds good for NetWare too, both for Winsock and Berkeley sockets */
 #include <netinet/in.h>
 #if HAVE_ARPA_INET_H

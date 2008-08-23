@@ -43,7 +43,9 @@
 #ifndef _GLOB_H_
 #define	_GLOB_H_
 
-#include <sys/cdefs.h>
+#ifndef PHP_WIN32
+# include <sys/cdefs.h>
+#endif
 
 struct stat;
 typedef struct {
@@ -93,9 +95,8 @@ typedef struct {
 #define	GLOB_NOSYS	(-4)	/* Function not supported. */
 #define GLOB_ABEND	GLOB_ABORTED
 
-__BEGIN_DECLS
+BEGIN_EXTERN_C()
 int	glob(const char *, int, int (*)(const char *, int), glob_t *);
 void	globfree(glob_t *);
-__END_DECLS
-
+END_EXTERN_C()
 #endif /* !_GLOB_H_ */
