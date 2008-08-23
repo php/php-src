@@ -22,20 +22,7 @@
 #define _PHP_NETWORK_H
 
 #ifdef PHP_WIN32
-# ifndef WINNT
-#  define WINNT 1
-# endif
-# undef FD_SETSIZE
-# include "arpa/inet.h"
-  /* Apache folks decided that strtoul was evil and redefined
-   * it to something that breaks the windows headers */
-# undef strtoul
-/* defines socklen_t and some IPV6 stuff */
-# include <ws2tcpip.h>
-# if HAVE_WSPIAPI_H
-   /* getaddrinfo */
-#  include <wspiapi.h>
-# endif
+# include "win32/inet.h"
 #else
 # undef closesocket
 # define closesocket close

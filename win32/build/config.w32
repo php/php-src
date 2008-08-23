@@ -247,17 +247,6 @@ function probe_basic_headers()
 		php_usual_include_suspects += ";" + PHP_PHP_BUILD + "\\include";
 		php_usual_lib_suspects += ";" + PHP_PHP_BUILD + "\\lib";
 	}
-
-	p = CHECK_HEADER_ADD_INCLUDE("arpa\\nameser.h", "CFLAGS", php_usual_include_suspects);
-
-	// hack to catch common location of libs
-	if (typeof(p) == "string") {
-		p = p.replace(new RegExp("include$"), "lib");
-		ADD_FLAG("LDFLAGS", '/libpath:"' + p + '" ');
-		php_usual_lib_suspects += ";" + p;
-	} else if (!p) {
-		ERROR("We really need that arpa\\nameser.h file - it is part of the bindlib package");
-	}
 }
 
 function add_extra_dirs()
@@ -291,9 +280,6 @@ function add_extra_dirs()
 
 probe_basic_headers();
 add_extra_dirs();
-if (!(CHECK_LIB("resolv_a.lib") || CHECK_LIB("resolv.lib"))) {
-	ERROR("We really need that arpa\\nameser.h file - it is part of the bindlib package");
-}
 
 //DEFINE("PHP_BUILD", PHP_PHP_BUILD);
 
@@ -317,6 +303,7 @@ ADD_SOURCES("main", "main.c snprintf.c spprintf.c safe_mode.c getopt.c fopen_wra
 	php_scandir.c php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
 	strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c network.c \
 	php_open_temporary_file.c php_logos.c output.c internal_functions.c php_sprintf.c");
+ADD_SOURCES("win32", "inet.c");
 
 ADD_SOURCES("main/streams", "streams.c cast.c memory.c filter.c plain_wrapper.c \
 	userspace.c transports.c xp_socket.c mmap.c glob_wrapper.c");
