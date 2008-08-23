@@ -2,7 +2,6 @@
 #ifndef _CRYPT_FREESEC_H
 #define _CRYPT_FREESEC_H
 
-#include "php_config.h"
 
 #if PHP_WIN32
 # include "win32/php_stdint.h"
@@ -11,11 +10,6 @@
 # if HAVE_STDINT_H
 # include <stdint.h>
 # endif
-# ifndef HAVE_U_INT32_T
-   typedef uint32_t u_int32_t;
-# endif
-#endif
-#if !PHP_WIN32
 # ifndef HAVE_U_INT32_T
    typedef uint32_t u_int32_t;
 # endif
