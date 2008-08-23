@@ -924,7 +924,7 @@ PHP_METHOD(xmlreader, resetState)
 */
 
 #if LIBXML_VERSION >= 20620
-/* {{{ proto boolean XMLReader::readInnerXml()
+/* {{{ proto string XMLReader::readInnerXml()
 Reads the contents of the current node, including child nodes and markup. */
 PHP_METHOD(xmlreader, readInnerXml)
 {
