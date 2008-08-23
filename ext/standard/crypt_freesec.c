@@ -69,6 +69,20 @@
 #include <stdio.h>
 #endif
 
+
+#if defined(__GNUC__)
+# ifdef inline
+# undef inline
+# endif
+# define inline inline __attribute__((always_inline))
+#elif defined(_MSC_VER)
+# define inline __forceinline
+#else
+# ifndef inline
+#  define inline
+# endif
+#endif
+
 #include "crypt_freesec.h"
 
 #define _PASSWORD_EFMT1 '_'
