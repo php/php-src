@@ -1,3 +1,106 @@
+2008-08-22  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_compile.c:
+      - Removed unused arguments
+
+2008-08-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      zend_list.c:
+      Fixed destruction of dl() loaded extensions
+
+    * zend_list.c
+      zend_list.c:
+      Removed redundant code
+
+2008-08-22  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      zend_API.c
+      zend_API.c:
+      MFH: fix zend_register_functions() not displaying duplicate functions
+      (reported by Gopal)
+
+    * zend_API.c:
+      fix zend_register_functions() not displaying duplicate functions (reported
+      by Gopal)
+
+2008-08-22  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      tests/get_class_methods_001.phpt
+      tests/get_class_methods_001.phpt
+      tests/get_class_methods_002.phpt
+      tests/get_class_methods_002.phpt
+      tests/get_class_methods_003.phpt
+      tests/get_class_methods_003.phpt:
+      - New tests
+
+    * tests/get_class_methods_001.phpt
+      tests/get_class_methods_001.phpt
+      tests/get_class_methods_001.phpt
+      tests/get_class_methods_002.phpt
+      tests/get_class_methods_002.phpt
+      tests/get_class_methods_002.phpt
+      tests/get_class_methods_003.phpt
+      tests/get_class_methods_003.phpt
+      tests/get_class_methods_003.phpt:
+        1.1.4;
+      - New tests
+
+    * (PHP_5_2)
+      zend_builtin_functions.c
+      zend_builtin_functions.c
+      tests/bug45862.phpt
+      tests/bug45862.phpt
+      tests/get_class_vars_001.phpt
+      tests/get_class_vars_001.phpt
+      tests/get_class_vars_002.phpt
+      tests/get_class_vars_002.phpt
+      tests/get_class_vars_003.phpt
+      tests/get_class_vars_003.phpt
+      tests/get_class_vars_004.phpt
+      tests/get_class_vars_004.phpt
+      tests/get_class_vars_005.phpt
+      tests/get_class_vars_005.phpt
+      tests/get_class_vars_006.phpt
+      tests/get_class_vars_006.phpt
+      tests/get_class_vars_007.phpt
+      tests/get_class_vars_007.phpt:
+      MFH:
+      - Fixed bug #45862 (get_class_vars is inconsistent with 'protected' and
+      'private' variables)
+      - Added some tests
+
+    * zend_builtin_functions.c
+      tests/bug45862.phpt
+      tests/bug45862.phpt
+      tests/bug45862.phpt
+      tests/get_class_vars_001.phpt
+      tests/get_class_vars_001.phpt
+      tests/get_class_vars_001.phpt
+      tests/get_class_vars_002.phpt
+      tests/get_class_vars_002.phpt
+      tests/get_class_vars_002.phpt
+      tests/get_class_vars_003.phpt
+      tests/get_class_vars_003.phpt
+      tests/get_class_vars_003.phpt
+      tests/get_class_vars_004.phpt
+      tests/get_class_vars_004.phpt
+      tests/get_class_vars_004.phpt
+      tests/get_class_vars_005.phpt
+      tests/get_class_vars_005.phpt
+      tests/get_class_vars_005.phpt
+      tests/get_class_vars_006.phpt
+      tests/get_class_vars_006.phpt
+      tests/get_class_vars_006.phpt
+      tests/get_class_vars_007.phpt
+      tests/get_class_vars_007.phpt
+      tests/get_class_vars_007.phpt:
+      - Fixed bug #45862 (get_class_vars is inconsistent with 'protected' and
+      'private' variables)
+      - Added some tests
+
 2008-08-21  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_list.c
