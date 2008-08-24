@@ -373,7 +373,6 @@ PHP_FUNCTION(spl_autoload_call)
 	ZVAL_ZSTRL(zclass_name, ZEND_STR_TYPE, class_name, class_name_len, 1);
 	if (SPL_G(autoload_functions)) {
 		int l_autoload_running = SPL_G(autoload_running);
-		zval *exception = NULL;
 		SPL_G(autoload_running) = 1;
 		lc_name = zend_u_str_tolower_dup(ZEND_STR_TYPE, class_name, class_name_len);
 		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &function_pos);
