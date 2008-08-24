@@ -2888,12 +2888,15 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 	}
 
 	ce->parent = parent_ce;
+	/* Transfer parent custom callbacks, if any */
+	if (!ce->serialize) {
+		ce->serialize = parent_ce->serialize;
+	}
+	if (!ce->unserialize) {
+		ce->unserialize = parent_ce->unserialize;
+	}
 	/* Inherit interfaces */
 	zend_do_inherit_interfaces(ce, parent_ce TSRMLS_CC);
-
-	/* Copy serialize/unserialize callbacks */
-	ce->serialize   = parent_ce->serialize;
-	ce->unserialize = parent_ce->unserialize;
 
 	/* Inherit properties */
 	zend_hash_merge(&ce->default_properties, &parent_ce->default_properties, (void (*)(void *)) zval_add_ref, NULL, sizeof(zval *), 0);

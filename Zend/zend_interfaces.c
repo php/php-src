@@ -474,13 +474,17 @@ ZEND_API int zend_user_unserialize(zval **object, zend_class_entry *ce, int type
 /* {{{ zend_implement_serializable */
 static int zend_implement_serializable(zend_class_entry *interface, zend_class_entry *class_type TSRMLS_DC)
 {
-	if ((class_type->serialize   && class_type->serialize   != zend_user_serialize)
-	||  (class_type->unserialize && class_type->unserialize != zend_user_unserialize)
-	) {
+	if (class_type->parent 
+		&& (class_type->parent->serialize || class_type->parent->unserialize) 
+		&& !instanceof_function_ex(class_type->parent, zend_ce_serializable, 1 TSRMLS_CC)) {
 		return FAILURE;
 	}
-	class_type->serialize = zend_user_serialize;
-	class_type->unserialize = zend_user_unserialize;
+	if (!class_type->serialize) {
+		class_type->serialize = zend_user_serialize;
+	}
+	if (!class_type->unserialize) {
+		class_type->unserialize = zend_user_unserialize;
+	}
 	return SUCCESS;
 }
 /* }}}*/
