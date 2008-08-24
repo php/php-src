@@ -55,6 +55,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 
 	if (destructor) {
 		zval *obj;
+		zend_object_store_bucket *obj_bucket;
 
 		if (destructor->op_array.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
 			if (destructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
@@ -89,7 +90,11 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 		MAKE_STD_ZVAL(obj);
 		Z_TYPE_P(obj) = IS_OBJECT;
 		Z_OBJ_HANDLE_P(obj) = handle;
-		Z_OBJ_HT_P(obj) = &std_object_handlers;
+		obj_bucket = &EG(objects_store).object_buckets[handle];
+		if (!obj_bucket->bucket.obj.handlers) {
+			obj_bucket->bucket.obj.handlers = &std_object_handlers;
+		}
+		Z_OBJ_HT_P(obj) = obj_bucket->bucket.obj.handlers;
 		zval_copy_ctor(obj);
 
 		/* Make sure that destructors are protected from previously thrown exceptions.
