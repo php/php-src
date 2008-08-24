@@ -66,6 +66,9 @@ ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *c
 
 ZEND_API void zend_register_interfaces(TSRMLS_D);
 
+ZEND_API int zend_user_serialize(zval *object, int *type, zstr *buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC);
+ZEND_API int zend_user_unserialize(zval **object, zend_class_entry *ce, int type, const zstr buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC);
+
 END_EXTERN_C()
 
 #endif /* ZEND_INTERFACES_H */
