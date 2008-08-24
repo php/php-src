@@ -405,7 +405,7 @@ static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_en
 /* }}}*/
 
 /* {{{ zend_user_serialize */
-int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC)
+ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC)
 {
 	zend_class_entry * ce = Z_OBJCE_P(object);
 	zval *retval;
@@ -442,7 +442,7 @@ int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len
 /* }}} */
 
 /* {{{ zend_user_unserialize */
-int zend_user_unserialize(zval **object, zend_class_entry *ce, const unsigned char *buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC)
+ZEND_API int zend_user_unserialize(zval **object, zend_class_entry *ce, const unsigned char *buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC)
 {
 	zval * zdata;
 
@@ -466,13 +466,17 @@ int zend_user_unserialize(zval **object, zend_class_entry *ce, const unsigned ch
 /* {{{ zend_implement_serializable */
 static int zend_implement_serializable(zend_class_entry *interface, zend_class_entry *class_type TSRMLS_DC)
 {
-	if ((class_type->serialize   && class_type->serialize   != zend_user_serialize)
-	||  (class_type->unserialize && class_type->unserialize != zend_user_unserialize)
-	) {
+	if (class_type->parent
+		&& (class_type->parent->serialize || class_type->parent->unserialize)
+		&& !instanceof_function_ex(class_type->parent, zend_ce_serializable, 1 TSRMLS_CC)) {
 		return FAILURE;
 	}
-	class_type->serialize = zend_user_serialize;
-	class_type->unserialize = zend_user_unserialize;
+	if (!class_type->serialize) {
+		class_type->serialize = zend_user_serialize;
+	}
+	if (!class_type->unserialize) {
+		class_type->unserialize = zend_user_unserialize;
+	}
 	return SUCCESS;
 }
 /* }}}*/

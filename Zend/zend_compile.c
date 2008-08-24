@@ -2780,6 +2780,14 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 	}
 
 	ce->parent = parent_ce;
+	/* Copy serialize/unserialize callbacks */
+	if (!ce->serialize) {
+		ce->serialize   = parent_ce->serialize;
+	}
+	if (!ce->unserialize) {
+		ce->unserialize = parent_ce->unserialize;
+	}
+
 	/* Inherit interfaces */
 	zend_do_inherit_interfaces(ce, parent_ce TSRMLS_CC);
 
