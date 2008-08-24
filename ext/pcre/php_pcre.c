@@ -1339,7 +1339,7 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, zend_uchar utype, char
 
 /* {{{ php_replace_in_subject
  */
-static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, int *result_len, int limit, zend_bool is_callable_replace, int *replace_count TSRMLS_DC)
+static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, int *result_len, int limit, int is_callable_replace, int *replace_count TSRMLS_DC)
 {
 	zval		**regex_entry,
 				**replace_entry = NULL,
@@ -1431,7 +1431,7 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 
 /* {{{ preg_replace_impl
  */
-static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callable_replace)
+static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_replace, int is_filter)
 {
 	zval		    *regex,
 				    *replace,
@@ -1445,8 +1445,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 	uint 			 string_key_len;
 	ulong			 num_key;
 	zval			 callback_name;
-	int				 replace_count=0;
-	int				*replace_count_ptr=NULL;
+	int				 replace_count=0, old_replace_count;
 	zend_uchar       utype;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/z/z/|lz", &regex,
@@ -1476,10 +1475,6 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 		convert_to_string_with_converter(replace, UG(utf8_conv));
 	}
 
-	if (ZEND_NUM_ARGS() > 4) {
-		replace_count_ptr = &replace_count;
-	}
-		
 	if (Z_TYPE_P(regex) != IS_ARRAY) {
 		convert_to_string_with_converter(regex, UG(utf8_conv));
 	}
@@ -1494,11 +1489,12 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 		while (zend_hash_get_current_data(Z_ARRVAL_P(subject), (void **)&subject_entry) == SUCCESS) {
 			SEPARATE_ZVAL(subject_entry);
 			utype = Z_TYPE_PP(subject_entry);
-			if ((result = php_replace_in_subject(regex, replace, subject_entry, &result_len, limit, is_callable_replace, replace_count_ptr TSRMLS_CC)) != NULL) {
-
-				/* Add to return array */
-				switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(subject), &string_key, &string_key_len, &num_key, 0, NULL))
-				{
+			old_replace_count = replace_count;
+			if ((result = php_replace_in_subject(regex, replace, subject_entry, &result_len, limit, is_callable_replace, &replace_count TSRMLS_CC)) != NULL) {
+				if (!is_filter || replace_count > old_replace_count) {
+					/* Add to return array */
+					switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(subject), &string_key, &string_key_len, &num_key, 0, NULL))
+					{
 					case HASH_KEY_IS_UNICODE:
 						if (utype == IS_UNICODE || (UG(unicode) && utype != IS_STRING)) {
 							add_u_assoc_utf8_stringl_ex(return_value, IS_UNICODE, string_key, string_key_len, result, result_len, ZSTR_AUTOFREE);
@@ -1522,6 +1518,9 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 							add_index_stringl(return_value, num_key, result, result_len, 0);
 						}
 						break;
+					}
+				} else {
+					efree(result);
 				}
 			}
 		
@@ -1529,15 +1528,20 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 		}
 	} else {	/* if subject is not an array */
 		utype = Z_TYPE_P(subject);
-		if ((result = php_replace_in_subject(regex, replace, &subject, &result_len, limit, is_callable_replace, replace_count_ptr TSRMLS_CC)) != NULL) {
-			if (utype == IS_UNICODE || (UG(unicode) && utype != IS_STRING)) {
-				RETVAL_UTF8_STRINGL(result, result_len, ZSTR_AUTOFREE);
+		old_replace_count = replace_count;
+		if ((result = php_replace_in_subject(regex, replace, &subject, &result_len, limit, is_callable_replace, &replace_count TSRMLS_CC)) != NULL) {
+			if (!is_filter || replace_count > old_replace_count) {
+				if (utype == IS_UNICODE || (UG(unicode) && utype != IS_STRING)) {
+					RETVAL_UTF8_STRINGL(result, result_len, ZSTR_AUTOFREE);
+				} else {
+					RETVAL_STRINGL(result, result_len, 0);
+				}
 			} else {
-				RETVAL_STRINGL(result, result_len, 0);
+				efree(result);
 			}
 		}
 	}
-	if (replace_count_ptr) {
+	if (ZEND_NUM_ARGS() > 4) {
 		zval_dtor(zcount);
 		ZVAL_LONG(zcount, replace_count);
 	}
@@ -1545,19 +1549,27 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 }
 /* }}} */
 
-/* {{{ proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, int &count]]) U
+/* {{{ proto mixed preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, int &count]]) U
    Perform Perl-style regular expression replacement. */
 static PHP_FUNCTION(preg_replace)
 {
-	preg_replace_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	preg_replace_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 0);
 }
 /* }}} */
 
-/* {{{ proto string preg_replace_callback(mixed regex, mixed callback, mixed subject [, int limit [, int &count]]) U
+/* {{{ proto mixed preg_replace_callback(mixed regex, mixed callback, mixed subject [, int limit [, int &count]]) U
    Perform Perl-style regular expression replacement using replacement callback. */
 static PHP_FUNCTION(preg_replace_callback)
 {
-	preg_replace_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	preg_replace_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1, 0);
+}
+/* }}} */
+
+/* {{{ proto mixed preg_filter(mixed regex, mixed replace, mixed subject [, int limit [, int &count]]) U
+   Perform Perl-style regular expression replacement and only return matches. */
+static PHP_FUNCTION(preg_filter)
+{
+	preg_replace_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 1);
 }
 /* }}} */
 
@@ -2115,6 +2127,7 @@ static const zend_function_entry pcre_functions[] = {
 	PHP_FE(preg_match_all,			arginfo_preg_match_all)
 	PHP_FE(preg_replace,			arginfo_preg_replace)
 	PHP_FE(preg_replace_callback,	arginfo_preg_replace_callback)
+	PHP_FE(preg_filter,				arginfo_preg_replace)
 	PHP_FE(preg_split,				arginfo_preg_split)
 	PHP_FE(preg_quote,				arginfo_preg_quote)
 	PHP_FE(preg_grep,				arginfo_preg_grep)
