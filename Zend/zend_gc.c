@@ -571,7 +571,7 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.refcount <= 0) {
 					EG(objects_store).object_buckets[Z_OBJ_HANDLE(p->z)].bucket.obj.refcount = 1;
 					Z_TYPE(p->z) = IS_NULL;
-					zend_objects_store_del_ref_by_handle(Z_OBJ_HANDLE(p->z) TSRMLS_CC);
+					zend_objects_store_del_ref_by_handle_ex(Z_OBJ_HANDLE(p->z), Z_OBJ_HT(p->z) TSRMLS_CC);
 				}
 			} else if (Z_TYPE(p->z) == IS_ARRAY) {
 				Z_TYPE(p->z) = IS_NULL;

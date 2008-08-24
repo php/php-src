@@ -37,6 +37,7 @@ typedef struct _zend_object_store_bucket {
 			zend_objects_store_dtor_t dtor;
 			zend_objects_free_object_storage_t free_storage;
 			zend_objects_store_clone_t clone;
+			const zend_object_handlers *handlers;
 			zend_uint refcount;
 			gc_root_buffer *buffered;
 		} obj;
@@ -66,7 +67,10 @@ ZEND_API zend_object_handle zend_objects_store_put(void *object, zend_objects_st
 ZEND_API void zend_objects_store_add_ref(zval *object TSRMLS_DC);
 ZEND_API void zend_objects_store_del_ref(zval *object TSRMLS_DC);
 ZEND_API void zend_objects_store_add_ref_by_handle(zend_object_handle handle TSRMLS_DC);
-ZEND_API void zend_objects_store_del_ref_by_handle(zend_object_handle handle TSRMLS_DC);
+ZEND_API void zend_objects_store_del_ref_by_handle_ex(zend_object_handle handle, const zend_object_handlers *handlers TSRMLS_DC);
+static inline void zend_objects_store_del_ref_by_handle(zend_object_handle handle TSRMLS_DC) {
+	zend_objects_store_del_ref_by_handle_ex(handle, NULL TSRMLS_CC);
+}
 ZEND_API zend_uint zend_objects_store_get_refcount(zval *object TSRMLS_DC);
 ZEND_API int zend_objects_is_destructor_called(zend_object_handle handle TSRMLS_DC);
 ZEND_API zend_object_value zend_objects_store_clone_obj(zval *object TSRMLS_DC);

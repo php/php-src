@@ -125,8 +125,8 @@ ZEND_API zend_object_handle zend_objects_store_put(void *object, zend_objects_st
 	obj->object = object;
 	obj->dtor = dtor?dtor:(zend_objects_store_dtor_t)zend_objects_destroy_object;
 	obj->free_storage = free_storage;
-
 	obj->clone = clone;
+	obj->handlers = NULL;
 
 #if ZEND_DEBUG_OBJECTS
 	fprintf(stderr, "Allocated object id #%d\n", handle);
@@ -184,7 +184,7 @@ ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC) /* {{{ */
 	handle = Z_OBJ_HANDLE_P(zobject);
 
 	Z_ADDREF_P(zobject);
-	zend_objects_store_del_ref_by_handle(handle TSRMLS_CC);
+	zend_objects_store_del_ref_by_handle_ex(handle, Z_OBJ_HT_P(zobject) TSRMLS_CC);
 	Z_DELREF_P(zobject);
 
 	GC_ZOBJ_CHECK_POSSIBLE_ROOT(zobject);
@@ -194,7 +194,7 @@ ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC) /* {{{ */
 /*
  * Delete a reference to an objects store entry given the object handle.
  */
-ZEND_API void zend_objects_store_del_ref_by_handle(zend_object_handle handle TSRMLS_DC) /* {{{ */
+ZEND_API void zend_objects_store_del_ref_by_handle_ex(zend_object_handle handle, const zend_object_handlers *handlers TSRMLS_DC) /* {{{ */
 {
 	struct _store_object *obj;
 	int failure = 0;
@@ -215,6 +215,9 @@ ZEND_API void zend_objects_store_del_ref_by_handle(zend_object_handle handle TSR
 				EG(objects_store).object_buckets[handle].destructor_called = 1;
 
 				if (obj->dtor) {
+					if (handlers && !obj->handlers) {
+						obj->handlers = handlers;
+					}
 					zend_try {
 						obj->dtor(obj->object, handle TSRMLS_CC);
 					} zend_catch {
@@ -268,6 +271,7 @@ ZEND_API zend_object_value zend_objects_store_clone_obj(zval *zobject TSRMLS_DC)
 
 	retval.handle = zend_objects_store_put(new_object, obj->dtor, obj->free_storage, obj->clone TSRMLS_CC);
 	retval.handlers = Z_OBJ_HT_P(zobject);
+	EG(objects_store).object_buckets[handle].bucket.obj.handlers = retval.handlers;
 
 	return retval;
 }
@@ -309,8 +313,10 @@ ZEND_API void zend_object_store_set_object(zval *zobject, void *object TSRMLS_DC
 ZEND_API void zend_object_store_ctor_failed(zval *zobject TSRMLS_DC) /* {{{ */
 {
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
-
-	EG(objects_store).object_buckets[handle].destructor_called = 1;
+	zend_object_store_bucket *obj_bucket = &EG(objects_store).object_buckets[handle];
+	
+	obj_bucket->bucket.obj.handlers = Z_OBJ_HT_P(zobject);;
+	obj_bucket->destructor_called = 1;
 }
 /* }}} */
 
