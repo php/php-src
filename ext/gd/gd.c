@@ -4143,44 +4143,36 @@ PHP_FUNCTION(imagepstext)
    Return the bounding box needed by a string if rasterized */
 PHP_FUNCTION(imagepsbbox)
 {
-	zval **str, **fnt, **sz, **sp, **wd, **ang;
-	int i, space, add_width = 0, char_width, amount_kern;
+	zval *fnt;
+	long sz = 0, sp, wd;
+	char *str;
+	int i, space = 0, add_width = 0, char_width, amount_kern;
 	int cur_x, cur_y, dx, dy;
 	int x1, y1, x2, y2, x3, y3, x4, y4;
 	int *f_ind;
-	int per_char = 0;
+	int str_len, per_char = 0;
+	int argc = ZEND_NUM_ARGS();
 	double angle, sin_a = 0, cos_a = 0;
 	BBox char_bbox, str_bbox = {0, 0, 0, 0};
 
-	switch (ZEND_NUM_ARGS()) {
-		case 3:
-			if (zend_get_parameters_ex(3, &str, &fnt, &sz) == FAILURE) {
-				RETURN_FALSE;
-			}
-			space = 0;
-			break;
-		case 6:
-			if (zend_get_parameters_ex(6, &str, &fnt, &sz, &sp, &wd, &ang) == FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(sp);
-			convert_to_long_ex(wd);
-			convert_to_double_ex(ang);
-			space = Z_LVAL_PP(sp);
-			add_width = Z_LVAL_PP(wd);
-			angle = Z_DVAL_PP(ang) * M_PI / 180;
-			sin_a = sin(angle);
-			cos_a = cos(angle);
-			per_char =  add_width || angle ? 1 : 0;
-			break;
-		default:
-			ZEND_WRONG_PARAM_COUNT();
+	if (argc != 3 && argc != 6) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "srl|lld", &str, &str_len, &fnt, &sz, &sp, &wd, &angle) == FAILURE) {
+		return;
+	}
+	
+	if (argc == 6) {
+		space = sp;
+		add_width = wd;
+		angle = angle * M_PI / 180;
+		sin_a = sin(angle);
+		cos_a = cos(angle);
+		per_char =  add_width || angle ? 1 : 0;
 	}
 
-	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", le_ps_font);
-
-	convert_to_string_ex(str);
-	convert_to_long_ex(sz);
+	ZEND_FETCH_RESOURCE(f_ind, int *, &fnt, -1, "Type 1 font", le_ps_font);
 
 #define max(a, b) (a > b ? a : b)
 #define min(a, b) (a < b ? a : b)
@@ -4191,15 +4183,15 @@ PHP_FUNCTION(imagepsbbox)
 		space += T1_GetCharWidth(*f_ind, ' ');
 		cur_x = cur_y = 0;
 
-		for (i = 0; i < Z_STRLEN_PP(str); i++) {
-			if (Z_STRVAL_PP(str)[i] == ' ') {
+		for (i = 0; i < str_len; i++) {
+			if (str[i] == ' ') {
 				char_bbox.llx = char_bbox.lly = char_bbox.ury = 0;
 				char_bbox.urx = char_width = space;
 			} else {
-				char_bbox = T1_GetCharBBox(*f_ind, Z_STRVAL_PP(str)[i]);
-				char_width = T1_GetCharWidth(*f_ind, Z_STRVAL_PP(str)[i]);
+				char_bbox = T1_GetCharBBox(*f_ind, str[i]);
+				char_width = T1_GetCharWidth(*f_ind, str[i]);
 			}
-			amount_kern = i ? T1_GetKerning(*f_ind, Z_STRVAL_PP(str)[i - 1], Z_STRVAL_PP(str)[i]) : 0;
+			amount_kern = i ? T1_GetKerning(*f_ind, str[i - 1], str[i]) : 0;
 
 			/* Transfer character bounding box to right place */
 			x1 = new_x(char_bbox.llx, char_bbox.lly) + cur_x;
@@ -4228,7 +4220,7 @@ PHP_FUNCTION(imagepsbbox)
 		}
 
 	} else {
-		str_bbox = T1_GetStringBBox(*f_ind, Z_STRVAL_PP(str), Z_STRLEN_PP(str), space, T1_KERNING);
+		str_bbox = T1_GetStringBBox(*f_ind, str, str_len, space, T1_KERNING);
 	}
 
 	if (T1_errno) {
