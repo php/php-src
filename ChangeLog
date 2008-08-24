@@ -1,3 +1,97 @@
+2008-08-23  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/crypt_freesec.c
+      ext/standard/crypt_freesec.h:
+      - MFB: fix build (common inline definition will be done later)
+
+    * ext/standard/flock_compat.c
+      ext/standard/flock_compat.h
+      win32/inet.h:
+      - more fixes for inet_* with vc9/xp
+
+    * (PHP_5_3)
+      ext/standard/flock_compat.h:
+      - keep inet_aton declaration on non windows (what inet_aton has to do with
+      flock?)
+
+    * win32/build/config.w32.h.in:
+      - MFB!!! _WIN32_WINNT and NTDDI_VERSION (bunnie--;)
+
+    * win32/inet.c
+      win32/inet.h:
+      - MFB: fix logic, build correctly when the build targets xp/2k
+
+    * win32/build/config.w32:
+      - we need it for vc < 9 (even if php6 will support officially only 9)
+
+    * win32/build/config.w32:
+      - readd the usual suspects to lib/include (was droped with the resolv.h
+      check removal)
+
+    * (PHP_5_3)
+      ext/sockets/php_sockets_win.c
+      ext/sockets/sockets.c
+      ext/standard/basic_functions.c
+      ext/standard/dns.c
+      ext/standard/flock_compat.c
+      ext/standard/flock_compat.h
+      main/network.c
+      main/php_network.h
+      win32/glob.h
+      win32/inet.c
+      win32/inet.h
+      win32/build/config.w32:
+      - MFH:
+       - drop bindlib usage on windows
+       - inet_pton, inet_ntop and inet_aton are always available (VC9 uses the
+      CRT implementation, VC6 our own)
+
+2008-08-23  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_3)
+      ext/xmlreader/php_xmlreader.c:
+      fix proto
+
+    * ext/xmlreader/php_xmlreader.c:
+      Fix proto
+
+2008-08-23  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      NEWS
+      main/main.c:
+      - MFH: expose MAXPATHLEN (PHP_MAXPATHLEN)
+
+    * main/main.c:
+      - exposePHP_MAXPATHLEN
+
+    * ext/standard/crypt_freesec.c
+      ext/standard/crypt_freesec.h:
+      - fix build
+
+2008-08-23  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/pspell/pspell.c
+      ext/pspell/tests/003.phpt
+      ext/pspell/tests/005.phpt:
+      MFH:
+      - WS, Cosmetics
+      - Removed unnecessary variables
+
+    * ext/pspell/pspell.c
+      ext/pspell/tests/002.phpt:
+      - MFB: New parameter parsing API
+      - WS, Cosmetics
+
+2008-08-23  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * ext/standard/config.m4
+      ext/standard/crypt_freesec.c
+      ext/standard/crypt_freesec.h:
+      Fix build on solaris
+
 2008-08-22  Felipe Pena  <felipensp@gmail.com>
 
     * ZendEngine2/zend_compile.c
