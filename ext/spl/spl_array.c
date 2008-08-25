@@ -539,7 +539,7 @@ static int spl_array_has_dimension(zval *object, zval *offset, int check_empty T
 
 /* {{{ proto bool ArrayObject::offsetExists(mixed $index)
        proto bool ArrayIterator::offsetExists(mixed $index)
- Returns whether the requested $index exists. */
+   Returns whether the requested $index exists. */
 SPL_METHOD(Array, offsetExists)
 {
 	zval *index;
@@ -551,7 +551,7 @@ SPL_METHOD(Array, offsetExists)
 
 /* {{{ proto mixed ArrayObject::offsetGet(mixed $index)
        proto mixed ArrayIterator::offsetGet(mixed $index)
- Returns the value at the specified $index. */
+   Returns the value at the specified $index. */
 SPL_METHOD(Array, offsetGet)
 {
 	zval *index, *value;
@@ -564,7 +564,7 @@ SPL_METHOD(Array, offsetGet)
 
 /* {{{ proto void ArrayObject::offsetSet(mixed $index, mixed $newval)
        proto void ArrayIterator::offsetSet(mixed $index, mixed $newval)
- Sets the value at the specified $index to $newval. */
+   Sets the value at the specified $index to $newval. */
 SPL_METHOD(Array, offsetSet)
 {
 	zval *index, *value;
@@ -598,7 +598,7 @@ void spl_array_iterator_append(zval *object, zval *append_value TSRMLS_DC) /* {{
 
 /* {{{ proto void ArrayObject::append(mixed $newval)
        proto void ArrayIterator::append(mixed $newval)
- Appends the value (cannot be called for objects). */
+   Appends the value (cannot be called for objects). */
 SPL_METHOD(Array, append)
 {
 	zval *value;
@@ -611,7 +611,7 @@ SPL_METHOD(Array, append)
 
 /* {{{ proto void ArrayObject::offsetUnset(mixed $index)
        proto void ArrayIterator::offsetUnset(mixed $index)
- Unsets the value at the specified $index. */
+   Unsets the value at the specified $index. */
 SPL_METHOD(Array, offsetUnset)
 {
 	zval *index;
@@ -623,7 +623,7 @@ SPL_METHOD(Array, offsetUnset)
 
 /* {{{ proto array ArrayObject::getArrayCopy()
       proto array ArrayIterator::getArrayCopy()
- Return a copy of the contained array */
+   Return a copy of the contained array */
 SPL_METHOD(Array, getArrayCopy)
 {
 	zval *object = getThis(), *tmp;
@@ -985,7 +985,7 @@ zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object,
 
 /* {{{ proto void ArrayObject::__construct(array|object ar = array() [, int flags = 0 [, string iterator_class = "ArrayIterator"]])
        proto void ArrayIterator::__construct(array|object ar = array() [, int flags = 0])
- Cronstructs a new array iterator from a path. */
+   Constructs a new array iterator from a path. */
 SPL_METHOD(Array, __construct)
 {
 	zval *object = getThis();
@@ -1135,7 +1135,7 @@ SPL_METHOD(Array, rewind)
 /* }}} */
 
 /* {{{ proto void ArrayIterator::seek(int $position)
- Seek to position. */
+   Seek to position. */
 SPL_METHOD(Array, seek)
 {
 	long opos, position;
@@ -1219,7 +1219,7 @@ int spl_array_object_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ 
 
 /* {{{ proto int ArrayObject::count()
        proto int ArrayIterator::count()
- Return the number of elements in the Iterator. */
+   Return the number of elements in the Iterator. */
 SPL_METHOD(Array, count)
 {
 	long count;
@@ -1261,32 +1261,32 @@ SPL_METHOD(cname, fname) \
 
 /* {{{ proto int ArrayObject::asort()
        proto int ArrayIterator::asort()
- Sort the entries by values. */
+   Sort the entries by values. */
 SPL_ARRAY_METHOD(Array, asort, 0) /* }}} */
 
 /* {{{ proto int ArrayObject::ksort()
        proto int ArrayIterator::ksort()
- Sort the entries by key. */
+   Sort the entries by key. */
 SPL_ARRAY_METHOD(Array, ksort, 0) /* }}} */
 
 /* {{{ proto int ArrayObject::uasort(callback cmp_function)
        proto int ArrayIterator::uasort(callback cmp_function)
- Sort the entries by values user defined function. */
+   Sort the entries by values user defined function. */
 SPL_ARRAY_METHOD(Array, uasort, 1) /* }}} */
 
 /* {{{ proto int ArrayObject::uksort(callback cmp_function)
        proto int ArrayIterator::uksort(callback cmp_function)
- Sort the entries by key using user defined function. */
+   Sort the entries by key using user defined function. */
 SPL_ARRAY_METHOD(Array, uksort, 1) /* }}} */
 
 /* {{{ proto int ArrayObject::natsort()
        proto int ArrayIterator::natsort()
- Sort the entries by values using "natural order" algorithm. */
+   Sort the entries by values using "natural order" algorithm. */
 SPL_ARRAY_METHOD(Array, natsort, 0) /* }}} */
 
 /* {{{ proto int ArrayObject::natcasesort()
        proto int ArrayIterator::natcasesort()
- Sort the entries by key using case insensitive "natural order" algorithm. */
+   Sort the entries by key using case insensitive "natural order" algorithm. */
 SPL_ARRAY_METHOD(Array, natcasesort, 0) /* }}} */
 
 /* {{{ proto mixed|NULL ArrayIterator::current()
@@ -1494,8 +1494,7 @@ smart_str spl_array_serialize_helper(spl_array_object *intern, php_serialize_dat
 /* }}} */
 
 /* {{{ proto string ArrayObject::serialize()
- * serialize the object
- */
+   Serialize the object */
 SPL_METHOD(Array, serialize)
 {
 	zval *object = getThis();
@@ -1523,7 +1522,8 @@ SPL_METHOD(Array, serialize)
 	RETURN_NULL();
 } /* }}} */
 
-int spl_array_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC) { /* {{{ */
+int spl_array_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC) /* {{{ */
+{
 	spl_array_object     *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 
 	if (intern->fptr_serialize) {
@@ -1555,7 +1555,8 @@ int spl_array_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len
 }
 /* }}} */
 
-void spl_array_unserialize_helper(spl_array_object *intern, const unsigned char *buf, int buf_len, php_unserialize_data_t *var_hash_p TSRMLS_DC) { /* {{{ */
+void spl_array_unserialize_helper(spl_array_object *intern, const unsigned char *buf, int buf_len, php_unserialize_data_t *var_hash_p TSRMLS_DC) /* {{{ */
+{
 	const unsigned char *p, *s;
 	zval *pmembers, *pflags = NULL;
 	long flags;
@@ -1631,10 +1632,7 @@ outexcept:
 /* }}} */
 
 /* {{{ proto void ArrayObject::unserialize(string serialized)
- *
- *
- * unserialize the object
- */
+   Unserialize the object */
 SPL_METHOD(Array, unserialize)
 {
 	char *buf;
@@ -1665,7 +1663,7 @@ SPL_METHOD(Array, unserialize)
 	}
 } /* }}} */
 
-int spl_array_unserialize(zval **object, zend_class_entry *ce, int type, const zstr buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC)
+int spl_array_unserialize(zval **object, zend_class_entry *ce, int type, const zstr buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern;
 
