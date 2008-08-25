@@ -65,24 +65,6 @@
 #include <sys/types.h>
 #include <string.h>
 
-#ifdef TEST
-#include <stdio.h>
-#endif
-
-
-#if defined(__GNUC__)
-# ifdef inline
-# undef inline
-# endif
-# define inline inline __attribute__((always_inline))
-#elif defined(_MSC_VER)
-# define inline __forceinline
-#else
-# ifndef inline
-#  define inline
-# endif
-#endif
-
 #include "crypt_freesec.h"
 
 #define _PASSWORD_EFMT1 '_'
@@ -172,7 +154,7 @@ static u_char	pbox[32] = {
 	 2,  8, 24, 14, 32, 27,  3,  9, 19, 13, 30,  6, 22, 11,  4, 25
 };
 
-static u_int32_t bits32[32] =
+static uint32_t bits32[32] =
 {
 	0x80000000, 0x40000000, 0x20000000, 0x10000000,
 	0x08000000, 0x04000000, 0x02000000, 0x01000000,
@@ -192,11 +174,11 @@ static unsigned char	ascii64[] =
 /*	  0123456789012345678901234567890123456789012345678901234567890123 */
 
 static u_char m_sbox[4][4096];
-static u_int32_t psbox[4][256];
-static u_int32_t ip_maskl[8][256], ip_maskr[8][256];
-static u_int32_t fp_maskl[8][256], fp_maskr[8][256];
-static u_int32_t key_perm_maskl[8][128], key_perm_maskr[8][128];
-static u_int32_t comp_maskl[8][128], comp_maskr[8][128];
+static uint32_t psbox[4][256];
+static uint32_t ip_maskl[8][256], ip_maskr[8][256];
+static uint32_t fp_maskl[8][256], fp_maskr[8][256];
+static uint32_t key_perm_maskl[8][128], key_perm_maskr[8][128];
+static uint32_t comp_maskl[8][128], comp_maskr[8][128];
 
 static inline int
 ascii_to_bin(char ch)
@@ -220,8 +202,8 @@ void
 _crypt_extended_init(void)
 {
 	int i, j, b, k, inbit, obit;
-	u_int32_t *p, *il, *ir, *fl, *fr;
-	u_int32_t *bits28, *bits24;
+	uint32_t *p, *il, *ir, *fl, *fr;
+	uint32_t *bits28, *bits24;
 	u_char inv_key_perm[64];
 	u_char u_key_perm[56];
 	u_char inv_comp_perm[56];
@@ -359,9 +341,9 @@ des_init_local(struct php_crypt_extended_data *data)
 }
 
 static void
-setup_salt(u_int32_t salt, struct php_crypt_extended_data *data)
+setup_salt(uint32_t salt, struct php_crypt_extended_data *data)
 {
-	u_int32_t	obit, saltbit, saltbits;
+	uint32_t	obit, saltbit, saltbits;
 	int	i;
 
 	if (salt == data->old_salt)
@@ -383,19 +365,19 @@ setup_salt(u_int32_t salt, struct php_crypt_extended_data *data)
 static int
 des_setkey(const char *key, struct php_crypt_extended_data *data)
 {
-	u_int32_t	k0, k1, rawkey0, rawkey1;
+	uint32_t	k0, k1, rawkey0, rawkey1;
 	int	shifts, round;
 
 	rawkey0 =
-		(u_int32_t)(u_char)key[3] |
-		((u_int32_t)(u_char)key[2] << 8) |
-		((u_int32_t)(u_char)key[1] << 16) |
-		((u_int32_t)(u_char)key[0] << 24);
+		(uint32_t)(u_char)key[3] |
+		((uint32_t)(u_char)key[2] << 8) |
+		((uint32_t)(u_char)key[1] << 16) |
+		((uint32_t)(u_char)key[0] << 24);
 	rawkey1 =
-		(u_int32_t)(u_char)key[7] |
-		((u_int32_t)(u_char)key[6] << 8) |
-		((u_int32_t)(u_char)key[5] << 16) |
-		((u_int32_t)(u_char)key[4] << 24);
+		(uint32_t)(u_char)key[7] |
+		((uint32_t)(u_char)key[6] << 8) |
+		((uint32_t)(u_char)key[5] << 16) |
+		((uint32_t)(u_char)key[4] << 24);
 
 	if ((rawkey0 | rawkey1)
 	    && rawkey0 == data->old_rawkey0
@@ -435,7 +417,7 @@ des_setkey(const char *key, struct php_crypt_extended_data *data)
 	 */
 	shifts = 0;
 	for (round = 0; round < 16; round++) {
-		u_int32_t	t0, t1;
+		uint32_t	t0, t1;
 
 		shifts += key_shifts[round];
 
@@ -466,14 +448,14 @@ des_setkey(const char *key, struct php_crypt_extended_data *data)
 }
 
 static int
-do_des(u_int32_t l_in, u_int32_t r_in, u_int32_t *l_out, u_int32_t *r_out,
+do_des(uint32_t l_in, uint32_t r_in, uint32_t *l_out, uint32_t *r_out,
 	int count, struct php_crypt_extended_data *data)
 {
 	/*
 	 *	l_in, r_in, l_out, and r_out are in pseudo-"big-endian" format.
 	 */
-	u_int32_t	l, r, *kl, *kr, *kl1, *kr1;
-	u_int32_t	f, r48l, r48r, saltbits;
+	uint32_t	l, r, *kl, *kr, *kl1, *kr1;
+	uint32_t	f, r48l, r48r, saltbits;
 	int	round;
 
 	if (count == 0) {
@@ -584,24 +566,24 @@ do_des(u_int32_t l_in, u_int32_t r_in, u_int32_t *l_out, u_int32_t *r_out,
 }
 
 static int
-des_cipher(const char *in, char *out, u_int32_t salt, int count,
+des_cipher(const char *in, char *out, uint32_t salt, int count,
 	struct php_crypt_extended_data *data)
 {
-	u_int32_t	l_out, r_out, rawl, rawr;
+	uint32_t	l_out, r_out, rawl, rawr;
 	int	retval;
 
 	setup_salt(salt, data);
 
 	rawl =
-		(u_int32_t)(u_char)in[3] |
-		((u_int32_t)(u_char)in[2] << 8) |
-		((u_int32_t)(u_char)in[1] << 16) |
-		((u_int32_t)(u_char)in[0] << 24);
+		(uint32_t)(u_char)in[3] |
+		((uint32_t)(u_char)in[2] << 8) |
+		((uint32_t)(u_char)in[1] << 16) |
+		((uint32_t)(u_char)in[0] << 24);
 	rawr =
-		(u_int32_t)(u_char)in[7] |
-		((u_int32_t)(u_char)in[6] << 8) |
-		((u_int32_t)(u_char)in[5] << 16) |
-		((u_int32_t)(u_char)in[4] << 24);
+		(uint32_t)(u_char)in[7] |
+		((uint32_t)(u_char)in[6] << 8) |
+		((uint32_t)(u_char)in[5] << 16) |
+		((uint32_t)(u_char)in[4] << 24);
 
 	retval = do_des(rawl, rawr, &l_out, &r_out, count, data);
 
@@ -622,7 +604,7 @@ _crypt_extended_r(const char *key, const char *setting,
 	struct php_crypt_extended_data *data)
 {
 	int		i;
-	u_int32_t	count, salt, l, r0, r1, keybuf[2];
+	uint32_t	count, salt, l, r0, r1, keybuf[2];
 	u_char		*p, *q;
 
 	if (!data->initialized)
