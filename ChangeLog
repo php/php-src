@@ -1,3 +1,92 @@
+2008-08-24  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/odbc/php_odbc.c:
+      - New parameter parsing API
+      - CS
+
+2008-08-24  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.h:
+      MFH:
+      - Copy custom callback to the child class if any
+      - Prevent overwriting valid parent callbacks when implementing
+      Serializable
+      - Export zend_user_(un)serialize to be available for custom callbacks
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_interfaces.c:
+      - Fix the order, and avoid overwriting when implementing Serializable
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.h:
+      - Export zend_user_(un)serialize functions to be used by custom callbacks
+      - Transfer custom (un)serialize callbacks through inheritance
+
+2008-08-24  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_gc.c
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.h:
+      - MFH Fix issue with destruction of overloaded objects
+
+    * (PHP_5_3)
+      ext/spl/tests/iterator_068.phpt:
+      - Add new test
+
+    * ext/spl/tests/iterator_068.phpt
+      ext/spl/tests/iterator_068.phpt:
+      
+      - Add new test
+
+    * ZendEngine2/zend_gc.c
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.h:
+      - Fix issue with destruction of overloaded objects
+
+2008-08-24  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/curl/config.w32:
+      - fix zlib detection and enable features available in 7.18.1
+
+2008-08-24  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/tests/preg_filter.phpt:
+      - Added function preg_filter()
+      [DOC] preg_filter() is basically the same as preg_replace but unlike the
+            latter it returns matches.
+
+2008-08-24  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/spl/php_spl.c:
+      - Removed unused variable
+
+    * ext/gd/gd.c
+      ext/wddx/wddx.c:
+      - MFB: New parameter parsing API
+      - CS (wddx)
+
+    * (PHP_5_3)
+      ext/xml/xml.c:
+      - Removed unnecessary variable
+
+    * ext/xml/xml.c:
+      MFB:
+      - New parameter parsing API
+      - Fixed crash in xml_parse_into_struct
+
+    * ext/xmlrpc/xmlrpc-epi-php.c:
+      - MFB: New parameter parsing API
+      - WS, Cosmetics
+
 2008-08-23  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * (PHP_5_3)

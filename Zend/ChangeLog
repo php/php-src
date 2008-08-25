@@ -1,3 +1,40 @@
+2008-08-24  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      zend_compile.c
+      zend_interfaces.c
+      zend_interfaces.h:
+      MFH:
+      - Copy custom callback to the child class if any
+      - Prevent overwriting valid parent callbacks when implementing
+      Serializable
+      - Export zend_user_(un)serialize to be available for custom callbacks
+
+    * zend_compile.c
+      zend_interfaces.c:
+      - Fix the order, and avoid overwriting when implementing Serializable
+
+    * zend_compile.c
+      zend_interfaces.c
+      zend_interfaces.h:
+      - Export zend_user_(un)serialize functions to be used by custom callbacks
+      - Transfer custom (un)serialize callbacks through inheritance
+
+2008-08-24  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      zend_gc.c
+      zend_objects.c
+      zend_objects_API.c
+      zend_objects_API.h:
+      - MFH Fix issue with destruction of overloaded objects
+
+    * zend_gc.c
+      zend_objects.c
+      zend_objects_API.c
+      zend_objects_API.h:
+      - Fix issue with destruction of overloaded objects
+
 2008-08-22  Felipe Pena  <felipensp@gmail.com>
 
     * zend_compile.c:
