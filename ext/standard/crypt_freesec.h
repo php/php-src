@@ -1,17 +1,24 @@
 /* $Id$ */
+
 #ifndef _CRYPT_FREESEC_H
 #define _CRYPT_FREESEC_H
 
+#include "php_config.h"
 
 #if PHP_WIN32
 # include "win32/php_stdint.h"
 #else
-# include "php_config.h"
-# if HAVE_STDINT_H
+# if HAVE_INTTYPES_H
+#  include <inttypes.h>
+# elif HAVE_STDINT_H
 #  include <stdint.h>
 # endif
-# ifndef HAVE_U_INT32_T
-   typedef uint32_t u_int32_t;
+# ifndef HAVE_UINT32_T
+#  if SIZEOF_INT == 4
+typedef unsigned int uint32_t;
+#  elif SIZEOF_LONG == 4
+typedef unsigned long int uint32_t;
+#  endif
 # endif
 #endif
 
@@ -19,11 +26,11 @@
 
 struct php_crypt_extended_data {
 	int initialized;
-	u_int32_t saltbits;
-	u_int32_t old_salt;
-	u_int32_t en_keysl[16], en_keysr[16];
-	u_int32_t de_keysl[16], de_keysr[16];
-	u_int32_t old_rawkey0, old_rawkey1;
+	uint32_t saltbits;
+	uint32_t old_salt;
+	uint32_t en_keysl[16], en_keysr[16];
+	uint32_t de_keysl[16], de_keysr[16];
+	uint32_t old_rawkey0, old_rawkey1;
 	char output[21];
 };
 
