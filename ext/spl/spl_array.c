@@ -59,18 +59,22 @@ PHPAPI zend_class_entry  *spl_ce_RecursiveArrayIterator;
 #define SPL_ARRAY_CLONE_MASK         0x0300FFFF
 
 typedef struct _spl_array_object {
-	zend_object       std;
-	zval              *array;
-	zval              *retval;
-	HashPosition      pos;
-	int               ar_flags;
-	int               is_self;
-	zend_function     *fptr_offset_get;
-	zend_function     *fptr_offset_set;
-	zend_function     *fptr_offset_has;
-	zend_function     *fptr_offset_del;
-	zend_function     *fptr_count;
-	zend_class_entry* ce_get_iterator;
+	zend_object            std;
+	zval                   *array;
+	zval                   *retval;
+	HashPosition           pos;
+	int                    ar_flags;
+	int                    is_self;
+	zend_function          *fptr_offset_get;
+	zend_function          *fptr_offset_set;
+	zend_function          *fptr_offset_has;
+	zend_function          *fptr_offset_del;
+	zend_function          *fptr_count;
+	zend_function          *fptr_serialize;
+	zend_function          *fptr_unserialize;
+	zend_class_entry       *ce_get_iterator;
+	php_serialize_data_t   *serialize_data;
+	php_unserialize_data_t *unserialize_data;
 } spl_array_object;
 
 static inline HashTable *spl_array_get_hash_table(spl_array_object* intern, int check_std_props TSRMLS_DC) { /* {{{ */
@@ -124,6 +128,8 @@ static void spl_array_object_free_storage(void *object TSRMLS_DC)
 /* }}} */
 
 zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
+int spl_array_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC);
+int spl_array_unserialize(zval **object, zend_class_entry *ce, const unsigned char *buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC);
 
 /* {{{ spl_array_object_new_ex */
 static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, spl_array_object **obj, zval *orig, int clone_orig TSRMLS_DC)
@@ -143,6 +149,8 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 	intern->ar_flags = 0;
+	intern->serialize_data   = NULL;
+	intern->unserialize_data = NULL;
 	intern->ce_get_iterator = spl_ce_ArrayIterator;
 	if (orig) {
 		spl_array_object *other = (spl_array_object*)zend_object_store_get_object(orig TSRMLS_CC);
@@ -207,6 +215,14 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 		zend_hash_find(&class_type->function_table, "count",        sizeof("count"),        (void **) &intern->fptr_count);
 		if (intern->fptr_count->common.scope == parent) {
 			intern->fptr_count = NULL;
+		}
+		zend_hash_find(&class_type->function_table, "serialize",    sizeof("serialize"),    (void **) &intern->fptr_serialize);
+		if (intern->fptr_serialize->common.scope == parent) {
+			intern->fptr_serialize = NULL;
+		}
+		zend_hash_find(&class_type->function_table, "unserialize",  sizeof("unserialize"),  (void **) &intern->fptr_unserialize);
+		if (intern->fptr_unserialize->common.scope == parent) {
+			intern->fptr_unserialize = NULL;
 		}
 	}
 	/* Cache iterator functions if ArrayIterator or derived. Check current's */
@@ -1440,32 +1456,27 @@ SPL_METHOD(Array, getChildren)
 }
 /* }}} */
 
-/* {{{ proto string ArrayObject::serialize()
- * serialize the object
- */
-SPL_METHOD(Array, serialize)
-{
-	zval *object = getThis();
-	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
+smart_str spl_array_serialize_helper(spl_array_object *intern, php_serialize_data_t *var_hash_p TSRMLS_DC) { /* {{{ */
 	HashTable *aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
 	zval members, *pmembers;
-	php_serialize_data_t var_hash;
 	smart_str buf = {0};
+	zval *flags;
 
 	if (!aht) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and is no longer an array");
-		return;
+		return buf;
 	}
 
-	PHP_VAR_SERIALIZE_INIT(var_hash);
+	MAKE_STD_ZVAL(flags);
+	ZVAL_LONG(flags, (intern->ar_flags & SPL_ARRAY_CLONE_MASK));
 
 	/* storage */
-	smart_str_appendl(&buf, "x:i:", 4);
-	smart_str_append_long(&buf, (intern->ar_flags & SPL_ARRAY_CLONE_MASK));
-	smart_str_appendc(&buf, ';');
+	smart_str_appendl(&buf, "x:", 2);
+	php_var_serialize(&buf, &flags, var_hash_p TSRMLS_CC);
+	zval_ptr_dtor(&flags);
 
 	if (!(intern->ar_flags & SPL_ARRAY_IS_SELF)) {
-		php_var_serialize(&buf, &intern->array, &var_hash TSRMLS_CC);
+		php_var_serialize(&buf, &intern->array, var_hash_p TSRMLS_CC);
 		smart_str_appendc(&buf, ';');
 	}
 
@@ -1475,10 +1486,35 @@ SPL_METHOD(Array, serialize)
 	Z_ARRVAL(members) = intern->std.properties;
 	Z_TYPE(members) = IS_ARRAY;
 	pmembers = &members;
-	php_var_serialize(&buf, &pmembers, &var_hash TSRMLS_CC); /* finishes the string */
+	php_var_serialize(&buf, &pmembers, var_hash_p TSRMLS_CC); /* finishes the string */
 
 	/* done */
-	PHP_VAR_SERIALIZE_DESTROY(var_hash);
+	return buf;
+}
+/* }}} */
+
+/* {{{ proto string ArrayObject::serialize()
+ * serialize the object
+ */
+SPL_METHOD(Array, serialize)
+{
+	zval *object = getThis();
+	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
+	int was_in_serialize = intern->serialize_data != NULL;
+	smart_str buf;
+
+	if (!was_in_serialize) {
+		intern->serialize_data = emalloc(sizeof(php_serialize_data_t));
+		PHP_VAR_SERIALIZE_INIT(*intern->serialize_data);
+	}
+
+	buf = spl_array_serialize_helper(intern, intern->serialize_data TSRMLS_CC);
+
+	if (!was_in_serialize) {
+		PHP_VAR_SERIALIZE_DESTROY(*intern->serialize_data);
+		efree(intern->serialize_data);
+		intern->serialize_data = NULL;
+	}
 
 	if (buf.c) {
 		RETURN_STRINGL(buf.c, buf.len, 0);
@@ -1487,32 +1523,45 @@ SPL_METHOD(Array, serialize)
 	RETURN_NULL();
 } /* }}} */
 
-/* {{{ proto void ArrayObject::unserialize(string serialized)
- * unserialize the object
- */
-SPL_METHOD(Array, unserialize)
-{
-	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+int spl_array_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC) { /* {{{ */
+	spl_array_object     *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 
-	char *buf;
-	int buf_len;
+	if (intern->fptr_serialize) {
+		int retval;
+		php_serialize_data_t *before;
+
+		before = intern->serialize_data;
+		intern->serialize_data = (php_serialize_data_t *)data;
+
+		retval = zend_user_serialize(object, buffer, buf_len, data TSRMLS_CC);
+
+		intern->serialize_data = before;
+
+		return retval;
+	} else {
+		smart_str buf;
+
+		buf = spl_array_serialize_helper(intern, (php_serialize_data_t *)data TSRMLS_CC);
+
+		if (buf.c) {
+			*buffer  = (unsigned char*)estrndup(buf.c, buf.len);
+			*buf_len = buf.len;
+			efree(buf.c);
+			return SUCCESS;
+		} else {
+			return FAILURE;
+		}
+	}
+}
+/* }}} */
+
+void spl_array_unserialize_helper(spl_array_object *intern, const unsigned char *buf, int buf_len, php_unserialize_data_t *var_hash_p TSRMLS_DC) { /* {{{ */
 	const unsigned char *p, *s;
-	php_unserialize_data_t var_hash;
 	zval *pmembers, *pflags = NULL;
 	long flags;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
-		return;
-	}
-
-	if (buf_len == 0) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Empty serialized string cannot be empty");
-		return;
-	}
 
 	/* storage */
-	s = p = (const unsigned char*)buf;
-	PHP_VAR_UNSERIALIZE_INIT(var_hash);
+	s = p = buf;
 
 	if (*p!= 'x' || *++p != ':') {
 		goto outexcept;
@@ -1520,7 +1569,7 @@ SPL_METHOD(Array, unserialize)
 	++p;
 
 	ALLOC_INIT_ZVAL(pflags);
-	if (!php_var_unserialize(&pflags, &p, s + buf_len, &var_hash TSRMLS_CC) || Z_TYPE_P(pflags) != IS_LONG) {
+	if (!php_var_unserialize(&pflags, &p, s + buf_len, var_hash_p TSRMLS_CC) || Z_TYPE_P(pflags) != IS_LONG) {
 		zval_ptr_dtor(&pflags);
 		goto outexcept;
 	}
@@ -1546,7 +1595,7 @@ SPL_METHOD(Array, unserialize)
 		intern->ar_flags |= flags & SPL_ARRAY_CLONE_MASK;
 		zval_ptr_dtor(&intern->array);
 		ALLOC_INIT_ZVAL(intern->array);
-		if (!php_var_unserialize(&intern->array, &p, s + buf_len, &var_hash TSRMLS_CC)) {
+		if (!php_var_unserialize(&intern->array, &p, s + buf_len, var_hash_p TSRMLS_CC)) {
 			goto outexcept;
 		}
 	}
@@ -1562,7 +1611,7 @@ SPL_METHOD(Array, unserialize)
 	++p;
 
 	ALLOC_INIT_ZVAL(pmembers);
-	if (!php_var_unserialize(&pmembers, &p, s + buf_len, &var_hash TSRMLS_CC)) {
+	if (!php_var_unserialize(&pmembers, &p, s + buf_len, var_hash_p TSRMLS_CC)) {
 		zval_ptr_dtor(&pmembers);
 		goto outexcept;
 	}
@@ -1572,16 +1621,82 @@ SPL_METHOD(Array, unserialize)
 	zval_ptr_dtor(&pmembers);
 
 	/* done reading $serialized */
-
-	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	return;
 
 outexcept:
-	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset %ld of %d bytes", (long)((char*)p - buf), buf_len);
+	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset %ld of %d bytes", (long)((char*)p - (char *)buf), buf_len);
 	return;
 
+}
+/* }}} */
+
+/* {{{ proto void ArrayObject::unserialize(string serialized)
+ *
+ *
+ * unserialize the object
+ */
+SPL_METHOD(Array, unserialize)
+{
+	char *buf;
+	int buf_len;
+	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	int was_in_unserialize = intern->unserialize_data != NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
+		return;
+	}
+
+	if (buf_len == 0) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Empty serialized string cannot be empty");
+		return;
+	}
+
+	if (!was_in_unserialize) {
+		intern->unserialize_data = emalloc(sizeof(php_unserialize_data_t));
+		PHP_VAR_UNSERIALIZE_INIT(*intern->unserialize_data);
+	}
+
+	spl_array_unserialize_helper(intern, (const unsigned char *)buf, buf_len, intern->unserialize_data TSRMLS_CC);
+
+	if (!was_in_unserialize) {
+		PHP_VAR_UNSERIALIZE_DESTROY(*intern->unserialize_data);
+		efree(intern->unserialize_data);
+		intern->unserialize_data = NULL;
+	}
 } /* }}} */
+
+int spl_array_unserialize(zval **object, zend_class_entry *ce, int type, const zstr buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC)
+{
+	spl_array_object *intern;
+
+	object_init_ex(*object, ce);
+	intern = (spl_array_object*)zend_object_store_get_object(*object TSRMLS_CC);
+
+	if (intern->fptr_unserialize) {
+		zval *zdata;
+		php_unserialize_data_t *before;
+		MAKE_STD_ZVAL(zdata);
+		ZVAL_ZSTRL(zdata, type, buf, buf_len, 1);
+
+		before = intern->unserialize_data;
+		intern->unserialize_data = (php_unserialize_data_t *)data;
+
+		zend_call_method_with_1_params(object, ce, &ce->unserialize_func, "unserialize", NULL, zdata);
+
+		intern->unserialize_data = before;
+
+		zval_ptr_dtor(&zdata);
+	} else {
+		spl_array_unserialize_helper(intern, buf, buf_len, (php_unserialize_data_t *)data TSRMLS_CC);
+	}
+
+	if (EG(exception)) {
+		return FAILURE;
+	} else {
+		return SUCCESS;
+	}
+} 
+/* }}} */
 
 /* {{{ arginfo and function tbale */
 static
@@ -1705,6 +1820,8 @@ PHP_MINIT_FUNCTION(spl_array)
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, Aggregate);
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, ArrayAccess);
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, Serializable);
+	spl_ce_ArrayObject->serialize   = spl_array_serialize;
+	spl_ce_ArrayObject->unserialize = spl_array_unserialize;
 	memcpy(&spl_handler_ArrayObject, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 
 	spl_handler_ArrayObject.clone_obj = spl_array_object_clone;
@@ -1727,6 +1844,8 @@ PHP_MINIT_FUNCTION(spl_array)
 	REGISTER_SPL_IMPLEMENTS(ArrayIterator, ArrayAccess);
 	REGISTER_SPL_IMPLEMENTS(ArrayIterator, SeekableIterator);
 	REGISTER_SPL_IMPLEMENTS(ArrayIterator, Serializable);
+	spl_ce_ArrayIterator->serialize   = spl_array_serialize;
+	spl_ce_ArrayIterator->unserialize = spl_array_unserialize;
 	memcpy(&spl_handler_ArrayIterator, &spl_handler_ArrayObject, sizeof(zend_object_handlers));
 	spl_ce_ArrayIterator->get_iterator = spl_array_get_iterator;
 	
