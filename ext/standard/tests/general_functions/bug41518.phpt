@@ -2,8 +2,7 @@
 Bug #41518 (file_exists() warns of open_basedir restriction on non-existent file)
 --SKIPIF--
 <?php
-/* let's use /tmp here */
-$tmp_dir = __DIR__ . '/tmp';
+$tmp_dir = __DIR__ . '/bug41518';
 mkdir($tmp_dir);
 if (!is_dir($tmp_dir)) {
 	die("skip");
@@ -14,7 +13,7 @@ open_basedir=.
 --FILE--
 <?php
 
-$tmp_dir = "/tmp";
+$tmp_dir = __DIR__ . "/bug41518/";
 $tmp_file = $tmp_dir."/bug41418.tmp";
 
 touch($tmp_file);
