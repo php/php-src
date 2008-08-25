@@ -11,7 +11,7 @@ if (PHP_LIBXML == "yes") {
 
 		EXTENSION("libxml", "libxml.c", false /* never shared */);
 		AC_DEFINE("HAVE_LIBXML", 1, "LibXML support");
-		ADD_FLAG("CFLAGS_LIBXML", "/D LIBXML_STATIC /D LIBXML_STATIC_FOR_DLL ");
+		ADD_FLAG("CFLAGS_LIBXML", "/D LIBXML_STATIC /D LIBXML_STATIC_FOR_DLL /D HAVE_WIN32_THREADS ");
 		if (!PHP_LIBXML_SHARED) {
 			ADD_DEF_FILE("ext\\libxml\\php_libxml2.def");
 		}
@@ -20,5 +20,3 @@ if (PHP_LIBXML == "yes") {
 		PHP_LIBXML = "no"
 	}
 }
-
-
