@@ -1663,7 +1663,7 @@ SPL_METHOD(Array, unserialize)
 	}
 } /* }}} */
 
-int spl_array_unserialize(zval **object, zend_class_entry *ce, int type, const zstr buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC) /* {{{ */
+int spl_array_unserialize(zval **object, zend_class_entry *ce, const unsigned char *buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC)
 {
 	spl_array_object *intern;
 
@@ -1674,7 +1674,7 @@ int spl_array_unserialize(zval **object, zend_class_entry *ce, int type, const z
 		zval *zdata;
 		php_unserialize_data_t *before;
 		MAKE_STD_ZVAL(zdata);
-		ZVAL_ZSTRL(zdata, type, buf, buf_len, 1);
+		ZVAL_STRINGL(zdata, buf, buf_len, 1);
 
 		before = intern->unserialize_data;
 		intern->unserialize_data = (php_unserialize_data_t *)data;
