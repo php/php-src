@@ -482,8 +482,6 @@ if test "$ac_cv_type_u_int32_t" = "yes"; then
   AC_DEFINE([HAVE_U_INT32_T], 1, [Define if your system has u_int32_t in sys/types.h])
 fi
 
-AC_C_INLINE
-
 dnl
 dnl Setup extension sources
 dnl
