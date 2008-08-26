@@ -99,6 +99,7 @@ typedef struct _fcgi_request {
 	int            fd;
 	int            id;
 	int            keep;
+	int            closed;
 
 	int            in_len;
 	int            in_pad;
@@ -118,7 +119,7 @@ int fcgi_in_shutdown(void);
 int fcgi_listen(const char *path, int backlog);
 void fcgi_init_request(fcgi_request *req, int listen_socket);
 int fcgi_accept_request(fcgi_request *req);
-int fcgi_finish_request(fcgi_request *req);
+int fcgi_finish_request(fcgi_request *req, int force_close);
 
 char* fcgi_getenv(fcgi_request *req, const char* var, int var_len);
 char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val);
