@@ -1,3 +1,110 @@
+2008-08-25  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/libxml/config.w32:
+      fix warning
+
+2008-08-25  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/bug45910_2.phpt
+      ext/standard/tests/general_functions/callbacks_002.phpt:
+      - New test
+
+    * ZendEngine2/tests/bug45910_2.phpt
+      ZendEngine2/tests/bug45910_2.phpt
+      ext/standard/tests/general_functions/callbacks_002.phpt:
+      
+      - New test
+
+    * (PHP_5_3)
+      ext/standard/tests/general_functions/callbacks_002.phpt:
+      file callbacks_002.phpt was added on branch PHP_5_3 on 2008-08-25 19:38:37
+      +0000
+
+2008-08-25  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_3)
+      ext/spl/spl_array.c:
+      no zstr in 5_3
+
+2008-08-25  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/bug45910.phpt
+      ZendEngine2/tests/constants_007.phpt
+      ZendEngine2/tests/constants_008.phpt
+      ZendEngine2/tests/constants_009.phpt
+      ZendEngine2/tests/inter_007.phpt:
+      - New tests
+
+    * ZendEngine2/tests/bug45910.phpt
+      ZendEngine2/tests/bug45910.phpt
+      ZendEngine2/tests/constants_007.phpt
+      ZendEngine2/tests/constants_007.phpt
+      ZendEngine2/tests/constants_008.phpt
+      ZendEngine2/tests/constants_008.phpt
+      ZendEngine2/tests/constants_009.phpt
+      ZendEngine2/tests/constants_009.phpt
+      ZendEngine2/tests/inter_007.phpt
+      ZendEngine2/tests/inter_007.phpt:
+      
+      - New tests
+
+2008-08-25  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/spl/spl_array.c:
+      - Fix CS, folding tags..etc. PLEASE do not invent your own coding styles.
+      Or commit something as fubar as this..
+
+2008-08-25  Etienne Kneuss  <php@colder.ch>
+
+    * ext/spl/tests/bug45826.phpt
+      ext/spl/tests/bug45826.phpt:
+      
+      Fix #45826 (Custom serialization)
+
+    * ext/spl/spl_array.c:
+      Fix #45826 (Custom serialization)
+
+2008-08-25  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/crypt_freesec.h:
+      - and the last part of the fix, inline on win
+
+2008-08-25  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/crypt_freesec.h:
+      - Fix win32 build
+
+2008-08-25  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/strings/stripslashes_error.phpt
+      ext/standard/tests/strings/stripslashes_variation1.phpt
+      ext/standard/tests/strings/strlen.phpt
+      ext/standard/tests/strings/strtoupper1.phpt:
+      - Fixed tests
+
+2008-08-25  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/config.m4
+      ext/standard/crypt_freesec.c
+      ext/standard/crypt_freesec.h:
+      - Nuke unncessary checks already done elsewhere (ZEND)
+      - Use the correct type header files if available. (win32 does what it
+      does)
+      - inline definition is in php_config.h, so include it always.
+
+    * ext/standard/tests/general_functions/bug41518.phpt:
+      fix test: no crap left behind
+
+    * ext/standard/config.m4:
+      - Nuke duplicate macro call
+
+    * (PHP_5_3)
+      NEWS:
+      - fixed in 5.2 branch
+
 2008-08-24  Felipe Pena  <felipensp@gmail.com>
 
     * ext/odbc/php_odbc.c:
