@@ -22,6 +22,7 @@ if (!$fp = @fopen('/tmp/mysqli_debug_phpt.trace', 'w'))
 	die("skip PHP cannot create a file in /tmp/mysqli_debug_phpt");
 else
 	fclose($fp);
+@unlink("/tmp/mysqli_debug_phpt.trace");
 ?>
 --INI--
 mysqlnd.debug="t:O,/tmp/mysqli_debug_phpt.trace"
