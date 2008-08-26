@@ -58,7 +58,7 @@ function get_depends($module)
 		 * but the debug version (msvcrtd.dll) and those from visual studio.net
 		 * (msvcrt7x.dll) are not */
 		'msvcrt.dll',
-
+		'wldap32.dll'
 		);
 	global $build_dir, $extra_dll_deps, $ext_targets, $sapi_targets, $pecl_targets, $phpdll, $per_module_deps, $pecl_dll_deps;
 	
@@ -295,22 +295,13 @@ foreach ($extra_dll_deps as $dll) {
 	copy($dll, "$dist_dir/" . basename($dll));
 }
 
-$ICU_DLLS = array(
-	'icudt36.dll',
-	'icuin36.dll',
-	'icuio36.dll',
-	'icule36.dll',
-	'iculx36.dll',
-	'icutu36.dll',
-	'icuuc36.dll'
-);
-foreach ($ICU_DLLS as $dll) {
-	$tdll = '../deps/bin/' . basename($dll);
-	if (!file_exists($tdll)) {
-		echo "WARNING: distro depends on $dll, but could not find it on your system\n";
-		continue;
-	}
-	copy($tdll, "$dist_dir/" . basename($dll));
+/* TODO:
+add sanity check and test if all required DLLs are present, per version 
+This version works at least for 3.6, 3.8 and 4.0 (5.3-vc6, 5.3-vc9 and HEAD).
+*/
+$ICU_DLLS = '../deps/bin/' . 'icudt*.dll';
+foreach (glob($ICU_DLLS) as $filename) {
+	copy($filename, "$dist_dir/" . basename($dll));
 }
 
 /* and those for pecl */
