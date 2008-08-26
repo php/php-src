@@ -1,3 +1,35 @@
+2008-08-25  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      tests/bug45910_2.phpt:
+      - New test
+
+    * tests/bug45910_2.phpt
+      tests/bug45910_2.phpt:
+      
+      - New test
+
+    * (PHP_5_3)
+      tests/bug45910.phpt
+      tests/constants_007.phpt
+      tests/constants_008.phpt
+      tests/constants_009.phpt
+      tests/inter_007.phpt:
+      - New tests
+
+    * tests/bug45910.phpt
+      tests/bug45910.phpt
+      tests/constants_007.phpt
+      tests/constants_007.phpt
+      tests/constants_008.phpt
+      tests/constants_008.phpt
+      tests/constants_009.phpt
+      tests/constants_009.phpt
+      tests/inter_007.phpt
+      tests/inter_007.phpt:
+      
+      - New tests
+
 2008-08-24  Etienne Kneuss  <php@colder.ch>
 
     * (PHP_5_3)
