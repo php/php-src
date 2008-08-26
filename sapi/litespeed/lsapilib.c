@@ -576,6 +576,10 @@ int LSAPI_Init(void)
         lsapi_signal(SIGPIPE, lsapi_sigpipe);
         lsapi_signal(SIGUSR1, lsapi_siguser1);
 
+#if defined(SIGXFSZ) && defined(SIG_IGN)
+        signal(SIGXFSZ, SIG_IGN);
+#endif
+
         if ( LSAPI_InitRequest( &g_req, LSAPI_SOCK_FILENO ) == -1 ) {
             return -1;
         }
