@@ -662,6 +662,7 @@ static int fcgi_read_request(fcgi_request *req)
 	unsigned char buf[FCGI_MAX_LENGTH+8];
 
 	req->keep = 0;
+	req->closed = 0;
 	req->in_len = 0;
 	req->out_hdr = NULL;
 	req->out_pos = req->out_buf;
@@ -886,7 +887,6 @@ int fcgi_accept_request(fcgi_request *req)
 	HANDLE pipe;
 	OVERLAPPED ov;
 #endif
-	fcgi_finish_request(req);
 
 	while (1) {
 		if (req->fd < 0) {
@@ -1177,13 +1177,16 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 	return len;
 }
 
-int fcgi_finish_request(fcgi_request *req)
+int fcgi_finish_request(fcgi_request *req, int force_close)
 {
 	int ret = 1;
 
 	if (req->fd >= 0) {
-		ret = fcgi_flush(req, 1);
-		fcgi_close(req, 0, 1);
+		if (!req->closed) {
+			ret = fcgi_flush(req, 1);
+			req->closed = 1;
+		}
+		fcgi_close(req, force_close, 1);
 	}
 	return ret;
 }
