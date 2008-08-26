@@ -448,11 +448,12 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ *
 			}
 		} else { /* local file */
 			char resolved_path[MAXPATHLEN];
-			if (!VCWD_REALPATH(buffer, resolved_path)) {
+
+			if (buffer_len && VCWD_REALPATH(buffer, resolved_path)) {
+				ret_val = (char *) magic_file(finfo->magic, buffer);
+			} else {
 				RETURN_FALSE;
 			}
-
-			ret_val = (char *) magic_file(finfo->magic, buffer);
 			goto common;
 		}
 	} else { /* buffer */
