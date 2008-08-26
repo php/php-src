@@ -27,6 +27,7 @@ PHP                                                                        NEWS
   relative time string. (Derick)
 
 - Fixed bug #45798 (sqlite3 doesn't notice if variable was bound). (Felipe)
+- Fixed bug #45786 (FastCGI process exited unexpectedly). (Dmitry)
 - Fixed bug #45763 (mysqli::multi_query does not work with mysqlnd). (Johannes)
 - Fixed bug #45757 (FreeBSD4.11 build failure: failed include; stdint.h).
   (Hannes)

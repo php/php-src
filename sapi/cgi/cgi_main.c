@@ -776,7 +776,7 @@ static int sapi_cgi_deactivate(TSRMLS_D)
 #ifndef PHP_WIN32
 				!parent &&
 #endif
-				!fcgi_finish_request((fcgi_request*)SG(server_context))) {
+				!fcgi_finish_request((fcgi_request*)SG(server_context), 0)) {
 				php_handle_aborted_connection();
 			}
 		} else {
@@ -1914,7 +1914,7 @@ consult the installation file that came with this distribution, or visit \n\
 			   get path_translated */
 			if (php_request_startup(TSRMLS_C) == FAILURE) {
 				if (fastcgi) {
-					fcgi_finish_request(&request);
+					fcgi_finish_request(&request, 1);
 				}
 				SG(server_context) = NULL;
 				php_module_shutdown(TSRMLS_C);
@@ -2056,7 +2056,7 @@ fastcgi_request_done:
 			/* only fastcgi will get here */
 			requests++;
 			if (max_requests && (requests == max_requests)) {
-				fcgi_finish_request(&request);
+				fcgi_finish_request(&request, 1);
 				if (bindpath) {
 					free(bindpath);
 				}
