@@ -294,6 +294,16 @@ foreach ($extra_dll_deps as $dll) {
 	}
 	copy($dll, "$dist_dir/" . basename($dll));
 }
+
+/* TODO:
+add sanity check and test if all required DLLs are present, per version 
+This version works at least for 3.6, 3.8 and 4.0 (5.3-vc6, 5.3-vc9 and HEAD).
+*/
+$ICU_DLLS = '../deps/bin/' . 'icudt*.dll';
+foreach (glob($ICU_DLLS) as $filename) {
+	copy($filename, "$dist_dir/" . basename($dll));
+}
+
 /* and those for pecl */
 foreach ($pecl_dll_deps as $dll) {
 	if (in_array($dll, $extra_dll_deps)) {
