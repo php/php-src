@@ -127,9 +127,9 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 
 		if ((m->flag & BINTEST) != mode) {
 			/* Skip sub-tests */
-			while (magic[magindex + 1].cont_level != 0 &&
-			       ++magindex < nmagic)
+			while (magic[magindex + 1].cont_level != 0 && ++magindex < nmagic) {
 				continue;
+			}
 			continue; /* Skip to next top-level test*/
 		}
 
@@ -157,9 +157,9 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 			 * main entry didn't match,
 			 * flush its continuations
 			 */
-			while (magindex < nmagic - 1 &&
-			    magic[magindex + 1].cont_level != 0)
+			while (magindex < nmagic - 1 && magic[magindex + 1].cont_level != 0) {
 				magindex++;
+			}
 			continue;
 		}
 
@@ -197,8 +197,7 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 			}
 			ms->offset = m->offset;
 			if (m->flag & OFFADD) {
-				ms->offset +=
-				    ms->c.li[cont_level - 1].off;
+				ms->offset += ms->c.li[cont_level - 1].off;
 			}
 
 #ifdef ENABLE_CONDITIONALS
@@ -282,11 +281,12 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 private int
 check_fmt(struct magic_set *ms, struct magic *m)
 {
-	regex_t rx;
+	regex_t rx = {0};
 	int rc;
 
-	if (strchr(MAGIC_DESC, '%') == NULL)
+	if (strchr(MAGIC_DESC, '%') == NULL) {
 		return 0;
+	}
 
 	rc = regcomp(&rx, "%[-0-9\\.]*s", REG_EXTENDED|REG_NOSUB);
 	if (rc) {
@@ -295,31 +295,13 @@ check_fmt(struct magic_set *ms, struct magic *m)
 		file_magerror(ms, "regex error %d, (%s)", rc, errmsg);
 		return -1;
 	} else {
-		rc = regexec(&rx, MAGIC_DESC, 0, 0, 0);
+		regmatch_t *pmatch = (regmatch_t *)ecalloc(sizeof(regmatch_t), rx.re_nsub + 1);
+		rc = regexec(&rx, MAGIC_DESC, rx.re_nsub + 1, pmatch, 0);
+		efree(pmatch);
 		regfree(&rx);
 		return !rc;
 	}
 }
-
-#ifndef HAVE_STRNDUP
-char * strndup(const char *, size_t);
-
-char *
-strndup(const char *str, size_t n)
-{
-	size_t len;
-	char *copy;
-
-	len = strlen(str);
-	if (len > n)
-		len = n;
-	if (!(copy = malloc(len + 1)))
-		return (NULL);
-	(void) memcpy(copy, str, len + 1);
-	copy[len] = '\0';
-	return (copy);
-}
-#endif /* HAVE_STRNDUP */
 
 private int32_t
 mprint(struct magic_set *ms, struct magic *m)
@@ -338,7 +320,7 @@ mprint(struct magic_set *ms, struct magic *m)
 		case -1:
 			return -1;
 		case 1:
-			if (asprintf(&buf, "%c", (unsigned char)v) < 0)
+			if (spprintf(&buf, 0, "%c", (unsigned char)v) < 0)
 				return -1;
 			if (file_printf(ms, MAGIC_DESC, buf) == -1)
 				return -1;
@@ -359,7 +341,7 @@ mprint(struct magic_set *ms, struct magic *m)
 		case -1:
 			return -1;
 		case 1:
-			if (asprintf(&buf, "%hu", (unsigned short)v) < 0)
+			if (spprintf(&buf, 0, "%hu", (unsigned short)v) < 0)
 				return -1;
 			if (file_printf(ms, MAGIC_DESC, buf) == -1)
 				return -1;
@@ -381,7 +363,7 @@ mprint(struct magic_set *ms, struct magic *m)
 		case -1:
 			return -1;
 		case 1:
-			if (asprintf(&buf, "%u", (uint32_t)v) < 0)
+			if (spprintf(&buf, 0, "%u", (uint32_t)v) < 0)
 				return -1;
 			if (file_printf(ms, MAGIC_DESC, buf) == -1)
 				return -1;
@@ -467,7 +449,7 @@ mprint(struct magic_set *ms, struct magic *m)
 		case -1:
 			return -1;
 		case 1:
-			if (asprintf(&buf, "%g", vf) < 0)
+			if (spprintf(&buf, 0, "%g", vf) < 0)
 				return -1;
 			if (file_printf(ms, MAGIC_DESC, buf) == -1)
 				return -1;
@@ -488,7 +470,7 @@ mprint(struct magic_set *ms, struct magic *m)
 		case -1:
 			return -1;
 		case 1:
-			if (asprintf(&buf, "%g", vd) < 0)
+			if (spprintf(&buf, 0, "%g", vd) < 0)
 				return -1;
 			if (file_printf(ms, MAGIC_DESC, buf) == -1)
 				return -1;
@@ -505,13 +487,10 @@ mprint(struct magic_set *ms, struct magic *m)
 		char *cp;
 		int rval;
 
-		cp = strndup((const char *)ms->search.s, ms->search.rm_len);
-		if (cp == NULL) {
-			file_oomem(ms, ms->search.rm_len);
-			return -1;
-		}
+		cp = estrndup((const char *)ms->search.s, ms->search.rm_len);
+
 		rval = file_printf(ms, MAGIC_DESC, cp);
-		free(cp);
+		efree(cp);
 
 		if (rval == -1)
 			return -1;
@@ -1665,24 +1644,20 @@ magiccheck(struct magic_set *ms, struct magic *m)
 	}
 	case FILE_REGEX: {
 		int rc;
-		regex_t rx;
+		regex_t rx = {0};
 		char errmsg[512];
 
 		if (ms->search.s == NULL)
 			return 0;
 
 		l = 0;
-		rc = regcomp(&rx, m->value.s,
-		    REG_EXTENDED|REG_NEWLINE|
-		    ((m->str_flags & STRING_IGNORE_CASE) ? REG_ICASE : 0));
+		rc = regcomp(&rx, m->value.s, REG_EXTENDED|REG_NEWLINE|((m->str_flags & STRING_IGNORE_CASE) ? REG_ICASE : 0));
 		if (rc) {
 			(void)regerror(rc, &rx, errmsg, sizeof(errmsg));
-			file_magerror(ms, "regex error %d, (%s)",
-			    rc, errmsg);
+			file_magerror(ms, "regex error %d, (%s)", rc, errmsg);
 			v = (uint64_t)-1;
-		}
-		else {
-			regmatch_t pmatch[1];
+		} else {
+			regmatch_t *pmatch = (regmatch_t *)ecalloc(sizeof(regmatch_t), rx.re_nsub + 1);
 #ifndef REG_STARTEND
 #define	REG_STARTEND	0
 			size_t l = ms->search.s_len - 1;
@@ -1692,8 +1667,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 			pmatch[0].rm_so = 0;
 			pmatch[0].rm_eo = ms->search.s_len;
 #endif
-			rc = regexec(&rx, (const char *)ms->search.s,
-			    1, pmatch, REG_STARTEND);
+			rc = regexec(&rx, (const char *)ms->search.s, 1, pmatch, REG_STARTEND);
 #if REG_STARTEND == 0
 			((char *)(intptr_t)ms->search.s)[l] = c;
 #endif
@@ -1701,8 +1675,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 			case 0:
 				ms->search.s += (int)pmatch[0].rm_so;
 				ms->search.offset += (size_t)pmatch[0].rm_so;
-				ms->search.rm_len =
-				    (size_t)(pmatch[0].rm_eo - pmatch[0].rm_so);
+				ms->search.rm_len = (size_t)(pmatch[0].rm_eo - pmatch[0].rm_so);
 				v = 0;
 				break;
 
@@ -1712,15 +1685,16 @@ magiccheck(struct magic_set *ms, struct magic *m)
 
 			default:
 				(void)regerror(rc, &rx, errmsg, sizeof(errmsg));
-				file_magerror(ms, "regexec error %d, (%s)",
-				    rc, errmsg);
+				file_magerror(ms, "regexec error %d, (%s)", rc, errmsg);
 				v = (uint64_t)-1;
 				break;
 			}
 			regfree(&rx);
+			efree(pmatch);
 		}
-		if (v == (uint64_t)-1)
+		if (v == (uint64_t)-1) {
 			return -1;
+		}
 		break;
 	}
 	default:

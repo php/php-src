@@ -32,6 +32,7 @@
  *	uncompress(method, old, n, newch) - uncompress old into new, 
  *					    using method, return sizeof new
  */
+#include "config.h"
 #include "file.h"
 #include "magic.h"
 #include <stdio.h>
@@ -133,7 +134,7 @@ file_zmagic(struct magic_set *ms, int fd, const char *name,
 	}
 error:
 	if (newbuf)
-		free(newbuf);
+		efree(newbuf);
 	ms->flags |= MAGIC_COMPRESS;
 	return rv;
 }
@@ -330,9 +331,7 @@ uncompressgzipped(struct magic_set *ms, const unsigned char *old,
 
 	if (data_start >= n)
 		return 0;
-	if ((*newch = (unsigned char *)malloc(HOWMANY + 1)) == NULL) {
-		return 0;
-	}
+	*newch = (unsigned char *)emalloc(HOWMANY + 1));
 	
 	/* XXX: const castaway, via strchr */
 	z.next_in = (Bytef *)strchr((const char *)old + data_start,
@@ -455,20 +454,14 @@ uncompressbuf(struct magic_set *ms, int fd, size_t method,
 			fdin[1] = -1;
 		}
 
-		if ((*newch = (unsigned char *) malloc(HOWMANY + 1)) == NULL) {
-#ifdef DEBUG
-			(void)fprintf(stderr, "Malloc failed (%s)\n",
-			    strerror(errno));
-#endif
-			n = 0;
-			goto err;
-		}
+		*newch = (unsigned char *) emalloc(HOWMANY + 1);
+
 		if ((r = sread(fdout[0], *newch, HOWMANY, 0)) <= 0) {
 #ifdef DEBUG
 			(void)fprintf(stderr, "Read failed (%s)\n",
 			    strerror(errno));
 #endif
-			free(*newch);
+			efree(*newch);
 			n = 0;
 			newch[0] = '\0';
 			goto err;
