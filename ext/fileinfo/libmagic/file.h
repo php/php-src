@@ -366,13 +366,6 @@ extern char *sys_errlist[];
 #define strtoul(a, b, c)	strtol(a, b, c)
 #endif
 
-#ifndef HAVE_VASPRINTF
-int vasprintf(char **ptr, const char *format_string, va_list vargs);
-#endif
-#ifndef HAVE_ASPRINTF
-int asprintf(char **ptr, const char *format_string, ...);
-#endif
-
 #if defined(HAVE_MMAP) && defined(HAVE_SYS_MMAN_H) && !defined(QUICK)
 #define QUICK
 #endif
