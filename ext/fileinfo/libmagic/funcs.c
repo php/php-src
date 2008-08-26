@@ -54,27 +54,23 @@ file_printf(struct magic_set *ms, const char *fmt, ...)
 	va_list ap;
 	size_t size;
 	int len;
-	char *buf, *newstr;
+	char *buf = NULL, *newstr;
 
 	va_start(ap, fmt);
-	len = vasprintf(&buf, fmt, ap);
-	if (len < 0)
-		goto out;
+	len = vspprintf(&buf, 0, fmt, ap);
 	va_end(ap);
 
 	if (ms->o.buf != NULL) {
-		len = asprintf(&newstr, "%s%s", ms->o.buf, buf);
-		free(buf);
-		if (len < 0)
-			goto out;
-		free(ms->o.buf);
-		buf = newstr;
+		len = spprintf(&newstr, 0, "%s%s", ms->o.buf, (buf ? buf : ""));
+		if (buf) {
+			efree(buf);
+		}
+		efree(ms->o.buf);
+		ms->o.buf = newstr;
+	} else {
+		ms->o.buf = buf;
 	}
-	ms->o.buf = buf;
 	return 0;
-out:
-	file_error(ms, errno, "vasprintf failed");
-	return -1;
 }
 
 /*
@@ -89,7 +85,7 @@ file_error_core(struct magic_set *ms, int error, const char *f, va_list va,
 	if (ms->haderr)
 		return;
 	if (lineno != 0) {
-		free(ms->o.buf);
+		efree(ms->o.buf);
 		ms->o.buf = NULL;
 		file_printf(ms, "line %u: ", lineno);
 	}
@@ -121,12 +117,6 @@ file_magerror(struct magic_set *ms, const char *f, ...)
 	va_start(va, f);
 	file_error_core(ms, 0, f, va, ms->line);
 	va_end(va);
-}
-
-protected void
-file_oomem(struct magic_set *ms, size_t len)
-{
-	file_error(ms, errno, "cannot allocate %zu bytes", len);
 }
 
 protected void
@@ -223,6 +213,9 @@ file_reset(struct magic_set *ms)
 		file_error(ms, 0, "no magic files loaded");
 		return -1;
 	}
+	if (ms->o.buf) {
+		efree(ms->o.buf);
+	}
 	ms->o.buf = NULL;
 	ms->haderr = 0;
 	ms->error = -1;
@@ -252,14 +245,10 @@ file_getbuffer(struct magic_set *ms)
 	/* * 4 is for octal representation, + 1 is for NUL */
 	len = strlen(ms->o.buf);
 	if (len > (SIZE_MAX - 1) / 4) {
-		file_oomem(ms, len);
 		return NULL;
 	}
 	psize = len * 4 + 1;
-	if ((pbuf = realloc(ms->o.pbuf, psize)) == NULL) {
-		file_oomem(ms, psize);
-		return NULL;
-	}
+	pbuf = erealloc(ms->o.pbuf, psize);
 	ms->o.pbuf = pbuf;
 
 #if defined(HAVE_WCHAR_H) && defined(HAVE_MBRTOWC) && defined(HAVE_WCWIDTH)
@@ -319,12 +308,7 @@ file_check_mem(struct magic_set *ms, unsigned int level)
 
 	if (level >= ms->c.len) {
 		len = (ms->c.len += 20) * sizeof(*ms->c.li);
-		ms->c.li = (ms->c.li == NULL) ? malloc(len) :
-		    realloc(ms->c.li, len);
-		if (ms->c.li == NULL) {
-			file_oomem(ms, len);
-			return -1;
-		}
+		ms->c.li = (ms->c.li == NULL) ? emalloc(len) : erealloc(ms->c.li, len);
 	}
 	ms->c.li[level].got_match = 0;
 #ifdef ENABLE_CONDITIONALS

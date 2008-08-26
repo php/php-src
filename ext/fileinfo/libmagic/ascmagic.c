@@ -101,13 +101,12 @@ file_ascmagic(struct magic_set *ms, const unsigned char *buf, size_t nbytes)
 	 * Undo the NUL-termination kindly provided by process()
 	 * but leave at least one byte to look at
 	 */
-	while (nbytes > 1 && buf[nbytes - 1] == '\0')
+	while (nbytes > 1 && buf[nbytes - 1] == '\0') {
 		nbytes--;
+	}
 
-	if ((nbuf = calloc(1, (nbytes + 1) * sizeof(nbuf[0]))) == NULL)
-		goto done;
-	if ((ubuf = calloc(1, (nbytes + 1) * sizeof(ubuf[0]))) == NULL)
-		goto done;
+	nbuf = ecalloc(1, (nbytes + 1) * sizeof(nbuf[0]));
+	ubuf = ecalloc(1, (nbytes + 1) * sizeof(ubuf[0]));
 
 	/*
 	 * Then try to determine whether it's any character code we can
@@ -172,10 +171,8 @@ file_ascmagic(struct magic_set *ms, const unsigned char *buf, size_t nbytes)
 	   re-converting improved, or at least realloced after
 	   re-converting conversion. */
 	mlen = ulen * 6;
-	if ((utf8_buf = malloc(mlen)) == NULL) {
-		file_oomem(ms, mlen);
-		goto done;
-	}
+	utf8_buf = emalloc(mlen);
+
 	if ((utf8_end = encode_utf8(utf8_buf, mlen, ubuf, ulen)) == NULL)
 		goto done;
 	if (file_softmagic(ms, utf8_buf, utf8_end - utf8_buf, TEXTTEST) != 0) {
@@ -348,11 +345,11 @@ subtype_identified:
 	rv = 1;
 done:
 	if (nbuf)
-		free(nbuf);
+		efree(nbuf);
 	if (ubuf)
-		free(ubuf);
+		efree(ubuf);
 	if (utf8_buf)
-		free(utf8_buf);
+		efree(utf8_buf);
 
 	return rv;
 }

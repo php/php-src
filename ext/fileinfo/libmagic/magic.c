@@ -35,9 +35,6 @@
 #include <sys/types.h>
 #include <sys/param.h>	/* for MAXPATHLEN */
 #include <sys/stat.h>
-#ifdef QUICK
-#include <sys/mman.h>
-#endif
 #include <limits.h>	/* for PIPE_BUF */
 
 #if defined(HAVE_UTIMES)
@@ -98,8 +95,7 @@ magic_open(int flags)
 {
 	struct magic_set *ms;
 
-	if ((ms = calloc((size_t)1, sizeof(struct magic_set))) == NULL)
-		return NULL;
+	ms = ecalloc((size_t)1, sizeof(struct magic_set));
 
 	if (magic_setflags(ms, flags) == -1) {
 		errno = EINVAL;
@@ -108,9 +104,7 @@ magic_open(int flags)
 
 	ms->o.buf = ms->o.pbuf = NULL;
 
-	ms->c.li = malloc((ms->c.len = 10) * sizeof(*ms->c.li));
-	if (ms->c.li == NULL)
-		goto free;
+	ms->c.li = emalloc((ms->c.len = 10) * sizeof(*ms->c.li));
 	
 	ms->haderr = 0;
 	ms->error = -1;
@@ -119,7 +113,7 @@ magic_open(int flags)
 	ms->line = 0;
 	return ms;
 free:
-	free(ms);
+	efree(ms);
 	return NULL;
 }
 
@@ -135,10 +129,10 @@ free_mlist(struct mlist *mlist)
 		struct mlist *next = ml->next;
 		struct magic *mg = ml->magic;
 		file_delmagic(mg, ml->mapped, ml->nmagic);
-		free(ml);
+		efree(ml);
 		ml = next;
 	}
-	free(ml);
+	efree(ml);
 }
 
 private int
@@ -162,11 +156,19 @@ info_from_stat(struct magic_set *ms, mode_t md)
 public void
 magic_close(struct magic_set *ms)
 {
-	free_mlist(ms->mlist);
-	free(ms->o.pbuf);
-	free(ms->o.buf);
-	free(ms->c.li);
-	free(ms);
+	if (ms->mlist) {
+		free_mlist(ms->mlist);
+	}
+	if (ms->o.pbuf) {
+		efree(ms->o.pbuf);
+	}
+	if (ms->o.buf) {
+		efree(ms->o.buf);
+	}
+	if (ms->c.li) {
+		efree(ms->c.li);
+	}
+	efree(ms);
 }
 
 /*
@@ -267,8 +269,7 @@ file_or_fd(struct magic_set *ms, const char *inname, int fd)
 	 * some overlapping space for matches near EOF
 	 */
 #define SLOP (1 + sizeof(union VALUETYPE))
-	if ((buf = malloc(HOWMANY + SLOP)) == NULL)
-		return NULL;
+	buf = emalloc(HOWMANY + SLOP);
 
 	if (file_reset(ms) == -1)
 		goto done;
@@ -351,7 +352,7 @@ file_or_fd(struct magic_set *ms, const char *inname, int fd)
 		goto done;
 	rv = 0;
 done:
-	free(buf);
+	efree(buf);
 	close_and_restore(ms, inname, fd, &sb);
 	return rv == 0 ? file_getbuffer(ms) : NULL;
 }

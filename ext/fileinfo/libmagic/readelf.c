@@ -789,20 +789,16 @@ doshn(struct magic_set *ms, int class, int swap, int fd, off_t off, int num,
 				file_badread(ms);
 				return -1;
 			}
-			if ((nbuf = malloc((size_t)xsh_size)) == NULL) {
-				file_error(ms, errno, "Cannot allocate memory"
-				    " for note");
-				return -1;
-			}
+			nbuf = emalloc((size_t)xsh_size);
 			if ((noff = lseek(fd, (off_t)xsh_offset, SEEK_SET)) ==
 			    (off_t)-1) {
 				file_badread(ms);
-				free(nbuf);
+				efree(nbuf);
 				return -1;
 			}
 			if (read(fd, nbuf, (size_t)xsh_size) !=
 			    (ssize_t)xsh_size) {
-				free(nbuf);
+				efree(nbuf);
 				file_badread(ms);
 				return -1;
 			}
@@ -818,11 +814,11 @@ doshn(struct magic_set *ms, int class, int swap, int fd, off_t off, int num,
 					break;
 			}
 			if ((lseek(fd, off, SEEK_SET)) == (off_t)-1) {
-				free(nbuf);
+				efree(nbuf);
 				file_badread(ms);
 				return -1;
 			}
-			free(nbuf);
+			efree(nbuf);
 			break;
 		}
 	}

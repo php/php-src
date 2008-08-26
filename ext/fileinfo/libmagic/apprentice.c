@@ -42,9 +42,6 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/param.h>
-#ifdef QUICK
-#include <sys/mman.h>
-#endif
 #include <sys/types.h>
 #include <dirent.h>
 
@@ -124,42 +121,7 @@ private const char usg_hdr[] = "cont\toffset\ttype\topcode\tmask\tvalue\tdesc";
 private const char mime_marker[] = "!:mime";
 private const size_t mime_marker_len = sizeof(mime_marker) - 1;
 
-#ifdef COMPILE_ONLY
-
-int main(int, char *[]);
-
-int
-main(int argc, char *argv[])
-{
-	int ret;
-	struct magic_set *ms;
-	char *progname;
-
-	if ((progname = strrchr(argv[0], '/')) != NULL)
-		progname++;
-	else
-		progname = argv[0];
-
-	if (argc != 2) {
-		(void)fprintf(stderr, "Usage: %s file\n", progname);
-		return 1;
-	}
-
-	if ((ms = magic_open(MAGIC_CHECK)) == NULL) {
-		(void)fprintf(stderr, "%s: %s\n", progname, strerror(errno));
-		return 1;
-	}
-	ret = magic_compile(ms, argv[1]) == -1 ? 1 : 0;
-	if (ret == 1)
-		(void)fprintf(stderr, "%s: %s\n", progname, magic_error(ms));
-	magic_close(ms);
-	return ret;
-}
-#endif /* COMPILE_ONLY */
-
-#ifdef PHP_BUNDLE
 #include "../data_file.c"
-#endif
 
 static const struct type_tbl_s {
 	const char name[16];
@@ -269,7 +231,7 @@ apprentice_1(struct magic_set *ms, const char *fn, int action,
 		if (rv != 0)
 			return -1;
 		rv = apprentice_compile(ms, &magic, &nmagic, fn);
-		free(magic);
+		efree(magic);
 		return rv;
 	}
 
@@ -289,11 +251,7 @@ apprentice_1(struct magic_set *ms, const char *fn, int action,
 		return -1;
 	}
 
-	if ((ml = malloc(sizeof(*ml))) == NULL) {
-		file_delmagic(magic, mapped, nmagic);
-		file_oomem(ms, sizeof(*ml));
-		return -1;
-	}
+	ml = emalloc(sizeof(*ml));
 
 	ml->magic = magic;
 	ml->nmagic = nmagic;
@@ -314,23 +272,18 @@ file_delmagic(struct magic *p, int type, size_t entries)
 	if (p == NULL)
 		return;
 	switch (type) {
-#ifdef PHP_BUNDLE
 	case 3:
 		/* Do nothing, it's part of the code segment */
 		break;
-#endif
-#ifdef QUICK
-	case 2:
-		p--;
-		(void)munmap((void *)p, sizeof(*p) * (entries + 1));
-		break;
-#endif
+
 	case 1:
 		p--;
 		/*FALLTHROUGH*/
+
 	case 0:
-		free(p);
+		efree(p);
 		break;
+
 	default:
 		abort();
 	}
@@ -349,30 +302,16 @@ file_apprentice(struct magic_set *ms, const char *fn, int action)
 	if (fn == NULL)
 		fn = getenv("MAGIC");
 	if (fn == NULL) {
-#ifdef PHP_BUNDLE
-		if ((mlist = malloc(sizeof(*mlist))) == NULL) {
-			file_oomem(ms, sizeof(*mlist));
-			return NULL;
-		}
+		mlist = emalloc(sizeof(*mlist));
 		mlist->next = mlist->prev = mlist;
 		apprentice_1(ms, fn, action, mlist);
 		return mlist;
-#else
-		fn = MAGIC;
-#endif
 	}
 
-	if ((mfn = strdup(fn)) == NULL) {
-		file_oomem(ms, strlen(fn));
-		return NULL;
-	}
+	mfn = estrdup(fn);
 	fn = mfn;
 
-	if ((mlist = malloc(sizeof(*mlist))) == NULL) {
-		free(mfn);
-		file_oomem(ms, sizeof(*mlist));
-		return NULL;
-	}
+	mlist = emalloc(sizeof(*mlist));
 	mlist->next = mlist->prev = mlist;
 
 	while (fn) {
@@ -386,13 +325,13 @@ file_apprentice(struct magic_set *ms, const char *fn, int action)
 		fn = p;
 	}
 	if (errs == -1) {
-		free(mfn);
-		free(mlist);
+		efree(mfn);
+		efree(mlist);
 		mlist = NULL;
 		file_error(ms, 0, "could not find any magic files!");
 		return NULL;
 	}
-	free(mfn);
+	efree(mfn);
 	return mlist;
 }
 
@@ -649,10 +588,7 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 	ms->flags |= MAGIC_CHECK;	/* Enable checks for parsed files */
 
         maxmagic = MAXMAGIS;
-	if ((marray = calloc(maxmagic, sizeof(*marray))) == NULL) {
-		file_oomem(ms, maxmagic * sizeof(*marray));
-		return -1;
-	}
+	marray = ecalloc(maxmagic, sizeof(*marray));
 	marraycount = 0;
 
 	/* print silly verbose header for USG compat. */
@@ -735,11 +671,7 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 	for (i = 0; i < marraycount; i++)
 		mentrycount += marray[i].cont_count;
 
-	if ((*magicp = malloc(sizeof(**magicp) * mentrycount)) == NULL) {
-		file_oomem(ms, sizeof(**magicp) * mentrycount);
-		errs++;
-		goto out;
-	}
+	*magicp = emalloc(sizeof(**magicp) * mentrycount);
 
 	mentrycount = 0;
 	for (i = 0; i < marraycount; i++) {
@@ -749,8 +681,8 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 	}
 out:
 	for (i = 0; i < marraycount; i++)
-		free(marray[i].mp);
-	free(marray);
+		efree(marray[i].mp);
+	efree(marray);
 	if (errs) {
 		*magicp = NULL;
 		*nmagicp = 0;
@@ -823,9 +755,9 @@ file_signextend(struct magic_set *ms, struct magic *m, uint64_t v)
 		case FILE_DEFAULT:
 			break;
 		default:
-			if (ms->flags & MAGIC_CHECK)
-			    file_magwarn(ms, "cannot happen: m->type=%d\n",
-				    m->type);
+			if (ms->flags & MAGIC_CHECK) {
+			    file_magwarn(ms, "cannot happen: m->type=%d\n", m->type);
+			}
 			return ~0U;
 		}
 	}
@@ -1024,10 +956,7 @@ parse(struct magic_set *ms, struct magic_entry **mentryp, uint32_t *nmentryp,
 		if (me->cont_count == me->max_count) {
 			struct magic *nm;
 			size_t cnt = me->max_count + ALLOC_CHUNK;
-			if ((nm = realloc(me->mp, sizeof(*nm) * cnt)) == NULL) {
-				file_oomem(ms, sizeof(*nm) * cnt);
-				return -1;
-			}
+			nm = erealloc(me->mp, sizeof(*nm) * cnt);
 			me->mp = m = nm;
 			me->max_count = cnt;
 		}
@@ -1039,21 +968,13 @@ parse(struct magic_set *ms, struct magic_entry **mentryp, uint32_t *nmentryp,
 			struct magic_entry *mp;
 
 			maxmagic += ALLOC_INCR;
-			if ((mp = realloc(*mentryp, sizeof(*mp) * maxmagic)) ==
-			    NULL) {
-				file_oomem(ms, sizeof(*mp) * maxmagic);
-				return -1;
-			}
-			(void)memset(&mp[*nmentryp], 0, sizeof(*mp) *
-			    ALLOC_INCR);
+			mp = erealloc(*mentryp, sizeof(*mp) * maxmagic);
+			(void)memset(&mp[*nmentryp], 0, sizeof(*mp) * ALLOC_INCR);
 			*mentryp = mp;
 		}
 		me = &(*mentryp)[*nmentryp];
 		if (me->mp == NULL) {
-			if ((m = malloc(sizeof(*m) * ALLOC_CHUNK)) == NULL) {
-				file_oomem(ms, sizeof(*m) * ALLOC_CHUNK);
-				return -1;
-			}
+			m = safe_emalloc(sizeof(*m), ALLOC_CHUNK, 0);
 			me->mp = m;
 			me->max_count = ALLOC_CHUNK;
 		} else
@@ -1908,13 +1829,11 @@ apprentice_map(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 	void *mm = NULL;
 	int   ret = 0;
 
-#ifdef PHP_BUNDLE
 	if (fn == NULL) {
 		mm = &php_magic_database;
 		ret = 3;
 		goto internal_loaded;
 	}
-#endif
 
 	mkdbname(fn, &dbname, 0);
 	if (dbname == NULL)
@@ -1932,29 +1851,18 @@ apprentice_map(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 		goto error1;
 	}
 
-#ifdef QUICK
-	if ((mm = mmap(0, (size_t)st.st_size, PROT_READ|PROT_WRITE,
-	    MAP_PRIVATE|MAP_FILE, fd, (off_t)0)) == MAP_FAILED) {
-		file_error(ms, errno, "cannot map `%s'", dbname);
-		goto error1;
-	}
-	ret = 2;
-#else
-	if ((mm = malloc((size_t)st.st_size)) == NULL) {
-		file_oomem(ms, (size_t)st.st_size);
-		goto error1;
-	}
+	mm = emalloc((size_t)st.st_size);
 	if (read(fd, mm, (size_t)st.st_size) != (size_t)st.st_size) {
 		file_badread(ms);
 		goto error1;
 	}
 	ret = 1;
-#endif
+
 	(void)close(fd);
 	fd = -1;
-#ifdef PHP_BUNDLE
+
 internal_loaded:
-#endif
+
 	*magicp = mm;
 	ptr = (uint32_t *)(void *)*magicp;
 	if (*ptr != MAGICNO) {
@@ -1975,35 +1883,36 @@ internal_loaded:
 		    VERSIONNO, dbname, version);
 		goto error1;
 	}
-#ifdef PHP_BUNDLE
-	if (fn == NULL)
+
+	if (fn == NULL) {
 		*nmagicp = (sizeof(php_magic_database) / sizeof(struct magic));
-	else /* the statement after the #endif is used */
-#endif
-	*nmagicp = (uint32_t)(st.st_size / sizeof(struct magic));
-	if (*nmagicp > 0)
+	} else {
+		*nmagicp = (uint32_t)(st.st_size / sizeof(struct magic));
+	}
+	if (*nmagicp > 0) {
 		(*nmagicp)--;
+	}
 	(*magicp)++;
-	if (needsbyteswap)
+	if (needsbyteswap) {
 		byteswap(*magicp, *nmagicp);
-	free(dbname);
+	}
+
+	if (dbname) {
+		efree(dbname);
+	}
 	return ret;
 
 error1:
 	if (fd != -1)
 		(void)close(fd);
 	if (mm) {
-#ifdef QUICK
-		(void)munmap((void *)mm, (size_t)st.st_size);
-#else
-		free(mm);
-#endif
+		efree(mm);
 	} else {
 		*magicp = NULL;
 		*nmagicp = 0;
 	}
 error2:
-	free(dbname);
+	efree(dbname);
 	return -1;
 }
 
@@ -2051,7 +1960,7 @@ apprentice_compile(struct magic_set *ms, struct magic **magicp,
 	(void)close(fd);
 	rv = 0;
 out:
-	free(dbname);
+	efree(dbname);
 	return rv;
 }
 
@@ -2068,9 +1977,9 @@ mkdbname(const char *fn, char **buf, int strip)
 			fn = ++p;
 	}
 
-	(void)asprintf(buf, "%s%s", fn, ext);
+	(void)spprintf(buf, 0, "%s%s", fn, ext);
 	if (*buf && strlen(*buf) > MAXPATHLEN) {
-		free(*buf);
+		efree(*buf);
 		*buf = NULL;
 	}
 }
