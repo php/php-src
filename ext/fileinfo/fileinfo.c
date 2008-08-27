@@ -316,7 +316,7 @@ PHP_FUNCTION(finfo_open)
 		RETURN_FALSE;
 	}
 
-	if (*file) { /* user specified filed, perform open_basedir checks */
+	if (file && *file) { /* user specified filed, perform open_basedir checks */
 		if (!VCWD_REALPATH(file, resolved_path)) {
 			RETURN_FALSE;
 		}
