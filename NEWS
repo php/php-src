@@ -50,7 +50,6 @@ PHP                                                                        NEWS
   duplicate keys). (Dmitry)
 - Fixed bug #43817 (opendir() fails on Windows directories with parent
   directory unaccessible). (Dmitry)
-- Fixed bug #43782 (feof() does not detect timeout on socket). (David Soria Parra)
 - Fixed bug #43008 (php://filter uris ignore url encoded filternames and can't
   handle slashes). (Arnaud)
 - Fixed bug #35980 (touch() works on files but not on directories). (Pierre)
