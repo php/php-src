@@ -86,6 +86,7 @@ PHP                                                                        NEWS
 - Fixed bug #43993 (mb_substr_count() behaves differently to substr_count() with
   overlapping needles). (Moriyoshi)
 - Fixed bug #43941 (json_encode silently cuts non-UTF8 strings). (Stas)
+- Fixed bug #43782 (feof() does not detect timeout on socket). (David Soria Parra)
 - Fixed bug #42737 (preg_split('//u') triggers a E_NOTICE with newlines).
   (Nuno)
 - Fixed bug #42604 ("make test" fails with --with-config-file-scan-dir=path).
