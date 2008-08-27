@@ -52,7 +52,6 @@ protected int
 file_printf(struct magic_set *ms, const char *fmt, ...)
 {
 	va_list ap;
-	size_t size;
 	int len;
 	char *buf = NULL, *newstr;
 
@@ -81,17 +80,32 @@ private void
 file_error_core(struct magic_set *ms, int error, const char *f, va_list va,
     uint32_t lineno)
 {
+	char *buf = NULL;
+	
 	/* Only the first error is ok */
-	if (ms->haderr)
+	if (ms->haderr) {
 		return;
+	}
+	
 	if (lineno != 0) {
 		efree(ms->o.buf);
 		ms->o.buf = NULL;
 		file_printf(ms, "line %u: ", lineno);
 	}
-        file_printf(ms, f, va);
-	if (error > 0)
-		file_printf(ms, " (%s)", strerror(error));
+
+	vspprintf(&buf, 0, f, va);
+	va_end(va);
+	
+	if (error > 0) {
+		file_printf(ms, "%s (%s)", (*buf ? buf : ""), strerror(error));
+	} else if (*buf) {
+		file_printf(ms, "%s", buf);
+	}
+	
+	if (buf) {
+		efree(buf);
+	}
+
 	ms->haderr++;
 	ms->error = error;
 }
