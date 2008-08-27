@@ -1,3 +1,9 @@
+2008-08-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c
+      zend_execute_API.c:
+      Fixed bug #45910 (Cannot declare self-referencing constant)
+
 2008-08-25  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)

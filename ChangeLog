@@ -1,3 +1,162 @@
+2008-08-26  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * main/main.c:
+      - Fixed bug #44924 (sendmail path wrong)
+
+    * main/main.c:
+      Sync with PHP_5_3 (what a nice mess..thanks guys for keeping the branches
+      in sync..NOT)
+
+    * (PHP_5_2)
+      main/main.c:
+      MFH: sendmail mess cleared (PHP_PROG_SENDMAIL was not used at all, see also
+      bug #42946)
+
+2008-08-26  George Wang  <gwang@litespeedtech.com>
+
+    * (PHP_5_3)
+      sapi/litespeed/lsapi_main.c
+      sapi/litespeed/lsapilib.c
+      sapi/litespeed/lsapilib.c:
+      ignore signal SIGXFSZ
+
+2008-08-26  Alexey Zakhlestin  <indeyets@gmail.com>
+
+    * sapi/apache2handler/php_functions.c:
+      MFB: switch to the new parameter-parse API
+
+    * (PHP_5_3)
+      sapi/apache2handler/php_functions.c:
+      switch to the new parameter-parse API
+
+    * ext/session/tests/session_id_error4.phpt:
+      MFB: this test depends on session.hash_bits_per_character, but it was not
+      explicitly set
+
+    * (PHP_5_3)
+      ext/session/tests/session_id_error4.phpt:
+      this test depends on session.hash_bits_per_character, but it was not
+      explicitly set
+
+2008-08-26  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/fileinfo/fileinfo.c
+      ext/fileinfo/tests/finfo_file_001.phpt:
+      - Improved fix
+
+2008-08-26  David Soria Parra  <dsoria@gmx.net>
+
+    * (PHP_5_3)
+      NEWS
+      main/streams/streams.c
+      main/streams/xp_socket.c:
+      MFH: Fixed bug #43782 (feof() does not detect timeout on socket)
+
+    * main/streams/streams.c
+      main/streams/xp_socket.c:
+      Fixed bug #43782 (feof() does not detect timeout on socket)
+
+2008-08-26  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Remove stray folding tag here
+
+2008-08-26  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/fileinfo/fileinfo.c
+      ext/fileinfo/tests/finfo_file_001.phpt
+      ext/fileinfo/tests/finfo_file_001.phpt:
+      - Added check for empty file name
+
+2008-08-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/fileinfo/libmagic/apprentice.c
+      ext/fileinfo/libmagic/ascmagic.c
+      ext/fileinfo/libmagic/compress.c
+      ext/fileinfo/libmagic/config.h
+      ext/fileinfo/libmagic/file.h
+      ext/fileinfo/libmagic/funcs.c
+      ext/fileinfo/libmagic/magic.c
+      ext/fileinfo/libmagic/readelf.c
+      ext/fileinfo/libmagic/softmagic.c:
+      MFB:
+      	Upgraded the lib to use PHP memory allocation routines.
+      	Fixed a crash caused by analysis of DEADJOE files
+      	A little bit of CS inside libmagic
+
+    * (PHP_5_3)
+      ext/fileinfo/libmagic/apprentice.c
+      ext/fileinfo/libmagic/ascmagic.c
+      ext/fileinfo/libmagic/compress.c
+      ext/fileinfo/libmagic/config.h
+      ext/fileinfo/libmagic/file.c
+      ext/fileinfo/libmagic/file.h
+      ext/fileinfo/libmagic/file_opts.h
+      ext/fileinfo/libmagic/funcs.c
+      ext/fileinfo/libmagic/getopt_long.c
+      ext/fileinfo/libmagic/magic.c
+      ext/fileinfo/libmagic/readelf.c
+      ext/fileinfo/libmagic/softmagic.c:
+      Upgraded the lib to use PHP memory allocation routines.
+      Fixed a crash caused by analysis of DEADJOE files
+      A little bit of CS inside libmagic
+
+2008-08-26  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/mysqli/tests/mysqli_debug_ini.phpt:
+      cleanup garbage
+
+    * ext/mysqli/tests/mysqli_debug_ini.phpt:
+      clean up garbage
+
+    * ext/mysqli/tests/mysqli_debug.phpt
+      ext/mysqli/tests/mysqli_debug.phpt
+      ext/mysqli/tests/mysqli_debug_append.phpt
+      ext/mysqli/tests/mysqli_debug_append.phpt
+      ext/mysqli/tests/mysqli_debug_control_string.phpt
+      ext/mysqli/tests/mysqli_debug_control_string.phpt
+      ext/mysqli/tests/mysqli_debug_ini.phpt
+      ext/mysqli/tests/mysqli_debug_ini.phpt
+      ext/mysqli/tests/mysqli_debug_mysqlnd_control_string.phpt
+      ext/mysqli/tests/mysqli_debug_mysqlnd_control_string.phpt
+      ext/mysqli/tests/mysqli_debug_mysqlnd_only.phpt
+      ext/mysqli/tests/mysqli_debug_mysqlnd_only.phpt:
+      fix typo
+
+2008-08-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.h
+      sapi/cgi/fastcgi.h:
+      Fixed bug #45786 (FastCGI process exited unexpectedly)
+
+2008-08-26  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * win32/build/mkdist.php:
+      - MFB; support for copy of ICU DLLS for all ICU versions
+
+    * (PHP_5_3)
+      win32/build/mkdist.php:
+      - support for copy of ICU DLLS for all ICU versions
+
+2008-08-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c:
+      Fixed bug #45910 (Cannot declare self-referencing constant)
+
+2008-08-26  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/standard/crypt_freesec.h:
+      - MFB:inline definition (win32)
+
 2008-08-25  Rob Richards  <rrichards@ctindustries.net>
 
     * ext/libxml/config.w32:
