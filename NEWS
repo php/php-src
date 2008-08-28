@@ -181,7 +181,9 @@ PHP                                                                        NEWS
     on Windows).
   . Improve persistent connection handling of restarted DBs.
   . Added SQLT_AFC (aka CHAR datatype) support to oci_bind_by_name.
-  . Fixed bug #41069 (Seg fault with query over DB link).
+  . Fixed bug #45458 (Numeric keys for associative arrays are not
+    handled properly)
+  . Fixed bug #41069 (Segmentation fault with query over DB link).
   . Fixed define of SQLT_BDOUBLE and SQLT_BFLOAT constants with Oracle
     10g ORACLE_HOME builds.
   . Changed default value of oci8.default_prefetch from 10 to 100.
