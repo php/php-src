@@ -19,6 +19,12 @@ $realfilename3 = "oci8bfiletest3.txt";
 $fullname3 = $realdirname."/".$realfilename3;
 
 // Setup
+$s = oci_parse($c, "drop table FileTest");
+@oci_execute($s);
+
+$s = oci_parse($c, "drop directory TestDir");
+@oci_execute($s);
+
 $s = oci_parse($c, "create directory TestDir as '$realdirname'");
 oci_execute($s);
 
