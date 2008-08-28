@@ -84,33 +84,33 @@ echo "Done\n";
 --EXPECTF-- 
 Test 1. Check how many rows in the table
 array(1) {
-  ["NUMROWS"]=>
+  [u"NUMROWS"]=>
   array(1) {
     [0]=>
-    string(1) "3"
+    unicode(1) "3"
   }
 }
 Test 2
 array(3) {
-  ["FILENUM"]=>
+  [u"FILENUM"]=>
   array(3) {
     [0]=>
-    string(1) "1"
+    unicode(1) "1"
     [1]=>
-    string(1) "2"
+    unicode(1) "2"
     [2]=>
-    string(1) "3"
+    unicode(1) "3"
   }
-  ["FILEDESC"]=>
+  [u"FILEDESC"]=>
   array(3) {
     [0]=>
-    string(13) "Description 1"
+    unicode(13) "Description 1"
     [1]=>
-    string(13) "Description 2"
+    unicode(13) "Description 2"
     [2]=>
-    string(13) "Description 3"
+    unicode(13) "Description 3"
   }
-  ["IMAGE"]=>
+  [u"IMAGE"]=>
   array(3) {
     [0]=>
     string(24) "Some text in the bfile 1"
