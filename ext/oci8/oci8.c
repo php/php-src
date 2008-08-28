@@ -1285,7 +1285,7 @@ PHP_RSHUTDOWN_FUNCTION(oci)
 #ifdef ZTS
 	zend_hash_apply_with_argument(&EG(regular_list), (apply_func_arg_t) php_oci_list_helper, (void *)le_descriptor TSRMLS_CC);
 	zend_hash_apply_with_argument(&EG(regular_list), (apply_func_arg_t) php_oci_list_helper, (void *)le_collection TSRMLS_CC);
-	while (OCI_G(num_statements)) {
+	while (OCI_G(num_statements) > 0) {
 		zend_hash_apply_with_argument(&EG(regular_list), (apply_func_arg_t) php_oci_list_helper, (void *)le_statement TSRMLS_CC);
 	}
 #endif
@@ -1297,7 +1297,9 @@ PHP_RSHUTDOWN_FUNCTION(oci)
 	zend_hash_apply(&EG(persistent_list), (apply_func_t) php_oci_persistent_helper TSRMLS_CC);
 
 #ifdef ZTS
-	zend_hash_apply_with_argument(&EG(regular_list), (apply_func_arg_t) php_oci_list_helper, (void *)le_connection TSRMLS_CC);
+	while (OCI_G(num_links) > OCI_G(num_persistent)) {
+		zend_hash_apply_with_argument(&EG(regular_list), (apply_func_arg_t) php_oci_list_helper, (void *)le_connection TSRMLS_CC);
+	}
 	php_oci_cleanup_global_handles(TSRMLS_C);
 #endif
 
@@ -1369,6 +1371,7 @@ static void php_oci_pconnection_list_dtor(zend_rsrc_list_entry *entry TSRMLS_DC)
 	if (connection) {
 		php_oci_connection_close(connection TSRMLS_CC);
 		OCI_G(num_persistent)--;
+		OCI_G(num_links)--;
 	}
 } /* }}} */
 
@@ -1979,11 +1982,11 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	if (persistent) {
 		zend_bool alloc_non_persistent = 0;
 
-		if (OCI_G(max_persistent)!=-1 && OCI_G(num_persistent)>=OCI_G(max_persistent)) {
+		if (OCI_G(max_persistent) != -1 && OCI_G(num_persistent) >= OCI_G(max_persistent)) {
 			/* try to find an idle connection and kill it */
 			zend_hash_apply(&EG(persistent_list), (apply_func_t) php_oci_persistent_helper TSRMLS_CC);
 
-			if (OCI_G(max_persistent)!=-1 && OCI_G(num_persistent)>=OCI_G(max_persistent)) {
+			if (OCI_G(max_persistent) != -1 && OCI_G(num_persistent) >= OCI_G(max_persistent)) {
 				/* all persistent connactions are in use, fallback to non-persistent connection creation */
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Too many open persistent connections (%ld)", OCI_G(num_persistent));
 				alloc_non_persistent = 1;
@@ -2070,6 +2073,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		}
 		zend_hash_update(&EG(persistent_list), connection->hash_key, strlen(connection->hash_key)+1, (void *)&new_le, sizeof(zend_rsrc_list_entry), NULL);
 		OCI_G(num_persistent)++;
+		OCI_G(num_links)++;
 	} else if (!exclusive) {
 		connection->rsrc_id = zend_list_insert(connection, le_connection);
 		new_le.ptr = (void *)connection->rsrc_id;
