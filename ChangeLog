@@ -1,3 +1,31 @@
+2008-08-27  David Soria Parra  <dsoria@gmx.net>
+
+    * (PHP_5_3)
+      NEWS:
+      Already in 5.2
+
+    * (PHP_5_2)
+      NEWS
+      main/streams/streams.c
+      main/streams/xp_socket.c:
+      MFH: Fixed bug #43782 (feof() does not detect timeout on socket)
+
+2008-08-27  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/fileinfo/fileinfo.c
+      ext/fileinfo/fileinfo.c:
+      fix file check and avoid segfault
+
+2008-08-27  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/fileinfo/fileinfo.c
+      ext/fileinfo/tests/finfo_open_001.phpt
+      ext/fileinfo/tests/finfo_open_001.phpt:
+      - Fixed check for empty file name
+
+    * ext/fileinfo/libmagic/funcs.c:
+      - Fixed crash in file_error_core()
+
 2008-08-26  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * main/main.c:
