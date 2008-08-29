@@ -551,7 +551,7 @@ PHP_FUNCTION(mime_content_type)
 				char resolved_path[MAXPATHLEN];
 
 				if (*Z_STRVAL_P(what) && VCWD_REALPATH(Z_STRVAL_P(what), resolved_path)) {
-					if ((PG(safe_mode) && (!php_checkuid(resolved_path, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(resolved_path TSRMLS_CC)) {
+					if (php_check_open_basedir(resolved_path TSRMLS_CC)) {
 						goto cleanup;
 					}
 					ret_val = (char *) magic_file(magic, resolved_path);
