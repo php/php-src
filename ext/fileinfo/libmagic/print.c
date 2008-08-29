@@ -46,7 +46,6 @@ FILE_RCSID("@(#)$File: print.c,v 1.63 2008/02/17 19:28:54 rrt Exp $")
 
 #define SZOF(a)	(sizeof(a) / sizeof(a[0]))
 
-#ifndef COMPILE_ONLY
 protected void
 file_mdump(struct magic *m)
 {
@@ -177,7 +176,6 @@ file_mdump(struct magic *m)
 	}
 	(void) fprintf(stderr, ",\"%s\"]\n", m->desc);
 }
-#endif
 
 /*VARARGS*/
 protected void
