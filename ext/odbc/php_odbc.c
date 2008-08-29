@@ -677,6 +677,50 @@ static PHP_INI_DISP(display_lrl)
 }
 /* }}} */
 
+
+/* {{{ PHP_INI_DISP(display_cursortype)
+ */
+static PHP_INI_DISP(display_cursortype)
+{
+	char *value;
+	TSRMLS_FETCH();
+
+	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
+		value = ini_entry->orig_value;
+	} else if (ini_entry->value) {
+		value = ini_entry->value;
+	} else {
+		value = NULL;
+	}
+
+	if (value) {
+		switch (atoi (value))
+		  {
+		    case SQL_CURSOR_FORWARD_ONLY:
+				PUTS ("Forward Only cursor");
+				break;
+
+			case SQL_CURSOR_STATIC:
+			    PUTS ("Static cursor");
+				break;
+
+			case SQL_CURSOR_KEYSET_DRIVEN:
+				PUTS ("Keyset driven cursor");
+				break;
+
+			case SQL_CURSOR_DYNAMIC:
+				PUTS ("Dynamic cursor");
+				break;
+
+			default:
+				php_printf("Unknown cursor model %s", value);
+				break;
+		  }
+	}
+}
+
+/* }}} */
+
 /* {{{ PHP_INI_BEGIN 
  */
 PHP_INI_BEGIN()
@@ -698,6 +742,8 @@ PHP_INI_BEGIN()
 			defaultbinmode, zend_odbc_globals, odbc_globals, display_binmode)
 	STD_PHP_INI_BOOLEAN("odbc.check_persistent", "1", PHP_INI_SYSTEM, OnUpdateLong,
 			check_persistent, zend_odbc_globals, odbc_globals)
+	STD_PHP_INI_ENTRY_EX("odbc.default_cursortype", "3", PHP_INI_ALL, OnUpdateLong, 
+			default_cursortype, zend_odbc_globals, odbc_globals, display_cursortype)
 PHP_INI_END()
 /* }}} */
 
@@ -1173,7 +1219,8 @@ PHP_FUNCTION(odbc_prepare)
 			/* Try to set CURSOR_TYPE to dynamic. Driver will replace this with other
 			   type if not possible.
 			*/
-			if (SQLSetStmtOption(result->stmt, SQL_CURSOR_TYPE, SQL_CURSOR_DYNAMIC)	== SQL_ERROR) {
+			int cursortype = ODBCG(default_cursortype);
+			if (SQLSetStmtOption(result->stmt, SQL_CURSOR_TYPE, cursortype) == SQL_ERROR) {
 				odbc_sql_error(conn, result->stmt, " SQLSetStmtOption");
 				SQLFreeStmt(result->stmt, SQL_DROP);
 				efree(result);
@@ -1561,7 +1608,8 @@ PHP_FUNCTION(odbc_exec)
 			/* Try to set CURSOR_TYPE to dynamic. Driver will replace this with other
 			   type if not possible.
 			 */
-			if (SQLSetStmtOption(result->stmt, SQL_CURSOR_TYPE, SQL_CURSOR_DYNAMIC)	== SQL_ERROR) {
+			int cursortype = ODBCG(default_cursortype);
+			if (SQLSetStmtOption(result->stmt, SQL_CURSOR_TYPE, cursortype) == SQL_ERROR) {
 				odbc_sql_error(conn, result->stmt, " SQLSetStmtOption");
 				SQLFreeStmt(result->stmt, SQL_DROP);
 				efree(result);
