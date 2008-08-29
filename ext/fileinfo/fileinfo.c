@@ -166,6 +166,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_method_buffer, 0, 0, 1)
 	ZEND_ARG_INFO(0, options)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mime_content_type, 0, 0, 1)
+	ZEND_ARG_INFO(0, string)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ finfo_class_functions
@@ -229,6 +234,7 @@ function_entry fileinfo_functions[] = {
 	PHP_FE(finfo_set_flags,	arginfo_finfo_set_flags)
 	PHP_FE(finfo_file,		arginfo_finfo_file)
 	PHP_FE(finfo_buffer,	arginfo_finfo_buffer)
+	PHP_FE(mime_content_type, arginfo_mime_content_type)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -450,7 +456,10 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ *
 			char resolved_path[MAXPATHLEN];
 
 			if (*buffer && VCWD_REALPATH(buffer, resolved_path)) {
-				ret_val = (char *) magic_file(finfo->magic, buffer);
+				if (php_check_open_basedir(resolved_path TSRMLS_CC)) {
+					RETURN_FALSE;
+				}
+				ret_val = (char *) magic_file(finfo->magic, resolved_path);
 			} else {
 				RETURN_FALSE;
 			}
@@ -495,6 +504,98 @@ PHP_FUNCTION(finfo_buffer)
 	_php_finfo_get_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
+
+/* {{{ proto string mime_content_type(string filename|resource stream)
+   Return content-type for file */
+PHP_FUNCTION(mime_content_type)
+{
+	zval *what;
+	magic_t magic;
+	char *tmp, *ret_val;
+	int buffer_len;
+	char *tmp2;
+	php_stream_wrapper *wrap; 
+	zval *zcontext = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &what) == FAILURE) {
+		return;
+	}
+
+	RETVAL_FALSE;
+
+	magic = magic_open(MAGIC_MIME);
+	if (magic_load(magic, NULL) == -1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to load magic database.");
+		goto cleanup;
+	}
+
+	switch (Z_TYPE_P(what)) {
+		case IS_STRING:
+			wrap = php_stream_locate_url_wrapper(Z_STRVAL_P(what), &tmp2, 0 TSRMLS_CC);
+			/* determine if the file is a local file or remote URL */
+			if (wrap && wrap->is_url) {
+				php_stream_context *context = php_stream_context_from_zval(zcontext, 0);
+				php_stream *stream = php_stream_open_wrapper_ex(Z_STRVAL_P(what), "rb", 
+						ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
+				if (!stream) {
+					goto cleanup;
+				}
+				buffer_len = php_stream_copy_to_mem(stream, &tmp, 4096, 0);
+				php_stream_close(stream);
+
+				if (buffer_len == 0) {
+					goto cleanup;
+				}
+				ret_val = (char *) magic_buffer(magic, tmp, buffer_len);
+			} else { /* local file */
+				char resolved_path[MAXPATHLEN];
+
+				if (Z_STRVAL_P(what) && VCWD_REALPATH(Z_STRVAL_P(what), resolved_path)) {
+					if ((PG(safe_mode) && (!php_checkuid(resolved_path, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(resolved_path TSRMLS_CC)) {
+						goto cleanup;
+					}
+					ret_val = (char *) magic_file(magic, resolved_path);
+				} else {
+					goto cleanup;
+				}
+			}
+			break;
+		case IS_RESOURCE:
+			{
+				php_stream *stream;
+				off_t streampos;
+
+				php_stream_from_zval_no_verify(stream, &what);
+				if (!stream) {
+					goto cleanup;
+				}
+				streampos = php_stream_tell(stream); /* remember stream position for restoration */
+				php_stream_seek(stream, 0, SEEK_SET);
+
+				buffer_len = php_stream_copy_to_mem(stream, &tmp, 4096, 0);
+		        php_stream_seek(stream, streampos, SEEK_SET); 
+
+				if (buffer_len == 0) {
+					goto cleanup;
+				}
+				ret_val = (char *) magic_buffer(magic, tmp, buffer_len);
+			}
+			break;
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can only process string or stream arguments");
+			goto cleanup;
+	}
+	if (!ret_val) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed identify data %d:%s",
+				magic_errno(magic), magic_error(magic));
+	} else {
+		RETVAL_STRING(ret_val, 1);
+	}
+cleanup:
+	magic_close(magic);
+}
+/* }}} */
+
 
 /*
  * Local variables:
