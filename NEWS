@@ -64,6 +64,7 @@ PHP                                                                        NEWS
   . ext/fbsql
   . ext/fdf
   . ext/ncurses
+  . ext/ming
   . ext/sybase (not maintained anymore, sybase_ct has to be used instead)
 
 - Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
