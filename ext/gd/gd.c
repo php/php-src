@@ -75,7 +75,7 @@ static void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 #include <gdfontl.h>  /* 4 Large font */
 #include <gdfontg.h>  /* 5 Giant font */
 #include "libgd/wbmp.h"
-
+#include <gdhelpers.h>
 #ifdef ENABLE_GD_TTF
 # ifdef HAVE_LIBFREETYPE
 #  include <ft2build.h>
