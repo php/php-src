@@ -750,8 +750,6 @@ Warning: array_merge() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
 Warning: array_merge(): Argument #1 is not an array in %s on line %d
-
-Warning: array_merge(): Argument #2 is not an array in %s on line %d
 NULL
 
 Warning: array_merge(): Argument #3 is not an array in %s on line %d
