@@ -1,3 +1,47 @@
+2008-08-28  Christopher Jones  <christopher.jones@oracle.com>
+
+    * (PHP_5_3)
+      ext/oci8/oci8.c:
+      MFH: Bug #45888 (Refcounting in ZTS mode)
+
+    * ext/oci8/oci8.c:
+      Bug #45888 (Refcounting in ZTS mode)
+
+    * (PHP_5_3)
+      NEWS:
+      Add #45458
+
+    * (PHP_5_3)
+      ext/oci8/oci8_interface.c
+      ext/oci8/tests/bug45458.phpt:
+      MFH: Bug #45458 (OCI8: Numeric keys for associative arrays are not handled
+      properly)
+
+    * ext/oci8/oci8_interface.c
+      ext/oci8/tests/bug45458.phpt
+      ext/oci8/tests/bug45458.phpt:
+      Bug #45458 (OCI8: Numeric keys for associative arrays are not handled
+      properly)
+
+    * ext/oci8/tests/lob_029.phpt:
+      Fix expected output for PHP 6
+
+    * (PHP_5_3)
+      ext/oci8/tests/lob_029.phpt:
+      MHF: Test initialization cleanup
+
+    * ext/oci8/tests/lob_029.phpt:
+      Test initialization cleanup
+
+    * (PHP_5_3)
+      php.ini-dist
+      php.ini-recommended:
+      MFH: Update Oracle DLL examples to match build changes
+
+    * php.ini-dist
+      php.ini-recommended:
+      Update Oracle DLL examples to match build changes
+
 2008-08-27  David Soria Parra  <dsoria@gmx.net>
 
     * (PHP_5_3)
