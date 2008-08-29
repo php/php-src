@@ -1718,7 +1718,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 		
 		convert_libmagic_pattern(pattern, options);
 
-		if ((pce = pcre_get_compiled_regex_cache(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern) TSRMLS_CC)) == NULL) {
+		if ((pce = pcre_get_compiled_regex_cache(IS_STRING, Z_STRVAL_P(pattern), Z_STRLEN_P(pattern) TSRMLS_CC)) == NULL) {
 			return -1;
 		} else {
 			/* pce now contains the compiled regex */
@@ -1733,7 +1733,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 			haystack = estrndup(ms->search.s, ms->search.s_len);
 
 			/* match v = 0, no match v = 1 */
-			php_pcre_match_impl(pce, haystack, ms->search.s_len, retval, subpats, 1, 1, PREG_OFFSET_CAPTURE, 0 TSRMLS_CC);
+			php_pcre_match_impl(pce, IS_STRING, haystack, ms->search.s_len, retval, subpats, 1, 1, PREG_OFFSET_CAPTURE, 0 TSRMLS_CC);
 			
 			/* Free haystack */
 			efree(haystack);
