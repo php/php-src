@@ -255,23 +255,23 @@ NULL
 Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
 bool(false)
 
-Warning: array_key_exists(): The second argument should be either an array or an object in %s on line %d
-bool(false)
+Warning: array_key_exists() expects parameter 2 to be array, Unicode string given in %s on line %d
+NULL
 
-Warning: array_key_exists(): The second argument should be either an array or an object in %s on line %d
-bool(false)
+Warning: array_key_exists() expects parameter 2 to be array, integer given in %s on line %d
+NULL
 
-Warning: array_key_exists(): The second argument should be either an array or an object in %s on line %d
-bool(false)
+Warning: array_key_exists() expects parameter 2 to be array, null given in %s on line %d
+NULL
 
-Warning: array_key_exists(): The second argument should be either an array or an object in %s on line %d
-bool(false)
+Warning: array_key_exists() expects parameter 2 to be array, boolean given in %s on line %d
+NULL
 
-Warning: array_key_exists(): The second argument should be either an array or an object in %s on line %d
-bool(false)
+Warning: array_key_exists() expects parameter 2 to be array, boolean given in %s on line %d
+NULL
 
-Warning: array_key_exists(): The second argument should be either an array or an object in %s on line %d
-bool(false)
+Warning: array_key_exists() expects parameter 2 to be array, double given in %s on line %d
+NULL
 
 Warning: array_key_exists() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
@@ -280,13 +280,23 @@ Warning: array_key_exists(): The first argument should be either a string or an 
 bool(false)
 
 *** Testing operation on objects ***
-bool(false)
-bool(false)
-bool(true)
-bool(false)
-bool(true)
+
+Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
+NULL
+
+Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
+NULL
+
+Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
+NULL
+
+Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
+NULL
+
+Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
+NULL
 bool(true)
 
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
+Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
+NULL
 Done
