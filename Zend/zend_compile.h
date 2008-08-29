@@ -394,9 +394,10 @@ void fetch_string_offset(znode *result, const znode *parent, const znode *offset
 void zend_do_fetch_static_member(znode *result, znode *class_znode TSRMLS_DC);
 void zend_do_print(znode *result, const znode *arg TSRMLS_DC);
 void zend_do_echo(const znode *arg, zend_bool inline_html TSRMLS_DC);
-typedef int (*unary_op_type)(zval *, zval *);
+typedef int (*unary_op_type)(zval *, zval * TSRMLS_DC);
+typedef int (*binary_op_type)(zval *, zval *, zval * TSRMLS_DC);
 ZEND_API unary_op_type get_unary_op(int opcode);
-ZEND_API void *get_binary_op(int opcode);
+ZEND_API binary_op_type get_binary_op(int opcode);
 
 void zend_do_while_cond(const znode *expr, znode *close_bracket_token TSRMLS_DC);
 void zend_do_while_end(const znode *while_token, const znode *close_bracket_token TSRMLS_DC);
