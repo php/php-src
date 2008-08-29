@@ -105,7 +105,8 @@ PHP                                                                        NEWS
   . Added ability to handle exceptions in destructors. (Marcus)
 
 - Improved PHP runtime speed and memory usage:
-  . Substitute persistent constants by their values at compile time. (Matt)
+  . Substitute global-scope, persistent constants with their values at compile
+    time. (Matt)
   . Optimized ZEND_SIGNED_MULTIPLY_LONG(). (Matt)
   . Removed direct executor recursion. (Dmitry)
   . Use fastcall calling convention in executor on x86. (Dmitry)
