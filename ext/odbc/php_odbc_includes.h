@@ -265,6 +265,7 @@ ZEND_BEGIN_MODULE_GLOBALS(odbc)
 	int defConn;
     long defaultlrl;
     long defaultbinmode;
+    long default_cursortype;
     char laststate[6];
     char lasterrormsg[SQL_MAX_MESSAGE_LENGTH];
 	HashTable *resource_list;
