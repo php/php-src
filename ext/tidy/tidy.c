@@ -1313,7 +1313,7 @@ static PHP_FUNCTION(tidy_parse_string)
 
 	TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
 
-	if (php_tidy_parse_string(obj, input.s, input_len, enc TSRMLS_CC) == FAILURE) {
+	if (php_tidy_parse_string(obj, input.s, USTR_BYTES(input_type, input_len), enc TSRMLS_CC) == FAILURE) {
 		zval_dtor(return_value);
 		INIT_ZVAL(*return_value);
 		RETVAL_FALSE;
