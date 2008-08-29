@@ -16,7 +16,7 @@ echo "*** Testing finfo_open() : basic functionality ***\n";
 var_dump( finfo_open( FILEINFO_MIME, $magicFile ) );
 var_dump( finfo_open( FILEINFO_NONE, $magicFile ) );
 var_dump( finfo_open( FILEINFO_SYMLINK, $magicFile ) );
-var_dump( finfo_open( FILEINFO_COMPRESS, $magicFile ) );
+//var_dump( finfo_open( FILEINFO_COMPRESS, $magicFile ) );
 var_dump( finfo_open( FILEINFO_DEVICES, $magicFile ) );
 var_dump( finfo_open( FILEINFO_CONTINUE, $magicFile ) );
 var_dump( finfo_open( FILEINFO_PRESERVE_ATIME, $magicFile ) );
@@ -30,7 +30,6 @@ var_dump( new finfo() );
 ===DONE===
 --EXPECTF--
 *** Testing finfo_open() : basic functionality ***
-resource(%d) of type (file_info)
 resource(%d) of type (file_info)
 resource(%d) of type (file_info)
 resource(%d) of type (file_info)
