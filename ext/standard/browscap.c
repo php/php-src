@@ -328,7 +328,7 @@ PHP_FUNCTION(get_browser)
 	char *agent_name = NULL;
 	int agent_name_len;
 	zend_bool return_array = 0;
-	zval **agent;
+	zval **agent, **z_agent_name;
 	zval *found_browser_entry, *tmp_copy;
 	char *lookup_browser_name;
 	char *browscap = INI_STR("browscap");
@@ -375,8 +375,8 @@ PHP_FUNCTION(get_browser)
 		zend_hash_copy(Z_OBJPROP_P(return_value), Z_ARRVAL_PP(agent), (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *));
 	}
 
-	while (zend_hash_find(Z_ARRVAL_PP(agent), "parent", sizeof("parent"), (void **) &agent_name) == SUCCESS) {
-		if (zend_hash_find(&browser_hash, agent_name, agent_name_len + 1, (void **)&agent) == FAILURE) {
+	while (zend_hash_find(Z_ARRVAL_PP(agent), "parent", sizeof("parent"), (void **) &z_agent_name) == SUCCESS) {
+		if (zend_hash_find(&browser_hash, Z_STRVAL_PP(z_agent_name), Z_STRLEN_PP(z_agent_name) + 1, (void **)&agent) == FAILURE) {
 			break;
 		}
 
