@@ -290,6 +290,8 @@ PHP                                                                        NEWS
     around the current day.
   . support for "<xth> <weekday of" and "last <weekday> of" phrases to be used
     with months - like in "last saturday of februari 2008".
+  . support for "back of <hour>" and "front of <hour>" phrases that are used in
+    Scotland.
   . DatePeriod class which supports iterating over a DateTime object applying
     DateInterval on each iteration, up to an end date or limited by maximum
     number of occurences.
