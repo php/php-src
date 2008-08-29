@@ -82,9 +82,7 @@ private void free_mlist(struct mlist *);
 private void close_and_restore(const struct magic_set *, const char *, int,
     const struct stat *);
 private int info_from_stat(struct magic_set *, mode_t);
-#ifndef COMPILE_ONLY
 private const char *file_or_fd(struct magic_set *, const char *, int);
-#endif
 
 #ifndef	STDIN_FILENO
 #define	STDIN_FILENO	0
@@ -235,7 +233,6 @@ close_and_restore(const struct magic_set *ms, const char *name, int fd,
 	}
 }
 
-#ifndef COMPILE_ONLY
 
 /*
  * find type of descriptor
@@ -372,7 +369,6 @@ magic_buffer(struct magic_set *ms, const void *buf, size_t nb)
 	}
 	return file_getbuffer(ms);
 }
-#endif
 
 public const char *
 magic_error(struct magic_set *ms)
