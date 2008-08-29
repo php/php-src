@@ -235,7 +235,6 @@ apprentice_1(struct magic_set *ms, const char *fn, int action,
 		return rv;
 	}
 
-#ifndef COMPILE_ONLY
 	if ((rv = apprentice_map(ms, &magic, &nmagic, fn)) == -1) {
 		if (ms->flags & MAGIC_CHECK)
 			file_magwarn(ms, "using regular magic file `%s'", fn);
@@ -263,7 +262,6 @@ apprentice_1(struct magic_set *ms, const char *fn, int action,
 	mlist->prev = ml;
 
 	return 0;
-#endif /* COMPILE_ONLY */
 }
 
 protected void
@@ -464,7 +462,7 @@ apprentice_sort(const void *a, const void *b)
 		return 1;
 }
 
-private int
+private void
 set_test_type(struct magic *mstart, struct magic *m)
 {
 	switch (m->type) {
@@ -599,7 +597,7 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 	if (stat(fn, &st) == 0 && S_ISDIR(st.st_mode)) {
 		dir = opendir(fn);
 		if (dir) {
-			while (d = readdir(dir)) {
+			while ((d = readdir(dir))) {
 				snprintf(subfn, sizeof(subfn), "%s/%s",
 				    fn, d->d_name);
 				if (stat(subfn, &st) == 0 && S_ISREG(st.st_mode)) {
@@ -1266,11 +1264,9 @@ parse(struct magic_set *ms, struct magic_entry **mentryp, uint32_t *nmentryp,
 		if (check_format(ms, m) == -1)
 			return -1;
 	}
-#ifndef COMPILE_ONLY
 	if (action == FILE_CHECK) {
 		file_mdump(m);
 	}
-#endif
 	m->mimetype[0] = '\0';		/* initialise MIME type to none */
 	if (m->cont_level == 0)
 		++(*nmentryp);		/* make room for next */
@@ -1862,7 +1858,6 @@ apprentice_map(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 	fd = -1;
 
 internal_loaded:
-
 	*magicp = mm;
 	ptr = (uint32_t *)(void *)*magicp;
 	if (*ptr != MAGICNO) {

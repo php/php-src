@@ -145,7 +145,6 @@ file_badread(struct magic_set *ms)
 	file_error(ms, errno, "error reading");
 }
 
-#ifndef COMPILE_ONLY
 protected int
 file_buffer(struct magic_set *ms, int fd, const char *inname, const void *buf,
     size_t nb)
@@ -218,7 +217,6 @@ file_buffer(struct magic_set *ms, int fd, const char *inname, const void *buf,
 #endif
 	return m;
 }
-#endif
 
 protected int
 file_reset(struct magic_set *ms)
