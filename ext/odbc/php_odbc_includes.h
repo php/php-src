@@ -90,19 +90,19 @@ PHP_FUNCTION(solid_fetch_prev);
 
 #elif defined(HAVE_IODBC) /* iODBC library */
 
-#define ODBC_TYPE "iODBC"
-#include <isql.h>
-#include <isqlext.h>
-#define HAVE_SQL_EXTENDED_FETCH 1
-#define SQL_FD_FETCH_ABSOLUTE   0x00000010L
-#define SQL_CURSOR_DYNAMIC      2UL
-#define SQL_NO_TOTAL            (-4)
-#define SQL_SO_DYNAMIC          0x00000004L
-#define SQL_LEN_DATA_AT_EXEC_OFFSET  (-100)
-#define SQL_LEN_DATA_AT_EXEC(length) (-(length)+SQL_LEN_DATA_AT_EXEC_OFFSET)
-#ifndef SQL_SUCCEEDED
-#define SQL_SUCCEEDED(rc) (((rc)&(~1))==0)
+#ifdef CHAR
+#undef CHAR
 #endif
+
+#ifdef SQLCHAR
+#undef SQLCHAR
+#endif
+
+#define ODBC_TYPE "iODBC"
+#include <sql.h>
+#include <sqlext.h>
+#include <iodbcext.h>
+#define HAVE_SQL_EXTENDED_FETCH 1
 
 #elif defined(HAVE_UNIXODBC) /* unixODBC library */
 
@@ -148,8 +148,12 @@ PHP_FUNCTION(solid_fetch_prev);
 #include <isqlext.h>
 #include <udbcext.h>
 #define HAVE_SQL_EXTENDED_FETCH 1
+#ifndef SQLSMALLINT
 #define SQLSMALLINT SWORD
+#endif
+#ifndef SQLUSMALLINT
 #define SQLUSMALLINT UWORD
+#endif
 
 #elif defined(HAVE_BIRDSTEP) /* Raima Birdstep */
 
@@ -204,7 +208,7 @@ PHP_FUNCTION(solid_fetch_prev);
 
 /* Common defines */
 
-#if defined( HAVE_IBMDB2 ) || defined( HAVE_UNIXODBC )
+#if defined( HAVE_IBMDB2 ) || defined( HAVE_UNIXODBC ) || defined (HAVE_IODBC)
 #define ODBC_SQL_ENV_T SQLHANDLE
 #define ODBC_SQL_CONN_T SQLHANDLE
 #define ODBC_SQL_STMT_T SQLHANDLE
@@ -230,15 +234,15 @@ typedef struct odbc_connection {
 typedef struct odbc_result_value {
 	char name[32];
 	char *value;
-	SDWORD vallen;
-	SDWORD coltype;
+	SQLLEN vallen;
+	SQLLEN coltype;
 } odbc_result_value;
 
 typedef struct odbc_result {
 	ODBC_SQL_STMT_T stmt;
 	odbc_result_value *values;
-	SWORD numcols;
-	SWORD numparams;
+	SQLSMALLINT numcols;
+	SQLSMALLINT numparams;
 # if HAVE_SQL_EXTENDED_FETCH
 	int fetch_abs;
 # endif
