@@ -36,6 +36,8 @@ PHP                                                                        NEWS
   child class). (Felipe)
 - Fixed bug #45717 (Fileinfo/libmagic build fails, missing err.h and getopt.h).
   (Derick)
+- Fixed bug #45706 (Unserialization of classes derived from ArrayIterator
+  fails). (Etienne, Dmitry)
 - Fixed bug #45696 (Not all DateTime methods allow method chaining). (Derick)
 - Fixed bug #45636 (fileinfo ext duplicate strndup). (Derick)
 - Fixed bug #45545 (DateInterval has 4 char limitation for ISO durations).
