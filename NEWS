@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   accessibility (like method_exists()). (Felipe)
 - Changed array_reduce() to allow mixed $initial (Christian Seiler)
 
+- Added function preg_filter() that does grep and replace in one go. (Marcus)
 - Added system independent realpath() implementation which caches intermediate
   directories in realpath-cache. (Dmitry)
 - Added optional clear_realpath_cache and filename parameters to
