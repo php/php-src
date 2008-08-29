@@ -131,8 +131,8 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 
 		if ((m->flag & BINTEST) != mode) {
 			/* Skip sub-tests */
-			while (magic[magindex + 1].cont_level != 0 && ++magindex < nmagic) {
-				continue;
+			while (magindex < nmagic - 1 && magic[magindex + 1].cont_level != 0) {
+				magindex++;
 			}
 			continue; /* Skip to next top-level test*/
 		}
