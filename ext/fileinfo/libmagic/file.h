@@ -46,7 +46,11 @@
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
 #endif
-#include <regex.h>
+
+#include "php.h"
+#include "ext/standard/php_string.h"
+#include "ext/pcre/php_pcre.h"
+
 #include <sys/types.h>
 /* Do this here and now, because struct stat gets re-defined on solaris */
 #include <sys/stat.h>
@@ -165,7 +169,7 @@ struct magic {
 #define				FILE_LEDOUBLE	38
 #define				FILE_NAMES_SIZE	39/* size of array to contain all names */
 
-#define IS_STRING(t) \
+#define IS_LIBMAGIC_STRING(t) \
 	((t) == FILE_STRING || \
 	 (t) == FILE_PSTRING || \
 	 (t) == FILE_BESTRING16 || \
