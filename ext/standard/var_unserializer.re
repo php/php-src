@@ -328,11 +328,6 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 {
 	long datalen;
 
-	if (ce->unserialize == NULL) {
-		zend_error(E_WARNING, "Class %s has no unserializer", ce->name);
-		return 0;
-	}
-
 	datalen = parse_iv2((*p) + 2, p);
 
 	(*p) += 2;
@@ -342,7 +337,10 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 		return 0;
 	}
 
-	if (ce->unserialize(rval, ce, (const unsigned char*)*p, datalen, (zend_unserialize_data *)var_hash TSRMLS_CC) != SUCCESS) {
+	if (ce->unserialize == NULL) {
+		zend_error(E_WARNING, "Class %s has no unserializer", ce->name);
+		object_init_ex(*rval, ce);
+	} else if (ce->unserialize(rval, ce, (const unsigned char*)*p, datalen, (zend_unserialize_data *)var_hash TSRMLS_CC) != SUCCESS) {
 		return 0;
 	}
 
@@ -673,8 +671,13 @@ object ":" uiv ":" ["]	{
 	*p = YYCURSOR;
 
 	if (custom_object) {
+		int ret = object_custom(UNSERIALIZE_PASSTHRU, ce);
+
+		if (ret && incomplete_class) {
+			php_store_class_name(*rval, class_name, len2);
+		}
 		efree(class_name);
-		return object_custom(UNSERIALIZE_PASSTHRU, ce);
+		return ret;
 	}
 	
 	elements = object_common1(UNSERIALIZE_PASSTHRU, ce);
