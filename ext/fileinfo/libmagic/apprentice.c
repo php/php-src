@@ -1118,7 +1118,7 @@ parse(struct magic_set *ms, struct magic_entry **mentryp, uint32_t *nmentryp,
 
 	m->mask_op = 0;
 	if (*l == '~') {
-		if (!IS_STRING(m->type))
+		if (!IS_LIBMAGIC_STRING(m->type))
 			m->mask_op |= FILE_OPINVERSE;
 		else if (ms->flags & MAGIC_CHECK)
 			file_magwarn(ms, "'~' invalid for string types");
@@ -1128,7 +1128,7 @@ parse(struct magic_set *ms, struct magic_entry **mentryp, uint32_t *nmentryp,
 	m->str_flags = 0;
 	m->num_mask = 0;
 	if ((op = get_op(*l)) != -1) {
-		if (!IS_STRING(m->type)) {
+		if (!IS_LIBMAGIC_STRING(m->type)) {
 			uint64_t val;
 			++l;
 			m->mask_op |= op;
@@ -2066,7 +2066,7 @@ bs1(struct magic *m)
 	m->offset = swap4((uint32_t)m->offset);
 	m->in_offset = swap4((uint32_t)m->in_offset);
 	m->lineno = swap4((uint32_t)m->lineno);
-	if (IS_STRING(m->type)) {
+	if (IS_LIBMAGIC_STRING(m->type)) {
 		m->str_range = swap4(m->str_range);
 		m->str_flags = swap4(m->str_flags);
 	}
