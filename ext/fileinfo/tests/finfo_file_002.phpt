@@ -17,14 +17,14 @@ var_dump($results);
 ?>
 --EXPECTF--
 array(5) {
-  ["%s/resources/test.bmp"]=>
+  [u"%s/resources/test.bmp"]=>
   string(14) "image/x-ms-bmp"
-  ["%s/resources/test.gif"]=>
+  [u"%s/resources/test.gif"]=>
   string(9) "image/gif"
-  ["%s/resources/test.jpg"]=>
+  [u"%s/resources/test.jpg"]=>
   string(10) "image/jpeg"
-  ["%s/resources/test.pdf"]=>
+  [u"%s/resources/test.pdf"]=>
   string(15) "application/pdf"
-  ["%s/resources/test.png"]=>
+  [u"%s/resources/test.png"]=>
   string(9) "image/png"
 }
