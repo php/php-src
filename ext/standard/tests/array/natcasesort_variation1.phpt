@@ -99,87 +99,87 @@ echo "Done";
 
 -- Iteration 1 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
 -- Iteration 2 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
 -- Iteration 3 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
 -- Iteration 4 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
 -- Iteration 5 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, double given in %s on line %d
 NULL
 
 -- Iteration 6 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, double given in %s on line %d
 NULL
 
 -- Iteration 7 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, double given in %s on line %d
 NULL
 
 -- Iteration 8 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, double given in %s on line %d
 NULL
 
 -- Iteration 9 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, double given in %s on line %d
 NULL
 
 -- Iteration 10 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, null given in %s on line %d
 NULL
 
 -- Iteration 11 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, null given in %s on line %d
 NULL
 
 -- Iteration 12 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, boolean given in %s on line %d
 NULL
 
 -- Iteration 13 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, boolean given in %s on line %d
 NULL
 
 -- Iteration 14 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, boolean given in %s on line %d
 NULL
 
 -- Iteration 15 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, boolean given in %s on line %d
 NULL
 
 -- Iteration 16 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, Unicode string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, Unicode string given in %s on line %d
 NULL
 
 -- Iteration 18 --
@@ -187,34 +187,36 @@ bool(true)
 
 -- Iteration 19 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, Unicode string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, Unicode string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, Unicode string given in %s on line %d
 NULL
 
 -- Iteration 22 --
-bool(true)
+
+Warning: natcasesort() expects parameter 1 to be array, object given in %s on line %d
+NULL
 
 -- Iteration 23 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, null given in %s on line %d
 NULL
 
 -- Iteration 24 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, null given in %s on line %d
 NULL
 
 -- Iteration 25 --
 
-Warning: natcasesort(): The argument should be an array in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, resource given in %s on line %d
 NULL
 Done
