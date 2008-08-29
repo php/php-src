@@ -931,6 +931,8 @@ isoweek          = year4 "-"? "W" weekofyear;
 exif             = year4 ":" monthlz ":" daylz " " hour24lz ":" minutelz ":" secondlz;
 firstdayof       = 'first day' ' of'?;
 lastdayof        = 'last day' ' of'?;
+backof           = 'back of ' hour24 space? meridian?;
+frontof          = 'front of ' hour24 space? meridian?;
 
 /* Common Log Format: 10/Oct/2000:13:55:36 -0700 */
 clf              = day "/" monthabbr "/" year4 ":" hour24lz ":" minutelz ":" secondlz space tzcorrection;
@@ -1054,6 +1056,29 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 			s->time->relative.first_last_day_of = 2;
 		} else {
 			s->time->relative.first_last_day_of = 1;
+		}
+
+		TIMELIB_DEINIT;
+		return TIMELIB_LF_DAY_OF_MONTH;
+	}
+
+	backof | frontof
+	{
+		DEBUG_OUTPUT("backof | frontof");
+		TIMELIB_INIT;
+		TIMELIB_UNHAVE_TIME();
+		TIMELIB_HAVE_TIME();
+
+		if (*ptr == 'b') {
+			s->time->h = timelib_get_nr((char **) &ptr, 2);
+			s->time->i = 15;
+		} else {
+			s->time->h = timelib_get_nr((char **) &ptr, 2) - 1;
+			s->time->i = 45;
+		}
+		if (*ptr != '\0' ) {
+			timelib_eat_spaces((char **) &ptr);
+			s->time->h += timelib_meridian((char **) &ptr, s->time->h);
 		}
 
 		TIMELIB_DEINIT;
