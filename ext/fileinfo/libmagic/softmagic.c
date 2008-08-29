@@ -288,6 +288,7 @@ check_fmt(struct magic_set *ms, struct magic *m)
 	pcre *pce;
 	int re_options;
 	pcre_extra *re_extra;
+	TSRMLS_FETCH();
 	
 	if (strchr(MAGIC_DESC, '%') == NULL) {
 		return 0;
@@ -1704,6 +1705,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 		zval *pattern;
 		int options = 0;
 		pcre_cache_entry *pce;
+		TSRMLS_FETCH();
 		
 		MAKE_STD_ZVAL(pattern);
 		Z_STRVAL_P(pattern) = (char *)m->value.s;
