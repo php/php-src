@@ -559,6 +559,7 @@ if (isset($argc) && $argc > 1) {
 				case 'p':
 					$php = $argv[++$i];
 					putenv("TEST_PHP_EXECUTABLE=$php");
+					$environment['TEST_PHP_EXECUTABLE'] = $php;
 					break;
 				case 'q':
 					putenv('NO_INTERACTION=1');
@@ -999,11 +1000,16 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 
 	$data = '';
 
+	$bin_env = array();
+	foreach($env as $key => $value) {
+		$bin_env[(binary)$key] = (binary)$value;
+	}
+
 	$proc = proc_open($commandline, array(
 		0 => array('pipe', 'r'),
 		1 => array('pipe', 'w'),
 		2 => array('pipe', 'w')
-		), $pipes, null, $env, array('suppress_errors' => true, 'binary_pipes' => true));
+		), $pipes, null, $bin_env, array('suppress_errors' => true, 'binary_pipes' => true));
 
 	if (!$proc) {
 		return false;
