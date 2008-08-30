@@ -1,3 +1,40 @@
+2008-08-29  Matt Wilmas  <php_lists@realplain.com>
+
+    * (PHP_5_3)
+      zend_compile.h
+      zend_opcode.c:
+      MFH: - Updated unary_op_type typedef with TSRMLS_DC
+      - Added binary_op_type typedef
+      - Added missing ZEND_BOOL_XOR to get_binary_op()
+
+    * zend_compile.h
+      zend_opcode.c:
+      - Updated unary_op_type typedef with TSRMLS_DC
+      - Added binary_op_type typedef
+      - Added missing ZEND_BOOL_XOR to get_binary_op()
+
+    * (PHP_5_3)
+      zend_language_parser.y:
+      MFH: - Saved opcode when unary +/- is applied to IS_CONST op (e.g. for
+      negative numbers)
+      - Made '+' in static_scalar context behave as '-' by calling
+      add_function()
+
+    * zend_language_parser.y:
+      - Saved opcode when unary +/- is applied to IS_CONST op (e.g. for negative
+      numbers)
+      - Made '+' in static_scalar context behave as '-' by calling
+      add_function(), so:
+          static $a = +'abc'; // 0 instead of abc
+          static $b = +array(); // "Invalid operand types," like -array(),
+      instead of array()
+
+2008-08-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c:
+      Imporoved compile-time constant substitution (Matt)
+
 2008-08-26  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute_API.c
