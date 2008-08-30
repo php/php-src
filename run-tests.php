@@ -559,6 +559,7 @@ if (isset($argc) && $argc > 1) {
 				case 'p':
 					$php = $argv[++$i];
 					putenv("TEST_PHP_EXECUTABLE=$php");
+					$environment['TEST_PHP_EXECUTABLE'] = $php;
 					break;
 				case 'q':
 					putenv('NO_INTERACTION=1');
