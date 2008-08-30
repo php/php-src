@@ -63,8 +63,11 @@ $sb = $zip->statIndex(1);
 var_dump($sb);
 $sb = $zip->statIndex(2);
 var_dump($sb);
+$zip->close();
 unset($zip);
-unlink($file);
+if (file_exists($file)) {
+	unlink($file);
+}
 ?>
 --EXPECTF--
 ok
