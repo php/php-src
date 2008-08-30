@@ -886,7 +886,8 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 	/* Rename directory. Update all nested paths */
 	if (is_dir) {
 		int key_type;
-		char *key, *new_key;
+		phar_zstr key, new_key;
+		char *str_key, *new_str_key;
 		uint key_len, new_key_len;
 		ulong unused;
 		uint from_len = strlen(resource_from->path+1);
@@ -897,22 +898,31 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 			SUCCESS == zend_hash_get_current_data(&phar->manifest, (void **) &entry);
 			zend_hash_move_forward(&phar->manifest)) {
 
+			PHAR_STR(key, str_key);
+
 			if (!entry->is_deleted &&
 				key_len > from_len &&
-				memcmp(key, resource_from->path+1, from_len) == 0 &&
-				IS_SLASH(key[from_len])) {
+				memcmp(str_key, resource_from->path+1, from_len) == 0 &&
+				IS_SLASH(str_key[from_len])) {
 
 				new_key_len = key_len + to_len - from_len;
-				new_key = emalloc(new_key_len+1);
-				memcpy(new_key, resource_to->path + 1, to_len);
-				memcpy(new_key + to_len, key + from_len, key_len - from_len);
-				new_key[new_key_len] = 0;
+				new_str_key = emalloc(new_key_len+1);
+				memcpy(new_str_key, resource_to->path + 1, to_len);
+				memcpy(new_str_key + to_len, str_key + from_len, key_len - from_len);
+				new_str_key[new_key_len] = 0;
 				is_modified = 1;
 				entry->is_modified = 1;
 				efree(entry->filename);
-				entry->filename = new_key;
+				entry->filename = new_str_key;
 				entry->filename_len = new_key_len;
+
+				PHAR_ZSTR(new_str_key, new_key);
+
+#if PHP_VERSION_ID < 50300
+				zend_hash_update_current_key_ex(&phar->manifest, key_type, new_key, new_key_len, 0, NULL);
+#else
 				zend_hash_update_current_key_ex(&phar->manifest, key_type, new_key, new_key_len, 0, HASH_UPDATE_KEY_ANYWAY, NULL);
+#endif
 			}
 		}
 
@@ -920,17 +930,25 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 			HASH_KEY_NON_EXISTANT != (key_type = zend_hash_get_current_key_ex(&phar->virtual_dirs, &key, &key_len, &unused, 0, NULL));
 			zend_hash_move_forward(&phar->virtual_dirs)) {
 
+			PHAR_STR(key, str_key);
+
 			if (key_len >= from_len &&
-				memcmp(key, resource_from->path+1, from_len) == 0 &&
-				(key_len == from_len || IS_SLASH(key[from_len]))) {
+				memcmp(str_key, resource_from->path+1, from_len) == 0 &&
+				(key_len == from_len || IS_SLASH(str_key[from_len]))) {
 
 				new_key_len = key_len + to_len - from_len;
-				new_key = emalloc(new_key_len+1);
-				memcpy(new_key, resource_to->path + 1, to_len);
-				memcpy(new_key + to_len, key + from_len, key_len - from_len);
-				new_key[new_key_len] = 0;
+				new_str_key = emalloc(new_key_len+1);
+				memcpy(new_str_key, resource_to->path + 1, to_len);
+				memcpy(new_str_key + to_len, str_key + from_len, key_len - from_len);
+				new_str_key[new_key_len] = 0;
+
+				PHAR_ZSTR(new_str_key, new_key);
+#if PHP_VERSION_ID < 50300
+				zend_hash_update_current_key_ex(&phar->virtual_dirs, key_type, new_key, new_key_len, 0, NULL);
+#else
 				zend_hash_update_current_key_ex(&phar->virtual_dirs, key_type, new_key, new_key_len, 0, HASH_UPDATE_KEY_ANYWAY, NULL);
-				efree(new_key);
+#endif
+				efree(new_str_key);
 			}
 		}
 
@@ -939,17 +957,25 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 			SUCCESS == zend_hash_get_current_data(&phar->mounted_dirs, (void **) &entry);
 			zend_hash_move_forward(&phar->mounted_dirs)) {
 
+			PHAR_STR(key, str_key);
+
 			if (key_len >= from_len &&
-				memcmp(key, resource_from->path+1, from_len) == 0 &&
-				(key_len == from_len || IS_SLASH(key[from_len]))) {
+				memcmp(str_key, resource_from->path+1, from_len) == 0 &&
+				(key_len == from_len || IS_SLASH(str_key[from_len]))) {
 
 				new_key_len = key_len + to_len - from_len;
-				new_key = emalloc(new_key_len+1);
-				memcpy(new_key, resource_to->path + 1, to_len);
-				memcpy(new_key + to_len, key + from_len, key_len - from_len);
-				new_key[new_key_len] = 0;
+				new_str_key = emalloc(new_key_len+1);
+				memcpy(new_str_key, resource_to->path + 1, to_len);
+				memcpy(new_str_key + to_len, str_key + from_len, key_len - from_len);
+				new_str_key[new_key_len] = 0;
+
+				PHAR_ZSTR(new_str_key, new_key);
+#if PHP_VERSION_ID < 50300
+				zend_hash_update_current_key_ex(&phar->mounted_dirs, key_type, new_key, new_key_len, 0, NULL);
+#else
 				zend_hash_update_current_key_ex(&phar->mounted_dirs, key_type, new_key, new_key_len, 0, HASH_UPDATE_KEY_ANYWAY, NULL);
-				efree(new_key);
+#endif
+				efree(new_str_key);
 			}
 		}
 	}
