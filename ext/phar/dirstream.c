@@ -647,8 +647,8 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_
 
 		if (!entry->is_deleted && 
 			key_len > path_len && 
-			memcmp(key, resource->path+1, path_len) == 0 && 
-			IS_SLASH(key[path_len])) {
+			memcmp(str_key, resource->path+1, path_len) == 0 && 
+			IS_SLASH(str_key[path_len])) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: Directory not empty");
 			if (entry->is_temp_dir) {
 				efree(entry->filename);
