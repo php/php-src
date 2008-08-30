@@ -50,53 +50,88 @@ string(%d) "Extension [ <persistent> extension #%d pcre version <no_version> ] {
     Constant [ integer PREG_RECURSION_LIMIT_ERROR ] { 3 }
     Constant [ integer PREG_BAD_UTF8_ERROR ] { 4 }
     Constant [ integer PREG_BAD_UTF8_OFFSET_ERROR ] { 5 }
-    Constant [ string PCRE_VERSION ] { %s }
+    Constant [ %string PCRE_VERSION ] { %s }
   }
 
   - Functions {
     Function [ <internal:pcre> function preg_match ] {
 
-      - Parameters [3] {
-        Parameter #0 [ <required> $param0 ]
-        Parameter #1 [ <required> $param1 ]
-        Parameter #2 [ <required> &$param2 ]
+      - Parameters [5] {
+        Parameter #0 [ <required> $pattern ]
+        Parameter #1 [ <required> $subject ]
+        Parameter #2 [ <optional> &$subpatterns ]
+        Parameter #3 [ <optional> $flags ]
+        Parameter #4 [ <optional> $offset ]
       }
     }
     Function [ <internal:pcre> function preg_match_all ] {
 
-      - Parameters [3] {
-        Parameter #0 [ <required> $param0 ]
-        Parameter #1 [ <required> $param1 ]
-        Parameter #2 [ <required> &$param2 ]
+      - Parameters [5] {
+        Parameter #0 [ <required> $pattern ]
+        Parameter #1 [ <required> $subject ]
+        Parameter #2 [ <required> &$subpatterns ]
+        Parameter #3 [ <optional> $flags ]
+        Parameter #4 [ <optional> $offset ]
       }
     }
     Function [ <internal:pcre> function preg_replace ] {
 
       - Parameters [5] {
-        Parameter #0 [ <required> $param0 ]
-        Parameter #1 [ <required> $param1 ]
-        Parameter #2 [ <required> $param2 ]
-        Parameter #3 [ <required> $param3 ]
-        Parameter #4 [ <required> &$param4 ]
+        Parameter #0 [ <required> $regex ]
+        Parameter #1 [ <required> $replace ]
+        Parameter #2 [ <optional> $subject ]
+        Parameter #3 [ <optional> $limit ]
+        Parameter #4 [ <optional> &$count ]
       }
     }
     Function [ <internal:pcre> function preg_replace_callback ] {
 
       - Parameters [5] {
-        Parameter #0 [ <required> $param0 ]
-        Parameter #1 [ <required> $param1 ]
-        Parameter #2 [ <required> $param2 ]
-        Parameter #3 [ <required> $param3 ]
-        Parameter #4 [ <required> &$param4 ]
+        Parameter #0 [ <required> $regex ]
+        Parameter #1 [ <required> $callback ]
+        Parameter #2 [ <required> $subject ]
+        Parameter #3 [ <optional> $limit ]
+        Parameter #4 [ <optional> &$count ]
+      }
+    }
+    Function [ <internal:pcre> function preg_filter ] {
+
+      - Parameters [5] {
+        Parameter #0 [ <required> $regex ]
+        Parameter #1 [ <required> $replace ]
+        Parameter #2 [ <optional> $subject ]
+        Parameter #3 [ <optional> $limit ]
+        Parameter #4 [ <optional> &$count ]
       }
     }
     Function [ <internal:pcre> function preg_split ] {
+
+      - Parameters [4] {
+        Parameter #0 [ <required> $pattern ]
+        Parameter #1 [ <required> $subject ]
+        Parameter #2 [ <optional> $limit ]
+        Parameter #3 [ <optional> $flags ]
+      }
     }
     Function [ <internal:pcre> function preg_quote ] {
+
+      - Parameters [2] {
+        Parameter #0 [ <required> $str ]
+        Parameter #1 [ <optional> $delim_char ]
+      }
     }
     Function [ <internal:pcre> function preg_grep ] {
+
+      - Parameters [3] {
+        Parameter #0 [ <required> $regex ]
+        Parameter #1 [ <required> $input ]
+        Parameter #2 [ <optional> $flags ]
+      }
     }
     Function [ <internal:pcre> function preg_last_error ] {
+
+      - Parameters [0] {
+      }
     }
   }
 }
