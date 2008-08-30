@@ -94,6 +94,16 @@ string(%d) "Extension [ <persistent> extension #%d pcre version <no_version> ] {
         Parameter #4 [ <optional> &$count ]
       }
     }
+    Function [ <internal:pcre> function preg_filter ] {
+
+      - Parameters [5] {
+        Parameter #0 [ <required> $regex ]
+        Parameter #1 [ <required> $replace ]
+        Parameter #2 [ <optional> $subject ]
+        Parameter #3 [ <optional> $limit ]
+        Parameter #4 [ <optional> &$count ]
+      }
+    }
     Function [ <internal:pcre> function preg_split ] {
 
       - Parameters [4] {
