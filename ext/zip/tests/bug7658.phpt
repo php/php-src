@@ -24,7 +24,8 @@ $zip->close();
 echo "\n";
 $zip->open($file);
 dump_entries_name($zip);
-@unlink($file);
+unset($zip);
+unlink($file);
 ?>
 --EXPECT--
 0 mimetype
