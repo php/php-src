@@ -69,7 +69,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 	HashTable *symtable1 = NULL;
 
 	assert(var_name != NULL);
-	
+
 	if (track_vars_array) {
 		symtable1 = Z_ARRVAL_P(track_vars_array);
 	} else if (PG(register_globals)) {
@@ -88,8 +88,8 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 	 * Prepare variable name
 	 */
 
-    var_orig = estrdup(var_name);
-    var = var_orig;
+	var_orig = estrdup(var_name);
+	var = var_orig;
 	/* ignore leading spaces in the variable name */
 	while (*var && *var==' ') {
 		var++;
