@@ -1,3 +1,350 @@
+2008-08-29  Henrique do Nascimento Angelo  <h.n.angelo@gmail.com>
+
+    * ext/tidy/tidy.c:
+      Fix wrong Unicode string length (bytes) in tidy_parse_string()
+
+2008-08-29  Patrick van Kleef  <iodbc@openlinksw.com>
+
+    * (PHP_5_3)
+      ext/odbc/php_odbc.c
+      ext/odbc/php_odbc_includes.h:
+      - MFH: Added odbc.default_cursortype to control the ODBC cursormodel
+        (bug #43668)
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc_includes.h:
+      - Added odbc.default_cursortype to control the ODBC cursormodel (bug
+      #43668)
+
+2008-08-29  Matt Wilmas  <php_lists@realplain.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_opcode.c:
+      MFH: - Updated unary_op_type typedef with TSRMLS_DC
+      - Added binary_op_type typedef
+      - Added missing ZEND_BOOL_XOR to get_binary_op()
+
+    * ZendEngine2/zend_compile.h
+      ZendEngine2/zend_opcode.c:
+      - Updated unary_op_type typedef with TSRMLS_DC
+      - Added binary_op_type typedef
+      - Added missing ZEND_BOOL_XOR to get_binary_op()
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_parser.y:
+      MFH: - Saved opcode when unary +/- is applied to IS_CONST op (e.g. for
+      negative numbers)
+      - Made '+' in static_scalar context behave as '-' by calling
+      add_function()
+
+    * ZendEngine2/zend_language_parser.y:
+      - Saved opcode when unary +/- is applied to IS_CONST op (e.g. for negative
+      numbers)
+      - Made '+' in static_scalar context behave as '-' by calling
+      add_function(), so:
+          static $a = +'abc'; // 0 instead of abc
+          static $b = +array(); // "Invalid operand types," like -array(),
+      instead of array()
+
+2008-08-29  Patrick van Kleef  <iodbc@openlinksw.com>
+
+    * (PHP_5_3)
+      ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h
+      ext/odbc/php_odbc_includes.h:
+      - MFH: Fixed code to use ODBC 3.52 datatypes for 64bit systems (bug #43666)
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h
+      ext/odbc/php_odbc_includes.h:
+      - Fixed code to use ODBC 3.52 datatypes for 64bit systems (bug #43666)
+
+2008-08-29  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/array/array_walk_object1.phpt
+      ext/standard/tests/array/array_walk_object1.phpt
+      ext/standard/tests/array/array_walk_objects.phpt
+      ext/standard/tests/array/array_walk_objects.phpt
+      ext/standard/tests/array/array_walk_rec_objects.phpt
+      ext/standard/tests/array/array_walk_rec_objects.phpt
+      ext/standard/tests/array/array_walk_recursive_object1.phpt
+      ext/standard/tests/array/array_walk_recursive_object1.phpt:
+      - Fixed tests
+
+    * ext/fileinfo/tests/finfo_open_basic.phpt
+      ext/fileinfo/tests/finfo_open_basic.phpt
+      ext/fileinfo/tests/finfo_open_variation1.phpt
+      ext/fileinfo/tests/finfo_open_variation1.phpt:
+      - Fixed tests (Disable COMPRESS support for now)
+
+    * ext/fileinfo/fileinfo.c:
+      - Fixed build
+
+2008-08-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/tests/serialize/bug45706.phpt
+      ext/standard/tests/serialize/bug45706.phpt
+      ext/standard/tests/serialize/serialization_objects_009.phpt:
+      
+      file bug45706.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/standard/var_unserializer.re
+      ext/standard/tests/serialize/bug45706.phpt
+      ext/standard/tests/serialize/serialization_objects_009.phpt:
+      Fixed bug #45706 (Unserialization of classes derived from ArrayIterator
+      fails)
+
+2008-08-29  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/standard/browscap.c:
+      MFH: fix get_browser() (broken in the process of param API conversion)
+
+    * ext/standard/browscap.c:
+      fix get_browser() (broken in the process of param API conversion)
+
+    * (PHP_5_3)
+      ext/fileinfo/fileinfo.c:
+      MFH: check for \0 to be consistent with other functions
+
+    * ext/fileinfo/fileinfo.c:
+      check for \0 to be consistent with other functions
+
+2008-08-29  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/fileinfo/fileinfo.c:
+      - MFB: Disable COMPRESS support for now, as it requires forking.
+
+    * (PHP_5_3)
+      ext/fileinfo/fileinfo.c:
+      - Disable COMPRESS support for now, as it requires forking.
+
+    * (PHP_5_3)
+      ext/fileinfo/fileinfo.c
+      ext/fileinfo/php_fileinfo.h:
+      - MFH: Adding back in mime_content_type().
+
+    * ext/fileinfo/fileinfo.c
+      ext/fileinfo/php_fileinfo.h:
+      - Adding back in mime_content_type().
+
+2008-08-29  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      NEWS
+      ext/pcre/php_pcre.c
+      ext/pcre/tests/preg_filter.phpt:
+      - MFH preg_filter()
+
+2008-08-29  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/fileinfo/libmagic/apprentice.c
+      ext/fileinfo/libmagic/file.h
+      ext/fileinfo/libmagic/funcs.c
+      ext/fileinfo/libmagic/magic.c
+      ext/fileinfo/libmagic/print.c:
+      - MFH: Some more cleanups, and fixed some warnings.
+
+    * ext/fileinfo/libmagic/apprentice.c
+      ext/fileinfo/libmagic/file.h
+      ext/fileinfo/libmagic/funcs.c
+      ext/fileinfo/libmagic/magic.c
+      ext/fileinfo/libmagic/print.c:
+      - Some more cleanups, and fixed some warnings.
+
+    * (PHP_5_3)
+      NEWS
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - MFH: Support for "back of <hour>" and "front of <hour>" phrases that are
+      used
+        in Scotland.
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re:
+      - Support for the Scottish "back of" and "front of" hour phrases.
+
+2008-08-29  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      - [DOC] ming has been moved to pecl
+
+2008-08-29  Matt Wilmas  <php_lists@realplain.com>
+
+    * (PHP_5_3)
+      NEWS:
+      - Be more specific about when constant substitution occurs
+      - And should that be "values" or "value"? Hmm, feel free to improve
+      wording
+
+2008-08-29  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/gd.c:
+      - fix warning
+
+2008-08-29  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/fileinfo/libmagic/softmagic.c:
+      fix invalid read
+
+    * ext/fileinfo/libmagic/softmagic.c:
+      fix invalid read
+      
+      weird, the code uses correct order of checks just ten lines below
+
+2008-08-29  Felix De Vliegher  <felix.devliegher@gmail.com>
+
+    * ext/fileinfo/tests/finfo_buffer_basic.phpt
+      ext/fileinfo/tests/finfo_buffer_error.phpt
+      ext/fileinfo/tests/finfo_buffer_variation1.phpt
+      ext/fileinfo/tests/finfo_close_basic.phpt
+      ext/fileinfo/tests/finfo_file_002.phpt
+      ext/fileinfo/tests/finfo_file_basic.phpt
+      ext/fileinfo/tests/finfo_open_basic.phpt
+      ext/fileinfo/tests/finfo_open_error.phpt
+      ext/fileinfo/tests/finfo_open_variation1.phpt
+      ext/fileinfo/tests/finfo_set_flags_basic.phpt
+      ext/fileinfo/tests/magic:
+      MFB: Some fileinfo tests
+
+    * ext/fileinfo/tests/finfo_buffer_basic.phpt
+      ext/fileinfo/tests/finfo_buffer_basic.phpt
+      ext/fileinfo/tests/finfo_buffer_error.phpt
+      ext/fileinfo/tests/finfo_buffer_error.phpt
+      ext/fileinfo/tests/finfo_buffer_variation1.phpt
+      ext/fileinfo/tests/finfo_buffer_variation1.phpt
+      ext/fileinfo/tests/finfo_close_basic.phpt
+      ext/fileinfo/tests/finfo_close_basic.phpt
+      ext/fileinfo/tests/finfo_file_basic.phpt
+      ext/fileinfo/tests/finfo_file_basic.phpt
+      ext/fileinfo/tests/finfo_open_basic.phpt
+      ext/fileinfo/tests/finfo_open_basic.phpt
+      ext/fileinfo/tests/finfo_open_error.phpt
+      ext/fileinfo/tests/finfo_open_error.phpt
+      ext/fileinfo/tests/finfo_open_variation1.phpt
+      ext/fileinfo/tests/finfo_open_variation1.phpt
+      ext/fileinfo/tests/finfo_set_flags_basic.phpt
+      ext/fileinfo/tests/finfo_set_flags_basic.phpt
+      ext/fileinfo/tests/magic
+      ext/fileinfo/tests/magic:
+      
+      file finfo_buffer_basic.phpt was initially added on branch PHP_5_3.
+
+    * run-tests.php
+      run-tests.php:
+      Added %unicode_string_optional% for differences in output between PHP 5 and
+      6
+
+2008-08-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c:
+      Imporoved compile-time constant substitution (Matt)
+
+2008-08-29  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/fileinfo/libmagic/softmagic.c
+      ext/fileinfo/libmagic/softmagic.c:
+      fix ZTS build
+
+    * ext/fileinfo/libmagic/softmagic.c:
+      fix build
+
+2008-08-29  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/fileinfo/tests/finfo_file_002.phpt
+      ext/fileinfo/tests/resources/test.bmp
+      ext/fileinfo/tests/resources/test.gif
+      ext/fileinfo/tests/resources/test.jpg
+      ext/fileinfo/tests/resources/test.pdf
+      ext/fileinfo/tests/resources/test.png:
+      MFB: Test for fileinfo to check mime types.
+
+    * ext/fileinfo/tests/finfo_file_002.phpt
+      ext/fileinfo/tests/finfo_file_002.phpt
+      ext/fileinfo/tests/resources/test.bmp
+      ext/fileinfo/tests/resources/test.bmp
+      ext/fileinfo/tests/resources/test.gif
+      ext/fileinfo/tests/resources/test.gif
+      ext/fileinfo/tests/resources/test.jpg
+      ext/fileinfo/tests/resources/test.jpg
+      ext/fileinfo/tests/resources/test.pdf
+      ext/fileinfo/tests/resources/test.pdf
+      ext/fileinfo/tests/resources/test.png
+      ext/fileinfo/tests/resources/test.png:
+      
+      file finfo_file_002.phpt was initially added on branch PHP_5_3.
+
+    * ext/fileinfo/libmagic/apprentice.c
+      ext/fileinfo/libmagic/file.h
+      ext/fileinfo/libmagic/print.c
+      ext/fileinfo/libmagic/softmagic.c:
+      MFB: Replace ereg code with pcre, fix duplicate macro names and segfault.
+      Patch by Mikko
+
+    * (PHP_5_3)
+      ext/fileinfo/libmagic/apprentice.c
+      ext/fileinfo/libmagic/file.h
+      ext/fileinfo/libmagic/print.c
+      ext/fileinfo/libmagic/softmagic.c:
+      Replace ereg code with pcre, fix duplicate macro names and segfault. Patch
+      by Mikko
+
+2008-08-29  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/array.c
+      ext/standard/tests/array/array_key_exists.phpt
+      ext/standard/tests/array/array_key_exists_object1.phpt
+      ext/standard/tests/array/array_key_exists_object2.phpt
+      ext/standard/tests/array/array_key_exists_variation2.phpt
+      ext/standard/tests/array/array_merge.phpt
+      ext/standard/tests/array/array_unique_variation1.phpt
+      ext/standard/tests/array/array_walk.phpt
+      ext/standard/tests/array/array_walk_recursive1.phpt
+      ext/standard/tests/array/array_walk_recursive_variation1.phpt
+      ext/standard/tests/array/array_walk_variation1.phpt
+      ext/standard/tests/array/bug40191.phpt
+      ext/standard/tests/array/natcasesort_variation1.phpt:
+      MFH:
+      - Removed the undocumented object support in the leftover array functions
+      [DOC]
+        (natcasesort, natsort, array_walk, array_walk_recursive, array_unique,
+      array_key_exists)
+      - Changed HASH_OF() to Z_ARRVAL_P()
+      - Fixed bug #45937 (array_walk and array_walk_recursive can alter
+      private/protected object variable)
+
+    * ext/standard/array.c
+      ext/standard/tests/array/array_key_exists.phpt
+      ext/standard/tests/array/array_key_exists_object1.phpt
+      ext/standard/tests/array/array_key_exists_object2.phpt
+      ext/standard/tests/array/array_key_exists_variation2.phpt
+      ext/standard/tests/array/array_merge.phpt
+      ext/standard/tests/array/array_unique_variation1.phpt
+      ext/standard/tests/array/array_walk.phpt
+      ext/standard/tests/array/array_walk_recursive1.phpt
+      ext/standard/tests/array/array_walk_recursive_variation1.phpt
+      ext/standard/tests/array/array_walk_variation1.phpt
+      ext/standard/tests/array/bug40191.phpt
+      ext/standard/tests/array/natcasesort_variation1.phpt:
+      - Removed the undocumented object support in the leftover array functions
+      [DOC]
+        (natcasesort, natsort, array_walk, array_walk_recursive, array_unique,
+      array_key_exists)
+      - Changed HASH_OF() to Z_ARRVAL_P()
+      - Fixed bug #45937 (array_walk and array_walk_recursive can alter
+      private/protected object variable)
+
 2008-08-28  Christopher Jones  <christopher.jones@oracle.com>
 
     * (PHP_5_3)
