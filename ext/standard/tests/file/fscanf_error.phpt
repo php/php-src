@@ -66,10 +66,10 @@ unlink($filename);
 
 Notice: fwrite(): 11 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 
-Warning: Wrong parameter count for fscanf() in %s on line %d
+Warning: fscanf() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for fscanf() in %s on line %d
+Warning: fscanf() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
 Warning: fscanf(): 6 is not a valid File-Handle resource in %s on line %d
