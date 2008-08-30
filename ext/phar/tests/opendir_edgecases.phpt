@@ -19,7 +19,12 @@ chdir(dirname(__FILE__));
 
 $a = opendir('poo');
 
+$arr = array();
 while (false !== ($b = readdir($a))) {
+    $arr[] = $b;
+}
+sort($arr);
+foreach ($arr as $b) {
     echo "$b\n";
 }
 
