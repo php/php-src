@@ -47,7 +47,8 @@ for($i=0; $i < $zip->numFiles; $i++) {
 $ar = array_diff($found, $expect);
 
 var_dump($ar);
-@unlink($file);
+unset($zip);
+unlink($file);
 ?>
 --EXPECTF--
 array(0) {
