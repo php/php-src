@@ -19,7 +19,6 @@ CREDIT_LINE("ctype", "Hartmut Holzgraefe");
 CREDIT_LINE("cURL", "Sterling Hughes");
 CREDIT_LINE("Date/Time Support", "Derick Rethans");
 CREDIT_LINE("DBA", "Sascha Schumann, Marcus Boerger");
-CREDIT_LINE("dBase", "Jim Winstead");
 CREDIT_LINE("DB-LIB (MS SQL, Sybase)", "Wez Furlong, Frank M. Kromann");
 CREDIT_LINE("DOM", "Christian Stocker, Rob Richards, Marcus Boerger");
 CREDIT_LINE("ereg", "Rasmus Lerdorf, Jim Winstead, Jaakko Hyvätti");
@@ -41,8 +40,6 @@ CREDIT_LINE("LDAP", "Amitay Isaacs, Eric Warnke, Rasmus Lerdorf, Gerrit Thomson,
 CREDIT_LINE("LIBXML", "Christian Stocker, Rob Richards, Marcus Boerger, Wez Furlong, Shane Caraveo");
 CREDIT_LINE("mcrypt", "Sascha Schumann, Derick Rethans");
 CREDIT_LINE("mhash", "Sascha Schumann");
-CREDIT_LINE("mime_magic", "Hartmut Holzgraefe");
-CREDIT_LINE("MING", "Dave Hayden, Frank M. Kromann");
 CREDIT_LINE("mSQL", "Zeev Suraski");
 CREDIT_LINE("MS SQL", "Frank M. Kromann");
 CREDIT_LINE("Multibyte String Functions", "Tsukada Takuya, Rui Hirokawa");
