@@ -3182,7 +3182,6 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		}
 
 		if (phar->flags & PHAR_FILE_COMPRESSED_GZ) {
-			php_stream_filter *filter;
 			/* to properly compress, we have to tell zlib to add a zlib header */
 			zval filterparams;
 
@@ -3206,8 +3205,6 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 			/* use the temp stream as our base */
 			phar->fp = newfile;
 		} else if (phar->flags & PHAR_FILE_COMPRESSED_BZ2) {
-			php_stream_filter *filter;
-
 			filter = php_stream_filter_create("bzip2.compress", NULL, php_stream_is_persistent(phar->fp) TSRMLS_CC);
 			php_stream_filter_append(&phar->fp->writefilters, filter);
 			php_stream_copy_to_stream(newfile, phar->fp, PHP_STREAM_COPY_ALL);
