@@ -1448,7 +1448,12 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 				}
 
 				if (key_type > 9) { /* IS_UNICODE == 10 */
+#if PHP_VERSION_ID < 60000
+/* this can never happen, but fixes a compile warning */
+					spprintf(&str_key, 0, "%s", key);
+#else
 					spprintf(&str_key, 0, "%v", key);
+#endif
 				} else {
 					PHAR_STR(key, str_key);
 				}
@@ -1575,7 +1580,12 @@ phar_spl_fileinfo:
 			}
 
 			if (key_type > 9) { /* IS_UNICODE == 10 */
+#if PHP_VERSION_ID < 60000
+/* this can never happen, but fixes a compile warning */
+				spprintf(&str_key, 0, "%s", key);
+#else
 				spprintf(&str_key, 0, "%v", key);
+#endif
 			} else {
 				PHAR_STR(key, str_key);
 			}
