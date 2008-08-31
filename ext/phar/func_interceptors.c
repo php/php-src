@@ -517,7 +517,7 @@ void phar_fancy_stat(struct stat *stat_sb, int type, zval *return_value TSRMLS_D
 		case S_IFDIR: RETURN_STRING("dir", 1);
 		case S_IFREG: RETURN_STRING("file", 1);
 		}
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown file type (%d)", stat_sb->st_mode&S_IFMT);
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown file type (%u)", stat_sb->st_mode & S_IFMT);
 		RETURN_STRING("unknown", 1);
 	case FS_IS_W:
 		RETURN_BOOL((stat_sb->st_mode & wmask) != 0);
@@ -681,16 +681,12 @@ splitted:
 #endif
 				goto statme_baby;
 			} else {
-				char *save, *save2, *actual;
-				int save_len, save2_len, actual_len;
+				char *save;
+				int save_len;
 
 notfound:
 				save = PHAR_G(cwd);
-				save2 = entry;
-				actual = entry[0] == '/' ? (entry + 1) : entry;
 				save_len = PHAR_G(cwd_len);
-				save2_len = entry_len;
-				actual_len = entry[0] == '/' ? (entry_len - 1) : entry_len;
 				/* this file is not in the current directory, use the original path */
 				entry = estrndup(filename, filename_length);
 				entry_len = filename_length;
@@ -702,7 +698,6 @@ notfound:
 					PHAR_G(cwd) = save;
 					PHAR_G(cwd_len) = save_len;
 					efree(entry);
-					efree(save2);
 					if (IS_EXISTS_CHECK(type)) {
 						efree(arch);
 						RETURN_TRUE;
@@ -713,7 +708,6 @@ notfound:
 					PHAR_G(cwd) = save;
 					PHAR_G(cwd_len) = save_len;
 					efree(entry);
-					efree(save2);
 					efree(arch);
 					if (IS_EXISTS_CHECK(type)) {
 						RETURN_TRUE;
@@ -735,7 +729,6 @@ notfound:
 				PHAR_G(cwd) = save;
 				PHAR_G(cwd_len) = save_len;
 				efree(entry);
-				efree(save2);
 				efree(arch);
 				/* Error Occured */
 				if (!IS_EXISTS_CHECK(type)) {

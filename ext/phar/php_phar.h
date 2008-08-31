@@ -22,7 +22,7 @@
 #ifndef PHP_PHAR_H
 #define PHP_PHAR_H
 
-#define PHP_PHAR_VERSION "2.0.0b2-dev"
+#define PHP_PHAR_VERSION "2.0.0RC2-dev"
 
 #include "ext/standard/basic_functions.h"
 extern zend_module_entry phar_module_entry;
