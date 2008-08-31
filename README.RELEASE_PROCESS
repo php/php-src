@@ -21,7 +21,22 @@ php/QA/bug websites try to have someone from the webmaster team (Bjori) on hand.
 5. Verify the tags to be extra sure everything was tagged properly.
 
 6. Moving extensions from/to PECL requires root level access to the CVS server.
-Do not use cvs rm, because this will prevent moving the CVS history.
+Contact systems@php.net to get this taken care of.
+
+Moving extensions from php-src to PECL
+- Filesystem: cp -r php-src/ext/foo pecl/foo
+- cvs rm php-src/ext/foo
+
+If the extension is still usable or not dead, in cooperation with the extension
+maintainers if any:
+- create the pecl.php.net/foo package and its content, license, maintainer
+- create the package.xml, commit
+- release the package
+
+Moving extensions from PECL to php-src
+- Filesystem: cp -r pecl/foo php-src/ext/foo
+OR depending on the wishes from the PECL extension maintainer.
+- Filesystem: ln -s pecl/foo php-src/ext/foo
 
 Rolling a non stable release (alpha/beta/RC)
 --------------------------------------------
