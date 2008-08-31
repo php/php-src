@@ -36,10 +36,6 @@ var_dump(mkdir($sessions));
 var_dump(chdir($sessions));
 ini_set("session.save_path", $directory);
 var_dump(session_save_path());
-var_dump(session_start());
-var_dump(session_save_path());
-var_dump(session_destroy());
-var_dump(session_save_path());
 var_dump(rmdir($sessions));
 
 echo "Done";
@@ -57,10 +53,6 @@ bool(true)
 bool(true)
 
 Warning: ini_set(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (.) in %s on line %d
-unicode(0) ""
-bool(true)
-unicode(0) ""
-bool(true)
 unicode(0) ""
 bool(true)
 Done
