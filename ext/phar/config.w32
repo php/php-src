@@ -1,7 +1,8 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_ENABLE("phar", "disable phar support", "yes");
+// this next line should be changed back to "yes" after fixes are committed to the snapshot build process
+ARG_ENABLE("phar", "disable phar support", false);
 ARG_ENABLE("phar-native-ssl", "enable phar with native OpenSSL support", "no");
 
 if (PHP_PHAR_NATIVE_SSL != "no") {
