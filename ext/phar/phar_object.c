@@ -1393,7 +1393,7 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 {
 	zval **value;
 	zend_uchar key_type;
-	zend_bool is_splfileinfo = 0, close_fp = 1;
+	zend_bool close_fp = 1;
 	ulong int_key;
 	struct _phar_t *p_obj = (struct _phar_t*) puser;
 	uint str_key_len, base_len = p_obj->l, fname_len;
@@ -1505,7 +1505,6 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 						}
 
 						save = fname;
-						is_splfileinfo = 1;
 						goto phar_spl_fileinfo;
 					case SPL_FS_INFO:
 					case SPL_FS_FILE:
@@ -1516,7 +1515,6 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 #endif
 						fname_len = strlen(fname);
 						save = fname;
-						is_splfileinfo = 1;
 						goto phar_spl_fileinfo;
 				}
 			}
