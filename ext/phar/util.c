@@ -254,7 +254,7 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 {
 #if PHP_VERSION_ID >= 50300
 	char *path, *fname, *arch, *entry, *ret, *test;
-	int arch_len, entry_len, fname_len;
+	int arch_len, entry_len, fname_len, ret_len;
 	phar_archive_data *phar;
 
 	if (pphar) {
@@ -322,9 +322,6 @@ splitted:
 	efree(path);
 
 	if (ret && strlen(ret) > 8 && !strncmp(ret, "phar://", 7)) {
-		char *arch;
-		int arch_len, ret_len;
-
 		ret_len = strlen(ret);
 		/* found phar:// */
 
@@ -475,7 +472,7 @@ not_stream:
 
 			wrapper = php_stream_locate_url_wrapper(trypath, &actual, STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
 			if (wrapper == &php_plain_files_wrapper) {
-				strncpy(trypath, actual, MAXPATHLEN);
+				strlcpy(trypath, actual, sizeof(trypath));
 			} else if (!wrapper) {
 				/* if wrapper is NULL, there was a mal-formed include_path stream wrapper, so skip this ptr */
 				continue;
@@ -542,7 +539,7 @@ not_stream:
 
 				if (wrapper == &php_plain_files_wrapper) {
 					/* this should never technically happen, but we'll leave it here for completeness */
-					strncpy(trypath, actual, MAXPATHLEN);
+					strlcpy(trypath, actual, sizeof(trypath));
 				} else if (!wrapper) {
 					/* if wrapper is NULL, there was a malformed include_path stream wrapper
 					   this also should be impossible */
@@ -686,7 +683,7 @@ really_get_entry:
 		if (entry->link) {
 			efree(entry->link);
 			entry->link = NULL;
-			entry->tar_type = (entry->tar_type ? TAR_FILE : 0);
+			entry->tar_type = (entry->is_tar ? TAR_FILE : '\0');
 		}
 
 		if (for_write) {
@@ -740,7 +737,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 	phar_unixify_path_separators(path, path_len);
 #endif
 
-	is_dir = (path_len > 0 && path != NULL) ? path[path_len - 1] == '/' : 0;
+	is_dir = (path_len && path[path_len - 1] == '/') ? 1 : 0;
 
 	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, error TSRMLS_CC)) {
 		return NULL;
@@ -877,7 +874,7 @@ int phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **er
 	if (dest->link) {
 		efree(dest->link);
 		dest->link = NULL;
-		dest->tar_type = (dest->tar_type ? TAR_FILE : 0);
+		dest->tar_type = (dest->is_tar ? TAR_FILE : '\0');
 	}
 
 	dest->fp_type = PHAR_MOD;
@@ -913,12 +910,17 @@ int phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_links TS
 	char *filtername;
 	off_t loc;
 	php_stream *ufp;
+	phar_entry_data dummy;
 
 	if (follow_links && entry->link) {
 		phar_entry_info *link_entry = phar_get_link_source(entry TSRMLS_CC);
 		if (link_entry && link_entry != entry) {
 			return phar_open_entry_fp(link_entry, error, 1 TSRMLS_CC);
 		}
+	}
+
+	if (entry->is_modified) {
+		return SUCCESS;
 	}
 
 	if (entry->fp_type == PHAR_TMP) {
@@ -941,6 +943,13 @@ int phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_links TS
 	}
 
 	if ((entry->old_flags && !(entry->old_flags & PHAR_ENT_COMPRESSION_MASK)) || !(entry->flags & PHAR_ENT_COMPRESSION_MASK)) {
+		dummy.internal_file = entry;
+		dummy.phar = phar;
+		dummy.zero = entry->offset;
+		dummy.fp = phar_get_pharfp(phar TSRMLS_CC);
+		if (FAILURE == phar_postprocess_file(&dummy, entry->crc32, error, 1 TSRMLS_CC)) {
+			return FAILURE;
+		}
 		return SUCCESS;
 	}
 
@@ -950,6 +959,14 @@ int phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_links TS
 			spprintf(error, 4096, "phar error: Cannot open temporary file for decompressing phar archive \"%s\" file \"%s\"", phar->fname, entry->filename);
 			return FAILURE;
 		}
+	}
+
+	dummy.internal_file = entry;
+	dummy.phar = phar;
+	dummy.zero = entry->offset;
+	dummy.fp = phar_get_pharfp(phar TSRMLS_CC);
+	if (FAILURE == phar_postprocess_file(&dummy, entry->crc32, error, 1 TSRMLS_CC)) {
+		return FAILURE;
 	}
 
 	ufp = phar_get_entrypufp(entry TSRMLS_CC);
@@ -991,6 +1008,11 @@ int phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_links TS
 
 	/* this is now the new location of the file contents within this fp */
 	phar_set_fp_type(entry, PHAR_UFP, loc TSRMLS_CC);
+	dummy.zero = entry->offset;
+	dummy.fp = ufp;
+	if (FAILURE == phar_postprocess_file(&dummy, entry->crc32, error, 0 TSRMLS_CC)) {
+		return FAILURE;
+	}
 	return SUCCESS;
 }
 /* }}} */
@@ -1057,7 +1079,7 @@ int phar_create_writeable_entry(phar_archive_data *phar, phar_entry_info *entry,
 	if (entry->link) {
 		efree(entry->link);
 		entry->link = NULL;
-		entry->tar_type = (entry->tar_type ? TAR_FILE : 0);
+		entry->tar_type = (entry->is_tar ? TAR_FILE : '\0');
 	}
 
 	entry->fp = php_stream_fopen_tmpfile();
@@ -1114,7 +1136,7 @@ int phar_separate_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC) /* {{
 	if (entry->link) {
 		efree(entry->link);
 		entry->link = NULL;
-		entry->tar_type = (entry->tar_type ? TAR_FILE : 0);
+		entry->tar_type = (entry->is_tar ? TAR_FILE : '\0');
 	}
 
 	entry->offset = 0;
@@ -1434,7 +1456,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 	phar_unixify_path_separators(path, path_len);
 #endif
 
-	is_dir = path_len && (path[path_len - 1] == '/');
+	is_dir = (path_len && (path[path_len - 1] == '/')) ? 1 : 0;
 
 	if (error) {
 		*error = NULL;
@@ -1525,7 +1547,6 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 			} else {
 				char *test;
 				int test_len;
-				phar_entry_info *entry;
 				php_stream_statbuf ssb;
 
 				if (SUCCESS != zend_hash_find(&phar->manifest, str_key, keylen, (void **) &entry)) {
@@ -1638,6 +1659,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 		zval_dtor(zkey);
 		return FAILURE;
 	}
+
 #if PHP_VERSION_ID < 50300
 	if (FAILURE == zend_fcall_info_init(openssl, &fci, &fcc TSRMLS_CC)) {
 #else
@@ -1655,7 +1677,9 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 	fci.params = zp;
 #if PHP_VERSION_ID < 50300
 	++(zdata->refcount);
-	++(zsig->refcount);
+	if (!is_sign) {
+		++(zsig->refcount);
+	}
 	++(zkey->refcount);
 #else
 	Z_ADDREF_P(zdata);
@@ -1684,7 +1708,9 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 	efree(openssl);
 #if PHP_VERSION_ID < 50300
 	--(zdata->refcount);
-	--(zsig->refcount);
+	if (!is_sign) {
+		--(zsig->refcount);
+	}
 	--(zkey->refcount);
 #else
 	Z_DELREF_P(zdata);

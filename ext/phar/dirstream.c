@@ -569,7 +569,6 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_
 	int arch_len, entry_len;
 	php_url *resource = NULL;
 	uint host_len;
-	int key_type;
 	phar_zstr key;
 	char *str_key;
 	uint key_len;
@@ -641,7 +640,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_
 	}
 
 	for (zend_hash_internal_pointer_reset(&phar->manifest);
-		HASH_KEY_NON_EXISTANT != (key_type = zend_hash_get_current_key_ex(&phar->manifest, &key, &key_len, &unused, 0, NULL));
+		HASH_KEY_NON_EXISTANT != zend_hash_get_current_key_ex(&phar->manifest, &key, &key_len, &unused, 0, NULL);
 		zend_hash_move_forward(&phar->manifest)) {
 
 		PHAR_STR(key, str_key);
@@ -661,7 +660,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_
 	}
 
 	for (zend_hash_internal_pointer_reset(&phar->virtual_dirs);
-		HASH_KEY_NON_EXISTANT != (key_type = zend_hash_get_current_key_ex(&phar->virtual_dirs, &key, &key_len, &unused, 0, NULL));
+		HASH_KEY_NON_EXISTANT != zend_hash_get_current_key_ex(&phar->virtual_dirs, &key, &key_len, &unused, 0, NULL);
 		zend_hash_move_forward(&phar->virtual_dirs)) {
 
 		PHAR_STR(key, str_key);

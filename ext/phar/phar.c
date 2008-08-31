@@ -2305,7 +2305,6 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 int phar_open_executed_filename(char *alias, int alias_len, char **error TSRMLS_DC) /* {{{ */
 {
 	char *fname;
-	long halt_offset;
 	zval *halt_constant;
 	php_stream *fp;
 	int fname_len;
@@ -2340,7 +2339,6 @@ int phar_open_executed_filename(char *alias, int alias_len, char **error TSRMLS_
 		return FAILURE;
 	}
 
-	halt_offset = Z_LVAL(*halt_constant);
 	FREE_ZVAL(halt_constant);
 
 #if PHP_MAJOR_VERSION < 6
@@ -2383,7 +2381,7 @@ int phar_open_executed_filename(char *alias, int alias_len, char **error TSRMLS_
 /**
  * Validate the CRC32 of a file opened from within the phar
  */
-int phar_postprocess_file(php_stream_wrapper *wrapper, int options, phar_entry_data *idata, php_uint32 crc32, char **error TSRMLS_DC) /* {{{ */
+int phar_postprocess_file(phar_entry_data *idata, php_uint32 crc32, char **error, int process_zip TSRMLS_DC) /* {{{ */
 {
 	php_uint32 crc = ~0;
 	int len = idata->internal_file->uncompressed_filesize;
@@ -2394,7 +2392,7 @@ int phar_postprocess_file(php_stream_wrapper *wrapper, int options, phar_entry_d
 		*error = NULL;
 	}
 
-	if (entry->is_zip) {
+	if (entry->is_zip && process_zip > 0) {
 		/* verify local file header */
 		phar_zip_file_header local;
 
@@ -2425,6 +2423,10 @@ int phar_postprocess_file(php_stream_wrapper *wrapper, int options, phar_entry_d
 		}
 	}
 
+	if (process_zip == 1) {
+		return SUCCESS;
+	}
+
 	php_stream_seek(fp, idata->zero, SEEK_SET);
 
 	while (len--) {
@@ -2437,7 +2439,7 @@ int phar_postprocess_file(php_stream_wrapper *wrapper, int options, phar_entry_d
 		entry->is_crc_checked = 1;
 		return SUCCESS;
 	} else {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: internal corruption of phar \"%s\" (crc32 mismatch on file \"%s\")", idata->phar->fname, entry->filename);
+		spprintf(error, 0, "phar error: internal corruption of phar \"%s\" (crc32 mismatch on file \"%s\")", idata->phar->fname, entry->filename);
 		return FAILURE;
 	}
 }
@@ -2514,125 +2516,6 @@ char *phar_create_default_stub(const char *index_php, const char *web_index, siz
 	return stub;
 }
 /* }}} */
-
-#ifndef PHAR_HAVE_OPENSSL
-static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, char *key, int key_len, char **signature, int *signature_len TSRMLS_DC) /* {{{ */
-{
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
-	zval *zdata, *zsig, *zkey, *retval_ptr, **zp[3], *openssl;
-
-	MAKE_STD_ZVAL(zdata);
-	MAKE_STD_ZVAL(openssl);
-	ZVAL_STRINGL(openssl, is_sign ? "openssl_sign" : "openssl_verify", is_sign ? sizeof("openssl_sign")-1 : sizeof("openssl_verify")-1, 1);
-	MAKE_STD_ZVAL(zsig);
-	ZVAL_STRINGL(zsig, *signature, *signature_len, 1);
-	MAKE_STD_ZVAL(zkey);
-	ZVAL_STRINGL(zkey, key, key_len, 1);
-	zp[0] = &zdata;
-	zp[1] = &zsig;
-	zp[2] = &zkey;
-
-	php_stream_rewind(fp);
-	Z_TYPE_P(zdata) = IS_STRING;
-	Z_STRLEN_P(zdata) = end;
-	if (end != (off_t) php_stream_copy_to_mem(fp, &(Z_STRVAL_P(zdata)), (size_t) end, 0)) {
-		zval_dtor(zdata);
-		zval_dtor(zsig);
-		zval_dtor(zkey);
-		return FAILURE;
-	}
-
-#if PHP_VERSION_ID < 50300
-	if (FAILURE == zend_fcall_info_init(openssl, &fci, &fcc TSRMLS_CC)) {
-#else
-	if (FAILURE == zend_fcall_info_init(openssl, 0, &fci, &fcc, NULL, NULL TSRMLS_CC)) {
-#endif
-		zval_dtor(zdata);
-		zval_dtor(zsig);
-		zval_dtor(zkey);
-		zval_dtor(openssl);
-		return FAILURE;
-	}
-
-	zval_dtor(openssl);
-	efree(openssl);
-
-	fci.param_count = 3;
-	fci.params = zp;
-#if PHP_VERSION_ID < 50300
-	++(zdata->refcount);
-	++(zsig->refcount);
-	++(zkey->refcount);
-#else
-	Z_ADDREF_P(zdata);
-
-	if (is_sign) {
-		Z_SET_ISREF_P(zsig);
-	} else {
-		Z_ADDREF_P(zsig);
-	}
-
-	Z_ADDREF_P(zkey);
-#endif
-	fci.retval_ptr_ptr = &retval_ptr;
-
-	if (FAILURE == zend_call_function(&fci, &fcc TSRMLS_CC)) {
-		zval_dtor(zdata);
-		zval_dtor(zsig);
-		zval_dtor(zkey);
-		efree(zdata);
-		efree(zkey);
-		efree(zsig);
-		return FAILURE;
-	}
-#if PHP_VERSION_ID < 50300
-	--(zdata->refcount);
-	--(zsig->refcount);
-	--(zkey->refcount);
-#else
-	Z_DELREF_P(zdata);
-
-	if (is_sign) {
-		Z_UNSET_ISREF_P(zsig);
-	} else {
-		Z_DELREF_P(zsig);
-	}
-
-	Z_DELREF_P(zkey);
-#endif
-	zval_dtor(zdata);
-	efree(zdata);
-	zval_dtor(zkey);
-	efree(zkey);
-
-	switch (Z_TYPE_P(retval_ptr)) {
-		default:
-		case IS_LONG:
-			zval_dtor(zsig);
-			efree(zsig);
-			if (1 == Z_LVAL_P(retval_ptr)) {
-				efree(retval_ptr);
-				return SUCCESS;
-			}
-			efree(retval_ptr);
-			return FAILURE;
-		case IS_BOOL:
-			efree(retval_ptr);
-			if (Z_BVAL_P(retval_ptr)) {
-				*signature = estrndup(Z_STRVAL_P(zsig), Z_STRLEN_P(zsig));
-				*signature_len = Z_STRLEN_P(zsig);
-				zval_dtor(zsig);
-				efree(zsig);
-				return SUCCESS;
-			}
-			zval_dtor(zsig);
-			efree(zsig);
-			return FAILURE;
-	}
-}
-/* }}} */
-#endif /* #ifndef PHAR_HAVE_OPENSSL */
 
 /**
  * Save phar contents to disk
@@ -3302,7 +3185,6 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		}
 
 		if (phar->flags & PHAR_FILE_COMPRESSED_GZ) {
-			php_stream_filter *filter;
 			/* to properly compress, we have to tell zlib to add a zlib header */
 			zval filterparams;
 
@@ -3326,8 +3208,6 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 			/* use the temp stream as our base */
 			phar->fp = newfile;
 		} else if (phar->flags & PHAR_FILE_COMPRESSED_BZ2) {
-			php_stream_filter *filter;
-
 			filter = php_stream_filter_create("bzip2.compress", NULL, php_stream_is_persistent(phar->fp) TSRMLS_CC);
 			php_stream_filter_append(&phar->fp->writefilters, filter);
 			php_stream_copy_to_stream(newfile, phar->fp, PHP_STREAM_COPY_ALL);

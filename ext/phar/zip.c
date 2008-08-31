@@ -159,7 +159,6 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 	phar_zip_dir_end locator;
 	char buf[sizeof(locator) + 65536];
 	long size;
-	size_t read;
 	php_uint16 i;
 	phar_archive_data *mydata = NULL;
 	phar_entry_info entry = {0};
@@ -181,7 +180,7 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 		php_stream_seek(fp, 0, SEEK_SET);
 	}
 
-	if (!(read = php_stream_read(fp, buf, size))) {
+	if (!php_stream_read(fp, buf, size)) {
 		php_stream_close(fp);
 		if (error) {
 			spprintf(error, 4096, "phar error: unable to read in data to search for end of central directory in zip-based phar \"%s\"", fname);
@@ -491,7 +490,6 @@ foundit:
 				php_stream_filter_remove(filter, 1 TSRMLS_CC);
 
 			} else if (entry.flags & PHAR_ENT_COMPRESSED_BZ2) {
-				php_stream_filter *filter;
 				filter = php_stream_filter_create("bzip2.decompress", NULL, php_stream_is_persistent(fp) TSRMLS_CC);
 
 				if (!filter) {
@@ -655,6 +653,7 @@ static int phar_zip_changed_apply(void *data, void *arg TSRMLS_DC) /* {{{ */
 	struct _phar_zip_pass *p;
 	php_uint32 newcrc32;
 	off_t offset;
+	int not_really_modified = 0;
 
 	entry = (phar_entry_info *)data;
 	p = (struct _phar_zip_pass*) arg;
@@ -721,6 +720,12 @@ static int phar_zip_changed_apply(void *data, void *arg TSRMLS_DC) /* {{{ */
 		if (FAILURE == phar_open_entry_fp(entry, p->error, 0 TSRMLS_CC)) {
 			spprintf(p->error, 0, "unable to open file contents of file \"%s\" in zip-based phar \"%s\"", entry->filename, entry->phar->fname);
 			return ZEND_HASH_APPLY_STOP;
+		}
+
+		/* we can be modified and already be compressed, such as when chmod() is executed */
+		if (entry->flags & PHAR_ENT_COMPRESSION_MASK && (entry->old_flags == entry->flags || !entry->old_flags)) {
+			not_really_modified = 1;
+			goto is_compressed;
 		}
 
 		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 0 TSRMLS_CC)) {
@@ -791,6 +796,7 @@ static int phar_zip_changed_apply(void *data, void *arg TSRMLS_DC) /* {{{ */
 		entry->old_flags = entry->flags;
 		entry->is_modified = 1;
 	} else {
+is_compressed:
 		central.uncompsize = local.uncompsize = PHAR_SET_32(entry->uncompressed_filesize);
 		central.compsize = local.compsize = PHAR_SET_32(entry->compressed_filesize);
 
@@ -872,7 +878,7 @@ continue_dir:
 		return ZEND_HASH_APPLY_STOP;
 	}
 
-	if (entry->is_modified) {
+	if (!not_really_modified && entry->is_modified) {
 		if (entry->cfp) {
 			if (entry->compressed_filesize != php_stream_copy_to_stream(entry->cfp, p->filefp, entry->compressed_filesize)) {
 				spprintf(p->error, 0, "unable to write compressed contents of file \"%s\" in zip-based phar \"%s\"", entry->filename, entry->phar->fname);
@@ -900,6 +906,7 @@ continue_dir:
 
 		entry->is_modified = 0;
 	} else {
+		entry->is_modified = 0;
 		if (entry->fp_refcount) {
 			/* open file pointers refer to this fp, do not free the stream */
 			switch (entry->fp_type) {

@@ -307,8 +307,9 @@ idata_error:
 #endif
 
 	/* check length, crc32 */
-	if (!idata->internal_file->is_crc_checked && phar_postprocess_file(wrapper, options, idata, idata->internal_file->crc32, &error TSRMLS_CC) != SUCCESS) {
-		/* already issued the error */
+	if (!idata->internal_file->is_crc_checked && phar_postprocess_file(idata, idata->internal_file->crc32, &error, 2 TSRMLS_CC) != SUCCESS) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, error);
+		efree(error);
 		phar_entry_delref(idata TSRMLS_CC);
 		efree(internal_file);
 		return NULL;
@@ -675,6 +676,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 {
 	php_url *resource;
 	char *internal_file, *error;
+	int internal_file_len;
 	phar_entry_data *idata;
 	phar_archive_data **pphar;
 	uint host_len;
@@ -700,7 +702,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	host_len = strlen(resource->host);
 	phar_request_initialize(TSRMLS_C);
 
-	if (FAILURE == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), resource->host, strlen(resource->host), (void **) &pphar)) {
+	if (FAILURE == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), resource->host, host_len, (void **) &pphar)) {
 		pphar = NULL;
 	}
 	if (PHAR_G(readonly) && (!pphar || !(*pphar)->is_data)) {
@@ -711,7 +713,8 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 
 	/* need to copy to strip leading "/", will get touched again */
 	internal_file = estrdup(resource->path + 1);
-	if (FAILURE == phar_get_entry_data(&idata, resource->host, strlen(resource->host), internal_file, strlen(internal_file), "r", 0, &error, 1 TSRMLS_CC)) {
+	internal_file_len = strlen(internal_file);
+	if (FAILURE == phar_get_entry_data(&idata, resource->host, host_len, internal_file, internal_file_len, "r", 0, &error, 1 TSRMLS_CC)) {
 		/* constraints of fp refcount were not met */
 		if (error) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "unlink of \"%s\" failed: %s", url, error);
@@ -828,7 +831,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 
 	host_len = strlen(resource_from->host);
 
-	if (SUCCESS != phar_get_archive(&phar, resource_from->host, strlen(resource_from->host), NULL, 0, &error TSRMLS_CC)) {
+	if (SUCCESS != phar_get_archive(&phar, resource_from->host, host_len, NULL, 0, &error TSRMLS_CC)) {
 		php_url_free(resource_from);
 		php_url_free(resource_to);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\": %s", url_from, url_to, error);
@@ -909,6 +912,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 				memcpy(new_str_key, resource_to->path + 1, to_len);
 				memcpy(new_str_key + to_len, str_key + from_len, key_len - from_len);
 				new_str_key[new_key_len] = 0;
+
 				is_modified = 1;
 				entry->is_modified = 1;
 				efree(entry->filename);
@@ -921,7 +925,6 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 #else
 				zend_hash_update_current_key_ex(&phar->manifest, key_type, new_key, new_key_len, 0, HASH_UPDATE_KEY_ANYWAY, NULL);
 #endif
-				efree(new_str_key);
 			}
 		}
 

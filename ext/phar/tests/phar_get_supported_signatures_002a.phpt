@@ -1,9 +1,12 @@
 --TEST--
 Phar::getSupportedSignatures()
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("hash")) die("skip extension hash required"); ?>
-<?php if (!extension_loaded("openssl")) die("skip extension openssl required"); ?>
+<?php
+if (!extension_loaded("phar")) die("skip");
+if (!extension_loaded("hash")) die("skip extension hash required");
+$arr = Phar::getSupportedSignatures();
+if (!in_array("OpenSSL", $arr)) die("skip openssl support required");
+?>
 --INI--
 phar.require_hash=0
 phar.readonly=0

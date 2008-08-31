@@ -255,7 +255,6 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 			phar_tar_number(hdr->size, sizeof(hdr->size));
 
 		if (((!old && hdr->prefix[0] == 0) || old) && strlen(hdr->name) == sizeof(".phar/signature.bin")-1 && !strncmp(hdr->name, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
-			size_t read;
 			if (size > 511) {
 				if (error) {
 					spprintf(error, 4096, "phar error: tar-based phar \"%s\" has signature that is larger than 511 bytes, cannot process", fname);
@@ -291,7 +290,7 @@ bail:
 			}
 			/* signature checked out, let's ensure this is the last file in the phar */
 			size = ((size+511)&~511) + 512;
-			if (((hdr->typeflag == 0) || (hdr->typeflag == TAR_FILE)) && size > 0) {
+			if (((hdr->typeflag == '\0') || (hdr->typeflag == TAR_FILE)) && size > 0) {
 				/* this is not good enough - seek succeeds even on truncated tars */
 				php_stream_seek(fp, size, SEEK_CUR);
 				if ((uint)php_stream_tell(fp) > totalsize) {
@@ -370,7 +369,7 @@ bail:
 			return FAILURE;
 		}
 
-		entry.tar_type = ((old & (hdr->typeflag == 0))?'0':hdr->typeflag);
+		entry.tar_type = ((old & (hdr->typeflag == '\0')) ? TAR_FILE : hdr->typeflag);
 		entry.offset = entry.offset_abs = pos; /* header_offset unused in tar */
 		entry.fp_type = PHAR_FP;
 		entry.flags = phar_tar_number(hdr->mode, sizeof(hdr->mode)) & PHAR_ENT_PERM_MASK;
@@ -424,7 +423,6 @@ bail:
 		}
 
 		if (!actual_alias && entry.filename_len == sizeof(".phar/alias.txt")-1 && !strncmp(entry.filename, ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
-			size_t read;
 			/* found explicit alias */
 			if (size > 511) {
 				if (error) {
@@ -473,7 +471,7 @@ bail:
 
 		size = (size+511)&~511;
 
-		if (((hdr->typeflag == 0) || (hdr->typeflag == TAR_FILE)) && size > 0) {
+		if (((hdr->typeflag == '\0') || (hdr->typeflag == TAR_FILE)) && size > 0) {
 			/* this is not good enough - seek succeeds even on truncated tars */
 			php_stream_seek(fp, size, SEEK_CUR);
 			if ((uint)php_stream_tell(fp) > totalsize) {
