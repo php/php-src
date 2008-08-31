@@ -517,7 +517,7 @@ void phar_fancy_stat(struct stat *stat_sb, int type, zval *return_value TSRMLS_D
 		case S_IFDIR: RETURN_STRING("dir", 1);
 		case S_IFREG: RETURN_STRING("file", 1);
 		}
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown file type (%d)", stat_sb->st_mode&S_IFMT);
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown file type (%d)", stat_sb->st_mode & S_IFMT);
 		RETURN_STRING("unknown", 1);
 	case FS_IS_W:
 		RETURN_BOOL((stat_sb->st_mode & wmask) != 0);
