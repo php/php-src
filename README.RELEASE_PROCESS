@@ -20,6 +20,9 @@ php/QA/bug websites try to have someone from the webmaster team (Bjori) on hand.
 
 5. Verify the tags to be extra sure everything was tagged properly.
 
+6. Moving extensions from/to PECL requires root level access to the CVS server.
+Do not use cvs rm, because this will prevent moving the CVS history.
+
 Rolling a non stable release (alpha/beta/RC)
 --------------------------------------------
 
