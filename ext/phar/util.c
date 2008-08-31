@@ -254,7 +254,7 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 {
 #if PHP_VERSION_ID >= 50300
 	char *path, *fname, *arch, *entry, *ret, *test;
-	int arch_len, entry_len, fname_len;
+	int arch_len, entry_len, fname_len, ret_len;
 	phar_archive_data *phar;
 
 	if (pphar) {
@@ -322,9 +322,6 @@ splitted:
 	efree(path);
 
 	if (ret && strlen(ret) > 8 && !strncmp(ret, "phar://", 7)) {
-		char *arch;
-		int arch_len, ret_len;
-
 		ret_len = strlen(ret);
 		/* found phar:// */
 
