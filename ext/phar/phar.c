@@ -2305,7 +2305,6 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 int phar_open_executed_filename(char *alias, int alias_len, char **error TSRMLS_DC) /* {{{ */
 {
 	char *fname;
-	long halt_offset;
 	zval *halt_constant;
 	php_stream *fp;
 	int fname_len;
@@ -2340,7 +2339,6 @@ int phar_open_executed_filename(char *alias, int alias_len, char **error TSRMLS_
 		return FAILURE;
 	}
 
-	halt_offset = Z_LVAL(*halt_constant);
 	FREE_ZVAL(halt_constant);
 
 #if PHP_MAJOR_VERSION < 6
