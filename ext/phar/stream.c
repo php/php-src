@@ -910,6 +910,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 				memcpy(new_str_key, resource_to->path + 1, to_len);
 				memcpy(new_str_key + to_len, str_key + from_len, key_len - from_len);
 				new_str_key[new_key_len] = 0;
+
 				is_modified = 1;
 				entry->is_modified = 1;
 				efree(entry->filename);
@@ -917,7 +918,6 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 				entry->filename_len = new_key_len;
 
 				PHAR_ZSTR(new_str_key, new_key);
-
 #if PHP_VERSION_ID < 50300
 				zend_hash_update_current_key_ex(&phar->manifest, key_type, new_key, new_key_len, 0, NULL);
 #else
