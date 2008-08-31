@@ -290,7 +290,7 @@ bail:
 			}
 			/* signature checked out, let's ensure this is the last file in the phar */
 			size = ((size+511)&~511) + 512;
-			if (((hdr->typeflag == 0) || (hdr->typeflag == TAR_FILE)) && size > 0) {
+			if (((hdr->typeflag == '\0') || (hdr->typeflag == TAR_FILE)) && size > 0) {
 				/* this is not good enough - seek succeeds even on truncated tars */
 				php_stream_seek(fp, size, SEEK_CUR);
 				if ((uint)php_stream_tell(fp) > totalsize) {
@@ -471,7 +471,7 @@ bail:
 
 		size = (size+511)&~511;
 
-		if (((hdr->typeflag == 0) || (hdr->typeflag == TAR_FILE)) && size > 0) {
+		if (((hdr->typeflag == '\0') || (hdr->typeflag == TAR_FILE)) && size > 0) {
 			/* this is not good enough - seek succeeds even on truncated tars */
 			php_stream_seek(fp, size, SEEK_CUR);
 			if ((uint)php_stream_tell(fp) > totalsize) {
