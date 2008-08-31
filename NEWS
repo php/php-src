@@ -2,7 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.3.0 Alpha 2
 - Removed special treatment of "/tmp" path for sessions in open_basedir
-  context. (Alexey)
+  context, which was introduced in 5.2.2, but was never documented. (Alexey)
 - Changed bundled libmagic to use PHP memory allocation routines. (Ilia)
 - Changed bundled libmagic to use pcre instead of ereg. (Derick, Scott, Mikko)
 - Updated mime_content_type to use fileinfo. (Derick)
