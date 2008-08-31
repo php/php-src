@@ -6305,7 +6305,11 @@ PHP_FUNCTION(parse_ini_file)
 	Z_TYPE(fh) = ZEND_HANDLE_FILENAME;
 
 	array_init(return_value);
-	zend_parse_ini_file(&fh, 0, ini_parser_cb, return_value);
+	if (zend_parse_ini_file(&fh, 0, ini_parser_cb, return_value) == FAILURE) {
+		zend_hash_destroy(Z_ARRVAL_P(return_value));
+		efree(Z_ARRVAL_P(return_value));
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 

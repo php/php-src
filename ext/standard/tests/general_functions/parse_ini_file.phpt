@@ -102,12 +102,10 @@ Warning: Wrong parameter count for parse_ini_file() in %s on line %d
 NULL
 
 Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %s on line %d
-array(0) {
-}
+bool(false)
 
 Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %s on line %d
-array(0) {
-}
+bool(false)
 array(1) {
   ["test"]=>
   string(0) ""
@@ -115,17 +113,11 @@ array(1) {
 
 Warning: Error parsing %sparse_ini_file.dat on line 2
  in %s on line %d
-array(1) {
-  ["test"]=>
-  string(0) ""
-}
+bool(false)
 
 Warning: Error parsing %sparse_ini_file.dat on line 2
  in %s on line %d
-array(1) {
-  ["test"]=>
-  string(4) "test"
-}
+bool(false)
 array(1) {
   ["test"]=>
   string(8) "new
