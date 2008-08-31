@@ -45,7 +45,7 @@ array(25) {
     [u"dqstring"]=>
     unicode(46) "asdadfsdjkslkj ¡@£$$ { } !^~|¥¥{[()/)&/% ¤ # #"
     [u"php_constant"]=>
-    unicode(5) "16383"
+    unicode(5) "32767"
     [u"user_constant"]=>
     unicode(21) "this_is_test_constant"
   }
@@ -76,7 +76,7 @@ array(25) {
     [u"dqstring"]=>
     unicode(34) "asdadfsdjkslkj ¡@£$$€¥¥{[()/)&/%#¤"
     [u"php_constant"]=>
-    unicode(5) "16383"
+    unicode(5) "32767"
   }
   [u"comments"]=>
   array(1) {
