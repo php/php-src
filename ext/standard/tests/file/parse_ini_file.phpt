@@ -9,7 +9,7 @@ Test parse_ini_file() function
 
 $file_path = dirname(__FILE__);
 
-$parse_string = <<<EOD
+$parse_string = (binary) <<<EOD
 ; Comment starts with semi-colon(;)
 ; Section starts with [<section name>]
 
