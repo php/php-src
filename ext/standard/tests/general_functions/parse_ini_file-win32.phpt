@@ -116,12 +116,10 @@ Warning: parse_ini_file() expects at most 3 parameters, 4 given in %s on line 7
 bool(false)
 
 Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %s.php on line 8
-array(0) {
-}
+bool(false)
 
 Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %s.php on line 9
-array(0) {
-}
+bool(false)
 array(1) {
   ["test"]=>
   string(0) ""
@@ -129,17 +127,11 @@ array(1) {
 
 Warning: parse error in %s on line %d
  in %s on line 20
-array(1) {
-  ["test"]=>
-  string(0) ""
-}
+bool(false)
 
 Warning: parse error in %s on line %d
  in %s on line 26
-array(1) {
-  ["test"]=>
-  string(4) "test"
-}
+bool(false)
 array(1) {
   ["test"]=>
   string(8) "new
