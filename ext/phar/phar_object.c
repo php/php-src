@@ -203,7 +203,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 			ctr.line_len = spprintf(&(ctr.line), 0, "Content-type: %s", mime_type);
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 			efree(ctr.line);
-			ctr.line_len = spprintf(&(ctr.line), 0, "Content-length: %d", info->uncompressed_filesize);
+			ctr.line_len = spprintf(&(ctr.line), 0, "Content-length: %u", info->uncompressed_filesize);
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 			efree(ctr.line);
 
@@ -2986,7 +2986,7 @@ PHP_METHOD(Phar, getSignature)
 				add_assoc_stringl(return_value, "hash_type", "OpenSSL", 7, 1);
 				break;
 			default:
-				unknown_len = spprintf(&unknown, 0, "Unknown (%d)", phar_obj->arc.archive->sig_flags);
+				unknown_len = spprintf(&unknown, 0, "Unknown (%u)", phar_obj->arc.archive->sig_flags);
 				add_assoc_stringl(return_value, "hash_type", unknown, unknown_len, 0);
 				break;
 		}
