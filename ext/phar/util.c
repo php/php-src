@@ -686,7 +686,7 @@ really_get_entry:
 		if (entry->link) {
 			efree(entry->link);
 			entry->link = NULL;
-			entry->tar_type = (entry->tar_type ? TAR_FILE : 0);
+			entry->tar_type = (entry->is_tar ? TAR_FILE : 0);
 		}
 
 		if (for_write) {
@@ -740,7 +740,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 	phar_unixify_path_separators(path, path_len);
 #endif
 
-	is_dir = (path_len > 0 && path != NULL) ? path[path_len - 1] == '/' : 0;
+	is_dir = (path_len && path[path_len - 1] == '/') ? 1 : 0;
 
 	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, error TSRMLS_CC)) {
 		return NULL;
@@ -877,7 +877,7 @@ int phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **er
 	if (dest->link) {
 		efree(dest->link);
 		dest->link = NULL;
-		dest->tar_type = (dest->tar_type ? TAR_FILE : 0);
+		dest->tar_type = (dest->is_tar ? TAR_FILE : 0);
 	}
 
 	dest->fp_type = PHAR_MOD;
@@ -1082,7 +1082,7 @@ int phar_create_writeable_entry(phar_archive_data *phar, phar_entry_info *entry,
 	if (entry->link) {
 		efree(entry->link);
 		entry->link = NULL;
-		entry->tar_type = (entry->tar_type ? TAR_FILE : 0);
+		entry->tar_type = (entry->is_tar ? TAR_FILE : 0);
 	}
 
 	entry->fp = php_stream_fopen_tmpfile();
@@ -1139,7 +1139,7 @@ int phar_separate_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC) /* {{
 	if (entry->link) {
 		efree(entry->link);
 		entry->link = NULL;
-		entry->tar_type = (entry->tar_type ? TAR_FILE : 0);
+		entry->tar_type = (entry->is_tar ? TAR_FILE : 0);
 	}
 
 	entry->offset = 0;
@@ -1459,7 +1459,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 	phar_unixify_path_separators(path, path_len);
 #endif
 
-	is_dir = path_len && (path[path_len - 1] == '/');
+	is_dir = (path_len && (path[path_len - 1] == '/')) ? 1 : 0;
 
 	if (error) {
 		*error = NULL;
@@ -1550,7 +1550,6 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 			} else {
 				char *test;
 				int test_len;
-				phar_entry_info *entry;
 				php_stream_statbuf ssb;
 
 				if (SUCCESS != zend_hash_find(&phar->manifest, str_key, keylen, (void **) &entry)) {
@@ -1663,6 +1662,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 		zval_dtor(zkey);
 		return FAILURE;
 	}
+
 #if PHP_VERSION_ID < 50300
 	if (FAILURE == zend_fcall_info_init(openssl, &fci, &fcc TSRMLS_CC)) {
 #else
@@ -1680,7 +1680,9 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 	fci.params = zp;
 #if PHP_VERSION_ID < 50300
 	++(zdata->refcount);
-	++(zsig->refcount);
+	if (!is_sign) {
+		++(zsig->refcount);
+	}
 	++(zkey->refcount);
 #else
 	Z_ADDREF_P(zdata);
@@ -1709,7 +1711,9 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 	efree(openssl);
 #if PHP_VERSION_ID < 50300
 	--(zdata->refcount);
-	--(zsig->refcount);
+	if (!is_sign) {
+		--(zsig->refcount);
+	}
 	--(zkey->refcount);
 #else
 	Z_DELREF_P(zdata);

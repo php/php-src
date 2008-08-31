@@ -159,7 +159,6 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 	phar_zip_dir_end locator;
 	char buf[sizeof(locator) + 65536];
 	long size;
-	size_t read;
 	php_uint16 i;
 	phar_archive_data *mydata = NULL;
 	phar_entry_info entry = {0};
@@ -181,7 +180,7 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 		php_stream_seek(fp, 0, SEEK_SET);
 	}
 
-	if (!(read = php_stream_read(fp, buf, size))) {
+	if (!php_stream_read(fp, buf, size)) {
 		php_stream_close(fp);
 		if (error) {
 			spprintf(error, 4096, "phar error: unable to read in data to search for end of central directory in zip-based phar \"%s\"", fname);
@@ -491,7 +490,6 @@ foundit:
 				php_stream_filter_remove(filter, 1 TSRMLS_CC);
 
 			} else if (entry.flags & PHAR_ENT_COMPRESSED_BZ2) {
-				php_stream_filter *filter;
 				filter = php_stream_filter_create("bzip2.decompress", NULL, php_stream_is_persistent(fp) TSRMLS_CC);
 
 				if (!filter) {
