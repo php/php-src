@@ -683,7 +683,7 @@ really_get_entry:
 		if (entry->link) {
 			efree(entry->link);
 			entry->link = NULL;
-			entry->tar_type = (entry->is_tar ? TAR_FILE : 0);
+			entry->tar_type = (entry->is_tar ? TAR_FILE : '\0');
 		}
 
 		if (for_write) {
@@ -874,7 +874,7 @@ int phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **er
 	if (dest->link) {
 		efree(dest->link);
 		dest->link = NULL;
-		dest->tar_type = (dest->is_tar ? TAR_FILE : 0);
+		dest->tar_type = (dest->is_tar ? TAR_FILE : '\0');
 	}
 
 	dest->fp_type = PHAR_MOD;
@@ -1079,7 +1079,7 @@ int phar_create_writeable_entry(phar_archive_data *phar, phar_entry_info *entry,
 	if (entry->link) {
 		efree(entry->link);
 		entry->link = NULL;
-		entry->tar_type = (entry->is_tar ? TAR_FILE : 0);
+		entry->tar_type = (entry->is_tar ? TAR_FILE : '\0');
 	}
 
 	entry->fp = php_stream_fopen_tmpfile();
@@ -1136,7 +1136,7 @@ int phar_separate_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC) /* {{
 	if (entry->link) {
 		efree(entry->link);
 		entry->link = NULL;
-		entry->tar_type = (entry->is_tar ? TAR_FILE : 0);
+		entry->tar_type = (entry->is_tar ? TAR_FILE : '\0');
 	}
 
 	entry->offset = 0;
