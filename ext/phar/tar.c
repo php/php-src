@@ -369,7 +369,7 @@ bail:
 			return FAILURE;
 		}
 
-		entry.tar_type = ((old & (hdr->typeflag == 0)) ? '0' : hdr->typeflag);
+		entry.tar_type = ((old & (hdr->typeflag == '\0')) ? TAR_FILE : hdr->typeflag);
 		entry.offset = entry.offset_abs = pos; /* header_offset unused in tar */
 		entry.fp_type = PHAR_FP;
 		entry.flags = phar_tar_number(hdr->mode, sizeof(hdr->mode)) & PHAR_ENT_PERM_MASK;
