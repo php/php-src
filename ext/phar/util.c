@@ -475,7 +475,7 @@ not_stream:
 
 			wrapper = php_stream_locate_url_wrapper(trypath, &actual, STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
 			if (wrapper == &php_plain_files_wrapper) {
-				strncpy(trypath, actual, MAXPATHLEN);
+				strlcpy(trypath, actual, sizeof(trypath));
 			} else if (!wrapper) {
 				/* if wrapper is NULL, there was a mal-formed include_path stream wrapper, so skip this ptr */
 				continue;
@@ -542,7 +542,7 @@ not_stream:
 
 				if (wrapper == &php_plain_files_wrapper) {
 					/* this should never technically happen, but we'll leave it here for completeness */
-					strncpy(trypath, actual, MAXPATHLEN);
+					strlcpy(trypath, actual, sizeof(trypath));
 				} else if (!wrapper) {
 					/* if wrapper is NULL, there was a malformed include_path stream wrapper
 					   this also should be impossible */
