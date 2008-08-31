@@ -1,3 +1,126 @@
+2008-08-30  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/credits_ext.h
+      ext/standard/credits_sapi.h:
+      update credits: new sapi, stuff moved to pecl..
+
+2008-08-30  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/zip/tests/oo_delete.phpt:
+      - MFH: file will exist only on error (thx tony for the headup)
+
+    * ext/zip/tests/oo_delete.phpt:
+      - file will exist only on error (thx tony for the headup)
+
+2008-08-30  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/dirstream.c:
+      sync with pecl/phar, missed one line change
+
+    * (PHP_5_3)
+      ext/phar/dirstream.c
+      ext/phar/phar.phar
+      ext/phar/stream.c:
+      sync with pecl/phar, this does not change any functionality in PHP 5.3, but
+      makes syncing easier.  This commit is only functional changes, WS will be
+      next
+
+2008-08-30  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/tests/array_intersect_ukey_error.phpt
+      ext/standard/tests/array_intersect_ukey_variation1.phpt
+      ext/standard/tests/array_intersect_ukey_variation2.phpt
+      ext/standard/tests/array_intersect_ukey_variation3.phpt
+      ext/standard/tests/array_intersect_ukey_variation4.phpt
+      ext/standard/tests/array_intersect_ukey_variation5.phpt
+      ext/standard/tests/array_intersect_ukey_variation6.phpt
+      ext/standard/tests/array_intersect_ukey_variation7.phpt
+      ext/standard/tests/array_intersect_ukey_variation8.phpt
+      ext/standard/tests/array_intersect_ukey_variation9.phpt
+      ext/standard/tests/array_replace.phpt
+      ext/standard/tests/array/array_intersect_ukey_error.phpt
+      ext/standard/tests/array/array_intersect_ukey_error.phpt
+      ext/standard/tests/array/array_intersect_ukey_variation1.phpt
+      ext/standard/tests/array/array_intersect_ukey_variation1.phpt
+      ext/standard/tests/array/array_intersect_ukey_variation2.phpt
+      ext/standard/tests/array/array_intersect_ukey_variation2.phpt
+      ext/standard/tests/array/array_intersect_ukey_variation3.phpt
+      ext/standard/tests/array/array_intersect_ukey_variation3.phpt
+      ext/standard/tests/array/array_intersect_ukey_variation4.phpt
+      ext/standard/tests/array/array_intersect_ukey_variation4.phpt
+      ext/standard/tests/array/array_intersect_ukey_variation5.phpt
+      ext/standard/tests/array/array_intersect_ukey_variation5.phpt
+      ext/standard/tests/array/array_intersect_ukey_variation6.phpt
+      ext/standard/tests/array/array_intersect_ukey_variation6.phpt
+      ext/standard/tests/array/array_intersect_ukey_variation7.phpt
+      ext/standard/tests/array/array_intersect_ukey_variation7.phpt
+      ext/standard/tests/array/array_intersect_ukey_variation8.phpt
+      ext/standard/tests/array/array_intersect_ukey_variation8.phpt
+      ext/standard/tests/array/array_intersect_ukey_variation9.phpt
+      ext/standard/tests/array/array_intersect_ukey_variation9.phpt
+      ext/standard/tests/array/array_replace.phpt
+      ext/standard/tests/array/array_replace.phpt:
+      - Move the tests where they belong
+
+2008-08-30  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/tests/opendir_edgecases.phpt:
+      fix OS-dependent order in test
+
+2008-08-30  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      main/php_variables.c:
+      WS
+
+2008-08-30  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/tests/file/fpassthru_error.phpt
+      ext/standard/tests/file/fscanf_error.phpt
+      ext/standard/tests/serialize/serialization_error_001.phpt
+      ext/standard/tests/strings/implode1.phpt:
+      - Fixed tests
+
+2008-08-30  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * main/php_variables.c
+      main/php_variables.c:
+      Fix the assert
+
+    * (PHP_5_3)
+      main/php_variables.c:
+      Oops, fix the assert.
+
+    * main/php_variables.c
+      main/php_variables.c
+      main/php_variables.c:
+      Fix for bugs 13961, 39927 and 45947
+
+2008-08-30  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/tests/bug7658.phpt
+      ext/zip/tests/oo_delete.phpt:
+      - MFB: fix test (clean on exit)
+
+    * (PHP_5_3)
+      ext/zip/tests/bug7658.phpt
+      ext/zip/tests/oo_delete.phpt:
+      - fix tests (clean on exit)
+
+2008-08-30  Marcus Boerger  <php@marcus-boerger.de>
+
+    * sapi/cli/tests/006.phpt:
+      - Fix test
+
+    * run-tests.php:
+      - Environment handling seems to have changed to respect unicode... so we
+        have to convert everything to binary before passing it along. A bunch of
+        tests suffer from this change in behavior as well. Can anyone explain to
+        me what was changed and why?
+
 2008-08-29  Henrique do Nascimento Angelo  <h.n.angelo@gmail.com>
 
     * ext/tidy/tidy.c:
