@@ -2422,7 +2422,10 @@ int phar_postprocess_file(phar_entry_data *idata, php_uint32 crc32, char **error
 			idata->zero = entry->offset_abs;
 		}
 	}
-	if (process_zip == 1) return SUCCESS;
+
+	if (process_zip == 1) {
+		return SUCCESS;
+	}
 
 	php_stream_seek(fp, idata->zero, SEEK_SET);
 

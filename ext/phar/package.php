@@ -8,8 +8,12 @@ BC BREAKING RELEASE
  * phar.extract_list and Phar::getExtractList() are removed
 
 Major feature functionality release
+ * phar.cache_list allows web-based phar applications to run at equal or faster than
+   their on-disk equivalent [Greg]
  * new default stub allows running of phar-based phars without phar extension [Greg/Steph]
  * add support for tar-based and zip-based phar archives [Greg]
+ * add support for OpenSSL-based true signatures [Greg]
+ * add support for signatures to tar-based phar archives [Greg]
  * add Phar::isFileFormat() [Greg]
  * add Phar::convertToExecutable(), Phar::convertToData() [Greg]
  * add Phar::compress() [Greg]
@@ -41,6 +45,10 @@ Security addition
 
 Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression API refactored,
  conversion API refactored
+Changes since 2.0.0b1: addition of phar.cache_list, many performance improvements and bugfixes
+ implement OpenSSL asynchronous true package signing
+ add support for package signing to tar-based archives
+ require PHP 5.2.1+
 ';
 
 if (!class_exists("Phar") && !extension_loaded("Phar")) {
@@ -81,7 +89,7 @@ $options = array(
 $package = PEAR_PackageFileManager2::importOptions(dirname(__FILE__) . '/package.xml', $options);
 
 $package->clearDeps();
-$package->setPhpDep('5.2.0');
+$package->setPhpDep('5.2.1');
 $package->setPearInstallerDep('1.4.3');
 $package->addPackageDepWithChannel('optional', 'bz2', 'pecl.php.net', false, false, false, false, 'bz2');
 // all this false business sets the <providesextension> tag that allows us to have hash built

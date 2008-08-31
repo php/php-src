@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.7.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.7.2" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>phar</name>
  <channel>pecl.php.net</channel>
  <summary>allows running of complete applications out of .phar files (like Java .jar files)</summary>
@@ -42,10 +42,10 @@ a 6x speedup measured running phpMyAdmin as a phar archive.</description>
   <email>sfox@php.net</email>
   <active>yes</active>
  </developer>
- <date>2008-05-12</date>
- <time>15:42:58</time>
+ <date>2008-08-31</date>
+ <time>15:34:02</time>
  <version>
-  <release>2.0.0b1</release>
+  <release>2.0.0RC1</release>
   <api>1.1.1</api>
  </version>
  <stability>
@@ -62,8 +62,12 @@ BC BREAKING RELEASE
  * phar.extract_list and Phar::getExtractList() are removed
 
 Major feature functionality release
+ * phar.cache_list allows web-based phar applications to run at equal or faster than
+   their on-disk equivalent [Greg]
  * new default stub allows running of phar-based phars without phar extension [Greg/Steph]
  * add support for tar-based and zip-based phar archives [Greg]
+ * add support for OpenSSL-based true signatures [Greg]
+ * add support for signatures to tar-based phar archives [Greg]
  * add Phar::isFileFormat() [Greg]
  * add Phar::convertToExecutable(), Phar::convertToData() [Greg]
  * add Phar::compress() [Greg]
@@ -95,6 +99,10 @@ Security addition
 
 Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression API refactored,
  conversion API refactored
+Changes since 2.0.0b1: addition of phar.cache_list, many performance improvements and bugfixes
+ implement OpenSSL asynchronous true package signing
+ add support for package signing to tar-based archives
+ require PHP 5.2.1+
 
  </notes>
  <contents>
@@ -109,7 +117,84 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
     <file name="pharcommand.inc" role="src" />
    </dir> <!-- /phar -->
    <dir name="tests">
+    <dir name="cache_list">
+     <dir name="files">
+      <file name="frontcontroller.phar" role="test" />
+      <file name="frontcontroller.phar.inc" role="test" />
+      <file name="frontcontroller2.phar" role="test" />
+      <file name="frontcontroller2.phar.inc" role="test" />
+      <file name="frontcontroller3.phar" role="test" />
+      <file name="frontcontroller3.phar.inc" role="test" />
+      <file name="frontcontroller4.phar" role="test" />
+      <file name="frontcontroller4.phar.inc" role="test" />
+      <file name="frontcontroller5.phar" role="test" />
+      <file name="frontcontroller5.phar.inc" role="test" />
+      <file name="frontcontroller6.phar" role="test" />
+      <file name="frontcontroller6.phar.inc" role="test" />
+      <file name="frontcontroller7.phar" role="test" />
+      <file name="frontcontroller7.phar.inc" role="test" />
+      <file name="frontcontroller8.phar" role="test" />
+      <file name="frontcontroller8.phar.inc" role="test" />
+      <file name="frontcontroller9.phar" role="test" />
+      <file name="frontcontroller9.phar.inc" role="test" />
+      <file name="frontcontroller10.phar" role="test" />
+      <file name="frontcontroller10.phar.inc" role="test" />
+      <file name="frontcontroller11.phar" role="test" />
+      <file name="frontcontroller11.phar.inc" role="test" />
+      <file name="frontcontroller12.phar" role="test" />
+      <file name="frontcontroller12.phar.inc" role="test" />
+      <file name="frontcontroller13.phar" role="test" />
+      <file name="frontcontroller13.phar.inc" role="test" />
+      <file name="frontcontroller14.phar" role="test" />
+      <file name="frontcontroller14.phar.inc" role="test" />
+      <file name="frontcontroller16.phar" role="test" />
+      <file name="frontcontroller16.phar.inc" role="test" />
+      <file name="frontcontroller17.phar" role="test" />
+      <file name="frontcontroller17.phar.inc" role="test" />
+      <file name="frontcontroller18.phar" role="test" />
+      <file name="frontcontroller18.phar.inc" role="test" />
+      <file name="frontcontroller19.phar" role="test" />
+      <file name="frontcontroller19.phar.inc" role="test" />
+     </dir> <!-- /tests/cache_list/files -->
+     <file name="frontcontroller1.phpt" role="test" />
+     <file name="frontcontroller2.phpt" role="test" />
+     <file name="frontcontroller3.phpt" role="test" />
+     <file name="frontcontroller4.phpt" role="test" />
+     <file name="frontcontroller5.phpt" role="test" />
+     <file name="frontcontroller6.phpt" role="test" />
+     <file name="frontcontroller7.phpt" role="test" />
+     <file name="frontcontroller8.phpt" role="test" />
+     <file name="frontcontroller9.phpt" role="test" />
+     <file name="frontcontroller10.phpt" role="test" />
+     <file name="frontcontroller11.phpt" role="test" />
+     <file name="frontcontroller12.phpt" role="test" />
+     <file name="frontcontroller13.phpt" role="test" />
+     <file name="frontcontroller14.phpt" role="test" />
+     <file name="frontcontroller15.phpt" role="test" />
+     <file name="frontcontroller16.phpt" role="test" />
+     <file name="frontcontroller17.phpt" role="test" />
+     <file name="frontcontroller18.phpt" role="test" />
+     <file name="frontcontroller19.phpt" role="test" />
+     <file name="frontcontroller20.phpt" role="test" />
+     <file name="frontcontroller21.phpt" role="test" />
+     <file name="frontcontroller22.phpt" role="test" />
+     <file name="frontcontroller23.phpt" role="test" />
+     <file name="frontcontroller24.phpt" role="test" />
+     <file name="frontcontroller25.phpt" role="test" />
+     <file name="frontcontroller26.phpt" role="test" />
+     <file name="frontcontroller27.phpt" role="test" />
+     <file name="frontcontroller28.phpt" role="test" />
+     <file name="frontcontroller29.phpt" role="test" />
+     <file name="frontcontroller30.phpt" role="test" />
+     <file name="frontcontroller31.phpt" role="test" />
+     <file name="frontcontroller32.phpt" role="test" />
+     <file name="frontcontroller33.phpt" role="test" />
+     <file name="frontcontroller34.phpt" role="test" />
+    </dir> <!-- /tests/cache_list -->
     <dir name="files">
+     <file name="blog.phar" role="test" />
+     <file name="blog.phar.inc" role="test" />
+     <file name="config.xml" role="test" />
      <file name="extracted.inc" role="test" />
      <file name="frontcontroller.phar" role="test" />
      <file name="frontcontroller.phar.inc" role="test" />
@@ -150,8 +235,12 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
      <file name="md5.phar" role="test" />
      <file name="nophar.phar" role="test" />
      <file name="nophar.phar.inc" role="test" />
+     <file name="notbogus.zip" role="test" />
+     <file name="openssl.phar" role="test" />
+     <file name="openssl.phar.pubkey" role="test" />
      <file name="phar_oo_test.inc" role="test" />
      <file name="phar_test.inc" role="test" />
+     <file name="private.pem" role="test" />
      <file name="sha1.phar" role="test" />
      <file name="sha256.phar" role="test" />
      <file name="sha512.phar" role="test" />
@@ -200,6 +289,8 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
      <file name="033.phpt" role="test" />
      <file name="033a.phpt" role="test" />
      <file name="alias_acrobatics.phpt" role="test" />
+     <file name="all.phpt" role="test" />
+     <file name="allU.phpt" role="test" />
      <file name="badalias.phpt" role="test" />
      <file name="badchecksum.phpt" role="test" />
      <file name="bignames.phpt" role="test" />
@@ -239,11 +330,16 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
      <file name="links5.phpt" role="test" />
      <file name="open_for_write_existing.phpt" role="test" />
      <file name="open_for_write_existing_b.phpt" role="test" />
+     <file name="open_for_write_existing_b_5_2.phpt" role="test" />
      <file name="open_for_write_existing_c.phpt" role="test" />
+     <file name="open_for_write_existing_c_5_2.phpt" role="test" />
      <file name="open_for_write_newfile.phpt" role="test" />
      <file name="open_for_write_newfile_b.phpt" role="test" />
+     <file name="open_for_write_newfile_b_5_2.phpt" role="test" />
      <file name="open_for_write_newfile_c.phpt" role="test" />
+     <file name="open_for_write_newfile_c_5_2.phpt" role="test" />
      <file name="phar_begin_setstub_commit.phpt" role="test" />
+     <file name="phar_begin_setstub_commitU.phpt" role="test" />
      <file name="phar_buildfromiterator4.phpt" role="test" />
      <file name="phar_buildfromiterator5.phpt" role="test" />
      <file name="phar_buildfromiterator6.phpt" role="test" />
@@ -259,17 +355,24 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
      <file name="phar_setalias.phpt" role="test" />
      <file name="phar_setalias2.phpt" role="test" />
      <file name="phar_setdefaultstub.phpt" role="test" />
+     <file name="phar_setsignaturealgo2.phpt" role="test" />
      <file name="phar_stub.phpt" role="test" />
      <file name="phar_stub_error.phpt" role="test" />
      <file name="refcount1.phpt" role="test" />
      <file name="refcount1_5_2.phpt" role="test" />
      <file name="rename.phpt" role="test" />
+     <file name="rename_dir.phpt" role="test" />
+     <file name="require_hash.phpt" role="test" />
+     <file name="rmdir.phpt" role="test" />
      <file name="tar_001.phpt" role="test" />
      <file name="tar_002.phpt" role="test" />
      <file name="tar_003.phpt" role="test" />
      <file name="tar_004.phpt" role="test" />
+     <file name="tar_004U.phpt" role="test" />
      <file name="tar_bz2.phpt" role="test" />
+     <file name="tar_bz2U.phpt" role="test" />
      <file name="tar_gzip.phpt" role="test" />
+     <file name="tar_gzipU.phpt" role="test" />
      <file name="tar_makebz2.phpt" role="test" />
      <file name="tar_makegz.phpt" role="test" />
      <file name="tar_nostub.phpt" role="test" />
@@ -282,6 +385,7 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
       <file name="badalias3.phar.zip" role="test" />
       <file name="badalias4.phar.zip" role="test" />
       <file name="badalias5.phar.zip" role="test" />
+      <file name="bzip2.zip" role="test" />
       <file name="cdir_offset.zip" role="test" />
       <file name="compress_unsup1.zip" role="test" />
       <file name="compress_unsup2.zip" role="test" />
@@ -299,11 +403,14 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
       <file name="compress_unsup98.zip" role="test" />
       <file name="compress_unsupunknown.zip" role="test" />
       <file name="corrupt2.php.inc" role="test" />
+      <file name="corrupt3.php.inc" role="test" />
       <file name="corrupt_count1.php.inc" role="test" />
       <file name="corrupt_zipmaker.php.inc" role="test" />
       <file name="count1.zip" role="test" />
       <file name="count2.zip" role="test" />
+      <file name="disknumber.zip" role="test" />
       <file name="encrypted.zip" role="test" />
+      <file name="extralen_toolong.zip" role="test" />
       <file name="filecomment.zip" role="test" />
       <file name="frontcontroller.phar.inc" role="test" />
       <file name="frontcontroller.phar.zip" role="test" />
@@ -343,7 +450,9 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
      <file name="033a.phpt" role="test" />
      <file name="alias_acrobatics.phpt" role="test" />
      <file name="all.phpt" role="test" />
+     <file name="allU.phpt" role="test" />
      <file name="badalias.phpt" role="test" />
+     <file name="bzip2.phpt" role="test" />
      <file name="corrupt_001.phpt" role="test" />
      <file name="corrupt_002.phpt" role="test" />
      <file name="corrupt_003.phpt" role="test" />
@@ -352,6 +461,8 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
      <file name="corrupt_006.phpt" role="test" />
      <file name="corrupt_007.phpt" role="test" />
      <file name="corrupt_008.phpt" role="test" />
+     <file name="corrupt_009.phpt" role="test" />
+     <file name="corrupt_010.phpt" role="test" />
      <file name="create_new_and_modify.phpt" role="test" />
      <file name="create_new_phar_b.phpt" role="test" />
      <file name="delete.phpt" role="test" />
@@ -384,15 +495,21 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
      <file name="getalias.phpt" role="test" />
      <file name="largezip.phpt" role="test" />
      <file name="metadata_write_commit.phpt" role="test" />
+     <file name="metadata_write_commitU.phpt" role="test" />
      <file name="notphar.phpt" role="test" />
      <file name="odt.phpt" role="test" />
      <file name="open_for_write_existing.phpt" role="test" />
      <file name="open_for_write_existing_b.phpt" role="test" />
+     <file name="open_for_write_existing_b_5_2.phpt" role="test" />
      <file name="open_for_write_existing_c.phpt" role="test" />
+     <file name="open_for_write_existing_c_5_2.phpt" role="test" />
      <file name="open_for_write_newfile.phpt" role="test" />
      <file name="open_for_write_newfile_b.phpt" role="test" />
+     <file name="open_for_write_newfile_b_5_2.phpt" role="test" />
      <file name="open_for_write_newfile_c.phpt" role="test" />
+     <file name="open_for_write_newfile_c_5_2.phpt" role="test" />
      <file name="phar_begin_setstub_commit.phpt" role="test" />
+     <file name="phar_begin_setstub_commitU.phpt" role="test" />
      <file name="phar_buildfromiterator4.phpt" role="test" />
      <file name="phar_buildfromiterator5.phpt" role="test" />
      <file name="phar_buildfromiterator6.phpt" role="test" />
@@ -403,6 +520,7 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
      <file name="phar_convert_phar.phpt" role="test" />
      <file name="phar_copy.phpt" role="test" />
      <file name="phar_magic.phpt" role="test" />
+     <file name="phar_magicU.phpt" role="test" />
      <file name="phar_oo_compressallbz2.phpt" role="test" />
      <file name="phar_oo_compressallgz.phpt" role="test" />
      <file name="phar_setalias.phpt" role="test" />
@@ -413,6 +531,8 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
      <file name="refcount1.phpt" role="test" />
      <file name="refcount1_5_2.phpt" role="test" />
      <file name="rename.phpt" role="test" />
+     <file name="rename_dir.phpt" role="test" />
+     <file name="rmdir.phpt" role="test" />
      <file name="unixzip.phpt" role="test" />
     </dir> <!-- /tests/zip -->
     <file name="001.phpt" role="test" />
@@ -435,10 +555,14 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
     <file name="016.phpt" role="test" />
     <file name="016b.phpt" role="test" />
     <file name="017.phpt" role="test" />
+    <file name="017U.phpt" role="test" />
     <file name="018.phpt" role="test" />
+    <file name="018U.phpt" role="test" />
     <file name="019.phpt" role="test" />
     <file name="019b.phpt" role="test" />
+    <file name="019bU.phpt" role="test" />
     <file name="019c.phpt" role="test" />
+    <file name="019cU.phpt" role="test" />
     <file name="020.phpt" role="test" />
     <file name="021.phpt" role="test" />
     <file name="022.phpt" role="test" />
@@ -447,6 +571,7 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
     <file name="025.phpt" role="test" />
     <file name="026.phpt" role="test" />
     <file name="027.phpt" role="test" />
+    <file name="027U.phpt" role="test" />
     <file name="028.phpt" role="test" />
     <file name="029.phpt" role="test" />
     <file name="030.phpt" role="test" />
@@ -459,6 +584,10 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
     <file name="badparameters.phpt" role="test" />
     <file name="bug13727.phpt" role="test" />
     <file name="bug13786.phpt" role="test" />
+    <file name="bug45218_SLOWTEST.phpt" role="test" />
+    <file name="bug45218_SLOWTESTU.phpt" role="test" />
+    <file name="cached_manifest_1.phpt" role="test" />
+    <file name="cached_manifest_1U.phpt" role="test" />
     <file name="create_new_and_modify.phpt" role="test" />
     <file name="create_new_phar.phpt" role="test" />
     <file name="create_new_phar_b.phpt" role="test" />
@@ -475,6 +604,7 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
     <file name="fopen5.2.phpt" role="test" />
     <file name="fopen_edgecases.phpt" role="test" />
     <file name="fopen_edgecases2.phpt" role="test" />
+    <file name="front.phar.phpt" role="test" />
     <file name="frontcontroller1.phpt" role="test" />
     <file name="frontcontroller2.phpt" role="test" />
     <file name="frontcontroller3.phpt" role="test" />
@@ -511,24 +641,34 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
     <file name="frontcontroller34.phpt" role="test" />
     <file name="include_path.phpt" role="test" />
     <file name="ini_set.phpt" role="test" />
+    <file name="ini_setU.phpt" role="test" />
     <file name="ini_set_off.phpt" role="test" />
+    <file name="ini_set_offU.phpt" role="test" />
     <file name="invalid_alias.phpt" role="test" />
     <file name="invalid_setstubalias.phpt" role="test" />
     <file name="metadata_read.phpt" role="test" />
+    <file name="metadata_readU.phpt" role="test" />
     <file name="metadata_write.phpt" role="test" />
+    <file name="metadata_writeU.phpt" role="test" />
     <file name="metadata_write_commit.phpt" role="test" />
+    <file name="metadata_write_commitU.phpt" role="test" />
     <file name="mkdir.phpt" role="test" />
     <file name="mounteddir.phpt" role="test" />
+    <file name="mounteddirU.phpt" role="test" />
     <file name="nophar.phpt" role="test" />
     <file name="nophar_web.phpt" role="test" />
     <file name="opendir.phpt" role="test" />
     <file name="opendir_edgecases.phpt" role="test" />
     <file name="open_for_write_existing.phpt" role="test" />
     <file name="open_for_write_existing_b.phpt" role="test" />
+    <file name="open_for_write_existing_b_5_2.phpt" role="test" />
     <file name="open_for_write_existing_c.phpt" role="test" />
+    <file name="open_for_write_existing_c_5_2.phpt" role="test" />
     <file name="open_for_write_newfile.phpt" role="test" />
     <file name="open_for_write_newfile_b.phpt" role="test" />
+    <file name="open_for_write_newfile_b_5_2.phpt" role="test" />
     <file name="open_for_write_newfile_c.phpt" role="test" />
+    <file name="open_for_write_newfile_c_5_2.phpt" role="test" />
     <file name="pharfileinfo_chmod.phpt" role="test" />
     <file name="pharfileinfo_compression.phpt" role="test" />
     <file name="pharfileinfo_construct.phpt" role="test" />
@@ -536,6 +676,7 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
     <file name="pharfileinfo_getcrc32.phpt" role="test" />
     <file name="pharfileinfo_setmetadata.phpt" role="test" />
     <file name="phar_begin_setstub_commit.phpt" role="test" />
+    <file name="phar_begin_setstub_commitU.phpt" role="test" />
     <file name="phar_buildfromdirectory1.phpt" role="test" />
     <file name="phar_buildfromdirectory2.phpt" role="test" />
     <file name="phar_buildfromdirectory3.phpt" role="test" />
@@ -552,7 +693,9 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
     <file name="phar_buildfromiterator8.phpt" role="test" />
     <file name="phar_buildfromiterator9.phpt" role="test" />
     <file name="phar_buildfromiterator10.phpt" role="test" />
+    <file name="phar_buildfromiterator10U.phpt" role="test" />
     <file name="phar_bz2.phpt" role="test" />
+    <file name="phar_bz2U.phpt" role="test" />
     <file name="phar_commitwrite.phpt" role="test" />
     <file name="phar_convert_again.phpt" role="test" />
     <file name="phar_convert_repeated.phpt" role="test" />
@@ -567,26 +710,40 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
     <file name="phar_ctx_001.phpt" role="test" />
     <file name="phar_decompress.phpt" role="test" />
     <file name="phar_dir_iterate.phpt" role="test" />
+    <file name="phar_dotted_path.phpt" role="test" />
     <file name="phar_extract.phpt" role="test" />
+    <file name="phar_extract2.phpt" role="test" />
+    <file name="phar_extract3.phpt" role="test" />
     <file name="phar_get_supportedcomp1.phpt" role="test" />
     <file name="phar_get_supportedcomp2.phpt" role="test" />
     <file name="phar_get_supportedcomp3.phpt" role="test" />
     <file name="phar_get_supportedcomp4.phpt" role="test" />
     <file name="phar_get_supported_signatures_001.phpt" role="test" />
+    <file name="phar_get_supported_signatures_001a.phpt" role="test" />
     <file name="phar_get_supported_signatures_002.phpt" role="test" />
+    <file name="phar_get_supported_signatures_002a.phpt" role="test" />
     <file name="phar_gobyebye.phpt" role="test" />
     <file name="phar_gzip.phpt" role="test" />
+    <file name="phar_gzipU.phpt" role="test" />
     <file name="phar_isvalidpharfilename.phpt" role="test" />
     <file name="phar_magic.phpt" role="test" />
     <file name="phar_metadata_read.phpt" role="test" />
+    <file name="phar_metadata_readU.phpt" role="test" />
     <file name="phar_metadata_write.phpt" role="test" />
+    <file name="phar_metadata_writeU.phpt" role="test" />
     <file name="phar_mount.phpt" role="test" />
+    <file name="phar_offset_check.phpt" role="test" />
     <file name="phar_offset_get_error.phpt" role="test" />
     <file name="phar_oo_001.phpt" role="test" />
+    <file name="phar_oo_001U.phpt" role="test" />
     <file name="phar_oo_002.phpt" role="test" />
+    <file name="phar_oo_002U.phpt" role="test" />
     <file name="phar_oo_003.phpt" role="test" />
     <file name="phar_oo_004.phpt" role="test" />
+    <file name="phar_oo_004U.phpt" role="test" />
     <file name="phar_oo_005.phpt" role="test" />
+    <file name="phar_oo_005U.phpt" role="test" />
+    <file name="phar_oo_005_5.2.phpt" role="test" />
     <file name="phar_oo_006.phpt" role="test" />
     <file name="phar_oo_007.phpt" role="test" />
     <file name="phar_oo_008.phpt" role="test" />
@@ -629,6 +786,9 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
     <file name="refcount1.phpt" role="test" />
     <file name="refcount1_5_2.phpt" role="test" />
     <file name="rename.phpt" role="test" />
+    <file name="rename_dir.phpt" role="test" />
+    <file name="rename_dir_and_mount.phpt" role="test" />
+    <file name="rmdir.phpt" role="test" />
     <file name="security.phpt" role="test" />
     <file name="stat.phpt" role="test" />
     <file name="stat2.phpt" role="test" />
@@ -676,7 +836,7 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
  <dependencies>
   <required>
    <php>
-    <min>5.2.0</min>
+    <min>5.2.1</min>
    </php>
    <pearinstaller>
     <min>1.4.3</min>
@@ -706,6 +866,70 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
  <changelog>
   <release>
    <version>
+    <release>2.0.0RC1</release>
+    <api>1.1.1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2008-08-31</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>
+
+BC BREAKING RELEASE
+ BC breaks:
+ * Phar object Compression API is rewritten.  Use Phar::compress() and decompress(),
+   Phar::compressFiles()/decompressFiles() and PharFileInfo-&gt;compress()/decompress().
+ * phar.extract_list and Phar::getExtractList() are removed
+
+Major feature functionality release
+ * phar.cache_list allows web-based phar applications to run at equal or faster than
+   their on-disk equivalent [Greg]
+ * new default stub allows running of phar-based phars without phar extension [Greg/Steph]
+ * add support for tar-based and zip-based phar archives [Greg]
+ * add support for OpenSSL-based true signatures [Greg]
+ * add support for signatures to tar-based phar archives [Greg]
+ * add Phar::isFileFormat() [Greg]
+ * add Phar::convertToExecutable(), Phar::convertToData() [Greg]
+ * add Phar::compress() [Greg]
+ * rename Phar::compressAllFiles() to compressFiles(), uncompressAllFiles() to
+   decompressFiles() [Greg]
+ * conversion to compressed or to other file formats automatically copies the archive
+   to a new extension (i.e. &quot;.phar&quot; to &quot;.phar.tar&quot; or &quot;.tar&quot; to &quot;.tar.gz&quot;) [Steph]
+ * add Phar::webPhar() for running a web-based application unmodified
+   directly from a phar archive [Greg]
+ * file functions (fopen-based and stat-based) can be instructed to only look for
+   relative paths within a phar via Phar::interceptFileFuncs()
+ * add PharData class to allow manipulation/creation of non-executable tar and zip archives. [Steph]
+   non-executable tar/zip manipulation is allowed even when phar.readonly=1 [Greg]
+ * paths with . and .. work (phar://blah.phar/a/../b.php =&gt; phar://blah.phar/b.php) [Greg]
+ * add support for mkdir()/rmdir() and support for empty directories to phar file format [Greg]
+ * add option to compress the entire phar file for phar/tar file format [Greg]
+ * implement Phar::isCompressed() returning 0, Phar::GZ or Phar::BZ2 [Greg]
+ * implement Phar::copy(string $from, string $to) [Greg]
+ * implement Phar::running(), returns path or URL to currently executed phar
+ * implement Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
+ * implement Phar::buildFromDirectory(string $base_directory[, string $regex]) [Steph]
+ * implement Phar::mount() for mounting external paths or files to locations inside a phar [Greg]
+ * add Phar::delete() [Greg]
+ * implement Phar::unlinkArchive() [Greg]
+
+Security addition
+ * aliases are validated so that they contain no directory separators as intended
+ * on conversion to other formats, user-supplied aliases are validated
+
+Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression API refactored,
+ conversion API refactored
+Changes since 2.0.0b1: addition of phar.cache_list, many performance improvements and bugfixes
+ implement OpenSSL asynchronous true package signing
+ add support for package signing to tar-based archives
+ require PHP 5.2.1+
+
+   </notes>
+  </release>
+  <release>
+   <version>
     <release>2.0.0b1</release>
     <api>1.1.1</api>
    </version>
@@ -715,9 +939,7 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
    </stability>
    <date>2008-05-12</date>
    <license uri="http://www.php.net/license">PHP License</license>
-   <notes>
-
-BC BREAKING RELEASE
+   <notes>BC BREAKING RELEASE
  BC breaks:
  * Phar object Compression API is rewritten.  Use Phar::compress() and decompress(),
    Phar::compressFiles()/decompressFiles() and PharFileInfo-&gt;compress()/decompress().
@@ -756,9 +978,7 @@ Security addition
  * on conversion to other formats, user-supplied aliases are validated
 
 Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression API refactored,
- conversion API refactored
-
-   </notes>
+ conversion API refactored</notes>
   </release>
   <release>
    <version>
