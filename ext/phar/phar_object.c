@@ -5033,12 +5033,12 @@ zend_function_entry php_archive_methods[] = {
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_entry___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_entry_chmod, 0, 0, 1)
 	ZEND_ARG_INFO(0, perms)
-ZEND_END_ARG_INFO();
+ZEND_END_ARG_INFO()
 
 zend_function_entry php_entry_methods[] = {
 	PHP_ME(PharFileInfo, __construct,        arginfo_entry___construct,  ZEND_ACC_PUBLIC)
