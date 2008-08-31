@@ -1984,6 +1984,7 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 	char *error;
 	const char *pcr_error;
 	int ext_len = ext ? strlen(ext) : 0;
+	int oldname_len;
 	phar_archive_data **pphar = NULL;
 
 	if (!ext) {
@@ -2049,12 +2050,13 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 	oldpath = estrndup(phar->fname, phar->fname_len);
 	oldname = zend_memrchr(phar->fname, '/', phar->fname_len);
 	++oldname;
+	oldname_len = strlen(oldname);
 
-	basename = estrndup(oldname, strlen(oldname));
+	basename = estrndup(oldname, oldname_len);
 	spprintf(&newname, 0, "%s.%s", strtok(basename, "."), ext);
 	efree(basename);
 
-	basepath = estrndup(oldpath, strlen(oldpath) - strlen(oldname));
+	basepath = estrndup(oldpath, (strlen(oldpath) - oldname_len));
 	phar->fname_len = spprintf(&newpath, 0, "%s%s", basepath, newname);
 	phar->fname = newpath;
 	phar->ext = newpath + phar->fname_len - strlen(ext) - 1;
