@@ -50,3 +50,7 @@ PHP                                                                        NEWS
 - Added str_getcsv() function. (Sara)
 
 - Fixed bug #40325 (Vary: header missing in gzip output handlers). (Mike)
+- Fixed bug #43666) (Fixed code to use ODBC 3.52 datatypes for 64bit systems). 
+  (iodbc)
+- Fixed bug #43668) (Added odbc.default_cursortype to control the ODBC 
+  cursormodel). (iodbc)
