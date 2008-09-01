@@ -32,6 +32,7 @@
  *	uncompress(method, old, n, newch) - uncompress old into new, 
  *					    using method, return sizeof new
  */
+
 #include "config.h"
 #include "file.h"
 #include "magic.h"
@@ -43,7 +44,9 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/types.h>
+#ifndef PHP_WIN32
 #include <sys/ioctl.h>
+#endif
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
@@ -55,6 +58,7 @@
 #include <zlib.h>
 #endif
 
+#undef FIONREAD
 
 #ifndef lint
 FILE_RCSID("@(#)$File: compress.c,v 1.56 2008/02/07 00:58:52 christos Exp $")
@@ -86,6 +90,7 @@ private size_t ncompr = sizeof(compr) / sizeof(compr[0]);
 
 
 private ssize_t swrite(int, const void *, size_t);
+#ifdef PHP_FILEINFO_UNCOMPRESS
 private size_t uncompressbuf(struct magic_set *, int, size_t,
     const unsigned char *, unsigned char **, size_t);
 #ifdef BUILTIN_DECOMPRESS
@@ -138,6 +143,7 @@ error:
 	ms->flags |= MAGIC_COMPRESS;
 	return rv;
 }
+#endif
 
 /*
  * `safe' write for sockets and pipes.
@@ -295,6 +301,7 @@ file_pipe2file(struct magic_set *ms, int fd, const void *startbuf,
 	return fd;
 }
 
+#ifdef PHP_FILEINFO_UNCOMPRESS
 #ifdef BUILTIN_DECOMPRESS
 
 #define FHCRC		(1 << 1)
@@ -364,6 +371,7 @@ uncompressgzipped(struct magic_set *ms, const unsigned char *old,
 	return n;
 }
 #endif
+
 
 private size_t
 uncompressbuf(struct magic_set *ms, int fd, size_t method,
@@ -483,3 +491,4 @@ err:
 		return n;
 	}
 }
+#endif /* if PHP_FILEINFO_UNCOMPRESS */
