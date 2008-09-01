@@ -1,3 +1,346 @@
+2008-08-31  Steph Fox  <steph.fox@virgin.net>
+
+    * ext/phar/tests/cache_list/files/blog.phar
+      ext/phar/tests/cache_list/files/blog.phar.inc
+      ext/phar/tests/cache_list/files/config.xml
+      ext/phar/tests/cache_list/files/extracted.inc:
+      - Missed the files we don't use yet
+
+    * (PHP_5_3)
+      ext/phar/phar_object.c:
+      - unnecessary ;
+      We are now 100% synched - let's keep it that way!
+
+    * (PHP_5_3)
+      ext/phar/package.php
+      ext/phar/package.xml
+      ext/phar/phar.c:
+      - cs, update package files following RC1 (just to keep it all in sync)
+
+    * ext/phar/php_phar.h:
+      - Note to self: don't try to second-guess Greg
+
+    * ext/phar/config.w32
+      ext/phar/dirstream.c
+      ext/phar/func_interceptors.c
+      ext/phar/package.php
+      ext/phar/package.xml
+      ext/phar/phar.c
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/php_phar.h
+      ext/phar/stream.c
+      ext/phar/stream.h
+      ext/phar/tar.c
+      ext/phar/util.c
+      ext/phar/zip.c
+      ext/phar/tests/opendir_edgecases.phpt
+      ext/phar/tests/phar_buildfromiterator10.phpt
+      ext/phar/tests/phar_get_supported_signatures_001.phpt
+      ext/phar/tests/phar_get_supported_signatures_001a.phpt
+      ext/phar/tests/phar_get_supported_signatures_002.phpt
+      ext/phar/tests/phar_get_supported_signatures_002a.phpt
+      ext/phar/tests/phpinfo_004.phpt
+      ext/phar/tests/cache_list/files/frontcontroller.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller10.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller11.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller12.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller13.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller14.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller16.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller17.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller18.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller19.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller2.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller3.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller4.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller5.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller6.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller7.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller8.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller9.phar.inc
+      ext/phar/tests/cache_list/files/md5.phar
+      ext/phar/tests/cache_list/files/nophar.phar
+      ext/phar/tests/cache_list/files/nophar.phar.inc
+      ext/phar/tests/cache_list/files/openssl.phar
+      ext/phar/tests/cache_list/files/openssl.phar.pubkey
+      ext/phar/tests/cache_list/files/phar_oo_test.inc
+      ext/phar/tests/cache_list/files/phar_test.inc
+      ext/phar/tests/cache_list/files/private.pem
+      ext/phar/tests/cache_list/files/sha1.phar
+      ext/phar/tests/cache_list/files/sha256.phar
+      ext/phar/tests/cache_list/files/sha512.phar
+      ext/phar/tests/cache_list/files/zfapp.tgz
+      ext/phar/tests/zip/bzip2.phpt
+      ext/phar/tests/zip/files/bzip2.zip:
+      - MFB
+
+2008-08-31  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/phar.phar
+      ext/phar/php_phar.h:
+      move to 2.0.0-dev
+
+    * (PHP_5_3)
+      ext/phar/phar.phar
+      ext/phar/tar.c:
+      use TAR_FILE instead of '0' and '\0' instead of 0
+
+    * (PHP_5_3)
+      ext/phar/config.w32:
+      temp bandaid on broken build system, revert when snapshot build is fixed in
+      win32
+
+    * (PHP_5_3)
+      ext/phar/tar.c:
+      hadn't saved tar.c, use '\0' instead of 0 for char values, removes warning
+      in intel compiler
+
+    * (PHP_5_3)
+      ext/phar/phar.phar
+      ext/phar/util.c:
+      use '\0' instead of 0 for chars, removes intel warning
+
+    * (PHP_5_3)
+      ext/phar/phar.phar
+      ext/phar/util.c:
+      remove unnecessary double variable declarations
+
+    * (PHP_5_3)
+      ext/phar/phar_object.c:
+      remove unnecessary ;
+
+2008-08-31  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      ext/phar/tests/phar_get_supported_signatures_001.phpt
+      ext/phar/tests/phar_get_supported_signatures_001a.phpt
+      ext/phar/tests/phar_get_supported_signatures_002.phpt
+      ext/phar/tests/phar_get_supported_signatures_002a.phpt
+      ext/phar/tests/phpinfo_004.phpt:
+      - Ensure that we're always checking for OpenSSL support, rather than just
+      for ext/openssl being loaded
+
+2008-08-31  Mikko Koppanen  <mikko.koppanen@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      Removed fileinfo related according to Jani's request
+
+2008-08-31  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pcre/tests/preg_filter.phpt:
+      MFB: remove extra skipif
+
+    * (PHP_5_3)
+      ext/pcre/tests/preg_filter.phpt:
+      remove unicode skipif, as the test doesnt require such support
+
+2008-08-31  Alexey Zakhlestin  <indeyets@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      more detailed news-entry
+
+    * (PHP_5_3)
+      NEWS:
+      added entry about change in ext/session
+
+    * ext/session/mod_files.c
+      ext/session/mod_files.c
+      ext/session/tests/session_save_path_variation5.phpt
+      ext/session/tests/session_save_path_variation5.phpt:
+      remove special treatment of /tmp path
+
+2008-08-31  Lukas Smith  <smith@pooteeweet.org>
+
+    * README.RELEASE_PROCESS:
+      - added further details on the steps necessary to move ext from/to pecl
+
+2008-08-31  Mikko Koppanen  <mikko.koppanen@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      Changed name,name,name to name, name, name according to Pierre's advice
+
+    * (PHP_5_3)
+      NEWS:
+      Added news entries about changes in ext/fileinfo
+
+2008-08-31  Lukas Smith  <smith@pooteeweet.org>
+
+    * README.RELEASE_PROCESS:
+      added note about how to move extensions from/to pecl
+
+2008-08-31  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      ext/phar/phar.phar
+      ext/phar/util.c:
+      use safer strlcpy, patch by Tony Dovgal
+
+    * ext/phar/tests/cache_list/files/blog.phar
+      ext/phar/tests/cache_list/files/blog.phar
+      ext/phar/tests/cache_list/files/blog.phar.inc
+      ext/phar/tests/cache_list/files/blog.phar.inc
+      ext/phar/tests/cache_list/files/config.xml
+      ext/phar/tests/cache_list/files/config.xml
+      ext/phar/tests/cache_list/files/extracted.inc
+      ext/phar/tests/cache_list/files/extracted.inc
+      ext/phar/tests/cache_list/files/frontcontroller.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller10.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller10.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller11.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller11.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller12.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller12.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller13.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller13.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller14.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller14.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller16.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller16.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller17.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller17.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller18.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller18.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller19.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller19.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller2.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller2.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller3.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller3.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller4.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller4.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller5.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller5.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller6.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller6.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller7.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller7.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller8.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller8.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller9.phar.inc
+      ext/phar/tests/cache_list/files/frontcontroller9.phar.inc
+      ext/phar/tests/cache_list/files/md5.phar
+      ext/phar/tests/cache_list/files/md5.phar
+      ext/phar/tests/cache_list/files/nophar.phar
+      ext/phar/tests/cache_list/files/nophar.phar
+      ext/phar/tests/cache_list/files/nophar.phar.inc
+      ext/phar/tests/cache_list/files/nophar.phar.inc
+      ext/phar/tests/cache_list/files/openssl.phar
+      ext/phar/tests/cache_list/files/openssl.phar
+      ext/phar/tests/cache_list/files/openssl.phar.pubkey
+      ext/phar/tests/cache_list/files/openssl.phar.pubkey
+      ext/phar/tests/cache_list/files/phar_oo_test.inc
+      ext/phar/tests/cache_list/files/phar_oo_test.inc
+      ext/phar/tests/cache_list/files/phar_test.inc
+      ext/phar/tests/cache_list/files/phar_test.inc
+      ext/phar/tests/cache_list/files/private.pem
+      ext/phar/tests/cache_list/files/private.pem
+      ext/phar/tests/cache_list/files/sha1.phar
+      ext/phar/tests/cache_list/files/sha1.phar
+      ext/phar/tests/cache_list/files/sha256.phar
+      ext/phar/tests/cache_list/files/sha256.phar
+      ext/phar/tests/cache_list/files/sha512.phar
+      ext/phar/tests/cache_list/files/sha512.phar
+      ext/phar/tests/cache_list/files/zfapp.tgz
+      ext/phar/tests/cache_list/files/zfapp.tgz:
+      
+      file blog.phar was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/phar/phar.phar
+      ext/phar/phar_object.c:
+      fix compile warning in PHP < 6.0
+
+    * (PHP_5_3)
+      ext/phar/phar.phar
+      ext/phar/tar.c:
+      remove superfluous variable declarations, merge WS from pecl/phar
+
+    * (PHP_5_3)
+      ext/phar/phar.phar
+      ext/phar/stream.c:
+      merge from pecl/phar strlen optimizations
+
+    * (PHP_5_3)
+      ext/phar/phar_object.c:
+      remove superfluous return statements, merge from pecl/phar
+
+    * (PHP_5_3)
+      ext/phar/phar.phar
+      ext/phar/phar_object.c:
+      merge minor optimization removing strlen from pecl/phar
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/phar.phar:
+      remove superfluous double variable declaration, merge from pecl/phar
+
+    * (PHP_5_3)
+      ext/phar/func_interceptors.c
+      ext/phar/phar.phar
+      ext/phar/phar_object.c:
+      use %u instead of %d, merge from pecl/phar
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/phar.phar:
+      remove orphaned code, merge from pecl/phar
+
+    * (PHP_5_3)
+      ext/phar/func_interceptors.c
+      ext/phar/phar.c
+      ext/phar/phar.phar
+      ext/phar/phar.phar
+      ext/phar/phar_object.c:
+      remove unused variables, merge from pecl/phar
+
+    * (PHP_5_3)
+      ext/phar/func_interceptors.c:
+      WS merge from pecl/phar
+
+    * (PHP_5_3)
+      ext/phar/phar.phar
+      ext/phar/stream.c
+      ext/phar/util.c
+      ext/phar/zip.c:
+      2 fixes, merge minor fixes from pecl/phar.  Merge in corrected fix from
+      pecl/phar for is_tar setting of tar_type
+
+2008-08-31  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c
+      ext/standard/tests/file/parse_ini_file.phpt
+      ext/standard/tests/file/parse_ini_file_error.phpt
+      ext/standard/tests/file/parse_ini_file_error.phpt
+      ext/standard/tests/general_functions/parse_ini_basic.phpt
+      ext/standard/tests/general_functions/parse_ini_file-win32.phpt
+      ext/standard/tests/general_functions/parse_ini_file.phpt
+      ext/standard/tests/general_functions/parse_ini_file.phpt
+      tests/security/open_basedir_parse_ini_file.phpt:
+      [DOC]- Fixed bug #45956 (parse_ini_file() does not return false with syntax
+      errors in parsed file)
+      [DOC] note: change will be in since 5.2.7
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c
+      ext/standard/tests/file/parse_ini_file_error.phpt
+      ext/standard/tests/general_functions/parse_ini_file-win32.phpt
+      ext/standard/tests/general_functions/parse_ini_file.phpt:
+      MFH:- Fixed bug #45956 (parse_ini_file() does not return false with syntax
+      errors in parsed file)
+
+    * (PHP_5_3)
+      ext/standard/credits_ext.h:
+      update credits
+
 2008-08-30  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/standard/credits_ext.h
