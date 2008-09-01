@@ -2295,14 +2295,19 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	    instanceof_function(Z_OBJCE_P(SOAP_GLOBAL(error_object)), soap_class_entry TSRMLS_CC)) {
 #ifdef ZEND_ENGINE_2
 		zval **tmp;
+		int use_exceptions = 0;
+
+		if (zend_hash_find(Z_OBJPROP_P(SOAP_GLOBAL(error_object)), "_exceptions", sizeof("_exceptions"), (void **) &tmp) != SUCCESS ||
+		     Z_TYPE_PP(tmp) != IS_BOOL || Z_LVAL_PP(tmp) != 0) {
+		     use_exceptions = 1;
+		}
 
 		if ((error_num == E_USER_ERROR || 
 		     error_num == E_COMPILE_ERROR || 
 		     error_num == E_CORE_ERROR ||
 		     error_num == E_ERROR || 
 		     error_num == E_PARSE) &&
-		    (zend_hash_find(Z_OBJPROP_P(SOAP_GLOBAL(error_object)), "_exceptions", sizeof("_exceptions"), (void **) &tmp) != SUCCESS ||
-		     Z_TYPE_PP(tmp) != IS_BOOL || Z_LVAL_PP(tmp) != 0)) {
+		    use_exceptions) {
 			zval *fault, *exception;
 			char* code = SOAP_GLOBAL(error_code);
 			char buffer[1024];
@@ -2357,7 +2362,10 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			EG(objects_store).object_buckets = old_objects;
 			PG(display_errors) = old;
 			zend_bailout();
-		} else {
+		} else if (!use_exceptions ||
+		           !SOAP_GLOBAL(error_code) ||
+		           strcmp(SOAP_GLOBAL(error_code),"WSDL") != 0) {
+			/* Ignore libxml warnings during WSDL parsing */
 			call_old_error_handler(error_num, error_filename, error_lineno, format, args);
 		}
 #else
