@@ -2685,7 +2685,10 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			EG(objects_store).object_buckets = old_objects;
 			PG(display_errors) = old;
 			zend_bailout();
-		} else {
+		} else if (!client->exceptions ||
+		           !SOAP_GLOBAL(error_code) ||
+		           strcmp(SOAP_GLOBAL(error_code),"WSDL") != 0) {
+			/* Ignore libxml warnings during WSDL parsing */
 			call_old_error_handler(error_num, error_filename, error_lineno, format, args);
 		}
 	} else {
