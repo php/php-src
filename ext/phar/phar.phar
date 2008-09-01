@@ -1,1232 +1,0 @@
-#!/home/cellog/testapache/bin/php
-<?php if (!class_exists('PHP_Archive')) {
-?><?php
-/**
- * PHP_Archive Class (implements .phar)
- *
- * @package PHP_Archive
- * @category PHP
- */
-/**
- * PHP_Archive Class (implements .phar)
- *
- * PHAR files a singular archive from which an entire application can run.
- * To use it, simply package it using {@see PHP_Archive_Creator} and use phar://
- * URIs to your includes. i.e. require_once 'phar://config.php' will include config.php
- * from the root of the PHAR file.
- *
- * Gz code borrowed from the excellent File_Archive package by Vincent Lascaux.
- *
- * @copyright Copyright David Shafik and Synaptic Media 2004. All rights reserved.
- * @author Davey Shafik <davey@synapticmedia.net>
- * @author Greg Beaver <cellog@php.net>
- * @link http://www.synapticmedia.net Synaptic Media
- * @version $Id: Archive.php,v 1.52 2007/09/01 20:28:14 cellog Exp $
- * @package PHP_Archive
- * @category PHP
- */
- 
-class PHP_Archive
-{
-    const GZ = 0x00001000;
-    const BZ2 = 0x00002000;
-    const SIG = 0x00010000;
-    const SHA1 = 0x0002;
-    const MD5 = 0x0001;
-    /**
-     * Whether this archive is compressed with zlib
-     *
-     * @var bool
-     */
-    private $_compressed;
-    /**
-     * @var string Real path to the .phar archive
-     */
-    private $_archiveName = null;
-    /**
-     * Current file name in the phar
-     * @var string
-     */
-    protected $currentFilename = null;
-    /**
-     * Length of current file in the phar
-     * @var string
-     */
-    protected $internalFileLength = null;
-    /**
-     * Current file statistics (size, creation date, etc.)
-     * @var string
-     */
-    protected $currentStat = null;
-    /**
-     * @var resource|null Pointer to open .phar
-     */
-    protected $fp = null;
-    /**
-     * @var int Current Position of the pointer
-     */
-    protected $position = 0;
-
-    /**
-     * Map actual realpath of phars to meta-data about the phar
-     *
-     * Data is indexed by the alias that is used by internal files.  In other
-     * words, if a file is included via:
-     * <code>
-     * require_once 'phar://PEAR.phar/PEAR/Installer.php';
-     * </code>
-     * then the alias is "PEAR.phar"
-     * 
-     * Information stored is a boolean indicating whether this .phar is compressed
-     * with zlib, another for bzip2, phar-specific meta-data, and
-     * the precise offset of internal files
-     * within the .phar, used with the {@link $_manifest} to load actual file contents
-     * @var array
-     */
-    private static $_pharMapping = array();
-    /**
-     * Map real file paths to alias used
-     *
-     * @var array
-     */
-    private static $_pharFiles = array();
-    /**
-     * File listing for the .phar
-     * 
-     * The manifest is indexed per phar.
-     * 
-     * Files within the .phar are indexed by their relative path within the
-     * .phar.  Each file has this information in its internal array
-     *
-     * - 0 = uncompressed file size
-     * - 1 = timestamp of when file was added to phar
-     * - 2 = offset of file within phar relative to internal file's start
-     * - 3 = compressed file size (actual size in the phar)
-     * @var array
-     */
-    private static $_manifest = array();
-    /**
-     * Absolute offset of internal files within the .phar, indexed by absolute
-     * path to the .phar
-     *
-     * @var array
-     */
-    private static $_fileStart = array();
-    /**
-     * file name of the phar
-     *
-     * @var string
-     */
-    private $_basename;
-
-
-    /**
-     * Default MIME types used for the web front controller
-     *
-     * @var array
-     */
-    public static $defaultmimes = array(
-            'aif' => 'audio/x-aiff',
-            'aiff' => 'audio/x-aiff',
-            'arc' => 'application/octet-stream',
-            'arj' => 'application/octet-stream',
-            'art' => 'image/x-jg',
-            'asf' => 'video/x-ms-asf',
-            'asx' => 'video/x-ms-asf',
-            'avi' => 'video/avi',
-            'bin' => 'application/octet-stream',
-            'bm' => 'image/bmp',
-            'bmp' => 'image/bmp',
-            'bz2' => 'application/x-bzip2',
-            'css' => 'text/css',
-            'doc' => 'application/msword',
-            'dot' => 'application/msword',
-            'dv' => 'video/x-dv',
-            'dvi' => 'application/x-dvi',
-            'eps' => 'application/postscript',
-            'exe' => 'application/octet-stream',
-            'gif' => 'image/gif',
-            'gz' => 'application/x-gzip',
-            'gzip' => 'application/x-gzip',
-            'htm' => 'text/html',
-            'html' => 'text/html',
-            'ico' => 'image/x-icon',
-            'jpe' => 'image/jpeg',
-            'jpg' => 'image/jpeg',
-            'jpeg' => 'image/jpeg',
-            'js' => 'application/x-javascript',
-            'log' => 'text/plain',
-            'mid' => 'audio/x-midi',
-            'mov' => 'video/quicktime',
-            'mp2' => 'audio/mpeg',
-            'mp3' => 'audio/mpeg3',
-            'mpg' => 'audio/mpeg',
-            'pdf' => 'aplication/pdf',
-            'png' => 'image/png',
-            'rtf' => 'application/rtf',
-            'tif' => 'image/tiff',
-            'tiff' => 'image/tiff',
-            'txt' => 'text/plain',
-            'xml' => 'text/xml',
-        );
-
-    public static $defaultphp = array(
-        'php' => true
-        );
-
-    public static $defaultphps = array(
-        'phps' => true
-        );
-
-    public static $deny = array('/.+\.inc$/');
-
-    public static function viewSource($archive, $file)
-    {
-        // security, idea borrowed from PHK
-        if (!file_exists($archive . '.introspect')) {
-            header("HTTP/1.0 404 Not Found");
-            return false;
-        }
-        if (self::_fileExists($archive, $_GET['viewsource'])) {
-            $source = highlight_file('phar://@ALIAS@/' .
-                $_GET['viewsource'], true);
-            header('Content-Type: text/html');
-            header('Content-Length: ' . strlen($source));
-            echo '<html><head><title>Source of ',
-                htmlspecialchars($_GET['viewsource']), '</title></head>';
-            echo '<body><h1>Source of ',
-                htmlspecialchars($_GET['viewsource']), '</h1>';
-            if (isset($_GET['introspect'])) {
-                echo '<a href="', htmlspecialchars($_SERVER['PHP_SELF']),
-                    '?introspect=', urlencode(htmlspecialchars($_GET['introspect'])),
-                    '">Return to ', htmlspecialchars($_GET['introspect']), '</a><br />';
-            }
-            echo $source;
-            return false;
-        } else {
-            header("HTTP/1.0 404 Not Found");
-            return false;
-        }
-        
-    }
-
-    public static function introspect($archive, $dir)
-    {
-        // security, idea borrowed from PHK
-        if (!file_exists($archive . '.introspect')) {
-            header("HTTP/1.0 404 Not Found");
-            return false;
-        }
-        if (!$dir) {
-            $dir = '/';
-        }
-        $dir = self::processFile($dir);
-        if ($dir[0] != '/') {
-            $dir = '/' . $dir;
-        }
-        try {
-            $self = htmlspecialchars($_SERVER['PHP_SELF']);
-            $iterate = new DirectoryIterator('phar://@ALIAS@' . $dir);
-            echo '<html><head><title>Introspect ', htmlspecialchars($dir),
-                '</title></head><body><h1>Introspect ', htmlspecialchars($dir),
-                '</h1><ul>';
-            if ($dir != '/') {
-                echo '<li><a href="', $self, '?introspect=',
-                    htmlspecialchars(dirname($dir)), '">..</a></li>';
-            }
-            foreach ($iterate as $entry) {
-                if ($entry->isDot()) continue;
-                $name = self::processFile($entry->getPathname());
-                $name = str_replace('phar://@ALIAS@/', '', $name);
-                if ($entry->isDir()) {
-                    echo '<li><a href="', $self, '?introspect=',
-                        urlencode(htmlspecialchars($name)),
-                        '">',
-                        htmlspecialchars($entry->getFilename()), '/</a> [directory]</li>';
-                } else {
-                    echo '<li><a href="', $self, '?introspect=',
-                        urlencode(htmlspecialchars($dir)), '&viewsource=',
-                        urlencode(htmlspecialchars($name)),
-                        '">',
-                        htmlspecialchars($entry->getFilename()), '</a></li>';
-                }
-            }
-            return false;
-        } catch (Exception $e) {
-            echo '<html><head><title>Directory not found: ',
-                htmlspecialchars($dir), '</title></head>',
-                '<body><h1>Directory not found: ', htmlspecialchars($dir), '</h1>',
-                '<p>Try <a href="', htmlspecialchars($_SERVER['PHP_SELF']), '?introspect=/">',
-                'This link</a></p></body></html>';
-            return false;
-        }
-    }
-
-    public static function webFrontController($initfile)
-    {
-        if (isset($_SERVER) && isset($_SERVER['REQUEST_URI'])) {
-            $uri = parse_url($_SERVER['REQUEST_URI']);
-            $archive = realpath($_SERVER['SCRIPT_FILENAME']);
-            $subpath = str_replace('/' . basename($archive), '', $uri['path']);
-            if (!$subpath || $subpath == '/') {
-                if (isset($_GET['viewsource'])) {
-                    return self::viewSource($archive, $_GET['viewsource']);
-                }
-                if (isset($_GET['introspect'])) {
-                    return self::introspect($archive, $_GET['introspect']);
-                }
-                $subpath = '/' . $initfile;
-            }
-            if (!self::_fileExists($archive, substr($subpath, 1))) {
-                header("HTTP/1.0 404 Not Found");
-                return false;
-            }
-            foreach (self::$deny as $pattern) {
-                if (preg_match($pattern, $subpath)) {
-                    header("HTTP/1.0 404 Not Found");
-                    return false;
-                }
-            }
-            $inf = pathinfo(basename($subpath));
-            if (!isset($inf['extension'])) {
-                header('Content-Type: text/plain');
-                header('Content-Length: ' .
-                    self::_filesize($archive, substr($subpath, 1)));
-                readfile('phar://@ALIAS@' . $subpath);
-                return false;
-            }
-            if (isset(self::$defaultphp[$inf['extension']])) {
-                include 'phar://@ALIAS@' . $subpath;
-                return false;
-            }
-            if (isset(self::$defaultmimes[$inf['extension']])) {
-                header('Content-Type: ' . self::$defaultmimes[$inf['extension']]);
-                header('Content-Length: ' .
-                    self::_filesize($archive, substr($subpath, 1)));
-                readfile('phar://@ALIAS@' . $subpath);
-                return false;
-            }
-            if (isset(self::$defaultphps[$inf['extension']])) {
-                header('Content-Type: text/html');
-                $c = highlight_file('phar://@ALIAS@' . $subpath, true);
-                header('Content-Length: ' . strlen($c));
-                echo $c;
-                return false;
-            }
-            header('Content-Type: text/plain');
-            header('Content-Length: ' .
-                    self::_filesize($archive, substr($subpath, 1)));
-            readfile('phar://@ALIAS@' . $subpath);
-        }
-    }
-
-    /**
-     * Detect end of stub
-     *
-     * @param string $buffer stub past '__HALT_'.'COMPILER();'
-     * @return end of stub, prior to length of manifest.
-     */
-    private static final function _endOfStubLength($buffer)
-    {
-        $pos = 0;
-        if (!strlen($buffer)) {
-            return $pos;
-        }
-        if (($buffer[0] == ' ' || $buffer[0] == "\n") && @substr($buffer, 1, 2) == '?>')
-        {
-            $pos += 3;
-            if ($buffer[$pos] == "\r" && $buffer[$pos+1] == "\n") {
-                $pos += 2;
-            }
-            else if ($buffer[$pos] == "\n") {
-                $pos += 1;
-            }
-        }
-        return $pos;
-    }
-
-    /**
-     * Allows loading an external Phar archive without include()ing it
-     *
-     * @param string $file  phar package to load
-     * @param string $alias alias to use
-     * @throws Exception
-     */
-    public static final function loadPhar($file, $alias = NULL)
-    {
-        $file = realpath($file);
-        if ($file) {
-            $fp = fopen($file, 'rb');
-            $buffer = '';
-            while (!feof($fp)) {
-                $buffer .= fread($fp, 8192);
-                // don't break phars
-                if ($pos = strpos($buffer, '__HALT_COMPI' . 'LER();')) {
-                    $buffer .= fread($fp, 5);
-                    fclose($fp);
-                    $pos += 18;
-                    $pos += self::_endOfStubLength(substr($buffer, $pos));
-                    return self::_mapPhar($file, $pos, $alias);
-                }
-            }
-            fclose($fp);
-        }
-    }
-
-    /**
-     * Map a full real file path to an alias used to refer to the .phar
-     *
-     * This function can only be called from the initialization of the .phar itself.
-     * Any attempt to call from outside the .phar or to re-alias the .phar will fail
-     * as a security measure.
-     * @param string $alias
-     * @param int $dataoffset the value of __COMPILER_HALT_OFFSET__
-     */
-    public static final function mapPhar($alias = NULL, $dataoffset = NULL)
-    {
-        try {
-            $trace = debug_backtrace();
-            $file = $trace[0]['file'];
-            // this ensures that this is safe
-            if (!in_array($file, get_included_files())) {
-                die('SECURITY ERROR: PHP_Archive::mapPhar can only be called from within ' .
-                    'the phar that initiates it');
-            }
-            $file = realpath($file);
-            if (!isset($dataoffset)) {
-                $dataoffset = constant('__COMPILER_HALT_OFFSET'.'__');
-                $fp = fopen($file, 'rb');
-                fseek($fp, $dataoffset, SEEK_SET);
-                $dataoffset = $dataoffset + self::_endOfStubLength(fread($fp, 5));
-                fclose($fp);
-            }
-
-            self::_mapPhar($file, $dataoffset);
-        } catch (Exception $e) {
-            die($e->getMessage());
-        }
-    }
-
-    /**
-     * Sub-function, allows recovery from errors
-     *
-     * @param unknown_type $file
-     * @param unknown_type $dataoffset
-     */
-    private static function _mapPhar($file, $dataoffset, $alias = NULL)
-    {
-        $file = realpath($file);
-        if (isset(self::$_manifest[$file])) {
-            return;
-        }
-        if (!is_array(self::$_pharMapping)) {
-            self::$_pharMapping = array();
-        }
-        $fp = fopen($file, 'rb');
-        // seek to __HALT_COMPILER_OFFSET__
-        fseek($fp, $dataoffset);
-        $manifest_length = unpack('Vlen', fread($fp, 4));
-        $manifest = '';
-        $last = '1';
-        while (strlen($last) && strlen($manifest) < $manifest_length['len']) {
-            $read = 8192;
-            if ($manifest_length['len'] - strlen($manifest) < 8192) {
-                $read = $manifest_length['len'] - strlen($manifest);
-            }
-            $last = fread($fp, $read);
-            $manifest .= $last;
-        }
-        if (strlen($manifest) < $manifest_length['len']) {
-            throw new Exception('ERROR: manifest length read was "' . 
-                strlen($manifest) .'" should be "' .
-                $manifest_length['len'] . '"');
-        }
-        $info = self::_unserializeManifest($manifest);
-        if ($info['alias']) {
-            $alias = $info['alias'];
-            $explicit = true;
-        } else {
-            if (!isset($alias)) {
-                $alias = $file;
-            }
-            $explicit = false;
-        }
-        self::$_manifest[$file] = $info['manifest'];
-        $compressed = $info['compressed'];
-        self::$_fileStart[$file] = ftell($fp);
-        fclose($fp);
-        if ($compressed & 0x00001000) {
-            if (!function_exists('gzinflate')) {
-                throw new Exception('Error: zlib extension is not enabled - gzinflate() function needed' .
-                    ' for compressed .phars');
-            }
-        }
-        if ($compressed & 0x00002000) {
-            if (!function_exists('bzdecompress')) {
-                throw new Exception('Error: bzip2 extension is not enabled - bzdecompress() function needed' .
-                    ' for compressed .phars');
-            }
-        }
-        if (isset(self::$_pharMapping[$alias])) {
-            throw new Exception('ERROR: PHP_Archive::mapPhar has already been called for alias "' .
-                $alias . '" cannot re-alias to "' . $file . '"');
-        }
-        self::$_pharMapping[$alias] = array($file, $compressed, $dataoffset, $explicit,
-            $info['metadata']);
-        self::$_pharFiles[$file] = $alias;
-    }
-
-    /**
-     * extract the manifest into an internal array
-     *
-     * @param string $manifest
-     * @return false|array
-     */
-    private static function _unserializeManifest($manifest)
-    {
-        // retrieve the number of files in the manifest
-        $info = unpack('V', substr($manifest, 0, 4));
-        $apiver = substr($manifest, 4, 2);
-        $apiver = bin2hex($apiver);
-        $apiver_dots = hexdec($apiver[0]) . '.' . hexdec($apiver[1]) . '.' . hexdec($apiver[2]);
-        $majorcompat = hexdec($apiver[0]);
-        $calcapi = explode('.', self::APIVersion());
-        if ($calcapi[0] != $majorcompat) {
-            throw new Exception('Phar is incompatible API version ' . $apiver_dots . ', but ' .
-                'PHP_Archive is API version '.self::APIVersion());
-        }
-        if ($calcapi[0] === '0') {
-            if (self::APIVersion() != $apiver_dots) {
-                throw new Exception('Phar is API version ' . $apiver_dots .
-                    ', but PHP_Archive is API version '.self::APIVersion(), E_USER_ERROR);
-            }
-        }
-        $flags = unpack('V', substr($manifest, 6, 4));
-        $ret = array('compressed' => $flags & 0x00003000);
-        // signature is not verified by default in PHP_Archive, phar is better
-        $ret['hassignature'] = $flags & 0x00010000;
-        $aliaslen = unpack('V', substr($manifest, 10, 4));
-        if ($aliaslen) {
-            $ret['alias'] = substr($manifest, 14, $aliaslen[1]);
-        } else {
-            $ret['alias'] = false;
-        }
-        $manifest = substr($manifest, 14 + $aliaslen[1]);
-        $metadatalen = unpack('V', substr($manifest, 0, 4));
-        if ($metadatalen[1]) {
-            $ret['metadata'] = unserialize(substr($manifest, 4, $metadatalen[1]));
-            $manifest = substr($manifest, 4 + $metadatalen[1]);
-        } else {
-            $ret['metadata'] = null;
-            $manifest = substr($manifest, 4);
-        }
-        $offset = 0;
-        $start = 0;
-        for ($i = 0; $i < $info[1]; $i++) {
-            // length of the file name
-            $len = unpack('V', substr($manifest, $start, 4));
-            $start += 4;
-            // file name
-            $savepath = substr($manifest, $start, $len[1]);
-            $start += $len[1];
-            // retrieve manifest data:
-            // 0 = uncompressed file size
-            // 1 = timestamp of when file was added to phar
-            // 2 = compressed filesize
-            // 3 = crc32
-            // 4 = flags
-            // 5 = metadata length
-            $ret['manifest'][$savepath] = array_values(unpack('Va/Vb/Vc/Vd/Ve/Vf', substr($manifest, $start, 24)));
-            $ret['manifest'][$savepath][3] = sprintf('%u', $ret['manifest'][$savepath][3]
-                & 0xffffffff);
-            if ($ret['manifest'][$savepath][5]) {
-                $ret['manifest'][$savepath][6] = unserialize(substr($manifest, $start + 24,
-                    $ret['manifest'][$savepath][5]));
-            } else {
-                $ret['manifest'][$savepath][6] = null;
-            }
-            $ret['manifest'][$savepath][7] = $offset;
-            $offset += $ret['manifest'][$savepath][2];
-            $start += 24 + $ret['manifest'][$savepath][5];
-        }
-        return $ret;
-    }
-
-    /**
-     * @param string
-     */
-    private static function processFile($path)
-    {
-        if ($path == '.') {
-            return '';
-        }
-        $std = str_replace("\\", "/", $path);
-        while ($std != ($std = ereg_replace("[^\/:?]+/\.\./", "", $std))) ;
-        $std = str_replace("/./", "", $std);
-        if (strlen($std) > 1 && $std[0] == '/') {
-            $std = substr($std, 1);
-        }
-        if (strncmp($std, "./", 2) == 0) {
-            return substr($std, 2);
-        } else {
-            return $std;
-        }
-    }
-
-    /**
-     * Seek in the master archive to a matching file or directory
-     * @param string
-     */
-    protected function selectFile($path, $allowdirs = true)
-    {
-        $std = self::processFile($path);
-        if (isset(self::$_manifest[$this->_archiveName][$path])) {
-            $this->_setCurrentFile($path);
-            return true;
-        }
-        if (!$allowdirs) {
-            return 'Error: "' . $path . '" is not a file in phar "' . $this->_basename . '"';
-        }
-        foreach (self::$_manifest[$this->_archiveName] as $file => $info) {
-            if (empty($std) ||
-                  //$std is a directory
-                  strncmp($std.'/', $path, strlen($std)+1) == 0) {
-                $this->currentFilename = $this->internalFileLength = $this->currentStat = null;
-                return true;
-            }
-        }
-        return 'Error: "' . $path . '" not found in phar "' . $this->_basename . '"';
-    }
-
-    private function _setCurrentFile($path)
-    {
-        $this->currentStat = array(
-            2 => 0100444, // file mode, readable by all, writeable by none
-            4 => 0, // uid
-            5 => 0, // gid
-            7 => self::$_manifest[$this->_archiveName][$path][0], // size
-            9 => self::$_manifest[$this->_archiveName][$path][1], // creation time
-            );
-        $this->currentFilename = $path;
-        $this->internalFileLength = self::$_manifest[$this->_archiveName][$path][2];
-        // seek to offset of file header within the .phar
-        if (is_resource(@$this->fp)) {
-            fseek($this->fp, self::$_fileStart[$this->_archiveName] + self::$_manifest[$this->_archiveName][$path][7]);
-        }
-    }
-
-    private static function _fileExists($archive, $path)
-    {
-        return isset(self::$_manifest[$archive]) &&
-            isset(self::$_manifest[$archive][$path]);
-    }
-
-    private static function _filesize($archive, $path)
-    {
-        return self::$_manifest[$archive][$path][0];
-    }
-
-    /**
-     * Seek to a file within the master archive, and extract its contents
-     * @param string
-     * @return array|string an array containing an error message string is returned
-     *                      upon error, otherwise the file contents are returned
-     */
-    public function extractFile($path)
-    {
-        $this->fp = @fopen($this->_archiveName, "rb");
-        if (!$this->fp) {
-            return array('Error: cannot open phar "' . $this->_archiveName . '"');
-        }
-        if (($e = $this->selectFile($path, false)) === true) {
-            $data = '';
-            $count = $this->internalFileLength;
-            while ($count) {
-                if ($count < 8192) {
-                    $data .= @fread($this->fp, $count);
-                    $count = 0;
-                } else {
-                    $count -= 8192;
-                    $data .= @fread($this->fp, 8192);
-                }
-            }
-            @fclose($this->fp);
-            if (self::$_manifest[$this->_archiveName][$path][4] & self::GZ) {
-                $data = gzinflate($data);
-            } elseif (self::$_manifest[$this->_archiveName][$path][4] & self::BZ2) {
-                $data = bzdecompress($data);
-            }
-            if (!isset(self::$_manifest[$this->_archiveName][$path]['ok'])) {
-                if (strlen($data) != $this->currentStat[7]) {
-                    return array("Not valid internal .phar file (size error {$size} != " .
-                        $this->currentStat[7] . ")");
-                }
-                if (self::$_manifest[$this->_archiveName][$path][3] != sprintf("%u", crc32($data) & 0xffffffff)) {
-                    return array("Not valid internal .phar file (checksum error)");
-                }
-                self::$_manifest[$this->_archiveName][$path]['ok'] = true;
-            }
-            return $data;
-        } else {
-            @fclose($this->fp);
-            return array($e);
-        }
-    }
-
-    /**
-     * Parse urls like phar:///fullpath/to/my.phar/file.txt
-     *
-     * @param string $file
-     * @return false|array
-     */
-    static protected function parseUrl($file)
-    {
-        if (substr($file, 0, 7) != 'phar://') {
-            return false;
-        }
-        $file = substr($file, 7);
-    
-        $ret = array('scheme' => 'phar');
-        $pos_p = strpos($file, '.phar.php');
-        $pos_z = strpos($file, '.phar.gz');
-        $pos_b = strpos($file, '.phar.bz2');
-        if ($pos_p) {
-            if ($pos_z) {
-                return false;
-            }
-            $ret['host'] = substr($file, 0, $pos_p + strlen('.phar.php'));
-            $ret['path'] = substr($file, strlen($ret['host']));
-        } elseif ($pos_z) {
-            $ret['host'] = substr($file, 0, $pos_z + strlen('.phar.gz'));
-            $ret['path'] = substr($file, strlen($ret['host']));
-        } elseif ($pos_b) {
-            $ret['host'] = substr($file, 0, $pos_z + strlen('.phar.bz2'));
-            $ret['path'] = substr($file, strlen($ret['host']));
-        } elseif (($pos_p = strpos($file, ".phar")) !== false) {
-            $ret['host'] = substr($file, 0, $pos_p + strlen('.phar'));
-            $ret['path'] = substr($file, strlen($ret['host']));
-        } else {
-            return false;
-        }
-        if (!$ret['path']) {
-            $ret['path'] = '/';
-        }
-        return $ret;
-    }
-    
-    /**
-     * Locate the .phar archive in the include_path and detect the file to open within
-     * the archive.
-     *
-     * Possible parameters are phar://pharname.phar/filename_within_phar.ext
-     * @param string a file within the archive
-     * @return string the filename within the .phar to retrieve
-     */
-    public function initializeStream($file)
-    {
-        $file = self::processFile($file);
-        $info = @parse_url($file);
-        if (!$info) {
-            $info = self::parseUrl($file);
-        }
-        if (!$info) {
-            return false;
-        }
-        if (!isset($info['host'])) {
-            // malformed internal file
-            return false;
-        }
-        if (!isset(self::$_pharFiles[$info['host']]) &&
-              !isset(self::$_pharMapping[$info['host']])) {
-            try {
-                self::loadPhar($info['host']);
-                // use alias from here out
-                $info['host'] = self::$_pharFiles[$info['host']];
-            } catch (Exception $e) {
-                return false;
-            }
-        }
-        if (!isset($info['path'])) {
-            return false;
-        } elseif (strlen($info['path']) > 1) {
-            $info['path'] = substr($info['path'], 1);
-        }
-        if (isset(self::$_pharMapping[$info['host']])) {
-            $this->_basename = $info['host'];
-            $this->_archiveName = self::$_pharMapping[$info['host']][0];
-            $this->_compressed = self::$_pharMapping[$info['host']][1];
-        } elseif (isset(self::$_pharFiles[$info['host']])) {
-            $this->_archiveName = $info['host'];
-            $this->_basename = self::$_pharFiles[$info['host']];
-            $this->_compressed = self::$_pharMapping[$this->_basename][1];
-        }
-        $file = $info['path'];
-        return $file;
-    }
-
-    /**
-     * Open the requested file - PHP streams API
-     *
-     * @param string $file String provided by the Stream wrapper
-     * @access private
-     */
-    public function stream_open($file)
-    {
-        return $this->_streamOpen($file);
-    }
-
-    /**
-     * @param string filename to opne, or directory name
-     * @param bool if true, a directory will be matched, otherwise only files
-     *             will be matched
-     * @uses trigger_error()
-     * @return bool success of opening
-     * @access private
-     */
-    private function _streamOpen($file, $searchForDir = false)
-    {
-        $path = $this->initializeStream($file);
-        if (!$path) {
-            trigger_error('Error: Unknown phar in "' . $file . '"', E_USER_ERROR);
-        }
-        if (is_array($this->file = $this->extractFile($path))) {
-            trigger_error($this->file[0], E_USER_ERROR);
-            return false;
-        }
-        if ($path != $this->currentFilename) {
-            if (!$searchForDir) {
-                trigger_error("Cannot open '$file', is a directory", E_USER_ERROR);
-                return false;
-            } else {
-                $this->file = '';
-                return true;
-            }
-        }
-
-        if (!is_null($this->file) && $this->file !== false) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    
-    /**
-     * Read the data - PHP streams API
-     *
-     * @param int
-     * @access private
-     */
-    public function stream_read($count)
-    {
-        $ret = substr($this->file, $this->position, $count);
-        $this->position += strlen($ret);
-        return $ret;
-    }
-    
-    /**
-     * Whether we've hit the end of the file - PHP streams API
-     * @access private
-     */
-    function stream_eof()
-    {
-        return $this->position >= $this->currentStat[7];
-    }
-    
-    /**
-     * For seeking the stream - PHP streams API
-     * @param int
-     * @param SEEK_SET|SEEK_CUR|SEEK_END
-     * @access private
-     */
-    public function stream_seek($pos, $whence)
-    {
-        switch ($whence) {
-            case SEEK_SET:
-                if ($pos < 0) {
-                    return false;
-                }
-                $this->position = $pos;
-                break;
-            case SEEK_CUR:
-                if ($pos + $this->currentStat[7] < 0) {
-                    return false;
-                }
-                $this->position += $pos;
-                break;
-            case SEEK_END:
-                if ($pos + $this->currentStat[7] < 0) {
-                    return false;
-                }
-                $this->position = $pos + $this->currentStat[7];
-                break;
-            default:
-                return false;
-        }
-        return true;
-    }
-    
-    /**
-     * The current position in the stream - PHP streams API
-     * @access private
-     */
-    public function stream_tell()
-    {
-        return $this->position;
-    }
-
-    /**
-     * The result of an fstat call, returns mod time from creation, and file size -
-     * PHP streams API
-     * @uses _stream_stat()
-     * @access private
-     */
-    public function stream_stat()
-    {
-        return $this->_stream_stat();
-    }
-
-    /**
-     * Retrieve statistics on a file or directory within the .phar
-     * @param string file/directory to stat
-     * @access private
-     */
-    public function _stream_stat($file = null)
-    {
-        $std = $file ? self::processFile($file) : $this->currentFilename;
-        if ($file) {
-            if (isset(self::$_manifest[$this->_archiveName][$file])) {
-                $this->_setCurrentFile($file);
-                $isdir = false;
-            } else {
-                do {
-                    $isdir = false;
-                    if ($file == '/') {
-                        break;
-                    }
-                    foreach (self::$_manifest[$this->_archiveName] as $path => $info) {
-                        if (strpos($path, $file) === 0) {
-                            if (strlen($path) > strlen($file) &&
-                                  $path[strlen($file)] == '/') {
-                                break 2;
-                            }
-                        }
-                    }
-                    // no files exist and no directories match this string
-                    return false;
-                } while (false);
-                $isdir = true;
-            }
-        } else {
-            $isdir = false; // open streams must be files
-        }
-        $mode = $isdir ? 0040444 : 0100444;
-        // 040000 = dir, 010000 = file
-        // everything is readable, nothing is writeable
-        return array(
-           0, 0, $mode, 0, 0, 0, 0, 0, 0, 0, 0, 0, // non-associative indices
-           'dev' => 0, 'ino' => 0,
-           'mode' => $mode,
-           'nlink' => 0, 'uid' => 0, 'gid' => 0, 'rdev' => 0, 'blksize' => 0, 'blocks' => 0,
-           'size' => $this->currentStat[7],
-           'atime' => $this->currentStat[9],
-           'mtime' => $this->currentStat[9],
-           'ctime' => $this->currentStat[9],
-           );
-    }
-
-    /**
-     * Stat a closed file or directory - PHP streams API
-     * @param string
-     * @param int
-     * @access private
-     */
-    public function url_stat($url, $flags)
-    {
-        $path = $this->initializeStream($url);
-        return $this->_stream_stat($path);
-    }
-
-    /**
-     * Open a directory in the .phar for reading - PHP streams API
-     * @param string directory name
-     * @access private
-     */
-    public function dir_opendir($path)
-    {
-        $info = @parse_url($path);
-        if (!$info) {
-            $info = self::parseUrl($path);
-            if (!$info) {
-                trigger_error('Error: "' . $path . '" is a file, and cannot be opened with opendir',
-                    E_USER_ERROR);
-                return false;
-            }
-        }
-        $path = !empty($info['path']) ?
-            $info['host'] . $info['path'] : $info['host'] . '/';
-        $path = $this->initializeStream('phar://' . $path);
-        if (isset(self::$_manifest[$this->_archiveName][$path])) {
-            trigger_error('Error: "' . $path . '" is a file, and cannot be opened with opendir',
-                E_USER_ERROR);
-            return false;
-        }
-        if ($path == false) {
-            trigger_error('Error: Unknown phar in "' . $file . '"', E_USER_ERROR);
-            return false;
-        }
-        $this->fp = @fopen($this->_archiveName, "rb");
-        if (!$this->fp) {
-            trigger_error('Error: cannot open phar "' . $this->_archiveName . '"');
-            return false;
-        }
-        $this->_dirFiles = array();
-        foreach (self::$_manifest[$this->_archiveName] as $file => $info) {
-            if ($path == '/') {
-                if (strpos($file, '/')) {
-                    $a = explode('/', $file);
-                    $this->_dirFiles[array_shift($a)] = true;
-                } else {
-                    $this->_dirFiles[$file] = true;
-                }
-            } elseif (strpos($file, $path) === 0) {
-                $fname = substr($file, strlen($path) + 1);
-                if (strpos($fname, '/')) {
-                    // this is a directory
-                    $a = explode('/', $fname);
-                    $this->_dirFiles[array_shift($a)] = true;
-                } elseif ($file[strlen($path)] == '/') {
-                    // this is a file
-                    $this->_dirFiles[$fname] = true;
-                }
-            }
-        }
-        @fclose($this->fp);
-        if (!count($this->_dirFiles)) {
-            return false;
-        }
-        @uksort($this->_dirFiles, 'strnatcmp');
-        return true;
-    }
-
-    /**
-     * Read the next directory entry - PHP streams API
-     * @access private
-     */
-    public function dir_readdir()
-    {
-        $ret = key($this->_dirFiles);
-        @next($this->_dirFiles);
-        if (!$ret) {
-            return false;
-        }
-        return $ret;
-    }
-
-    /**
-     * Close a directory handle opened with opendir() - PHP streams API
-     * @access private
-     */
-    public function dir_closedir()
-    {
-        $this->_dirFiles = array();
-        return true;
-    }
-
-    /**
-     * Rewind to the first directory entry - PHP streams API
-     * @access private
-     */
-    public function dir_rewinddir()
-    {
-        @reset($this->_dirFiles);
-        return true;
-    }
-
-    /**
-     * API version of this class
-     * @return string
-     */
-    public static final function APIVersion()
-    {
-        return '1.0.0';
-    }
-
-    /**
-     * Retrieve Phar-specific metadata for a Phar archive
-     *
-     * @param string $phar full path to Phar archive, or alias
-     * @return null|mixed The value that was serialized for the Phar
-     *                    archive's metadata
-     * @throws Exception
-     */
-    public static function getPharMetadata($phar)
-    {
-        if (isset(self::$_pharFiles[$phar])) {
-            $phar = self::$_pharFiles[$phar];
-        }
-        if (!isset(self::$_pharMapping[$phar])) {
-            throw new Exception('Unknown Phar archive: "' . $phar . '"');
-        }
-        return self::$_pharMapping[$phar][4];
-    }
-
-    /**
-     * Retrieve File-specific metadata for a Phar archive file
-     *
-     * @param string $phar full path to Phar archive, or alias
-     * @param string $file relative path to file within Phar archive
-     * @return null|mixed The value that was serialized for the Phar
-     *                    archive's metadata
-     * @throws Exception
-     */
-    public static function getFileMetadata($phar, $file)
-    {
-        if (!isset(self::$_pharFiles[$phar])) {
-            if (!isset(self::$_pharMapping[$phar])) {
-                throw new Exception('Unknown Phar archive: "' . $phar . '"');
-            }
-            $phar = self::$_pharMapping[$phar][0];
-        }
-        if (!isset(self::$_manifest[$phar])) {
-            throw new Exception('Unknown Phar: "' . $phar . '"');
-        }
-        $file = self::processFile($file);
-        if (!isset(self::$_manifest[$phar][$file])) {
-            throw new Exception('Unknown file "' . $file . '" within Phar "'. $phar . '"');
-        }
-        return self::$_manifest[$phar][$file][6];
-    }
-
-    /**
-     * @return list of supported signature algorithmns.
-     */
-    public static function getsupportedsignatures()
-    {
-        $ret = array('MD5', 'SHA-1');
-        if (extension_loaded('hash')) {
-            $ret[] = 'SHA-256';
-            $ret[] = 'SHA-512';
-        }
-        return $ret;
-    }
-}
-?><?php
-}
-if (!in_array('phar', stream_get_wrappers())) {
-	stream_wrapper_register('phar', 'PHP_Archive');
-}
-if (!class_exists('Phar',0)) {
-	include 'phar://'.__FILE__.'/phar.inc';
-}
-?><?php
-
-/** @file phar.php
- * @ingroup Phar
- * @brief class CLICommand
- * @author  Marcus Boerger
- * @date    2007 - 2008
- *
- * Phar Command
- */
-
-if (!extension_loaded('phar'))
-{
-	if (!class_exists('PHP_Archive', 0)) {
-		echo "Neither Extension Phar nor class PHP_Archive are available.\n";
-		exit(1);
-	}
-	if (!in_array('phar', stream_get_wrappers())) {
-		stream_wrapper_register('phar', 'PHP_Archive');
-	}
-	if (!class_exists('Phar',0)) {
-		require 'phar://'.__FILE__.'/phar.inc';
-	}
-}
-
-foreach(array("SPL", "Reflection") as $ext)
-{
-	if (!extension_loaded($ext)) {
-		echo "$argv[0] requires PHP extension $ext.\n";
-		exit(1);
-	}
-}
-
-function command_include($file)
-{
-	$file = 'phar://' . __FILE__ . '/' . $file;
-	if (file_exists($file)) {
-		include($file);
-	}
-}
-
-function command_autoload($classname)
-{
-	command_include(strtolower($classname) . '.inc');
-}
-
-Phar::mapPhar();
-
-spl_autoload_register('command_autoload');
-
-new PharCommand($argc, $argv);
-
-__HALT_COMPILER(); ?>
-6            pharcommand       clicommand.incü!  ªÿºH%
-  Çší¶         directorygraphiterator.incò  ªÿºHu  .XM¶         directorytreeiterator.inc  ªÿºHX  e#Q¶         invertedregexiterator.incÕ  ªÿºHÕ   j©Q¶         pharcommand.inc4š  ªÿºH#  …¿Z^¶         phar.inc  ªÿºH+  CbcD¶      µksÚHò3üŠ1Å­¤°±·j÷L`/—»­Úªd/åd?Š’Åt7#a»²şï×İóĞ	ìÍí¥Ê fzú=ıR^ÿ´Ûìºİ‹W¯Øßâ$å,J“(ßnÃl5J²¨Ë`=ÉÖ"/wìÃ&´p'd(%{ûî—·
-¶Â²Øä‚±÷¡ˆJÉşs±æêÔ*,8ƒW——?°!~ıë¸…ˆY…åBós„.coîd!Â¨`w¡óLæÈ¹BÀ’í.å[a‘äÙs\í¹ ÆÆ£K"Üñ¾v;;‘<*øŠõC±&‡+ûúJ´]I6e¡á£4 î»Ú^·—Y„Ò°åÅ-D>ñ0P`Š|Ğí —~±Iäp†Û€Æ°ê,ïõòŞYÖÌJÆ77k^h±¥Oû©Ù³oÄú,Y@€Lb¦Øc¯ÙUÀ©‚çBäÂïıš[{­“=Ï,ÚğèëE¶æ—‹'¶áéîsÖ#ÊOŒ§’#Ö³DJ^øÓs’d>^,æ(3o´ü-û’å÷™¥êiJãÅ“÷"â
-gßœ×
-„ób„náNŸ îà@Å]eTf¦é²”\,ÑÔ¾2=ØilB– ±zÜpu`!oZ¼ßàİöÏÏğµòÍ†5Õ~ŞO ;›N™7ôÌ6íƒÃ¥<«Àºbß}Çjò¢,ó
-X$°h:¸nµ¦¶'zIk³i·C#¾×¢L‰7œ9Û…"Üò‚0)ª„å±cdıôœ‰ñŸkæNİ@$¨|¦Ş…ĞA”ÊûI7`ªdÀôµTÒ"ïju"­.êJôÕ¨ëÉCa`F®çÅR„ë²İ	~Qû´MŞÛt_’Ü«<V¹J‹•„ÉÿS&‚ô–SÛ­*1_ñ8,S°·“Ôõ ùçi¥Áœ±v£;æ*ùÍ{tÁ|áxıùù¢ÎA·bCk÷ í‡ğ‡JF#ÿ“"”áãü!Ú¸Æc¡dêÂÎÀ§³Øõ 'QMD0-ràDZÕf^7h,˜Ø5š2fïÜ‡¡ºâHÔVG7Bh‚A›ºí¦Ö•>ÿ¡Z¥¥ëÿˆÑI,S"f|–ÃOÕı­\ëtïD’±ÿñÓ?şy{XpëÈqâ\@şP0¬8fMI¨ÈøU!ı
-Ş ·x_êLíñ¸«"¤<aÃ[LZ%Vs<iÀŒ=/J‘½$;6Qª\3hò£vù]´'UroU5T>Ë»Ÿá§ô«2‘ª>ªÂNğ8y°%š,ï¤QSX,}¿3~Ïnyœr"ğ‘øK±ğÒ¾«°«‚ËŞa1œcï9¼P»t‘·Z›äø%¸`øá,ƒ[5`—ÀgJ	İ ÔWÁ¢Ä#„ª«z¿	dæ_?=7"üùØÎ>jY2lDáË[zøNb)ø.ÁUj€…É@A¬5AèM(•Ğ>Ñq
-·jçtØ­K:v±êMÖ®@æÈ2^¼B‰U ÜÜ€¯.Ñn‰ğÊ‹*ï:r{İ²»Í¥´óh4¶ ·nèøÜ~¢Ö”TT0<ˆ½ğ‰)8DœšşÏàè:\àå<JÙ€Ğò.ÏSk¢?¿ğÇ:ma„y>ˆ¡ÇĞ¡‹ø°O¨Ø™Ê×m]Ä§ğ"¶-%ô¡œ…ÚÊ‘íº§û€åá«nv¯¶›˜glL©~è¢]˜áx °´Ë¥ï]<Aºy0×Ä	‹§d©mztQƒ#üQeÍf|ıõ·wïN„VW ´ÜY’-uJ  z^ºb¼{
-f•6›~°å/%7mdH–gÛ	¯ı;O2¿‡1¨w’€ö<Ç•÷œ¼«D¶Cä œîÂbãëüeºíx:’ÍØï¿³3œå,!Ë8„ò×©Ç­j¸…rŒK,-»ÑÂ*ç’TA¸ZÅŠ_ TL532ìH‚éîã.ıö~ÉâÜ·	™vû1e²[÷ŠK;ÏKªEãÑ&gL4Û:*¹*•@ão¤9j7€ê1AHYYsåÚîkıx,Òó3R5EQ>qpVãæ%FùñªI1Àj8¥*°+ñã­¾PCÓ¬8ábúøáÊï§cš–Ø‹ÔÓ*xXøÃ –Ù9»‚¿ïáïÇh¯5Úôêqëg@€O§´ˆy°/±#ñë4zŸ 0¥V…Aé-2QÀuÍ8¶§	@7°ÇQjÂ}.V÷"„âëdşäÎ8 –äÛğÁÿá¯lH{ß_Æ²‹¶M²d[nøğZ;¶\k@·ÁÃwN™§°«šq‚‡a5ÖËÒ_R$a
-;¦­¢Š¢àÛ0ÉV\XH§Ğëë~@8'¥$«Î1Ì>gt<ËÉJKğ
-UpJ¨yrlTiµˆ<èfÕ(¬	l÷(r˜Bù K©ãj-5\ØÉÜ¦Âåf·Ü\Å
-År¤³0Ş¸$+¹ÓØ©Ì(®Gİ44ÚÍ”n F£‘Ù&Œ È•3ÿª]Ñš¨!$Ü	§SSfN	zÕTæ’»ª~ĞBc±º0w±`v¥€}0±Rà6£Ş¢¼Ìš;V)]/'õV§L&Ëw™ŒšÛıĞi¼Qğ4°r¬Èêêx¾nÓ×µÒ­”X¯ëZ»¾•¿Óz¾B5‚ááKêáBï/Ãş×T>IXÖÀ4eÈè5éÿºÒ£·qErÜ»á«æº’Å)Kãn5Ëºùœ¤˜œúø¿vx‰!ğwOW¥f#.cäo‰Ëº[ñP·Nç2yaöº¦3¬cUK–3›‚&°‰„ï¹ì#¯=Õ!+Ğ”ÕX¡)«MSÔ›ûMm¦,ÕÄÑJúj°k}1Ô:Æ’që°ñ=8+6ĞØ`\{[3:˜ VÑ4CìÌ–Ê¶H#˜Ú¬,8˜/yšßsayÄWšY½™¨JWyË¨ØŠºËÚ<õZhÀ¢0Ã"ªf·†¸îF±¨¢[í…ŸQÊ¬>¤ÕEcğ¤
-ÖÏY_/ÙkÍÒŒÍsr,¹ ·XTğú"sQ{ã¤x9êg.°ê#Ğûdm8«¢‚ÕğÓ&=3¢¸1¼ÈÂæBZ9Ú¡Ùñ¹~5õGy¼Ã ôÂH€@/¤®ÖèGx”"ëjĞ,â`5ĞqÌªSÎaÌÔÎd¦-• )ùœØ|R­<µ9²¥-úv®/!Ñ™°Ê^'âûÉai›S¸q½I½öæ²"_iã¨^Rµò¡ğ:…V!JLşßTTguÄôDÖ3p½
-!/)ïuø©×øï0ğ±p&ixWıWikú£© †®ıªÛ4 ×tGµk-üÔ’?Íºÿ…’AOÂ@…Ï4é˜ƒ1¨Sˆ¥BcAB{ñÔ¬Ûn‚Ûfw«õ¿»Û–ŠÆ`tŞ7oßlz=ÈÓÜ¶l«wr·K¶FH˜@ª2±]	’§L¡ ú«Ë8µ-Ğã+‘9xò’¯QVİgÁp	tM¤„ÑÎalüÚ¡âH¡ÒL L‰ …„»Å
-k-!
-A?çışœšri„Rçn…Šğ„ˆæ“9ìY±5r¯YáP:€!(»¥@¥DAÆ×[iö&›İÊîÿy_QH–q8ëÕ!í¸QÈ“=9ÒY¾oçİ¶ZË‚Se,ã˜f\*QPu|”•¶µjˆÖi¡}m&wÕqö‡ÚâøïšêÛÙáQ"s"«_ÂÏá&sC•©:Çyğâaßû7N½Ú·]Õv§ª¿b9;‚8z£…?ü!Gî${QìNü`TšÔ^y¹‡ã„^p¯O]„‘i·¯ôûÓ¶>Í?2¸ùS]oÚ@|‰ÿ°–°“@’ö¥rPÅ¼Tªd]ÌbŸdlkïœ5ùïİ³äK´–|'ïÎÎÎÍ­Ïûyœ·š­æñÁ\.e‚°„¡Îh­	Qj$Á]™†­&0F¦eEã'±ÊTUô$.!L„R0ÚÌ™`ZT0Qè8#€Aa¡à{†a[ÀÏ—““¯Ğ1Û7“(“şÌã¯Eº´€Ùd¼'Ak“>Ş`Ÿ8Ø	ÛˆA„©ù@øÃé"y,Ã`lPÿ–ÿ€¤d–Âi÷´Ö´ÇÀ'éBÁ†×=l3;¿ş´šs¨a–*ME¨aIÙ
-äBÇ]Nš®¹ ±Ë„^KÎ º8,a¬¥±,ÒP}Aní²Îá¬éÕ`.Lµë¾F˜x#ÅÇĞ¡c¶y£³B¼…|ğ¹jt´áº?Æ¿‚\M½ñíàf\Ñ:GÕş®©ëÌúó»éíõó'éùp\çÁp2õF%IÍµ9¥?ö®¸Û?7açŒ×3G¥ç—„º tŒÀ’M`‚+³ç„Kù„x”lú›©Qí®«í­Ë–™'¸€vÛ´l,yl+¹89+s°t,U§¡a®cÛ1ñÃCÊâºº{ñ
-ç÷;Ÿ§Ó‹…ºåù²èCûÚàòU»³Ô‡«¹¸ıÿruJ®ß¶S]Kƒ«÷Î|M|3ö;QDñ|ªÒb™ò?r;úŸÌ¬HÛ2#3í<ôjëh}	
-…X ˆÄÚ®ÖÏ5:Le Î²VY
-í÷ş…P_kÂ0n ßáö¶	jçË†;öæÃ@ö²ôÚ$)—‹†ß}I­C'Ö{	ÜïïeU´M+…óÉŞ+³C0vÄXÖØFRìhf¬–"ÇØš\haÛ(:n¾É`z§¼‡Í şJâÍ >ÒTàÆÀ§"<|8¤¬TŒg‘ç/0MÏkzğd	Wó¿â·JÁˆz¼QTyã,<Ïò!jä@ÀÑ–şÈYßYx¸À—K¥5¶üøi}DV«9Å!É$»cğ9)éCŠõ/í=ıwÛ6’?;’u—R#Ëvv{wk7NÔió^’úÅi{Û$ëR$qM‘\’òGÛüï7 „DÙémß½ó{m$r03ƒ™ôå“lİ»·ûùç÷Äçâ«iK‘ÍÃ|œ.a2FÉ˜^DÉ,O—™8…wô`”Gr*ÆqXâÙËÏ^…ËræB¼4ËB<Me>“Üj–RÀß£½½ÿ;øÏÁs|…ˆE…e÷Şî®øõ×_UøV½òº”ÉÄéU‘oCQ;|ˆÿ½G…Â4‡—±,D9—üF&Ò)}ÏÔàÔà‹¡xQŠ«(ÅHŠe!'bš§ıZ@S¹;N“"%6‹‘æ™‹2¹,A—R0År¼,¿˜.“qA«¡¦ÎÇ\ÁLQ=˜n£EË…LÊÑ¬ãø¥Ì ûÃ=bk'~şzoK±?[âhlˆ&Fç3YŸ>º·µâeo;Şˆí0ŸGÉ´oPnS–y"Š2?Ïe&Ã²ˆ  â}ñP<‚ÿş
-ÿı­xoë#ğñãÇ„ü``ş·`´ÏâH|#KA?û*ópâLc_ôwÃì$­âí•Œ/e„¿ª…ï@Ô¤àÁ¸ğÃ!îŞÛj£]ñ)~tKf©ÏH4|jg]’b±Åğ:+*Æ‘ Á£%ÊUAè´p*ºSº()DKB/³Zê7ìºšGã9rôGú »¸&çi!“ak3D^Şd’XJ`™âÃ(29¦8&ÔW°Ü®ÒüB¤‰3#Ëä"I¯Å|/zLß êPMÀ¶è<¼éÁÓ­ Äã#ëÁV èYÆQX~zÆôôõ÷/_ªG0»ø%AÁ
-ÏÓËh‚jBĞ#‘„)¦°˜qŒÃ ô	M0ZA@rÓ©ûQ˜Ì wñmXÌwğ)3ä$ğ)/©sĞ%ó4XOgCñ§û»Ë"ßEÉ.XŒşfeÍ‘bı·a>¢²ñT¼ştÿ}@ŠÑ&òŠúÃØÂq)Qî`j3œ•0v:ö„.ãYG^ÏR,h·,—©C|–Gå|1Ô(€V9.ë=n{4*Dô:EY×(T»­ I¬ íœ2À1|Z ÂºÜ£İ¤"‹™Ú·˜!ıÌ€Å”w›w‚^¼F)ƒåDß­$z‹e+3ÇKÊÓoßÀ˜$˜1‰r 7…$¤Ñæô¦ïÌØÔK¤Y]]ÈD‘Ç;ãu®ÌµYÁNïs?‹Ôìvé|!Á˜NÄ5Ñº™œÄ/4ÁbòãyõõÁ (æá>?ûöx?°'4òS›Ë™¼îD,AÙœ
-ÁüÌ–1°J^¹B…%Ù²$ş×.î®N¢dÂT,GÅ8h-zèLÕÀê5ö÷
-Wïu¯Ñ%šï%y¹AÓ Ò)åmG±ia%áIÉ¨dì¾‘¡àÃ+‡¤Åİ²¢à¾‚8»!÷‚†»ÉQë­WÈ<uÿ¸ L	Ğ]G™Ÿ”8ÁÇìDƒ‰—é˜|EäÒé·§çÇJ³³/Hüè‡‘ƒ(Ê’N‘Æ*şïéRŒÁZ;š};ˆÖû`>ÀPcì	TC)BGÕ-œ\Ihù¹…”:×[pd¢ZpØN{¿“ˆKÒRÈ<‡Sé+„G£54 áÁ…gê&Cvk
-˜tGâ"áà"]`?hÁWæÊÂY”Ë Áã°Ôû‹›àÑ¸ö€‡2‡ñ1Gu ^HŸ×æ*³„ÕÂ	J4±-Š0¿Šcèt%Ä²Ò¢‘ö @#Qdöh¸9c‘¶R³,_„3Ş| à„ÀìÈ¤XæÒÚR¡†:æ¤šc{I~9D2:I!²”9›;q²á×\J…øf­$\“¡sÈ¸ñ“‘åÑå…ì¤
-N—€SÇße29;{)Šh–àÀÒ<àµÃÿAz´CZÏiéNzÁ/q4
-ú}©å‘¾ßèÃ;m~àÓì—àù)"øæ'Ğt¶r¸¶m”ak_Û~òF¿<êB‚}`êB6"oäasoc¢oMôyxF1@¢pÀŠ<[fYšÃ¢?¾‡°/EwI
-^»ÆÃG3½óè‹ÿ06?+GÖ† g;_ì?2 øÙP3Í úÏ1‚Çó^­sĞÛ('è&¡k¥Š,’s&`RR³İaİÜa¨2Ó+™÷/2‘>Ï?Ş9›œ©Õ.ÉŒ5ãéLÏûŸ±ğQKTr=íóäæò_Ëu"Ad©µéÂÆ}qÿñc1MÌ„m[ÓR‡ëğšSU'¿ı&Ã$âµ&& ù‡ïƒÄÍ`´¸eöåÔ®ÓvFpÛãÁşWî3ŞäâÁoô–¬¨HØé0gÈ{Áá«ÜĞ¾Ç<¼ÆBíÑø[$#¢`íÌZ³‰^D×öBV£ÃÖ7	J¤I“t'™”^G¼„Àı‡Ş€*šZÖØJ—€–»ÅÇã@¢5¡şl°øË¤§Áûâñcİ¶Ó4bĞ#4`XıåÕlë…)ôÛöÙ~Šh&yo8–Wr§À½BE»,t6ZªşLD¦á´†T@êqœL£Ù2g—Œ`†Máß÷æÔskcZå('ğ¡-ôÅ#{K‘f‡o&›¬ìaã8 ÔtâÂ¦w8[¸Çµ­¿ÂvJüùÏâ>R|.¯Áï*Ö¤)yqÉ>³b	3`M~&—sç_àLSÇ{t´;‘—»É2›å2ƒ]ûéñ‡QƒŸkx`è‹–6~:JÔœ†ı>ëBRU¨uFI`mGcÙ{pŠ„iÎ"ì@Xè„Â1|Ÿ<è+MÆ^êÌ,ÊŞx5PmwìÖ-aû%Ã–1IÈ˜OÜœã+‹+?×ÔW…±ëT+kdô
-ìÓ Ô|ªlíH™y½µñ\ö”+”à0ÌÎéuïÁà€øx_~xØ{÷üwøù»÷ğ·ûˆSŸ‰ï‡íÚ '±/ø¿ê£¢
-ú@{¡^½Ûÿ »¦¾µ	¨1›°=I‹¸ÒßÆ|a¾~¼W‡F´æµ¬`ùŸB¢WİuŸqšçË¬ä9‡cÜ¨D#°£pÁ0xÏİ)ü¨Í¥šÌB–=&·¿©Ès³
-·3ŠíEŠ@x›#Õê#Î¢½İÅ¡A]	¥iú­¬Â.õ([J{RÈ°‚Q«º¾7¶µ"ÉºlcÛ„şèqŸqBOy._´ŞhqIş6ìØ•>ÿwDcR´wì`]3|æEMJ;ÿ[Û*£tŸwQñCGüò\YlÇÙbñàTÇ/AQÖyx©vófc%‚!’Œ}@¹­¾à6
-…Z}…=ŸY5ÏôVRÃ“Ô.6d^qBÌ *õ÷k\–Ãn‹†¯Zs‡”JÌˆ’*Ú”f¾	n:v­z¾à©WìtSüb5¶Ê¡fË¢&ÒÉ[áŠ/ª9(†¥:‰ÌÀ×(ÉÅ0bµë&Â|rÜ&ÄZ9+1F²ğSÏ`«ij%Áß'áˆÃï8+<E¢*M¸µ(jt$¢bLö÷äz,9B¼-Û–Iõö|±¤®p
-¬Ş ;1„ö;Gà¤¼ÂğÙLöúğèµ 6_Ë<ö- šFx¿G–ì?›KØh•–Ó‹n‰ÆûVá¥@œâITª$¸$SÜ]Ú©pa…ıäú€şı£’G¼P:+ *eÛÂ|—DµÅ!ƒµ5#Ü5½«…W˜™¯3‚V}Cëbyk'kv4™¥^Ú"ôª—@ñ)€ùnŠ¼åÜJ)ºÅ¡#İìhuË¢ÆµtôOŒ¢#)ÓÕ(`A1Œ¼Áf*£5¼Fc¨^uw½MXØÿ´ùòwYÉ”dñ­ãÊÀà\+üf²{8„µïõQŞj•öî2]ï›/h’B»œcÒ3a¹ˆEx3’êF–*€µbŠc%	E`îä¨äº…­	ëë€c“>³L½²æª* İúÛãzóm¨`p]Ù”¯™(ÅİHîÌc€9·ÃJ™WÏwU:0{’59Ó;¦ ìÉú€}ÕŸ¶íjôû½ÀÚÎT›Ì;;œNñÉYf¥Pz-9”şÿi™SÌÙ\æ¨wÌmš%1›bŒ³™\„ÉjÔĞ iqúU•lİ8³Š^fpÍÄ2wÚÕP¾‚´ã9ÒfÙoÒ˜W*¼N\êYĞKÜÆY»Õ+ÖGQf&”BU… ’¾Z¯œáÁhÏ¢š4½äñ¥³æ±j„—¼ê˜§æÕ×_V@TKÒ…•%.&­ÚáŠé«vPxc¢ñ.ŠØRL÷ÍàÚ‚ zŞ±N ¶nÍ´CÛzØÈ¥â»Ó“×Ğp#/`¼˜`åyF9=ù/ªÅ*2•i[´Çb"«–p„d"<¾ã­{”PTãÔòêVÙz›œëÇ>8Å$‹®4Vr)°O}`Eì‚“ê”tIÜŒ:
-óH"˜ÕX¥¹Uı2íZas¦•ßDy1´Z½MÅ8ÇBVªNÔ,?è´Ãé	ĞÛ,…°…Y
-ã;™å?SĞ}×
-Ï©H\÷IF…çN2ñ3¬W¨¡‹ÆL“ã}Táæ+
-ò§ÂÊï8¿š’¥›£œ«JÓ Ÿƒ+œ×7ÕQÑ)•æLd@©G«Ü”Št	¢©CâÚıÜ T	L|¼¯
-Í°&Á 0¹£ãü`S=eFPMU?5/¦b'BÉŠ¸ğ‡&õ»×/ÿn5 à·ªò™Ó’¶:4,õdéD~a)¢¾FÔÜ†0«Y…DÎƒìõwo]„AUQ±6SëjïB–ç¸ŒÎÉ¶Rµ²*ZQ‚P/Foiß#Úæzåm|ÉkJv©¿2T}ËO¬¤—Ššc;“Îåº°v— Š¬‚©B::5ˆ½xDyÎàO÷M@ÛÎH m³ª|ºÑå¤ášL+ça“îöØÀıPì+¯34«ÕŠ&®?ºQÛã–>«ÌÊÇ*Ve±»Óf¨~©ùzßå«Ó;¾Àm­~d[¸vœ;û„‘ÇßÀ8ä76íN&ÄêúÁƒÃÖ±±ìUU#¨ |‰Ç±•´¸N£–6§ıÂûäÉ‘êZ[Qõ`Cq†rõğcıÏ«q/Uœ«æ¨U9^)ã6_*Pv®«ğ*w<‡İªq„0íµ÷¯¦Mhjx~şüÅË“óóa°«kõ‚µıOû;
-1E;G0‘g°Ú{–`€niK­€ë@í–:ËbLa £dtŠã«ÅÓYÊdâ*QòQèi%
-pëU¨Gaân¥Uê­¥§çWŞ¬$kçŞ7Îf|2Q1u¦jOYq‚¬™şÓÜœ­î€U¦“FßWø=øüæ†“/¿/uªÂœmG‚(±¡ÎdnÇ{â¶_RŠ“k®F]„`T± •ü•$ƒ>Iãoµù²©íÙóŸĞ™*^ñCĞ€(¾	ZqÏĞ«5‘Hå€ÀÜÓ1ÂÍ}î[IP5”ÖîÔMÃäGØİËŞm:ˆ:•0ĞåWn·Û|ZˆŠî¶±æwçˆİÇ+ Ñ9¤Ç"Ú`#L{÷u°i›hétî‚©}aìÆ£Rİl‘F•ş-`qŒC,sÁH	µ`+\°(¹dòj`×u0ôš›Ø,(Ã7g?°"TÀMHJ 	Óë9"ÀÓo‚®Çƒ[O—Ó©¤øzGÃ5Äµù©­úÕòM«êdğ¼t1*Û8¦rĞ_#MüKÀÁóMß/õGî”½ášÆæLC¥%Mñó‹"ãÌ¬£àV½[²mìCÕÊ<7¼k‹ÅØÈ…ı™ıÂaı-ÊT˜EM­¸£}.z¬'¾ùI9ZUÉ7ÇXîı«§×¢{úÓ£¾‰œ†Ë¸tÚN¤ÛºŞÈèD;Æey#:¾x¬#¡-â¯™®å:Í±ŞÚ—¬ìímrØub¹"Ç“Iu  tÒsU °ÍÊ¡½
-­Spt¼LŒ”ó<]Î¸ŒO¿À«™Ú7š¾¢¤yÉ¡RW´I:Ó[õ§´.X oœ5tâÔú251ª‰šğ7C»·•ÑÉê 3~£“ï°óƒß^Ğ€Ó|UÇJuŠÉ¥ÄÈ²ÓØÚÅ;x,”×”83q-¯ÍµÉªW-–cX6ƒİn?JÓX†	·ORm@t6z49/ñè>¿T÷zOjëz=Ø·	˜q™'†R½e¯œ 5éäş*7’55ÇïUY¥£¼´V´A¿şW“f6
-ÛXªÖ9^æˆö×Zèôìk
-½M4dÕ‚KK]_Ÿ˜gŒ×¢2KÔ¨©fºë¶)4zZ0µ
-¯ÆhÚ¤&Ånl¢BKE%5VL¡'Yy£·+XÔL¥˜#Ãø4,ç=ŠDí¹;›NµÎª­„™GhFÏ–#Dˆg{ı“`M«%jõjF« “+* ªz!DË’Š TVÊ>PÇÁ'*p†î*ı°r½=z†æŒ±Ï8Ô4´_;·éÈÊŸ%hş¦J>¬ú±Z#.-ĞøEÕ[¡i nU]™òÂÔ>ÛßÚ¸Ò¤œ­´i^«u;AƒZ­P?­2e!nÕ¨Ä‡•’[S’Šõµq8–½ 6ì¬¡ĞIÚ¨f¥Ç]íìˆ#±‡Ë“u(IõMûÍjÕ—
-öij³‡ûFgÖ6ÄBºÕckßÏYS“Óƒ>ĞxŠMQ$í1½ãgÚƒÅ¤--÷Ô(ñî©î¡ò$ïê“z1¶¹¥Œc¯½}åŸ6\S×Ÿµ‹Öß6C²zóÙ^i•œÇ©j;ñ“9…êZ’s*qØ®
-†éAè”r%Äjê§¾„™—Ñ½ÕŒq®³uı-ºIHCzM·`ÏŞ¤f/ëşmãÀÄs=:4.xMÊ‰PvÈÍ06•ókÃF¹:ƒÍ¤}1¨&3{«Ç>`‚Š†ÚYK­—´ß½:¢]A‰?¸‹´&7Â:ëÙğ”²„—NuO_æK©ŸÃ†$?G¦ökÕúà;”*Ô$ “³PÖ•`bÜ­ùÔ÷d‘wş’^·×üˆaLÀA§$;”`Wõ’ Ä/´º¦Jz·&`ó¹@¦ÚªuPUR<V¯×dÀ[†ÓH€?®u˜|™ÇA÷«¾tØ×?š7Ë¤66Û‘›š
-\b¶äÅCIz\F“¾Í¥Ñ=;<U©ò}[*¤†0Š5Fñ«ûbºÏ9ó‚¤«2¼‚,ŞÒÛv9&em—ÁVf 1«J‰M«`°i]äñÂ6ú»‰¾ŸFôWñáØ¬€(ß¿y)¸„¨K5HË8?ıZğ×‚™pŠš¬ÎqW0ËÃl9aj=)ÿ¡´˜w\oÖœÍ¸í°¹^³ğ’>ÙÊSµn¡2Hì|ı¶óe¦V@íHer[½I{Èë¯=ó¯ÌĞ.”-kÓ¾‡ĞóŞÕĞÖea*²êkS£—¢>dYÃ¿ùÊ\É…jİY¼ĞÉÇzµ•æ+*uWÍ:Nåÿ­l®®YÚ5Nyk½¬å½¶ÀKİµ«»ğ‘º'¦ºWÆ8®•çN÷Ø0àcOms(äü>¾úE­ZiCEÓ˜$|èò•-FÁ”»šéú„°oº"§˜«Õo0Çãt™”üãoû­çà¾KbØá…‰€_–vN ÆûV¼'–mğÏ»½µ±guş•]?*3=cü
-8˜:’‰}Ç
-‚ëÃ£Á*
-}à«¾İ[0Ğ1ÅYÛ£X&Œ‹.Ö@0%èkuöŠH/¶bıìSÏ<ß„´ph³Ïç1ù÷Øu±>©–SXKšø²CfòIôß•û®«'\d”"Råµú„t£ò’ÚMdl§kŠÕÉX™/"ŠÈü(ÄÃìñD6Ù¶‡ ôÓ©"Ô‡¢ÜM³ª“eÃãPÿçß:QxkÏ½ÚvM­['Ú“ìóúPùót_eñ9‰_É(aD,šj]òRC: 5TW%h“n_¢ëjTÃ¾­0Ò~•G%†²½€5ı`œ+P'ñD¨ûçt|R;-»¸ÀH~µÙ4«€Pÿ "ÿ«qšà#uÛCÃá¨Ñ‰¥‡*ˆôb•ß²Êa˜H‰H¢ïtğ›˜TiVuØöIŸ_S;µ½Æea
-jK èpˆ°·ÁÆ¾J}¤wE»\¦¦ı	Öw>·¸ örQÇJÇ)±ˆ®qDZÇßtCNl/dC{ß:Étoİhn¹õ 2ùó’üSf¥5ª£œÊûîÓÆ¬²“:òîÀÈZQ¯lfkk™PÔË,³ZñU$l¶tœjp|QvP˜TrDß‚à¬…¶SIVfªk?æÉÔİ¨¢:‘¢üş[8úÊ•]í»Æ×ºE¦ÿdÅøy;÷›ÌÇÿŸ¨ØàDÅÆ{g{ÁÈ¶Ş4XÎšt,µ¤d×¨[ztn¨¦ÆµòE•Î]­cºEìu²wuíb‡¸¾Ul¸ºÖpE5àïSÄW+Tù_(ÜkëÑÜÏx»²1Ÿ¡š¤j?°­G‚2kokâ>mÍ7ã†±RÛëdØ¦ ®­í£IV²€è°áJHRK!¡vPrù¢bB@š¢(aÕU‡é°k·4£­²ı,3Ş’>NÕÆ«ú¼G¯Úz]k-FÏ³¢ÕVTUÀ|ÅJv°»K	n¡ÿ\=Ôd‰ó#nhD«|sô;(½':Ö›J–Õº¯cu—’ìZ¸`óâä[TçŞfıÏì™ûF–NÔ•øA§M½Ë?lsÕ¬uëè.ê`ÖTßl¤`ïÑMà&å“(„V®VvÂŞªëqTA6^Ç:›õáÛ‚˜ùúGgŠCÂ0°b‹aJ§iäBŸ'7lqã:ºê¨šj™vÕ2ÈL'Ó!éJhê,ÀèÈgí ëÀ
-~²6Ü|=k¿ÁŸƒyf 4³mS W}µ&Wdkº¬õªœÉ]ëšD,l†vúVÂ°³Ï†Sß<B»Ø[¬Ûñ*Vç3‡U-+·™q[Ö,VÏØ›kõ™¼Ccµ8àºkÑÊYt\+õ±|²8Æ§8gb•úpdu¹[Á_íÚ ÇVjW	­/¼-U	ag"­&5*ÂÎ5‹[Iñœ­i^º´¡ûÍ¯ªK…9’³‘+t«õsuZÚ61:÷—–nãix‡kŠ>Î¤U_;ºÊáÍ:Ï¢9´¦¢úöæŠÊ?2ršóHZªyöª~Õº>k*kíîà5è6?<¹Áy³ÍÖşÆ“#‡îıúÓ™ôÖp8+ªÃªÑ=¶­œ…ù¥©Êág³QUPé²¾>Èúñ)Šl)À5QuèTøôÏEÑ¯,1¢—„y)üÈ?¦n6ºÕC!‡E©Cê:qî4ÊØµá[¹B½‚õï‚-Í%½
-å®­ÀQŠ–º·9ıaâNı@ò“Ní¨#îÜ›¾Ø—3¹}E$NŸÆEy#1aœL§¹ÈIÍ-?…ûCqŒ¼ÓªSËSEcBáüŸ#ÍñÈC>|Èõ˜õäßBµ®–|£^½âï­Â!™R‘5jÖ³šªV^¼ºƒ®]`aÕ^ÙˆÕ´_Ûtñ+%-M­°eı\gÇ§q+)Ø<i~¿pahÚê0‹ÍâÑ¦Â|R•—{+:-ãúV Í53{––Æ](SÁÎ*Æ{1nf~É¸_˜¡¢Kïwêõ]ƒ ¢ö ÜZt¼²ôŒ£[øöİPë?«ò3Ä+(Š%&yìzìãO	ıÎ3½æ‡' Póëw˜<U:¦GÏZO8óZ›&k}Øì¾Ééj£LíÃëÈhK?ëhèµ-Zp›F
-t­à‰øß­PDG Jl/ 3ó›ÄÛ½€f”Ğ¹¿ğé˜+V¸[]£Qû&uçIYz:ñÈªß¥¼¦«é^æŠK.ÉÚXaõoi½Ò
-Zò6´ËĞ¢KdÕ#¢m†ùnvyÅ µa5³«±Lî»íëºieGƒw5Ê³‡Q^¡dÕ•­ë'/‚×©Ğ¯Ì%e”@İ·®#PKİ¯0·^Ñsw:Œ]òXÜæy¶voÃyn¿@üÚ"Vv(tŞª&ÓÜ0öşQ9Ãjq;êÌ6ÏÏ×Z“2‘ñjãF 7hcºìjÛ Mİ¶©J¾ÍÍ›kx°æ¢VS·&>b¡ÑÖ¤u'É%j“FÇø‹Âôóˆäj)¨V…¿'è§¯¢‚~=ù.& >§Ï„®WsJU}ö‹Jº˜€æLş&À+¸Ú|mnMÛCãÚ¾ñ¶‹¶·Fı‡Ñö^¥ÖÉ´¨#WÏz÷U
-ùU™NøÖ	ş­î_ê!@Îå°"¦ÚÚFóõOÿ¨ÊLG3@§=DM¡bP½5ùâ	¬ËaYšº[Ãâ¬mòvOë<ı]¸¹)×soS…jßZæ/]ûô‚Şv¿Ç½T%æ:ıÚ)cÚv]¶Ebô«ŒĞÓ›*€Çê=KÕO)ò)‘«Ë-Ô]µLí‹·¡7µ¾Í¨.îŸšzÿ.jß?8Tù®,˜:«Äa·éï¤Á»hg•
-±µÉH¨#[T5$ÜßŞ¶LĞâ¯z4Êƒ¼è)ÿLuÒñxï;ñ©Æø³;TMe,¯¿{}4b,­°„í]@¿úÁëÀu8á3nã\WÊíÑè—µïtúÎş®øÚ÷Eí»ú¡ÃÏà›Ÿ‚ÇGx‰îÓŸá§¾óãæ]¢Õ~f–I|øğP› |·sºH@N*E¯èWĞzønSVµ:C§^©_^“B¯"jÀïp t?Õ y‘`Š»r©BÓĞõŠÿ+ÆcBÅ—^—ƒ­–RM°ê°:+©Äí„O*€ÄYxm66:´ ¿72rÂ¿ƒÌRºl@>kÂ1ÊU³_4	…;%Xçğ¡Ñ€¸ï%ùˆlüìA­ÁµÔßEc‘Õ,§½à³á_fŸ}†ÇAyŞÀôğ,.ö÷öúbW¿9 ï6n=};³8Q‰œ°tŸ3¿ˆ­µiÅsjºhp‹¾¬1j®ëC¨Íâ°5;ÿûæ¢¯oñS}oä¿–²ÀoÛÜß°v¨ƒZzkÅX–c­½¬By´	¨w®æÑxNâ@—ZaƒExİÓc& ¼À/®°vÄÅDò›¡è'ùj4–½@ $ÄxäWì·?¼š1©úoãß]ò¯™û]¼4Àïìå)Bº9ztw+Ç.£<M:£‹/Ê4…Bw®É‘šçãˆÏS7qåÚ™Ñğæ¬«æÿP\|PWxÌ7ÏªïÕŒrÎŠ~{ª9Nç¿²yfĞóQ0Ä@ì5§ùš†í7ò2Â¯ &‡ıÛğÑp_l«“fTì}òßo&†Î'v/ŠBĞ¶ÁkĞ4ôCkxÙÆt|úÂÁÄ>Ì¢\RñùÒŸ8‡¨
-j„7l1ØÛPšH†üéÅiGH¬5´¯’$ß/rªıëĞ†~Ñ›úgìªz²¢ÎÛ¦pu€Šùäûù;â9³™ä‚¯;pUµ–T°¬\ÍÏàé¨«éóÀ¨Ğ}º{këáCz·«t8Ç›6¬ò“.ÑZ^ÂøIw®N$_ÿ¸@P…Ê•¡ğÙÎö¯ØïÇBˆÏ
-Pàø3C° ì¬¡Í?ŞSİû’AOƒ@…Ïì¯˜£6±T/šØXk/zhÒØ`¦0ÀÆe!³»¨!şwª©mH[.dŞ÷æí[ÂtVµRñh¤`™6u<Ö6éms®B+{aÃš2H:·1ø¢b€%r<UÄ9mQŠ@›Éä®º×èê¶aQ•%ÚTæXÅ1´mû/èÓ“Mex^½Í9)tC]{Ş[»éXWØzuY*Ézôº²§j7ÄNlp=ôİ—Ú…;x¥$ÈnC/}ÅªUQlÒ9ùµÎ-úÀtq©"a“L24îUô­öıs£ÑãeúĞ6ıuî‘NÏ‰ê,·Êx§¯!ÙÊçÒt‹B›TâÎ¼çı0mIågÂ!,Û'ğÚ‡ÍrHàìáòæBÔrXMƒ™şoÀÅ)»ƒ   GBMB
