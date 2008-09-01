@@ -12,6 +12,7 @@ var_dump(finfo_file($fp, '&'));
 
 ?>
 --EXPECTF--
+Warning: finfo_file(): Empty filename or path in %s on line %d
 bool(false)
 
 Warning: finfo_file(): Empty filename or path in %s on line %d
