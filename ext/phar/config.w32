@@ -1,18 +1,16 @@
 // $Id$
 // vim:ft=javascript
 
-// this next line should be changed back to "yes" after fixes are committed to the snapshot build process
-ARG_ENABLE("phar", "disable phar support", false);
+ARG_ENABLE("phar", "disable phar support", "yes");
 ARG_ENABLE("phar-native-ssl", "enable phar with native OpenSSL support", "no");
 
 if (PHP_PHAR_NATIVE_SSL != "no") {
 	PHP_PHAR = PHP_PHAR_NATIVE_SSL;
-	PHP_PHAR_SHARED = PHP_PHAR_NATIVE_SSL_SHARED;
 }
 
 if (PHP_PHAR != "no") {
 	EXTENSION("phar", "dirstream.c func_interceptors.c phar.c phar_object.c phar_path_check.c stream.c tar.c util.c zip.c");
-	if (PHP_PHAR_SHARED) {
+	if (PHP_PHAR_SHARED | (PHP_PHAR_NATIVE_SSL_SHARED && PHP_SNAPSHOT_BUILD == "no")) {
 		ADD_FLAG("CFLAGS_PHAR", "/D COMPILE_DL_PHAR ");
 	}
 	if (PHP_PHAR_NATIVE_SSL != "no") {
