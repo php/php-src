@@ -42,9 +42,9 @@ PHP                                                                        NEWS
 - Fixed bug #45706 (Unserialization of classes derived from ArrayIterator
   fails). (Etienne, Dmitry)
 - Fixed bug #45696 (Not all DateTime methods allow method chaining). (Derick)
-- Fixed bug #43668) (Added odbc.default_cursortype to control the ODBC
+- Fixed bug #43668 (Added odbc.default_cursortype to control the ODBC
   cursormodel). (Patrick)
-- Fixed bug #43666) (Fixed code to use ODBC 3.52 datatypes for 64bit systems). 
+- Fixed bug #43666 (Fixed code to use ODBC 3.52 datatypes for 64bit systems). 
   (Patrick)
 - Fixed bug #45636 (fileinfo ext duplicate strndup). (Derick)
 - Fixed bug #45545 (DateInterval has 4 char limitation for ISO durations).
