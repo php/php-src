@@ -299,9 +299,9 @@ foreach ($extra_dll_deps as $dll) {
 add sanity check and test if all required DLLs are present, per version 
 This version works at least for 3.6, 3.8 and 4.0 (5.3-vc6, 5.3-vc9 and HEAD).
 */
-$ICU_DLLS = '../deps/bin/' . 'icudt*.dll';
+$ICU_DLLS = '../deps/bin/' . 'icu*.dll';
 foreach (glob($ICU_DLLS) as $filename) {
-	copy($filename, "$dist_dir/" . basename($dll));
+	copy($filename, "$dist_dir/" . basename($filename));
 }
 
 /* and those for pecl */
