@@ -437,6 +437,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 			case IS_STRING:
 				buffer = Z_STRVAL_P(what);
 				buffer_len = Z_STRLEN_P(what);
+				mode = FILEINFO_MODE_FILE;
 				break;
 
 			case IS_RESOURCE:
@@ -505,7 +506,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 			php_stream_wrapper *wrap;
 			struct stat sb;
 
-			if (buffer_len < 1) {
+			if (buffer == NULL || !*buffer) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty filename or path");
 				RETURN_FALSE;
 			}
@@ -523,6 +524,9 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 				php_stream *stream = php_stream_open_wrapper_ex(buffer, "rb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
 
 				if (!stream) {
+					if (mimetype_emu) {
+						magic_close(magic);
+					}
 					RETURN_FALSE;
 				}
 
