@@ -1,10 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.3.0 Alpha 2
-- Removed special treatment of "/tmp" path for sessions in open_basedir
-  context, which was introduced in 5.2.2, but was never documented. (Alexey)
-
-- Removed shebang line check from CGI sapi (it is checked by scanner). (Dmitry)
+- Removed special treatment of "/tmp" in sessions for open_basedir.
+  Note: This undocumented behaviour was introduced in 5.2.2. (Alexey)
+- Removed shebang line check from CGI sapi (checked by scanner). (Dmitry)
 
 - Changed session_start() to return false when session startup fails. (Jani)
 - Changed property_exists() to check the existence of a property independent of
@@ -30,6 +29,7 @@ PHP                                                                        NEWS
 - Fixed a bug causing miscalculations with the "last <weekday> of <n> month"
   relative time string. (Derick)
 
+- Fixed bug #45826 (custom ArrayObject serialization). (Etienne)
 - Fixed bug #45798 (sqlite3 doesn't notice if variable was bound). (Felipe)
 - Fixed bug #45786 (FastCGI process exited unexpectedly). (Dmitry)
 - Fixed bug #45763 (mysqli::multi_query does not work with mysqlnd). (Johannes)
@@ -42,6 +42,10 @@ PHP                                                                        NEWS
 - Fixed bug #45706 (Unserialization of classes derived from ArrayIterator
   fails). (Etienne, Dmitry)
 - Fixed bug #45696 (Not all DateTime methods allow method chaining). (Derick)
+- Fixed bug #43668) (Added odbc.default_cursortype to control the ODBC
+  cursormodel). (Patrick)
+- Fixed bug #43666) (Fixed code to use ODBC 3.52 datatypes for 64bit systems). 
+  (Patrick)
 - Fixed bug #45636 (fileinfo ext duplicate strndup). (Derick)
 - Fixed bug #45545 (DateInterval has 4 char limitation for ISO durations).
   (Derick)
@@ -59,7 +63,7 @@ PHP                                                                        NEWS
 - Fixed bug #43008 (php://filter uris ignore url encoded filternames and can't
   handle slashes). (Arnaud)
 - Fixed bug #35980 (touch() works on files but not on directories). (Pierre)
-- Fixed bug #45826 (custom ArrayObject serialization). (Etienne)
+
 
 01 Aug 2008, PHP 5.3.0 Alpha 1
 - Upgraded bundled PCRE to version 7.7. (Nuno)
@@ -3503,7 +3507,3 @@ PHP                                                                        NEWS
 - Fixed bug #28694 (ReflectionExtension::getFunctions() crashes PHP). (Marcus)
 - Fixed bug #28512 (Allocate enough space to store MSSQL data). (Frank)
 - Fixed strip_tags() to correctly handle '\0' characters. (Stefan)
-- Fixed bug #43666) (Fixed code to use ODBC 3.52 datatypes for 64bit systems). 
-  (iodbc)
-- Fixed bug #43668) (Added odbc.default_cursortype to control the ODBC 
-  cursormodel). (iodbc)
