@@ -943,7 +943,6 @@ dophn_exec(struct magic_set *ms, int class, int swap, int fd, off_t off,
 	return 0;
 }
 
-
 protected int
 file_tryelf(struct magic_set *ms, int fd, const unsigned char *buf,
     size_t nbytes)
@@ -963,6 +962,7 @@ file_tryelf(struct magic_set *ms, int fd, const unsigned char *buf,
 
 	if (ms->flags & MAGIC_MIME)
 		return 0;
+
 	/*
 	 * ELF executables have multiple section headers in arbitrary
 	 * file locations and thus file(1) cannot determine it from easily.

@@ -33,9 +33,7 @@
 #ifndef __file_h__
 #define __file_h__
 
-//#ifdef HAVE_CONFIG_H
 #include "config.h"
-//#endif */
 
 #include <stdio.h>	/* Include that here, to make sure __P gets defined */
 #include <errno.h>
@@ -45,6 +43,9 @@
 #endif
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
+#endif
+#ifdef PHP_WIN32
+#include "win32/php_stdint.h"
 #endif
 
 #include "php.h"
@@ -62,7 +63,7 @@
 #define MAGIC "/etc/magic"
 #endif
 
-#ifdef __EMX__
+#if defined(__EMX__) || defined(PHP_WIN32)
 #define PATHSEP	';'
 #else
 #define PATHSEP	':'
@@ -323,16 +324,18 @@ typedef unsigned long unichar;
 
 struct stat;
 protected const char *file_fmttime(uint32_t, int);
-protected int file_buffer(struct magic_set *, int, const char *, const void *,
+protected int file_buffer(struct magic_set *, php_stream *, const char *, const void *,
     size_t);
-protected int file_fsmagic(struct magic_set *, const char *, struct stat *);
+protected int file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *stream);
 protected int file_pipe2file(struct magic_set *, int, const void *, size_t);
 protected int file_printf(struct magic_set *, const char *, ...);
 protected int file_reset(struct magic_set *);
 protected int file_tryelf(struct magic_set *, int, const unsigned char *,
     size_t);
+#ifdef PHP_FILEINFO_UNCOMPRESS 
 protected int file_zmagic(struct magic_set *, int, const char *,
     const unsigned char *, size_t);
+#endif
 protected int file_ascmagic(struct magic_set *, const unsigned char *, size_t);
 protected int file_is_tar(struct magic_set *, const unsigned char *, size_t);
 protected int file_softmagic(struct magic_set *, const unsigned char *, size_t, int);
