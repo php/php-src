@@ -10,7 +10,7 @@ if (PHP_PHAR_NATIVE_SSL != "no") {
 
 if (PHP_PHAR != "no") {
 	EXTENSION("phar", "dirstream.c func_interceptors.c phar.c phar_object.c phar_path_check.c stream.c tar.c util.c zip.c");
-	if (PHP_PHAR_SHARED | (PHP_PHAR_NATIVE_SSL_SHARED && PHP_SNAPSHOT_BUILD == "no")) {
+	if (PHP_PHAR_SHARED || (PHP_PHAR_NATIVE_SSL_SHARED && PHP_SNAPSHOT_BUILD == "no")) {
 		ADD_FLAG("CFLAGS_PHAR", "/D COMPILE_DL_PHAR ");
 	}
 	if (PHP_PHAR_NATIVE_SSL != "no") {
