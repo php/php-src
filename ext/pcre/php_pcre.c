@@ -602,7 +602,6 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_uchar utype, char *s
 	int				 matched;			/* Has anything matched */
 	int				 g_notempty = 0;	/* If the match should not be empty */
 	const char	   **stringlist;		/* Holds list of subpatterns */
-	char			*match;				/* The current match */
 	char 		   **subpat_names;		/* Array for named subpatterns */
 	int				 i, rc;
 	int				 subpats_order;		/* Order of subpattern matches */
@@ -696,7 +695,6 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_uchar utype, char *s
 		}
 	}
 
-	match = NULL;
 	matched = 0;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 	
@@ -717,7 +715,6 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_uchar utype, char *s
 		/* If something has matched */
 		if (count > 0) {
 			matched++;
-			match = subject + offsets[0];
 
 			/* If subpatterns array has been passed, fill it in with values. */
 			if (subpats != NULL) {
@@ -1636,8 +1633,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_uchar utype, char *s
 	int				 start_offset;		/* Where the new search starts */
 	int				 next_offset;		/* End of the last delimiter match + 1 */
 	int				 g_notempty = 0;	/* If the match should not be empty */
-	char			*match,				/* The current match */
-					*last_match;		/* Location of last match */
+	char			*last_match;		/* Location of last match */
 	int				 rc;
 	int				 no_empty;			/* If NO_EMPTY flag is set */
 	int				 delim_capture; 	/* If delimiters should be captured */
@@ -1675,7 +1671,6 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_uchar utype, char *s
 	start_offset = 0;
 	next_offset = 0;
 	last_match = subject;
-	match = NULL;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
 	if (utype != IS_UNICODE && !(pce->compile_options & PCRE_UTF8)) {
@@ -1699,8 +1694,6 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_uchar utype, char *s
 				
 		/* If something matched */
 		if (count > 0) {
-			match = subject + offsets[0];
-
 			if (!no_empty || &subject[offsets[0]] != last_match) {
 
 				if (offset_capture) {
