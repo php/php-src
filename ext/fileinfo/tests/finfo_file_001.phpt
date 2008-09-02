@@ -22,5 +22,5 @@ Warning: finfo_file(): Empty filename or path in %s on line %d
 bool(false)
 string(9) "directory"
 
-Warning: finfo_file(&): failed to open stream: No such file or directory in %s on line %d
+Warning: finfo_file(): File or path not found '&' in %s on line %d
 bool(false)
