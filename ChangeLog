@@ -1,3 +1,128 @@
+2008-09-01  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/fileinfo/fileinfo.c
+      ext/fileinfo/tests/finfo_file_001.phpt
+      ext/fileinfo/tests/mime_content_type_001.phpt:
+      - Fixed mime_content_type() behavior when a string is given
+      - Fixed check for "empty file name"
+      - MFH: New test
+
+    * ext/fileinfo/tests/mime_content_type_001.phpt
+      ext/fileinfo/tests/mime_content_type_001.phpt:
+      
+      - New test
+
+2008-09-01  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      NEWS
+      configure.in
+      main/php_version.h:
+      back to dev
+
+    * (PHP_5_3)
+      NEWS
+      configure.in
+      main/php_version.h:
+      dev -> release
+
+2008-09-01  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/fileinfo/fileinfo.c
+      ext/fileinfo/libmagic/apprentice.c
+      ext/fileinfo/libmagic/compress.c
+      ext/fileinfo/libmagic/file.h
+      ext/fileinfo/libmagic/fsmagic.c
+      ext/fileinfo/libmagic/funcs.c
+      ext/fileinfo/libmagic/magic.c
+      ext/fileinfo/libmagic/magic.h
+      ext/fileinfo/libmagic/readelf.c
+      ext/fileinfo/tests/finfo_file_001.phpt:
+      - use php's stream in libmagic
+      - remove duplicate code (like mime_content_type() compatibility function
+        now use the same base as finfo_file())
+      - make it portable (works now on windows too, belongs other OSes)
+      
+      - ([20:28]  <lsmith> Pierre: ok please commit)
+
+    * win32/build/mkdist.php:
+      - MFB: fix typo and icu bundling
+
+    * (PHP_5_3)
+      win32/build/mkdist.php:
+      - fix typo and icu bundling
+
+2008-09-01  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      ext/phar/config.w32:
+      I hate not being able to test.
+
+    * (PHP_5_3)
+      ext/phar/config.w32:
+      - Fix the fix (sorry, missed this until now)
+
+    * ext/phar/.cvsignore
+      ext/phar/phar.phar:
+      - MFB Remove pre-made phar.phar
+
+2008-09-01  Patrick van Kleef  <iodbc@openlinksw.com>
+
+    * (PHP_5_2)
+      ext/odbc/php_odbc.c
+      ext/odbc/php_odbc_includes.h:
+      MFH: - Added odbc.default_cursortype to control the ODBC cursormodel
+        (bug #43668)
+
+2008-09-01  Steph Fox  <steph.fox@virgin.net>
+
+    * (PHP_5_3)
+      ext/phar/.cvsignore
+      ext/phar/phar.phar:
+      - Remove pre-made phar.phar
+
+2008-09-01  Patrick van Kleef  <iodbc@openlinksw.com>
+
+    * (PHP_5_2)
+      ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h
+      ext/odbc/php_odbc_includes.h:
+      MFH: - Fixed code to use ODBC 3.52 datatypes for 64bit systems (bug #43666)
+
+2008-09-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/soap.c
+      ext/soap/soap.c:
+      Disabled warning messages in SoapClient constructor
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cli/config.m4
+      sapi/cli/config.m4
+      sapi/cli/config.m4:
+      Fixed bug #42318 (problem with nm on AIX, not finding object files)
+
+2008-09-01  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      NEWS:
+      - Remove extra )
+
+    * (PHP_5_3)
+      NEWS:
+      fix news
+
+    * NEWS:
+      Remove entries which are in previous release NEWS
+
+2008-09-01  Patrick van Kleef  <iodbc@openlinksw.com>
+
+    * NEWS
+      NEWS:
+      - fixes for ext/odbc
+
 2008-08-31  Steph Fox  <steph.fox@virgin.net>
 
     * ext/phar/tests/cache_list/files/blog.phar
