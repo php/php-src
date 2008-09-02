@@ -87,6 +87,7 @@ PHP                                                                        NEWS
   (Jani)
 - Fixed bug #43993 (mb_substr_count() behaves differently to substr_count() with
   overlapping needles). (Moriyoshi)
+- Fixed Bug #43958 (class name added into the error message). (Dmitry)
 - Fixed bug #43941 (json_encode silently cuts non-UTF8 strings). (Stas)
 - Fixed bug #43782 (feof() does not detect timeout on socket). (David Soria Parra)
 - Fixed bug #43668 (Added odbc.default_cursortype to control the ODBC
