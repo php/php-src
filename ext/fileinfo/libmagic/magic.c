@@ -275,7 +275,7 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 	unsigned char *buf;
 	struct stat	sb;
 	ssize_t nbytes = 0;	/* number of bytes read from a datafile */
-	int	ispipe = 0;
+	int no_in_stream = 0;
 	TSRMLS_FETCH();
 
 	if (!inname && !stream) {
@@ -303,30 +303,28 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 			goto done;
 	}
 
-		errno = 0;
+	errno = 0;
 
-		if (!stream && inname) {
+	if (!stream && inname) {
+		no_in_stream = 1;
 #if (PHP_MAJOR_VERSION < 6)
 		stream = php_stream_open_wrapper(inname, "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
 #else
 		stream = php_stream_open_wrapper(inname, "rb", REPORT_ERRORS, NULL);
 #endif
-		}
+	}
 
-		if (!stream) {
-				fprintf(stderr, "couldn't open file\n");
-				if (info_from_stat(ms, sb.st_mode) == -1)
-					goto done;
-				rv = 0;
-				goto done;
-		}
+	if (!stream) {
+		fprintf(stderr, "couldn't open file\n");
+		if (info_from_stat(ms, sb.st_mode) == -1)
+			goto done;
+		rv = 0;
+		goto done;
+	}
 
 #ifdef O_NONBLOCK
-/* we should be already be in non blocking mode for network socket 
- * leaving the comment/#ifdef as documentation
- */
+		/* we should be already be in non blocking mode for network socket */
 #endif
-
 
 	/*
 	 * try looking at the first HOWMANY bytes
@@ -343,14 +341,13 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 done:
 	efree(buf);
 
-	if (stream) {
+	if (no_in_stream && stream) {
 		php_stream_close(stream);
 	}
 
 	close_and_restore(ms, inname, 0, &sb);
 	return rv == 0 ? file_getbuffer(ms) : NULL;
 }
-
 
 public const char *
 magic_buffer(struct magic_set *ms, const void *buf, size_t nb)

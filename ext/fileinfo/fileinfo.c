@@ -452,10 +452,8 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 		magic = magic_open(MAGIC_MIME);
 		if (magic_load(magic, NULL) == -1) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to load magic database.");
-			magic_close(magic);
-			RETURN_FALSE;
+			goto common;
 		}
-
 	} else if (object) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lr", &buffer, &buffer_len, &options, &zcontext) == FAILURE) {
 			RETURN_FALSE;
@@ -508,12 +506,19 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 
 			if (buffer == NULL || !*buffer) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty filename or path");
-				RETURN_FALSE;
+				RETVAL_FALSE;
+				goto clean;
 			}
 
-			if (php_sys_stat(buffer, &sb) == 0 && (sb.st_mode & _S_IFDIR)) {
-				ret_val = mime_directory;
-				goto common;
+			if (php_sys_stat(buffer, &sb) == 0) {
+					  if (sb.st_mode & _S_IFDIR) {
+								 ret_val = mime_directory;
+								 goto common;
+					  }
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "File or path not found '%s'", buffer);
+				RETVAL_FALSE;
+				goto clean;
 			}
 
 			wrap = php_stream_locate_url_wrapper(buffer, &tmp2, 0 TSRMLS_CC);
@@ -524,10 +529,8 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 				php_stream *stream = php_stream_open_wrapper_ex(buffer, "rb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
 
 				if (!stream) {
-					if (mimetype_emu) {
-						magic_close(magic);
-					}
-					RETURN_FALSE;
+					RETVAL_FALSE;
+					goto clean;
 				}
 
 				ret_val = magic_stream(magic, stream);
@@ -538,27 +541,26 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can only process string or stream arguments");
-			RETURN_FALSE;
 	}
 
 common:
+	if (ret_val) {
+		RETVAL_STRING(ret_val, 1);
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed identify data %d:%s", magic_errno(magic), magic_error(magic));
+		RETVAL_FALSE;
+	}
+
+clean:
 	if (mimetype_emu) {
-		if (magic) {
-			magic_close(magic);
-		}
+		magic_close(magic);
 	}
 
 	/* Restore options */
 	if (options) {
 		FINFO_SET_OPTION(magic, finfo->options)
 	}
-
-	if (!ret_val) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed identify data %d:%s", magic_errno(magic), magic_error(magic));
-		RETURN_FALSE;
-	} else {
-		RETURN_STRING(ret_val, 1);
-	}
+	return;
 }
 /* }}} */
 
