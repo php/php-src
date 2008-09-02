@@ -1894,6 +1894,7 @@ apprentice_map(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 	ret = 1;
 
 	php_stream_close(stream);
+	stream = NULL;
 
 internal_loaded:
 	*magicp = mm;
