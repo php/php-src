@@ -21,7 +21,7 @@ Warning: mime_content_type(): Can only process string or stream arguments in %s 
 
 Warning: mime_content_type(): Can only process string or stream arguments in %s on line %d
 
-Warning: mime_content_type(foo/inexistent): failed to open stream: No such file or directory in %s on line %d
+Warning: mime_content_type(): File or path not found 'foo/inexistent' in %s on line %d
 
 Warning: mime_content_type(): Empty filename or path in %s on line %d
 
