@@ -575,8 +575,8 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	char *docref_target = "", *docref_root = "";
 	char *p;
 	int buffer_len = 0;
-	char *space;
-	char *class_name = get_active_class_name(&space TSRMLS_CC);
+	char *space = "";
+	char *class_name = "";
 	char *function;
 	int origin_len;
 	char *origin;
@@ -632,6 +632,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 			function = "Unknown";
 		} else {
 			is_function = 1;
+			class_name = get_active_class_name(&space TSRMLS_CC);
 		}
 	}
 
