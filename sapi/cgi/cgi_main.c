@@ -375,6 +375,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	char buf[SAPI_CGI_MAX_HEADER_LENGTH];
 	sapi_header_struct *h;
 	zend_llist_position pos;
+	zend_bool ignore_status = 0;
 
 	if (SG(request_info).no_headers == 1) {
 		return  SAPI_HEADER_SENT_SUCCESSFULLY;
@@ -431,6 +432,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 
 		if (!has_status) {
 			PHPWRITE_H(buf, len);
+			ignore_status = 1;
 		}
 	}
 
@@ -438,8 +440,17 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	while (h) {
 		/* prevent CRLFCRLF */
 		if (h->header_len) {
-			PHPWRITE_H(h->header, h->header_len);
-			PHPWRITE_H("\r\n", 2);
+			if (h->header_len > sizeof("Status:")-1 &&
+			    strncasecmp(h->header, "Status:", sizeof("Status:")-1) == 0) {
+			    if (!ignore_status) {
+				    ignore_status = 1;
+					PHPWRITE_H(h->header, h->header_len);
+					PHPWRITE_H("\r\n", 2);
+				}
+			} else {
+				PHPWRITE_H(h->header, h->header_len);
+				PHPWRITE_H("\r\n", 2);
+			}
 		}
 		h = (sapi_header_struct*)zend_llist_get_next_ex(&sapi_headers->headers, &pos);
 	}
