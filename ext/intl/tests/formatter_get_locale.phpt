@@ -14,7 +14,7 @@ function ut_main()
     $locales = array(
         'en_UK',
         'en_US@California',
-        'uk',
+        'fr_CA',
     );
 
     $loc_types = array(
@@ -46,4 +46,4 @@ ut_run();
 --EXPECT--
 en_UK:  actual='en' valid='en'
 en_US@California:  actual='en' valid='en'
-uk:  actual='root' valid='uk'
+fr_CA:  actual='fr_CA' valid='fr_CA'
