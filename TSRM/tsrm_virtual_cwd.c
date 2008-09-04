@@ -818,7 +818,6 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	}
 #endif
 
-
 	add_slash = (use_realpath != CWD_REALPATH) && path_length > 0 && IS_SLASH(resolved_path[path_length-1]);
 	t = CWDG(realpath_cache_ttl) ? 0 : -1;
 	path_length = tsrm_realpath_r(resolved_path, start, path_length, &ll, &t, use_realpath, 0, NULL TSRMLS_CC);
@@ -1033,8 +1032,14 @@ static int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 	BOOL f;
 	HANDLE hFile; 
 
-	hFile = CreateFile(filename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL,
-				 OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+	hFile = CreateFile(filename, GENERIC_WRITE, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL,
+				 OPEN_ALWAYS, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+
+	/* OPEN_ALWAYS mode sets the last error to ERROR_ALREADY_EXISTS but 
+	   the CreateFile operation succeeds */
+	if (GetLastError() == ERROR_ALREADY_EXISTS) {
+		SetLastError(0);
+	}
 
 	if ( hFile == INVALID_HANDLE_VALUE ) {
 		return -1;
