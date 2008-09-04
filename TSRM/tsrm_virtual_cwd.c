@@ -1032,8 +1032,14 @@ static int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 	BOOL f;
 	HANDLE hFile; 
 
-	hFile = CreateFile(filename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL,
-				 OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+	hFile = CreateFile(filename, GENERIC_WRITE, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL,
+				 OPEN_ALWAYS, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+
+	/* OPEN_ALWAYS mode sets the last error to ERROR_ALREADY_EXISTS but 
+	   the CreateFile operation succeeds */
+	if (GetLastError() == ERROR_ALREADY_EXISTS) {
+		SetLastError(0);
+	}
 
 	if ( hFile == INVALID_HANDLE_VALUE ) {
 		return -1;
