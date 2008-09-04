@@ -1,3 +1,18 @@
+2008-09-03  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/pdo_oci/config.m4
+      ext/pdo_oci/config.m4:
+      revert last change
+
+    * ext/pdo_oci/config.m4
+      ext/pdo_oci/config.m4:
+      better detection for client libraries
+
+2008-09-03  Lukas Smith  <smith@pooteeweet.org>
+
+    * README.RELEASE_PROCESS:
+      - made it clear which steps are relevant for RCs only
+
 2008-09-02  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
