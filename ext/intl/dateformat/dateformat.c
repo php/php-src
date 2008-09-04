@@ -75,7 +75,7 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	zval*       object;
     long        date_type = 0;
     long        time_type = 0;
-    long        calendar = 1;
+    long        calendar = UCAL_GREGORIAN;
     char*       timezone_str = NULL;
     int         timezone_str_len = 0;
     char*       pattern_str = NULL;
@@ -91,7 +91,7 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	object = return_value;
 	/* Parse parameters. */
     if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "sll|sls",
-		&locale, &locale_len, &date_type, & time_type , &timezone_str, &timezone_str_len , &calendar ,&pattern_str , &pattern_str_len ) == FAILURE )
+		&locale, &locale_len, &date_type, &time_type, &timezone_str, &timezone_str_len, &calendar,&pattern_str, &pattern_str_len ) == FAILURE )
     {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"datefmt_create: unable to parse input parameters", 0 TSRMLS_CC );
 		zval_dtor(return_value);
@@ -117,14 +117,14 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if( pattern_str && pattern_str_len>0 ){
-		DATE_FORMAT_OBJECT(dfo) = udat_open(UDAT_IGNORE,UDAT_IGNORE, locale, timezone_utf16, timezone_utf16_len ,svalue ,slength , &INTL_DATA_ERROR_CODE(dfo));
+		DATE_FORMAT_OBJECT(dfo) = udat_open(UDAT_IGNORE, UDAT_IGNORE, locale, timezone_utf16, timezone_utf16_len, svalue, slength, &INTL_DATA_ERROR_CODE(dfo));
 	} else {
-		DATE_FORMAT_OBJECT(dfo) = udat_open(time_type,date_type, locale, timezone_utf16, timezone_utf16_len ,svalue ,slength , &INTL_DATA_ERROR_CODE(dfo));
+		DATE_FORMAT_OBJECT(dfo) = udat_open(time_type, date_type, locale, timezone_utf16, timezone_utf16_len, svalue, slength, &INTL_DATA_ERROR_CODE(dfo));
 	}
 
     /* Set the calendar if passed */
     if(!U_FAILURE(INTL_DATA_ERROR_CODE(dfo)) && calendar) {
-		ucal_obj = ucal_open( timezone_utf16 , timezone_utf16_len , locale , calendar , &INTL_DATA_ERROR_CODE(dfo) );
+		ucal_obj = ucal_open( timezone_utf16, timezone_utf16_len, locale, calendar, &INTL_DATA_ERROR_CODE(dfo) );
 		if(!U_FAILURE(INTL_DATA_ERROR_CODE(dfo))) {
 			udat_setCalendar( DATE_FORMAT_OBJECT(dfo), ucal_obj );
 		}
