@@ -1,3 +1,44 @@
+2008-09-04  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      ext/intl/tests/formatter_format.phpt
+      ext/intl/tests/formatter_format_currency.phpt
+      ext/intl/tests/formatter_get_locale.phpt
+      ext/intl/tests/formatter_get_set_pattern.phpt:
+      fix formatter tests for ICU 3.8
+
+2008-09-04  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      TSRM/tsrm_virtual_cwd.c
+      ext/standard/tests/file/bug45985.phpt:
+      - MFH: #45985, touch on opened file raises a warning
+
+    * ext/standard/tests/file/bug45985.phpt
+      ext/standard/tests/file/bug45985.phpt:
+      
+      - #45985, touch on opened file raises a warning
+
+    * TSRM/tsrm_virtual_cwd.c:
+      - #45985, touch on opened file raises a warning
+
+2008-09-04  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      ext/intl/tests/dateformat_format.phpt
+      ext/intl/tests/dateformat_format_parse.phpt:
+      fix tests
+
+    * (PHP_5_3)
+      ext/intl/dateformat/dateformat_format.c
+      ext/intl/dateformat/dateformat_parse.c:
+      fix formatting/parsing
+
+    * (PHP_5_3)
+      ext/intl/dateformat/dateformat.c
+      ext/intl/dateformat/dateformat_attr.c:
+      ws cleanup
+
 2008-09-03  Stanislav Malyshev  <stas@zend.com>
 
     * ext/pdo_oci/config.m4
