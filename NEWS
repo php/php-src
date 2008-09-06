@@ -98,6 +98,7 @@ PHP                                                                        NEWS
   cursormodel). (Patrick)
 - Fixed bug #43666 (Fixed code to use ODBC 3.52 datatypes for 64bit systems). 
   (Patrick)
+- Fixed bug #43540 (rfc1867 handler newlength problem). (Arnaud)
 - Fixed bug #42737 (preg_split('//u') triggers a E_NOTICE with newlines).
   (Nuno)
 - Fixed bug #42604 ("make test" fails with --with-config-file-scan-dir=path).
