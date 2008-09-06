@@ -290,6 +290,7 @@ static inline zstr _to_zstr(void *v) {
 #	define EMPTY_ZSTR empty_zstr
 #endif
 
+#define PZSTR(x)  ((zstr*)((void*)&(x)))
 #define EMPTY_STR ((UChar*)"\0\0")
 
 #undef SUCCESS
