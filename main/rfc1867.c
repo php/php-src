@@ -1300,13 +1300,13 @@ var_done:
 					if (cancel_upload != UPLOAD_ERROR_E) { /* file creation failed */
 						unlink(ascii_temp_filename);
 					}
-					efree(ascii_temp_filename);
 					efree(temp_filename);
 				}
 				temp_filename = EMPTY_STR;
 			} else {
 				zend_u_hash_add(SG(rfc1867_uploaded_files), IS_UNICODE, ZSTR(temp_filename), u_strlen(temp_filename) + 1, &temp_filename, sizeof(UChar *), NULL);
 			}
+			efree(ascii_temp_filename);
 
 			/* is_arr_upload is true when name of file upload field
 			 * ends in [.*]
@@ -1372,7 +1372,7 @@ var_done:
 
 			/* Possible Content-Type: */
 			if (cancel_upload || !(cd = php_mime_get_hdr_value(header, "Content-Type"))) {
-				ucd = EMPTY_STR;
+				ucd = ecalloc(1, UBYTES(1));
 				ucd_len = 0;
 			} else { 
 				ucd = php_ap_to_unicode(cd, strlen(cd), &ucd_len TSRMLS_CC);
@@ -1470,7 +1470,6 @@ var_done:
 				register_u_http_post_files_variable_ex(lbuf, &file_size, http_post_files, 0 TSRMLS_CC);
 			}
 			efree(param);
-			efree(filename);
 		}
 	}
 
