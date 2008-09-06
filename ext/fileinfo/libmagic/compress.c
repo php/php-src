@@ -84,8 +84,6 @@ private const struct {
 	{ "BZh",      3, { "bzip2", "-cd", NULL }, 1 },		/* bzip2-ed */
 };
 
-private size_t ncompr = sizeof(compr) / sizeof(compr[0]);
-
 #define NODATA ((size_t)~0)
 
 
@@ -176,7 +174,7 @@ swrite(int fd, const void *buf, size_t n)
 protected ssize_t
 sread(int fd, void *buf, size_t n, int canbepipe)
 {
-	int rv, cnt;
+	int rv;
 #ifdef FIONREAD
 	int t = 0;
 #endif
