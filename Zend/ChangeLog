@@ -1,3 +1,8 @@
+2008-09-06  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * zend.h:
+      Ported rfc1867 hooks to HEAD
+
 2008-08-29  Matt Wilmas  <php_lists@realplain.com>
 
     * (PHP_5_3)
