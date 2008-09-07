@@ -14,4 +14,4 @@ $response= $client->__call('function', array(), null, $header);
 print $client->__getLastRequest();
 ?>
 --EXPECTF--
-Fatal error: SoapHeader::__construct(): Invalid parameters. Invalid namespace in %s on line %d
+Fatal error: SoapHeader::__construct(): Invalid namespace in %s on line %d
