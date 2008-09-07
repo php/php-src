@@ -80,6 +80,8 @@ private const struct {
 	{ "BZh",      3, { "bzip2", "-cd", NULL }, 1 },		/* bzip2-ed */
 };
 
+private size_t ncompr = sizeof(compr) / sizeof(compr[0]);
+
 #define NODATA ((size_t)~0)
 
 
@@ -180,6 +182,8 @@ sread(int fd, void *buf, size_t n, int canbepipe)
 #ifdef FIONREAD
 	if ((canbepipe && (ioctl(fd, FIONREAD, &t) == -1)) || (t == 0)) {
 #ifdef FD_ZERO
+		int cnt;
+
 		for (cnt = 0;; cnt++) {
 			fd_set check;
 			struct timeval tout = {0, 100 * 1000};
