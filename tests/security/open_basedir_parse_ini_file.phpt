@@ -39,43 +39,43 @@ bool(true)
 
 Warning: parse_ini_file(): open_basedir restriction in effect. File(%s\test\bad) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: parse_ini_file(%s\test\bad): failed to open stream: Operation not permitted in %s on line %d
+Warning: parse_ini_file(%s\test\bad): failed to open stream: %s in %s on line %d
 array(0) {
 }
 
 Warning: parse_ini_file(): open_basedir restriction in effect. File(%s\test\bad\bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: parse_ini_file(%s\test\bad\bad.txt): failed to open stream: Operation not permitted in %s on line %d
+Warning: parse_ini_file(%s\test\bad\bad.txt): failed to open stream: %s in %s on line %d
 array(0) {
 }
 
 Warning: parse_ini_file(): open_basedir restriction in effect. File(%s\test) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: parse_ini_file(%s\test): failed to open stream: Operation not permitted in %s on line %d
+Warning: parse_ini_file(%s\test): failed to open stream: %s in %s on line %d
 array(0) {
 }
 
 Warning: parse_ini_file(): open_basedir restriction in effect. File(%s\test) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: parse_ini_file(%s\test): failed to open stream: Operation not permitted in %s on line %d
+Warning: parse_ini_file(%s\test): failed to open stream: %s in %s on line %d
 array(0) {
 }
 
 Warning: parse_ini_file(): open_basedir restriction in effect. File(%s\test\bad) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: parse_ini_file(%s\test\bad): failed to open stream: Operation not permitted in %s on line %d
+Warning: parse_ini_file(%s\test\bad): failed to open stream: %s in %s on line %d
 array(0) {
 }
 
 Warning: parse_ini_file(): open_basedir restriction in effect. File(%s\test\bad\bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: parse_ini_file(%s\test\bad\bad.txt): failed to open stream: Operation not permitted in %s on line %d
+Warning: parse_ini_file(%s\test\bad\bad.txt): failed to open stream: %s in %s on line %d
 array(0) {
 }
 
 Warning: parse_ini_file(): open_basedir restriction in effect. File(%s\test) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: parse_ini_file(%s\test): failed to open stream: Operation not permitted in %s on line %d
+Warning: parse_ini_file(%s\test): failed to open stream: %s in %s on line %d
 array(0) {
 }
 *** Finished testing open_basedir configuration [parse_ini_file] ***
