@@ -1,3 +1,49 @@
+2008-09-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/fileinfo/libmagic/compress.c:
+      MFB: removed unused variables
+
+    * (PHP_5_3)
+      ext/fileinfo/libmagic/compress.c:
+      
+      Removed unused variables
+
+2008-09-06  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      main/rfc1867.c
+      main/rfc1867.c:
+      MFH: Fixed #43540 (rfc1867 handler newlength problem)
+
+    * main/rfc1867.c:
+      Fixed #43540 (rfc1867 handler newlength problem)
+
+    * ZendEngine2/zend.h
+      main/rfc1867.c
+      main/rfc1867.h:
+      Ported rfc1867 hooks to HEAD
+
+    * main/rfc1867.c:
+      Fix mem leak and invalid frees in rfc1867 post handler
+
+2008-09-06  Alexey Zakhlestin  <indeyets@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      bugfix is also applied to 5.2, so NEWS moved there
+
+    * (PHP_5_2)
+      NEWS
+      ext/snmp/snmp.c
+      ext/snmp/snmp.c:
+      MFB: Fixed bug #45405 (snmp extension memory leak)
+
+    * (PHP_5_3)
+      NEWS
+      ext/snmp/snmp.c:
+      Fixed bug #45405 (snmp extension memory leak)
+
 2008-09-04  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_3)
