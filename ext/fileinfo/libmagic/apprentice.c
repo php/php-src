@@ -29,21 +29,32 @@
  * apprentice - make one pass through /etc/magic, learning its secrets.
  */
 
+#include "php.h"
+
 #include "file.h"
 #include "magic.h"
 #include "patchlevel.h"
 #include <stdlib.h>
-//#ifdef HAVE_UNISTD_H
+
+#ifdef PHP_WIN32
+#include "win32/unistd.h"
+#define strtoull _strtoui64
+#else
 #include <unistd.h>
-//#endif
+#endif
+
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#ifndef PHP_WIN32
 #include <sys/param.h>
+#endif
 #include <sys/types.h>
+#ifndef PHP_WIN32
 #include <dirent.h>
+#endif
 
 #ifndef	lint
 FILE_RCSID("@(#)$File: apprentice.c,v 1.132 2008/03/28 18:19:30 christos Exp $")
@@ -173,6 +184,10 @@ static const struct type_tbl_s {
 # undef XX
 # undef XX_NULL
 };
+
+#ifndef S_ISDIR
+#define S_ISDIR(mode) ((mode) & _S_IFDIR)
+#endif
 
 private int
 get_type(const char *l, const char **t)
@@ -528,30 +543,41 @@ private void
 load_1(struct magic_set *ms, int action, const char *fn, int *errs,
    struct magic_entry **marray, uint32_t *marraycount)
 {
-	char line[BUFSIZ];
+	zstr buffer;
+	char *line;
+	size_t line_len;
 	size_t lineno = 0;
-	FILE *f = fopen(ms->file = fn, "r");
-	if (f == NULL) {
+
+	php_stream *stream;
+
+	TSRMLS_FETCH();
+
+#if (PHP_MAJOR_VERSION < 6)
+	stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
+#else
+	stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS, NULL);
+#endif
+	if (stream == NULL) {
 		if (errno != ENOENT)
 			file_error(ms, errno, "cannot read magic file `%s'",
 				   fn);
 		(*errs)++;
 	} else {
-		/* read and parse this file */
-		for (ms->line = 1; fgets(line, sizeof(line), f) != NULL; ms->line++) {
-			size_t len;
-			len = strlen(line);
-			if (len == 0) /* null line, garbage, etc */
+		buffer.v = emalloc(BUFSIZ+1);
+		for (ms->line = 1; (line = php_stream_get_line(stream, buffer, BUFSIZ, &line_len)) != NULL; ms->line++) {
+			if (line_len == 0 ||		/* null line, garbage, etc */
+					line[0] == '\0' ||	/* empty*/
+					line[0] == '#' || 	/* comment */
+					line[0] == '\n' || line[0] == '\r') {	/* New Line */
 				continue;
-			if (line[len - 1] == '\n') {
-				lineno++;
-				line[len - 1] = '\0'; /* delete newline */
 			}
-			if (line[0] == '\0')	/* empty, do not parse */
-				continue;
-			if (line[0] == '#')	/* comment, do not parse */
-				continue;
-			if (len > mime_marker_len &&
+
+			if (line[line_len - 1] == '\n') {
+				lineno++;
+				line[line_len - 1] = '\0'; /* delete newline */
+			}
+
+			if (line_len > mime_marker_len &&
 			    memcmp(line, mime_marker, mime_marker_len) == 0) {
 				/* MIME type */
 				if (parse_mime(ms, marray, marraycount,
@@ -562,8 +588,8 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 			if (parse(ms, marray, marraycount, line, lineno, action) != 0)
 				(*errs)++;
 		}
-
-		(void)fclose(f);
+		efree(buffer.v);
+		php_stream_close(stream);
 	}
 }
 
@@ -585,7 +611,7 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 
 	ms->flags |= MAGIC_CHECK;	/* Enable checks for parsed files */
 
-        maxmagic = MAXMAGIS;
+	maxmagic = MAXMAGIS;
 	marray = ecalloc(maxmagic, sizeof(*marray));
 	marraycount = 0;
 
@@ -594,7 +620,7 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 		(void)fprintf(stderr, "%s\n", usg_hdr);
 
 	/* load directory or file */
-	if (stat(fn, &st) == 0 && S_ISDIR(st.st_mode)) {
+	if (php_sys_stat(fn, &st) == 0 && S_ISDIR(st.st_mode)) {
 		dir = opendir(fn);
 		if (dir) {
 			while ((d = readdir(dir))) {
@@ -1816,17 +1842,20 @@ private int
 apprentice_map(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
     const char *fn)
 {
-	int fd;
-	struct stat st;
 	uint32_t *ptr;
 	uint32_t version;
 	int needsbyteswap;
 	char *dbname = NULL;
 	void *mm = NULL;
 	int   ret = 0;
+	php_stream *stream;
+	php_stream_statbuf st;
+
+
+	TSRMLS_FETCH();
 
 	if (fn == NULL) {
-		mm = &php_magic_database;
+		mm = (void *)&php_magic_database;
 		ret = 3;
 		goto internal_loaded;
 	}
@@ -1835,27 +1864,35 @@ apprentice_map(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 	if (dbname == NULL)
 		goto error2;
 
-	if ((fd = open(dbname, O_RDONLY|O_BINARY)) == -1)
-		goto error2;
+#if (PHP_MAJOR_VERSION < 6)
+		stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
+#else
+		stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS, NULL);
+#endif
 
-	if (fstat(fd, &st) == -1) {
+	if (!stream) {
+		goto error2;
+	}
+
+	if (php_stream_stat(stream, &st) < 0) {
 		file_error(ms, errno, "cannot stat `%s'", dbname);
 		goto error1;
 	}
-	if (st.st_size < 8) {
+
+	if (st.sb.st_size < 8) {
 		file_error(ms, 0, "file `%s' is too small", dbname);
 		goto error1;
 	}
 
-	mm = emalloc((size_t)st.st_size);
-	if (read(fd, mm, (size_t)st.st_size) != (size_t)st.st_size) {
+	mm = emalloc((size_t)st.sb.st_size);
+	if (php_stream_read(stream, mm, (size_t)st.sb.st_size) != (size_t)st.sb.st_size) {
 		file_badread(ms);
 		goto error1;
 	}
 	ret = 1;
 
-	(void)close(fd);
-	fd = -1;
+	php_stream_close(stream);
+	stream = NULL;
 
 internal_loaded:
 	*magicp = mm;
@@ -1882,7 +1919,7 @@ internal_loaded:
 	if (fn == NULL) {
 		*nmagicp = (sizeof(php_magic_database) / sizeof(struct magic));
 	} else {
-		*nmagicp = (uint32_t)(st.st_size / sizeof(struct magic));
+		*nmagicp = (uint32_t)(st.sb.st_size / sizeof(struct magic));
 	}
 	if (*nmagicp > 0) {
 		(*nmagicp)--;
@@ -1898,8 +1935,9 @@ internal_loaded:
 	return ret;
 
 error1:
-	if (fd != -1)
-		(void)close(fd);
+	if (stream) {
+		php_stream_close(stream);
+	}
 	if (mm) {
 		efree(mm);
 	} else {
@@ -1921,38 +1959,47 @@ private int
 apprentice_compile(struct magic_set *ms, struct magic **magicp,
     uint32_t *nmagicp, const char *fn)
 {
-	int fd;
 	char *dbname;
 	int rv = -1;
+	php_stream *stream;
+
+	TSRMLS_FETCH();
 
 	mkdbname(fn, &dbname, 1);
 
-	if (dbname == NULL) 
+	if (dbname == NULL) {
 		goto out;
+	}
 
-	if ((fd = open(dbname, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY, 0644)) == -1) {
+/* wb+ == O_WRONLY|O_CREAT|O_TRUNC|O_BINARY */
+#if (PHP_MAJOR_VERSION < 6)
+	stream = php_stream_open_wrapper((char *)fn, "wb+", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
+#else
+	stream = php_stream_open_wrapper((char *)fn, "wb+", REPORT_ERRORS, NULL);
+#endif
+
+	if (!stream) {
 		file_error(ms, errno, "cannot open `%s'", dbname);
 		goto out;
 	}
 
-	if (write(fd, ar, sizeof(ar)) != (ssize_t)sizeof(ar)) {
+	if (php_stream_write(stream, (char *)ar, sizeof(ar)) != (ssize_t)sizeof(ar)) {
 		file_error(ms, errno, "error writing `%s'", dbname);
 		goto out;
 	}
 
-	if (lseek(fd, (off_t)sizeof(struct magic), SEEK_SET)
-	    != sizeof(struct magic)) {
+	if (php_stream_seek(stream,(off_t)sizeof(struct magic), SEEK_SET) != sizeof(struct magic)) {
 		file_error(ms, errno, "error seeking `%s'", dbname);
 		goto out;
 	}
 
-	if (write(fd, *magicp, (sizeof(struct magic) * *nmagicp)) 
-	    != (ssize_t)(sizeof(struct magic) * *nmagicp)) {
+	if (php_stream_write(stream, (char *)*magicp, (sizeof(struct magic) * *nmagicp) != (ssize_t)(sizeof(struct magic) * *nmagicp))) {
 		file_error(ms, errno, "error writing `%s'", dbname);
 		goto out;
 	}
 
-	(void)close(fd);
+	php_stream_close(stream);
+
 	rv = 0;
 out:
 	efree(dbname);

@@ -11,9 +11,16 @@ var_dump(finfo_file($fp, '.'));
 var_dump(finfo_file($fp, '&'));
 
 ?>
---EXPECT--
+--EXPECTF--
+Warning: finfo_file(): Empty filename or path in %s on line %d
 bool(false)
+
+Warning: finfo_file(): Empty filename or path in %s on line %d
 bool(false)
+
+Warning: finfo_file(): Empty filename or path in %s on line %d
 bool(false)
 string(9) "directory"
+
+Warning: finfo_file(): File or path not found '&' in %s on line %d
 bool(false)
