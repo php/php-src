@@ -36,42 +36,42 @@ bool(true)
 
 Warning: copy(): open_basedir restriction in effect. File(../bad) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: copy(../bad): failed to open stream: Operation not permitted in %s on line %d
+Warning: copy(../bad): failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: copy(): open_basedir restriction in effect. File(../bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: copy(../bad/bad.txt): failed to open stream: Operation not permitted in %s on line %d
+Warning: copy(../bad/bad.txt): failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: copy(): open_basedir restriction in effect. File(..) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: copy(..): failed to open stream: Operation not permitted in %s on line %d
+Warning: copy(..): failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: copy(): open_basedir restriction in effect. File(../) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: copy(../): failed to open stream: Operation not permitted in %s on line %d
+Warning: copy(../): failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: copy(): open_basedir restriction in effect. File(/) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: copy(/): failed to open stream: Operation not permitted in %s on line %d
+Warning: copy(/): failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: copy(): open_basedir restriction in effect. File(../bad/.) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: copy(../bad/.): failed to open stream: Operation not permitted in %s on line %d
+Warning: copy(../bad/.): failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: copy(): open_basedir restriction in effect. File(../bad/./bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: copy(../bad/./bad.txt): failed to open stream: Operation not permitted in %s on line %d
+Warning: copy(../bad/./bad.txt): failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: copy(): open_basedir restriction in effect. File(./../.) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: copy(./../.): failed to open stream: Operation not permitted in %s on line %d
+Warning: copy(./../.): failed to open stream: %s in %s on line %d
 bool(false)
 bool(true)
 bool(true)
