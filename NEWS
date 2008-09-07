@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.3.0 Alpha 3
+- Changed Soap methods error level, now it is no longer E_ERROR. (Felipe)
+
 - Fixed bug #45911 (Cannot disable ext/hash). (Arnaud)
 
 02 Sep 2008, PHP 5.3.0 Alpha 2
