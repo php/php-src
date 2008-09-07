@@ -30,10 +30,19 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef PHP_WIN32
+#include "win32/unistd.h"
+#else
 #include <unistd.h>
+#endif
 #include <string.h>
 #include <sys/types.h>
-#include <sys/param.h>	/* for MAXPATHLEN */
+#ifdef PHP_WIN32
+# include "config.w32.h"
+#else
+# include "php_config.h"
+#endif
+
 #include <sys/stat.h>
 #include <limits.h>	/* for PIPE_BUF */
 
@@ -55,7 +64,9 @@
 #include <locale.h>
 #endif
 
-#include <netinet/in.h>		/* for byte swapping */
+#ifndef PHP_WIN32
+# include <netinet/in.h>		/* for byte swapping */
+#endif
 
 #include "patchlevel.h"
 
@@ -72,6 +83,11 @@ FILE_RCSID("@(#)$File: magic.c,v 1.50 2008/02/19 00:58:59 rrt Exp $")
 #endif
 #endif
 
+#ifdef PHP_WIN32
+# undef S_IFLNK
+# undef S_IFIFO
+#endif
+
 #ifdef __EMX__
 private char *apptypeName = NULL;
 protected int file_os2_apptype(struct magic_set *ms, const char *fn,
@@ -82,7 +98,7 @@ private void free_mlist(struct mlist *);
 private void close_and_restore(const struct magic_set *, const char *, int,
     const struct stat *);
 private int info_from_stat(struct magic_set *, mode_t);
-private const char *file_or_fd(struct magic_set *, const char *, int);
+private const char *file_or_stream(struct magic_set *, const char *, php_stream *);
 
 #ifndef	STDIN_FILENO
 #define	STDIN_FILENO	0
@@ -204,9 +220,6 @@ private void
 close_and_restore(const struct magic_set *ms, const char *name, int fd,
     const struct stat *sb)
 {
-	if (fd == STDIN_FILENO)
-		return;
-	(void) close(fd);
 
 	if ((ms->flags & MAGIC_PRESERVE_ATIME) != 0) {
 		/*
@@ -240,7 +253,7 @@ close_and_restore(const struct magic_set *ms, const char *name, int fd,
 public const char *
 magic_descriptor(struct magic_set *ms, int fd)
 {
-	return file_or_fd(ms, NULL, fd);
+	return file_or_stream(ms, NULL, NULL);
 }
 
 /*
@@ -249,17 +262,28 @@ magic_descriptor(struct magic_set *ms, int fd)
 public const char *
 magic_file(struct magic_set *ms, const char *inname)
 {
-	return file_or_fd(ms, inname, STDIN_FILENO);
+	return file_or_stream(ms, inname, NULL);
+}
+
+public const char *
+magic_stream(struct magic_set *ms, php_stream *stream)
+{
+	return file_or_stream(ms, NULL, stream);
 }
 
 private const char *
-file_or_fd(struct magic_set *ms, const char *inname, int fd)
+file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 {
 	int	rv = -1;
 	unsigned char *buf;
 	struct stat	sb;
 	ssize_t nbytes = 0;	/* number of bytes read from a datafile */
-	int	ispipe = 0;
+	int no_in_stream = 0;
+	TSRMLS_FETCH();
+
+	if (!inname && !stream) {
+		return NULL;
+	}
 
 	/*
 	 * one extra for terminating '\0', and
@@ -268,92 +292,65 @@ file_or_fd(struct magic_set *ms, const char *inname, int fd)
 #define SLOP (1 + sizeof(union VALUETYPE))
 	buf = emalloc(HOWMANY + SLOP);
 
-	if (file_reset(ms) == -1)
+	if (file_reset(ms) == -1) {
 		goto done;
+	}
 
-	switch (file_fsmagic(ms, inname, &sb)) {
-	case -1:		/* error */
-		goto done;
-	case 0:			/* nothing found */
-		break;
-	default:		/* matched it and printed type */
+	switch (file_fsmagic(ms, inname, &sb, stream)) {
+		case -1:		/* error */
+			goto done;
+		case 0:			/* nothing found */
+			break;
+		default:		/* matched it and printed type */
+			rv = 0;
+			goto done;
+	}
+
+	errno = 0;
+
+	if (!stream && inname) {
+		no_in_stream = 1;
+#if (PHP_MAJOR_VERSION < 6)
+		stream = php_stream_open_wrapper(inname, "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
+#else
+		stream = php_stream_open_wrapper(inname, "rb", REPORT_ERRORS, NULL);
+#endif
+	}
+
+	if (!stream) {
+		fprintf(stderr, "couldn't open file\n");
+		if (info_from_stat(ms, sb.st_mode) == -1)
+			goto done;
 		rv = 0;
 		goto done;
 	}
 
-	if (inname == NULL) {
-		if (fstat(fd, &sb) == 0 && S_ISFIFO(sb.st_mode))
-			ispipe = 1;
-	} else {
-		int flags = O_RDONLY|O_BINARY;
-
-		if (stat(inname, &sb) == 0 && S_ISFIFO(sb.st_mode)) {
-			flags |= O_NONBLOCK;
-			ispipe = 1;
-		}
-
-		errno = 0;
-		if ((fd = open(inname, flags)) < 0) {
-#ifdef __CYGWIN__
-			/* FIXME: Do this with EXEEXT from autotools */
-			char *tmp = alloca(strlen(inname) + 5);
-			(void)strcat(strcpy(tmp, inname), ".exe");
-			if ((fd = open(tmp, flags)) < 0) {
-#endif
-				fprintf(stderr, "couldn't open file\n");
-				if (info_from_stat(ms, sb.st_mode) == -1)
-					goto done;
-				rv = 0;
-				goto done;
-#ifdef __CYGWIN__
-			}
-#endif
-		}
 #ifdef O_NONBLOCK
-		if ((flags = fcntl(fd, F_GETFL)) != -1) {
-			flags &= ~O_NONBLOCK;
-			(void)fcntl(fd, F_SETFL, flags);
-		}
+/* we should be already be in non blocking mode for network socket */
 #endif
-	}
 
 	/*
 	 * try looking at the first HOWMANY bytes
 	 */
-	if (ispipe) {
-		ssize_t r = 0;
-
-		while ((r = sread(fd, (void *)&buf[nbytes],
-		    (size_t)(HOWMANY - nbytes), 1)) > 0) {
-			nbytes += r;
-			if (r < PIPE_BUF) break;
-		}
-
-		if (nbytes == 0) {
-			/* We can not read it, but we were able to stat it. */
-			if (info_from_stat(ms, sb.st_mode) == -1)
-				goto done;
-			rv = 0;
-			goto done;
-		}
-
-	} else {
-		if ((nbytes = read(fd, (char *)buf, HOWMANY)) == -1) {
-			file_error(ms, errno, "cannot read `%s'", inname);
-			goto done;
-		}
+	if ((nbytes = php_stream_read(stream, (char *)buf, HOWMANY)) < 0) {
+		file_error(ms, errno, "cannot read `%s'", inname);
+		goto done;
 	}
 
 	(void)memset(buf + nbytes, 0, SLOP); /* NUL terminate */
-	if (file_buffer(ms, fd, inname, buf, (size_t)nbytes) == -1)
+	if (file_buffer(ms, stream, inname, buf, (size_t)nbytes) == -1)
 		goto done;
 	rv = 0;
 done:
 	efree(buf);
-	close_and_restore(ms, inname, fd, &sb);
+
+	if (no_in_stream && stream) {
+		php_stream_close(stream);
+	}
+
+	close_and_restore(ms, inname, 0, &sb);
 	return rv == 0 ? file_getbuffer(ms) : NULL;
 }
-
 
 public const char *
 magic_buffer(struct magic_set *ms, const void *buf, size_t nb)
@@ -364,7 +361,7 @@ magic_buffer(struct magic_set *ms, const void *buf, size_t nb)
 	 * The main work is done here!
 	 * We have the file name and/or the data buffer to be identified. 
 	 */
-	if (file_buffer(ms, -1, NULL, buf, nb) == -1) {
+	if (file_buffer(ms, NULL, NULL, buf, nb) == -1) {
 		return NULL;
 	}
 	return file_getbuffer(ms);

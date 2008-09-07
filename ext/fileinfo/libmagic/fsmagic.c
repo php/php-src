@@ -60,69 +60,64 @@
 FILE_RCSID("@(#)$File: fsmagic.c,v 1.50 2008/02/12 17:22:54 rrt Exp $")
 #endif	/* lint */
 
-private int
-bad_link(struct magic_set *ms, int err, char *buf)
-{
-	char *errfmt;
-	if (err == ELOOP)
-		errfmt = "symbolic link in a loop";
-	else
-		errfmt = "broken symbolic link to `%s'";
-	if (ms->flags & MAGIC_ERROR) {
-		file_error(ms, err, errfmt, buf);
-		return -1;
-	} 
-	if (file_printf(ms, errfmt, buf) == -1)
-		return -1;
-	return 1;
-}
+#ifdef PHP_WIN32
+
+# undef S_IFIFO
+#endif
+
+
+#ifndef S_ISDIR
+#define S_ISDIR(mode) ((mode) & _S_IFDIR)
+#endif
+
+#ifndef S_ISREG
+#define S_ISREG(mode) ((mode) & _S_IFREG)
+#endif
 
 protected int
-file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb)
+file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *stream)
 {
-	int ret = 0;
 	int mime = ms->flags & MAGIC_MIME;
-#ifdef	S_IFLNK
-	char buf[BUFSIZ+4];
-	int nch;
-	struct stat tstatbuf;
-#endif
+	TSRMLS_FETCH();
 
-	if (fn == NULL)
-		return 0;
-
-	/*
-	 * Fstat is cheaper but fails for files you don't have read perms on.
-	 * On 4.2BSD and similar systems, use lstat() to identify symlinks.
-	 */
-#ifdef	S_IFLNK
-	if ((ms->flags & MAGIC_SYMLINK) == 0)
-		ret = lstat(fn, sb);
-	else
-#endif
-	ret = stat(fn, sb);	/* don't merge into if; see "ret =" above */
-
-	if (ret) {
-		if (ms->flags & MAGIC_ERROR) {
-			file_error(ms, errno, "cannot stat `%s'", fn);
-			return -1;
-		}
-		if (file_printf(ms, "cannot open `%s' (%s)",
-		    fn, strerror(errno)) == -1)
-			return -1;
-		return 1;
+	if (!fn && !stream) {
+		return -1;
 	}
 
-	if (mime) {
-		if ((sb->st_mode & S_IFMT) != S_IFREG) {
-			if ((mime & MAGIC_MIME_TYPE) &&
-			    file_printf(ms, "application/x-not-regular-file")
-			    == -1)
-				    return -1;
+	if (stream) {
+		php_stream_statbuf ssb;
+		if (php_stream_stat(stream, &ssb) < 0) {
+			if (ms->flags & MAGIC_ERROR) {
+				file_error(ms, errno, "cannot stat `%s'", fn);
+			}
+			return 1;
+		}
+		memcpy(sb, &ssb.sb, sizeof(struct stat));
+	} else {
+		if (php_sys_stat(fn, sb) != 0) {
+			if (ms->flags & MAGIC_ERROR) {
+				file_error(ms, errno, "cannot stat `%s'", fn);
+			}
 			return 1;
 		}
 	}
-	else {
+
+	if (mime) {
+			if (!S_ISREG(sb->st_mode)) {
+				if ((mime & MAGIC_MIME_TYPE) &&
+						file_printf(ms, "application/x-not-regular-file") == -1) {
+					return -1;
+				}
+				return 1;
+			}
+
+			if (S_ISDIR(sb->st_mode)) {
+				if (file_printf(ms, "directory") == -1) {
+					return -1;
+				}
+				return 1;
+			}
+	} else {
 #ifdef S_ISUID
 		if (sb->st_mode & S_ISUID) 
 			if (file_printf(ms, "setuid ") == -1)
@@ -139,65 +134,41 @@ file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb)
 				return -1;
 #endif
 	}
-	
+
 	switch (sb->st_mode & S_IFMT) {
-	case S_IFDIR:
-		if (file_printf(ms, "directory") == -1)
-			return -1;
-		return 1;
-#ifdef S_IFCHR
-	case S_IFCHR:
-		/* 
-		 * If -s has been specified, treat character special files
-		 * like ordinary files.  Otherwise, just report that they
-		 * are block special files and go on to the next file.
-		 */
-		if ((ms->flags & MAGIC_DEVICES) != 0)
-			break;
-#ifdef HAVE_STAT_ST_RDEV
-# ifdef dv_unit
-		if (file_printf(ms, "character special (%d/%d/%d)",
-		    major(sb->st_rdev), dv_unit(sb->st_rdev),
-		    dv_subunit(sb->st_rdev)) == -1)
-			return -1;
-# else
-		if (file_printf(ms, "character special (%ld/%ld)",
-		    (long) major(sb->st_rdev), (long) minor(sb->st_rdev)) == -1)
-			return -1;
+#ifndef PHP_WIN32
+# ifdef S_IFCHR
+		case S_IFCHR:
+			/* 
+			 * If -s has been specified, treat character special files
+			 * like ordinary files.  Otherwise, just report that they
+			 * are block special files and go on to the next file.
+			 */
+			if ((ms->flags & MAGIC_DEVICES) != 0) {
+				break;
+			}
+#  ifdef HAVE_STAT_ST_RDEV
+#   ifdef dv_unit
+			if (file_printf(ms, "character special (%d/%d/%d)",
+					major(sb->st_rdev), dv_unit(sb->st_rdev),
+					dv_subunit(sb->st_rdev)) == -1) {
+				return -1;
+			}
+#   else
+			if (file_printf(ms, "character special (%ld/%ld)",
+					(long) major(sb->st_rdev), (long) minor(sb->st_rdev)) == -1) {
+				return -1;
+			}
+#   endif
+#  else
+			if (file_printf(ms, "character special") == -1) {
+				return -1;
+			}
+#  endif
+			return 1;
 # endif
-#else
-		if (file_printf(ms, "character special") == -1)
-			return -1;
 #endif
-		return 1;
-#endif
-#ifdef S_IFBLK
-	case S_IFBLK:
-		/* 
-		 * If -s has been specified, treat block special files
-		 * like ordinary files.  Otherwise, just report that they
-		 * are block special files and go on to the next file.
-		 */
-		if ((ms->flags & MAGIC_DEVICES) != 0)
-			break;
-#ifdef HAVE_STAT_ST_RDEV
-# ifdef dv_unit
-		if (file_printf(ms, "block special (%d/%d/%d)",
-		    major(sb->st_rdev), dv_unit(sb->st_rdev),
-		    dv_subunit(sb->st_rdev)) == -1)
-			return -1;
-# else
-		if (file_printf(ms, "block special (%ld/%ld)",
-		    (long)major(sb->st_rdev), (long)minor(sb->st_rdev)) == -1)
-			return -1;
-# endif
-#else
-		if (file_printf(ms, "block special") == -1)
-			return -1;
-#endif
-		return 1;
-#endif
-	/* TODO add code to handle V7 MUX and Blit MUX files */
+
 #ifdef	S_IFIFO
 	case S_IFIFO:
 		if((ms->flags & MAGIC_DEVICES) != 0)
@@ -212,67 +183,17 @@ file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb)
 			return -1;
 		return 1;
 #endif
+
 #ifdef	S_IFLNK
 	case S_IFLNK:
-		if ((nch = readlink(fn, buf, BUFSIZ-1)) <= 0) {
+		/* stat is used, if it made here then the link is broken */
 			if (ms->flags & MAGIC_ERROR) {
-			    file_error(ms, errno, "unreadable symlink `%s'",
-				fn);
+			    file_error(ms, errno, "unreadable symlink `%s'", fn);
 			    return -1;
 			}
-			if (file_printf(ms,
-			    "unreadable symlink `%s' (%s)", fn,
-			    strerror(errno)) == -1)
-				return -1;
-			return 1;
-		}
-		buf[nch] = '\0';	/* readlink(2) does not do this */
-
-		/* If broken symlink, say so and quit early. */
-		if (*buf == '/') {
-			if (stat(buf, &tstatbuf) < 0)
-				return bad_link(ms, errno, buf);
-		} else {
-			char *tmp;
-			char buf2[BUFSIZ+BUFSIZ+4];
-
-			if ((tmp = strrchr(fn,  '/')) == NULL) {
-				tmp = buf; /* in current directory anyway */
-			} else {
-				if (tmp - fn + 1 > BUFSIZ) {
-					if (ms->flags & MAGIC_ERROR) {
-						file_error(ms, 0, 
-						    "path too long: `%s'", buf);
-						return -1;
-					}
-					if (file_printf(ms,
-					    "path too long: `%s'", fn) == -1)
-						return -1;
-					return 1;
-				}
-				(void)strcpy(buf2, fn);  /* take dir part */
-				buf2[tmp - fn + 1] = '\0';
-				(void)strcat(buf2, buf); /* plus (rel) link */
-				tmp = buf2;
-			}
-			if (stat(tmp, &tstatbuf) < 0)
-				return bad_link(ms, errno, buf);
-		}
-
-		/* Otherwise, handle it. */
-		if ((ms->flags & MAGIC_SYMLINK) != 0) {
-			const char *p;
-			ms->flags &= MAGIC_SYMLINK;
-			p = magic_file(ms, buf);
-			ms->flags |= MAGIC_SYMLINK;
-			return p != NULL ? 1 : -1;
-		} else { /* just print what it points to */
-			if (file_printf(ms, "symbolic link to `%s'",
-			    buf) == -1)
-				return -1;
-		}
 	return 1;
 #endif
+
 #ifdef	S_IFSOCK
 #ifndef __COHERENT__
 	case S_IFSOCK:
@@ -281,12 +202,14 @@ file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb)
 		return 1;
 #endif
 #endif
-	case S_IFREG:
-		break;
-	default:
-		file_error(ms, 0, "invalid mode 0%o", sb->st_mode);
-		return -1;
-		/*NOTREACHED*/
+
+		case S_IFREG:
+			break;
+
+		default:
+			file_error(ms, 0, "invalid mode 0%o", sb->st_mode);
+			return -1;
+			/*NOTREACHED*/
 	}
 
 	/*
