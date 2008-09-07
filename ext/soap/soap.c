@@ -887,10 +887,10 @@ PHP_METHOD(SoapParam, SoapParam)
 	int name_length;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &data, &name, &name_length) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
+		return;
 	}
 	if (name_length == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid parameter name.");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameter name");
 	}
 
 #ifndef ZEND_ENGINE_2
@@ -912,13 +912,13 @@ PHP_METHOD(SoapHeader, SoapHeader)
 	zend_bool must_understand = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|zbz", &ns, &ns_len, &name, &name_len, &data, &must_understand, &actor) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
+		return;
 	}
 	if (ns_len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid namespace.");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid namespace");
 	}
 	if (name_len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid header name.");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid header name");
 	}
 
 	add_property_stringl(this_ptr, "namespace", ns, ns_len, 1);
@@ -939,7 +939,7 @@ PHP_METHOD(SoapHeader, SoapHeader)
 	} else if (Z_TYPE_P(actor) == IS_STRING && Z_STRLEN_P(actor) > 0) {
 		add_property_stringl(this_ptr, "actor", Z_STRVAL_P(actor), Z_STRLEN_P(actor), 1);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid actor.");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid actor");
 	}
 }
 
@@ -956,8 +956,9 @@ PHP_METHOD(SoapFault, SoapFault)
 		&fault_string, &fault_string_len,
 		&fault_actor, &fault_actor_len,
 		&details, &name, &name_len, &headerfault) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
+		return;
 	}
+
 	if (Z_TYPE_P(code) == IS_NULL) {
 	} else if (Z_TYPE_P(code) == IS_STRING) {
 		fault_code = Z_STRVAL_P(code);
@@ -974,13 +975,13 @@ PHP_METHOD(SoapFault, SoapFault)
 		  fault_code = Z_STRVAL_PP(t_code);
 		  fault_code_len = Z_STRLEN_PP(t_code);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid fault code.");
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid fault code");
 		}
 	} else  {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid fault code.");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid fault code");
 	}
 	if (fault_code != NULL && fault_code_len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid fault code.");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid fault code");
 	}
 	if (name != NULL && name_len == 0) {
 		name = NULL;
@@ -1048,7 +1049,7 @@ PHP_METHOD(SoapVar, SoapVar)
 	int stype_len, ns_len, name_len, namens_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z!z|ssss", &data, &type, &stype, &stype_len, &ns, &ns_len, &name, &name_len, &namens, &namens_len) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
+		return;
 	}
 
 	if (Z_TYPE_P(type) == IS_NULL) {
@@ -1205,7 +1206,7 @@ static HashTable* soap_create_typemap(sdlPtr sdl, HashTable *ht TSRMLS_DC)
 PHP_METHOD(SoapServer, SoapServer)
 {
 	soapServicePtr service;
-	zval *wsdl, *options = NULL;
+	zval *wsdl = NULL, *options = NULL;
 	int ret;
 	int version = SOAP_1_1;
 	long cache_wsdl;
@@ -1213,15 +1214,8 @@ PHP_METHOD(SoapServer, SoapServer)
 
 	SOAP_SERVER_BEGIN_CODE();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|a", &wsdl, &options) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
-	}
-
-	if (Z_TYPE_P(wsdl) == IS_STRING) {
-	} else if (Z_TYPE_P(wsdl) == IS_NULL) {
-		wsdl = NULL;
-	} else {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z!|a", &wsdl, &options) == FAILURE) {
+		return;
 	}
 
 	service = emalloc(sizeof(soapService));
@@ -1245,7 +1239,7 @@ PHP_METHOD(SoapServer, SoapServer)
 		    Z_TYPE_PP(tmp) == IS_STRING) {
 			service->uri = estrndup(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
 		} else if (wsdl == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid arguments. 'uri' option is required in nonWSDL mode.");
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'uri' option is required in nonWSDL mode");
 			return;
 		}
 
@@ -1260,7 +1254,7 @@ PHP_METHOD(SoapServer, SoapServer)
 		
 			encoding = xmlFindCharEncodingHandler(Z_STRVAL_PP(tmp));
     	if (encoding == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid arguments. Invalid 'encoding' option - '%s'.", Z_STRVAL_PP(tmp));
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid 'encoding' option - '%s'", Z_STRVAL_PP(tmp));
 	    } else {
 	      service->encoding = encoding;
 	    }
@@ -1297,7 +1291,7 @@ PHP_METHOD(SoapServer, SoapServer)
 		}
 
 	} else if (wsdl == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid arguments. 'uri' option is required in nonWSDL mode.");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "'uri' option is required in nonWSDL mode");
 	}
 
 	service->version = version;
@@ -1430,7 +1424,7 @@ PHP_METHOD(SoapServer, setObject)
 	FETCH_THIS_SERVICE(service);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &obj) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
+		return;
 	}
 
 	service->type = SOAP_OBJECT;
@@ -1507,7 +1501,7 @@ PHP_METHOD(SoapServer, addFunction)
 	FETCH_THIS_SERVICE(service);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &function_name) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
+		return;
 	}
 
 	/* TODO: could use zend_is_callable here */
@@ -1613,8 +1607,9 @@ PHP_METHOD(SoapServer, handle)
 
 	FETCH_THIS_SERVICE(service);
 	SOAP_GLOBAL(soap_version) = service->version;
+	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &arg, &arg_len) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
+		return;
 	}
 
 	if (SG(request_info).request_method &&
@@ -2145,7 +2140,7 @@ PHP_METHOD(SoapServer, fault)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|szs",
 	    &code, &code_len, &string, &string_len, &actor, &actor_len, &details,
 	    &name, &name_len) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
+		return;
 	}
 
 	soap_server_fault(code, string, actor, details, name TSRMLS_CC);
@@ -2168,7 +2163,7 @@ PHP_METHOD(SoapServer, addSoapHeader)
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &fault, soap_header_class_entry) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
+		return;
 	}
 
 	p = service->soap_headers_ptr;
@@ -2495,7 +2490,6 @@ PHP_METHOD(SoapClient, SoapClient)
 	SOAP_CLIENT_BEGIN_CODE();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|a", &wsdl, &options) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
 		return;
 	}
 
@@ -3018,30 +3012,26 @@ PHP_METHOD(SoapClient, __call)
 
 	HashPosition pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sa|zzz",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sa|a!zz",
 		&function, &function_len, &args, &options, &headers, &output_headers) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
+		return;
 	}
 
 	if (options) {
-		if (Z_TYPE_P(options) == IS_ARRAY) {
-			HashTable *ht = Z_ARRVAL_P(options);
-			if (zend_hash_find(ht, "location", sizeof("location"), (void**)&tmp) == SUCCESS &&
-			    Z_TYPE_PP(tmp) == IS_STRING) {
-				location = Z_STRVAL_PP(tmp);
-			}
+		HashTable *ht = Z_ARRVAL_P(options);
+		if (zend_hash_find(ht, "location", sizeof("location"), (void**)&tmp) == SUCCESS &&
+			Z_TYPE_PP(tmp) == IS_STRING) {
+			location = Z_STRVAL_PP(tmp);
+		}
 
-			if (zend_hash_find(ht, "soapaction", sizeof("soapaction"), (void**)&tmp) == SUCCESS &&
-			    Z_TYPE_PP(tmp) == IS_STRING) {
-				soap_action = Z_STRVAL_PP(tmp);
-			}
+		if (zend_hash_find(ht, "soapaction", sizeof("soapaction"), (void**)&tmp) == SUCCESS &&
+			Z_TYPE_PP(tmp) == IS_STRING) {
+			soap_action = Z_STRVAL_PP(tmp);
+		}
 
-			if (zend_hash_find(ht, "uri", sizeof("uri"), (void**)&tmp) == SUCCESS &&
-			    Z_TYPE_PP(tmp) == IS_STRING) {
-				uri = Z_STRVAL_PP(tmp);
-			}
-		} else if (Z_TYPE_P(options) != IS_NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "first parameter must be string or null");
+		if (zend_hash_find(ht, "uri", sizeof("uri"), (void**)&tmp) == SUCCESS &&
+			Z_TYPE_PP(tmp) == IS_STRING) {
+			uri = Z_STRVAL_PP(tmp);
 		}
 	}
 
@@ -3259,7 +3249,7 @@ PHP_METHOD(SoapClient, __doRequest)
 	    &location, &location_size,
 	    &action, &action_size,
 	    &version, &one_way) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
+		return;
 	}
 	if (SOAP_GLOBAL(features) & SOAP_WAIT_ONE_WAY_CALLS) {
 		one_way = 0;
@@ -3288,10 +3278,8 @@ PHP_METHOD(SoapClient, __setCookie)
 	int  name_len, val_len;
 	zval **cookies;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s",
-	    &name, &name_len, &val, &val_len) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
-	  RETURN_NULL();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &name, &name_len, &val, &val_len) == FAILURE) {
+		return;
 	}
 
 	if (val == NULL) {
@@ -3326,8 +3314,7 @@ PHP_METHOD(SoapClient, __setSoapHeaders)
 	zval *headers = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|z", &headers) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
-	  RETURN_NULL();
+		return;
 	}
 
 	if (headers == NULL || Z_TYPE_P(headers) == IS_NULL) {
@@ -3369,17 +3356,16 @@ PHP_METHOD(SoapClient, __setLocation)
 	int  location_len;
 	zval **tmp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s",
-	    &location, &location_len) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
-	  RETURN_NULL();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &location, &location_len) == FAILURE) {
+		return;
 	}
-	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "location", sizeof("location"),(void **) &tmp) == SUCCESS &&
-	    Z_TYPE_PP(tmp) == IS_STRING) {
-	  RETVAL_STRINGL(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
+
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "location", sizeof("location"),(void **) &tmp) == SUCCESS && Z_TYPE_PP(tmp) == IS_STRING) {
+		RETVAL_STRINGL(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
 	} else {
 	  RETVAL_NULL();
 	}
+
 	if (location && location_len) {
 		add_property_stringl(this_ptr, "location", location, location_len, 1);
 	} else {
