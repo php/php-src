@@ -1041,15 +1041,17 @@ static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mo
 	/* Check IV */
 	iv_s = NULL;
 	iv_size = mcrypt_enc_get_iv_size (td);
-	if (argc == 5) {
-		if (iv_size != Z_STRLEN_PP(iv)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, MCRYPT_IV_WRONG_SIZE);
-		} else {
-			iv_s = emalloc(iv_size + 1);
-			memcpy(iv_s, Z_STRVAL_PP(iv), iv_size);
-		}
-	} else if (argc == 4) {
-		if (iv_size != 0) {
+	
+	/* IV is required */
+	if (mcrypt_enc_mode_has_iv(td) == 1) {
+		if (argc == 5) {
+			if (iv_size != Z_STRLEN_PP(iv)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, MCRYPT_IV_WRONG_SIZE);
+			} else {
+				iv_s = emalloc(iv_size + 1);
+				memcpy(iv_s, Z_STRVAL_PP(iv), iv_size);
+			}
+		} else if (argc == 4) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempt to use an empty IV, which is NOT recommend");
 			iv_s = emalloc(iv_size + 1);
 			memset(iv_s, 0, iv_size + 1);

@@ -14,10 +14,10 @@ $enc_data = mcrypt_ecb($cipher, $key, $secret, MCRYPT_ENCRYPT, $iv);
 // we have to trim as AES rounds the blocks and decrypt doesnt detect that
 echo trim(mcrypt_ecb($cipher, $key, $enc_data, MCRYPT_DECRYPT, $iv)) . "\n";
 
-// a warning must be issued if we don't use a IV on a AES cipher, that usually requires an IV
+// a warning not must be issued if we don't use a IV on a AES cipher, that not requires an IV
 mcrypt_ecb($cipher, $key, $enc_data, MCRYPT_DECRYPT);
 
 --EXPECTF--
 PHP Testfest 2008
 
-Warning: mcrypt_ecb(): Attempt to use an empty IV, which is NOT recommend in %s on line %d
+
