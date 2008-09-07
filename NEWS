@@ -19,6 +19,8 @@ PHP                                                                        NEWS
 - Fixed a crash on invalid method in ReflectionParameter constructor.
   (Christian Seiler)
 
+- Fixed bug #46010 (warnings incorrectly generated for iv in ecb mode). 
+  (Felipe)
 - Fixed bug #45405 (snmp extension memory leak). (Federico Cuello, Rodrigo
   Campos)
 - Fixed bug #45956 (parse_ini_file() does not return false with syntax errors
