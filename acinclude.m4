@@ -2416,6 +2416,7 @@ AC_DEFUN([PHP_SETUP_ICONV], [
   $php_shtool mkdir -p ext/iconv
 
   echo > ext/iconv/php_have_bsd_iconv.h
+  echo > ext/iconv/php_have_ibm_iconv.h
   echo > ext/iconv/php_have_glibc_iconv.h
   echo > ext/iconv/php_have_libiconv.h
   echo > ext/iconv/php_have_iconv.h
