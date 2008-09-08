@@ -1,7 +1,5 @@
 --TEST--
 locale_get_display_variant()
---INI--
-unicode.runtime_encoding="utf-8"
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 --FILE--
@@ -93,7 +91,7 @@ include_once( 'ut_common.inc' );
 ut_run();
 
 ?>
---EXPECT--
+--EXPECTREGEX--
 locale='uk-ua_CALIFORNIA@currency=;currency=GRN'
 disp_locale=en :  display_variant=CALIFORNIA
 disp_locale=fr :  display_variant=CALIFORNIA
@@ -177,17 +175,17 @@ disp_locale=de :  display_variant=
 locale='de-CH-1901'
 disp_locale=en :  display_variant=Traditional German orthography
 disp_locale=fr :  display_variant=orthographe allemande traditionnelle
-disp_locale=de :  display_variant=1901
+disp_locale=de :  display_variant=(1901|alte deutsche Rechtschreibung)
 -----------------
 locale='sl-IT-nedis'
 disp_locale=en :  display_variant=Natisone dialect
 disp_locale=fr :  display_variant=dialecte de Natisone
-disp_locale=de :  display_variant=NEDIS
+disp_locale=de :  display_variant=(NEDIS|Natisone-Dialekt)
 -----------------
 locale='sl-Latn-IT-nedis'
 disp_locale=en :  display_variant=Natisone dialect
 disp_locale=fr :  display_variant=dialecte de Natisone
-disp_locale=de :  display_variant=NEDIS
+disp_locale=de :  display_variant=(NEDIS|Natisone-Dialekt)
 -----------------
 locale='de-DE'
 disp_locale=en :  display_variant=
