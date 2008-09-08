@@ -1,3 +1,138 @@
+2008-09-07  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN #46010
+
+    * (PHP_5_3)
+      NEWS:
+      - New entry
+
+    * (PHP_5_2)
+      ext/mcrypt/mcrypt.c
+      ext/mcrypt/mcrypt.c
+      ext/mcrypt/tests/bug46010.phpt
+      ext/mcrypt/tests/bug46010.phpt
+      ext/mcrypt/tests/mcrypt_ecb.phpt:
+      - MFH: Fixed bug #46010 (warnings incorrectly generated for iv in ecb mode)
+
+    * ext/mcrypt/mcrypt.c
+      ext/mcrypt/tests/bug46010.phpt
+      ext/mcrypt/tests/bug46010.phpt
+      ext/mcrypt/tests/bug46010.phpt:
+      - Fixed bug #46010 (warnings incorrectly generated for iv in ecb mode)
+
+2008-09-07  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      tests/security/open_basedir_copy.phpt
+      tests/security/open_basedir_copy.phpt
+      tests/security/open_basedir_dir.phpt
+      tests/security/open_basedir_dir.phpt
+      tests/security/open_basedir_error_log_variation.phpt
+      tests/security/open_basedir_error_log_variation.phpt
+      tests/security/open_basedir_file.phpt
+      tests/security/open_basedir_file.phpt
+      tests/security/open_basedir_file_get_contents.phpt
+      tests/security/open_basedir_file_get_contents.phpt
+      tests/security/open_basedir_file_put_contents.phpt
+      tests/security/open_basedir_file_put_contents.phpt
+      tests/security/open_basedir_fopen.phpt
+      tests/security/open_basedir_fopen.phpt
+      tests/security/open_basedir_opendir.phpt
+      tests/security/open_basedir_opendir.phpt
+      tests/security/open_basedir_scandir.phpt
+      tests/security/open_basedir_scandir.phpt:
+      - MFH: The exact error message might differ (it's "Not owner" on Solaris)
+
+    * tests/security/open_basedir_copy.phpt
+      tests/security/open_basedir_dir.phpt
+      tests/security/open_basedir_error_log_variation.phpt
+      tests/security/open_basedir_file.phpt
+      tests/security/open_basedir_file_get_contents.phpt
+      tests/security/open_basedir_file_put_contents.phpt
+      tests/security/open_basedir_fopen.phpt
+      tests/security/open_basedir_opendir.phpt
+      tests/security/open_basedir_parse_ini_file.phpt
+      tests/security/open_basedir_scandir.phpt:
+      - The exact error message might differ (it's "Not owner" on Solaris)
+
+2008-09-07  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/fileinfo/fileinfo.c
+      ext/fileinfo/libmagic/apprentice.c
+      ext/fileinfo/libmagic/compress.c
+      ext/fileinfo/libmagic/file.h
+      ext/fileinfo/libmagic/fsmagic.c
+      ext/fileinfo/libmagic/funcs.c
+      ext/fileinfo/libmagic/magic.c
+      ext/fileinfo/libmagic/magic.h
+      ext/fileinfo/tests/finfo_file_001.phpt
+      ext/fileinfo/tests/mime_content_type_001.phpt:
+      - MFB:
+        - use php's stream in libmagic
+        - remove duplicate code (like mime_content_type() compatibility function
+          now use the same base as finfo_file())
+        - make it portable (works now on windows too, belongs other OSes)
+      
+        - don't close caller streams in libmagic (prevent leak and zombie
+      stream)
+        - string returned by magic_* are freed on magic_close, duplicate before
+          calling magic_close (set return value)
+        - if stat failed, don't try to call magic_* (when FILEINFO_MODE_FILE)
+
+2008-09-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/session/tests/020.phpt
+      ext/session/tests/bug41600.phpt:
+      MFB
+
+    * (PHP_5_3)
+      ext/session/tests/020.phpt
+      ext/session/tests/bug41600.phpt:
+      - Revert idiotic patch (hint: Windows IS NOT the most important OS!)
+
+2008-09-07  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      main/rfc1867.c
+      main/rfc1867.c:
+      MFH: More accurate max_file_size / upload_max_filesize (fixes #45124)
+
+    * main/rfc1867.c:
+      More accurate max_file_size / upload_max_filesize (fixes #45124)
+
+    * (PHP_5_3)
+      NEWS
+      ext/hash/config.m4
+      ext/mhash/config.m4:
+      MFH: Fixed #45911 (Cannot disable ext/hash)
+
+    * ext/hash/config.m4
+      ext/mhash/config.m4:
+      Fixed #45911 (Cannot disable ext/hash)
+
+2008-09-07  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/fileinfo/libmagic/compress.c:
+      - Fix build
+
+    * (PHP_5_3)
+      ext/soap/soap.c
+      ext/soap/tests/bugs/bug31755.phpt:
+      - MFH: Removed the doubled error message (the error level is no longer
+      E_ERROR)
+
+    * ext/soap/soap.c
+      ext/soap/tests/bugs/bug31755.phpt:
+      - Removed the doubled error message (the error level is no longer E_ERROR)
+
+2008-09-07  Kalle Sommer Nielsen  <kalle.php@gmail.com>
+
+    * ext/session/tests/020.phpt:
+      Fix test on Windows
+
 2008-09-06  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/fileinfo/libmagic/compress.c:
