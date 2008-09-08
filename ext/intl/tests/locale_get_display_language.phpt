@@ -92,7 +92,7 @@ include_once( 'ut_common.inc' );
 ut_run();
 
 ?>
---EXPECT--
+--EXPECTREGEX--
 locale='uk-ua_CALIFORNIA@currency=;currency=GRN'
 disp_locale=en :  display_language=Ukrainian
 disp_locale=fr :  display_language=ukrainien
@@ -101,7 +101,7 @@ disp_locale=de :  display_language=Ukrainisch
 locale='root'
 disp_locale=en :  display_language=Root
 disp_locale=fr :  display_language=racine
-disp_locale=de :  display_language=root
+disp_locale=de :  display_language=[rR]oot
 -----------------
 locale='uk@currency=EURO'
 disp_locale=en :  display_language=Ukrainian
