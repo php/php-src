@@ -8,6 +8,10 @@ numfmt_format_currency()
 /*
  * Format a number using misc currencies/locales.
  */
+/* 
+ * TODO: doesn't pass on ICU 3.6 because 'ru' and 'uk' locales changed
+ * currency formatting.
+ */
 
 
 function ut_main()
@@ -26,7 +30,7 @@ function ut_main()
     foreach( $locales as $locale => $currency )
     {
         $fmt = ut_nfmt_create( $locale, NumberFormatter::CURRENCY );
-        $res_str .= "$locale: " . dump_str( ut_nfmt_format_currency( $fmt, $number, $currency ) ) . "\n";
+        $res_str .= "$locale: " . var_export( ut_nfmt_format_currency( $fmt, $number, $currency ), true ) . "\n";
     }
     return $res_str;
 }
@@ -37,9 +41,9 @@ include_once( 'ut_common.inc' );
 ut_run();
 
 ?>
---EXPECT--
+--EXPECTREGEX--
 en_UK: '£1,234,567.89'
-en_US: '$1,234,567.89'
-ru: '1 234 567,89р.'
-uk: 'грн. 1 234 567,89'
+en_US: '\$1,234,567.89'
+ru: '1 234 567,89 ?р.'
+uk: '(грн. )?1 234 567,89( грн.)?'
 en: 'UAH1,234,567.89'

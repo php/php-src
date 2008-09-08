@@ -1,7 +1,5 @@
 --TEST--
 locale_get_display_region()
---INI--
-unicode.runtime_encoding="utf-8"
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 --FILE--
@@ -93,7 +91,7 @@ include_once( 'ut_common.inc' );
 ut_run();
 
 ?>
---EXPECT--
+--EXPECTREGEX--
 locale='uk-ua_CALIFORNIA@currency=;currency=GRN'
 disp_locale=en :  display_region=Ukraine
 disp_locale=fr :  display_region=Ukraine
@@ -160,7 +158,7 @@ disp_locale=fr :  display_region=Chine
 disp_locale=de :  display_region=China
 -----------------
 locale='sr-Latn-CS'
-disp_locale=en :  display_region=Serbia And Montenegro
+disp_locale=en :  display_region=Serbia [Aa]nd Montenegro
 disp_locale=fr :  display_region=Serbie-et-Monténégro
 disp_locale=de :  display_region=Serbien und Montenegro
 -----------------
@@ -240,7 +238,7 @@ disp_locale=fr :  display_region=QM
 disp_locale=de :  display_region=QM
 -----------------
 locale='sr-Qaaa-CS'
-disp_locale=en :  display_region=Serbia And Montenegro
+disp_locale=en :  display_region=Serbia [Aa]nd Montenegro
 disp_locale=fr :  display_region=Serbie-et-Monténégro
 disp_locale=de :  display_region=Serbien und Montenegro
 -----------------

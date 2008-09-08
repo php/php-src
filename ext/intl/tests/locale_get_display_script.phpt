@@ -1,7 +1,5 @@
 --TEST--
 locale_get_display_script()
---INI--
-unicode.runtime_encoding="utf-8"
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 --FILE--

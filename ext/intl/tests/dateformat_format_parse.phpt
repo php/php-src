@@ -13,6 +13,8 @@ datefmt_format_code() and datefmt_parse_code()
 
 function ut_main()
 {
+	$timezone = 'GMT+5'; 
+
 	$locale_arr = array (
 		'en_US'
 	);
@@ -44,31 +46,22 @@ function ut_main()
 	    'tm_mday' => 3,
 	    'tm_mon' => 3,
 	    'tm_year' => 105,
-	    'tm_wday' => 0,
-	    'tm_yday' => 93,
-	    'tm_isdst' => 1
 	);
 	$localtime_arr2 = array (
-	    'tm_sec' => 24 ,
-	    'tm_min' => 3,
-	    'tm_hour' => 3,
-	    'tm_mday' => 3,
-	    'tm_mon' => 3,
+	    'tm_sec' => 21,
+	    'tm_min' => 5,
+	    'tm_hour' => 7,
+	    'tm_mday' => 13,
+	    'tm_mon' => 7,
 	    'tm_year' => 205,
-	    'tm_wday' => 5,
-	    'tm_yday' => 93,
-	    'tm_isdst' => 1
 	);
 	$localtime_arr3 = array (
-            'tm_sec' => 24 ,
-            'tm_min' => 3,
-            'tm_hour' => 3,
-            'tm_mday' => 3,
-            'tm_mon' => 3,
-            'tm_year' => -5,
-            'tm_wday' => 3,
-            'tm_yday' => 93,
-            'tm_isdst' => 1
+            'tm_sec' => 11,
+            'tm_min' => 13,
+            'tm_hour' => 0,
+            'tm_mday' => 17,
+            'tm_mon' => 11,
+            'tm_year' => -5
         );
 
 	$localtime_arr = array (
@@ -85,7 +78,7 @@ function ut_main()
 		foreach( $locale_arr as $locale_entry ){
 			foreach( $datetype_arr as $datetype_entry ) {
 				$res_str .= "\nIntlDateFormatter locale= $locale_entry ,datetype = $datetype_entry ,timetype =$datetype_entry ";
-				$fmt = ut_datefmt_create( $locale_entry , $datetype_entry ,$datetype_entry,'America/Los_Angeles', IntlDateFormatter::GREGORIAN  );
+				$fmt = ut_datefmt_create( $locale_entry , $datetype_entry ,$datetype_entry,$timezone);
 				$formatted = ut_datefmt_format( $fmt , $timestamp_entry);
 				$res_str .= "\nFormatted timestamp is : $formatted";
 				$parsed = ut_datefmt_parse( $fmt , $formatted);
@@ -110,7 +103,7 @@ function ut_main()
 		foreach( $locale_arr as $locale_entry ){
 			foreach( $datetype_arr as $datetype_entry ) {
 				$res_str .= "\nIntlDateFormatter locale= $locale_entry ,datetype = $datetype_entry ,timetype =$datetype_entry ";
-				$fmt = ut_datefmt_create( $locale_entry , $datetype_entry ,$datetype_entry);
+				$fmt = ut_datefmt_create( $locale_entry , $datetype_entry ,$datetype_entry,$timezone);
 				$formatted1 = ut_datefmt_format( $fmt , $localtime_entry);
 				if( intl_get_error_code() == U_ZERO_ERROR){
 					$res_str .= "\nFormatted localtime_array is : $formatted1";
@@ -152,13 +145,13 @@ Input timestamp is : 0
 ------------
 
 IntlDateFormatter locale= en_US ,datetype = 0 ,timetype =0 
-Formatted timestamp is : Wednesday, December 31, 1969 4:00:00 PM PT
+Formatted timestamp is : Thursday, January 1, 1970 5:00:00 AM GMT+05:00
 Parsed timestamp is : 0
 IntlDateFormatter locale= en_US ,datetype = 1 ,timetype =1 
-Formatted timestamp is : December 31, 1969 4:00:00 PM PST
+Formatted timestamp is : January 1, 1970 5:00:00 AM GMT+05:00
 Parsed timestamp is : 0
 IntlDateFormatter locale= en_US ,datetype = 2 ,timetype =2 
-Formatted timestamp is : Dec 31, 1969 4:00:00 PM
+Formatted timestamp is : Jan 1, 1970 5:00:00 AM
 Parsed timestamp is : 0
 ------------
 
@@ -166,13 +159,13 @@ Input timestamp is : -1200000
 ------------
 
 IntlDateFormatter locale= en_US ,datetype = 0 ,timetype =0 
-Formatted timestamp is : Wednesday, December 17, 1969 6:40:00 PM PT
+Formatted timestamp is : Thursday, December 18, 1969 7:40:00 AM GMT+05:00
 Parsed timestamp is : -1200000
 IntlDateFormatter locale= en_US ,datetype = 1 ,timetype =1 
-Formatted timestamp is : December 17, 1969 6:40:00 PM PST
+Formatted timestamp is : December 18, 1969 7:40:00 AM GMT+05:00
 Parsed timestamp is : -1200000
 IntlDateFormatter locale= en_US ,datetype = 2 ,timetype =2 
-Formatted timestamp is : Dec 17, 1969 6:40:00 PM
+Formatted timestamp is : Dec 18, 1969 7:40:00 AM
 Parsed timestamp is : -1200000
 ------------
 
@@ -180,13 +173,13 @@ Input timestamp is : 1200000
 ------------
 
 IntlDateFormatter locale= en_US ,datetype = 0 ,timetype =0 
-Formatted timestamp is : Wednesday, January 14, 1970 1:20:00 PM PT
+Formatted timestamp is : Thursday, January 15, 1970 2:20:00 AM GMT+05:00
 Parsed timestamp is : 1200000
 IntlDateFormatter locale= en_US ,datetype = 1 ,timetype =1 
-Formatted timestamp is : January 14, 1970 1:20:00 PM PST
+Formatted timestamp is : January 15, 1970 2:20:00 AM GMT+05:00
 Parsed timestamp is : 1200000
 IntlDateFormatter locale= en_US ,datetype = 2 ,timetype =2 
-Formatted timestamp is : Jan 14, 1970 1:20:00 PM
+Formatted timestamp is : Jan 15, 1970 2:20:00 AM
 Parsed timestamp is : 1200000
 ------------
 
@@ -194,15 +187,15 @@ Input timestamp is : 2200000000
 ------------
 
 IntlDateFormatter locale= en_US ,datetype = 0 ,timetype =0 
-Formatted timestamp is : Sunday, September 18, 2039 4:06:40 PM PT
+Formatted timestamp is : Monday, September 19, 2039 4:06:40 AM GMT+05:00
 Error while parsing as: 'datefmt_parse: parsing of input parametrs resulted in value larger than data type long can handle.
 The valid range of a timestamp is typically from Fri, 13 Dec 1901 20:45:54 GMT to Tue, 19 Jan 2038 03:14:07 GMT.: U_BUFFER_OVERFLOW_ERROR'
 IntlDateFormatter locale= en_US ,datetype = 1 ,timetype =1 
-Formatted timestamp is : September 18, 2039 4:06:40 PM PDT
+Formatted timestamp is : September 19, 2039 4:06:40 AM GMT+05:00
 Error while parsing as: 'datefmt_parse: parsing of input parametrs resulted in value larger than data type long can handle.
 The valid range of a timestamp is typically from Fri, 13 Dec 1901 20:45:54 GMT to Tue, 19 Jan 2038 03:14:07 GMT.: U_BUFFER_OVERFLOW_ERROR'
 IntlDateFormatter locale= en_US ,datetype = 2 ,timetype =2 
-Formatted timestamp is : Sep 18, 2039 4:06:40 PM
+Formatted timestamp is : Sep 19, 2039 4:06:40 AM
 Error while parsing as: 'datefmt_parse: parsing of input parametrs resulted in value larger than data type long can handle.
 The valid range of a timestamp is typically from Fri, 13 Dec 1901 20:45:54 GMT to Tue, 19 Jan 2038 03:14:07 GMT.: U_BUFFER_OVERFLOW_ERROR'
 ------------
@@ -211,15 +204,15 @@ Input timestamp is : -2200000000
 ------------
 
 IntlDateFormatter locale= en_US ,datetype = 0 ,timetype =0 
-Formatted timestamp is : Saturday, April 14, 1900 5:53:20 PM PT
+Formatted timestamp is : Sunday, April 15, 1900 5:53:20 AM GMT+05:00
 Error while parsing as: 'datefmt_parse: parsing of input parametrs resulted in value larger than data type long can handle.
 The valid range of a timestamp is typically from Fri, 13 Dec 1901 20:45:54 GMT to Tue, 19 Jan 2038 03:14:07 GMT.: U_BUFFER_OVERFLOW_ERROR'
 IntlDateFormatter locale= en_US ,datetype = 1 ,timetype =1 
-Formatted timestamp is : April 14, 1900 5:53:20 PM PDT
+Formatted timestamp is : April 15, 1900 5:53:20 AM GMT+05:00
 Error while parsing as: 'datefmt_parse: parsing of input parametrs resulted in value larger than data type long can handle.
 The valid range of a timestamp is typically from Fri, 13 Dec 1901 20:45:54 GMT to Tue, 19 Jan 2038 03:14:07 GMT.: U_BUFFER_OVERFLOW_ERROR'
 IntlDateFormatter locale= en_US ,datetype = 2 ,timetype =2 
-Formatted timestamp is : Apr 14, 1900 5:53:20 PM
+Formatted timestamp is : Apr 15, 1900 5:53:20 AM
 Error while parsing as: 'datefmt_parse: parsing of input parametrs resulted in value larger than data type long can handle.
 The valid range of a timestamp is typically from Fri, 13 Dec 1901 20:45:54 GMT to Tue, 19 Jan 2038 03:14:07 GMT.: U_BUFFER_OVERFLOW_ERROR'
 ------------
@@ -228,13 +221,13 @@ Input timestamp is : 90099999
 ------------
 
 IntlDateFormatter locale= en_US ,datetype = 0 ,timetype =0 
-Formatted timestamp is : Wednesday, November 8, 1972 11:46:39 AM PT
+Formatted timestamp is : Thursday, November 9, 1972 12:46:39 AM GMT+05:00
 Parsed timestamp is : 90099999
 IntlDateFormatter locale= en_US ,datetype = 1 ,timetype =1 
-Formatted timestamp is : November 8, 1972 11:46:39 AM PST
+Formatted timestamp is : November 9, 1972 12:46:39 AM GMT+05:00
 Parsed timestamp is : 90099999
 IntlDateFormatter locale= en_US ,datetype = 2 ,timetype =2 
-Formatted timestamp is : Nov 8, 1972 11:46:39 AM
+Formatted timestamp is : Nov 9, 1972 12:46:39 AM
 Parsed timestamp is : 90099999
 ------------
 
@@ -242,13 +235,13 @@ Input timestamp is : 3600
 ------------
 
 IntlDateFormatter locale= en_US ,datetype = 0 ,timetype =0 
-Formatted timestamp is : Wednesday, December 31, 1969 5:00:00 PM PT
+Formatted timestamp is : Thursday, January 1, 1970 6:00:00 AM GMT+05:00
 Parsed timestamp is : 3600
 IntlDateFormatter locale= en_US ,datetype = 1 ,timetype =1 
-Formatted timestamp is : December 31, 1969 5:00:00 PM PST
+Formatted timestamp is : January 1, 1970 6:00:00 AM GMT+05:00
 Parsed timestamp is : 3600
 IntlDateFormatter locale= en_US ,datetype = 2 ,timetype =2 
-Formatted timestamp is : Dec 31, 1969 5:00:00 PM
+Formatted timestamp is : Jan 1, 1970 6:00:00 AM
 Parsed timestamp is : 3600
 ------------
 
@@ -256,53 +249,53 @@ Input timestamp is : -3600
 ------------
 
 IntlDateFormatter locale= en_US ,datetype = 0 ,timetype =0 
-Formatted timestamp is : Wednesday, December 31, 1969 3:00:00 PM PT
+Formatted timestamp is : Thursday, January 1, 1970 4:00:00 AM GMT+05:00
 Parsed timestamp is : -3600
 IntlDateFormatter locale= en_US ,datetype = 1 ,timetype =1 
-Formatted timestamp is : December 31, 1969 3:00:00 PM PST
+Formatted timestamp is : January 1, 1970 4:00:00 AM GMT+05:00
 Parsed timestamp is : -3600
 IntlDateFormatter locale= en_US ,datetype = 2 ,timetype =2 
-Formatted timestamp is : Dec 31, 1969 3:00:00 PM
+Formatted timestamp is : Jan 1, 1970 4:00:00 AM
 Parsed timestamp is : -3600
 ------------
 
-Input localtime is : tm_sec : '24' , tm_min : '3' , tm_hour : '19' , tm_mday : '3' , tm_mon : '3' , tm_year : '105' , tm_wday : '0' , tm_yday : '93' , tm_isdst : '1' , 
+Input localtime is : tm_sec : '24' , tm_min : '3' , tm_hour : '19' , tm_mday : '3' , tm_mon : '3' , tm_year : '105' , 
 ------------
 
 IntlDateFormatter locale= en_US ,datetype = 0 ,timetype =0 
-Formatted localtime_array is : Sunday, April 3, 2005 7:03:24 PM PT
-Parsed array is: tm_sec : '24' , tm_min : '3' , tm_hour : '19' , tm_year : '105' , tm_mday : '3' , tm_wday : '0' , tm_yday : '93' , tm_mon : '3' , tm_isdst : '1' , 
+Formatted localtime_array is : Sunday, April 3, 2005 7:03:24 PM GMT+05:00
+Parsed array is: tm_sec : '24' , tm_min : '3' , tm_hour : '19' , tm_year : '105' , tm_mday : '3' , tm_wday : '0' , tm_yday : '93' , tm_mon : '3' , tm_isdst : '0' , 
 IntlDateFormatter locale= en_US ,datetype = 1 ,timetype =1 
-Formatted localtime_array is : April 3, 2005 7:03:24 PM PDT
-Parsed array is: tm_sec : '24' , tm_min : '3' , tm_hour : '19' , tm_year : '105' , tm_mday : '3' , tm_wday : '0' , tm_yday : '93' , tm_mon : '3' , tm_isdst : '1' , 
+Formatted localtime_array is : April 3, 2005 7:03:24 PM GMT+05:00
+Parsed array is: tm_sec : '24' , tm_min : '3' , tm_hour : '19' , tm_year : '105' , tm_mday : '3' , tm_wday : '0' , tm_yday : '93' , tm_mon : '3' , tm_isdst : '0' , 
 IntlDateFormatter locale= en_US ,datetype = 2 ,timetype =2 
 Formatted localtime_array is : Apr 3, 2005 7:03:24 PM
-Parsed array is: tm_sec : '24' , tm_min : '3' , tm_hour : '19' , tm_year : '105' , tm_mday : '3' , tm_wday : '0' , tm_yday : '93' , tm_mon : '3' , tm_isdst : '1' , 
+Parsed array is: tm_sec : '24' , tm_min : '3' , tm_hour : '19' , tm_year : '105' , tm_mday : '3' , tm_wday : '0' , tm_yday : '93' , tm_mon : '3' , tm_isdst : '0' , 
 ------------
 
-Input localtime is : tm_sec : '24' , tm_min : '3' , tm_hour : '3' , tm_mday : '3' , tm_mon : '3' , tm_year : '205' , tm_wday : '5' , tm_yday : '93' , tm_isdst : '1' , 
-------------
-
-IntlDateFormatter locale= en_US ,datetype = 0 ,timetype =0 
-Formatted localtime_array is : Friday, April 3, 2105 3:03:24 AM PT
-Parsed array is: tm_sec : '24' , tm_min : '3' , tm_hour : '3' , tm_year : '205' , tm_mday : '3' , tm_wday : '5' , tm_yday : '93' , tm_mon : '3' , tm_isdst : '1' , 
-IntlDateFormatter locale= en_US ,datetype = 1 ,timetype =1 
-Formatted localtime_array is : April 3, 2105 3:03:24 AM PDT
-Parsed array is: tm_sec : '24' , tm_min : '3' , tm_hour : '3' , tm_year : '205' , tm_mday : '3' , tm_wday : '5' , tm_yday : '93' , tm_mon : '3' , tm_isdst : '1' , 
-IntlDateFormatter locale= en_US ,datetype = 2 ,timetype =2 
-Formatted localtime_array is : Apr 3, 2105 3:03:24 AM
-Parsed array is: tm_sec : '24' , tm_min : '3' , tm_hour : '3' , tm_year : '205' , tm_mday : '3' , tm_wday : '5' , tm_yday : '93' , tm_mon : '3' , tm_isdst : '1' , 
-------------
-
-Input localtime is : tm_sec : '24' , tm_min : '3' , tm_hour : '3' , tm_mday : '3' , tm_mon : '3' , tm_year : '-5' , tm_wday : '3' , tm_yday : '93' , tm_isdst : '1' , 
+Input localtime is : tm_sec : '21' , tm_min : '5' , tm_hour : '7' , tm_mday : '13' , tm_mon : '7' , tm_year : '205' , 
 ------------
 
 IntlDateFormatter locale= en_US ,datetype = 0 ,timetype =0 
-Formatted localtime_array is : Wednesday, April 3, 1895 3:03:24 AM PT
-Parsed array is: tm_sec : '24' , tm_min : '3' , tm_hour : '3' , tm_year : '-5' , tm_mday : '3' , tm_wday : '3' , tm_yday : '93' , tm_mon : '3' , tm_isdst : '1' , 
+Formatted localtime_array is : Thursday, August 13, 2105 7:05:21 AM GMT+05:00
+Parsed array is: tm_sec : '21' , tm_min : '5' , tm_hour : '7' , tm_year : '205' , tm_mday : '13' , tm_wday : '4' , tm_yday : '225' , tm_mon : '7' , tm_isdst : '0' , 
 IntlDateFormatter locale= en_US ,datetype = 1 ,timetype =1 
-Formatted localtime_array is : April 3, 1895 3:03:24 AM PDT
-Parsed array is: tm_sec : '24' , tm_min : '3' , tm_hour : '3' , tm_year : '-5' , tm_mday : '3' , tm_wday : '3' , tm_yday : '93' , tm_mon : '3' , tm_isdst : '1' , 
+Formatted localtime_array is : August 13, 2105 7:05:21 AM GMT+05:00
+Parsed array is: tm_sec : '21' , tm_min : '5' , tm_hour : '7' , tm_year : '205' , tm_mday : '13' , tm_wday : '4' , tm_yday : '225' , tm_mon : '7' , tm_isdst : '0' , 
 IntlDateFormatter locale= en_US ,datetype = 2 ,timetype =2 
-Formatted localtime_array is : Apr 3, 1895 3:03:24 AM
-Parsed array is: tm_sec : '24' , tm_min : '3' , tm_hour : '3' , tm_year : '-5' , tm_mday : '3' , tm_wday : '3' , tm_yday : '93' , tm_mon : '3' , tm_isdst : '1' ,
+Formatted localtime_array is : Aug 13, 2105 7:05:21 AM
+Parsed array is: tm_sec : '21' , tm_min : '5' , tm_hour : '7' , tm_year : '205' , tm_mday : '13' , tm_wday : '4' , tm_yday : '225' , tm_mon : '7' , tm_isdst : '0' , 
+------------
+
+Input localtime is : tm_sec : '11' , tm_min : '13' , tm_hour : '0' , tm_mday : '17' , tm_mon : '11' , tm_year : '-5' , 
+------------
+
+IntlDateFormatter locale= en_US ,datetype = 0 ,timetype =0 
+Formatted localtime_array is : Tuesday, December 17, 1895 12:13:11 AM GMT+05:00
+Parsed array is: tm_sec : '11' , tm_min : '13' , tm_hour : '0' , tm_year : '-5' , tm_mday : '17' , tm_wday : '2' , tm_yday : '351' , tm_mon : '11' , tm_isdst : '0' , 
+IntlDateFormatter locale= en_US ,datetype = 1 ,timetype =1 
+Formatted localtime_array is : December 17, 1895 12:13:11 AM GMT+05:00
+Parsed array is: tm_sec : '11' , tm_min : '13' , tm_hour : '0' , tm_year : '-5' , tm_mday : '17' , tm_wday : '2' , tm_yday : '351' , tm_mon : '11' , tm_isdst : '0' , 
+IntlDateFormatter locale= en_US ,datetype = 2 ,timetype =2 
+Formatted localtime_array is : Dec 17, 1895 12:13:11 AM
+Parsed array is: tm_sec : '11' , tm_min : '13' , tm_hour : '0' , tm_year : '-5' , tm_mday : '17' , tm_wday : '2' , tm_yday : '351' , tm_mon : '11' , tm_isdst : '0' ,

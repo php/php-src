@@ -9,6 +9,10 @@ numfmt_format()
  * Format a number using misc locales/patterns.
  */
 
+/* 
+ * TODO: doesn't pass on ICU 3.6 because 'ru' and 'de' locales changed
+ * currency and percent formatting.
+ */
 
 function ut_main()
 {
@@ -25,10 +29,15 @@ function ut_main()
         1234999, // bad one
     );
 
+   $integer = array(
+        NumberFormatter::ORDINAL => '',
+        NumberFormatter::DURATION => '',
+   );
     $locales = array(
         'en_US',
         'ru_UA',
         'de',
+        'fr',
         'en_UK'
     );
 
@@ -37,7 +46,7 @@ function ut_main()
 
     foreach( $locales as $locale )
     {
-        $str_res .= "\n  Locale is: $locale\n";
+        $str_res .= "\nLocale is: $locale\n";
         foreach( $styles as $style => $pattern )
         {
             $fmt = ut_nfmt_create( $locale, $style, $pattern );
@@ -46,7 +55,7 @@ function ut_main()
 				$str_res .= "Bad formatter!\n";
 				continue;
 			}
-            $str_res .= dump_str( ut_nfmt_format( $fmt, $number ) ) . "\n";
+            $str_res .= dump( isset($integer[$style])?ut_nfmt_format( $fmt, $number, NumberFormatter::TYPE_INT32):ut_nfmt_format( $fmt, $number ) ) . "\n";
         }
     }
     return $str_res;
@@ -58,51 +67,63 @@ include_once( 'ut_common.inc' );
 ut_run();
 
 ?>
---EXPECT--
+--EXPECTREGEX--
 Locale is: en_US
 '1234567.89123457'
 '1,234,567.891'
-'$1,234,567.89'
+'\$1,234,567.89'
 '123,456,789%'
 '1.23456789123457E6'
 'one million, two hundred and thirty-four thousand, five hundred and sixty-seven point eight nine one two three four five seven'
-'1,234,568th'
-'342:56:08'
+'1,234,567th'
+'342:56:07'
 '#####.###'
 Bad formatter!
 
-  Locale is: ru_UA
+Locale is: ru_UA
 '1234567,89123457'
 '1 234 567,891'
 '1 234 567,89 грн.'
-'123 456 789%'
+'123 456 789 ?%'
 '1,23456789123457E6'
 'миллион два сто тридцать четыре тысяча пять сто шестьдесят восемь'
-'1 234 568'
-'1 234 568'
+'1 234 567'
+'1 234 567'
 '#####.###'
 Bad formatter!
 
-  Locale is: de
+Locale is: de
 '1234567,89123457'
 '1.234.567,891'
-'¤ 1.234.567,89'
-'123.456.789%'
+'(¤ )?1.234.567,89( ¤)?'
+'123.456.789 ?%'
 '1,23456789123457E6'
 'eine Million zweihundertvierunddreißigtausendfünfhundertsiebenundsechzig komma acht neun eins zwei drei vier fünf sieben'
-'1.234.568'
-'1.234.568'
+'1.234.567'
+'1.234.567'
 '#####.###'
 Bad formatter!
 
-  Locale is: en_UK
+Locale is: fr
+'1234567,89123457'
+'1 234 567,891'
+'1 234 567,89 ¤'
+'123 456 789 ?%'
+'1,23456789123457E6'
+'un million deux cents trente-quatre mille cinq cents soixante-sept virgule huit neuf un deux trois quatre cinq sept'
+'1 234 567'
+'1 234 567'
+'#####.###'
+Bad formatter!
+
+Locale is: en_UK
 '1234567.89123457'
 '1,234,567.891'
 '¤1,234,567.89'
 '123,456,789%'
 '1.23456789123457E6'
 'one million, two hundred and thirty-four thousand, five hundred and sixty-seven point eight nine one two three four five seven'
-'1,234,568th'
-'342:56:08'
+'1,234,567th'
+'342:56:07'
 '#####.###'
 Bad formatter!
