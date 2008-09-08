@@ -890,7 +890,8 @@ PHP_METHOD(SoapParam, SoapParam)
 		return;
 	}
 	if (name_length == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameter name");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter name");
+		return;
 	}
 
 #ifndef ZEND_ENGINE_2
@@ -915,10 +916,12 @@ PHP_METHOD(SoapHeader, SoapHeader)
 		return;
 	}
 	if (ns_len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid namespace");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid namespace");
+		return;
 	}
 	if (name_len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid header name");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid header name");
+		return;
 	}
 
 	add_property_stringl(this_ptr, "namespace", ns, ns_len, 1);
@@ -939,7 +942,7 @@ PHP_METHOD(SoapHeader, SoapHeader)
 	} else if (Z_TYPE_P(actor) == IS_STRING && Z_STRLEN_P(actor) > 0) {
 		add_property_stringl(this_ptr, "actor", Z_STRVAL_P(actor), Z_STRLEN_P(actor), 1);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid actor");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid actor");
 	}
 }
 
@@ -975,13 +978,16 @@ PHP_METHOD(SoapFault, SoapFault)
 		  fault_code = Z_STRVAL_PP(t_code);
 		  fault_code_len = Z_STRLEN_PP(t_code);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid fault code");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid fault code");
+			return;
 		}
 	} else  {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid fault code");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid fault code");
+		return;
 	}
 	if (fault_code != NULL && fault_code_len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid fault code");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid fault code");
+		return;
 	}
 	if (name != NULL && name_len == 0) {
 		name = NULL;
@@ -1058,7 +1064,8 @@ PHP_METHOD(SoapVar, SoapVar)
 		if (zend_hash_index_exists(&SOAP_GLOBAL(defEncIndex), Z_LVAL_P(type))) {
 			add_property_long(this_ptr, "enc_type", Z_LVAL_P(type));
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid type ID");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid type ID");
+			return;
 		}
 	}
 
@@ -1101,7 +1108,8 @@ static HashTable* soap_create_typemap(sdlPtr sdl, HashTable *ht TSRMLS_DC)
 		encodePtr enc, new_enc;
 
 		if (Z_TYPE_PP(tmp) != IS_ARRAY) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Wrong 'typemap' option");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Wrong 'typemap' option");
+			return;
 		}
 		ht2 = Z_ARRVAL_PP(tmp);
 
@@ -1239,7 +1247,7 @@ PHP_METHOD(SoapServer, SoapServer)
 		    Z_TYPE_PP(tmp) == IS_STRING) {
 			service->uri = estrndup(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
 		} else if (wsdl == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'uri' option is required in nonWSDL mode");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "'uri' option is required in nonWSDL mode");
 			return;
 		}
 
@@ -1253,11 +1261,12 @@ PHP_METHOD(SoapServer, SoapServer)
 			xmlCharEncodingHandlerPtr encoding;
 		
 			encoding = xmlFindCharEncodingHandler(Z_STRVAL_PP(tmp));
-    	if (encoding == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid 'encoding' option - '%s'", Z_STRVAL_PP(tmp));
-	    } else {
-	      service->encoding = encoding;
-	    }
+			if (encoding == NULL) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid 'encoding' option - '%s'", Z_STRVAL_PP(tmp));
+				return;
+			} else {
+			  service->encoding = encoding;
+			}
 		}
 
 		if (zend_hash_find(ht, "classmap", sizeof("classmap"), (void**)&tmp) == SUCCESS &&
@@ -1291,7 +1300,8 @@ PHP_METHOD(SoapServer, SoapServer)
 		}
 
 	} else if (wsdl == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "'uri' option is required in nonWSDL mode");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'uri' option is required in nonWSDL mode");
+		return;
 	}
 
 	service->version = version;
@@ -1341,10 +1351,12 @@ PHP_METHOD(SoapServer, setPersistence)
 				value == SOAP_PERSISTENCE_REQUEST) {
 				service->soap_class.persistance = value;
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Tried to set persistence with bogus value (%ld)", value);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to set persistence with bogus value (%ld)", value);
+				return;
 			}
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Tried to set persistence when you are using you SOAP SERVER in function mode, no persistence needed");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to set persistence when you are using you SOAP SERVER in function mode, no persistence needed");
+			return;
 		}
 	}
 
@@ -1400,7 +1412,8 @@ PHP_METHOD(SoapServer, setClass)
 			}
 		}
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Tried to set a non existant class (%s)", classname);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to set a non existant class (%s)", classname);
+		return;
 	}
 
 	if (argv) {
@@ -1523,7 +1536,8 @@ PHP_METHOD(SoapServer, addFunction)
 				zend_function *f;
 
 				if (Z_TYPE_PP(tmp_function) != IS_STRING) {
-					php_error_docref(NULL TSRMLS_CC, E_ERROR, "Tried to add a function that isn't a string");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to add a function that isn't a string");
+					return;
 				}
 
 				key_len = Z_STRLEN_PP(tmp_function);
@@ -1531,7 +1545,8 @@ PHP_METHOD(SoapServer, addFunction)
 				zend_str_tolower_copy(key, Z_STRVAL_PP(tmp_function), key_len);
 
 				if (zend_hash_find(EG(function_table), key, key_len+1, (void**)&f) == FAILURE) {
-					php_error_docref(NULL TSRMLS_CC, E_ERROR, "Tried to add a non existant function '%s'", Z_STRVAL_PP(tmp_function));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to add a non existant function '%s'", Z_STRVAL_PP(tmp_function));
+					return;
 				}
 
 				MAKE_STD_ZVAL(function_copy);
@@ -1552,7 +1567,8 @@ PHP_METHOD(SoapServer, addFunction)
 		zend_str_tolower_copy(key, Z_STRVAL_P(function_name), key_len);
 
 		if (zend_hash_find(EG(function_table), key, key_len+1, (void**)&f) == FAILURE) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Tried to add a non existant function '%s'", Z_STRVAL_P(function_name));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to add a non existant function '%s'", Z_STRVAL_P(function_name));
+			return;
 		}
 		if (service->soap_functions.ft == NULL) {
 			service->soap_functions.functions_all = FALSE;
@@ -1573,7 +1589,8 @@ PHP_METHOD(SoapServer, addFunction)
 			}
 			service->soap_functions.functions_all = TRUE;
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid value passed");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value passed");
+			return;
 		}
 	}
 
@@ -1696,14 +1713,16 @@ PHP_METHOD(SoapServer, handle)
 					ZVAL_STRINGL(params[0], post_data, post_data_length, 0);
 					INIT_PZVAL(params[0]);
 				} else {
-					php_error_docref(NULL TSRMLS_CC, E_ERROR,"Request is compressed with unknown compression '%s'",Z_STRVAL_PP(encoding));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING,"Request is compressed with unknown compression '%s'",Z_STRVAL_PP(encoding));
+					return;
 				}
 				if (call_user_function(CG(function_table), (zval**)NULL, &func, &retval, 1, params TSRMLS_CC) == SUCCESS &&
 				    Z_TYPE(retval) == IS_STRING) {
 					doc_request = soap_xmlParseMemory(Z_STRVAL(retval),Z_STRLEN(retval));
 					zval_dtor(&retval);
 				} else {
-					php_error_docref(NULL TSRMLS_CC, E_ERROR,"Can't uncompress compressed request");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING,"Can't uncompress compressed request");
+					return;
 				}
 			} else {
 				doc_request = soap_xmlParseMemory(post_data, post_data_length);
@@ -1901,7 +1920,8 @@ PHP_METHOD(SoapServer, handle)
 					call_status = call_user_function(EG(function_table), NULL, &h->function_name, &h->retval, h->num_params, h->parameters TSRMLS_CC);
 				}
 				if (call_status != SUCCESS) {
-					php_error_docref(NULL TSRMLS_CC, E_ERROR, "Function '%s' call failed", Z_STRVAL(h->function_name));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Function '%s' call failed", Z_STRVAL(h->function_name));
+					return;
 				}
 				if (Z_TYPE(h->retval) == IS_OBJECT &&
 				    instanceof_function(Z_OBJCE(h->retval), soap_fault_class_entry TSRMLS_CC)) {
@@ -2005,7 +2025,8 @@ PHP_METHOD(SoapServer, handle)
 		doc_return = serialize_response_call(function, response_name, service->uri, retval, soap_headers, soap_version TSRMLS_CC);
 		efree(response_name);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Function '%s' call failed", Z_STRVAL(function_name));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Function '%s' call failed", Z_STRVAL(function_name));
+		return;
 	}
 
 #ifdef ZEND_ENGINE_2
@@ -2159,7 +2180,8 @@ PHP_METHOD(SoapServer, addSoapHeader)
 	FETCH_THIS_SERVICE(service);
 
 	if (!service || !service->soap_headers_ptr) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "The SoapServer::addSoapHeader function may be called only during SOAP request processing");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The SoapServer::addSoapHeader function may be called only during SOAP request processing");
+		return;
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &fault, soap_header_class_entry) == FAILURE) {
@@ -2495,7 +2517,7 @@ PHP_METHOD(SoapClient, SoapClient)
 
 	if (Z_TYPE_P(wsdl) == IS_STRING) {
 	} else if (Z_TYPE_P(wsdl) != IS_NULL ) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "$wsdl must be string or null");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "$wsdl must be string or null");
 		return;
 	} else {
 		wsdl = NULL;
@@ -2513,7 +2535,7 @@ PHP_METHOD(SoapClient, SoapClient)
 			    Z_TYPE_PP(tmp) == IS_STRING) {
 				add_property_stringl(this_ptr, "uri", Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "'uri' option is required in nonWSDL mode");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "'uri' option is required in nonWSDL mode");
 				return;
 			}
 
@@ -2539,7 +2561,7 @@ PHP_METHOD(SoapClient, SoapClient)
 		    Z_TYPE_PP(tmp) == IS_STRING) {
 			add_property_stringl(this_ptr, "location", Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
 		} else if (wsdl == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'location' option is required in nonWSDL mode");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "'location' option is required in nonWSDL mode");
 			return;
 		}
 
@@ -2615,10 +2637,11 @@ PHP_METHOD(SoapClient, SoapClient)
 			xmlCharEncodingHandlerPtr encoding;
 		
 			encoding = xmlFindCharEncodingHandler(Z_STRVAL_PP(tmp));
-    	if (encoding == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid 'encoding' option - '%s'", Z_STRVAL_PP(tmp));
-	    } else {
-		    xmlCharEncCloseFunc(encoding);
+			if (encoding == NULL) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid 'encoding' option - '%s'", Z_STRVAL_PP(tmp));
+				return;
+			} else {
+				xmlCharEncCloseFunc(encoding);
 				add_property_stringl(this_ptr, "_encoding", Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);			
 			}
 		}
@@ -2669,7 +2692,7 @@ PHP_METHOD(SoapClient, SoapClient)
 		}
 
 	} else if (wsdl == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "'location' and 'uri' options are required in nonWSDL mode");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'location' and 'uri' options are required in nonWSDL mode");
 		return;
 	}
 
@@ -3048,7 +3071,8 @@ PHP_METHOD(SoapClient, __call)
 		Z_ADDREF_P(headers);
 		free_soap_headers = 1;
 	} else{
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid SOAP header");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid SOAP header");
+		return;
 	}
 
 	/* Add default headers */
@@ -3336,7 +3360,7 @@ PHP_METHOD(SoapClient, __setSoapHeaders)
 		Z_DELREF_P(default_headers);
 		add_property_zval(this_ptr, "__default_headers", default_headers);
 	} else{
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid SOAP header");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid SOAP header");
 	}
 	RETURN_TRUE;
 }
