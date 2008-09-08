@@ -1741,6 +1741,11 @@ COMMAND $cmd
 				version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? 'string' : 'unicode',
 				$wanted_re
 			);
+			$wanted_re = str_replace(
+				array('%u\|b%', '%b\|u%'),
+				version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? '' : 'u',
+				$wanted_re
+			);
 			// Stick to basics
 			$wanted_re = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $wanted_re);
 			$wanted_re = str_replace('%s', '[^\r\n]+', $wanted_re);
