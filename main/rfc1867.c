@@ -1484,6 +1484,7 @@ var_done:
 				s = u_strchr(ucd, 0x3b /*';'*/);
 				if (s != NULL) {
 					*s = 0;
+					ucd_len = u_strlen(ucd);
 				}
 			}
 
