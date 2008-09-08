@@ -448,7 +448,7 @@ function ut_datefmt_format( $fmt , $value )
 {
     return $GLOBALS['oo-mode'] ? $fmt->format(  $value ) : datefmt_format( $fmt ,  $value);
 }
-function ut_datefmt_parse( $fmt , $value ,$parse_pos=0 )
+function ut_datefmt_parse( $fmt , $value , &$parse_pos=0 )
 {
     return $GLOBALS['oo-mode'] ? $fmt->parse(  $value ,$parse_pos ) : datefmt_parse( $fmt ,  $value,$parse_pos );
 }
