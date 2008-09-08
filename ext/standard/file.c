@@ -2132,7 +2132,7 @@ PHP_FUNCTION(fgetcsv)
 	zval *zstream;
 	zend_uchar delimiter_free = 0, enclosure_free = 0, escape_free = 0;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "r|l!ttt", &zstream, &len,
+	if (zend_parse_parameters(argc TSRMLS_CC, "r|lttt", &zstream, &len,
 						&delimiter, &delimiter_len, &delimiter_type,
 						&enclosure, &enclosure_len, &enclosure_type,
 						&escape,    &escape_len,    &escape_type) == FAILURE) {
