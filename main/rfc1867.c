@@ -1172,6 +1172,7 @@ static SAPI_POST_HANDLER_FUNC(rfc1867_post_handler_unicode)
 						goto var_done;
 					}
 				} else {
+					u_val_len = 0;
 					u_val = USTR_MAKE("");
 				}
 
