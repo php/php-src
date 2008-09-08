@@ -446,7 +446,9 @@ static int fill_buffer(multipart_buffer *self TSRMLS_DC)
 			bytes_to_read -= actual_read;
 		} else {
 			if (!done) {
+#ifdef DEBUG_FILE_UPLOAD_INTENSIVE
 				fprintf(stderr, "\n###################\n%s\n#################\n", self->buffer);
+#endif
 				done = 1;
 			}
 			break;
