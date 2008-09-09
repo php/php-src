@@ -1,3 +1,133 @@
+2008-09-08  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/intl/tests/collator_create.phpt
+      ext/intl/tests/dateformat_format.phpt
+      ext/intl/tests/dateformat_format_parse.phpt
+      ext/intl/tests/formatter_format.phpt
+      ext/intl/tests/formatter_format_currency.phpt
+      ext/intl/tests/formatter_get_locale.phpt
+      ext/intl/tests/formatter_get_set_pattern.phpt
+      ext/intl/tests/locale_get_display_language.phpt
+      ext/intl/tests/locale_get_display_name.phpt
+      ext/intl/tests/locale_get_display_region.phpt
+      ext/intl/tests/locale_get_display_script.phpt
+      ext/intl/tests/locale_get_display_variant.phpt:
+      update tests from 5.x
+
+    * ext/intl/tests/ut_common.inc:
+      fix datefmt_parse function
+
+    * (PHP_5_3)
+      ext/intl/tests/formatter_format.phpt
+      ext/intl/tests/formatter_format_currency.phpt
+      ext/intl/tests/locale_get_display_language.phpt
+      ext/intl/tests/locale_get_display_name.phpt
+      ext/intl/tests/locale_get_display_region.phpt
+      ext/intl/tests/locale_get_display_variant.phpt:
+      fix tests to work both in ICU 3.6 and 3.8
+
+2008-09-08  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/soap/soap.c
+      ext/soap/tests/bugs/bug31755.phpt:
+      - MFH: Changed error level E_ERROR into E_WARNING in parameter validation
+
+    * ext/soap/soap.c
+      ext/soap/tests/bugs/bug31755.phpt:
+      - Changed error level E_ERROR into E_WARNING in parameter validation
+
+2008-09-08  Alexey Zakhlestin  <indeyets@gmail.com>
+
+    * (PHP_5_3)
+      ext/pcntl/tests/002.phpt:
+      pcntl_sigwaitinfo() and pcntl_sigtimedwait() functions are conditionally
+      enabled, so, test should verify if they are present
+
+2008-09-08  Antony Dovgal  <tony@daylessday.org>
+
+    * acinclude.m4
+      acinclude.m4
+      acinclude.m4:
+      add missing file
+
+2008-09-08  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      tests/basic/rfc1867_anonymous_upload.phpt
+      tests/basic/rfc1867_array_upload.phpt
+      tests/basic/rfc1867_boundary_1.phpt
+      tests/basic/rfc1867_boundary_2.phpt
+      tests/basic/rfc1867_empty_upload.phpt
+      tests/basic/rfc1867_file_upload_disabled.phpt
+      tests/basic/rfc1867_garbled_mime_headers.phpt
+      tests/basic/rfc1867_invalid_boundary.phpt
+      tests/basic/rfc1867_malicious_input.phpt
+      tests/basic/rfc1867_max_file_size.phpt
+      tests/basic/rfc1867_missing_boundary.phpt
+      tests/basic/rfc1867_missing_boundary_2.phpt
+      tests/basic/rfc1867_post_max_filesize.phpt
+      tests/basic/rfc1867_post_max_size.phpt:
+      MFH: Added tests for rfc1867 post handler
+
+    * tests/basic/rfc1867_anonymous_upload.phpt
+      tests/basic/rfc1867_anonymous_upload.phpt
+      tests/basic/rfc1867_array_upload.phpt
+      tests/basic/rfc1867_array_upload.phpt
+      tests/basic/rfc1867_boundary_1.phpt
+      tests/basic/rfc1867_boundary_1.phpt
+      tests/basic/rfc1867_boundary_2.phpt
+      tests/basic/rfc1867_boundary_2.phpt
+      tests/basic/rfc1867_empty_upload.phpt
+      tests/basic/rfc1867_empty_upload.phpt
+      tests/basic/rfc1867_file_upload_disabled.phpt
+      tests/basic/rfc1867_file_upload_disabled.phpt
+      tests/basic/rfc1867_garbled_mime_headers.phpt
+      tests/basic/rfc1867_garbled_mime_headers.phpt
+      tests/basic/rfc1867_invalid_boundary.phpt
+      tests/basic/rfc1867_invalid_boundary.phpt
+      tests/basic/rfc1867_malicious_input.phpt
+      tests/basic/rfc1867_malicious_input.phpt
+      tests/basic/rfc1867_max_file_size.phpt
+      tests/basic/rfc1867_max_file_size.phpt
+      tests/basic/rfc1867_missing_boundary.phpt
+      tests/basic/rfc1867_missing_boundary.phpt
+      tests/basic/rfc1867_missing_boundary_2.phpt
+      tests/basic/rfc1867_missing_boundary_2.phpt
+      tests/basic/rfc1867_post_max_filesize.phpt
+      tests/basic/rfc1867_post_max_filesize.phpt
+      tests/basic/rfc1867_post_max_size.phpt
+      tests/basic/rfc1867_post_max_size.phpt:
+      
+      Added tests for rfc1867 post handler
+
+    * (PHP_5_3)
+      run-tests.php:
+      MFH: run-tests.php: Added %u|b% placeholder, like %unicode|string%, for
+      array keys in var_dump() output.
+
+    * run-tests.php:
+      run-tests.php: Added %u|b% placeholder, like %unicode|string%, for array
+      keys in var_dump() output.
+
+    * main/rfc1867.c:
+      Fix the "Content-Type contains ';'" case in rfc1867 post handler
+
+    * main/rfc1867.c:
+      fix empty-value case in rfc1867 post handler
+
+    * main/rfc1867.c:
+      comment out debug printf
+
+2008-09-08  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/pgsql.c
+      ext/standard/file.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.c:
+      - Fixed some wrong format parameters
+
 2008-09-07  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
