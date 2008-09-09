@@ -1109,7 +1109,7 @@ static HashTable* soap_create_typemap(sdlPtr sdl, HashTable *ht TSRMLS_DC)
 
 		if (Z_TYPE_PP(tmp) != IS_ARRAY) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Wrong 'typemap' option");
-			return;
+			return NULL;
 		}
 		ht2 = Z_ARRVAL_PP(tmp);
 
