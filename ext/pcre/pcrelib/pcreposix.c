@@ -158,7 +158,7 @@ static const char *const pstring[] = {
 *          Translate error code to string        *
 *************************************************/
 
-PCREPOSIX_EXP_DEFN size_t
+PCREPOSIX_EXP_DEFN size_t PCRE_CALL_CONVENTION
 regerror(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size)
 {
 const char *message, *addmessage;
@@ -193,7 +193,7 @@ return length + addlength;
 *           Free store held by a regex           *
 *************************************************/
 
-PCREPOSIX_EXP_DEFN void
+PCREPOSIX_EXP_DEFN void PCRE_CALL_CONVENTION
 regfree(regex_t *preg)
 {
 (pcre_free)(preg->re_pcre);
@@ -216,7 +216,7 @@ Returns:      0 on success
               various non-zero codes on failure
 */
 
-PCREPOSIX_EXP_DEFN int
+PCREPOSIX_EXP_DEFN int PCRE_CALL_CONVENTION
 regcomp(regex_t *preg, const char *pattern, int cflags)
 {
 const char *errorptr;
@@ -258,7 +258,7 @@ If REG_NOSUB was specified at compile time, the PCRE_NO_AUTO_CAPTURE flag will
 be set. When this is the case, the nmatch and pmatch arguments are ignored, and
 the only result is yes/no/error. */
 
-PCREPOSIX_EXP_DEFN int
+PCREPOSIX_EXP_DEFN int PCRE_CALL_CONVENTION
 regexec(const regex_t *preg, const char *string, size_t nmatch,
   regmatch_t pmatch[], int eflags)
 {

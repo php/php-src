@@ -763,7 +763,7 @@ of case for anything other than the ASCII letters. /
     \x{1b00}\x{12000}\x{7c0}\x{a840}\x{10900}
 
 /The next two are special cases where the lengths of the different cases of the 
-same character differ. The first went wrong with heap fram storage; the 2nd
+same character differ. The first went wrong with heap frame storage; the 2nd
 was broken in all cases./
 
 /^\x{023a}+?(\x{0130}+)/8i
@@ -906,5 +906,41 @@ was broken in all cases./
 /\pL{2}+/8BZ
 
 /\p{Cc}{2}+/8BZ
+
+/\x{c0}+\x{116}+/8i
+    \x{c0}\x{e0}\x{116}\x{117}
+
+/[\x{c0}\x{116}]+/8i
+    \x{c0}\x{e0}\x{116}\x{117}
+
+/\p{Carian}\p{Cham}\p{Kayah_Li}\p{Lepcha}\p{Lycian}\p{Lydian}\p{Ol_Chiki}\p{Rejang}\p{Saurashtra}\p{Sundanese}\p{Vai}/8
+    \x{102A4}\x{AA52}\x{A91D}\x{1C46}\x{10283}\x{1092E}\x{1C6B}\x{A93B}\x{A8BF}\x{1BA0}\x{A50A}====
+
+/\x{a77d}\x{1d79}/8i
+    \x{a77d}\x{1d79}
+    \x{1d79}\x{a77d} 
+
+/\x{a77d}\x{1d79}/8
+    \x{a77d}\x{1d79}
+    ** Failers 
+    \x{1d79}\x{a77d} 
+
+/(A)\1/8i
+    AA
+    Aa
+    aa
+    aA
+
+/(\x{de})\1/8i
+    \x{de}\x{de}
+    \x{de}\x{fe}
+    \x{fe}\x{fe}
+    \x{fe}\x{de}
+
+/(\x{10a})\1/8i
+    \x{10a}\x{10a}
+    \x{10a}\x{10b}
+    \x{10b}\x{10b}
+    \x{10b}\x{10a}
 
 / End of testinput6 /

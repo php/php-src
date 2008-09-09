@@ -85,8 +85,6 @@ The following are generic comments about building the PCRE C library "by hand".
 
        pcre_internal.h
        ucp.h
-       ucpinternal.h
-       ucptable.h
 
  (5) Also ensure that you have the following file, which is #included as source
      when building a debugging version of PCRE, and is also used by pcretest.
@@ -113,7 +111,7 @@ The following are generic comments about building the PCRE C library "by hand".
        pcre_study.c
        pcre_tables.c
        pcre_try_flipped.c
-       pcre_ucp_searchfuncs.c
+       pcre_ucd.c
        pcre_valid_utf8.c
        pcre_version.c
        pcre_xclass.c
@@ -188,6 +186,17 @@ If you want to statically link a program against a PCRE library in the form of
 a non-dll .a file, you must define PCRE_STATIC before including pcre.h,
 otherwise the pcre_malloc() and pcre_free() exported functions will be declared
 __declspec(dllimport), with unwanted results.
+
+
+CALLING CONVENTIONS IN WINDOWS ENVIRONMENTS
+
+It is possible to compile programs to use different calling conventions using
+MSVC. Search the web for "calling conventions" for more information. To make it
+easier to change the calling convention for the exported functions in the
+PCRE library, the macro PCRE_CALL_CONVENTION is present in all the external
+definitions. It can be set externally when compiling (e.g. in CFLAGS). If it is
+not set, it defaults to empty; the default calling convention is then used
+(which is what is wanted most of the time).
 
 
 COMMENTS ABOUT WIN32 BUILDS (see also "BUILDING PCRE WITH CMAKE" below)
@@ -428,5 +437,5 @@ $!   Locale could not be set to fr
 $!
 =========================
 
-Last Updated: 25 January 2008
+Last Updated: 05 September 2008
 ****

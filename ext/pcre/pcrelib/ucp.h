@@ -121,11 +121,24 @@ enum {
   ucp_Tifinagh,
   ucp_Ugaritic,
   ucp_Yi,
-  ucp_Balinese,      /* New for Unicode 5.0.0 */
-  ucp_Cuneiform,     /* New for Unicode 5.0.0 */
-  ucp_Nko,           /* New for Unicode 5.0.0 */
-  ucp_Phags_Pa,      /* New for Unicode 5.0.0 */
-  ucp_Phoenician     /* New for Unicode 5.0.0 */
+  /* New for Unicode 5.0: */
+  ucp_Balinese,
+  ucp_Cuneiform,
+  ucp_Nko,
+  ucp_Phags_Pa,
+  ucp_Phoenician,
+  /* New for Unicode 5.1: */
+  ucp_Carian,
+  ucp_Cham,
+  ucp_Kayah_Li,
+  ucp_Lepcha,
+  ucp_Lycian,
+  ucp_Lydian,
+  ucp_Ol_Chiki,
+  ucp_Rejang,
+  ucp_Saurashtra,
+  ucp_Sundanese,
+  ucp_Vai
 };
 
 #endif

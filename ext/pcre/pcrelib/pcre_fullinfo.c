@@ -63,7 +63,7 @@ Arguments:
 Returns:           0 if data returned, negative on error
 */
 
-PCRE_EXP_DEFN int
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre_fullinfo(const pcre *argument_re, const pcre_extra *extra_data, int what,
   void *where)
 {

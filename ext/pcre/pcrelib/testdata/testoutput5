@@ -1628,4 +1628,17 @@ No match
     ab  
 No match
 
+/(\x{de})\1/
+    \x{de}\x{de}
+ 0: \xde\xde
+ 1: \xde
+    \x{123} 
+** Character \x{123} is greater than 255 and UTF-8 mode is not enabled.
+** Truncation will probably give the wrong result.
+No match
+
+/X/8f<any> 
+    A\x{1ec5}ABCXYZ
+ 0: X
+
 / End of testinput5 /
