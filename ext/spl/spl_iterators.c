@@ -1499,6 +1499,9 @@ static inline void spl_dual_it_rewind(spl_dual_it_object *intern TSRMLS_DC)
 
 static inline int spl_dual_it_valid(spl_dual_it_object *intern TSRMLS_DC)
 {
+	if (!intern->inner.iterator) {
+		return FAILURE;
+	}
 	/* FAILURE / SUCCESS */
 	return intern->inner.iterator->funcs->valid(intern->inner.iterator TSRMLS_CC);
 }
