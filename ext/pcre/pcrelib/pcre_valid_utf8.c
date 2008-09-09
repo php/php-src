@@ -152,6 +152,9 @@ for (p = string; length-- > 0; p++)
     if ((*(++p) & 0xc0) != 0x80) return p - string;
     }
   }
+#else
+(void)(string);  /* Keep picky compilers happy */
+(void)(length);
 #endif
 
 return -1;

@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.3.0 Alpha 3
+- Upgraded bundled PCRE to version 7.8. (Nuno)
 - Changed Soap methods error level, now it is no longer E_ERROR. (Felipe)
 
 - Fixed bug #45911 (Cannot disable ext/hash). (Arnaud)

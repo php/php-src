@@ -1431,7 +1431,7 @@ of case for anything other than the ASCII letters. /
  0: \x{1b00}\x{12000}\x{7c0}\x{a840}\x{10900}
 
 /The next two are special cases where the lengths of the different cases of the 
-same character differ. The first went wrong with heap fram storage; the 2nd
+same character differ. The first went wrong with heap frame storage; the 2nd
 was broken in all cases./
 
 /^\x{023a}+?(\x{0130}+)/8i
@@ -1678,5 +1678,73 @@ No match
         Ket
         End
 ------------------------------------------------------------------
+
+/\x{c0}+\x{116}+/8i
+    \x{c0}\x{e0}\x{116}\x{117}
+ 0: \x{c0}\x{e0}\x{116}\x{117}
+
+/[\x{c0}\x{116}]+/8i
+    \x{c0}\x{e0}\x{116}\x{117}
+ 0: \x{c0}\x{e0}\x{116}\x{117}
+
+/\p{Carian}\p{Cham}\p{Kayah_Li}\p{Lepcha}\p{Lycian}\p{Lydian}\p{Ol_Chiki}\p{Rejang}\p{Saurashtra}\p{Sundanese}\p{Vai}/8
+    \x{102A4}\x{AA52}\x{A91D}\x{1C46}\x{10283}\x{1092E}\x{1C6B}\x{A93B}\x{A8BF}\x{1BA0}\x{A50A}====
+ 0: \x{102a4}\x{aa52}\x{a91d}\x{1c46}\x{10283}\x{1092e}\x{1c6b}\x{a93b}\x{a8bf}\x{1ba0}\x{a50a}
+
+/\x{a77d}\x{1d79}/8i
+    \x{a77d}\x{1d79}
+ 0: \x{a77d}\x{1d79}
+    \x{1d79}\x{a77d} 
+ 0: \x{1d79}\x{a77d}
+
+/\x{a77d}\x{1d79}/8
+    \x{a77d}\x{1d79}
+ 0: \x{a77d}\x{1d79}
+    ** Failers 
+No match
+    \x{1d79}\x{a77d} 
+No match
+
+/(A)\1/8i
+    AA
+ 0: AA
+ 1: A
+    Aa
+ 0: Aa
+ 1: A
+    aa
+ 0: aa
+ 1: a
+    aA
+ 0: aA
+ 1: a
+
+/(\x{de})\1/8i
+    \x{de}\x{de}
+ 0: \x{de}\x{de}
+ 1: \x{de}
+    \x{de}\x{fe}
+ 0: \x{de}\x{fe}
+ 1: \x{de}
+    \x{fe}\x{fe}
+ 0: \x{fe}\x{fe}
+ 1: \x{fe}
+    \x{fe}\x{de}
+ 0: \x{fe}\x{de}
+ 1: \x{fe}
+
+/(\x{10a})\1/8i
+    \x{10a}\x{10a}
+ 0: \x{10a}\x{10a}
+ 1: \x{10a}
+    \x{10a}\x{10b}
+ 0: \x{10a}\x{10b}
+ 1: \x{10a}
+    \x{10b}\x{10b}
+ 0: \x{10b}\x{10b}
+ 1: \x{10b}
+    \x{10b}\x{10a}
+ 0: \x{10b}\x{10a}
+ 1: \x{10b}
 
 / End of testinput6 /
