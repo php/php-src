@@ -43,6 +43,11 @@ static const char rcsid[] = "#(@) $Id$";
  *   9/1999 - 10/2000
  * HISTORY
  *   $Log$
+ *   Revision 1.8.4.3  2007/09/18 19:49:53  iliaa
+ *
+ *   Fixed bug #42189 (xmlrpc_set_type() crashes php on invalid datetime
+ *     values).
+ *
  *   Revision 1.8.4.2  2007/06/07 09:07:36  tony2001
  *   MFH: php_localtime_r() checks
  *
@@ -161,11 +166,21 @@ static const char rcsid[] = "#(@) $Id$";
 * Begin Time Functions *
 ***********************/
 
+static time_t mkgmtime(struct tm *tm)
+{
+    static const int mdays[12] = {0,31,59,90,120,151,181,212,243,273,304,334};
+
+    return ((((((tm->tm_year - 70) * 365) + mdays[tm->tm_mon] + tm->tm_mday-1 +
+                  (tm->tm_year-68-1+(tm->tm_mon>=2))/4) * 24) + tm->tm_hour) * 60 +
+        tm->tm_min) * 60 + tm->tm_sec;
+}
+
 static int date_from_ISO8601 (const char *text, time_t * value) {
    struct tm tm;
    int n;
    int i;
-	char buf[18];
+   char buf[30];
+	
 
 	if (strchr (text, '-')) {
 		char *p = (char *) text, *p2 = buf;
@@ -173,6 +188,9 @@ static int date_from_ISO8601 (const char *text, time_t * value) {
 			if (*p != '-') {
 				*p2 = *p;
 				p2++;
+				if (p2-buf >= sizeof(buf)) {
+					return -1;
+				}
 			}
 			p++;
 		}
@@ -181,10 +199,6 @@ static int date_from_ISO8601 (const char *text, time_t * value) {
 
 
    tm.tm_isdst = -1;
-
-   if(strlen(text) < 17) {
-      return -1;
-   }
 
 #define XMLRPC_IS_NUMBER(x) if (x < '0' || x > '9') return -1;
 
@@ -238,7 +252,7 @@ static int date_from_ISO8601 (const char *text, time_t * value) {
 
    tm.tm_year -= 1900;
 
-   *value = mktime(&tm);
+   *value = mkgmtime(&tm);
 
    return 0;
 
@@ -246,14 +260,14 @@ static int date_from_ISO8601 (const char *text, time_t * value) {
 
 static int date_to_ISO8601 (time_t value, char *buf, int length) {
    struct tm *tm, tmbuf;
-   tm = php_localtime_r(&value, &tmbuf);
+   tm = php_gmtime_r(&value, &tmbuf);
    if (!tm) {
 	   return 0;
    }
 #if 0  /* TODO: soap seems to favor this method. xmlrpc the latter. */
 	return strftime (buf, length, "%Y-%m-%dT%H:%M:%SZ", tm);
 #else
-   return strftime(buf, length, "%Y%m%dT%H:%M:%S", tm);
+   return strftime(buf, length, "%Y%m%dT%H:%M:%SZ", tm);
 #endif
 }
 
@@ -1524,8 +1538,7 @@ void XMLRPC_SetValueDateTime(XMLRPC_VALUE value, time_t time) {
       date_to_ISO8601(time, timeBuf, sizeof(timeBuf));
 
       if(timeBuf[0]) {
-         simplestring_clear(&value->str);
-         simplestring_add(&value->str, timeBuf);
+         XMLRPC_SetValueDateTime_ISO8601 (value, timeBuf);
       }
    }
 }
@@ -1701,8 +1714,11 @@ void XMLRPC_SetValueDateTime_ISO8601(XMLRPC_VALUE value, const char* s) {
    if(value) {
       time_t time_val = 0;
       if(s) {
+         value->type = xmlrpc_datetime;
          date_from_ISO8601(s, &time_val);
-         XMLRPC_SetValueDateTime(value, time_val);
+         value->i = time_val;
+         simplestring_clear(&value->str);
+         simplestring_add(&value->str, s);
       }
    }
 }
