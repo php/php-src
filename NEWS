@@ -18,12 +18,9 @@ PHP                                                                        NEWS
   (Scott)
 - Fixed a crash on invalid method in ReflectionParameter constructor.
   (Christian Seiler)
-
 - Fixed bug #46031 (Segfault in AppendIterator::next). (Arnaud)
 - Fixed bug #46010 (warnings incorrectly generated for iv in ecb mode). 
   (Felipe)
-- Fixed bug #45405 (snmp extension memory leak). (Federico Cuello, Rodrigo
-  Campos)
 - Fixed bug #45956 (parse_ini_file() does not return false with syntax errors
   in parsed file). (Jani)
 - Fixed bug #45862 (get_class_vars is inconsistent with 'protected' and 
@@ -45,6 +42,8 @@ PHP                                                                        NEWS
 - Fixed bug #45556 (Return value from callback isn't freed). (Felipe)
 - Fixed bug #45555 (Segfault with invalid non-string as 
   register_introspection_callback). (Christian Seiler)
+- Fixed bug #45553 (Using XPath to return values for attributes with a 
+  namespace does not work). (Rob)
 - Fixed bug #45486 (mb_send_mail(); header 'Content-Type: text/plain; charset=' 
   parsing incorrect). (Felipe)
 - Fixed bug #45485 (strip_tags and <?XML tag). (Felipe)
@@ -56,6 +55,8 @@ PHP                                                                        NEWS
   before shutdown) (basant dot kukreja at sun dot com)
 - Fixed bug #45406 (session.serialize_handler declared by shared extension 
   fails). (Kalle, oleg dot grenrus at dynamoid dot com)
+- Fixed bug #45405 (snmp extension memory leak). (Federico Cuello, Rodrigo
+  Campos)
 - Fixed bug #45392 (ob_start()/ob_end_clean() and memory_limit). (Arnaud)
 - Fixed bug #45352 (Segmentation fault because of tick function on second
   request). (Dmitry)
