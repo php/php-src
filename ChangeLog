@@ -1,3 +1,87 @@
+2008-09-09  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/spl/spl_iterators.c
+      ext/spl/spl_iterators.c
+      ext/spl/tests/bug46031.phpt
+      ext/spl/tests/bug46031.phpt:
+      MFH: Fixed bug #46031 (Segfault in AppendIterator::next)
+
+    * ext/spl/spl_iterators.c
+      ext/spl/tests/bug46031.phpt
+      ext/spl/tests/bug46031.phpt
+      ext/spl/tests/bug46031.phpt:
+      Fixed bug #46031 (Segfault in AppendIterator::next)
+
+2008-09-09  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      - New try
+
+2008-09-09  Nuno Lopes  <nunoplopes@gmail.com>
+
+    * ext/pcre/pcrelib/pcre_ucd.c
+      ext/pcre/pcrelib/pcre_ucd.c
+      ext/pcre/pcrelib/pcre_ucp_searchfuncs.c
+      ext/pcre/pcrelib/pcre_valid_utf8.c
+      ext/pcre/pcrelib/pcre_version.c
+      ext/pcre/pcrelib/pcre_xclass.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/ucp.h
+      ext/pcre/pcrelib/ucpinternal.h
+      ext/pcre/pcrelib/ucptable.h
+      ext/pcre/pcrelib/doc/pcre.txt:
+      
+      file pcre_ucd.c was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      ext/pcre/config.w32
+      ext/pcre/config0.m4
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/config.h
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_config.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_fullinfo.c
+      ext/pcre/pcrelib/pcre_get.c
+      ext/pcre/pcrelib/pcre_info.c
+      ext/pcre/pcrelib/pcre_internal.h
+      ext/pcre/pcrelib/pcre_ord2utf8.c
+      ext/pcre/pcrelib/pcre_refcount.c
+      ext/pcre/pcrelib/pcre_study.c
+      ext/pcre/pcrelib/pcre_tables.c
+      ext/pcre/pcrelib/testdata/testinput1
+      ext/pcre/pcrelib/testdata/testinput2
+      ext/pcre/pcrelib/testdata/testinput4
+      ext/pcre/pcrelib/testdata/testinput5
+      ext/pcre/pcrelib/testdata/testinput6
+      ext/pcre/pcrelib/testdata/testinput7
+      ext/pcre/pcrelib/testdata/testinput8
+      ext/pcre/pcrelib/testdata/testinput9
+      ext/pcre/pcrelib/testdata/testoutput1
+      ext/pcre/pcrelib/testdata/testoutput2
+      ext/pcre/pcrelib/testdata/testoutput4
+      ext/pcre/pcrelib/testdata/testoutput5
+      ext/pcre/pcrelib/testdata/testoutput6
+      ext/pcre/pcrelib/testdata/testoutput7
+      ext/pcre/pcrelib/testdata/testoutput8
+      ext/pcre/pcrelib/testdata/testoutput9:
+      upgrade to PCRE 7.8. this includes a security improvement. I'll upgrade
+      HEAD later (not urgent..)
+
+2008-09-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/soap/soap.c:
+      Fixed a compiler warning
+
 2008-09-08  Stanislav Malyshev  <stas@zend.com>
 
     * ext/intl/tests/collator_create.phpt
