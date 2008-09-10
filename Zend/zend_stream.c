@@ -51,6 +51,11 @@ static size_t zend_stream_stdio_fsizer(void *handle TSRMLS_DC) /* {{{ */
 {
 	struct stat buf;
 	if (handle && fstat(fileno((FILE*)handle), &buf) == 0) {
+#ifdef S_ISREG
+		if (!S_ISREG(buf.st_mode)) {
+			return 0;
+		}
+#endif
 		return buf.st_size;
 	}
 	return 0;
@@ -96,6 +101,11 @@ static size_t zend_stream_fsize(zend_file_handle *file_handle TSRMLS_DC) /* {{{ 
 		return file_handle->handle.stream.fsizer(file_handle->handle.stream.handle TSRMLS_CC);
 	}
 	if (file_handle->handle.fp && fstat(fileno(file_handle->handle.fp), &buf) == 0) {
+#ifdef S_ISREG
+		if (!S_ISREG(buf.st_mode)) {
+			return 0;
+		}
+#endif
 		return buf.st_size;
 	}
 
