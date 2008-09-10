@@ -1275,7 +1275,7 @@ int php_mcrypt_iv(php_mcrypt_iv_source source, int size, char **iv_str, int *iv_
 int php_mcrypt_func(php_mcrypt_op op, char *cipher, char *mode, char *key_str, int key_len, char *iv_str, int iv_len, char *data_str, int data_len, char **data_copy, int *data_size TSRMLS_DC)
 {
 	MCRYPT td;
-	char *cipher_dir_string, *module_dir_string, *key_copy, *iv_copy;
+	char *cipher_dir_string, *module_dir_string, *key_copy, *iv_copy = NULL;
 	int i, status = SUCCESS, count, *key_sizes, key_size, iv_size, block_size;
 	
 	MCRYPT_GET_INI
@@ -1362,7 +1362,9 @@ int php_mcrypt_func(php_mcrypt_op op, char *cipher, char *mode, char *key_str, i
 	}
 	
 	efree(key_copy);
-	efree(iv_copy);
+	if (iv_copy) {
+		efree(iv_copy);
+	}
 	
 	return status;
 }
