@@ -361,7 +361,7 @@ PHPAPI void php_u_register_variable_ex(UChar *var, zval *val, zval *track_vars_a
 				is_array = 1;
 				*ip = 0;
 			} else {
-				is_array = 0;
+				goto plain_var;
 			}
 		}
 	} else {
