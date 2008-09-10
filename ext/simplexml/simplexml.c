@@ -1287,7 +1287,7 @@ SXE_METHOD(xpath)
 			if (nodeptr->type == XML_TEXT_NODE) {
 				_node_as_zval(sxe, nodeptr->parent, value, SXE_ITER_NONE, NULL, NULL, 0 TSRMLS_CC);
 			} else if (nodeptr->type == XML_ATTRIBUTE_NODE) {
-				_node_as_zval(sxe, nodeptr->parent, value, SXE_ITER_ATTRLIST, (char *)nodeptr->name, NULL, 0 TSRMLS_CC);
+				_node_as_zval(sxe, nodeptr->parent, value, SXE_ITER_ATTRLIST, (char*)nodeptr->name, nodeptr->ns ? nodeptr->ns->href : NULL, 0 TSRMLS_CC);
 			} else {
 				_node_as_zval(sxe, nodeptr, value, SXE_ITER_NONE, NULL, NULL, 0 TSRMLS_CC);
 			}
