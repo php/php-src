@@ -504,6 +504,7 @@ PHP_FUNCTION(readline_callback_handler_install)
 
 	if (!zend_is_callable(callback, 0, &name)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not callable", name);
+		efree(name);
 		RETURN_FALSE;
 	}
 
