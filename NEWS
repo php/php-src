@@ -62,6 +62,8 @@ PHP                                                                        NEWS
 - Fixed bug #45312 (Segmentation fault on second request for array functions).
   (Dmitry)
 - Fixed bug #45251 (double free or corruption with setAttributeNode()). (Rob)
+- Fixed bug #45226 (xmlrpc_set_type() segfaults with valid ISO8601 date string).
+  (Jeff Lawsons)
 - Fixed bug #45220 (curl_read callback returns -1 when needs to return 
   size_t (unsigned)). (Felipe)
 - Fixed bug #45181 (chdir() should clear relative entries in stat cache). 
@@ -110,6 +112,7 @@ PHP                                                                        NEWS
   (Jani)
 - Fixed bug #42318 (problem with nm on AIX, not finding object files). (Dmitry)
 - Fixed bug #41348 (OCI8: allow compilation with Oracle 8.1). (Chris Jones)
+- Fixed bug #18916 (xmlrpc_set_type() "not working"). (Jeff Lawsons)
 
 01 May 2008, PHP 5.2.6
 - Fixed two possible crashes inside posix extension (Tony)
