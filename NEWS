@@ -22,6 +22,7 @@ PHP                                                                        NEWS
 - Fixed bug #46029 (Segfault in DOMText when using with Reflection). (Rob)
 - Fixed bug #46010 (warnings incorrectly generated for iv in ecb mode). 
   (Felipe)
+- Fixed bug #46003 (isset on nonexisting node return unexpected results). (Rob)
 - Fixed bug #45956 (parse_ini_file() does not return false with syntax errors
   in parsed file). (Jani)
 - Fixed bug #45862 (get_class_vars is inconsistent with 'protected' and 
