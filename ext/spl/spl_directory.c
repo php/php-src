@@ -2612,7 +2612,9 @@ SPL_METHOD(SplFileObject, seek)
 	spl_filesystem_file_rewind(getThis(), intern TSRMLS_CC);
 	
 	while(intern->u.file.current_line_num < line_pos) {
-		spl_filesystem_file_read_line(getThis(), intern, 1 TSRMLS_CC);
+		if (spl_filesystem_file_read_line(getThis(), intern, 1 TSRMLS_CC) == FAILURE) {
+			break;
+		}
 	}
 } /* }}} */
 
