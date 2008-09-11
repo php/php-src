@@ -1186,10 +1186,6 @@ int phar_free_alias(phar_archive_data *phar, char *alias, int alias_len TSRMLS_D
 }
 /* }}} */
 
-static int phar_retrieve_apc(fname, fname_len, archive)
-{
-}
-
 /**
  * Looks up a phar archive in the filename map, connecting it to the alias
  * (if any) or returns null
@@ -1385,18 +1381,11 @@ realpath_success:
 
 			return SUCCESS;
 		}
-<<<<<<< util.c
-		if (SUCCESS == phar_retrieve_apc(fname, fname_len, archive)) {
-			efree(my_realpath);
-			return SUCCESS;
-		}
-=======
 
 		if (PHAR_G(manifest_cached) && SUCCESS == zend_hash_quick_find(&cached_phars, fname, fname_len, fhash, (void**)&fd_ptr)) {
 			goto realpath_success;
 		}
 
->>>>>>> 1.60
 		efree(my_realpath);
 	}
 
