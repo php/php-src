@@ -1,3 +1,160 @@
+2008-09-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mbstring/mbstring.c:
+      
+      MFB: Fixed bug #46042 (memory leaks with reflection of
+      mb_convert_encoding())
+
+    * (PHP_5_3)
+      ext/mbstring/mbstring.c:
+      Fixed bug #46042 (memory leaks with reflection of mb_convert_encoding())
+
+2008-09-10  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug46003.phpt
+      ext/simplexml/tests/bug46003.phpt:
+      MFH: fix bug #46003 (isset on nonexisting node return unexpected results)
+      add test
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug46003.phpt
+      ext/simplexml/tests/bug46003.phpt
+      ext/simplexml/tests/bug46003.phpt:
+      fix bug #46003 (isset on nonexisting node return unexpected results)
+      add test
+
+    * (PHP_5_2)
+      ext/dom/cdatasection.c
+      ext/dom/cdatasection.c
+      ext/dom/comment.c
+      ext/dom/comment.c
+      ext/dom/documentfragment.c
+      ext/dom/documentfragment.c
+      ext/dom/processinginstruction.c
+      ext/dom/processinginstruction.c
+      ext/dom/text.c
+      ext/dom/text.c:
+      MFH: fix bug #46029 (Segfault in DOMText when using with Reflection)
+
+    * ext/dom/cdatasection.c
+      ext/dom/comment.c
+      ext/dom/documentfragment.c
+      ext/dom/processinginstruction.c
+      ext/dom/text.c:
+      fix bug #46029 (Segfault in DOMText when using with Reflection)
+
+2008-09-10  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * main/php_variables.c:
+      Fix php_u_register_variable_ex(), avoid readding some uninitialized data
+      after the end of the variable name
+
+2008-09-10  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/readline/readline.c:
+      - MFB: Fixed mem. leak
+
+    * (PHP_5_3)
+      ext/readline/readline.c:
+      - Fixed mem. leak
+
+    * (PHP_5_2)
+      NEWS:
+      - Union #45226 + #18916
+
+2008-09-10  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+      fix order
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug45553.phpt
+      ext/simplexml/tests/bug45553.phpt:
+      MFH: fix bug #45553 (Using XPath for attributes with a namespace does not
+      work)
+      add test
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug45553.phpt
+      ext/simplexml/tests/bug45553.phpt
+      ext/simplexml/tests/bug45553.phpt:
+      fix bug #45553 (Using XPath for attributes with a namespace does not work)
+      add test
+
+2008-09-10  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * tests/basic/bug20539.phpt:
+      Fix test
+
+    * (PHP_5_3)
+      NEWS:
+      BFN
+
+    * (PHP_5_3)
+      ZendEngine2/zend_stream.c:
+      MFH: Fixed #45928 (large scripts from stdin are stripped at 16K border)
+
+    * ZendEngine2/zend_stream.c:
+      Fixed #45928 (large scripts from stdin are stripped at 16K border)
+
+2008-09-10  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/mcrypt/mcrypt.c:
+      check for NULL before freeing
+
+2008-09-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/pgsql/pgsql.c:
+      Fixed unused var warning
+
+2008-09-10  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN #45226, #18916
+
+    * ext/xmlrpc/tests/bug18916.phpt
+      ext/xmlrpc/tests/bug45226.phpt:
+      - New tests
+
+    * (PHP_5_2)
+      ext/xmlrpc/libxmlrpc/xmlrpc.c
+      ext/xmlrpc/libxmlrpc/xmlrpc.c
+      ext/xmlrpc/tests/bug18916.phpt
+      ext/xmlrpc/tests/bug45226.phpt:
+      MFH:
+      - Merged fix from SF project (Import Jeff Lawsons patches for XML datetime
+      bug fixes)
+        Fixed bugs:
+
+    * ext/xmlrpc/tests/bug18916.phpt
+      ext/xmlrpc/tests/bug18916.phpt
+      ext/xmlrpc/tests/bug18916.phpt
+      ext/xmlrpc/tests/bug45226.phpt
+      ext/xmlrpc/tests/bug45226.phpt
+      ext/xmlrpc/tests/bug45226.phpt:
+        1.1.4;
+      file bug18916.phpt was initially added on branch PHP_5_3.
+
+    * ext/xmlrpc/libxmlrpc/xmlrpc.c:
+      - Merged fix from SF project (Import Jeff Lawsons patches for XML datetime
+      bug fixes)
+        Fixed bugs:
+
 2008-09-09  Arnaud Le Blanc  <arnaud.lb@gmail.com>
 
     * (PHP_5_2)
