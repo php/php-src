@@ -29,6 +29,6 @@ string(%d) "%smytest"
 
 Fatal error: Uncaught exception 'UnexpectedValueException' with message 'Cannot create phar '0000000000000000000', file extension (or combination) not recognised' in %sbug46032.php:%d
 Stack trace:
-#0 /home/cellog/workspace/php5/ext/phar/tests/bug46032.php(%d): PharData->__construct('000000000000000...')
+#0 %s(%d): PharData->__construct('000000000000000...')
 #1 {main}
   thrown in %sbug46032.php on line %d
