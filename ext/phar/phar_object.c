@@ -1165,10 +1165,10 @@ PHP_METHOD(Phar, __construct)
 		return;
 	}
 
+	save_fname = fname;
 	if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, !is_data, 2 TSRMLS_CC)) {
 		/* use arch (the basename for the archive) for fname instead of fname */
 		/* this allows support for RecursiveDirectoryIterator of subdirectories */
-		save_fname = fname;
 #ifdef PHP_WIN32
 		phar_unixify_path_separators(arch, arch_len);
 #endif
@@ -1178,7 +1178,6 @@ PHP_METHOD(Phar, __construct)
 	} else {
 		arch = estrndup(fname, fname_len);
 		arch_len = fname_len;
-		save_fname = fname;
 		fname = arch;
 		phar_unixify_path_separators(arch, arch_len);
 #endif
@@ -1186,7 +1185,7 @@ PHP_METHOD(Phar, __construct)
 
 	if (phar_open_or_create_filename(fname, fname_len, alias, alias_len, is_data, REPORT_ERRORS, &phar_data, &error TSRMLS_CC) == FAILURE) {
 
-		if (fname == arch) {
+		if (fname == arch && fname != save_fname) {
 			efree(arch);
 			fname = save_fname;
 		}
