@@ -5,9 +5,13 @@ PHP                                                                        NEWS
 - Changed error level E_ERROR into E_WARNING in Soap extension methods 
   parameter validation. (Felipe)
 
+- Fixed bug #46042 (memory leaks with reflection of mb_convert_encoding()).
+  (Ilia)
 - Fixed bug #45928 (large scripts from stdin are stripped at 16K border).
   (Christian Schneider, Arnaud)
 - Fixed bug #45911 (Cannot disable ext/hash). (Arnaud)
+- Fixed bug #45382 (timeout bug in stream_socket_enable_crypto).
+  (vnegrier at optilian dot com, Ilia
 
 02 Sep 2008, PHP 5.3.0 Alpha 2
 - Removed special treatment of "/tmp" in sessions for open_basedir.
