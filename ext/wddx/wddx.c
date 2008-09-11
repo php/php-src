@@ -466,6 +466,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 	char *key;
 	ulong idx;
 	char tmp_buf[WDDX_BUF_LEN];
+	HashTable *objhash;
 	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(fname);
@@ -476,7 +477,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 	 * array of property names to be serialized.
 	 */
 	if (call_user_function_ex(CG(function_table), &obj, fname, &retval, 0, 0, 1, NULL TSRMLS_CC) == SUCCESS) {
-		if (retval && HASH_OF(retval)) {
+		if (retval && (objhash = HASH_OF(retval))) {
 			PHP_CLASS_ATTRIBUTES;
 			
 			PHP_SET_CLASS_ATTRIBUTES(obj);
@@ -491,15 +492,15 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 
 			PHP_CLEANUP_CLASS_ATTRIBUTES();
 			
-			for (zend_hash_internal_pointer_reset(HASH_OF(retval));
-				 zend_hash_get_current_data(HASH_OF(retval), (void **)&varname) == SUCCESS;
-				 zend_hash_move_forward(HASH_OF(retval))) {
+			for (zend_hash_internal_pointer_reset(objhash);
+				 zend_hash_get_current_data(objhash, (void **)&varname) == SUCCESS;
+				 zend_hash_move_forward(objhash)) {
 				if (Z_TYPE_PP(varname) != IS_STRING) {
-					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize");
+					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize.");
 					continue;
 				}
 
-				if (zend_hash_find(HASH_OF(obj), Z_STRVAL_PP(varname), Z_STRLEN_PP(varname)+1, (void **)&ent) == SUCCESS) {
+				if (zend_hash_find(objhash, Z_STRVAL_PP(varname), Z_STRLEN_PP(varname)+1, (void **)&ent) == SUCCESS) {
 					php_wddx_serialize_var(packet, *ent, Z_STRVAL_PP(varname), Z_STRLEN_PP(varname) TSRMLS_CC);
 				}
 			}
@@ -523,14 +524,15 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 
 		PHP_CLEANUP_CLASS_ATTRIBUTES();
 		
-		for (zend_hash_internal_pointer_reset(HASH_OF(obj));
-			 zend_hash_get_current_data(HASH_OF(obj), (void**)&ent) == SUCCESS;
-			 zend_hash_move_forward(HASH_OF(obj))) {
+		objhash = HASH_OF(obj);
+		for (zend_hash_internal_pointer_reset(objhash);
+			 zend_hash_get_current_data(objhash, (void**)&ent) == SUCCESS;
+			 zend_hash_move_forward(objhash)) {
 			if (*ent == obj) {
 				continue;
 			}
 
-			if (zend_hash_get_current_key_ex(HASH_OF(obj), &key, &key_len, &idx, 0, NULL) == HASH_KEY_IS_STRING) {
+			if (zend_hash_get_current_key_ex(objhash, &key, &key_len, &idx, 0, NULL) == HASH_KEY_IS_STRING) {
 				char *class_name, *prop_name;
 				
 				zend_unmangle_property_name(key, key_len-1, &class_name, &prop_name);
