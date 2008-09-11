@@ -1163,6 +1163,7 @@ SPL_METHOD(SplFileInfo, getRealPath)
 	UChar *path;
 	int filename_len, path_len;
 	char *filename, buff[MAXPATHLEN];
+	zend_bool free_filename = 0;
 
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, NULL TSRMLS_CC);
 
@@ -1175,6 +1176,7 @@ SPL_METHOD(SplFileInfo, getRealPath)
 	} else {
 		if (intern->file_name_type == IS_UNICODE) {
 			php_stream_path_encode(NULL, &filename, &filename_len, intern->file_name.u, intern->file_name_len, REPORT_ERRORS, FG(default_context));
+			free_filename = filename != NULL;
 		} else {
 			filename = intern->file_name.s;
 		}
@@ -1199,7 +1201,7 @@ SPL_METHOD(SplFileInfo, getRealPath)
 		RETVAL_FALSE;
 	}
 
-	if (intern->file_name_type == IS_UNICODE && filename) {
+	if (free_filename) {
 		efree(filename);
 	}
 }
