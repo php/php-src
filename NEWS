@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   (Scott)
 - Fixed a crash on invalid method in ReflectionParameter constructor.
   (Christian Seiler)
+- Fixed buf #46053 (SplFileObject::seek - Endless loop). (Arnaud)
 - Fixed bug #46051 (SplFileInfo::openFile - memory overlap). (Arnaud)
 - Fixed bug #46047 (SimpleXML converts empty nodes into object with nested 
   array). (Rob)
