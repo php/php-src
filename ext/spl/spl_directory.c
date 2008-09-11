@@ -426,6 +426,7 @@ static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_fil
 					&use_include_path, &intern->u.file.zcontext) == FAILURE) {
 				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 				intern->u.file.open_mode = NULL;
+				intern->file_name = NULL;
 				zval_dtor(return_value);
 				Z_TYPE_P(return_value) = IS_NULL;
 				return NULL;
