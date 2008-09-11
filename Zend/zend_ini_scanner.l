@@ -244,21 +244,10 @@ static void zend_ini_escape_string(zval *lval, char *str, int len, char quote_ty
 		if (*s == '\\') {
 			s++;
 			if (s >= end) {
+				*t++ = '\\';
 				continue;
 			}
 			switch (*s) {
-				case 'n':
-					*t++ = '\n';
-					Z_STRLEN_P(lval)--;
-					break;
-				case 'r':
-					*t++ = '\r';
-					Z_STRLEN_P(lval)--;
-					break;
-				case 't':
-					*t++ = '\t';
-					Z_STRLEN_P(lval)--;
-					break;
 				case '"':
 					if (*s != quote_type) {
 						*t++ = '\\';
@@ -325,7 +314,7 @@ RAW_VALUE_CHARS [^=\n\r;]
 LITERAL_DOLLAR ("$"([^{\000]|("\\"{ANY_CHAR})))
 VALUE_CHARS         ([^$= \t\n\r;&|~()!"'\000]|{LITERAL_DOLLAR})
 SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
-DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
+DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"[^"])|{LITERAL_DOLLAR}|"\\"["][^\r\n])
 
 +<!*> := yyleng = YYCURSOR - SCNG(yy_text);
 
@@ -458,7 +447,11 @@ DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 	return '"';
 }
 
-<ST_DOUBLE_QUOTES>{DOUBLE_QUOTES_CHARS}+ { /* Escape double quoted string contents */
+<ST_DOUBLE_QUOTES>{DOUBLE_QUOTES_CHARS}+("\\"["])? { /* Escape double quoted string contents */
+	if(yyleng > 1 && yytext[yyleng-1] == '"' && yytext[yyleng-2] == '\\') {
+		yyless(yyleng-1);
+		yyleng--;
+	}
 	zend_ini_escape_string(ini_lval, yytext, yyleng, '"' TSRMLS_CC);
 	return TC_QUOTED_STRING;
 }
