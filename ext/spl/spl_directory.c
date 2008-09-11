@@ -533,6 +533,7 @@ static spl_filesystem_object * spl_filesystem_object_create_type(int ht, spl_fil
 					&use_include_path, &intern->u.file.zcontext) == FAILURE) {
 				zend_restore_error_handling(&error_handling TSRMLS_CC);
 				intern->u.file.open_mode = NULL;
+				intern->file_name.v = NULL;
 				zval_dtor(return_value);
 				Z_TYPE_P(return_value) = IS_NULL;
 				return NULL;
