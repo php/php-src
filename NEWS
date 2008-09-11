@@ -18,6 +18,8 @@ PHP                                                                        NEWS
   (Scott)
 - Fixed a crash on invalid method in ReflectionParameter constructor.
   (Christian Seiler)
+- Fixed bug #46047 (SimpleXML converts empty nodes into object with nested 
+  array). (Rob)
 - Fixed bug #46031 (Segfault in AppendIterator::next). (Arnaud)
 - Fixed bug #46029 (Segfault in DOMText when using with Reflection). (Rob)
 - Fixed bug #46010 (warnings incorrectly generated for iv in ecb mode). 
@@ -25,6 +27,8 @@ PHP                                                                        NEWS
 - Fixed bug #46003 (isset on nonexisting node return unexpected results). (Rob)
 - Fixed bug #45956 (parse_ini_file() does not return false with syntax errors
   in parsed file). (Jani)
+- Fixed bug #45901 (wddx_serialize_value crash with SimpleXMLElement object).
+  (Rob)
 - Fixed bug #45862 (get_class_vars is inconsistent with 'protected' and 
   'private' variables). (ilewis at uk dot ibm dot com, Felipe)
 - Fixed bug #45860 (header() function fails to correctly replace all Status
