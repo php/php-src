@@ -127,3 +127,6 @@ ini_with-hyphen = with hyphen and underscore
 ini.with-hyphen = dot and hyphen
 ini-with.hyphen = hyphen and dot
 
+[windows paths]
+winpath1="c:\some windows\path\test\new\r\quote \" here\single ' quote\some more"
+winpath2="special case\"

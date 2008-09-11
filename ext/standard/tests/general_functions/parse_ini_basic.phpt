@@ -15,7 +15,7 @@ var_dump(parse_ini_file($ini_file, 1));
 echo "Done.\n";
 ?>
 --EXPECTF--	
-array(25) {
+array(26) {
   ["basic"]=>
   array(15) {
     ["basicval"]=>
@@ -271,6 +271,13 @@ array(25) {
     string(14) "dot and hyphen"
     ["ini-with.hyphen"]=>
     string(14) "hyphen and dot"
+  }
+  ["windows paths"]=>
+  array(2) {
+    ["winpath1"]=>
+    string(69) "c:\some windows\path\test\new\r\quote " here\single ' quote\some more"
+    ["winpath2"]=>
+    string(13) "special case\"
   }
 }
 Done.
