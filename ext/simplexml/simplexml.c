@@ -1142,13 +1142,17 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 				SKIP_TEXT(node);
 			} else {
 				if (node->type == XML_TEXT_NODE) {
-					xmlChar *tmp;
-
-					MAKE_STD_ZVAL(value);
-					tmp = xmlNodeListGetString(node->doc, node, 1);
-					ZVAL_XML_STRING(value, (char *)tmp, ZSTR_DUPLICATE);
-					xmlFree(tmp);
-					zend_hash_next_index_insert(rv, &value, sizeof(zval *), NULL);
+					const xmlChar *cur = node->content;
+					
+					if (*cur != 0) {
+						xmlChar *tmp;
+	
+						MAKE_STD_ZVAL(value);
+						tmp = xmlNodeListGetString(node->doc, node, 1);
+						ZVAL_XML_STRING(value, (char *)tmp, ZSTR_DUPLICATE);
+						xmlFree(tmp);
+						zend_hash_next_index_insert(rv, &value, sizeof(zval *), NULL);
+					}
 					goto next_iter;
 				}
 			}
