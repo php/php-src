@@ -602,7 +602,7 @@ PHP_FUNCTION(pcntl_wstopsig)
    Executes specified program in current process space as defined by exec(2) */
 PHP_FUNCTION(pcntl_exec)
 {
-	zval *args, *envs;
+	zval *args = NULL, *envs = NULL;
 	zval **element;
 	HashTable *args_hash, *envs_hash;
 	int argc = 0, argi = 0;
