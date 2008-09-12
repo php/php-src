@@ -157,6 +157,11 @@ static void text_iter_cp_next(text_iter_obj* object, long flags TSRMLS_DC)
 	if (object->u.cp.offset == UBRK_DONE) {
 		return;
 	}
+	
+	if (object->text == NULL) {
+		object->u.cp.offset = object->u.cp.cp_offset = UBRK_DONE;
+		return;
+	}
 
 	if (flags & ITER_REVERSE) {
 		U16_BACK_1(object->text, 0, object->u.cp.offset);
