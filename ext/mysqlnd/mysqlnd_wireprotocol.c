@@ -44,13 +44,13 @@
 #define MYSQLND_DUMP_HEADER_N_BODY_FULL2
 
 
-#define	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, buf_size, packet_type) \
+#define	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, buf_size, packet_type_as_text, packet_type) \
 	{ \
 		if (FAIL == mysqlnd_read_header((conn), &((packet)->header) TSRMLS_CC)) {\
 			CONN_SET_STATE(conn, CONN_QUIT_SENT); \
 			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);\
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", mysqlnd_server_gone); \
-			DBG_ERR_FMT("Can't read %s's header", (packet_type)); \
+			DBG_ERR_FMT("Can't read %s's header", (packet_type_as_text)); \
 			DBG_RETURN(FAIL);\
 		}\
 		if ((buf_size) < (packet)->header.size) { \
@@ -62,9 +62,13 @@
 			CONN_SET_STATE(conn, CONN_QUIT_SENT); \
 			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);\
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", mysqlnd_server_gone); \
-			DBG_ERR_FMT("Empty %s packet body", (packet_type)); \
+			DBG_ERR_FMT("Empty %s packet body", (packet_type_as_text)); \
 			DBG_RETURN(FAIL);\
 		} \
+		MYSQLND_INC_CONN_STATISTIC_W_VALUE2(&conn->stats, packet_type_to_statistic_byte_count[packet_type], \
+											MYSQLND_HEADER_SIZE + (packet)->header.size, \
+											packet_type_to_statistic_packet_count[packet_type], \
+											1); \
 	}
 
 
@@ -76,7 +80,7 @@ char * const mysqlnd_empty_string = "";
 
 /* Used in mysqlnd_debug.c */
 char * mysqlnd_read_header_name	= "mysqlnd_read_header";
-char * mysqlnd_read_body_name		= "mysqlnd_read_body";
+char * mysqlnd_read_body_name	= "mysqlnd_read_body";
 
 
 /* {{{ mysqlnd_command_to_text 
@@ -92,6 +96,36 @@ const char * const mysqlnd_command_to_text[COM_END] =
   "STMT_RESET", "SET_OPTION", "STMT_FETCH", "DAEMON"
 };
 /* }}} */
+
+
+
+static enum_mysqlnd_collected_stats packet_type_to_statistic_byte_count[PROT_LAST] =
+{
+	STAT_LAST,
+	STAT_LAST,
+	STAT_BYTES_RECEIVED_OK,
+	STAT_BYTES_RECEIVED_EOF,
+	STAT_LAST,
+	STAT_BYTES_RECEIVED_RSET_HEADER,
+	STAT_BYTES_RECEIVED_RSET_FIELD_META,
+	STAT_BYTES_RECEIVED_RSET_ROW,
+	STAT_BYTES_RECEIVED_PREPARE_RESPONSE,
+	STAT_BYTES_RECEIVED_CHANGE_USER,
+};
+
+static enum_mysqlnd_collected_stats packet_type_to_statistic_packet_count[PROT_LAST] =
+{
+	STAT_LAST,
+	STAT_LAST,
+	STAT_PACKETS_RECEIVED_OK,
+	STAT_PACKETS_RECEIVED_EOF,
+	STAT_LAST,
+	STAT_PACKETS_RECEIVED_RSET_HEADER,
+	STAT_PACKETS_RECEIVED_RSET_FIELD_META,
+	STAT_PACKETS_RECEIVED_RSET_ROW,
+	STAT_PACKETS_RECEIVED_PREPARE_RESPONSE,
+	STAT_PACKETS_RECEIVED_CHANGE_USER,
+};
 
 
 /* {{{ php_mysqlnd_net_field_length 
@@ -313,7 +347,7 @@ size_t mysqlnd_stream_write_w_header(MYSQLND * const conn, char * const buf, siz
 	while (left > MYSQLND_MAX_PACKET_SIZE) {
 		STORE_HEADER_SIZE(safe_storage, p);
 		int3store(p, MYSQLND_MAX_PACKET_SIZE);
-		int1store(p + 3, net->packet_no);		
+		int1store(p + 3, net->packet_no);
 		net->packet_no++;
 		ret = php_stream_write(net->stream, (char *)p, MYSQLND_MAX_PACKET_SIZE + MYSQLND_HEADER_SIZE);
 		RESTORE_HEADER_SIZE(p, safe_storage);
@@ -326,7 +360,7 @@ size_t mysqlnd_stream_write_w_header(MYSQLND * const conn, char * const buf, siz
 	/* Even for zero size payload we have to send a packet */
 	STORE_HEADER_SIZE(safe_storage, p);
 	int3store(p, left);
-	int1store(p + 3, net->packet_no);		
+	int1store(p + 3, net->packet_no);
 	net->packet_no++;
 	ret = php_stream_write(net->stream, (char *)p, left + MYSQLND_HEADER_SIZE);
 	RESTORE_HEADER_SIZE(p, safe_storage);
@@ -335,7 +369,7 @@ size_t mysqlnd_stream_write_w_header(MYSQLND * const conn, char * const buf, siz
 		DBG_ERR_FMT("Can't %u send bytes", count);
 		conn->state = CONN_QUIT_SENT;
 		SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
-	}	
+	}
 
 	MYSQLND_INC_CONN_STATISTIC_W_VALUE3(&conn->stats,
 			STAT_BYTES_SENT, count + packets_sent * MYSQLND_HEADER_SIZE,
@@ -371,12 +405,12 @@ size_t mysqlnd_stream_write_w_command(MYSQLND * const conn, enum php_mysqlnd_ser
 	setsockopt(((php_netstream_data_t*)net->stream->abstract)->socket,
 				IPPROTO_TCP, TCP_CORK, &corked, sizeof(corked));
 
-	int1store(safe_storage + MYSQLND_HEADER_SIZE, command);		
+	int1store(safe_storage + MYSQLND_HEADER_SIZE, command);
 	while (left > MYSQLND_MAX_PACKET_SIZE) {
 		size_t body_size = MYSQLND_MAX_PACKET_SIZE;
 
 		int3store(safe_storage, MYSQLND_MAX_PACKET_SIZE);
-		int1store(safe_storage + 3, net->packet_no);		
+		int1store(safe_storage + 3, net->packet_no);
 		net->packet_no++;
 		
 		ret = php_stream_write(net->stream, (char *)safe_storage, header_len);
@@ -534,7 +568,7 @@ php_mysqlnd_greet_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	DBG_ENTER("php_mysqlnd_greet_read");
 
-	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "greeting");
+	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "greeting", PROT_GREET_PACKET);
 
 	packet->protocol_version = uint1korr(p);
 	p++;
@@ -551,7 +585,7 @@ php_mysqlnd_greet_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 		*/
 		if (packet->error_no == 1040) {
 			memcpy(packet->sqlstate, "08004", MYSQLND_SQLSTATE_LENGTH);
-		}							 
+		}
 		DBG_RETURN(PASS);
 	}
 
@@ -582,7 +616,7 @@ php_mysqlnd_greet_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	if (p - buf < packet->header.size) {
 		/* scramble_buf is split into two parts */
 		memcpy(packet->scramble_buf + SCRAMBLE_LENGTH_323,
-		   		p, SCRAMBLE_LENGTH - SCRAMBLE_LENGTH_323);
+				p, SCRAMBLE_LENGTH - SCRAMBLE_LENGTH_323);
 	} else {
 		packet->pre41 = TRUE;
 	}
@@ -755,7 +789,7 @@ php_mysqlnd_ok_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	DBG_ENTER("php_mysqlnd_ok_read");
 
-	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "OK");
+	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "OK", PROT_OK_PACKET);
 
 	/* Should be always 0x0 or 0xFF for error */
 	packet->field_count = uint1korr(p);
@@ -834,7 +868,7 @@ php_mysqlnd_eof_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	DBG_ENTER("php_mysqlnd_eof_read");
 
-	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "EOF");
+	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "EOF", PROT_EOF_PACKET);
 
 	/* Should be always 0xFE */
 	packet->field_count = uint1korr(p);
@@ -907,6 +941,8 @@ size_t php_mysqlnd_cmd_write(void *_packet, MYSQLND *conn TSRMLS_DC)
 	if (error_reporting) {
 		EG(error_reporting) = 0;
 	}
+
+	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_PACKETS_SENT_CMD);
 	
 #ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
 	php_mysqlnd_consume_uneaten_data(conn, packet->command TSRMLS_CC);
@@ -972,7 +1008,7 @@ php_mysqlnd_rset_header_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	DBG_ENTER("php_mysqlnd_rset_header_read");
 
-	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "resultset header");
+	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "resultset header", PROT_RSET_HEADER_PACKET);
 
 	/*
 	  Don't increment. First byte is 0xFF on error, but otherwise is starting byte
@@ -1086,7 +1122,7 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	DBG_ENTER("php_mysqlnd_rset_field_read");
 
-	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, buf_len, "field");
+	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, buf_len, "field", PROT_RSET_FLD_PACKET);
 
 	if (packet->skip_parsing) {
 		DBG_RETURN(PASS);
@@ -1366,10 +1402,46 @@ void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffe
 		if (*null_ptr & bit) {
 			DBG_INF("It's null");
 			ZVAL_NULL(*current_field);
+			MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_BINARY_TYPE_FETCHED_NULL);
 		} else {
 			enum_mysqlnd_field_types type = fields_metadata[i].type;
 			mysqlnd_ps_fetch_functions[type].func(*current_field, &fields_metadata[i],
 												  0, &p, as_unicode TSRMLS_CC);
+
+			if (MYSQLND_G(collect_statistics)) {
+				enum_mysqlnd_collected_stats statistic;
+				switch (fields_metadata[i].type) {
+					case MYSQL_TYPE_DECIMAL:	statistic = STAT_BINARY_TYPE_FETCHED_DECIMAL; break;
+					case MYSQL_TYPE_TINY:		statistic = STAT_BINARY_TYPE_FETCHED_INT8; break;
+					case MYSQL_TYPE_SHORT:		statistic = STAT_BINARY_TYPE_FETCHED_INT16; break;
+					case MYSQL_TYPE_LONG:		statistic = STAT_BINARY_TYPE_FETCHED_INT32; break;
+					case MYSQL_TYPE_FLOAT:		statistic = STAT_BINARY_TYPE_FETCHED_FLOAT; break;
+					case MYSQL_TYPE_DOUBLE:		statistic = STAT_BINARY_TYPE_FETCHED_DOUBLE; break;
+					case MYSQL_TYPE_NULL:		statistic = STAT_BINARY_TYPE_FETCHED_NULL; break;
+					case MYSQL_TYPE_TIMESTAMP:	statistic = STAT_BINARY_TYPE_FETCHED_TIMESTAMP; break;
+					case MYSQL_TYPE_LONGLONG:	statistic = STAT_BINARY_TYPE_FETCHED_INT64; break;
+					case MYSQL_TYPE_INT24:		statistic = STAT_BINARY_TYPE_FETCHED_INT24; break;
+					case MYSQL_TYPE_DATE:		statistic = STAT_BINARY_TYPE_FETCHED_DATE; break;
+					case MYSQL_TYPE_TIME:		statistic = STAT_BINARY_TYPE_FETCHED_TIME; break;
+					case MYSQL_TYPE_DATETIME:	statistic = STAT_BINARY_TYPE_FETCHED_DATETIME; break;
+					case MYSQL_TYPE_YEAR:		statistic = STAT_BINARY_TYPE_FETCHED_YEAR; break;
+					case MYSQL_TYPE_NEWDATE:	statistic = STAT_BINARY_TYPE_FETCHED_DATE; break;
+					case MYSQL_TYPE_VARCHAR:	statistic = STAT_BINARY_TYPE_FETCHED_STRING; break;
+					case MYSQL_TYPE_BIT:		statistic = STAT_BINARY_TYPE_FETCHED_BIT; break;
+					case MYSQL_TYPE_NEWDECIMAL:	statistic = STAT_BINARY_TYPE_FETCHED_DECIMAL; break;
+					case MYSQL_TYPE_ENUM:		statistic = STAT_BINARY_TYPE_FETCHED_ENUM; break;
+					case MYSQL_TYPE_SET:		statistic = STAT_BINARY_TYPE_FETCHED_SET; break;
+					case MYSQL_TYPE_TINY_BLOB:	statistic = STAT_BINARY_TYPE_FETCHED_BLOB; break;
+					case MYSQL_TYPE_MEDIUM_BLOB:statistic = STAT_BINARY_TYPE_FETCHED_BLOB; break;
+					case MYSQL_TYPE_LONG_BLOB:	statistic = STAT_BINARY_TYPE_FETCHED_BLOB; break;
+					case MYSQL_TYPE_BLOB:		statistic = STAT_BINARY_TYPE_FETCHED_BLOB; break;
+					case MYSQL_TYPE_VAR_STRING:	statistic = STAT_BINARY_TYPE_FETCHED_STRING; break;
+					case MYSQL_TYPE_STRING:		statistic = STAT_BINARY_TYPE_FETCHED_STRING; break;
+					case MYSQL_TYPE_GEOMETRY:	statistic = STAT_BINARY_TYPE_FETCHED_GEOMETRY; break;
+					default: statistic = STAT_BINARY_TYPE_FETCHED_OTHER; break;
+				}			
+				MYSQLND_INC_CONN_STATISTIC(&conn->stats, statistic);
+			}
 		}
 		if (!((bit<<=1) & 255)) {
 			bit = 1;	/* to the following byte */
@@ -1443,6 +1515,40 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 			struct st_mysqlnd_perm_bind perm_bind =
 					mysqlnd_ps_fetch_functions[fields_metadata[i].type];
 #endif
+			if (MYSQLND_G(collect_statistics)) {
+				enum_mysqlnd_collected_stats statistic;
+				switch (fields_metadata[i].type) {
+					case MYSQL_TYPE_DECIMAL:	statistic = STAT_TEXT_TYPE_FETCHED_DECIMAL; break;
+					case MYSQL_TYPE_TINY:		statistic = STAT_TEXT_TYPE_FETCHED_INT8; break;
+					case MYSQL_TYPE_SHORT:		statistic = STAT_TEXT_TYPE_FETCHED_INT16; break;
+					case MYSQL_TYPE_LONG:		statistic = STAT_TEXT_TYPE_FETCHED_INT32; break;
+					case MYSQL_TYPE_FLOAT:		statistic = STAT_TEXT_TYPE_FETCHED_FLOAT; break;
+					case MYSQL_TYPE_DOUBLE:		statistic = STAT_TEXT_TYPE_FETCHED_DOUBLE; break;
+					case MYSQL_TYPE_NULL:		statistic = STAT_TEXT_TYPE_FETCHED_NULL; break;
+					case MYSQL_TYPE_TIMESTAMP:	statistic = STAT_TEXT_TYPE_FETCHED_TIMESTAMP; break;
+					case MYSQL_TYPE_LONGLONG:	statistic = STAT_TEXT_TYPE_FETCHED_INT64; break;
+					case MYSQL_TYPE_INT24:		statistic = STAT_TEXT_TYPE_FETCHED_INT24; break;
+					case MYSQL_TYPE_DATE:		statistic = STAT_TEXT_TYPE_FETCHED_DATE; break;
+					case MYSQL_TYPE_TIME:		statistic = STAT_TEXT_TYPE_FETCHED_TIME; break;
+					case MYSQL_TYPE_DATETIME:	statistic = STAT_TEXT_TYPE_FETCHED_DATETIME; break;
+					case MYSQL_TYPE_YEAR:		statistic = STAT_TEXT_TYPE_FETCHED_YEAR; break;
+					case MYSQL_TYPE_NEWDATE:	statistic = STAT_TEXT_TYPE_FETCHED_DATE; break;
+					case MYSQL_TYPE_VARCHAR:	statistic = STAT_TEXT_TYPE_FETCHED_STRING; break;
+					case MYSQL_TYPE_BIT:		statistic = STAT_TEXT_TYPE_FETCHED_BIT; break;
+					case MYSQL_TYPE_NEWDECIMAL:	statistic = STAT_TEXT_TYPE_FETCHED_DECIMAL; break;
+					case MYSQL_TYPE_ENUM:		statistic = STAT_TEXT_TYPE_FETCHED_ENUM; break;
+					case MYSQL_TYPE_SET:		statistic = STAT_TEXT_TYPE_FETCHED_SET; break;
+					case MYSQL_TYPE_TINY_BLOB:	statistic = STAT_TEXT_TYPE_FETCHED_BLOB; break;
+					case MYSQL_TYPE_MEDIUM_BLOB:statistic = STAT_TEXT_TYPE_FETCHED_BLOB; break;
+					case MYSQL_TYPE_LONG_BLOB:	statistic = STAT_TEXT_TYPE_FETCHED_BLOB; break;
+					case MYSQL_TYPE_BLOB:		statistic = STAT_TEXT_TYPE_FETCHED_BLOB; break;
+					case MYSQL_TYPE_VAR_STRING:	statistic = STAT_TEXT_TYPE_FETCHED_STRING; break;
+					case MYSQL_TYPE_STRING:		statistic = STAT_TEXT_TYPE_FETCHED_STRING; break;
+					case MYSQL_TYPE_GEOMETRY:	statistic = STAT_TEXT_TYPE_FETCHED_GEOMETRY; break;
+					default: statistic = STAT_TEXT_TYPE_FETCHED_OTHER; break;
+				}			
+				MYSQLND_INC_CONN_STATISTIC(&conn->stats, statistic);
+			}
 
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
 			if (as_int && perm_bind.php_type == IS_LONG &&
@@ -1574,7 +1680,7 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 				if (Z_TYPE_P(*current_field) == IS_STRING) {
 					((mysqlnd_zval *) obj)->point_type = MYSQLND_POINTS_INT_BUFFER;
 				} else {
-					((mysqlnd_zval *) obj)->point_type = MYSQLND_POINTS_EXT_BUFFER;					
+					((mysqlnd_zval *) obj)->point_type = MYSQLND_POINTS_EXT_BUFFER;
 				}
 			}
 #endif
@@ -1622,6 +1728,10 @@ php_mysqlnd_rowp_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	if (FAIL == ret) {
 		goto end;
 	}
+	MYSQLND_INC_CONN_STATISTIC_W_VALUE2(&conn->stats, packet_type_to_statistic_byte_count[PROT_ROW_PACKET],
+										MYSQLND_HEADER_SIZE + packet->header.size,
+										packet_type_to_statistic_packet_count[PROT_ROW_PACKET],
+										1);
 
 	/* packet->row_buffer->ptr is of size 'data_size + 1' */
 	packet->header.size = data_size;
@@ -1727,7 +1837,7 @@ php_mysqlnd_stats_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	DBG_ENTER("php_mysqlnd_stats_read");
 
-	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "statistics");
+	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "statistics", PROT_STATS_PACKET);
 
 	packet->message = mnd_pemalloc(packet->header.size + 1, conn->persistent);
 	memcpy(packet->message, buf, packet->header.size);
@@ -1772,7 +1882,7 @@ php_mysqlnd_prepare_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	DBG_ENTER("php_mysqlnd_prepare_read");
 
-	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "prepare");
+	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "prepare", PROT_PREPARE_RESP_PACKET);
 	
 	data_size = packet->header.size;
 	packet->error_code = uint1korr(p);
@@ -1851,7 +1961,7 @@ php_mysqlnd_chg_user_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	DBG_ENTER("php_mysqlnd_chg_user_read");
 
-	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "change user response ");
+	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "change user response", PROT_CHG_USER_PACKET);
 
 	/*
 	  Don't increment. First byte is 0xFF on error, but otherwise is starting byte

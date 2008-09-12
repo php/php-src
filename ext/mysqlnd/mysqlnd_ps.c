@@ -2009,7 +2009,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, net_close)(MYSQLND_STMT * const stmt, zend_
 			DBG_INF("skipping result");
 			stmt->result->m.skip_result(stmt->result TSRMLS_CC);
 		}
-	} while (mysqlnd_stmt_more_results(stmt) && mysqlnd_stmt_next_result(stmt));
+	} while (mysqlnd_stmt_more_results(stmt) && mysqlnd_stmt_next_result(stmt) == PASS);
 	/*
 	  After this point we are allowed to free the result set,
 	  as we have cleaned the line
