@@ -996,7 +996,7 @@ function error_report($testname, $logname, $tested)
 
 function system_with_timeout($commandline, $env = null, $stdin = null)
 {
-	global $leak_check;
+	global $leak_check, $cwd;
 
 	$data = '';
 
@@ -1009,7 +1009,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 		0 => array('pipe', 'r'),
 		1 => array('pipe', 'w'),
 		2 => array('pipe', 'w')
-		), $pipes, null, $bin_env, array('suppress_errors' => true, 'binary_pipes' => true));
+		), $pipes, $cwd, $bin_env, array('suppress_errors' => true, 'binary_pipes' => true));
 
 	if (!$proc) {
 		return false;
