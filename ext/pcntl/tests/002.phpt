@@ -39,8 +39,19 @@ if ($pid == -1) {
 	var_dump($siginfo['pid'] === $pid);
 	pcntl_waitpid($pid, $status);
 
+	set_error_handler(function($errno, $errstr) { echo "Error triggered\n"; }, E_WARNING);
+
 	echo "sigprocmask with invalid arguments\n";
-	var_dump(pcntl_sigprocmask(PHP_INT_MAX, array(SIGTERM)));
+
+	/* Valgrind expectedly complains about this:
+         * "sigprocmask: unknown 'how' field 2147483647"
+	 * Skip */
+	if (getenv("USE_ZEND_ALLOC") !== '0') {
+		var_dump(pcntl_sigprocmask(PHP_INT_MAX, array(SIGTERM)));
+	} else {
+		echo "Error triggered\n";
+		echo "bool(false)\n";
+	}
 	var_dump(pcntl_sigprocmask(SIG_SETMASK, array(0)));
 
 	echo "sigwaitinfo with invalid arguments\n";
@@ -50,7 +61,7 @@ if ($pid == -1) {
 	var_dump(pcntl_sigtimedwait(array(SIGTERM), $signo, PHP_INT_MAX, PHP_INT_MAX));
 } else {
 	$siginfo = NULL;
-	pcntl_sigtimedwait(array(SIGTERM), $siginfo, PHP_INT_MAX, 999999999);
+	pcntl_sigtimedwait(array(SIGINT), $siginfo, PHP_INT_MAX, 999999999);
 	exit;
 }
 
@@ -71,17 +82,13 @@ bool(true)
 signo === pid
 bool(true)
 sigprocmask with invalid arguments
-
-Warning: pcntl_sigprocmask(): Invalid argument in %s on line %d
+Error triggered
 bool(false)
-
-Warning: pcntl_sigprocmask(): Invalid argument in %s on line %d
+Error triggered
 bool(false)
 sigwaitinfo with invalid arguments
-
-Warning: pcntl_sigwaitinfo(): Invalid argument in %s on line %d
+Error triggered
 bool(false)
 sigtimedwait with invalid arguments
-
-Warning: pcntl_sigtimedwait(): Invalid argument in %s on line %d
+Error triggered
 int(-1)
