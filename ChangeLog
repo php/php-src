@@ -1,3 +1,232 @@
+2008-09-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/openssl/xp_ssl.c:
+      
+      MFB: Fixed bug #45382 (timeout bug in stream_socket_enable_crypto).
+
+    * (PHP_5_3)
+      NEWS
+      ext/openssl/xp_ssl.c:
+      
+      Fixed bug #45382 (timeout bug in stream_socket_enable_crypto).
+
+2008-09-11  Lars Strojny  <lars@strojny.net>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/prev_basic.phpt
+      ext/standard/tests/array/prev_error1.phpt
+      ext/standard/tests/array/prev_error2.phpt
+      ext/standard/tests/array/prev_error3.phpt
+      ext/standard/tests/array/prev_variation1.phpt
+      ext/standard/tests/array/prev_variation2.phpt:
+      MFH: prev()-tests by Iain Lewis <ilewis@uk.ibm.com>
+
+    * ext/standard/tests/array/prev_basic.phpt
+      ext/standard/tests/array/prev_basic.phpt
+      ext/standard/tests/array/prev_error1.phpt
+      ext/standard/tests/array/prev_error1.phpt
+      ext/standard/tests/array/prev_error2.phpt
+      ext/standard/tests/array/prev_error2.phpt
+      ext/standard/tests/array/prev_error3.phpt
+      ext/standard/tests/array/prev_error3.phpt
+      ext/standard/tests/array/prev_variation1.phpt
+      ext/standard/tests/array/prev_variation1.phpt
+      ext/standard/tests/array/prev_variation2.phpt
+      ext/standard/tests/array/prev_variation2.phpt:
+      
+      prev()-tests by Iain Lewis <ilewis@uk.ibm.com>
+
+2008-09-11  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * ext/spl/tests/recursive_tree_iterator_005.phpt:
+      Fix test
+
+    * ext/spl/spl_directory.c:
+      Fix invalid free
+
+    * (PHP_5_2)
+      NEWS
+      ext/spl/spl_directory.c
+      ext/spl/spl_directory.c
+      ext/spl/tests/bug46053.phpt
+      ext/spl/tests/bug46053.phpt:
+      MFH: Fixed #46053 (SplFileObject::seek - Endless loop)
+
+    * ext/spl/spl_directory.c
+      ext/spl/tests/bug46053.phpt
+      ext/spl/tests/bug46053.phpt
+      ext/spl/tests/bug46053.phpt:
+      Fixed #46053 (SplFileObject::seek - Endless loop)
+
+    * (PHP_5_2)
+      NEWS
+      ext/spl/spl_directory.c
+      ext/spl/spl_directory.c
+      ext/spl/tests/bug46051.phpt
+      ext/spl/tests/bug46051.phpt:
+      MFH: Fixed #46051 (SplFileInfo::openFile - memory overlap)
+
+    * ext/spl/spl_directory.c
+      ext/spl/tests/bug46051.phpt
+      ext/spl/tests/bug46051.phpt
+      ext/spl/tests/bug46051.phpt:
+      Fixed #46051 (SplFileInfo::openFile - memory overlap)
+
+2008-09-11  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug46047.phpt
+      ext/simplexml/tests/bug46047.phpt:
+      MFH: fix bug #46047 (SimpleXML converts empty nodes into object with nested
+      array)
+      add test
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug46047.phpt
+      ext/simplexml/tests/bug46047.phpt
+      ext/simplexml/tests/bug46047.phpt:
+      fix bug #46047 (SimpleXML converts empty nodes into object with nested
+      array)
+      add test
+
+    * (PHP_5_2)
+      ext/wddx/wddx.c
+      ext/wddx/wddx.c
+      ext/wddx/tests/bug45901.phpt
+      ext/wddx/tests/bug45901.phpt:
+      MFH: fix bug #45901 (wddx_serialize_value crash with SimpleXMLElement
+      object)
+      add test
+
+    * ext/wddx/wddx.c
+      ext/wddx/tests/bug45901.phpt
+      ext/wddx/tests/bug45901.phpt
+      ext/wddx/tests/bug45901.phpt:
+      fix bug #45901 (wddx_serialize_value crash with SimpleXMLElement object)
+      add test
+
+2008-09-11  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/phar/tests/bug46032.phpt
+      ext/phar/tests/bug46032.phpt:
+      fix test
+
+2008-09-11  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * ext/session/tests/rfc1867.phpt
+      ext/session/tests/rfc1867_disabled.phpt
+      ext/session/tests/rfc1867_disabled_2.phpt
+      ext/session/tests/rfc1867_invalid_settings.phpt
+      ext/session/tests/rfc1867_invalid_settings_2.phpt
+      ext/session/tests/rfc1867_no_name.phpt
+      ext/session/tests/rfc1867_sid_cookie.phpt
+      ext/session/tests/rfc1867_sid_get.phpt
+      ext/session/tests/rfc1867_sid_get_2.phpt
+      ext/session/tests/rfc1867_sid_invalid.phpt
+      ext/session/tests/rfc1867_sid_only_cookie.phpt
+      ext/session/tests/rfc1867_sid_only_cookie_2.phpt
+      ext/session/tests/rfc1867_sid_post.phpt:
+      Added tests
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+      Implemented ability to provide upload progress feedback through session
+      data.
+
+2008-09-11  Sanjay Mantoor  <smantoor@in.ibm.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_intersect_key_error.phpt:
+      Fixed expected output
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_intersect_key_error.phpt
+      ext/standard/tests/array/array_intersect_key_variation1.phpt
+      ext/standard/tests/array/array_intersect_key_variation2.phpt
+      ext/standard/tests/array/array_intersect_key_variation3.phpt
+      ext/standard/tests/array/array_intersect_key_variation4.phpt
+      ext/standard/tests/array/array_intersect_key_variation5.phpt
+      ext/standard/tests/array/array_intersect_key_variation6.phpt
+      ext/standard/tests/array/array_intersect_key_variation7.phpt
+      ext/standard/tests/array/array_intersect_key_variation8.phpt:
+      New testcases for array_intersect_key() function
+
+    * ext/standard/tests/array/array_intersect_key_error.phpt
+      ext/standard/tests/array/array_intersect_key_error.phpt
+      ext/standard/tests/array/array_intersect_key_variation1.phpt
+      ext/standard/tests/array/array_intersect_key_variation1.phpt
+      ext/standard/tests/array/array_intersect_key_variation2.phpt
+      ext/standard/tests/array/array_intersect_key_variation2.phpt
+      ext/standard/tests/array/array_intersect_key_variation3.phpt
+      ext/standard/tests/array/array_intersect_key_variation3.phpt
+      ext/standard/tests/array/array_intersect_key_variation4.phpt
+      ext/standard/tests/array/array_intersect_key_variation4.phpt
+      ext/standard/tests/array/array_intersect_key_variation5.phpt
+      ext/standard/tests/array/array_intersect_key_variation5.phpt
+      ext/standard/tests/array/array_intersect_key_variation6.phpt
+      ext/standard/tests/array/array_intersect_key_variation6.phpt
+      ext/standard/tests/array/array_intersect_key_variation7.phpt
+      ext/standard/tests/array/array_intersect_key_variation7.phpt
+      ext/standard/tests/array/array_intersect_key_variation8.phpt
+      ext/standard/tests/array/array_intersect_key_variation8.phpt:
+      
+      New testcases for array_intersect_key() function
+
+2008-09-11  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/util.c:
+      remove weird relic of development past that somehow made it in here on the
+      last commit
+
+    * (PHP_5_3)
+      NEWS:
+      update NEWS to note bug #46032 fix
+
+    * ext/phar/phar_object.c
+      ext/phar/util.c
+      ext/phar/tests/bug46032.phpt:
+      MFPHP5: fix Bug #46032: PharData::__construct wrong memory read
+
+    * ext/phar/tests/bug46032.phpt
+      ext/phar/tests/bug46032.phpt:
+      
+      file bug46032.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/phar/phar_object.c:
+      fix Bug #46032: PharData::__construct wrong memory read
+
+2008-09-11  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/tests/general_functions/parse_ini_basic.data
+      ext/standard/tests/general_functions/parse_ini_basic.data
+      ext/standard/tests/general_functions/parse_ini_basic.phpt
+      ext/standard/tests/general_functions/parse_ini_basic.phpt:
+      add some windows-style INI entries to tests
+
+    * ZendEngine2/zend_ini_scanner.c
+      ZendEngine2/zend_ini_scanner.c
+      ZendEngine2/zend_ini_scanner_defs.h
+      ZendEngine2/zend_ini_scanner_defs.h:
+      update scanner files
+
+    * ZendEngine2/zend_ini_scanner.l:
+      MF5: Fix BC issue with ini scanner.
+
+    * (PHP_5_3)
+      ext/standard/tests/general_functions/parse_ini_basic.data:
+      fix file format
+
+    * (PHP_5_3)
+      ZendEngine2/zend_ini_scanner.l:
+      Fix BC issue with ini scanner.
+
 2008-09-10  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/mbstring/mbstring.c:

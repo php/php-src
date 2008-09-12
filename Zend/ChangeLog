@@ -1,3 +1,18 @@
+2008-09-11  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_ini_scanner.c
+      zend_ini_scanner.c
+      zend_ini_scanner_defs.h
+      zend_ini_scanner_defs.h:
+      update scanner files
+
+    * zend_ini_scanner.l:
+      MF5: Fix BC issue with ini scanner.
+
+    * (PHP_5_3)
+      zend_ini_scanner.l:
+      Fix BC issue with ini scanner.
+
 2008-09-10  Arnaud Le Blanc  <arnaud.lb@gmail.com>
 
     * (PHP_5_3)
