@@ -4527,14 +4527,12 @@ PHP_FUNCTION(mb_check_encoding)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create converter");
 		RETURN_FALSE;
 	}	
-	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
-	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));	
+	mbfl_buffer_converter_illegal_mode(convd, MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE);
+	mbfl_buffer_converter_illegal_substchar(convd, 0);	
 	
 	/* initialize string */
-	mbfl_string_init(&string);
+	mbfl_string_init_set(&string, mbfl_no_language_neutral, no_encoding);
 	mbfl_string_init(&result);
-	string.no_encoding = no_encoding;
-	string.no_language = MBSTRG(language);
 
 	string.val = (unsigned char *)var;
 	string.len = var_len;
@@ -4542,17 +4540,12 @@ PHP_FUNCTION(mb_check_encoding)
 	illegalchars = mbfl_buffer_illegalchars(convd);
 	mbfl_buffer_converter_delete(convd);
 
+	RETVAL_FALSE;
 	if (ret != NULL) {
-		MBSTRG(illegalchars) += illegalchars;
-		if (illegalchars == 0 && strncmp((char *)string.val, (char *)ret->val, string.len) == 0) {
-			efree(ret->val);
-			RETURN_TRUE;
-		} else {
-			efree(ret->val);
-			RETURN_FALSE;
+		if (illegalchars == 0 && string.len == result.len && memcmp(string.val, result.val, string.len) == 0) {
+			RETVAL_TRUE;
 		}
-	} else {
-		RETURN_FALSE;
+		mbfl_string_clear(&result);
 	}
 }
 /* }}} */
