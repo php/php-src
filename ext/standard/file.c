@@ -2000,7 +2000,7 @@ PHPAPI PHP_FUNCTION(fread)
 }
 /* }}} */
 
-#define FPUTCSV_FLD_CHK(c) memchr(Z_STRVAL_PP(field), c, Z_STRLEN_PP(field))
+#define FPUTCSV_FLD_CHK(c) memchr(Z_STRVAL(field), c, Z_STRLEN(field))
 
 /* {{{ proto int fputcsv(resource fp, array fields [, string delimiter [, string enclosure]])
    Format line as CSV and write to file pointer */
@@ -2012,7 +2012,7 @@ PHP_FUNCTION(fputcsv)
 	const char escape_char = '\\';
 	php_stream *stream;
 	int ret;
-	zval *fp = NULL, *fields = NULL, **field = NULL;
+	zval *fp = NULL, *fields = NULL, **field_tmp = NULL, field;
 	char *delimiter_str = NULL, *enclosure_str = NULL;
 	int delimiter_str_len, enclosure_str_len;
 	HashPosition pos;
@@ -2054,10 +2054,13 @@ PHP_FUNCTION(fputcsv)
 	count = zend_hash_num_elements(Z_ARRVAL_P(fields));
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(fields), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(fields), (void **) &field, &pos) == SUCCESS) {
-		if (Z_TYPE_PP(field) != IS_STRING) {
-			SEPARATE_ZVAL(field);
-			convert_to_string(*field);
+		field = **field_tmp;
+
+		if (Z_TYPE_PP(field_tmp) != IS_STRING) {
+			zval_copy_ctor(&field);
+			convert_to_string(&field);
 		}
+
 		/* enclose a field that contains a delimiter, an enclosure character, or a newline */
 		if (FPUTCSV_FLD_CHK(delimiter) ||
 			FPUTCSV_FLD_CHK(enclosure) ||
@@ -2067,8 +2070,8 @@ PHP_FUNCTION(fputcsv)
 			FPUTCSV_FLD_CHK('\t') ||
 			FPUTCSV_FLD_CHK(' ')
 		) {
-			char *ch = Z_STRVAL_PP(field);
-			char *end = ch + Z_STRLEN_PP(field);
+			char *ch = Z_STRVAL(field);
+			char *end = ch + Z_STRLEN(field);
 			int escaped = 0;
 
 			smart_str_appendc(&csvline, enclosure);
@@ -2085,13 +2088,17 @@ PHP_FUNCTION(fputcsv)
 			}
 			smart_str_appendc(&csvline, enclosure);
 		} else {
-			smart_str_appendl(&csvline, Z_STRVAL_PP(field), Z_STRLEN_PP(field));
+			smart_str_appendl(&csvline, Z_STRVAL(field), Z_STRLEN(field));
 		}
 
 		if (++i != count) {
 			smart_str_appendl(&csvline, &delimiter, 1);
 		}
 		zend_hash_move_forward_ex(Z_ARRVAL_P(fields), &pos);
+		
+		if (Z_TYPE_PP(field_tmp) != IS_STRING) {
+			zval_dtor(&field);
+		}
 	}
 
 	smart_str_appendc(&csvline, '\n');
