@@ -879,11 +879,11 @@ SPL_METHOD(SplFileInfo, getBasename)
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	zstr fname, suffix, path;
 	int flen, slen = 0, path_len;
-	zend_uchar path_type;
+	zend_uchar path_type, stype;
 
 	suffix.v = 0;
 	if (intern->file_name_type == IS_UNICODE) {	
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|t", &suffix.u, &slen) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|t", &suffix, &slen, &stype) == FAILURE) {
 			return;
 		}
 	} else {
