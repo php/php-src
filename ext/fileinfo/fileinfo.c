@@ -499,6 +499,8 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 				php_stream_seek(stream, 0, SEEK_SET);
 
 				ret_val = (char *) magic_stream(magic, stream);
+
+				php_stream_seek(stream, streampos, SEEK_SET);
 				break;
 		}
 
