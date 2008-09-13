@@ -785,12 +785,12 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 	if (allow_dir == 2) {
 		etemp.is_dir = 1;
 		etemp.flags = etemp.old_flags = PHAR_ENT_PERM_DEF_DIR;
-		if (is_dir) {
-			etemp.filename_len--; /* strip trailing / */
-			path_len--;
-		}
 	} else {
 		etemp.flags = etemp.old_flags = PHAR_ENT_PERM_DEF_FILE;
+	}
+	if (is_dir) {
+		etemp.filename_len--; /* strip trailing / */
+		path_len--;
 	}
 
 	phar_add_virtual_dirs(phar, path, path_len TSRMLS_CC);
@@ -803,7 +803,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 
 	if (phar->is_tar) {
 		etemp.is_tar = phar->is_tar;
-		etemp.tar_type = TAR_FILE;
+		etemp.tar_type = etemp.is_dir ? TAR_DIR : TAR_FILE;
 	}
 
 	if (FAILURE == zend_hash_add(&phar->manifest, etemp.filename, path_len, (void*)&etemp, sizeof(phar_entry_info), (void **) &entry)) {
