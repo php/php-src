@@ -1701,7 +1701,7 @@ static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *a
 			if (got > 512) {
 				if (phar_is_tar(pos, fname)) {
 					php_stream_rewind(fp);
-					return phar_parse_tarfile(fp, fname, fname_len, alias, alias_len, options, pphar, compression, error TSRMLS_CC);
+					return phar_parse_tarfile(fp, fname, fname_len, alias, alias_len, pphar, compression, error TSRMLS_CC);
 				}
 			}
 		}
@@ -2769,7 +2769,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		}
 		if (!phar_get_efp(entry, 0 TSRMLS_CC)) {
 			/* re-open internal file pointer just-in-time */
-			newentry = phar_open_jit(phar, entry, oldfile, error, 0 TSRMLS_CC);
+			newentry = phar_open_jit(phar, entry, error TSRMLS_CC);
 			if (!newentry) {
 				/* major problem re-opening, so we ignore this file and the error */
 				efree(*error);
@@ -3103,7 +3103,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		}
 
 		switch(phar->sig_flags) {
-#if !HAVE_HASH_EXT
+#ifndef HAVE_HASH_EXT
 			case PHAR_SIG_SHA512:
 			case PHAR_SIG_SHA256:
 				if (closeoldfile) {
@@ -3271,7 +3271,7 @@ static long phar_stream_fteller_for_zend(void *handle TSRMLS_DC) /* {{{ */
 zend_op_array *(*phar_orig_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
 #if PHP_VERSION_ID >= 50300
 #define phar_orig_zend_open zend_stream_open_function
-char *phar_resolve_path(const char *filename, int filename_len TSRMLS_DC)
+static char *phar_resolve_path(const char *filename, int filename_len TSRMLS_DC)
 {
 	return phar_find_in_include_path((char *) filename, filename_len, NULL TSRMLS_CC);
 }

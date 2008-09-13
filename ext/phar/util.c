@@ -1150,7 +1150,7 @@ int phar_separate_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC) /* {{
 /**
  * helper function to open an internal file's fp just-in-time
  */
-phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, php_stream *fp, char **error, int for_write TSRMLS_DC) /* {{{ */
+phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, char **error TSRMLS_DC) /* {{{ */
 {
 	if (error) {
 		*error = NULL;
@@ -1450,7 +1450,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 {
 	const char *pcr_error;
 	phar_entry_info *entry;
-	char is_dir;
+	int is_dir;
 
 #ifdef PHP_WIN32
 	phar_unixify_path_separators(path, path_len);
@@ -1875,7 +1875,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 			*signature_len = phar_hex_str((const char*)sig, sig_len, signature TSRMLS_CC);
 		}
 		break;
-#if HAVE_HASH_EXT
+#ifdef HAVE_HASH_EXT
 		case PHAR_SIG_SHA512: {
 			unsigned char digest[64];
 			PHP_SHA512_CTX context;
@@ -2039,7 +2039,7 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 	}
 
 	switch(phar->sig_flags) {
-#if HAVE_HASH_EXT
+#ifdef HAVE_HASH_EXT
 		case PHAR_SIG_SHA512: {
 			unsigned char digest[64];
 			PHP_SHA512_CTX context;
