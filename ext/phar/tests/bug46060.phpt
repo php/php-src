@@ -3,6 +3,8 @@ Phar: Bug #46060: addEmptyDir() breaks
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if (getenv('SKIP_SLOW_TESTS')) die('skip'); ?>
+--INI--
+phar.require_hash=0
 --FILE--
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.tar';

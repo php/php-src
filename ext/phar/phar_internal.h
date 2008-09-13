@@ -66,7 +66,7 @@
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
 #endif
-#if HAVE_HASH_EXT
+#ifdef HAVE_HASH_EXT
 #include "ext/hash/php_hash.h"
 #include "ext/hash/php_hash_sha.h"
 #endif
@@ -270,30 +270,31 @@ typedef struct _phar_entry_info {
 	php_stream               *fp;
 	php_stream               *cfp;
 	int                      fp_refcount;
-	int                      is_crc_checked:1;
-	int                      is_modified:1;
-	int                      is_deleted:1;
-	int                      is_dir:1;
-	/* this flag is used for mounted entries (external files mapped to location
-	   inside a phar */
-	int                      is_mounted:1;
 	char                     *tmp;
-	/* used when iterating */
-	int                      is_temp_dir:1;
 	phar_archive_data        *phar;
 	smart_str                metadata_str;
-	/* tar-based phar file stuff */
-	int                      is_tar:1;
 	char                     *link; /* symbolic link to another file */
 	char                     tar_type;
-	/* zip-based phar file stuff */
-	int                      is_zip:1;
-	/* for cached phar entries */
-	int                      is_persistent:1;
 	/* position in the manifest */
 	uint                     manifest_pos;
 	/* for stat */
 	unsigned short           inode;
+
+	unsigned int             is_crc_checked:1;
+	unsigned int             is_modified:1;
+	unsigned int             is_deleted:1;
+	unsigned int             is_dir:1;
+	/* this flag is used for mounted entries (external files mapped to location
+	   inside a phar */
+	unsigned int             is_mounted:1;
+	/* used when iterating */
+	unsigned int             is_temp_dir:1;
+	/* tar-based phar file stuff */
+	unsigned int             is_tar:1;
+	/* zip-based phar file stuff */
+	unsigned int             is_zip:1;
+	/* for cached phar entries */
+	unsigned int             is_persistent:1;
 } phar_entry_info;
 
 /* information about a phar file (the archive itself) */
@@ -325,22 +326,22 @@ struct _phar_archive_data {
 	char                     *signature;
 	zval                     *metadata;
 	int                      metadata_len; /* only used for cached manifests */
-	/* if 1, then this alias was manually specified by the user and is not a permanent alias */
-	int                      is_temporary_alias:1;
-	int                      is_modified:1;
-	int                      is_writeable:1;
-	int                      is_brandnew:1;
-	/* defer phar creation */
-	int                      donotflush:1;
-	/* zip-based phar variables */
-	int                      is_zip:1;
-	/* tar-based phar variables */
-	int                      is_tar:1;
-	/* PharData variables       */
-	int                      is_data:1;
-	/* for cached phar manifests */
-	int                      is_persistent:1;
 	uint                     phar_pos;
+	/* if 1, then this alias was manually specified by the user and is not a permanent alias */
+	unsigned int             is_temporary_alias:1;
+	unsigned int             is_modified:1;
+	unsigned int             is_writeable:1;
+	unsigned int             is_brandnew:1;
+	/* defer phar creation */
+	unsigned int             donotflush:1;
+	/* zip-based phar variables */
+	unsigned int             is_zip:1;
+	/* tar-based phar variables */
+	unsigned int             is_tar:1;
+	/* PharData variables       */
+	unsigned int             is_data:1;
+	/* for cached phar manifests */
+	unsigned int             is_persistent:1;
 };
 
 typedef struct _phar_entry_fp_info {
@@ -596,8 +597,7 @@ void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, int filename
 int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, char *path, int path_len TSRMLS_DC);
 char *phar_find_in_include_path(char *file, int file_len, phar_archive_data **pphar TSRMLS_DC);
 char *phar_fix_filepath(char *path, int *new_len, int use_cwd TSRMLS_DC);
-phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, php_stream *fp,
-				      char **error, int for_write TSRMLS_DC);
+phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, char **error TSRMLS_DC);
 int phar_parse_metadata(char **buffer, zval **metadata, int zip_metadata_len TSRMLS_DC);
 void destroy_phar_manifest_entry(void *pDest);
 int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t position, int follow_links TSRMLS_DC);
@@ -612,7 +612,7 @@ int phar_copy_on_write(phar_archive_data **pphar TSRMLS_DC);
 
 /* tar functions in tar.c */
 int phar_is_tar(char *buf, char *fname);
-int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, php_uint32 compression, char **error TSRMLS_DC);
+int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, php_uint32 compression, char **error TSRMLS_DC);
 int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC);
 int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defaultstub, char **error TSRMLS_DC);
 
