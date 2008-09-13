@@ -393,7 +393,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_list_encodings, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_list_encoding_aliases, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_encoding_aliases, 0, 0, 1)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
@@ -582,7 +582,7 @@ const zend_function_entry mbstring_functions[] = {
 	PHP_FE(mb_convert_encoding,		arginfo_mb_convert_encoding)
 	PHP_FE(mb_detect_encoding,		arginfo_mb_detect_encoding)
 	PHP_FE(mb_list_encodings,		arginfo_mb_list_encodings)
-	PHP_FE(mb_list_encoding_aliases,		arginfo_mb_list_encoding_aliases)
+	PHP_FE(mb_encoding_aliases,		arginfo_mb_encoding_aliases)
 	PHP_FE(mb_convert_kana,			arginfo_mb_convert_kana)
 	PHP_FE(mb_encode_mimeheader,	arginfo_mb_encode_mimeheader)
 	PHP_FE(mb_decode_mimeheader,	arginfo_mb_decode_mimeheader)
@@ -3140,9 +3140,9 @@ PHP_FUNCTION(mb_list_encodings)
 }
 /* }}} */
 
-/* {{{ proto array mb_list_encoding_aliases(string encoding)
+/* {{{ proto array mb_encoding_aliases(string encoding)
    Returns an array of the aliases of a given encoding name */
-PHP_FUNCTION(mb_list_encoding_aliases)
+PHP_FUNCTION(mb_encoding_aliases)
 {
 	const mbfl_encoding *encoding;
 	char *name = NULL;
