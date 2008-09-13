@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Changed error level E_ERROR into E_WARNING in Soap extension methods 
   parameter validation. (Felipe)
 
+- Fixed bug #46060 (Phar::addEmptyDir() breaks) (Greg)
 - Fixed bug #46042 (memory leaks with reflection of mb_convert_encoding()).
   (Ilia)
 - Fixed bug #45928 (large scripts from stdin are stripped at 16K border).
