@@ -50,7 +50,7 @@ static int phar_file_type(HashTable *mimes, char *file, char **mime_type TSRMLS_
 }
 /* }}} */
 
-static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char *basename, char *request_uri, int request_uri_len TSRMLS_DC) /* {{{ */
+static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char *basename, int request_uri_len TSRMLS_DC) /* {{{ */
 {
 	HashTable *_SERVER;
 	zval **stuff;
@@ -166,7 +166,7 @@ static void phar_mung_server_vars(char *fname, char *entry, int entry_len, char 
 }
 /* }}} */
 
-static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char *mime_type, int code, char *entry, int entry_len, char *arch, int arch_len, char *basename, char *ru, int ru_len TSRMLS_DC) /* {{{ */
+static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char *mime_type, int code, char *entry, int entry_len, char *arch, char *basename, char *ru, int ru_len TSRMLS_DC) /* {{{ */
 {
 	char *name = NULL, buf[8192], *cwd;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
@@ -216,7 +216,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 
 			if (!fp) {
 				char *error;
-				if (!phar_open_jit(phar, info, phar_get_pharfp(phar TSRMLS_CC), &error, 0 TSRMLS_CC)) {
+				if (!phar_open_jit(phar, info, &error TSRMLS_CC)) {
 					if (error) {
 						zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, error);
 						efree(error);
@@ -242,7 +242,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 			zend_bailout();
 		case PHAR_MIME_PHP:
 			if (basename) {
-				phar_mung_server_vars(arch, entry, entry_len, basename, ru, ru_len TSRMLS_CC);
+				phar_mung_server_vars(arch, entry, entry_len, basename, ru_len TSRMLS_CC);
 				efree(basename);
 			}
 
@@ -349,7 +349,7 @@ static void phar_do_404(phar_archive_data *phar, char *fname, int fname_len, cha
 		info = phar_get_entry_info(phar, f404, f404_len, NULL, 1 TSRMLS_CC);
 
 		if (info) {
-			phar_file_action(phar, info, "text/html", PHAR_MIME_PHP, f404, f404_len, fname, fname_len, NULL, NULL, 0 TSRMLS_CC);
+			phar_file_action(phar, info, "text/html", PHAR_MIME_PHP, f404, f404_len, fname, NULL, NULL, 0 TSRMLS_CC);
 			return;
 		}
 	}
@@ -603,16 +603,16 @@ PHP_METHOD(Phar, webPhar)
 		|| (strlen(sapi_module.name) == sizeof("cgi")-1 && !strncmp(sapi_module.name, "cgi", sizeof("cgi")-1))) {
 
 		if (PG(http_globals)[TRACK_VARS_SERVER]) {
-			HashTable *ht = Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]);
+			HashTable *_server = Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]);
 			zval **z_script_name, **z_path_info;
 
-			if (SUCCESS != zend_hash_find(ht, "SCRIPT_NAME", sizeof("SCRIPT_NAME"), (void**)&z_script_name) ||
+			if (SUCCESS != zend_hash_find(_server, "SCRIPT_NAME", sizeof("SCRIPT_NAME"), (void**)&z_script_name) ||
 				IS_STRING != Z_TYPE_PP(z_script_name) ||
 				!strstr(Z_STRVAL_PP(z_script_name), basename)) {
 				return;
 			}
 
-			if (SUCCESS == zend_hash_find(ht, "PATH_INFO", sizeof("PATH_INFO"), (void**)&z_path_info) &&
+			if (SUCCESS == zend_hash_find(_server, "PATH_INFO", sizeof("PATH_INFO"), (void**)&z_path_info) &&
 				IS_STRING == Z_TYPE_PP(z_path_info)) {
 				entry_len = Z_STRLEN_PP(z_path_info);
 				entry = estrndup(Z_STRVAL_PP(z_path_info), entry_len);
@@ -875,7 +875,7 @@ PHP_METHOD(Phar, webPhar)
 	if (!mime_type) {
 		code = phar_file_type(&PHAR_G(mime_types), entry, &mime_type TSRMLS_CC);
 	}
-	ret = phar_file_action(phar, info, mime_type, code, entry, entry_len, fname, fname_len, pt, ru, ru_len TSRMLS_CC);
+	ret = phar_file_action(phar, info, mime_type, code, entry, entry_len, fname, pt, ru, ru_len TSRMLS_CC);
 }
 /* }}} */
 
@@ -1271,7 +1271,7 @@ PHP_METHOD(Phar, getSupportedSignatures)
 
 	add_next_index_stringl(return_value, "MD5", 3, 1);
 	add_next_index_stringl(return_value, "SHA-1", 5, 1);
-#if HAVE_HASH_EXT
+#ifdef HAVE_HASH_EXT
 	add_next_index_stringl(return_value, "SHA-256", 7, 1);
 	add_next_index_stringl(return_value, "SHA-512", 7, 1);
 #endif
@@ -2939,7 +2939,7 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 	switch (algo) {
 		case PHAR_SIG_SHA256:
 		case PHAR_SIG_SHA512:
-#if !HAVE_HASH_EXT
+#ifndef HAVE_HASH_EXT
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 				"SHA-256 and SHA-512 signatures are only supported if the hash extension is enabled");
 			return;
@@ -3762,7 +3762,7 @@ PHP_METHOD(Phar, getStub)
 					char *filter_name;
 
 					if ((filter_name = phar_decompress_filter(stub, 0)) != NULL) {
-						filter = php_stream_filter_create(phar_decompress_filter(stub, 0), NULL, php_stream_is_persistent(fp) TSRMLS_CC);
+						filter = php_stream_filter_create(filter_name, NULL, php_stream_is_persistent(fp) TSRMLS_CC);
 					} else {
 						filter = NULL;
 					}
@@ -4195,8 +4195,9 @@ PHP_METHOD(Phar, extractTo)
 			return;
 		}
 	} else {
-		phar_archive_data *phar = phar_obj->arc.archive;
+		phar_archive_data *phar;
 all_files:
+		phar = phar_obj->arc.archive;
 		/* Extract all files */
 		if (!zend_hash_num_elements(&(phar->manifest))) {
 			RETURN_TRUE;
@@ -4205,7 +4206,6 @@ all_files:
 		for (zend_hash_internal_pointer_reset(&phar->manifest);
 		zend_hash_has_more_elements(&phar->manifest) == SUCCESS;
 		zend_hash_move_forward(&phar->manifest)) {
-			phar_entry_info *entry;
 
 			if (zend_hash_get_current_data(&phar->manifest, (void **)&entry) == FAILURE) {
 				continue;

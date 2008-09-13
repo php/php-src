@@ -155,7 +155,7 @@ int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_l
 }
 /* }}} */
 
-int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp TSRMLS_DC) /* {{{ */
+static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp TSRMLS_DC) /* {{{ */
 {
 	char *metadata;
 	size_t save = php_stream_tell(fp), read;
@@ -192,7 +192,7 @@ int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp TSRMLS_DC) 
 }
 /* }}} */
 
-int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, php_uint32 compression, char **error TSRMLS_DC) /* {{{ */
+int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, php_uint32 compression, char **error TSRMLS_DC) /* {{{ */
 {
 	char buf[512], *actual_alias = NULL, *p;
 	phar_entry_info entry = {0};
@@ -599,7 +599,7 @@ struct _phar_pass_tar_info {
 	char **error;
 };
 
-int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC) /* {{{ */
+static int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC) /* {{{ */
 {
 	tar_header header;
 	size_t pos;
@@ -736,7 +736,7 @@ int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error, php_stream *fp TSRMLS_DC) /* {{{ */
+int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error TSRMLS_DC) /* {{{ */
 {
 	php_serialize_data_t metadata_hash;
 
@@ -770,17 +770,16 @@ int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error, p
 }
 /* }}} */
 
-int phar_tar_setupmetadata(void *pDest, void *argument TSRMLS_DC) /* {{{ */
+static int phar_tar_setupmetadata(void *pDest, void *argument TSRMLS_DC) /* {{{ */
 {
 	int lookfor_len;
 	struct _phar_pass_tar_info *i = (struct _phar_pass_tar_info *)argument;
 	char *lookfor, **error = i->error;
-	php_stream *fp = i->old;
 	phar_entry_info *entry = (phar_entry_info *)pDest, *metadata, newentry = {0};
 
 	if (entry->filename_len >= sizeof(".phar/.metadata") && !memcmp(entry->filename, ".phar/.metadata", sizeof(".phar/.metadata")-1)) {
 		if (entry->filename_len == sizeof(".phar/.metadata.bin")-1 && !memcmp(entry->filename, ".phar/.metadata.bin", sizeof(".phar/.metadata.bin")-1)) {
-			return phar_tar_setmetadata(entry->phar->metadata, entry, error, fp TSRMLS_CC);
+			return phar_tar_setmetadata(entry->phar->metadata, entry, error TSRMLS_CC);
 		}
 		/* search for the file this metadata entry references */
 		if (entry->filename_len >= sizeof(".phar/.metadata/") + sizeof("/.metadata.bin") - 1 && !zend_hash_exists(&(entry->phar->manifest), entry->filename + sizeof(".phar/.metadata/") - 1, entry->filename_len - (sizeof("/.metadata.bin") - 1 + sizeof(".phar/.metadata/") - 1))) {
@@ -806,7 +805,7 @@ int phar_tar_setupmetadata(void *pDest, void *argument TSRMLS_DC) /* {{{ */
 
 	if (SUCCESS == zend_hash_find(&(entry->phar->manifest), lookfor, lookfor_len, (void **)&metadata)) {
 		int ret;
-		ret = phar_tar_setmetadata(entry->metadata, metadata, error, fp TSRMLS_CC);
+		ret = phar_tar_setmetadata(entry->metadata, metadata, error TSRMLS_CC);
 		efree(lookfor);
 		return ret;
 	}
@@ -823,7 +822,7 @@ int phar_tar_setupmetadata(void *pDest, void *argument TSRMLS_DC) /* {{{ */
 		return ZEND_HASH_APPLY_STOP;
 	}
 
-	return phar_tar_setmetadata(entry->metadata, metadata, error, fp TSRMLS_CC);
+	return phar_tar_setmetadata(entry->metadata, metadata, error TSRMLS_CC);
 }
 /* }}} */
 
@@ -1014,7 +1013,7 @@ nostub:
 	if (phar->metadata) {
 		phar_entry_info *mentry;
 		if (SUCCESS == zend_hash_find(&(phar->manifest), ".phar/.metadata.bin", sizeof(".phar/.metadata.bin")-1, (void **)&mentry)) {
-			if (ZEND_HASH_APPLY_KEEP != phar_tar_setmetadata(phar->metadata, mentry, error, oldfile TSRMLS_CC)) {
+			if (ZEND_HASH_APPLY_KEEP != phar_tar_setmetadata(phar->metadata, mentry, error TSRMLS_CC)) {
 				if (closeoldfile) {
 					php_stream_close(oldfile);
 				}
@@ -1037,7 +1036,7 @@ nostub:
 				return EOF;
 			}
 
-			if (ZEND_HASH_APPLY_KEEP != phar_tar_setmetadata(phar->metadata, mentry, error, oldfile TSRMLS_CC)) {
+			if (ZEND_HASH_APPLY_KEEP != phar_tar_setmetadata(phar->metadata, mentry, error TSRMLS_CC)) {
 				zend_hash_del(&(phar->manifest), ".phar/.metadata.bin", sizeof(".phar/.metadata.bin")-1);
 				if (closeoldfile) {
 					php_stream_close(oldfile);
