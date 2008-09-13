@@ -1,3 +1,125 @@
+2008-09-12  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c:
+      - The mb_list_* issue has been resolved in the following way:
+        - Keep the same prototype as 5.2 for mb_list_encodings().
+        - Add mb_list_encoding_aliases() with the mandatory parameter.
+        - Remove mb_list_mime_names() as the list can be made from iteration
+          on mb_list_encodings() with mb_preferred_mime_name().
+
+    * (PHP_5_2)
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      - Remove unexposed functions.
+
+    * ext/mbstring/mbstring.c:
+      - Use memcmp() for binary safety.
+
+2008-09-12  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      ext/pcntl/tests/pcntl_alarm.phpt
+      ext/pcntl/tests/pcntl_exec.phpt
+      ext/pcntl/tests/pcntl_exec_2.phpt
+      ext/pcntl/tests/pcntl_exec_3.phpt
+      ext/pcntl/tests/pcntl_signal.phpt
+      ext/pcntl/tests/pcntl_wait.phpt:
+      Add tests for pcntl
+
+    * ext/pcntl/tests/pcntl_alarm.phpt
+      ext/pcntl/tests/pcntl_alarm.phpt
+      ext/pcntl/tests/pcntl_exec.phpt
+      ext/pcntl/tests/pcntl_exec.phpt
+      ext/pcntl/tests/pcntl_exec_2.phpt
+      ext/pcntl/tests/pcntl_exec_2.phpt
+      ext/pcntl/tests/pcntl_exec_3.phpt
+      ext/pcntl/tests/pcntl_exec_3.phpt
+      ext/pcntl/tests/pcntl_signal.phpt
+      ext/pcntl/tests/pcntl_signal.phpt
+      ext/pcntl/tests/pcntl_wait.phpt
+      ext/pcntl/tests/pcntl_wait.phpt:
+      
+      Add tests for pcntl
+
+    * ext/pcntl/pcntl.c:
+      initialize optional args
+
+2008-09-12  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/unicode/unicode_iterators.c
+      ext/unicode/tests/textiterator_getall_001.phpt
+      ext/unicode/tests/textiterator_next_001.phpt:
+      - Fixed endless loop and segfault
+
+    * ext/spl/spl_directory.c:
+      - Missing argument to type "t"
+
+2008-09-12  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      ext/phar/phar/pharcommand.inc:
+      MFH: make pharcommand.inc works without ereg
+
+    * ext/phar/phar/pharcommand.inc:
+      make pharcommand.inc works without ereg
+
+2008-09-12  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysqlnd/mysqlnd_debug.c
+      ext/mysqlnd/mysqlnd_enum_n_def.h
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_statistics.c
+      ext/mysqlnd/mysqlnd_statistics.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c:
+      MFH:
+      - More statistics
+      - Fixed endless loop - mysqlnd_stmt_next_result() returned FAIL but as it
+        is defined to be 1 (and PASS is 0), checking for
+      mysqlnd_stmt_more_result()
+        was successful although we were expecting a FAIL.
+
+    * ext/mysqlnd/mysqlnd_debug.c
+      ext/mysqlnd/mysqlnd_enum_n_def.h
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_statistics.c
+      ext/mysqlnd/mysqlnd_statistics.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c:
+      - More statistics
+      - Fixed endless loop - mysqlnd_stmt_next_result() returned FAIL but as it
+        is defined to be 1 (and PASS is 0), checking for
+      mysqlnd_stmt_more_result()
+        was successful although we were expecting a FAIL.
+
+2008-09-12  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      run-tests.php:
+      MFH: Fix cwd when running tests out of tree with ZTS builds (fixes #45837)
+
+    * run-tests.php:
+      Fix cwd when running tests out of tree with ZTS builds (fixes #45837)
+
+    * ext/pcntl/tests/002.phpt:
+      MFB skipif
+
+    * ext/pcntl/tests/002.phpt:
+      Fix test
+
+2008-09-12  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/file.c:
+      fix typo
+      test before commit!
+
+2008-09-12  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/file.c
+      ext/standard/tests/file/fputcsv_002.phpt
+      ext/standard/tests/file/fputcsv_002.phpt
+      ext/standard/tests/file/fputcsv_002.phpt:
+      - Fixed unexpected zval changes
+
 2008-09-11  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/openssl/xp_ssl.c:
