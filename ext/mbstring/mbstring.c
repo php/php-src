@@ -1165,7 +1165,8 @@ static int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uin
 /* {{{ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding) */
 static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 {
-	if (stage == PHP_INI_STAGE_STARTUP || stage == PHP_INI_STAGE_SHUTDOWN) {
+	if (stage == PHP_INI_STAGE_STARTUP || stage == PHP_INI_STAGE_SHUTDOWN
+			|| stage == PHP_INI_STAGE_RUNTIME) {
 		return _php_mb_ini_mbstring_internal_encoding_set(new_value, new_value_length TSRMLS_CC);
 	} else {
 		/* the corresponding mbstring globals needs to be set according to the
