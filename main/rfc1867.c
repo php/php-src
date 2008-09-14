@@ -1507,11 +1507,6 @@ var_done:
 			register_u_http_post_files_variable(lbuf, ucd, ucd_len, http_post_files, 0 TSRMLS_CC);
 
 			efree(ucd);
-
-			/* Restore Content-Type Header */
-			if (s != NULL) {
-				*s = 0x3b /*';'*/;
-			}
 			s = EMPTY_STR;
 
 			/* Initialize variables */
