@@ -23,43 +23,51 @@
 #include <ctype.h>
 #include "php_string.h"
 
-#define LEVENSHTEIN_MAX_LENTH 255
+#define LEVENSHTEIN_MAX_LENGTH 255
 
 /* {{{ reference_levdist
  * reference implementation, only optimized for memory usage, not speed */
-static int reference_levdist(const char *s1, int l1, 
-														 const char *s2, int l2, 
-														 int cost_ins, int cost_rep, int cost_del )
+static int reference_levdist(const char *s1, int l1, const char *s2, int l2, int cost_ins, int cost_rep, int cost_del )
 {
 	int *p1, *p2, *tmp;
 	int i1, i2, c0, c1, c2;
-	
-	if(l1==0) return l2*cost_ins;
-	if(l2==0) return l1*cost_del;
 
-	if((l1>LEVENSHTEIN_MAX_LENTH)||(l2>LEVENSHTEIN_MAX_LENTH))
+	if (l1 == 0) {
+		return l2 * cost_ins;
+	}
+	if (l2 == 0) {
+		return l1 * cost_del;
+	}
+
+	if ((l1 > LEVENSHTEIN_MAX_LENGTH) || (l2 > LEVENSHTEIN_MAX_LENGTH)) {
 		return -1;
+	}
+	p1 = safe_emalloc((l2 + 1), sizeof(int), 0);
+	p2 = safe_emalloc((l2 + 1), sizeof(int), 0);
 
-	p1 = safe_emalloc((l2+1), sizeof(int), 0);
-	p2 = safe_emalloc((l2+1), sizeof(int), 0);
+	for (i2 = 0; i2 <= l2; i2++) {
+		p1[i2] = i2 * cost_ins;
+	}
+	for (i1 = 0; i1 < l1 ; i1++) {
+		p2[0] = p1[0] + cost_del;
 
-	for(i2=0;i2<=l2;i2++)
-		p1[i2] = i2*cost_ins;
-
-	for(i1=0;i1<l1;i1++)
-		{
-			p2[0]=p1[0]+cost_del;
-			for(i2=0;i2<l2;i2++)
-				{
-					c0=p1[i2]+((s1[i1]==s2[i2])?0:cost_rep);
-					c1=p1[i2+1]+cost_del; if(c1<c0) c0=c1;
-					c2=p2[i2]+cost_ins; if(c2<c0) c0=c2;				
-					p2[i2+1]=c0;
-				}
-			tmp=p1; p1=p2; p2=tmp;
+		for (i2 = 0; i2 < l2; i2++) {
+			c0 = p1[i2] + ((s1[i1] == s2[i2]) ? 0 : cost_rep);
+			c1 = p1[i2 + 1] + cost_del;
+			if (c1 < c0) {
+				c0 = c1;
+			}
+			c2 = p2[i2] + cost_ins;
+			if (c2 < c0) {
+				c0 = c2;
+			}
+			p2[i2 + 1] = c0;
 		}
-
-	c0=p1[l2];
+		tmp = p1;
+		p1 = p2;
+		p2 = tmp;
+	}
+	c0 = p1[l2];
 
 	efree(p1);
 	efree(p2);
@@ -70,7 +78,7 @@ static int reference_levdist(const char *s1, int l1,
 
 /* {{{ custom_levdist
  */
-static int custom_levdist(char *str1, char *str2, char *callback_name TSRMLS_DC) 
+static int custom_levdist(char *str1, char *str2, char *callback_name TSRMLS_DC)
 {
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "The general Levenshtein support is not there yet");
 	/* not there yet */
@@ -83,59 +91,43 @@ static int custom_levdist(char *str1, char *str2, char *callback_name TSRMLS_DC)
    Calculate Levenshtein distance between two strings */
 PHP_FUNCTION(levenshtein)
 {
-	zval **str1, **str2, **cost_ins, **cost_rep, **cost_del, **callback_name;
-	int distance=-1;
+	int argc = ZEND_NUM_ARGS();
+	char *str1, *str2;
+	char *callback_name;
+	int str1_len, str2_len, callback_len;
+	long cost_ins, cost_rep, cost_del;
+	int distance = -1;
 
-	switch(ZEND_NUM_ARGS()) {
-	case 2: /* just two string: use maximum performance version  */
-		if (zend_get_parameters_ex(2, &str1, &str2) == FAILURE) {
+	switch (argc) {
+		case 2: /* just two strings: use maximum performance version */
+			if (zend_parse_parameters(2 TSRMLS_CC, "ss", &str1, &str1_len, &str2, &str2_len) == FAILURE) {
+				return;
+			}
+			distance = reference_levdist(str1, str1_len, str2, str2_len, 1, 1, 1);
+			break;
+
+		case 5: /* more general version: calc cost by ins/rep/del weights */
+			if (zend_parse_parameters(5 TSRMLS_CC, "sslll", &str1, &str1_len, &str2, &str2_len, &cost_ins, &cost_rep, &cost_del) == FAILURE) {
+				return;
+			}
+			distance = reference_levdist(str1, str1_len, str2, str2_len, cost_ins, cost_rep, cost_del);
+			break;
+
+		case 3: /* most general version: calc cost by user-supplied function */
+			if (zend_parse_parameters(3 TSRMLS_CC, "sss", &str1, &str1_len, &str2, &str2_len, &callback_name, &callback_len) == FAILURE) {
+				return;
+			}
+			distance = custom_levdist(str1, str2, callback_name TSRMLS_CC);
+			break;
+
+		default:
 			WRONG_PARAM_COUNT;
-		}
-		convert_to_string_ex(str1);
-		convert_to_string_ex(str2);
+	}
 
-		distance = reference_levdist(Z_STRVAL_PP(str1), Z_STRLEN_PP(str1), 
-									 Z_STRVAL_PP(str2), Z_STRLEN_PP(str2), 1, 1, 1);
-
-		break;
-
-	case 5: /* more general version: calc cost by ins/rep/del weights */
-		if (zend_get_parameters_ex(5, &str1, &str2, &cost_ins, &cost_rep, &cost_del) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_string_ex(str1);
-		convert_to_string_ex(str2);
-		convert_to_long_ex(cost_ins);
-		convert_to_long_ex(cost_rep);
-		convert_to_long_ex(cost_del);
-		
-		distance = reference_levdist(Z_STRVAL_PP(str1), Z_STRLEN_PP(str1),
-									 Z_STRVAL_PP(str2), Z_STRLEN_PP(str2),
-									 Z_LVAL_PP(cost_ins), Z_LVAL_PP(cost_rep),
-									 Z_LVAL_PP(cost_del));
-		
-		break;
-
-	case 3: /* most general version: calc cost by user-supplied function */
-		if (zend_get_parameters_ex(3, &str1, &str2, &callback_name) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_string_ex(str1);
-		convert_to_string_ex(str2);
-		convert_to_string_ex(callback_name);
-
-		distance = custom_levdist(Z_STRVAL_PP(str1), Z_STRVAL_PP(str2),
-								  Z_STRVAL_PP(callback_name) TSRMLS_CC);
-		break;
-
-	default: 
-		WRONG_PARAM_COUNT;
-	}	
-
-	if(distance < 0 && /* TODO */ ZEND_NUM_ARGS() != 3) {
+	if (distance < 0 && /* TODO */ ZEND_NUM_ARGS() != 3) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument string(s) too long");
 	}
-	
+
 	RETURN_LONG(distance);
 }
 /* }}} */
