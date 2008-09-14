@@ -2047,83 +2047,87 @@ MATCHING A PATTERN: THE TRADITIONAL FUNCTION
    The string to be matched by pcre_exec()
 
        The  subject string is passed to pcre_exec() as a pointer in subject, a
-       length in length, and a starting byte offset in startoffset.  In  UTF-8
-       mode,  the  byte  offset  must point to the start of a UTF-8 character.
-       Unlike the pattern string, the subject may contain binary  zero  bytes.
-       When  the starting offset is zero, the search for a match starts at the
-       beginning of the subject, and this is by far the most common case.
+       length (in bytes) in length, and a starting byte offset in startoffset.
+       In UTF-8 mode, the byte offset must point to the start of a UTF-8 char-
+       acter. Unlike the pattern string, the subject may contain  binary  zero
+       bytes.  When the starting offset is zero, the search for a match starts
+       at the beginning of the subject, and this is by  far  the  most  common
+       case.
 
-       A non-zero starting offset is useful when searching for  another  match
-       in  the same subject by calling pcre_exec() again after a previous suc-
-       cess.  Setting startoffset differs from just passing over  a  shortened
-       string  and  setting  PCRE_NOTBOL  in the case of a pattern that begins
+       A  non-zero  starting offset is useful when searching for another match
+       in the same subject by calling pcre_exec() again after a previous  suc-
+       cess.   Setting  startoffset differs from just passing over a shortened
+       string and setting PCRE_NOTBOL in the case of  a  pattern  that  begins
        with any kind of lookbehind. For example, consider the pattern
 
          \Biss\B
 
-       which finds occurrences of "iss" in the middle of  words.  (\B  matches
-       only  if  the  current position in the subject is not a word boundary.)
-       When applied to the string "Mississipi" the first call  to  pcre_exec()
-       finds  the  first  occurrence. If pcre_exec() is called again with just
-       the remainder of the subject,  namely  "issipi",  it  does  not  match,
+       which  finds  occurrences  of "iss" in the middle of words. (\B matches
+       only if the current position in the subject is not  a  word  boundary.)
+       When  applied  to the string "Mississipi" the first call to pcre_exec()
+       finds the first occurrence. If pcre_exec() is called  again  with  just
+       the  remainder  of  the  subject,  namely  "issipi", it does not match,
        because \B is always false at the start of the subject, which is deemed
-       to be a word boundary. However, if pcre_exec()  is  passed  the  entire
+       to  be  a  word  boundary. However, if pcre_exec() is passed the entire
        string again, but with startoffset set to 4, it finds the second occur-
-       rence of "iss" because it is able to look behind the starting point  to
+       rence  of "iss" because it is able to look behind the starting point to
        discover that it is preceded by a letter.
 
-       If  a  non-zero starting offset is passed when the pattern is anchored,
+       If a non-zero starting offset is passed when the pattern  is  anchored,
        one attempt to match at the given offset is made. This can only succeed
-       if  the  pattern  does  not require the match to be at the start of the
+       if the pattern does not require the match to be at  the  start  of  the
        subject.
 
    How pcre_exec() returns captured substrings
 
-       In general, a pattern matches a certain portion of the subject, and  in
-       addition,  further  substrings  from  the  subject may be picked out by
-       parts of the pattern. Following the usage  in  Jeffrey  Friedl's  book,
-       this  is  called "capturing" in what follows, and the phrase "capturing
-       subpattern" is used for a fragment of a pattern that picks out  a  sub-
-       string.  PCRE  supports several other kinds of parenthesized subpattern
+       In  general, a pattern matches a certain portion of the subject, and in
+       addition, further substrings from the subject  may  be  picked  out  by
+       parts  of  the  pattern.  Following the usage in Jeffrey Friedl's book,
+       this is called "capturing" in what follows, and the  phrase  "capturing
+       subpattern"  is  used for a fragment of a pattern that picks out a sub-
+       string. PCRE supports several other kinds of  parenthesized  subpattern
        that do not cause substrings to be captured.
 
-       Captured substrings are returned to the caller via a vector of  integer
-       offsets  whose  address is passed in ovector. The number of elements in
-       the vector is passed in ovecsize, which must be a non-negative  number.
-       Note: this argument is NOT the size of ovector in bytes.
+       Captured substrings are returned to the caller via a vector of integers
+       whose address is passed in ovector. The number of elements in the  vec-
+       tor  is  passed in ovecsize, which must be a non-negative number. Note:
+       this argument is NOT the size of ovector in bytes.
 
-       The  first  two-thirds of the vector is used to pass back captured sub-
-       strings, each substring using a pair of integers. The  remaining  third
-       of  the  vector is used as workspace by pcre_exec() while matching cap-
-       turing subpatterns, and is not available for passing back  information.
-       The  length passed in ovecsize should always be a multiple of three. If
+       The first two-thirds of the vector is used to pass back  captured  sub-
+       strings,  each  substring using a pair of integers. The remaining third
+       of the vector is used as workspace by pcre_exec() while  matching  cap-
+       turing  subpatterns, and is not available for passing back information.
+       The number passed in ovecsize should always be a multiple of three.  If
        it is not, it is rounded down.
 
-       When a match is successful, information about  captured  substrings  is
-       returned  in  pairs  of integers, starting at the beginning of ovector,
-       and continuing up to two-thirds of its length at the  most.  The  first
-       element of a pair is set to the offset of the first character in a sub-
-       string, and the second is set to the  offset  of  the  first  character
-       after  the  end  of  a  substring. The first pair, ovector[0] and ovec-
-       tor[1], identify the portion of  the  subject  string  matched  by  the
-       entire  pattern.  The next pair is used for the first capturing subpat-
-       tern, and so on. The value returned by pcre_exec() is one more than the
-       highest numbered pair that has been set. For example, if two substrings
-       have been captured, the returned value is 3. If there are no  capturing
-       subpatterns,  the return value from a successful match is 1, indicating
-       that just the first pair of offsets has been set.
+       When  a  match  is successful, information about captured substrings is
+       returned in pairs of integers, starting at the  beginning  of  ovector,
+       and  continuing  up  to two-thirds of its length at the most. The first
+       element of each pair is set to the byte offset of the  first  character
+       in  a  substring, and the second is set to the byte offset of the first
+       character after the end of a substring. Note: these values  are  always
+       byte offsets, even in UTF-8 mode. They are not character counts.
+
+       The  first  pair  of  integers, ovector[0] and ovector[1], identify the
+       portion of the subject string matched by the entire pattern.  The  next
+       pair  is  used for the first capturing subpattern, and so on. The value
+       returned by pcre_exec() is one more than the highest numbered pair that
+       has  been  set.  For example, if two substrings have been captured, the
+       returned value is 3. If there are no capturing subpatterns, the  return
+       value from a successful match is 1, indicating that just the first pair
+       of offsets has been set.
 
        If a capturing subpattern is matched repeatedly, it is the last portion
        of the string that it matched that is returned.
 
        If  the vector is too small to hold all the captured substring offsets,
        it is used as far as possible (up to two-thirds of its length), and the
-       function  returns a value of zero. In particular, if the substring off-
-       sets are not of interest, pcre_exec() may be called with ovector passed
-       as  NULL  and  ovecsize  as zero. However, if the pattern contains back
-       references and the ovector is not big enough to  remember  the  related
-       substrings,  PCRE has to get additional memory for use during matching.
-       Thus it is usually advisable to supply an ovector.
+       function  returns  a value of zero. If the substring offsets are not of
+       interest, pcre_exec() may be called with ovector  passed  as  NULL  and
+       ovecsize  as zero. However, if the pattern contains back references and
+       the ovector is not big enough to remember the related substrings,  PCRE
+       has  to  get additional memory for use during matching. Thus it is usu-
+       ally advisable to supply an ovector.
 
        The pcre_info() function can be used to find  out  how  many  capturing
        subpatterns  there  are  in  a  compiled pattern. The smallest size for
@@ -2604,7 +2608,7 @@ AUTHOR
 
 REVISION
 
-       Last updated: 12 April 2008
+       Last updated: 24 August 2008
        Copyright (c) 1997-2008 University of Cambridge.
 ------------------------------------------------------------------------------
 
@@ -6536,6 +6540,8 @@ PCRE DISCUSSION OF STACK USAGE
        ing long subject strings is to write repeated parenthesized subpatterns
        to match more than one character whenever possible.
 
+   Compiling PCRE to use heap instead of stack
+
        In environments where stack memory is constrained, you  might  want  to
        compile  PCRE to use heap memory instead of stack for remembering back-
        up points. This makes it run a lot more slowly, however. Details of how
@@ -6547,6 +6553,24 @@ PCRE DISCUSSION OF STACK USAGE
        functions. Since the block sizes are always the same,  and  are  always
        freed in reverse order, it may be possible to implement customized mem-
        ory handlers that are more efficient than the standard functions.
+
+   Limiting PCRE's stack usage
+
+       PCRE has an internal counter that can be used to  limit  the  depth  of
+       recursion,  and  thus cause pcre_exec() to give an error code before it
+       runs out of stack. By default, the limit is very  large,  and  unlikely
+       ever  to operate. It can be changed when PCRE is built, and it can also
+       be set when pcre_exec() is called. For details of these interfaces, see
+       the pcrebuild and pcreapi documentation.
+
+       As a very rough rule of thumb, you should reckon on about 500 bytes per
+       recursion. Thus, if you want to limit your  stack  usage  to  8Mb,  you
+       should  set  the  limit at 16000 recursions. A 64Mb stack, on the other
+       hand, can support around 128000 recursions. The pcretest  test  program
+       has a command line option (-S) that can be used to increase the size of
+       its stack.
+
+   Changing stack size in Unix-like systems
 
        In Unix-like environments, there is not often a problem with the  stack
        unless  very  long  strings  are  involved, though the default limit on
@@ -6568,19 +6592,12 @@ PCRE DISCUSSION OF STACK USAGE
        attempts to increase the soft limit to  100Mb  using  setrlimit().  You
        must do this before calling pcre_exec().
 
-       PCRE  has  an  internal  counter that can be used to limit the depth of
-       recursion, and thus cause pcre_exec() to give an error code  before  it
-       runs  out  of  stack. By default, the limit is very large, and unlikely
-       ever to operate. It can be changed when PCRE is built, and it can  also
-       be set when pcre_exec() is called. For details of these interfaces, see
-       the pcrebuild and pcreapi documentation.
+   Changing stack size in Mac OS X
 
-       As a very rough rule of thumb, you should reckon on about 500 bytes per
-       recursion.  Thus,  if  you  want  to limit your stack usage to 8Mb, you
-       should set the limit at 16000 recursions. A 64Mb stack,  on  the  other
-       hand,  can  support around 128000 recursions. The pcretest test program
-       has a command line option (-S) that can be used to increase the size of
-       its stack.
+       Using setrlimit(), as described above, should also work on Mac OS X. It
+       is also possible to set a stack size when linking a program. There is a
+       discussion   about   stack  sizes  in  Mac  OS  X  at  this  web  site:
+       http://developer.apple.com/qa/qa2005/qa1419.html.
 
 
 AUTHOR
@@ -6592,8 +6609,8 @@ AUTHOR
 
 REVISION
 
-       Last updated: 05 June 2007
-       Copyright (c) 1997-2007 University of Cambridge.
+       Last updated: 09 July 2008
+       Copyright (c) 1997-2008 University of Cambridge.
 ------------------------------------------------------------------------------
 
 

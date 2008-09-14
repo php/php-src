@@ -1284,4 +1284,8 @@ No match
     a\x0bb\<bsr_anycrlf>
 No match
  
+/X/8f<any> 
+    A\x{1ec5}ABCXYZ
+ 0: X
+
 / End of testinput 8 / 

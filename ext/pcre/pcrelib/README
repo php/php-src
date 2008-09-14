@@ -1,9 +1,12 @@
 README file for PCRE (Perl-compatible regular expression library)
 -----------------------------------------------------------------
 
-The latest release of PCRE is always available from
+The latest release of PCRE is always available in three alternative formats
+from:
 
   ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-xxx.tar.gz
+  ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-xxx.tar.bz2
+  ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-xxx.zip
 
 There is a mailing list for discussion about the development of PCRE at
 
@@ -640,7 +643,7 @@ The distribution should contain the following files:
   pcre_study.c            )
   pcre_tables.c           )
   pcre_try_flipped.c      )
-  pcre_ucp_searchfuncs.c  )
+  pcre_ucd.c              )
   pcre_valid_utf8.c       )
   pcre_version.c          )
   pcre_xclass.c           )
@@ -649,9 +652,7 @@ The distribution should contain the following files:
   pcre.h.in               template for pcre.h when built by "configure"
   pcreposix.h             header for the external POSIX wrapper API
   pcre_internal.h         header for internal use
-  ucp.h                   ) headers concerned with
-  ucpinternal.h           )   Unicode property handling
-  ucptable.h              ) (this one is the data table)
+  ucp.h                   header for Unicode property handling
 
   config.h.in             template for config.h, which is built by "configure"
 
@@ -725,6 +726,9 @@ The distribution should contain the following files:
 
 (D) Auxiliary files for cmake support
 
+  cmake/COPYING-CMAKE-SCRIPTS
+  cmake/FindPackageHandleStandardArgs.cmake
+  cmake/FindReadline.cmake
   CMakeLists.txt
   config-cmake.h.in
 
@@ -749,4 +753,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 13 April 2008
+Last updated: 05 September 2008
