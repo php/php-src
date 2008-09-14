@@ -465,10 +465,27 @@ foundit:
 		if (!actual_alias && entry.filename_len == sizeof(".phar/alias.txt")-1 && !strncmp(entry.filename, ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
 			php_stream_filter *filter;
 			off_t saveloc;
+			/* verify local file header */
+			phar_zip_file_header local;
 
-			/* archive alias found, seek to file contents, do not validate local header. Potentially risky, but not very. */
+			/* archive alias found */
 			saveloc = php_stream_tell(fp);
-			php_stream_seek(fp, PHAR_GET_32(zipentry.offset) + sizeof(phar_zip_file_header) + entry.filename_len + PHAR_GET_16(zipentry.extra_len), SEEK_SET);
+			php_stream_seek(fp, PHAR_GET_32(zipentry.offset), SEEK_SET);
+
+			if (sizeof(local) != php_stream_read(fp, (char *) &local, sizeof(local))) {
+				PHAR_ZIP_FAIL("phar error: internal corruption of zip-based phar (cannot read local file header for alias)");
+			}
+
+			/* verify local header */
+			if (entry.filename_len != PHAR_GET_16(local.filename_len) || entry.crc32 != PHAR_GET_32(local.crc32) || entry.uncompressed_filesize != PHAR_GET_32(local.uncompsize) || entry.compressed_filesize != PHAR_GET_32(local.compsize)) {
+				PHAR_ZIP_FAIL("phar error: internal corruption of zip-based phar (local head of alias does not match central directory)");
+			}
+
+			/* construct actual offset to file start - local extra_len can be different from central extra_len */
+			entry.offset = entry.offset_abs =
+				sizeof(local) + entry.header_offset + PHAR_GET_16(local.filename_len) + PHAR_GET_16(local.extra_len);
+			php_stream_seek(fp, entry.offset, SEEK_SET);
+
 			mydata->alias_len = entry.uncompressed_filesize;
 
 			if (entry.flags & PHAR_ENT_COMPRESSED_GZ) {
@@ -497,7 +514,6 @@ foundit:
 					PHAR_ZIP_FAIL("unable to read in alias, bzip2 filter creation failed");
 				}
 
-				php_stream_filter_append(&fp->readfilters, filter);
 				php_stream_filter_append(&fp->readfilters, filter);
 
 				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &actual_alias, entry.uncompressed_filesize, 0)) || !actual_alias) {

@@ -11,6 +11,8 @@ try {
 	foreach ($a as $entry => $file) {
 		echo $file->getContent();
 	}
+	$a = new Phar(dirname(__FILE__) . '/files/bz2_alias.phar.zip');
+	var_dump($a->getAlias());
 } catch (Exception $e) {
 	echo $e->getMessage() . "\n";
 }
@@ -77,4 +79,5 @@ $a = new corrupt_zipmaker;
 $a->addFile('hi', null, 'hii', null, null, 'compress', 'compress', 11);
 $a->writeZip(dirname(__FILE__) . '/compress_unsupunknown.zip');
 ?>
+string(7) "hithere"
 ===DONE===
