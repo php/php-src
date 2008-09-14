@@ -1185,6 +1185,9 @@ PHPAPI PHP_FUNCTION(fgetc)
 		UChar *buf = php_stream_read_unicode_chars(stream, &buflen);
 
 		if (!buf || !buflen) {
+			if (buf) {
+				efree(buf);
+			}
 			RETURN_FALSE;
 		}
 		RETURN_UNICODEL(buf, buflen, 0);
