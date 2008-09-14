@@ -22,8 +22,14 @@
 #ifdef PHP_WIN32
 #pragma pack(1)
 # define PHAR_TAR_PACK
+#elif defined(__sgi)
+# define PHAR_TAR_PACK
 #else
 # define PHAR_TAR_PACK __attribute__((__packed__))
+#endif
+
+#if defined(__sgi)
+# pragma pack 0
 #endif
 /**
  * the format of the header block for a file, in the older UNIX-compatible
@@ -46,6 +52,9 @@ typedef struct _old_tar_header {  /* {{{ */
 } PHAR_TAR_PACK old_tar_header;
 /* }}} */
 
+#if defined(__sgi)
+# pragma pack 0
+#endif
 /**
  * the new USTAR header format.
  * Note that tar can determine that the USTAR format is being used by the
