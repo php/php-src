@@ -52,7 +52,7 @@ PHP_ARG_WITH(pcre-regex,,
   else
     AC_MSG_CHECKING([for PCRE library to use])
     AC_MSG_RESULT([bundled])
-    pcrelib_sources="pcrelib/pcre_chartables.c pcrelib/pcre_ucp_searchfuncs.c \
+    pcrelib_sources="pcrelib/pcre_chartables.c pcrelib/pcre_ucd.c \
     				 pcrelib/pcre_compile.c pcrelib/pcre_config.c pcrelib/pcre_exec.c \
     				 pcrelib/pcre_fullinfo.c pcrelib/pcre_get.c pcrelib/pcre_globals.c \
     				 pcrelib/pcre_info.c pcrelib/pcre_maketables.c pcrelib/pcre_newline.c \

@@ -664,4 +664,7 @@
     a\x{85}b\<bsr_anycrlf>
     a\x0bb\<bsr_anycrlf>
  
+/X/8f<any> 
+    A\x{1ec5}ABCXYZ
+
 / End of testinput 8 / 

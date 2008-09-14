@@ -819,10 +819,28 @@
 /^\x{023a}+([^X])/8i
   \x{023a}\x{2c65}X
  
+/\x{c0}+\x{116}+/8i
+    \x{c0}\x{e0}\x{116}\x{117}
+
+/[\x{c0}\x{116}]+/8i
+    \x{c0}\x{e0}\x{116}\x{117}
+
 /Check property support in non-UTF-8 mode/
  
 /\p{L}{4}/
     123abcdefg
     123abc\xc4\xc5zz
+
+/\p{Carian}\p{Cham}\p{Kayah_Li}\p{Lepcha}\p{Lycian}\p{Lydian}\p{Ol_Chiki}\p{Rejang}\p{Saurashtra}\p{Sundanese}\p{Vai}/8
+    \x{102A4}\x{AA52}\x{A91D}\x{1C46}\x{10283}\x{1092E}\x{1C6B}\x{A93B}\x{A8BF}\x{1BA0}\x{A50A}====
+
+/\x{a77d}\x{1d79}/8i
+    \x{a77d}\x{1d79}
+    \x{1d79}\x{a77d} 
+
+/\x{a77d}\x{1d79}/8
+    \x{a77d}\x{1d79}
+    ** Failers 
+    \x{1d79}\x{a77d} 
 
 / End / 
