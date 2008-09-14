@@ -1,3 +1,99 @@
+2008-09-13  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/dirstream.c
+      ext/phar/func_interceptors.c
+      ext/phar/phar.c
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/stream.c
+      ext/phar/tar.c
+      ext/phar/util.c
+      ext/phar/tests/bug46060.phpt:
+      MFB: fix minor issues found by ICC (unused variables and the like)
+
+    * (PHP_5_3)
+      ext/phar/dirstream.c
+      ext/phar/func_interceptors.c
+      ext/phar/phar.c
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/stream.c
+      ext/phar/tar.c
+      ext/phar/util.c
+      ext/phar/tests/bug46060.phpt:
+      fix minor issues found by ICC (unused variables and the like)
+
+2008-09-13  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/fileinfo/fileinfo.c:
+      actually reset stream position when finished
+
+2008-09-13  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      NEWS:
+      note fix of Bug #46060: Phar::addEmptyDir() breaks
+
+    * ext/phar/util.c
+      ext/phar/tests/bug46060.phpt:
+      MFB: fix Bug #46060: addEmptyDir() breaks
+
+    * ext/phar/tests/bug46060.phpt
+      ext/phar/tests/bug46060.phpt:
+      
+      file bug46060.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/phar/util.c:
+      fix Bug #46060: addEmptyDir() breaks
+
+2008-09-13  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_2)
+      ext/mbstring/mbstring.c:
+      - MFH: Reenable ini_set("mbstring.internal_encoding", VALUE) to work on
+      runtime.
+          (noticed by Antony. Thanks!)
+
+    * (PHP_5_3)
+      ext/mbstring/mbstring.c:
+      - MFH: Reenable ini_set("mbstring.internal_encoding", VALUE) to work on
+      runtime.
+        (noticed by Antony. Thanks!)
+
+    * ext/mbstring/mbstring.c:
+      - Reenable ini_set("mbstring.internal_encoding", VALUE) to work on runtime.
+        (noticed by Antony. Thanks!)
+
+    * (PHP_5_2)
+      ext/mbstring/php_mbregex.c
+      ext/mbstring/php_mbregex.c:
+      - MFH: Properly initialize/finalize the library. This plugs the leaks
+      caused by
+        onig_new().
+
+    * ext/mbstring/php_mbregex.c:
+      - Properly initialize/finalize the library. This plugs the leaks caused by
+        onig_new().
+
+    * ext/mbstring/tests/mb_encoding_aliases.phpt
+      ext/mbstring/tests/mb_encoding_aliases.phpt
+      ext/mbstring/tests/mb_list_encodings.phpt
+      ext/mbstring/tests/mb_list_encodings.phpt:
+      
+      - Adding tests.
+
+    * ext/sqlite/config.m4:
+      - WS
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      - mb_encoding_aliases() is more consistent with mb_preferred_mime_name()
+        despite the unconformance with the naming convention.
+
+    * ext/sqlite/config.m4:
+      - Add missing =DIR
+
 2008-09-12  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/mbstring/mbstring.c:
