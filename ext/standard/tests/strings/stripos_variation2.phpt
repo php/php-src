@@ -119,16 +119,16 @@ int(10)
 int(10)
 -- Iteration 12 --
 bool(false)
-int(63)
+bool(false)
 -- Iteration 13 --
 bool(false)
-int(63)
+bool(false)
 -- Iteration 14 --
 bool(false)
-int(63)
+bool(false)
 -- Iteration 15 --
 bool(false)
-int(63)
+bool(false)
 -- Iteration 16 --
 bool(false)
 bool(false)

@@ -92,7 +92,7 @@ echo "*** Done ***";
 *** Testing stripos() function with unexpected values for haystack and needle ***
 -- Iteration 1 --
 bool(false)
-int(1)
+bool(false)
 -- Iteration 2 --
 bool(false)
 bool(false)
@@ -125,17 +125,17 @@ Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on li
 bool(false)
 -- Iteration 8 --
 bool(false)
-int(7)
+bool(false)
 -- Iteration 9 --
 bool(false)
-int(3)
+bool(false)
 -- Iteration 10 --
 
 Notice: Array to string conversion in %s on line %d
 bool(false)
 
 Notice: Array to string conversion in %s on line %d
-int(5)
+bool(false)
 -- Iteration 11 --
 
 Notice: Array to string conversion in %s on line %d

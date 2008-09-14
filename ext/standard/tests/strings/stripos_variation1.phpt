@@ -7,10 +7,10 @@ Test stripos() function : usage variations - double quoted strings for 'haystack
  * Source code: ext/standard/string.c
 */
 
-/* Test stripos() function by passing double quoted strings to 'haystack' & 'needle' arguments */
+/* Test stripos() function by passing double quoted strings for 'haystack' & 'needle' arguments */
 
 echo "*** Testing stripos() function: with double quoted strings ***\n";
-$haystack = "Hello,\t\n\0\n  $&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101";
+$haystack = "Hello,\t\n\0\n  $&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 ";
 $needle = array(
   //regular strings
   "l",
@@ -50,6 +50,7 @@ $needle = array(
   "()",
   "*+",
   "+",
+  "-",
   ".",
   ".;",
   ":;",
@@ -57,6 +58,8 @@ $needle = array(
   "<=>",
   ">",
   "=>",
+  "?",
+  "@",
   "@hEllo",
 
   "12345", //decimal numeric string
@@ -68,7 +71,7 @@ $needle = array(
   $haystack  //haystack as needle
 );
  
-/* loop through 'needle' array to get the position of the needle in haystack string */
+/* loop through to get the position of the needle in haystack string */
 $count = 1;
 for($index=0; $index<count($needle); $index++) {
   echo "-- Iteration $count --\n";
@@ -78,7 +81,7 @@ for($index=0; $index<count($needle); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing stripos() function: with double quoted strings ***
 -- Iteration 1 --
 int(2)
@@ -112,19 +115,19 @@ int(7)
 int(9)
 -- Iteration 11 --
 int(8)
-int(52)
+bool(false)
 -- Iteration 12 --
 int(8)
-int(52)
+bool(false)
 -- Iteration 13 --
 int(8)
-int(52)
+bool(false)
 -- Iteration 14 --
 int(8)
-int(52)
+bool(false)
 -- Iteration 15 --
 int(8)
-int(52)
+bool(false)
 -- Iteration 16 --
 bool(false)
 bool(false)
@@ -159,48 +162,57 @@ bool(false)
 int(23)
 bool(false)
 -- Iteration 27 --
-int(25)
+int(24)
 bool(false)
 -- Iteration 28 --
-bool(false)
+int(25)
 bool(false)
 -- Iteration 29 --
-int(27)
+bool(false)
 bool(false)
 -- Iteration 30 --
-int(28)
+int(27)
 bool(false)
 -- Iteration 31 --
-int(29)
+int(28)
 bool(false)
 -- Iteration 32 --
-int(31)
-int(31)
+int(29)
+bool(false)
 -- Iteration 33 --
-int(30)
+int(31)
 bool(false)
 -- Iteration 34 --
-int(33)
-int(33)
+int(30)
+bool(false)
 -- Iteration 35 --
-int(39)
-int(39)
+int(32)
+bool(false)
 -- Iteration 36 --
-int(15)
-int(48)
+int(33)
+bool(false)
 -- Iteration 37 --
+int(33)
+bool(false)
+-- Iteration 38 --
+int(39)
+int(39)
+-- Iteration 39 --
 int(15)
 int(48)
--- Iteration 38 --
-int(51)
-int(51)
--- Iteration 39 --
-int(51)
-int(51)
 -- Iteration 40 --
-bool(false)
-bool(false)
+int(15)
+int(48)
 -- Iteration 41 --
+int(51)
+int(51)
+-- Iteration 42 --
+int(51)
+int(51)
+-- Iteration 43 --
+bool(false)
+bool(false)
+-- Iteration 44 --
 int(0)
 bool(false)
 *** Done ***
