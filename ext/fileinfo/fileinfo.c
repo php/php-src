@@ -99,6 +99,7 @@ PHP_FILEINFO_API zend_object_value finfo_objects_new(zend_class_entry *class_typ
 {
 	zend_object_value retval;
 	struct finfo_object *intern;
+	zval *tmp;
 
 	intern = emalloc(sizeof(struct finfo_object));
 
