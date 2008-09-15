@@ -1564,7 +1564,7 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 					ZVAL_LONG(*current_field, v);
 				} else {
 					uint64 v = (uint64) atoll((char *) p);
-					zend_bool uns = packet->fields_metadata[i].flags & UNSIGNED_FLAG? TRUE:FALSE;
+					zend_bool uns = fields_metadata[i].flags & UNSIGNED_FLAG? TRUE:FALSE;
 					/* We have to make it ASCIIZ temporarily */
 #if SIZEOF_LONG==8
 					if (uns == TRUE && v > 9223372036854775807L)
@@ -1581,7 +1581,7 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 				}
 				*(p + len) = save;
 			} else
-#endif
+#endif /* MYSQLND_STRING_TO_INT_CONVERSION */
 			if (fields_metadata[i].type == MYSQL_TYPE_BIT) {
 				/*
 				  BIT fields are specially handled. As they come as bit mask, we have
