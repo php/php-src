@@ -1545,8 +1545,8 @@ PHP_METHOD(SoapServer, SoapServer)
 
 	SOAP_SERVER_BEGIN_CODE();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t!|a", &zwsdl, &zwsdl_len, &zwsdl_type, &options) == FAILURE) {
-		return;
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "t!|a", &zwsdl, &zwsdl_len, &zwsdl_type, &options) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
 	}
 
 	if (zwsdl.v) {
@@ -1601,8 +1601,7 @@ PHP_METHOD(SoapServer, SoapServer)
 			}
 			encoding = xmlFindCharEncodingHandler(str);
 			if (encoding == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid arguments. Invalid 'encoding' option - '%v'", Z_TYPE_PP(tmp), Z_UNIVAL_PP(tmp));
-				return;
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid arguments. Invalid 'encoding' option - '%v'", Z_TYPE_PP(tmp), Z_UNIVAL_PP(tmp));
 			} else {
 				service->encoding = encoding;
 			}
@@ -1643,8 +1642,7 @@ PHP_METHOD(SoapServer, SoapServer)
 	}
 
 	if (wsdl == NULL && service->uri == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid arguments. 'uri' option is required in nonWSDL mode");
-		return;
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "'uri' option is required in nonWSDL mode");
 	}
 
 
@@ -2847,7 +2845,7 @@ PHP_METHOD(SoapClient, SoapClient)
 	client = (soap_client_object*)zend_object_store_get_object(this_ptr TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t!|a", &zwsdl, &zwsdl_len, &zwsdl_type, &options) == FAILURE) {
-		return;
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
 	}
 
 	if (zwsdl.v) {
@@ -2874,8 +2872,7 @@ PHP_METHOD(SoapClient, SoapClient)
 					client->uri = soap_unicode_to_string(Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp) TSRMLS_CC);
 				}
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "'uri' option is required in nonWSDL mode");
-				return;
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "'uri' option is required in nonWSDL mode");
 			}
 
 			if (zend_ascii_hash_find(ht, "style", sizeof("style"), (void**)&tmp) == SUCCESS &&
@@ -2904,8 +2901,7 @@ PHP_METHOD(SoapClient, SoapClient)
 				client->location = soap_unicode_to_string(Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp) TSRMLS_CC);
 			}
 		} else if (wsdl == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "'location' option is required in nonWSDL mode");
-			return;
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'location' option is required in nonWSDL mode");
 		}
 
 		if (zend_ascii_hash_find(ht, "soap_version", sizeof("soap_version"), (void**)&tmp) == SUCCESS) {
@@ -3005,8 +3001,7 @@ PHP_METHOD(SoapClient, SoapClient)
 			}
 			encoding = xmlFindCharEncodingHandler(str);
 			if (encoding == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid arguments. Invalid 'encoding' option - '%v'", Z_TYPE_PP(tmp), Z_UNIVAL_PP(tmp));
-				return;
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid arguments. Invalid 'encoding' option - '%v'", Z_TYPE_PP(tmp), Z_UNIVAL_PP(tmp));
 			} else {
 				client->encoding = encoding;
 			}
@@ -3060,8 +3055,7 @@ PHP_METHOD(SoapClient, SoapClient)
 		}
 
 	} else if (wsdl == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'location' and 'uri' options are required in nonWSDL mode");
-		return;
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "'location' and 'uri' options are required in nonWSDL mode");
 	}
 
 	client->version = soap_version;
