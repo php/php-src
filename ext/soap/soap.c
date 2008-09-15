@@ -1222,10 +1222,14 @@ PHP_METHOD(SoapServer, SoapServer)
 
 	SOAP_SERVER_BEGIN_CODE();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z!|a", &wsdl, &options) == FAILURE) {
-		return;
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "z|a", &wsdl, &options) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
 	}
 
+	if (Z_TYPE_P(wsdl) != IS_STRING && Z_TYPE_P(wsdl) != IS_NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
+	}
+	
 	service = emalloc(sizeof(soapService));
 	memset(service, 0, sizeof(soapService));
 	service->send_errors = 1;
@@ -1246,9 +1250,8 @@ PHP_METHOD(SoapServer, SoapServer)
 		if (zend_hash_find(ht, "uri", sizeof("uri"), (void**)&tmp) == SUCCESS &&
 		    Z_TYPE_PP(tmp) == IS_STRING) {
 			service->uri = estrndup(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
-		} else if (wsdl == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "'uri' option is required in nonWSDL mode");
-			return;
+		} else if (Z_TYPE_P(wsdl) == IS_NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'uri' option is required in nonWSDL mode");
 		}
 
 		if (zend_hash_find(ht, "actor", sizeof("actor"), (void**)&tmp) == SUCCESS &&
@@ -1262,8 +1265,7 @@ PHP_METHOD(SoapServer, SoapServer)
 		
 			encoding = xmlFindCharEncodingHandler(Z_STRVAL_PP(tmp));
 			if (encoding == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid 'encoding' option - '%s'", Z_STRVAL_PP(tmp));
-				return;
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid 'encoding' option - '%s'", Z_STRVAL_PP(tmp));
 			} else {
 			  service->encoding = encoding;
 			}
@@ -1299,9 +1301,8 @@ PHP_METHOD(SoapServer, SoapServer)
 			service->send_errors = Z_LVAL_PP(tmp);
 		}
 
-	} else if (wsdl == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'uri' option is required in nonWSDL mode");
-		return;
+	} else if (Z_TYPE_P(wsdl) == IS_NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "'uri' option is required in nonWSDL mode");
 	}
 
 	service->version = version;
@@ -1310,7 +1311,7 @@ PHP_METHOD(SoapServer, SoapServer)
 	service->soap_functions.ft = emalloc(sizeof(HashTable));
 	zend_hash_init(service->soap_functions.ft, 0, NULL, ZVAL_PTR_DTOR, 0);
 
-	if (wsdl) {
+	if (Z_TYPE_P(wsdl) != IS_NULL) {
 		service->sdl = get_sdl(this_ptr, Z_STRVAL_P(wsdl), cache_wsdl TSRMLS_CC);
 		if (service->uri == NULL) {
 			if (service->sdl->target_ns) {
@@ -2501,8 +2502,7 @@ PHP_FUNCTION(is_soap_fault)
 PHP_METHOD(SoapClient, SoapClient)
 {
 
-	zval *wsdl;
-	zval *options = NULL;
+	zval *wsdl, *options = NULL;
 	int  soap_version = SOAP_1_1;
 	php_stream_context *context = NULL;
 	long cache_wsdl;
@@ -2511,16 +2511,12 @@ PHP_METHOD(SoapClient, SoapClient)
 
 	SOAP_CLIENT_BEGIN_CODE();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|a", &wsdl, &options) == FAILURE) {
-		return;
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "z|a", &wsdl, &options) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
 	}
 
-	if (Z_TYPE_P(wsdl) == IS_STRING) {
-	} else if (Z_TYPE_P(wsdl) != IS_NULL ) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "$wsdl must be string or null");
-		return;
-	} else {
-		wsdl = NULL;
+	if (Z_TYPE_P(wsdl) != IS_STRING && Z_TYPE_P(wsdl) != IS_NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "$wsdl must be string or null");
 	}
 
 	cache_wsdl = SOAP_GLOBAL(cache);
@@ -2529,14 +2525,13 @@ PHP_METHOD(SoapClient, SoapClient)
 		HashTable *ht = Z_ARRVAL_P(options);
 		zval **tmp;
 
-		if (wsdl == NULL) {
+		if (Z_TYPE_P(wsdl) == IS_NULL) {
 			/* Fetching non-WSDL mode options */
 			if (zend_hash_find(ht, "uri", sizeof("uri"), (void**)&tmp) == SUCCESS &&
 			    Z_TYPE_PP(tmp) == IS_STRING) {
 				add_property_stringl(this_ptr, "uri", Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "'uri' option is required in nonWSDL mode");
-				return;
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "'uri' option is required in nonWSDL mode");
 			}
 
 			if (zend_hash_find(ht, "style", sizeof("style"), (void**)&tmp) == SUCCESS &&
@@ -2560,9 +2555,8 @@ PHP_METHOD(SoapClient, SoapClient)
 		if (zend_hash_find(ht, "location", sizeof("location"), (void**)&tmp) == SUCCESS &&
 		    Z_TYPE_PP(tmp) == IS_STRING) {
 			add_property_stringl(this_ptr, "location", Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
-		} else if (wsdl == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "'location' option is required in nonWSDL mode");
-			return;
+		} else if (Z_TYPE_P(wsdl) == IS_NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'location' option is required in nonWSDL mode");
 		}
 
 		if (zend_hash_find(ht, "soap_version", sizeof("soap_version"), (void**)&tmp) == SUCCESS) {
@@ -2638,8 +2632,7 @@ PHP_METHOD(SoapClient, SoapClient)
 		
 			encoding = xmlFindCharEncodingHandler(Z_STRVAL_PP(tmp));
 			if (encoding == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid 'encoding' option - '%s'", Z_STRVAL_PP(tmp));
-				return;
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid 'encoding' option - '%s'", Z_STRVAL_PP(tmp));
 			} else {
 				xmlCharEncCloseFunc(encoding);
 				add_property_stringl(this_ptr, "_encoding", Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);			
@@ -2690,15 +2683,13 @@ PHP_METHOD(SoapClient, SoapClient)
 		    Z_TYPE_PP(tmp) == IS_STRING) {
 			add_property_stringl(this_ptr, "_user_agent", Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
 		}
-
-	} else if (wsdl == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'location' and 'uri' options are required in nonWSDL mode");
-		return;
+	} else if (Z_TYPE_P(wsdl) == IS_NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "'location' and 'uri' options are required in nonWSDL mode");
 	}
 
 	add_property_long(this_ptr, "_soap_version", soap_version);
 
-	if (wsdl) {
+	if (Z_TYPE_P(wsdl) != IS_NULL) {
 		int    old_soap_version, ret;
 
 		old_soap_version = SOAP_GLOBAL(soap_version);
