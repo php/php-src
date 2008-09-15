@@ -1652,7 +1652,9 @@ static void php_sqlite3_stmt_object_free_storage(void *object TSRMLS_DC) /* {{{ 
 			(int (*)(void *, void *)) php_sqlite3_compare_stmt_free);
 	}
 
-	Z_DELREF_P(intern->db_obj_zval);
+	if (intern->db_obj_zval) {
+		Z_DELREF_P(intern->db_obj_zval);
+	}
 
 	zend_object_std_dtor(&intern->zo TSRMLS_CC);
 	efree(intern);
@@ -1666,16 +1668,17 @@ static void php_sqlite3_result_object_free_storage(void *object TSRMLS_DC) /* {{
 	if (!intern) {
 		return;
 	}
-
-	if (intern->stmt_obj->initialised) {
-		sqlite3_reset(intern->stmt_obj->stmt);
-	}
-
-	if (intern->is_prepared_statement == 0) {
-		zval_dtor(intern->stmt_obj_zval);
-		FREE_ZVAL(intern->stmt_obj_zval);
-	} else {
-		zval_ptr_dtor(&intern->stmt_obj_zval);
+	if (intern->stmt_obj_zval) {
+		if (intern->stmt_obj->initialised) {
+			sqlite3_reset(intern->stmt_obj->stmt);
+		}
+		
+		if (intern->is_prepared_statement == 0) {
+			zval_dtor(intern->stmt_obj_zval);
+			FREE_ZVAL(intern->stmt_obj_zval);
+		} else {
+			zval_ptr_dtor(&intern->stmt_obj_zval);
+		}
 	}
 
 	zend_object_std_dtor(&intern->zo TSRMLS_CC);
@@ -1716,6 +1719,8 @@ static zend_object_value php_sqlite3_stmt_object_new(zend_class_entry *class_typ
 	intern = emalloc(sizeof(php_sqlite3_stmt));
 	memset(&intern->zo, 0, sizeof(php_sqlite3_stmt));
 
+	intern->db_obj_zval = NULL;
+
 	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
 	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,(void *) &tmp, sizeof(zval *));
 
@@ -1738,6 +1743,7 @@ static zend_object_value php_sqlite3_result_object_new(zend_class_entry *class_t
 
 	intern->complete = 0;
 	intern->is_prepared_statement = 0;
+	intern->stmt_obj_zval = NULL;
 
 	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
 	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,(void *) &tmp, sizeof(zval *));
