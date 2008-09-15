@@ -177,7 +177,7 @@ typedef struct st_mysqlnd_option
 
 	zend_bool	numeric_and_datetime_as_unicode;
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
-	zend_bool	int_and_year_as_int;
+	zend_bool	int_and_float_native;
 #endif
 	unsigned int net_read_buffer_size;
 } MYSQLND_OPTION;

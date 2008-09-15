@@ -1467,7 +1467,7 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 	zend_uchar *bit_area = (zend_uchar*) row_buffer->ptr + data_size + 1; /* we allocate from here */
 	zend_bool as_unicode = conn->options.numeric_and_datetime_as_unicode;
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
-	zend_bool as_int = conn->options.int_and_year_as_int;
+	zend_bool as_int_or_float = conn->options.int_and_float_native;
 #endif
 
 	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol");
@@ -1551,7 +1551,7 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 			}
 
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
-			if (as_int && perm_bind.php_type == IS_LONG &&
+			if (as_int_or_float && perm_bind.php_type == IS_LONG &&
 				perm_bind.pack_len <= SIZEOF_LONG)
 			{
 				zend_uchar save = *(p + len);
@@ -1579,6 +1579,14 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 						ZVAL_LONG(*current_field, (int64)v);
 					}
 				}
+				*(p + len) = save;
+			} else if (as_int_or_float && perm_bind.php_type == IS_DOUBLE)
+			{
+				zend_uchar save = *(p + len);
+				/* We have to make it ASCIIZ temporarily */
+				*(p + len) = '\0';
+				double v = atof((char *) p);
+				ZVAL_DOUBLE(*current_field, v);
 				*(p + len) = save;
 			} else
 #endif /* MYSQLND_STRING_TO_INT_CONVERSION */
