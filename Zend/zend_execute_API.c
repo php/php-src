@@ -1032,7 +1032,6 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 	int retval;
 	unsigned int lc_name_len;
 	zstr lc_name, lc_free;
-	zval *exception;
 	char dummy = 1;
 	zend_fcall_info fcall_info;
 	zend_fcall_info_cache fcall_cache;
@@ -1116,9 +1115,10 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 	fcall_cache.called_scope = NULL;
 	fcall_cache.object_pp = NULL;
 
-	exception = EG(exception);
 	zend_exception_save(TSRMLS_C);
 	retval = zend_call_function(&fcall_info, &fcall_cache TSRMLS_CC);
+	zend_exception_restore(TSRMLS_C);
+
 	EG(autoload_func) = fcall_cache.function_handler;
 
 	if (UG(unicode)) {
@@ -1129,25 +1129,15 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 
 	zend_u_hash_del(EG(in_autoload), type, lc_name, lc_name_len + 1);
 
-	if (retval == FAILURE) {
-		zend_exception_restore(TSRMLS_C);
-		if (do_normalize) {
-			efree(lc_free.v);
-		}
-		return FAILURE;
-	}
-
-	if (EG(exception) && exception) {
-		zend_exception_restore(TSRMLS_C);
-		if (do_normalize) {
-			efree(lc_free.v);
-		}
-		zend_error(E_ERROR, "Function %s(%R) threw an exception of type '%v'", ZEND_AUTOLOAD_FUNC_NAME, type, name, Z_OBJCE_P(EG(exception))->name);
-		return FAILURE;
-	}
-	zend_exception_restore(TSRMLS_C);
 	if (retval_ptr) {
 		zval_ptr_dtor(&retval_ptr);
+	}
+
+	if (retval == FAILURE) {
+		if (do_normalize) {
+			efree(lc_free.v);
+		}
+		return FAILURE;
 	}
 
 	retval = zend_u_hash_find(EG(class_table), type, lc_name, lc_name_len + 1, (void **) ce);
@@ -1639,15 +1629,13 @@ check_fetch_type:
 			}
 		}
 		if (use_autoload) {
-			if (rt_ns_check &&
-				zend_u_lookup_class_ex(type, lcname, class_name_len, class_name, 0, &pce TSRMLS_CC) == SUCCESS
-			) {
+			if (rt_ns_check && zend_u_lookup_class_ex(type, lcname, class_name_len, class_name, 0, &pce TSRMLS_CC) == SUCCESS) {
 				if (lcname.v != class_name.v) {
 					efree(lcname.v);
 				}
 				return *pce;
 			}
-			if (!silent) {
+			if (!silent && !EG(exception)) {
 				if (fetch_type == ZEND_FETCH_CLASS_INTERFACE) {
 					zend_error(E_ERROR, "Interface '%R' not found", type, class_name);
 				} else {

@@ -26,10 +26,22 @@ try {
     } while($e = $e->getPrevious());
 }
 
+try {
+    new ThisClassDoesNotExist;
+} catch(Exception $e) {
+    do {
+        echo $e->getMessage()."\n";
+    } while($e = $e->getPrevious());
+}
+
 class_exists('ThisClassDoesNotExist');
 ?>
 ===DONE===
 --EXPECTF--
+autoload_first
+autoload_second
+second
+first
 autoload_first
 autoload_second
 second
