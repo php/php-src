@@ -970,7 +970,6 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 	int retval;
 	char *lc_name;
 	char *lc_free;
-	zval *exception;
 	zend_fcall_info fcall_info;
 	zend_fcall_info_cache fcall_cache;
 	char dummy = 1;
@@ -1035,30 +1034,23 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 	fcall_cache.called_scope = NULL;
 	fcall_cache.object_pp = NULL;
 
-	exception = EG(exception);
 	zend_exception_save(TSRMLS_C);
 	retval = zend_call_function(&fcall_info, &fcall_cache TSRMLS_CC);
+	zend_exception_restore(TSRMLS_C);
+
 	EG(autoload_func) = fcall_cache.function_handler;
 
 	zval_ptr_dtor(&class_name_ptr);
 
 	zend_hash_del(EG(in_autoload), lc_name, name_length + 1);
 
-	if (retval == FAILURE) {
-		zend_exception_restore(TSRMLS_C);
-		free_alloca(lc_free, use_heap);
-		return FAILURE;
-	}
-
-	if (EG(exception) && exception) {
-		zend_exception_restore(TSRMLS_C);
-		free_alloca(lc_free, use_heap);
-		zend_error(E_ERROR, "Function %s(%s) threw an exception of type '%s'", ZEND_AUTOLOAD_FUNC_NAME, name, Z_OBJCE_P(EG(exception))->name);
-		return FAILURE;
-	}
-	zend_exception_restore(TSRMLS_C);
 	if (retval_ptr) {
 		zval_ptr_dtor(&retval_ptr);
+	}
+
+	if (retval == FAILURE) {
+		free_alloca(lc_free, use_heap);
+		return FAILURE;
 	}
 
 	retval = zend_hash_find(EG(class_table), lc_name, name_length + 1, (void **) ce);
@@ -1493,7 +1485,7 @@ check_fetch_type:
 			if (rt_ns_check && zend_lookup_class_ex(class_name, class_name_len, 1, &pce TSRMLS_CC) == SUCCESS) {
 				return *pce;
 			}
-			if (!silent) {
+			if (!silent && !EG(exception)) {
 				if (fetch_type == ZEND_FETCH_CLASS_INTERFACE) {
 					zend_error(E_ERROR, "Interface '%s' not found", class_name);
 				} else {
