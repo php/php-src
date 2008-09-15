@@ -2,9 +2,12 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.3.0 Alpha 3
 - Upgraded bundled PCRE to version 7.8. (Nuno)
+- Upgraded bundled sqlite to version 3.6.2. (Scott)
 - Changed error level E_ERROR into E_WARNING in Soap extension methods 
   parameter validation. (Felipe)
 
+- Fixed bug #46086 (Segfault when accessing fileinfo class properties).
+  (Scott)
 - Fixed bug #46072 (Compile failure under IRIX 6.5.30 building util.c) (Greg)
 - Fixed bug #46060 (Phar::addEmptyDir() breaks) (Greg)
 - Fixed bug #46042 (memory leaks with reflection of mb_convert_encoding()).
