@@ -1,3 +1,8 @@
+2008-09-14  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * zend_gc.c:
+      MFB "Disabled $GLOBALS' refcount modification"
+
 2008-09-11  Stanislav Malyshev  <stas@zend.com>
 
     * zend_ini_scanner.c

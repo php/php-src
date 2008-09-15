@@ -1,3 +1,119 @@
+2008-09-14  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/mysqlnd/mysqlnd_statistics.h:
+      - fix build (declaration must be fist in a given contex)
+
+2008-09-14  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * ZendEngine2/zend_gc.c:
+      MFB "Disabled $GLOBALS' refcount modification"
+
+    * ext/standard/tests/strings/stripos_variation1.phpt
+      ext/standard/tests/strings/stripos_variation11.phpt
+      ext/standard/tests/strings/stripos_variation12.phpt
+      ext/standard/tests/strings/stripos_variation2.phpt:
+      MFB / fix tests
+
+    * ext/standard/string.c:
+      Fix str len in stripos when $offset argument is given
+
+    * ext/standard/file.c:
+      Fix leak in fgetc()
+
+    * main/rfc1867.c:
+      Fix invalid read in freed area
+
+2008-09-14  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ext/pcre/config.w32
+      ext/pcre/config0.m4
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/config.h
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_config.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_fullinfo.c
+      ext/pcre/pcrelib/pcre_get.c
+      ext/pcre/pcrelib/pcre_info.c
+      ext/pcre/pcrelib/pcre_internal.h
+      ext/pcre/pcrelib/pcre_ord2utf8.c
+      ext/pcre/pcrelib/pcre_refcount.c
+      ext/pcre/pcrelib/pcre_study.c
+      ext/pcre/pcrelib/pcre_tables.c
+      ext/pcre/pcrelib/pcre_ucd.c
+      ext/pcre/pcrelib/pcre_ucp_searchfuncs.c
+      ext/pcre/pcrelib/pcre_valid_utf8.c
+      ext/pcre/pcrelib/pcre_version.c
+      ext/pcre/pcrelib/pcre_xclass.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/ucp.h
+      ext/pcre/pcrelib/ucpinternal.h
+      ext/pcre/pcrelib/ucptable.h
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/testdata/testinput1
+      ext/pcre/pcrelib/testdata/testinput2
+      ext/pcre/pcrelib/testdata/testinput4
+      ext/pcre/pcrelib/testdata/testinput5
+      ext/pcre/pcrelib/testdata/testinput6
+      ext/pcre/pcrelib/testdata/testinput7
+      ext/pcre/pcrelib/testdata/testinput8
+      ext/pcre/pcrelib/testdata/testinput9
+      ext/pcre/pcrelib/testdata/testoutput1
+      ext/pcre/pcrelib/testdata/testoutput2
+      ext/pcre/pcrelib/testdata/testoutput4
+      ext/pcre/pcrelib/testdata/testoutput5
+      ext/pcre/pcrelib/testdata/testoutput6
+      ext/pcre/pcrelib/testdata/testoutput7
+      ext/pcre/pcrelib/testdata/testoutput8
+      ext/pcre/pcrelib/testdata/testoutput9
+      main/php_compat.h:
+      sync with PHP 5.3: upgrade to pcre 7.8
+
+    * (PHP_5_3)
+      main/php_compat.h:
+      update list of pcre symbols
+
+2008-09-14  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_3)
+      NEWS
+      ext/phar/pharzip.h
+      ext/phar/tar.h:
+      fix compile on IRIX with MIPSPro (Bug #46072)
+
+    * ext/phar/pharzip.h
+      ext/phar/tar.h:
+      MFB: fix compile on IRIX with MIPSPro (Bug #46072)
+
+    * ext/phar/phar_internal.h
+      ext/phar/zip.c
+      ext/phar/tests/zip/bzip2.phpt
+      ext/phar/tests/zip/files/bz2_alias.phar.zip:
+      MFB: increase code coverage, fix bzip2-compressed alias in zip
+
+    * ext/phar/tests/zip/files/bz2_alias.phar.zip
+      ext/phar/tests/zip/files/bz2_alias.phar.zip:
+      
+      file bz2_alias.phar.zip was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/phar/phar_internal.h
+      ext/phar/zip.c
+      ext/phar/tests/zip/bzip2.phpt:
+      increase code coverage, fix bzip2-compressed alias in zip
+
+2008-09-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/levenshtein.c:
+      MFB: Fixed bug #45580 (levenshtein() crashes with invalid argument)
+
 2008-09-13  Greg Beaver  <greg@chiaraquartet.net>
 
     * ext/phar/dirstream.c
