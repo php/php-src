@@ -36,7 +36,7 @@ if (version_compare(PHP_VERSION, '5.0.0', '<'))
 			}
 
 			public function __call($method, $args) {
-				print "__call()";
+				print "__call(".var_export($method,true).", ".var_export($args, true).")\n";
 				// $this->protocol();
 			}
 
@@ -74,8 +74,6 @@ if (version_compare(PHP_VERSION, '5.0.0', '<'))
 	$db->exec('DROP TABLE IF EXISTS test');
 	print "done!\n";
 ?>
---XFAIL--
-PDO doesn't like __call()
 --EXPECTF--
 __construct('%s', '%s', '%s')
 exec('DROP TABLE IF EXISTS test')
