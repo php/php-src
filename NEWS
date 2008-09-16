@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Changed error level E_ERROR into E_WARNING in Soap extension methods 
   parameter validation. (Felipe)
 
+- Fixed bug #46087 (DOMXPath - segfault on destruction of a cloned object).
+  (Ilia)
 - Fixed bug #46086 (Segfault when accessing fileinfo class properties).
   (Scott)
 - Fixed bug #46072 (Compile failure under IRIX 6.5.30 building util.c) (Greg)
