@@ -954,8 +954,10 @@ void dom_xpath_objects_free_storage(void *object TSRMLS_DC)
 		intern->ptr = NULL;
 	}
 
-	zend_hash_destroy(intern->registered_phpfunctions);
-	FREE_HASHTABLE(intern->registered_phpfunctions);
+	if (intern->registered_phpfunctions) {
+		zend_hash_destroy(intern->registered_phpfunctions);
+		FREE_HASHTABLE(intern->registered_phpfunctions);
+	}
 	
 	if (intern->node_list) {
 		zend_hash_destroy(intern->node_list);
