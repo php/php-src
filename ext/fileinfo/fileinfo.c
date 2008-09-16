@@ -88,7 +88,8 @@ static void finfo_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC
 		magic_close(intern->ptr->magic);
 		efree(intern->ptr);
 	}
-
+	
+	zend_object_std_dtor(&intern->zo TSRMLS_CC);
 	efree(intern);
 }
 /* }}} */
