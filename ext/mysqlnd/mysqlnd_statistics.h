@@ -62,9 +62,9 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 #define MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(statistic1, value1, statistic2, value2) \
  { \
  	if (MYSQLND_G(collect_statistics)) { \
-		DBG_INF_FMT("Global stat increase [%s] [%s]", mysqlnd_stats_values_names[statistic1], mysqlnd_stats_values_names[statistic2]); \
 		uint64 v1 = (uint64) (value1); \
 		uint64 v2 = (uint64) (value2); \
+		DBG_INF_FMT("Global stat increase [%s] [%s]", mysqlnd_stats_values_names[statistic1], mysqlnd_stats_values_names[statistic2]); \
 										\
  		tsrm_mutex_lock(mysqlnd_global_stats->LOCK_access); \
 		if (statistic1 != STAT_LAST) mysqlnd_global_stats->values[(statistic1)]+= v1; \
@@ -111,8 +111,8 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 		if (statistic2 != STAT_LAST) mysqlnd_global_stats->values[(statistic2)]+= v2; \
 		tsrm_mutex_unlock(mysqlnd_global_stats->LOCK_access); \
 		if ((conn_stats)) { \
-			((MYSQLND_STATS *) conn_stats)->values[(statistic1)]+= v1; \
-			((MYSQLND_STATS *) conn_stats)->values[(statistic2)]+= v2; \
+			if (statistic1 != STAT_LAST) ((MYSQLND_STATS *) conn_stats)->values[(statistic1)]+= v1; \
+			if (statistic2 != STAT_LAST) ((MYSQLND_STATS *) conn_stats)->values[(statistic2)]+= v2; \
 		} \
 	} \
  }
@@ -164,9 +164,9 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 #define MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(statistic1, value1, statistic2, value2) \
  { \
  	if (MYSQLND_G(collect_statistics)) { \
-		DBG_INF_FMT("Global stat increase [%s] [%s]", mysqlnd_stats_values_names[statistic1], mysqlnd_stats_values_names[statistic2]); \
 		uint64 v1 = (uint64) (value1); \
 		uint64 v2 = (uint64) (value2); \
+		DBG_INF_FMT("Global stat increase [%s] [%s]", mysqlnd_stats_values_names[statistic1], mysqlnd_stats_values_names[statistic2]); \
 			\
 		if (statistic1 != STAT_LAST) mysqlnd_global_stats->values[(statistic1)]+= v1; \
 		if (statistic2 != STAT_LAST) mysqlnd_global_stats->values[(statistic2)]+= v2; \
@@ -205,8 +205,8 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 		if (statistic1 != STAT_LAST) mysqlnd_global_stats->values[(statistic1)]+= v1; \
 		if (statistic2 != STAT_LAST) mysqlnd_global_stats->values[(statistic2)]+= v2; \
 		if ((conn_stats)) { \
-			((MYSQLND_STATS *) conn_stats)->values[(statistic1)]+= v1; \
-			((MYSQLND_STATS *) conn_stats)->values[(statistic2)]+= v2; \
+			if (statistic1 != STAT_LAST) ((MYSQLND_STATS *) conn_stats)->values[(statistic1)]+= v1; \
+			if (statistic2 != STAT_LAST) ((MYSQLND_STATS *) conn_stats)->values[(statistic2)]+= v2; \
 		} \
 	} \
  }
