@@ -1291,9 +1291,7 @@ static union _zend_function *dbh_method_get(
 
 		if (zend_hash_find(dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH],
 				lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
-			if (std_object_handlers.get_method) {
-				fbc = std_object_handlers.get_method(object_pp, lc_method_name, method_len TSRMLS_CC);
-			}
+
 			if (!fbc) {
 				fbc = NULL;
 			}
@@ -1304,6 +1302,12 @@ static union _zend_function *dbh_method_get(
 	}
 
 out:
+	if (!fbc) {
+		if (std_object_handlers.get_method) {
+			fbc = std_object_handlers.get_method(object_pp, lc_method_name, method_len TSRMLS_CC);
+		}
+	}
+
 	efree(lc_method_name);
 	return fbc;
 }
