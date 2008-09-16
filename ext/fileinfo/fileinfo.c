@@ -540,7 +540,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 					goto clean;
 				}
 
-				ret_val = magic_stream(magic, stream);
+				ret_val = (char *)magic_stream(magic, stream);
 				php_stream_close(stream);
 			}
 			break;
