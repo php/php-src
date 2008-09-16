@@ -1899,7 +1899,7 @@ internal_loaded:
 	ptr = (uint32_t *)(void *)*magicp;
 	if (*ptr != MAGICNO) {
 		if (swap4(*ptr) != MAGICNO) {
-			file_error(ms, 0, "bad magic in `%s'");
+			file_error(ms, 0, "bad magic in `%s'", dbname);
 			goto error1;
 		}
 		needsbyteswap = 1;
