@@ -1560,10 +1560,20 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 				if (perm_bind.pack_len < SIZEOF_LONG)
 				{
 					/* direct conversion */
-					int64 v = atoll((char *) p);
+					int64 v =
+#ifndef PHP_WIN32
+						atoll((char *) p);
+#else
+						_atoi64((char *) p);
+#endif
 					ZVAL_LONG(*current_field, v);
 				} else {
-					uint64 v = (uint64) atoll((char *) p);
+					uint64 v =
+#ifndef PHP_WIN32
+						(uint64) atoll((char *) p);
+#else
+						(uint64) _atoi64((char *) p);
+#endif
 					zend_bool uns = fields_metadata[i].flags & UNSIGNED_FLAG? TRUE:FALSE;
 					/* We have to make it ASCIIZ temporarily */
 #if SIZEOF_LONG==8
@@ -1580,13 +1590,11 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 					}
 				}
 				*(p + len) = save;
-			} else if (as_int_or_float && perm_bind.php_type == IS_DOUBLE)
-			{
+			} else if (as_int_or_float && perm_bind.php_type == IS_DOUBLE) {
 				zend_uchar save = *(p + len);
 				/* We have to make it ASCIIZ temporarily */
 				*(p + len) = '\0';
-				double v = atof((char *) p);
-				ZVAL_DOUBLE(*current_field, v);
+				ZVAL_DOUBLE(*current_field, atof((char *) p));
 				*(p + len) = save;
 			} else
 #endif /* MYSQLND_STRING_TO_INT_CONVERSION */
