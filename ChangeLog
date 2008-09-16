@@ -1,3 +1,165 @@
+2008-09-15  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/fileinfo/fileinfo.c:
+      Missed variable declaration.
+
+    * ext/fileinfo/fileinfo.c:
+      MFB Fixed bug #46086 (Segfault when accessing fileinfo class property)
+
+    * (PHP_5_3)
+      NEWS
+      ext/fileinfo/fileinfo.c:
+      Fixed bug #46086 (Segfault when accessing fileinfo class property)
+
+2008-09-15  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd_enum_n_def.h:
+      Forgot to merge these changes - Float conversion
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli.c
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd_enum_n_def.h
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c:
+      MFH:
+      Add float conversions too. Float users should understand how float
+      works!!!
+
+    * ext/mysqli/mysqli.c
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c:
+      Add float conversions too. Float users should understand how float works!!!
+
+2008-09-15  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/soap/soap.c:
+      - Added E_ERROR in constructors
+
+2008-09-15  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h:
+      - Updated to version 2008.6 (2008f)
+
+    * ext/date/lib/timezonedb.h:
+      - Updated to version
+      Notice: Undefined offset: 1 in Command line code on line 1
+      
+      Call Stack:
+          0.0002     660592   1. {main}() Command line code:0
+      
+      .
+      Notice: Undefined offset: 2 in Command line code on line 1
+      
+      Call Stack:
+          0.0002     660592   1. {main}() Command line code:0
+      
+      -96 ()
+
+2008-09-15  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c:
+      MFH:Compile-in a string-to-int conversion for INT columns by default,
+      controlled by a ini setting.
+
+    * ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c:
+      Compile-in a string-to-int conversion for INT columns by default,
+      controlled by a ini setting.
+
+2008-09-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug43053.phpt
+      ZendEngine2/tests/bug43053.phpt
+      ZendEngine2/tests/bug43053.phpt
+      ZendEngine2/tests/hex_overflow_32bit.phpt
+      ZendEngine2/tests/zend_strtod.phpt
+      ext/standard/tests/general_functions/008.phpt
+      ext/standard/tests/strings/printf.phpt
+      main/snprintf.c:
+        1.1.4;
+      file bug43053.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/tests/bug43053.phpt
+      ZendEngine2/tests/bug43053.phpt
+      ZendEngine2/tests/hex_overflow_32bit.phpt
+      ZendEngine2/tests/hex_overflow_32bit.phpt
+      ZendEngine2/tests/zend_strtod.phpt
+      ZendEngine2/tests/zend_strtod.phpt
+      ext/standard/tests/general_functions/008.phpt
+      ext/standard/tests/general_functions/008.phpt
+      ext/standard/tests/strings/printf.phpt
+      ext/standard/tests/strings/printf.phpt
+      main/snprintf.c
+      main/snprintf.c:
+      Fixed bug #43053 (Regression: some numbers shown in scientific notation).
+      (int-e at gmx dot de)
+      some 64bit test files may need to be fixed
+
+2008-09-15  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/fileinfo/tests/.cvsignore:
+      add missing .cvsignore
+
+    * ext/fileinfo/tests/.cvsignore
+      ext/fileinfo/tests/.cvsignore:
+      
+      add missing .cvsignore
+
+2008-09-15  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_execute_API.c
+      ext/spl/tests/spl_autoload_012.phpt:
+      MFH: Fix #45656 (new Class silenting exceptions in autoloaders)
+
+    * ZendEngine2/zend_execute_API.c
+      ext/spl/tests/spl_autoload_012.phpt:
+      Fix #45656 (new Class silenting exceptions in autoloaders)
+
+2008-09-15  Felix De Vliegher  <felix.devliegher@gmail.com>
+
+    * ext/fileinfo/tests/finfo_close_error.phpt
+      ext/fileinfo/tests/finfo_close_error.phpt
+      ext/fileinfo/tests/finfo_phpinfo_basic.phpt
+      ext/fileinfo/tests/finfo_phpinfo_basic.phpt:
+      
+      More fileinfo tests
+
+2008-09-15  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/sqlite3/libsqlite/sqlite3.c
+      ext/sqlite3/libsqlite/sqlite3.h
+      ext/sqlite3/libsqlite/sqlite3ext.h:
+      MFH: Sync libsqlite to 3.6.2 with some VC6 patches
+
+    * ext/sqlite3/libsqlite/sqlite3.c
+      ext/sqlite3/libsqlite/sqlite3.h
+      ext/sqlite3/libsqlite/sqlite3ext.h:
+      Sync libsqlite to 3.6.2 with some VC6 patches
+
+    * ext/sqlite3/sqlite3.c:
+      MFB Fixed bug #46033 (Segfault when instantiating SQLite3Stmt and
+      SQLite3Result)
+
+    * (PHP_5_3)
+      ext/sqlite3/sqlite3.c:
+      Fixed bug #46033 (Segfault when instantiating SQLite3Stmt and
+      SQLite3Result)
+
 2008-09-14  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * (PHP_5_3)

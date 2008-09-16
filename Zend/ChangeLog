@@ -1,3 +1,35 @@
+2008-09-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_strtod.c
+      zend_strtod.c
+      zend_strtod.c
+      tests/bug43053.phpt
+      tests/bug43053.phpt
+      tests/hex_overflow_32bit.phpt
+      tests/hex_overflow_32bit.phpt
+      tests/zend_strtod.phpt
+      tests/zend_strtod.phpt:
+      Fixed bug #43053 (Regression: some numbers shown in scientific notation).
+      (int-e at gmx dot de)
+      some 64bit test files may need to be fixed
+
+    * tests/bug43053.phpt
+      tests/bug43053.phpt
+      tests/bug43053.phpt
+      tests/hex_overflow_32bit.phpt
+      tests/zend_strtod.phpt:
+        1.1.4;
+      file bug43053.phpt was initially added on branch PHP_5_2.
+
+2008-09-15  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      zend_execute_API.c:
+      MFH: Fix #45656 (new Class silenting exceptions in autoloaders)
+
+    * zend_execute_API.c:
+      Fix #45656 (new Class silenting exceptions in autoloaders)
+
 2008-09-14  Arnaud Le Blanc  <arnaud.lb@gmail.com>
 
     * zend_gc.c:
