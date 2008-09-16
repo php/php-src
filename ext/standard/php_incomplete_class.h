@@ -31,6 +31,14 @@
 	if (Z_OBJ_HT_P(struc)->get_class_entry && \
             Z_OBJCE_P(struc) == BG(incomplete_class)) {	\
 		class_name = php_lookup_class_name(struc, &name_len); \
+		if (!class_name.v) { \
+			name_len = sizeof(INCOMPLETE_CLASS) - 1; \
+			if (UG(unicode)) { \
+				class_name.u = USTR_MAKE(INCOMPLETE_CLASS); \
+			} else { \
+				class_name.s = estrndup(INCOMPLETE_CLASS, name_len); \
+			} \
+		} \
 		free_class_name = 1; \
 		incomplete_class = 1; \
 	} else { \
