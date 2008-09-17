@@ -1,3 +1,94 @@
+2008-09-16  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_dbh.c:
+      MFH Fix #44424 (Extending PDO/MySQL class with a __call() function doesn't
+      work)
+
+    * (PHP_5_3)
+      ext/pdo/pdo_dbh.c
+      ext/pdo_mysql/tests/pdo_mysql_subclass.phpt:
+      MFH Fix #44425 (Extending PDO/MySQL class with a __call() function doesn't
+      work)
+
+    * ext/pdo/pdo_dbh.c
+      ext/pdo_mysql/tests/pdo_mysql_subclass.phpt:
+      - Fix #44425 (Extending PDO/MySQL class with a __call() function doesn't
+      work)
+
+2008-09-16  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      - BFN #46071
+
+    * (PHP_5_3)
+      ext/fileinfo/libmagic/apprentice.c:
+      - MFH: Fixed bug #46071 (finfo_open() segfaults with wrong file name on
+      BSD)
+
+    * ext/fileinfo/libmagic/apprentice.c:
+      - Fixed bug #46071 (finfo_open() segfaults with wrong file name on BSD)
+
+2008-09-16  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/standard/php_incomplete_class.h
+      ext/standard/tests/serialize/incomplete_class.phpt
+      ext/standard/tests/serialize/incomplete_class.phpt
+      ext/standard/tests/serialize/incomplete_class.phpt:
+      fix segfault with serialize(new __PHP_Incomplete_Class) found by Felipe
+      add test
+
+2008-09-16  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysqlnd/mysqlnd_statistics.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c:
+      MFH:
+      Fix a crash introduced yesterday in mysqlnd, non-zts mode - missing if ()
+      for
+      STAT_LAST was accessing wrong memory thus overwritting method pointers.
+      
+      Windows doesn't have atoll(), which is C99, C89 has only atoi() + atol().
+      Win has _atoi64, so use it.
+
+    * ext/mysqlnd/mysqlnd_statistics.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c:
+      Fix a crash introduced yesterday in mysqlnd, non-zts mode - missing if ()
+      for
+      STAT_LAST was accessing wrong memory thus overwritting method pointers.
+      
+      Windows doesn't have atoll(), which is C99, C89 has only atoi() + atol().
+      Win has _atoi64, so use it.
+
+2008-09-16  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/standard/tests/strings/printf_64bit.phpt:
+      fix test
+
+    * ext/fileinfo/fileinfo.c:
+      fix compile warning
+
+2008-09-16  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/fileinfo/fileinfo.c:
+      Fix memory leak in a few cases
+
+2008-09-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/dom/php_dom.c:
+      
+      MFB: Fixed bug #46087 (DOMXPath - segfault on destruction of a cloned
+      object).
+
+    * (PHP_5_3)
+      NEWS
+      ext/dom/php_dom.c:
+      
+      Fixed bug #46087 (DOMXPath - segfault on destruction of a cloned object).
+
 2008-09-15  Scott MacVicar  <scott@macvicar.net>
 
     * (PHP_5_3)
