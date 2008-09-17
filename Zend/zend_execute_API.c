@@ -1775,8 +1775,20 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 {
 	zend_uchar type = ZEND_STR_TYPE;
 	zend_uint i;
+	zend_execute_data *ex;
 
 	if (!EG(active_symbol_table)) {
+
+		/* Search for last called user function */
+		ex = EG(current_execute_data);
+		while (ex && !ex->op_array) {
+			ex = ex->prev_execute_data;
+		}
+		if (ex && ex->symbol_table) {
+			EG(active_symbol_table) = ex->symbol_table;
+			return;
+		}
+
 		if (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
 			/*printf("Cache hit!  Reusing %x\n", symtable_cache[symtable_cache_ptr]);*/
 			EG(active_symbol_table) = *(EG(symtable_cache_ptr)--);
@@ -1785,25 +1797,25 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 			zend_hash_init(EG(active_symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
 			/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
 		}
-		if (EG(current_execute_data) && EG(current_execute_data)->op_array) {
-			EG(current_execute_data)->symbol_table = EG(active_symbol_table);
+		if (ex && ex->op_array) {
+			ex->symbol_table = EG(active_symbol_table);
 
-			if (EG(current_execute_data)->op_array->this_var != -1 &&
-			    !EG(current_execute_data)->CVs[EG(current_execute_data)->op_array->this_var] &&
+			if (ex->op_array->this_var != -1 &&
+			    !ex->CVs[ex->op_array->this_var] &&
 			    EG(This)) {
-				EG(current_execute_data)->CVs[EG(current_execute_data)->op_array->this_var] = (zval**)EG(current_execute_data)->CVs + EG(current_execute_data)->op_array->last_var + EG(current_execute_data)->op_array->this_var;
-				*EG(current_execute_data)->CVs[EG(current_execute_data)->op_array->this_var] = EG(This);
+				ex->CVs[ex->op_array->this_var] = (zval**)ex->CVs + ex->op_array->last_var + ex->op_array->this_var;
+				*ex->CVs[ex->op_array->this_var] = EG(This);
  			}
-			for (i = 0; i < EG(current_execute_data)->op_array->last_var; i++) {
-				if (EG(current_execute_data)->CVs[i]) {
+			for (i = 0; i < ex->op_array->last_var; i++) {
+				if (ex->CVs[i]) {
 					zend_u_hash_quick_update(EG(active_symbol_table),
 						type,
-						EG(current_execute_data)->op_array->vars[i].name,
-						EG(current_execute_data)->op_array->vars[i].name_len + 1,
-						EG(current_execute_data)->op_array->vars[i].hash_value,
-						(void**)EG(current_execute_data)->CVs[i],
+						ex->op_array->vars[i].name,
+						ex->op_array->vars[i].name_len + 1,
+						ex->op_array->vars[i].hash_value,
+						(void**)ex->CVs[i],
 						sizeof(zval*),
-						(void**)&EG(current_execute_data)->CVs[i]);
+						(void**)&ex->CVs[i]);
 				}
 			}
 		}
