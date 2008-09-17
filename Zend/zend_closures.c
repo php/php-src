@@ -140,7 +140,8 @@ static zend_function *zend_closure_get_method(zval **object_ptr, zstr method_nam
 static zval *zend_closure_read_property(zval *object, zval *member, int type TSRMLS_DC) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
-	return NULL;
+	Z_ADDREF(EG(uninitialized_zval));
+	return &EG(uninitialized_zval);
 }
 /* }}} */
 
