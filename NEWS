@@ -53,6 +53,8 @@ PHP                                                                        NEWS
 - Fixed a bug causing miscalculations with the "last <weekday> of <n> month"
   relative time string. (Derick)
 
+- Fixed bug #46110 (XMLWriter - openmemory() and openuri() leak memory on
+  multiple calls). (Ilia)
 - Fixed bug #46032 (PharData::__construct() wrong memory read). (Greg)
 - Fixed bug #45826 (custom ArrayObject serialization). (Etienne)
 - Fixed bug #45798 (sqlite3 doesn't notice if variable was bound). (Felipe)
