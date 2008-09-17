@@ -1478,7 +1478,12 @@ void php_request_shutdown(void *dummy)
 
 	/* 3. Flush all output buffers */
 	zend_try {
-		php_end_ob_buffers((zend_bool)(SG(request_info).headers_only?0:1) TSRMLS_CC);
+		zend_bool send_buffer = SG(request_info).headers_only ? 0 : 1;
+		if (CG(unclean_shutdown) && PG(last_error_type) == E_ERROR &&
+				!OG(active_ob_buffer).chunk_size && PG(memory_limit) < zend_memory_usage(1 TSRMLS_CC)) {
+			send_buffer = 0;
+		}
+		php_end_ob_buffers(send_buffer TSRMLS_CC);
 	} zend_end_try();
 
 	/* 4. Send the set HTTP headers (note: This must be done AFTER php_end_ob_buffers() !!) */
