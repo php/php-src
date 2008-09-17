@@ -110,6 +110,7 @@ typedef struct _php_session_rfc1867_progress {
 	zval      *current_file;
 	zval      *current_file_bytes_processed;
 	zend_bool apply_trans_sid;
+	zend_bool cancel_upload;
 } php_session_rfc1867_progress;
 
 typedef struct _php_ps_globals {
