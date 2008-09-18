@@ -1401,13 +1401,13 @@ var_done:
 					if (cancel_upload != UPLOAD_ERROR_E) { /* file creation failed */
 						unlink(ascii_temp_filename);
 					}
+					efree(ascii_temp_filename);
 					efree(temp_filename);
 				}
 				temp_filename = EMPTY_STR;
 			} else {
-				zend_u_hash_add(SG(rfc1867_uploaded_files), IS_UNICODE, ZSTR(temp_filename), u_strlen(temp_filename) + 1, &temp_filename, sizeof(UChar *), NULL);
+				zend_u_hash_add(SG(rfc1867_uploaded_files), IS_UNICODE, ZSTR(temp_filename), u_strlen(temp_filename) + 1, &ascii_temp_filename, sizeof(char *), NULL);
 			}
-			efree(ascii_temp_filename);
 
 			/* is_arr_upload is true when name of file upload field
 			 * ends in [.*]
@@ -1525,6 +1525,9 @@ var_done:
 			}
 			add_u_protected_variable(lbuf TSRMLS_CC);
 			register_u_http_post_files_variable(lbuf, temp_filename, u_strlen(temp_filename), http_post_files, 1 TSRMLS_CC);
+			if (!cancel_upload) {
+				efree(temp_filename);
+			}
 
 			{
 				zval file_size, error_type;
