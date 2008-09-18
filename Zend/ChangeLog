@@ -1,3 +1,25 @@
+2008-09-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c
+      zend_execute_API.c
+      tests/bug46106.phpt:
+      Fixed bug #46106 (Memory leaks when using global statement)
+
+    * tests/bug46106.phpt
+      tests/bug46106.phpt:
+      
+      file bug46106.phpt was initially added on branch PHP_5_3.
+
+    * zend_closures.c
+      zend_closures.c
+      tests/closure_031.phpt:
+      Fixed possible crash because of overriden error handler
+
+    * tests/closure_031.phpt
+      tests/closure_031.phpt:
+      
+      file closure_031.phpt was initially added on branch PHP_5_3.
+
 2008-09-15  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_strtod.c
