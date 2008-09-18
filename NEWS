@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Changed error level E_ERROR into E_WARNING in Soap extension methods 
   parameter validation. (Felipe)
 
+- Fixed bug causing the algorithm parameter of mhash() to be modified. (Scott)
+
 - Fixed bug #46106 (Memory leaks when using global statement). (Dmitry)
 - Fixed bug #46099 (Xsltprocessor::setProfiling - memory leak). (Felipe, Rob).
 - Fixed bug #46087 (DOMXPath - segfault on destruction of a cloned object).
