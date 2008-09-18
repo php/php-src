@@ -555,10 +555,6 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	php_libxml_decrement_doc_ref(intern->doc TSRMLS_CC);
 	efree(intern->doc);
 	intern->doc = NULL;
-	
-	if (intern->profiling) {
-		efree(intern->profiling);
-	}
 
 	if (params) {
 		clone = 0;
@@ -882,13 +878,20 @@ PHP_FUNCTION(xsl_xsltprocessor_set_profiling)
 {
 	zval *id;
 	xsl_object *intern;
-	char *filename;
+	char *filename = NULL;
 	int filename_len;
 	DOM_GET_THIS(id);
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == SUCCESS) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s!", &filename, &filename_len) == SUCCESS) {
 		intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
-		intern->profiling = estrndup(filename,filename_len);
+		if (intern->profiling) {
+			efree(intern->profiling);
+		}
+		if (filename != NULL) {
+			intern->profiling = estrndup(filename,filename_len);
+		} else {
+			intern->profiling = NULL;
+		}
 		RETURN_TRUE;
 	} else {
 		WRONG_PARAM_COUNT;
