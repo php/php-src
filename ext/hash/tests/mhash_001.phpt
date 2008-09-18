@@ -33,7 +33,7 @@ foreach ($supported_hash_al as $hash=>$wanted) {
 		echo "$hash: ";
 		var_dump($wanted);
 		echo "$hash: ";
-		var_dump($result);
+		var_dump(bin2hex($result));
 	}
 	echo "\n";
 }
