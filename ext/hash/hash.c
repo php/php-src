@@ -797,20 +797,22 @@ static void mhash_init(INIT_FUNC_ARGS)
    Hash data with hash */
 PHP_FUNCTION(mhash)
 {
-	zval *z_algorithm;
-	int algorithm;
+	zval **z_algorithm;
+	long algorithm;
 
-	if (zend_parse_parameters(1 TSRMLS_CC, "z", &z_algorithm) == FAILURE) {
+	if (zend_parse_parameters(1 TSRMLS_CC, "Z", &z_algorithm) == FAILURE) {
 		return;
 	}
 
-	algorithm = Z_LVAL_P(z_algorithm);
+	SEPARATE_ZVAL(z_algorithm);
+	convert_to_long_ex(z_algorithm);
+	algorithm = Z_LVAL_PP(z_algorithm);
 
 	/* need to conver the first parameter from int to string */
 	if (algorithm >= 0 && algorithm < MHASH_NUM_ALGOS) {
 		struct mhash_bc_entry algorithm_lookup = mhash_to_hash[algorithm];
 		if (algorithm_lookup.hash_name) {
-			ZVAL_STRING(z_algorithm, algorithm_lookup.hash_name, 1);
+			ZVAL_STRING(*z_algorithm, algorithm_lookup.hash_name, 1);
 		}
 	}
 
