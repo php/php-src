@@ -7,6 +7,7 @@ PHP                                                                        NEWS
   parameter validation. (Felipe)
 
 - Fixed bug #46106 (Memory leaks when using global statement). (Dmitry)
+- Fixed bug #46099 (Xsltprocessor::setProfiling - memory leak). (Felipe, Rob).
 - Fixed bug #46087 (DOMXPath - segfault on destruction of a cloned object).
   (Ilia)
 - Fixed bug #46086 (Segfault when accessing fileinfo class properties).
