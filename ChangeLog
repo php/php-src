@@ -1,3 +1,56 @@
+2008-09-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/xmlwriter/php_xmlwriter.c:
+      
+      MFB: Fixed bug #46110 (XMLWriter - openmemory() and openuri() leak memory
+      on
+        multiple calls).
+
+    * (PHP_5_3)
+      NEWS
+      ext/xmlwriter/php_xmlwriter.c:
+      
+      Fixed bug #46110 (XMLWriter - openmemory() and openuri() leak memory on
+      multiple calls).
+
+2008-09-17  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+      Added ability to cancel upload in rfc1867 handler
+
+2008-09-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug46106.phpt
+      ZendEngine2/tests/bug46106.phpt:
+      
+      file bug46106.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/bug46106.phpt:
+      Fixed bug #46106 (Memory leaks when using global statement)
+
+    * ZendEngine2/zend_closures.c
+      ZendEngine2/zend_closures.c
+      ZendEngine2/tests/closure_031.phpt:
+      Fixed possible crash because of overriden error handler
+
+    * ZendEngine2/tests/closure_031.phpt
+      ZendEngine2/tests/closure_031.phpt:
+      
+      file closure_031.phpt was initially added on branch PHP_5_3.
+
+2008-09-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      NEWS
+      main/main.c:
+      
+      Fixed bug #45392 (ob_start()/ob_end_clean() and memory_limit).
+
 2008-09-16  Johannes Schlüter  <johannes@schlueters.de>
 
     * (PHP_5_2)
