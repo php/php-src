@@ -1255,7 +1255,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			} else {
 				ZVAL_STRINGL(res, row[i], field_len[i], 1);	
 			}
-
+			if (m
 			if (fetchtype & MYSQLI_NUM) {
 				add_index_zval(return_value, i, res);
 			}

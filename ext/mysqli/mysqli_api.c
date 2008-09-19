@@ -1364,7 +1364,13 @@ PHP_FUNCTION(mysqli_info)
 PHP_FUNCTION(mysqli_init)
 {
 	MYSQLI_RESOURCE *mysqli_resource;
-	MY_MYSQL *mysql = (MY_MYSQL *)ecalloc(1, sizeof(MY_MYSQL));
+	MY_MYSQL *mysql;
+
+	if (getThis() && instanceof_function(Z_OBJCE_P(getThis()), mysqli_link_class_entry TSRMLS_CC)) {
+		return;
+	}
+
+	mysql = (MY_MYSQL *)ecalloc(1, sizeof(MY_MYSQL));
 
 #if !defined(MYSQLI_USE_MYSQLND)
 	if (!(mysql->mysql = mysql_init(NULL)))
