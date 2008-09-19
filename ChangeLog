@@ -1,3 +1,74 @@
+2008-09-18  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * main/rfc1867.c:
+      Fixed cleaning of uploaded files
+
+2008-09-18  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      NEWS
+      ext/openssl/openssl.c:
+      MFH: Show the library version currently loaded as well as the version the
+      extension was compiled with. Useful for checking PHP is using the latest
+      version.
+
+    * ext/openssl/openssl.c:
+      Show the library version currently loaded as well as the version the
+      extension was compiled with. Useful for checking PHP is using the latest
+      version.
+
+2008-09-18  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/mysqli/tests/010.phpt:
+      fix typo
+
+    * ext/hash/tests/mhash_001.phpt
+      ext/hash/tests/mhash_001.phpt
+      ext/hash/tests/mhash_003.phpt
+      ext/hash/tests/mhash_003.phpt:
+      update tests
+
+2008-09-18  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      NEWS
+      ext/hash/hash.c
+      ext/hash/tests/mhash_001.phpt
+      ext/hash/tests/mhash_004.phpt:
+      MFH: mhash algorithm parameter was modified when it was a zval, also update
+      a test.
+
+    * ext/hash/hash.c
+      ext/hash/tests/mhash_001.phpt
+      ext/hash/tests/mhash_004.phpt
+      ext/hash/tests/mhash_004.phpt:
+      mhash algorithm parameter was modified when it was a zval, also update a
+      test.
+
+2008-09-18  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_3)
+      NEWS:
+      BFN
+
+    * (PHP_5_3)
+      ext/xsl/php_xsl.c
+      ext/xsl/xsltprocessor.c:
+      MFH: fix bug #46099 (Xsltprocessor::setProfiling - memory leak)
+
+    * ext/xsl/php_xsl.c
+      ext/xsl/xsltprocessor.c:
+      fix bug #46099 (Xsltprocessor::setProfiling - memory leak)
+
+2008-09-18  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/mysqli/tests/010.phpt
+      ext/mysqli/tests/010.phpt
+      ext/mysqli/tests/010.phpt
+      ext/standard/tests/strings/printf_64bit.phpt:
+      fix test
+
 2008-09-17  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/xmlwriter/php_xmlwriter.c:
