@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 
 - Fixed bug causing the algorithm parameter of mhash() to be modified. (Scott)
 
+- Fixed bug #46115 (Memory leak when calling a method using Reflection).
+  (Dmitry)
 - Fixed bug #46106 (Memory leaks when using global statement). (Dmitry)
 - Fixed bug #46099 (Xsltprocessor::setProfiling - memory leak). (Felipe, Rob).
 - Fixed bug #46087 (DOMXPath - segfault on destruction of a cloned object).
