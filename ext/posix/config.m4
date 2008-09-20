@@ -31,4 +31,20 @@ int main(int argc, char *argv[])
   ], [
     AC_MSG_RESULT([no, cannot detect working ttyname_r() when cross compiling. posix_ttyname() will be thread-unsafe])
   ])
+
+  AC_CACHE_CHECK([for utsname.domainname], ac_cv_have_utsname_domainname, [
+    AC_TRY_COMPILE([
+      #define _GNU_SOURCE
+      #include <sys/utsname.h>
+    ],[
+      return sizeof(((struct utsname *)0)->domainname);
+    ],[
+      ac_cv_have_utsname_domainname=yes
+    ],[
+      ac_cv_have_utsname_domainname=no
+    ])
+  ])
+  if test ac_cv_have_utsname_domainname=yes; then
+    AC_DEFINE(HAVE_UTSNAME_DOMAINNAME, 1, [Wether struct utsname has domainname])
+  fi
 fi
