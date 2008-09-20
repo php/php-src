@@ -180,10 +180,14 @@ PHP_FUNCTION(collator_create)
 	int               collator_name_len;
 	zval 			 *object;
 	UCollator		 *ucoll;
+	zend_error_handling error_handling;
+
+	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &collator_name, &collator_name_len) == FAILURE) {
 		RETURN_FALSE;
 	}
+	zend_restore_error_handling(&error_handling TSRMLS_CC);
 
 	if ((object = getThis()) == NULL) {
 		object = return_value;
