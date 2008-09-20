@@ -666,7 +666,7 @@ PHP_FUNCTION(posix_uname)
 	add_assoc_string(return_value, "release",  u.release,  1);
 	add_assoc_string(return_value, "version",  u.version,  1);
 	add_assoc_string(return_value, "machine",  u.machine,  1);
-#if defined(_GNU_SOURCE) && !defined(DARWIN)
+#if defined(_GNU_SOURCE) && !defined(DARWIN) && defined(HAVE_UTSNAME_DOMAINNAME)
 	add_assoc_string(return_value, "domainname", u.domainname, 1);
 #endif
 }
