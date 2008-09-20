@@ -1,3 +1,30 @@
+2008-09-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/spl/spl_array.c
+      ext/spl/spl_array.c
+      ext/spl/tests/bug46115.phpt
+      ext/spl/tests/bug46115.phpt
+      ext/spl/tests/bug46115.phpt:
+      Fixed bug #46115 (Memory leak when calling a method using Reflection)
+
+2008-09-19  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/mysqli.c:
+      Fix the libmysql build. Unintentionally broken by my last commit.
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/tests/bug46109.phpt:
+      MFH:Fix for bug#46019 MySQLi::init() leaks memory
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/tests/bug46109.phpt
+      ext/mysqli/tests/bug46109.phpt:
+      Fix for bug#46019 MySQLi::init() leaks memory
+
 2008-09-18  Arnaud Le Blanc  <arnaud.lb@gmail.com>
 
     * main/rfc1867.c:
