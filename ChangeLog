@@ -1,3 +1,28 @@
+2008-09-20  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/sqlite3/libsqlite/sqlite3.h:
+      - fix VC6 build
+
+2008-09-20  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/posix/config.m4
+      ext/posix/config.m4
+      ext/posix/posix.c
+      ext/posix/posix.c:
+      MFH: Fixed #46059 (Compile failure under IRIX 6.5.30 building posix.c)
+
+    * ext/posix/config.m4
+      ext/posix/posix.c:
+      Fixed #46059 (Compile failure under IRIX 6.5.30 building posix.c)
+
+2008-09-20  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/unicode/collator.c:
+      - Fixed bug #46067 (Collator methods - Segfault)
+
 2008-09-19  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_3)
