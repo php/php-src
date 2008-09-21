@@ -66,7 +66,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <sys/resource.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <sys/uio.h>
 #include <sys/wait.h>
 #include <time.h>
@@ -2120,7 +2122,16 @@ void LSAPI_Init_Env_Parameters( fn_select_t fp )
     if ( p ) {
         avoidFork = atoi( p );
     }    
-    
+
+#if defined( RLIMIT_CORE )
+    p = getenv( "LSAPI_ALLOW_CORE_DUMP" );
+    if ( !p )
+    {
+        struct rlimit limit = { 0, 0 };
+        setrlimit( RLIMIT_CORE, &limit );
+    }
+#endif    
+
     p = getenv( "LSAPI_MAX_IDLE" );
     if ( p ) {
         n = atoi( p );
