@@ -2125,8 +2125,7 @@ void LSAPI_Init_Env_Parameters( fn_select_t fp )
 
 #if defined( RLIMIT_CORE )
     p = getenv( "LSAPI_ALLOW_CORE_DUMP" );
-    if ( !p )
-    {
+    if ( !p ) {
         struct rlimit limit = { 0, 0 };
         setrlimit( RLIMIT_CORE, &limit );
     }
