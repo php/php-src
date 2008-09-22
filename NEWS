@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 
 - Fixed bug causing the algorithm parameter of mhash() to be modified. (Scott)
 
+- Fixed Bug #46147 (after stream seek, appending stream filter reads incorrect data).
+  (Greg)
 - Fixed bug #46115 (Memory leak when calling a method using Reflection).
   (Dmitry)
 - Fixed bug #46106 (Memory leaks when using global statement). (Dmitry)
