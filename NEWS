@@ -18,6 +18,8 @@ PHP                                                                        NEWS
   (Scott)
 - Fixed a crash on invalid method in ReflectionParameter constructor.
   (Christian Seiler)
+- Fixed Bug #46147 (after stream seek, appending stream filter reads incorrect data).
+  (Greg)
 - Fixed bug #46059 (Compile failure under IRIX 6.5.30 building posix.c). 
   (Arnaud)
 - Fixed bug #46053 (SplFileObject::seek - Endless loop). (Arnaud)
