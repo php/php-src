@@ -484,6 +484,10 @@ foundit:
 			/* construct actual offset to file start - local extra_len can be different from central extra_len */
 			entry.offset = entry.offset_abs =
 				sizeof(local) + entry.header_offset + PHAR_GET_16(local.filename_len) + PHAR_GET_16(local.extra_len);
+#if PHP_VERSION_ID < 50207
+			/* work around Bug #46147 */
+			fp->writepos = fp->readpos = 0;
+#endif
 			php_stream_seek(fp, entry.offset, SEEK_SET);
 
 			mydata->alias_len = entry.uncompressed_filesize;
