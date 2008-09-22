@@ -1689,7 +1689,11 @@ SPL_METHOD(RegexIterator, accept)
 	char       *subject, tmp[32], *result;
 	int        subject_len, use_copy, count, result_len;
 	zval       subject_copy, zcount, *replacement;
-
+	
+	if (intern->current.data == NULL) {
+		RETURN_FALSE;
+	}
+	
 	if (intern->u.regex.flags & REGIT_USE_KEY) {
 		if (intern->current.key_type == HASH_KEY_IS_LONG) {
 			subject_len = slprintf(tmp, sizeof(tmp), "%ld", intern->current.int_key);
