@@ -31,7 +31,7 @@
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_configuration_set_parameter, 0, 0, 2)
 	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_OBJ_INFO(0, value, DOMUserData, 0)
+	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO();
 
 static
@@ -42,7 +42,7 @@ ZEND_END_ARG_INFO();
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_configuration_can_set_parameter, 0, 0, 0)
 	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_OBJ_INFO(0, value, DOMUserData, 0)
+	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO();
 /* }}} */
 
