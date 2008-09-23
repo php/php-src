@@ -379,7 +379,6 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 					name = constant_name;
 					name_len = const_name_len;
 					efree(class_name);
-					retval = 1;
 					return zend_get_constant(name, name_len, result TSRMLS_CC);
 				}
 				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
