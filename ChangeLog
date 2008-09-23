@@ -1,3 +1,62 @@
+2008-09-22  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/gd/gd.c:
+      sz is long not zval**
+
+    * ext/dom/domconfiguration.c
+      ext/dom/node.c:
+      fix hints causing phpdoc crash
+
+2008-09-22  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN #46088
+
+    * (PHP_5_2)
+      ext/spl/spl_iterators.c
+      ext/spl/spl_iterators.c
+      ext/spl/tests/bug46088.phpt:
+      - MFH: Fixed bug #46088 (RegexIterator::accept - segfault)
+
+    * (PHP_5_3)
+      ext/spl/tests/bug46088.phpt:
+      - New test
+
+    * ext/spl/tests/bug46088.phpt
+      ext/spl/tests/bug46088.phpt
+      ext/spl/tests/bug46088.phpt:
+        1.1.4;
+      - Fixed bug #46088 (RegexIterator::accept - segfault)
+
+    * ext/spl/spl_iterators.c:
+      - Fixed bug #46088 (RegexIterator::accept - segfault)
+
+2008-09-22  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/zip.c:
+      MF53: workaround for Bug #46147 for PHP < 5.2.7
+
+    * (PHP_5_3)
+      ext/phar/zip.c:
+      workaround for Bug #46147 for PHP < 5.2.7
+
+    * (PHP_5_3)
+      NEWS
+      main/streams/filter.c
+      main/streams/filter.c
+      main/streams/streams.c
+      main/streams/streams.c:
+      MF52 fix Bug #46147: after stream seek, appending stream filter reads
+      incorrect data
+
+    * (PHP_5_2)
+      NEWS
+      main/streams/filter.c
+      main/streams/streams.c:
+      fix Bug #46147: after stream seek, appending stream filter reads incorrect
+      data
+
 2008-09-21  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_3)
