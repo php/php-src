@@ -46,7 +46,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_fetch, 0, 0, 0)
 	ZEND_ARG_INFO(0, orientation)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_fetchobject, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_fetchobject, 0, 0, 0)
 	ZEND_ARG_INFO(0, class_name)
 	ZEND_ARG_INFO(0, ctor_args) /* array */
 ZEND_END_ARG_INFO()
@@ -1381,7 +1381,7 @@ static PHP_METHOD(PDOStatement, fetch)
 }
 /* }}} */
 
-/* {{{ proto mixed PDOStatement::fetchObject(string class_name [, NULL|array ctor_args])
+/* {{{ proto mixed PDOStatement::fetchObject([string class_name [, NULL|array ctor_args]])
    Fetches the next row and returns it as an object. */
 static PHP_METHOD(PDOStatement, fetchObject)
 {
