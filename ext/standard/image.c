@@ -653,7 +653,7 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream TSRMLS_DC)
 	}
 
 	/* Collect bit depth info */
-	highest_bit_depth = bit_depth = 0;
+	highest_bit_depth = 0;
 	for (i = 0; i < result->channels; i++) {
 		bit_depth = php_stream_getc(stream); /* Ssiz[i] */
 		bit_depth++;
