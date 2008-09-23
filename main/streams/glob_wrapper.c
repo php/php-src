@@ -209,7 +209,7 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, char *pat
 		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	glob_s_t *pglob;
-	int ret, path_len;
+	int ret;
 	char *tmp, *pos;
 
 	if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir(path TSRMLS_CC)) {
@@ -218,12 +218,9 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, char *pat
 
 	if (!strncmp(path, "glob://", sizeof("glob://")-1)) {
 		path += sizeof("glob://")-1;
-		path_len = strlen(path);
 		if (opened_path) {
-			*opened_path = estrndup(path, path_len);
+			*opened_path = estrdup(path);
 		}
-	} else {
-		path_len = strlen(path);
 	}
 
 	pglob = ecalloc(sizeof(*pglob), 1);

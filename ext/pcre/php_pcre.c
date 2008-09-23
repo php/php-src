@@ -1023,7 +1023,6 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 				} else {
 					esc_match = "";
 					esc_match_len = 0;
-					match_len = 0;
 				}
 				smart_str_appendl(&code, esc_match, esc_match_len);
 

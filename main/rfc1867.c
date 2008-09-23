@@ -189,7 +189,8 @@ static void normalize_protected_variable(char *varname TSRMLS_DC)
 			index = NULL;
 		}	
 	}
-	*s++='\0';
+
+	*s = '\0';
 }
 
 
@@ -784,7 +785,7 @@ static char *substring_conf(char *start, int len, char quote TSRMLS_DC)
 		}
 	}
 
-	*resp++ = '\0';
+	*resp = '\0';
 	return result;
 }
 
