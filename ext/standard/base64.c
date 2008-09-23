@@ -190,7 +190,7 @@ PHPAPI unsigned char *php_base64_decode_ex(const unsigned char *str, int length,
 		case 2:
 			k++;
 		case 3:
-			result[k++] = 0;
+			result[k] = 0;
 		}
 	}
 	if(ret_length) {
