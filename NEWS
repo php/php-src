@@ -10,7 +10,7 @@ PHP                                                                        NEWS
 
 - Fixed bug causing the algorithm parameter of mhash() to be modified. (Scott)
 
-- Fixed bug #46160 (SPL - Memory leak when exception is throwed in offsetSet).
+- Fixed bug #46160 (SPL - Memory leak when exception is thrown in offsetSet).
   (Felipe)
 - Fixed Bug #46147 (after stream seek, appending stream filter reads incorrect data).
   (Greg)
