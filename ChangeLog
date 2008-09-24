@@ -1,3 +1,57 @@
+2008-09-23  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_stmt.c
+      ext/pdo/pdo_stmt.c:
+      - MFH: Fixed bug #46157 (PDOStatement::fetchObject prototype error)
+
+    * ext/pdo/pdo_stmt.c:
+      - Fixed bug #46157 (PDOStatement::fetchObject prototype error)
+
+2008-09-23  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * ZendEngine2/zend_constants.c
+      ext/iconv/iconv.c
+      ext/pcre/php_pcre.c
+      ext/standard/array.c
+      ext/standard/base64.c
+      ext/standard/image.c
+      ext/standard/versioning.c
+      main/rfc1867.c
+      main/streams/glob_wrapper.c:
+      MFB: clean some dead code
+
+    * (PHP_5_3)
+      ZendEngine2/zend_constants.c
+      ext/iconv/iconv.c
+      ext/pcre/php_pcre.c
+      ext/standard/array.c
+      ext/standard/base64.c
+      ext/standard/image.c
+      ext/standard/versioning.c
+      main/rfc1867.c
+      main/streams/glob_wrapper.c:
+      clean some dead code (with static analysis help)
+
+2008-09-23  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      - BFN #46160
+
+    * (PHP_5_3)
+      ext/spl/spl_dllist.c
+      ext/spl/tests/bug46160.phpt:
+      - MFH: Fixed bug #46160 (SPL - Memory leak when exception is throwed in
+      offsetSet method)
+
+    * ext/spl/spl_dllist.c
+      ext/spl/tests/bug46160.phpt
+      ext/spl/tests/bug46160.phpt:
+      - Fixed bug #46160 (SPL - Memory leak when exception is throwed in
+      offsetSet method)
+
 2008-09-22  Rob Richards  <rrichards@ctindustries.net>
 
     * ext/gd/gd.c:
