@@ -77,10 +77,8 @@ Warning: levenshtein(): Argument string(s) too long in %s on line %d
 Warning: levenshtein(): Argument string(s) too long in %s on line %d
 all passed
 
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-int(0)
+Warning: levenshtein() expects parameter 1 to be string, array given in %s on line %d
+NULL
 int(0)
 int(0)
 
