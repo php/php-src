@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.79 2008-07-25 12:40:13 pajoye Exp $
+// $Id: confutils.js,v 1.80 2008-09-25 14:59:10 pajoye Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -41,6 +41,13 @@ VC_VERSIONS[1300] = 'MSVC7 (Visual C++ 2002)';
 VC_VERSIONS[1310] = 'MSVC7.1 (Visual C++ 2003)';
 VC_VERSIONS[1400] = 'MSVC8 (Visual C++ 2005)';
 VC_VERSIONS[1500] = 'MSVC9 (Visual C++ 2008)';
+
+var VC_VERSIONS_SHORT = new Array();
+VC_VERSIONS_SHORT[1200] = 'VC6';
+VC_VERSIONS_SHORT[1300] = 'VC7';
+VC_VERSIONS_SHORT[1310] = 'VC7.1';
+VC_VERSIONS_SHORT[1400] = 'VC8';
+VC_VERSIONS_SHORT[1500] = 'VC9';
 
 if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files";

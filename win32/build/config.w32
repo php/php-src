@@ -19,6 +19,7 @@ if (!CL) {
 VCVERS = probe_binary(CL).substr(0, 5).replace('.', '');
 STDOUT.WriteLine("  Detected compiler " + VC_VERSIONS[VCVERS]);
 AC_DEFINE('COMPILER', VC_VERSIONS[VCVERS], "Detected compiler version");
+DEFINE("PHP_COMPILER_SHORT", VC_VERSIONS_SHORT[VCVERS]);
 
 // do we use x64 or 80x86 version of compiler?
 X64 = probe_binary(CL, 64);
@@ -28,6 +29,7 @@ if (X64) {
 	STDOUT.WriteLine("  Detected 32-bit compiler");
 }
 AC_DEFINE('ARCHITECTURE', X64 ? 'x64' : 'x86', "Detected compiler architecture");
+DEFINE("PHP_ARCHITECTURE", X64 ? 'x64' : 'x86');
 
 // cygwin now ships with link.exe.  Avoid searching the cygwin path
 // for this, as we want the MS linker, not the fileutil
