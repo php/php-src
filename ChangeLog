@@ -1,3 +1,16 @@
+2008-09-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      NEWS:
+      
+      Fixed typo
+
+2008-09-24  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/levenshtein.phpt:
+      fix test
+
 2008-09-23  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
