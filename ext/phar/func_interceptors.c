@@ -645,6 +645,7 @@ static void phar_file_stat(const char *filename, php_stat_len filename_length, i
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = (int) filename_length;
 			if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {
+				efree(entry);
 				efree(arch);
 				goto skip_phar;
 			}
