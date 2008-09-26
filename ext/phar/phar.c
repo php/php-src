@@ -3561,7 +3561,6 @@ void phar_request_initialize(TSRMLS_D) /* {{{ */
 		PHAR_G(cwd) = NULL;
 		PHAR_G(cwd_len) = 0;
 		PHAR_G(cwd_init) = 0;
-		phar_intercept_functions(TSRMLS_C);
 	}
 }
 /* }}} */

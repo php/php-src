@@ -258,7 +258,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 
 				entry = (phar_entry_info *) ecalloc(1, sizeof(phar_entry_info));
 				entry->is_temp_dir = 1;
-				entry->filename = "";
+				entry->filename = estrndup("", 0);
 				entry->filename_len = 0;
 				entry->phar = phar;
 				entry->offset = entry->offset_abs = 0;
@@ -346,15 +346,8 @@ phar_stub:
  */
 static int phar_stream_close(php_stream *stream, int close_handle TSRMLS_DC) /* {{{ */
 {
-	phar_entry_info *entry = ((phar_entry_data *)stream->abstract)->internal_file;
-	int is_temp_dir = entry->is_temp_dir;
-
 	phar_entry_delref((phar_entry_data *)stream->abstract TSRMLS_CC);
 
-	if (is_temp_dir) {
-		/* phar archive stub, free it */
-		efree(entry);
-	}
 	return 0;
 }
 /* }}} */
