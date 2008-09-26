@@ -183,6 +183,7 @@ if (PHP_DEBUG == "yes") {
 if (PHP_ZTS == "yes") {
 	ADD_FLAG("CFLAGS", "/D ZTS=1");
 }
+DEFINE("PHP_ZTS_ARCHIVE_POSTFIX", PHP_ZTS == "yes" ? '' : "-nts");
 
 // we want msvcrt in the PHP DLL
 ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:libcmt");
