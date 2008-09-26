@@ -1,3 +1,16 @@
+2008-09-25  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      win32/build/Makefile
+      win32/build/config.w32
+      win32/build/confutils.js:
+      - MFH: add VC version and architecture to the created zip(s) names
+
+    * win32/build/Makefile
+      win32/build/config.w32
+      win32/build/confutils.js:
+      - add VC version and architecture to the created zip(s) names
+
 2008-09-24  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_3)
