@@ -686,6 +686,7 @@ splitted:
 				int save_len;
 
 notfound:
+				efree(entry);
 				save = PHAR_G(cwd);
 				save_len = PHAR_G(cwd_len);
 				/* this file is not in the current directory, use the original path */
