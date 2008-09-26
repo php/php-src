@@ -646,6 +646,7 @@ static void phar_file_stat(const char *filename, php_stat_len filename_length, i
 			entry_len = (int) filename_length;
 			if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {
 				efree(arch);
+				efree(entry);
 				goto skip_phar;
 			}
 splitted:
