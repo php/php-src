@@ -10,6 +10,7 @@ PHP                                                                        NEWS
 
 - Fixed bug causing the algorithm parameter of mhash() to be modified. (Scott)
 
+- Fixed bug #46178 (memory leak in ext/phar). (Greg)
 - Fixed bug #46160 (SPL - Memory leak when exception is thrown in offsetSet).
   (Felipe)
 - Fixed Bug #46147 (after stream seek, appending stream filter reads incorrect data).
@@ -22,7 +23,6 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed bug #46086 (Segfault when accessing fileinfo class properties).
   (Scott)
-- Fixed bug #46072 (Compile failure under IRIX 6.5.30 building util.c) (Greg)
 - Fixed bug #46071 (finfo_open() segfaults when using wrong file name on BSD).
   (Felipe)
 - Fixed bug #46060 (Phar::addEmptyDir() breaks) (Greg)
