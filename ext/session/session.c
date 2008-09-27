@@ -696,6 +696,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.upload_progress.name",
 	                          "PHP_SESSION_UPLOAD_PROGRESS", ZEND_INI_PERDIR, OnUpdateUTF8String,  rfc1867_name,    php_ps_globals, ps_globals)
 	STD_PHP_INI_ENTRY("session.upload_progress.freq",  "1%", ZEND_INI_PERDIR, OnUpdateRfc1867Freq, rfc1867_freq,    php_ps_globals, ps_globals)
+	STD_PHP_INI_ENTRY("session.upload_progress.min_freq",
+	                                                   "0",  ZEND_INI_PERDIR, OnUpdateReal,        rfc1867_min_freq,php_ps_globals, ps_globals)
 
 	/* Commented out until future discussion */
 	/* PHP_INI_ENTRY("session.encode_sources", "globals,track", PHP_INI_ALL, NULL) */
@@ -2150,9 +2152,29 @@ static inline void php_session_rfc1867_early_find_sid(php_session_rfc1867_progre
 	}
 } /* }}} */
 
-static inline void php_session_rfc1867_update(php_session_rfc1867_progress *progress TSRMLS_DC) /* {{{ */
+static inline void php_session_rfc1867_update(php_session_rfc1867_progress *progress, int force_update TSRMLS_DC) /* {{{ */
 {
 	zval **progress_ary, **cancel_upload;
+
+	if (!force_update) {
+		if (Z_LVAL_P(progress->post_bytes_processed) < progress->next_update) {
+			return;
+		}
+#ifdef HAVE_GETTIMEOFDAY
+		if (PS(rfc1867_min_freq) > 0.0) {
+			struct timeval tv = {0};
+			double dtv;
+			gettimeofday(&tv, NULL);
+			dtv = (double) tv.tv_sec + tv.tv_usec / 1000000.0;
+			if ((dtv - progress->last_update_time) < PS(rfc1867_min_freq)) {
+				return;
+			}
+			progress->last_update_time = dtv;
+		}
+#endif
+		progress->next_update = Z_LVAL_P(progress->post_bytes_processed) + progress->update_step;
+	}
+
 	php_session_initialize(TSRMLS_C);
 	PS(session_status) = php_session_active;
 	IF_SESSION_VARS() {
@@ -2265,6 +2287,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 					progress->update_step = progress->content_length * -PS(rfc1867_freq) / 100;
 				}
 				progress->next_update = 0;
+				progress->last_update_time = 0.0;
 
 				ALLOC_INIT_ZVAL(progress->data);
 				array_init(progress->data);
@@ -2301,10 +2324,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			
 			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 
-			if (data->post_bytes_processed >= progress->next_update) {
-				php_session_rfc1867_update(progress TSRMLS_CC);
-				progress->next_update = data->post_bytes_processed + progress->update_step;
-			}
+			php_session_rfc1867_update(progress, 0 TSRMLS_CC);
 		}
 		break;
 		case MULTIPART_EVENT_FILE_DATA: {
@@ -2317,10 +2337,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			Z_LVAL_P(progress->current_file_bytes_processed) = data->offset + data->length;
 			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 
-			if (data->post_bytes_processed >= progress->next_update) {
-				php_session_rfc1867_update(progress TSRMLS_CC);
-				progress->next_update = data->post_bytes_processed + progress->update_step;
-			}
+			php_session_rfc1867_update(progress, 0 TSRMLS_CC);
 		}
 		break;
 		case MULTIPART_EVENT_FILE_END: {
@@ -2338,10 +2355,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 
 			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 
-			if (data->post_bytes_processed >= progress->next_update) {
-				php_session_rfc1867_update(progress TSRMLS_CC);
-				progress->next_update = data->post_bytes_processed + progress->update_step;
-			}
+			php_session_rfc1867_update(progress, 0 TSRMLS_CC);
 		}
 		break;
 		case MULTIPART_EVENT_END: {
@@ -2350,7 +2364,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			if (Z_TYPE(progress->sid) && Z_TYPE(progress->key)) {
 				add_ascii_assoc_bool_ex(progress->data, "done", sizeof("done"), 1);
 				Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
-				php_session_rfc1867_update(progress TSRMLS_CC);
+				php_session_rfc1867_update(progress, 1 TSRMLS_CC);
 				php_rshutdown_session_globals(TSRMLS_C);
 			}
 
