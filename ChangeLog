@@ -1,3 +1,114 @@
+2008-09-26  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/phar.c
+      ext/phar/stream.c:
+      MFB: fix 017.phpt in streams.c, and very dangerous intercepting of file
+      functions in all cases introduced in multi-threaded fix
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/stream.c:
+      fix 017.phpt in streams.c, and very dangerous intercepting of file
+      functions in all cases introduced in multi-threaded fix
+
+    * (PHP_5_3)
+      NEWS:
+      note fix to Bug #46178 memory leak in ext/phar, remove 'useless entry'
+      according to Hannes
+
+    * ext/phar/phar.c
+      ext/phar/tests/bug46178.phpt:
+      MFB: fix bug #46178: memory leak in ext/phar
+
+    * ext/phar/tests/bug46178.phpt
+      ext/phar/tests/bug46178.phpt:
+      
+      file bug46178.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/phar/phar.c:
+      fix bug #46178: memory leak in ext/phar
+
+2008-09-26  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * win32/build/Makefile
+      win32/build/config.w32:
+      - MFB: add nts to the zip names
+
+    * (PHP_5_3)
+      win32/build/Makefile
+      win32/build/config.w32:
+      - add nts to the zip names
+
+2008-09-26  Sanjay Mantoor  <smantoor@in.ibm.com>
+
+    * ext/standard/tests/array/array_diff_uassoc_error.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation1.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation10.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation11.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation12.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation13.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation2.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation3.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation4.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation5.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation6.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation7.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation8.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation9.phpt:
+      New testcases for array_diff_uassoc() function
+
+    * ext/standard/tests/array/array_diff_uassoc_variation10.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation10.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation11.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation11.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation12.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation12.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation13.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation13.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation5.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation5.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation6.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation6.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation7.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation7.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation8.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation8.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation9.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation9.phpt:
+      
+      file array_diff_uassoc_variation10.phpt was initially added on branch
+      PHP_5_3.
+
+    * ext/standard/tests/array/array_diff_uassoc_error.phpt
+      ext/standard/tests/array/array_diff_uassoc_error.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation1.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation1.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation2.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation2.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation3.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation3.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation4.phpt
+      ext/standard/tests/array/array_diff_uassoc_variation4.phpt:
+      
+      file array_diff_uassoc_error.phpt was initially added on branch PHP_5_3.
+
+2008-09-26  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/func_interceptors.c:
+      MFB: fix another memory leak
+
+    * (PHP_5_3)
+      ext/phar/func_interceptors.c:
+      fix another memory leak
+
+    * ext/phar/func_interceptors.c:
+      MFB: fix obvious memory leak
+
+    * (PHP_5_3)
+      ext/phar/func_interceptors.c:
+      fix obvious memory leak
+
 2008-09-25  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * (PHP_5_3)
