@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   (Scott)
 - Fixed a crash on invalid method in ReflectionParameter constructor.
   (Christian Seiler)
+- Fixed bug #46191 (BC break: DOMDocument saveXML() doesn't accept null). (Rob)
 - Fixed bug #46157 (PDOStatement::fetchObject prototype error). (Felipe)
 - Fixed bug #46147 (after stream seek, appending stream filter reads incorrect data).
   (Greg)
