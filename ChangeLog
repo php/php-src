@@ -1,3 +1,17 @@
+2008-09-28  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/dom/document.c
+      ext/dom/document.c:
+      MFH: fix bug #46191 (BC break: DOMDocument saveXML() doesn't accept null)
+
+    * ext/dom/document.c:
+      fix bug #46191 (BC break: DOMDocument saveXML() doesn't accept null)
+
 2008-09-27  Arnaud Le Blanc  <arnaud.lb@gmail.com>
 
     * ext/session/php_session.h
