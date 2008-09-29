@@ -269,7 +269,7 @@ void timeout(int sig);
 							\
 			mysql_result = (MYSQL_RES *) zend_list_find(mysql->active_result_id, &type);	\
 			if (mysql_result && type==le_result) {						\
-				if (mysqli_result_is_unbuffered(mysql_result) && !mysql_eof(mysql_result)) { \
+				if (mysql_result_is_unbuffered(mysql_result) && !mysql_eof(mysql_result)) { \
 					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Function called without first fetching all rows from a previous unbuffered query");	\
 				}						\
 				zend_list_delete(mysql->active_result_id);	\
@@ -915,7 +915,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			efree(hashed_details);
 			/* free mysql structure */
 #ifdef MYSQL_USE_MYSQLND
-			mysqli_close(mysql->conn, MYSQLI_CLOSE_DISCONNECTED);
+			mysqlnd_close(mysql->conn, MYSQLND_CLOSE_DISCONNECTED);
 #endif
 			efree(mysql);
 			MYSQL_DO_CONNECT_RETURN_FALSE();
