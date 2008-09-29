@@ -1594,7 +1594,7 @@ void spl_array_unserialize_helper(spl_array_object *intern, const unsigned char 
 	++p;
 
 	if (*p!='m') {
-		if (*p!='a') {
+		if (*p!='a' && *p!='O' && *p!='C') {
 			goto outexcept;
 		}
 		intern->ar_flags &= ~SPL_ARRAY_CLONE_MASK;
