@@ -2408,7 +2408,7 @@ PHP_FUNCTION(openssl_csr_sign)
 	X509 * cert = NULL, *new_cert = NULL;
 	X509_REQ * csr;
 	EVP_PKEY * key = NULL, *priv_key = NULL;
-	long csr_resource, certresource = 0, keyresource;
+	long csr_resource, certresource = 0, keyresource = -1;
 	int i;
 	struct php_x509_request req;
 	
