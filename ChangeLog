@@ -1,3 +1,50 @@
+2008-09-29  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      NEWS
+      ext/spl/spl_array.c
+      ext/spl/tests/array_025.phpt:
+      MFH: Fix #46192 (Serialization of ArrayObject with objects as storage)
+
+    * ext/spl/tests/array_025.phpt
+      ext/spl/tests/array_025.phpt:
+      
+      Fix #46192 (Serialization of ArrayObject with objects as storage)
+
+    * ext/spl/spl_array.c:
+      Fix #46192 (Serialization of ArrayObject with objects as storage)
+
+2008-09-29  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      ext/pdo_mysql/pdo_mysql.c:
+      MFH: Free persistent cache and improve MINFO output
+
+    * ext/pdo_mysql/pdo_mysql.c:
+      Free persistent cache and improve MINFO output
+
+    * ext/mysql/mysql_mysqlnd.h
+      ext/mysql/php_mysql.c:
+      No mysqli stuff in ext/mysql
+
+2008-09-29  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_3)
+      NEWS:
+      BFN
+
+    * (PHP_5_3)
+      ext/dom/node.c
+      ext/dom/tests/bug46185.phpt:
+      MFH: fix bug #46185 (importNode changes the namespace of an XML element)
+      add test
+
+    * ext/dom/node.c
+      ext/dom/tests/bug46185.phpt
+      ext/dom/tests/bug46185.phpt:
+      fix bug #46185 (importNode changes the namespace of an XML element)
+      add test
+
 2008-09-28  Rob Richards  <rrichards@ctindustries.net>
 
     * (PHP_5_2)
