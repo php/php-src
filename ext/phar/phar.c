@@ -3291,6 +3291,9 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 	int failed;
 	phar_archive_data *phar;
 
+	if (!file_handle || !file_handle->filename) {
+		return phar_orig_compile_file(file_handle, type TSRMLS_CC);
+	}
 	if (strstr(file_handle->filename, ".phar") && !strstr(file_handle->filename, "://")) {
 		if (SUCCESS == phar_open_from_filename(file_handle->filename, strlen(file_handle->filename), NULL, 0, 0, &phar, NULL TSRMLS_CC)) {
 			if (phar->is_zip || phar->is_tar) {
