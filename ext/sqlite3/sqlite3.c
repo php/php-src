@@ -1507,7 +1507,7 @@ static zend_function_entry php_sqlite3_class_methods[] = {
 	PHP_ME(sqlite3,		lastErrorMsg,		arginfo_sqlite3_lasterrormsg, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		loadExtension,		arginfo_sqlite3_loadextension, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		changes,			arginfo_sqlite3_changes, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3,		escapeString,		arginfo_sqlite3_escapestring, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		escapeString,		arginfo_sqlite3_escapestring, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME(sqlite3,		prepare,			arginfo_sqlite3_prepare, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		query,				arginfo_sqlite3_query, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		querySingle,		arginfo_sqlite3_querysingle, ZEND_ACC_PUBLIC)

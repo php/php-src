@@ -12,7 +12,7 @@ echo "Creating Table\n";
 var_dump($db->exec('CREATE TABLE test (time INTEGER, id STRING)'));
 
 echo "INSERT into table\n";
-var_dump($db->exec("INSERT INTO test (time, id) VALUES (" . TIMENOW . ", '" . $db->escapeString("test''%") . "')"));
+var_dump($db->exec("INSERT INTO test (time, id) VALUES (" . TIMENOW . ", '" . SQLite3::escapeString("test''%") . "')"));
 var_dump($db->exec("INSERT INTO test (time, id) VALUES (" . TIMENOW . ", 'b')"));
 
 echo "SELECTING results\n";
