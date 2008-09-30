@@ -4,7 +4,9 @@ $fname = dirname(__FILE__) . '/blog.phar';
 @unlink($fname);
 
 $phar = new Phar($fname);
-$phar->setStub('<?php if(file_exists(dirname(__FILE__) . "/files/config.xml")) {
+$phar->setStub('<?php
+Phar::interceptFileFuncs();
+if(file_exists(dirname(__FILE__) . "/files/config.xml")) {
     Phar::mount("config.xml", dirname(__FILE__) . "/files/config.xml");
 }
 Phar::webPhar("blog", "index.php");
