@@ -111,6 +111,9 @@ SAFE_MODE_WARNING;
 }
 
 $environment = isset($_ENV) ? $_ENV : array();
+if ((substr(PHP_OS, 0, 3) == "WIN") && empty($environment["SystemRoot"])) {
+  $environment["SystemRoot"] = getenv("SystemRoot");
+}
 
 // Don't ever guess at the PHP executable location.
 // Require the explicit specification.
