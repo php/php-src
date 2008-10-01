@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 
 - Fixed bug causing the algorithm parameter of mhash() to be modified. (Scott)
 
+- Fixed bug #46206 (pg_query_params/pg_execute convert passed values to
+  strings). (Ilia) 
 - Fixed bug #46205 (Closure - Memory leaks when ReflectionException is thrown).
   (Dmitry)
 - Fixed bug #46194 (SIGSEGV when requested file is not found). (Greg)
