@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 
 - Changed openssl info to show the shared library version number. (Scott)
 
+- Added ability to send user defined HTTP headers with SOAP request.
+  (Brain J.France, Dmitry)
+
 - Fixed bug causing the algorithm parameter of mhash() to be modified. (Scott)
 
 - Fixed bug #46205 (Closure - Memory leaks when ReflectionException is thrown).
