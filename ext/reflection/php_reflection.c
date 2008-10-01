@@ -2005,6 +2005,12 @@ ZEND_METHOD(reflection_parameter, __construct)
 	if (Z_TYPE_PP(parameter) == IS_LONG) {
 		position= Z_LVAL_PP(parameter);
 		if (position < 0 || (zend_uint)position >= fptr->common.num_args) {
+			if (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) {
+				if (fptr->type != ZEND_OVERLOADED_FUNCTION) {
+					efree(fptr->common.function_name.v);
+				}
+				efree(fptr);
+			}
 			_DO_THROW("The parameter specified by its offset could not be found");
 			/* returns out of this function */
 		}
@@ -2023,6 +2029,12 @@ ZEND_METHOD(reflection_parameter, __construct)
 			}
 		}
 		if (position == -1) {
+			if (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) {
+				if (fptr->type != ZEND_OVERLOADED_FUNCTION) {
+					efree(fptr->common.function_name.v);
+				}
+				efree(fptr);
+			}
 			_DO_THROW("The parameter specified by its name could not be found");
 			/* returns out of this function */
 		}
