@@ -235,6 +235,7 @@ int make_http_soap_request(zval  *this_ptr,
 	char *http_msg = NULL;
 	char *old_allow_url_fopen_list;
 	soap_client_object *client;
+	zval **tmp;
 
 	if (this_ptr == NULL || Z_TYPE_P(this_ptr) != IS_OBJECT) {
 		return FALSE;
@@ -435,6 +436,14 @@ try_again:
 			if (client->user_agent[0] != 0) {
 				smart_str_append_const(&soap_headers, "User-Agent: ");
 				smart_str_appends(&soap_headers, client->user_agent);
+				smart_str_append_const(&soap_headers, "\r\n");
+			}
+		} else if (client->stream_context && 
+		           php_stream_context_get_option(client->stream_context, "http", "user_agent", &tmp) == SUCCESS &&
+		           Z_TYPE_PP(tmp) == IS_STRING) {
+			if (Z_STRLEN_PP(tmp) > 0) {
+				smart_str_append_const(&soap_headers, "User-Agent: ");
+				smart_str_appendl(&soap_headers, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
 				smart_str_append_const(&soap_headers, "\r\n");
 			}
 		} else{
@@ -671,6 +680,64 @@ try_again:
 				smart_str_append_const(&soap_headers, "\r\n");
 			}
 		}
+
+		if (client->stream_context &&
+			php_stream_context_get_option(client->stream_context, "http", "header", &tmp) == SUCCESS &&
+			Z_TYPE_PP(tmp) == IS_STRING && Z_STRLEN_PP(tmp)) {
+			char *s = Z_STRVAL_PP(tmp);
+			char *p;
+			int name_len;
+
+			while (*s) {
+				/* skip leading newlines and spaces */
+				while (*s == ' ' || *s == '\t' || *s == '\r' || *s == '\n') {
+					s++;
+				}
+				/* extract header name */
+				p = s;
+				name_len = -1;
+				while (*p) {
+					if (*p == ':') {
+						if (name_len < 0) name_len = p - s;
+						break;
+					} else if (*p == ' ' || *p == '\t') {
+						if (name_len < 0) name_len = p - s;
+					} else if (*p == '\r' || *p == '\n') {
+						break;
+					}
+					p++;
+				}
+				if (*p == ':') {
+					/* extract header value */
+					while (*p && *p != '\r' && *p != '\n') {
+						p++;
+					}
+					/* skip some predefined headers */
+					if ((name_len != sizeof("host")-1 ||
+					     strncasecmp(s, "host", sizeof("host")-1) != 0) &&
+					    (name_len != sizeof("connection")-1 ||
+					     strncasecmp(s, "connection", sizeof("connection")-1) != 0) &&
+					    (name_len != sizeof("user-agent")-1 ||
+					     strncasecmp(s, "user-agent", sizeof("user-agent")-1) != 0) &&
+					    (name_len != sizeof("content-length")-1 ||
+					     strncasecmp(s, "content-length", sizeof("content-length")-1) != 0) &&
+					    (name_len != sizeof("content-type")-1 ||
+					     strncasecmp(s, "content-type", sizeof("content-type")-1) != 0) &&
+					    (name_len != sizeof("cookie")-1 ||
+					     strncasecmp(s, "cookie", sizeof("cookie")-1) != 0) &&
+					    (name_len != sizeof("authorization")-1 ||
+					     strncasecmp(s, "authorization", sizeof("authorization")-1) != 0) &&
+					    (name_len != sizeof("proxy-authorization")-1 ||
+					     strncasecmp(s, "proxy-authorization", sizeof("proxy-authorization")-1) != 0)) {
+					    /* add header */
+						smart_str_appendl(&soap_headers, s, p-s);
+						smart_str_append_const(&soap_headers, "\r\n");
+					}
+				}
+				s = (*p) ? (p + 1) : p;
+			}
+		}
+
 		smart_str_append_const(&soap_headers, "\r\n");
 		smart_str_0(&soap_headers);
 		if (client->trace) {
