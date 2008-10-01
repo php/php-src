@@ -1,4 +1,4 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2008, PHP 5.2.7
 - Reverted fix for bug #44197 due to behaviour change in minor version.
@@ -127,14 +127,15 @@ PHP                                                                        NEWS
 - Fixed bug #43540 (rfc1867 handler newlength problem). (Arnaud)
 - Fixed bug #43053 (Regression: some numbers shown in scientific notation).
   (int-e at gmx dot de)
+- Fixed bug #43045 (SOAP encoding violation on "INF" for type double/float).
+  (Dmitry)
 - Fixed bug #42737 (preg_split('//u') triggers a E_NOTICE with newlines).
   (Nuno)
 - Fixed bug #42604 ("make test" fails with --with-config-file-scan-dir=path).
   (Jani)
 - Fixed bug #42318 (problem with nm on AIX, not finding object files). (Dmitry)
 - Fixed bug #41348 (OCI8: allow compilation with Oracle 8.1). (Chris Jones)
-- Fixed bug #43045 (SOAP encoding violation on "INF" for type double/float).
-  (Dmitry)
+
 
 01 May 2008, PHP 5.2.6
 - Fixed two possible crashes inside posix extension (Tony)
