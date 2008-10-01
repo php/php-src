@@ -18,15 +18,11 @@ $db = MySQLPDOTest::factory();
 	ob_end_clean();
 
 	/*	PDO Driver for MySQL, client library version => 6.0.3-alpha	*/
-	$expected = sprintf('PDO Driver for MySQL, client library version => %s',
+	$expected = sprintf('Client API version => %s',
 		$db->getAttribute(PDO::ATTR_CLIENT_VERSION));
 
 	if (false === stristr($tmp, $expected)) {
-		// maybe its PDO_MYSQLND
-		$expected = sprintf('PDO Driver for MySQL, mysql native driver version => %s',
-			$db->getAttribute(PDO::ATTR_CLIENT_VERSION));
-		if (false === stristr($tmp, $expected))
-			printf("[001] Cannot find MySQL PDO driver line in phpinfo() output\n");
+		printf("[001] Cannot find MySQL PDO driver line in phpinfo() output\n");
 	}
 
 	print "done!";
