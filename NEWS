@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 
 - Fixed bug causing the algorithm parameter of mhash() to be modified. (Scott)
 
+- Fixed bug #46205 (Closure - Memory leaks when ReflectionException is thrown).
+  (Dmitry)
 - Fixed bug #46194 (SIGSEGV when requested file is not found). (Greg)
 - Fixed bug #46185 (importNode changes the namespace of an XML element). (Rob)
 - Fixed bug #46178 (memory leak in ext/phar). (Greg)
