@@ -138,14 +138,6 @@ PHPAPI long php_rand(TSRMLS_D)
 	LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 	NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-	The original code included the following notice:
-
-	When you use this, send an email to: matumoto@math.keio.ac.jp
-    with an appropriate reference to your work.
-
-	It would be nice to CC: rjwagner@writeme.com and Cokus@math.washington.edu
-	when you write.
 */
 
 #define N             MT_N                 /* length of state vector */
