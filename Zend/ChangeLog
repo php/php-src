@@ -1,3 +1,8 @@
+2008-10-01  Antony Dovgal  <tony@daylessday.org>
+
+    * zend_execute_API.c:
+      initialize variable
+
 2008-09-23  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * zend_constants.c:
