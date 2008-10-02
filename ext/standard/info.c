@@ -528,9 +528,10 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			ulong num_key;
 
 			if ((url_stream_wrappers_hash = php_stream_get_url_stream_wrappers_hash())) {
-				for (zend_hash_internal_pointer_reset(url_stream_wrappers_hash);
-						zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, (uint *)&stream_protocol_len, &num_key, 0, NULL) == HASH_KEY_IS_STRING;
-						zend_hash_move_forward(url_stream_wrappers_hash)) {
+				HashPosition pos;
+				for (zend_hash_internal_pointer_reset_ex(url_stream_wrappers_hash, &pos);
+						zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, (uint *)&stream_protocol_len, &num_key, 0, &pos) == HASH_KEY_IS_STRING;
+						zend_hash_move_forward_ex(url_stream_wrappers_hash, &pos)) {
 					stream_protocols_buf = erealloc(stream_protocols_buf, stream_protocols_buf_len + stream_protocol_len + 2 + 1);
 					memcpy(stream_protocols_buf + stream_protocols_buf_len, stream_protocol, stream_protocol_len - 1);
 					stream_protocols_buf[stream_protocols_buf_len + stream_protocol_len - 1] = ',';
@@ -559,9 +560,10 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			ulong num_key;
 
 			if ((stream_xport_hash = php_stream_xport_get_hash())) {
-				for(zend_hash_internal_pointer_reset(stream_xport_hash);
-					zend_hash_get_current_key_ex(stream_xport_hash, &xport_name, (uint *)&xport_name_len, &num_key, 0, NULL) == HASH_KEY_IS_STRING;
-					zend_hash_move_forward(stream_xport_hash)) {
+				HashPosition pos;
+				for(zend_hash_internal_pointer_reset_ex(stream_xport_hash, &pos);
+					zend_hash_get_current_key_ex(stream_xport_hash, &xport_name, (uint *)&xport_name_len, &num_key, 0, &pos) == HASH_KEY_IS_STRING;
+					zend_hash_move_forward_ex(stream_xport_hash, &pos)) {
 					if (xport_buf_len + xport_name_len + 2 > xport_buf_size) {
 						while (xport_buf_len + xport_name_len + 2 > xport_buf_size) {
 							xport_buf_size += 256;
@@ -600,9 +602,10 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			ulong num_key;
 
 			if ((stream_filter_hash = php_get_stream_filters_hash())) {
-				for(zend_hash_internal_pointer_reset(stream_filter_hash);
-					zend_hash_get_current_key_ex(stream_filter_hash, &filter_name, (uint *)&filter_name_len, &num_key, 0, NULL) == HASH_KEY_IS_STRING;
-					zend_hash_move_forward(stream_filter_hash)) {
+				HashPosition pos;
+				for(zend_hash_internal_pointer_reset_ex(stream_filter_hash, &pos);
+					zend_hash_get_current_key_ex(stream_filter_hash, &filter_name, (uint *)&filter_name_len, &num_key, 0, &pos) == HASH_KEY_IS_STRING;
+					zend_hash_move_forward_ex(stream_filter_hash, &pos)) {
 					if (filter_buf_len + filter_name_len + 2 > filter_buf_size) {
 						while (filter_buf_len + filter_name_len + 2 > filter_buf_size) {
 							filter_buf_size += 256;
