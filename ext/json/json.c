@@ -211,6 +211,9 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 					if (i == HASH_KEY_IS_STRING || i == HASH_KEY_IS_UNICODE) {
 						if (key.s[0] == '\0' && Z_TYPE_PP(val) == IS_OBJECT) {
 							/* Skip protected and private members. */
+							if (tmp_ht) {
+								tmp_ht->nApplyCount--;
+							}
 							continue;
 						}
 
