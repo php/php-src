@@ -159,7 +159,7 @@ void init_executor(TSRMLS_D) /* {{{ */
 	EG(in_execution) = 0;
 	EG(in_autoload) = NULL;
 	EG(autoload_func) = NULL;
-	EG(error_handling) = 0;
+	EG(error_handling) = EH_NORMAL;
 
 	zend_vm_stack_init(TSRMLS_C);
 	zend_vm_stack_push((void *) NULL TSRMLS_CC);
