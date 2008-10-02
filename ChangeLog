@@ -1,3 +1,97 @@
+2008-10-01  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ext/mysqlnd/php_mysqlnd.c:
+      Improve order in MINFO output
+
+2008-10-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pgsql/pgsql.c:
+      
+      MFB: Fixed bug #46206 (pg_query_params/pg_execute convert passed values to
+      strings).
+
+    * (PHP_5_3)
+      NEWS
+      ext/pgsql/pgsql.c:
+      
+      Fixed bug #46206 (pg_query_params/pg_execute convert passed values to
+      strings).
+
+2008-10-01  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ext/mysqlnd/mysqlnd.c:
+      Handle failed connections right
+
+    * ext/pdo_mysql/tests/pdo_mysql_phpinfo.phpt:
+      Fix test
+
+2008-10-01  Antony Dovgal  <tony@daylessday.org>
+
+    * ZendEngine2/zend_execute_API.c:
+      initialize variable
+
+2008-10-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/php_http.c:
+      Added ability to send user defined HTTP headers with SOAP request
+
+    * (PHP_5_3)
+      NEWS
+      ext/soap/php_http.c:
+      Added ability to send user defined HTTP headers with SOAP request.
+
+2008-10-01  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      NEWS:
+      remove BOM
+
+2008-10-01  Kalle Sommer Nielsen  <kalle.php@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      Fix bugs order
+
+2008-10-01  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_2)
+      ext/standard/rand.c
+      ext/standard/rand.c:
+      MFH: Fix bug #46209 - Remove license condition that is no longer required.
+
+    * ext/standard/rand.c:
+      Remove license condition that is no longer required.
+
+2008-10-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/tests/bugs/bug43045.phpt
+      ext/soap/tests/bugs/bug43045.phpt
+      ext/soap/tests/bugs/bug43045.phpt:
+        1.1.4;
+      file bug43045.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/tests/bugs/bug43045.phpt
+      ext/soap/tests/bugs/bug43045.phpt:
+      Fixed bug #43045 (SOAP encoding violation on "INF" for type double/float)
+
+    * ext/reflection/tests/bug46205.phpt
+      ext/reflection/tests/bug46205.phpt:
+      
+      file bug46205.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      ext/reflection/php_reflection.c
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/bug46205.phpt:
+      Fixed bug #46205 (Closure - Memory leaks when ReflectionException is
+      thrown)
+
 2008-09-30  Rob Richards  <rrichards@ctindustries.net>
 
     * sapi/cli/tests/002-win32.phpt:
