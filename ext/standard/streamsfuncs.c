@@ -573,13 +573,14 @@ PHP_FUNCTION(stream_get_transports)
 	}
 
 	if ((stream_xport_hash = php_stream_xport_get_hash())) {
+		HashPosition pos;
 		array_init(return_value);
-		zend_hash_internal_pointer_reset(stream_xport_hash);
+		zend_hash_internal_pointer_reset_ex(stream_xport_hash, &pos);
 		while (zend_hash_get_current_key_ex(stream_xport_hash,
 					&stream_xport, &stream_xport_len,
-					&num_key, 0, NULL) == HASH_KEY_IS_STRING) {
+					&num_key, 0, &pos) == HASH_KEY_IS_STRING) {
 			add_next_index_rt_stringl(return_value, stream_xport.s, stream_xport_len - 1, ZSTR_DUPLICATE);
-			zend_hash_move_forward(stream_xport_hash);
+			zend_hash_move_forward_ex(stream_xport_hash, &pos);
 		}
 	} else {
 		RETURN_FALSE;
@@ -601,10 +602,11 @@ PHP_FUNCTION(stream_get_wrappers)
 	}
 
 	if ((url_stream_wrappers_hash = php_stream_get_url_stream_wrappers_hash())) {
+		HashPosition pos;
 		array_init(return_value);
-		for(zend_hash_internal_pointer_reset(url_stream_wrappers_hash);
-			(key_flags = zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, &stream_protocol_len, &num_key, 0, NULL)) != HASH_KEY_NON_EXISTANT;
-			zend_hash_move_forward(url_stream_wrappers_hash)) {
+		for(zend_hash_internal_pointer_reset_ex(url_stream_wrappers_hash, &pos);
+			(key_flags = zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, &stream_protocol_len, &num_key, 0, &pos)) != HASH_KEY_NON_EXISTANT;
+			zend_hash_move_forward_ex(url_stream_wrappers_hash, &pos)) {
 				if (key_flags == HASH_KEY_IS_STRING) {
 					add_next_index_rt_stringl(return_value, stream_protocol.s, stream_protocol_len - 1, ZSTR_DUPLICATE);
 				}
