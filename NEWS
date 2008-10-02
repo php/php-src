@@ -18,10 +18,12 @@ PHP                                                                        NEWS
   (Scott)
 - Fixed a crash on invalid method in ReflectionParameter constructor.
   (Christian Seiler)
+- Fixed bug #46215 (json_encode mutates its parameter and has some 
+  class-specific state). (Felipe)
 - Fixed bug #46191 (BC break: DOMDocument saveXML() doesn't accept null). (Rob)
 - Fixed bug #46157 (PDOStatement::fetchObject prototype error). (Felipe)
-- Fixed bug #46147 (after stream seek, appending stream filter reads incorrect data).
-  (Greg)
+- Fixed bug #46147 (after stream seek, appending stream filter reads 
+  incorrect data). (Greg)
 - Fixed bug #46088 (RegexIterator::accept - segfault). (Felipe)
 - Fixed bug #46059 (Compile failure under IRIX 6.5.30 building posix.c). 
   (Arnaud)
