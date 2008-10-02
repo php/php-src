@@ -139,14 +139,16 @@ static void php_info_print_stream_hash(const char *name, HashTable *ht TSRMLS_DC
 	
 	if (ht) {
 		if (zend_hash_num_elements(ht)) {
+			HashPosition pos;
+
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_printf("<tr class=\"v\"><td>Registered %s</td><td>", name);
 			} else {
 				php_info_printf("\nRegistered %s => ", name);
 			}
 			
-			zend_hash_internal_pointer_reset(ht);
-			type = zend_hash_get_current_key_ex(ht, &key, &len, NULL, 0, NULL);
+			zend_hash_internal_pointer_reset_ex(ht, &pos);
+			type = zend_hash_get_current_key_ex(ht, &key, &len, NULL, 0, &pos);
 			do {
 				switch (type) {
 					case IS_STRING:
@@ -157,8 +159,8 @@ static void php_info_print_stream_hash(const char *name, HashTable *ht TSRMLS_DC
 						break;
 				}
 				
-				zend_hash_move_forward(ht);
-				type = zend_hash_get_current_key_ex(ht, &key, &len, NULL, 0, NULL);
+				zend_hash_move_forward_ex(ht, &pos);
+				type = zend_hash_get_current_key_ex(ht, &key, &len, NULL, 0, &pos);
 				
 				if (type == IS_STRING || type == IS_UNICODE) {
 					php_info_print(", ");
