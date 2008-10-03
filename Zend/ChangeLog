@@ -1,3 +1,12 @@
+2008-10-02  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      zend_execute_API.c:
+      MFH: Use enum alternative instead of explicit value
+
+    * zend_execute_API.c:
+      Use enum alternative instead of explicit value
+
 2008-10-01  Antony Dovgal  <tony@daylessday.org>
 
     * zend_execute_API.c:
