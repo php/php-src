@@ -23,6 +23,7 @@
 #endif
 
 #include "php.h"
+#include "php_ini.h"
 #include "php_msql.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/info.h"
@@ -429,12 +430,12 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		zend_rsrc_list_entry *le;
 		
 		if (msql_globals.max_links!=-1 && msql_globals.num_links>=msql_globals.max_links) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%d)", msql_globals.num_links);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%ld)", msql_globals.num_links);
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
 		if (msql_globals.max_persistent!=-1 && msql_globals.num_persistent>=msql_globals.max_persistent) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open persistent links (%d)", msql_globals.num_persistent);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open persistent links (%ld)", msql_globals.num_persistent);
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -445,6 +446,7 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			
 			/* create the link */
 			if ((msql=msqlConnect(host))==-1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "A link to the server could not be established");
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -505,7 +507,7 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			}
 		}
 		if (msql_globals.max_links!=-1 && msql_globals.num_links>=msql_globals.max_links) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%d)",msql_globals.num_links);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%ld)", msql_globals.num_links);
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -563,23 +565,16 @@ PHP_FUNCTION(msql_pconnect)
    Close an mSQL connection */
 PHP_FUNCTION(msql_close)
 {
-	zval *msql_link;
-	int id;
+	zval *msql_link = NULL;
+	int id = -1;
 	int msql;
 	
-	switch (ZEND_NUM_ARGS()) {
-		case 0:
-			id = msql_globals.default_link;
-			break;
-		case 1:
-			if (zend_get_parameters(ht, 1, &msql_link)==FAILURE) {
-				RETURN_FALSE;
-			}
-			id = -1;
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &msql_link) == FAILURE) {
+		return;
+	}
+	
+	if (ZEND_NUM_ARGS() == 0) {
+		id = msql_globals.default_link;
 	}
 	
 	ZEND_FETCH_RESOURCE2(msql, int, &msql_link, id, "mSQL-Link", msql_globals.le_link, msql_globals.le_plink);
@@ -602,34 +597,25 @@ PHP_FUNCTION(msql_close)
    Select an mSQL database */
 PHP_FUNCTION(msql_select_db)
 {
-	zval *db,*msql_link;
-	int id;
-	int msql;
+	zval *msql_link = NULL;
+	char *db;
+	int db_len, msql, id = -1;
 	
-	switch(ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters(ht, 1, &db)==FAILURE) {
-				RETURN_FALSE;
-			}
-			id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-			break;
-		case 2:
-			if (zend_get_parameters(ht, 2, &db, &msql_link)==FAILURE) {
-				RETURN_FALSE;
-			}
-			id = -1;
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &db, &db_len, &msql_link) == FAILURE) {
+		return;
 	}
 	
+	if (ZEND_NUM_ARGS() == 1) {
+		id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	
+		if (id == -1) {
+			RETURN_FALSE;
+		}
+	}
 
 	ZEND_FETCH_RESOURCE2(msql, int, &msql_link, id, "mSQL-Link", msql_globals.le_link, msql_globals.le_plink);
-
-	convert_to_string(db);
 	
-	if (msqlSelectDB(msql,Z_STRVAL_P(db))==-1) {
+	if (msqlSelectDB(msql, db) == -1) {
 		RETURN_FALSE;
 	} else {
 		RETURN_TRUE;
@@ -641,32 +627,25 @@ PHP_FUNCTION(msql_select_db)
    Create an mSQL database */
 PHP_FUNCTION(msql_create_db)
 {
-	zval *db,*msql_link;
-	int id;
-	int msql;
+	zval *msql_link = NULL;
+	char *db;
+	int id = -1, db_len, msql;
 	
-	switch(ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters(ht, 1, &db)==FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-			break;
-		case 2:
-			if (zend_get_parameters(ht, 2, &db, &msql_link)==FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			id = -1;
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &db, &db_len, &msql_link) == FAILURE) {
+		return;
+	}
+	
+	if (ZEND_NUM_ARGS() == 1) {
+		id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		
+		if (id == -1) {
+			RETURN_FALSE;
+		}
 	}
 	
 	ZEND_FETCH_RESOURCE2(msql, int, &msql_link, id, "mSQL-Link", msql_globals.le_link, msql_globals.le_plink);
 	
-	convert_to_string(db);
-	if (msqlCreateDB(msql,Z_STRVAL_P(db))<0) {
+	if (msqlCreateDB(msql, db) < 0) {
 		RETURN_FALSE;
 	} else {
 		RETURN_TRUE;
@@ -678,32 +657,25 @@ PHP_FUNCTION(msql_create_db)
    Drop (delete) an mSQL database */
 PHP_FUNCTION(msql_drop_db)
 {
-	zval *db,*msql_link;
-	int id;
-	int msql;
+	zval *msql_link = NULL;
+	char *db;
+	int id = -1, msql, db_len;
 	
-	switch(ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters(ht, 1, &db)==FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-			break;
-		case 2:
-			if (zend_get_parameters(ht, 2, &db, &msql_link)==FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			id = -1;
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &db, &db_len, &msql_link) == FAILURE) {
+		return;
+	}
+	
+	if (ZEND_NUM_ARGS() == 1) {
+		id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		
+		if (id == -1) {
+			RETURN_FALSE;
+		}
 	}
 	
 	ZEND_FETCH_RESOURCE2(msql, int, &msql_link, id, "mSQL-Link", msql_globals.le_link, msql_globals.le_plink);
 	
-	convert_to_string(db);
-	if (msqlDropDB(msql,Z_STRVAL_P(db))<0) {
+	if (msqlDropDB(msql, db) < 0) {
 		RETURN_FALSE;
 	} else {
 		RETURN_TRUE;
@@ -715,33 +687,25 @@ PHP_FUNCTION(msql_drop_db)
    Send an SQL query to mSQL */
 PHP_FUNCTION(msql_query)
 {
-	zval *query,*msql_link;
-	int id;
-	int msql;
-	int af_rows;
+	zval *msql_link = NULL;
+	char *query;
+	int id, msql, query_len, af_rows;
 	
-	switch(ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters(ht, 1, &query)==FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			id = msql_globals.default_link;
-			break;
-		case 2:
-			if (zend_get_parameters(ht, 2, &query, &msql_link)==FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			id = -1;
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &query, &query_len, &msql_link) == FAILURE) {
+		return;
+	}
+	
+	if (ZEND_NUM_ARGS() == 1) {
+		id = msql_globals.default_link;
+		
+		if (id == -1) {
+			RETURN_FALSE;
+		}
 	}
 	
 	ZEND_FETCH_RESOURCE2(msql, int, &msql_link, id, "mSQL-Link", msql_globals.le_link, msql_globals.le_plink);
 	
-	convert_to_string(query);
-	if ((af_rows = msqlQuery(msql,Z_STRVAL_P(query)))==-1) {
+	if ((af_rows = msqlQuery(msql, query)) == -1) {
 		RETURN_FALSE;
 	}
 	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msqlStoreResult(), af_rows), msql_globals.le_query);
@@ -752,38 +716,32 @@ PHP_FUNCTION(msql_query)
    Send an SQL query to mSQL */
 PHP_FUNCTION(msql_db_query)
 {
-	zval *db,*query,*msql_link;
-	int id;
+	zval *msql_link = NULL;
+	char *db, *query;
+	int db_len, query_len;
+	int id = -1;
 	int msql;
 	int af_rows;
 	
-	switch(ZEND_NUM_ARGS()) {
-		case 2:
-			if (zend_get_parameters(ht, 2, &db, &query)==FAILURE) {
-				RETURN_FALSE;
-			}
-			id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-			break;
-		case 3:
-			if (zend_get_parameters(ht, 3, &db, &query, &msql_link)==FAILURE) {
-				RETURN_FALSE;
-			}
-			id = -1;
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|r", &db, &db_len, &query, &query_len, &msql_link) == FAILURE) {
+		return;
 	}
 	
+	if (ZEND_NUM_ARGS() == 2) {
+		id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		
+		if (id == -1) {			
+			RETURN_FALSE;
+		}
+	}
+		
 	ZEND_FETCH_RESOURCE2(msql, int, &msql_link, id, "mSQL-Link", msql_globals.le_link, msql_globals.le_plink);
 	
-	convert_to_string(db);
-	if (msqlSelectDB(msql,Z_STRVAL_P(db))==-1) {
+	if (msqlSelectDB(msql, db) == -1) {
 		RETURN_FALSE;
 	}
 	
-	convert_to_string(query);
-	if ((af_rows = msqlQuery(msql,Z_STRVAL_P(query)))==-1) {
+	if ((af_rows = msqlQuery(msql, query)) == -1) {
 		RETURN_FALSE;
 	}
 	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msqlStoreResult(), af_rows), msql_globals.le_query);
@@ -794,29 +752,25 @@ PHP_FUNCTION(msql_db_query)
    List databases available on an mSQL server */
 PHP_FUNCTION(msql_list_dbs)
 {
-	zval *msql_link;
-	int id;
-	int msql;
+	zval *msql_link = NULL;
+	int id = -1, msql;
 	m_result *msql_result;
 	
-	switch(ZEND_NUM_ARGS()) {
-		case 0:
-			id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-			break;
-		case 1:
-			if (zend_get_parameters(ht, 1, &msql_link)==FAILURE) {
-				RETURN_FALSE;
-			}
-			id = -1;
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &msql_link) == FAILURE) {
+		return;
+	}
+	
+	if (ZEND_NUM_ARGS() == 0) {
+		id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		
+		if (id == -1) {
+			RETURN_FALSE;
+		}
 	}
 	
 	ZEND_FETCH_RESOURCE2(msql, int, &msql_link, id, "mSQL-Link", msql_globals.le_link, msql_globals.le_plink);
 
-	if ((msql_result=msqlListDBs(msql))==NULL) {
+	if ((msql_result = msqlListDBs(msql)) == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to save mSQL query result");
 		RETURN_FALSE;
 	}
@@ -828,36 +782,29 @@ PHP_FUNCTION(msql_list_dbs)
    List tables in an mSQL database */
 PHP_FUNCTION(msql_list_tables)
 {
-	zval *db,*msql_link;
-	int id;
-	int msql;
+	zval *msql_link = NULL;
+	char *db;
+	int id = -1, msql, db_len;
 	m_result *msql_result;
 	
-	switch(ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters(ht, 1, &db)==FAILURE) {
-				RETURN_FALSE;
-			}
-			id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-			break;
-		case 2:
-			if (zend_get_parameters(ht, 2, &db, &msql_link)==FAILURE) {
-				RETURN_FALSE;
-			}
-			id = -1;
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &db, &db_len, &msql_link) == FAILURE) {
+		return;
+	}
+	
+	if (ZEND_NUM_ARGS() == 1) {
+		id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		
+		if (id == -1) {
+			RETURN_FALSE;
+		}
 	}
 	
 	ZEND_FETCH_RESOURCE2(msql, int, &msql_link, id, "mSQL-Link", msql_globals.le_link, msql_globals.le_plink);
 	
-	convert_to_string(db);
-	if (msqlSelectDB(msql,Z_STRVAL_P(db))==-1) {
+	if (msqlSelectDB(msql, db) == -1) {
 		RETURN_FALSE;
 	}
-	if ((msql_result=msqlListTables(msql))==NULL) {
+	if ((msql_result = msqlListTables(msql)) == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to save mSQL query result");
 		RETURN_FALSE;
 	}
@@ -869,37 +816,30 @@ PHP_FUNCTION(msql_list_tables)
    List mSQL result fields */
 PHP_FUNCTION(msql_list_fields)
 {
-	zval *db,*table,*msql_link;
-	int id;
-	int msql;
+	zval *msql_link = NULL;
+	char *db, *table;
+	int db_len, table_len, id = -1, msql;
 	m_result *msql_result;
 	
-	switch(ZEND_NUM_ARGS()) {
-		case 2:
-			if (zend_get_parameters(ht, 2, &db, &table)==FAILURE) {
-				RETURN_FALSE;
-			}
-			id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-			break;
-		case 3:
-			if (zend_get_parameters(ht, 3, &db, &table, &msql_link)==FAILURE) {
-				RETURN_FALSE;
-			}
-			id = -1;
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|r", &db, &db_len, &table, &table_len, &msql_link) == FAILURE) {
+		return;
+	}
+	
+	if (ZEND_NUM_ARGS() == 2) {
+		id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		
+		if (id == -1) {
+			RETURN_FALSE;
+		}
 	}
 	
 	ZEND_FETCH_RESOURCE2(msql, int, &msql_link, id, "mSQL-Link", msql_globals.le_link, msql_globals.le_plink);
 	
-	convert_to_string(db);
-	if (msqlSelectDB(msql,Z_STRVAL_P(db))==-1) {
+	if (msqlSelectDB(msql, db) == -1) {
 		RETURN_FALSE;
 	}
-	convert_to_string(table);
-	if ((msql_result=msqlListFields(msql,Z_STRVAL_P(table)))==NULL) {
+
+	if ((msql_result=msqlListFields(msql, table)) == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to save mSQL query result");
 		RETURN_FALSE;
 	}
@@ -918,46 +858,35 @@ PHP_FUNCTION(msql_error)
 }
 /* }}} */
 
-/* {{{ proto string msql_result(int query, int row [, mixed field])
+/* {{{ proto string msql_result(resource result, int row [, mixed field])
    Get result data */
 PHP_FUNCTION(msql_result)
 {
-	zval *result, *row, *field=NULL;
+	zval *result, *field = NULL;
+	long row;
 	m_result *msql_result;
 	m_query *msql_query;
 	m_row sql_row;
 	int field_offset=0;
 	
-	switch (ZEND_NUM_ARGS()) {
-		case 2:
-			if (zend_get_parameters(ht, 2, &result, &row)==FAILURE) {
-				RETURN_FALSE;
-			}
-			break;
-		case 3:
-			if (zend_get_parameters(ht, 3, &result, &row, &field)==FAILURE) {
-				RETURN_FALSE;
-			}
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|z", &result, &row, &field) == FAILURE) {
+		return;	
 	}
 	
 	MSQL_GET_QUERY(result);
 	
-	convert_to_long(row);
-	if (Z_LVAL_P(row)<0 || Z_LVAL_P(row)>=msqlNumRows(msql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %ld on mSQL query index %ld", Z_LVAL_P(row), Z_LVAL_P(result));
+	if (row < 0 || row >= msqlNumRows(msql_result)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %ld on mSQL query index %ld", row, Z_RESVAL_P(result));
 		RETURN_FALSE;
 	}
-	msqlDataSeek(msql_result,Z_LVAL_P(row));
-	if ((sql_row=msqlFetchRow(msql_result))==NULL) { /* shouldn't happen? */
+
+	msqlDataSeek(msql_result, row);
+	if ((sql_row = msqlFetchRow(msql_result)) == NULL) { /* shouldn't happen? */
 		RETURN_FALSE;
 	}
 
 	if (field) {
-		switch(Z_TYPE_P(field)) {
+		switch (Z_TYPE_P(field)) {
 			case IS_STRING: {
 					int i=0;
 					m_field *tmp_field;
@@ -969,7 +898,7 @@ PHP_FUNCTION(msql_result)
 						field_name = estrdup(tmp+1);
 					} else {
 						table_name = NULL;
-						field_name = estrndup(Z_STRVAL_P(field),Z_STRLEN_P(field));
+						field_name = estrndup(Z_STRVAL_P(field), Z_STRLEN_P(field));
 					}
 					msqlFieldSeek(msql_result,0);
 					while ((tmp_field=msqlFetchField(msql_result))) {
@@ -997,7 +926,7 @@ PHP_FUNCTION(msql_result)
 			default:
 				convert_to_long(field);
 				field_offset = Z_LVAL_P(field);
-				if (field_offset<0 || field_offset>=msqlNumFields(msql_result)) {
+				if (field_offset < 0 || field_offset >= msqlNumFields(msql_result)) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad column offset specified");
 					RETURN_FALSE;
 				}
@@ -1007,10 +936,10 @@ PHP_FUNCTION(msql_result)
 	
 	if (sql_row[field_offset]) {
 		if (PG(magic_quotes_runtime)) {
-			Z_STRVAL_P(return_value) = php_addslashes(sql_row[field_offset],0,&Z_STRLEN_P(return_value),0 TSRMLS_CC);
+			Z_STRVAL_P(return_value) = php_addslashes(sql_row[field_offset], 0, &Z_STRLEN_P(return_value), 0 TSRMLS_CC);
 		} else {	
-			Z_STRLEN_P(return_value) = (sql_row[field_offset]?strlen(sql_row[field_offset]):0);
-			Z_STRVAL_P(return_value) = (char *) safe_estrndup(sql_row[field_offset],Z_STRLEN_P(return_value));
+			Z_STRLEN_P(return_value) = (sql_row[field_offset] ? strlen(sql_row[field_offset]) : 0);
+			Z_STRVAL_P(return_value) = (char *) safe_estrndup(sql_row[field_offset], Z_STRLEN_P(return_value));
 		}
 		Z_TYPE_P(return_value) = IS_STRING;
 	} else {
@@ -1027,8 +956,8 @@ PHP_FUNCTION(msql_num_rows)
 	m_result *msql_result;
 	m_query *msql_query;
 	
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters(ht, 1, &result)==FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &result) == FAILURE) {
+		return;
 	}
 	
 	MSQL_GET_QUERY(result);
@@ -1044,8 +973,8 @@ PHP_FUNCTION(msql_num_fields)
 	m_result *msql_result;
 	m_query *msql_query;
 	
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters(ht, 1, &result)==FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &result)==FAILURE) {
+		return;
 	}
 	
 	MSQL_GET_QUERY(result);
@@ -1057,7 +986,8 @@ PHP_FUNCTION(msql_num_fields)
  */
 static void php_msql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 {
-	zval *result, *arg2;
+	zval *result;
+	long arg2;
 	m_result *msql_result;
 	m_row msql_row;
 	m_field *msql_field;
@@ -1065,29 +995,20 @@ static void php_msql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	int num_fields;
 	int i;
 	
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters(ht, 1, &result)==FAILURE) {
-				RETURN_FALSE;
-			}
-			if (!result_type) {
-				result_type = MSQL_BOTH;
-			}
-			break;
-		case 2:
-			if (zend_get_parameters(ht, 2, &result, &arg2)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long(arg2);
-			result_type = Z_LVAL_P(arg2);
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &result, &arg2) == FAILURE) {
+		return;
+	}
+	
+	if (ZEND_NUM_ARGS() == 1) {
+		if (!result_type) {
+			result_type = MSQL_BOTH;
+		}
+	} else {
+		result_type = (int) arg2;
 	}
 	
 	MSQL_GET_QUERY(result);
-	if (!msql_result || (msql_row=msqlFetchRow(msql_result))==NULL) {
+	if (!msql_result || (msql_row=msqlFetchRow(msql_result)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -1164,23 +1085,22 @@ PHP_FUNCTION(msql_fetch_array)
    Move internal result pointer */
 PHP_FUNCTION(msql_data_seek)
 {
-	zval *result,*offset;
+	zval *result;
+	long offset;
 	m_result *msql_result;
 	m_query *msql_query;
 	
-	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters(ht, 2, &result, &offset)==FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &result, &offset) == FAILURE) {
+		return;
 	}
 	
 	MSQL_GET_QUERY(result);
-	convert_to_long(offset);
-	if (!msql_result ||
-			Z_LVAL_P(offset)<0 || 
-			Z_LVAL_P(offset)>=msqlNumRows(msql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is invalid for mSQL query index %ld", Z_LVAL_P(offset), Z_LVAL_P(result));
+
+	if (!msql_result ||	offset < 0 || offset >= msqlNumRows(msql_result)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is invalid for mSQL query index %ld", offset, Z_RESVAL_P(result));
 		RETURN_FALSE;
 	}
-	msqlDataSeek(msql_result,Z_LVAL_P(offset));
+	msqlDataSeek(msql_result, offset);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1230,36 +1150,26 @@ static char *php_msql_get_field_name(int field_type)
    Get column information from a result and return as an object */
 PHP_FUNCTION(msql_fetch_field)
 {
-	zval *result, *field=NULL;
+	zval *result;
+	long field = 0;
 	m_result *msql_result;
 	m_field *msql_field;
 	m_query *msql_query;
 	
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters(ht, 1, &result)==FAILURE) {
-				RETURN_FALSE;
-			}
-			break;
-		case 2:
-			if (zend_get_parameters(ht, 2, &result, &field)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long(field);
-		default:
-			WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &result, &field)==FAILURE) {
+		return;
 	}
 	
 	MSQL_GET_QUERY(result);
 	
-	if (field) {
-		if (Z_LVAL_P(field)<0 || Z_LVAL_P(field)>=msqlNumRows(msql_result)) {
+	if (ZEND_NUM_ARGS() > 1) {
+		if (field < 0 || field >= msqlNumRows(msql_result)) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Bad field offset specified");
 			RETURN_FALSE;
 		}
-		msqlFieldSeek(msql_result,Z_LVAL_P(field));
+		msqlFieldSeek(msql_result, field);
 	}
-	if (!msql_result || (msql_field=msqlFetchField(msql_result))==NULL) {
+	if (!msql_result || (msql_field = msqlFetchField(msql_result)) == NULL) {
 		RETURN_FALSE;
 	}
 	object_init(return_value);
@@ -1281,25 +1191,25 @@ PHP_FUNCTION(msql_fetch_field)
    Set result pointer to a specific field offset */
 PHP_FUNCTION(msql_field_seek)
 {
-	zval *result, *offset;
+	zval *result;
+	long offset;
 	m_result *msql_result;
 	m_query *msql_query;
 	
-	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters(ht, 2, &result, &offset)==FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &result, &offset) == FAILURE) {
+		return;
 	}
 	
 	MSQL_GET_QUERY(result);
-	convert_to_long(offset);
-	if(!msql_result) {
+
+	if (!msql_result) {
 		RETURN_FALSE;
 	}
-	if (Z_LVAL_P(offset)<0 || Z_LVAL_P(offset)>=msqlNumFields(msql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Field %ld is invalid for mSQL query index %ld",
-				Z_LVAL_P(offset),Z_LVAL_P(result));
+	if (offset < 0 || offset >= msqlNumFields(msql_result)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Field %ld is invalid for mSQL query index %ld", offset, Z_RESVAL_P(result));
 		RETURN_FALSE;
 	}
-	msqlFieldSeek(msql_result,Z_LVAL_P(offset));
+	msqlFieldSeek(msql_result, offset);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1314,26 +1224,27 @@ PHP_FUNCTION(msql_field_seek)
  */
 static void php_msql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
-	zval *result, *field;
+	zval *result;
+	long field;
 	m_result *msql_result;
 	m_field *msql_field;
 	m_query *msql_query;
 	
-	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters(ht, 2, &result, &field)==FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &result, &field) == FAILURE) {
+		return;
 	}
-	
+
 	MSQL_GET_QUERY(result);
 	if(!msql_result) {
 		RETURN_FALSE;
 	}
-	convert_to_long(field);
-	if (Z_LVAL_P(field)<0 || Z_LVAL_P(field)>=msqlNumFields(msql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Field %ld is invalid for mSQL query index %ld", Z_LVAL_P(field), Z_LVAL_P(result));
+
+	if (field < 0 || field >= msqlNumFields(msql_result)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field %ld is invalid for mSQL query index %ld", field, Z_RESVAL_P(result));
 		RETURN_FALSE;
 	}
-	msqlFieldSeek(msql_result,Z_LVAL_P(field));
-	if ((msql_field=msqlFetchField(msql_result))==NULL) {
+	msqlFieldSeek(msql_result, field);
+	if ((msql_field = msqlFetchField(msql_result)) == NULL) {
 		RETURN_FALSE;
 	}
 	
@@ -1446,8 +1357,8 @@ PHP_FUNCTION(msql_free_result)
 	m_result *msql_result;
 	m_query *msql_query;
 	
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters(ht, 1, &result)==FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &result) == FAILURE) {
+		return;
 	}
 
 	MSQL_GET_QUERY(result);
@@ -1464,9 +1375,10 @@ PHP_FUNCTION(msql_affected_rows)
 	m_result *msql_result;
 	m_query *msql_query;
 
-	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters(ht, 1, &result) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &result) == FAILURE) {
+		return;
 	}
+
 	MSQL_GET_QUERY(result);
 	RETVAL_LONG(msql_query->af_rows);
 }
