@@ -1,8 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2008, PHP 5.2.7
-- Fixed bug #14032 (Mail() always returns false but mail is sent). (Mikko)
-
 - Reverted fix for bug #44197 due to behaviour change in minor version.
   (Felipe)
 
@@ -139,7 +137,7 @@ PHP                                                                        NEWS
   (Jani)
 - Fixed bug #42318 (problem with nm on AIX, not finding object files). (Dmitry)
 - Fixed bug #41348 (OCI8: allow compilation with Oracle 8.1). (Chris Jones)
-
+- Fixed bug #14032 (Mail() always returns false but mail is sent). (Mikko)
 
 01 May 2008, PHP 5.2.6
 - Fixed two possible crashes inside posix extension (Tony)
