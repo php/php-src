@@ -1,3 +1,61 @@
+2008-10-02  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * (PHP_5_3)
+      ext/simplexml/tests/SimpleXMLElement_addAttribute_basic.phpt
+      ext/simplexml/tests/simplexml_load_file.phpt:
+      Committting tests for Olafur Waage
+
+    * ext/simplexml/tests/SimpleXMLElement_addAttribute_basic.phpt
+      ext/simplexml/tests/SimpleXMLElement_addAttribute_basic.phpt
+      ext/simplexml/tests/simplexml_load_file.phpt
+      ext/simplexml/tests/simplexml_load_file.phpt:
+      
+      Committting tests for Olafur Waage
+
+2008-10-02  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_execute_API.c:
+      MFH: Use enum alternative instead of explicit value
+
+    * ZendEngine2/zend_execute_API.c:
+      Use enum alternative instead of explicit value
+
+2008-10-02  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ext/standard/info.c
+      ext/standard/streamsfuncs.c:
+      MFH: use HashPosition to prevent race condition in multithreaded env
+
+    * ext/standard/info.c
+      ext/standard/streamsfuncs.c:
+      use HashPosition to prevent race condition in multithreaded env
+
+2008-10-02  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/json/json.c
+      ext/json/json.c
+      ext/json/tests/bug46215.phpt:
+      - MFH: Fixed bug #46215 (json_encode mutates its parameter and has some
+      class-specific state)
+
+    * (PHP_5_3)
+      ext/json/tests/bug46215.phpt:
+      - New test
+
+    * ext/json/tests/bug46215.phpt
+      ext/json/tests/bug46215.phpt
+      ext/json/tests/bug46215.phpt:
+        1.1.4;
+      - New test
+
+    * ext/json/json.c:
+      - Fixed bug #46215 (json_encode mutates its parameter and has some
+      class-specific state)
+
 2008-10-01  Johannes Schlüter  <johannes@schlueters.de>
 
     * ext/mysqlnd/php_mysqlnd.c:
