@@ -31,6 +31,12 @@
 #include <sys/sysexits.h>
 #endif
 
+#if PHP_SIGCHILD
+#if HAVE_SIGNAL_H
+#include <signal.h>
+#endif
+#endif
+
 #include "php_mail.h"
 #include "php_ini.h"
 #include "exec.h"
@@ -187,6 +193,9 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	int ret;
 	char *sendmail_path = INI_STR("sendmail_path");
 	char *sendmail_cmd = NULL;
+#if PHP_SIGCHILD
+	void (*sig_handler)() = NULL;
+#endif
 
 	if (!sendmail_path) {
 #if (defined PHP_WIN32 || defined NETWARE)
@@ -211,6 +220,16 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		sendmail_cmd = sendmail_path;
 	}
 
+#if PHP_SIGCHILD
+	/* Set signal handler of SIGCHLD to default to prevent other signal handlers
+	 * from being called and reaping the return code when our child exits.
+	 * The original handler needs to be restored after pclose() */
+	sig_handler = (void *)signal(SIGCHLD, SIG_DFL);
+	if (sig_handler == SIG_ERR) {
+		sig_handler = NULL;
+	}
+#endif
+
 #ifdef PHP_WIN32
 	sendmail = popen(sendmail_cmd, "wb");
 #else
@@ -229,6 +248,13 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		if (EACCES == errno) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Permission denied: unable to execute shell to run mail delivery binary '%s'", sendmail_path);
 			pclose(sendmail);
+#if PHP_SIGCHILD
+			/* Restore handler in case of error on Windows
+			   Not sure if this applicable on Win but just in case. */
+			if (sig_handler) {
+				signal(SIGCHLD, sig_handler);
+			}
+#endif
 			return 0;
 		}
 #endif
@@ -239,6 +265,12 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		}
 		fprintf(sendmail, "\n%s\n", message);
 		ret = pclose(sendmail);
+
+#if PHP_SIGCHILD
+		if (sig_handler) {
+			signal(SIGCHLD, sig_handler);
+		}
+#endif
 
 #ifdef PHP_WIN32
 		if (ret == -1)
@@ -258,6 +290,11 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		}
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not execute mail delivery program '%s'", sendmail_path);
+#if PHP_SIGCHILD
+		if (sig_handler) {
+			signal(SIGCHLD, sig_handler);						
+		}
+#endif
 		return 0;
 	}
 
