@@ -94,8 +94,8 @@ static int le_pmysqli;
 /* Destructor for mysqli entries in free_links/used_links */
 void php_mysqli_dtor_p_elements(void *data)
 {
-	TSRMLS_FETCH();
 	MYSQL *mysql = (MYSQL *) data;
+	TSRMLS_FETCH();
 	mysqli_close(mysql, MYSQLI_CLOSE_IMPLICIT);
 }
 
