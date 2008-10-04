@@ -11,13 +11,17 @@ if test "$PHP_PDO_DBLIB" != "no"; then
     AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
   fi
 
-  PDO_FREETDS_INSTALLATION_DIR=""
   if test "$PHP_PDO_DBLIB" = "yes"; then
 
     for i in /usr/local /usr; do
-      if test -f $i/include/tds.h; then
+      if test -f $i/include/sybdb.h; then
         PDO_FREETDS_INSTALLATION_DIR=$i
+        PDO_FREETDS_INCLUDE_DIR=$i/include
         break
+      elif test -f $i/include/freetds/sybdb.h; then
+        PDO_FREETDS_INSTALLATION_DIR=$i
+        PDO_FREETDS_INCLUDE_DIR=$i/include/freetds
+        break;
       fi
     done
 
@@ -27,8 +31,12 @@ if test "$PHP_PDO_DBLIB" != "no"; then
 
   elif test "$PHP_PDO_DBLIB" != "no"; then
 
-    if test -f $PHP_PDO_DBLIB/include/tds.h; then
+    if test -f $PHP_PDO_DBLIB/include/sybdb.h; then
       PDO_FREETDS_INSTALLATION_DIR=$PHP_PDO_DBLIB
+      PDO_FREETDS_INCLUDE_DIR=$PHP_PDO_DBLIB/include
+    elif test -f $PHP_PDO_DBLIB/include/freetds/sybdb.h; then
+      PDO_FREETDS_INSTALLATION_DIR=$PHP_PDO_DBLIB
+      PDO_FREETDS_INCLUDE_DIR=$PHP_PDO_DBLIB/include/freetds
     else
       AC_MSG_ERROR(Directory $PHP_PDO_DBLIB is not a FreeTDS installation directory)
     fi
@@ -38,15 +46,13 @@ if test "$PHP_PDO_DBLIB" != "no"; then
     PHP_LIBDIR=lib
   fi
 
-  if test ! -r "$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libtds.a" && test ! -r "$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libtds.so"; then
-     AC_MSG_ERROR(Could not find $PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libtds.[a|so])
+  if test ! -r "$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libsybdb.a" && test ! -r "$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libsybdb.so"; then
+     AC_MSG_ERROR(Could not find $PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libsybdb.[a|so])
   fi
 
-  PDO_DBLIB_INCDIR=$PDO_FREETDS_INSTALLATION_DIR/include
-  PDO_DBLIB_LIBDIR=$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR
+  PHP_ADD_INCLUDE($PDO_FREETDS_INCLUDE_DIR)
+  PHP_ADD_LIBRARY_WITH_PATH(sybdb, $PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR, PDO_DBLIB_SHARED_LIBADD)
 
-  PHP_ADD_INCLUDE($PDO_DBLIB_INCDIR)
-  PHP_ADD_LIBRARY_WITH_PATH(sybdb, $PDO_DBLIB_LIBDIR, PDO_DBLIB_SHARED_LIBADD)
   ifdef([PHP_CHECK_PDO_INCLUDES],
   [
     PHP_CHECK_PDO_INCLUDES
