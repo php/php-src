@@ -14,11 +14,11 @@ if test "$PHP_PDO_DBLIB" != "no"; then
   if test "$PHP_PDO_DBLIB" = "yes"; then
 
     for i in /usr/local /usr; do
-      if test -f $i/include/tds.h; then
+      if test -f $i/include/sybdb.h; then
         PDO_FREETDS_INSTALLATION_DIR=$i
         PDO_FREETDS_INCLUDE_DIR=$i/include
         break
-      elif test -f $i/include/freetds/tds.h; then
+      elif test -f $i/include/freetds/sybdb.h; then
         PDO_FREETDS_INSTALLATION_DIR=$i
         PDO_FREETDS_INCLUDE_DIR=$i/include/freetds
         break;
@@ -31,10 +31,10 @@ if test "$PHP_PDO_DBLIB" != "no"; then
 
   elif test "$PHP_PDO_DBLIB" != "no"; then
 
-    if test -f $PHP_PDO_DBLIB/include/tds.h; then
+    if test -f $PHP_PDO_DBLIB/include/sybdb.h; then
       PDO_FREETDS_INSTALLATION_DIR=$PHP_PDO_DBLIB
       PDO_FREETDS_INCLUDE_DIR=$PHP_PDO_DBLIB/include
-    elif test -f $PHP_PDO_DBLIB/include/freetds/tds.h; then
+    elif test -f $PHP_PDO_DBLIB/include/freetds/sybdb.h; then
       PDO_FREETDS_INSTALLATION_DIR=$PHP_PDO_DBLIB
       PDO_FREETDS_INCLUDE_DIR=$PHP_PDO_DBLIB/include/freetds
     else
@@ -46,8 +46,8 @@ if test "$PHP_PDO_DBLIB" != "no"; then
     PHP_LIBDIR=lib
   fi
 
-  if test ! -r "$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libtds.a" && test ! -r "$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libtds.so"; then
-     AC_MSG_ERROR(Could not find $PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libtds.[a|so])
+  if test ! -r "$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libsybdb.a" && test ! -r "$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libsybdb.so"; then
+     AC_MSG_ERROR(Could not find $PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libsybdb.[a|so])
   fi
 
   PHP_ADD_INCLUDE($PDO_FREETDS_INCLUDE_DIR)
