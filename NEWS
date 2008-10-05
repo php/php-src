@@ -141,6 +141,8 @@ PHP                                                                        NEWS
 - Fixed bug #42318 (problem with nm on AIX, not finding object files). (Dmitry)
 - Fixed bug #41348 (OCI8: allow compilation with Oracle 8.1). (Chris Jones)
 - Fixed bug #14032 (Mail() always returns false but mail is sent). (Mikko)
+- Fixed bug #46222 (ArrayObject EG(uninitialized_var_ptr) overwrite).
+  (Etienne)
 
 01 May 2008, PHP 5.2.6
 - Fixed two possible crashes inside posix extension (Tony)
