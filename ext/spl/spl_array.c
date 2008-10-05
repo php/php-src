@@ -282,6 +282,7 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 	zval **retval;
 	long index;
+	HashTable *ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
 
 /*  We cannot get the pointer pointer so we don't allow it here for now
 	if (check_inherited && intern->fptr_offset_get) {
@@ -295,9 +296,17 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
 	case IS_UNICODE:
-		if (zend_u_symtable_find(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, (void **) &retval) == FAILURE) {
-			zend_error(E_NOTICE, "Undefined index:  %R", Z_TYPE_P(offset), Z_STRVAL_P(offset));
-			return &EG(uninitialized_zval_ptr);
+		if (zend_u_symtable_find(ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, (void **) &retval) == FAILURE) {
+			if (type == BP_VAR_W || type == BP_VAR_RW) {
+				zval *value;
+				ALLOC_INIT_ZVAL(value);
+				zend_u_symtable_update(ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, (void**)&value, sizeof(void*), NULL);
+				zend_u_symtable_find(ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, (void **) &retval);
+				return retval;
+			} else {
+				zend_error(E_NOTICE, "Undefined index:  %R", Z_TYPE_P(offset), Z_STRVAL_P(offset));
+				return &EG(uninitialized_zval_ptr);
+			}
 		} else {
 			return retval;
 		}
@@ -310,9 +319,17 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 		} else {
 			index = Z_LVAL_P(offset);
 		}
-		if (zend_hash_index_find(spl_array_get_hash_table(intern, 0 TSRMLS_CC), index, (void **) &retval) == FAILURE) {
-			zend_error(E_NOTICE, "Undefined offset:  %ld", Z_LVAL_P(offset));
-			return &EG(uninitialized_zval_ptr);
+		if (zend_hash_index_find(ht, index, (void **) &retval) == FAILURE) {
+			if (type == BP_VAR_W || type == BP_VAR_RW) {
+				zval *value;
+				ALLOC_INIT_ZVAL(value);
+				zend_hash_index_update(ht, index, (void**)&value, sizeof(void*), NULL);
+				zend_hash_index_find(ht, index, (void **) &retval);
+				return retval;
+			} else {
+				zend_error(E_NOTICE, "Undefined offset:  %ld", Z_LVAL_P(offset));
+				return &EG(uninitialized_zval_ptr);
+			}
 		} else {
 			return retval;
 		}
