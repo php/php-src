@@ -1,3 +1,42 @@
+2008-10-04  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/mssql/config.m4
+      ext/pdo_dblib/config.m4:
+      MFH:
+      - Fixed bug #44991 (Compile Failure With freetds0.82)
+        patch by:
+        - jklowden at freetds dot org (ext/mssql)
+        - matthias at dsx dot at (ext/pdo_dblib)
+
+    * (PHP_5_2)
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      - Fixed compiler warning
+
+    * (PHP_5_3)
+      ext/mssql/config.m4:
+      - MFH: Fixed bug #44991 (Compile Failure With freetds0.82) (patch by
+      jklowden at freetds dot org)
+
+    * ext/mssql/config.m4:
+      - Fixed bug #44991 (Compile Failure With freetds0.82) (patch by jklowden at
+      freetds dot org)
+
+    * (PHP_5_3)
+      ext/pdo_dblib/config.m4:
+      - MFH: Fixed bug #44991 (Compile Failure With freetds0.82) (patch by
+      matthias at dsx dot at)
+
+    * ext/pdo_dblib/config.m4:
+      - Fixed bug #44991 (Compile Failure With freetds0.82) (patch by matthias at
+      dsx dot at)
+      - MFB: Fix #35032; pdo_dblib doesn't find includes on some systems
+
+    * ext/pdo_dblib/dblib_driver.c:
+      - Fix build
+
 2008-10-03  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
