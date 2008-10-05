@@ -689,7 +689,7 @@ PHP_FUNCTION(msql_query)
 {
 	zval *msql_link = NULL;
 	char *query;
-	int id, msql, query_len, af_rows;
+	int id = -1, msql, query_len, af_rows;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &query, &query_len, &msql_link) == FAILURE) {
 		return;
@@ -697,10 +697,6 @@ PHP_FUNCTION(msql_query)
 	
 	if (ZEND_NUM_ARGS() == 1) {
 		id = msql_globals.default_link;
-		
-		if (id == -1) {
-			RETURN_FALSE;
-		}
 	}
 	
 	ZEND_FETCH_RESOURCE2(msql, int, &msql_link, id, "mSQL-Link", msql_globals.le_link, msql_globals.le_plink);
