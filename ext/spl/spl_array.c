@@ -1197,6 +1197,7 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	HashTable *aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
 	zval tmp, *arg;
+	zval *retval_ptr = NULL;
 	
 	INIT_PZVAL(&tmp);
 	Z_TYPE(tmp) = IS_ARRAY;
@@ -1207,9 +1208,12 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 			zend_throw_exception(spl_ce_BadMethodCallException, "Function expects exactly one argument", 0 TSRMLS_CC);
 			return;
 		}
-		zend_call_method(NULL, NULL, NULL, fname, fname_len, return_value_ptr, 2, &tmp, arg TSRMLS_CC);
+		zend_call_method(NULL, NULL, NULL, fname, fname_len, &retval_ptr, 2, &tmp, arg TSRMLS_CC);
 	} else {
-		zend_call_method(NULL, NULL, NULL, fname, fname_len, return_value_ptr, 1, &tmp, NULL TSRMLS_CC);
+		zend_call_method(NULL, NULL, NULL, fname, fname_len, &retval_ptr, 1, &tmp, NULL TSRMLS_CC);
+	}
+	if (retval_ptr) {
+		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	}
 }
 
