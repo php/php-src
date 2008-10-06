@@ -1983,7 +1983,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 		}
 	}
 	if(OP2_TYPE != IS_UNUSED) {
-		char *function_name_strval;
+		char *function_name_strval = NULL;
 		int function_name_strlen = 0;
 		zend_free_op free_op2;
 
@@ -2001,7 +2001,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
  			}
 		}
 
-		if (function_name_strlen) {
+		if (function_name_strval) {
 			if (ce->get_static_method) {
 				EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 			} else {

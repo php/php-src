@@ -2630,7 +2630,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 		}
 	}
 	if(IS_CONST != IS_UNUSED) {
-		char *function_name_strval;
+		char *function_name_strval = NULL;
 		int function_name_strlen = 0;
 
 
@@ -2648,7 +2648,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
  			}
 		}
 
-		if (function_name_strlen) {
+		if (function_name_strval) {
 			if (ce->get_static_method) {
 				EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 			} else {
@@ -3226,7 +3226,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
 		}
 	}
 	if(IS_TMP_VAR != IS_UNUSED) {
-		char *function_name_strval;
+		char *function_name_strval = NULL;
 		int function_name_strlen = 0;
 		zend_free_op free_op2;
 
@@ -3244,7 +3244,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
  			}
 		}
 
-		if (function_name_strlen) {
+		if (function_name_strval) {
 			if (ce->get_static_method) {
 				EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 			} else {
@@ -3702,7 +3702,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
 		}
 	}
 	if(IS_VAR != IS_UNUSED) {
-		char *function_name_strval;
+		char *function_name_strval = NULL;
 		int function_name_strlen = 0;
 		zend_free_op free_op2;
 
@@ -3720,7 +3720,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
  			}
 		}
 
-		if (function_name_strlen) {
+		if (function_name_strval) {
 			if (ce->get_static_method) {
 				EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 			} else {
@@ -3934,7 +3934,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 		}
 	}
 	if(IS_UNUSED != IS_UNUSED) {
-		char *function_name_strval;
+		char *function_name_strval = NULL;
 		int function_name_strlen = 0;
 
 
@@ -3952,7 +3952,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
  			}
 		}
 
-		if (function_name_strlen) {
+		if (function_name_strval) {
 			if (ce->get_static_method) {
 				EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 			} else {
@@ -4378,7 +4378,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 		}
 	}
 	if(IS_CV != IS_UNUSED) {
-		char *function_name_strval;
+		char *function_name_strval = NULL;
 		int function_name_strlen = 0;
 
 
@@ -4396,7 +4396,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
  			}
 		}
 
-		if (function_name_strlen) {
+		if (function_name_strval) {
 			if (ce->get_static_method) {
 				EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 			} else {
@@ -10371,7 +10371,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 		}
 	}
 	if(IS_CONST != IS_UNUSED) {
-		char *function_name_strval;
+		char *function_name_strval = NULL;
 		int function_name_strlen = 0;
 
 
@@ -10389,7 +10389,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
  			}
 		}
 
-		if (function_name_strlen) {
+		if (function_name_strval) {
 			if (ce->get_static_method) {
 				EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 			} else {
@@ -12225,7 +12225,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND
 		}
 	}
 	if(IS_TMP_VAR != IS_UNUSED) {
-		char *function_name_strval;
+		char *function_name_strval = NULL;
 		int function_name_strlen = 0;
 		zend_free_op free_op2;
 
@@ -12243,7 +12243,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND
  			}
 		}
 
-		if (function_name_strlen) {
+		if (function_name_strval) {
 			if (ce->get_static_method) {
 				EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 			} else {
@@ -14059,7 +14059,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND
 		}
 	}
 	if(IS_VAR != IS_UNUSED) {
-		char *function_name_strval;
+		char *function_name_strval = NULL;
 		int function_name_strlen = 0;
 		zend_free_op free_op2;
 
@@ -14077,7 +14077,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND
  			}
 		}
 
-		if (function_name_strlen) {
+		if (function_name_strval) {
 			if (ce->get_static_method) {
 				EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 			} else {
@@ -14986,7 +14986,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 		}
 	}
 	if(IS_UNUSED != IS_UNUSED) {
-		char *function_name_strval;
+		char *function_name_strval = NULL;
 		int function_name_strlen = 0;
 
 
@@ -15004,7 +15004,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
  			}
 		}
 
-		if (function_name_strlen) {
+		if (function_name_strval) {
 			if (ce->get_static_method) {
 				EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 			} else {
@@ -16507,7 +16507,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 		}
 	}
 	if(IS_CV != IS_UNUSED) {
-		char *function_name_strval;
+		char *function_name_strval = NULL;
 		int function_name_strlen = 0;
 
 
@@ -16525,7 +16525,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
  			}
 		}
 
-		if (function_name_strlen) {
+		if (function_name_strval) {
 			if (ce->get_static_method) {
 				EX(fbc) = ce->get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 			} else {
