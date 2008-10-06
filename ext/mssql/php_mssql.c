@@ -2002,22 +2002,27 @@ PHP_FUNCTION(mssql_init)
 }
 /* }}} */
 
-/* {{{ proto bool mssql_bind(resource stmt, string param_name, mixed var, int type [, int is_output [, int is_null [, int maxlen]]])
+/* {{{ proto bool mssql_bind(resource stmt, string param_name, mixed var, int type [, bool is_output [, bool is_null [, int maxlen]]])
    Adds a parameter to a stored procedure or a remote stored procedure  */
 PHP_FUNCTION(mssql_bind)
 {
 	char *param_name;
 	int param_name_len, datalen;
 	int status = 0;
-	long type = 0, is_output = 0, is_null = 0, maxlen = -1;
+	long type = 0, maxlen = -1;
 	zval *stmt, **var;
+	zend_bool is_output = 0, is_null = 0;
 	mssql_link *mssql_ptr;
 	mssql_statement *statement;
 	mssql_bind bind,*bindp;
 	LPBYTE value = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsZl|lll", &stmt, &param_name, &param_name_len, &var, &type, &is_output, &is_null, &maxlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsZl|bbl", &stmt, &param_name, &param_name_len, &var, &type, &is_output, &is_null, &maxlen) == FAILURE) {
 		return;
+	}
+
+	if (ZEND_NUM_ARGS() == 7 && !is_output) {
+		maxlen = -1;
 	}
 	
 	ZEND_FETCH_RESOURCE(statement, mssql_statement *, &stmt, -1, "MS SQL-Statement", le_statement);
@@ -2032,24 +2037,21 @@ PHP_FUNCTION(mssql_bind)
 		if (is_null) {
 			maxlen=0;
 			datalen=0;
-		}
-		else {
+		} else {
 			convert_to_string_ex(var);
 			datalen=Z_STRLEN_PP(var);
 			value=(LPBYTE)Z_STRVAL_PP(var);
 		}
-	}
-	else	{	/* fixed-length type */
+	} else {
+		/* fixed-length type */
 		if (is_null)	{
 			datalen=0;
-		}
-		else {
+		} else {
 			datalen=-1;
 		}
 		maxlen=-1;
 
-		switch (type)	{
-
+		switch (type) {
 			case SQLFLT4:
 			case SQLFLT8:
 			case SQLFLTN:
