@@ -1,3 +1,62 @@
+2008-10-05  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      NEWS:
+      Moved to NEWS in 5_2
+
+    * (PHP_5_2)
+      NEWS
+      NEWS
+      ext/spl/spl_array.c
+      ext/spl/spl_array.c
+      ext/spl/spl_array.c
+      ext/spl/tests/array_026.phpt
+      ext/spl/tests/array_026.phpt:
+      Fix #46222 (Allow indirect modifications of Arrays inside ArrayObject + fix
+      EG(uninitialized_zval_ptr) overwrite)
+
+    * ext/spl/tests/array_026.phpt
+      ext/spl/tests/array_026.phpt
+      ext/spl/tests/array_026.phpt:
+        1.1.4;
+      Fix #46222 (Allow indirect modifications of Arrays inside ArrayObject +
+      fix EG(uninitialized_zval_ptr) overwrite)
+
+2008-10-05  Kalle Sommer Nielsen  <kalle.php@gmail.com>
+
+    * (PHP_5_3)
+      ext/mssql/php_mssql.c:
+      MFH: New parameter parsing API (with lots of help from Felipe)
+
+    * ext/mssql/php_mssql.c:
+      New parameter parsing API (with lots of help from Felipe)
+
+2008-10-05  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/msql/php_msql.c:
+      - Initialize variable
+
+2008-10-05  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/user_filters.c
+      ext/standard/user_filters.c
+      ext/standard/tests/filters/bug46164-1.phpt
+      ext/standard/tests/filters/bug46164-1.phpt
+      ext/standard/tests/filters/bug46164-2.phpt
+      ext/standard/tests/filters/bug46164-2.phpt:
+      MFH: Fixed #46164 (stream_filter_remove() closes the stream)
+
+    * ext/standard/user_filters.c
+      ext/standard/tests/filters/bug46164-1.phpt
+      ext/standard/tests/filters/bug46164-1.phpt
+      ext/standard/tests/filters/bug46164-1.phpt
+      ext/standard/tests/filters/bug46164-2.phpt
+      ext/standard/tests/filters/bug46164-2.phpt
+      ext/standard/tests/filters/bug46164-2.phpt:
+      Fixed #46164 (stream_filter_remove() closes the stream)
+
 2008-10-04  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
