@@ -1855,16 +1855,17 @@ PHP_FUNCTION(ibase_execute)
 		if (bind_n != expected_n) {
 			php_error_docref(NULL TSRMLS_CC, (bind_n < expected_n) ? E_WARNING : E_NOTICE,
 				"Statement expects %d arguments, %d given", expected_n, bind_n);
+
 			if (bind_n < expected_n) {
 				break;
 			}
-
-		} else if (bind_n > 0) { /* have variables to bind */
-			args = (zval ***) do_alloca(ZEND_NUM_ARGS() * sizeof(zval **), use_heap);
+		}
+		
+		/* have variables to bind */
+		args = (zval ***) do_alloca(ZEND_NUM_ARGS() * sizeof(zval **), use_heap);
 	
-			if (FAILURE == zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args)) {
-				break;
-			}
+		if (FAILURE == zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args)) {
+			break;
 		}
 
 		/* Have we used this cursor before and it's still open (exec proc has no cursor) ? */
