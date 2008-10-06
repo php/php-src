@@ -77,6 +77,7 @@ PHP                                                                        NEWS
 - Fixed bug #45405 (snmp extension memory leak). (Federico Cuello, Rodrigo
   Campos)
 - Fixed bug #45392 (ob_start()/ob_end_clean() and memory_limit). (Arnaud)
+- Fixed bug #45373 (php crash on query with errors in params). (Felipe)
 - Fixed bug #45352 (Segmentation fault because of tick function on second
   request). (Dmitry)
 - Fixed bug #45312 (Segmentation fault on second request for array functions).
