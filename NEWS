@@ -62,6 +62,8 @@ PHP                                                                        NEWS
   requests). (Moriyoshi)
 - Fixed bug #45581 (htmlspecialchars() double encoding &#x hex items). (Arnaud)
 - Fixed bug #45580 (levenshtein() crashes with invalid argument). (Ilia)
+- Fixed bug #45575 (Segfault with invalid non-string as event handler callback).
+  (Christian Seiler)
 - Fixed bug #45568 (ISAPI doesn't properly clear auth_digest in header).
   (Patch by: navara at emclient dot com)
 - Fixed bug #45556 (Return value from callback isn't freed). (Felipe)
