@@ -104,6 +104,9 @@ function rand_number($len , $prec = -1, $sign = 1)
         }
     } else if ($prec == 0) {
         $n = substr(rand() . rand(), 0, rand() % $len + 1);
+    } else if (($prec - $len) == 0) {
+        $n = substr(rand() . rand(), 0, 1);
+        $n .= "." . substr(rand(), 0, $prec);
     } else {
         $n = substr(rand() . rand(), 0, rand() % ($len - $prec) + 1);
         $n .= "." . substr(rand(), 0, $prec);
