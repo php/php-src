@@ -260,7 +260,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 	 * link resource id (int) as arguments. The value returned from the function is
 	 * used to determine if the event handler should remain set.
 	 */
-
+	zval cb_name;
 	zval **args[17], **cb_arg;
 	ibase_db_link *ib_link;
 	ibase_event *event;
@@ -279,7 +279,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 	}
 
 	/* get a working link */
-	if (Z_TYPE_PP(args[0]) != IS_STRING) {
+	if (Z_TYPE_PP(args[0]) != IS_STRING && Z_TYPE_PP(args[0]) != IS_UNICODE) {
 		/* resource, callback, event_1 [, ... event_15]
 		 * No more than 15 events
 		 */
@@ -312,11 +312,12 @@ PHP_FUNCTION(ibase_set_event_handler)
 	}
 
 	/* get the callback */
-	if (!zend_is_callable(*cb_arg, 0, NULL TSRMLS_CC)) {
-		_php_ibase_module_error("Callback argument %s is not a callable function"
-			TSRMLS_CC, Z_STRVAL_PP(cb_arg));
+	if (!zend_is_callable(*cb_arg, 0, &cb_name TSRMLS_CC)) {
+		_php_ibase_module_error("Callback argument %v is not a callable function" TSRMLS_CC, Z_UNIVAL(cb_name));
+		zval_dtor(&cb_name);
 		RETURN_FALSE;
 	}
+	zval_dtor(&cb_name);
 
 	/* allocate the event resource */
 	event = (ibase_event *) safe_emalloc(sizeof(ibase_event), 1, 0);
