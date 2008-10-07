@@ -268,8 +268,8 @@ PHP_FUNCTION(ibase_set_event_handler)
 	int link_res_id;
 
 	RESET_ERRMSG;
-
-	/* no more than 15 events */
+	
+	/* Minimum and maximum number of arguments allowed */
 	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 17) {
 		WRONG_PARAM_COUNT;
 	}
@@ -280,6 +280,12 @@ PHP_FUNCTION(ibase_set_event_handler)
 
 	/* get a working link */
 	if (Z_TYPE_PP(args[0]) != IS_STRING) {
+		/* resource, callback, event_1 [, ... event_15]
+		 * No more than 15 events
+		 */
+		if (ZEND_NUM_ARGS() < 3 || ZEND_NUM_ARGS() > 17) {
+			WRONG_PARAM_COUNT;
+		}
 
 		cb_arg = args[1];
 		i = 2;
@@ -291,8 +297,10 @@ PHP_FUNCTION(ibase_set_event_handler)
 		link_res_id = Z_LVAL_PP(args[0]);
 
 	} else {
-
-		if (ZEND_NUM_ARGS() > 16) {
+		/* callback, event_1 [, ... event_15] 
+		 * No more than 15 events
+		 */
+		if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 16) {
 			WRONG_PARAM_COUNT;
 		}
 
