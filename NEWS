@@ -18,6 +18,8 @@ PHP                                                                        NEWS
   (Scott)
 - Fixed a crash on invalid method in ReflectionParameter constructor.
   (Christian Seiler)
+- Fixed bug #46247 (ibase_set_event_handler() is allowing to pass callback
+  without event). (Felipe)
 - Fixed bug #46215 (json_encode mutates its parameter and has some 
   class-specific state). (Felipe)
 - Fixed bug #46206 (pg_query_params/pg_execute convert passed values to
