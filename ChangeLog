@@ -1,3 +1,90 @@
+2008-10-06  Kalle Sommer Nielsen  <kalle.php@gmail.com>
+
+    * (PHP_5_3)
+      ext/mssql/php_mssql.c:
+      MFH:
+      * is_output and is_null parameters are now booleans instead of int in
+      mssql_bind
+      * Added missing conditional from old parameter parsing
+
+    * ext/mssql/php_mssql.c:
+      - is_output and is_null parameters are now booleans instead of int in
+      mssql_bind
+      * Added missing conditional from old parameter parsing
+
+2008-10-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/gd/gd.c:
+      Removed deprecated usage of zend_get_parameters_ex()
+
+2008-10-06  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/interbase/ibase_service.c:
+      - Fixed compiler warning
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN #45373
+
+    * (PHP_5_2)
+      ext/interbase/ibase_query.c
+      ext/interbase/ibase_query.c
+      ext/interbase/tests/bug45373.phpt
+      ext/interbase/tests/bug45373.phpt:
+      - MFH: Fixed bug #45373 (php crash on query with errors in params)
+
+    * ext/interbase/ibase_query.c
+      ext/interbase/tests/bug45373.phpt
+      ext/interbase/tests/bug45373.phpt
+      ext/interbase/tests/bug45373.phpt:
+      - Fixed bug #45373 (php crash on query with errors in params)
+
+2008-10-06  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h:
+      - Updated to version 2008.7 (2008g)
+
+2008-10-06  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_2)
+      ext/spl/spl_array.c
+      ext/spl/tests/bug46115.phpt:
+      MFH: bug #46115 (Fixes nothing in 5.2, but sync code)
+
+2008-10-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/imap/php_imap.c:
+      
+      MFB: Fixed a few signedness warnings
+
+    * (PHP_5_3)
+      ext/imap/php_imap.c:
+      Fixed a few signedness warnings
+
+2008-10-06  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug46238.phpt:
+      - MFH: Fixed bug #46238 (Segmentation fault on static call with empty
+      string method)
+
+    * ZendEngine2/tests/bug46238.phpt
+      ZendEngine2/tests/bug46238.phpt:
+      
+      - Fixed bug #46238 (Segmentation fault on static call with empty string
+      method)
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - Fixed bug #46238 (Segmentation fault on static call with empty string
+      method)
+
 2008-10-05  Etienne Kneuss  <php@colder.ch>
 
     * (PHP_5_3)

@@ -1,3 +1,23 @@
+2008-10-06  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug46238.phpt:
+      - MFH: Fixed bug #46238 (Segmentation fault on static call with empty
+      string method)
+
+    * tests/bug46238.phpt
+      tests/bug46238.phpt:
+      
+      - Fixed bug #46238 (Segmentation fault on static call with empty string
+      method)
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      - Fixed bug #46238 (Segmentation fault on static call with empty string
+      method)
+
 2008-10-02  Etienne Kneuss  <php@colder.ch>
 
     * (PHP_5_3)
