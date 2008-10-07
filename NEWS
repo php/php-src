@@ -20,11 +20,15 @@ PHP                                                                        NEWS
   (Christian Seiler)
 - Fixed bug #46215 (json_encode mutates its parameter and has some 
   class-specific state). (Felipe)
+- Fixed bug #46206 (pg_query_params/pg_execute convert passed values to
+  strings). (Ilia)
 - Fixed bug #46191 (BC break: DOMDocument saveXML() doesn't accept null). (Rob)
 - Fixed bug #46164 (stream_filter_remove() closes the stream). (Arnaud)
 - Fixed bug #46157 (PDOStatement::fetchObject prototype error). (Felipe)
 - Fixed bug #46147 (after stream seek, appending stream filter reads 
   incorrect data). (Greg)
+- Fixed bug #46110 (XMLWriter - openmemory() and openuri() leak memory on
+  multiple calls). (Ilia)
 - Fixed bug #46088 (RegexIterator::accept - segfault). (Felipe)
 - Fixed bug #46059 (Compile failure under IRIX 6.5.30 building posix.c). 
   (Arnaud)
@@ -77,6 +81,7 @@ PHP                                                                        NEWS
 - Fixed bug #45405 (snmp extension memory leak). (Federico Cuello, Rodrigo
   Campos)
 - Fixed bug #45392 (ob_start()/ob_end_clean() and memory_limit). (Arnaud)
+- Fixed bug #45382 (timeout bug in stream_socket_enable_crypto). (Ilia)
 - Fixed bug #45373 (php crash on query with errors in params). (Felipe)
 - Fixed bug #45352 (Segmentation fault because of tick function on second
   request). (Dmitry)

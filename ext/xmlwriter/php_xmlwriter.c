@@ -1483,6 +1483,9 @@ static PHP_FUNCTION(xmlwriter_open_uri)
 	intern->uri_output = out_buffer;
 #else
 	if (this) {
+		if (ze_obj->xmlwriter_ptr) {
+			xmlwriter_free_resource_ptr(ze_obj->xmlwriter_ptr TSRMLS_CC);
+		}
 		ze_obj->xmlwriter_ptr = intern;
 		RETURN_TRUE;
 	} else
@@ -1533,6 +1536,9 @@ static PHP_FUNCTION(xmlwriter_open_memory)
 	intern->uri_output = NULL;
 #else
 	if (this) {
+		if (ze_obj->xmlwriter_ptr) {
+			xmlwriter_free_resource_ptr(ze_obj->xmlwriter_ptr TSRMLS_CC);
+		}
 		ze_obj->xmlwriter_ptr = intern;
 		RETURN_TRUE;
 	} else
