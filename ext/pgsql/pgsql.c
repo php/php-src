@@ -2877,7 +2877,7 @@ PHP_FUNCTION(pg_free_result)
 	if (Z_LVAL_P(result) == 0) {
 		RETURN_FALSE;
 	}
-	zend_list_delete(Z_LVAL_P(result));
+	zend_list_delete(Z_RESVAL_P(result));
 	RETURN_TRUE;
 }
 /* }}} */
