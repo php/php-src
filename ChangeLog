@@ -1,3 +1,67 @@
+2008-10-07  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/interbase/ibase_events.c
+      ext/interbase/ibase_events.c
+      ext/interbase/tests/bug45575.phpt
+      ext/interbase/tests/bug45575.phpt:
+      - MFH: Fixed bug #45575 (Segfault with invalid non-string as event handler
+      callback)
+        patch by Christian seiler
+
+    * ext/interbase/ibase_events.c
+      ext/interbase/tests/bug45575.phpt
+      ext/interbase/tests/bug45575.phpt
+      ext/interbase/tests/bug45575.phpt:
+      - Fixed bug #45575 (Segfault with invalid non-string as event handler
+      callback)
+        patch by Christian seiler
+
+    * (PHP_5_2)
+      NEWS
+      ext/interbase/ibase_events.c
+      ext/interbase/ibase_events.c
+      ext/interbase/tests/bug46247.phpt
+      ext/interbase/tests/bug46247.phpt:
+      - MFH: Fixed bug #46247 (ibase_set_event_handler() is allowing to pass
+      callback without event)
+
+    * ext/interbase/tests/bug46247.phpt
+      ext/interbase/tests/bug46247.phpt
+      ext/interbase/tests/bug46247.phpt:
+        1.1.4;
+      - Fixed bug #46247 (ibase_set_event_handler() is allowing to pass callback
+      without event)
+
+    * ext/interbase/ibase_events.c:
+      - Fixed bug #46247 (ibase_set_event_handler() is allowing to pass callback
+      without event)
+
+2008-10-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/openssl/xp_ssl.c
+      ext/pgsql/pgsql.c
+      ext/xmlwriter/php_xmlwriter.c:
+      MFB:
+       Fixed bug #46042 (memory leaks with reflection of mb_convert_encoding())
+       Fixed bug #46110 (XMLWriter - openmemory() and openuri() leak memory on
+        multiple calls).
+       Fixed bug #46206 (pg_query_params/pg_execute convert passed values to
+        strings).
+
+2008-10-07  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/interbase/tests/interbase.inc
+      ext/interbase/tests/interbase.inc:
+      - MFH: Fixed code ("Division by zero" anymore)
+
+    * ext/interbase/tests/interbase.inc:
+      - Fixed code ("Division by zero" anymore)
+
 2008-10-06  Kalle Sommer Nielsen  <kalle.php@gmail.com>
 
     * (PHP_5_3)
