@@ -264,7 +264,7 @@ subtype_identified:
 
 		if ((mime == 0 || mime == MAGIC_MIME) && code_mime) {
 			if ((mime & MAGIC_MIME_TYPE) &&
-			    file_printf(ms, " charset=") == -1)
+			    file_printf(ms, "; charset=") == -1)
 				goto done;
 			if (file_printf(ms, code_mime) == -1)
 				goto done;
