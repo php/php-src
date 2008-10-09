@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2008, PHP 5.2.7
+09 Oct 2008, PHP 5.2.7RC1
 - Reverted fix for bug #44197 due to behaviour change in minor version.
   (Felipe)
 
