@@ -42,6 +42,7 @@ PHP                                                                        NEWS
 - Fixed bug #45928 (large scripts from stdin are stripped at 16K border).
   (Christian Schneider, Arnaud)
 - Fixed bug #45911 (Cannot disable ext/hash). (Arnaud)
+- Fixed bug #45907 (undefined reference to 'PHP_SHA512Init'). (Greg)
 - Fixed bug #45392 (ob_start()/ob_end_clean() and memory_limit). (Ilia)
 - Fixed bug #45382 (timeout bug in stream_socket_enable_crypto).
   (vnegrier at optilian dot com, Ilia)
