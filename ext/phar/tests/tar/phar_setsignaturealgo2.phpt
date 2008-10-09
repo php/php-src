@@ -2,8 +2,10 @@
 Phar::setSupportedSignatures() with hash, tar-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("hash")) die("skip extension hash required"); ?>
-<?php if (!extension_loaded("openssl")) die("skip extension openssl required"); ?>
+<?php if (!extension_loaded("hash")) die("skip extension hash required");
+$arr = Phar::getSupportedSignatures();
+if (!in_array("OpenSSL", $arr)) die("skip openssl support required");
+if (!in_array('SHA-256', $arr)) die("skip hash extension loaded shared"); ?>
 --INI--
 phar.require_hash=0
 phar.readonly=0
