@@ -1875,7 +1875,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 			*signature_len = phar_hex_str((const char*)sig, sig_len, signature TSRMLS_CC);
 		}
 		break;
-#ifdef HAVE_HASH_EXT
+#ifdef PHAR_HASH_OK
 		case PHAR_SIG_SHA512: {
 			unsigned char digest[64];
 			PHP_SHA512_CTX context;
@@ -2039,7 +2039,7 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 	}
 
 	switch(phar->sig_flags) {
-#ifdef HAVE_HASH_EXT
+#ifdef PHAR_HASH_OK
 		case PHAR_SIG_SHA512: {
 			unsigned char digest[64];
 			PHP_SHA512_CTX context;

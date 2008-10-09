@@ -66,7 +66,7 @@
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
 #endif
-#ifdef HAVE_HASH_EXT
+#ifdef PHAR_HASH_OK
 #include "ext/hash/php_hash.h"
 #include "ext/hash/php_hash_sha.h"
 #endif

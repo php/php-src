@@ -4,7 +4,9 @@ Phar::setSupportedSignatures() with hash
 <?php
 if (!extension_loaded("phar")) die("skip");
 if (!extension_loaded("hash")) die("skip hash extension required");
-if (!extension_loaded("openssl")) die("skip openssl extension required");
+$arr = Phar::getSupportedSignatures();
+if (!in_array("OpenSSL", $arr)) die("skip openssl support required");
+if (!in_array('SHA-256', $arr)) die("skip hash extension loaded shared");
 ?>
 --INI--
 phar.require_hash=0
