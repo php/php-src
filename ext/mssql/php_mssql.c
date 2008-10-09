@@ -503,7 +503,7 @@ PHP_RINIT_FUNCTION(mssql)
 {
 	MS_SQL_G(default_link) = -1;
 	MS_SQL_G(num_links) = MS_SQL_G(num_persistent);
-	MS_SQL_G(appname) = estrndup("PHP 5", 5);
+	MS_SQL_G(appname) = estrndup("PHP 6", 5);
 	MS_SQL_G(server_message) = NULL;
 	MS_SQL_G(min_error_severity) = MS_SQL_G(cfg_min_error_severity);
 	MS_SQL_G(min_message_severity) = MS_SQL_G(cfg_min_message_severity);
@@ -1322,7 +1322,7 @@ PHP_FUNCTION(mssql_query)
 	char *query;
 	zval *mssql_link_index = NULL;
 	int query_len, retvalue, batchsize, num_fields;
-	long zbatchsize;
+	long zbatchsize = 0;
 	mssql_link *mssql_ptr;
 	mssql_result *result;
 	int id = -1;
@@ -1490,7 +1490,8 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 {
 	zval *mssql_result_index;
 	mssql_result *result;
-	int i, resulttype;
+	int i;
+	long resulttype = 0;
 
 	switch (result_type) {
 		case MSSQL_NUM:
