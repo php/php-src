@@ -838,7 +838,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 				efree(sig);
 			}
 			break;
-#if HAVE_HASH_EXT
+#if PHAR_HASH_OK
 			case PHAR_SIG_SHA512: {
 				unsigned char digest[64];
 
@@ -3108,7 +3108,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		}
 
 		switch(phar->sig_flags) {
-#ifndef HAVE_HASH_EXT
+#ifndef PHAR_HASH_OK
 			case PHAR_SIG_SHA512:
 			case PHAR_SIG_SHA256:
 				if (closeoldfile) {

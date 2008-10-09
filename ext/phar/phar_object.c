@@ -1271,7 +1271,7 @@ PHP_METHOD(Phar, getSupportedSignatures)
 
 	add_next_index_stringl(return_value, "MD5", 3, 1);
 	add_next_index_stringl(return_value, "SHA-1", 5, 1);
-#ifdef HAVE_HASH_EXT
+#ifdef PHAR_HASH_OK
 	add_next_index_stringl(return_value, "SHA-256", 7, 1);
 	add_next_index_stringl(return_value, "SHA-512", 7, 1);
 #endif
@@ -2939,9 +2939,9 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 	switch (algo) {
 		case PHAR_SIG_SHA256:
 		case PHAR_SIG_SHA512:
-#ifndef HAVE_HASH_EXT
+#ifndef PHAR_HASH_OK
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
-				"SHA-256 and SHA-512 signatures are only supported if the hash extension is enabled");
+				"SHA-256 and SHA-512 signatures are only supported if the hash extension is enabled and built non-shared");
 			return;
 #endif
 		case PHAR_SIG_MD5:
