@@ -114,7 +114,7 @@ $db = MySQLPDOTest::factory();
 
 		$row = $stmt->fetch(PDO::FETCH_ASSOC);
 		if ($row !== $expected) {
-			printf("[004a] Expecting %s got %s\n", var_export($expected, true), vat_export($row, true));
+			printf("[004a] Expecting %s got %s\n", var_export($expected, true), var_export($row, true));
 		}
 
 		prepex(5, $db, 'DROP TABLE IF EXISTS test');
