@@ -1,3 +1,28 @@
+2008-10-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pgsql/pgsql.c:
+      
+      MFB: use proper macro
+
+    * (PHP_5_3)
+      ext/pgsql/pgsql.c:
+      use proper macro
+
+2008-10-08  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/fileinfo/libmagic/ascmagic.c
+      ext/fileinfo/tests/finfo_buffer_basic.phpt
+      ext/fileinfo/tests/finfo_buffer_variation1.phpt
+      ext/fileinfo/tests/finfo_file_basic.phpt:
+      - MFH: Fixed mime-type generation.
+
+    * ext/fileinfo/libmagic/ascmagic.c
+      ext/fileinfo/tests/finfo_buffer_basic.phpt
+      ext/fileinfo/tests/finfo_buffer_variation1.phpt
+      ext/fileinfo/tests/finfo_file_basic.phpt:
+      - Fixed mime-type generation.
+
 2008-10-07  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
