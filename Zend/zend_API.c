@@ -2879,21 +2879,34 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 	lmname = zend_u_str_case_fold(Z_TYPE_P(callable), mname, mlen, 1, &lmlen);
 	if (zend_u_hash_find(ftable, Z_TYPE_P(callable), lmname, lmlen+1, (void**)&fcc->function_handler) == SUCCESS) {
 		retval = 1;
-	} else if (fcc->object_pp && Z_OBJ_HT_PP(fcc->object_pp)->get_method) {
-		zstr method = mname;
-		int method_len = mlen;
+		if ((fcc->function_handler->op_array.fn_flags & ZEND_ACC_CHANGED) &&
+		    EG(scope) &&
+		    instanceof_function(fcc->function_handler->common.scope, EG(scope) TSRMLS_CC)) {
+			zend_function *priv_fbc;
 
-		if (UG(unicode) && Z_TYPE_P(callable) == IS_STRING) {
-			zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &method.u, &method_len, mname.s, mlen TSRMLS_CC);
-		} else if (!UG(unicode) && Z_TYPE_P(callable) == IS_UNICODE) {
-			zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &method.s, &method_len, mname.u, mlen TSRMLS_CC);
-		}	
-		fcc->function_handler = Z_OBJ_HT_PP(fcc->object_pp)->get_method(fcc->object_pp, method, method_len TSRMLS_CC);
-		if (method.v != mname.v) {
-			efree(method.v);
+			if (zend_u_hash_find(&EG(scope)->function_table, Z_TYPE_P(callable), lmname, lmlen+1, (void **) &priv_fbc)==SUCCESS
+				&& priv_fbc->common.fn_flags & ZEND_ACC_PRIVATE
+				&& priv_fbc->common.scope == EG(scope)) {
+				fcc->function_handler = priv_fbc;
+			}
 		}
-		retval = fcc->function_handler ? 1 : 0;
-		call_via_handler = 1;
+	} else if (fcc->object_pp) {
+		if (Z_OBJ_HT_PP(fcc->object_pp)->get_method) {
+			zstr method = mname;
+			int method_len = mlen;
+
+			if (UG(unicode) && Z_TYPE_P(callable) == IS_STRING) {
+				zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &method.u, &method_len, mname.s, mlen TSRMLS_CC);
+			} else if (!UG(unicode) && Z_TYPE_P(callable) == IS_UNICODE) {
+				zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &method.s, &method_len, mname.u, mlen TSRMLS_CC);
+			}	
+			fcc->function_handler = Z_OBJ_HT_PP(fcc->object_pp)->get_method(fcc->object_pp, method, method_len TSRMLS_CC);
+			if (method.v != mname.v) {
+				efree(method.v);
+			}
+			retval = fcc->function_handler ? 1 : 0;
+			call_via_handler = 1;
+		}
 	} else if (fcc->calling_scope) {
 		if (fcc->calling_scope->get_static_method) {
 			fcc->function_handler = fcc->calling_scope->get_static_method(fcc->calling_scope, Z_TYPE_P(callable), mname, mlen TSRMLS_CC);
