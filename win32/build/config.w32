@@ -45,6 +45,9 @@ if (X64) {
 	STDOUT.WriteLine("Detected 32-bit compiler");
 }
 
+AC_DEFINE('ARCHITECTURE', X64 ? 'x64' : 'x86', "Detected compiler architecture");
+DEFINE("PHP_ARCHITECTURE", X64 ? 'x64' : 'x86');
+
 // cygwin now ships with link.exe.  Avoid searching the cygwin path
 // for this, as we want the MS linker, not the fileutil
 PATH_PROG('link', WshShell.Environment("Process").Item("PATH"));
@@ -176,6 +179,9 @@ if (PHP_ZTS == "yes") {
 	ADD_FLAG("CFLAGS", "/D ZTS=1");
 }
 	
+DEFINE("PHP_ZTS_ARCHIVE_POSTFIX", PHP_ZTS == "yes" ? '' : "-nts");
+
+
 // we want msvcrt in the PHP DLL
 ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:libcmt");
 
