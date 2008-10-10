@@ -89,10 +89,8 @@ object(myclass)#%d (0) {
 }
 
 And now PDO using setFetchMode(PDO::FETCH:CLASS|PDO::FETCH_SERIALIZE) + fetch()...
-myclass::__set('myobj', 'Data fetched from DB to be given to unserialize()')
+myclass::unserialize('Data fetched from DB to be given to unserialize()')
 myclass::__construct('Called by PDO') - note that it must not be called when unserializing
-object(myclass)#%d (1) {
-  ["myobj"]=>
-  string(49) "Data fetched from DB to be given to unserialize()"
+object(myclass)#%d (0) {
 }
 done!
