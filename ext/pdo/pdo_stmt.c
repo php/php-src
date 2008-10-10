@@ -907,7 +907,7 @@ static int do_fetch_opt_finish(pdo_stmt_t *stmt, int free_ctor_agrs TSRMLS_DC) /
 static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 	enum pdo_fetch_type how, enum pdo_fetch_orientation ori, long offset, zval *return_all TSRMLS_DC) /* {{{ */
 {
-	int flags = how & PDO_FETCH_FLAGS, idx, old_arg_count = 0;
+	int flags, idx, old_arg_count = 0;
 	zend_class_entry *ce = NULL, *old_ce = NULL;
 	zval grp_val, *grp, **pgrp, *retval, *old_ctor_args = NULL;
 	int colno;
@@ -915,6 +915,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 	if (how == PDO_FETCH_USE_DEFAULT) {
 		how = stmt->default_fetch_type;
 	}
+	flags = how & PDO_FETCH_FLAGS;
 	how = how & ~PDO_FETCH_FLAGS;
 
 	if (!do_fetch_common(stmt, ori, offset, do_bind TSRMLS_CC)) {
@@ -1489,7 +1490,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 	zval *arg2;
 	zend_class_entry *old_ce;
 	zval *old_ctor_args, *ctor_args = NULL;
-	int error = 0, old_arg_count;
+	int error = 0, flags, old_arg_count;
 	PHP_STMT_GET_OBJ;    	  
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|lzz", &how, &arg2, &ctor_args)) {
@@ -1581,7 +1582,10 @@ static PHP_METHOD(PDOStatement, fetchAll)
 		}
 	}
 
+	flags = how & PDO_FETCH_FLAGS;
+	
 	if ((how & ~PDO_FETCH_FLAGS) == PDO_FETCH_USE_DEFAULT) {
+		flags |= stmt->default_fetch_type & PDO_FETCH_FLAGS;
 		how |= stmt->default_fetch_type & ~PDO_FETCH_FLAGS;
 	}
 
@@ -1596,7 +1600,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 		} else {
 			return_all = 0;
 		}
-		if (!do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0, return_all TSRMLS_CC)) {
+		if (!do_fetch(stmt, TRUE, data, how | flags, PDO_FETCH_ORI_NEXT, 0, return_all TSRMLS_CC)) {
 			FREE_ZVAL(data);
 			error = 2;
 		}
@@ -1605,15 +1609,15 @@ static PHP_METHOD(PDOStatement, fetchAll)
 		if ((how & PDO_FETCH_GROUP)) {
 			do {
 				MAKE_STD_ZVAL(data);
-			} while (do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0, return_all TSRMLS_CC));
+			} while (do_fetch(stmt, TRUE, data, how | flags, PDO_FETCH_ORI_NEXT, 0, return_all TSRMLS_CC));
 		} else if (how == PDO_FETCH_KEY_PAIR || (how == PDO_FETCH_USE_DEFAULT && stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)) {
-			while (do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0, return_all TSRMLS_CC));
+			while (do_fetch(stmt, TRUE, data, how | flags, PDO_FETCH_ORI_NEXT, 0, return_all TSRMLS_CC));
 		} else {
 			array_init(return_value);
 			do {
 				add_next_index_zval(return_value, data);
 				MAKE_STD_ZVAL(data);
-			} while (do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0, 0 TSRMLS_CC));
+			} while (do_fetch(stmt, TRUE, data, how | flags, PDO_FETCH_ORI_NEXT, 0, 0 TSRMLS_CC));
 		}
 		FREE_ZVAL(data);
 	}
