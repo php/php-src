@@ -113,6 +113,7 @@ inline static void * __zend_realloc(void *p, size_t len)
 #define safe_perealloc(ptr, nmemb, size, offset, persistent)	((persistent)?_safe_realloc((ptr), (nmemb), (size), (offset)):safe_erealloc((ptr), (nmemb), (size), (offset)))
 #define perealloc_recoverable(ptr, size, persistent) ((persistent)?__zend_realloc((ptr), (size)):erealloc_recoverable((ptr), (size)))
 #define pestrdup(s, persistent) ((persistent)?strdup(s):estrdup(s))
+#define pestrndup(s, length, persistent) ((persistent)?zend_strndup((s),(length)):estrndup((s),(length)))
 
 #define pemalloc_rel(size, persistent) ((persistent)?__zend_malloc(size):emalloc_rel(size))
 #define pefree_rel(ptr, persistent)	((persistent)?free(ptr):efree_rel(ptr))
