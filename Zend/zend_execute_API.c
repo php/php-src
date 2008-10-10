@@ -824,7 +824,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			}
 			EX(function_state).function = 
 			  Z_OBJ_HT_PP(fci->object_pp)->get_method(fci->object_pp, fname, fname_len TSRMLS_CC);
-			if (EX(function_state).function && calling_scope != EX(function_state).function->common.scope) {
+			if (EX(function_state).function &&
+			    (EX(function_state).function->common.fn_flags & ZEND_ACC_PRIVATE) == 0 &&
+			    calling_scope != EX(function_state).function->common.scope) {
 				char *function_name_lc = zend_str_tolower_dup(fname, fname_len);
 				if (zend_hash_find(&calling_scope->function_table, function_name_lc, fname_len+1, (void **) &EX(function_state).function)==FAILURE) {
 					efree(function_name_lc);
