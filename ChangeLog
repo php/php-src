@@ -1,3 +1,78 @@
+2008-10-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      5.2.7RC1
+
+2008-10-09  Kalle Sommer Nielsen  <kalle.php@gmail.com>
+
+    * (PHP_5_3)
+      ext/mssql/php_mssql.c:
+      MFH:
+      * Fix gcov warnings about parameters not initialized (Thanks for noticing
+      Felipe!)
+      * Changed int to be long in mssql_num_fields
+
+    * ext/mssql/php_mssql.c:
+      - Fix gcov warnings about parameters not initialized (Thanks for noticing
+      Felipe!)
+      * Changed int to be long in mssql_num_fields
+
+2008-10-09  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_dbh.c:
+      - MFH: Fixed bug pecl#9641 (Unable to add driver specific methods to
+      PDOStatement) (patch by Christopher Jones)
+
+    * ext/pdo/pdo_dbh.c:
+      - Fixed bug pecl#9641 (Unable to add driver specific methods to
+      PDOStatement)
+
+    * ext/pdo_mysql/tests/pdo_mysql_prepare_native.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native.phpt:
+      - Fix typo
+
+2008-10-09  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/config.m4
+      ext/phar/phar.c
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/util.c
+      ext/phar/tests/phar_get_supported_signatures_002a.phpt
+      ext/phar/tests/phar_setsignaturealgo2.phpt
+      ext/phar/tests/test_signaturealgos.phpt
+      ext/phar/tests/tar/phar_setsignaturealgo2.phpt:
+      MFB: fix bug #45907: undefined reference to PHP_SHA512Init
+
+    * (PHP_5_3)
+      NEWS:
+      note fix to bug #45907: undefined reference to 'PHP_SHA512Init'
+
+    * (PHP_5_3)
+      ext/phar/config.m4
+      ext/phar/phar.c
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/util.c
+      ext/phar/tests/phar_get_supported_signatures_002a.phpt
+      ext/phar/tests/phar_setsignaturealgo2.phpt
+      ext/phar/tests/test_signaturealgos.phpt
+      ext/phar/tests/tar/phar_setsignaturealgo2.phpt:
+      fix bug #45907: undefined reference to PHP_SHA512Init
+
 2008-10-08  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/pgsql/pgsql.c:
