@@ -2,16 +2,16 @@
 Bug #41125 (PDO mysql + quote() + prepare() can result in seg fault)
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require dirname(__FILE__) . '/config.inc';
+require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
 MySQLPDOTest::skip();
 
 ?>
 --FILE--
 <?php
 
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
-
+require dirname(__FILE__) . '/config.inc';
+require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
 
 $search = "o'";
