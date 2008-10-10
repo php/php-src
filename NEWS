@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? Oct 2008, PHP 5.2.7RC2
 - Fixed bug #46246 (difference between call_user_func(array($this, $method))
   and $this->$method()). (Dmitry)
+- Fixed bug #46139 (PDOStatement->setFetchMode() forgets FETCH_PROPS_LATE).
+  (chsc at peytz dot dk, Felipe)
 - Fixed bug #44251, #41125 (PDO + quote() + prepare() can result in seg fault).
   (tsteiner at nerdclub dot net)
 
