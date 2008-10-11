@@ -1,3 +1,131 @@
+2008-10-10  Kalle Sommer Nielsen  <kalle.php@gmail.com>
+
+    * (PHP_5_3)
+      ext/pdo/pdo.c:
+      MFH:
+      Add missing zend_parse_paramters_none() in pdo_drivers()
+
+    * ext/pdo/pdo.c:
+      Add missing zend_parse_paramters_none() in pdo_drivers()
+
+2008-10-10  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/pdo_mysql/tests/bug41125.phpt:
+      - Fixed test
+
+2008-10-10  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/pdo_oci/config.m4
+      ext/pdo_oci/config.m4:
+      improve OCI detection
+
+2008-10-10  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/pdo_sqlite/tests/bug46139.phpt
+      ext/pdo_sqlite/tests/bug46139.phpt:
+      - Added skipif
+
+    * ext/pdo_sqlite/tests/bug46139.phpt:
+      - Added skipif (Opss :))
+
+    * (PHP_5_2)
+      ext/pdo_sqlite/tests/bug46139.phpt
+      ext/pdo_sqlite/tests/bug46139.phpt:
+      - New test
+
+    * ext/pdo_sqlite/tests/bug46139.phpt
+      ext/pdo_sqlite/tests/bug46139.phpt
+      ext/pdo_sqlite/tests/bug46139.phpt:
+        1.1.4;
+      - New test
+
+    * ext/pdo/pdo_stmt.c:
+      - Static'fication
+
+    * ext/pdo_mysql/tests/pdo_mysql_stmt_fetch_serialize.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_fetch_serialize.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_fetch_serialize_simple.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_fetch_serialize_simple.phpt:
+      - Fixed tests
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN #46139
+
+    * (PHP_5_2)
+      ext/pdo/pdo_stmt.c
+      ext/pdo/pdo_stmt.c:
+      MFH:
+      - Fixed bug #46139 (PDOStatement->setFetchMode() forgets FETCH_PROPS_LATE)
+        Initial patch by: chsc at peytz dot dk
+
+    * ext/pdo/pdo_stmt.c:
+      - Fixed bug #46139 (PDOStatement->setFetchMode() forgets FETCH_PROPS_LATE)
+        Initial patch by: chsc at peytz dot dk
+      
+      MFB:
+      - Fixed bug #41971 (PDOStatement::fetch and PDOStatement::setFetchMode
+      causes unexpected behavior)
+      - Fixed bug #42917 (PDO::FETCH_KEY_PAIR doesn't work with setFetchMode)
+
+2008-10-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/bug46246.phpt
+      ZendEngine2/tests/bug46246.phpt:
+      Fixed bug #46246 (difference between call_user_func(array($this, $method))
+      and $this->$method())
+
+    * ZendEngine2/tests/bug46246.phpt
+      ZendEngine2/tests/bug46246.phpt
+      ZendEngine2/tests/bug46246.phpt:
+        1.1.4;
+      Fixed bug #46246 (difference between call_user_func(array($this, $method))
+      and $this->$method())
+
+2008-10-10  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_alloc.h:
+      backport convenience macro
+
+2008-10-10  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN: #44251, #41125
+
+    * (PHP_5_2)
+      ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re
+      ext/pdo/pdo_sql_parser.re
+      ext/pdo_mysql/tests/bug41125.phpt
+      ext/pdo_mysql/tests/bug41125.phpt:
+      MFH:
+      - Fixed bug #44251 (Question mark and an escaped singel quote lead to an
+      exception)
+      - Fixed bug #41125 (PDO mysql + quote() + prepare() can result in seg
+      fault)
+        Patch by: tsteiner at nerdclub dot net
+
+    * ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re
+      ext/pdo_mysql/tests/bug41125.phpt
+      ext/pdo_mysql/tests/bug41125.phpt
+      ext/pdo_mysql/tests/bug41125.phpt:
+      - Fixed bug #44251 (Question mark and an escaped singel quote lead to an
+      exception)
+      - Fixed bug #41125 (PDO mysql + quote() + prepare() can result in seg
+      fault)
+        Patch by: tsteiner at nerdclub dot net
+
 2008-10-09  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
