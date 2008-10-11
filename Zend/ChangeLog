@@ -1,3 +1,22 @@
+2008-10-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c
+      zend_API.c
+      zend_execute_API.c
+      tests/bug46246.phpt
+      tests/bug46246.phpt
+      tests/bug46246.phpt
+      tests/bug46246.phpt
+      tests/bug46246.phpt:
+      Fixed bug #46246 (difference between call_user_func(array($this, $method))
+      and $this->$method())
+
+2008-10-10  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      zend_alloc.h:
+      backport convenience macro
+
 2008-10-06  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
