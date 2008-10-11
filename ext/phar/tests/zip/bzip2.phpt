@@ -79,5 +79,5 @@ $a = new corrupt_zipmaker;
 $a->addFile('hi', null, 'hii', null, null, 'compress', 'compress', 11);
 $a->writeZip(dirname(__FILE__) . '/compress_unsupunknown.zip');
 ?>
-string(7) "hithere"
+string(175) "hitheresuperlongzipistoostupidtodowhatIsaysoIhavetousethisridiculouslylongaliasbecauseitisstupiddidImentionthatalreadythemadnessdoesnotstopIhateinfozipIhateinfozipIhateinfozip"
 ===DONE===
