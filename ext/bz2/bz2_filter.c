@@ -27,6 +27,12 @@
 
 /* {{{ data structure */
 
+enum strm_status {
+    PHP_BZ2_UNITIALIZED,
+    PHP_BZ2_RUNNING,
+    PHP_BZ2_FINISHED
+};
+
 typedef struct _php_bz2_filter_data {
 	int persistent;
 	bz_stream strm;
@@ -34,6 +40,11 @@ typedef struct _php_bz2_filter_data {
 	size_t inbuf_len;
 	char *outbuf;
 	size_t outbuf_len;
+	
+	/* Decompress options */
+	enum strm_status status;
+	unsigned int small_footprint : 1;
+	unsigned int expect_concatenated : 1;
 } php_bz2_filter_data;
 
 /* }}} */
@@ -89,6 +100,21 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 
 		bucket = php_stream_bucket_make_writeable(bucket TSRMLS_CC);
 		while (bin < bucket->buflen) {
+			if (data->status == PHP_BZ2_UNITIALIZED) {
+				status = BZ2_bzDecompressInit(streamp, 0, data->small_footprint);
+
+				if (BZ_OK != status) {
+					return PSFS_ERR_FATAL;
+				}
+
+				data->status = PHP_BZ2_RUNNING;
+			}
+
+			if (data->status != PHP_BZ2_RUNNING) {
+				consumed += bucket->buflen;
+				break;
+			}
+
 			desired = bucket->buflen - bin;
 			if (desired > data->inbuf_len) {
 				desired = data->inbuf_len;
@@ -97,7 +123,15 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 			data->strm.avail_in = desired;
 
 			status = BZ2_bzDecompress(&(data->strm));
-			if (status != BZ_OK && status != BZ_STREAM_END) {
+
+			if (status == BZ_STREAM_END) {
+				BZ2_bzDecompressEnd(&(data->strm));
+				if (data->expect_concatenated) {
+					data->status = PHP_BZ2_UNITIALIZED;
+				} else {
+					data->status = PHP_BZ2_FINISHED;
+				}
+			} else if (status != BZ_OK) {
 				/* Something bad happened */
 				php_stream_bucket_delref(bucket TSRMLS_CC);
 				return PSFS_ERR_FATAL;
@@ -122,10 +156,11 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 				return PSFS_PASS_ON;
 			}
 		}
+
 		php_stream_bucket_delref(bucket TSRMLS_CC);
 	}
 
-	if (flags & PSFS_FLAG_FLUSH_CLOSE) {
+	if ((data->status == PHP_BZ2_RUNNING) && (flags & PSFS_FLAG_FLUSH_CLOSE)) {
 		/* Spit it out! */
 		status = BZ_OK;
 		while (status == BZ_OK) {
@@ -155,7 +190,9 @@ static void php_bz2_decompress_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 {
 	if (thisfilter && thisfilter->abstract) {
 		php_bz2_filter_data *data = thisfilter->abstract;
-		BZ2_bzDecompressEnd(&(data->strm));
+		if (data->status == PHP_BZ2_RUNNING) {
+			BZ2_bzDecompressEnd(&(data->strm));
+		}
 		pefree(data->inbuf, data->persistent);
 		pefree(data->outbuf, data->persistent);
 		pefree(data, data->persistent);
@@ -291,7 +328,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 {
 	php_stream_filter_ops *fops = NULL;
 	php_bz2_filter_data *data;
-	int status;
+	int status = BZ_OK;
 
 	/* Create this filter */
 	data = pecalloc(1, sizeof(php_bz2_filter_data), persistent);
@@ -323,12 +360,22 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 	}
 
 	if (strcasecmp(filtername, "bzip2.decompress") == 0) {
-		int smallFootprint = 0;
+		data->small_footprint = 0;
+		data->expect_concatenated = 0;
 
 		if (filterparams) {
 			zval **tmpzval = NULL;
 
 			if (Z_TYPE_P(filterparams) == IS_ARRAY || Z_TYPE_P(filterparams) == IS_OBJECT) {
+
+				if (SUCCESS == zend_hash_find(HASH_OF(filterparams), "concatenated", sizeof("concatenated"), (void **) &tmpzval) ) {
+						SEPARATE_ZVAL(tmpzval);
+						convert_to_boolean_ex(tmpzval);
+						data->expect_concatenated = Z_LVAL_PP(tmpzval);
+						zval_ptr_dtor(tmpzval);
+						tmpzval = NULL;
+				}
+
 				zend_hash_find(HASH_OF(filterparams), "small", sizeof("small"), (void **) &tmpzval);
 			} else {
 				tmpzval = &filterparams;
@@ -337,12 +384,12 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 			if (tmpzval) {
 				SEPARATE_ZVAL(tmpzval);
 				convert_to_boolean_ex(tmpzval);
-				smallFootprint = Z_LVAL_PP(tmpzval);
+				data->small_footprint = Z_LVAL_PP(tmpzval);
 				zval_ptr_dtor(tmpzval);
 			}
 		}
 
-		status = BZ2_bzDecompressInit(&(data->strm), 0, smallFootprint);
+		data->status = PHP_BZ2_UNITIALIZED;
 		fops = &php_bz2_decompress_ops;
 	} else if (strcasecmp(filtername, "bzip2.compress") == 0) {
 		int blockSize100k = PHP_BZ2_FILTER_DEFAULT_BLOCKSIZE;
