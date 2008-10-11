@@ -31,6 +31,7 @@ typedef struct _php_zlib_filter_data {
 	size_t inbuf_len;
 	char *outbuf;
 	size_t outbuf_len;
+	zend_bool finished;
 } php_zlib_filter_data;
 
 /* }}} */
@@ -81,6 +82,12 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 
 		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
 		while (bin < bucket->buflen) {
+
+			if (data->finished) {
+				consumed += bucket->buflen;
+				break;
+			}
+
 			desired = bucket->buflen - bin;
 			if (desired > data->inbuf_len) {
 				desired = data->inbuf_len;
@@ -89,7 +96,10 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 			data->strm.avail_in = desired;
 
 			status = inflate(&(data->strm), flags & PSFS_FLAG_FLUSH_CLOSE ? Z_FINISH : Z_SYNC_FLUSH);
-			if (status != Z_OK && status != Z_STREAM_END) {
+			if (status == Z_STREAM_END) {
+				inflateEnd(&(data->strm));
+				data->finished = '\1';
+			} else if (status != Z_OK) {
 				/* Something bad happened */
 				php_stream_bucket_delref(bucket TSRMLS_CC);
 				return PSFS_ERR_FATAL;
@@ -118,7 +128,7 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 		php_stream_bucket_delref(bucket TSRMLS_CC);
 	}
 
-	if (flags & PSFS_FLAG_FLUSH_CLOSE) {
+	if (!data->finished && flags & PSFS_FLAG_FLUSH_CLOSE) {
 		/* Spit it out! */
 		status = Z_OK;
 		while (status == Z_OK) {
@@ -146,7 +156,9 @@ static void php_zlib_inflate_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 {
 	if (thisfilter && thisfilter->abstract) {
 		php_zlib_filter_data *data = thisfilter->abstract;
-		inflateEnd(&(data->strm));
+		if (!data->finished) {
+			inflateEnd(&(data->strm));
+		}
 		pefree(data->inbuf, data->persistent);
 		pefree(data->outbuf, data->persistent);
 		pefree(data, data->persistent);
@@ -330,6 +342,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 		}
 
 		/* RFC 1951 Inflate */
+		data->finished = '\0';
 		status = inflateInit2(&(data->strm), windowBits);
 		fops = &php_zlib_inflate_ops;
 	} else if (strcasecmp(filtername, "zlib.deflate") == 0) {

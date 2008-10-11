@@ -34,6 +34,7 @@ typedef struct _php_bz2_filter_data {
 	size_t inbuf_len;
 	char *outbuf;
 	size_t outbuf_len;
+	zend_bool finished;
 } php_bz2_filter_data;
 
 /* }}} */
@@ -82,6 +83,11 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 
 		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
 		while (bin < bucket->buflen) {
+			if (data->finished) {
+				consumed += bucket->buflen;
+				break;
+			}
+
 			desired = bucket->buflen - bin;
 			if (desired > data->inbuf_len) {
 				desired = data->inbuf_len;
@@ -90,7 +96,11 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 			data->strm.avail_in = desired;
 
 			status = BZ2_bzDecompress(&(data->strm));
-			if (status != BZ_OK && status != BZ_STREAM_END) {
+
+			if (status == BZ_STREAM_END) {
+				BZ2_bzDecompressEnd(&(data->strm));
+				data->finished = '\1';
+			} else if (status != BZ_OK) {
 				/* Something bad happened */
 				php_stream_bucket_delref(bucket TSRMLS_CC);
 				return PSFS_ERR_FATAL;
@@ -115,10 +125,11 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 				return PSFS_PASS_ON;
 			}
 		}
+
 		php_stream_bucket_delref(bucket TSRMLS_CC);
 	}
 
-	if (flags & PSFS_FLAG_FLUSH_CLOSE) {
+	if (!data->finished && (flags & PSFS_FLAG_FLUSH_CLOSE)) {
 		/* Spit it out! */
 		status = BZ_OK;
 		while (status == BZ_OK) {
@@ -148,7 +159,9 @@ static void php_bz2_decompress_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 {
 	if (thisfilter && thisfilter->abstract) {
 		php_bz2_filter_data *data = thisfilter->abstract;
-		BZ2_bzDecompressEnd(&(data->strm));
+		if (!data->finished) {
+			BZ2_bzDecompressEnd(&(data->strm));
+		}
 		pefree(data->inbuf, data->persistent);
 		pefree(data->outbuf, data->persistent);
 		pefree(data, data->persistent);
@@ -327,6 +340,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 		}
 
 		status = BZ2_bzDecompressInit(&(data->strm), 0, smallFootprint);
+		data->finished = '\0';
 		fops = &php_bz2_decompress_ops;
 	} else if (strcasecmp(filtername, "bzip2.compress") == 0) {
 		int blockSize100k = PHP_BZ2_FILTER_DEFAULT_BLOCKSIZE;

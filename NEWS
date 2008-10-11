@@ -5,6 +5,8 @@ PHP                                                                        NEWS
   and $this->$method()). (Dmitry)
 - Fixed bug #46139 (PDOStatement->setFetchMode() forgets FETCH_PROPS_LATE).
   (chsc at peytz dot dk, Felipe)
+- Fixed bug #46026 (bzip2.decompress/zlib.inflate filter tries to decompress
+  after end of stream). (Keisial at gmail dot com, Greg)
 - Fixed bug #44251, #41125 (PDO + quote() + prepare() can result in seg fault).
   (tsteiner at nerdclub dot net)
 
