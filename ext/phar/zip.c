@@ -1170,6 +1170,7 @@ nostub:
 	pass.filefp = php_stream_fopen_tmpfile();
 
 	if (!pass.filefp) {
+fperror:
 		if (closeoldfile) {
 			php_stream_close(oldfile);
 		}
@@ -1182,13 +1183,7 @@ nostub:
 	pass.centralfp = php_stream_fopen_tmpfile();
 
 	if (!pass.centralfp) {
-		if (closeoldfile) {
-			php_stream_close(oldfile);
-		}
-		if (error) {
-			spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to open temporary file", phar->fname);
-		}
-		return EOF;
+		goto fperror;
 	}
 
 	pass.free_fp = pass.free_ufp = 1;
@@ -1199,15 +1194,17 @@ nostub:
 	zend_hash_apply_with_argument(&phar->manifest, phar_zip_changed_apply, (void *) &pass TSRMLS_CC);
 
 	if (temperr) {
-		php_stream_close(pass.filefp);
-		php_stream_close(pass.centralfp);
-		if (closeoldfile) {
-			php_stream_close(oldfile);
-		}
 		if (error) {
 			spprintf(error, 4096, "phar zip flush of \"%s\" failed: %s", phar->fname, temperr);
 		}
 		efree(temperr);
+temperror:
+		php_stream_close(pass.centralfp);
+nocentralerror:
+		php_stream_close(pass.filefp);
+		if (closeoldfile) {
+			php_stream_close(oldfile);
+		}
 		return EOF;
 	}
 
@@ -1217,15 +1214,10 @@ nostub:
 	php_stream_seek(pass.centralfp, 0, SEEK_SET);
 
 	if (eocd.cdir_size != php_stream_copy_to_stream(pass.centralfp, pass.filefp, PHP_STREAM_COPY_ALL)) {
-		php_stream_close(pass.filefp);
-		php_stream_close(pass.centralfp);
 		if (error) {
 			spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write central-directory", phar->fname);
 		}
-		if (closeoldfile) {
-			php_stream_close(oldfile);
-		}
-		return EOF;
+		goto temperror;
 	}
 
 	php_stream_close(pass.centralfp);
@@ -1238,41 +1230,27 @@ nostub:
 		eocd.comment_len = PHAR_SET_16(main_metadata_str.len);
 
 		if (sizeof(eocd) != php_stream_write(pass.filefp, (char *)&eocd, sizeof(eocd))) {
-			php_stream_close(pass.filefp);
 			if (error) {
 				spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write end of central-directory", phar->fname);
 			}
-			if (closeoldfile) {
-				php_stream_close(oldfile);
-			}
-			smart_str_free(&main_metadata_str);
-			return EOF;
+			goto nocentralerror;
 		}
 
 		if (main_metadata_str.len != php_stream_write(pass.filefp, main_metadata_str.c, main_metadata_str.len)) {
-			php_stream_close(pass.filefp);
 			if (error) {
 				spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write metadata to zip comment", phar->fname);
 			}
-			if (closeoldfile) {
-				php_stream_close(oldfile);
-			}
-			smart_str_free(&main_metadata_str);
-			return EOF;
+			goto nocentralerror;
 		}
 
 		smart_str_free(&main_metadata_str);
 
 	} else {
 		if (sizeof(eocd) != php_stream_write(pass.filefp, (char *)&eocd, sizeof(eocd))) {
-			php_stream_close(pass.filefp);
 			if (error) {
 				spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write end of central-directory", phar->fname);
 			}
-			if (closeoldfile) {
-				php_stream_close(oldfile);
-			}
-			return EOF;
+			goto nocentralerror;
 		}
 	}
 
