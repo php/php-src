@@ -65,12 +65,13 @@ static char *phar_get_link_location(phar_entry_info *entry TSRMLS_DC) /* {{{ */
 phar_entry_info *phar_get_link_source(phar_entry_info *entry TSRMLS_DC) /* {{{ */
 {
 	phar_entry_info *link_entry;
-	char *link = phar_get_link_location(entry TSRMLS_CC);
+	char *link;
 
 	if (!entry->link) {
 		return entry;
 	}
 
+	link = phar_get_link_location(entry TSRMLS_CC);
 	if (SUCCESS == zend_hash_find(&(entry->phar->manifest), entry->link, strlen(entry->link), (void **)&link_entry) ||
 		SUCCESS == zend_hash_find(&(entry->phar->manifest), link, strlen(link), (void **)&link_entry)) {
 		if (link != entry->link) {
@@ -680,13 +681,13 @@ really_get_entry:
 			phar_seek_efp(entry, 0, SEEK_END, 0, 0 TSRMLS_CC);
 		}
 	} else {
-		if (entry->link) {
-			efree(entry->link);
-			entry->link = NULL;
-			entry->tar_type = (entry->is_tar ? TAR_FILE : '\0');
-		}
-
 		if (for_write) {
+			if (entry->link) {
+				efree(entry->link);
+				entry->link = NULL;
+				entry->tar_type = (entry->is_tar ? TAR_FILE : '\0');
+			}
+
 			if (for_trunc) {
 				if (FAILURE == phar_create_writeable_entry(phar, entry, error TSRMLS_CC)) {
 					return FAILURE;
@@ -711,7 +712,11 @@ really_get_entry:
 	(*ret)->is_zip = entry->is_zip;
 	(*ret)->is_tar = entry->is_tar;
 	(*ret)->fp = phar_get_efp(entry, 1 TSRMLS_CC);
-	(*ret)->zero = phar_get_fp_offset(entry TSRMLS_CC);
+	if (entry->link) {
+		(*ret)->zero = phar_get_fp_offset(phar_get_link_source(entry TSRMLS_CC) TSRMLS_CC);
+	} else {
+		(*ret)->zero = phar_get_fp_offset(entry TSRMLS_CC);
+	}
 
 	if (!phar->is_persistent) {
 		++(entry->fp_refcount);

@@ -359,8 +359,15 @@ static size_t phar_stream_read(php_stream *stream, char *buf, size_t count TSRML
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 	size_t got;
+	phar_entry_info *entry;
 
-	if (data->internal_file->is_deleted) {
+	if (data->internal_file->link) {
+		entry = phar_get_link_source(data->internal_file TSRMLS_CC);
+	} else {
+		entry = data->internal_file;
+	}
+
+	if (entry->is_deleted) {
 		stream->eof = 1;
 		return 0;
 	}
@@ -368,9 +375,9 @@ static size_t phar_stream_read(php_stream *stream, char *buf, size_t count TSRML
 	/* use our proxy position */
 	php_stream_seek(data->fp, data->position + data->zero, SEEK_SET);
 
-	got = php_stream_read(data->fp, buf, MIN(count, data->internal_file->uncompressed_filesize - data->position));
+	got = php_stream_read(data->fp, buf, MIN(count, entry->uncompressed_filesize - data->position));
 	data->position = php_stream_tell(data->fp) - data->zero;
-	stream->eof = (data->position == (off_t) data->internal_file->uncompressed_filesize);
+	stream->eof = (data->position == (off_t) entry->uncompressed_filesize);
 
 	return got;
 }
