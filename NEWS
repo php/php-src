@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Oct 2008, PHP 5.2.7RC2
+- Fixed bug #46274, #46249 (pdo_pgsql always fill in NULL for empty BLOB and 
+  segfaults when returned by SELECT). (Felipe)
 - Fixed bug #46246 (difference between call_user_func(array($this, $method))
   and $this->$method()). (Dmitry)
 - Fixed bug #46139 (PDOStatement->setFetchMode() forgets FETCH_PROPS_LATE).
