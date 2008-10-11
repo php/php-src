@@ -389,12 +389,19 @@ static size_t phar_stream_read(php_stream *stream, char *buf, size_t count TSRML
 static int phar_stream_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
-
+	phar_entry_info *entry;
 	int res;
 	off_t temp;
+
+	if (data->internal_file->link) {
+		entry = phar_get_link_source(data->internal_file TSRMLS_CC);
+	} else {
+		entry = data->internal_file;
+	}
+
 	switch (whence) {
 		case SEEK_END :
-			temp = data->zero + data->internal_file->uncompressed_filesize + offset;
+			temp = data->zero + entry->uncompressed_filesize + offset;
 			break;
 		case SEEK_CUR :
 			temp = data->zero + data->position + offset;
@@ -403,7 +410,7 @@ static int phar_stream_seek(php_stream *stream, off_t offset, int whence, off_t 
 			temp = data->zero + offset;
 			break;
 	}
-	if (temp > data->zero + (off_t) data->internal_file->uncompressed_filesize) {
+	if (temp > data->zero + (off_t) entry->uncompressed_filesize) {
 		*newoffset = -1;
 		return -1;
 	}
