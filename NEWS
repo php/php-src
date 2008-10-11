@@ -9,7 +9,9 @@ PHP                                                                        NEWS
 - Changed openssl info to show the shared library version number. (Scott)
 
 - Added ability to send user defined HTTP headers with SOAP request.
-  (Brain J.France, Dmitry)
+  (Brian J.France, Dmitry)
+- Added concatenation option to bz2.decompress stream filter.
+  (Keisial at gmail dot com, Greg)
 
 - Fixed bug causing the algorithm parameter of mhash() to be modified. (Scott)
 
