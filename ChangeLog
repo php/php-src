@@ -1,3 +1,103 @@
+2008-10-11  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/stream.c
+      ext/phar/tests/tar/links6.phpt:
+      MFB: fix links for fseek as well
+
+    * (PHP_5_3)
+      ext/phar/stream.c
+      ext/phar/tests/tar/links6.phpt:
+      fix links for fseek as well
+
+    * ext/phar/stream.c
+      ext/phar/util.c
+      ext/phar/tests/tar/links6.phpt
+      ext/phar/tests/tar/files/links.phar.tar:
+      MFB: fix reading links from streams (works with PharFileInfo->getContent())
+
+    * ext/phar/tests/tar/links6.phpt
+      ext/phar/tests/tar/links6.phpt:
+      
+      file links6.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/phar/stream.c
+      ext/phar/util.c:
+      fix reading links from streams (works with PharFileInfo->getContent())
+
+    * ext/phar/zip.c:
+      MFB: cosmetics/maintainability: reduce code redundancy on error conditions
+
+    * (PHP_5_3)
+      ext/phar/zip.c:
+      cosmetics/maintainability: reduce code redundancy on error conditions
+
+    * ext/phar/zip.c
+      ext/phar/tests/zip/bzip2.phpt
+      ext/phar/tests/zip/zlib.phpt
+      ext/phar/tests/zip/files/bz2_alias.phar.zip
+      ext/phar/tests/zip/files/zlib_alias.phar.zip:
+      MFB: work around crap stream filter implementation, update tests for
+      compressed aliases in zip-based phar so they actually test the compression
+
+    * ext/phar/tests/zip/zlib.phpt
+      ext/phar/tests/zip/zlib.phpt
+      ext/phar/tests/zip/files/bz2_alias.phar.zip
+      ext/phar/tests/zip/files/zlib_alias.phar.zip
+      ext/phar/tests/zip/files/zlib_alias.phar.zip:
+      
+      file zlib.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/phar/zip.c
+      ext/phar/tests/zip/bzip2.phpt:
+      work around crap stream filter implementation, update tests for compressed
+      aliases in zip-based phar so they actually test the compression
+
+2008-10-11  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN: #46274, #46249
+
+2008-10-11  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/bz2/bz2_filter.c
+      ext/zlib/zlib_filter.c:
+      MFB fix Bug #46026: bz2.decompress/zlib.inflate filter tries to decompress
+      after end of stream
+      MFB add concatenation option to bz2.decompress stream filter
+
+    * (PHP_5_3)
+      NEWS
+      ext/bz2/bz2_filter.c
+      ext/zlib/zlib_filter.c:
+      fix Bug #46026: bz2.decompress/zlib.inflate filter tries to decompress
+      after end of stream
+      [DOC] add concatenation option to bz2.decompress stream filter
+
+    * (PHP_5_2)
+      NEWS
+      ext/bz2/bz2_filter.c
+      ext/zlib/zlib_filter.c:
+      fix Bug #46026: bz2.decompress/zlib.inflate filter tries to decompress
+      after end of stream
+
+2008-10-11  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/pdo_pgsql/pgsql_statement.c:
+      MFH:
+      - Fixed bug #46249 (pdo_pgsql always fill in NULL for empty BLOB)
+      - Fixed bug #46274 (pdo_pgsql - Segfault when using
+      PDO::ATTR_STRINGIFY_FETCHES and blob)
+
+    * (PHP_5_3)
+      ext/pdo_pgsql/pgsql_statement.c:
+      - Fixed bug #46249 (pdo_pgsql always fill in NULL for empty BLOB)
+      - Fixed bug #46274 (pdo_pgsql - Segfault when using
+      PDO::ATTR_STRINGIFY_FETCHES and blob)
+
 2008-10-10  Kalle Sommer Nielsen  <kalle.php@gmail.com>
 
     * (PHP_5_3)
