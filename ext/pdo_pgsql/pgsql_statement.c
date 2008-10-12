@@ -246,6 +246,9 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 				break;
 
 			case PDO_PARAM_EVT_ALLOC:
+			case PDO_PARAM_EVT_EXEC_POST:
+			case PDO_PARAM_EVT_FETCH_PRE:
+			case PDO_PARAM_EVT_FETCH_POST:
 				/* work is handled by EVT_NORMALIZE */
 				return 1;
 
@@ -604,6 +607,7 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 			case PDO_PARAM_STR:
 			case PDO_PARAM_STMT:
 			case PDO_PARAM_INPUT_OUTPUT:
+			default:
 				break;
 		}
 	}
