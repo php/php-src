@@ -4,6 +4,8 @@ Phar: test nested linked files
 <?php
 if (!extension_loaded("phar")) die("skip");
 ?>
+--INI--
+phar.require_hash=0
 --FILE--
 <?php
 echo file_get_contents('phar://' . dirname(__FILE__) . '/files/links.phar.tar/link2');
