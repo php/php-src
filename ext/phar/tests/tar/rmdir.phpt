@@ -23,6 +23,7 @@ $files['a/x'] = 'a';
 foreach ($files as $n => $file) {
 	$tar->addFile($n, $file);
 }
+$tar->mkdir('a');
 
 $tar->close();
 
@@ -39,7 +40,7 @@ var_dump(rmdir($alias . '/a'));
 --EXPECTF--
 a
 
-Warning: rmdir(): phar error: Directory not empty in %srmdir.php on line 24
+Warning: rmdir(): phar error: Directory not empty in %srmdir.php on line %d
 bool(false)
 a
 bool(true)

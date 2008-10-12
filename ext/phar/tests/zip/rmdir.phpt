@@ -15,6 +15,7 @@ $phar = new Phar($fname);
 $phar->setStub("<?php
 Phar::mapPhar('hio');
 __HALT_COMPILER(); ?>");
+$phar->addEmptyDir('a');
 $phar['a/x'] = 'a';
 $phar->stopBuffering();
 
@@ -31,7 +32,7 @@ var_dump(rmdir($alias . '/a'));
 --EXPECTF--
 a
 
-Warning: rmdir(): phar error: Directory not empty in %srmdir.php on line 16
+Warning: rmdir(): phar error: Directory not empty in %srmdir.php on line %d
 bool(false)
 a
 bool(true)
