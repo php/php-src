@@ -587,7 +587,7 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 		case PDO_PARAM_LOB:
 			if (value == NULL) {
 				ZVAL_NULL(dest);
-			} else if (strcmp(value, "") == 0) {
+			} else if (value[0] == '\0') {
 				ZVAL_EMPTY_STRING(dest);
 			} else if (value_len == 0) {
 				if (stmt->dbh->stringify || new_type == PDO_PARAM_STR) {
