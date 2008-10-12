@@ -2219,8 +2219,10 @@ static void phar_update_cached_entry(void *data, void *argument) /* {{{ */
 
 	if (entry->metadata) {
 		if (entry->metadata_len) {
+			char *buf = estrndup((char *) entry->metadata, entry->metadata_len);
 			/* assume success, we would have failed before */
 			phar_parse_metadata((char **) &entry->metadata, &entry->metadata, entry->metadata_len TSRMLS_CC);
+			efree(buf);
 		} else {
 			zval *t;
 
@@ -2245,6 +2247,7 @@ static void phar_copy_cached_phar(phar_archive_data **pphar TSRMLS_DC) /* {{{ */
 	phar_archive_data *phar;
 	HashTable newmanifest;
 	char *fname;
+	phar_archive_object **objphar;
 
 	phar = (phar_archive_data *) emalloc(sizeof(phar_archive_data));
 	*phar = **pphar;
@@ -2264,7 +2267,9 @@ static void phar_copy_cached_phar(phar_archive_data **pphar TSRMLS_DC) /* {{{ */
 	if (phar->metadata) {
 		/* assume success, we would have failed before */
 		if (phar->metadata_len) {
-			phar_parse_metadata((char **) &phar->metadata, &phar->metadata, phar->metadata_len TSRMLS_CC);
+			char *buf = estrndup((char *) phar->metadata, phar->metadata_len);
+			phar_parse_metadata(&buf, &phar->metadata, phar->metadata_len TSRMLS_CC);
+			efree(buf);
 		} else {
 			zval *t;
 
@@ -2291,6 +2296,15 @@ static void phar_copy_cached_phar(phar_archive_data **pphar TSRMLS_DC) /* {{{ */
 		zend_get_hash_value, NULL, 0);
 	zend_hash_copy(&phar->virtual_dirs, &(*pphar)->virtual_dirs, NULL, NULL, sizeof(void *));
 	*pphar = phar;
+
+	/* now, scan the list of persistent Phar objects referencing this phar and update the pointers */
+	for (zend_hash_internal_pointer_reset(&PHAR_GLOBALS->phar_persist_map);
+	SUCCESS == zend_hash_get_current_data(&PHAR_GLOBALS->phar_persist_map, (void **) &objphar);
+	zend_hash_move_forward(&PHAR_GLOBALS->phar_persist_map)) {
+		if (objphar[0]->arc.archive->fname_len == phar->fname_len && !memcmp(objphar[0]->arc.archive->fname, phar->fname, phar->fname_len)) {
+			objphar[0]->arc.archive = phar;
+		}
+	}
 }
 /* }}} */
 

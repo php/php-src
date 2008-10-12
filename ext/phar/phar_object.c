@@ -1254,6 +1254,9 @@ PHP_METHOD(Phar, __construct)
 
 	if (!phar_data->is_persistent) {
 		phar_obj->arc.archive->is_data = is_data;
+	} else if (!EG(exception)) {
+		/* register this guy so we can modify if necessary */
+		zend_hash_add(&PHAR_GLOBALS->phar_persist_map, (const char *) phar_obj->arc.archive, sizeof(phar_obj->arc.archive), (void *) &phar_obj, sizeof(phar_archive_object **), NULL);
 	}
 
 	phar_obj->spl.info_class = phar_ce_entry;
@@ -1377,6 +1380,19 @@ PHP_METHOD(Phar, unlinkArchive)
 			"Cannot call method on an uninitialized Phar object"); \
 		return; \
 	}
+
+/* {{{ proto void Phar::__destruct()
+ * if persistent, remove from the cache
+ */
+PHP_METHOD(Phar, __destruct)
+{
+	phar_archive_object *phar_obj = (phar_archive_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (phar_obj->arc.archive && phar_obj->arc.archive->is_persistent) {
+		zend_hash_del(&PHAR_GLOBALS->phar_persist_map, (const char *) &(phar_obj->arc.archive), sizeof(&(phar_obj->arc.archive)));
+	}
+}
+/* }}} */
 
 struct _phar_t {
 	phar_archive_object *p;
@@ -3923,6 +3939,15 @@ PHP_METHOD(Phar, getMetadata)
 	PHAR_ARCHIVE_OBJECT();
 
 	if (phar_obj->arc.archive->metadata) {
+		if (phar_obj->arc.archive->is_persistent) {
+			zval *ret;
+			char *buf = estrndup((char *) phar_obj->arc.archive->metadata, phar_obj->arc.archive->metadata_len);
+			/* assume success, we would have failed before */
+			phar_parse_metadata(&buf, &ret, phar_obj->arc.archive->metadata_len TSRMLS_CC);
+			efree(buf);
+			RETURN_ZVAL(ret, 0, 1);
+			return;
+		}
 		RETURN_ZVAL(phar_obj->arc.archive->metadata, 1, 0);
 	}
 }
@@ -5098,6 +5123,7 @@ zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, __construct,           arginfo_phar___construct,  ZEND_ACC_PRIVATE)
 #else
 	PHP_ME(Phar, __construct,           arginfo_phar___construct,  ZEND_ACC_PUBLIC)
+	PHP_ME(Phar, __destruct,            NULL,                      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, addEmptyDir,           arginfo_phar_emptydir,     ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, addFile,               arginfo_phar_addfile,      ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, addFromString,         arginfo_phar_fromstring,   ZEND_ACC_PUBLIC)

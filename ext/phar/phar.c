@@ -637,9 +637,7 @@ int phar_parse_metadata(char **buffer, zval **metadata, int zip_metadata_len TSR
 			zval_ptr_dtor(metadata);
 			*metadata = (zval *) pemalloc(buf_len, 1);
 			memcpy(*metadata, *buffer, buf_len);
-			if (!zip_metadata_len) {
-				*buffer += buf_len;
-			}
+			*buffer += buf_len;
 			return SUCCESS;
 		}
 	} else {
@@ -1036,9 +1034,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 
 	/* check whether we have meta data, zero check works regardless of byte order */
 	if (mydata->is_persistent) {
-		char *mysave = buffer;
 		PHAR_GET_32(buffer, mydata->metadata_len);
-		buffer = mysave;
 		if (phar_parse_metadata(&buffer, &mydata->metadata, mydata->metadata_len TSRMLS_CC) == FAILURE) {
 			MAPPHAR_FAIL("unable to read phar metadata in .phar file \"%s\"");
 		}
@@ -2562,6 +2558,8 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		return EOF;
 	}
 
+	zend_hash_clean(&phar->virtual_dirs);
+
 	if (phar->is_zip) {
 		return phar_zip_flush(phar, user_stub, len, convert, error TSRMLS_CC);
 	}
@@ -2739,6 +2737,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		}
 		/* after excluding deleted files, calculate manifest size in bytes and number of entries */
 		++new_manifest_count;
+		phar_add_virtual_dirs(phar, entry->filename, entry->filename_len);
 
 		if (entry->is_dir) {
 			/* we use this to calculate API version, 1.1.1 is used for phars with directories */
@@ -3545,6 +3544,7 @@ void phar_request_initialize(TSRMLS_D) /* {{{ */
 		PHAR_GLOBALS->request_ends = 0;
 		PHAR_GLOBALS->request_done = 0;
 		zend_hash_init(&(PHAR_GLOBALS->phar_fname_map), 5, zend_get_hash_value, destroy_phar_data,  0);
+		zend_hash_init(&(PHAR_GLOBALS->phar_persist_map), 5, zend_get_hash_value, NULL,  0);
 		zend_hash_init(&(PHAR_GLOBALS->phar_alias_map), 5, zend_get_hash_value, NULL, 0);
 
 		if (PHAR_G(manifest_cached)) {
@@ -3581,6 +3581,8 @@ PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 		PHAR_GLOBALS->phar_alias_map.arBuckets = NULL;
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_fname_map));
 		PHAR_GLOBALS->phar_fname_map.arBuckets = NULL;
+		zend_hash_destroy(&(PHAR_GLOBALS->phar_persist_map));
+		PHAR_GLOBALS->phar_persist_map.arBuckets = NULL;
 		PHAR_GLOBALS->phar_SERVER_mung_list = 0;
 
 		if (PHAR_GLOBALS->cached_fp) {
