@@ -620,6 +620,7 @@ static int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC) /* {{{ *
 		}
 	}
 
+	phar_add_virtual_dirs(entry->phar, entry->filename, entry->filename_len);
 	memset((char *) &header, 0, sizeof(header));
 
 	if (entry->filename_len > 100) {
