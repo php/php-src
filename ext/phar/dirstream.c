@@ -507,12 +507,6 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, char *url_from, int mode, in
 		return 0;
 	}
 
-	if (phar->is_persistent && FAILURE == phar_copy_on_write(&phar TSRMLS_CC)) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", unable to make cached phar writeable", resource->path+1, resource->host);
-		php_url_free(resource);
-		return 0;
-	}
-
 	memset((void *) &entry, 0, sizeof(phar_entry_info));
 
 	/* strip leading "/" */
@@ -631,50 +625,43 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_
 		return 0;
 	}
 
-	/* now for the easy part */
-	if (phar->is_persistent && FAILURE == phar_copy_on_write(&phar TSRMLS_CC)) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot remove directory \"%s\" in phar \"%s\", unable to make cached phar writeable", resource->path+1, resource->host);
-		php_url_free(resource);
-		return 0;
-	}
-
-	for (zend_hash_internal_pointer_reset(&phar->manifest);
+	if (!entry->is_deleted) {
+		for (zend_hash_internal_pointer_reset(&phar->manifest);
 		HASH_KEY_NON_EXISTANT != zend_hash_get_current_key_ex(&phar->manifest, &key, &key_len, &unused, 0, NULL);
 		zend_hash_move_forward(&phar->manifest)) {
 
-		PHAR_STR(key, str_key);
+			PHAR_STR(key, str_key);
 
-		if (!entry->is_deleted && 
-			key_len > path_len && 
-			memcmp(str_key, resource->path+1, path_len) == 0 && 
-			IS_SLASH(str_key[path_len])) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: Directory not empty");
-			if (entry->is_temp_dir) {
-				efree(entry->filename);
-				efree(entry);
+			if (key_len > path_len && 
+				memcmp(str_key, resource->path+1, path_len) == 0 && 
+				IS_SLASH(str_key[path_len])) {
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: Directory not empty");
+				if (entry->is_temp_dir) {
+					efree(entry->filename);
+					efree(entry);
+				}
+				php_url_free(resource);
+				return 0;
 			}
-			php_url_free(resource);
-			return 0;
 		}
-	}
 
-	for (zend_hash_internal_pointer_reset(&phar->virtual_dirs);
-		HASH_KEY_NON_EXISTANT != zend_hash_get_current_key_ex(&phar->virtual_dirs, &key, &key_len, &unused, 0, NULL);
-		zend_hash_move_forward(&phar->virtual_dirs)) {
-
-		PHAR_STR(key, str_key);
-
-		if (!entry->is_deleted && 
-			key_len > path_len && 
-			memcmp(str_key, resource->path+1, path_len) == 0 && 
-			IS_SLASH(str_key[path_len])) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: Directory not empty");
-			if (entry->is_temp_dir) {
-				efree(entry->filename);
-				efree(entry);
+		for (zend_hash_internal_pointer_reset(&phar->virtual_dirs);
+			HASH_KEY_NON_EXISTANT != zend_hash_get_current_key_ex(&phar->virtual_dirs, &key, &key_len, &unused, 0, NULL);
+			zend_hash_move_forward(&phar->virtual_dirs)) {
+	
+			PHAR_STR(key, str_key);
+	
+			if (key_len > path_len && 
+				memcmp(str_key, resource->path+1, path_len) == 0 && 
+				IS_SLASH(str_key[path_len])) {
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: Directory not empty");
+				if (entry->is_temp_dir) {
+					efree(entry->filename);
+					efree(entry);
+				}
+				php_url_free(resource);
+				return 0;
 			}
-			php_url_free(resource);
-			return 0;
 		}
 	}
 
