@@ -1,3 +1,190 @@
+2008-10-12  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/tests/tar/rmdir.phpt
+      ext/phar/tests/zip/rmdir.phpt:
+      MFB: fix faulty tests
+
+    * (PHP_5_3)
+      ext/phar/tests/tar/rmdir.phpt
+      ext/phar/tests/zip/rmdir.phpt:
+      fix faulty tests
+
+2008-10-12  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/phar/phar.c
+      ext/phar/tar.c
+      ext/phar/zip.c:
+      fix ZTS build
+
+2008-10-12  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/phar_object.c:
+      MFB: fix incorrect key for Phar destructor
+
+    * (PHP_5_3)
+      ext/phar/phar_object.c:
+      fix incorrect key for Phar destructor
+
+    * ext/phar/dirstream.c
+      ext/phar/phar.c
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/tar.c
+      ext/phar/util.c
+      ext/phar/zip.c
+      ext/phar/tests/cache_list/copyonwrite2.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite3.phar.phpt
+      ext/phar/tests/cache_list/files/write2.phar
+      ext/phar/tests/cache_list/files/write3.phar:
+      MFB: add tests for copy-on-write support
+       - fix metadata handling with cached phars
+       - fix virtual_dirs with rmdir
+       - ensure that after copy-on-write, all existing Phar objects link to the
+      newly copied phar data
+
+    * (PHP_5_3)
+      ext/phar/dirstream.c
+      ext/phar/phar.c
+      ext/phar/phar_internal.h
+      ext/phar/phar_object.c
+      ext/phar/tar.c
+      ext/phar/util.c
+      ext/phar/zip.c
+      ext/phar/tests/cache_list/copyonwrite2.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite2.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite3.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite3.phar.phpt
+      ext/phar/tests/cache_list/files/write2.phar
+      ext/phar/tests/cache_list/files/write2.phar
+      ext/phar/tests/cache_list/files/write2.phar.inc
+      ext/phar/tests/cache_list/files/write2.phar.inc
+      ext/phar/tests/cache_list/files/write3.phar
+      ext/phar/tests/cache_list/files/write3.phar
+      ext/phar/tests/cache_list/files/write3.phar.inc
+      ext/phar/tests/cache_list/files/write3.phar.inc:
+      add tests for copy-on-write support
+       - fix metadata handling with cached phars
+       - fix virtual_dirs with rmdir
+       - ensure that after copy-on-write, all existing Phar objects link to the
+      newly copied phar data
+
+2008-10-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      WS
+
+2008-10-12  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/tests/tar/links6.phpt
+      ext/phar/tests/tar/links6.phpt:
+      add missing --INI-- section
+
+    * (PHP_5_3)
+      ext/phar/tests/tar/files/links.phar.tar:
+      oops, need to add as binary
+
+    * (PHP_5_3)
+      ext/phar/tests/tar/files/links.phar.tar:
+      add missing file for tests
+
+2008-10-12  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/pdo_pgsql/pgsql_statement.c:
+      - MFB: Fixed compiler warnings
+
+    * (PHP_5_3)
+      ext/pdo_pgsql/pgsql_statement.c:
+      - Fixed compiler warnings
+
+    * (PHP_5_2)
+      ext/pdo/pdo_stmt.c:
+      - MFB: Removed unnecessary strcmp call (thanks Tony)
+
+    * (PHP_5_3)
+      ext/pdo/pdo_stmt.c:
+      - Removed unnecessary strcmp call (thanks Tony)
+
+    * (PHP_5_2)
+      ext/pdo_pgsql/tests/bug46274.phpt
+      ext/pdo_pgsql/tests/bug46274_2.phpt:
+      - New tests
+
+    * (PHP_5_2)
+      ext/pdo/pdo_stmt.c:
+      - MFB: Complete the fix for #46274, and tests
+
+    * (PHP_5_3)
+      ext/pdo/pdo_stmt.c
+      ext/pdo_pgsql/tests/bug46274.phpt
+      ext/pdo_pgsql/tests/bug46274.phpt
+      ext/pdo_pgsql/tests/bug46274.phpt
+      ext/pdo_pgsql/tests/bug46274_2.phpt
+      ext/pdo_pgsql/tests/bug46274_2.phpt
+      ext/pdo_pgsql/tests/bug46274_2.phpt:
+      - Complete the fix for #46274, and tests
+
+2008-10-12  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/phar_object.c
+      ext/phar/tests/cache_list/copyonwrite1.phar.phpt
+      ext/phar/tests/cache_list/files/write.phar
+      ext/phar/tests/cache_list/files/write.phar.inc:
+      MFB: add new test for copy-on-write, fix copy-on-write for
+      Phar/PharFileInfo methods
+
+    * (PHP_5_3)
+      ext/phar/phar_object.c
+      ext/phar/tests/cache_list/copyonwrite1.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite1.phar.phpt
+      ext/phar/tests/cache_list/files/write.phar
+      ext/phar/tests/cache_list/files/write.phar
+      ext/phar/tests/cache_list/files/write.phar.inc
+      ext/phar/tests/cache_list/files/write.phar.inc:
+      add new test for copy-on-write, fix copy-on-write for Phar/PharFileInfo
+      methods
+
+    * ext/phar/tests/files/include_path.phar
+      ext/phar/tests/files/include_path.phar.inc
+      ext/phar/tests/files/include_path2.phar:
+      fix test files
+
+    * ext/phar/tests/files/include_path2.phar:
+      need to re-add as binary
+
+    * (PHP_5_3)
+      ext/phar/tests/files/include_path.phar
+      ext/phar/tests/files/include_path2.phar
+      ext/phar/tests/tar/files/links.phar.tar:
+      re-add as binary
+
+    * (PHP_5_3)
+      ext/phar/tests/files/include_path2.phar:
+      stupid cvs added this as text
+
+    * (PHP_5_3)
+      ext/phar/tests/files/include_path.phar
+      ext/phar/tests/files/include_path.phar.inc:
+      fix files for advanced include_path test
+
+    * ext/phar/tests/include_path_advanced.phpt
+      ext/phar/tests/files/include_path.phar
+      ext/phar/tests/files/include_path.phar.inc
+      ext/phar/tests/files/include_path2.phar:
+      increase code coverage
+
+    * ext/phar/tests/include_path_advanced.phpt
+      ext/phar/tests/include_path_advanced.phpt
+      ext/phar/tests/files/include_path.phar
+      ext/phar/tests/files/include_path.phar
+      ext/phar/tests/files/include_path.phar.inc
+      ext/phar/tests/files/include_path.phar.inc
+      ext/phar/tests/files/include_path2.phar
+      ext/phar/tests/files/include_path2.phar:
+      
+      file include_path_advanced.phpt was initially added on branch PHP_5_3.
+
 2008-10-11  Greg Beaver  <greg@chiaraquartet.net>
 
     * ext/phar/stream.c
