@@ -14,7 +14,7 @@ $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.tar';
 $fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
 $a = new Phar($fname);
-$a['index.php'] = '<?php
+$a['my/index.php'] = '<?php
 echo "stat\n";
 var_dump(stat("dir/file1.txt"));
 echo "lstat\n";
@@ -53,13 +53,17 @@ echo "is_file\n";
 var_dump(is_file("dir/file1.txt"));
 echo "is_link\n";
 var_dump(is_link("dir/file1.txt"));
+echo "not found\n";
+var_dump(file_exists("not/found"));
+echo "not found 2\n";
+var_dump(fileperms("not/found"));
 ?>';
 $a['dir/file1.txt'] = 'hi';
 $a['dir/file2.txt'] = 'hi2';
 $a['dir/file3.txt'] = 'hi3';
 $a->setStub('<?php
 set_include_path("phar://" . __FILE__ . "/dir" . PATH_SEPARATOR . "phar://" . __FILE__);
-include "index.php";
+include "my/index.php";
 __HALT_COMPILER();');
 include $fname;
 ?>
@@ -211,5 +215,11 @@ bool(false)
 is_file
 bool(true)
 is_link
+bool(false)
+not found
+bool(false)
+not found 2
+
+Warning: fileperms(): stat failed for not/found in phar://%sstat.phar.php/my/index.php on line %d
 bool(false)
 ===DONE===
