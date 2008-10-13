@@ -11,6 +11,7 @@ PHP                                                                        NEWS
   after end of stream). (Keisial at gmail dot com, Greg)
 - Fixed bug #44251, #41125 (PDO + quote() + prepare() can result in segfault).
   (tsteiner at nerdclub dot net)
+- Fixed bug #37100 (data is returned truncated with BINARY CURSOR). (Tony)
 
 09 Oct 2008, PHP 5.2.7RC1
 - Reverted fix for bug #44197 due to behaviour change in minor version.
