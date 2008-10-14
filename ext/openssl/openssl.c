@@ -4700,30 +4700,33 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 		X509 *cert = NULL;
 		EVP_PKEY *key = NULL;
 		SSL *tmpssl;
+		char resolved_path_buff[MAXPATHLEN];
 
-		/* a certificate to use for authentication */
-		if (SSL_CTX_use_certificate_chain_file(ctx, certfile) != 1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set local cert chain file `%s'; Check that your cafile/capath settings include details of your certificate and its issuer", certfile);
-			return NULL;
-		}
+		if (VCWD_REALPATH(certfile, resolved_path_buff)) {
+			/* a certificate to use for authentication */
+			if (SSL_CTX_use_certificate_chain_file(ctx, resolved_path_buff) != 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set local cert chain file `%s'; Check that your cafile/capath settings include details of your certificate and its issuer", certfile);
+				return NULL;
+			}
 
-		if (SSL_CTX_use_PrivateKey_file(ctx, certfile, SSL_FILETYPE_PEM) != 1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set private key file `%s'", certfile);
-			return NULL;
-		}
+			if (SSL_CTX_use_PrivateKey_file(ctx, resolved_path_buff, SSL_FILETYPE_PEM) != 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set private key file `%s'", resolved_path_buff);
+				return NULL;
+			}
 
-		tmpssl = SSL_new(ctx);
-		cert = SSL_get_certificate(tmpssl);
+			tmpssl = SSL_new(ctx);
+			cert = SSL_get_certificate(tmpssl);
 
-		if (cert) {
-			key = X509_get_pubkey(cert);
-			EVP_PKEY_copy_parameters(key, SSL_get_privatekey(tmpssl));
-			EVP_PKEY_free(key);
-		}
-		SSL_free(tmpssl);
+			if (cert) {
+				key = X509_get_pubkey(cert);
+				EVP_PKEY_copy_parameters(key, SSL_get_privatekey(tmpssl));
+				EVP_PKEY_free(key);
+			}
+			SSL_free(tmpssl);
 
-		if (!SSL_CTX_check_private_key(ctx)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Private key does not match certificate!");
+			if (!SSL_CTX_check_private_key(ctx)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Private key does not match certificate!");
+			}
 		}
 	}
 	if (ok) {
