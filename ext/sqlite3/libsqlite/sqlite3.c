@@ -1,3 +1,7 @@
+#if defined(_MSC_VER) && _MSC_VER < 1300
+#pragma optimize("", off)
+#endif
+
 /******************************************************************************
 ** This file is an amalgamation of many separate C source files from SQLite
 ** version 3.6.2.  By combining all the individual C code files into this 
@@ -96603,3 +96607,7 @@ SQLITE_API int sqlite3_extension_init(
 #endif
 
 /************** End of icu.c *************************************************/
+
+#if defined(_MSC_VER) && _MSC_VER < 1300
+#pragma optimize("", on)
+#endif
