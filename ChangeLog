@@ -1,3 +1,245 @@
+2008-10-13  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN #37100
+
+    * (PHP_5_2)
+      ext/pgsql/pgsql.c
+      ext/pgsql/pgsql.c
+      ext/pgsql/tests/bug37100.phpt
+      ext/pgsql/tests/bug37100.phpt:
+      MFH:
+      - Fixed bug #37100 (data is returned truncated with BINARY CURSOR)
+        Patch by Tony
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/tests/bug37100.phpt
+      ext/pgsql/tests/bug37100.phpt
+      ext/pgsql/tests/bug37100.phpt:
+      - Fixed bug #37100 (data is returned truncated with BINARY CURSOR)
+        Patch by Tony
+
+2008-10-13  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h:
+      - Updated to version 2008.8 (2008h)
+
+2008-10-13  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/tests/stat.phpt:
+      MFB: increase code coverage
+
+    * (PHP_5_3)
+      ext/phar/tests/stat.phpt:
+      increase code coverage
+
+    * ext/phar/tests/cache_list/copyonwrite10.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite11.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite12.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite13.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite14.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite15.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite16.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite17.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite18.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite19.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite20.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite21.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite22.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite23.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite24.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite4.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite4a.phpt
+      ext/phar/tests/cache_list/copyonwrite5.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite6.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite7.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite8.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite9.phar.phpt
+      ext/phar/tests/cache_list/files/write10.phar
+      ext/phar/tests/cache_list/files/write10.phar.inc
+      ext/phar/tests/cache_list/files/write11.phar
+      ext/phar/tests/cache_list/files/write11.phar.inc
+      ext/phar/tests/cache_list/files/write12.phar
+      ext/phar/tests/cache_list/files/write12.phar.inc
+      ext/phar/tests/cache_list/files/write13.phar
+      ext/phar/tests/cache_list/files/write13.phar.inc
+      ext/phar/tests/cache_list/files/write14.phar
+      ext/phar/tests/cache_list/files/write14.phar.inc
+      ext/phar/tests/cache_list/files/write15.phar
+      ext/phar/tests/cache_list/files/write15.phar.inc
+      ext/phar/tests/cache_list/files/write16.phar
+      ext/phar/tests/cache_list/files/write16.phar.inc
+      ext/phar/tests/cache_list/files/write17.phar
+      ext/phar/tests/cache_list/files/write17.phar.inc
+      ext/phar/tests/cache_list/files/write18.phar
+      ext/phar/tests/cache_list/files/write18.phar.inc
+      ext/phar/tests/cache_list/files/write19.phar
+      ext/phar/tests/cache_list/files/write19.phar.inc
+      ext/phar/tests/cache_list/files/write2.phar.inc
+      ext/phar/tests/cache_list/files/write20.phar
+      ext/phar/tests/cache_list/files/write20.phar.inc
+      ext/phar/tests/cache_list/files/write21.phar
+      ext/phar/tests/cache_list/files/write21.phar.inc
+      ext/phar/tests/cache_list/files/write22.phar
+      ext/phar/tests/cache_list/files/write22.phar.inc
+      ext/phar/tests/cache_list/files/write23.phar
+      ext/phar/tests/cache_list/files/write23.phar.inc
+      ext/phar/tests/cache_list/files/write24.phar
+      ext/phar/tests/cache_list/files/write24.phar.inc
+      ext/phar/tests/cache_list/files/write3.phar
+      ext/phar/tests/cache_list/files/write3.phar.inc
+      ext/phar/tests/cache_list/files/write4.phar
+      ext/phar/tests/cache_list/files/write4.phar.inc
+      ext/phar/tests/cache_list/files/write5.phar
+      ext/phar/tests/cache_list/files/write5.phar.inc
+      ext/phar/tests/cache_list/files/write6.phar
+      ext/phar/tests/cache_list/files/write6.phar.inc
+      ext/phar/tests/cache_list/files/write7.phar
+      ext/phar/tests/cache_list/files/write7.phar.inc
+      ext/phar/tests/cache_list/files/write8.phar
+      ext/phar/tests/cache_list/files/write8.phar.inc
+      ext/phar/tests/cache_list/files/write9.phar
+      ext/phar/tests/cache_list/files/write9.phar.inc:
+      MFB: add complete tests verifying copy-on-write for cached phars
+
+    * (PHP_5_3)
+      ext/phar/tests/cache_list/files/write19.phar
+      ext/phar/tests/cache_list/files/write19.phar.inc
+      ext/phar/tests/cache_list/files/write19.phar.inc
+      ext/phar/tests/cache_list/files/write20.phar
+      ext/phar/tests/cache_list/files/write20.phar
+      ext/phar/tests/cache_list/files/write20.phar.inc
+      ext/phar/tests/cache_list/files/write20.phar.inc
+      ext/phar/tests/cache_list/files/write21.phar
+      ext/phar/tests/cache_list/files/write21.phar
+      ext/phar/tests/cache_list/files/write21.phar.inc
+      ext/phar/tests/cache_list/files/write21.phar.inc
+      ext/phar/tests/cache_list/files/write22.phar
+      ext/phar/tests/cache_list/files/write22.phar
+      ext/phar/tests/cache_list/files/write22.phar.inc
+      ext/phar/tests/cache_list/files/write22.phar.inc
+      ext/phar/tests/cache_list/files/write23.phar
+      ext/phar/tests/cache_list/files/write23.phar
+      ext/phar/tests/cache_list/files/write23.phar.inc
+      ext/phar/tests/cache_list/files/write23.phar.inc
+      ext/phar/tests/cache_list/files/write24.phar
+      ext/phar/tests/cache_list/files/write24.phar
+      ext/phar/tests/cache_list/files/write24.phar.inc
+      ext/phar/tests/cache_list/files/write24.phar.inc
+      ext/phar/tests/cache_list/files/write3.phar
+      ext/phar/tests/cache_list/files/write4.phar
+      ext/phar/tests/cache_list/files/write4.phar
+      ext/phar/tests/cache_list/files/write4.phar.inc
+      ext/phar/tests/cache_list/files/write4.phar.inc
+      ext/phar/tests/cache_list/files/write5.phar
+      ext/phar/tests/cache_list/files/write5.phar
+      ext/phar/tests/cache_list/files/write5.phar.inc
+      ext/phar/tests/cache_list/files/write5.phar.inc
+      ext/phar/tests/cache_list/files/write6.phar
+      ext/phar/tests/cache_list/files/write6.phar
+      ext/phar/tests/cache_list/files/write6.phar.inc
+      ext/phar/tests/cache_list/files/write6.phar.inc
+      ext/phar/tests/cache_list/files/write7.phar
+      ext/phar/tests/cache_list/files/write7.phar
+      ext/phar/tests/cache_list/files/write7.phar.inc
+      ext/phar/tests/cache_list/files/write7.phar.inc
+      ext/phar/tests/cache_list/files/write8.phar
+      ext/phar/tests/cache_list/files/write8.phar
+      ext/phar/tests/cache_list/files/write8.phar.inc
+      ext/phar/tests/cache_list/files/write8.phar.inc
+      ext/phar/tests/cache_list/files/write9.phar
+      ext/phar/tests/cache_list/files/write9.phar
+      ext/phar/tests/cache_list/files/write9.phar.inc
+      ext/phar/tests/cache_list/files/write9.phar.inc:
+      add complete tests verifying copy-on-write for cached phars
+
+    * ext/phar/tests/cache_list/copyonwrite10.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite10.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite11.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite11.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite12.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite12.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite13.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite13.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite14.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite14.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite15.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite15.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite16.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite16.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite17.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite17.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite18.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite18.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite19.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite19.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite20.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite20.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite21.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite21.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite22.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite22.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite23.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite23.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite24.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite24.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite4.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite4.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite4a.phpt
+      ext/phar/tests/cache_list/copyonwrite4a.phpt
+      ext/phar/tests/cache_list/copyonwrite5.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite5.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite6.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite6.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite7.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite7.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite8.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite8.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite9.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite9.phar.phpt
+      ext/phar/tests/cache_list/files/write10.phar
+      ext/phar/tests/cache_list/files/write10.phar
+      ext/phar/tests/cache_list/files/write10.phar.inc
+      ext/phar/tests/cache_list/files/write10.phar.inc
+      ext/phar/tests/cache_list/files/write11.phar
+      ext/phar/tests/cache_list/files/write11.phar
+      ext/phar/tests/cache_list/files/write11.phar.inc
+      ext/phar/tests/cache_list/files/write11.phar.inc
+      ext/phar/tests/cache_list/files/write12.phar
+      ext/phar/tests/cache_list/files/write12.phar
+      ext/phar/tests/cache_list/files/write12.phar.inc
+      ext/phar/tests/cache_list/files/write12.phar.inc
+      ext/phar/tests/cache_list/files/write13.phar
+      ext/phar/tests/cache_list/files/write13.phar
+      ext/phar/tests/cache_list/files/write13.phar.inc
+      ext/phar/tests/cache_list/files/write13.phar.inc
+      ext/phar/tests/cache_list/files/write14.phar
+      ext/phar/tests/cache_list/files/write14.phar
+      ext/phar/tests/cache_list/files/write14.phar.inc
+      ext/phar/tests/cache_list/files/write14.phar.inc
+      ext/phar/tests/cache_list/files/write15.phar
+      ext/phar/tests/cache_list/files/write15.phar
+      ext/phar/tests/cache_list/files/write15.phar.inc
+      ext/phar/tests/cache_list/files/write15.phar.inc
+      ext/phar/tests/cache_list/files/write16.phar
+      ext/phar/tests/cache_list/files/write16.phar
+      ext/phar/tests/cache_list/files/write16.phar.inc
+      ext/phar/tests/cache_list/files/write16.phar.inc
+      ext/phar/tests/cache_list/files/write17.phar
+      ext/phar/tests/cache_list/files/write17.phar
+      ext/phar/tests/cache_list/files/write17.phar.inc
+      ext/phar/tests/cache_list/files/write17.phar.inc
+      ext/phar/tests/cache_list/files/write18.phar
+      ext/phar/tests/cache_list/files/write18.phar
+      ext/phar/tests/cache_list/files/write18.phar.inc
+      ext/phar/tests/cache_list/files/write18.phar.inc
+      ext/phar/tests/cache_list/files/write19.phar:
+      
+      file copyonwrite10.phar.phpt was initially added on branch PHP_5_3.
+
 2008-10-12  Greg Beaver  <greg@chiaraquartet.net>
 
     * ext/phar/tests/tar/rmdir.phpt
