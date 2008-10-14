@@ -12,6 +12,7 @@ PHP                                                                        NEWS
   (Brian J.France, Dmitry)
 - Added concatenation option to bz2.decompress stream filter.
   (Keisial at gmail dot com, Greg)
+- Added support for using compressed connections with PDO_mysql. (Johannes)
 
 - Fixed bug causing the algorithm parameter of mhash() to be modified. (Scott)
 
