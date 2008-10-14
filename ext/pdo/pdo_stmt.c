@@ -1939,7 +1939,7 @@ static PHP_METHOD(PDOStatement, getColumnMeta)
 int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int skip)
 {
 	long mode = PDO_FETCH_BOTH;
-	int argc = ZEND_NUM_ARGS() - skip;
+	int flags, argc = ZEND_NUM_ARGS() - skip;
 	zval ***args;
 	zend_class_entry **cep;
 	
@@ -1972,6 +1972,7 @@ fail_out:
 	
 	convert_to_long_ex(args[skip]);
 	mode = Z_LVAL_PP(args[skip]);
+	flags = mode & PDO_FETCH_FLAGS;
 	
 	if (!pdo_stmt_verify_mode(stmt, mode, 0 TSRMLS_CC)) {
 		efree(args);
@@ -1999,21 +2000,30 @@ fail_out:
 			break;
 
 		case PDO_FETCH_CLASS:
-			if (argc < 2 || argc > 3) {
-				goto fail_out;
-			}
-			convert_to_string_ex(args[skip+1]);
-
-			if (FAILURE == zend_lookup_class(Z_STRVAL_PP(args[skip+1]),
-					Z_STRLEN_PP(args[skip+1]), &cep TSRMLS_CC)) {
-				goto fail_out;
-			}
+			/* Gets its class name from 1st column */
+			if ((flags & PDO_FETCH_CLASSTYPE) == PDO_FETCH_CLASSTYPE) {
+				if (argc != 1) {
+					goto fail_out;
+				}
+				stmt->fetch.cls.ce = NULL;
+			} else {
+				if (argc < 2 || argc > 3) {
+					goto fail_out;
+				}				
+				convert_to_string_ex(args[skip+1]);
 				
-			if (!cep || !*cep) {
-				goto fail_out;
+				if (FAILURE == zend_lookup_class(Z_STRVAL_PP(args[skip+1]),
+						Z_STRLEN_PP(args[skip+1]), &cep TSRMLS_CC)) {
+					goto fail_out;
+				}
+					
+				if (!cep || !*cep) {
+					goto fail_out;
+				}
+				
+				stmt->fetch.cls.ce = *cep;				
 			}
-			
-			stmt->fetch.cls.ce = *cep;
+
 			stmt->fetch.cls.ctor_args = NULL;
 
 #ifdef ilia_0 /* we'll only need this when we have persistent statements, if ever */
