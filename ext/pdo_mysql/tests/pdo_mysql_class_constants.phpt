@@ -19,7 +19,7 @@ require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
 		$expected['MYSQL_ATTR_INIT_COMMAND'] 				= true;
 		$expected['MYSQL_ATTR_READ_DEFAULT_FILE'] 	= true;
 		$expected['MYSQL_ATTR_READ_DEFAULT_GROUP'] 	= true;
-
+		$expected['MYSQL_ATTR_COMPRESS']			= true;
 	}
 
 	/*
