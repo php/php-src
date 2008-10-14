@@ -48,24 +48,24 @@ Bug #46292 (PDO::setFetchMode() shouldn't requires the 2nd arg when using FETCH_
 --EXPECTF--
 bool(true)
 myclass::__construct()
-object(myclass)#3 (1) {
+object(myclass)#%d (1) {
   ["value"]=>
   string(1) "1"
 }
 myclass::__construct()
-object(myclass2)#3 (1) {
+object(myclass2)#%d (1) {
   ["value"]=>
   string(1) "2"
 }
 myclass::__construct()
 array(2) {
   [0]=>
-  object(myclass)#3 (1) {
+  object(myclass)#%d (1) {
     ["value"]=>
     NULL
   }
   [1]=>
-  object(stdClass)#4 (1) {
+  object(stdClass)#%d (1) {
     ["value"]=>
     NULL
   }
