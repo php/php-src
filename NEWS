@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Oct 2008, PHP 5.2.7RC2
+- Fixed bug #46292 (PDO::setFetchMode() shouldn't requires the 2nd arg when 
+  using FETCH_CLASSTYPE). (Felipe)
 - Fixed bug #46274, #46249 (pdo_pgsql always fill in NULL for empty BLOB and 
   segfaults when returned by SELECT). (Felipe)
 - Fixed bug #46246 (difference between call_user_func(array($this, $method))
