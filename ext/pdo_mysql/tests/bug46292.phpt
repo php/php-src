@@ -1,5 +1,13 @@
 --TEST--
 Bug #46292 (PDO::setFetchMode() shouldn't requires the 2nd arg when using FETCH_CLASSTYPE)
+--SKIPIF--
+<?php
+require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+MySQLPDOTest::skip();
+if (version_compare(PHP_VERSION, '5.1.0', '<'))
+	die("skip Needs 5.1.0 and Interface Serializable");
+?>
 --FILE--
 <?php	
 	
