@@ -623,6 +623,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		long local_infile = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_LOCAL_INFILE, 0 TSRMLS_CC);
 #ifndef PDO_USE_MYSQLND
 		char *init_cmd = NULL, *default_file = NULL, *default_group = NULL;
+		long compress = 0;
 #endif
 		H->buffered = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 1 TSRMLS_CC);
 
@@ -691,6 +692,14 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 				goto cleanup;
 			}
 			efree(default_group);
+		}
+
+		compress = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_COMPRESS, 0 TSRMLS_CC);
+		if (compress) {
+			if (mysql_options(H->server, MYSQL_OPT_COMPRESS, 0)) {
+				pdo_mysql_error(dbh);
+				goto cleanup;
+			}
 		}
 #endif
 	}
