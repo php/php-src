@@ -877,7 +877,6 @@ mget(struct magic_set *ms, const unsigned char *s,
 
 	if ((ms->flags & MAGIC_DEBUG) != 0) {
 		mdebug(offset, (char *)(void *)p, sizeof(union VALUETYPE));
-		file_mdump(m);
 	}
 
 	if (m->flag & INDIR) {
@@ -1347,7 +1346,6 @@ mget(struct magic_set *ms, const unsigned char *s,
 		if ((ms->flags & MAGIC_DEBUG) != 0) {
 			mdebug(offset, (char *)(void *)p,
 			    sizeof(union VALUETYPE));
-			file_mdump(m);
 		}
 	}
 
