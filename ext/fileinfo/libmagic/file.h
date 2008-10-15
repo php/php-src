@@ -349,7 +349,6 @@ protected void file_oomem(struct magic_set *, size_t);
 protected void file_error(struct magic_set *, int, const char *, ...);
 protected void file_magerror(struct magic_set *, const char *, ...);
 protected void file_magwarn(struct magic_set *, const char *, ...);
-protected void file_mdump(struct magic *);
 protected void file_showstr(FILE *, const char *, size_t);
 protected size_t file_mbswidth(const char *);
 protected const char *file_getbuffer(struct magic_set *);
