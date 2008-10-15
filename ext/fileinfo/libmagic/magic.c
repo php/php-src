@@ -208,14 +208,6 @@ magic_compile(struct magic_set *ms, const char *magicfile)
 	return ml ? 0 : -1;
 }
 
-public int
-magic_check(struct magic_set *ms, const char *magicfile)
-{
-	struct mlist *ml = file_apprentice(ms, magicfile, FILE_CHECK);
-	free_mlist(ml);
-	return ml ? 0 : -1;
-}
-
 private void
 close_and_restore(const struct magic_set *ms, const char *name, int fd,
     const struct stat *sb)
