@@ -1,3 +1,86 @@
+2008-10-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/openssl/openssl.c
+      ext/openssl/openssl.c:
+      
+      MFB: Fixed bug #46271 (local_cert option is not resolved to full path)
+
+    * (PHP_5_3)
+      ext/openssl/openssl.c:
+      Fixed bug #46271 (local_cert option is not resolved to full path)
+
+2008-10-14  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      NEWS:
+      Update NEWS
+
+    * (PHP_5_3)
+      ext/pdo_mysql/mysql_driver.c
+      ext/pdo_mysql/pdo_mysql.c
+      ext/pdo_mysql/php_pdo_mysql_int.h
+      ext/pdo_mysql/tests/pdo_mysql_class_constants.phpt:
+      MFH: Add PDO::MYSQL_ATTR_COMPRESS connection flag [DOC]
+
+    * ext/pdo_mysql/mysql_driver.c
+      ext/pdo_mysql/pdo_mysql.c
+      ext/pdo_mysql/php_pdo_mysql_int.h
+      ext/pdo_mysql/tests/pdo_mysql_class_constants.phpt:
+      Add PDO::MYSQL_ATTR_COMPRESS connection flag
+
+2008-10-14  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/pdo_mysql/tests/bug46292.phpt
+      ext/pdo_mysql/tests/bug46292.phpt:
+      - Added SKIPIF
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_stmt.c
+      ext/pdo/pdo_stmt.c
+      ext/pdo_mysql/tests/bug46292.phpt
+      ext/pdo_mysql/tests/bug46292.phpt:
+      - MFH: Fixed bug #46292 (PDO::setFetchMode() shouldn't requires the 2nd arg
+      when using FETCH_CLASSTYPE)
+
+    * ext/pdo_mysql/tests/bug46292.phpt
+      ext/pdo_mysql/tests/bug46292.phpt:
+      
+      - Fixed test
+
+    * ext/pdo/pdo_stmt.c
+      ext/pdo_mysql/tests/bug46292.phpt
+      ext/pdo_mysql/tests/bug46292.phpt:
+      - Fixed bug #46292 (PDO::setFetchMode() shouldn't requires the 2nd arg when
+      using FETCH_CLASSTYPE)
+
+2008-10-14  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/sqlite3/libsqlite/sqlite3.c:
+      Disable optimizations at the moment for libsqlite on VC6 with the
+      amalgamation, will most likely need to track down what particular function
+      is causing problems or consider setting the flags to /O1 for libsqlite
+      specifically.
+
+2008-10-14  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/tests/cache_list/copyonwrite25.phar.phpt
+      ext/phar/tests/cache_list/files/write25.phar
+      ext/phar/tests/cache_list/files/write25.phar.inc:
+      MFB: last test for cached phar copy on write (forgot this one yesterday)
+
+    * ext/phar/tests/cache_list/copyonwrite25.phar.phpt
+      ext/phar/tests/cache_list/copyonwrite25.phar.phpt
+      ext/phar/tests/cache_list/files/write25.phar
+      ext/phar/tests/cache_list/files/write25.phar
+      ext/phar/tests/cache_list/files/write25.phar.inc
+      ext/phar/tests/cache_list/files/write25.phar.inc:
+      
+      file copyonwrite25.phar.phpt was initially added on branch PHP_5_3.
+
 2008-10-13  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
