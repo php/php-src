@@ -73,7 +73,6 @@ int magic_setflags(magic_t, int);
 
 int magic_load(magic_t, const char *);
 int magic_compile(magic_t, const char *);
-int magic_check(magic_t, const char *);
 int magic_errno(magic_t);
 
 #ifdef __cplusplus

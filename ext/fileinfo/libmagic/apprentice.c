@@ -1290,9 +1290,6 @@ parse(struct magic_set *ms, struct magic_entry **mentryp, uint32_t *nmentryp,
 		if (check_format(ms, m) == -1)
 			return -1;
 	}
-	if (action == FILE_CHECK) {
-		file_mdump(m);
-	}
 	m->mimetype[0] = '\0';		/* initialise MIME type to none */
 	if (m->cont_level == 0)
 		++(*nmentryp);		/* make room for next */
