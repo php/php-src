@@ -24,6 +24,8 @@ PHP                                                                        NEWS
     options. (Pierre)
   . Changed get_magic_quotes_gpc(), get_magic_quotes_runtime to always return
     false and set_magic_quotes_runtime() to raise an E_CORE_ERROR.
+  . "define_syslog_variables" ini option and define_syslog_variables() 
+    (Kalle)
 - Removed support for "continue" and "break" operators with non-constant
   operands. (Dmitry)
 - Removed Freetype 1.x and GD 1.x support from GD extension. (Pierre)
