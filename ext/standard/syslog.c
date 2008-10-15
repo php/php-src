@@ -105,11 +105,6 @@ PHP_MINIT_FUNCTION(syslog)
 
 PHP_RINIT_FUNCTION(syslog) /* {{{ */
 {
-	if (INI_INT("define_syslog_variables")) {
-		start_syslog(TSRMLS_C);
-	} else {
-		BG(syslog_started)=0;
-	}
 	BG(syslog_device) = NULL;
 	return SUCCESS;
 }
@@ -131,87 +126,6 @@ PHP_MSHUTDOWN_FUNCTION(syslog) /* {{{ */
 		BG(syslog_device) = NULL;
 	}
 	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ start_syslog
- */
-static void start_syslog(TSRMLS_D)
-{
-	/* error levels */
-	SET_VAR_LONG("LOG_EMERG", LOG_EMERG); /* system unusable */
-	SET_VAR_LONG("LOG_ALERT", LOG_ALERT); /* immediate action required */
-	SET_VAR_LONG("LOG_CRIT", LOG_CRIT); /* critical conditions */
-	SET_VAR_LONG("LOG_ERR", LOG_ERR); 
-	SET_VAR_LONG("LOG_WARNING", LOG_WARNING);
-	SET_VAR_LONG("LOG_NOTICE", LOG_NOTICE);
-	SET_VAR_LONG("LOG_INFO", LOG_INFO);
-	SET_VAR_LONG("LOG_DEBUG", LOG_DEBUG);
-	/* facility: type of program logging the message */
-	SET_VAR_LONG("LOG_KERN", LOG_KERN);
-	SET_VAR_LONG("LOG_USER", LOG_USER); /* generic user level */
-	SET_VAR_LONG("LOG_MAIL", LOG_MAIL); /* log to email */
-	SET_VAR_LONG("LOG_DAEMON", LOG_DAEMON); /* other system daemons */
-	SET_VAR_LONG("LOG_AUTH", LOG_AUTH);
-#ifndef NETWARE
-	SET_VAR_LONG("LOG_SYSLOG", LOG_SYSLOG);
-#endif
-	SET_VAR_LONG("LOG_LPR", LOG_LPR);
-#ifdef LOG_NEWS
-	/* No LOG_NEWS on HP-UX */
-	SET_VAR_LONG("LOG_NEWS", LOG_NEWS); /* usenet new */
-#endif
-#ifdef LOG_UUCP
-	/* No LOG_UUCP on HP-UX */
-	SET_VAR_LONG("LOG_UUCP", LOG_UUCP);
-#endif
-#ifdef LOG_CRON
-	/* apparently some systems don't have this one */
-	SET_VAR_LONG("LOG_CRON", LOG_CRON);
-#endif
-#ifdef LOG_AUTHPRIV
-	/* AIX doesn't have LOG_AUTHPRIV */
-	SET_VAR_LONG("LOG_AUTHPRIV", LOG_AUTHPRIV);
-#endif
-#if !defined(PHP_WIN32) && !defined(NETWARE)
-	SET_VAR_LONG("LOG_LOCAL0", LOG_LOCAL0);
-	SET_VAR_LONG("LOG_LOCAL1", LOG_LOCAL1);
-	SET_VAR_LONG("LOG_LOCAL2", LOG_LOCAL2);
-	SET_VAR_LONG("LOG_LOCAL3", LOG_LOCAL3);
-	SET_VAR_LONG("LOG_LOCAL4", LOG_LOCAL4);
-	SET_VAR_LONG("LOG_LOCAL5", LOG_LOCAL5);
-	SET_VAR_LONG("LOG_LOCAL6", LOG_LOCAL6);
-	SET_VAR_LONG("LOG_LOCAL7", LOG_LOCAL7);
-#endif
-	/* options */
-	SET_VAR_LONG("LOG_PID", LOG_PID);
-	SET_VAR_LONG("LOG_CONS", LOG_CONS);
-	SET_VAR_LONG("LOG_ODELAY", LOG_ODELAY);
-	SET_VAR_LONG("LOG_NDELAY", LOG_NDELAY);
-#ifdef LOG_NOWAIT
-	/* BeOS doesn't have LOG_NOWAIT */
-	SET_VAR_LONG("LOG_NOWAIT", LOG_NOWAIT);
-#endif
-#ifdef LOG_PERROR
-	/* AIX doesn't have LOG_PERROR */
-	SET_VAR_LONG("LOG_PERROR", LOG_PERROR); /*log to stderr*/
-#endif
-
-	BG(syslog_started)=1;
-}
-/* }}} */
-
-/* {{{ proto void define_syslog_variables(void) U
-   Initializes all syslog-related variables */
-PHP_FUNCTION(define_syslog_variables)
-{
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	if (!BG(syslog_started)) {
-		start_syslog(TSRMLS_C);
-	}
 }
 /* }}} */
 

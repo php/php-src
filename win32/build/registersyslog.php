@@ -20,7 +20,6 @@ if (extension_loaded("win32std")) {
 		reg_set_value($key, "TypesSupported", REG_DWORD, 7) or die("Types");
 		reg_set_value($key, "EventMessageFile", REG_SZ, $dll) or die("EventMessageFile");
 
-		define_syslog_variables();
 		syslog(LOG_NOTICE, "Registered PHP Event source");
 	} else {
 		echo "Could not register event source\n";

@@ -200,7 +200,6 @@ typedef struct _php_basic_globals {
 	zend_bool mt_rand_is_seeded; /* Whether mt_rand() has been seeded */
     
 	/* syslog.c */
-	int syslog_started;
 	char *syslog_device;
 
 	/* var.c */
