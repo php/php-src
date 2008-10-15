@@ -14,6 +14,8 @@ PHP                                                                        NEWS
   (Keisial at gmail dot com, Greg)
 - Added support for using compressed connections with PDO_mysql. (Johannes)
 
+- Deprecated define_syslog_variables(). (Kalle)
+
 - Fixed bug causing the algorithm parameter of mhash() to be modified. (Scott)
 
 - Fixed bug #46238 (Segmentation fault on static call with empty string method).
