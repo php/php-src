@@ -3668,7 +3668,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(openlog,															arginfo_openlog)
 	PHP_FE(syslog,															arginfo_syslog)
 	PHP_FE(closelog,														arginfo_closelog)
-	PHP_FE(define_syslog_variables,											arginfo_define_syslog_variables)
+	PHP_DEP_FE(define_syslog_variables,											arginfo_define_syslog_variables)
 #endif
 
 	/* functions from lcg.c */
