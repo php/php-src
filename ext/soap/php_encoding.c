@@ -471,27 +471,27 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 
 					zend_uchar utype = zend_hash_get_current_key_ex(SOAP_GLOBAL(class_map), &type_name, &type_len, &idx, 0, &pos);
 				    
-				    if (utype == HASH_KEY_IS_STRING || utype == HASH_KEY_IS_UNICODE) {
-				    	encodePtr enc = NULL;
+					if (utype == HASH_KEY_IS_STRING || utype == HASH_KEY_IS_UNICODE) {
+						encodePtr enc = NULL;
 
-				    	type_name.s = soap_encode_string_ex(utype, type_name, type_len TSRMLS_CC);
+						type_name.s = soap_encode_string_ex(utype, type_name, type_len TSRMLS_CC);
 
-					    /* TODO: namespace isn't stored */
-					    if (SOAP_GLOBAL(sdl)) {
-					    	enc = get_encoder(SOAP_GLOBAL(sdl), SOAP_GLOBAL(sdl)->target_ns, type_name.s);
-					    	if (!enc) {
-						 		enc = find_encoder_by_type_name(SOAP_GLOBAL(sdl), type_name.s);
-						 	}
-					    }
-				    	if (enc) {
-				    		if (encode != enc && style == SOAP_LITERAL) {
+						/* TODO: namespace isn't stored */
+						if (SOAP_GLOBAL(sdl)) {
+							enc = get_encoder(SOAP_GLOBAL(sdl), SOAP_GLOBAL(sdl)->target_ns, type_name.s);
+							if (!enc) {
+								enc = find_encoder_by_type_name(SOAP_GLOBAL(sdl), type_name.s);
+							}
+						}
+						if (enc) {
+							if (encode != enc && style == SOAP_LITERAL) {
 								add_type = 1;			    			
-				    		}
-				    		encode = enc;
+							}
+							encode = enc;
 						}
 						efree(type_name.v);
-				        break;
-				    }
+						break;
+					}
 				}
 			}
 		}
