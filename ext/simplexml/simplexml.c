@@ -69,7 +69,7 @@ static void php_sxe_iterator_rewind(zend_object_iterator *iter TSRMLS_DC);
 
 /* {{{ _node_as_zval()
  */
-static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE_ITER itertype, char *name, xmlChar *nsprefix, int isprefix TSRMLS_DC)
+static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE_ITER itertype, char *name, const xmlChar *nsprefix, int isprefix TSRMLS_DC)
 {
 	php_sxe_object *subnode;
 
@@ -81,7 +81,7 @@ static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE
 		subnode->iter.name = xmlStrdup((xmlChar *)name);
 	}
 	if (nsprefix && *nsprefix) {
-		subnode->iter.nsprefix = xmlStrdup((xmlChar *)nsprefix);
+		subnode->iter.nsprefix = xmlStrdup(nsprefix);
 		subnode->iter.isprefix = isprefix;
 	}
 
