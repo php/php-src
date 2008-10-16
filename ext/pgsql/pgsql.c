@@ -4897,27 +4897,47 @@ PHP_FUNCTION(pg_get_pid)
 PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta TSRMLS_DC) 
 {
 	PGresult *pg_result;
-	char *tmp_name;
+	char *src, *tmp_name, *tmp_name2 = NULL;
 	smart_str querystr = {0};
 	int new_len;
 	int i, num_rows;
 	zval *elem;
 	
+	if (!*table_name) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The table name must be specified");
+		return FAILURE;
+	}
+
+	src = estrdup(table_name);
+	tmp_name = php_strtok_r(src, ".", &tmp_name2);
+	
+	if (!*tmp_name2) {
+		/* Default schema */
+		tmp_name2 = tmp_name;
+		tmp_name = "public";
+	}
+
 	smart_str_appends(&querystr, 
 			"SELECT a.attname, a.attnum, t.typname, a.attlen, a.attnotNULL, a.atthasdef, a.attndims "
-			"FROM pg_class as c, pg_attribute a, pg_type t "
+			"FROM pg_class as c, pg_attribute a, pg_type t, pg_namespace n "
 			"WHERE a.attnum > 0 AND a.attrelid = c.oid AND c.relname = '");
+	tmp_name2 = php_addslashes(tmp_name2, strlen(tmp_name2), &new_len, 0 TSRMLS_CC);
+	smart_str_appendl(&querystr, tmp_name2, new_len);
 	
-	tmp_name = php_addslashes((char *)table_name, strlen(table_name), &new_len, 0 TSRMLS_CC);
+	smart_str_appends(&querystr, "' AND c.relnamespace = n.oid AND n.nspname = '");
+	tmp_name = php_addslashes(tmp_name, strlen(tmp_name), &new_len, 0 TSRMLS_CC);
 	smart_str_appendl(&querystr, tmp_name, new_len);
-	efree(tmp_name);
 
 	smart_str_appends(&querystr, "' AND a.atttypid = t.oid ORDER BY a.attnum;");
 	smart_str_0(&querystr);
 	
+	efree(tmp_name2);
+	efree(tmp_name);
+	efree(src);	
+	
 	pg_result = PQexec(pg_link, querystr.c);
 	if (PQresultStatus(pg_result) != PGRES_TUPLES_OK || (num_rows = PQntuples(pg_result)) == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Failed to query meta_data for '%s' table %s", table_name, querystr.c);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Table '%s' doesn't exists", table_name);
 		smart_str_free(&querystr);
 		PQclear(pg_result);
 		return FAILURE;
@@ -5832,7 +5852,7 @@ static int do_exec(smart_str *querystr, int expect, PGconn *pg_link, ulong opt T
 			PQclear(pg_result);
 			return 0;
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Failed to execute '%s'", querystr->c);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", PQresultErrorMessage(pg_result));
 			PQclear(pg_result);
 		}
 	}
@@ -6183,7 +6203,7 @@ cleanup:
 		FREE_ZVAL(ids_converted);
 	}
 	if (ret == SUCCESS && (opt & PGSQL_DML_STRING)) {
-		*sql = estrdup(querystr.c);
+		*sql = querystr.c;
 	}
 	else {
 		smart_str_free(&querystr);
