@@ -207,8 +207,6 @@ PHP_FUNCTION(define_syslog_variables)
 		return;
 	}
 
-	php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "define_syslog_variables is deprecated, please use the syslog constants instead");
-
 	if (!BG(syslog_started)) {
 		start_syslog(TSRMLS_C);
 	}
