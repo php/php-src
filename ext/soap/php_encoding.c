@@ -362,6 +362,7 @@ static zend_bool soap_check_xml_ref(zval **data, xmlNodePtr node TSRMLS_DC)
 static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xmlNodePtr parent, int use_class_map)
 {
 	xmlNodePtr node = NULL;
+	int add_type = 0;
 	TSRMLS_FETCH();
 
 	/* Special handling of class SoapVar */
@@ -478,14 +479,15 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 					    /* TODO: namespace isn't stored */
 					    if (SOAP_GLOBAL(sdl)) {
 					    	enc = get_encoder(SOAP_GLOBAL(sdl), SOAP_GLOBAL(sdl)->target_ns, type_name.s);
+					    	if (!enc) {
+						 		enc = find_encoder_by_type_name(SOAP_GLOBAL(sdl), type_name.s);
+						 	}
 					    }
 				    	if (enc) {
+				    		if (encode != enc && style == SOAP_LITERAL) {
+								add_type = 1;			    			
+				    		}
 				    		encode = enc;
-						} else if (SOAP_GLOBAL(sdl)) {
-							enc = find_encoder_by_type_name(SOAP_GLOBAL(sdl), type_name.s);
-							if (enc) {
-								encode = enc;
-							}
 						}
 						efree(type_name.v);
 				        break;
@@ -514,6 +516,9 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 		}
 		if (encode->to_xml) {
 			node = encode->to_xml(&encode->details, data, style, parent);
+			if (add_type) {
+				set_ns_and_type(node, &encode->details);
+			}
 		}
 	}
 	return node;
@@ -1594,6 +1599,13 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 			encodePtr enc;
 
 			data = get_zval_property(object, model->u.element->name TSRMLS_CC);
+			if (data &&
+			    Z_TYPE_P(data) == IS_NULL &&
+			    !model->u.element->nillable &&
+			    model->min_occurs > 0 &&
+			    !strict) {
+				return 0;
+			}
 			if (data) {
 				enc = model->u.element->encode;
 				if ((model->max_occurs == -1 || model->max_occurs > 1) &&
