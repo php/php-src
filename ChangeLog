@@ -1,3 +1,50 @@
+2008-10-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/fileinfo/libmagic/apprentice.c
+      ext/fileinfo/libmagic/file.h
+      ext/fileinfo/libmagic/magic.c
+      ext/fileinfo/libmagic/magic.h
+      ext/fileinfo/libmagic/print.c
+      ext/fileinfo/libmagic/softmagic.c:
+      
+      MFB: removed dead-code
+
+    * (PHP_5_3)
+      ext/fileinfo/libmagic/apprentice.c
+      ext/fileinfo/libmagic/file.h
+      ext/fileinfo/libmagic/magic.c
+      ext/fileinfo/libmagic/magic.h
+      ext/fileinfo/libmagic/print.c
+      ext/fileinfo/libmagic/softmagic.c:
+      Removed dead-code
+
+2008-10-15  Kalle Sommer Nielsen  <kalle.php@gmail.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/standard/syslog.c
+      win32/build/registersyslog.php:
+      [DOC] Deprecate define_syslog_variables() in 5.3
+
+    * NEWS
+      php.ini-dist
+      php.ini-recommended
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/php_ext_syslog.h
+      ext/standard/syslog.c
+      main/main.c
+      win32/build/registersyslog.php:
+      [DOC] Remove define_syslog_variables() and define_syslog_variables ini
+      option
+
+2008-10-15  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/pgsql.c
+      ext/pgsql/pgsql.c:
+      - Fixed possible efree(NULL)
+
 2008-10-14  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
