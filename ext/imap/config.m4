@@ -229,4 +229,34 @@ if test "$PHP_IMAP" != "no"; then
       AC_MSG_RESULT(no)
       AC_MSG_ERROR([build test failed. Please check the config.log for details.])
     ], $TST_LIBS)
+
+    AC_MSG_CHECKING(whether rfc822_output_address_list function present)
+    PHP_TEST_BUILD(foobar, [
+      AC_MSG_RESULT(yes)
+      AC_DEFINE(HAVE_RFC822_OUTPUT_ADDRESS_LIST, 1, [ ])
+    ], [
+      AC_MSG_RESULT(no)
+	], [
+      $TST_LIBS
+    ], [
+      void mm_log(void){}
+      void mm_dlog(void){}
+      void mm_flags(void){}
+      void mm_fatal(void){}
+      void mm_critical(void){}
+      void mm_nocritical(void){}
+      void mm_notify(void){}
+      void mm_login(void){}
+      void mm_diskerror(void){}
+      void mm_status(void){}
+      void mm_lsub(void){}
+      void mm_list(void){}
+      void mm_exists(void){}
+      void mm_searched(void){}
+      void mm_expunged(void){}
+      void rfc822_output_address_list(void);
+      void (*f)(void);
+      char foobar () {f = rfc822_output_address_list;}
+    ])
+
 fi
