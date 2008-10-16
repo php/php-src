@@ -12,6 +12,7 @@ PHP                                                                        NEWS
   (chsc at peytz dot dk, Felipe)
 - Fixed bug #46026 (bzip2.decompress/zlib.inflate filter tries to decompress
   after end of stream). (Keisial at gmail dot com, Greg)
+- Fixed buf #45722 (mb_check_encoding() crashes). (Moriyoshi)
 - Fixed bug #44251, #41125 (PDO + quote() + prepare() can result in segfault).
   (tsteiner at nerdclub dot net)
 - Fixed bug #42078 (pg_meta_data mix tables metadata from different schemas).
