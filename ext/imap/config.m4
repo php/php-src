@@ -235,4 +235,40 @@ if test "$PHP_IMAP" != "no"; then
       AC_MSG_RESULT(no)
       AC_MSG_ERROR([build test failed. Please check the config.log for details.])
     ], $TST_LIBS)
+
+    AC_MSG_CHECKING(whether rfc822_output_address_list function present)
+    PHP_TEST_BUILD(foobar, [
+      AC_MSG_RESULT(yes)
+      AC_DEFINE(HAVE_RFC822_OUTPUT_ADDRESS_LIST, 1, [ ])
+    ], [
+      AC_MSG_RESULT(no)
+	], [
+      $TST_LIBS
+    ], [
+#if defined(__GNUC__) && __GNUC__ >= 4
+# define PHP_IMAP_EXPORT __attribute__ ((visibility("default")))
+#else
+# define PHP_IMAP_EXPORT
+#endif
+
+      PHP_IMAP_EXPORT void mm_log(void){}
+      PHP_IMAP_EXPORT void mm_dlog(void){}
+      PHP_IMAP_EXPORT void mm_flags(void){}
+      PHP_IMAP_EXPORT void mm_fatal(void){}
+      PHP_IMAP_EXPORT void mm_critical(void){}
+      PHP_IMAP_EXPORT void mm_nocritical(void){}
+      PHP_IMAP_EXPORT void mm_notify(void){}
+      PHP_IMAP_EXPORT void mm_login(void){}
+      PHP_IMAP_EXPORT void mm_diskerror(void){}
+      PHP_IMAP_EXPORT void mm_status(void){}
+      PHP_IMAP_EXPORT void mm_lsub(void){}
+      PHP_IMAP_EXPORT void mm_list(void){}
+      PHP_IMAP_EXPORT void mm_exists(void){}
+      PHP_IMAP_EXPORT void mm_searched(void){}
+      PHP_IMAP_EXPORT void mm_expunged(void){}
+      void rfc822_output_address_list(void);
+      void (*f)(void);
+      char foobar () {f = rfc822_output_address_list;}
+    ])
+
 fi
