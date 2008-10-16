@@ -15,6 +15,7 @@ PHP                                                                        NEWS
 - Fixed buf #45722 (mb_check_encoding() crashes). (Moriyoshi)
 - Fixed bug #44251, #41125 (PDO + quote() + prepare() can result in segfault).
   (tsteiner at nerdclub dot net)
+- Fixed bug #43723 (SOAP not sent properly from client for <choice>). (Dmitry)
 - Fixed bug #42078 (pg_meta_data mix tables metadata from different schemas).
   (Felipe)
 - Fixed bug #37100 (data is returned truncated with BINARY CURSOR). (Tony)
