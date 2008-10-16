@@ -724,9 +724,9 @@ register struct parse *p;
 register cset *cs;
 {
 	register unsigned char *sp = p->next;
-	register struct cclass *cp;
+	register const struct cclass *cp;
 	register size_t len;
-	register unsigned char *u;
+	register const unsigned char *u;
 	register unsigned char c;
 
 	while (MORE() && isalpha(PEEK()))
@@ -795,7 +795,7 @@ register struct parse *p;
 int endc;			/* name ended by endc,']' */
 {
 	register unsigned char *sp = p->next;
-	register struct cname *cp;
+	register const struct cname *cp;
 	register int len;
 
 	while (MORE() && !SEETWO(endc, ']'))
@@ -1153,7 +1153,7 @@ static void
 mcadd(p, cs, cp)
 register struct parse *p;
 register cset *cs;
-register unsigned char *cp;
+register const unsigned char *cp;
 {
 	register size_t oldend = cs->smultis;
 
