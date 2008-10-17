@@ -38,7 +38,7 @@ var_dump($ar);
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-object(ArrayObject)#1 (2) {
+object(ArrayObject)#%d (2) {
   [0]=>
   int(0)
   [1]=>
