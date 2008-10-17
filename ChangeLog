@@ -1,3 +1,149 @@
+2008-10-16  Kalle Sommer Nielsen  <kalle.php@gmail.com>
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c
+      ext/standard/syslog.c:
+      Use PHP_DEP_FE instead of throwing an E_DEPRECATED manually inside
+      define_syslog_variables() (Thanks Hannes!)
+
+2008-10-16  Ed Batutis  <ed@batutis.com>
+
+    * ext/intl/msgformat/msgformat_helpers.cpp
+      ext/intl/msgformat/msgformat_helpers.cpp:
+      Fix for pecl bug 14664 - problem with older gcc
+
+2008-10-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/imap/config.m4
+      ext/imap/config.m4
+      ext/imap/config.m4
+      ext/imap/php_imap.c
+      ext/imap/php_imap.c
+      ext/imap/php_imap.c:
+      Fixed bug #42862 (IMAP toolkit crash: rfc822.c legacy routine buffer
+      overflow)
+
+    * ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c:
+      ws
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c:
+      Fixed bug #43723 (SOAP not sent properly from client for <choice>)
+
+2008-10-16  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/standard/exec.c
+      ext/standard/exec.c:
+      - Revert
+
+2008-10-16  Alexey Zakhlestin  <indeyets@gmail.com>
+
+    * (PHP_5_3)
+      ext/sqlite/sqlite.c:
+      Updated functions-signatures (const)
+
+    * ext/standard/exec.c:
+      MFB: Fixed compilation warnings: tsrm_ls is not used here (anymore?)
+
+    * (PHP_5_3)
+      ext/standard/exec.c:
+      Fixed compilation warnings: tsrm_ls is not used here (anymore?)
+
+    * ext/ereg/regex/regcomp.c
+      ext/ereg/regex/regcomp.ih
+      ext/simplexml/simplexml.c:
+      MFB: propagated const, to avoid "discards qualifiers from pointer target
+      type" errors
+
+    * (PHP_5_3)
+      ext/ereg/regex/regcomp.c
+      ext/ereg/regex/regcomp.ih
+      ext/simplexml/simplexml.c:
+      propagated const, to avoid "discards qualifiers from pointer target type"
+      errors
+
+2008-10-16  Moriyoshi Koizumi  <mozo@mozo.jp>
+
+    * ext/mbstring/libmbfl/filters/mbfilter_htmlent.c
+      ext/mbstring/tests/bug45722.phpt
+      ext/mbstring/tests/bug45722.phpt
+      ext/mbstring/tests/bug45722.phpt:
+      - Fix bug #45722 (mb_check_encoding() crashes).
+
+2008-10-16  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pgsql/pgsql.c
+      ext/pgsql/pgsql.c
+      ext/pgsql/tests/pg_delete_001.phpt
+      ext/pgsql/tests/pg_delete_001.phpt
+      ext/pgsql/tests/pg_insert_001.phpt
+      ext/pgsql/tests/pg_insert_001.phpt
+      ext/pgsql/tests/pg_meta_data_001.phpt
+      ext/pgsql/tests/pg_meta_data_001.phpt
+      ext/pgsql/tests/pg_select_001.phpt
+      ext/pgsql/tests/pg_select_001.phpt
+      ext/pgsql/tests/pg_update_001.phpt
+      ext/pgsql/tests/pg_update_001.phpt:
+      MFH:
+      - Fixed:
+        . Memory leak in pg_delete() when using PGSQL_DML_STRING.
+        . Bug #24679 (pg_insert problem!)
+        . Bug #35996 (pg_meta_data should take the schema into account)
+        . Bug #40808 (pg_insert problem)
+        . Bug #42078 (pg_meta_data mix tables metadata from different schemas)
+      - Improved:
+        . Error messages
+      - Added:
+        . Tests
+
+    * ext/pgsql/tests/pg_delete_001.phpt
+      ext/pgsql/tests/pg_delete_001.phpt
+      ext/pgsql/tests/pg_delete_001.phpt
+      ext/pgsql/tests/pg_insert_001.phpt
+      ext/pgsql/tests/pg_insert_001.phpt
+      ext/pgsql/tests/pg_insert_001.phpt
+      ext/pgsql/tests/pg_meta_data_001.phpt
+      ext/pgsql/tests/pg_meta_data_001.phpt
+      ext/pgsql/tests/pg_meta_data_001.phpt
+      ext/pgsql/tests/pg_select_001.phpt
+      ext/pgsql/tests/pg_select_001.phpt
+      ext/pgsql/tests/pg_select_001.phpt
+      ext/pgsql/tests/pg_update_001.phpt
+      ext/pgsql/tests/pg_update_001.phpt
+      ext/pgsql/tests/pg_update_001.phpt:
+        1.1.4;
+      - Fixed:
+        . Memory leak in pg_delete() when using PGSQL_DML_STRING.
+        . Bug #24679 (pg_insert problem!)
+        . Bug #35996 (pg_meta_data should take the schema into account)
+        . Bug #40808 (pg_insert problem)
+        . Bug #42078 (pg_meta_data mix tables metadata from different schemas)
+      - Improved:
+        . Error messages
+      - Added
+        . Tests
+
+    * ext/pgsql/pgsql.c:
+      - Fixed:
+        . Memory leak in pg_delete() when using PGSQL_DML_STRING.
+        . Bug #24679 (pg_insert problem!)
+        . Bug #35996 (pg_meta_data should take the schema into account)
+        . Bug #40808 (pg_insert problem)
+        . Bug #42078 (pg_meta_data mix tables metadata from different schemas)
+      - Improved:
+        . Error messages
+      - Added
+        . Tests
+
 2008-10-15  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/fileinfo/libmagic/apprentice.c
