@@ -61,7 +61,7 @@ array(6) {
   int(5)
 }
 string(1) "a"
-object(ArrayObject)#1 (5) {
+object(ArrayObject)#%d (5) {
   [0]=>
   int(0)
   [1]=>
@@ -84,13 +84,13 @@ NULL
 Notice: Undefined offset:  7 in %sarray_001.php on line %d
 
 Notice: Undefined index:  c in %sarray_001.php on line %d
-object(ArrayObject)#1 (2) {
+object(ArrayObject)#%d (2) {
   [0]=>
   int(0)
   [2]=>
   int(2)
 }
-object(ArrayObject)#1 (4) {
+object(ArrayObject)#%d (4) {
   [0]=>
   int(0)
   [2]=>
