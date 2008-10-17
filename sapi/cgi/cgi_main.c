@@ -376,6 +376,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	sapi_header_struct *h;
 	zend_llist_position pos;
 	zend_bool ignore_status = 0;
+	int response_status = SG(sapi_headers).http_response_code;
 
 	if (SG(request_info).no_headers == 1) {
 		return  SAPI_HEADER_SENT_SUCCESSFULLY;
@@ -387,7 +388,11 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 		zend_bool has_status = 0;
 
 		if (CGIG(rfc2616_headers) && SG(sapi_headers).http_status_line) {
+			char *s;
 			len = snprintf(buf, SAPI_CGI_MAX_HEADER_LENGTH, "%s\r\n", SG(sapi_headers).http_status_line);
+			if ((s = strchr(SG(sapi_headers).http_status_line, ' '))) {
+				response_status = atoi((s + 1));
+			}
 
 			if (len > SAPI_CGI_MAX_HEADER_LENGTH) {
 				len = SAPI_CGI_MAX_HEADER_LENGTH;
@@ -402,6 +407,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 				strncasecmp(SG(sapi_headers).http_status_line, "HTTP/", 5) == 0
 			) {
 				len = slprintf(buf, sizeof(buf), "Status:%s\r\n", s);
+				response_status = atoi((s + 1));
 			} else {
 				h = (sapi_header_struct*)zend_llist_get_first_ex(&sapi_headers->headers, &pos);
 				while (h) {
@@ -447,6 +453,9 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 					PHPWRITE_H(h->header, h->header_len);
 					PHPWRITE_H("\r\n", 2);
 				}
+			} else if (response_status == 304 && h->header_len > sizeof("Content-Type:")-1 && 
+					strncasecmp(h->header, "Content-Type:", sizeof("Content-Type:")-1) == 0) {
+				continue;
 			} else {
 				PHPWRITE_H(h->header, h->header_len);
 				PHPWRITE_H("\r\n", 2);
