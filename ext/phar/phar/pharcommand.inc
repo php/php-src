@@ -488,7 +488,9 @@ class PharCommand extends CLICommand
 
 			if (isset($loader)) {
 				$s = "<?php if (!class_exists('PHP_Archive')) {\n?>";
-				$s .= file_get_contents($loader);
+				if (is_file($loader)) {
+					$s .= file_get_contents($loader);
+				}
 				$s .= "<?php\n";
 				$s .= "}\n";
 				$s .= "if (!in_array('phar', stream_get_wrappers())) {\n";
