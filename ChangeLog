@@ -1,3 +1,282 @@
+2008-10-17  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/spl/spl_array.c:
+      fix memleak
+
+2008-10-17  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * ext/spl/tests/array_001.phpt
+      ext/spl/tests/array_001.phpt
+      ext/spl/tests/array_001.phpt:
+      Replacing explicit object ID with %d
+
+    * (PHP_5_2)
+      ext/spl/tests/array_001.phpt:
+      missed one!
+
+    * ext/spl/tests/arrayObject___construct_basic1.phpt
+      ext/spl/tests/arrayObject___construct_basic1.phpt
+      ext/spl/tests/arrayObject___construct_basic2.phpt
+      ext/spl/tests/arrayObject___construct_basic2.phpt
+      ext/spl/tests/arrayObject___construct_basic3.phpt
+      ext/spl/tests/arrayObject___construct_basic3.phpt
+      ext/spl/tests/arrayObject___construct_basic4.phpt
+      ext/spl/tests/arrayObject___construct_basic4.phpt
+      ext/spl/tests/arrayObject___construct_basic5.phpt
+      ext/spl/tests/arrayObject___construct_basic5.phpt
+      ext/spl/tests/arrayObject___construct_basic6.phpt
+      ext/spl/tests/arrayObject___construct_basic6.phpt
+      ext/spl/tests/arrayObject___construct_error1.phpt
+      ext/spl/tests/arrayObject___construct_error1.phpt
+      ext/spl/tests/arrayObject___construct_error2.phpt
+      ext/spl/tests/arrayObject___construct_error2.phpt
+      ext/spl/tests/arrayObject_asort_basic1.phpt
+      ext/spl/tests/arrayObject_asort_basic1.phpt
+      ext/spl/tests/arrayObject_asort_basic2.phpt
+      ext/spl/tests/arrayObject_asort_basic2.phpt
+      ext/spl/tests/arrayObject_clone_basic1.phpt
+      ext/spl/tests/arrayObject_clone_basic1.phpt
+      ext/spl/tests/arrayObject_clone_basic2.phpt
+      ext/spl/tests/arrayObject_clone_basic2.phpt
+      ext/spl/tests/arrayObject_clone_basic3.phpt
+      ext/spl/tests/arrayObject_clone_basic3.phpt
+      ext/spl/tests/arrayObject_count_basic1.phpt
+      ext/spl/tests/arrayObject_count_basic1.phpt
+      ext/spl/tests/arrayObject_exchangeArray_basic3.phpt
+      ext/spl/tests/arrayObject_exchangeArray_basic3.phpt
+      ext/spl/tests/arrayObject_getFlags_basic1.phpt
+      ext/spl/tests/arrayObject_getFlags_basic1.phpt
+      ext/spl/tests/arrayObject_getFlags_basic2.phpt
+      ext/spl/tests/arrayObject_getFlags_basic2.phpt
+      ext/spl/tests/arrayObject_getIteratorClass_basic1.phpt
+      ext/spl/tests/arrayObject_getIteratorClass_basic1.phpt
+      ext/spl/tests/arrayObject_ksort_basic1.phpt
+      ext/spl/tests/arrayObject_ksort_basic1.phpt
+      ext/spl/tests/arrayObject_ksort_basic2.phpt
+      ext/spl/tests/arrayObject_ksort_basic2.phpt
+      ext/spl/tests/arrayObject_magicMethods1.phpt
+      ext/spl/tests/arrayObject_magicMethods1.phpt
+      ext/spl/tests/arrayObject_magicMethods2.phpt
+      ext/spl/tests/arrayObject_magicMethods2.phpt
+      ext/spl/tests/arrayObject_magicMethods3.phpt
+      ext/spl/tests/arrayObject_magicMethods3.phpt
+      ext/spl/tests/arrayObject_magicMethods4.phpt
+      ext/spl/tests/arrayObject_magicMethods4.phpt
+      ext/spl/tests/arrayObject_magicMethods5.phpt
+      ext/spl/tests/arrayObject_magicMethods5.phpt
+      ext/spl/tests/arrayObject_magicMethods6.phpt
+      ext/spl/tests/arrayObject_magicMethods6.phpt
+      ext/spl/tests/arrayObject_natcasesort_basic1.phpt
+      ext/spl/tests/arrayObject_natcasesort_basic1.phpt
+      ext/spl/tests/arrayObject_natsort_basic1.phpt
+      ext/spl/tests/arrayObject_natsort_basic1.phpt
+      ext/spl/tests/arrayObject_setFlags_basic1.phpt
+      ext/spl/tests/arrayObject_setFlags_basic1.phpt
+      ext/spl/tests/arrayObject_setFlags_basic2.phpt
+      ext/spl/tests/arrayObject_setFlags_basic2.phpt
+      ext/spl/tests/arrayObject_setIteratorClass_error1.phpt
+      ext/spl/tests/arrayObject_setIteratorClass_error1.phpt
+      ext/spl/tests/arrayObject_uasort_basic1.phpt
+      ext/spl/tests/arrayObject_uasort_basic1.phpt
+      ext/spl/tests/arrayObject_uasort_error1.phpt
+      ext/spl/tests/arrayObject_uasort_error1.phpt
+      ext/spl/tests/arrayObject_uksort_basic1.phpt
+      ext/spl/tests/arrayObject_uksort_basic1.phpt
+      ext/spl/tests/arrayObject_uksort_error1.phpt
+      ext/spl/tests/arrayObject_uksort_error1.phpt
+      ext/spl/tests/class_implements_basic.phpt
+      ext/spl/tests/class_implements_basic.phpt
+      ext/spl/tests/class_implements_basic2.phpt
+      ext/spl/tests/class_implements_basic2.phpt
+      ext/spl/tests/class_implements_variation.phpt
+      ext/spl/tests/class_implements_variation.phpt
+      ext/spl/tests/class_implements_variation1.phpt
+      ext/spl/tests/class_implements_variation1.phpt
+      ext/spl/tests/class_implements_variation2.phpt
+      ext/spl/tests/class_implements_variation2.phpt
+      ext/spl/tests/countable_class_basic1.phpt
+      ext/spl/tests/countable_class_basic1.phpt
+      ext/spl/tests/countable_count_variation1.phpt
+      ext/spl/tests/countable_count_variation1.phpt:
+      Committing for Robin Fernandes
+
+    * ext/spl/tests/arrayObject___construct_basic1.phpt
+      ext/spl/tests/arrayObject___construct_basic1.phpt
+      ext/spl/tests/arrayObject___construct_basic1.phpt
+      ext/spl/tests/arrayObject___construct_basic2.phpt
+      ext/spl/tests/arrayObject___construct_basic2.phpt
+      ext/spl/tests/arrayObject___construct_basic2.phpt
+      ext/spl/tests/arrayObject___construct_basic3.phpt
+      ext/spl/tests/arrayObject___construct_basic3.phpt
+      ext/spl/tests/arrayObject___construct_basic3.phpt
+      ext/spl/tests/arrayObject___construct_basic4.phpt
+      ext/spl/tests/arrayObject___construct_basic4.phpt
+      ext/spl/tests/arrayObject___construct_basic4.phpt
+      ext/spl/tests/arrayObject___construct_basic5.phpt
+      ext/spl/tests/arrayObject___construct_basic5.phpt
+      ext/spl/tests/arrayObject___construct_basic5.phpt
+      ext/spl/tests/arrayObject___construct_basic6.phpt
+      ext/spl/tests/arrayObject___construct_basic6.phpt
+      ext/spl/tests/arrayObject___construct_basic6.phpt
+      ext/spl/tests/arrayObject___construct_error1.phpt
+      ext/spl/tests/arrayObject___construct_error1.phpt
+      ext/spl/tests/arrayObject___construct_error1.phpt
+      ext/spl/tests/arrayObject___construct_error2.phpt
+      ext/spl/tests/arrayObject___construct_error2.phpt
+      ext/spl/tests/arrayObject___construct_error2.phpt
+      ext/spl/tests/arrayObject_asort_basic1.phpt
+      ext/spl/tests/arrayObject_asort_basic1.phpt
+      ext/spl/tests/arrayObject_asort_basic1.phpt
+      ext/spl/tests/arrayObject_asort_basic2.phpt
+      ext/spl/tests/arrayObject_asort_basic2.phpt
+      ext/spl/tests/arrayObject_asort_basic2.phpt
+      ext/spl/tests/arrayObject_clone_basic1.phpt
+      ext/spl/tests/arrayObject_clone_basic1.phpt
+      ext/spl/tests/arrayObject_clone_basic1.phpt
+      ext/spl/tests/arrayObject_clone_basic3.phpt
+      ext/spl/tests/arrayObject_clone_basic3.phpt
+      ext/spl/tests/arrayObject_clone_basic3.phpt
+      ext/spl/tests/arrayObject_count_basic1.phpt
+      ext/spl/tests/arrayObject_count_basic1.phpt
+      ext/spl/tests/arrayObject_count_basic1.phpt
+      ext/spl/tests/arrayObject_exchangeArray_basic3.phpt
+      ext/spl/tests/arrayObject_exchangeArray_basic3.phpt
+      ext/spl/tests/arrayObject_exchangeArray_basic3.phpt
+      ext/spl/tests/arrayObject_getFlags_basic2.phpt
+      ext/spl/tests/arrayObject_getFlags_basic2.phpt
+      ext/spl/tests/arrayObject_getFlags_basic2.phpt
+      ext/spl/tests/arrayObject_getIteratorClass_basic1.phpt
+      ext/spl/tests/arrayObject_getIteratorClass_basic1.phpt
+      ext/spl/tests/arrayObject_getIteratorClass_basic1.phpt
+      ext/spl/tests/arrayObject_ksort_basic2.phpt
+      ext/spl/tests/arrayObject_ksort_basic2.phpt
+      ext/spl/tests/arrayObject_ksort_basic2.phpt
+      ext/spl/tests/arrayObject_magicMethods2.phpt
+      ext/spl/tests/arrayObject_magicMethods2.phpt
+      ext/spl/tests/arrayObject_magicMethods2.phpt
+      ext/spl/tests/arrayObject_magicMethods3.phpt
+      ext/spl/tests/arrayObject_magicMethods3.phpt
+      ext/spl/tests/arrayObject_magicMethods3.phpt
+      ext/spl/tests/arrayObject_magicMethods4.phpt
+      ext/spl/tests/arrayObject_magicMethods4.phpt
+      ext/spl/tests/arrayObject_magicMethods4.phpt
+      ext/spl/tests/arrayObject_magicMethods5.phpt
+      ext/spl/tests/arrayObject_magicMethods5.phpt
+      ext/spl/tests/arrayObject_magicMethods5.phpt
+      ext/spl/tests/arrayObject_magicMethods6.phpt
+      ext/spl/tests/arrayObject_magicMethods6.phpt
+      ext/spl/tests/arrayObject_magicMethods6.phpt
+      ext/spl/tests/arrayObject_natcasesort_basic1.phpt
+      ext/spl/tests/arrayObject_natcasesort_basic1.phpt
+      ext/spl/tests/arrayObject_natcasesort_basic1.phpt
+      ext/spl/tests/arrayObject_setFlags_basic1.phpt
+      ext/spl/tests/arrayObject_setFlags_basic1.phpt
+      ext/spl/tests/arrayObject_setFlags_basic1.phpt
+      ext/spl/tests/arrayObject_setFlags_basic2.phpt
+      ext/spl/tests/arrayObject_setFlags_basic2.phpt
+      ext/spl/tests/arrayObject_setFlags_basic2.phpt
+      ext/spl/tests/arrayObject_uasort_basic1.phpt
+      ext/spl/tests/arrayObject_uasort_basic1.phpt
+      ext/spl/tests/arrayObject_uasort_basic1.phpt
+      ext/spl/tests/arrayObject_uksort_basic1.phpt
+      ext/spl/tests/arrayObject_uksort_basic1.phpt
+      ext/spl/tests/arrayObject_uksort_basic1.phpt
+      ext/spl/tests/arrayObject_uksort_error1.phpt
+      ext/spl/tests/arrayObject_uksort_error1.phpt
+      ext/spl/tests/arrayObject_uksort_error1.phpt
+      ext/spl/tests/class_implements_basic.phpt
+      ext/spl/tests/class_implements_basic.phpt
+      ext/spl/tests/class_implements_basic.phpt
+      ext/spl/tests/class_implements_error.phpt
+      ext/spl/tests/class_implements_error.phpt
+      ext/spl/tests/class_implements_variation.phpt
+      ext/spl/tests/class_implements_variation.phpt
+      ext/spl/tests/class_implements_variation.phpt
+      ext/spl/tests/countable_class_basic1.phpt
+      ext/spl/tests/countable_class_basic1.phpt
+      ext/spl/tests/countable_class_basic1.phpt:
+        1.1.4;
+      file arrayObject___construct_basic1.phpt was initially added on branch
+      PHP_5_2.
+
+    * ext/spl/tests/arrayObject_clone_basic2.phpt
+      ext/spl/tests/arrayObject_clone_basic2.phpt
+      ext/spl/tests/arrayObject_clone_basic2.phpt
+      ext/spl/tests/arrayObject_getFlags_basic1.phpt
+      ext/spl/tests/arrayObject_getFlags_basic1.phpt
+      ext/spl/tests/arrayObject_getFlags_basic1.phpt
+      ext/spl/tests/arrayObject_ksort_basic1.phpt
+      ext/spl/tests/arrayObject_ksort_basic1.phpt
+      ext/spl/tests/arrayObject_ksort_basic1.phpt
+      ext/spl/tests/arrayObject_magicMethods1.phpt
+      ext/spl/tests/arrayObject_magicMethods1.phpt
+      ext/spl/tests/arrayObject_magicMethods1.phpt
+      ext/spl/tests/arrayObject_natsort_basic1.phpt
+      ext/spl/tests/arrayObject_natsort_basic1.phpt
+      ext/spl/tests/arrayObject_natsort_basic1.phpt
+      ext/spl/tests/arrayObject_setIteratorClass_error1.phpt
+      ext/spl/tests/arrayObject_setIteratorClass_error1.phpt
+      ext/spl/tests/arrayObject_setIteratorClass_error1.phpt
+      ext/spl/tests/arrayObject_uasort_error1.phpt
+      ext/spl/tests/arrayObject_uasort_error1.phpt
+      ext/spl/tests/arrayObject_uasort_error1.phpt
+      ext/spl/tests/class_implements_basic2.phpt
+      ext/spl/tests/class_implements_basic2.phpt
+      ext/spl/tests/class_implements_basic2.phpt
+      ext/spl/tests/class_implements_variation1.phpt
+      ext/spl/tests/class_implements_variation1.phpt
+      ext/spl/tests/class_implements_variation1.phpt
+      ext/spl/tests/class_implements_variation2.phpt
+      ext/spl/tests/class_implements_variation2.phpt
+      ext/spl/tests/class_implements_variation2.phpt
+      ext/spl/tests/countable_count_variation1.phpt
+      ext/spl/tests/countable_count_variation1.phpt
+      ext/spl/tests/countable_count_variation1.phpt:
+        1.1.4;
+      file arrayObject_clone_basic2.phpt was initially added on branch PHP_5_2.
+
+2008-10-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug46308.phpt
+      ZendEngine2/tests/bug46308.phpt
+      ZendEngine2/tests/bug46308.phpt
+      ZendEngine2/tests/bug46308.phpt
+      ZendEngine2/tests/bug46308.phpt:
+      Fixed bug #46308 (Invalid write when changing property from inside getter)
+
+2008-10-17  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/phar/phar/pharcommand.inc:
+      - MFH: Fixed bug #45726 (PHP_Archive / Archive.php missing)
+
+    * ext/phar/phar/pharcommand.inc:
+      - Fixed bug #45726 (PHP_Archive / Archive.php missing)
+
+2008-10-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/cgi/cgi_main.c:
+      MFB: Fixed bug #46319 (PHP sets default Content-Type header for HTTP 304
+      response code, in cgi sapi)
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/cgi_main.c:
+      
+      MFB: Fixed bug #46319 (PHP sets default Content-Type header for HTTP 304
+      response code, in cgi sapi)
+
+    * (PHP_5_3)
+      sapi/cgi/cgi_main.c:
+      Fixed bug #46319 (PHP sets default Content-Type header for HTTP 304
+      response
+      code, in cgi sapi)
+
 2008-10-16  Kalle Sommer Nielsen  <kalle.php@gmail.com>
 
     * (PHP_5_3)

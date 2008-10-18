@@ -1,3 +1,18 @@
+2008-10-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_object_handlers.c
+      zend_object_handlers.c
+      zend_object_handlers.c
+      tests/bug46308.phpt
+      tests/bug46308.phpt:
+      Fixed bug #46308 (Invalid write when changing property from inside getter)
+
+    * tests/bug46308.phpt
+      tests/bug46308.phpt
+      tests/bug46308.phpt:
+        1.1.4;
+      file bug46308.phpt was initially added on branch PHP_5_2.
+
 2008-10-10  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_API.c
