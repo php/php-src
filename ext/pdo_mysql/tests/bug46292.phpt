@@ -34,6 +34,7 @@ if (version_compare(PHP_VERSION, '5.1.0', '<'))
 	class myclass2 extends myclass { }
 
 	$pdoDb->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+	$pdoDb->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 	
 	$pdoDb->query('DROP TABLE IF EXISTS testz');
 	
