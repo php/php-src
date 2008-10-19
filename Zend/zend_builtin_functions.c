@@ -26,6 +26,7 @@
 #include "zend_ini.h"
 #include "zend_exceptions.h"
 #include "zend_extensions.h"
+#include <ctype.h>
 
 #undef ZEND_TEST_EXCEPTIONS
 
@@ -454,35 +455,58 @@ ZEND_FUNCTION(error_reporting)
    Define a new constant */
 ZEND_FUNCTION(define)
 {
-	zval **var, **val, **non_cs, *val_free = NULL;
-	int case_sensitive;
+	char *name, *p;
+	int name_len;
+	zval *val;
+	zval *val_free = NULL;
+	zend_bool non_cs = 0;
+	int case_sensitive = CONST_CS;
 	zend_constant c;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 2:
-			if (zend_get_parameters_ex(2, &var, &val)==FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|b", &name, &name_len, &val, &non_cs) == FAILURE) {
+		return;
+	}
+
+	/* check if class constant */
+	if ((p = memchr(name, ':', name_len))) {
+		char *s = name;
+		zend_class_entry **ce;
+
+		if (*(p + 1) != ':') { /* invalid constant specifier */
+			RETURN_FALSE;
+		} else if ((p + 2) >= (name + name_len)) { /* constant name length < 1 */
+			zend_error(E_WARNING, "Constants name cannot be empty");
+			RETURN_FALSE;
+		} else if (zend_lookup_class(s, (p - s), &ce TSRMLS_CC) != SUCCESS) { /* invalid class name */
+			zend_error(E_WARNING, "Class does not exists");
+			RETURN_FALSE;
+		} else { /* check of constant name contains invalid chars */
+			int ok = 1;
+			p += 2; /* move beyond :: to 1st char of constant's name */
+
+			if (!isalpha(*p) && *p != '_') {
+				ok = 0;
+			}
+
+			while (ok && *++p) {
+				if (!isalnum(*p) && *p != '_') {
+					ok = 0;
+					break;
+				}
+			}
+
+			if (!ok) {
 				RETURN_FALSE;
 			}
-			case_sensitive = CONST_CS;
-			break;
-		case 3:
-			if (zend_get_parameters_ex(3, &var, &val, &non_cs)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(non_cs);
-			if (Z_LVAL_PP(non_cs)) {
-				case_sensitive = 0;
-			} else {
-				case_sensitive = CONST_CS;
-			}
-			break;
-		default:
-			ZEND_WRONG_PARAM_COUNT();
-			break;
+		}
+	}
+
+	if(non_cs) {
+		case_sensitive = 0;
 	}
 
 repeat:
-	switch (Z_TYPE_PP(val)) {
+	switch (Z_TYPE_P(val)) {
 		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_STRING:
@@ -492,13 +516,13 @@ repeat:
 			break;
 		case IS_OBJECT:
 			if (!val_free) {
-				if (Z_OBJ_HT_PP(val)->get) {
-					val_free = *val = Z_OBJ_HT_PP(val)->get(*val TSRMLS_CC);
+				if (Z_OBJ_HT_P(val)->get) {
+					val_free = val = Z_OBJ_HT_P(val)->get(val TSRMLS_CC);
 					goto repeat;
-				} else if (Z_OBJ_HT_PP(val)->cast_object) {
+				} else if (Z_OBJ_HT_P(val)->cast_object) {
 					ALLOC_INIT_ZVAL(val_free);
-					if (Z_OBJ_HT_PP(val)->cast_object(*val, val_free, IS_STRING TSRMLS_CC) == SUCCESS) {
-						val = &val_free;
+					if (Z_OBJ_HT_P(val)->cast_object(val, val_free, IS_STRING TSRMLS_CC) == SUCCESS) {
+						val = val_free;
 						break;
 					}
 				}
@@ -511,16 +535,15 @@ repeat:
 			}
 			RETURN_FALSE;
 	}
-	convert_to_string_ex(var);
 	
-	c.value = **val;
+	c.value = *val;
 	zval_copy_ctor(&c.value);
 	if (val_free) {
 		zval_ptr_dtor(&val_free);
 	}
 	c.flags = case_sensitive; /* non persistent */
-	c.name = zend_strndup(Z_STRVAL_PP(var), Z_STRLEN_PP(var));
-	c.name_len = Z_STRLEN_PP(var)+1;
+	c.name = zend_strndup(name, name_len);
+	c.name_len = name_len+1;
 	c.module_number = PHP_USER_CONSTANT;
 	if (zend_register_constant(&c TSRMLS_CC) == SUCCESS) {
 		RETURN_TRUE;
