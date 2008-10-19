@@ -75,7 +75,7 @@ if (version_compare(PHP_VERSION, '5.0.0', '<'))
 	print "done!\n";
 ?>
 --EXPECTF--
-__construct('%s', '%s', '%s')
+__construct('%S', '%S', '%S')
 exec('DROP TABLE IF EXISTS test')
 exec('CREATE TABLE test(id INT)')
 exec('INSERT INTO test(id) VALUES (1), (2)')
