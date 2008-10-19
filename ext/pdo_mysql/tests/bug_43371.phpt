@@ -2,7 +2,6 @@
 Bug #43371 (Memory errors in PDO constructor)
 --SKIPIF--
 <?php
-<?php
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
