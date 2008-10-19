@@ -155,7 +155,7 @@ class MySQLPDOTest extends PDOTest {
 			phpinfo();
 			$tmp = ob_get_contents();
 			ob_end_clean();
-			return (true == stristr($tmp, 'PDO Driver for MySQL, mysql native driver version'));
+			return (bool)preg_match('/Client API version.*mysqlnd/', $tmp);
 	}
 
 }
