@@ -1551,7 +1551,9 @@ COMMAND $cmd
 			// Stick to basics
 			$wanted_re = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $wanted_re);
 			$wanted_re = str_replace('%s', '[^\r\n]+', $wanted_re);
+			$wanted_re = str_replace('%S', '[^\r\n]*', $wanted_re);
 			$wanted_re = str_replace('%a', '.+', $wanted_re);
+			$wanted_re = str_replace('%A', '.*', $wanted_re);
 			$wanted_re = str_replace('%w', '\s*', $wanted_re);
 			$wanted_re = str_replace('%i', '[+-]?\d+', $wanted_re);
 			$wanted_re = str_replace('%d', '\d+', $wanted_re);
