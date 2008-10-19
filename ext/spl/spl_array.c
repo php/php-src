@@ -1009,9 +1009,7 @@ SPL_METHOD(Array, __construct)
 	spl_array_object *intern;
 	zval **array;
 	long ar_flags = 0;
-	char *class_name;
-	int class_name_len;
-	zend_class_entry ** pce_get_iterator;
+	zend_class_entry *ce_get_iterator = spl_ce_Iterator;
 
 	if (ZEND_NUM_ARGS() == 0) {
 		return; /* nothing to do */
@@ -1021,16 +1019,12 @@ SPL_METHOD(Array, __construct)
 
 	intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|ls", &array, &ar_flags, &class_name, &class_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|lC", &array, &ar_flags, &ce_get_iterator) == FAILURE) {
 		return;
 	}
 
 	if (ZEND_NUM_ARGS() > 2) {
-		if (zend_lookup_class(class_name, class_name_len, &pce_get_iterator TSRMLS_CC) == FAILURE) {
-			zend_throw_exception(spl_ce_InvalidArgumentException, "A class that implements Iterator must be specified", 0 TSRMLS_CC);
-			return;
-		}
-		intern->ce_get_iterator = *pce_get_iterator;
+		intern->ce_get_iterator = ce_get_iterator;
 	}
 
 	ar_flags &= ~SPL_ARRAY_INT_MASK;
@@ -1046,19 +1040,13 @@ SPL_METHOD(Array, setIteratorClass)
 {
 	zval *object = getThis();
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
-	char *class_name;
-	int class_name_len;
-	zend_class_entry ** pce_get_iterator;
+	zend_class_entry * ce_get_iterator = spl_ce_Iterator;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &class_name, &class_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "C", &ce_get_iterator) == FAILURE) {
 		return;
 	}
 
-	if (zend_lookup_class(class_name, class_name_len, &pce_get_iterator TSRMLS_CC) == FAILURE) {
-		zend_throw_exception(spl_ce_InvalidArgumentException, "A class that implements Iterator must be specified", 0 TSRMLS_CC);
-		return;
-	}
-	intern->ce_get_iterator = *pce_get_iterator;
+	intern->ce_get_iterator = ce_get_iterator;
 }
 /* }}} */
 

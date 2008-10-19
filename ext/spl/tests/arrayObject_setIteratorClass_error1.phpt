@@ -1,7 +1,5 @@
 --TEST--
 SPL: ArrayObject with bad iterator class.
---XFAIL--
-Expected to fail on PHP5 - see http://bugs.php.net/bug.php?id=46317.
 --FILE--
 <?php
 try {
