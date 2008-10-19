@@ -1,7 +1,5 @@
 --TEST--
 SPL: ArrayObject::__construct with bad iterator.
---XFAIL--
-See bug http://bugs.php.net/bug.php?id=46317
 --FILE--
 <?php
 echo "Bad iterator type:\n";

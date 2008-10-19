@@ -1,7 +1,5 @@
 --TEST--
 SPL: ArrayObject::setIteratorClass with bad iterator class.
---XFAIL--
-See bug http://bugs.php.net/bug.php?id=46317
 --FILE--
 <?php
 try {
