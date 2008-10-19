@@ -1,3 +1,9 @@
+2008-10-18  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/spl/spl_array.c:
+      revert the patch, it's not needed in this branch
+
 2008-10-17  Antony Dovgal  <tony@daylessday.org>
 
     * ext/spl/spl_array.c:
