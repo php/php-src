@@ -966,12 +966,13 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 	php_mysql_packet_row *row_packet = result->row_packet;
 
 	DBG_ENTER("mysqlnd_fetch_stmt_row_cursor");
-	DBG_INF_FMT("stmt=%lu flags=%u", stmt->stmt_id, flags);
 
 	if (!stmt) {
 		DBG_ERR("no statement");
 		DBG_RETURN(FAIL);
 	}
+
+	DBG_INF_FMT("stmt=%lu flags=%u", stmt->stmt_id, flags);
 
 	if (stmt->state < MYSQLND_STMT_USER_FETCHING) {
 		/* Only initted - error */
