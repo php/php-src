@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? Oct 2008, PHP 5.2.7RC2
 - Fixed bug #46341 (Added missing validation checks into define() for class
   constants). (Ilia)
+- Fixed bug #46335 (DOMText::splitText doesn't handle multibyte characters).
+  (Rob)
 - Fixed bug #46319 (PHP sets default Content-Type header for HTTP 304
   response code, in cgi sapi). (Ilia)
 - Fixed bug #46308 (Invalid write when changing property from inside getter).
