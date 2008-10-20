@@ -1,3 +1,61 @@
+2008-10-19  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/pdo_mysql/tests/bug_43371.phpt
+      ext/pdo_mysql/tests/bug_43371.phpt:
+      - Fixed test
+
+2008-10-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_builtin_functions.c:
+      MFB: Fixed bug #46341 (Added missing validation checks into define() for
+      class constants)
+
+    * (PHP_5_3)
+      ZendEngine2/zend_builtin_functions.c:
+      Fixed bug #46341 (Added missing validation checks into define() for class
+      constants)
+
+2008-10-19  Johannes Schlüter  <johannes@schlueters.de>
+
+    * run-tests.php
+      run-tests.php
+      run-tests.php:
+      Add %S and %A to EXPECTF, they work like %s and %a but match empty strings,
+      too
+
+2008-10-19  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_2)
+      ext/spl/spl_array.c
+      ext/spl/tests/arrayObject___construct_error1.phpt
+      ext/spl/tests/arrayObject_setIteratorClass_error1.phpt:
+      MFB: Fix #46317 (Iterator class not properly checked)
+
+    * (PHP_5_3)
+      ext/spl/spl_array.c
+      ext/spl/tests/arrayObject___construct_error1.phpt
+      ext/spl/tests/arrayObject_setIteratorClass_error1.phpt:
+      Fix #46317 (Iterator class not properly checked)
+
+    * ext/spl/spl_array.c:
+      Link to spl iterator
+
+2008-10-19  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ext/pdo_mysql/tests/mysql_pdo_test.inc:
+      fix mysqlnd detection
+
+    * ext/mysqlnd/mysqlnd_ps.c:
+      Don't dereference NULL-pointer
+
+    * ext/pdo_mysql/tests/bug46292.phpt
+      ext/pdo_mysql/tests/bug46292.phpt
+      ext/pdo_mysql/tests/pdo_mysql_subclass.phpt
+      ext/pdo_mysql/tests/pdo_mysql_subclass.phpt:
+      Fix test
+
 2008-10-18  Antony Dovgal  <tony@daylessday.org>
 
     * (PHP_5_2)

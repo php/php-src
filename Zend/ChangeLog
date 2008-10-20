@@ -1,3 +1,15 @@
+2008-10-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      zend_builtin_functions.c:
+      MFB: Fixed bug #46341 (Added missing validation checks into define() for
+      class constants)
+
+    * (PHP_5_3)
+      zend_builtin_functions.c:
+      Fixed bug #46341 (Added missing validation checks into define() for class
+      constants)
+
 2008-10-17  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_object_handlers.c
