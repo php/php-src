@@ -529,6 +529,7 @@ static int _php_filter_validate_ipv6(char *str, int str_len TSRMLS_DC) /* {{{ */
 	char *ipv4;
 	char *end;
 	int ip4elm[4];
+	char *s = str;
 
 	if (!memchr(str, ':', str_len)) {
 		return 0;
@@ -568,6 +569,8 @@ static int _php_filter_validate_ipv6(char *str, int str_len TSRMLS_DC) /* {{{ */
 					return 1;
 				}
 				compressed = 1;
+			} else if ((str - 1) == s) {
+				return 0;
 			}				
 		}
 		n = 0;
