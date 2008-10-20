@@ -789,7 +789,6 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	int str_len = 0, num_vars = 0, num_vars_max = 2*10, *len_list = NULL;
 	char **val_list = NULL;
 #endif
-	zend_bool magic_quotes_gpc;
 	multipart_buffer *mbuff;
 	zval *array_ptr = (zval *) arg;
 	int fd=-1;
@@ -1280,12 +1279,18 @@ filedone:
 			}
 			s = "";
 
+			{
+			/* store temp_filename as-is (without magic_quotes_gpc-ing it, in case upload_tmp_dir
+			 * contains escapeable characters. escape only the variable name.) */
+			zval zfilename;
+
 			/* Initialize variables */
 			add_protected_variable(param TSRMLS_CC);
 
 			/* if param is of form xxx[.*] this will cut it to xxx */
 			if (!is_anonymous) {
-				safe_php_register_variable(param, temp_filename, strlen(temp_filename), NULL, 1 TSRMLS_CC);
+				ZVAL_STRING(&zfilename, temp_filename, 1);
+				safe_php_register_variable_ex(param, &zfilename, NULL, 1 TSRMLS_CC);
 			}
 	
 			/* Add $foo[tmp_name] */
@@ -1295,7 +1300,9 @@ filedone:
 				snprintf(lbuf, llen, "%s[tmp_name]", param);
 			}
 			add_protected_variable(lbuf TSRMLS_CC);
-			register_http_post_files_variable(lbuf, temp_filename, http_post_files, 1 TSRMLS_CC);
+			ZVAL_STRING(&zfilename, temp_filename, 1);
+			register_http_post_files_variable_ex(lbuf, &zfilename, http_post_files, 1 TSRMLS_CC);
+			}
 
 			{
 				zval file_size, error_type;
