@@ -7,6 +7,7 @@ PHP                                                                        NEWS
   (Rob)
 - Fixed bug #46319 (PHP sets default Content-Type header for HTTP 304
   response code, in cgi sapi). (Ilia)
+- Fixed bug #46313 (Magic quotes broke $_FILES). (Arnaud)
 - Fixed bug #46308 (Invalid write when changing property from inside getter).
   (Dmitry)
 - Fixed bug #46292 (PDO::setFetchMode() shouldn't requires the 2nd arg when 
