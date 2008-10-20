@@ -1913,6 +1913,16 @@ internal_loaded:
 		goto error1;
 	}
 
+	/* php_magic_database is a const, performing writes will segfault. This is for big-endian
+	machines only, PPC and Sparc specifically. Consider static variable or MINIT in
+	future. */
+	if (needsbyteswap && fn == NULL) {
+		mm = emalloc(sizeof(php_magic_database));
+		mm = memcpy(mm, php_magic_database, sizeof(php_magic_database));
+		*magicp = mm;
+		ret = 1;
+	}
+
 	if (fn == NULL) {
 		*nmagicp = (sizeof(php_magic_database) / sizeof(struct magic));
 	} else {
