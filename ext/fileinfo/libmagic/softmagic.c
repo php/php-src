@@ -582,16 +582,16 @@ cvt_64(union VALUETYPE *p, const struct magic *m)
 	if (m->num_mask) \
 		switch (m->mask_op & FILE_OPS_MASK) { \
 		case FILE_OPADD: \
-			p->fld += cast m->num_mask; \
+			p->fld += cast (int64_t)m->num_mask; \
 			break; \
 		case FILE_OPMINUS: \
-			p->fld -= cast m->num_mask; \
+			p->fld -= cast (int64_t)m->num_mask; \
 			break; \
 		case FILE_OPMULTIPLY: \
-			p->fld *= cast m->num_mask; \
+			p->fld *= cast (int64_t)m->num_mask; \
 			break; \
 		case FILE_OPDIVIDE: \
-			p->fld /= cast m->num_mask; \
+			p->fld /= cast (int64_t)m->num_mask; \
 			break; \
 		} \
 
@@ -1860,7 +1860,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 	case 'x':
 		if ((ms->flags & MAGIC_DEBUG) != 0)
 			(void) fprintf(stderr, "%llu == *any* = 1\n",
-			    (unsigned long long)v);
+			    (uint64_t)v);
 		matched = 1;
 		break;
 
@@ -1868,7 +1868,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 		matched = v != l;
 		if ((ms->flags & MAGIC_DEBUG) != 0)
 			(void) fprintf(stderr, "%llu != %llu = %d\n",
-			    (unsigned long long)v, (unsigned long long)l,
+			    (uint64_t)v, (uint64_t)l,
 			    matched);
 		break;
 
@@ -1876,7 +1876,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 		matched = v == l;
 		if ((ms->flags & MAGIC_DEBUG) != 0)
 			(void) fprintf(stderr, "%llu == %llu = %d\n",
-			    (unsigned long long)v, (unsigned long long)l,
+			    (uint64_t)v, (uint64_t)l,
 			    matched);
 		break;
 
@@ -1885,14 +1885,14 @@ magiccheck(struct magic_set *ms, struct magic *m)
 			matched = v > l;
 			if ((ms->flags & MAGIC_DEBUG) != 0)
 				(void) fprintf(stderr, "%llu > %llu = %d\n",
-				    (unsigned long long)v,
-				    (unsigned long long)l, matched);
+				    (uint64_t)v,
+				    (uint64_t)l, matched);
 		}
 		else {
 			matched = (int64_t) v > (int64_t) l;
 			if ((ms->flags & MAGIC_DEBUG) != 0)
 				(void) fprintf(stderr, "%lld > %lld = %d\n",
-				    (long long)v, (long long)l, matched);
+				    (uint64_t)v, (uint64_t)l, matched);
 		}
 		break;
 
@@ -1901,14 +1901,14 @@ magiccheck(struct magic_set *ms, struct magic *m)
 			matched = v < l;
 			if ((ms->flags & MAGIC_DEBUG) != 0)
 				(void) fprintf(stderr, "%llu < %llu = %d\n",
-				    (unsigned long long)v,
-				    (unsigned long long)l, matched);
+				    (uint64_t)v,
+				    (uint64_t)l, matched);
 		}
 		else {
 			matched = (int64_t) v < (int64_t) l;
 			if ((ms->flags & MAGIC_DEBUG) != 0)
 				(void) fprintf(stderr, "%lld < %lld = %d\n",
-				       (long long)v, (long long)l, matched);
+				       (int64_t)v, (int64_t)l, matched);
 		}
 		break;
 
@@ -1916,16 +1916,16 @@ magiccheck(struct magic_set *ms, struct magic *m)
 		matched = (v & l) == l;
 		if ((ms->flags & MAGIC_DEBUG) != 0)
 			(void) fprintf(stderr, "((%llx & %llx) == %llx) = %d\n",
-			    (unsigned long long)v, (unsigned long long)l,
-			    (unsigned long long)l, matched);
+			    (uint64_t)v, (uint64_t)l,
+			    (uint64_t)l, matched);
 		break;
 
 	case '^':
 		matched = (v & l) != l;
 		if ((ms->flags & MAGIC_DEBUG) != 0)
 			(void) fprintf(stderr, "((%llx & %llx) != %llx) = %d\n",
-			    (unsigned long long)v, (unsigned long long)l,
-			    (unsigned long long)l, matched);
+			    (uint64_t)v, (uint64_t)l,
+			    (uint64_t)l, matched);
 		break;
 
 	default:

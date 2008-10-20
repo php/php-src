@@ -13,6 +13,10 @@ if (PHP_FILEINFO != 'no') {
 			magic.c print.c \
 			readelf.c softmagic.c";
 
+		if (VCVERS <1500) {
+			ADD_FLAG('CFLAGS', '/Zm1000');
+		}
+
 		EXTENSION('fileinfo', 'fileinfo.c', true, "/I" + configure_module_dirname + "/libmagic /I" + configure_module_dirname);
 		ADD_SOURCES(configure_module_dirname + '\\libmagic', LIBMAGIC_SOURCES, "fileinfo");
 	} else {
