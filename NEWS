@@ -5,6 +5,8 @@ PHP                                                                        NEWS
   constants). (Ilia)
 - Fixed bug #46335 (DOMText::splitText doesn't handle multibyte characters).
   (Rob)
+- Fixed bug #46323 (compilation of simplexml for NetWare breaks). 
+  (Patch by guenter@php.net)
 - Fixed bug #46319 (PHP sets default Content-Type header for HTTP 304
   response code, in cgi sapi). (Ilia)
 - Fixed bug #46313 (Magic quotes broke $_FILES). (Arnaud)
