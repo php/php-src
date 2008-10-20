@@ -1280,28 +1280,28 @@ filedone:
 			s = "";
 
 			{
-			/* store temp_filename as-is (without magic_quotes_gpc-ing it, in case upload_tmp_dir
-			 * contains escapeable characters. escape only the variable name.) */
-			zval zfilename;
+				/* store temp_filename as-is (without magic_quotes_gpc-ing it, in case upload_tmp_dir
+				 * contains escapeable characters. escape only the variable name.) */
+				zval zfilename;
 
-			/* Initialize variables */
-			add_protected_variable(param TSRMLS_CC);
+				/* Initialize variables */
+				add_protected_variable(param TSRMLS_CC);
 
-			/* if param is of form xxx[.*] this will cut it to xxx */
-			if (!is_anonymous) {
+				/* if param is of form xxx[.*] this will cut it to xxx */
+				if (!is_anonymous) {
+					ZVAL_STRING(&zfilename, temp_filename, 1);
+					safe_php_register_variable_ex(param, &zfilename, NULL, 1 TSRMLS_CC);
+				}
+		
+				/* Add $foo[tmp_name] */
+				if (is_arr_upload) {
+					snprintf(lbuf, llen, "%s[tmp_name][%s]", abuf, array_index);
+				} else {
+					snprintf(lbuf, llen, "%s[tmp_name]", param);
+				}
+				add_protected_variable(lbuf TSRMLS_CC);
 				ZVAL_STRING(&zfilename, temp_filename, 1);
-				safe_php_register_variable_ex(param, &zfilename, NULL, 1 TSRMLS_CC);
-			}
-	
-			/* Add $foo[tmp_name] */
-			if (is_arr_upload) {
-				snprintf(lbuf, llen, "%s[tmp_name][%s]", abuf, array_index);
-			} else {
-				snprintf(lbuf, llen, "%s[tmp_name]", param);
-			}
-			add_protected_variable(lbuf TSRMLS_CC);
-			ZVAL_STRING(&zfilename, temp_filename, 1);
-			register_http_post_files_variable_ex(lbuf, &zfilename, http_post_files, 1 TSRMLS_CC);
+				register_http_post_files_variable_ex(lbuf, &zfilename, http_post_files, 1 TSRMLS_CC);
 			}
 
 			{
