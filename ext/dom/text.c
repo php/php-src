@@ -171,19 +171,19 @@ PHP_FUNCTION(dom_text_split_text)
 	if (cur == NULL) {
 		RETURN_FALSE;
 	}
-	length = xmlStrlen(cur);
+	length = xmlUTF8Strlen(cur);
 
 	if (offset > length || offset < 0) {
 		xmlFree(cur);
 		RETURN_FALSE;
 	}
 
-	first = xmlStrndup(cur, offset);
-	second = xmlStrdup(cur + offset);
+	first = xmlUTF8Strndup(cur, offset);
+	second = xmlUTF8Strsub(cur, offset, length - offset);
 	
 	xmlFree(cur);
 
-	xmlNodeSetContentLen(node, first, offset);
+	xmlNodeSetContent(node, first);
 	nnode = xmlNewDocText(node->doc, second);
 	
 	xmlFree(first);
