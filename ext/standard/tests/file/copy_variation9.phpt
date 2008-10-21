@@ -2,8 +2,8 @@
 Test copy() function: usage variations - destination file access perms 
 --SKIPIF--
 <?php
-if( (stristr(PHP_OS, "Darwin")) || (stristr(PHP_OS, "Win")) )
-  die("skip do not run on MacOS/Windows");
+if(substr(PHP_OS, 0, 3) == 'WIN')
+  die("skip do not run on Windows");
 
 // Skip if being run by root (files are always readable, writeable and executable)
 $filename = dirname(__FILE__)."/copy_variation9_root_check.tmp";
